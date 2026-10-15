@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.registry.ModSounds;
+import jp.revati.skyabyss.titan.travel.TravelTitan;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -32,8 +33,10 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 第一の巨神「岩鯨」。背中に古代の遺跡を乗せ、雲の高さをゆっくり泳ぐ。
 // ときどきプレイヤーの近くまで降りてきて、背中の尾の側にある錨石から脇腹ごしに鎖を地上へ垂らす。
 // 鎖を右クリックすると、巻き上げられて背中へ引き上げられる。
-public class StoneWhaleEntity extends Entity implements GeoEntity {
+public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
+    // 鎖が頭の乗り場から垂れているか (巨神での移動。titan.travel)。false なら背中の錨石から垂れる
+    private static final EntityDataAccessor<Boolean> HEAD_CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.BOOLEAN);
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.stone_whale.swim");
 
     // 鎖の付け根まわり (採用案 B のモデルに合わせる。geo の 1 単位は 0.5 ブロック。ゲームでは geo の +X が左)
@@ -62,6 +65,15 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
 
     private enum Mode { CRUISE, APPROACH, REST }
 
+    // ---- 巨神での移動 (titan.travel) の乗り場。頭の上の平らな所 (geo の z -76〜-116 単位、高さ 64 単位前後)
+    // 座席 (横, 上, 前)。横は左が +。頭の付け根 (前 30 ブロック) から 12〜16 ブロック先なので、泳ぎの揺れは 1 ブロック未満
+    private static final double[][] SEATS = {
+            {-1.5, 33.0, 46.0}, {1.5, 33.0, 46.0}, {-1.5, 32.9, 42.0}, {1.5, 32.9, 42.0},
+            {-4.5, 32.4, 46.0}, {4.5, 32.4, 46.0}, {-4.5, 32.2, 42.0}, {4.5, 32.2, 42.0}};
+    // 乗り場の鎖: 頭の上の留め具 → 頭の丸みに沿った曲がり目 → 左の頬の外の垂れ口 (横, 上)。前へ 44 ブロックの所
+    private static final double HEAD_CHAIN_FORWARD = 44.0;
+    private static final double[][] HEAD_CHAIN_PATH = {{6.0, 31.6}, {13.0, 25.2}, {14.5, 22.5}};
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private Mode mode = Mode.CRUISE;
@@ -73,6 +85,9 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private int approachTicks;
     private int songCooldown = 200;
     private double groundY = 64;
+    // 旅の操縦中 (保存しない。読み込み直したら自分で泳ぐ)
+    private boolean voyage;
+    private double voyageGround = Double.NaN;
     private double surroundingMax = 64;
     @Nullable
     private WhaleChainEntity chainHandle;
@@ -92,6 +107,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(CHAIN, 0f);
+        builder.define(HEAD_CHAIN, false);
     }
 
     // 腹から垂れている鎖の長さ (0 = たたんでいる)
@@ -101,7 +117,38 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
 
     // 鎖の付け根 (背中の縁) の位置。向きに合わせて回す
     public Vec3 chainTop() {
-        return chainTop(getX(), getY(), getZ(), getYRot());
+        return position().add(chainTopOffset(getYRot()));
+    }
+
+    // 鎖の付け根の、岩鯨の中心からの位置 (乗り場の鎖か背中の鎖か)
+    public Vec3 chainTopOffset(float yaw) {
+        if (entityData.get(HEAD_CHAIN)) {
+            return boardingChainOffset(yaw);
+        }
+        return chainTop(0, 0, 0, yaw);
+    }
+
+    // 付け根から留め具までの、たるまない鎖の折れ線 (付け根 → 留め具の順。描画用)
+    public List<Vec3> chainSpanOffsets(float yaw) {
+        if (entityData.get(HEAD_CHAIN)) {
+            List<Vec3> points = new java.util.ArrayList<>();
+            for (int i = HEAD_CHAIN_PATH.length - 1; i >= 0; i--) {
+                points.add(offset(yaw, HEAD_CHAIN_PATH[i][0], HEAD_CHAIN_PATH[i][1], HEAD_CHAIN_FORWARD));
+            }
+            return points;
+        }
+        return List.of(chainTop(0, 0, 0, yaw), chainAnchor(0, 0, 0, yaw));
+    }
+
+    public boolean isHeadChain() {
+        return entityData.get(HEAD_CHAIN);
+    }
+
+    // 向き yaw の岩鯨の、(横, 上, 前) の点の中心からの位置。横は左が + (chainTop と同じ回し方)
+    public static Vec3 offset(float yaw, double side, double up, double forward) {
+        double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);
+        double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
+        return new Vec3(fx * forward + fz * side, up, fz * forward - fx * side);
     }
 
     public static Vec3 chainTop(double x, double y, double z, float yaw) {
@@ -124,7 +171,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
 
     // 鎖が地面近くまで下りきっているか
     public boolean isChainDown() {
-        return mode == Mode.REST && chainLength() > 4f && chainBottom().y <= groundY + CHAIN_END_HEIGHT + 0.5;
+        return (mode == Mode.REST || voyage) && chainLength() > 4f && chainBottom().y <= groundY + CHAIN_END_HEIGHT + 0.5;
     }
 
     @Override
@@ -138,6 +185,11 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
             return;
         }
         ServerLevel level = (ServerLevel) level();
+        if (voyage) {
+            // 動きは旅の操縦 (titan.travel.Voyage) が決める。ここでは鎖だけを伸び縮みさせる
+            tickVoyageChain(level);
+            return;
+        }
         if (tickCount % 20 == 0) {
             sampleGround(level);
         }
@@ -256,10 +308,155 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private void hintNearbyPlayers(ServerLevel level) {
         Vec3 bottom = chainBottom();
         for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(bottom) < 12 * 12) {
-                player.displayClientMessage(ModText.hint("message.skyabyss.chain_hint"), true);
+            if (player.distanceToSqr(bottom) < 12 * 12 && !player.isPassenger()) {
+                player.displayClientMessage(ModText.hint(voyage ? "message.skyabyss.travel.chain_hint" : "message.skyabyss.chain_hint"), true);
             }
         }
+    }
+
+    // ---------------------------------------------------------------- 巨神での移動 (TravelTitan)
+
+    @Override
+    public Entity asEntity() {
+        return this;
+    }
+
+    @Override
+    public void beginVoyage() {
+        voyage = true;
+        voyageGround = Double.NaN;
+        mode = Mode.CRUISE;
+        hasTarget = false;
+        restTicks = 0;
+        approachTicks = 0;
+        setDeltaMovement(Vec3.ZERO);
+    }
+
+    @Override
+    public void endVoyage(int restFor) {
+        voyage = false;
+        voyageGround = Double.NaN;
+        ejectPassengers();
+        dropChainHandle();
+        entityData.set(HEAD_CHAIN, false);
+        entityData.set(CHAIN, 0f);
+        hasTarget = false;
+        approachTicks = 0;
+        if (restFor > 0) {
+            // その場で休み、背中の鎖を垂らす (着いた先の人も背中へ乗れる)
+            mode = Mode.REST;
+            restTicks = restFor;
+        } else {
+            mode = Mode.CRUISE;
+            restCooldown = Math.max(restCooldown, 2400);
+        }
+        if (level() instanceof ServerLevel level) {
+            sampleGround(level);
+        }
+    }
+
+    @Override
+    public boolean inVoyage() {
+        return voyage;
+    }
+
+    @Override
+    public void setVoyageChain(double ground) {
+        voyageGround = ground;
+        if (!Double.isNaN(ground)) {
+            groundY = ground;
+        }
+    }
+
+    @Override
+    public boolean isVoyageChainDown() {
+        return voyage && entityData.get(HEAD_CHAIN) && isChainDown();
+    }
+
+    @Override
+    public boolean isChainFolded() {
+        return chainLength() <= 0.01f;
+    }
+
+    @Override
+    public Vec3 boardingChainOffset(float yaw) {
+        double[] hang = HEAD_CHAIN_PATH[HEAD_CHAIN_PATH.length - 1];
+        return offset(yaw, hang[0], hang[1], HEAD_CHAIN_FORWARD);
+    }
+
+    // 垂れ口から曲がり目と留め具を経て、座席の手前までの道すじ (世界の座標。垂れ口 → 留め具の順)
+    @Override
+    public List<Vec3> boardingPath() {
+        List<Vec3> points = new java.util.ArrayList<>();
+        for (int i = HEAD_CHAIN_PATH.length - 1; i >= 0; i--) {
+            points.add(position().add(offset(getYRot(), HEAD_CHAIN_PATH[i][0], HEAD_CHAIN_PATH[i][1] + 0.4, HEAD_CHAIN_FORWARD)));
+        }
+        return points;
+    }
+
+    @Override
+    public int seatCount() {
+        return SEATS.length;
+    }
+
+    @Override
+    public Vec3 seatPosition(int index) {
+        double[] s = SEATS[Mth.clamp(index, 0, SEATS.length - 1)];
+        return position().add(offset(getYRot(), s[0], s[1], s[2]));
+    }
+
+    // 乗り場の鎖は、背中の鎖をたたんでから頭へ付け替える (垂れたまま頭へ飛ばないように)
+    private void tickVoyageChain(ServerLevel level) {
+        float chain = chainLength();
+        if (!entityData.get(HEAD_CHAIN)) {
+            dropChainHandle();
+            if (chain > 0) {
+                entityData.set(CHAIN, Math.max(0f, chain - CHAIN_SHRINK));
+                return;
+            }
+            entityData.set(HEAD_CHAIN, true);
+        }
+        if (Double.isNaN(voyageGround)) {
+            retractChain();
+            return;
+        }
+        float wanted = (float) Math.max(0, chainTop().y - voyageGround - CHAIN_END_HEIGHT);
+        float step = chain < wanted ? Math.min(wanted - chain, CHAIN_GROW) : -Math.min(chain - wanted, CHAIN_SHRINK);
+        entityData.set(CHAIN, chain + step);
+        if (isChainDown()) {
+            keepChainHandle(level);
+            if (tickCount % 40 == 0) {
+                hintNearbyPlayers(level);
+            }
+        } else {
+            dropChainHandle();
+        }
+    }
+
+    // 乗り場の座席。何人目かで決める (降りた人がいると詰める)
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity entity, net.minecraft.world.entity.EntityDimensions dimensions, float partialTick) {
+        int index = getPassengers().indexOf(entity);
+        double[] s = SEATS[Mth.clamp(index, 0, SEATS.length - 1)];
+        return offset(getYRot(), s[0], s[1], s[2]);
+    }
+
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return voyage && getPassengers().size() < SEATS.length;
+    }
+
+    // 降りるときに岩鯨の中心の上へ飛ばさない (降ろす道すじは旅の操縦が決める)
+    @Override
+    public Vec3 getDismountLocationForPassenger(net.minecraft.world.entity.LivingEntity passenger) {
+        return passenger.position();
+    }
+
+    // 一人だけ乗せていても、岩鯨をそのプレイヤーの持ち物として保存しない・ログアウトで消さない
+    // (バニラは「プレイヤー一人だけを乗せた乗り物」をプレイヤーと一緒に保存し、ログアウトで取り除く)
+    @Override
+    public boolean hasExactlyOnePlayerPassenger() {
+        return false;
     }
 
     @Override
@@ -414,6 +611,17 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     // (以前は10tickかけて追いかけていたため、描画がサーバーの位置より遅れ、鎖の先が鎖の根元とずれていた)
     @Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+        // 遠くへ移った (旅の雲の中の移動・呼び直し) ときは、間を補間せずにその場へ置く
+        if (distanceToSqr(x, y, z) > 64.0 * 64.0) {
+            this.lerpSteps = 0;
+            setPos(x, y, z);
+            setYRot(yRot % 360f);
+            this.xo = x;
+            this.yo = y;
+            this.zo = z;
+            this.yRotO = getYRot();
+            return;
+        }
         this.lerpX = x;
         this.lerpY = y;
         this.lerpZ = z;
@@ -442,7 +650,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         tag.putInt("RestCooldown", restCooldown);
         tag.putInt("RestTicks", restTicks);
         tag.putInt("ApproachTicks", approachTicks);
-        tag.putFloat("Chain", chainLength());
+        // 旅の途中 (頭の鎖) の長さは残さない。読み込み直した岩鯨は自分で泳ぐ
+        tag.putFloat("Chain", voyage || entityData.get(HEAD_CHAIN) ? 0f : chainLength());
     }
 
     @Override

@@ -94,6 +94,12 @@ public final class WhaleKeeper {
             if (now % 20 == 0) {
                 data.remember(whale);
             }
+            // 巨神での移動の最中 (人を乗せている・迎えに行く) は、呼び直さない。動きと読み込みは旅の操縦が受け持つ
+            if (whale.inVoyage()) {
+                frozenSince = -1;
+                unreachableSince = -1;
+                return;
+            }
             // チケットを張っていて、オーバーワールドに人がいる (エンティティが動く) のに tick が進まない
             if (near && !level.players().isEmpty()) {
                 if (whale.tickCount != lastTickCount || frozenSince < 0) {

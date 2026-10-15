@@ -54,6 +54,9 @@ public final class TitanTravel {
     // 引き上げの速さ (ブロック/tick) と、打ち切るまでの最大時間
     private static final double LIFT_SPEED = 0.85;
     private static final int LIFT_MAX_TICKS = 160;
+    // 上った場所 (オーバーワールド)。岩鯨がここから CARRIED_AWAY より遠くへ移っていたら、降りるときはここへ戻す
+    private static final String TAG_BOARDED_FROM = "skyabyss_boarded_from";
+    private static final double CARRIED_AWAY = 128.0;
 
     // 鎖に引き上げられている最中のプレイヤー → (どの岩鯨か, 経過tick)
     private static final Map<UUID, Lift> LIFTS = new HashMap<>();
@@ -62,6 +65,11 @@ public final class TitanTravel {
     }
 
     private TitanTravel() {
+    }
+
+    // 背中の鎖を上っている人がいるか (巨神での移動は、その間は岩鯨を呼べない)
+    public static boolean isLifting() {
+        return !LIFTS.isEmpty();
     }
 
     public static void startLift(ServerPlayer player, StoneWhaleEntity whale) {
@@ -132,6 +140,14 @@ public final class TitanTravel {
             return;
         }
         player.getPersistentData().putUUID(TAG_TITAN, whaleId);
+        // 上った場所を覚えておく。背中にいる間に岩鯨が遠くへ運ばれても (巨神での移動)、降りるときはここへ戻す
+        if (player.level().dimension() == Level.OVERWORLD) {
+            CompoundTag from = new CompoundTag();
+            from.putDouble("x", player.getX());
+            from.putDouble("y", player.getY());
+            from.putDouble("z", player.getZ());
+            player.getPersistentData().put(TAG_BOARDED_FROM, from);
+        }
         TitanBackData data = TitanBackData.get(back);
         if (data.needsBuild()) {
             // 起動時に建て直せなかったとき (自己テストなど) の保険。古い配置なら、進み具合も最初に戻す
@@ -160,6 +176,18 @@ public final class TitanTravel {
         } else if (data.hasLast) {
             Vec3 top = StoneWhaleEntity.chainTop(data.lastX, data.lastY, data.lastZ, data.lastYaw);
             drop = new Vec3(top.x, top.y - 4, top.z);
+        }
+        // 背中にいる間に、岩鯨がほかの人を乗せて遠くへ泳いだ (巨神での移動)。上った場所の空へ戻す
+        CompoundTag from = player.getPersistentData().getCompound(TAG_BOARDED_FROM);
+        player.getPersistentData().remove(TAG_BOARDED_FROM);
+        if (from.contains("x")) {
+            Vec3 boarded = new Vec3(from.getDouble("x"), from.getDouble("y"), from.getDouble("z"));
+            if (drop == null) {
+                drop = boarded;
+            } else if (Math.hypot(boarded.x - drop.x, boarded.z - drop.z) > CARRIED_AWAY) {
+                drop = boarded;
+                player.sendSystemMessage(ModText.lore("message.skyabyss.travel.returned_home"));
+            }
         }
         if (drop == null) {
             BlockPos spawn = overworld.getSharedSpawnPos();
