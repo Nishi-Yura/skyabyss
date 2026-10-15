@@ -217,9 +217,7 @@ public final class TravelSelfTest {
             for (; ticks < 6000 && !f.finished; ticks++) {
                 seen.add(f.phase);
                 if (f.phase == Voyage.Phase.WAITING && f.dest == null) {
-                    f.dest = new TravelNetwork.Dest("test", "test", "", destPos.getX(), destPos.getY(), destPos.getZ(), 2, true, 0);
-                    f.phase = Voyage.Phase.BOARDING;
-                    f.phaseTicks = 0;
+                    f.chosen(new TravelNetwork.Dest("test", "test", "", destPos.getX(), destPos.getY(), destPos.getZ(), 2, true, 0));
                     // 鎖はたたんだことにする (岩鯨自身の tick は回していない)
                     whale.setVoyageChain(Double.NaN);
                 }

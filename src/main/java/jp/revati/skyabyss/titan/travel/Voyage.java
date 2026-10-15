@@ -83,6 +83,9 @@ final class Voyage {
     long ticketRefreshed;
     boolean veiled;
     int veilMovedAt = -1;
+    // 雲の帳の出口 (移すまで)
+    @Nullable
+    Vec3 veilExit;
     // 呼び寄せ: 雲の向こうの入口へ移すのを待っている
     @Nullable
     Vec3 relocateTo;
@@ -138,6 +141,10 @@ final class Voyage {
         Entity whale = entity();
         totalTicks++;
         phaseTicks++;
+        if (relocateTo == null && veilExit == null) {
+            // 泳いでいく少し先を中心に読み込む
+            holdMoveTicket(level, new ChunkPos(BlockPos.containing(whale.position().add(whale.getDeltaMovement().scale(16)))));
+        }
         tickRiders(level);
         tickClimbs(level);
         tickLowers(level);
@@ -168,9 +175,8 @@ final class Voyage {
     private void tickComing(ServerLevel level, Entity whale) {
         if (relocateTo != null) {
             // 雲の向こうの入口のチャンクが読み込まれるのを待ってから移す (読み込まれていない所へ移すと止まってしまう)
-            ChunkPos cp = new ChunkPos(BlockPos.containing(relocateTo));
-            holdTicket(level, cp);
-            if (level.getChunkSource().hasChunk(cp.x, cp.z) || phaseTicks > TravelRules.VEIL_WAIT_LIMIT) {
+            holdMoveTicket(level, new ChunkPos(BlockPos.containing(relocateTo)));
+            if (loaded(level, relocateTo) || phaseTicks > TravelRules.VEIL_WAIT_LIMIT) {
                 whale.teleportTo(relocateTo.x, relocateTo.y, relocateTo.z);
                 whale.setYRot(yawTowards(whale.position(), Vec3.atCenterOf(pickup)));
                 relocateTo = null;
@@ -318,18 +324,26 @@ final class Voyage {
         holdTicket(level, new ChunkPos(feet));
         Vec3 target = Vec3.atCenterOf(feet);
         if (veilMovedAt < 0) {
-            // 雲の中へ沈みながら進む
-            move(whale, whale.getYRot(), speed, -0.15);
-            boolean ready = level.getChunkSource().hasChunk(feet.getX() >> 4, feet.getZ() >> 4);
-            if (phaseTicks >= TravelRules.VEIL_FADE + 10 && (ready || phaseTicks > TravelRules.VEIL_WAIT_LIMIT)) {
+            if (veilExit == null) {
+                // 出口: 行き先の手前、今の向きの延長上
                 Vec3 from = whale.position();
                 Vec3 dir = new Vec3(target.x - from.x, 0, target.z - from.z).normalize();
-                Vec3 exit = new Vec3(target.x - dir.x * TravelRules.VEIL_EXIT, 0, target.z - dir.z * TravelRules.VEIL_EXIT);
+                veilExit = new Vec3(target.x - dir.x * TravelRules.VEIL_EXIT, 0, target.z - dir.z * TravelRules.VEIL_EXIT);
+            }
+            // 出口のまわりを読み込ませる (移した先で巨神が止まらないように)
+            holdMoveTicket(level, new ChunkPos(BlockPos.containing(veilExit)));
+            // 雲の中へ沈みながら、速さを落として進む
+            speed = Math.max(0.4, speed - 0.03);
+            move(whale, whale.getYRot(), speed, -0.15);
+            boolean ready = loaded(level, veilExit) && loaded(level, target);
+            if (phaseTicks >= TravelRules.VEIL_FADE + 10 && (ready || phaseTicks > TravelRules.VEIL_WAIT_LIMIT)) {
+                Vec3 exit = veilExit;
                 double y = Math.max(TravelRules.TRAVEL_Y, surfaceMax(level, exit) + TravelRules.TERRAIN_CLEARANCE);
                 y = Math.min(y, level.getMaxBuildHeight() - 50);
                 whale.teleportTo(exit.x, y, exit.z);
                 whale.setYRot(yawTowards(whale.position(), target));
                 veilMovedAt = phaseTicks;
+                veilExit = null;
                 SkyAbyss.LOGGER.info("Titan voyage: moved {} through the cloud veil to {}, {}", kind.id(), (int) exit.x, (int) exit.z);
             }
             return;
@@ -660,6 +674,10 @@ final class Voyage {
         if (!entity().isRemoved()) {
             titan.endVoyage(arrived ? TravelRules.REST_AFTER : 0);
         }
+        if (arrived && dest != null) {
+            SkyAbyss.LOGGER.info("Titan voyage: {} arrived {} ticks ({} s) after the destination was chosen (estimate {} s)",
+                    kind.id(), totalTicks - chosenAt, (totalTicks - chosenAt) / 20, estimateAtChoose);
+        }
         if (arrived) {
             ServerPlayer lead = player(leader);
             if (lead != null) {
@@ -811,22 +829,24 @@ final class Voyage {
     }
 
     // 残りの時間の見積もり (tick)
+    // 残りの時間の見積もり (tick)。行き先を決めたときの見積もりから、たった時間を引く (数字が戻らないように)。
+    // 着く手前で見積もりを使い切ったら、降りていく分だけを出す
     private int remainingTicks(Entity whale) {
-        double distance = horizontal(whale.position(), Vec3.atCenterOf(destFeet()));
-        double ticks = 240;
-        if (phase == Phase.ASCENT || phase == Phase.CRUISE) {
-            if (cruiseFor != Integer.MAX_VALUE && distance > TravelRules.VEIL_EXIT + 180) {
-                ticks += Math.max(0, cruiseFor - (phase == Phase.CRUISE ? phaseTicks : 0)) + TravelRules.VEIL_FADE * 2 + 40
-                        + TravelRules.VEIL_EXIT / TravelRules.TRAVEL_SPEED * 1.3;
-            } else {
-                ticks += distance / TravelRules.TRAVEL_SPEED * 1.15;
-            }
-        } else if (phase == Phase.VEIL) {
-            ticks += 60 + TravelRules.VEIL_EXIT / TravelRules.TRAVEL_SPEED * 1.3;
-        } else {
-            ticks += distance / Math.max(0.5, speed) * 1.1;
-        }
-        return (int) ticks;
+        int left = estimateAtChoose * 20 - (totalTicks - chosenAt);
+        int floor = phase == Phase.APPROACH ? 120 : 60;
+        return Math.max(floor, left);
+    }
+
+    // 行き先を決めたとき (totalTicks) と、そのときの見積もり (秒)
+    int chosenAt;
+    int estimateAtChoose;
+
+    void chosen(TravelNetwork.Dest d) {
+        dest = d;
+        chosenAt = totalTicks;
+        estimateAtChoose = TravelRules.estimateSeconds(Math.hypot(d.x() + 0.5 - pickup.getX(), d.z() + 0.5 - pickup.getZ()));
+        phase = Phase.BOARDING;
+        phaseTicks = 0;
     }
 
     BlockPos destPos() {
@@ -861,6 +881,34 @@ final class Voyage {
             level.getChunkSource().removeRegionTicket(TICKET, ticketPos, TICKET_RADIUS, ticketPos);
             ticketPos = null;
         }
+        if (moveTicketPos != null) {
+            level.getChunkSource().removeRegionTicket(TICKET, moveTicketPos, MOVE_RADIUS, moveTicketPos);
+            moveTicketPos = null;
+        }
+    }
+
+    // 巨神のまわり (半径 3 チャンク = 前後 48 ブロック) を読み込んでおく。泳いでいく先が読み込まれていないと、
+    // 巨神がチャンクの外へ出て見えなくなり、見守りに見失われるため。移す先 (雲の帳の出口・呼び寄せの入口) にも使う
+    private static final int MOVE_RADIUS = 3;
+    @Nullable
+    private ChunkPos moveTicketPos;
+    private long moveTicketRefreshed;
+
+    private void holdMoveTicket(ServerLevel level, ChunkPos pos) {
+        long now = level.getGameTime();
+        if (pos.equals(moveTicketPos) && now - moveTicketRefreshed < 100) {
+            return;
+        }
+        if (moveTicketPos != null && !pos.equals(moveTicketPos)) {
+            level.getChunkSource().removeRegionTicket(TICKET, moveTicketPos, MOVE_RADIUS, moveTicketPos);
+        }
+        level.getChunkSource().addRegionTicket(TICKET, pos, MOVE_RADIUS, pos);
+        moveTicketPos = pos;
+        moveTicketRefreshed = now;
+    }
+
+    private static boolean loaded(ServerLevel level, Vec3 at) {
+        return level.getChunkSource().hasChunk(Mth.floor(at.x) >> 4, Mth.floor(at.z) >> 4);
     }
 
     // ---------------------------------------------------------------- 小物

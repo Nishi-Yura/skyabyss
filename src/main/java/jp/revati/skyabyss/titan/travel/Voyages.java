@@ -248,9 +248,7 @@ public final class Voyages {
             sendChart(player, v);
             return;
         }
-        v.dest = chosen;
-        v.phase = Voyage.Phase.BOARDING;
-        v.phaseTicks = 0;
+        v.chosen(chosen);
         for (ServerPlayer rider : v.players(v.riders)) {
             rider.sendSystemMessage(ModText.progress("message.skyabyss.travel.chosen", destName(chosen), TravelRules.BOARDING_COUNTDOWN / 20));
         }
@@ -336,7 +334,9 @@ public final class Voyages {
         }
         for (Voyage v : new ArrayList<>(ACTIVE.values())) {
             Entity whale = v.entity();
-            if (whale.isRemoved() || !v.titan.inVoyage()) {
+            TravelTitan registered = v.totalTicks % 20 == 0 ? v.kind.find(v.level()) : null;
+            if (whale.isRemoved() || !v.titan.inVoyage() || (registered != null && registered != v.titan)) {
+                // 消えた・呼び直された (本物が別の個体になった)
                 v.lost();
             } else if (v.pendingCancel) {
                 v.tickCancelling();

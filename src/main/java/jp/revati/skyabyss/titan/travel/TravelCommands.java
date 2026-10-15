@@ -94,9 +94,7 @@ public final class TravelCommands {
         v.leader = player.getUUID();
         v.leaderName = player.getGameProfile().getName();
         BlockPos pos = new BlockPos(x, player.serverLevel().getSeaLevel(), z);
-        v.dest = new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 2, true, 0);
-        v.phase = Voyage.Phase.BOARDING;
-        v.phaseTicks = 0;
+        v.chosen(new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 2, true, 0));
         ctx.getSource().sendSuccess(() -> Component.literal("destination set to " + x + ", " + z), true);
         return 1;
     }

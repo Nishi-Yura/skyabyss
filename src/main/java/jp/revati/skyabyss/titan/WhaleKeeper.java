@@ -132,7 +132,9 @@ public final class WhaleKeeper {
             unreachableSince = -1;
             if (missingSince < 0) {
                 missingSince = now;
-            } else if (now - missingSince > RELOAD_GRACE) {
+            } else if (now - missingSince > RELOAD_GRACE
+                    && !jp.revati.skyabyss.titan.travel.Voyages.isBusy(jp.revati.skyabyss.titan.travel.TitanKind.STONE_WHALE)) {
+                // (巨神での移動の最中は、旅の操縦が岩鯨を持っているので呼び直さない。読み込まれれば見つかる)
                 ServerPlayer target = near != null ? near : randomEligible(level);
                 if (target != null) {
                     SkyAbyss.LOGGER.warn("The stone whale was not found at its last position; calling it again");
