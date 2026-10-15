@@ -1,0 +1,5 @@
+B 留まる者の影 (v1): boxes 76 height 2.59 blocks texture 256x48 glow px 4 overlaps none
+D 頭巾の留まる者: boxes 41 height 2.22 blocks texture 256x54 glow px 10308 overlaps none
+E 自分に似た影: boxes 56 height 2.12 blocks texture 256x58 glow px 10658 overlaps none
+F 喪の鐘: boxes 28 height 2.00 blocks texture 256x50 glow px 9712 overlaps none
+エンダーマン (比較): boxes 6 height 2.88 blocks texture 256x64 glow px 10 overlaps none

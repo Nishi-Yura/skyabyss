@@ -13,7 +13,8 @@
 
 実行 (リポジトリ直下):
     python tools/rough/watcher.py            ラフ 3 案と比較シートを docs/review/watcher_roughs/ に書く
-    python tools/rough/watcher.py --install  さらに採用案 (CHOSEN) を src/main/resources に書き出す
+    python tools/rough/watcher.py --install  v1 の採用案 B はゲームでエンダーマンに見えたので、今の採用案は
+                                             watcher_v2.py の CHOSEN。--install はそちらを書き出す
 出力: docs/review/watcher_roughs/<a|b|c>/ (geo.json, texture.png, glowmask.png)、
       docs/review/watcher_roughs/watcher_roughs.png (比較シート)、night_*.png (夜の遠景の見え方)
 """
@@ -541,26 +542,8 @@ def main(install=False):
     sheet.save(OUT / "watcher_night.png")
     (OUT / "report.txt").write_text("\n".join(report) + "\n", encoding="utf-8")
     if install:
-        _, fn, _ = CONCEPTS[CHOSEN]
-        m, pose = fn()
-        geo, tex, gl = finish_geo(m)
-        assert not vx.check_overlaps(geo)
-        assert (gl[..., 3] > 0).any(), "glowmask has no glowing pixel"
-        (SRC / "geo" / "entity" / "watcher.geo.json").write_text(json.dumps(geo, ensure_ascii=False), encoding="utf-8")
-        Image.fromarray(tex, "RGBA").save(SRC / "textures" / "entity" / "watcher.png")
-        Image.fromarray(gl, "RGBA").save(SRC / "textures" / "entity" / "watcher_glowmask.png")
-        (SRC / "animations" / "entity" / "watcher.animation.json").write_text(
-            json.dumps(animations({b["name"] for b in geo["minecraft:geometry"][0]["bones"]}), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-        glint = np.zeros((16, 16, 4), np.uint8)
-        yy, xx = np.mgrid[0:16, 0:16]
-        r = np.hypot(xx - 7.5, yy - 7.5) / 7.5
-        a = np.clip(1 - r, 0, 1) ** 2.2
-        glint[..., 0] = (180 * a).astype(np.uint8)
-        glint[..., 1] = (198 * a).astype(np.uint8)
-        glint[..., 2] = (220 * a).astype(np.uint8)
-        glint[..., 3] = (255 * a).astype(np.uint8)
-        Image.fromarray(glint, "RGBA").save(SRC / "textures" / "entity" / "watcher_glint.png")
-        print("installed", CHOSEN, flush=True)
+        import watcher_v2
+        watcher_v2.do_install()
 
 
 if __name__ == "__main__":

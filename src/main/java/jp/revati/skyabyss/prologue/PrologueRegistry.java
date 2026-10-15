@@ -19,7 +19,7 @@ public final class PrologueRegistry {
     // 見る者: 見せる相手の画面の中にだけ置く (サーバーには出さない)。保存も召喚もしない
     public static final DeferredHolder<EntityType<?>, EntityType<WatcherEntity>> WATCHER = ENTITIES.register("watcher",
             () -> EntityType.Builder.<WatcherEntity>of(WatcherEntity::new, MobCategory.MISC)
-                    .sized(0.6f, 2.6f)
+                    .sized(0.6f, 2.15f)
                     .clientTrackingRange(10)
                     .noSave()
                     .noSummon()
