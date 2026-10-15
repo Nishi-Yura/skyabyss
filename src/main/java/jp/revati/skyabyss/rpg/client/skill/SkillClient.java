@@ -89,8 +89,10 @@ public final class SkillClient {
                 }
             }
         }
-        // クールダウンは手元でも数える (サーバーからは使ったときにだけ届く)
-        SkillManager.get(mc.player).tickCooldowns();
+        // クールダウンは手元でも数える (サーバーからは使ったときにだけ届く)。一人遊びで止めている間は数えない
+        if (!mc.isPaused()) {
+            SkillManager.get(mc.player).tickCooldowns();
+        }
         for (int i = 0; i < slotFlash.length; i++) {
             if (slotFlash[i] > 0) {
                 slotFlash[i]--;

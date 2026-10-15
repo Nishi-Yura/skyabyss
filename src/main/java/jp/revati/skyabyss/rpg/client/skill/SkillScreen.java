@@ -24,9 +24,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 技の画面 (K キー)。左に木のつまみ (剣士・弓使い・星術師・深淵術師)、真ん中に木 (3 段)、右に選んだ技の説明と「習得」、
 // 下に技の枠 4 つと振り直し。技を選んでから枠を押すと置ける (右クリックで空ける)。
-// 背景は tools/gen_skill_assets.py で作る 2 倍密度のテクスチャ (552x368 を 276x184 で描く)
+// 背景は tools/gen_skill_assets.py で作る 2 倍密度のテクスチャ (600x368 を 300x184 で描く)
 public class SkillScreen extends Screen {
-    static final int W = 276;
+    static final int W = 300;
     static final int H = 184;
     // 木のつまみ
     static final int TREE_TAB_X = 8;
@@ -34,16 +34,18 @@ public class SkillScreen extends Screen {
     static final int TREE_TAB = 26;
     static final int TREE_TAB_STEP = 30;
     // 技の印 (22x22) の位置: 列 0・1・2 (真ん中) と段 0・1・2
-    static final int[] COL_X = {48, 108, 78};
+    static final int[] COL_X = {46, 98, 72};
     static final int[] TIER_Y = {42, 80, 118};
     static final int NODE = 22;
     // 説明の欄
-    static final int INFO_X = 156;
-    static final int INFO_Y = 24;
-    static final int INFO_W = 112;
-    static final int INFO_H = 104;
+    static final int INFO_X = 130;
+    static final int INFO_Y = 22;
+    static final int INFO_W = 162;
+    static final int INFO_H = 128;
+    // 習得のボタン (説明の欄の右上)
+    static final int LEARN_W = 54;
     // 枠
-    static final int SLOT_X = 116;
+    static final int SLOT_X = 132;
     static final int SLOT_Y = 157;
     static final int SLOT_STEP = 24;
 
@@ -74,9 +76,9 @@ public class SkillScreen extends Screen {
         left = (width - W) / 2;
         top = (height - H) / 2;
         learn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.learn"), b -> learnSelected())
-                .bounds(left + INFO_X + 4, top + INFO_Y + INFO_H + 4, INFO_W - 8, 16).build());
+                .bounds(left + INFO_X + INFO_W - 4 - LEARN_W, top + INFO_Y + 3, LEARN_W, 14).build());
         respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.respec"), b -> pressRespec())
-                .bounds(left + 214, top + 160, 54, 16).build());
+                .bounds(left + 236, top + 160, 56, 16).build());
         RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.SKILLS);
         refresh();
     }
@@ -264,6 +266,7 @@ public class SkillScreen extends Screen {
         renderInfo(g, d, level);
         renderBottom(g, d, level);
         renderHover(g, d, mouseX, mouseY);
+        renderLearnTooltip(g, d, mouseX, mouseY);
     }
 
     private void renderTreeTabs(GuiGraphics g, SkillData d) {
@@ -285,10 +288,8 @@ public class SkillScreen extends Screen {
 
     private void renderTree(GuiGraphics g, SkillData d, int level) {
         boolean open = d.treeOpen(tree);
-        // 見出し: 木の名前と、効果の元のステータス
-        g.drawString(font, Component.translatable(tree.nameKey()), left + 40, top + 25, open ? GOLD : SOFT, false);
-        Component stat = Component.translatable(tree.mainStat.nameKey());
-        g.drawString(font, stat, left + 150 - font.width(stat), top + 25, open ? SOFT : DIM, false);
+        // 見出し: 木の名前 (効果の元のステータスは説明の欄に出す)
+        g.drawString(font, Component.translatable(tree.nameKey()), left + 42, top + 25, open ? GOLD : SOFT, false);
         if (!open) {
             // 封じられた木: 形だけを暗く見せる
             for (int tier = 0; tier < 3; tier++) {
@@ -355,27 +356,32 @@ public class SkillScreen extends Screen {
     }
 
     private void renderInfo(GuiGraphics g, SkillData d, int level) {
-        int x = left + INFO_X + 4;
-        int y = top + INFO_Y + 4;
-        int w = INFO_W - 8;
+        int x = left + INFO_X + 5;
+        int y = top + INFO_Y + 5;
+        int w = INFO_W - 10;
+        int maxY = top + INFO_Y + INFO_H - 2;
         List<FormattedCharSequence> lines = new ArrayList<>();
+        Component statLine = Component.translatable("gui.skyabyss.skill.main_stat", Component.translatable(tree.mainStat.nameKey()));
         if (!d.treeOpen(tree)) {
             lines.addAll(font.split(Component.translatable(tree.sealedKey()).withColor(LORE), w));
             lines.add(FormattedCharSequence.EMPTY);
             lines.addAll(font.split(Component.translatable(tree.descKey()).withColor(SOFT), w));
-            drawLines(g, lines, x, y, top + INFO_Y + INFO_H - 2);
+            lines.add(statLine.copy().withColor(DIM).getVisualOrderText());
+            drawLines(g, lines, x, y, maxY);
             return;
         }
         if (selected == null || selected.tree != tree) {
             lines.addAll(font.split(Component.translatable(tree.descKey()).withColor(SOFT), w));
+            lines.add(statLine.copy().withColor(SOFT).getVisualOrderText());
             lines.add(FormattedCharSequence.EMPTY);
             lines.addAll(font.split(Component.translatable("gui.skyabyss.skill.pick_hint").withColor(DIM), w));
-            drawLines(g, lines, x, y, top + INFO_Y + INFO_H - 2);
+            drawLines(g, lines, x, y, maxY);
             return;
         }
         Skill s = selected;
         int rank = d.rank(s);
-        lines.add(Component.translatable(s.nameKey()).withColor(GOLD).getVisualOrderText());
+        // 一行目: 名前 (右に習得のボタン)
+        lines.addAll(font.split(Component.translatable(s.nameKey()).withColor(GOLD), w - LEARN_W - 4));
         lines.add(Component.translatable(s.active ? "gui.skyabyss.skill.kind_active" : "gui.skyabyss.skill.kind_passive")
                 .append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.rank", rank, s.maxRank)).withColor(SOFT)
                 .getVisualOrderText());
@@ -384,16 +390,13 @@ public class SkillScreen extends Screen {
             lines.add(Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(s, r),
                     SkillRules.fmtSeconds(SkillRules.cooldownTicks(s, r))).withColor(0x9FB8FF).getVisualOrderText());
         }
-        List<FormattedCharSequence> flavor = font.split(Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
+        // 今の段の効果 (まだ覚えていなければ段 1 の効果)。次の段は「習得」のボタンに重ねると出る
         List<FormattedCharSequence> body = new ArrayList<>();
-        if (rank > 0) {
-            body.addAll(font.split(Component.translatable(s.effectKey(), SkillRules.describeArgs(s, rank)).withColor(TEXT), w));
+        MutableComponent effect = Component.translatable(s.effectKey(), SkillRules.describeArgs(s, Math.max(1, rank)));
+        if (rank == 0) {
+            effect = Component.translatable("gui.skyabyss.skill.first").append(effect);
         }
-        if (rank < s.maxRank) {
-            MutableComponent next = Component.translatable(rank == 0 ? "gui.skyabyss.skill.first" : "gui.skyabyss.skill.next")
-                    .append(Component.translatable(s.effectKey(), SkillRules.describeArgs(s, rank + 1)));
-            body.addAll(font.split(next.withColor(rank == 0 ? TEXT : PALE), w));
-        }
+        body.addAll(font.split(effect.withColor(TEXT), w));
         // 足りない条件 (赤紫)
         if (rank < s.maxRank) {
             if (level < s.minLevel) {
@@ -414,13 +417,34 @@ public class SkillScreen extends Screen {
                 body.addAll(font.split(Component.translatable("gui.skyabyss.skill.need_points").withColor(DENY), w));
             }
         }
-        // 入りきるなら言い伝えの一行も添える
-        int room = (INFO_H - 6) / 10 - lines.size() - body.size();
-        if (room >= flavor.size() + 1) {
+        // 入りきるなら、言い伝えの一行を効果の前に添える
+        List<FormattedCharSequence> flavor = font.split(Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
+        int room = (maxY - y) / 10 - lines.size() - body.size();
+        if (room >= flavor.size()) {
             lines.addAll(flavor);
         }
         lines.addAll(body);
-        drawLines(g, lines, x, y, top + INFO_Y + INFO_H - 2);
+        drawLines(g, lines, x, y, maxY);
+    }
+
+    // 習得のボタンに重ねたとき: 次の段の効果
+    private void renderLearnTooltip(GuiGraphics g, SkillData d, int mx, int my) {
+        if (selected == null || !learn.visible || !learn.isHovered()) {
+            return;
+        }
+        int rank = d.rank(selected);
+        if (rank >= selected.maxRank) {
+            return;
+        }
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        lines.add(Component.translatable("gui.skyabyss.skill.rank", rank + 1, selected.maxRank).withColor(GOLD).getVisualOrderText());
+        lines.addAll(font.split(Component.translatable(selected.effectKey(), SkillRules.describeArgs(selected, rank + 1)).withColor(PALE), 200));
+        if (selected.active && rank > 0) {
+            lines.addAll(font.split(Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(selected, rank + 1),
+                    SkillRules.fmtSeconds(SkillRules.cooldownTicks(selected, rank + 1))).withColor(0x9FB8FF), 200));
+        }
+        lines.add(Component.translatable("gui.skyabyss.skill.learn_cost").withColor(SOFT).getVisualOrderText());
+        g.renderTooltip(font, lines, mx, my);
     }
 
     private void drawLines(GuiGraphics g, List<FormattedCharSequence> lines, int x, int y, int maxY) {

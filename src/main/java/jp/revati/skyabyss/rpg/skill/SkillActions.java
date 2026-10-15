@@ -11,6 +11,10 @@ import jp.revati.skyabyss.rpg.GrowthRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -120,12 +124,19 @@ public final class SkillActions {
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class, box, e -> isFoe(player, e) && player.hasLineOfSight(e));
     }
 
-    // 技の傷を入れる。近接の技は「プレイヤーの攻撃」として入る (返し刃・鷹の目の印が効く)
+    // 天の驟雨の傷の種類 (data/skyabyss/damage_type/sky_rain.json)。ノックバックしない (敵を降る範囲の外へ押し出さない)
+    public static final ResourceKey<DamageType> SKY_RAIN_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(jp.revati.skyabyss.SkyAbyss.MODID, "sky_rain"));
+
+    // 技の傷を入れる。近接の技は「プレイヤーの攻撃」として入る (返し刃・鷹の目の印が効く)。驟雨は独自の傷の種類
     public static boolean hit(ServerPlayer player, LivingEntity target, float amount, Skill skill) {
         DEALING.set(skill);
         try {
+            DamageSource source = skill == Skill.SKY_RAIN
+                    ? new DamageSource(player.serverLevel().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SKY_RAIN_DAMAGE), player)
+                    : player.damageSources().playerAttack(player);
             target.invulnerableTime = 0;
-            boolean hurt = target.hurt(player.damageSources().playerAttack(player), amount);
+            boolean hurt = target.hurt(source, amount);
             target.invulnerableTime = 0;
             if (hurt) {
                 player.setLastHurtMob(target);
@@ -405,8 +416,8 @@ public final class SkillActions {
                 continue;
             }
             // 刺さるか寿命が来たら消える (拾えない矢を残さない)
-            boolean stuck = a.getDeltaMovement().lengthSqr() < 1e-4 || age > 3 && a.position().distanceToSqr(a.xo, a.yo, a.zo) < 1e-4;
-            if (age > SkillRules.PIERCE_LIFETIME || (stuck && age > 2)) {
+            boolean stuck = age > 2 && a.position().distanceToSqr(a.xo, a.yo, a.zo) < 1e-4;
+            if (age > SkillRules.PIERCE_LIFETIME || stuck) {
                 if (a.level() instanceof ServerLevel l) {
                     l.sendParticles(Skills.SKY_MOTE.get(), a.getX(), a.getY(), a.getZ(), 6, 0.15, 0.15, 0.15, 0.02);
                 }
@@ -414,7 +425,7 @@ public final class SkillActions {
                 it.remove();
                 continue;
             }
-            if (a.level() instanceof ServerLevel l && age % 1 == 0) {
+            if (a.level() instanceof ServerLevel l) {
                 l.sendParticles(Skills.SKY_MOTE.get(), a.getX(), a.getY(), a.getZ(), 1, 0.02, 0.02, 0.02, 0.0);
             }
         }

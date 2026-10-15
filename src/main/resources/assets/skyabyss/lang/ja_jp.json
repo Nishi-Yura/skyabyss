@@ -429,5 +429,9 @@
   "subtitles.skyabyss.skill_mark": "印が灯る",
   "subtitles.skyabyss.skill_rain": "光の矢が降る",
   "subtitles.skyabyss.skill_learn": "技が刻まれる",
-  "subtitles.skyabyss.skill_fail": "技が出ない"
+  "subtitles.skyabyss.skill_fail": "技が出ない",
+  "gui.skyabyss.skill.main_stat": "効果の元: %s",
+  "gui.skyabyss.skill.learn_cost": "技の点を 1 使う",
+  "death.attack.skyabyss.sky_rain": "%1$s は天の驟雨に射抜かれた",
+  "death.attack.skyabyss.sky_rain.player": "%1$s は %2$s の天の驟雨に射抜かれた"
 }

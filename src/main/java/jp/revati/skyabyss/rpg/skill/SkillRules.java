@@ -138,9 +138,10 @@ public final class SkillRules {
         return 0.06 * rank * t;
     }
 
-    // 跳び退き: 地に足が着いていて、10 ブロック以内に敵がいるときだけ。後ろへ跳ぶ (水平 1.0、上 0.42)
+    // 跳び退き: 地に足が着いていて、10 ブロック以内に敵がいるときだけ。後ろへ跳ぶ (水平 0.85、上 0.42)。
+    // 跳ぶ最初の tick は地面の摩擦が掛かるので、届くのはおよそ 4 ブロック (走って跳ぶのと同じくらい。アスレの近道にならない)
     public static final double BACKSTEP_ENEMY_RANGE = 10;
-    public static final double BACKSTEP_PUSH = 1.0;
+    public static final double BACKSTEP_PUSH = 0.85;
     public static final double BACKSTEP_LIFT = 0.42;
 
     // 鷹の目: 自分の矢が当たった敵に 5 秒の印。印の敵は、誰の攻撃でも 5% / 8% / 12% 多く傷つく (重ならない。高いほうを使う)
