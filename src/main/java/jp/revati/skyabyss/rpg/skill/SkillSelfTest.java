@@ -238,6 +238,23 @@ public final class SkillSelfTest {
         check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.NO_MANA && pd.mana == 5, "titan cleave was cast without mana");
         check(f, SkillManager.cast(p, 3) == SkillManager.CastResult.EMPTY, "an empty slot did something");
 
+        // 驟雨の傷: 独自の傷の種類で、ノックバックしない (敵を範囲の外へ押し出さない)
+        var rainType = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getHolder(SkillActions.SKY_RAIN_DAMAGE);
+        check(f, rainType.isPresent() && rainType.get().is(net.minecraft.tags.DamageTypeTags.NO_KNOCKBACK), "the sky rain damage type is missing or knocks back");
+        zombie.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        float beforeRain = zombie.getHealth();
+        check(f, SkillActions.hit(p, zombie, 2f, Skill.SKY_RAIN) && zombie.getHealth() < beforeRain, "sky rain damage did not hurt");
+        check(f, zombie.getDeltaMovement().horizontalDistanceSqr() < 1e-6, "sky rain damage knocked the zombie back");
+
+        // 踏み込み: 宙に浮いている (地に足が着いていない) と使えず、マナも減らない
+        SkillManager.forceRank(p, Skill.LUNGE, 1);
+        SkillManager.setSlot(p, 3, Skill.LUNGE);
+        pd.mana = 20;
+        pd.globalCooldown = 0;
+        check(f, SkillManager.cast(p, 3) == SkillManager.CastResult.FAILED && pd.mana == 20 && pd.cooldown(Skill.LUNGE) == 0,
+                "lunge in mid-air was not refused for free");
+        SkillManager.setSlot(p, 3, null);
+
         // 雲穿ち: 弓と矢が要る。矢を 1 本使い、貫く矢が飛ぶ。弓がなければ何も払わない
         SkillManager.forceRank(p, Skill.CLOUD_PIERCE, 2);
         SkillManager.setSlot(p, 1, Skill.CLOUD_PIERCE);

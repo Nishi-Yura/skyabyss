@@ -203,7 +203,7 @@ public final class SkillActions {
     // 踏み込み: 見ている先 (8 ブロック以内、左右 25 度) の敵の手前まで一気に詰めて斬る。
     // 足場のない所・壁の向こうへは出ない (背中のアスレの近道にならないように)
     static String lunge(ServerPlayer player, int rank) {
-        if (!player.onGround()) {
+        if (!player.onGround() || player.isPassenger()) {
             return "message.skyabyss.skill.need_ground";
         }
         ServerLevel level = player.serverLevel();
@@ -342,8 +342,9 @@ public final class SkillActions {
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0f, SkillRules.PIERCE_SPEED, 0f);
         level.addFreshEntity(arrow);
         ARROWS.add(new TrackedArrow(arrow, new int[1]));
+        // 無限のエンチャントの弓なら、ふつうの矢は減らない (バニラの弓と同じ)
         if (!player.getAbilities().instabuild) {
-            ammo.shrink(1);
+            ammo.shrink(net.minecraft.world.item.enchantment.EnchantmentHelper.processAmmoUse(level, bow, ammo, 1));
         }
         player.swing(player.getMainHandItem() == bow ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, true);
         particle(level, Skills.SKY_MOTE.get(), player.getEyePosition().add(player.getLookAngle().scale(1.2)), 8, 0.15, 0.05);
@@ -353,7 +354,7 @@ public final class SkillActions {
 
     // 跳び退き: 後ろへ軽く跳ぶ。地に足が着いていて、近くに敵がいるときだけ (背中のアスレの近道にならないように)
     static String backstep(ServerPlayer player, int rank) {
-        if (!player.onGround()) {
+        if (!player.onGround() || player.isPassenger()) {
             return "message.skyabyss.skill.need_ground";
         }
         if (foesAroundAny(player, SkillRules.BACKSTEP_ENEMY_RANGE).isEmpty()) {
@@ -388,13 +389,15 @@ public final class SkillActions {
         var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, center,
                 new AABB(eye, center).inflate(1.0), e -> isFoe(player, e), eye.distanceToSqr(center));
         if (entityHit != null) {
+            // 浮いている相手 (岩鯨の心臓など) にも当たるよう、相手の足もとを中心にする
             center = entityHit.getEntity().position();
-        }
-        // 宙を指していたら、真下の地面まで下ろす (8 ブロックまで)
-        BlockHitResult ground = level.clip(new ClipContext(center.add(0, 0.5, 0), center.add(0, -8, 0), ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE, player));
-        if (ground.getType() != HitResult.Type.MISS) {
-            center = ground.getLocation();
+        } else {
+            // 宙を指していたら、真下の地面まで下ろす (8 ブロックまで)
+            BlockHitResult ground = level.clip(new ClipContext(center.add(0, 0.5, 0), center.add(0, -8, 0), ClipContext.Block.COLLIDER,
+                    ClipContext.Fluid.NONE, player));
+            if (ground.getType() != HitResult.Type.MISS) {
+                center = ground.getLocation();
+            }
         }
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
         double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
@@ -433,7 +436,7 @@ public final class SkillActions {
             Rain r = it.next();
             r.ticks++;
             // 降ってくる光 (毎 tick 少し)
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 2; i++) {
                 double a = r.level.random.nextDouble() * Math.PI * 2;
                 double d = Math.sqrt(r.level.random.nextDouble()) * SkillRules.RAIN_RADIUS;
                 r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x + Math.cos(a) * d, r.center.y + 5 + r.level.random.nextDouble() * 2,
