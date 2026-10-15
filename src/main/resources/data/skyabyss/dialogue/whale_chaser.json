@@ -1,0 +1,378 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "entries": [
+    {
+      "node": "c_fragment",
+      "if": {
+        "type": "quest",
+        "quest": "main_song",
+        "is": "active",
+        "stage": "return"
+      }
+    },
+    {
+      "node": "c_deja",
+      "if": [
+        {
+          "type": "loop",
+          "min": 1
+        },
+        {
+          "type": "remembers",
+          "flag": "met"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "c_first",
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "met"
+        }
+      }
+    },
+    {
+      "node": "c_menu"
+    }
+  ],
+  "nodes": {
+    "c_first": {
+      "face": "smile",
+      "next": "c_menu"
+    },
+    "c_deja": {
+      "face": "grave",
+      "next": "c_menu"
+    },
+    "c_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "whale_q",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "main_song",
+            "is": "active",
+            "stage": "find_chaser"
+          },
+          "goto": "c_whale1"
+        },
+        {
+          "id": "whale",
+          "if": [
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "c_whale_heard"
+              }
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "quest",
+                "quest": "main_song",
+                "is": "active",
+                "stage": "find_chaser"
+              }
+            }
+          ],
+          "goto": "c_whale1"
+        },
+        {
+          "id": "when",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "c_whale_heard"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "chapter1/stone_whale"
+              }
+            }
+          ],
+          "goto": "c_when"
+        },
+        {
+          "id": "peak",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "c_whale_heard"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "prologue/shaved_peak"
+              }
+            }
+          ],
+          "goto": "c_peak"
+        },
+        {
+          "id": "saw",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/stone_whale"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "c_saw"
+              }
+            }
+          ],
+          "goto": "c_saw"
+        },
+        {
+          "id": "back",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/sky_ruins"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "c_back_told"
+              }
+            }
+          ],
+          "goto": "c_back"
+        },
+        {
+          "id": "help",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/sky_ruins"
+            },
+            {
+              "type": "quest",
+              "quest": "sub_shards",
+              "is": "none"
+            }
+          ],
+          "goto": "c_shards_offer"
+        },
+        {
+          "id": "shards",
+          "kind": "give",
+          "if": [
+            {
+              "type": "quest",
+              "quest": "sub_shards",
+              "is": "active",
+              "stage": "deliver"
+            },
+            {
+              "type": "item",
+              "item": "skyabyss:stone_whale_shard",
+              "count": 3
+            }
+          ],
+          "do": [
+            {
+              "type": "take",
+              "item": "skyabyss:stone_whale_shard",
+              "count": 3
+            }
+          ],
+          "goto": "c_shards_thanks"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    },
+    "c_whale1": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_whale_heard"
+        }
+      ],
+      "next": "c_whale2"
+    },
+    "c_whale2": {
+      "face": "grave",
+      "next": "c_whale3"
+    },
+    "c_whale3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "grab",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "afraid",
+          "goto": "c_afraid"
+        }
+      ]
+    },
+    "c_afraid": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "c_when": {
+      "face": "neutral",
+      "next": "@entry"
+    },
+    "c_peak": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "prologue/shaved_peak"
+        },
+        {
+          "type": "flag",
+          "flag": "c_peak_told"
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_saw": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_saw"
+        },
+        {
+          "type": "affinity",
+          "amount": 3
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_back": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_back_told"
+        }
+      ],
+      "options": [
+        {
+          "id": "town",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 3
+            }
+          ],
+          "goto": "c_back_town"
+        },
+        {
+          "id": "guard",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ],
+          "goto": "c_back_guard"
+        },
+        {
+          "id": "secret",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": -1
+            }
+          ],
+          "goto": "c_back_secret"
+        }
+      ]
+    },
+    "c_back_town": {
+      "face": "neutral",
+      "next": "@entry"
+    },
+    "c_back_guard": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "c_back_secret": {
+      "face": "neutral",
+      "next": "@entry"
+    },
+    "c_shards_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_shards"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "c_shards_thanks": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "keep",
+          "goto": "end"
+        }
+      ]
+    },
+    "c_fragment": {
+      "face": "grave",
+      "next": "c_fragment2"
+    },
+    "c_fragment2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

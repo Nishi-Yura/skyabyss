@@ -43,6 +43,9 @@ public class SkyAbyss {
         jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
         // 技 (スキル・マナ・技の枠)。登録は rpg.skill パッケージにまとめてある
         jp.revati.skyabyss.rpg.skill.Skills.register(modEventBus);
+        // NPC (語り部・鯨追い、好感度) とクエスト (記録)。登録は npc / quest パッケージにまとめてある
+        jp.revati.skyabyss.npc.NpcSetup.register(modEventBus);
+        jp.revati.skyabyss.quest.QuestSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
