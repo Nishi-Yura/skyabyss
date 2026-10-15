@@ -36,7 +36,6 @@ public final class GearEvents {
     public static final double TOUGHNESS_PER_LEVEL = 0.2;
 
     private static final ResourceLocation ENHANCE = id("enhance");
-    private static final ResourceLocation ENHANCE_TOUGHNESS = id("enhance_toughness");
     private static final ResourceLocation FANG_WATER = id("fang_water");
     private static final ResourceLocation PLATING_ARMOR = id("plating_armor");
     private static final ResourceLocation PLATING_KNOCKBACK = id("plating_knockback");
@@ -62,9 +61,11 @@ public final class GearEvents {
             event.addModifier(Attributes.ATTACK_DAMAGE, new AttributeModifier(ENHANCE, level * ATTACK_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE),
                     EquipmentSlotGroup.MAINHAND);
         } else if (stack.getItem() instanceof ArmorItem armor) {
+            // 修飾子の ID は部位ごとに分ける。同じ ID だと、二つ目の部位が一つ目を上書きし、外すと両方消える
+            String part = armor.getEquipmentSlot().getName();
             EquipmentSlotGroup slot = EquipmentSlotGroup.bySlot(armor.getEquipmentSlot());
-            event.addModifier(Attributes.ARMOR, new AttributeModifier(ENHANCE, level * ARMOR_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE), slot);
-            event.addModifier(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(ENHANCE_TOUGHNESS, level * TOUGHNESS_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE), slot);
+            event.addModifier(Attributes.ARMOR, new AttributeModifier(id("enhance_" + part), level * ARMOR_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE), slot);
+            event.addModifier(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id("enhance_toughness_" + part), level * TOUGHNESS_PER_LEVEL, AttributeModifier.Operation.ADD_VALUE), slot);
         }
     }
 
