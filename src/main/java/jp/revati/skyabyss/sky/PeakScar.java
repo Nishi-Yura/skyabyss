@@ -253,7 +253,7 @@ public final class PeakScar {
     record Shape(double halfLength, double halfWidth, int depth, int grooves, double drag, int debris) {
         static Shape of(float strength) {
             float s = Mth.clamp(strength, 0f, 1f);
-            return new Shape(7.0 + 4.0 * s, 3.0 + 1.2 * s, 2 + Math.round(2 * s), s < 0.5f ? 2 : 3, 6.0 + 6.0 * s, 6 + Math.round(6 * s));
+            return new Shape(7.0 + 4.0 * s, 3.0 + 1.2 * s, 2 + Math.round(2 * s), s < 0.5f ? 2 : 3, 9.0 + 7.0 * s, 6 + Math.round(6 * s));
         }
 
         Shape shallower() {
@@ -409,6 +409,23 @@ public final class PeakScar {
         int innerMaxX = Mth.floor(c.x() + reach);
         int innerMinZ = Mth.floor(c.z() - reach);
         int innerMaxZ = Mth.floor(c.z() + reach);
+        // 雪の峰か: 削る所の地表の4割以上が雪なら、切り口は「むき出しの灰色の岩」にする (白い方解石では雪に紛れる)。
+        // 岩の峰なら、切り口を白い方解石にする (「切り口の岩はまだ白かった」)
+        int columns = 0;
+        int snowTops = 0;
+        for (int x = innerMinX; x <= innerMaxX; x++) {
+            for (int z = innerMinZ; z <= innerMaxZ; z++) {
+                double rx = x + 0.5 - (c.x() + 0.5);
+                double rz = z + 0.5 - (c.z() + 0.5);
+                if (sq((rx * dx + rz * dz) / shape.halfLength()) + sq((-rx * dz + rz * dx) / shape.halfWidth()) <= 1.0) {
+                    columns++;
+                    if (snow(level.getBlockState(m.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1, z)))) {
+                        snowTops++;
+                    }
+                }
+            }
+        }
+        boolean snowy = snowTops > columns * 0.4;
         for (int x = innerMinX; x <= innerMaxX; x++) {
             for (int z = innerMinZ; z <= innerMaxZ; z++) {
                 double rx = x + 0.5 - (c.x() + 0.5);
@@ -444,8 +461,9 @@ public final class PeakScar {
                         removals.add(new Change(m.immutable(), s, Blocks.AIR.defaultBlockState()));
                     }
                     BlockState below = level.getBlockState(m.set(x, floor, z));
-                    if (WHITENS.contains(below.getBlock()) && random.nextFloat() < 0.75f) {
-                        whiten.add(new Change(m.immutable(), below, Blocks.CALCITE.defaultBlockState()));
+                    Change floorChange = floor(below, m.immutable(), snowy, random);
+                    if (floorChange != null) {
+                        whiten.add(floorChange);
                     }
                     touched.add(BlockPos.asLong(x, 0, z));
                 } else if (inGroove && along > 0 && along < shape.halfLength() + shape.drag()) {
@@ -458,9 +476,17 @@ public final class PeakScar {
                     if (y < MIN_PEAK_Y - 20) {
                         continue;
                     }
+                    // 雪は掘り抜いて (3段まで)、下の岩を見せる
+                    int bottom = y;
+                    while (bottom > y - 3 && snow(level.getBlockState(m.set(x, bottom, z)))) {
+                        bottom--;
+                    }
+                    if (bottom < y && !removable(level.getBlockState(m.set(x, bottom, z)))) {
+                        bottom++;
+                    }
                     boolean ok = true;
                     List<Change> col = new ArrayList<>();
-                    for (int yy = surface; yy >= y; yy--) {
+                    for (int yy = surface; yy >= bottom; yy--) {
                         BlockState s = level.getBlockState(m.set(x, yy, z));
                         if (s.isAir()) {
                             continue;
@@ -473,6 +499,10 @@ public final class PeakScar {
                     }
                     if (ok) {
                         removals.addAll(col);
+                        Change floorChange = floor(level.getBlockState(m.set(x, bottom - 1, z)), m.immutable(), snowy, random);
+                        if (floorChange != null) {
+                            whiten.add(floorChange);
+                        }
                         touched.add(BlockPos.asLong(x, 0, z));
                     }
                 }
@@ -534,14 +564,35 @@ public final class PeakScar {
         return new Result(new Plan(new BlockPos(c.x(), c.y(), c.z()), dx, dz, List.copyOf(all), removed, area), "ok");
     }
 
+    static boolean snow(BlockState s) {
+        return s.is(Blocks.SNOW) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW);
+    }
+
+    // 削ったあとの底のブロックをどう変えるか (変えないなら null)。
+    // 雪の峰: 底に残った雪を灰色の岩 (石・安山岩) にする。岩の峰: 石の底の4分の3を白い方解石にする
+    @Nullable
+    private static Change floor(BlockState below, BlockPos pos, boolean snowy, RandomSource random) {
+        if (snowy) {
+            if (below.is(Blocks.SNOW_BLOCK) || below.is(Blocks.POWDER_SNOW)) {
+                return new Change(pos, below, (random.nextFloat() < 0.7f ? Blocks.STONE : Blocks.ANDESITE).defaultBlockState());
+            }
+            return null;
+        }
+        if (WHITENS.contains(below.getBlock()) && random.nextFloat() < 0.75f) {
+            return new Change(pos, below, Blocks.CALCITE.defaultBlockState());
+        }
+        return null;
+    }
+
     // 人の持ち物かもしれないエンティティ: 防具立て・額縁・絵・乗り物・トロッコなど (生き物でないもの)、
     // 飼いならした・名前の付いた・消えない設定の・リードでつないだ生き物、プレイヤー
     static boolean belongsToSomeone(Entity e) {
         if (e instanceof ItemEntity) {
             return false;
         }
-        if (e instanceof net.minecraft.world.entity.player.Player) {
-            return true;
+        if (e instanceof net.minecraft.world.entity.player.Player player) {
+            // 観戦モードの人は、ブロックに触れないので数えない
+            return !player.isSpectator();
         }
         if (!(e instanceof Mob mob)) {
             return true;

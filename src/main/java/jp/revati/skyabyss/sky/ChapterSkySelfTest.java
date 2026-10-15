@@ -328,7 +328,8 @@ public final class ChapterSkySelfTest {
                 if (removal && !PeakScar.removable(c.expect())) {
                     failures.add("the plan removes " + c.expect() + " at " + c.pos());
                 }
-                if (!removal && !c.expect().isAir() && !PeakScar.vegetation(c.expect()) && !PeakScar.WHITENS.contains(c.expect().getBlock())) {
+                if (!removal && !c.expect().isAir() && !PeakScar.vegetation(c.expect()) && !PeakScar.WHITENS.contains(c.expect().getBlock())
+                        && !PeakScar.snow(c.expect())) {
                     failures.add("the plan replaces " + c.expect() + " at " + c.pos());
                 }
                 calcite |= c.to().is(Blocks.CALCITE) && PeakScar.WHITENS.contains(c.expect().getBlock());
@@ -359,6 +360,19 @@ public final class ChapterSkySelfTest {
             buildPeak(level);
             expectRefused(level, peak, "near another scar", failures);
             forgetTestScars(data);
+
+            // 雪の峰では、切り口を白くせず、雪の底を灰色の岩にする (雪に紛れさせない)
+            buildPeak(level, true);
+            PeakScar.Result snowyPlan = PeakScar.plan(level, peak, dirX, dirZ, 0.5f, RandomSource.create(8), PeakScar.PLAYER_CLEAR);
+            if (snowyPlan.plan() == null) {
+                failures.add("a snowy peak was refused: " + snowyPlan.reason());
+            } else {
+                boolean anyCalcite = snowyPlan.plan().changes().stream().anyMatch(c -> c.to().is(Blocks.CALCITE) && !c.expect().isAir());
+                boolean bareRock = snowyPlan.plan().changes().stream().anyMatch(c -> PeakScar.snow(c.expect()) && !c.to().isAir());
+                if (anyCalcite || !bareRock) {
+                    failures.add("a snowy peak should be cut to grey rock, not calcite (calcite " + anyCalcite + ", rock " + bareRock + ")");
+                }
+            }
 
             // 3. 強さ (月の近さ) で深く長くなる
             PeakScar.Result weak = PeakScar.plan(level, peak, dirX, dirZ, 0f, RandomSource.create(2), PeakScar.PLAYER_CLEAR);
@@ -508,8 +522,12 @@ public final class ChapterSkySelfTest {
         }
     }
 
-    // 空中に円錐の峰 (石。上の二段は土と草) を作る。前の結果は消してから
     private static void buildPeak(ServerLevel level) {
+        buildPeak(level, false);
+    }
+
+    // 空中に円錐の峰 (石。上の二段は土と草、snowy なら雪) を作る。前の結果は消してから
+    private static void buildPeak(ServerLevel level, boolean snowy) {
         clearArea(level);
         for (int x = -RADIUS; x <= RADIUS; x++) {
             for (int z = -RADIUS; z <= RADIUS; z++) {
@@ -524,6 +542,10 @@ public final class ChapterSkySelfTest {
                     if (r < 4 && y >= top - 2) {
                         // 頂は岩がむき出し
                         s = Blocks.STONE.defaultBlockState();
+                    }
+                    if (snowy && y >= top - 2) {
+                        // 雪の峰: 上の三段が雪 (頂も)
+                        s = Blocks.SNOW_BLOCK.defaultBlockState();
                     }
                     level.setBlock(new BlockPos(CX + x, y, CZ + z), s, Block.UPDATE_CLIENTS);
                 }
