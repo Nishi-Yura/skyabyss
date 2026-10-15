@@ -270,6 +270,7 @@ public final class GrowthRewards {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         STONES.clear();
+        HEALTH_AFTER_EQUIP.clear();
     }
 
     // ---------------------------------------------------------------- 修飾子を付け直す時機
@@ -289,7 +290,57 @@ public final class GrowthRewards {
             // 倒れて目を覚ましたら、耐久で増えた分まで満たす (バニラの復活と同じく満タン)
             if (!event.isEndConquered()) {
                 player.setHealth(player.getMaxHealth());
+                // 装備の特性 (活力) の最大体力は、次の tick で装備を見直したときに付く。付いてからもう一度満たす
+                HEALTH_AFTER_EQUIP.put(player.getUUID(), Float.MAX_VALUE);
             }
+        }
+    }
+
+    // ---------------------------------------------------------------- 装備の最大体力と体力の持ち越し
+    // 装備の修飾子 (特性の活力など) は保存されず、ログイン・復活のあとの最初の tick で付く。
+    // それより先に体力が今の上限 (装備なし) に切り詰められるので、最後に見た体力を覚えておき、
+    // 修飾子が付いたあとで戻す (復活のときは満たす)
+    static final String HEALTH_TAG = "skyabyss_health";
+    private static final Map<java.util.UUID, Float> HEALTH_AFTER_EQUIP = new HashMap<>();
+
+    @SubscribeEvent
+    static void onLoginHealth(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && !(player instanceof FakePlayer)) {
+            CompoundTag data = player.getPersistentData();
+            if (data.contains(HEALTH_TAG) && player.isAlive()) {
+                float saved = data.getFloat(HEALTH_TAG);
+                // 切り詰められていたときだけ (上限ちょうどになっている)
+                if (saved > player.getHealth() && player.getHealth() >= player.getMaxHealth() - 1e-3f) {
+                    HEALTH_AFTER_EQUIP.put(player.getUUID(), saved);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void onLogoutHealth(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            HEALTH_AFTER_EQUIP.remove(player.getUUID());
+            if (player.isAlive()) {
+                player.getPersistentData().putFloat(HEALTH_TAG, player.getHealth());
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void onPlayerTickHealth(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || player instanceof FakePlayer) {
+            return;
+        }
+        if (!HEALTH_AFTER_EQUIP.isEmpty()) {
+            Float target = HEALTH_AFTER_EQUIP.remove(player.getUUID());
+            if (target != null && player.isAlive() && target > player.getHealth()) {
+                player.setHealth(Math.min(target, player.getMaxHealth()));
+            }
+        }
+        // 自動保存に備えて 1 秒ごとに覚えておく (ログアウトのときは onLogoutHealth で最新にする)
+        if (player.tickCount % 20 == 11 && player.isAlive()) {
+            player.getPersistentData().putFloat(HEALTH_TAG, player.getHealth());
         }
     }
 

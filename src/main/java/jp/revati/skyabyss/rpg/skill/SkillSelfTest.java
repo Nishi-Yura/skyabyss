@@ -180,6 +180,16 @@ public final class SkillSelfTest {
         SkillData pd = SkillManager.get(p);
         SkillManager.settleMana(p);
         check(f, Math.abs(pd.mana - GrowthRules.BASE_MANA) < 1e-4, "fresh mana is not full: " + pd.mana);
+        // 復活のあと (mana = -1) は、装備の特性の最大マナが付いた最初の tick で、その上限まで満たす
+        net.minecraft.resources.ResourceLocation gearMana = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                jp.revati.skyabyss.SkyAbyss.MODID, "selftest_gear_mana");
+        pd.mana = -1;
+        p.getAttribute(jp.revati.skyabyss.rpg.Rpg.MAX_MANA).addTransientModifier(
+                new net.minecraft.world.entity.ai.attributes.AttributeModifier(gearMana, 15, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+        SkillManager.regenTick(p, pd, level.getGameTime());
+        check(f, Math.abs(pd.mana - (GrowthRules.BASE_MANA + 15)) < 1e-4, "respawn mana did not fill to the gear max: " + pd.mana);
+        p.getAttribute(jp.revati.skyabyss.rpg.Rpg.MAX_MANA).removeModifier(gearMana);
+        SkillManager.settleMana(p);
 
         // 習得 (サーバーの入口)
         check(f, SkillManager.learn(p, Skill.TITAN_CLEAVE) == SkillData.LearnResult.OK, "learning titan cleave failed");
