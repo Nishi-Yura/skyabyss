@@ -10,6 +10,7 @@ import jp.revati.skyabyss.prologue.WatcherEndPayload;
 import jp.revati.skyabyss.prologue.WatcherEntity;
 import jp.revati.skyabyss.prologue.WatcherOutcome;
 import jp.revati.skyabyss.prologue.WatcherPayload;
+import jp.revati.skyabyss.prologue.WatcherSpot;
 import jp.revati.skyabyss.prologue.WatcherStage;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -46,6 +47,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class WatcherClient {
     // 気づいたとみなすまでに、続けて見えている tick 数
     private static final int NOTICE_TICKS = 6;
+    // 見た目の確かめ用 (起動時に -Dskyabyss.watcherHold=true): 見つめても近づいても消えない
+    private static final boolean HOLD = Boolean.getBoolean("skyabyss.watcherHold");
     // 目を離してから消えるまでの tick 数
     private static final int LOOK_AWAY_TICKS = 8;
     // 見つめているとみなす、視線の中心からの角度
@@ -190,6 +193,11 @@ public final class WatcherClient {
             }
         }
         stareTicks = staring ? stareTicks + 1 : Math.max(0, stareTicks - 2);
+        if (HOLD) {
+            // 見た目の確かめ用: 消えずに立ち続ける
+            aim(w, eye, staring);
+            return;
+        }
 
         double distance = Math.sqrt(mc.player.distanceToSqr(w));
         boolean morning = shownAtNight && isDay(level);
@@ -330,7 +338,7 @@ public final class WatcherClient {
     }
 
     private static Vec3 head(WatcherEntity w) {
-        return w.position().add(0, 2.3, 0);
+        return w.position().add(0, WatcherSpot.HEAD, 0);
     }
 
     private static boolean clear(Minecraft mc, ClientLevel level, Vec3 target) {

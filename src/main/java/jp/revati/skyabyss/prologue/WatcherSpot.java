@@ -25,9 +25,9 @@ public record WatcherSpot(Vec3 feet, float yaw, double distance, boolean skyline
     static final int TRIES = 48;
     // 見ている向きから何度より外を選ぶか
     static final float VIEW_HALF_ANGLE = 75f;
-    // 見る者の頭と胸の高さ (足もとから)
-    static final double HEAD = 2.3;
-    static final double CHEST = 1.4;
+    // 見る者の頭 (光る目) と胸の高さ (足もとから)。背丈は 2.1 ブロック
+    public static final double HEAD = 1.95;
+    static final double CHEST = 1.2;
     // 立ち位置の明るさ (ブロックの光) の上限。松明の光の中には立たない
     static final int MAX_BLOCK_LIGHT = 5;
 
