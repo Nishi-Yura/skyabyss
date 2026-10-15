@@ -28,12 +28,12 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
-// クエストのクライアント側。定義の一覧を持ち、K でログを開き、始まった・進んだ・終わったの札を出す。
+// クエストのクライアント側。定義の一覧を持ち、U でログを開き、始まった・進んだ・終わったの札を出す。
 // 記録 (QuestLog) は Data Attachment の同期で mc.player に届いている
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class QuestClient {
     public static final KeyMapping LOG_KEY = new KeyMapping("key.skyabyss.quest_log", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, "key.categories.skyabyss");
 
     private static Map<String, QuestDef> catalog = Map.of();
     private static List<QuestDef> ordered = List.of();
