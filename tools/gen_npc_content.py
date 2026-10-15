@@ -375,12 +375,12 @@ C_MENU = [
 wc.node("c_menu", "なにか用か。", "Need something?", options=C_MENU, note="話題を選ぶ節")
 
 wc.node("c_whale1",
-        "俺は、もう何年も鯨を追っている。\n空の影が通った年には、決まって歌が聞こえる。その歌の主が、岩の鯨だ。背中に、崩れた町を乗せている。",
-        "I've been chasing the whale for years now.\nIn the years the shadow passes, the song is always heard. The singer is a whale of rock. It carries a ruined town on its back.",
+        "俺は、もう何年も鯨を追っている。\n影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。",
+        "I've been chasing the whale for years now.\nThat low song from the far sky in the shadow years... its singer is a whale of rock. Someone told me long ago there's a town on its back.",
         next="c_whale2", do=[set_flag("c_whale_heard")])
 wc.node("c_whale2",
-        "ときどき雲の下まで降りてきて、鎖を垂らすんだ。地面に届くくらい、長い鎖を。\n俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。",
-        "Sometimes it comes down below the clouds and lets down a chain. Long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
+        "ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。\n俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。",
+        "Sometimes it comes down below the clouds and lets down a chain long enough to reach the ground.\nI've... never once caught it. It always comes down over someone far away.",
         face="grave", next="c_whale3", note="ここに入るとメインの「鯨追いに話を聞く」が済む")
 wc.node("c_whale3",
         "あんたの上には、来るかもしれないな。\n……もし鎖が届いたら、迷わずつかめ。",
@@ -433,8 +433,8 @@ wc.node("c_shards_offer",
             ("later", "今はやめておく。", "Not right now.", {"goto": "@entry"}),
         ], note="サブ「鯨のかけら」を始める")
 wc.node("c_shards_thanks",
-        "これが……鯨の。\n冷たいのに、どこか脈を打っているみたいだ。……ありがとう。礼に、これを持っていけ。俺にはもう、要らないかもしれない。",
-        "So this is... the whale.\nIt's cold, but somehow it feels like it's beating. ...Thank you. Take this as thanks. I may not need it anymore.",
+        "これが……鯨の。\n冷たい石だ。……なのに、耳を当てると、遠くで歌が聞こえる気がする。ありがとう。礼に、これを持っていけ。俺にはもう、要らないかもしれない。",
+        "So this is... the whale.\nJust cold stone. ...And yet, held to my ear, I think I hear the song, far off. Thank you. Take this as thanks. I may not need it anymore.",
         face="smile", options=[("keep", "大事にする。", "I'll take good care of it.")],
         note="石を渡すとサブ「鯨のかけら」が終わる (遠眼鏡を受け取る)")
 wc.node("c_fragment",
@@ -514,7 +514,7 @@ quest(MAIN, "main", 10, ST,
                        "On its back lay a ruined town. Below the shrine stairs, three paths lead deeper in.\nAt the end of each, the people of the back must have left an inscription."),
            "objectives": [{"id": "read", "type": "lore", "count": 3,
                            "targets": ["chapter1/inscription_west", "chapter1/inscription_east", "chapter1/inscription_below"],
-                           "ja": "背中の碑文を読む（西・東・水路）", "en": "Read the inscriptions on the back (west, east, waterway)"}]},
+                           "ja": "背中の碑文を三つ読む", "en": "Read the three inscriptions on the back"}]},
           {"id": "heart",
            "journal": ("封印が解けた。奥の扉の向こうで、何かが脈を打っている。\n鍵は、鼓動のそばに納められているという。",
                        "The seal is broken. Beyond the inner door, something is beating.\nThe key, they say, was laid to rest beside the heartbeat."),

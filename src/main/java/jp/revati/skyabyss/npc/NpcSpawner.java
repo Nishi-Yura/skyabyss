@@ -24,6 +24,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -149,7 +150,7 @@ public final class NpcSpawner {
                 continue;
             }
             BlockPos at = ground(level, column, 12, 16);
-            if (at == null || !level.canSeeSky(at) || !natural(level.getBlockState(at.below()))) {
+            if (at == null || !openSky(level, at) || !natural(level.getBlockState(at.below()))) {
                 continue;
             }
             BlockPos fire = campfireSpot(level, at, random);
@@ -171,12 +172,17 @@ public final class NpcSpawner {
         int start = random.nextInt(4);
         for (int k = 0; k < 4; k++) {
             BlockPos p = at.relative(dirs[(start + k) % 4], 2);
-            if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && natural(level.getBlockState(p.below()))
+            if (level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && openSky(level, p) && natural(level.getBlockState(p.below()))
                     && level.getBlockState(p.below()).isFaceSturdy(level, p.below(), Direction.UP)) {
                 return p;
             }
         }
         return null;
+    }
+
+    // 真上に何もない (木の葉も屋根もない)。canSeeSky は空の明るさで見るので、読み込んだばかりのチャンクや葉の下で外れることがある
+    private static boolean openSky(ServerLevel level, BlockPos p) {
+        return p.getY() >= level.getHeight(Heightmap.Types.MOTION_BLOCKING, p.getX(), p.getZ());
     }
 
     private static boolean natural(BlockState state) {

@@ -32,7 +32,7 @@ public class QuestLogScreen extends Screen {
     private static final int LIST_W = 112;
     private static final int ROW_H = 12;
     private static final int LINE_H = 10;
-    private static final int PANEL = 0xF0101318;
+    private static final int PANEL = 0xFA101318;
     private static final int EDGE = 0xFF2E5552;
     private static final int EDGE_IN = 0xFF17302F;
     private static final int TEAL = 0xFF7FD6D0;
@@ -154,10 +154,7 @@ public class QuestLogScreen extends Screen {
                 int have = Math.min(entry.progress(i), ob.count());
                 boolean ok = have >= ob.count();
                 String text = Component.translatable(def.objectiveKey(stage, ob)).getString();
-                if (ob.count() > 1) {
-                    text += "（" + have + "/" + ob.count() + "）";
-                }
-                List<String> wrapped = LoreWrap.wrap(text, w - 12, font::width);
+                List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", w - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
                     body.add(new BodyLine((k == 0 ? (ok ? "■ " : "□ ") : "") + wrapped.get(k), ok ? SOFT : TEXT, k == 0 ? 0 : 11));
                 }
@@ -253,7 +250,8 @@ public class QuestLogScreen extends Screen {
         g.renderOutline(left + 2, top + 2, W - 4, H - 4, EDGE_IN);
         g.drawString(font, title, left + 10, top + 8, TEAL, false);
         g.fill(left + 8, top + 19, left + W - 8, top + 20, EDGE_IN);
-        g.fill(left + LIST_W + 10, top + 24, left + LIST_W + 11, top + H - 8, EDGE_IN);
+        // 縦の仕切りは下の一行 (伝承の書への案内) の上で止める。案内を左の列に押し込むと「伝承の書／に。」と切れるため
+        g.fill(left + LIST_W + 10, top + 24, left + LIST_W + 11, top + H - 26, EDGE_IN);
         if (rows.isEmpty()) {
             g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), left + W / 2, top + H / 2 - 4, SOFT);
             return;
@@ -277,7 +275,7 @@ public class QuestLogScreen extends Screen {
                 }
             }
             y += ROW_H;
-            if (y > top + H - 14) {
+            if (y > top + H - 38) {
                 break;
             }
         }

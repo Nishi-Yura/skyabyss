@@ -30,13 +30,15 @@ public class DialogueScreen extends Screen {
     private static final int NAME = 0xFF7FD6D0;
     private static final int SOFT = 0xFF9A9AAE;
     private static final int GOLD = 0xFFF2C14E;
-    private static final int PANEL = 0xE6101318;
+    private static final int PANEL = 0xF2101318;
     private static final int EDGE = 0xFF2E5552;
     private static final int EDGE_IN = 0xFF17302F;
     private static final int HOVER = 0x402E8F88;
     private static final int LINE_H = 11;
     private static final int OPTION_H = 13;
     private static final int FACE = 40;
+    // 選択肢の印 (「1◆」) の幅
+    private static final int MARK_W = 18;
     // 1 tick に出す字の数 (2 = 毎秒 40 字)
     private static final float CHARS_PER_TICK = 2.0f;
 
@@ -90,11 +92,11 @@ public class DialogueScreen extends Screen {
         textX = 16 + FACE + 14;
         textW = panelW - textX - 12;
         lines.clear();
-        lines.addAll(LoreWrap.wrap(Component.translatable(show.textKey()).getString(), textW, font::width));
+        lines.addAll(wrapBalanced(Component.translatable(show.textKey()).getString(), textW, font));
         totalChars = lines.stream().mapToInt(String::length).sum();
         optionLines.clear();
         for (NpcNetwork.OptionView o : options()) {
-            optionLines.add(LoreWrap.wrap(Component.translatable(o.textKey()).getString(), textW - 14, font::width));
+            optionLines.add(wrapBalanced(Component.translatable(o.textKey()).getString(), textW - MARK_W, font));
         }
         int optionsH = 0;
         for (List<String> ol : optionLines) {
@@ -105,6 +107,25 @@ public class DialogueScreen extends Screen {
         panelX = (width - panelW) / 2;
         panelY = height - panelH - 10;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
+    }
+
+    // 段落ごとに折り返す。最後の行が「れど。」のように短く残る (幅の 1/4 未満) ときは、行の数を変えずに
+    // 幅を少しずつ狭めて、前の行から字を送る (ゲーム画面で「勧めないけ／れど。」と切れていたため)
+    static List<String> wrapBalanced(String text, int width, Font font) {
+        List<String> out = new ArrayList<>();
+        for (String para : text.split("\n", -1)) {
+            List<String> best = LoreWrap.wrap(para, width, font::width);
+            int lines = best.size();
+            for (int w = width - 4; lines >= 2 && font.width(best.get(lines - 1)) < width / 4 && w > width * 2 / 3; w -= 4) {
+                List<String> narrower = LoreWrap.wrap(para, w, font::width);
+                if (narrower.size() != lines) {
+                    break;
+                }
+                best = narrower;
+            }
+            out.addAll(best);
+        }
+        return out;
     }
 
     // 画面に出す選択肢。選択肢も続きもない節には「立ち去る」を一つ置く
@@ -209,15 +230,16 @@ public class DialogueScreen extends Screen {
                 case "leave" -> SOFT;
                 default -> TEXT;
             };
-            String mark = switch (o.kind()) {
+            // 番号はいつも出す (数字キーで選べるのが分かるように)。クエストに関わるものは ◆、物を渡すものは ◇ を添える
+            String mark = (i + 1) + switch (o.kind()) {
                 case "quest" -> "◆";
                 case "give" -> "◇";
-                default -> (i + 1) + ".";
+                default -> ".";
             };
             g.drawString(font, mark, tx, ty, i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
             int ly = ty;
             for (String l : ol) {
-                g.drawString(font, l, tx + 14, ly, i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
+                g.drawString(font, l, tx + MARK_W, ly, i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
                 ly += LINE_H;
             }
             ty += h;
