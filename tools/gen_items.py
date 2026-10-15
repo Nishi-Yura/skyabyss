@@ -14,6 +14,19 @@
 import sys
 from pathlib import Path
 
+# ---------------------------------------------------------------------------
+# 停止中 (2026-10-15): このスクリプトは古い第 1 版の 32px 生成器。
+# 採用済みのアイコン・ブロック (docs/roughs/v4/items_blocks/b、生成器は tools/rough/items_blocks_32.py) と
+# 防具の見た目 (textures/models/armor) を上書きしてしまうので、実行すると何も書かずに終了する。
+# 新しい絵は tools/rough/items_blocks_32.py で作り、docs/roughs/v4/items_blocks/b/ から手でコピーする。
+# どうしても動かす必要があるときだけ、環境変数 SKYABYSS_ALLOW_GEN_ITEMS=1 を付ける。
+# ---------------------------------------------------------------------------
+import os as _os
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_GEN_ITEMS") != "1":
+    sys.exit("tools/gen_items.py は停止中です: 採用済みの 32x32 テクスチャを上書きするため。"
+             "新しい絵は tools/rough/items_blocks_32.py を使ってください (詳細はファイル先頭のコメント)。")
+
 import numpy as np
 from PIL import Image, ImageDraw
 

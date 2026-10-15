@@ -2,7 +2,8 @@
   "loader": "neoforge:separate_transforms",
   "base": {
     "textures": {
-      "tex": "skyabyss:item/bone_spike_arrow"
+      "tex": "skyabyss:item/3d/bone_spike_arrow",
+      "particle": "skyabyss:item/bone_spike_arrow"
     },
     "elements": [
       {
