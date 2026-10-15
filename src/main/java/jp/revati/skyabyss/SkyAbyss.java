@@ -36,6 +36,7 @@ public class SkyAbyss {
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
+        jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

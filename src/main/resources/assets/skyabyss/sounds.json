@@ -24,6 +24,22 @@
       }
     ]
   },
+  "watcher_presence": {
+    "subtitle": "subtitles.skyabyss.watcher_presence",
+    "sounds": [
+      {
+        "name": "skyabyss:prologue/watcher_presence"
+      }
+    ]
+  },
+  "watcher_fade": {
+    "subtitle": "subtitles.skyabyss.watcher_fade",
+    "sounds": [
+      {
+        "name": "skyabyss:prologue/watcher_fade"
+      }
+    ]
+  },
   "titan_song": {
     "subtitle": "subtitles.skyabyss.titan_song",
     "sounds": [
