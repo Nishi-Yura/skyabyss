@@ -53,6 +53,12 @@ public final class SkyEvents {
     private SkyEvents() {
     }
 
+    // 進行中の通過 (なければ null)。伝承の書が「空の影を見た」かを調べるのに使う
+    @Nullable
+    public static SkyPass activePass() {
+        return active;
+    }
+
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {

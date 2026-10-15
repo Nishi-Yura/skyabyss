@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 130,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "titan_back"
+    }
+  ],
+  "related": [
+    "chapter1/stone_whale"
+  ]
+}

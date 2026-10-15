@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 80,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:whalebone_captain",
+      "radius": 32
+    }
+  ],
+  "related": [
+    "chapter1/inscription_east"
+  ]
+}

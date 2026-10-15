@@ -1,0 +1,19 @@
+{
+  "chapter": "chapter1",
+  "order": 10,
+  "unlock": [
+    {
+      "type": "near_entity",
+      "target": "skyabyss:stone_whale",
+      "radius": 160
+    },
+    {
+      "type": "dimension",
+      "target": "skyabyss:titan_back"
+    }
+  ],
+  "related": [
+    "chapter1/sky_ruins",
+    "chapter1/whale_song"
+  ]
+}
