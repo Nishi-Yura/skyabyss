@@ -1,0 +1,14 @@
+{
+  "sky_wingbeat": {
+    "subtitle": "subtitles.skyabyss.sky_wingbeat",
+    "sounds": [{ "name": "skyabyss:sky/wingbeat" }]
+  },
+  "sky_drone": {
+    "subtitle": "subtitles.skyabyss.sky_drone",
+    "sounds": [{ "name": "skyabyss:sky/drone", "stream": true }]
+  },
+  "sky_call": {
+    "subtitle": "subtitles.skyabyss.sky_call",
+    "sounds": [{ "name": "skyabyss:sky/call" }]
+  }
+}

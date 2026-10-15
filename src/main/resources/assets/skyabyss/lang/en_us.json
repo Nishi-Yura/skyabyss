@@ -1,0 +1,17 @@
+{
+  "skyabyss.configuration.title": "Between Sky and Abyss Configs",
+  "skyabyss.configuration.horrorEventFrequency": "Horror Event Frequency",
+  "skyabyss.configuration.screenShake": "Screen Shake",
+  "skyabyss.configuration.loopLengthDays": "Loop Length (days)",
+  "commands.skyabyss.pass.started": "Something begins to move above the clouds over %s",
+  "commands.skyabyss.pass.overworld_only": "This can only happen in the Overworld",
+  "commands.skyabyss.next": "Next pass in about %s seconds",
+  "skyabyss.configuration.section.skyabyss.server.toml": "Between Sky and Abyss Server Configs",
+  "skyabyss.configuration.section.skyabyss.server.toml.title": "Between Sky and Abyss Server Configs",
+  "skyabyss.configuration.section.skyabyss.client.toml": "Between Sky and Abyss Display Configs",
+  "skyabyss.configuration.section.skyabyss.client.toml.title": "Between Sky and Abyss Display Configs",
+  "skyabyss.configuration.screenEffectStrength": "Screen Effect Strength",
+  "subtitles.skyabyss.sky_wingbeat": "Something vast beats its wings overhead",
+  "subtitles.skyabyss.sky_drone": "The sky groans",
+  "subtitles.skyabyss.sky_call": "A voice falls from above the clouds"
+}

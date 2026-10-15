@@ -1,0 +1,17 @@
+{
+  "skyabyss.configuration.title": "天と淵のあいだ 設定",
+  "skyabyss.configuration.horrorEventFrequency": "ホラー演出の頻度",
+  "skyabyss.configuration.screenShake": "画面の揺れ",
+  "skyabyss.configuration.loopLengthDays": "1ループの日数",
+  "commands.skyabyss.pass.started": "%s の頭上で、雲の上を何かが動き出した",
+  "commands.skyabyss.pass.overworld_only": "オーバーワールドでのみ起こせます",
+  "commands.skyabyss.next": "次の通過まで約 %s 秒",
+  "skyabyss.configuration.section.skyabyss.server.toml": "天と淵のあいだ サーバー設定",
+  "skyabyss.configuration.section.skyabyss.server.toml.title": "天と淵のあいだ サーバー設定",
+  "skyabyss.configuration.section.skyabyss.client.toml": "天と淵のあいだ 表示設定",
+  "skyabyss.configuration.section.skyabyss.client.toml.title": "天と淵のあいだ 表示設定",
+  "skyabyss.configuration.screenEffectStrength": "画面効果の強さ",
+  "subtitles.skyabyss.sky_wingbeat": "頭上で巨大な何かが羽ばたく",
+  "subtitles.skyabyss.sky_drone": "空が低く唸る",
+  "subtitles.skyabyss.sky_call": "雲の上から声が降ってくる"
+}
