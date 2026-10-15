@@ -55,7 +55,7 @@ public final class ModEntities {
             WaterwayMaw::new, 1.2f, 0.7f);
     public static final DeferredHolder<EntityType<?>, EntityType<WhaleboneCaptain>> WHALEBONE_CAPTAIN = ENTITIES.register("whalebone_captain",
             () -> EntityType.Builder.<WhaleboneCaptain>of(WhaleboneCaptain::new, MobCategory.MONSTER)
-                    .sized(1.4f, 3.4f).clientTrackingRange(10).fireImmune()
+                    .sized(1.8f, 2.9f).clientTrackingRange(10).fireImmune()
                     .build(SkyAbyss.MODID + ":whalebone_captain"));
     // 岩鯨の心臓: 最終ボス。石と骨の殻に包まれ、空中にとどまる
     public static final DeferredHolder<EntityType<?>, EntityType<StoneWhaleHeart>> STONE_WHALE_HEART = ENTITIES.register("stone_whale_heart",

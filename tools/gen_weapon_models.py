@@ -1,8 +1,9 @@
 """武器 5 種の 3D モデルを作る (neoforge:separate_transforms)。
 
-使い方: python tools/gen_weapon_models.py
+使い方: python tools/gen_weapon_models.py [名前 ...]   (省略時は全部)
 
-既存の 32x32 アイコン (textures/item/*.png) の形をそのまま押し出して 3D にする。
+既存のアイコン (textures/item/*.png) の形をそのまま押し出して 3D にする。
+アイコンの大きさは武器ごとに違う (WEAPONS の 4 つ目の値)。
 - 色が同じ画素の横長の連なりを、欠けなく重ならないよう長方形にまとめる (greedy meshing)
 - 各長方形を、アイコンの同じ画素領域を指す UV をもつ直方体にする。だから 3D 表示の色は 2D アイコンと完全に一致する
 - 奥行きは武器ごとに決める (大剣は厚く、牙は薄い)
@@ -17,6 +18,7 @@ NeoForge の separate_transforms は base / perspectives の各値を BlockModel
 単位は model 座標 (16 = 1 ブロック)。アイコン 1px = 0.5 単位。
 """
 import json
+import sys
 from pathlib import Path
 
 from PIL import Image
@@ -25,24 +27,23 @@ ROOT = Path(__file__).resolve().parent.parent / "src/main/resources/assets/skyab
 TEX_DIR = ROOT / "textures/item"
 MODEL_DIR = ROOT / "models/item"
 NS = "skyabyss:item/"
-ICON_SIZE = 32
-PX = 16 / ICON_SIZE  # アイコン 1px のモデル上の大きさ
 UV_INSET = 0.25      # UV の縁から縮める量 (texel 単位)。隣の画素の色が混ざらないようにする
 
-# 名前: (奥行き (単位), 種別, 拡大率 {tp, fp, ground, head, fixed})
+# 名前: (奥行き (単位), 種別, 拡大率 {tp, fp, ground, head, fixed}, アイコンの一辺 (px))
+# 16px のアイコンは 1px = 1 単位 (モデル全体で 16 単位 = 1 ブロック)。32px は 1px = 0.5 単位。
 # 種別 "hand": ふつうの剣と同じ持ち方 (item/handheld 基準)
 # 種別 "gen" : 平らな generated と同じ持ち方 (護符)
 WEAPONS = {
     # 大剣: 重い。手に持つと一回り大きく見せる
-    "whalebone_greatsword": (3.0, "hand", {"tp": 1.4, "fp": 0.95, "ground": 0.8, "head": 1.0, "fixed": 0.7}),
+    "whalebone_greatsword": (3.0, "hand", {"tp": 1.4, "fp": 0.95, "ground": 0.8, "head": 1.0, "fixed": 0.7}, 32),
     # 鉾: 長柄。大剣に次ぐ大きさ
-    "captain_pike": (2.0, "hand", {"tp": 1.35, "fp": 0.92, "ground": 0.75, "head": 1.0, "fixed": 0.7}),
+    "captain_pike": (2.0, "hand", {"tp": 1.35, "fp": 0.92, "ground": 0.75, "head": 1.0, "fixed": 0.7}, 32),
     # 牙の短剣: 軽く、薄い
-    "waterway_fang": (1.5, "hand", {"tp": 0.95, "fp": 0.68, "ground": 0.5, "head": 0.9, "fixed": 0.5}),
-    # 骨棘の矢
-    "bone_spike_arrow": (1.0, "hand", {"tp": 0.85, "fp": 0.68, "ground": 0.5, "head": 0.8, "fixed": 0.5}),
+    "waterway_fang": (1.5, "hand", {"tp": 0.95, "fp": 0.68, "ground": 0.5, "head": 0.9, "fixed": 0.5}, 32),
+    # 骨棘の矢: 16px の平らなアイコンを 2 単位の厚さ (z 7〜9) に押し出す
+    "bone_spike_arrow": (2.0, "hand", {"tp": 0.85, "fp": 0.68, "ground": 0.5, "head": 0.8, "fixed": 0.5}, 16),
     # 共鳴の護符: 丸い飾り
-    "resonance_charm": (2.5, "gen", {"tp": 0.55, "fp": 0.68, "ground": 0.5, "head": 0.8, "fixed": 0.5}),
+    "resonance_charm": (2.5, "gen", {"tp": 0.55, "fp": 0.68, "ground": 0.5, "head": 0.8, "fixed": 0.5}, 32),
 }
 
 
@@ -81,15 +82,16 @@ def r3(v):
     return int(v) if v == int(v) else v
 
 
-def element(x, y, w, h, depth, tex_region):
-    """アイコン上の (x,y,w,h) 画素を、奥行き depth の直方体にする。"""
-    x0, y0 = x * PX, 16 - (y + h) * PX
-    x1, y1 = (x + w) * PX, 16 - y * PX
+def element(x, y, w, h, depth, size):
+    """アイコン (size x size px) 上の (x,y,w,h) 画素を、奥行き depth の直方体にする。"""
+    px = 16 / size  # アイコン 1px のモデル上の大きさ
+    x0, y0 = x * px, 16 - (y + h) * px
+    x1, y1 = (x + w) * px, 16 - y * px
     z0, z1 = 8 - depth / 2, 8 + depth / 2
-    u0 = (x + UV_INSET) / 2
-    v0 = (y + UV_INSET) / 2
-    u1 = (x + w - UV_INSET) / 2
-    v1 = (y + h - UV_INSET) / 2
+    u0 = (x + UV_INSET) / (size / 16)
+    v0 = (y + UV_INSET) / (size / 16)
+    u1 = (x + w - UV_INSET) / (size / 16)
+    v1 = (y + h - UV_INSET) / (size / 16)
     uv = [r3(u0), r3(v0), r3(u1), r3(v1)]
     faces = {}
     for f in ("north", "south", "east", "west", "up", "down"):
@@ -123,11 +125,11 @@ def display(kind, s):
     }
 
 
-def build(name, depth, kind, scales):
+def build(name, depth, kind, scales, size):
     tex = NS + name
     img = Image.open(TEX_DIR / f"{name}.png").convert("RGBA")
-    assert img.size == (ICON_SIZE, ICON_SIZE), img.size
-    elements = [element(x, y, w, h, depth, None) for x, y, w, h, _ in greedy_rects(img)]
+    assert img.size == (size, size), img.size
+    elements = [element(x, y, w, h, depth, size) for x, y, w, h, _ in greedy_rects(img)]
     base = {
         "textures": {"tex": tex},
         "elements": elements,
@@ -143,8 +145,10 @@ def build(name, depth, kind, scales):
 
 
 def main():
-    for name, (depth, kind, scales) in WEAPONS.items():
-        model, n = build(name, depth, kind, scales)
+    names = sys.argv[1:] or list(WEAPONS)
+    for name in names:
+        depth, kind, scales, size = WEAPONS[name]
+        model, n = build(name, depth, kind, scales, size)
         out = MODEL_DIR / f"{name}.json"
         out.write_text(json.dumps(model, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"{name}: {n} elements, depth {depth} -> {out}")

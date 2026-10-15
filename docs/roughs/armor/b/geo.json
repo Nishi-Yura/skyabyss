@@ -1,0 +1,325 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.skyabyss_armor_b",
+        "texture_width": 128,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 3.5,
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "armorHead",
+          "pivot": [
+            0,
+            24,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                24,
+                -5
+              ],
+              "size": [
+                10,
+                6,
+                10
+              ],
+              "uv": [
+                32,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -4,
+                30,
+                -4
+              ],
+              "size": [
+                8,
+                3,
+                8
+              ],
+              "uv": [
+                96,
+                18
+              ]
+            },
+            {
+              "origin": [
+                -7,
+                27,
+                -2
+              ],
+              "size": [
+                2,
+                4,
+                4
+              ],
+              "uv": [
+                48,
+                30
+              ]
+            },
+            {
+              "origin": [
+                5,
+                27,
+                -2
+              ],
+              "size": [
+                2,
+                4,
+                4
+              ],
+              "uv": [
+                60,
+                30
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorBody",
+          "pivot": [
+            0,
+            24,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                12,
+                -3
+              ],
+              "size": [
+                10,
+                12,
+                6
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3,
+                13,
+                -5
+              ],
+              "size": [
+                6,
+                10,
+                2
+              ],
+              "uv": [
+                80,
+                18
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorRightArm",
+          "pivot": [
+            -5,
+            22,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -11,
+                12,
+                -3
+              ],
+              "size": [
+                6,
+                8,
+                6
+              ],
+              "uv": [
+                72,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -11,
+                20,
+                -3
+              ],
+              "size": [
+                6,
+                4,
+                6
+              ],
+              "uv": [
+                0,
+                30
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorLeftArm",
+          "pivot": [
+            5,
+            22,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                5,
+                12,
+                -3
+              ],
+              "size": [
+                6,
+                8,
+                6
+              ],
+              "uv": [
+                96,
+                0
+              ]
+            },
+            {
+              "origin": [
+                5,
+                20,
+                -3
+              ],
+              "size": [
+                6,
+                4,
+                6
+              ],
+              "uv": [
+                24,
+                30
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorRightLeg",
+          "pivot": [
+            -1.9,
+            12,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                6,
+                -3
+              ],
+              "size": [
+                4,
+                6,
+                6
+              ],
+              "uv": [
+                0,
+                18
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorLeftLeg",
+          "pivot": [
+            1.9,
+            12,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1,
+                6,
+                -3
+              ],
+              "size": [
+                4,
+                6,
+                6
+              ],
+              "uv": [
+                20,
+                18
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorRightBoot",
+          "pivot": [
+            -1.9,
+            12,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                0,
+                -3
+              ],
+              "size": [
+                4,
+                6,
+                6
+              ],
+              "uv": [
+                40,
+                18
+              ]
+            }
+          ]
+        },
+        {
+          "name": "armorLeftBoot",
+          "pivot": [
+            1.9,
+            12,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1,
+                0,
+                -3
+              ],
+              "size": [
+                4,
+                6,
+                6
+              ],
+              "uv": [
+                60,
+                18
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

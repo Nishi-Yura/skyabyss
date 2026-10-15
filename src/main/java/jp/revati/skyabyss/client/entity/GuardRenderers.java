@@ -3,14 +3,24 @@ package jp.revati.skyabyss.client.entity;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.entity.BoneSpike;
 import jp.revati.skyabyss.registry.ModEntities;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import org.joml.Matrix3f;
+import org.joml.Quaternionf;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -26,12 +36,15 @@ public final class GuardRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> geo(ctx, "bone_sentinel", 1.0f));
-        event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> geo(ctx, "rib_archer", 1.0f));
-        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), ctx -> geo(ctx, "moss_crawler", 1.0f));
-        event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> geo(ctx, "waterway_maw", 1.1f));
-        event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> geo(ctx, "whalebone_captain", 1.45f));
-        event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), ctx -> geo(ctx, "stone_whale_heart", 1.0f));
+        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f,
+                r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
+        event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
+                r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));
+        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), ctx -> geo(ctx, "moss_crawler", 1.7f));
+        event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> geo(ctx, "waterway_maw", 0.58f));
+        event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> geo(ctx, "whalebone_captain", 1.0f,
+                r -> r.addRenderLayer(GearLayer.item(r, "socket_main", captainPikeStack(), ItemDisplayContext.NONE, GuardRenderers::captainPike))));
+        event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
             public ResourceLocation getTextureLocation(BoneSpike entity) {
@@ -41,9 +54,33 @@ public final class GuardRenderers {
     }
 
     private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale) {
+        return geo(ctx, name, scale, r -> {
+        });
+    }
+
+    // extra で、そのモブだけの描画層 (武器の GearLayer など) を足す
+    private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale,
+                                                                            Consumer<GeoEntityRenderer<T>> extra) {
         GeoEntityRenderer<T> renderer = new GeoEntityRenderer<>(ctx, new DefaultedEntityGeoModel<T>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true));
         renderer.withScale(scale);
         renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+        extra.accept(renderer);
         return renderer;
+    }
+
+    // 番兵長の鉾 (アイテムの3Dモデル) を socket_main に合わせる。
+    // アイテムの座標 (画素) で、柄の軸は x=5.875 z=8、握りは y=4 (石突きから7画素)。刃は +x、穂先は +y で、-45°傾けて置いてある。
+    // 受け口の向き: 穂先が -Z、刃が -Y (腕を前へ水平に出すと、柄が立ち、刃が前を向く)。大きさは 1.8 倍 (番兵長の背丈に合わせる)。
+    // tools/rough/captain_v4.py の PIKE_* と同じ値にしておく
+    private static <T> Function<T, ItemStack> captainPikeStack() {
+        ItemStack stack = new ItemStack(ModItems.CAPTAIN_PIKE.get());
+        return mob -> stack;
+    }
+
+    private static void captainPike(PoseStack pose) {
+        pose.mulPose(new Quaternionf().setFromNormalized(new Matrix3f(0, -1, 0, 0, 0, -1, 1, 0, 0)));
+        pose.scale(1.8f, 1.8f, 1.8f);
+        pose.translate(2.125f / 16f, 4f / 16f, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(45));
     }
 }

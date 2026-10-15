@@ -1,120 +1,135 @@
 {
- "format_version": "1.8.0",
- "animations": {
-  "animation.waterway_maw.swim": {
-   "loop": true,
-   "animation_length": 1.333,
-   "bones": {
-    "seg0": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + 0.0) * 8.0",
-      "0"
-     ]
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.waterway_maw.swim": {
+      "loop": true,
+      "animation_length": 1.6,
+      "bones": {
+        "seg0": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 0) * 3",
+            "0"
+          ]
+        },
+        "seg1": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 50) * 4",
+            "0"
+          ]
+        },
+        "seg2": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 100) * 5",
+            "0"
+          ]
+        },
+        "seg3": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 150) * 6",
+            "0"
+          ]
+        },
+        "seg4": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 200) * 7",
+            "0"
+          ]
+        },
+        "seg5": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 250) * 8",
+            "0"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "0",
+            "math.sin(query.anim_time*225 - 300) * 14 + math.sin(query.anim_time*450) * 5",
+            "0"
+          ]
+        },
+        "lure": {
+          "rotation": [
+            "math.sin(query.anim_time*225 + 180) * 5",
+            "0",
+            "math.sin(query.anim_time*225) * 8"
+          ]
+        }
+      }
     },
-    "seg1": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -0.8) * 10.5",
-      "0"
-     ]
-    },
-    "seg2": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -1.6) * 13.0",
-      "0"
-     ]
-    },
-    "seg3": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -2.4000000000000004) * 15.5",
-      "0"
-     ]
-    },
-    "seg4": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -3.2) * 18.0",
-      "0"
-     ]
-    },
-    "seg5": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -4.0) * 20.5",
-      "0"
-     ]
-    },
-    "tailfin": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + -4.5) * 20",
-      "0"
-     ]
-    },
-    "head": {
-     "rotation": [
-      "0",
-      "math.sin(query.anim_time * 270 + 0.6) * 4",
-      "0"
-     ]
+    "animation.waterway_maw.bite": {
+      "animation_length": 0.5,
+      "bones": {
+        "jaw": {
+          "rotation": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              -32,
+              0,
+              0
+            ],
+            "0.18": [
+              -30,
+              0,
+              0
+            ],
+            "0.22": [
+              6,
+              0,
+              0
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "head": {
+          "position": {
+            "0.00": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              0,
+              0,
+              -5
+            ],
+            "0.22": [
+              0,
+              0,
+              -3
+            ],
+            "0.30": [
+              0,
+              0,
+              0
+            ],
+            "0.50": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
     }
-   }
-  },
-  "animation.waterway_maw.bite": {
-   "animation_length": 0.4,
-   "bones": {
-    "jaw": {
-     "rotation": {
-      "0.00": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       35,
-       0,
-       0
-      ],
-      "0.22": [
-       -5,
-       0,
-       0
-      ],
-      "0.40": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0.00": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       -12,
-       0,
-       0
-      ],
-      "0.22": [
-       8,
-       0,
-       0
-      ],
-      "0.40": [
-       0,
-       0,
-       0
-      ]
-     }
-    }
-   }
   }
- }
 }

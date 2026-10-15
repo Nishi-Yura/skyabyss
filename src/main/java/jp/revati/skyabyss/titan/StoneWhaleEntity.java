@@ -36,16 +36,16 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.stone_whale.swim");
 
-    // 鎖の付け根まわり (モデルの寸法に合わせる。geo の 1 単位は 0.5 ブロック)
-    // 背の後端 (尾の付け根の少し手前、z=60 単位) は、中央の幅8ブロック以内が高さ20ブロック、
-    // その外側は高さ16ブロックで、胴の縁は横12.5ブロック
-    // 錨石: 体の中心から後ろへ30・横へ7・上へ20.5 ブロック。背の表面のすぐ上に乗る
-    private static final double CHAIN_BACK = 30.0;
-    private static final double ANCHOR_SIDE = 7.0;
-    public static final double ANCHOR_UP = 20.5;
-    // 鎖の垂れ口: 胴の縁の外 (横15ブロック)、縁の高さ (上15ブロック)。錨石から縁ごしに斜めに渡り、そこから真下へ垂れる
-    private static final double CHAIN_SIDE = 15.0;
-    public static final double CHAIN_UP = 15.0;
+    // 鎖の付け根まわり (採用案 B のモデルに合わせる。geo の 1 単位は 0.5 ブロック。ゲームでは geo の +X が左)
+    // 錨石 (geo の chain 骨、左のわき腹 x 19.5〜22.5、y 37〜41、z 60〜62 単位) の中心は、
+    //   後ろ 61 単位 = 30.5 ブロック、左へ 21 単位 = 10.5 ブロック、上へ 39 単位 = 19.5 ブロック
+    // 体の左わき腹は z=60 付近で x=19.5 単位 (横 9.75 ブロック)。鎖はその外側 (中心 21 単位) から真下へ垂れる
+    // 鎖の先頭 (付け根): 錨石の真下、model の鎖の 3 節 (y 28〜36 単位) の下端 y=28 単位 = 14 ブロック
+    private static final double CHAIN_BACK = 30.5;
+    private static final double ANCHOR_SIDE = 10.5;
+    public static final double ANCHOR_UP = 19.5;
+    private static final double CHAIN_SIDE = 10.5;
+    public static final double CHAIN_UP = 14.0;
     // 鎖の先は地面の何ブロック上で止まるか (REST の鎖の伸び)
     private static final double CHAIN_END_HEIGHT = 2.5;
     // 鎖の伸び縮みの速さ (ブロック/tick)。地面の高さが変わっても急に跳ねないようにする
@@ -359,7 +359,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(100.0, 40.0, 100.0).expandTowards(0, -Math.max(0, chainLength() - CHAIN_UP), 0);
+        // モデルは体の底が付け根の上 6.75 ブロック、背の上端が 46.5 ブロック (前後は -66〜81 ブロック)。上はそこまで届くようにする
+        return getBoundingBox().inflate(100.0, 50.0, 100.0).expandTowards(0, -Math.max(0, chainLength() - CHAIN_UP), 0);
     }
 
     // 位置の補間。サーバーは2tickごとに位置を送るので、それに合わせた steps で滑らかにつなぐ

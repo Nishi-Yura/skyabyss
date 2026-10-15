@@ -19,6 +19,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import software.bernie.geckolib.animation.AnimationController;
 
 // 骨棘の射手: 肋骨の弓で、骨の棘を放つ。当たると動きが鈍る
 public class RibArcher extends GuardMob implements RangedAttackMob {
@@ -46,9 +47,31 @@ public class RibArcher extends GuardMob implements RangedAttackMob {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    // 弦を放つまでの時間 (shoot アニメーションの 0.50 秒 = 10 tick)。構えて引いてから棘が飛ぶ
+    private static final int RELEASE_TICKS = 10;
+    private LivingEntity pendingTarget;
+    private int releaseIn;
+
     @Override
     public void performRangedAttack(LivingEntity target, float velocity) {
         playAction("shoot");
+        pendingTarget = target;
+        releaseIn = RELEASE_TICKS;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!level().isClientSide && releaseIn > 0 && --releaseIn == 0) {
+            LivingEntity target = pendingTarget;
+            pendingTarget = null;
+            if (target != null && target.isAlive() && !isDeadOrDying()) {
+                fireSpike(target);
+            }
+        }
+    }
+
+    private void fireSpike(LivingEntity target) {
         BoneSpike spike = new BoneSpike(level(), this);
         double dx = target.getX() - getX();
         double dy = target.getY(0.33) - spike.getY();
@@ -57,6 +80,12 @@ public class RibArcher extends GuardMob implements RangedAttackMob {
         spike.shoot(dx, dy + d * 0.18, dz, 1.7f, 4f);
         level().addFreshEntity(spike);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.SKELETON_SHOOT, SoundSource.HOSTILE, 1f, 0.6f);
+    }
+
+    // 描画側 (弓の GearLayer) が使う: shoot の動作アニメーションが流れている間は弓の弦を引く (draw)
+    public boolean isDrawingBow() {
+        AnimationController<?> action = getAnimatableInstanceCache().getManagerForId(getId()).getAnimationControllers().get("action");
+        return action != null && action.isPlayingTriggeredAnimation();
     }
 
     @Override

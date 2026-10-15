@@ -19,6 +19,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import software.bernie.geckolib.animation.AnimationController;
 
 // 骨の番兵: 鯨骨の鎧をまとった剣士。正面からの攻撃は骨の盾で受け、半分しか通らない (回り込めば効く)
 public class BoneSentinel extends GuardMob {
@@ -66,6 +67,15 @@ public class BoneSentinel extends GuardMob {
             }
         }
         return super.hurt(source, amount);
+    }
+
+    // クライアント用: 盾で受ける動作 (action の block) が流れている間か。盾のモデル (GearLayer) の震えに使う
+    public boolean isBlockingAnim() {
+        AnimationController<?> action = getAnimatableInstanceCache().getManagerForId(getId()).getAnimationControllers().get("action");
+        if (action == null || !action.isPlayingTriggeredAnimation() || action.getCurrentAnimation() == null) {
+            return false;
+        }
+        return action.getCurrentAnimation().animation().name().endsWith(".block");
     }
 
     @Override

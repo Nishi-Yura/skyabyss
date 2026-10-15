@@ -66,6 +66,13 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // 動作確認用: 起動したら開発用ワールド "New World" へ直接入る
+        clientTest {
+            client()
+            programArguments.addAll '--quickPlaySingleplayer', 'New World'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'

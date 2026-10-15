@@ -38,3 +38,6 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+docs/roughs/vanilla_ref/
+docs/roughs/_gallery/
+__pycache__/
