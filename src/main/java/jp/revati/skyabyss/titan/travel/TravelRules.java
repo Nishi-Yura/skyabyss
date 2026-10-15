@@ -82,7 +82,8 @@ public final class TravelRules {
         } else {
             ticks += distance / TRAVEL_SPEED * 1.15;
         }
-        ticks += 120 /* 降りていく */ + 120 /* 鎖で降ろす */;
+        // 降りていく (向きを合わせて真上へ寄る) と、鎖で降ろす。試遊で測った 1,433 ブロックの旅 (64 秒) に合わせた
+        ticks += 260 + 160;
         return (int) Math.round(ticks / 20.0);
     }
 

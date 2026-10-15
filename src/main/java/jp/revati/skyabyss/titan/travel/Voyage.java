@@ -94,6 +94,8 @@ final class Voyage {
     boolean toldAboard;
     // 自己テスト: 乗る人がいなくても旅を進める (呼んだ人の不在や空の乗り場で取りやめない)
     boolean test;
+    // 寄りきれずに、真上へ移して済ませた回数 (自己テストで 0 を確かめる)
+    int snaps;
 
     // 鎖を上る (dir > 0) ・下りる (dir < 0) 人の進み具合
     static final class Climb {
@@ -169,6 +171,7 @@ final class Voyage {
     private void setPhase(Phase next) {
         phase = next;
         phaseTicks = 0;
+        hoverYaw = null;
     }
 
     // ---- 迎え
@@ -188,8 +191,11 @@ final class Voyage {
         boolean arrived = flyToHover(level, whale, pickup, hoverY);
         if (arrived || phaseTicks > TravelRules.COMING_LIMIT) {
             if (!arrived) {
+                snaps++;
                 // 地形の都合などで寄りきれない。迎えの場所の上へ寄せる (呼んだ人の真上には落とさない)
-                Vec3 center = TitanKind.centerForChainAt(titan, Vec3.atBottomCenterOf(pickup), whale.getYRot(), hoverY);
+                float yaw = hoverYaw(whale, Vec3.atBottomCenterOf(pickup));
+                Vec3 center = TitanKind.centerForChainAt(titan, Vec3.atBottomCenterOf(pickup), yaw, hoverY);
+                whale.setYRot(yaw);
                 whale.teleportTo(center.x, center.y, center.z);
             }
             whale.setDeltaMovement(Vec3.ZERO);
@@ -370,7 +376,10 @@ final class Voyage {
         boolean arrived = flyToHover(level, whale, spot, hoverY);
         if (arrived || phaseTicks > TravelRules.COMING_LIMIT) {
             if (!arrived) {
-                Vec3 center = TitanKind.centerForChainAt(titan, Vec3.atBottomCenterOf(spot), whale.getYRot(), hoverY);
+                snaps++;
+                float yaw = hoverYaw(whale, Vec3.atBottomCenterOf(spot));
+                Vec3 center = TitanKind.centerForChainAt(titan, Vec3.atBottomCenterOf(spot), yaw, hoverY);
+                whale.setYRot(yaw);
                 whale.teleportTo(center.x, center.y, center.z);
             }
             if (landing == null) {
@@ -752,14 +761,31 @@ final class Voyage {
     // ---------------------------------------------------------------- 飛び方
 
     // 迎え・降ろす場所 (鎖の垂れ口の真下が spot) の上空へ寄っていく。着いたら true
+    // 寄っていくときの、着いたときの向き。段階の初めに一度だけ決める (今の向きで目標を回し直すと、
+    // 目標が巨神と一緒に回ってしまい、いつまでも円を描いて着かない。2026-10-16 の試遊で見つかった)
+    @Nullable
+    private Float hoverYaw;
+
+    float hoverYaw(Entity whale, Vec3 point) {
+        if (hoverYaw == null) {
+            hoverYaw = yawTowards(whale.position(), point);
+        }
+        return hoverYaw;
+    }
+
     private boolean flyToHover(ServerLevel level, Entity whale, BlockPos spot, double hoverY) {
         Vec3 point = Vec3.atBottomCenterOf(spot);
-        Vec3 center = TitanKind.centerForChainAt(titan, point, whale.getYRot(), hoverY);
+        float finalYaw = hoverYaw(whale, point);
+        Vec3 center = TitanKind.centerForChainAt(titan, point, finalYaw, hoverY);
         double distance = horizontal(whale.position(), center);
         float yaw = whale.getYRot();
         if (distance > 30) {
-            // 遠いうちは向き直りながら進む (垂れ口が目標の真上に来るよう、毎回目標を回し直す)
+            // 遠いうちは、止まる位置 (決めた向きで垂れ口が目標の真上に来る所) へ向き直りながら進む
             yaw = Mth.approachDegrees(yaw, yawTowards(whale.position(), center), TravelRules.TURN_RATE * 1.5f);
+        } else {
+            // 近くでは、決めた向きへ合わせながらまっすぐ寄せる
+            yaw = Mth.approachDegrees(yaw, finalYaw, TravelRules.TURN_RATE * 2f);
+            whale.setYRot(yaw);
         }
         double wantSpeed = Mth.clamp(distance * 0.03, 0.06, TravelRules.TRAVEL_SPEED);
         speed = speed < wantSpeed ? Math.min(wantSpeed, speed + 0.02) : wantSpeed;
@@ -775,7 +801,7 @@ final class Voyage {
             whale.setDeltaMovement(motion);
             whale.move(MoverType.SELF, motion);
         }
-        return distance < 1.0 && Math.abs(whale.getY() - hoverY) < 1.0;
+        return distance < 1.0 && Math.abs(whale.getY() - hoverY) < 1.0 && Math.abs(Mth.degreesDifference(yaw, finalYaw)) < 2f;
     }
 
     private void hover(Entity whale) {

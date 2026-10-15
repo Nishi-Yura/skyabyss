@@ -205,14 +205,35 @@ public final class TravelSelfTest {
             Voyages.forceEnd(TitanKind.STONE_WHALE);
             check(!whale.inVoyage() && Voyages.active(TitanKind.STONE_WHALE) == null, "ending the voyage did not free the whale", failures);
 
-            // 早回し: 迎え → 行き先 (東へ 180) へ。旅の操縦だけを毎 tick 呼ぶ
+            // 早回し: 迎え → 行き先 (東へ 180) へ。旅の操縦だけを毎 tick 呼ぶ。
+            // 巨神の出だしの位置と向きを変えて 4 回 (近くで背を向けている・行き過ぎた所から、など)。どれも寄せ直し (snap) なしで着くこと
+            // {東, 南, 向き, 迎えの場所からの高さ (なければ y=212)}
+            double[][] starts = {{120, 30, 0}, {20, 0, 90}, {-60, -25, 200}, {40, 25, -45}, {250, 0, 180}, {30, 10, 270, 30}, {-20, -20, 45, 30}};
+            for (double[] start : starts) {
+                flight(level, whale, a, pickup, start, failures);
+            }
+        } finally {
+            Voyages.forceEnd(TitanKind.STONE_WHALE);
+            if (whale != null) {
+                whale.discard();
+            }
+            whaleData.restore(saved, level.registryAccess());
+        }
+    }
+
+    private static void flight(ServerLevel level, StoneWhaleEntity whale, FakePlayer a, BlockPos pickup, double[] start, List<String> outer) {
+        String label = "start " + (int) start[0] + "," + (int) start[1] + " yaw " + (int) start[2] + ": ";
+        List<String> failures = new ArrayList<>();
+        {
             whale.beginVoyage();
-            whale.setPos(pickup.getX() + 120, 212, pickup.getZ() + 30);
+            whale.setPos(pickup.getX() + start[0], start.length > 3 ? pickup.getY() + start[3] : 212, pickup.getZ() + start[1]);
+            whale.setYRot((float) start[2]);
             Voyage f = new Voyage(TitanKind.STONE_WHALE, whale, a, pickup);
             f.test = true;
             BlockPos destPos = new BlockPos(pickup.getX() + 180, level.getSeaLevel(), pickup.getZ() + 6);
             EnumSet<Voyage.Phase> seen = EnumSet.noneOf(Voyage.Phase.class);
             Vec3 chainAtLowering = null;
+            StringBuilder timeline = new StringBuilder();
             int ticks = 0;
             for (; ticks < 6000 && !f.finished; ticks++) {
                 seen.add(f.phase);
@@ -222,7 +243,11 @@ public final class TravelSelfTest {
                     whale.setVoyageChain(Double.NaN);
                 }
                 seen.add(f.phase);
+                Voyage.Phase before = f.phase;
                 f.tick();
+                if (f.phase != before) {
+                    timeline.append(before).append('=').append(ticks).append(' ');
+                }
                 if (f.phase == Voyage.Phase.LOWERING && chainAtLowering == null) {
                     chainAtLowering = whale.position().add(whale.boardingChainOffset(whale.getYRot()));
                 }
@@ -244,14 +269,11 @@ public final class TravelSelfTest {
             }
             check(countWhales(level) == 1, countWhales(level) + " whales after the voyage", failures);
             check(!whale.inVoyage(), "the whale stayed in voyage mode after arriving", failures);
-            SkyAbyss.LOGGER.info("SELFTEST travel: short voyage took {} ticks ({} s), phases {}", ticks, ticks / 20, seen);
-        } finally {
-            Voyages.forceEnd(TitanKind.STONE_WHALE);
-            if (whale != null) {
-                whale.discard();
-            }
-            whaleData.restore(saved, level.registryAccess());
+            check(f.snaps == 0, "the whale could not reach the hover point and was moved there " + f.snaps + " time(s)", failures);
+            SkyAbyss.LOGGER.info("SELFTEST travel: {}short voyage took {} ticks ({} s), {} after choosing, snaps {}, phases ended at {}",
+                    label, ticks, ticks / 20, f.totalTicks - f.chosenAt, f.snaps, timeline);
         }
+        failures.forEach(m -> outer.add(label + m));
     }
 
     private static int countWhales(ServerLevel level) {

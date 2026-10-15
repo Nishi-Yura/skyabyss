@@ -107,6 +107,13 @@ public final class Voyages {
             return CallResult.REFUSED;
         }
         TravelRules.Refusal refusal = TravelRules.check(player, kind, bypass);
+        if (current != null && !current.leader.equals(player.getUUID()) && current.beforeDeparture() && !current.pendingCancel
+                && refusal != TravelRules.Refusal.WRONG_DIMENSION && refusal != TravelRules.Refusal.RIDING
+                && player.distanceToSqr(Vec3.atCenterOf(current.pickup)) < TravelRules.JOIN_RADIUS * TravelRules.JOIN_RADIUS) {
+            // ほかの人の呼んだ巨神には、まだ認められていない人も、休んでいる人も一緒に乗れる
+            player.displayClientMessage(ModText.hint("message.skyabyss.travel.join", current.leaderName), true);
+            return CallResult.JOINED;
+        }
         if (refusal == TravelRules.Refusal.COOLDOWN) {
             player.displayClientMessage(ModText.deny(refusal.key, (TravelRules.cooldownLeft(player) + 19) / 20), true);
             return CallResult.REFUSED;
@@ -430,7 +437,9 @@ public final class Voyages {
         if (player.isAlive() && player.level().dimension() == Level.OVERWORLD) {
             ServerLevel overworld = player.serverLevel();
             BlockPos pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
-            // 着く先の地面の高さは、読み込んでから決める (古い高さで埋まらないよう、高い方を取る)
+            // 着く先の地面の高さは、チャンクを読み込んでから決める (読み込まれていないと高さが最低になり、地中へ埋まる)。
+            // 古い高さで埋まらないよう、高い方を取る。ログインのときに 1 チャンクだけ同期で読み込む
+            overworld.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
             int top = overworld.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
             double y = Math.max(pos.getY(), top) + 0.1;
             player.fallDistance = 0;
