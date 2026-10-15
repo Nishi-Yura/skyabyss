@@ -219,6 +219,12 @@ public final class SkillSelfTest {
         golem.setNoGravity(true);
         level.addFreshEntity(golem);
         check(f, SkillActions.isFoe(p, zombie) && !SkillActions.isFoe(p, golem) && !SkillActions.isFoe(p, p), "foe filter is wrong");
+        // 怒っていないゾンビピグリンは巻き込まない
+        net.minecraft.world.entity.monster.ZombifiedPiglin pigman = new net.minecraft.world.entity.monster.ZombifiedPiglin(EntityType.ZOMBIFIED_PIGLIN, level);
+        pigman.moveTo(px - 30, py, pz, 0f, 0f);
+        check(f, !SkillActions.isFoe(p, pigman), "a calm zombified piglin counts as a foe");
+        pigman.setTarget(p);
+        check(f, SkillActions.isFoe(p, pigman), "an angry zombified piglin does not count as a foe");
         check(f, SkillActions.isLarge(golem) && !SkillActions.isLarge(zombie), "large check is wrong for golem / zombie");
         pd.mana = 20;
         pd.cooldowns.clear();

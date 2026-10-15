@@ -25,7 +25,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Enemy;
@@ -102,10 +105,23 @@ public final class SkillActions {
         if (e instanceof OwnableEntity pet && pet.getOwnerUUID() != null) {
             return false;
         }
+        // 怒っていなければ襲ってこない生き物 (エンダーマン、ゾンビピグリン、ピグリンなど) は、プレイヤーに怒っているときだけ。
+        // 範囲の技でネザーの群れを起こさないように
+        if ((e instanceof NeutralMob || e instanceof AbstractPiglin) && e instanceof Mob neutral) {
+            return angryAtPlayer(neutral);
+        }
         if (e instanceof Enemy) {
             return true;
         }
-        return e instanceof Mob mob && mob.getTarget() instanceof Player;
+        return e instanceof Mob mob && angryAtPlayer(mob);
+    }
+
+    private static boolean angryAtPlayer(Mob mob) {
+        if (mob.getTarget() instanceof Player) {
+            return true;
+        }
+        return mob.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+                && mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) instanceof Player;
     }
 
     public static boolean isLarge(LivingEntity e) {
