@@ -8,8 +8,8 @@
 
 この書類は**全体設計**（コンセプト・世界観・ロードマップ・決定ログ）。詳しい内容は次の書類に分けている。
 
-- [岩鯨と背中の試練（実装仕様）](https://claude.ai/code/artifact/f13ff82c-5af2-4bf9-9c2d-b7b65f4fabed)
-- [装備・エンドコンテンツ設計](https://claude.ai/code/artifact/b2838bf2-a89d-4d84-8809-cd941764a838)
+- [02 岩鯨と背中の試練（実装仕様）](02_stone_whale.md)
+- [03 装備・エンドコンテンツ設計](03_gear_and_endgame.md)
 
 ## ブレない軸
 
