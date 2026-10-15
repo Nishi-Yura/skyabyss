@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 70,
+  "inscription_sign": "sign.skyabyss.lore_heart",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_heart"
+    }
+  ],
+  "related": [
+    "chapter1/heart_stilled",
+    "chapter1/inscription_below"
+  ]
+}

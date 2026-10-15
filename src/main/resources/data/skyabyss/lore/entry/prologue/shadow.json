@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 20,
+  "unlock": [
+    {
+      "type": "sky_shadow"
+    }
+  ],
+  "related": [
+    "prologue/counting_song",
+    "prologue/shaved_peak"
+  ]
+}

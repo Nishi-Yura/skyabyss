@@ -39,6 +39,8 @@ public class SkyAbyss {
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
+        // 伝承の書 (アイテム・頁の出どころ・プレイヤーの記録)
+        jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

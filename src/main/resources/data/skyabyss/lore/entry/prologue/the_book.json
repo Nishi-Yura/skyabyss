@@ -1,0 +1,14 @@
+{
+  "chapter": "prologue",
+  "order": 10,
+  "inscription": true,
+  "unlock": [
+    {
+      "type": "item",
+      "target": "skyabyss:lore_book"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_vault"
+  ]
+}

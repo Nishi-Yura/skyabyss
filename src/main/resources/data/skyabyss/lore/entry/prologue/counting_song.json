@@ -1,0 +1,15 @@
+{
+  "chapter": "prologue",
+  "order": 30,
+  "inscription": true,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "village"
+    }
+  ],
+  "related": [
+    "prologue/shadow",
+    "prologue/seventh_night"
+  ]
+}
