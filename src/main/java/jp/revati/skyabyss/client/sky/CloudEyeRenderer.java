@@ -73,7 +73,7 @@ public final class CloudEyeRenderer {
         }
         Vec3 cam = event.getCamera().getPosition();
         Vec3 rel = eye.pos.subtract(cam);
-        float width = eye.stage.width();
+        float width = eye.width;
         // 遠くの描画の切れる距離 (描画距離の4倍) より手前に寄せる。見かけの大きさは変えない
         double far = mc.options.getEffectiveRenderDistance() * 16.0 * 4.0 * 0.8;
         double dist = rel.length();

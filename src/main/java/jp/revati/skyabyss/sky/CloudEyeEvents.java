@@ -150,8 +150,8 @@ public final class CloudEyeEvents {
         }
     }
 
-    // 本人にだけ目を開かせる。今見ている向きから左右に外した向きの、雲の高さ
-    static int open(ServerLevel level, ServerPlayer player) {
+    // 本人にだけ目を開かせる。今見ている向きから左右に外した向きの、雲の高さ。送ったパケットを返す
+    static CloudEyePayload open(ServerLevel level, ServerPlayer player) {
         ChapterSkyData data = ChapterSkyData.get(level);
         ChapterSkyData.Entry entry = data.entry(player.getUUID());
         float moon = ChapterSky.moonNearness(level);
@@ -165,10 +165,11 @@ public final class CloudEyeEvents {
         double frequency = frequency();
         entry.nextEye = now + (frequency > 0 ? gap(level, frequency, moon) : DAY * 3);
         data.changed();
-        PacketDistributor.sendToPlayer(player, new CloudEyePayload(id, yaw, elevation, stage.index(), level.random.nextInt()));
+        CloudEyePayload payload = new CloudEyePayload(id, yaw, elevation, stage.index(), level.random.nextInt());
+        PacketDistributor.sendToPlayer(player, payload);
         SkyAbyss.LOGGER.debug("Cloud eye {} opened for {} (stage {}, yaw {}, elevation {})", id, player.getName().getString(),
                 stage.index(), Math.round(yaw), Math.round(elevation));
-        return id;
+        return payload;
     }
 
     // 左右どちらかに offset 度外した向き。月の通り道 (東西) と重なりにくい方を選ぶ

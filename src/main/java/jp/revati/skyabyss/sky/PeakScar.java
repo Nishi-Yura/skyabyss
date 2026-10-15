@@ -33,7 +33,8 @@ import net.minecraft.world.phys.AABB;
 // プレイヤーの建築は絶対に壊さない。そのため、疑わしいときは削らない (安全側):
 //  1. 消すのは自然に生成される地形のブロック (石・花崗岩・閃緑岩・安山岩・凝灰岩・深層岩・方解石・土・草・雪・砂利・氷塊・鉱石と草花) だけ
 //  2. 削る所の周り (横に16、上下に12) に、自然のブロック以外が一つでもあれば削らない
-//     (松明・作業台・ベッド・板材・丸石・ガラス・柵・扉など、人の手を思わせるものはすべて「自然でない」に入る)
+//     (松明・作業台・ベッド・板材・丸石・ガラス・柵・扉など、人の手を思わせるものはすべて「自然でない」に入る)。
+//     原木だけは、自然の葉 (プレイヤーには置けない) が茂る木の幹なら周りにあってよい (削る所にあれば削らない)
 //  3. その範囲に、ブロックエンティティ (チェスト・看板・かまどなど)、防具立て・額縁・乗り物、飼いならした・名前の付いた・
 //     消えない設定の生き物がいれば削らない
 //  4. プレイヤーがブロックを置いたことのあるチャンク (ChapterSkyData) と、プレイヤーが長く過ごしたチャンク
@@ -127,6 +128,45 @@ public final class PeakScar {
         return b instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT);
     }
 
+    // 皮をはいでいない原木 (はいだ原木は斧で作るので、人の手)
+    static boolean wildLog(BlockState s) {
+        return s.is(BlockTags.LOGS) && !net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath().startsWith("stripped");
+    }
+
+    // 原木が自然の木の一部か: 原木をたどって上へ登り (32まで)、いちばん上の原木のまわり (横に2、上に3) に
+    // 自然の葉 (persistent でない) が3つ以上あれば自然の木。プレイヤーは persistent でない葉を置けないので、
+    // 原木だけの柱や小屋はここで弾かれる。結果は幹のいちばん上ごとに覚える
+    static boolean naturalTree(ServerLevel level, BlockPos start, java.util.Map<Long, Boolean> memo) {
+        BlockPos.MutableBlockPos p = start.mutable();
+        for (int i = 0; i < 32 && wildLog(level.getBlockState(p.above())); i++) {
+            p.move(0, 1, 0);
+        }
+        long key = p.asLong();
+        Boolean known = memo.get(key);
+        if (known != null) {
+            return known;
+        }
+        int leaves = 0;
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        for (int dx = -2; dx <= 2 && leaves < 3; dx++) {
+            for (int dz = -2; dz <= 2 && leaves < 3; dz++) {
+                for (int dy = -1; dy <= 3 && leaves < 3; dy++) {
+                    q.set(p.getX() + dx, p.getY() + dy, p.getZ() + dz);
+                    if (!level.isLoaded(q)) {
+                        continue;
+                    }
+                    BlockState s = level.getBlockState(q);
+                    if (s.getBlock() instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT)) {
+                        leaves++;
+                    }
+                }
+            }
+        }
+        boolean natural = leaves >= 3;
+        memo.put(key, natural);
+        return natural;
+    }
+
     // 経路 (origin から dir へ length) の左右 lateral の範囲で、高い峰を探す。読み込み済みのチャンクだけを見る。高い順
     public static List<Candidate> findCandidates(ServerLevel level, double originX, double originZ, float dirX, float dirZ,
                                                  double length, double lateral) {
@@ -136,7 +176,7 @@ public final class PeakScar {
                 int x = Mth.floor(originX + dirX * s - dirZ * l);
                 int z = Mth.floor(originZ + dirZ * s + dirX * l);
                 int h = top(level, x, z);
-                if (h < MIN_PEAK_Y) {
+                if (h < MIN_PEAK_Y || near(found, x, z, 16)) {
                     continue;
                 }
                 // 近くの一番高い所まで登る
@@ -164,20 +204,22 @@ public final class PeakScar {
                 if (prominence(level, x, z, h) < MIN_PROMINENCE) {
                     continue;
                 }
-                boolean duplicate = false;
-                for (Candidate c : found) {
-                    if (Math.abs(c.x() - x) < 24 && Math.abs(c.z() - z) < 24) {
-                        duplicate = true;
-                        break;
-                    }
-                }
-                if (!duplicate) {
+                if (!near(found, x, z, 24)) {
                     found.add(new Candidate(x, h, z));
                 }
             }
         }
         found.sort(Comparator.comparingInt(Candidate::y).reversed());
         return found;
+    }
+
+    private static boolean near(List<Candidate> found, int x, int z, int distance) {
+        for (Candidate c : found) {
+            if (Math.abs(c.x() - x) < distance && Math.abs(c.z() - z) < distance) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 地形の一番上の固いブロックの高さ (葉は数えない)。読み込まれていなければ最低の値
@@ -188,9 +230,11 @@ public final class PeakScar {
         return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
     }
 
-    // 周りの8点の平均よりどれだけ高いか (読み込まれていない点があれば 0)
+    // 周りの8点の平均よりどれだけ高いか (読み込まれていない点があれば 0)。
+    // 8点のうち6点以上が3ブロック以上低いこと (山頂と尾根は通り、台地の縁や崖の上は通らない)
     static double prominence(ServerLevel level, int x, int z, int h) {
         double sum = 0;
+        int lower = 0;
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4.0;
             int t = top(level, x + Mth.floor(Math.cos(a) * PROMINENCE_RING), z + Mth.floor(Math.sin(a) * PROMINENCE_RING));
@@ -198,8 +242,11 @@ public final class PeakScar {
                 return 0;
             }
             sum += t;
+            if (t <= h - 3) {
+                lower++;
+            }
         }
-        return h - sum / 8.0;
+        return lower >= 6 ? h - sum / 8.0 : 0;
     }
 
     // 削り方の大きさ。strength (0〜1) は月の近さで、近いほど深く長い
@@ -312,16 +359,18 @@ public final class PeakScar {
         }
 
         // 周りのブロックがすべて自然のものか (地表より上は空気なので、各列の一番上の何かまで)
+        // 原木だけは、自然に生えた木 (幹の上に、自然の葉が茂っている) なら周りにあってよい
         int maxY = minY;
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        java.util.Map<Long, Boolean> trees = new java.util.HashMap<>();
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
                 maxY = Math.max(maxY, surface);
                 for (int y = minY; y <= surface; y++) {
                     BlockState s = level.getBlockState(m.set(x, y, z));
-                    if (!natural(s)) {
-                        return Result.no("artifact " + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath()
+                    if (!natural(s) && !(wildLog(s) && naturalTree(level, m, trees))) {
+                        return Result.no("non-natural " + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath()
                                 + " at " + x + " " + y + " " + z);
                     }
                 }

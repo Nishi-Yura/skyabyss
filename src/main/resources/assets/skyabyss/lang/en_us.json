@@ -488,7 +488,7 @@
   "commands.skyabyss.scar.none": "No peak could be scarred: %s",
   "commands.skyabyss.scar.busy": "Another peak is being scarred right now",
   "commands.skyabyss.scar.list": "%s scars: %s",
-  "commands.skyabyss.eye.opened": "The clouds above %s begin to part (stage %s)",
+  "commands.skyabyss.eye.opened": "The clouds above %s begin to part (stage %s, yaw %s, elevation %s)",
   "commands.skyabyss.eye.next": "%s: next cloud eye in about %s s (seen %s times, now: %s)",
   "commands.skyabyss.eye.reset": "Cleared the cloud eye record of %s",
   "commands.skyabyss.moon.status": "Moon nearness %s (%s)",

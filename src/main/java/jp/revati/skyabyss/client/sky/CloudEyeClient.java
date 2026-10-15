@@ -54,10 +54,15 @@ public final class CloudEyeClient {
 
     enum Phase { HUSH, OPENING, OPEN, MET, CLOSING, CLEARING }
 
+    // この距離より近いときは、目を小さくして見かけの大きさを保つ (高い所にいても画面いっぱいにしない)
+    static final double REFERENCE_DISTANCE = 170.0;
+
     static final class Eye {
         final int id;
         final Vec3 pos;
         final CloudEyeStage stage;
+        // 目の幅 (ブロック)。段階の幅を、近いときだけ縮めたもの
+        final float width;
         final int seed;
         Phase phase = Phase.HUSH;
         int phaseTicks;
@@ -78,10 +83,11 @@ public final class CloudEyeClient {
         boolean cancelled;
         boolean visible = true;
 
-        Eye(int id, Vec3 pos, CloudEyeStage stage, int seed) {
+        Eye(int id, Vec3 pos, CloudEyeStage stage, int seed, double distance) {
             this.id = id;
             this.pos = pos;
             this.stage = stage;
+            this.width = stage.width() * (float) Math.min(1.0, distance / REFERENCE_DISTANCE);
             this.seed = seed;
             // はじめは下 (地上) を、少し横を見ている
             this.irisX = ((seed & 1) == 0 ? 0.5f : -0.5f);
@@ -143,7 +149,7 @@ public final class CloudEyeClient {
         double horizontal = h / Math.tan(Math.toRadians(Mth.clamp(payload.elevation(), 20f, 80f)));
         double yaw = Math.toRadians(payload.yaw());
         Vec3 pos = new Vec3(cam.x - Math.sin(yaw) * horizontal, cam.y + h, cam.z + Math.cos(yaw) * horizontal);
-        eye = new Eye(payload.id(), pos, CloudEyeStage.byIndex(payload.stage()), payload.seed());
+        eye = new Eye(payload.id(), pos, CloudEyeStage.byIndex(payload.stage()), payload.seed(), pos.distanceTo(cam));
         mc.getMusicManager().stopPlaying();
     }
 
@@ -368,7 +374,7 @@ public final class CloudEyeClient {
     // 見つめたとみなす角度: 目の幅の3割ほど (遠いほど小さい)、最低5度
     private static double stareCone(Camera camera, Eye e) {
         double d = camera.getPosition().distanceTo(e.pos);
-        return Math.max(5.0, Math.toDegrees(Math.atan(e.stage.width() * 0.3 / Math.max(1.0, d))));
+        return Math.max(5.0, Math.toDegrees(Math.atan(e.width * 0.3 / Math.max(1.0, d))));
     }
 
     private static boolean clear(Minecraft mc, ClientLevel level, Vec3 target) {

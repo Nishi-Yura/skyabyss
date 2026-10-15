@@ -16,6 +16,7 @@ import jp.revati.skyabyss.lore.Lore;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -143,9 +144,10 @@ public final class ChapterSkyCommands {
             ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.pass.overworld_only"));
             return 0;
         }
-        CloudEyeEvents.open(level, player);
-        int stage = CloudEyeStage.of(ChapterSkyData.get(level).entry(player.getUUID()).eyeSightings, ChapterSky.moonNearness(level)).index();
-        ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.eye.opened", player.getDisplayName(), stage), true);
+        CloudEyePayload p = CloudEyeEvents.open(level, player);
+        // 向きも添える (試す人が /tp @s ~ ~ ~ <向き> <-見上げる角度> で向けるように)
+        ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.eye.opened", player.getDisplayName(), p.stage(),
+                Math.round(p.yaw()), Math.round(p.elevation())), true);
         return 1;
     }
 
@@ -195,7 +197,8 @@ public final class ChapterSkyCommands {
         ChapterSkyData.Entry entry = ChapterSkyData.get(player.serverLevel()).entry(player.getUUID());
         boolean lore = Lore.state(player).has(ChapterSky.CHAPTER_ONE_LORE);
         ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.chapter1.status", player.getDisplayName(),
-                ChapterSky.inChapterOne(player), entry.boarded, lore), false);
+                CommonComponents.optionStatus(ChapterSky.inChapterOne(player)), CommonComponents.optionStatus(entry.boarded),
+                CommonComponents.optionStatus(lore)), false);
         return 1;
     }
 
@@ -203,7 +206,8 @@ public final class ChapterSkyCommands {
         ChapterSkyData data = ChapterSkyData.get(player.serverLevel());
         data.entry(player.getUUID()).boarded = value;
         data.changed();
-        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.chapter1.set", player.getDisplayName(), value), true);
+        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.chapter1.set", player.getDisplayName(),
+                CommonComponents.optionStatus(value)), true);
         return 1;
     }
 }

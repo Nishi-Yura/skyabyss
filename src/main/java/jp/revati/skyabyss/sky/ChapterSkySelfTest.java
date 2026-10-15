@@ -387,6 +387,30 @@ public final class ChapterSkySelfTest {
                 failures.add("wild leaves at the edge should not stop the scar: " + wild.reason());
             }
 
+            // 自然の木 (幹の上に自然の葉) が斜面にあっても削れる。葉のない原木の柱、皮をはいだ原木は削らない
+            buildPeak(level);
+            BlockPos trunk = surface(level, CX - 12, CZ - 10);
+            for (int i = 0; i < 5; i++) {
+                level.setBlock(trunk.above(i), Blocks.SPRUCE_LOG.defaultBlockState(), Block.UPDATE_CLIENTS);
+            }
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    level.setBlock(trunk.offset(dx, 5, dz), Blocks.SPRUCE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false), Block.UPDATE_CLIENTS);
+                }
+            }
+            PeakScar.Result tree = PeakScar.plan(level, peak, dirX, dirZ, 0.5f, RandomSource.create(7), PeakScar.PLAYER_CLEAR);
+            if (tree.plan() == null) {
+                failures.add("a wild spruce on the slope should not stop the scar: " + tree.reason());
+            }
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    level.setBlock(trunk.offset(dx, 5, dz), Blocks.SPRUCE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true), Block.UPDATE_CLIENTS);
+                }
+            }
+            expectRefused(level, peak, "non-natural", failures);
+            refuseWith(level, peak, surface(level, CX + 11, CZ + 6), Blocks.OAK_LOG.defaultBlockState(), "a bare log", failures);
+            refuseWith(level, peak, surface(level, CX + 11, CZ + 6), Blocks.STRIPPED_OAK_LOG.defaultBlockState(), "a stripped log", failures);
+
             // 5. 防具立て (人の持ち物) があれば削らない
             buildPeak(level);
             ArmorStand stand = EntityType.ARMOR_STAND.create(level);
@@ -472,6 +496,8 @@ public final class ChapterSkySelfTest {
         PeakScar.Result r = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
         if (r.plan() != null) {
             failures.add("the peak was planned for carving with " + what + " at " + pos);
+        } else if (!r.reason().startsWith("non-natural") && !r.reason().startsWith("cannot remove")) {
+            failures.add("the peak with " + what + " was refused for another reason: " + r.reason());
         }
     }
 
