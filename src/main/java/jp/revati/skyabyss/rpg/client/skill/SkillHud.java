@@ -36,10 +36,27 @@ public final class SkillHud {
     private SkillHud() {
     }
 
-    // 成長の表示が「+12」の列を下げるか (マナのバーを出しているとき)
+    // 成長の表示が「+12」の列を下げる量 (マナのバーと、画面が狭くて左上に寄せた技の枠の分)
     public static int rowsBelowXpBar() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && showMana(mc.player, SkillManager.get(mc.player)) ? MANA_ROW : 0;
+        if (mc.player == null) {
+            return 0;
+        }
+        SkillData d = SkillManager.get(mc.player);
+        int rows = showMana(mc.player, d) ? MANA_ROW : 0;
+        if (anySlot(d) && slotsOnTopLeft(mc, mc.getWindow().getGuiScaledWidth())) {
+            rows += SLOT + 4;
+        }
+        return rows;
+    }
+
+    static boolean anySlot(SkillData d) {
+        for (int i = 0; i < d.slots.length; i++) {
+            if (d.slot(i) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static boolean showMana(Player player, SkillData d) {
@@ -63,11 +80,7 @@ public final class SkillHud {
         if (showMana(mc.player, d)) {
             renderMana(g, mc.player, d);
         }
-        boolean anySlot = false;
-        for (int i = 0; i < d.slots.length; i++) {
-            anySlot |= d.slot(i) != null;
-        }
-        if (anySlot) {
+        if (anySlot(d)) {
             renderSlots(g, mc, d);
         }
     }
@@ -88,17 +101,22 @@ public final class SkillHud {
 
     // 枠の置き場: ホットバーの右 (攻撃の目盛りや、左利きのオフハンドの枠があればその先)。画面が狭ければ左上のマナの下
     static int[] slotOrigin(Minecraft mc, GuiGraphics g) {
-        int cx = g.guiWidth() / 2;
+        if (slotsOnTopLeft(mc, g.guiWidth())) {
+            return new int[] {MANA_X, MANA_Y + 8};
+        }
+        return new int[] {hotbarSideX(mc, g.guiWidth()), g.guiHeight() - 21};
+    }
+
+    private static int hotbarSideX(Minecraft mc, int guiWidth) {
         Player p = mc.player;
         boolean leftHanded = p.getMainArm() == HumanoidArm.LEFT;
         boolean rightBusy = leftHanded ? !p.getOffhandItem().isEmpty()
                 : mc.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR;
-        int x = cx + 91 + 6 + (rightBusy ? 26 : 0);
-        int width = SkillRules.SLOTS * (SLOT + SLOT_GAP);
-        if (x + width > g.guiWidth() - 2) {
-            return new int[] {MANA_X, MANA_Y + 8};
-        }
-        return new int[] {x, g.guiHeight() - 21};
+        return guiWidth / 2 + 91 + 6 + (rightBusy ? 26 : 0);
+    }
+
+    static boolean slotsOnTopLeft(Minecraft mc, int guiWidth) {
+        return hotbarSideX(mc, guiWidth) + SkillRules.SLOTS * (SLOT + SLOT_GAP) > guiWidth - 2;
     }
 
     private static void renderSlots(GuiGraphics g, Minecraft mc, SkillData d) {
