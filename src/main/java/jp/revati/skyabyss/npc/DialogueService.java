@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.quest.StoryContext;
@@ -65,14 +64,23 @@ public final class DialogueService {
         bond.talks++;
         bond.flags.add("met");
         NpcBonds.sync(player);
-        npc.startTalking(player);
+        // ほかの NPC と話している途中なら、そちらは終える (その NPC が話し相手を待ち続けないように)
+        Session old = SESSIONS.get(player.getUUID());
+        if (old != null && old.npcId() != npc.getId()) {
+            NpcEntity previous = npcById(player, old.npcId());
+            if (previous != null) {
+                previous.stopTalking(player);
+            }
+        }
         enter(player, npc, dialogue, node);
     }
 
     // 画面で選んだ。node は画面が映している節 (食い違えば古い画面からの選択なので捨てる)
     public static void choose(ServerPlayer player, String nodeId, int index) {
         Session s = SESSIONS.get(player.getUUID());
-        if (s == null || !s.node().equals(nodeId)) {
+        if (s == null) {
+            // 会話はもう終わっている (離れた等): 画面を閉じさせる
+            send(player, new NpcNetwork.Close());
             return;
         }
         NpcEntity npc = npc(player, s);
@@ -87,6 +95,11 @@ public final class DialogueService {
             return;
         }
         StoryContext ctx = new StoryContext(player, s.role(), npc);
+        if (!s.node().equals(nodeId)) {
+            // 古い画面からの選択: 今の節を映し直す (画面が返事を待ったまま止まらないように)
+            enter(player, npc, dialogue, node, false);
+            return;
+        }
         if (index == CONTINUE) {
             go(player, npc, dialogue, ctx, node.next() == null ? Dialogue.END : node.next());
             return;
@@ -96,6 +109,7 @@ public final class DialogueService {
             return;
         }
         if (!s.shown().contains(index) || index < 0 || index >= node.options().size()) {
+            enter(player, npc, dialogue, node, false);
             return;
         }
         Dialogue.Option option = node.options().get(index);
@@ -128,6 +142,8 @@ public final class DialogueService {
     // 節に入る: 結果を起こし、「話した」をクエストへ知らせ、見せる選択肢を選んで画面へ送る
     private static void enter(ServerPlayer player, NpcEntity npc, Dialogue dialogue, Dialogue.Node node, boolean fresh) {
         StoryContext ctx = new StoryContext(player, dialogue.role(), npc);
+        // 節ごとに「話している」を更新する (長い会話の途中で、NPC が話し相手を忘れないように)
+        npc.startTalking(player);
         if (fresh) {
             node.actions().forEach(a -> a.run(ctx));
             Quests.onTalk(player, dialogue.role(), node.id());

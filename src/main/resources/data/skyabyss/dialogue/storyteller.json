@@ -1,0 +1,549 @@
+{
+  "npc": "skyabyss:storyteller",
+  "entries": [
+    {
+      "node": "fragment",
+      "if": {
+        "type": "quest",
+        "quest": "main_song",
+        "is": "active",
+        "stage": "return"
+      }
+    },
+    {
+      "node": "song_done",
+      "if": {
+        "type": "quest",
+        "quest": "sub_song",
+        "is": "active",
+        "stage": "tell"
+      }
+    },
+    {
+      "node": "deja_vu_song",
+      "if": [
+        {
+          "type": "loop",
+          "min": 1
+        },
+        {
+          "type": "remembers",
+          "flag": "song_heard"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "deja_vu",
+      "if": [
+        {
+          "type": "loop",
+          "min": 1
+        },
+        {
+          "type": "remembers",
+          "flag": "met"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "first",
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "met"
+        }
+      }
+    },
+    {
+      "node": "menu"
+    }
+  ],
+  "nodes": {
+    "first": {
+      "face": "smile",
+      "next": "menu"
+    },
+    "deja_vu": {
+      "face": "grave",
+      "next": "menu"
+    },
+    "deja_vu_song": {
+      "face": "grave",
+      "next": "menu"
+    },
+    "menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "shadow_seen",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/shadow"
+            },
+            {
+              "type": "any",
+              "of": [
+                {
+                  "type": "quest",
+                  "quest": "main_song",
+                  "is": "none"
+                },
+                {
+                  "type": "quest",
+                  "quest": "main_song",
+                  "is": "active",
+                  "stage": "ask_storyteller"
+                }
+              ]
+            }
+          ],
+          "goto": "shadow1"
+        },
+        {
+          "id": "shadow_ask",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "prologue/shadow"
+              }
+            },
+            {
+              "type": "quest",
+              "quest": "main_song",
+              "is": "none"
+            }
+          ],
+          "goto": "shadow1"
+        },
+        {
+          "id": "chaser_where",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "main_song",
+            "is": "active",
+            "stage": "find_chaser"
+          },
+          "goto": "chaser_hint"
+        },
+        {
+          "id": "song",
+          "if": {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "song_heard"
+            }
+          },
+          "goto": "song1"
+        },
+        {
+          "id": "song_more",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "flag",
+              "flag": "song_heard"
+            },
+            {
+              "type": "quest",
+              "quest": "sub_song",
+              "is": "none"
+            },
+            {
+              "type": "quest",
+              "quest": "main_song",
+              "is": "started"
+            }
+          ],
+          "goto": "sub_offer"
+        },
+        {
+          "id": "watcher_seen",
+          "if": [
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "prologue/watcher"
+              }
+            },
+            {
+              "type": "watcher",
+              "min": 1
+            }
+          ],
+          "goto": "watcher"
+        },
+        {
+          "id": "watcher_ask",
+          "if": [
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "prologue/watcher"
+              }
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "watcher",
+                "min": 1
+              }
+            },
+            {
+              "type": "affinity",
+              "min": 15
+            }
+          ],
+          "goto": "watcher"
+        },
+        {
+          "id": "custom",
+          "if": [
+            {
+              "type": "not",
+              "of": {
+                "type": "lore",
+                "entry": "prologue/seventh_night"
+              }
+            },
+            {
+              "type": "affinity",
+              "min": 30
+            }
+          ],
+          "goto": "calendar"
+        },
+        {
+          "id": "book",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/the_book"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "book_shown"
+              }
+            }
+          ],
+          "goto": "book"
+        },
+        {
+          "id": "whale",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/stone_whale"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "whale_told"
+              }
+            }
+          ],
+          "goto": "whale"
+        },
+        {
+          "id": "back",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/sky_ruins"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "back_told"
+              }
+            }
+          ],
+          "goto": "back"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    },
+    "shadow1": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "quest_start",
+          "quest": "main_song"
+        }
+      ],
+      "next": "shadow2"
+    },
+    "shadow2": {
+      "face": "grave",
+      "next": "shadow3"
+    },
+    "shadow3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "why",
+          "goto": "shadow_why"
+        }
+      ]
+    },
+    "shadow_why": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "go",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ],
+          "goto": "end"
+        }
+      ]
+    },
+    "chaser_hint": {
+      "face": "smile",
+      "next": "@entry"
+    },
+    "song1": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "song_heard"
+        },
+        {
+          "type": "lore",
+          "entry": "prologue/counting_song"
+        },
+        {
+          "type": "affinity",
+          "amount": 3
+        }
+      ],
+      "next": "song2"
+    },
+    "song2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "curious",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ],
+          "goto": "song_curious"
+        },
+        {
+          "id": "child",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": -2
+            }
+          ],
+          "goto": "song_child"
+        }
+      ]
+    },
+    "song_curious": {
+      "face": "smile",
+      "next": "@entry"
+    },
+    "song_child": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "sub_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_song"
+            },
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ],
+          "goto": "end"
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "song_done": {
+      "face": "neutral",
+      "next": "song_done2"
+    },
+    "song_done2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "thanks",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ],
+          "goto": "end"
+        }
+      ]
+    },
+    "watcher": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "prologue/watcher"
+        },
+        {
+          "type": "flag",
+          "flag": "watcher_told"
+        }
+      ],
+      "next": "watcher2"
+    },
+    "watcher2": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "calendar": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "prologue/seventh_night"
+        },
+        {
+          "type": "flag",
+          "flag": "calendar_told"
+        }
+      ],
+      "next": "calendar2"
+    },
+    "calendar2": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "book": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "book_shown"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "book2"
+    },
+    "book2": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "whale": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "whale_told"
+        }
+      ],
+      "next": "whale2"
+    },
+    "whale2": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "back": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "back_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "@entry"
+    },
+    "fragment": {
+      "face": "neutral",
+      "next": "fragment2"
+    },
+    "fragment2": {
+      "face": "grave",
+      "next": "fragment3"
+    },
+    "fragment3": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "thanks",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 3
+            }
+          ],
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

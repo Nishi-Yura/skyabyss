@@ -87,7 +87,7 @@ public final class QuestHud {
             if (ob.count() > 1) {
                 text += "（" + Math.min(have, ob.count()) + "/" + ob.count() + "）";
             }
-            List<String> wrapped = LoreWrap.wrap(text, WIDTH - 8, font::width);
+            List<String> wrapped = LoreWrap.wrap(text, WIDTH - 12, font::width);
             for (int k = 0; k < wrapped.size(); k++) {
                 out.add(new Line((k == 0 ? "・" : "") + wrapped.get(k), k == 0 ? 0 : 9, TEXT));
             }
