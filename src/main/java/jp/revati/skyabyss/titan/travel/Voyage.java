@@ -96,6 +96,8 @@ final class Voyage {
     boolean test;
     // 寄りきれずに、真上へ移して済ませた回数 (自己テストで 0 を確かめる)
     int snaps;
+    // 呼んだ人が迎えの場所から離れている tick 数
+    int leaderAway;
 
     // 鎖を上る (dir > 0) ・下りる (dir < 0) 人の進み具合
     static final class Climb {
@@ -172,6 +174,7 @@ final class Voyage {
         phase = next;
         phaseTicks = 0;
         hoverYaw = null;
+        hoverHeightCache = Double.NaN;
     }
 
     // ---- 迎え
@@ -187,7 +190,7 @@ final class Voyage {
             }
             return;
         }
-        double hoverY = pickup.getY() + TravelRules.HOVER_CLEARANCE;
+        double hoverY = hoverHeight(level, whale, pickup);
         boolean arrived = flyToHover(level, whale, pickup, hoverY);
         if (arrived || phaseTicks > TravelRules.COMING_LIMIT) {
             if (!arrived) {
@@ -222,7 +225,11 @@ final class Voyage {
         if (!leaderAboard && !leaderClimbing) {
             // 呼んだ人が乗る前にいなくなった (ログアウト・遠くへ行った)。ほかに乗っている人がいれば、その人に任せる
             ServerPlayer lead = player(leader);
-            boolean gone = lead == null || lead.level() != level || lead.distanceToSqr(Vec3.atCenterOf(pickup)) > 64 * 64;
+            // 少し離れただけ (横に 96 ブロックまで、または 10 秒まで) では取りやめない
+            boolean away = lead == null || lead.level() != level
+                    || Math.hypot(lead.getX() - pickup.getX(), lead.getZ() - pickup.getZ()) > 96;
+            leaderAway = away ? leaderAway + 1 : 0;
+            boolean gone = lead == null || lead.level() != level || leaderAway > 200;
             if (gone && !passLeadership()) {
                 if (riders.isEmpty() && climbs.isEmpty()) {
                     cancel("message.skyabyss.travel.cancel.gone", true);
@@ -370,9 +377,11 @@ final class Voyage {
         holdTicket(level, new ChunkPos(feet));
         if (landing == null && level.getChunkSource().hasChunk(feet.getX() >> 4, feet.getZ() >> 4)) {
             landing = LandingFinder.find(level, destPos(), 1, 10);
+            // 降ろす場所が決まったので、止まる高さを測り直す
+            hoverHeightCache = Double.NaN;
         }
         BlockPos spot = landing != null ? landing : feet;
-        double hoverY = spot.getY() + TravelRules.HOVER_CLEARANCE;
+        double hoverY = hoverHeight(level, whale, spot);
         boolean arrived = flyToHover(level, whale, spot, hoverY);
         if (arrived || phaseTicks > TravelRules.COMING_LIMIT) {
             if (!arrived) {
@@ -765,6 +774,21 @@ final class Voyage {
     // 目標が巨神と一緒に回ってしまい、いつまでも円を描いて着かない。2026-10-16 の試遊で見つかった)
     @Nullable
     private Float hoverYaw;
+
+    // 止まる高さ: 鎖の下の地面の 30 上。止まる位置のまわりに丘があれば、その上 (体が丘に埋まると、
+    // 光の届かない所にいることになって巨神が真っ黒に描かれ、頭の乗り場も土に埋まるため)
+    private double hoverHeightCache = Double.NaN;
+
+    private double hoverHeight(ServerLevel level, Entity whale, BlockPos spot) {
+        if (Double.isNaN(hoverHeightCache)) {
+            Vec3 point = Vec3.atBottomCenterOf(spot);
+            Vec3 center = TitanKind.centerForChainAt(titan, point, hoverYaw(whale, point), 0);
+            // 体の中ほど (中心) と頭 (鎖の垂れ口の真下) のまわり
+            double hills = Math.max(surfaceMax(level, center), surfaceMax(level, point));
+            hoverHeightCache = Math.min(level.getMaxBuildHeight() - 50, Math.max(spot.getY() + TravelRules.HOVER_CLEARANCE, hills + 8));
+        }
+        return hoverHeightCache;
+    }
 
     float hoverYaw(Entity whale, Vec3 point) {
         if (hoverYaw == null) {
