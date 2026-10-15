@@ -183,5 +183,37 @@
         "stream": true
       }
     ]
+  },
+  "titan_call": {
+    "subtitle": "subtitles.skyabyss.titan_call",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/call"
+      }
+    ]
+  },
+  "titan_depart": {
+    "subtitle": "subtitles.skyabyss.titan_depart",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/depart"
+      }
+    ]
+  },
+  "titan_veil": {
+    "subtitle": "subtitles.skyabyss.titan_veil",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/veil"
+      }
+    ]
+  },
+  "titan_waymark": {
+    "subtitle": "subtitles.skyabyss.titan_waymark",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/waymark"
+      }
+    ]
   }
 }
