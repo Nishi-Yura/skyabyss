@@ -125,6 +125,16 @@ public final class SkillSelfTest {
         d.sanitize(50);
         check(f, d.ranks.isEmpty(), "a skill without its requirement survived sanitize");
 
+        // ---------------------------------------------------------------- 空いた枠へ自動で置く
+        d = new SkillData();
+        d.ranks.put(Skill.TITAN_CLEAVE.id, 1);
+        d.ranks.put(Skill.RIPOSTE.id, 1);
+        SkillManager.autoSlot(d, Skill.RIPOSTE); // 常時の技は置かない
+        SkillManager.autoSlot(d, Skill.TITAN_CLEAVE);
+        SkillManager.autoSlot(d, Skill.TITAN_CLEAVE); // 二度目は重ねない
+        SkillManager.autoSlot(d, Skill.LUNGE); // 覚えていない技は置かない
+        check(f, d.slots[0].equals(Skill.TITAN_CLEAVE.id) && d.slots[1].isEmpty(), "auto slot is wrong: " + String.join(",", d.slots));
+
         // ---------------------------------------------------------------- クールダウン
         d = new SkillData();
         d.cooldowns.put(Skill.TITAN_CLEAVE.id, 3);

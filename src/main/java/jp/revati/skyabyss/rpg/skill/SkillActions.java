@@ -199,17 +199,18 @@ public final class SkillActions {
         for (int i = 0; i < Math.min(targets.size(), SkillRules.CLEAVE_MAX_TARGETS); i++) {
             LivingEntity e = targets.get(i);
             boolean large = isLarge(e);
-            if (hit(player, e, large ? base * (float) SkillRules.CLEAVE_LARGE_BONUS : base, Skill.TITAN_CLEAVE) && large) {
-                bigHit = true;
-                particle(level, Skills.RUNE_SPARK.get(), e.position().add(0, e.getBbHeight() * 0.6, 0), 14, 0.4, 0.08);
+            if (hit(player, e, large ? base * (float) SkillRules.CLEAVE_LARGE_BONUS : base, Skill.TITAN_CLEAVE)) {
+                // 当たった印 (大きな相手には多め)
+                particle(level, Skills.RUNE_SPARK.get(), e.position().add(0, e.getBbHeight() * 0.6, 0), large ? 14 : 5, large ? 0.4 : 0.25, 0.06);
+                bigHit |= large;
             }
         }
         player.swing(InteractionHand.MAIN_HAND, true);
         // 弧を描く光: 右上から左下へ、半径 2.6 の扇に沿って
         Vec3 side = new Vec3(-dir.z, 0, dir.x);
-        for (int i = 0; i <= 12; i++) {
-            double a = Math.toRadians(-SkillRules.CLEAVE_HALF_ANGLE + i * SkillRules.CLEAVE_HALF_ANGLE * 2 / 12.0);
-            Vec3 p = origin.add(dir.scale(Math.cos(a) * 2.6)).add(side.scale(Math.sin(a) * 2.6)).add(0, 1.8 - i * 0.09, 0);
+        for (int i = 0; i <= 24; i++) {
+            double a = Math.toRadians(-SkillRules.CLEAVE_HALF_ANGLE + i * SkillRules.CLEAVE_HALF_ANGLE * 2 / 24.0);
+            Vec3 p = origin.add(dir.scale(Math.cos(a) * 2.6)).add(side.scale(Math.sin(a) * 2.6)).add(0, 1.8 - i * 0.045, 0);
             level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
         }
         sound(player, Skills.SOUND_CLEAVE.get(), 1.0f, bigHit ? 0.85f : 1.0f);
@@ -418,6 +419,12 @@ public final class SkillActions {
         int agility = Growth.get(player).stat(GrowthRules.Stat.AGILITY);
         double damage = SkillRules.rainDamage(rank) * (1 + GrowthRules.projectileMultiplier(agility));
         RAINS.add(new Rain(level, center, player.getUUID(), damage));
+        // 降る範囲を地面に輪で示す (どこに降るか分かるように)
+        for (int i = 0; i < 28; i++) {
+            double a = Math.PI * 2 * i / 28;
+            level.sendParticles(Skills.SKY_MOTE.get(), center.x + Math.cos(a) * SkillRules.RAIN_RADIUS, center.y + 0.15,
+                    center.z + Math.sin(a) * SkillRules.RAIN_RADIUS, 1, 0.02, 0.02, 0.02, 0.0);
+        }
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
         sound(player, Skills.SOUND_PIERCE.get(), 0.5f, 1.4f);
@@ -451,17 +458,23 @@ public final class SkillActions {
         for (Iterator<Rain> it = RAINS.iterator(); it.hasNext();) {
             Rain r = it.next();
             r.ticks++;
-            // 降ってくる光 (毎 tick 少し)
-            for (int i = 0; i < 2; i++) {
+            // 降ってくる光の矢 (毎 tick 3 本。1 本は縦に並んだ 3 粒で、筋に見える)
+            for (int i = 0; i < 3; i++) {
                 double a = r.level.random.nextDouble() * Math.PI * 2;
                 double d = Math.sqrt(r.level.random.nextDouble()) * SkillRules.RAIN_RADIUS;
-                r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x + Math.cos(a) * d, r.center.y + 5 + r.level.random.nextDouble() * 2,
-                        r.center.z + Math.sin(a) * d, 0, 0, -1.4, 0, 1.0);
+                double top = r.center.y + 5 + r.level.random.nextDouble() * 2;
+                for (int k = 0; k < 3; k++) {
+                    r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x + Math.cos(a) * d, top + k * 0.45,
+                            r.center.z + Math.sin(a) * d, 0, 0, -1.4, 0, 1.0);
+                }
             }
             if (r.ticks % SkillRules.RAIN_INTERVAL != 0) {
                 continue;
             }
             r.pulses++;
+            // 一度降るたびに、地面で光がはじける
+            r.level.sendParticles(Skills.SKY_MOTE.get(), r.center.x, r.center.y + 0.2, r.center.z, 10,
+                    SkillRules.RAIN_RADIUS * 0.45, 0.05, SkillRules.RAIN_RADIUS * 0.45, 0.03);
             ServerPlayer caster = server.getPlayerList().getPlayer(r.caster);
             if (caster != null && caster.level() == r.level && caster.isAlive()) {
                 AABB box = new AABB(r.center, r.center).inflate(SkillRules.RAIN_RADIUS, 1, SkillRules.RAIN_RADIUS).expandTowards(0, 4, 0);

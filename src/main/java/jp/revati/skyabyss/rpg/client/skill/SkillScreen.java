@@ -66,6 +66,8 @@ public class SkillScreen extends Screen {
     private Button learn;
     private Button respec;
     private int respecArmed;
+    private Component noticeText;
+    private int noticeTicks;
 
     public SkillScreen() {
         super(Component.translatable("gui.skyabyss.skill.title"));
@@ -109,6 +111,9 @@ public class SkillScreen extends Screen {
         if (respecArmed > 0) {
             respecArmed--;
         }
+        if (noticeTicks > 0) {
+            noticeTicks--;
+        }
         refresh();
     }
 
@@ -120,12 +125,32 @@ public class SkillScreen extends Screen {
 
     // 振り直しは二度押し (押しまちがえで技を失わないように)
     private void pressRespec() {
+        // 画面を開いている間はアクションバーが見えないので、断られる理由は先にここで出す (最後はサーバーが検める)
+        int cost = SkillRules.respecCost(data().respecs);
+        if (!minecraft.player.isCreative()) {
+            if (!SkillManager.nearForge(minecraft.player)) {
+                notice(Component.translatable("message.skyabyss.skill.respec_failed.no_forge"));
+                return;
+            }
+            if (SkillManager.countCrystals(minecraft.player.getInventory()) < cost) {
+                notice(Component.translatable("message.skyabyss.skill.respec_failed.no_crystals", cost));
+                return;
+            }
+        }
         if (respecArmed <= 0) {
             respecArmed = 60;
             return;
         }
         respecArmed = 0;
-        PacketDistributor.sendToServer(new SkillRespecPayload(SkillRules.respecCost(data().respecs)));
+        PacketDistributor.sendToServer(new SkillRespecPayload(cost));
+    }
+
+    // 画面の中の短い知らせ (断られた理由)。3 秒で消える
+    private void notice(Component text) {
+        noticeText = text;
+        noticeTicks = 60;
+        respecArmed = 0;
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(Skills.SOUND_FAIL.get(), 1.0f, 0.5f));
     }
 
     private void click() {
@@ -265,6 +290,17 @@ public class SkillScreen extends Screen {
         renderTree(g, d, level);
         renderInfo(g, d, level);
         renderBottom(g, d, level);
+        if (noticeTicks > 0 && noticeText != null) {
+            // 説明の欄の下端に、拒否の色で
+            int alpha = Math.min(255, noticeTicks * 12);
+            List<FormattedCharSequence> lines = TextWrap.split(font, noticeText, INFO_W - 10);
+            int y = top + INFO_Y + INFO_H - 4 - lines.size() * 10;
+            g.fill(left + INFO_X + 2, y - 3, left + INFO_X + INFO_W - 2, top + INFO_Y + INFO_H - 2, (Math.min(200, alpha) << 24) | 0x1A1020);
+            for (FormattedCharSequence line : lines) {
+                g.drawString(font, line, left + INFO_X + 5, y, (alpha << 24) | DENY, false);
+                y += 10;
+            }
+        }
         renderHover(g, d, mouseX, mouseY);
         renderLearnTooltip(g, d, mouseX, mouseY);
     }
@@ -363,25 +399,25 @@ public class SkillScreen extends Screen {
         List<FormattedCharSequence> lines = new ArrayList<>();
         Component statLine = Component.translatable("gui.skyabyss.skill.main_stat", Component.translatable(tree.mainStat.nameKey()));
         if (!d.treeOpen(tree)) {
-            lines.addAll(font.split(Component.translatable(tree.sealedKey()).withColor(LORE), w));
+            lines.addAll(TextWrap.split(font, Component.translatable(tree.sealedKey()).withColor(LORE), w));
             lines.add(FormattedCharSequence.EMPTY);
-            lines.addAll(font.split(Component.translatable(tree.descKey()).withColor(SOFT), w));
+            lines.addAll(TextWrap.split(font, Component.translatable(tree.descKey()).withColor(SOFT), w));
             lines.add(statLine.copy().withColor(DIM).getVisualOrderText());
             drawLines(g, lines, x, y, maxY);
             return;
         }
         if (selected == null || selected.tree != tree) {
-            lines.addAll(font.split(Component.translatable(tree.descKey()).withColor(SOFT), w));
+            lines.addAll(TextWrap.split(font, Component.translatable(tree.descKey()).withColor(SOFT), w));
             lines.add(statLine.copy().withColor(SOFT).getVisualOrderText());
             lines.add(FormattedCharSequence.EMPTY);
-            lines.addAll(font.split(Component.translatable("gui.skyabyss.skill.pick_hint").withColor(DIM), w));
+            lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.pick_hint").withColor(DIM), w));
             drawLines(g, lines, x, y, maxY);
             return;
         }
         Skill s = selected;
         int rank = d.rank(s);
         // 一行目: 名前 (右に習得のボタン)
-        lines.addAll(font.split(Component.translatable(s.nameKey()).withColor(GOLD), w - LEARN_W - 4));
+        lines.addAll(TextWrap.split(font, Component.translatable(s.nameKey()).withColor(GOLD), w - LEARN_W - 4));
         lines.add(Component.translatable(s.active ? "gui.skyabyss.skill.kind_active" : "gui.skyabyss.skill.kind_passive")
                 .append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.rank", rank, s.maxRank)).withColor(SOFT)
                 .getVisualOrderText());
@@ -396,11 +432,11 @@ public class SkillScreen extends Screen {
         if (rank == 0) {
             effect = Component.translatable("gui.skyabyss.skill.first").append(effect);
         }
-        body.addAll(font.split(effect.withColor(TEXT), w));
+        body.addAll(TextWrap.split(font, effect.withColor(TEXT), w));
         // 足りない条件 (赤紫)
         if (rank < s.maxRank) {
             if (level < s.minLevel) {
-                body.addAll(font.split(Component.translatable("gui.skyabyss.skill.need_level", s.minLevel).withColor(DENY), w));
+                body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_level", s.minLevel).withColor(DENY), w));
             }
             if (!d.requirementsMet(s)) {
                 MutableComponent names = Component.empty();
@@ -411,14 +447,14 @@ public class SkillScreen extends Screen {
                     }
                     names.append(Component.translatable(req.get(i).nameKey()));
                 }
-                body.addAll(font.split(Component.translatable("gui.skyabyss.skill.need_skill", names).withColor(DENY), w));
+                body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_skill", names).withColor(DENY), w));
             }
             if (d.unspentPoints(level) < 1 && level >= s.minLevel && d.requirementsMet(s)) {
-                body.addAll(font.split(Component.translatable("gui.skyabyss.skill.need_points").withColor(DENY), w));
+                body.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.need_points").withColor(DENY), w));
             }
         }
         // 入りきるなら、言い伝えの一行を効果の前に添える
-        List<FormattedCharSequence> flavor = font.split(Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
+        List<FormattedCharSequence> flavor = TextWrap.split(font, Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
         int room = (maxY - y) / 10 - lines.size() - body.size();
         if (room >= flavor.size()) {
             lines.addAll(flavor);
@@ -438,9 +474,11 @@ public class SkillScreen extends Screen {
         }
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(Component.translatable("gui.skyabyss.skill.rank", rank + 1, selected.maxRank).withColor(GOLD).getVisualOrderText());
-        lines.addAll(font.split(Component.translatable(selected.effectKey(), SkillRules.describeArgs(selected, rank + 1)).withColor(PALE), 200));
-        if (selected.active && rank > 0) {
-            lines.addAll(font.split(Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(selected, rank + 1),
+        lines.addAll(TextWrap.split(font, Component.translatable(selected.effectKey(), SkillRules.describeArgs(selected, rank + 1)).withColor(PALE), 200));
+        // マナと待ちは、今の段から変わるときだけ (段 0 のときは説明の欄に段 1 の値が出ている)
+        if (selected.active && rank > 0 && (SkillRules.manaCost(selected, rank + 1) != SkillRules.manaCost(selected, rank)
+                || SkillRules.cooldownTicks(selected, rank + 1) != SkillRules.cooldownTicks(selected, rank))) {
+            lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(selected, rank + 1),
                     SkillRules.fmtSeconds(SkillRules.cooldownTicks(selected, rank + 1))).withColor(0x9FB8FF), 200));
         }
         lines.add(Component.translatable("gui.skyabyss.skill.learn_cost").withColor(SOFT).getVisualOrderText());
@@ -519,10 +557,10 @@ public class SkillScreen extends Screen {
         }
         if (respec.isHovered()) {
             int cost = SkillRules.respecCost(d.respecs);
-            List<FormattedCharSequence> lines = new ArrayList<>(font.split(Component.translatable(cost == 0
+            List<FormattedCharSequence> lines = new ArrayList<>(TextWrap.split(font, Component.translatable(cost == 0
                     ? "gui.skyabyss.skill.respec_free" : "gui.skyabyss.skill.respec_cost", cost, SkillRules.RESPEC_FORGE_RANGE).withColor(TEXT), 180));
             if (respecArmed > 0) {
-                lines.addAll(font.split(Component.translatable("gui.skyabyss.skill.respec_again").withColor(DENY), 180));
+                lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.respec_again").withColor(DENY), 180));
             }
             g.renderTooltip(font, lines, mx, my);
         }

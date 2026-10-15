@@ -116,13 +116,8 @@ public final class SkillManager {
         int rank = d.rank(skill) + 1;
         d.ranks.put(skill.id, rank);
         // 能動の技を初めて覚えたら、空いている枠に置いておく (画面を開かなくても使える)
-        if (skill.active && rank == 1) {
-            for (int i = 0; i < d.slots.length; i++) {
-                if (d.slots[i].isEmpty()) {
-                    d.slots[i] = skill.id;
-                    break;
-                }
-            }
+        if (rank == 1) {
+            autoSlot(d, skill);
         }
         sync(player);
         applyModifiers(player);
@@ -131,6 +126,24 @@ public final class SkillManager {
         level.sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 18, 0.4, 0.6, 0.4, 0.02);
         player.displayClientMessage(ModText.progress("message.skyabyss.skill.learned", Component.translatable(skill.nameKey()), rank, skill.maxRank), true);
         return r;
+    }
+
+    // 能動の技がどの枠にもなければ、最初の空いた枠に置く
+    static void autoSlot(SkillData d, Skill skill) {
+        if (!skill.active || !d.knows(skill)) {
+            return;
+        }
+        for (String id : d.slots) {
+            if (skill.id.equals(id)) {
+                return;
+            }
+        }
+        for (int i = 0; i < d.slots.length; i++) {
+            if (d.slots[i].isEmpty()) {
+                d.slots[i] = skill.id;
+                return;
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 置き場
@@ -320,11 +333,18 @@ public final class SkillManager {
     // 点が足りなければ追加の点を足して数を合わせる (ログインのときの検めで消されないように)
     public static void forceRank(ServerPlayer player, Skill skill, int rank) {
         SkillData d = get(player);
+        java.util.Set<String> before = new java.util.HashSet<>(d.ranks.keySet());
         if (rank <= 0) {
             d.ranks.remove(skill.id);
         } else {
             d.ranks.put(skill.id, Math.min(rank, skill.maxRank));
             fillRequirements(d, skill);
+            // 覚えたての能動の技 (埋めた前提も) は、画面で覚えたときと同じく空いた枠へ
+            for (Skill s : Skill.values()) {
+                if (!before.contains(s.id) && d.knows(s)) {
+                    autoSlot(d, s);
+                }
+            }
         }
         int over = d.spentPoints() - d.totalPoints(level(player));
         if (over > 0) {
