@@ -1,0 +1,27 @@
+{
+  "entity.skyabyss.tide_shell": "Tide Shell Titan",
+  "subtitles.skyabyss.tide_song": "Something vast calls under the sea",
+  "subtitles.skyabyss.tide_surf": "The tide ebbs",
+  "subtitles.skyabyss.tide_gate": "Passing the tide gate",
+  "subtitles.skyabyss.tide_step": "The sea floor trembles",
+  "subtitles.skyabyss.tide_back_waves": "Waves lap",
+
+  "message.skyabyss.tide.ebb": "The tide is going out. The island offshore is drifting toward the shallows...",
+  "message.skyabyss.tide.gate_hint": "Pass through the tide gate to cross onto its back",
+  "message.skyabyss.tide.arrived": "Through the water, you stand on dry sand. Beneath your feet a vast shell slowly breathes.",
+  "message.skyabyss.tide.leaving": "Beyond the tide gate, you hear the sea of the world below.",
+  "message.skyabyss.tide.return_hint": "Pass through the tide gate to return",
+  "message.skyabyss.tide.swept_back": "The tide pushed you back",
+  "title.skyabyss.tide_back": "The Tide Shell's Back",
+  "title.skyabyss.tide_back.sub": "Atop the shell of the titan that walks the sea",
+
+  "commands.skyabyss.tide.overworld_only": "The tide shell titan can only be called to the overworld sea",
+  "commands.skyabyss.tide.no_sea": "No walkable sea (depth 6+, loaded) 120 blocks ahead",
+  "commands.skyabyss.tide.summoned": "Called the tide shell titan to the sea at %s, %s",
+  "commands.skyabyss.tide.missing": "The tide shell titan is not loaded (use titan summon tide first)",
+  "commands.skyabyss.tide.no_shallows": "No shallows to rest in nearby (depth 6-14, within 40 of shore, within 64 blocks)",
+  "commands.skyabyss.tide.resting": "The tide shell titan rests in the shallows (3 minutes)",
+  "commands.skyabyss.tide.rebuilt": "Rebuilt the tide back (placeholder island)",
+  "commands.skyabyss.tide.status": "Tide shell titan: %s at %s %s %s. Next low tide in %s s",
+  "commands.skyabyss.tide.status_absent": "The tide shell titan is not loaded (has appeared: %s). Next low tide in %s s"
+}

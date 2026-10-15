@@ -168,6 +168,7 @@ public final class SkyEvents {
         int duration = (int) (PATH_HALF * 2.0 / SPEED);
 
         active = new SkyPass(level.getGameTime() + 1, originX, originZ, dirX, dirZ, SPEED, duration);
+        SkyEventData.get(level).countPass();
         PacketDistributor.sendToPlayersInDimension(level, new SkyPassPayload(active));
         SkyAbyss.LOGGER.debug("Sky pass started near {}", witness.getName().getString());
     }
