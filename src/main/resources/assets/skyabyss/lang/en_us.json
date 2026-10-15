@@ -9,7 +9,7 @@
   "entity.skyabyss.watcher": "Watcher",
   "subtitles.skyabyss.watcher_presence": "Ears ring",
   "subtitles.skyabyss.watcher_fade": "A presence fades",
-  "commands.skyabyss.watcher.shown": "A watcher now stands %2$s blocks away from %1$s",
+  "commands.skyabyss.watcher.shown": "A watcher now stands %2$s blocks away from %1$s (%3$s)",
   "commands.skyabyss.watcher.no_spot": "No place for the watcher to stand (try a dark, open place outdoors)",
   "commands.skyabyss.watcher.next": "%s: next watcher in about %s s (noticed %s times, now: %s)",
   "commands.skyabyss.watcher.reset": "Cleared the watcher record of %s (it may appear on the next suitable night)",

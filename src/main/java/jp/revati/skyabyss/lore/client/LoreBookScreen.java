@@ -50,6 +50,7 @@ public class LoreBookScreen extends Screen {
     static final int FADED = 0xFF8E7B5E;
     static final int TEAL = 0xFF1D6E69;
     static final int TITLE = 0xFF184F55;
+    static final int PAPER = 0xFFF2E6C8;
     // まだ何も記されていない章のしおりの字
     static final int TAB_LOCKED = 0xFF5E5040;
 
@@ -354,14 +355,17 @@ public class LoreBookScreen extends Screen {
             blitWidget(g, x, y + 1, unlocked ? W_MARK_KNOWN : W_MARK_LOCKED);
             Component title = unlocked ? Component.translatable(entry.titleKey()) : Component.literal("？？？");
             FormattedText clipped = font.substrByWidth(title, LEFT_W - 22);
-            int color = unlocked ? (hover ? TEAL : INK) : FADED;
+            // 選んだ行は濃い青緑の帯の上なので、羊皮紙の色で書く (墨の色では帯に沈んで読めない)
+            boolean isSelected = entry.id().equals(selected);
+            int color = !unlocked ? FADED : isSelected ? PAPER : hover ? TEAL : INK;
             g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(clipped), x + 11, y + 1, color, false);
             if (LoreClient.isNew(entry.id())) {
                 blitWidget(g, x + LEFT_W - 9, y + 1, W_MARK_NEW);
             }
         }
         if (listScroll > 0) {
-            blitWidget(g, x + LEFT_W - 8, top + LIST_Y - 9, W_ARROW_UP);
+            // 上の矢印も一覧の下に並べる (一覧の上は見出しの二重線で、重なってしまう)
+            blitWidget(g, x + LEFT_W - 18, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_UP);
         }
         if (listScroll + LIST_ROWS < entries.size()) {
             blitWidget(g, x + LEFT_W - 8, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_DOWN);

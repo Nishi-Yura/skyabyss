@@ -46,10 +46,13 @@ public class WatcherRenderer extends GeoEntityRenderer<WatcherEntity> {
     // 支点は tools/rough/watcher.py が案ごとに書くので、案を差し替えてもここは変えなくてよい
     private static final String EYE_BONE = "eyes";
     private static final float EYE_X = 1.0f;
-    // 光のにじみの大きさ (半径, ブロック): 距離 × GLINT_SCALE、ただし GLINT_MIN より小さくしない
-    private static final float GLINT_SCALE = 0.0021f;
+    // 光のにじみの大きさ (半径, ブロック): 距離 × GLINT_SCALE、ただし GLINT_MIN より小さくしない。
+    // ゲーム内で確かめた値: 真夜中の空はほぼ黒 (RGB 3,4,7) で体の影は見分けられないので、目の光だけが手がかりになる。
+    // 0.0021・0.7 では 60 ブロック先でにじみが 1 画素ほどの灰色 (明るさ 25 前後) になり、見つけられなかった。
+    // 0.0032・1.4 で、1080p・視野 70 度のとき半径 2〜3 画素、芯の明るさ 130 前後の「かすかな青白い点」になる
+    private static final float GLINT_SCALE = 0.0032f;
     private static final float GLINT_MIN = 0.03f;
-    private static final float GLINT_BRIGHTNESS = 0.7f;
+    private static final float GLINT_BRIGHTNESS = 1.4f;
 
     private final Vector3f[] eyes = {new Vector3f(), new Vector3f()};
     // 顔がどれだけカメラを向いているか (0〜1)。横や後ろから見たとき、頭の向こうの目の光が透けて見えないようにする

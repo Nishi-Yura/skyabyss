@@ -9,7 +9,7 @@
   "entity.skyabyss.watcher": "見る者",
   "subtitles.skyabyss.watcher_presence": "耳鳴りがする",
   "subtitles.skyabyss.watcher_fade": "気配が薄れる",
-  "commands.skyabyss.watcher.shown": "%s から %s ブロック先に、見る者が立った",
+  "commands.skyabyss.watcher.shown": "%s から %s ブロック先に、見る者が立った (%s)",
   "commands.skyabyss.watcher.no_spot": "見る者の立てる場所が見つからなかった（開けた屋外の、暗い場所で試してください）",
   "commands.skyabyss.watcher.next": "%s: 次の見る者まで約 %s 秒（気づいた回数 %s、今の条件: %s）",
   "commands.skyabyss.watcher.reset": "%s の見る者の記録を消した（次に条件がそろった夜から現れうる）",
