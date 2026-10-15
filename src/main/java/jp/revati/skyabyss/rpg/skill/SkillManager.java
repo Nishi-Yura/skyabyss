@@ -274,7 +274,8 @@ public final class SkillManager {
             return CastResult.FAILED;
         }
         d.mana = Math.max(0, d.mana - cost);
-        d.cooldowns.put(skill.id, SkillRules.cooldownTicks(skill, rank));
+        // 手の武器の特性「冴え」で待ちが縮む (03 の 8章)
+        d.cooldowns.put(skill.id, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, SkillRules.cooldownTicks(skill, rank)));
         d.globalCooldown = SkillRules.GLOBAL_COOLDOWN;
         d.lastCombat = player.level().getGameTime();
         sync(player);

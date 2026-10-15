@@ -21,6 +21,8 @@ import jp.revati.skyabyss.entity.BoneSentinel;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.entity.RibArcher;
 import jp.revati.skyabyss.entity.WaterwayMaw;
+import jp.revati.skyabyss.forge.ForgeRules;
+import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
@@ -207,7 +209,7 @@ public final class TitanLoot {
                 pieces.add(item);
             }
         }
-        List<Item> fresh = record(r, pieces, items);
+        List<Item> fresh = record(r, pieces, items, random);
         return new Roll(items, pieces, fresh, guaranteed, pityShards, memory);
     }
 
@@ -227,15 +229,15 @@ public final class TitanLoot {
         if (random.nextFloat() < CAPTAIN_PIKE_CHANCE) {
             pieces.add(ModItems.CAPTAIN_PIKE.get());
         }
-        List<Item> fresh = record(r, pieces, items);
+        List<Item> fresh = record(r, pieces, items, random);
         return new Roll(items, pieces, fresh, null, false, r.memory);
     }
 
-    // 出た装備を渡す品に加え、図鑑に記す。初めてのものがあれば記憶を 0 に戻す
-    private static List<Item> record(TitanMemoryData.Record r, List<Item> pieces, List<ItemStack> items) {
+    // 出た装備を渡す品に加え (特性はここで決まる)、図鑑に記す。初めてのものがあれば記憶を 0 に戻す
+    private static List<Item> record(TitanMemoryData.Record r, List<Item> pieces, List<ItemStack> items, RandomSource random) {
         List<Item> fresh = new ArrayList<>();
         for (Item piece : pieces) {
-            items.add(new ItemStack(piece));
+            items.add(AffixRules.withAffixes(new ItemStack(piece), random));
             if (r.owned.add(id(piece))) {
                 fresh.add(piece);
             }
@@ -276,7 +278,7 @@ public final class TitanLoot {
         }
         if (mob instanceof BoneSentinel && random.nextFloat() < 0.01f) {
             Item piece = armorSet().get(random.nextInt(4));
-            items.add(new ItemStack(piece));
+            items.add(AffixRules.withAffixes(new ItemStack(piece), random));
             if (r != null && r.owned.add(id(piece))) {
                 r.memory = 0;
             }
@@ -529,7 +531,8 @@ public final class TitanLoot {
 
     private static void announcePieces(ServerLevel level, ServerPlayer player, TitanMemoryData.Record r, Roll roll) {
         for (Item piece : roll.pieces()) {
-            ItemStack shown = new ItemStack(piece);
+            // 特性の付いた実物を見せる (名前にカーソルで特性まで見える)
+            ItemStack shown = roll.items().stream().filter(s -> s.is(piece)).findFirst().orElseGet(() -> new ItemStack(piece));
             boolean fresh = roll.fresh().contains(piece);
             if (isExclusive(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
@@ -665,11 +668,79 @@ public final class TitanLoot {
         r.choicePending = false;
         // 初回の贈り物は記憶のカウンタを戻さない (天井の進みはそのまま)
         r.owned.add(id(item));
-        int held = handOver(player.server, player.getUUID(), player, List.of(new ItemStack(item)), 0);
+        ItemStack gift = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
+        int held = handOver(player.server, player.getUUID(), player, List.of(gift), 0);
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        player.sendSystemMessage(ModText.battle("message.skyabyss.legendary_new", itemLink(new ItemStack(item))));
+        player.sendSystemMessage(ModText.battle("message.skyabyss.legendary_new", itemLink(gift)));
         tellHeld(player, held);
         return 1;
+    }
+
+    // ---------------------------------------------------------------- 交換 (共鳴の炉。03 の 2.4節)
+    // 共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (周回を促し、急がせない)。
+    // 天井のカウンタは戻さない (買ったものは「心臓から出た新しい品」ではないため。初回の選択と同じ扱い)
+    public static List<Item> missingExclusives(TitanMemoryData.Record r) {
+        return exclusives().stream().filter(i -> !r.owned.contains(id(i))).toList();
+    }
+
+    public static ForgeRules.ExchangeState exchangeState(@Nullable TitanMemoryData.Record r) {
+        if (r == null || r.clears <= 0) {
+            return ForgeRules.ExchangeState.NO_CLEAR;
+        }
+        if (missingExclusives(r).isEmpty()) {
+            return ForgeRules.ExchangeState.ALL_OWNED;
+        }
+        return r.lastExchangeClears >= r.clears ? ForgeRules.ExchangeState.USED : ForgeRules.ExchangeState.READY;
+    }
+
+    // 炉の画面に見せる: 持っている専用伝説の印 (1 ビットずつ)
+    public static int ownedExclusiveMask(@Nullable TitanMemoryData.Record r) {
+        int mask = 0;
+        List<Item> all = exclusives();
+        for (int i = 0; i < all.size(); i++) {
+            if (r != null && r.owned.contains(id(all.get(i)))) {
+                mask |= 1 << i;
+            }
+        }
+        return mask;
+    }
+
+    @Nullable
+    public static TitanMemoryData.Record peek(ServerPlayer player) {
+        return memory(player.server).peek(player.getUUID(), STONE_WHALE);
+    }
+
+    // 交換の決まり (払う前に検める)。できたら null、できなければ断る理由の翻訳キー
+    @Nullable
+    public static String exchangeDenial(TitanMemoryData.Record r, Item item, boolean affordable) {
+        return switch (exchangeState(r)) {
+            case NO_CLEAR -> "message.skyabyss.exchange.no_clear";
+            case USED -> "message.skyabyss.exchange.used";
+            case ALL_OWNED -> "message.skyabyss.exchange.all_owned";
+            case READY -> !isExclusive(item) || r.owned.contains(id(item)) ? "message.skyabyss.exchange.owned"
+                    : !affordable ? "message.skyabyss.exchange.no_shards" : null;
+        };
+    }
+
+    // 交換する。払う・図鑑に記す・渡す。できたら true
+    public static boolean exchange(ServerPlayer player, Item item) {
+        TitanMemoryData.Record r = record(player);
+        syncOwned(player, r);
+        String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player));
+        if (denial != null) {
+            player.sendSystemMessage(ModText.deny(denial));
+            return false;
+        }
+        ForgeRules.payExchange(player);
+        r.owned.add(id(item));
+        r.lastExchangeClears = r.clears;
+        r.exchanges++;
+        ItemStack stack = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
+        int held = handOver(player.server, player.getUUID(), player, List.of(stack), 0);
+        player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
+        player.sendSystemMessage(ModText.battle("message.skyabyss.exchange.done", itemLink(stack)));
+        tellHeld(player, held);
+        return true;
     }
 
     // ---------------------------------------------------------------- 自己テスト: 天井が効くか、何周で揃うか (1〜4人)
