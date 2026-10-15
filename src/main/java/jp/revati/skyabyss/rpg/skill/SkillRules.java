@@ -194,7 +194,9 @@ public final class SkillRules {
     }
 
     static String fmt(double v) {
-        return v == Math.floor(v) ? String.valueOf((long) v) : String.format("%.1f", v);
+        // 0.3 * 100 = 30.000000000000004 のような誤差を「30.0」と出さないよう、先に小数 1 桁に丸める
+        v = Math.round(v * 10) / 10.0;
+        return v == Math.floor(v) ? String.valueOf((long) v) : String.format(java.util.Locale.ROOT, "%.1f", v);
     }
 
     private SkillRules() {
