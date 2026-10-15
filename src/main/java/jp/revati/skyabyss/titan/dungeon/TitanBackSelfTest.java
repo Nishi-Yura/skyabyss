@@ -40,7 +40,11 @@ public final class TitanBackSelfTest {
         if (back == null) {
             failures.add("titan_back dimension is missing");
         } else {
-            TitanBackBuilder.build(back, TitanBackData.get(back));
+            TitanBackData built = TitanBackData.get(back);
+            TitanBackBuilder.build(back, built);
+            if (built.needsBuild() || built.layoutVersion() != LAYOUT_VERSION) {
+                failures.add("layout version was not recorded after building (" + built.layoutVersion() + ")");
+            }
             checkSurface(back, failures);
             checkRooms(back, failures);
             checkDoors(back, failures);
@@ -100,8 +104,9 @@ public final class TitanBackSelfTest {
     private static final List<net.minecraft.world.entity.Mob> SPAWNED = new ArrayList<>();
     private static int waitTicks = -1;
 
-    // 2 段目: ピースフルで、試練の心臓と番兵が消えずに残るか
-    private static boolean peacefulStage;
+    // 2 段目: ピースフルにすると、試練が眠るか (祠の封印・番兵と心臓が消える・閉じた扉が開く)。
+    // 3 段目: 難易度を戻すと、祠の封印が外れるか
+    private static int stage;
     private static net.minecraft.world.Difficulty originalDifficulty;
 
     @SubscribeEvent
@@ -110,26 +115,31 @@ public final class TitanBackSelfTest {
             return;
         }
         waitTicks = -1;
-        for (var mob : SPAWNED) {
-            if (!mob.isAlive() || mob.isRemoved()) {
-                PENDING.add(mob.getType() + " did not survive " + (peacefulStage ? "2 seconds in peaceful" : "5 seconds")
-                        + " (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
+        ServerLevel back = event.getServer().getLevel(TitanTravel.TITAN_BACK);
+        if (stage == 0) {
+            for (var mob : SPAWNED) {
+                if (!mob.isAlive() || mob.isRemoved()) {
+                    PENDING.add(mob.getType() + " did not survive 5 seconds (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
+                }
             }
         }
-        ServerLevel back = event.getServer().getLevel(TitanTravel.TITAN_BACK);
-        if (!peacefulStage && back != null) {
-            peacefulStage = true;
+        if (stage == 0 && back != null) {
+            stage = 1;
             SPAWNED.forEach(net.minecraft.world.entity.Entity::discard);
             SPAWNED.clear();
-            originalDifficulty = event.getServer().getWorldData().getDifficulty();
-            event.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
-            BlockPos at = HUB.center();
-            var guard = TitanBackTrials.spawnGuard(back, "sentinel", at);
+            // 祠の封印の場所を読み込んでおく (プレイヤーがいないので)
+            BlockPos seal = shrineSeal().get(0);
+            back.setChunkForced(seal.getX() >> 4, seal.getZ() >> 4, true);
+            // 戦いの途中を作る: 第一の広間の入口と心臓の間の入口を閉じ、試練の番兵と心臓を置く
+            TitanBackTrials.seal(back, E1_ENTRANCE);
+            TitanBackTrials.seal(back, HEART_GATE);
+            var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center());
             if (guard != null) {
                 SPAWNED.add(guard);
             }
             var heart = jp.revati.skyabyss.registry.ModEntities.STONE_WHALE_HEART.get().create(back);
             if (heart != null) {
+                BlockPos at = HUB.center();
                 heart.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 0f, 0f);
                 heart.addTag(TitanBackTrials.HEART_TAG);
                 heart.bindArena(TitanBackTrials.heartArena(), 1);
@@ -139,11 +149,49 @@ public final class TitanBackSelfTest {
                     PENDING.add("the trial heart would be saved to disk");
                 }
             }
+            originalDifficulty = event.getServer().getWorldData().getDifficulty();
+            if (originalDifficulty == net.minecraft.world.Difficulty.PEACEFUL) {
+                originalDifficulty = net.minecraft.world.Difficulty.NORMAL;
+            }
+            event.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
             waitTicks = 40;
             return;
         }
+        if (stage == 1 && back != null) {
+            stage = 2;
+            for (var mob : SPAWNED) {
+                if (mob.isAlive() && !mob.isRemoved()) {
+                    PENDING.add(mob.getType() + " (trial) was not put to sleep in peaceful");
+                }
+            }
+            for (BlockPos p : shrineSeal()) {
+                if (!back.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
+                    PENDING.add("peaceful did not seal the shrine stairs at " + p);
+                    break;
+                }
+            }
+            for (List<BlockPos> door : List.of(E1_ENTRANCE, HEART_GATE)) {
+                for (BlockPos p : door) {
+                    if (!back.getBlockState(p).isAir()) {
+                        PENDING.add("peaceful did not reopen the door at " + p);
+                        break;
+                    }
+                }
+            }
+            event.getServer().setDifficulty(originalDifficulty, true);
+            waitTicks = 20;
+            return;
+        }
+        if (back != null) {
+            for (BlockPos p : shrineSeal()) {
+                if (!back.getBlockState(p).isAir()) {
+                    PENDING.add("leaving peaceful did not unseal the shrine stairs at " + p);
+                    break;
+                }
+            }
+        }
         if (PENDING.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST PASSED (guards ran for 5 seconds; {} trial mobs stayed in peaceful)", SPAWNED.size());
+            SkyAbyss.LOGGER.info("SELFTEST PASSED (guards ran for 5 seconds; peaceful sealed the shrine and put the trials to sleep)");
         } else {
             PENDING.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST FAILED: {}", f));
             SkyAbyss.LOGGER.error("SELFTEST FAILED: {} problems", PENDING.size());
@@ -180,7 +228,7 @@ public final class TitanBackSelfTest {
 
     // どの部屋も、天井と床 (谷は溶岩の底) がそろっていて、空や奈落に穴が開いていないこと
     private static void checkRooms(ServerLevel level, List<String> failures) {
-        List<Box> rooms = List.of(HUB, ENTRY, TREASURY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E2, CE2, E3, MAZE_EXIT_ROOM);
+        List<Box> rooms = List.of(HUB, ENTRY, TREASURY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3, MAZE_EXIT_ROOM);
         for (Box room : rooms) {
             int holes = 0;
             for (int x = room.x1(); x <= room.x2(); x++) {
@@ -215,7 +263,8 @@ public final class TitanBackSelfTest {
         int[][] open = {
                 {0, FLOOR + 1, -11}, {0, FLOOR + 1, -12}, {-12, FLOOR + 1, -22}, {12, FLOOR + 1, -22},
                 {-23, FLOOR + 1, -22}, {-30, 98, -35}, {-29, 98, -43}, {-23, 101, -57}, {-17, 101, -55},
-                {23, FLOOR + 1, -22}, {28, FLOOR + 1, -43}, {17, FLOOR + 1, -55}, {6, 94, -7},
+                {23, FLOOR + 1, -22}, {25, FLOOR + 1, -39}, {22, FLOOR + 1, -39}, {20, FLOOR + 1, -39},
+                {6, 94, -7},
                 // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
                 {0, 94, -46}, {0, 94, -63}, {0, 94, -64}, {0, 94, -65}};
         for (int[] d : open) {
@@ -223,7 +272,7 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E2_EXIT)) {
+        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -244,6 +293,29 @@ public final class TitanBackSelfTest {
         }
         if (!level.getBlockState(new BlockPos(4, FLOOR, -25)).is(Blocks.LADDER)) {
             failures.add("maze entrance ladder missing at the hub floor");
+        }
+        // 配置の版 2 で除いた第二の広間・旧番兵長の控えの間・その間の通路は、埋まっていること (古いワールドを建て直したとき)
+        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -60), new BlockPos(17, 94, -55))) {
+            if (level.getBlockState(p).isAir()) {
+                failures.add("removed east hall space is still open at " + p);
+            }
+        }
+        // 祠の階段の封印の場所は、ピースフルでないときは通れること
+        for (BlockPos p : shrineSeal()) {
+            air(level, p, "shrine stair (seal spot)", failures);
+        }
+        if (level.getBlockState(shrineSeal().get(0).below()).isAir()) {
+            failures.add("shrine seal is not on the stairs at " + shrineSeal().get(0));
+        }
+        // 物語の碑文: 看板があり、掛かっている壁が固いこと
+        for (Inscription lore : LORE_SIGNS) {
+            BlockState sign = level.getBlockState(lore.pos());
+            BlockPos wall = lore.pos().relative(lore.facing().getOpposite());
+            if (!(sign.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
+                failures.add("lore sign " + lore.key() + " missing at " + lore.pos() + " (" + sign + ")");
+            } else if (!level.getBlockState(wall).isFaceSturdy(level, wall, lore.facing())) {
+                failures.add("lore sign " + lore.key() + " has no wall behind it at " + wall);
+            }
         }
     }
 
@@ -342,7 +414,7 @@ public final class TitanBackSelfTest {
 
 
     private static void checkHalls(ServerLevel level, List<String> failures) {
-        for (Box hall : List.of(E1, E2, E3)) {
+        for (Box hall : List.of(E1, E3)) {
             for (BlockPos p : EastWingBuilder.spawnPoints(hall)) {
                 air(level, p, "hall spawn point", failures);
                 air(level, p.above(), "hall spawn point head", failures);

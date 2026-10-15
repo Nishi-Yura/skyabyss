@@ -133,7 +133,11 @@ public final class TitanTravel {
         }
         player.getPersistentData().putUUID(TAG_TITAN, whaleId);
         TitanBackData data = TitanBackData.get(back);
-        if (!data.isBuilt()) {
+        if (data.needsBuild()) {
+            // 起動時に建て直せなかったとき (自己テストなど) の保険。古い配置なら、進み具合も最初に戻す
+            if (data.isBuilt()) {
+                data.resetProgress();
+            }
             TitanBackBuilder.build(back, data);
         }
         BlockPos arrival = TitanBackLayout.arrival();

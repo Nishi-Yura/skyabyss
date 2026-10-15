@@ -19,8 +19,8 @@ import net.minecraft.world.phys.AABB;
 //
 // 西の翼 (裂け目の回廊): 西の前室 → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 → 崩れ橋 → 共鳴石
 //                        足場の並びは毎回変わる
-// 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 休み場 → 第二の広間 → 休み場 → 番兵長の広間 → 共鳴石
-//                        封印の扉は一方通行。くぐると後ろで閉じ、戻れない
+// 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 番兵長の控えの間 → 短い通路 → 番兵長の広間 → 共鳴石
+//                        広間の扉は戦いの間だけ閉じる。制圧すると出口と入口が開く
 // 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
 // 闇の水路: 3×3 の水の通路でできた迷路。毎回形が変わり、途中に息継ぎのくぼみだけがある
 public final class TitanBackLayout {
@@ -29,9 +29,15 @@ public final class TitanBackLayout {
     public static final int RZ = 120;
     public static final int FLOOR = 93;
 
+    // 配置の版。部屋の配置を変えたら上げる。保存された版と違えば、起動時に背中を建て直す (TitanBackData)
+    //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
+    public static final int LAYOUT_VERSION = 2;
+
     // ---------------------------------------------------------------- 地表
     public static final int PLATFORM_Z = 96;
     public static final int SHRINE_Z = 24;
+    // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
+    public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
 
     // ---------------------------------------------------------------- 中央
     public static final Box HUB = new Box(-9, 9, -32, -12, FLOOR, 9);
@@ -74,15 +80,17 @@ public final class TitanBackLayout {
     // ---------------------------------------------------------------- 東の翼 (戦闘)
     public static final Box E0 = new Box(16, 22, -26, -18, FLOOR, 6);
     public static final Box E1 = new Box(24, 36, -34, -12, FLOOR, 8);
+    // 番兵長の控えの間 (休み場 ce1)。E1 の出口の先。西の壁の戸口から短い通路で番兵長の広間へ
     public static final Box CE1 = new Box(26, 32, -42, -36, FLOOR, 5);
-    public static final Box E2 = new Box(22, 31, -56, -44, FLOOR, 8);
-    public static final Box CE2 = new Box(16, 24, -63, -58, FLOOR, 5);
     public static final Box E3 = new Box(11, 19, -52, -30, FLOOR, 8);
+    // 控えの間 → 番兵長の広間の通路 (x 21〜24)。両端の壁 x=25 (戸口) と x=20 (番兵長の広間の入口)
+    public static final Box E3_CORRIDOR = new Box(21, 24, -40, -38, FLOOR, 4);
     public static final List<BlockPos> E1_ENTRANCE = wall(-23, -21, 94, 97, 23, false);
     public static final List<BlockPos> E1_EXIT = wall(28, 30, 94, 97, -35, true);
-    public static final List<BlockPos> E2_ENTRANCE = wall(27, 29, 94, 97, -43, true);
-    public static final List<BlockPos> E2_EXIT = wall(22, 24, 94, 97, -57, true);
-    public static final List<BlockPos> E3_ENTRANCE = wall(16, 18, 94, 97, -53, true);
+    public static final List<BlockPos> CE1_WEST_DOOR = wall(-40, -38, 94, 97, 25, false);
+    public static final List<BlockPos> E3_ENTRANCE = wall(-40, -38, 94, 97, 20, false);
+    // 番兵長の広間の前室 (扉が閉じるとき、ここにいる人も中へ入れる): 控えの間と通路
+    public static final AABB E3_ANTE = CE1.aabb().minmax(E3_CORRIDOR.aabb());
     // 東の石を鳴らすと開く、鼓動の間へ戻る扉
     public static final List<BlockPos> EAST_RETURN = List.of(new BlockPos(10, 94, -31), new BlockPos(10, 95, -31));
 
@@ -106,7 +114,25 @@ public final class TitanBackLayout {
     public static final List<BlockPos> RESONANCE_STONES = List.of(
             new BlockPos(-15, 98, -30), new BlockPos(15, 94, -31), new BlockPos(13, 82, -9));
 
+    // ---------------------------------------------------------------- 碑文 (物語の断片)。sign.skyabyss.lore_<name>
+    // facing は看板の向く側。看板は反対側の壁に掛かる
+    public record Inscription(String key, BlockPos pos, net.minecraft.core.Direction facing) {
+    }
+
+    public static final List<Inscription> LORE_SIGNS = List.of(
+            new Inscription("sign.skyabyss.lore_heart", new BlockPos(3, 96, -54), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-6, 96, -38), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.lore_west", new BlockPos(-17, 99, -30), net.minecraft.core.Direction.NORTH),
+            new Inscription("sign.skyabyss.lore_east", new BlockPos(17, 96, -30), net.minecraft.core.Direction.NORTH),
+            new Inscription("sign.skyabyss.lore_below", new BlockPos(11, 83, -6), net.minecraft.core.Direction.NORTH));
+
     private TitanBackLayout() {
+    }
+
+    // 祠の階段の封印 (ピースフルのあいだだけ置く)。階段の幅 3 × 高さ 4
+    public static List<BlockPos> shrineSeal() {
+        int step = shrineY() - 1 - (SHRINE_Z - 1 - SHRINE_SEAL_Z);
+        return wall(-1, 1, step + 1, step + 4, SHRINE_SEAL_Z, true);
     }
 
     // 尾の台。乗り移ってきた人はここに立つ

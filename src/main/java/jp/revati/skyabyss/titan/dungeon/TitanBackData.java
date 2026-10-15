@@ -22,6 +22,8 @@ public class TitanBackData extends SavedData {
     private static final Factory<TitanBackData> FACTORY = new Factory<>(TitanBackData::new, TitanBackData::load);
 
     private boolean built;
+    // 建てたときの配置の版 (TitanBackLayout.LAYOUT_VERSION)。古いワールドは 1
+    private int layoutVersion = 1;
     private boolean gateOpened;
     private boolean heartDefeated;
     private final Set<String> clearedHalls = new HashSet<>();
@@ -40,6 +42,7 @@ public class TitanBackData extends SavedData {
     private static TitanBackData load(CompoundTag tag, HolderLookup.Provider registries) {
         TitanBackData data = new TitanBackData();
         data.built = tag.getBoolean("Built");
+        data.layoutVersion = tag.contains("LayoutVersion") ? tag.getInt("LayoutVersion") : 1;
         data.gateOpened = tag.getBoolean("GateOpened");
         data.heartDefeated = tag.getBoolean("HeartDefeated");
         data.clears = tag.getInt("Clears");
@@ -58,6 +61,7 @@ public class TitanBackData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putBoolean("Built", built);
+        tag.putInt("LayoutVersion", layoutVersion);
         tag.putBoolean("GateOpened", gateOpened);
         tag.putBoolean("HeartDefeated", heartDefeated);
         tag.putInt("Clears", clears);
@@ -79,7 +83,17 @@ public class TitanBackData extends SavedData {
 
     public void markBuilt() {
         built = true;
+        layoutVersion = TitanBackLayout.LAYOUT_VERSION;
         setDirty();
+    }
+
+    // 建て直しが要るか: まだ建てていないか、建てたときの配置の版が今の版と違う
+    public boolean needsBuild() {
+        return !built || layoutVersion != TitanBackLayout.LAYOUT_VERSION;
+    }
+
+    public int layoutVersion() {
+        return layoutVersion;
     }
 
     public boolean isGateOpened() {

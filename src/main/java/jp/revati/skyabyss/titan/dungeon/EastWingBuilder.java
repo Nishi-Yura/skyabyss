@@ -9,8 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 
-// 東の翼「番兵の回廊」: 三つの広間を順に制圧していく戦いの回廊。
-//   東の前室 (休み場) → 第一の広間 → 休み場 → 第二の広間 → 休み場 → 番兵長の広間 (共鳴石)
+// 東の翼「番兵の回廊」: 二つの広間を順に制圧していく戦いの回廊。
+//   東の前室 (休み場) → 第一の広間 → 番兵長の控えの間 (休み場) → 短い通路 → 番兵長の広間 (共鳴石)
+// (配置の版 2 で第二の広間を除いた。TitanBackLayout.LAYOUT_VERSION)
 // 広間に入ると入口が閉じ、番兵の波が押し寄せる。倒しきると出口が開く (TitanBackTrials)。
 // 広間には身を隠せる柱が並ぶ。出口は最初から封じておき、制圧で開く
 final class EastWingBuilder {
@@ -21,17 +22,15 @@ final class EastWingBuilder {
         kit.room(E0);
         kit.room(E1);
         kit.room(CE1);
-        kit.room(E2);
-        kit.room(CE2);
         kit.room(E3);
-        kit.room(new Box(16, 18, -57, -53, FLOOR, 4));   // 休み場 → 番兵長の広間
-        for (List<BlockPos> door : List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, E2_EXIT)) {
+        kit.room(E3_CORRIDOR);   // 控えの間 → 番兵長の広間
+        for (List<BlockPos> door : List.of(E1_ENTRANCE, E1_EXIT, CE1_WEST_DOOR, E3_ENTRANCE)) {
             for (BlockPos p : door) {
                 kit.set(p, BuildKit.AIR);
             }
         }
         // 出口は制圧するまで閉じている (入口は戦いが始まると閉じる)
-        for (List<BlockPos> exit : List.of(E1_EXIT, E2_EXIT)) {
+        for (List<BlockPos> exit : List.of(E1_EXIT)) {
             for (BlockPos p : exit) {
                 kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
             }
@@ -41,15 +40,15 @@ final class EastWingBuilder {
         for (BlockPos p : EAST_RETURN) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        for (Box hall : List.of(E1, E2, E3)) {
+        for (Box hall : List.of(E1, E3)) {
             hallInterior(kit, hall);
         }
         throneDais(kit);
         kit.restPoint(E0, "sign.skyabyss.rest_e0", Direction.SOUTH, new BlockPos(19, FLOOR + 3, E0.z1()));
-        kit.restPoint(CE1, "sign.skyabyss.rest_e1", Direction.NORTH, new BlockPos(27, FLOOR + 3, CE1.z2()));
-        kit.restPoint(CE2, "sign.skyabyss.rest_e2", Direction.SOUTH, new BlockPos(19, FLOOR + 3, CE2.z1()));
+        kit.restPoint(CE1, "sign.skyabyss.rest_e2", Direction.NORTH, new BlockPos(27, FLOOR + 3, CE1.z2()));
+        kit.wallLamps(E3_CORRIDOR, 3, FLOOR + 3);
         kit.pilasters(E0, 3);
-        for (Box rest : List.of(E0, CE1, CE2)) {
+        for (Box rest : List.of(E0, CE1)) {
             kit.wallLamps(rest, 3, FLOOR + 3);
         }
         kit.moss(E0, 0.05f);

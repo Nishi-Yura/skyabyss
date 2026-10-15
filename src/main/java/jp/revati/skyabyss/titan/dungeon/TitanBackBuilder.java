@@ -51,6 +51,10 @@ public final class TitanBackBuilder {
         for (BlockPos p : RESONANCE_STONES) {
             kit.set(p, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         }
+        // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
+        for (Inscription lore : LORE_SIGNS) {
+            kit.wallSign(lore.pos(), lore.facing(), lore.key());
+        }
         data.markBuilt();
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
     }
