@@ -305,7 +305,10 @@ public final class WatcherEvents {
             return 0;
         }
         long distance = Math.round(spot.get().distance());
-        ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.watcher.shown", player.getDisplayName(), distance), true);
+        // 位置も添える (試す人が /tp ~ ~ ~ facing x y z で向けるように)
+        net.minecraft.world.phys.Vec3 feet = spot.get().feet();
+        String where = String.format(java.util.Locale.ROOT, "%d %d %d", Math.round(feet.x), Math.round(feet.y + WatcherSpot.HEAD), Math.round(feet.z));
+        ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.watcher.shown", player.getDisplayName(), distance, where), true);
         return 1;
     }
 
