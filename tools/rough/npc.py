@@ -45,7 +45,7 @@ LABEL = {
     "whale_chaser": {"a": "A 長外套・広つば・鯨骨と羽", "b": "B 鯨骨と羽の帽子 (山高)", "c": "C 裾のぎざぎざ外套"},
 }
 HEIGHT = {"storyteller": 24.5, "whale_chaser": 30.0}  # 単位 (1 ブロック = 16 単位)
-ICON_YMIN = {"storyteller": 13.0, "whale_chaser": 18.0}
+ICON_YMIN = {"storyteller": 13.0, "whale_chaser": 19.0}
 
 RAMP = v2.RAMP
 RAMP.update({
@@ -100,13 +100,13 @@ WC_FACE = {
     ],
     "smile": [
         "............", "..wwwwwwww..", "............", "..ggg..ggg..",
-        ".k.kk..kk.k.", "..kk....kk..", "..w......w..", "............",
-        ".....nn.....", ".....nn.....", "..k......k..", "...mmmmmm...",
+        "............", "..ww....ww..", ".wkkw..wkkw.", "............",
+        ".....nn.....", "..m..nn..m..", "...mmmmmm...", "d.dd.dd.dd.d",
     ],
     "grave": [
-        "............", "..wwwwwwww..", "............", "..ggg..ggg..",
-        "....g..g....", "..kk....kk..", "..w......w..", "............",
-        ".....nn.....", ".....nn.....", "...mmmmmm...", "..m......m..",
+        "............", "..wwwwwwww..", "...w....w...", "...ggggggg..",
+        "............", "..kk....kk..", "..w......w..", "............",
+        ".....nn.....", ".....nn.....", "..mmmmmmmm..", "d.md.dd.dm.d",
     ],
 }
 
@@ -419,7 +419,135 @@ def whale_chaser(v, expr="neutral"):
 
 
 
+# ---------------------------------------------------------------- 語り部 A改 (採用)
+# A 案 (肩掛けの老婆) の作り直し。第 1・2 回のラフは頭が 7 単位の立方体で胴の半分ほどもあり、村人の箱頭に見えた。
+#  - 頭を 5×5×5 に小さくし、首から前へ突き出す (腰の曲がった老婆の「くの字」を、骨の回転を使わず段のずらしで作る。
+#    GeckoLib は骨の回転の符号を反転して読むので、回転に頼ると前かがみが後ろへ反ってしまうおそれがある)
+#  - 顔は 0.5 単位で彫る: 眉の張り出し (目が影に入る)、頬骨、鉤鼻、耳の半分を覆う髪、後ろの髷と簪
+#  - 背の丸み (肩掛けの盛り上がり二段)、帯と背の結び目、腰から垂れる結縄 (結び目 3 つと房)
+#  - 手は胸の下で組む (広い袖の袂が垂れ、袖口から出た両手が帯の上で合わさる)
+RAMP.update({
+    "tabi": ("#9C968A", "#C4BEB0", "#D8D3C6", "#E6E2D8"),
+    "kimono": ("#3E3A33", "#58524A", "#6F685E", "#857D71"),
+    "obi": ("#4A3320", "#6B4A2C", "#86603B", "#A07750"),
+    "pin": ("#3A2614", "#5A3C20", "#7A5430", "#946B42"),
+})
+ST2_COL = {"h": "#B9B5AC", "k": "#241A14", "w": "#7E5E49", "m": "#5A372B", "r": "#B5806A", "l": "#C59C7F"}
+# 頭の前の面 (x -2.5..2.5、y 18..23 → 10×10 画素)。上の行が上。眉 (y21.5..22)・鼻・頬骨の箱が前に重なる行は塗っても見えない
+ST2_FACE = {
+    "neutral": ["hhhhhhhhhh", "hw......wh", "..........", ".w......w.", ".kk....kk.",
+                "w........w", "..........", "..w....w..", "...mmmm...", "....ww...."],
+    "smile": ["hhhhhhhhhh", "hw......wh", "..........", "..........", ".kk....kk.",
+              "w.l....l.w", "..........", ".rm....mr.", "..mmmmmm..", "....ww...."],
+    "grave": ["hhhhhhhhhh", "hww....wwh", "..........", "..kk..kk..", ".kk....kk.",
+              "w........w", "..........", "..w....w..", "..mmmmmm..", "..m....m.."],
+}
+
+
+def kimono(front_z):
+    """着物: 縦のひだ、裾の濃い帯、前の合わせ (右前に重なる縦の線)。"""
+    dk, md, lt, hi = RAMP["kimono"]
+    edge = RAMP["undyed"][2]
+
+    def det(X, Y, Z, f):
+        if f in ("up", "down"):
+            return None
+        if Y < 3.5:
+            return dk if math.floor(X * 2 + Z * 2) % 3 else RAMP["kimono"][1]
+        if f == "south" and abs(Z - front_z) < 1e-6 and 0.5 <= X < 1.5:
+            return edge if 0.5 <= X < 1 else dk
+        u = X if f in ("south", "north") else Z
+        if math.floor(u * 2) % 5 == 0:
+            return dk
+        return None
+    return det
+
+
+def storyteller_d(v, expr="neutral"):
+    m = W.Mdl("storyteller")
+    m.bone("body", (0, 2.5, 0))
+    m.bone("legL", (1.25, 2.5, 0.5), "body")
+    m.bone("legR", (-1.25, 2.5, 0.5), "body")
+    m.bone("armL", (4.5, 16.5, 1.5), "body")
+    m.bone("armR", (-4.5, 16.5, 1.5), "body")
+    m.bone("head", (0, 17.5, 2.5), "body")
+    m.bone("hair", (0, 23, 2.5), "head")
+    m.bone("shawl", (0, 15, 0), "body")
+    m.bone("cord", (2.25, 10.5, 3.75), "body")
+
+    sd = stripes(RAMP["indigo"][1], RAMP["indigo"][3], 6)
+    # 足: 足袋と草履
+    for s, leg in ((1, "legL"), (-1, "legR")):
+        side(m, leg, s, 0.5, 2, 0.5, 2.5, -0.5, 1.5, "tabi")
+        side(m, leg, s, 0.5, 2, 0.5, 1, 1.5, 2.5, "tabi")          # つま先
+        side(m, leg, s, 0.5, 2.5, 0, 0.5, -1, 2.5, "straw")        # 草履
+    # 着物の裾 (下が少し広い)。上体は段ごとに前へずらして、腰の曲がりを作る
+    bx(m, "body", -4, 4, 2.5, 6, -3, 3.5, "kimono", kimono(3.5))
+    bx(m, "body", -3.5, 3.5, 6, 10.5, -2.5, 3, "kimono", kimono(3))
+    # 帯と、背の結び目
+    bx(m, "body", -4, 4, 10.5, 12, -3, 3.5, "obi", stripes(RAMP["obi"][1], RAMP["obi"][3], 8))
+    bx(m, "body", -1.5, 1.5, 10, 12, -4, -3, "obi")
+    # 胸 (着物。肩掛けの下からのぞく)
+    bx(m, "body", -3, 3, 12, 16, -1.5, 3.5, "kimono", kimono(3.5))
+    # 肩掛け: 背の丸み (二段)・脇・肩の上・前の V 字の板・背の裾のぎざぎざ
+    bx(m, "shawl", -3, 3, 12, 17.5, -3, -1.5, "indigo", sd)                 # 背の盛り上がり
+    bx(m, "shawl", -2.5, 2.5, 13.5, 17, -4, -3, "indigo", sd)               # 背の丸みの頂
+    for s in (1, -1):
+        side(m, "shawl", s, 3, 4, 12.5, 16, -1.5, 3.5, "indigo", sd)        # 脇
+    bx(m, "shawl", -4, 4, 16, 17.5, -1.5, 4, "indigo", sd)                   # 肩の上
+    vfront = ["".join("." if abs(c - 6.5) < 3.5 - r * 0.6 else "#" for c in range(14)) for r in range(5)]
+    m.plate("shawl", -3.5, 16, 3.5, vfront, 0.5, "indigo", sd)              # 前の板 (喉元が V 字に開く)
+    bx(m, "shawl", -0.5, 0.5, 13.5, 14, 4, 4.5, "indigo")                    # 前の結び目
+    for x0, x1, y0 in [(-3, -2, 11), (-2, -1.5, 10.5), (1.5, 2, 10.5), (2, 3, 11)]:
+        bx(m, "shawl", x0, x1, y0, 12, -3.5, -3, "indigo", sd)              # 背の裾 (帯の外側)
+    # 首: 前へ出る
+    bx(m, "body", -1, 1, 17.5, 18, 1.5, 3.5, "sk_old")
+    # 頭: 肩より前へ突き出す。顔の彫り
+    head_box = (-2.5, 2.5, 18, 23, 0, 5)
+    hd = face_det(head_box, ST2_FACE[expr], ST2_COL)
+    bx(m, "head", -2.5, 2.5, 18, 23, 0, 5, "sk_old", hd)
+    bx(m, "head", -2, 2, 21.5, 22, 5, 5.5, "sk_old")                         # 眉の張り出し
+    bx(m, "head", -0.5, 0.5, 19.5, 21, 5, 5.5, "sk_old")                     # 鼻
+    bx(m, "head", -0.5, 0.5, 19.5, 20, 5.5, 6, "sk_old")                     # 鼻先 (鉤鼻)
+    for s in (1, -1):
+        side(m, "head", s, 1, 2, 19.5, 20, 5, 5.5, "sk_old")                # 頬骨
+        side(m, "head", s, 2.5, 3, 19.5, 21, 1.5, 2.5, "sk_old")            # 耳
+    # 髪: 頭頂 (生え際は顔より少し奥)・後ろ・耳の上を覆う横の髪、髷と簪
+    bx(m, "hair", -2.5, 2.5, 23, 23.5, 0, 4.5, "hair_gray")
+    bx(m, "hair", -3, 3, 19, 23.5, -0.5, 0, "hair_gray")
+    for s in (1, -1):
+        side(m, "hair", s, 2.5, 3, 21, 23, 0, 3.5, "hair_gray")
+    bx(m, "hair", -1.5, 1.5, 23.5, 25, -0.5, 2, "hair_gray")                # 髷
+    bx(m, "hair", -0.5, 0.5, 25, 25.5, 0, 1, "hair_gray")
+    bx(m, "hair", 1.5, 3, 24, 24.5, 0.5, 1, "pin")                          # 簪
+    # 腕: 肩から垂れる広い袖 (下に袂がたまる)、前へ曲げた袖口、帯の上で組んだ手
+    for s, arm in ((1, "armL"), (-1, "armR")):
+        side(m, arm, s, 4, 5.5, 13.5, 16.5, 0.5, 3.5, "kimono", kimono(99))  # 上の袖
+        side(m, arm, s, 4, 5.5, 11, 13.5, 0.5, 3, "kimono", kimono(99))      # 袂 (垂れた袖の底)
+        side(m, arm, s, 2.5, 5, 12, 13.5, 3.5, 5, "kimono", kimono(99))      # 袖口 (前へ曲げた前腕)
+        side(m, arm, s, 0, 2.5, 12, 13, 4, 5, "sk_old")                     # 手 (真ん中で合わさる)
+    # 結縄: 帯から垂れる縄に、結び目 3 つと房
+    for y0, y1, knot in [(9.5, 10.5, False), (8.5, 9.5, True), (7.5, 8.5, False), (6.5, 7.5, True),
+                         (5.5, 6.5, False), (4.5, 5.5, True), (3, 4.5, False)]:
+        if knot:
+            bx(m, "cord", 1.5, 3, y0, y1, 3.5, 4.5, "rope")
+        else:
+            bx(m, "cord", 2, 2.5, y0, y1, 3.5, 4, "rope")
+    return m
+
+
 BUILD = {"storyteller": storyteller, "whale_chaser": whale_chaser}
+
+
+def _story(v, expr="neutral"):
+    return storyteller_d(v, expr) if v == "d" else storyteller(v, expr)
+
+
+BUILD["storyteller"] = _story
+LABEL["storyteller"]["d"] = "A改 肩掛けの老婆 (採用)"
+HEIGHT["storyteller"] = 26.0
+ICON_YMIN["storyteller"] = 15.5
+CHOSEN["storyteller"] = "d"
 
 
 def build(npc, letter, expr="neutral"):
@@ -452,40 +580,43 @@ def write_geo(path, geo):
 
 
 def animations(npc, bones):
-    """待機 (idle)・歩き (walk)・話す (talk)。角度は度。控えめな振れ幅にする。
-    bones にない骨の分は書かない。"""
+    """待機 (idle)・歩き (walk)・話す (talk)。角度は度 (GeckoLib の molang の sin は度)。
+    GeckoLib はファイルの回転の X を反転して読む (ラフ座標で -X が「腕を前へ上げる」なので、ファイルには +X を書く)。
+    左右対称に振れる動き (歩き・揺れ) は符号を取り違えても見た目が変わらないので、向きに意味があるのは話すときの腕だけ。
+    頭の向きとうなずきはコード (NpcRenderer) が入れるので、ここでは頭を動かさない。bones にない骨の分は書かない。"""
     if npc == "storyteller":
-        walk_leg, walk_arm, bob = 12, 8, 0.3
+        walk_leg, walk_arm, bob, raise_r, raise_l = 10, 2, 0.2, 14, 4
     else:
-        walk_leg, walk_arm, bob = 20, 14, 0.4
+        walk_leg, walk_arm, bob, raise_r, raise_l = 20, 14, 0.4, 26, 3
     anims = {
         "animation.%s.idle" % npc: {
             "loop": True, "animation_length": 4.0, "bones": {
-                "body": {"rotation": ["math.sin(query.anim_time * 90) * 0.6", "0", "0"],
-                         "position": ["0", "math.sin(query.anim_time * 90) * 0.3", "0"]},
-                "armL": {"rotation": ["math.sin(query.anim_time * 90 + 30) * 1.5", "0", "0"]},
-                "armR": {"rotation": ["math.sin(query.anim_time * 90 + 90) * 1.5", "0", "0"]},
-                "head": {"rotation": ["math.sin(query.anim_time * 45) * 1.0", "0", "0"]},
+                "body": {"position": ["0", "math.sin(query.anim_time * 90) * 0.2", "0"]},
+                "shawl": {"rotation": ["math.sin(query.anim_time * 90 + 40) * 0.8", "0", "0"]},
+                "armL": {"rotation": ["math.sin(query.anim_time * 90 + 30) * 1.2", "0", "0"]},
+                "armR": {"rotation": ["math.sin(query.anim_time * 90 + 90) * 1.2", "0", "0"]},
+                "cord": {"rotation": ["0", "0", "math.sin(query.anim_time * 90) * 3"]},
+                "pack": {"position": ["0", "math.sin(query.anim_time * 90 + 60) * 0.15", "0"]},
             }},
         "animation.%s.walk" % npc: {
-            "loop": True, "animation_length": 1.0, "bones": {
-                "legL": {"rotation": ["math.sin(query.anim_time * 360) * %d" % walk_leg, "0", "0"]},
-                "legR": {"rotation": ["-math.sin(query.anim_time * 360) * %d" % walk_leg, "0", "0"]},
+            "loop": True, "animation_length": 1.2 if npc == "storyteller" else 1.0, "bones": {
+                "legL": {"rotation": ["math.sin(query.anim_time * %d) * %d" % (300 if npc == "storyteller" else 360, walk_leg), "0", "0"]},
+                "legR": {"rotation": ["-math.sin(query.anim_time * %d) * %d" % (300 if npc == "storyteller" else 360, walk_leg), "0", "0"]},
                 "armL": {"rotation": ["-math.sin(query.anim_time * 360) * %d" % walk_arm, "0", "0"]},
                 "armR": {"rotation": ["math.sin(query.anim_time * 360) * %d" % walk_arm, "0", "0"]},
                 "body": {"position": ["0", "math.abs(math.sin(query.anim_time * 360)) * %s" % bob, "0"]},
+                "cord": {"rotation": ["0", "0", "math.sin(query.anim_time * 600) * 8"]},
             }},
         "animation.%s.talk" % npc: {
-            "loop": True, "animation_length": 2.0, "bones": {
-                "head": {"rotation": ["math.sin(query.anim_time * 180) * 3", "0", "0"]},
-                "armR": {"rotation": ["-25 + math.sin(query.anim_time * 180) * 4", "0", "0"]},
-                "armL": {"rotation": ["math.sin(query.anim_time * 180 + 90) * 2", "0", "0"]},
-                "body": {"rotation": ["0", "math.sin(query.anim_time * 90) * 2", "0"]},
+            "loop": True, "animation_length": 3.0, "bones": {
+                # 右手を少し前へ上げて、ゆっくり振る (ファイルの +X = 前へ)
+                "armR": {"rotation": ["%d + math.sin(query.anim_time * 120) * 4" % raise_r, "0", "0"]},
+                "armL": {"rotation": ["%d + math.sin(query.anim_time * 120 + 90) * 1.5" % raise_l, "0", "0"]},
+                "body": {"position": ["0", "math.sin(query.anim_time * 120) * 0.15", "0"]},
+                "shawl": {"rotation": ["math.sin(query.anim_time * 120 + 40) * 1", "0", "0"]},
             }},
     }
     for a in anims.values():
-        if npc == "storyteller" and "body" in a["bones"]:
-            a["bones"]["torso"] = a["bones"].pop("body")  # 前傾した上体を揺らす
         a["bones"] = {k: v for k, v in a["bones"].items() if k in bones}
     return {"format_version": "1.8.0", "animations": anims}
 
@@ -520,7 +651,7 @@ def main(install=False):
     report = []
     for npc in NPCS:
         cols = []
-        for letter in ("a", "b", "c"):
+        for letter in ("a", "b", "c", "d") if npc == "storyteller" else ("a", "b", "c"):
             m, geo, tex, gl = build(npc, letter)
             overlaps = vx.check_overlaps(geo)
             d = OUT / npc / letter

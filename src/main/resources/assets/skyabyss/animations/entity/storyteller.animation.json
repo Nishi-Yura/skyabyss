@@ -5,111 +5,120 @@
    "loop": true,
    "animation_length": 4.0,
    "bones": {
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.anim_time * 90) * 0.2",
+      "0"
+     ]
+    },
+    "shawl": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 40) * 0.8",
+      "0",
+      "0"
+     ]
+    },
     "armL": {
      "rotation": [
-      "math.sin(query.anim_time * 90 + 30) * 1.5",
+      "math.sin(query.anim_time * 90 + 30) * 1.2",
       "0",
       "0"
      ]
     },
     "armR": {
      "rotation": [
-      "math.sin(query.anim_time * 90 + 90) * 1.5",
+      "math.sin(query.anim_time * 90 + 90) * 1.2",
       "0",
       "0"
      ]
     },
-    "head": {
+    "cord": {
      "rotation": [
-      "math.sin(query.anim_time * 45) * 1.0",
       "0",
-      "0"
-     ]
-    },
-    "torso": {
-     "rotation": [
-      "math.sin(query.anim_time * 90) * 0.6",
       "0",
-      "0"
-     ],
-     "position": [
-      "0",
-      "math.sin(query.anim_time * 90) * 0.3",
-      "0"
+      "math.sin(query.anim_time * 90) * 3"
      ]
     }
    }
   },
   "animation.storyteller.walk": {
    "loop": true,
-   "animation_length": 1.0,
+   "animation_length": 1.2,
    "bones": {
     "legL": {
      "rotation": [
-      "math.sin(query.anim_time * 360) * 12",
+      "math.sin(query.anim_time * 300) * 10",
       "0",
       "0"
      ]
     },
     "legR": {
      "rotation": [
-      "-math.sin(query.anim_time * 360) * 12",
+      "-math.sin(query.anim_time * 300) * 10",
       "0",
       "0"
      ]
     },
     "armL": {
      "rotation": [
-      "-math.sin(query.anim_time * 360) * 8",
+      "-math.sin(query.anim_time * 360) * 2",
       "0",
       "0"
      ]
     },
     "armR": {
      "rotation": [
-      "math.sin(query.anim_time * 360) * 8",
+      "math.sin(query.anim_time * 360) * 2",
       "0",
       "0"
      ]
     },
-    "torso": {
+    "body": {
      "position": [
       "0",
-      "math.abs(math.sin(query.anim_time * 360)) * 0.3",
+      "math.abs(math.sin(query.anim_time * 360)) * 0.2",
       "0"
+     ]
+    },
+    "cord": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.anim_time * 600) * 8"
      ]
     }
    }
   },
   "animation.storyteller.talk": {
    "loop": true,
-   "animation_length": 2.0,
+   "animation_length": 3.0,
    "bones": {
-    "head": {
-     "rotation": [
-      "math.sin(query.anim_time * 180) * 3",
-      "0",
-      "0"
-     ]
-    },
     "armR": {
      "rotation": [
-      "-25 + math.sin(query.anim_time * 180) * 4",
+      "14 + math.sin(query.anim_time * 120) * 4",
       "0",
       "0"
      ]
     },
     "armL": {
      "rotation": [
-      "math.sin(query.anim_time * 180 + 90) * 2",
+      "4 + math.sin(query.anim_time * 120 + 90) * 1.5",
       "0",
       "0"
      ]
     },
-    "torso": {
-     "rotation": [
+    "body": {
+     "position": [
       "0",
-      "math.sin(query.anim_time * 90) * 2",
+      "math.sin(query.anim_time * 120) * 0.15",
+      "0"
+     ]
+    },
+    "shawl": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 40) * 1",
+      "0",
       "0"
      ]
     }

@@ -1,6 +1,7 @@
 storyteller A: boxes 54, texture 256x46, glow px 0, overlaps none
 storyteller B: boxes 41, texture 256x46, glow px 0, overlaps none
 storyteller C: boxes 43, texture 256x46, glow px 0, overlaps none
+storyteller D: boxes 58, texture 256x36, glow px 0, overlaps none
 whale_chaser A: boxes 52, texture 256x54, glow px 0, overlaps none
 whale_chaser B: boxes 54, texture 256x54, glow px 0, overlaps none
 whale_chaser C: boxes 60, texture 256x54, glow px 0, overlaps none
