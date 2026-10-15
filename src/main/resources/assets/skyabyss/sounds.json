@@ -85,5 +85,85 @@
         "name": "skyabyss:rpg/level_up"
       }
     ]
+  },
+  "skill_cleave": {
+    "subtitle": "subtitles.skyabyss.skill_cleave",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/cleave"
+      }
+    ]
+  },
+  "skill_riposte": {
+    "subtitle": "subtitles.skyabyss.skill_riposte",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/riposte"
+      }
+    ]
+  },
+  "skill_lunge": {
+    "subtitle": "subtitles.skyabyss.skill_lunge",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/lunge"
+      }
+    ]
+  },
+  "skill_sweep": {
+    "subtitle": "subtitles.skyabyss.skill_sweep",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/sweep"
+      }
+    ]
+  },
+  "skill_pierce": {
+    "subtitle": "subtitles.skyabyss.skill_pierce",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/pierce"
+      }
+    ]
+  },
+  "skill_backstep": {
+    "subtitle": "subtitles.skyabyss.skill_backstep",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/backstep"
+      }
+    ]
+  },
+  "skill_mark": {
+    "subtitle": "subtitles.skyabyss.skill_mark",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/mark"
+      }
+    ]
+  },
+  "skill_rain": {
+    "subtitle": "subtitles.skyabyss.skill_rain",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/rain"
+      }
+    ]
+  },
+  "skill_learn": {
+    "subtitle": "subtitles.skyabyss.skill_learn",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/learn"
+      }
+    ]
+  },
+  "skill_fail": {
+    "subtitle": "subtitles.skyabyss.skill_fail",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/fail"
+      }
+    ]
   }
 }

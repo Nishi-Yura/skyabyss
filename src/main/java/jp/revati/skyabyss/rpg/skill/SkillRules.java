@@ -170,16 +170,16 @@ public final class SkillRules {
     public static Object[] describeArgs(Skill skill, int rank) {
         int r = Math.max(1, rank);
         return switch (skill) {
-            case TITAN_CLEAVE -> new Object[] {pct(cleaveMultiplier(r)), pct(CLEAVE_LARGE_BONUS)};
-            case RIPOSTE -> new Object[] {pct(riposteBonus(r))};
-            case LUNGE -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER)};
+            case TITAN_CLEAVE -> new Object[] {pct(cleaveMultiplier(r)), fmt(CLEAVE_LARGE_BONUS)};
+            case RIPOSTE -> new Object[] {pct(riposteBonus(r)), RIPOSTE_WINDOW / SECOND};
+            case LUNGE -> new Object[] {fmt(LUNGE_RANGE), pct(LUNGE_MULTIPLIER), fmtSeconds(cooldownTicks(skill, r))};
             case STONE_STANCE -> new Object[] {fmt(stanceArmor(r)), fmt(stanceKnockback(r) * 100)};
-            case WHALE_SWEEP -> new Object[] {fmt(SWEEP_RADIUS), pct(sweepMultiplier(r))};
+            case WHALE_SWEEP -> new Object[] {fmt(SWEEP_RADIUS), pct(sweepMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
             case CLOUD_PIERCE -> new Object[] {pierceDamage(r), piercePierce(r)};
             case FAR_SHOT -> new Object[] {fmt(0.06 * r * 100), fmt(FAR_FULL)};
-            case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE)};
+            case BACKSTEP -> new Object[] {fmt(BACKSTEP_ENEMY_RANGE), fmtSeconds(cooldownTicks(skill, r))};
             case HAWK_EYE -> new Object[] {fmt(markBonus(r) * 100), MARK_TICKS / SECOND};
-            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r))};
+            case SKY_RAIN -> new Object[] {fmt(RAIN_RADIUS), RAIN_PULSES, fmt(rainDamage(r)), fmtSeconds(cooldownTicks(skill, r))};
         };
     }
 
