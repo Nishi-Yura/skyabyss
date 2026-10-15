@@ -481,5 +481,21 @@
   "message.skyabyss.exchange.done": "The fragments melt together in the forge and take shape. %s",
   "message.skyabyss.exchange.status_ready": "Forge trade: available (30 Resonance Fragments)",
   "message.skyabyss.exchange.status_used": "Forge trade: used this run (again after the next Heart)",
-  "message.skyabyss.affix.not_eligible": "You are not holding gear that takes traits."
+  "message.skyabyss.affix.not_eligible": "You are not holding gear that takes traits.",
+  "commands.skyabyss.scar.carved": "Something scrapes the peak at %s from above (%s blocks)",
+  "commands.skyabyss.scar.check": "Peak %s: %s",
+  "commands.skyabyss.scar.check_none": "No high peak nearby (a top at y 110 or more, 6 above its surroundings)",
+  "commands.skyabyss.scar.none": "No peak could be scarred: %s",
+  "commands.skyabyss.scar.busy": "Another peak is being scarred right now",
+  "commands.skyabyss.scar.list": "%s scars: %s",
+  "commands.skyabyss.eye.opened": "The clouds above %s begin to part (stage %s)",
+  "commands.skyabyss.eye.next": "%s: next cloud eye in about %s s (seen %s times, now: %s)",
+  "commands.skyabyss.eye.reset": "Cleared the cloud eye record of %s",
+  "commands.skyabyss.moon.status": "Moon nearness %s (%s)",
+  "commands.skyabyss.moon.set": "Moon nearness fixed at %s (/skyabyss moon clear to undo)",
+  "commands.skyabyss.moon.cleared": "Moon nearness is no longer fixed",
+  "commands.skyabyss.chapter1.status": "%s: chapter 1 %s (boarded a titan %s, lore 'sky ruins' %s)",
+  "commands.skyabyss.chapter1.set": "Set 'boarded a titan' of %s to %s",
+  "subtitles.skyabyss.peak_scrape": "Rock grinds in the distance",
+  "subtitles.skyabyss.sky_eye_presence": "Something above the clouds"
 }

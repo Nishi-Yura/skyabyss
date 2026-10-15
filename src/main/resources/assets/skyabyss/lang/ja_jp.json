@@ -481,5 +481,21 @@
   "message.skyabyss.exchange.done": "炉の中で欠片が溶け合い、形を結んだ。%s",
   "message.skyabyss.exchange.status_ready": "共鳴の炉での交換: できる（共鳴の欠片 30）",
   "message.skyabyss.exchange.status_used": "共鳴の炉での交換: この周回は済み（次の心臓のあとで）",
-  "message.skyabyss.affix.not_eligible": "手に持っているのは、特性の付く装備ではない。"
+  "message.skyabyss.affix.not_eligible": "手に持っているのは、特性の付く装備ではない。",
+  "commands.skyabyss.scar.carved": "%s の峰を、上から何かが削っていく（%s ブロック）",
+  "commands.skyabyss.scar.check": "峰 %s: %s",
+  "commands.skyabyss.scar.check_none": "近くに高い峰が見つからない（高さ110以上で、周りより6以上高い頂）",
+  "commands.skyabyss.scar.none": "削れる峰がなかった: %s",
+  "commands.skyabyss.scar.busy": "いま別の峰を削っている途中です",
+  "commands.skyabyss.scar.list": "削り跡 %s か所: %s",
+  "commands.skyabyss.eye.opened": "%s の空で、雲がゆっくり割れはじめた（段階 %s）",
+  "commands.skyabyss.eye.next": "%s: 次の雲の目まで約 %s 秒（見た回数 %s、今の条件: %s）",
+  "commands.skyabyss.eye.reset": "%s の雲の目の記録を消した（次に条件がそろった夜から開きうる）",
+  "commands.skyabyss.moon.status": "月の近さ %s（%s）",
+  "commands.skyabyss.moon.set": "月の近さを %s に固定した（/skyabyss moon clear で戻す）",
+  "commands.skyabyss.moon.cleared": "月の近さの固定を外した",
+  "commands.skyabyss.chapter1.status": "%s: 1章 %s（巨神の背に乗った %s、伝承「空の遺跡」%s）",
+  "commands.skyabyss.chapter1.set": "%s の「巨神の背に乗った」を %s にした",
+  "subtitles.skyabyss.peak_scrape": "遠くで岩が擦れる",
+  "subtitles.skyabyss.sky_eye_presence": "雲の上の気配"
 }

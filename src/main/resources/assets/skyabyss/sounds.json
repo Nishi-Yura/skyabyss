@@ -165,5 +165,23 @@
         "name": "skyabyss:rpg/skill/fail"
       }
     ]
+  },
+  "peak_scrape": {
+    "subtitle": "subtitles.skyabyss.peak_scrape",
+    "sounds": [
+      {
+        "name": "skyabyss:sky_ch1/peak_scrape",
+        "attenuation_distance": 320
+      }
+    ]
+  },
+  "sky_eye_presence": {
+    "subtitle": "subtitles.skyabyss.sky_eye_presence",
+    "sounds": [
+      {
+        "name": "skyabyss:sky_ch1/eye_presence",
+        "stream": true
+      }
+    ]
   }
 }
