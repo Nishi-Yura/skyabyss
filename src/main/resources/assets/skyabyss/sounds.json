@@ -61,5 +61,13 @@
         "volume": 0.8
       }
     ]
+  },
+  "growth_level_up": {
+    "subtitle": "subtitles.skyabyss.growth_level_up",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/level_up"
+      }
+    ]
   }
 }
