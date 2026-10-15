@@ -11,6 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.Config;
+import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -137,14 +138,14 @@ public final class SkyEvents {
             return 0;
         }
         start(level, player);
-        ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss.pass.started", player.getDisplayName()), true);
+        ctx.getSource().sendSuccess(() -> ModText.lore("commands.skyabyss.pass.started", player.getDisplayName()), true);
         return 1;
     }
 
     private static int showNext(CommandContext<CommandSourceStack> ctx) {
         ServerLevel level = ctx.getSource().getServer().overworld();
         long remaining = SkyEventData.get(level).nextPassTick() - level.getGameTime();
-        ctx.getSource().sendSuccess(() -> Component.translatable("commands.skyabyss.next", Math.max(0, remaining / 20)), false);
+        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.next", Math.max(0, remaining / 20)), false);
         return 1;
     }
 

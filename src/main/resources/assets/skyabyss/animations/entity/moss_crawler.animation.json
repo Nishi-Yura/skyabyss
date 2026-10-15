@@ -1,0 +1,159 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.moss_crawler.idle": {
+   "loop": true,
+   "animation_length": 2.0,
+   "bones": {
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.anim_time * 180 + 0) * 0.4",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 180 + 0) * 12",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.moss_crawler.walk": {
+   "loop": true,
+   "animation_length": 0.5,
+   "bones": {
+    "leg_fl": {
+     "rotation": [
+      "math.sin(query.anim_time * 720 + 0) * 35",
+      "0",
+      "0"
+     ]
+    },
+    "leg_br": {
+     "rotation": [
+      "math.sin(query.anim_time * 720 + 0) * 35",
+      "0",
+      "0"
+     ]
+    },
+    "leg_fr": {
+     "rotation": [
+      "math.sin(query.anim_time * 720 + 0) * -35",
+      "0",
+      "0"
+     ]
+    },
+    "leg_bl": {
+     "rotation": [
+      "math.sin(query.anim_time * 720 + 0) * -35",
+      "0",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 720 + 0) * 0.6)",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 720 + 0) * 18",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.moss_crawler.pounce": {
+   "animation_length": 0.6,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       15,
+       0,
+       0
+      ],
+      "0.35": [
+       -20,
+       0,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.30": [
+       -25,
+       0,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "leg_fl": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.30": [
+       -60,
+       0,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "leg_fr": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.30": [
+       -60,
+       0,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

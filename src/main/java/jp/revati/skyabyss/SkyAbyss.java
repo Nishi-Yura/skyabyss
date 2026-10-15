@@ -4,6 +4,13 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import jp.revati.skyabyss.registry.ModArmorMaterials;
+import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.registry.ModDataComponents;
+import jp.revati.skyabyss.registry.ModEffects;
+import jp.revati.skyabyss.registry.ModEntities;
+import jp.revati.skyabyss.registry.ModItems;
+import jp.revati.skyabyss.registry.ModMenus;
 import jp.revati.skyabyss.registry.ModSounds;
 
 import net.neoforged.bus.api.IEventBus;
@@ -22,6 +29,13 @@ public class SkyAbyss {
     public SkyAbyss(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
+        ModEffects.register(modEventBus);
+        ModDataComponents.register(modEventBus);
+        ModBlocks.register(modEventBus);
+        ModArmorMaterials.register(modEventBus);
+        ModItems.register(modEventBus);
+        ModEntities.register(modEventBus);
+        ModMenus.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

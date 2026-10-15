@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skyabyss:block/resonance_forge"
+    },
+    "facing=east": {
+      "model": "skyabyss:block/resonance_forge",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skyabyss:block/resonance_forge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skyabyss:block/resonance_forge",
+      "y": 270
+    }
+  }
+}

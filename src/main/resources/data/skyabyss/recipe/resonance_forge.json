@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BCB",
+    "DSD",
+    "DDD"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:bone_block"
+    },
+    "C": {
+      "item": "skyabyss:resonance_crystal"
+    },
+    "D": {
+      "item": "minecraft:polished_deepslate"
+    },
+    "S": {
+      "item": "skyabyss:stone_whale_shard"
+    }
+  },
+  "result": {
+    "id": "skyabyss:resonance_forge",
+    "count": 1
+  }
+}

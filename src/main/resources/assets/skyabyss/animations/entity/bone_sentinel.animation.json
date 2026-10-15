@@ -1,0 +1,160 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.bone_sentinel.idle": {
+   "loop": true,
+   "animation_length": 3.0,
+   "bones": {
+    "body": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 0) * 1.5",
+      "0",
+      "0"
+     ]
+    },
+    "left_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 1) * 3",
+      "0",
+      "-3"
+     ]
+    },
+    "right_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 2) * 3",
+      "0",
+      "3"
+     ]
+    }
+   }
+  },
+  "animation.bone_sentinel.walk": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "left_leg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 32",
+      "0",
+      "0"
+     ]
+    },
+    "right_leg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * -32",
+      "0",
+      "0"
+     ]
+    },
+    "left_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * -22",
+      "0",
+      "-3"
+     ]
+    },
+    "right_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 22",
+      "0",
+      "3"
+     ]
+    },
+    "body": {
+     "rotation": [
+      "4",
+      "math.sin(query.anim_time * 360 + 0) * 3",
+      "0"
+     ],
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 360 + 0) * 0.8)",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.bone_sentinel.attack": {
+   "animation_length": 0.6,
+   "bones": {
+    "right_arm": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.22": [
+       -130,
+       10,
+       0
+      ],
+      "0.38": [
+       30,
+       -10,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "body": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.22": [
+       0,
+       15,
+       0
+      ],
+      "0.38": [
+       8,
+       -20,
+       0
+      ],
+      "0.60": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.bone_sentinel.block": {
+   "animation_length": 0.5,
+   "bones": {
+    "left_arm": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.10": [
+       -70,
+       -30,
+       0
+      ],
+      "0.40": [
+       -70,
+       -30,
+       0
+      ],
+      "0.50": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

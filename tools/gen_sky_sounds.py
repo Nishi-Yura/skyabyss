@@ -121,11 +121,18 @@ def call():
     return finish(reverb(dry, 4.5, 0.5))
 
 
+def write_ogg(path, data):
+    """少しずつ書き込む (Windows版の libsndfile は長い音を一度に書くとスタックが溢れるため)"""
+    with sf.SoundFile(path, "w", SR, 1, format="OGG", subtype="VORBIS") as f:
+        for i in range(0, len(data), 4096):
+            f.write(data[i:i + 4096])
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, make in [("wingbeat", wingbeat), ("drone", drone), ("call", call)]:
         data = make().astype(np.float32)
-        sf.write(OUT / f"{name}.ogg", data, SR, format="OGG", subtype="VORBIS")
+        write_ogg(OUT / f"{name}.ogg", data)
         print(f"{name}.ogg  {len(data) / SR:.1f}s")
 
 

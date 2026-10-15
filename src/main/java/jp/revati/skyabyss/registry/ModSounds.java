@@ -15,6 +15,10 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SKY_WINGBEAT = register("sky_wingbeat");
     public static final DeferredHolder<SoundEvent, SoundEvent> SKY_DRONE = register("sky_drone");
     public static final DeferredHolder<SoundEvent, SoundEvent> SKY_CALL = register("sky_call");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TITAN_SONG = register("titan_song");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TITAN_WIND = register("titan_wind");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TITAN_CHAIN = register("titan_chain");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RESONANCE = register("resonance");
 
     private ModSounds() {
     }

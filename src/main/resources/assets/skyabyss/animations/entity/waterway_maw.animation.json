@@ -1,0 +1,113 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.waterway_maw.swim": {
+   "loop": true,
+   "animation_length": 1.333,
+   "bones": {
+    "seg0": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + 0.0) * 8",
+      "0"
+     ]
+    },
+    "seg1": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -0.8) * 11",
+      "0"
+     ]
+    },
+    "seg2": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -1.6) * 14",
+      "0"
+     ]
+    },
+    "seg3": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -2.4000000000000004) * 17",
+      "0"
+     ]
+    },
+    "seg4": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -3.2) * 20",
+      "0"
+     ]
+    },
+    "tailfin": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -4.5) * 20",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + 0.6) * 4",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.waterway_maw.bite": {
+   "animation_length": 0.4,
+   "bones": {
+    "jaw": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       35,
+       0,
+       0
+      ],
+      "0.22": [
+       -5,
+       0,
+       0
+      ],
+      "0.40": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -12,
+       0,
+       0
+      ],
+      "0.22": [
+       8,
+       0,
+       0
+      ],
+      "0.40": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

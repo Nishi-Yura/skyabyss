@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "stage=solid": {
+      "model": "skyabyss:block/crumbling_bone"
+    },
+    "stage=cracking": {
+      "model": "skyabyss:block/crumbling_bone"
+    },
+    "stage=gone": {
+      "model": "skyabyss:block/crumbling_bone"
+    }
+  }
+}

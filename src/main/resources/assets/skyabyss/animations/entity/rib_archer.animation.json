@@ -1,0 +1,136 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.rib_archer.idle": {
+   "loop": true,
+   "animation_length": 3.0,
+   "bones": {
+    "body": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 0) * 1.5",
+      "0",
+      "0"
+     ]
+    },
+    "left_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 1) * 3",
+      "0",
+      "-3"
+     ]
+    },
+    "right_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 120 + 2) * 3",
+      "0",
+      "3"
+     ]
+    }
+   }
+  },
+  "animation.rib_archer.walk": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "left_leg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 32",
+      "0",
+      "0"
+     ]
+    },
+    "right_leg": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * -32",
+      "0",
+      "0"
+     ]
+    },
+    "left_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * -22",
+      "0",
+      "-3"
+     ]
+    },
+    "right_arm": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0) * 22",
+      "0",
+      "3"
+     ]
+    },
+    "body": {
+     "rotation": [
+      "4",
+      "math.sin(query.anim_time * 360 + 0) * 3",
+      "0"
+     ],
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 360 + 0) * 0.8)",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.rib_archer.shoot": {
+   "animation_length": 0.8,
+   "bones": {
+    "left_arm": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       -90,
+       10,
+       0
+      ],
+      "0.65": [
+       -90,
+       10,
+       0
+      ],
+      "0.80": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "right_arm": {
+     "rotation": {
+      "0.00": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       -90,
+       -25,
+       0
+      ],
+      "0.55": [
+       -85,
+       -40,
+       0
+      ],
+      "0.62": [
+       -90,
+       -10,
+       0
+      ],
+      "0.80": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

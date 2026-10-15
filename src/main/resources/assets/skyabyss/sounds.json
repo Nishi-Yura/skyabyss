@@ -1,14 +1,65 @@
 {
   "sky_wingbeat": {
     "subtitle": "subtitles.skyabyss.sky_wingbeat",
-    "sounds": [{ "name": "skyabyss:sky/wingbeat" }]
+    "sounds": [
+      {
+        "name": "skyabyss:sky/wingbeat"
+      }
+    ]
   },
   "sky_drone": {
     "subtitle": "subtitles.skyabyss.sky_drone",
-    "sounds": [{ "name": "skyabyss:sky/drone", "stream": true }]
+    "sounds": [
+      {
+        "name": "skyabyss:sky/drone",
+        "stream": true
+      }
+    ]
   },
   "sky_call": {
     "subtitle": "subtitles.skyabyss.sky_call",
-    "sounds": [{ "name": "skyabyss:sky/call" }]
+    "sounds": [
+      {
+        "name": "skyabyss:sky/call"
+      }
+    ]
+  },
+  "titan_song": {
+    "subtitle": "subtitles.skyabyss.titan_song",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/song",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "titan_wind": {
+    "subtitle": "subtitles.skyabyss.titan_wind",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/wind",
+        "stream": true
+      }
+    ]
+  },
+  "titan_chain": {
+    "subtitle": "subtitles.skyabyss.titan_chain",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/chain"
+      }
+    ]
+  },
+  "resonance": {
+    "subtitle": "subtitles.skyabyss.resonance",
+    "sounds": [
+      {
+        "name": "minecraft:block/bell/resonate"
+      },
+      {
+        "name": "minecraft:block/amethyst/resonate1",
+        "volume": 0.8
+      }
+    ]
   }
 }

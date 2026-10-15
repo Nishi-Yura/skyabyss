@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "skyabyss:block/resonance_forge_top",
+    "front": "skyabyss:block/resonance_forge_front",
+    "side": "skyabyss:block/resonance_forge_side",
+    "bottom": "skyabyss:block/resonance_forge_bottom"
+  }
+}
