@@ -23,6 +23,8 @@
 | 共鳴の炉の画面: `textures/gui/forge/forge.png` (左右の板・つまみ・印・候補の札、2 倍密度) | `gen_forge_assets.py` | 同じ物ができる。画面の配置を変えたら `ResonanceForgeScreen.java` と値をそろえる |
 | 語り部・鯨追い: `geo/entity/{storyteller,whale_chaser}.geo.json`、`textures/entity/{storyteller,whale_chaser}.png`、`animations/entity/{storyteller,whale_chaser}.animation.json`、顔 `textures/gui/npc/face/*.png` | `rough/npc.py --install` (画面の見本は `rough/npc_ui_mock.py`) | ラフは `docs/review/npc_roughs/`。`--install` なしなら docs にだけ書く |
 | 会話とクエスト: `data/skyabyss/{dialogue,quest}/*.json`、`assets/skyabyss_npc/lang/*.json`、`docs/design/07_npc_quest.md` の表 | `gen_npc_content.py` | 文と構造の正本はこのスクリプト。JSON や lang を手で直したら、こちらにも反映する |
+| 1章の空 雲の目: `textures/environment/sky_eye/{sclera,iris,lid,lid_glow,patch}.png` | `rough/sky_eye.py --install` | ラフ 3 案と夜空の比較は `docs/review/sky_eye_roughs/`、採用は `CHOSEN` (今は b 月蝕の瞳)。`--install` なしなら docs にだけ書く。描画の割合を変えたら `CloudEyeRenderer.java` と値をそろえる |
+| `sounds/sky_ch1/*.ogg` (削られた山頂・雲の目の音) | `gen_chapter_sky_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
 `rough/` のそのほか (`armor*.py`、`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は `docs/roughs/` にしか書かない。履歴として残している。

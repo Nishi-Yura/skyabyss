@@ -39,6 +39,8 @@ public class SkyAbyss {
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
+        // 1章の空 (削られた山頂・雲の目) の音
+        jp.revati.skyabyss.sky.ChapterSkyRegistry.register(modEventBus);
         // 伝承の書 (アイテム・頁の出どころ・プレイヤーの記録)
         jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
         // 技 (スキル・マナ・技の枠)。登録は rpg.skill パッケージにまとめてある
