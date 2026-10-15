@@ -8,7 +8,7 @@
   geo/entity/stone_whale_far.geo.json     遠景 (160 ブロック以上)。4 単位 (2 ブロック) の格子
   textures/entity/stone_whale.png / _glowmask.png  3 つのモデルで共有する 1 枚のテクスチャ
   animations/entity/stone_whale.animation.json
-確認用: docs/roughs/v4/stone_whale.png
+確認用: docs/roughs/v5/stone_whale.png, docs/roughs/v5/whale_fins.png (胸びれを下から)
 
 ゲームでの向き (GeckoLib 4.9.3 の仕様を確かめた結果):
 - 箱の X は反転して描かれる (BakedModelFactory は x を -(origin.x + size.x) にする)。
@@ -39,8 +39,15 @@ sys.path.insert(0, str(ROOT / "tools/rough"))
 import stone_whale_v2 as V  # noqa: E402
 from voxel import Face, FACE_SHADE, load_geo, render, sheet  # noqa: E402
 
+# 格子を X 方向に広げる (第5回)。案 B の格子は x -64〜+64 単位だが、胸びれの先は x ±71 まで出る。
+# numpy の負の添字は反対側に回り込むので、右の胸びれ (-X) の先 7 単位が +X 側 (左の胸びれの先の後ろ) に
+# 置かれ、左の胸びれの先は x 64 で切れていた (ゲームで右の胸びれの先の近くに浮いて見えた小片)。
+# ci() と Model() は呼ぶときに V.OX / V.NX を読むので、ここで差し替える。OX は 8 の倍数のまま (LOD の箱の境目は同じ)。
+V.OX, V.NX = 192, 384     # x -96〜+96 単位
+
 RES = ROOT / "src/main/resources/assets/skyabyss"
-PREVIEW = ROOT / "docs/roughs/v4/stone_whale.png"
+PREVIEW = ROOT / "docs/roughs/v5/stone_whale.png"
+FIN_PREVIEW = ROOT / "docs/roughs/v5/whale_fins.png"
 
 YC = V.YC
 HULL_Q = 1.0            # 体の断面の幅の段 (単位)
@@ -83,7 +90,7 @@ class Whale(V.Model):
     """案 B の Model。部品の番号を PARTS に置き換え、体・胸びれ・岩の板・藤壺・錨石を差し替える"""
 
     def put(self, x0, x1, y0, y1, z0, z1, k, mode="empty"):
-        super().put(x0, x1, y0, y1, z0, z1, self.remap(k), mode)
+        self.raw(x0, x1, y0, y1, z0, z1, self.remap(k), mode)
 
     @staticmethod
     def remap(k):
@@ -96,7 +103,12 @@ class Whale(V.Model):
         return PARTS[part] * 16 + k % 16
 
     def raw(self, x0, x1, y0, y1, z0, z1, k, mode="empty"):
-        """PARTS のキーのまま置く"""
+        """PARTS のキーのまま置く。格子の外にはみ出す箱は止める (負の添字は反対側に回り込むため)"""
+        if x1 > x0 and y1 > y0 and z1 > z0:
+            lo = (V.ci(x0), V.cj(y0), V.ck(z0))
+            hi = (V.ci(x1), V.cj(y1), V.ck(z1))
+            if min(lo) < 0 or any(h > n for h, n in zip(hi, self.K.shape)):
+                raise ValueError("格子の外: %r" % ((x0, x1, y0, y1, z0, z1),))
         V.Model.put(self, x0, x1, y0, y1, z0, z1, k, mode)
 
     def body(self):
@@ -122,6 +134,24 @@ class Whale(V.Model):
                     part = "jaw"
                 mat = "belly" if t < -0.55 else "stone"
                 self.raw(xl, xr, y0, y1, zs, zs + 1, key(part, mat), "set")
+
+    @staticmethod
+    def hull_part(zs, y1):
+        """z セル zs で上端 y1 までの体の帯の骨 (body() と同じ決め方: 頭の口の線より下は顎)"""
+        zc = zs + 0.5
+        if zc < -66 and y1 <= V.MOUTH + 1e-9:
+            return "jaw"
+        return V.part_of(zc)
+
+    def throat(self):
+        """案 B の喉の溝 (腹の下の細い隆起)。隆起は下の体の帯と同じ骨にする
+        (案 B は z -66 より前も head にしていたので、顎の下に head の隆起が乗り、顎が開くと浮いた)"""
+        for zs in range(-118, -14):
+            r0 = self.SL[zs]["rows"][0]
+            y0, xl, xr = r0[0], r0[2], r0[3]
+            for px in (-8, -6, -4, -2, 0, 2, 4, 6, 8):
+                if px >= xl + 0.5 and px + 1 <= xr - 0.5:
+                    self.raw(px, px + 1, y0 - 0.5, y0, zs, zs + 1, key(self.hull_part(zs, y0), "belly"))
 
     def flank(self, side, zs, y):
         r = self.row_at(zs, y)
@@ -222,7 +252,12 @@ class Whale(V.Model):
             z = int(-100 + 200 * V.hz(k, 4))
             if z not in self.SL:
                 continue
-            top_z = int(round(self.SL[z]["top"]))
+            # 石片は x の列での背の高さに置く (第4回までは背の中央の高さに置いたので、x が外寄りの石片は
+            # 丸い背から浮いていた)
+            tops = [r[1] for r in self.SL[z]["rows"] if r[2] <= x and x + 1 <= r[3]]
+            if not tops:
+                continue
+            top_z = int(math.floor(max(tops)))
             self.put(x, x + 1, top_z - 1, top_z + 1 + (k % 2), z, z + 1, V.key("ruins", "ruin"))
 
     def plates(self, prob):
@@ -244,14 +279,14 @@ class Whale(V.Model):
                     outs = [self.flank(side, z, y + 0.5) for z in zr for y in np.arange(y0, y1, 1.0)]
                     outs = [o for o in outs if o is not None]
                     if outs:
-                        part = V.part_of(zs + 0.5)
-                        k = key(part, "plate")
                         face = (max(outs) + 1) if side > 0 else (min(outs) - 1)
                         for z in zr:
                             for y in np.arange(y0, y1, 0.5):
                                 f = self.flank(side, z, y + 0.25)
                                 if f is None:
                                     continue
+                                # 板のセルは裏の体の帯と同じ骨 (頭・顎・体・尾の境をまたぐ板が別の骨に浮かないように)
+                                k = key(self.hull_part(z, y + 0.5), "plate")
                                 if side > 0:
                                     self.raw(f, face, y, y + 0.5, z, z + 1, k)
                                 else:
@@ -286,9 +321,18 @@ class Whale(V.Model):
                 f = self.flank(1, zs, yy + 0.25)
                 if f is not None and f < x0:
                     self.raw(f, x0, yy, yy + 0.5, zs, zs + 1, k)
+        # 鎖の 3 節 (y 37〜28)。節どうし・錨石と面で接する輪にする (第4回までは 1 単位ずつ離れて浮いていた)。
+        # 偶数の節は x-y 面の輪 (x 20.5〜22.5)、奇数の節は z-y 面の輪 (z 59.5〜61.5)。どちらも穴は 1 単位
+        cx0, cz0 = x0 + 1.5, z0                 # 鎖の芯 (x 21〜22, z 60〜61)
         for i in range(3):
-            ytop = YC - 4 - 3 * i
-            self.raw(x0 + 1.5, x0 + 2.5, ytop - 2, ytop, z0, z0 + 1, k)
+            ytop = y0 - 3 * i
+            yb = ytop - 3
+            if i % 2 == 0:
+                self.raw(cx0 - 0.5, cx0 + 1.5, yb, ytop, cz0, cz0 + 1, k)
+                self.raw(cx0, cx0 + 1, yb + 0.5, ytop - 0.5, cz0, cz0 + 1, 0, "set")
+            else:
+                self.raw(cx0, cx0 + 1, yb, ytop, cz0 - 0.5, cz0 + 1.5, k)
+                self.raw(cx0, cx0 + 1, yb + 0.5, ytop - 0.5, cz0, cz0 + 1, 0, "set")
 
 
 def build():
@@ -312,6 +356,7 @@ def build():
     M.barnacles()
     M.chain()
     fill_enclosed(M.K)
+    M.island_log = connect_islands(M.K, M.K, 1)
     return M, root_l, root_r, nplates
 
 
@@ -380,6 +425,129 @@ def downsample(K, f):
         vals, cnt = np.unique(pick, return_counts=True)
         out[i, j, k] = p * 16 + int(vals[np.argmax(cnt)])
     return out
+
+
+# ---------------------------------------------------------------- 離れ島 (骨ごとのつながり)
+
+# 一緒に動く骨の組。body に対して動かない ruins / spine は body と 1 つの組 (遺跡や椎骨は体の上に立つ)。
+# chain は 1 つの塊 (錨石と 3 節) であればよい: 錨石は尾の付け根 (z 60〜62) のわき腹に接するが、
+# StoneWhaleEntity の鎖の位置が chain の骨 (体に固定) を前提にしているので tail には移さない。
+RIGID = {"body": ("body", "ruins", "spine"), "chain": ("chain",), "head": ("head",), "jaw": ("jaw",),
+         "tail": ("tail",), "fluke": ("fluke",), "fin_left": ("fin_left",), "fin_right": ("fin_right",)}
+
+
+def islands(G):
+    """組ごとに、一番大きい塊とつながらない塊 (面で接するものだけをつながりとする) を返す。
+    [(組, セル数, 格子の lo, hi, 接している別の組の部品)]"""
+    out = []
+    P = G // 16
+    for g, names in RIGID.items():
+        m = np.isin(P, [PARTS[n] for n in names])
+        if not m.any():
+            continue
+        lab, n = ndimage.label(m)
+        if n <= 1:
+            continue
+        sizes = ndimage.sum(m, lab, range(1, n + 1))
+        big = int(np.argmax(sizes)) + 1
+        for i, sl in enumerate(ndimage.find_objects(lab), start=1):
+            if i == big:
+                continue
+            sl2 = tuple(slice(max(0, s.start - 1), s.stop + 1) for s in sl)
+            comp = lab[sl2] == i
+            ring = ndimage.binary_dilation(comp) & ~comp & ~m[sl2]
+            touch = sorted(set(PART_NAME[int(v)] for v in np.unique(P[sl2][ring]) if v))
+            lo = [s.start for s in sl]
+            hi = [s.stop for s in sl]
+            out.append((g, int(sizes[i - 1]), lo, hi, touch))
+    return out
+
+
+def connect_islands(G, K, f):
+    """組の一番大きい塊とつながらない塊を直す。何をしたかの一覧を返す。
+    1. 粗い格子 (f > 1) では、元の格子でその組のセルがある空きセルを通して 3 セルまででつなぐ。
+    2. つなげず、別の組の骨に接している塊は、一番多く接している骨に移す (その骨と一緒に動く。
+       例: 頭の上の椎骨や遺跡は head に乗っているので head に移す)。材料はそのまま。
+    3. 何にも接していない塊 (空中に浮いた石) は消す。"""
+    log = []
+    if f > 1:
+        sh = [(-(-n // f)) * f for n in K.shape]
+        Pf = np.zeros(sh, K.dtype)
+        Pf[:K.shape[0], :K.shape[1], :K.shape[2]] = K // 16
+        a, b, c = sh[0] // f, sh[1] // f, sh[2] // f
+        blk = Pf.reshape(a, f, b, f, c, f).transpose(0, 2, 4, 1, 3, 5).reshape(a, b, c, f ** 3)
+    for g, names in RIGID.items():
+        ids = [PARTS[n] for n in names]
+        for _ in range(4):
+            P = G // 16
+            m = np.isin(P, ids)
+            lab, n = ndimage.label(m)
+            if n <= 1:
+                break
+            sizes = ndimage.sum(m, lab, range(1, n + 1))
+            big = int(np.argmax(sizes)) + 1
+            bridged = False
+            for i, sl in enumerate(ndimage.find_objects(lab), start=1):
+                if i == big or sl is None:
+                    continue
+                size = int(sizes[i - 1])
+                if f > 1:
+                    cand = (G == 0) & np.isin(blk, ids).any(-1)
+                    path = _bridge(lab == i, lab == big, cand, limit=3)
+                    if path is not None:
+                        vv, cc = np.unique(G[lab == i], return_counts=True)
+                        for p in path:
+                            G[p] = vv[np.argmax(cc)]
+                        log.append("%s: %d セルの塊を %d セルでつないだ" % (g, size, len(path)))
+                        bridged = True
+                        continue
+                sl2 = tuple(slice(max(0, s_.start - 1), s_.stop + 1) for s_ in sl)
+                comp = lab[sl2] == i
+                ring = ndimage.binary_dilation(comp) & ~m[sl2]
+                touch = P[sl2][ring]
+                touch = touch[touch != 0]
+                sub = G[sl2]
+                if len(touch):
+                    vv, cc = np.unique(touch, return_counts=True)
+                    to = int(vv[np.argmax(cc)])
+                    sub[comp] = to * 16 + sub[comp] % 16
+                    log.append("%s: %d セルの塊を %s に移した" % (g, size, PART_NAME[to]))
+                else:
+                    sub[comp] = 0
+                    log.append("%s: %d セルの浮いた塊を消した" % (g, size))
+            if not bridged:
+                break
+    return log
+
+
+def _bridge(src, dst, cand, limit):
+    """src から cand のセルだけを通って dst に届く一番短い道 (limit セルまで)。なければ None"""
+    from collections import deque
+    start = [tuple(p) for p in np.argwhere(src)]
+    prev = {p: None for p in start}
+    q = deque((p, 0) for p in start)
+    shape = src.shape
+    while q:
+        p, d = q.popleft()
+        for ax in range(3):
+            for dd in (-1, 1):
+                n = list(p)
+                n[ax] += dd
+                if not (0 <= n[ax] < shape[ax]):
+                    continue
+                n = tuple(n)
+                if n in prev:
+                    continue
+                if dst[n]:
+                    out = []
+                    while p is not None and not src[p]:
+                        out.append(p)
+                        p = prev[p]
+                    return out
+                if cand[n] and d < limit:
+                    prev[n] = p
+                    q.append((n, d + 1))
+    return None
 
 
 # ---------------------------------------------------------------- 箱にまとめる
@@ -660,8 +828,15 @@ def main():
     del ys
 
     lods = {}
+    print("near islands:", *M.island_log, sep="\n  ")
+    island_logs = {"near": M.island_log}
     for name, f, ppu in LODS:
         G = downsample(K, f)
+        if f > 1:
+            island_logs[name] = connect_islands(G, K, f)
+            print(name, "islands:", *island_logs[name], sep="\n  ")
+        left = islands(G)
+        assert not left, (name, left)
         cubes, raw = build_lod(G, f, ppu)
         lods[name] = (G, f, ppu, cubes)
         print(name, "boxes", raw, "kept", len(cubes), "quads", sum(len(c["faces"]) for c in cubes), flush=True)
@@ -711,12 +886,20 @@ def main():
     preview(geos, tex, glow)
 
 
+def gecko_pose(rot):
+    """アニメーションの回転 (度、{骨: (rx, ry, rz)}) を、load_geo の pose (Blockbench の向き) にする。
+    GeckoLib 4.9.3 は X を反転した空間で、pivot の x も反転し、回転の X と Y の符号を反転して回す
+    (Rz(rz) Ry(-ry) Rx(-rx))。これを X の反転 M で Blockbench の向きに戻すと M R M = Rz(-rz) Ry(ry) Rx(-rx)
+    なので、pose は (-rx, ry, -rz)。描いたあと mirror_faces で X を反転すると、ゲームと同じ形になる"""
+    return {b: (-r[0], r[1], -r[2]) for b, r in rot.items()}
+
+
 def preview(geos, tex, glow):
     def faces_of(name, pose=None):
         return mirror_faces(load_geo(geos[name], tex, glowmask=glow, pose=pose))
 
     near = faces_of("near")
-    flap = faces_of("near", pose={"fin_left": (0, 0, 6), "fin_right": (0, 0, -6), "fluke": (0, 0, 8)})
+    flap = faces_of("near", pose=gecko_pose({"fin_left": (0, 0, 6), "fin_right": (0, 0, -6), "fluke": (0, 0, 8)}))
     cols = []
     for name, label in (("near", "近景 (64 未満)"), ("mid", "中景 (64〜160)"), ("far", "遠景 (160 以上)")):
         fs = near if name == "near" else faces_of(name)
@@ -736,10 +919,34 @@ def preview(geos, tex, glow):
                                render(flap, yaw=140, pitch=-20, size=(460, 460)),
                                render(close, yaw=90, pitch=10, size=(460, 460), margin=0.05)]))
     PREVIEW.parent.mkdir(parents=True, exist_ok=True)
-    sht = sheet("岩鯨 第4回: 胸びれを左右同じに / 箱を減らして 3 段の LOD",
+    sht = sheet("岩鯨 第5回: 胸びれの先の離れ片を直す / 骨ごとの離れ島をなくす",
                 cols, note="ゲームの向き (X は反転済み)。行: 側面 / 斜め上 / 正面。右列: 胸びれ (頭の側の半分を前から) / 斜め下から (ひれを動かした姿勢) / 錨石のまわり (マゼンタ = 錨石、緑 = 鎖の付け根)。")
     sht.save(PREVIEW)
     print("preview", PREVIEW)
+    fins_preview(geos, tex, glow)
+
+
+def fins_preview(geos, tex, glow):
+    """胸びれを下から見上げた絵 (ゲームの向き。GeckoLib の X 反転と回転の符号に合わせる)。
+    行: 近景 / 中景 / 遠景。列: 静止 / ひれを上げた姿勢 (sin = 1) / 下げた姿勢 (sin = -1)。
+    頭の側の半分 (z < 0) だけ描く。下から見るので、画像の右がゲームの体の右"""
+    def cen(f):
+        return f.origin + f.eu / 2 + f.ev / 2
+
+    cols = []
+    for title, s in (("静止", 0.0), ("sin = +1", 1.0), ("sin = -1", -1.0)):
+        rot = {"fin_left": (0, 0, 6 * s), "fin_right": (0, 0, -6 * s)}
+        imgs = []
+        for name in ("near", "mid", "far"):
+            fs = mirror_faces(load_geo(geos[name], tex, glowmask=glow, pose=gecko_pose(rot)))
+            fs = [f for f in fs if cen(f)[2] < 0]
+            imgs.append(render(fs, yaw=180, pitch=-80, size=(520, 400), margin=0.04))
+        cols.append((title, imgs))
+    sht = sheet("岩鯨 第5回: 胸びれを下から (行: 近景 / 中景 / 遠景)", cols,
+                note="ゲームの向き。下から見上げ、頭が上。胸びれの先に離れた片がないこと。")
+    FIN_PREVIEW.parent.mkdir(parents=True, exist_ok=True)
+    sht.save(FIN_PREVIEW)
+    print("fins preview", FIN_PREVIEW)
 
 
 if __name__ == "__main__":
