@@ -13,6 +13,19 @@
   docs/roughs/v3/whalebone_captain/*_keys.png (デバッグ用: 各動作の全キー)
   --install を付けると、src/main/resources の geo / texture / glowmask / animation を書き換える。
 """
+
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: 番兵長の geo / png / glowmask / animation を v3 に戻す
+#   採用版の生成元: tools/rough/captain_v4.py --install
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and "--install" in _sys.argv and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/rough/captain_v3.py は停止中です: 採用済みの素材 (番兵長の geo / png / glowmask / animation を v3 に戻す) を上書きするため。"
+              "採用版の生成元は tools/rough/captain_v4.py --install です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
 import json
 import sys
 from pathlib import Path

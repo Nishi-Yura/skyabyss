@@ -36,7 +36,7 @@ public final class GuardRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f,
+        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f, false,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
         event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));
@@ -61,9 +61,18 @@ public final class GuardRenderers {
     // extra で、そのモブだけの描画層 (武器の GearLayer など) を足す
     private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale,
                                                                             Consumer<GeoEntityRenderer<T>> extra) {
+        return geo(ctx, name, scale, true, extra);
+    }
+
+    // glow = false のモブには発光層 (AutoGlowingGeoLayer) を付けない。付けると textures/entity/<name>_glowmask.png が要る
+    // (光る画素が 0 個のマスクでも落ちる)。光る所のない番兵 (bone_sentinel) は false で、マスクも置いていない
+    private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale,
+                                                                            boolean glow, Consumer<GeoEntityRenderer<T>> extra) {
         GeoEntityRenderer<T> renderer = new GeoEntityRenderer<>(ctx, new DefaultedEntityGeoModel<T>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true));
         renderer.withScale(scale);
-        renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+        if (glow) {
+            renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+        }
         extra.accept(renderer);
         return renderer;
     }

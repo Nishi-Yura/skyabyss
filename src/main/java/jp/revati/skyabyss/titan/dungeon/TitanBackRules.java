@@ -3,6 +3,12 @@ package jp.revati.skyabyss.titan.dungeon;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanTravel;
+import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
+
+import java.util.List;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +20,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 岩鯨の背の決まりごと。巨神の体は、よそ者の手を拒む。
 // サバイバルでは、ブロックを置く・壊す、水を撒く、ワープや跳躍で近道する、といったことができない。
@@ -95,6 +102,38 @@ public final class TitanBackRules {
         if (restricted(event.getLevel(), event.getEntity()) && isShortcutItem(event.getItemStack())) {
             event.setCanceled(true);
             deny(event.getEntity());
+        }
+    }
+
+    // 西の翼 (アスレチックの谷と休み場)。ここでは跳躍とゆっくり落ちる効果を消す
+    private static final List<Box> WEST_WING = List.of(W0, WA, W1, WB, W2, WC);
+
+    // 背中ではエリトラで滑空できない。西の翼では、跳躍とゆっくり落ちる効果 (薬・食べ物) を消す (足場の近道になるため)
+    @SubscribeEvent
+    static void onPlayerTick(PlayerTickEvent.Post event) {
+        Player player = event.getEntity();
+        if (player.level().isClientSide || !restricted(player.level(), player)) {
+            return;
+        }
+        if (player.isFallFlying()) {
+            player.stopFallFlying();
+            if (player.tickCount % 20 == 0) {
+                deny(player);
+            }
+        }
+        if (player.tickCount % 5 != 0) {
+            return;
+        }
+        BlockPos pos = player.blockPosition();
+        for (Box box : WEST_WING) {
+            if (box.contains(pos)) {
+                if (player.hasEffect(MobEffects.JUMP) || player.hasEffect(MobEffects.SLOW_FALLING)) {
+                    player.removeEffect(MobEffects.JUMP);
+                    player.removeEffect(MobEffects.SLOW_FALLING);
+                    deny(player);
+                }
+                return;
+            }
         }
     }
 }

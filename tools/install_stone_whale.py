@@ -720,7 +720,7 @@ def bones(pivots):
     return out
 
 
-def make_geo(cubes, uvs, S, pivots):
+def make_geo(cubes, uvs, S, H, pivots):
     bl = bones(pivots)
     for b in bl:
         b["cubes"] = []
@@ -733,7 +733,7 @@ def make_geo(cubes, uvs, S, pivots):
             b.pop("cubes")
     return {"format_version": "1.12.0",
             "minecraft:geometry": [{"description": {
-                "identifier": "geometry.stone_whale", "texture_width": S, "texture_height": S,
+                "identifier": "geometry.stone_whale", "texture_width": S, "texture_height": H,
                 "visible_bounds_width": 160, "visible_bounds_height": 80, "visible_bounds_offset": [0, 20, 0]},
                 "bones": bl}]}
 
@@ -851,9 +851,12 @@ def main():
         pos = pack(items, S)
         if pos:
             break
-    print("atlas", S, "pixels used", sum(w * h for _, w, h in items))
-    tex = np.zeros((S, S, 4), np.uint8)
-    glow = np.zeros((S, S, 4), np.uint8)
+    # 詰めたあと、使っている高さ (16 画素単位に切り上げ) まで画像を切り詰める (assets_audit.md の S5)。
+    # uv は画素単位で、geo の texture_height を同じ値にするので、どの面も同じ画素を指す
+    H = -(-max(pos[k][1] + h for k, w, h in items) // 16) * 16
+    print("atlas", S, "x", H, "pixels used", sum(w * h for _, w, h in items))
+    tex = np.zeros((H, S, 4), np.uint8)
+    glow = np.zeros((H, S, 4), np.uint8)
     geos = {}
     for name, (G, f, ppu, cubes) in lods.items():
         uvs = []
@@ -866,7 +869,7 @@ def main():
                 glow[v:v + h, u:u + w] = g
                 uv[fname] = {"uv": [u, v], "uv_size": [w, h]}
             uvs.append(uv)
-        geos[name] = make_geo(cubes, uvs, S, pivots)
+        geos[name] = make_geo(cubes, uvs, S, H, pivots)
         print(name, "overlap cells", check_overlap(cubes))
     print("glow pixels", int((glow[..., 3] > 0).sum()))
 

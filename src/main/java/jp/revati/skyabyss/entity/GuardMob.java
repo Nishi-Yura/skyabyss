@@ -1,7 +1,17 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -54,5 +64,65 @@ public abstract class GuardMob extends Monster implements GeoEntity {
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
+    }
+
+    // ---- 試練で湧いた者 (広間の番兵・番兵長・心臓) の扱い ----
+
+    // 試練の仕組みが湧かせた個体か (スポーンエッグなどで出したものは、ふつうのモブとして振る舞う)
+    public boolean isTrialMob() {
+        return getTags().contains(TitanBackTrials.MOB_TAG) || getTags().contains(TitanBackTrials.HEART_TAG);
+    }
+
+    private boolean peacefulTrial() {
+        return isTrialMob() && level().getDifficulty() == Difficulty.PEACEFUL;
+    }
+
+    // 試練の戦いの状態はメモリにしかないので、試練の個体はディスクに書かない (保存して終了したあとに二重に湧かないように)
+    @Override
+    public boolean shouldBeSaved() {
+        return !isTrialMob() && super.shouldBeSaved();
+    }
+
+    // ピースフルでも、試練の個体は消えない (消えると、広間や心臓の間が戦わずに片付いたり、開け閉めを繰り返したりする)
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return !isTrialMob();
+    }
+
+    // ピースフルでは、バニラはモンスターがプレイヤーを狙えないようにする。試練の個体だけは狙える
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (target instanceof Player && peacefulTrial()) {
+            return target.canBeSeenAsEnemy();
+        }
+        return super.canAttack(target);
+    }
+
+    // 人へ与える傷の出どころ。ピースフルでは、モンスターの攻撃は 0 にされるので、
+    // 試練の個体だけは難易度で変わらない出どころ (generic) を使う
+    public DamageSource attackSource() {
+        return peacefulTrial() ? damageSources().generic() : damageSources().mobAttack(this);
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        if (target instanceof Player player && peacefulTrial()) {
+            boolean hit = player.hurt(attackSource(), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
+            if (hit) {
+                setLastHurtMob(player);
+            }
+            return hit;
+        }
+        return super.doHurtTarget(target);
+    }
+
+    // 技の予告の粒。近くの人ごとに「制限を無視する」印を付けて送る (パーティクル「最小」の設定でも描かれる)
+    protected void warn(ServerLevel server, ParticleOptions particle, double x, double y, double z, int count,
+            double dx, double dy, double dz, double speed) {
+        for (ServerPlayer player : server.players()) {
+            if (player.distanceToSqr(x, y, z) < 64 * 64) {
+                server.sendParticles(player, particle, true, x, y, z, count, dx, dy, dz, speed);
+            }
+        }
     }
 }

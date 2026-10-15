@@ -32,8 +32,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 地上と「岩鯨の背」(専用のディメンション) を行き来させる。
@@ -45,6 +47,10 @@ public final class TitanTravel {
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "titan_back"));
 
     private static final String TAG_TITAN = "skyabyss_titan";
+    // 引き上げの途中で抜けた (ログアウト・サーバー停止)。次のログインで背中へ乗せる
+    private static final String TAG_LIFT_PENDING = "skyabyss_lift_pending";
+    // 鎖の軸からこれより離れたら (押し出された・岩鯨が呼び直された) 引き上げを打ち切る
+    private static final double LIFT_MAX_DRIFT = 16.0;
     // 引き上げの速さ (ブロック/tick) と、打ち切るまでの最大時間
     private static final double LIFT_SPEED = 0.85;
     private static final int LIFT_MAX_TICKS = 160;
@@ -72,10 +78,14 @@ public final class TitanTravel {
     private static void tickLift(ServerPlayer player, Lift lift) {
         Entity entity = player.serverLevel().getEntity(lift.whale());
         if (!(entity instanceof StoneWhaleEntity whale) || player.level().dimension() != Level.OVERWORLD) {
-            endLift(player);
+            abortLift(player);
             return;
         }
         Vec3 top = whale.chainTop();
+        if (Math.hypot(top.x - player.getX(), top.z - player.getZ()) > LIFT_MAX_DRIFT) {
+            abortLift(player);
+            return;
+        }
         // 鎖の軸へ寄せながら、まっすぐ上へ巻き上げる
         double vx = (top.x - player.getX()) * 0.3;
         double vz = (top.z - player.getZ()) * 0.3;
@@ -103,13 +113,25 @@ public final class TitanTravel {
         player.fallDistance = 0;
     }
 
+    // 途中で打ち切る。宙にいるので、ゆっくり落ちる効果を付けて地上へ降ろす
+    private static void abortLift(ServerPlayer player) {
+        endLift(player);
+        if (player.isAlive() && !player.onGround()) {
+            player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 20, 0, false, false, true));
+        }
+    }
+
     public static void board(ServerPlayer player, StoneWhaleEntity whale) {
+        board(player, whale.getUUID());
+    }
+
+    private static void board(ServerPlayer player, UUID whaleId) {
         ServerLevel back = player.server.getLevel(TITAN_BACK);
         if (back == null) {
             SkyAbyss.LOGGER.error("Titan back dimension is missing");
             return;
         }
-        player.getPersistentData().putUUID(TAG_TITAN, whale.getUUID());
+        player.getPersistentData().putUUID(TAG_TITAN, whaleId);
         TitanBackData data = TitanBackData.get(back);
         if (!data.isBuilt()) {
             TitanBackBuilder.build(back, data);
@@ -121,17 +143,19 @@ public final class TitanTravel {
         player.sendSystemMessage(ModText.lore("message.skyabyss.arrived_back"));
     }
 
-    // 地上へ戻す。巨神がまだいればその脇の下へ、ゆっくり落ちる効果をつけて降ろす
+    // 地上へ戻す。岩鯨の鎖の付け根の下へ、ゆっくり落ちる効果をつけて降ろす。
+    // 岩鯨は背中に人がいる間は読み込まれたままだが、もし読み込まれていなければ、最後に見た位置の下へ降ろす
     public static void leave(ServerPlayer player) {
         ServerLevel overworld = player.server.overworld();
         Vec3 drop = null;
-        CompoundTag tag = player.getPersistentData();
-        if (tag.hasUUID(TAG_TITAN)) {
-            Entity titan = overworld.getEntity(tag.getUUID(TAG_TITAN));
-            if (titan instanceof StoneWhaleEntity whale) {
-                Vec3 top = whale.chainTop();
-                drop = new Vec3(top.x, top.y - 4, top.z);
-            }
+        StoneWhaleEntity whale = WhaleKeeper.current(overworld);
+        TitanWorldData data = TitanWorldData.get(overworld);
+        if (whale != null) {
+            Vec3 top = whale.chainTop();
+            drop = new Vec3(top.x, top.y - 4, top.z);
+        } else if (data.hasLast) {
+            Vec3 top = StoneWhaleEntity.chainTop(data.lastX, data.lastY, data.lastZ, data.lastYaw);
+            drop = new Vec3(top.x, top.y - 4, top.z);
         }
         if (drop == null) {
             BlockPos spawn = overworld.getSharedSpawnPos();
@@ -173,19 +197,72 @@ public final class TitanTravel {
         }
     }
 
-    // 引き上げの途中で抜けた人が、宙に浮いたまま戻ってこないようにする
+    // 引き上げの途中で抜けた人は、次のログインで背中の尾の台へ乗せる (宙から落とさない)。
+    // ログアウトのイベントはプレイヤーの保存より前に来るので、ここで付けた印は保存される
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            Lift lift = LIFTS.get(player.getUUID());
+            if (lift != null) {
+                endLift(player);
+                if (player.isAlive()) {
+                    player.getPersistentData().putUUID(TAG_LIFT_PENDING, lift.whale());
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        if (player.isNoGravity()) {
+            // 引き上げの途中でサーバーが落ちた (印を付けられなかった) 場合も、宙から落とさない
+            player.setNoGravity(false);
+            if (!player.onGround()) {
+                player.fallDistance = 0;
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 40, 0, false, false, true));
+            }
+        }
+        CompoundTag tag = player.getPersistentData();
+        if (tag.hasUUID(TAG_LIFT_PENDING)) {
+            UUID whaleId = tag.getUUID(TAG_LIFT_PENDING);
+            tag.remove(TAG_LIFT_PENDING);
+            player.fallDistance = 0;
+            if (player.isAlive() && player.level().dimension() == Level.OVERWORLD && player.server.getLevel(TITAN_BACK) != null) {
+                board(player, whaleId);
+            } else if (player.isAlive()) {
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 40, 0, false, false, true));
+            }
+        }
+    }
+
+    // 引き上げの途中で倒れた・別の次元へ移った人を、鎖から外す (目を覚ました後に引っ張られないように)
+    @SubscribeEvent
+    static void onDeath(LivingDeathEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && LIFTS.containsKey(player.getUUID())) {
             endLift(player);
         }
     }
 
     @SubscribeEvent
-    static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player && player.isNoGravity()) {
+    static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && LIFTS.containsKey(player.getUUID())) {
+            endLift(player);
+        }
+    }
+
+    @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && LIFTS.remove(player.getUUID()) != null) {
             player.setNoGravity(false);
         }
+    }
+
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        LIFTS.clear();
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {

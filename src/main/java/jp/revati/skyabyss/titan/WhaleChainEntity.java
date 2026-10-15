@@ -21,6 +21,15 @@ public class WhaleChainEntity extends Entity {
         this.setNoGravity(true);
     }
 
+    // 岩鯨が呼び直された・読み込みが外れたなどで、垂れている鎖がなくなった当たり判定は消す
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide && tickCount % 40 == 0 && getVehicleWhale() == null) {
+            discard();
+        }
+    }
+
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (level().isClientSide) {

@@ -57,6 +57,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private static final double CRUISE_CLEARANCE = 75.0;
     private static final double REST_CLEARANCE = 34.0;
     private static final int REST_DURATION = 3600;
+    // 降下の途中で目的地に着けないまま、これより長くたったらあきらめる
+    private static final int APPROACH_GIVE_UP = 1800;
 
     private enum Mode { CRUISE, APPROACH, REST }
 
@@ -68,6 +70,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private boolean hasTarget;
     private int restCooldown = 2400;
     private int restTicks;
+    private int approachTicks;
     private int songCooldown = 200;
     private double groundY = 64;
     private double surroundingMax = 64;
@@ -169,13 +172,26 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
             targetZ = player.getZ() + Math.sin(angle) * 14;
             hasTarget = true;
             mode = Mode.APPROACH;
+            approachTicks = 0;
         }
     }
 
     private void tickApproach(ServerLevel level) {
         steer(targetX, targetZ, surroundingMax + REST_CLEARANCE, APPROACH_SPEED);
         retractChain();
-        if (horizontalDistanceTo(targetX, targetZ) < 6 && Math.abs(getY() - (surroundingMax + REST_CLEARANCE)) < 2) {
+        boolean arrived = horizontalDistanceTo(targetX, targetZ) < 6 && Math.abs(getY() - (surroundingMax + REST_CLEARANCE)) < 2;
+        if (!arrived && ++approachTicks > APPROACH_GIVE_UP) {
+            // 地形や高さの都合で降りきれない。近くまで来ていればそこで休み、遠ければ巡航に戻ってやり直す
+            if (horizontalDistanceTo(targetX, targetZ) < 24) {
+                arrived = true;
+            } else {
+                mode = Mode.CRUISE;
+                hasTarget = false;
+                restCooldown = 1200;
+                return;
+            }
+        }
+        if (arrived) {
             mode = Mode.REST;
             restTicks = REST_DURATION;
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
@@ -296,11 +312,18 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         int x = Mth.floor(getX());
         int z = Mth.floor(getZ());
         Vec3 top = chainTop();
-        groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(top.x), Mth.floor(top.z));
+        if (level.getChunkSource().hasChunk(Mth.floor(top.x) >> 4, Mth.floor(top.z) >> 4)) {
+            groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(top.x), Mth.floor(top.z));
+        }
         double max = groundY;
         for (int i = -1; i <= 1; i++) {
             for (int k = -1; k <= 1; k++) {
-                max = Math.max(max, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x + i * 40, z + k * 40));
+                int sx = x + i * 40;
+                int sz = z + k * 40;
+                // 読み込まれていないチャンクは調べない (同期読み込みや地形生成を起こさないため)
+                if (level.getChunkSource().hasChunk(sx >> 4, sz >> 4)) {
+                    max = Math.max(max, level.getHeight(Heightmap.Types.MOTION_BLOCKING, sx, sz));
+                }
             }
         }
         surroundingMax = max;
@@ -338,6 +361,30 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         targetZ = player.getZ() + 10;
         hasTarget = true;
         mode = Mode.APPROACH;
+        approachTicks = 0;
+    }
+
+    public boolean isResting() {
+        return mode == Mode.REST;
+    }
+
+    // 見守り (WhaleKeeper) が覚えておく状態。呼び直したときに新しい個体へ引き継ぐ
+    public CompoundTag saveState() {
+        CompoundTag tag = new CompoundTag();
+        addAdditionalSaveData(tag);
+        return tag;
+    }
+
+    // 呼び直した個体に、前の個体の状態を引き継ぐ。場所が変わるので、巡航から始め、鎖はたたむ。
+    // 降下までの待ち時間は残すが、長すぎても短すぎてもいけないので 30 秒〜2 分に収める
+    public void restoreState(CompoundTag tag) {
+        readAdditionalSaveData(tag);
+        mode = Mode.CRUISE;
+        hasTarget = false;
+        restTicks = 0;
+        approachTicks = 0;
+        restCooldown = Mth.clamp(restCooldown, 600, 2400);
+        entityData.set(CHAIN, 0f);
     }
 
     // 巨神は傷つかない
@@ -382,6 +429,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         hasTarget = tag.getBoolean("HasTarget");
         restCooldown = tag.getInt("RestCooldown");
         restTicks = tag.getInt("RestTicks");
+        approachTicks = tag.getInt("ApproachTicks");
         entityData.set(CHAIN, tag.getFloat("Chain"));
     }
 
@@ -393,6 +441,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         tag.putBoolean("HasTarget", hasTarget);
         tag.putInt("RestCooldown", restCooldown);
         tag.putInt("RestTicks", restTicks);
+        tag.putInt("ApproachTicks", approachTicks);
         tag.putFloat("Chain", chainLength());
     }
 

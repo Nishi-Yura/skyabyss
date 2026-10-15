@@ -146,7 +146,7 @@ public class WhaleboneCaptain extends GuardMob {
             for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(5, 2, 5))) {
                 Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
                 if (to.length() <= 5.2 && look.dot(to.normalize()) > Math.cos(Math.toRadians(70))) {
-                    player.hurt(damageSources().mobAttack(this), 11f);
+                    player.hurt(attackSource(), 11f);
                     player.knockback(1.2, -to.x, -to.z);
                 }
             }
@@ -207,7 +207,7 @@ public class WhaleboneCaptain extends GuardMob {
             Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
             double d = to.length();
             if (d <= radius) {
-                player.hurt(damageSources().mobAttack(this), (float) (damage * (1 - d / radius * 0.5)));
+                player.hurt(attackSource(), (float) (damage * (1 - d / radius * 0.5)));
                 Vec3 push = d > 0.01 ? to.normalize() : new Vec3(1, 0, 0);
                 player.setDeltaMovement(player.getDeltaMovement().add(push.x * 1.3, 0.55, push.z * 1.3));
                 player.hurtMarked = true;
@@ -223,7 +223,7 @@ public class WhaleboneCaptain extends GuardMob {
         }
         if (actionTicks == 1) {
             eruptions.clear();
-            server.playSound(null, getX(), getY(), getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.2f, 1.4f);
+            server.playSound(null, getX(), getY(), getZ(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.HOSTILE, 1.6f, 0.6f);
             int count = enraged() ? 10 : 6;
             for (Player player : server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(18, 4, 18))) {
                 eruptions.add(player.position());
@@ -237,7 +237,7 @@ public class WhaleboneCaptain extends GuardMob {
         if (actionTicks < 30 && actionTicks % 4 == 1) {
             for (Vec3 p : eruptions) {
                 for (int a = 0; a < 360; a += 30) {
-                    server.sendParticles(ParticleTypes.END_ROD, p.x + Math.cos(Math.toRadians(a)) * 1.2, p.y + 0.1,
+                    warn(server, ParticleTypes.END_ROD, p.x + Math.cos(Math.toRadians(a)) * 1.2, p.y + 0.1,
                             p.z + Math.sin(Math.toRadians(a)) * 1.2, 1, 0, 0, 0, 0);
                 }
             }
@@ -249,7 +249,7 @@ public class WhaleboneCaptain extends GuardMob {
                 server.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.5, p.z, 10, 0.2, 0.8, 0.2, 0.3);
                 server.playSound(null, BlockPos.containing(p), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.HOSTILE, 1.2f, 0.7f);
                 for (Player player : server.getEntitiesOfClass(Player.class, new net.minecraft.world.phys.AABB(p, p).inflate(1.3, 2, 1.3))) {
-                    player.hurt(damageSources().mobAttack(this), 7f);
+                    player.hurt(attackSource(), 7f);
                     player.setDeltaMovement(player.getDeltaMovement().add(0, 0.85, 0));
                     player.hurtMarked = true;
                 }

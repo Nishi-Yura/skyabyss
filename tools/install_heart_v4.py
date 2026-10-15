@@ -536,7 +536,7 @@ def main():
         else:
             cols2.append((label, [im]))
     PREVIEW.parent.mkdir(parents=True, exist_ok=True)
-    s1 = sheet("岩鯨の心臓 案A: 上 ラフ / 中 ゲームの読み方 (X 反転・回転 X,Y 反転) / 下 同じく下から", cols)
+    s1 = sheet("上: ラフ / 中: ゲームの読み方 / 下: 下から", cols)
     s2 = sheet("岩鯨の心臓 案A: アニメーションの要所 (ゲームの読み方)", cols2)
     W = max(s1.width, s2.width)
     out = Image.new("RGB", (W, s1.height + s2.height), (20, 20, 26))

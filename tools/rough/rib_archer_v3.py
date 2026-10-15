@@ -19,6 +19,19 @@
 """
 from __future__ import annotations
 
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: 射手の geo / animation を v3 に戻す
+#   採用版の生成元: tools/rough/rib_archer_v4.py
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/rough/rib_archer_v3.py は停止中です: 採用済みの素材 (射手の geo / animation を v3 に戻す) を上書きするため。"
+              "採用版の生成元は tools/rough/rib_archer_v4.py です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
+
 import json
 import math
 import sys

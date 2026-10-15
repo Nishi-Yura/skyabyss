@@ -30,6 +30,8 @@ public class TitanBackData extends SavedData {
     // アスレチックと迷路の形を決める種。試練が元に戻るたびに新しくなる
     private long courseSeed;
     private long mazeSeed;
+    // 試練が元に戻るたびに一つ増える番号 (1 から)。休み場の記録にも同じ番号を書き、違えば記録を無効にする
+    private int epoch = 1;
 
     public static TitanBackData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -43,6 +45,7 @@ public class TitanBackData extends SavedData {
         data.clears = tag.getInt("Clears");
         data.courseSeed = tag.getLong("CourseSeed");
         data.mazeSeed = tag.getLong("MazeSeed");
+        data.epoch = tag.contains("Epoch") ? Math.max(1, tag.getInt("Epoch")) : 1;
         for (Tag t : tag.getList("ClearedHalls", Tag.TAG_STRING)) {
             data.clearedHalls.add(t.getAsString());
         }
@@ -60,6 +63,7 @@ public class TitanBackData extends SavedData {
         tag.putInt("Clears", clears);
         tag.putLong("CourseSeed", courseSeed);
         tag.putLong("MazeSeed", mazeSeed);
+        tag.putInt("Epoch", epoch);
         ListTag halls = new ListTag();
         clearedHalls.forEach(h -> halls.add(StringTag.valueOf(h)));
         tag.put("ClearedHalls", halls);
@@ -112,6 +116,7 @@ public class TitanBackData extends SavedData {
     }
 
     public void resetProgress() {
+        epoch++;
         gateOpened = false;
         heartDefeated = false;
         clearedHalls.clear();
@@ -127,6 +132,11 @@ public class TitanBackData extends SavedData {
         return added;
     }
 
+    // 天の鍵の欠片をもう受け取ったか
+    public boolean hasClaimedFragment(UUID player) {
+        return fragmentClaimed.contains(player);
+    }
+
     public long courseSeed() {
         return courseSeed;
     }
@@ -140,6 +150,11 @@ public class TitanBackData extends SavedData {
         courseSeed = random.nextLong();
         mazeSeed = random.nextLong();
         setDirty();
+    }
+
+    // いまの試練の番号。リセットのたびに増える (休み場の記録とログイン位置の検査に使う)
+    public int epoch() {
+        return epoch;
     }
 
     public int clears() {

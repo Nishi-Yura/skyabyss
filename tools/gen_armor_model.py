@@ -15,6 +15,19 @@
 - 光は左上・手前寄り。アイコン (textures/item/stone_whale_*.png) と同じ石・骨・青の 4 段ランプ。
 - 乱数は全て seed 付きの numpy 生成器。Python の hash() は使わない。
 """
+
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: 甲殻の防具の geo / png / glowmask
+#   採用版の生成元: 今の src/ が正本 (作り直す生成元はない)
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/gen_armor_model.py は停止中です: 採用済みの素材 (甲殻の防具の geo / png / glowmask) を上書きするため。"
+              "採用版の生成元は 今の src/ が正本 (作り直す生成元はない) です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
 import json
 import math
 from pathlib import Path

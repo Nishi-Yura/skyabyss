@@ -4,7 +4,7 @@
       ボクセルは立てた向き (刃は +Y)。X は右、Y は上。
 出力:
   src/main/resources/assets/skyabyss/models/item/<item>.json   (separate_transforms: base=3D, gui=平面)
-  src/main/resources/assets/skyabyss/textures/item/3d/<item>.png (パレット 16 x N、1色1画素)
+  src/main/resources/assets/skyabyss/textures/item/3d/<item>.png (パレット 16x16、1色1画素。行は繰り返して 16 行にする)
   src/main/resources/assets/skyabyss/textures/item/<item>.png    (採用の 16x16 アイコンをコピー)
   docs/roughs/v3/weapons_<item>.png                              (確認用の描画)
 
@@ -19,6 +19,19 @@
 使い方: python tools/gen_weapon_models_v2.py
 """
 from __future__ import annotations
+
+# ---------------------------------------------------------------------------
+# 上書き防止: このスクリプトは採用済みの武器モデル (models/item/*.json) とパレットを書き直す。
+# 生成元のボクセルが変わっていなければ同じ物ができるはずだが、手で直した分は消える。
+# 古い 16x16 アイコンのコピー (write_icon) は、さらに SKYABYSS_COPY_OLD_ICONS=1 のときだけ行う。
+# 実行するときは環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。tools/README.md も参照。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/gen_weapon_models_v2.py は停止中です: 採用済みの武器モデルとパレットを上書きするため。"
+              "どうしても作り直すときだけ SKYABYSS_ALLOW_REGEN=1 を付けて実行してください (tools/README.md)。")
 
 import json
 import math
@@ -48,6 +61,7 @@ TILT_DEG = -45.0          # z 軸まわり。-45 で刃先が右上 (MC の回�
 CENTRE = 8.0
 MAX_PALETTE = 256
 PAL_W = 16
+PAL_H = 16          # パレット画像の高さ。16 未満にしない (M1)
 GLOW_DATA = {"block_light": 15, "sky_light": 15}
 
 # 面の名前 -> (軸, 向き)  (x: east/west, y: up/down, z: south/north)
@@ -140,7 +154,7 @@ def face_covered(solid, box, name):
 
 
 def pixel_uv(i):
-    """パレット番号 i (0 始まり) の画素の uv。texture_size = [16, H] の画素単位。画素の中心寄りを使う。"""
+    """パレット番号 i (0 始まり) の画素の uv。texture_size = [16, 16] の画素単位。画素の中心寄りを使う。"""
     col, row = i % PAL_W, i // PAL_W
     return [col + 0.25, row + 0.25, col + 0.75, row + 0.75]
 
@@ -194,7 +208,7 @@ def build_model(item: str, target_len: float):
             "gui_light": "front",
             "display": HANDHELD_DISPLAY,
             "textures": {"pal": f"skyabyss:item/3d/{item}", "particle": f"skyabyss:item/{item}"},
-            "texture_size": [PAL_W, H],
+            "texture_size": [PAL_W, PAL_H],
             "elements": elements,
         },
         "perspectives": {
@@ -217,9 +231,14 @@ def build_model(item: str, target_len: float):
 
 
 def write_palette(item, palette, H):
-    arr = np.zeros((H, PAL_W, 4), np.uint8)
+    # 高さ 1px の画像は block atlas 全体のミップマップを 0 に落とす (assets_audit.md の M1)。
+    # 常に 16x16 で書く。モデルの uv は 16 単位 = 画像全体なので、16x16 なら uv の 1 単位がちょうど 1 画素になる。
+    # 使わない行は、パレットの行を繰り返して埋める (H=1 なら 1 行目を 16 回)。
+    assert H <= PAL_H, (item, H)
+    pal = np.zeros((H, PAL_W, 4), np.uint8)
     for i, (r, g, b, _) in enumerate(palette):
-        arr[i // PAL_W, i % PAL_W] = (r, g, b, 255)
+        pal[i // PAL_W, i % PAL_W] = (r, g, b, 255)
+    arr = pal[np.arange(PAL_H) % H]
     out = ASSETS / "textures/item/3d" / f"{item}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(arr, "RGBA").save(out)
@@ -284,7 +303,9 @@ def main():
     for item, target in ITEMS.items():
         model, palette, H, stats = build_model(item, target)
         write_palette(item, palette, H)
-        write_icon(item)
+        # 採用のアイコンは 32x32 (tools/rough/items_blocks_32.py)。古い 16x16 アイコンでの上書きは、明示したときだけ
+        if _os.environ.get("SKYABYSS_COPY_OLD_ICONS") == "1":
+            write_icon(item)
         # 範囲の確認
         for el in model["base"]["elements"]:
             for v in el["from"] + el["to"]:
@@ -303,7 +324,7 @@ def main():
         hand = render(faces, yaw=35, pitch=20, size=(520, 520), margin=0.04, outline_jump=0.6)
         side = render(faces, yaw=90, pitch=0, size=(520, 520), margin=0.04, outline_jump=0.6)
         cols = [
-            ("16x16 アイコン (採用)", [icon_big(icon, 12)]),
+            ("アイコン (採用)", [icon_big(icon, 12)]),
             ("正面 (GUI と同じ向き)", [front]),
             ("斜め (手に持つ向き)", [hand]),
             ("横 (刃の厚み)", [side]),

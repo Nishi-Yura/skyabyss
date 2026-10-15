@@ -7,6 +7,19 @@
 - drone.ogg    : 通過中ずっと鳴る低い唸り（8秒で切れ目なくループする）
 - call.ogg     : 雲の上から降ってくる、うめき声のような呼び声
 """
+
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: sounds/sky/*.ogg (採用済みの音)
+#   採用版の生成元: 今の src/ が正本
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/gen_sky_sounds.py は停止中です: 採用済みの素材 (sounds/sky/*.ogg (採用済みの音)) を上書きするため。"
+              "採用版の生成元は 今の src/ が正本 です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
 from pathlib import Path
 
 import numpy as np

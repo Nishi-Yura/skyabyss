@@ -11,6 +11,19 @@
 頭は -Z 向き。胴の寸法 (PROFILE) は鎖の付け根に合わせてあるので変えないこと。
 鎖の付け根 (ゲーム内の 後ろ30・横21・上20 ブロック) は、モデル座標では z=+60, x=-42 (付け根は x=-20, y=54), y=40 px。
 """
+
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: 岩鯨の geo (近景) / stone_whale.png / _glowmask.png / animation
+#   採用版の生成元: tools/install_stone_whale.py
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/gen_titan_model.py は停止中です: 採用済みの素材 (岩鯨の geo (近景) / stone_whale.png / _glowmask.png / animation) を上書きするため。"
+              "採用版の生成元は tools/install_stone_whale.py です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
 import json
 import math
 import sys

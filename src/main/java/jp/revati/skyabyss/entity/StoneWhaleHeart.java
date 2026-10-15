@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Nullable;
+
+import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -109,6 +112,12 @@ public class StoneWhaleHeart extends GuardMob {
     private final List<Wave> waves = new ArrayList<>();
     private final List<Spike> spikes = new ArrayList<>();
     private final List<double[]> cracks = new ArrayList<>();
+    // 試練で湧いたときの心臓の間の範囲。技と狙いは、この中にいる人だけに向く (前室や回廊には届かない)
+    @Nullable
+    private AABB arena;
+    // 挑む人数による強さ。受ける傷をこの値で割る (1 人で 1.0、1 人増えるごとに +0.6)。
+    // 体力の上限 (1024) を超えないよう、体力そのものではなく受ける傷で強くする (実質の体力は 450 × この値)
+    private float toughness = 1f;
 
     public StoneWhaleHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "stone_whale_heart", "roar_1", "roar_2", "thrust", "sweep", "leap", "crack", "reclose", "volley", "beam", "chain", "shell_drop");
@@ -119,9 +128,9 @@ public class StoneWhaleHeart extends GuardMob {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 600)
+                .add(Attributes.MAX_HEALTH, 450)
                 .add(Attributes.ATTACK_DAMAGE, 12)
-                .add(Attributes.ARMOR, 12)
+                .add(Attributes.ARMOR, 8)
                 .add(Attributes.ARMOR_TOUGHNESS, 6)
                 .add(Attributes.MOVEMENT_SPEED, 0.0)
                 .add(Attributes.FOLLOW_RANGE, 48)
@@ -156,7 +165,27 @@ public class StoneWhaleHeart extends GuardMob {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 24f));
-        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, false));
+        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10, false, false, this::canReach));
+    }
+
+    // 試練の仕組みが、心臓の間の範囲と挑む人数を伝える
+    public void bindArena(AABB arena, int challengers) {
+        this.arena = arena;
+        this.toughness = scaleFor(challengers);
+    }
+
+    // 人数による強さの倍率 (心臓と番兵長で共通): 1 + 0.6 × (人数 − 1)
+    public static float scaleFor(int challengers) {
+        return 1f + 0.6f * (Math.max(1, challengers) - 1);
+    }
+
+    public float toughness() {
+        return toughness;
+    }
+
+    // 技と狙いの対象になれるか。心臓の間に縛られているときは、その内側にいる人だけ
+    private boolean canReach(@Nullable LivingEntity entity) {
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
     }
 
     // 体力の割合から、いまあるべき段階
@@ -197,6 +226,11 @@ public class StoneWhaleHeart extends GuardMob {
                 return;
             }
             LivingEntity target = getTarget();
+            if (target != null && !canReach(target)) {
+                // 部屋の外へ出た人は狙わない
+                setTarget(null);
+                target = null;
+            }
             if (target == null || !target.isAlive()) {
                 return;
             }
@@ -280,7 +314,7 @@ public class StoneWhaleHeart extends GuardMob {
 
     // 人へ傷を与える。殻が閉じた直後 (弱まっている間) は、この心臓の攻撃は半分になる
     private void strike(ServerPlayer player, float amount) {
-        player.hurt(damageSources().mobAttack(this), weakTicks > 0 ? amount * 0.5f : amount);
+        player.hurt(attackSource(), weakTicks > 0 ? amount * 0.5f : amount);
     }
 
     private double floorY() {
@@ -301,8 +335,7 @@ public class StoneWhaleHeart extends GuardMob {
     }
 
     private List<ServerPlayer> nearbyPlayers(ServerLevel server, double range) {
-        return server.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(range, 12, range),
-                p -> p.isAlive() && !p.isSpectator());
+        return server.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(range, 12, range), this::canReach);
     }
 
     // ---- 咆哮 (段階の切り替え) ----
@@ -320,7 +353,7 @@ public class StoneWhaleHeart extends GuardMob {
             waves.add(new Wave(floorY(), false));
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            server.sendParticles(dust(0x9CFBFF, 1.2f), getX(), getY() + 2.2, getZ(), 6, 1.0, 1.0, 1.0, 0.05);
+            warn(server, dust(0x9CFBFF, 1.2f), getX(), getY() + 2.2, getZ(), 6, 1.0, 1.0, 1.0, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
@@ -342,7 +375,7 @@ public class StoneWhaleHeart extends GuardMob {
         if (actionTicks < 24 && actionTicks % 2 == 0) {
             for (int i = -2; i <= 2; i++) {
                 Vec3 side = new Vec3(-f.z, 0, f.x).scale(i * 1.1);
-                server.sendParticles(dust(0xA8C8D0, 1.0f),
+                warn(server, dust(0xA8C8D0, 1.0f),
                         getX() + f.x * 3.2 + side.x, getY() + 2.0, getZ() + f.z * 3.2 + side.z, 1, 0, 0, 0, 0);
             }
         }
@@ -354,7 +387,7 @@ public class StoneWhaleHeart extends GuardMob {
                 double along = v.dot(f);
                 double across = v.subtract(f.scale(along)).length();
                 if (along > 0.5 && along < 7 && across < 2.6 && player.getY() < getY() + 3) {
-                    strike(player, 14f);
+                    strike(player, 12f);
                     player.knockback(1.2, -f.x, -f.z);
                 }
             }
@@ -372,7 +405,7 @@ public class StoneWhaleHeart extends GuardMob {
         if (actionTicks < 20 && actionTicks % 3 == 0) {
             for (int a = 0; a < 360; a += 30) {
                 double rad = Math.toRadians(a);
-                server.sendParticles(dust(0xFF5A5A, 1.0f),
+                warn(server, dust(0xFF5A5A, 1.0f),
                         getX() + Math.cos(rad) * 4.5, getY() - 1.0, getZ() + Math.sin(rad) * 4.5, 1, 0, 0, 0, 0);
             }
         }
@@ -399,7 +432,7 @@ public class StoneWhaleHeart extends GuardMob {
             double fy = floorY();
             for (int a = 0; a < 360; a += 20) {
                 double rad = Math.toRadians(a);
-                server.sendParticles(dust(0x7FF4FF, 1.2f),
+                warn(server, dust(0x7FF4FF, 1.2f),
                         getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
             }
         }
@@ -452,7 +485,7 @@ public class StoneWhaleHeart extends GuardMob {
                     double t = d / len;
                     double x = line[0] + (line[2] - line[0]) * t;
                     double z = line[1] + (line[3] - line[1]) * t;
-                    server.sendParticles(dust(0xFF8A2A, 0.9f), x, floorAt(Mth.floor(x), Mth.floor(z)) + 0.1, z, 1, 0, 0, 0, 0);
+                    warn(server, dust(0xFF8A2A, 0.9f), x, floorAt(Mth.floor(x), Mth.floor(z)) + 0.1, z, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -486,7 +519,7 @@ public class StoneWhaleHeart extends GuardMob {
         }
         if (actionTicks == 30) {
             sound(server, SoundEvents.ANVIL_LAND, 2f, 0.6f);
-            server.sendParticles(dust(0xFFB347, 1.4f), getX(), getY() + 2.0, getZ(), 60, 1.8, 1.8, 1.8, 0.1);
+            warn(server, dust(0xFFB347, 1.4f), getX(), getY() + 2.0, getZ(), 60, 1.8, 1.8, 1.8, 0.1);
             weakTicks = 20;
         }
         if (actionTicks >= 40) {
@@ -507,7 +540,7 @@ public class StoneWhaleHeart extends GuardMob {
             int steps = (int) Math.min(40, d.length() / 0.8);
             for (int i = 1; i <= steps; i++) {
                 Vec3 p = from.add(d.scale((double) i / steps));
-                server.sendParticles(dust(0xFFD0A0, 0.7f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                warn(server, dust(0xFFD0A0, 0.7f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
             }
         }
         if (actionTicks == 30 && target != null) {
@@ -543,13 +576,13 @@ public class StoneWhaleHeart extends GuardMob {
                 double r = 2.6 * (1 - actionTicks / 40.0) + 0.3;
                 for (int a = 0; a < 360; a += 45) {
                     double rad = Math.toRadians(a + actionTicks * 6);
-                    server.sendParticles(dust(0xFF3A2A, 1.0f),
+                    warn(server, dust(0xFF3A2A, 1.0f),
                             origin.x + Math.cos(rad) * r, origin.y + Math.sin(rad) * r, origin.z, 1, 0, 0, 0, 0);
                 }
             }
             if (actionTicks % 4 == 0) {
                 for (double d = 2; d <= 12; d += 1.0) {
-                    server.sendParticles(dust(0xFF8A7A, 0.6f), origin.x + f.x * d, origin.y, origin.z + f.z * d, 1, 0, 0, 0, 0);
+                    warn(server, dust(0xFF8A7A, 0.6f), origin.x + f.x * d, origin.y, origin.z + f.z * d, 1, 0, 0, 0, 0);
                 }
             }
         } else if (actionTicks < 64) {
@@ -559,12 +592,12 @@ public class StoneWhaleHeart extends GuardMob {
             double p = (actionTicks - 40) / 24.0;
             Vec3 dir = forward((float) (attackYaw + (-8 + 16 * p)));
             for (double d = 1; d <= BEAM_LENGTH; d += 0.8) {
-                server.sendParticles(dust(0xFF3A2A, 1.4f),
+                warn(server, dust(0xFF3A2A, 1.4f),
                         origin.x + dir.x * d, origin.y, origin.z + dir.z * d, 1, 0.05, 0.05, 0.05, 0);
             }
             if (actionTicks % 6 == 0) {
                 AABB area = new AABB(origin, origin.add(dir.scale(BEAM_LENGTH))).inflate(1.5, 2, 1.5);
-                for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, q -> q.isAlive() && !q.isSpectator())) {
+                for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
                     Vec3 v = player.position().add(0, player.getBbHeight() * 0.6, 0).subtract(origin);
                     double along = v.dot(dir);
                     if (along < 0 || along > BEAM_LENGTH) {
@@ -572,7 +605,7 @@ public class StoneWhaleHeart extends GuardMob {
                     }
                     Vec3 perp = v.subtract(dir.scale(along));
                     if (perp.length() < 1.1) {
-                        strike(player, 12f);
+                        strike(player, 10f);
                         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
                     }
                 }
@@ -592,14 +625,14 @@ public class StoneWhaleHeart extends GuardMob {
         if (actionTicks < 24 && actionTicks % 2 == 0) {
             Vec3 f = forward(attackYaw);
             for (double d = 1; d <= CHAIN_LENGTH; d += 1.0) {
-                server.sendParticles(dust(0x8A1C1C, 1.0f), getX() + f.x * d, chainY + 0.1, getZ() + f.z * d, 1, 0, 0, 0, 0);
+                warn(server, dust(0x8A1C1C, 1.0f), getX() + f.x * d, chainY + 0.1, getZ() + f.z * d, 1, 0, 0, 0, 0);
             }
         }
         if (actionTicks >= 24 && actionTicks <= 60) {
             double t = (actionTicks - 24) / 36.0;
             Vec3 f = forward((float) (attackYaw + (-90 + 180 * t)));
             for (double d = 1; d <= CHAIN_LENGTH; d += 1.5) {
-                server.sendParticles(dust(0xB02A2A, 1.2f), getX() + f.x * d, chainY + 1.0, getZ() + f.z * d, 1, 0, 0, 0, 0);
+                warn(server, dust(0xB02A2A, 1.2f), getX() + f.x * d, chainY + 1.0, getZ() + f.z * d, 1, 0, 0, 0, 0);
             }
             if (actionTicks % 4 == 0) {
                 for (ServerPlayer player : nearbyPlayers(server, CHAIN_LENGTH + 2)) {
@@ -611,7 +644,7 @@ public class StoneWhaleHeart extends GuardMob {
                     double across = v.subtract(f.scale(along)).length();
                     // 鎖は腰の高さを通る。跳び越えた人は当たらない
                     if (across < 1.2 && player.getY() < chainY + 1.0) {
-                        strike(player, 12f);
+                        strike(player, 10f);
                         player.knockback(0.9, f.x, f.z);
                     }
                 }
@@ -625,7 +658,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 殻の落下: 人の足元に二つの影が広がり (1.5秒)、そこへ殻の塊が落ちる
     private void tickShellDrop(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.CHAIN_PLACE, 1.8f, 0.4f);
+            sound(server, SoundEvents.GRINDSTONE_USE, 1.8f, 0.4f);
             List<ServerPlayer> players = nearbyPlayers(server, 26);
             players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
             for (int i = 0; i < Math.min(2, players.size()); i++) {
@@ -644,15 +677,15 @@ public class StoneWhaleHeart extends GuardMob {
     private void tickWaves(ServerLevel server) {
         for (Wave wave : waves) {
             wave.radius += 0.8;
-            int points = Math.max(8, (int) (2 * Math.PI * wave.radius / 1.2));
+            int points = Math.max(8, (int) (2 * Math.PI * wave.radius / 1.6));
             for (int i = 0; i < points; i++) {
                 double a = i * 2 * Math.PI / points;
-                server.sendParticles(dust(0x7FF4FF, 1.2f),
+                warn(server, dust(0x7FF4FF, 1.2f),
                         getX() + Math.cos(a) * wave.radius, wave.floorY + 0.6, getZ() + Math.sin(a) * wave.radius, 1, 0, 0, 0, 0);
             }
             double r = wave.radius + 2;
             AABB area = new AABB(getX() - r, wave.floorY - 1, getZ() - r, getX() + r, wave.floorY + 3, getZ() + r);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, p -> p.isAlive() && !p.isSpectator())) {
+            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
                 Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
                 double d = to.length();
                 // 地に立ったままの人だけに当たる (跳べば輪の下を抜けられる)
@@ -687,7 +720,7 @@ public class StoneWhaleHeart extends GuardMob {
                 };
                 for (int a = 0; a < 360; a += 30) {
                     double rad = Math.toRadians(a);
-                    server.sendParticles(dust(color, 1.0f),
+                    warn(server, dust(color, 1.0f),
                             s.x() + Math.cos(rad) * 1.4, s.y() + 0.1, s.z() + Math.sin(rad) * 1.4, 1, 0, 0, 0, 0);
                 }
             }
@@ -724,14 +757,14 @@ public class StoneWhaleHeart extends GuardMob {
                 server.playSound(null, s.x(), s.y(), s.z(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 2.2f, 0.5f);
                 server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
                         s.x(), s.y() + 0.5, s.z(), 60, 1.4, 0.6, 1.4, 0.25);
-                hurtArea(server, s, 2.5, 14f, 0.6);
+                hurtArea(server, s, 2.5, 12f, 0.6);
             }
         }
     }
 
     private List<ServerPlayer> areaPlayers(ServerLevel server, Spike s, double radius) {
         AABB area = new AABB(s.x() - radius, s.y() - 1, s.z() - radius, s.x() + radius, s.y() + 2.5, s.z() + radius);
-        return server.getEntitiesOfClass(ServerPlayer.class, area, p -> p.isAlive() && !p.isSpectator());
+        return server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach);
     }
 
     private void hurtArea(ServerLevel server, Spike s, double radius, float amount, double lift) {
@@ -752,7 +785,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
             return false;
         }
-        return super.hurt(source, weakTicks > 0 ? amount * 1.5f : amount);
+        return super.hurt(source, (weakTicks > 0 ? amount * 1.5f : amount) / toughness);
     }
 
     private void updateBossBarViewers() {
@@ -786,8 +819,11 @@ public class StoneWhaleHeart extends GuardMob {
         if (level() instanceof ServerLevel server) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
                     getX(), getY() + 2.2, getZ(), 120, 1.2, 1.5, 1.2, 0.2);
-            server.sendParticles(dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
-            TitanBackTrials.onHeartDefeated(server, this);
+            warn(server, dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
+            // 試練で湧いた心臓だけが、背中の攻略を知らせる (スポーンエッグの心臓や、地上の心臓では何も起きない)
+            if (server.dimension() == TitanTravel.TITAN_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
+                TitanBackTrials.onHeartDefeated(server, this);
+            }
         }
     }
 

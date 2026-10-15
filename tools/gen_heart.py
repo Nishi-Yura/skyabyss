@@ -16,6 +16,19 @@
 単位は px (16px = 1ブロック)。足元が y=0、正面は -Z。テクスチャは宣言サイズの2倍で描く。
 テクスチャは全て決定的 (シード固定の乱数のみ)。光る部分は _glowmask.png に書き、それ以外は透明にする。
 """
+
+# ---------------------------------------------------------------------------
+# 上書き防止 (docs/review/assets_audit.md の S1): 実行すると採用済みの素材を古い版で上書きする。
+#   上書きするもの: 心臓の animation (v4 の 3 段階共用) と、使われない旧 geo / png
+#   採用版の生成元: tools/install_heart_v4.py
+# どうしても動かすときだけ、環境変数 SKYABYSS_ALLOW_REGEN=1 を付ける。一覧は tools/README.md。
+# ---------------------------------------------------------------------------
+import os as _os
+import sys as _sys
+
+if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
+    _sys.exit("tools/gen_heart.py は停止中です: 採用済みの素材 (心臓の animation (v4 の 3 段階共用) と、使われない旧 geo / png) を上書きするため。"
+              "採用版の生成元は tools/install_heart_v4.py です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
 import json
 import math
 from pathlib import Path

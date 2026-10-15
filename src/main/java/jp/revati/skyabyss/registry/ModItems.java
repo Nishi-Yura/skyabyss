@@ -50,7 +50,7 @@ public final class ModItems {
                 }
             });
 
-    // 鯨骨の大剣・岩鯨の甲殻・共鳴の護符・雲上の干し肉 (岩鯨の背の宝物庫で手に入る)
+    // 鯨骨の大剣・岩鯨の甲殻・共鳴の護符・雲上の干し肉 (岩鯨の背の番兵長・心臓・番兵から低い確率で手に入る)
     public static final DeferredItem<Item> WHALEBONE_GREATSWORD = ITEMS.register("whalebone_greatsword",
             () -> new WhaleboneGreatswordItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant()));
     public static final DeferredItem<Item> STONE_WHALE_HELMET = ITEMS.register("stone_whale_helmet",

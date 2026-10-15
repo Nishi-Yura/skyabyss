@@ -49,6 +49,7 @@ public final class TitanBackSelfTest {
             checkMaze(back, failures);
             checkTreasury(back, failures);
             checkHeart(back, failures);
+            checkRestPoints(back, failures);
             checkReset(back, failures);
             if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
                 failures.add("resonance forge missing at " + TitanBackLayout.forge());
@@ -78,6 +79,10 @@ public final class TitanBackSelfTest {
                     PENDING.add("could not spawn " + kind);
                 } else {
                     SPAWNED.add(mob);
+                    // 試練の番兵は保存しない (保存して終了したあとに二重に湧かないように)
+                    if (mob.shouldBeSaved()) {
+                        PENDING.add(kind + " spawned by the trials would be saved to disk");
+                    }
                 }
             }
             BlockPos water = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 1, 1);
@@ -95,6 +100,10 @@ public final class TitanBackSelfTest {
     private static final List<net.minecraft.world.entity.Mob> SPAWNED = new ArrayList<>();
     private static int waitTicks = -1;
 
+    // 2 段目: ピースフルで、試練の心臓と番兵が消えずに残るか
+    private static boolean peacefulStage;
+    private static net.minecraft.world.Difficulty originalDifficulty;
+
     @SubscribeEvent
     static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
         if (waitTicks < 0 || --waitTicks > 0) {
@@ -103,14 +112,44 @@ public final class TitanBackSelfTest {
         waitTicks = -1;
         for (var mob : SPAWNED) {
             if (!mob.isAlive() || mob.isRemoved()) {
-                PENDING.add(mob.getType() + " did not survive 5 seconds (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
+                PENDING.add(mob.getType() + " did not survive " + (peacefulStage ? "2 seconds in peaceful" : "5 seconds")
+                        + " (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
             }
         }
+        ServerLevel back = event.getServer().getLevel(TitanTravel.TITAN_BACK);
+        if (!peacefulStage && back != null) {
+            peacefulStage = true;
+            SPAWNED.forEach(net.minecraft.world.entity.Entity::discard);
+            SPAWNED.clear();
+            originalDifficulty = event.getServer().getWorldData().getDifficulty();
+            event.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
+            BlockPos at = HUB.center();
+            var guard = TitanBackTrials.spawnGuard(back, "sentinel", at);
+            if (guard != null) {
+                SPAWNED.add(guard);
+            }
+            var heart = jp.revati.skyabyss.registry.ModEntities.STONE_WHALE_HEART.get().create(back);
+            if (heart != null) {
+                heart.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 0f, 0f);
+                heart.addTag(TitanBackTrials.HEART_TAG);
+                heart.bindArena(TitanBackTrials.heartArena(), 1);
+                back.addFreshEntity(heart);
+                SPAWNED.add(heart);
+                if (heart.shouldBeSaved()) {
+                    PENDING.add("the trial heart would be saved to disk");
+                }
+            }
+            waitTicks = 40;
+            return;
+        }
         if (PENDING.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST PASSED ({} mobs ran for 5 seconds)", SPAWNED.size());
+            SkyAbyss.LOGGER.info("SELFTEST PASSED (guards ran for 5 seconds; {} trial mobs stayed in peaceful)", SPAWNED.size());
         } else {
             PENDING.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST FAILED: {}", f));
             SkyAbyss.LOGGER.error("SELFTEST FAILED: {} problems", PENDING.size());
+        }
+        if (originalDifficulty != null) {
+            event.getServer().setDifficulty(originalDifficulty, true);
         }
         event.getServer().halt(false);
     }
@@ -411,6 +450,16 @@ public final class TitanBackSelfTest {
         }
     }
 
+    // 休み場の復活位置: 足元と頭が空いていて、床が固いこと (鼓動の間の台座や腰掛けに埋まらない)
+    private static void checkRestPoints(ServerLevel level, List<String> failures) {
+        for (var e : TitanBackTrials.checkpointSpawns().entrySet()) {
+            if (!TitanBackTrials.isSafeStand(level, e.getValue())) {
+                failures.add("rest point " + e.getKey() + " spawn is not a safe standing spot at " + e.getValue()
+                        + " (feet " + level.getBlockState(e.getValue()) + ", floor " + level.getBlockState(e.getValue().below()) + ")");
+            }
+        }
+    }
+
     // 試練を進めた状態から、リセットで元に戻ること
     private static void checkReset(ServerLevel level, List<String> failures) {
         for (BlockPos p : RESONANCE_STONES) {
@@ -424,7 +473,25 @@ public final class TitanBackSelfTest {
         data.markHeartDefeated();
         long courseSeed = data.courseSeed();
         long mazeSeed = data.mazeSeed();
+        int epoch = data.epoch();
+        // 休み場の記録は、同じ番号の間だけ有効。リセットのあとは無効 (尾の台) になること
+        net.minecraft.nbt.CompoundTag rest = new net.minecraft.nbt.CompoundTag();
+        TitanBackTrials.writeCheckpoint(rest, "heart", epoch);
+        if (!"heart".equals(TitanBackTrials.validCheckpoint(rest, epoch))) {
+            failures.add("a fresh rest point was not accepted");
+        }
+        net.minecraft.nbt.CompoundTag legacy = new net.minecraft.nbt.CompoundTag();
+        legacy.putString("skyabyss_checkpoint", "heart");
+        if (!TitanBackTrials.validCheckpoint(legacy, epoch).isEmpty()) {
+            failures.add("a rest point without an epoch (older than this fix) was accepted");
+        }
         TitanBackTrials.resetTrials(level);
+        if (data.epoch() == epoch) {
+            failures.add("reset did not advance the epoch");
+        }
+        if (!TitanBackTrials.validCheckpoint(rest, data.epoch()).isEmpty()) {
+            failures.add("a rest point from before the reset was still accepted");
+        }
         if (data.courseSeed() == courseSeed || data.mazeSeed() == mazeSeed) {
             failures.add("reset did not reshape the parkour and maze");
         }
