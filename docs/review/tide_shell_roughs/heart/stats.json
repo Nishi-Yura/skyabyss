@@ -1,0 +1,92 @@
+{
+ "a1": {
+  "cubes": 780,
+  "bones": 9,
+  "atlas": [
+   512,
+   86
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "a2": {
+  "cubes": 879,
+  "bones": 9,
+  "atlas": [
+   512,
+   83
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "a3": {
+  "cubes": 830,
+  "bones": 11,
+  "atlas": [
+   512,
+   63
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "b1": {
+  "cubes": 669,
+  "bones": 9,
+  "atlas": [
+   512,
+   73
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "b2": {
+  "cubes": 411,
+  "bones": 8,
+  "atlas": [
+   512,
+   44
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "b3": {
+  "cubes": 348,
+  "bones": 10,
+  "atlas": [
+   512,
+   33
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "c1": {
+  "cubes": 761,
+  "bones": 7,
+  "atlas": [
+   512,
+   38
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "c2": {
+  "cubes": 954,
+  "bones": 6,
+  "atlas": [
+   512,
+   40
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ },
+ "c3": {
+  "cubes": 606,
+  "bones": 16,
+  "atlas": [
+   512,
+   36
+  ],
+  "overlaps": 0,
+  "ov_list": []
+ }
+}
