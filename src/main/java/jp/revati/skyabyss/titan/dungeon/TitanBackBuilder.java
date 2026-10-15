@@ -2,29 +2,22 @@ package jp.revati.skyabyss.titan.dungeon;
 
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
-import java.util.List;
-
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.registry.ModBlocks;
-import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 岩鯨の背を建てる。ワールドで初めて必要になったとき (サーバー起動時) に一度だけ実行する。
@@ -43,6 +36,8 @@ public final class TitanBackBuilder {
         buildSurface(kit);
         buildHub(kit);
         buildTreasury(kit);
+        // 宝物庫の奥の扉の先: 心臓の回廊と、最終ボスの心臓の間
+        HeartArenaBuilder.build(kit);
         // 鼓動の間の柱は、戸口・はしご・封印・碑文をすべて置いたあとに立てる (それらの前を避けるため)
         kit.pilasters(HUB, 4);
         kit.wallLamps(HUB, 4, FLOOR + 4);
@@ -127,8 +122,12 @@ public final class TitanBackBuilder {
     private static void buildSurface(BuildKit kit) {
         RandomSource random = kit.random;
         for (int z = -104; z <= PLATFORM_Z - 5; z++) {
+            // 祠 (南の端) から尾の台までは、磨いた石畳を敷く
+            boolean paved = z >= SHRINE_Z + 11 && z <= PLATFORM_Z - 9;
             for (int x = -1; x <= 1; x++) {
-                if (random.nextFloat() < 0.75f) {
+                if (paved) {
+                    kit.set(x, top(x, z), z, x == 0 || z % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES);
+                } else if (random.nextFloat() < 0.75f) {
                     BlockState path = switch (random.nextInt(3)) {
                         case 0 -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
                         case 1 -> Blocks.TUFF_BRICKS.defaultBlockState();
@@ -136,6 +135,15 @@ public final class TitanBackBuilder {
                     };
                     kit.set(x, top(x, z), z, path);
                 }
+            }
+        }
+        // 石畳の脇に、灯りの柱を立てる
+        for (int z : new int[]{42, 56, 70, 84}) {
+            for (int side = -1; side <= 1; side += 2) {
+                int base = top(2 * side, z) + 1;
+                kit.set(2 * side, base, z, BuildKit.POLISHED);
+                kit.set(2 * side, base + 1, z, BuildKit.POLISHED);
+                kit.set(2 * side, base + 2, z, Blocks.SOUL_LANTERN.defaultBlockState());
             }
         }
         // 道の両側の柱列。祠と尾の台のまわりは空ける。いくつかは折れている
@@ -247,35 +255,152 @@ public final class TitanBackBuilder {
         }
     }
 
-    // 尾の台: 到着地点。錨石と、そこから縁ごしに垂れる鎖
+    // 尾の台: 到着地点の広場。円形の石畳 (外はレンガ、中ほどは市松と線、中央は扇形の模様)、
+    // 北の骨の門 (遺跡の方角)、錨石の祠、縁の柵、灯りの柱と旗、ベンチ、焚き火の休み場、三つの試練の碑文を置く
+    // 到着は (0, 107, 94)、錨石は (0, 106, 99)。どちらも動かさない
+    private static final double PLAZA_RX = 7.0;
+    private static final double PLAZA_RZ = 9.0;
+
+    private static double plazaDistance(int x, int z) {
+        return Math.hypot(x / PLAZA_RX, (z - PLATFORM_Z) / PLAZA_RZ);
+    }
+
+    // 北の門の前後 (柵を置かず、石畳の道をあける)
+    private static boolean plazaGate(int x, int z) {
+        return Math.abs(x) <= 4 && z <= PLATFORM_Z - 6;
+    }
+
     private static void buildPlatform(BuildKit kit) {
         int py = platformY();
-        for (int x = -6; x <= 6; x++) {
-            for (int z = PLATFORM_Z - 8; z <= PLATFORM_Z + 8; z++) {
-                if ((x * x) / 36.0 + ((z - PLATFORM_Z) * (z - PLATFORM_Z)) / 64.0 > 1.0) {
+        RandomSource random = kit.random;
+        // 円形の石畳と、下の埋め
+        for (int x = -8; x <= 8; x++) {
+            for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
+                double d = plazaDistance(x, z);
+                if (d > 1.0) {
                     continue;
                 }
-                kit.fill(x, py - 3, z, x, py - 1, z, Blocks.TUFF.defaultBlockState());
-                boolean ring = (x * x) / 36.0 + ((z - PLATFORM_Z) * (z - PLATFORM_Z)) / 64.0 > 0.6;
-                kit.set(x, py, z, ring ? Blocks.TUFF_BRICKS.defaultBlockState() : Blocks.POLISHED_TUFF.defaultBlockState());
-                kit.fill(x, py + 1, z, x, py + 5, z, BuildKit.AIR);
+                kit.fill(x, Math.min(py - 3, top(x, z)), z, x, py - 1, z, Blocks.DEEPSLATE.defaultBlockState());
+                kit.set(x, py, z, plazaFloor(x, z, d, random));
+                kit.fill(x, py + 1, z, x, py + 6, z, BuildKit.AIR);
+                if (d < 0.84 && random.nextFloat() < 0.06f) {
+                    kit.set(x, py + 1, z, Blocks.MOSS_CARPET.defaultBlockState());
+                }
+            }
+        }
+        // 縁の柵: 石畳の外へ面した所に、低い石の柵を巡らす (北の門の前は除く)
+        for (int x = -8; x <= 8; x++) {
+            for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
+                if (plazaDistance(x, z) > 1.0 || plazaGate(x, z)) {
+                    continue;
+                }
+                boolean edge = plazaDistance(x + 1, z) > 1.0 || plazaDistance(x - 1, z) > 1.0
+                        || plazaDistance(x, z + 1) > 1.0 || plazaDistance(x, z - 1) > 1.0;
+                if (edge) {
+                    kit.set(x, py + 1, z, Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState());
+                }
+            }
+        }
+        buildGate(kit, py);
+        buildShrine(kit, py);
+        // 縁の柱: 灯りを吊るす柱と、旗を立てる柱を交互に
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4;
+            int x = (int) Math.round(6.0 * Math.cos(a));
+            int z = PLATFORM_Z + (int) Math.round(7.7 * Math.sin(a));
+            if (plazaGate(x, z) || (x == 0 && z == PLATFORM_Z - 8)) {
+                continue;
+            }
+            for (int y = py + 1; y <= py + 3; y++) {
+                kit.set(x, y, z, BuildKit.POLISHED);
+            }
+            if (k == 0 || k == 4) {
+                kit.set(x, py + 4, z, Blocks.LIGHT_BLUE_BANNER.defaultBlockState());
+            } else {
+                kit.lantern(x, py + 4, z);
+            }
+        }
+        // 休みのベンチ (入口の両脇)
+        kit.set(-4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
+        kit.set(4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        // 魂の焚き火の休み場 (祠の脇): 焚き火と、そのまわりのベンチ
+        kit.set(-4, py + 1, PLATFORM_Z + 3, Blocks.SOUL_CAMPFIRE.defaultBlockState()
+                .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
+        kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
+        // 看板: 三つの試練の碑文 (北の門の柱に取り付ける)。錨石と共鳴の炉の看板は、その脇へ
+        kit.wallSign(new BlockPos(-3, py + 2, PLATFORM_Z - 6), Direction.SOUTH, "sign.skyabyss.trials");
+        kit.standingSign(new BlockPos(3, py + 1, PLATFORM_Z + 1), "sign.skyabyss.anchor");
+        kit.set(forge(), ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.EAST));
+        kit.standingSign(forge().south(), "sign.skyabyss.forge");
+    }
+
+    // 円形の石畳の模様。縁はレンガ、一つ内側に彫刻の線、その内側は市松、中央は扇形の模様
+    private static BlockState plazaFloor(int x, int z, double d, RandomSource random) {
+        if (d > 0.84) {
+            return random.nextFloat() < 0.15f ? BuildKit.CRACKED : BuildKit.BRICKS;
+        }
+        if (d > 0.56) {
+            return (x + z) % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES;
+        }
+        if (d > 0.5) {
+            return BuildKit.CHISELED;
+        }
+        if (d < 0.16) {
+            return BuildKit.CHISELED;
+        }
+        double a = Math.atan2(z - PLATFORM_Z, x);
+        int sector = Math.floorMod((int) Math.floor((a + Math.PI) / (Math.PI / 4)), 8);
+        return sector % 2 == 0 ? BuildKit.TILES : BuildKit.POLISHED;
+    }
+
+    // 北の骨の門: 遺跡のほうへ抜ける、鯨の肋骨の門。中央に魂のランタンを吊るす
+    private static void buildGate(BuildKit kit, int py) {
+        int gz = PLATFORM_Z - 7;
+        BlockState bone = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState beam = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
+        for (int x : new int[]{-3, 3}) {
+            for (int y = py + 1; y <= py + 3; y++) {
+                kit.set(x, y, gz, bone);
+            }
+            kit.set(x, py + 4, gz, bone);
+        }
+        for (int x = -2; x <= 2; x++) {
+            kit.set(x, py + 5, gz, beam);
+        }
+        kit.hangingLantern(0, gz, py + 5, 1);
+    }
+
+    // 錨石の祠: 錨石 (石の磁石) を、磨いた石の台と、後ろの壁と屋根で囲む。屋根から鎖と魂のランタンを下げる
+    private static void buildShrine(BuildKit kit, int py) {
+        for (int x = -1; x <= 1; x++) {
+            for (int z = PLATFORM_Z + 2; z <= PLATFORM_Z + 4; z++) {
+                kit.set(x, py, z, BuildKit.CHISELED);
             }
         }
         kit.set(anchor(), Blocks.LODESTONE.defaultBlockState());
         for (int side = -1; side <= 1; side += 2) {
-            for (int i = 1; i <= 3; i++) {
-                kit.set(4 * side, py + i, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState());
+            for (int y = py + 1; y <= py + 3; y++) {
+                kit.set(2 * side, y, PLATFORM_Z + 4, BuildKit.POLISHED);
             }
-            kit.set(4 * side, py + 4, PLATFORM_Z + 3, Blocks.SOUL_LANTERN.defaultBlockState());
         }
-        // 錨石から台の縁へ這う鎖
-        for (int z = PLATFORM_Z + 4; z <= PLATFORM_Z + 8; z++) {
-            kit.set(0, py + 1, z, Blocks.CHAIN.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
+        for (int x = -2; x <= 2; x++) {
+            for (int z = PLATFORM_Z + 3; z <= PLATFORM_Z + 5; z++) {
+                kit.set(x, py + 4, z, BuildKit.POLISHED);
+            }
         }
-        kit.standingSign(new BlockPos(-2, py + 1, PLATFORM_Z + 3), "sign.skyabyss.anchor");
-        kit.set(forge(), ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.EAST));
-        kit.standingSign(forge().south(), "sign.skyabyss.forge");
+        for (int x = -1; x <= 1; x++) {
+            for (int y = py + 1; y <= py + 3; y++) {
+                kit.set(x, y, PLATFORM_Z + 5, BuildKit.BRICKS);
+            }
+        }
+        kit.set(0, py + 2, PLATFORM_Z + 5, BuildKit.CHISELED);
+        // 鎖: 屋根の下から、錨石の上へ。中央には魂のランタン
+        kit.set(-2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
+        kit.set(2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
+        kit.hangingLantern(0, PLATFORM_Z + 3, py + 4, 1);
     }
+
 
     // ---------------------------------------------------------------- 祠と体内への階段
     private static void buildShrineAndStairs(BuildKit kit) {
@@ -404,7 +529,7 @@ public final class TitanBackBuilder {
         for (BlockPos p : INNER_GATE) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        // 天の鍵の欠片の台座: 磁石石を、紫水晶とろうそくが囲む
+        // 眠る台座 (飾り): 磁石石を、紫水晶とろうそくが囲む。欠片は心臓を倒すと受け取れる
         kit.set(PEDESTAL.below(), Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
         kit.set(PEDESTAL, Blocks.LODESTONE.defaultBlockState());
         for (Direction d : Direction.Plane.HORIZONTAL) {
@@ -412,9 +537,6 @@ public final class TitanBackBuilder {
             kit.set(c, d.getAxis() == Direction.Axis.X ? Blocks.AMETHYST_CLUSTER.defaultBlockState()
                     : Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
         }
-        kit.set(CHEST, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH));
-        kit.set(CHEST_2, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH));
-        fillChests(kit.level(), kit.random);
         kit.wallSign(new BlockPos(3, FLOOR + 3, -44), Direction.SOUTH, "sign.skyabyss.inner_gate");
         kit.wallSign(new BlockPos(3, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.gate");
         kit.wallSign(new BlockPos(5, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.maze");
@@ -424,39 +546,7 @@ public final class TitanBackBuilder {
         }
     }
 
-    // 試練を越えるたびに満たされる宝箱 (天の鍵の欠片は台座から一人一つ)。
-    // このModの装備 (鯨骨の大剣・岩鯨の甲殻・共鳴の護符) が、毎回いくつか入る
-    public static void fillChests(ServerLevel level, RandomSource random) {
-        List<Item> armor = List.of(ModItems.STONE_WHALE_HELMET.get(), ModItems.STONE_WHALE_CHESTPLATE.get(),
-                ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get());
-        if (level.getBlockEntity(CHEST) instanceof ChestBlockEntity a) {
-            a.clearContent();
-            a.setItem(13, random.nextFloat() < 0.45f ? new ItemStack(ModItems.WHALEBONE_GREATSWORD.get())
-                    : new ItemStack(armor.get(random.nextInt(armor.size()))));
-            a.setItem(11, new ItemStack(armor.get(random.nextInt(armor.size()))));
-            a.setItem(15, new ItemStack(ModItems.CLOUD_JERKY.get(), 4 + random.nextInt(5)));
-            a.setItem(4, new ItemStack(Items.DIAMOND, 2 + random.nextInt(3)));
-            a.setItem(22, new ItemStack(Items.GOLDEN_APPLE, 2 + random.nextInt(2)));
-            a.setItem(20, new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 4 + random.nextInt(5)));
-        }
-        if (level.getBlockEntity(CHEST_2) instanceof ChestBlockEntity b) {
-            b.clearContent();
-            b.setItem(13, random.nextFloat() < 0.6f ? new ItemStack(ModItems.RESONANCE_CHARM.get())
-                    : new ItemStack(armor.get(random.nextInt(armor.size()))));
-            b.setItem(11, new ItemStack(armor.get(random.nextInt(armor.size()))));
-            b.setItem(15, new ItemStack(Items.ECHO_SHARD, 1 + random.nextInt(2)));
-            b.setItem(4, new ItemStack(Items.EMERALD, 6 + random.nextInt(8)));
-            b.setItem(22, new ItemStack(Items.EXPERIENCE_BOTTLE, 8 + random.nextInt(8)));
-            b.setItem(24, new ItemStack(ModItems.RESONANCE_CRYSTAL.get()));
-            b.setItem(20, new ItemStack(ModItems.BONE_SPIKE_ARROW.get(), 8 + random.nextInt(9)));
-        }
-    }
-
     static BlockState sealed() {
         return ModBlocks.SEALED_GATE.get().defaultBlockState();
-    }
-
-    static ItemStack fragment() {
-        return new ItemStack(ModItems.SKY_KEY_FRAGMENT.get());
     }
 }

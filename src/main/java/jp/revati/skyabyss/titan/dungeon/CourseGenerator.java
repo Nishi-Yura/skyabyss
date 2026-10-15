@@ -22,17 +22,15 @@ public final class CourseGenerator {
     private CourseGenerator() {
     }
 
-    // 足場の並び ({x, y, z, 崩れるなら1}) を返す。同じ種からは同じ道になる
+    // 足場の並び ({x, y, z, 崩れるなら1}) を返す。足場はすべて崩れる骨。同じ種からは同じ道になる
     public static List<int[]> generate(Spec spec, long seed) {
         Random random = new Random(seed);
         for (int attempt = 0; attempt < 2000; attempt++) {
             List<int[]> steps = attempt(spec, random);
             if (steps != null) {
-                // 最初と最後以外の足場を、3つに1つくらい崩れる足場にする
-                for (int i = 1; i < steps.size() - 1; i++) {
-                    if (random.nextFloat() < 0.38f) {
-                        steps.get(i)[3] = 1;
-                    }
+                // すべての足場を崩れる骨にする (入口と出口の岩棚は石のまま、ここには含まれない)
+                for (int[] step : steps) {
+                    step[3] = 1;
                 }
                 return steps;
             }

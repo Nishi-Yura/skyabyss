@@ -16,12 +16,14 @@ import net.minecraft.world.level.saveddata.SavedData;
 // 岩鯨の背の状態をワールドに保存する。
 // 試練の進み具合 (制圧した広間、封印を解いたか) は、誰もいなくなってしばらくすると元に戻り、何度でも挑める。
 // 天の鍵の欠片を受け取った人の一覧だけは消さない (欠片は一人一つ)
+// 岩鯨の心臓を倒したかどうかは、試練のリセットまで保つ (リセットで挑み直せる)
 public class TitanBackData extends SavedData {
     private static final String NAME = "skyabyss_titan_back";
     private static final Factory<TitanBackData> FACTORY = new Factory<>(TitanBackData::new, TitanBackData::load);
 
     private boolean built;
     private boolean gateOpened;
+    private boolean heartDefeated;
     private final Set<String> clearedHalls = new HashSet<>();
     private final Set<UUID> fragmentClaimed = new HashSet<>();
     private int clears;
@@ -37,6 +39,7 @@ public class TitanBackData extends SavedData {
         TitanBackData data = new TitanBackData();
         data.built = tag.getBoolean("Built");
         data.gateOpened = tag.getBoolean("GateOpened");
+        data.heartDefeated = tag.getBoolean("HeartDefeated");
         data.clears = tag.getInt("Clears");
         data.courseSeed = tag.getLong("CourseSeed");
         data.mazeSeed = tag.getLong("MazeSeed");
@@ -53,6 +56,7 @@ public class TitanBackData extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putBoolean("Built", built);
         tag.putBoolean("GateOpened", gateOpened);
+        tag.putBoolean("HeartDefeated", heartDefeated);
         tag.putInt("Clears", clears);
         tag.putLong("CourseSeed", courseSeed);
         tag.putLong("MazeSeed", mazeSeed);
@@ -84,6 +88,15 @@ public class TitanBackData extends SavedData {
         setDirty();
     }
 
+    public boolean isHeartDefeated() {
+        return heartDefeated;
+    }
+
+    public void markHeartDefeated() {
+        heartDefeated = true;
+        setDirty();
+    }
+
     public boolean isHallCleared(String id) {
         return clearedHalls.contains(id);
     }
@@ -95,11 +108,12 @@ public class TitanBackData extends SavedData {
 
     // 何かしら試練が進んでいるか (進んでいなければ、元に戻す必要もない)
     public boolean hasProgress() {
-        return gateOpened || !clearedHalls.isEmpty();
+        return gateOpened || heartDefeated || !clearedHalls.isEmpty();
     }
 
     public void resetProgress() {
         gateOpened = false;
+        heartDefeated = false;
         clearedHalls.clear();
         setDirty();
     }

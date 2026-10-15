@@ -15,6 +15,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.entity.WhaleboneCaptain;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.titan.TitanTravel;
+import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -42,8 +43,9 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 // 個人抽選と「巨神の記憶」(天井)。
-// 報酬はすべて、番兵長 (ボス) を倒したときにまとめて渡す (道中の敵は経験値だけ)。
-// 広間にいた全員が、それぞれ別々の抽選で報酬を受け取り、記憶のカウンタが一つ進む:
+// 番兵長 (中ボス) を倒したときは、小さな素材と経験値だけ。
+// 本当の報酬は、最終ボスの岩鯨の心臓を倒したときに、島にいる全員へ渡す (天の鍵の欠片・心核・装備の抽選)。
+// 心臓の報酬では、それぞれ別々の抽選で受け取り、記憶のカウンタが一つ進む:
 //  - 5 以上: 伝説 (番兵長の鉾・水路の顎牙) の出る確率が2倍 (ソフト天井)
 //  - 8 以上: まだ持っていない専用伝説を一つ必ず受け取る (ハード天井)。全部持っていれば共鳴の欠片に変わる
 //  - まだ持っていない専用伝説を手にすると 0 に戻る (持っているものが重なっても戻らない)
@@ -136,19 +138,46 @@ public final class TitanLoot {
         LivingEntity mob = event.getEntity();
         if (mob instanceof WhaleboneCaptain && mob.level() instanceof ServerLevel level
                 && level.dimension() == TitanTravel.TITAN_BACK && !event.isCanceled()) {
-            onBossDeath(level, mob);
+            onMidBossDeath(level, mob);
         }
     }
 
-    private static void onBossDeath(ServerLevel level, LivingEntity boss) {
+    // 番兵長: 欠片と経験値だけ。本当の報酬は心臓で
+    private static void onMidBossDeath(ServerLevel level, LivingEntity boss) {
         List<ServerPlayer> players = new ArrayList<>(level.getEntitiesOfClass(ServerPlayer.class, TitanBackLayout.E3.aabb().inflate(6),
                 p -> !p.isSpectator()));
         if (players.isEmpty() && boss.getKillCredit() instanceof ServerPlayer killer) {
             players.add(killer);
         }
         for (ServerPlayer player : players) {
+            give(player, new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3 + level.random.nextInt(3)));
+            give(player, new ItemStack(ModItems.RESONANCE_SHARD.get(), 1 + level.random.nextInt(2)));
+            player.giveExperiencePoints(40);
+            player.sendSystemMessage(ModText.progress("message.skyabyss.mid_boss_reward"));
+        }
+    }
+
+    // 岩鯨の心臓を倒したとき: 島にいる全員に、天の鍵の欠片 (今までに一人一つ)、心核と装備の抽選を渡す
+    public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> players) {
+        TitanBackData data = TitanBackData.get(level);
+        for (ServerPlayer player : players) {
+            if (data.claimFragment(player.getUUID())) {
+                give(player, new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
+                player.sendSystemMessage(ModText.progress("message.skyabyss.fragment_received"));
+            }
+            // 以前の宝箱の装備: 甲殻の防具を一つ必ず、大剣と共鳴の護符を確率で
+            RandomSource random = level.random;
+            List<Item> armor = List.of(ModItems.STONE_WHALE_HELMET.get(), ModItems.STONE_WHALE_CHESTPLATE.get(),
+                    ModItems.STONE_WHALE_LEGGINGS.get(), ModItems.STONE_WHALE_BOOTS.get());
+            give(player, new ItemStack(armor.get(random.nextInt(armor.size()))));
+            if (random.nextFloat() < 0.45f) {
+                give(player, new ItemStack(ModItems.WHALEBONE_GREATSWORD.get()));
+            }
+            if (random.nextFloat() < 0.6f) {
+                give(player, new ItemStack(ModItems.RESONANCE_CHARM.get()));
+            }
             TitanMemoryData.Record r = record(player);
-            Roll roll = rollBoss(r, level.random);
+            Roll roll = rollBoss(r, random);
             for (ItemStack stack : roll.items()) {
                 give(player, stack);
             }

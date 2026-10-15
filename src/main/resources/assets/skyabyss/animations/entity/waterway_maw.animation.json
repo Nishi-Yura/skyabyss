@@ -8,35 +8,42 @@
     "seg0": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 270 + 0.0) * 8",
+      "math.sin(query.anim_time * 270 + 0.0) * 8.0",
       "0"
      ]
     },
     "seg1": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 270 + -0.8) * 11",
+      "math.sin(query.anim_time * 270 + -0.8) * 10.5",
       "0"
      ]
     },
     "seg2": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 270 + -1.6) * 14",
+      "math.sin(query.anim_time * 270 + -1.6) * 13.0",
       "0"
      ]
     },
     "seg3": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 270 + -2.4000000000000004) * 17",
+      "math.sin(query.anim_time * 270 + -2.4000000000000004) * 15.5",
       "0"
      ]
     },
     "seg4": {
      "rotation": [
       "0",
-      "math.sin(query.anim_time * 270 + -3.2) * 20",
+      "math.sin(query.anim_time * 270 + -3.2) * 18.0",
+      "0"
+     ]
+    },
+    "seg5": {
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 270 + -4.0) * 20.5",
       "0"
      ]
     },

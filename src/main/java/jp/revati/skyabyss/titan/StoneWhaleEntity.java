@@ -36,14 +36,21 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.stone_whale.swim");
 
-    // 鎖の付け根: 背中の尾の側の錨石。体の中心から 後ろへ30・横へ13・上へ20 ブロック (モデルの寸法に合わせる)
+    // 鎖の付け根まわり (モデルの寸法に合わせる。geo の 1 単位は 0.5 ブロック)
+    // 背の後端 (尾の付け根の少し手前、z=60 単位) は、中央の幅8ブロック以内が高さ20ブロック、
+    // その外側は高さ16ブロックで、胴の縁は横12.5ブロック
+    // 錨石: 体の中心から後ろへ30・横へ7・上へ20.5 ブロック。背の表面のすぐ上に乗る
     private static final double CHAIN_BACK = 30.0;
-    // 胴の半幅はおよそ15ブロック。引き上げられる人が体にぶつからないよう、胴の外へ張り出した位置から垂らす
-    private static final double CHAIN_SIDE = 21.0;
-    // 鎖を背中に留めている所 (ここから張り出した位置まで、斜めに鎖が渡る)
-    private static final double ANCHOR_SIDE = 10.0;
-    public static final double ANCHOR_UP = 27.0;
-    public static final double CHAIN_UP = 20.0;
+    private static final double ANCHOR_SIDE = 7.0;
+    public static final double ANCHOR_UP = 20.5;
+    // 鎖の垂れ口: 胴の縁の外 (横15ブロック)、縁の高さ (上15ブロック)。錨石から縁ごしに斜めに渡り、そこから真下へ垂れる
+    private static final double CHAIN_SIDE = 15.0;
+    public static final double CHAIN_UP = 15.0;
+    // 鎖の先は地面の何ブロック上で止まるか (REST の鎖の伸び)
+    private static final double CHAIN_END_HEIGHT = 2.5;
+    // 鎖の伸び縮みの速さ (ブロック/tick)。地面の高さが変わっても急に跳ねないようにする
+    private static final float CHAIN_GROW = 0.6f;
+    private static final float CHAIN_SHRINK = 1.2f;
     private static final float CRUISE_SPEED = 0.2f;
     private static final float APPROACH_SPEED = 0.12f;
     private static final float TURN_RATE = 0.5f;
@@ -114,7 +121,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
 
     // 鎖が地面近くまで下りきっているか
     public boolean isChainDown() {
-        return mode == Mode.REST && chainLength() > 4f && chainBottom().y <= groundY + 2.5;
+        return mode == Mode.REST && chainLength() > 4f && chainBottom().y <= groundY + CHAIN_END_HEIGHT + 0.5;
     }
 
     @Override
@@ -185,9 +192,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         // ほとんど止まり、ゆっくり漂う
         setDeltaMovement(getDeltaMovement().scale(0.9));
         move(net.minecraft.world.entity.MoverType.SELF, getDeltaMovement());
-        float wanted = (float) Math.max(0, chainTop().y - groundY - 0.5);
+        float wanted = (float) Math.max(0, chainTop().y - groundY - CHAIN_END_HEIGHT);
         float chain = chainLength();
-        entityData.set(CHAIN, chain < wanted ? Math.min(wanted, chain + 0.6f) : wanted);
+        float step = chain < wanted ? Math.min(wanted - chain, CHAIN_GROW) : -Math.min(chain - wanted, CHAIN_SHRINK);
+        entityData.set(CHAIN, chain + step);
         if (isChainDown()) {
             keepChainHandle(level);
             if (tickCount % 40 == 0) {
@@ -207,6 +215,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     private void keepChainHandle(ServerLevel level) {
         Vec3 bottom = chainBottom();
         if (chainHandle == null || chainHandle.isRemoved()) {
+            // 以前の当たり判定が残っていれば消す (右クリックが二重に届かないように)
+            for (WhaleChainEntity stray : level.getEntitiesOfClass(WhaleChainEntity.class, getBoundingBox().inflate(120, 120, 120))) {
+                stray.discard();
+            }
             chainHandle = ModEntities.WHALE_CHAIN.get().create(level);
             if (chainHandle == null) {
                 return;
@@ -244,7 +256,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
         dropChainHandle();
         float chain = chainLength();
         if (chain > 0) {
-            entityData.set(CHAIN, Math.max(0f, chain - 1.2f));
+            entityData.set(CHAIN, Math.max(0f, chain - CHAIN_SHRINK));
         }
     }
 
@@ -347,16 +359,18 @@ public class StoneWhaleEntity extends Entity implements GeoEntity {
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(90.0, 40.0, 90.0).expandTowards(0, -Math.max(0, chainLength() - CHAIN_UP), 0);
+        return getBoundingBox().inflate(100.0, 40.0, 100.0).expandTowards(0, -Math.max(0, chainLength() - CHAIN_UP), 0);
     }
 
+    // 位置の補間。サーバーは2tickごとに位置を送るので、それに合わせた steps で滑らかにつなぐ
+    // (以前は10tickかけて追いかけていたため、描画がサーバーの位置より遅れ、鎖の先が鎖の根元とずれていた)
     @Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
         this.lerpX = x;
         this.lerpY = y;
         this.lerpZ = z;
         this.lerpYRot = yRot;
-        this.lerpSteps = 10;
+        this.lerpSteps = Math.max(1, steps);
     }
 
     @Override

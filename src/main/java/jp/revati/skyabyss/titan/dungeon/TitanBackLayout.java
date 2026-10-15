@@ -21,6 +21,7 @@ import net.minecraft.world.phys.AABB;
 //                        足場の並びは毎回変わる
 // 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 休み場 → 第二の広間 → 休み場 → 番兵長の広間 → 共鳴石
 //                        封印の扉は一方通行。くぐると後ろで閉じ、戻れない
+// 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
 // 闇の水路: 3×3 の水の通路でできた迷路。毎回形が変わり、途中に息継ぎのくぼみだけがある
 public final class TitanBackLayout {
     public static final int BASE_Y = 100;
@@ -38,12 +39,23 @@ public final class TitanBackLayout {
     public static final Box TREASURY = new Box(-6, 6, -44, -34, FLOOR, 7);
     // 宝物庫の封印 (三つの石で開く)
     public static final List<BlockPos> GATE = wall(-1, 1, 94, 97, -33, true);
-    // 宝物庫の奥の扉 (次の段階・守護者のためにまだ開かない)
+    // 宝物庫の奥の扉 (三つの石で封印が開くと、一緒に開く)。その先は心臓の回廊
     public static final List<BlockPos> INNER_GATE = wall(-1, 1, 94, 97, -45, true);
-    // 天の鍵の欠片を授ける台座と、試練を越えるたびに満たされる宝箱
+    // 天の鍵の欠片の台座 (飾り。欠片は岩鯨の心臓を倒すと、そこで受け取る)
     public static final BlockPos PEDESTAL = new BlockPos(0, FLOOR + 1, -41);
-    public static final BlockPos CHEST = new BlockPos(-3, FLOOR + 1, -41);
-    public static final BlockPos CHEST_2 = new BlockPos(3, FLOOR + 1, -41);
+
+    // ---------------------------------------------------------------- 心臓の回廊と心臓の間 (最終ボス)
+    // 奥の扉から北へ伸びる回廊 (x -1〜1、z -46〜-63)。途中に休み場 heart がある
+    public static final Box HEART_REST = new Box(-3, 3, -57, -51, FLOOR, 4);
+    // 心臓の間: 中心 (0, 94, -80)、床 y=93、天井 y=106 (体の表面の内側に収まる)。内側の半径 14.5、壁の外側 16.5
+    public static final int HEART_CX = 0;
+    public static final int HEART_CZ = -80;
+    public static final Box HEART = new Box(-16, 16, -96, -64, FLOOR, 12);
+    // 心臓の間の入口 (戦いが始まると閉じる)。z=HEART_GATE_Z の壁
+    public static final int HEART_GATE_Z = -64;
+    public static final List<BlockPos> HEART_GATE = wall(-1, 1, 94, 97, HEART_GATE_Z, true);
+    // 心臓を倒すと現れる光の柱。上に立つと尾の台へ戻される
+    public static final BlockPos HEART_PILLAR = new BlockPos(HEART_CX, FLOOR + 1, HEART_CZ);
 
     // ---------------------------------------------------------------- 西の翼 (アスレチック)
     public static final Box W0 = new Box(-22, -16, -26, -18, FLOOR, 6);

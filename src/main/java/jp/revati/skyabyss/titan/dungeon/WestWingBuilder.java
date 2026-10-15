@@ -86,11 +86,11 @@ final class WestWingBuilder {
         kit.fill(x1, y, z1, x2, y, z2, BuildKit.POLISHED);
     }
 
-    // 足場を置く。新しい足場の頭上に飾り (鎖・鍾乳石) が垂れていたら取り除く
+    // 足場を置く。足場はすべて崩れる骨。新しい足場の頭上に飾り (鎖・鍾乳石) が垂れていたら取り除く
     static void placeCourses(BuildKit kit, List<List<int[]>> courses) {
         for (List<int[]> course : courses) {
             for (int[] s : course) {
-                kit.set(s[0], s[1], s[2], s[3] == 1 ? ModBlocks.CRUMBLING_BONE.get().defaultBlockState() : Blocks.BONE_BLOCK.defaultBlockState());
+                kit.set(s[0], s[1], s[2], ModBlocks.CRUMBLING_BONE.get().defaultBlockState());
                 for (int y = s[1] + 1; y <= s[1] + 4; y++) {
                     kit.set(s[0], y, s[2], BuildKit.AIR);
                 }

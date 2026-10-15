@@ -17,7 +17,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -49,6 +48,7 @@ public final class TitanBackSelfTest {
             checkHalls(back, failures);
             checkMaze(back, failures);
             checkTreasury(back, failures);
+            checkHeart(back, failures);
             checkReset(back, failures);
             if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
                 failures.add("resonance forge missing at " + TitanBackLayout.forge());
@@ -176,7 +176,9 @@ public final class TitanBackSelfTest {
         int[][] open = {
                 {0, FLOOR + 1, -11}, {0, FLOOR + 1, -12}, {-12, FLOOR + 1, -22}, {12, FLOOR + 1, -22},
                 {-23, FLOOR + 1, -22}, {-30, 98, -35}, {-29, 98, -43}, {-23, 101, -57}, {-17, 101, -55},
-                {23, FLOOR + 1, -22}, {28, FLOOR + 1, -43}, {17, FLOOR + 1, -55}, {6, 94, -7}};
+                {23, FLOOR + 1, -22}, {28, FLOOR + 1, -43}, {17, FLOOR + 1, -55}, {6, 94, -7},
+                // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
+                {0, 94, -46}, {0, 94, -63}, {0, 94, -64}, {0, 94, -65}};
         for (int[] d : open) {
             BlockPos p = new BlockPos(d[0], d[1], d[2]);
             air(level, p, "doorway", failures);
@@ -355,14 +357,57 @@ public final class TitanBackSelfTest {
         }
     }
 
+    // 宝物庫: 台座は飾りとして残る。宝箱はもうない (欠片と装備は心臓を倒したときに渡す)
     private static void checkTreasury(ServerLevel level, List<String> failures) {
         if (!level.getBlockState(PEDESTAL).is(Blocks.LODESTONE)) {
-            failures.add("fragment pedestal missing");
+            failures.add("pedestal missing");
         }
-        for (BlockPos p : List.of(CHEST, CHEST_2)) {
-            if (!(level.getBlockEntity(p) instanceof ChestBlockEntity chest) || chest.isEmpty()) {
-                failures.add("treasure chest missing or empty at " + p);
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -43; z <= -36; z++) {
+                if (level.getBlockEntity(new BlockPos(x, FLOOR + 1, z)) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity) {
+                    failures.add("treasure chest should be gone at " + x + "," + z);
+                }
             }
+        }
+    }
+
+    // 心臓の回廊と心臓の間: 中は空いていて、天井・壁が体の中で閉じていること (抜け道がないこと)。休み場の焚き火があること
+    private static void checkHeart(ServerLevel level, List<String> failures) {
+        int cx = HEART_CX;
+        int cz = HEART_CZ;
+        if (!level.getBlockState(new BlockPos(cx, FLOOR + 1, cz)).isAir()) {
+            failures.add("heart arena floor-level center is blocked");
+        }
+        if (!level.getBlockState(new BlockPos(cx, HEART.ceilingY() - 1, cz)).isAir()) {
+            failures.add("heart arena top-level center is blocked");
+        }
+        if (!level.getBlockState(new BlockPos(cx, FLOOR, cz)).isSolid() || !level.getBlockState(new BlockPos(cx, HEART.ceilingY(), cz)).isSolid()) {
+            failures.add("heart arena floor or ceiling is not solid");
+        }
+        int holes = 0;
+        for (int dx = -17; dx <= 17; dx++) {
+            for (int dz = -17; dz <= 17; dz++) {
+                int d2 = dx * dx + dz * dz;
+                if (d2 > 272) {
+                    continue;
+                }
+                BlockPos ceil = new BlockPos(cx + dx, HEART.ceilingY(), cz + dz);
+                if (d2 <= 210) {
+                    // 内側の天井は、すべて固体であること
+                    if (!level.getBlockState(ceil).isSolid()) {
+                        holes++;
+                    }
+                } else if (!level.getBlockState(new BlockPos(cx + dx, 100, cz + dz)).isSolid()) {
+                    // 壁の輪は、どこも空いていないこと
+                    holes++;
+                }
+            }
+        }
+        if (holes > 0) {
+            failures.add("heart arena shell has " + holes + " holes");
+        }
+        if (!level.getBlockState(new BlockPos(0, 94, -54)).is(Blocks.SOUL_CAMPFIRE)) {
+            failures.add("heart rest campfire missing");
         }
     }
 
@@ -376,6 +421,7 @@ public final class TitanBackSelfTest {
         TitanBackData data = TitanBackData.get(level);
         data.markGateOpened();
         data.markHallCleared("e1");
+        data.markHeartDefeated();
         long courseSeed = data.courseSeed();
         long mazeSeed = data.mazeSeed();
         TitanBackTrials.resetTrials(level);
@@ -391,11 +437,16 @@ public final class TitanBackSelfTest {
                 failures.add("reset left a stone singing at " + p);
             }
         }
-        for (List<BlockPos> sealed : List.of(GATE, E1_EXIT)) {
+        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, E1_EXIT)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("reset did not reseal " + p);
                 }
+            }
+        }
+        for (BlockPos p : HEART_GATE) {
+            if (!level.getBlockState(p).isAir()) {
+                failures.add("reset did not open the heart gate at " + p);
             }
         }
         if (data.hasProgress()) {

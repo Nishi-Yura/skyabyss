@@ -208,6 +208,66 @@ def bleeding_icon():
     return img
 
 
+def crack_lines(seed, count, steps, branch=0.06):
+    """ひび割れの線 (ランダムに折れ曲がる線。ところどころ枝分かれする)"""
+    r = np.random.default_rng(seed)
+    m = np.zeros((S, S), bool)
+    for _ in range(count):
+        x, y = r.uniform(0, S), r.uniform(0, S)
+        ang = r.uniform(0, 2 * math.pi)
+        for _ in range(steps):
+            ang += r.normal(0, 0.7)
+            x += math.cos(ang)
+            y += math.sin(ang)
+            if not (0 <= x < S and 0 <= y < S):
+                break
+            m[int(y), int(x)] = True
+            if r.random() < branch:
+                ang2 = ang + r.choice([-1, 1]) * r.uniform(0.6, 1.2)
+                bx, by = x, y
+                for _ in range(steps // 4):
+                    ang2 += r.normal(0, 0.5)
+                    bx += math.cos(ang2)
+                    by += math.sin(ang2)
+                    if not (0 <= bx < S and 0 <= by < S):
+                        break
+                    m[int(by), int(bx)] = True
+    return m
+
+
+def bone(seed):
+    """骨の地色: 黄みがかった白に、細かい筋と斑点"""
+    n = noise(seed, 4) * 0.6 + np.random.default_rng(seed + 3).random((S, S)) * 0.4
+    base = np.array([224, 214, 186], float)
+    return base * (0.86 + 0.18 * n[..., None])
+
+
+def crumbling_bone(cracking, seed=41):
+    """崩れる骨: 骨の地色に、ひび割れと欠けを入れる。cracking のときは、さらに深く割れている"""
+    rgb = bone(seed)
+    # 側面は縦の筋 (骨の繊維)
+    yy, xx = np.mgrid[0:S, 0:S]
+    grain = np.sin(xx * 1.9 + noise(seed + 5, 8) * 6) * 0.5 + 0.5
+    side = rgb * (0.92 + 0.12 * grain[..., None])
+    # 上面は年輪のような同心円の筋
+    rr = np.hypot(xx - 15.5, yy - 15.5)
+    rings = np.abs((rr % 5.0) - 2.5) < 0.6
+    top = rgb.copy()
+    top[rings] *= 0.84
+    dark = np.array([84, 70, 58], float)
+    for img, lines_seed in ((side, seed + 10), (top, seed + 20)):
+        count, steps = (6, 24) if cracking else (4, 18)
+        m = crack_lines(lines_seed, count, steps)
+        img[m] = dark
+        if cracking:
+            # 割れ目の両側に欠けた穴 (奥の暗い骨が見える)
+            r = np.random.default_rng(lines_seed + 1)
+            chips = m & (r.random((S, S)) < 0.35)
+            img[np.roll(chips, 1, axis=1)] = dark * 0.8
+            img[np.roll(chips, -1, axis=0)] = np.array([150, 136, 116], float)
+    return side, top
+
+
 def main():
     save(resonance_stone(False), ROOT / "block/resonance_stone.png")
     save(resonance_stone(True), ROOT / "block/resonance_stone_active.png")
@@ -223,6 +283,11 @@ def main():
     save(forge_front(), ROOT / "block/resonance_forge_front.png")
     save(forge_bottom(), ROOT / "block/resonance_forge_bottom.png")
     save_rgba(bleeding_icon(), ROOT / "mob_effect/bleeding.png")
+    # 崩れる骨: ひびの入った骨 (乗る前) と、崩れかけの骨 (ひびが大きく割れる)
+    for cracking, suffix in ((False, ""), (True, "_cracking")):
+        side, top = crumbling_bone(cracking)
+        save(side, ROOT / f"block/crumbling_bone_side{suffix}.png")
+        save(top, ROOT / f"block/crumbling_bone_top{suffix}.png")
     print("ok")
 
 

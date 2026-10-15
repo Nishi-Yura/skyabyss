@@ -4,14 +4,18 @@ import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.entity.StoneWhaleHeart;
+import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.titan.TitanTravel;
@@ -31,7 +35,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -53,16 +56,21 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //  - 休憩地点: 休み場に着くと記録され、谷に落ちたり倒れたりすると、そこからやり直せる
 //  - 倒れても持ち物と経験値は失わない (巨神の背の上でだけ)。地上のリスポーン地点はそのまま
 //  - 番兵の広間: 入ると入口が閉じて二度と開かない (一方通行)。人数に応じた番兵の波を倒しきると出口が開く
+//  - 心臓の間 (最終ボス): 入ると入口が閉じ、岩鯨の心臓が現れる。全員が倒れるか島を去ると心臓は眠り、入口が開く。
+//    倒すと島にいる全員に報酬 (TitanLoot)、光の柱で尾の台へ戻れる
 //  - 休み場の焚き火にしゃがんで触れると、試練をあきらめて背の入口 (尾の台) へ戻れる
-//  - 天の鍵の欠片: 宝物庫の台座から一人一つ。宝箱は試練を越えるたびに満たされる
-//  - リセット: 背中に誰もいなくなって3分たつと、石・封印・広間・宝箱が元に戻り、アスレチックと迷路は新しい形になる
+//  - リセット: 背中に誰もいなくなって3分たつと、石・封印・広間・心臓が元に戻り、アスレチックと迷路は新しい形になる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanBackTrials {
     private static final String TAG_CHECKPOINT = "skyabyss_checkpoint";
     private static final String TAG_DIED_ON_BACK = "skyabyss_died_on_back";
     public static final String MOB_TAG = "skyabyss_guard";
+    // 心臓 (最終ボス) に付ける印。残ったものを、リセットや起動時に片付けるため
+    public static final String HEART_TAG = "skyabyss_heart";
     private static final int RESET_AFTER_IDLE = 20 * 60 * 3;
     private static final int WAVE_DELAY = 60;
+    // 心臓の間から人が消えてから、心臓を眠らせて入口を開けるまでの時間
+    private static final int HEART_ABANDON_DELAY = 60;
 
     // ---------------------------------------------------------------- 休憩地点
     private record Checkpoint(String id, Box area, BlockPos spawn) {
@@ -75,7 +83,8 @@ public final class TitanBackTrials {
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 0)),
             new Checkpoint("e0", E0, E0.center().offset(0, 0, 2)),
             new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, 0)),
-            new Checkpoint("ce2", CE2, CE2.center().offset(2, 0, 0)));
+            new Checkpoint("ce2", CE2, CE2.center().offset(2, 0, 0)),
+            new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)));
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
 
     // 倒れた人の持ち物と経験値を、生き返るまで預かっておく
@@ -111,6 +120,13 @@ public final class TitanBackTrials {
     private static boolean cleanedAfterLoad;
     private static int idleTicks;
 
+    // ---------------------------------------------------------------- 心臓の間 (最終ボス)
+    private static boolean heartActive;
+    @Nullable
+    private static UUID heartId;
+    private static final Set<UUID> heartParticipants = new HashSet<>();
+    private static int heartEmpty;
+
     private TitanBackTrials() {
     }
 
@@ -143,11 +159,15 @@ public final class TitanBackTrials {
     static void onServerStopped(ServerStoppedEvent event) {
         HALL_STATES.clear();
         KEPT.clear();
+        heartActive = false;
+        heartId = null;
+        heartParticipants.clear();
+        heartEmpty = 0;
         cleanedAfterLoad = false;
         idleTicks = 0;
     }
 
-    // ---------------------------------------------------------------- 毎tick: 広間の進行とリセット
+    // ---------------------------------------------------------------- 毎tick: 広間と心臓の進行、リセット
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK || level.getGameTime() % 10 != 0) {
@@ -165,12 +185,18 @@ public final class TitanBackTrials {
                     resetHall(level, hall, false);
                 }
             }
+            resetHeart(level, false);
         }
         for (Hall hall : HALLS) {
             if (!data.isHallCleared(hall.id())) {
                 tickHall(level, data, hall);
             }
         }
+        // 宝物庫の封印が開いていれば、奥の扉も一緒に開く (三つの石がそろったとき)
+        if (data.isGateOpened()) {
+            open(level, INNER_GATE);
+        }
+        tickHeart(level, data);
         // 誰もいなくなってしばらくたったら、試練を元に戻す
         if (level.players().isEmpty()) {
             idleTicks += 10;
@@ -304,16 +330,145 @@ public final class TitanBackTrials {
         return level.getEntitiesOfClass(ServerPlayer.class, area, p -> p.isAlive() && !p.isSpectator());
     }
 
+    // ---------------------------------------------------------------- 心臓の間 (最終ボス)
+    // 入ると入口が閉じ、心臓が現れる。全員が倒れるか島から消えて数秒たつと、心臓を眠らせて入口を開け直す
+    private static void tickHeart(ServerLevel level, TitanBackData data) {
+        if (data.isHeartDefeated()) {
+            tickHeartPillar(level);
+            return;
+        }
+        List<ServerPlayer> inside = playersInHeart(level);
+        if (!heartActive) {
+            if (!inside.isEmpty()) {
+                startHeart(level, inside);
+            }
+            return;
+        }
+        Entity heart = heartId == null ? null : level.getEntity(heartId);
+        if (heart == null || !heart.isAlive()) {
+            // 撃破の報告がないまま心臓が消えたので、最初に戻す
+            resetHeart(level, true);
+            return;
+        }
+        // 戦いの中で心臓が部屋の外へ出たら、中央へ戻す
+        if (heart.distanceToSqr(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5) > 20 * 20) {
+            heart.moveTo(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5, heart.getYRot(), 0f);
+        }
+        if (inside.isEmpty()) {
+            heartEmpty += 10;
+            if (heartEmpty >= HEART_ABANDON_DELAY) {
+                resetHeart(level, true);
+            }
+            return;
+        }
+        heartEmpty = 0;
+        for (ServerPlayer player : inside) {
+            heartParticipants.add(player.getUUID());
+        }
+    }
+
+    private static void startHeart(ServerLevel level, List<ServerPlayer> inside) {
+        heartActive = true;
+        heartEmpty = 0;
+        heartParticipants.clear();
+        for (ServerPlayer player : inside) {
+            heartParticipants.add(player.getUUID());
+        }
+        seal(level, HEART_GATE);
+        level.playSound(null, HEART.center(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
+        StoneWhaleHeart heart = ModEntities.STONE_WHALE_HEART.get().create(level);
+        if (heart != null) {
+            heart.moveTo(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5, 0f, 0f);
+            heart.addTag(HEART_TAG);
+            level.addFreshEntity(heart);
+            heartId = heart.getUUID();
+        }
+        broadcast(level, HEART, ModText.battle("message.skyabyss.heart_begin"));
+        SkyAbyss.LOGGER.info("The heart of the stone whale woke with {} challenger(s)", inside.size());
+    }
+
+    // 心臓を消して、入口を開ける。心臓の間に残った心臓の印も片付ける
+    private static void resetHeart(ServerLevel level, boolean announce) {
+        boolean wasActive = heartActive;
+        for (Entity e : level.getEntitiesOfClass(Entity.class, HEART.aabb().inflate(6), e -> e.getTags().contains(HEART_TAG))) {
+            e.discard();
+        }
+        heartActive = false;
+        heartId = null;
+        heartParticipants.clear();
+        heartEmpty = 0;
+        open(level, HEART_GATE);
+        if (announce && wasActive) {
+            broadcast(level, HEART, ModText.deny("message.skyabyss.heart_abandoned"));
+        }
+    }
+
+    // 岩鯨の心臓を倒したときに、心臓そのものが呼ぶ。報酬を渡し、入口と光の柱を開く
+    public static void onHeartDefeated(ServerLevel level, StoneWhaleHeart heart) {
+        TitanBackData data = TitanBackData.get(level);
+        if (data.isHeartDefeated()) {
+            return;
+        }
+        data.markHeartDefeated();
+        heartActive = false;
+        heartId = null;
+        heartParticipants.clear();
+        heartEmpty = 0;
+        // 入口は開けたまま。奥の扉から来た道を戻れる
+        open(level, HEART_GATE);
+        List<ServerPlayer> alive = new ArrayList<>();
+        for (ServerPlayer player : level.players()) {
+            if (player.isAlive() && !player.isSpectator()) {
+                alive.add(player);
+            }
+        }
+        TitanLoot.onHeartDefeat(level, alive);
+        for (ServerPlayer player : level.players()) {
+            player.sendSystemMessage(ModText.progress("message.skyabyss.heart_defeated"));
+        }
+        BlockPos c = HEART.center();
+        level.playSound(null, c, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 2.5f, 0.6f);
+        level.playSound(null, c, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.7f);
+        SkyAbyss.LOGGER.info("The heart of the stone whale was defeated by {} player(s)", alive.size());
+    }
+
+    // 心臓を倒したあとの光の柱。中央に立つと尾の台へ戻される
+    private static void tickHeartPillar(ServerLevel level) {
+        double px = HEART_CX + 0.5;
+        double pz = HEART_CZ + 0.5;
+        level.sendParticles(ParticleTypes.END_ROD, px, FLOOR + 1 + (level.getGameTime() % 12), pz, 3, 0.25, 0.2, 0.25, 0.02);
+        for (ServerPlayer player : level.players()) {
+            if (player.isAlive() && Math.abs(player.getX() - px) < 1.2 && Math.abs(player.getZ() - pz) < 1.2
+                    && player.getY() > FLOOR && player.getY() < FLOOR + 12) {
+                toArrival(player);
+                player.sendSystemMessage(ModText.lore("message.skyabyss.heart_pillar"));
+            }
+        }
+    }
+
+    private static void toArrival(ServerPlayer player) {
+        BlockPos a = arrival();
+        player.fallDistance = 0;
+        player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, player.getYRot(), 0f);
+    }
+
+    // 心臓の間の中にいる人。入口 (HEART_GATE, z=-64) より奥に入った人だけを数える
+    private static List<ServerPlayer> playersInHeart(ServerLevel level) {
+        AABB area = new AABB(HEART.x1() + 1, FLOOR + 1, HEART.z1() + 1, HEART.x2(), HEART.ceilingY(), HEART_GATE_Z - 1);
+        return level.getEntitiesOfClass(ServerPlayer.class, area, p -> p.isAlive() && !p.isSpectator());
+    }
+
     // ---------------------------------------------------------------- リセット
     public static void resetTrials(ServerLevel level) {
         TitanBackData data = TitanBackData.get(level);
+        resetHeart(level, false);
         for (BlockPos p : RESONANCE_STONES) {
             BlockState s = level.getBlockState(p);
             if (s.getBlock() instanceof ResonanceStoneBlock) {
                 level.setBlock(p, s.setValue(ResonanceStoneBlock.ACTIVE, false), 3);
             }
         }
-        for (List<BlockPos> gate : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
+        for (List<BlockPos> gate : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
             seal(level, gate);
         }
         for (Hall hall : HALLS) {
@@ -325,7 +480,6 @@ public final class TitanBackTrials {
         data.reseed(level.getRandom());
         WestWingBuilder.placeCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
         MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
-        TitanBackBuilder.fillChests(level, level.random);
         data.resetProgress();
         idleTicks = 0;
         SkyAbyss.LOGGER.info("The stone whale's trials have been reset");
@@ -480,9 +634,10 @@ public final class TitanBackTrials {
         }
         BlockPos pos = event.getPos();
         if (pos.equals(PEDESTAL)) {
+            // 飾りの台座。欠片は心臓を倒すと受け取れる
             event.setCanceled(true);
             if (event.getEntity() instanceof ServerPlayer player) {
-                claimFragment(player);
+                player.displayClientMessage(ModText.hint("message.skyabyss.pedestal_sleep"), true);
             }
             return;
         }
@@ -498,21 +653,6 @@ public final class TitanBackTrials {
                     player.displayClientMessage(ModText.hint("message.skyabyss.campfire_hint"), true);
                 }
             }
-        }
-    }
-
-    private static void claimFragment(ServerPlayer player) {
-        TitanBackData data = TitanBackData.get(player.serverLevel());
-        if (data.claimFragment(player.getUUID())) {
-            ItemStack fragment = TitanBackBuilder.fragment();
-            if (!player.getInventory().add(fragment)) {
-                player.drop(fragment, false);
-            }
-            player.level().playSound(null, PEDESTAL, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2f, 0.8f);
-            player.serverLevel().sendParticles(ParticleTypes.END_ROD, PEDESTAL.getX() + 0.5, PEDESTAL.getY() + 1.2, PEDESTAL.getZ() + 0.5, 30, 0.3, 0.5, 0.3, 0.04);
-            player.sendSystemMessage(ModText.progress("message.skyabyss.fragment_received"));
-        } else {
-            player.displayClientMessage(ModText.hint("message.skyabyss.fragment_already"), true);
         }
     }
 

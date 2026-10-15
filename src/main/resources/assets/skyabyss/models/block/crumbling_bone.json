@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "minecraft:block/bone_block_top",
-    "side": "minecraft:block/bone_block_side"
+    "end": "skyabyss:block/crumbling_bone_top",
+    "side": "skyabyss:block/crumbling_bone_side"
   }
 }

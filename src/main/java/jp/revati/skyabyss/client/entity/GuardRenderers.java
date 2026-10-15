@@ -31,6 +31,7 @@ public final class GuardRenderers {
         event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), ctx -> geo(ctx, "moss_crawler", 1.0f));
         event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> geo(ctx, "waterway_maw", 1.1f));
         event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> geo(ctx, "whalebone_captain", 1.45f));
+        event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), ctx -> geo(ctx, "stone_whale_heart", 1.0f));
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
             public ResourceLocation getTextureLocation(BoneSpike entity) {

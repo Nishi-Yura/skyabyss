@@ -11,6 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -37,6 +38,8 @@ public class CrumblingBoneBlock extends Block {
     // 乗ってから崩れるまで / 崩れてから戻るまで (tick)
     private static final int CRACK_TICKS = 12;
     private static final int RESTORE_TICKS = 90;
+    // 人が埋まっている間は戻さず、少し待つ
+    private static final int RESTORE_RETRY_TICKS = 10;
 
     public enum Stage implements StringRepresentable {
         SOLID, CRACKING, GONE;
@@ -112,6 +115,11 @@ public class CrumblingBoneBlock extends Block {
                         pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 24, 0.3, 0.3, 0.3, 0.1);
             }
             case GONE -> {
+                // 落ちてきた人や、下にいた人が骨の中に埋まらないよう、そこに立つ人がいなくなってから戻す
+                if (!level.getEntitiesOfClass(LivingEntity.class, new AABB(pos)).isEmpty()) {
+                    level.scheduleTick(pos, this, RESTORE_RETRY_TICKS);
+                    return;
+                }
                 level.setBlock(pos, state.setValue(STAGE, Stage.SOLID), Block.UPDATE_CLIENTS);
                 level.playSound(null, pos, SoundEvents.BONE_BLOCK_PLACE, SoundSource.BLOCKS, 0.8f, 0.8f);
             }

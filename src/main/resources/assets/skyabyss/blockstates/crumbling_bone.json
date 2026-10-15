@@ -4,7 +4,7 @@
       "model": "skyabyss:block/crumbling_bone"
     },
     "stage=cracking": {
-      "model": "skyabyss:block/crumbling_bone"
+      "model": "skyabyss:block/crumbling_bone_cracking"
     },
     "stage=gone": {
       "model": "skyabyss:block/crumbling_bone"
