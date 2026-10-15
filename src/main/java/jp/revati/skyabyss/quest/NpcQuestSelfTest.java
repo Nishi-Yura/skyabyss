@@ -110,6 +110,7 @@ public final class NpcQuestSelfTest {
         level.addFreshEntity(st);
         level.addFreshEntity(wc);
         try {
+            placement(level, new BlockPos(spawn.getX(), 260, spawn.getZ()), failures, notes);
             entity(st, failures, notes);
             dialogues(server, level, st, wc, at, failures, notes);
             kills(level, failures, notes);
@@ -321,6 +322,48 @@ public final class NpcQuestSelfTest {
             failures.add(path + ": " + e);
             return null;
         }
+    }
+
+    // ---------------------------------------------------------------- 立たせる場所
+    // 空中に草の足場 (半径 40) を作り、真ん中を鐘とみなして、語り部は鐘のそば、鯨追いは外れの火のそばに立つか
+    private static void placement(ServerLevel level, BlockPos bell, List<String> failures, List<String> notes) {
+        int r = 40;
+        List<BlockPos> placed = new ArrayList<>();
+        for (int dx = -r; dx <= r; dx++) {
+            for (int dz = -r; dz <= r; dz++) {
+                BlockPos p = bell.offset(dx, -1, dz);
+                level.setBlock(p, net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+                placed.add(p);
+            }
+        }
+        List<NpcEntity> spawned = new ArrayList<>();
+        try {
+            NpcEntity st = jp.revati.skyabyss.npc.NpcSpawner.spawnStoryteller(level, bell);
+            check(st != null, "the storyteller could not be placed", failures);
+            if (st != null) {
+                spawned.add(st);
+                double d = Math.sqrt(st.blockPosition().distSqr(bell));
+                check(d <= 8 && st.getY() == bell.getY(), "the storyteller stands too far from the bell (" + d + ")", failures);
+                check(bell.equals(st.home()) && st.hasCustomName(), "the storyteller has no home or name", failures);
+            }
+            NpcEntity wc = jp.revati.skyabyss.npc.NpcSpawner.spawnChaser(level, bell, net.minecraft.util.RandomSource.create(7));
+            check(wc != null, "the whale chaser could not be placed", failures);
+            if (wc != null) {
+                spawned.add(wc);
+                double d = Math.sqrt(wc.blockPosition().distSqr(bell));
+                BlockPos fire = wc.home();
+                check(d >= 16 && d <= 36, "the whale chaser should camp 18-34 blocks from the bell (" + d + ")", failures);
+                check(fire != null && level.getBlockState(fire).is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
+                        && fire.distSqr(wc.blockPosition()) <= 4, "the whale chaser has no campfire beside him", failures);
+                if (fire != null) {
+                    placed.add(fire);
+                }
+            }
+        } finally {
+            spawned.forEach(NpcEntity::discard);
+            placed.forEach(p -> level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2));
+        }
+        notes.add("placement: storyteller beside the bell, whale chaser at the village edge with a campfire");
     }
 
     // ---------------------------------------------------------------- エンティティ
@@ -567,15 +610,15 @@ public final class NpcQuestSelfTest {
         pick(a, ST, "accept", failures);
         check(stage(a, "sub_song").equals("gather"), "sub_song did not start", failures);
         // 見る者の話 (好感度 15 から) と鯨追いの峰の話で、2 つ記される
-        Affinity.set(a, ST, 20);
+        Affinity.set(a, ST, 12);
         DialogueService.open(a, st);
-        check(shown(a, ST, "watcher_ask"), "the watcher topic should appear at affinity 20", failures);
+        check(shown(a, ST, "watcher_ask"), "the watcher topic should appear at affinity 12", failures);
         pick(a, ST, "watcher_ask", failures);
         check(Lore.state(a).has("prologue/watcher"), "the watcher topic did not record lore", failures);
         DialogueService.close(a);
-        Affinity.set(a, ST, 35);
+        Affinity.set(a, ST, 22);
         DialogueService.open(a, st);
-        check(shown(a, ST, "custom"), "the custom (seventh night) topic should appear at affinity 30+", failures);
+        check(shown(a, ST, "custom"), "the custom (seventh night) topic should appear at affinity 20+", failures);
         pick(a, ST, "custom", failures);
         DialogueService.close(a);
         DialogueService.open(a, wc);

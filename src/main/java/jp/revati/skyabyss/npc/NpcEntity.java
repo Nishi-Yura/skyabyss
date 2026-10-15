@@ -98,6 +98,11 @@ public class NpcEntity extends PathfinderMob implements GeoEntity {
     }
 
     // ---------------------------------------------------------------- 家
+    // 見つめたときに名前が出るよう、役の名前を付ける (翻訳キーなので言語を切り替えても追従する)
+    public void nameByRole() {
+        setCustomName(Component.translatable(getType().getDescriptionId()));
+    }
+
     public void setHome(BlockPos pos) {
         this.home = pos.immutable();
         restrictTo(home, homeRadius);

@@ -197,9 +197,9 @@ MENU_OPTS = [
     ("watcher_seen", "夜、遠くに誰かが立っていた。", "At night, someone was standing far off.",
      {"goto": "watcher", "if": all_(not_(lore("prologue/watcher")), watcher(1))}),
     ("watcher_ask", "夜に気をつけることはある？", "Is there anything to beware of at night?",
-     {"goto": "watcher", "if": all_(not_(lore("prologue/watcher")), not_(watcher(1)), aff(15))}),
+     {"goto": "watcher", "if": all_(not_(lore("prologue/watcher")), not_(watcher(1)), aff(10))}),
     ("custom", "この村の決まりごとを教えてほしい。", "Tell me the customs of this village.",
-     {"goto": "calendar", "if": all_(not_(lore("prologue/seventh_night")), aff(30))}),
+     {"goto": "calendar", "if": all_(not_(lore("prologue/seventh_night")), aff(20))}),
     ("book", "古い帳面を見せる。", "Show her the old notebook.",
      {"goto": "book", "if": all_(lore("prologue/the_book"), not_(flag("book_shown")))}),
     ("whale", "空を泳ぐ岩の山を見た。", "I saw a mountain of rock swimming in the sky.",
@@ -284,12 +284,12 @@ st.node("watcher2",
         "But my grandmother used to say:\nit isn't watching us. It's \"remembering\" us.",
         face="grave", next="@entry")
 
-# 七日目の夜 (好感度 30 から)
+# 七日目の夜 (好感度 20 から)
 st.node("calendar",
         "決まりごとかい。……ひとつだけ、ある。\n七日目の夜は、戸を閉めて外へ出ないこと。古い暦の余白に、同じことが七日おきに書いてある。",
         "Customs? ...There's just one.\nOn the seventh night, shut your door and don't go out. The margins of the old calendar say the same thing every seven days.",
         face="grave", next="calendar2", do=[unlock("prologue/seventh_night"), set_flag("calendar_told")],
-        note="好感度 30 から。伝承「暦の書き込み」を記す")
+        note="好感度 20 から。伝承「暦の書き込み」を記す")
 st.node("calendar2",
         "なぜ七日目なのかは、誰も知らない。守らなかった家の話も、聞いたことがないね。\n……守らなかった家が、残っていないだけかもしれないけど。",
         "No one knows why the seventh. I've never heard of a house that didn't keep it, either.\n...Though maybe that's only because none of them are left.",

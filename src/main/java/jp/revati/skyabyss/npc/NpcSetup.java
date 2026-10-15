@@ -25,12 +25,14 @@ public final class NpcSetup {
             () -> EntityType.Builder.<NpcEntity>of((type, level) -> new NpcEntity(type, level, 8), MobCategory.MISC)
                     .sized(0.6f, 1.6f)
                     .clientTrackingRange(10)
+                    .fireImmune()
                     .build(STORYTELLER_ID));
     // 鯨追い: 岩鯨を追って旅する人。村の外れで火を焚いている (火のまわり 4 ブロック)
     public static final DeferredHolder<EntityType<?>, EntityType<NpcEntity>> WHALE_CHASER = ENTITIES.register("whale_chaser",
             () -> EntityType.Builder.<NpcEntity>of((type, level) -> new NpcEntity(type, level, 4), MobCategory.MISC)
                     .sized(0.6f, 1.95f)
                     .clientTrackingRange(10)
+                    .fireImmune()
                     .build(WHALE_CHASER_ID));
 
     // プレイヤーと NPC の記録 (好感度・会話の印)。死んでも引き継ぎ、持ち主にだけ同期する

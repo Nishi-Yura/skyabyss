@@ -210,6 +210,7 @@ public final class NpcSpawner {
         }
         npc.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
         npc.setHome(home);
+        npc.nameByRole();
         npc.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null);
         level.addFreshEntity(npc);
         SkyAbyss.LOGGER.info("[npc] {} appeared at {} (home {})", npc.role(), at, home);

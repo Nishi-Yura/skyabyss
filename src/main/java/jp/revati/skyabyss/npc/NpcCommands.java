@@ -89,6 +89,7 @@ public final class NpcCommands {
         }
         npc.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, ctx.getSource().getRotation().y + 180f, 0f);
         npc.setHome(at);
+        npc.nameByRole();
         level.addFreshEntity(npc);
         ctx.getSource().sendSuccess(() -> Component.literal("spawned " + role + " at " + at.toShortString()), true);
         return 1;

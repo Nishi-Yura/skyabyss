@@ -214,7 +214,7 @@
             },
             {
               "type": "affinity",
-              "min": 15
+              "min": 10
             }
           ],
           "goto": "watcher"
@@ -231,7 +231,7 @@
             },
             {
               "type": "affinity",
-              "min": 30
+              "min": 20
             }
           ],
           "goto": "calendar"
