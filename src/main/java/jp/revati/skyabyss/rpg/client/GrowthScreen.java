@@ -69,6 +69,8 @@ public class GrowthScreen extends Screen {
                 .bounds(left + 136, top + 161, 44, 16).build());
         confirm = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.confirm"), b -> send())
                 .bounds(left + 184, top + 161, 46, 16).build());
+        // 技の画面へのつまみ (上の縁)
+        jp.revati.skyabyss.rpg.client.skill.RpgTabs.add(this::addRenderableWidget, width, height, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
         refresh();
     }
 
@@ -131,8 +133,8 @@ public class GrowthScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (GrowthClientSetup.STATUS_KEY.matches(keyCode, scanCode)) {
-            onClose();
+        // J で閉じる、K で技の画面へ
+        if (jp.revati.skyabyss.rpg.client.skill.RpgTabs.keyPressed(keyCode, scanCode, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS)) {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

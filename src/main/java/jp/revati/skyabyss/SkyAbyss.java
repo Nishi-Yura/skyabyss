@@ -41,6 +41,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
         // 伝承の書 (アイテム・頁の出どころ・プレイヤーの記録)
         jp.revati.skyabyss.lore.LoreSetup.register(modEventBus);
+        // 技 (スキル・マナ・技の枠)。登録は rpg.skill パッケージにまとめてある
+        jp.revati.skyabyss.rpg.skill.Skills.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
