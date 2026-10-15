@@ -70,7 +70,7 @@ public final class SkyPassClient {
     }
 
     @Nullable
-    static SkyPass current() {
+    public static SkyPass current() {
         return current;
     }
 

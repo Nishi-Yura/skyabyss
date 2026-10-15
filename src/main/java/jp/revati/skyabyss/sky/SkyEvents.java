@@ -21,7 +21,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -184,14 +186,15 @@ public final class SkyEvents {
         return (long) (gap / frequency);
     }
 
-    // 影の下と、影がこれから来る場所の動物は、動きを止めて空を見上げる
+    // 影の下と、影がこれから来る場所の動物と村人は、動きを止めて空を見上げる
+    // (うずくまって震える見た目は client/prologue/CowerClient)
     private static void frightenAnimals(ServerLevel level, SkyPass pass, long now) {
         double age = pass.age(now, 0f);
         double cx = pass.centerX(age);
         double cz = pass.centerZ(age);
         double reach = SkyPass.REACH + FEAR_LOOKAHEAD * pass.speed();
         AABB area = new AABB(cx - reach, level.getMinBuildHeight(), cz - reach, cx + reach, level.getMaxBuildHeight(), cz + reach);
-        for (Animal animal : level.getEntitiesOfClass(Animal.class, area)) {
+        for (PathfinderMob animal : level.getEntitiesOfClass(PathfinderMob.class, area, mob -> mob instanceof Animal || mob instanceof AbstractVillager)) {
             float fear = Math.max(pass.shadow(animal.getX(), animal.getZ(), age),
                     pass.shadow(animal.getX(), animal.getZ(), age + FEAR_LOOKAHEAD));
             if (fear <= 0f) {
