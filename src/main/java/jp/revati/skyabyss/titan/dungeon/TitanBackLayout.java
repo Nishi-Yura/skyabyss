@@ -31,7 +31,7 @@ public final class TitanBackLayout {
 
     // 配置の版。部屋の配置を変えたら上げる。保存された版と違えば、起動時に背中を建て直す (TitanBackData)
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
-    public static final int LAYOUT_VERSION = 2;
+    public static final int LAYOUT_VERSION = 3;
 
     // ---------------------------------------------------------------- 地表
     public static final int PLATFORM_Z = 96;

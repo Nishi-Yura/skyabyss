@@ -517,8 +517,10 @@ public final class TitanBackBuilder {
 
     // ---------------------------------------------------------------- 宝物庫
     private static void buildTreasury(BuildKit kit) {
-        BlockState warded = ModBlocks.WARDED_STONE.get().defaultBlockState();
-        kit.wardedRoom(TREASURY, warded);
+        // 壁はほかの部屋と同じ深層岩。島ではブロックを壊せないので、特別な石で囲む必要はない
+        kit.room(TREASURY);
+        kit.ribs(TREASURY, 3, true);
+        kit.floorBorder(TREASURY);
         for (int x = TREASURY.x1(); x <= TREASURY.x2(); x++) {
             for (int z = TREASURY.z1(); z <= TREASURY.z2(); z++) {
                 if ((x + z) % 2 == 0) {

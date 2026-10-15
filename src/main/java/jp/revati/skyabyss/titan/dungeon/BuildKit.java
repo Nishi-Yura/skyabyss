@@ -94,19 +94,6 @@ final class BuildKit {
         room(box, POLISHED, TILES);
     }
 
-    // 守りの石だけでできた部屋 (宝物庫)。壊せないので掘って入れない
-    void wardedRoom(Box box, BlockState warded) {
-        for (int x = box.x1() - 1; x <= box.x2() + 1; x++) {
-            for (int z = box.z1() - 1; z <= box.z2() + 1; z++) {
-                for (int y = box.floorY(); y <= box.ceilingY(); y++) {
-                    boolean inside = x >= box.x1() && x <= box.x2() && z >= box.z1() && z <= box.z2()
-                            && y > box.floorY() && y < box.ceilingY();
-                    set(x, y, z, inside ? AIR : warded);
-                }
-            }
-        }
-    }
-
     // 戸口を開ける (壁に x1〜x2 × z1〜z2 × 高さ height の穴)
     void doorway(int x1, int x2, int z1, int z2, int floorY, int height) {
         fill(x1, floorY + 1, z1, x2, floorY + height, z2, AIR);

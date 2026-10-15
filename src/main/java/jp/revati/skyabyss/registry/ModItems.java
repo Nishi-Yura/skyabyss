@@ -108,7 +108,6 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> RESONANCE_STONE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_STONE);
     public static final DeferredItem<BlockItem> SEALED_GATE = ITEMS.registerSimpleBlockItem(ModBlocks.SEALED_GATE);
-    public static final DeferredItem<BlockItem> WARDED_STONE = ITEMS.registerSimpleBlockItem(ModBlocks.WARDED_STONE);
     public static final DeferredItem<BlockItem> CRUMBLING_BONE = ITEMS.registerSimpleBlockItem(ModBlocks.CRUMBLING_BONE);
     public static final DeferredItem<BlockItem> RESONANCE_FORGE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_FORGE);
 
@@ -142,7 +141,6 @@ public final class ModItems {
                 output.accept(STONE_WHALE_HEART_EGG.get());
                 output.accept(RESONANCE_STONE.get());
                 output.accept(SEALED_GATE.get());
-                output.accept(WARDED_STONE.get());
                 output.accept(CRUMBLING_BONE.get());
             })
             .build());

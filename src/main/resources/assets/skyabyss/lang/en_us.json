@@ -20,7 +20,6 @@
   "item.skyabyss.sky_key_fragment.desc": "Warm, faintly beating. Four together, they say, open a way above the clouds",
   "block.skyabyss.resonance_stone": "Resonance Stone",
   "block.skyabyss.sealed_gate": "Sealed Gate",
-  "block.skyabyss.warded_stone": "Warded Stone",
   "message.skyabyss.chain_hint": "Right-click the chain to be pulled up onto its back",
   "message.skyabyss.descending": "At your touch, the chain slowly lowers you to the ground",
   "message.skyabyss.resonance": "A resonance stone begins to sing (%s / %s)",

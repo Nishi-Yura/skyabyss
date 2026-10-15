@@ -24,9 +24,6 @@ public final class ModBlocks {
     // 封印の扉。共鳴石がそろうまで壊せない
     public static final DeferredBlock<SealedGateBlock> SEALED_GATE = BLOCKS.register("sealed_gate",
             () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).lightLevel(state -> 3)));
-    // 宝物庫を囲む、守りの刻まれた石。掘って封印を迂回できないようにする
-    public static final DeferredBlock<Block> WARDED_STONE = BLOCKS.register("warded_stone",
-            () -> new Block(unbreakable(MapColor.DEEPSLATE)));
 
     // 乗ると崩れ、しばらくすると戻る骨の足場
     public static final DeferredBlock<CrumblingBoneBlock> CRUMBLING_BONE = BLOCKS.register("crumbling_bone",
