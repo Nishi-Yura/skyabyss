@@ -285,7 +285,7 @@ public final class NpcQuestSelfTest {
                     continue;
                 }
                 List<String> lines = LoreWrap.wrap(lang.get(e.getKey()).getAsString(), TEXT_W, NpcQuestSelfTest::width);
-                int h = 10 + lines.size() * 11 + 8 + e.getValue() * 13 + 10;
+                int h = Math.max(94, 10 + lines.size() * 11 + 8 + e.getValue() * 13 + 10);
                 if (h > longest) {
                     longest = h;
                     longestKey = code + " " + e.getKey();

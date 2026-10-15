@@ -101,7 +101,7 @@ public class DialogueScreen extends Screen {
             optionsH += Math.max(OPTION_H, ol.size() * LINE_H + 2);
         }
         int textH = lines.size() * LINE_H;
-        panelH = Math.max(FACE + 44, 10 + textH + 8 + optionsH + 10);
+        panelH = Math.max(FACE + 54, 10 + textH + 8 + optionsH + 10);
         panelX = (width - panelW) / 2;
         panelY = height - panelH - 10;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
