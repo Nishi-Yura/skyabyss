@@ -287,6 +287,8 @@ public final class TitanLoot {
     // ---------------------------------------------------------------- 入口 (T が撃破時に呼ぶ。FIX_PLAN の約束)
     // participants: その戦いに参加した人 (途中で倒れて復活待ちの人も含む)
     public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants) {
+        // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
+        jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "heart");
         MinecraftServer server = level.getServer();
         TitanBackData data = TitanBackData.get(level);
         for (UUID uuid : unique(participants)) {
@@ -336,6 +338,8 @@ public final class TitanLoot {
     }
 
     public static void onCaptainDefeat(ServerLevel level, List<ServerPlayer> participants) {
+        // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
+        jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "captain");
         MinecraftServer server = level.getServer();
         for (UUID uuid : unique(participants)) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);

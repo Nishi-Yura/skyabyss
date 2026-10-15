@@ -16,6 +16,7 @@
 | 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | `rough/captain_v4.py --install` | 同じ物ができる |
 | 苔這い: geo / png / glowmask / animation | `rough/moss_crawler_v3.py` | 監査では今の素材と比べていない |
 | `textures/gui/sky_vignette.png` | `gen_vignette.py` | 同じ物ができる |
+| 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
 `rough/` のそのほか (`armor*.py`、`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は `docs/roughs/` にしか書かない。履歴として残している。
