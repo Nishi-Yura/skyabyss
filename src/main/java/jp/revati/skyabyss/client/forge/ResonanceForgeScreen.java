@@ -37,8 +37,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int[] TAB_X = {4, 52, 100};
     private static final int CARD_W = 136;
     private static final int CARD_H = 31;
-    private static final int CARD_Y = 38;
-    private static final int CARD_STEP = 33;
+    private static final int CARD_Y = 44;
+    private static final int CARD_STEP = 32;
     private static final int EXCHANGE_Y = 62;
     private static final int EXCHANGE_STEP = 24;
 
@@ -99,7 +99,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 press(ResonanceForgeMenu.BUTTON_PICK + selected);
                 selected = -1;
             }
-        }).bounds(sx + 10, topPos + 140, 62, 16).build());
+        }).bounds(sx + 10, topPos + 142, 62, 16).build());
         keepButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.keep"), b -> {
             if (!keepArmed) {
                 keepArmed = true;
@@ -108,7 +108,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 selected = -1;
                 press(ResonanceForgeMenu.BUTTON_KEEP);
             }
-        }).bounds(sx + 76, topPos + 140, 66, 16).build());
+        }).bounds(sx + 76, topPos + 142, 66, 16).build());
         for (int i = 0; i < exchangeButtons.length; i++) {
             int index = i;
             exchangeButtons[i] = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.exchange_pick"), b -> {

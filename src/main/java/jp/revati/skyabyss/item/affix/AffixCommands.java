@@ -34,7 +34,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // /skyabyss affix set <種類> <値>         : 特性を一つ足す・置き換える (幅や数の決まりは見ない。試すため)
 // /skyabyss affix trial [回数]            : 費用なしで再鍛造の候補を作る
 // /skyabyss exchange show <人>            : 交換の状態
-// /skyabyss exchange reset <人>           : この周回の交換をやり直せるようにする
+// /skyabyss exchange reset <人>           : この周回の交換をやり直せるようにする (撃破 0 回なら 1 回にする)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AffixCommands {
     private AffixCommands() {
@@ -85,6 +85,8 @@ public final class AffixCommands {
                         .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
                             ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
                             TitanMemoryData.Record r = TitanMemoryData.get(p.server).record(p.getUUID(), TitanLoot.STONE_WHALE);
+                            // まだ心臓を倒していなければ、倒した一回として数える (試すため)
+                            r.clears = Math.max(1, r.clears);
                             r.lastExchangeClears = 0;
                             ctx.getSource().sendSuccess(() -> Component.literal(p.getScoreboardName() + ": " + TitanLoot.exchangeState(r)), true);
                             return 1;

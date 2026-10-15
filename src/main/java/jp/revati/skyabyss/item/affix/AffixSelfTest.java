@@ -20,7 +20,6 @@ import jp.revati.skyabyss.registry.ModDataComponents;
 import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -297,7 +296,8 @@ public final class AffixSelfTest {
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         double health = p.getAttributeValue(Attributes.MAX_HEALTH);
         double tough = p.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-        Set<ResourceLocation> ids = new HashSet<>();
+        // 同じ属性に同じ ID が二つあると上書きし合う (属性が違えば同じ ID でよい。バニラの防具もそう)
+        Set<String> ids = new HashSet<>();
         for (int i = 0; i < 4; i++) {
             ItemStack s = new ItemStack(armor[i]);
             s.set(ModDataComponents.AFFIXES.get(), List.of(new Affix(AffixType.VIGOR, 1.0), new Affix(AffixType.WARD, 0.03)));
@@ -305,7 +305,7 @@ public final class AffixSelfTest {
             p.setItemSlot(slots[i], s);
             EquipmentSlot slot = slots[i];
             s.forEachModifier(slot, (attribute, modifier) -> {
-                if (!ids.add(modifier.id())) {
+                if (!ids.add(attribute.getRegisteredName() + "|" + modifier.id())) {
                     f.add("modifier id " + modifier.id() + " is shared between armor pieces");
                 }
                 AttributeInstance inst = p.getAttribute(attribute);

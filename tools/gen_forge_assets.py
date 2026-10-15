@@ -121,10 +121,10 @@ def main_panel(img):
     d.rectangle([S(GEAR[0] - 3), S(GEAR[1] - 3), S(GEAR[0] + 19) - 1, S(GEAR[1] + 19) - 1], outline=PALE)
     # 情報の欄: 薄いくぼみ
     recess(d, S(69), S(16), S(169), S(75), fill=(22, 25, 33, 255))
-    # 持ち物との境の線と飾り
-    ty = S(78)
-    d.line([S(10), ty, w - S(10), ty], fill=TEAL_DIM)
-    gem(d, w // 2, ty, 4)
+    # 持ち物との境の線と飾り (「持ち物」の文字 (y 72..80) の右から)
+    ty = S(77)
+    d.line([S(70), ty, w - S(10), ty], fill=TEAL_DIM)
+    gem(d, S(120), ty, 4)
     for row in range(3):
         for col in range(9):
             slot(d, 8 + col * 18, 84 + row * 18)

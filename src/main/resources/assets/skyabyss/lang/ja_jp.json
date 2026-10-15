@@ -443,7 +443,7 @@
   "affix.skyabyss.thirst": "吸血 %s%%",
   "affix.skyabyss.resonant": "最大マナ +%s",
   "affix.skyabyss.keen": "技の待ち −%s%%",
-  "affix.skyabyss.bulwark": "防具の強靭 +%s",
+  "affix.skyabyss.bulwark": "防具強度 +%s",
   "affix.skyabyss.vigor": "最大体力 +%s",
   "affix.skyabyss.stride": "移動速度 +%s%%",
   "affix.skyabyss.ward": "受ける傷 −%s%%",
