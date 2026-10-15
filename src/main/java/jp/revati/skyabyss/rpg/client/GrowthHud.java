@@ -57,7 +57,8 @@ public final class GrowthHud {
             g.fill(X + 1, by + 1, X + 1 + fill, by + 4, (a << 24) | 0xFFFFFF);
         }
         // 得た経験値: バーの下に、薄れながら並ぶ
-        int y = by + 8;
+        // マナのバー (技の表示) を出しているときは、その下から
+        int y = by + 8 + jp.revati.skyabyss.rpg.client.skill.SkillHud.rowsBelowXpBar();
         for (GrowthClient.Popup p : GrowthClient.POPUPS) {
             float left = 1f - (float) p.age / GrowthClient.POPUP_TICKS;
             int alpha = Mth.clamp((int) (Math.min(1f, left * 3f) * 255), 8, 255);
