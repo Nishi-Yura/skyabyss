@@ -364,7 +364,8 @@ public class LoreBookScreen extends Screen {
             }
         }
         if (listScroll > 0) {
-            blitWidget(g, x + LEFT_W - 8, top + LIST_Y - 9, W_ARROW_UP);
+            // 上の矢印も一覧の下に並べる (一覧の上は見出しの二重線で、重なってしまう)
+            blitWidget(g, x + LEFT_W - 18, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_UP);
         }
         if (listScroll + LIST_ROWS < entries.size()) {
             blitWidget(g, x + LEFT_W - 8, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_DOWN);
