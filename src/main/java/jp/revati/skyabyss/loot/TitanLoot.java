@@ -647,6 +647,12 @@ public final class TitanLoot {
             owned.append("  ");
         }
         player.sendSystemMessage(owned);
+        // 共鳴の炉での交換 (欠片 30 で専用伝説)
+        ForgeRules.ExchangeState exchange = exchangeState(r);
+        if (exchange == ForgeRules.ExchangeState.READY || exchange == ForgeRules.ExchangeState.USED) {
+            player.sendSystemMessage(ModText.hint(exchange == ForgeRules.ExchangeState.READY
+                    ? "message.skyabyss.exchange.status_ready" : "message.skyabyss.exchange.status_used"));
+        }
         if (memory(player.server).hasPending(player.getUUID())) {
             player.sendSystemMessage(ModText.hint("message.skyabyss.reward_pending"));
         }
