@@ -69,6 +69,7 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":coral_thrall", new Source(14, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
     }
 
 
@@ -140,6 +141,10 @@ public final class GrowthRewards {
             return;
         }
         // 試練の番兵長と心臓は、参加者の一覧で配る (onBossDefeat)
+        if (mob instanceof jp.revati.skyabyss.titan.tide.back.TideBeckoner beckoner && beckoner.isTrialMob()) {
+            // 試練の潮招きは、参加者の一覧で配る (TideFlats)
+            return;
+        }
         if (mob.getTags().contains(TitanBackTrials.HEART_TAG)
                 || (mob.getTags().contains(TitanBackTrials.MOB_TAG) && mob.getType() == jp.revati.skyabyss.registry.ModEntities.WHALEBONE_CAPTAIN.get())) {
             return;

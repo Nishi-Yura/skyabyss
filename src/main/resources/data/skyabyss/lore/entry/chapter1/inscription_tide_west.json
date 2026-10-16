@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 110,
+  "inscription_sign": "sign.skyabyss.lore_tide_west",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_tide_west"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_tide_hub",
+    "chapter1/inscription_tide_east"
+  ]
+}

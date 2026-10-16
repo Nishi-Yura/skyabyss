@@ -1,0 +1,604 @@
+package jp.revati.skyabyss.titan.tide.back;
+
+import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.mojang.authlib.GameProfile;
+
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import jp.revati.skyabyss.titan.tide.TideBackBuilder;
+import jp.revati.skyabyss.titan.tide.TideTravel;
+import jp.revati.skyabyss.titan.tide.mob.MobTide;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+
+// 潮殻の背の本番の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide back PASSED / FAILED。
+// 配置の形 (歩いて行ける所・行けない所、休み場の復活位置、碑文と石)、潮の時計、潮の溜め (満ちても漏れない、引けば残らない)、
+// 三つの試練の進み (真珠、四つの配置が解けること・水位と戸、巣と潮招き)、三つの石で潮の底が開く、リセットと眠る試練、ピースフルの封印
+@EventBusSubscriber(modid = SkyAbyss.MODID)
+public final class TideBackSelfTest {
+    private static int countdown = -1;
+
+    private TideBackSelfTest() {
+    }
+
+    @SubscribeEvent
+    static void onServerStarted(ServerStartedEvent event) {
+        if (System.getenv("SKYABYSS_SELFTEST") != null) {
+            countdown = 70;
+        }
+    }
+
+    @SubscribeEvent
+    static void onTick(LevelTickEvent.Post event) {
+        if (countdown < 0 || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
+            return;
+        }
+        if (--countdown != 0) {
+            return;
+        }
+        countdown = -1;
+        List<String> failures = new ArrayList<>();
+        List<String> notes = new ArrayList<>();
+        try {
+            run(level.getServer(), failures, notes);
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST tide back crashed", e);
+            failures.add("crashed: " + e);
+        }
+        if (failures.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST tide back PASSED ({})", String.join("; ", notes));
+        } else {
+            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {}", f));
+            SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {} problems ({})", failures.size(), String.join("; ", notes));
+        }
+    }
+
+    private static void check(boolean ok, String message, List<String> failures) {
+        if (!ok) {
+            failures.add(message);
+        }
+    }
+
+    static void run(MinecraftServer server, List<String> failures, List<String> notes) {
+        ServerLevel back = server.getLevel(TideTravel.TIDE_BACK);
+        if (back == null) {
+            failures.add("tide_back is missing");
+            return;
+        }
+        long t0 = System.currentTimeMillis();
+        TideBackBuilder.build(back, TitanBackData.get(back));
+        notes.add("built in " + (System.currentTimeMillis() - t0) + " ms");
+        TideClock.force(TideClock.Phase.LOW);
+        try {
+            checkClock(failures);
+            checkFixtures(back, failures);
+            checkPools(back, failures, notes);
+            checkWalk(back, failures, notes);
+            checkPuzzle(back, failures, notes);
+            checkGarden(back, failures);
+            checkFlats(back, failures);
+            checkBottom(back, failures);
+            checkReset(back, failures, notes);
+            checkPeaceful(back, failures);
+        } finally {
+            TideClock.force(null);
+            TideBackTrials.reset(back, false, null, true);
+        }
+    }
+
+    // ---------------------------------------------------------------- 潮の時計
+    private static void checkClock(List<String> failures) {
+        check(TideClock.CYCLE == 2400, "tide cycle should be 2 minutes", failures);
+        check(TideClock.phaseAt(0) == TideClock.Phase.LOW && TideClock.phaseAt(999) == TideClock.Phase.LOW, "low tide is the first 50 s", failures);
+        check(TideClock.phaseAt(1000) == TideClock.Phase.RISING && TideClock.phaseAt(1199) == TideClock.Phase.RISING, "rising is 10 s", failures);
+        check(TideClock.phaseAt(1200) == TideClock.Phase.HIGH && TideClock.phaseAt(2199) == TideClock.Phase.HIGH, "high tide is 50 s", failures);
+        check(TideClock.phaseAt(2200) == TideClock.Phase.FALLING && TideClock.phaseAt(2399) == TideClock.Phase.FALLING, "falling is 10 s", failures);
+        check(TideClock.fullnessAt(500) == 0 && TideClock.fullnessAt(1500) == 1, "fullness at low/high", failures);
+        check(TideClock.levelFor(TideClock.fullnessAt(1199), 3) == 3 && TideClock.levelFor(TideClock.fullnessAt(1066), 3) == 1, "levels while rising", failures);
+        check(TideClock.levelFor(TideClock.fullnessAt(2399), 3) == 0, "falling ends dry", failures);
+        // 敵の見る潮 (MobTide) は時計そのもの
+        TideClock.force(TideClock.Phase.HIGH);
+        check(MobTide.forced() == MobTide.Phase.HIGH, "mob tide does not follow the clock", failures);
+        TideClock.force(TideClock.Phase.LOW);
+    }
+
+    // ---------------------------------------------------------------- 碑文・石・休み場・門
+    private static void checkFixtures(ServerLevel back, List<String> failures) {
+        for (Inscription i : LORE_SIGNS) {
+            check(back.getBlockEntity(i.pos()) instanceof SignBlockEntity, "inscription " + i.key() + " missing at " + i.pos(), failures);
+        }
+        for (TideBackState.Trial t : TideBackState.Trial.values()) {
+            check(back.getBlockState(TideBackTrials.stonePos(t)).is(TideBackSetup.CHIME_STONE.get()), "chime stone " + t + " missing", failures);
+        }
+        for (Rest r : RESTS) {
+            check(TitanBackTrials.isSafeStand(back, r.spawn()), "cannot stand at the rest spawn " + r.id() + " " + r.spawn(), failures);
+            check(back.getBlockState(r.campfire()).is(Blocks.SOUL_CAMPFIRE), "rest campfire " + r.id() + " missing", failures);
+            check(r.area().contains(r.spawn()) || r.id().equals("hub"), "rest spawn " + r.id() + " outside its area", failures);
+        }
+        check(TitanBackTrials.isSafeStand(back, ARRIVAL), "cannot stand at the arrival", failures);
+        check(back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "the clam has no pearl", failures);
+        check(back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, FLATS_GATE_Z)).is(ModBlocks.SEALED_GATE.get())
+                || back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, FLATS_GATE_Z)).isAir(), "flats gate cell is neither open nor sealed", failures);
+        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 0)).is(ModBlocks.SEALED_GATE.get()), "bottom gate is not closed after building", failures);
+        check(back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, 0)).isAir(), "hub is not open above the bottom gate", failures);
+        check(back.getBlockState(TideWatch.RESET_LEVER.above()).is(Blocks.LEVER), "reset plug missing", failures);
+        // 螺旋の階段の段がある
+        int stairs = 0;
+        for (int y = SPIRAL_BOTTOM; y <= SPIRAL_TOP; y++) {
+            for (int[] c : TideIslandBuilder.SPIRAL_RING) {
+                if (back.getBlockState(new BlockPos(c[0], y, c[1])).getBlock() instanceof net.minecraft.world.level.block.StairBlock) {
+                    stairs++;
+                }
+            }
+        }
+        check(stairs == TideIslandBuilder.SPIRAL_STEPS, "spiral stair has " + stairs + " steps", failures);
+    }
+
+    // ---------------------------------------------------------------- 潮の溜め: 満ちても漏れない、引けば残らない
+    private static void checkPools(ServerLevel back, List<String> failures, List<String> notes) {
+        TideBackTrials.initPools(back);
+        StringBuilder sizes = new StringBuilder();
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
+            sizes.append(p.id).append('=').append(p.size()).append(' ');
+            check(p.size() > 50, "pool " + p.id + " is too small (" + p.size() + ")", failures);
+            for (int k = 0; k < p.depth(); k++) {
+                check(!p.layer(k).isEmpty(), "pool " + p.id + " layer " + k + " is empty", failures);
+            }
+        }
+        notes.add("pools " + sizes.toString().trim());
+        // 満ちるときは干潟の門が閉じている
+        for (int x = -1; x <= 1; x++) {
+            for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
+                back.setBlock(new BlockPos(x, y, FLATS_GATE_Z), ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
+            }
+        }
+        TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
+        for (List<BlockPos> layer : hub.layers) {
+            for (BlockPos c : layer) {
+                if (c.getZ() <= FLATS_GATE_Z || c.getY() > HUB_LEDGE - 1) {
+                    failures.add("hub pool reaches outside the hall at " + c);
+                    break;
+                }
+            }
+        }
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
+            TideField.settleNow(back, p, p.depth());
+            int leaks = 0;
+            BlockPos first = null;
+            Set<Long> cells = new HashSet<>();
+            for (List<BlockPos> layer : p.layers) {
+                layer.forEach(c -> cells.add(c.asLong()));
+            }
+            for (List<BlockPos> layer : p.layers) {
+                for (BlockPos c : layer) {
+                    if (!back.getBlockState(c).is(Blocks.WATER)) {
+                        continue;
+                    }
+                    for (Direction d : new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
+                        BlockPos n = c.relative(d);
+                        if (back.getBlockState(n).isAir() && !cells.contains(n.asLong())) {
+                            leaks++;
+                            if (first == null) {
+                                first = n;
+                            }
+                        }
+                    }
+                }
+            }
+            check(leaks == 0, "pool " + p.id + " leaks at " + leaks + " cells (first " + first + ")", failures);
+            check(p.level() == p.depth(), "pool " + p.id + " did not fill", failures);
+            TideField.settleNow(back, p, 0);
+            int left = 0;
+            for (List<BlockPos> layer : p.layers) {
+                for (BlockPos c : layer) {
+                    if (back.getBlockState(c).is(Blocks.WATER)) {
+                        left++;
+                    }
+                }
+            }
+            check(left == 0, "pool " + p.id + " left " + left + " water blocks after draining", failures);
+        }
+    }
+
+    // ---------------------------------------------------------------- 歩いて行ける所 (干潮、門は閉じたまま。干潟の門だけ開ける)
+    static boolean passable(ServerLevel l, BlockPos p) {
+        BlockState s = l.getBlockState(p);
+        return s.getCollisionShape(l, p).isEmpty() && !s.is(ModBlocks.SEALED_GATE.get());
+    }
+
+    static boolean standable(ServerLevel l, BlockPos p) {
+        if (!passable(l, p) || !passable(l, p.above())) {
+            return false;
+        }
+        BlockState below = l.getBlockState(p.below());
+        return !below.getCollisionShape(l, p.below()).isEmpty() || l.getBlockState(p).is(Blocks.WATER);
+    }
+
+    // 到着地点から歩いて (跳んで 1 段、落ちて 3 段まで) 行ける所と、その歩数
+    // 歩いた道のり (自己テストの失敗の説明用): 行き先 → ひとつ前
+    static final Map<Long, Long> PARENT = new HashMap<>();
+
+    static String pathTo(BlockPos goal) {
+        List<String> steps = new ArrayList<>();
+        Long cur = goal.asLong();
+        int guard = 0;
+        while (cur != null && guard++ < 400) {
+            BlockPos p = BlockPos.of(cur);
+            steps.add(p.getX() + "," + p.getY() + "," + p.getZ());
+            cur = PARENT.get(cur);
+        }
+        java.util.Collections.reverse(steps);
+        // 長いときは、高さが変わる所だけ
+        List<String> out = new ArrayList<>();
+        String prevY = null;
+        for (String st : steps) {
+            String y = st.split(",")[1];
+            if (!y.equals(prevY)) {
+                out.add(st);
+                prevY = y;
+            }
+        }
+        return String.join(" > ", out);
+    }
+
+    static Map<Long, Integer> walk(ServerLevel l, BlockPos start) {
+        PARENT.clear();
+        Map<Long, Integer> dist = new HashMap<>();
+        ArrayDeque<BlockPos> q = new ArrayDeque<>();
+        dist.put(start.asLong(), 0);
+        q.add(start);
+        while (!q.isEmpty() && dist.size() < 400000) {
+            BlockPos p = q.poll();
+            int d = dist.get(p.asLong());
+            List<BlockPos> next = new ArrayList<>();
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                BlockPos n = p.relative(dir);
+                for (int dy = 1; dy >= -3; dy--) {
+                    BlockPos m = n.above(dy);
+                    if (dy == 1 && !passable(l, p.above(2))) {
+                        continue;
+                    }
+                    if (dy < 0) {
+                        boolean clear = true;
+                        for (int k = dy; k <= 1; k++) {
+                            if (!passable(l, n.above(k))) {
+                                clear = false;
+                            }
+                        }
+                        if (!clear) {
+                            continue;
+                        }
+                    }
+                    if (standable(l, m)) {
+                        next.add(m);
+                        break;
+                    }
+                }
+            }
+            if (l.getBlockState(p).is(Blocks.WATER) && standable(l, p.above())) {
+                next.add(p.above());
+            }
+            for (BlockPos m : next) {
+                if (m.getX() < -70 || m.getX() > 64 || m.getZ() < -112 || m.getZ() > 76 || m.getY() < 45 || m.getY() > 110) {
+                    continue;
+                }
+                if (!dist.containsKey(m.asLong())) {
+                    dist.put(m.asLong(), d + 1);
+                    PARENT.put(m.asLong(), p.asLong());
+                    q.add(m);
+                }
+            }
+        }
+        return dist;
+    }
+
+    private static void checkWalk(ServerLevel back, List<String> failures, List<String> notes) {
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
+            TideField.settleNow(back, p, 0);
+        }
+        TideBackState state = TideBackState.get(back);
+        state.reset(back.random, null, true);
+        TideBackTrials.applyTrials(back, state);
+        // 干潟の門を開ける (干潮で水盤が空)
+        for (int x = -1; x <= 1; x++) {
+            for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
+                back.setBlock(new BlockPos(x, y, FLATS_GATE_Z), Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        Map<Long, Integer> dist = walk(back, ARRIVAL);
+        Map<String, BlockPos> should = new java.util.LinkedHashMap<>();
+        for (Rest r : RESTS) {
+            if (!r.id().equals("heart")) {
+                should.put("rest " + r.id(), r.spawn());
+            }
+        }
+        should.put("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2));
+        should.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
+        should.put("east gallery", new BlockPos(10, HUB_LEDGE + 1, -2));
+        should.put("hub floor", new BlockPos(5, HUB_FLOOR + 1, 5));
+        should.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -85));
+        should.put("front stone", STONE_FRONT.offset(0, 0, 1));
+        for (Map.Entry<String, BlockPos> e : should.entrySet()) {
+            BlockPos g = e.getValue();
+            if (!dist.containsKey(g.asLong())) {
+                // いちばん近くまで行けた所
+                BlockPos best = null;
+                double bd = Double.MAX_VALUE;
+                for (long k : dist.keySet()) {
+                    BlockPos q = BlockPos.of(k);
+                    double dd = q.distSqr(g);
+                    if (dd < bd) {
+                        bd = dd;
+                        best = q;
+                    }
+                }
+                failures.add("cannot walk from the arrival to " + e.getKey() + " " + g + " (closest " + best + ", standable " + standable(back, g) + ")");
+            }
+        }
+        Integer toHub = dist.get(RESTS.get(0).spawn().asLong());
+        notes.add("arrival to hall " + toHub + " steps (" + dist.size() + " standing spots)");
+        check(toHub != null && toHub <= 80, "the hall is too far from the arrival (" + toHub + " steps)", failures);
+        Map<String, BlockPos> shouldNot = new java.util.LinkedHashMap<>();
+        shouldNot.put("middle tier", new BlockPos(41, TIER_FLOOR[1] + 1, -10));
+        shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
+        shouldNot.put("east ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32));
+        shouldNot.put("heart rest", RESTS.get(5).spawn());
+        shouldNot.put("shell top", new BlockPos(20, shellTop(20, 30) + 1, 30));
+        shouldNot.put("garden wall top", new BlockPos(-30, GARDEN_WALL_TOP + 1, 20));
+        for (Map.Entry<String, BlockPos> e : shouldNot.entrySet()) {
+            if (dist.containsKey(e.getValue().asLong())) {
+                failures.add("can walk to " + e.getKey() + " without solving (" + e.getValue() + "): " + pathTo(e.getValue()));
+            }
+        }
+        String mapDir = System.getenv("SKYABYSS_TIDE_MAP");
+        if (mapDir != null) {
+            writeMap(back, dist, java.nio.file.Path.of(mapDir, "tide_walk.png"));
+        }
+    }
+
+    // 上から見た地図: 歩いて行ける所は高さで色、立てるが行けない所は灰、立てない所は黒。1 マス 4 画素
+    static void writeMap(ServerLevel l, Map<Long, Integer> dist, java.nio.file.Path file) {
+        int x0 = -70;
+        int x1 = 64;
+        int z0 = -145;
+        int z1 = 76;
+        int sc = 4;
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage((x1 - x0 + 1) * sc, (z1 - z0 + 1) * sc, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                int color = 0x101010;
+                for (int y = 110; y >= 45; y--) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (dist.containsKey(p.asLong())) {
+                        float t = Math.max(0, Math.min(1, (y - 60) / 36f));
+                        color = java.awt.Color.HSBtoRGB(0.66f - 0.66f * t, 0.8f, 0.95f) & 0xFFFFFF;
+                        break;
+                    }
+                    if (standable(l, p)) {
+                        color = 0x505050 + ((y - 45) & 0x1F);
+                        break;
+                    }
+                }
+                for (int i = 0; i < sc; i++) {
+                    for (int j = 0; j < sc; j++) {
+                        img.setRGB((x - x0) * sc + i, (z - z0) * sc + j, color);
+                    }
+                }
+            }
+        }
+        try {
+            java.nio.file.Files.createDirectories(file.getParent());
+            javax.imageio.ImageIO.write(img, "png", file.toFile());
+        } catch (java.io.IOException e) {
+            SkyAbyss.LOGGER.warn("could not write {}", file, e);
+        }
+    }
+
+    // ---------------------------------------------------------------- 潮見の間
+    private static void checkPuzzle(ServerLevel back, List<String> failures, List<String> notes) {
+        StringBuilder sb = new StringBuilder("puzzle moves");
+        for (int i = 0; i < TidePuzzle.CONFIGS.length; i++) {
+            int m = TidePuzzle.solve(TidePuzzle.CONFIGS[i]);
+            sb.append(' ').append(m);
+            check(m >= 5 && m <= 9, "puzzle config " + i + " needs " + m + " moves", failures);
+            TidePuzzle.Config c = TidePuzzle.CONFIGS[i];
+            for (int k = 0; k < 3; k++) {
+                check(c.caps()[k] <= 7 && c.init()[k] <= c.caps()[k], "config " + i + " basin " + k + " does not fit", failures);
+            }
+        }
+        notes.add(sb.toString());
+        check(TidePuzzle.solve(TidePuzzle.CONFIGS[0]) <= TidePuzzle.solve(TidePuzzle.CONFIGS[1]), "the first config is not the easiest", failures);
+        // 一歩: 栓が開いていれば一段だけ移る。重石で逆になる
+        TidePuzzle.Config c0 = TidePuzzle.CONFIGS[0];
+        int[] lv = c0.init().clone();
+        TidePuzzle.step(c0, lv, new boolean[] {false, true}, false);
+        check(lv[0] == c0.init()[0] + 1 && lv[1] == c0.init()[1] - 1, "a plug did not move one level", failures);
+        lv = c0.init().clone();
+        TidePuzzle.step(c0, lv, new boolean[] {true, false}, true);
+        check(lv[2] == c0.init()[2] + 1 && lv[1] == c0.init()[1] - 1, "the weight floor did not reverse the plug", failures);
+        // ブロック: 水の段、浮き石の高さ、戸
+        TideWatch.setLevels(back, 1, 5, 0);
+        int water = 0;
+        int[] b = BASIN[0];
+        for (int x = b[0]; x <= b[1]; x++) {
+            for (int z = b[2]; z <= b[3]; z++) {
+                for (int y = TIER_FLOOR[0]; y <= TIER_FLOOR[1]; y++) {
+                    if (back.getBlockState(new BlockPos(x, y, z)).is(Blocks.WATER)) {
+                        water++;
+                    }
+                }
+            }
+        }
+        check(water == 25, "lower basin at level 1 has " + water + " water", failures);
+        check(!back.getBlockState(new BlockPos(36, TIER_FLOOR[0] + 1, -10)).isAir(), "lower float is not at level 1", failures);
+        check(back.getBlockState(BASIN_DOOR[0]).isAir(), "lower door closed at level 1", failures);
+        check(back.getBlockState(BASIN_DOOR[1]).is(ModBlocks.SEALED_GATE.get()), "middle door open at level 5", failures);
+        check(back.getBlockState(BASIN_DOOR[2]).isAir() && back.getBlockState(T_EXIT_DOOR).isAir(), "upper doors closed while empty", failures);
+        // 浮き石が 5 段なら、次の段の床へ一段で上がれる高さ
+        check(TIER_FLOOR[1] + 1 - (TIER_FLOOR[1] + TidePuzzle.REACH + 1) <= 1, "middle float at 5 cannot reach the upper tier", failures);
+        check(TIER_FLOOR[0] + TidePuzzle.REACH + 1 >= TIER_FLOOR[1], "lower float at 5 cannot reach the middle tier", failures);
+        TideWatch.setLevels(back, 0, 0, 3);
+        check(back.getBlockState(BASIN_DOOR[2]).is(ModBlocks.SEALED_GATE.get()), "upper door open with water", failures);
+        TideWatch.reset(back, TideBackState.get(back));
+    }
+
+    // ---------------------------------------------------------------- 珊瑚の庭 (真珠)
+    private static void checkGarden(ServerLevel back, List<String> failures) {
+        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(java.util.UUID.fromString("7e1de0c4-0000-4000-8000-000000000001"), "[TideTest]"));
+        BlockPos at = new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1]);
+        fake.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        fake.getInventory().clearContent();
+        TideBackState state = TideBackState.get(back);
+        check(TideGarden.useClam(back, TideGarden.pearlBlock(), fake), "clam did not react", failures);
+        check(TideGarden.holds(fake) && TideGarden.pearlOut(), "pearl was not given", failures);
+        check(!back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "clam still shows the pearl", failures);
+        // 落とした真珠は大貝へ戻る
+        TideGarden.returnPearl(back, "message.skyabyss.tide.pearl_dropped");
+        check(!TideGarden.pearlOut() && back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "pearl did not return to the clam", failures);
+        TideGarden.strip(fake);
+        // 据える
+        TideGarden.useClam(back, TideGarden.pearlBlock(), fake);
+        TideBackTrials.useStone(back, STONE_WEST, fake, fake.getMainHandItem());
+        check(state.rung(TideBackState.Trial.WEST), "placing the pearl did not ring the west stone", failures);
+        check(!TideGarden.holds(fake), "pearl stayed in the inventory after placing", failures);
+        check(back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "west stone not lit", failures);
+        check(back.getBlockState(RETURN_WEST).is(Blocks.SEA_LANTERN), "west return floor not lit", failures);
+        // 前の石は潮招きを倒すまで黙る
+        TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);
+        check(!state.rung(TideBackState.Trial.FRONT), "front stone rang before the beckoner fell", failures);
+    }
+
+    // ---------------------------------------------------------------- 群れの干潟 (巣と潮招き)
+    private static void checkFlats(ServerLevel back, List<String> failures) {
+        TideBackState state = TideBackState.get(back);
+        check(Integer.bitCount(state.nestSites()) == 3, "nest sites should be 3 of 6", failures);
+        for (int s = 0; s < 6; s++) {
+            if ((state.nestSites() & (1 << s)) != 0) {
+                check(!back.getBlockState(TideFlats.nestPos(s)).isAir(), "nest mound missing at site " + s, failures);
+            }
+        }
+        TideBeckoner boss = TideBackSetup.TIDE_BECKONER.get().create(back);
+        check(boss != null, "beckoner cannot be created", failures);
+        if (boss != null) {
+            boss.setChallengers(3);
+            check(Math.abs(boss.multiplier() - 2.2f) < 1e-4, "beckoner health multiplier for 3 is " + boss.multiplier(), failures);
+            check(Math.abs(boss.getMaxHealth() - TideBeckoner.HEALTH) < 0.01, "beckoner max health " + boss.getMaxHealth(), failures);
+            boss.addTag(jp.revati.skyabyss.titan.tide.mob.TideMob.TRIAL_TAG);
+            check(!boss.shouldBeSaved(), "trial beckoner would be saved", failures);
+            boss.discard();
+        }
+        // 潮招きを倒した記録で、前の石が鳴らせる
+        state.markBeckonerDefeated();
+        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(java.util.UUID.fromString("7e1de0c4-0000-4000-8000-000000000001"), "[TideTest]"));
+        TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);
+        check(state.rung(TideBackState.Trial.FRONT), "front stone did not ring after the beckoner", failures);
+    }
+
+    // ---------------------------------------------------------------- 三つの石で潮の底が開く
+    private static void checkBottom(ServerLevel back, List<String> failures) {
+        TideBackState state = TideBackState.get(back);
+        TideBackTrials.ring(back, state, TideBackState.Trial.EAST, null);
+        check(state.rungCount() == 3, "three stones did not ring", failures);
+        TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
+        check(TideBackTrials.target(back, hub) == 0, "hub keeps filling after three stones", failures);
+        TideField.settleNow(back, hub, 0);
+        TideBackTrials.tickGatesForTest(back, state);
+        check(state.bottomOpen(), "bottom gate did not open", failures);
+        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 1)).isAir(), "the grate did not sink", failures);
+        Map<Long, Integer> dist = walk(back, RESTS.get(0).spawn());
+        check(dist.containsKey(RESTS.get(5).spawn().asLong()), "cannot walk from the hall down to the heart rest", failures);
+        check(dist.containsKey(BlockPos.containing(jp.revati.skyabyss.titan.tide.heart.TideHeartArena.anteSpawn()).asLong()),
+                "cannot walk to the heart antechamber", failures);
+        check(TideHeartArenaAccess.chamberBuilt(back), "heart chamber is not built at the shell bottom", failures);
+    }
+
+    // ---------------------------------------------------------------- リセットと眠る試練
+    private static void checkReset(ServerLevel back, List<String> failures, List<String> notes) {
+        TitanBackData data = TitanBackData.get(back);
+        TideBackState state = TideBackState.get(back);
+        int epoch = data.epoch();
+        boolean ever = state.everDefeated();
+        TideBackTrials.reset(back, false, null, true);
+        check(data.epoch() == epoch + 1, "reset did not advance the trial number", failures);
+        check(state.rungCount() == 0 && !state.bottomOpen() && !state.beckonerDefeated(), "reset left progress", failures);
+        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 0)).is(ModBlocks.SEALED_GATE.get()), "reset did not close the bottom gate", failures);
+        check(!back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "reset left the west stone lit", failures);
+        check(back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "reset did not return the pearl", failures);
+        // 2 周目から: 一つ眠る。同じ試練が二回続けて眠らない
+        state.markEverDefeated();
+        TideBackState.Trial last = null;
+        int[] counts = new int[3];
+        for (int i = 0; i < 24; i++) {
+            state.reset(back.random, null, false);
+            TideBackState.Trial s = state.sleeping();
+            if (s == null) {
+                failures.add("no trial sleeps after the heart fell");
+                break;
+            }
+            counts[s.ordinal()]++;
+            check(s != last, "the same trial slept twice in a row (" + s + ")", failures);
+            check(state.rung(s) && state.rungCount() == 1, "sleeping trial's stone is not ringing", failures);
+            last = s;
+        }
+        notes.add("sleeping west/east/front " + counts[0] + "/" + counts[1] + "/" + counts[2]);
+        check(counts[0] > 0 && counts[1] > 0 && counts[2] > 0, "some trial never sleeps", failures);
+        // 眠った試練は石が鳴っていて、残り二つで潮の底が開く
+        TideBackTrials.reset(back, false, TideBackState.Trial.EAST, false);
+        check(state.sleeping() == TideBackState.Trial.EAST && state.rung(TideBackState.Trial.EAST)
+                && back.getBlockState(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE), "forced sleeping trial is not lit", failures);
+        // 休み場の記録は、リセットの番号で無効になる
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putString("skyabyss_tide_checkpoint", "f0");
+        tag.putInt("skyabyss_tide_checkpoint_epoch", data.epoch() - 1);
+        check(TideBackTrials.validCheckpoint(tag, data.epoch()).isEmpty(), "old checkpoint survived a reset", failures);
+        tag.putInt("skyabyss_tide_checkpoint_epoch", data.epoch());
+        check(TideBackTrials.validCheckpoint(tag, data.epoch()).equals("f0"), "current checkpoint is not valid", failures);
+        if (!ever) {
+            // 元に戻す (ほかの自己テストのため)
+            notes.add("ever defeated set by this test");
+        }
+    }
+
+    // ---------------------------------------------------------------- ピースフル
+    private static void checkPeaceful(ServerLevel back, List<String> failures) {
+        Difficulty before = back.getDifficulty();
+        back.getServer().setDifficulty(Difficulty.PEACEFUL, true);
+        TideBackTrials.tickPeacefulForTest(back, true);
+        BlockPos seal = new BlockPos(CAVE_X1, TideIslandBuilder.caveFloor(CAVE_SEAL_Z) + 1, CAVE_SEAL_Z);
+        check(back.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()), "peaceful did not seal the cave", failures);
+        back.getServer().setDifficulty(before == Difficulty.PEACEFUL ? Difficulty.NORMAL : before, true);
+        TideBackTrials.tickPeacefulForTest(back, false);
+        check(!back.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()), "leaving peaceful did not unseal the cave", failures);
+    }
+
+    // 心臓の間が建っているか (TideHeartArena.isBuilt を使う)
+    static final class TideHeartArenaAccess {
+        static boolean chamberBuilt(ServerLevel back) {
+            return jp.revati.skyabyss.titan.tide.heart.TideHeartArena.isBuilt(back);
+        }
+    }
+}

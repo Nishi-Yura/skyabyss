@@ -10,12 +10,11 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 殻の底 (心臓の間) の仮の形 (08 の 3.6節)。背中の本番の島がまだないので、tide_back の仮の島の真下に置く。
-// 本番の配置 (潮の広間の床の底の門の下) は次の担当が決める。そのときは CENTER と入口・出口の pad を動かす。
+// 殻の底 (心臓の間、08 の 3.6節)。本番の島では潮の広間の南の、干潟の前室の真下 (中心 0, 51, -30。天井 y=62)。
+// 潮の底の門の下の螺旋の階段 → 休み場 heart の小部屋 → 前室 (南の口) → 入口の封印 → 部屋 (TideIslandBuilder が先に建てる)。
 //  - 丸い部屋 (内側の半径 14、天井まで 10)。床は砂と平らな石、壁は海の石と真珠層 (方解石) の白い筋
 //  - 中心から半径約 8.5 に、高さ 2 の「岩の島」が 4 つ (北東・北西・南東・南西。上は 3x3)
 //  - 床の外周に水の溜めの溝 (半径 12.5〜13.5、1 段低い)
@@ -25,10 +24,10 @@ import net.minecraft.world.phys.Vec3;
 public final class TideHeartArena {
     // 部屋の中心 (床の上の空気の段の y)
     public static final int CX = 0;
-    public static final int CZ = 0;
-    public static final int FLOOR = 44;
+    public static final int CZ = -30;
+    public static final int FLOOR = 51;
     public static final int RADIUS = 14;
-    public static final int CEILING = 54;
+    public static final int CEILING = 62;
     // 溝 (床の外周、1 段低い水)
     static final double GROOVE_IN = 12.5;
     static final double GROOVE_OUT = 13.5;
@@ -63,7 +62,7 @@ public final class TideHeartArena {
 
     // 前室 (入口の外の通路)
     public static AABB ante() {
-        return new AABB(CX - 2, FLOOR, ANTE_Z0, CX + 3, FLOOR + 4, ANTE_Z1 + 1);
+        return new AABB(CX - 2, FLOOR, CZ + ANTE_Z0, CX + 3, FLOOR + 4, CZ + ANTE_Z1 + 1);
     }
 
     public static List<BlockPos> gate() {
@@ -111,20 +110,12 @@ public final class TideHeartArena {
         return island((int) Math.floor(x), (int) Math.floor(z)) && y >= FLOOR + ISLAND_HEIGHT - 0.2;
     }
 
-    // 島の頂の「降りる床」の中心 (柱の跡の真ん中)。高さは建てたときの地面
-    static BlockPos descentPad(ServerLevel back) {
-        int top = back.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CX, CZ) - 1;
-        return new BlockPos(CX, top, CZ);
-    }
-
     // 建っているか (部屋の床の中心と、前室の出口の床で見る。島が建て直されると、部屋は砂で埋まる)
     public static boolean isBuilt(ServerLevel back) {
         return back.getBlockState(new BlockPos(CX, FLOOR - 1, CZ)).is(Blocks.CHISELED_TUFF_BRICKS)
-                && back.getBlockState(new BlockPos(CX, FLOOR - 1, CZ + EXIT_Z)).is(Blocks.SEA_LANTERN)
                 && back.getBlockState(new BlockPos(CX, CEILING - 2, CZ)).isAir()
-                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + ISLAND_OFFSET)).is(Blocks.SEA_LANTERN)
-                && back.getBlockState(descentPad(back)).is(Blocks.SEA_LANTERN)
-                && back.getBlockState(descentPad(back).offset(1, 0, 0)).is(Blocks.DARK_PRISMARINE);
+                && back.getBlockState(new BlockPos(CX, FLOOR, CZ + EXIT_Z + 1)).isAir()
+                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + ISLAND_OFFSET)).is(Blocks.SEA_LANTERN);
     }
 
     public static void ensureBuilt(ServerLevel back) {
@@ -225,6 +216,11 @@ public final class TideHeartArena {
                 for (int y = FLOOR - 1; y <= FLOOR + 4; y++) {
                     p.set(x, y, CZ + z);
                     boolean edge = Math.abs(x - CX) == 3 || z == ANTE_Z1 + 1 || y == FLOOR - 1 || y == FLOOR + 4;
+                    // 前室の南の口 (休み場の小部屋と螺旋の階段へ)
+                    if (z == ANTE_Z1 + 1 && Math.abs(x - CX) <= 1 && y >= FLOOR && y <= FLOOR + 2) {
+                        back.setBlock(p, air, flags);
+                        continue;
+                    }
                     if (z == GATE_Z) {
                         // 入口の段: 口は x -1〜1、y FLOOR〜FLOOR+2。まわりは壁のまま
                         if (Math.abs(x - CX) <= 1 && y >= FLOOR && y <= FLOOR + 2) {
@@ -237,7 +233,7 @@ public final class TideHeartArena {
                     BlockState s;
                     if (edge) {
                         if (y == FLOOR - 1) {
-                            s = z == EXIT_Z && Math.abs(x - CX) <= 1 ? lamp : stone;
+                            s = stone;
                         } else if (y == FLOOR + 4) {
                             s = band;
                         } else {
@@ -252,18 +248,8 @@ public final class TideHeartArena {
                 }
             }
         }
-        // 島の頂の降りる床: 柱の跡の真ん中に、暗い海の石の 3x3 と海のランタン
-        BlockPos pad = descentPad(back);
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                back.setBlock(pad.offset(x, 0, z), x == 0 && z == 0 ? lamp : band, flags);
-                for (int y = 1; y <= 2; y++) {
-                    back.setBlock(pad.offset(x, y, z), air, flags);
-                }
-            }
-        }
         fillTicks = holdTicks = drainTicks = 0;
-        SkyAbyss.LOGGER.info("Built the tide heart chamber (placeholder) under the tide back island");
+        SkyAbyss.LOGGER.info("Built the tide heart chamber (shell bottom)");
     }
 
     private static void floorLamp(ServerLevel back, int dx, int dz, BlockState lamp, int flags) {
@@ -272,18 +258,6 @@ public final class TideHeartArena {
         if (inside(x, z) && !groove(x, z) && !island(x, z) && !(dx == 0 && dz == 0)) {
             back.setBlock(new BlockPos(x, FLOOR - 1, z), lamp, flags);
         }
-    }
-
-    // 島の頂の降りる床の上に立っているか
-    static boolean onDescentPad(ServerLevel back, double x, double y, double z) {
-        BlockPos pad = descentPad(back);
-        return x >= pad.getX() - 1 && x < pad.getX() + 2 && z >= pad.getZ() - 1 && z < pad.getZ() + 2
-                && y >= pad.getY() + 0.8 && y < pad.getY() + 2.5;
-    }
-
-    // 前室の出口の光る床の上に立っているか
-    static boolean onExitPad(double x, double y, double z) {
-        return x >= CX - 1 && x < CX + 2 && z >= CZ + EXIT_Z && z < CZ + EXIT_Z + 1 && y >= FLOOR - 0.2 && y < FLOOR + 1.5;
     }
 
     // ---------------------------------------------------------------- 満ち潮

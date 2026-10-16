@@ -166,18 +166,20 @@ public final class TideTravel {
             return;
         }
         if (player.tickCount % 40 == 0) {
-            BlockPos a = TideBackBuilder.arrival();
-            if (player.distanceToSqr(0.5, a.getY(), TideBackBuilder.GATE_Z + 1) < 7 * 7) {
+            if (player.distanceToSqr(jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_X + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Y0,
+                    jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Z + 1) < 6 * 6) {
                 player.displayClientMessage(ModText.hint("message.skyabyss.tide.return_hint"), true);
             }
         }
-        double r = Math.hypot(player.getX(), player.getZ());
+        double r = Math.hypot(player.getX(), player.getZ() - jp.revati.skyabyss.titan.tide.back.TideBackLayout.SHELL_CZ);
         if (r > FAR) {
             sweepBack(player);
             return;
         }
-        // 島から海に落ちた: 5 秒たつと、潮に押し戻される
-        if (r > TideBackBuilder.ISLAND_R + 1 && player.isInWater()) {
+        // 島から海に落ちた: 5 秒たつと、潮に押し戻される (甲羅の外で、海の水の中にいる)
+        boolean offIsland = jp.revati.skyabyss.titan.tide.back.TideBackLayout.shellS2(player.getX(), player.getZ()) > 1.02
+                && player.getY() < TideBackBuilder.SEA + 1;
+        if (offIsland && player.isInWater()) {
             int t = ADRIFT.merge(player.getUUID(), 2, Integer::sum);
             if (t >= SWEPT_AFTER) {
                 sweepBack(player);

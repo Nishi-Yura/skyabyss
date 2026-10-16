@@ -131,7 +131,7 @@ public final class TideSelfTest {
         }
     }
 
-    // 背中の仮の島: 到着地点に立てる、戻りの門の口が開いていて判定に入る、到着地点は門の判定の外
+    // 背中の島 (本番): 到着地点に立てる、戻りの門の口が開いていて判定に入る、到着地点は門の判定の外
     private static void checkBack(ServerLevel overworld, List<String> failures) {
         ServerLevel back = overworld.getServer().getLevel(TideTravel.TIDE_BACK);
         if (back == null) {
@@ -156,8 +156,9 @@ public final class TideSelfTest {
             if (TideBackBuilder.inReturnGate(a.getX() + 0.5, a.getY(), a.getZ() + 0.5)) {
                 failures.add("the arrival is inside the return gate");
             }
-            BlockPos g = new BlockPos(0, TideBackBuilder.GATE_Y0, TideBackBuilder.GATE_Z);
-            if (!TideBackBuilder.inReturnGate(0.5, g.getY(), g.getZ() + 0.5)) {
+            BlockPos g = new BlockPos(jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_X, jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Y0,
+                    jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Z);
+            if (!TideBackBuilder.inReturnGate(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) {
                 failures.add("the return gate mouth is not detected");
             }
             for (int y = 0; y < 2; y++) {
@@ -168,16 +169,16 @@ public final class TideSelfTest {
             if (!back.getBlockState(g.below()).isSolidRender(back, g.below())) {
                 failures.add("the return gate has no floor");
             }
-            // 到着地点から門へ、平らに歩ける (間の地面がふさがっていない)
-            for (int z = a.getZ(); z < TideBackBuilder.GATE_Z; z++) {
-                int top = TideBackBuilder.surfaceY(0, z);
-                if (top + 1 - a.getY() > 1 && z > a.getZ()) {
-                    failures.add("a step up of more than one block on the way to the gate at z=" + z);
+            // 到着地点から門まで、段差なく歩ける (間の床は浜の高さ)
+            for (int z = a.getZ(); z < g.getZ(); z++) {
+                BlockPos f = new BlockPos(a.getX(), a.getY() - 1, z);
+                if (!back.getBlockState(f).isSolidRender(back, f) || !back.getBlockState(f.above()).isAir() || !back.getBlockState(f.above(2)).isAir()) {
+                    failures.add("the beach is not flat between the arrival and the gate at z=" + z);
                     break;
                 }
             }
             // 島の外は海 (落ちたら泳げる)
-            BlockPos sea = new BlockPos(TideBackBuilder.ISLAND_R + 6, TideBackBuilder.SEA - 1, 0);
+            BlockPos sea = new BlockPos(-40, TideBackBuilder.SEA - 1, 70);
             back.getChunk(sea);
             if (!back.getFluidState(sea).isSource()) {
                 failures.add("no sea around the tide back island at " + sea);

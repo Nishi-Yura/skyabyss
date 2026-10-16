@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 118,
+  "inscription_sign": "sign.skyabyss.lore_tide_heart",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_tide_heart"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_heart",
+    "chapter1/tide_heart_stilled"
+  ]
+}

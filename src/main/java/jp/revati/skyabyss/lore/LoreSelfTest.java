@@ -77,8 +77,9 @@ public final class LoreSelfTest {
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().equals("chapter1"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
-        if (early < 12 || early > 24) {
-            failures.add("prologue + chapter 1 should have 12-24 entries, found " + early);
+        // 1 章は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後)
+        if (early < 12 || early > 40) {
+            failures.add("prologue + chapter 1 should have 12-40 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue and chapter 1 may be written yet (" + unlockable + " unlockable)");
@@ -95,6 +96,8 @@ public final class LoreSelfTest {
         // ---- 条件の先が実在するか
         Set<String> signKeys = new HashSet<>();
         TitanBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
+        // 潮殻の背の碑文 (08 の 9.2節)
+        jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
         Set<String> usedSigns = new HashSet<>();
         for (LoreEntry entry : catalog.entries()) {
             for (LoreTrigger t : entry.unlock()) {
@@ -179,6 +182,15 @@ public final class LoreSelfTest {
             JsonObject main = json("/assets/skyabyss/lang/" + lang + ".json", failures);
             if (main == null) {
                 continue;
+            }
+            // 潮殻の背の看板の文は skyabyss_tide にある
+            JsonObject tideSigns = json("/assets/skyabyss_tide/lang/" + lang + ".json", failures);
+            if (tideSigns != null) {
+                tideSigns.entrySet().forEach(e -> {
+                    if (!main.has(e.getKey())) {
+                        main.add(e.getKey(), e.getValue());
+                    }
+                });
             }
             for (LoreEntry entry : catalog.entries()) {
                 if (!entry.inscriptionSign().isEmpty()) {

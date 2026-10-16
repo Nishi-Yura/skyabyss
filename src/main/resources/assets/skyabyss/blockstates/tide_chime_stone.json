@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "skyabyss:block/tide_chime_stone"
+    },
+    "active=true": {
+      "model": "skyabyss:block/tide_chime_stone_active"
+    }
+  }
+}

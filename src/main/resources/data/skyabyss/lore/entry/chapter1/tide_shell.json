@@ -1,0 +1,19 @@
+{
+  "chapter": "chapter1",
+  "order": 102,
+  "unlock": [
+    {
+      "type": "near_entity",
+      "target": "skyabyss:tide_shell",
+      "radius": 200
+    },
+    {
+      "type": "dimension",
+      "target": "skyabyss:tide_back"
+    }
+  ],
+  "related": [
+    "chapter1/tide_ruins",
+    "chapter1/tide_hours"
+  ]
+}
