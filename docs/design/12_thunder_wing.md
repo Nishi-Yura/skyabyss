@@ -338,7 +338,7 @@
 | 名前（ID） | HP | 攻撃 | 防御 | 特殊な動き | 出る所 |
 |---|---|---|---|---|---|
 | 羽守（feather_warden） | 52 | 近接 10（鉤槍。届く 3 ブロック、前方 60 度）。突撃 12 | 9 | 凪は歩いて番をする。嵐で 1.0 秒かがみ（外套を広げる）、上へ跳んで、予告の線（地面に長さ 14 の光る帯 0.8 秒）の上を一直線に突っ込む。着地のあと 1.5 秒動けず、その間の傷 1.5 倍 | 風切りの骨、雷の骨の前、竜骨の門の前（リセットごとに 0〜1） |
-| 雷蛾（static_moth） | 14 | 放電 5（4 ブロック以内の人へ。そこから 4 ブロック以内の別の人へ跳ぶ、最大 3 人、跳ぶごとに −20%） | 2 | 宙を舞う。4 秒かけて帯電し（翅の模様が明るくなる）、満ちると放電。満ちた雷蛾を倒すと半径 2.5 で弾ける（4）。光と、満ちかけの避雷の柱に寄る | 三つの試練すべて（少数） |
+| 雷蛾（static_`/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、） | 14 | 放電 5（4 ブロック以内の人へ。そこから 4 ブロック以内の別の人へ跳ぶ、最大 3 人、跳ぶごとに −20%） | 2 | 宙を舞う。4 秒かけて帯電し（翅の模様が明るくなる）、満ちると放電。満ちた雷蛾を倒すと半径 2.5 で弾ける（4）。光と、満ちかけの避雷の柱に寄る | 三つの試練すべて（少数） |
 | 雷乞い（thunder_supplicant） | 32 | 杖 4。招雷 9（足もとの輪 1.2 秒、半径 1.5、0.5 秒の鈍足） | 4 | 8〜14 ブロックの間合いを保つ。杖を頭上へ掲げ（予告）、人の足もとに輪を呼ぶ。輪が避雷の柱から 3 ブロック以内なら雷は柱へ（東の試練で柱を満たせる） | 雷の骨、眼の間の前室 |
 | 雷獣（raiju、中ボス） | 430 | 技により 12・11・9・5 | 10 | 靭性 4。ノックバック耐性 0.9。落下の傷なし。5.2節 | 右手首の瘤 |
 | 雷翼の心臓（thunder_wing_heart、最終ボス） | 650（実質。参加者で増える） | 技により 15.5・14・13・12・10・9 | 9 | 靭性 6。ノックバック耐性 1.0。5.3節 | 竜骨の間 |
@@ -711,7 +711,7 @@
 
 - パッケージ: `jp.revati.skyabyss.titan.storm`（地上）、`.storm.back`（背中と試練）、`.storm.mob`（敵）、`.storm.raiju`（中ボス）、`.storm.heart`（心臓）、`jp.revati.skyabyss.item.storm`（装備）。描画は各パッケージの `.client`。
 - 名前空間: lang は `assets/skyabyss_storm/lang`（伝承の担当が持つ。ほかの担当は文の鍵だけ決めて、仮の英文を自分の lang の断片 `lang/parts/<担当>.json` に書き、伝承の担当がまとめる）。
-- ID: ディメンション `skyabyss:storm_back`、巨神 `skyabyss:thunder_wing`、記録 `thunder_wing`、敵 `feather_warden`・`static_moth`・`thunder_supplicant`・`raiju`・`thunder_wing_heart`。素材 `thunder_wing_shard`（雷翼の欠片）、`thunder_wing_core`（心核）、`cloudgap_fruit`（雲間の干し果）、`moth_dust`（鱗粉）。
+- ID: ディメンション `skyabyss:storm_back`、巨神 `skyabyss:thunder_wing`、記録 `thunder_wing`、敵 `feather_warden`・`static_`/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、`・`thunder_supplicant`・`raiju`・`thunder_wing_heart`。素材 `thunder_wing_shard`（雷翼の欠片）、`thunder_wing_core`（心核）、`cloudgap_fruit`（雲間の干し果）、`moth_dust`（鱗粉）。
 - **伝承とクエストの約束**（担当 6 が決めた。コードは `titan/storm/lore/StormLore` に同じ名前がある。ほかの担当はこの名前を使う）:
 
   | もの | 名前 | 誰が使うか |
@@ -739,7 +739,7 @@
 | 担当 | 中身 | 持つファイル | 確かめ方 |
 |---|---|---|---|
 | 1. 本体と背中 | 共通化（10.2節）、`storm_back` のディメンション、鳥の形（`gen_back_shape.py` と `storm_back/bird.bin`）、配置、休み場・リセット・眠る試練・ピースフル、嵐の拍と目盛り、三つの試練（風切りの骨・雷の骨の柱と戸・眼の間）、`StormRods`・`StormStrike`・`Updraft`・`GaleFeather`・`EyeMirrors`、碑文と看板の置き場所。地上の巨神（飛ぶ・止まり木・昇り風・見守り・嵐の雲・空の影でうずくまる）と本体のモデルの取り込み（`tools/install_thunder_wing.py`、3 段の LOD） | `titan/storm/**`（`mob`・`raiju`・`heart` を除く）、`titan/` の共通化した部品、`data/skyabyss/dimension/storm_back.json` ほか、`tools/gen_back_shape.py`、`tools/install_thunder_wing.py`、`tools/gen_storm_sounds.py` | `titan board storm` で乗り、拍が 90 秒で回り、昇り風の高さが変わる。四つの鏡の配置を自己テストで解く。到着から休み場・石・竜骨の間へ歩いて行ける。夕立の刻に峰に止まり、昇り風で乗れる |
-| 2. 敵 | 羽守（＋鉤槍）、雷蛾、雷乞い（＋杖）。モデルの取り込み（`tools/install_storm_mobs.py`）、動き、落とす物（6.1節）、経験値、音 | `titan/storm/mob/**`、`tools/install_storm_mobs.py`、`tools/gen_storm_mob_assets.py` | `/skyabyss stormmob spawn <warden\|moth\|supplicant>`。突撃の線が 0.8 秒前に出る、連鎖が 3 人まで、雷乞いの輪が柱へ落ちる（柱は担当 1 の API の空の実装でよい） |
+| 2. 敵 | 羽守（＋鉤槍）、雷蛾、雷乞い（＋杖）。モデルの取り込み（`tools/install_storm_mobs.py`）、動き、落とす物（6.1節）、経験値、音 | `titan/storm/mob/**`、`tools/install_storm_mobs.py`、`tools/gen_storm_mob_assets.py` | `/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、\|moth\|supplicant>`。突撃の線が 0.8 秒前に出る、連鎖が 3 人まで、雷乞いの輪が柱へ落ちる（柱は担当 1 の API の空の実装でよい） |
 | 3. 中ボス | 雷獣（モデル取り込み・技・柱を渡る・接地で落ちる）、巣の戦い（`BossRoom`）、報酬（6.2節）、10 段のバー | `titan/storm/raiju/**`、`tools/install_raiju.py` | `/skyabyss raiju go\|start\|win`。一人で、栓を引いて落とせる |
 | 4. 心臓 | 雷翼の心臓（段階ごとの geo、3 段階・9 技・空中戦・閃光の向きの判定）、竜骨の間、段階のバー、`StormLoot`（6.3節）、`Progression.onTitanStopped` | `titan/storm/heart/**`、`tools/install_storm_heart.py`、`tools/gen_storm_heart_bar.py`、`tools/gen_storm_heart_sounds.py` | `/skyabyss stormheart go\|phase\|action\|win`。9 技の予告がパーティクル最小でも見える。閃光が背を向けた人に当たらない |
 | 5. 装備 | 図鑑の 10 品と素材 4 つ、必要 Lv、強化・特性、`GearCurve.STAGES` の雷翼、羽衣の立体防具、空駆け、アイテムの絵（ラフ 3 案から） | `item/storm/**`、`tools/gen_storm_items.py`、`tools/rough/storm_items.py` | `GearCurveSelfTest` の雷翼の段が目安に入る。報酬の表から ID で出る |
@@ -860,7 +860,7 @@
 - 心臓（2 房と 3 本の大動脈）は全案で同じ形で、岩鯨・潮殻と同じ種類の器官に見えるようにした（色は白銀と銅の血管、稲妻の核）。
 - バーの色案は `heart/bars.png`（段階 1 青白、段階 2 金、段階 3 白金）。5.3節の色（段階 1 銅の橙）とどちらにするかは、バーの絵を作るときに決める。
 
-### 14.3 背中の敵（`feather_warden.png`、`static_moth.png`、`thunder_supplicant.png`）
+### 14.3 背中の敵（`feather_warden.png`、`static_`/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、.png`、`thunder_supplicant.png`）
 
 | 敵 | 案 | 箱の数 | 評価 |
 |---|---|---|---|
@@ -932,6 +932,35 @@
 ## 17. 実装の記録
 
 11 章の担当ごとに、08 の 17〜21 章と同じ形で書き足す。
+
+### 17.2 担当 2: 敵（2026-10-16）
+
+#### 17.2.1 作ったもの
+
+| もの | 中身 | ファイル |
+|---|---|---|
+| モデル | 14 章の推奨（羽守 B・雷蛾 B・雷乞い C）を 0.5 単位の格子で取り込む。鉤槍と杖は別のモデル（`geo/gear/{hooked_glaive,supplicant_staff}`）で、手の受け口 `socket_main` に付ける。面の隠れは同じ骨の中だけで数える | `tools/install_storm_mobs.py`、`titan/storm/mob/client/StormMobRenderers.java` |
+| 動き | 羽守: 凪は歩いて番、嵐で 1.0 秒かがみ → 長さ 14 の線を 0.8 秒前に出す → 突撃 12 → 着地 1.5 秒の痺れ（傷 1.5 倍）。線は壁で止まる。雷蛾: 4 秒の帯電（嵐は速い）→ 放電 5、4 ブロック以内へ最大 3 人、跳ぶごとに −20%。満ちた雷蛾は倒すと半径 2.5 で弾ける。雷乞い: 8〜14 の間合い、杖を掲げて足もとに輪 1.2 秒 → 9 と鈍足、輪が柱から 3 以内なら柱へ | `FeatherWarden`・`StaticMoth`・`ThunderSupplicant`・`StormMob`・`MobStorm`（拍は `StormBackClock` から） |
+| 落とす物 | 6.1 節の表。倒した人だけが拾える形。品は ID で引き、まだ登録されていない品（雷翼の欠片・干し果・鱗粉・羽衣）は落とさない。頁は出どころ `storm_back` | `StormMobLoot.java` |
+| 経験値 | `GrowthRewards.MOD_ENEMIES`: 羽守 18・雷蛾 5・雷乞い 14（雷翼の Lv 24） | `rpg/GrowthRewards.java` |
+| 音・エッグ | 合成した音 18（`sounds/storm_mobs/`）、スポーンエッグ 3 | `tools/gen_storm_mob_assets.py`、`StormMobSetup.java` |
+| 文 | `lang/parts/mob.json`（鍵ごとに英日）。伝承の担当の鍵に合わせ、杖を掲げる音を `thunder_supplicant_raise` にした。`gen_storm_lore.py` でまとめ済み（日本語のない鍵 0） | `assets/skyabyss_storm/lang/parts/mob.json` |
+| 試す | `/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、\|moth\|supplicant>`、`storm calm\|storm\|cycle`、`clear`。試練の印付きで湧き、保存されない | `StormMobCommands.java` |
+| 自己テスト | `SELFTEST storm mobs`: 登録・強さ・保存しない・経験値・ドロップの率（模擬）・拍・線 0.8 秒前・長さ 14・壁で止まる・痺れの 1.5 倍・連鎖 3 人と減り方・輪が柱へ | `StormMobSelfTest.java` |
+
+背中の API（`StormRods`・`StormStrike`・`StormBackClock`）は、担当 1 の本物がまだ m1-sky-pass にないので、11.1 節の名前の空の実装を `titan/storm/back/` に置いたまま。本物が入ったら置き換えて消す。
+
+#### 17.2.2 結果
+
+- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST storm mobs PASSED**、全体も `SELFTEST PASSED`。ただし `tide gear` の「護符がゾンビに当たらない」が一行 FAILED と出た（潮殻の装備の自己テスト。この担当のファイルは触っていない）。
+- データの検査: 箱の重なり 0（羽守 349・雷蛾 124・雷乞い 373・鉤槍 48・杖 21）。光る画素は羽守 62・雷蛾 190・雷乞い 196・鉤槍 24・杖 236（0 のものなし）。羽守と雷乞いに `socket_main` がある。
+- 見た目: 前の担当が撮った `docs/review/ingame_storm_mobs_*.png`（8 枚）。台本で撮るスクショの道具はまだ m1-sky-pass にないので、撮り直していない。試遊での確認はしていない。
+
+#### 17.2.3 判断が要る点
+
+| # | 点 | 選択肢 | 推奨 |
+|---|---|---|---|
+| 1 | 満ちた雷蛾が弾ける音の字幕 | A 別の鍵 `static_`/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、_burst`「帯電した雷蛾が弾ける」（今） / B 死の字幕「雷蛾が弾ける」に寄せて一つに | A。弾けるのは傷のある別の出来事なので分ける |
 
 ### 17.6 担当 6: 伝承とクエスト（2026-10-17）
 
@@ -1039,7 +1068,7 @@
 | 担当 | 鍵の数 | 例 |
 | --- | --- | --- |
 | 1 | 85 | `entity.skyabyss.thunder_wing` = 雷翼の巨神、`message.skyabyss.memory_title_thunder_wing` = ── 巨神の記憶: 雷翼 ── |
-| 2 | 22 | `entity.skyabyss.feather_warden` = 羽守、`item.skyabyss.moth_dust.desc` = 矢に付けると、当たった敵が光る |
+| 2 | 22 | `entity.skyabyss.feather_warden` = 羽守、`item.skyabyss.`/skyabyss stormmob spawn <warden|moth|supplicant|mix> [数]`、_dust.desc` = 矢に付けると、当たった敵が光る |
 | 3 | 18 | `entity.skyabyss.raiju` = 雷獣、`subtitles.skyabyss.ground_plug` = 栓が引かれる |
 | 4 | 26 | `entity.skyabyss.thunder_wing_heart` = 雷翼の心臓、`subtitles.skyabyss.storm_heart_death` = 心臓が止まり、風が止む |
 | 5 | 14 | `item.skyabyss.thunder_wing_shard` = 雷翼の欠片、`item.skyabyss.storm_eye_feather` = 嵐の目の羽根 |

@@ -341,7 +341,7 @@
   "static_moth_death": {"subtitle": "subtitles.skyabyss.static_moth_death", "sounds": [{"name": "skyabyss:storm_mobs/static_moth_death"}]},
   "static_moth_burst": {"subtitle": "subtitles.skyabyss.static_moth_burst", "sounds": [{"name": "skyabyss:storm_mobs/static_moth_burst"}]},
   "thunder_supplicant_ambient": {"subtitle": "subtitles.skyabyss.thunder_supplicant_ambient", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_ambient"}]},
-  "thunder_supplicant_cast": {"subtitle": "subtitles.skyabyss.thunder_supplicant_cast", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_cast"}]},
+  "thunder_supplicant_raise": {"subtitle": "subtitles.skyabyss.thunder_supplicant_raise", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_raise"}]},
   "thunder_supplicant_hurt": {"subtitle": "subtitles.skyabyss.thunder_supplicant_hurt", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_hurt"}]},
   "thunder_supplicant_death": {"subtitle": "subtitles.skyabyss.thunder_supplicant_death", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_death"}]},
   "thunder_supplicant_swing": {"subtitle": "subtitles.skyabyss.thunder_supplicant_swing", "sounds": [{"name": "skyabyss:storm_mobs/thunder_supplicant_swing"}]}

@@ -181,7 +181,7 @@ public class ThunderSupplicant extends StormMob {
                 castWindup = CAST_WINDUP;
                 castCooldown = CAST_COOLDOWN + mob.getRandom().nextInt(30);
                 mob.playAction("cast");
-                mob.level().playSound(null, mob.getX(), mob.getY(), mob.getZ(), StormMobSetup.SUPPLICANT_CAST.get(), SoundSource.HOSTILE, 1.2f, 1f);
+                mob.level().playSound(null, mob.getX(), mob.getY(), mob.getZ(), StormMobSetup.SUPPLICANT_RAISE.get(), SoundSource.HOSTILE, 1.2f, 1f);
                 return;
             }
             // 間合い: 近ければ離れ、遠ければ寄る。間合いの中なら止まる

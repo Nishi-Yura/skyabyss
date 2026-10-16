@@ -60,7 +60,7 @@ public final class StormMobSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_AMBIENT = sound("thunder_supplicant_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_HURT = sound("thunder_supplicant_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_DEATH = sound("thunder_supplicant_death");
-    public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_CAST = sound("thunder_supplicant_cast");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_RAISE = sound("thunder_supplicant_raise");
     public static final DeferredHolder<SoundEvent, SoundEvent> SUPPLICANT_SWING = sound("thunder_supplicant_swing");
 
     private StormMobSetup() {

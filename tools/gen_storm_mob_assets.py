@@ -19,7 +19,7 @@
 - static_moth_discharge  : 放電: 乾いた破裂と、跳ねる火花
 - static_moth_hurt / death / burst : 紙のような翅の裂け / しぼむ火花 / 弾ける放電
 - thunder_supplicant_ambient : 籠の中で閉じこめられた雷の、くぐもった唸り (遠い祈りの声のように揺れる)
-- thunder_supplicant_cast    : 杖を掲げる: 輪の鳴りが上ってゆく (招雷の予告)
+- thunder_supplicant_raise    : 杖を掲げる: 輪の鳴りが上ってゆく (招雷の予告)
 - thunder_supplicant_hurt / death / swing : 籠の格子の鳴り / 籠が落ちて中の雷が抜ける / 杖の風切り
 """
 import json
@@ -231,7 +231,7 @@ SOUNDS = {
     "static_moth_death": (moth_death, "Static Moth fizzles out"),
     "static_moth_burst": (moth_burst, "Charged moth bursts"),
     "thunder_supplicant_ambient": (sup_ambient, "Thunder Supplicant murmurs"),
-    "thunder_supplicant_cast": (sup_cast, "Thunder Supplicant raises its staff"),
+    "thunder_supplicant_raise": (sup_cast, "Thunder Supplicant raises its staff"),
     "thunder_supplicant_hurt": (sup_hurt, "Cage rattles"),
     "thunder_supplicant_death": (sup_death, "Thunder Supplicant falls"),
     "thunder_supplicant_swing": (sup_swing, "Staff swings"),
