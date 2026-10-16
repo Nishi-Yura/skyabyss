@@ -1,0 +1,23 @@
+{
+  "skyabyss_gear.key.charm": "護符を使う",
+  "skyabyss_gear.message.level_short": "%s は Lv %s から使える（いまは Lv %s）",
+  "skyabyss_gear.message.equipped.charm": "%s を護符の枠に付けた",
+  "skyabyss_gear.message.equipped.trinket": "%s を装飾の枠に付けた",
+  "skyabyss_gear.message.no_charm": "護符の枠が空いている",
+  "skyabyss_gear.message.charm_resting": "%s は休んでいる（あと %s 秒）",
+  "skyabyss_gear.message.migrated": "持ち物にあった装飾品 %s 個を、装飾の枠へ移した。装飾品は枠に付けているときだけ効く（持ち物の画面の上の「装飾」）",
+  "skyabyss_gear.screen.title": "装飾",
+  "skyabyss_gear.screen.charm": "護符",
+  "skyabyss_gear.screen.charm_key": "[%s] で使う",
+  "skyabyss_gear.screen.trinket": "装飾",
+  "skyabyss_gear.screen.level": "Lv %s",
+  "skyabyss_gear.screen.tab_inventory": "持ち物",
+  "skyabyss_gear.screen.tab_accessories": "装飾",
+  "skyabyss_gear.tooltip.required_level": "必要 Lv %s",
+  "skyabyss_gear.tooltip.level_now": "（いま Lv %s）",
+  "skyabyss_gear.tooltip.short.armor": "レベルが足りず、身につけられない",
+  "skyabyss_gear.tooltip.short.weapon": "レベルが足りず、振っても力と効果が出ない",
+  "skyabyss_gear.tooltip.short.accessory": "レベルが足りず、枠に付けられない",
+  "skyabyss_gear.tooltip.slot.charm": "護符の枠に付けて [%s] で使う",
+  "skyabyss_gear.tooltip.slot.trinket": "装飾の枠に付けているあいだ効く"
+}

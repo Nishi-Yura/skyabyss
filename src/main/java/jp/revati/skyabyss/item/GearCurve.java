@@ -21,6 +21,14 @@ public final class GearCurve {
     // ダメージ軽減 IV を 4 部位 (EPF 16 → 64%)
     public static final double PROTECTION_IV_SET = 0.36;
 
+    // ダメージ軽減を 4 部位に同じ段で付けたときに受ける割合 (EPF = 段 × 4、1 につき 4%。上限 80%)
+    public static double protectionSet(int level) {
+        return 1 - Math.min(0.8, 0.04 * 4 * level);
+    }
+
+    // 耐性 I (岩鯨の甲殻一式。03 の 10.1節)。防具のあとの傷に掛かる
+    public static final double RESISTANCE_I = 0.8;
+
     public static double diamondSwordDps() {
         return DIAMOND_SWORD * SWORD_SPEED;
     }

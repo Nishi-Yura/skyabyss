@@ -32,6 +32,10 @@ public class WhaleboneGreatswordItem extends SwordItem implements ModGear {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        // 必要レベルに届かない人の手では、固有効果は出ない (GearLevel)
+        if (!GearLevel.usable(attacker, stack)) {
+            return super.hurtEnemy(stack, target, attacker);
+        }
         // +5 からは衝撃が深く響き、鈍足が強く長くなる
         boolean awakened = ModGear.awakened(stack);
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, awakened ? 70 : 50, awakened ? 2 : 1), attacker);

@@ -19,6 +19,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -67,6 +70,24 @@ public class StoneWhaleArmorItem extends ArmorItem implements ModGear, GeoItem {
         });
     }
 
+
+    // 必要レベルに届かないと身につけられない (持ち物の防具の枠・右クリック・発射装置。着ていたら GearLevel が外す)
+    @Override
+    public boolean canEquip(ItemStack stack, EquipmentSlot armorType, LivingEntity entity) {
+        return super.canEquip(stack, armorType, entity) && GearLevel.usable(entity, stack);
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!GearLevel.meets(player, stack)) {
+            if (!level.isClientSide) {
+                GearLevel.denyMessage(player, stack);
+            }
+            return InteractionResultHolder.fail(stack);
+        }
+        return super.use(level, player, hand);
+    }
 
     @Override
     public GearTier tier() {
