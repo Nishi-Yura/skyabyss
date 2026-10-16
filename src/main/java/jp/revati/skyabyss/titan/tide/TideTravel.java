@@ -41,50 +41,33 @@ public final class TideTravel {
     public static final ResourceKey<Level> TIDE_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tide_back"));
 
-    // 渡ってすぐに、また門に入って行き来しないように (tick)
-    private static final String TAG_COOLDOWN = "skyabyss_tide_cooldown";
-    private static final int COOLDOWN = 60;
+    // 渡ってすぐに、また門に入って行き来しないように (tick)。背中の潮門の口に 0.5 秒いたら地上へ。
+    // 待ち・資格・舟から降ろす・0.5 秒は共通の TitanGate (13 の 10.2節。待ちの記録の名前 skyabyss_tide_cooldown は前と同じ)
+    static final jp.revati.skyabyss.titan.TitanGate PASSAGE = new jp.revati.skyabyss.titan.TitanGate("tide", TideKeeper.SLOT, 60, 10);
     private static final int SWEPT_AFTER = 100;
     private static final double FAR = 160;
 
     // 背中のまわりの海にいる人 → 何 tick いるか
     private static final Map<UUID, Integer> ADRIFT = new HashMap<>();
-    // 背中の潮門の口にいる人 → 何 tick いるか (GATE_DWELL で地上へ)
-    private static final Map<UUID, Integer> IN_GATE = new HashMap<>();
-    private static final int GATE_DWELL = 10;
 
     private TideTravel() {
     }
 
-    private static boolean coolingDown(ServerPlayer player) {
-        return player.getPersistentData().getLong(TAG_COOLDOWN) > player.server.overworld().getGameTime();
-    }
-
     private static void startCooldown(ServerPlayer player) {
-        player.getPersistentData().putLong(TAG_COOLDOWN, player.server.overworld().getGameTime() + COOLDOWN);
+        PASSAGE.startCooldown(player);
     }
 
-    // 休んでいる巨神の潮門の口に入った
+    // 休んでいる巨神の潮門の口に入った (資格がなければ、舟から降ろす前に断る)
     static void boardFromGate(ServerPlayer player, TideShellEntity titan) {
-        if (coolingDown(player) || player.isSleeping()) {
-            return;
+        if (PASSAGE.admit(player)) {
+            board(player);
         }
-        // 資格がなければ、舟から降ろす前に断る
-        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, TideKeeper.SLOT)) {
-            startCooldown(player);
-            return;
-        }
-        if (player.isPassenger()) {
-            player.stopRiding();
-        }
-        board(player);
     }
 
     // 背中へ渡す (コマンドからも)
     public static boolean board(ServerPlayer player) {
         // 乗れるのは、自分で岩鯨の心臓を止めた人だけ (10 の 3 章)。断ったら門の判定がすぐまた来ないように待たせる
-        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, TideKeeper.SLOT)) {
-            startCooldown(player);
+        if (!PASSAGE.checkBoard(player)) {
             return false;
         }
         ServerLevel back = player.server.getLevel(TIDE_BACK);
@@ -164,13 +147,7 @@ public final class TideTravel {
             return;
         }
         // 背中の潮門をくぐると、地上へ戻る。口の中に 0.5 秒いたら (かすっただけ・押し戻しの一瞬では戻さない)
-        boolean inGate = !coolingDown(player) && TideBackBuilder.inReturnGate(player.getX(), player.getY(), player.getZ());
-        int inGateTicks = inGate ? IN_GATE.merge(player.getUUID(), 2, Integer::sum) : 0;
-        if (!inGate) {
-            IN_GATE.remove(player.getUUID());
-        }
-        if (inGateTicks >= GATE_DWELL) {
-            IN_GATE.remove(player.getUUID());
+        if (PASSAGE.dwell(player, TideBackBuilder.inReturnGate(player.getX(), player.getY(), player.getZ()), 2)) {
             SkyAbyss.LOGGER.info("{} went through the tide back gate at {} {} {}", player.getGameProfile().getName(), player.getX(), player.getY(), player.getZ());
             player.sendSystemMessage(ModText.lore("message.skyabyss.tide.leaving"));
             leave(player);
@@ -220,7 +197,7 @@ public final class TideTravel {
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         ADRIFT.remove(event.getEntity().getUUID());
-        IN_GATE.remove(event.getEntity().getUUID());
+        PASSAGE.forget(event.getEntity().getUUID());
     }
 
     // 島は乗り込みの前に建てておく (サーバーの起動のとき、まだ無いか版が古ければ)。乗り込みの途中で 4〜6 秒止まらないように
@@ -236,7 +213,7 @@ public final class TideTravel {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         ADRIFT.clear();
-        IN_GATE.clear();
+        PASSAGE.clear();
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
