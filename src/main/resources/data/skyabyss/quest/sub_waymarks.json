@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "order": 43,
+  "giver": "skyabyss:whale_chaser",
+  "min_stage": 1,
+  "unlock": {
+    "type": "stilled",
+    "titan": "stone_whale"
+  },
+  "stages": [
+    {
+      "id": "ride",
+      "objectives": [
+        {
+          "id": "ride",
+          "type": "signal",
+          "target": "titan_voyage",
+          "count": 2,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "fq_c_way_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [
+      {
+        "item": "minecraft:flint",
+        "count": 1,
+        "name": "item.skyabyss.keepsake.notched_stone",
+        "lore": [
+          "item.skyabyss.keepsake.notched_stone.lore"
+        ]
+      }
+    ],
+    "affinity": {
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

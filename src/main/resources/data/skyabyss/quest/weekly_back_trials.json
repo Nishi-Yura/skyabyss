@@ -1,0 +1,36 @@
+{
+  "category": "sub",
+  "order": 80,
+  "repeat": "weekly",
+  "board": true,
+  "unlock": {
+    "type": "lore",
+    "entry": "chapter1/sky_ruins"
+  },
+  "stages": [
+    {
+      "id": "trials",
+      "objectives": [
+        {
+          "id": "trial",
+          "type": "signal",
+          "target": "back_trial_cleared",
+          "count": 3
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 100,
+    "items": [
+      {
+        "item": "skyabyss:stone_whale_shard",
+        "count": 3
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 1
+      }
+    ]
+  }
+}

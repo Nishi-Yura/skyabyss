@@ -1,0 +1,33 @@
+{
+  "category": "sub",
+  "order": 81,
+  "repeat": "weekly",
+  "board": true,
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "heart",
+          "type": "kill",
+          "target": "skyabyss:stone_whale_heart",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150,
+    "items": [
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 1
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 2
+      }
+    ]
+  }
+}

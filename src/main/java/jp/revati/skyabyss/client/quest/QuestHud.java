@@ -104,6 +104,9 @@ public final class QuestHud {
             if (have >= ob.count() && !stage.any()) {
                 continue;
             }
+            if (ob.type().equals("turn_in") && Minecraft.getInstance().player != null) {
+                have = Math.min(jp.revati.skyabyss.quest.QuestItems.count(Minecraft.getInstance().player, ob.targets().get(0), ob.token()), ob.count());
+            }
             if (stage.any() && !first) {
                 out.add(new Line(Component.translatable("gui.skyabyss.quest.or").getString(), 8, SOFT));
             }

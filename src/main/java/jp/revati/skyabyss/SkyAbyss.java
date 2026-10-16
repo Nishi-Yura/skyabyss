@@ -48,6 +48,8 @@ public class SkyAbyss {
         // NPC (語り部・鯨追い、好感度) とクエスト (記録)。登録は npc / quest パッケージにまとめてある
         jp.revati.skyabyss.npc.NpcSetup.register(modEventBus);
         jp.revati.skyabyss.quest.QuestSetup.register(modEventBus);
+        // 自由なモードのサブクエスト (言伝ての板)。docs/design/07 の 15 章
+        jp.revati.skyabyss.quest.free.FreeQuestSetup.register(modEventBus);
         // 巨神での移動 (呼び笛・碑・音・プレイヤーの記録)。登録は titan.travel パッケージにまとめてある
         jp.revati.skyabyss.titan.travel.TravelSetup.register(modEventBus);
         // 第二の巨神「潮殻の巨神」(エンティティ・音)。登録は titan.tide パッケージにまとめてある

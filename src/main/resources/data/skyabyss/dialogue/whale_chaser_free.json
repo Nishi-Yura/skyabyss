@@ -1,0 +1,297 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "sub_parcel",
+            "is": "active",
+            "stage": "deliver"
+          },
+          {
+            "type": "item",
+            "item": "minecraft:leather",
+            "count": 1,
+            "token": "parcel"
+          }
+        ]
+      },
+      "node": "fq_c_parcel"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "sub_waymarks",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "fq_c_way_done"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "sub_tide_watch",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "fq_c_tide_done"
+    }
+  ],
+  "add_options": {
+    "c_menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "errands",
+          "goto": "fq_c_menu",
+          "kind": "quest"
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "fq_c_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "way",
+          "goto": "fq_c_way_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stilled",
+                "titan": "stone_whale"
+              },
+              {
+                "type": "quest",
+                "quest": "sub_waymarks",
+                "is": "none"
+              }
+            ]
+          }
+        },
+        {
+          "id": "tide",
+          "goto": "fq_c_tide_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 1
+              },
+              {
+                "type": "quest",
+                "quest": "sub_tide_watch",
+                "is": "none"
+              }
+            ]
+          }
+        },
+        {
+          "id": "clasp_lost",
+          "goto": "fq_c_clasp_lost",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "sub_parcel",
+                "is": "active",
+                "stage": "return"
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "item",
+                  "item": "minecraft:bone",
+                  "count": 1,
+                  "token": "clasp_return"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "board",
+          "goto": "fq_c_board",
+          "if": {
+            "type": "stage",
+            "min": 1
+          }
+        },
+        {
+          "id": "back",
+          "goto": "@entry",
+          "kind": "leave"
+        }
+      ]
+    },
+    "fq_c_board": {
+      "face": "grave",
+      "next": "@entry"
+    },
+    "fq_c_parcel": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "minecraft:leather",
+          "count": 1,
+          "token": "parcel"
+        }
+      ],
+      "next": "fq_c_parcel2"
+    },
+    "fq_c_parcel2": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "minecraft:bone",
+          "count": 1,
+          "token": "clasp_return",
+          "name": "item.skyabyss.keepsake.clasp_return",
+          "lore": [
+            "item.skyabyss.keepsake.clasp_return.lore"
+          ]
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "fq_c_clasp_lost": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "minecraft:bone",
+          "count": 1,
+          "token": "clasp_return",
+          "name": "item.skyabyss.keepsake.clasp_return",
+          "lore": [
+            "item.skyabyss.keepsake.clasp_return.lore"
+          ]
+        }
+      ],
+      "next": "@entry"
+    },
+    "fq_c_way_offer": {
+      "face": "grave",
+      "next": "fq_c_way_offer2"
+    },
+    "fq_c_way_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_waymarks"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "fq_c_way_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "sea",
+          "goto": "fq_c_way_sea"
+        },
+        {
+          "id": "small",
+          "goto": "fq_c_way_small"
+        }
+      ]
+    },
+    "fq_c_way_sea": {
+      "face": "neutral",
+      "next": "fq_c_way_done2"
+    },
+    "fq_c_way_small": {
+      "face": "grave",
+      "next": "fq_c_way_done2"
+    },
+    "fq_c_way_done2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "thanks",
+          "goto": "end"
+        }
+      ]
+    },
+    "fq_c_tide_offer": {
+      "face": "grave",
+      "next": "fq_c_tide_offer2"
+    },
+    "fq_c_tide_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_tide_watch"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "fq_c_tide_done": {
+      "face": "grave",
+      "next": "fq_c_tide_done2"
+    },
+    "fq_c_tide_done2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "chapter1/tide_hours"
+        }
+      ],
+      "options": [
+        {
+          "id": "thanks",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

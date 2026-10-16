@@ -1,0 +1,334 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "quest",
+        "quest": "sub_shadow_log",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "fq_shadow_done"
+    },
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "sub_parcel",
+            "is": "active",
+            "stage": "return"
+          },
+          {
+            "type": "item",
+            "item": "minecraft:bone",
+            "count": 1,
+            "token": "clasp_return"
+          }
+        ]
+      },
+      "node": "fq_parcel_back"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "sub_lore_gaps",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "fq_gaps_done"
+    }
+  ],
+  "add_options": {
+    "menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "errands",
+          "goto": "fq_menu",
+          "kind": "quest"
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "fq_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "board",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "open_board"
+            }
+          ]
+        },
+        {
+          "id": "shadow",
+          "goto": "fq_shadow_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "lore",
+                "entry": "prologue/shadow"
+              },
+              {
+                "type": "quest",
+                "quest": "main_song",
+                "is": "started"
+              },
+              {
+                "type": "quest",
+                "quest": "sub_shadow_log",
+                "is": "none"
+              }
+            ]
+          }
+        },
+        {
+          "id": "parcel",
+          "goto": "fq_parcel_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "flag",
+                "flag": "c_whale_heard",
+                "npc": "skyabyss:whale_chaser"
+              },
+              {
+                "type": "quest",
+                "quest": "sub_parcel",
+                "is": "none"
+              }
+            ]
+          }
+        },
+        {
+          "id": "parcel_lost",
+          "goto": "fq_parcel_lost",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "sub_parcel",
+                "is": "active",
+                "stage": "deliver"
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "item",
+                  "item": "minecraft:leather",
+                  "count": 1,
+                  "token": "parcel"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "gaps",
+          "goto": "fq_gaps_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "sub_song",
+                "is": "done"
+              },
+              {
+                "type": "quest",
+                "quest": "sub_lore_gaps",
+                "is": "none"
+              }
+            ]
+          }
+        },
+        {
+          "id": "back",
+          "goto": "@entry",
+          "kind": "leave"
+        }
+      ]
+    },
+    "fq_shadow_offer": {
+      "face": "grave",
+      "next": "fq_shadow_offer2"
+    },
+    "fq_shadow_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_shadow_log"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "fq_shadow_done": {
+      "face": "grave",
+      "next": "fq_shadow_done2"
+    },
+    "fq_shadow_done2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "prologue/shadow_heading"
+        }
+      ],
+      "options": [
+        {
+          "id": "thanks",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "fq_parcel_offer": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "give",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_parcel"
+            },
+            {
+              "type": "give",
+              "item": "minecraft:leather",
+              "count": 1,
+              "token": "parcel",
+              "name": "item.skyabyss.keepsake.parcel",
+              "lore": [
+                "item.skyabyss.keepsake.parcel.lore"
+              ]
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "fq_parcel_lost": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "minecraft:leather",
+          "count": 1,
+          "token": "parcel",
+          "name": "item.skyabyss.keepsake.parcel",
+          "lore": [
+            "item.skyabyss.keepsake.parcel.lore"
+          ]
+        }
+      ],
+      "next": "@entry"
+    },
+    "fq_parcel_back": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "take",
+          "item": "minecraft:bone",
+          "count": 1,
+          "token": "clasp_return"
+        }
+      ],
+      "next": "fq_parcel_back2"
+    },
+    "fq_parcel_back2": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "thanks",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "fq_gaps_offer": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_lore_gaps"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "fq_gaps_done": {
+      "face": "smile",
+      "next": "fq_gaps_done2"
+    },
+    "fq_gaps_done2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "thanks",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

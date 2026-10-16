@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 25,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/shadow",
+    "prologue/shaved_peak"
+  ]
+}
