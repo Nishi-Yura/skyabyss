@@ -1,0 +1,28 @@
+{
+  "entity.skyabyss.tide_shell": "潮殻の巨神",
+  "biome.skyabyss.tide_back": "潮殻の背",
+  "subtitles.skyabyss.tide_song": "海の底で、巨きなものが鳴く",
+  "subtitles.skyabyss.tide_surf": "潮が引いていく",
+  "subtitles.skyabyss.tide_gate": "潮門をくぐる",
+  "subtitles.skyabyss.tide_step": "海の底が揺れる",
+  "subtitles.skyabyss.tide_back_waves": "波が寄せる",
+
+  "message.skyabyss.tide.ebb": "潮が引いていく。沖の島が、浅瀬へ寄ってくる……",
+  "message.skyabyss.tide.gate_hint": "潮門をくぐると、背中へ渡る",
+  "message.skyabyss.tide.arrived": "水をくぐると、乾いた砂の上にいた。足もとで、巨きな甲羅がゆっくりと息をしている。",
+  "message.skyabyss.tide.leaving": "潮門の向こうから、地上の海の音がする。",
+  "message.skyabyss.tide.return_hint": "潮門をくぐると、地上へ戻る",
+  "message.skyabyss.tide.swept_back": "潮に押し戻された",
+  "title.skyabyss.tide_back": "潮殻の背",
+  "title.skyabyss.tide_back.sub": "海を歩く巨神の、甲羅の上",
+
+  "commands.skyabyss.tide.overworld_only": "潮殻の巨神は、地上の海にしか呼べない",
+  "commands.skyabyss.tide.no_sea": "120 ブロック先に、巨神が歩ける海 (水深 6 以上、読み込まれている所) がない",
+  "commands.skyabyss.tide.summoned": "潮殻の巨神を %s, %s の海に呼んだ",
+  "commands.skyabyss.tide.missing": "潮殻の巨神が読み込まれていない (先に titan summon tide)",
+  "commands.skyabyss.tide.no_shallows": "近くに休める浅瀬 (水深 6〜14、岸から 40 以内、64 ブロック以内) がない",
+  "commands.skyabyss.tide.resting": "潮殻の巨神を浅瀬で休ませた (3 分)",
+  "commands.skyabyss.tide.rebuilt": "潮殻の背 (仮の島) を建て直した",
+  "commands.skyabyss.tide.status": "潮殻の巨神: %s、位置 %s %s %s。次の干潮の刻まで %s 秒",
+  "commands.skyabyss.tide.status_absent": "潮殻の巨神は読み込まれていない (現れたことがある: %s)。次の干潮の刻まで %s 秒"
+}
