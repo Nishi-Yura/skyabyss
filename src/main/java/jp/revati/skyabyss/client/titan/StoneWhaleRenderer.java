@@ -37,6 +37,15 @@ public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
         this.shadowRadius = 0f;
     }
 
+    // GeckoLib 4.9.3 は、LivingEntity でないエンティティの向きを描画に使わない (体の向きを 0 として 180 度だけ回す)。
+    // そのままでは、いつも南を向いて描かれる。潮殻 (TideShellRenderer) と同じく、エンティティの yaw で回す
+    @Override
+    protected void applyRotations(StoneWhaleEntity whale, PoseStack poseStack, float ageInTicks,
+                                  float rotationYaw, float partialTick, float nativeScale) {
+        float yaw = Mth.rotLerp(partialTick, whale.yRotO, whale.getYRot());
+        super.applyRotations(whale, poseStack, ageInTicks, yaw, partialTick, nativeScale);
+    }
+
     @Override
     public void render(StoneWhaleEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
         super.render(entity, entityYaw, partialTick, poseStack, buffers, packedLight);

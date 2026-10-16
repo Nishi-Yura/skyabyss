@@ -147,12 +147,40 @@ public final class Growth {
         return sum > 0 && sum <= data.unspentPoints();
     }
 
-    // 振り分けを全部戻す (管理者・テスト用。将来は振り直しのアイテムから呼ぶ)
+    // 振り分けを全部戻す (管理者・テスト用。回数も費用も数えない)
     public static void resetStats(ServerPlayer player) {
         GrowthData data = get(player);
         java.util.Arrays.fill(data.stats, 0);
         sync(player);
         applyModifiers(player);
+    }
+
+    // ステータス画面の「振り直す」(00 の 3 = A): 技の振り直しと同じく、共鳴の炉のそばで共鳴の結晶を払う。
+    // 費用も技と同じ表 (初回無料、以後 1〜5) だが、回数は技と別に数える。クリエイティブは炉も結晶も要らない
+    public static jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult respecStats(ServerPlayer player) {
+        GrowthData data = get(player);
+        if (data.spentPoints() <= 0) {
+            return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NOTHING;
+        }
+        boolean free = player.isCreative();
+        if (!free && !jp.revati.skyabyss.rpg.skill.SkillManager.nearForge(player)) {
+            return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_FORGE;
+        }
+        int cost = GrowthRules.statRespecCost(data.statRespecs);
+        if (!free && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(player.getInventory()) < cost) {
+            return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_CRYSTALS;
+        }
+        if (!free) {
+            jp.revati.skyabyss.rpg.skill.SkillManager.removeCrystals(player.getInventory(), cost);
+        }
+        java.util.Arrays.fill(data.stats, 0);
+        data.statRespecs++;
+        sync(player);
+        applyModifiers(player);
+        player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(),
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 0.7f);
+        player.displayClientMessage(jp.revati.skyabyss.ModText.lore("message.skyabyss.growth.respec_done"), false);
+        return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK;
     }
 
     // 成長の修飾子を今の値で付け直す。ログイン・復活・ディメンション移動・振り分けのたびに呼ぶ。

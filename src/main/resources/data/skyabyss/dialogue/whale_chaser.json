@@ -47,10 +47,22 @@
   "nodes": {
     "c_first": {
       "face": "smile",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "chapter1/whale_chaser"
+        }
+      ],
       "next": "c_menu"
     },
     "c_deja": {
       "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "chapter1/whale_chaser"
+        }
+      ],
       "next": "c_menu"
     },
     "c_menu": {

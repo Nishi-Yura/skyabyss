@@ -163,7 +163,9 @@ public final class WatcherEvents {
         PrologueData data = PrologueData.get(level);
         PrologueData.Entry entry = data.entry(player.getUUID());
         float moon = moonNearness(level);
-        WatcherStage stage = WatcherStage.of(entry.sightings, moon);
+        // 1 章に入った人にも出し続けるが、段階 2 で止める (00 の 2 = B)
+        int chapter = jp.revati.skyabyss.sky.ChapterSky.inChapterOne(player) ? 1 : 0;
+        WatcherStage stage = WatcherStage.of(entry.sightings, moon, chapter);
         Vec3 eye = player.getEyePosition();
         Optional<WatcherSpot> spot = WatcherSpot.find(level, eye, player.getYRot(), stage.minDistance(), stage.maxDistance(),
                 level.random, !force);

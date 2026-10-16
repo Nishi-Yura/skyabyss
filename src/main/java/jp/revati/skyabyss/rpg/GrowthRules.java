@@ -135,4 +135,9 @@ public final class GrowthRules {
         int base = (int) Math.floor(value);
         return base + (r < value - base ? 1 : 0);
     }
+
+    // ステータスの振り直しの費用 (共鳴の結晶の数)。技の振り直しと同じ表を使う (初回無料、以後 1〜5)
+    public static int statRespecCost(int respecsSoFar) {
+        return jp.revati.skyabyss.rpg.skill.SkillRules.respecCost(respecsSoFar);
+    }
 }
