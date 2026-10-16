@@ -90,7 +90,9 @@ public final class FreeQuestSelfTest {
     }
 
     static List<QuestDef> freeQuests() {
-        return QuestManager.all().stream().filter(q -> q.board() || q.id().startsWith("sub_") && !List.of("sub_song", "sub_shards").contains(q.id()))
+        // 1 章の続きのクエスト (潮殻〜余燼の段階で開くもの。story/StorySelfTest が確かめる) は数えない
+        return QuestManager.all().stream().filter(q -> !jp.revati.skyabyss.story.StorySelfTest.STORY_QUESTS.contains(q.id()))
+                .filter(q -> q.board() || q.id().startsWith("sub_") && !List.of("sub_song", "sub_shards").contains(q.id()))
                 .toList();
     }
 

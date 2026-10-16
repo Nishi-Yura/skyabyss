@@ -371,7 +371,9 @@ public final class LoreSelfTest {
         JsonObject quest = json("/assets/skyabyss_quest/lang/" + code + ".json", failures);
         // 潮殻の心臓が記す項目 (潮の止まる刻) の文は skyabyss_tide にある
         JsonObject tide = json("/assets/skyabyss_tide/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide)) {
+        // 1 章の続き (雷翼・余燼・天の鍵・数え歌のいつつ・嵐の通り道) の文は skyabyss_story にある
+        JsonObject story = json("/assets/skyabyss_story/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

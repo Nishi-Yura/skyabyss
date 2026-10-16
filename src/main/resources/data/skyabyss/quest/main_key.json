@@ -1,0 +1,39 @@
+{
+  "category": "main",
+  "order": 50,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "any",
+    "of": [
+      {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "done"
+      },
+      {
+        "type": "lore",
+        "entry": "chapter1/sky_key_whole"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "show",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ms_key4"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 500,
+    "affinity": {
+      "skyabyss:storyteller": 5,
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "active",
+        "stage": "report"
+      },
+      "node": "ms_tide_back"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "active",
+        "stage": "rumor"
+      },
+      "node": "ms_thunder"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "active",
+        "stage": "report"
+      },
+      "node": "ms_thunder_back"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_key",
+        "is": "active",
+        "stage": "show"
+      },
+      "node": "ms_key"
+    },
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "sub_warm_coal",
+            "is": "active",
+            "stage": "tell"
+          },
+          {
+            "type": "item",
+            "item": "minecraft:magma_cream",
+            "count": 4
+          }
+        ]
+      },
+      "node": "ms_coal_done"
+    }
+  ],
+  "add_options": {
+    "fq_menu": {
+      "before": "back",
+      "options": [
+        {
+          "id": "coal",
+          "goto": "ms_coal_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 3
+              },
+              {
+                "type": "quest",
+                "quest": "sub_warm_coal",
+                "is": "none"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ms_tide_back": {
+      "face": "smile",
+      "next": "ms_tide_back2"
+    },
+    "ms_tide_back2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "ms_thunder": {
+      "face": "grave",
+      "next": "ms_thunder2"
+    },
+    "ms_thunder2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "why",
+          "goto": "ms_thunder_why"
+        }
+      ]
+    },
+    "ms_thunder_why": {
+      "face": "neutral",
+      "next": "@entry"
+    },
+    "ms_thunder_back": {
+      "face": "smile",
+      "next": "ms_thunder_back2"
+    },
+    "ms_thunder_back2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "ms_key": {
+      "face": "grave",
+      "next": "ms_key2"
+    },
+    "ms_key2": {
+      "face": "grave",
+      "next": "ms_key3"
+    },
+    "ms_key3": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "chapter1/fifth_verse"
+        }
+      ],
+      "next": "ms_key4"
+    },
+    "ms_key4": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 3
+            }
+          ]
+        }
+      ]
+    },
+    "ms_coal_offer": {
+      "face": "neutral",
+      "next": "ms_coal_offer2"
+    },
+    "ms_coal_offer2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_warm_coal"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "ms_coal_done": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "take",
+          "item": "minecraft:magma_cream",
+          "count": 4
+        }
+      ],
+      "next": "ms_coal_done2"
+    },
+    "ms_coal_done2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

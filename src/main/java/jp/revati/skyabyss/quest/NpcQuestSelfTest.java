@@ -121,7 +121,9 @@ public final class NpcQuestSelfTest {
                 "expected quests main_song, sub_song, sub_shards", failures);
         check(DialogueManager.dialogue(NpcSetup.STORYTELLER_ID) != null && DialogueManager.dialogue(NpcSetup.WHALE_CHASER_ID) != null,
                 "expected dialogues for both npcs", failures);
-        check(QuestManager.all().stream().filter(QuestDef::main).count() == 1, "exactly one main quest", failures);
+        // メインは「雲の下の歌」から一本の鎖 (1 章の続きは前のメインを終えると始まる。docs/design/14_beta.md)
+        check(QuestManager.all().stream().filter(QuestDef::main).min(java.util.Comparator.comparingInt(QuestDef::order))
+                .map(q -> q.id().equals("main_song")).orElse(false), "main_song should be the first main quest", failures);
         // 条件と結果の指す先
         List<Condition> conditions = new ArrayList<>();
         List<Action> actions = new ArrayList<>();
@@ -268,13 +270,16 @@ public final class NpcQuestSelfTest {
                 continue;
             }
             // 自由なモードのサブクエストの文は skyabyss_quest に置いた (skyabyss_npc は別の担当が直すため)
-            JsonObject extra = json("/assets/skyabyss_quest/lang/" + code + ".json", failures);
-            if (extra != null) {
-                extra.entrySet().forEach(e -> {
-                    if (!lang.has(e.getKey())) {
-                        lang.add(e.getKey(), e.getValue());
-                    }
-                });
+            // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story")) {
+                JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
+                if (extra != null) {
+                    extra.entrySet().forEach(e -> {
+                        if (!lang.has(e.getKey())) {
+                            lang.add(e.getKey(), e.getValue());
+                        }
+                    });
+                }
             }
             for (String key : keys) {
                 if (!lang.has(key) || lang.get(key).getAsString().isBlank()) {

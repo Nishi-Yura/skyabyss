@@ -1,0 +1,258 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "active",
+        "stage": "rumor"
+      },
+      "node": "ms_c_tide"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_tide",
+        "is": "active",
+        "stage": "report"
+      },
+      "node": "ms_c_tide_back"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_thunder",
+        "is": "active",
+        "stage": "report"
+      },
+      "node": "ms_c_thunder_back"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "main_ember",
+        "is": "active",
+        "stage": "rumor"
+      },
+      "node": "ms_c_ember"
+    },
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/sky_key_whole"
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "c_key_seen"
+            }
+          }
+        ]
+      },
+      "node": "ms_c_key"
+    },
+    {
+      "if": {
+        "type": "quest",
+        "quest": "sub_old_map",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "ms_c_map_done"
+    }
+  ],
+  "add_options": {
+    "fq_c_menu": {
+      "before": "back",
+      "options": [
+        {
+          "id": "map",
+          "goto": "ms_c_map_offer",
+          "kind": "quest",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 2
+              },
+              {
+                "type": "quest",
+                "quest": "sub_old_map",
+                "is": "none"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ms_c_tide": {
+      "face": "grave",
+      "next": "ms_c_tide2"
+    },
+    "ms_c_tide2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "count",
+          "goto": "fq_c_tide_offer2",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "sub_tide_watch",
+            "is": "none"
+          }
+        }
+      ]
+    },
+    "ms_c_tide_back": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "town",
+          "goto": "ms_c_tide_back2"
+        },
+        {
+          "id": "beat",
+          "goto": "ms_c_tide_back2"
+        }
+      ]
+    },
+    "ms_c_tide_back2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "ms_c_thunder_back": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "ms_c_ember": {
+      "face": "grave",
+      "next": "ms_c_ember2"
+    },
+    "ms_c_ember2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "ms_c_key": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_key_seen"
+        }
+      ],
+      "next": "ms_c_key2"
+    },
+    "ms_c_key2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "ms_c_map_offer": {
+      "face": "neutral",
+      "next": "ms_c_map_offer2"
+    },
+    "ms_c_map_offer2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "accept",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "sub_old_map"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "ms_c_map_done": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "wing",
+          "goto": "ms_c_map_done2"
+        },
+        {
+          "id": "count",
+          "goto": "ms_c_map_done2"
+        }
+      ]
+    },
+    "ms_c_map_done2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "lore",
+          "entry": "chapter1/storm_path"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

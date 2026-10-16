@@ -1,0 +1,20 @@
+{
+  "key_form": {
+    "subtitle": "subtitles.skyabyss_story.key_form",
+    "sounds": [
+      {
+        "name": "skyabyss_story:key_form",
+        "stream": false
+      }
+    ]
+  },
+  "deep_beat": {
+    "subtitle": "subtitles.skyabyss_story.deep_beat",
+    "sounds": [
+      {
+        "name": "skyabyss_story:deep_beat",
+        "stream": false
+      }
+    ]
+  }
+}

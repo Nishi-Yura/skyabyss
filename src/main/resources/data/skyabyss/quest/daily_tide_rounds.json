@@ -1,0 +1,33 @@
+{
+  "category": "sub",
+  "order": 64,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "rounds",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "skyabyss:coral_thrall",
+            "skyabyss:reef_scuttler",
+            "skyabyss:bubble_puffer"
+          ],
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 90,
+    "items": [
+      {
+        "item": "skyabyss:tide_shell_shard",
+        "count": 2
+      }
+    ]
+  }
+}

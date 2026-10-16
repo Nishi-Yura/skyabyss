@@ -45,7 +45,7 @@ public final class Board {
     // 一日に受けられる日替わりの数 (10 の判断 12 の推奨)
     public static final int QUOTA = 3;
     // 板に出す日替わりの数 (抽選)
-    public static final int DRAW = 4;
+    public static final int DRAW = 5;
     // 板 (か NPC) からこれより離れたら、画面から受けられない
     public static final double REACH = 8.0;
 

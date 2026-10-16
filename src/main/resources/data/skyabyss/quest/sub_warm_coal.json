@@ -1,0 +1,55 @@
+{
+  "category": "sub",
+  "order": 46,
+  "giver": "skyabyss:storyteller",
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "fetch",
+      "objectives": [
+        {
+          "id": "go",
+          "type": "visit",
+          "target": "minecraft:the_nether"
+        },
+        {
+          "id": "cream",
+          "type": "collect",
+          "target": "minecraft:magma_cream",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ms_coal_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 350,
+    "items": [
+      {
+        "item": "minecraft:charcoal",
+        "count": 1,
+        "name": "item.skyabyss.keepsake.warm_coal",
+        "lore": [
+          "item.skyabyss.keepsake.warm_coal.lore"
+        ]
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 3
+      }
+    ],
+    "affinity": {
+      "skyabyss:storyteller": 10
+    }
+  }
+}
