@@ -19,7 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 // 岩鯨の見守り。岩鯨はワールドに一体だけで、見失ってはいけない。
@@ -129,29 +128,16 @@ public final class WhaleKeeper {
     // プレイヤーがいないので、試す場所のチャンクを強制読み込みし、エンティティが読み込まれるのを待ってから試す
     private static final int TEST_X = 4000;
     private static final int TEST_Z = 4000;
-    private static int selfTestCountdown = -1;
-
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        ServerLevel level = event.getServer().overworld();
+    // 呼ぶのは SelfTestRunner: 読み込み → 40 tick 待つ → 試す
+    public static void selfTestLoad(net.minecraft.server.MinecraftServer server) {
+        ServerLevel level = server.overworld();
         for (int dx = 0; dx <= 4; dx++) {
             level.setChunkForced((TEST_X >> 4) + dx, TEST_Z >> 4, true);
         }
-        selfTestCountdown = 40;
     }
 
-    @SubscribeEvent
-    static void onSelfTestTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
-        if (selfTestCountdown < 0 || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
-            return;
-        }
-        if (--selfTestCountdown == 0) {
-            selfTestCountdown = -1;
-            runSelfTest(level);
-        }
+    public static void selfTestRun(net.minecraft.server.MinecraftServer server) {
+        runSelfTest(server.overworld());
     }
 
     private static void runSelfTest(ServerLevel level) {

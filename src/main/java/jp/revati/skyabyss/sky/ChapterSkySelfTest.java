@@ -35,16 +35,12 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 1章の空の演出の自己テスト。SKYABYSS_SELFTEST=1 の専用サーバーで、起動直後に一度だけ動く (止めるのは TitanBackSelfTest)。
 // いちばん大事なのは「プレイヤーの建築を壊さない」ことなので、空中 (y=220〜250) に石の峰を作り、
 // 人工物を一つずつ置いては「削らない」と判断することを確かめる。削ったときは、計画した所以外が一つも変わっていないことを確かめる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ChapterSkySelfTest {
     private static final int CX = -4000;
     private static final int CZ = -4000;
@@ -56,37 +52,67 @@ public final class ChapterSkySelfTest {
     private ChapterSkySelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        MinecraftServer server = event.getServer();
-        ServerLevel level = server.overworld();
-        List<String> failures = new ArrayList<>();
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき)。重いので段に分け、1 tick に 1 段ずつ流す:
+    // 決まりごと → 空中の峰を削る → 置いた・掘った記録 → 本物の山 (場所ごとに、チャンクの生成を待ってから) → 砂漠とまとめ
+    private static final List<String> FAILURES = new ArrayList<>();
+
+    public static List<jp.revati.skyabyss.SelfTestRunner.Step> steps() {
+        return List.of(
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (rules)", server -> guarded(() -> {
+                    FAILURES.clear();
+                    REAL_REASONS.clear();
+                    REAL_HITS.clear();
+                    REAL_FAILURES.clear();
+                    realTried = 0;
+                    realCarved = 0;
+                    realGrids = 0;
+                    realSite = 0;
+                    realStage = 0;
+                    realSkipped = 0;
+                    realStarted = 0;
+                    checkMoon(FAILURES);
+                    checkStages(FAILURES);
+                    checkBlocker(FAILURES);
+                    checkOutcomes(FAILURES);
+                    checkYaw(FAILURES);
+                    checkData(server, FAILURES);
+                    checkPayloads(server, FAILURES);
+                    checkChapterOne(server.overworld(), FAILURES);
+                    checkBlockSets(FAILURES);
+                })),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (scars)", server -> guarded(() -> checkScars(server.overworld(), FAILURES))),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (recording)", server -> guarded(() -> checkRecording(server.overworld(), FAILURES))),
+                jp.revati.skyabyss.SelfTestRunner.Step.until("chapter sky (real peaks)", server -> {
+                    try {
+                        return realPeakStep(server.overworld());
+                    } catch (RuntimeException e) {
+                        SkyAbyss.LOGGER.error("SELFTEST chapter sky crashed", e);
+                        FAILURES.add("crashed: " + e);
+                        return true;
+                    }
+                }),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky", server -> {
+                    guarded(() -> finishRealPeaks(server.overworld(), FAILURES));
+                    report();
+                }));
+    }
+
+    private static void guarded(Runnable check) {
         try {
-            checkMoon(failures);
-            checkStages(failures);
-            checkBlocker(failures);
-            checkOutcomes(failures);
-            checkYaw(failures);
-            checkData(server, failures);
-            checkPayloads(server, failures);
-            checkChapterOne(level, failures);
-            checkBlockSets(failures);
-            checkScars(level, failures);
-            checkRecording(level, failures);
-            checkRealPeaks(level, failures);
+            check.run();
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST chapter sky crashed", e);
-            failures.add("crashed: " + e);
+            FAILURES.add("crashed: " + e);
         }
-        if (failures.isEmpty()) {
+    }
+
+    private static void report() {
+        if (FAILURES.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST chapter sky PASSED (moon, stages, eye conditions, outcomes, data, payloads, chapter 1, "
                     + "peak scar: finds the peak, carves only the plan, refuses every artifact and every stone-and-dirt build, stops when a block changes, "
                     + "records placing and digging, still carves real mountain peaks)");
         } else {
-            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
+            FAILURES.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
         }
     }
 
@@ -839,23 +865,85 @@ public final class ChapterSkySelfTest {
     private static int realCarved;
     private static int realGrids;
 
-    // 起動の tick の中で順に調べる (ウォッチドッグの60秒に収まるよう、12秒を過ぎたら残りの場所は飛ばす。
-    // 一度生成したチャンクは保存されるので、2回目からは全部の場所を数秒で調べられる)
-    private static void checkRealPeaks(ServerLevel level, List<String> failures) {
-        List<Site> sites = List.of(new Site(Biomes.STONY_PEAKS, -9000, 0), new Site(Biomes.JAGGED_PEAKS, 6000, 6000),
-                new Site(Biomes.FROZEN_PEAKS, -6000, 6000), new Site(Biomes.JAGGED_PEAKS, -6000, -6000),
-                new Site(Biomes.STONY_PEAKS, 6000, -6000), new Site(Biomes.FROZEN_PEAKS, 9000, 0), new Site(Biomes.JAGGED_PEAKS, 0, 9000));
-        long started = System.currentTimeMillis();
-        int skipped = 0;
-        for (Site site : sites) {
-            if (System.currentTimeMillis() - started > 12_000) {
-                SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks, skipped {} near {} {} (time; it runs once its chunks are saved)",
-                        site.biome().location().getPath(), site.x(), site.z());
-                skipped++;
-                continue;
-            }
-            realPeakSite(level, site);
+    private static final List<Site> SITES = List.of(new Site(Biomes.STONY_PEAKS, -9000, 0), new Site(Biomes.JAGGED_PEAKS, 6000, 6000),
+            new Site(Biomes.FROZEN_PEAKS, -6000, 6000), new Site(Biomes.JAGGED_PEAKS, -6000, -6000),
+            new Site(Biomes.STONY_PEAKS, 6000, -6000), new Site(Biomes.FROZEN_PEAKS, 9000, 0), new Site(Biomes.JAGGED_PEAKS, 0, 9000));
+    // 本物の山を調べる時間の目安。新しいワールドでは生成に時間がかかるので、これを過ぎたら残りの場所は飛ばす
+    // (一度生成したチャンクは保存されるので、2回目からは全部の場所を数秒で調べられる)
+    private static final long REAL_BUDGET_MS = 60_000;
+    // 一つの場所のチャンクの生成を待つ上限 (過ぎたら、残りはその tick の中で読み込む)
+    private static final long REAL_LOAD_WAIT_MS = 30_000;
+    private static int realSite;
+    private static int realStage;
+    private static int realSkipped;
+    private static long realStarted;
+    private static long realLoadStarted;
+    private static BlockPos realAt;
+    private static final List<ChunkPos> REAL_FORCED = new ArrayList<>();
+
+    // 1 tick に 1 段ずつ: 場所を探してチャンクを強制読み込み → 生成されるのを待つ (サーバーは tick を回し続ける) → 峰を計画する。
+    // すべての場所が終わったら true
+    private static boolean realPeakStep(ServerLevel level) {
+        if (realStarted == 0) {
+            realStarted = System.currentTimeMillis();
         }
+        if (realSite >= SITES.size()) {
+            return true;
+        }
+        Site site = SITES.get(realSite);
+        switch (realStage) {
+            case 0 -> {
+                if (System.currentTimeMillis() - realStarted > REAL_BUDGET_MS) {
+                    SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks, skipped {} near {} {} (time; it runs once its chunks are saved)",
+                            site.biome().location().getPath(), site.x(), site.z());
+                    realSkipped++;
+                    realSite++;
+                    return realSite >= SITES.size();
+                }
+                Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(h -> h.is(site.biome()), new BlockPos(site.x(), 150, site.z()), 2400, 32, 64);
+                if (found == null) {
+                    SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no {} near {} {}", site.biome().location(), site.x(), site.z());
+                    realSite++;
+                    return realSite >= SITES.size();
+                }
+                realAt = found.getFirst();
+                REAL_FORCED.clear();
+                int radius = 7;
+                for (int cx = (realAt.getX() >> 4) - radius; cx <= (realAt.getX() >> 4) + radius; cx++) {
+                    for (int cz = (realAt.getZ() >> 4) - radius; cz <= (realAt.getZ() >> 4) + radius; cz++) {
+                        level.setChunkForced(cx, cz, true);
+                        REAL_FORCED.add(new ChunkPos(cx, cz));
+                    }
+                }
+                realLoadStarted = System.currentTimeMillis();
+                realStage = 1;
+                return false;
+            }
+            case 1 -> {
+                boolean loaded = REAL_FORCED.stream().allMatch(p -> level.hasChunk(p.x, p.z));
+                if (loaded || System.currentTimeMillis() - realLoadStarted > REAL_LOAD_WAIT_MS) {
+                    realStage = 2;
+                }
+                return false;
+            }
+            default -> {
+                try {
+                    realPeakSite(level, site, realAt, REAL_FORCED);
+                } finally {
+                    for (ChunkPos p : REAL_FORCED) {
+                        level.setChunkForced(p.x, p.z, false);
+                    }
+                    REAL_FORCED.clear();
+                    realStage = 0;
+                    realSite++;
+                }
+                return realSite >= SITES.size();
+            }
+        }
+    }
+
+    private static void finishRealPeaks(ServerLevel level, List<String> failures) {
+        int skipped = realSkipped;
         SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks tried {}, carved {}, reasons {}", realTried, realCarved, REAL_REASONS);
         SkyAbyss.LOGGER.info("SELFTEST chapter sky: shape rules hit on {} natural areas: {}", realGrids, REAL_HITS);
         // 本物の山はワールドの種で変わる。新しいワールドでは生成に時間がかかり、最初の一つ二つの場所しか調べられない。
@@ -924,21 +1012,7 @@ public final class ChapterSkySelfTest {
         seen.forEach(k -> REAL_HITS.merge(k, 1, Integer::sum));
     }
 
-    private static void realPeakSite(ServerLevel level, Site site) {
-        Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(h -> h.is(site.biome()), new BlockPos(site.x(), 150, site.z()), 2400, 32, 64);
-        if (found == null) {
-            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no {} near {} {}", site.biome().location(), site.x(), site.z());
-            return;
-        }
-        BlockPos at = found.getFirst();
-        List<ChunkPos> forced = new ArrayList<>();
-        int radius = 7;
-        for (int cx = (at.getX() >> 4) - radius; cx <= (at.getX() >> 4) + radius; cx++) {
-            for (int cz = (at.getZ() >> 4) - radius; cz <= (at.getZ() >> 4) + radius; cz++) {
-                level.setChunkForced(cx, cz, true);
-                forced.add(new ChunkPos(cx, cz));
-            }
-        }
+    private static void realPeakSite(ServerLevel level, Site site, BlockPos at, List<ChunkPos> forced) {
         PeakScar.gridProbe = ChapterSkySelfTest::probe;
         try {
             for (ChunkPos p : forced) {
@@ -965,9 +1039,6 @@ public final class ChapterSkySelfTest {
             }
         } finally {
             PeakScar.gridProbe = null;
-            for (ChunkPos p : forced) {
-                level.setChunkForced(p.x, p.z, false);
-            }
         }
     }
 }

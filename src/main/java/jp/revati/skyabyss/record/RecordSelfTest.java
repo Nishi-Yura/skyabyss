@@ -24,31 +24,24 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 // 控え帳と大事な品の守りの自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー、起動直後に一度。止めるのは TitanBackSelfTest)。
 // 中身の符号化、在りかの数え方 (持ち物・袋・エンダーチェスト・預かり・背中の預かり)、変わった値の見つけ方、
 // 落ちた品の守り (消えない・燃えない・奈落から戻る・控え)、投げ捨ての拒み、見てよい人の決まりを確かめる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RecordSelfTest {
     private RecordSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("record selftest crashed", e);
             failures.add("crashed: " + e);

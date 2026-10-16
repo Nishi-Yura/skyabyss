@@ -8,18 +8,15 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.item.affix.AffixType;
 import jp.revati.skyabyss.registry.ModItems;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 強さの曲線の自己テスト (SKYABYSS_SELFTEST=1)。結果はログに SELFTEST gear curve PASSED / FAILED (止めるのは TitanBackSelfTest)。
 //  - 岩鯨の装備の実際の値 (品の既定の修飾子) が 03 の 9章の表どおりか
 //  - 手に入れた直後 (+0) がダイヤの剣の前後か、+10 でもバニラの終盤 (ネザライトの剣 + 鋭さ V) を超えないか
 //  - +10 と最良の特性を盛っても、岩鯨の心臓が殴り合いで勝てる作業にならないか (手ごたえ >= 1.3)
 //  - 巨神ごとの目安が段ごとに伸び、前の巨神の +10 が次の巨神の +10 を超えないか
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GearCurveSelfTest {
     // 心臓 (02 の 5.3節): 体力 450、防御 8、強靭 6、技は 2.5 秒ほどに一度。殴っていられるのは 6 割とみる
     private static final double HEART_HP = 450;
@@ -31,11 +28,8 @@ public final class GearCurveSelfTest {
     private GearCurveSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         try {
             run(f);

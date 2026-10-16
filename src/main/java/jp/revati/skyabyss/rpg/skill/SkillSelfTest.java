@@ -24,27 +24,20 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 技の自己テスト。SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く (止めるのは TitanBackSelfTest)。
 // 技の点の計算、習得の条件、記録の検め、保存 (NBT・同期・死亡時の引き継ぎ・プレイヤーの保存と読み込み)、
 // クールダウン、マナ (回復・払う・足りない)、実際に技を使う (巨神斬り・雲穿ち・天の驟雨)、常時の技の修飾子を確かめる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkillSelfTest {
     private SkillSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("skill selftest crashed", e);
             failures.add("crashed: " + e);
