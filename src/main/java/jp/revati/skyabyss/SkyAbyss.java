@@ -62,6 +62,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
         // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
         jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
+        // 潮殻の装備 (鎧・三叉槍・盾・護符・専用伝説・心核) と図鑑の表。登録は titan.tide.gear パッケージにまとめてある
+        jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
