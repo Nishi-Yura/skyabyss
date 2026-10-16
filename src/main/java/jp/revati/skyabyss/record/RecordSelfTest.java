@@ -54,7 +54,7 @@ public final class RecordSelfTest {
             failures.add("crashed: " + e);
         }
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST record PASSED (snapshot codec, locations, diff, guarded drops, void rescue, toss, permissions)");
+            SkyAbyss.LOGGER.info("SELFTEST record PASSED (snapshot codec, locations, diff, guarded drops, void rescue, toss, give without duplicate, permissions)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST record FAILED: {}", f));
         }
@@ -176,9 +176,18 @@ public final class RecordSelfTest {
         // ---------------------------------------------------------------- 投げ捨て
         a.getInventory().clearContent();
         ItemEntity toss = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(fragment));
+        toss.setThrower(a);
         ItemTossEvent tossEvent = new ItemTossEvent(toss, a);
         NeoForge.EVENT_BUS.post(tossEvent);
         check(f, tossEvent.isCanceled() && Keepsakes.locate(a, fragment).inventory() == 1, "tossing a fragment should be refused and returned");
+        // /give は持ち物に入れたあと、見せかけの品を投げた人なしで落とす。拒んで戻すと 1 つ増えてしまう
+        a.getInventory().clearContent();
+        a.getInventory().add(new ItemStack(fragment));
+        ItemEntity giveShow = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(fragment));
+        ItemTossEvent giveEvent = new ItemTossEvent(giveShow, a);
+        NeoForge.EVENT_BUS.post(giveEvent);
+        check(f, !giveEvent.isCanceled() && Keepsakes.locate(a, fragment).inventory() == 1,
+                "the /give display drop should pass untouched (no duplicate), got " + Keepsakes.locate(a, fragment).inventory());
         ItemEntity tossCore = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(ModItems.STONE_WHALE_CORE.get()));
         ItemTossEvent coreEvent = new ItemTossEvent(tossCore, a);
         NeoForge.EVENT_BUS.post(coreEvent);

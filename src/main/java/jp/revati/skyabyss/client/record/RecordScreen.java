@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.record.RecordNetwork;
 import jp.revati.skyabyss.record.RecordSnapshot;
@@ -43,11 +45,14 @@ public class RecordScreen extends Screen {
     // widgets.png の中の絵 (画素。画面には半分で描く)
     record Sprite(int u, int v, int w, int h) {
         void draw(GuiGraphics g, int x, int y) {
-            g.blit(WIDGETS, x, y, w / 2, h / 2, u, v, w, h, WIDGETS_W, WIDGETS_H);
+            draw(g, x, y, w / 2, h / 2);
         }
 
         void draw(GuiGraphics g, int x, int y, int gw, int gh) {
+            // 半透明の絵 (選んだ行の帯など) があるので、重ねて描く
+            RenderSystem.enableBlend();
             g.blit(WIDGETS, x, y, gw, gh, u, v, w, h, WIDGETS_W, WIDGETS_H);
+            RenderSystem.disableBlend();
         }
     }
 

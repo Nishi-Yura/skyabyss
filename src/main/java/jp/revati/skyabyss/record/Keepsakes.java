@@ -314,6 +314,11 @@ public final class Keepsakes {
         if (!untossable(stack) || !(event.getPlayer() instanceof ServerPlayer player) || player.isCreative()) {
             return;
         }
+        // 自分で投げた (Q キー・画面の外へ) ときだけ、投げた人が付く。/give の見せかけの品や、
+        // 入りきらずに足もとへ出る品には付かないので、拒まない (拒んで戻すと品が増える・止めると品が消える)
+        if (event.getEntity().getOwner() != player) {
+            return;
+        }
         event.setCanceled(true);
         // 投げる前に持ち物から外されているので、戻す
         giveOrDrop(player, stack.copy());
