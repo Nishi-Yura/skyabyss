@@ -559,7 +559,8 @@ public final class EmberHeartArena {
     }
 
     // 溶岩の面より下 (沈んだ区画・溝・溜め) にいる人は呑まれる
-    private static void rescue(ServerLevel level, @Nullable EmberHeart heart) {
+    // tick が 2 tick に一度だけ呼ぶ。自己テストは同じ tick のうちに続けて呼ぶので、直接呼べるようにしてある
+    static void rescue(ServerLevel level, @Nullable EmberHeart heart) {
         for (ServerPlayer player : players(level)) {
             if (player.getY() < SURFACE - 0.35 && player.getY() > BOTTOM && dist((int) Math.floor(player.getX()), (int) Math.floor(player.getZ())) < RADIUS) {
                 engulf(level, player, heart);
