@@ -68,6 +68,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
         // 第四の巨神「余燼の巨神」の骨組み (熱の音、背中の口)。ID の一覧は titan.ember.EmberIds。docs/design/13_ember.md の 11章
         jp.revati.skyabyss.titan.ember.EmberSetup.register(modEventBus);
+        // 余燼の巨神の地上 (本体・熱の口・温石・地上の音)。13 の 2章、11.2節の担当 A
+        jp.revati.skyabyss.titan.ember.EmberTitanSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
