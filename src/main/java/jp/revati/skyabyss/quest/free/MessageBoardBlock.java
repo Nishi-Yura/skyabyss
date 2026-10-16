@@ -20,12 +20,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 // 言伝ての板。村の人の頼みごと (日替わり・週替わりのサブクエスト) が紙で留めてある。
 // 右クリックで今日の頼みごとの画面 (Board) を開く。品を納める頼みごとは、開いたときに手持ちから受け取る。
-// 村ごとに一枚、鐘のそばに立つ (BoardPlacer)。作って好きな所に置いてもよい。モデルは tools/gen_message_board.py
+// 村ごとに一枚、鐘のそばに立つ (FreeQuestEvents.placeBoard)。作って好きな所に置いてもよい。モデルは tools/gen_message_board.py
 public class MessageBoardBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<MessageBoardBlock> CODEC = simpleCodec(MessageBoardBlock::new);
-    // 北向きで x 0〜16、y 0〜14、z 5〜11 (二本柱・板・庇)
-    private static final VoxelShape SHAPE_NS = Block.box(0, 0, 5, 16, 14, 11);
-    private static final VoxelShape SHAPE_EW = Block.box(5, 0, 0, 11, 14, 16);
+    // 北向きで x 0〜16、y 0〜16、z 5〜11 (脚・板・庇)
+    private static final VoxelShape SHAPE_NS = Block.box(0, 0, 5, 16, 16, 11);
+    private static final VoxelShape SHAPE_EW = Block.box(5, 0, 0, 11, 16, 16);
 
     public MessageBoardBlock(Properties properties) {
         super(properties);
