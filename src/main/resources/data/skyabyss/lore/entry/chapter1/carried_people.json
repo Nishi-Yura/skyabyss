@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 110,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "titan_back"
+    }
+  ],
+  "related": [
+    "chapter1/sky_ruins",
+    "chapter1/inscription_west"
+  ]
+}

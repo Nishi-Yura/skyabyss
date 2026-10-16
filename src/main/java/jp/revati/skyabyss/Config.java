@@ -16,6 +16,20 @@ public final class Config {
             .comment("1ループの長さ (ゲーム内日数)。月はこの日数で落ちる")
             .defineInRange("loopLengthDays", 7, 3, 30);
 
+    // 序章「見る者」(prologue/WatcherEvents)
+    public static final ModConfigSpec.DoubleValue WATCHER_FREQUENCY = SERVER_BUILDER
+            .comment("「見る者」(夜に一人でいると遠くに立つ人影) の現れる頻度の倍率 (0 = 現れない, 1 = 標準)。horrorEventFrequency にも掛かる")
+            .defineInRange("watcherFrequency", 1.0, 0.0, 3.0);
+
+    // 1章の空「削られた山頂」(sky/PeakScarEvents) と「雲の目」(sky/CloudEyeEvents)
+    public static final ModConfigSpec.DoubleValue PEAK_SCAR_CHANCE = SERVER_BUILDER
+            .comment("1章に入ったプレイヤーの近くを影が通ったとき、その下の自然の山頂を削る確率 (0 = 削らない)。プレイヤーの建築・拠点の近くは常に対象外。horrorEventFrequency が 0 なら削らない")
+            .defineInRange("peakScarChance", 0.6, 0.0, 1.0);
+
+    public static final ModConfigSpec.DoubleValue CLOUD_EYE_FREQUENCY = SERVER_BUILDER
+            .comment("「雲の切れ間の目」(1章・月が半分以上近い夜) の頻度の倍率 (0 = 開かない, 1 = 標準)。horrorEventFrequency にも掛かる")
+            .defineInRange("cloudEyeFrequency", 1.0, 0.0, 3.0);
+
     static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
 
     // --- クライアント設定: プレイヤーごとの見え方の好み ---
@@ -28,6 +42,20 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue SCREEN_EFFECT_STRENGTH = CLIENT_BUILDER
             .comment("影の下での画面効果（暗さ・縁の暗がり・霧）の強さ (0 = なし, 1 = 標準)")
             .defineInRange("screenEffectStrength", 1.0, 0.0, 1.5);
+
+    // 序章「見る者」(client/prologue/WatcherClient)
+    public static final ModConfigSpec.BooleanValue WATCHER_VISIBLE = CLIENT_BUILDER
+            .comment("「見る者」を自分の画面に出すか (false = サーバーが出そうとしても現れない)")
+            .define("watcherVisible", true);
+
+    // 1章の空「雲の目」(client/sky/CloudEyeClient)
+    public static final ModConfigSpec.BooleanValue CLOUD_EYE_VISIBLE = CLIENT_BUILDER
+            .comment("「雲の切れ間の目」を自分の画面に出すか (false = サーバーが出そうとしても開かない)")
+            .define("cloudEyeVisible", true);
+
+    public static final ModConfigSpec.DoubleValue CLOUD_EYE_INTENSITY = CLIENT_BUILDER
+            .comment("「雲の切れ間の目」の強さ (光と音の大きさ。0.3 = 弱め, 1 = 標準)")
+            .defineInRange("cloudEyeIntensity", 1.0, 0.3, 1.0);
 
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 

@@ -94,6 +94,12 @@ public final class WhaleKeeper {
             if (now % 20 == 0) {
                 data.remember(whale);
             }
+            // 巨神での移動の最中 (人を乗せている・迎えに行く) は、呼び直さない。動きと読み込みは旅の操縦が受け持つ
+            if (whale.inVoyage()) {
+                frozenSince = -1;
+                unreachableSince = -1;
+                return;
+            }
             // チケットを張っていて、オーバーワールドに人がいる (エンティティが動く) のに tick が進まない
             if (near && !level.players().isEmpty()) {
                 if (whale.tickCount != lastTickCount || frozenSince < 0) {
@@ -126,7 +132,9 @@ public final class WhaleKeeper {
             unreachableSince = -1;
             if (missingSince < 0) {
                 missingSince = now;
-            } else if (now - missingSince > RELOAD_GRACE) {
+            } else if (now - missingSince > RELOAD_GRACE
+                    && !jp.revati.skyabyss.titan.travel.Voyages.isBusy(jp.revati.skyabyss.titan.travel.TitanKind.STONE_WHALE)) {
+                // (巨神での移動の最中は、旅の操縦が岩鯨を持っているので呼び直さない。読み込まれれば見つかる)
                 ServerPlayer target = near != null ? near : randomEligible(level);
                 if (target != null) {
                     SkyAbyss.LOGGER.warn("The stone whale was not found at its last position; calling it again");

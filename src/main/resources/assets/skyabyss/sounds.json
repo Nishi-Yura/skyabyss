@@ -24,6 +24,22 @@
       }
     ]
   },
+  "watcher_presence": {
+    "subtitle": "subtitles.skyabyss.watcher_presence",
+    "sounds": [
+      {
+        "name": "skyabyss:prologue/watcher_presence"
+      }
+    ]
+  },
+  "watcher_fade": {
+    "subtitle": "subtitles.skyabyss.watcher_fade",
+    "sounds": [
+      {
+        "name": "skyabyss:prologue/watcher_fade"
+      }
+    ]
+  },
   "titan_song": {
     "subtitle": "subtitles.skyabyss.titan_song",
     "sounds": [
@@ -59,6 +75,144 @@
       {
         "name": "minecraft:block/amethyst/resonate1",
         "volume": 0.8
+      }
+    ]
+  },
+  "growth_level_up": {
+    "subtitle": "subtitles.skyabyss.growth_level_up",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/level_up"
+      }
+    ]
+  },
+  "skill_cleave": {
+    "subtitle": "subtitles.skyabyss.skill_cleave",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/cleave"
+      }
+    ]
+  },
+  "skill_riposte": {
+    "subtitle": "subtitles.skyabyss.skill_riposte",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/riposte"
+      }
+    ]
+  },
+  "skill_lunge": {
+    "subtitle": "subtitles.skyabyss.skill_lunge",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/lunge"
+      }
+    ]
+  },
+  "skill_sweep": {
+    "subtitle": "subtitles.skyabyss.skill_sweep",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/sweep"
+      }
+    ]
+  },
+  "skill_pierce": {
+    "subtitle": "subtitles.skyabyss.skill_pierce",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/pierce"
+      }
+    ]
+  },
+  "skill_backstep": {
+    "subtitle": "subtitles.skyabyss.skill_backstep",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/backstep"
+      }
+    ]
+  },
+  "skill_mark": {
+    "subtitle": "subtitles.skyabyss.skill_mark",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/mark"
+      }
+    ]
+  },
+  "skill_rain": {
+    "subtitle": "subtitles.skyabyss.skill_rain",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/rain"
+      }
+    ]
+  },
+  "skill_learn": {
+    "subtitle": "subtitles.skyabyss.skill_learn",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/learn"
+      }
+    ]
+  },
+  "skill_fail": {
+    "subtitle": "subtitles.skyabyss.skill_fail",
+    "sounds": [
+      {
+        "name": "skyabyss:rpg/skill/fail"
+      }
+    ]
+  },
+  "peak_scrape": {
+    "subtitle": "subtitles.skyabyss.peak_scrape",
+    "sounds": [
+      {
+        "name": "skyabyss:sky_ch1/peak_scrape",
+        "attenuation_distance": 320
+      }
+    ]
+  },
+  "sky_eye_presence": {
+    "subtitle": "subtitles.skyabyss.sky_eye_presence",
+    "sounds": [
+      {
+        "name": "skyabyss:sky_ch1/eye_presence",
+        "stream": true
+      }
+    ]
+  },
+  "titan_call": {
+    "subtitle": "subtitles.skyabyss.titan_call",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/call"
+      }
+    ]
+  },
+  "titan_depart": {
+    "subtitle": "subtitles.skyabyss.titan_depart",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/depart"
+      }
+    ]
+  },
+  "titan_veil": {
+    "subtitle": "subtitles.skyabyss.titan_veil",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/veil"
+      }
+    ]
+  },
+  "titan_waymark": {
+    "subtitle": "subtitles.skyabyss.titan_waymark",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/waymark"
       }
     ]
   }

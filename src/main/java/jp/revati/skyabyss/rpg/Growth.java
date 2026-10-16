@@ -1,0 +1,204 @@
+package jp.revati.skyabyss.rpg;
+
+import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.rpg.GrowthRules.Stat;
+import jp.revati.skyabyss.rpg.net.GrowthGainPayload;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+// 成長の記録を読み書きする入口。ほかの担当 (報酬、クエスト、スキル) もここを通す。
+// 書き換えたら sync で持ち主へ送り、ステータスが変わったら修飾子を付け直す
+public final class Growth {
+    // 修飾子の ID。バニラの値は置き換えず、この ID の分だけ上乗せする
+    public static final ResourceLocation MOD_STRENGTH = id("growth/strength_melee");
+    public static final ResourceLocation MOD_AGILITY_MOVE = id("growth/agility_move");
+    public static final ResourceLocation MOD_AGILITY_ATTACK = id("growth/agility_attack_speed");
+    public static final ResourceLocation MOD_SPIRIT = id("growth/spirit_mana");
+    public static final ResourceLocation MOD_VITALITY = id("growth/vitality_health");
+
+    private Growth() {
+    }
+
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, path);
+    }
+
+    public static GrowthData get(Player player) {
+        return player.getData(Rpg.GROWTH);
+    }
+
+    public static void sync(Player player) {
+        if (player instanceof ServerPlayer) {
+            player.syncData(Rpg.GROWTH);
+        }
+    }
+
+    // ---------------------------------------------------------------- 経験値
+    // 経験値を足す。reason は画面に出す理由の翻訳キー (空なら数だけ)。上がったレベルの数を返す
+    public static int addXp(ServerPlayer player, int amount, String reason) {
+        if (amount <= 0) {
+            return 0;
+        }
+        GrowthData data = get(player);
+        int gained = addXpRaw(data, amount);
+        sync(player);
+        if (gained > 0) {
+            applyModifiers(player);
+            celebrate(player, data, gained);
+        }
+        if (player.connection != null) {
+            PacketDistributor.sendToPlayer(player, new GrowthGainPayload(amount, reason, gained));
+        }
+        return gained;
+    }
+
+    // 記録だけを進める (同期・演出なし)。自己テストからも使う
+    public static int addXpRaw(GrowthData data, long amount) {
+        int before = data.level;
+        long xp = data.xp + amount;
+        while (data.level < GrowthRules.MAX_LEVEL && xp >= GrowthRules.xpToNext(data.level)) {
+            xp -= GrowthRules.xpToNext(data.level);
+            data.level++;
+        }
+        // 上限では、あふれた分は捨てる (バーは満ちたまま)
+        data.xp = data.level >= GrowthRules.MAX_LEVEL ? 0 : (int) xp;
+        return data.level - before;
+    }
+
+    // レベルを直接決める (管理者・テスト用)。使いすぎた力は戻す
+    public static void setLevel(ServerPlayer player, int level) {
+        GrowthData data = get(player);
+        data.level = level;
+        data.xp = 0;
+        data.sanitize();
+        sync(player);
+        applyModifiers(player);
+    }
+
+    // レベルが上がった知らせ: 鈴のような音 (近くの仲間にも小さく聞こえる)、光の粒、チャットに一行
+    private static void celebrate(ServerPlayer player, GrowthData data, int gained) {
+        ServerLevel level = player.serverLevel();
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
+        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
+        player.sendSystemMessage(ModText.progress("message.skyabyss.growth.level_up", data.level,
+                GrowthRules.POINTS_PER_LEVEL * gained));
+        if (data.level >= GrowthRules.MAX_LEVEL) {
+            player.sendSystemMessage(ModText.lore("message.skyabyss.growth.max_level"));
+        } else if (data.unspentPoints() > 0 && (data.level <= 5 || data.unspentPoints() >= 3 * GrowthRules.POINTS_PER_LEVEL)) {
+            // 振り方の手がかりは、はじめのうちと、力をためこんでいるときだけ (毎回は出さない)
+            player.sendSystemMessage(ModText.hint("message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status")));
+        }
+    }
+
+    // ---------------------------------------------------------------- ステータス
+    // 力を振り分ける。add は 4 つのステータスへの追加量。正しくなければ何もせず false
+    public static boolean allocate(ServerPlayer player, int[] add) {
+        GrowthData data = get(player);
+        if (!canAllocate(data, add)) {
+            return false;
+        }
+        for (int i = 0; i < add.length; i++) {
+            data.stats[i] += add[i];
+        }
+        sync(player);
+        applyModifiers(player);
+        return true;
+    }
+
+    public static boolean canAllocate(GrowthData data, int[] add) {
+        if (add == null || add.length != data.stats.length) {
+            return false;
+        }
+        int sum = 0;
+        for (int i = 0; i < add.length; i++) {
+            // 引き算で比べる (足し算だと、改造したクライアントの巨大な値で int があふれて通ってしまう)
+            if (add[i] < 0 || add[i] > GrowthRules.STAT_CAP - data.stats[i]) {
+                return false;
+            }
+            sum += add[i];
+        }
+        return sum > 0 && sum <= data.unspentPoints();
+    }
+
+    // 振り分けを全部戻す (管理者・テスト用。将来は振り直しのアイテムから呼ぶ)
+    public static void resetStats(ServerPlayer player) {
+        GrowthData data = get(player);
+        java.util.Arrays.fill(data.stats, 0);
+        sync(player);
+        applyModifiers(player);
+    }
+
+    // 成長の修飾子を今の値で付け直す。ログイン・復活・ディメンション移動・振り分けのたびに呼ぶ。
+    // 保存される修飾子にしているので、ログインしたとき体力がバニラの上限 20 に切り詰められない
+    public static void applyModifiers(Player player) {
+        GrowthData data = get(player);
+        float healthBefore = player.getHealth();
+        float maxBefore = player.getMaxHealth();
+        set(player, Attributes.ATTACK_DAMAGE, MOD_STRENGTH, GrowthRules.meleeMultiplier(data.stat(Stat.STRENGTH)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        set(player, Attributes.MOVEMENT_SPEED, MOD_AGILITY_MOVE, GrowthRules.moveMultiplier(data.stat(Stat.AGILITY)), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        set(player, Attributes.ATTACK_SPEED, MOD_AGILITY_ATTACK, GrowthRules.attackSpeedMultiplier(data.stat(Stat.AGILITY)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        set(player, Rpg.MAX_MANA, MOD_SPIRIT, GrowthRules.bonusMana(data.stat(Stat.SPIRIT)), AttributeModifier.Operation.ADD_VALUE);
+        set(player, Attributes.MAX_HEALTH, MOD_VITALITY, GrowthRules.bonusHealth(data.stat(Stat.VITALITY)), AttributeModifier.Operation.ADD_VALUE);
+        // 最大体力が増えた分は、そのぶん満たしておく (振った直後にハートが空のままにならないように)
+        float maxAfter = player.getMaxHealth();
+        if (maxAfter > maxBefore && player.isAlive() && healthBefore >= maxBefore - 0.01f) {
+            player.setHealth(maxAfter);
+        } else if (player.getHealth() > maxAfter) {
+            player.setHealth(maxAfter);
+        }
+    }
+
+    private static void set(Player player, Holder<Attribute> attribute, ResourceLocation id, double value, AttributeModifier.Operation op) {
+        AttributeInstance instance = player.getAttribute(attribute);
+        if (instance == null) {
+            return;
+        }
+        if (value == 0) {
+            instance.removeModifier(id);
+            return;
+        }
+        AttributeModifier current = instance.getModifier(id);
+        if (current != null && current.amount() == value && current.operation() == op) {
+            return;
+        }
+        instance.addOrReplacePermanentModifier(new AttributeModifier(id, value, op));
+    }
+
+    // ---------------------------------------------------------------- 一度だけの経験値
+    // key をまだ記録していなければ記録して true (経験値を渡すのは呼ぶ側)
+    public static boolean discover(Player player, String key) {
+        return get(player).discoveries.add(key);
+    }
+
+    // ---------------------------------------------------------------- 記憶の断片
+    // 記憶の断片を付ける。器に入りきらない分は付けず、付けた数を返す。
+    // 効果 (永続強化の枝) はまだない。入れ物と記録だけ (03 の 5.1 節、E9)
+    public static int grantFragment(ServerPlayer player, ResourceLocation id, int count) {
+        GrowthData data = get(player);
+        int added = data.addFragments(id.toString(), count);
+        if (added > 0) {
+            sync(player);
+            player.playNotifySound(Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
+            player.sendSystemMessage(ModText.lore("message.skyabyss.growth.fragment_gained",
+                    Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity));
+        }
+        return added;
+    }
+
+    public static void clearFragments(ServerPlayer player) {
+        get(player).fragments.clear();
+        sync(player);
+    }
+}

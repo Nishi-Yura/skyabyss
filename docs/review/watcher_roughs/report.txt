@@ -1,0 +1,3 @@
+A 巡礼者の外套: boxes 62 texture 256x130 glow px 4 overlaps none
+B 留まる者の影: boxes 76 texture 256x48 glow px 4 overlaps none
+C 月を負う者: boxes 56 texture 256x48 glow px 62 overlaps none

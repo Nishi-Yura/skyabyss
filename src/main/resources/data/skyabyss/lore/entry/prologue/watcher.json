@@ -1,0 +1,10 @@
+{
+  "chapter": "prologue",
+  "order": 60,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "village"
+    }
+  ]
+}

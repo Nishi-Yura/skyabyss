@@ -1,0 +1,41 @@
+{
+  "category": "sub",
+  "order": 30,
+  "giver": "skyabyss:whale_chaser",
+  "stages": [
+    {
+      "id": "gather",
+      "objectives": [
+        {
+          "id": "shards",
+          "type": "collect",
+          "target": "skyabyss:stone_whale_shard",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "deliver",
+      "objectives": [
+        {
+          "id": "give",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "c_shards_thanks"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 120,
+    "items": [
+      {
+        "item": "minecraft:spyglass",
+        "count": 1
+      }
+    ],
+    "affinity": {
+      "skyabyss:whale_chaser": 10
+    }
+  }
+}

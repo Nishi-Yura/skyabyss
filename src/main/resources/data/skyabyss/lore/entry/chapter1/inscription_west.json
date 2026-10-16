@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 30,
+  "inscription_sign": "sign.skyabyss.lore_west",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_west"
+    }
+  ],
+  "related": [
+    "chapter1/carried_people",
+    "chapter1/inscription_below"
+  ]
+}

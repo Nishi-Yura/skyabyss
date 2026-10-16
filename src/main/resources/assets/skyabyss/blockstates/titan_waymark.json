@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "skyabyss:block/titan_waymark" },
+    "facing=east": { "model": "skyabyss:block/titan_waymark", "y": 90 },
+    "facing=south": { "model": "skyabyss:block/titan_waymark", "y": 180 },
+    "facing=west": { "model": "skyabyss:block/titan_waymark", "y": 270 }
+  }
+}

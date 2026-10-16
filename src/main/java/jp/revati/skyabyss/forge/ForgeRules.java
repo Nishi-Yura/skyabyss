@@ -1,6 +1,8 @@
 package jp.revati.skyabyss.forge;
 
+import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
+import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.registry.ModDataComponents;
 import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,7 +12,9 @@ import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の決まりごと (画面の表示とサーバーの処理で同じ計算を使う)
 //  強化: 岩鯨の欠片と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
-//  分解: 装備を壊し、共鳴の欠片 (伝説) か岩鯨の欠片 (それ以外) に戻す。鍛えた分の欠片も半分戻る
+//  分解: 装備を壊し、共鳴の欠片 (伝説) か岩鯨の欠片 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
+//  再鍛造: 共鳴の結晶 1 つで特性の候補を一組 (最大 3 組)。今のものか候補を選んで確定する (item/affix/AffixRules)
+//  交換: 共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)
 public final class ForgeRules {
     private ForgeRules() {
     }
@@ -40,16 +44,56 @@ public final class ForgeRules {
         return total;
     }
 
-    // 分解で得るもの: [共鳴の欠片の数, 岩鯨の欠片の数]
+    // 分解で得るもの: [共鳴の欠片の数, 岩鯨の欠片の数, 共鳴の結晶の数]
+    // 結晶は特性の付く武器・防具だけ (レア 1、伝説 2)。重なった甲殻や大剣が、再鍛造の結晶になる
     public static int[] dismantleYield(ItemStack stack) {
         if (!(stack.getItem() instanceof ModGear gear)) {
-            return new int[]{0, 0};
+            return new int[]{0, 0, 0};
         }
         int refund = shardsSpent(ModGear.enhance(stack)) / 2;
+        int crystals = AffixRules.eligible(stack) ? (gear.tier() == GearTier.LEGENDARY ? DISMANTLE_CRYSTALS_LEGENDARY : DISMANTLE_CRYSTALS_RARE) : 0;
         return switch (gear.tier()) {
-            case LEGENDARY -> new int[]{gear.tier().dismantleValue, refund};
-            default -> new int[]{0, gear.tier().dismantleValue + refund};
+            case LEGENDARY -> new int[]{gear.tier().dismantleValue, refund, crystals};
+            default -> new int[]{0, gear.tier().dismantleValue + refund, crystals};
         };
+    }
+
+    // ---------------------------------------------------------------- 再鍛造
+    public static final int DISMANTLE_CRYSTALS_RARE = 1;
+    public static final int DISMANTLE_CRYSTALS_LEGENDARY = 2;
+
+    public static Cost trialCost() {
+        return new Cost(0, AffixRules.TRIAL_CRYSTALS);
+    }
+
+    // 候補を一組作る。できたら true (費用は持ち物から)
+    public static boolean reforgeTrial(Player player, ItemStack stack) {
+        if (!AffixRules.canTrial(stack) || !affordable(player, trialCost())) {
+            return false;
+        }
+        if (!player.isCreative()) {
+            remove(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get(), trialCost().crystals());
+        }
+        AffixRules.addTrial(stack, player.getRandom());
+        return true;
+    }
+
+    // ---------------------------------------------------------------- 交換 (共鳴の欠片 30 で、まだ持っていない専用伝説を一つ)
+    public static final int EXCHANGE_SHARDS = 30;
+
+    // 交換できるか: 心臓をまだ倒していない / この周回ではもう交換した / 図鑑の専用伝説をすべて持っている / できる
+    public enum ExchangeState {
+        READY, NO_CLEAR, USED, ALL_OWNED
+    }
+
+    public static boolean exchangeAffordable(Player player) {
+        return player.isCreative() || count(player.getInventory(), ModItems.RESONANCE_SHARD.get()) >= EXCHANGE_SHARDS;
+    }
+
+    public static void payExchange(Player player) {
+        if (!player.isCreative()) {
+            remove(player.getInventory(), ModItems.RESONANCE_SHARD.get(), EXCHANGE_SHARDS);
+        }
     }
 
     public static int count(Inventory inventory, Item item) {

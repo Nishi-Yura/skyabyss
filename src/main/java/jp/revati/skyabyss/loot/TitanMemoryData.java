@@ -36,8 +36,11 @@ public class TitanMemoryData extends SavedData {
         // 初回クリアを済ませたか / 初回の選択報酬をまだ受け取っていないか
         public boolean firstCleared;
         public boolean choicePending;
+        // 共鳴の欠片での交換: 最後に交換したときの撃破数 (心臓を倒すごとに一度。0 = まだ一度もしていない) と、交換した回数
+        public int lastExchangeClears;
+        public int exchanges;
 
-        CompoundTag save() {
+        public CompoundTag save() {
             CompoundTag tag = new CompoundTag();
             tag.putInt("memory", memory);
             tag.putInt("clears", clears);
@@ -49,10 +52,12 @@ public class TitanMemoryData extends SavedData {
             tag.putBoolean("firstCleared", firstCleared);
             tag.putBoolean("choicePending", choicePending);
             tag.putBoolean("fragment", fragment);
+            tag.putInt("lastExchangeClears", lastExchangeClears);
+            tag.putInt("exchanges", exchanges);
             return tag;
         }
 
-        static Record load(CompoundTag tag) {
+        public static Record load(CompoundTag tag) {
             Record r = new Record();
             r.memory = tag.getInt("memory");
             r.clears = tag.getInt("clears");
@@ -62,6 +67,9 @@ public class TitanMemoryData extends SavedData {
             r.firstCleared = tag.getBoolean("firstCleared");
             r.choicePending = tag.getBoolean("choicePending");
             r.fragment = tag.getBoolean("fragment");
+            // 第1段階のセーブにはない項目 (なければ 0 = まだ交換していない)
+            r.lastExchangeClears = tag.getInt("lastExchangeClears");
+            r.exchanges = tag.getInt("exchanges");
             return r;
         }
     }
@@ -87,6 +95,13 @@ public class TitanMemoryData extends SavedData {
     public Record record(UUID player, String dungeon) {
         setDirty();
         return players.computeIfAbsent(player, k -> new HashMap<>()).computeIfAbsent(dungeon, k -> new Record());
+    }
+
+    // 見るだけ (なければ null。保存の印を付けない。炉の画面が毎 tick 見るため)
+    @org.jetbrains.annotations.Nullable
+    public Record peek(UUID player, String dungeon) {
+        Map<String, Record> dungeons = players.get(player);
+        return dungeons == null ? null : dungeons.get(dungeon);
     }
 
     public Pending pending(UUID player) {

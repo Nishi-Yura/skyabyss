@@ -42,21 +42,24 @@ public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
         super.render(entity, entityYaw, partialTick, poseStack, buffers, packedLight);
         float length = entity.chainLength();
         if (length > 0.1f) {
-            // 鎖は背中の尾の側の縁 (錨石のある所) から、脇腹ごしに垂れる
+            // 鎖は背中の尾の側の縁 (錨石のある所) から脇腹ごしに垂れる。巨神での移動のあいだは、頭の乗り場から左の頬ごしに垂れる
             float yaw = Mth.rotLerp(partialTick, entity.yRotO, entity.getYRot());
-            Vec3 top = StoneWhaleEntity.chainTop(0, 0, 0, yaw);
+            Vec3 top = entity.chainTopOffset(yaw);
             poseStack.pushPose();
             poseStack.translate(top.x, top.y, top.z);
             renderChain(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(CHAIN)), length, packedLight);
             poseStack.popPose();
-            // 背中の留め具から、張り出した垂れ口まで斜めに渡る鎖
-            Vec3 anchor = StoneWhaleEntity.chainAnchor(0, 0, 0, yaw);
-            Vec3 span = top.subtract(anchor);
-            poseStack.pushPose();
-            poseStack.translate(anchor.x, anchor.y, anchor.z);
-            poseStack.mulPose(new Quaternionf().rotationTo(new Vector3f(0, -1, 0), span.toVector3f().normalize()));
-            renderChain(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(CHAIN)), (float) span.length(), packedLight);
-            poseStack.popPose();
+            // 留め具から垂れ口まで、体の縁に沿って渡る鎖 (折れ線。付け根 → 留め具の順)
+            java.util.List<Vec3> span = entity.chainSpanOffsets(yaw);
+            for (int i = span.size() - 1; i > 0; i--) {
+                Vec3 from = span.get(i);
+                Vec3 piece = span.get(i - 1).subtract(from);
+                poseStack.pushPose();
+                poseStack.translate(from.x, from.y, from.z);
+                poseStack.mulPose(new Quaternionf().rotationTo(new Vector3f(0, -1, 0), piece.toVector3f().normalize()));
+                renderChain(poseStack, buffers.getBuffer(RenderType.entityCutoutNoCull(CHAIN)), (float) piece.length(), packedLight);
+                poseStack.popPose();
+            }
         }
     }
 

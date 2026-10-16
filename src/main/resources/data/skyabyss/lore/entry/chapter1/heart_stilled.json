@@ -1,0 +1,19 @@
+{
+  "chapter": "chapter1",
+  "order": 90,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:stone_whale_heart",
+      "radius": 40
+    },
+    {
+      "type": "item",
+      "target": "skyabyss:sky_key_fragment"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_heart",
+    "chapter1/sky_key"
+  ]
+}

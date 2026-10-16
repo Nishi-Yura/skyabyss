@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 20,
+  "unlock": [
+    {
+      "type": "dimension",
+      "target": "skyabyss:titan_back"
+    }
+  ],
+  "related": [
+    "chapter1/carried_people"
+  ]
+}

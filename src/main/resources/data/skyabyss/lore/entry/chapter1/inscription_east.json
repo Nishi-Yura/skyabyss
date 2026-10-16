@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 40,
+  "inscription_sign": "sign.skyabyss.lore_east",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_east"
+    }
+  ],
+  "related": [
+    "chapter1/captain"
+  ]
+}

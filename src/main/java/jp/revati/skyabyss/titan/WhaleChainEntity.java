@@ -36,6 +36,11 @@ public class WhaleChainEntity extends Entity {
             return InteractionResult.SUCCESS;
         }
         if (player instanceof ServerPlayer server && getVehicleWhale() instanceof StoneWhaleEntity whale) {
+            // 呼ばれて降りてきた岩鯨の鎖 (頭の乗り場から垂れる) は、背中ではなく乗り場へ引き上げる
+            if (whale.inVoyage()) {
+                jp.revati.skyabyss.titan.travel.Voyages.grabChain(server, whale);
+                return InteractionResult.SUCCESS;
+            }
             TitanTravel.startLift(server, whale);
         } else {
             player.displayClientMessage(ModText.deny("message.skyabyss.chain_slack"), true);

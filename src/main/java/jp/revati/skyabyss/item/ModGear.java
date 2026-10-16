@@ -2,6 +2,8 @@ package jp.revati.skyabyss.item;
 
 import java.util.List;
 
+import jp.revati.skyabyss.item.affix.Affix;
+import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -49,6 +51,21 @@ public interface ModGear {
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.translatable("gear.skyabyss.origin.stone_whale").withStyle(ChatFormatting.GRAY)));
         tooltip.add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        // ランダムな特性。まだ決まっていない装備 (創造の持ち物や古いセーブの品) は、手にしたときに決まると書く
+        if (AffixRules.eligible(stack)) {
+            if (!stack.has(ModDataComponents.AFFIXES.get())) {
+                tooltip.add(Component.translatable("gear.skyabyss.affix_unrolled").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            } else {
+                for (Affix affix : AffixRules.affixes(stack)) {
+                    tooltip.add(AffixRules.line(affix));
+                }
+            }
+            int offers = AffixRules.offers(stack).size();
+            if (offers > 0) {
+                tooltip.add(Component.translatable("gear.skyabyss.reforge_pending", offers, AffixRules.MAX_TRIALS)
+                        .withStyle(s -> s.withColor(AffixRules.PENDING_COLOR)));
+            }
+        }
         if (enhanceable) {
             int level = enhance(stack);
             tooltip.add(Component.translatable("gear.skyabyss.enhance", level, MAX_ENHANCE).withStyle(s -> s.withColor(0x9FE8FF)));

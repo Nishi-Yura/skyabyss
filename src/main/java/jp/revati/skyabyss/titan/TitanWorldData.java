@@ -35,6 +35,38 @@ public final class TitanWorldData extends SavedData {
         return whaleId;
     }
 
+    // 巨神での移動 (titan.travel) が、読み込まれていない岩鯨を呼び寄せるときに使う
+    public boolean hasSpawned() {
+        return spawned;
+    }
+
+    public CompoundTag lastState() {
+        return state.copy();
+    }
+
+    @Nullable
+    public net.minecraft.world.phys.Vec3 lastPosition() {
+        return hasLast ? new net.minecraft.world.phys.Vec3(lastX, lastY, lastZ) : null;
+    }
+
+    // 自己テスト用: 今の記録を写し取り、あとで元に戻す
+    public CompoundTag snapshot(HolderLookup.Provider registries) {
+        return save(new CompoundTag(), registries);
+    }
+
+    public void restore(CompoundTag tag, HolderLookup.Provider registries) {
+        TitanWorldData r = load(tag, registries);
+        spawned = r.spawned;
+        whaleId = r.whaleId;
+        hasLast = r.hasLast;
+        lastX = r.lastX;
+        lastY = r.lastY;
+        lastZ = r.lastZ;
+        lastYaw = r.lastYaw;
+        state = r.state;
+        setDirty();
+    }
+
     void register(StoneWhaleEntity whale) {
         spawned = true;
         whaleId = whale.getUUID();
