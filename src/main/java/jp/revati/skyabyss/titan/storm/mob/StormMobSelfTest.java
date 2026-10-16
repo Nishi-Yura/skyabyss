@@ -34,8 +34,16 @@ public final class StormMobSelfTest {
     private StormMobSelfTest() {
     }
 
+    private static int waited;
+
     public static void load(MinecraftServer server) {
         server.overworld().setChunkForced(TEST_X >> 4, TEST_Z >> 4, true);
+        waited = 0;
+    }
+
+    // 試す所のチャンクが、エンティティを数えられる (近くの敵を探せる) 状態になるまで待つ (新しいワールドでは生成に時間がかかる)
+    public static boolean ready(MinecraftServer server) {
+        return server.overworld().isPositionEntityTicking(new BlockPos(TEST_X, Y, TEST_Z)) || ++waited > 600;
     }
 
     public static void runSelfTest(MinecraftServer server) {
@@ -72,6 +80,7 @@ public final class StormMobSelfTest {
         checkLoot(failures);
         checkCycle(failures);
         BlockPos floor = new BlockPos(TEST_X, Y, TEST_Z);
+        check(failures, level.isPositionEntityTicking(floor), "test chunk is entity ticking");
         for (int dx = -4; dx <= 4; dx++) {
             for (int dz = -4; dz <= 4; dz++) {
                 level.setBlock(floor.offset(dx, 0, dz), Blocks.STONE.defaultBlockState(), 3);
