@@ -35,6 +35,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   status              : 潮・石・眠る試練・種・巣・潮招き
 //   watch <下> <中> <上> : 潮見の間の水位を直接決める
 //   nests               : 群れの巣をすべて壊す (潮招きの集合が始まる)
+//   route <x> <y> <z>   : 自分の足もとから、そこまで歩いて (跳んで 1 段・落ちて 3 段) 行く道の曲がり角を出す。
+//                         試遊の自動の歩き (外の道具がキーで歩かせる) と、迷う所を調べるのに使う。行けなければ「行けない」
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideBackCommands {
     private static final Map<String, BlockPos> PLACES = Map.ofEntries(
@@ -88,6 +90,9 @@ public final class TideBackCommands {
         dispatcher.register(op(SkyAbyss.MODID).then(op("tideback").then(go).then(ring)
                 .then(op("status").executes(TideBackCommands::status))
                 .then(op("nests").executes(TideBackCommands::nests))
+                .then(op("route").then(Commands.argument("x", IntegerArgumentType.integer())
+                        .then(Commands.argument("y", IntegerArgumentType.integer())
+                                .then(Commands.argument("z", IntegerArgumentType.integer()).executes(TideBackCommands::route)))))
                 .then(op("watch").then(Commands.argument("b", IntegerArgumentType.integer(0, 7))
                         .then(Commands.argument("m", IntegerArgumentType.integer(0, 7))
                                 .then(Commands.argument("t", IntegerArgumentType.integer(0, 7)).executes(TideBackCommands::watch)))))));
@@ -206,5 +211,92 @@ public final class TideBackCommands {
             ((ReefNest) e).kill();
         }
         return 1;
+    }
+
+    // 歩いて行く道 (曲がり角だけ)。行き先は立てる所で、近い所 (2 マス以内) に着ければよい
+    private static int route(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerLevel back = back(ctx);
+        if (back == null || player.level() != back) {
+            return 0;
+        }
+        BlockPos goal = new BlockPos(IntegerArgumentType.getInteger(ctx, "x"), IntegerArgumentType.getInteger(ctx, "y"), IntegerArgumentType.getInteger(ctx, "z"));
+        // 足もとが立てる所でなければ (階段・半ブロック・水の中など)、すぐそばの立てる所から
+        BlockPos start = player.blockPosition();
+        search:
+        for (int dy : new int[] {0, 1, -1}) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    BlockPos c = player.blockPosition().offset(dx, dy, dz);
+                    if (TideBackSelfTest.standable(back, c)) {
+                        start = c;
+                        break search;
+                    }
+                }
+            }
+        }
+        java.util.Map<Long, Integer> dist = TideBackSelfTest.walk(back, start);
+        BlockPos best = null;
+        double bd = 4.5;
+        for (long k : dist.keySet()) {
+            BlockPos q = BlockPos.of(k);
+            double d = q.distSqr(goal);
+            if (d < bd) {
+                bd = d;
+                best = q;
+            }
+        }
+        if (best == null) {
+            ctx.getSource().sendFailure(Component.literal("route: unreachable from " + start.toShortString()));
+            return 0;
+        }
+        java.util.List<BlockPos> cells = new java.util.ArrayList<>();
+        Long cur = best.asLong();
+        while (cur != null) {
+            cells.add(BlockPos.of(cur));
+            cur = TideBackSelfTest.PARENT.get(cur);
+        }
+        java.util.Collections.reverse(cells);
+        // 糸を張る: まっすぐ歩ける (間の点が、行ける所で高さが 1 段ずつしか変わらない) いちばん先の点へ
+        StringBuilder sb = new StringBuilder("route ").append(cells.size() - 1).append(':');
+        int i = 0;
+        while (i < cells.size() - 1) {
+            int j = i + 1;
+            for (int k = Math.min(cells.size() - 1, i + 24); k > i + 1; k--) {
+                if (straight(dist, cells.get(i), cells.get(k))) {
+                    j = k;
+                    break;
+                }
+            }
+            BlockPos w = cells.get(j);
+            sb.append(' ').append(w.getX()).append(',').append(w.getY()).append(',').append(w.getZ());
+            i = j;
+        }
+        String out = sb.toString();
+        ctx.getSource().sendSuccess(() -> Component.literal(out), false);
+        return cells.size();
+    }
+
+    private static boolean straight(java.util.Map<Long, Integer> dist, BlockPos a, BlockPos b) {
+        if (a.getY() != b.getY()) {
+            return false;
+        }
+        double len = Math.sqrt(Math.pow(b.getX() - a.getX(), 2) + Math.pow(b.getZ() - a.getZ(), 2));
+        int n = (int) Math.ceil(len / 0.25);
+        // 体の幅 (0.6) ぶん、左右にずらした線も調べる
+        double nx = -(b.getZ() - a.getZ()) / len * 0.35;
+        double nz = (b.getX() - a.getX()) / len * 0.35;
+        for (int s = 0; s <= n; s++) {
+            double t = (double) s / n;
+            double x = a.getX() + 0.5 + (b.getX() - a.getX()) * t;
+            double z = a.getZ() + 0.5 + (b.getZ() - a.getZ()) * t;
+            for (int side = -1; side <= 1; side++) {
+                BlockPos c = BlockPos.containing(x + nx * side, a.getY(), z + nz * side);
+                if (!dist.containsKey(c.asLong())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
