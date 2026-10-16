@@ -25,8 +25,8 @@ import net.minecraft.world.phys.Vec3;
 // (南の段: 浜からのくぐり道、西の段: 庭への道、東の回廊: 潮見の間への道)。満潮なら水盤を泳いで東の回廊へ一段上がれる。
 // 干潮なら水盤の底へ下り、南東の回り道 (底から東の回廊まで上る坂) を通る。北の干潟の門は床の高さで、干潮のあいだだけ開く。
 public final class TideBackLayout {
-    // 配置の版。2: 本番の島 (2026-10-17)
-    public static final int LAYOUT_VERSION = 2;
+    // 配置の版。2: 本番の島 (2026-10-17) / 3: 甲羅の地表・庭の壁・浜のすり鉢を直した (試遊 1 周目)
+    public static final int LAYOUT_VERSION = 3;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

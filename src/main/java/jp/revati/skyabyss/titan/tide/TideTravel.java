@@ -156,7 +156,7 @@ public final class TideTravel {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.level().dimension() != TIDE_BACK || player.isSpectator()) {
             return;
         }
-        if (player.tickCount % 2 != 0) {
+        if (player.tickCount % 2 != 0 || (player.isCreative() && player.getAbilities().flying)) {
             return;
         }
         // 背中の潮門をくぐると、地上へ戻る

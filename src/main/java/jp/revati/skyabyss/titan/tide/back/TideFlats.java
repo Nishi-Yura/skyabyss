@@ -284,14 +284,17 @@ public final class TideFlats {
                 level.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, nest.getX(), nest.getY() + 2.2, nest.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
             }
             NEST_TIMER[site] -= 10;
-            if (NEST_TIMER[site] > 0 || inFlats(level).isEmpty()) {
+            if (NEST_TIMER[site] > 0 || inFlats(level).stream().allMatch(p -> p.isCreative())) {
                 continue;
             }
             NEST_TIMER[site] = NEST_INTERVAL;
-            int cap = 6 + 2 * (people - 1);
+            // 一つの巣から生きているのは 3 体 (人が一人増えるごとに +1)。干潟全体でも 8 体 (+2) まで (試遊で 3 つの巣から 20 体になり、一人では巣に届かなかった)
+            int cap = 3 + (people - 1);
+            int all = 8 + 2 * (people - 1);
             String tag = NEST_TAG + site;
             int alive = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(tag)).size();
-            for (int i = 0; i < NEST_BURST && alive < cap; i++, alive++) {
+            int total = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG)).size();
+            for (int i = 0; i < NEST_BURST && alive < cap && total < all; i++, alive++, total++) {
                 Mob m = spawn(level, TideMobSetup.REEF_SCUTTLER.get(), nestPos(site).offset(level.random.nextInt(3) - 1, 2, level.random.nextInt(3) - 1));
                 if (m != null) {
                     m.addTag(tag);

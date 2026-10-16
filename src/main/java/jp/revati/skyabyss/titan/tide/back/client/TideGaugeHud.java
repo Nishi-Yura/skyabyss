@@ -45,7 +45,7 @@ public final class TideGaugeHud {
             return;
         }
         GuiGraphics g = event.getGuiGraphics();
-        int w = 92;
+        int w = 112;
         int h = 30;
         int x = g.guiWidth() - w - 6;
         int y = 6;

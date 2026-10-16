@@ -360,7 +360,7 @@ public final class TideBackTrials {
         // 試練の踏破の経験値 (石の近くにいた人。仲間には分け前) と、サブクエストの「試練を踏破する」
         List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(16), p -> p.isAlive() && !p.isSpectator());
         for (ServerPlayer p : near) {
-            Growth.addXp(p, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(p).level, TideLoot.TIDE_LEVEL)), "growth.skyabyss.reason.trial");
+            Growth.addXp(p, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(p).level, TideLoot.TIDE_LEVEL)), "growth.skyabyss.reason.tide_trial");
             jp.revati.skyabyss.quest.Quests.signal(p, "tide_trial_" + trial.id());
         }
         double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());

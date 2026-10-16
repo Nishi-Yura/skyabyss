@@ -119,21 +119,53 @@ public final class TideIslandBuilder {
         }
     }
 
+    // なめらかな値の雑音 (0〜1)。格子の点に乱数を置き、間をなめらかにつなぐ
+    static double noise(double x, double z, double scale, int seed) {
+        double fx = x / scale;
+        double fz = z / scale;
+        int ix = (int) Math.floor(fx);
+        int iz = (int) Math.floor(fz);
+        double tx = fx - ix;
+        double tz = fz - iz;
+        tx = tx * tx * (3 - 2 * tx);
+        tz = tz * tz * (3 - 2 * tz);
+        double a = lattice(ix, iz, seed);
+        double b = lattice(ix + 1, iz, seed);
+        double c = lattice(ix, iz + 1, seed);
+        double d = lattice(ix + 1, iz + 1, seed);
+        return (a * (1 - tx) + b * tx) * (1 - tz) + (c * (1 - tx) + d * tx) * tz;
+    }
+
+    private static double lattice(int x, int z, int seed) {
+        long h = x * 374761393L + z * 668265263L + seed * 2246822519L;
+        h = (h ^ (h >>> 13)) * 1274126177L;
+        return ((h ^ (h >>> 16)) & 0xFFFF) / 65535.0;
+    }
+
+    // 甲羅の地表: 甲羅の板の継ぎ目 (同心の環と放射の線) は暗い石、板の上は苔と砂の大きな斑、ところどころ珊瑚の色
     private static BlockState surface(TideKit kit, int x, int z) {
-        int h = Math.floorMod(x * 31 + z * 17 + (x / 5) * 13 + (z / 7) * 29, 20);
-        if (h < 8) {
+        double s = Math.sqrt(shellS2(x, z));
+        double a = Math.atan2(z - SHELL_CZ, x);
+        double ring = Math.abs(s * 3.2 - Math.round(s * 3.2));
+        double ray = Math.abs(Math.sin(a * 4 + (s < 0.31 ? 0 : 0.6)));
+        if (s > 0.12 && (ring < 0.025 || (ray < 0.05 && s > 0.31))) {
+            return (Math.floorMod(x + z, 3) == 0) ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState() : Blocks.DEEPSLATE_TILES.defaultBlockState();
+        }
+        double n = noise(x, z, 9, 1) * 0.7 + noise(x, z, 3.5, 2) * 0.3;
+        double c = noise(x, z, 6, 3);
+        if (c > 0.72) {
+            return reef((int) (noise(x, z, 4, 4) * 10));
+        }
+        if (n < 0.42) {
             return Blocks.MOSS_BLOCK.defaultBlockState();
         }
-        if (h < 13) {
-            return Blocks.SAND.defaultBlockState();
-        }
-        if (h < 15) {
-            return Blocks.GRAVEL.defaultBlockState();
-        }
-        if (h < 17) {
+        if (n < 0.55) {
             return Blocks.MOSSY_COBBLESTONE.defaultBlockState();
         }
-        return reef(h);
+        if (n < 0.70) {
+            return Blocks.SAND.defaultBlockState();
+        }
+        return n < 0.78 ? Blocks.GRAVEL.defaultBlockState() : Blocks.MOSS_BLOCK.defaultBlockState();
     }
 
     // 甲羅の板: 同心の環ごとに色を変える (掘った所の断面で見える)
@@ -172,6 +204,30 @@ public final class TideIslandBuilder {
                 for (int y = b.floor() + 1; y <= b.floor() + 40; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
+            }
+        }
+        // 浜のまわりの甲羅をすり鉢のように下げる (浜が深い穴に見えないように。胸壁の外なので歩いては出られない)
+        for (int x = b.x1() - 16; x <= b.x2() + 16; x++) {
+            for (int z = b.z1() - 16; z <= b.z2() + 16; z++) {
+                int top = shellTop(x, z);
+                if (top == Integer.MIN_VALUE || (x >= b.x1() - 1 && x <= b.x2() + 1 && z >= b.z1() - 1 && z <= b.z2() + 1)) {
+                    continue;
+                }
+                double dx = Math.max(0, Math.max(b.x1() - x, x - b.x2()));
+                double dz = Math.max(0, Math.max(b.z1() - z, z - b.z2()));
+                int limit = b.floor() + 5 + (int) Math.round(Math.hypot(dx, dz) * 1.4);
+                if (top <= limit) {
+                    continue;
+                }
+                // くぐり道の上は残す
+                if (x >= CAVE_X1 - 2 && x <= CAVE_X2 + 2 && z <= b.z1()) {
+                    limit = Math.max(limit, caveFloor(Math.max(z, CAVE_Z_HUB)) + 7);
+                }
+                for (int y = limit + 1; y <= top + 1; y++) {
+                    kit.set(x, y, z, TideKit.AIR);
+                }
+                kit.set(x, limit, z, surface(kit, x, z));
+                kit.set(x, limit - 1, z, plate(x, z));
             }
         }
         // 浜のまわりの胸壁 (外の甲羅の上へ歩いて出られないように。浜の床から 4 段)。北はくぐり道、南は潮門の段だけ開く
@@ -574,12 +630,23 @@ public final class TideIslandBuilder {
         // 礁の壁 (水路の外) をいったん全部詰め、上は空まで開ける
         for (int x = g.x1(); x <= g.x2(); x++) {
             for (int z = g.z1(); z <= g.z2(); z++) {
-                for (int y = 58; y <= GARDEN_WALL_TOP; y++) {
-                    kit.set(x, y, z, gardenWall(x, y, z));
+                int bump = gardenBump(x, z);
+                for (int y = 58; y <= GARDEN_WALL_TOP + bump; y++) {
+                    kit.set(x, y, z, y > GARDEN_WALL_TOP - 1 + bump ? gardenCap(x, z) : gardenWall(x, y, z));
                 }
-                int top = Math.max(shellTop(x, z), GARDEN_WALL_TOP + 1);
-                for (int y = GARDEN_WALL_TOP + 1; y <= top + 2; y++) {
+                int top = Math.max(shellTop(x, z), GARDEN_WALL_TOP + 4);
+                for (int y = GARDEN_WALL_TOP + bump + 1; y <= top + 2; y++) {
                     kit.set(x, y, z, TideKit.AIR);
+                }
+                // 珊瑚の芽 (枯れた珊瑚の扇と、ときどき高い枝)
+                double sp = noise(x, z, 2.2, 7);
+                if (sp > 0.86) {
+                    int hgt = 1 + (int) ((sp - 0.86) * 30);
+                    for (int y = 1; y <= hgt; y++) {
+                        kit.set(x, GARDEN_WALL_TOP + bump + y, z, reef(x + z));
+                    }
+                } else if (sp > 0.74) {
+                    kit.set(x, GARDEN_WALL_TOP + bump + 1, z, deadFan(x * 3 + z));
                 }
             }
         }
@@ -594,18 +661,29 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        carveGardenRoute(kit, 0, true);
-        // 大貝の淵 (半径 3 の窪み。床 64)
+        // 大貝の淵 (半径 3 の窪み。床 64)。大貝そのものは道の形と一緒に置く
         for (int x = CLAM[0] - 3; x <= CLAM[0] + 3; x++) {
             for (int z = CLAM[1] - 3; z <= CLAM[1] + 3; z++) {
                 if (Math.hypot(x - CLAM[0], z - CLAM[1]) <= 3.3) {
                     kit.set(x, GARDEN_FLOOR, z, TideKit.SAND);
-                    for (int y = GARDEN_FLOOR + 1; y <= GARDEN_WALL_TOP; y++) {
+                    for (int y = GARDEN_FLOOR + 1; y <= GARDEN_WALL_TOP + 6; y++) {
                         kit.set(x, y, z, TideKit.AIR);
                     }
                 }
             }
         }
+        carveGardenRoute(kit, 0, true);
+    }
+
+    // 庭の壁の上の高さの揺れ (0〜2)
+    static int gardenBump(int x, int z) {
+        return (int) Math.floor(noise(x, z, 5, 5) * 2.99);
+    }
+
+    // 壁のいちばん上 (苔と珊瑚)
+    static BlockState gardenCap(int x, int z) {
+        double n = noise(x, z, 4, 6);
+        return n < 0.45 ? Blocks.MOSS_BLOCK.defaultBlockState() : n < 0.7 ? reef((int) (n * 13)) : Blocks.MOSSY_COBBLESTONE.defaultBlockState();
     }
 
     static BlockState gardenWall(int x, int y, int z) {
@@ -630,8 +708,9 @@ public final class TideIslandBuilder {
     public static void carveGardenRoute(TideKit kit, int route, boolean full) {
         for (Channel c : Channel.values()) {
             for (BlockPos p : channelCells(c)) {
-                for (int y = GARDEN_FLOOR; y <= GARDEN_WALL_TOP; y++) {
-                    kit.set(p.getX(), y, p.getZ(), gardenWall(p.getX(), y, p.getZ()));
+                int bump = gardenBump(p.getX(), p.getZ());
+                for (int y = GARDEN_FLOOR; y <= GARDEN_WALL_TOP + bump; y++) {
+                    kit.set(p.getX(), y, p.getZ(), y > GARDEN_WALL_TOP - 1 + bump ? gardenCap(p.getX(), p.getZ()) : gardenWall(p.getX(), y, p.getZ()));
                 }
             }
         }
@@ -640,8 +719,8 @@ public final class TideIslandBuilder {
         open.add(Channel.G0_C);
         for (Channel c : open) {
             for (BlockPos p : channelCells(c)) {
-                kit.set(p.getX(), GARDEN_FLOOR, p.getZ(), (p.getX() + p.getZ()) % 7 == 0 ? Blocks.GRAVEL.defaultBlockState() : TideKit.SAND);
-                for (int y = GARDEN_FLOOR + 1; y <= GARDEN_WALL_TOP; y++) {
+                kit.set(p.getX(), GARDEN_FLOOR, p.getZ(), noise(p.getX(), p.getZ(), 3, 8) < 0.25 ? Blocks.GRAVEL.defaultBlockState() : TideKit.SAND);
+                for (int y = GARDEN_FLOOR + 1; y <= GARDEN_WALL_TOP + 6; y++) {
                     kit.set(p.getX(), y, p.getZ(), TideKit.AIR);
                 }
             }
@@ -664,7 +743,7 @@ public final class TideIslandBuilder {
                 for (int y = GARDEN_FLOOR; y <= PLATFORM_TOP; y++) {
                     kit.set(x, y, z, y == PLATFORM_TOP ? TideKit.FLOOR : TideKit.SANDSTONE);
                 }
-                for (int y = PLATFORM_TOP + 1; y <= GARDEN_WALL_TOP + 2; y++) {
+                for (int y = PLATFORM_TOP + 1; y <= GARDEN_WALL_TOP + 6; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
             }
@@ -713,7 +792,7 @@ public final class TideIslandBuilder {
                 for (int y = floor; y <= h; y++) {
                     kit.set(x, y, z, y == h ? (ring <= coreR ? TideKit.FLOOR : Blocks.SMOOTH_SANDSTONE.defaultBlockState()) : TideKit.SANDSTONE);
                 }
-                for (int y = h + 1; y <= GARDEN_WALL_TOP; y++) {
+                for (int y = h + 1; y <= GARDEN_WALL_TOP + 6; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
             }
@@ -919,8 +998,8 @@ public final class TideIslandBuilder {
     }
 
     private static BlockState flatsFloor(int x, int z) {
-        int h = Math.floorMod(x * 13 + z * 7 + (x / 3) * 5, 11);
-        return h < 7 ? TideKit.SAND : h < 9 ? Blocks.MUD.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
+        double n = noise(x, z, 5, 9) * 0.75 + noise(x, z, 2, 10) * 0.25;
+        return n < 0.55 ? TideKit.SAND : n < 0.72 ? Blocks.MUD.defaultBlockState() : n < 0.85 ? Blocks.CLAY.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
     }
 
     private static BlockState rock(int x, int y, int z) {
@@ -1069,7 +1148,7 @@ public final class TideIslandBuilder {
                 if (top == Integer.MIN_VALUE) {
                     continue;
                 }
-                boolean garden = x >= GARDEN.x1() - 1 && x <= GARDEN.x2() + 1 && z >= GARDEN.z1() - 1 && z <= GARDEN.z2() + 1;
+                boolean garden = x >= GARDEN.x1() && x <= GARDEN.x2() && z >= GARDEN.z1() && z <= GARDEN.z2();
                 for (int y = 58; y <= top - 3; y++) {
                     m.set(x, y, z);
                     BlockState s = kit.level().getBlockState(m);
