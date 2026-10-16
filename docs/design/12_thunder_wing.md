@@ -935,6 +935,37 @@
 
 11 章の担当ごとに、08 の 17〜21 章と同じ形で書き足す。
 
+### 17.4 担当 4: 雷翼の心臓（2026-10-16〜17）
+
+#### 17.4.1 作ったもの
+
+| もの | 中身 | ファイル |
+|---|---|---|
+| 模型 | 推奨ラフ C（翼の心臓）を段階ごとの geo に（包む翼 → 開いた翼と冠の翼 → 骨だけの翼と稲妻の網）。立方体の重なり 0、0.5 の格子。光らない画素をガンマ 0.8 で持ち上げ、網の光は核より弱くして点滅 | `tools/install_storm_heart.py`（形の元 `tools/sources/storm_heart/`） |
+| 色が沈まない描き方（08 の 19.8節） | 心臓の光をブロックの光 15 で描き（`getBlockLightLevel`）、光る画素は基のテクスチャの上に `_glowmask` を目の光（`RenderType.eyes`）で足す（`GlowLayer`）。`AutoGlowingGeoLayer` は使わない | `client/StormHeartRenderer.java` |
+| 技 | 3 段階・9 技（5.3 節の表の予告と傷のまま）。段階 1 招雷・風の刃・雷の鎖（4 本の柱が 3 段で満ちると翼が裂けて 6 秒・1.5 倍）、段階 2 羽ばたき・帯電の床・羽根の雨（心臓は 7 上がり、風穴の昇り風で空中戦。1.2 倍）、段階 3 閃光（視線から 60 度以内だけ。背を向けるか柱の陰なら当たらない）・雷の網・招雷の連打。変わり目は 3 秒の咆哮 | `StormHeart.java` |
+| 竜骨の間 | 中心 (0, 121, -14)、半径 15、天井 134。柱 4 本（中心から約 9、電球 3 段・先の光）、風穴 4 つ（格子）、竜骨の筋、北の入口と前室。床の明るさ 11 以上 | `StormHeartArena.java` |
+| 戦い | `BossRoom`（集合・封印・戻す・放棄・ピースフルで眠る・光の柱で尾の間へ）。体力 650 ×（1 + 0.6 ×（人数 − 1））を受ける傷で割る | `StormHeartBattle.java` |
+| バーと予告 | 段階ごとの枠と色の `PhasedBossBar`（銅の橙・風の青白・稲妻の白金）、画面の予告の印 9 つ、閃光の暗転 | `tools/gen_storm_heart_bar.py`、`client/StormHeartClient.java`、`StormHeartNetwork.java` |
+| 報酬 | 6.3 節: 欠片 4〜7・共鳴の欠片 1〜3・心核（初回は必ず、以後 25%）・共鳴の結晶 40%・干し果 50%。図鑑の表と確率は装備の担当の `StormGear.SET`（潮殻の `TideLoot` と同じ形。天井・初回の専用伝説の選択・天の鍵の欠片は一人一回）。経験値 400、成長 480（初回 +300、推奨 24）。撃破で `Progression.onTitanStopped`（報酬より先）、合図 `thunder_heart_stilled`、伝承 `chapter1/storm_stilled` | `StormLoot.java` |
+| 音 | 技ごとに別の音 14（独自合成）。字幕の鍵は伝承の担当の名前に合わせた（`storm_heart_flap`・`_floor`・`_feathers`） | `tools/gen_storm_heart_sounds.py` |
+| 文 | 鍵は伝承の担当の `skyabyss_storm` に合わせた（段階の札 `gui.skyabyss.boss.thunder_wing_heart.phase.N`・`roaring`、`message.skyabyss.storm_heart.wings_torn`）。この担当だけの鍵は `lang/parts/heart.json`（`{"鍵": {"en", "ja"}}`）に書き、`tools/gen_storm_lore.py` でまとめた | `assets/skyabyss_storm/lang/parts/heart.json` |
+| コマンド | `/skyabyss stormheart go`・`start`・`phase <1-3>`・`action <技>`・`split`・`win`・`reset`・`rebuild`・`shot <人> <技>`・`status` | `StormHeartCommands.java` |
+| 背中の API | 背中の担当の本物がまだ無いので、`StormBackLayout`・`StormBackClock`・`Updraft` は同じ名前の仮の実装（`titan/storm/back/`。`StormBackLayout` は担当 3 と同じ中身）。竜骨の間で戦うため、仮の `storm_back` のディメンション（潮殻の背の型の空のワールド）も置いた | `titan/storm/back/*`、`data/skyabyss/dimension/storm_back.json` |
+
+#### 17.4.2 結果
+
+- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST storm_heart PASSED**（9/9 の技が最後まで回る、図鑑は平均 14.1 回で揃う（6.4 節の模擬）、抽選から外す品 0、立ったままでは段階 2 に届かず、段階 1・3 で 24 の体力に 25.1 の傷（手ごたえ 1.04）、8 回で倒れる）、**storm_heart light PASSED**（床のいちばん暗い所 12）。
+- 自己テストで確かめること: 素材（段階ごとの geo・テクスチャ・発光・バーの枠・予告の印・音）、9 技の予告の長さと傷（5.3 節の数）、アニメの名前、文の鍵が `skyabyss_storm` の日英にある、竜骨の間の形（柱・風穴・竜骨の筋・入口・前室）、柱の段と翼が裂ける、閃光の向きの判定（見ている / 背を向けている / 90 度 / 50 度 / 柱の陰）、風の刃（しゃがむと当たらない）、雷の網（すき間）、封印・保存されない・段階と咆哮の無敵・1.2 倍・1.5 倍・人数の倍率・段階の高さ、部屋の外から戻す・放棄、報酬（天井・図鑑・欠片は一人一回・作られていない品は外す・巨神ごとの記録）、撃破で雷翼を止めた記録と入口が開く、床の明るさ。
+- データの検査（出荷している素材を読んで数えた）: 立方体の重なり 0（段階 1〜3: 860・1090・679 個）、光る画素 256・362・3776（どれも 0 でない）、光らない画素の明るさの平均 124・125・146（ラフの 107 から持ち上がっている）。
+- 試遊はしていない（指示により）。見た目のスクショは、台本で撮る道具がまだ m1-sky-pass に無いので省いた。
+
+#### 17.4.3 合わせるときに
+
+1. 担当 1 の本物が入ったら、`titan/storm/back/` の仮の実装と仮の `storm_back.json` を消し、竜骨の間の座標を本物の部屋に合わせる（`StormHeartArena` は `StormBackLayout.KEEL_*` を読む）。担当 3 の雷獣の巣は、`storm_back` があればそこに建つ。
+2. 背中の嵐の拍（`StormBackClock`）と昇り風（`Updraft`）は、本物に替えても名前と引数は同じ。
+3. 12 の 17.3 節（担当 3）と同じ所に書き足しているので、合わせるときは 17.3 → 17.4 → 17.6 の順に並べる。
+
 ### 17.6 担当 6: 伝承とクエスト（2026-10-17）
 
 #### 17.6.1 作ったもの

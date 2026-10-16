@@ -60,28 +60,16 @@ public final class StormLoot {
     public static final int HEART_XP = 480;
     public static final int HEART_FIRST_BONUS = 300;
 
-    // 品の ID (まだ登録されていないものを含む。素材は 12 の 11.1節の名前、装備は 17 章の表)
+    // 品の ID は装備の担当の StormGear (12 の 11.1節の名前)。まだ登録されていない品は抽選から外す
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");
     public static final String RESONANCE_SHARD = id("resonance_shard");
     public static final String RESONANCE_CRYSTAL = id("resonance_crystal");
-    public static final String SHARD = id("thunder_wing_shard");
-    public static final String CORE = id("thunder_wing_core");
-    public static final String FRUIT = id("cloudgap_fruit");
-    public static final List<String> ARMOR = List.of(id("thunder_wing_helmet"), id("thunder_wing_chestplate"),
-            id("thunder_wing_leggings"), id("thunder_wing_boots"));
-    public static final String BOW = id("thunder_wing_bow");
-    public static final String ANKLET = id("storm_anklet");
-    public static final String CHARM = id("storm_charm");
-    // 専用伝説: 雷獣の爪、羽守の鉤槍、嵐の目の羽根
-    public static final List<String> EXCLUSIVES = List.of(id("raiju_claw"), id("warden_hook_spear"), id("storm_eye_feather"));
+    public static final String SHARD = jp.revati.skyabyss.item.storm.StormGear.SHARD;
+    public static final String CORE = jp.revati.skyabyss.item.storm.StormGear.CORE;
+    public static final String FRUIT = jp.revati.skyabyss.item.storm.StormGear.FRUIT;
+    // 専用伝説 (図鑑の並び: 雷獣の爪、羽守の薙刀、嵐の目の羽根)
+    public static final List<String> EXCLUSIVES = jp.revati.skyabyss.item.storm.StormGear.SET.exclusives();
 
-    public static final float ARMOR_CHANCE = 0.25f;
-    public static final float BOW_CHANCE = 0.20f;
-    public static final float ANKLET_CHANCE = 0.20f;
-    public static final float CHARM_CHANCE = 0.20f;
-    public static final float CLAW_CHANCE = 0.04f;
-    public static final float SPEAR_CHANCE = 0.04f;
-    public static final float FEATHER_CHANCE = 0.02f;
     public static final float CORE_CHANCE = 0.25f;
     public static final float CRYSTAL_CHANCE = 0.40f;
     public static final float FRUIT_CHANCE = 0.50f;
@@ -98,35 +86,14 @@ public final class StormLoot {
         return SkyAbyss.MODID + ":" + path;
     }
 
-    // 図鑑 (10 品): 羽衣 4、弓、足環、護符、専用伝説 3
+    // 図鑑 (10 品): 羽衣 4、弓、足環、護符、専用伝説 3 (雷獣の爪・羽守の薙刀・嵐の目の羽根)。
+    // 表と確率は装備の担当の StormGear.SET (巨神ごとの装備の表、TitanGearSet。潮殻の TideLoot と同じ形)
     public static List<String> collection() {
-        List<String> all = new ArrayList<>(ARMOR);
-        all.add(BOW);
-        all.add(ANKLET);
-        all.add(CHARM);
-        all.addAll(EXCLUSIVES);
-        return all;
+        return jp.revati.skyabyss.item.storm.StormGear.SET.collection();
     }
 
     public static float chance(String item) {
-        if (ARMOR.contains(item)) {
-            return ARMOR_CHANCE;
-        }
-        if (item.equals(BOW)) {
-            return BOW_CHANCE;
-        }
-        if (item.equals(ANKLET)) {
-            return ANKLET_CHANCE;
-        }
-        if (item.equals(CHARM)) {
-            return CHARM_CHANCE;
-        }
-        return switch (EXCLUSIVES.indexOf(item)) {
-            case 0 -> CLAW_CHANCE;
-            case 1 -> SPEAR_CHANCE;
-            case 2 -> FEATHER_CHANCE;
-            default -> 0f;
-        };
+        return jp.revati.skyabyss.item.storm.StormGear.SET.chance(item);
     }
 
     // 登録されている品か (まだ作られていない品は false)
@@ -409,7 +376,7 @@ public final class StormLoot {
         for (int i = 0; i < runs; i++) {
             TitanMemoryData.Record r = new TitanMemoryData.Record();
             // 初回は専用伝説で一番出にくい嵐の目の羽根を選ぶ (6.4節の前提)
-            r.owned.add(EXCLUSIVES.get(2));
+            r.owned.add(jp.revati.skyabyss.item.storm.StormGear.EYE_FEATHER);
             int n = 0;
             while (collected(r) < collection().size() && n < 200) {
                 rollHeart(r, random, available);
