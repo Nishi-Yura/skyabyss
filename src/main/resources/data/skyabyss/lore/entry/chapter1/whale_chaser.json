@@ -1,0 +1,12 @@
+{
+  "chapter": "chapter1",
+  "order": 140,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/whale_song"
+  ]
+}
