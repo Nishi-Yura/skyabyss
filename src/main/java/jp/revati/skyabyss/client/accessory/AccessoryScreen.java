@@ -78,7 +78,8 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, 8, 6, TEXT, false);
-        g.drawString(font, playerInventoryTitle, 8, inventoryLabelY, TEXT, false);
+        // バニラの「インベントリ」は人形の窓に掛かるので、短い「持ち物」(つまみと同じ名前) にする
+        g.drawString(font, Component.translatable("skyabyss_gear.screen.tab_inventory"), 8, inventoryLabelY, TEXT, false);
         // 護符の枠の上に「護符」、下に使うキー。装飾の枠の上に「装飾」、下にいまのレベル
         Component charm = Component.translatable("skyabyss_gear.screen.charm");
         g.drawString(font, charm, 38 - font.width(charm) / 2, 17, GOLD, false);
