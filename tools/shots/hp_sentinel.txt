@@ -1,0 +1,72 @@
+# Bone sentinel before/after the high-poly pass (docs/design/15_high_poly.md).
+# ./gradlew runShots -Pscript=tools/shots/hp_sentinel.txt [-PshotsName=hp_sentinel_after]
+# Output: run/shots/<name>/shots/<name>/*.png and shots.log (PERF lines = ms per frame)
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:bone_sentinel 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+hud off
+camera minecraft:overworld 0 -60.6 4.2 180 0
+waitchunks
+wait 60
+shot sentinel_front
+camera minecraft:overworld 2.8 -60.4 3.0 150 4
+wait 20
+shot sentinel_three_quarter
+camera minecraft:overworld 0.35 -59.8 1.5 180 2
+wait 20
+shot sentinel_face
+camera minecraft:overworld -2.6 -60.4 -3.2 -35 6
+wait 20
+shot sentinel_back
+# render cost: 5 x 8 sentinels in view
+cmd kill @e[type=skyabyss:bone_sentinel]
+cmd execute positioned -9 -60 -6 run summon skyabyss:bone_sentinel ~ ~ ~ {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -59 13 180 8
+wait 100
+shot sentinel_crowd
+perf 300 crowd40
+quit

@@ -74,6 +74,9 @@ public final class ShotRunner {
     private static CompletableFuture<Void> pending;
     private static String shotName;
     private static boolean shotDone;
+    private static boolean perfOn;
+    private static long perfFrames;
+    private static long perfStartNanos;
     private static int lastSections = -1;
     private static int stableTicks;
     private static Vec3 cameraTarget;
@@ -341,6 +344,23 @@ public final class ShotRunner {
                 }
                 return false;
             }
+            case "perf" -> {
+                // perf <tick> [名前] : その間に描いた枚数から平均のフレーム時間を記録に書く (垂直同期を切り、上限を外す)。モデルの重さの比較用
+                if (first) {
+                    mc.options.enableVsync().set(false);
+                    mc.options.framerateLimit().set(260);
+                    perfFrames = 0;
+                    perfStartNanos = System.nanoTime();
+                    perfOn = true;
+                }
+                if (stepTicks + 1 >= line.intArg(0)) {
+                    double ms = (System.nanoTime() - perfStartNanos) / 1.0e6 / Math.max(1, perfFrames);
+                    say(String.format("  PERF %s: %.2f ms/frame (%.0f fps) over %d frames", line.args().length > 1 ? line.arg(1) : "", ms, 1000.0 / ms, perfFrames));
+                    perfOn = false;
+                    return true;
+                }
+                return false;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
@@ -409,6 +429,9 @@ public final class ShotRunner {
     // ---------------------------------------------------------------- 撮る (描き終えたあと、画面へ出す前)
     @SubscribeEvent
     static void onRenderFrame(RenderFrameEvent.Post event) {
+        if (perfOn) {
+            perfFrames++;
+        }
         if (!active() || shotName == null || shotDone || stepTicks < 2) {
             return;
         }
