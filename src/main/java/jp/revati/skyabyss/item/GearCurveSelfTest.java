@@ -130,6 +130,18 @@ public final class GearCurveSelfTest {
         check(f, worst >= 1.3, "maxed whale gear makes the heart load " + fmt(worst) + " (want >= 1.3: the heart must still be dodged)");
         check(f, plain >= 3.0, "fresh whale gear makes the heart load " + fmt(plain) + " (want >= 3.0)");
 
+        // ---- 甲殻一式の耐性 I (03 の 10.1節): 強すぎないか。心臓の一撃で、ダイヤ + ダメージ軽減 I〜II の間に収まるか
+        double heartHit = whale.bossHit();
+        double base = heartHit * GearCurve.armorTaken(heartHit, defense, toughness);
+        double withSet = health / (base * GearCurve.RESISTANCE_I);
+        double protI = health / (base * GearCurve.protectionSet(1));
+        double protII = health / (base * GearCurve.protectionSet(2));
+        SkyAbyss.LOGGER.info("[selftest] gear curve resistance I: survives {} heart hits (no set effect {}, diamond + protection I {}, II {}); fresh load {} -> {} without it",
+                fmt(withSet), fmt(health / base), fmt(protI), fmt(protII), fmt(plain), fmt(plain / GearCurve.RESISTANCE_I));
+        check(f, withSet >= protI && withSet <= protII, "stone whale set with resistance I survives " + fmt(withSet)
+                + " heart hits (want between diamond + protection I " + fmt(protI) + " and II " + fmt(protII) + ")");
+        SkyAbyss.LOGGER.info("[selftest] gear curve resistance I: maxed load {} -> {} without it", fmt(worst), fmt(worst / GearCurve.RESISTANCE_I));
+
         // ---- 巨神ごとの目安
         for (int i = 1; i < GearCurve.STAGES.size(); i++) {
             GearCurve.Stage prev = GearCurve.STAGES.get(i - 1);

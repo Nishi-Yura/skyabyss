@@ -291,6 +291,8 @@ public final class AffixSelfTest {
     private static void modifiers(MinecraftServer server, List<String> f, RandomSource random) {
         ServerLevel level = server.overworld();
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "affix_test_a"));
+        // 必要レベル (03 の 10章) に届いている人として試す
+        jp.revati.skyabyss.rpg.Growth.get(p).level = jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL;
         Item[] armor = {ModItems.STONE_WHALE_HELMET.get(), ModItems.STONE_WHALE_CHESTPLATE.get(), ModItems.STONE_WHALE_LEGGINGS.get(),
                 ModItems.STONE_WHALE_BOOTS.get()};
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};

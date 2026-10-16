@@ -52,6 +52,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.travel.TravelSetup.register(modEventBus);
         // 第二の巨神「潮殻の巨神」(エンティティ・音)。登録は titan.tide パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.TideSetup.register(modEventBus);
+        // 装飾の枠 (護符 1・装飾 2。記録・画面・パケット)。登録は item.accessory パッケージにまとめてある
+        jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

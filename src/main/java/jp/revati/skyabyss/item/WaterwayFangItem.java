@@ -39,6 +39,10 @@ public class WaterwayFangItem extends SwordItem implements ModGear {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        // 必要レベルに届かない人の手では、固有効果は出ない (GearLevel)
+        if (!GearLevel.usable(attacker, stack)) {
+            return super.hurtEnemy(stack, target, attacker);
+        }
         // 出血 2秒。+5 からは 3秒の出血 II
         boolean awakened = ModGear.awakened(stack);
         target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, awakened ? 60 : 40, awakened ? 1 : 0), attacker);

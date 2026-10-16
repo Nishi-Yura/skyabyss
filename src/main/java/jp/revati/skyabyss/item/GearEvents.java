@@ -1,6 +1,7 @@
 package jp.revati.skyabyss.item;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.item.accessory.Accessories;
 import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -29,8 +30,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 装備の効果のうち、持ち主の状態で変わるもの:
 //  - 共鳴の炉で鍛えた段階に応じた、攻撃力 (武器の 3%/段)・強靭 (0.3/段) の上乗せ
 //  - 水路の顎牙: 水の中で攻撃速度 +30%
-//  - 苔の護石: 苔の上にいると体力が回復する
-//  - 岩鯨の補強板: 岩鯨の甲殻を2部位で強靭 +3、4部位でノックバック耐性
+//  - 苔の護石: 装飾の枠に付けて苔の上にいると体力が回復する
+//  - 岩鯨の補強板: 装飾の枠に付けて、岩鯨の甲殻を2部位で強靭 +3、4部位でノックバック耐性
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GearEvents {
     // 1段階ごとの上乗せ (03 の 9章、2026-10-17 改)
@@ -97,14 +98,15 @@ public final class GearEvents {
             return;
         }
         // 水路の顎牙: 手に持って水の中にいる間だけ、速く振れる (毎tick見る。水から出たらすぐ戻す)
-        boolean fangInWater = player.getMainHandItem().getItem() instanceof WaterwayFangItem && player.isInWaterOrBubble();
+        boolean fangInWater = player.getMainHandItem().getItem() instanceof WaterwayFangItem && player.isInWaterOrBubble()
+                && GearLevel.meets(player, player.getMainHandItem());
         toggle(player, Attributes.ATTACK_SPEED, FANG_WATER, fangInWater ? 0.3 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         if (player.tickCount % 20 != 0) {
             return;
         }
-        // 岩鯨の補強板: 持ち物にあれば、甲殻の部位数に応じて守りが増す
-        boolean plating = player.getInventory().contains(new ItemStack(ModItems.STONE_WHALE_PLATING.get()));
+        // 岩鯨の補強板: 装飾の枠に付けていれば、甲殻の部位数に応じて守りが増す (持ち物にあるだけでは効かない。03 の 10章)
+        boolean plating = Accessories.worn(player, ModItems.STONE_WHALE_PLATING.get());
         int pieces = plating ? StoneWhaleArmorItem.piecesWorn(player) : 0;
         toggle(player, Attributes.ARMOR_TOUGHNESS, PLATING_TOUGHNESS_ID, pieces >= 2 ? PLATING_TOUGHNESS : 0, AttributeModifier.Operation.ADD_VALUE);
         // 以前の「防御 +2」の修飾子が残っていたら外す (一時的な修飾子なので本来は残らないが、念のため)
@@ -113,7 +115,7 @@ public final class GearEvents {
 
         // 苔の護石: 苔のブロックか苔のカーペットの上で、毎秒 0.5 回復
         if (player.getHealth() < player.getMaxHealth() && onMoss(player)
-                && player.getInventory().contains(new ItemStack(ModItems.MOSS_TALISMAN.get()))) {
+                && Accessories.worn(player, ModItems.MOSS_TALISMAN.get())) {
             player.heal(0.5f);
             player.serverLevel().sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.3, 0.1, 0.3, 0);
         }

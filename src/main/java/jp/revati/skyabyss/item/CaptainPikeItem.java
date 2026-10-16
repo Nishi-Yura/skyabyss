@@ -54,7 +54,8 @@ public class CaptainPikeItem extends SwordItem implements ModGear {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.level() instanceof ServerLevel level) {
+        // 必要レベルに届かない人の手では、扇も噴出も出ない (GearLevel)
+        if (attacker.level() instanceof ServerLevel level && GearLevel.usable(attacker, stack)) {
             float damage = (float) attacker.getAttributeValue(Attributes.ATTACK_DAMAGE);
             sweepFan(level, target, attacker, damage * 0.5f);
             int hits = attacker.getPersistentData().getInt(HITS) + 1;

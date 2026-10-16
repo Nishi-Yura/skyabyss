@@ -27,6 +27,11 @@ public interface ModGear {
         return true;
     }
 
+    // 必要レベル (成長の Lv)。由来の巨神の推奨 Lv と階級から決まる (GearLevel、03 の 10章)。0 = 要件なし
+    default int requiredLevel() {
+        return GearLevel.defaultRequired(this);
+    }
+
     static int enhance(ItemStack stack) {
         return stack.getOrDefault(ModDataComponents.ENHANCE.get(), 0);
     }
