@@ -246,12 +246,7 @@ public final class TitanBackBuilder {
                 kit.set(x, py + 4, z, BuildKit.POLISHED);
             }
         }
-        for (int x = -1; x <= 1; x++) {
-            for (int y = py + 1; y <= py + 3; y++) {
-                kit.set(x, y, PLATFORM_Z + 5, BuildKit.BRICKS);
-            }
-        }
-        kit.set(0, py + 2, PLATFORM_Z + 5, BuildKit.CHISELED);
+        // 後ろの壁は置かない (広場から尾と尾びれが見えるように)。屋根を支える柱だけ
         // 鎖: 屋根の下から、錨石の上へ。中央には魂のランタン
         kit.set(-2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
         kit.set(2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
@@ -291,6 +286,26 @@ public final class TitanBackBuilder {
             }
         }
         kit.hangingLantern(0, SHRINE_Z + 6, sy + 6, 1);
+        // 南の口 (広場から来る踏み跡) の段: 背は南へ下がっていくので、祠の床まで一段ずつ上がる段を置く
+        BlockState up = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
+        for (int i = 1; i <= 8; i++) {
+            int z = z2 + i;
+            int y = sy - i;
+            boolean any = false;
+            for (int x = -2; x <= 2; x++) {
+                int t = top(x, z);
+                if (t >= y) {
+                    continue;
+                }
+                any = true;
+                kit.fill(x, t + 1, z, x, y - 1, z, BuildKit.BRICKS);
+                kit.set(x, y, z, up);
+                kit.fill(x, y + 1, z, x, y + 4, z, BuildKit.AIR);
+            }
+            if (!any) {
+                break;
+            }
+        }
         // 北へ下りていく階段。1段ごとに1つ低くなり、体内の床の高さで終わる
         BlockState step = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
         for (int i = 0; ; i++) {
