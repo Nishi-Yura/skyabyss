@@ -78,6 +78,8 @@ public final class StormHeartSelfTest {
             return;
         }
         checkAssets(failures);
+        checkDesign(failures);
+        checkLang(failures);
         forceChunks(back);
         checkArena(back, failures);
         checkJudgements(back, failures);
@@ -116,6 +118,82 @@ public final class StormHeartSelfTest {
         check(StormHeart.bagFor(0).length == 3 && StormHeart.bagFor(1).length == 3 && StormHeart.bagFor(2).length == 3, "each phase should have 3 moves", failures);
         GrowthRewards.Source xp = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":thunder_wing_heart");
         check(xp != null && xp.xp() == StormLoot.HEART_XP && xp.contentLevel() == StormLoot.STORM_LEVEL, "growth xp entry for the heart is missing or wrong", failures);
+    }
+
+    // 技の予告の長さと傷 (12 の 5.3節の表): 招雷 1.2 秒・風の刃 1.2・雷の鎖 1.0・羽ばたき 1.5・帯電の床 1.5・羽根の雨 1.2・閃光 2.0・
+    // 雷の網 1.5・招雷の連打 1.0。咆哮 3 秒、翼が裂けて 6 秒、閃光は視線から 60 度、網は一周 6 秒
+    private static void checkDesign(List<String> failures) {
+        java.util.Map<StormHeart.Action, Integer> warn = java.util.Map.of(
+                StormHeart.Action.SUMMON, 24, StormHeart.Action.BLADE, 24, StormHeart.Action.CHAIN, 20,
+                StormHeart.Action.WINGBEAT, 30, StormHeart.Action.CHARGE, 30, StormHeart.Action.FEATHER, 24,
+                StormHeart.Action.FLASH, 40, StormHeart.Action.WEB, 30, StormHeart.Action.BARRAGE, 20);
+        warn.forEach((a, t) -> check(a.warnTicks == t, a + " warning should be " + t + " ticks (" + a.warnTicks + ")", failures));
+        check(StormHeart.ROAR_TICKS == 60 && StormHeart.SPLIT_TICKS == 120 && StormHeart.WEB_TICKS == 120, "roar / split / web timings differ from 5.3", failures);
+        check(StormHeart.FLASH_CONE_DEG == 60, "flash cone should be 60 degrees", failures);
+        float[] dmg = {StormHeart.SUMMON_DAMAGE, StormHeart.BLADE_DAMAGE, StormHeart.CHAIN_DAMAGE, StormHeart.WINGBEAT_DAMAGE,
+                StormHeart.CHARGE_DAMAGE, StormHeart.FEATHER_DAMAGE, StormHeart.FLASH_DAMAGE, StormHeart.WEB_DAMAGE, StormHeart.BARRAGE_DAMAGE};
+        float[] want = {13f, 14f, 15.5f, 6f, 3f, 10f, 12f, 14f, 10f};
+        check(java.util.Arrays.equals(dmg, want), "move damage differs from 5.3: " + java.util.Arrays.toString(dmg), failures);
+        // 9 つの技と咆哮のアニメが模型のアニメにある
+        try (InputStream in = StormHeartSelfTest.class.getResourceAsStream("/assets/skyabyss/animations/entity/storm_heart.animation.json")) {
+            String json = in == null ? "" : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            for (StormHeart.Action a : StormHeart.Action.values()) {
+                if (a.anim != null) {
+                    check(json.contains("\"animation.storm_heart." + a.anim + "\""), "animation missing: " + a.anim, failures);
+                }
+            }
+            for (int n = 1; n < StormHeart.PHASE_COUNT; n++) {
+                check(json.contains("\"animation.storm_heart.roar_" + n + "\""), "animation missing: roar_" + n, failures);
+            }
+        } catch (java.io.IOException e) {
+            failures.add("could not read the heart animations");
+        }
+    }
+
+    // 文は伝承の担当の skyabyss_storm の lang にまとまっている: 断片 (parts/heart.json) の鍵と、音の字幕の鍵が日英ともにある
+    private static void checkLang(List<String> failures) {
+        java.util.Set<String> keys = new java.util.TreeSet<>();
+        try (InputStream parts = StormHeartSelfTest.class.getResourceAsStream("/assets/skyabyss_storm/lang/parts/heart.json");
+             InputStream sounds = StormHeartSelfTest.class.getResourceAsStream("/assets/skyabyss_storm_heart/sounds.json")) {
+            if (parts == null || sounds == null) {
+                failures.add("missing parts/heart.json or the heart sounds.json");
+                return;
+            }
+            keys.addAll(com.google.gson.JsonParser.parseString(new String(parts.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8))
+                    .getAsJsonObject().keySet());
+            com.google.gson.JsonObject table = com.google.gson.JsonParser.parseString(
+                    new String(sounds.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+            for (String name : table.keySet()) {
+                keys.add(table.getAsJsonObject(name).get("subtitle").getAsString());
+            }
+        } catch (java.io.IOException | RuntimeException e) {
+            failures.add("could not read the heart text keys: " + e);
+            return;
+        }
+        for (StormHeart.Action a : StormHeart.Action.values()) {
+            if (a != StormHeart.Action.NONE) {
+                keys.add("gui.skyabyss.storm_heart.warn." + a.key());
+            }
+        }
+        for (int n = 1; n <= StormHeart.PHASE_COUNT; n++) {
+            keys.add("gui.skyabyss.boss.thunder_wing_heart.phase." + n);
+        }
+        for (String code : new String[] {"ja_jp", "en_us"}) {
+            String path = "/assets/skyabyss_storm/lang/" + code + ".json";
+            try (InputStream in = StormHeartSelfTest.class.getResourceAsStream(path)) {
+                if (in == null) {
+                    failures.add("missing " + path);
+                    continue;
+                }
+                com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(
+                        new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                for (String k : keys) {
+                    check(json.has(k), code + " has no " + k, failures);
+                }
+            } catch (java.io.IOException | RuntimeException e) {
+                failures.add("could not read " + path + ": " + e);
+            }
+        }
     }
 
     private static void checkArena(ServerLevel back, List<String> failures) {

@@ -1,85 +1,158 @@
 {
-  "_comment": "雷翼の心臓 (12 の 11.2節の担当 4) の文の断片。伝承の担当 (担当 6) が assets/skyabyss_storm/lang/<言語>.json にまとめる。英文は仮。この場所のファイルはゲームには読まれない",
-  "ja_jp": {
-    "entity.skyabyss.thunder_wing_heart": "雷翼の心臓",
-    "gui.skyabyss.boss.storm_heart.phase.1": "畳んだ翼",
-    "gui.skyabyss.boss.storm_heart.phase.2": "開いた翼",
-    "gui.skyabyss.boss.storm_heart.phase.3": "骨の翼",
-    "gui.skyabyss.boss.storm_heart.roaring": "咆哮",
-    "gui.skyabyss.storm_heart.warn.summon": "招雷 ― 柱のそばへ",
-    "gui.skyabyss.storm_heart.warn.blade": "風の刃 ― 身を低く",
-    "gui.skyabyss.storm_heart.warn.chain": "雷の鎖",
-    "gui.skyabyss.storm_heart.warn.wingbeat": "羽ばたき",
-    "gui.skyabyss.storm_heart.warn.charge": "帯電の床 ― 宙へ",
-    "gui.skyabyss.storm_heart.warn.feather": "羽根の雨",
-    "gui.skyabyss.storm_heart.warn.flash": "閃光 ― 目を背けよ",
-    "gui.skyabyss.storm_heart.warn.web": "雷の網 ― すき間へ",
-    "gui.skyabyss.storm_heart.warn.barrage": "招雷の連打",
-    "gui.skyabyss.storm_heart.warn.roar": "咆哮",
-    "message.skyabyss.storm_heart.begin": "竜骨の奥で、雷翼の心臓が目を覚ました。",
-    "message.skyabyss.storm_heart.asleep": "心臓は眠っている。この世界が穏やかなうちは、目を覚まさない。",
-    "message.skyabyss.storm_heart.descend": "竜骨の前室へ降りた。胸の奥で、雷が脈打っている。",
-    "message.skyabyss.storm_heart.go": "（試験）南の口から竜骨の間へ入ると、5 秒後に戦いが始まる。",
-    "message.skyabyss.storm_heart.split": "翼が裂けた。心臓が落ちる ― 今だ。",
-    "message.skyabyss.storm_heart.defeated": "雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ。",
-    "message.skyabyss.storm_heart.reward": "止まった心臓が、手の中に何かを残した。",
-    "message.skyabyss.storm_heart.pillar": "光の柱に包まれ、上へ運ばれた。",
-    "message.skyabyss.storm_heart.choice_later": "この巨神の伝説の品は、まだこの世界にない。現れたら /titanmemory storm で一つ選べる。",
-    "message.skyabyss.memory_title_thunder_wing": "雷翼の記憶",
-    "subtitles.skyabyss.storm_heart_beat": "雷翼の心臓が打つ",
-    "subtitles.skyabyss.storm_heart_roar": "雷翼の心臓が吼える",
-    "subtitles.skyabyss.storm_heart_summon": "雲の上で雷が鳴る",
-    "subtitles.skyabyss.storm_heart_strike": "雷が落ちる",
-    "subtitles.skyabyss.storm_heart_blade": "風が笛のように鳴る",
-    "subtitles.skyabyss.storm_heart_chain": "電気が唸る",
-    "subtitles.skyabyss.storm_heart_split": "翼が裂ける",
-    "subtitles.skyabyss.storm_heart_wingbeat": "大きな羽ばたき",
-    "subtitles.skyabyss.storm_heart_charge": "床が帯電する",
-    "subtitles.skyabyss.storm_heart_feather": "羽根が降る",
-    "subtitles.skyabyss.storm_heart_flash": "光が吸い込まれる",
-    "subtitles.skyabyss.storm_heart_web": "雷の網が回る",
-    "subtitles.skyabyss.storm_heart_barrage": "雷が続けて鳴る",
-    "subtitles.skyabyss.storm_heart_death": "雷翼の心臓が止まる"
+  "entity.skyabyss.thunder_wing_heart": {
+    "en": "Heart of the Thunder Wing",
+    "ja": "雷翼の心臓"
   },
-  "en_us": {
-    "entity.skyabyss.thunder_wing_heart": "Heart of the Thunder Wing",
-    "gui.skyabyss.boss.storm_heart.phase.1": "Folded Wings",
-    "gui.skyabyss.boss.storm_heart.phase.2": "Open Wings",
-    "gui.skyabyss.boss.storm_heart.phase.3": "Bare Bones",
-    "gui.skyabyss.boss.storm_heart.roaring": "Roaring",
-    "gui.skyabyss.storm_heart.warn.summon": "Lightning Call - near a rod",
-    "gui.skyabyss.storm_heart.warn.blade": "Wind Blade - crouch",
-    "gui.skyabyss.storm_heart.warn.chain": "Thunder Chain",
-    "gui.skyabyss.storm_heart.warn.wingbeat": "Wingbeat",
-    "gui.skyabyss.storm_heart.warn.charge": "Charged Floor - take to the air",
-    "gui.skyabyss.storm_heart.warn.feather": "Feather Rain",
-    "gui.skyabyss.storm_heart.warn.flash": "Flash - look away",
-    "gui.skyabyss.storm_heart.warn.web": "Thunder Web - find the gap",
-    "gui.skyabyss.storm_heart.warn.barrage": "Lightning Barrage",
-    "gui.skyabyss.storm_heart.warn.roar": "Roar",
-    "message.skyabyss.storm_heart.begin": "Deep in the keel, the heart of the thunder wing awakens.",
-    "message.skyabyss.storm_heart.asleep": "The heart sleeps. While this world is peaceful, it will not wake.",
-    "message.skyabyss.storm_heart.descend": "You descend into the keel antechamber. Lightning pulses deep in the chest.",
-    "message.skyabyss.storm_heart.go": "(Test) Enter the keel chamber through the south opening; the fight begins after 5 seconds.",
-    "message.skyabyss.storm_heart.split": "The wings split. The heart falls - now!",
-    "message.skyabyss.storm_heart.defeated": "The heart of the thunder wing stops. The wind in its chest falls still for the first time.",
-    "message.skyabyss.storm_heart.reward": "The stilled heart leaves something in your hands.",
-    "message.skyabyss.storm_heart.pillar": "The pillar of light carries you upward.",
-    "message.skyabyss.storm_heart.choice_later": "This titan's legendary items do not exist in this world yet. Once they do, choose one with /titanmemory storm.",
-    "message.skyabyss.memory_title_thunder_wing": "Memory of the Thunder Wing",
-    "subtitles.skyabyss.storm_heart_beat": "Thunder wing heart beats",
-    "subtitles.skyabyss.storm_heart_roar": "Thunder wing heart roars",
-    "subtitles.skyabyss.storm_heart_summon": "Thunder rumbles above",
-    "subtitles.skyabyss.storm_heart_strike": "Lightning strikes",
-    "subtitles.skyabyss.storm_heart_blade": "Wind whistles",
-    "subtitles.skyabyss.storm_heart_chain": "Electricity hums",
-    "subtitles.skyabyss.storm_heart_split": "Wings split",
-    "subtitles.skyabyss.storm_heart_wingbeat": "Great wingbeat",
-    "subtitles.skyabyss.storm_heart_charge": "Floor crackles",
-    "subtitles.skyabyss.storm_heart_feather": "Feathers fall",
-    "subtitles.skyabyss.storm_heart_flash": "Light is drawn in",
-    "subtitles.skyabyss.storm_heart_web": "Thunder web spins",
-    "subtitles.skyabyss.storm_heart_barrage": "Lightning cracks again and again",
-    "subtitles.skyabyss.storm_heart_death": "Thunder wing heart stops"
+  "gui.skyabyss.boss.thunder_wing_heart.phase.1": {
+    "en": "Folded Wings",
+    "ja": "畳んだ翼"
+  },
+  "gui.skyabyss.boss.thunder_wing_heart.phase.2": {
+    "en": "Open Wings",
+    "ja": "開いた翼"
+  },
+  "gui.skyabyss.boss.thunder_wing_heart.phase.3": {
+    "en": "Bare Bones",
+    "ja": "骨の翼"
+  },
+  "gui.skyabyss.boss.thunder_wing_heart.roaring": {
+    "en": "Roaring",
+    "ja": "咆哮"
+  },
+  "gui.skyabyss.storm_heart.warn.summon": {
+    "en": "Lightning Call - near a rod",
+    "ja": "招雷 ― 柱のそばへ"
+  },
+  "gui.skyabyss.storm_heart.warn.blade": {
+    "en": "Wind Blade - crouch",
+    "ja": "風の刃 ― 身を低く"
+  },
+  "gui.skyabyss.storm_heart.warn.chain": {
+    "en": "Thunder Chain",
+    "ja": "雷の鎖"
+  },
+  "gui.skyabyss.storm_heart.warn.wingbeat": {
+    "en": "Wingbeat",
+    "ja": "羽ばたき"
+  },
+  "gui.skyabyss.storm_heart.warn.charge": {
+    "en": "Charged Floor - take to the air",
+    "ja": "帯電の床 ― 宙へ"
+  },
+  "gui.skyabyss.storm_heart.warn.feather": {
+    "en": "Feather Rain",
+    "ja": "羽根の雨"
+  },
+  "gui.skyabyss.storm_heart.warn.flash": {
+    "en": "Flash - look away",
+    "ja": "閃光 ― 目を背けよ"
+  },
+  "gui.skyabyss.storm_heart.warn.web": {
+    "en": "Thunder Web - find the gap",
+    "ja": "雷の網 ― すき間へ"
+  },
+  "gui.skyabyss.storm_heart.warn.barrage": {
+    "en": "Lightning Barrage",
+    "ja": "招雷の連打"
+  },
+  "gui.skyabyss.storm_heart.warn.roar": {
+    "en": "Roar",
+    "ja": "咆哮"
+  },
+  "message.skyabyss.storm_heart.begin": {
+    "en": "Deep in the keel, the heart of the thunder wing awakens.",
+    "ja": "竜骨の奥で、雷翼の心臓が目を覚ました。"
+  },
+  "message.skyabyss.storm_heart.asleep": {
+    "en": "The heart sleeps. While this world is peaceful, it will not wake.",
+    "ja": "心臓は眠っている。この世界が穏やかなうちは、目を覚まさない。"
+  },
+  "message.skyabyss.storm_heart.descend": {
+    "en": "You descend into the keel antechamber. Lightning pulses deep in the chest.",
+    "ja": "竜骨の前室へ降りた。胸の奥で、雷が脈打っている。"
+  },
+  "message.skyabyss.storm_heart.go": {
+    "en": "(Test) Enter the keel chamber through the south opening; the fight begins after 5 seconds.",
+    "ja": "（試験）南の口から竜骨の間へ入ると、5 秒後に戦いが始まる。"
+  },
+  "message.skyabyss.storm_heart.wings_torn": {
+    "en": "The wings split. The heart falls - now!",
+    "ja": "翼が裂けた。心臓が落ちる ― 今だ。"
+  },
+  "message.skyabyss.storm_heart.defeated": {
+    "en": "The heart of the thunder wing stops. The wind in its chest falls still for the first time.",
+    "ja": "雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ。"
+  },
+  "message.skyabyss.storm_heart.reward": {
+    "en": "The stilled heart leaves something in your hands.",
+    "ja": "止まった心臓が、手の中に何かを残した。"
+  },
+  "message.skyabyss.storm_heart.pillar": {
+    "en": "The pillar of light carries you upward.",
+    "ja": "光の柱に包まれ、上へ運ばれた。"
+  },
+  "message.skyabyss.storm_heart.choice_later": {
+    "en": "This titan's legendary items do not exist in this world yet. Once they do, choose one with /titanmemory storm.",
+    "ja": "この巨神の伝説の品は、まだこの世界にない。現れたら /titanmemory storm で一つ選べる。"
+  },
+  "message.skyabyss.memory_title_thunder_wing": {
+    "en": "Memory of the Thunder Wing",
+    "ja": "雷翼の記憶"
+  },
+  "subtitles.skyabyss.storm_heart_beat": {
+    "en": "Thunder wing heart beats",
+    "ja": "雷翼の心臓が打つ"
+  },
+  "subtitles.skyabyss.storm_heart_roar": {
+    "en": "Thunder wing heart roars",
+    "ja": "雷翼の心臓が吼える"
+  },
+  "subtitles.skyabyss.storm_heart_summon": {
+    "en": "Thunder rumbles above",
+    "ja": "雲の上で雷が鳴る"
+  },
+  "subtitles.skyabyss.storm_heart_strike": {
+    "en": "Lightning strikes",
+    "ja": "雷が落ちる"
+  },
+  "subtitles.skyabyss.storm_heart_blade": {
+    "en": "Wind whistles",
+    "ja": "風が笛のように鳴る"
+  },
+  "subtitles.skyabyss.storm_heart_chain": {
+    "en": "Electricity hums",
+    "ja": "電気が唸る"
+  },
+  "subtitles.skyabyss.storm_heart_split": {
+    "en": "Wings split",
+    "ja": "翼が裂ける"
+  },
+  "subtitles.skyabyss.storm_heart_flap": {
+    "en": "Great wingbeat",
+    "ja": "大きな羽ばたき"
+  },
+  "subtitles.skyabyss.storm_heart_floor": {
+    "en": "Floor crackles",
+    "ja": "床が帯電する"
+  },
+  "subtitles.skyabyss.storm_heart_feathers": {
+    "en": "Feathers fall",
+    "ja": "羽根が降る"
+  },
+  "subtitles.skyabyss.storm_heart_flash": {
+    "en": "Light is drawn in",
+    "ja": "光が吸い込まれる"
+  },
+  "subtitles.skyabyss.storm_heart_web": {
+    "en": "Thunder web spins",
+    "ja": "雷の網が回る"
+  },
+  "subtitles.skyabyss.storm_heart_barrage": {
+    "en": "Lightning cracks again and again",
+    "ja": "雷が続けて鳴る"
+  },
+  "subtitles.skyabyss.storm_heart_death": {
+    "en": "Thunder wing heart stops",
+    "ja": "雷翼の心臓が止まる"
   }
 }

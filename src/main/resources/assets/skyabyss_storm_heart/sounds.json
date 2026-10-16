@@ -56,7 +56,7 @@
     ]
   },
   "wingbeat": {
-    "subtitle": "subtitles.skyabyss.storm_heart_wingbeat",
+    "subtitle": "subtitles.skyabyss.storm_heart_flap",
     "sounds": [
       {
         "name": "skyabyss_storm_heart:wingbeat"
@@ -64,7 +64,7 @@
     ]
   },
   "charge": {
-    "subtitle": "subtitles.skyabyss.storm_heart_charge",
+    "subtitle": "subtitles.skyabyss.storm_heart_floor",
     "sounds": [
       {
         "name": "skyabyss_storm_heart:charge"
@@ -72,7 +72,7 @@
     ]
   },
   "feather": {
-    "subtitle": "subtitles.skyabyss.storm_heart_feather",
+    "subtitle": "subtitles.skyabyss.storm_heart_feathers",
     "sounds": [
       {
         "name": "skyabyss_storm_heart:feather"

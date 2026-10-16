@@ -1,4 +1,4 @@
-package jp.revati.skyabyss.titan.storm;
+package jp.revati.skyabyss.titan.storm.back;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;

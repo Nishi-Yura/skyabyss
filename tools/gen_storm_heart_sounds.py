@@ -193,13 +193,17 @@ SOUNDS = {"beat": beat, "roar": roar, "summon": summon, "strike": strike, "blade
           "death": death}
 
 
+# 字幕の鍵は伝承の担当 (skyabyss_storm の lang) の名前に合わせる。音の名前と違うものだけ
+SUBTITLE = {"wingbeat": "flap", "charge": "floor", "feather": "feathers"}
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     table = {}
     for name, fn in SOUNDS.items():
         data = fn().astype(np.float32)
         write_ogg(OUT / f"{name}.ogg", data)
-        table[name] = {"subtitle": f"subtitles.skyabyss.storm_heart_{name}", "sounds": [{"name": f"skyabyss_storm_heart:{name}"}]}
+        table[name] = {"subtitle": f"subtitles.skyabyss.storm_heart_{SUBTITLE.get(name, name)}", "sounds": [{"name": f"skyabyss_storm_heart:{name}"}]}
         print(name, "%.1f s" % (len(data) / SR))
     JSON.write_text(json.dumps(table, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

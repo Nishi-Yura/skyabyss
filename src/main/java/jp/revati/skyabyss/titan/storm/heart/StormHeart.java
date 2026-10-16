@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.entity.GuardMob;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
-import jp.revati.skyabyss.titan.storm.StormBackLayout;
-import jp.revati.skyabyss.titan.storm.Updraft;
+import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
+import jp.revati.skyabyss.titan.storm.back.Updraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -743,7 +743,7 @@ public class StormHeart extends GuardMob {
         }
         StormHeartNetwork.warn(reachable(server, 32), null, 0);
         for (ServerPlayer p : reachable(server, 32)) {
-            p.displayClientMessage(jp.revati.skyabyss.ModText.battle("message.skyabyss.storm_heart.split"), true);
+            p.displayClientMessage(jp.revati.skyabyss.ModText.battle("message.skyabyss.storm_heart.wings_torn"), true);
         }
     }
 

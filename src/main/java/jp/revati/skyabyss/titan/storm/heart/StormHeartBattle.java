@@ -12,7 +12,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.BossRoom;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
-import jp.revati.skyabyss.titan.storm.StormBackLayout;
+import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;

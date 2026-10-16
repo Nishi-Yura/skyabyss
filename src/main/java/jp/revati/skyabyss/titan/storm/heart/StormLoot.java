@@ -70,7 +70,7 @@ public final class StormLoot {
     public static final List<String> ARMOR = List.of(id("thunder_wing_helmet"), id("thunder_wing_chestplate"),
             id("thunder_wing_leggings"), id("thunder_wing_boots"));
     public static final String BOW = id("thunder_wing_bow");
-    public static final String ANKLET = id("stormwrap_anklet");
+    public static final String ANKLET = id("storm_anklet");
     public static final String CHARM = id("storm_charm");
     // 専用伝説: 雷獣の爪、羽守の鉤槍、嵐の目の羽根
     public static final List<String> EXCLUSIVES = List.of(id("raiju_claw"), id("warden_hook_spear"), id("storm_eye_feather"));

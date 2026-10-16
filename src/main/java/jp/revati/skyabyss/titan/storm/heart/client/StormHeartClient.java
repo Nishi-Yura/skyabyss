@@ -28,7 +28,7 @@ public final class StormHeartClient {
             new int[] {0xD98A4E, 0xA8D8FF, 0xF6F0C8},
             new int[] {0xFFC090, 0xE8F6FF, 0xFFFFF0},
             new int[] {0xF0A878, 0xC8E8FF, 0xFFF4C0},
-            "gui.skyabyss.boss.storm_heart.phase.", "gui.skyabyss.boss.storm_heart.roaring", 0xFFD27A);
+            "gui.skyabyss.boss.thunder_wing_heart.phase.", "gui.skyabyss.boss.thunder_wing_heart.roaring", 0xFFD27A);
 
     // 今の予告 (技の名前、始まった時刻、長さ)
     private static String warnMove = "";
