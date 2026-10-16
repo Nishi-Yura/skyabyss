@@ -58,7 +58,8 @@ public final class Keepsakes {
 
     // ---------------------------------------------------------------- どの品か
     public static List<Item> guardedItems() {
-        return List.of(ModItems.SKY_KEY_FRAGMENT.get(), ModItems.STONE_WHALE_CORE.get(), TravelSetup.STONE_WHALE_CALL.get());
+        return List.of(ModItems.SKY_KEY_FRAGMENT.get(), jp.revati.skyabyss.story.StorySetup.SKY_KEY.get(), ModItems.STONE_WHALE_CORE.get(),
+                TravelSetup.STONE_WHALE_CALL.get());
     }
 
     public static boolean guarded(ItemStack stack) {
@@ -66,7 +67,7 @@ public final class Keepsakes {
     }
 
     public static boolean untossable(ItemStack stack) {
-        return stack.is(ModItems.SKY_KEY_FRAGMENT.get());
+        return stack.is(ModItems.SKY_KEY_FRAGMENT.get()) || stack.is(jp.revati.skyabyss.story.StorySetup.SKY_KEY.get());
     }
 
     // ---------------------------------------------------------------- 在りか
@@ -246,7 +247,11 @@ public final class Keepsakes {
     }
 
     // 天の鍵の欠片を受け取ったのに、どこにも見当たらない (心臓をもう一度倒したときに戻すかどうか)
+    // 天の鍵にした後は、欠片が手もとになくても「なくした」ではない (鍵になった。14_beta の 4 章)
     public static boolean fragmentMissing(ServerPlayer player) {
+        if (jp.revati.skyabyss.story.SkyKey.assembled(player)) {
+            return false;
+        }
         return locate(player, ModItems.SKY_KEY_FRAGMENT.get()).total() == 0;
     }
 

@@ -9,8 +9,6 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.rpg.GrowthRules;
-import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.tide.TideTravel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -144,16 +142,10 @@ public final class Progression {
         return false;
     }
 
-    // 背中のディメンションの巨神 (背中でなければ null)
+    // 背中のディメンションの巨神 (背中でなければ null)。後の巨神の背中は Titans.bindBack で足す
     @Nullable
     public static String titanOfBack(ResourceKey<Level> dimension) {
-        if (dimension == TitanTravel.TITAN_BACK) {
-            return "stone_whale";
-        }
-        if (dimension == TideTravel.TIDE_BACK) {
-            return "tide_shell";
-        }
-        return null;
+        return Titans.titanOfBack(dimension);
     }
 
     // ---------------------------------------------------------------- 心臓を止めた (TitanLoot など、撃破の報酬より先に呼ぶ)
@@ -225,11 +217,7 @@ public final class Progression {
         }
         SkyAbyss.LOGGER.info("{} was on the {} back without stopping the previous heart; sending them down", player.getGameProfile().getName(), titan);
         checkBoard(player, titan);
-        if (player.level().dimension() == TideTravel.TIDE_BACK) {
-            TideTravel.leave(player);
-        } else {
-            TitanTravel.leave(player);
-        }
+        Titans.sendDown(player, titan);
     }
 
     // ログイン: 古いワールドで止めていた巨神を、世界の進みにも写す
