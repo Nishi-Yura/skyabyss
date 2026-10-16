@@ -35,6 +35,8 @@ public final class BackWhispers {
     // 上から順に見る。休み場は TitanBackTrials の休憩地点と同じ部屋
     private static final List<Whisper> WHISPERS = List.of(
             new Whisper("plaza", false, p -> near(p, arrival(), 9, 4)),
+            // 背の上 (石の門のアーチの下): 景色の囁き。背の遺跡と、頭とひれのある方角
+            new Whisper("ridge", true, p -> near(p, new BlockPos(-3, top(-3, RIDGE_Z) + 1, RIDGE_Z), 8, 5)),
             new Whisper("shrine", true, p -> near(p, new BlockPos(0, shrineY(), SHRINE_Z), 6, 4)),
             new Whisper("hub", true, HUB::contains),
             new Whisper("treasury", true, TREASURY::contains),
