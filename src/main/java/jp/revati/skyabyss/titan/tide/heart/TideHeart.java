@@ -58,16 +58,16 @@ public class TideHeart extends GuardMob {
     // 段階2 (開いた殻) で受ける傷の倍率
     public static final float OPEN_SHELL_TAKEN = 1.2f;
 
-    // 技の傷 (防具で減る前)。08 の表の値を、03 の目安 (ふつうの技 13.5) に合わせて 1 割ほど上げた
-    public static final float BREATH_DAMAGE = 12f;
-    public static final float SHELL_RING_DAMAGE = 9f;
-    public static final float WHIRL_DAMAGE = 11f;
-    public static final float SPEAR_DAMAGE = 10f;
+    // 技の傷 (防具で減る前)。08 の表の値を、03 の 9.8節の目安 (ふつうの技の一撃 13.5) に合わせて 1〜2 割上げた (ゲームで、動かずに立つ人が推奨 Lv・ダイヤ一式でほぼ勝ててしまったため)
+    public static final float BREATH_DAMAGE = 13.5f;
+    public static final float SHELL_RING_DAMAGE = 10f;
+    public static final float WHIRL_DAMAGE = 12.5f;
+    public static final float SPEAR_DAMAGE = 11.5f;
     public static final float BUBBLE_DAMAGE_PER_SECOND = 2f;
-    public static final float PEARL_DAMAGE = 8f;
-    public static final float EBB_DAMAGE = 13.5f;
-    public static final float WAVE_DAMAGE = 15f;
-    public static final float RAIN_DAMAGE = 11f;
+    public static final float PEARL_DAMAGE = 9f;
+    public static final float EBB_DAMAGE = 15f;
+    public static final float WAVE_DAMAGE = 16.5f;
+    public static final float RAIN_DAMAGE = 12.5f;
     // 引く速さ (ブロック/tick)。渦潮は歩けば逆らえる、引き潮は島の上では半分
     public static final double WHIRL_PULL = 0.08;
     public static final double EBB_PULL = 0.15;

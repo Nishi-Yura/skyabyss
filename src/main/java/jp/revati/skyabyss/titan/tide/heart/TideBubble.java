@@ -12,6 +12,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -83,9 +85,11 @@ public class TideBubble extends Entity {
         double t = Math.min(1.0, tickCount / (double) RISE_TICKS);
         double y = baseY + LIFT * t;
         setPos(getX(), y - 0.2, getZ());
-        if (player.distanceToSqr(getX(), y, getZ()) > 0.04) {
+        if (player.distanceToSqr(getX(), y, getZ()) > 0.0025) {
             player.teleportTo(getX(), y, getZ());
         }
+        // 宙に浮いている間、専用サーバーの「飛びすぎ」で蹴られないように、短い浮遊の効果を付けておく (泡が割れたら外す)
+        player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 6, 0, false, false, false));
         player.fallDistance = 0;
         player.setDeltaMovement(0, 0, 0);
         if (tickCount % 20 == 10) {
@@ -104,6 +108,7 @@ public class TideBubble extends Entity {
         server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY() + 1.2, getZ(), 20, 0.6, 0.8, 0.6, 0.1);
         if (player != null) {
             player.fallDistance = 0;
+            player.removeEffect(MobEffects.LEVITATION);
         }
         discard();
     }

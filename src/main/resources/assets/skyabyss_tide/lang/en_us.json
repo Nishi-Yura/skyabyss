@@ -91,5 +91,6 @@
   "message.skyabyss.tide_heart.choice_later": "The first-clear gift (one exclusive legendary) can be chosen with /titanmemory tide once those items exist",
   "message.skyabyss.memory_title_tide_shell": "── Titan Memory: Tide Shell ──",
   "lore.skyabyss.chapter1.tide_heart_stilled.title": "When the Tide Stands Still",
-  "lore.skyabyss.chapter1.tide_heart_stilled.body": "The spiral shell came undone, and the thin coil that was left fell quiet beneath a silver crescent.\n\nFor the first time, I heard a tide that neither rose nor fell.\n\nThe titan does not stop. Only, the second fragment pulls, faintly, toward the first."
+  "lore.skyabyss.chapter1.tide_heart_stilled.body": "The spiral shell came undone, and the thin coil that was left fell quiet beneath a silver crescent.\n\nFor the first time, I heard a tide that neither rose nor fell.\n\nThe titan does not stop. Only, the second fragment pulls, faintly, toward the first.",
+  "message.skyabyss.tide_heart.reward": "What the heart of the tide shell left behind is now in your hands"
 }

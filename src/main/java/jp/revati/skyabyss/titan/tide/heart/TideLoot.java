@@ -50,7 +50,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 //   新しい品の出ない撃破で +1、3 以上で図鑑の確率 2 倍、5 で未所持を一つ保証。図鑑にない品を手にすると 0
 // - 天の鍵の欠片は一人一回 (巨神ごと。岩鯨の欠片とは別の一つ)
 // - 初めての撃破では、専用伝説三つから一つを選ぶ
-// 潮殻の品 (欠片・心核・貝・鎧・三叉槍・盾・護符・専用伝説) はまだ作られていない (ラフから)。
+// 潮殻の欠片と潮干しの貝は背中の敵の担当が登録した (TideMobSetup)。心核・鎧・三叉槍・盾・護符・専用伝説はまだ作られていない (ラフから)。
 // 表は品の ID で持ち、登録されていない品は抽選から外す (図鑑にも記さない)。品が登録されれば、そのまま出るようになる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideLoot {
@@ -64,9 +64,10 @@ public final class TideLoot {
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");
     public static final String RESONANCE_SHARD = id("resonance_shard");
     public static final String RESONANCE_CRYSTAL = id("resonance_crystal");
-    public static final String SHARD = id("tide_shell_shard");
+    // 潮殻の欠片と潮干しの貝は、背中の敵の担当が登録したもの (TideMobSetup) を使う
+    public static final String SHARD = jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.getId().toString();
     public static final String CORE = id("tide_shell_core");
-    public static final String CLAM = id("tide_clam");
+    public static final String CLAM = jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.getId().toString();
     public static final List<String> ARMOR = List.of(id("tide_shell_helmet"), id("tide_shell_chestplate"),
             id("tide_shell_leggings"), id("tide_shell_boots"));
     public static final String TRIDENT = id("tide_shell_trident");
@@ -254,7 +255,7 @@ public final class TideLoot {
             if (fragment) {
                 player.sendSystemMessage(ModText.progress("message.skyabyss.fragment_received"));
             }
-            player.sendSystemMessage(ModText.progress("message.skyabyss.boss_reward"));
+            player.sendSystemMessage(ModText.progress("message.skyabyss.tide_heart.reward"));
             player.sendSystemMessage(TitanLoot.rewardLine(items));
             announce(level, player, r, roll, items);
             if (roll.guaranteed() != null) {

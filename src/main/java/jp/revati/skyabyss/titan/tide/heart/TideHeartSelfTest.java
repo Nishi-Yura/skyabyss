@@ -276,6 +276,9 @@ public final class TideHeartSelfTest {
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null, "tide defeat wrote to the stone whale record", failures);
         check(memory.hasPending(fake), "rewards for an absent player were not held", failures);
         TitanMemoryData.Pending held = memory.takePending(fake);
+        check(TideLoot.registered(TideLoot.SHARD) && TideLoot.registered(TideLoot.CLAM), "tide shell shard / dried shell are not registered", failures);
+        check(held.items.stream().anyMatch(s -> TitanLoot.id(s.getItem()).equals(TideLoot.SHARD) && s.getCount() >= 4),
+                "heart reward did not give tide shell shards", failures);
         long fragments = held.items.stream().filter(s -> TitanLoot.id(s.getItem()).equals(TideLoot.SKY_KEY_FRAGMENT)).count();
         check(fragments == 1, "first defeat should give one sky key fragment (" + fragments + ")", failures);
         TideLoot.onHeartDefeat(back, List.of(), List.of(fake));
