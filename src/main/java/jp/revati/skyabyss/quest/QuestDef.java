@@ -230,7 +230,8 @@ public record QuestDef(String id, String category, int order, @Nullable String g
             for (JsonElement e : o.getAsJsonArray("items")) {
                 JsonObject io = e.getAsJsonObject();
                 String item = GsonHelper.getAsString(io, "item", "");
-                if (Condition.item(item) == null) {
+                // optional: 別の担当がまだ登録していない品 (雷翼の欠片・風見鶏など)。ないうちは渡さず、読み込みも止めない
+                if (Condition.item(item) == null && !GsonHelper.getAsBoolean(io, "optional", false)) {
                     errors.add(where + ": unknown reward item " + item);
                 }
                 List<String> lore = new ArrayList<>();

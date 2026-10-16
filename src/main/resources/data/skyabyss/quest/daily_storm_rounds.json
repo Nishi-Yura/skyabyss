@@ -1,0 +1,38 @@
+{
+  "category": "sub",
+  "order": 66,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "rounds",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "skyabyss:feather_warden",
+            "skyabyss:static_moth",
+            "skyabyss:thunder_supplicant"
+          ],
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 110,
+    "items": [
+      {
+        "item": "skyabyss:thunder_wing_shard",
+        "count": 2,
+        "optional": true
+      },
+      {
+        "item": "skyabyss:resonance_shard",
+        "count": 1
+      }
+    ]
+  }
+}

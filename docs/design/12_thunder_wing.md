@@ -712,6 +712,21 @@
 - パッケージ: `jp.revati.skyabyss.titan.storm`（地上）、`.storm.back`（背中と試練）、`.storm.mob`（敵）、`.storm.raiju`（中ボス）、`.storm.heart`（心臓）、`jp.revati.skyabyss.item.storm`（装備）。描画は各パッケージの `.client`。
 - 名前空間: lang は `assets/skyabyss_storm/lang`（伝承の担当が持つ。ほかの担当は文の鍵だけ決めて、仮の英文を自分の lang の断片 `lang/parts/<担当>.json` に書き、伝承の担当がまとめる）。
 - ID: ディメンション `skyabyss:storm_back`、巨神 `skyabyss:thunder_wing`、記録 `thunder_wing`、敵 `feather_warden`・`static_moth`・`thunder_supplicant`・`raiju`・`thunder_wing_heart`。素材 `thunder_wing_shard`（雷翼の欠片）、`thunder_wing_core`（心核）、`cloudgap_fruit`（雲間の干し果）、`moth_dust`（鱗粉）。
+- **伝承とクエストの約束**（担当 6 が決めた。コードは `titan/storm/lore/StormLore` に同じ名前がある。ほかの担当はこの名前を使う）:
+
+  | もの | 名前 | 誰が使うか |
+  |---|---|---|
+  | 碑文の看板のキー（4 行、`.1`〜`.4`） | `sign.skyabyss.lore_storm_{tail,hub,west,east,eye,heart}` | 担当 1 が、この文の看板を 3.3 節の場所に立てる。立てたら `StormLore.inscriptionPositions(() -> 置き場所の一覧)` を一度呼ぶ（近くで目を向けるだけで読めるように） |
+  | 入口の一言（2 行） | `sign.skyabyss.storm_{west,east,front}` | 担当 1（左右の肩の門・首の前室） |
+  | 風鳴り石の合図（人ごと） | `storm_trial_west`・`storm_trial_east`・`storm_trial_front`（`Quests.signal`）。あわせて共通の `back_trial_cleared` を `Quests.signalWithParty` で | 担当 1（石が鳴ったとき、居合わせた人へ）。メイン「嵐を渡る翼」が数える |
+  | 心臓の合図（人ごと） | `storm_heart_stilled` | 担当 4（`StormLoot`、潮殻の `tide_heart_stilled` と同じ）。メインは `Progression.onTitanStopped` の記録で進むので、合図はなくても詰まらない |
+  | 伝承（自動で記す） | `chapter1/storm_wing`（巨神が 240 以内・背に入る）、`chapter1/thunder_wing`（96 以内）、`chapter1/storm_ruins`（背に入る）、`chapter1/raiju`（雷獣が倒れる）、`chapter1/storm_stilled`（心臓が倒れる） | 条件は項目の JSON に書いてある。誰も呼ばなくてよい |
+  | 伝承（呼んで記す） | `chapter1/storm_cower`（空の影の下でうずくまる雷翼を 160 以内で見た） | 担当 1 が `Lore.unlock(player, "chapter1/storm_cower", true)` |
+  | 破れた頁 | 出どころ `storm_back`（`LorePageItem.of("storm_back")`）。読むと `chapter1/wind_ledger`（風見の帳） | 担当 2（雷乞いの 5%） |
+  | 風見鶏の品 | `skyabyss:weathercock` | 担当 1 が登録する。イサナが「古い地図」の報酬で渡す（品がまだなければ渡さない） |
+  | 雷翼の欠片 | `skyabyss:thunder_wing_shard` | 担当 5。背の周回の報酬（品がまだなければ渡さない） |
+  | 文の断片 | `assets/skyabyss_storm/lang/parts/<担当>.json`（`{"鍵": "英文"}` か `{"鍵": {"en": ..., "ja": ...}}`） | 担当 1〜5。`python tools/gen_storm_lore.py` が日本語を当てて `ja_jp`・`en_us` にまとめ、日本語のない鍵と、想定したが使われていない鍵を一覧に出す |
+
 - **背中の担当が最初の 1 日で出す API**（ほかの担当はこれを待たずに、同じ名前の空の実装で作り始めてよい）:
   - `StormRods.find(level, pos, 3.0)`、`StormRods.charge(level, rod, 1)`、`StormRods.isGrounded(rod)`、`StormRods.ground(rod, ticks)`
   - `StormStrike.call(level, target, warnTicks, damage, owner)`（輪 → 落雷。柱があれば柱へ）
@@ -916,4 +931,117 @@
 
 ## 17. 実装の記録
 
-（まだない。11 章の担当ごとに、08 の 17〜21 章と同じ形で書き足す）
+11 章の担当ごとに、08 の 17〜21 章と同じ形で書き足す。
+
+### 17.6 担当 6: 伝承とクエスト（2026-10-17）
+
+#### 17.6.1 作ったもの
+
+| もの | 中身 | ファイル |
+|---|---|---|
+| 文の名前空間 | `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`。この担当の文 80 と、ほかの担当のために 12 の各章から鍵を想定して先に書いた文 165（日本語と英語）。生成元は `tools/gen_storm_lore.py` | `tools/gen_storm_lore.py` |
+| 碑文と入口の一言 | 9.2 節の 6 枚と 3 枚。日本語は 1 行 8 字まで、英語は 90 px まで（生成のときと `SignFit` の自己テストで測る）。`SignFit` が `skyabyss_storm` も読むように一行足した | 同上 |
+| 囁き 8 つ | `StormWhispers`（`BackWhispers` と同じ聞いた印）。尾羽の上・尾の間・風の広間・背の上・左右の肩の門・首の前室・竜骨の前室。休み場の四つでは、最初の一度だけ焚き火の一言を添える。場所の箱は 3.3 節の表から取った（担当 1 の `StormBackLayout` ができたら、その部屋の範囲に差し替える） | `titan/storm/lore/StormWhispers.java` |
+| 伝承の項目 | 雷翼の 12 項目（下の表）と、14 の「雷翼の巨神」(`chapter1/thunder_wing`) の本文と条件の直し。ほのめかしだけ: 分かたれた鼓動は竜骨の前室の碑文と「晴れた空」で（拍は下から昇る、欠片は少し下を向いて寄り合う）。空の影への伏線は尾の間の碑文と「うずくまる巨神」。見る者は眼の間の「四角い頭の浮き彫り」だけで、名も役目も書かない（自己テストで「見る者」「留まる者」「深淵」の語が本文にないことを確かめる） | `data/skyabyss/lore/entry/chapter1/` |
+| メイン「嵐を渡る翼」 | 段を 4 から 6 に: 噂 → 見る（`storm_wing` か `thunder_wing`）→ 乗る（`storm_ruins`）→ 碑文 2 つと風鳴り石 1 つ（合図 `storm_trial_*`）→ 心臓（`Progression.onTitanStopped`）→ 報告。心臓を先に止めた人は、乗る・試練の段を飛ばす。本体がなくても `/skyabyss lore unlock` と `/skyabyss quest signal` で通せる | `tools/gen_story_quests.py` |
+| 鯨追いの古い地図 | 報告のあと、イサナが祖父の風見鶏を渡す（報酬。品がまだなければ渡さない）。なくしたときは「頼み」の節から、もう一つもらえる | 同上 |
+| 雷翼の背の周回 | 日替わり「雷翼の背の見回り」（羽守・雷蛾・雷乞いを 8 体）、週替わり「嵐の鼓動をもう一度」（心臓）。段階 3、言伝ての板。10 の 8.6 節の形（潮殻の 2 本と同じ） | `data/skyabyss/quest/{daily_storm_rounds,weekly_storm_heart}.json` |
+| 名前 | 14 の `NAMES` を 12 の名前に（日本語「雷翼の巨神」は仮と同じ。英語を "the Thunder Wing Titan" に、題の形を足した。潮殻の "Tide Shell Titan" と同じ書き方） | `tools/gen_story_quests.py` |
+| 品が後から来る | クエストの報酬・`give`・条件 `item` に `optional` を足した。別の担当がまだ登録していない品（雷翼の欠片・風見鶏）でも読み込みを止めず、品ができたら渡す | `quest/QuestDef`・`Action`・`Condition` |
+| 自己テスト | `SELFTEST storm lore`（`StormLoreSelfTest`）。伝承・文・碑文の写し・頁、看板のはみ出し、囁き 8 つ、メインを通しで（合図と伝承だけで）、心臓を先に止めた人の飛ばし、背の周回 2 本。ほかの担当が登録する ID（巨神・雷獣・心臓・敵・背中・品）は `StormLore.PENDING` で「待っている」として扱い、伝承と NPC の自己テストを落とさない（登録されれば、ふつうに確かめる） | `titan/storm/lore/StormLoreSelfTest.java` |
+
+#### 17.6.2 結果
+
+- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST storm lore PASSED**、ほかの系統もすべて PASSED（`SELFTEST PASSED`）。伝承の自己テストは「待っている: raiju, storm_back, thunder_wing, thunder_wing_heart」と一行書く。
+- 看板のはみ出し 0（9 枚、日英）。英語でいちばん広い行は 86 px（"Bones are hollow"。下の表）。クライアントの本物の字の幅でも 0（`SignFit (client): checked 18 signs ... 0 problem(s)`）。
+- ゲーム画面（`runClientTest`、854×480、GUI 拡大率 2、日本語）: コマンドで伝承と合図を送り、メインを「試練」→「心臓」→「報告」まで進めた。左の追跡表示（「背の中の碑文を読む（1/2）」「風鳴り石を一つ鳴らす」）、クエストログ（6 段のうち 4 段目、依頼・書き付け・やること）、伝承の書（一章に「風に逆らう嵐」「風の民の遺跡」「尾の間の碑文」「眼の間の碑文」、碑文の写しと本文）、語り部への報告の会話を見た。画像は `docs/review/ingame_storm_{questlog,tracker,lore_eye}.png`。直したこと: クエストログで書き付けの「門が開／くのだろう」が行をまたいだので、文の切れ目で改行した。ダンジョンの試遊はユーザーが行う（指示により、ここでは文の見え方だけ確かめた）。
+
+#### 17.6.3 見直し（推敲 3 周）
+
+| 周 | 見たこと | 直したこと |
+|---|---|---|
+| 1 | 9.2・9.3 節の案のまま書いた文が、ほかの書類（14 ラフの推奨）と食い違っていないか | 羽守の推奨は B（銅の兜と鎧羽）なので、「外套の中は空っぽ」を「兜の奥には、何もなかった」に。板の紙も「銅の兜の番人」に。「晴れた空」の天窓は心臓の間から見えないので、尾の間の碑文（衣を脱がぬ）と響き合う「それでも鳥は、嵐を脱がなかった」に替えた |
+| 2 | 言いすぎていないか（05 の決まり） | 心臓の項目は鍵の場面（14 の 4.3 節「鍵は空を指さない」）の先取りにならないよう、「下を向いて寄り合った」で止めた。眼の間は「四角い頭」だけで、誰かは書かない。雷翼の巨神の本文から「骨だけが白く浮かぶ」（心臓の段階 3 と重なる）を外した |
+| 3 | 英語が 90 px に入るか・読めるか | "Bolts choose rods"（93 px）を "Bolts seek rods,"、"Your face it / already knows" を "It already knows / your face"、"Light to three" を "Light all three" に。囁きの英語は命令の形にそろえた |
+
+#### 17.6.4 判断が要る点
+
+| # | 点 | 選択肢 | 推奨 |
+|---|---|---|---|
+| 1 | 9.3 節の `chapter1/storm_wing` と 14 の `chapter1/thunder_wing` | A 両方残す（遠くの嵐 240 / 近くの鳥 96。今） / B 一つにまとめる | A。遠くで「嵐が風に逆らう」と気づき、近くで「鳥だった」と知る二段にした。メインはどちらでも「見た」 |
+| 2 | 古い地図の形（10 の 8.6 節の「埋もれた箱」） | A 雷雨の高い所で空を見て、報告で風見鶏（今） / B 地上の箱を 3 か所に置く | A。地上に箱を置く仕組みがない。B は担当 1 の地上の生成と一緒に |
+| 3 | 囁きの場所 | A 3.3 節の表の箱（今） / B `StormBackLayout` の部屋 | B（合わせるときに差し替える） |
+
+#### 17.6.5 合わせるときの手順（まとめ役へ）
+
+1. 担当 1〜5 の `assets/skyabyss_storm/lang/parts/*.json` をそろえ、`python tools/gen_storm_lore.py` を流す。「日本語がない」「使われていない」の一覧を見て、日本語を書き足すか鍵の名前を合わせる（17.6.6 の「ほかの担当の文」の行が想定した鍵）。
+2. `python tools/gen_story_quests.py`（メインと古い地図）。
+3. 担当 1: 碑文 6 枚・入口の一言 3 枚を `StormLore` のキーで立て、`StormLore.inscriptionPositions` を登録。風鳴り石で `storm_trial_<id>` を送る。`StormWhispers` の箱を `StormBackLayout` に。`StorySelfTest` の「雷翼の背はまだない」の一行を消す（14 の 5.2 節の 10）。
+4. 品と敵が登録されると、`optional` の報酬と「待っている」の自己テストは、そのまま本物を確かめる形になる。
+
+#### 17.6.6 文の一覧
+
+<!-- 伝承とクエスト 生成ここから (tools/gen_storm_lore.py が書き換える。手で直さない) -->
+
+#### 碑文と入口の一言（生成。看板の幅は SignFit と同じ表で測った）
+
+| 看板 | 日本語 | 英語 | 英語の最大幅 |
+| --- | --- | --- | --- |
+| `sign.skyabyss.lore_storm_tail` | 嵐は鳥の衣 / 衣を脱がぬのは / 見つかるからだ / 上の影に | Storm cloaks / the bird. It / hides from the / shadow above | 73 px |
+| `sign.skyabyss.lore_storm_hub` | 凪には下を / 嵐には上を / 風の民は / 息を数えた | In calm, below / in storm, above. / The wind folk / counted breaths | 84 px |
+| `sign.skyabyss.lore_storm_west` | 骨は空洞 / 風の通う道 / 我らは骨の中で / 飛ぶことを知った | Bones are hollow / roads for wind. / Inside them we / learned to fly | 86 px |
+| `sign.skyabyss.lore_storm_east` | 雷は柱を選ぶ / 柱は我らを / 守ってくれた / あの夜までは | Bolts seek rods, / and the rods / kept us safe / until that night | 82 px |
+| `sign.skyabyss.lore_storm_eye` | 眼は来る者を / 覚えている / お前の顔は / もう知っている | The eye recalls / all who come. / It already knows / your face | 84 px |
+| `sign.skyabyss.lore_storm_heart` | 雷は空から / 落ちてくる / この拍だけは / 下から昇る | Bolts fall / from the sky. / This beat alone / rises from below | 84 px |
+| `sign.skyabyss.storm_west` | 風切りの骨 / 風に乗れ | Windbone / Ride the wind | 64 px |
+| `sign.skyabyss.storm_east` | 雷の骨 / 雷を柱へ | Thunderbone / Bolts to rods | 67 px |
+| `sign.skyabyss.storm_front` | 眼の間 / 光を三つへ | Eye Hall / Light all three | 72 px |
+
+#### 囁き（生成。`StormWhispers`）
+
+| ID | 種類 | 日本語 | 英語 |
+| --- | --- | --- | --- |
+| `storm_landing` | lore | 尾羽の上に立っている。腰の羽根の門の奥で、何かが脈打っている | You stand on the tail feathers. Beyond the feather gate at the hips, something is beating |
+| `storm_tail` | hint | 右上の風見の板が、凪と嵐の拍。西・東・前の三つの風鳴り石を鳴らせば、広間の床の竜骨の門が開く。西の壁の段は背の上へ | The wind vane at the top right shows the beat of calm and storm. Ring the three wind stones (west, east, front) to open the keel gate in the hall floor. The steps in the west wall climb onto the back |
+| `storm_hub` | lore | 凪には下を、嵐には上を。凪なら壁ぞいの坂で上の回廊へ。嵐なら、中央の昇り風がひと息に運ぶ | In calm, below; in storm, above. In a calm, take the ramp along the wall to the upper gallery. In a storm, the central updraft carries you up in one breath |
+| `storm_top` | lore | 鳥の背の上に出た。左右の翼が、雲の天井の上をどこまでも伸びている。ずっと下で、嵐が光っている | You are out on the bird's back. Its wings stretch away on either side over the cloud ceiling. Far below, the storm flickers |
+| `storm_west` | hint | 風切りの羽根を持って、空中でしゃがむと滑空する。床の穴の昇り風は、凪には低く、嵐には高く上がる。横風は梁の陰でやり過ごせ | With the gale feather, crouch in midair to glide. The updrafts from holes in the floor rise low in a calm and high in a storm. Wait out the crosswinds behind the beams |
+| `storm_east` | hint | 足もとに白い輪が出たら、雷が来る。輪が銅の柱の近くなら、雷は柱へ落ちる。柱が満ちると、骨の戸が開く | When a white ring appears at your feet, lightning is coming. If the ring is near a copper rod, the bolt strikes the rod instead. A full rod opens a bone door |
+| `storm_front` | hint | 羽鏡は手で回る。眼から差す光を、壁の三つの受け羽へ導け。詰まったら、前室の戻しの鏡で最初の向きに戻せる | The feather mirrors turn by hand. Guide the light from the eye to the three catch-feathers on the walls. If you get stuck, the reset mirror in the antechamber turns them back |
+| `storm_heart` | hint | この先は竜骨の間。心臓は、三つの試練で覚えたことを、一つずつ問うてくる | Beyond lies the keel chamber. The heart will test what you learned in the three trials, one at a time |
+
+#### 伝承の項目（生成。`lore.skyabyss.chapter1.*`）
+
+| 項目 | 順 | 記される条件 | 題 | 本文 |
+| --- | --- | --- | --- | --- |
+| `chapter1/storm_wing` | 159 | near_entity skyabyss:thunder_wing 240、dimension skyabyss:storm_back | 風に逆らう嵐 | 遠くの嵐が、風上へ向かって動いていた。稲妻が光るたびに、雨の幕の中に翼の形が浮かんだ。<br><br>翼は、空の影より小さかった。 |
+| `chapter1/storm_ruins` | 161 | dimension skyabyss:storm_back | 風の民の遺跡 | 鳥の背に、石の塔が二本立っていた。塔の壁には、短い棒が数えきれないほど刻まれている。<br><br>人の姿はない。骨の回廊を、銅の兜の番人が歩いていた。兜の奥には、何もなかった。 |
+| `chapter1/storm_cower` | 162 | manual  | うずくまる巨神 | 空の影が通るあいだ、雷翼は峰にしがみつき、翼で頭を覆っていた。山のような鳥が、怯えていた。 |
+| `chapter1/inscription_storm_tail` | 163 | 碑文 `sign.skyabyss.lore_storm_tail` | 尾の間の碑文 | 尾の間の炉の上にあった。最後の行だけ刻みが浅く、急いで彫ったように見える。 |
+| `chapter1/inscription_storm_hub` | 164 | 碑文 `sign.skyabyss.lore_storm_hub` | 風の広間の碑文 | 天窓の真下、昇り風の柱のそばの石にあった。石の縁には、棒の刻みが四本ずつ束ねて並んでいる。 |
+| `chapter1/inscription_storm_west` | 165 | 碑文 `sign.skyabyss.lore_storm_west` | 左手首の瘤の碑文 | 風鳴り石の岩棚の壁にあった。そこへは、嵐の風に乗らなければ上がれない。 |
+| `chapter1/inscription_storm_east` | 166 | 碑文 `sign.skyabyss.lore_storm_east` | 右手首の瘤の碑文 | 雷獣の巣の、六本の柱のまんなかの床にあった。床の石は、そこだけ焦げていない。 |
+| `chapter1/inscription_storm_eye` | 167 | 碑文 `sign.skyabyss.lore_storm_eye` | 眼の間の碑文 | 三つ目の受け羽の下にあった。そばの壁に、小さな人の浮き彫りがある。<br><br>四角い頭をしていた。 |
+| `chapter1/wind_ledger` | 168 | page storm_back、manual  | 風見の帳 | 凪と嵐が、棒の数で書き留めてある。ある日から、棒の横に小さな印が付きはじめる。上を見るな、という意味の印らしい。<br><br>最後の頁には、棒が一本もない。 |
+| `chapter1/raiju` | 169 | kill skyabyss:raiju 48、manual  | 雷獣 | 獣が倒れると、瘤の中に集まっていた雷が、行き場をなくして柱を何度も行き来した。やがて、柱は静かになった。 |
+| `chapter1/inscription_storm_heart` | 171 | 碑文 `sign.skyabyss.lore_storm_heart` | 竜骨の前室の碑文 | 竜骨の門の下、前室の壁にあった。石に耳を当てると、拍は確かに、足もとのほうから昇ってくる。 |
+| `chapter1/storm_stilled` | 172 | kill skyabyss:thunder_wing_heart 64、manual  | 晴れた空 | 雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ。<br><br>嵐の上の空は、ずっと晴れていた。それでも鳥は、嵐を脱がなかった。<br><br>三つの欠片を手のひらに並べると、わずかに下を向いて寄り合った。 |
+
+#### 雷翼の背の周回（生成。言伝ての板、段階 3）
+
+| クエスト | 繰り返し | 目的 | 書き付け | 報酬 | 短い筋 |
+| --- | --- | --- | --- | --- | --- |
+| 雷翼の背の見回り `daily_storm_rounds` | 日替わり | 雷翼の背で、羽守・雷蛾・雷乞いを倒す ×8 | 板の紙（雨に濡れて、字が少し流れている）：「鳥の背の骨の中で、銅の兜の番人と光る蛾が、また騒いでいる。八つ、静めてきてほしい」 | 経験値 110、thunder_wing_shard ×2（品ができたら）、resonance_shard ×1 | 雷翼の背の周回の入口 (段階 3)。潮殻の「潮殻の背の見回り」と同じ形 |
+| 嵐の鼓動をもう一度 `weekly_storm_heart` | 週替わり | 雷翼の心臓を止める ×1 | 板の隅の紙（同じ、名前のない字）：「嵐は七日で戻る。戻りきる前に、確かめてきてほしい」 | 経験値 260、resonance_crystal ×1、thunder_wing_shard ×3（品ができたら） | 「心臓をもう一度」「潮の鼓動をもう一度」と同じ名前のない紙。七日という数を、三度目にほのめかす |
+
+#### ほかの担当の文（想定した鍵。合わせるときに lang/parts と照らす）
+
+| 担当 | 鍵の数 | 例 |
+| --- | --- | --- |
+| 1 | 85 | `entity.skyabyss.thunder_wing` = 雷翼の巨神、`message.skyabyss.memory_title_thunder_wing` = ── 巨神の記憶: 雷翼 ── |
+| 2 | 22 | `entity.skyabyss.feather_warden` = 羽守、`item.skyabyss.moth_dust.desc` = 矢に付けると、当たった敵が光る |
+| 3 | 18 | `entity.skyabyss.raiju` = 雷獣、`subtitles.skyabyss.ground_plug` = 栓が引かれる |
+| 4 | 26 | `entity.skyabyss.thunder_wing_heart` = 雷翼の心臓、`subtitles.skyabyss.storm_heart_death` = 心臓が止まり、風が止む |
+| 5 | 14 | `item.skyabyss.thunder_wing_shard` = 雷翼の欠片、`item.skyabyss.storm_eye_feather` = 嵐の目の羽根 |
+
+<!-- 伝承とクエスト 生成ここまで -->
