@@ -112,6 +112,25 @@ public class AshSmith extends EmberMob {
     @Nullable
     public static volatile List<ServerPlayer> testFighters;
 
+    // 試験用: 人へ与える傷の記録 (偽のプレイヤーは傷を受けないので、与えた量をここで数える)。通常は null
+    public interface DamageLog {
+        void hit(ServerPlayer player, float amount, String kind);
+    }
+
+    @Nullable
+    public static volatile DamageLog testLog;
+
+    private void hurtPlayer(ServerPlayer p, DamageSource source, float amount, String kind) {
+        DamageLog log = testLog;
+        if (log != null) {
+            log.hit(p, amount, kind);
+        }
+        p.hurt(source, amount);
+    }
+
+    // 試験用: true なら、技を自分では選ばない (forceAction で呼んだ技だけ回す。怒りは体力で自動)
+    public boolean passive;
+
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
     private int actionTick;
@@ -302,7 +321,7 @@ public class AshSmith extends EmberMob {
             tickAction(server);
             return;
         }
-        if (target == null) {
+        if (target == null || passive) {
             getNavigation().stop();
             return;
         }
@@ -359,6 +378,7 @@ public class AshSmith extends EmberMob {
             return;
         }
         action = Action.NONE;
+        target = pickTarget(server);
         begin(server, a);
     }
 
@@ -441,7 +461,7 @@ public class AshSmith extends EmberMob {
             float damage = SLAM_DAMAGE * (slamCold ? COLD_MULT : 1f);
             for (ServerPlayer p : fighters(server)) {
                 if (inStrip(p.position(), slamOrigin, aimDir, SLAM_LENGTH, SLAM_HALF_WIDTH)) {
-                    p.hurt(attackSource(), damage);
+                    hurtPlayer(p, attackSource(), damage, "slam");
                 }
             }
             Vec3 impact = slamOrigin.add(aimDir.scale(3.5));
@@ -519,7 +539,7 @@ public class AshSmith extends EmberMob {
             sound(server, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
             for (ServerPlayer p : fighters(server)) {
                 if (inFan(p.position(), position(), look)) {
-                    p.hurt(attackSource(), BREATH_DAMAGE);
+                    hurtPlayer(p, attackSource(), BREATH_DAMAGE, "breath");
                     Vec3 away = p.position().subtract(position());
                     away = new Vec3(away.x, 0, away.z).normalize();
                     p.setDeltaMovement(away.x * 1.9, 0.45, away.z * 1.9);
@@ -703,7 +723,7 @@ public class AshSmith extends EmberMob {
                 double d = Math.sqrt(dx * dx + dz * dz);
                 if (!r.hit.contains(p.getUUID()) && Math.abs(d - r.radius) <= 0.9 && p.getY() - r.center.y < 0.6) {
                     r.hit.add(p.getUUID());
-                    p.hurt(attackSource(), RING_DAMAGE);
+                    hurtPlayer(p, attackSource(), RING_DAMAGE, "ring");
                 }
             }
             if (r.radius > RING_MAX) {
@@ -729,7 +749,7 @@ public class AshSmith extends EmberMob {
                     double dx = p.getX() - s.pos.x;
                     double dz = p.getZ() - s.pos.z;
                     if (dx * dx + dz * dz <= SPARK_RADIUS * SPARK_RADIUS && p.getY() - s.pos.y < 2.0) {
-                        p.hurt(attackSource(), SPARK_DAMAGE);
+                        hurtPlayer(p, attackSource(), SPARK_DAMAGE, "spark");
                     }
                 }
                 warn(server, ParticleTypes.LAVA, s.pos.x, s.pos.y + 0.2, s.pos.z, 14, 0.5, 0.2, 0.5, 0.1);
@@ -775,7 +795,7 @@ public class AshSmith extends EmberMob {
         }
         for (ServerPlayer p : fighters(server)) {
             if (inStrip(p.position(), v.origin, v.dir, SLAM_LENGTH, SLAM_HALF_WIDTH)) {
-                p.hurt(damage(EmberIds.HEAT_BURST, this), VENT_DAMAGE);
+                hurtPlayer(p, damage(EmberIds.HEAT_BURST, this), VENT_DAMAGE, "vent");
                 EmberHeat.add(p, VENT_HEAT, EmberHeat.Reason.SMITH);
             }
         }
