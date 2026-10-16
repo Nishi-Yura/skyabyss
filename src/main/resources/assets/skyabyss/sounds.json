@@ -215,5 +215,25 @@
         "name": "skyabyss:titan/travel/waymark"
       }
     ]
+  },
+  "tide_song": {
+    "subtitle": "subtitles.skyabyss.tide_song",
+    "sounds": [{"name": "skyabyss:tide/song", "attenuation_distance": 16}]
+  },
+  "tide_surf": {
+    "subtitle": "subtitles.skyabyss.tide_surf",
+    "sounds": [{"name": "skyabyss:tide/surf"}]
+  },
+  "tide_gate": {
+    "subtitle": "subtitles.skyabyss.tide_gate",
+    "sounds": [{"name": "skyabyss:tide/gate"}]
+  },
+  "tide_step": {
+    "subtitle": "subtitles.skyabyss.tide_step",
+    "sounds": [{"name": "skyabyss:tide/step"}]
+  },
+  "tide_back_waves": {
+    "subtitle": "subtitles.skyabyss.tide_back_waves",
+    "sounds": [{"name": "skyabyss:tide/back_waves", "stream": true}]
   }
 }
