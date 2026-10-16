@@ -88,11 +88,21 @@ public final class EmberTravel {
         EmberSurfaceNetwork.send(player, new EmberSurfaceNetwork.Plunge(30));
         Vec3 at = arrival(back);
         player.fallDistance = 0;
-        player.teleportTo(back, at.x, at.y, at.z, EmberBackLayout.ARRIVAL_YAW, 0f);
+        teleport(player, back, at.x, at.y, at.z, EmberBackLayout.ARRIVAL_YAW);
         back.playSound(null, at.x, at.y, at.z, EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.0f, 0.8f);
         showTitle(player, "title.skyabyss.ember_back", "title.skyabyss.ember_back.sub");
         player.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "arrived"));
         return true;
+    }
+
+    // 次元をまたぐ移動。偽プレイヤー (自己テスト) は接続が無く changeDimension のパケットで落ちるので、世界だけ切り替える
+    private static void teleport(ServerPlayer player, ServerLevel to, double x, double y, double z, float yaw) {
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            player.setServerLevel(to);
+            player.moveTo(x, y, z, yaw, 0f);
+            return;
+        }
+        player.teleportTo(to, x, y, z, yaw, 0f);
     }
 
     // 到着点 (舌の上)。体がまだ建っていなければ、到着点の真下の灰の原の上
@@ -120,7 +130,7 @@ public final class EmberTravel {
         }
         player.fallDistance = 0;
         Vec3 p = landing.pos();
-        player.teleportTo(overworld, p.x, p.y, p.z, yaw, 0f);
+        teleport(player, overworld, p.x, p.y, p.z, yaw);
         overworld.playSound(null, p.x, p.y, p.z, EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
     }
 
@@ -227,6 +237,9 @@ public final class EmberTravel {
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            return;
+        }
         player.connection.send(new ClientboundSetTitlesAnimationPacket(20, 60, 30));
         player.connection.send(new ClientboundSetSubtitleTextPacket(ModText.subtitle(subtitle)));
         player.connection.send(new ClientboundSetTitleTextPacket(ModText.title(title)));
