@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "stage=0": {
+      "model": "skyabyss:block/cooled_crust_0"
+    },
+    "stage=1": {
+      "model": "skyabyss:block/cooled_crust_1"
+    },
+    "stage=2": {
+      "model": "skyabyss:block/cooled_crust_2"
+    }
+  }
+}

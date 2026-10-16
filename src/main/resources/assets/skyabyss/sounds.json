@@ -1362,5 +1362,117 @@
         "attenuation_distance": 32
       }
     ]
+  },
+  "ember_ash_scatter": {
+    "subtitle": "subtitles.skyabyss.ember_ash_scatter",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_ash_scatter"
+      }
+    ]
+  },
+  "ember_crust_crack": {
+    "subtitle": "subtitles.skyabyss.ember_crust_crack",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_crust_crack"
+      }
+    ]
+  },
+  "ember_crust_sink": {
+    "subtitle": "subtitles.skyabyss.ember_crust_sink",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_crust_sink"
+      }
+    ]
+  },
+  "ember_engulf": {
+    "subtitle": "subtitles.skyabyss.ember_engulf",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_engulf"
+      }
+    ]
+  },
+  "ember_bellows": {
+    "subtitle": "subtitles.skyabyss.ember_bellows",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_bellows"
+      }
+    ]
+  },
+  "ember_anvil_strike": {
+    "subtitle": "subtitles.skyabyss.ember_anvil_strike",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_anvil_strike"
+      }
+    ]
+  },
+  "ember_anvil_ting": {
+    "subtitle": "subtitles.skyabyss.ember_anvil_ting",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_anvil_ting"
+      }
+    ]
+  },
+  "ember_bloom_crack": {
+    "subtitle": "subtitles.skyabyss.ember_bloom_crack",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_bloom_crack"
+      }
+    ]
+  },
+  "ember_quench": {
+    "subtitle": "subtitles.skyabyss.ember_quench",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_quench"
+      }
+    ]
+  },
+  "ember_door_kindle": {
+    "subtitle": "subtitles.skyabyss.ember_door_kindle",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_door_kindle"
+      }
+    ]
+  },
+  "ember_vent_hiss": {
+    "subtitle": "subtitles.skyabyss.ember_vent_hiss",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_vent_hiss"
+      }
+    ]
+  },
+  "ember_vent_burst": {
+    "subtitle": "subtitles.skyabyss.ember_vent_burst",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_vent_burst"
+      }
+    ]
+  },
+  "ember_hearth_feed": {
+    "subtitle": "subtitles.skyabyss.ember_hearth_feed",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_hearth_feed"
+      }
+    ]
+  },
+  "ember_hearth_douse": {
+    "subtitle": "subtitles.skyabyss.ember_hearth_douse",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_trial/ember_hearth_douse"
+      }
+    ]
   }
 }
