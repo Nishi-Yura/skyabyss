@@ -19,7 +19,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class ModArmorMaterials {
     private static final DeferredRegister<ArmorMaterial> MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, SkyAbyss.MODID);
 
-    // 岩鯨の甲殻: ダイヤより少し硬く、ノックバックに強い。骨のブロックで直せる
+    // 岩鯨の甲殻: 防御・強靭はダイヤと同じ (20 / 1 部位 2)。ノックバックに強い。骨のブロックで直せる
+    // 2026-10-17: 強靭 2.5 → 2.0。一式の耐性 I が個性で、素の硬さはダイヤにそろえた (03 の 9章)
     public static final Holder<ArmorMaterial> STONE_WHALE = MATERIALS.register("stone_whale", () -> new ArmorMaterial(
             new EnumMap<>(java.util.Map.of(
                     ArmorItem.Type.HELMET, 3,
@@ -31,7 +32,7 @@ public final class ModArmorMaterials {
             SoundEvents.ARMOR_EQUIP_IRON,
             () -> Ingredient.of(Items.BONE_BLOCK),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "stone_whale"))),
-            2.5f,
+            2.0f,
             0.1f));
 
     private ModArmorMaterials() {

@@ -26,7 +26,7 @@ public class WhaleboneGreatswordItem extends SwordItem implements ModGear {
             () -> Ingredient.of(Items.BONE_BLOCK));
 
     public WhaleboneGreatswordItem(Properties properties) {
-        // 攻撃力 10、攻撃速度 1.0 (ふつうの剣よりかなり遅い)
+        // 攻撃力 10、攻撃速度 1.0 (ふつうの剣よりかなり遅い)。1 秒あたりはダイヤの剣より少し下で、一撃の重さと鈍足で補う
         super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 5, -3.0f)));
     }
 
