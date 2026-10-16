@@ -1,8 +1,9 @@
 """雷翼の心臓 (第三の巨神「雷翼の巨神」の最終ボス) のラフをゲームに入れる。推奨は C 翼の心臓 (12 の 14.2節)。
 
 使い方 (リポジトリ直下で): python tools/install_storm_heart.py [--option a|b|c]
-形の元: --option c (既定) は tools/sources/storm_heart/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png
-        (tools/rough/thunder_heart.py の C 案。比較の絵は docs/review/thunder_wing_roughs/heart.png)
+形の元: --option c (既定) は tools/sources/storm_heart_hp/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png
+        (0.25 で作り直した高ポリ版。tools/rough/hp_heart_storm.py の C 案、比較の絵は docs/review/high_poly_roughs/storm_heart_hp.png。
+        元の 0.5 の形は tools/sources/storm_heart/ に残してある: tools/rough/thunder_heart.py の C 案)
         a / b はまだ選ばれていない案のデータ (docs/review/thunder_wing_roughs/heart/<a|b>/) を読む。
         ただしアニメーションの骨は C の骨 (翼・冠の翼・網) で書いてあるので、a / b に差し替えるときは anims() を直す
 出力 (src/main/resources/assets/skyabyss/ 以下):
@@ -57,7 +58,7 @@ def S(s):
 
 def source(option):
     if option == "c":
-        return ROOT / "tools/sources/storm_heart"
+        return ROOT / "tools/sources/storm_heart_hp"
     return ROOT / f"docs/review/thunder_wing_roughs/heart/{option}"
 
 
@@ -254,7 +255,7 @@ def checks(ph, geo):
     for b in geo["minecraft:geometry"][0]["bones"]:
         for c in b.get("cubes", []):
             for x in list(c["origin"]) + list(c["size"]):
-                assert abs(x * 2 - round(x * 2)) < 1e-6, f"phase {ph}: cube not on the 0.5 grid in {b['name']}: {c}"
+                assert abs(x * 4 - round(x * 4)) < 1e-6, f"phase {ph}: cube not on the 0.25 grid in {b['name']}: {c}"
 
 
 def main():

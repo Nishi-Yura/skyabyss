@@ -1,8 +1,9 @@
 """潮殻の心臓 (潮殻の巨神の最終ボス) のラフ 案B 巻貝 をゲームに入れる。
 
 使い方 (リポジトリ直下で): python tools/install_tide_heart.py
-形の元: tools/sources/tide_heart/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png
-        (tools/rough/tide_heart.py の B 案。比較の絵は docs/review/tide_shell_roughs/heart/b)
+形の元: tools/sources/tide_heart_hp/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png
+        (ハイポリ版 = 0.25 で彫り直したもの。tools/rough/hp_heart_tide.py の C 案。比較の絵は docs/review/high_poly_roughs/tide_heart_hp.png)
+        元の 0.5 の版は tools/sources/tide_heart (tools/rough/tide_heart.py の B 案。docs/review/tide_shell_roughs/heart/b) に残してある
 出力 (src/main/resources/assets/skyabyss/ 以下):
   geo/entity/tide_heart_p1|p2|p3.geo.json
   textures/entity/tide_heart_p1|p2|p3.png と _glowmask.png
@@ -30,7 +31,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import install_heart_v4 as H  # noqa: E402  (convert_geo, gecko_faces, track, sample を使う)
 from voxel import load_geo, render, sheet  # noqa: E402
 
-SRC = ROOT / "tools/sources/tide_heart"
+SRC = ROOT / "tools/sources/tide_heart_hp"
 ASSET = ROOT / "src/main/resources/assets/skyabyss"
 PREVIEW = ROOT / "docs/review/previews/tide_heart.png"
 NAME = "tide_heart"

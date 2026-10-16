@@ -1,7 +1,7 @@
 """余燼の心臓 (余燼の巨神の最終ボス) のラフ 案B 熔け殻 をゲームに入れる。
 
 使い方 (リポジトリ直下で): python tools/install_ember_heart.py
-形の元: tools/sources/ember_heart/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png
+形の元: tools/sources/ember_heart_hp/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png (tools/rough/hp_heart_ember.py の B 案で 0.25 に彫り直したもの。元の 0.5 は tools/sources/ember_heart)
         (tools/rough/ember_heart.py の B 案。比較の絵は docs/review/ember_roughs/heart/b。選ばれなかった A 炉・C 黒曜の棘は同じ docs/review/ember_roughs/heart/a・c に残る)
 出力 (src/main/resources/assets/skyabyss/ 以下):
   geo/entity/ember_heart_p1|p2|p3.geo.json
@@ -35,7 +35,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import install_heart_v4 as H  # noqa: E402  (convert_geo, gecko_faces, track, sample を使う)
 from voxel import load_geo, render, sheet  # noqa: E402
 
-SRC = ROOT / "tools/sources/ember_heart"
+SRC = ROOT / "tools/sources/ember_heart_hp"
 ASSET = ROOT / "src/main/resources/assets/skyabyss"
 PREVIEW = ROOT / "docs/review/previews/ember_heart.png"
 NAME = "ember_heart"
