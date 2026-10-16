@@ -127,8 +127,14 @@ public final class LoreEvents {
     private static void readNearbyInscriptions(ServerPlayer player) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
-        for (TitanBackLayout.Inscription inscription : TitanBackLayout.LORE_SIGNS) {
-            Vec3 at = Vec3.atCenterOf(inscription.pos());
+        java.util.List<java.util.Map.Entry<String, net.minecraft.core.BlockPos>> signs = new java.util.ArrayList<>();
+        if (player.level().dimension() == TitanTravel.TITAN_BACK) {
+            TitanBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
+        } else {
+            jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
+        }
+        for (java.util.Map.Entry<String, net.minecraft.core.BlockPos> inscription : signs) {
+            Vec3 at = Vec3.atCenterOf(inscription.getValue());
             Vec3 to = at.subtract(eye);
             double distance = to.length();
             if (distance > SIGN_READ_DISTANCE || distance < 1.0e-3) {
@@ -140,8 +146,8 @@ public final class LoreEvents {
             // 壁の向こうの碑文は読めない (看板には当たり判定がないので、看板の中心まで何にも当たらなければ見えている)
             var hit = player.level().clip(new net.minecraft.world.level.ClipContext(eye, at,
                     net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
-            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS || hit.getBlockPos().equals(inscription.pos())) {
-                Lore.fire(player, "sign", t -> t.target().equals(inscription.key()));
+            if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS || hit.getBlockPos().equals(inscription.getValue())) {
+                Lore.fire(player, "sign", t -> t.target().equals(inscription.getKey()));
             }
         }
     }
@@ -156,7 +162,8 @@ public final class LoreEvents {
         long now = level.getGameTime();
         int phase = player.getId() & 0xFF;
         LoreState state = Lore.state(player);
-        if ((now + phase) % 5 == 0 && level.dimension() == TitanTravel.TITAN_BACK && anyLocked(state, "sign")) {
+        if ((now + phase) % 5 == 0 && (level.dimension() == TitanTravel.TITAN_BACK || level.dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK)
+                && anyLocked(state, "sign")) {
             readNearbyInscriptions(player);
         }
         if ((now + phase) % 10 == 0 && level.dimension() == Level.OVERWORLD) {

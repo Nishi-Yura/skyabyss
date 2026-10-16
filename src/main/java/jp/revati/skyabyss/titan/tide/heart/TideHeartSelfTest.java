@@ -71,6 +71,12 @@ public final class TideHeartSelfTest {
             return;
         }
         checkAssets(failures);
+        // 部屋は本番の島の殻の底 (中心 0, -30)。人がいないので、部屋のチャンクを読み込んだままにする
+        for (int dx = -2; dx <= 1; dx++) {
+            for (int dz = -3; dz <= 0; dz++) {
+                back.setChunkForced(dx, dz, true);
+            }
+        }
         checkArena(back, failures);
         checkFlood(back, failures);
         checkBattle(back, failures, notes);
@@ -108,24 +114,22 @@ public final class TideHeartSelfTest {
         int o = TideHeartArena.ISLAND_OFFSET;
         for (int sx = -1; sx <= 1; sx += 2) {
             for (int sz = -1; sz <= 1; sz += 2) {
-                BlockPos top = new BlockPos(sx * o, f + 1, sz * o);
+                BlockPos top = new BlockPos(sx * o, f + 1, TideHeartArena.CZ + sz * o);
                 check(!back.getBlockState(top).isAir() && back.getBlockState(top.above()).isAir(), "rock island missing or covered at " + top, failures);
             }
         }
-        check(back.getBlockState(new BlockPos(13, f - 1, 0)).is(Blocks.WATER), "groove has no water", failures);
-        check(back.getBlockState(new BlockPos(3, f, 3)).isAir() && back.getBlockState(new BlockPos(3, TideHeartArena.CEILING - 1, 3)).isAir(),
+        check(back.getBlockState(new BlockPos(13, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "groove has no water", failures);
+        check(back.getBlockState(new BlockPos(3, f, TideHeartArena.CZ + 3)).isAir() && back.getBlockState(new BlockPos(3, TideHeartArena.CEILING - 1, TideHeartArena.CZ + 3)).isAir(),
                 "chamber interior is not open", failures);
-        check(!back.getBlockState(new BlockPos(0, TideHeartArena.CEILING, 0)).isAir(), "chamber has no ceiling", failures);
+        check(!back.getBlockState(new BlockPos(0, TideHeartArena.CEILING, TideHeartArena.CZ + 0)).isAir(), "chamber has no ceiling", failures);
         for (BlockPos g : TideHeartArena.gate()) {
             check(back.getBlockState(g).isAir(), "entrance is closed at " + g, failures);
         }
         check(TideHeartArena.ante().contains(TideHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", failures);
         check(!TideHeartArena.arena().contains(TideHeartArena.anteSpawn()), "antechamber spawn is inside the fight", failures);
-        BlockPos pad = TideHeartArena.descentPad(back);
-        check(TideHeartArena.onDescentPad(back, pad.getX() + 0.5, pad.getY() + 1, pad.getZ() + 0.5), "descent pad does not trigger", failures);
-        check(TideHeartArena.onExitPad(0.5, f, TideHeartArena.EXIT_Z + 0.5), "exit pad does not trigger", failures);
-        check(!TideHeartArena.onExitPad(0.5, f, TideHeartArena.anteSpawn().z), "exit pad triggers at the antechamber spawn", failures);
-        check(TideHeartArena.onIsland(o + 0.5, f + 2, o + 0.5) && !TideHeartArena.onIsland(3.5, f, 3.5), "island test is wrong", failures);
+        // 前室の南の口は、休み場の小部屋と螺旋の階段へ開いている (本番の島)
+        check(back.getBlockState(new BlockPos(0, f, TideHeartArena.CZ + 21)).isAir(), "antechamber has no way out to the stairs", failures);
+        check(TideHeartArena.onIsland(o + 0.5, f + 2, TideHeartArena.CZ + o + 0.5) && !TideHeartArena.onIsland(3.5, f, TideHeartArena.CZ + 3.5), "island test is wrong", failures);
         check(TideHeartArena.arena().contains(TideHeartArena.heartHome()), "heart home outside the arena", failures);
     }
 
@@ -137,15 +141,15 @@ public final class TideHeartSelfTest {
             TideHeartArena.tickFlood(back);
         }
         check(TideHeartArena.flooded(), "floor is not flooded after filling", failures);
-        check(back.getBlockState(new BlockPos(3, f, 3)).is(Blocks.WATER) && back.getBlockState(new BlockPos(-10, f, 2)).is(Blocks.WATER),
+        check(back.getBlockState(new BlockPos(3, f, TideHeartArena.CZ + 3)).is(Blocks.WATER) && back.getBlockState(new BlockPos(-10, f, TideHeartArena.CZ + 2)).is(Blocks.WATER),
                 "flood did not cover the floor", failures);
-        check(back.getBlockState(new BlockPos(o, f + 2, o)).isAir(), "flood wet the island top", failures);
+        check(back.getBlockState(new BlockPos(o, f + 2, TideHeartArena.CZ + o)).isAir(), "flood wet the island top", failures);
         for (int i = 0; i < 30 + 13; i++) {
             TideHeartArena.tickFlood(back);
         }
         check(!TideHeartArena.flooding(), "flood did not end", failures);
-        check(back.getBlockState(new BlockPos(3, f, 3)).isAir() && back.getBlockState(new BlockPos(-10, f, 2)).isAir(), "flood did not drain", failures);
-        check(back.getBlockState(new BlockPos(13, f - 1, 0)).is(Blocks.WATER), "draining emptied the groove", failures);
+        check(back.getBlockState(new BlockPos(3, f, TideHeartArena.CZ + 3)).isAir() && back.getBlockState(new BlockPos(-10, f, TideHeartArena.CZ + 2)).isAir(), "flood did not drain", failures);
+        check(back.getBlockState(new BlockPos(13, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "draining emptied the groove", failures);
     }
 
     private static TideHeart startHeart(ServerLevel back, List<String> failures) {
@@ -153,7 +157,11 @@ public final class TideHeartSelfTest {
         TitanBackData.get(back).resetProgress();
         check(TideHeartBattle.startNow(back), "battle did not start", failures);
         TideHeart heart = TideHeartBattle.current(back);
-        check(heart != null, "no heart after starting", failures);
+        if (heart == null) {
+            failures.add("no heart after starting (difficulty " + back.getDifficulty() + ", hearts nearby "
+                    + back.getEntitiesOfClass(TideHeart.class, TideHeartArena.arena().inflate(8)).size() + ", chunk loaded "
+                    + back.isLoaded(net.minecraft.core.BlockPos.containing(TideHeartArena.heartHome())) + ")");
+        }
         return heart;
     }
 

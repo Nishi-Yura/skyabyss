@@ -60,6 +60,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
+        // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
+        jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

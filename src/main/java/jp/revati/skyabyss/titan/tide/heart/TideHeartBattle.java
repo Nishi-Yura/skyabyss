@@ -35,14 +35,13 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 殻の底 (心臓の間) の戦い。岩鯨の心臓の間と同じ決まり (BossRoom):
 // 5 秒の集合 → 入口が閉じて心臓が現れる → 全員が倒れるか部屋から消えて 3 秒で放棄 (心臓を消して入口を開ける)。
 // 心臓が部屋の外へ出たら中央へ戻す。撃破で入口が開き、中央に光の柱 (立つと島へ戻る)。
-// 撃破のあと、部屋と前室に 30 秒だれもいないと、心臓は眠りから覚めて (TitanBackData の進みを戻して) また挑める (08 の 7.1節)。
-// 仮の島への出入り: 島の頂の降りる床を踏むと前室へ、前室の南の光る床で島の到着地点へ
+// 撃破のあと、潮の底の門より奥に 30 秒だれもいないと、背中の試練ごと次の周へ戻る (TideBackTrials のリセット。08 の 7.1節)。
+// 出入りは、潮の広間の潮の底の門の下の螺旋の階段 (本番の島)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideHeartBattle {
     public static final int RESET_AFTER_DEFEAT = 20 * 30;
     private static final BossRoom ROOM = new BossRoom();
     private static int afterDefeatIdle;
-    private static int padCooldown;
     private static long lastAsleepNotice;
 
     private TideHeartBattle() {
@@ -175,10 +174,6 @@ public final class TideHeartBattle {
             return;
         }
         TideHeartArena.tickFlood(level);
-        if (padCooldown > 0) {
-            padCooldown--;
-        }
-        tickPads(level);
         if (level.getGameTime() % 10 != 0) {
             return;
         }
@@ -195,23 +190,6 @@ public final class TideHeartBattle {
             broadcast(level, ModText.deny("message.skyabyss.tide_heart.asleep"));
         }
         ROOM.tick(level, HOST);
-    }
-
-    // 降りる床と出口の床
-    private static void tickPads(ServerLevel level) {
-        if (level.getGameTime() % 5 != 0) {
-            return;
-        }
-        for (ServerPlayer player : List.copyOf(level.players())) {
-            if (!player.isAlive() || player.isSpectator() || player.isPassenger()) {
-                continue;
-            }
-            if (TideHeartArena.onDescentPad(level, player.getX(), player.getY(), player.getZ())) {
-                descend(level, player);
-            } else if (TideHeartArena.onExitPad(player.getX(), player.getY(), player.getZ())) {
-                ascend(level, player);
-            }
-        }
     }
 
     // 潮の底へ降りる (前室へ)
@@ -253,10 +231,6 @@ public final class TideHeartBattle {
             }
         }
         afterDefeatIdle = anyone ? 0 : afterDefeatIdle + 10;
-        if (afterDefeatIdle >= RESET_AFTER_DEFEAT) {
-            afterDefeatIdle = 0;
-            reawaken(level, data);
-        }
     }
 
     // 心臓をもう一度挑めるようにする (背中の進みを戻す)
@@ -297,6 +271,8 @@ public final class TideHeartBattle {
         }
         TitanBackData data = TitanBackData.get(level);
         data.markHeartDefeated();
+        // 2 周目から試練が一つ眠る (ワールドで一度でも心臓が倒されたあと)
+        jp.revati.skyabyss.titan.tide.back.TideBackState.get(level).markEverDefeated();
         afterDefeatIdle = 0;
         List<ServerPlayer> participants = new ArrayList<>();
         for (UUID id : ids) {
@@ -330,6 +306,5 @@ public final class TideHeartBattle {
         ROOM.clear();
         TideHeartArena.resetState();
         afterDefeatIdle = 0;
-        padCooldown = 0;
     }
 }

@@ -277,6 +277,33 @@ def downsample(K, f):
     return out
 
 
+def stamp_gate(G, K, f):
+    """中景・遠景で潮門の枠が消えないように (17 章・本体 B の指摘「遠くから見ると潮門の枠が消える」の直し):
+    近景の潮門 (gate の骨) のセルが 1 つでも入る粗いセルは、すべて潮門のセルにする。材料は、光る材料があれば光る材料、
+    なければ枠の石の多数決。甲羅のセルを上書きするので、枠は甲羅に接したまま残り (離れ島にならない)、遠くでも光る口が見える。
+    書き換えたセルの数を返す"""
+    gm = (K // 32) == GATE_PART
+    idx = np.argwhere(gm)
+    if idx.size == 0:
+        return 0
+    coarse = {}
+    for i, j, k in idx:
+        key = (i // f, j // f, k // f)
+        coarse.setdefault(key, []).append(int(K[i, j, k] % 32))
+    n = 0
+    for (a, b, c), mats in coarse.items():
+        if a >= G.shape[0] or b >= G.shape[1] or c >= G.shape[2]:
+            continue
+        glow = [m for m in mats if m in GLOW_MATS]
+        if glow:
+            mat = max(set(glow), key=glow.count)
+        else:
+            mat = max(set(mats), key=mats.count)
+        G[a, b, c] = GATE_PART * 32 + mat
+        n += 1
+    return n
+
+
 # 中景・遠景の珊瑚: 房ごとに 1 色の丸い塊にする (B の弱み「遠くでは珊瑚が点に散って、形がにじむ」の直し)。
 # merge: この距離 (単位) より近い房は 1 つの塊にまとめる。rmin: 塊の半径の下限 (単位)。
 # rmax: 半径の上限 (単位。まとめた塊が背を覆って、塔や甲羅の丸みを隠さないように)。
@@ -842,6 +869,8 @@ def main():
     stats = {}
     for name, f, ppu in LODS:
         G = downsample(coral_lumps(K, f), f) if f > 1 else K.copy()
+        if f > 1:
+            print(name, "gate marker cells", stamp_gate(G, K, f))
         log = islands_fix(G, name)
         for line in log:
             print(line)

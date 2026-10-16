@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 104,
+  "unlock": [
+    {
+      "type": "dimension",
+      "target": "skyabyss:tide_back"
+    }
+  ],
+  "related": [
+    "chapter1/tide_shell",
+    "chapter1/inscription_tide_beach"
+  ]
+}
