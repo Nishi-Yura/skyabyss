@@ -1,4 +1,23 @@
 {
+  "coral_thrall_ambient": {"subtitle": "subtitles.skyabyss.coral_thrall_ambient", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_ambient"}]},
+  "coral_thrall_hurt": {"subtitle": "subtitles.skyabyss.coral_thrall_hurt", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_hurt"}]},
+  "coral_thrall_death": {"subtitle": "subtitles.skyabyss.coral_thrall_death", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_death"}]},
+  "coral_thrall_thrust": {"subtitle": "subtitles.skyabyss.coral_thrall_thrust", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_thrust"}]},
+  "coral_thrall_petrify": {"subtitle": "subtitles.skyabyss.coral_thrall_petrify", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_petrify"}]},
+  "coral_thrall_wake": {"subtitle": "subtitles.skyabyss.coral_thrall_wake", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_wake"}]},
+  "coral_thrall_stone_tap": {"subtitle": "subtitles.skyabyss.coral_thrall_stone_tap", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_stone_tap"}]},
+  "reef_scuttler_ambient": {"subtitle": "subtitles.skyabyss.reef_scuttler_ambient", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_ambient"}]},
+  "reef_scuttler_hurt": {"subtitle": "subtitles.skyabyss.reef_scuttler_hurt", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_hurt"}]},
+  "reef_scuttler_death": {"subtitle": "subtitles.skyabyss.reef_scuttler_death", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_death"}]},
+  "reef_scuttler_step": {"sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_step"}]},
+  "reef_scuttler_flip": {"subtitle": "subtitles.skyabyss.reef_scuttler_flip", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_flip"}]},
+  "bubble_puffer_ambient": {"subtitle": "subtitles.skyabyss.bubble_puffer_ambient", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_ambient"}]},
+  "bubble_puffer_hurt": {"subtitle": "subtitles.skyabyss.bubble_puffer_hurt", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_hurt"}]},
+  "bubble_puffer_death": {"subtitle": "subtitles.skyabyss.bubble_puffer_death", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_death"}]},
+  "bubble_puffer_shoot": {"subtitle": "subtitles.skyabyss.bubble_puffer_shoot", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_shoot"}]},
+  "bubble_puffer_inflate": {"subtitle": "subtitles.skyabyss.bubble_puffer_inflate", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_inflate"}]},
+  "bubble_puffer_deflate": {"subtitle": "subtitles.skyabyss.bubble_puffer_deflate", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_deflate"}]},
+  "bubble_pop": {"subtitle": "subtitles.skyabyss.bubble_pop", "sounds": [{"name": "skyabyss:tide_mobs/bubble_pop"}]},
   "sky_wingbeat": {
     "subtitle": "subtitles.skyabyss.sky_wingbeat",
     "sounds": [
