@@ -18,7 +18,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // サーバーが中身を作って送り、クライアントは「見せて」「受け取る」を頼むだけ。頼みはサーバーで検める
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RecordNetwork {
-    private static final String PROTOCOL_VERSION = "record-1";
+    private static final String PROTOCOL_VERSION = "record-2";
 
     private RecordNetwork() {
     }
@@ -37,6 +37,11 @@ public final class RecordNetwork {
                 .playToServer(Claim.TYPE, Claim.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         RecordService.claim(player);
+                    }
+                })
+                .playToServer(Recall.TYPE, Recall.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        RecordService.recall(player, payload.key());
                     }
                 });
     }
@@ -73,6 +78,18 @@ public final class RecordNetwork {
     public record Claim() implements CustomPacketPayload {
         public static final Type<Claim> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_claim"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Claim> STREAM_CODEC = StreamCodec.unit(new Claim());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 本人 → サーバー: なくした天の鍵の欠片 (key = false)・天の鍵 (key = true) を呼び戻す
+    public record Recall(boolean key) implements CustomPacketPayload {
+        public static final Type<Recall> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "record_recall"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Recall> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.BOOL, Recall::key, Recall::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
