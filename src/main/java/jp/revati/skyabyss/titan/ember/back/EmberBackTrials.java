@@ -104,6 +104,8 @@ public final class EmberBackTrials {
         EmberBackState state = EmberBackState.get(level);
         state.reset(level.random, null, true);
         EmberBackRooms.resetAll(level, state::roomSleeping);
+        idleTicks = 0;
+        afterHeartIdle = 0;
         gateTimer = 0;
         applyGate(level, false);
         applyStones(level, state);
@@ -499,6 +501,9 @@ public final class EmberBackTrials {
         }
         data.resetProgress();
         state.reset(level.random, forceSleep, noSleep);
+        // 見守る人がいない時間の数え直し (他の背中と同じ。数え直さないと、起動してから 3 分たったあとの最初の石で、すぐ戻ってしまう)
+        idleTicks = 0;
+        afterHeartIdle = 0;
         for (ServerPlayer p : List.copyOf(level.players())) {
             if (!p.isSpectator() && inTrial(p.position())) {
                 toHub(p);

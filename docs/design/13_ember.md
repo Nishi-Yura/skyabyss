@@ -1714,6 +1714,15 @@ E の `AshSmithBattle.onForgeDoorOpened` を、`EmberSmithSetup`（共通の準�
 - `./gradlew compileJava --offline` は通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`（`server-port` 26400）で、空の `run/` 2 回と本体の `run/world` の写し 1 回、すべて PASSED（39 項目）。
 - 試遊はしていない（決まり）。見た目の確認はしていない。
 
+### 24.6a 新しいワールドでときどき落ちた `ember back`（門が開かない）の原因
+
+- **原因: 検査のタイミングと、余燼の「見守る人がいない時間」の数え直しの抜け。裏の建設の順番ではない。** 失敗したログでは、背中は起動の 30 秒後に裏で建ち終わっており（187 tick）、自己テストの `load` 段の `ensureBuilt` は建ててあるので何もしない。三つの石を鳴らした直後（`ring` 段）と `gate` 段の間に、テストが呼んでいない `Ember back trials reset` が一度入り、門の予定（`gateTimer`）と石が消されていた。
+- 呼び手は `tickReset` の無人リセット。誰もいない時間 `idleTicks` が 3 分（3600 tick）たつと、石が鳴っていれば戻す。自己テストは人がいない（FakePlayer は `level.players()` に入らない）まま、起動から `ember back` の段まで 5 分ほど流れるので、`idleTicks` が 3 分を超えた状態で三つの石を鳴らすと、次の 10 tick の見回りで戻ってしまう。新しいワールドは前の段（チャンクの生成）が長引いて超えやすく、本体のワールドは速いので通っていた。
+- 岩鯨・潮殻・雷翼は `reset` のたびに `idleTicks = 0` にしているが、**余燼の `reset` と `afterBuild` だけ数え直しが無かった**。ゲームでも、無人のまま 3 分たったあとに戻した直後は、次の無人リセットが数え直されずに効く（人が石を鳴らしている間は `anyone` なので `idleTicks` が 0 になり、実害は小さい）。
+- 直し: `EmberBackTrials.reset` と `afterBuild` で `idleTicks`・`afterHeartIdle` を 0 にする。ほかの背中と同じ。
+- 確かめ: 直す前は新しいワールドの 1 回目で再現した（`ember heart` も同じ回で落ちたが、直したあとの 7 回では出ていない）。直したあと、空の `run/` で 5 回連続と、本体の `run/world` の写しで 2 回、すべて `SELFTEST ember back PASSED`（失敗の行は無し、`server-port` 27600）。`./gradlew compileJava --offline` は通る。試遊はしていない。
+- 建設との関係: 乗り込み（`ensureBuilt` / `build`）は予約を取り消して同期で建てる（24.5節の通り）。建て終わり（`buildRest`）は `afterBuild` で試練を最初の形にしてから建てた印を付けるので、建設の途中でも後でも、門は閉じた状態から始まり、石を鳴らせば開く。岩鯨・潮殻・雷翼の背中も同じ `BackBuildJobs` に乗るが、`idleTicks` の数え直しはすでにあり、同じ問題は無い。
+
 ### 24.7 判断待ちのまま残すもの
 
 13 の 23.10（冷えの重ね方）、F の溝の溶岩を段階 3 で固めるか、21.8（C の判断 C1〜C4 のうち、C4 は 24.2 で「B の `ring` で送る」に決まった。C1〜C3 は未決）、打つ順（21.8 の C2）。`00_decisions_needed.md` は触っていない。
