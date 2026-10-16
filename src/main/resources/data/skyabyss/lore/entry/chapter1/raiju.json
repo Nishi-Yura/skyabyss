@@ -1,0 +1,17 @@
+{
+  "chapter": "chapter1",
+  "order": 169,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:raiju",
+      "radius": 48
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_storm_east"
+  ]
+}

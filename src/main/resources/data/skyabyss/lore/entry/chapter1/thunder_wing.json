@@ -3,10 +3,16 @@
   "order": 160,
   "unlock": [
     {
+      "type": "near_entity",
+      "target": "skyabyss:thunder_wing",
+      "radius": 96
+    },
+    {
       "type": "manual"
     }
   ],
   "related": [
+    "chapter1/storm_wing",
     "chapter1/storm_path"
   ]
 }

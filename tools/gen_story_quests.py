@@ -4,7 +4,8 @@
 元の会話とその足し書き (storyteller.json / *_free.json) には手を入れない。会話は「足し書き」(*_story.json、extends: true) で混ぜる。
 足し書きは名前の順に混ざるので、*_free の節 (fq_menu・fq_c_menu) に選択肢を足せる。
 
-雷翼・余燼の固有名は 12・13 の設計書ができるまで仮。名前は NAMES の一か所だけ直せば、文・伝承・クエストがそろって替わる。
+雷翼の固有名は 12 の設計書で決まった (2026-10-17、担当 6)。余燼は 13 ができるまで仮。名前は NAMES の一か所だけ直せば、文・伝承・クエストがそろって替わる。
+雷翼の背の周回 (*storm*)・伝承・碑文の文は tools/gen_storm_lore.py (skyabyss_storm) が書く。ここは雷翼のメインと古い地図だけ。
 
 実行 (リポジトリ直下):
     python tools/gen_story_quests.py
@@ -29,11 +30,13 @@ DOC = ROOT / "docs/design/07_npc_quest.md"
 ST = "skyabyss:storyteller"
 WC = "skyabyss:whale_chaser"
 
-# 雷翼・余燼の名前 (仮。12・13 で決まったらここだけ直す)
+# 雷翼・余燼の名前 (日本語, 英語の文中の形, 英語の題の形)。雷翼は 12 で決まった。余燼は 13 で決まったらここだけ直す
 NAMES = {
-    "thunder_wing": ("雷翼の巨神", "the Thunderwing Titan"),
-    "ember": ("余燼の巨神", "the Ember Titan"),
+    "thunder_wing": ("雷翼の巨神", "the Thunder Wing Titan", "The Thunder Wing Titan"),
+    "ember": ("余燼の巨神", "the Ember Titan", "The Ember Titan"),
 }
+# 雷翼の担当が登録する品 (12 の 11.1 節)。別の担当が登録するので optional (まだないうちは渡さない)
+WEATHERCOCK = "skyabyss:weathercock"
 
 JA: dict[str, str] = {}
 EN: dict[str, str] = {}
@@ -64,8 +67,11 @@ def flag(f, npc=None):
     return c
 
 
-def item(i, count=1):
-    return {"type": "item", "item": i, "count": count}
+def item(i, count=1, optional=False):
+    c = {"type": "item", "item": i, "count": count}
+    if optional:
+        c["optional"] = True
+    return c
 
 
 def not_(c):
@@ -104,8 +110,10 @@ def set_flag(f):
     return {"type": "flag", "flag": f}
 
 
-def give(i, count=1, name=None, lore_=None):
+def give(i, count=1, name=None, lore_=None, optional=False):
     a = {"type": "give", "item": i, "count": count}
+    if optional:
+        a["optional"] = True
     if name:
         a["name"] = name
     if lore_:
@@ -214,8 +222,8 @@ KEY = "main_key"
 MAP = "sub_old_map"
 ASH = "sub_warm_coal"
 
-TW_JA, TW_EN = NAMES["thunder_wing"]
-EM_JA, EM_EN = NAMES["ember"]
+TW_JA, TW_EN, TW_TITLE = NAMES["thunder_wing"]
+EM_JA, EM_EN, EM_TITLE = NAMES["ember"]
 
 # ================================================================ 語り部
 S.entry("ms_tide_back", q(TIDE, stage="report"))
@@ -351,9 +359,24 @@ C.node("ms_c_map_done", "戻ったか。……光ったか？", "You're back. ..
 ], note="サブ「鯨追いの古い地図」の報告")
 C.node("ms_c_map_done2", "……そうか。やっぱり、あの線の上を何かが渡っている。\nこの切れ端をやる。線のところだけ、破いておいた。",
        "...I see. Something does cross along that line.\nTake this scrap. I tore off just the part with the line.", face="grave",
-       do=[unlock("chapter1/storm_path")], options=[
+       do=[unlock("chapter1/storm_path")], next="ms_c_map_done3",
+       note="ここに入るとサブ「鯨追いの古い地図」が終わる (報酬で風見鶏も渡る)。伝承「嵐の通り道」を記す")
+C.node("ms_c_map_done3", "それと、これも持っていけ。じいさんの風見鶏だ。\n屋根から下ろしてから、こいつは風じゃなく、嵐のほうばかり向くようになった。",
+       "And take this, too. My grandfather's weathercock.\nEver since he took it down from the roof, it points at storms instead of the wind.", next="ms_c_map_done4",
+       note="風見鶏 (12 の 2.6 節) の話")
+C.node("ms_c_map_done4", "高い所で掲げると、嵐のほうが気づくらしい。\n……俺は、試したことがないがな。",
+       "Raise it somewhere high, and they say the storm takes notice.\n...Not that I've ever tried.", face="grave", options=[
            opt("ok", "預かっておく。", "I'll keep it."),
-       ], note="ここに入るとサブ「鯨追いの古い地図」が終わる。伝承「嵐の通り道」を記す")
+       ])
+
+# 風見鶏をなくしたとき (古い地図を終えた人。前の版で地図を終えて、風見鶏を受け取っていない人も)
+C.add_option("fq_c_menu", "back", opt("cock", "風見鶏を、もう一つ持っていないか。", "Do you have another weathercock?", goto="ms_c_cock",
+                                      if_=all_(q(MAP, "done"), not_(item(WEATHERCOCK, optional=True)))))
+C.node("ms_c_cock", "嵐に持っていかれたか。\n……じいさんは、屋根ごとに一つずつ作っていた。まだ残っている。",
+       "Did a storm take it?\n...My grandfather made one for every roof. There are still a few left.",
+       do=[give(WEATHERCOCK, optional=True)], options=[
+           opt("ok", "今度は、なくさない。", "I won't lose this one."),
+       ], note="風見鶏を渡す (なくしたとき)")
 
 
 # ================================================================ クエスト
@@ -451,28 +474,43 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
       {"xp": 300, "affinity": {ST: 5, WC: 5}}, giver=WC, start_when=all_(q("main_song", "done"), stilled("stone_whale")),
       story="鍵は四つに分かれている。イサナは海の噂を話し、プレイヤーは潮殻の背へ渡って二つ目の欠片を手にする。")
 
-# ---- メイン 3: 嵐を渡る翼 (雷翼。中身は 12 の担当が作る)
+# ---- メイン 3: 嵐を渡る翼 (雷翼。12 の 9 章・11.1 節。見つける → 乗る → 碑文と風鳴り石 → 心臓)
+# 進みは伝承 (見た・渡った・碑文)、背中の担当の合図 storm_trial_<west|east|front>、心臓の記録 (Progression.onTitanStopped) で数える。
+# 本体がなくても /skyabyss lore unlock と /skyabyss quest signal で通せる
+STORM_SIGHT = ["chapter1/thunder_wing", "chapter1/storm_wing"]
+STORM_INSCRIPTIONS = [f"chapter1/inscription_storm_{p}" for p in ("tail", "hub", "west", "east", "eye", "heart")]
 quest(THUNDER, "main", 30, ("嵐を渡る翼", "Wings Across the Storm"),
-      ("三つ目の欠片を求めて、雷の晩に雲の中を渡るものを追う。", "Follow what crosses inside the clouds on thunder nights, in search of the third fragment."),
+      ("三つ目の欠片を求めて、風に逆らう嵐を追い、その背へ渡る。", "In search of the third fragment, chase the storm that moves against the wind and cross onto its back."),
       ("残りは一つ。", "Only one left."),
       [stage("rumor", ("欠片が二つになった。並べると、少し引き合っている。\n語り部に、三つ目の心当たりを聞いてみよう。",
                        "I have two fragments now. Side by side, they pull at each other a little.\nI'll ask the storyteller about the third."),
              [ob("talk", "talk", "語り部に、三つ目のことを尋ねる", "Ask the storyteller about the third", target=ST, topic="ms_thunder2")], xp=40,
-             skip_if=lore("chapter1/thunder_wing")),
-       stage("see", ("雷の晩、雲の中を大きな翼が渡るという。\n嵐の来るほうの空を、見ていよう。",
-                     "On thunder nights, great wings are said to cross inside the clouds.\nI'll watch the sky where the storms come from."),
-             [ob("see", "lore", f"嵐の中を渡る{TW_JA}を、その目で見る", f"See {TW_EN} crossing the storm with your own eyes",
-                 targets=["chapter1/thunder_wing"])], xp=80),
-       stage("heart", ("あの翼の奥にも、きっと鼓動がある。背へ渡る道を探そう。",
-                       "Those wings must hold a heartbeat too. I need to find a way onto its back."),
-             [cond_ob("still", "翼の奥で脈打つものを、止める", "Still what beats inside the wings", stilled("thunder_wing"))]),
+             skip_if=any_(*[lore(x) for x in STORM_SIGHT])),
+       stage("see", ("雷の晩、雲の中を大きな鳥が渡るという。\n風に逆らって動く嵐を見かけたら、それかもしれない。",
+                     "On thunder nights, they say, a great bird crosses inside the clouds.\nIf I see a storm moving against the wind, that may be it."),
+             [ob("see", "lore", "風に逆らって動く嵐を、その目で見る", "See the storm that moves against the wind with your own eyes",
+                 targets=STORM_SIGHT, count=1)], xp=80),
+       stage("board", (f"{TW_JA}は、午後の夕立の刻に、近くでいちばん高い峰へ降りてくるらしい。\n足もとに立つ風の柱に入れば、背まで運ばれるかもしれない。",
+                       f"At the hour of the afternoon squall, {TW_EN} is said to come down onto the highest peak nearby.\n"
+                       "If I step into the column of wind at its feet, it may carry me up to its back."),
+             [ob("board", "lore", "夕立の刻に、昇り風に乗って背へ上がる", "At the hour of the squall, ride the updraft onto its back",
+                 targets=["chapter1/storm_ruins"])], xp=60, skip_if=stilled("thunder_wing")),
+       stage("trials", ("鳥の背の中に、風の民の字が残っている。\n三つの風鳴り石を鳴らせば、奥へ続く門が開くのだろう。",
+                        "The wind folk left writing inside the bird's back.\nIf I ring the three wind stones, the way deeper in should open."),
+             [ob("read", "lore", "背の中の碑文を読む", "Read the inscriptions inside its back", targets=STORM_INSCRIPTIONS, count=2),
+              ob("stone", "signal", "風鳴り石を一つ鳴らす", "Ring one of the wind stones", targets=[f"storm_trial_{t}" for t in ("west", "east", "front")],
+                 count=1, party=False)],
+             xp=90, skip_if=stilled("thunder_wing")),
+       stage("heart", ("竜骨の門の下で、雷のような鼓動が打っている。\n音は、上からではなく、下から昇ってくる。",
+                       "Below the keel gate, a heartbeat strikes like thunder.\nThe sound rises from below, not from above."),
+             [cond_ob("still", "竜骨の奥で脈打つものを、止める", "Still what beats behind the keel", stilled("thunder_wing"))]),
        stage("report", ("三つ目の欠片が手に入った。手が、少し焦げた匂いがする。\n村へ戻ろう。",
                         "I have the third fragment. My hands smell faintly scorched.\nBack to the village."),
              [ob("st", "talk", "語り部に、欠片を見せる", "Show the storyteller the fragment", target=ST, topic="ms_thunder_back2"),
               ob("wc", "talk", "イサナに、嵐の上の話をする", "Tell Isana about what lies above the storm", target=WC, topic="ms_c_thunder_back")],
              mode="any")],
       {"xp": 400, "affinity": {ST: 5, WC: 5}}, giver=ST, start_when=q(TIDE, "done"),
-      story="語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。三つ目の欠片は嵐の上に。")
+      story="語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。風に逆らう嵐を追い、夕立の刻に昇り風で背へ。碑文と風鳴り石、竜骨の奥の心臓。")
 
 # ---- メイン 4: 灰の昇る山 (余燼。中身は 13 の担当が作る)
 quest(EMBER, "main", 40, ("灰の昇る山", "The Mountain Where Ash Rises"),
@@ -509,7 +547,8 @@ quest(KEY, "main", 50, ("天の鍵", "The Sky Key"),
 # ---- サブ (一度きり)
 quest(MAP, "sub", 45, ("鯨追いの古い地図", "The Whale Chaser's Old Map"),
       ("雷の晩に高い所で空を見て、嵐の通り道をイサナに話す。", "Watch the sky from somewhere high on a thunder night, and tell Isana about the path of the storms."),
-      ("地図の切れ端には、嵐の通り道が一本だけ引いてある。", "The scrap of map shows a single line: the path of the storms."),
+      ("地図の切れ端には、嵐の通り道が一本だけ引いてある。風見鶏は、いつも嵐のほうを向いている。",
+       "The scrap of map shows a single line: the path of the storms. The weathercock always points at a storm."),
       [stage("watch", ("イサナの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲がその上を走るという。\n雷の晩に、高い所で空を見よう。",
                        "A single line is drawn in the margin of Isana's old map. Every storm, the clouds run along it.\n"
                        "On a thunder night, I'll watch the sky from somewhere high."),
@@ -518,8 +557,9 @@ quest(MAP, "sub", 45, ("鯨追いの古い地図", "The Whale Chaser's Old Map")
        stage("tell", ("雷の晩、高い所から空を見た。\nイサナの火のところへ、話をしに行こう。", "I watched the sky from up high on a thunder night.\n"
                       "I'll go and tell Isana."),
              [ob("talk", "talk", "イサナに、嵐の空の話をする", "Tell Isana about the stormy sky", target=WC, topic="ms_c_map_done2")])],
-      {"xp": 300, "items": [reward_item("map_scrap")], "affinity": {WC: 5}}, giver=WC, min_stage=2,
-      story="雷が怖いイサナの代わりに、嵐の晩に高い所で空を見る。雷翼の手がかり (伝承「嵐の通り道」)。背中には入らない。")
+      {"xp": 300, "items": [reward_item("map_scrap"), {"item": WEATHERCOCK, "count": 1, "optional": True}], "affinity": {WC: 5}},
+      giver=WC, min_stage=2,
+      story="雷が怖いイサナの代わりに、嵐の晩に高い所で空を見る。雷翼の手がかり (伝承「嵐の通り道」) と、イサナの祖父の風見鶏 (12 の 2.6 節)。背中には入らない。")
 
 quest(ASH, "sub", 46, ("冷めない炭", "The Coal That Will Not Cool"),
       ("地の底の火のかけらを持ち帰り、語り部の炉に入れる。", "Bring back a piece of the fire beneath the earth for the storyteller's hearth."),
@@ -560,18 +600,21 @@ quest("weekly_tide_heart", "sub", 82, ("潮の鼓動をもう一度", "The Tide'
       story="「心臓をもう一度」と同じ名前のない紙。七日という数を、もう一度ほのめかす。")
 
 # ================================================================ 伝承の項目 (manual: 会話・天の鍵・巨神の担当が記す)
+# 項目: (ID, 順, 関わる項目, 題, 本文[, 記される条件])。条件を省くと manual だけ
 LORE = [
-    ("chapter1/thunder_wing", 160, ["chapter1/storm_path"], (TW_JA, TW_EN),
-     ("嵐の晩、雲の中を大きな翼が渡っていった。稲光が走るたびに、翼の骨だけが白く浮かぶ。\n\n音は、光よりずっと遅れて届いた。",
-      "On a stormy night, great wings crossed inside the clouds. With every flash of lightning, only the bones of the wings showed white.\n\n"
-      "The sound came long after the light.")),
+    # 雷翼を近くで見た (96 ブロック以内。本体の担当が manual でも記す)。遠くの嵐を見た「風に逆らう嵐」(chapter1/storm_wing) は gen_storm_lore.py
+    ("chapter1/thunder_wing", 160, ["chapter1/storm_wing", "chapter1/storm_path"], (TW_JA, TW_TITLE),
+     ("稲妻が近くに落ちた一瞬、雨の幕の向こうに、山のような鳥がいた。\n\n冠の銅の針に、稲妻が何度も落ちる。鳥は、まばたきひとつしなかった。",
+      "In the instant lightning struck close by, there was a bird the size of a mountain beyond the curtain of rain.\n\n"
+      "Again and again the lightning struck the copper spikes of its crown. It did not so much as blink."),
+     [{"type": "near_entity", "target": "skyabyss:thunder_wing", "radius": 96}, {"type": "manual"}]),
     ("chapter1/storm_path", 158, ["chapter1/thunder_wing"], ("嵐の通り道", "The Path of the Storms"),
      ("鯨追いの古い地図の余白に、線が一本引いてある。嵐が来るたび、雲はこの線の上を走る。\n\n"
       "雷の晩に高い所から見ると、稲光は線に沿って、同じ向きに続けて光った。何かが、決まった道を渡っている。",
       "A single line is drawn in the margin of the whale chaser's old map. Whenever a storm comes, the clouds run along it.\n\n"
       "From high ground on a thunder night, the lightning flashed along that line, one after another, always the same way. "
       "Something crosses by a fixed road.")),
-    ("chapter1/ember", 170, ["chapter1/thunder_wing"], (EM_JA, EM_EN),
+    ("chapter1/ember", 176, ["chapter1/thunder_wing"], (EM_JA, EM_TITLE),
      ("灰が、空へ昇っていく。火の気のない晩でも、その山だけはうっすらと赤い。\n\n山だと思っていたものが、ゆっくりと息をした。",
       "Ash rises into the sky. Even on nights without a fire anywhere, that one mountain glows faintly red.\n\n"
       "What I had taken for a mountain slowly drew a breath.")),
@@ -585,7 +628,8 @@ LORE = [
      ("語り部が、天の鍵を見て思い出した。\n\nいつつ　いきづく　つちのそこ\n\nむっつから先は、まだ誰も知らない。",
       "The storyteller remembered it when she saw the sky key.\n\nFive, five, a breath below the ground.\n\nNo one yet knows six, or what comes after.")),
 ]
-for lid, order, related, title, body in LORE:
+LORE = [e if len(e) == 6 else e + ([{"type": "manual"}],) for e in LORE]
+for lid, order, related, title, body, _ in LORE:
     key = "lore.skyabyss." + lid.replace("/", ".")
     text(key + ".title", *title)
     text(key + ".body", *body)
@@ -759,9 +803,8 @@ def main():
         write_json(DATA / "quest" / f"{qid}.json", out)
     write_json(DATA / "dialogue" / "storyteller_story.json", S.json())
     write_json(DATA / "dialogue" / "whale_chaser_story.json", C.json())
-    for lid, order, related, _, _ in LORE:
-        write_json(DATA / "lore" / "entry" / f"{lid}.json", {"chapter": "chapter1", "order": order, "unlock": [{"type": "manual"}],
-                                                            "related": related})
+    for lid, order, related, _, _, unlock_ in LORE:
+        write_json(DATA / "lore" / "entry" / f"{lid}.json", {"chapter": "chapter1", "order": order, "unlock": unlock_, "related": related})
     write_json(LANG / "ja_jp.json", dict(sorted(JA.items())))
     write_json(LANG / "en_us.json", dict(sorted(EN.items())))
     doc = DOC.read_text(encoding="utf-8")

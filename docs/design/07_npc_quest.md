@@ -920,10 +920,10 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | クエスト | 種類 | 依頼 | 始まり・解放 | 繰り返し | 目的（段階の順） | 報酬 | 短い筋 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 満ち引きの門 `main_tide` | メイン | イサナ | main_song が done、stone_whale の心臓を自分で止めた | 一度きり | whale_chaser の節 `ms_c_tide2`（skip_if: (伝承 chapter1/tide_shell または 伝承 chapter1/tide_hours)） → 伝承 chapter1/tide_shell → 伝承 chapter1/tide_ruins → 伝承 2/6 項目（skip_if: tide_shell の心臓を自分で止めた） → 条件 tide_shell の心臓を自分で止めた → どれか: storyteller の節 `ms_tide_back2`、whale_chaser の節 `ms_c_tide_back2` | 経験値 300、好感度 storyteller +5、好感度 whale_chaser +5（段階で計 250） | 鍵は四つに分かれている。イサナは海の噂を話し、プレイヤーは潮殻の背へ渡って二つ目の欠片を手にする。 |
-| 嵐を渡る翼 `main_thunder` | メイン | 語り部 | main_tide が done | 一度きり | storyteller の節 `ms_thunder2`（skip_if: 伝承 chapter1/thunder_wing） → 伝承 chapter1/thunder_wing → 条件 thunder_wing の心臓を自分で止めた → どれか: storyteller の節 `ms_thunder_back2`、whale_chaser の節 `ms_c_thunder_back` | 経験値 400、好感度 storyteller +5、好感度 whale_chaser +5（段階で計 120） | 語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。三つ目の欠片は嵐の上に。 |
+| 嵐を渡る翼 `main_thunder` | メイン | 語り部 | main_tide が done | 一度きり | storyteller の節 `ms_thunder2`（skip_if: (伝承 chapter1/thunder_wing または 伝承 chapter1/storm_wing)） → 伝承 1/2 項目 → 伝承 chapter1/storm_ruins（skip_if: thunder_wing の心臓を自分で止めた） → 伝承 2/6 項目、signal（skip_if: thunder_wing の心臓を自分で止めた） → 条件 thunder_wing の心臓を自分で止めた → どれか: storyteller の節 `ms_thunder_back2`、whale_chaser の節 `ms_c_thunder_back` | 経験値 400、好感度 storyteller +5、好感度 whale_chaser +5（段階で計 270） | 語り部の祖母は、雷の晩に雲の中を渡る鳥を見て、何かを数えるのをやめた。風に逆らう嵐を追い、夕立の刻に昇り風で背へ。碑文と風鳴り石、竜骨の奥の心臓。 |
 | 灰の昇る山 `main_ember` | メイン | イサナ | main_thunder が done | 一度きり | whale_chaser の節 `ms_c_ember2`（skip_if: 伝承 chapter1/ember） → 伝承 chapter1/ember → 条件 ember の心臓を自分で止めた → 伝承 chapter1/sky_key_whole | 経験値 400、好感度 whale_chaser +5（段階で計 120） | イサナは灰が空へ昇る山を見たことがある。四つ目の欠片を手にすると、欠片が一つの鍵になる。 |
 | 天の鍵 `main_key` | メイン | 語り部 | (main_ember が done または 伝承 chapter1/sky_key_whole) | 一度きり | storyteller の節 `ms_key4` | 経験値 500、好感度 storyteller +5、好感度 whale_chaser +5 | 語り部は鍵を見て、数え歌のいつつめを思い出す。「鍵というのは、開けたい扉のほうを向くものだよ」。 |
-| 鯨追いの古い地図 `sub_old_map` | サブ | イサナ | 段階 2 | 一度きり | 条件 雷雨で空の下、高さ 100 以上 → whale_chaser の節 `ms_c_map_done2` | 経験値 300、古い地図の切れ端 ×1、好感度 whale_chaser +5 | 雷が怖いイサナの代わりに、嵐の晩に高い所で空を見る。雷翼の手がかり (伝承「嵐の通り道」)。背中には入らない。 |
+| 鯨追いの古い地図 `sub_old_map` | サブ | イサナ | 段階 2 | 一度きり | 条件 雷雨で空の下、高さ 100 以上 → whale_chaser の節 `ms_c_map_done2` | 経験値 300、古い地図の切れ端 ×1、weathercock ×1、好感度 whale_chaser +5 | 雷が怖いイサナの代わりに、嵐の晩に高い所で空を見る。雷翼の手がかり (伝承「嵐の通り道」) と、イサナの祖父の風見鶏 (12 の 2.6 節)。背中には入らない。 |
 | 冷めない炭 `sub_warm_coal` | サブ | 語り部 | 段階 3 | 一度きり | 行く minecraft:the_nether、集める magma_cream ×4 → storyteller の節 `ms_coal_done2` | 経験値 350、冷めない炭 ×1、bread ×3、好感度 storyteller +10 | 七日目の夜まで火がもたない炉。地の底の火を入れると、灰の底で何かが応える (2 章の深淵へのほのめかし)。 |
 | 潮殻の背の見回り `daily_tide_rounds` | サブ | 言伝ての板 | 段階 2 | 日替わり | 倒す coral_thrall, reef_scuttler, bubble_puffer ×8（仲間も） | 経験値 90、tide_shell_shard ×2 | 潮殻の背の周回の入口 (10 の 8.3 節: 段階 2)。 |
 | 潮の鼓動をもう一度 `weekly_tide_heart` | サブ | 言伝ての板 | 段階 2 | 週替わり | 倒す tide_heart ×1（仲間も） | 経験値 220、resonance_crystal ×1、tide_shell_shard ×3 | 「心臓をもう一度」と同じ名前のない紙。七日という数を、もう一度ほのめかす。 |
@@ -983,7 +983,11 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | `ms_c_map_offer` | neutral | 手がかりか。……これを見ろ。俺の古い地図だ。<br>余白に一本だけ線を引いてある。嵐が来るたび、雲がこの線の上を走っていくんだ。 |  | ▼ `ms_c_map_offer2` |
 | `ms_c_map_offer2` | grave | 雷の晩に、高い所で空を見てくれ。……俺は、雷の晩に外へ出るのが、どうしても駄目でな。<br>（サブ「鯨追いの古い地図」を始める） |  | 「見てくる。」→ `end`（クエスト開始 sub_old_map、好感度+1）<br>「また今度。」→ `@entry` |
 | `ms_c_map_done` | smile | 戻ったか。……光ったか？<br>（サブ「鯨追いの古い地図」の報告） |  | 「稲光の中に、翼の形が見えた気がした。」→ `ms_c_map_done2`<br>「光ってから音が来るまで、ずいぶん長かった。」→ `ms_c_map_done2` |
-| `ms_c_map_done2` | grave | ……そうか。やっぱり、あの線の上を何かが渡っている。<br>この切れ端をやる。線のところだけ、破いておいた。<br>（ここに入るとサブ「鯨追いの古い地図」が終わる。伝承「嵐の通り道」を記す） | 伝承 chapter1/storm_path | 「預かっておく。」→ `end` |
+| `ms_c_map_done2` | grave | ……そうか。やっぱり、あの線の上を何かが渡っている。<br>この切れ端をやる。線のところだけ、破いておいた。<br>（ここに入るとサブ「鯨追いの古い地図」が終わる (報酬で風見鶏も渡る)。伝承「嵐の通り道」を記す） | 伝承 chapter1/storm_path | ▼ `ms_c_map_done3` |
+| `ms_c_map_done3` | neutral | それと、これも持っていけ。じいさんの風見鶏だ。<br>屋根から下ろしてから、こいつは風じゃなく、嵐のほうばかり向くようになった。<br>（風見鶏 (12 の 2.6 節) の話） |  | ▼ `ms_c_map_done4` |
+| `ms_c_map_done4` | grave | 高い所で掲げると、嵐のほうが気づくらしい。<br>……俺は、試したことがないがな。 |  | 「預かっておく。」→ `end` |
+| `fq_c_menu（元の節に足す）` | | | | 「風見鶏を、もう一つ持っていないか。」→ `ms_c_cock`（条件: sub_old_map が done、not(weathercock ×1)） |
+| `ms_c_cock` | neutral | 嵐に持っていかれたか。<br>……じいさんは、屋根ごとに一つずつ作っていた。まだ残っている。<br>（風見鶏を渡す (なくしたとき)） | give | 「今度は、なくさない。」→ `end` |
 
 #### 書き付けと目的の文（生成）
 
@@ -996,8 +1000,10 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | 満ち引きの門 | `heart` | 甲羅の奥で、潮のように満ち引きする鼓動がある。<br>欠片は、そのそばに納められているのだろう。 | 甲羅の奥で脈打つものを、止める |
 | 満ち引きの門 | `report` | 二つ目の欠片が手に入った。一つ目のほうへ、かすかに引かれている気がする。<br>村へ戻って、話をしよう。 | 語り部に、欠片を見せる<br>イサナに、甲羅の山の話をする |
 | 嵐を渡る翼 | `rumor` | 欠片が二つになった。並べると、少し引き合っている。<br>語り部に、三つ目の心当たりを聞いてみよう。 | 語り部に、三つ目のことを尋ねる |
-| 嵐を渡る翼 | `see` | 雷の晩、雲の中を大きな翼が渡るという。<br>嵐の来るほうの空を、見ていよう。 | 嵐の中を渡る雷翼の巨神を、その目で見る |
-| 嵐を渡る翼 | `heart` | あの翼の奥にも、きっと鼓動がある。背へ渡る道を探そう。 | 翼の奥で脈打つものを、止める |
+| 嵐を渡る翼 | `see` | 雷の晩、雲の中を大きな鳥が渡るという。<br>風に逆らって動く嵐を見かけたら、それかもしれない。 | 風に逆らって動く嵐を、その目で見る |
+| 嵐を渡る翼 | `board` | 雷翼の巨神は、午後の夕立の刻に、近くでいちばん高い峰へ降りてくるらしい。<br>足もとに立つ風の柱に入れば、背まで運ばれるかもしれない。 | 夕立の刻に、昇り風に乗って背へ上がる |
+| 嵐を渡る翼 | `trials` | 鳥の背の中に、風の民の字が残っている。<br>三つの風鳴り石を鳴らせば、奥へ続く門が開くのだろう。 | 背の中の碑文を読む<br>風鳴り石を一つ鳴らす |
+| 嵐を渡る翼 | `heart` | 竜骨の門の下で、雷のような鼓動が打っている。<br>音は、上からではなく、下から昇ってくる。 | 竜骨の奥で脈打つものを、止める |
 | 嵐を渡る翼 | `report` | 三つ目の欠片が手に入った。手が、少し焦げた匂いがする。<br>村へ戻ろう。 | 語り部に、欠片を見せる<br>イサナに、嵐の上の話をする |
 | 灰の昇る山 | `rumor` | 残りは一つ。イサナは、旅の途中でいろいろなものを見ている。<br>火のところへ、話を聞きに行こう。 | イサナに、四つ目のことを尋ねる |
 | 灰の昇る山 | `see` | 灰が空へ昇っていく山があるという。火の気のない晩でも、その山だけはうっすら赤い。 | 灰の昇る山で、余燼の巨神を見る |
