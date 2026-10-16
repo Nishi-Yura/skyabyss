@@ -485,6 +485,8 @@
 
 ### 6.5 アイテムの性能（案。03 の 9.8節の目安と 10章の必要 Lv に寄せる）
 
+> 2026-10-17 実装済み（担当 5）。実際の値と、この表からの違い（弓の矢 ×1.75・感電 2.5 ブロック、羽衣の 4 部位の「嵐の衣」、鉤槍の空中は大きな相手には自分が宙にいるときだけ、弓に特性なし）は [03 の 12 章](03_gear_and_endgame.md#12-雷翼の装備の実装2026-10-17)。絵は 3 案から推奨（03 の 12.4節）。自己テスト `SELFTEST storm gear PASSED`。
+
 必要 Lv はレア以下 20、伝説以上 22（03 の 10.2節）。
 
 | アイテム | 性能 |
@@ -943,22 +945,22 @@
 | 技 | 雷渡り（予告の線 1.0 秒、6〜9 秒ごと・怒り 4〜6 秒、行き先は人に近い柱）、接地した柱に着くと 4 秒落ちる（受ける傷 1.5 倍）、飛びかかり（溜め 0.8 秒・怒り 0.6 秒）、爪の連打 3 回、50% で雷鳴の咆哮（輪 6・雷蛾 2）、床で 10 秒たつと柱へ戻る | `titan/storm/raiju/Raiju.java` |
 | 巣 | 直径 26・高さ 15 の洞、柱 6 本（半径 9、60 度おき、銅の電球つき）、根元の栓（レバー。8 秒接地・待ち 4 秒、電球が消え根元が暗くなる）、前室と入口 | `RaijuNest.java` |
 | 戦い | `BossRoom`（5 秒の集合、封印、巣の外へ出たら戻す、誰もいなければ放棄、ピースフルで眠る）。体力 430 ×（1 + 0.6 ×（人数 − 1））を受ける傷で割る | `RaijuBattle.java` |
-| 報酬 | 6.2 節の表を参加者ごとに抽選（品は ID で持ち、登録されていない品は抽選から外す）。経験値 50、成長 170（初回 +80、推奨 24）、合図 `raiju_stilled`。`GrowthRewards.MOD_ENEMIES` に `raiju`（170 / Lv 24）の一行（試練の外で呼ばれたとき用） | `RaijuLoot.java`、`rpg/GrowthRewards.java` |
+| 報酬 | 6.2 節の表を参加者ごとに抽選（品は装備の担当の `StormGear` の ID で持ち、登録されていない品は抽選から外す）。雷獣の爪 5% は図鑑の品なので `StormGearLoot.rollRaiju` で引く（特性・図鑑の記録は装備の担当の決まり）。経験値 50、成長 170（初回 +80、推奨 24）、合図 `raiju_stilled`。`GrowthRewards.MOD_ENEMIES` に `raiju`（170 / Lv 24）の一行（試練の外で呼ばれたとき用） | `RaijuLoot.java`、`rpg/GrowthRewards.java` |
 | バーと音 | 段のない 10 段のバー（青白）、怒り・痺れの札。音 10（独自合成） | `tools/gen_raiju_bar.py`、`tools/gen_raiju_sounds.py`、`client/RaijuClient.java` |
 | 文 | 鍵は伝承の担当の `skyabyss_storm` に合わせた（`message.skyabyss.raiju.stunned`・`message.skyabyss.raiju.grounded`・`subtitles.skyabyss.raiju_leap`・`subtitles.skyabyss.ground_plug`）。この担当だけの鍵は `lang/parts/raiju.json`（`{"鍵": {"en", "ja"}}`）に書き、`tools/gen_storm_lore.py` でまとめた。仮の名前空間 `skyabyss_raiju` と `tools/gen_raiju_lang.py` は消した | `assets/skyabyss_storm/lang/parts/raiju.json` |
 | コマンド | `/skyabyss raiju go`・`start`・`win`・`reset`・`rebuild`・`action <技>`・`ground <柱>`・`shot <人> <技>`・`status` | `RaijuCommands.java` |
-| 背中の API | 背中の担当の本物がまだ無いので、`StormRods`・`StormStrike`・`StormBackLayout` は同じ名前の仮の実装（`titan/storm/back/`）。背中のディメンションが無いあいだ、巣はオーバーワールドの空に仮に建てる | `titan/storm/back/*` |
+| 背中の API | 背中の担当の本物がまだ無いので、`StormRods`・`StormStrike`・`StormBackLayout` は同じ名前の仮の実装（`titan/storm/back/`。`StormBackLayout` は担当 4 と同じ中身）。背中のディメンションが無いあいだ、巣はオーバーワールドの空に仮に建てる | `titan/storm/back/*` |
 
 #### 17.3.2 結果
 
-- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST raiju PASSED**（仮の巣、6/6 の技が最後まで回る。抽選から外した品: `thunder_wing_shard`・`cloudgap_fruit`・`raiju_claw`）、全体も `SELFTEST PASSED`。
+- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST raiju PASSED**（仮の巣、6/6 の技が最後まで回る。装備の担当の品が入ったので、抽選から外す品はない）、全体も `SELFTEST PASSED`。
 - 自己テストで確かめること: 素材とアニメの名前、技の予告と時間・傷（5.2 節の数）、文の鍵が `skyabyss_storm` の日英にある、巣の形（柱 6 本・半径 9・高さ 15・床・天井・入口・前室）、栓（接地・待ち・見た目）、封印・保存されない・人数の倍率、接地した柱で落ちる（1.5 倍）、接地していない柱には乗る、50% の咆哮、巣の外から戻す・放棄、報酬の確率と数・作られていない品は出さない・いない人の分は預かる、撃破の記録とやり直し。
 - 試遊はしていない（指示により。確かめはコンパイル・自己テスト・データの検査だけ）。
 
 #### 17.3.3 合わせるときに
 
 1. 担当 1 の `StormRods`・`StormStrike`・`StormBackLayout` が入ったら、`titan/storm/back/` の仮の実装を消し、巣の座標を本物の部屋に合わせる（`RaijuNest` は `StormBackLayout.RAIJU_NEST`・`RAIJU_NEST_CEILING` を読む）。担当 4 も同じ名前の仮の実装を持つので、合わせるときにどちらか一つにする。
-2. 担当 2・5 の品（欠片・干し果・雷獣の爪）が登録されると、表のまま抽選に入る。
+2. 担当 5 の品（欠片・干し果・雷獣の爪）は登録済み（m1-sky-pass に入った `item/storm`）。
 3. 東の試練の風鳴り石は、雷獣を倒したあとに鳴らせる（`message.skyabyss.raiju.east_stone_ready`）。石の置き場は担当 1。
 
 ### 17.6 担当 6: 伝承とクエスト（2026-10-17）

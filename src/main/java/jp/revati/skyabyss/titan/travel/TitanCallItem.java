@@ -58,8 +58,9 @@ public class TitanCallItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.skyabyss.stone_whale_call.desc").withStyle(s -> s.withColor(0x7FD6D0).withItalic(true)));
-        tooltip.add(Component.translatable("item.skyabyss.stone_whale_call.use").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("item.skyabyss.stone_whale_call.rule").withStyle(ChatFormatting.DARK_GRAY));
+        String key = getDescriptionId();
+        tooltip.add(Component.translatable(key + ".desc").withStyle(s -> s.withColor(0x7FD6D0).withItalic(true)));
+        tooltip.add(Component.translatable(key + ".use").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable(key + ".rule").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

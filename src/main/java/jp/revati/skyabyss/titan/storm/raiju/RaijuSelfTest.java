@@ -314,7 +314,12 @@ public final class RaijuSelfTest {
             none += RaijuLoot.roll(random, id -> false).size();
         }
         check(none == 0, "unmade items were drawn", failures);
+        check(Math.abs(RaijuLoot.CLAW_CHANCE - 0.05f) < 1e-6 && RaijuLoot.TABLE.stream().noneMatch(e -> e.id().equals(RaijuLoot.CLAW)),
+                "raiju claw should be drawn once at 5% through StormGearLoot", failures);
         List<String> missing = new ArrayList<>();
+        if (!RaijuLoot.registered(RaijuLoot.CLAW)) {
+            missing.add("raiju_claw");
+        }
         for (RaijuLoot.Entry e : RaijuLoot.TABLE) {
             if (!RaijuLoot.registered(e.id())) {
                 missing.add(e.id().substring(e.id().indexOf(':') + 1));

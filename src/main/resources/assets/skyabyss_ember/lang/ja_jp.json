@@ -1,0 +1,23 @@
+{
+  "__ember.0": "骨組み (熱・傷の種類)",
+  "death.attack.skyabyss.heat": "%1$sは焦げついた",
+  "death.attack.skyabyss.heat.player": "%1$sは%2$sから逃れきれず、焦げついた",
+  "death.attack.skyabyss.heat_burst": "%1$sは噴き上がる熱に焼かれた",
+  "death.attack.skyabyss.heat_burst.player": "%1$sは%2$sの熱に焼かれた",
+  "death.attack.skyabyss.engulfed": "%1$sは熾に呑まれた",
+  "death.attack.skyabyss.engulfed.player": "%1$sは%2$sに押され、熾に呑まれた",
+  "subtitles.skyabyss.ember_heat_warn": "体が焦げはじめる",
+  "subtitles.skyabyss.ember_scorch": "焦げる",
+  "__ember.A": "地上 (message.skyabyss.ember.surface.*、commands.skyabyss.ember.*、title.skyabyss.ember_back)",
+  "__ember.B": "体と広間 (message.skyabyss.ember.back.*、whisper.*、gui.skyabyss.ember_heat.*、sign.skyabyss.lore_ember_*)",
+  "message.skyabyss.ember.back.arrived": "熱い。足もとの灰が、呼吸のように温かい。",
+  "message.skyabyss.ember.back.leaving": "灰の段を下りると、夜気が冷たかった。",
+  "message.skyabyss.ember.back.pushed_back": "灰に押し戻された",
+  "__ember.C1": "灰の道 (message.skyabyss.ember.trial.west.*)",
+  "__ember.C2": "鍛えの間 (message.skyabyss.ember.trial.east.*)",
+  "__ember.C3": "火守り (message.skyabyss.ember.trial.south.*)",
+  "__ember.D": "敵 (entity.skyabyss.*、message.skyabyss.ember.mob.*)",
+  "__ember.E": "鍛え手 (message.skyabyss.ember.smith.*)",
+  "__ember.F": "心臓 (message.skyabyss.ember.heart.*)",
+  "__ember.G": "品・伝承 (item.skyabyss.*、tooltip.skyabyss.ember.*)"
+}

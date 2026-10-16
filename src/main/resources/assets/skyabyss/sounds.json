@@ -1,23 +1,155 @@
 {
-  "coral_thrall_ambient": {"subtitle": "subtitles.skyabyss.coral_thrall_ambient", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_ambient"}]},
-  "coral_thrall_hurt": {"subtitle": "subtitles.skyabyss.coral_thrall_hurt", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_hurt"}]},
-  "coral_thrall_death": {"subtitle": "subtitles.skyabyss.coral_thrall_death", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_death"}]},
-  "coral_thrall_thrust": {"subtitle": "subtitles.skyabyss.coral_thrall_thrust", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_thrust"}]},
-  "coral_thrall_petrify": {"subtitle": "subtitles.skyabyss.coral_thrall_petrify", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_petrify"}]},
-  "coral_thrall_wake": {"subtitle": "subtitles.skyabyss.coral_thrall_wake", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_wake"}]},
-  "coral_thrall_stone_tap": {"subtitle": "subtitles.skyabyss.coral_thrall_stone_tap", "sounds": [{"name": "skyabyss:tide_mobs/coral_thrall_stone_tap"}]},
-  "reef_scuttler_ambient": {"subtitle": "subtitles.skyabyss.reef_scuttler_ambient", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_ambient"}]},
-  "reef_scuttler_hurt": {"subtitle": "subtitles.skyabyss.reef_scuttler_hurt", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_hurt"}]},
-  "reef_scuttler_death": {"subtitle": "subtitles.skyabyss.reef_scuttler_death", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_death"}]},
-  "reef_scuttler_step": {"sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_step"}]},
-  "reef_scuttler_flip": {"subtitle": "subtitles.skyabyss.reef_scuttler_flip", "sounds": [{"name": "skyabyss:tide_mobs/reef_scuttler_flip"}]},
-  "bubble_puffer_ambient": {"subtitle": "subtitles.skyabyss.bubble_puffer_ambient", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_ambient"}]},
-  "bubble_puffer_hurt": {"subtitle": "subtitles.skyabyss.bubble_puffer_hurt", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_hurt"}]},
-  "bubble_puffer_death": {"subtitle": "subtitles.skyabyss.bubble_puffer_death", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_death"}]},
-  "bubble_puffer_shoot": {"subtitle": "subtitles.skyabyss.bubble_puffer_shoot", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_shoot"}]},
-  "bubble_puffer_inflate": {"subtitle": "subtitles.skyabyss.bubble_puffer_inflate", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_inflate"}]},
-  "bubble_puffer_deflate": {"subtitle": "subtitles.skyabyss.bubble_puffer_deflate", "sounds": [{"name": "skyabyss:tide_mobs/bubble_puffer_deflate"}]},
-  "bubble_pop": {"subtitle": "subtitles.skyabyss.bubble_pop", "sounds": [{"name": "skyabyss:tide_mobs/bubble_pop"}]},
+  "coral_thrall_ambient": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_ambient"
+      }
+    ]
+  },
+  "coral_thrall_hurt": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_hurt"
+      }
+    ]
+  },
+  "coral_thrall_death": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_death",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_death"
+      }
+    ]
+  },
+  "coral_thrall_thrust": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_thrust",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_thrust"
+      }
+    ]
+  },
+  "coral_thrall_petrify": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_petrify",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_petrify"
+      }
+    ]
+  },
+  "coral_thrall_wake": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_wake",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_wake"
+      }
+    ]
+  },
+  "coral_thrall_stone_tap": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_stone_tap",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/coral_thrall_stone_tap"
+      }
+    ]
+  },
+  "reef_scuttler_ambient": {
+    "subtitle": "subtitles.skyabyss.reef_scuttler_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/reef_scuttler_ambient"
+      }
+    ]
+  },
+  "reef_scuttler_hurt": {
+    "subtitle": "subtitles.skyabyss.reef_scuttler_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/reef_scuttler_hurt"
+      }
+    ]
+  },
+  "reef_scuttler_death": {
+    "subtitle": "subtitles.skyabyss.reef_scuttler_death",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/reef_scuttler_death"
+      }
+    ]
+  },
+  "reef_scuttler_step": {
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/reef_scuttler_step"
+      }
+    ]
+  },
+  "reef_scuttler_flip": {
+    "subtitle": "subtitles.skyabyss.reef_scuttler_flip",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/reef_scuttler_flip"
+      }
+    ]
+  },
+  "bubble_puffer_ambient": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_ambient"
+      }
+    ]
+  },
+  "bubble_puffer_hurt": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_hurt"
+      }
+    ]
+  },
+  "bubble_puffer_death": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_death",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_death"
+      }
+    ]
+  },
+  "bubble_puffer_shoot": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_shoot",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_shoot"
+      }
+    ]
+  },
+  "bubble_puffer_inflate": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_inflate",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_inflate"
+      }
+    ]
+  },
+  "bubble_puffer_deflate": {
+    "subtitle": "subtitles.skyabyss.bubble_puffer_deflate",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_puffer_deflate"
+      }
+    ]
+  },
+  "bubble_pop": {
+    "subtitle": "subtitles.skyabyss.bubble_pop",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_mobs/bubble_pop"
+      }
+    ]
+  },
   "sky_wingbeat": {
     "subtitle": "subtitles.skyabyss.sky_wingbeat",
     "sounds": [
@@ -237,104 +369,434 @@
   },
   "tide_song": {
     "subtitle": "subtitles.skyabyss.tide_song",
-    "sounds": [{"name": "skyabyss:tide/song", "attenuation_distance": 16}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide/song",
+        "attenuation_distance": 16
+      }
+    ]
   },
   "tide_surf": {
     "subtitle": "subtitles.skyabyss.tide_surf",
-    "sounds": [{"name": "skyabyss:tide/surf"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide/surf"
+      }
+    ]
   },
   "tide_gate": {
     "subtitle": "subtitles.skyabyss.tide_gate",
-    "sounds": [{"name": "skyabyss:tide/gate"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide/gate"
+      }
+    ]
   },
   "tide_step": {
     "subtitle": "subtitles.skyabyss.tide_step",
-    "sounds": [{"name": "skyabyss:tide/step"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide/step"
+      }
+    ]
   },
   "tide_back_waves": {
     "subtitle": "subtitles.skyabyss.tide_back_waves",
-    "sounds": [{"name": "skyabyss:tide/back_waves", "stream": true}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide/back_waves",
+        "stream": true
+      }
+    ]
   },
   "tide_heart_beat": {
     "subtitle": "subtitles.skyabyss.tide_heart_beat",
-    "sounds": [{"name": "skyabyss:tide_heart/beat"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/beat"
+      }
+    ]
   },
   "tide_heart_roar": {
     "subtitle": "subtitles.skyabyss.tide_heart_roar",
-    "sounds": [{"name": "skyabyss:tide_heart/roar", "attenuation_distance": 24}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/roar",
+        "attenuation_distance": 24
+      }
+    ]
   },
   "tide_heart_breath": {
     "subtitle": "subtitles.skyabyss.tide_heart_breath",
-    "sounds": [{"name": "skyabyss:tide_heart/breath"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/breath"
+      }
+    ]
   },
   "tide_heart_shell": {
     "subtitle": "subtitles.skyabyss.tide_heart_shell",
-    "sounds": [{"name": "skyabyss:tide_heart/shell"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/shell"
+      }
+    ]
   },
   "tide_heart_whirl": {
     "subtitle": "subtitles.skyabyss.tide_heart_whirl",
-    "sounds": [{"name": "skyabyss:tide_heart/whirl"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/whirl"
+      }
+    ]
   },
   "tide_heart_flood": {
     "subtitle": "subtitles.skyabyss.tide_heart_flood",
-    "sounds": [{"name": "skyabyss:tide_heart/flood", "attenuation_distance": 24}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/flood",
+        "attenuation_distance": 24
+      }
+    ]
   },
   "tide_heart_spear": {
     "subtitle": "subtitles.skyabyss.tide_heart_spear",
-    "sounds": [{"name": "skyabyss:tide_heart/spear"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/spear"
+      }
+    ]
   },
   "tide_heart_bubble": {
     "subtitle": "subtitles.skyabyss.tide_heart_bubble",
-    "sounds": [{"name": "skyabyss:tide_heart/bubble"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/bubble"
+      }
+    ]
   },
   "tide_heart_pearl": {
     "subtitle": "subtitles.skyabyss.tide_heart_pearl",
-    "sounds": [{"name": "skyabyss:tide_heart/pearl"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/pearl"
+      }
+    ]
   },
   "tide_heart_ebb": {
     "subtitle": "subtitles.skyabyss.tide_heart_ebb",
-    "sounds": [{"name": "skyabyss:tide_heart/ebb"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/ebb"
+      }
+    ]
   },
   "tide_heart_wave": {
     "subtitle": "subtitles.skyabyss.tide_heart_wave",
-    "sounds": [{"name": "skyabyss:tide_heart/wave", "attenuation_distance": 24}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/wave",
+        "attenuation_distance": 24
+      }
+    ]
   },
   "tide_heart_rain": {
     "subtitle": "subtitles.skyabyss.tide_heart_rain",
-    "sounds": [{"name": "skyabyss:tide_heart/rain"}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/rain"
+      }
+    ]
   },
   "tide_heart_death": {
     "subtitle": "subtitles.skyabyss.tide_heart_death",
-    "sounds": [{"name": "skyabyss:tide_heart/death", "attenuation_distance": 24}]
+    "sounds": [
+      {
+        "name": "skyabyss:tide_heart/death",
+        "attenuation_distance": 24
+      }
+    ]
   },
-  "tide_horn_low": {"subtitle": "subtitles.skyabyss.tide_horn_low", "sounds": [{"name": "skyabyss:tide_back/tide_horn_low"}]},
-  "tide_horn_high": {"subtitle": "subtitles.skyabyss.tide_horn_high", "sounds": [{"name": "skyabyss:tide_back/tide_horn_high"}]},
-  "tide_chime": {"subtitle": "subtitles.skyabyss.tide_chime", "sounds": [{"name": "skyabyss:tide_back/tide_chime"}]},
-  "tide_pearl_take": {"subtitle": "subtitles.skyabyss.tide_pearl_take", "sounds": [{"name": "skyabyss:tide_back/tide_pearl_take"}]},
-  "tide_pearl_return": {"subtitle": "subtitles.skyabyss.tide_pearl_return", "sounds": [{"name": "skyabyss:tide_back/tide_pearl_return"}]},
-  "tide_plug_flow": {"subtitle": "subtitles.skyabyss.tide_plug_flow", "sounds": [{"name": "skyabyss:tide_back/tide_plug_flow"}]},
-  "tide_lock": {"subtitle": "subtitles.skyabyss.tide_lock", "sounds": [{"name": "skyabyss:tide_back/tide_lock"}]},
-  "reef_nest_open": {"subtitle": "subtitles.skyabyss.reef_nest_open", "sounds": [{"name": "skyabyss:tide_back/reef_nest_open"}]},
-  "reef_nest_close": {"subtitle": "subtitles.skyabyss.reef_nest_close", "sounds": [{"name": "skyabyss:tide_back/reef_nest_close"}]},
-  "reef_nest_break": {"subtitle": "subtitles.skyabyss.reef_nest_break", "sounds": [{"name": "skyabyss:tide_back/reef_nest_break"}]},
-  "tide_beckoner_ambient": {"subtitle": "subtitles.skyabyss.tide_beckoner_ambient", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_ambient"}]},
-  "tide_beckoner_hurt": {"subtitle": "subtitles.skyabyss.tide_beckoner_hurt", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_hurt"}]},
-  "tide_beckoner_death": {"subtitle": "subtitles.skyabyss.tide_beckoner_death", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_death"}]},
-  "tide_beckoner_raise": {"subtitle": "subtitles.skyabyss.tide_beckoner_raise", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_raise"}]},
-  "tide_beckoner_slam": {"subtitle": "subtitles.skyabyss.tide_beckoner_slam", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_slam"}]},
-  "tide_beckoner_beckon": {"subtitle": "subtitles.skyabyss.tide_beckoner_beckon", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_beckon"}]},
-  "tide_beckoner_breath": {"subtitle": "subtitles.skyabyss.tide_beckoner_breath", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_breath"}]},
-  "tide_beckoner_burrow": {"subtitle": "subtitles.skyabyss.tide_beckoner_burrow", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_burrow"}]},
-  "tide_beckoner_emerge": {"subtitle": "subtitles.skyabyss.tide_beckoner_emerge", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_emerge"}]},
-  "tide_beckoner_roar": {"subtitle": "subtitles.skyabyss.tide_beckoner_roar", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_roar"}]},
-  "raiju_ambient": {"subtitle": "subtitles.skyabyss.raiju_ambient", "sounds": [{"name": "skyabyss:raiju/ambient"}]},
-  "raiju_hurt": {"subtitle": "subtitles.skyabyss.raiju_hurt", "sounds": [{"name": "skyabyss:raiju/hurt"}]},
-  "raiju_death": {"subtitle": "subtitles.skyabyss.raiju_death", "sounds": [{"name": "skyabyss:raiju/death"}]},
-  "raiju_rail_charge": {"subtitle": "subtitles.skyabyss.raiju_rail_charge", "sounds": [{"name": "skyabyss:raiju/rail_charge"}]},
-  "raiju_rail": {"subtitle": "subtitles.skyabyss.raiju_leap", "sounds": [{"name": "skyabyss:raiju/rail"}]},
-  "raiju_pounce": {"subtitle": "subtitles.skyabyss.raiju_pounce", "sounds": [{"name": "skyabyss:raiju/pounce"}]},
-  "raiju_claw": {"subtitle": "subtitles.skyabyss.raiju_claw", "sounds": [{"name": "skyabyss:raiju/claw"}]},
-  "raiju_roar": {"subtitle": "subtitles.skyabyss.raiju_roar", "sounds": [{"name": "skyabyss:raiju/roar"}]},
-  "raiju_stun": {"subtitle": "subtitles.skyabyss.raiju_stun", "sounds": [{"name": "skyabyss:raiju/stun"}]},
-  "raiju_ground": {"subtitle": "subtitles.skyabyss.ground_plug", "sounds": [{"name": "skyabyss:raiju/ground"}]}
+  "tide_horn_low": {
+    "subtitle": "subtitles.skyabyss.tide_horn_low",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_horn_low"
+      }
+    ]
+  },
+  "tide_horn_high": {
+    "subtitle": "subtitles.skyabyss.tide_horn_high",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_horn_high"
+      }
+    ]
+  },
+  "tide_chime": {
+    "subtitle": "subtitles.skyabyss.tide_chime",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_chime"
+      }
+    ]
+  },
+  "tide_pearl_take": {
+    "subtitle": "subtitles.skyabyss.tide_pearl_take",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_pearl_take"
+      }
+    ]
+  },
+  "tide_pearl_return": {
+    "subtitle": "subtitles.skyabyss.tide_pearl_return",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_pearl_return"
+      }
+    ]
+  },
+  "tide_plug_flow": {
+    "subtitle": "subtitles.skyabyss.tide_plug_flow",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_plug_flow"
+      }
+    ]
+  },
+  "tide_lock": {
+    "subtitle": "subtitles.skyabyss.tide_lock",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_lock"
+      }
+    ]
+  },
+  "reef_nest_open": {
+    "subtitle": "subtitles.skyabyss.reef_nest_open",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/reef_nest_open"
+      }
+    ]
+  },
+  "reef_nest_close": {
+    "subtitle": "subtitles.skyabyss.reef_nest_close",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/reef_nest_close"
+      }
+    ]
+  },
+  "reef_nest_break": {
+    "subtitle": "subtitles.skyabyss.reef_nest_break",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/reef_nest_break"
+      }
+    ]
+  },
+  "tide_beckoner_ambient": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_ambient"
+      }
+    ]
+  },
+  "tide_beckoner_hurt": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_hurt"
+      }
+    ]
+  },
+  "tide_beckoner_death": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_death",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_death"
+      }
+    ]
+  },
+  "tide_beckoner_raise": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_raise",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_raise"
+      }
+    ]
+  },
+  "tide_beckoner_slam": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_slam",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_slam"
+      }
+    ]
+  },
+  "tide_beckoner_beckon": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_beckon",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_beckon"
+      }
+    ]
+  },
+  "tide_beckoner_breath": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_breath",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_breath"
+      }
+    ]
+  },
+  "tide_beckoner_burrow": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_burrow",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_burrow"
+      }
+    ]
+  },
+  "tide_beckoner_emerge": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_emerge",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_emerge"
+      }
+    ]
+  },
+  "tide_beckoner_roar": {
+    "subtitle": "subtitles.skyabyss.tide_beckoner_roar",
+    "sounds": [
+      {
+        "name": "skyabyss:tide_back/tide_beckoner_roar"
+      }
+    ]
+  },
+  "ember_heat_warn": {
+    "subtitle": "subtitles.skyabyss.ember_heat_warn",
+    "sounds": [
+      {
+        "name": "minecraft:fire/ignite",
+        "pitch": 0.6
+      }
+    ]
+  },
+  "ember_scorch": {
+    "subtitle": "subtitles.skyabyss.ember_scorch",
+    "sounds": [
+      {
+        "name": "minecraft:random/fizz",
+        "volume": 0.5
+      }
+    ]
+  },
+  "tide_call": {
+    "subtitle": "subtitles.skyabyss.tide_call",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/tide_call"
+      }
+    ]
+  },
+  "tide_depart": {
+    "subtitle": "subtitles.skyabyss.tide_depart",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/tide_depart"
+      }
+    ]
+  },
+  "tide_current": {
+    "subtitle": "subtitles.skyabyss.tide_current",
+    "sounds": [
+      {
+        "name": "skyabyss:titan/travel/tide_current"
+      }
+    ]
+  },
+  "raiju_ambient": {
+    "subtitle": "subtitles.skyabyss.raiju_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/ambient"
+      }
+    ]
+  },
+  "raiju_hurt": {
+    "subtitle": "subtitles.skyabyss.raiju_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/hurt"
+      }
+    ]
+  },
+  "raiju_death": {
+    "subtitle": "subtitles.skyabyss.raiju_death",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/death"
+      }
+    ]
+  },
+  "raiju_rail_charge": {
+    "subtitle": "subtitles.skyabyss.raiju_rail_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/rail_charge"
+      }
+    ]
+  },
+  "raiju_rail": {
+    "subtitle": "subtitles.skyabyss.raiju_leap",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/rail"
+      }
+    ]
+  },
+  "raiju_pounce": {
+    "subtitle": "subtitles.skyabyss.raiju_pounce",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/pounce"
+      }
+    ]
+  },
+  "raiju_claw": {
+    "subtitle": "subtitles.skyabyss.raiju_claw",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/claw"
+      }
+    ]
+  },
+  "raiju_roar": {
+    "subtitle": "subtitles.skyabyss.raiju_roar",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/roar"
+      }
+    ]
+  },
+  "raiju_stun": {
+    "subtitle": "subtitles.skyabyss.raiju_stun",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/stun"
+      }
+    ]
+  },
+  "raiju_ground": {
+    "subtitle": "subtitles.skyabyss.ground_plug",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/ground"
+      }
+    ]
+  }
 }

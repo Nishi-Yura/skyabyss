@@ -73,7 +73,7 @@ public final class RecordCommands {
     }
 
     private static String tab(String tab) {
-        return RecordSnapshot.TAB_IDS.contains(tab) ? tab : "";
+        return RecordSnapshot.TAB_IDS.contains(RecordSnapshot.parentTab(tab)) ? tab : "";
     }
 
     private static int openSelf(CommandContext<CommandSourceStack> ctx, String tab) throws CommandSyntaxException {

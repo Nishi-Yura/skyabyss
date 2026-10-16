@@ -22,8 +22,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 雷獣の報酬 (12 の 6.2節)。必ず出る品はない。参加者それぞれに別々に抽選し、持ち物へ直接入れる (受け取れない人の分は預かる)。
-// 品は ID で持つ。まだ登録されていない品 (欠片・干し果は敵の担当、雷獣の爪は装備の担当が作る) は抽選から外す。
-// 品が登録されれば、この表のまま出る
+// 品は ID で持つ (装備の担当の StormGear の ID)。まだ登録されていない品は抽選から外す。
+// 雷獣の爪 (5%) は図鑑の品なので、装備の担当の StormGearLoot.rollRaiju で引く (特性を付け、図鑑に記す)
 public final class RaijuLoot {
     public static final int VANILLA_XP = 50;
     // 成長の経験値 (6.6節): 170、初回 +80、推奨 Lv 24 から離れると減る
@@ -32,10 +32,11 @@ public final class RaijuLoot {
     public static final int LEVEL = 24;
     public static final String SIGNAL = "raiju_stilled";
 
-    public static final String SHARD = id("thunder_wing_shard");
+    public static final String SHARD = jp.revati.skyabyss.item.storm.StormGear.SHARD;
     public static final String RESONANCE_SHARD = id("resonance_shard");
-    public static final String FRUIT = id("cloudgap_fruit");
-    public static final String CLAW = id("raiju_claw");
+    public static final String FRUIT = jp.revati.skyabyss.item.storm.StormGear.FRUIT;
+    public static final String CLAW = jp.revati.skyabyss.item.storm.StormGear.CLAW;
+    public static final float CLAW_CHANCE = jp.revati.skyabyss.item.storm.StormGear.RAIJU_CLAW_CHANCE;
 
     public record Entry(String id, float chance, int min, int max) {
     }
@@ -43,8 +44,7 @@ public final class RaijuLoot {
     public static final List<Entry> TABLE = List.of(
             new Entry(SHARD, 0.60f, 2, 4),
             new Entry(RESONANCE_SHARD, 0.35f, 1, 2),
-            new Entry(FRUIT, 0.20f, 1, 2),
-            new Entry(CLAW, 0.05f, 1, 1));
+            new Entry(FRUIT, 0.20f, 1, 2));
 
     private RaijuLoot() {
     }
@@ -89,6 +89,7 @@ public final class RaijuLoot {
             for (Draw d : roll(level.random, RaijuLoot::registered)) {
                 item(d.id()).ifPresent(i -> items.add(new ItemStack(i, d.count())));
             }
+            items.addAll(jp.revati.skyabyss.item.storm.StormGearLoot.rollRaiju(server, id, level.random));
             int held = TitanLoot.handOver(server, id, p, items, VANILLA_XP);
             if (p == null) {
                 continue;
