@@ -107,6 +107,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
+        // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
+        steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
+        steps.add(Step.once("raiju", 40, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }

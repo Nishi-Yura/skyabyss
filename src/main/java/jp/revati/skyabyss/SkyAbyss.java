@@ -64,6 +64,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
         // 1 章の終わり (天の鍵、ベータの終わり)。docs/design/14_beta.md
         jp.revati.skyabyss.story.StorySetup.register(modEventBus);
+        // 雷翼の中ボス 雷獣 (12 の 5.2節)。登録は titan.storm.raiju パッケージにまとめてある
+        jp.revati.skyabyss.titan.storm.raiju.RaijuSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

@@ -70,6 +70,8 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
+        // 雷翼の中ボス 雷獣 (12 の 6.6節。推奨レベル 24)。試練の雷獣は参加者の一覧で配る (RaijuLoot)。ここは試練の外で呼ばれたもの
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, 24));
     }
 
 
