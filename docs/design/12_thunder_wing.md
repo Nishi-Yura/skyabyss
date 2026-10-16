@@ -953,7 +953,8 @@
 #### 17.6.2 結果
 
 - `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST storm lore PASSED**、ほかの系統もすべて PASSED（`SELFTEST PASSED`）。伝承の自己テストは「待っている: raiju, storm_back, thunder_wing, thunder_wing_heart」と一行書く。
-- 看板のはみ出し 0（9 枚、日英）。英語でいちばん広い行は 86 px（"Bones are hollow"。下の表）。
+- 看板のはみ出し 0（9 枚、日英）。英語でいちばん広い行は 86 px（"Bones are hollow"。下の表）。クライアントの本物の字の幅でも 0（`SignFit (client): checked 18 signs ... 0 problem(s)`）。
+- ゲーム画面（`runClientTest`、854×480、GUI 拡大率 2、日本語）: コマンドで伝承と合図を送り、メインを「試練」→「心臓」→「報告」まで進めた。左の追跡表示（「背の中の碑文を読む（1/2）」「風鳴り石を一つ鳴らす」）、クエストログ（6 段のうち 4 段目、依頼・書き付け・やること）、伝承の書（一章に「風に逆らう嵐」「風の民の遺跡」「尾の間の碑文」「眼の間の碑文」、碑文の写しと本文）、語り部への報告の会話を見た。画像は `docs/review/ingame_storm_{questlog,tracker,lore_eye}.png`。直したこと: クエストログで書き付けの「門が開／くのだろう」が行をまたいだので、文の切れ目で改行した。ダンジョンの試遊はユーザーが行う（指示により、ここでは文の見え方だけ確かめた）。
 
 #### 17.6.3 見直し（推敲 3 周）
 
