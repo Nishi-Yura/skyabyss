@@ -70,6 +70,8 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
+        // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
+        jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
     }
 
 
