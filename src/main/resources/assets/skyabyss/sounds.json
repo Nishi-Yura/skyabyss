@@ -1,4 +1,7 @@
 {
+  "ember_back_ambient": {"subtitle": "subtitles.skyabyss.ember_back_ambient", "sounds": [{"name": "minecraft:ambient/nether/basalt_deltas/loop", "stream": true}]},
+  "ember_stone_ring": {"subtitle": "subtitles.skyabyss.ember_stone_ring", "sounds": [{"name": "minecraft:block/bell/resonate", "pitch": 0.6}]},
+  "ember_forge_dim": {"subtitle": "subtitles.skyabyss.ember_forge_dim", "sounds": [{"name": "minecraft:block/fire/extinguish", "pitch": 0.5}]},
   "coral_thrall_ambient": {
     "subtitle": "subtitles.skyabyss.coral_thrall_ambient",
     "sounds": [
