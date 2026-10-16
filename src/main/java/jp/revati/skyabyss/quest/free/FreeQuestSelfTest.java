@@ -91,7 +91,9 @@ public final class FreeQuestSelfTest {
 
     static List<QuestDef> freeQuests() {
         // 1 章の続きのクエスト (潮殻〜余燼の段階で開くもの。story/StorySelfTest が確かめる) は数えない
+        // 雷翼の背の周回 (段階 3。titan/storm/lore/StormLoreSelfTest が確かめる) も数えない
         return QuestManager.all().stream().filter(q -> !jp.revati.skyabyss.story.StorySelfTest.STORY_QUESTS.contains(q.id()))
+                .filter(q -> !jp.revati.skyabyss.titan.storm.lore.StormLore.QUESTS.contains(q.id()))
                 .filter(q -> q.board() || q.id().startsWith("sub_") && !List.of("sub_song", "sub_shards").contains(q.id()))
                 .toList();
     }

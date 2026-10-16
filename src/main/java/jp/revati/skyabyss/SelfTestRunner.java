@@ -85,6 +85,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
+        steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
@@ -92,6 +93,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
         steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
+        // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
+        steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
@@ -110,6 +113,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
+        // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
+        steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }

@@ -130,6 +130,9 @@ public final class LoreEvents {
         java.util.List<java.util.Map.Entry<String, net.minecraft.core.BlockPos>> signs = new java.util.ArrayList<>();
         if (player.level().dimension() == TitanTravel.TITAN_BACK) {
             TitanBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
+        } else if (player.level().dimension() == jp.revati.skyabyss.titan.storm.lore.StormLore.STORM_BACK) {
+            // 雷翼の背の碑文 (置き場所は背中の担当が StormLore に登録する)
+            signs.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.inscriptionPositions());
         } else {
             jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
         }
@@ -162,7 +165,8 @@ public final class LoreEvents {
         long now = level.getGameTime();
         int phase = player.getId() & 0xFF;
         LoreState state = Lore.state(player);
-        if ((now + phase) % 5 == 0 && (level.dimension() == TitanTravel.TITAN_BACK || level.dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK)
+        if ((now + phase) % 5 == 0 && (level.dimension() == TitanTravel.TITAN_BACK || level.dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK
+                || level.dimension() == jp.revati.skyabyss.titan.storm.lore.StormLore.STORM_BACK)
                 && anyLocked(state, "sign")) {
             readNearbyInscriptions(player);
         }

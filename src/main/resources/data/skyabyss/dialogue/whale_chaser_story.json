@@ -89,6 +89,29 @@
               }
             ]
           }
+        },
+        {
+          "id": "cock",
+          "goto": "ms_c_cock",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "quest",
+                "quest": "sub_old_map",
+                "is": "done"
+              },
+              {
+                "type": "not",
+                "of": {
+                  "type": "item",
+                  "item": "skyabyss:weathercock",
+                  "count": 1,
+                  "optional": true
+                }
+              }
+            ]
+          }
         }
       ]
     }
@@ -245,6 +268,31 @@
         {
           "type": "lore",
           "entry": "chapter1/storm_path"
+        }
+      ],
+      "next": "ms_c_map_done3"
+    },
+    "ms_c_map_done3": {
+      "face": "neutral",
+      "next": "ms_c_map_done4"
+    },
+    "ms_c_map_done4": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "ms_c_cock": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give",
+          "item": "skyabyss:weathercock",
+          "count": 1,
+          "optional": true
         }
       ],
       "options": [

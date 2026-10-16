@@ -8,7 +8,8 @@ import jp.revati.skyabyss.forge.ResonanceForgeMenu;
 import jp.revati.skyabyss.item.ModGear;
 import jp.revati.skyabyss.item.affix.Affix;
 import jp.revati.skyabyss.item.affix.AffixRules;
-import jp.revati.skyabyss.loot.TitanLoot;
+import jp.revati.skyabyss.item.TitanGearSet;
+import jp.revati.skyabyss.item.TitanGearSets;
 import jp.revati.skyabyss.registry.ModDataComponents;
 import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.client.gui.GuiGraphics;
@@ -63,6 +64,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private Button confirmButton;
     private Button keepButton;
     private final Button[] exchangeButtons = new Button[3];
+    // 交換の巨神を切り替える (岩鯨 → 潮殻 → …)
+    private Button titanButton;
+    private static int lastTitan;
+    private int titan = lastTitan;
     // 分解・今のまま・交換は、もう一度押して確定する
     private boolean dismantleArmed;
     private boolean keepArmed;
@@ -116,10 +121,16 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                     exchangeArmed = index;
                 } else {
                     exchangeArmed = -1;
-                    press(ResonanceForgeMenu.BUTTON_EXCHANGE + index);
+                    press(ResonanceForgeMenu.BUTTON_EXCHANGE + titan * ResonanceForgeMenu.EXCHANGE_STRIDE + index);
                 }
             }).bounds(sx + 98, topPos + EXCHANGE_Y + i * EXCHANGE_STEP, 44, 16).build());
         }
+        titanButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+            titan = (titan + 1) % Math.max(1, TitanGearSets.all().size());
+            lastTitan = titan;
+            exchangeArmed = -1;
+            updateButtons();
+        }).bounds(sx + 10, topPos + 140, 132, 16).build());
         updateButtons();
     }
 
@@ -165,7 +176,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
         enhanceButton.visible = enhanceTab;
         dismantleButton.visible = enhanceTab;
-        enhanceButton.active = ForgeRules.canEnhance(gear) && ForgeRules.affordable(minecraft.player, ForgeRules.enhanceCost(ModGear.enhance(gear)));
+        enhanceButton.active = ForgeRules.canEnhance(gear)
+                && ForgeRules.affordable(minecraft.player, ForgeRules.enhanceCost(ModGear.enhance(gear)), ForgeRules.shardItem(gear));
         dismantleButton.active = !gear.isEmpty();
         dismantleButton.setMessage(Component.translatable(dismantleArmed ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.dismantle"));
 
@@ -181,13 +193,19 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         keepButton.setMessage(Component.translatable(keepArmed ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.keep"));
         keepButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.keep_hint")));
 
-        List<Item> exclusives = TitanLoot.exclusives();
-        boolean ready = menu.exchangeState() == ForgeRules.ExchangeState.READY;
+        if (titan >= TitanGearSets.all().size()) {
+            titan = 0;
+        }
+        List<Item> exclusives = exclusives();
+        boolean ready = menu.exchangeState(titan) == ForgeRules.ExchangeState.READY;
         boolean affordable = ForgeRules.exchangeAffordable(minecraft.player);
+        titanButton.visible = exchangeTab && TitanGearSets.all().size() > 1;
+        titanButton.setMessage(Component.translatable("gui.skyabyss.forge.exchange_titan", Component.translatable(set().originKey())));
+        titanButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.exchange_titan_hint")));
         for (int i = 0; i < exchangeButtons.length; i++) {
             Button b = exchangeButtons[i];
-            boolean owned = menu.ownsExclusive(i);
-            b.visible = exchangeTab && i < exclusives.size() && !owned;
+            boolean owned = menu.ownsExclusive(titan, i);
+            b.visible = exchangeTab && i < exclusives.size() && exclusives.get(i) != null && !owned;
             b.active = ready && affordable;
             b.setMessage(Component.translatable(exchangeArmed == i ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.exchange_pick"));
         }
@@ -241,11 +259,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         renderTooltip(g, mouseX, mouseY);
         // 交換の品にカーソルを合わせると、その品の説明
         if (tab == Tab.EXCHANGE) {
-            List<Item> exclusives = TitanLoot.exclusives();
+            List<Item> exclusives = exclusives();
             for (int i = 0; i < exclusives.size(); i++) {
                 int x = leftPos + SIDE_X + 10;
                 int y = topPos + EXCHANGE_Y + i * EXCHANGE_STEP;
-                if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
+                if (exclusives.get(i) != null && mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
                     g.renderTooltip(font, new ItemStack(exclusives.get(i)), mouseX, mouseY);
                 }
             }
@@ -342,7 +360,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         if (ForgeRules.canEnhance(gear)) {
             ForgeRules.Cost cost = ForgeRules.enhanceCost(level);
             g.drawString(font, Component.translatable("gui.skyabyss.forge.next", level, level + 1), x, 27, level + 1 >= ModGear.AWAKEN_LEVEL ? GOLD : OK, false);
-            costLine(g, ModItems.STONE_WHALE_SHARD.get(), cost.shards(), x, 38);
+            costLine(g, ForgeRules.shardItem(gear), cost.shards(), x, 38);
             costLine(g, ModItems.RESONANCE_CRYSTAL.get(), cost.crystals(), x, 48);
         } else if (gear.getItem() instanceof ModGear g2 && g2.enhanceable()) {
             g.drawString(font, Component.translatable("gui.skyabyss.forge.max"), x, 27, GOLD, false);
@@ -353,7 +371,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         g.drawString(font, Component.translatable("gui.skyabyss.forge.dismantle_yields"), x, 92, TEXT, false);
         int[] yield = ForgeRules.dismantleYield(gear);
         int y = 103;
-        Item[] items = {ModItems.RESONANCE_SHARD.get(), ModItems.STONE_WHALE_SHARD.get(), ModItems.RESONANCE_CRYSTAL.get()};
+        Item[] items = {ModItems.RESONANCE_SHARD.get(), ForgeRules.shardItem(gear), ModItems.RESONANCE_CRYSTAL.get()};
         for (int i = 0; i < 3; i++) {
             if (yield[i] > 0) {
                 g.drawString(font, Component.literal("・").append(Component.translatable(items[i].getDescriptionId())).append(" ×" + yield[i]), x, y, DIM, false);
@@ -396,18 +414,26 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         int have = ForgeRules.count(minecraft.player.getInventory(), ModItems.RESONANCE_SHARD.get());
         boolean enough = minecraft.player.isCreative() || have >= ForgeRules.EXCHANGE_SHARDS;
         g.drawString(font, Component.translatable("gui.skyabyss.forge.exchange_shards", have, ForgeRules.EXCHANGE_SHARDS), x, 26, enough ? OK : LACK, false);
-        String state = switch (menu.exchangeState()) {
+        String state = switch (menu.exchangeState(titan)) {
             case READY -> "gui.skyabyss.forge.exchange_ready";
             case USED -> "gui.skyabyss.forge.exchange_used";
             case NO_CLEAR -> "gui.skyabyss.forge.exchange_no_clear";
             case ALL_OWNED -> "gui.skyabyss.forge.exchange_all_owned";
         };
-        drawWrapped(g, Component.translatable(state), x, 37, 132, 2, menu.exchangeState() == ForgeRules.ExchangeState.READY ? TEXT : DIM);
-        List<Item> exclusives = TitanLoot.exclusives();
+        // 巨神ごとの文があればそちら (例 gui.skyabyss.forge.exchange_no_clear.tide_shell)。岩鯨は元の文
+        String perTitan = state + "." + set().titan;
+        if (net.minecraft.client.resources.language.I18n.exists(perTitan)) {
+            state = perTitan;
+        }
+        drawWrapped(g, Component.translatable(state), x, 37, 132, 2, menu.exchangeState(titan) == ForgeRules.ExchangeState.READY ? TEXT : DIM);
+        List<Item> exclusives = exclusives();
         for (int i = 0; i < exclusives.size(); i++) {
+            if (exclusives.get(i) == null) {
+                continue;
+            }
             int y = EXCHANGE_Y + i * EXCHANGE_STEP;
             ItemStack shown = new ItemStack(exclusives.get(i));
-            boolean owned = menu.ownsExclusive(i);
+            boolean owned = menu.ownsExclusive(titan, i);
             g.renderItem(shown, x, y);
             Component name = shown.getHoverName();
             drawWrapped(g, name, x + 20, y + 4, owned ? 120 : 66, 1, owned ? DIM : TEXT);
@@ -416,6 +442,20 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                         y + 4, DIM, false);
             }
         }
+    }
+
+    // 交換の巨神の表と、その専用伝説 (まだ登録されていない品は null。番号は set.exclusives() の並び)
+    private TitanGearSet set() {
+        List<TitanGearSet> all = TitanGearSets.all();
+        return all.get(Math.min(titan, all.size() - 1));
+    }
+
+    private List<Item> exclusives() {
+        List<Item> out = new java.util.ArrayList<>();
+        for (String id : set().exclusives()) {
+            out.add(TitanGearSet.item(id).orElse(null));
+        }
+        return out.subList(0, Math.min(out.size(), exchangeButtons.length));
     }
 
     private void costLine(GuiGraphics g, Item material, int need, int x, int y) {

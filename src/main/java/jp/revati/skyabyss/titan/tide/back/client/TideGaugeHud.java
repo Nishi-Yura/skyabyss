@@ -1,11 +1,11 @@
 package jp.revati.skyabyss.titan.tide.back.client;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.titan.BackGaugeHud;
 import jp.revati.skyabyss.titan.tide.TideTravel;
 import jp.revati.skyabyss.titan.tide.back.TideBackNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -15,14 +15,25 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 // 潮見の目盛り (08 の 3.4節): 背中にいる間、画面の右上に小さな貝の目盛り。今の潮位と、次に変わるまでの秒数。
-// パーティクルの設定に左右されない (岩鯨の必須4 の反省)。招き潮の予告と満ちている間は、縁が赤く光る
+// パーティクルの設定に左右されない (岩鯨の必須4 の反省)。招き潮の予告と満ちている間は、縁が赤く光る。
+// 板の置き場所・幅・枠・文の切り方は共通の BackGaugeHud (13 の 10.2節)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TideGaugeHud {
     private static TideBackNetwork.Gauge gauge;
     private static int ticksLeft;
     private static int age = 1000;
 
+    private static final BackGaugeHud.Gauge GAUGE = TideGaugeHud::shown;
+
+    static {
+        BackGaugeHud.register(GAUGE);
+    }
+
     private TideGaugeHud() {
+    }
+
+    private static boolean shown(Minecraft mc) {
+        return gauge != null && mc.level != null && mc.level.dimension() == TideTravel.TIDE_BACK && !mc.options.hideGui && age <= 100;
     }
 
     public static void receive(TideBackNetwork.Gauge g) {
@@ -39,29 +50,20 @@ public final class TideGaugeHud {
         }
     }
 
-    // 板の上端。右上の効き目の絵 (バニラ: 良い効き目は y 1〜、そのほかは y 27〜) があれば、その下へずらす
+    // 板の上端 (効き目の絵の下へずらす)
     static int top(Minecraft mc) {
-        if (mc.player == null || mc.player.getActiveEffects().isEmpty()) {
-            return 6;
-        }
-        boolean other = mc.player.getActiveEffects().stream().anyMatch(e -> e.showIcon() && !e.getEffect().value().isBeneficial());
-        boolean good = mc.player.getActiveEffects().stream().anyMatch(e -> e.showIcon() && e.getEffect().value().isBeneficial());
-        return other ? 54 : good ? 28 : 6;
+        return BackGaugeHud.top(mc);
     }
 
-    // 板の下端 (仲間の表示がこれより下に来るように。背中にいて板が出ているときだけ)
+    // 板の下端 (仲間の表示がこれより下に来るように)。今は余燼の熱など、ほかの背中の板もまとめて BackGaugeHud.bottom が見る
     public static int bottom() {
-        Minecraft mc = Minecraft.getInstance();
-        if (gauge == null || mc.level == null || mc.level.dimension() != TideTravel.TIDE_BACK || mc.options.hideGui || age > 100) {
-            return 0;
-        }
-        return top(mc) + 30;
+        return BackGaugeHud.bottom();
     }
 
     @SubscribeEvent
     static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (gauge == null || mc.level == null || mc.level.dimension() != TideTravel.TIDE_BACK || mc.options.hideGui || age > 100) {
+        if (!shown(mc)) {
             return;
         }
         GuiGraphics g = event.getGuiGraphics();
@@ -78,19 +80,14 @@ public final class TideGaugeHud {
                 : Component.translatable("gui.skyabyss.tide_gauge.left", (ticksLeft + 19) / 20);
         int text = Math.max(mc.font.width(name), mc.font.width(time));
         // 左の飾り (貝の溝と水位の柱) 34、文、右の石の点 10。ボスバー (中央の幅 182) との間を 4 あけた幅まで
-        int w = Mth.clamp(34 + text + 10, 112, Math.max(112, g.guiWidth() / 2 - 91 - 4 - 6));
-        int h = 30;
-        int x = g.guiWidth() - w - 6;
+        int w = BackGaugeHud.width(g, 34 + text + 10, 112);
+        int h = BackGaugeHud.HEIGHT;
+        int x = BackGaugeHud.left(g, w);
         int y = top(mc);
         float pulse = alert ? 0.5f + 0.5f * Mth.sin((mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(true)) * 0.4f) : 0;
         int border = alert ? (0xFF << 24) | ((int) (180 + 75 * pulse) << 16) | 0x3020 : 0xFF5FB8B0;
         // 貝の形の枠 (角を落とした板)
-        g.fill(x + 2, y, x + w - 2, y + h, 0xB0101C22);
-        g.fill(x, y + 2, x + w, y + h - 2, 0xB0101C22);
-        g.fill(x + 2, y, x + w - 2, y + 1, border);
-        g.fill(x + 2, y + h - 1, x + w - 2, y + h, border);
-        g.fill(x, y + 2, x + 1, y + h - 2, border);
-        g.fill(x + w - 1, y + 2, x + w, y + h - 2, border);
+        BackGaugeHud.frame(g, x, y, w, h, 0xB0101C22, border);
         // 貝の溝 (左の小さな扇)
         int sx = x + 5;
         int sy = y + 5;
@@ -110,8 +107,8 @@ public final class TideGaugeHud {
         }
         // 狭い画面で幅が足りなければ、はみ出す分を切る (枠の外へは出さない)
         int room = w - 34 - 10;
-        g.drawString(mc.font, Language.getInstance().getVisualOrder(mc.font.substrByWidth(name, room)), bx + 11, by, alert ? 0xFFFF8060 : 0xFFE6F2EE, true);
-        g.drawString(mc.font, Language.getInstance().getVisualOrder(mc.font.substrByWidth(time, room)), bx + 11, by + 11, 0xFFB0C8C4, true);
+        BackGaugeHud.text(g, mc.font, name, bx + 11, by, room, alert ? 0xFFFF8060 : 0xFFE6F2EE);
+        BackGaugeHud.text(g, mc.font, time, bx + 11, by + 11, room, 0xFFB0C8C4);
         // 鳴った石 (小さな三つの点)
         for (int i = 0; i < 3; i++) {
             int c = i < gauge.stones() ? 0xFFF0E8B0 : 0xFF404848;

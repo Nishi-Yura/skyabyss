@@ -237,6 +237,13 @@ public final class RecordBuilder {
                     List.of(t(has ? "d.piece_owned" : "d.piece_missing"), t("d.piece_chance", chance)), RecordSnapshot.ACTION_NONE));
         }
 
+        // 後の巨神 (潮殻など、TitanGearSets の 2 つ目から): 記録があれば、記憶・撃破・図鑑を同じ形で
+        for (jp.revati.skyabyss.item.TitanGearSet set : jp.revati.skyabyss.item.TitanGearSets.all()) {
+            if (!set.titan.equals(TitanLoot.STONE_WHALE)) {
+                rows.addAll(laterTitan(p, set));
+            }
+        }
+
         rows.add(header("travel"));
         TravelState travel = Voyages.state(p);
         List<Component> titanNames = new ArrayList<>();
@@ -261,6 +268,45 @@ public final class RecordBuilder {
         long left = TravelRules.cooldownLeft(p);
         rows.add(value("cooldown", t("r.cooldown"), left <= 0 ? t("v.ready") : t("v.seconds", (left + 19) / 20), RecordSnapshot.MARK_NONE,
                 List.of(t("d.cooldown"))));
+        return rows;
+    }
+
+    private static List<Row> laterTitan(ServerPlayer p, jp.revati.skyabyss.item.TitanGearSet set) {
+        List<Row> rows = new ArrayList<>();
+        TitanMemoryData.Record r = TitanMemoryData.get(p.server).peek(p.getUUID(), set.titan);
+        if (r == null) {
+            return rows;
+        }
+        String k = set.titan + ".";
+        rows.add(header(set.titan));
+        rows.add(value(k + "memory", t("r.memory"), memoryBar(r.memory), r.memory >= TitanLoot.HARD_PITY - 1 ? RecordSnapshot.MARK_ATTENTION
+                : RecordSnapshot.MARK_NONE, List.of(t("d.memory", TitanLoot.SOFT_PITY, TitanLoot.HARD_PITY),
+                t(r.memory >= TitanLoot.HARD_PITY - 1 ? "d.memory_next_guaranteed" : r.memory >= TitanLoot.SOFT_PITY - 1 ? "d.memory_next_soft"
+                        : "d.memory_next_plain"))));
+        rows.add(value(k + "clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
+        int owned = set.collected(r);
+        int size = set.collection().size();
+        rows.add(value(k + "collection", t("r.collection"), t("v.of", owned, size), owned >= size ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
+                List.of(t("d.collection"))));
+        rows.add(value(k + "fragment_record", t("r.fragment_record"), t(r.fragment ? "v.yes" : "v.no"),
+                r.fragment ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.fragment_record"))));
+        rows.add(value(k + "exchanges", t("r.exchanges"), t("v.times", r.exchanges), RecordSnapshot.MARK_NONE, List.of(t("d.exchanges"))));
+        rows.add(new Row("h.collection." + set.titan, Kind.HEADER, ItemStack.EMPTY, t("h.collection"), Component.empty(), RecordSnapshot.MARK_NONE, -1,
+                List.of(), RecordSnapshot.ACTION_NONE));
+        float multiplier = TitanLoot.pityMultiplier(r.memory);
+        for (String id : set.collection()) {
+            java.util.Optional<Item> item = jp.revati.skyabyss.item.TitanGearSet.item(id);
+            if (item.isEmpty()) {
+                continue;
+            }
+            boolean has = r.owned.contains(id);
+            boolean hidden = !has && set.isExclusive(id);
+            int chance = Math.round(set.chance(id) * multiplier * 100);
+            rows.add(new Row("piece." + id, Kind.ITEM, hidden ? ItemStack.EMPTY : new ItemStack(item.get()),
+                    hidden ? t("r.unknown") : item.get().getDescription().copy(), t(has ? "v.owned" : "v.not_owned"),
+                    has ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, -1,
+                    List.of(t(has ? "d.piece_owned" : "d.piece_missing"), t("d.piece_chance", chance)), RecordSnapshot.ACTION_NONE));
+        }
         return rows;
     }
 

@@ -92,7 +92,8 @@ public final class AccessoryClient {
         }
         lines.add(at++, line);
         if (!ok) {
-            String what = stack.getItem() instanceof ArmorItem ? "armor" : stack.getItem() instanceof Accessory ? "accessory" : "weapon";
+            String what = stack.getItem() instanceof ArmorItem ? "armor" : stack.getItem() instanceof Accessory ? "accessory"
+                    : stack.getItem() instanceof net.minecraft.world.item.ShieldItem ? "shield" : "weapon";
             lines.add(at++, Component.translatable("skyabyss_gear.tooltip.short." + what).withStyle(s -> s.withColor(SHORT).withItalic(true)));
         }
         if (stack.getItem() instanceof Accessory a) {

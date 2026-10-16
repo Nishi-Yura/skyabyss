@@ -1,0 +1,19 @@
+{
+  "type": "skyabyss:ember_back",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:ember_back",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:deepslate", "height": 20},
+        {"block": "minecraft:basalt", "height": 16},
+        {"block": "minecraft:tuff", "height": 26},
+        {"block": "minecraft:smooth_basalt", "height": 1}
+      ],
+      "structure_overrides": []
+    }
+  }
+}

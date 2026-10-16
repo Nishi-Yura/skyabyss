@@ -40,7 +40,7 @@ import net.minecraft.world.item.Item;
 //   world_stage {min}          : 世界の進み (ワールドの誰かが止めた心臓の数)
 //   weather {thunder, rain}    : 今いる所が雷雨 / 雨で、真上に空が見える (屋根の下では数えない)
 //   height  {min}              : 足もとの高さ (y) が min 以上
-//   item は token を書くと、その印の品だけを数える (QuestItems)
+//   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
             "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height");
@@ -121,7 +121,7 @@ public final class Condition {
             case "flag", "remembers" -> need("flag", errors, where);
             case "item" -> {
                 need("item", errors, where);
-                if (!QuestItems.known(GsonHelper.getAsString(json, "item", ""))) {
+                if (!QuestItems.known(GsonHelper.getAsString(json, "item", "")) && !GsonHelper.getAsBoolean(json, "optional", false)) {
                     errors.add(where + ": unknown item " + GsonHelper.getAsString(json, "item", ""));
                 }
             }

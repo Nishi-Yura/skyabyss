@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 //   give        {item, count}      : 渡す (入りきらなければ足もとに落とす)
 //   take        {item, count}      : 受け取る (足りなければ何もしない。条件 item と組で使う)
 //   xp          {amount, once}     : 成長の経験値。once の鍵で一人一回だけ (会話をくり返して稼げないように)
+//   give は optional を書ける (まだ登録されていない品なら何もしない)
 //   give / take は token・name・lore を書ける (印の付いた品。QuestItems)。item はタグ ("#minecraft:logs") でもよい (take だけ)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 public final class Action {
@@ -108,7 +109,8 @@ public final class Action {
             errors.add(where + ": action '" + type + "' needs '" + need + "'");
             return null;
         }
-        if ((type.equals("give") ? Condition.item(GsonHelper.getAsString(o, "item")) == null
+        // give の optional: 別の担当がまだ登録していない品。ないうちは何も渡さない (読み込みは止めない)
+        if ((type.equals("give") ? Condition.item(GsonHelper.getAsString(o, "item")) == null && !GsonHelper.getAsBoolean(o, "optional", false)
                 : type.equals("take") && !QuestItems.known(GsonHelper.getAsString(o, "item")))) {
             errors.add(where + ": unknown item " + GsonHelper.getAsString(o, "item"));
             return null;

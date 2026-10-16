@@ -1,0 +1,24 @@
+{
+  "crusted": {
+    "texture": "texture.png",
+    "glowmask": "glowmask.png",
+    "hide_bones": [
+      "flare_body",
+      "flare_head"
+    ]
+  },
+  "flared": {
+    "texture": "texture_flared.png",
+    "glowmask": "glowmask_flared.png",
+    "hide_bones": [
+      "crust_body",
+      "crust_head",
+      "crust_arm_r",
+      "crust_arm_l",
+      "crust_fore_r",
+      "crust_fore_l",
+      "crust_leg_r",
+      "crust_leg_l"
+    ]
+  }
+}

@@ -326,5 +326,7 @@
   "tide_beckoner_breath": {"subtitle": "subtitles.skyabyss.tide_beckoner_breath", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_breath"}]},
   "tide_beckoner_burrow": {"subtitle": "subtitles.skyabyss.tide_beckoner_burrow", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_burrow"}]},
   "tide_beckoner_emerge": {"subtitle": "subtitles.skyabyss.tide_beckoner_emerge", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_emerge"}]},
-  "tide_beckoner_roar": {"subtitle": "subtitles.skyabyss.tide_beckoner_roar", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_roar"}]}
+  "tide_beckoner_roar": {"subtitle": "subtitles.skyabyss.tide_beckoner_roar", "sounds": [{"name": "skyabyss:tide_back/tide_beckoner_roar"}]},
+  "ember_heat_warn": {"subtitle": "subtitles.skyabyss.ember_heat_warn", "sounds": [{"name": "minecraft:fire/ignite", "pitch": 0.6}]},
+  "ember_scorch": {"subtitle": "subtitles.skyabyss.ember_scorch", "sounds": [{"name": "minecraft:random/fizz", "volume": 0.5}]}
 }

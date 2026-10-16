@@ -60,10 +60,14 @@ public final class AffixEvents {
         if (kind == AffixType.Slot.WEAPON) {
             group = EquipmentSlotGroup.MAINHAND;
             slotName = "mainhand";
-        } else {
-            EquipmentSlot slot = ((ArmorItem) stack.getItem()).getEquipmentSlot();
+        } else if (stack.getItem() instanceof ArmorItem armor) {
+            EquipmentSlot slot = armor.getEquipmentSlot();
             group = EquipmentSlotGroup.bySlot(slot);
             slotName = slot.getName();
+        } else {
+            // 盾: 左手に持っているあいだ
+            group = EquipmentSlotGroup.OFFHAND;
+            slotName = "offhand";
         }
         for (Affix affix : AffixRules.affixes(stack)) {
             AffixType t = affix.kind();
@@ -99,6 +103,12 @@ public final class AffixEvents {
             if (AffixRules.slotOf(stack.getItem()) == AffixType.Slot.ARMOR) {
                 sum += AffixRules.value(stack, AffixType.WARD);
             }
+        }
+        // 左手の盾の守り (必要 Lv に届いていれば)
+        ItemStack off = entity.getOffhandItem();
+        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && AffixRules.slotOf(off.getItem()) == AffixType.Slot.ARMOR
+                && GearLevel.usable(entity, off)) {
+            sum += AffixRules.value(off, AffixType.WARD);
         }
         return Math.min(AffixRules.WARD_CAP, sum);
     }
