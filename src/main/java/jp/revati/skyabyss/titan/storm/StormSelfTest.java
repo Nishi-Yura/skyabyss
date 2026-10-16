@@ -1,0 +1,166 @@
+package jp.revati.skyabyss.titan.storm;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.titan.TitanBacks;
+import jp.revati.skyabyss.titan.TitanWorldData;
+import jp.revati.skyabyss.titan.storm.StormPerch.Peak;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
+
+// 雷翼の巨神の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST storm PASSED / FAILED
+// 夕立の刻の境目、止まり木の探し方、昇り風の幾何、一体だけの決まり、記録の保存と読み込み (岩鯨・潮殻が変わらないこと)、
+// 戻る先、背中の結びつけと一覧
+public final class StormSelfTest {
+    // 岩鯨 (4000, 4000)・潮殻 (-4000, 4000) と重ならない所
+    private static final int TEST_X = -6000;
+    private static final int TEST_Z = -6000;
+    private static final int FORCE_CHUNKS = 7;
+
+    private StormSelfTest() {
+    }
+
+    // SelfTestRunner が呼ぶ: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
+    public static void load(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        for (int dx = 0; dx <= FORCE_CHUNKS; dx++) {
+            for (int dz = 0; dz <= FORCE_CHUNKS; dz++) {
+                level.setChunkForced((TEST_X >> 4) + dx, (TEST_Z >> 4) + dz, true);
+            }
+        }
+    }
+
+    public static void runSelfTest(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        List<String> failures = new ArrayList<>();
+        try {
+            run(level, failures);
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST storm crashed", e);
+            failures.add("crashed: " + e);
+        }
+        for (int dx = 0; dx <= FORCE_CHUNKS; dx++) {
+            for (int dz = 0; dz <= FORCE_CHUNKS; dz++) {
+                level.setChunkForced((TEST_X >> 4) + dx, (TEST_Z >> 4) + dz, false);
+            }
+        }
+        if (failures.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST storm PASSED (window, perch, gale column, one titan, record, leave, bind, back list)");
+        } else {
+            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST storm FAILED: {}", f));
+        }
+    }
+
+    private static void run(ServerLevel level, List<String> failures) {
+        checkWindow(failures);
+        checkRules(failures);
+        checkPerch(level, failures);
+        checkGale(level, failures);
+        TitanWorldData data = TitanWorldData.get(level);
+        CompoundTag saved = data.snapshot(level.registryAccess());
+        try {
+            checkKeeper(level, failures);
+        } finally {
+            StormWingEntity t = StormKeeper.KEEPER.current(level);
+            if (t != null) {
+                t.discard();
+            }
+            StormKeeper.KEEPER.releaseTicket(level);
+            data.restoreSlot(StormKeeper.SLOT, saved, level.registryAccess());
+        }
+        // 岩鯨と潮殻の記録が変わっていない (雷翼の記録は別の場所)
+        CompoundTag after = data.snapshot(level.registryAccess());
+        for (String key : List.of("StoneWhaleSpawned", "WhaleId", "LastX", "State")) {
+            if (!java.util.Objects.equals(saved.get(key), after.get(key))) {
+                failures.add("the stone whale's record changed: " + key);
+            }
+        }
+        checkLeave(level, failures);
+    }
+
+    // 夕立の刻: 7000〜10600 (一日の中の時刻)。刻の前後と、次の日も同じ
+    private static void checkWindow(List<String> failures) {
+        if (StormWingEntity.inWindow(6999) || !StormWingEntity.inWindow(7000) || !StormWingEntity.inWindow(10599)
+                || StormWingEntity.inWindow(10600)) {
+            failures.add("the storm window (7000..10600) is wrong");
+        }
+        if (!StormWingEntity.inWindow(24000L + 7000) || StormWingEntity.inWindow(24000L * 3 + 10600)) {
+            failures.add("the storm window must repeat every day");
+        }
+    }
+
+    // 止まり木: 平らな地面の上で、人の周り 24〜96 ブロックに地表が見つかる
+    private static void checkPerch(ServerLevel level, List<String> failures) {
+        Peak p = StormPerch.find(level, TEST_X + 8, TEST_Z + 8, 24, 96);
+        if (p == null) {
+            failures.add("the perch finder found no dry ground around the test point");
+            return;
+        }
+        double d = Math.hypot(p.x() - (TEST_X + 8), p.z() - (TEST_Z + 8));
+        if (d < 24 - 1 || d > 96 + 1 || Double.isNaN(p.y())) {
+            failures.add("the perch is out of range: " + d);
+        }
+    }
+
+    // 昇り風: 柱の中 (半径 2.5、地面から頂まで) と外
+    private static void checkGale(ServerLevel level, List<String> failures) {
+        GaleColumnEntity col = StormSetup.GALE_COLUMN.get().create(level);
+        if (col == null) {
+            failures.add("the gale column could not be created");
+            return;
+        }
+        col.setup(java.util.UUID.randomUUID(), TEST_X + 20.5, TEST_Z + 20.5, 200);
+        double base = col.position().y;
+        boolean inside = col.inColumn(TEST_X + 20.5 + 2.0, base + 10, TEST_Z + 20.5);
+        boolean outside = col.inColumn(TEST_X + 20.5 + 3.0, base + 10, TEST_Z + 20.5);
+        boolean above = col.inColumn(TEST_X + 20.5, 300, TEST_Z + 20.5);
+        if (!inside || outside || above) {
+            failures.add("the gale column geometry is wrong (inside " + inside + ", outside " + outside + ", above " + above + ")");
+        }
+        col.discard();
+    }
+
+    // 一体だけ: 二度目の呼び出しで前の個体が消える。前の個体は (読み込まれていれば) 本物でなくなる
+    private static void checkKeeper(ServerLevel level, List<String> failures) {
+        StormWingEntity first = StormKeeper.KEEPER.spawn(level, TEST_X + 40, TEST_Z + 40, null);
+        StormWingEntity second = StormKeeper.KEEPER.spawn(level, TEST_X + 60, TEST_Z + 60, null);
+        if (StormKeeper.KEEPER.current(level) != second) {
+            failures.add("the second thunder wing is not the current one");
+        }
+        if (!first.isRemoved()) {
+            failures.add("the first thunder wing was not removed when the second appeared");
+        }
+        if (!StormKeeper.KEEPER.slot(level).spawned) {
+            failures.add("the thunder wing slot is not marked spawned");
+        }
+        second.discard();
+    }
+
+    // 戻る先: 巨神が無くても、有限の座標 (共有スポーン地点の上)
+    private static void checkLeave(ServerLevel level, List<String> failures) {
+        StormTravel.Landing landing = StormTravel.landing(level);
+        Vec3 p = landing.pos();
+        if (Double.isNaN(p.x) || Double.isNaN(p.y) || Double.isNaN(p.z)) {
+            failures.add("the landing point is not finite");
+        }
+    }
+
+    // 規則: 背中の一覧、背中と巨神の結びつけ
+    private static void checkRules(List<String> failures) {
+        if (!TitanBacks.isBack(StormTravel.STORM_BACK)) {
+            failures.add("storm_back is not in the back list");
+        }
+        if (Titans.titanOfBack(StormTravel.STORM_BACK) == null
+                || !Titans.THUNDER_WING.equals(Titans.titanOfBack(StormTravel.STORM_BACK))) {
+            failures.add("titanOfBack(storm_back) must be thunder_wing");
+        }
+        if (!Titans.hasBack(Titans.THUNDER_WING)) {
+            failures.add("the thunder wing back is not bound");
+        }
+    }
+}

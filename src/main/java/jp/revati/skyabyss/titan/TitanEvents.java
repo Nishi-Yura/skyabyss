@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.titan.dungeon.TitanBackBuilder;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
@@ -86,9 +87,10 @@ public final class TitanEvents {
                         }))
                         .then(Commands.literal("leave").executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            // 潮殻の背にいれば、潮殻の巨神のもとへ戻す
-                            if (player.level().dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK) {
-                                jp.revati.skyabyss.titan.tide.TideTravel.leave(player);
+                            // 巨神の背にいれば、その巨神のもとへ戻す (背中の一覧 Titans に登録された道)。岩鯨の背は TitanTravel
+                            String back = Titans.titanOfBack(player.level().dimension());
+                            if (back != null) {
+                                Titans.sendDown(player, back);
                             } else {
                                 TitanTravel.leave(player);
                             }

@@ -11,7 +11,8 @@ import net.minecraft.world.level.Level;
 // 巨神の背中のディメンションの一覧。背中の決まり (TitanBackRules) はこの一覧のどれにも効く。
 // 岩鯨の背 (titan_back) と潮殻の背 (tide_back)。後の巨神は、ここに一行足す
 public final class TitanBacks {
-    private static final Set<ResourceKey<Level>> BACKS = Set.of(TitanTravel.TITAN_BACK, TideTravel.TIDE_BACK);
+    private static final Set<ResourceKey<Level>> BACKS = Set.of(TitanTravel.TITAN_BACK, TideTravel.TIDE_BACK,
+            jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK);
 
     private TitanBacks() {
     }
