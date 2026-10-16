@@ -7,6 +7,7 @@ render 16
 
 cmd time set noon
 cmd weather clear
+cmd gamemode creative
 # 到着地点へ到着の向きで移る (島がまだなければ建てる)
 cmd skyabyss dev arrive titan_back
 waitchunks

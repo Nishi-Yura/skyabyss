@@ -80,6 +80,7 @@ public final class ShotRunner {
     private static ResourceKey<Level> cameraDim;
     private static int shots;
     private static int failures;
+    private static Screen confirmed;
 
     private ShotRunner() {
     }
@@ -150,6 +151,21 @@ public final class ShotRunner {
             // 入ろうとしたのにタイトル画面へ戻った: 世界を開けなかった (同じ台本のゲームが別に動いていて、世界が使われている など)
             if (screen instanceof TitleScreen && mc.level == null && mc.getSingleplayerServer() == null) {
                 fail("could not enter the world '" + script.world + "' (is another game using the same folder? use -PshotsName=<other>)");
+            } else if (mc.level == null) {
+                say("screen while entering the world: " + screen.getClass().getName() + " \"" + screen.getTitle().getString() + "\"");
+                // 「実験的な設定の世界」の確認 (巨神の背の次元がデータパックなので出る)。台本の世界なので、控えを取らずに進む
+                if (screen instanceof net.minecraft.client.gui.screens.BackupConfirmScreen confirm && confirmed != screen) {
+                    confirmed = screen;
+                    try {
+                        Field f = net.minecraft.client.gui.screens.BackupConfirmScreen.class.getDeclaredField("onProceed");
+                        f.setAccessible(true);
+                        var listener = (net.minecraft.client.gui.screens.BackupConfirmScreen.Listener) f.get(confirm);
+                        mc.execute(() -> listener.proceed(false, false));
+                        say("  proceeding without a backup");
+                    } catch (ReflectiveOperationException e) {
+                        fail("cannot get past " + screen.getTitle().getString() + ": " + e);
+                    }
+                }
             }
             return;
         }
