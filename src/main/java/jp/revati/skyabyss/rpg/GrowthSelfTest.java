@@ -88,6 +88,11 @@ public final class GrowthSelfTest {
         check(f, !Growth.canAllocate(d, new int[] {16, 0, 0, 0}), "an allocation over the points was accepted");
         check(f, !Growth.canAllocate(d, new int[] {1, 0}), "a short allocation was accepted");
         check(f, Growth.canAllocate(d, new int[] {5, 5, 3, 2}), "a valid allocation was refused");
+        // 巨大な値で int があふれても通らない (受け取るのは改造されうるクライアントの値)
+        int keep = d.stats[0];
+        d.stats[0] = 1;
+        check(f, !Growth.canAllocate(d, new int[] {Integer.MAX_VALUE, Integer.MAX_VALUE, 0, 3}), "an overflowing allocation was accepted");
+        d.stats[0] = keep;
         d.level = 50;
         d.stats[0] = GrowthRules.STAT_CAP;
         check(f, !Growth.canAllocate(d, new int[] {1, 0, 0, 0}), "an allocation over the stat cap was accepted");

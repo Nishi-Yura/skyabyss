@@ -189,7 +189,11 @@ public final class SkillEvents {
             SkillData d = SkillManager.get(player);
             d.sanitize(SkillManager.level(player));
             SkillManager.applyModifiers(player);
-            SkillManager.settleMana(player);
+            // ここではまだ上限まで切り詰めない。装備の特性 (共鳴・静心) の最大マナは最初の tick で付くので、
+            // 上限を超えていれば regenTick がそのとき収める
+            if (d.mana < 0) {
+                SkillManager.settleMana(player);
+            }
             if (d.notifiedPoints == 0 && d.spentPoints() > 0) {
                 d.notifiedPoints = d.totalPoints(SkillManager.level(player));
             }
@@ -204,12 +208,15 @@ public final class SkillEvents {
             SkillManager.applyModifiers(player);
             SkillData d = SkillManager.get(player);
             // 倒れて目を覚ましたら、マナも満タン (体力と同じ)
+            // 装備の最大マナが付く次の tick で満たす (regenTick は負の値を「満タンにする」と読む)
             if (!event.isEndConquered()) {
-                d.mana = (float) SkillManager.maxMana(player);
+                d.mana = -1;
             }
             d.riposteUntil = 0;
             SkillManager.sync(player);
-            SkillManager.sendMana(player, true);
+            if (d.mana >= 0) {
+                SkillManager.sendMana(player, true);
+            }
         }
     }
 

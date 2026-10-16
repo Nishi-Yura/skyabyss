@@ -1,12 +1,12 @@
 """武器3案 (案B 装飾, 4倍) の彫刻ボクセルを、NeoForge 1.21.1 の item モデルに書き出す。
 
-入力: docs/roughs/v2/weapons/<item>/b/voxels.npz (grid[X,Y,Z,4] RGBA, glow[X,Y,Z], scale)
+入力: tools/sources/weapons/<item>/voxels.npz (採用した B 案。元は docs/roughs/v2/weapons/<item>/b) (grid[X,Y,Z,4] RGBA, glow[X,Y,Z], scale)
       ボクセルは立てた向き (刃は +Y)。X は右、Y は上。
 出力:
   src/main/resources/assets/skyabyss/models/item/<item>.json   (separate_transforms: base=3D, gui=平面)
   src/main/resources/assets/skyabyss/textures/item/3d/<item>.png (パレット 16x16、1色1画素。行は繰り返して 16 行にする)
   src/main/resources/assets/skyabyss/textures/item/<item>.png    (採用の 16x16 アイコンをコピー)
-  docs/roughs/v3/weapons_<item>.png                              (確認用の描画)
+  docs/review/previews/weapons_<item>.png                              (確認用の描画)
 
 手順:
 1. 色 (と光るか) をパレット番号にする。256色を超えるときは色を丸めて減らす。
@@ -47,9 +47,9 @@ sys.path.insert(0, str(ROOT / "tools" / "rough"))
 from voxel import FACE_SHADE, Face, icon_big, load_png, render, sheet  # noqa: E402
 
 ASSETS = ROOT / "src/main/resources/assets/skyabyss"
-ICON_SRC = ROOT / "docs/roughs/weapons"
-VOX = ROOT / "docs/roughs/v2/weapons"
-CHECK_DIR = ROOT / "docs/roughs/v3"
+ICON_SRC = ROOT / "tools/sources/weapons"
+VOX = ROOT / "tools/sources/weapons"
+CHECK_DIR = ROOT / "docs/review/previews"
 
 # item: 立てた全長 (単位)。手に持つ武器の長さ
 ITEMS = {
@@ -81,7 +81,7 @@ HANDHELD_DISPLAY = {
 
 
 def load_voxels(item: str):
-    d = np.load(VOX / item / "b" / "voxels.npz")
+    d = np.load(VOX / item / "voxels.npz")
     grid = d["grid"]
     glow = d["glow"].astype(bool)
     return grid, glow
@@ -245,7 +245,7 @@ def write_palette(item, palette, H):
 
 
 def write_icon(item):
-    src = ICON_SRC / item / "a" / "icon.png"
+    src = ICON_SRC / item / "old_icon.png"
     dst = ASSETS / "textures/item" / f"{item}.png"
     shutil.copyfile(src, dst)
 

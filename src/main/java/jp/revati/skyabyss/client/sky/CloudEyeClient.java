@@ -24,6 +24,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.Commands;
 import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -35,7 +38,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 描画は CloudEyeRenderer、音は CloudEyeSound
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class CloudEyeClient {
-    // 雲の高さから目をどれだけ下に置くか (バニラの雲より手前に見せる)
+    // 雲の層がこれより下 (= 雲の上や雲の中にいる) なら開かない。目は雲の向こうにあるので
     static final float BELOW_CLOUDS = 6f;
     // 雲の高さまでこれより近い (高い所にいる) ときは開かない
     static final float MIN_HEIGHT_ABOVE_EYE = 40f;
@@ -54,15 +57,17 @@ public final class CloudEyeClient {
 
     enum Phase { HUSH, OPENING, OPEN, MET, CLOSING, CLEARING }
 
-    // この距離より近いときは、目を小さくして見かけの大きさを保つ (高い所にいても画面いっぱいにしない)
-    static final double REFERENCE_DISTANCE = 170.0;
+    // 視線・遮り・音の計算に使う、目までの仮の距離 (目は方向にあり、プレイヤーが動いても空の同じ所にある)
+    static final double LOGIC_DISTANCE = 400.0;
 
     static final class Eye {
         final int id;
-        final Vec3 pos;
+        // 目のある方向 (単位ベクトル)。天体と同じく、カメラからの向きだけで決まる
+        final Vec3 dir;
         final CloudEyeStage stage;
-        // 目の幅 (ブロック)。段階の幅を、近いときだけ縮めたもの
-        final float width;
+        // 目の幅 (視野の角度、度)、傾き (度)
+        final float angle;
+        final float tilt;
         final int seed;
         Phase phase = Phase.HUSH;
         int phaseTicks;
@@ -71,6 +76,9 @@ public final class CloudEyeClient {
         float openBefore;
         float patch;
         float patchBefore;
+        // 雲の切れ間の開き (0〜1)
+        float part;
+        float partBefore;
         float irisX;
         float irisY;
         float irisXBefore;
@@ -83,11 +91,12 @@ public final class CloudEyeClient {
         boolean cancelled;
         boolean visible = true;
 
-        Eye(int id, Vec3 pos, CloudEyeStage stage, int seed, double distance) {
+        Eye(int id, Vec3 dir, CloudEyeStage stage, int seed) {
             this.id = id;
-            this.pos = pos;
+            this.dir = dir;
             this.stage = stage;
-            this.width = stage.width() * (float) Math.min(1.0, distance / REFERENCE_DISTANCE);
+            this.angle = CloudEyeRenderer.angularWidth(stage.width());
+            this.tilt = ((seed >>> 11 & 15) - 7.5f) * 0.9f;
             this.seed = seed;
             // はじめは下 (地上) を、少し横を見ている
             this.irisX = ((seed & 1) == 0 ? 0.5f : -0.5f);
@@ -102,6 +111,15 @@ public final class CloudEyeClient {
 
         float patch(float partial) {
             return Mth.lerp(partial, patchBefore, patch);
+        }
+
+        float part(float partial) {
+            return Mth.lerp(partial, partBefore, part);
+        }
+
+        // 視線や遮りを調べるための、目の仮の位置
+        Vec3 pos(Vec3 cam) {
+            return cam.add(dir.scale(LOGIC_DISTANCE));
         }
 
         float irisX(float partial) {
@@ -146,10 +164,10 @@ public final class CloudEyeClient {
             send(payload.id(), CloudEyeOutcome.CANCELLED);
             return;
         }
-        double horizontal = h / Math.tan(Math.toRadians(Mth.clamp(payload.elevation(), 20f, 80f)));
+        double pitch = Math.toRadians(Mth.clamp(payload.elevation(), 20f, 80f));
         double yaw = Math.toRadians(payload.yaw());
-        Vec3 pos = new Vec3(cam.x - Math.sin(yaw) * horizontal, cam.y + h, cam.z + Math.cos(yaw) * horizontal);
-        eye = new Eye(payload.id(), pos, CloudEyeStage.byIndex(payload.stage()), payload.seed(), pos.distanceTo(cam));
+        Vec3 dir = new Vec3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+        eye = new Eye(payload.id(), dir, CloudEyeStage.byIndex(payload.stage()), payload.seed());
         mc.getMusicManager().stopPlaying();
     }
 
@@ -192,6 +210,7 @@ public final class CloudEyeClient {
         }
         e.openBefore = e.open;
         e.patchBefore = e.patch;
+        e.partBefore = e.part;
         e.irisXBefore = e.irisX;
         e.irisYBefore = e.irisY;
         e.age++;
@@ -206,15 +225,16 @@ public final class CloudEyeClient {
         }
 
         Camera camera = mc.gameRenderer.getMainCamera();
+        Vec3 pos = e.pos(camera.getPosition());
         // 遮るものがないか (4tick ごとに調べる)
         if (e.age % 4 == 1) {
-            e.visible = clear(mc, level, e.pos);
+            e.visible = clear(mc, level, pos);
         }
         boolean visible = e.visible;
-        if (e.open > 0.2f && visible && onScreen(mc, camera, e.pos)) {
+        if (e.open > 0.2f && visible && onScreen(mc, camera, pos)) {
             e.seenTicks++;
         }
-        if (!e.met && e.open > 0.35f && visible && angleFromCenter(camera, e.pos) < stareCone(camera, e)) {
+        if (!e.met && e.open > 0.35f && visible && angleFromCenter(camera, pos) < stareCone(e)) {
             e.stareTicks++;
         } else if (!e.met) {
             e.stareTicks = Math.max(0, e.stareTicks - 1);
@@ -229,40 +249,58 @@ public final class CloudEyeClient {
 
         float irisTargetX;
         float irisTargetY;
-        float irisSpeed = 0.035f;
+        float irisSpeed = 0.018f;
         switch (e.phase) {
             case HUSH -> {
+                // 撮影用 (eyeHold): 向きを合わせる間 (4秒) 待ってから始める
+                if (HOLD && e.age < 80) {
+                    e.phaseTicks = 0;
+                    break;
+                }
                 e.patch = Math.min(1f, e.patch + 1f / CloudEyeStage.HUSH_TICKS);
+                // 雲が集まりきる前から、ゆっくり割れはじめる
+                e.part = Math.min(0.45f, e.part + 0.45f / CloudEyeStage.HUSH_TICKS * smooth(e.patch) * 1.6f);
                 if (e.phaseTicks >= CloudEyeStage.HUSH_TICKS) {
                     to(e, Phase.OPENING);
                 }
             }
             case OPENING -> {
                 e.patch = 1f;
-                e.open = smooth(e.phaseTicks / (float) CloudEyeStage.OPEN_TICKS);
+                e.part = Math.min(1f, e.part + 0.55f / (CloudEyeStage.OPEN_TICKS * 0.6f));
+                // 重い瞼: 雲が割れてから、ためらうように持ち上がる
+                float t = Mth.clamp((e.phaseTicks - 8) / (float) (CloudEyeStage.OPEN_TICKS - 8), 0f, 1f);
+                e.open = heavy(t);
                 if (e.phaseTicks >= CloudEyeStage.OPEN_TICKS) {
                     to(e, Phase.OPEN);
                 }
             }
             case OPEN -> {
-                e.open = 1f;
+                e.part = 1f;
+                e.open = blink(e.phaseTicks, e.stage.holdTicks());
                 if (e.phaseTicks >= e.stage.holdTicks() && !HOLD) {
                     to(e, Phase.CLOSING);
                 }
             }
             case MET -> {
+                // 瞬きの途中で目が合ったら、ゆっくり開ききる
+                e.open = Math.min(1f, e.open + 0.03f);
                 if (e.phaseTicks >= MET_HOLD && !HOLD) {
                     e.closeTicks = MET_CLOSE;
                     to(e, Phase.CLOSING);
                 }
             }
             case CLOSING -> {
-                e.open = Math.max(0f, e.open - 1f / e.closeTicks);
+                // 閉じるのも重く: 残りの開きが小さいほど遅く、最後はそっと合わさる
+                e.open = Math.max(0f, e.open - (0.4f + 0.9f * e.open) / e.closeTicks);
+                if (e.open < 0.01f) {
+                    e.open = 0f;
+                }
                 if (e.open <= 0f) {
                     to(e, Phase.CLEARING);
                 }
             }
             case CLEARING -> {
+                e.part = Math.max(0f, e.part - 1.6f / CloudEyeStage.CLEAR_TICKS);
                 e.patch = Math.max(0f, e.patch - 1f / CloudEyeStage.CLEAR_TICKS);
                 if (e.patch <= 0f) {
                     finish(e, outcome(e));
@@ -277,9 +315,9 @@ public final class CloudEyeClient {
         if (looking) {
             irisTargetX = 0f;
             irisTargetY = 0f;
-            irisSpeed = e.met ? 0.22f : 0.05f;
+            irisSpeed = e.met ? 0.09f : 0.025f;
         } else {
-            float t = e.age * 0.035f + (e.seed & 0xFF) * 0.1f;
+            float t = e.age * 0.02f + (e.seed & 0xFF) * 0.1f;
             irisTargetX = 0.55f * Mth.sin(t);
             irisTargetY = -0.55f + 0.15f * Mth.sin(t * 1.7f + 1.3f);
         }
@@ -338,7 +376,7 @@ public final class CloudEyeClient {
             volume = 0f;
         }
         if (e != null && e.phase != Phase.MET && !e.met && (sound == null || sound.isStopped())) {
-            sound = new CloudEyeSound(e.pos);
+            sound = new CloudEyeSound(e.pos(mc.gameRenderer.getMainCamera().getPosition()));
             mc.getSoundManager().play(sound);
         }
         if (sound != null && sound.isStopped()) {
@@ -363,6 +401,19 @@ public final class CloudEyeClient {
         }
     }
 
+    // 撮影用 (eyeHold のときだけ): /eyevariant <a|b|c> で見比べの案を切り替える。次に開く目から効く
+    @SubscribeEvent
+    static void onClientCommands(RegisterClientCommandsEvent event) {
+        if (!HOLD) {
+            return;
+        }
+        event.getDispatcher().register(Commands.literal("eyevariant")
+                .then(Commands.argument("v", StringArgumentType.word()).executes(ctx -> {
+                    System.setProperty("skyabyss.eyeVariant", StringArgumentType.getString(ctx, "v"));
+                    return 1;
+                })));
+    }
+
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         eye = null;
@@ -371,10 +422,9 @@ public final class CloudEyeClient {
         silence = 0;
     }
 
-    // 見つめたとみなす角度: 目の幅の3割ほど (遠いほど小さい)、最低5度
-    private static double stareCone(Camera camera, Eye e) {
-        double d = camera.getPosition().distanceTo(e.pos);
-        return Math.max(5.0, Math.toDegrees(Math.atan(e.width * 0.3 / Math.max(1.0, d))));
+    // 見つめたとみなす角度: 瞳のあたり (目の幅の 15%)、最低5度
+    static double stareCone(Eye e) {
+        return Math.max(5.0, e.angle * 0.15);
     }
 
     private static boolean clear(Minecraft mc, ClientLevel level, Vec3 target) {
@@ -406,6 +456,27 @@ public final class CloudEyeClient {
         Vector3f look = camera.getLookVector();
         double dot = Mth.clamp(d.x * look.x() + d.y * look.y() + d.z * look.z(), -1.0, 1.0);
         return Math.toDegrees(Math.acos(dot));
+    }
+
+    // 重い瞼の開き方: はじめはなかなか上がらず、そこから持ち上がり、最後はゆっくり止まる
+    static float heavy(float t) {
+        float s = smooth(t);
+        return s * s * (1.6f - 0.6f * s);
+    }
+
+    // 開いている間の、重く遅い瞬き (一度だけ。開いている時間が長い段階のみ)。半分ほどまで下りて、ゆっくり戻る
+    static float blink(int ticks, int hold) {
+        if (hold < 70) {
+            return 1f;
+        }
+        int t = ticks - (int) (hold * 0.4f);
+        int down = 22;
+        int up = 30;
+        if (t < 0 || t > down + up) {
+            return 1f;
+        }
+        float depth = 0.62f;
+        return t <= down ? 1f - depth * smooth(t / (float) down) : 1f - depth * (1f - smooth((t - down) / (float) up));
     }
 
     private static float smooth(float t) {

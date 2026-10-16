@@ -123,7 +123,8 @@ public final class Growth {
         }
         int sum = 0;
         for (int i = 0; i < add.length; i++) {
-            if (add[i] < 0 || data.stats[i] + add[i] > GrowthRules.STAT_CAP) {
+            // 引き算で比べる (足し算だと、改造したクライアントの巨大な値で int があふれて通ってしまう)
+            if (add[i] < 0 || add[i] > GrowthRules.STAT_CAP - data.stats[i]) {
                 return false;
             }
             sum += add[i];
