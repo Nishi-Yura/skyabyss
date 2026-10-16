@@ -250,7 +250,7 @@ LINES = [
 for key, ja, en in LINES:
     text(f"message.skyabyss.ember.lore.{key}", ja, en)
 
-# ================================================================ 品 (03 の 12章、13 の 6.5節)
+# ================================================================ 品 (03 の 13章、13 の 6.5節)
 GEAR = [
     ("ember_helmet", "余燼の兜", "Ember Helm", None, None),
     ("ember_chestplate", "余燼の胸当て", "Ember Breastplate", None, None),

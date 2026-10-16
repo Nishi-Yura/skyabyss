@@ -1,10 +1,10 @@
 {
-  "cubes": 200,
+  "cubes": 225,
   "texture": [
     512,
     512
   ],
-  "glow_pixels": 2016,
+  "glow_pixels": 2144,
   "overlaps": [],
   "clearance": []
 }
