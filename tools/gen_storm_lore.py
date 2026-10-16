@@ -113,9 +113,9 @@ LORE = [
     ("storm_ruins", 161, [{"type": "dimension", "target": "skyabyss:storm_back"}],
      ["chapter1/storm_wing", "chapter1/inscription_storm_tail"], ("風の民の遺跡", "Ruins of the Wind Folk"),
      ("鳥の背に、石の塔が二本立っていた。塔の壁には、短い棒が数えきれないほど刻まれている。\n\n"
-      "人の姿はない。骨の回廊を、外套を広げた番人が歩いていた。外套の中は、空っぽだった。",
+      "人の姿はない。骨の回廊を、銅の兜の番人が歩いていた。兜の奥には、何もなかった。",
       "Two stone towers stood on the bird's back. Their walls are cut with short strokes, more than anyone could count.\n\n"
-      "No one was there. Down the hollow bones walked wardens with their cloaks spread wide. Inside the cloaks there was nothing."), None),
+      "No one was there. Wardens in copper helms walked the hollow bones. Behind the helms there was nothing."), None),
     ("storm_cower", 162, [{"type": "manual"}],
      ["chapter1/storm_wing", "prologue/shadow"], ("うずくまる巨神", "The Cowering Titan"),
      ("空の影が通るあいだ、雷翼は峰にしがみつき、翼で頭を覆っていた。山のような鳥が、怯えていた。",
@@ -157,7 +157,7 @@ LORE = [
      ("雷翼の心臓が止まった。胸の奥の風が、はじめて止んだ。\n\n嵐の上の空は、ずっと晴れていた。それでも鳥は、嵐を脱がなかった。\n\n"
       "三つの欠片を手のひらに並べると、わずかに下を向いて寄り合った。",
       "The thunder wing's heart stopped. The wind deep in its chest fell still for the first time.\n\n"
-      "Above the storm, the sky had been clear all along. Even so, the bird never took off its storm.\n\n"
+      "Above the storm, the sky had been clear all along. Even so, the bird never shed its storm.\n\n"
       "Laid side by side in my palm, the three fragments drew together, tilting slightly downward."), None),
 ]
 for lid, order, unlock_, related, title, body, sign in LORE:
@@ -185,8 +185,8 @@ quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thun
       ("雷翼の背で、羽守・雷蛾・雷乞いを八体倒す。仲間も数える。",
        "Defeat eight feather wardens, static moths or thunder supplicants on the thunder wing's back. Party members count too."),
       ("骨の回廊は、しばらく静かになるだろう。", "The hollow bones will be quiet for a while."),
-      ("板の紙（雨に濡れて、字が少し流れている）：「鳥の背の骨の中で、外套の番人と光る蛾がまた騒いでいる。八つ、静めてきてほしい」",
-       "A note on the board, the ink run a little by rain: \"Inside the bones on the bird's back, the cloaked wardens and the glowing moths "
+      ("板の紙（雨に濡れて、字が少し流れている）：「鳥の背の骨の中で、銅の兜の番人と光る蛾が、また騒いでいる。八つ、静めてきてほしい」",
+       "A note on the board, the ink run a little by rain: \"Inside the bones on the bird's back, the copper-helmed wardens and the glowing moths "
        "are stirring again. Quiet eight of them.\""),
       {"stage": "rounds", "id": "kill", "type": "kill", "targets": ["skyabyss:feather_warden", "skyabyss:static_moth", "skyabyss:thunder_supplicant"],
        "count": 8, "text": ("雷翼の背で、羽守・雷蛾・雷乞いを倒す", "Defeat feather wardens, static moths and thunder supplicants on the thunder wing")},
