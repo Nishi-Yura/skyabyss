@@ -70,9 +70,9 @@ public final class LoreSelfTest {
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().equals("chapter1"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
-        // 1 章は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後)
-        if (early < 12 || early > 40) {
-            failures.add("prologue + chapter 1 should have 12-40 entries, found " + early);
+        // 1 章は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
+        if (early < 12 || early > 75) {
+            failures.add("prologue + chapter 1 should have 12-75 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue and chapter 1 may be written yet (" + unlockable + " unlockable)");
@@ -91,6 +91,10 @@ public final class LoreSelfTest {
         TitanBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
         // 潮殻の背の碑文 (08 の 9.2節)
         jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
+        // 雷翼の背の碑文 (12 の 9.2節。キーは伝承の担当が決め、背中の担当がこのキーで看板を立てる)
+        signKeys.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.INSCRIPTIONS.values());
+        // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
+        Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();
         for (LoreEntry entry : catalog.entries()) {
             for (LoreTrigger t : entry.unlock()) {
@@ -107,7 +111,9 @@ public final class LoreSelfTest {
                         }
                     }
                     case "kill", "near_entity" -> {
-                        if (LoreEvents.entityType(t.target()) == null) {
+                        if (LoreEvents.entityType(t.target()) == null && jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t.target())) {
+                            pending.add(t.target());
+                        } else if (LoreEvents.entityType(t.target()) == null) {
                             failures.add(entry.id() + ": unknown entity " + t.target());
                         }
                         if (t.radius() <= 0) {
@@ -116,12 +122,16 @@ public final class LoreSelfTest {
                     }
                     case "dimension" -> {
                         ResourceLocation dim = ResourceLocation.tryParse(t.target());
-                        if (dim == null || server.getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, dim)) == null) {
+                        boolean missing = dim == null || server.getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, dim)) == null;
+                        if (missing && jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t.target())) {
+                            pending.add(t.target());
+                        } else if (missing) {
                             failures.add(entry.id() + ": unknown dimension " + t.target());
                         }
                     }
                     case "page" -> {
-                        if (!t.target().equals("village") && !t.target().equals("titan_back")) {
+                        if (!t.target().equals("village") && !t.target().equals("titan_back")
+                                && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }
                     }
@@ -129,6 +139,9 @@ public final class LoreSelfTest {
                     }
                 }
             }
+        }
+        if (!pending.isEmpty()) {
+            SkyAbyss.LOGGER.warn("SELFTEST lore: waiting for other parts to register {} (their lore triggers stay idle until then)", pending);
         }
         if (!usedSigns.containsAll(signKeys)) {
             Set<String> missing = new HashSet<>(signKeys);
@@ -143,6 +156,7 @@ public final class LoreSelfTest {
             }
             List<String> keys = new ArrayList<>(List.of("item.skyabyss.lore_book", "item.skyabyss.lore_book.desc", "item.skyabyss.lore_page",
                     "item.skyabyss.lore_page.desc", "item.skyabyss.lore_page.desc.village", "item.skyabyss.lore_page.desc.titan_back",
+                    "item.skyabyss.lore_page.desc.storm_back",
                     "gui.skyabyss.lore.toast", "gui.skyabyss.lore.related", "gui.skyabyss.lore.count", "gui.skyabyss.lore.empty",
                     "message.skyabyss.lore.book_falls", "message.skyabyss.lore.book_appeared", "message.skyabyss.lore.book_returned",
                     "message.skyabyss.lore.page_read", "message.skyabyss.lore.page_known",
@@ -177,13 +191,16 @@ public final class LoreSelfTest {
                 continue;
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
-            JsonObject tideSigns = json("/assets/skyabyss_tide/lang/" + lang + ".json", failures);
-            if (tideSigns != null) {
-                tideSigns.entrySet().forEach(e -> {
-                    if (!main.has(e.getKey())) {
-                        main.add(e.getKey(), e.getValue());
-                    }
-                });
+            // 雷翼の背の看板の文は skyabyss_storm にある
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm")) {
+                JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
+                if (backSigns != null) {
+                    backSigns.entrySet().forEach(e -> {
+                        if (!main.has(e.getKey())) {
+                            main.add(e.getKey(), e.getValue());
+                        }
+                    });
+                }
             }
             for (LoreEntry entry : catalog.entries()) {
                 if (!entry.inscriptionSign().isEmpty()) {
@@ -373,7 +390,9 @@ public final class LoreSelfTest {
         JsonObject tide = json("/assets/skyabyss_tide/lang/" + code + ".json", failures);
         // 1 章の続き (雷翼・余燼・天の鍵・数え歌のいつつ・嵐の通り道) の文は skyabyss_story にある
         JsonObject story = json("/assets/skyabyss_story/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story)) {
+        // 雷翼の背の項目 (風に逆らう嵐・碑文・雷獣・晴れた空・風見の帳ほか) の文は skyabyss_storm にある (12 の 9 章)
+        JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

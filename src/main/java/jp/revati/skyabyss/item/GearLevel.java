@@ -89,34 +89,15 @@ public final class GearLevel {
     // 足し算と基礎への掛け算は符号を変え、全体への掛け算は 1/(1+a) − 1 を掛けて、ちょうど品を持たない値に戻す
     public static void updateLock(ServerPlayer player) {
         ItemStack hand = player.getMainHandItem();
+        ItemStack off = player.getOffhandItem();
         List<Lock> previous = LOCKS.getOrDefault(player, List.of());
-        if (previous.isEmpty() && !(hand.getItem() instanceof ModGear)) {
+        if (previous.isEmpty() && !(hand.getItem() instanceof ModGear) && !(off.getItem() instanceof ModGear)) {
             return;
         }
         List<Lock> next = new ArrayList<>();
-        if (hand.getItem() instanceof ModGear && !meets(player, hand)) {
-            int i = 0;
-            for (ItemAttributeModifiers.Entry e : hand.getAttributeModifiers().modifiers()) {
-                if (!e.slot().test(EquipmentSlot.MAINHAND)) {
-                    continue;
-                }
-                AttributeInstance instance = player.getAttribute(e.attribute());
-                if (instance == null) {
-                    continue;
-                }
-                AttributeModifier m = e.modifier();
-                double amount = switch (m.operation()) {
-                    case ADD_VALUE, ADD_MULTIPLIED_BASE -> -m.amount();
-                    case ADD_MULTIPLIED_TOTAL -> m.amount() > -1 ? 1 / (1 + m.amount()) - 1 : 0;
-                };
-                ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "gear_lock/" + i++);
-                AttributeModifier current = instance.getModifier(id);
-                if (current == null || current.amount() != amount || current.operation() != m.operation()) {
-                    instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, m.operation()));
-                }
-                next.add(new Lock(e.attribute(), id));
-            }
-        }
+        // 利き手の武器と、左手の盾 (珊瑚の盾など。特性は左手の修飾子になる)
+        lock(player, hand, EquipmentSlot.MAINHAND, "gear_lock/", next);
+        lock(player, off, EquipmentSlot.OFFHAND, "gear_lock/off/", next);
         for (Lock old : previous) {
             if (!next.contains(old)) {
                 AttributeInstance instance = player.getAttribute(old.attribute());
@@ -129,6 +110,33 @@ public final class GearLevel {
             LOCKS.remove(player);
         } else {
             LOCKS.put(player, next);
+        }
+    }
+
+    private static void lock(ServerPlayer player, ItemStack stack, EquipmentSlot slot, String prefix, List<Lock> next) {
+        if (!(stack.getItem() instanceof ModGear) || meets(player, stack)) {
+            return;
+        }
+        int i = 0;
+        for (ItemAttributeModifiers.Entry e : stack.getAttributeModifiers().modifiers()) {
+            if (!e.slot().test(slot)) {
+                continue;
+            }
+            AttributeInstance instance = player.getAttribute(e.attribute());
+            if (instance == null) {
+                continue;
+            }
+            AttributeModifier m = e.modifier();
+            double amount = switch (m.operation()) {
+                case ADD_VALUE, ADD_MULTIPLIED_BASE -> -m.amount();
+                case ADD_MULTIPLIED_TOTAL -> m.amount() > -1 ? 1 / (1 + m.amount()) - 1 : 0;
+            };
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, prefix + i++);
+            AttributeModifier current = instance.getModifier(id);
+            if (current == null || current.amount() != amount || current.operation() != m.operation()) {
+                instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, m.operation()));
+            }
+            next.add(new Lock(e.attribute(), id));
         }
     }
 

@@ -20,8 +20,17 @@
       ],
       "xp": 40,
       "skip_if": {
-        "type": "lore",
-        "entry": "chapter1/thunder_wing"
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/thunder_wing"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/storm_wing"
+          }
+        ]
       }
     },
     {
@@ -31,11 +40,64 @@
           "id": "see",
           "type": "lore",
           "targets": [
-            "chapter1/thunder_wing"
-          ]
+            "chapter1/thunder_wing",
+            "chapter1/storm_wing"
+          ],
+          "count": 1
         }
       ],
       "xp": 80
+    },
+    {
+      "id": "board",
+      "objectives": [
+        {
+          "id": "board",
+          "type": "lore",
+          "targets": [
+            "chapter1/storm_ruins"
+          ]
+        }
+      ],
+      "xp": 60,
+      "skip_if": {
+        "type": "stilled",
+        "titan": "thunder_wing"
+      }
+    },
+    {
+      "id": "trials",
+      "objectives": [
+        {
+          "id": "read",
+          "type": "lore",
+          "targets": [
+            "chapter1/inscription_storm_tail",
+            "chapter1/inscription_storm_hub",
+            "chapter1/inscription_storm_west",
+            "chapter1/inscription_storm_east",
+            "chapter1/inscription_storm_eye",
+            "chapter1/inscription_storm_heart"
+          ],
+          "count": 2
+        },
+        {
+          "id": "stone",
+          "type": "signal",
+          "targets": [
+            "storm_trial_west",
+            "storm_trial_east",
+            "storm_trial_front"
+          ],
+          "count": 1,
+          "party": false
+        }
+      ],
+      "xp": 90,
+      "skip_if": {
+        "type": "stilled",
+        "titan": "thunder_wing"
+      }
     },
     {
       "id": "heart",

@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 162,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/storm_wing",
+    "prologue/shadow"
+  ]
+}

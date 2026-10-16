@@ -1,0 +1,29 @@
+{
+  "a": {
+    "boxes": 236,
+    "overlaps": 0,
+    "overlaps_flap38_sat": 0,
+    "overlaps_flap70_sat": 0,
+    "buried": 0,
+    "glow_px": 678,
+    "wingspan_blocks": 1.25
+  },
+  "b": {
+    "boxes": 244,
+    "overlaps": 0,
+    "overlaps_flap38_sat": 0,
+    "overlaps_flap70_sat": 0,
+    "buried": 0,
+    "glow_px": 1424,
+    "wingspan_blocks": 1.31
+  },
+  "c": {
+    "boxes": 217,
+    "overlaps": 0,
+    "overlaps_flap38_sat": 0,
+    "overlaps_flap70_sat": 0,
+    "buried": 0,
+    "glow_px": 649,
+    "wingspan_blocks": 1.19
+  }
+}
