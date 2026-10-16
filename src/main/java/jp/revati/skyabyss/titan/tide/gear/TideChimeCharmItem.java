@@ -69,11 +69,18 @@ public class TideChimeCharmItem extends Item implements ModGear, Accessory {
             }
             e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), player);
         }
-        // 足もとから外へ広がる水の輪
+        // 足もとから外へ広がる水の輪 (2026-10-17: 水しぶきだけでは昼の草の上で見えなかったので、白い波頭と青い光を足した)
         for (int i = 0; i < 48; i++) {
             double a = Math.PI * 2 * i / 48;
+            double cx = Math.cos(a);
+            double cz = Math.sin(a);
             for (double d = 1.5; d <= r; d += 1.75) {
-                level.sendParticles(ParticleTypes.SPLASH, player.getX() + Math.cos(a) * d, player.getY() + 0.2, player.getZ() + Math.sin(a) * d, 2, 0.1, 0.05, 0.1, 0.05);
+                level.sendParticles(ParticleTypes.SPLASH, player.getX() + cx * d, player.getY() + 0.2, player.getZ() + cz * d, 2, 0.1, 0.05, 0.1, 0.05);
+            }
+            // 波頭: 外へ押し出される白い泡 (速さを持たせて輪が広がって見えるように)
+            level.sendParticles(ParticleTypes.CLOUD, player.getX() + cx * 1.2, player.getY() + 0.25, player.getZ() + cz * 1.2, 0, cx, 0.02, cz, 0.35);
+            if (i % 2 == 0) {
+                level.sendParticles(ParticleTypes.GLOW, player.getX() + cx * r, player.getY() + 0.4, player.getZ() + cz * r, 1, 0.05, 0.1, 0.05, 0);
             }
         }
         level.sendParticles(ParticleTypes.BUBBLE_POP, player.getX(), player.getY() + 1, player.getZ(), 30, 1.2, 0.6, 1.2, 0.05);

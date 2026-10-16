@@ -247,9 +247,14 @@ public final class TideGearSelfTest {
             // その段の +0 の目安 (武器 dps0、防具 armor / toughness ×一式) と比べる
             double hitN = next.bossHit() * GearCurve.armorTaken(next.bossHit(), next.armor(), next.toughness()) * next.setMultiplier();
             double own0 = GearCurve.load(dpsOn(next.dps0(), next.dps0() / GearCurve.SWORD_SPEED, s), next.bossHp(), 0.6, 2.5, h, hitN);
-            notes.add(String.format("%s boss with tide +10: load %.2f (that titan's own +0 gear: %.2f)", next.id(), tide10, own0));
-            // 潮殻の +10 は、次の巨神の +0 より楽にならない (少しの差は強化の努力の分として許す)
-            check(f, tide10 >= own0 * 0.9, next.id() + ": tide +10 makes the boss easier than its own +0 gear (" + tide10 + " < " + own0 + ")");
+            // 9.8節の表どおりの潮殻 +10 (武器 dps10、防具 +10 は強靭 +12) で挑んだとき。前の巨神の +10 は次の巨神の +0 より少し強いのが表の作り
+            double hitPlan = next.bossHit() * GearCurve.armorTaken(next.bossHit(), tide.armor(), tide.toughness() + 12) * tide.setMultiplier();
+            double plan10 = GearCurve.load(dpsOn(tide.dps10() * 1.05, tide.dps10() / GearCurve.SWORD_SPEED, s), next.bossHp(), 0.6, 2.5, h, hitPlan);
+            notes.add(String.format("%s boss with tide +10: load %.2f (9.8 plan for tide +10: %.2f, that titan's own +0 gear: %.2f)",
+                    next.id(), tide10, plan10, own0));
+            // 潮殻の +10 は、表の潮殻 +10 より楽にしない (5% まで)。どの場合も避けて戦う相手のまま (2.0 以上)
+            check(f, tide10 >= plan10 * 0.95 && tide10 >= 2.0,
+                    next.id() + ": tide +10 makes the boss too easy (" + tide10 + ", plan " + plan10 + ", own +0 " + own0 + ")");
         }
         // 守り: 潮殻の鎧 +0 は、岩鯨の甲殻 +0 (耐性 I) より潮殻の一撃に弱くない。+10 でも雷翼の目安 +0 より硬くない
         double whaleHit = tide.bossHit() * GearCurve.armorTaken(tide.bossHit(), whale.armor(), whale.toughness()) * GearCurve.RESISTANCE_I;
