@@ -45,6 +45,10 @@ public final class ForgeRoom {
         k.fill(23, floor + 1, 11, 28, floor + 2, 11, RoomKit.BRICKS);
         k.set(23, floor + 3, 11, RoomKit.BRICKS);
         k.set(28, floor + 3, 11, RoomKit.BRICKS);
+        k.set(23, floor + 4, 11, Blocks.LANTERN.defaultBlockState());
+        k.set(28, floor + 4, 11, Blocks.LANTERN.defaultBlockState());
+        k.set(Forge.TROUGH_B.getX() + 1, floor + 1, Forge.TROUGH_B.getZ(), RoomKit.BRICKS);
+        k.set(Forge.TROUGH_B.getX() + 1, floor + 2, Forge.TROUGH_B.getZ(), Blocks.LANTERN.defaultBlockState());
         // 焼き入れの槽
         k.set(Forge.TROUGH_A, EmberTrialSetup.QUENCH_TROUGH.get().defaultBlockState());
         k.set(Forge.TROUGH_B, EmberTrialSetup.QUENCH_TROUGH.get().defaultBlockState());
