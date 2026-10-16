@@ -102,6 +102,18 @@ final class StormEast {
         long gt = level.getGameTime();
         if (gt % 5 == 0) {
             showRods(level);
+            openFullDoors(level, state);
+        }
+        if (peaceful || StormBackClock.phase(level) != StormBackClock.Phase.STORM) {
+            LINES.clear();
+            return;
+        }
+        tickStorm(level, gt);
+    }
+
+    // 満ちた柱の戸を開ける
+    static void openFullDoors(ServerLevel level, StormBackState state) {
+        {
             for (int i = 0; i < EAST_RODS.size(); i++) {
                 if (!state.eastDoorOpen(i) && StormRods.isFull(level, EAST_RODS.get(i))) {
                     state.openEastDoor(i);
@@ -117,10 +129,9 @@ final class StormEast {
                 }
             }
         }
-        if (peaceful || StormBackClock.phase(level) != StormBackClock.Phase.STORM) {
-            LINES.clear();
-            return;
-        }
+    }
+
+    private static void tickStorm(ServerLevel level, long gt) {
         // 招雷
         if (gt % STRIKE_EVERY == 0) {
             List<ServerPlayer> cands = new ArrayList<>();

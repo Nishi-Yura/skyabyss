@@ -329,6 +329,11 @@ public final class StormBirdBuilder {
                     kit.put(x, y, z, StormKit.wall(Style.BONE, x, y, z));
                 }
                 kit.put(x, l.floor(), z, StormKit.floor(Style.BONE, x, z));
+                // 岩棚の上は 3 段空ける (丸天井の端で低くならないように)
+                for (int y = l.floor() + 1; y <= l.floor() + 3; y++) {
+                    kit.air(x, y, z);
+                }
+                kit.solid(x, l.floor() + 4, z, StormKit.wall(Style.BONE, x, l.floor() + 4, z));
             }
         }
         vent(kit, WEST_KNOB_VENT);
@@ -497,6 +502,9 @@ public final class StormBirdBuilder {
         for (int x = p.x1(); x <= p.x2(); x++) {
             for (int z = p.z1(); z <= p.z2(); z++) {
                 kit.put(x, p.floor(), z, StormKit.COPPER);
+                for (int y = p.floor() + 1; y <= p.floor() + 2; y++) {
+                    kit.air(x, y, z);
+                }
             }
         }
         for (int y = p.floor() + 3; y <= RAIJU_NEST_CEILING + 1; y++) {

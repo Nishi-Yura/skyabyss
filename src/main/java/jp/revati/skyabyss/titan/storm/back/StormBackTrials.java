@@ -440,6 +440,10 @@ public final class StormBackTrials {
         wasPeaceful = peaceful;
     }
 
+    static void tickPeacefulForTest(ServerLevel level, boolean peaceful) {
+        tickPeaceful(level, peaceful);
+    }
+
     // 背の上 (体の外の羽の上)。鳥のいちばん上のブロックの上にいる
     static boolean onBackTop(Vec3 p) {
         int t = StormBirdBuilder.top((int) Math.floor(p.x), (int) Math.floor(p.z));

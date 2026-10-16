@@ -129,7 +129,8 @@ public final class StormSelfTest {
     private static void checkKeeper(ServerLevel level, List<String> failures) {
         StormWingEntity first = StormKeeper.KEEPER.spawn(level, TEST_X + 40, TEST_Z + 40, null);
         StormWingEntity second = StormKeeper.KEEPER.spawn(level, TEST_X + 60, TEST_Z + 60, null);
-        if (StormKeeper.KEEPER.current(level) != second) {
+        // 巨神は嵐の中心から 120〜200 離れた輪の上に置かれる (読み込んだチャンクの外のことがある) ので、記録の UUID で見る
+        if (!second.getUUID().equals(StormKeeper.KEEPER.slot(level).id)) {
             failures.add("the second thunder wing is not the current one");
         }
         if (!first.isRemoved()) {

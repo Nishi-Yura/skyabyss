@@ -163,6 +163,44 @@ public final class EyeMirrors {
         return -1;
     }
 
+    // 最短の解き方 (回す鏡の番号の並び。解けなければ null)。自己テストが世界の鏡で同じ手を打って確かめる
+    @Nullable
+    public static List<Integer> solvePath(Config cfg) {
+        int n = cfg.mirrors().size();
+        int full = (1 << cfg.receivers().size()) - 1;
+        ArrayDeque<Long> q = new ArrayDeque<>();
+        Map<Long, long[]> parent = new HashMap<>();
+        int[] start = cfg.init().clone();
+        long s0 = encode(start, lit(cfg, start, 0));
+        q.add(s0);
+        parent.put(s0, null);
+        while (!q.isEmpty()) {
+            long cur = q.poll();
+            if ((int) (cur & 0xFF) == full) {
+                List<Integer> moves = new ArrayList<>();
+                long c = cur;
+                while (parent.get(c) != null) {
+                    long[] p = parent.get(c);
+                    moves.add(0, (int) p[1]);
+                    c = p[0];
+                }
+                return moves;
+            }
+            int[] rots = decode(cur, n);
+            int mask = (int) (cur & 0xFF);
+            for (int i = 0; i < n; i++) {
+                int[] nr = rots.clone();
+                nr[i] = (nr[i] + 1) % 4;
+                long st = encode(nr, lit(cfg, nr, mask));
+                if (!parent.containsKey(st)) {
+                    parent.put(st, new long[] {cur, i});
+                    q.add(st);
+                }
+            }
+        }
+        return null;
+    }
+
     static int lit(Config cfg, int[] rots, int mask) {
         Wall w = trace(cfg.entry(), grid(cfg, rots)).exit();
         int i = w == null ? -1 : cfg.receivers().indexOf(w);

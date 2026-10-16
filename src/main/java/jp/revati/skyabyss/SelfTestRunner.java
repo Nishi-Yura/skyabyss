@@ -108,6 +108,8 @@ public final class SelfTestRunner {
         // 雷翼の巨神 (窓・止まり木・昇り風・一体だけ・記録・戻る先・背中の結びつけ)
         steps.add(Step.once("storm (load)", jp.revati.skyabyss.titan.storm.StormSelfTest::load));
         steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
+        // 雷翼の背 (鳥の形・看板・拍・鏡・柱・歩ける所・リセット)。建てたあと 100 tick 待ってから数える
+        steps.addAll(jp.revati.skyabyss.titan.storm.back.StormBackSelfTest.steps());
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
