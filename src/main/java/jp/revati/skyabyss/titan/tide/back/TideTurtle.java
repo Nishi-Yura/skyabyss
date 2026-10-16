@@ -60,4 +60,11 @@ public final class TideTurtle {
         BlockState air = Blocks.AIR.defaultBlockState();
         return BODY.place(kit.level(), TideKit.FLAGS, y -> y < TideBackLayout.SEA ? water : air);
     }
+
+    // 同じ置き方を、何 tick かに分けて進められる形で (BackBuildJobs)
+    public static jp.revati.skyabyss.titan.BackBuildJobs.Job job(TideKit kit) {
+        BlockState water = Blocks.WATER.defaultBlockState();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        return BODY.job(kit.level(), TideKit.FLAGS, y -> y < TideBackLayout.SEA ? water : air);
+    }
 }

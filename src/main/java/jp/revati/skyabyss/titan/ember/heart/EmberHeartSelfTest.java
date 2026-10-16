@@ -399,9 +399,8 @@ public final class EmberHeartSelfTest {
             EmberHeat.reset(p);
             EmberHeartArena.resetState();
             p.moveTo(EmberHeartArena.CX + 15.5, EmberHeartArena.FLOOR - 0.5, EmberHeartArena.CZ + 0.5);
-            back.getGameTime();
-            EmberHeartArena.tick(back, null);
-            EmberHeartArena.tick(back, null);
+            // 救い上げは tick が 2 tick に一度だけ呼ぶ (同じ tick のうちに続けて tick を呼んでも、出生の偶奇で動かない) ので直接呼ぶ
+            EmberHeartArena.rescue(back, null);
             check(EmberHeartArena.onPlatform(p.getX(), p.getZ()), "a player who fell in the moat was not put back", f);
         } finally {
             EmberHeat.reset(p);

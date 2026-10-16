@@ -329,6 +329,7 @@ public final class AshPath {
         List<ServerPlayer> in = EmberTrials.playersIn(level, EmberBackLayout.WEST);
         for (ServerPlayer p : in) {
             trackStand(level, p);
+            rescueUrn(level, p);
             if (FAR_SHORE.contains(p.position()) && !EmberBackTrials.sleeping(level, EmberIds.WEST)
                     && !EmberBackState.get(level).ready(EmberBackState.Trial.WEST)) {
                 EmberTrials.markReady(level, EmberBackState.Trial.WEST);
@@ -338,6 +339,34 @@ public final class AshPath {
         if (!in.isEmpty() && !EmberBackTrials.sleeping(level, EmberIds.WEST)) {
             keepEnemies(level, in, now);
         }
+    }
+
+    // 島の上で壺を失った人 (死んで休み場 w1 で目覚めた、ログアウト、落とした) は湖の真ん中で動けなくなる。
+    // 島に立っていて壺を持っていなければ、手元へ戻す (入口の岸は台から受け取るので対象外)
+    static void rescueUrn(ServerLevel level, ServerPlayer p) {
+        if (!p.isAlive() || p.isSpectator() || p.isCreative() || EmberBackTrials.sleeping(level, EmberIds.WEST)) {
+            return;
+        }
+        BlockPos feet = p.blockPosition();
+        if (feet.getY() != LAVA_Y + 1) {
+            return;
+        }
+        boolean onIsland = false;
+        for (Island i : PATTERNS.get(patternOf(level))) {
+            if (i.contains(feet.getX(), feet.getZ())) {
+                onIsland = true;
+                break;
+            }
+        }
+        if (!onIsland) {
+            return;
+        }
+        for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+            if (p.getInventory().getItem(i).is(EmberTrialSetup.ASH_URN.get())) {
+                return;
+            }
+        }
+        giveUrn(p);
     }
 
     private static void trackStand(ServerLevel level, ServerPlayer p) {

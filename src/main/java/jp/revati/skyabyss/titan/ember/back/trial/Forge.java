@@ -410,12 +410,21 @@ public final class Forge {
             }
         } else if (doorState == 2 && --doorTimer <= 0) {
             doorState = 3;
-            List<Consumer<ServerLevel>> ls;
-            synchronized (Forge.class) {
-                ls = new ArrayList<>(DOOR_LISTENERS);
-            }
-            ls.forEach(l -> l.accept(level));
+            notifyDoorOpened(level);
         }
+    }
+
+    // 扉が開いて予告が済んだことを、登録された受け口 (E の鍛え手の戦い) へ知らせる
+    public static void notifyDoorOpened(ServerLevel level) {
+        List<Consumer<ServerLevel>> ls;
+        synchronized (Forge.class) {
+            ls = new ArrayList<>(DOOR_LISTENERS);
+        }
+        ls.forEach(l -> l.accept(level));
+    }
+
+    public static synchronized int doorListeners() {
+        return DOOR_LISTENERS.size();
     }
 
     static void fillLayer(ServerLevel level, int z, BlockState state) {

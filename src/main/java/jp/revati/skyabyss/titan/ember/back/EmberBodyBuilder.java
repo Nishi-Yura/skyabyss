@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.BackBuildJobs;
 import jp.revati.skyabyss.titan.TitanBodyBlocks;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.ember.EmberIds;
@@ -65,14 +66,37 @@ public final class EmberBodyBuilder {
         }
     }
 
-    // 建てる (かかった時間 ms を返す)
+    // 建てる (かかった時間 ms を返す)。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
     public static long build(ServerLevel back, TitanBackData data) {
+        BackBuildJobs.cancel(back.dimension());
         long start = System.currentTimeMillis();
-        EmberBodyBuilder b = new EmberBodyBuilder(back);
         long t0 = System.currentTimeMillis();
         int placed = BODY.place(back, EmberKit.FLAGS, y -> EmberKit.AIR);
-        long tBody = System.currentTimeMillis() - t0;
-        t0 = System.currentTimeMillis();
+        return buildRest(back, data, start, placed, System.currentTimeMillis() - t0);
+    }
+
+    // 起動時: 体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    public static void schedule(ServerLevel back) {
+        TitanBackData data = TitanBackData.get(back);
+        if (!BODY.present()) {
+            SkyAbyss.LOGGER.warn("ember back: {} is missing, the body is not built", EmberIds.BODY_BIN);
+            return;
+        }
+        int version = buildVersion();
+        if (!data.needsBuild(version)) {
+            return;
+        }
+        if (data.isBuilt()) {
+            SkyAbyss.LOGGER.info("Rebuilding the ember back (build {} -> {})", data.layoutVersion(), version);
+            data.resetProgress();
+        }
+        BackBuildJobs.Job job = BODY.job(back, EmberKit.FLAGS, y -> EmberKit.AIR);
+        BackBuildJobs.schedule("ember back body", back, job, () -> buildRest(back, data, System.currentTimeMillis(), job.placed(), 0));
+    }
+
+    private static long buildRest(ServerLevel back, TitanBackData data, long start, int placed, long tBody) {
+        EmberBodyBuilder b = new EmberBodyBuilder(back);
+        long t0 = System.currentTimeMillis();
         b.restoreUnderground();
         b.mouth();
         b.throat();

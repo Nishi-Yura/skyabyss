@@ -252,7 +252,10 @@ public final class EmberGearSelfTest {
     // ---------------------------------------------------------------- 効果
     private static FakePlayer player(ServerLevel level, String name, int lv) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
-        p.setPos(0.5, level.getMinBuildHeight() + 2, 0.5);
+        // 世界の出生地点 (出生地点の周りのチャンクは読み込まれている)。(0, 0) は世界によって読み込まれておらず、
+        // 敵を足せない (大鎚の亀裂・護符が当たらない) ことがあった
+        net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+        p.setPos(spawn.getX() + 0.5, level.getMinBuildHeight() + 2, spawn.getZ() + 0.5);
         Growth.get(p).level = lv;
         return p;
     }

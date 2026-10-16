@@ -1,11 +1,13 @@
 package jp.revati.skyabyss.titan.tide;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.BackBuildJobs;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
 import jp.revati.skyabyss.titan.tide.back.TideBackTrials;
 import jp.revati.skyabyss.titan.tide.back.TideIslandBuilder;
 import jp.revati.skyabyss.titan.tide.back.TideKit;
+import jp.revati.skyabyss.titan.tide.back.TideTurtle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -43,11 +45,33 @@ public final class TideBackBuilder {
         }
     }
 
+    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
     public static void build(ServerLevel back, TitanBackData data) {
+        BackBuildJobs.cancel(back.dimension());
         long start = System.currentTimeMillis();
-        TideIslandBuilder.build(new TideKit(back, RandomSource.create(20261017L)));
+        TideKit kit = new TideKit(back, RandomSource.create(20261017L));
+        TideTurtle.place(kit);
+        finish(back, data, kit, start);
+    }
+
+    // 起動時: 亀の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    public static void schedule(ServerLevel back) {
+        TitanBackData data = TitanBackData.get(back);
+        if (!data.needsBuild(LAYOUT_VERSION)) {
+            return;
+        }
+        if (data.isBuilt()) {
+            SkyAbyss.LOGGER.info("Rebuilding the tide back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
+            data.resetProgress();
+        }
+        TideKit kit = new TideKit(back, RandomSource.create(20261017L));
+        BackBuildJobs.schedule("tide back island", back, TideTurtle.job(kit), () -> finish(back, data, kit, System.currentTimeMillis()));
+    }
+
+    private static void finish(ServerLevel back, TitanBackData data, TideKit kit, long start) {
+        TideIslandBuilder.buildRest(kit);
         data.markBuilt(LAYOUT_VERSION);
         TideBackTrials.afterBuild(back);
-        SkyAbyss.LOGGER.info("Built the tide back island (layout {}) in {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
+        SkyAbyss.LOGGER.info("Built the tide back island (layout {}); the rooms took {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
     }
 }

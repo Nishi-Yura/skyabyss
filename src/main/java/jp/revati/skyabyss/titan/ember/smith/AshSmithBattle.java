@@ -208,6 +208,25 @@ public final class AshSmithBattle {
         return ROOM.start(level, host, host.playersInside(level));
     }
 
+    // 鍛えの間の扉 (C2) が開いて 5 秒の予告が済んだ (Forge.onDoorOpened)。部屋が建っていなければ建て、
+    // もう中にいる人 (予告のうちに入った人) がいれば集合を待たずに始める。誰も入っていなければ、人が入ったとき (onLevelTick) に 5 秒の集合から始まる
+    public static void onForgeDoorOpened(ServerLevel level) {
+        if (level.dimension() != EmberIds.BACK || done(level)) {
+            return;
+        }
+        if (!AshSmithArena.isBuilt(level)) {
+            AshSmithArena.build(level, AshSmithArena.BOX);
+        }
+        Host host = new Host();
+        if (ROOM.active() || host.asleep(level)) {
+            return;
+        }
+        List<ServerPlayer> inside = host.playersInside(level);
+        if (!inside.isEmpty()) {
+            ROOM.start(level, host, inside);
+        }
+    }
+
     public static void abandon(MinecraftServer server) {
         ServerLevel level = level(server);
         if (level != null) {

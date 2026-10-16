@@ -38,6 +38,17 @@ public final class StormBirdBuilder {
             // 形がまだ無い (取り込みの前)。部屋だけを空に建てる
             SkyAbyss.LOGGER.warn("storm_back/bird.bin is missing; building the rooms without the bird");
         }
+        buildRest(kit);
+    }
+
+    // 起動時: 鳥の体を何 tick かに分けて置く仕事 (BackBuildJobs)。形が無ければ空の仕事
+    public static jp.revati.skyabyss.titan.BackBuildJobs.Job job(StormKit kit) {
+        return BIRD.exists() ? BIRD.job(kit.level()) : jp.revati.skyabyss.titan.BackBuildJobs.empty();
+    }
+
+    // 鳥の体を置いたあと (部屋を掘る・中身を建てる)
+    public static void buildRest(StormKit kit) {
+        long t0 = System.currentTimeMillis();
         arrival(kit);
         gate(kit);
         tailHall(kit);

@@ -206,7 +206,7 @@ public final class TideTravel {
     static void onServerStarted(ServerStartedEvent event) {
         ServerLevel back = event.getServer().getLevel(TIDE_BACK);
         if (back != null) {
-            TideBackBuilder.ensureBuilt(back);
+            TideBackBuilder.schedule(back);
         }
     }
 

@@ -40,6 +40,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // - 戻る: 背中の羽根の門の口に 0.5 秒いると戻る。止まっていれば止まり木の足もと、止まっていなければ最後に止まった足もと、
 //   記録もなければ共有スポーン地点。低速落下 10 秒
 // - 嵐の雲の天井 (CLOUD_Y) より下へ落ちると、白い閃光のあと休み場 (なければ到着) へ戻し、低速落下 5 秒。傷は 2 (試練の中は 3)
+@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormTravel {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
@@ -206,7 +207,7 @@ public final class StormTravel {
     static void onServerStarted(ServerStartedEvent event) {
         ServerLevel back = event.getServer().getLevel(STORM_BACK);
         if (back != null) {
-            StormBackBuilder.ensureBuilt(back);
+            StormBackBuilder.schedule(back);
         }
     }
 

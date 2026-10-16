@@ -272,8 +272,19 @@ public final class EmberBackSelfTest {
     }
 
     // ---------------------------------------------------------------- 歩く
+    // 試練の仕掛けを通ったものとして歩く (灰の道の湖を冷え殻で渡る、鍛えの間の扉を火の鍵で開ける)。通常は false
+    private static boolean mechanisms;
+
+    private static boolean lakeLava(ServerLevel l, BlockPos p) {
+        return p.getY() == jp.revati.skyabyss.titan.ember.back.trial.AshPath.LAVA_Y && l.getFluidState(p).is(FluidTags.LAVA)
+                && EmberBackLayout.WEST.contains(p);
+    }
+
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
+        if (mechanisms && s.is(ModBlocks.SEALED_GATE.get()) && SMITH_DOOR.contains(p)) {
+            return true;
+        }
         return s.getCollisionShape(l, p).isEmpty() && !s.is(ModBlocks.SEALED_GATE.get()) && !l.getFluidState(p).is(FluidTags.LAVA)
                 && !s.is(Blocks.FIRE) && !s.is(Blocks.SOUL_FIRE);
     }
@@ -283,7 +294,7 @@ public final class EmberBackSelfTest {
             return false;
         }
         BlockPos b = p.below();
-        return !l.getBlockState(b).getCollisionShape(l, b).isEmpty() || l.getBlockState(p).is(Blocks.WATER);
+        return !l.getBlockState(b).getCollisionShape(l, b).isEmpty() || l.getBlockState(p).is(Blocks.WATER) || mechanisms && lakeLava(l, b);
     }
 
     static Map<Long, Integer> walk(ServerLevel l, BlockPos start) {
@@ -343,7 +354,21 @@ public final class EmberBackSelfTest {
         return best;
     }
 
+    // 試練の向こう側にある所。仕掛け (冷え殻・火の鍵) を通らないと歩いて行けないのが仕様 (13 の 24.1節)
+    private static final Set<String> TRIAL_GATED = Set.of("rest w1", "west stone", "east stone");
+
     private static void checkWalk(ServerLevel back, boolean gateOpen) {
+        mechanisms = false;
+        checkWalk(back, gateOpen, false);
+        mechanisms = true;
+        try {
+            checkWalk(back, gateOpen, true);
+        } finally {
+            mechanisms = false;
+        }
+    }
+
+    private static void checkWalk(ServerLevel back, boolean gateOpen, boolean mech) {
         Map<Long, Integer> dist = walk(back, ARRIVAL.above());
         Map<String, BlockPos> goals = new LinkedHashMap<>();
         for (Rest r : RESTS) {
@@ -371,12 +396,19 @@ public final class EmberBackSelfTest {
             int r = e.getKey().equals("back top") || e.getKey().equals("crack rail") ? 4 : e.getKey().contains("crater") ? 2 : 1;
             int d = reached(dist, e.getValue(), r);
             if (d < 0) {
+                if (!mech && TRIAL_GATED.contains(e.getKey())) {
+                    continue;
+                }
                 miss.add(e.getKey() + " " + e.getValue().toShortString());
-            } else if (!gateOpen) {
+            } else if (!gateOpen && !mech) {
                 sb.append(e.getKey()).append('=').append(d).append(' ');
             }
         }
-        expect(miss.isEmpty(), (gateOpen ? "with the gate open" : "with the gate closed") + " cannot walk from the arrival to: " + miss);
+        expect(miss.isEmpty(), (gateOpen ? "with the gate open" : "with the gate closed") + (mech ? " and the trials' mechanisms used" : "")
+                + " cannot walk from the arrival to: " + miss);
+        if (mech) {
+            return;
+        }
         if (!gateOpen) {
             // 門が閉じていれば前室へは行けない
             expect(reached(dist, rest("heart").floor().above(), 3) < 0, "the ante is reachable while the gate is closed");

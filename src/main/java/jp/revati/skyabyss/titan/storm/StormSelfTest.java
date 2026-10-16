@@ -98,7 +98,17 @@ public final class StormSelfTest {
     private static void checkPerch(ServerLevel level, List<String> failures) {
         Peak p = StormPerch.find(level, TEST_X + 8, TEST_Z + 8, 24, 96);
         if (p == null) {
-            failures.add("the perch finder found no dry ground around the test point");
+            // 世界の種によっては、試す所が海 (乾いた地面が一つもない)。そのときは「見つからない」が正しい
+            boolean anyLand = false;
+            for (int dx = -96; dx <= 96 && !anyLand; dx += 8) {
+                for (int dz = -96; dz <= 96 && !anyLand; dz += 8) {
+                    double dist = Math.hypot(dx, dz);
+                    anyLand = dist >= 24 && dist <= 96 && jp.revati.skyabyss.titan.tide.TideOcean.land(level, TEST_X + 8 + dx, TEST_Z + 8 + dz);
+                }
+            }
+            if (anyLand) {
+                failures.add("the perch finder found no dry ground around the test point");
+            }
             return;
         }
         double d = Math.hypot(p.x() - (TEST_X + 8), p.z() - (TEST_Z + 8));
