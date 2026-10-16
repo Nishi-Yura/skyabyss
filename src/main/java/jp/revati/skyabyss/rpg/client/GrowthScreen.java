@@ -76,7 +76,7 @@ public class GrowthScreen extends Screen {
                 .bounds(left + 184, top + 161, 46, 16).build());
         // 振り分けられる力の行の右。技の画面の「振り直す」と同じ費用と場所 (共鳴の炉のそば)
         respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.respec"), b -> pressRespec())
-                .bounds(left + 170, top + 42, 60, 14).build());
+                .bounds(left + 170, top + 45, 60, 12).build());
         // 技の画面へのつまみ (上の縁)
         jp.revati.skyabyss.rpg.client.skill.RpgTabs.add(this::addRenderableWidget, width, height, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
         refresh();
@@ -275,11 +275,11 @@ public class GrowthScreen extends Screen {
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
         if (respec.isHovered()) {
             int cost = GrowthRules.statRespecCost(d.statRespecs);
-            List<FormattedCharSequence> lines = new ArrayList<>(font.split(Component.translatable(cost == 0
+            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable(cost == 0
                     ? "gui.skyabyss.growth.respec_free" : "gui.skyabyss.growth.respec_cost", cost,
                     jp.revati.skyabyss.rpg.skill.SkillRules.RESPEC_FORGE_RANGE).withColor(TEXT), 200));
             if (respecArmed > 0) {
-                lines.addAll(font.split(Component.translatable("gui.skyabyss.growth.respec_again").withColor(0xD9779A), 200));
+                lines.addAll(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable("gui.skyabyss.growth.respec_again").withColor(0xD9779A), 200));
             }
             g.renderTooltip(font, lines, mouseX, mouseY);
             return;
