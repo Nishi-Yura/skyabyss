@@ -184,6 +184,7 @@ public final class RecordBuilder {
         place(detail, "inventory", where.inventory());
         place(detail, "bags", where.bags());
         place(detail, "ender", where.ender());
+        where.holders().forEach((id, n) -> detail.add(Component.translatableWithFallback(P + "d.place_" + id, "- " + id + " x" + n, n)));
         place(detail, "pending", where.pending());
         place(detail, "kept", where.kept());
         for (Keepsakes.Ground g : where.ground()) {

@@ -73,7 +73,33 @@ public final class Keepsakes {
     public record Ground(String dimension, BlockPos pos, int count, boolean loaded) {
     }
 
-    public record Where(int inventory, int bags, int ender, int pending, int kept, List<Ground> ground) {
+    // ほかの仕組みが持つ「手もとの枠」(例: 装飾品の専用スロット)。id は画面の行 d.place_<id> の名前になる。
+    // 枠を作る側が起動時に registerHolder("accessory", (player, item) -> 数) を呼べば、在りかに並び、手もとに数えられる
+    @FunctionalInterface
+    public interface Holder {
+        int count(ServerPlayer player, Item item);
+    }
+
+    private static final Map<String, Holder> HOLDERS = new java.util.LinkedHashMap<>();
+
+    public static synchronized void registerHolder(String id, Holder holder) {
+        HOLDERS.put(id, holder);
+    }
+
+    static synchronized void unregisterHolder(String id) {
+        HOLDERS.remove(id);
+    }
+
+    // holders: 枠の名前 → 数 (0 の枠は入れない)
+    public record Where(int inventory, int bags, int ender, Map<String, Integer> holders, int pending, int kept, List<Ground> ground) {
+        public int holderCount() {
+            int n = 0;
+            for (int c : holders.values()) {
+                n += c;
+            }
+            return n;
+        }
+
         public int groundCount() {
             int n = 0;
             for (Ground g : ground) {
@@ -83,12 +109,12 @@ public final class Keepsakes {
         }
 
         public int total() {
-            return inventory + bags + ender + pending + kept + groundCount();
+            return safe() + pending + kept + groundCount();
         }
 
-        // 手もと (持ち物とその中の袋・箱、エンダーチェスト) にあるか
+        // 手もと (持ち物とその中の袋・箱、エンダーチェスト、ほかの仕組みの枠) にあるか
         public int safe() {
-            return inventory + bags + ender;
+            return inventory + bags + ender + holderCount();
         }
     }
 
@@ -130,7 +156,18 @@ public final class Keepsakes {
             }
         }
         int kept = countKept(player, item);
-        return new Where(inventory, bags, ender, pending, kept, ground(server, player.getUUID(), item));
+        Map<String, Integer> holders = new java.util.LinkedHashMap<>();
+        List<Map.Entry<String, Holder>> registered;
+        synchronized (Keepsakes.class) {
+            registered = new ArrayList<>(HOLDERS.entrySet());
+        }
+        for (Map.Entry<String, Holder> e : registered) {
+            int n = e.getValue().count(player, item);
+            if (n > 0) {
+                holders.put(e.getKey(), n);
+            }
+        }
+        return new Where(inventory, bags, ender, holders, pending, kept, ground(server, player.getUUID(), item));
     }
 
     // 袋や箱 (シュルカーボックスなど) の中 (一段だけ)

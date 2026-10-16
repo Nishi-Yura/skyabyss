@@ -54,7 +54,7 @@ public final class RecordSelfTest {
             failures.add("crashed: " + e);
         }
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST record PASSED (snapshot codec, locations, diff, guarded drops, void rescue, toss, give without duplicate, permissions)");
+            SkyAbyss.LOGGER.info("SELFTEST record PASSED (snapshot codec, locations, diff, guarded drops, void rescue, toss, give without duplicate, holders, permissions)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST record FAILED: {}", f));
         }
@@ -193,6 +193,17 @@ public final class RecordSelfTest {
         NeoForge.EVENT_BUS.post(coreEvent);
         check(f, !coreEvent.isCanceled(), "tossing a core should be allowed");
         a.getInventory().clearContent();
+
+        // ---------------------------------------------------------------- ほかの仕組みの枠 (装飾品のスロット用)
+        Keepsakes.registerHolder("accessory", (player, item) -> player == a && item == fragment ? 1 : 0);
+        try {
+            Keepsakes.Where held = Keepsakes.locate(a, fragment);
+            check(f, held.holders().getOrDefault("accessory", 0) == 1 && held.safe() == 1 && held.total() == 1,
+                    "a registered holder should count as at hand, got " + held);
+            check(f, Keepsakes.locate(b, fragment).holders().isEmpty(), "a holder with nothing should not be listed");
+        } finally {
+            Keepsakes.unregisterHolder("accessory");
+        }
         memory.takePending(a.getUUID());
     }
 }
