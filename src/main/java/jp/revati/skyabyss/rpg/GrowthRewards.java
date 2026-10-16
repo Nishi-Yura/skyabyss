@@ -49,6 +49,8 @@ public final class GrowthRewards {
     // ---------------------------------------------------------------- 数値 (表は 04 の 3 章)
     // 岩鯨の推奨レベル。これ +3 を超えると、岩鯨で得る経験値が減っていく
     public static final int STONE_WHALE_LEVEL = 12;
+    // 潮殻の巨神の推奨レベル (04 の 11 章の判断 6 の案 A)
+    public static final int TIDE_SHELL_LEVEL = 18;
 
     public record Source(int xp, int contentLevel) {
     }
@@ -63,7 +65,12 @@ public final class GrowthRewards {
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));
+        // 潮殻の背の敵 (08 の 6.6節。推奨レベル 18)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":coral_thrall", new Source(14, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
     }
+
 
     // 試練のボス: 参加者それぞれが満額を受け取る (人数で強くなるぶん、取り分は減らさない)
     public static final int CAPTAIN_XP = 100;

@@ -1,16 +1,18 @@
-"""潮殻の巨神 (tide_shell) の採用案 A「遺跡の島」をゲームに入れる (GeckoLib の geo、テクスチャ、アニメーション)。
+"""潮殻の巨神 (tide_shell) の採用案 B「珊瑚礁の背」をゲームに入れる (GeckoLib の geo、テクスチャ、アニメーション)。
 
 使い方 (リポジトリ直下で): python tools/install_tide_shell.py
-形の元: tools/rough/tide_shell_titan.py の build("a")。格子はそのまま使う。関数は変えず、
+形の元: tools/rough/tide_shell_titan.py の build("b")。格子はそのまま使う。関数は変えず、
         甲羅の縁のサンゴは水面に接地させ (lift 0)、縁の海藻は甲羅の縁に寄せ、潮門の枠は gate の骨にする。
+        背中の島 (08 の 3.3節) とつながるように、B の塔を少し高くし (頂の月の窓)、西に半分埋まった段々の庭を足す。
 出力 (src/main/resources/assets/skyabyss/ 以下):
   geo/entity/tide_shell.geo.json        近景。0.5 単位の格子 (2 px/単位)。ただし甲羅・頭・ひれ・尾・珊瑚・海藻は 2 単位 (1 ブロック) の段にそろえる。
-                                        遺跡と潮門だけ 0.5 単位の細かさを残す (箱は約 1900)
-  geo/entity/tide_shell_mid.geo.json    中景。4 単位の格子 (1 px/単位、箱は約 530)
-  geo/entity/tide_shell_far.geo.json    遠景。6 単位の格子 (0.5 px/単位、箱は約 240)
+                                        遺跡と潮門だけ 0.5 単位の細かさを残す
+  geo/entity/tide_shell_mid.geo.json    中景。4 単位の格子 (1 px/単位)。珊瑚は房ごとに 1 色の丸い塊にまとめる
+  geo/entity/tide_shell_far.geo.json    遠景。6 単位の格子 (0.5 px/単位)。近い房をまとめて大きな塊にし、縁の珊瑚は消す
+                                        (鋸歯の縁・頭・首・ひれの形を珊瑚で崩さない)
   textures/entity/tide_shell.png / tide_shell_glowmask.png   3 つの LOD で共有する 1 枚 (幅 2048)
   animations/entity/tide_shell.animation.json
-確認用 (docs/review/tide_shell_roughs/install/): tide_shell_lods.png, tide_shell_poses.png
+確認用 (docs/review/tide_shell_roughs/install/): tide_shell_lods.png, tide_shell_poses.png, tide_shell_far_read.png
 
 ゲームでの向き (岩鯨と同じ決まり): 格子は X を反転してから箱にする。GeckoLib は X を反転して描くので、
 geo の +X がゲームの左わき。潮門 (遺跡の左後ろ) は geo の +X 側に来る。頭は -Z。
@@ -49,7 +51,7 @@ WATER_BAND = 20.0         # ここまで上へ、藻が薄くなりながら続�
 GATE_PART = 11            # 潮門を遺跡から切り離す骨の番号 (tide_shell_titan の 1..10 の次)
 MAT = T.MAT
 GLOW_MATS = [MAT["eye"], MAT["cyan"], MAT["gate"]]
-THIN_PARTS = {4, 5, 6, 7, 8, 10}          # ひれ・尾・海藻は細いので、低い割合でも残す
+THIN_PARTS = {2, 4, 5, 6, 7, 8, 10}       # 遺跡 (塔の柱・アーチ)・ひれ・尾・海藻は細いので、低い割合でも残す
 GLOW_MIN = {1: 2, 4: 4, 8: 12, 12: 16, 16: 24}            # 粗い格子で、光る材料をこの数だけ含む段は光る材料で残す
 
 PART_BONE = {1: "body", 2: "ruins", GATE_PART: "gate", 3: "head", 4: "fin_front_left", 5: "fin_front_right",
@@ -97,11 +99,53 @@ def _coral_ground(cx, cz, kind, s, seed, mat_pick, ge, lift=0.0):
     return _coral_orig(cx, cz, kind, s, seed, mat_pick, ge, lift=0.0)
 
 
+_tower_orig = T.tower
+_build_b_orig = T.build_b
+
+
+def _tower_b(topf, T0, h, sc=1.0):
+    """B の塔 (ラフは h 0.55) を少しだけ高くし、頂の柱の冠を出す。背中の島の潮の広間 (頂の月の窓) の目印。
+    A の塔 (h 1.0、1.5 倍) よりはずっと低く、珊瑚の房から頭が出る程度"""
+    return _tower_orig(topf, T0, h=0.7, sc=1.2)
+
+
+def _build_b_install(topf, T0, ge):
+    """ラフの B に、背中の島 (08 の 3.3節) の西の珊瑚の庭へつながる、半分埋まった段々の庭を足す。
+    庭の範囲 (島の x -60〜-20、z -40〜40) に、外へ下る 3 段の低い石の段 (各 2 単位、甲羅から 1〜3 単位だけ出る)。
+    ラフの座標はまだ反転前 (潮門は -X) なので、島の西 = ラフの -X"""
+    _build_b_orig(topf, T0, ge)
+    # ゲームで脇 (水面の高さ) から見ると、ラフの珊瑚は頂の近くにしかなく、甲羅がただの緑の丘に見えた。
+    # 甲羅の肩 (平面の r 0.55〜0.75) に房を 5 つ足して、近景の華やかさを脇からも見えるようにする。
+    # 潮門 (x -72〜-60、z 56〜72) と西の段々の庭 (x -58〜-24、z -26〜26) は避ける
+    for i, (x, z, kind, s) in enumerate(((50.0, -52.0, "brain", 2.6), (62.0, 12.0, "table", 2.8),
+                                         (40.0, 58.0, "branch", 2.6), (-36.0, 52.0, "brain", 2.4),
+                                         (-22.0, -72.0, "table", 2.4))):
+        T.coral_at(x, z, kind, s, 400 + i, T.CORAL_MATS[(i + 1) % 4], ge, lift=0.0)
+    for k, (xa, xb) in enumerate(((-34.0, -24.0), (-46.0, -34.0), (-58.0, -46.0))):
+        za, zb = -26.0 + 4 * k, 26.0 - 4 * k
+        rise = 3.0 - k
+
+        def fn(X, Y, z, xa=xa, xb=xb, za=za, zb=zb, rise=rise):
+            top = topf(X, z)
+            # 段の上面は段ごとに平ら (段の中央の甲羅の高さ + rise)。内側は甲羅に埋まる
+            flat = float(topf(np.array((xa + xb) / 2), (za + zb) / 2)) + rise
+            m = inb(X, xa, xb) & inb(z, za, zb) & (Y > top - 2.0) & (Y <= flat)
+            edge = (np.abs(X - xa) <= 1.0) | (np.abs(z - za) <= 1.0) | (np.abs(z - zb) <= 1.0)
+            return m, np.where(edge, MAT["stone"], MAT["ruin"])
+        T.fill(fn, (xa - 1, xb + 1, 30, 90, za - 1, zb + 1), T.PART["ruins"])
+
+
+def inb(v, a, b):
+    return (v >= a) & (v <= b)
+
+
 def build_grid():
     """格子を作って X を反転する。戻り値は (a, b, c) の骨の番号 * 32 + 材料 の配列 (int16)"""
     T.kelp_strand = _kelp_rim
     T.coral_at = _coral_ground
-    T.build("a")
+    T.tower = _tower_b
+    T.build_b = _build_b_install
+    T.build("b")
     K = T.K
     # 潮門の枠・光る面・ランタンを、遺跡 (ruins) から切り離して gate の骨にする (岩鯨と同じく骨で分ける)
     i0, i1 = T.ci(-80), T.ci(-55)
@@ -231,6 +275,93 @@ def downsample(K, f):
     sel = occ[keep]
     out[sel[:, 0], sel[:, 1], sel[:, 2]] = (pm * 32 + mat_out)[keep]
     return out
+
+
+# 中景・遠景の珊瑚: 房ごとに 1 色の丸い塊にする (B の弱み「遠くでは珊瑚が点に散って、形がにじむ」の直し)。
+# merge: この距離 (単位) より近い房は 1 つの塊にまとめる。rmin: 塊の半径の下限 (単位)。
+# rmax: 半径の上限 (単位。まとめた塊が背を覆って、塔や甲羅の丸みを隠さないように)。
+# rim: 甲羅の縁 (平面の r がこれより外) の房は消す (鋸歯の縁を珊瑚で崩さない)。None なら残す
+CORAL_LUMP = {8: dict(merge=0.0, rmin=7.0, rmax=12.0, rim=None), 12: dict(merge=50.0, rmin=12.0, rmax=16.0, rim=0.86)}
+CORAL_PART = 9
+
+
+def coral_clumps(K):
+    """近景の格子の珊瑚を房ごとに分ける。[{i, k (中心の格子の番号), y0, y1, r (セル), mat, n}]"""
+    m = (K // 32) == CORAL_PART
+    lab, _ = ndimage.label(ndimage.binary_dilation(m, iterations=6))
+    lab = np.where(m, lab, 0)
+    out = []
+    for i, sl in enumerate(ndimage.find_objects(lab), start=1):
+        if sl is None:
+            continue
+        idx = np.argwhere(lab[sl] == i) + np.array([s.start for s in sl])
+        if len(idx) < 8:
+            continue
+        vals, cnt = np.unique(K[tuple(idx.T)] % 32, return_counts=True)
+        lo, hi = idx.min(0), idx.max(0) + 1
+        out.append(dict(i=float(idx[:, 0].mean()), k=float(idx[:, 2].mean()), y0=int(lo[1]), y1=int(hi[1]),
+                        r=max(hi[0] - lo[0], hi[2] - lo[2]) / 2.0, mat=int(vals[np.argmax(cnt)]), n=len(idx)))
+    return out
+
+
+def coral_lumps(K, f):
+    """f 倍の LOD に落とす前に、珊瑚を丸い塊に置き換えた格子を返す (近景はそのまま)"""
+    spec = CORAL_LUMP.get(f)
+    if spec is None:
+        return K
+    clumps = coral_clumps(K)
+    if spec["rim"] is not None:
+        keep = []
+        for c in clumps:
+            x = T.X0 + (c["i"] + 0.5) / CELL          # 平面は X について左右対称なので、反転後の番号のままでよい
+            z = T.Z0 + (c["k"] + 0.5) / CELL
+            r, _ = T.plan(np.array(x), z)
+            if float(r) <= spec["rim"]:
+                keep.append(c)
+        clumps = keep
+    # 近い房をまとめる (大きい房から順に、まだ入っていない近い房を集める)
+    groups = []
+    for c in sorted(clumps, key=lambda c: -c["n"]):
+        for g in groups:
+            if math.hypot(g[0]["i"] - c["i"], g[0]["k"] - c["k"]) <= spec["merge"] * CELL:
+                g.append(c)
+                break
+        else:
+            groups.append([c])
+    G = K.copy()
+    G[(G // 32) == CORAL_PART] = 0
+    for g in groups:
+        w = np.array([c["n"] for c in g], float)
+        ci_ = float(np.average([c["i"] for c in g], weights=w))
+        ck_ = float(np.average([c["k"] for c in g], weights=w))
+        R = max(max(math.hypot(c["i"] - ci_, c["k"] - ck_) + c["r"] for c in g), spec["rmin"] * CELL)
+        R = min(R, spec["rmax"] * CELL)
+        y0 = min(c["y0"] for c in g)
+        Ry = max(max(c["y1"] for c in g) - y0, 0.75 * R)
+        i0, i1 = max(int(ci_ - R) - 1, 0), min(int(ci_ + R) + 2, G.shape[0])
+        k0, k1 = max(int(ck_ - R) - 1, 0), min(int(ck_ + R) + 2, G.shape[2])
+        # 下は深く (0.9R) 伸ばす。空いているセルだけ埋めるので甲羅の斜面に沿う裾になり、粗い格子でも甲羅から離れない
+        j0, j1 = max(int(y0 - 0.9 * R), 0), min(int(y0 + Ry) + 2, G.shape[1])
+        I, J, Kk = np.meshgrid(np.arange(i0, i1), np.arange(j0, j1), np.arange(k0, k1), indexing="ij")
+        dy = np.where(J >= y0, (J - y0) / Ry, (J - y0) / (0.9 * R))
+        m = ((I - ci_) / R) ** 2 + dy ** 2 + ((Kk - ck_) / R) ** 2 <= 1.0
+        sub = G[i0:i1, j0:j1, k0:k1]
+        sub[m & (sub == 0)] = CORAL_PART * 32 + g[0]["mat"]
+    print("coral lumps f=%d: %d 房 -> %d 塊" % (f, len(clumps), len(groups)))
+    tower_core(G)
+    return G
+
+
+def tower_core(G):
+    """粗い LOD では塔の頂の 4 本の柱が細くて消え、屋根が浮く。柱のあいだを石の芯で埋めて屋根を支える
+    (塔の寸法は _tower_b: h 0.7、1.2 倍)"""
+    sc, h = 1.2, 0.7
+    T0 = float(T.top_at(np.array(0.0), T.ZC, 0.0))
+    up = (12 * h + 10) * sc
+    y0, y1 = T0 + up - 1.0, T0 + up + 10 * sc + 0.5
+    half = 4.0 * sc
+    sub = G[T.ci(-half):T.ci(half), T.cj(y0):T.cj(y1), T.ck(T.ZC - half):T.ck(T.ZC + half)]
+    sub[sub == 0] = 2 * 32 + MAT["ruin"]
 
 
 def islands_fix(G, label):
@@ -625,16 +756,39 @@ def preview(geos, tex, glow, counts):
         return mirror_faces(load_geo(geos[name], tex, glowmask=glow, pose=pose))
 
     cols = []
-    for name, label in (("near", "近景 (遺跡 0.5 / 体 2 単位)"), ("mid", "中景 (4 単位)"), ("far", "遠景 (6 単位)")):
+    for name, label in (("near", "近景 (遺跡 0.5 / 体 2 単位)"), ("mid", "中景 (4 単位、珊瑚は房ごとの塊)"),
+                        ("far", "遠景 (6 単位、近い房をまとめた塊)")):
         fs = faces_of(name)
         cols.append(("%s %d 箱" % (label, counts[name]),
                      [render(fs, yaw=90, pitch=0, size=(460, 460)),
                       render(fs, yaw=35, pitch=35, size=(460, 460)),
                       render(fs, yaw=180, pitch=8, size=(460, 460))]))
-    sht = sheet("潮殻の巨神 LOD (採用案 A 遺跡の島、ゲームの向き)", cols,
+    sht = sheet("潮殻の巨神 LOD (採用案 B 珊瑚礁の背、ゲームの向き)", cols,
                 note="行: 側面 / 斜め上 / 正面。頭は左 (-Z のゲーム側は画面の右)。LOD ごとの箱の数は見出し。")
     PREVIEW_DIR.mkdir(parents=True, exist_ok=True)
     out = PREVIEW_DIR / "tide_shell_lods.png"
+    sht.save(out)
+    print("preview", out)
+
+
+def preview_far(geos, tex, glow):
+    """遠景の読みやすさ: 3 つの LOD を小さく (140px) 描き、ラフ B の遠景と並べる。休む水面 (y=8) の板あり"""
+    rest_plane = marker((0, WATER_REST, 0), (330, 0.8, 330), (34, 92, 128, 255))
+    cols = []
+    for name in ("near", "mid", "far"):
+        fs = mirror_faces(load_geo(geos[name], tex, glowmask=glow))
+        ims = []
+        for planes in ([], rest_plane):
+            for yaw, pitch in ((90, 4), (35, 30), (180, 10)):
+                ims.append(render(fs + planes, yaw=yaw, pitch=pitch, size=(140, 140), margin=0.04))
+        cols.append((name, ims))
+    rough = ROOT / "docs/review/tide_shell_roughs/titan/b/far.png"
+    if rough.exists():
+        im = Image.open(rough).convert("RGB")
+        cols.append(("ラフ B の遠景", [im.crop((0, 0, 140, 140)), im.crop((150, 0, 290, 140))]))
+    sht = sheet("潮殻の巨神 遠景の読みやすさ (140px)", cols,
+                note="行: 側面 / 斜め上 / 正面、下の 3 行は休む水面 (y=8) の板つき。遠景は縁の珊瑚を消し、背の房を大きな塊にまとめた。")
+    out = PREVIEW_DIR / "tide_shell_far_read.png"
     sht.save(out)
     print("preview", out)
 
@@ -687,7 +841,7 @@ def main():
     geos = {}
     stats = {}
     for name, f, ppu in LODS:
-        G = downsample(K, f) if f > 1 else K.copy()
+        G = downsample(coral_lumps(K, f), f) if f > 1 else K.copy()
         log = islands_fix(G, name)
         for line in log:
             print(line)
@@ -746,6 +900,7 @@ def main():
                                                         encoding="utf-8")
     preview(geos, tex, glow, counts)
     preview_poses(geos, tex, glow)
+    preview_far(geos, tex, glow)
     print("done", json.dumps(stats, ensure_ascii=False))
 
 

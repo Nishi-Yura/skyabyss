@@ -11,7 +11,9 @@
 |---|---|---|
 | `textures/item/*.png` (32x32)、`textures/block/*.png` | `rough/items_blocks_32.py` | 出力先 (`docs/roughs/`) は片付けた。作り直すときは一時フォルダに書き出し、採用した物だけ src へ手でコピーする |
 | 岩鯨: `geo/entity/stone_whale{,_mid,_far}.geo.json`、`textures/entity/stone_whale{,_glowmask}.png`、`animations/entity/stone_whale.animation.json` | `install_stone_whale.py` | 実行しても今の素材と同じ物ができる |
-| 潮殻の巨神: `geo/entity/tide_shell{,_mid,_far}.geo.json`、`textures/entity/tide_shell{,_glowmask}.png`、`animations/entity/tide_shell.animation.json`、`sounds/tide/*.ogg` | `install_tide_shell.py` (形の元は `rough/tide_shell_titan.py` の案 A)、音は `gen_tide_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/tide_shell_roughs/install/`。アニメの角度は `install_tide_shell.py` の `ANIM` に意図した向きで書く (GeckoLib の符号はスクリプトが直す) |
+| 潮殻の巨神: `geo/entity/tide_shell{,_mid,_far}.geo.json`、`textures/entity/tide_shell{,_glowmask}.png`、`animations/entity/tide_shell.animation.json`、`sounds/tide/*.ogg` | `install_tide_shell.py` (形の元は `rough/tide_shell_titan.py` の案 B。珊瑚の LOD の塊・塔・段々の庭は install 側で足す)、音は `gen_tide_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/tide_shell_roughs/install/`。アニメの角度は `install_tide_shell.py` の `ANIM` に意図した向きで書く (GeckoLib の符号はスクリプトが直す) |
+| 潮殻の背の敵: `geo/entity/{coral_thrall,reef_scuttler,bubble_puffer}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (珊瑚憑きは `_statue` も)、`animations/entity/<名前>.animation.json`、銛 `geo/gear/coral_spear{,_statue}.geo.json` など | `install_tide_mobs.py` (形の元は `rough/tide_mobs_v2.py` の A 案。頭と泡吹きの目を変えた) | 同じ物ができる。`--eyes original` で泡吹きの目をラフ A に戻す。目の比較は `docs/review/tide_shell_roughs/bubble_puffer_eyes.png`、確認用の絵は `docs/review/previews/tide_mobs/` |
+| 潮殻の背の敵の音 `sounds/tide_mobs/*.ogg`、泡 `textures/entity/bubble_shot.png`、素材の絵 `textures/item/{tide_shell_shard,tide_dried_shell,bubble_sac}.png` (仮) | `gen_tide_mob_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 心臓: `geo/entity/stone_whale_heart_p1..p3.geo.json`、`textures/entity/stone_whale_heart_p*`、`animations/entity/stone_whale_heart.animation.json` | `install_heart_v4.py` (形の元は `tools/sources/heart/`。`rough/boss_v4.py` の A 案) | |
 | 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | `rough/rib_archer_v4.py` | 同じ物ができる |
 | 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | `rough/captain_v4.py --install` | 同じ物ができる |
@@ -64,7 +66,7 @@
 | 2026-10-17 | `record_screen_roughs/` | `compare.png` | `a/`〜`c/` |
 | 2026-10-17 | `accessory_slot_roughs/` (B) | `compare.png` (片付けのときに `a.png`〜`c.png` を横に並べて作った) | `a.png`〜`c.png` |
 | 2026-10-17 | `board_roughs/` (A を仮に採用。比べ直しは 00 の 85 の比較画像で) | `compare.png`、`README.md` (選定理由) | `option_A/`〜`option_C/` |
-| 2026-10-17 | `tide_shell_roughs/` | すべて (本体・心臓・敵の案をユーザーがまだ選んでいない。00 の 55)。`install_tide_shell.py` は A 案を `rough/tide_shell_titan.py` から import して作るので、ここのファイルは読まない。`install/` はその確認用の出力 | なし |
+| 2026-10-17 | `tide_shell_roughs/` (本体 B、心臓 B、珊瑚憑き A・磯走り A・泡吹き A、00 の 55) | 比較画像 `titan.png`・`heart.png`・`coral_thrall.png`・`reef_scuttler.png`・`bubble_puffer.png`。選ばれた案のデータ `titan/b/`・`heart/b/`・`heart/bars.png`・`mobs/coral_thrall/a/`・`mobs/coral_spear/`・`mobs/reef_scuttler/a/`・`mobs/bubble_puffer/a/` (心臓と敵の担当が並行で読むので、今は場所を変えない。取り込みが済んだら `tools/sources/` へ移すか消す)。`mobs/bubble_puffer/c/` (月明かりのクラゲ混じり) も残す: 08 の 14.3節で「3 章以降の別の種に回せる」としたため。`install/` は `install_tide_shell.py` の確認用の出力。`install_tide_shell.py` は B 案を `rough/tide_shell_titan.py` から import して作り、ここのファイルは比較の絵 (`titan/b/far.png`、無ければ飛ばす) しか読まない | `titan/a/`・`titan/c/`、`heart/a/`・`heart/c/`、`mobs/coral_thrall/b/`・`c/`、`mobs/reef_scuttler/b/`・`c/`、`mobs/bubble_puffer/b/` |
 
 
 生成元のないもの (今の `src/` が正本): 番兵 (`bone_sentinel`) と盾、水路の顎 (`waterway_maw`)、甲殻の防具 (`geo/armor`、`textures/armor`)、`textures/item/3d/bone_spike_arrow.png`、`sounds/**/*.ogg`。
