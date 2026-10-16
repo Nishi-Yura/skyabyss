@@ -1,0 +1,114 @@
+{
+ "a": {
+  "boxes": 19576,
+  "buried": 4111,
+  "over": 0,
+  "vol_ok": true,
+  "tex": [
+   1856,
+   2048
+  ],
+  "glow_px": 14436,
+  "x": [
+   -227.0,
+   227.0
+  ],
+  "y": [
+   13.0,
+   90.0
+  ],
+  "z": [
+   -126.0,
+   137.0
+  ],
+  "span_blocks_game": 227.0,
+  "length_blocks_game": 131.5,
+  "parts": {
+   "body": 1535,
+   "head": 2842,
+   "wing_l": 2726,
+   "wing_r": 2726,
+   "hand_l": 3022,
+   "hand_r": 2879,
+   "tail": 1758,
+   "legs": 1128,
+   "crest": 684,
+   "ruins": 276
+  }
+ },
+ "b": {
+  "boxes": 12749,
+  "buried": 2190,
+  "over": 0,
+  "vol_ok": true,
+  "tex": [
+   1184,
+   2048
+  ],
+  "glow_px": 11674,
+  "x": [
+   -230.0,
+   230.0
+  ],
+  "y": [
+   15.0,
+   76.0
+  ],
+  "z": [
+   -184.0,
+   127.5
+  ],
+  "span_blocks_game": 230.0,
+  "length_blocks_game": 155.8,
+  "parts": {
+   "body": 1410,
+   "head": 2895,
+   "wing_l": 1612,
+   "wing_r": 1612,
+   "hand_l": 1737,
+   "hand_r": 1744,
+   "tail": 633,
+   "legs": 508,
+   "crest": 438,
+   "ruins": 160
+  }
+ },
+ "c": {
+  "boxes": 22233,
+  "buried": 5259,
+  "over": 0,
+  "vol_ok": true,
+  "tex": [
+   1072,
+   4096
+  ],
+  "glow_px": 16734,
+  "x": [
+   -227.0,
+   227.0
+  ],
+  "y": [
+   13.0,
+   90.0
+  ],
+  "z": [
+   -126.0,
+   137.0
+  ],
+  "span_blocks_game": 227.0,
+  "length_blocks_game": 131.5,
+  "parts": {
+   "body": 1307,
+   "head": 2840,
+   "wing_l": 2399,
+   "wing_r": 2382,
+   "hand_l": 3022,
+   "hand_r": 2879,
+   "tail": 1718,
+   "legs": 1128,
+   "crest": 684,
+   "ruins": 60,
+   "clouds": 3814
+  }
+ }
+}

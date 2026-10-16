@@ -1,0 +1,55 @@
+{
+ "a": {
+  "cubes": 267,
+  "hidden_dropped": 0,
+  "cells": 11944,
+  "atlas": [
+   512,
+   48
+  ],
+  "glow_px": 6,
+  "bones": 11,
+  "size_blocks": [
+   1.75,
+   2.5,
+   1.5
+  ],
+  "overlaps": 0
+ },
+ "b": {
+  "cubes": 342,
+  "hidden_dropped": 7,
+  "cells": 16424,
+  "atlas": [
+   512,
+   48
+  ],
+  "glow_px": 62,
+  "bones": 11,
+  "size_blocks": [
+   1.75,
+   2.5,
+   1.5
+  ],
+  "overlaps": 0
+ },
+ "c": {
+  "cubes": 316,
+  "hidden_dropped": 0,
+  "cells": 13466,
+  "atlas": [
+   512,
+   48
+  ],
+  "glow_px": 112,
+  "bones": 11,
+  "size_blocks": [
+   1.75,
+   2.5,
+   1.5
+  ],
+  "overlaps": 0
+ },
+ "weapon_overlaps": 0,
+ "weapon_cubes": 48
+}
