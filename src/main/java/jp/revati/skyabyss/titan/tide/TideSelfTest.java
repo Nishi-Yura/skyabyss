@@ -146,24 +146,28 @@ public final class TideSelfTest {
             if (!TideBackBuilder.inReturnGate(g.getX() + 0.5, g.getY(), g.getZ() + 0.5)) {
                 failures.add("the return gate mouth is not detected");
             }
+            // 見送りの段 (21 章): 段の口は人が入れる (空気か水)。いちばん下の段は階段で、その手前の段から下りられる
             for (int y = 0; y < 2; y++) {
-                if (!back.getBlockState(g.above(y)).isAir() || !back.getBlockState(g.above(y).south()).isAir()) {
-                    failures.add("the return gate mouth is blocked at " + g.above(y));
+                for (BlockPos c : new BlockPos[] {g.above(y), g.above(y).south(), g.above(y).east()}) {
+                    if (!back.getBlockState(c).getCollisionShape(back, c).isEmpty()) {
+                        failures.add("the return steps are blocked at " + c);
+                    }
                 }
             }
-            if (!back.getBlockState(g.below()).isSolidRender(back, g.below())) {
-                failures.add("the return gate has no floor");
+            BlockPos step = g.east().below();
+            if (!(back.getBlockState(step).getBlock() instanceof net.minecraft.world.level.block.StairBlock)) {
+                failures.add("the return steps have no stair at " + step);
             }
-            // 到着地点から門まで、段差なく歩ける (間の床は浜の高さ)
-            for (int z = a.getZ(); z < g.getZ(); z++) {
-                BlockPos f = new BlockPos(a.getX(), a.getY() - 1, z);
+            // 到着の段は平ら (到着から段の西の縁まで)
+            for (int x = a.getX(); x >= jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.x1(); x--) {
+                BlockPos f = new BlockPos(x, a.getY() - 1, a.getZ());
                 if (!back.getBlockState(f).isSolidRender(back, f) || !back.getBlockState(f.above()).isAir() || !back.getBlockState(f.above(2)).isAir()) {
-                    failures.add("the beach is not flat between the arrival and the gate at z=" + z);
+                    failures.add("the landing is not flat between the arrival and the steps at x=" + x);
                     break;
                 }
             }
             // 島の外は海 (落ちたら泳げる)
-            BlockPos sea = new BlockPos(-40, TideBackBuilder.SEA - 1, 70);
+            BlockPos sea = new BlockPos(-110, TideBackBuilder.SEA - 1, 40);
             back.getChunk(sea);
             if (!back.getFluidState(sea).isSource()) {
                 failures.add("no sea around the tide back island at " + sea);

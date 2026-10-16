@@ -108,7 +108,7 @@ public final class TideBackTrials {
                 p -> p.getZ() <= FLATS_GATE_Z || (Math.abs(p.getX()) <= BOTTOM_GATE_R && Math.abs(p.getZ()) <= BOTTOM_GATE_R && p.getY() <= HUB_FLOOR)));
         initGardenPool(level);
         // 干潟 (床 63 の上の 2 段)。干潟の口の階段の外へは出ない
-        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -85), new BlockPos(-20, 0, -100), new BlockPos(20, 0, -76));
+        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -85 + FLATS_DZ), new BlockPos(-20, 0, -100 + FLATS_DZ), new BlockPos(20, 0, -76 + FLATS_DZ));
         FIELD.put("flats", FLATS_FLOOR + 1, TideField.flood(level, FLATS.x1(), FLATS.x2(), FLATS.z1(), FLATS.z2(), flatSeeds, FLATS_FLOOR + 1, FLATS_DEPTH,
                 p -> false));
         ready = true;
@@ -408,14 +408,6 @@ public final class TideBackTrials {
         }
         BlockPos pearlTop = STONE_WEST.above();
         level.setBlock(pearlTop, state.rung(TideBackState.Trial.WEST) ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);
-        // 浜の石盤: 眠っている試練
-        String key = state.sleeping() == null ? "sign.skyabyss.tide_sleep_none" : "sign.skyabyss.tide_sleep_" + state.sleeping().id();
-        BlockPos sign = new BlockPos(-19, 68, 43);
-        if (!(level.getBlockState(sign).getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
-            level.setBlock(new BlockPos(-19, 68, 42), TideKit.DARK, 3);
-            level.setBlock(new BlockPos(-19, 67, 42), TideKit.DARK, 3);
-        }
-        new TideKit(level, level.random).wallSign(sign, net.minecraft.core.Direction.SOUTH, key);
     }
 
     // ---------------------------------------------------------------- リセット
@@ -524,9 +516,13 @@ public final class TideBackTrials {
                 if (p.isCreative() || p.isSpectator() || !p.isAlive()) {
                     continue;
                 }
+                // 浜の側: 浜・くぐり道の封印の手前・潮門と到着の段と廊下・甲羅の上へ上る段・甲羅の上 (外) と頂の塔 (21 章)
                 boolean beachSide = BEACH.aabb().inflate(2, 4, 16).contains(p.position())
-                        || (p.getZ() > CAVE_SEAL_Z && p.getX() > CAVE_X1 - 2 && p.getX() < CAVE_X2 + 2);
-                if (!beachSide && p.getY() < 120) {
+                        || (p.getZ() > CAVE_SEAL_Z && p.getX() > CAVE_X1 - 2 && p.getX() < CAVE_X2 + 2)
+                        || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
+                        || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
+                        || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition()) || p.getY() > TOWER_DECK - 20 && Math.abs(p.getX()) < 12 && Math.abs(p.getZ() - TOWER_CZ) < 12;
+                if (!beachSide && p.getY() < 150) {
                     toArrival(p);
                     p.sendSystemMessage(ModText.lore("message.skyabyss.trials_peaceful"));
                 }
@@ -546,7 +542,7 @@ public final class TideBackTrials {
 
     static void toArrival(ServerPlayer p) {
         p.fallDistance = 0;
-        p.teleportTo(p.serverLevel(), ARRIVAL.getX() + 0.5, ARRIVAL.getY(), ARRIVAL.getZ() + 0.5, 180f, 0f);
+        p.teleportTo(p.serverLevel(), ARRIVAL.getX() + 0.5, ARRIVAL.getY(), ARRIVAL.getZ() + 0.5, ARRIVAL_YAW, 0f);
     }
 
     // ---------------------------------------------------------------- 休み場

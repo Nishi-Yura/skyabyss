@@ -10,47 +10,50 @@ import net.minecraft.world.phys.Vec3;
 
 // 潮殻の背 (tide_back) の配置図 (08 の 3 章)。建てる側 (TideIslandBuilder) と仕組みの側 (潮・試練・休み場・リセット) が参照する。
 // 座標は「床のブロックの y」で書く (人が立つのは +1)。頭は -Z (北)。
+// 島は巨神本体のモデルと同じ形のブロックの亀 (TideTurtle、ゲームの巨神の 1.7 倍)。試練はすべて甲羅の中に掘る (08 の 21 章)。
 //
-//                     [首と頭]
-//               [群れの干潟 (前の試練)]   z -104〜-72、床 63、潮で 0〜2 満ちる
-//                        | 干潟の口 (z=-71)
+//                     [首と頭]  海から立ち上がる (z -82 より北)
+//               [群れの干潟 (前の試練)]   甲羅の前の洞、z -82〜-50、床 63、潮で 0〜2 満ちる
+//                        | 干潟の口 (z=-49)
 //                  [干潟へのトンネル]      床 66
-//                  [干潟の前室 f0]         z -30〜-18、床 66        真下に [殻の底 (心臓の間)] 中心 (0,-30) 床 50
+//                  [干潟の前室 f0]         z -30〜-18、床 66        真下に [殻の底 (心臓の間)] 中心 (0,-30) 床 50 (腹の中)
 //                        | 干潟の門 (z=-13、干潮だけ開く)
 //   [珊瑚の庭 (西)]--[潮の広間 (HUB)]--[潮見の間 (東)]           広間の床 70、潮で 0〜3 満ちる。縁の段 (74) から入る
-//      床 64             | 縁のくぐり道
-//                   [潮門の浜 (到着)]      床 66
+//      床 64             | 縁のくぐり道            真上の甲羅の頂に [頂の塔] (月の窓の縦穴が塔の中を通る)
+//                   [潮門の浜]  床 66  ── 北西の角から甲羅の上へ上る段 (外の景色と遺跡)
+//                        | 潮門の廊下 (西へ)
+//   [潮門] 甲羅の左後ろの縁、水際の大きな門。外に [到着の段] と、海へ下りる [見送りの段] (地上へ戻る)
 //
 // 広間は「沈んだ円い水盤」: 床 70 の円 (半径 12) が潮で 3 マス (71〜73) 満ちる。入口は高さ 74 の縁の段
 // (南の段: 浜からのくぐり道、西の段: 庭への道、東の回廊: 潮見の間への道)。満潮なら水盤を泳いで東の回廊へ一段上がれる。
 // 干潮なら水盤の底へ下り、南東の回り道 (底から東の回廊まで上る坂) を通る。北の干潟の門は床の高さで、干潮のあいだだけ開く。
 public final class TideBackLayout {
-    // 配置の版。2: 本番の島 (2026-10-17) / 3: 甲羅の地表・庭の壁・浜のすり鉢を直した (試遊 1 周目)
-    public static final int LAYOUT_VERSION = 3;
+    // 配置の版。2: 本番の島 (2026-10-17) / 3: 甲羅の地表・庭の壁・浜のすり鉢を直した (試遊 1 周目) /
+    // 4: 巨神の形の亀にし、試練を甲羅の中に埋めた (08 の 21 章)
+    public static final int LAYOUT_VERSION = 4;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
 
-    // ---------------------------------------------------------------- 甲羅 (楕円の丘)
-    public static final int SHELL_CZ = -4;
-    public static final int SHELL_RX = 64;
-    public static final int SHELL_RZ = 76;
-    public static final int RIM_Y = 64;
-    public static final int TOP_Y = 100;
+    // ---------------------------------------------------------------- 甲羅 (モデルの超楕円。tide_shell_titan.py の plan と同じ形)
+    // モデルの甲羅は中心 z -4、半長 100、半幅 84、n 2.4 (単位)。1 単位 = 0.85 ブロック
+    public static final int SHELL_CZ = -3;
+    public static final int SHELL_RX = 71;
+    public static final int SHELL_RZ = 85;
+    public static final double SHELL_N = 2.4;
+    public static final int TOP_Y = 114;
 
-    // 甲羅の地表の高さ (いちばん上のブロックの y)。甲羅の外は Integer.MIN_VALUE
+    // 甲羅の地表の高さ (甲羅のいちばん上のブロックの y。上の遺跡・珊瑚は含まない)。甲羅の無い柱は Integer.MIN_VALUE
     public static int shellTop(int x, int z) {
-        double s2 = shellS2(x, z);
-        if (s2 > 1) {
-            return Integer.MIN_VALUE;
-        }
-        return RIM_Y + (int) Math.round((TOP_Y - RIM_Y) * Math.pow(1 - s2, 0.85));
+        return TideTurtle.carapaceTop(x, z);
     }
 
+    // 甲羅の平面の位置の 2 乗 (縁が 1。鋸歯の先は 1.2 くらい)。島から海に落ちたかを見るのに使う
     public static double shellS2(double x, double z) {
-        double nx = x / SHELL_RX;
-        double nz = (z - SHELL_CZ) / SHELL_RZ;
-        return nx * nx + nz * nz;
+        double nx = Math.abs(x / 71.4);
+        double nz = Math.abs((z + 3.4) / 85.0);
+        double r = Math.pow(Math.pow(nx, SHELL_N) + Math.pow(nz, SHELL_N), 1.0 / SHELL_N);
+        return r * r;
     }
 
     // ---------------------------------------------------------------- 場所 (x1〜x2、z1〜z2 は両端を含む。floor は床のブロックの y、height は床の上の空間の高さ)
@@ -72,14 +75,35 @@ public final class TideBackLayout {
         }
     }
 
-    // 潮門の浜 (到着)。焚き火・炉・腰掛け・潮見の目盛りの石盤・三つの試練の碑文
+    // 潮門の浜 (甲羅の中の広間)。焚き火・炉・腰掛け・碑文。西の潮門の廊下から入り、北のくぐり道で広間へ
     public static final Area BEACH = new Area(-32, -12, 42, 62, 66, 8);
-    public static final BlockPos ARRIVAL = new BlockPos(-22, 67, 50);
-    // 地上へ戻る潮門の口 (x -27〜-25、y 67〜69、z 59〜60)。南の海を向く
-    public static final int GATE_X = -26;
-    public static final int GATE_Z = 59;
-    public static final int GATE_Y0 = 67;
-    public static final int GATE_Y1 = 70;
+    public static final int BEACH_CEILING = 77;
+    // 潮門 (モデルの左後ろの縁の大きな門。口は x -61〜-50、z 47〜61、y 65〜86。光る面は x -54〜-53、y 68〜82)。
+    // 光る面の下 (y 65〜67) をくぐって中へ入り、廊下 (z 52〜56、床 64 → 66) で浜の西の壁へ
+    public static final int GATE_MOUTH_X1 = -61;
+    public static final int GATE_MOUTH_X2 = -50;
+    public static final int GATE_MOUTH_Z1 = 48;
+    public static final int GATE_MOUTH_Z2 = 60;
+    public static final int GATE_FLOOR = 64;
+    public static final int GATE_HALL_Z1 = 52;
+    public static final int GATE_HALL_Z2 = 56;
+    // 到着の段 (潮門の外。甲羅の縁と後ろのひれの付け根の上、床 64)
+    public static final Area LANDING = new Area(-67, -56, 49, 59, GATE_FLOOR, 8);
+    // 着く所: 左後ろのひれの上 (ひれの面は y 67)。北東を向くと、甲羅の脇腹に開いた潮門の大きな枠と、丸い甲羅が見える。
+    // ひれの付け根から到着の段へ下り (3 段)、潮門の光る面の下をくぐって中へ
+    public static final BlockPos ARRIVAL = new BlockPos(-80, 68, 70);
+    public static final float ARRIVAL_YAW = -140f;
+    // 見送りの段: 到着の段の西から海へ下りる段。いちばん下の段 (x -71〜-69、z 52〜56) に入ると地上へ戻る
+    public static final int GATE_X = -70;
+    public static final int GATE_Z = 53;
+    public static final int GATE_Y0 = 63;
+    public static final int GATE_Y1 = 66;
+    // 甲羅の上へ上る段 (浜の西の壁の外、x -46〜-42、z 42〜46 の四角い螺旋。浜の西の壁の口 (-33, 44) から通路で入る)。上は甲羅の地表の口
+    public static final int TOP_STAIR_X1 = -46;
+    public static final int TOP_STAIR_Z1 = 42;
+    // 頂の塔 (モデルの塔。中心 (0, -3)、甲羅の地表 114、土台 115〜126、胴 127〜133、柱の段 134〜142、屋根 143〜146)
+    public static final int TOWER_CZ = -3;
+    public static final int TOWER_DECK = 133;
 
     // 縁のくぐり道: 浜の北 (z=41) から広間の南の段 (y 74) へ上る屋根のある坂 (x -12〜-10)
     public static final int CAVE_X1 = -12;
@@ -95,6 +119,8 @@ public final class TideBackLayout {
     public static final int HUB_LEDGE = 74;
     public static final int HUB_CEILING = 84;
     public static final int MOON_R = 3;
+    // 月の窓の縦穴の中心 (頂の塔の真下。広間の中心から 3 だけ北)。塔の柱の段のガラスの床まで抜ける
+    public static final int MOON_CZ = TOWER_CZ;
     public static final Area HUB = new Area(-HUB_R, HUB_R, -HUB_R, HUB_R, HUB_FLOOR, 13);
     // 南の段 (浜から) と西の段 (庭へ) はつながった L 字。東の回廊 (潮見の間へ) は離れている
     public static final Area LEDGE_S = new Area(-11, 1, 8, 12, HUB_LEDGE, 6);
@@ -120,10 +146,13 @@ public final class TideBackLayout {
     public static final Area EAST_HALL = new Area(13, 23, -5, -1, HUB_LEDGE, 4);
 
     // 珊瑚の庭 (西)。屋根のない、潮で 0〜3 満ちる水路の庭
-    public static final Area GARDEN = new Area(-62, -19, -42, 42, 64, 30);
+    // 北の縁は z 40 (浜の北の列 z 41〜42 と重ならないように。20.12節)
+    public static final Area GARDEN = new Area(-62, -19, -42, 40, 64, 30);
     public static final int GARDEN_FLOOR = 64;
     public static final int GARDEN_DEPTH = 3;
     public static final int GARDEN_WALL_TOP = 71;
+    // 庭は甲羅の中の洞。天井はおよそ 84〜86 (甲羅の低い縁では、地表から 4 段下)
+    public static final int GARDEN_CEILING = 84;
     public static final int PLATFORM_TOP = 68;
     // 広間の西の段から庭の入口 g0 へ下りる道 (x -13〜-19、y 74→68)
     public static final Area G0 = new Area(-24, -19, -3, 3, PLATFORM_TOP, 5);
@@ -173,20 +202,25 @@ public final class TideBackLayout {
     public static final Area TIER2 = new Area(50, 56, -15, -8, 86, 5);
     public static final Area LEDGE_E = new Area(50, 56, -35, -31, LEDGE_FLOOR, 5);
 
-    // 群れの干潟 (前)
-    public static final Area FLATS = new Area(-24, 24, -104, -72, 63, 12);
+    // 群れの干潟 (前)。甲羅の前の洞 (天井 78)。北の壁の向こうに首がある。北東・北西の角の窓から首と頭が見える
+    public static final Area FLATS = new Area(-24, 24, -82, -50, 63, 12);
+    public static final int FLATS_CEILING = 78;
     public static final int FLATS_FLOOR = 63;
     public static final int FLATS_DEPTH = 2;
     public static final Area F0 = new Area(-4, 4, -30, -18, 66, 5);
     public static final int TUNNEL_FLOOR = 66;
     // 干潟の口 (トンネルの北の端。潮招きの戦いの間だけ閉じる)
-    public static final int MOUTH_Z = -71;
+    public static final int MOUTH_Z = -49;
+    // 干潟を前の版 (甲羅の外、z -104〜-72) から南へ動かした量。岩の島・巣・石の並びは前の版と同じ
+    public static final int FLATS_DZ = 22;
     // 岩の島 (中心、上は 3x3、上の床 66)
-    public static final int[][] FLATS_ROCKS = {{-16, -80}, {0, -79}, {16, -80}, {-19, -93}, {-7, -91}, {7, -95}, {19, -92}, {0, -101}};
+    public static final int[][] FLATS_ROCKS = {{-16, -80 + FLATS_DZ}, {0, -79 + FLATS_DZ}, {16, -80 + FLATS_DZ}, {-19, -93 + FLATS_DZ},
+            {-7, -91 + FLATS_DZ}, {7, -95 + FLATS_DZ}, {19, -92 + FLATS_DZ}, {0, -101 + FLATS_DZ}};
     public static final int ROCK_TOP = 66;
     // 巣の候補地 (6 か所から、リセットの種で 3 つ)
-    public static final int[][] NEST_SITES = {{-10, -78}, {9, -77}, {-20, -86}, {20, -86}, {-12, -99}, {12, -101}};
-    public static final BlockPos BECKONER_HOME = new BlockPos(0, 64, -88);
+    public static final int[][] NEST_SITES = {{-10, -78 + FLATS_DZ}, {9, -77 + FLATS_DZ}, {-20, -86 + FLATS_DZ}, {20, -86 + FLATS_DZ},
+            {-12, -99 + FLATS_DZ}, {12, -101 + FLATS_DZ}};
+    public static final BlockPos BECKONER_HOME = new BlockPos(0, 64, -88 + FLATS_DZ);
 
     // ---------------------------------------------------------------- 殻の底 (心臓の間) と、潮の底の門からの螺旋の階段
     public static final int SPIRAL_TOP = 69;
@@ -198,11 +232,11 @@ public final class TideBackLayout {
     // ---------------------------------------------------------------- 潮鳴り石と、抜け道 (石が鳴ると光る床。踏むと戻れる)
     public static final BlockPos STONE_WEST = new BlockPos(ALTAR[0], ALTAR_TOP + 1, ALTAR[1] - 2);
     public static final BlockPos STONE_EAST = new BlockPos(53, LEDGE_FLOOR + 1, -34);
-    public static final BlockPos STONE_FRONT = new BlockPos(0, ROCK_TOP + 1, -102);
+    public static final BlockPos STONE_FRONT = new BlockPos(0, ROCK_TOP + 1, -102 + FLATS_DZ);
     // 抜け道の床 (石の近く) と、運ぶ先
     public static final BlockPos RETURN_WEST = new BlockPos(ALTAR[0] + 2, ALTAR_TOP, ALTAR[1] + 1);
     public static final BlockPos RETURN_EAST = new BlockPos(51, LEDGE_FLOOR, -32);
-    public static final BlockPos RETURN_FRONT = new BlockPos(1, ROCK_TOP, -100);
+    public static final BlockPos RETURN_FRONT = new BlockPos(1, ROCK_TOP, -100 + FLATS_DZ);
     public static final BlockPos RETURN_WEST_TO = new BlockPos(-10, HUB_LEDGE + 1, 0);
     public static final BlockPos RETURN_EAST_TO = new BlockPos(10, HUB_LEDGE + 1, -2);
     public static final BlockPos RETURN_FRONT_TO = new BlockPos(2, 67, -22);
@@ -228,7 +262,7 @@ public final class TideBackLayout {
             new Inscription("sign.skyabyss.lore_tide_hub", new BlockPos(-4, HUB_LEDGE + 2, 12), Direction.NORTH),
             new Inscription("sign.skyabyss.lore_tide_west", new BlockPos(ALTAR[0] - 2, ALTAR_TOP + 2, ALTAR[1] - 2), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(55, LEDGE_FLOOR + 2, -35), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -91), Direction.UP),
+            new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -91 + FLATS_DZ), Direction.UP),
             new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST));
 
     // ---------------------------------------------------------------- リセットで広間へ移す所 (試練の中)
@@ -236,7 +270,7 @@ public final class TideBackLayout {
         List<Area> list = new ArrayList<>();
         list.add(GARDEN);
         list.add(new Area(23, 60, -38, -2, 70, 30));
-        list.add(new Area(-26, 26, -106, -31, 60, 20));
+        list.add(new Area(-26, 26, -84, -31, 60, 20));
         list.add(new Area(-18, 18, -48, -3, 45, 18));
         list.add(new Area(-2, 2, -2, 2, 48, 22));
         return list;

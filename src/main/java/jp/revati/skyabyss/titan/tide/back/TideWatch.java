@@ -18,7 +18,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.AABB;
@@ -76,21 +75,22 @@ public final class TideWatch {
         }
         for (BlockPos p : PLATES) {
             level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+            level.setBlock(p.west().above(), Blocks.AIR.defaultBlockState(), 3);
             level.setBlock(p.west(), Blocks.AIR.defaultBlockState(), 3);
         }
         int[] used = new int[3];
         for (int i = 0; i < c.plugs().length; i++) {
             TidePuzzle.Plug plug = c.plugs()[i];
             BlockPos slot = SLOTS[plug.tier()][used[plug.tier()]++];
-            placeLever(level, slot, "sign.skyabyss.tide_plug_" + "bmt".charAt(plug.from()) + "bmt".charAt(plug.to()));
+            placeLever(level, slot, plug.from(), plug.to());
         }
         BlockPos plate = PLATES[c.plateTier()];
         level.setBlock(plate, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE.defaultBlockState(), 3);
         TidePuzzle.Plug pp = c.plugs()[c.platePlug()];
-        level.setBlock(plate.west(), Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 12), 3);
-        new TideKit(level, level.random).writeSign(plate.west(), "sign.skyabyss.tide_plate_" + "bmt".charAt(pp.from()) + "bmt".charAt(pp.to()),
-                net.minecraft.world.item.DyeColor.LIGHT_BLUE);
-        placeLever(level, RESET_LEVER, "sign.skyabyss.tide_plug_reset");
+        // 重石の床の印: 隣に、つながる栓と同じ印 (元の溜めの色の石に、行き先の溜めの色の敷物)
+        level.setBlock(plate.west(), BASIN_STONE[pp.from()], 3);
+        level.setBlock(plate.west().above(), BASIN_CARPET[pp.to()], 3);
+        placeLever(level, RESET_LEVER, -1, -1);
         // 溜めの壁を建て直し、上限の線 (青い線) を引く
         for (int k = 0; k < 3; k++) {
             int[] b = BASIN[k];
@@ -107,7 +107,9 @@ public final class TideWatch {
                         if (isDoor(p)) {
                             continue;
                         }
-                        BlockState s = y == capY ? Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA.defaultBlockState() : wall(x, y, z, k);
+                        boolean corner = (x == b[0] - 1 || x == b[1] + 1) && (z == b[2] - 1 || z == b[3] + 1);
+                        // 角の柱は溜めの色 (栓の台と敷物の色と同じ。看板の代わり)
+                        BlockState s = y == capY ? Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA.defaultBlockState() : corner ? BASIN_STONE[k] : wall(x, y, z, k);
                         // 段の床の高さの縁 (次の段の床) は床のまま
                         if (y == top && k < 2 && x == b[1] + 1) {
                             s = TideKit.FLOOR;
@@ -153,23 +155,31 @@ public final class TideWatch {
     private static void clearSlot(ServerLevel level, BlockPos s) {
         level.setBlock(s.above(), Blocks.AIR.defaultBlockState(), 3);
         for (Direction d : Direction.Plane.HORIZONTAL) {
-            if (level.getBlockState(s.relative(d)).getBlock() instanceof net.minecraft.world.level.block.WallSignBlock) {
+            BlockState n = level.getBlockState(s.relative(d));
+            if (n.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock || n.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock) {
                 level.setBlock(s.relative(d), Blocks.AIR.defaultBlockState(), 3);
             }
         }
         level.setBlock(s, Blocks.AIR.defaultBlockState(), 3);
     }
 
-    // 台の石と取っ手、取っ手の行き先を書いた看板 (段の内側を向く)
-    private static void placeLever(ServerLevel level, BlockPos slot, String signKey) {
-        level.setBlock(slot, Blocks.CHISELED_TUFF.defaultBlockState(), 3);
+    // 溜めの色 (下 B・中 M・上 T)。溜めの角の柱、栓の台 (元の溜め)、台の前の敷物 (行き先の溜め) に使う。看板の代わり
+    static final BlockState[] BASIN_STONE = {Blocks.YELLOW_CONCRETE.defaultBlockState(), Blocks.LIME_CONCRETE.defaultBlockState(),
+            Blocks.MAGENTA_CONCRETE.defaultBlockState()};
+    static final BlockState[] BASIN_CARPET = {Blocks.YELLOW_CARPET.defaultBlockState(), Blocks.LIME_CARPET.defaultBlockState(),
+            Blocks.MAGENTA_CARPET.defaultBlockState()};
+
+    // 台の石と取っ手。台は水の元の溜めの色、台の前 (段の内側) の敷物は行き先の溜めの色。from < 0 は戻しの栓 (台は彫った凝灰岩)
+    private static void placeLever(ServerLevel level, BlockPos slot, int from, int to) {
+        level.setBlock(slot, from < 0 ? Blocks.CHISELED_TUFF.defaultBlockState() : BASIN_STONE[from], 3);
         Direction face = slot.getZ() <= -12 && slot.getX() < 50 ? Direction.SOUTH : slot.getZ() >= -8 && slot.getX() < 50 ? Direction.NORTH
                 : slot.getX() >= 54 ? Direction.WEST : slot.getX() <= 25 ? Direction.EAST : Direction.EAST;
         level.setBlock(slot.above(), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR)
                 .setValue(LeverBlock.FACING, face).setValue(LeverBlock.POWERED, false), 3);
-        BlockPos sign = slot.relative(face);
-        level.setBlock(sign, Blocks.DARK_OAK_WALL_SIGN.defaultBlockState().setValue(net.minecraft.world.level.block.WallSignBlock.FACING, face), 3);
-        new TideKit(level, level.random).writeSign(sign, signKey, net.minecraft.world.item.DyeColor.LIGHT_BLUE);
+        BlockPos front = slot.relative(face);
+        if (to >= 0 && level.getBlockState(front).isAir() && !level.getBlockState(front.below()).isAir()) {
+            level.setBlock(front, BASIN_CARPET[to], 3);
+        }
     }
 
     static boolean leverOn(ServerLevel level, BlockPos slot) {
