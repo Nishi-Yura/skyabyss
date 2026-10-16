@@ -1,9 +1,9 @@
 {
-  "type": "skyabyss:tide_back",
+  "type": "skyabyss:storm_back",
   "generator": {
     "type": "minecraft:flat",
     "settings": {
-      "biome": "minecraft:the_void",
+      "biome": "skyabyss:storm_back",
       "features": false,
       "lakes": false,
       "layers": [],

@@ -1,0 +1,216 @@
+{
+  "block.skyabyss.wind_stone": {
+    "en": "Wind Chime Stone",
+    "ja": "風鳴り石"
+  },
+  "block.skyabyss.feather_mirror": {
+    "en": "Feather Mirror",
+    "ja": "羽鏡"
+  },
+  "block.skyabyss.catch_feather": {
+    "en": "Feather Receiver",
+    "ja": "受け羽"
+  },
+  "item.skyabyss.gale_feather": {
+    "en": "Gale Feather",
+    "ja": "風切りの羽根"
+  },
+  "item.skyabyss.gale_feather.desc": {
+    "en": "Crouch in the air to glide",
+    "ja": "空中でしゃがむと滑空する"
+  },
+  "biome.skyabyss.storm_back": {
+    "en": "Storm Above",
+    "ja": "嵐の上"
+  },
+  "gui.skyabyss.storm_gauge.calm": {
+    "en": "Calm",
+    "ja": "凪"
+  },
+  "gui.skyabyss.storm_gauge.rising": {
+    "en": "Storm rising",
+    "ja": "荒れてくる"
+  },
+  "gui.skyabyss.storm_gauge.storm": {
+    "en": "Storm",
+    "ja": "嵐"
+  },
+  "gui.skyabyss.storm_gauge.falling": {
+    "en": "Storm easing",
+    "ja": "静まる"
+  },
+  "gui.skyabyss.storm_gauge.left": {
+    "en": "%s s left",
+    "ja": "あと %s 秒"
+  },
+  "gui.skyabyss.storm_gauge.held": {
+    "en": "Beat held",
+    "ja": "拍が止まっている"
+  },
+  "trial.skyabyss.storm_west": {
+    "en": "the Windbone",
+    "ja": "風切りの骨"
+  },
+  "trial.skyabyss.storm_east": {
+    "en": "the Thunderbone",
+    "ja": "雷の骨"
+  },
+  "trial.skyabyss.storm_front": {
+    "en": "the Eye Hall",
+    "ja": "眼の間"
+  },
+  "checkpoint.skyabyss.storm_hub": {
+    "en": "Wind Hall",
+    "ja": "風の広間"
+  },
+  "checkpoint.skyabyss.storm_w0": {
+    "en": "Left shoulder",
+    "ja": "左の肩"
+  },
+  "checkpoint.skyabyss.storm_w1": {
+    "en": "Left elbow",
+    "ja": "左の肘"
+  },
+  "checkpoint.skyabyss.storm_e0": {
+    "en": "Right shoulder",
+    "ja": "右の肩"
+  },
+  "checkpoint.skyabyss.storm_e1": {
+    "en": "Right elbow",
+    "ja": "右の肘"
+  },
+  "checkpoint.skyabyss.storm_f0": {
+    "en": "Neck",
+    "ja": "首の前室"
+  },
+  "checkpoint.skyabyss.storm_heart": {
+    "en": "Keel antechamber",
+    "ja": "竜骨の前室"
+  },
+  "growth.skyabyss.reason.storm_trial": {
+    "en": "Wind chime stone",
+    "ja": "風鳴り石"
+  },
+  "message.skyabyss.storm.storm_soon": {
+    "en": "A low wind growls through the bones... the storm is coming.",
+    "ja": "低い風の唸りが骨を伝う……嵐が来る。"
+  },
+  "message.skyabyss.storm.calm_soon": {
+    "en": "A distant high cry... the storm will ease.",
+    "ja": "遠くで高い鳴き声……嵐が静まる。"
+  },
+  "message.skyabyss.storm.keel_opened": {
+    "en": "Three stones sing. The feather ring in the hall floor opens, and wind rises from below.",
+    "ja": "三つの石が鳴る。広間の床の羽根の輪が開き、下から風が吹き上がった。"
+  },
+  "message.skyabyss.storm.stone_ringing": {
+    "en": "The wind chime stone of %s rings (%s/%s).",
+    "ja": "%s の風鳴り石が鳴った（%s/%s）。"
+  },
+  "message.skyabyss.storm.all_rung": {
+    "en": "All three stones are singing. Something opens in the floor of the Wind Hall.",
+    "ja": "三つの石が鳴っている。風の広間の床で、何かが開いた。"
+  },
+  "message.skyabyss.storm.return_opened": {
+    "en": "The floor nearby begins to glow. Step on it to return near the hall.",
+    "ja": "近くの床が光りはじめた。踏むと広間の近くへ戻れる。"
+  },
+  "message.skyabyss.storm.trial_sleeping": {
+    "en": "This trial sleeps for now. Its stone is already singing.",
+    "ja": "この試練は今は眠っている。石はもう鳴っている。"
+  },
+  "message.skyabyss.storm.stone_rung": {
+    "en": "The stone is already singing.",
+    "ja": "石はもう鳴っている。"
+  },
+  "message.skyabyss.storm.stone_silent": {
+    "en": "The stone is silent. Something in the knob still eats the lightning.",
+    "ja": "石は黙っている。瘤の中で、まだ何かが雷を食べている。"
+  },
+  "message.skyabyss.raiju.defeated": {
+    "en": "The beast falls. Wind rises from the middle of the knob.",
+    "ja": "獣が倒れた。瘤の真ん中から風が昇りはじめる。"
+  },
+  "message.skyabyss.storm.mirrors_reset": {
+    "en": "The mirrors turn back to how they were.",
+    "ja": "鏡が最初の向きに戻った。"
+  },
+  "message.skyabyss.storm.mirrors_reset_wait": {
+    "en": "The mirrors are still settling (%s s).",
+    "ja": "鏡はまだ揺れている（%s 秒）。"
+  },
+  "message.skyabyss.storm.gale_feather": {
+    "en": "A gale feather drifts into your hand. Crouch in the air to glide.",
+    "ja": "風切りの羽根が手に舞い込んだ。空中でしゃがむと滑空する。"
+  },
+  "message.skyabyss.storm.trials_renewed": {
+    "en": "The storm's breath changes. The trials on the back have returned.",
+    "ja": "嵐の息が変わった。背中の試練が元に戻った。"
+  },
+  "message.skyabyss.storm.sleeping_west": {
+    "en": "The Windbone sleeps this time. Its stone already sings.",
+    "ja": "今回は風切りの骨が眠っている。石はもう鳴っている。"
+  },
+  "message.skyabyss.storm.sleeping_east": {
+    "en": "The Thunderbone sleeps this time. Its stone already sings.",
+    "ja": "今回は雷の骨が眠っている。石はもう鳴っている。"
+  },
+  "message.skyabyss.storm.sleeping_front": {
+    "en": "The Eye Hall sleeps this time. Its stone already sings.",
+    "ja": "今回は眼の間が眠っている。石はもう鳴っている。"
+  },
+  "message.skyabyss.storm.gave_up": {
+    "en": "You let the trial go and return to the tail hall.",
+    "ja": "試練をあきらめ、尾の間へ戻った。"
+  },
+  "message.skyabyss.storm.campfire_hint": {
+    "en": "Crouch and touch the fire to give up and return to the tail hall.",
+    "ja": "しゃがんで火に触れると、試練をあきらめて尾の間へ戻る。"
+  },
+  "sign.skyabyss.storm_west.1": "",
+  "sign.skyabyss.storm_west.2": {
+    "en": "Windbone",
+    "ja": "風切りの骨"
+  },
+  "sign.skyabyss.storm_west.3": {
+    "en": "Ride the wind",
+    "ja": "風に乗れ"
+  },
+  "sign.skyabyss.storm_west.4": "",
+  "sign.skyabyss.storm_east.1": "",
+  "sign.skyabyss.storm_east.2": {
+    "en": "Thunderbone",
+    "ja": "雷の骨"
+  },
+  "sign.skyabyss.storm_east.3": {
+    "en": "Bolts to rods",
+    "ja": "雷を柱へ"
+  },
+  "sign.skyabyss.storm_east.4": "",
+  "sign.skyabyss.storm_front.1": "",
+  "sign.skyabyss.storm_front.2": {
+    "en": "Eye Hall",
+    "ja": "眼の間"
+  },
+  "sign.skyabyss.storm_front.3": {
+    "en": "Light to three",
+    "ja": "光を三つへ"
+  },
+  "sign.skyabyss.storm_front.4": "",
+  "message.skyabyss.storm.door_opened": "",
+  "message.skyabyss.storm.feather_lit": "",
+  "entity.skyabyss.gale_column": "",
+  "message.skyabyss.storm.gale_feather_gone": "",
+  "message.skyabyss.storm.return_path": "",
+  "message.skyabyss.storm.peaceful": "",
+  "message.skyabyss.storm.perching": "",
+  "message.skyabyss.storm.taking_off": "",
+  "subtitles.skyabyss.storm_cry": "",
+  "subtitles.skyabyss.storm_thunder": "",
+  "subtitles.skyabyss.storm_column": "",
+  "subtitles.skyabyss.storm_wind": "",
+  "subtitles.skyabyss.storm_crosswind": "",
+  "subtitles.skyabyss.storm_mirror": "",
+  "subtitles.skyabyss.storm_feather": "",
+  "entity.skyabyss.thunder_wing": ""
+}

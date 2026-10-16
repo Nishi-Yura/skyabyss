@@ -5,6 +5,7 @@ import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.storm.back.StormBackBuilder;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,22 +18,27 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 竜骨の間 (心臓の間、12 の 3.6節)。雷翼の胸の奥、竜骨の内側。座標は StormBackLayout (背中の担当の配置) から取る。
-//  - 丸い部屋 (内側の半径 15、床 121、天井 134)。床は竜骨の稜線に沿って中央の幅 3 が 1 段低い (浅い舟の底)。
+// 部屋の穴と前室・入口は背中の担当が鳥の中に彫る (StormBirdBuilder.keel)。ここは穴の中の形 (柱・風穴・竜骨の筋・壁と天井の飾り) を
+// 建て直すだけで、背中の担当が彫った範囲 (中心から半径 HEART_ROOM_RADIUS + 1.6、床のブロック HEART_ROOM.y 〜 天井のブロック) の外は触らない。
+// 前室・螺旋の階段・天井の上の低い道 (竜骨の門から) は背中の担当のもの。
+//  - 丸い部屋 (内側の半径 15、立つ高さ 122、天井のブロック 134)。床は竜骨の稜線に沿って中央の幅 3 が 1 段低い (浅い舟の底)。
 //    壁は肋と飛ぶための筋の束: 灰白の石 (磨いた閃緑岩) に、方解石の縦の肋と、白い羽毛の層の帯。赤みは使わない
 //  - 避雷の柱 4 本 (北東・北西・南東・南西、中心から (±6, ±6))。銅の柱、高さ 6。中の 3 段は銅の電球で、満ちた段だけ灯る。先は光る
 //  - 風穴 4 つ (北・南・東・西、中心から 5)。床の銅の格子、下に光。段階 2 で昇り風が立つ (高さは心臓の下の端まで)
-//  - 天井の真ん中に、上の広間へ抜ける細い縦穴 (演出だけ)
-//  - 北の壁に入口 (幅 3、高さ 3。戦いの間は封印)。その外に前室 (休み場 heart。担当 1 の螺旋の階段は前室の天井の口から降りてくる)
+//  - 北の壁に入口 (幅 3、高さ 3。戦いの間は封印)。その外に前室 (休み場 heart。担当 1 の螺旋の階段から西の道で着く)
 // 明るさ (13.2節の「暗い部屋で予告の粒が見えない」の直し): 柱の先・風穴・壁の灯に加え、見えない光のブロックを頭の高さに散らし、
 // 床が明るさ 11 以上になるようにする。心臓は自分の光で描く (StormHeartRenderer)
 // 背中の鳥は担当 1 が建てる。鳥が建て直されると部屋は石で埋まるので、5 秒ごとに確かめて建て直す (潮殻と同じ)
 public final class StormHeartArena {
-    public static final int CX = StormBackLayout.KEEL_CENTER.getX();
-    public static final int CZ = StormBackLayout.KEEL_CENTER.getZ();
-    public static final int FLOOR = StormBackLayout.KEEL_FLOOR;
-    public static final int RADIUS = StormBackLayout.KEEL_RADIUS;
-    public static final int CEILING = StormBackLayout.KEEL_CEILING;
-    static final int WALL = 2;
+    public static final int CX = StormBackLayout.HEART_ROOM.getX();
+    public static final int CZ = StormBackLayout.HEART_ROOM.getZ();
+    // 立つ高さ (竜骨の筋の外)。背中の HEART_ROOM.y は筋の床のブロック、その外は 1 段高い床のブロック (HEART_ROOM.y + 1) の上に立つ
+    public static final int FLOOR = StormBackLayout.HEART_ROOM.getY() + 2;
+    public static final int RADIUS = StormBackLayout.HEART_ROOM_RADIUS;
+    // 天井のブロックの y (空気はその下まで)。その上は竜骨の門からの低い道の床なので、ここより上は触らない
+    public static final int CEILING = StormBackLayout.HEART_ROOM_CEILING + 1;
+    // 建て直す範囲 (背中の担当が彫った壁の外の端)
+    static final double OUTER = RADIUS + 1.6;
     // 竜骨の稜線 (1 段低い中央の筋): |x - CX| <= KEEL_HALF
     static final int KEEL_HALF = 1;
     // 避雷の柱 (中心から ±ROD_OFFSET)。柱は FLOOR から ROD_HEIGHT 段、いちばん上が光る先
@@ -43,11 +49,8 @@ public final class StormHeartArena {
     public static final int HOLE_OFFSET = 5;
     public static final double UPDRAFT_RADIUS = 1.6;
     public static final double UPDRAFT_TOP = FLOOR + 8.5;
-    // 入口 (北の壁、z = CZ - RADIUS - 1 と -2) と前室 (z CZ-22 〜 CZ-18、x -2〜2)
-    static final int GATE_Z = CZ - RADIUS - 1;
-    static final int ANTE_Z0 = CZ - RADIUS - 3;
-    static final int ANTE_Z1 = CZ - RADIUS - 7;
-    static final int ANTE_CEILING = FLOOR + 4;
+    // 入口 (北の壁。前室 KEEL_ANTE の北の口 = 背中の HEART_DOOR) と、その内側の壁の厚み (z GATE_Z + 1)
+    static final int GATE_Z = StormBackLayout.KEEL_ANTE.z2() + 1;
 
     // 柱の満ちた段 (部屋は一つなので static)
     private static final int[] CHARGE = new int[4];
@@ -65,9 +68,9 @@ public final class StormHeartArena {
         return new AABB(CX - RADIUS, FLOOR - 2, CZ - RADIUS, CX + RADIUS + 1, CEILING, CZ + RADIUS + 1);
     }
 
-    // 前室 (入口の外の通路)
+    // 前室 (入口の外。背中の担当の KEEL_ANTE)
     public static AABB ante() {
-        return new AABB(CX - 2, FLOOR, ANTE_Z1, CX + 3, ANTE_CEILING, GATE_Z);
+        return StormBackLayout.KEEL_ANTE.aabb();
     }
 
     public static List<BlockPos> gate() {
@@ -80,9 +83,9 @@ public final class StormHeartArena {
         return list;
     }
 
-    // 前室に降りたときの位置 (南の入口を向く)
+    // 前室に降りたときの位置 (休み場 heart の目を覚ます所。南の入口を向く)
     public static Vec3 anteSpawn() {
-        return new Vec3(CX + 0.5, FLOOR, ANTE_Z1 + 2.5);
+        return Vec3.atBottomCenterOf(StormBackLayout.rest("heart"));
     }
 
     static double dist(double x, double z) {
@@ -193,12 +196,12 @@ public final class StormHeartArena {
     }
 
     // ---------------------------------------------------------------- 建てる
-    // 建っているか (床の中心の印、中の空気、柱の先、前室の床で見る)
+    // 建っているか (床の中心の印、中の空気、柱の先、入口の内側の空気で見る)
     public static boolean isBuilt(ServerLevel back) {
         return back.getBlockState(new BlockPos(CX, FLOOR - 2, CZ)).is(Blocks.CHISELED_TUFF_BRICKS)
                 && back.getBlockState(new BlockPos(CX + 3, FLOOR + 6, CZ + 3)).isAir()
                 && back.getBlockState(rod(0).above(ROD_HEIGHT - 1)).is(Blocks.END_ROD)
-                && !back.getBlockState(new BlockPos(CX, FLOOR, ANTE_Z1 + 2)).isSolid();
+                && !back.getBlockState(new BlockPos(CX + 1, FLOOR, GATE_Z + 1)).isSolid();
     }
 
     public static void ensureBuilt(ServerLevel back) {
@@ -208,6 +211,8 @@ public final class StormHeartArena {
     }
 
     public static void build(ServerLevel back) {
+        // 部屋は鳥の中にある。鳥がまだ建っていなければ先に建てる (前室・入口の床・天井の上の道は背中の担当のもの)
+        StormBackBuilder.ensureBuilt(back);
         int flags = 2 | 16;
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState wall = Blocks.POLISHED_DIORITE.defaultBlockState();
@@ -220,21 +225,22 @@ public final class StormHeartArena {
         BlockState ring = Blocks.POLISHED_TUFF.defaultBlockState();
         BlockState base = Blocks.SMOOTH_STONE.defaultBlockState();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        int r = RADIUS + WALL;
-        for (int y = CEILING + 1; y >= FLOOR - 3; y--) {
+        int r = (int) Math.ceil(OUTER);
+        for (int y = CEILING; y >= FLOOR - 3; y--) {
             for (int x = CX - r; x <= CX + r; x++) {
                 for (int z = CZ - r; z <= CZ + r; z++) {
                     double d = dist(x, z);
-                    if (d > RADIUS + WALL) {
+                    if (d > OUTER) {
                         continue;
                     }
                     p.set(x, y, z);
                     BlockState s;
                     if (y >= CEILING) {
-                        // 天井: 方解石。中心の縦穴の口 (演出だけ) と、半径 10 の灯の輪
-                        if (y == CEILING && d < 1.6) {
-                            s = air;
-                        } else if (y == CEILING && Math.abs(d - 10) < 0.5 && Math.floorMod(x + z, 4) == 0) {
+                        // 天井: 方解石と半径 10 の灯の輪。上が空いていて床のブロックがある所 (竜骨の門と低い道の床) は背中の担当の床のまま
+                        if (!back.getBlockState(p).isAir() && back.getBlockState(p.above()).isAir()) {
+                            continue;
+                        }
+                        if (Math.abs(d - 10) < 0.5 && Math.floorMod(x + z, 4) == 0) {
                             s = lamp;
                         } else {
                             s = (Math.abs(d - 6) < 0.5 || Math.abs(d - 12) < 0.5) ? band : rib;
@@ -272,15 +278,6 @@ public final class StormHeartArena {
                         s = air;
                     }
                     back.setBlock(p, s, flags);
-                }
-            }
-        }
-        // 天井の縦穴 (2 段だけ。上の広間の床とは重ねない)
-        for (int x = CX - 1; x <= CX + 1; x++) {
-            for (int z = CZ - 1; z <= CZ + 1; z++) {
-                if (dist(x, z) < 1.6) {
-                    back.setBlock(new BlockPos(x, CEILING + 1, z), air, flags);
-                    back.setBlock(new BlockPos(x, CEILING + 2, z), rib, flags);
                 }
             }
         }
@@ -325,38 +322,11 @@ public final class StormHeartArena {
                 }
             }
         }
-        // 入口 (北の壁を抜く) と前室
-        for (int z = GATE_Z; z >= ANTE_Z1 - 1; z--) {
-            for (int x = CX - 3; x <= CX + 3; x++) {
-                for (int y = FLOOR - 2; y <= ANTE_CEILING; y++) {
-                    p.set(x, y, z);
-                    boolean opening = Math.abs(x - CX) <= 1 && y >= FLOOR && y <= FLOOR + 2;
-                    if (z >= GATE_Z - 1) {
-                        // 壁の厚み 2 段: 口だけ抜く
-                        if (opening) {
-                            back.setBlock(p, air, flags);
-                        } else if (Math.abs(x - CX) <= 2 && y == FLOOR + 3) {
-                            back.setBlock(p, rib, flags);
-                        }
-                        continue;
-                    }
-                    boolean edge = Math.abs(x - CX) == 3 || z == ANTE_Z1 - 1 || y <= FLOOR - 1 || y == ANTE_CEILING;
-                    BlockState s;
-                    if (edge) {
-                        if (y == FLOOR - 1) {
-                            s = floor;
-                        } else if (y < FLOOR - 1) {
-                            s = base;
-                        } else if (y == ANTE_CEILING) {
-                            // 前室の天井の口 (担当 1 の螺旋の階段がここから降りてくる)
-                            s = (Math.abs(x - CX) <= 1 && z >= ANTE_Z1 && z <= ANTE_Z1 + 2) ? air : rib;
-                        } else {
-                            s = (y == FLOOR + 2 && Math.abs(x - CX) == 3 && z == ANTE_Z0 - 1) ? lamp : wall;
-                        }
-                    } else {
-                        s = air;
-                    }
-                    back.setBlock(p, s, flags);
+        // 入口 (北の壁の口と、その内側の壁の厚み)。前室は背中の担当が彫ったまま
+        for (int z = GATE_Z; z <= GATE_Z + 1; z++) {
+            for (int x = CX - 1; x <= CX + 1; x++) {
+                for (int y = FLOOR; y <= FLOOR + 2; y++) {
+                    back.setBlock(new BlockPos(x, y, z), air, flags);
                 }
             }
         }

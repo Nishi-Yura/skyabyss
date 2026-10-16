@@ -12,6 +12,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.BossRoom;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import jp.revati.skyabyss.titan.storm.StormTravel;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -52,7 +53,7 @@ public final class StormHeartBattle {
 
     @Nullable
     public static ServerLevel back(net.minecraft.server.MinecraftServer server) {
-        return server.getLevel(StormBackLayout.DIMENSION);
+        return server.getLevel(StormTravel.STORM_BACK);
     }
 
     static final BossRoom.Host HOST = new BossRoom.Host() {
@@ -189,7 +190,7 @@ public final class StormHeartBattle {
     // ---------------------------------------------------------------- 毎 tick
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != StormBackLayout.DIMENSION) {
+        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != StormTravel.STORM_BACK) {
             return;
         }
         if (level.players().isEmpty() || level.getGameTime() % 10 != 0) {
@@ -222,7 +223,7 @@ public final class StormHeartBattle {
 
     // 光の柱から尾の間へ戻る。尾の間がまだ建っていなければ (背中の鳥がない) 地上の共有スポーン地点へ
     public static void ascend(ServerLevel level, ServerPlayer player) {
-        BlockPos tail = StormBackLayout.TAIL_HALL;
+        BlockPos tail = StormBackLayout.TAIL_CENTER;
         player.fallDistance = 0;
         if (!level.getBlockState(tail.below()).isAir()) {
             player.teleportTo(level, tail.getX() + 0.5, tail.getY(), tail.getZ() + 0.5, 180f, 0f);
@@ -320,7 +321,7 @@ public final class StormHeartBattle {
     // 試練で湧いた心臓は保存しないが、古いものが残っていれば読み込みのときに消す
     @SubscribeEvent
     static void onEntityJoin(EntityJoinLevelEvent event) {
-        if (event.loadedFromDisk() && event.getLevel().dimension() == StormBackLayout.DIMENSION
+        if (event.loadedFromDisk() && event.getLevel().dimension() == StormTravel.STORM_BACK
                 && event.getEntity() instanceof StormHeart && event.getEntity().getTags().contains(TitanBackTrials.HEART_TAG)) {
             event.setCanceled(true);
         }

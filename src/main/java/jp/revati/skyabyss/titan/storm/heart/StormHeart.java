@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.entity.GuardMob;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
-import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
+import jp.revati.skyabyss.titan.storm.StormTravel;
 import jp.revati.skyabyss.titan.storm.back.Updraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -1230,7 +1230,7 @@ public class StormHeart extends GuardMob {
             server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 120, 1.5, 1.6, 1.5, 0.2);
             warn(server, dust(0xF6F0C8, 1.6f), getX(), core().y, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
             StormHeartNetwork.warn(reachable(server, 32), null, 0);
-            if (server.dimension() == StormBackLayout.DIMENSION && getTags().contains(TitanBackTrials.HEART_TAG)) {
+            if (server.dimension() == StormTravel.STORM_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
                 StormHeartBattle.onDefeated(server, this);
             }
         }
