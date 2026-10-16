@@ -88,13 +88,16 @@ public final class TideIslandBuilder {
         };
     }
 
+    // 枯れた珊瑚は、ふだんの形 (defaultBlockState) が水に浸かっている。空気の中に置くと、隣が変わったときに水が流れ出すので、乾いた形で置く
+    // (潮で庭が満ちるときは TideField が水に沈める)
     private static BlockState deadFan(int i) {
-        return switch (Math.floorMod(i, 4)) {
+        BlockState s = switch (Math.floorMod(i, 4)) {
             case 0 -> Blocks.DEAD_BRAIN_CORAL.defaultBlockState();
             case 1 -> Blocks.DEAD_FIRE_CORAL.defaultBlockState();
             case 2 -> Blocks.DEAD_TUBE_CORAL_FAN.defaultBlockState();
             default -> Blocks.DEAD_HORN_CORAL.defaultBlockState();
         };
+        return s.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false);
     }
 
     // ---------------------------------------------------------------- 潮門の浜 (甲羅の中の広間)
@@ -1291,22 +1294,38 @@ public final class TideIslandBuilder {
         }
     }
 
+    // 縦穴は、井戸と、そのまわり 1 マスの地表のいちばん低い所の下までで止め、そこから上は各柱の地表までガラスで埋める。
+    // 前は柱ごとに地表まで掘っていて、甲羅の斜面では高い側の柱の横腹が、低い側の地表の上に出て外へ開いていた
+    // (構造の検査で見つけた (-55, 106〜109, -6) の穴)
     private static void well(TideKit kit, int x0, int z0, int from) {
+        int cap = Integer.MAX_VALUE;
+        for (int x = x0 - 1; x <= x0 + 2; x++) {
+            for (int z = z0 - 1; z <= z0 + 2; z++) {
+                cap = Math.min(cap, surface(x, z));
+            }
+        }
+        BlockState glass = Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState();
         for (int dx = 0; dx <= 1; dx++) {
             for (int dz = 0; dz <= 1; dz++) {
                 int x = x0 + dx;
                 int z = z0 + dz;
-                int top = Math.max(TideTurtle.top(x, z), shellTop(x, z));
-                for (int y = from; y < top; y++) {
+                int top = surface(x, z);
+                for (int y = from; y < cap; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
-                kit.set(x, top, z, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+                for (int y = cap; y <= top; y++) {
+                    kit.set(x, y, z, glass);
+                }
             }
         }
         // 井戸の口 (天井) のまわりに灯り
         kit.set(x0 - 1, from, z0, TideKit.LAMP);
         kit.set(x0 + 2, from, z0 + 1, TideKit.LAMP);
     }
+    private static int surface(int x, int z) {
+        return Math.max(TideTurtle.top(x, z), shellTop(x, z));
+    }
+
     // ---------------------------------------------------------------- 休み場・碑文・潮鳴り石・抜け道の床
     // 看板は、試練の入口の一言 (3 枚) と碑文 (6 枚) だけ。使い方は最初の一度だけの囁き (TideWhispers)、形・光・音で伝える
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(

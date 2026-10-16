@@ -50,6 +50,7 @@ public final class TideGarden {
     private static int missing;
     private static final Map<UUID, Integer> UNDER = new HashMap<>();
     private static boolean spawned;
+    private static int spawnedFor;
     private static TideClock.Phase lastPhase;
 
     private TideGarden() {
@@ -179,11 +180,17 @@ public final class TideGarden {
         if (level.getGameTime() % 20 != 0 || peaceful || westDone) {
             return;
         }
-        // 人が庭に入ったら、試練の敵を置く (人数で数を変える)
+        // 人が庭に入ったら、試練の敵を置く (人数で数を変える)。あとから仲間が入ってきたら、その分を足す
+        // (試遊 (2 人) で、先に入った一人の分しか湧かず、二人でも一人のときと同じ数だった)
         List<ServerPlayer> inside = level.getEntitiesOfClass(ServerPlayer.class, GARDEN.aabb().inflate(2, 6, 2), p -> p.isAlive() && !p.isSpectator());
-        if (!spawned && !inside.isEmpty()) {
+        int people = Math.min(4, inside.size());
+        if (!spawned && people > 0) {
             spawned = true;
-            spawnGuards(level, state, Math.min(4, inside.size()));
+            spawnedFor = people;
+            spawnGuards(level, state, people);
+        } else if (spawned && people > spawnedFor) {
+            spawnExtra(level, state, people - spawnedFor);
+            spawnedFor = people;
         }
     }
 
@@ -272,23 +279,48 @@ public final class TideGarden {
             BlockPos mid = cells.get(cells.size() / 2);
             spots.add(new BlockPos(mid.getX(), GARDEN_FLOOR + 1, mid.getZ()));
         }
-        int thralls = 5 + 2 * (people - 1);
-        RandomSource r = level.random;
-        java.util.Collections.shuffle(spots, new java.util.Random(r.nextLong()));
-        for (int i = 0; i < thralls && i < spots.size(); i++) {
-            BlockPos at = spots.get(i);
+        placeThralls(level, spots, 5 + 2 * (people - 1));
+        placePack(level, 3 + people - 1);
+    }
+
+    // あとから入ってきた仲間の分 (一人につき珊瑚憑き 2、磯走り 1)
+    private static void spawnExtra(ServerLevel level, TideBackState state, int added) {
+        List<BlockPos> spots = new ArrayList<>();
+        for (Channel c : GARDEN_ROUTES[Math.floorMod(state.gardenRoute(), GARDEN_ROUTES.length)]) {
+            List<BlockPos> cells = TideIslandBuilder.channelCells(c);
+            BlockPos mid = cells.get(cells.size() / 2);
+            spots.add(new BlockPos(mid.getX(), GARDEN_FLOOR + 1, mid.getZ()));
+            spots.add(new BlockPos(c.from[0], GARDEN_FLOOR + 1, c.to[1]));
+        }
+        placeThralls(level, spots, 2 * added);
+        placePack(level, added);
+    }
+
+    // 珊瑚憑きを置ける所 (空気か水) に、数がそろうまで置く。
+    // 前は候補の先頭から数だけ試し、壁の中の候補を飛ばした分だけ少なかった (二人で 7 体のはずが 5 体)
+    private static void placeThralls(ServerLevel level, List<BlockPos> spots, int count) {
+        java.util.Collections.shuffle(spots, new java.util.Random(level.random.nextLong()));
+        int placed = 0;
+        for (BlockPos at : spots) {
+            if (placed >= count) {
+                break;
+            }
             if (!level.getBlockState(at).isAir() && !level.getBlockState(at).is(Blocks.WATER)) {
                 continue;
             }
             Mob m = TideFlats.spawn(level, TideMobSetup.CORAL_THRALL.get(), at);
             if (m != null) {
                 m.addTag(GARDEN_TAG);
+                placed++;
             }
         }
-        // 水路の群れ (g0〜C の水路の奥)
+    }
+
+    // 水路の群れ (g0〜C の水路の奥)
+    private static void placePack(ServerLevel level, int count) {
         List<BlockPos> g0c = TideIslandBuilder.channelCells(Channel.G0_C);
         BlockPos pack = g0c.get(g0c.size() * 2 / 3);
-        for (int i = 0; i < 3 + people - 1; i++) {
+        for (int i = 0; i < count; i++) {
             Mob m = TideFlats.spawn(level, TideMobSetup.REEF_SCUTTLER.get(), new BlockPos(pack.getX(), GARDEN_FLOOR + 1, pack.getZ()));
             if (m != null) {
                 m.addTag(GARDEN_TAG);
@@ -321,6 +353,7 @@ public final class TideGarden {
         pearl = state.rung(TideBackState.Trial.WEST) ? Pearl.PLACED : Pearl.CLAM;
         level.setBlock(pearlBlock(), pearl == Pearl.CLAM ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.WHITE_TERRACOTTA.defaultBlockState(), 3);
         spawned = false;
+        spawnedFor = 0;
         missing = 0;
         UNDER.clear();
         lastPhase = null;
@@ -351,6 +384,7 @@ public final class TideGarden {
         missing = 0;
         UNDER.clear();
         spawned = false;
+        spawnedFor = 0;
         lastPhase = null;
     }
 

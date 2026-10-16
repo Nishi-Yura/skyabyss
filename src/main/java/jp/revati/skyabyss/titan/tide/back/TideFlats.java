@@ -276,6 +276,15 @@ public final class TideFlats {
                 NESTS[site] = nest.getUUID();
                 buildNest(level, site, false);
             }
+            // 巣の強さは、干潟に入ってきた人数に合わせて上げる (下げない)。前は巣ができたとき (人がまだ前室にいるうち) に数え、
+            // 二人で入っても一人の強さのままだった。削った割合は変えない
+            float want = ReefNest.BASE_HEALTH * (1 + 0.6f * (people - 1));
+            float max = (float) nest.getAttribute(Attributes.MAX_HEALTH).getBaseValue();
+            if (want > max + 0.5f) {
+                float frac = nest.getHealth() / max;
+                nest.getAttribute(Attributes.MAX_HEALTH).setBaseValue(want);
+                nest.setHealth(want * frac);
+            }
             if (!open) {
                 NEST_TIMER[site] = 40;
                 continue;

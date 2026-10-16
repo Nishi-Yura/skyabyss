@@ -1,0 +1,31 @@
+# 潮殻の背の直し (光の井戸の穴・庭の枯れ珊瑚) を撮る。./gradlew runShots -Pscript=tools/shots/tide_back_fix.txt
+# 出力: run/shots/tide_back_fix/shots/tide_back_fix/*.png → docs/review/tide_back_fix_*.png
+world shots flat
+size 1280 720
+timeout 600
+render 12
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+hud off
+cmd skyabyss dev arrive tide_back
+waitchunks
+# 甲羅の西の斜面の光の井戸 (-55, -6)。外 (西の低い側) から見る: 横腹が開かず、ガラスで地表まで埋まっている
+camera skyabyss:tide_back -63 112 -5 270 30
+waitchunks
+shot tide_back_fix_well_outside
+# 同じ井戸を庭の天井の下から見上げる
+camera skyabyss:tide_back -54 80 -9 0 -60
+waitchunks
+shot tide_back_fix_well_inside
+# 珊瑚の庭 (壁の上の枯れた珊瑚の扇。水に浸かった形ではなく乾いた形)
+camera skyabyss:tide_back -24 78 10 120 25
+waitchunks
+shot tide_back_fix_garden
+# 甲羅の上へ出る段の口 (-46〜-45, 107, 42)。検査で口に数えられる、わざと開けた口
+camera skyabyss:tide_back -40 112 36 135 40
+waitchunks
+shot tide_back_fix_top_stair
+quit
