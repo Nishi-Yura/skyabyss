@@ -30,7 +30,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 装飾の枠の入口。ほかの担当 (装備の効果、巨神の装備) もここを通す。
 //  - worn: 枠に付けていて、必要レベルに届いている品だけが効く (持ち物にあるだけでは効かない)
 //  - 護符は B キー (UseCharmPayload) で使う。右クリックで手から枠へ付ける (装飾も同じ)
-//  - 死んだとき: 持ち物と同じに落とす。keepInventory と、岩鯨の背 (持ち物を預かる仕組みが落とす前に止める) では残る
+//  - 死んだとき: 持ち物と同じに落とす。keepInventory と、四体の背 (持ち物を預かる仕組みが落とす前に止める) では残る
 //  - 枠を作る前のセーブ: 持ち物にある装飾品を、一度だけ空いた枠へ移す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Accessories {
@@ -192,11 +192,15 @@ public final class Accessories {
     }
 
     // ---------------------------------------------------------------- 死んだとき
-    // 落とすかどうか: keepInventory なら落とさない。岩鯨の背では、預かりの仕組み (TitanBackTrials) が落とす前に止める
+    // 落とすかどうか: keepInventory なら落とさない。どの巨神の背でも、預かりの仕組み (TitanBackTrials) が落とす前に止める
     // (止められた LivingDropsEvent はここに届かないので、枠の中身は copyOnDeath で残る)
     public static boolean keepsOnDeath(ServerPlayer player) {
-        return player.serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)
-                || player.level().dimension() == TitanTravel.TITAN_BACK;
+        return player.serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || keepsInDimension(player.level().dimension());
+    }
+
+    // 背中のどれか (岩鯨・潮殻・雷翼・余燼。TitanBacks の一覧) なら、倒れても落とさない
+    public static boolean keepsInDimension(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension) {
+        return jp.revati.skyabyss.titan.TitanBacks.isBack(dimension);
     }
 
     // 枠の中身を足もとへ落とす品にして返し、枠を空にする (消滅の呪いの品は消える)

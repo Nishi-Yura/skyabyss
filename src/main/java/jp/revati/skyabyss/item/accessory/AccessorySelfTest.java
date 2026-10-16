@@ -174,6 +174,15 @@ public final class AccessorySelfTest {
             check(f, drops.size() == 3 && data.isEmpty(), "death drops " + drops.size() + " (want 3) and slots should empty");
             SkyAbyss.LOGGER.info("[selftest] accessory: keepInventory/back keeps={} (overworld), {} drops", keep, drops.size());
 
+            // ---- 四体の背中では倒れても落とさない (岩鯨・潮殻・雷翼・余燼)。地上・ネザーでは落とす
+            for (net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> back : List.of(jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK,
+                    jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK, jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK,
+                    jp.revati.skyabyss.titan.ember.EmberIds.BACK)) {
+                check(f, Accessories.keepsInDimension(back), "accessories would drop on death in " + back.location());
+            }
+            check(f, !Accessories.keepsInDimension(net.minecraft.world.level.Level.OVERWORLD) && !Accessories.keepsInDimension(net.minecraft.world.level.Level.NETHER),
+                    "accessories would be kept on death outside the backs");
+
             // ---- 前のセーブ: 持ち物の装飾品を一度だけ枠へ (必要 Lv に届かない補強板は残る)
             data.migrated = false;
             setLevel(p, 8);
