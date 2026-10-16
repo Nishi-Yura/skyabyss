@@ -286,6 +286,8 @@ public final class GrowthRewards {
                     int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
                     Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
                 }
+                // サブクエストの「試練を踏破する」(居合わせた人と、同じ背中の仲間。quest/free)
+                jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
             }
         }
     }

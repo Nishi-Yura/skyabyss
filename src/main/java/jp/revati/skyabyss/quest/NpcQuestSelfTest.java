@@ -164,7 +164,7 @@ public final class NpcQuestSelfTest {
                 }
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
-            boolean started = q.startWhen() != null || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            boolean started = q.startWhen() != null || q.board() || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
@@ -273,6 +273,15 @@ public final class NpcQuestSelfTest {
             JsonObject lang = json("/assets/skyabyss_npc/lang/" + code + ".json", failures);
             if (lang == null) {
                 continue;
+            }
+            // 自由なモードのサブクエストの文は skyabyss_quest に置いた (skyabyss_npc は別の担当が直すため)
+            JsonObject extra = json("/assets/skyabyss_quest/lang/" + code + ".json", failures);
+            if (extra != null) {
+                extra.entrySet().forEach(e -> {
+                    if (!lang.has(e.getKey())) {
+                        lang.add(e.getKey(), e.getValue());
+                    }
+                });
             }
             for (String key : keys) {
                 if (!lang.has(key) || lang.get(key).getAsString().isBlank()) {

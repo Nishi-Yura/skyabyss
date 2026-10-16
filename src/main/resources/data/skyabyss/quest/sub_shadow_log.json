@@ -1,0 +1,36 @@
+{
+  "category": "sub",
+  "order": 40,
+  "giver": "skyabyss:storyteller",
+  "stages": [
+    {
+      "id": "watch",
+      "objectives": [
+        {
+          "id": "see",
+          "type": "signal",
+          "target": "sky_shadow_seen",
+          "count": 2,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "fq_shadow_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "affinity": {
+      "skyabyss:storyteller": 5
+    }
+  }
+}

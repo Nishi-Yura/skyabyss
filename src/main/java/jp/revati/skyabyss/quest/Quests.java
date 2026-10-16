@@ -30,12 +30,29 @@ public final class Quests {
     // ---------------------------------------------------------------- 始める
     // 始めたら true。定義がない・もう始まっている・終えているなら false
     public static boolean start(ServerPlayer player, String questId) {
+        return start(player, questId, null);
+    }
+
+    // origin: 受けた場所 (言伝ての板など)。繰り返すクエストは、前の周期に終えていれば受け直せる (記録を新しくする)
+    public static boolean start(ServerPlayer player, String questId, @Nullable net.minecraft.core.BlockPos origin) {
         QuestDef def = QuestManager.quest(questId);
         QuestLog log = QuestLog.of(player);
-        if (def == null || log.quests.containsKey(questId)) {
+        if (def == null) {
             return false;
         }
+        QuestLog.Entry old = log.quests.get(questId);
+        if (old != null) {
+            if (!def.repeats() || !old.done || Repeats.takenThisCycle(player.server, def, old)) {
+                return false;
+            }
+            log.quests.remove(questId);
+        }
         QuestLog.Entry entry = new QuestLog.Entry(def.stages().get(0).objectives().size(), player.server.overworld().getGameTime());
+        entry.cycle = Repeats.cycle(player.server, def.repeat());
+        if (origin != null) {
+            entry.origin = origin.asLong();
+            entry.originDim = player.level().dimension().location().toString();
+        }
         log.quests.put(questId, entry);
         // メインは必ず追跡する。サブは何も追跡していないときだけ
         if (def.main() || log.tracked.isEmpty() || QuestLog.of(player).entry(log.tracked) == null) {
@@ -65,6 +82,60 @@ public final class Quests {
     // 生き物が倒れた。倒した人なら距離を問わず、そうでなければ目的の半径の内にいたときだけ数える
     public static void onKill(ServerPlayer player, String entityId, boolean killer, double distance) {
         bump(player, (def, stage, ob) -> ob.type().equals("kill") && ob.targets().contains(entityId) && (killer || distance <= ob.radius()));
+    }
+
+    // パーティの仲間が倒した (経験値の分け前と同じ条件の仲間。party の目的だけを数える)
+    public static void onKillShared(ServerPlayer player, String entityId) {
+        bump(player, (def, stage, ob) -> ob.type().equals("kill") && ob.party() && ob.targets().contains(entityId));
+    }
+
+    // 合図を、本人と、居合わせなかったパーティの仲間 (party の目的だけ) に送る。present は合図を受ける本人たち
+    public static void signalWithParty(net.minecraft.server.level.ServerLevel level, java.util.Collection<ServerPlayer> present, String signal) {
+        signalWithParty(level, present, signal, id -> level.getServer().getPlayerList().getPlayer(id));
+    }
+
+    public static void signalWithParty(net.minecraft.server.level.ServerLevel level, java.util.Collection<ServerPlayer> present, String signal,
+                                java.util.function.Function<java.util.UUID, ServerPlayer> lookup) {
+        present.forEach(p -> signal(p, signal));
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, present, lookup)) {
+            bump(mate, (def, stage, ob) -> ob.type().equals("signal") && ob.party() && ob.targets().contains(signal));
+        }
+    }
+
+    // 品を納める (言伝ての板を開いたとき、依頼主に話したとき)。今の段階の turn_in の目的で、手持ちが足りるものを受け取って済ませる。
+    // giver が null なら板 (板に出すクエストだけ)、役なら、その人が依頼主のクエストだけ。納めたクエストの ID を返す
+    public static List<String> turnIn(ServerPlayer player, @Nullable String giver) {
+        QuestLog log = QuestLog.of(player);
+        List<String> done = new java.util.ArrayList<>();
+        for (Map.Entry<String, QuestLog.Entry> e : List.copyOf(log.quests.entrySet())) {
+            QuestLog.Entry entry = e.getValue();
+            QuestDef def = QuestManager.quest(e.getKey());
+            if (def == null || entry.done || entry.stage >= def.stages().size()) {
+                continue;
+            }
+            if (giver == null ? !def.board() : !giver.equals(def.giver())) {
+                continue;
+            }
+            QuestDef.Stage stage = def.stages().get(entry.stage);
+            ensureSize(entry, stage);
+            boolean hit = false;
+            for (int i = 0; i < stage.objectives().size(); i++) {
+                QuestDef.Objective ob = stage.objectives().get(i);
+                if (ob.type().equals("turn_in") && entry.progress[i] < ob.count()
+                        && QuestItems.take(player, ob.targets().get(0), ob.token(), ob.count())) {
+                    entry.progress[i] = ob.count();
+                    hit = true;
+                }
+            }
+            if (hit) {
+                done.add(def.id());
+                advance(player, def, entry, false);
+            }
+        }
+        if (!done.isEmpty()) {
+            sync(player);
+        }
+        return done;
     }
 
     interface Match {
@@ -138,18 +209,17 @@ public final class Quests {
             QuestDef.Objective ob = stage.objectives().get(i);
             int value = switch (ob.type()) {
                 case "lore" -> (int) ob.targets().stream().filter(t -> Lore.state(player).has(t)).count();
-                case "collect" -> {
-                    Item item = Condition.item(ob.targets().get(0));
-                    yield item == null ? 0 : player.getInventory().countItem(item);
-                }
+                case "collect" -> QuestItems.count(player, ob.targets().get(0), ob.token());
+                case "herd" -> slow ? herded(player, entry, ob) : entry.progress(i);
                 case "visit" -> ob.targets().contains(player.level().dimension().location().toString()) ? ob.count() : entry.progress(i);
                 case "condition" -> ob.condition().test(StoryContext.of(player)) ? ob.count() : 0;
                 case "near" -> slow ? (near(player, ob) ? ob.count() : entry.progress(i)) : entry.progress(i);
                 default -> entry.progress(i);
             };
             value = Math.min(value, ob.count());
-            // 場所と近くは、一度満たせば戻らない (離れても済んだまま)
-            if ((ob.type().equals("visit") || ob.type().equals("near")) && value < entry.progress(i)) {
+            // 場所と近くは、一度満たせば戻らない (離れても済んだまま)。連れ戻しは、そろった時点で済む (途中の数は今いる数)
+            if ((ob.type().equals("visit") || ob.type().equals("near")
+                    || (ob.type().equals("herd") && entry.progress(i) >= ob.count())) && value < entry.progress(i)) {
                 value = entry.progress(i);
             }
             if (value != entry.progress[i]) {
@@ -158,6 +228,28 @@ public final class Quests {
             }
         }
         return changed;
+    }
+
+    // 受けた場所 (板) の radius 以内に、その生き物が count 頭いる。本人も近く (32 以内) にいるときだけ数える
+    // (遠くの村で、たまたま集まっている羊で済まないように)
+    static int herded(ServerPlayer player, QuestLog.Entry entry, QuestDef.Objective ob) {
+        if (entry.origin == QuestLog.Entry.NO_ORIGIN || !player.level().dimension().location().toString().equals(entry.originDim)) {
+            return 0;
+        }
+        net.minecraft.core.BlockPos at = net.minecraft.core.BlockPos.of(entry.origin);
+        if (player.distanceToSqr(at.getX() + 0.5, at.getY(), at.getZ() + 0.5) > 32 * 32) {
+            return 0;
+        }
+        int n = 0;
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(at).inflate(ob.radius(), 4, ob.radius());
+        for (String target : ob.targets()) {
+            ResourceLocation key = ResourceLocation.tryParse(target);
+            EntityType<?> type = key == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(key).orElse(null);
+            if (type != null) {
+                n += player.level().getEntities(type, box, Entity::isAlive).size();
+            }
+        }
+        return n;
     }
 
     private static boolean near(ServerPlayer player, QuestDef.Objective ob) {
@@ -227,15 +319,21 @@ public final class Quests {
         entry.progress = new int[0];
         entry.finished = player.server.overworld().getGameTime();
         QuestDef.Reward reward = def.reward();
-        // 報酬は一人一回 (コマンドでやり直したり、ループで戻ったりしても二度は渡さない)
-        if (Growth.discover(player, "quest:" + def.id())) {
+        // 報酬は一人一回 (コマンドでやり直したり、ループで戻ったりしても二度は渡さない)。
+        // 繰り返すクエストは周期ごとに一回 (記録を消して同じ日に受け直しても、二度は渡さない)
+        QuestLog log0 = QuestLog.of(player);
+        boolean pay = def.repeats() ? log0.claimed(def.id()) != entry.cycle : Growth.discover(player, "quest:" + def.id());
+        if (pay) {
+            if (def.repeats()) {
+                log0.claimed.put(def.id(), entry.cycle);
+            }
             if (reward.xp() > 0) {
                 Growth.addXp(player, reward.xp(), def.titleKey());
             }
             for (QuestDef.ItemReward r : reward.items()) {
                 Item item = Condition.item(r.item());
                 if (item != null) {
-                    give(player, new ItemStack(item, r.count()));
+                    give(player, QuestItems.make(item, r.count(), r.token(), r.name(), r.lore()));
                 }
             }
             reward.affinity().forEach((role, amount) -> Affinity.add(player, role, amount));

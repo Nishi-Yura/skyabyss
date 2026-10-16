@@ -27,6 +27,7 @@
 | 1章の空 雲の目: `textures/environment/sky_eye/{sclera,iris,lid,lid_glow,patch}.png` | `rough/sky_eye.py --install` | ラフ 3 案と夜空の比較は `docs/review/sky_eye_roughs/`、採用は `CHOSEN` (今は b 月蝕の瞳)。`--install` なしなら docs にだけ書く。描画の割合を変えたら `CloudEyeRenderer.java` と値をそろえる |
 | `sounds/sky_ch1/*.ogg` (削られた山頂・雲の目の音) | `gen_chapter_sky_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 巨神での移動: `textures/item/stone_whale_call.png`、`textures/block/titan_waymark_{front,side,base,cap}.png`、`textures/gui/travel/chart.png`、`sounds/titan/travel/*.ogg` | `gen_titan_travel_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。ラフ 3 案と比較画像は `docs/review/titan_travel_roughs/`、採用は `ADOPTED_CALL` / `ADOPTED_MARK`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `TravelChartScreen.java` と値をそろえる |
+| 言伝ての板: `models/block/message_board.json`、`models/item/message_board.json`、`blockstates/message_board.json`、`textures/block/message_board_*.png` (32x32) | `gen_message_board.py` | 採用は既定で A。`--option B` などで別案に差し替えられる。ラフ 3 案と比較画像は `docs/review/board_roughs/`。`--roughs-only` なら docs にだけ書く |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
 `rough/` のそのほか (`armor*.py`、`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。

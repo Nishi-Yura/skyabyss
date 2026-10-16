@@ -63,15 +63,38 @@ public final class QuestEvents {
             return;
         }
         ServerPlayer killer = event.getSource().getEntity() instanceof ServerPlayer p ? p : null;
+        credit(level, dead, id, killer, uuid -> level.getServer().getPlayerList().getPlayer(uuid));
+    }
+
+    // 倒した生き物の目的を数える。lookup はパーティの仲間を UUID から引く (自己テストでは偽のプレイヤーを渡す)
+    public static void credit(ServerLevel level, LivingEntity dead, String id, ServerPlayer killer,
+                       java.util.function.Function<java.util.UUID, ServerPlayer> lookup) {
         Set<ServerPlayer> players = new LinkedHashSet<>(level.getEntitiesOfClass(ServerPlayer.class,
                 dead.getBoundingBox().inflate(KILL_SEARCH), p -> !p.isSpectator()));
         if (killer != null && killer.level() == level) {
             players.add(killer);
         }
+        // 居合わせた人 (倒した人と、ふつうの半径 32 の内) のパーティの仲間は、経験値の分け前と同じ条件 (64 ブロック以内、
+        // 同じ巨神の背中なら距離を問わない、10 レベルを超えて低い人は除く) で、party の目的を数える (10 の 8.5 節)
+        java.util.List<ServerPlayer> present = new java.util.ArrayList<>();
         for (ServerPlayer p : players) {
-            Quests.onKill(p, id, p == killer, p.distanceTo(dead));
+            if (p == killer || p.distanceTo(dead) <= SHARE_PRESENT) {
+                present.add(p);
+            }
+        }
+        java.util.List<ServerPlayer> mates = jp.revati.skyabyss.party.Parties.absentMates(level, present, lookup);
+        for (ServerPlayer p : players) {
+            if (!mates.contains(p)) {
+                Quests.onKill(p, id, p == killer, p.distanceTo(dead));
+            }
+        }
+        for (ServerPlayer mate : mates) {
+            // 一度だけ数える (仲間として party の目的だけ。party でない目的は、居合わせた人だけのもの)
+            Quests.onKillShared(mate, id);
         }
     }
+
+    private static final double SHARE_PRESENT = 32;
 
     // その生き物を倒す目的が、だれかの進行中の段階にあるか (毎回の死亡で全員を回さないため)
     private static boolean anyKillObjective(ServerLevel level, String id) {

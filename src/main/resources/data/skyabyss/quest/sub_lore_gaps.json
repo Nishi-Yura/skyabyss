@@ -1,0 +1,80 @@
+{
+  "category": "sub",
+  "order": 42,
+  "giver": "skyabyss:storyteller",
+  "stages": [
+    {
+      "id": "prologue",
+      "objectives": [
+        {
+          "id": "lore",
+          "type": "lore",
+          "targets": [
+            "prologue/the_book",
+            "prologue/shadow",
+            "prologue/counting_song",
+            "prologue/seventh_night",
+            "prologue/shaved_peak",
+            "prologue/watcher",
+            "prologue/shadow_heading"
+          ]
+        }
+      ],
+      "xp": 40
+    },
+    {
+      "id": "chapter1",
+      "objectives": [
+        {
+          "id": "lore",
+          "type": "lore",
+          "targets": [
+            "chapter1/stone_whale",
+            "chapter1/sky_ruins",
+            "chapter1/inscription_west",
+            "chapter1/inscription_east",
+            "chapter1/inscription_below",
+            "chapter1/inscription_heart",
+            "chapter1/inscription_vault",
+            "chapter1/captain",
+            "chapter1/heart_stilled",
+            "chapter1/sky_key",
+            "chapter1/carried_people",
+            "chapter1/return_fire",
+            "chapter1/whale_song",
+            "chapter1/tide_hours"
+          ],
+          "count": 11
+        }
+      ],
+      "xp": 60
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "fq_gaps_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150,
+    "items": [
+      {
+        "item": "minecraft:blue_dye",
+        "count": 1,
+        "name": "item.skyabyss.keepsake.indigo_bookmark",
+        "lore": [
+          "item.skyabyss.keepsake.indigo_bookmark.lore"
+        ]
+      }
+    ],
+    "affinity": {
+      "skyabyss:storyteller": 5
+    }
+  }
+}

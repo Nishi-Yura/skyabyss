@@ -1,0 +1,42 @@
+{
+  "category": "sub",
+  "order": 61,
+  "repeat": "daily",
+  "board": true,
+  "stages": [
+    {
+      "id": "watch",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "targets": [
+            "minecraft:zombie",
+            "minecraft:skeleton",
+            "minecraft:spider",
+            "minecraft:creeper",
+            "minecraft:husk",
+            "minecraft:stray",
+            "minecraft:drowned",
+            "minecraft:zombie_villager",
+            "minecraft:witch"
+          ],
+          "count": 6
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 40,
+    "items": [
+      {
+        "item": "minecraft:torch",
+        "count": 8
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 2
+      }
+    ]
+  }
+}

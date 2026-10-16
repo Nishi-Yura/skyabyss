@@ -1,0 +1,50 @@
+{
+  "category": "sub",
+  "order": 41,
+  "giver": "skyabyss:storyteller",
+  "stages": [
+    {
+      "id": "deliver",
+      "objectives": [
+        {
+          "id": "give",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "fq_c_parcel2"
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "objectives": [
+        {
+          "id": "give",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "fq_parcel_back2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 50,
+    "items": [
+      {
+        "item": "minecraft:bone",
+        "count": 1,
+        "name": "item.skyabyss.keepsake.whalebone_clasp",
+        "lore": [
+          "item.skyabyss.keepsake.whalebone_clasp.lore"
+        ]
+      },
+      {
+        "item": "skyabyss:cloud_jerky",
+        "count": 2
+      }
+    ],
+    "affinity": {
+      "skyabyss:storyteller": 5,
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

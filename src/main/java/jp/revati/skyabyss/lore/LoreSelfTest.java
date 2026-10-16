@@ -76,8 +76,9 @@ public final class LoreSelfTest {
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().equals("chapter1"))).count();
-        if (early < 12 || early > 20) {
-            failures.add("prologue + chapter 1 should have 12-20 entries, found " + early);
+        // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
+        if (early < 12 || early > 24) {
+            failures.add("prologue + chapter 1 should have 12-24 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue and chapter 1 may be written yet (" + unlockable + " unlockable)");
@@ -359,8 +360,18 @@ public final class LoreSelfTest {
         }
     }
 
+    // 伝承の文は skyabyss_lore に。サブクエストが記す項目 (柱の刻み目・干潮の刻) の文は skyabyss_quest にある
     private static JsonObject lang(String code, List<String> failures) {
-        return json("/assets/skyabyss_lore/lang/" + code + ".json", failures);
+        JsonObject lang = json("/assets/skyabyss_lore/lang/" + code + ".json", failures);
+        JsonObject quest = json("/assets/skyabyss_quest/lang/" + code + ".json", failures);
+        if (lang != null && quest != null) {
+            quest.entrySet().forEach(e -> {
+                if (!lang.has(e.getKey())) {
+                    lang.add(e.getKey(), e.getValue());
+                }
+            });
+        }
+        return lang;
     }
 
     private static JsonObject json(String path, List<String> failures) {
