@@ -1,0 +1,133 @@
+# Heart models after the 0.25 re-sculpt (docs/design/15_high_poly.md, assignment 3)
+# ./gradlew runShots -Pscript=tools/shots/hp_hearts.txt [-PshotsName=hp_hearts_after]
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+hud off
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:stone_whale_heart 0 -57 0 {NoAI:1b,Health:450f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot stone_p1_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot stone_p1_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:stone_whale_heart 0 -57 0 {NoAI:1b,Health:248f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot stone_p2_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot stone_p2_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:stone_whale_heart 0 -57 0 {NoAI:1b,Health:90f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot stone_p3_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot stone_p3_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:tide_heart 0 -57 0 {NoAI:1b,Health:540f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot tide_p1_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot tide_p1_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:tide_heart 0 -57 0 {NoAI:1b,Health:297f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot tide_p2_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot tide_p2_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:tide_heart 0 -57 0 {NoAI:1b,Health:108f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot tide_p3_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot tide_p3_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:thunder_wing_heart 0 -57 0 {NoAI:1b,Health:650f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot storm_p1_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot storm_p1_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:thunder_wing_heart 0 -57 0 {NoAI:1b,Health:358f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot storm_p2_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot storm_p2_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:thunder_wing_heart 0 -57 0 {NoAI:1b,Health:130f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot storm_p3_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot storm_p3_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:ember_heart 0 -57 0 {NoAI:1b,Health:790f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot ember_p1_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot ember_p1_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:ember_heart 0 -57 0 {NoAI:1b,Health:435f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot ember_p2_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot ember_p2_three_quarter
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:ember_heart 0 -57 0 {NoAI:1b,Health:158f,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -56 9 180 0
+waitchunks
+wait 80
+shot ember_p3_front
+camera minecraft:overworld 5 -55 6 150 10
+wait 15
+shot ember_p3_three_quarter
