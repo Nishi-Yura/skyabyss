@@ -49,7 +49,7 @@ public final class Hearth {
     public static final float MOTH_FROM = 60f;
     public static final int CARRIER_INTERVAL = 160;
     public static final int MOTH_INTERVAL = 600;
-    public static final double CARRIER_ARRIVE = 3.0;
+    public static final double CARRIER_ARRIVE = 4.0;
     public static final double MOTH_TOUCH = 1.8;
     public static final int MOTH_TOUCH_GAP = 30;
     public static final float COAL_HEAT = 1f;
@@ -59,7 +59,6 @@ public final class Hearth {
     private static boolean spawned;
     private static long lastCarrier;
     private static long lastMoths;
-    private static boolean relit;
     private static final Map<UUID, Long> MOTH_TOUCHED = new HashMap<>();
 
     private Hearth() {
@@ -69,7 +68,6 @@ public final class Hearth {
         strength = START;
         done = false;
         spawned = false;
-        relit = false;
         MOTH_TOUCHED.clear();
         HearthVents.clearMemory();
     }
@@ -158,7 +156,7 @@ public final class Hearth {
     private static void complete(ServerLevel level) {
         done = true;
         EmberTrials.clearMobs(level, EmberBackLayout.SOUTH);
-        EmberBackTrials.markReady(level, EmberBackState.Trial.SOUTH);
+        EmberTrials.markReady(level, EmberBackState.Trial.SOUTH);
         level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_FEED.get(), SoundSource.BLOCKS, 2f, 0.6f);
         level.sendParticles(ParticleTypes.FLAME, HEARTH.getX() + 0.5, HEARTH.getY() + 1.2, HEARTH.getZ() + 0.5, 60, 0.4, 0.8, 0.4, 0.1);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
@@ -206,7 +204,7 @@ public final class Hearth {
     }
 
     // 1 秒ごと: 火が弱まる。近くの人へ火の強さを出す
-    private static void second(ServerLevel level, List<ServerPlayer> in) {
+    static void second(ServerLevel level, List<ServerPlayer> in) {
         if (!done) {
             add(level, -decayPerSecond(in.size()));
         }
@@ -231,10 +229,11 @@ public final class Hearth {
     }
 
     // 灰運びは火床へ歩く。着いたら灰をかける。人が近ければそちらと戦う
-    private static void carriers(ServerLevel level) {
-        Vec3 target = Vec3.atBottomCenterOf(HEARTH);
+    static void carriers(ServerLevel level) {
+        Vec3 hearth = Vec3.atBottomCenterOf(HEARTH);
+        Vec3 target = Vec3.atBottomCenterOf(HEARTH.north(2));
         for (AshThrall t : carriersAlive(level)) {
-            if (t.distanceToSqr(target) < CARRIER_ARRIVE * CARRIER_ARRIVE) {
+            if (t.distanceToSqr(hearth) < CARRIER_ARRIVE * CARRIER_ARRIVE) {
                 t.removeTag(CARRIER_TAG);
                 douse(level);
                 continue;
@@ -248,7 +247,7 @@ public final class Hearth {
     }
 
     // 蛾が火床のそばに来たら、触れた火を −2 する (一匹 1.5 秒に一度)
-    private static void mothsTouchHearth(ServerLevel level, long now) {
+    static void mothsTouchHearth(ServerLevel level, long now) {
         Vec3 c = Vec3.atCenterOf(HEARTH);
         for (EmberMoth m : level.getEntitiesOfClass(EmberMoth.class, EmberBackLayout.SOUTH.aabb())) {
             if (m.distanceToSqr(c) < MOTH_TOUCH * MOTH_TOUCH) {
@@ -264,7 +263,7 @@ public final class Hearth {
         }
     }
 
-    private static void spawnWaves(ServerLevel level, List<ServerPlayer> in, long now) {
+    static void spawnWaves(ServerLevel level, List<ServerPlayer> in, long now) {
         int n = Math.max(1, Math.min(4, in.size()));
         if (!spawned) {
             spawned = true;

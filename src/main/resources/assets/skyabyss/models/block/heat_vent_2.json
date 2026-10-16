@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "skyabyss:block/heat_vent_top_2",
+    "side": "skyabyss:block/heat_vent_side",
+    "bottom": "skyabyss:block/heat_vent_side",
+    "particle": "skyabyss:block/heat_vent_side"
+  }
+}

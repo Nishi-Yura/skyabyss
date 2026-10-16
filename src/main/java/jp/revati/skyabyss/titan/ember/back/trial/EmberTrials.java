@@ -51,7 +51,30 @@ public final class EmberTrials {
 
     private static final Map<EmberBackState.Trial, Boolean> SIGNALLED = new EnumMap<>(EmberBackState.Trial.class);
 
+    // 自己テスト用: true のあいだ、石を鳴らせるようにする・初めての打つ順を使った記録を、ワールドに書かない (呼ばれた回数だけ数える)
+    public static boolean dryRun;
+    public static final List<EmberBackState.Trial> READY_CALLS = new ArrayList<>();
+    public static int firstForgeCalls;
+
     private EmberTrials() {
+    }
+
+    // 試練が済んだ (石を鳴らせるようにする)
+    static void markReady(ServerLevel level, EmberBackState.Trial trial) {
+        if (dryRun) {
+            READY_CALLS.add(trial);
+        } else {
+            jp.revati.skyabyss.titan.ember.back.EmberBackTrials.markReady(level, trial);
+        }
+    }
+
+    static void markFirstForgeUsed(ServerLevel level) {
+        EmberBackState state = EmberBackState.get(level);
+        if (dryRun) {
+            firstForgeCalls++;
+        } else if (!state.firstForgeUsed()) {
+            state.markFirstForgeUsed();
+        }
     }
 
     // ---------------------------------------------------------------- 道具
@@ -220,8 +243,8 @@ public final class EmberTrials {
     }
 
     // 試練の品を、その部屋の外へ持ち出していないか (1 秒に一度)
-    private static void patrol(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+    static void patrol(ServerLevel level, List<ServerPlayer> players) {
+        for (ServerPlayer p : players) {
             if (!p.isAlive()) {
                 continue;
             }
@@ -253,7 +276,7 @@ public final class EmberTrials {
         Hearth.tick(level);
         if (level.getGameTime() % 20 == 0) {
             if (!level.players().isEmpty()) {
-                patrol(level);
+                patrol(level, level.players());
             }
             tickSignals(level);
         }

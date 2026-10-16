@@ -142,6 +142,14 @@ public final class AshPath {
         return age >= Math.max(20, life - CRACK_BEFORE) ? 1 : 0;
     }
 
+    static List<BlockPos> crustKeys() {
+        return new ArrayList<>(CRUSTS.keySet());
+    }
+
+    static void setLastStand(UUID id, BlockPos pos) {
+        LAST_STAND.put(id, pos);
+    }
+
     static void clearMemory() {
         CRUSTS.clear();
         LAST_STAND.clear();
@@ -296,6 +304,10 @@ public final class AshPath {
         p.fallDistance = 0;
         p.setDeltaMovement(Vec3.ZERO);
         p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), p.getXRot());
+        if (p.distanceToSqr(to.getX() + 0.5, to.getY(), to.getZ() + 0.5) > 1.0) {
+            // 位置合わせができない人 (接続のない偽のプレイヤーなど) は、そのまま置く
+            p.setPos(to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
+        }
         p.invulnerableTime = 0;
         p.hurt(EmberTrials.damage(level, EmberIds.ENGULFED, null), ENGULF_DAMAGE);
         EmberHeat.add(p, ENGULF_HEAT, EmberHeat.Reason.ENGULFED);
@@ -306,7 +318,7 @@ public final class AshPath {
     static void tick(ServerLevel level) {
         long now = level.getGameTime();
         if (!CRUSTS.isEmpty()) {
-            tickCrusts(level, now);
+            tickCrusts(level, now, level.players());
             if (now % 5 == 0) {
                 mothTouch(level, now);
             }
@@ -319,7 +331,7 @@ public final class AshPath {
             trackStand(level, p);
             if (FAR_SHORE.contains(p.position()) && !EmberBackTrials.sleeping(level, EmberIds.WEST)
                     && !EmberBackState.get(level).ready(EmberBackState.Trial.WEST)) {
-                EmberBackTrials.markReady(level, EmberBackState.Trial.WEST);
+                EmberTrials.markReady(level, EmberBackState.Trial.WEST);
                 p.sendSystemMessage(ModText.lore(EmberIds.LANG_WEST + "far_shore"));
             }
         }
@@ -350,8 +362,7 @@ public final class AshPath {
         return false;
     }
 
-    private static void tickCrusts(ServerLevel level, long now) {
-        List<ServerPlayer> players = level.players();
+    static void tickCrusts(ServerLevel level, long now, List<ServerPlayer> players) {
         Iterator<Map.Entry<BlockPos, Crust>> it = CRUSTS.entrySet().iterator();
         List<BlockPos> sunk = new ArrayList<>();
         while (it.hasNext()) {
@@ -394,7 +405,7 @@ public final class AshPath {
     }
 
     // 火の粉蛾が殻に触れたら、その殻は 3 秒早く崩れる (最短 5 秒は残る)
-    private static void mothTouch(ServerLevel level, long now) {
+    static void mothTouch(ServerLevel level, long now) {
         for (EmberMoth moth : level.getEntitiesOfClass(EmberMoth.class, EmberBackLayout.WEST.aabb())) {
             BlockPos p = new BlockPos(moth.getBlockX(), LAVA_Y, moth.getBlockZ());
             Crust c = CRUSTS.get(p);

@@ -61,6 +61,8 @@ public final class Forge {
     public static final int KEY_TICKS = 200;
     public static final float KEY_HEAT = 20f;
     public static final int PRESS_GAP = 6;
+    // 灰被りが炉に灰をかけられる距離 (炉の口の中心から)
+    public static final double DOUSE_REACH = 5.5;
     public static final int DOOR_WARNING_TICKS = 100;
     // 帯の色 (0 黒 1 赤 2 橙 3 黄 4 白)
     public static final int BLACK = 0;
@@ -283,9 +285,7 @@ public final class Forge {
             player.displayClientMessage(ModText.deny(EmberIds.LANG_EAST + "inventory_full"), true);
             return StrikeResult.FULL;
         }
-        if (!state.firstForgeUsed()) {
-            state.markFirstForgeUsed();
-        }
+        EmberTrials.markFirstForgeUsed(level);
         level.playSound(null, ANVIL, EmberTrialSetup.ANVIL_STRIKE.get(), SoundSource.BLOCKS, 1f, 1f);
         int band = bandOf(heat);
         if (band == WHITE) {
@@ -387,7 +387,7 @@ public final class Forge {
     }
 
     // 扉の 3 枚の壁を、奥へ向かって一枚ずつ灯して開ける。そのあと 5 秒の予告
-    private static void tickDoor(ServerLevel level) {
+    static void tickDoor(ServerLevel level) {
         EmberBackLayout.Box d = EmberBackLayout.SMITH_DOOR;
         if (doorState == 1) {
             if (doorTimer++ % 10 != 0) {
@@ -460,7 +460,7 @@ public final class Forge {
         return !level.getEntitiesOfClass(LivingEntity.class, plate, e -> e.isAlive() && !e.isSpectator()).isEmpty();
     }
 
-    private static void pollBellows(ServerLevel level, long now) {
+    static void pollBellows(ServerLevel level, long now) {
         BlockPos[] plates = {BELLOWS_A, BELLOWS_B};
         for (int i = 0; i < 2; i++) {
             boolean pressed = pressedNow(level, plates[i]);
@@ -479,7 +479,7 @@ public final class Forge {
     }
 
     // 焼き入れ前の鍵は 10 秒で割れる。持つ人は光る
-    private static void keys(ServerLevel level, List<ServerPlayer> in, long now) {
+    static void keys(ServerLevel level, List<ServerPlayer> in, long now) {
         for (ServerPlayer p : in) {
             Inventory inv = p.getInventory();
             for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -503,10 +503,10 @@ public final class Forge {
     }
 
     // 灰被りは炉へ向かい、触れる所まで来たら灰をかけて熱を下げる。人が近ければそちらと戦う
-    private static void dousers(ServerLevel level) {
+    static void dousers(ServerLevel level) {
         Vec3 front = Vec3.atBottomCenterOf(FORGE_FRONT);
         for (AshThrall t : thralls(level)) {
-            if (t.distanceToSqr(Vec3.atCenterOf(FORGE)) < 4.5 * 4.5) {
+            if (t.distanceToSqr(Vec3.atCenterOf(FORGE)) < DOUSE_REACH * DOUSE_REACH) {
                 t.removeTag(DOUSER_TAG);
                 douse(level);
                 continue;
@@ -520,7 +520,7 @@ public final class Forge {
     }
 
     // 灰被りの湧き: 最初に人が入ったとき 2 体 (+1 体/人)。いなくなって 40 秒たったら 1 体足す
-    private static void keepThralls(ServerLevel level, List<ServerPlayer> in, long now) {
+    static void keepThralls(ServerLevel level, List<ServerPlayer> in, long now) {
         int n = Math.max(1, Math.min(4, in.size()));
         if (!spawned) {
             spawned = true;
