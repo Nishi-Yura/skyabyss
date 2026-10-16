@@ -39,6 +39,18 @@ public final class MazeBuilder {
         }
     }
 
+    // 正しい道の上の、息継ぎのくぼみを置くマス (マスの北西の隅の水の一段目)
+    public static List<BlockPos> pockets(FloodedMaze maze) {
+        List<int[]> path = maze.solution();
+        List<BlockPos> result = new java.util.ArrayList<>();
+        for (int k = 1; k < path.size() - 1; k++) {
+            if (k % POCKET_EVERY == 0) {
+                result.add(mazeCell(path.get(k)[0], path.get(k)[1]));
+            }
+        }
+        return result;
+    }
+
     // 迷路の部分 (水と壁と仕掛け) だけを掘り直す。試練のリセットのたびに呼ばれる
     public static void buildMaze(BuildKit kit, long seed) {
         FloodedMaze maze = maze(seed);
@@ -71,8 +83,12 @@ public final class MazeBuilder {
         for (int k = 1; k < path.size() - 1; k++) {
             int[] c = path.get(k);
             if (k % POCKET_EVERY == 0) {
-                // 息継ぎのくぼみ: マスの天井を一段くぼませ、一番上を空気にする
+                // 息継ぎのくぼみ: マスの天井を一段くぼませ、上の二段を空気にする。
+                // 通路の水は水源なので、空気と同じ高さでつながっていると、流れる水が空気へ広がって数秒で埋めてしまう。
+                // そこで、このマスへの通路の一番上の段 (空気と同じ高さ) を壁でふさぎ、潜鐘のように空気を閉じ込める。
+                // 下の二段は水源のままなので、通路から潜って入り、浮かび上がって息をつく
                 BlockPos p = mazeCell(c[0], c[1]);
+                sealPocketMouths(kit, maze, c, wall);
                 kit.fill(p.getX(), p.getY() + 2, p.getZ(), p.getX() + 2, p.getY() + 3, p.getZ() + 2, BuildKit.AIR);
                 // 暗い水の中から見つけられるよう、床と天井に青い光をともし、四隅にシーピクルスを置く
                 kit.set(p.getX() + 1, p.getY() - 1, p.getZ() + 1, Blocks.SEA_LANTERN.defaultBlockState());
@@ -155,6 +171,22 @@ public final class MazeBuilder {
         kit.set(hatch.getX(), FLOOR + 1, hatch.getZ(), BuildKit.AIR);
         kit.lantern(hatch.getX() - 2, FLOOR + 1, hatch.getZ());
         kit.lantern(hatch.getX() + 2, FLOOR + 1, hatch.getZ());
+    }
+
+    // 息継ぎのマス c へつながるすべての通路 (正しい道も枝道も) の、一番上の段を壁にする
+    private static void sealPocketMouths(BuildKit kit, FloodedMaze maze, int[] c, BlockState wall) {
+        BlockPos p = mazeCell(c[0], c[1]);
+        int y = p.getY() + 2;
+        for (int[] d : FloodedMaze.DIRS) {
+            if (!maze.linked(c[0], c[1], d[0], d[1])) {
+                continue;
+            }
+            for (int t = 0; t < MAZE_CELL; t++) {
+                int x = d[0] != 0 ? p.getX() + (d[0] > 0 ? MAZE_CELL : -1) : p.getX() + t;
+                int z = d[1] != 0 ? p.getZ() + (d[1] > 0 ? MAZE_CELL : -1) : p.getZ() + t;
+                kit.set(x, y, z, wall);
+            }
+        }
     }
 
     // a から b へ向かう通路を、下へ引く泡の流れで満たす
