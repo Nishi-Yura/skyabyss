@@ -106,6 +106,11 @@ public final class EmberGround {
         return !level.getFluidState(new BlockPos(Mth.floor(x), top - 1, Mth.floor(z))).isEmpty();
     }
 
+    // 海面の高さ。Level.getSeaLevel() は 1.21.1 ではいつも 63 なので、地形の生成の海面を使う (平らな世界は -63)
+    public static int seaLevel(ServerLevel level) {
+        return level.getChunkSource().getGenerator().getSeaLevel();
+    }
+
     // 巨神が出てよい陸か: 読み込まれていて、地表が海面より 2 以上高く、地表が水でなく、海・川のバイオームでない (2.1節)
     public static boolean isLand(ServerLevel level, double x, double z) {
         if (!loaded(level, x, z)) {
@@ -114,7 +119,7 @@ public final class EmberGround {
         int bx = Mth.floor(x);
         int bz = Mth.floor(z);
         int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, bx, bz);
-        if (top < level.getSeaLevel() + 2) {
+        if (top < seaLevel(level) + 2) {
             return false;
         }
         if (!level.getFluidState(new BlockPos(bx, top - 1, bz)).isEmpty()) {

@@ -44,7 +44,7 @@ public final class EmberKeeper {
                 throw new IllegalStateException("Failed to create the ember titan");
             }
             double surface = EmberGround.surfaceY(level, x, z);
-            double y = (Double.isNaN(surface) ? level.getSeaLevel() : surface) - EmberTitanEntity.BURROW_SINK;
+            double y = (Double.isNaN(surface) ? EmberGround.seaLevel(level) : surface) - EmberTitanEntity.BURROW_SINK;
             titan.moveTo(x, y, z, level.random.nextFloat() * 360f, 0f);
             if (state != null && !state.isEmpty()) {
                 titan.restoreState(state);
