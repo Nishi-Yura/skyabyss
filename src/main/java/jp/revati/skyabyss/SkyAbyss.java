@@ -66,6 +66,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.story.StorySetup.register(modEventBus);
         // 雷翼の中ボス 雷獣 (12 の 5.2節)。登録は titan.storm.raiju パッケージにまとめてある
         jp.revati.skyabyss.titan.storm.raiju.RaijuSetup.register(modEventBus);
+        // 潮殻の装備 (鎧・三叉槍・盾・護符・専用伝説・心核) と図鑑の表。登録は titan.tide.gear パッケージにまとめてある
+        jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

@@ -565,7 +565,7 @@ public class Raiju extends GuardMob {
         sound(server, RaijuSetup.STUN.get(), 3f, 1f);
         server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, site.floor() + 1, at.z, 60, 1.2, 0.8, 1.2, 0.3);
         server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, site.floor() + 0.5, at.z, 20, 1.0, 0.3, 1.0, 0.02);
-        broadcast(server, ModText.battle("message.skyabyss.raiju.grounded_fall"));
+        broadcast(server, ModText.battle("message.skyabyss.raiju.stunned"));
         SkyAbyss.LOGGER.debug("Raiju fell off grounded rod {}", i);
     }
 

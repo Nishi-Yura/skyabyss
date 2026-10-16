@@ -60,6 +60,11 @@ public class ResonanceCharmItem extends Item implements ModGear, Accessory {
     }
 
     @Override
+    public int cooldownTicks() {
+        return COOLDOWN;
+    }
+
+    @Override
     public boolean isFoil(ItemStack stack) {
         return true;
     }

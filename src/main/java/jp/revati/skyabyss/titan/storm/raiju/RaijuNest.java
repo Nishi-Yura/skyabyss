@@ -367,7 +367,7 @@ public final class RaijuNest {
         level.playSound(null, b, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
         level.sendParticles(ParticleTypes.SMOKE, rod.getX() + 0.5, rod.getY() - 0.5, rod.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
         if (player != null) {
-            player.displayClientMessage(ModText.progress("message.skyabyss.raiju.plug_pulled", GROUND_TICKS / 20), true);
+            player.displayClientMessage(ModText.progress("message.skyabyss.raiju.grounded", GROUND_TICKS / 20), true);
         }
         return true;
     }

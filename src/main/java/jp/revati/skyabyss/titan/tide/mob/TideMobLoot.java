@@ -21,7 +21,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 // 一体ごとに、倒した人のための抽選をし、その人にだけ拾える形で落とす。背中 (tide_back) の上で、プレイヤーが倒したときだけ。
 //
 // | 敵       | 潮殻の欠片 | 共鳴の欠片 | 潮干しの貝 | そのほか |
-// | 珊瑚憑き | 30%、1〜2  | 5%、1      | 3%、1      | 潮殻の鎧のどれか一部位 1% (鎧はまだないので、今は落とさない) |
+// | 珊瑚憑き | 30%、1〜2  | 5%、1      | 3%、1      | 潮殻の鎧のどれか一部位 1% (TideGearLoot.rollThrall) |
 // | 磯走り   | 8%、1      | 1%、1      | —          | — |
 // | 泡吹き   | 25%、1〜2  | 5%、1      | 3%、1      | 泡袋 20% |
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -86,7 +86,12 @@ public final class TideMobLoot {
         if (killer == null || killer instanceof FakePlayer) {
             return;
         }
-        for (ItemStack stack : roll(r, level.random)) {
+        List<ItemStack> drops = roll(r, level.random);
+        if (mob instanceof CoralThrall) {
+            // 潮殻の鎧のどれか一部位 1% (図鑑に記す。titan/tide/gear)
+            drops.addAll(jp.revati.skyabyss.titan.tide.gear.TideGearLoot.rollThrall(level.getServer(), killer.getUUID(), level.random));
+        }
+        for (ItemStack stack : drops) {
             ItemEntity item = new ItemEntity(level, mob.getX(), mob.getY() + 0.5, mob.getZ(), stack);
             item.setTarget(killer.getUUID());
             item.setDefaultPickUpDelay();

@@ -331,10 +331,10 @@
   "raiju_hurt": {"subtitle": "subtitles.skyabyss.raiju_hurt", "sounds": [{"name": "skyabyss:raiju/hurt"}]},
   "raiju_death": {"subtitle": "subtitles.skyabyss.raiju_death", "sounds": [{"name": "skyabyss:raiju/death"}]},
   "raiju_rail_charge": {"subtitle": "subtitles.skyabyss.raiju_rail_charge", "sounds": [{"name": "skyabyss:raiju/rail_charge"}]},
-  "raiju_rail": {"subtitle": "subtitles.skyabyss.raiju_rail", "sounds": [{"name": "skyabyss:raiju/rail"}]},
+  "raiju_rail": {"subtitle": "subtitles.skyabyss.raiju_leap", "sounds": [{"name": "skyabyss:raiju/rail"}]},
   "raiju_pounce": {"subtitle": "subtitles.skyabyss.raiju_pounce", "sounds": [{"name": "skyabyss:raiju/pounce"}]},
   "raiju_claw": {"subtitle": "subtitles.skyabyss.raiju_claw", "sounds": [{"name": "skyabyss:raiju/claw"}]},
   "raiju_roar": {"subtitle": "subtitles.skyabyss.raiju_roar", "sounds": [{"name": "skyabyss:raiju/roar"}]},
   "raiju_stun": {"subtitle": "subtitles.skyabyss.raiju_stun", "sounds": [{"name": "skyabyss:raiju/stun"}]},
-  "raiju_ground": {"subtitle": "subtitles.skyabyss.raiju_ground", "sounds": [{"name": "skyabyss:raiju/ground"}]}
+  "raiju_ground": {"subtitle": "subtitles.skyabyss.ground_plug", "sounds": [{"name": "skyabyss:raiju/ground"}]}
 }

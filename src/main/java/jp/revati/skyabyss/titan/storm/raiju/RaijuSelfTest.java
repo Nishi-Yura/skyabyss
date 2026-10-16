@@ -75,6 +75,8 @@ public final class RaijuSelfTest {
         RaijuNest.Site site = RaijuNest.site(server);
         notes.add(site.temporary() ? "temporary nest" : "storm back nest");
         checkAssets(failures);
+        checkTimings(failures);
+        checkLang(failures);
         GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(SkyAbyss.MODID + ":raiju");
         check(src != null && src.xp() == 170 && src.contentLevel() == 24, "growth source for raiju is not 170 / Lv24", failures);
         checkNest(site, failures);
@@ -115,6 +117,46 @@ public final class RaijuSelfTest {
             }
         } catch (java.io.IOException e) {
             failures.add("could not read the raiju animations");
+        }
+    }
+
+    // 技の予告と時間 (12 の 5.2節): 渡りの線 1.0 秒、飛びかかりの溜め 0.8 秒 (怒り 0.6 秒)、痺れ 4 秒、床で 10 秒、栓 8 秒・待ち 4 秒
+    private static void checkTimings(List<String> failures) {
+        check(Raiju.RAIL_WARN == 20, "rail warning should be 1.0 s (" + Raiju.RAIL_WARN + " ticks)", failures);
+        check(Raiju.POUNCE_WINDUP == 16 && Raiju.POUNCE_WINDUP_ANGRY == 12, "pounce wind-up should be 0.8 s / 0.6 s", failures);
+        check(Raiju.STUN_TICKS == 80 && Math.abs(Raiju.STUN_TAKEN - 1.5f) < 1e-4, "stun should be 4 s at 1.5x", failures);
+        check(Raiju.GROUND_TICKS == 200, "back to a rod after 10 s on the floor (" + Raiju.GROUND_TICKS + ")", failures);
+        check(RaijuNest.GROUND_TICKS == 160 && RaijuNest.PLUG_WAIT == 80, "plug should ground 8 s and wait 4 s", failures);
+        check(Raiju.RAIL_DAMAGE == 12 && Raiju.POUNCE_DAMAGE == 11 && Raiju.CLAW_DAMAGE == 5 && Raiju.ROAR_STRIKE_DAMAGE == 9
+                && Raiju.ROAR_RINGS == 6, "move damage differs from 12 section 5.2", failures);
+    }
+
+    // 文は伝承の担当の skyabyss_storm の lang にまとまっている (鍵が日英ともにある)
+    static final String[] LANG_KEYS = {"entity.skyabyss.raiju", "gui.skyabyss.boss.raiju.angry", "gui.skyabyss.boss.raiju.stunned",
+            "message.skyabyss.raiju.after", "message.skyabyss.raiju.asleep", "message.skyabyss.raiju.begin", "message.skyabyss.raiju.defeated",
+            "message.skyabyss.raiju.east_stone_ready", "message.skyabyss.raiju.go", "message.skyabyss.raiju.go_temporary",
+            "message.skyabyss.raiju.stunned", "message.skyabyss.raiju.hint_plug", "message.skyabyss.raiju.plug_already",
+            "message.skyabyss.raiju.grounded", "message.skyabyss.raiju.plug_wait", "message.skyabyss.raiju.roar",
+            "subtitles.skyabyss.raiju_ambient", "subtitles.skyabyss.raiju_hurt", "subtitles.skyabyss.raiju_death",
+            "subtitles.skyabyss.raiju_rail_charge", "subtitles.skyabyss.raiju_leap", "subtitles.skyabyss.raiju_pounce",
+            "subtitles.skyabyss.raiju_claw", "subtitles.skyabyss.raiju_roar", "subtitles.skyabyss.raiju_stun", "subtitles.skyabyss.ground_plug"};
+
+    private static void checkLang(List<String> failures) {
+        for (String code : new String[] {"ja_jp", "en_us"}) {
+            String path = "/assets/skyabyss_storm/lang/" + code + ".json";
+            try (InputStream in = RaijuSelfTest.class.getResourceAsStream(path)) {
+                if (in == null) {
+                    failures.add("missing " + path);
+                    continue;
+                }
+                com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(
+                        new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+                for (String k : LANG_KEYS) {
+                    check(json.has(k), code + " has no " + k, failures);
+                }
+            } catch (java.io.IOException | RuntimeException e) {
+                failures.add("could not read " + path + ": " + e);
+            }
         }
     }
 

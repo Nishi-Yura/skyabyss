@@ -234,9 +234,10 @@ public final class StorySelfTest {
         DialogueService.close(p);
         Lore.unlock(p, "chapter1/thunder_wing", false);
         Quests.poll(p, true);
-        check(stage(p, "main_thunder").equals("heart"), "seeing the thunder wing did not advance", f);
+        // 見たあとは「背へ上がる」。背中・碑文・風鳴り石の段は titan/storm/lore/StormLoreSelfTest が通す。心臓を先に止めれば飛ばす
+        check(stage(p, "main_thunder").equals("board"), "seeing the thunder wing did not advance: " + stage(p, "main_thunder"), f);
         Quests.poll(p, true);
-        check(stage(p, "main_thunder").equals("heart"), "the thunder heart stage passed without stopping the heart", f);
+        check(stage(p, "main_thunder").equals("board"), "the thunder board stage passed without boarding", f);
         Progression.onTitanStopped(server, List.of(p.getUUID()), Titans.THUNDER_WING);
         Quests.poll(p, true);
         talk(p, wc, "ms_c_thunder_back", f);
@@ -312,6 +313,9 @@ public final class StorySelfTest {
         talk(p, wc, "ms_c_map_done", f);
         pick(p, WC, "wing", f);
         check(stage(p, "sub_old_map").equals("done") && Lore.state(p).has("chapter1/storm_path"), "sub_old_map did not finish", f);
+        // 切れ端のあと、風見鶏の話が二つ (12 の 2.6 節)
+        next(p);
+        next(p);
         pick(p, WC, "ok", f);
         level.setWeatherParameters(6000, 0, false, false);
 
