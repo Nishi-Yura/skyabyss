@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 // | 余燼の戦斧      | 斧 (剣の扱い)   | レア | 26 | 17.6 / 22.9   | 命中で 4 秒くすぶらせる (燃えない相手にも印)。燃えている・くすぶる相手に +10% |
 // | 熾火の外套      | 装飾            | レア | 26 | —             | 熱のたまり方 ×0.75、燃焼・溶岩の傷 −30% (火炎耐性ではない) |
 // | 熾りの護符      | 護符 (H キー)   | レア | 26 | —             | 自分の熱を 0 に。半径 5 の敵に 6 の傷と 4 秒の燃焼。待ち 50 秒 |
-// | 鍛え手の大鎚    | 両手の大鎚      | 伝説 | 28 | 17.7 / 23.7   | 3 度に 1 度 (+5 で 2 度に 1 度)、床に亀裂が走り 0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%) |
+// | 鍛え手の大鎚    | 両手の大鎚      | 伝説 | 28 | 16.8 / 23.4   | 3 度に 1 度 (+5 で 2 度に 1 度)、床に亀裂が走り 0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%) |
 // | 灰被りの火掻き  | 長柄            | 伝説 | 28 | 17.6 / 22.9   | 間合い +1。命中で灰を積む。5 つ (+5 で 4 つ) で鈍足 II 3 秒・防御 −4 |
 // | 余燼の灯        | 装飾            | 伝説 | 28 | —             | 倒れる傷を一度だけ体力 4 で踏みとどまり、まわり半径 3 に 6 の傷と燃焼。待ち 600 秒。不死のトーテムが先 |
 // | 熾火の角杯      | 食べ物          | —    | —  | —             | 回復 6・飽和 0.8。背中では 3 分 熱のたまり方 ×0.6、地上では火炎耐性 30 秒 |
@@ -73,8 +73,8 @@ public final class EmberGear {
     public static final double WAR_AXE_SPEED = 1.0;
     public static final double WAR_AXE_SMOLDER_BONUS = 0.10;
     public static final int WAR_AXE_SMOLDER_TICKS = 80;
-    // 大鎚: 攻撃力 19、速さ 0.8。亀裂の噴き (攻撃力の 50%) が 3 度に 1 度 → 一体へ 17.7。+5 から 2 度に 1 度
-    public static final double HAMMER_ATTACK = 19;
+    // 大鎚: 攻撃力 18、速さ 0.8。亀裂の噴き (攻撃力の 50%) が 3 度に 1 度 → 一体へ 16.8。+5 から 2 度に 1 度 (+10 で 23.4)
+    public static final double HAMMER_ATTACK = 18;
     public static final double HAMMER_SPEED = 0.8;
     public static final double HAMMER_CRACK_RATE = 0.5;
     public static final double HAMMER_CRACK_LENGTH = 5;

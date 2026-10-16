@@ -11,15 +11,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.phys.Vec3;
 
-// 鍛え手の大鎚 (伝説): 灰の鍛え手が振るっていた両手の大鎚 (中ボスの大鎚と同じ形)。攻撃力 19、速さ 0.8。
+// 鍛え手の大鎚 (伝説): 灰の鍛え手が振るっていた両手の大鎚 (中ボスの大鎚と同じ形)。攻撃力 18、速さ 0.8。
 // 三度目ごとに (+5 から二度目ごとに)、打った先の床へ亀裂が走り、0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%。打った相手にも当たる)。
 // 鍛え手の技「亀裂」と同じく二段の攻め: 走った線が赤く光ってから噴く (EmberGearEvents の Crack)
 public class SmithHammerItem extends EmberWeaponItem {
     private static final String HITS = SkyAbyss.MODID + ":smith_hammer_hits";
 
     public SmithHammerItem(Properties properties) {
-        // 攻撃力 19 = 1 + 5 + 13、攻撃速度 0.8 = 4 − 3.2
-        super(properties.attributes(SwordItem.createAttributes(TIER, 13, -3.2f)), GearTier.LEGENDARY, "item.skyabyss.smith_hammer.desc");
+        // 攻撃力 18 = 1 + 5 + 12、攻撃速度 0.8 = 4 − 3.2
+        super(properties.attributes(SwordItem.createAttributes(TIER, 12, -3.2f)), GearTier.LEGENDARY, "item.skyabyss.smith_hammer.desc");
     }
 
     // 何度目ごとに亀裂が走るか
