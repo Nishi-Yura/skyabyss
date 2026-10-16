@@ -1014,5 +1014,101 @@
         "name": "skyabyss:raiju/ground"
       }
     ]
+  },
+  "ash_thrall_ambient": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_ambient"
+      }
+    ]
+  },
+  "ash_thrall_hurt": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_hurt"
+      }
+    ]
+  },
+  "ash_thrall_death": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_death"
+      }
+    ]
+  },
+  "ash_thrall_shell_break": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_shell_break",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_shell_break"
+      }
+    ]
+  },
+  "ash_thrall_ignite": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_ignite",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_ignite"
+      }
+    ]
+  },
+  "ember_moth_flutter": {
+    "subtitle": "subtitles.skyabyss.ember_moth_flutter",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ember_moth_flutter"
+      }
+    ]
+  },
+  "ember_moth_death": {
+    "subtitle": "subtitles.skyabyss.ember_moth_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ember_moth_death"
+      }
+    ]
+  },
+  "cinder_roller_curl": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_curl",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_curl"
+      }
+    ]
+  },
+  "cinder_roller_roll": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_roll",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_roll"
+      }
+    ]
+  },
+  "cinder_roller_bonk": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_bonk",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_bonk"
+      }
+    ]
+  },
+  "cinder_roller_hurt": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_hurt"
+      }
+    ]
+  },
+  "cinder_roller_death": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_death"
+      }
+    ]
   }
 }
