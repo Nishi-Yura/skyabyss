@@ -684,8 +684,7 @@
     "subtitle": "subtitles.skyabyss.ember_heat_warn",
     "sounds": [
       {
-        "name": "minecraft:fire/ignite",
-        "pitch": 0.6
+        "name": "skyabyss:ember/heat_warn"
       }
     ]
   },
@@ -693,8 +692,7 @@
     "subtitle": "subtitles.skyabyss.ember_scorch",
     "sounds": [
       {
-        "name": "minecraft:random/fizz",
-        "volume": 0.5
+        "name": "skyabyss:ember/scorch"
       }
     ]
   },
@@ -719,6 +717,62 @@
     "sounds": [
       {
         "name": "skyabyss:titan/travel/tide_current"
+      }
+    ]
+  },
+  "ember_rumble": {
+    "subtitle": "subtitles.skyabyss.ember_rumble",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/rumble"
+      }
+    ]
+  },
+  "ember_breath_in": {
+    "subtitle": "subtitles.skyabyss.ember_breath_in",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/breath_in"
+      }
+    ]
+  },
+  "ember_breath_out": {
+    "subtitle": "subtitles.skyabyss.ember_breath_out",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/breath_out"
+      }
+    ]
+  },
+  "ember_swallow": {
+    "subtitle": "subtitles.skyabyss.ember_swallow",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/swallow"
+      }
+    ]
+  },
+  "ember_wall_scrape": {
+    "subtitle": "subtitles.skyabyss.ember_wall_scrape",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/wall_scrape"
+      }
+    ]
+  },
+  "ember_far_beat": {
+    "subtitle": "subtitles.skyabyss.ember_far_beat",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/far_beat"
+      }
+    ]
+  },
+  "ember_world_turn": {
+    "subtitle": "subtitles.skyabyss.ember_world_turn",
+    "sounds": [
+      {
+        "name": "skyabyss:ember/world_turn"
       }
     ]
   },

@@ -1301,3 +1301,10 @@ C1・C2・E・C3・F は、自分の Setup の共通の準備で一度だけ次�
 - **G**: 品（`ember_shard`・`ember_horn`・`spark_dust`・`cinder_husk`・鎧 4 部位）を登録すれば敵が落とし始める。火掻き棒の形は `tools/install_ember_mobs.py` の `TH.weapon_poker()`（ラフの `ember_mobs_thrall.weapon_poker`）。
 - **F**: 鎧の 1% を図鑑に記すなら、`EmberMobLoot.onDrops` の鎧の行から `EmberLoot` の記録を呼ぶ形にする（今は記していない）。
 - **E**: 怒りで出す灰被り 2 体は `EmberMobSetup.ASH_THRALL` を `TRIAL_TAG` 付きで。
+
+## 19. 実装の記録（地上。11.2節の担当 A、2026-10-17）
+
+- **作ったもの**: `EmberTitanEntity`（地の中を泳ぐ火蜥蜴。昼は背の尾根だけ出し、夜は浮かんで眠る）、`EmberMouthEntity`（熱の口。息を吸う間に歩いて入ると背中へ渡る）、`EmberKeeper`（見守り・出現）、`EmberGround`（陸の判定。海面は生成器の値を使う。平らな世界は -63）、`EmberTravel`（乗り降り。共通の TitanGate）、`EmberCommands`、`EmberSelfTest`、温石、灰の降り、描画、音（`tools/gen_ember_sounds.py`）。登録は `EmberTitanSetup`。
+- **モデル**: `tools/install_ember_titan.py` が geo（近景・中景・遠景）・テクスチャ・光るマスク・アニメを書く。近景 2636 箱、重なり 0、光る画素あり（`docs/review/ember_roughs/install/stats.json`）。見た目の確認は `tools/shots/ember_surface.txt`（runShots）。
+- **自己テスト**: `ember surface` が通る（夜の刻、息の窓、一体だけ、状態の持ち越し、口と息の扇、口からの乗り込み、灰の段、温石、モデルのデータ）。偽プレイヤーは接続が無く次元またぎで落ちるので、`EmberTravel.teleport` は世界だけ切り替える。
+- **既知**: `tide travel`（内陸の行き先から 142 ブロック）と `raiju`（StormRods.find）の失敗は雷翼・潮殻側で、この担当の範囲外。

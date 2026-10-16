@@ -134,6 +134,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
         // 余燼の背の体と広間 (体の穴・歩いて行ける所・液体・看板・石と門・リセット・熱)。13 の 18章
         steps.addAll(jp.revati.skyabyss.titan.ember.back.EmberBackSelfTest.steps());
+        // 余燼の地上 (巨神・熱の口・戻る先・温石・モデルのデータ)。13 の 2章
+        steps.addAll(jp.revati.skyabyss.titan.ember.EmberSelfTest.steps());
         // 余燼の背の敵 (強さ・殻と燃え上がり・蛾の熱・燠虫の転がり・落とす物)。13 の 5.1節
         steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
