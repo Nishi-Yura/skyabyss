@@ -927,6 +927,9 @@ def main():
     Image.fromarray(glow, "RGBA").save(tex_dir / "tide_shell_glowmask.png", optimize=True)
     (anim_dir / "tide_shell.animation.json").write_text(json.dumps(anim_json(), ensure_ascii=False, indent=1) + "\n",
                                                         encoding="utf-8")
+    if "--no-hp" not in sys.argv:   # high-poly pass on the near LOD (docs/design/15_high_poly.md, titan bodies); the grid above is untouched
+        import hp_titan_body
+        hp_titan_body.install("tide_shell", "C", rebase=True)
     preview(geos, tex, glow, counts)
     preview_poses(geos, tex, glow)
     preview_far(geos, tex, glow)
