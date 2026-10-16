@@ -1,0 +1,98 @@
+package jp.revati.skyabyss.titan.ember.back;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import jp.revati.skyabyss.SkyAbyss;
+import net.minecraft.server.level.ServerLevel;
+
+// 部屋の中身の建て方とリセットの受け口 (13 の 11.2節「部屋の箱の約束」、18 章)。
+// C1 (west)・C2 (east)・E (smith)・C3 (south)・F (heart) は、自分の Setup の共通の準備 (FMLCommonSetupEvent) か static 初期化で一度だけ
+//   EmberBackRooms.register("west", AshPathRoom::build);
+//   EmberBackRooms.onReset("west", AshPath::reset);
+// のように渡す。体を建てるとき (EmberBodyBuilder) と試練のリセットのとき (EmberBackTrials.reset) に B が呼ぶ。
+//
+// - build(level, box): 体を置き、B が箱を掘ったあとに呼ぶ。箱の中はすべて空気で、いちばん下の段 (box.minY()) にだけ仮の床がある。
+//   箱の中だけに置くこと。EmberBackLayout.reserved(部屋) の場所は空けておく (B が後で休み場・熾り石・碑文を置く)。
+//   建て直し (LAYOUT_VERSION が上がった・titan rebuild ember) のたびに呼ばれるので、何度呼ばれても同じ物になるように書く。
+// - reset(level, sleeping): 試練のリセットのたび (箱の中の人は広間へ移したあと)。sleeping は「この周、この試練は眠っている」
+//   (眠る試練の石は最初から鳴っている。東が眠る周は smith も sleeping)。熾り石・休み場は B が戻すので触らなくてよい。
+public final class EmberBackRooms {
+    @FunctionalInterface
+    public interface Builder {
+        void build(ServerLevel level, EmberBackLayout.Box box);
+    }
+
+    @FunctionalInterface
+    public interface Resetter {
+        void reset(ServerLevel level, boolean sleeping);
+    }
+
+    private static final Map<String, List<Builder>> BUILDERS = new LinkedHashMap<>();
+    private static final Map<String, List<Resetter>> RESETTERS = new LinkedHashMap<>();
+
+    private EmberBackRooms() {
+    }
+
+    public static synchronized void register(String room, Builder builder) {
+        check(room);
+        BUILDERS.computeIfAbsent(room, k -> new ArrayList<>()).add(builder);
+    }
+
+    public static synchronized void onReset(String room, Resetter resetter) {
+        check(room);
+        RESETTERS.computeIfAbsent(room, k -> new ArrayList<>()).add(resetter);
+    }
+
+    private static void check(String room) {
+        if (!EmberBackLayout.TRIAL_ROOMS.contains(room)) {
+            throw new IllegalArgumentException("unknown ember room " + room + " (use one of " + EmberBackLayout.TRIAL_ROOMS + ")");
+        }
+    }
+
+    // 担当が建て方を渡しているか (自己テストと、仮の床を残すかの判断)
+    public static synchronized boolean hasBuilder(String room) {
+        return BUILDERS.containsKey(room);
+    }
+
+    // B が呼ぶ: 部屋の中身を建てる。一つの部屋が落ちても、ほかの部屋は建てる
+    static void buildAll(ServerLevel level) {
+        List<Map.Entry<String, List<Builder>>> list;
+        synchronized (EmberBackRooms.class) {
+            list = new ArrayList<>(BUILDERS.entrySet());
+        }
+        for (String room : EmberBackLayout.TRIAL_ROOMS) {
+            for (Map.Entry<String, List<Builder>> e : list) {
+                if (!e.getKey().equals(room)) {
+                    continue;
+                }
+                for (Builder b : e.getValue()) {
+                    try {
+                        b.build(level, EmberBackLayout.ROOMS.get(room));
+                    } catch (RuntimeException ex) {
+                        SkyAbyss.LOGGER.error("ember back: building room {} failed", room, ex);
+                    }
+                }
+            }
+        }
+    }
+
+    // B が呼ぶ: 試練のリセット。sleeping は眠っている部屋の名前 (east が眠るなら smith も)
+    static void resetAll(ServerLevel level, java.util.function.Predicate<String> sleeping) {
+        List<Map.Entry<String, List<Resetter>>> list;
+        synchronized (EmberBackRooms.class) {
+            list = new ArrayList<>(RESETTERS.entrySet());
+        }
+        for (Map.Entry<String, List<Resetter>> e : list) {
+            for (Resetter r : e.getValue()) {
+                try {
+                    r.reset(level, sleeping.test(e.getKey()));
+                } catch (RuntimeException ex) {
+                    SkyAbyss.LOGGER.error("ember back: resetting room {} failed", e.getKey(), ex);
+                }
+            }
+        }
+    }
+}
