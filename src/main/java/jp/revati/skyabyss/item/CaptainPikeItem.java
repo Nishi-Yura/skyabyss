@@ -30,12 +30,12 @@ import net.neoforged.neoforge.common.SimpleTier;
 // 番兵長の鉾 (伝説): 鯨骨の番兵長が振るっていた長柄。
 // 間合いが長く、一振りが前方の扇形に届く。三度目ごとに、足もとから骨が噴き上がる
 public class CaptainPikeItem extends SwordItem implements ModGear {
-    public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 2200, 6.0f, 4.0f, 16,
+    public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 2200, 6.0f, 3.5f, 16,
             () -> Ingredient.of(Items.BONE_BLOCK));
     private static final String HITS = SkyAbyss.MODID + ":pike_hits";
 
     public CaptainPikeItem(Properties properties) {
-        // 攻撃力 9、攻撃速度 1.1、間合い +1.5
+        // 攻撃力 8.5 (2026-10-17 に 9 から)、攻撃速度 1.1、間合い +1.5。扇と噴出の上乗せで、一体へはダイヤの剣ほど
         super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 4, -2.9f)
                 .withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pike_reach"), 1.5, AttributeModifier.Operation.ADD_VALUE),
