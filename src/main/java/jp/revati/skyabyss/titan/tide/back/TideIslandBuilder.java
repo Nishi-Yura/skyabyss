@@ -554,7 +554,8 @@ public final class TideIslandBuilder {
                     if (edge) {
                         s = gardenWall(x, y, z);
                     } else if (y <= GARDEN_WALL_TOP + bump) {
-                        s = y > GARDEN_WALL_TOP - 1 + bump ? gardenCap(x, z) : gardenWall(x, y, z);
+                        // 壁の上の灯り (天井の灯りは水路の底まで届かないため)
+                        s = y > GARDEN_WALL_TOP - 1 + bump ? (Math.floorMod(x * 5 + z * 3, 23) == 0 ? TideKit.LAMP : gardenCap(x, z)) : gardenWall(x, y, z);
                     } else if (y <= ceil) {
                         s = TideKit.AIR;
                     } else {
@@ -739,7 +740,7 @@ public final class TideIslandBuilder {
 
     // ---------------------------------------------------------------- 潮見の間 (東)
     private static void eastRoom(TideKit kit) {
-        // 外枠を詰め、上を空へ開ける。四方に高い胸壁 (外へ飛び降りないように)
+        // 外枠を詰め、中を空ける。上は甲羅 (21 章で甲羅の中の部屋になった)
         for (int x = 23; x <= 58; x++) {
             for (int z = -37; z <= -4; z++) {
                 boolean edge = x == 23 || x == 58 || z == -37 || z == -4;
@@ -747,7 +748,8 @@ public final class TideIslandBuilder {
                     if (y < HUB_LEDGE) {
                         kit.set(x, y, z, TideKit.SHELL);
                     } else if (edge) {
-                        kit.set(x, y, z, y == 96 ? TideKit.DARK : kit.wall(x, y, z));
+                        // 甲羅の中になったので、段ごとの高さに壁の灯り (77・83・89・95)
+                        kit.set(x, y, z, y == 96 ? TideKit.DARK : Math.floorMod(y - 77, 6) == 0 && Math.floorMod(x + z, 4) == 0 ? TideKit.LAMP : kit.wall(x, y, z));
                     } else if (y == HUB_LEDGE) {
                         kit.set(x, y, z, TideKit.BRICK);
                     } else {
@@ -877,7 +879,8 @@ public final class TideIslandBuilder {
                 for (int y = 58; y <= FLATS_CEILING + 1; y++) {
                     BlockState s;
                     if (!inside) {
-                        s = rock(x, y, z);
+                        // 壁の灯り (腰の高さ。天井の灯りは床まで届かないため)
+                        s = y == FLATS_FLOOR + 4 && Math.floorMod(x + z, 5) == 0 ? TideKit.LAMP : rock(x, y, z);
                     } else if (y < FLATS_FLOOR) {
                         s = TideKit.SANDSTONE;
                     } else if (y == FLATS_FLOOR) {
@@ -885,7 +888,7 @@ public final class TideIslandBuilder {
                     } else if (y <= ceil) {
                         s = TideKit.AIR;
                     } else {
-                        s = Math.floorMod(x * 3 + z * 7, 19) == 0 ? TideKit.LAMP : rock(x, y, z);
+                        s = Math.floorMod(x * 3 + z * 7, 11) == 0 ? TideKit.LAMP : rock(x, y, z);
                     }
                     kit.set(x, y, z, s);
                 }

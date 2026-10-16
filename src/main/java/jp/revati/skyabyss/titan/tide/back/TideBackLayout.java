@@ -87,11 +87,12 @@ public final class TideBackLayout {
     public static final int GATE_FLOOR = 64;
     public static final int GATE_HALL_Z1 = 52;
     public static final int GATE_HALL_Z2 = 56;
-    // 到着の段 (潮門の外。甲羅の縁と後ろのひれの付け根の上、床 64)。北を向いて立つ (甲羅の脇腹と前のひれが見える)
+    // 到着の段 (潮門の外。甲羅の縁と後ろのひれの付け根の上、床 64)
     public static final Area LANDING = new Area(-67, -56, 49, 59, GATE_FLOOR, 8);
-    public static final BlockPos ARRIVAL = new BlockPos(-62, GATE_FLOOR + 1, 54);
-    // 着いたときの向き (北北東: 右に甲羅の脇腹と光る潮門、前へ縁の歯が続く)
-    public static final float ARRIVAL_YAW = -150f;
+    // 着く所: 左後ろのひれの上 (ひれの面は y 67)。北東を向くと、甲羅の脇腹に開いた潮門の大きな枠と、丸い甲羅が見える。
+    // ひれの付け根から到着の段へ下り (3 段)、潮門の光る面の下をくぐって中へ
+    public static final BlockPos ARRIVAL = new BlockPos(-80, 68, 70);
+    public static final float ARRIVAL_YAW = -140f;
     // 見送りの段: 到着の段の西から海へ下りる段。いちばん下の段 (x -71〜-69、z 52〜56) に入ると地上へ戻る
     public static final int GATE_X = -70;
     public static final int GATE_Z = 53;

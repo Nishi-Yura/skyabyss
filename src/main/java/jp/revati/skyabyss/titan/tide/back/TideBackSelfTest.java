@@ -560,7 +560,8 @@ public final class TideBackSelfTest {
         }
         Integer toHub = dist.get(RESTS.get(0).spawn().asLong());
         notes.add("arrival to hall " + toHub + " steps (" + dist.size() + " standing spots)");
-        check(toHub != null && toHub <= 130, "the hall is too far from the arrival (" + toHub + " steps)", failures);
+        // 到着 (ひれの上) → 潮門 → 廊下 → 浜 → くぐり道 → 広間。歩いて 40 秒ほど (3.2節の「1 分以内」)
+        check(toHub != null && toHub <= 160, "the hall is too far from the arrival (" + toHub + " steps)", failures);
         Map<String, BlockPos> shouldNot = new java.util.LinkedHashMap<>();
         shouldNot.put("middle tier", new BlockPos(41, TIER_FLOOR[1] + 1, -10));
         shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
