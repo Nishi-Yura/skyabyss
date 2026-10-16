@@ -77,7 +77,8 @@ public class TravelChartScreen extends Screen {
     private String selected;
 
     public TravelChartScreen(TravelNetwork.Chart chart) {
-        super(Component.translatable("gui.skyabyss.travel.title"));
+        super(Component.translatable(net.minecraft.locale.Language.getInstance().has("gui.skyabyss.travel.title." + chart.titan())
+                ? "gui.skyabyss.travel.title." + chart.titan() : "gui.skyabyss.travel.title"));
         this.chart = chart;
         pickDefault();
     }

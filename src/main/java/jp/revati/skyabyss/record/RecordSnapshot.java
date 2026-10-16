@@ -44,6 +44,18 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
     public static final int ACTION_CLAIM = 1;
     // 初回の選択報酬をチャットで選ぶ (/titanmemory を走らせて画面を閉じる。本人だけ)
     public static final int ACTION_CHOOSE = 2;
+    // なくした天の鍵の欠片・天の鍵を呼び戻す (KeepsakeBonds.recall。本人だけ)
+    public static final int ACTION_RECALL_FRAGMENT = 3;
+    public static final int ACTION_RECALL_KEY = 4;
+
+    // 中のつまみ: 「巨神」のつまみの中に、一覧と巨神ごとの頁を並べる (id は「titans.巨神の名前」)。
+    // 巨神の一覧 (progress.Titans) の順に、サーバーが頁を作る。巨神が増えれば頁も自動で増える
+    public static final String SUB = ".";
+
+    public static String parentTab(String id) {
+        int i = id.indexOf(SUB);
+        return i < 0 ? id : id.substring(0, i);
+    }
 
     // key: 行の名前 (変わった値を見つけるため。つまみの中で一意)
     // bar: 0..1 の帯 (経験値など)。帯がなければ -1
@@ -82,9 +94,16 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
                 });
     }
 
-    public record Tab(String id, List<Row> rows) {
+    // title: 中のつまみの名前 (伏せ字のこともある)。mark: 中のつまみの印
+    public record Tab(String id, Component title, int mark, List<Row> rows) {
+        public Tab(String id, List<Row> rows) {
+            this(id, Component.empty(), MARK_NONE, rows);
+        }
+
         public static final StreamCodec<RegistryFriendlyByteBuf, Tab> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8, Tab::id,
+                ComponentSerialization.STREAM_CODEC, Tab::title,
+                ByteBufCodecs.VAR_INT, Tab::mark,
                 Row.STREAM_CODEC.apply(ByteBufCodecs.list(256)), Tab::rows,
                 Tab::new);
 
@@ -102,7 +121,7 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
             UUIDUtil.STREAM_CODEC, RecordSnapshot::target,
             ComponentSerialization.STREAM_CODEC, RecordSnapshot::targetName,
             ByteBufCodecs.BOOL, RecordSnapshot::self,
-            Tab.STREAM_CODEC.apply(ByteBufCodecs.list(8)), RecordSnapshot::tabs,
+            Tab.STREAM_CODEC.apply(ByteBufCodecs.list(32)), RecordSnapshot::tabs,
             RecordSnapshot::new);
 
     public Tab tab(String id) {
@@ -112,6 +131,23 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
             }
         }
         return null;
+    }
+
+    // 中のつまみ (一覧の頁 parent と、parent:… の頁)。中のつまみがなければ空
+    public List<Tab> subTabs(String parent) {
+        List<Tab> out = new ArrayList<>();
+        for (Tab t : tabs) {
+            if (t.id.startsWith(parent + SUB)) {
+                out.add(t);
+            }
+        }
+        if (!out.isEmpty()) {
+            Tab head = tab(parent);
+            if (head != null) {
+                out.add(0, head);
+            }
+        }
+        return out;
     }
 
     // 変わった値を見つけるための、行の名前 → 行 (見出しは除く)。名前は「つまみ/行」
@@ -129,7 +165,7 @@ public record RecordSnapshot(UUID target, Component targetName, boolean self, Li
 
     // 時間とともに勝手に動く値 (マナ、巨神を呼べるまでの時間)。「変わった値」には数えない
     public static boolean isVolatile(String flatKey) {
-        return flatKey.equals(GROWTH + "/mana") || flatKey.equals(TITANS + "/cooldown");
+        return flatKey.equals(GROWTH + "/mana") || flatKey.equals(TITANS + "/cooldown") || flatKey.endsWith("/cooldown");
     }
 
     // 二つの控え帳で値が変わった行 (前にない行も「変わった」に入れる。前にあって今ない行は、値を空にして入れる)

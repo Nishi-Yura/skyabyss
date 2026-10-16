@@ -111,29 +111,29 @@ public final class Voyages {
                 && refusal != TravelRules.Refusal.WRONG_DIMENSION && refusal != TravelRules.Refusal.RIDING
                 && player.distanceToSqr(Vec3.atCenterOf(current.pickup)) < TravelRules.JOIN_RADIUS * TravelRules.JOIN_RADIUS) {
             // ほかの人の呼んだ巨神には、まだ認められていない人も、休んでいる人も一緒に乗れる
-            player.displayClientMessage(ModText.hint("message.skyabyss.travel.join", current.leaderName), true);
+            player.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.join"), current.leaderName), true);
             return CallResult.JOINED;
         }
         if (refusal == TravelRules.Refusal.COOLDOWN) {
-            player.displayClientMessage(ModText.deny(refusal.key, (TravelRules.cooldownLeft(player) + 19) / 20), true);
+            player.displayClientMessage(ModText.deny(kind.text(refusal.key), (TravelRules.cooldownLeft(player) + 19) / 20), true);
             return CallResult.REFUSED;
         }
         if (refusal != null) {
-            player.displayClientMessage(ModText.deny(refusal.key), true);
+            player.displayClientMessage(ModText.deny(kind.text(refusal.key)), true);
             return CallResult.REFUSED;
         }
         if (current != null) {
             if (current.leader.equals(player.getUUID())) {
-                player.displayClientMessage(ModText.hint("message.skyabyss.travel.already_coming"), true);
+                player.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.already_coming")), true);
                 return CallResult.REFUSED;
             }
             if (current.beforeDeparture() && !current.pendingCancel
                     && player.distanceToSqr(Vec3.atCenterOf(current.pickup)) < TravelRules.JOIN_RADIUS * TravelRules.JOIN_RADIUS) {
                 // ほかの人の呼んだ巨神に、一緒に乗れる
-                player.displayClientMessage(ModText.hint("message.skyabyss.travel.join", current.leaderName), true);
+                player.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.join"), current.leaderName), true);
                 return CallResult.JOINED;
             }
-            player.displayClientMessage(ModText.deny("message.skyabyss.travel.busy", current.leaderName), true);
+            player.displayClientMessage(ModText.deny(kind.text("message.skyabyss.travel.busy"), current.leaderName), true);
             return CallResult.REFUSED;
         }
         if (kind.busyAboard().get()) {
@@ -141,7 +141,17 @@ public final class Voyages {
             return CallResult.REFUSED;
         }
         ServerLevel overworld = player.server.overworld();
-        BlockPos pickup = LandingFinder.find(overworld, player.blockPosition(), 2, 5);
+        BlockPos pickup;
+        if (kind.style() == TitanKind.Style.SEA) {
+            // 潮殻: 海辺でなければ呼べない (寄れる浅瀬と、迎えの泡の柱を立てる水際を探す)
+            pickup = SeaVoyage.findPickup(overworld, player);
+            if (pickup == null) {
+                player.displayClientMessage(ModText.deny("message.skyabyss.travel.refuse.no_sea"), true);
+                return CallResult.REFUSED;
+            }
+        } else {
+            pickup = LandingFinder.find(overworld, player.blockPosition(), 2, 5);
+        }
         TravelTitan titan = kind.find(overworld);
         Vec3 relocate = null;
         if (titan == null || Math.hypot(titan.asEntity().getX() - player.getX(), titan.asEntity().getZ() - player.getZ()) > TravelRules.CALL_FLY_LIMIT) {
@@ -151,6 +161,13 @@ public final class Voyages {
             double x = player.getX() + Math.cos(angle) * TravelRules.CALL_ENTRY;
             double z = player.getZ() + Math.sin(angle) * TravelRules.CALL_ENTRY;
             double y = Math.min(overworld.getMaxBuildHeight() - 50, Math.max(TravelRules.TRAVEL_Y, Voyage.surfaceMax(overworld, player.position()) + TravelRules.TERRAIN_CLEARANCE));
+            if (kind.style() == TitanKind.Style.SEA) {
+                // 潮殻は沖の海から歩いてくる (海の点が見つからなければ、迎えの場所の沖)
+                Vec3 sea = SeaVoyage.entryPoint(overworld, pickup, angle);
+                x = sea.x;
+                z = sea.z;
+                y = sea.y;
+            }
             if (titan == null) {
                 titan = kind.respawn().spawn(overworld, x, y, z);
             } else {
@@ -158,13 +175,21 @@ public final class Voyages {
             }
         }
         titan.beginVoyage();
-        Voyage voyage = new Voyage(kind, titan, player, pickup);
+        Voyage voyage = newVoyage(kind, titan, player, pickup);
         voyage.relocateTo = relocate;
         ACTIVE.put(kind.id(), voyage);
-        overworld.playSound(null, player.getX(), player.getY(), player.getZ(), TravelSetup.CALL_SOUND.get(), SoundSource.PLAYERS, 4f, 1f);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.travel.called"));
+        overworld.playSound(null, player.getX(), player.getY(), player.getZ(), kind.callSound().get(), SoundSource.PLAYERS, 4f, 1f);
+        player.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.called")));
         SkyAbyss.LOGGER.info("{} called the {} at {}", player.getGameProfile().getName(), kind.id(), pickup);
         return CallResult.CALLED;
+    }
+
+    // 巨神の型ごとの旅 (後の巨神が新しい型を足すときは、ここに一行)
+    static Voyage newVoyage(TitanKind kind, TravelTitan titan, ServerPlayer leader, BlockPos pickup) {
+        return switch (kind.style()) {
+            case SEA -> new SeaVoyage(kind, titan, leader, pickup);
+            case SKY -> new Voyage(kind, titan, leader, pickup);
+        };
     }
 
     // 呼ばれた巨神の鎖を右クリックした
@@ -184,7 +209,7 @@ public final class Voyages {
     // ---------------------------------------------------------------- 海図
 
     static void sendChart(ServerPlayer player, Voyage voyage) {
-        List<TravelNetwork.Dest> dests = destinations(player);
+        List<TravelNetwork.Dest> dests = destinations(player, voyage);
         // 壊された碑は、この海図では「失われた碑」として灰色で見せ (選べない)、記録からは外して枠を空ける。次に開いたときには出ない
         pruneLost(state(player), TravelWorldData.get(player.server));
         PacketDistributor.sendToPlayer(player, new TravelNetwork.Chart(voyage.kind.id(), voyage.leader.equals(player.getUUID()),
@@ -193,14 +218,18 @@ public final class Voyages {
 
     // 行き先の一覧: はじまりの地 (世界の初期スポーン) と、覚えた碑
     public static List<TravelNetwork.Dest> destinations(ServerPlayer player) {
+        return destinations(player, null);
+    }
+
+    public static List<TravelNetwork.Dest> destinations(ServerPlayer player, @Nullable Voyage voyage) {
         ServerLevel overworld = player.server.overworld();
         List<TravelNetwork.Dest> list = new ArrayList<>();
         BlockPos spawn = overworld.getSharedSpawnPos();
-        list.add(dest(player, "spawn", "", "", spawn, 0, true));
+        list.add(dest(player, voyage, "spawn", "", "", spawn, 0, true));
         TravelWorldData world = TravelWorldData.get(player.server);
         for (BlockPos pos : state(player).waymarks) {
             TravelWorldData.Waymark mark = world.waymark(pos);
-            list.add(dest(player, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null));
+            list.add(dest(player, voyage, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null));
         }
         return list;
     }
@@ -212,9 +241,11 @@ public final class Voyages {
         return before - s.waymarks.size();
     }
 
-    private static TravelNetwork.Dest dest(ServerPlayer player, String id, String name, String biome, BlockPos pos, int kind, boolean valid) {
+    private static TravelNetwork.Dest dest(ServerPlayer player, @Nullable Voyage voyage, String id, String name, String biome, BlockPos pos, int kind,
+                                           boolean valid) {
         double distance = Math.hypot(pos.getX() + 0.5 - player.getX(), pos.getZ() + 0.5 - player.getZ());
-        return new TravelNetwork.Dest(id, name, biome, pos.getX(), pos.getY(), pos.getZ(), kind, valid, TravelRules.estimateSeconds(distance));
+        int seconds = voyage == null ? TravelRules.estimateSeconds(distance) : voyage.estimate(distance);
+        return new TravelNetwork.Dest(id, name, biome, pos.getX(), pos.getY(), pos.getZ(), kind, valid, seconds);
     }
 
     public static Component destName(@Nullable TravelNetwork.Dest dest) {
@@ -248,7 +279,7 @@ public final class Voyages {
             return;
         }
         TravelNetwork.Dest chosen = null;
-        for (TravelNetwork.Dest d : destinations(player)) {
+        for (TravelNetwork.Dest d : destinations(player, v)) {
             if (d.id().equals(id)) {
                 chosen = d;
             }
@@ -261,6 +292,12 @@ public final class Voyages {
         double distance = Math.hypot(chosen.x() + 0.5 - v.pickup.getX(), chosen.z() + 0.5 - v.pickup.getZ());
         if (distance < TravelRules.MIN_DISTANCE) {
             player.displayClientMessage(ModText.deny("message.skyabyss.travel.too_close"), true);
+            sendChart(player, v);
+            return;
+        }
+        String refused = v.accept(chosen);
+        if (refused != null) {
+            player.displayClientMessage(ModText.deny(refused), true);
             sendChart(player, v);
             return;
         }
@@ -293,7 +330,7 @@ public final class Voyages {
             return;
         }
         v.startLower(player);
-        player.sendSystemMessage(ModText.hint("message.skyabyss.travel.disembark"));
+        player.sendSystemMessage(ModText.hint(v.kind.text("message.skyabyss.travel.disembark")));
         if (v.leader.equals(player.getUUID()) && v.dest == null && !v.passLeadership()) {
             v.cancel("message.skyabyss.travel.cancel.disembark", true);
         }
@@ -304,7 +341,7 @@ public final class Voyages {
     static void arrived(ServerPlayer player, TitanKind kind, @Nullable TravelNetwork.Dest dest) {
         TravelState s = state(player);
         s.voyages++;
-        player.sendSystemMessage(ModText.lore("message.skyabyss.travel.arrived", destName(dest)));
+        player.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.arrived"), destName(dest)));
         Quests.signal(player, "titan_voyage");
     }
 
@@ -386,7 +423,7 @@ public final class Voyages {
         if (v.beforeDeparture() && !v.pendingCancel) {
             disembark(player);
         } else {
-            player.displayClientMessage(ModText.hint("message.skyabyss.travel.no_dismount"), true);
+            player.displayClientMessage(ModText.hint(v.kind.text("message.skyabyss.travel.no_dismount")), true);
         }
     }
 
@@ -420,7 +457,7 @@ public final class Voyages {
         player.setNoGravity(false);
         player.fallDistance = 0;
         markSafe(player, departed ? v.destFeet() : v.pickup);
-        PacketDistributor.sendToPlayer(player, new TravelNetwork.Veil(false));
+        PacketDistributor.sendToPlayer(player, new TravelNetwork.Veil(false, 0));
     }
 
     @SubscribeEvent
@@ -462,22 +499,30 @@ public final class Voyages {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 40 != 7 || !player.isAlive()) {
             return;
         }
+        giveCalls(player);
+    }
+
+    // 心臓を倒した巨神 (巨神の記憶の撃破の記録) の呼び笛を、一度だけ渡す。渡した数を返す
+    static int giveCalls(ServerPlayer player) {
+        int given = 0;
         for (TitanKind kind : TitanKind.all()) {
             TravelState s = state(player);
             if (s.callGiven.contains(kind.id()) || !isUnlocked(player, kind)) {
                 continue;
             }
+            given++;
             s.callGiven.add(kind.id());
             s.unlocked.add(kind.id());
             ItemStack call = new ItemStack(kind.callItem().get());
             if (!player.getInventory().add(call)) {
                 player.drop(call, false);
             }
-            player.sendSystemMessage(ModText.lore("message.skyabyss.travel.recognized"));
-            player.sendSystemMessage(ModText.hint("message.skyabyss.travel.recognized_hint"));
-            player.playNotifySound(TravelSetup.CALL_SOUND.get(), SoundSource.PLAYERS, 0.6f, 1.2f);
+            player.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.recognized")));
+            player.sendSystemMessage(ModText.hint(kind.text("message.skyabyss.travel.recognized_hint")));
+            player.playNotifySound(kind.callSound().get(), SoundSource.PLAYERS, 0.6f, 1.2f);
             Quests.signal(player, "titan_travel_" + kind.id());
         }
+        return given;
     }
 
     @SubscribeEvent

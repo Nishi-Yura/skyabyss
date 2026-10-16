@@ -57,9 +57,35 @@ public final class Keepsakes {
     }
 
     // ---------------------------------------------------------------- どの品か
+    // 品の一覧は登録が済んでから一度だけ作る (落ちた品の毎 tick の検めで使うため)
+    private static volatile List<Item> guardedCache;
+
     public static List<Item> guardedItems() {
-        return List.of(ModItems.SKY_KEY_FRAGMENT.get(), jp.revati.skyabyss.story.StorySetup.SKY_KEY.get(), ModItems.STONE_WHALE_CORE.get(),
-                TravelSetup.STONE_WHALE_CALL.get());
+        List<Item> cached = guardedCache;
+        if (cached == null) {
+            cached = List.copyOf(buildGuarded());
+            guardedCache = cached;
+        }
+        return cached;
+    }
+
+    private static List<Item> buildGuarded() {
+        // 欠片・天の鍵、巨神ごとの心核 (TitanPages)、巨神ごとの呼び笛 (TitanKind)
+        List<Item> items = new ArrayList<>(List.of(ModItems.SKY_KEY_FRAGMENT.get(), jp.revati.skyabyss.story.StorySetup.SKY_KEY.get(),
+                ModItems.STONE_WHALE_CORE.get(), TravelSetup.STONE_WHALE_CALL.get()));
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            TitanPages.Page page = TitanPages.page(titan);
+            Item core = page == null ? null : page.coreItem();
+            if (core != null && !items.contains(core)) {
+                items.add(core);
+            }
+        }
+        for (jp.revati.skyabyss.titan.travel.TitanKind kind : jp.revati.skyabyss.titan.travel.TitanKind.all()) {
+            if (!items.contains(kind.callItem().get())) {
+                items.add(kind.callItem().get());
+            }
+        }
+        return items;
     }
 
     public static boolean guarded(ItemStack stack) {
@@ -92,7 +118,9 @@ public final class Keepsakes {
     }
 
     // holders: 枠の名前 → 数 (0 の枠は入れない)
-    public record Where(int inventory, int bags, int ender, Map<String, Integer> holders, int pending, int kept, List<Ground> ground) {
+    // stash: 箱にしまった品 (KeepsakeBonds が箱を閉じたときに控える。読み込まれていれば中身を数え直す)
+    public record Where(int inventory, int bags, int ender, Map<String, Integer> holders, int pending, int kept, List<Ground> ground,
+                        List<Ground> stash) {
         public int holderCount() {
             int n = 0;
             for (int c : holders.values()) {
@@ -109,8 +137,16 @@ public final class Keepsakes {
             return n;
         }
 
+        public int stashCount() {
+            int n = 0;
+            for (Ground g : stash) {
+                n += g.count();
+            }
+            return n;
+        }
+
         public int total() {
-            return safe() + pending + kept + groundCount();
+            return safe() + pending + kept + groundCount() + stashCount();
         }
 
         // 手もと (持ち物とその中の袋・箱、エンダーチェスト、ほかの仕組みの枠) にあるか
@@ -120,43 +156,49 @@ public final class Keepsakes {
     }
 
     public static Where locate(ServerPlayer player, Item item) {
+        return locate(player, item, s -> true);
+    }
+
+    // match: 数える品の決まり (持ち主に結ばれた品のうち、その人の今の代だけ、など。KeepsakeBonds)
+    public static Where locate(ServerPlayer player, Item item, java.util.function.Predicate<ItemStack> match) {
+        java.util.function.Predicate<ItemStack> is = s -> s.is(item) && match.test(s);
         int inventory = 0;
         int bags = 0;
         int ender = 0;
         var inv = player.getInventory();
         for (List<ItemStack> part : List.of(inv.items, inv.armor, inv.offhand)) {
             for (ItemStack s : part) {
-                if (s.is(item)) {
+                if (is.test(s)) {
                     inventory += s.getCount();
                 }
-                bags += inside(s, item);
+                bags += inside(s, is);
             }
         }
         // 画面でつかんでいる品も持ち物に数える
         ItemStack carried = player.containerMenu == null ? ItemStack.EMPTY : player.containerMenu.getCarried();
-        if (carried.is(item)) {
+        if (is.test(carried)) {
             inventory += carried.getCount();
         }
-        bags += inside(carried, item);
+        bags += inside(carried, is);
         var chest = player.getEnderChestInventory();
         for (int i = 0; i < chest.getContainerSize(); i++) {
             ItemStack s = chest.getItem(i);
-            if (s.is(item)) {
+            if (is.test(s)) {
                 ender += s.getCount();
             }
-            ender += inside(s, item);
+            ender += inside(s, is);
         }
         MinecraftServer server = player.server;
         int pending = 0;
         TitanMemoryData memory = TitanMemoryData.get(server);
         if (memory.hasPending(player.getUUID())) {
             for (ItemStack s : memory.pending(player.getUUID()).items) {
-                if (s.is(item)) {
+                if (is.test(s)) {
                     pending += s.getCount();
                 }
             }
         }
-        int kept = countKept(player, item);
+        int kept = countKept(player, is);
         Map<String, Integer> holders = new java.util.LinkedHashMap<>();
         List<Map.Entry<String, Holder>> registered;
         synchronized (Keepsakes.class) {
@@ -168,11 +210,12 @@ public final class Keepsakes {
                 holders.put(e.getKey(), n);
             }
         }
-        return new Where(inventory, bags, ender, holders, pending, kept, ground(server, player.getUUID(), item));
+        return new Where(inventory, bags, ender, holders, pending, kept, ground(server, player.getUUID(), item),
+                KeepsakeBonds.stashed(player, item, is));
     }
 
     // 袋や箱 (シュルカーボックスなど) の中 (一段だけ)
-    private static int inside(ItemStack holder, Item item) {
+    private static int inside(ItemStack holder, java.util.function.Predicate<ItemStack> is) {
         if (holder.isEmpty()) {
             return 0;
         }
@@ -180,7 +223,7 @@ public final class Keepsakes {
         ItemContainerContents box = holder.get(DataComponents.CONTAINER);
         if (box != null) {
             for (ItemStack s : box.nonEmptyItems()) {
-                if (s.is(item)) {
+                if (is.test(s)) {
                     n += s.getCount();
                 }
             }
@@ -188,7 +231,7 @@ public final class Keepsakes {
         BundleContents bundle = holder.get(DataComponents.BUNDLE_CONTENTS);
         if (bundle != null) {
             for (ItemStack s : bundle.items()) {
-                if (s.is(item)) {
+                if (is.test(s)) {
                     n += s.getCount();
                 }
             }
@@ -200,7 +243,7 @@ public final class Keepsakes {
         return player.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
     }
 
-    private static int countKept(ServerPlayer player, Item item) {
+    private static int countKept(ServerPlayer player, java.util.function.Predicate<ItemStack> item) {
         CompoundTag tag = persisted(player);
         int n = 0;
         n += countList(player.registryAccess(), tag.getCompound(KEPT_TAG).getList("Inventory", Tag.TAG_COMPOUND), item);
@@ -215,11 +258,11 @@ public final class Keepsakes {
                 + tag.getCompound(KEPT_EXTRA_TAG).getList("Items", Tag.TAG_COMPOUND).size();
     }
 
-    private static int countList(HolderLookup.Provider registries, ListTag list, Item item) {
+    private static int countList(HolderLookup.Provider registries, ListTag list, java.util.function.Predicate<ItemStack> item) {
         int n = 0;
         for (Tag t : list) {
             ItemStack s = ItemStack.parse(registries, t).orElse(ItemStack.EMPTY);
-            if (s.is(item)) {
+            if (item.test(s)) {
                 n += s.getCount();
             }
             n += inside(s, item);
@@ -246,13 +289,11 @@ public final class Keepsakes {
         return list;
     }
 
-    // 天の鍵の欠片を受け取ったのに、どこにも見当たらない (心臓をもう一度倒したときに戻すかどうか)
-    // 天の鍵にした後は、欠片が手もとになくても「なくした」ではない (鍵になった。14_beta の 4 章)
+    // 岩鯨の心臓 (TitanLoot) が「なくした欠片」をその場で戻すかどうか。常に false。
+    // なくした欠片の戻し方は巨神をまたいで KeepsakeBonds が受け持つ (心臓をもう一度倒す・控え帳から呼び戻す)。
+    // TitanLoot が欠片をそのまま足すと、箱にしまった欠片と合わせて二つになるため (一人一つ。11 の 4.2 節)
     public static boolean fragmentMissing(ServerPlayer player) {
-        if (jp.revati.skyabyss.story.SkyKey.assembled(player)) {
-            return false;
-        }
-        return locate(player, ModItems.SKY_KEY_FRAGMENT.get()).total() == 0;
+        return false;
     }
 
     // ---------------------------------------------------------------- 守り
