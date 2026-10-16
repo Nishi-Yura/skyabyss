@@ -98,9 +98,13 @@ public final class TideKeeper {
         nextTry = now + RETRY;
     }
 
-    // 出現の条件 (08 の 2.1節、15 章の判断 4 は推奨 A): 4 日分たち、空の通過が一度起きたあと
+    // 出現の条件 (08 の 2.1節、15 章の判断 4 は推奨 A): 4 日分たち、空の通過が一度起きたあと。加えて岩鯨の心臓が止まったあと (10 の 3 章)
     static boolean canAppear(ServerLevel level) {
         if (level.getGameTime() < FIRST_APPEARANCE_TICK) {
+            return false;
+        }
+        // 前の巨神 (岩鯨) の心臓を、ワールドの誰かが止めたあと (10 の 3 章。ゲームルール skyabyssStoryGate で切れる)
+        if (!jp.revati.skyabyss.progress.Progression.worldAllows(level.getServer(), SLOT)) {
             return false;
         }
         return Config.HORROR_EVENT_FREQUENCY.get() <= 0 || SkyEventData.get(level).passCount() > 0;

@@ -52,11 +52,16 @@ public final class Growth {
             return 0;
         }
         GrowthData data = get(player);
-        int gained = addXpRaw(data, amount);
+        // 物語の進みで決まるレベルの上限 (10 の 5 章)
+        int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
+        int gained = addXpRaw(data, amount, cap);
         sync(player);
         if (gained > 0) {
             applyModifiers(player);
             celebrate(player, data, gained);
+            if (data.level >= cap && cap < GrowthRules.MAX_LEVEL) {
+                jp.revati.skyabyss.progress.Progression.tellCapped(player, cap);
+            }
         }
         if (player.connection != null) {
             PacketDistributor.sendToPlayer(player, new GrowthGainPayload(amount, reason, gained));
@@ -66,14 +71,24 @@ public final class Growth {
 
     // 記録だけを進める (同期・演出なし)。自己テストからも使う
     public static int addXpRaw(GrowthData data, long amount) {
+        return addXpRaw(data, amount, GrowthRules.MAX_LEVEL);
+    }
+
+    // cap: 物語の進みで決まるレベルの上限。上限のレベルでは、バーが満ちる 1 手前まで貯まり、あふれた分は捨てる
+    // (物語が進んで上限が上がれば、次の経験値ですぐ上がる)。50 では 0 のまま (バーは満ちたまま)
+    public static int addXpRaw(GrowthData data, long amount, int cap) {
         int before = data.level;
+        int limit = Math.min(cap, GrowthRules.MAX_LEVEL);
         long xp = data.xp + amount;
-        while (data.level < GrowthRules.MAX_LEVEL && xp >= GrowthRules.xpToNext(data.level)) {
+        while (data.level < limit && xp >= GrowthRules.xpToNext(data.level)) {
             xp -= GrowthRules.xpToNext(data.level);
             data.level++;
         }
-        // 上限では、あふれた分は捨てる (バーは満ちたまま)
-        data.xp = data.level >= GrowthRules.MAX_LEVEL ? 0 : (int) xp;
+        if (data.level >= GrowthRules.MAX_LEVEL) {
+            data.xp = 0;
+        } else {
+            data.xp = (int) Math.min(xp, GrowthRules.xpToNext(data.level) - 1L);
+        }
         return data.level - before;
     }
 

@@ -289,6 +289,8 @@ public final class TitanLoot {
     // ---------------------------------------------------------------- 入口 (T が撃破時に呼ぶ。FIX_PLAN の約束)
     // participants: その戦いに参加した人 (途中で倒れて復活待ちの人も含む)
     public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants) {
+        // 物語の進み (経験値より先に。レベルの上限が上がってから心臓の経験値を渡す。progress/Progression)
+        jp.revati.skyabyss.progress.Progression.onTitanStopped(level.getServer(), unique(participants), STONE_WHALE);
         // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
         jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "heart");
         MinecraftServer server = level.getServer();

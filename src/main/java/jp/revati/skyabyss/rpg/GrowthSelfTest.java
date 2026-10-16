@@ -121,9 +121,10 @@ public final class GrowthSelfTest {
                 "random rounding is wrong");
         ServerLevel overworld = server.overworld();
         GrowthData budget = new GrowthData();
-        double first = GrowthRewards.vanillaBudget(overworld, budget, 140);
+        // 上限 (VANILLA_DAILY) の 10 手前まで使い、次の 20 は 10 が満額・10 が疲れ
+        double first = GrowthRewards.vanillaBudget(overworld, budget, GrowthRules.VANILLA_DAILY - 10);
         double second = GrowthRewards.vanillaBudget(overworld, budget, 20);
-        check(f, first == 140 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
+        check(f, first == GrowthRules.VANILLA_DAILY - 10 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
                 "vanilla daily budget is wrong: " + first + ", " + second);
 
         // ---------------------------------------------------------------- 保存 (NBT) と同期のコーデック

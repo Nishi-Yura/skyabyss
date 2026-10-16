@@ -65,6 +65,11 @@ public final class TideTravel {
         if (coolingDown(player) || player.isSleeping()) {
             return;
         }
+        // 資格がなければ、舟から降ろす前に断る
+        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, TideKeeper.SLOT)) {
+            startCooldown(player);
+            return;
+        }
         if (player.isPassenger()) {
             player.stopRiding();
         }
@@ -73,6 +78,11 @@ public final class TideTravel {
 
     // 背中へ渡す (コマンドからも)
     public static boolean board(ServerPlayer player) {
+        // 乗れるのは、自分で岩鯨の心臓を止めた人だけ (10 の 3 章)。断ったら門の判定がすぐまた来ないように待たせる
+        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, TideKeeper.SLOT)) {
+            startCooldown(player);
+            return false;
+        }
         ServerLevel back = player.server.getLevel(TIDE_BACK);
         if (back == null) {
             SkyAbyss.LOGGER.error("Tide back dimension is missing");
