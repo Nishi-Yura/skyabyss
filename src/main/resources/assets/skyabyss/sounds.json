@@ -1110,5 +1110,120 @@
         "name": "skyabyss:ember_mobs/cinder_roller_death"
       }
     ]
+  },
+  "ember_heart_beat": {
+    "subtitle": "subtitles.skyabyss.ember_heart_beat",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/beat"
+      }
+    ]
+  },
+  "ember_heart_roar": {
+    "subtitle": "subtitles.skyabyss.ember_heart_roar",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/roar",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "ember_heart_breath": {
+    "subtitle": "subtitles.skyabyss.ember_heart_breath",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/breath"
+      }
+    ]
+  },
+  "ember_heart_pulse": {
+    "subtitle": "subtitles.skyabyss.ember_heart_pulse",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/pulse"
+      }
+    ]
+  },
+  "ember_heart_orb": {
+    "subtitle": "subtitles.skyabyss.ember_heart_orb",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/orb"
+      }
+    ]
+  },
+  "ember_heart_floor": {
+    "subtitle": "subtitles.skyabyss.ember_heart_floor",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/floor"
+      }
+    ]
+  },
+  "ember_heart_gale": {
+    "subtitle": "subtitles.skyabyss.ember_heart_gale",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/gale"
+      }
+    ]
+  },
+  "ember_heart_pellet": {
+    "subtitle": "subtitles.skyabyss.ember_heart_pellet",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/pellet"
+      }
+    ]
+  },
+  "ember_heart_chill": {
+    "subtitle": "subtitles.skyabyss.ember_heart_chill",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/chill"
+      }
+    ]
+  },
+  "ember_heart_embers": {
+    "subtitle": "subtitles.skyabyss.ember_heart_embers",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/embers"
+      }
+    ]
+  },
+  "ember_heart_fading": {
+    "subtitle": "subtitles.skyabyss.ember_heart_fading",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/fading",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "ember_heart_echo": {
+    "subtitle": "subtitles.skyabyss.ember_heart_echo",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/echo"
+      }
+    ]
+  },
+  "ember_heart_veil": {
+    "subtitle": "subtitles.skyabyss.ember_heart_veil",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/veil"
+      }
+    ]
+  },
+  "ember_heart_death": {
+    "subtitle": "subtitles.skyabyss.ember_heart_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_heart/death",
+        "attenuation_distance": 32
+      }
+    ]
   }
 }

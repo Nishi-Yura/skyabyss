@@ -80,6 +80,7 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, THUNDER_WING_LEVEL));
         // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
+        jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.Xp.put(MOD_ENEMIES);
     }
 
 
