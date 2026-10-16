@@ -544,7 +544,13 @@ def main():
     write_tex("entity", "cinder_roller", ro["tex"], ro["gl"])
     write_anim("entity", "cinder_roller", ANIM_ROLLER)
 
-    # アニメの姿勢ごとの重なり (別の骨の立方体どうし)。灰被りは武器を付け、殻のある姿で調べる
+    # 15 章 (ハイポリゴン化): 書き出した素の形を、面の整理・面取り・飾りで彫り直す (rough/hp_mobs_storm_ember.py)
+    sys.path.insert(0, str(HERE / "rough"))
+    import hp_mobs_storm_ember as hp
+    for name in ("ash_thrall", "ember_moth", "cinder_roller"):
+        hp.install_mob(name)
+
+    # アニメの姿勢ごとの重なり (別の骨の立方体どうし)。灰被りは武器を付け、殻のある姿で調べる (素の形での検査)
     checks = {}
     th_times = [i * 0.1 for i in range(15)]
     for name in ("idle", "walk", "walk_flared", "attack", "hurt", "shell_break"):
