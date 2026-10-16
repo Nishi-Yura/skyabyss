@@ -770,6 +770,11 @@ def main():
     write_model("bubble_puffer", pu)
     write_anim("bubble_puffer", ANIM_PUFFER)
 
+    # ハイポリ化 (docs/design/15 の 8 章、担当 1a): 上で書いたものを、tools/sources/hp_base/entity/ の控えから作り直した版 (採用案) で置き換える。
+    # 控えは「今の install の出力」の写し。この install の箱を変えたら、控えを取り直してから hp_mobs_whale_tide.py の build を見直す。
+    import hp_mobs_whale_tide as hp  # noqa: E402
+    hp.install_picks(["coral_thrall", "reef_scuttler", "bubble_puffer"])
+
     for name, r in (("coral_thrall", th), ("reef_scuttler", sc), ("bubble_puffer", pu)):
         print(f"{name}: 箱 {r['n']}、テクスチャ {r['tex'].shape[1]}x{r['tex'].shape[0]}、光る画素 {int((r['gl'][..., 3] > 0).sum())}")
     previews(th, st_tex, st_gl, sc, pu, sp)
