@@ -34,12 +34,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の枠と必要レベルのクライアント側:
 //  - 装飾の画面をメニューに結びつける。持ち物の画面の上に「持ち物」「装飾」のつまみを足す
-//  - B キーで護符の枠の品を使う (バニラ・このModのほかのキー J/K/U/R/G/V/Z とぶつからない)
+//  - H キーで護符の枠の品を使う (バニラ・このModのほかのキー J/K/U/B/O/R/G/V/Z とぶつからない)
 //  - 装備のツールチップに必要レベルを常に出す (足りないときは赤で、何が起きるかも)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AccessoryClient {
     public static final KeyMapping CHARM_KEY = new KeyMapping("skyabyss_gear.key.charm", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.skyabyss");
     private static final int OK = 0x9AA0B0;
     private static final int SHORT = 0xE0505A;
 
