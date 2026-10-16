@@ -1203,6 +1203,13 @@ C1・C2・E・C3・F は、自分の Setup の共通の準備で一度だけ次�
 | `EmberBackTrials.ring(level, trial, player)` | 石を鳴らす（ふつうは人が石を右クリックしたとき B が呼ぶ） |
 | `EmberBackTrials.sleeping(level, "east")` | その部屋が眠っているか |
 | `EmberBackState.get(level).seed()` | リセットの種（島の並び 3 通り・打つ順 4 通りを決める）。`firstForgeUsed()`・`markFirstForgeUsed()` は C2 の「初めての挑戦はやさしい順」 |
+### 19.3 作ったものと検査の結果（担当 B の仕上げ）
+
+- 体（`EmberBodyBuilder` と `tools/gen_ember_back_body.py` → `body.bin`）は推奨 A の火山の背の火蜥蜴。広間・喉・休み場・碑文 6 枚と入口 3 枚・囁き（`EmberWhispers`）・三つの抜け道と熾の底の門・`EmberBackState`・`EmberBackTrials`（リセット・眠る試練・休み場）・`EmberHeat`（たまり方・冷え方・焦げの傷）・`HeatHud`（文字は枠に収める）まで入った。部屋の箱（版 2）は変えていない。
+- 自己テスト `SELFTEST ember back` は合格: 体の穴（決めた口以外へ出ない。漏れ 0）、到着点から休み場・各部屋の口・奥の石・火口・背の上・亀裂の手すりまで歩いて行ける（門が閉じているあいだは前室へ行けない）、液体は建てた直後・100 tick 後・リセット後のどれも 0、看板 9 枚が 90 px に収まる、石・光る床・門・リセット・眠る試練、熱。`python tools/structure/ember_leaks.py`（台本 `tools/shots/ember_back.txt` の書き出し）も漏れ 0。
+- 建設時間: 新しいワールドの起動時に一度だけ約 20.6 秒（体 104 万ブロック 20.2 秒、掘り 0.4 秒。C1〜C3・E・F の部屋の中身は未接続で 0）。設計の目安（7〜11 秒）より長い。保存済みのワールドでは建て直さない。
+- 判断が要る点: 初回の建設が 20 秒。縮めるなら体の外側の飾り（鱗の面取り）を減らす。
+
 ## 18. 敵の実装の記録（灰被り・火の粉蛾・燠虫。11.2節の担当 D、2026-10-16）
 
 5.1節の道中の敵 3 種を作った。ラフは 14 章の推奨どおりすべて A（灰被り A 灰の衣＋火掻き棒、火の粉蛾 A 灰の翅、燠虫 A 玄武の殻）。型は 08 の 18 章（潮殻の敵）。背中の体と試練（B・C）はまだ無いので、試練への配置はしていない（湧かせるのはコマンドと、試練の担当が `EmberMob.TRIAL_TAG` を付けて湧かせる形）。コードは `jp.revati.skyabyss.titan.ember.mob`（描画は `.client`）。
