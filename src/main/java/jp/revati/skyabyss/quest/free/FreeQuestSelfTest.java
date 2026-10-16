@@ -43,18 +43,14 @@ import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 自由なモードのサブクエストの自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー、起動直後に一度)。
 // 全クエストを最初から最後まで (会話・板・合図・倒す・納める・連れ戻す)、解放の条件 (段階・伝承)、
 // 繰り返し (同じ日に受け直せない・報酬は周期に一度・日が替わると受けられる・受けたままの頼みは残る)、日替わりの枠、
 // パーティの共有 (倒す・合図は仲間も、ほかの人は数えない)、二人が同時に進める、印の付いた品を別の品で代えられない、
 // 記録の保存と読み込みを確かめる。結果はログに SELFTEST freequest PASSED / FAILED
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class FreeQuestSelfTest {
     private static final String ST = NpcSetup.STORYTELLER_ID;
     private static final String WC = NpcSetup.WHALE_CHASER_ID;
@@ -63,12 +59,8 @@ public final class FreeQuestSelfTest {
     private FreeQuestSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        MinecraftServer server = event.getServer();
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
         ServerLevel level = server.overworld();

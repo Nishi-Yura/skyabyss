@@ -25,29 +25,22 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 必要レベルと装飾の枠の自己テスト (SKYABYSS_SELFTEST=1)。結果はログに SELFTEST accessory PASSED / FAILED。
 //  - 必要 Lv の表 (03 の 10.2節)、防具が着られない、武器の修飾子がちょうど打ち消される (強化込み)
 //  - 枠の決まり (種類・重複・レベル)、効くのは枠の品だけ、保存 (NBT) と同期 (StreamCodec) の往復
 //  - 前のセーブの移し替え、死んだときに落ちる品、護符をキーで使う (待ち)
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AccessorySelfTest {
     private AccessorySelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         try {
-            run(event.getServer(), f);
+            run(server, f);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("accessory selftest crashed", e);
             f.add("crashed: " + e);

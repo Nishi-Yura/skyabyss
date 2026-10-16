@@ -18,17 +18,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 巨神での移動の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST travel PASSED / FAILED。
 // 1. 碑の登録 (重ね・上限・忘れる) と保存 (プレイヤーの記録のコーデック、世界の碑の一覧)
@@ -37,10 +34,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 4. 降ろす場所 (溶岩・サボテンを避け、空の開けた所)
 // 5. 一体だけ・排他 (同時に呼ぶ人: 近くなら一緒に乗る、遠くなら断る。岩鯨は 1 体のまま)
 // 6. 旅の流れ (迎え → 出発 → 雲の上 → 降下 → 鎖の垂れ口が降ろす場所の真上) をサーバーの外で早回しする
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelSelfTest {
-    // 岩鯨の見守りの自己テスト (40 tick 目) の後、岩鯨の背の自己テストがサーバーを止める前に行う
-    private static int countdown = -1;
+    // 流す順番と待つ tick は SelfTestRunner が決める (岩鯨の見守りの自己テストの後)
     private static final UUID TEST_A = UUID.fromString("7a7e1000-0000-4000-8000-00000000a7a1");
     private static final UUID TEST_B = UUID.fromString("7a7e1000-0000-4000-8000-00000000a7a2");
     private static final UUID TEST_C = UUID.fromString("7a7e1000-0000-4000-8000-00000000a7a3");
@@ -51,28 +46,19 @@ public final class TravelSelfTest {
     private TravelSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        ServerLevel level = event.getServer().overworld();
+    // 呼ぶのは SelfTestRunner: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
+    public static void load(MinecraftServer server) {
+        ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
         for (int cx = STRIP_FROM; cx <= STRIP_TO; cx++) {
             for (int cz = -2; cz <= 2; cz++) {
                 level.setChunkForced((spawn.getX() >> 4) + cx, (spawn.getZ() >> 4) + cz, true);
             }
         }
-        countdown = 70;
     }
 
-    @SubscribeEvent
-    static void onServerTick(ServerTickEvent.Post event) {
-        if (countdown < 0 || --countdown > 0) {
-            return;
-        }
-        countdown = -1;
-        ServerLevel level = event.getServer().overworld();
+    public static void runSelfTest(MinecraftServer server) {
+        ServerLevel level = server.overworld();
         List<String> failures = new ArrayList<>();
         try {
             run(level, failures);
