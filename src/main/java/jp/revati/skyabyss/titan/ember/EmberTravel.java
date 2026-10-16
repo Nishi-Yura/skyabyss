@@ -27,7 +27,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 // 地上と「余燼の背」(ember_back) を行き来させる (13 の 2.4〜2.5節)。
 // - 乗る: 眠る巨神の熱の口 (EmberMouthEntity) に、吸うか止めるあいだに歩いて入る。画面が橙に沈み、呑みこむ音。
@@ -86,7 +85,7 @@ public final class EmberTravel {
             from.playSound(null, player.getX(), player.getY(), player.getZ(), EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.5f, 1.0f);
             from.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY() + 1, player.getZ(), 40, 0.8, 0.8, 0.8, 0.05);
         }
-        PacketDistributor.sendToPlayer(player, new EmberSurfaceNetwork.Plunge(30));
+        EmberSurfaceNetwork.send(player, new EmberSurfaceNetwork.Plunge(30));
         Vec3 at = arrival(back);
         player.fallDistance = 0;
         player.teleportTo(back, at.x, at.y, at.z, EmberBackLayout.ARRIVAL_YAW, 0f);
@@ -115,7 +114,7 @@ public final class EmberTravel {
         PASSAGE.startCooldown(player);
         ON_PLAIN.remove(player.getUUID());
         EmberHeat.reset(player);
-        PacketDistributor.sendToPlayer(player, new EmberSurfaceNetwork.Plunge(24));
+        EmberSurfaceNetwork.send(player, new EmberSurfaceNetwork.Plunge(24));
         if (player.level() instanceof ServerLevel from) {
             from.playSound(null, player.getX(), player.getY(), player.getZ(), EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.0f, 1.2f);
         }
@@ -170,7 +169,11 @@ public final class EmberTravel {
         }
         BlockPos feet = player.blockPosition();
         ServerLevel level = player.serverLevel();
-        return level.canSeeSky(feet) && level.getBlockState(feet.below()).is(Blocks.SMOOTH_BASALT);
+        if (!level.canSeeSky(feet) || !level.getBlockState(feet.below()).is(Blocks.SMOOTH_BASALT)) {
+            return false;
+        }
+        // 到着点のそばは除く (体がまだ建っていないうちは、到着点そのものが灰の原の上にある。戻しても同じ所なので、繰り返さない)
+        return player.position().distanceToSqr(arrival(level)) > 4 * 4;
     }
 
     @SubscribeEvent

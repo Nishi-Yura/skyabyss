@@ -29,6 +29,13 @@ public final class EmberSurfaceNetwork {
                 .playToClient(StoneInfo.TYPE, StoneInfo.STREAM_CODEC, (p, c) -> EmberTitanClient.stoneInfo(p));
     }
 
+    // 一人へ送る。偽のプレイヤー (自己テスト・ほかの Mod) には送らない (接続が無く、送ると落ちる)
+    public static void send(net.minecraft.server.level.ServerPlayer player, CustomPacketPayload payload) {
+        if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer) && player.connection != null) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, payload);
+        }
+    }
+
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, path);
     }

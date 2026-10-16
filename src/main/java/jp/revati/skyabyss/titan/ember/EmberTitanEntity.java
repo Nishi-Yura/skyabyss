@@ -29,7 +29,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -520,7 +519,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
             } else {
                 p.push(fx * EXHALE_PUSH, 0.01, fz * EXHALE_PUSH);
                 p.hurtMarked = true;
-                if (!p.isCreative() && breathTick % 40 == 0) {
+                // 背中から出てきたばかりの人 (口の前 6 ブロックに立つ) は燃やさない
+                if (!p.isCreative() && breathTick % 40 == 0 && !EmberTravel.PASSAGE.coolingDown(p)) {
                     p.igniteForTicks(20);
                 }
             }
@@ -542,7 +542,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
             int count = tier == 3 ? 24 : tier == 2 ? 10 : 4;
             level.sendParticles(p, ParticleTypes.WHITE_ASH, false, p.getX(), p.getY() + 6, p.getZ(), count, 10, 4, 10, 0.0);
             if (tickCount % 40 == 0) {
-                PacketDistributor.sendToPlayer(p, new EmberSurfaceNetwork.AshSky(tier));
+                EmberSurfaceNetwork.send(p, new EmberSurfaceNetwork.AshSky(tier));
             }
             if (d < 160) {
                 level.sendParticles(p, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, crater.x, crater.y, crater.z, 3, 3, 1, 3, 0.02);
@@ -667,7 +667,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
                 continue;
             }
             p.playNotifySound(EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, volume, 0.8f + random.nextFloat() * 0.2f);
-            PacketDistributor.sendToPlayer(p, new EmberSurfaceNetwork.Tremor(60, shake));
+            EmberSurfaceNetwork.send(p, new EmberSurfaceNetwork.Tremor(60, shake));
         }
     }
 

@@ -26,7 +26,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 // 温石 (おんじゃく、13 の 2.6節。ID は warm_stone、11.2節の HearthStoneItem)。灰の民の焼き物の小石で、余燼の巨神を探す手間を減らす。
 // - 手に持つ: 画面に巨神の向き (手の温かさの左右)、距離の三段、眠っている／地の中、次の眠りまで (EmberTitanClient が描く)
@@ -136,7 +135,7 @@ public class WarmStoneItem extends Item {
                 return;
             }
             if (player.tickCount % 20 == 7 && holds(player)) {
-                PacketDistributor.sendToPlayer(player, info(player));
+                EmberSurfaceNetwork.send(player, info(player));
             }
             if (player.tickCount % 100 == 31) {
                 giveIfEarned(player);

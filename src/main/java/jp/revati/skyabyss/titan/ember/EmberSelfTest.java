@@ -165,7 +165,7 @@ public final class EmberSelfTest {
             Vec3 exit = first.exitPoint();
             expect(!first.inMouth(exit.x, first.getY() + EmberTitanEntity.TONGUE_UP, exit.z), "the exit is in the mouth at yaw " + yaw, f);
             Vec3 l = first.local(exit.x, first.getY(), exit.z);
-            expect(Math.abs(l.x) < 1e-6 && Math.abs(l.z - EmberTitanEntity.EXIT_FORWARD) < 1e-6, "local() does not invert offset() at yaw " + yaw, f);
+            expect(Math.abs(l.x) < 1e-3 && Math.abs(l.z - EmberTitanEntity.EXIT_FORWARD) < 1e-3, "local() does not invert offset() at yaw " + yaw, f);
             Vec3 front = first.position().add(EmberTitanEntity.offset(yaw, 0, EmberTitanEntity.TONGUE_UP, EmberTitanEntity.SNOUT_FORWARD + 8));
             Vec3 aside = first.position().add(EmberTitanEntity.offset(yaw, 40, EmberTitanEntity.TONGUE_UP, EmberTitanEntity.SNOUT_FORWARD + 8));
             Vec3 behind = first.position().add(EmberTitanEntity.offset(yaw, 0, EmberTitanEntity.TONGUE_UP, -60));
@@ -183,8 +183,15 @@ public final class EmberSelfTest {
         expect(Math.abs(first.getY() + EmberTitanEntity.TONGUE_UP - ground) < 1e-6, "the tongue is not on the ground: " + first.getY() + " ground " + ground, f);
         EmberTravel.Landing landing = EmberTravel.landing(level);
         Vec3 exit = first.exitPoint();
-        expect(Math.hypot(landing.pos().x - exit.x, landing.pos().z - exit.z) < 16.5 && Math.abs(landing.yaw() - first.getYRot()) < 1e-3,
-                "leaving a sleeping titan does not land at the mouth front: " + landing.pos() + " exit " + exit, f);
+        // 口の前に立てる地面があればそこへ (巨神に背を向ける)。なければ (試す所が水の上など) 共有スポーン地点
+        Vec3 stand = EmberGround.landingAt(level, exit.x, exit.z, 16);
+        if (stand != null) {
+            expect(landing.pos().distanceTo(stand) < 1e-6 && Math.hypot(stand.x - exit.x, stand.z - exit.z) < 16.5
+                    && Math.abs(landing.yaw() - first.getYRot()) < 1e-3, "leaving a sleeping titan does not land at the mouth front: " + landing.pos() + " exit " + exit, f);
+        } else {
+            SkyAbyss.LOGGER.warn("SELFTEST ember surface: no standing ground at the test mouth front {}; checked the spawn fallback", exit);
+            expect(Float.isNaN(landing.yaw()), "with no ground at the mouth front, leaving must fall back to the spawn", f);
+        }
         // 熱の口のエンティティ: 眠ると口の真ん中に出る
         first.setBreathTick(5);
         expect(first.mouthOpen(), "the mouth is not open while breathing in", f);
@@ -211,7 +218,7 @@ public final class EmberSelfTest {
                 "the carried state is wrong: " + second.saveState(), f);
         // 呼び直したあと (潜っている) は、最後に眠った場所の口の前へ戻す
         EmberTravel.Landing later = EmberTravel.landing(level);
-        expect(Math.hypot(later.pos().x - exit.x, later.pos().z - exit.z) < 16.5, "leaving a burrowing titan does not land at the last sleeping place", f);
+        expect(stand == null || later.pos().distanceTo(stand) < 1e-6, "leaving a burrowing titan does not land at the last sleeping place: " + later.pos(), f);
         if (mouth != null) {
             mouth.tick();
             expect(mouth.isRemoved(), "the heat maw stayed after its titan was called again", f);

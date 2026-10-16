@@ -62,7 +62,7 @@ public class EmberTitanRenderer extends GeoEntityRenderer<EmberTitanEntity> {
         @Override
         public void render(PoseStack poseStack, EmberTitanEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            RenderType glow = getRenderType(animatable);
+            RenderType glow = getRenderType(animatable, bufferSource);
             if (glow == null) {
                 return;
             }
