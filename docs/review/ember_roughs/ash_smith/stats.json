@@ -1,8 +1,8 @@
 {
   "a": {
     "boxes": {
-      "boss": 398,
-      "hammer": 19,
+      "boss": 702,
+      "hammer": 27,
       "tongs": 18
     },
     "overlaps": {
@@ -14,42 +14,51 @@
       "boss": 0,
       "hammer": 0,
       "tongs": 0,
-      "pruned_hidden": 4
+      "pruned_hidden": 34
     },
     "glow_px": {
-      "boss": 18548,
-      "hammer": 792,
+      "boss": 18700,
+      "hammer": 960,
       "tongs": 1008
     },
     "bounds": {
       "lo": [
-        -33.0,
+        -35.5,
         0.0,
         -21.5
       ],
       "hi": [
-        33.0,
+        35.5,
         79.0,
-        25.0
+        34.5
       ],
       "height_blocks": 4.94
     },
+    "hammer_idle_lowest_y": 0.13,
+    "socket_main_rest_rotation": {
+      "intended": [
+        -45.0,
+        0.0,
+        0.0
+      ],
+      "geo_json": [
+        45.0,
+        0.0,
+        -0.0
+      ]
+    },
     "texture": [
       256,
-      1094
+      1334
     ],
     "cross_bone_carves": {
-      "bellows_r<-belly": 4,
-      "bellows_r<-body": 8,
-      "bellows_l<-belly": 4,
-      "bellows_l<-body": 8
+      "bellows_r<-body": 35,
+      "bellows_l<-body": 30
     },
     "bones": [
       "body",
       "belly",
       "apron",
-      "bellows_l",
-      "bellows_r",
       "head",
       "arm_r",
       "forearm_r",
@@ -58,13 +67,15 @@
       "forearm_l",
       "socket_off",
       "leg_r",
-      "leg_l"
+      "leg_l",
+      "bellows_l",
+      "bellows_r"
     ]
   },
   "b": {
     "boxes": {
-      "boss": 465,
-      "hammer": 35,
+      "boss": 663,
+      "hammer": 32,
       "tongs": 23
     },
     "overlaps": {
@@ -76,43 +87,51 @@
       "boss": 0,
       "hammer": 0,
       "tongs": 0,
-      "pruned_hidden": 72
+      "pruned_hidden": 125
     },
     "glow_px": {
       "boss": 4120,
-      "hammer": 1136,
+      "hammer": 1240,
       "tongs": 1140
     },
     "bounds": {
       "lo": [
-        -34.5,
+        -36.5,
         0.0,
         -18.5
       ],
       "hi": [
-        34.5,
+        36.5,
         101.0,
-        24.5
+        34.5
       ],
       "height_blocks": 6.31
     },
+    "hammer_idle_lowest_y": 0.13,
+    "socket_main_rest_rotation": {
+      "intended": [
+        -45.0,
+        0.0,
+        0.0
+      ],
+      "geo_json": [
+        45.0,
+        0.0,
+        -0.0
+      ]
+    },
     "texture": [
       256,
-      1140
+      1188
     ],
     "cross_bone_carves": {
-      "body<-head": 25,
-      "chimney<-body": 12,
-      "bellows<-body": 56,
-      "bellows<-belly": 3
+      "chimney<-body": 9,
+      "bellows<-body": 62
     },
     "bones": [
       "body",
       "belly",
       "apron",
-      "bellows",
-      "chimney",
-      "smoke",
       "head",
       "arm_r",
       "forearm_r",
@@ -121,13 +140,16 @@
       "forearm_l",
       "socket_off",
       "leg_r",
-      "leg_l"
+      "leg_l",
+      "bellows",
+      "chimney",
+      "smoke"
     ]
   },
   "c": {
     "boxes": {
-      "boss": 363,
-      "hammer": 13,
+      "boss": 704,
+      "hammer": 21,
       "tongs": 18
     },
     "overlaps": {
@@ -139,45 +161,57 @@
       "boss": 0,
       "hammer": 0,
       "tongs": 0,
-      "pruned_hidden": 0
+      "pruned_hidden": 38
     },
     "glow_px": {
-      "boss": 5416,
-      "hammer": 568,
+      "boss": 5612,
+      "hammer": 632,
       "tongs": 1224
     },
     "bounds": {
       "lo": [
-        -28.0,
+        -32.5,
         0.0,
         -17.5
       ],
       "hi": [
-        28.0,
-        71.5,
-        23.0
+        32.5,
+        72.5,
+        33.0
       ],
-      "height_blocks": 4.47
+      "height_blocks": 4.53
+    },
+    "hammer_idle_lowest_y": 0.31,
+    "socket_main_rest_rotation": {
+      "intended": [
+        -45.0,
+        0.0,
+        0.0
+      ],
+      "geo_json": [
+        45.0,
+        0.0,
+        -0.0
+      ]
     },
     "texture": [
       256,
-      798
+      1098
     ],
     "cross_bone_carves": {
-      "body<-furnace": 10,
-      "bellows_r<-body": 7,
-      "bellows_r<-belly": 4,
-      "bellows_l<-body": 7,
-      "bellows_l<-belly": 4
+      "body<-furnace": 25,
+      "belly<-body": 5,
+      "bellows_r<-body": 20,
+      "bellows_r<-arm_r": 1,
+      "bellows_r<-belly": 12,
+      "bellows_l<-body": 20,
+      "bellows_l<-arm_l": 1,
+      "bellows_l<-belly": 12
     },
     "bones": [
       "body",
       "belly",
       "apron",
-      "furnace",
-      "flue",
-      "bellows_l",
-      "bellows_r",
       "head",
       "arm_r",
       "forearm_r",
@@ -186,7 +220,11 @@
       "forearm_l",
       "socket_off",
       "leg_r",
-      "leg_l"
+      "leg_l",
+      "furnace",
+      "flue",
+      "bellows_l",
+      "bellows_r"
     ]
   }
 }

@@ -18,11 +18,11 @@
     "glow_px": 3388
   },
   "c": {
-    "boxes": 316,
+    "boxes": 286,
     "overlaps": 0,
     "overlaps_walk_sat": 0,
     "overlaps_curled_sat": 0,
-    "buried": 2,
+    "buried": 0,
     "dropped_hidden": 0,
     "glow_px": 3586
   }

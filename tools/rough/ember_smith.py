@@ -101,13 +101,13 @@ def ash_style(X, Y, Z, f, mat):
         return None
     h = h01(X, Y, Z)
     if mat in ("skin", "skin_dk"):
-        if f == "up" and h < 0.22:
-            return RAMP["ash"][2] if h < 0.1 else RAMP["ash"][0]     # 肩や腕の上に積もった灰
-        if h > 0.988:
+        if f == "up" and Y > 40 and h < 0.07:
+            return RAMP["ash"][2] if h < 0.03 else RAMP["ash"][0]    # 肩や背の上に積もった灰
+        if f in ("south", "east", "west") and h > 0.993:
             return "#F3E6D3"                                          # 汗の光 (光らない、明るい点)
-        if h < 0.035:
+        if h < 0.012:
             return RAMP["ash"][1]
-        if 0.5 < h < 0.56:
+        if 0.5 < h < 0.53:
             return r[0]                                               # 煤のしみ
         return None
     if mat == "soot":

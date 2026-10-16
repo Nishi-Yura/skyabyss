@@ -33,7 +33,7 @@ SHEET = ROOT / "docs/review/ember_roughs/titan.png"
 # ---------------------------------------------------------------- 格子
 CELL = 2
 X0, X1 = -126.0, 126.0
-Y0, Y1 = 0.0, 184.0                   # 地面より下は作らない
+Y0, Y1 = 0.0, 192.0                   # 地面より下は作らない
 Z0, Z1 = -210.0, 250.0
 NX = int((X1 - X0) * CELL)
 NY = int((Y1 - Y0) * CELL)
@@ -60,7 +60,7 @@ TONES = {
     "deepred": [(122, 32, 26), (104, 26, 22), (140, 42, 30)],
     "tongue": [(150, 48, 42), (134, 40, 36)],
     "bronze": [(156, 114, 62), (136, 96, 52), (172, 128, 72)],
-    "brick": [(112, 60, 46), (98, 52, 40), (124, 68, 52)],
+    "brick": [(94, 52, 42), (82, 46, 38), (104, 58, 46)],
     "column": [(72, 72, 78), (64, 64, 70), (80, 80, 86)],
     "smoke": [(122, 120, 120), (108, 106, 108), (136, 134, 132)],
     "smoke2": [(92, 90, 92), (82, 80, 84)],
@@ -501,7 +501,7 @@ def build_a():
         body = (rh <= r) & (Yl >= Yb) & (Yl <= YT)
         rim = (rh <= Rr + 1) & (rh > Rr - 4.0) & (Yl > YT) & (Yl <= YT + rimh)
         m = body | rim
-        crater = (rh < Rr - 4.0) & (Yl > YT - 14.0)
+        crater = (rh < Rr - 4.0) & (Yl > YT - 9.0)
         shaft = (rh < 7.0) & (Yl > 72.0)
         m &= ~crater & ~shaft
         shell = rh > r - 2.5
@@ -514,11 +514,11 @@ def build_a():
             da = np.abs(np.mod(th - wig + math.pi, 2 * math.pi) - math.pi) * np.maximum(rh, 1)
             mat = np.where(shell & (da < 2.2) & (f < 0.97) & (f > 0.03), MAT["lava"], mat)
         # 火口の床・井戸 (火の井戸。体の中の広間へ降りる)
-        floor = (rh < Rr - 4.0) & (Yl > YT - 16.0)
+        floor = (rh < Rr - 4.0) & (Yl > YT - 11.0)
         mat = np.where(floor, MAT["crust"], mat)
         mat = np.where(floor & (rh < 11.0), MAT["lava"], mat)
-        wall = (rh >= 7.0) & (rh < 9.5) & (Yl > 72.0)
-        mat = np.where(wall, np.where(Yl < 96.0, MAT["ember"], MAT["dark"]), mat)
+        wall = (rh >= 7.0) & (rh < 9.5) & (Yl > 72.0) & (Yl < YT - 11.0)
+        mat = np.where(wall, np.where(Yl < 104.0, MAT["ember"], MAT["deepred"]), mat)
         mat = np.where((rh < 7.0) & (Yl > 70.0) & (Yl <= 72.0), MAT["molten"], mat)
         return m, mat
     fill(cone, (-62, 62, Yb - 1, YT + 8, ZV - 62, ZV + 62), PART["ridge"])
@@ -538,6 +538,9 @@ def build_a():
     # 溶岩の流れ: 火山の裾から背を下り、脇腹を地面まで (2 筋)
     for side, zf in ((-1, ZV + 16.0), (1, ZV - 6.0)):
         lavafall(zf - 2.0, zf + 2.0, side, 64.0)
+    # 火口の床から立つ細い煙 (井戸の真上は空けて、脇から立てる)
+    solid_box((5.0, 9.0, YT - 9.0, YT + 12.0, ZV + 6.0, ZV + 10.0), PART["smoke"], MAT["smoke2"])
+    solid_box((3.0, 9.0, YT + 6.0, YT + 12.0, ZV + 8.0, ZV + 14.0), PART["smoke"], MAT["smoke2"])
     smoke_puffs([(2.0, YT + 16.0, ZV + 14.0, 6.0), (4.0, YT + 26.0, ZV + 22.0, 8.0),
                  (-1.0, YT + 38.0, ZV + 32.0, 9.0), (5.0, YT + 47.0, ZV + 44.0, 7.0)])
 
@@ -628,10 +631,10 @@ def chimney(cx, cz, ytop, broken=False):
 
 def build_b():
     # 台 (二段)
-    slab(-32, 32, -94, -28, 66.0, MAT["slag"])
-    slab(-26, 26, -88, -34, 69.0, MAT["brick"])
-    slab(-34, 34, -6, 74, 64.0, MAT["slag"])
-    slab(-28, 28, 0, 68, 67.0, MAT["brick"])
+    slab(-32, 32, -94, -28, 66.0, MAT["column"])
+    slab(-26, 26, -88, -34, 69.0, MAT["slag"])
+    slab(-34, 34, -6, 74, 64.0, MAT["column"])
+    slab(-28, 28, 0, 68, 67.0, MAT["slag"])
     # 台の間の溶岩の水路 (煉瓦の縁)
     fill(lambda X, Y, z: (inb(X, -5, 5) & inb(z, -30, -4) & (Y <= topf(X, z) + 3.0) & (Y > topf(X, z) - 2.0) &
                           (np.abs(X) > 2.5), MAT["brick"]), (-6, 6, 50, 72, -31, -3), PART["ridge"])
@@ -641,6 +644,11 @@ def build_b():
     hall(-20, 20, -82, -44, 69.0, 15.0, 3, -1)
     hall(-27, -5, 6, 40, 67.0, 13.0, 2, -1)
     hall(5, 28, 20, 62, 67.0, 11.0, 3, 1)
+    # 崩れ: 鍛冶場の屋根と壁の角が欠けている (灰の民が去った後の廃墟)
+    for bx in ((10, 21, 80, 100, -82, -70), (-28, -18, 74, 90, 30, 41), (20, 29, 72, 90, 52, 63)):
+        fill(lambda X, Y, z, bx=bx: (inb(X, bx[0], bx[1]) & inb(Y, bx[2], bx[3]) & inb(z, bx[4], bx[5]) &
+                                     (Y - bx[2] > 2.0 * np.abs(np.floor(X - (bx[0] + bx[1]) / 2) / 2.0)), 0),
+             (bx[0] - 1, bx[1] + 1, bx[2], bx[3], bx[4] - 1, bx[5] + 1), mode="zero")
     # 煙突 (5 本 + 折れた 1 本)
     tops = []
     for cx, cz, yt, br in ((-24.0, -60.0, 124.0, False), (22.0, -68.0, 112.0, False), (0.0, -16.0, 142.0, False),
@@ -660,7 +668,7 @@ def build_b():
     for cx, ty, cz, br in tops:
         if br:
             continue
-        puffs += [(cx + 0.5, ty + 5.0, cz + 3.0, 4.5), (cx + 2.0, ty + 13.0, cz + 9.0, 5.5)]
+        puffs += [(cx + 0.5, ty + 4.5, cz + 2.0, 4.5), (cx + 2.0, ty + 12.5, cz + 8.0, 5.5)]
     smoke_puffs(puffs)
 
 
@@ -690,7 +698,7 @@ def fin(zf, L, H, xin, side, base, center=False):
         h = 2.0 * math.floor(hz_ / 2.0) + 2.0
         Y2 = q2(Y)
         a = np.clip((Y2 - base) / max(H, 1.0), 0, 1)
-        th = 7.0 - 4.0 * a
+        th = 8.0 - 5.0 * a
         Xs = q2(X)
         if center:
             m = np.abs(Xs - xin) <= th / 2
@@ -738,17 +746,17 @@ def build_c():
     fill(crack_skin, (-18, 18, 20, 120, CZ0, CZ1), PART["ridge"], mode="replace")
     # 背骨の板: 割れ目の両脇に互い違い (鮫の鰭の形)。首と尾では 1 列の小さな板
     HZP = np.array([-140, -112, -80, -30, 30, 80, 104, 140, 180, 222], float)
-    HHP = np.array([8, 18, 32, 42, 40, 30, 22, 15, 9, 4], float)
+    HHP = np.array([10, 22, 40, 54, 52, 38, 26, 17, 10, 5], float)
     for side in (-1, 1):
-        zf = -112.0 + (0.0 if side < 0 else 11.0)
-        while zf + 18 < CZ1 + 2:
-            zm = zf + 9.0
+        zf = -112.0 + (0.0 if side < 0 else 13.0)
+        while zf + 22 < CZ1 + 4:
+            zm = zf + 11.0
             c = float(crack_cx(zm))
             hw = float(crack_hw(zm))
             xin = c + side * (hw + 2.0)
             base = float(topf(np.array(xin + side * 3.5), zm)) - 3.0
-            fin(zf, 18.0, float(np.interp(zm, HZP, HHP)), xin, side, base)
-            zf += 22.0
+            fin(zf, 22.0, float(np.interp(zm, HZP, HHP)), xin, side, base)
+            zf += 26.0
     for zf in list(np.arange(-150.0, -118.0, 14.0)) + list(np.arange(112.0, 222.0, 14.0)):
         zm = zf + 6.0
         cxz = float(cx_of(zm))
@@ -769,7 +777,7 @@ def build_c():
     for zj, n in ((-50.0, 4), (40.0, 3)):
         c = float(crack_cx(zj))
         fl = 50.0
-        solid_box((c - 2, c + 2, fl, fl + 34, zj - 2, zj + 2), PART["smoke"], MAT["steam"])
+        solid_box((c - 2, c + 2, fl - 4, fl + 34, zj - 2, zj + 2), PART["smoke"], MAT["steam"])
         y = fl + 34.0
         for i in range(n):
             h = 4.0 + 1.5 * i
@@ -801,6 +809,20 @@ def build(kid):
         build_b()
     else:
         build_c()
+    drop_islands()
+
+
+def drop_islands(min_cells=4000):
+    """どこにもつながらない小さな塊 (歯のかけら等) を消す。煙も体か煙の柱につながっていれば残る"""
+    from scipy import ndimage
+    lab, n = ndimage.label(K != 0)
+    if n <= 1:
+        return
+    sizes = ndimage.sum(np.ones(K.shape, np.uint8), lab, range(1, n + 1))
+    small = np.flatnonzero(sizes < min_cells) + 1
+    if small.size:
+        K[np.isin(lab, small)] = 0
+    print(f"  islands removed: {small.size} ({int(sizes[small - 1].sum()) if small.size else 0} cells)", flush=True)
 
 
 # ---------------------------------------------------------------- greedy meshing (tide_shell_titan と同じ)

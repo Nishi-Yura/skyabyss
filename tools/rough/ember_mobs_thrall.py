@@ -140,7 +140,7 @@ def front_z(sc, bone, x, y):
 def build_head_a(sc):
     """灰の衣のフード: 顔は暗く奥まり、目だけ光る。フードの先が後ろへ尖る。"""
     c = (0, 31.0, 1.5)
-    sc.add("head", E.ell(c, (2.25, 2.5, 2.0), 2.2), "face", E.bb(c, (2.25, 2.5, 2.0)))
+    sc.add("head", E.ell(c, (2.25, 2.5, 2.0), 2.2), "face", E.bb(c, (2.25, 2.5, 2.0), pad=1.0), sz=2)
     sc.box("head", -1.25, 28.25, 2.0, 1.25, 28.75, 3.0, "face")          # 顎
     hc = (0, 31.5, 1.0)
 
@@ -152,7 +152,7 @@ def build_head_a(sc):
         if z > 1.25 and abs(x) < 2.5 and 28.0 < y < 33.25:   # 顔の開き
             return False
         return y > 28.0 or z < 0
-    sc.add("head", hood, "hood", E.bb(hc, (3.75, 4.0, 3.75)))
+    sc.add("head", hood, "hood", E.bb(hc, (3.75, 4.0, 3.75)), sz=2)
     sc.add("head", E.ell((0, 34.75, -1.75), (1.25, 1.25, 1.5), 2), "hood", E.bb((0, 34.75, -1.75), (1.25, 1.25, 1.5)))
     sc.add("head", E.ell((0, 35.5, -2.75), (0.75, 0.75, 1.0), 2), "hood", E.bb((0, 35.5, -2.75), (0.75, 0.75, 1.0)))
     eyes(sc, 30.75, 31.5, ((-1.75, -0.5), (0.5, 1.75)), 2.75)
@@ -165,7 +165,7 @@ def build_head_a(sc):
 def build_head_b(sc):
     """鉱滓の兜: 重い眉庇の下に深い目、突き出た顎。殻 (兜) が割れると炭の頭と炎の鬣。"""
     c = (0, 31.0, 1.5)
-    sc.add("head", E.ell(c, (2.5, 2.75, 2.5), 2.3), "face", E.bb(c, (2.5, 2.75, 2.5)))
+    sc.add("head", E.ell(c, (2.5, 2.75, 2.5), 2.3), "face", E.bb(c, (2.5, 2.75, 2.5), pad=1.0), sz=2)
     sc.add("head", E.ell((0, 28.75, 2.75), (2.0, 1.0, 1.5), 3), "face", E.bb((0, 28.75, 2.75), (2.0, 1.0, 1.5)))  # 顎
     eyes(sc, 30.5, 31.0, ((-1.75, -0.75), (0.75, 1.75)), 3.0)
     # 兜 (殻): 上と横を覆い、前は眉庇だけ
@@ -177,7 +177,7 @@ def build_head_b(sc):
         if z > 2.0 and y < 31.75 and abs(x) < 2.25:
             return False
         return y > 29.0
-    sc.add("crust_head", helm, "slag", E.bb(hc, (3.5, 3.75, 3.5)))
+    sc.add("crust_head", helm, "slag", E.bb(hc, (3.5, 3.75, 3.5)), sz=2)
     sc.box("crust_head", -3.0, 31.75, 4.0, 3.0, 32.75, 5.0, "slag")       # 眉庇 (前へ張り出す)
     sc.box("crust_head", -2.0, 35.0, -1.0, 2.0, 35.5, 2.0, "slag")        # 頭頂の盛り
     sc.box("crust_head", -1.0, 35.5, -0.5, 1.0, 36.0, 1.0, "slag")
@@ -190,7 +190,7 @@ def build_head_b(sc):
 def build_head_c(sc):
     """炉の面: 窯のような半球の面。横一文字の覗き穴が光る。頂に小さな煙突。"""
     c = (0, 31.0, 1.0)
-    sc.add("head", E.ell(c, (2.25, 2.5, 2.0), 2.2), "face", E.bb(c, (2.25, 2.5, 2.0)))
+    sc.add("head", E.ell(c, (2.25, 2.5, 2.0), 2.2), "face", E.bb(c, (2.25, 2.5, 2.0), pad=1.0), sz=2)
     mc = (0, 31.25, 1.0)
 
     def mask(x, y, z):
@@ -201,7 +201,7 @@ def build_head_c(sc):
         if 30.5 <= y <= 31.5 and abs(x) <= 2.25 and z > 1.0:   # 覗き穴 (横一文字)
             return False
         return y > 27.75
-    sc.add("head", mask, "kiln", E.bb(mc, (3.25, 3.75, 3.25)))
+    sc.add("head", mask, "kiln", E.bb(mc, (3.25, 3.75, 3.25)), sz=2)
     # 覗き穴の奥: 顔の前に溶けた光の層
     sc.add("head", lambda x, y, z: 30.5 <= y <= 31.5 and abs(x) <= 2.25 and 1.0 < z <= 3.5, "slit", (-2.5, 30.25, 1.0, 2.5, 31.75, 3.75))
     sc.box("head", -1.0, 34.75, -0.5, 1.0, 36.5, 1.5, "kiln")              # 煙突
@@ -252,7 +252,7 @@ def dress_a(sc, P):
     def cape(x, y, z):
         return (E.ell((0, 25.5, 0.75), (5.75, 2.75, 3.75), 2.3)(x, y, z) and y > 24.0
                 and not E.ell((0, 25.5, 0.75), (4.75, 2.0, 2.75), 2.3)(x, y, z))
-    sc.add("body", cape, "cloth", (-6.5, 22, -4, 6.5, 29, 5))
+    sc.add("body", cape, "cloth", (-6.5, 22, -4, 6.5, 29, 5), sz=2)
     # 背の裂けた布 (後ろの面に貼る)
     for x0, x1, yb in ((-3.0, -1.5, 9.0), (-1.5, 0.0, 12.0), (0.0, 1.5, 8.0), (1.5, 3.0, 11.0)):
         surface_layer(sc, {"body"}, lambda x, y, x0=x0, x1=x1, yb=yb: x0 <= x < x1 and yb <= y < 24.0, "cloth", "body",
@@ -261,12 +261,12 @@ def dress_a(sc, P):
     sc.add("body", lambda x, y, z: 16.5 <= y <= 17.5 and E.ell((0, 17, 0.25), (3.5 * P["w"] + 0.6, 1.0, 2.85), 2.5)(x, y, z),
            "leather", (-4, 16, -3.5, 4, 18, 3.5))
     # 殻: 胸の前、肩、前腕、すねの前と外
-    crust_patch(sc, "body", "crust_body", lambda x, y, z: z > 0.5 and 18.5 < y < 24.5, "crust", 1, th=1.0, thr=0.35)
+    crust_patch(sc, "body", "crust_body", lambda x, y, z: 14.5 < y < 24.5, "crust", 1, th=1.0, thr=0.3)
     for s, side in ((-1, "r"), (1, "l")):
         crust_patch(sc, f"forearm_{side}", f"crust_fore_{side}", lambda x, y, z, s=s: 14.5 < y < 19.0 and (s * x > P["fx"] - 0.5 or z > 1.5),
                     "crust", 2 + (s > 0), th=1.0, thr=0.3)
         crust_patch(sc, f"arm_{side}", f"crust_arm_{side}", lambda x, y, z: 19.5 < y < 23.5, "crust", 4 + (s > 0), th=1, thr=0.35)
-        crust_patch(sc, f"leg_{side}", f"crust_leg_{side}", lambda x, y, z: 2.0 < y < 13.5 and z > -0.5, "crust", 6 + (s > 0), th=1.0, thr=0.4)
+        crust_patch(sc, f"leg_{side}", f"crust_leg_{side}", lambda x, y, z: 2.0 < y < 13.5, "crust", 6 + (s > 0), th=1.0, thr=0.3)
     # 燃え上がり: 肩から炎の舌
     for s in (-1, 1):
         for x0, z0, h in ((4.0, -0.5, 1.5), (4.5, 1.0, 2.5), (3.5, 0.5, 2.0)):
@@ -565,8 +565,11 @@ def run():
         wimg = E.render(E.vx.load_geo(wr["geo"], wtex, wgl), 30, 12, size=(180, 360))
         wimg.save(wf / "render.png")
         hand_geo = filtered(r["geo"], {"forearm_r", "crust_fore_r"})
-        himg = E.render(E.faces_of(hand_geo, ct, cg, weapon=weapon, weapon_pose=wpose), 230, 20, size=(180, 360))
-        both = E.pair(E.label(wimg, "武器だけ"), E.label(himg, "握った手"))
+        wshort = copy.deepcopy(wr["geo"])
+        for b in wshort["minecraft:geometry"][0]["bones"]:
+            b["cubes"] = [c for c in b["cubes"] if -6 <= c["origin"][1] <= 6]
+        himg = E.render(E.faces_of(hand_geo, ct, cg, weapon=(wshort, wtex, wgl), weapon_pose=wpose), 230, 20, size=(180, 360))
+        both = E.pair(E.label(wimg, "武器だけ"), E.label(himg, "握った手 (拡大)"))
         both.save(of / "render_weapon.png")
         rows.append(both)
         d1 = E.render(E.faces_of(r["geo"], E.lava_light(ct), cg, hide=flare, weapon=(wr["geo"], E.lava_light(wtex), wgl), weapon_pose=wpose), 205, 15, size=(180, 360))

@@ -1,13 +1,13 @@
 {
   "a": {
-    "boxes": 456,
+    "boxes": 307,
     "overlaps": 0,
-    "buried_crusted": 0,
+    "buried_crusted": 3,
     "buried_flared": 0,
     "dropped_hidden": 0,
-    "glow_px_crusted": 330,
-    "glow_px_flared": 3801,
-    "boxes_crust": 55,
+    "glow_px_crusted": 302,
+    "glow_px_flared": 3595,
+    "boxes_crust": 92,
     "boxes_flare": 13,
     "weapon": {
       "name": "poker",
@@ -19,15 +19,15 @@
     "height_blocks": 2.25
   },
   "b": {
-    "boxes": 462,
+    "boxes": 341,
     "overlaps": 0,
-    "buried_crusted": 51,
+    "buried_crusted": 26,
     "buried_flared": 0,
     "dropped_hidden": 0,
-    "glow_px_crusted": 898,
-    "glow_px_flared": 5107,
-    "boxes_crust": 275,
-    "boxes_flare": 32,
+    "glow_px_crusted": 876,
+    "glow_px_flared": 4930,
+    "boxes_crust": 186,
+    "boxes_flare": 29,
     "weapon": {
       "name": "hammer",
       "boxes": 35,
@@ -38,13 +38,13 @@
     "height_blocks": 2.25
   },
   "c": {
-    "boxes": 306,
+    "boxes": 214,
     "overlaps": 0,
     "buried_crusted": 9,
     "buried_flared": 0,
-    "dropped_hidden": 0,
-    "glow_px_crusted": 350,
-    "glow_px_flared": 3978,
+    "dropped_hidden": 1,
+    "glow_px_crusted": 270,
+    "glow_px_flared": 3788,
     "boxes_crust": 70,
     "boxes_flare": 6,
     "weapon": {
