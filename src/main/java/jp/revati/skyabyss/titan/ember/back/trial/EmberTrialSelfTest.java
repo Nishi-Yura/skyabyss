@@ -51,6 +51,7 @@ public final class EmberTrialSelfTest {
 
     private static final List<String> F = new ArrayList<>();
     private static final Map<String, BlockState[]> RINGS = new HashMap<>();
+    private static final Map<String, BlockState[]> RESERVED = new HashMap<>();
     private static final List<EmberBackLayout.Box> TRIAL_BOXES = List.of(EmberBackLayout.WEST, EmberBackLayout.EAST, EmberBackLayout.SOUTH);
     private static String lastAim = "";
     private static AshThrall douser;
@@ -152,6 +153,21 @@ public final class EmberTrialSelfTest {
             }
             RINGS.put(b.toString(), states);
         }
+        // 取っておく場所 (床より上) の様子も覚える (B が先に休み場や石を置いていてもよい。私が触らないことを見る)
+        for (String room : List.of("west", "east", "south")) {
+            List<BlockState> cells = new ArrayList<>();
+            int floor = EmberBackLayout.floorOf(room);
+            for (EmberBackLayout.Box r : EmberBackLayout.reserved(room)) {
+                for (int x = r.minX(); x <= r.maxX(); x++) {
+                    for (int y = Math.max(r.minY(), floor + 1); y <= r.maxY(); y++) {
+                        for (int z = r.minZ(); z <= r.maxZ(); z++) {
+                            cells.add(level.getBlockState(new BlockPos(x, y, z)));
+                        }
+                    }
+                }
+            }
+            RESERVED.put(room, cells.toArray(new BlockState[0]));
+        }
         // B の受け口に登録されているか
         for (String room : List.of("west", "east", "south")) {
             expect(EmberBackRooms.hasBuilder(room), "no builder registered for room " + room);
@@ -205,23 +221,27 @@ public final class EmberTrialSelfTest {
             }
         }
         expect(lavaInLake > 2000, "the lake holds too little lava: " + lavaInLake);
-        // 取っておく場所は、床より上が空いている
+        // 取っておく場所は、建てる前と同じ (床より上に私は置かない)
         for (String room : List.of("west", "east", "south")) {
             int floor = EmberBackLayout.floorOf(room);
+            BlockState[] before = RESERVED.get(room);
+            int k = 0;
+            int changed = 0;
+            BlockPos first = null;
             for (EmberBackLayout.Box r : EmberBackLayout.reserved(room)) {
                 for (int x = r.minX(); x <= r.maxX(); x++) {
                     for (int y = Math.max(r.minY(), floor + 1); y <= r.maxY(); y++) {
                         for (int z = r.minZ(); z <= r.maxZ(); z++) {
-                            if (!level.getBlockState(new BlockPos(x, y, z)).isAir()) {
-                                F.add("reserved cell not empty: " + room + " " + x + "," + y + "," + z + " " + level.getBlockState(new BlockPos(x, y, z)));
-                                x = r.maxX();
-                                y = r.maxY();
-                                z = r.maxZ();
+                            BlockPos pos = new BlockPos(x, y, z);
+                            if (before[k++] != level.getBlockState(pos)) {
+                                changed++;
+                                first = first == null ? pos : first;
                             }
                         }
                     }
                 }
             }
+            expect(changed == 0, "reserved cells of " + room + " changed: " + changed + " (first " + first + ")");
         }
         // 床 (取っておく場所の下も) があり、溶岩に面した所に空気がない (どの島・岸の床の上にも立てる)
         for (AshPath.Island i : AshPath.PATTERNS.get(AshPath.patternOf(level))) {
