@@ -1,0 +1,53 @@
+# Ember titan (near LOD high-poly) before / after + frame time near the body.
+# ./gradlew runShots -Pscript=tools/shots/hp_titans_ember.txt -PshotsName=hp_titans_ember_before   (and _after)
+# Coordinates are local to the titan (^ = left ^ up ^ forward; the head is forward, about 103 blocks from the centre). No OS input.
+world hp_titans_ember flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set 18000
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p thunder_wing
+camera 0.5 -60 0.5 0 0
+waitchunks
+cmd skyabyss titan summon ember
+wait 60
+cmd skyabyss titan rest ember here
+wait 60
+hud off
+cmd gamemode spectator
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^-14 ^20 ^128 facing ^0 ^8 ^103
+waitchunks
+wait 40
+shot head_front
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^50 ^26 ^118 facing ^0 ^8 ^96
+wait 30
+shot head_three_quarter
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^0 ^55 ^88 facing ^0 ^10 ^96
+wait 30
+shot head_top
+# the ridge and the lava cracks
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^46 ^52 ^20 facing ^0 ^30 ^-5
+wait 30
+shot ridge_close
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^70 ^40 ^-30 facing ^0 ^25 ^-40
+wait 30
+shot near_side
+# the front left foot
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^90 ^8 ^-40 facing ^62 ^3 ^-44
+wait 30
+shot foot_close
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^100 ^40 ^-30 facing ^0 ^25 ^-30
+wait 30
+shot mid
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^200 ^50 ^-30 facing ^0 ^25 ^-30
+wait 30
+shot far
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^46 ^52 ^20 facing ^0 ^30 ^-5
+wait 40
+perf 300 near_a
+perf 300 near_b
+quit
