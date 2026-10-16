@@ -252,5 +252,14 @@
   "title.skyabyss.storm_back.sub": "A bird's back, flying above the storm",
   "trial.skyabyss.storm_east": "East (Thunderbone)",
   "trial.skyabyss.storm_front": "Front (Eye Hall)",
-  "trial.skyabyss.storm_west": "West (Windbone)"
+  "trial.skyabyss.storm_west": "West (Windbone)",
+  "commands.skyabyss.stormmob.cleared": "Removed %s thunder wing enemies",
+  "commands.skyabyss.stormmob.spawned": "Spawned %s thunder wing enemies (not saved)",
+  "commands.skyabyss.stormmob.storm.calm": "Enemies held in the calm (feather wardens guard on foot)",
+  "commands.skyabyss.stormmob.storm.cycle": "Enemies back on the 90-second storm beat",
+  "commands.skyabyss.stormmob.storm.storm": "Enemies held in the storm (feather wardens dive, moths charge fast)",
+  "subtitles.skyabyss.feather_warden_land": "Feather warden slams down",
+  "subtitles.skyabyss.feather_warden_swing": "Hooked glaive swings",
+  "subtitles.skyabyss.static_moth_burst": "Charged moth bursts",
+  "subtitles.skyabyss.thunder_supplicant_swing": "Staff swings"
 }

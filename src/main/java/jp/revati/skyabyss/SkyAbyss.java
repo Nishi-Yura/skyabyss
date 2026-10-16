@@ -58,6 +58,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.storm.StormSetup.register(modEventBus);
         // 潮殻の背の敵 (珊瑚憑き・磯走り・泡吹き)
         jp.revati.skyabyss.titan.tide.mob.TideMobSetup.register(modEventBus);
+        // 雷翼の背の敵 (羽守・雷蛾・雷乞い)。docs/design/12 の 5.1節
+        jp.revati.skyabyss.titan.storm.mob.StormMobSetup.register(modEventBus);
         // 装飾の枠 (護符 1・装飾 2。記録・画面・パケット)。登録は item.accessory パッケージにまとめてある
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある

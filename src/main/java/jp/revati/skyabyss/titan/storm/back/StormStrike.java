@@ -110,7 +110,8 @@ public final class StormStrike {
         PENDING.removeIf(s -> s.level == level);
     }
 
-    private static void tick(ServerLevel level) {
+    // public: 敵の自己テストが予告から落雷までを進めるために呼ぶ
+    public static void tick(ServerLevel level) {
         if (PENDING.isEmpty()) {
             return;
         }

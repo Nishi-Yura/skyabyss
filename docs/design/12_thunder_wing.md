@@ -968,6 +968,34 @@
 #### 17.1.3 判断が要る点
 
 00 の O 群（117〜120）: 近景の箱の数（2277 を推奨）、風見鶏の絵と回るモデル（今は仮）、風見鶏の待ちを保存するか、避雷の柱・戻しの鏡を専用ブロックにするか。
+### 17.2 担当 2: 敵（2026-10-16）
+
+#### 17.2.1 作ったもの
+
+| もの | 中身 | ファイル |
+|---|---|---|
+| モデル | 14 章の推奨（羽守 B・雷蛾 B・雷乞い C）を 0.5 単位の格子で取り込む。鉤槍と杖は別のモデル（`geo/gear/{hooked_glaive,supplicant_staff}`）で、手の受け口 `socket_main` に付ける。面の隠れは同じ骨の中だけで数える | `tools/install_storm_mobs.py`、`titan/storm/mob/client/StormMobRenderers.java` |
+| 動き | 羽守: 凪は歩いて番、嵐で 1.0 秒かがみ → 長さ 14 の線を 0.8 秒前に出す → 突撃 12 → 着地 1.5 秒の痺れ（傷 1.5 倍）。線は壁で止まる。雷蛾: 帯電 4 秒（嵐は 2.5 秒）→ 放電 5、4 ブロック以内へ最大 3 人、跳ぶごとに −20%。満ちた雷蛾は倒すと半径 2.5 で弾ける。雷乞い: 8〜14 の間合い、杖を掲げて足もとに輪 1.2 秒 → 9 と鈍足、輪が柱から 3 以内なら柱へ | `FeatherWarden`・`StaticMoth`・`ThunderSupplicant`・`StormMob`・`MobStorm`（拍は `StormBackClock` から） |
+| 落とす物 | 6.1 節の表。倒した人だけが拾える形。品は ID で引き、まだ登録されていない品（雷翼の欠片・干し果・鱗粉・羽衣）は落とさない。頁は出どころ `storm_back` | `StormMobLoot.java` |
+| 経験値 | `GrowthRewards.MOD_ENEMIES`: 羽守 18・雷蛾 5・雷乞い 14（雷翼の Lv 24） | `rpg/GrowthRewards.java` |
+| 音・エッグ | 合成した音 18（`sounds/storm_mobs/`）、スポーンエッグ 3 | `tools/gen_storm_mob_assets.py`、`StormMobSetup.java` |
+| 文 | `lang/parts/mob.json`（鍵ごとに英日）。伝承の担当の鍵に合わせ、杖を掲げる音を `thunder_supplicant_raise` にした。`gen_storm_lore.py` でまとめ済み（日本語のない鍵 0） | `assets/skyabyss_storm/lang/parts/mob.json` |
+| 試す | `/skyabyss stormmob spawn (warden / moth / supplicant / mix) [数]`、`stormmob storm (calm / storm / cycle)`、`stormmob clear`。試練の印付きで湧き、保存されない | `StormMobCommands.java` |
+| 自己テスト | `SELFTEST storm mobs`: 登録・強さ・保存しない・経験値・ドロップの率（模擬）・拍・線 0.8 秒前・長さ 14・壁で止まる・痺れの 1.5 倍・連鎖 3 人と減り方・輪が柱へ | `StormMobSelfTest.java` |
+
+背中の API（`StormRods`・`StormStrike`・`StormBackClock`）は、担当 1 の本物がまだ m1-sky-pass にないので、11.1 節の名前の空の実装を `titan/storm/back/` に置いたまま。本物が入ったら置き換えて消す。
+
+#### 17.2.2 結果
+
+- `./gradlew compileJava --offline` 通る。`SKYABYSS_SELFTEST=1 ./gradlew runServer`: **SELFTEST storm mobs PASSED**、全体も `SELFTEST PASSED`。ただし `tide gear` の「護符がゾンビに当たらない」が一行 FAILED と出た（潮殻の装備の自己テスト。この担当のファイルは触っていない）。
+- データの検査: 箱の重なり 0（羽守 349・雷蛾 124・雷乞い 373・鉤槍 48・杖 21）。光る画素は羽守 62・雷蛾 190・雷乞い 196・鉤槍 24・杖 236（0 のものなし）。羽守と雷乞いに `socket_main` がある。
+- 見た目: 前の担当が撮った `docs/review/ingame_storm_mobs_*.png`（8 枚）。台本で撮るスクショの道具はまだ m1-sky-pass にないので、撮り直していない。試遊での確認はしていない。
+
+#### 17.2.3 判断が要る点
+
+| # | 点 | 選択肢 | 推奨 |
+|---|---|---|---|
+| 1 | 満ちた雷蛾が弾ける音の字幕 | A 別の鍵 `static_moth_burst`「帯電した雷蛾が弾ける」（今） / B 死の字幕「雷蛾が弾ける」に寄せて一つに | A。弾けるのは傷のある別の出来事なので分ける |
 
 ### 17.6 担当 6: 伝承とクエスト（2026-10-17）
 

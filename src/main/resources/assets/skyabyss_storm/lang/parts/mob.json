@@ -1,0 +1,118 @@
+{
+  "entity.skyabyss.feather_warden": {
+    "en": "Feather Warden",
+    "ja": "羽守"
+  },
+  "entity.skyabyss.static_moth": {
+    "en": "Static Moth",
+    "ja": "雷蛾"
+  },
+  "entity.skyabyss.thunder_supplicant": {
+    "en": "Thunder Supplicant",
+    "ja": "雷乞い"
+  },
+  "item.skyabyss.feather_warden_spawn_egg": {
+    "en": "Feather Warden Spawn Egg",
+    "ja": "羽守のスポーンエッグ"
+  },
+  "item.skyabyss.static_moth_spawn_egg": {
+    "en": "Static Moth Spawn Egg",
+    "ja": "雷蛾のスポーンエッグ"
+  },
+  "item.skyabyss.thunder_supplicant_spawn_egg": {
+    "en": "Thunder Supplicant Spawn Egg",
+    "ja": "雷乞いのスポーンエッグ"
+  },
+  "subtitles.skyabyss.feather_warden_ambient": {
+    "en": "Feather warden rustles",
+    "ja": "羽守の羽がこすれる"
+  },
+  "subtitles.skyabyss.feather_warden_hurt": {
+    "en": "Copper helm rings",
+    "ja": "銅の兜が鳴る"
+  },
+  "subtitles.skyabyss.feather_warden_death": {
+    "en": "Feather warden collapses",
+    "ja": "羽守が崩れ落ちる"
+  },
+  "subtitles.skyabyss.feather_warden_swing": {
+    "en": "Hooked glaive swings",
+    "ja": "鉤槍が風を切る"
+  },
+  "subtitles.skyabyss.feather_warden_crouch": {
+    "en": "Feather warden spreads its cloak",
+    "ja": "羽守が外套を広げる"
+  },
+  "subtitles.skyabyss.feather_warden_dive": {
+    "en": "Feather warden dives",
+    "ja": "羽守が突っ込む"
+  },
+  "subtitles.skyabyss.feather_warden_land": {
+    "en": "Feather warden slams down",
+    "ja": "羽守が地を打つ"
+  },
+  "subtitles.skyabyss.static_moth_ambient": {
+    "en": "Static Moth flutters",
+    "ja": "雷蛾がはばたく"
+  },
+  "subtitles.skyabyss.static_moth_charge": {
+    "en": "Static Moth charges",
+    "ja": "雷蛾が帯電する"
+  },
+  "subtitles.skyabyss.static_moth_discharge": {
+    "en": "Static Moth discharges",
+    "ja": "雷蛾が放電する"
+  },
+  "subtitles.skyabyss.static_moth_hurt": {
+    "en": "Static Moth crackles",
+    "ja": "雷蛾が火花を散らす"
+  },
+  "subtitles.skyabyss.static_moth_death": {
+    "en": "Static Moth fizzles out",
+    "ja": "雷蛾の火花が消える"
+  },
+  "subtitles.skyabyss.static_moth_burst": {
+    "en": "Charged moth bursts",
+    "ja": "帯電した雷蛾が弾ける"
+  },
+  "subtitles.skyabyss.thunder_supplicant_ambient": {
+    "en": "Thunder Supplicant murmurs",
+    "ja": "雷乞いがつぶやく"
+  },
+  "subtitles.skyabyss.thunder_supplicant_raise": {
+    "en": "Thunder Supplicant raises its staff",
+    "ja": "雷乞いが杖を掲げる"
+  },
+  "subtitles.skyabyss.thunder_supplicant_hurt": {
+    "en": "Cage rattles",
+    "ja": "籠が鳴る"
+  },
+  "subtitles.skyabyss.thunder_supplicant_death": {
+    "en": "Thunder Supplicant falls",
+    "ja": "雷乞いが倒れる"
+  },
+  "subtitles.skyabyss.thunder_supplicant_swing": {
+    "en": "Staff swings",
+    "ja": "杖が風を切る"
+  },
+  "commands.skyabyss.stormmob.spawned": {
+    "en": "Spawned %s thunder wing enemies (not saved)",
+    "ja": "雷翼の背の敵を %s 体湧かせた (保存されない)"
+  },
+  "commands.skyabyss.stormmob.storm.calm": {
+    "en": "Enemies held in the calm (feather wardens guard on foot)",
+    "ja": "敵の拍を凪に止めた (羽守は歩いて番をする)"
+  },
+  "commands.skyabyss.stormmob.storm.storm": {
+    "en": "Enemies held in the storm (feather wardens dive, moths charge fast)",
+    "ja": "敵の拍を嵐に止めた (羽守が突っ込み、雷蛾の帯電が速い)"
+  },
+  "commands.skyabyss.stormmob.storm.cycle": {
+    "en": "Enemies back on the 90-second storm beat",
+    "ja": "敵の拍を 90 秒の周期に戻した"
+  },
+  "commands.skyabyss.stormmob.cleared": {
+    "en": "Removed %s thunder wing enemies",
+    "ja": "雷翼の背の敵を %s 体消した"
+  }
+}

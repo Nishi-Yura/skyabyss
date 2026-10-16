@@ -252,5 +252,14 @@
   "title.skyabyss.storm_back.sub": "嵐の上を飛ぶ、鳥の背",
   "trial.skyabyss.storm_east": "東 (雷の骨)",
   "trial.skyabyss.storm_front": "前 (眼の間)",
-  "trial.skyabyss.storm_west": "西 (風切りの骨)"
+  "trial.skyabyss.storm_west": "西 (風切りの骨)",
+  "commands.skyabyss.stormmob.cleared": "雷翼の背の敵を %s 体消した",
+  "commands.skyabyss.stormmob.spawned": "雷翼の背の敵を %s 体湧かせた (保存されない)",
+  "commands.skyabyss.stormmob.storm.calm": "敵の拍を凪に止めた (羽守は歩いて番をする)",
+  "commands.skyabyss.stormmob.storm.cycle": "敵の拍を 90 秒の周期に戻した",
+  "commands.skyabyss.stormmob.storm.storm": "敵の拍を嵐に止めた (羽守が突っ込み、雷蛾の帯電が速い)",
+  "subtitles.skyabyss.feather_warden_land": "羽守が地を打つ",
+  "subtitles.skyabyss.feather_warden_swing": "鉤槍が風を切る",
+  "subtitles.skyabyss.static_moth_burst": "帯電した雷蛾が弾ける",
+  "subtitles.skyabyss.thunder_supplicant_swing": "杖が風を切る"
 }

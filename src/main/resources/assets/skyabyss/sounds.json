@@ -790,5 +790,149 @@
         "name": "skyabyss:storm/storm_receiver_lit"
       }
     ]
+  },
+  "feather_warden_ambient": {
+    "subtitle": "subtitles.skyabyss.feather_warden_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_ambient"
+      }
+    ]
+  },
+  "feather_warden_hurt": {
+    "subtitle": "subtitles.skyabyss.feather_warden_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_hurt"
+      }
+    ]
+  },
+  "feather_warden_death": {
+    "subtitle": "subtitles.skyabyss.feather_warden_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_death"
+      }
+    ]
+  },
+  "feather_warden_swing": {
+    "subtitle": "subtitles.skyabyss.feather_warden_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_swing"
+      }
+    ]
+  },
+  "feather_warden_crouch": {
+    "subtitle": "subtitles.skyabyss.feather_warden_crouch",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_crouch"
+      }
+    ]
+  },
+  "feather_warden_dive": {
+    "subtitle": "subtitles.skyabyss.feather_warden_dive",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_dive"
+      }
+    ]
+  },
+  "feather_warden_land": {
+    "subtitle": "subtitles.skyabyss.feather_warden_land",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_land"
+      }
+    ]
+  },
+  "static_moth_ambient": {
+    "subtitle": "subtitles.skyabyss.static_moth_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_ambient"
+      }
+    ]
+  },
+  "static_moth_charge": {
+    "subtitle": "subtitles.skyabyss.static_moth_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_charge"
+      }
+    ]
+  },
+  "static_moth_discharge": {
+    "subtitle": "subtitles.skyabyss.static_moth_discharge",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_discharge"
+      }
+    ]
+  },
+  "static_moth_hurt": {
+    "subtitle": "subtitles.skyabyss.static_moth_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_hurt"
+      }
+    ]
+  },
+  "static_moth_death": {
+    "subtitle": "subtitles.skyabyss.static_moth_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_death"
+      }
+    ]
+  },
+  "static_moth_burst": {
+    "subtitle": "subtitles.skyabyss.static_moth_burst",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_burst"
+      }
+    ]
+  },
+  "thunder_supplicant_ambient": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_ambient"
+      }
+    ]
+  },
+  "thunder_supplicant_raise": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_raise",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_raise"
+      }
+    ]
+  },
+  "thunder_supplicant_hurt": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_hurt"
+      }
+    ]
+  },
+  "thunder_supplicant_death": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_death"
+      }
+    ]
+  },
+  "thunder_supplicant_swing": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_swing"
+      }
+    ]
   }
 }
