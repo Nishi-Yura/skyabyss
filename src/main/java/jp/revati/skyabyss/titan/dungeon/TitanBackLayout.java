@@ -44,6 +44,8 @@ public final class TitanBackLayout {
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
     public static final int PLATFORM_Z = 100;
     public static final int SHRINE_Z = 39;
+    // 広場と祠のあいだの、背の石の門 (モデルのアーチ、z 68〜76)
+    public static final int RIDGE_Z = 72;
     // モデルの錨石 (左のわき腹の留め具、x -35〜-31、y 78〜96、z 107〜110)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
     public static final int ANCHOR_STONE_X = -34;
     public static final int ANCHOR_CHAIN_X = -46;
@@ -181,8 +183,20 @@ public final class TitanBackLayout {
         return new BlockPos(0, platformY(), PLATFORM_Z + 3);
     }
 
+    // 広場の石畳の高さ: 広場 (x -8〜8、z ±10) の背のいちばん高い所。背の丸みに沈まず、北の背を見渡せる
+    private static int platformY = Integer.MIN_VALUE;
+
     public static int platformY() {
-        return top(0, PLATFORM_Z);
+        if (platformY == Integer.MIN_VALUE) {
+            int y = BASE_Y;
+            for (int x = -8; x <= 8; x++) {
+                for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
+                    y = Math.max(y, top(x, z));
+                }
+            }
+            platformY = y;
+        }
+        return platformY;
     }
 
     public static int shrineY() {

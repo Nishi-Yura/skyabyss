@@ -52,6 +52,12 @@ public final class TitanBackBuilder {
         for (Inscription lore : LORE_SIGNS) {
             kit.wallSign(lore.pos(), lore.facing(), lore.key());
         }
+        // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
+        for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
+            if (kit.get(spawn.getX(), spawn.getY(), spawn.getZ()).is(Blocks.MOSS_CARPET)) {
+                kit.set(spawn, BuildKit.AIR);
+            }
+        }
         data.markBuilt();
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
     }
