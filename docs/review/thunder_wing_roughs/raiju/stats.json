@@ -1,0 +1,59 @@
+{
+ "a": {
+  "cubes": 837,
+  "hidden_dropped": 9,
+  "cells": 139491,
+  "atlas": [
+   512,
+   176
+  ],
+  "glow_px": 1386,
+  "bones": 17,
+  "size_blocks": [
+   3.75,
+   4.0,
+   7.62
+  ],
+  "overlaps": 0,
+  "option": "a",
+  "name": "A 狼型"
+ },
+ "b": {
+  "cubes": 675,
+  "hidden_dropped": 20,
+  "cells": 113126,
+  "atlas": [
+   512,
+   176
+  ],
+  "glow_px": 162,
+  "bones": 17,
+  "size_blocks": [
+   3.75,
+   4.0,
+   7.62
+  ],
+  "overlaps": 0,
+  "option": "b",
+  "name": "B 鼬型"
+ },
+ "c": {
+  "cubes": 1011,
+  "hidden_dropped": 17,
+  "cells": 137103,
+  "atlas": [
+   512,
+   176
+  ],
+  "glow_px": 506,
+  "bones": 17,
+  "size_blocks": [
+   3.75,
+   4.0,
+   7.62
+  ],
+  "overlaps": 0,
+  "option": "c",
+  "name": "C 猫型と雷太鼓"
+ }
+}

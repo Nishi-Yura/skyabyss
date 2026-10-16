@@ -1,0 +1,19 @@
+{
+  "chapter": "chapter1",
+  "order": 159,
+  "unlock": [
+    {
+      "type": "near_entity",
+      "target": "skyabyss:thunder_wing",
+      "radius": 240
+    },
+    {
+      "type": "dimension",
+      "target": "skyabyss:storm_back"
+    }
+  ],
+  "related": [
+    "chapter1/thunder_wing",
+    "chapter1/storm_path"
+  ]
+}

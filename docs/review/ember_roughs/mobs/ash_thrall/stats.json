@@ -1,0 +1,59 @@
+{
+  "a": {
+    "boxes": 307,
+    "overlaps": 0,
+    "buried_crusted": 3,
+    "buried_flared": 0,
+    "dropped_hidden": 0,
+    "glow_px_crusted": 302,
+    "glow_px_flared": 3595,
+    "boxes_crust": 92,
+    "boxes_flare": 13,
+    "weapon": {
+      "name": "poker",
+      "boxes": 20,
+      "overlaps": 0,
+      "glow_px": 160,
+      "buried": 0
+    },
+    "height_blocks": 2.25
+  },
+  "b": {
+    "boxes": 341,
+    "overlaps": 0,
+    "buried_crusted": 26,
+    "buried_flared": 0,
+    "dropped_hidden": 0,
+    "glow_px_crusted": 876,
+    "glow_px_flared": 4930,
+    "boxes_crust": 186,
+    "boxes_flare": 29,
+    "weapon": {
+      "name": "hammer",
+      "boxes": 35,
+      "overlaps": 0,
+      "glow_px": 262,
+      "buried": 0
+    },
+    "height_blocks": 2.25
+  },
+  "c": {
+    "boxes": 214,
+    "overlaps": 0,
+    "buried_crusted": 9,
+    "buried_flared": 0,
+    "dropped_hidden": 1,
+    "glow_px_crusted": 270,
+    "glow_px_flared": 3788,
+    "boxes_crust": 70,
+    "boxes_flare": 6,
+    "weapon": {
+      "name": "tongs",
+      "boxes": 18,
+      "overlaps": 0,
+      "glow_px": 136,
+      "buried": 0
+    },
+    "height_blocks": 2.28
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "a": {
+    "boxes": 240,
+    "overlaps": 0,
+    "overlaps_walk_sat": 0,
+    "overlaps_curled_sat": 0,
+    "buried": 0,
+    "dropped_hidden": 0,
+    "glow_px": 3786
+  },
+  "b": {
+    "boxes": 300,
+    "overlaps": 0,
+    "overlaps_walk_sat": 0,
+    "overlaps_curled_sat": 0,
+    "buried": 0,
+    "dropped_hidden": 0,
+    "glow_px": 3388
+  },
+  "c": {
+    "boxes": 286,
+    "overlaps": 0,
+    "overlaps_walk_sat": 0,
+    "overlaps_curled_sat": 0,
+    "buried": 0,
+    "dropped_hidden": 0,
+    "glow_px": 3586
+  }
+}

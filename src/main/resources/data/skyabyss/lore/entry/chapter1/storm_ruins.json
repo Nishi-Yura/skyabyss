@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 161,
+  "unlock": [
+    {
+      "type": "dimension",
+      "target": "skyabyss:storm_back"
+    }
+  ],
+  "related": [
+    "chapter1/storm_wing",
+    "chapter1/inscription_storm_tail"
+  ]
+}

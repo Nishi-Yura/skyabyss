@@ -94,35 +94,13 @@ public final class TideLoot {
         return SkyAbyss.MODID + ":" + path;
     }
 
-    // 図鑑 (10 品): 鎧 4、三叉槍、盾、護符、専用伝説 3
+    // 図鑑 (10 品): 鎧 4、三叉槍、盾、護符、専用伝説 3。表と確率は装備の担当の TideGear.SET (巨神ごとの装備の表、TitanGearSet)
     public static List<String> collection() {
-        List<String> all = new ArrayList<>(ARMOR);
-        all.add(TRIDENT);
-        all.add(SHIELD);
-        all.add(CHARM);
-        all.addAll(EXCLUSIVES);
-        return all;
+        return jp.revati.skyabyss.titan.tide.gear.TideGear.SET.collection();
     }
 
     public static float chance(String item) {
-        if (ARMOR.contains(item)) {
-            return ARMOR_CHANCE;
-        }
-        if (item.equals(TRIDENT)) {
-            return TRIDENT_CHANCE;
-        }
-        if (item.equals(SHIELD)) {
-            return SHIELD_CHANCE;
-        }
-        if (item.equals(CHARM)) {
-            return CHARM_CHANCE;
-        }
-        return switch (EXCLUSIVES.indexOf(item)) {
-            case 0 -> CLAW_CHANCE;
-            case 1 -> HARPOON_CHANCE;
-            case 2 -> PEARL_CHANCE;
-            default -> 0f;
-        };
+        return jp.revati.skyabyss.titan.tide.gear.TideGear.SET.chance(item);
     }
 
     // 登録されている品か (まだ作られていない品は false)

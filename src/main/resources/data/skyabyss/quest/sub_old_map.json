@@ -48,6 +48,11 @@
         "lore": [
           "item.skyabyss.keepsake.map_scrap.lore"
         ]
+      },
+      {
+        "item": "skyabyss:weathercock",
+        "count": 1,
+        "optional": true
       }
     ],
     "affinity": {

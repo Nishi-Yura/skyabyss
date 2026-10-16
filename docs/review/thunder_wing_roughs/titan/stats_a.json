@@ -1,0 +1,39 @@
+{
+ "a": {
+  "boxes": 19498,
+  "buried": 4067,
+  "over": 0,
+  "vol_ok": true,
+  "tex": [
+   1840,
+   2048
+  ],
+  "glow_px": 14436,
+  "x": [
+   -227.0,
+   227.0
+  ],
+  "y": [
+   13.0,
+   90.0
+  ],
+  "z": [
+   -126.0,
+   137.0
+  ],
+  "span_blocks_game": 227.0,
+  "length_blocks_game": 131.5,
+  "parts": {
+   "body": 1535,
+   "head": 2842,
+   "wing_l": 2692,
+   "wing_r": 2692,
+   "hand_l": 3017,
+   "hand_r": 2874,
+   "tail": 1758,
+   "legs": 1128,
+   "crest": 684,
+   "ruins": 276
+  }
+ }
+}

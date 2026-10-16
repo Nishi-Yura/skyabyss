@@ -1,0 +1,56 @@
+{
+ "a": {
+  "cubes": 110,
+  "hidden_dropped": 0,
+  "cells": 1774,
+  "atlas": [
+   512,
+   32
+  ],
+  "glow_px": 37,
+  "bones": 4,
+  "size_blocks": [
+   1.38,
+   0.81,
+   0.94
+  ],
+  "charged_glow_px": 319,
+  "overlaps": 0
+ },
+ "b": {
+  "cubes": 124,
+  "hidden_dropped": 0,
+  "cells": 1716,
+  "atlas": [
+   512,
+   32
+  ],
+  "glow_px": 190,
+  "bones": 4,
+  "size_blocks": [
+   1.38,
+   0.81,
+   0.94
+  ],
+  "charged_glow_px": 442,
+  "overlaps": 0
+ },
+ "c": {
+  "cubes": 195,
+  "hidden_dropped": 6,
+  "cells": 2026,
+  "atlas": [
+   512,
+   32
+  ],
+  "glow_px": 35,
+  "bones": 4,
+  "size_blocks": [
+   1.38,
+   0.81,
+   0.94
+  ],
+  "charged_glow_px": 517,
+  "overlaps": 0
+ }
+}
