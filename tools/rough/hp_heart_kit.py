@@ -500,17 +500,22 @@ def height_outside(vox, occ=None):
 
 
 def groove(vox, mask, cond, depth=1, color=None, glow=False, only=None):
-    """Carve cells of `mask` (owner filter via `only` = list of bone names) that satisfy `cond` down to `depth` cells.
-    cond marks cells at (or near) the surface. color: recolour the cells at the bottom of the groove; glow: make them glow."""
+    """Carve a groove `depth` cells deep under the surface cells marked by `cond` (a path, a rib line ...).
+    The cells under a path cell are found through the nearest empty cell, so the groove keeps the width of the path and never
+    hollows out the walls. color: recolour the new floor; glow: make the floor a glow pixel (a light leak)."""
     d = depth_inside(vox)
     own = np.ones(vox.n, bool) if only is None else np.isin(vox.lab, [vox.names[n] for n in only if n in vox.names])
-    m = vox.occ & mask & cond & (d <= depth) & own
-    below = vox.occ & (d == depth + 1) & own & mask
+    P = vox.occ & mask & cond & own & (d == 1)
+    if not P.any():
+        return P
+    E = ndi.binary_dilation(P, structure=ndi.generate_binary_structure(3, 1)) & ~vox.occ
+    idx = ndi.distance_transform_edt(vox.occ, return_distances=False, return_indices=True)
+    under = E[idx[0], idx[1], idx[2]]
+    m = vox.occ & mask & own & (d <= depth) & under
+    floor = vox.occ & mask & own & (d == depth + 1) & under
     vox.carve(m)
-    if color is None and not glow:
-        return m
-    floor = below & ndi.binary_dilation(m, structure=ball(1.1))
-    vox.paint(floor, color if color is not None else vox.col[floor].mean(0), glow=glow)
+    if color is not None or glow:
+        vox.paint(floor, color if color is not None else vox.col[floor].mean(0), glow=glow)
     return m
 
 

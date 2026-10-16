@@ -42,7 +42,7 @@ def build(variant, ph, seed=11):
     if variant == "now":
         return s
     # ---- the organ at 0.25: only where it can be seen (front and the sides), the back stays at 0.5
-    visible = np.broadcast_to(Z > -3.0, v.n)
+    visible = np.broadcast_to(Z > -1.5, v.n)
     K.smooth(v, HEART_LABELS, sigma=1.7, where=visible)
     K.smooth(v, ["core_ring", "core_eye", "chamber"], sigma=1.3)
     heart = np.isin(v.lab, [v.names[n] for n in ("heart", "heart_vein") if n in v.names])
@@ -69,12 +69,10 @@ def _carve_heart(v, ph, seed, heart):
     K.groove(v, front & hb, ribs, depth=1, only=["heart"])
     # purple vein net: painted on the surface (no new faces), running down from the aorta root over both lobes
     start = K.nearest_surface_cell(v, hb & front, (0.0, CY + 4.4, 2.5))
-    starts = [start] * 6
-    dirs = [(-1, -0.5, 0.5), (1, -0.5, 0.5), (-0.5, -1, 0.5), (0.5, -1, 0.5), (-1.2, -0.1, 0.4), (1.2, -0.1, 0.4)]
-    paths = K.surface_walk(v, hb & front, starts, steps=46, seed=seed + 5, branch=0.05, persist=0.94, width=1, dirs=dirs, jitter=0.22)
-    near = ndi.binary_dilation(paths, structure=K.ball(1.2))
+    starts = [start] * 4
+    dirs = [(-1, -0.6, 0.5), (1, -0.6, 0.5), (-0.45, -1, 0.5), (0.45, -1, 0.5)]
+    paths = K.surface_walk(v, hb & front, starts, steps=40, seed=seed + 5, branch=0.035, persist=0.95, width=1, dirs=dirs, jitter=0.22)
     v.paint(paths & hb, VEIN)
-    v.paint(near & ~paths & hb, lambda m: v.col[m] * 0.82 + np.array(VEIN, np.float32) * 0.18)
     # petal collar around the core: 12 raised nacre teeth just outside the glowing core (core centre z = 3.5 at phase 1-2)
     cz = 3.5 + (5.5 if ph == 3 else 0.0)
     rc = np.sqrt(X ** 2 + (Y - CY) ** 2)
@@ -92,10 +90,11 @@ def _cracks(v, ph, seed):
     front = np.broadcast_to(Z > 0.4, v.n)
     n = {1: 3, 2: 6, 3: 9}[ph]
     steps = {1: 22, 2: 28, 3: 30}[ph]
-    width = {1: 1, 2: 2, 3: 2}[ph]
+    width = {1: 2, 2: 2, 3: 2}[ph]
+    n = {1: 5, 2: 7, 3: 8}[ph]
     rng = np.random.default_rng(seed + 40)
     ang = (np.linspace(0, 2 * np.pi, n, endpoint=False) + 0.5 + rng.uniform(-0.25, 0.25, n))
-    rc = 4.3
+    rc = 3.5 + (0.5 if ph == 1 else 0.0)
     starts, dirs = [], []
     for a in ang:
         c = K.nearest_surface_cell(v, heart & front, (rc * np.cos(a), CY + rc * np.sin(a), 3.0))
