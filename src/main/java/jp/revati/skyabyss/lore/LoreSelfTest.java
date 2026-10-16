@@ -364,12 +364,16 @@ public final class LoreSelfTest {
     private static JsonObject lang(String code, List<String> failures) {
         JsonObject lang = json("/assets/skyabyss_lore/lang/" + code + ".json", failures);
         JsonObject quest = json("/assets/skyabyss_quest/lang/" + code + ".json", failures);
-        if (lang != null && quest != null) {
-            quest.entrySet().forEach(e -> {
-                if (!lang.has(e.getKey())) {
-                    lang.add(e.getKey(), e.getValue());
-                }
-            });
+        // 潮殻の心臓が記す項目 (潮の止まる刻) の文は skyabyss_tide にある
+        JsonObject tide = json("/assets/skyabyss_tide/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide)) {
+            if (lang != null && extra != null) {
+                extra.entrySet().forEach(e -> {
+                    if (!lang.has(e.getKey())) {
+                        lang.add(e.getKey(), e.getValue());
+                    }
+                });
+            }
         }
         return lang;
     }
