@@ -3,9 +3,9 @@
 使い方 (リポジトリ直下で): python tools/install_thunder_wing.py
 形の元: tools/rough/thunder_wing_titan.py の build("a") (格子はそのまま使う)。関数は変えない。
         この版で、骨の番号を振り直す (首・頭・冠・手・脚・門・遺跡を別の骨にする)、左右を反転する (左 = geo の +X)、
-        近景は大きな面を 2 単位の段にそろえる (手・頭・冠・門・遺跡・尾羽の先は 0.5 単位の細かさを残す)。
+        近景は胴・翼・首・頭・尾・脚を 4 単位 (2 ブロック) の段、手 (風切り) を 2 単位、冠を 1 単位の段にそろえる (門・遺跡は 0.5 単位のまま)。近景 2300 前後
 出力 (src/main/resources/assets/skyabyss/ 以下):
-  geo/entity/thunder_wing.geo.json        近景。0.5 単位の格子 (2 px/単位)。大きな面は 2 単位の段
+  geo/entity/thunder_wing.geo.json        近景。0.5 単位の格子 (2 px/単位)。段は上の通り
   geo/entity/thunder_wing_mid.geo.json    中景。4 単位の格子 (1 px/単位)
   geo/entity/thunder_wing_far.geo.json    遠景。6 単位の格子 (0.5 px/単位)。薄い骨は消さず、離れ島は組ごとに直す
   textures/entity/thunder_wing.png / thunder_wing_glowmask.png   3 つの LOD で共有する 1 枚 (幅 2048)
@@ -76,6 +76,9 @@ PIVOT = {"root": [0, 0, 0], "body": [0, 40, 0], "ruins": [0, 40, 0], "gate": Non
          "head": [0, 51, -80], "crest": [0, 51, -80], "wing_l": [28, 44, 0], "hand_l": None,
          "wing_r": [-28, 44, 0], "hand_r": None, "tail": [0, 42, 56], "leg_l": None, "leg_r": None}
 
+SNAP_Q = 8  # 近景の胴・翼・首・頭・尾・脚の段 (セル。8 = 4 単位 = 2 ブロック)
+# 箱の多い骨の段 (セル): 手 (風切り) は 2 単位、冠は 1 単位 (冠は 2 単位にすると形が消える)。近景は合わせて 2300 前後
+FINE_SNAP = {"hand_l": 4, "hand_r": 4, "crest": 2}
 LODS = [("near", 1, 2.0), ("mid", 8, 1.0), ("far", 12, 0.5)]   # 名前, 格子の倍率, 1 単位あたりの画素
 FACE_AXIS = {"west": (0, -1), "east": (0, 1), "down": (1, -1), "up": (1, 1), "north": (2, -1), "south": (2, 1)}
 FILES = {"near": "thunder_wing.geo.json", "mid": "thunder_wing_mid.geo.json", "far": "thunder_wing_far.geo.json"}
@@ -786,8 +789,16 @@ def write_landmarks(G, bnd):
 def main():
     global piv
     G0 = build_grid()
-    snap_body_tops(G0, 4)
-    snap_blocks(G0, SNAP_BONES, 4)
+    # 段の大きさで割り切れるよう、格子の端 (原点の反対側) を空のセルで足す
+    pad = [(0, (-n) % SNAP_Q) for n in G0.shape]
+    if any(b for _, b in pad):
+        G0 = np.pad(G0, pad)
+    snap_body_tops(G0, SNAP_Q)
+    snap_blocks(G0, SNAP_BONES, SNAP_Q)
+    for b, q in FINE_SNAP.items():
+        before = int(((G0 // 32) == BONE[b]).sum())
+        snap_blocks(G0, [BONE[b]], q)
+        print("snapped", b, q, before, "->", int(((G0 // 32) == BONE[b]).sum()))
     print("snapped near cells", int((G0 != 0).sum()))
 
     lods = {}

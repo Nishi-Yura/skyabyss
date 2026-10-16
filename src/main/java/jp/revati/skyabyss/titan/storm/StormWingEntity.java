@@ -88,6 +88,8 @@ public class StormWingEntity extends Entity implements GeoEntity {
     // 空の影から隠れる速さと、影を見る距離
     static final double COVER_SPEED = 0.8;
     static final double COWER_RANGE = 640;
+    static final double COWER_LORE_RANGE = 160;
+    static final double TELL_RANGE = 200;
 
     public enum Mode { CRUISE, DESCEND, PERCH, TAKE_OFF, COWER }
 
@@ -385,6 +387,7 @@ public class StormWingEntity extends Entity implements GeoEntity {
         perchY = peak.y();
         perchZ = peak.z();
         hasPerch = true;
+        tell(level, "message.skyabyss.storm.perching");
         return true;
     }
 
@@ -453,7 +456,19 @@ public class StormWingEntity extends Entity implements GeoEntity {
 
     private void beginTakeOff(ServerLevel level) {
         forcedTicks = 0;
+        if (mode == Mode.PERCH) {
+            tell(level, "message.skyabyss.storm.taking_off");
+        }
         setMode(Mode.TAKE_OFF);
+    }
+
+    // 近くの人 (止まり木から TELL_RANGE 以内) に一行
+    private void tell(ServerLevel level, String key) {
+        for (ServerPlayer p : level.players()) {
+            if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - perchX, p.getZ() - perchZ) < TELL_RANGE) {
+                p.displayClientMessage(jp.revati.skyabyss.ModText.lore(key), true);
+            }
+        }
     }
 
     // 飛び立つ: 前へ進みながら上がる。終わったら、今いる所をそのまま輪の上の点として巡航に入る (向きは進む向きと同じ)
@@ -497,6 +512,14 @@ public class StormWingEntity extends Entity implements GeoEntity {
     }
 
     private void tickCower(ServerLevel level) {
+        // うずくまる雷翼を 160 ブロック以内で見た人に、伝承「うずくまる巨神」を記す (12 の 11.1 の約束)
+        if (modeTicks % 20 == 0) {
+            for (ServerPlayer p : level.players()) {
+                if (TitanKeeper.eligible(p) && p.distanceToSqr(this) < COWER_LORE_RANGE * COWER_LORE_RANGE && p.hasLineOfSight(this)) {
+                    jp.revati.skyabyss.lore.Lore.unlock(p, jp.revati.skyabyss.titan.storm.lore.StormLore.LORE_COWER, true);
+                }
+            }
+        }
         SkyPass pass = SkyEvents.activePass();
         if (pass == null || !pass.isActive(level.getGameTime())) {
             beginTakeOff(level);

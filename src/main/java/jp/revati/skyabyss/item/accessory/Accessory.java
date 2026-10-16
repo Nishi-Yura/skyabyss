@@ -12,4 +12,9 @@ public interface Accessory {
     default boolean activate(ServerPlayer player, ItemStack stack) {
         return false;
     }
+
+    // 護符の待ち (tick)。休んでいるときの「あと何秒」の計算に使う
+    default int cooldownTicks() {
+        return 20 * 60;
+    }
 }

@@ -166,7 +166,7 @@ public final class StormBackTrials {
         for (ServerPlayer p : level.players()) {
             level.playSound(null, p.getX(), p.getY() + 6, p.getZ(), rise ? StormSetup.RISE_WARN.get() : StormSetup.FALL_WARN.get(),
                     SoundSource.AMBIENT, 1.4f, 1f);
-            p.displayClientMessage(ModText.lore(rise ? "message.skyabyss.storm.rising_soon" : "message.skyabyss.storm.falling_soon"), true);
+            p.displayClientMessage(ModText.lore(rise ? "message.skyabyss.storm.storm_soon" : "message.skyabyss.storm.calm_soon"), true);
         }
     }
 
@@ -187,7 +187,7 @@ public final class StormBackTrials {
             StormBirdBuilder.setKeelGate(level, true);
             level.playSound(null, HUB_CENTER, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.storm.keel_open"));
+                p.sendSystemMessage(ModText.lore("message.skyabyss.storm.keel_opened"));
             }
         }
         if (state.keelOpen() && level.getGameTime() % 10 == 0) {
@@ -213,6 +213,7 @@ public final class StormBackTrials {
                 p.fallDistance = 0;
                 p.teleportTo(level, dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, p.getYRot(), p.getXRot());
                 level.playSound(null, dest, StormSetup.GALE.get(), SoundSource.PLAYERS, 1f, 1.2f);
+                p.displayClientMessage(ModText.hint("message.skyabyss.storm.return_path"), true);
             }
         }
     }
@@ -236,7 +237,7 @@ public final class StormBackTrials {
             return;
         }
         if (trial == StormBackState.Trial.EAST && !state.raijuDefeated()) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.storm.east_silent"), true);
+            player.displayClientMessage(ModText.deny("message.skyabyss.storm.stone_silent"), true);
             return;
         }
         ring(level, state, trial, player);
@@ -313,7 +314,7 @@ public final class StormBackTrials {
         state.setRaijuDefeated(true);
         for (ServerPlayer p : level.players()) {
             if (inEast(p.position())) {
-                p.displayClientMessage(ModText.lore("message.skyabyss.storm.raiju_fell"), true);
+                p.displayClientMessage(ModText.lore("message.skyabyss.raiju.defeated"), true);
             }
         }
     }
@@ -424,10 +425,10 @@ public final class StormBackTrials {
                 }
                 if (pastSeal(p.position()) && !onBackTop(p.position())) {
                     toArrival(p);
-                    p.sendSystemMessage(ModText.lore("message.skyabyss.trials_peaceful"));
+                    p.sendSystemMessage(ModText.lore("message.skyabyss.storm.peaceful"));
                 }
                 if (p.tickCount % 40 < 5 && Math.abs(p.getZ() - SEAL_Z) < 4 && Math.abs(p.getX()) < 3) {
-                    p.displayClientMessage(ModText.lore("message.skyabyss.trials_peaceful"), true);
+                    p.displayClientMessage(ModText.lore("message.skyabyss.storm.peaceful"), true);
                 }
             }
             if (!wasPeaceful) {

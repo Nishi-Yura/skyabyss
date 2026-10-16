@@ -17,6 +17,11 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class StormSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
+
+    // 風見鶏 (12 の 2.6節。イサナが「古い地図」の報酬で渡す)
+    public static final net.neoforged.neoforge.registries.DeferredItem<WeathercockItem> WEATHERCOCK = ITEMS.register("weathercock",
+            () -> new WeathercockItem(new net.minecraft.world.item.Item.Properties().stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
 
     // 当たり判定は小さく、見た目は描画側で 8 倍にする (潮殻と同じ)。位置はモデルの底
     public static final DeferredHolder<EntityType<?>, EntityType<StormWingEntity>> THUNDER_WING = ENTITIES.register("thunder_wing",
@@ -57,6 +62,7 @@ public final class StormSetup {
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         SOUNDS.register(modEventBus);
+        ITEMS.register(modEventBus);
         modEventBus.addListener(StormSetup::onCommonSetup);
     }
 

@@ -50,6 +50,7 @@ public final class TitanBackSelfTest {
                 })),
                 SelfTestRunner.Step.once("titan back (layout)", server -> withBack(server, back -> {
                     checkSurface(back, PENDING);
+                    checkWhale(back, PENDING);
                     checkRooms(back, PENDING);
                     checkDoors(back, PENDING);
                     checkCourses(back, PENDING);
@@ -263,6 +264,131 @@ public final class TitanBackSelfTest {
                 failures.add("stairwell blocked at z=" + z);
             }
         }
+    }
+
+    // ---------------------------------------------------------------- 鯨の形 (02 の「巨神の形の背中（作り直し）」)
+    // 頭・左右の胸びれ・左右の尾びれ・背の遺跡・錨石の鎖がある。背 (体のいちばん上) に掘った穴がない (祠と広場のほかで、背の面が空)。
+    // 体の中の部屋は外とつながっていない (鼓動の間から空気を辿って、祠の封印の面より先で外へ出ない。肋骨の窓はガラス)。
+    // 尾の付け根の広場から、背を歩いて祠へ、祠の階段で鼓動の間へ行ける
+    private static void checkWhale(ServerLevel level, List<String> failures) {
+        record Part(String name, int x, int z, int y1, int y2) {
+        }
+        for (Part part : List.of(new Part("head", -3, -150, 70, 125), new Part("left pectoral fin", -75, -30, 60, 95),
+                new Part("right pectoral fin", 69, -30, 60, 95), new Part("left fluke", -60, 238, 85, 100),
+                new Part("right fluke", 54, 238, 85, 100), new Part("back tower", -3, -38, 150, 168),
+                new Part("anchor chain", ANCHOR_CHAIN_X, ANCHOR_CHAIN_Z, BASE_Y - 40, ANCHOR_CHAIN_Y))) {
+            boolean found = false;
+            for (int y = part.y1(); y <= part.y2() && !found; y++) {
+                found = !level.getBlockState(new BlockPos(part.x(), y, part.z())).isAir();
+            }
+            if (!found) {
+                failures.add("whale " + part.name() + " is missing around (" + part.x() + ", " + part.z() + ")");
+            }
+        }
+        // 背の穴: 体のいちばん上のブロックが空いていて、その下も空 (掘った部屋が背を突き抜けた)
+        int holes = 0;
+        BlockPos firstHole = null;
+        for (int x = WhaleShape.minX(); x <= WhaleShape.maxX(); x++) {
+            for (int z = WhaleShape.minZ(); z <= WhaleShape.maxZ(); z++) {
+                int t = WhaleShape.bodyTop(x, z);
+                if (t == Integer.MIN_VALUE || (Math.abs(x) <= 6 && z >= SHRINE_Z - 11 && z <= SHRINE_Z + 11)
+                        || (Math.abs(x) <= 9 && Math.abs(z - PLATFORM_Z) <= 11)) {
+                    continue;
+                }
+                if (level.getBlockState(new BlockPos(x, t, z)).isAir() && level.getBlockState(new BlockPos(x, t - 1, z)).isAir()) {
+                    holes++;
+                    if (firstHole == null) {
+                        firstHole = new BlockPos(x, t, z);
+                    }
+                }
+            }
+        }
+        if (holes > 0) {
+            failures.add("whale back has " + holes + " holes (first at " + firstHole + ")");
+        }
+        // 体の中の空気が外へ抜けていないか。祠の封印の面 (shrineSeal) は壁とみなす
+        Set<BlockPos> seal = new HashSet<>(shrineSeal());
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> seen = new HashSet<>();
+        BlockPos start = HUB.center();
+        queue.add(start);
+        seen.add(start);
+        BlockPos leak = null;
+        while (!queue.isEmpty() && leak == null && seen.size() < 600_000) {
+            BlockPos p = queue.poll();
+            for (Direction d : Direction.values()) {
+                BlockPos q = p.relative(d);
+                if (seen.contains(q) || seal.contains(q)) {
+                    continue;
+                }
+                BlockState st = level.getBlockState(q);
+                if (st.blocksMotion() && st.getFluidState().isEmpty()) {
+                    continue;
+                }
+                seen.add(q);
+                // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
+                if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
+                    leak = q;
+                    break;
+                }
+                queue.add(q);
+            }
+        }
+        if (leak != null) {
+            failures.add("the inside of the whale opens to the outside at " + leak + " (not through the shrine stairs)");
+        }
+        SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
+        // 歩ける道: 到着から祠、祠の階段で鼓動の間
+        int toShrine = walkSteps(level, arrival(), new BlockPos(0, shrineY() + 1, SHRINE_Z), 2);
+        int toHub = walkSteps(level, arrival(), HUB.center(), 2);
+        if (toShrine < 0) {
+            failures.add("cannot walk from the arrival on the tail to the shrine");
+        }
+        if (toHub < 0) {
+            failures.add("cannot walk from the arrival to the heartbeat hall");
+        } else if (toHub > 220) {
+            failures.add("the walk from the arrival to the hub is too long (" + toHub + " steps)");
+        }
+        SkyAbyss.LOGGER.info("Titan back walk: arrival -> shrine {} steps, -> hub {} steps", toShrine, toHub);
+    }
+
+    // 歩いて何歩で着くか (着かなければ -1)。足元が固く、足と頭が空いている所を、上り 1・下り 3 まで。目標から r 以内で着いたとみなす
+    static int walkSteps(ServerLevel level, BlockPos from, BlockPos to, int r) {
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        java.util.Map<BlockPos, Integer> dist = new java.util.HashMap<>();
+        queue.add(from);
+        dist.put(from, 0);
+        while (!queue.isEmpty() && dist.size() < 400_000) {
+            BlockPos p = queue.poll();
+            int d = dist.get(p);
+            if (Math.abs(p.getX() - to.getX()) <= r && Math.abs(p.getZ() - to.getZ()) <= r && Math.abs(p.getY() - to.getY()) <= 1) {
+                return d;
+            }
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                for (int dy = 1; dy >= -3; dy--) {
+                    BlockPos q = p.relative(dir).above(dy);
+                    if (dy == 1 && !passable(level, p.above(2))) {
+                        continue;
+                    }
+                    if (passable(level, q) && passable(level, q.above()) && !passable(level, q.below())) {
+                        if (!dist.containsKey(q)) {
+                            dist.put(q, d + 1);
+                            queue.add(q);
+                        }
+                        break;
+                    }
+                    if (!passable(level, q)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static boolean passable(ServerLevel level, BlockPos p) {
+        BlockState st = level.getBlockState(p);
+        return !st.blocksMotion() && !st.is(Blocks.LAVA) && !st.is(Blocks.WATER);
     }
 
     // どの部屋も、天井と床 (谷は溶岩の底) がそろっていて、空や奈落に穴が開いていないこと
@@ -729,7 +855,7 @@ public final class TitanBackSelfTest {
                     for (int z = -RZ - 4; z <= RZ + 4; z++) {
                         int color = 0x1A2233;
                         if (slices[k][0] < 0) {
-                            for (int y = BASE_Y + 40; y > BASE_Y - 50; y--) {
+                            for (int y = BASE_Y + 70; y > BASE_Y - 50; y--) {
                                 BlockState st = level.getBlockState(new BlockPos(x, y, z));
                                 if (!st.isAir()) {
                                     color = shade(st.getMapColor(level, new BlockPos(x, y, z)).col, (y - BASE_Y) * 4);

@@ -149,7 +149,7 @@ final class StormWest {
             if (inWest) {
                 if (W0.contains(p.blockPosition()) && !GaleFeather.holds(p) && p.isAlive()) {
                     if (p.getInventory().add(new ItemStack(StormBackSetup.GALE_FEATHER.get()))) {
-                        p.displayClientMessage(ModText.hint("message.skyabyss.storm.feather_got"), true);
+                        p.displayClientMessage(ModText.hint("message.skyabyss.storm.gale_feather"), true);
                         level.playSound(null, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
                     }
                 }
@@ -159,6 +159,7 @@ final class StormWest {
                 }
             } else if (GaleFeather.holds(p)) {
                 strip(p);
+                p.displayClientMessage(ModText.hint("message.skyabyss.storm.gale_feather_gone"), true);
             }
         }
     }

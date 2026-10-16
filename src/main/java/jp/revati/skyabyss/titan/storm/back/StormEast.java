@@ -111,6 +111,16 @@ final class StormEast {
         tickStorm(level, gt);
     }
 
+    static int openDoors(StormBackState state) {
+        int n = 0;
+        for (int i = 0; i < EAST_RODS.size(); i++) {
+            if (state.eastDoorOpen(i)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     // 満ちた柱の戸を開ける
     static void openFullDoors(ServerLevel level, StormBackState state) {
         {
@@ -123,7 +133,7 @@ final class StormEast {
                     level.playSound(null, d, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.6f, 1.8f);
                     for (ServerPlayer p : level.players()) {
                         if (inCorridor(p.position())) {
-                            p.displayClientMessage(ModText.lore("message.skyabyss.storm.bone_door_open"), true);
+                            p.displayClientMessage(ModText.progress("message.skyabyss.storm.door_opened", openDoors(state)), true);
                         }
                     }
                 }

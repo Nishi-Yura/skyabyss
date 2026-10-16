@@ -2,6 +2,7 @@ package jp.revati.skyabyss.forge;
 
 import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
+import jp.revati.skyabyss.item.TitanGearSets;
 import jp.revati.skyabyss.item.affix.AffixRules;
 import jp.revati.skyabyss.registry.ModDataComponents;
 import jp.revati.skyabyss.registry.ModItems;
@@ -11,8 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の決まりごと (画面の表示とサーバーの処理で同じ計算を使う)
-//  強化: 岩鯨の欠片と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
-//  分解: 装備を壊し、共鳴の欠片 (伝説) か岩鯨の欠片 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
+//  強化: 由来の巨神の欠片 (岩鯨の品は岩鯨の欠片、潮殻の品は潮殻の欠片。TitanGearSets.shardFor) と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
+//  分解: 装備を壊し、共鳴の欠片 (伝説) か由来の巨神の欠片 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
 //  再鍛造: 共鳴の結晶 1 つで特性の候補を一組 (最大 3 組)。今のものか候補を選んで確定する (item/affix/AffixRules)
 //  交換: 共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)
 public final class ForgeRules {
@@ -44,7 +45,7 @@ public final class ForgeRules {
         return total;
     }
 
-    // 分解で得るもの: [共鳴の欠片の数, 岩鯨の欠片の数, 共鳴の結晶の数]
+    // 分解で得るもの: [共鳴の欠片の数, 由来の巨神の欠片の数 (shardItem), 共鳴の結晶の数]
     // 結晶は特性の付く武器・防具だけ (レア 1、伝説 2)。重なった甲殻や大剣が、再鍛造の結晶になる
     public static int[] dismantleYield(ItemStack stack) {
         if (!(stack.getItem() instanceof ModGear gear)) {
@@ -118,8 +119,18 @@ public final class ForgeRules {
         }
     }
 
+    // 強化と分解で使う欠片 (由来の巨神の欠片)
+    public static Item shardItem(ItemStack stack) {
+        return TitanGearSets.shardFor(stack);
+    }
+
+    // 欠片を使わない費用 (再鍛造) か、岩鯨の欠片で払う費用
     public static boolean affordable(Player player, Cost cost) {
-        return player.isCreative() || (count(player.getInventory(), ModItems.STONE_WHALE_SHARD.get()) >= cost.shards()
+        return affordable(player, cost, ModItems.STONE_WHALE_SHARD.get());
+    }
+
+    public static boolean affordable(Player player, Cost cost, Item shard) {
+        return player.isCreative() || (count(player.getInventory(), shard) >= cost.shards()
                 && count(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get()) >= cost.crystals());
     }
 
@@ -130,11 +141,12 @@ public final class ForgeRules {
         }
         int level = ModGear.enhance(stack);
         Cost cost = enhanceCost(level);
-        if (!affordable(player, cost)) {
+        Item shard = shardItem(stack);
+        if (!affordable(player, cost, shard)) {
             return false;
         }
         if (!player.isCreative()) {
-            remove(player.getInventory(), ModItems.STONE_WHALE_SHARD.get(), cost.shards());
+            remove(player.getInventory(), shard, cost.shards());
             remove(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get(), cost.crystals());
         }
         stack.set(ModDataComponents.ENHANCE.get(), level + 1);

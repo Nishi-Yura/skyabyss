@@ -32,7 +32,6 @@ public class GaleFeather extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> tip, TooltipFlag flag) {
         tip.add(Component.translatable("item.skyabyss.gale_feather.desc").withStyle(ChatFormatting.GRAY));
-        tip.add(Component.translatable("item.skyabyss.gale_feather.desc2").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override

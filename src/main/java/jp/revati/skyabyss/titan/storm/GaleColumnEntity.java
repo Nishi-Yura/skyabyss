@@ -123,7 +123,7 @@ public class GaleColumnEntity extends Entity {
         if (tickCount % HINT_EVERY == 0) {
             for (ServerPlayer p : level.players()) {
                 if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - baseX, p.getZ() - baseZ) < HINT_RANGE) {
-                    p.displayClientMessage(ModText.hint("message.skyabyss.storm.gale_hint"), true);
+                    p.displayClientMessage(ModText.hint("message.skyabyss.storm.column_hint"), true);
                 }
             }
         }

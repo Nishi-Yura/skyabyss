@@ -65,6 +65,7 @@ public final class StormBackSelfTest {
                     "blocks are falling in the storm back after building", FAILURES);
             checkClock(FAILURES);
             checkBird(back, FAILURES);
+            checkShell(back, FAILURES, NOTES);
             checkSigns(back, FAILURES);
             checkWhispers(FAILURES);
             checkMirrors(back, FAILURES, NOTES);
@@ -147,6 +148,150 @@ public final class StormBackSelfTest {
         check(StormBirdBuilder.top(0, -78) > EYE_HALL.floor() + EYE_HALL.height(), "the eye hall pokes out of the head", f);
     }
 
+    // ---------------------------------------------------------------- 体の皮 (データで確かめる。ダンジョンの試遊はしない)
+    // 1) 背の穴: 鳥のいちばん上のブロックとその下が空いている柱 (羽根の門・背の上へ出る段・到着の台・天窓を除く)
+    // 2) 漏れ: 風の広間から空気をたどって、鳥の形の外 (上か下) へ出る所 (羽根の門と背の上の段の口は出口として許す)
+    // 3) 水と溶岩: 建てて 100 tick 置いたあと、体の中の空気に流れる物が無い。休み場と部屋の真ん中は空気
+    private static void checkShell(ServerLevel l, List<String> f, List<String> notes) {
+        if (!StormBirdBuilder.BIRD.exists()) {
+            return;
+        }
+        var bird = StormBirdBuilder.BIRD;
+        int holes = 0;
+        BlockPos firstHole = null;
+        for (int x = bird.minX(); x <= bird.maxX(); x++) {
+            for (int z = bird.minZ(); z <= bird.maxZ(); z++) {
+                int t = bird.top(x, z);
+                if (t == Integer.MIN_VALUE || allowedOpening(x, t, z)) {
+                    continue;
+                }
+                // 空が見えて (上に何も建っていない)、鳥の上の 2 段が空いている
+                if (skyAt(l, x, z) < t && !l.getBlockState(new BlockPos(x, t - 1, z)).blocksMotion()) {
+                    holes++;
+                    if (firstHole == null) {
+                        firstHole = new BlockPos(x, t, z);
+                    }
+                }
+            }
+        }
+        check(holes == 0, "the bird's back has " + holes + " holes (first at " + firstHole + ")", f);
+        if (holes > 0 || DUMP) {
+            dumpHoles(l, bird);
+        }
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> seen = new HashSet<>();
+        queue.add(HUB_CENTER.above());
+        seen.add(HUB_CENTER.above());
+        List<BlockPos> leaks = new ArrayList<>();
+        int fluids = 0;
+        BlockPos firstFluid = null;
+        while (!queue.isEmpty() && seen.size() < 3_000_000) {
+            BlockPos p = queue.poll();
+            for (Direction d : Direction.values()) {
+                BlockPos q = p.relative(d);
+                if (seen.contains(q)) {
+                    continue;
+                }
+                var st = l.getBlockState(q);
+                if (st.blocksMotion() && st.getFluidState().isEmpty()) {
+                    continue;
+                }
+                seen.add(q);
+                if (!st.getFluidState().isEmpty()) {
+                    fluids++;
+                    if (firstFluid == null) {
+                        firstFluid = q;
+                    }
+                }
+                // 外: 空が見える (上に固いブロックが無い) か、鳥の下
+                boolean outside = q.getY() >= skyAt(l, q.getX(), q.getZ())
+                        || (q.getY() < bird.bottom(q.getX(), q.getZ()) && openBelow(l, q, bird.minY() - 2));
+                if (outside) {
+                    if (!allowedOpening(q.getX(), q.getY(), q.getZ()) && leaks.size() < 5) {
+                        leaks.add(q);
+                    }
+                    continue;
+                }
+                queue.add(q);
+            }
+        }
+        check(leaks.isEmpty(), "the inside of the bird opens to the sky at " + leaks, f);
+        check(fluids == 0, fluids + " fluid blocks inside the bird (first at " + firstFluid + ")", f);
+        for (Rest r : RESTS) {
+            check(l.getBlockState(r.spawn()).isAir() && l.getBlockState(r.spawn().above()).isAir(), "rest " + r.id() + " is not open air", f);
+        }
+        for (BlockPos c : List.of(TAIL_CENTER, HUB_CENTER.above(), EYE_HALL_CENTER.offset(1, 0, 6), HEART_ROOM.offset(0, 2, 8))) {
+            check(l.getBlockState(c).isAir(), "the room around " + c + " is not air", f);
+        }
+        notes.add("inside air " + seen.size() + ", back holes " + holes + ", leaks " + leaks.size() + ", fluids " + fluids);
+    }
+
+    // いちばん上の固いブロックの 1 上 (ここから上は空が見える)
+    static int skyAt(ServerLevel l, int x, int z) {
+        return l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
+    }
+
+    // 下に固いブロックが一つもない (嵐の雲へ落ちる)
+    static boolean openBelow(ServerLevel l, BlockPos q, int minY) {
+        for (int y = q.getY() - 1; y >= minY; y--) {
+            if (l.getBlockState(new BlockPos(q.getX(), y, q.getZ())).blocksMotion()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static final boolean DUMP = System.getenv("SKYABYSS_STORM_DUMP") != null;
+
+    // 背の穴の地図と断面図を run/storm_back_dump/ に書く (上から: '#' 穴、'+' 鳥、'.' なし。断面: '#' 固い、' ' 空、'~' 流れる物)
+    static void dumpHoles(ServerLevel l, jp.revati.skyabyss.titan.BackShape bird) {
+        try {
+            java.nio.file.Path dir = java.nio.file.Path.of("storm_back_dump");
+            java.nio.file.Files.createDirectories(dir);
+            StringBuilder top = new StringBuilder();
+            for (int z = bird.minZ(); z <= bird.maxZ(); z++) {
+                for (int x = bird.minX(); x <= bird.maxX(); x++) {
+                    int t = bird.top(x, z);
+                    char c = '.';
+                    if (t != Integer.MIN_VALUE) {
+                        boolean hole = !allowedOpening(x, t, z) && skyAt(l, x, z) < t && !l.getBlockState(new BlockPos(x, t - 1, z)).blocksMotion();
+                        c = hole ? '#' : '+';
+                    }
+                    top.append(c);
+                }
+                top.append('\n');
+            }
+            java.nio.file.Files.writeString(dir.resolve("holes_top.txt"), top.toString());
+            for (int z : new int[] {-17, -10, -3, 0, -78, 22, 26, 31, 40}) {
+                StringBuilder sec = new StringBuilder("z=" + z + " x " + bird.minX() + ".." + bird.maxX() + "\n");
+                for (int y = 170; y >= 110; y--) {
+                    sec.append(String.format("%3d ", y));
+                    for (int x = bird.minX(); x <= bird.maxX(); x++) {
+                        var st = l.getBlockState(new BlockPos(x, y, z));
+                        boolean inBird = bird.at(x, y, z) != null;
+                        sec.append(!st.getFluidState().isEmpty() ? '~' : st.blocksMotion() ? (inBird ? '#' : '@') : (inBird ? ' ' : (y > bird.top(x, z) ? '.' : ',')));
+                    }
+                    sec.append('\n');
+                }
+                java.nio.file.Files.writeString(dir.resolve("section_z" + z + ".txt"), sec.toString());
+            }
+        } catch (java.io.IOException e) {
+            SkyAbyss.LOGGER.error("could not write the storm back dump", e);
+        }
+    }
+
+    // 外へ開いていてよい所: 空へ開く口 (StormBackLayout.openToSky) と、風切りの骨の割れた床 (下の嵐の雲へ抜ける。12 の 4.1節)
+    static boolean allowedOpening(int x, int y, int z) {
+        if (y < HIGH_BEAM_Y && z >= BONE_Z1 - 1 && z <= BONE_Z2 + 1) {
+            for (int[] g : WEST_GAPS) {
+                if (x >= g[0] - 1 && x <= g[1] + 1) {
+                    return true;
+                }
+            }
+        }
+        return openToSky(x, y, z);
+    }
+
     private record BackShapeProbe(ServerLevel l) {
         boolean columnHas(int x, int z) {
             return StormBirdBuilder.BIRD.top(x, z) != Integer.MIN_VALUE;
@@ -175,11 +320,9 @@ public final class StormBackSelfTest {
             keys.add(i.key());
             check(l.getBlockEntity(i.pos()) instanceof SignBlockEntity, "sign " + i.key() + " is missing at " + i.pos(), f);
         }
-        // 文の幅: 伝承の担当がまとめる前は、この担当の lang の断片 (parts/back.json) で測る
-        Map<String, Map<String, String>> parts = parts();
+        // 文の幅: 伝承の担当がまとめた lang (skyabyss_storm) で測る
         for (String lang : SignFit.LANGUAGES) {
-            Map<String, String> m = new HashMap<>(parts.getOrDefault(lang, Map.of()));
-            m.putAll(SignFit.lang(lang));
+            Map<String, String> m = SignFit.lang(lang);
             for (String k : keys) {
                 if (!m.containsKey(k + ".1")) {
                     f.add("sign " + k + " has no text in " + lang);
@@ -195,17 +338,13 @@ public final class StormBackSelfTest {
         }
     }
 
-    static Map<String, Map<String, String>> parts() {
-        Map<String, Map<String, String>> out = new HashMap<>();
+    // この担当と地上の担当が使う文の鍵 (lang/parts/{back,ground}.json。tools/gen_storm_lore.py が ja_jp・en_us にまとめる)
+    static List<String> partKeys() {
+        List<String> out = new ArrayList<>();
         for (String part : List.of("back", "ground")) {
             try (InputStream in = StormBackSelfTest.class.getResourceAsStream("/assets/skyabyss_storm/lang/parts/" + part + ".json")) {
-                if (in == null) {
-                    continue;
-                }
-                JsonObject json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
-                for (String lang : json.keySet()) {
-                    Map<String, String> m = out.computeIfAbsent(lang, k -> new HashMap<>());
-                    json.getAsJsonObject(lang).entrySet().forEach(e -> m.put(e.getKey(), e.getValue().getAsString()));
+                if (in != null) {
+                    out.addAll(JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject().keySet());
                 }
             } catch (Exception e) {
                 SkyAbyss.LOGGER.error("could not read the storm lang part {}", part, e);
@@ -215,13 +354,14 @@ public final class StormBackSelfTest {
     }
 
     private static void checkWhispers(List<String> f) {
-        Map<String, Map<String, String>> parts = parts();
+        List<String> keys = new ArrayList<>(partKeys());
+        keys.addAll(jp.revati.skyabyss.titan.storm.lore.StormWhispers.keys());
+        check(keys.size() > 60, "the storm lang parts are missing", f);
         for (String lang : SignFit.LANGUAGES) {
-            for (String k : StormWhispers.keys()) {
-                check(parts.getOrDefault(lang, Map.of()).containsKey(k) || SignFit.lang(lang).containsKey(k), "whisper " + k + " has no text in " + lang, f);
+            for (String k : keys) {
+                check(SignFit.lang(lang).containsKey(k), "text " + k + " is missing in " + lang + " (run tools/gen_storm_lore.py)", f);
             }
         }
-        check(StormWhispers.keys().size() == 8, "there should be 8 whispers", f);
     }
 
     // ---------------------------------------------------------------- 眼の間 (四つの配置を解く。世界の鏡でも同じ手で解ける)

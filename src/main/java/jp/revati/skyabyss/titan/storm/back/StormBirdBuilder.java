@@ -48,8 +48,10 @@ public final class StormBirdBuilder {
         keel(kit);
         topStair(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
+        int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
         fixtures(kit);
-        SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks in {} ms", kit.carved().size(), skinned, System.currentTimeMillis() - t0);
+        SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed in {} ms", kit.carved().size(), skinned, sealed,
+                System.currentTimeMillis() - t0);
     }
 
     static Style styleAt(BlockPos p) {
@@ -69,7 +71,7 @@ public final class StormBirdBuilder {
     }
 
     // 鳥の上 (いちばん上のブロック)。形が無ければ到着の高さ
-    static int top(int x, int z) {
+    public static int top(int x, int z) {
         if (!BIRD.exists()) {
             return ARRIVAL.getY() - 1;
         }

@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 // ほかの担当へ (11.1 の約束): 雷獣の巣・竜骨の間・休み場はここから読む。数字を写さないこと (建て直しで動くことがある)。
 public final class StormBackLayout {
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 1;
+    public static final int LAYOUT_VERSION = 2;   // 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -212,9 +212,9 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_eye", new BlockPos(-4, 148, -69), Direction.NORTH),
             new Inscription("sign.skyabyss.lore_storm_heart", new BlockPos(-3, 123, -37), Direction.SOUTH));
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.storm_windbone", new BlockPos(-15, 140, -8), Direction.EAST),
-            new Inscription("sign.skyabyss.storm_thunderbone", new BlockPos(15, 140, -8), Direction.WEST),
-            new Inscription("sign.skyabyss.storm_eye_hall", new BlockPos(-2, 152, -57), Direction.SOUTH));
+            new Inscription("sign.skyabyss.storm_west", new BlockPos(-15, 140, -8), Direction.EAST),
+            new Inscription("sign.skyabyss.storm_east", new BlockPos(15, 140, -8), Direction.WEST),
+            new Inscription("sign.skyabyss.storm_front", new BlockPos(-2, 152, -57), Direction.SOUTH));
 
     private StormBackLayout() {
     }
@@ -259,6 +259,20 @@ public final class StormBackLayout {
     // 体の中 (尾の間より奥。ピースフルのあいだは入れない)。腰の回廊の封印より北で、体の中の高さ
     public static boolean pastSeal(Vec3 p) {
         return p.z < SEAL_Z && p.y < 158 && p.y > 110 && Math.abs(p.x) < 145 && p.z > -100;
+    }
+
+    // 外へ開いていてよい所: 尾羽の上の到着の台と下り風の輪・羽根の門・背の上へ出る段・天窓
+    public static boolean openToSky(int x, int y, int z) {
+        if (Math.abs(x - ARRIVAL.getX()) <= 4 && z >= ARRIVAL.getZ() - 4 && z <= DOWNDRAFT.getZ() + 4) {
+            return true;
+        }
+        if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 4 && z <= FEATHER_GATE.maxZ + 4) {
+            return true;
+        }
+        if (Math.abs(x - TOP_STAIR.getX()) <= 3 && Math.abs(z - TOP_STAIR.getZ()) <= 3) {
+            return true;
+        }
+        return y > HUB.floor() + HUB.height() && x * x + (z + 4) * (z + 4) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);
     }
 
     // 眼の間の格子の台の座標 (列 c・行 r)

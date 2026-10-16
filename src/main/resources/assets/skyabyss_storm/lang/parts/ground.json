@@ -1,34 +1,72 @@
 {
-  "en_us": {
-    "title.skyabyss.storm_back": "Storm Above",
-    "title.skyabyss.storm_back.sub": "The wing of the thunder bird",
-    "message.skyabyss.storm.arrived": "The updraft carried you onto the back of the thunder wing.",
-    "message.skyabyss.storm.leaving": "You slide back down the wind to the ground.",
-    "message.skyabyss.storm.swept_back": "The storm threw you back onto the bird's back.",
-    "message.skyabyss.storm.gale_hint": "Ride the updraft and it will carry you up to its back.",
-    "commands.skyabyss.storm.overworld_only": "The thunder wing can only be summoned in the overworld.",
-    "commands.skyabyss.storm.summoned": "Summoned the thunder wing near %s, %s.",
-    "commands.skyabyss.storm.missing": "The thunder wing is not in this world yet.",
-    "commands.skyabyss.storm.no_peak": "No dry peak was found near that player.",
-    "commands.skyabyss.storm.resting": "The thunder wing is coming down to rest on a peak.",
-    "commands.skyabyss.storm.rebuilt": "Rebuilt the storm back.",
-    "commands.skyabyss.storm.status_absent": "Thunder wing not present (spawned before: %s). Storm window in %s s.",
-    "commands.skyabyss.storm.status": "Thunder wing: %s at %s, %s, %s. Storm window in %s s."
+  "title.skyabyss.storm_back": {
+    "en": "Storm Above",
+    "ja": "嵐の上"
   },
-  "ja_jp": {
-    "title.skyabyss.storm_back": "嵐の上",
-    "title.skyabyss.storm_back.sub": "雷翼の背",
-    "message.skyabyss.storm.arrived": "昇り風に運ばれ、雷翼の背へ上がった。",
-    "message.skyabyss.storm.leaving": "風に乗って、地上へ滑り降りる。",
-    "message.skyabyss.storm.swept_back": "嵐に投げ返され、背中へ戻された。",
-    "message.skyabyss.storm.gale_hint": "昇り風に乗ると、背中へ運ばれる。",
-    "commands.skyabyss.storm.overworld_only": "雷翼は主世界でだけ呼べる。",
-    "commands.skyabyss.storm.summoned": "雷翼を %s, %s の近くへ呼んだ。",
-    "commands.skyabyss.storm.missing": "雷翼はまだこの世界にいない。",
-    "commands.skyabyss.storm.no_peak": "その人の近くに、乾いた峰が見つからなかった。",
-    "commands.skyabyss.storm.resting": "雷翼が峰へ降りて止まる。",
-    "commands.skyabyss.storm.rebuilt": "嵐の背を建て直した。",
-    "commands.skyabyss.storm.status_absent": "雷翼はいない（一度でも現れたか: %s）。夕立の刻まで %s 秒。",
-    "commands.skyabyss.storm.status": "雷翼: %s、%s, %s, %s。夕立の刻まで %s 秒。"
-  }
+  "title.skyabyss.storm_back.sub": {
+    "en": "The wing of the thunder bird",
+    "ja": "雷翼の背"
+  },
+  "message.skyabyss.storm.arrived": {
+    "en": "The updraft carried you onto the back of the thunder wing.",
+    "ja": "昇り風に運ばれ、雷翼の背へ上がった。"
+  },
+  "message.skyabyss.storm.leaving": {
+    "en": "You slide back down the wind to the ground.",
+    "ja": "風に乗って、地上へ滑り降りる。"
+  },
+  "message.skyabyss.storm.swept_back": {
+    "en": "The storm threw you back onto the bird's back.",
+    "ja": "嵐に投げ返され、背中へ戻された。"
+  },
+  "message.skyabyss.storm.column_hint": {
+    "en": "Ride the updraft and it will carry you up to its back.",
+    "ja": "昇り風に乗ると、背中へ運ばれる。"
+  },
+  "commands.skyabyss.storm.overworld_only": {
+    "en": "The thunder wing can only be summoned in the overworld.",
+    "ja": "雷翼は主世界でだけ呼べる。"
+  },
+  "commands.skyabyss.storm.summoned": {
+    "en": "Summoned the thunder wing near %s, %s.",
+    "ja": "雷翼を %s, %s の近くへ呼んだ。"
+  },
+  "commands.skyabyss.storm.missing": {
+    "en": "The thunder wing is not in this world yet.",
+    "ja": "雷翼はまだこの世界にいない。"
+  },
+  "commands.skyabyss.storm.no_peak": {
+    "en": "No dry peak was found near that player.",
+    "ja": "その人の近くに、乾いた峰が見つからなかった。"
+  },
+  "commands.skyabyss.storm.resting": {
+    "en": "The thunder wing is coming down to rest on a peak.",
+    "ja": "雷翼が峰へ降りて止まる。"
+  },
+  "commands.skyabyss.storm.rebuilt": {
+    "en": "Rebuilt the storm back.",
+    "ja": "嵐の背を建て直した。"
+  },
+  "commands.skyabyss.storm.status_absent": {
+    "en": "Thunder wing not present (spawned before: %s). Storm window in %s s.",
+    "ja": "雷翼はいない（一度でも現れたか: %s）。夕立の刻まで %s 秒。"
+  },
+  "commands.skyabyss.storm.status": {
+    "en": "Thunder wing: %s at %s, %s, %s. Storm window in %s s.",
+    "ja": "雷翼: %s、%s, %s, %s。夕立の刻まで %s 秒。"
+  },
+  "item.skyabyss.weathercock": "",
+  "item.skyabyss.weathercock.desc": "",
+  "item.skyabyss.weathercock.desc2": "",
+  "message.skyabyss.weathercock.too_low": "",
+  "message.skyabyss.weathercock.no_sky": "",
+  "message.skyabyss.weathercock.called": "",
+  "message.skyabyss.weathercock.called_by": "",
+  "message.skyabyss.weathercock.wait": "",
+  "message.skyabyss.weathercock.next": "",
+  "message.skyabyss.weathercock.now": "",
+  "message.skyabyss.weathercock.far": "",
+  "message.skyabyss.weathercock.near": "",
+  "message.skyabyss.weathercock.close": "",
+  "message.skyabyss.weathercock.absent": ""
 }

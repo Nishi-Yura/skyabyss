@@ -1,9 +1,9 @@
 """雷翼の背 (鳥の形の背中・三つの試練) のブロックとアイテムの絵とモデル (12 の 4 章)。
 
 使い方 (リポジトリ直下で): python tools/gen_storm_back_assets.py
-- 風鳴り石 (storm_chime_stone): 方解石の地に銅の羽の模様。鳴ると青白く光る (active)
+- 風鳴り石 (wind_stone): 方解石の地に銅の羽の模様。鳴ると青白く光る (active)
 - 羽鏡 (feather_mirror): 台の上に 45 度に立てた磨いた銅の羽の板 (片面。裏は暗い銅)。ROT 0〜3 は y の回転
-- 受け羽 (feather_receiver): 壁の白い羽の飾り。光ると真珠の灯りの色 (lit)
+- 受け羽 (catch_feather): 壁の白い羽の飾り。光ると真珠の灯りの色 (lit)
 - 風切りの羽根 (gale_feather): 32x32 のアイテムの絵 (灰青の風切羽に白い羽軸。仮。ラフ 3 案はまだ)
 絵はすべて 32x32 (art direction)。乱数は seed 固定
 """
@@ -127,25 +127,25 @@ def feather_item():
 
 
 def main():
-    save_png(stone(False), "block/storm_chime_stone.png")
-    save_png(stone(True), "block/storm_chime_stone_active.png")
+    save_png(stone(False), "block/wind_stone.png")
+    save_png(stone(True), "block/wind_stone_active.png")
     save_png(copper(), "block/feather_mirror.png")
     save_png(copper(True), "block/feather_mirror_back.png")
-    save_png(receiver(False), "block/feather_receiver.png")
-    save_png(receiver(True), "block/feather_receiver_lit.png")
+    save_png(receiver(False), "block/catch_feather.png")
+    save_png(receiver(True), "block/catch_feather_lit.png")
     save_png(feather_item(), "item/gale_feather.png")
 
-    write("blockstates/storm_chime_stone.json", {"variants": {
-        "active=false": {"model": "skyabyss:block/storm_chime_stone"},
-        "active=true": {"model": "skyabyss:block/storm_chime_stone_active"}}})
-    write("models/block/storm_chime_stone.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/storm_chime_stone"}})
-    write("models/block/storm_chime_stone_active.json", {"parent": "minecraft:block/cube_all",
-                                                         "textures": {"all": "skyabyss:block/storm_chime_stone_active"}})
-    write("blockstates/feather_receiver.json", {"variants": {
-        "lit=false": {"model": "skyabyss:block/feather_receiver"},
-        "lit=true": {"model": "skyabyss:block/feather_receiver_lit"}}})
-    write("models/block/feather_receiver.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/feather_receiver"}})
-    write("models/block/feather_receiver_lit.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/feather_receiver_lit"}})
+    write("blockstates/wind_stone.json", {"variants": {
+        "active=false": {"model": "skyabyss:block/wind_stone"},
+        "active=true": {"model": "skyabyss:block/wind_stone_active"}}})
+    write("models/block/wind_stone.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/wind_stone"}})
+    write("models/block/wind_stone_active.json", {"parent": "minecraft:block/cube_all",
+                                                         "textures": {"all": "skyabyss:block/wind_stone_active"}})
+    write("blockstates/catch_feather.json", {"variants": {
+        "lit=false": {"model": "skyabyss:block/catch_feather"},
+        "lit=true": {"model": "skyabyss:block/catch_feather_lit"}}})
+    write("models/block/catch_feather.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/catch_feather"}})
+    write("models/block/catch_feather_lit.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/catch_feather_lit"}})
     # 羽鏡: 低い台 + 45 度に立てた板 (ROT 0 は北東を向く面 = 北と東をつなぐ)
     mirror = {
         "parent": "minecraft:block/block",

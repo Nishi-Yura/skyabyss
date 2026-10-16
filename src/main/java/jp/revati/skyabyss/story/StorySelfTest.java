@@ -127,23 +127,24 @@ public final class StorySelfTest {
         Progression.onTitanStopped(server, List.of(b.getUUID()), Titans.STONE_WHALE);
         check(Progression.canBoard(b, Titans.TIDE_SHELL) && !Progression.canBoard(b, Titans.THUNDER_WING), "b's boarding after the whale", f);
         // 後の巨神の背中の口: 仮の背中を登録すると、ディメンション移動の取り消しが効く
-        ResourceKey<Level> fake = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "selftest_thunder_back"));
+        ResourceKey<Level> fake = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "selftest_ember_back"));
         List<String> sentDown = new ArrayList<>();
-        check(!Titans.hasBack(Titans.THUNDER_WING), "thunder wing already has a back (remove this check when it is made)", f);
-        Titans.bindBack(fake, Titans.THUNDER_WING, p -> sentDown.add(p.getGameProfile().getName()));
+        check(!Titans.hasBack(Titans.EMBER), "ember already has a back (use the next titan without a back here)", f);
+        Titans.bindBack(fake, Titans.EMBER, p -> sentDown.add(p.getGameProfile().getName()));
         try {
-            check(Titans.THUNDER_WING.equals(Progression.titanOfBack(fake)), "the bound back is not known", f);
+            check(Titans.EMBER.equals(Progression.titanOfBack(fake)), "the bound back is not known", f);
             EntityTravelToDimensionEvent denied = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(b, fake));
             EntityTravelToDimensionEvent allowed = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(a, fake));
-            check(denied.isCanceled() && !allowed.isCanceled(), "travel to the thunder back was not gated", f);
-            Titans.sendDown(b, Titans.THUNDER_WING);
+            check(denied.isCanceled() && !allowed.isCanceled(), "travel to a later back was not gated", f);
+            Titans.sendDown(b, Titans.EMBER);
             check(sentDown.equals(List.of("story_test_b")), "sendDown did not use the bound way down", f);
         } finally {
             Titans.unbindBack(fake);
         }
-        check(Progression.titanOfBack(fake) == null && !Titans.hasBack(Titans.THUNDER_WING), "unbind did not remove the back", f);
+        check(Progression.titanOfBack(fake) == null && !Titans.hasBack(Titans.EMBER), "unbind did not remove the back", f);
         check(Titans.STONE_WHALE.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK))
-                && Titans.TIDE_SHELL.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK)), "built-in backs are missing", f);
+                && Titans.TIDE_SHELL.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK))
+                && Titans.THUNDER_WING.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK)), "built-in backs are missing", f);
         notes.add("four titans wake in order; only those who stopped the previous heart board; caps 15/21/27/33/40; later backs plug in");
     }
 
@@ -234,9 +235,10 @@ public final class StorySelfTest {
         DialogueService.close(p);
         Lore.unlock(p, "chapter1/thunder_wing", false);
         Quests.poll(p, true);
-        check(stage(p, "main_thunder").equals("heart"), "seeing the thunder wing did not advance", f);
+        // 見たあとは「背へ上がる」。背中・碑文・風鳴り石の段は titan/storm/lore/StormLoreSelfTest が通す。心臓を先に止めれば飛ばす
+        check(stage(p, "main_thunder").equals("board"), "seeing the thunder wing did not advance: " + stage(p, "main_thunder"), f);
         Quests.poll(p, true);
-        check(stage(p, "main_thunder").equals("heart"), "the thunder heart stage passed without stopping the heart", f);
+        check(stage(p, "main_thunder").equals("board"), "the thunder board stage passed without boarding", f);
         Progression.onTitanStopped(server, List.of(p.getUUID()), Titans.THUNDER_WING);
         Quests.poll(p, true);
         talk(p, wc, "ms_c_thunder_back", f);
@@ -312,6 +314,9 @@ public final class StorySelfTest {
         talk(p, wc, "ms_c_map_done", f);
         pick(p, WC, "wing", f);
         check(stage(p, "sub_old_map").equals("done") && Lore.state(p).has("chapter1/storm_path"), "sub_old_map did not finish", f);
+        // 切れ端のあと、風見鶏の話が二つ (12 の 2.6 節)
+        next(p);
+        next(p);
         pick(p, WC, "ok", f);
         level.setWeatherParameters(6000, 0, false, false);
 

@@ -133,7 +133,9 @@ public final class StormSelfTest {
         if (!second.getUUID().equals(StormKeeper.KEEPER.slot(level).id)) {
             failures.add("the second thunder wing is not the current one");
         }
-        if (!first.isRemoved()) {
+        // 前の個体が読み込まれていないチャンクに置かれたときは、まだ見えていない (読み込まれると handleJoin が取り消す)。
+        // 見えている前の個体が残っていたら失敗
+        if (!first.isRemoved() && level.getEntity(first.getUUID()) == first) {
             failures.add("the first thunder wing was not removed when the second appeared");
         }
         if (!StormKeeper.KEEPER.slot(level).spawned) {

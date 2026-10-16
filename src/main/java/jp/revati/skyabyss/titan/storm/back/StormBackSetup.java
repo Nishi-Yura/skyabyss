@@ -17,13 +17,13 @@ public final class StormBackSetup {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
-    public static final DeferredBlock<StormBlocks.ChimeStone> CHIME_STONE = BLOCKS.register("storm_chime_stone",
+    public static final DeferredBlock<StormBlocks.ChimeStone> CHIME_STONE = BLOCKS.register("wind_stone",
             () -> new StormBlocks.ChimeStone(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f)
                     .noLootTable().sound(SoundType.AMETHYST).lightLevel(s -> s.getValue(StormBlocks.ChimeStone.ACTIVE) ? 13 : 3)));
     public static final DeferredBlock<StormBlocks.Mirror> MIRROR = BLOCKS.register("feather_mirror",
             () -> new StormBlocks.Mirror(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(-1.0f, 3600000.0f)
                     .noLootTable().noOcclusion().sound(SoundType.COPPER).lightLevel(s -> 4)));
-    public static final DeferredBlock<StormBlocks.Receiver> RECEIVER = BLOCKS.register("feather_receiver",
+    public static final DeferredBlock<StormBlocks.Receiver> RECEIVER = BLOCKS.register("catch_feather",
             () -> new StormBlocks.Receiver(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f)
                     .noLootTable().sound(SoundType.WOOL).lightLevel(s -> s.getValue(StormBlocks.Receiver.LIT) ? 15 : 2)));
 
@@ -37,5 +37,9 @@ public final class StormBackSetup {
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        // 碑文と入口の一言の置き場所を伝承の担当へ (近くで目を向けるだけで読める)
+        java.util.List<java.util.Map.Entry<String, net.minecraft.core.BlockPos>> signs = new java.util.ArrayList<>();
+        StormBackLayout.LORE_SIGNS.forEach(i -> signs.add(java.util.Map.entry(i.key(), i.pos())));
+        jp.revati.skyabyss.titan.storm.lore.StormLore.inscriptionPositions(() -> signs);
     }
 }

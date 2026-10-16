@@ -597,9 +597,8 @@ public final class TideFlats {
             if (r.nextFloat() < 0.20f) {
                 items.add(new ItemStack(TideMobSetup.TIDE_DRIED_SHELL.get(), 1 + r.nextInt(2)));
             }
-            if (r.nextFloat() < 0.05f) {
-                item(CLAW).ifPresent(i -> items.add(new ItemStack(i)));
-            }
+            // 潮招きの大鋏 5% (特性を付け、図鑑に記す。titan/tide/gear)
+            items.addAll(jp.revati.skyabyss.titan.tide.gear.TideGearLoot.rollBeckoner(server, id, r));
             int held = TitanLoot.handOver(server, id, p, items, 40);
             if (p != null) {
                 int amount = (int) Math.round(BECKONER_XP * GrowthRules.levelFalloff(Growth.get(p).level, TideLoot.TIDE_LEVEL));

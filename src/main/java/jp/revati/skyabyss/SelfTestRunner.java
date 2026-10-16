@@ -85,6 +85,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
+        steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
@@ -92,6 +93,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
         steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
+        // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
+        steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
@@ -123,6 +126,15 @@ public final class SelfTestRunner {
         }
         QUEUE.clear();
         QUEUE.addAll(steps());
+        // SKYABYSS_SELFTEST_ONLY=<名前の頭> なら、その段だけ (例: "storm back")。終わるとサーバーを止める
+        String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
+        if (only != null && !only.isBlank()) {
+            QUEUE.removeIf(s -> !s.name().startsWith(only));
+            haltWhenDone = true;
+        }
+        if (QUEUE.isEmpty()) {
+            return;
+        }
         current = null;
         wait = QUEUE.peek().waitBefore();
         startedAt = System.nanoTime();
@@ -135,6 +147,8 @@ public final class SelfTestRunner {
         QUEUE.clear();
         current = null;
     }
+
+    private static boolean haltWhenDone;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -184,6 +198,9 @@ public final class SelfTestRunner {
         if (QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST runner: all steps done in {} s, slowest tick {} ms ({})", (System.nanoTime() - startedAt) / 1_000_000_000L,
                     slowestTick / 1_000_000, slowestStep);
+            if (haltWhenDone) {
+                event.getServer().halt(false);
+            }
         } else {
             wait = QUEUE.peek().waitBefore();
         }

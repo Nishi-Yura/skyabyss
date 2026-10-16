@@ -360,13 +360,13 @@ public final class EyeMirrors {
         level.setBlock(p, StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, true), 3);
         level.playSound(null, p, StormSetup.RECEIVER_LIT.get(), SoundSource.BLOCKS, 2f, 1f + 0.15f * Integer.bitCount(state.receivers()));
         StormFx.burst(level, ParticleTypes.END_ROD, Vec3.atCenterOf(p), 20, 0.4);
+        for (ServerPlayer pl : level.players()) {
+            if (inFront(pl.position())) {
+                pl.displayClientMessage(ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(state.receivers())), true);
+            }
+        }
         if (state.receivers() == 7) {
             setDoor(level, true);
-            for (ServerPlayer pl : level.players()) {
-                if (inFront(pl.position())) {
-                    pl.displayClientMessage(ModText.lore("message.skyabyss.storm.eye_open"), true);
-                }
-            }
         }
     }
 
@@ -384,7 +384,7 @@ public final class EyeMirrors {
     public static boolean resetMirrors(ServerLevel level, ServerPlayer player) {
         long now = level.getGameTime();
         if (now - lastReset < RESET_COOLDOWN) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.storm.mirrors_wait", (RESET_COOLDOWN - (now - lastReset) + 19) / 20), true);
+            player.displayClientMessage(ModText.deny("message.skyabyss.storm.mirrors_reset_wait", (RESET_COOLDOWN - (now - lastReset) + 19) / 20), true);
             return false;
         }
         lastReset = now;

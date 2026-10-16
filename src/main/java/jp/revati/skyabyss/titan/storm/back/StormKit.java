@@ -254,4 +254,31 @@ public final class StormKit {
         }
         return n;
     }
+
+    // 掘った所の横と上が、掘っていない空気 (鳥の外の空など) なら壁でふさぐ (天井の縁のすき間・部屋が体の外へはみ出した所)。
+    // 外へ開いていてよい所 (到着の台・羽根の門・背の上へ出る段・天窓) は open で除く。ふさいだ数を返す
+    public int seal(java.util.function.Predicate<BlockPos> open, java.util.function.Function<BlockPos, Style> styleAt) {
+        int n = 0;
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (long l : carved.toLongArray()) {
+            int x = BlockPos.getX(l);
+            int y = BlockPos.getY(l);
+            int z = BlockPos.getZ(l);
+            if (open.test(new BlockPos(x, y, z))) {
+                continue;
+            }
+            for (Direction d : Direction.values()) {
+                if (d == Direction.DOWN) {
+                    continue;
+                }
+                m.set(x + d.getStepX(), y + d.getStepY(), z + d.getStepZ());
+                if (carved.contains(m.asLong()) || open.test(m) || !level.getBlockState(m).isAir()) {
+                    continue;
+                }
+                level.setBlock(m, wall(styleAt.apply(m), m.getX(), m.getY(), m.getZ()), FLAGS);
+                n++;
+            }
+        }
+        return n;
+    }
 }

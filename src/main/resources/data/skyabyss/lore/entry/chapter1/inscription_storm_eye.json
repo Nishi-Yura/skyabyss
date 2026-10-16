@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 167,
+  "inscription_sign": "sign.skyabyss.lore_storm_eye",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_eye"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_storm_heart"
+  ]
+}
