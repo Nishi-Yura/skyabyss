@@ -1,0 +1,19 @@
+{
+  "title": "余燼の巨神ラフ選定",
+  "intro": "第四の巨神「余燼の巨神」のラフです。ベータを急ぐため推奨案で実装に入りますが、差し替えたい案があれば選んでください。設計は docs/design/13_ember.md、推奨の理由は14章。どの案も立方体の重なりはありません。",
+  "done": [],
+  "subjects": [
+    {"id": "ember_titan", "short": "巨神本体", "kind": "ラフ 3案", "title": "余燼の巨神（地を泳ぐ火蜥蜴）", "sheets": ["../review/ember_roughs/titan.png"], "extra": "推奨は A。",
+     "options": {"a": {"name": "火山の背", "desc": "背に火口の円錐と溶岩の筋。遠くから火山に見える。"}, "b": {"name": "炉の都", "desc": "灰の民の煙突と炉の館。"}, "c": {"name": "割れた背", "desc": "背骨の棘の列と、一本の光る亀裂。"}}},
+    {"id": "ember_heart", "short": "余燼の心臓", "kind": "ラフ 3案 x 3段階", "title": "余燼の心臓（最終ボス）", "sheets": ["../review/ember_roughs/heart.png"], "extra": "推奨は B。",
+     "options": {"a": {"name": "炉", "desc": "煉瓦の窯 → 割れて露出 → 格子の輪と灰の輪。"}, "b": {"name": "熔け殻", "desc": "黒い殻と割れ目 → 熔けて垂れる → 灰の殻と残り火。"}, "c": {"name": "黒曜の棘", "desc": "棘が貫く → 砕ける → 棘が回る。"}}},
+    {"id": "ember_thrall", "short": "灰被り", "kind": "ラフ 3案", "title": "灰被り（殻が割れると燃え上がる）", "sheets": ["../review/ember_roughs/ash_thrall.png"], "extra": "武器は別モデル。推奨は A。",
+     "options": {"a": {"name": "灰の衣", "desc": "フードと火掻き棒。"}, "b": {"name": "鉱滓の鎧", "desc": "兜と鍛冶の鎚。"}, "c": {"name": "炉の面", "desc": "窯の面と火箸。"}}},
+    {"id": "ember_moth", "short": "火の粉蛾", "kind": "ラフ 3案", "title": "火の粉蛾（熱に寄る群れ）", "sheets": ["../review/ember_roughs/ember_moth.png"],
+     "options": {"a": {"name": "灰の翅", "desc": "灰色の翅に熾の目玉模様。"}, "b": {"name": "燃える翅", "desc": "橙の翅に光る翅脈。"}, "c": {"name": "燭の蛾", "desc": "灯のように光る腹。"}}},
+    {"id": "ember_roller", "short": "燠虫", "kind": "ラフ 3案", "title": "燠虫（丸まって転がる）", "sheets": ["../review/ember_roughs/cinder_roller.png"], "extra": "推奨は A。",
+     "options": {"a": {"name": "玄武の殻", "desc": "黒い板と溶岩の継ぎ目。"}, "b": {"name": "鉱滓の殻", "desc": "光る鉱石の粒。"}, "c": {"name": "瓦の殻", "desc": "灰の民の屋根瓦。"}}},
+    {"id": "ember_smith", "short": "灰の鍛え手", "kind": "ラフ 3案", "title": "中ボス 灰の鍛え手", "sheets": ["../review/ember_roughs/ash_smith.png"], "extra": "大鎚と火箸は別モデル。推奨は A。",
+     "options": {"a": {"name": "鞴の巨人", "desc": "背の二つの鞴が弱み。"}, "b": {"name": "鉱滓の鎧", "desc": "肩の煙突。"}, "c": {"name": "炉を背負う者", "desc": "胸の炉の口。"}}}
+  ]
+}

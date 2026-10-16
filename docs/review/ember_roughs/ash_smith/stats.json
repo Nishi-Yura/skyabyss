@@ -1,0 +1,192 @@
+{
+  "a": {
+    "boxes": {
+      "boss": 398,
+      "hammer": 19,
+      "tongs": 18
+    },
+    "overlaps": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0
+    },
+    "buried": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0,
+      "pruned_hidden": 4
+    },
+    "glow_px": {
+      "boss": 18548,
+      "hammer": 792,
+      "tongs": 1008
+    },
+    "bounds": {
+      "lo": [
+        -33.0,
+        0.0,
+        -21.5
+      ],
+      "hi": [
+        33.0,
+        79.0,
+        25.0
+      ],
+      "height_blocks": 4.94
+    },
+    "texture": [
+      256,
+      1094
+    ],
+    "cross_bone_carves": {
+      "bellows_r<-belly": 4,
+      "bellows_r<-body": 8,
+      "bellows_l<-belly": 4,
+      "bellows_l<-body": 8
+    },
+    "bones": [
+      "body",
+      "belly",
+      "apron",
+      "bellows_l",
+      "bellows_r",
+      "head",
+      "arm_r",
+      "forearm_r",
+      "socket_main",
+      "arm_l",
+      "forearm_l",
+      "socket_off",
+      "leg_r",
+      "leg_l"
+    ]
+  },
+  "b": {
+    "boxes": {
+      "boss": 465,
+      "hammer": 35,
+      "tongs": 23
+    },
+    "overlaps": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0
+    },
+    "buried": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0,
+      "pruned_hidden": 72
+    },
+    "glow_px": {
+      "boss": 4120,
+      "hammer": 1136,
+      "tongs": 1140
+    },
+    "bounds": {
+      "lo": [
+        -34.5,
+        0.0,
+        -18.5
+      ],
+      "hi": [
+        34.5,
+        101.0,
+        24.5
+      ],
+      "height_blocks": 6.31
+    },
+    "texture": [
+      256,
+      1140
+    ],
+    "cross_bone_carves": {
+      "body<-head": 25,
+      "chimney<-body": 12,
+      "bellows<-body": 56,
+      "bellows<-belly": 3
+    },
+    "bones": [
+      "body",
+      "belly",
+      "apron",
+      "bellows",
+      "chimney",
+      "smoke",
+      "head",
+      "arm_r",
+      "forearm_r",
+      "socket_main",
+      "arm_l",
+      "forearm_l",
+      "socket_off",
+      "leg_r",
+      "leg_l"
+    ]
+  },
+  "c": {
+    "boxes": {
+      "boss": 363,
+      "hammer": 13,
+      "tongs": 18
+    },
+    "overlaps": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0
+    },
+    "buried": {
+      "boss": 0,
+      "hammer": 0,
+      "tongs": 0,
+      "pruned_hidden": 0
+    },
+    "glow_px": {
+      "boss": 5416,
+      "hammer": 568,
+      "tongs": 1224
+    },
+    "bounds": {
+      "lo": [
+        -28.0,
+        0.0,
+        -17.5
+      ],
+      "hi": [
+        28.0,
+        71.5,
+        23.0
+      ],
+      "height_blocks": 4.47
+    },
+    "texture": [
+      256,
+      798
+    ],
+    "cross_bone_carves": {
+      "body<-furnace": 10,
+      "bellows_r<-body": 7,
+      "bellows_r<-belly": 4,
+      "bellows_l<-body": 7,
+      "bellows_l<-belly": 4
+    },
+    "bones": [
+      "body",
+      "belly",
+      "apron",
+      "furnace",
+      "flue",
+      "bellows_l",
+      "bellows_r",
+      "head",
+      "arm_r",
+      "forearm_r",
+      "socket_main",
+      "arm_l",
+      "forearm_l",
+      "socket_off",
+      "leg_r",
+      "leg_l"
+    ]
+  }
+}

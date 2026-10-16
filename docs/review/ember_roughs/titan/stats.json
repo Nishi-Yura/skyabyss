@@ -1,0 +1,107 @@
+{
+ "a": {
+  "boxes": 9093,
+  "buried": 2037,
+  "overlaps": 0,
+  "vol_ok": true,
+  "tex": 2048,
+  "glow_px": 103290,
+  "bounds": {
+   "x": [
+    -119.0,
+    119.0
+   ],
+   "y": [
+    0.0,
+    184.0
+   ],
+   "z": [
+    -206.0,
+    248.0
+   ]
+  },
+  "parts": {
+   "body": 1911,
+   "ridge": 1781,
+   "head": 1734,
+   "jaw": 199,
+   "leg_fl": 608,
+   "leg_fr": 608,
+   "leg_rl": 711,
+   "leg_rr": 711,
+   "tail": 800,
+   "smoke": 30
+  },
+  "faces": 25608
+ },
+ "b": {
+  "boxes": 7262,
+  "buried": 1606,
+  "overlaps": 0,
+  "vol_ok": true,
+  "tex": 2048,
+  "glow_px": 80411,
+  "bounds": {
+   "x": [
+    -119.0,
+    119.0
+   ],
+   "y": [
+    0.0,
+    164.0
+   ],
+   "z": [
+    -206.0,
+    248.0
+   ]
+  },
+  "parts": {
+   "body": 1871,
+   "ridge": 753,
+   "head": 1734,
+   "jaw": 199,
+   "leg_fl": 436,
+   "leg_fr": 436,
+   "leg_rl": 495,
+   "leg_rr": 495,
+   "tail": 800,
+   "smoke": 43
+  },
+  "faces": 21505
+ },
+ "c": {
+  "boxes": 8726,
+  "buried": 1671,
+  "overlaps": 0,
+  "vol_ok": true,
+  "tex": 2048,
+  "glow_px": 100744,
+  "bounds": {
+   "x": [
+    -119.0,
+    119.0
+   ],
+   "y": [
+    0.0,
+    127.0
+   ],
+   "z": [
+    -206.0,
+    248.0
+   ]
+  },
+  "parts": {
+   "body": 2310,
+   "ridge": 1965,
+   "head": 1538,
+   "jaw": 199,
+   "leg_fl": 436,
+   "leg_fr": 436,
+   "leg_rl": 495,
+   "leg_rr": 495,
+   "tail": 802,
+   "smoke": 50
+  },
+  "faces": 25207
+ }
+}
