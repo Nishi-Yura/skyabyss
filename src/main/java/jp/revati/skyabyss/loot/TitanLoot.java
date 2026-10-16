@@ -308,6 +308,10 @@ public final class TitanLoot {
                     fragment = true;
                     items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
                 }
+            } else if (canReceive(player) && jp.revati.skyabyss.record.Keepsakes.fragmentMissing(player)) {
+                // 受け取ったのにどこにも見当たらない欠片は、鼓動のそばで再び見つかる (11 の 4章)
+                items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
+                player.sendSystemMessage(ModText.lore("skyabyss_record.guard.fragment_restored"));
             }
             Roll roll = rollHeart(r, level.random);
             items.addAll(roll.items());
