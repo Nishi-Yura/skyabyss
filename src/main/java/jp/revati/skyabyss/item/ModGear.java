@@ -18,7 +18,7 @@ public interface ModGear {
 
     GearTier tier();
 
-    // 由来のダンジョン (欠片の種類を決める)。今は岩鯨のみ
+    // 由来の巨神 (欠片の種類・必要 Lv・ツールチップの由来・図鑑の表を決める。TitanGearSets)。既定は岩鯨
     default String dungeon() {
         return "stone_whale";
     }
@@ -54,7 +54,8 @@ public interface ModGear {
     static void tooltip(ItemStack stack, List<Component> tooltip, GearTier tier, String descKey, boolean enhanceable) {
         tooltip.add(Component.translatable("gear.skyabyss.tier." + tier.key).withStyle(s -> s.withColor(tier.color))
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.translatable("gear.skyabyss.origin.stone_whale").withStyle(ChatFormatting.GRAY)));
+                .append(Component.translatable("gear.skyabyss.origin." + (stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale"))
+                        .withStyle(ChatFormatting.GRAY)));
         tooltip.add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         // ランダムな特性。まだ決まっていない装備 (創造の持ち物や古いセーブの品) は、手にしたときに決まると書く
         if (AffixRules.eligible(stack)) {

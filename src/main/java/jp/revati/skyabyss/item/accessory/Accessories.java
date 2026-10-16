@@ -152,7 +152,7 @@ public final class Accessories {
     }
 
     private static int cooldownTicks(ItemStack charm) {
-        return charm.getItem() instanceof jp.revati.skyabyss.item.ResonanceCharmItem ? jp.revati.skyabyss.item.ResonanceCharmItem.COOLDOWN : 20 * 60;
+        return charm.getItem() instanceof Accessory a ? a.cooldownTicks() : 20 * 60;
     }
 
     public static void openMenu(ServerPlayer player) {

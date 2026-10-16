@@ -47,7 +47,8 @@ public final class AffixRules {
         if (item instanceof SwordItem) {
             return AffixType.Slot.WEAPON;
         }
-        if (item instanceof ArmorItem) {
+        // 盾 (珊瑚の盾) は防具の特性。左手に持っているあいだ効く (AffixEvents)
+        if (item instanceof ArmorItem || item instanceof net.minecraft.world.item.ShieldItem) {
             return AffixType.Slot.ARMOR;
         }
         return null;
