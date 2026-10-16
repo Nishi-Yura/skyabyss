@@ -11,7 +11,9 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
+import jp.revati.skyabyss.titan.storm.back.StormStrike;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 // 素材 (模型・テクスチャ・発光・アニメ・バーの絵・音)、巣の形 (柱 6 本・栓・入口・天井)、接地の栓 (8 秒・待ち・見た目)、
 // 戦いの始まりと封印、保存されない、体力と人数の倍率、接地した柱へ渡ると痺れて落ちる (受ける傷 1.5 倍)、接地していない柱には乗る、
 // すべての技が最後まで回る、50% の咆哮、巣の外へ出た雷獣を戻す、誰もいなければ放棄、報酬の表 (確率・数・作られていない品は出さない・
-// いない人の分は預かる)、撃破の記録と、もう一度挑めるようにする。背中がまだ無ければ、仮の巣 (オーバーワールドの空) で試す
+// いない人の分は預かる)、撃破の記録 (背中の記録にも) と、もう一度挑めるようにする。巣は背中の担当が建てた本物 (storm_back) で試す
 public final class RaijuSelfTest {
     private RaijuSelfTest() {
     }
@@ -73,7 +75,7 @@ public final class RaijuSelfTest {
 
     private static void run(MinecraftServer server, List<String> failures, List<String> notes) {
         RaijuNest.Site site = RaijuNest.site(server);
-        notes.add(site.temporary() ? "temporary nest" : "storm back nest");
+        notes.add("storm back nest " + site.center());
         checkAssets(failures);
         checkTimings(failures);
         checkLang(failures);
@@ -134,7 +136,7 @@ public final class RaijuSelfTest {
     // 文は伝承の担当の skyabyss_storm の lang にまとまっている (鍵が日英ともにある)
     static final String[] LANG_KEYS = {"entity.skyabyss.raiju", "gui.skyabyss.boss.raiju.angry", "gui.skyabyss.boss.raiju.stunned",
             "message.skyabyss.raiju.after", "message.skyabyss.raiju.asleep", "message.skyabyss.raiju.begin", "message.skyabyss.raiju.defeated",
-            "message.skyabyss.raiju.east_stone_ready", "message.skyabyss.raiju.go", "message.skyabyss.raiju.go_temporary",
+            "message.skyabyss.raiju.east_stone_ready", "message.skyabyss.raiju.go",
             "message.skyabyss.raiju.stunned", "message.skyabyss.raiju.hint_plug", "message.skyabyss.raiju.plug_already",
             "message.skyabyss.raiju.grounded", "message.skyabyss.raiju.plug_wait", "message.skyabyss.raiju.roar",
             "subtitles.skyabyss.raiju_ambient", "subtitles.skyabyss.raiju_hurt", "subtitles.skyabyss.raiju_death",
@@ -162,47 +164,84 @@ public final class RaijuSelfTest {
 
     private static void checkNest(RaijuNest.Site site, List<String> failures) {
         RaijuBattle.abandon(site.level().getServer());
-        RaijuNest.build(site);
         ServerLevel level = site.level();
+        check(level.dimension() == RaijuNest.STORM_BACK, "the nest is not in the storm back (" + level.dimension().location() + ")", failures);
+        check(site.center().equals(StormBackLayout.RAIJU_NEST), "the nest is not at StormBackLayout.RAIJU_NEST", failures);
+        RaijuNest.build(site);
         check(RaijuNest.isBuilt(site), "nest not recognised as built", failures);
+        List<BlockPos> layoutRods = StormBackLayout.raijuRods();
         for (int i = 0; i < RaijuNest.RODS; i++) {
+            BlockPos rod = site.rod(i);
             BlockPos top = site.rodTop(i);
+            check(rod.equals(layoutRods.get(i)), "rod " + i + " is not StormBackLayout.raijuRods() " + i, failures);
             check(level.getBlockState(top).is(Blocks.LIGHTNING_ROD), "rod " + i + " has no lightning rod on top", failures);
-            check(level.getBlockState(top.below()).is(Blocks.WAXED_COPPER_BULB), "rod " + i + " has no bulb", failures);
-            check(level.getBlockState(site.plug(i)).is(Blocks.LEVER), "rod " + i + " has no plug", failures);
+            for (int k = 1; k <= 3; k++) {
+                check(level.getBlockState(rod.above(k)).is(Blocks.WAXED_COPPER_BULB) && level.getBlockState(rod.above(k)).getValue(CopperBulbBlock.LIT),
+                        "rod " + i + " bulb " + k + " is not a lit bulb", failures);
+            }
+            check(level.getBlockState(site.plug(i)).is(Blocks.LEVER) && !level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED),
+                    "rod " + i + " has no plug (or it is down)", failures);
             check(level.getBlockState(top.above()).isAir() && level.getBlockState(top.above(3)).isAir(), "no room above rod " + i, failures);
-            check(site.inside(site.dropPoint(i)), "drop point of rod " + i + " is outside the nest", failures);
-            Vec3 base = Vec3.atBottomCenterOf(site.rodBase(i)).add(1.5, 0, 0);
-            check(top.equals(StormRods.find(level, base, 3.0)), "StormRods.find does not find rod " + i, failures);
-            double r = Math.sqrt(site.rodBase(i).distSqr(site.center().atY(site.floor())));
+            check(site.inside(site.dropPoint(i)) && level.getBlockState(BlockPos.containing(site.dropPoint(i))).isAir()
+                    && !level.getBlockState(BlockPos.containing(site.dropPoint(i)).below()).isAir(), "drop point of rod " + i + " is not on the floor", failures);
+            check(StormRods.get(level, rod) != null && StormRods.isFull(level, rod), "rod " + i + " is not a registered, full StormRods rod", failures);
+            Vec3 near = new Vec3(rod.getX() + 2.0, site.floor(), rod.getZ() + 0.5);
+            check(rod.equals(StormRods.find(level, near, StormStrike.ROD_REACH)), "StormRods.find does not find rod " + i, failures);
+            double r = Math.sqrt(rod.distSqr(site.center()));
             check(Math.abs(r - RaijuNest.ROD_RADIUS) < 1.0, "rod " + i + " is not on the radius 9 ring (" + r + ")", failures);
         }
+        // 柱のそばの招雷の輪は柱へ落ちる (雷獣の咆哮の輪も同じ)
+        StormStrike.Strike strike = StormStrike.call(level, new Vec3(site.rod(1).getX() + 1.5, site.floor(), site.rod(1).getZ() + 0.5), 1, 0f, null);
+        check(site.rod(1).equals(strike.rod), "a strike ring by rod 1 does not go to the rod", failures);
+        StormStrike.cancelAll(level);
         BlockPos c = site.center();
         check(level.getBlockState(c.offset(3, 1, 3)).isAir() && level.getBlockState(new BlockPos(c.getX() + 3, site.ceiling() - 1, c.getZ() + 3)).isAir(),
                 "nest interior is not open", failures);
-        check(!level.getBlockState(new BlockPos(c.getX(), site.ceiling(), c.getZ())).isAir(), "nest has no ceiling", failures);
-        check(!level.getBlockState(c.below()).isAir(), "nest has no floor", failures);
-        check(site.ceiling() - site.floor() == 15, "nest height should be 15 (" + (site.ceiling() - site.floor()) + ")", failures);
+        check(!level.getBlockState(new BlockPos(c.getX(), site.ceiling() + 1, c.getZ())).isAir(), "nest has no ceiling", failures);
+        check(!level.getBlockState(c.offset(2, 0, 2)).isAir(), "nest has no floor", failures);
+        check(site.ceiling() - c.getY() == 15, "nest height should be 15 (" + (site.ceiling() - c.getY()) + ")", failures);
+        // 入口: 開いているときは空気、封じる面のまわりは壁 (封じると回廊がふさがる)
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxZ = Integer.MIN_VALUE;
         for (BlockPos g : site.gate()) {
             check(level.getBlockState(g).isAir(), "entrance closed at " + g, failures);
+            minY = Math.min(minY, g.getY());
+            maxY = Math.max(maxY, g.getY());
+            minZ = Math.min(minZ, g.getZ());
+            maxZ = Math.max(maxZ, g.getZ());
+        }
+        int gx = site.gateCenter().getX();
+        for (int y = minY; y <= maxY; y++) {
+            check(!level.getBlockState(new BlockPos(gx, y, minZ - 1)).isAir() && !level.getBlockState(new BlockPos(gx, y, maxZ + 1)).isAir(),
+                    "entrance does not span the corridor at y " + y, failures);
+        }
+        for (int z = minZ; z <= maxZ; z++) {
+            check(!level.getBlockState(new BlockPos(gx, minY - 1, z)).isAir() && !level.getBlockState(new BlockPos(gx, maxY + 1, z)).isAir(),
+                    "entrance does not span the corridor at z " + z, failures);
         }
         check(site.ante().contains(site.anteSpawn()) && !site.inside(site.anteSpawn()), "antechamber spawn is wrong", failures);
         check(site.inside(site.entranceInside()) && site.inside(site.home()), "entrance / home not inside", failures);
         check(level.getBlockState(BlockPos.containing(site.anteSpawn())).isAir() && !level.getBlockState(BlockPos.containing(site.anteSpawn()).below()).isAir(),
                 "cannot stand at the antechamber spawn", failures);
+        check(level.getBlockState(BlockPos.containing(site.entranceInside())).isAir()
+                && !level.getBlockState(BlockPos.containing(site.entranceInside()).below()).isAir(), "cannot stand inside the entrance", failures);
     }
 
     private static void checkPlugs(RaijuNest.Site site, List<String> failures) {
         ServerLevel level = site.level();
         int i = 2;
-        BlockPos top = site.rodTop(i);
-        check(!StormRods.isGrounded(top), "rod grounded before pulling", failures);
+        BlockPos rod = site.rod(i);
+        check(!StormRods.isGrounded(rod), "rod grounded before pulling", failures);
         check(RaijuNest.pull(site, i, null), "plug could not be pulled", failures);
-        check(StormRods.isGrounded(top), "pulled rod is not grounded", failures);
+        check(StormRods.isGrounded(rod), "pulled rod is not grounded", failures);
         check(!RaijuNest.pull(site, i, null), "a grounded rod could be pulled again", failures);
-        check(!level.getBlockState(top.below()).getValue(CopperBulbBlock.LIT), "grounded rod's bulb still lit", failures);
+        for (int k = 1; k <= 3; k++) {
+            check(!level.getBlockState(rod.above(k)).getValue(CopperBulbBlock.LIT), "grounded rod's bulb " + k + " still lit", failures);
+        }
         check(level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED), "grounded rod's plug not down", failures);
-        check(level.getBlockState(site.rodBase(i).offset(1, -1, 0)).is(Blocks.WAXED_OXIDIZED_COPPER_GRATE), "grounded rod's foot not darkened", failures);
+        check(RaijuNest.rodIndexOfPlug(site, site.plug(i)) == i, "the plug of rod " + i + " is not found by its position", failures);
     }
 
     private static Raiju startRaiju(MinecraftServer server, List<String> failures) {
@@ -239,7 +278,7 @@ public final class RaijuSelfTest {
         check(r.isNoGravity(), "perched raiju falls", failures);
         // 接地した柱へ渡ると、痺れて落ちる
         int g = 3;
-        StormRods.ground(site.rodTop(g), 400);
+        StormRods.ground(site.rod(g), 400);
         r.railTo(g);
         tick(r, Raiju.RAIL_WARN + Raiju.RAIL_TRAVEL + 2);
         check(r.isStunned(), "raiju did not fall on a grounded rod (mode " + r.mode() + ")", failures);

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.BossRoom;
+import jp.revati.skyabyss.titan.storm.back.StormBackState;
+import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -33,7 +35,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 巣の中に人が入ると 5 秒の集合 → 入口が閉じて、雷とともに雷獣が柱の先へ落ちてくる → 全員が倒れるか巣から消えて 3 秒で放棄。
 // 雷獣が巣の外へ出たら中央へ戻す。撃破で入口が開き、報酬 (RaijuLoot)。
 // 撃破の記録 (RaijuState.defeated) は、背中のリセットが reawaken で戻すまで残る (そのあいだ巣に入っても戦いは始まらない)。
-// 東の風鳴り石は defeated(server) が true になるまで黙る (背中の担当が読む)
+// 撃破は StormBackTrials.onRaijuDefeated で背中の記録にも書く (東の風鳴り石・巣の昇り風は背中の担当がそちらを読む)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RaijuBattle {
     private static final BossRoom ROOM = new BossRoom();
@@ -66,7 +68,7 @@ public final class RaijuBattle {
         @Override
         public void seal(ServerLevel level) {
             RaijuNest.seal(site);
-            level.playSound(null, site.gate().get(4), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
+            level.playSound(null, site.gateCenter(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
         }
 
         @Override
@@ -123,7 +125,7 @@ public final class RaijuBattle {
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y + 1, top.z, 80, 1.0, 1.0, 1.0, 0.4);
             broadcast(level, ModText.battle("message.skyabyss.raiju.begin"));
             broadcast(level, ModText.hint("message.skyabyss.raiju.hint_plug"));
-            SkyAbyss.LOGGER.info("The raiju woke with {} challenger(s){}", challengers.size(), site.temporary() ? " (temporary nest)" : "");
+            SkyAbyss.LOGGER.info("The raiju woke with {} challenger(s)", challengers.size());
             return raiju;
         }
 
@@ -182,10 +184,6 @@ public final class RaijuBattle {
         }
         RaijuNest.Site site = RaijuNest.site(level.getServer());
         RaijuState state = RaijuState.get(level.getServer());
-        // 仮の巣は、コマンドで建てたあとだけ動かす (オーバーワールドに勝手に建てない)
-        if (site.temporary() && state.built(true) == 0) {
-            return;
-        }
         if (!level.isLoaded(site.center())) {
             return;
         }
@@ -195,8 +193,12 @@ public final class RaijuBattle {
         if (level.getGameTime() % 10 != 0) {
             return;
         }
-        if (!site.temporary() && level.getGameTime() % 100 == 0 && !ROOM.active()) {
+        if (level.getGameTime() % 100 == 0 && !ROOM.active()) {
             RaijuNest.ensureBuilt(site);
+        }
+        // 背中のリセット (StormBackTrials.reset) が背中の記録を戻したら、雷獣もまた挑めるようにする
+        if (state.defeated() && !ROOM.active() && !StormBackState.get(level).raijuDefeated()) {
+            state.setDefeated(false);
         }
         if (state.defeated()) {
             return;
@@ -230,6 +232,10 @@ public final class RaijuBattle {
     // 雷獣をもう一度挑めるようにする (背中のリセット・テスト用)
     public static void reawaken(MinecraftServer server) {
         RaijuState.get(server).setDefeated(false);
+        ServerLevel level = RaijuNest.site(server).level();
+        if (RaijuNest.isNestLevel(level)) {
+            StormBackState.get(level).setRaijuDefeated(false);
+        }
         ROOM.reset(RaijuNest.site(server).level(), host(server), false);
     }
 
@@ -258,6 +264,8 @@ public final class RaijuBattle {
             return;
         }
         RaijuState.get(level.getServer()).setDefeated(true);
+        // 背中の記録へ (巣の真ん中の昇り風が立ち、東の風鳴り石が鳴らせる)
+        StormBackTrials.onRaijuDefeated(level);
         RaijuLoot.onDefeat(level, ids);
         broadcast(site, ModText.lore("message.skyabyss.raiju.after"));
         broadcast(site, ModText.progress("message.skyabyss.raiju.east_stone_ready"));
