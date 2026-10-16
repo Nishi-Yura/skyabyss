@@ -1010,7 +1010,7 @@
 | バーと音 | 段のない 10 段のバー（青白）、怒り・痺れの札。音 10（独自合成） | `tools/gen_raiju_bar.py`、`tools/gen_raiju_sounds.py`、`client/RaijuClient.java` |
 | 文 | 鍵は伝承の担当の `skyabyss_storm` に合わせた（`message.skyabyss.raiju.stunned`・`message.skyabyss.raiju.grounded`・`subtitles.skyabyss.raiju_leap`・`subtitles.skyabyss.ground_plug`）。この担当だけの鍵は `lang/parts/raiju.json`（`{"鍵": {"en", "ja"}}`）に書き、`tools/gen_storm_lore.py` でまとめた。仮の名前空間 `skyabyss_raiju` と `tools/gen_raiju_lang.py` は消した | `assets/skyabyss_storm/lang/parts/raiju.json` |
 | コマンド | `/skyabyss raiju go`・`start`・`win`・`reset`・`rebuild`・`action <技>`・`ground <柱>`・`shot <人> <技>`・`status` | `RaijuCommands.java` |
-| 背中の API | 背中の担当の本物がまだ無いので、`StormRods`・`StormStrike`・`StormBackLayout` は同じ名前の仮の実装（`titan/storm/back/`。`StormBackLayout` は担当 4 と同じ中身）。背中のディメンションが無いあいだ、巣はオーバーワールドの空に仮に建てる | `titan/storm/back/*` |
+| 背中の API | 仮の実装は消し、本物（`titan/storm/back/` の `StormRods`・`StormStrike`・`StormBackLayout`）で動く。巣は `StormBackLayout.RAIJU_NEST` の洞（背中の鳥の右手首の瘤。`StormBirdBuilder` が建てる）で、`RaijuNest` は建てず、座標を読み、柱 6 本を `StormRods.register` ＋ `charge`（満ちた柱）で登録し、栓（レバー）・電球だけ戦いの前に戻す
 
 #### 17.3.2 結果
 
@@ -1020,7 +1020,7 @@
 
 #### 17.3.3 合わせるときに
 
-1. 担当 1 の `StormRods`・`StormStrike`・`StormBackLayout` が入ったら、`titan/storm/back/` の仮の実装を消し、巣の座標を本物の部屋に合わせる（`RaijuNest` は `StormBackLayout.RAIJU_NEST`・`RAIJU_NEST_CEILING` を読む）。担当 4 も同じ名前の仮の実装を持つので、合わせるときにどちらか一つにする。
+1. 【済】背中の本物に合わせた（2026-10-17）。仮の `titan/storm/back/` は消え、柱を渡る（`StormStrike` の柱探し 3 ブロック）・接地で落ちる（`StormRods.ground`）・巣の柱の配置（`raijuRods()`）は本物。自己テストも本物の柱（`StormRods.get/find/isFull`、本物の避雷針と銅の電球、巣は背中のディメンション）で確かめる。古い世界（旧版の自前の洞）は背中を一度だけ建て直す。担当 4 の仮の実装は無い
 2. 担当 5 の品（欠片・干し果・雷獣の爪）は登録済み（m1-sky-pass に入った `item/storm`）。
 3. 東の試練の風鳴り石は、雷獣を倒したあとに鳴らせる（`message.skyabyss.raiju.east_stone_ready`）。石の置き場は担当 1。
 
