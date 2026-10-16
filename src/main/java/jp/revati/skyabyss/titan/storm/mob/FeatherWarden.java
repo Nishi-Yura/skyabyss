@@ -70,7 +70,7 @@ public class FeatherWarden extends StormMob {
     static final double DIVE_MAX = 13;
     static final double RISE_SPEED = 0.38;
 
-    private static final DustParticleOptions LINE = new DustParticleOptions(new Vector3f(0.68f, 0.84f, 1.0f), 1.1f);
+    private static final DustParticleOptions LINE = new DustParticleOptions(new Vector3f(0.68f, 0.84f, 1.0f), 1.4f);
     private static final DustParticleOptions LINE_EDGE = new DustParticleOptions(new Vector3f(0.95f, 0.97f, 1.0f), 0.8f);
 
     public enum State { IDLE, CROUCH, RISE, AIM, DIVE, STUNNED }
@@ -269,7 +269,7 @@ public class FeatherWarden extends StormMob {
     }
 
     private void showLine() {
-        if (!(level() instanceof ServerLevel server) || clock % 2 != 0 && clock != lineShownAt) {
+        if (!(level() instanceof ServerLevel server)) {
             return;
         }
         Vec3 d = lineEnd.subtract(lineStart);
