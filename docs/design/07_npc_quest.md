@@ -86,7 +86,7 @@
 
 ### 3.4 見た目（ラフ 3 案と選定）
 
-素材: `docs/review/npc_roughs/`（比較シート、顔、画面の見本 `ui_mock.png`、選定の表 `README.md`）。生成: `tools/rough/npc.py`。
+素材: `docs/review/npc_roughs/`（比較シート `storyteller_roughs.png`・`whale_chaser_roughs.png` と選定の表 `README.md`。各案の素材・顔・画面の見本は片付けた）。生成: `tools/rough/npc.py`。
 
 | | 案 | 選んだ理由 |
 | --- | --- | --- |
@@ -114,7 +114,7 @@
 | 操作 | クリック、数字キー、↑↓（W/S）と Enter・Space。本文の途中で押すと全文を出す。Esc で立ち去る |
 | ゲーム | 止めない（マルチでも同じ）。8 ブロックより離れる・相手がいなくなる・倒れる・ディメンションを移ると閉じる |
 
-画面の見本（ゲームの外で寸法と折り返しを再現）: `docs/review/npc_roughs/ui_mock.png`。いちばん高い枠は語り部の話題の節（話題が全部出たとき 195 / 上限 210）。
+画面の見本（ゲームの外で寸法と折り返しを再現）: `docs/review/npc_roughs/ui_mock.png`（片付けた。`tools/rough/npc_ui_mock.py` で作り直せる。ゲームの画面は `docs/review/ingame_npc_*.png`）。いちばん高い枠は語り部の話題の節（話題が全部出たとき 195 / 上限 210）。
 
 ### 4.2 しくみ（サーバーが決める）
 

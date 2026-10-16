@@ -51,6 +51,21 @@
 - 生成スクリプトが入力に使う物 (`tools/sources/` へ移す)
 - ユーザーがまだ選んでいない案 (`docs/review/*_roughs/`)。選ばれたら、比較画像 1 枚と選定理由 (書類) だけ残し、ほかは消す
 
+下の `_roughs/` を書くスクリプトは、どれも `docs/review` のラフを入力に読まない (`--install` も、その場で作った案を書き出す)。消したラフはスクリプトを動かせば作り直せるので、`tools/sources/` へ移した物はない。
+
+| 日付 | フォルダ (`docs/review/`) | 残した | 消した |
+|---|---|---|---|
+| 2026-10-17 | `watcher_roughs/` (E、00 の 8) | `v2/watcher_v2_roughs.png` (v1 の B と D・E・F を並べた比較) | v1 の `a/`〜`c/`・`watcher_roughs.png`・`watcher_night.png`・`report.txt`、v2 の `d/`〜`f/`・`watcher_v2_night.png`・`report.txt` |
+| 2026-10-17 | `npc_roughs/` (語り部 A改・鯨追い A、00 の 9) | `storyteller_roughs.png`、`whale_chaser_roughs.png` (NPC ごとの比較)、`README.md` (選定理由) | `storyteller/`・`whale_chaser/` の各案、`faces.png`、`ui_mock.png`、`report.txt` |
+| 2026-10-17 | `lore_book_roughs/` (b、00 の 10) | `compare.png` | `a/`〜`c/` |
+| 2026-10-17 | `skill_icons_roughs/` | `compare.png` | `a/`〜`c/` |
+| 2026-10-17 | `sky_eye_roughs/` (b) | `sky_eye_roughs.png` | `a/`〜`c/`、`lid.png`・`lid_glow.png`・`patch.png`、`sky_eye_night.png`、`v2_preview.png` |
+| 2026-10-17 | `titan_travel_roughs/` (呼び笛 A・碑) | `compare_call.png`、`compare_waymark.png` (品ごとの比較) | `call_a〜c.png`、`waymark_front_a〜c.png`、`chart_texture.png` |
+| 2026-10-17 | `record_screen_roughs/` | `compare.png` | `a/`〜`c/` |
+| 2026-10-17 | `accessory_slot_roughs/` (B) | `compare.png` (片付けのときに `a.png`〜`c.png` を横に並べて作った) | `a.png`〜`c.png` |
+| 2026-10-17 | `board_roughs/` (A を仮に採用。比べ直しは 00 の 85 の比較画像で) | `compare.png`、`README.md` (選定理由) | `option_A/`〜`option_C/` |
+| 2026-10-17 | `tide_shell_roughs/` | すべて (本体・心臓・敵の案をユーザーがまだ選んでいない。00 の 55)。`install_tide_shell.py` は A 案を `rough/tide_shell_titan.py` から import して作るので、ここのファイルは読まない。`install/` はその確認用の出力 | なし |
+
 
 生成元のないもの (今の `src/` が正本): 番兵 (`bone_sentinel`) と盾、水路の顎 (`waterway_maw`)、甲殻の防具 (`geo/armor`、`textures/armor`)、`textures/item/3d/bone_spike_arrow.png`、`sounds/**/*.ogg`。
 

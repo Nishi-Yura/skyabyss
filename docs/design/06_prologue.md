@@ -3,7 +3,7 @@
 - 文書番号: 06
 - 対象: 序章（地上）のホラー演出。雲の上を通る巨大な影と、その下の異変（動物と村人）、夜に遠くから見ている人影「見る者」。1章からの空の演出「削られた山頂」と「雲の切れ間の巨大な目」（10章）
 - 状態: 空の影は実装済みの仕様をコードから起こしたもの。見る者と動物のうずくまりは今回の実装（数値はコードの定数に基づく）
-- 関連: 全体設計は [01_overview.md](01_overview.md)（ホラー演出の原則と一覧）。見る者のラフは `docs/review/watcher_roughs/`（v1）と `docs/review/watcher_roughs/v2/`（作り直し）。雲の目のラフは `docs/review/sky_eye_roughs/`
+- 関連: 全体設計は [01_overview.md](01_overview.md)（ホラー演出の原則と一覧）。見る者のラフは比較シート `docs/review/watcher_roughs/v2/watcher_v2_roughs.png` だけ残した（v1 の 3 案と v2 の各案の素材は片付けた。`tools/rough/watcher.py`・`watcher_v2.py` で作り直せる）。雲の目のラフは `docs/review/sky_eye_roughs/sky_eye_roughs.png`
 
 ---
 
@@ -249,9 +249,9 @@
 
 ### 5.1 v1：ラフ3案（A・B・C）と B の採用
 
-比較シート: `docs/review/watcher_roughs/watcher_roughs.png`（正面3/4・横・背面3/4は確認用に明るさ×2.4、最下段は頭の近景を本来の色で）。
-夜の遠景: `docs/review/watcher_roughs/watcher_night.png`（60ブロックと40ブロック先。1080p・視野70度での大きさ、空の光4前後の暗さ、目の光のにじみ込み）。
-素材: `docs/review/watcher_roughs/<a|b|c>/`（geo.json、texture.png、glowmask.png）。3案とも重なり検査は空。
+比較シート: `docs/review/watcher_roughs/watcher_roughs.png`（片付けた。`tools/rough/watcher.py` で作り直せる。正面3/4・横・背面3/4は確認用に明るさ×2.4、最下段は頭の近景を本来の色で）。
+夜の遠景: `docs/review/watcher_roughs/watcher_night.png`（片付けた。60ブロックと40ブロック先。1080p・視野70度での大きさ、空の光4前後の暗さ、目の光のにじみ込み）。
+素材: `docs/review/watcher_roughs/<a|b|c>/`（geo.json、texture.png、glowmask.png。片付けた）。3案とも重なり検査は空。
 
 | 案 | 内容 | 遠景での読め方 | 世界観 |
 | --- | --- | --- | --- |
@@ -287,8 +287,8 @@
 | 色 | 真っ黒 | 夜霧に溶ける青灰。布にごくかすかな霧の光 |
 
 比較シート: `docs/review/watcher_roughs/v2/watcher_v2_roughs.png`（B・D・E・F・エンダーマンを同じ縮尺で。正面3/4・横は明るさ×2、正面は本来の色、最下段は頭の近景）。
-夜の見え方: `docs/review/watcher_roughs/v2/watcher_v2_night.png`（同じ稜線に5体を並べ、60・40・12ブロック先。1080p・視野70度、真夜中の空、目の光のにじみ込み）。
-素材: `docs/review/watcher_roughs/v2/<d|e|f>/`。3案とも重なり検査は空、0.5単位、1ブロック=32px。
+夜の見え方: `docs/review/watcher_roughs/v2/watcher_v2_night.png`（片付けた。`tools/rough/watcher_v2.py` で作り直せる。同じ稜線に5体を並べ、60・40・12ブロック先。1080p・視野70度、真夜中の空、目の光のにじみ込み）。
+素材: `docs/review/watcher_roughs/v2/<d|e|f>/`（片付けた）。3案とも重なり検査は空、0.5単位、1ブロック=32px。
 
 | 案 | 内容 | 遠景での読め方 | 世界観 |
 | --- | --- | --- | --- |
@@ -437,7 +437,7 @@
 | 3章（月） | ループの仕組みが明かされ、見る者が「前のループの自分（留まる者）が残した影」だと気づく | 未実装（3 章で作る） |
 | 終章（ラスボス第3形態） | 01 の「過去の自分の幻影が加勢する」の幻影は、これまでの見る者たち。このときはじめて近くに来て、一緒に戦う | 未実装 |
 
-- 見る者は裏ボスにしない。答え（正体）がラスボス第3形態と重なるため。裏ボスは別の題材で、あとで決める（00 の I 群）。
+- 見る者は裏ボスにしない。答え（正体）がラスボス第3形態と重なるため。裏ボスは別の題材で、あとで決める（00 の J 群、64）。
 - 序章では正体を説明しない。伝承の書の最初の一行（00 の 6 = A）と、見た目（自分に似た影、00 の 8 = E）がほのめかしになる。
 
 ---
@@ -600,7 +600,7 @@ v1（`ingame_sky_eye_moon.png` ほか）は、目が月の3倍ほどの小さな
 
 ### 10.5 目のラフと選定
 
-比較シート: `docs/review/sky_eye_roughs/sky_eye_roughs.png`（近景／開きかけ／地上を探す／こちらを見る）。素材: `docs/review/sky_eye_roughs/<a|b|c>/`。テクスチャは空の太陽・月と同じく、ドットの見える低い解像度（白目128×56、瞳48×48）。
+比較シート: `docs/review/sky_eye_roughs/sky_eye_roughs.png`（近景／開きかけ／地上を探す／こちらを見る）。素材: `docs/review/sky_eye_roughs/<a|b|c>/`（片付けた。`tools/rough/sky_eye.py` で作り直せる）。テクスチャは空の太陽・月と同じく、ドットの見える低い解像度（白目128×56、瞳48×48）。
 
 | 案 | 内容 | 印象 |
 | --- | --- | --- |
@@ -664,7 +664,7 @@ v1（`ingame_sky_eye_moon.png` ほか）は、目が月の3倍ほどの小さな
 | `sky/ChapterSkySelfTest` | 自己テスト（10.9節） |
 | `client/sky/CloudEyeClient`、`CloudEyeRenderer`、`CloudEyeSound` | 雲の目の流れ・視線・引き算、描画、音 |
 | `tools/rough/sky_eye.py` | 目のラフ3案と比較画像、採用案の書き出し（`--install`。v2 で使うのは sclera・iris だけ。lid・lid_glow・patch も書き出すが使わない） |
-| `tools/rough/sky_eye_v2.py` | v2 の顔・雲・霞のテクスチャ（`face.png`・`cloud.png`・`haze.png`）と確かめ用の合成（`docs/review/sky_eye_roughs/v2_preview.png`）。`--install` で書き出す |
+| `tools/rough/sky_eye_v2.py` | v2 の顔・雲・霞のテクスチャ（`face.png`・`cloud.png`・`haze.png`）と確かめ用の合成（`docs/review/sky_eye_roughs/v2_preview.png`。片付けたので、要るときは実行して作る。ゲームの見え方は `docs/review/ingame_sky_eye_v2_*.png`）。`--install` で書き出す |
 | `tools/gen_chapter_sky_sounds.py` | 音の合成（`sounds/sky_ch1/`） |
 
 ### 10.9 テスト結果（2026-10-16）

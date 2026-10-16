@@ -356,7 +356,7 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ### 2.10 テクスチャ
 
-- 生成: `tools/gen_lore_book.py`（Pillow、乱数は seed 付き）。3 案を `docs/review/lore_book_roughs/{a,b,c}/` に書き、比較画像 `compare.png` を作る。`--install b` で採用案をゲームの場所へ写す。
+- 生成: `tools/gen_lore_book.py`（Pillow、乱数は seed 付き）。3 案を `docs/review/lore_book_roughs/{a,b,c}/` に書き、比較画像 `compare.png` を作る（片付けで比較画像だけ残した）。`--install b` で採用案をゲームの場所へ写す。
 - 作るもの: 見開き `textures/gui/lore/book.png`（608×384）、部品 `textures/gui/lore/widgets.png`（512×256。しおり 2 種、菱形の印 3 種、矢印 2 種、選んだ行の青緑のにじみ、伏せ字の墨の帯、知らせの札）、アイテム `textures/item/lore_book.png` と `lore_page.png`（32×32）。部品の位置は `LoreBookScreen` の `Sprite` と合わせてある。
 
 | 案 | 表紙 | 頁 | 評価 |
