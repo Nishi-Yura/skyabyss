@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 
 // 部屋の中身の建て方とリセットの受け口 (13 の 11.2節「部屋の箱の約束」、18 章)。
 // C1 (west)・C2 (east)・E (smith)・C3 (south)・F (heart) は、自分の Setup の共通の準備 (FMLCommonSetupEvent) か static 初期化で一度だけ
-//   EmberBackRooms.register("west", AshPathRoom::build);
+//   EmberBackRooms.register("west", 1, AshPathRoom::build);      (1 は中身の版。中身を変えたら上げると、起動時に建て直す)
 //   EmberBackRooms.onReset("west", AshPath::reset);
 // のように渡す。体を建てるとき (EmberBodyBuilder) と試練のリセットのとき (EmberBackTrials.reset) に B が呼ぶ。
 //
@@ -31,14 +31,30 @@ public final class EmberBackRooms {
     }
 
     private static final Map<String, List<Builder>> BUILDERS = new LinkedHashMap<>();
+    private static final Map<String, Integer> VERSIONS = new LinkedHashMap<>();
     private static final Map<String, List<Resetter>> RESETTERS = new LinkedHashMap<>();
 
     private EmberBackRooms() {
     }
 
     public static synchronized void register(String room, Builder builder) {
+        register(room, 1, builder);
+    }
+
+    // version: 中身を変えたら上げる (体を建て直す。各部屋の版の和が変わると、起動時に建て直す)
+    public static synchronized void register(String room, int version, Builder builder) {
         check(room);
         BUILDERS.computeIfAbsent(room, k -> new ArrayList<>()).add(builder);
+        VERSIONS.merge(room, version, Integer::sum);
+    }
+
+    // 中身の版 (部屋ごとの版を名前つきで混ぜた数)
+    public static synchronized int contentVersion() {
+        int v = 0;
+        for (Map.Entry<String, Integer> e : VERSIONS.entrySet()) {
+            v = v * 31 + e.getKey().hashCode() % 97 + e.getValue() * 7;
+        }
+        return v;
     }
 
     public static synchronized void onReset(String room, Resetter resetter) {
