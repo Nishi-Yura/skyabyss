@@ -86,6 +86,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
+        steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
