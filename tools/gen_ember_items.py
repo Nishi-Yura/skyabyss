@@ -58,13 +58,16 @@ RECOMMEND = {
     "cinder_husk": "a",
 }
 
-# 大鎚は重い両手の武器。拡大を下げ、刃先が手の上へ出ない位置にする (目分量。実機で確認)
+# 大鎚は重い両手の武器で、頭が大きい (中ボスの大鎚と同じ比)。拡大を下げる。
+# 台本 tools/shots/ember_gear.txt・ember_gear_hands.txt で、潮殻の三叉槍と並べて決めた (2026-10-16)。
+# 戦斧と火掻きはバニラの handheld のまま (一人称で三叉槍と同じ大きさに見えた)
 HAMMER_DISPLAY = copy.deepcopy(HANDHELD_DISPLAY)
 for _k in ("thirdperson_righthand", "thirdperson_lefthand"):
-    HAMMER_DISPLAY[_k]["scale"] = [0.75, 0.75, 0.75]
-    HAMMER_DISPLAY[_k]["translation"] = [0, 3.0, 0.5]
-for _k in ("firstperson_righthand", "firstperson_lefthand"):
     HAMMER_DISPLAY[_k]["scale"] = [0.6, 0.6, 0.6]
+    HAMMER_DISPLAY[_k]["translation"] = [0, 2.5, 0.5]
+for _k in ("firstperson_righthand", "firstperson_lefthand"):
+    HAMMER_DISPLAY[_k]["scale"] = [0.5, 0.5, 0.5]
+WEAPON_DISPLAY = HANDHELD_DISPLAY
 
 
 def install_item(item: str, opt: str):
@@ -112,7 +115,7 @@ def write_item(item: str):
     if ov:
         raise SystemExit(f"{item}: {ov} overlapping elements")
     write_palette(item, palette)
-    display = HAMMER_DISPLAY if item == "smith_hammer" else HANDHELD_DISPLAY
+    display = HAMMER_DISPLAY if item == "smith_hammer" else WEAPON_DISPLAY
     model = {
         "loader": "neoforge:separate_transforms",
         "base": {

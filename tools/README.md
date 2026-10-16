@@ -5,6 +5,85 @@
 どうしても動かすときだけ、環境変数 `SKYABYSS_ALLOW_REGEN=1` を付ける。`gen_items.py` だけは `SKYABYSS_ALLOW_GEN_ITEMS=1`。
 経緯は `docs/review/assets_audit.md` の S1。
 
+## ゲームを立ち上げる担当の決まり (並列で動かすとき)
+
+マイクラをいくつ同時に立ち上げてもよい。ただし、ほかの担当のウィンドウに入力が入らないよう、次を守る。
+
+- **OS のキー送り・マウス操作・ウィンドウのフォーカス操作は禁止** (PowerShell の SendKeys、AppActivate、SetForegroundWindow、nircmd など全部)。前面のウィンドウは誰のものか分からない
+- **画面の確認は台本で撮る** (下の「台本で撮るスクショ」)。ゲームの中から撮るので、ウィンドウが裏にあっても撮れる。最小化だけはしない
+- **建築の抜け・不具合はデータで確かめる** (下の「構造をデータで確かめる」)。試遊 (歩いて回る) での確認はしない
+- **コマンドを打つときは** 台本の `cmd`、または専用サーバー (`./gradlew runServer`) の RCON か自己テスト。クライアントのチャット欄へ打ち込まない
+- 専用サーバーを並べて立てるときは、worktree ごとに `run/server.properties` の `server-port` (と `rcon.port`) を別の番号にする (同じ番号だと起動時にポートを取れない)
+- 終わったら java を残さない。台本は最後に自分でゲームを閉じる (止まっても `timeout` 秒で閉じる)
+
+## 台本で撮るスクショ (`client/dev/ShotRunner`)
+
+```
+./gradlew runShots -Pscript=tools/shots/example_tide_back.txt
+```
+
+- ゲームのフォルダは `run/shots/<台本の名前>/`、撮った絵と記録は `run/shots/<台本の名前>/shots/<台本の名前>/` (`*.png` と `shots.log`)。台本ごとにフォルダが分かれるので、同じ worktree で別の台本を同時に動かしても混ざらない。同じ台本を 2 本同時に動かすときは `-PshotsName=<別名>` を付ける
+- `shots.log` の最後の行が `SHOTS OK <枚数> shots` なら成功、`SHOTS FAILED: <理由>` なら失敗。コマンドの返事もここに出る (チャットには出さない)
+- `runClientTest` などほかの起動でも、環境変数 `SKYABYSS_SHOTS=<台本の絶対パス>` を付ければ動く (出力先は `SKYABYSS_SHOTS_OUT` で変えられる)。開発環境でだけ動く
+- 台本の世界は `world` の名前で作る (無ければ平らな世界をクリエイティブ・コマンド可で作る。昼は進まない)。2 回目からは同じ世界を開く。巨神の背は `cmd skyabyss dev arrive <titan_back|tide_back>` で建って (無ければ) 移れる
+
+台本の書き方 (1 行 1 手順。`#` で始まる行は注釈):
+
+| 手順 | 意味 |
+|---|---|
+| `world <名前> [flat\|normal]` | 使う世界 (既定 `shots flat`)。頭に書く |
+| `size <幅> <高さ>` | ウィンドウの大きさ (撮る絵の大きさ) |
+| `timeout <秒>` | これを過ぎたら失敗として閉じる (既定 600) |
+| `cmd <コマンド>` | 統合サーバーで権限 4 で実行 (`/` はあってもなくても)。終わるまで待つ |
+| `camera [次元] <x> <y> <z> <yaw> <pitch>` | 体ごとそこへ置いて向きを決める (yaw 0=南 90=西 180=北 270=東、pitch 90=真下)。着くまで待つ。壁を抜けたいときは先に `cmd gamemode spectator` |
+| `look <yaw> <pitch>` | 向きだけ変える |
+| `waitchunks [最大 tick]` | まわりの描画が出そろうまで待つ (既定 600 tick まで) |
+| `wait <tick>` | 待つ |
+| `hud on\|off` | HUD と手を出す/隠す |
+| `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
+| `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
+| `close` | 画面を閉じる |
+| `chat clear` | チャット欄と右上の通知 (トースト) を消す |
+| `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
+| `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |
+| `echo <文>` | 記録に書くだけ |
+| `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
+
+例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
+
+## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
+
+ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。
+
+書き出し (どれか):
+
+```
+./gradlew runShots -Pscript=tools/shots/dump_backs.txt                              # 岩鯨・潮殻の背 → run/shots/dump_backs/dumps/*.sbd
+SKYABYSS_DUMP=titan_back,tide_back ./gradlew runServer                               # 専用サーバーで書いて止まる → run/dumps/*.sbd (ポートが空いているとき)
+/skyabyss dev dump preset <titan_back|tide_back>                                      # 台本の cmd や RCON から (島が無ければ建てる)
+/execute in skyabyss:titan_back run skyabyss dev dump <名前> <x1 y1 z1> <x2 y2 z2>     # 好きな範囲
+```
+
+書き出し先は `<ゲームのフォルダ>/dumps/<名前>.sbd` (環境変数 `SKYABYSS_DUMP_OUT` で変えられる)。台本では書き終わるまで `waitdump` で待つ。
+`/skyabyss dev arrive <titan_back|tide_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
+
+図と検査:
+
+```
+python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out docs/review --prefix structure_titan_back     --goal shrine --goal hub --seed hub --section y=94 --section x=0 --iso-step 1
+```
+
+| 出力 (`<out>/<prefix>_`) | 中身 |
+|---|---|
+| `top.png` / `iso.png` / `sections.png` | 真上から・等角 (南東の上から)・断面 (`--section y=/x=/z=`)。色はブロックの地図の色、水は青 |
+| `walk.png` | 歩き始め (`--walk-from`、既定 `arrival`) から歩いて行ける足の位置 (高さで色) と目標の印 |
+| `report.txt` | 目標 (`--goal`) に何歩で着くか (着かなければ一番近くまで来た所。終了コード 1)、部屋 (`--seed`) から外への口の一覧、水が広がる見積もり (今流れている水、流れたら埋まる空気。部屋の中の分)、看板の一覧 (lang のキー) |
+
+起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …)。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
+歩く決まり (上り 1・下り 3・頭 2 マス・水の中は 1 つ上へ) は背の自己テスト (`TideBackSelfTest.walk`) と同じ。水は実際より多めに出る (バニラは近くの落ち口の方へだけ流れるため)。
+部品は `sbd.py` (読む)、`analyze.py` (囲まれた空間と口・歩く・水・看板)、`render.py` (図)。新しく背中の検査を書くときは、自己テストに同じ探索を書き足す前にこれで見る。例は `docs/review/structure_*`。
+
 ## 採用版の生成元 (実行してよい)
 
 | 素材 (`src/main/resources/assets/skyabyss/` 以下) | 生成元 | 備考 |
@@ -36,6 +115,8 @@
 | 潮殻の装備 (三叉槍・盾・大鋏・銛): `models/item/{tide_shell_trident,coral_shield,coral_shield_blocking,tidecaller_claw,coral_harpoon}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{tide_shell_trident,coral_shield,tidecaller_claw,coral_harpoon,tide_chime_charm,moontide_pearl,tide_shell_core}.png` と護符・真珠・心核の `models/item/*.json` | `install_tide_gear.py` (ラフは `rough/tide_gear.py`、3 案と比較画像は `docs/review/tide_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/tide_gear/` から入れ直す) | 同じ物ができる。盾の持ち方 (`SHIELD_DISPLAY`) はバニラの盾の値 (03 の 11.6節) |
 | 余燼の装備 (戦斧・大鎚・火掻き): `models/item/{ember_war_axe,smith_hammer,thrall_poker}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{ember_war_axe,smith_hammer,thrall_poker,ember_mantle,kindling_charm,ember_lantern,ember_horn,ember_core,ember_shard,spark_dust,cinder_husk}.png` と、アイコンだけの品の `models/item/*.json` | `gen_ember_items.py` (ラフは `rough/ember_gear.py`、3 案と比較画像は `docs/review/ember_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/ember_gear/` から入れ直す) | 同じ物ができる。大鎚の持ち方 (`HAMMER_DISPLAY`) は目分量の最初の値 (実機で確認すること) |
 | 潮殻の鎧: `geo/armor/tide_shell_armor.geo.json`、`textures/armor/tide_shell_armor{,_glowmask}.png`、`textures/models/armor/tide_shell_layer_{1,2}.png`、`textures/item/tide_shell_{helmet,chestplate,leggings,boots}.png`、`models/item/tide_shell_*.json` | `install_tide_armor.py` (ラフは `rough/tide_armor.py`、採用は B。`--option a\|b\|c`、`--from-sources` で `tools/sources/tide_armor/` から) | 同じ物ができる |
+| 雷翼の装備 (弓・爪・鉤槍と、アイコンだけの品 7 つ): `models/item/{thunder_wing_bow,thunder_wing_bow_pulling_{0,1,2},raiju_claw,warden_glaive,storm_charm,storm_anklet,storm_eye_feather,thunder_wing_shard,thunder_wing_core,cloudgap_fruit,moth_dust}.json`、`textures/item/3d/*.png`、`textures/item/*.png`、`textures/mob_effect/static_ward.png` | `install_storm_gear.py` (ラフは `rough/storm_items.py`、3 案と比較画像は `docs/review/storm_gear_roughs/`。採用は 03 の 12.4節。`--option <品>=<a\|b\|c>`、`--from-sources` で `tools/sources/storm_gear/` から) | 同じ物ができる。弓の持ち方はバニラの `item/bow.json` の値 |
+| 雷翼の羽衣: `geo/armor/thunder_wing_armor.geo.json`、`textures/armor/thunder_wing_armor{,_glowmask}.png`、`animations/armor/thunder_wing_armor.animation.json`、`textures/models/armor/thunder_wing_layer_{1,2}.png`、`textures/item/thunder_wing_{helmet,chestplate,leggings,boots}.png`、`models/item/thunder_wing_*.json` | `install_storm_armor.py` (ラフは `rough/storm_armor.py`、採用は A。`--option a\|b\|c`、`--from-sources` で `tools/sources/storm_armor/` から) | 同じ物ができる |
 | 余燼の鎧: `geo/armor/ember_armor.geo.json`、`textures/armor/ember_armor{,_glowmask}.png`、`textures/models/armor/ember_layer_{1,2}.png`、`textures/item/ember_{helmet,chestplate,leggings,boots}.png`、`animations/armor/ember_armor.animation.json`、`models/item/ember_{helmet,chestplate,leggings,boots}.json` | `install_ember_armor.py` (ラフは `rough/ember_armor.py`、採用は A 火山の背。`--option a\|b\|c`、`--from-sources` で `tools/sources/ember_armor/` から) | 同じ物ができる |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。

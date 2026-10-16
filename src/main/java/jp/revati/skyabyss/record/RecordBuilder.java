@@ -20,6 +20,9 @@ import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.npc.WorldLoop;
+import jp.revati.skyabyss.progress.ProgressRules;
+import jp.revati.skyabyss.progress.Progression;
+import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
@@ -38,7 +41,6 @@ import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.titan.travel.TitanKind;
 import jp.revati.skyabyss.titan.travel.TravelRules;
-import jp.revati.skyabyss.titan.travel.TravelSetup;
 import jp.revati.skyabyss.titan.travel.TravelState;
 import jp.revati.skyabyss.titan.travel.TravelWorldData;
 import jp.revati.skyabyss.titan.travel.Voyages;
@@ -60,11 +62,11 @@ public final class RecordBuilder {
     }
 
     public static RecordSnapshot build(ServerPlayer target, boolean self) {
-        List<Tab> tabs = List.of(
-                new Tab(RecordSnapshot.KEEPSAKES, keepsakes(target, self)),
-                new Tab(RecordSnapshot.TITANS, titans(target)),
-                new Tab(RecordSnapshot.GROWTH, growth(target)),
-                new Tab(RecordSnapshot.BONDS, bonds(target)));
+        List<Tab> tabs = new ArrayList<>();
+        tabs.add(new Tab(RecordSnapshot.KEEPSAKES, keepsakes(target, self)));
+        tabs.addAll(titanTabs(target));
+        tabs.add(new Tab(RecordSnapshot.GROWTH, growth(target)));
+        tabs.add(new Tab(RecordSnapshot.BONDS, bonds(target)));
         return new RecordSnapshot(target.getUUID(), target.getDisplayName().copy(), self, tabs);
     }
 
@@ -83,25 +85,111 @@ public final class RecordBuilder {
     }
 
     private static TitanMemoryData.Record memory(ServerPlayer player) {
-        TitanMemoryData.Record r = TitanMemoryData.get(player.server).peek(player.getUUID(), TitanLoot.STONE_WHALE);
+        return memory(player, TitanLoot.STONE_WHALE);
+    }
+
+    private static TitanMemoryData.Record memory(ServerPlayer player, String titan) {
+        TitanMemoryData.Record r = TitanMemoryData.get(player.server).peek(player.getUUID(), titan);
         return r == null ? new TitanMemoryData.Record() : r;
+    }
+
+    // ---------------------------------------------------------------- 巨神の見え方
+    // 巨神の名前を出してよいか: 心臓を止めた、または順番がその巨神まで来た (前の巨神の心臓を自分で止めた)
+    static boolean revealed(ServerPlayer p, String titan) {
+        return Progression.stopped(p.server, p.getUUID(), titan) || ProgressRules.canChallenge(Progression.stage(p), titan);
+    }
+
+    static Component titanName(ServerPlayer p, String titan) {
+        return revealed(p, titan) ? Progression.titanName(titan) : t("r.unknown");
+    }
+
+    private static Row header(String key, Component label) {
+        return new Row("h." + key, Kind.HEADER, ItemStack.EMPTY, label, Component.empty(), RecordSnapshot.MARK_NONE, -1, List.of(),
+                RecordSnapshot.ACTION_NONE);
     }
 
     // ---------------------------------------------------------------- 大事な品
     private static List<Row> keepsakes(ServerPlayer p, boolean self) {
         List<Row> rows = new ArrayList<>();
-        TitanMemoryData.Record r = memory(p);
         TravelState travel = Voyages.state(p);
         LoreState lore = Lore.state(p);
+        TitanMemoryData data = TitanMemoryData.get(p.server);
+
+        rows.add(header("sky_key"));
+        // 天の鍵の欠片 (巨神ごとに一つ、同じ品)。在りかの分かる数と、受け取った数
+        int expected = KeepsakeBonds.expected(p, KeepsakeBonds.Kind.FRAGMENT);
+        boolean assembled = jp.revati.skyabyss.story.SkyKey.assembled(p);
+        Keepsakes.Where fw = KeepsakeBonds.where(p, KeepsakeBonds.Kind.FRAGMENT);
+        int missing = Math.max(0, expected - fw.total());
+        List<Component> fragDetail = new ArrayList<>();
+        fragDetail.add(t("d.where"));
+        if (fw.total() == 0) {
+            fragDetail.add(t(assembled ? "d.fragments_became_key" : expected > 0 ? "d.where_none" : "d.where_not_yet"));
+        }
+        places(fragDetail, fw);
+        fragDetail.add(t("d.fragments_received", expected, FRAGMENTS_TOTAL));
+        if (missing > 0) {
+            fragDetail.add(t("d.fragments_missing", missing));
+        }
+        fragDetail.add(t("d.guard_fragment"));
+        fragDetail.add(t("d.bond_fragment"));
+        fragDetail.add(t("d.recover_fragment"));
+        Component fragValue;
+        int fragMark;
+        if (assembled) {
+            fragValue = t("v.became_key");
+            fragMark = RecordSnapshot.MARK_SAFE;
+        } else if (missing > 0) {
+            fragValue = t("v.held_missing", fw.total(), expected);
+            fragMark = RecordSnapshot.MARK_LOST;
+        } else if (expected == 0 && fw.total() == 0) {
+            fragValue = t("v.not_yet");
+            fragMark = RecordSnapshot.MARK_LOCKED;
+        } else {
+            fragValue = t("v.held_of", fw.total(), FRAGMENTS_TOTAL);
+            fragMark = fw.safe() >= fw.total() ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_ATTENTION;
+        }
+        rows.add(new Row("fragments", Kind.ITEM, new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()), ModItems.SKY_KEY_FRAGMENT.get().getDescription().copy(),
+                fragValue, fragMark, -1, fragDetail, self && missing > 0 ? RecordSnapshot.ACTION_RECALL_FRAGMENT : RecordSnapshot.ACTION_NONE));
+        // 巨神ごとの欠片 (一人一つ)
+        int order = 0;
+        for (String titan : Titans.all()) {
+            order++;
+            TitanMemoryData.Record r = data.peek(p.getUUID(), titan);
+            boolean got = r != null && r.fragment;
+            boolean shown = revealed(p, titan);
+            rows.add(value("fragment." + titan, t("r.fragment_of", t("n." + order), shown ? t("short." + titan) : t("r.unknown")),
+                    got ? t("v.received") : shown ? t("v.not_yet_short") : t("r.unknown"),
+                    got ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED,
+                    List.of(t(got ? "d.fragment_got" : shown ? "d.fragment_how" : "d.fragment_hidden", titanName(p, titan)), t("d.fragment_record"))));
+        }
+        // 天の鍵 (四つの欠片が一つになったもの)
+        Item key = jp.revati.skyabyss.story.StorySetup.SKY_KEY.get();
+        Keepsakes.Where kw = KeepsakeBonds.where(p, KeepsakeBonds.Kind.KEY);
+        boolean keyMissing = assembled && kw.total() == 0;
+        Row keyRow = keepsake("sky_key", key, kw, assembled, "guard_key", "recover_key");
+        rows.add(new Row(keyRow.key(), keyRow.kind(), keyRow.icon(), keyRow.label(), keyRow.value(), keyRow.mark(), -1, keyRow.detail(),
+                self && keyMissing ? RecordSnapshot.ACTION_RECALL_KEY : RecordSnapshot.ACTION_NONE));
+
         rows.add(header("carried"));
-        rows.add(keepsake(p, "fragment", ModItems.SKY_KEY_FRAGMENT.get(), r.fragment, "guard_fragment", "recover_fragment"));
-        rows.add(keepsake(p, "core", ModItems.STONE_WHALE_CORE.get(), r.firstCleared, "guard_core", "recover_core"));
-        rows.add(keepsake(p, "call", TravelSetup.STONE_WHALE_CALL.get(), travel.callGiven.contains(TitanKind.STONE_WHALE.id()), "guard_call",
-                "recover_call"));
-        rows.add(keepsake(p, "book", LoreSetup.LORE_BOOK.get(), lore.bookGiven(), "guard_book", "recover_book"));
+        for (String titan : Titans.all()) {
+            TitanPages.Page page = TitanPages.page(titan);
+            Item core = page == null ? null : page.coreItem();
+            if (core == null || !revealed(p, titan)) {
+                continue;
+            }
+            TitanMemoryData.Record r = memory(p, titan);
+            rows.add(keepsake("core." + titan, core, Keepsakes.locate(p, core), r.firstCleared, "guard_core",
+                    titan.equals(TitanLoot.STONE_WHALE) ? "recover_core" : "recover_core_other"));
+        }
+        for (TitanKind kind : TitanKind.all()) {
+            Item call = kind.callItem().get();
+            rows.add(keepsake("call." + kind.id(), call, Keepsakes.locate(p, call), travel.callGiven.contains(kind.id()), "guard_call",
+                    "recover_call_" + kind.id()));
+        }
+        rows.add(keepsake("book", LoreSetup.LORE_BOOK.get(), Keepsakes.locate(p, LoreSetup.LORE_BOOK.get()), lore.bookGiven(), "guard_book", "recover_book"));
 
         rows.add(header("held"));
-        TitanMemoryData data = TitanMemoryData.get(p.server);
         List<Component> pendingDetail = new ArrayList<>();
         int pendingCount = 0;
         int pendingXp = 0;
@@ -128,20 +216,30 @@ public final class RecordBuilder {
                 kept > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, List.of(t("d.kept"))));
 
         rows.add(header("rights"));
-        Component choiceValue;
-        int choiceMark;
-        if (r.choicePending) {
-            choiceValue = t("v.choice_ready");
-            choiceMark = RecordSnapshot.MARK_ATTENTION;
-        } else if (r.firstCleared) {
-            choiceValue = t("v.choice_done");
-            choiceMark = RecordSnapshot.MARK_SAFE;
-        } else {
-            choiceValue = t("v.choice_locked");
-            choiceMark = RecordSnapshot.MARK_LOCKED;
+        TitanMemoryData.Record r = memory(p);
+        for (String titan : Titans.all()) {
+            if (TitanPages.page(titan) == null || !revealed(p, titan)) {
+                continue;
+            }
+            TitanMemoryData.Record tr = memory(p, titan);
+            Component choiceValue;
+            int choiceMark;
+            if (tr.choicePending) {
+                choiceValue = t("v.choice_ready");
+                choiceMark = RecordSnapshot.MARK_ATTENTION;
+            } else if (tr.firstCleared) {
+                choiceValue = t("v.choice_done");
+                choiceMark = RecordSnapshot.MARK_SAFE;
+            } else {
+                choiceValue = t("v.choice_locked");
+                choiceMark = RecordSnapshot.MARK_LOCKED;
+            }
+            // 岩鯨の行は前からの名前 (choice) のまま。選ぶボタンは岩鯨だけ (/titanmemory は岩鯨の選択を出す)
+            boolean whale = titan.equals(TitanLoot.STONE_WHALE);
+            rows.add(new Row(whale ? "choice" : "choice." + titan, Kind.VALUE, ItemStack.EMPTY, t("r.choice_of", Progression.titanName(titan)),
+                    choiceValue, choiceMark, -1, List.of(t(whale ? "d.choice" : "d.choice_other", Progression.titanName(titan))),
+                    self && whale && tr.choicePending ? RecordSnapshot.ACTION_CHOOSE : RecordSnapshot.ACTION_NONE));
         }
-        rows.add(new Row("choice", Kind.VALUE, ItemStack.EMPTY, t("r.choice"), choiceValue, choiceMark, -1, List.of(t("d.choice")),
-                self && r.choicePending ? RecordSnapshot.ACTION_CHOOSE : RecordSnapshot.ACTION_NONE));
         ForgeRules.ExchangeState exchange = TitanLoot.exchangeState(r.clears > 0 ? r : null);
         int exchangeMark = switch (exchange) {
             case READY -> RecordSnapshot.MARK_ATTENTION;
@@ -153,8 +251,10 @@ public final class RecordBuilder {
         return rows;
     }
 
-    private static Row keepsake(ServerPlayer p, String key, Item item, boolean received, String guardKey, String recoverKey) {
-        Keepsakes.Where where = Keepsakes.locate(p, item);
+    // 天の鍵の欠片の総数 (巨神の数)
+    static final int FRAGMENTS_TOTAL = jp.revati.skyabyss.story.SkyKey.FRAGMENTS;
+
+    private static Row keepsake(String key, Item item, Keepsakes.Where where, boolean received, String guardKey, String recoverKey) {
         Component value;
         int mark;
         if (where.safe() > 0) {
@@ -165,6 +265,9 @@ public final class RecordBuilder {
             mark = RecordSnapshot.MARK_ATTENTION;
         } else if (where.kept() > 0) {
             value = t("v.in_kept", where.kept());
+            mark = RecordSnapshot.MARK_ATTENTION;
+        } else if (where.stashCount() > 0) {
+            value = t("v.in_stash", where.stashCount());
             mark = RecordSnapshot.MARK_ATTENTION;
         } else if (where.groundCount() > 0) {
             value = t("v.on_ground", where.groundCount());
@@ -181,20 +284,28 @@ public final class RecordBuilder {
         if (where.total() == 0) {
             detail.add(t(received ? "d.where_none" : "d.where_not_yet"));
         }
+        places(detail, where);
+        detail.add(t("d.received_" + (received ? "yes" : "no")));
+        detail.add(t("d." + guardKey));
+        detail.add(t("d." + recoverKey));
+        return new Row(key, Kind.ITEM, new ItemStack(item), item.getDescription().copy(), value, mark, -1, detail, RecordSnapshot.ACTION_NONE);
+    }
+
+    private static void places(List<Component> detail, Keepsakes.Where where) {
         place(detail, "inventory", where.inventory());
         place(detail, "bags", where.bags());
         place(detail, "ender", where.ender());
         where.holders().forEach((id, n) -> detail.add(Component.translatableWithFallback(P + "d.place_" + id, "- " + id + " x" + n, n)));
         place(detail, "pending", where.pending());
         place(detail, "kept", where.kept());
+        for (Keepsakes.Ground g : where.stash()) {
+            BlockPos pos = g.pos();
+            detail.add(t(g.loaded() ? "d.place_stash" : "d.place_stash_far", g.count(), dimension(g.dimension()), pos.getX(), pos.getY(), pos.getZ()));
+        }
         for (Keepsakes.Ground g : where.ground()) {
             BlockPos pos = g.pos();
             detail.add(t(g.loaded() ? "d.place_ground" : "d.place_ground_far", g.count(), dimension(g.dimension()), pos.getX(), pos.getY(), pos.getZ()));
         }
-        detail.add(t("d.received_" + (received ? "yes" : "no")));
-        detail.add(t("d." + guardKey));
-        detail.add(t("d." + recoverKey));
-        return new Row(key, Kind.ITEM, new ItemStack(item), item.getDescription().copy(), value, mark, -1, detail, RecordSnapshot.ACTION_NONE);
     }
 
     private static void place(List<Component> detail, String where, int count) {
@@ -208,40 +319,58 @@ public final class RecordBuilder {
         return Component.translatableWithFallback(P + "dim." + path, id);
     }
 
-    // ---------------------------------------------------------------- 巨神の記録と図鑑
-    private static List<Row> titans(ServerPlayer p) {
-        List<Row> rows = new ArrayList<>();
-        TitanMemoryData.Record r = memory(p);
-        rows.add(header("stone_whale"));
-        rows.add(value("memory", t("r.memory"), memoryBar(r.memory), r.memory >= TitanLoot.HARD_PITY - 1 ? RecordSnapshot.MARK_ATTENTION
-                : RecordSnapshot.MARK_NONE, List.of(t("d.memory", TitanLoot.SOFT_PITY, TitanLoot.HARD_PITY),
-                t(r.memory >= TitanLoot.HARD_PITY - 1 ? "d.memory_next_guaranteed" : r.memory >= TitanLoot.SOFT_PITY - 1 ? "d.memory_next_soft"
-                        : "d.memory_next_plain"))));
-        rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
-        int owned = TitanLoot.collected(r);
-        int size = TitanLoot.collection().size();
-        rows.add(value("collection", t("r.collection"), t("v.of", owned, size), owned >= size ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
-                List.of(t("d.collection"))));
-        rows.add(value("fragment_record", t("r.fragment_record"), t(r.fragment ? "v.yes" : "v.no"),
-                r.fragment ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.fragment_record"))));
-        rows.add(value("exchanges", t("r.exchanges"), t("v.times", r.exchanges), RecordSnapshot.MARK_NONE, List.of(t("d.exchanges"))));
-        rows.add(header("collection"));
-        float multiplier = TitanLoot.pityMultiplier(r.memory);
-        for (Item item : TitanLoot.collection()) {
-            boolean has = r.owned.contains(TitanLoot.id(item));
-            boolean hidden = !has && TitanLoot.isExclusive(item);
-            int chance = Math.round(TitanLoot.heartChance(item) * multiplier * 100);
-            rows.add(new Row("piece." + TitanLoot.id(item), Kind.ITEM, hidden ? ItemStack.EMPTY : new ItemStack(item),
-                    hidden ? t("r.unknown") : item.getDescription().copy(), t(has ? "v.owned" : "v.not_owned"),
-                    has ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, -1,
-                    List.of(t(has ? "d.piece_owned" : "d.piece_missing"), t("d.piece_chance", chance)), RecordSnapshot.ACTION_NONE));
+    // ---------------------------------------------------------------- 巨神 (一覧と、巨神ごとの頁)
+    // 一覧の頁 (titans) と、巨神の一覧 (Titans.all) の順の頁 (titans.巨神の名前)。巨神が増えれば頁も増える
+    private static List<Tab> titanTabs(ServerPlayer p) {
+        List<Tab> tabs = new ArrayList<>();
+        tabs.add(new Tab(RecordSnapshot.TITANS, t("sub.overview"), RecordSnapshot.MARK_NONE, titanOverview(p)));
+        for (String titan : Titans.all()) {
+            boolean shown = revealed(p, titan);
+            boolean stopped = Progression.stopped(p.server, p.getUUID(), titan);
+            Component title = shown ? Component.translatable(P + "short." + titan) : t("sub.hidden");
+            int mark = stopped ? RecordSnapshot.MARK_SAFE : shown ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_LOCKED;
+            tabs.add(new Tab(RecordSnapshot.TITANS + RecordSnapshot.SUB + titan, title, mark, titanPage(p, titan)));
         }
+        return tabs;
+    }
 
-        // 後の巨神 (潮殻など、TitanGearSets の 2 つ目から): 記録があれば、記憶・撃破・図鑑を同じ形で
-        for (jp.revati.skyabyss.item.TitanGearSet set : jp.revati.skyabyss.item.TitanGearSets.all()) {
-            if (!set.titan.equals(TitanLoot.STONE_WHALE)) {
-                rows.addAll(laterTitan(p, set));
+    private static List<Row> titanOverview(ServerPlayer p) {
+        List<Row> rows = new ArrayList<>();
+        rows.add(header("progress"));
+        int stage = Progression.stage(p);
+        rows.add(value("stage", t("r.stage"), t("v.of", stage, Titans.all().size()), stage >= Titans.all().size() ? RecordSnapshot.MARK_SAFE
+                : RecordSnapshot.MARK_NONE, List.of(t("d.stage"), t("d.level_cap", ProgressRules.levelCap(stage)))));
+        int order = 0;
+        for (String titan : Titans.all()) {
+            order++;
+            boolean shown = revealed(p, titan);
+            boolean stopped = Progression.stopped(p.server, p.getUUID(), titan);
+            TitanMemoryData.Record r = memory(p, titan);
+            TitanPages.Page page = TitanPages.page(titan);
+            Item icon = page == null ? null : page.icon();
+            Component value;
+            int mark;
+            List<Component> detail = new ArrayList<>();
+            if (stopped) {
+                value = r.clears > 0 ? t("v.stopped", r.clears) : t("v.stopped_plain");
+                mark = RecordSnapshot.MARK_SAFE;
+                detail.add(t("d.titan_stopped", Progression.titanName(titan)));
+            } else if (shown && page == null) {
+                value = t("v.not_risen");
+                mark = RecordSnapshot.MARK_LOCKED;
+                detail.add(t("d.titan_not_risen", Progression.titanName(titan)));
+            } else if (shown) {
+                value = t("v.challenge", Titans.recommendedLevel(titan));
+                mark = RecordSnapshot.MARK_ATTENTION;
+                detail.add(t("d.titan_challenge", Progression.titanName(titan)));
+            } else {
+                value = t("v.unseen");
+                mark = RecordSnapshot.MARK_LOCKED;
+                detail.add(t("d.titan_unseen"));
             }
+            detail.add(shown ? t("d.titan_level", Titans.recommendedLevel(titan)) : t("d.titan_level_hidden"));
+            rows.add(new Row("titan." + titan, Kind.ITEM, shown && icon != null ? new ItemStack(icon) : ItemStack.EMPTY,
+                    t("r.titan_of", t("n." + order), titanName(p, titan)), value, mark, -1, detail, RecordSnapshot.ACTION_NONE));
         }
 
         rows.add(header("travel"));
@@ -271,41 +400,66 @@ public final class RecordBuilder {
         return rows;
     }
 
-    private static List<Row> laterTitan(ServerPlayer p, jp.revati.skyabyss.item.TitanGearSet set) {
+    private static List<Row> titanPage(ServerPlayer p, String titan) {
         List<Row> rows = new ArrayList<>();
-        TitanMemoryData.Record r = TitanMemoryData.get(p.server).peek(p.getUUID(), set.titan);
-        if (r == null) {
+        TitanPages.Page page = TitanPages.page(titan);
+        if (!revealed(p, titan)) {
+            // まだ見ぬ巨神: 枠と伏せ字だけ
+            rows.add(header(titan, t("r.unknown")));
+            rows.add(value("unknown", t("r.unknown"), t("v.unseen"), RecordSnapshot.MARK_LOCKED, List.of(t("d.page_hidden"))));
+            rows.add(value("memory", t("r.memory"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.page_hidden"))));
+            rows.add(value("collection", t("r.collection"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.page_hidden"))));
             return rows;
         }
-        String k = set.titan + ".";
-        rows.add(header(set.titan));
-        rows.add(value(k + "memory", t("r.memory"), memoryBar(r.memory), r.memory >= TitanLoot.HARD_PITY - 1 ? RecordSnapshot.MARK_ATTENTION
+        rows.add(header(titan, Progression.titanName(titan)));
+        if (page == null) {
+            // 順番は来たが、この世界にまだ現れない (ベータでは本体がない)
+            rows.add(value("not_risen", t("r.not_risen"), t("v.not_risen"), RecordSnapshot.MARK_LOCKED,
+                    List.of(t("d.titan_not_risen", Progression.titanName(titan)), t("d.titan_level", Titans.recommendedLevel(titan)))));
+            rows.add(value("memory", t("r.memory"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.page_not_risen"))));
+            rows.add(value("collection", t("r.collection"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.page_not_risen"))));
+            return rows;
+        }
+        TitanMemoryData.Record r = memory(p, titan);
+        rows.add(value("memory", t("r.memory"), memoryBar(r.memory), r.memory >= TitanLoot.HARD_PITY - 1 ? RecordSnapshot.MARK_ATTENTION
                 : RecordSnapshot.MARK_NONE, List.of(t("d.memory", TitanLoot.SOFT_PITY, TitanLoot.HARD_PITY),
                 t(r.memory >= TitanLoot.HARD_PITY - 1 ? "d.memory_next_guaranteed" : r.memory >= TitanLoot.SOFT_PITY - 1 ? "d.memory_next_soft"
                         : "d.memory_next_plain"))));
-        rows.add(value(k + "clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
-        int owned = set.collected(r);
-        int size = set.collection().size();
-        rows.add(value(k + "collection", t("r.collection"), t("v.of", owned, size), owned >= size ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
-                List.of(t("d.collection"))));
-        rows.add(value(k + "fragment_record", t("r.fragment_record"), t(r.fragment ? "v.yes" : "v.no"),
-                r.fragment ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.fragment_record"))));
-        rows.add(value(k + "exchanges", t("r.exchanges"), t("v.times", r.exchanges), RecordSnapshot.MARK_NONE, List.of(t("d.exchanges"))));
-        rows.add(new Row("h.collection." + set.titan, Kind.HEADER, ItemStack.EMPTY, t("h.collection"), Component.empty(), RecordSnapshot.MARK_NONE, -1,
-                List.of(), RecordSnapshot.ACTION_NONE));
-        float multiplier = TitanLoot.pityMultiplier(r.memory);
-        for (String id : set.collection()) {
-            java.util.Optional<Item> item = jp.revati.skyabyss.item.TitanGearSet.item(id);
-            if (item.isEmpty()) {
-                continue;
+        rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
+        List<Item> collection = page.collection().get();
+        int owned = 0;
+        for (Item item : collection) {
+            if (r.owned.contains(TitanLoot.id(item))) {
+                owned++;
             }
-            boolean has = r.owned.contains(id);
-            boolean hidden = !has && set.isExclusive(id);
-            int chance = Math.round(set.chance(id) * multiplier * 100);
-            rows.add(new Row("piece." + id, Kind.ITEM, hidden ? ItemStack.EMPTY : new ItemStack(item.get()),
-                    hidden ? t("r.unknown") : item.get().getDescription().copy(), t(has ? "v.owned" : "v.not_owned"),
+        }
+        int size = collection.size();
+        rows.add(value("collection", t("r.collection"), t("v.of", owned, size), owned >= size && size > 0 ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
+                List.of(titan.equals(TitanLoot.STONE_WHALE) ? t("d.collection") : t("d.collection_other", size))));
+        rows.add(value("fragment_record", t("r.fragment_record"), t(r.fragment ? "v.yes" : "v.no"),
+                r.fragment ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.fragment_record"))));
+        if (page.exchange()) {
+            rows.add(value("exchanges", t("r.exchanges"), t("v.times", r.exchanges), RecordSnapshot.MARK_NONE, List.of(t("d.exchanges"))));
+        }
+        TitanKind kind = TitanKind.byId(titan);
+        if (kind != null) {
+            boolean unlocked = Voyages.isUnlocked(p, kind);
+            rows.add(value("travel", t("r.travel_of"), t(unlocked ? "v.travel_yes" : "v.travel_no"),
+                    unlocked ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.travel_" + titan))));
+        }
+        rows.add(header("collection"));
+        float multiplier = TitanLoot.pityMultiplier(r.memory);
+        for (Item item : collection) {
+            boolean has = r.owned.contains(TitanLoot.id(item));
+            boolean hidden = !has && page.exclusive().test(item);
+            int chance = (int) Math.round(page.chance().applyAsDouble(item) * multiplier * 100);
+            rows.add(new Row("piece." + TitanLoot.id(item), Kind.ITEM, hidden ? ItemStack.EMPTY : new ItemStack(item),
+                    hidden ? t("r.unknown") : item.getDescription().copy(), t(has ? "v.owned" : "v.not_owned"),
                     has ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, -1,
                     List.of(t(has ? "d.piece_owned" : "d.piece_missing"), t("d.piece_chance", chance)), RecordSnapshot.ACTION_NONE));
+        }
+        if (collection.isEmpty()) {
+            rows.add(value("collection_none", t("r.collection_none"), Component.empty(), RecordSnapshot.MARK_LOCKED, List.of(t("d.collection_none"))));
         }
         return rows;
     }

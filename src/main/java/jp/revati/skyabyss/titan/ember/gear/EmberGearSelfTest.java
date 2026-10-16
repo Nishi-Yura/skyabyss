@@ -46,7 +46,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
-// 余燼の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST ember gear PASSED / FAILED)。03 の 12.8節の表と同じ検査:
+// 余燼の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST ember gear PASSED / FAILED)。03 の 13.8節の表と同じ検査:
 //  - 品の登録、図鑑の表 (10 品・EmberIds.CODEX の並び・確率)、必要 Lv (レア 26・伝説 28)、品の数値
 //  - 強さの曲線: GearCurve.STAGES の余燼の段 (03 の 9.8節) に +0 / +10 が入るか、潮殻・雷翼の目安との比べ、余燼の目安のボスとの手ごたえ、守り
 //  - 効果: 一式 (強靭・火に触れて筋力・熱のたまり方)、戦斧のくすぶり (火に強い相手にも) と +10%、大鎚の亀裂、火掻きの灰、外套、護符、灯、角杯

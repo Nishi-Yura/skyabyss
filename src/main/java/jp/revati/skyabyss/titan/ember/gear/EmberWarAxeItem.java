@@ -12,7 +12,7 @@ import net.minecraft.world.item.SwordItem;
 
 // 余燼の戦斧 (レア): 玄武岩の刃に熾火の割れ目が走る斧。命中した相手を 4 秒くすぶらせる (燃える相手は燃やし、
 // 火に強い相手にも「くすぶり」の印を付ける)。燃えている・くすぶる相手への傷 +10% (EmberGearEvents)。
-// 余燼の背の敵は火に強いので、バニラの燃焼だけだと効かなくなる。そのため印を別に持つ (03 の 12.1節)
+// 余燼の背の敵は火に強いので、バニラの燃焼だけだと効かなくなる。そのため印を別に持つ (03 の 13.1節)
 public class EmberWarAxeItem extends EmberWeaponItem {
     public EmberWarAxeItem(Properties properties) {
         // 攻撃力 16 = 1 + 5 + 10、攻撃速度 1.0 = 4 − 3

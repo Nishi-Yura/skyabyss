@@ -86,6 +86,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
+        steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
         // 余燼の装備と伝承・天の鍵の締め (13 の 11.2節の担当 G)
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
@@ -105,6 +106,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));
         steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
+        steps.add(Step.once("tide travel (load)", jp.revati.skyabyss.titan.travel.TideTravelSelfTest::load));
+        steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
         steps.add(Step.once("tide (load)", TideSelfTest::load));

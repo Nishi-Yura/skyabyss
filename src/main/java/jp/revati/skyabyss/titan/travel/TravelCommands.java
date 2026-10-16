@@ -4,12 +4,14 @@ import java.util.Collection;
 import java.util.List;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -44,7 +46,10 @@ public final class TravelCommands {
                                 .executes(ctx -> unlock(ctx, List.of(ctx.getSource().getPlayerOrException()), false))
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(ctx -> unlock(ctx, EntityArgument.getPlayers(ctx, "targets"), false))))
-                        .then(Commands.literal("call").executes(TravelCommands::call))
+                        .then(Commands.literal("call").executes(ctx -> call(ctx, TitanKind.STONE_WHALE))
+                                .then(Commands.argument("titan", StringArgumentType.word())
+                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(kindIds(), b))
+                                        .executes(ctx -> call(ctx, kind(ctx)))))
                         .then(Commands.literal("go")
                                 .then(Commands.argument("x", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer()).executes(TravelCommands::go))))
@@ -55,29 +60,47 @@ public final class TravelCommands {
                         }))
                         .then(Commands.literal("status").executes(TravelCommands::status))
                         .then(Commands.literal("end").executes(ctx -> {
-                            Voyages.forceEnd(TitanKind.STONE_WHALE);
-                            ctx.getSource().sendSuccess(() -> Component.literal("voyage ended"), true);
+                            for (TitanKind k : TitanKind.all()) {
+                                Voyages.forceEnd(k);
+                            }
+                            ctx.getSource().sendSuccess(() -> Component.literal("voyages ended"), true);
                             return 1;
                         }))));
+    }
+
+    private static List<String> kindIds() {
+        List<String> ids = new java.util.ArrayList<>();
+        TitanKind.all().forEach(k -> ids.add(k.id()));
+        return ids;
+    }
+
+    private static TitanKind kind(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        TitanKind k = TitanKind.byId(StringArgumentType.getString(ctx, "titan"));
+        if (k == null) {
+            throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(Component.literal("unknown titan; try " + kindIds())).create();
+        }
+        return k;
     }
 
     private static int unlock(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, boolean unlock) {
         for (ServerPlayer p : players) {
             TravelState s = Voyages.state(p);
-            if (unlock) {
-                s.unlocked.add(TitanKind.STONE_WHALE.id());
-            } else {
-                s.unlocked.remove(TitanKind.STONE_WHALE.id());
-                s.callGiven.remove(TitanKind.STONE_WHALE.id());
+            for (TitanKind k : TitanKind.all()) {
+                if (unlock) {
+                    s.unlocked.add(k.id());
+                } else {
+                    s.unlocked.remove(k.id());
+                    s.callGiven.remove(k.id());
+                }
             }
         }
-        ctx.getSource().sendSuccess(() -> Component.literal((unlock ? "unlocked" : "locked") + " the stone whale for " + players.size() + " player(s)"), true);
+        ctx.getSource().sendSuccess(() -> Component.literal((unlock ? "unlocked" : "locked") + " every travel titan for " + players.size() + " player(s)"), true);
         return players.size();
     }
 
-    private static int call(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static int call(CommandContext<CommandSourceStack> ctx, TitanKind kind) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Voyages.CallResult r = Voyages.call(player, TitanKind.STONE_WHALE, true);
+        Voyages.CallResult r = Voyages.call(player, kind, true);
         ctx.getSource().sendSuccess(() -> Component.literal("call: " + r), false);
         return r == Voyages.CallResult.REFUSED ? 0 : 1;
     }
@@ -94,7 +117,13 @@ public final class TravelCommands {
         v.leader = player.getUUID();
         v.leaderName = player.getGameProfile().getName();
         BlockPos pos = new BlockPos(x, player.serverLevel().getSeaLevel(), z);
-        v.chosen(new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 2, true, 0));
+        TravelNetwork.Dest d = new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 2, true, 0);
+        String refused = v.accept(d);
+        if (refused != null) {
+            ctx.getSource().sendFailure(Component.translatable(refused));
+            return 0;
+        }
+        v.chosen(d);
         ctx.getSource().sendSuccess(() -> Component.literal("destination set to " + x + ", " + z), true);
         return 1;
     }
@@ -102,8 +131,10 @@ public final class TravelCommands {
     private static int status(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         TravelState s = Voyages.state(player);
-        String voyage = Voyages.describe(TitanKind.STONE_WHALE);
-        ctx.getSource().sendSuccess(() -> Component.literal("voyage: " + (voyage == null ? "none" : voyage)), false);
+        for (TitanKind k : TitanKind.all()) {
+            String voyage = Voyages.describe(k);
+            ctx.getSource().sendSuccess(() -> Component.literal(k.id() + " voyage: " + (voyage == null ? "none" : voyage)), false);
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("unlocked=" + Voyages.isUnlocked(player, TitanKind.STONE_WHALE) + " " + s.unlocked
                 + " callGiven=" + s.callGiven + " waymarks=" + s.waymarks.size() + " cooldown=" + TravelRules.cooldownLeft(player) / 20 + "s voyages=" + s.voyages), false);
         return 1;

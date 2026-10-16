@@ -25,7 +25,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-// 余燼の装備の登録 (13 の 11.2節の担当 G、03 の 12章)。品・防具の素材・素材の品・角杯・図鑑の表 (TitanGearSets)・クリエイティブのタブ。
+// 余燼の装備の登録 (13 の 11.2節の担当 G、03 の 13章)。品・防具の素材・素材の品・角杯・図鑑の表 (TitanGearSets)・クリエイティブのタブ。
 // 名前はすべて EmberIds から取る (ID の約束)。SkyAbyss のコンストラクタから register を呼ぶ。
 // 潮殻 (titan/tide/gear) と同じ形: 表と数値は EmberGear、登録はここ
 public final class EmberGearSetup {

@@ -105,6 +105,10 @@ public class RecordScreen extends Screen {
 
     private RecordSnapshot snapshot;
     private String tab;
+    // 中のつまみ (つまみ → 選んだ頁の id)。巨神のつまみの「一覧・岩鯨・潮殻…」
+    private final Map<String, String> subByTab = new HashMap<>();
+    // 中のつまみの帯の高さ
+    static final int CHIP_H = 12;
     private final Map<String, String> selectedByTab = new HashMap<>();
     private final Map<String, Integer> listScroll = new HashMap<>();
     private int bodyScroll;
@@ -124,7 +128,11 @@ public class RecordScreen extends Screen {
     public RecordScreen(RecordSnapshot snapshot, String tab) {
         super(Component.translatable("skyabyss_record.title"));
         this.snapshot = snapshot;
-        this.tab = RecordSnapshot.TAB_IDS.contains(tab) ? tab : RecordSnapshot.KEEPSAKES;
+        String parent = RecordSnapshot.parentTab(tab);
+        this.tab = RecordSnapshot.TAB_IDS.contains(parent) ? parent : RecordSnapshot.KEEPSAKES;
+        if (!parent.equals(tab)) {
+            subByTab.put(parent, tab);
+        }
     }
 
     public UUID target() {
@@ -139,8 +147,12 @@ public class RecordScreen extends Screen {
             }
         }
         snapshot = next;
-        if (RecordSnapshot.TAB_IDS.contains(openTab)) {
-            tab = openTab;
+        String parent = RecordSnapshot.parentTab(openTab);
+        if (RecordSnapshot.TAB_IDS.contains(parent)) {
+            tab = parent;
+            if (!parent.equals(openTab)) {
+                subByTab.put(parent, openTab);
+            }
         }
         rebuildBody(false);
     }
@@ -168,15 +180,48 @@ public class RecordScreen extends Screen {
     }
 
     // ---------------------------------------------------------------- 選ぶ
+    // 中のつまみ (なければ空)
+    private List<Tab> chips() {
+        return snapshot.subTabs(tab);
+    }
+
+    // 行の一覧に出す頁の id (中のつまみがあれば、選んだ頁)
+    private String page() {
+        List<Tab> chips = chips();
+        if (chips.isEmpty()) {
+            return tab;
+        }
+        String sub = subByTab.get(tab);
+        for (Tab c : chips) {
+            if (c.id().equals(sub)) {
+                return sub;
+            }
+        }
+        return chips.get(0).id();
+    }
+
+    private int listTop() {
+        return chips().isEmpty() ? LIST_TOP : LIST_TOP + CHIP_H + 1;
+    }
+
     private Tab currentTab() {
-        Tab t = snapshot.tab(tab);
-        return t == null ? new Tab(tab, List.of()) : t;
+        String id = page();
+        Tab t = snapshot.tab(id);
+        return t == null ? new Tab(id, List.of()) : t;
+    }
+
+    private void switchPage(String id) {
+        if (!id.equals(page())) {
+            subByTab.put(tab, id);
+            bodyScroll = 0;
+            rebuildBody(true);
+        }
     }
 
     @Nullable
     private Row selected() {
         Tab t = currentTab();
-        String key = selectedByTab.get(tab);
+        String key = selectedByTab.get(page());
         Row row = key == null ? null : t.row(key);
         if (row == null || row.kind() == Kind.HEADER) {
             for (Row r : t.rows()) {
@@ -190,7 +235,7 @@ public class RecordScreen extends Screen {
     }
 
     private void select(Row row) {
-        selectedByTab.put(tab, row.key());
+        selectedByTab.put(page(), row.key());
         bodyScroll = 0;
         rebuildBody(true);
     }
@@ -224,11 +269,11 @@ public class RecordScreen extends Screen {
     }
 
     private int maxListScroll() {
-        return Math.max(0, listHeight() - (LIST_BOTTOM - LIST_TOP));
+        return Math.max(0, listHeight() - (LIST_BOTTOM - listTop()));
     }
 
     private int scroll() {
-        return Mth.clamp(listScroll.getOrDefault(tab, 0), 0, maxListScroll());
+        return Mth.clamp(listScroll.getOrDefault(page(), 0), 0, maxListScroll());
     }
 
     static int markColor(int mark) {
@@ -273,7 +318,7 @@ public class RecordScreen extends Screen {
         if (resetScroll) {
             bodyScroll = 0;
         }
-        Changed c = changed.get(tab + "/" + row.key());
+        Changed c = changed.get(page() + "/" + row.key());
         if (c != null) {
             for (FormattedCharSequence l : TextWrap.split(font, Component.translatable("skyabyss_record.gui.before", c.before()), RW)) {
                 body.add(new BodyLine(l, AMBER, LINE_H));
@@ -363,7 +408,7 @@ public class RecordScreen extends Screen {
 
     private boolean hasChangedIn(String tabId) {
         for (String key : changed.keySet()) {
-            if (key.startsWith(tabId + "/")) {
+            if (key.startsWith(tabId + "/") || key.startsWith(tabId + RecordSnapshot.SUB)) {
                 return true;
             }
         }
@@ -387,13 +432,47 @@ public class RecordScreen extends Screen {
         }
     }
 
+    // 中のつまみの帯: 左の頁の上に、頁の数で等分して並べる (巨神が増えれば細くなる)
+    private int chipX(int i, int n) {
+        return left + LX - 4 + (LW + 4) * i / n;
+    }
+
+    private void renderChips(GuiGraphics g, int mouseX, int mouseY) {
+        List<Tab> chips = chips();
+        if (chips.isEmpty()) {
+            return;
+        }
+        int n = chips.size();
+        int y = top + LIST_TOP - 1;
+        String current = page();
+        for (int i = 0; i < n; i++) {
+            Tab c = chips.get(i);
+            int x0 = chipX(i, n);
+            int x1 = chipX(i + 1, n) - 1;
+            boolean on = c.id().equals(current);
+            boolean hover = !on && mouseX >= x0 && mouseX < x1 && mouseY >= y && mouseY < y + CHIP_H;
+            g.fill(x0, y, x1, y + CHIP_H, on ? 0x501D6E69 : hover ? 0x30000000 : 0x18000000);
+            if (on) {
+                g.fill(x0, y + CHIP_H - 1, x1, y + CHIP_H, TEAL);
+            }
+            int color = on ? TITLE : c.mark() == RecordSnapshot.MARK_LOCKED ? FADED : hover ? INK : 0xFF5E5040;
+            FormattedCharSequence label = ellipsize(c.title(), x1 - x0 - 3);
+            g.drawString(font, label, x0 + (x1 - x0 - font.width(label)) / 2 + 1, y + 2, color, false);
+            if (!on && hasChangedIn(c.id())) {
+                MARK_CHANGED.draw(g, x1 - 7, y - 3);
+            }
+        }
+    }
+
     @Nullable
     private ItemHover renderList(GuiGraphics g, int mouseX, int mouseY) {
         Tab t = currentTab();
         Row sel = selected();
-        int y = top + LIST_TOP - scroll();
+        renderChips(g, mouseX, mouseY);
+        int listTop = listTop();
+        int y = top + listTop - scroll();
         ItemHover hover = null;
-        g.enableScissor(left + 6, top + LIST_TOP, left + 151, top + LIST_BOTTOM);
+        g.enableScissor(left + 6, top + listTop, left + 151, top + LIST_BOTTOM);
         for (Row r : t.rows()) {
             int h = rowHeight(r);
             if (y + h >= top + LIST_TOP && y < top + LIST_BOTTOM) {
@@ -403,7 +482,7 @@ public class RecordScreen extends Screen {
         }
         g.disableScissor();
         if (scroll() > 0) {
-            ARROW_UP.draw(g, left + 140, top + LIST_TOP - 9);
+            ARROW_UP.draw(g, left + 140, top + listTop - 9);
         }
         if (scroll() < maxListScroll()) {
             ARROW_DOWN.draw(g, left + 140, top + LIST_BOTTOM - 2);
@@ -414,7 +493,7 @@ public class RecordScreen extends Screen {
     @Nullable
     private ItemHover renderRow(GuiGraphics g, Row r, int y, boolean selected, int mouseX, int mouseY, @Nullable ItemHover hover) {
         int x = left + LX;
-        boolean inside = mouseY >= Math.max(y, top + LIST_TOP) && mouseY < Math.min(y + rowHeight(r), top + LIST_BOTTOM);
+        boolean inside = mouseY >= Math.max(y, top + listTop()) && mouseY < Math.min(y + rowHeight(r), top + LIST_BOTTOM);
         if (r.kind() == Kind.HEADER) {
             g.drawString(font, r.label(), x, y + 3, TEAL, false);
             g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x401D6E69);
@@ -430,7 +509,7 @@ public class RecordScreen extends Screen {
             g.setColor(1f, 1f, 1f, 1f);
             g.pose().popPose();
         }
-        boolean isChanged = changed.containsKey(tab + "/" + r.key());
+        boolean isChanged = changed.containsKey(page() + "/" + r.key());
         if (isChanged) {
             MARK_CHANGED.draw(g, left + 7, y + (rowHeight(r) - 8) / 2);
         }
@@ -479,7 +558,7 @@ public class RecordScreen extends Screen {
             tx += 19;
         }
         g.drawString(font, ellipsize(row.label(), RW - (tx - x)), tx, top + 11, TITLE, false);
-        boolean isChanged = changed.containsKey(tab + "/" + row.key());
+        boolean isChanged = changed.containsKey(page() + "/" + row.key());
         g.drawString(font, ellipsize(row.value(), RW - 10), x, top + BODY_TOP, isChanged ? AMBER : markColor(row.mark()), false);
         if (isChanged) {
             MARK_CHANGED.draw(g, x + RW - 8, top + BODY_TOP);
@@ -514,7 +593,11 @@ public class RecordScreen extends Screen {
             int by = top + BUTTON_Y;
             boolean hover = mouseX >= bx && mouseX < bx + 80 && mouseY >= by && mouseY < by + 14;
             BUTTON[hover ? 1 : 0].draw(g, bx, by);
-            Component label = Component.translatable(row.action() == RecordSnapshot.ACTION_CLAIM ? "skyabyss_record.gui.claim" : "skyabyss_record.gui.choose");
+            Component label = Component.translatable(switch (row.action()) {
+                case RecordSnapshot.ACTION_CLAIM -> "skyabyss_record.gui.claim";
+                case RecordSnapshot.ACTION_RECALL_FRAGMENT, RecordSnapshot.ACTION_RECALL_KEY -> "skyabyss_record.gui.recall";
+                default -> "skyabyss_record.gui.choose";
+            });
             g.drawString(font, label, bx + (80 - font.width(label)) / 2, by + 3, TITLE, false);
         }
     }
@@ -542,9 +625,23 @@ public class RecordScreen extends Screen {
                     return true;
                 }
             }
+            // 中のつまみ
+            List<Tab> chips = chips();
+            int cy = top + LIST_TOP - 1;
+            if (!chips.isEmpty() && mouseY >= cy && mouseY < cy + CHIP_H) {
+                for (int i = 0; i < chips.size(); i++) {
+                    if (mouseX >= chipX(i, chips.size()) && mouseX < chipX(i + 1, chips.size()) - 1) {
+                        if (!chips.get(i).id().equals(page())) {
+                            click();
+                            switchPage(chips.get(i).id());
+                        }
+                        return true;
+                    }
+                }
+            }
             // 一覧の行
-            if (mouseX >= left + LX - 4 && mouseX < left + LX + LW && mouseY >= top + LIST_TOP && mouseY < top + LIST_BOTTOM) {
-                int y = top + LIST_TOP - scroll();
+            if (mouseX >= left + LX - 4 && mouseX < left + LX + LW && mouseY >= top + listTop() && mouseY < top + LIST_BOTTOM) {
+                int y = top + listTop() - scroll();
                 for (Row r : currentTab().rows()) {
                     int h = rowHeight(r);
                     if (mouseY >= y && mouseY < y + h) {
@@ -575,6 +672,8 @@ public class RecordScreen extends Screen {
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
         if (row.action() == RecordSnapshot.ACTION_CLAIM) {
             PacketDistributor.sendToServer(new RecordNetwork.Claim());
+        } else if (row.action() == RecordSnapshot.ACTION_RECALL_FRAGMENT || row.action() == RecordSnapshot.ACTION_RECALL_KEY) {
+            PacketDistributor.sendToServer(new RecordNetwork.Recall(row.action() == RecordSnapshot.ACTION_RECALL_KEY));
         } else if (row.action() == RecordSnapshot.ACTION_CHOOSE && minecraft.player != null) {
             // 選ぶ品の名前はチャットに出る (押すと選べる)。チャットが見えるよう画面を閉じる
             minecraft.player.connection.sendCommand("titanmemory");
@@ -586,7 +685,7 @@ public class RecordScreen extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         int step = (int) Math.signum(scrollY) * -12;
         if (mouseX < left + 154) {
-            listScroll.put(tab, Mth.clamp(scroll() + step, 0, maxListScroll()));
+            listScroll.put(page(), Mth.clamp(scroll() + step, 0, maxListScroll()));
         } else {
             Row row = selected();
             if (row != null) {
@@ -614,6 +713,19 @@ public class RecordScreen extends Screen {
             switchTab(ids.get(ti - 1));
             return true;
         }
+        List<Tab> chips = chips();
+        if (keyCode == GLFW.GLFW_KEY_TAB && !chips.isEmpty()) {
+            int ci = 0;
+            for (int i = 0; i < chips.size(); i++) {
+                if (chips.get(i).id().equals(page())) {
+                    ci = i;
+                }
+            }
+            int next = Math.floorMod(ci + ((modifiers & GLFW.GLFW_MOD_SHIFT) != 0 ? -1 : 1), chips.size());
+            click();
+            switchPage(chips.get(next).id());
+            return true;
+        }
         if (keyCode >= GLFW.GLFW_KEY_1 && keyCode < GLFW.GLFW_KEY_1 + ids.size()) {
             switchTab(ids.get(keyCode - GLFW.GLFW_KEY_1));
             return true;
@@ -636,14 +748,14 @@ public class RecordScreen extends Screen {
         int y = 0;
         for (Row r : currentTab().rows()) {
             if (r == target) {
-                int view = LIST_BOTTOM - LIST_TOP;
+                int view = LIST_BOTTOM - listTop();
                 int s = scroll();
                 if (y < s) {
                     s = y;
                 } else if (y + rowHeight(r) > s + view) {
                     s = y + rowHeight(r) - view;
                 }
-                listScroll.put(tab, Mth.clamp(s, 0, maxListScroll()));
+                listScroll.put(page(), Mth.clamp(s, 0, maxListScroll()));
                 return;
             }
             y += rowHeight(r);

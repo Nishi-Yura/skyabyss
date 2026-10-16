@@ -1,0 +1,27 @@
+# 余燼の武器を一人称で持った絵 (潮殻の三叉槍と並べて大きさを比べる)。./gradlew runShots -Pscript=tools/shots/ember_gear_hands.txt
+world shots flat
+size 1280 720
+timeout 300
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+wait 40
+chat clear
+shot hand_ref_tide_trident
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+wait 40
+chat clear
+shot hand_ember_war_axe
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+wait 40
+chat clear
+shot hand_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:thrall_poker
+wait 40
+chat clear
+shot hand_thrall_poker
+quit

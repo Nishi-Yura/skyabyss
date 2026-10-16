@@ -42,7 +42,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 余燼の装備のうち、持ち主や相手の状態で変わる効果 (03 の 12章、13 の 6.5節):
+// 余燼の装備のうち、持ち主や相手の状態で変わる効果 (03 の 13章、13 の 6.5節):
 //  - 余燼の鎧: 2 部位で強靭 +3。4 部位で、余燼の背の火照り (熱 50 以上) のとき与える傷 +10%、どこでも火に触れたら筋力 I 10 秒。
 //    熱のたまり方 ×0.7 は EmberGear.heatGain (熱の担当 B の EmberHeat.gainMultiplier が呼ぶ)
 //  - 余燼の戦斧: 燃えている・くすぶる相手への傷 +10% (くすぶりの印は smolder)

@@ -68,6 +68,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
         // 第四の巨神「余燼の巨神」の骨組み (熱の音、背中の口)。ID の一覧は titan.ember.EmberIds。docs/design/13_ember.md の 11章
         jp.revati.skyabyss.titan.ember.EmberSetup.register(modEventBus);
+        // 雷翼の装備 (羽衣・弓・足環・護符・専用伝説) と素材 4 つ (欠片・心核・干し果・鱗粉)、図鑑の表。item.storm パッケージ
+        jp.revati.skyabyss.item.storm.StormGearSetup.register(modEventBus);
         // 余燼の装備 (鎧・戦斧・外套・護符・専用伝説・角杯・素材) と図鑑の表、伝承の締め。13 の 11.2節の担当 G
         jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.register(modEventBus);
 
