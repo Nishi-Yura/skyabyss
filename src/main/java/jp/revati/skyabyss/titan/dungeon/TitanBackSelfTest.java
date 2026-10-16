@@ -58,7 +58,10 @@ public final class TitanBackSelfTest {
                     checkTreasury(back, PENDING);
                     checkHeart(back, PENDING);
                     checkRestPoints(back, PENDING);
+                    forceMazeChunks(back, true);
                 })),
+                // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
+                SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
                 SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
                     checkReset(back, PENDING);
                     if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
@@ -69,6 +72,12 @@ public final class TitanBackSelfTest {
                     if (mapDir != null) {
                         writeMaps(back, java.nio.file.Path.of(mapDir));
                     }
+                })),
+                SelfTestRunner.Step.once("titan back (reset maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> {
+                    List<String> after = new ArrayList<>();
+                    checkPockets(back, after);
+                    after.forEach(f -> PENDING.add("after reset: " + f));
+                    forceMazeChunks(back, false);
                 })));
     }
 
@@ -476,15 +485,6 @@ public final class TitanBackSelfTest {
         if (!seen.contains(goal)) {
             failures.add("maze exit is unreachable from the ladder");
         }
-        int pockets = 0;
-        for (BlockPos p : seen) {
-            if (p.getY() == 80 && level.getBlockState(p).isAir()) {
-                pockets++;
-            }
-        }
-        if (pockets < 9 * 3) {
-            failures.add("maze has too few air pockets (" + pockets / 9 + ")");
-        }
         if (MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).links(MAZE_START_I, MAZE_START_J) < 2) {
             failures.add("maze entrance is not a junction");
         }
@@ -495,6 +495,50 @@ public final class TitanBackSelfTest {
         if (!level.getBlockState(new BlockPos(MAZE_EXIT_ROOM.x1(), FLOOR, -7)).is(Blocks.LADDER)) {
             failures.add("maze return ladder missing");
         }
+    }
+
+    // 息継ぎのくぼみを置いてから水を流す時間
+    private static final int MAZE_SETTLE_TICKS = 100;
+
+    // 迷路のチャンクを読み込んだままにする (プレイヤーがいないと、水が流れる tick が来ないため)
+    private static void forceMazeChunks(ServerLevel level, boolean forced) {
+        int x2 = MAZE_X0 + MAZE_W * (MAZE_CELL + 1);
+        int z2 = MAZE_Z0 + MAZE_H * (MAZE_CELL + 1);
+        for (int cx = MAZE_X0 >> 4; cx <= x2 >> 4; cx++) {
+            for (int cz = MAZE_Z0 >> 4; cz <= z2 >> 4; cz++) {
+                level.setChunkForced(cx, cz, forced);
+            }
+        }
+    }
+
+    // 水を流したあとでも、正しい道の息継ぎのくぼみごとに 3×3×2 の空気が残っていること (流れる水で埋まっていないこと)。
+    // くぼみの下の段は水源のままで、泳いで入れること
+    private static void checkPockets(ServerLevel level, List<String> failures) {
+        List<BlockPos> pockets = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
+        if (pockets.size() < 2) {
+            failures.add("maze has too few breathing pockets on the path (" + pockets.size() + ")");
+        }
+        int flooded = 0;
+        for (BlockPos p : pockets) {
+            String bad = null;
+            for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
+                for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
+                    for (int dy = 2; dy <= 3; dy++) {
+                        if (!level.getBlockState(p.offset(dx, dy, dz)).isAir()) {
+                            bad = level.getBlockState(p.offset(dx, dy, dz)) + " at " + p.offset(dx, dy, dz).toShortString();
+                        }
+                    }
+                    if (!level.getFluidState(p.offset(dx, 1, dz)).isSource()) {
+                        bad = "no water source under the air at " + p.offset(dx, 1, dz).toShortString();
+                    }
+                }
+            }
+            if (bad != null) {
+                flooded++;
+                failures.add("breathing pocket at " + p.toShortString() + " is flooded or blocked after " + MAZE_SETTLE_TICKS + " ticks: " + bad);
+            }
+        }
+        SkyAbyss.LOGGER.info("SELFTEST maze pockets: {} on the path, {} flooded", pockets.size(), flooded);
     }
 
     // 宝物庫: 台座は飾りとして残る。宝箱はもうない (欠片と装備は心臓を倒したときに渡す)
