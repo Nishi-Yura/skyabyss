@@ -1,0 +1,9 @@
+# 岩鯨・潮殻の背を書き出す (画面は撮らない)。./gradlew runShots -Pscript=tools/shots/dump_backs.txt
+# 出力: run/shots/dump_backs/dumps/{titan_back,tide_back}.sbd → python tools/structure/check.py で図と検査
+world shots flat
+timeout 900
+cmd skyabyss dev dump preset titan_back
+waitdump
+cmd skyabyss dev dump preset tide_back
+waitdump
+quit
