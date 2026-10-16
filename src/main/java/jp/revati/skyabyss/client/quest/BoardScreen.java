@@ -131,7 +131,13 @@ public class BoardScreen extends Screen {
         } else {
             second = def == null ? "" : Component.translatable(def.summaryKey()).getString();
         }
-        g.drawString(font, font.plainSubstrByWidth(second, textW), left + 14, y + 15, faint ? DIM : SOFT, false);
+        // 右下に「仲間も N 人」を出すときは、そのぶん二行目を短く切る
+        int secondW = line.mates() > 0 ? textW - 30 : textW;
+        String cut = font.plainSubstrByWidth(second, secondW);
+        if (cut.length() < second.length()) {
+            cut = font.plainSubstrByWidth(second, secondW - font.width("…")) + "…";
+        }
+        g.drawString(font, cut, left + 14, y + 15, faint ? DIM : SOFT, false);
         // 右: 状態 (受けられるものは釦)
         String state = switch (line.state()) {
             case Board.ACTIVE -> "gui.skyabyss.board.state.active";

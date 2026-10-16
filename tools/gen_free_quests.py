@@ -589,9 +589,10 @@ quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
 
 quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"),
       ("岩鯨の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the stone whale's heart once more. Party members in the fight count too."),
-      ("鼓動は止まった。七日もすれば、また戻っているのだろう。", "The beating has stopped. In seven days, it will likely have returned."),
-      [stage("heart", ("板の隅の紙：「止まった鼓動は、七日もすれば戻っている」\n誰が書いたのか、名前はない。",
-                       "A note in the corner of the board: \"A stilled heartbeat returns within seven days.\"\nIt is unsigned."),
+      ("鼓動は止まった。けれど、また打ちはじめるのだろう。", "The beating has stopped. But it will start again, surely."),
+      [stage("heart", ("板の隅の紙：「止めた鼓動は、また打ちはじめる。七日に一度は、確かめてきてほしい」\n誰が書いたのか、名前はない。",
+                       "A note in the corner of the board: \"A stilled heartbeat starts again. Go and make sure of it, once every seven days.\"\n"
+                       "It is unsigned."),
              [ob("heart", "kill", "岩鯨の心臓を止める", "Still the stone whale's heart", target="skyabyss:stone_whale_heart", count=1)])],
       {"xp": 150, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:resonance_shard", "count": 2}]},
       repeat="weekly", board=True, min_stage=1,
@@ -632,7 +633,7 @@ text("gui.skyabyss.board.state.active", "受けている", "In progress")
 text("gui.skyabyss.board.state.done", "済んだ", "Done")
 text("gui.skyabyss.board.state.full", "今日はもう受けられない", "Daily limit reached")
 text("gui.skyabyss.board.state.locked", "まだ", "Not yet")
-text("gui.skyabyss.board.mates", "仲間 %s 人も", "%s party member(s) too")
+text("gui.skyabyss.board.mates", "仲間も %s 人", "+%s in party")
 text("message.skyabyss.board.handed", "「%s」の品を、板に納めた。", "Handed in the items for \"%s\" at the board.")
 text("gui.skyabyss.quest.repeat.", "", "")
 text("gui.skyabyss.quest.repeat.daily", "日替わり", "Daily")

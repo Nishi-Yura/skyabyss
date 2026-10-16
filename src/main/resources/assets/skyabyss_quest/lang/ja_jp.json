@@ -62,7 +62,7 @@
   "gui.skyabyss.board.empty": "今日は、頼みごとが貼られていない。",
   "gui.skyabyss.board.footer": "品を納める頼みは、品を持って板を開けば渡せる。",
   "gui.skyabyss.board.hidden": "？？？",
-  "gui.skyabyss.board.mates": "仲間 %s 人も",
+  "gui.skyabyss.board.mates": "仲間も %s 人",
   "gui.skyabyss.board.next": "次の張り替えまで、およそ %s 分",
   "gui.skyabyss.board.quota": "今日受けた頼み %s / %s",
   "gui.skyabyss.board.state.active": "受けている",
@@ -161,9 +161,9 @@
   "quest.skyabyss.weekly_back_trials.trials.journal": "板の紙：「鯨の背の試練を、三つ越えてきてほしい。共鳴石が鳴るのを聞いたら、それでいい。——鯨追い」",
   "quest.skyabyss.weekly_back_trials.trials.trial": "岩鯨の背の試練を越える（共鳴石が鳴る）",
   "quest.skyabyss.weekly_back_trials.unlock_hint": "岩鯨の背に渡ると、受けられる",
-  "quest.skyabyss.weekly_heart_again.done": "鼓動は止まった。七日もすれば、また戻っているのだろう。",
+  "quest.skyabyss.weekly_heart_again.done": "鼓動は止まった。けれど、また打ちはじめるのだろう。",
   "quest.skyabyss.weekly_heart_again.heart.heart": "岩鯨の心臓を止める",
-  "quest.skyabyss.weekly_heart_again.heart.journal": "板の隅の紙：「止まった鼓動は、七日もすれば戻っている」\n誰が書いたのか、名前はない。",
+  "quest.skyabyss.weekly_heart_again.heart.journal": "板の隅の紙：「止めた鼓動は、また打ちはじめる。七日に一度は、確かめてきてほしい」\n誰が書いたのか、名前はない。",
   "quest.skyabyss.weekly_heart_again.summary": "岩鯨の心臓を、もう一度止める。戦いに加わった仲間も数える。",
   "quest.skyabyss.weekly_heart_again.title": "心臓をもう一度"
 }
