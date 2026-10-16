@@ -9,8 +9,7 @@ clouds off
 
 cmd gamemode spectator
 cmd skyabyss smith rebuild
-cmd execute in skyabyss:ember_back run kill @e[type=skyabyss:ash_smith]
-cmd execute in skyabyss:ember_back run summon skyabyss:ash_smith 26.5 81 46.5 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd execute in skyabyss:ember_back run summon skyabyss:ash_smith 26.5 81 46.5 {NoAI:1b,Rotation:[180f,0f],PersistenceRequired:1b}
 hud off
 # 北の入口から見た全景 (鍛え手は奥)
 camera skyabyss:ember_back 26.5 85.5 33.2 0 14

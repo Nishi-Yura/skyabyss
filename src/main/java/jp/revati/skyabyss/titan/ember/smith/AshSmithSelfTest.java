@@ -451,9 +451,12 @@ public final class AshSmithSelfTest {
         tick(s, p, 40);
         check(s.currentAction() == AshSmith.Action.NONE, "the slam did not finish (" + s.currentAction() + ")", f);
         heal(p);
-        put(p, bx + 4.5, fy, AshSmithArena.CZ - 2.5);
+        put(p, bx, fy, AshSmithArena.CZ - 2.5);
         s.moveTo(bx, fy, AshSmithArena.CZ - 6.5, 0f, 0f);
         s.forceAction(AshSmith.Action.SLAM);
+        tick(s, p, 1);
+        // 帯の向きは溜めの始まりで決まる。決まったあとで、横へ 4.5 離れる
+        put(p, bx + 4.5, fy, AshSmithArena.CZ - 2.5);
         tick(s, p, AshSmith.SLAM_WINDUP + 40);
         check(lost(p) == 0, "a player outside the strip was hurt (" + lost(p) + ")", f);
         // 鞴の息: 扇の中は 8・熱 35・押される、吐いたあと 3 秒は後ろからの傷 1.5 倍
@@ -486,8 +489,11 @@ public final class AshSmithSelfTest {
         // 扇の外は無傷
         heal(p);
         s.moveTo(bx, fy, AshSmithArena.CZ - 6.5, 0f, 0f);
-        put(p, bx + 5, fy, AshSmithArena.CZ - 3.5);
+        put(p, bx, fy, AshSmithArena.CZ - 1.5);
         s.forceAction(AshSmith.Action.BREATH);
+        tick(s, p, AshSmith.BREATH_INHALE - 3);
+        // 向きは吸っている間に決まる (吐く 6 tick 前まで追う)。決まったあとで、扇の外 (横へ 5) へ出る
+        put(p, bx + 5, fy, AshSmithArena.CZ - 3.5);
         tick(s, p, 60);
         check(lost(p) == 0, "a player outside the fan was hurt (" + lost(p) + ")", f);
         // 焼き入れ: 槽へ歩き、湯気 6 秒、鎚が冷える。冷えた鎚打ち 3 回: 24・噴気なし・輪 12 (跳べば当たらない)
