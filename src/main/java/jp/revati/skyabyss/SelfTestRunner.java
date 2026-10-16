@@ -90,6 +90,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
+        // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
+        steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの

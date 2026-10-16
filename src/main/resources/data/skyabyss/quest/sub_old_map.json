@@ -1,0 +1,57 @@
+{
+  "category": "sub",
+  "order": 45,
+  "giver": "skyabyss:whale_chaser",
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "watch",
+      "objectives": [
+        {
+          "id": "storm",
+          "type": "condition",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "weather",
+                "thunder": true
+              },
+              {
+                "type": "height",
+                "min": 100
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_map_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "items": [
+      {
+        "item": "minecraft:paper",
+        "count": 1,
+        "name": "item.skyabyss.keepsake.map_scrap",
+        "lore": [
+          "item.skyabyss.keepsake.map_scrap.lore"
+        ]
+      }
+    ],
+    "affinity": {
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "category": "main",
+  "order": 40,
+  "giver": "skyabyss:whale_chaser",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_thunder",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "rumor",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_ember2"
+        }
+      ],
+      "xp": 40,
+      "skip_if": {
+        "type": "lore",
+        "entry": "chapter1/ember"
+      }
+    },
+    {
+      "id": "see",
+      "objectives": [
+        {
+          "id": "see",
+          "type": "lore",
+          "targets": [
+            "chapter1/ember"
+          ]
+        }
+      ],
+      "xp": 80
+    },
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "still",
+          "type": "condition",
+          "if": {
+            "type": "stilled",
+            "titan": "ember"
+          }
+        }
+      ]
+    },
+    {
+      "id": "key",
+      "objectives": [
+        {
+          "id": "key",
+          "type": "lore",
+          "targets": [
+            "chapter1/sky_key_whole"
+          ]
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 400,
+    "affinity": {
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

@@ -38,10 +38,12 @@ import net.minecraft.world.item.Item;
 //   stage   {min, max}         : 個人の物語の段階 (自分で止めた心臓の数。progress/Progression.stage)
 //   stilled {titan}            : 自分でその巨神の心臓を止めた (Progression.stopped)
 //   world_stage {min}          : 世界の進み (ワールドの誰かが止めた心臓の数)
+//   weather {thunder, rain}    : 今いる所が雷雨 / 雨で、真上に空が見える (屋根の下では数えない)
+//   height  {min}              : 足もとの高さ (y) が min 以上
 //   item は token を書くと、その印の品だけを数える (QuestItems)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -173,6 +175,15 @@ public final class Condition {
             }
             case "stilled" -> jp.revati.skyabyss.progress.Progression.stopped(ctx.player().server, ctx.player().getUUID(), str("titan"));
             case "world_stage" -> jp.revati.skyabyss.progress.Progression.worldStage(ctx.player().server) >= GsonHelper.getAsInt(json, "min", 0);
+            case "weather" -> {
+                var level = ctx.player().level();
+                boolean sky = level.canSeeSky(ctx.player().blockPosition().above());
+                // 空の明るさの移り (isThundering) ではなく、天気の記録で見る (雷が鳴りはじめた時点から数える)
+                boolean thunder = !GsonHelper.getAsBoolean(json, "thunder", false) || level.getLevelData().isThundering();
+                boolean rain = !GsonHelper.getAsBoolean(json, "rain", false) || level.getLevelData().isRaining();
+                yield sky && thunder && rain;
+            }
+            case "height" -> ctx.player().getY() >= GsonHelper.getAsDouble(json, "min", 0);
             case "watcher" -> PrologueData.get(ctx.player().server.overworld()).entry(ctx.player().getUUID()).sightings
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);

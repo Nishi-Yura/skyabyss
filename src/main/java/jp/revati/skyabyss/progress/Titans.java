@@ -58,6 +58,14 @@ public final class Titans {
         LEAVE.put(titan, leave);
     }
 
+    // 自己テスト用: 仮に登録した背中を外す
+    public static synchronized void unbindBack(ResourceKey<Level> dimension) {
+        String titan = BACKS.remove(dimension);
+        if (titan != null && !BACKS.containsValue(titan)) {
+            LEAVE.remove(titan);
+        }
+    }
+
     // 背中のディメンションの巨神 (背中でなければ null)
     @Nullable
     public static String titanOfBack(ResourceKey<Level> dimension) {

@@ -1,0 +1,133 @@
+{
+  "category": "main",
+  "order": 20,
+  "giver": "skyabyss:whale_chaser",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "quest",
+        "quest": "main_song",
+        "is": "done"
+      },
+      {
+        "type": "stilled",
+        "titan": "stone_whale"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "rumor",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_tide2"
+        }
+      ],
+      "xp": 40,
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/tide_shell"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/tide_hours"
+          }
+        ]
+      }
+    },
+    {
+      "id": "see",
+      "objectives": [
+        {
+          "id": "see",
+          "type": "lore",
+          "targets": [
+            "chapter1/tide_shell"
+          ]
+        }
+      ],
+      "xp": 60
+    },
+    {
+      "id": "board",
+      "objectives": [
+        {
+          "id": "board",
+          "type": "lore",
+          "targets": [
+            "chapter1/tide_ruins"
+          ]
+        }
+      ],
+      "xp": 60
+    },
+    {
+      "id": "inscriptions",
+      "objectives": [
+        {
+          "id": "read",
+          "type": "lore",
+          "targets": [
+            "chapter1/inscription_tide_beach",
+            "chapter1/inscription_tide_hub",
+            "chapter1/inscription_tide_west",
+            "chapter1/inscription_tide_east",
+            "chapter1/inscription_tide_front",
+            "chapter1/inscription_tide_heart"
+          ],
+          "count": 2
+        }
+      ],
+      "xp": 90,
+      "skip_if": {
+        "type": "stilled",
+        "titan": "tide_shell"
+      }
+    },
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "still",
+          "type": "condition",
+          "if": {
+            "type": "stilled",
+            "titan": "tide_shell"
+          }
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "objectives": [
+        {
+          "id": "st",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ms_tide_back2"
+        },
+        {
+          "id": "wc",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_tide_back2"
+        }
+      ],
+      "mode": "any"
+    }
+  ],
+  "reward": {
+    "xp": 300,
+    "affinity": {
+      "skyabyss:storyteller": 5,
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

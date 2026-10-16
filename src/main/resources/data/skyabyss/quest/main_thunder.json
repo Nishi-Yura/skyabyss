@@ -1,0 +1,79 @@
+{
+  "category": "main",
+  "order": 30,
+  "giver": "skyabyss:storyteller",
+  "start_when": {
+    "type": "quest",
+    "quest": "main_tide",
+    "is": "done"
+  },
+  "stages": [
+    {
+      "id": "rumor",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ms_thunder2"
+        }
+      ],
+      "xp": 40,
+      "skip_if": {
+        "type": "lore",
+        "entry": "chapter1/thunder_wing"
+      }
+    },
+    {
+      "id": "see",
+      "objectives": [
+        {
+          "id": "see",
+          "type": "lore",
+          "targets": [
+            "chapter1/thunder_wing"
+          ]
+        }
+      ],
+      "xp": 80
+    },
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "still",
+          "type": "condition",
+          "if": {
+            "type": "stilled",
+            "titan": "thunder_wing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "objectives": [
+        {
+          "id": "st",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ms_thunder_back2"
+        },
+        {
+          "id": "wc",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ms_c_thunder_back"
+        }
+      ],
+      "mode": "any"
+    }
+  ],
+  "reward": {
+    "xp": 400,
+    "affinity": {
+      "skyabyss:storyteller": 5,
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

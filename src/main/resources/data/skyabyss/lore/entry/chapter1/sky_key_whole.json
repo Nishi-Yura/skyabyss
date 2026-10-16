@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 180,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/sky_key",
+    "chapter1/fifth_verse"
+  ]
+}
