@@ -87,6 +87,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
         steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));
+        // 余燼の装備と伝承・天の鍵の締め (13 の 11.2節の担当 G)
+        steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
+        steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
@@ -111,10 +114,23 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
+        // 雷翼の巨神 (窓・止まり木・昇り風・一体だけ・記録・戻る先・背中の結びつけ)
+        steps.add(Step.once("storm (load)", jp.revati.skyabyss.titan.storm.StormSelfTest::load));
+        steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
+        // 雷翼の背 (鳥の形・看板・拍・鏡・柱・歩ける所・リセット)。建てたあと 100 tick 待ってから数える
+        steps.addAll(jp.revati.skyabyss.titan.storm.back.StormBackSelfTest.steps());
+        steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
+        steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
+        steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
+        // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
+        steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
+        steps.add(Step.once("raiju", 40, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));
         // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
+        // 余燼の背の敵 (強さ・殻と燃え上がり・蛾の熱・燠虫の転がり・落とす物)。13 の 5.1節
+        steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }
@@ -126,6 +142,15 @@ public final class SelfTestRunner {
         }
         QUEUE.clear();
         QUEUE.addAll(steps());
+        // SKYABYSS_SELFTEST_ONLY=<名前の頭> なら、その段だけ (例: "storm back")。終わるとサーバーを止める
+        String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
+        if (only != null && !only.isBlank()) {
+            QUEUE.removeIf(s -> !s.name().startsWith(only));
+            haltWhenDone = true;
+        }
+        if (QUEUE.isEmpty()) {
+            return;
+        }
         current = null;
         wait = QUEUE.peek().waitBefore();
         startedAt = System.nanoTime();
@@ -138,6 +163,8 @@ public final class SelfTestRunner {
         QUEUE.clear();
         current = null;
     }
+
+    private static boolean haltWhenDone;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -187,6 +214,9 @@ public final class SelfTestRunner {
         if (QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST runner: all steps done in {} s, slowest tick {} ms ({})", (System.nanoTime() - startedAt) / 1_000_000_000L,
                     slowestTick / 1_000_000, slowestStep);
+            if (haltWhenDone) {
+                event.getServer().halt(false);
+            }
         } else {
             wait = QUEUE.peek().waitBefore();
         }

@@ -1,0 +1,24 @@
+# 潮殻の背 (亀の島) の全景を撮る例。./gradlew runShots -Pscript=tools/shots/example_tide_back.txt
+world shots flat
+size 1280 720
+timeout 420
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+hud off
+# 島の南東の空から、甲羅の中心を見下ろす (yaw 0=南 90=西 180=北 270=東)
+camera skyabyss:tide_back 150 190 150 135 28
+waitchunks
+shot tide_back_overview
+# 真上から
+camera skyabyss:tide_back 0 260 -10 180 90
+waitchunks
+shot tide_back_top
+# 到着の段
+cmd skyabyss dev arrive tide_back
+waitchunks
+shot tide_back_arrival
+quit

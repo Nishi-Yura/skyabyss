@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "skyabyss:block/wind_stone"
+    },
+    "active=true": {
+      "model": "skyabyss:block/wind_stone_active"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.supplicant_staff.idle": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {}
+  }
+ }
+}

@@ -1,0 +1,39 @@
+# 余燼の背の敵 3 種 (13 の 5.1節) を並べて撮る。./gradlew runShots -Pscript=tools/shots/ember_mobs.txt
+# 出力: run/shots/ember_mobs/shots/ember_mobs/*.png と shots.log。平らな世界の地上に玄武岩の台を敷き、動かない個体 (NoAI) を置く
+world shots flat
+size 1280 720
+timeout 480
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -8 -61 -8 8 -61 8 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+# 左から: 灰被り (殻) / 灰被り (燃え上がり) / 燠虫 / 火の粉蛾 2 体。南 (z の正) から北を見る向きに置く
+cmd summon skyabyss:ash_thrall -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_thrall -0.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Flared:1b,BurnLeft:999999}
+cmd summon skyabyss:cinder_roller 2 -60 0 {NoAI:1b,Rotation:[30f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ember_moth 4 -59 0.5 {NoAI:1b,Rotation:[-20f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ember_moth 5 -58.5 -0.5 {NoAI:1b,Rotation:[10f,0f],PersistenceRequired:1b}
+hud off
+camera minecraft:overworld 0.5 -59.2 6.5 180 6
+waitchunks
+wait 40
+shot ember_mobs_day
+# 斜め後ろから
+camera minecraft:overworld -4 -57.5 -4.5 -35 18
+wait 20
+shot ember_mobs_back
+# 夜 (光る画素の見え方)
+cmd time set midnight
+camera minecraft:overworld 0.5 -59.2 6.5 180 6
+wait 40
+shot ember_mobs_night
+# 近くで: 灰被り 2 体の顔と火掻き棒
+cmd time set noon
+camera minecraft:overworld -1.8 -59.6 3.4 180 6
+wait 20
+shot ember_thrall_close
+quit

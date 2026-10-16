@@ -718,5 +718,397 @@
         "name": "skyabyss:titan/travel/tide_current"
       }
     ]
+  },
+  "storm_wing_call": {
+    "subtitle": "subtitles.skyabyss.storm_cry",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_wing_call"
+      }
+    ]
+  },
+  "storm_thunder_far": {
+    "subtitle": "subtitles.skyabyss.storm_thunder",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_thunder_far"
+      }
+    ]
+  },
+  "storm_gale": {
+    "subtitle": "subtitles.skyabyss.storm_column",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_gale"
+      }
+    ]
+  },
+  "storm_back_wind": {
+    "subtitle": "subtitles.skyabyss.storm_wind",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_back_wind"
+      }
+    ]
+  },
+  "storm_rise_warn": {
+    "subtitle": "subtitles.skyabyss.storm_wind",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_rise_warn"
+      }
+    ]
+  },
+  "storm_fall_warn": {
+    "subtitle": "subtitles.skyabyss.storm_cry",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_fall_warn"
+      }
+    ]
+  },
+  "storm_crosswind": {
+    "subtitle": "subtitles.skyabyss.storm_crosswind",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_crosswind"
+      }
+    ]
+  },
+  "storm_mirror_turn": {
+    "subtitle": "subtitles.skyabyss.storm_mirror",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_mirror_turn"
+      }
+    ]
+  },
+  "storm_receiver_lit": {
+    "subtitle": "subtitles.skyabyss.storm_feather",
+    "sounds": [
+      {
+        "name": "skyabyss:storm/storm_receiver_lit"
+      }
+    ]
+  },
+  "feather_warden_ambient": {
+    "subtitle": "subtitles.skyabyss.feather_warden_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_ambient"
+      }
+    ]
+  },
+  "feather_warden_hurt": {
+    "subtitle": "subtitles.skyabyss.feather_warden_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_hurt"
+      }
+    ]
+  },
+  "feather_warden_death": {
+    "subtitle": "subtitles.skyabyss.feather_warden_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_death"
+      }
+    ]
+  },
+  "feather_warden_swing": {
+    "subtitle": "subtitles.skyabyss.feather_warden_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_swing"
+      }
+    ]
+  },
+  "feather_warden_crouch": {
+    "subtitle": "subtitles.skyabyss.feather_warden_crouch",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_crouch"
+      }
+    ]
+  },
+  "feather_warden_dive": {
+    "subtitle": "subtitles.skyabyss.feather_warden_dive",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_dive"
+      }
+    ]
+  },
+  "feather_warden_land": {
+    "subtitle": "subtitles.skyabyss.feather_warden_land",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/feather_warden_land"
+      }
+    ]
+  },
+  "static_moth_ambient": {
+    "subtitle": "subtitles.skyabyss.static_moth_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_ambient"
+      }
+    ]
+  },
+  "static_moth_charge": {
+    "subtitle": "subtitles.skyabyss.static_moth_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_charge"
+      }
+    ]
+  },
+  "static_moth_discharge": {
+    "subtitle": "subtitles.skyabyss.static_moth_discharge",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_discharge"
+      }
+    ]
+  },
+  "static_moth_hurt": {
+    "subtitle": "subtitles.skyabyss.static_moth_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_hurt"
+      }
+    ]
+  },
+  "static_moth_death": {
+    "subtitle": "subtitles.skyabyss.static_moth_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_death"
+      }
+    ]
+  },
+  "static_moth_burst": {
+    "subtitle": "subtitles.skyabyss.static_moth_burst",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/static_moth_burst"
+      }
+    ]
+  },
+  "thunder_supplicant_ambient": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_ambient"
+      }
+    ]
+  },
+  "thunder_supplicant_raise": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_raise",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_raise"
+      }
+    ]
+  },
+  "thunder_supplicant_hurt": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_hurt"
+      }
+    ]
+  },
+  "thunder_supplicant_death": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_death",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_death"
+      }
+    ]
+  },
+  "thunder_supplicant_swing": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:storm_mobs/thunder_supplicant_swing"
+      }
+    ]
+  },
+  "raiju_ambient": {
+    "subtitle": "subtitles.skyabyss.raiju_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/ambient"
+      }
+    ]
+  },
+  "raiju_hurt": {
+    "subtitle": "subtitles.skyabyss.raiju_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/hurt"
+      }
+    ]
+  },
+  "raiju_death": {
+    "subtitle": "subtitles.skyabyss.raiju_death",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/death"
+      }
+    ]
+  },
+  "raiju_rail_charge": {
+    "subtitle": "subtitles.skyabyss.raiju_rail_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/rail_charge"
+      }
+    ]
+  },
+  "raiju_rail": {
+    "subtitle": "subtitles.skyabyss.raiju_leap",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/rail"
+      }
+    ]
+  },
+  "raiju_pounce": {
+    "subtitle": "subtitles.skyabyss.raiju_pounce",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/pounce"
+      }
+    ]
+  },
+  "raiju_claw": {
+    "subtitle": "subtitles.skyabyss.raiju_claw",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/claw"
+      }
+    ]
+  },
+  "raiju_roar": {
+    "subtitle": "subtitles.skyabyss.raiju_roar",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/roar"
+      }
+    ]
+  },
+  "raiju_stun": {
+    "subtitle": "subtitles.skyabyss.raiju_stun",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/stun"
+      }
+    ]
+  },
+  "raiju_ground": {
+    "subtitle": "subtitles.skyabyss.ground_plug",
+    "sounds": [
+      {
+        "name": "skyabyss:raiju/ground"
+      }
+    ]
+  },
+  "ash_thrall_ambient": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_ambient"
+      }
+    ]
+  },
+  "ash_thrall_hurt": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_hurt"
+      }
+    ]
+  },
+  "ash_thrall_death": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_death"
+      }
+    ]
+  },
+  "ash_thrall_shell_break": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_shell_break",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_shell_break"
+      }
+    ]
+  },
+  "ash_thrall_ignite": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_ignite",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ash_thrall_ignite"
+      }
+    ]
+  },
+  "ember_moth_flutter": {
+    "subtitle": "subtitles.skyabyss.ember_moth_flutter",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ember_moth_flutter"
+      }
+    ]
+  },
+  "ember_moth_death": {
+    "subtitle": "subtitles.skyabyss.ember_moth_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/ember_moth_death"
+      }
+    ]
+  },
+  "cinder_roller_curl": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_curl",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_curl"
+      }
+    ]
+  },
+  "cinder_roller_roll": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_roll",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_roll"
+      }
+    ]
+  },
+  "cinder_roller_bonk": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_bonk",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_bonk"
+      }
+    ]
+  },
+  "cinder_roller_hurt": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_hurt"
+      }
+    ]
+  },
+  "cinder_roller_death": {
+    "subtitle": "subtitles.skyabyss.cinder_roller_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_mobs/cinder_roller_death"
+      }
+    ]
   }
 }

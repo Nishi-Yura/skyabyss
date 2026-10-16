@@ -1,0 +1,18 @@
+{
+  "chapter": "chapter1",
+  "order": 179,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:ash_smith",
+      "radius": 64
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_ember_east",
+    "chapter1/ember_stilled"
+  ]
+}
