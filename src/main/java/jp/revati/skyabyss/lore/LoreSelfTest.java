@@ -93,6 +93,8 @@ public final class LoreSelfTest {
         jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
         // 雷翼の背の碑文 (12 の 9.2節。キーは伝承の担当が決め、背中の担当がこのキーで看板を立てる)
         signKeys.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.INSCRIPTIONS.values());
+        // 余燼の背の碑文 (13 の 9.2節。文は担当 G、看板は B が置く)
+        signKeys.addAll(jp.revati.skyabyss.titan.ember.lore.EmberLore.inscriptionSigns());
         // 雷翼の巨神・雷獣・心臓・背中は別の担当が登録する。まだないうちは失敗にせず、待っているものとして書き出す
         Set<String> pending = new java.util.TreeSet<>();
         Set<String> usedSigns = new HashSet<>();
@@ -111,7 +113,7 @@ public final class LoreSelfTest {
                         }
                     }
                     case "kill", "near_entity" -> {
-                        if (LoreEvents.entityType(t.target()) == null && jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t.target())) {
+                        if (LoreEvents.entityType(t.target()) == null && (jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t.target()) || jp.revati.skyabyss.titan.ember.lore.EmberLore.pending(t.target()))) {
                             pending.add(t.target());
                         } else if (LoreEvents.entityType(t.target()) == null) {
                             failures.add(entry.id() + ": unknown entity " + t.target());
@@ -131,7 +133,7 @@ public final class LoreSelfTest {
                     }
                     case "page" -> {
                         if (!t.target().equals("village") && !t.target().equals("titan_back")
-                                && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE)) {
+                                && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }
                     }
@@ -156,7 +158,7 @@ public final class LoreSelfTest {
             }
             List<String> keys = new ArrayList<>(List.of("item.skyabyss.lore_book", "item.skyabyss.lore_book.desc", "item.skyabyss.lore_page",
                     "item.skyabyss.lore_page.desc", "item.skyabyss.lore_page.desc.village", "item.skyabyss.lore_page.desc.titan_back",
-                    "item.skyabyss.lore_page.desc.storm_back",
+                    "item.skyabyss.lore_page.desc.storm_back", "item.skyabyss.lore_page.desc.ember_back",
                     "gui.skyabyss.lore.toast", "gui.skyabyss.lore.related", "gui.skyabyss.lore.count", "gui.skyabyss.lore.empty",
                     "message.skyabyss.lore.book_falls", "message.skyabyss.lore.book_appeared", "message.skyabyss.lore.book_returned",
                     "message.skyabyss.lore.page_read", "message.skyabyss.lore.page_known",
@@ -192,7 +194,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
@@ -392,7 +394,9 @@ public final class LoreSelfTest {
         JsonObject story = json("/assets/skyabyss_story/lang/" + code + ".json", failures);
         // 雷翼の背の項目 (風に逆らう嵐・碑文・雷獣・晴れた空・風見の帳ほか) の文は skyabyss_storm にある (12 の 9 章)
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm)) {
+        // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
+        JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

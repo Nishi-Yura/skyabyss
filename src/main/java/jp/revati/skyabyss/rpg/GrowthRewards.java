@@ -51,6 +51,8 @@ public final class GrowthRewards {
     public static final int STONE_WHALE_LEVEL = 12;
     // 潮殻の巨神の推奨レベル (04 の 11 章の判断 6 の案 A)
     public static final int TIDE_SHELL_LEVEL = 18;
+    // 雷翼の巨神の推奨レベル (12 の 6.6節)
+    public static final int THUNDER_WING_LEVEL = 24;
 
     public record Source(int xp, int contentLevel) {
     }
@@ -70,6 +72,14 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
+        // 雷翼の背の敵 (12 の 6.6節。推奨レベル 24): 羽守 18、雷蛾 5、雷乞い 14
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":feather_warden", new Source(18, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_moth", new Source(5, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_supplicant", new Source(14, THUNDER_WING_LEVEL));
+        // 雷翼の中ボス 雷獣 (12 の 6.6節。推奨レベル 24)。試練の雷獣は参加者の一覧で配る (RaijuLoot)。ここは試練の外で呼ばれたもの
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, THUNDER_WING_LEVEL));
+        // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
+        jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
     }
 
 

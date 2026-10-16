@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.dungeon.BackWhispers;
+import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
+import jp.revati.skyabyss.titan.storm.back.StormBirdBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,7 +15,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 雷翼の背 (嵐の上) の「最初の一度だけの囁き」。岩鯨の BackWhispers・潮殻の TideWhispers と同じ仕組み・同じ聞いた印 (12 の 9.2 節)。
 // 看板を 9 枚に絞った代わりに、場所へ初めて来たときだけチャットで伝える。lore は場所の気配、hint は使い方。
-// 場所の箱は 12 の 3.3 節の配置の表から取った。背中の担当の StormBackLayout ができたら、その部屋の範囲に差し替える (合わせるときに)
+// 場所の箱は背中の担当の StormBackLayout の部屋の範囲から取る
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormWhispers {
     record Box(int x0, int y0, int z0, int x1, int y1, int z1) {
@@ -28,15 +30,23 @@ public final class StormWhispers {
         }
     }
 
-    // 12 の 3.3 節 (床の高さから天井まで。少し広めに取る)
-    static final Box LANDING = new Box(-8, 140, 86, 8, 150, 102);   // 尾羽の上 (到着 (0, 143, 94))
-    static final Box TAIL = new Box(-10, 145, 20, 10, 153, 34);      // 尾の間 (炉・焚き火・碑文)
-    static final Box HUB = new Box(-14, 136, -18, 14, 156, 10);      // 風の広間 (天井 156)
-    static final Box TOP = new Box(-40, 157, -50, 40, 172, 60);      // 背の上 (天窓と二本の塔のまわり)
-    static final Box WEST = new Box(-28, 135, -14, -15, 152, 2);     // 左の肩の門と休み場 w0
-    static final Box EAST = new Box(15, 135, -14, 28, 152, 2);       // 右の肩の門と休み場 e0
-    static final Box FRONT = new Box(-5, 148, -62, 5, 157, -44);     // 首の回廊・前室 (休み場 f0)
-    static final Box HEART = new Box(-4, 119, -37, 4, 127, -29);     // 竜骨の前室 (休み場 heart)
+    // 部屋の範囲は背中の担当の StormBackLayout から取る (床の 1 上から天井まで)
+    static Box of(StormBackLayout.Area a) {
+        return new Box(a.x1(), a.floor() + 1, a.z1(), a.x2(), a.floor() + a.height(), a.z2());
+    }
+
+    static final Box LANDING = new Box(StormBackLayout.ARRIVAL.getX() - 5, StormBackLayout.ARRIVAL.getY() - 2, StormBackLayout.ARRIVAL.getZ() - 5,
+            StormBackLayout.ARRIVAL.getX() + 5, StormBackLayout.ARRIVAL.getY() + 3, StormBackLayout.ARRIVAL.getZ() + 3);  // 尾羽の上
+    static final Box TAIL = of(StormBackLayout.TAIL_HALL);       // 尾の間 (炉・焚き火・碑文)
+    static final Box HUB = of(StormBackLayout.HUB);              // 風の広間 (上の回廊まで)
+    // 背の上: 尾の間の西の壁の段を上りきった所のまわり (鳥の背の表面より上だけ)
+    static final Box TOP = new Box(StormBackLayout.TOP_STAIR.getX() - 6, StormBirdBuilder.top(StormBackLayout.TOP_STAIR.getX(), StormBackLayout.TOP_STAIR.getZ()) + 1,
+            StormBackLayout.TOP_STAIR.getZ() - 6, StormBackLayout.TOP_STAIR.getX() + 6,
+            StormBirdBuilder.top(StormBackLayout.TOP_STAIR.getX(), StormBackLayout.TOP_STAIR.getZ()) + 8, StormBackLayout.TOP_STAIR.getZ() + 6);
+    static final Box WEST = of(StormBackLayout.W0);              // 左の肩の門と休み場 w0
+    static final Box EAST = of(StormBackLayout.E0);              // 右の肩の門と休み場 e0
+    static final Box FRONT = of(StormBackLayout.F0);             // 首の前室 (休み場 f0)
+    static final Box HEART = of(StormBackLayout.KEEL_ANTE);      // 竜骨の前室 (休み場 heart)
 
     // 上から順に見る (一度に一つ)
     static final List<Whisper> WHISPERS = List.of(

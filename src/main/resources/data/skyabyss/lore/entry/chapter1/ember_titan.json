@@ -1,0 +1,19 @@
+{
+  "chapter": "chapter1",
+  "order": 177,
+  "unlock": [
+    {
+      "type": "near_entity",
+      "target": "skyabyss:ember_titan",
+      "radius": 200
+    },
+    {
+      "type": "dimension",
+      "target": "skyabyss:ember_back"
+    }
+  ],
+  "related": [
+    "chapter1/ember",
+    "chapter1/ember_ruins"
+  ]
+}
