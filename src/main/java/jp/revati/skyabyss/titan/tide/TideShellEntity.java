@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.titan.TitanKeeper;
+import jp.revati.skyabyss.titan.travel.TravelTitan;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -35,7 +36,9 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 休むあいだ、甲羅の後ろ左の縁にある潮門が水から出る。門の口に舟か泳ぎで入ると、背中 (tide_back) へ渡る
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (岩鯨と同じ。巨大なモデルには当たり判定を付けない)。
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック
-public class TideShellEntity extends Entity implements GeoEntity {
+// 巨神での移動 (09 の 16 章): TravelTitan を実装する。旅の間は自分の動き (巡航・干潮) を止め、動きは旅の操縦 (titan.travel.SeaVoyage) が決める。
+// 乗り場は潮門の前の水 (泡の柱)、座席は甲羅の頂
+public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -61,12 +64,12 @@ public class TideShellEntity extends Entity implements GeoEntity {
     static final double HEAD_FORWARD = 66.0;
     static final double HEAD_UP = 12.0;
     // 休むときの水面は底から 3.5 ブロック上 (潮門の敷居 geo y=9 が水面の 1 ブロック上)。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
-    static final double REST_DRAFT = 3.5;
-    static final double CRUISE_DRAFT_MAX = 29.0;
+    public static final double REST_DRAFT = 3.5;
+    public static final double CRUISE_DRAFT_MAX = 29.0;
     // 浅い所でも、底から 22 ブロック上までしか浮かない (甲羅の頂が海から 12 ブロックまで。ゲームで見て、もっと浮くと島に見えなかった)
-    static final double CRUISE_DRAFT_MIN = 22.0;
+    public static final double CRUISE_DRAFT_MIN = 22.0;
     // 甲羅の頂 (光を測る所)
-    static final double DOME_TOP = 34.0;
+    public static final double DOME_TOP = 34.0;
 
     // ---- 動き
     static final float CRUISE_SPEED = 0.08f;
@@ -107,6 +110,17 @@ public class TideShellEntity extends Entity implements GeoEntity {
     private int stepCooldown = 160;
     private int blockedCooldown;
     private double floorY = Double.NaN;
+
+    // ---- 巨神での移動 (TravelTitan)
+    private boolean voyage;
+    // 乗り場の泡の柱 (0 = たたんだ、COLUMN_UP = 立ちきった)
+    private int column;
+    private boolean columnWanted;
+    static final int COLUMN_UP = 20;
+    // 座席: 甲羅の頂 (横, 上, 前)。8 人
+    static final double[][] SEATS = {
+            {1.6, DOME_TOP + 0.6, 3.0}, {-1.6, DOME_TOP + 0.6, 3.0}, {4.6, DOME_TOP + 0.2, 3.0}, {-4.6, DOME_TOP + 0.2, 3.0},
+            {1.6, DOME_TOP + 0.6, -1.0}, {-1.6, DOME_TOP + 0.6, -1.0}, {4.6, DOME_TOP + 0.2, -1.0}, {-4.6, DOME_TOP + 0.2, -1.0}};
 
     private int lerpSteps;
     private double lerpX;
@@ -199,6 +213,10 @@ public class TideShellEntity extends Entity implements GeoEntity {
         ServerLevel level = (ServerLevel) level();
         if (tickCount % 20 == 0) {
             sampleFloor(level);
+        }
+        if (voyage) {
+            tickVoyage(level);
+            return;
         }
         switch (mode) {
             case CRUISE -> tickCruise(level);
@@ -484,6 +502,131 @@ public class TideShellEntity extends Entity implements GeoEntity {
         hasTarget = false;
         forcedTicks = 0;
         approachTicks = 0;
+    }
+
+    // ---------------------------------------------------------------- 巨神での移動 (TravelTitan)
+    private void tickVoyage(ServerLevel level) {
+        column = Mth.clamp(column + (columnWanted ? 1 : -1), 0, COLUMN_UP);
+        boolean moving = getDeltaMovement().horizontalDistanceSqr() > 1.0e-4;
+        // 歩いている間は歩く姿、止まっている間は休む姿 (首を上げない)
+        entityData.set(MODE, (byte) (moving ? Mode.CRUISE.ordinal() : Mode.REST.ordinal()));
+        entityData.set(LOOK, false);
+        if (moving && --stepCooldown <= 0) {
+            stepCooldown = 100 + random.nextInt(80);
+            level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 6f, 0.8f + random.nextFloat() * 0.2f);
+        }
+    }
+
+    @Override
+    public Entity asEntity() {
+        return this;
+    }
+
+    @Override
+    public void beginVoyage() {
+        voyage = true;
+        columnWanted = false;
+        column = 0;
+        forcedTicks = 0;
+        approachTicks = 0;
+        hasTarget = false;
+        setDeltaMovement(Vec3.ZERO);
+    }
+
+    @Override
+    public void endVoyage(int restFor) {
+        voyage = false;
+        columnWanted = false;
+        column = 0;
+        ejectPassengers();
+        setDeltaMovement(Vec3.ZERO);
+        hasTarget = false;
+        approachTicks = 0;
+        if (restFor > 0 && level() instanceof ServerLevel level) {
+            // 着いた浜の沖でしばらく休み、潮門を開けておく (その地の人も背中へ渡れる)
+            restX = getX();
+            restZ = getZ();
+            restYaw = getYRot();
+            forcedTicks = restFor;
+            startRest(level);
+        } else {
+            setMode(Mode.CRUISE);
+        }
+    }
+
+    @Override
+    public boolean inVoyage() {
+        return voyage;
+    }
+
+    // 乗り場の泡の柱を立てる (NaN でたたむ)。柱の位置は旅の操縦が決め、泡も旅の操縦が出す
+    @Override
+    public void setVoyageChain(double ground) {
+        columnWanted = !Double.isNaN(ground);
+    }
+
+    @Override
+    public boolean isVoyageChainDown() {
+        return voyage && columnWanted && column >= COLUMN_UP;
+    }
+
+    @Override
+    public boolean isChainFolded() {
+        return column <= 0;
+    }
+
+    // 乗り場: 潮門の前の水の上 (背中から戻るときに出る所と同じ)
+    @Override
+    public Vec3 boardingChainOffset(float yaw) {
+        return offset(yaw, EXIT_SIDE, 0, -GATE_BACK);
+    }
+
+    // 潮門の前 → 門の敷居 → 甲羅の肩 → 頂の座席の手前 (世界の座標)
+    @Override
+    public List<Vec3> boardingPath() {
+        float yaw = getYRot();
+        double sea = level().getSeaLevel();
+        List<Vec3> points = new ArrayList<>();
+        Vec3 dock = position().add(offset(yaw, EXIT_SIDE, 0, -GATE_BACK));
+        points.add(new Vec3(dock.x, sea + 0.6, dock.z));
+        points.add(position().add(offset(yaw, GATE_SIDE, REST_DRAFT + 7.0, -GATE_BACK)));
+        points.add(position().add(offset(yaw, 20.0, 27.0, -17.0)));
+        points.add(position().add(offset(yaw, 4.0, DOME_TOP + 1.5, 0.0)));
+        return points;
+    }
+
+    @Override
+    public int seatCount() {
+        return SEATS.length;
+    }
+
+    @Override
+    public Vec3 seatPosition(int index) {
+        double[] seat = SEATS[Mth.clamp(index, 0, SEATS.length - 1)];
+        return position().add(offset(getYRot(), seat[0], seat[1], seat[2]));
+    }
+
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity entity, net.minecraft.world.entity.EntityDimensions dimensions, float partialTick) {
+        int index = getPassengers().indexOf(entity);
+        double[] seat = SEATS[Mth.clamp(index, 0, SEATS.length - 1)];
+        return offset(getYRot(), seat[0], seat[1], seat[2]);
+    }
+
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return voyage && getPassengers().size() < SEATS.length;
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(net.minecraft.world.entity.LivingEntity passenger) {
+        return passenger.position();
+    }
+
+    // 一人だけ乗せていても、巨神をそのプレイヤーの持ち物として保存しない・ログアウトで消さない (岩鯨と同じ)
+    @Override
+    public boolean hasExactlyOnePlayerPassenger() {
+        return false;
     }
 
     // 巨神は傷つかない
