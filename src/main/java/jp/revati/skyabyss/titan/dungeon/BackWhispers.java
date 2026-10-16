@@ -74,22 +74,32 @@ public final class BackWhispers {
     }
 
     private static void hear(ServerPlayer player, Whisper w) {
+        hear(player, w.id(), w.key(), w.lore(), REST_POINTS.contains(w.id()) ? "campfire" : null, "message.skyabyss.campfire_hint");
+    }
+
+    // 囁きを一度だけ伝える (潮殻の背の TideWhispers も使う)。restFlag が null でなければ、その印で焚き火の一言も一度だけ添える
+    public static void hear(ServerPlayer player, String id, String key, boolean lore, String restFlag, String campfireKey) {
         CompoundTag heard = heard(player);
-        if (heard.getBoolean(w.id())) {
+        if (heard.getBoolean(id)) {
             return;
         }
-        heard.putBoolean(w.id(), true);
-        if (w.lore()) {
-            player.sendSystemMessage(ModText.lore(w.key()));
+        heard.putBoolean(id, true);
+        if (lore) {
+            player.sendSystemMessage(ModText.lore(key));
             player.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.AMBIENT, 0.6f, 0.7f);
         } else {
-            player.sendSystemMessage(ModText.hint(w.key()));
+            player.sendSystemMessage(ModText.hint(key));
         }
         // 最初の休み場で、焚き火のことも一度だけ添える
-        if (REST_POINTS.contains(w.id()) && !heard.getBoolean("campfire")) {
-            heard.putBoolean("campfire", true);
-            player.sendSystemMessage(ModText.hint("message.skyabyss.campfire_hint"));
+        if (restFlag != null && !heard.getBoolean(restFlag)) {
+            heard.putBoolean(restFlag, true);
+            player.sendSystemMessage(ModText.hint(campfireKey));
         }
+    }
+
+    // 聞いたか (自己テスト用)
+    public static boolean heardAlready(Player player, String id) {
+        return heard(player).getBoolean(id);
     }
 
     private static CompoundTag heard(Player player) {

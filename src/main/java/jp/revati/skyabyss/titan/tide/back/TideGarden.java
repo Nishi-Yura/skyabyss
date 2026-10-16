@@ -344,8 +344,6 @@ public final class TideGarden {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }
         }
-        // 手引きの看板 (祭壇の西の壁)
-        kit.wallSign(new BlockPos(ax + 2, ALTAR_TOP + 2, az - 2), Direction.SOUTH, "sign.skyabyss.tide_altar");
     }
 
     static void clear() {

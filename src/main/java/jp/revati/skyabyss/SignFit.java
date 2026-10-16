@@ -89,18 +89,21 @@ public final class SignFit {
     public static synchronized Map<String, String> lang(String language) {
         return CACHE.computeIfAbsent(language, l -> {
             Map<String, String> map = new HashMap<>();
-            String path = "/assets/" + SkyAbyss.MODID + "/lang/" + l + ".json";
-            try (InputStream in = SignFit.class.getResourceAsStream(path)) {
-                if (in == null) {
-                    SkyAbyss.LOGGER.error("Missing lang file {}", path);
-                    return map;
+            // 潮殻の背の文は skyabyss_tide の lang にある (同じ "sign.skyabyss." のキー)
+            for (String ns : List.of(SkyAbyss.MODID, SkyAbyss.MODID + "_tide")) {
+                String path = "/assets/" + ns + "/lang/" + l + ".json";
+                try (InputStream in = SignFit.class.getResourceAsStream(path)) {
+                    if (in == null) {
+                        SkyAbyss.LOGGER.error("Missing lang file {}", path);
+                        continue;
+                    }
+                    JsonObject json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+                    for (Map.Entry<String, JsonElement> e : json.entrySet()) {
+                        map.putIfAbsent(e.getKey(), e.getValue().getAsString());
+                    }
+                } catch (Exception e) {
+                    SkyAbyss.LOGGER.error("Could not read lang file {}", path, e);
                 }
-                JsonObject json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
-                for (Map.Entry<String, JsonElement> e : json.entrySet()) {
-                    map.put(e.getKey(), e.getValue().getAsString());
-                }
-            } catch (Exception e) {
-                SkyAbyss.LOGGER.error("Could not read lang file {}", path, e);
             }
             return map;
         });

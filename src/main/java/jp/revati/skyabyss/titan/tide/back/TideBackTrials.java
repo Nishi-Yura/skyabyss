@@ -108,7 +108,7 @@ public final class TideBackTrials {
                 p -> p.getZ() <= FLATS_GATE_Z || (Math.abs(p.getX()) <= BOTTOM_GATE_R && Math.abs(p.getZ()) <= BOTTOM_GATE_R && p.getY() <= HUB_FLOOR)));
         initGardenPool(level);
         // 干潟 (床 63 の上の 2 段)。干潟の口の階段の外へは出ない
-        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -85), new BlockPos(-20, 0, -100), new BlockPos(20, 0, -76));
+        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -85 + FLATS_DZ), new BlockPos(-20, 0, -100 + FLATS_DZ), new BlockPos(20, 0, -76 + FLATS_DZ));
         FIELD.put("flats", FLATS_FLOOR + 1, TideField.flood(level, FLATS.x1(), FLATS.x2(), FLATS.z1(), FLATS.z2(), flatSeeds, FLATS_FLOOR + 1, FLATS_DEPTH,
                 p -> false));
         ready = true;
@@ -408,14 +408,6 @@ public final class TideBackTrials {
         }
         BlockPos pearlTop = STONE_WEST.above();
         level.setBlock(pearlTop, state.rung(TideBackState.Trial.WEST) ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);
-        // 浜の石盤: 眠っている試練
-        String key = state.sleeping() == null ? "sign.skyabyss.tide_sleep_none" : "sign.skyabyss.tide_sleep_" + state.sleeping().id();
-        BlockPos sign = new BlockPos(-19, 68, 43);
-        if (!(level.getBlockState(sign).getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
-            level.setBlock(new BlockPos(-19, 68, 42), TideKit.DARK, 3);
-            level.setBlock(new BlockPos(-19, 67, 42), TideKit.DARK, 3);
-        }
-        new TideKit(level, level.random).wallSign(sign, net.minecraft.core.Direction.SOUTH, key);
     }
 
     // ---------------------------------------------------------------- リセット

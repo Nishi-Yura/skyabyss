@@ -185,7 +185,7 @@ public final class TideFlats {
         if (phase == TideClock.Phase.HIGH && !inFlats(level).isEmpty() && !state.rung(TideBackState.Trial.FRONT)) {
             for (int i = 0; i < 2; i++) {
                 int x = -16 + level.random.nextInt(33);
-                int z = -100 + level.random.nextInt(26);
+                int z = -100 + FLATS_DZ + level.random.nextInt(26);
                 Mob puffer = spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), new BlockPos(x, FLATS_FLOOR + 4, z));
                 if (puffer != null) {
                     puffer.addTag(FLATS_TAG);

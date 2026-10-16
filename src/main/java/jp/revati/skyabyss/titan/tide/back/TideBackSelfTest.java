@@ -66,6 +66,8 @@ public final class TideBackSelfTest {
             TideClock.force(TideClock.Phase.LOW);
             checkClock(FAILURES);
             checkFixtures(back, FAILURES);
+            checkSigns(back, FAILURES);
+            checkTurtle(back, FAILURES);
             fillPools(back, FAILURES, NOTES);
         })));
         steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools settled)", SETTLE_TICKS, server -> guarded(server, back -> {
@@ -122,8 +124,8 @@ public final class TideBackSelfTest {
 
     // 島のチャンクを読み込んだままにする (水が流れ、溜めが動くように)
     private static void forceChunks(ServerLevel back, boolean on) {
-        for (int cx = -5; cx <= 4; cx++) {
-            for (int cz = -10; cz <= 4; cz++) {
+        for (int cx = TideTurtle.minX() >> 4; cx <= TideTurtle.maxX() >> 4; cx++) {
+            for (int cz = TideTurtle.minZ() >> 4; cz <= TideTurtle.maxZ() >> 4; cz++) {
                 back.setChunkForced(cx, cz, on);
             }
         }
@@ -175,6 +177,93 @@ public final class TideBackSelfTest {
             }
         }
         check(stairs == TideIslandBuilder.SPIRAL_STEPS, "spiral stair has " + stairs + " steps", failures);
+    }
+
+    // ---------------------------------------------------------------- 看板: 碑文 6 枚と試練の入口の一言 3 枚だけ。どの行も看板の幅に収まる (SignFit)
+    private static void checkSigns(ServerLevel back, List<String> failures) {
+        java.util.Set<BlockPos> expected = new java.util.HashSet<>();
+        LORE_SIGNS.forEach(i -> expected.add(i.pos()));
+        TideIslandBuilder.ENTRANCE_SIGNS.forEach(i -> expected.add(i.pos()));
+        java.util.Set<String> keys = new java.util.TreeSet<>();
+        int count = 0;
+        for (int cx = TideTurtle.minX() >> 4; cx <= TideTurtle.maxX() >> 4; cx++) {
+            for (int cz = TideTurtle.minZ() >> 4; cz <= TideTurtle.maxZ() >> 4; cz++) {
+                for (var be : back.getChunk(cx, cz).getBlockEntities().values()) {
+                    if (!(be instanceof SignBlockEntity sign)) {
+                        continue;
+                    }
+                    count++;
+                    if (!expected.contains(be.getBlockPos())) {
+                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                    }
+                    for (int i = 0; i < 4; i++) {
+                        var line = sign.getFrontText().getMessage(i, false);
+                        if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+                            keys.add(tc.getKey().substring(0, tc.getKey().lastIndexOf('.')));
+                        } else if (!line.getString().isEmpty()) {
+                            failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
+                        }
+                    }
+                }
+            }
+        }
+        check(count == expected.size(), "found " + count + " signs on the tide back, expected " + expected.size(), failures);
+        failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
+        var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        var en = jp.revati.skyabyss.SignFit.lang("en_us");
+        for (String k : TideWhispers.keys()) {
+            check(ja.containsKey(k) && en.containsKey(k), "whisper text missing: " + k, failures);
+        }
+        NOTES.add(count + " signs");
+    }
+
+    // ---------------------------------------------------------------- 亀の形: 甲羅・頭・ひれ・尾がモデルの通りに置かれ、掘った部屋が甲羅を突き抜けていない
+    private static void checkTurtle(ServerLevel back, List<String> failures) {
+        check(shellTop(0, 20) >= 110, "the shell is not domed (top at (0,20) " + shellTop(0, 20) + ")", failures);
+        int[][] parts = {{0, -125}, {-90, -15}, {90, -15}, {-75, 67}, {75, 67}, {0, 90}};
+        String[] names = {"head", "left front flipper", "right front flipper", "left rear flipper", "right rear flipper", "tail"};
+        for (int i = 0; i < parts.length; i++) {
+            int t = TideTurtle.top(parts[i][0], parts[i][1]);
+            check(t != Integer.MIN_VALUE && !back.getBlockState(new BlockPos(parts[i][0], t, parts[i][1])).isAir(),
+                    "the " + names[i] + " is missing at " + parts[i][0] + "," + parts[i][1], failures);
+        }
+        // 甲羅の地表に、掘った穴が開いていない (光の井戸・上る段の口・塔のまわりだけ)
+        int holes = 0;
+        for (int x = -60; x <= 60; x += 2) {
+            for (int z = -75; z <= 70; z += 2) {
+                int top = shellTop(x, z);
+                if (top == Integer.MIN_VALUE || top < 100) {
+                    continue;
+                }
+                if (back.getBlockState(new BlockPos(x, top, z)).isAir() && back.getBlockState(new BlockPos(x, top - 1, z)).isAir()
+                        && back.getBlockState(new BlockPos(x, top - 2, z)).isAir() && !nearOpening(x, z)) {
+                    holes++;
+                    if (holes <= 5) {
+                        failures.add("hole in the shell at " + x + "," + top + "," + z);
+                    }
+                }
+            }
+        }
+        NOTES.add("shell holes " + holes);
+    }
+
+    private static boolean nearOpening(int x, int z) {
+        int sx = TOP_STAIR_X1 + 2;
+        int sz = TOP_STAIR_Z1 + 2;
+        if (Math.abs(x - sx) <= 3 && Math.abs(z - sz) <= 3) {
+            return true;
+        }
+        if (Math.abs(x) <= 11 && Math.abs(z - TOWER_CZ) <= 14) {
+            return true;
+        }
+        for (int[][] wells : new int[][][] {TideIslandBuilder.GARDEN_WELLS, TideIslandBuilder.FLATS_WELLS}) {
+            for (int[] w : wells) {
+                if (Math.abs(x - w[0] - 0.5) <= 2 && Math.abs(z - w[1] - 0.5) <= 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------- 潮の溜め: 満ちても漏れない、引けば残らない
@@ -364,6 +453,12 @@ public final class TideBackSelfTest {
         return String.join(" > ", out);
     }
 
+    // 歩いて調べる範囲 (甲羅と、まわりの海の水面を少し)
+    static final int WALK_X0 = -80;
+    static final int WALK_X1 = 80;
+    static final int WALK_Z0 = -100;
+    static final int WALK_Z1 = 85;
+
     static Map<Long, Integer> walk(ServerLevel l, BlockPos start) {
         PARENT.clear();
         Map<Long, Integer> dist = new HashMap<>();
@@ -402,7 +497,7 @@ public final class TideBackSelfTest {
                 next.add(p.above());
             }
             for (BlockPos m : next) {
-                if (m.getX() < -70 || m.getX() > 64 || m.getZ() < -112 || m.getZ() > 76 || m.getY() < 45 || m.getY() > 110) {
+                if (m.getX() < WALK_X0 || m.getX() > WALK_X1 || m.getZ() < WALK_Z0 || m.getZ() > WALK_Z1 || m.getY() < 45 || m.getY() > 150) {
                     continue;
                 }
                 if (!dist.containsKey(m.asLong())) {
@@ -439,8 +534,12 @@ public final class TideBackSelfTest {
         should.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
         should.put("east gallery", new BlockPos(10, HUB_LEDGE + 1, -2));
         should.put("hub floor", new BlockPos(5, HUB_FLOOR + 1, 5));
-        should.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -85));
+        should.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -85 + FLATS_DZ));
         should.put("front stone", STONE_FRONT.offset(0, 0, 1));
+        // 甲羅の上 (外) と頂の塔の柱の段へは、浜の西の壁の段と塔の螺旋で行ける (21 章)
+        should.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
+        should.put("shell top", new BlockPos(-20, shellTop(-20, 30) + 1, 30));
+        should.put("tower deck", new BlockPos(4, TOWER_DECK + 1, TOWER_CZ));
         for (Map.Entry<String, BlockPos> e : should.entrySet()) {
             BlockPos g = e.getValue();
             if (!dist.containsKey(g.asLong())) {
@@ -460,13 +559,13 @@ public final class TideBackSelfTest {
         }
         Integer toHub = dist.get(RESTS.get(0).spawn().asLong());
         notes.add("arrival to hall " + toHub + " steps (" + dist.size() + " standing spots)");
-        check(toHub != null && toHub <= 80, "the hall is too far from the arrival (" + toHub + " steps)", failures);
+        check(toHub != null && toHub <= 130, "the hall is too far from the arrival (" + toHub + " steps)", failures);
         Map<String, BlockPos> shouldNot = new java.util.LinkedHashMap<>();
         shouldNot.put("middle tier", new BlockPos(41, TIER_FLOOR[1] + 1, -10));
         shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
         shouldNot.put("east ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32));
         shouldNot.put("heart rest", RESTS.get(5).spawn());
-        shouldNot.put("shell top", new BlockPos(20, shellTop(20, 30) + 1, 30));
+        shouldNot.put("garden from above", new BlockPos(PLAT_C[0], PLATFORM_TOP + 1, PLAT_C[1]).above(30));
         shouldNot.put("garden wall top", new BlockPos(-30, GARDEN_WALL_TOP + 1, 20));
         for (Map.Entry<String, BlockPos> e : shouldNot.entrySet()) {
             if (dist.containsKey(e.getValue().asLong())) {
@@ -481,19 +580,19 @@ public final class TideBackSelfTest {
 
     // 上から見た地図: 歩いて行ける所は高さで色、立てるが行けない所は灰、立てない所は黒。1 マス 4 画素
     static void writeMap(ServerLevel l, Map<Long, Integer> dist, java.nio.file.Path file) {
-        int x0 = -70;
-        int x1 = 64;
-        int z0 = -145;
-        int z1 = 76;
+        int x0 = WALK_X0;
+        int x1 = WALK_X1;
+        int z0 = WALK_Z0;
+        int z1 = WALK_Z1;
         int sc = 4;
         java.awt.image.BufferedImage img = new java.awt.image.BufferedImage((x1 - x0 + 1) * sc, (z1 - z0 + 1) * sc, java.awt.image.BufferedImage.TYPE_INT_RGB);
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 int color = 0x101010;
-                for (int y = 110; y >= 45; y--) {
+                for (int y = 150; y >= 45; y--) {
                     BlockPos p = new BlockPos(x, y, z);
                     if (dist.containsKey(p.asLong())) {
-                        float t = Math.max(0, Math.min(1, (y - 60) / 36f));
+                        float t = Math.max(0, Math.min(1, (y - 60) / 60f));
                         color = java.awt.Color.HSBtoRGB(0.66f - 0.66f * t, 0.8f, 0.95f) & 0xFFFFFF;
                         break;
                     }

@@ -46,7 +46,7 @@ public final class TideBackCommands {
             Map.entry("watch", RESTS.get(3).spawn()),
             Map.entry("ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32)),
             Map.entry("f0", RESTS.get(4).spawn()),
-            Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -76)),
+            Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -76 + FLATS_DZ)),
             Map.entry("heart", RESTS.get(5).spawn()),
             Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)));
 
