@@ -30,8 +30,9 @@ public final class StormBackBuilder {
 
     public static void build(ServerLevel back, TitanBackData data) {
         long start = System.currentTimeMillis();
-        // 鳥の形と部屋はこのあと足す
+        StormBirdBuilder.build(new StormKit(back));
         data.markBuilt(LAYOUT_VERSION);
+        StormBackTrials.afterBuild(back);
         SkyAbyss.LOGGER.info("Built the storm back bird (layout {}) in {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
     }
 }

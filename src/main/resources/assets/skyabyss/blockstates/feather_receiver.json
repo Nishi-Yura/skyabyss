@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "skyabyss:block/feather_receiver"
+    },
+    "lit=true": {
+      "model": "skyabyss:block/feather_receiver_lit"
+    }
+  }
+}

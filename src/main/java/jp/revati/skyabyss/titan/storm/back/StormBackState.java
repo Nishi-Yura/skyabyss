@@ -129,14 +129,9 @@ public class StormBackState extends SavedData {
         return n;
     }
 
-    // 眠っている試練の石は鳴ったものとして数える
+    // 三つとも鳴ったか (眠っている試練の石は鳴っている)
     public boolean allRung() {
-        for (Trial t : Trial.values()) {
-            if (!rung(t) && t != sleeping) {
-                return false;
-            }
-        }
-        return true;
+        return rungCount() >= 3;
     }
 
     @Nullable
@@ -149,11 +144,16 @@ public class StormBackState extends SavedData {
         return lastSleeping;
     }
 
+    // 眠る試練をコマンドで決める (今の周に効かせる)
     public void setSleeping(@Nullable Trial t) {
-        if (t != null) {
-            lastSleeping = t;
+        if (sleeping != null && sleeping != t) {
+            rung[sleeping.ordinal()] = false;
         }
         sleeping = t;
+        if (t != null) {
+            rung[t.ordinal()] = true;
+            lastSleeping = t;
+        }
         setDirty();
     }
 
@@ -238,8 +238,8 @@ public class StormBackState extends SavedData {
         return resets;
     }
 
-    // 試練を戻す (拍は凪の始まりへ)
-    void clearTrials() {
+    // 試練を最初に戻す (12 の 7.1節)。新しい種を引き、2 周目からは試練を一つ眠らせる (同じ試練は二回続けて眠らない)。拍は凪の始まりへ
+    public void reset(net.minecraft.util.RandomSource random, @Nullable Trial forceSleep, boolean noSleep) {
         java.util.Arrays.fill(rung, false);
         eastDoors = 0;
         raijuDefeated = false;
@@ -247,6 +247,26 @@ public class StormBackState extends SavedData {
         receivers = 0;
         mirrorFacing = 0;
         clock = 0;
+        westRoute = random.nextInt(3);
+        if (!mirrorsFirstUsed) {
+            mirrorConfig = 0;
+            mirrorsFirstUsed = true;
+        } else {
+            mirrorConfig = 1 + random.nextInt(3);
+        }
+        Trial next = null;
+        if (forceSleep != null) {
+            next = forceSleep;
+        } else if (everDefeated && !noSleep) {
+            java.util.List<Trial> pool = new java.util.ArrayList<>(java.util.List.of(Trial.values()));
+            pool.remove(lastSleeping);
+            next = pool.get(random.nextInt(pool.size()));
+        }
+        sleeping = next;
+        if (next != null) {
+            lastSleeping = next;
+            rung[next.ordinal()] = true;
+        }
         resets++;
         setDirty();
     }
