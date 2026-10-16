@@ -1,0 +1,35 @@
+# 余燼の中ボス 灰の鍛え手 (13 の 5.2節) と鍛え手の間を撮る。./gradlew runShots -Pscript=tools/shots/ember_smith.txt
+# 出力: run/shots/ember_smith/shots/ember_smith/*.png と shots.log。余燼の背 (ember_back) の鍛え手の間 (x 13〜39, z 32〜58, 床 y 80) を建て、
+# 動かない鍛え手 (NoAI) を置く。体の外 (空と灰の原) は B の体がまだ建っていなければ何もないので、部屋の中だけを撮る
+world shots flat
+size 1280 720
+timeout 480
+render 8
+clouds off
+
+cmd gamemode spectator
+cmd skyabyss smith rebuild
+cmd execute in skyabyss:ember_back run summon skyabyss:ash_smith 26.5 81 46.5 {NoAI:1b,Rotation:[180f,0f],PersistenceRequired:1b}
+hud off
+# 北の入口から見た全景 (鍛え手は奥)
+camera skyabyss:ember_back 26.5 85.5 33.2 0 14
+waitchunks
+wait 60
+shot smith_room_entrance
+# 正面 (鞴は見えない)
+camera skyabyss:ember_back 26.5 83.5 38.5 0 6
+wait 30
+shot smith_front
+# 背中 (二つの鞴と光る窓)
+camera skyabyss:ember_back 26.5 84 55 180 8
+wait 30
+shot smith_back
+# 斜め後ろ上から (部屋の全体: 槽・灰溜まり・柱・炉の扉)
+camera skyabyss:ember_back 26.5 93 56 180 52
+wait 30
+shot smith_room_top
+# 近くで: 大鎚と前腕
+camera skyabyss:ember_back 22.5 82.2 41.2 -20 8
+wait 30
+shot smith_hammer_close
+quit
