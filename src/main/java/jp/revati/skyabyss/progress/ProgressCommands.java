@@ -79,6 +79,12 @@ public final class ProgressCommands {
                     ProgressRules.TITAN_LEVEL[ProgressRules.titanIndex(t)], data.worldFirstBy.getOrDefault(t, "-"))
                     .withStyle(mine ? ChatFormatting.GOLD : world ? ChatFormatting.WHITE : ChatFormatting.DARK_GRAY));
         }
+        // 天の鍵 (1 章の終わり。story/SkyKey)
+        jp.revati.skyabyss.story.StoryData story = jp.revati.skyabyss.story.StoryData.get(server);
+        Component key = story.assembled(player.getUUID())
+                ? Component.translatable("message.skyabyss.story.key_yes", story.day(player.getUUID()) + 1)
+                : Component.translatable("message.skyabyss.story.key_no", jp.revati.skyabyss.story.SkyKey.fragmentsHeld(player));
+        text.append("\n").append(Component.translatable("message.skyabyss.story.show_key", key).withStyle(ChatFormatting.GRAY));
         source.sendSuccess(() -> text, false);
         return 1;
     }

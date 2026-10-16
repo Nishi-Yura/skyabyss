@@ -54,11 +54,27 @@ public final class SkyKeyScene extends Screen {
         mc.execute(() -> mc.setScreen(new SkyKeyScene(payload.days())));
     }
 
+    // 場面の間は HUD (チャット・追跡表示・技の枠) を隠す。閉じたら元に戻す
+    private Boolean hudHiddenBefore;
+
     @Override
     protected void init() {
         if (startMs == 0) {
             startMs = Util.getMillis();
         }
+        if (hudHiddenBefore == null && minecraft != null) {
+            hudHiddenBefore = minecraft.options.hideGui;
+            minecraft.options.hideGui = true;
+        }
+    }
+
+    @Override
+    public void removed() {
+        if (hudHiddenBefore != null && minecraft != null) {
+            minecraft.options.hideGui = hudHiddenBefore;
+            hudHiddenBefore = null;
+        }
+        super.removed();
     }
 
     // 経った秒数 (Esc で札へ飛ばしたぶんを足す)
@@ -142,7 +158,7 @@ public final class SkyKeyScene extends Screen {
         if (t > CARD - 1f) {
             dark = Math.max(dark, 1f);
         }
-        g.fillGradient(0, 0, w, h, argb(0.9f * dark, 0x05070C), argb(0.72f * dark, 0x0A0D14));
+        g.fillGradient(0, 0, w, h, argb(0.94f * dark, 0x05070C), argb(0.84f * dark, 0x0A0D14));
 
         float cx = w / 2f;
         float cy = h * 0.40f;
@@ -263,10 +279,11 @@ public final class SkyKeyScene extends Screen {
         if (alpha <= 0.01f) {
             return;
         }
-        // 重ねた四角でぼんやりした光 (外ほど薄い)
-        for (int i = 4; i >= 1; i--) {
-            float rr = r * i / 4f;
-            g.fill((int) (x - rr), (int) (y - rr), (int) (x + rr), (int) (y + rr), argb(alpha * 0.22f, rgb));
+        // 重ねた四角でぼんやりした光 (外ほど薄く、角が目立たないように段を細かく)
+        for (int i = 10; i >= 1; i--) {
+            float rr = r * i / 10f;
+            g.fill((int) (x - rr), (int) (y - rr * 0.8f), (int) (x + rr), (int) (y + rr * 0.8f), argb(alpha * 0.07f, rgb));
+            g.fill((int) (x - rr * 0.8f), (int) (y - rr), (int) (x + rr * 0.8f), (int) (y + rr), argb(alpha * 0.05f, rgb));
         }
     }
 

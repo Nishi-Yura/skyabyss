@@ -257,10 +257,10 @@ S.node("ms_key", "……そろったんだね。見せておくれ。", "...They
        note="メイン「天の鍵」(鍵がそろったあと)")
 S.node("ms_key2", "空の扉の鍵だと、言い伝えでは聞いていたけれど……。\nおかしいね。この鍵、下を向いて打っているよ。",
        "The old tales call it the key to a door in the sky...\nStrange. This key is beating downward.", face="grave", next="ms_key3")
-S.node("ms_key3", "……あ。\nいつつ　いきづく　つちのそこ\n……母さんは、いつつめをそう歌っていた。どうして今まで、思い出せなかったんだろう。",
+S.node("ms_key3", "……あ。\nいつつ　いきづく　つちのそこ\n……母さんは、いつつめをそう歌っていた。\nどうして今まで、思い出せなかったんだろう。",
        "...Oh.\nFive, five, a breath below the ground.\n...That's how my mother sang the fifth. Why couldn't I remember it until now?",
        do=[unlock("chapter1/fifth_verse")], next="ms_key4", note="伝承「数え歌のいつつ」を記す")
-S.node("ms_key4", "むっつから先は、まだ出てこない。\n……鍵というのは、開けたい扉のほうを向くものだよ。それだけは、覚えておおき。",
+S.node("ms_key4", "むっつから先は、まだ出てこない。\n……鍵というのは、開けたい扉のほうを向くものだよ。\nそれだけは、覚えておおき。",
        "Six and beyond still won't come.\n...A key always turns toward the door it wants to open. Remember that much.", face="grave", options=[
            opt("ok", "覚えておく。", "I'll remember.", do=[add_aff(3)]),
        ], note="ここに入るとメイン「天の鍵」が終わる (ベータの終わり)")
@@ -429,7 +429,7 @@ quest(TIDE, "main", 20, ("満ち引きの門", "The Gate of Ebb and Flow"),
              skip_if=any_(lore("chapter1/tide_shell"), lore("chapter1/tide_hours"))),
        stage("see", ("沖の島が、潮の引くころに岸へ寄ってくるという。\n……島ではないのかもしれない。",
                      "They say an island comes to the shore when the tide goes out.\n...Perhaps it isn't an island."),
-             [ob("see", "lore", "海辺で、岸に寄ってくるものを見る", "Watch what comes to the shore", targets=["chapter1/tide_shell"])], xp=60),
+             [ob("see", "lore", "岸に寄ってくるものを見る", "Watch what comes to the shore", targets=["chapter1/tide_shell"])], xp=60),
        stage("board", ("甲羅の縁に、古い門があるという。潮が引いたときにだけ、口を開ける。",
                        "There is an old gate on the rim of the shell, they say. It opens only when the tide is out."),
              [ob("board", "lore", "潮が引いたときに、門をくぐって背へ渡る", "Pass through the gate at low tide onto the back",
@@ -605,7 +605,7 @@ text("scene.skyabyss.sky_key.line4", "足もとの、ずっと下。何かが、
 text("scene.skyabyss.sky_key.end_title", "一章　天の鍵", "Chapter One: The Sky Key")
 text("scene.skyabyss.sky_key.end_sub", "ベータ版はここまでです", "This is the end of the beta")
 text("scene.skyabyss.sky_key.end_thanks", "遊んでくれて、ありがとう。", "Thank you for playing.")
-text("scene.skyabyss.sky_key.end_days", "空の影を見てから %s 日目", "Day %s since the shadow in the sky")
+text("scene.skyabyss.sky_key.end_days", "この世界の %s 日目", "Day %s of this world")
 text("scene.skyabyss.sky_key.end_hint", "Esc かクリックで戻る　（巨神の背の周回と頼みごとは、このあとも続けられる）",
      "Esc or click to return  (titan backs and requests remain open)")
 text("subtitles.skyabyss_story.key_form", "欠片が触れ合う", "Fragments meet")

@@ -2,7 +2,7 @@
 
 - 文書番号: 10
 - 対象: 巨神の出現の順番と乗る資格、物語の進みで決まるレベルの上限、「ストーリーモード」と「自由なモード」の扱い、マルチプレイで全員が同じ体験をするための同期、パーティ（経験値の分け前）、ギルドとランキング（設計と段取りだけ）、自由なモードのサブクエスト（設計とクエスト案）
-- 状態: 2026-10-16。3〜6 章は実装済み（`jp.revati.skyabyss.progress`、`jp.revati.skyabyss.party`）。8 章（自由なモードのサブクエスト）は序章〜1 章の 11 本を実装済み（07 の 15 章、`jp.revati.skyabyss.quest.free`）。7 章（ギルド）は設計だけ。マルチの確認は 9.3 節
+- 状態: 2026-10-16。3〜6 章は実装済み（`jp.revati.skyabyss.progress`、`jp.revati.skyabyss.party`）。8 章（自由なモードのサブクエスト）は序章〜1 章の 11 本を実装済み（07 の 15 章、`jp.revati.skyabyss.quest.free`）。7 章（ギルド）は設計だけ。マルチの確認は 9.3 節。1 章の続き（段階 2〜3 のサブ 4 本、4 体の背中の口 `Titans`、天の鍵）は 14
 - 関連: 01（全体設計。攻略順の変更案は 11 章）、02（岩鯨）、04（成長）、07（クエスト）、08（潮殻）、09（巨神での移動）、00（1 番の決定: 推奨レベル 12・18・24・30）
 
 ---
@@ -408,6 +408,8 @@ Web で調べた範囲と、広く知られている仕組み（「一般」と�
 | 11 | 名を持つもの（`loop_named_beast`） | 掲示板 | 2 | ループごと | 月のループの 5 日目の夜、地上に一体だけ現れる名付きの強い敵を倒す（ワールドで一体、倒した場の全員が数える） | 素材、ギルドの記録 【未実装: 段階 2】 |
 | 12 | 団の誓い（`guild_vow`） | ギルドの画面 | 1 | ループごと | ギルドの団員の合計で、心臓を 5 回止める（7.2 節の周回の数と同じ集計） | ギルドの記録、紋章の色 1 つ 【未実装: ギルドのあと】 |
 
+**1 章の続き（2026-10-16、ベータ。[14](14_beta.md)）**: 段階 2〜3 で開くものを 4 本足した（07 の 16 章）。9 は「鯨追いの古い地図」`sub_old_map`（段階 2、雷雨のときに高い所で空を見る。地図の 3 か所を訪ねる形は、地上の箱を置く仕組みがないので替えた）。8 の代わりに日替わり「潮殻の背の見回り」`daily_tide_rounds`（段階 2、潮殻の背の敵 8 体）、6 と同じ型の週替わり「潮の鼓動をもう一度」`weekly_tide_heart`（段階 2）、段階 3 の「冷めない炭」`sub_warm_coal`（語り部、ネザーの火）。雷翼・余燼の背中の周回は、その巨神の担当が同じ型で足す（14 の 5.2 節）。
+
 作る順の案: 新しい条件（`stage`・`stilled`）→ `repeat` と鍵 → 一度きりの 1・3・7・9・10 → 掲示板と日替わり 2・4・8 → `run` の目的とループごとの 5・6・11 → ギルド（7 章）のあとに 12。
 
 **実装の記録（2026-10-16）**: 1・2・3・4・6・7・10 と、案にない 4 本（語り部の届け物「火のそばへ」`sub_parcel`、日替わり「夜回り」`daily_night_watch`・「炉の薪」`daily_firewood`、週替わり「背中の試練」`weekly_back_trials`）の 11 本を作った。表は 07 の 15.8 節。ループごとの型は、月のループの本体がまだないので 7 日の「週替わり」（`repeat: "weekly"`）にした。繰り返しの報酬は鍵ではなく、クエストごとに「最後に払った周期」を一つ持つ（鍵が日ごとに増え続けないように）。判断 12（日替わりの枠 3）・13（掲示板ブロック）・14（一つ先だけ伏せる）は推奨で仮実装した（`Board.QUOTA`・`Board.DRAW`。語り部の「村の頼みごとを見せて」が同じ画面を開くので、B の NPC にも替えられる）。
@@ -423,7 +425,8 @@ Web で調べた範囲と、広く知られている仕組み（「一般」と�
 | `progress/ProgressRules` | 巨神の順番、推奨レベル、段階ごとの上限、段階の数え方（順番どおりに続いている所まで） |
 | `progress/ProgressData` | 世界の進み（最初に止めた人と日）と、人ごとに止めた巨神（`skyabyss_progress`） |
 | `progress/Progression` | 段階・上限・世界の進み・乗る資格、入口の断り、ディメンション移動の取り消し、背中の見回り、心臓を止めたときの記録と知らせ、ゲームルール `skyabyssStoryGate`・`skyabyssStoryLevelCap` |
-| `progress/ProgressCommands` | `/story`（誰でも）、`/skyabyss progress show|grant|revoke|world grant|world revoke`（管理者） |
+| `progress/Titans` | 4 体の名前と、背中のディメンションの口（`bindBack`・`titanOfBack`・`sendDown`）。岩鯨と潮殻は登録済み。雷翼・余燼の担当が一行で足す（14 の 5.2 節、2026-10-16） |
+| `progress/ProgressCommands` | `/story`（誰でも。天の鍵の行も）、`/skyabyss progress show|grant|revoke|world grant|world revoke`（管理者） |
 | `party/PartyData` | パーティの記録（`skyabyss_parties`） |
 | `party/Parties` | 招待・受ける・断る・抜ける・外す・リーダーを渡す、分け前の相手の選び方、ゲームルール `skyabyssPartyShare` |
 | `party/PartyCommands` | `/party`、`invite`、`accept`、`decline`、`leave`、`kick`、`leader` |
@@ -432,7 +435,7 @@ Web で調べた範囲と、広く知られている仕組み（「一般」と�
 | 既存への小さな変更 | `Growth.addXp`（上限）、`GrowthRewards`（仲間の分け前）、`GrowthRules.VANILLA_DAILY` 150→100、`TitanLoot.onHeartDefeat`（物語の進みを先に書く）、`TideKeeper.canAppear`（岩鯨のあと）、`TideTravel.board`/`boardFromGate`・`TitanTravel.board`（乗る資格） |
 | 文 | `assets/skyabyss_party/lang`（名前空間を分けた） |
 
-潮殻の心臓（まだない）を作る担当へ: 心臓を倒したとき、報酬より先に `Progression.onTitanStopped(server, 参加者の UUID, "tide_shell")` を呼ぶ。雷翼・余燼も同じ。背中のディメンションを足したら `Progression.titanOfBack` に一行足す。
+潮殻の心臓（まだない）を作る担当へ: 心臓を倒したとき、報酬より先に `Progression.onTitanStopped(server, 参加者の UUID, "tide_shell")` を呼ぶ。雷翼・余燼も同じ。背中のディメンションを足したら、起動時に `Titans.bindBack(背中, Titans.THUNDER_WING, 地上へ戻す関数)` を一行呼ぶ（`progress/Titans`。14 の 5.2 節）。
 
 ### 9.2 自己テスト（`SELFTEST progress`）
 
