@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.storm.back.StormBackBuilder;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
 import net.minecraft.core.BlockPos;
@@ -28,7 +30,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,24 +37,23 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
-// 雷獣の巣 (右手首の瘤の中、12 の 3.3節・5.2節): 直径 26 の丸い洞、天井 15 段、避雷の柱 6 本 (中心から半径 9、60 度おき)。
-// 柱の根元に「接地の栓」(レバー)。右クリックで柱が 8 秒接地する (先の灯りが消え、根元の格子が暗くなる)。栓は接地が切れてから 4 秒待つ。
-// 座標は StormBackLayout (背中の担当) から読む。背中のディメンション (skyabyss:storm_back) がまだ無いあいだは、
-// オーバーワールドの仮の場所 (TEMP_OFFSET だけずらした空中) に、殻と前室ごと建てる (背中ができたら自動で本番へ)。
-// 本番の背中では、洞の中 (半径 13.5 の円柱) を空けて床・柱・栓を置き、殻はもとが空気の所だけ埋める (鳥の形を壊さない)
+// 雷獣の巣 (右手首の瘤の中、12 の 3.3節・5.2節): 直径 26 の丸い洞、避雷の柱 6 本 (中心から半径 9、60 度おき)。
+// 洞・柱・栓 (レバー) は背中の担当が鳥と一緒に建てる (StormBirdBuilder)。座標はすべて StormBackLayout から読み、ここでは建てない。
+// 柱は本物の避雷の柱 (StormRods)。根元 (StormBackLayout.raijuRods()) で登録し、満ちた (3 段) 柱として置く:
+// 段の電球 3 つが灯っているのが「雷が通る柱」、接地すると消える (StormEast.showRods と同じ決まり)。
+// 柱の根元の「接地の栓」(レバー) を右クリックすると、柱が 8 秒接地する (電球が消え、栓が倒れる)。栓は接地が切れてから 4 秒待つ。
+// 入口は雷の骨の回廊の突き当たり (StormBackLayout.RAIJU_NEST_MOUTH の x)。戦いのあいだ回廊の幅と高さいっぱいを封じる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RaijuNest {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
-    // 仮の巣: 本番の座標から東へ 4096、上へ 57 (床 y 200)。スポーンの近くを避け、まわりは空
-    public static final BlockPos TEMP_OFFSET = new BlockPos(4096, 57, 0);
-    public static final int LAYOUT_VERSION = 1;
+    // 2: 背中の担当の本物の巣を使う (自前の洞を建てない)
+    public static final int LAYOUT_VERSION = 2;
     public static final int RODS = 6;
-    public static final int ROD_RADIUS = 9;
-    // 柱: 床の上 5 段の銅、6 段目に銅の電球 (先の灯り)、7 段目に避雷針。雷獣は避雷針の上に立つ
-    public static final int ROD_TOP = 6;
-    public static final double RADIUS = 13.5;
-    private static final double SHELL = 15.5;
+    public static final int ROD_RADIUS = StormBackLayout.RAIJU_ROD_RADIUS;
+    // 柱: 根元 (床のブロックの高さ) の銅、電球 3 つ、銅、5 段上に避雷針。雷獣は避雷針の上に立つ
+    public static final int ROD_TOP = 5;
+    public static final double RADIUS = StormBackLayout.RAIJU_NEST_RADIUS + 0.5;
     public static final int GROUND_TICKS = 160;
     public static final int PLUG_WAIT = 80;
 
@@ -61,28 +61,34 @@ public final class RaijuNest {
     private static final Map<Integer, Long> READY_AT = new HashMap<>();
     private static final Map<Integer, Boolean> SHOWN = new HashMap<>();
 
-    // 巣の場所 (本番か仮か)
-    public record Site(ServerLevel level, BlockPos center, boolean temporary) {
+    // 巣の場所 (背中の storm_back)。center は StormBackLayout.RAIJU_NEST (床のブロックの高さ)
+    public record Site(ServerLevel level, BlockPos center) {
+        // 立つ高さ (床のブロックの 1 上)
         public int floor() {
-            return center.getY();
+            return center.getY() + 1;
         }
 
+        // 丸天井のいちばん上の空気
         public int ceiling() {
-            return StormBackLayout.RAIJU_NEST_CEILING + (temporary ? TEMP_OFFSET.getY() : 0);
+            return StormBackLayout.RAIJU_NEST_CEILING + dy();
         }
 
         public Vec3 home() {
-            return Vec3.atBottomCenterOf(center);
+            return new Vec3(center.getX() + 0.5, floor(), center.getZ() + 0.5);
         }
 
+        // 柱の根元 (StormRods の柱の座標。find・isGrounded・ground はこれで引く)
+        public BlockPos rodBase(int i) {
+            return StormBackLayout.raijuRods().get(i).offset(center.subtract(StormBackLayout.RAIJU_NEST));
+        }
+
+        public BlockPos rod(int i) {
+            return rodBase(i);
+        }
+
+        // 避雷針 (雷獣が立つブロック)
         public BlockPos rodTop(int i) {
             return rodBase(i).above(ROD_TOP);
-        }
-
-        public BlockPos rodBase(int i) {
-            double a = Math.toRadians(30 + 60 * i);
-            return new BlockPos(center.getX() + (int) Math.round(ROD_RADIUS * Math.cos(a)), floor(),
-                    center.getZ() + (int) Math.round(ROD_RADIUS * Math.sin(a)));
         }
 
         public List<BlockPos> rodTops() {
@@ -93,86 +99,120 @@ public final class RaijuNest {
             return out;
         }
 
-        // 栓の向き: 柱から中心へ一番近い横の向き
-        public Direction plugFacing(int i) {
-            BlockPos b = rodBase(i);
-            return Direction.getNearest(center.getX() - b.getX(), 0, center.getZ() - b.getZ());
-        }
-
+        // 栓 (レバー): 柱の根元の 1 上の、横どなり (背中の担当が置いた所)。見つからなければ中心へ一番近い横
         public BlockPos plug(int i) {
-            return rodBase(i).above().relative(plugFacing(i));
+            BlockPos b = rodBase(i).above();
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                if (level.getBlockState(b.relative(d)).is(Blocks.LEVER)) {
+                    return b.relative(d);
+                }
+            }
+            return b.relative(Direction.getNearest(center.getX() - b.getX(), 0, center.getZ() - b.getZ()));
         }
 
-        // 雷獣が柱から落ちる所 (根元から中心へ 2 ブロック)
+        // 雷獣が柱から落ちる所 (根元から中心へ 2.2 ブロック、床の上)
         public Vec3 dropPoint(int i) {
             Vec3 b = Vec3.atBottomCenterOf(rodBase(i));
             Vec3 toC = home().subtract(b).multiply(1, 0, 1).normalize();
-            return b.add(toC.scale(2.2));
+            Vec3 p = b.add(toC.scale(2.2));
+            return new Vec3(p.x, floor(), p.z);
         }
 
         public AABB arena() {
             return new AABB(center.getX() - RADIUS + 0.5, floor() - 0.5, center.getZ() - RADIUS + 0.5,
-                    center.getX() + RADIUS + 0.5, ceiling(), center.getZ() + RADIUS + 0.5);
+                    center.getX() + RADIUS + 0.5, ceiling() + 1, center.getZ() + RADIUS + 0.5);
         }
 
         public boolean inside(Vec3 p) {
             double dx = p.x - (center.getX() + 0.5);
             double dz = p.z - (center.getZ() + 0.5);
-            return dx * dx + dz * dz <= RADIUS * RADIUS && p.y >= floor() - 0.5 && p.y < ceiling();
+            return dx * dx + dz * dz <= RADIUS * RADIUS && p.y >= floor() - 0.5 && p.y < ceiling() + 1;
         }
 
-        // 前室 (仮の巣では建てた通路。本番では雷の骨の回廊の突き当たり)
+        private int dx() {
+            return center.getX() - StormBackLayout.RAIJU_NEST.getX();
+        }
+
+        private int dy() {
+            return center.getY() - StormBackLayout.RAIJU_NEST.getY();
+        }
+
+        private int dz() {
+            return center.getZ() - StormBackLayout.RAIJU_NEST.getZ();
+        }
+
+        // 入口を封じる列の x (雷の骨の回廊の突き当たり)
+        private int gateX() {
+            return (int) Math.floor(StormBackLayout.RAIJU_NEST_MOUTH.minX) + dx();
+        }
+
+        // 回廊の立つ高さ
+        private int corridorY() {
+            return StormBackLayout.BONE_FLOOR + 1 + dy();
+        }
+
+        // 前室 (入口の手前の回廊 14 ブロック)
         public AABB ante() {
-            return new AABB(center.getX() - 24, floor(), center.getZ() - 3, center.getX() - 14.5, floor() + 4, center.getZ() + 4);
+            return new AABB(gateX() - 14, corridorY(), StormBackLayout.BONE_Z1 + dz(),
+                    gateX(), corridorY() + StormBackLayout.EAST_HEIGHT, StormBackLayout.BONE_Z2 + 1 + dz());
         }
 
         public Vec3 anteSpawn() {
-            return new Vec3(center.getX() - 19.5, floor(), center.getZ() + 0.5);
+            return new Vec3(gateX() - 5.5, corridorY(), center.getZ() + 0.5);
         }
 
         // 入口の内側 (集合で中へ入れる所)
         public Vec3 entranceInside() {
-            return new Vec3(center.getX() - 10.5, floor(), center.getZ() + 0.5);
+            return new Vec3(center.getX() + 0.5 - RADIUS + 3, floor(), center.getZ() + 0.5);
         }
 
+        // 封じるブロック (回廊の幅と高さいっぱい)
         public List<BlockPos> gate() {
             List<BlockPos> out = new ArrayList<>();
-            for (int dz = -1; dz <= 1; dz++) {
-                for (int dy = 0; dy <= 2; dy++) {
-                    out.add(new BlockPos(center.getX() - 14, floor() + dy, center.getZ() + dz));
+            int x = gateX();
+            for (int y = corridorY(); y < corridorY() + StormBackLayout.EAST_HEIGHT; y++) {
+                for (int z = StormBackLayout.BONE_Z1; z <= StormBackLayout.BONE_Z2; z++) {
+                    out.add(new BlockPos(x, y, z + dz()));
                 }
             }
             return out;
         }
 
-        // 戸口 (封印の外側 1 マス)。戦いの途中に参加者が触れると中へ通す
+        // 入口の真ん中の足もと (封じたかを見る所・閉じる音)
+        public BlockPos gateCenter() {
+            return new BlockPos(gateX(), corridorY(), center.getZ());
+        }
+
+        // 戸口 (封印の外側 3 マス)。戦いの途中に参加者が触れると中へ通す
         public AABB door() {
-            return new AABB(center.getX() - 16, floor(), center.getZ() - 1, center.getX() - 14, floor() + 3, center.getZ() + 2);
+            return new AABB(gateX() - 3, corridorY(), StormBackLayout.BONE_Z1 + dz(),
+                    gateX(), corridorY() + 3, StormBackLayout.BONE_Z2 + 1 + dz());
         }
     }
 
     private RaijuNest() {
     }
 
-    // 巣の場所: 背中のディメンションがあれば本番、なければオーバーワールドの仮の場所
+    // 巣の場所 (背中のディメンション)
     public static Site site(MinecraftServer server) {
         ServerLevel back = server.getLevel(STORM_BACK);
-        if (back != null) {
-            return new Site(back, StormBackLayout.RAIJU_NEST, false);
-        }
-        return new Site(server.overworld(), StormBackLayout.RAIJU_NEST.offset(TEMP_OFFSET), true);
+        return new Site(back != null ? back : server.overworld(), StormBackLayout.RAIJU_NEST);
     }
 
     public static boolean isNestLevel(Level level) {
-        MinecraftServer server = level.getServer();
-        return server != null && level instanceof ServerLevel s && site(server).level() == s;
+        return level instanceof ServerLevel s && s.dimension() == STORM_BACK;
     }
 
-    // ---------------------------------------------------------------- 建てる
+    // ---------------------------------------------------------------- 支度 (建てるのは背中の担当)
 
+    // 背中の鳥が建っていて、巣の柱が本物の柱として登録されている
     public static boolean isBuilt(Site site) {
-        RaijuState state = RaijuState.get(site.level().getServer());
-        return state.built(site.temporary()) == LAYOUT_VERSION && site.level().getBlockState(site.rodTop(0)).is(Blocks.LIGHTNING_ROD);
+        for (int i = 0; i < RODS; i++) {
+            if (!site.level().getBlockState(site.rodTop(i)).is(Blocks.LIGHTNING_ROD) || StormRods.get(site.level(), site.rod(i)) == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void ensureBuilt(Site site) {
@@ -181,141 +221,37 @@ public final class RaijuNest {
         }
     }
 
+    // 巣を戦いの前の姿に戻す: 背中が建っていなければ建て、柱を登録し直し (満ちた柱)、栓と電球を戻し、入口を開ける。
+    // 前の版 (1) の雷獣は自前の洞を背中の上に彫っていたので、柱が見つからない古い世界は背中を一度だけ建て直す
     public static void build(Site site) {
         ServerLevel level = site.level();
-        BlockPos c = site.center();
-        int f = site.floor();
-        int top = site.ceiling();
-        int cx = c.getX();
-        int cz = c.getZ();
-        int r = (int) Math.ceil(SHELL) + 1;
-        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        for (int dx = -r; dx <= r; dx++) {
-            for (int dz = -r; dz <= r; dz++) {
-                double d = Math.sqrt((dx + 0.0) * dx + (dz + 0.0) * dz);
-                if (d > SHELL + 0.5) {
-                    continue;
-                }
-                boolean interior = d <= RADIUS;
-                for (int y = f - 2; y <= top; y++) {
-                    p.set(cx + dx, y, cz + dz);
-                    BlockState s;
-                    if (interior && y == f - 1) {
-                        s = floorBlock(dx, dz, d);
-                    } else if (interior && y >= f && y < top) {
-                        s = Blocks.AIR.defaultBlockState();
-                    } else if (interior && y == top) {
-                        s = ceilingBlock(dx, dz, d);
-                    } else {
-                        // 殻 (床の下・壁)。本番の背中では、もとが空気の所だけ埋める
-                        if (!site.temporary() && !level.getBlockState(p).isAir()) {
-                            continue;
-                        }
-                        s = interior ? Blocks.TUFF_BRICKS.defaultBlockState() : wallBlock(dx, dz, y - f);
-                    }
-                    level.setBlock(p, s, 2);
-                }
-            }
+        if (!isNestLevel(level)) {
+            return;
         }
-        // 柱と栓
+        StormBackBuilder.ensureBuilt(level);
+        RaijuState state = RaijuState.get(level.getServer());
+        if (!level.getBlockState(site.rodTop(0)).is(Blocks.LIGHTNING_ROD) && state.built() < LAYOUT_VERSION) {
+            SkyAbyss.LOGGER.info("Found the raiju nest of an older version; rebuilding the storm back once");
+            StormBackBuilder.build(level, TitanBackData.get(level));
+        }
+        state.markBuilt(LAYOUT_VERSION);
+        READY_AT.clear();
         for (int i = 0; i < RODS; i++) {
-            BlockPos b = site.rodBase(i);
-            for (int y = 0; y < ROD_TOP - 1; y++) {
-                level.setBlock(b.above(y), Blocks.WAXED_CUT_COPPER.defaultBlockState(), 2);
-            }
-            level.setBlock(b.above(ROD_TOP - 1), Blocks.WAXED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true), 2);
-            level.setBlock(b.above(ROD_TOP), Blocks.LIGHTNING_ROD.defaultBlockState(), 2);
-            for (int gx = -1; gx <= 1; gx++) {
-                for (int gz = -1; gz <= 1; gz++) {
-                    if (gx != 0 || gz != 0) {
-                        level.setBlock(b.offset(gx, -1, gz), Blocks.WAXED_COPPER_GRATE.defaultBlockState(), 2);
-                    }
-                }
-            }
-            level.setBlock(site.plug(i), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.WALL)
-                    .setValue(LeverBlock.FACING, site.plugFacing(i)).setValue(LeverBlock.POWERED, false), 2);
-            SHOWN.put(i, false);
+            BlockPos rod = site.rod(i);
+            StormRods.register(level, rod);
+            StormRods.charge(level, rod, StormRods.FULL);
+            show(site, i, false);
         }
-        // 入口のくぐり (西の壁) と、仮の巣の前室
-        for (int x = cx - 17; x <= cx - 13; x++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                for (int dy = 0; dy <= 2; dy++) {
-                    level.setBlock(new BlockPos(x, f + dy, cz + dz), Blocks.AIR.defaultBlockState(), 2);
-                }
-                level.setBlock(new BlockPos(x, f - 1, cz + dz), Blocks.POLISHED_TUFF.defaultBlockState(), 2);
-            }
-        }
-        if (site.temporary()) {
-            buildAnte(level, cx, f, cz);
-        }
-        RaijuState.get(level.getServer()).markBuilt(site.temporary(), LAYOUT_VERSION);
-        SkyAbyss.LOGGER.info("Built the raiju nest at {} ({})", c, site.temporary() ? "temporary, the storm back is not there yet" : "storm back");
-    }
-
-    private static void buildAnte(ServerLevel level, int cx, int f, int cz) {
-        for (int x = cx - 25; x <= cx - 16; x++) {
-            for (int dz = -4; dz <= 4; dz++) {
-                for (int y = f - 1; y <= f + 4; y++) {
-                    boolean edge = Math.abs(dz) == 4 || y == f - 1 || y == f + 4 || x == cx - 25;
-                    BlockState s = edge ? Blocks.TUFF_BRICKS.defaultBlockState() : Blocks.AIR.defaultBlockState();
-                    if (y == f - 1 && Math.abs(dz) <= 3 && x > cx - 25) {
-                        s = (x + dz) % 4 == 0 ? Blocks.CHISELED_TUFF.defaultBlockState() : Blocks.POLISHED_TUFF.defaultBlockState();
-                    }
-                    if (y == f + 4 && dz == 0 && (x - cx) % 3 == 0) {
-                        s = Blocks.SEA_LANTERN.defaultBlockState();
-                    }
-                    level.setBlock(new BlockPos(x, y, cz + dz), s, 2);
-                }
-            }
-        }
-    }
-
-    private static BlockState floorBlock(int dx, int dz, double d) {
-        // 中心から柱へ伸びる銅の線 (雷の通り道)、外周の灯り、中心の彫り
-        if (d < 1.6) {
-            return Blocks.CHISELED_TUFF_BRICKS.defaultBlockState();
-        }
-        double a = Math.toDegrees(Math.atan2(dz, dx));
-        double rel = ((a - 30) % 60 + 60) % 60;
-        double off = Math.toRadians(Math.min(rel, 60 - rel));
-        if (d > 2 && d < ROD_RADIUS - 1.2 && d * Math.sin(off) <= 0.55) {
-            return Blocks.WAXED_CUT_COPPER.defaultBlockState();
-        }
-        if (d > 11.6 && d < 12.6 && ((int) Math.round(a / 15)) % 2 == 0) {
-            return Blocks.SEA_LANTERN.defaultBlockState();
-        }
-        if (d > 4.5 && d < 5.5) {
-            return Blocks.TUFF_BRICKS.defaultBlockState();
-        }
-        return ((dx * 7 + dz * 13) & 7) == 0 ? Blocks.TUFF.defaultBlockState() : Blocks.POLISHED_TUFF.defaultBlockState();
-    }
-
-    private static BlockState ceilingBlock(int dx, int dz, double d) {
-        if (d < 2.2) {
-            return Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
-        }
-        if (d > 6.5 && d < 7.5 && (dx + dz) % 3 == 0) {
-            return Blocks.SEA_LANTERN.defaultBlockState();
-        }
-        return Blocks.TUFF_BRICKS.defaultBlockState();
-    }
-
-    private static BlockState wallBlock(int dx, int dz, int h) {
-        double a = Math.toDegrees(Math.atan2(dz, dx));
-        if (h == 7 && ((int) Math.round(a / 10)) % 3 == 0) {
-            return Blocks.SEA_LANTERN.defaultBlockState();
-        }
-        if (h == 0 || h == 12) {
-            return Blocks.POLISHED_TUFF.defaultBlockState();
-        }
-        return Blocks.TUFF_BRICKS.defaultBlockState();
+        open(site);
     }
 
     // ---------------------------------------------------------------- 封印
 
     public static void seal(Site site) {
         for (BlockPos p : site.gate()) {
-            site.level().setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
+            if (site.level().getBlockState(p).isAir()) {
+                site.level().setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
+            }
         }
     }
 
@@ -328,7 +264,7 @@ public final class RaijuNest {
     }
 
     public static boolean sealed(Site site) {
-        return site.level().getBlockState(site.gate().get(4)).is(ModBlocks.SEALED_GATE.get());
+        return site.level().getBlockState(site.gateCenter()).is(ModBlocks.SEALED_GATE.get());
     }
 
     // ---------------------------------------------------------------- 接地の栓
@@ -345,7 +281,7 @@ public final class RaijuNest {
     // 栓を引く。引けたら true (人へは理由を一行出す)
     public static boolean pull(Site site, int i, @Nullable ServerPlayer player) {
         ServerLevel level = site.level();
-        BlockPos rod = site.rodTop(i);
+        BlockPos rod = site.rod(i);
         long now = level.getGameTime();
         if (StormRods.isGrounded(rod)) {
             if (player != null) {
@@ -363,34 +299,30 @@ public final class RaijuNest {
         StormRods.ground(rod, GROUND_TICKS);
         READY_AT.put(i, now + GROUND_TICKS + PLUG_WAIT);
         show(site, i, true);
-        BlockPos b = site.rodBase(i);
-        level.playSound(null, b, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
-        level.sendParticles(ParticleTypes.SMOKE, rod.getX() + 0.5, rod.getY() - 0.5, rod.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
+        BlockPos top = site.rodTop(i);
+        level.playSound(null, rod, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
+        level.sendParticles(ParticleTypes.SMOKE, top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
         if (player != null) {
             player.displayClientMessage(ModText.progress("message.skyabyss.raiju.grounded", GROUND_TICKS / 20), true);
         }
         return true;
     }
 
-    // 接地の見た目: 先の灯り (銅の電球) を消し、栓を倒し、根元の格子を暗い緑青にする
+    // 接地の見た目: 柱の段の電球 3 つを消し、栓を倒す (戻ると灯り、栓が起きる)
     private static void show(Site site, int i, boolean grounded) {
         ServerLevel level = site.level();
         BlockPos b = site.rodBase(i);
-        BlockPos bulb = b.above(ROD_TOP - 1);
-        if (level.getBlockState(bulb).is(Blocks.WAXED_COPPER_BULB)) {
-            level.setBlock(bulb, level.getBlockState(bulb).setValue(CopperBulbBlock.LIT, !grounded), 2);
+        for (int k = 1; k <= 3; k++) {
+            BlockPos bulb = b.above(k);
+            BlockState s = level.getBlockState(bulb);
+            if (s.is(Blocks.WAXED_COPPER_BULB) && s.getValue(CopperBulbBlock.LIT) == grounded) {
+                level.setBlock(bulb, s.setValue(CopperBulbBlock.LIT, !grounded), 2);
+            }
         }
         BlockPos plug = site.plug(i);
-        if (level.getBlockState(plug).is(Blocks.LEVER)) {
-            level.setBlock(plug, level.getBlockState(plug).setValue(LeverBlock.POWERED, grounded), 2);
-        }
-        BlockState grate = grounded ? Blocks.WAXED_OXIDIZED_COPPER_GRATE.defaultBlockState() : Blocks.WAXED_COPPER_GRATE.defaultBlockState();
-        for (int gx = -1; gx <= 1; gx++) {
-            for (int gz = -1; gz <= 1; gz++) {
-                if (gx != 0 || gz != 0) {
-                    level.setBlock(b.offset(gx, -1, gz), grate, 2);
-                }
-            }
+        BlockState lever = level.getBlockState(plug);
+        if (lever.is(Blocks.LEVER) && lever.getValue(LeverBlock.POWERED) != grounded) {
+            level.setBlock(plug, lever.setValue(LeverBlock.POWERED, grounded), 2);
         }
         SHOWN.put(i, grounded);
     }
@@ -400,7 +332,7 @@ public final class RaijuNest {
         ServerLevel level = site.level();
         for (int i = 0; i < RODS; i++) {
             BlockPos top = site.rodTop(i);
-            boolean g = StormRods.isGrounded(top);
+            boolean g = StormRods.isGrounded(site.rod(i));
             if (SHOWN.getOrDefault(i, false) != g) {
                 show(site, i, g);
                 if (!g) {

@@ -91,10 +91,13 @@ public final class EmberSkeletonSelfTest {
             return;
         }
         BlockPos a = EmberBackLayout.ARRIVAL;
-        int surface = back.getHeight(Heightmap.Types.WORLD_SURFACE, a.getX(), a.getZ());
+        // 灰の原は体の外 (口の先の北) で見る。体が建ったあとは到着点の上に頭がある
+        BlockPos plainAt = new BlockPos(0, 0, EmberBackLayout.BODY.minZ() - 20);
+        back.getChunk(plainAt.getX() >> 4, plainAt.getZ() >> 4);
+        int surface = back.getHeight(Heightmap.Types.WORLD_SURFACE, plainAt.getX(), plainAt.getZ());
         expect(surface == EmberBackLayout.PLAIN_TOP + 1, "the ash plain surface is " + surface + ", expected " + (EmberBackLayout.PLAIN_TOP + 1), f);
-        expect(back.getBlockState(new BlockPos(a.getX(), EmberBackLayout.PLAIN_TOP, a.getZ())).is(Blocks.SMOOTH_BASALT), "the plain top is not smooth basalt", f);
-        expect(back.getBlockState(new BlockPos(a.getX(), 0, a.getZ())).is(Blocks.BEDROCK), "the plain has no bedrock", f);
+        expect(back.getBlockState(new BlockPos(plainAt.getX(), EmberBackLayout.PLAIN_TOP, plainAt.getZ())).is(Blocks.SMOOTH_BASALT), "the plain top is not smooth basalt", f);
+        expect(back.getBlockState(new BlockPos(plainAt.getX(), 0, plainAt.getZ())).is(Blocks.BEDROCK), "the plain has no bedrock", f);
         expect(back.getMaxBuildHeight() > EmberBackLayout.BODY.maxY() && back.getMinBuildHeight() < EmberBackLayout.BODY.minY(),
                 "the body box does not fit in the dimension height", f);
         expect(back.getBiome(new BlockPos(0, 64, 0)).is(EmberIds.BACK_BIOME), "the ember_back biome is not used", f);

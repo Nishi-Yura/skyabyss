@@ -562,6 +562,21 @@ final class SeaVoyage extends Voyage {
                 }
             }
         }
+        // 行き先まで陸がない (行き先が水の上・海の中): 行き先のまわりのいちばん近い浜。水の上に降ろさない。
+        // 読み込まれている所だけを見る (行き先のまわりは札で読み込まれている)
+        for (int r = 6; r <= 72 && found == null; r += 6) {
+            for (int i = 0; i < 24 && found == null; i++) {
+                double angle = Math.PI * 2 * i / 24;
+                double x = to.x + Math.cos(angle) * r;
+                double z = to.z + Math.sin(angle) * r;
+                if (TideOcean.land(level, x, z)) {
+                    Vec3 shore = TideOcean.standableShore(level, x, z);
+                    if (shore != null) {
+                        found = BlockPos.containing(shore);
+                    }
+                }
+            }
+        }
         if (found == null) {
             found = LandingFinder.find(level, dest != null && dest.kind() == 1 ? destination.above() : destination, 1, 10);
         }
