@@ -498,6 +498,11 @@ def main():
     write_model("thunder_supplicant", sg, st, sgl)
     write_anim("thunder_supplicant", ANIM_SUPPLICANT)
 
+    # 15 章 (ハイポリゴン化): 書き出した素の形を、箱の切り直し・面取り・飾りで彫り直す (rough/hp_mobs_storm_ember.py)
+    import hp_mobs_storm_ember as hp
+    for name in ("feather_warden", "static_moth", "thunder_supplicant"):
+        hp.install_mob(name)
+
     for name, geo, gl, s in (("feather_warden", wg, wgl, ws), ("static_moth", mg, mgl, ms), ("thunder_supplicant", sg, sgl, ss)):
         print(f"{name}: 箱 {s['cubes']}、テクスチャ {s['atlas'][0]}x{s['atlas'][1]}、光る画素 {s['glow_px']}、大きさ {s['size_blocks']}")
     print(f"moth charged extra glow px {int((extra[..., 3] > 0).sum())}")
