@@ -90,6 +90,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.ember.EmberTitanSetup.register(modEventBus);
         // 余燼の装備 (鎧・戦斧・外套・護符・専用伝説・角杯・素材) と図鑑の表、伝承の締め。13 の 11.2節の担当 G
         jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.register(modEventBus);
+        // 余燼の心臓 (最終ボス: 熾の底、三段階、灰の礫、報酬、天の鍵の四つ目の欠片)。13 の 11.2節の担当 F
+        jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
