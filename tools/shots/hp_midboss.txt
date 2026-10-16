@@ -1,0 +1,96 @@
+# The four mid bosses before/after the high-poly pass (docs/design/15_high_poly.md section 8, assignment 2).
+# ./gradlew runShots -Pscript=tools/shots/hp_midboss.txt -PshotsName=hp_midboss_before   (and _after)
+# (camera y is the FEET position: the eye is 1.62 higher.)
+# Output: run/shots/<shotsName>/shots/hp_midboss/*.png and shots.log (PERF line = ms per frame). NoAI mobs on a flat basalt floor, noon.
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+# ---- whalebone captain (2.75 blocks tall, faces +z)
+cmd summon skyabyss:whalebone_captain 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -60.0 5.0 180 4
+waitchunks
+wait 60
+shot captain_front
+camera minecraft:overworld 3.4 -59.8 4.4 150 8
+wait 20
+shot captain_three_quarter
+camera minecraft:overworld 0.3 -59.0 2.0 180 0
+wait 20
+shot captain_face
+camera minecraft:overworld 0 -60.4 2.4 180 14
+wait 20
+shot captain_hands
+cmd kill @e[type=skyabyss:whalebone_captain]
+
+# ---- tide beckoner (6 blocks wide, big claw reaches 5.6 blocks to the front)
+cmd summon skyabyss:tide_beckoner 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -58.0 10.0 180 16
+wait 60
+shot beckoner_front
+camera minecraft:overworld 7.0 -58.1 8.5 145 18
+wait 20
+shot beckoner_three_quarter
+camera minecraft:overworld 2.7 -59.5 8.2 180 6
+wait 20
+shot beckoner_claw
+camera minecraft:overworld 0 -52.5 2 180 80
+wait 20
+shot beckoner_top
+cmd kill @e[type=skyabyss:tide_beckoner]
+
+# ---- raiju (storm beast, 4.4 blocks long)
+cmd summon skyabyss:raiju 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -60.1 6.0 180 4
+wait 60
+shot raiju_front
+camera minecraft:overworld 4.2 -59.9 4.8 145 8
+wait 20
+shot raiju_three_quarter
+camera minecraft:overworld 0.2 -58.9 4.6 180 2
+wait 20
+shot raiju_face
+camera minecraft:overworld -4.0 -60.0 -4.0 -40 8
+wait 20
+shot raiju_back
+cmd kill @e[type=skyabyss:raiju]
+
+# ---- ash smith (5 blocks tall)
+cmd summon skyabyss:ash_smith 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -59.1 8.0 180 3
+wait 60
+shot smith_front
+camera minecraft:overworld 5.0 -59.1 7.0 150 6
+wait 20
+shot smith_three_quarter
+camera minecraft:overworld 0.3 -58.4 4.8 180 2
+wait 20
+shot smith_face
+camera minecraft:overworld -3.5 -59.0 -6.5 -25 8
+wait 20
+shot smith_back
+cmd kill @e[type=skyabyss:ash_smith]
+
+# ---- render cost: all four at once, twice (a worst case; a real fight has 1 to 2)
+cmd summon skyabyss:whalebone_captain -9 -60 -2 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:tide_beckoner -2 -60 -2 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:raiju 5 -60 -2 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_smith 12 -60 -2 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:whalebone_captain -9 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:tide_beckoner -2 -60 8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:raiju 5 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_smith 12 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 1.5 -56.5 22 180 14
+wait 100
+shot all_four
+perf 300 midbosses8
+quit
