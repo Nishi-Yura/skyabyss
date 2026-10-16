@@ -73,10 +73,13 @@ public final class TideBackSelfTest {
         steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools settled)", SETTLE_TICKS, server -> guarded(server, back -> {
             checkSettled(back, FAILURES, "after building");
             checkWatchSettled(back, FAILURES, "after building");
+            checkWaterlogged(back, FAILURES, NOTES, "full");
             drainPools(back);
         })));
         steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools drained)", SETTLE_TICKS, server -> guarded(server, back -> {
             checkDrained(back, FAILURES, "after building");
+            checkWaterlogged(back, FAILURES, NOTES, "ebb");
+            checkOpenings(back, FAILURES, NOTES);
             checkWalk(back, FAILURES, NOTES);
             checkPuzzle(back, FAILURES, NOTES);
             checkGarden(back, FAILURES);
@@ -245,6 +248,131 @@ public final class TideBackSelfTest {
             }
         }
         NOTES.add("shell holes " + holes);
+    }
+
+    // ---------------------------------------------------------------- 構造の検査 (tools/structure の check.py と同じ見方)
+    // 水に浸かった形 (waterlogged) のブロックの横か下が空いていると、隣が変わったときに水が流れ出す。
+    // 溜めを満たして SETTLE_TICKS 流したあと (full) と、引いたあと (ebb) に数える
+    private static void checkWaterlogged(ServerLevel back, List<String> failures, List<String> notes, String when) {
+        int bad = 0;
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int x = TideTurtle.minX(); x <= TideTurtle.maxX(); x++) {
+            for (int z = TideTurtle.minZ(); z <= TideTurtle.maxZ(); z++) {
+                for (int y = TideTurtle.minY(); y <= TideTurtle.maxY(); y++) {
+                    BlockState s = back.getBlockState(c.set(x, y, z));
+                    if (!s.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+                            || !s.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)) {
+                        continue;
+                    }
+                    BlockPos at = c.immutable();
+                    for (BlockPos n : new BlockPos[] {at.below(), at.north(), at.south(), at.east(), at.west()}) {
+                        BlockState ns = back.getBlockState(n);
+                        if (ns.getCollisionShape(back, n).isEmpty() && ns.getFluidState().isEmpty()) {
+                            bad++;
+                            if (bad <= 5) {
+                                failures.add("waterlogged block next to open space (" + when + ") at " + at.toShortString() + " " + s);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        notes.add("waterlogged leaks " + when + " " + bad);
+    }
+
+    // 甲羅の中の部屋 (広間からつながる、上にも下にも固いものがある空き所) が外に接する口。
+    // わざと開けた口 (潮門・到着の段・見送りの段・甲羅の上へ出る段) のほかに口が 0 であること。
+    // 水は壁とみなす (海の下で部屋が外とつながって見えないように)。干潮で、門は閉じたまま
+    private static void checkOpenings(ServerLevel back, List<String> failures, List<String> notes) {
+        int x0 = TideTurtle.minX() - 1;
+        int x1 = TideTurtle.maxX() + 1;
+        int z0 = TideTurtle.minZ() - 1;
+        int z1 = TideTurtle.maxZ() + 1;
+        int y0 = TideTurtle.minY() - 1;
+        int y1 = TideTurtle.maxY() + 8;
+        int w = x1 - x0 + 1;
+        int[] lo = new int[w * (z1 - z0 + 1)];
+        int[] hi = new int[lo.length];
+        BlockPos.MutableBlockPos c = new BlockPos.MutableBlockPos();
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                int i = (z - z0) * w + (x - x0);
+                lo[i] = Integer.MAX_VALUE;
+                hi[i] = Integer.MIN_VALUE;
+                for (int y = y0; y <= y1; y++) {
+                    BlockState s = back.getBlockState(c.set(x, y, z));
+                    if (!s.getCollisionShape(back, c).isEmpty()) {
+                        lo[i] = Math.min(lo[i], y);
+                        hi[i] = Math.max(hi[i], y);
+                    }
+                }
+            }
+        }
+        java.util.function.Predicate<BlockPos> open = p -> {
+            BlockState s = back.getBlockState(p);
+            return s.getCollisionShape(back, p).isEmpty() && s.getFluidState().isEmpty();
+        };
+        java.util.function.Predicate<BlockPos> enclosed = p -> {
+            int i = (p.getZ() - z0) * w + (p.getX() - x0);
+            return lo[i] < p.getY() && p.getY() < hi[i];
+        };
+        // 広間の休み場から始める
+        BlockPos start = null;
+        BlockPos seed = RESTS.get(0).spawn();
+        for (int r = 0; r <= 3 && start == null; r++) {
+            for (BlockPos q : BlockPos.betweenClosed(seed.offset(-r, -r, -r), seed.offset(r, r, r))) {
+                if (open.test(q) && enclosed.test(q)) {
+                    start = q.immutable();
+                    break;
+                }
+            }
+        }
+        if (start == null) {
+            failures.add("openings: no enclosed room around " + seed.toShortString());
+            return;
+        }
+        Set<Long> seen = new HashSet<>();
+        ArrayDeque<BlockPos> q = new ArrayDeque<>();
+        seen.add(start.asLong());
+        q.add(start);
+        int unexpected = 0;
+        int expected = 0;
+        while (!q.isEmpty() && seen.size() < 2_000_000) {
+            BlockPos p = q.poll();
+            boolean mouth = false;
+            for (Direction d : Direction.values()) {
+                BlockPos n = p.relative(d);
+                if (n.getX() < x0 || n.getX() > x1 || n.getZ() < z0 || n.getZ() > z1 || n.getY() < y0 || n.getY() > y1) {
+                    mouth = true;
+                    continue;
+                }
+                if (!open.test(n)) {
+                    continue;
+                }
+                if (!enclosed.test(n)) {
+                    mouth = true;
+                } else if (seen.add(n.asLong())) {
+                    q.add(n);
+                }
+            }
+            if (mouth) {
+                if (intendedOpening(p)) {
+                    expected++;
+                } else if (++unexpected <= 5) {
+                    failures.add("hole from the rooms to the outside at " + p.toShortString());
+                }
+            }
+        }
+        notes.add("rooms " + seen.size() + " cells, openings " + expected + " intended / " + unexpected + " unexpected");
+    }
+
+    // わざと開けた口: 潮門と到着の段・ひれ・見送りの段 (左後ろの縁)、甲羅の上へ出る段の口
+    private static boolean intendedOpening(BlockPos p) {
+        if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 1 && p.getY() <= GATE_FLOOR + 24) {
+            return true;
+        }
+        return p.getY() >= 100 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
     }
 
     private static boolean nearOpening(int x, int z) {

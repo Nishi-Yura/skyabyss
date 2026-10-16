@@ -63,7 +63,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 読むのは tools/structure/ の Python (上・横の断面図、等角の図、外とつながる空気、歩いて行ける所、水の広がり、看板の一覧)。
 //
 //   /skyabyss dev dump <名前> <端1> <端2>   : 実行した次元の範囲 (execute in で次元を選ぶ)
-//   /skyabyss dev dump preset <titan_back|tide_back> : 巨神の背の島全体 (まだ建っていなければ建てる)
+//   /skyabyss dev dump preset <titan_back|tide_back|storm_back> : 巨神の背の島全体 (まだ建っていなければ建てる)
 //   環境変数 SKYABYSS_DUMP=titan_back,tide_back で専用サーバーを起動すると、起動後に書き出してサーバーを止める
 //
 // 書き出し先: 環境変数 SKYABYSS_DUMP_OUT、無ければ <サーバーのフォルダ>/dumps/<名前>.sbd (worktree の run/ の下)。
@@ -94,7 +94,9 @@ public final class StructureDump {
     // 巨神の背の島全体。鯨は x ±100・z ±256・y 58〜 (WhaleShape)、亀は甲羅 x ±71・z -88〜82 に頭と尾、海底 41
     public static final Map<String, Box> PRESETS = Map.of(
             "titan_back", new Box(-100, 50, -256, 100, 190, 256),
-            "tide_back", new Box(-100, 38, -150, 100, 160, 120));
+            "tide_back", new Box(-100, 38, -150, 100, 160, 120),
+            // 雷翼の鳥は翼 x ±227・頭 z -124〜尾 132・y 110〜172 (StormBirdBuilder.BIRD)
+            "storm_back", new Box(-232, 96, -136, 232, 176, 140));
     private static final int CHUNKS_PER_TICK = 6;
 
     private static final ArrayDeque<Job> JOBS = new ArrayDeque<>();
@@ -127,7 +129,7 @@ public final class StructureDump {
                                 .then(Commands.argument("from", BlockPosArgument.blockPos())
                                         .then(Commands.argument("to", BlockPosArgument.blockPos())
                                                 .executes(StructureDump::custom)))))
-                        // /skyabyss dev arrive <titan_back|tide_back> : 巨神の背の到着地点へ、到着の向きで移る (建っていなければ建てる)
+                        // /skyabyss dev arrive <titan_back|tide_back|storm_back> : 巨神の背の到着地点へ、到着の向きで移る (建っていなければ建てる)
                         .then(Commands.literal("arrive").then(Commands.argument("back", StringArgumentType.word())
                                 .suggests((ctx, b) -> {
                                     PRESETS.keySet().forEach(b::suggest);
@@ -156,8 +158,10 @@ public final class StructureDump {
             return 0;
         }
         BlockPos a = name.equals("titan_back") ? jp.revati.skyabyss.titan.dungeon.TitanBackLayout.arrival()
+                : name.equals("storm_back") ? jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL
                 : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL;
-        float yaw = name.equals("titan_back") ? 180f : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW;
+        float yaw = name.equals("titan_back") ? 180f : name.equals("storm_back") ? jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL_YAW
+                : jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW;
         player.teleportTo(level, a.getX() + 0.5, a.getY(), a.getZ() + 0.5, yaw, 0f);
         ctx.getSource().sendSuccess(() -> Component.literal("arrived at " + name + " " + a.toShortString() + " yaw " + yaw), false);
         return 1;
@@ -188,6 +192,16 @@ public final class StructureDump {
             job.point("arrival", jp.revati.skyabyss.titan.dungeon.TitanBackLayout.arrival());
             job.point("shrine", new BlockPos(0, jp.revati.skyabyss.titan.dungeon.TitanBackLayout.shrineY() + 1, jp.revati.skyabyss.titan.dungeon.TitanBackLayout.SHRINE_Z));
             job.point("hub", jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HUB.center());
+        } else if (name.equals("storm_back")) {
+            job.point("arrival", jp.revati.skyabyss.titan.storm.back.StormBackLayout.ARRIVAL);
+            job.point("hub", jp.revati.skyabyss.titan.storm.back.StormBackLayout.HUB_CENTER.above());
+            for (var rest : jp.revati.skyabyss.titan.storm.back.StormBackLayout.RESTS) {
+                job.point("rest_" + rest.id(), rest.spawn());
+            }
+            job.point("west_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.WEST_STONE.offset(1, 0, 0));
+            job.point("east_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EAST_STONE.offset(-1, 0, 0));
+            job.point("front_stone", jp.revati.skyabyss.titan.storm.back.StormBackLayout.FRONT_STONE.offset(1, 0, 0));
+            job.point("eye_hall", jp.revati.skyabyss.titan.storm.back.StormBackLayout.EYE_HALL_CENTER.offset(1, 0, 6));
         } else {
             job.point("arrival", jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL);
             for (var rest : jp.revati.skyabyss.titan.tide.back.TideBackLayout.RESTS) {
@@ -203,6 +217,7 @@ public final class StructureDump {
         ResourceKey<Level> dim = switch (name) {
             case "titan_back" -> TitanTravel.TITAN_BACK;
             case "tide_back" -> TideTravel.TIDE_BACK;
+            case "storm_back" -> jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK;
             default -> null;
         };
         ServerLevel level = dim == null ? null : server.getLevel(dim);
@@ -217,6 +232,8 @@ public final class StructureDump {
                 }
                 TitanBackBuilder.build(level, data);
             }
+        } else if (name.equals("storm_back")) {
+            jp.revati.skyabyss.titan.storm.back.StormBackBuilder.ensureBuilt(level);
         } else {
             TideBackBuilder.ensureBuilt(level);
         }

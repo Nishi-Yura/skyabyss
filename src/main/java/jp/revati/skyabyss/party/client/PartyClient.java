@@ -89,7 +89,7 @@ public final class PartyClient {
         Font font = mc.font;
         int x = g.guiWidth() - W - 4;
         // 潮殻の背の潮見の目盛り (右上) と重ならないよう、その下から
-        int y = Math.max(g.guiHeight() / 3, jp.revati.skyabyss.titan.tide.back.client.TideGaugeHud.bottom() + 6);
+        int y = Math.max(g.guiHeight() / 3, Math.max(jp.revati.skyabyss.titan.tide.back.client.TideGaugeHud.bottom(), jp.revati.skyabyss.titan.storm.back.client.StormGaugeHud.bottom()) + 6);
         String self = mc.player.getUUID().toString();
         for (PartyNetwork.Member m : last.members()) {
             if (m.id().equals(self)) {

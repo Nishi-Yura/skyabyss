@@ -61,12 +61,12 @@
 ```
 ./gradlew runShots -Pscript=tools/shots/dump_backs.txt                              # 岩鯨・潮殻の背 → run/shots/dump_backs/dumps/*.sbd
 SKYABYSS_DUMP=titan_back,tide_back ./gradlew runServer                               # 専用サーバーで書いて止まる → run/dumps/*.sbd (ポートが空いているとき)
-/skyabyss dev dump preset <titan_back|tide_back>                                      # 台本の cmd や RCON から (島が無ければ建てる)
+/skyabyss dev dump preset <titan_back|tide_back|storm_back>                           # 台本の cmd や RCON から (島が無ければ建てる)
 /execute in skyabyss:titan_back run skyabyss dev dump <名前> <x1 y1 z1> <x2 y2 z2>     # 好きな範囲
 ```
 
 書き出し先は `<ゲームのフォルダ>/dumps/<名前>.sbd` (環境変数 `SKYABYSS_DUMP_OUT` で変えられる)。台本では書き終わるまで `waitdump` で待つ。
-`/skyabyss dev arrive <titan_back|tide_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
+`/skyabyss dev arrive <titan_back|tide_back|storm_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
 
 図と検査:
 
@@ -80,7 +80,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | `walk.png` | 歩き始め (`--walk-from`、既定 `arrival`) から歩いて行ける足の位置 (高さで色) と目標の印 |
 | `report.txt` | 目標 (`--goal`) に何歩で着くか (着かなければ一番近くまで来た所。終了コード 1)、部屋 (`--seed`) から外への口の一覧、水が広がる見積もり (今流れている水、流れたら埋まる空気。部屋の中の分)、看板の一覧 (lang のキー) |
 
-起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …)。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
+起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …、`storm_back`: `arrival` `hub` `rest_*` `west_stone` `east_stone` `front_stone` `eye_hall`)。雷翼の背は `tools/shots/storm_back.txt` で書き出しと撮影を一度にする。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
 歩く決まり (上り 1・下り 3・頭 2 マス・水の中は 1 つ上へ) は背の自己テスト (`TideBackSelfTest.walk`) と同じ。水は実際より多めに出る (バニラは近くの落ち口の方へだけ流れるため)。
 部品は `sbd.py` (読む)、`analyze.py` (囲まれた空間と口・歩く・水・看板)、`render.py` (図)。新しく背中の検査を書くときは、自己テストに同じ探索を書き足す前にこれで見る。例は `docs/review/structure_*`。
 
@@ -93,6 +93,9 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 潮殻の巨神: `geo/entity/tide_shell{,_mid,_far}.geo.json`、`textures/entity/tide_shell{,_glowmask}.png`、`animations/entity/tide_shell.animation.json`、`sounds/tide/*.ogg` | `install_tide_shell.py` (形の元は `rough/tide_shell_titan.py` の案 B。珊瑚の LOD の塊・塔・段々の庭は install 側で足す)、音は `gen_tide_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/tide_shell_roughs/install/`。アニメの角度は `install_tide_shell.py` の `ANIM` に意図した向きで書く (GeckoLib の符号はスクリプトが直す) |
 | 潮殻の背の島 (巨神 B と同じ形のブロックの亀、08 の 21 章): `data/skyabyss/tide_back/turtle.bin` | `gen_tide_back_turtle.py` (形の元は `install_tide_shell.build_grid()`。ブロックの色は `rough/block_colors.json`。`--preview` で上と横の色の地図、`--cache` で調べる用の npz) | 同じ物ができる。変えたら配置の版 (`TideBackLayout.LAYOUT_VERSION`) を上げる |
 | 潮殻の背の敵: `geo/entity/{coral_thrall,reef_scuttler,bubble_puffer}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (珊瑚憑きは `_statue` も)、`animations/entity/<名前>.animation.json`、銛 `geo/gear/coral_spear{,_statue}.geo.json` など | `install_tide_mobs.py` (形の元は `rough/tide_mobs_v2.py` の A 案。頭と泡吹きの目を変えた) | 同じ物ができる。`--eyes original` で泡吹きの目をラフ A に戻す。目の比較は `docs/review/tide_shell_roughs/bubble_puffer_eyes.png`、確認用の絵は `docs/review/previews/tide_mobs/` |
+| 雷翼の背の敵: `geo/entity/{feather_warden,static_moth,thunder_supplicant}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (雷蛾は帯電で足す光 `static_moth_charge.png` も)、`animations/entity/<名前>.animation.json`、鉤槍と杖 `geo/gear/{hooked_glaive,supplicant_staff}.geo.json` など | `install_storm_mobs.py` (形の元は `rough/thunder_mobs.py`。既定は 12 の 14 章の推奨 羽守 B・雷蛾 B・雷乞い C、`--warden/--moth/--supplicant a\|b\|c` で選び直せる。面の隠れは同じ骨の中だけで数える) | 同じ物ができる。確認用の絵は `docs/review/previews/storm_mobs/` |
+| 雷翼の背の敵の音 `sounds/storm_mobs/*.ogg` と `sounds.json` の 18 行、スポーンエッグのモデル | `gen_storm_mob_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。`sounds.json` は自分の行だけ書き直す |
+| 余燼の背の敵: `geo/entity/{ash_thrall,ember_moth,cinder_roller}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (灰被りは燃え上がった姿の `ash_thrall_flared` も)、`animations/entity/<名前>.animation.json`、火掻き棒 `geo/gear/ash_poker.geo.json` など。音 `sounds/ember_mobs/*.ogg` | `install_ember_mobs.py` (形の元は `rough/ember_mobs_{thrall,moth,roller}.py` の A 案。`--option thrall=c` などで差し替え。アニメの姿勢の重なりも検査する。約 2 分)、音は `gen_ember_mob_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/previews/ember_mobs/`、ゲームの中は台本 `tools/shots/ember_mobs.txt` (13 の 18 章) |
 | 天の鍵 `textures/item/sky_key.png`、場面の音 `assets/skyabyss_story/sounds/*.ogg` と `sounds.json` (14 の 4 章) | `gen_story_assets.py` (`--option A\|B\|C`、既定 C。比較は `docs/review/sky_key_roughs/compare.png`) | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 1 章の続きのクエスト・会話の足し書き `data/skyabyss/{quest,dialogue/*_story.json,lore/entry/chapter1}`、文 `assets/skyabyss_story/lang`、07 の 16 章の表 | `gen_story_quests.py` (雷翼・余燼の仮の名は `NAMES`) | 同じ物ができる |
 | 潮殻の背の敵の音 `sounds/tide_mobs/*.ogg`、泡 `textures/entity/bubble_shot.png`、素材の絵 `textures/item/{tide_shell_shard,tide_dried_shell,bubble_sac}.png` (仮) | `gen_tide_mob_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
@@ -113,9 +116,11 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 巨神での移動: `textures/item/stone_whale_call.png`、`textures/block/titan_waymark_{front,side,base,cap}.png`、`textures/gui/travel/chart.png`、`sounds/titan/travel/*.ogg` | `gen_titan_travel_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。ラフ 3 案と比較画像は `docs/review/titan_travel_roughs/`、採用は `ADOPTED_CALL` / `ADOPTED_MARK`。`--roughs` なら docs にだけ書く。画面の配置を変えたら `TravelChartScreen.java` と値をそろえる |
 | 言伝ての板: `models/block/message_board.json`、`models/item/message_board.json`、`blockstates/message_board.json`、`textures/block/message_board_*.png` (32x32) | `gen_message_board.py` | 採用は既定で A。`--option B` などで別案に差し替えられる。ラフ 3 案と比較画像は `docs/review/board_roughs/`。`--roughs-only` なら docs にだけ書く |
 | 潮殻の装備 (三叉槍・盾・大鋏・銛): `models/item/{tide_shell_trident,coral_shield,coral_shield_blocking,tidecaller_claw,coral_harpoon}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{tide_shell_trident,coral_shield,tidecaller_claw,coral_harpoon,tide_chime_charm,moontide_pearl,tide_shell_core}.png` と護符・真珠・心核の `models/item/*.json` | `install_tide_gear.py` (ラフは `rough/tide_gear.py`、3 案と比較画像は `docs/review/tide_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/tide_gear/` から入れ直す) | 同じ物ができる。盾の持ち方 (`SHIELD_DISPLAY`) はバニラの盾の値 (03 の 11.6節) |
+| 余燼の装備 (戦斧・大鎚・火掻き): `models/item/{ember_war_axe,smith_hammer,thrall_poker}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{ember_war_axe,smith_hammer,thrall_poker,ember_mantle,kindling_charm,ember_lantern,ember_horn,ember_core,ember_shard,spark_dust,cinder_husk}.png` と、アイコンだけの品の `models/item/*.json` | `gen_ember_items.py` (ラフは `rough/ember_gear.py`、3 案と比較画像は `docs/review/ember_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/ember_gear/` から入れ直す) | 同じ物ができる。大鎚の持ち方 (`HAMMER_DISPLAY`) は目分量の最初の値 (実機で確認すること) |
 | 潮殻の鎧: `geo/armor/tide_shell_armor.geo.json`、`textures/armor/tide_shell_armor{,_glowmask}.png`、`textures/models/armor/tide_shell_layer_{1,2}.png`、`textures/item/tide_shell_{helmet,chestplate,leggings,boots}.png`、`models/item/tide_shell_*.json` | `install_tide_armor.py` (ラフは `rough/tide_armor.py`、採用は B。`--option a\|b\|c`、`--from-sources` で `tools/sources/tide_armor/` から) | 同じ物ができる |
 | 雷翼の装備 (弓・爪・鉤槍と、アイコンだけの品 7 つ): `models/item/{thunder_wing_bow,thunder_wing_bow_pulling_{0,1,2},raiju_claw,warden_glaive,storm_charm,storm_anklet,storm_eye_feather,thunder_wing_shard,thunder_wing_core,cloudgap_fruit,moth_dust}.json`、`textures/item/3d/*.png`、`textures/item/*.png`、`textures/mob_effect/static_ward.png` | `install_storm_gear.py` (ラフは `rough/storm_items.py`、3 案と比較画像は `docs/review/storm_gear_roughs/`。採用は 03 の 12.4節。`--option <品>=<a\|b\|c>`、`--from-sources` で `tools/sources/storm_gear/` から) | 同じ物ができる。弓の持ち方はバニラの `item/bow.json` の値 |
 | 雷翼の羽衣: `geo/armor/thunder_wing_armor.geo.json`、`textures/armor/thunder_wing_armor{,_glowmask}.png`、`animations/armor/thunder_wing_armor.animation.json`、`textures/models/armor/thunder_wing_layer_{1,2}.png`、`textures/item/thunder_wing_{helmet,chestplate,leggings,boots}.png`、`models/item/thunder_wing_*.json` | `install_storm_armor.py` (ラフは `rough/storm_armor.py`、採用は A。`--option a\|b\|c`、`--from-sources` で `tools/sources/storm_armor/` から) | 同じ物ができる |
+| 余燼の鎧: `geo/armor/ember_armor.geo.json`、`textures/armor/ember_armor{,_glowmask}.png`、`textures/models/armor/ember_layer_{1,2}.png`、`textures/item/ember_{helmet,chestplate,leggings,boots}.png`、`animations/armor/ember_armor.animation.json`、`models/item/ember_{helmet,chestplate,leggings,boots}.json` | `install_ember_armor.py` (ラフは `rough/ember_armor.py`、採用は A 火山の背。`--option a\|b\|c`、`--from-sources` で `tools/sources/ember_armor/` から) | 同じ物ができる |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
 `rough/` のそのほか (`armor*.py`、`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
