@@ -1115,6 +1115,10 @@ def main():
                             texture=[ATLAS_W, H])
     (PREVIEW_DIR / "stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=1), encoding="utf-8")
     print("done", json.dumps(stats, ensure_ascii=False))
+    # high-poly near LOD (docs/design/15_high_poly.md, assignment 6b): rebuild the near geo from the raw files just written
+    sys.path.insert(0, str(ROOT / "tools/rough"))
+    import hp_titans_storm_ember as hp  # noqa: E402
+    hp.install_titan("ember_titan")
 
 
 if __name__ == "__main__":

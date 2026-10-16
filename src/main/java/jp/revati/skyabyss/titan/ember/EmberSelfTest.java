@@ -316,7 +316,7 @@ public final class EmberSelfTest {
             double minY = cubes.stream().mapToDouble(c -> c[1]).min().orElse(0);
             expect(minY >= -1e-6, files[i] + " has cubes under the ground plane (y " + minY + ")", f);
         }
-        expect(counts[0] >= 2000 && counts[0] <= 3000, "the near LOD should be about 2500 cubes: " + counts[0], f);
+        expect(counts[0] >= 2000 && counts[0] <= 3500, "the near LOD should be about 2500 to 3300 cubes (high-poly trims, design doc 15): " + counts[0], f);
         expect(counts[1] < counts[0] && counts[2] < counts[1] && counts[2] > 0, "the LODs do not get coarser: " + java.util.Arrays.toString(counts), f);
         expect(glowPixels("/assets/skyabyss/textures/entity/ember_titan_glowmask.png", f) > 0, "the ember titan glowmask has no glowing pixels", f);
         JsonObject anim = json("/assets/skyabyss/animations/entity/ember_titan.animation.json", f);

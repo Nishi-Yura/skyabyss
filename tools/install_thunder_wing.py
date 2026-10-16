@@ -886,6 +886,10 @@ def main():
     preview_poses(geos, tex, glow)
     preview_far(geos, tex, glow)
     print("done", json.dumps(stats, ensure_ascii=False))
+    # high-poly near LOD (docs/design/15_high_poly.md, assignment 6b): rebuild the near geo from the raw files just written
+    sys.path.insert(0, str(ROOT / "tools/rough"))
+    import hp_titans_storm_ember as hp  # noqa: E402
+    hp.install_titan("thunder_wing")
 
 
 if __name__ == "__main__":
