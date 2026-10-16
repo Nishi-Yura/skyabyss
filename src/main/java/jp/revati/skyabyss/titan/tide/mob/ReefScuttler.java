@@ -49,6 +49,7 @@ public class ReefScuttler extends TideMob {
     // 水の中の速さ (掛け算)
     static final double WATER_SLOW = -0.5;
     static final double PACK_RADIUS = 10;
+    static final int BITE_INTERVAL = 28;
 
     public ReefScuttler(EntityType<? extends Monster> type, Level level) {
         super(type, level, "reef_scuttler", "attack");
@@ -78,7 +79,13 @@ public class ReefScuttler extends TideMob {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true));
+        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
+            // 噛みつきの間は 1.4 秒 (バニラの 1 秒より長い)。群れで囲まれても、一度に削られすぎないように
+            @Override
+            protected int getAttackInterval() {
+                return adjustedTickDelay(BITE_INTERVAL);
+            }
+        });
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.6));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));

@@ -51,6 +51,10 @@ public class BubblePuffer extends TideMob {
     static final int SHOT_INTERVAL = 50;
     static final int SHOT_WINDUP = 9;
     static final double SHOT_RANGE = 14;
+    // 相手との間合い (この間なら動かない) と、相手の足もとからの高さ
+    static final double MIN_KEEP = 3;
+    static final double MAX_KEEP = 9;
+    static final double HOVER = 2.0;
 
     private int calm;
     private final Map<UUID, Integer> spineHit = new HashMap<>();
@@ -216,19 +220,24 @@ public class BubblePuffer extends TideMob {
             mob.getLookControl().setLookAt(t, 30f, 30f);
             face(t);
             double d = mob.distanceTo(t);
-            // 離れた所 (5〜9 ブロック) で、相手より 2〜3 ブロック上に浮く
+            // 3〜9 ブロックの間なら、その場に浮いたまま (高さだけ合わせる)。遠ければ 7 ブロックまで寄る。
+            // 近づいた人から逃げ続けない: 近づかれたらふくらんで、その場で棘を立てる (剣の届く所に残る)
             if (--repath <= 0) {
                 repath = 15;
-                Vec3 away = mob.position().subtract(t.position()).multiply(1, 0, 1);
-                if (away.lengthSqr() < 1e-3) {
-                    away = new Vec3(1, 0, 0);
-                }
-                double want = d < 5 ? 7 : d > 9 ? 7 : d;
-                Vec3 goal = t.position().add(away.normalize().scale(want)).add(0, 2.5, 0);
                 if (mob.isInflated()) {
-                    goal = mob.position().add(away.normalize().scale(1.5)).add(0, 0.5, 0); // ふくらんだら少し離れる
+                    mob.getNavigation().stop();
+                    mob.setDeltaMovement(mob.getDeltaMovement().multiply(0.5, 0.5, 0.5));
+                } else {
+                    Vec3 away = mob.position().subtract(t.position()).multiply(1, 0, 1);
+                    if (away.lengthSqr() < 1e-3) {
+                        away = new Vec3(1, 0, 0);
+                    }
+                    double want = d > MAX_KEEP ? 7 : Math.max(d, MIN_KEEP);
+                    Vec3 goal = t.position().add(away.normalize().scale(want)).add(0, HOVER, 0);
+                    if (goal.distanceToSqr(mob.position()) > 1.0) {
+                        mob.getNavigation().moveTo(goal.x, goal.y, goal.z, 1.0);
+                    }
                 }
-                mob.getNavigation().moveTo(goal.x, goal.y, goal.z, 1.0);
             }
             if (cooldown > 0) {
                 cooldown--;
