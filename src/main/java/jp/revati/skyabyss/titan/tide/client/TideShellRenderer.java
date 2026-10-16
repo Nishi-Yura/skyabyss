@@ -24,6 +24,15 @@ public class TideShellRenderer extends GeoEntityRenderer<TideShellEntity> {
         this.shadowRadius = 0f;
     }
 
+    // GeckoLib 4.9.3 は、LivingEntity でないエンティティの向きを描画に使わない (体の向きを 0 として 180 度だけ回す)。
+    // そのままでは、いつも南を向いて描かれる (ゲームで見て、頭が進む向きの反対にあった)。エンティティの yaw で回す
+    @Override
+    protected void applyRotations(TideShellEntity titan, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks,
+                                  float rotationYaw, float partialTick, float nativeScale) {
+        float yaw = Mth.rotLerp(partialTick, titan.yRotO, titan.getYRot());
+        super.applyRotations(titan, poseStack, ageInTicks, yaw, partialTick, nativeScale);
+    }
+
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (頭の先から尾の先までの線分) までの距離で選ぶ
     private static final class LodModel extends DefaultedEntityGeoModel<TideShellEntity> {
         private static final ResourceLocation NEAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/tide_shell.geo.json");

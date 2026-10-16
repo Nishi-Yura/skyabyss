@@ -63,7 +63,8 @@ public class TideShellEntity extends Entity implements GeoEntity {
     // 休むときの水面は底から 3.5 ブロック上 (潮門の敷居 geo y=9 が水面の 1 ブロック上)。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
     static final double REST_DRAFT = 3.5;
     static final double CRUISE_DRAFT_MAX = 29.0;
-    static final double CRUISE_DRAFT_MIN = 6.0;
+    // 浅い所でも、底から 22 ブロック上までしか浮かない (甲羅の頂が海から 12 ブロックまで。ゲームで見て、もっと浮くと島に見えなかった)
+    static final double CRUISE_DRAFT_MIN = 22.0;
     // 甲羅の頂 (光を測る所)
     static final double DOME_TOP = 34.0;
 
@@ -73,7 +74,11 @@ public class TideShellEntity extends Entity implements GeoEntity {
     private static final float TURN_RATE = 0.4f;
     private static final double CRUISE_RISE = 0.025;
     private static final double REST_RISE = 0.05;
-    private static final double LOOK_AHEAD = 24.0;
+    // 前方を確かめる距離。頭は中心から 87 ブロック先まで出るので、近くと遠くの 2 点を見る (24 では頭が陸に乗り上げた)
+    private static final double LOOK_AHEAD = 30.0;
+    private static final double LOOK_FAR = 60.0;
+    // 巡航の目的地と前方に要る水深 (浅い所を歩くと体が大きく出すぎる)
+    private static final int CRUISE_DEPTH = 10;
     private static final int APPROACH_GIVE_UP = 4800;
     // コマンドで休ませたときの長さ
     static final int FORCED_REST = 3600;
@@ -215,9 +220,12 @@ public class TideShellEntity extends Entity implements GeoEntity {
         }
         // 前方 24 ブロックの海面に水がない・浅い (読み込まれていれば) なら、向きを変える
         if (tickCount % 10 == 0 && blockedCooldown <= 0) {
-            Vec3 ahead = position().add(offset(getYRot(), 0, 0, LOOK_AHEAD));
-            if (TideOcean.loaded(level, ahead.x, ahead.z) && !TideOcean.walkable(level, ahead.x, ahead.z, 6)) {
-                turnAway(level);
+            for (double d : new double[] {LOOK_AHEAD, LOOK_FAR}) {
+                Vec3 ahead = position().add(offset(getYRot(), 0, 0, d));
+                if (TideOcean.loaded(level, ahead.x, ahead.z) && !TideOcean.walkable(level, ahead.x, ahead.z, 6)) {
+                    turnAway(level);
+                    break;
+                }
             }
         }
         steer(targetX, targetZ, cruiseHeight(level), CRUISE_SPEED, CRUISE_RISE);
@@ -348,7 +356,7 @@ public class TideShellEntity extends Entity implements GeoEntity {
         }
     }
 
-    // 巡航の高さ: 前方の海底に立つ高さ。ただし甲羅の頂が海から約 5 ブロック出る所より沈まず、潮門の敷居が水に隠れる所より浮かない
+    // 巡航の高さ: 前方の海底に立つ高さ。ただし甲羅の頂が海から約 5 ブロック出る所より沈まず、12 ブロック出る所より浮かない
     private double cruiseHeight(ServerLevel level) {
         double sea = level.getSeaLevel();
         double stand = Double.isNaN(floorY) ? sea - CRUISE_DRAFT_MAX : floorY - 1.0;
@@ -371,7 +379,7 @@ public class TideShellEntity extends Entity implements GeoEntity {
 
     private void turnAway(ServerLevel level) {
         blockedCooldown = 100;
-        Vec3 p = TideOcean.findOceanPoint(level, random, getX(), getZ(), 80, 240, 6, 24);
+        Vec3 p = TideOcean.findOceanPoint(level, random, getX(), getZ(), 80, 240, CRUISE_DEPTH, 24);
         if (p != null && !inFront(p, 60)) {
             targetX = p.x;
             targetZ = p.z;
@@ -397,10 +405,10 @@ public class TideShellEntity extends Entity implements GeoEntity {
         Vec3 p = null;
         if (!near.isEmpty()) {
             ServerPlayer player = near.get(random.nextInt(near.size()));
-            p = TideOcean.findOceanPoint(level, random, player.getX(), player.getZ(), 160, 320, 6, 16);
+            p = TideOcean.findOceanPoint(level, random, player.getX(), player.getZ(), 160, 320, CRUISE_DEPTH, 16);
         }
         if (p == null) {
-            p = TideOcean.findOceanPoint(level, random, getX(), getZ(), 200, 300, 6, 12);
+            p = TideOcean.findOceanPoint(level, random, getX(), getZ(), 200, 300, CRUISE_DEPTH, 12);
         }
         if (p == null) {
             // 読み込まれていない先は調べられない。今の向きの 300 ブロック先 (歩きながら前方を確かめる)
