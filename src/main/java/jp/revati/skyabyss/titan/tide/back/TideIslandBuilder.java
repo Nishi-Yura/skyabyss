@@ -774,7 +774,7 @@ public final class TideIslandBuilder {
         }
         for (int x = s0.x1(); x <= s0.x2(); x++) {
             for (int z = s0.z1() - 1; z <= s0.z2() + 1; z++) {
-                kit.set(x, HUB_LEDGE + 6, z, TideKit.DARK);
+                kit.set(x, HUB_LEDGE + 6, z, Math.floorMod(x + z, 3) == 0 ? TideKit.LAMP : TideKit.DARK);
             }
         }
         // 前室の外 (段 0 の南北と、西の通路の口以外) は壁で囲む
