@@ -2,7 +2,7 @@
 
 - 文書番号: 13
 - 対象: 第四の巨神「余燼の巨神」、その背中のディメンション（余燼の背）、体の中の三つの試練、中ボス「灰の鍛え手」、最終ボス「余燼の心臓」、1 章の締め（四つ目の欠片）
-- 状態: 設計案（未実装）。数値はすべて案で、実装と試遊で詰める。座標は配置の考え方を示すもので、建てるときに直してよい。**ベータ（巨神 4 体を倒すまで）を急ぐため、ラフは推奨案で実装に入る**（14 章。選ばれなかった案のデータも残す）
+- 状態: 設計案。骨組み（11.1節の順 1）を実装した（17 章）。数値はすべて案で、実装と試遊で詰める。座標は配置の考え方を示すもので、建てるときに直してよい。**ベータ（巨神 4 体を倒すまで）を急ぐため、ラフは推奨案で実装に入る**（14 章。選ばれなかった案のデータも残す）
 - 型: [08 潮殻の巨神](08_tide_shell.md) と同じ章立て。02・08 と同じ決まり（参加者、預かり、ピースフル、背中の決まり、巨神の形の背中）は、違うところだけ書く
 - 関連: [01 全体設計](01_overview.md)、[03 装備](03_gear_and_endgame.md) の 3.4節・9.8節・10章、[04 成長](04_growth_and_skills.md)、[05 伝承](05_lore_npc_quest.md)、[07 NPC](07_npc_quest.md)、[09 巨神での移動](09_titan_travel.md)、[10 進み](10_progression_multiplayer.md)、ラフは `docs/review/ember_roughs/`
 - 並行: 第三の巨神「雷翼」は別の担当（`12_thunder_wing.md`）。雷翼は「空・嵐・光」、余燼は「熱・溶岩・灰」に寄せ、乗り方・試練・敵がかぶらないようにした（13.1節）
@@ -964,3 +964,142 @@
 | --- | --- | --- |
 | 2026-10-17 | 第四の巨神を「余燼の巨神」（地の中を泳ぐ火蜥蜴）とする。昼は地の中を進んで尾根だけを出し、夜に浮かんで眠る。乗り方は、息を読んで口へ歩いて入る形。背中は別のディメンション（`ember_back`）で、体は巨神と同じ形のブロックで建て、試練は体の中。人ごとの「熱」が軸。試練は灰の道（道を作って渡る）・鍛えの間（熱の色を読む）・火守り（火を絶やさない戦い）。中ボスは灰の鍛え手、最終ボスは余燼の心臓（燃える炉 → 割れた炉 → 余燼。最後は部屋が冷える）。報酬は同じ型。四つ目の欠片で天の鍵になり、1 章を閉じる。詳細は 13 | 三体と違う体験にし、1 章の山場にするため。雷翼（空・嵐・光）と被らないよう熱・溶岩・灰に寄せた |
 | 2026-10-17 | ベータ（巨神 4 体を倒すまで）は、余燼のラフを推奨案で実装に入る。選ばれなかった案のデータは残す | ベータを急ぐため。差し替えは取り込みの 1 行 |
+
+---
+
+## 17. 実装の記録（骨組み。11.2節の担当 0、2026-10-16）
+
+11.1節の順 1 を作った。ほかの担当（A〜G）は、このコミットから枝を切って並列に作る。ここに書いた名前・API・箱の名前は変えない（中身と値は担当が直してよい）。
+
+### 17.1 作ったもの
+
+| ファイル | 中身 | 今後持つ担当 |
+|---|---|---|
+| `titan/ember/EmberIds.java` | 全担当が使う ID・音・lang の鍵の頭・休み場・碑文・図鑑の並びの一覧（17.2節） | 0（新しい ID は 0 か B に頼む） |
+| `titan/ember/EmberSetup.java` | 骨組みの登録（熱の音 2 つ）と、起動時の `Titans.bindBack(EmberIds.BACK, Titans.EMBER, EmberTravel::leave)` | 0 |
+| `titan/ember/EmberNetwork.java`、`client/EmberHeatClient.java` | 熱を目盛りへ送るパケット（版 `ember-1`、`ember_heat`）と、クライアントが持つ自分の熱 | 0（B の `HeatHud` が読む） |
+| `titan/ember/back/EmberHeat.java` | 熱の API（17.3節）と最小の中身 | B が中身を書く |
+| `titan/ember/back/EmberBackLayout.java` | **仮の**部屋の箱と休み場（17.4節） | B が体に合わせて直す |
+| `titan/ember/EmberTravel.java` | 仮の乗り降り: `board`（資格・到着点。体が無ければ灰の原の上）、`leave`（今は共有スポーン地点）、見送りの石に 0.5 秒、220 より外で到着点へ | A |
+| `titan/ember/EmberCommands.java` | `titan board ember`、`emberback go <場所>`・`heat <0-100>`・`status` | A・B が足す |
+| `titan/ember/EmberSkeletonSelfTest.java` | 自己テスト `SELFTEST ember skeleton`（17.6節） | 0 |
+| `data/skyabyss/dimension/ember_back.json`・`dimension_type/ember_back.json` | 平らな灰の原: 岩盤 1、深層岩 20、玄武岩 16、凝灰岩 26、滑らかな玄武岩 1（いちばん上は y 63）。高さ 0〜255、`ultrawarm` は false（焼き入れの槽の水が消えないように） | B |
+| `data/skyabyss/worldgen/biome/ember_back.json` | 空 赤黒（#3A1A14）、霧 灰（#6B6260）、粒 `white_ash`、音は玄武岩の三角州（B が独自の音に替える） | B |
+| `data/skyabyss/damage_type/heat.json`・`heat_burst.json`・`engulfed.json`、`data/minecraft/tags/damage_type/bypasses_armor.json` | 傷の種類 3 つ。どれも `#is_fire` に入れない。`heat` と `engulfed` は防具を通る | 0 |
+| `assets/skyabyss_ember/lang/{ja_jp,en_us}.json` | 余燼の lang。担当ごとの区切りの行 `"__ember.A"` などの下に、自分の行をまとめる | 全担当 |
+| `assets/skyabyss/sounds.json` | `ember_heat_warn`・`ember_scorch`（仮にバニラの音） | A が独自の音に替える |
+| 共通化 `titan/TitanBodyBlocks.java` | 柱ごとの区間の表（`.bin`、"TBT1"）の読み・置き・地表の高さ。`place(level, flags, y → 背景のブロック)` | 共通 |
+| 共通化 `client/titan/BackGaugeHud.java` | 右上の板の置き場所（効き目の下へずらす）・幅・角を落とした枠・はみ出さない文・仲間の表示の下端（`bottom()` は登録された板すべてを見る） | 共通 |
+| 共通化 `titan/TitanGate.java` | 入口の待ち・乗る資格（断ったら待たせる）・乗り物から降ろす・戻る段の 0.5 秒 | 共通 |
+
+既存のファイルへの変更は最小限にした。
+
+| ファイル | 変更 |
+|---|---|
+| `titan/tide/back/TideTurtle.java` | 読み書きを `TitanBodyBlocks` に任せた（公開の名前は同じ） |
+| `titan/tide/back/client/TideGaugeHud.java` | 置き場所・幅・枠・文を `BackGaugeHud` に任せた。`bottom()` は `BackGaugeHud.bottom()`（仲間の表示 `PartyClient` は今までどおりこれを呼ぶ） |
+| `titan/tide/TideTravel.java` | 待ち・資格・舟から降ろす・0.5 秒を `TitanGate`（待ちの記録の名前 `skyabyss_tide_cooldown` は前と同じ） |
+| `titan/TitanBacks.java` | `isBack` に `EmberIds.BACK` を一行。`extraBanned` に余燼の背のスポーンエッグ（火打石とファイヤーチャージはもともとどの背中でも禁止） |
+| `titan/TitanEvents.java` | `titan leave` が、`Titans.bindBack` で登録した背中（雷翼・余燼）なら `Titans.sendDown` で戻す |
+| `SkyAbyss.java`、`SelfTestRunner.java` | 一行ずつ |
+
+`progress/Titans.java` は直していない（`bindBack` は `EmberSetup` から呼ぶ）。`BossRoom`・`TitanKeeper`・`SignFit`・`BackWhispers`・`PhasedBossBar` は読むだけ。
+
+### 17.2 ID の一覧（`EmberIds`。名前空間はすべて `skyabyss`）
+
+| 種類 | ID | 登録する担当 |
+|---|---|---|
+| 巨神の名前・記録 | `ember`（`Titans.EMBER`、`Titans/ember`、天井のカウンタ） | — |
+| ディメンション・バイオーム | `ember_back` | 0 |
+| 体の表 | `data/skyabyss/ember_back/body.bin` | B |
+| 傷の種類 | `heat`（焦げ。防具を通る）、`heat_burst`（噴気・亀裂・心臓の地形の熱。防具で減る）、`engulfed`（呑まれた。防具を通る） | 0 |
+| エンティティ | `ember_titan`・`ember_mouth`（A）、`ash_thrall`・`ember_moth`・`cinder_roller` とスポーンエッグ `*_spawn_egg`（D）、`ash_smith`（E）、`ember_heart`・`ash_pellet`（灰の礫）（F） | 右の担当 |
+| ブロック | `cooled_crust`・`ash_urn_stand`（C1。冷え殻は F の区画の床も使う）、`ash_forge`・`forge_bellows`・`ash_anvil`・`quench_trough`（C2）、`ember_hearth`・`heat_vent`（C3）、`kindle_stone`（熾り石、B）、`cinder_lamp`（G） | 右の担当 |
+| 試練の品 | `ash_urn`（C1）、`fire_key_hot`・`fire_key`（C2）、`live_coal`（熾、C3） | 右の担当 |
+| 地上の品 | `warm_stone`（温石、A） | A |
+| 素材 | `ember_shard`・`ember_core`・`spark_dust`・`cinder_husk`・`ember_horn`（熾火の角杯） | G |
+| 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯）。初回の選択は後ろの 3 つ | G |
+| 音（0） | `ember_heat_warn`、`ember_scorch` | 0 |
+| 音（A） | `ember_rumble`・`ember_breath_in`・`ember_breath_out`・`ember_swallow`・`ember_wall_scrape`・`ember_far_beat`・`ember_world_turn` | A |
+| 音（B） | `ember_back_ambient`・`ember_stone_ring`・`ember_forge_dim` | B |
+| 音（C） | `ember_ash_scatter`・`ember_crust_crack`・`ember_crust_sink`・`ember_engulf`（C1）、`ember_bellows`・`ember_anvil_strike`・`ember_anvil_ting`・`ember_bloom_crack`・`ember_quench`・`ember_door_kindle`（C2）、`ember_vent_hiss`・`ember_vent_burst`・`ember_hearth_feed`・`ember_hearth_douse`（C3） | 右の担当 |
+| 音（D・E・F） | `ash_thrall_{ambient,hurt,death,shell_break,ignite}`、`ember_moth_{flutter,death}`、`cinder_roller_{curl,roll,bonk,hurt,death}`（D）、`ash_smith_{slam,inhale,blast,sparks,rage,hurt,death}`（E）、`ember_heart_{beat,roar,breath,pulse,orb,floor,gale,pellet,chill,embers,fading,echo,veil,death}`（F） | 右の担当 |
+| 休み場 | `throat`・`hub`・`w0`・`w1`・`e0`・`s0`・`heart` | B |
+| 碑文 | `lore_ember_mouth`・`_hub`・`_west`・`_east`・`_south`・`_heart` | B が置く、G が文 |
+| 伝承 | `chapter1/ember`（14 の約束の仮の項目、A が見つけたときに記す）、`chapter1/ember_titan`・`ember_ruins`・`ash_smith`・`ember_stilled`・`forge_ledger`、碑文ごとの `chapter1/inscription_ember_*` | G |
+
+lang の鍵の頭: 0 `message.skyabyss.ember.heat.*` と `death.attack.skyabyss.{heat,heat_burst,engulfed}`、A `message.skyabyss.ember.surface.*`・`commands.skyabyss.ember.*`・`title.skyabyss.ember_back`、B `message.skyabyss.ember.back.*`・`message.skyabyss.ember.whisper.*`・`gui.skyabyss.ember_heat.*`・`sign.skyabyss.lore_ember_*`、C1〜C3 `message.skyabyss.ember.trial.{west,east,south}.*`、D `message.skyabyss.ember.mob.*`、E `message.skyabyss.ember.smith.*`、F `message.skyabyss.ember.heart.*`、G `tooltip.skyabyss.ember.*`。品・ブロック・エンティティの名前はバニラの決まり（`item.skyabyss.<ID>` など）で、登録した担当が書く。
+
+- 熾は火守りの熾り石（`kindle_stone`）と紛らわしくないよう、品は `live_coal`、石は `kindle_stone` にした。温石は火床（`ember_hearth`）と分けて `warm_stone`（13 の 11.2節のクラス名 `HearthStoneItem` は A が `WarmStoneItem` にしてよい）。
+- 火の鍵は「焼き入れ前（10 秒で割れる）」と「焼き入れた鍵」を別の品にした（持ち物の表示と、割れる時計を品の種類で分けられる）。
+- 灰溜まりは灰色の羊毛、封印は `SealedGateBlock`、天の鍵の欠片は `ModItems.SKY_KEY_FRAGMENT` で、新しい ID は作らない。
+
+### 17.3 熱の API（`titan.ember.back.EmberHeat`）
+
+| 呼び方 | 中身 |
+|---|---|
+| `add(player, 量, Reason)` | 熱をためる。量に `gainMultiplier`（B が書く倍率）がかかる。背中の外・観戦者・クリエイティブでは動かない。負の量は `cool` と同じ。新しい熱を返す |
+| `cool(player, 量)` | 冷ます（倍率なし） |
+| `get(player)`、`band(player)`、`flushed(player)` | 今の熱、帯（`NORMAL` 0〜49・`FLUSHED` 50〜84・`SCORCHING` 85〜99・`SCORCHED` 100）、火照りか（灰の殻 2 倍・鎧の攻撃 +10% の判定） |
+| `set(player, 値)`、`reset(player)` | コマンドとテスト用、0 に戻す（背中を出た・死んだ・リセットで広間へ移した） |
+| `affects(player)` | 熱が効く人か（余燼の背にいて、観戦者・クリエイティブでない） |
+| `Reason` | `LAVA_NEAR`・`HOT_GROUND`・`SHAFT`・`VENT`・`MOTH`・`ROLLER_TRAIL`・`ENGULFED`・`FIRE_KEY`・`LIVE_COAL`・`SMITH`・`HEART`・`OTHER` |
+| 定数 | `MAX` 100、`FLUSHED` 50、`SCORCHING` 85 |
+
+- 骨組みの中身: 値の保持（保存しない）・0〜100 に収める・背中を出る／死ぬ／ログアウトで 0・クライアントへ同期（変わったら 5 tick ごと、変わらなくても 2 秒ごと。`EmberHeatClient.heat()`）。
+- B が書く所は 2 つの空の関数: `gainMultiplier(player, reason)`（火炎耐性 0.5、角杯 0.6、鎧 0.7 など）と `tickPlayer(player)`（ふだんの冷え、溶岩のそば、灰溜まり、水、焦げの傷 `EmberIds.HEAT`、火照りの光、85 の警告 `EmberSetup.HEAT_WARN`）。
+- 傷を与える側の約束: 焦げは `EmberIds.HEAT`、噴気・亀裂の噴き・心臓の地形の熱は `EmberIds.HEAT_BURST`、溶岩に落ちたときは `EmberIds.ENGULFED`（溶岩の傷を使わない）。敵の打撃（鎚・火掻き棒など）はふつうの mob の攻撃。
+
+### 17.4 仮の部屋の箱（`EmberBackLayout`。B が直す）
+
+y は床のブロック（人は +1）。頭は北（-Z）。灰の原の上は y 63。箱は両端を含む。自己テストで「重ならない・体の箱の中・休み場が自分の部屋の中」を見ている。
+
+| 名前 | 箱 (x, y, z の最小〜最大) | 中身を建てる担当 |
+|---|---|---|
+| `BODY`（体の外形） | (-60, 40, -190)〜(60, 150, 190) | B |
+| `MOUTH`（口の中） | (-6, 64, -174)〜(6, 80, -142)。到着 `ARRIVAL` (0, 65, -150) 南向き、見送りの石 `RETURN_STONE` (-1, 64, -173)〜(1, 66, -172) | B（A が使う） |
+| `HUB`（炉心の広間） | (-15, 85, -75)〜(15, 103, -45)。中心 (0, 85, -60) 半径 14 | B |
+| `WEST`（灰の道） | (-47, 70, -30)〜(-8, 92, 30) | C1 |
+| `EAST`（鍛えの間） | (8, 80, -30)〜(43, 96, 9) | C2 |
+| `SMITH`（鍛え手の間） | (12, 80, 12)〜(40, 94, 40)。中心 (26, 80, 26) 半径 13 | E |
+| `SOUTH`（火守りの谷） | (-10, 70, 45)〜(10, 110, 115) | C3 |
+| `HEART_ANTE`（熾の底の前室） | (-3, 57, -43)〜(2, 62, -38) | B |
+| `HEART`（熾の底） | (-17, 52, -37)〜(17, 69, -3)。中心 (0, 56, -20) 半径 16（灰の原より下、腹の底） | F |
+
+休み場（焚き火の前の床）: `throat` (0, 75, -115)、`hub` (0, 85, -52)、`w0` (-12, 72, -26)、`w1` (-28, 72, 0)、`e0` (12, 80, -26)、`s0` (0, 70, 48)、`heart` (0, 57, -40)。
+
+- 今は体が建っていないので、箱の中は灰の原の空中か地中。C1〜F は `/skyabyss emberback go <箱の名前>`（箱の中心の床の上）か `go rest_<休み場>` で行き、自分の箱の中に中身を置いて試してよい。
+- 箱の中身は、箱の角（`box.min()`）や中心からの相対で書く。B が箱を動かしても付いて来るように。
+- 体の大きさ（3.2節、全長約 370、胴の幅約 95）に対して、広間の左右に灰の道（幅 40）と鍛えの間（幅 36）を並べると入らないので、仮の箱は灰の道と鍛えの間を広間の南（胸と腹の脇）へずらした。B が体を作るとき、入らなければ 1.8 倍（15 章の判断 2）を選ぶ。
+- 3.3節では広間の床が灰の原より 22 上、喉の坂は「下り」だが、到着（床 65）より広間（85）が高い。B が坂の向きか高さを決める。
+
+### 17.5 共通化の使い方
+
+- `TitanBodyBlocks`: `new TitanBodyBlocks(EmberIds.BODY_BIN)` を static に一つ持ち、`place(level, flags, y -> y <= EmberBackLayout.PLAIN_TOP ? 灰の原の層 : 空気)` で置く。`shellTop`・`top`・`at` で地表を引く。表が置かれる前は `present()` が false。
+- `BackGaugeHud`: 目盛りのクラス（`@EventBusSubscriber(value = Dist.CLIENT)`）の static 初期化で `BackGaugeHud.register(mc -> 出ているか)` を一度呼ぶ。描くときは `w = width(g, 中身の幅, 最小)`、`x = left(g, w)`、`y = top(mc)`、`frame(...)`、`text(...)`。仲間の表示は登録された板の下へ自動で並ぶ。
+- `TitanGate`: `EmberTravel.PASSAGE`（`new TitanGate("ember", Titans.EMBER, 60, 10)`）。熱の口に入ったら `PASSAGE.admit(player)` が true のときだけ `EmberTravel.board`。見送りの石は `PASSAGE.dwell(player, 中にいるか, 2)`。
+- 雷翼の 12 の 10.2節は同じものを `BackShape`・`BackGaugeHud` と呼んでいる。雷翼の担当が先に同じ名前のファイルを作っていたら、合わせるときに片方へ寄せる（中身は潮殻からの同じ切り出し）。
+
+### 17.6 テスト
+
+- `./gradlew compileJava --offline` が通る。
+- `SKYABYSS_SELFTEST=1 ./gradlew runServer`: `SELFTEST ember skeleton` が通り、岩鯨・潮殻の自己テスト（`tide`・`tide back`・`tide_heart`・`tide mobs`・`titan back` ほか）もすべて通る（17.7節）。
+- `SELFTEST ember skeleton` が見るもの: ディメンションと灰の原（いちばん上が滑らかな玄武岩で y 63、岩盤、バイオーム）、体が無いときの到着点が灰の原の上、背中の一覧と `bindBack`、スポーンエッグの禁止、傷の種類 3 つが `#is_fire` に無く、`heat`・`engulfed` だけ防具を通る、熱の API（足す・冷ます・上限・帯・背中の外では動かない）、部屋の箱（重ならない・体の中・休み場）、`EmberIds` の ID が重ならない・図鑑が 10 品、`TitanGate`（資格のない人を断って待たせる、資格のある人は通す、0.5 秒で一度だけ、降りたら数え直す、待ちの間は数えない）、地上にいる資格のある人が `/skyabyss titan board ember` を打つと余燼の背の到着点（今は灰の原の上）に立つ。
+- 試遊（ゲームの画面での確かめ）はしない（並列の担当どうしでキー入力が干渉したため）。確かめは compileJava・自己テスト・データの検査だけ。
+
+### 17.7 結果
+
+- `compileJava` が通る。
+- 自己テスト: 新しいワールドの 1 回目は `SELFTEST whale` だけが落ちた（「the new whale is not registered」。チャンクの読み込みが遅い初回だけで、余燼の変更とは関係しない）。同じワールドの 2 回目は 22 の系統と最後のまとめ `SELFTEST PASSED` がすべて通った（`tide`・`tide back`・`tide_heart`・`tide mobs`・`story`・`progress`・岩鯨の背、`ember skeleton`）。
+- `titan board ember` で灰の原に立てることは、ゲームの画面ではなく自己テスト（`SELFTEST ember skeleton` の最後の確かめ）で見た。偽のプレイヤーは接続が無く位置合わせが効かないので、ディメンションが移ることと、到着点が灰の原の上の立てる場所であることを見る。
+- m1-sky-pass（雷翼の伝承とクエスト）を取りこんだあとの再実行（2026-10-16）: 失敗の行は無く、`SELFTEST ember skeleton PASSED` と最後のまとめ `SELFTEST PASSED`（系統ごとの PASSED 22 行）。
+
+### 17.8 ほかの担当への申し送り
+
+- **A 地上**: `EmberTravel`・`EmberCommands` は仮の版。`leave` を「眠っていれば口の前 6 ブロック、潜っていれば最後に眠った場所の口の前、記録も無ければ共有スポーン地点」に、`board` に呑みこむ音と橙の沈み（`TideNetwork.Plunge` と同じ形のパケットを自分の版で）を足す。灰の原に 5 秒で到着点へ（2.5節）も A。`chapter1/ember` の伝承は見つけたときに。`Progression.worldAllows(server, Titans.EMBER)` を見て出す。温石は「雷翼を止めた」の知らせで渡す（雷翼のファイルは触らない）。
+- **B 体と広間**: `EmberBackLayout` の値を体に合わせて直し、最初の 1 日で公開する（名前は変えない）。`EmberHeat` の `gainMultiplier` と `tickPlayer` に熱の中身、`client/HeatHud.java`（`BackGaugeHud` と `EmberHeatClient`）。`LAYOUT_VERSION` を上げて体を建てる。体を建てたら `EmberTravel.arrival` は自動で舌の上になる。
+- **C1・C2・C3・E・F**: 自分の箱の中だけ。熱は `EmberHeat.add`・`cool` だけ。傷の種類は 17.3節。ID は `EmberIds` から。
+- **D 敵**: 火照りは `EmberHeat.flushed(player)`。蛾が触れたら `add(player, 8, Reason.MOTH)`。
+- **G 品・伝承**: 外套・角杯・鎧のたまり方の倍率は B の `gainMultiplier` に入れてもらう（品の側は「持っているか」を返す関数だけ）。
+- **登録**: 各担当は自分の Setup を作って `SkyAbyss` に一行、自己テストは `SelfTestRunner` に一行。lang は `assets/skyabyss_ember/lang` の自分の区切りの下。音は `assets/skyabyss/sounds.json` に一行ずつ（A の `gen_ember_sounds.py` がまとめて書くなら、A に頼む）。
+- **パケット**: 自分のパケットは自分のクラスで、別の版（例 `ember-surface-1`）として登録する。

@@ -62,12 +62,12 @@ public final class TideOcean {
 
     // ---- 海の調べ方
 
-    static boolean loaded(ServerLevel level, double x, double z) {
+    public static boolean loaded(ServerLevel level, double x, double z) {
         return level.getChunkSource().hasChunk(Mth.floor(x) >> 4, Mth.floor(z) >> 4);
     }
 
     // 海面に水があるか (読み込まれていなければ false)
-    static boolean waterAtSurface(ServerLevel level, double x, double z) {
+    public static boolean waterAtSurface(ServerLevel level, double x, double z) {
         if (!loaded(level, x, z)) {
             return false;
         }
@@ -76,7 +76,7 @@ public final class TideOcean {
     }
 
     // 海面から海底までの深さ (ブロック)。読み込まれていなければ -1
-    static int depth(ServerLevel level, double x, double z) {
+    public static int depth(ServerLevel level, double x, double z) {
         if (!loaded(level, x, z)) {
             return -1;
         }
@@ -85,7 +85,7 @@ public final class TideOcean {
     }
 
     // 海底の高さ (読み込まれていなければ NaN)
-    static double floorY(ServerLevel level, double x, double z) {
+    public static double floorY(ServerLevel level, double x, double z) {
         if (!loaded(level, x, z)) {
             return Double.NaN;
         }
@@ -93,17 +93,17 @@ public final class TideOcean {
     }
 
     // 歩ける海か: 海面に水があり、深さが minDepth 以上
-    static boolean walkable(ServerLevel level, double x, double z, int minDepth) {
+    public static boolean walkable(ServerLevel level, double x, double z, int minDepth) {
         return waterAtSurface(level, x, z) && depth(level, x, z) >= minDepth;
     }
 
     // 海のバイオームか (海・深海・暖かい海など。川は含まない)
-    static boolean oceanBiome(ServerLevel level, double x, double z) {
+    public static boolean oceanBiome(ServerLevel level, double x, double z) {
         return level.getBiome(BlockPos.containing(x, level.getSeaLevel() - 1, z)).is(BiomeTags.IS_OCEAN);
     }
 
     // 陸か (海面より上に、水でないブロックがある)
-    static boolean land(ServerLevel level, double x, double z) {
+    public static boolean land(ServerLevel level, double x, double z) {
         if (!loaded(level, x, z)) {
             return false;
         }
@@ -116,7 +116,7 @@ public final class TideOcean {
 
     // (cx, cz) から rMin〜rMax 離れた、海のバイオームで深さ minDepth 以上の点をいくつか試して探す。なければ null
     @Nullable
-    static Vec3 findOceanPoint(ServerLevel level, RandomSource random, double cx, double cz, double rMin, double rMax, int minDepth, int tries) {
+    public static Vec3 findOceanPoint(ServerLevel level, RandomSource random, double cx, double cz, double rMin, double rMax, int minDepth, int tries) {
         for (int i = 0; i < tries; i++) {
             double angle = random.nextDouble() * Math.PI * 2;
             double r = rMin + random.nextDouble() * (rMax - rMin);
@@ -133,7 +133,7 @@ public final class TideOcean {
     // 巨神の左 (潮門の側) をその人へ向けたとき、潮門の前が水であること。見つからなければ null。
     // 戻り値は (x, 向き, z)。近すぎると甲羅が人に重なるので、中心は人から 40〜64 ブロック、だめなら 24〜36 ブロックを試す
     @Nullable
-    static Vec3 findRestSpot(ServerLevel level, double px, double pz) {
+    public static Vec3 findRestSpot(ServerLevel level, double px, double pz) {
         int[] rings = {44, 52, 60, 64, 40, 36, 30, 24};
         for (int r : rings) {
             for (int a = 0; a < 16; a++) {
@@ -161,7 +161,7 @@ public final class TideOcean {
     }
 
     // 岸 (陸のブロック) が range ブロック以内にあるか (8 方向を 4 ブロックごとに見る)
-    static boolean nearShore(ServerLevel level, double x, double z, int range) {
+    public static boolean nearShore(ServerLevel level, double x, double z, int range) {
         for (int dir = 0; dir < 8; dir++) {
             double ax = Math.cos(Math.PI / 4 * dir);
             double az = Math.sin(Math.PI / 4 * dir);
@@ -177,7 +177,7 @@ public final class TideOcean {
     // 岸の近くの立てる場所 (背中から、休んでいない巨神のもとへ戻るとき)。(x, z) から 48 ブロック以内で探す。
     // チャンクを読み込んでよい (テレポートの直前に一度だけ呼ぶ)。なければ null
     @Nullable
-    static Vec3 standableShore(ServerLevel level, double x, double z) {
+    public static Vec3 standableShore(ServerLevel level, double x, double z) {
         for (int s = 0; s <= 48; s += 4) {
             for (int dir = 0; dir < (s == 0 ? 1 : 16); dir++) {
                 double ax = x + Math.cos(Math.PI / 8 * dir) * s;

@@ -67,6 +67,12 @@ public final class TideKeeper {
             return back != null && !back.players().isEmpty();
         }
 
+        // 巨神での移動の最中は、動きと読み込みは旅の操縦 (titan.travel.SeaVoyage) が受け持つ
+        @Override
+        protected boolean inVoyage(TideShellEntity titan) {
+            return titan.inVoyage();
+        }
+
         @Override
         protected void announce(ServerLevel level, TideShellEntity titan) {
             // 知らせない。最初の出会いは「沖の島が動いた」と自分で気づく形にする (呼び直しも黙って行う)

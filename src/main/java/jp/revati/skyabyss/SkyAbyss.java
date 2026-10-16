@@ -70,6 +70,10 @@ public class SkyAbyss {
         jp.revati.skyabyss.story.StorySetup.register(modEventBus);
         // 潮殻の装備 (鎧・三叉槍・盾・護符・専用伝説・心核) と図鑑の表。登録は titan.tide.gear パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
+        // 第四の巨神「余燼の巨神」の骨組み (熱の音、背中の口)。ID の一覧は titan.ember.EmberIds。docs/design/13_ember.md の 11章
+        jp.revati.skyabyss.titan.ember.EmberSetup.register(modEventBus);
+        // 雷翼の装備 (羽衣・弓・足環・護符・専用伝説) と素材 4 つ (欠片・心核・干し果・鱗粉)、図鑑の表。item.storm パッケージ
+        jp.revati.skyabyss.item.storm.StormGearSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

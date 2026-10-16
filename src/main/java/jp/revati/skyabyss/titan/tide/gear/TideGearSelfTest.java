@@ -274,7 +274,9 @@ public final class TideGearSelfTest {
     // ---------------------------------------------------------------- 効果
     private static FakePlayer player(ServerLevel level, String name, int lv) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
-        p.setPos(0.5, level.getMinBuildHeight() + 2, 0.5);
+        // 世界の出現地点の下 (読み込まれたままのチャンク)。(0, 0) は出現地点が遠い世界では読み込まれず、護符がゾンビを見つけられない
+        net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+        p.setPos(spawn.getX() + 0.5, level.getMinBuildHeight() + 2, spawn.getZ() + 0.5);
         Growth.get(p).level = lv;
         return p;
     }

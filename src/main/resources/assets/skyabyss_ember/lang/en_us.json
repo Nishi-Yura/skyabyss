@@ -1,0 +1,23 @@
+{
+  "__ember.0": "skeleton (heat, damage types)",
+  "death.attack.skyabyss.heat": "%1$s was scorched",
+  "death.attack.skyabyss.heat.player": "%1$s was scorched while fleeing %2$s",
+  "death.attack.skyabyss.heat_burst": "%1$s was burned by rising heat",
+  "death.attack.skyabyss.heat_burst.player": "%1$s was burned by the heat of %2$s",
+  "death.attack.skyabyss.engulfed": "%1$s was swallowed by the embers",
+  "death.attack.skyabyss.engulfed.player": "%1$s was pushed into the embers by %2$s",
+  "subtitles.skyabyss.ember_heat_warn": "Body starts to scorch",
+  "subtitles.skyabyss.ember_scorch": "Scorching",
+  "__ember.A": "surface (message.skyabyss.ember.surface.*, commands.skyabyss.ember.*, title.skyabyss.ember_back)",
+  "__ember.B": "body and hub (message.skyabyss.ember.back.*, whisper.*, gui.skyabyss.ember_heat.*, sign.skyabyss.lore_ember_*)",
+  "message.skyabyss.ember.back.arrived": "It is hot. The ash underfoot is warm, like breath.",
+  "message.skyabyss.ember.back.leaving": "Down the ash steps, the night air was cold.",
+  "message.skyabyss.ember.back.pushed_back": "The ash pushed you back",
+  "__ember.C1": "ash path (message.skyabyss.ember.trial.west.*)",
+  "__ember.C2": "forge (message.skyabyss.ember.trial.east.*)",
+  "__ember.C3": "hearth keeping (message.skyabyss.ember.trial.south.*)",
+  "__ember.D": "enemies (entity.skyabyss.*, message.skyabyss.ember.mob.*)",
+  "__ember.E": "smith (message.skyabyss.ember.smith.*)",
+  "__ember.F": "heart (message.skyabyss.ember.heart.*)",
+  "__ember.G": "items and lore (item.skyabyss.*, tooltip.skyabyss.ember.*)"
+}

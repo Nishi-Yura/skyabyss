@@ -126,22 +126,14 @@ public final class StorySelfTest {
         // b は岩鯨だけ。仲間 (a) がいても雷翼には乗れない
         Progression.onTitanStopped(server, List.of(b.getUUID()), Titans.STONE_WHALE);
         check(Progression.canBoard(b, Titans.TIDE_SHELL) && !Progression.canBoard(b, Titans.THUNDER_WING), "b's boarding after the whale", f);
-        // 後の巨神の背中の口: 仮の背中を登録すると、ディメンション移動の取り消しが効く
-        ResourceKey<Level> fake = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "selftest_ember_back"));
-        List<String> sentDown = new ArrayList<>();
-        check(!Titans.hasBack(Titans.EMBER), "ember already has a back (use the next titan without a back here)", f);
-        Titans.bindBack(fake, Titans.EMBER, p -> sentDown.add(p.getGameProfile().getName()));
-        try {
-            check(Titans.EMBER.equals(Progression.titanOfBack(fake)), "the bound back is not known", f);
-            EntityTravelToDimensionEvent denied = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(b, fake));
-            EntityTravelToDimensionEvent allowed = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(a, fake));
-            check(denied.isCanceled() && !allowed.isCanceled(), "travel to a later back was not gated", f);
-            Titans.sendDown(b, Titans.EMBER);
-            check(sentDown.equals(List.of("story_test_b")), "sendDown did not use the bound way down", f);
-        } finally {
-            Titans.unbindBack(fake);
+        // 後の巨神の背中の口: 四体とも背中が登録されていて (Titans.bindBack)、雷翼の背へのディメンション移動は前の心臓を止めた人だけ通す
+        for (String t : Titans.all()) {
+            check(Titans.hasBack(t), t + " has no back bound", f);
         }
-        check(Progression.titanOfBack(fake) == null && !Titans.hasBack(Titans.EMBER), "unbind did not remove the back", f);
+        ResourceKey<Level> stormBack = jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK;
+        EntityTravelToDimensionEvent denied = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(b, stormBack));
+        EntityTravelToDimensionEvent allowed = NeoForge.EVENT_BUS.post(new EntityTravelToDimensionEvent(a, stormBack));
+        check(denied.isCanceled() && !allowed.isCanceled(), "travel to the thunder back was not gated", f);
         check(Titans.STONE_WHALE.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK))
                 && Titans.TIDE_SHELL.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK))
                 && Titans.THUNDER_WING.equals(Progression.titanOfBack(jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK)), "built-in backs are missing", f);
