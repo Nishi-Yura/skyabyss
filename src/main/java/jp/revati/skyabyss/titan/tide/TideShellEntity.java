@@ -225,7 +225,7 @@ public class TideShellEntity extends Entity implements GeoEntity {
             stepCooldown = 160 + random.nextInt(160);
             level.playSound(null, getX(), getY() + 4, getZ(), TideSetup.STEP.get(), SoundSource.AMBIENT, 5f, 0.8f + random.nextFloat() * 0.2f);
         }
-        if (tickCount % 100 == 0) {
+        if (tickCount % 200 == 0) {
             tryGather(level);
         }
     }
