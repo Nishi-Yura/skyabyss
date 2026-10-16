@@ -33,16 +33,16 @@ import net.minecraft.world.phys.Vec3;
 //   z   32                                                                     [鍛え手の間 SMITH]
 //   z   62  (谷の奥)
 public final class EmberBackLayout {
-    // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる
-    public static final int LAYOUT_VERSION = 2;
+    // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く
+    public static final int LAYOUT_VERSION = 3;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。2.5節の 220 ブロック)
     public static final int BODY_CX = 0;
     public static final int BODY_CZ = 0;
     public static final double FAR = 230;
-    // 体の外形の箱 (body.bin の範囲: 頭の先 z -175、尾の先 z 210、脚を入れた幅 x -101〜100、火山の煙の頂 y 189。熾の底は灰の原の下 y 46 から)
-    public static final Box BODY = new Box(-104, 44, -180, 104, 194, 214);
+    // 体の外形の箱 (body.bin の表の範囲: x -107〜106、y 64〜226、z -179〜212。ブロックは頭の先 z -175・尾の先 z 210・脚を入れた幅 x -101〜100・火口の縁 y 175。熾の底は灰の原の下 y 46 から)
+    public static final Box BODY = new Box(-108, 44, -180, 108, 230, 214);
 
     // ---------------------------------------------------------------- 箱 (両端を含む整数の箱)
     public record Box(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
@@ -162,12 +162,15 @@ public final class EmberBackLayout {
     // ---------------------------------------------------------------- 熾の底の門・火の井戸・背の亀裂 (→ B)
     // 広間の中央の大きな炉の底の格子 (3 × 3、広間の床の高さ)。三つの石がそろうと開き、下の螺旋の階段へ
     public static final Box HEART_GATE = new Box(-1, 85, -35, 1, 85, -33);
-    // 門の下の螺旋の縦穴 (中心は広間の中心の真下、半径 4.5、中央の柱 3 × 3)。前室の床まで
-    public static final int GATE_SHAFT_RADIUS = 4;
-    public static final Box GATE_SHAFT = new Box(-4, FLOOR_HEART + 1, -38, 4, 84, -30);
-    // 火の井戸 (広間の天井の中央から火山の火口まで。半径 3 の縦穴、そのまわりに半径 6 までの螺旋の段)
-    public static final int WELL_RADIUS = 6;
-    public static final int WELL_BOTTOM = 104;
+    // 門の下の螺旋の縦穴 (格子の真下の 3 × 3。中央の柱のまわりを 1 段ずつ下りる)。前室の床 (50) まで。底から南へ短い通路で前室へ
+    public static final Box GATE_SHAFT = new Box(-1, FLOOR_HEART + 1, -35, 1, 84, -33);
+    // 火の井戸 (広間の天井の中央から火山の火口まで。半径 3 の縦穴、そのまわりに半径 6.6 までの螺旋の段 (内側に手すり))。
+    // 広間の南東の壁の中の小さな螺旋 (WELL_STAIR) で床 105 まで上り、短い通路で井戸の螺旋の下の端へ。井戸の螺旋の途中から南へ背の上への出口
+    public static final double WELL_RADIUS = 6.6;
+    public static final int WELL_BOTTOM = 105;
+    public static final BlockPos WELL_STAIR = new BlockPos(8, 85, -20);
+    // 背の上への出口の通路の床 (井戸の南から z -1 まで)
+    public static final int BACK_EXIT_FLOOR = 118;
     // 背の亀裂 (火守りの谷の天井から背の上まで。上に格子の手すり)
     public static final Box CRACK = new Box(-2, 109, 14, 2, 140, 56);
 
@@ -190,7 +193,7 @@ public final class EmberBackLayout {
 
     public static final List<Inscription> INSCRIPTIONS = List.of(
             new Inscription("lore_ember_mouth", new BlockPos(3, MOUTH_FLOOR + 1, -146), Direction.NORTH),
-            new Inscription("lore_ember_hub", new BlockPos(0, 86, -24), Direction.NORTH),
+            new Inscription("lore_ember_hub", new BlockPos(0, 87, -37), Direction.NORTH),
             new Inscription("lore_ember_west", new BlockPos(-28, FLOOR_WEST + 1, 55), Direction.NORTH),
             new Inscription("lore_ember_east", new BlockPos(23, FLOOR_EAST + 1, 57), Direction.NORTH),
             new Inscription("lore_ember_south", new BlockPos(3, FLOOR_SOUTH + 1, 61), Direction.NORTH),
@@ -198,9 +201,9 @@ public final class EmberBackLayout {
 
     // 試練の入口の一言の看板 (広間の扉の内側の脇。3 枚)
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
-            new Inscription("entrance_west", new BlockPos(-13, 87, -36), Direction.EAST),
-            new Inscription("entrance_east", new BlockPos(13, 87, -36), Direction.WEST),
-            new Inscription("entrance_south", new BlockPos(2, 87, -21), Direction.NORTH));
+            new Inscription("entrance_west", new BlockPos(-14, 87, -36), Direction.EAST),
+            new Inscription("entrance_east", new BlockPos(14, 87, -36), Direction.WEST),
+            new Inscription("entrance_south", new BlockPos(2, 87, -20), Direction.NORTH));
 
     // ---------------------------------------------------------------- 部屋の一覧
     // 部屋の名前 → 箱 (コマンドの go・自己テストの重なりの検査・リセットで中の人を広間へ移す範囲)
@@ -294,6 +297,8 @@ public final class EmberBackLayout {
                 out.add(rest("s0").area());
                 // 谷の奥 (南の熾り石・光る床・碑文。火床は C3 がこれより北に置く)
                 out.add(new Box(-4, FLOOR_SOUTH, 56, 4, FLOOR_SOUTH + 4, 62));
+                // 背の亀裂の下 (谷の天井に抜ける縦の溝。C3 はここを空けておく)
+                out.add(new Box(CRACK.minX(), 100, CRACK.minZ(), CRACK.maxX(), SOUTH.maxY(), CRACK.maxZ()));
             }
             case "heart" -> out.add(new Box(-1, FLOOR_HEART, -21, 1, FLOOR_HEART + 4, -20));
             default -> {

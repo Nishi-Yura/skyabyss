@@ -103,9 +103,9 @@ public final class RaijuCommands {
                     Raiju r = RaijuBattle.current(server);
                     StringBuilder rods = new StringBuilder();
                     for (int i = 0; i < RaijuNest.RODS; i++) {
-                        rods.append(StormRods.isGrounded(site.rodTop(i)) ? 'G' : '-');
+                        rods.append(StormRods.isGrounded(site.rod(i)) ? 'G' : '-');
                     }
-                    String s = "site=" + (site.temporary() ? "temporary " : "storm_back ") + site.center()
+                    String s = "site=" + site.level().dimension().location() + " " + site.center()
                             + " built=" + RaijuNest.isBuilt(site) + " active=" + RaijuBattle.room().active()
                             + " gathering=" + RaijuBattle.room().gathering() + " defeated=" + RaijuState.get(server).defeated()
                             + " rods=" + rods
@@ -131,7 +131,7 @@ public final class RaijuCommands {
         Vec3 at = site.anteSpawn();
         player.fallDistance = 0;
         player.teleportTo(site.level(), at.x, at.y, at.z, -90f, 0f);
-        player.sendSystemMessage(ModText.hint(site.temporary() ? "message.skyabyss.raiju.go_temporary" : "message.skyabyss.raiju.go"));
+        player.sendSystemMessage(ModText.hint("message.skyabyss.raiju.go"));
         return 1;
     }
 }

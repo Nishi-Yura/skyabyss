@@ -64,6 +64,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
+        // 雷翼の心臓 (第三の巨神の最終ボス・音)。登録は titan.storm.heart パッケージにまとめてある
+        jp.revati.skyabyss.titan.storm.heart.StormHeartSetup.register(modEventBus);
         // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
         jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
         // 雷翼の背 (鳥の形の背中・三つの試練: 風鳴り石、羽鏡、受け羽、風切りの羽根)
@@ -76,12 +78,16 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
         // 第四の巨神「余燼の巨神」の骨組み (熱の音、背中の口)。ID の一覧は titan.ember.EmberIds。docs/design/13_ember.md の 11章
         jp.revati.skyabyss.titan.ember.EmberSetup.register(modEventBus);
+        // 余燼の背の体と広間 (熾り石・背中の音)。docs/design/13_ember.md の 18章
+        jp.revati.skyabyss.titan.ember.back.EmberBackSetup.register(modEventBus);
         // 余燼の背の敵 (灰被り・火の粉蛾・燠虫、スポーンエッグ、音)。13 の 11.2節の担当 D
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.register(modEventBus);
         // 余燼の中ボス 灰の鍛え手 (エンティティ・音・鍛え手の間の建て方)。13 の 11.2節の担当 E
         jp.revati.skyabyss.titan.ember.smith.EmberSmithSetup.register(modEventBus);
         // 雷翼の装備 (羽衣・弓・足環・護符・専用伝説) と素材 4 つ (欠片・心核・干し果・鱗粉)、図鑑の表。item.storm パッケージ
         jp.revati.skyabyss.item.storm.StormGearSetup.register(modEventBus);
+        // 余燼の巨神の地上 (本体・熱の口・温石・地上の音)。13 の 2章、11.2節の担当 A
+        jp.revati.skyabyss.titan.ember.EmberTitanSetup.register(modEventBus);
         // 余燼の装備 (鎧・戦斧・外套・護符・専用伝説・角杯・素材) と図鑑の表、伝承の締め。13 の 11.2節の担当 G
         jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.register(modEventBus);
 
