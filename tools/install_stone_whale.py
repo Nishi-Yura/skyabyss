@@ -885,6 +885,9 @@ def main():
                                                          encoding="utf-8")
     for name in files:
         print(name, "cubes", cube_count(geos[name]), "quads", quads(geos[name]))
+    if "--no-hp" not in sys.argv:   # high-poly pass on the near LOD (docs/design/15_high_poly.md, titan bodies); the grid above is untouched
+        import hp_titan_body
+        hp_titan_body.install("stone_whale", "C", rebase=True)
 
     preview(geos, tex, glow)
 

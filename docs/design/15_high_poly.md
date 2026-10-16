@@ -443,3 +443,50 @@ NoAI の中ボスを平らな玄武岩に置き、同じ台本を取り込み前
 ### 取り込み前の確認
 
 `./gradlew compileJava --offline`、`SKYABYSS_SELFTEST=1 ./gradlew runServer` (server-port 27300) 全部 PASSED。`check_overlaps` は 4 体とも 0。
+
+## 巨神本体（岩鯨・潮殻）の記録 (担当 6a)
+
+近景だけを作り直した。中景・遠景の形は変えていない (描画の都合でテクスチャが数行増えるので、中・遠の geo の `texture_height` の数字だけ同じ値にした。uv は画素単位なので見た目は同じ)。
+作り方は `tools/rough/hp_titan_body.py` (道具は `tools/rough/hp_occ.py`)。元の近景 geo・テクスチャ・発光マスクは `tools/sources/hp_base/entity/{stone_whale,tide_shell}*` に控えてあり、ラフは必ずそこから始める。
+比較画像は `docs/review/high_poly_roughs/{stone_whale,tide_shell}_titan.png` (列 = 今 / A / B / C、行 = 視点)。取り込んだ絵は `assets/*_C/`。
+
+### 結果 (面は uv のある面の数。上限 12,000)
+
+| モデル | 今 箱/面 | A | B | C (取り込み) |
+|---|---|---|---|---|
+| 岩鯨 | 2512 / 10590 | 2657 / 10842 | 2811 / 11488 | **2838 / 11650** |
+| 潮殻 | 2158 / 9403 | 2256 / 9097 | 2613 / 10707 | **2868 / 11981** |
+
+- A = 顔だけ (岩鯨: 目の瞼 2 段・眉・瞳の縦の線・唇の帯・下顎の歯。潮殻: 目の瞼と眉・鼻孔・嘴の背の筋・嘴の板の継ぎ目・唇)。B = A + ひれ (前縁の筋と肋) と尾びれの肋 (潮殻は縁の鋸歯の歯 119 本も)。C = B + 背の遺跡・塔の上面の細い筋 (潮殻はさらに甲羅の放射状の筋 4 本)。推奨は C。
+- 最小の箱は 0.25 (単色の飾り)。足した飾りはどれも面から 1 単位以内の出っ張りで、輪郭と比率は変えていない。色は元の面の色を持ち上げ・暗くしただけ (テクスチャの絵は今のまま)。
+- 面の予算の取り方: 元の箱の「別の箱に完全に埋まった面」を先に捨てた (岩鯨 399 面・潮殻 720 面)。足した飾りの隠れた面も捨てた (面が隣の飾りや体に接している向き)。それでも潮殻 C は 11,981 面でほぼ上限。もう足すなら甲羅の筋を減らす。
+- 飾りは「実際の表面」に敷く (`Skin.relief`: 0.5 角の格子で形を決め、各格子の表面の高さから 0.25〜1.0 だけ盛る。同じ高さの隣は 1 つの箱にまとめる)。なので隙間も重なりもできない。`check_overlaps` 0、光る画素はどちらも 1 個以上 (岩鯨・潮殻とも元のまま。瞳の縦の線は暗い非発光の箱なので、目の光る面積だけ少し減る)。
+
+### 背中のディメンションとの関係
+
+岩鯨の背・潮殻の背 (亀の島) は、`install_stone_whale.build()` / `install_tide_shell.build_grid()` の**格子**から作っていて、近景の geo は読まない (`gen_titan_back_whale.py` の格子のキャッシュも install スクリプトとラフのソースだけを見る)。この作業は格子の関数を変えていないので、背中の生成の入力は前と同じ。背中は作り直していない (`SELFTEST tide back / whale / tide / travel` は PASSED)。
+- `install_stone_whale.py` / `install_tide_shell.py` は最後に hp の処理 (`hp_titan_body.install(名前, "C", rebase=True)`) を呼ぶ。出来たての近景を新しい元として `hp_base` に控え直し、そのうえで飾りを足す。呼ばないとき (従来の近景に戻すとき) は `--no-hp` を付ける。
+- ラフだけ試すときは `python tools/rough/hp_titan_body.py --sheet <名前> out.png now,A,B,C`、取り込みは `--install <名前> <案>`、面の数は `--stats`。
+
+### アニメ・描画
+
+骨の木・pivot は変えていない (箱を足しただけ)。泳ぐ・休む・首を上げる・顎の動きは台本で撮ったとおり崩れていない (顎は動く骨のまま、飾りは頭の骨に付けた)。重なり (`check_overlaps`) は 0。
+
+### ゲーム内の測定 (`tools/shots/hp_titan_body.txt`)
+
+岩鯨は休み (`Mode:2`)・潮殻は休み (`ForcedTicks`) で出し、北向きに置いたまま近く・中くらい・遠くを撮り (`docs/review/high_poly_roughs/ingame/titan_*_{before,after}.png`)、近景のとき `perf 300` でフレーム時間を測った (描画 16 チャンク、1280x720、何も無いとき 0.7〜1.0 ms)。タイトルの世界は毎回消して作り直す (巨神の番人が世界に 1 体だけ残すので、前の世界だと出した巨神が捨てられる)。
+
+| | 今 (3 回) | C (3 回) |
+|---|---|---|
+| 岩鯨 近景 | 6.00 / 6.49 / 6.29 ms (平均 6.3) | 6.53 / 6.54 / 6.97 ms (平均 6.7) |
+| 潮殻 近景 | 5.90 / 5.72 / 5.51 ms (平均 5.7) | 6.06 / 5.73 / 6.97 ms (平均 6.3) |
+
+増分は +0.4〜0.6 ms 程度で、ばらつき (0.5 ms) と同じくらい。面は岩鯨 +10%・潮殻 +27% だが、発光層と地面・空の描画が大半を占めるので、体感の差はほぼない。判断 9-5 のとおり上限 12,000 は超えていない。
+
+### 戻し方
+
+`python tools/install_stone_whale.py --no-hp` (潮殻は `install_tide_shell.py --no-hp`)、または `tools/sources/hp_base/entity/` の 3 ファイル (geo・png・glowmask) を `assets/skyabyss/geo/entity/` と `textures/entity/` へ戻し、中・遠の geo の `texture_height` を戻す (岩鯨 1056・潮殻 2672)。
+
+### 確認
+
+`./gradlew compileJava --offline`、`SKYABYSS_SELFTEST=1 ./gradlew runServer` (server-port 27700) 全部 PASSED。
