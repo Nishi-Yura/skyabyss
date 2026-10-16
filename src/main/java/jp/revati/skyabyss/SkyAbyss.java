@@ -60,6 +60,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
+        // 雷翼の心臓 (第三の巨神の最終ボス・音)。登録は titan.storm.heart パッケージにまとめてある
+        jp.revati.skyabyss.titan.storm.heart.StormHeartSetup.register(modEventBus);
         // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
         jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
         // 1 章の終わり (天の鍵、ベータの終わり)。docs/design/14_beta.md

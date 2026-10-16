@@ -1,0 +1,114 @@
+{
+  "beat": {
+    "subtitle": "subtitles.skyabyss.storm_heart_beat",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:beat"
+      }
+    ]
+  },
+  "roar": {
+    "subtitle": "subtitles.skyabyss.storm_heart_roar",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:roar"
+      }
+    ]
+  },
+  "summon": {
+    "subtitle": "subtitles.skyabyss.storm_heart_summon",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:summon"
+      }
+    ]
+  },
+  "strike": {
+    "subtitle": "subtitles.skyabyss.storm_heart_strike",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:strike"
+      }
+    ]
+  },
+  "blade": {
+    "subtitle": "subtitles.skyabyss.storm_heart_blade",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:blade"
+      }
+    ]
+  },
+  "chain": {
+    "subtitle": "subtitles.skyabyss.storm_heart_chain",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:chain"
+      }
+    ]
+  },
+  "split": {
+    "subtitle": "subtitles.skyabyss.storm_heart_split",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:split"
+      }
+    ]
+  },
+  "wingbeat": {
+    "subtitle": "subtitles.skyabyss.storm_heart_wingbeat",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:wingbeat"
+      }
+    ]
+  },
+  "charge": {
+    "subtitle": "subtitles.skyabyss.storm_heart_charge",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:charge"
+      }
+    ]
+  },
+  "feather": {
+    "subtitle": "subtitles.skyabyss.storm_heart_feather",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:feather"
+      }
+    ]
+  },
+  "flash": {
+    "subtitle": "subtitles.skyabyss.storm_heart_flash",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:flash"
+      }
+    ]
+  },
+  "web": {
+    "subtitle": "subtitles.skyabyss.storm_heart_web",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:web"
+      }
+    ]
+  },
+  "barrage": {
+    "subtitle": "subtitles.skyabyss.storm_heart_barrage",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:barrage"
+      }
+    ]
+  },
+  "death": {
+    "subtitle": "subtitles.skyabyss.storm_heart_death",
+    "sounds": [
+      {
+        "name": "skyabyss_storm_heart:death"
+      }
+    ]
+  }
+}

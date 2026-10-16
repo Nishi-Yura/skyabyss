@@ -101,6 +101,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
+        steps.add(Step.once("storm_heart (load)", jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::load));
+        steps.add(Step.once("storm_heart", 30, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::runSelfTest));
+        steps.add(Step.once("storm_heart (light)", 40, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::checkLight));
         steps.add(Step.once("tide (load)", TideSelfTest::load));
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));

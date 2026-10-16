@@ -70,6 +70,7 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(480, 24)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
     }
 
 
