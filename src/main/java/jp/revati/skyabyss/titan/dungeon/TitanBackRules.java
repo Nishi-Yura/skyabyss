@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.dungeon;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.TitanBacks;
 import jp.revati.skyabyss.titan.TitanTravel;
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
@@ -22,7 +23,8 @@ import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 岩鯨の背の決まりごと。巨神の体は、よそ者の手を拒む。
+// 巨神の背の決まりごと。巨神の体は、よそ者の手を拒む。
+// 背中のディメンションの一覧 (TitanBacks) のどれでも同じ決まりにする。巨神ごとの追加の禁止 (潮殻の背の舟など) は TitanBacks.extraBanned
 // サバイバルでは、ブロックを置く・壊す、水を撒く、ワープや跳躍で近道する、といったことができない。
 // (謎解きと試練を、正面から越えてもらうため。クリエイティブでは制限しない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -32,7 +34,7 @@ public final class TitanBackRules {
 
     private static boolean restricted(LevelAccessor level, Player player) {
         return player != null && !player.isCreative() && !player.isSpectator()
-                && level instanceof net.minecraft.world.level.Level l && l.dimension() == TitanTravel.TITAN_BACK;
+                && level instanceof net.minecraft.world.level.Level l && TitanBacks.isBack(l.dimension());
     }
 
     private static boolean isShortcutItem(ItemStack stack) {
@@ -49,6 +51,10 @@ public final class TitanBackRules {
                 || stack.is(Items.TNT)
                 || stack.is(Items.TNT_MINECART)
                 || stack.is(Items.RESPAWN_ANCHOR);
+    }
+
+    private static boolean banned(net.minecraft.world.level.Level level, ItemStack stack) {
+        return isShortcutItem(stack) || TitanBacks.extraBanned(level.dimension(), stack);
     }
 
     private static void deny(Player player) {
@@ -68,7 +74,7 @@ public final class TitanBackRules {
     // 爆発でも、巨神の体は崩れない (誰が起こしたものでも)
     @SubscribeEvent
     static void onExplosion(ExplosionEvent.Detonate event) {
-        if (event.getLevel().dimension() == TitanTravel.TITAN_BACK) {
+        if (TitanBacks.isBack(event.getLevel().dimension())) {
             event.getAffectedBlocks().clear();
         }
     }
@@ -91,7 +97,7 @@ public final class TitanBackRules {
 
     @SubscribeEvent
     static void onUseItem(PlayerInteractEvent.RightClickItem event) {
-        if (restricted(event.getLevel(), event.getEntity()) && isShortcutItem(event.getItemStack())) {
+        if (restricted(event.getLevel(), event.getEntity()) && banned(event.getLevel(), event.getItemStack())) {
             event.setCanceled(true);
             deny(event.getEntity());
         }
@@ -99,7 +105,7 @@ public final class TitanBackRules {
 
     @SubscribeEvent
     static void onUseItemOnBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (restricted(event.getLevel(), event.getEntity()) && isShortcutItem(event.getItemStack())) {
+        if (restricted(event.getLevel(), event.getEntity()) && banned(event.getLevel(), event.getItemStack())) {
             event.setCanceled(true);
             deny(event.getEntity());
         }
@@ -121,7 +127,7 @@ public final class TitanBackRules {
                 deny(player);
             }
         }
-        if (player.tickCount % 5 != 0) {
+        if (player.tickCount % 5 != 0 || player.level().dimension() != TitanTravel.TITAN_BACK) {
             return;
         }
         BlockPos pos = player.blockPosition();

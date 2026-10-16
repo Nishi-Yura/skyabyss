@@ -1,0 +1,17 @@
+{
+  "type": "skyabyss:tide_back",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "skyabyss:tide_back",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:sand", "height": 40},
+        {"block": "minecraft:water", "height": 22}
+      ],
+      "structure_overrides": []
+    }
+  }
+}

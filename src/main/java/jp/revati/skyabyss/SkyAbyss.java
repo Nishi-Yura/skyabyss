@@ -50,6 +50,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.quest.QuestSetup.register(modEventBus);
         // 巨神での移動 (呼び笛・碑・音・プレイヤーの記録)。登録は titan.travel パッケージにまとめてある
         jp.revati.skyabyss.titan.travel.TravelSetup.register(modEventBus);
+        // 第二の巨神「潮殻の巨神」(エンティティ・音)。登録は titan.tide パッケージにまとめてある
+        jp.revati.skyabyss.titan.tide.TideSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

@@ -169,7 +169,7 @@ public final class TitanTravel {
         ServerLevel overworld = player.server.overworld();
         Vec3 drop = null;
         StoneWhaleEntity whale = WhaleKeeper.current(overworld);
-        TitanWorldData data = TitanWorldData.get(overworld);
+        TitanWorldData.Slot data = TitanWorldData.get(overworld).whale();
         if (whale != null) {
             Vec3 top = whale.chainTop();
             drop = new Vec3(top.x, top.y - 4, top.z);
