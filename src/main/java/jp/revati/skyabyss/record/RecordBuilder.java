@@ -158,7 +158,7 @@ public final class RecordBuilder {
             TitanMemoryData.Record r = data.peek(p.getUUID(), titan);
             boolean got = r != null && r.fragment;
             boolean shown = revealed(p, titan);
-            rows.add(value("fragment." + titan, t("r.fragment_of", t("n." + order), titanName(p, titan)),
+            rows.add(value("fragment." + titan, t("r.fragment_of", t("n." + order), shown ? t("short." + titan) : t("r.unknown")),
                     got ? t("v.received") : shown ? t("v.not_yet_short") : t("r.unknown"),
                     got ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED,
                     List.of(t(got ? "d.fragment_got" : shown ? "d.fragment_how" : "d.fragment_hidden", titanName(p, titan)), t("d.fragment_record"))));
@@ -347,12 +347,12 @@ public final class RecordBuilder {
             boolean stopped = Progression.stopped(p.server, p.getUUID(), titan);
             TitanMemoryData.Record r = memory(p, titan);
             TitanPages.Page page = TitanPages.page(titan);
-            Item icon = page == null ? null : page.coreItem();
+            Item icon = page == null ? null : page.icon();
             Component value;
             int mark;
             List<Component> detail = new ArrayList<>();
             if (stopped) {
-                value = t("v.stopped", r.clears);
+                value = r.clears > 0 ? t("v.stopped", r.clears) : t("v.stopped_plain");
                 mark = RecordSnapshot.MARK_SAFE;
                 detail.add(t("d.titan_stopped", Progression.titanName(titan)));
             } else if (shown && page == null) {

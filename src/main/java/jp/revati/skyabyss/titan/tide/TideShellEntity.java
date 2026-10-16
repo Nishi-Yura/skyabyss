@@ -117,10 +117,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private int column;
     private boolean columnWanted;
     static final int COLUMN_UP = 20;
-    // 座席: 甲羅の頂 (横, 上, 前)。8 人
+    // 座席 (横, 上, 前)。甲羅の頂の真ん中には塔が立つので、塔の前の平らな所 (前へ 11、高さ 34) と、その前の高台 (前へ 17、高さ 36) に 4 人ずつ。
+    // 高さは geo から測った (tide_shell.geo.json の上面。中心の塔は横 -6〜+4・前 -2〜+8)
     static final double[][] SEATS = {
-            {1.6, DOME_TOP + 0.6, 3.0}, {-1.6, DOME_TOP + 0.6, 3.0}, {4.6, DOME_TOP + 0.2, 3.0}, {-4.6, DOME_TOP + 0.2, 3.0},
-            {1.6, DOME_TOP + 0.6, -1.0}, {-1.6, DOME_TOP + 0.6, -1.0}, {4.6, DOME_TOP + 0.2, -1.0}, {-4.6, DOME_TOP + 0.2, -1.0}};
+            {2.0, 34.4, 11.0}, {-2.0, 34.4, 11.0}, {6.0, 34.4, 11.0}, {-6.0, 34.4, 11.0},
+            {2.0, 36.4, 17.0}, {-2.0, 36.4, 17.0}, {6.0, 36.4, 17.0}, {-6.0, 36.4, 17.0}};
 
     private int lerpSteps;
     private double lerpX;
@@ -581,7 +582,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         return offset(yaw, EXIT_SIDE, 0, -GATE_BACK);
     }
 
-    // 潮門の前 → 門の敷居 → 甲羅の肩 → 頂の座席の手前 (世界の座標)
+    // 潮門の前 → 門の敷居 → 甲羅の肩 → 塔の横 → 塔の前の座席の手前 (世界の座標)
     @Override
     public List<Vec3> boardingPath() {
         float yaw = getYRot();
@@ -591,7 +592,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         points.add(new Vec3(dock.x, sea + 0.6, dock.z));
         points.add(position().add(offset(yaw, GATE_SIDE, REST_DRAFT + 7.0, -GATE_BACK)));
         points.add(position().add(offset(yaw, 20.0, 27.0, -17.0)));
-        points.add(position().add(offset(yaw, 4.0, DOME_TOP + 1.5, 0.0)));
+        points.add(position().add(offset(yaw, 9.0, 37.0, 0.0)));
+        points.add(position().add(offset(yaw, 6.0, 36.0, 11.0)));
         return points;
     }
 

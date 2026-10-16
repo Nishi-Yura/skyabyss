@@ -34,9 +34,18 @@ public final class TitanPages {
         public Item coreItem() {
             return core.get();
         }
+
+        // 一覧の絵: 心核、まだなければ巨神の欠片 (shard)
+        @Nullable
+        public Item icon() {
+            Item c = core.get();
+            return c != null ? c : item(SHARDS.getOrDefault(titan, "")).orElse(null);
+        }
     }
 
     private static final Map<String, Page> PAGES = new LinkedHashMap<>();
+    // 心核のない巨神の絵の代わり
+    private static final Map<String, String> SHARDS = Map.of(TideLoot.TITAN, TideLoot.SHARD);
 
     static {
         register(new Page(TitanLoot.STONE_WHALE, TitanLoot::collection, TitanLoot::isExclusive, TitanLoot::heartChance,

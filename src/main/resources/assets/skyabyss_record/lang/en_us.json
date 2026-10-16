@@ -177,7 +177,7 @@
   "skyabyss_record.n.4": "4th",
   "skyabyss_record.n.5": "5th",
   "skyabyss_record.n.6": "6th",
-  "skyabyss_record.r.fragment_of": "%s fragment (%s)",
+  "skyabyss_record.r.fragment_of": "%s (%s)",
   "skyabyss_record.r.titan_of": "%s titan: %s",
   "skyabyss_record.r.stage": "Hearts stilled",
   "skyabyss_record.r.choice_of": "First-clear choice (%s)",
@@ -232,5 +232,6 @@
   "skyabyss_record.bond.nothing_missing_fragment": "Every fragment's place is known. Check the ledger to see where",
   "skyabyss_record.bond.nothing_missing_key": "The sky key's place is known. Check the ledger",
   "skyabyss_record.bond.recalled_fragment": "Answering the call, your lost fragments returned to you (%s)",
-  "skyabyss_record.bond.recalled_key": "Answering the call, the sky key returned to you"
+  "skyabyss_record.bond.recalled_key": "Answering the call, the sky key returned to you",
+  "skyabyss_record.v.stopped_plain": "Stilled"
 }

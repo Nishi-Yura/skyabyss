@@ -177,7 +177,7 @@
   "skyabyss_record.n.4": "四",
   "skyabyss_record.n.5": "五",
   "skyabyss_record.n.6": "六",
-  "skyabyss_record.r.fragment_of": "%sつ目の欠片（%s）",
+  "skyabyss_record.r.fragment_of": "%sつ目（%s）",
   "skyabyss_record.r.titan_of": "%s体目　%s",
   "skyabyss_record.r.stage": "止めた心臓",
   "skyabyss_record.r.choice_of": "初回の選択報酬（%s）",
@@ -232,5 +232,6 @@
   "skyabyss_record.bond.nothing_missing_fragment": "欠片はどれも在りかが分かっている。控え帳で在りかを確かめよう",
   "skyabyss_record.bond.nothing_missing_key": "天の鍵の在りかは分かっている。控え帳で確かめよう",
   "skyabyss_record.bond.recalled_fragment": "呼び声に応えて、なくした欠片が手もとに戻った（%s）",
-  "skyabyss_record.bond.recalled_key": "呼び声に応えて、天の鍵が手もとに戻った"
+  "skyabyss_record.bond.recalled_key": "呼び声に応えて、天の鍵が手もとに戻った",
+  "skyabyss_record.v.stopped_plain": "止めた"
 }
