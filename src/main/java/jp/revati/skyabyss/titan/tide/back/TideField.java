@@ -16,6 +16,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 // 潮の溜めの水を一段ずつ置き、一段ずつ消す (08 の 3.4節)。
 // 溜めは「段ごとの、水を置く所の一覧」で持つ。一覧は建てたあと (と、形が変わったとき) に、段ごとに種の所から横へたどって作る
@@ -187,9 +188,21 @@ public final class TideField {
             while (p.cursor < cells.size() && budget > 0) {
                 BlockPos c = cells.get(p.cursor++);
                 BlockState s = level.getBlockState(c);
+                boolean logged = s.hasProperty(BlockStateProperties.WATERLOGGED);
                 if (p.workingFill) {
-                    if (s.isAir() || (s.is(Blocks.WATER) && !s.getFluidState().isSource())) {
+                    if (logged) {
+                        // 階段など、水を抱えられるブロックは水に沈める (隣の水が勝手に入り、引いても残るのを防ぐ)
+                        if (!s.getValue(BlockStateProperties.WATERLOGGED)) {
+                            level.setBlock(c, s.setValue(BlockStateProperties.WATERLOGGED, true), FLAGS);
+                            budget--;
+                        }
+                    } else if (s.isAir() || (s.is(Blocks.WATER) && !s.getFluidState().isSource())) {
                         level.setBlock(c, water, FLAGS);
+                        budget--;
+                    }
+                } else if (logged) {
+                    if (s.getValue(BlockStateProperties.WATERLOGGED)) {
+                        level.setBlock(c, s.setValue(BlockStateProperties.WATERLOGGED, false), FLAGS);
                         budget--;
                     }
                 } else if (s.is(Blocks.WATER)) {
@@ -248,6 +261,6 @@ public final class TideField {
             return false;
         }
         BlockState s = level.getBlockState(p);
-        return s.isAir() || s.is(Blocks.WATER);
+        return s.isAir() || s.is(Blocks.WATER) || s.hasProperty(BlockStateProperties.WATERLOGGED);
     }
 }

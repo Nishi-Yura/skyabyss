@@ -38,43 +38,13 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // 潮殻の背の本番の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide back PASSED / FAILED。
 // 配置の形 (歩いて行ける所・行けない所、休み場の復活位置、碑文と石)、潮の時計、潮の溜め (満ちても漏れない、引けば残らない)、
 // 三つの試練の進み (真珠、四つの配置が解けること・水位と戸、巣と潮招き)、三つの石で潮の底が開く、リセットと眠る試練、ピースフルの封印
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideBackSelfTest {
-    private static int countdown = -1;
+    // 水を流してから数えるまでの tick (流れる水が広がりきるのを待つ。岩鯨の水路の息継ぎの穴が、隣の水で埋まっていた反省)
+    public static final int SETTLE_TICKS = 100;
+    private static final List<String> FAILURES = new ArrayList<>();
+    private static final List<String> NOTES = new ArrayList<>();
 
     private TideBackSelfTest() {
-    }
-
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") != null) {
-            countdown = 70;
-        }
-    }
-
-    @SubscribeEvent
-    static void onTick(LevelTickEvent.Post event) {
-        if (countdown < 0 || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
-            return;
-        }
-        if (--countdown != 0) {
-            return;
-        }
-        countdown = -1;
-        List<String> failures = new ArrayList<>();
-        List<String> notes = new ArrayList<>();
-        try {
-            run(level.getServer(), failures, notes);
-        } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.error("SELFTEST tide back crashed", e);
-            failures.add("crashed: " + e);
-        }
-        if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tide back PASSED ({})", String.join("; ", notes));
-        } else {
-            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {}", f));
-            SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {} problems ({})", failures.size(), String.join("; ", notes));
-        }
     }
 
     private static void check(boolean ok, String message, List<String> failures) {
@@ -83,30 +53,79 @@ public final class TideBackSelfTest {
         }
     }
 
-    static void run(MinecraftServer server, List<String> failures, List<String> notes) {
-        ServerLevel back = server.getLevel(TideTravel.TIDE_BACK);
-        if (back == null) {
-            failures.add("tide_back is missing");
-            return;
-        }
-        long t0 = System.currentTimeMillis();
-        TideBackBuilder.build(back, TitanBackData.get(back));
-        notes.add("built in " + (System.currentTimeMillis() - t0) + " ms");
-        TideClock.force(TideClock.Phase.LOW);
-        try {
-            checkClock(failures);
-            checkFixtures(back, failures);
-            checkPools(back, failures, notes);
-            checkWalk(back, failures, notes);
-            checkPuzzle(back, failures, notes);
-            checkGarden(back, failures);
-            checkFlats(back, failures);
-            checkBottom(back, failures);
-            checkReset(back, failures, notes);
-            checkPeaceful(back, failures);
-        } finally {
+    // SelfTestRunner の段。重い所 (建てる・溜めを満たす) は段を分け、水を流したあとに数える段は SETTLE_TICKS 待つ
+    public static List<jp.revati.skyabyss.SelfTestRunner.Step> steps() {
+        List<jp.revati.skyabyss.SelfTestRunner.Step> steps = new ArrayList<>();
+        steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (build)", server -> guarded(server, back -> {
+            FAILURES.clear();
+            NOTES.clear();
+            forceChunks(back, true);
+            long t0 = System.currentTimeMillis();
+            TideBackBuilder.build(back, TitanBackData.get(back));
+            NOTES.add("built in " + (System.currentTimeMillis() - t0) + " ms");
+            TideClock.force(TideClock.Phase.LOW);
+            checkClock(FAILURES);
+            checkFixtures(back, FAILURES);
+            fillPools(back, FAILURES, NOTES);
+        })));
+        steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools settled)", SETTLE_TICKS, server -> guarded(server, back -> {
+            checkSettled(back, FAILURES, "after building");
+            checkWatchSettled(back, FAILURES, "after building");
+            drainPools(back);
+        })));
+        steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools drained)", SETTLE_TICKS, server -> guarded(server, back -> {
+            checkDrained(back, FAILURES, "after building");
+            checkWalk(back, FAILURES, NOTES);
+            checkPuzzle(back, FAILURES, NOTES);
+            checkGarden(back, FAILURES);
+            checkFlats(back, FAILURES);
+            checkBottom(back, FAILURES);
+            checkReset(back, FAILURES, NOTES);
+            // リセットのあと (庭の道の形が変わる) にも、もう一度満たして漏れを数える
+            TideBackTrials.initPools(back);
+            fillPools(back, FAILURES, NOTES);
+        })));
+        steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools settled after reset)", SETTLE_TICKS, server -> guarded(server, back -> {
+            checkSettled(back, FAILURES, "after a reset");
+            checkWatchSettled(back, FAILURES, "after a reset");
+            drainPools(back);
+        })));
+        steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back", SETTLE_TICKS, server -> guarded(server, back -> {
+            checkDrained(back, FAILURES, "after a reset");
+            checkPeaceful(back, FAILURES);
             TideClock.force(null);
             TideBackTrials.reset(back, false, null, true);
+            forceChunks(back, false);
+            if (FAILURES.isEmpty()) {
+                SkyAbyss.LOGGER.info("SELFTEST tide back PASSED ({})", String.join("; ", NOTES));
+            } else {
+                FAILURES.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {}", f));
+                SkyAbyss.LOGGER.error("SELFTEST tide back FAILED: {} problems ({})", FAILURES.size(), String.join("; ", NOTES));
+            }
+        })));
+        return steps;
+    }
+
+    private static void guarded(MinecraftServer server, java.util.function.Consumer<ServerLevel> body) {
+        ServerLevel back = server.getLevel(TideTravel.TIDE_BACK);
+        if (back == null) {
+            FAILURES.add("tide_back is missing");
+            return;
+        }
+        try {
+            body.accept(back);
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST tide back crashed", e);
+            FAILURES.add("crashed: " + e);
+        }
+    }
+
+    // 島のチャンクを読み込んだままにする (水が流れ、溜めが動くように)
+    private static void forceChunks(ServerLevel back, boolean on) {
+        for (int cx = -5; cx <= 4; cx++) {
+            for (int cz = -10; cz <= 4; cz++) {
+                back.setChunkForced(cx, cz, on);
+            }
         }
     }
 
@@ -159,7 +178,8 @@ public final class TideBackSelfTest {
     }
 
     // ---------------------------------------------------------------- 潮の溜め: 満ちても漏れない、引けば残らない
-    private static void checkPools(ServerLevel back, List<String> failures, List<String> notes) {
+    // 満たした直後ではなく、SETTLE_TICKS のあいだ水を流してから数える (流れる水がすき間や空気の所を埋めていないか)
+    private static void fillPools(ServerLevel back, List<String> failures, List<String> notes) {
         TideBackTrials.initPools(back);
         StringBuilder sizes = new StringBuilder();
         for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
@@ -187,40 +207,119 @@ public final class TideBackSelfTest {
         }
         for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
             TideField.settleNow(back, p, p.depth());
-            int leaks = 0;
-            BlockPos first = null;
-            Set<Long> cells = new HashSet<>();
-            for (List<BlockPos> layer : p.layers) {
-                layer.forEach(c -> cells.add(c.asLong()));
-            }
-            for (List<BlockPos> layer : p.layers) {
-                for (BlockPos c : layer) {
-                    if (!back.getBlockState(c).is(Blocks.WATER)) {
+            check(p.level() == p.depth(), "pool " + p.id + " did not fill", failures);
+        }
+        // 潮見の間の三段の溜めも、いちばん高い水位にして流しておく (戸は閉じる)
+        TideWatch.setLevels(back, 7, 7, 6);
+    }
+
+    // 潮見の間: 溜めの内側のほかに水が出ていない (溜めを満たして流したあと)
+    private static void checkWatchSettled(ServerLevel back, List<String> failures, String when) {
+        int leaks = 0;
+        BlockPos first = null;
+        for (int x = 24; x <= 57; x++) {
+            for (int z = -36; z <= -5; z++) {
+                for (int y = TIER_FLOOR[0]; y <= LEDGE_FLOOR + 2; y++) {
+                    BlockPos c = new BlockPos(x, y, z);
+                    if (back.getFluidState(c).isEmpty()) {
                         continue;
                     }
-                    for (Direction d : new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
-                        BlockPos n = c.relative(d);
-                        if (back.getBlockState(n).isAir() && !cells.contains(n.asLong())) {
+                    boolean inBasin = false;
+                    for (int[] b : BASIN) {
+                        inBasin |= x >= b[0] && x <= b[1] && z >= b[2] && z <= b[3];
+                    }
+                    if (!inBasin) {
+                        leaks++;
+                        if (first == null) {
+                            first = c;
+                        }
+                    }
+                }
+            }
+        }
+        check(leaks == 0, "tidewatch " + when + ": water outside the basins at " + leaks + " cells (first " + first + ")", failures);
+        TideWatch.reset(back, TideBackState.get(back));
+    }
+
+    // 溜めの箱 (置く所のまわり 2 マス、水の段の高さだけ)
+    private static int[] box(TideField.Pool p) {
+        int[] b = {Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE};
+        for (List<BlockPos> layer : p.layers) {
+            for (BlockPos c : layer) {
+                b[0] = Math.min(b[0], c.getX());
+                b[1] = Math.max(b[1], c.getX());
+                b[2] = Math.min(b[2], c.getZ());
+                b[3] = Math.max(b[3], c.getZ());
+            }
+        }
+        return new int[] {b[0] - 2, b[1] + 2, b[2] - 2, b[3] + 2};
+    }
+
+    // 満たして水を流したあと: 置く所はすべて水の源、まわりに漏れた水がない
+    private static void checkSettled(ServerLevel back, List<String> failures, String when) {
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
+            Set<Long> cells = new HashSet<>();
+            int holes = 0;
+            BlockPos firstHole = null;
+            for (List<BlockPos> layer : p.layers) {
+                for (BlockPos c : layer) {
+                    cells.add(c.asLong());
+                    BlockState st = back.getBlockState(c);
+                    if (!st.getFluidState().isSource()) {
+                        holes++;
+                        if (firstHole == null) {
+                            firstHole = c;
+                        }
+                    }
+                }
+            }
+            check(holes == 0, "pool " + p.id + " " + when + ": " + holes + " cells are not still water (first " + firstHole + ")", failures);
+            int[] b = box(p);
+            int leaks = 0;
+            BlockPos firstLeak = null;
+            for (int x = b[0]; x <= b[1]; x++) {
+                for (int z = b[2]; z <= b[3]; z++) {
+                    for (int y = p.base - 1; y < p.base + p.depth() + 1; y++) {
+                        BlockPos c = new BlockPos(x, y, z);
+                        if (!cells.contains(c.asLong()) && !back.getFluidState(c).isEmpty() && y >= TideBackLayout.SEA) {
                             leaks++;
-                            if (first == null) {
-                                first = n;
+                            if (firstLeak == null) {
+                                firstLeak = c;
                             }
                         }
                     }
                 }
             }
-            check(leaks == 0, "pool " + p.id + " leaks at " + leaks + " cells (first " + first + ")", failures);
-            check(p.level() == p.depth(), "pool " + p.id + " did not fill", failures);
+            check(leaks == 0, "pool " + p.id + " " + when + ": water spread to " + leaks + " cells outside it (first " + firstLeak + ")", failures);
+        }
+    }
+
+    private static void drainPools(ServerLevel back) {
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
             TideField.settleNow(back, p, 0);
+        }
+    }
+
+    // 引いて水を流したあと: 置く所にも、まわりにも水が残らない
+    private static void checkDrained(ServerLevel back, List<String> failures, String when) {
+        for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
+            int[] b = box(p);
             int left = 0;
-            for (List<BlockPos> layer : p.layers) {
-                for (BlockPos c : layer) {
-                    if (back.getBlockState(c).is(Blocks.WATER)) {
-                        left++;
+            BlockPos first = null;
+            for (int x = b[0]; x <= b[1]; x++) {
+                for (int z = b[2]; z <= b[3]; z++) {
+                    for (int y = Math.max(p.base - 1, TideBackLayout.SEA); y < p.base + p.depth() + 1; y++) {
+                        BlockPos c = new BlockPos(x, y, z);
+                        if (!back.getFluidState(c).isEmpty()) {
+                            left++;
+                            if (first == null) {
+                                first = c;
+                            }
+                        }
                     }
                 }
             }
-            check(left == 0, "pool " + p.id + " left " + left + " water blocks after draining", failures);
+            check(left == 0, "pool " + p.id + " " + when + ": " + left + " water blocks left after draining (first " + first + ")", failures);
         }
     }
 

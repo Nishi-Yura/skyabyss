@@ -103,6 +103,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
+        // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
+        steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }
