@@ -1,0 +1,22 @@
+# 岩鯨の背の到着 (尾の付け根の台) を撮る例。./gradlew runShots -Pscript=tools/shots/example_titan_arrival.txt
+# 出力: run/shots/example_titan_arrival/shots/example_titan_arrival/*.png と shots.log
+world shots flat
+size 1280 720
+timeout 420
+render 16
+
+cmd time set noon
+cmd weather clear
+# 到着地点へ到着の向きで移る (島がまだなければ建てる)
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 20
+shot titan_arrival_hud
+hud off
+shot titan_arrival
+# 少し上から、背の中ほど (祠) の方を見下ろす
+cmd gamemode spectator
+camera skyabyss:titan_back 0 150 140 180 25
+waitchunks
+shot titan_back_from_tail
+quit

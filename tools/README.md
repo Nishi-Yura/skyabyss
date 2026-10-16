@@ -5,6 +5,52 @@
 どうしても動かすときだけ、環境変数 `SKYABYSS_ALLOW_REGEN=1` を付ける。`gen_items.py` だけは `SKYABYSS_ALLOW_GEN_ITEMS=1`。
 経緯は `docs/review/assets_audit.md` の S1。
 
+## ゲームを立ち上げる担当の決まり (並列で動かすとき)
+
+マイクラをいくつ同時に立ち上げてもよい。ただし、ほかの担当のウィンドウに入力が入らないよう、次を守る。
+
+- **OS のキー送り・マウス操作・ウィンドウのフォーカス操作は禁止** (PowerShell の SendKeys、AppActivate、SetForegroundWindow、nircmd など全部)。前面のウィンドウは誰のものか分からない
+- **画面の確認は台本で撮る** (下の「台本で撮るスクショ」)。ゲームの中から撮るので、ウィンドウが裏にあっても撮れる。最小化だけはしない
+- **建築の抜け・不具合はデータで確かめる** (下の「構造をデータで確かめる」)。試遊 (歩いて回る) での確認はしない
+- **コマンドを打つときは** 台本の `cmd`、または専用サーバー (`./gradlew runServer`) の RCON か自己テスト。クライアントのチャット欄へ打ち込まない
+- 終わったら java を残さない。台本は最後に自分でゲームを閉じる (止まっても `timeout` 秒で閉じる)
+
+## 台本で撮るスクショ (`client/dev/ShotRunner`)
+
+```
+./gradlew runShots -Pscript=tools/shots/example_tide_back.txt
+```
+
+- ゲームのフォルダは `run/shots/<台本の名前>/`、撮った絵と記録は `run/shots/<台本の名前>/shots/<台本の名前>/` (`*.png` と `shots.log`)。台本ごとにフォルダが分かれるので、同じ worktree で別の台本を同時に動かしても混ざらない。同じ台本を 2 本同時に動かすときは `-PshotsName=<別名>` を付ける
+- `shots.log` の最後の行が `SHOTS OK <枚数> shots` なら成功、`SHOTS FAILED: <理由>` なら失敗。コマンドの返事もここに出る (チャットには出さない)
+- `runClientTest` などほかの起動でも、環境変数 `SKYABYSS_SHOTS=<台本の絶対パス>` を付ければ動く (出力先は `SKYABYSS_SHOTS_OUT` で変えられる)。開発環境でだけ動く
+- 台本の世界は `world` の名前で作る (無ければ平らな世界をクリエイティブ・コマンド可で作る。昼は進まない)。2 回目からは同じ世界を開く。巨神の背は `cmd skyabyss dev arrive <titan_back|tide_back>` で建って (無ければ) 移れる
+
+台本の書き方 (1 行 1 手順。`#` で始まる行は注釈):
+
+| 手順 | 意味 |
+|---|---|
+| `world <名前> [flat\|normal]` | 使う世界 (既定 `shots flat`)。頭に書く |
+| `size <幅> <高さ>` | ウィンドウの大きさ (撮る絵の大きさ) |
+| `timeout <秒>` | これを過ぎたら失敗として閉じる (既定 600) |
+| `cmd <コマンド>` | 統合サーバーで権限 4 で実行 (`/` はあってもなくても)。終わるまで待つ |
+| `camera [次元] <x> <y> <z> <yaw> <pitch>` | 体ごとそこへ置いて向きを決める (yaw 0=南 90=西 180=北 270=東、pitch 90=真下)。着くまで待つ。壁を抜けたいときは先に `cmd gamemode spectator` |
+| `look <yaw> <pitch>` | 向きだけ変える |
+| `waitchunks [最大 tick]` | まわりの描画が出そろうまで待つ (既定 600 tick まで) |
+| `wait <tick>` | 待つ |
+| `hud on\|off` | HUD と手を出す/隠す |
+| `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
+| `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
+| `close` | 画面を閉じる |
+| `chat clear` | チャット欄を消す |
+| `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
+| `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |
+| `echo <文>` | 記録に書くだけ |
+| `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
+
+例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
+
 ## 採用版の生成元 (実行してよい)
 
 | 素材 (`src/main/resources/assets/skyabyss/` 以下) | 生成元 | 備考 |

@@ -73,6 +73,18 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // 台本で撮るスクショ: ./gradlew runShots -Pscript=tools/shots/<台本>.txt
+        // ゲームのフォルダは run/shots/<台本の名前>/ (台本ごとに分かれるので、同時に何本動かしても混ざらない)。
+        // 撮った絵と記録は run/shots/<台本の名前>/shots/<台本の名前>/。OS のキー・マウスは使わない (tools/README.md)
+        shots {
+            client()
+            def shotScript = project.findProperty('script') ?: 'tools/shots/example_tide_back.txt'
+            def shotName = project.findProperty('shotsName') ?: file(shotScript).name.replaceFirst(/\.[^.]*$/, '')
+            gameDirectory = project.file("run/shots/${shotName}")
+            environment 'SKYABYSS_SHOTS', file(shotScript).absolutePath
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'
