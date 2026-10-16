@@ -80,6 +80,8 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, THUNDER_WING_LEVEL));
         // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
         jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
+        // 余燼の中ボス 灰の鍛え手 (13 の 6.6節。推奨レベル 30)。試練の鍛え手は参加者の一覧で配る (AshSmithLoot)。ここは試練の外で呼ばれたもの
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(220, 30));
     }
 
 

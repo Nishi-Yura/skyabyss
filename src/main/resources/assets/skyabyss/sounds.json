@@ -1110,5 +1110,61 @@
         "name": "skyabyss:ember_mobs/cinder_roller_death"
       }
     ]
+  },
+  "ash_smith_slam": {
+    "subtitle": "subtitles.skyabyss.ash_smith_slam",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_slam"
+      }
+    ]
+  },
+  "ash_smith_inhale": {
+    "subtitle": "subtitles.skyabyss.ash_smith_inhale",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_inhale"
+      }
+    ]
+  },
+  "ash_smith_blast": {
+    "subtitle": "subtitles.skyabyss.ash_smith_blast",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_blast"
+      }
+    ]
+  },
+  "ash_smith_sparks": {
+    "subtitle": "subtitles.skyabyss.ash_smith_sparks",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_sparks"
+      }
+    ]
+  },
+  "ash_smith_rage": {
+    "subtitle": "subtitles.skyabyss.ash_smith_rage",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_rage"
+      }
+    ]
+  },
+  "ash_smith_hurt": {
+    "subtitle": "subtitles.skyabyss.ash_smith_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_hurt"
+      }
+    ]
+  },
+  "ash_smith_death": {
+    "subtitle": "subtitles.skyabyss.ash_smith_death",
+    "sounds": [
+      {
+        "name": "skyabyss:ember_smith/ash_smith_death"
+      }
+    ]
   }
 }
