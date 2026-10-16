@@ -103,7 +103,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));
         steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
-        steps.add(Step.once("tide travel (load)", jp.revati.skyabyss.titan.travel.TideTravelSelfTest::load));
+        steps.add(Step.until("tide travel (load)", jp.revati.skyabyss.titan.travel.TideTravelSelfTest::load));
         steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
