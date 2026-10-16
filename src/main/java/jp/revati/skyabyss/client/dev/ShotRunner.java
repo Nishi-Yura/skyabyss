@@ -141,11 +141,18 @@ public final class ShotRunner {
     // ---------------------------------------------------------------- ワールドに入る
     @SubscribeEvent
     static void onScreenInit(ScreenEvent.Init.Post event) {
-        if (!init() || finished || worldRequested) {
+        if (!init() || finished) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
         Screen screen = event.getScreen();
+        if (worldRequested) {
+            // 入ろうとしたのにタイトル画面へ戻った: 世界を開けなかった (同じ台本のゲームが別に動いていて、世界が使われている など)
+            if (screen instanceof TitleScreen && mc.level == null && mc.getSingleplayerServer() == null) {
+                fail("could not enter the world '" + script.world + "' (is another game using the same folder? use -PshotsName=<other>)");
+            }
+            return;
+        }
         if (mc.level != null || mc.getSingleplayerServer() != null) {
             return;
         }
@@ -342,8 +349,9 @@ public final class ShotRunner {
                 return true;
             }
             case "chat" -> {
-                // chat clear : チャットの欄を消す
+                // chat clear : チャットの欄と右上の通知 (トースト) を消す
                 mc.gui.getChat().clearMessages(false);
+                mc.getToasts().clear();
                 return true;
             }
             case "open" -> {

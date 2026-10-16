@@ -43,13 +43,45 @@
 | `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
-| `chat clear` | チャット欄を消す |
+| `chat clear` | チャット欄と右上の通知 (トースト) を消す |
 | `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
 | `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |
 | `echo <文>` | 記録に書くだけ |
 | `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
 
 例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
+
+## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
+
+ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。
+
+書き出し (どれか):
+
+```
+./gradlew runShots -Pscript=tools/shots/dump_backs.txt                              # 岩鯨・潮殻の背 → run/shots/dump_backs/dumps/*.sbd
+SKYABYSS_DUMP=titan_back,tide_back ./gradlew runServer                               # 専用サーバーで書いて止まる → run/dumps/*.sbd (ポートが空いているとき)
+/skyabyss dev dump preset <titan_back|tide_back>                                      # 台本の cmd や RCON から (島が無ければ建てる)
+/execute in skyabyss:titan_back run skyabyss dev dump <名前> <x1 y1 z1> <x2 y2 z2>     # 好きな範囲
+```
+
+書き出し先は `<ゲームのフォルダ>/dumps/<名前>.sbd` (環境変数 `SKYABYSS_DUMP_OUT` で変えられる)。台本では書き終わるまで `waitdump` で待つ。
+`/skyabyss dev arrive <titan_back|tide_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
+
+図と検査:
+
+```
+python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out docs/review --prefix structure_titan_back     --goal shrine --goal hub --seed hub --section y=94 --section x=0 --iso-step 1
+```
+
+| 出力 (`<out>/<prefix>_`) | 中身 |
+|---|---|
+| `top.png` / `iso.png` / `sections.png` | 真上から・等角 (南東の上から)・断面 (`--section y=/x=/z=`)。色はブロックの地図の色、水は青 |
+| `walk.png` | 歩き始め (`--walk-from`、既定 `arrival`) から歩いて行ける足の位置 (高さで色) と目標の印 |
+| `report.txt` | 目標 (`--goal`) に何歩で着くか (着かなければ一番近くまで来た所。終了コード 1)、部屋 (`--seed`) から外への口の一覧、水が広がる見積もり (今流れている水、流れたら埋まる空気。部屋の中の分)、看板の一覧 (lang のキー) |
+
+起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …)。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
+歩く決まり (上り 1・下り 3・頭 2 マス・水の中は 1 つ上へ) は背の自己テスト (`TideBackSelfTest.walk`) と同じ。水は実際より多めに出る (バニラは近くの落ち口の方へだけ流れるため)。
+部品は `sbd.py` (読む)、`analyze.py` (囲まれた空間と口・歩く・水・看板)、`render.py` (図)。新しく背中の検査を書くときは、自己テストに同じ探索を書き足す前にこれで見る。例は `docs/review/structure_*`。
 
 ## 採用版の生成元 (実行してよい)
 

@@ -11,6 +11,7 @@ cmd weather clear
 cmd skyabyss dev arrive titan_back
 waitchunks
 wait 20
+chat clear
 shot titan_arrival_hud
 hud off
 shot titan_arrival

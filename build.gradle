@@ -45,6 +45,11 @@ base {
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+// 台本で撮るスクショ (runShots) の台本と名前。-Pscript=... -PshotsName=...
+// (Project には script という名前の別の値があるので、-P で渡された値を直接読む)
+def shotScript = providers.gradleProperty('script').getOrElse('tools/shots/example_tide_back.txt')
+def shotName = providers.gradleProperty('shotsName').getOrElse(file(shotScript).name.replaceFirst(/\.[^.]*$/, ''))
+
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
@@ -78,8 +83,6 @@ neoForge {
         // 撮った絵と記録は run/shots/<台本の名前>/shots/<台本の名前>/。OS のキー・マウスは使わない (tools/README.md)
         shots {
             client()
-            def shotScript = project.findProperty('script') ?: 'tools/shots/example_tide_back.txt'
-            def shotName = project.findProperty('shotsName') ?: file(shotScript).name.replaceFirst(/\.[^.]*$/, '')
             gameDirectory = project.file("run/shots/${shotName}")
             environment 'SKYABYSS_SHOTS', file(shotScript).absolutePath
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
