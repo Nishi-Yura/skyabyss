@@ -1,0 +1,46 @@
+# 余燼の背 (火山の背の火蜥蜴、13 の 18 章) を撮り、構造を書き出す。./gradlew runShots -Pscript=tools/shots/ember_back.txt
+# 出力: run/shots/ember_back/shots/ember_back/*.png、run/shots/ember_back/dumps/ember_back.sbd → python tools/structure/check.py で図と検査
+world shots flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set midnight
+cmd weather clear
+cmd gamemode spectator
+hud off
+# 体の南東の空から全景 (昼。yaw 0=南 90=西 180=北 270=東)
+cmd time set noon
+camera skyabyss:ember_back 210 170 150 135 22
+waitchunks
+shot ember_overview
+cmd time set midnight
+# 北の灰の原から口 (正面)
+camera skyabyss:ember_back 0 70 -215 0 0
+waitchunks
+shot ember_mouth_front
+# 舌の上 (到着) から南を見る
+camera skyabyss:ember_back 0 69 -150 0 0
+waitchunks
+shot ember_arrival
+# 炉心の広間 (北の扉から)
+camera skyabyss:ember_back 0 88 -46 0 10
+waitchunks
+shot ember_hub
+# 火の井戸 (広間の天井の上から見上げる)
+camera skyabyss:ember_back 4 108 -30 160 -60
+waitchunks
+shot ember_well
+# 火口から南の背
+camera skyabyss:ember_back 0 168 -34 0 25
+waitchunks
+shot ember_crater
+# 背の亀裂を上から
+camera skyabyss:ember_back 6 125 10 20 45
+waitchunks
+shot ember_crack
+# 構造の書き出し (体の箱の全体。灰の原の下の熾の底を含む)
+cmd execute in skyabyss:ember_back run skyabyss dev dump ember_back -108 44 -180 108 190 214
+waitdump
+quit

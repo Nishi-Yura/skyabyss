@@ -270,7 +270,7 @@ public final class EmberBackTrials {
         int cz = HUB_CENTER.getZ();
         int fy = HUB_CENTER.getY();
         BlockState gate = ModBlocks.SEALED_GATE.get().defaultBlockState();
-        BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, true);
+        BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 level.setBlock(new BlockPos(cx + dx, fy, cz + dz), open ? Blocks.AIR.defaultBlockState() : gate, 3);

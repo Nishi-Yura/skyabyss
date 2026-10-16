@@ -155,6 +155,12 @@ public final class EmberBodyBuilder {
             }
         }
         track(-7, MOUTH_FLOOR, -167, 7, MOUTH_FLOOR + 8, -134);
+        // 口の中の灯り (頬の内側に熾の光。夜でも舌の上と喉の口が見える)
+        for (int z : new int[] {-160, -149, -138}) {
+            for (int sx : new int[] {-7, 7}) {
+                kit.set(sx, MOUTH_FLOOR + 2, z, EmberKit.GLOW);
+            }
+        }
         // 見送りの段: 床 67・66・65・64 と下り、z -171 から先は灰の原 (顎の先の唇を 5 幅に切る)
         for (int z = -178; z <= -167; z++) {
             int floor = z >= -170 ? MOUTH_FLOOR + (z + 166) : PLAIN_TOP;

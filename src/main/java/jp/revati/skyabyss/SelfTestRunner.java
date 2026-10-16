@@ -115,6 +115,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
+        // 余燼の背の体と広間 (体の穴・歩いて行ける所・液体・看板・石と門・リセット・熱)。13 の 18章
+        steps.addAll(jp.revati.skyabyss.titan.ember.back.EmberBackSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }
