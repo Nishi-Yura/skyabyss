@@ -90,13 +90,15 @@ public final class TideBackLayout {
     // 到着の段 (潮門の外。甲羅の縁と後ろのひれの付け根の上、床 64)。北を向いて立つ (甲羅の脇腹と前のひれが見える)
     public static final Area LANDING = new Area(-67, -56, 49, 59, GATE_FLOOR, 8);
     public static final BlockPos ARRIVAL = new BlockPos(-62, GATE_FLOOR + 1, 54);
+    // 着いたときの向き (北北東: 右に甲羅の脇腹と光る潮門、前へ縁の歯が続く)
+    public static final float ARRIVAL_YAW = -150f;
     // 見送りの段: 到着の段の西から海へ下りる段。いちばん下の段 (x -71〜-69、z 52〜56) に入ると地上へ戻る
     public static final int GATE_X = -70;
     public static final int GATE_Z = 53;
     public static final int GATE_Y0 = 63;
     public static final int GATE_Y1 = 66;
-    // 甲羅の上へ上る段 (浜の西の壁の外、x -38〜-34、z 42〜46 の四角い螺旋。浜の西の壁の口 (-33, 44) から入る)。上は甲羅の地表の口
-    public static final int TOP_STAIR_X1 = -38;
+    // 甲羅の上へ上る段 (浜の西の壁の外、x -46〜-42、z 42〜46 の四角い螺旋。浜の西の壁の口 (-33, 44) から通路で入る)。上は甲羅の地表の口
+    public static final int TOP_STAIR_X1 = -46;
     public static final int TOP_STAIR_Z1 = 42;
     // 頂の塔 (モデルの塔。中心 (0, -3)、甲羅の地表 114、土台 115〜126、胴 127〜133、柱の段 134〜142、屋根 143〜146)
     public static final int TOWER_CZ = -3;
@@ -143,7 +145,8 @@ public final class TideBackLayout {
     public static final Area EAST_HALL = new Area(13, 23, -5, -1, HUB_LEDGE, 4);
 
     // 珊瑚の庭 (西)。屋根のない、潮で 0〜3 満ちる水路の庭
-    public static final Area GARDEN = new Area(-62, -19, -42, 42, 64, 30);
+    // 北の縁は z 40 (浜の北の列 z 41〜42 と重ならないように。20.12節)
+    public static final Area GARDEN = new Area(-62, -19, -42, 40, 64, 30);
     public static final int GARDEN_FLOOR = 64;
     public static final int GARDEN_DEPTH = 3;
     public static final int GARDEN_WALL_TOP = 71;

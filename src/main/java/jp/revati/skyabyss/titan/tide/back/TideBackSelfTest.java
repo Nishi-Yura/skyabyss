@@ -220,7 +220,7 @@ public final class TideBackSelfTest {
     // ---------------------------------------------------------------- 亀の形: 甲羅・頭・ひれ・尾がモデルの通りに置かれ、掘った部屋が甲羅を突き抜けていない
     private static void checkTurtle(ServerLevel back, List<String> failures) {
         check(shellTop(0, 20) >= 110, "the shell is not domed (top at (0,20) " + shellTop(0, 20) + ")", failures);
-        int[][] parts = {{0, -125}, {-90, -15}, {90, -15}, {-75, 67}, {75, 67}, {0, 90}};
+        int[][] parts = {{0, -125}, {-90, -25}, {90, -25}, {-75, 67}, {75, 67}, {0, 90}};
         String[] names = {"head", "left front flipper", "right front flipper", "left rear flipper", "right rear flipper", "tail"};
         for (int i = 0; i < parts.length; i++) {
             int t = TideTurtle.top(parts[i][0], parts[i][1]);
@@ -538,7 +538,8 @@ public final class TideBackSelfTest {
         should.put("front stone", STONE_FRONT.offset(0, 0, 1));
         // 甲羅の上 (外) と頂の塔の柱の段へは、浜の西の壁の段と塔の螺旋で行ける (21 章)
         should.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
-        should.put("shell top", new BlockPos(-20, shellTop(-20, 30) + 1, 30));
+        should.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
+        should.put("shell top (far)", new BlockPos(30, shellTop(30, -40) + 1, -40));
         should.put("tower deck", new BlockPos(4, TOWER_DECK + 1, TOWER_CZ));
         for (Map.Entry<String, BlockPos> e : should.entrySet()) {
             BlockPos g = e.getValue();

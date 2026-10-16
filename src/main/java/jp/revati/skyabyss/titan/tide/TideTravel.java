@@ -102,7 +102,7 @@ public final class TideTravel {
         PacketDistributor.sendToPlayer(player, new TideNetwork.Plunge(30));
         BlockPos arrival = TideBackBuilder.arrival();
         player.fallDistance = 0;
-        player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, 180f, 0f);
+        player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
         back.playSound(null, arrival, TideSetup.GATE.get(), SoundSource.PLAYERS, 1.2f, 1.2f);
         showTitle(player, "title.skyabyss.tide_back", "title.skyabyss.tide_back.sub");
         player.sendSystemMessage(ModText.lore("message.skyabyss.tide.arrived"));
@@ -204,7 +204,7 @@ public final class TideTravel {
         ADRIFT.remove(player.getUUID());
         BlockPos a = TideBackBuilder.arrival();
         player.fallDistance = 0;
-        player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
+        player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
         player.serverLevel().playSound(null, a, TideSetup.SURF.get(), SoundSource.PLAYERS, 1.0f, 1.1f);
         player.displayClientMessage(ModText.hint("message.skyabyss.tide.swept_back"), true);
     }

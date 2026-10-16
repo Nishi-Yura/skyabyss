@@ -288,10 +288,35 @@ def preview(B, names, org):
     print("preview saved")
 
 
+def walkable_plates(B, G, org):
+    """甲羅の上を歩けるようにする: 鱗板の段 (モデルは 2 単位 = 1.7 ブロックの段) で、隣が 2〜3 高い柱に、
+    同じ石を 1 段だけ足す (板の縁の面取りの帯になる)。甲羅の上の高い所 (y 95 より上) だけ。2 回くり返す"""
+    x0, y0, z0 = org
+    added = 0
+    for _ in range(2):
+        occ = B != 0
+        NY = B.shape[1]
+        top = np.where(occ.any(1), NY - 1 - np.argmax(occ[:, ::-1, :], axis=1), -1)
+        part = np.take_along_axis(G, np.maximum(top, 0)[:, None, :], 1)[:, 0, :] // 32
+        nb = np.full(top.shape, -1)
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nb = np.maximum(nb, np.roll(np.roll(top, dx, 0), dz, 1))
+        diff = nb - top
+        sel = (part == 1) & (top + y0 > 95) & (diff >= 2) & (diff <= 3) & (top + 1 < NY)
+        ii, kk = np.nonzero(sel)
+        for a, c in zip(ii, kk):
+            t = top[a, c]
+            B[a, t + 1, c] = B[a, t, c]
+            G[a, t + 1, c] = G[a, t, c]
+        added += len(ii)
+    print("plate steps added", added)
+
+
 def main():
     G, org = block_grid()
     G, org = add_belly(G, org)
     B, names = to_blocks(G, org)
+    walkable_plates(B, G, org)
     nz = np.argwhere(B != 0)
     lo, hi = nz.min(0), nz.max(0)
     print("origin", org, "shape", B.shape, "blocks", len(nz))

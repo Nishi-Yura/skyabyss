@@ -1066,7 +1066,8 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 甲羅の上へ上る段
-    // 浜の西の壁 (x -33、z 44) の口から、5x5 の四角い螺旋 (中心 (-36, 44)) を甲羅の地表の口まで上る。
+    // 浜の西の壁 (x -33、z 44) の口から通路で西へ、5x5 の四角い螺旋 (中心 (-44, 44)) を甲羅の地表の口まで上る。
+    // 口は珊瑚の房 (浜の真上) を避け、甲羅の板の平らな所 (y 107) に開く。
     // 段の列は外周の 16 マス。一段ずつ 1 上がり、どの段の上も 3 マス空いている (落ちても 1 段だけ)
     public static List<int[]> topStairRing() {
         int cx = TOP_STAIR_X1 + 2;
@@ -1110,10 +1111,15 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        // 浜からの口 (x -33、z 44、床 66)
-        kit.set(cx + 3, y0, cz, TideKit.FLOOR);
-        for (int y = y0 + 1; y <= y0 + 3; y++) {
-            kit.set(cx + 3, y, cz, TideKit.AIR);
+        // 浜の西の壁の口 (x -33、z 44) から段の下まで、床 66 の短い通路
+        for (int x = cx + 3; x <= BEACH.x1() - 1; x++) {
+            for (int z = cz - 1; z <= cz + 1; z++) {
+                for (int y = y0; y <= y0 + 4; y++) {
+                    boolean wall = z != cz;
+                    kit.set(x, y, z, y == y0 ? TideKit.FLOOR : wall || y == y0 + 4 ? (x % 4 == 0 && y == y0 + 2 && wall ? TideKit.LAMP : kit.wall(x, y, z))
+                            : TideKit.AIR);
+                }
+            }
         }
         List<int[]> ring = topStairRing();
         int y = y0 + 1;
@@ -1126,7 +1132,7 @@ public final class TideIslandBuilder {
             for (int yy = y + 1; yy <= y + 3; yy++) {
                 kit.set(c[0], yy, c[1], TideKit.AIR);
             }
-            if (y + 2 >= top) {
+            if (y + 1 >= top) {
                 // 地表に出た: 段の上を空まで開け、口のまわりに低い遺跡の枠 (半分埋まった石の段)
                 for (int yy = y + 1; yy <= top + 3; yy++) {
                     kit.set(c[0], yy, c[1], TideKit.AIR);
