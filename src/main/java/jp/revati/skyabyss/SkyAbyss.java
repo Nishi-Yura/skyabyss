@@ -70,6 +70,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.storm.back.StormBackSetup.register(modEventBus);
         // 1 章の終わり (天の鍵、ベータの終わり)。docs/design/14_beta.md
         jp.revati.skyabyss.story.StorySetup.register(modEventBus);
+        // 雷翼の中ボス 雷獣 (12 の 5.2節)。登録は titan.storm.raiju パッケージにまとめてある
+        jp.revati.skyabyss.titan.storm.raiju.RaijuSetup.register(modEventBus);
         // 潮殻の装備 (鎧・三叉槍・盾・護符・専用伝説・心核) と図鑑の表。登録は titan.tide.gear パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.gear.TideGearSetup.register(modEventBus);
         // 第四の巨神「余燼の巨神」の骨組み (熱の音、背中の口)。ID の一覧は titan.ember.EmberIds。docs/design/13_ember.md の 11章

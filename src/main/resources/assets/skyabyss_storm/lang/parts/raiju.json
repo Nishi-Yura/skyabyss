@@ -1,0 +1,110 @@
+{
+  "entity.skyabyss.raiju": {
+    "en": "Raiju",
+    "ja": "雷獣"
+  },
+  "gui.skyabyss.boss.raiju.angry": {
+    "en": "Enraged",
+    "ja": "怒り"
+  },
+  "gui.skyabyss.boss.raiju.stunned": {
+    "en": "Stunned",
+    "ja": "痺れ"
+  },
+  "message.skyabyss.raiju.begin": {
+    "en": "The lightning in the knuckle gathers into one point, and takes the shape of a beast...",
+    "ja": "瘤に集まっていた雷が一点に寄り、獣の形になった……"
+  },
+  "message.skyabyss.raiju.hint_plug": {
+    "en": "Pull the plug at a rod's foot to ground it. A beast that lands on a grounded rod falls.",
+    "ja": "柱の根元の栓を引くと、柱は接地する。接地した柱に渡った獣は落ちる"
+  },
+  "message.skyabyss.raiju.stunned": {
+    "en": "The raiju struck a grounded rod and fell, stunned!",
+    "ja": "雷獣が接地した柱に落ち、痺れて動けない！"
+  },
+  "message.skyabyss.raiju.roar": {
+    "en": "The raiju roars. Lightning is called to your feet!",
+    "ja": "雷獣が吼えた。足もとに雷が呼ばれる！"
+  },
+  "message.skyabyss.raiju.grounded": {
+    "en": "You pulled the plug. The rod is grounded (%s s)",
+    "ja": "栓を引いた。柱が接地した (%s 秒)"
+  },
+  "message.skyabyss.raiju.plug_wait": {
+    "en": "The plug has not settled yet (%s s)",
+    "ja": "栓はまだ戻らない (%s 秒)"
+  },
+  "message.skyabyss.raiju.plug_already": {
+    "en": "This rod is already grounded",
+    "ja": "この柱はもう接地している"
+  },
+  "message.skyabyss.raiju.defeated": {
+    "en": "The raiju has fallen.",
+    "ja": "雷獣が倒れた。"
+  },
+  "message.skyabyss.raiju.after": {
+    "en": "The lightning gathered in the knuckle lost its home, and ran from rod to rod again and again.",
+    "ja": "瘤に集まっていた雷が、行き場をなくして柱を何度も行き来した。"
+  },
+  "message.skyabyss.raiju.east_stone_ready": {
+    "en": "At the crown of the knuckle, a wind chime stone waits to ring.",
+    "ja": "瘤の頂で、風鳴り石が鳴るのを待っている。"
+  },
+  "message.skyabyss.raiju.asleep": {
+    "en": "The raiju sleeps. Nothing stirs while the world is peaceful.",
+    "ja": "雷獣は眠っている。世界が穏やかなあいだは、目を覚まさない"
+  },
+  "message.skyabyss.raiju.go": {
+    "en": "Raiju's nest: walk in to begin (5 s). /skyabyss raiju start to begin now",
+    "ja": "雷獣の巣: 中へ入ると 5 秒で始まる。すぐ始めるなら /skyabyss raiju start"
+  },
+  "message.skyabyss.raiju.go_temporary": {
+    "en": "Raiju's nest (temporary, in the overworld sky until the storm back exists). Walk in to begin",
+    "ja": "雷獣の巣 (仮。雷翼の背ができるまで、オーバーワールドの空に置いてある)。中へ入ると始まる"
+  },
+  "subtitles.skyabyss.raiju_ambient": {
+    "en": "Raiju growls and crackles",
+    "ja": "雷獣が唸り、毛が爆ぜる"
+  },
+  "subtitles.skyabyss.raiju_hurt": {
+    "en": "Raiju hurts",
+    "ja": "雷獣が傷つく"
+  },
+  "subtitles.skyabyss.raiju_death": {
+    "en": "Raiju dies",
+    "ja": "雷獣が倒れる"
+  },
+  "subtitles.skyabyss.raiju_rail_charge": {
+    "en": "Raiju gathers lightning",
+    "ja": "雷獣が雷を溜める"
+  },
+  "subtitles.skyabyss.raiju_leap": {
+    "en": "Raiju leaps as lightning",
+    "ja": "雷獣が雷になって渡る"
+  },
+  "subtitles.skyabyss.raiju_pounce": {
+    "en": "Raiju crouches",
+    "ja": "雷獣が身を低くする"
+  },
+  "subtitles.skyabyss.raiju_claw": {
+    "en": "Raiju claws",
+    "ja": "雷獣の爪"
+  },
+  "subtitles.skyabyss.raiju_roar": {
+    "en": "Raiju roars thunder",
+    "ja": "雷獣の雷鳴の咆哮"
+  },
+  "subtitles.skyabyss.raiju_stun": {
+    "en": "Raiju falls, stunned",
+    "ja": "雷獣が痺れて落ちる"
+  },
+  "subtitles.skyabyss.ground_plug": {
+    "en": "Rod grounded",
+    "ja": "柱が接地する"
+  },
+  "gui.skyabyss.boss.raiju": {
+    "en": "Raiju",
+    "ja": "雷獣"
+  }
+}
