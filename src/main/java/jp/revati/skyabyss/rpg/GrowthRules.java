@@ -34,7 +34,7 @@ public final class GrowthRules {
     // 一緒に倒した人が増えるごとに、全体の量が 25% 増える (一人あたりは減る)
     public static final double PARTY_BONUS = 0.25;
     // バニラの敵は 1 日 (ゲーム内 20 分) にこの量までは満額、そのあとは 20%
-    public static final int VANILLA_DAILY = 150;
+    public static final int VANILLA_DAILY = 100;
     public static final double VANILLA_TIRED = 0.20;
 
     private GrowthRules() {
@@ -134,5 +134,10 @@ public final class GrowthRules {
     public static int roundRandom(double value, double r) {
         int base = (int) Math.floor(value);
         return base + (r < value - base ? 1 : 0);
+    }
+
+    // ステータスの振り直しの費用 (共鳴の結晶の数)。技の振り直しと同じ表を使う (初回無料、以後 1〜5)
+    public static int statRespecCost(int respecsSoFar) {
+        return jp.revati.skyabyss.rpg.skill.SkillRules.respecCost(respecsSoFar);
     }
 }

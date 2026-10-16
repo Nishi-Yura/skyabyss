@@ -50,6 +50,22 @@ public final class SkillHud {
         return rows;
     }
 
+    // 成長の表示を経験値バーの左に置いたとき、左上に残るものの高さ (画面が狭くて左上に寄せた技の枠だけ)。クエストの追跡が読む
+    public static int topLeftRowsWhenGrowthAtBottom() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return 0;
+        }
+        SkillData d = SkillManager.get(mc.player);
+        return anySlot(d) && slotsOnTopLeft(mc, mc.getWindow().getGuiScaledWidth()) ? SLOT + 4 : 0;
+    }
+
+    // マナのバーの位置: 成長の表示のバーのすぐ下 (左上でも経験値バーの左でも)
+    static int[] manaOrigin(Minecraft mc, int guiWidth, int guiHeight) {
+        int[] o = jp.revati.skyabyss.rpg.client.GrowthHud.origin(mc, guiWidth, guiHeight);
+        return new int[] {o[0], o[1] + MANA_Y - 6};
+    }
+
     static boolean anySlot(SkillData d) {
         for (int i = 0; i < d.slots.length; i++) {
             if (d.slot(i) != null) {
@@ -78,30 +94,37 @@ public final class SkillHud {
         }
         SkillData d = SkillManager.get(mc.player);
         if (showMana(mc.player, d)) {
-            renderMana(g, mc.player, d);
+            renderMana(g, mc, d);
         }
         if (anySlot(d)) {
             renderSlots(g, mc, d);
         }
     }
 
-    private static void renderMana(GuiGraphics g, Player player, SkillData d) {
-        double max = SkillManager.maxMana(player);
+    private static void renderMana(GuiGraphics g, Minecraft mc, SkillData d) {
+        double max = SkillManager.maxMana(mc.player);
+        int[] m = manaOrigin(mc, g.guiWidth(), g.guiHeight());
+        int mx = m[0];
+        int my = m[1];
         float fraction = max <= 0 ? 0 : (float) Mth.clamp(Math.max(0, d.mana) / max, 0, 1);
-        g.blit(TEXTURE, MANA_X, MANA_Y, MANA_W, 4, 240, 440, 128, 8, TEX_W, TEX_H);
+        g.blit(TEXTURE, mx, my, MANA_W, 4, 240, 440, 128, 8, TEX_W, TEX_H);
         int fill = Mth.clamp(Math.round((MANA_W - 2) * fraction), 0, MANA_W - 2);
         if (fill > 0) {
-            g.blit(TEXTURE, MANA_X + 1, MANA_Y + 1, fill, 2, 240, 450, fill * 2, 4, TEX_W, TEX_H);
+            g.blit(TEXTURE, mx + 1, my + 1, fill, 2, 240, 450, fill * 2, 4, TEX_W, TEX_H);
         }
         if (SkillClient.manaFlash > 0) {
             int a = (int) (SkillClient.manaFlash / 14f * 0xC0);
-            g.fill(MANA_X, MANA_Y, MANA_X + MANA_W, MANA_Y + 4, (a << 24) | 0xD9779A);
+            g.fill(mx, my, mx + MANA_W, my + 4, (a << 24) | 0xD9779A);
         }
     }
 
     // 枠の置き場: ホットバーの右 (攻撃の目盛りや、左利きのオフハンドの枠があればその先)。画面が狭ければ左上のマナの下
     static int[] slotOrigin(Minecraft mc, GuiGraphics g) {
         if (slotsOnTopLeft(mc, g.guiWidth())) {
+            // 成長の表示が経験値バーの左にあるときは、左上が空いているので一番上に
+            if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, g.guiWidth())) {
+                return new int[] {MANA_X, 6};
+            }
             return new int[] {MANA_X, MANA_Y + 8};
         }
         return new int[] {hotbarSideX(mc, g.guiWidth()), g.guiHeight() - 21};
@@ -136,7 +159,9 @@ public final class SkillHud {
                 }
                 // クールダウン: 上から暗く覆い、残りの秒を出す
                 int left = d.cooldown(s);
-                int total = Math.max(1, SkillRules.cooldownTicks(s, rank));
+                // 冴え (手の武器の特性) で縮んだ待ちを全体の長さにする (サーバーが待ちを決めるときと同じ計算)。
+                // 待ちの途中で武器を持ち替えると全体が変わるが、覆いは 16 で止まるので崩れない
+                int total = jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(mc.player, SkillRules.cooldownTicks(s, rank));
                 if (left > 0) {
                     int h = Mth.clamp(Math.round(16f * left / total), 1, 16);
                     g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);

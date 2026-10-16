@@ -188,7 +188,7 @@ public final class GrowthRewards {
         return list;
     }
 
-    // バニラの敵は日ごとに 150 までは満額、そのあとは 20%
+    // バニラの敵は日ごとに 100 までは満額、そのあとは 20%
     static double vanillaBudget(ServerLevel level, GrowthData data, double amount) {
         long day = level.getGameTime() / 24000L;
         if (data.vanillaDay != day) {

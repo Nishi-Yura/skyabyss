@@ -90,6 +90,13 @@ public final class PrologueSelfTest {
         if (WatcherStage.of(0, 0.6f).index() != 1 || WatcherStage.of(5, 1f).index() != 2) {
             failures.add("a near moon does not advance the stage by one (capped)");
         }
+        // 1 章以降も出るが、段階 2 より近くならない (00 の 2 = B)
+        for (int chapter = 1; chapter <= 3; chapter++) {
+            if (WatcherStage.of(50, 1f, chapter).index() != WatcherStage.CHAPTER_CAP
+                    || WatcherStage.of(0, 0f, chapter).index() != 0) {
+                failures.add("chapter " + chapter + " does not keep the watcher between stage 0 and the cap");
+            }
+        }
         WatcherStage prev = null;
         for (WatcherStage s : WatcherStage.STAGES) {
             if (s.minDistance() < 40 || s.maxDistance() > 70 || s.minDistance() >= s.maxDistance()) {

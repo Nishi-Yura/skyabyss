@@ -224,7 +224,7 @@ public final class SkillManager {
         return n;
     }
 
-    private static void removeCrystals(Inventory inv, int count) {
+    public static void removeCrystals(Inventory inv, int count) {
         for (int i = 0; i < inv.getContainerSize() && count > 0; i++) {
             ItemStack s = inv.getItem(i);
             if (s.is(ModItems.RESONANCE_CRYSTAL.get())) {

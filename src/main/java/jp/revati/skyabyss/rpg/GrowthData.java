@@ -29,6 +29,8 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     // 記憶の断片: 種類 (ID) ごとの数。上限は capacity
     public final Map<String, Integer> fragments = new LinkedHashMap<>();
     public int fragmentCapacity = GrowthRules.FRAGMENT_CAPACITY;
+    // ステータスを振り直した回数 (費用を決める。技の振り直しとは別に数える。持ち主のクライアントへも送る)
+    public int statRespecs;
 
     // ここから下はサーバーだけが使う (クライアントへは送らない)
     // 一度だけの経験値 (新しい場所、初めての撃破) の記録
@@ -92,6 +94,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
             java.util.Arrays.fill(stats, 0);
         }
         fragmentCapacity = Math.max(0, fragmentCapacity);
+        statRespecs = Math.max(0, statRespecs);
         fragments.values().removeIf(v -> v == null || v <= 0);
     }
 
@@ -110,6 +113,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         fragments.forEach(f::putInt);
         tag.put("fragments", f);
         tag.putInt("fragmentCapacity", fragmentCapacity);
+        tag.putInt("statRespecs", statRespecs);
         ListTag d = new ListTag();
         for (String id : discoveries) {
             d.add(StringTag.valueOf(id));
@@ -135,6 +139,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
             fragments.put(key, f.getInt(key));
         }
         fragmentCapacity = tag.contains("fragmentCapacity") ? tag.getInt("fragmentCapacity") : GrowthRules.FRAGMENT_CAPACITY;
+        statRespecs = tag.getInt("statRespecs");
         discoveries.clear();
         for (Tag t : tag.getList("discoveries", Tag.TAG_STRING)) {
             discoveries.add(t.getAsString());
@@ -159,6 +164,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                     buf.writeUtf(id);
                     buf.writeVarInt(n);
                 });
+                buf.writeVarInt(data.statRespecs);
             },
             buf -> {
                 GrowthData data = new GrowthData();
@@ -173,6 +179,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                 for (int i = 0; i < n; i++) {
                     data.fragments.put(buf.readUtf(), buf.readVarInt());
                 }
+                data.statRespecs = buf.readVarInt();
                 return data;
             });
 }

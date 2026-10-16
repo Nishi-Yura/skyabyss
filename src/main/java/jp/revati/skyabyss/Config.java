@@ -57,6 +57,16 @@ public final class Config {
             .comment("「雲の切れ間の目」の強さ (光と音の大きさ。0.3 = 弱め, 1 = 標準)")
             .defineInRange("cloudEyeIntensity", 1.0, 0.3, 1.0);
 
+    // 成長の表示 (rpg/client/GrowthHud) の置き場。マナのバー・技の枠・クエストの追跡もこれに合わせて動く (00 の 35)
+    public enum GrowthHudPosition {
+        TOP_LEFT,
+        XP_BAR
+    }
+
+    public static final ModConfigSpec.EnumValue<GrowthHudPosition> GROWTH_HUD_POSITION = CLIENT_BUILDER
+            .comment("成長の表示 (Lv と細いバー) の置き場。TOP_LEFT = 画面の左上, XP_BAR = 下の経験値バーの左 (画面が狭くて入らなければ左上)")
+            .defineEnum("growthHudPosition", GrowthHudPosition.TOP_LEFT);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {
