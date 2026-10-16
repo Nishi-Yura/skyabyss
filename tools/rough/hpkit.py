@@ -79,6 +79,16 @@ def sub_uv(po, ps, d, puv, so, ss):
     else:
         v_start = v0 + (1 - vt) * vh
         v_size = (vt - vb) * vh
+    # a face smaller than one texel must sample the texel under its centre only (no bleeding of neighbours / glow)
+    import math
+    if abs(u_size) < 1:
+        cu = u_start + u_size / 2
+        sg = 1 if u_size >= 0 else -1
+        u_start, u_size = math.floor(cu) + (0.25 if sg > 0 else 0.75), 0.5 * sg
+    if abs(v_size) < 1:
+        cv = v_start + v_size / 2
+        sg = 1 if v_size >= 0 else -1
+        v_start, v_size = math.floor(cv) + (0.25 if sg > 0 else 0.75), 0.5 * sg
     return [round(u_start, 4), round(v_start, 4)], [round(u_size, 4), round(v_size, 4)]
 
 
@@ -320,8 +330,25 @@ class Model:
         # patches are placed under the original texture; the final y offset is applied in finalize()
         return ("palette", i, per_row)
 
-    def add_box(self, bone, origin, size, rgb=None, glow=False, rgb_by_face=None, faces=DIRS, rot=None, pivot=None):
-        """Add a box (flat colour, 1 texel per face). rgb_by_face: {dir: rgb} to shade faces differently."""
+    def collides(self, origin, size, tol=1e-6):
+        """True if the box overlaps any existing (unrotated) box. Bone rotations are ignored (checked by check_overlaps)."""
+        o = np.array(origin, float)
+        e = o + np.array(size, float)
+        for b in self.g["bones"]:
+            for c in b.get("cubes", []):
+                if "rotation" in c:
+                    continue
+                co = np.array(c["origin"], float)
+                ce = co + np.array(c["size"], float)
+                if ((np.minimum(e, ce) - np.maximum(o, co)) > tol).all():
+                    return True
+        return False
+
+    def add_box(self, bone, origin, size, rgb=None, glow=False, rgb_by_face=None, faces=DIRS, rot=None, pivot=None, safe=False):
+        """Add a box (flat colour, 1 texel per face). rgb_by_face: {dir: rgb} to shade faces differently.
+        safe=True: skip (return None) when it would overlap an existing box."""
+        if safe and self.collides(origin, size):
+            return None
         uv = {}
         for d in faces:
             col = (rgb_by_face or {}).get(d, rgb)
@@ -332,6 +359,40 @@ class Model:
             c["pivot"] = list(pivot if pivot is not None else [origin[i] + size[i] / 2 for i in range(3)])
         self.bone(bone).setdefault("cubes", []).append(c)
         return c
+
+    def ridges(self, bones, face="up", min_len=6, spacing=2.0, width=0.5, height=0.25, k=1.25, min_w=2.0):
+        """Raised thin strips across the `face` of every big box (shell ribs, armour plates, fur ridges). Skips collisions.
+        Returns the number added. Colour = the face colour * k."""
+        n = 0
+        ax, sg = NORMAL[face]
+        for b in list(self.g["bones"]):
+            if bones is not None and b["name"] not in bones:
+                continue
+            for c in list(b.get("cubes", [])):
+                if face not in c["uv"] or "rotation" in c:
+                    continue
+                o, sz = c["origin"], c["size"]
+                other = [a for a in range(3) if a != ax]
+                lens = [sz[a] for a in other]
+                if min(lens) < min_w or max(lens) < min_len:
+                    continue
+                run = other[lens.index(max(lens))]   # strips run across the short axis, repeated along the long one
+                short = other[1 - lens.index(max(lens))]
+                u, v = c["uv"][face]["uv"], c["uv"][face]["uv_size"]
+                rgb = self.color_at((u[0] + v[0] / 2 - 0.01, u[1] + v[1] / 2 - 0.01)) if not isinstance(u, tuple) else (128, 128, 128)
+                col = tuple(min(255, int(x * k)) for x in rgb)
+                t = 1.0
+                while t + width < sz[run] - 0.5:
+                    org = [0, 0, 0]
+                    size = [0, 0, 0]
+                    org[run], size[run] = o[run] + t, width
+                    org[short], size[short] = o[short] + 0.5, sz[short] - 1.0
+                    org[ax] = o[ax] + sz[ax] if sg > 0 else o[ax] - height
+                    size[ax] = height
+                    if self.add_box(b["name"], org, size, rgb=col, safe=True):
+                        n += 1
+                    t += spacing
+        return n
 
     def finalize(self):
         """Resolve palette placeholders: append rows to the texture / glowmask, return (geo, tex, glow)."""
