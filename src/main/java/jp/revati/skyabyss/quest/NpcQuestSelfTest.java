@@ -40,17 +40,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // NPC とクエストの自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー、起動直後に一度)。
 // JSON の読み込みと参照先、文の有無と長さ、会話の条件分岐、ループをまたぐ「覚えているような」入口、
 // メインクエストを最初から最後まで、サブ 2 本、二人同時、倒した数の数え方、保存と死んだときの引き継ぎを確かめる。
 // 結果はログに SELFTEST npc PASSED / FAILED (サーバーを止めるのは岩鯨の背の自己テスト)
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class NpcQuestSelfTest {
     private static final String[] LANGS = {"ja_jp", "en_us"};
     // 会話画面の本文の幅 (枠 400 − 顔と余白 82) と、枠の高さの上限 (GUI 拡大率 4 の 1080p で画面の高さ 270)
@@ -60,21 +56,18 @@ public final class NpcQuestSelfTest {
     private NpcQuestSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
-        int loopBefore = WorldLoop.count(event.getServer());
+        int loopBefore = WorldLoop.count(server);
         try {
-            run(event.getServer(), failures, notes);
+            run(server, failures, notes);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
             SkyAbyss.LOGGER.error("SELFTEST npc exception", e);
         } finally {
-            WorldLoop.set(event.getServer(), loopBefore);
+            WorldLoop.set(server, loopBefore);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST npc: {}", n));
         if (failures.isEmpty()) {

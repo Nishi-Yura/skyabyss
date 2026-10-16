@@ -33,30 +33,23 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 伝承の書の自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー)。
 // JSON の読み込み・文の有無・解放の条件・記録の保存と引き継ぎ・頁・村の宝箱を確かめ、ログに PASSED / FAILED を出す。
 // サーバーを止めるのは岩鯨の背の自己テスト (TitanBackSelfTest) の役目なので、ここは起動直後に一度で済ませる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class LoreSelfTest {
     private static final String[] LANGS = {"ja_jp", "en_us"};
 
     private LoreSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
             SkyAbyss.LOGGER.error("SELFTEST lore exception", e);

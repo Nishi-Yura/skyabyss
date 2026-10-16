@@ -21,29 +21,22 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 物語の進みとパーティの自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー、起動直後に一度。止めるのは TitanBackSelfTest)。
 // 巨神の順番・段階・レベルの上限・世界の進み・乗る資格 (入口とディメンション移動)・ゲームルール・パーティの記録と分け前を確かめる。
 // ワールドの記録は写し取ってから試し、最後に元へ戻す
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ProgressSelfTest {
     private ProgressSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("progress selftest crashed", e);
             failures.add("crashed: " + e);

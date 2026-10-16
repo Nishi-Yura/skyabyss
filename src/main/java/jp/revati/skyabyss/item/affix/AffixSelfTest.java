@@ -28,29 +28,22 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 特性・再鍛造・交換の自己テスト。SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く (止めるのは TitanBackSelfTest)。
 //  - 抽選の分布 (数・種類・値の幅・重なりなし)、保存 (NBT の往復)、古い装備の扱い
 //  - 再鍛造 (3 組まで、確定・今のまま・範囲外)、交換の決まり (心臓ごとに一度、未所持だけ、欠片 30)
 //  - 修飾子 (部位ごとの ID、値)、守りの上限、冴え
 //  - 模擬: 欠片と結晶の集まり方、特性込みで岩鯨の心臓が簡単になりすぎないか
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AffixSelfTest {
     private AffixSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("affix selftest crashed", e);
             failures.add("crashed: " + e);

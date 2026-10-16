@@ -67,7 +67,7 @@
   "gui.skyabyss.travel.waymark_unnamed": "Nameless Waymark",
   "gui.skyabyss.travel.waymark_of": "Waymark of %s",
   "gui.skyabyss.travel.detail": "%s · %s · ~%ss",
-  "gui.skyabyss.travel.lost": "Waymark lost",
+  "gui.skyabyss.travel.lost": "Lost, now cleared",
   "gui.skyabyss.travel.here": "Here (too close)",
   "gui.skyabyss.travel.no_waymarks": "Touch a Titan Waymark",
   "gui.skyabyss.travel.no_waymarks2": "to add it here",

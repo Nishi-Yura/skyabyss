@@ -35,16 +35,12 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 1章の空の演出の自己テスト。SKYABYSS_SELFTEST=1 の専用サーバーで、起動直後に一度だけ動く (止めるのは TitanBackSelfTest)。
 // いちばん大事なのは「プレイヤーの建築を壊さない」ことなので、空中 (y=220〜250) に石の峰を作り、
 // 人工物を一つずつ置いては「削らない」と判断することを確かめる。削ったときは、計画した所以外が一つも変わっていないことを確かめる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ChapterSkySelfTest {
     private static final int CX = -4000;
     private static final int CZ = -4000;
@@ -56,37 +52,67 @@ public final class ChapterSkySelfTest {
     private ChapterSkySelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        MinecraftServer server = event.getServer();
-        ServerLevel level = server.overworld();
-        List<String> failures = new ArrayList<>();
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき)。重いので段に分け、1 tick に 1 段ずつ流す:
+    // 決まりごと → 空中の峰を削る → 置いた・掘った記録 → 本物の山 (場所ごとに、チャンクの生成を待ってから) → 砂漠とまとめ
+    private static final List<String> FAILURES = new ArrayList<>();
+
+    public static List<jp.revati.skyabyss.SelfTestRunner.Step> steps() {
+        return List.of(
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (rules)", server -> guarded(() -> {
+                    FAILURES.clear();
+                    REAL_REASONS.clear();
+                    REAL_HITS.clear();
+                    REAL_FAILURES.clear();
+                    realTried = 0;
+                    realCarved = 0;
+                    realGrids = 0;
+                    realSite = 0;
+                    realStage = 0;
+                    realSkipped = 0;
+                    realStarted = 0;
+                    checkMoon(FAILURES);
+                    checkStages(FAILURES);
+                    checkBlocker(FAILURES);
+                    checkOutcomes(FAILURES);
+                    checkYaw(FAILURES);
+                    checkData(server, FAILURES);
+                    checkPayloads(server, FAILURES);
+                    checkChapterOne(server.overworld(), FAILURES);
+                    checkBlockSets(FAILURES);
+                })),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (scars)", server -> guarded(() -> checkScars(server.overworld(), FAILURES))),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky (recording)", server -> guarded(() -> checkRecording(server.overworld(), FAILURES))),
+                jp.revati.skyabyss.SelfTestRunner.Step.until("chapter sky (real peaks)", server -> {
+                    try {
+                        return realPeakStep(server.overworld());
+                    } catch (RuntimeException e) {
+                        SkyAbyss.LOGGER.error("SELFTEST chapter sky crashed", e);
+                        FAILURES.add("crashed: " + e);
+                        return true;
+                    }
+                }),
+                jp.revati.skyabyss.SelfTestRunner.Step.once("chapter sky", server -> {
+                    guarded(() -> finishRealPeaks(server.overworld(), FAILURES));
+                    report();
+                }));
+    }
+
+    private static void guarded(Runnable check) {
         try {
-            checkMoon(failures);
-            checkStages(failures);
-            checkBlocker(failures);
-            checkOutcomes(failures);
-            checkYaw(failures);
-            checkData(server, failures);
-            checkPayloads(server, failures);
-            checkChapterOne(level, failures);
-            checkBlockSets(failures);
-            checkScars(level, failures);
-            checkRecording(level, failures);
-            checkRealPeaks(level, failures);
+            check.run();
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST chapter sky crashed", e);
-            failures.add("crashed: " + e);
+            FAILURES.add("crashed: " + e);
         }
-        if (failures.isEmpty()) {
+    }
+
+    private static void report() {
+        if (FAILURES.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST chapter sky PASSED (moon, stages, eye conditions, outcomes, data, payloads, chapter 1, "
                     + "peak scar: finds the peak, carves only the plan, refuses every artifact and every stone-and-dirt build, stops when a block changes, "
-                    + "records placing and digging, still carves real mountain peaks)");
+                    + "records placing and digging, tries real mountain peaks)");
         } else {
-            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
+            FAILURES.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
         }
     }
 
@@ -307,6 +333,8 @@ public final class ChapterSkySelfTest {
                 forced.add(new ChunkPos(cx, cz));
             }
         }
+        // 固定の峰のバイオームは種しだいなので、草の育つ平原に決めて試す (砂漠などの判定は checkForeignSoil で決まった形で試す)
+        PeakScar.testBiome = biome(level, Biomes.PLAINS);
         try {
             forgetTestScars(data);
             float dirX = 1f;
@@ -525,12 +553,49 @@ public final class ChapterSkySelfTest {
             if (!flat.isEmpty() && flat.stream().anyMatch(c -> Math.abs(c.x() - CX) < RADIUS && Math.abs(c.z() - CZ) < RADIUS)) {
                 failures.add("a flat plateau was taken for a peak");
             }
+
+            // 11. 砂漠・荒野・浜の地表の草や土は運び込まれたもの。同じ峰でも、平原なら削り、砂漠などなら削らない
+            checkForeignSoil(level, peak, failures);
         } finally {
+            PeakScar.testBiome = null;
             clearArea(level);
             forgetTestScars(data);
             for (ChunkPos p : forced) {
                 level.setChunkForced(p.x, p.z, false);
             }
+        }
+    }
+
+    private static Holder<Biome> biome(ServerLevel level, ResourceKey<Biome> key) {
+        return level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).getHolderOrThrow(key);
+    }
+
+    // バイオームの表層に合わない土の判定を、種に頼らず決まった形で試す (終わったら平原に戻す)
+    private static void checkForeignSoil(ServerLevel level, PeakScar.Candidate peak, List<String> failures) {
+        for (ResourceKey<Biome> key : List.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.BEACH,
+                Biomes.SNOWY_BEACH)) {
+            if (!PeakScar.foreignBiome(biome(level, key))) {
+                failures.add("soil on " + key.location().getPath() + " was not taken as foreign");
+            }
+        }
+        for (ResourceKey<Biome> key : List.of(Biomes.PLAINS, Biomes.MEADOW, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.JAGGED_PEAKS,
+                Biomes.STONY_PEAKS, Biomes.FROZEN_PEAKS, Biomes.WINDSWEPT_HILLS)) {
+            if (PeakScar.foreignBiome(biome(level, key))) {
+                failures.add("soil on " + key.location().getPath() + " was taken as foreign");
+            }
+        }
+        try {
+            for (ResourceKey<Biome> key : List.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.BEACH)) {
+                PeakScar.testBiome = biome(level, key);
+                buildPeak(level);
+                PeakScar.Result r = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
+                if (r.plan() != null || !r.reason().startsWith("built shape: soil that does not belong")) {
+                    failures.add("a grassy peak in a " + key.location().getPath() + " should be refused as carried-in soil, got "
+                            + (r.plan() != null ? "a plan" : r.reason()));
+                }
+            }
+        } finally {
+            PeakScar.testBiome = biome(level, Biomes.PLAINS);
         }
     }
 
@@ -839,24 +904,87 @@ public final class ChapterSkySelfTest {
     private static int realCarved;
     private static int realGrids;
 
-    // 起動の tick の中で順に調べる (ウォッチドッグの60秒に収まるよう、12秒を過ぎたら残りの場所は飛ばす。
-    // 一度生成したチャンクは保存されるので、2回目からは全部の場所を数秒で調べられる)
-    private static void checkRealPeaks(ServerLevel level, List<String> failures) {
-        List<Site> sites = List.of(new Site(Biomes.STONY_PEAKS, -9000, 0), new Site(Biomes.JAGGED_PEAKS, 6000, 6000),
-                new Site(Biomes.FROZEN_PEAKS, -6000, 6000), new Site(Biomes.JAGGED_PEAKS, -6000, -6000),
-                new Site(Biomes.STONY_PEAKS, 6000, -6000), new Site(Biomes.FROZEN_PEAKS, 9000, 0), new Site(Biomes.JAGGED_PEAKS, 0, 9000));
-        long started = System.currentTimeMillis();
-        int skipped = 0;
-        for (Site site : sites) {
-            if (System.currentTimeMillis() - started > 12_000) {
-                SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks, skipped {} near {} {} (time; it runs once its chunks are saved)",
-                        site.biome().location().getPath(), site.x(), site.z());
-                skipped++;
-                continue;
-            }
-            realPeakSite(level, site);
+    private static final List<Site> SITES = List.of(new Site(Biomes.STONY_PEAKS, -9000, 0), new Site(Biomes.JAGGED_PEAKS, 6000, 6000),
+            new Site(Biomes.FROZEN_PEAKS, -6000, 6000), new Site(Biomes.JAGGED_PEAKS, -6000, -6000),
+            new Site(Biomes.STONY_PEAKS, 6000, -6000), new Site(Biomes.FROZEN_PEAKS, 9000, 0), new Site(Biomes.JAGGED_PEAKS, 0, 9000));
+    // 本物の山を調べる時間の目安。新しいワールドでは生成に時間がかかるので、これを過ぎたら残りの場所は飛ばす
+    // (一度生成したチャンクは保存されるので、2回目からは全部の場所を数秒で調べられる)
+    private static final long REAL_BUDGET_MS = 60_000;
+    // 一つの場所のチャンクの生成を待つ上限 (過ぎたら、残りはその tick の中で読み込む)
+    private static final long REAL_LOAD_WAIT_MS = 30_000;
+    private static int realSite;
+    private static int realStage;
+    private static int realSkipped;
+    private static long realStarted;
+    private static long realLoadStarted;
+    private static BlockPos realAt;
+    private static final List<ChunkPos> REAL_FORCED = new ArrayList<>();
+
+    // 1 tick に 1 段ずつ: 場所を探してチャンクを強制読み込み → 生成されるのを待つ (サーバーは tick を回し続ける) → 峰を計画する。
+    // すべての場所が終わったら true
+    private static boolean realPeakStep(ServerLevel level) {
+        if (realStarted == 0) {
+            realStarted = System.currentTimeMillis();
         }
-        SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks tried {}, carved {}, reasons {}", realTried, realCarved, REAL_REASONS);
+        if (realSite >= SITES.size()) {
+            return true;
+        }
+        Site site = SITES.get(realSite);
+        switch (realStage) {
+            case 0 -> {
+                if (System.currentTimeMillis() - realStarted > REAL_BUDGET_MS) {
+                    SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks, skipped {} near {} {} (time; it runs once its chunks are saved)",
+                            site.biome().location().getPath(), site.x(), site.z());
+                    realSkipped++;
+                    realSite++;
+                    return realSite >= SITES.size();
+                }
+                Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(h -> h.is(site.biome()), new BlockPos(site.x(), 150, site.z()), 2400, 32, 64);
+                if (found == null) {
+                    SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no {} near {} {}", site.biome().location(), site.x(), site.z());
+                    realSite++;
+                    return realSite >= SITES.size();
+                }
+                realAt = found.getFirst();
+                REAL_FORCED.clear();
+                int radius = 7;
+                for (int cx = (realAt.getX() >> 4) - radius; cx <= (realAt.getX() >> 4) + radius; cx++) {
+                    for (int cz = (realAt.getZ() >> 4) - radius; cz <= (realAt.getZ() >> 4) + radius; cz++) {
+                        level.setChunkForced(cx, cz, true);
+                        REAL_FORCED.add(new ChunkPos(cx, cz));
+                    }
+                }
+                realLoadStarted = System.currentTimeMillis();
+                realStage = 1;
+                return false;
+            }
+            case 1 -> {
+                boolean loaded = REAL_FORCED.stream().allMatch(p -> level.hasChunk(p.x, p.z));
+                if (loaded || System.currentTimeMillis() - realLoadStarted > REAL_LOAD_WAIT_MS) {
+                    realStage = 2;
+                }
+                return false;
+            }
+            default -> {
+                try {
+                    realPeakSite(level, site, realAt, REAL_FORCED);
+                } finally {
+                    for (ChunkPos p : REAL_FORCED) {
+                        level.setChunkForced(p.x, p.z, false);
+                    }
+                    REAL_FORCED.clear();
+                    realStage = 0;
+                    realSite++;
+                }
+                return realSite >= SITES.size();
+            }
+        }
+    }
+
+    private static void finishRealPeaks(ServerLevel level, List<String> failures) {
+        int skipped = realSkipped;
+        SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks (seed {}) tried {}, carved {}, reasons {}", level.getSeed(), realTried, realCarved,
+                REAL_REASONS);
         SkyAbyss.LOGGER.info("SELFTEST chapter sky: shape rules hit on {} natural areas: {}", realGrids, REAL_HITS);
         // 本物の山はワールドの種で変わる。新しいワールドでは生成に時間がかかり、最初の一つ二つの場所しか調べられない。
         // だから「削れる峰が一つもない」は、全部の場所を調べられたときだけ失敗にする (調べ残しがあれば、次の起動で残りを調べる)。
@@ -866,7 +994,9 @@ public final class ChapterSkySelfTest {
         if (realTried == 0 && skipped == 0) {
             failures.add("no real mountain peak was found to test");
         } else if (realCarved == 0 && skipped == 0) {
-            failures.add("no real mountain peak could be carved (" + REAL_REASONS + ")");
+            // 種によっては、見つかる峰がどれも自然の平らな面 (凍った峰の氷塊など) や蜂の巣のそばで、一つも削れない (安全側)。
+            // 削れることは固定の峰で決まった形で確かめているので、本物の峰では警告だけにする
+            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no real peak could be carved in this world (seed {}): {}", level.getSeed(), REAL_REASONS);
         } else if (realCarved == 0) {
             SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no real peak carved yet in {} tries, {} sites left for the next start ({})",
                     realTried, skipped, REAL_REASONS);
@@ -876,10 +1006,12 @@ public final class ChapterSkySelfTest {
                     builtHits, realTried, REAL_REASONS);
         }
         failures.addAll(REAL_FAILURES);
-        // 砂漠の地表に土があれば、運び込まれたものとみなす
+        // 本物の砂漠でも同じに見えるか。見つかる場所は砂漠の縁で、ブロックごとのバイオームは境目でとなりのものに揺れる (種しだい)。
+        // だから警告だけにする。判定そのものは checkForeignSoil で決まった形で試している
         Pair<BlockPos, Holder<Biome>> desert = level.findClosestBiome3d(h -> h.is(Biomes.DESERT), new BlockPos(0, 64, 3000), 2400, 32, 64);
         if (desert != null && !PeakScar.foreignSoil(level, desert.getFirst())) {
-            failures.add("soil in a desert was not taken as foreign");
+            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: the block biome at the found desert {} is {} (a biome edge), not taken as foreign",
+                    desert.getFirst(), level.getBiome(desert.getFirst()).getRegisteredName());
         }
     }
 
@@ -924,21 +1056,7 @@ public final class ChapterSkySelfTest {
         seen.forEach(k -> REAL_HITS.merge(k, 1, Integer::sum));
     }
 
-    private static void realPeakSite(ServerLevel level, Site site) {
-        Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(h -> h.is(site.biome()), new BlockPos(site.x(), 150, site.z()), 2400, 32, 64);
-        if (found == null) {
-            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no {} near {} {}", site.biome().location(), site.x(), site.z());
-            return;
-        }
-        BlockPos at = found.getFirst();
-        List<ChunkPos> forced = new ArrayList<>();
-        int radius = 7;
-        for (int cx = (at.getX() >> 4) - radius; cx <= (at.getX() >> 4) + radius; cx++) {
-            for (int cz = (at.getZ() >> 4) - radius; cz <= (at.getZ() >> 4) + radius; cz++) {
-                level.setChunkForced(cx, cz, true);
-                forced.add(new ChunkPos(cx, cz));
-            }
-        }
+    private static void realPeakSite(ServerLevel level, Site site, BlockPos at, List<ChunkPos> forced) {
         PeakScar.gridProbe = ChapterSkySelfTest::probe;
         try {
             for (ChunkPos p : forced) {
@@ -960,14 +1078,13 @@ public final class ChapterSkySelfTest {
             }
             // 山の地表の土は、そのバイオームのもの
             BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at).below();
+            // (見つかる場所は峰のバイオームの縁なので、となりの砂漠・荒野・浜にかかることがある。種しだいなので警告だけ)
             if (PeakScar.foreignSoil(level, ground)) {
-                REAL_FAILURES.add("soil on a " + site.biome().location().getPath() + " was taken as foreign");
+                SkyAbyss.LOGGER.warn("SELFTEST chapter sky: the ground {} near the {} is in {}, taken as foreign", ground,
+                        site.biome().location().getPath(), level.getBiome(ground).getRegisteredName());
             }
         } finally {
             PeakScar.gridProbe = null;
-            for (ChunkPos p : forced) {
-                level.setChunkForced(p.x, p.z, false);
-            }
         }
     }
 }

@@ -1,0 +1,182 @@
+package jp.revati.skyabyss;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import jp.revati.skyabyss.item.GearCurveSelfTest;
+import jp.revati.skyabyss.item.accessory.AccessorySelfTest;
+import jp.revati.skyabyss.item.affix.AffixSelfTest;
+import jp.revati.skyabyss.lore.LoreSelfTest;
+import jp.revati.skyabyss.progress.ProgressSelfTest;
+import jp.revati.skyabyss.prologue.PrologueSelfTest;
+import jp.revati.skyabyss.quest.NpcQuestSelfTest;
+import jp.revati.skyabyss.quest.free.FreeQuestSelfTest;
+import jp.revati.skyabyss.record.RecordSelfTest;
+import jp.revati.skyabyss.rpg.GrowthSelfTest;
+import jp.revati.skyabyss.rpg.skill.SkillSelfTest;
+import jp.revati.skyabyss.sky.ChapterSkySelfTest;
+import jp.revati.skyabyss.titan.WhaleKeeper;
+import jp.revati.skyabyss.titan.dungeon.TitanBackSelfTest;
+import jp.revati.skyabyss.titan.tide.TideSelfTest;
+import jp.revati.skyabyss.titan.tide.heart.TideHeartSelfTest;
+import jp.revati.skyabyss.titan.tide.mob.TideMobSelfTest;
+import jp.revati.skyabyss.titan.travel.TravelSelfTest;
+import net.minecraft.Util;
+import net.minecraft.server.MinecraftServer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+// 自己テストの入口。環境変数 SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く。
+// 各系統を 1 tick に 1 つずつ順に流す (重いものは系統の中をさらに何 tick かに分ける)。
+// 1 tick にまとめて動かすと、サーバーのウォッチドッグ (max-tick-time=60000) に止められるため。
+// 重い段のあとは、サーバーが予定の時刻に追いつくまで次の段を待つ (下の onServerTick)。
+// 結果の行 (SELFTEST <名前> PASSED / FAILED) は各系統が書く。最後のまとめ (SELFTEST PASSED / FAILED) と
+// サーバーを止めるのは岩鯨の背の自己テスト (TitanBackSelfTest) の最後の段
+@EventBusSubscriber(modid = SkyAbyss.MODID)
+public final class SelfTestRunner {
+    // 一段: 前の段が終わってから waitBefore tick 待って、action を毎 tick 呼ぶ。true を返したら次の段へ
+    public record Step(String name, int waitBefore, Predicate<MinecraftServer> action) {
+        public static Step once(String name, Consumer<MinecraftServer> action) {
+            return once(name, 0, action);
+        }
+
+        public static Step once(String name, int waitBefore, Consumer<MinecraftServer> action) {
+            return new Step(name, waitBefore, server -> {
+                action.accept(server);
+                return true;
+            });
+        }
+
+        public static Step until(String name, Predicate<MinecraftServer> action) {
+            return new Step(name, 0, action);
+        }
+    }
+
+    private static final long CATCH_UP_NANOS = 1_000_000_000L;
+    private static final ArrayDeque<Step> QUEUE = new ArrayDeque<>();
+    private static Step current;
+    private static int wait;
+    private static int stepTicks;
+    private static long stepNanos;
+    private static long stepLongest;
+    private static long startedAt;
+    private static long slowestTick;
+    private static String slowestStep = "";
+
+    private SelfTestRunner() {
+    }
+
+    public static boolean enabled() {
+        return System.getenv("SKYABYSS_SELFTEST") != null;
+    }
+
+    private static List<Step> steps() {
+        List<Step> steps = new ArrayList<>();
+        // 岩鯨の背: 建てる・調べる (番兵を動かす段は最後。サーバーを止めるので)
+        steps.addAll(TitanBackSelfTest.buildSteps());
+        steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
+        steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
+        steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
+        steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
+        steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
+        steps.add(Step.once("record", RecordSelfTest::runSelfTest));
+        steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
+        steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
+        steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
+        steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
+        steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
+        steps.addAll(ChapterSkySelfTest.steps());
+        // チャンクを読み込んでから、エンティティが入るのを待って試すもの
+        steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
+        steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
+        steps.add(Step.once("travel (load)", TravelSelfTest::load));
+        steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
+        steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
+        steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
+        steps.add(Step.once("tide (load)", TideSelfTest::load));
+        steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
+        steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
+        steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
+        steps.addAll(TitanBackSelfTest.trialSteps());
+        return steps;
+    }
+
+    @SubscribeEvent
+    static void onServerStarted(ServerStartedEvent event) {
+        if (!enabled()) {
+            return;
+        }
+        QUEUE.clear();
+        QUEUE.addAll(steps());
+        current = null;
+        wait = QUEUE.peek().waitBefore();
+        startedAt = System.nanoTime();
+        slowestTick = 0;
+        SkyAbyss.LOGGER.info("SELFTEST runner: {} steps, one per tick", QUEUE.size());
+    }
+
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        QUEUE.clear();
+        current = null;
+    }
+
+    @SubscribeEvent
+    static void onServerTick(ServerTickEvent.Post event) {
+        if (current == null && QUEUE.isEmpty()) {
+            return;
+        }
+        // ウォッチドッグが見るのは 1 tick の長さではなく「予定の時刻からの遅れ」(MinecraftServer.getNextTickTime)。
+        // 遅れは重い tick のたびに積み上がり、サーバーが自分で追いつく (Can't keep up) のは 20 秒に一度だけなので、
+        // 重い段のあとは、軽い tick を回して遅れが取り戻されるまで次へ進まない (取り戻すのは数百 tick、実時間で 1 秒もかからない)。
+        // 待つ tick (チャンクやエンティティの読み込みを待つ) も、追いついてから数える (追いつく間の tick は一瞬で過ぎるため)
+        if (Util.getNanos() - event.getServer().getNextTickTime() > CATCH_UP_NANOS) {
+            return;
+        }
+        if (current == null && wait-- > 0) {
+            return;
+        }
+        if (current == null) {
+            current = QUEUE.poll();
+            stepTicks = 0;
+            stepNanos = 0;
+            stepLongest = 0;
+        }
+        Step step = current;
+        long t0 = System.nanoTime();
+        boolean done;
+        try {
+            done = step.action().test(event.getServer());
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST " + step.name() + " crashed", e);
+            SkyAbyss.LOGGER.error("SELFTEST {} FAILED: crashed: {}", step.name(), e);
+            done = true;
+        }
+        long took = System.nanoTime() - t0;
+        stepTicks++;
+        stepNanos += took;
+        stepLongest = Math.max(stepLongest, took);
+        if (took > slowestTick) {
+            slowestTick = took;
+            slowestStep = step.name();
+        }
+        if (!done) {
+            return;
+        }
+        SkyAbyss.LOGGER.info("SELFTEST runner: {} took {} ms in {} tick(s), longest tick {} ms", step.name(), stepNanos / 1_000_000, stepTicks,
+                stepLongest / 1_000_000);
+        current = null;
+        if (QUEUE.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST runner: all steps done in {} s, slowest tick {} ms ({})", (System.nanoTime() - startedAt) / 1_000_000_000L,
+                    slowestTick / 1_000_000, slowestStep);
+        } else {
+            wait = QUEUE.peek().waitBefore();
+        }
+    }
+}

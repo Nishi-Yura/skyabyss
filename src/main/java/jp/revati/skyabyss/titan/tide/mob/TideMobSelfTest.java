@@ -8,6 +8,7 @@ import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.rpg.GrowthRewards;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
@@ -17,41 +18,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 潮殻の背の敵の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide mobs PASSED / FAILED (サーバーを止めるのは TitanBackSelfTest)。
 // 登録と強さ、試練の個体は保存されないこと、経験値の表、落とす物の表 (2 万回の抽選)、潮の周期、像になる・目覚める、
 // 裏返りの 2 倍、泡が真上にだけ浮かせること
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideMobSelfTest {
     private static final int TEST_X = -4200;
     private static final int TEST_Z = 4200;
-    private static int countdown = -1;
 
     private TideMobSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        event.getServer().overworld().setChunkForced(TEST_X >> 4, TEST_Z >> 4, true);
-        countdown = 45;
+    // 呼ぶのは SelfTestRunner: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
+    public static void load(MinecraftServer server) {
+        server.overworld().setChunkForced(TEST_X >> 4, TEST_Z >> 4, true);
     }
 
-    @SubscribeEvent
-    static void onTick(LevelTickEvent.Post event) {
-        if (countdown < 0 || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
-            return;
-        }
-        if (--countdown != 0) {
-            return;
-        }
-        countdown = -1;
+    public static void runSelfTest(MinecraftServer server) {
+        ServerLevel level = server.overworld();
         List<String> failures = new ArrayList<>();
         MobTide.Phase before = MobTide.forced();
         try {

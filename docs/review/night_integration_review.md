@@ -50,10 +50,10 @@
 
 | # | 場所 | 内容 | 根拠 | 提案 |
 |---|---|---|---|---|
-| T1 | `titan/TitanTravel.java` board()/leave() | 背中で倒れると、乗り込んだ場所の記録（`TAG_BOARDED_FROM`）が消える。降りるときに、上った場所ではなく、今の尾の付け根の下に出る | persistent data の直下に保存しているが、復活で写されるのは `PlayerPersisted` の子だけ（`ServerPlayer.restoreFrom`） | `Player.PERSISTED_NBT_TAG` の下に保存する（`TitanBackTrials.persisted()` と同じやり方） |
-| T2 | `titan/travel/Voyages.java` `OFFLINE_COOLDOWN` | リーダーがログアウトしている間に着いたときの呼び笛の待ち時間を、メモリにしか置いていない。サーバーを再起動すると消え、待たずに呼び直せる | static HashMap。ServerStopped で clear している | `TravelWorldData` に UUID → 時刻 の表を持たせる |
-| T3 | `titan/TitanTravel.java` `TAG_TITAN` | 書くだけで、どこからも読まれていない | 読み手がない | 消すか、用途を書く |
-| T4 | `titan/travel/TitanWaymarkBlock.onRemove` | 壊された碑が、プレイヤーの記録（上限 16）に残って枠を使い続ける | ワールド側からしか消していない | 仕様を決める（海図で灰色にして自動で消すなど） |
-| T5 | `titan/dungeon/TitanBackTrials.onExperienceDrop` | 背中で持ち物を保っている人が死んだとき、バニラの経験値のドロップを取り消している | 01 の「バニラを置き換えない」に触れうる | 仕様として了承済みかを 00 で確かめる |
+| T1 | `titan/TitanTravel.java` board()/leave() | 背中で倒れると、乗り込んだ場所の記録（`TAG_BOARDED_FROM`）が消える。降りるときに、上った場所ではなく、今の尾の付け根の下に出る | persistent data の直下に保存しているが、復活で写されるのは `PlayerPersisted` の子だけ（`ServerPlayer.restoreFrom`） | `Player.PERSISTED_NBT_TAG` の下に保存する（`TitanBackTrials.persisted()` と同じやり方）。**対応済み（2026-10-17）**：`TitanTravel.rememberBoarding`／`takeBoardedFrom` で `PlayerPersisted` の下に書く。前の版で直下に書いた記録も読んで消す。潮殻の潮門は乗り込んだ場所を記録していない（降りるときは巨神の門の前か最後に休んだ岸）ので、変える所はない。自己テスト（travel）に、記録が `PlayerPersisted` の下にあり取り出すと消えることを足した。02 の 2.6、09 の 7 章 |
+| T2 | `titan/travel/Voyages.java` `OFFLINE_COOLDOWN` | リーダーがログアウトしている間に着いたときの呼び笛の待ち時間を、メモリにしか置いていない。サーバーを再起動すると消え、待たずに呼び直せる | static HashMap。ServerStopped で clear している | `TravelWorldData` に UUID → 時刻 の表を持たせる。**対応済み（2026-10-17）**：`TravelWorldData.putOfflineReady`／`takeOfflineReady`（`offline_ready` に保存）。static の表と ServerStopped での clear を消した。自己テスト（travel）に、保存と読み直しで残り、遅い方の時刻が残り、取り出すと消えることを足した。09 の 6 章 |
+| T3 | `titan/TitanTravel.java` `TAG_TITAN` | 書くだけで、どこからも読まれていない | 読み手がない | 消すか、用途を書く。**対応済み（2026-10-17）**：消した。`board` の whaleId 引数に、今は使わないことを書いた（古いセーブに残った値は無害） |
+| T4 | `titan/travel/TitanWaymarkBlock.onRemove` | 壊された碑が、プレイヤーの記録（上限 16）に残って枠を使い続ける | ワールド側からしか消していない | 仕様を決める（海図で灰色にして自動で消すなど）。**対応済み（2026-10-17）**：海図を送るとき（`Voyages.sendChart`）、壊された碑は「碑は失われた（外した）」と灰色で出し、行・印とも選べず × も出さない。同時に `Voyages.pruneLost` で記録から外して枠を空けるので、次に開いたときには出ない。自己テスト（travel）に、壊された碑だけが外れることを足した。09 の 4.3・8 章 |
+| T5 | `titan/dungeon/TitanBackTrials.onExperienceDrop` | 背中で持ち物を保っている人が死んだとき、バニラの経験値のドロップを取り消している | 01 の「バニラを置き換えない」に触れうる | 仕様として了承済みかを 00 で確かめる。**対応済み（2026-10-17）**：コードは変えず仕様として残す。経験値は持ち物と一緒に預かって復活で戻すので、玉も落とすと二重になる（背中で何度も挑むための、背中の次元だけの扱い）。理由を 02 の 7.2 とコードのコメントに書き、00 の「決定」に追認待ちとして足した |
 | T6 | `sky/PeakScar.java` REMOVABLE | 石・土・草ブロックだけでできた、拠点から離れた建築は削られうる（自然でないブロック、構造物、ブロックエンティティは拒んでいる。距離はプレイヤーから 24、拠点から 128） | 01 の「建築を壊さない」に照らして判断が要る | 草の上に土が積まれているなど「人が積んだ」形を拒むか、削る前に周りの光源・置かれたブロックを調べる範囲を広げる。**対応済み（2026-10-16）**：`PeakScar.builtShape` で人が積んだ形（草の上の固いブロック、草の下の空洞、細い柱4段、厚さ1の壁、切り立った箱、7×7の平らな床、砂漠などの土）を拒む。光と人工物を見る範囲を横40に広げた。固いブロックを掘ったチャンクも記録し、Mod 前からの古いチャンクは5分いたら削らない。自己テストに石と土だけの建築8種（草が土に変わったあとも）と、生成した本物の山で削れること（39の計画で11、人が積んだ形と誤ったものは0）を足した。06 の 10.3 |
-| T7 | `sky/SkyEvents.java` | 空の影の知らせは `sendToPlayersInDimension` で全員に送っている | 空の範囲の演出なので、意図どおりと思われる | 記録だけ |
+| T7 | `sky/SkyEvents.java` | 空の影の知らせは `sendToPlayersInDimension` で全員に送っている | 空の範囲の演出なので、意図どおりと思われる | 記録だけ。**対応済み（記録のみ、2026-10-17）** |

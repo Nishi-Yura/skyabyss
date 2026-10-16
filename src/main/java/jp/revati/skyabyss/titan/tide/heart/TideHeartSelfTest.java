@@ -20,28 +20,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 潮殻の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide_heart PASSED / FAILED (サーバーを止めるのは TitanBackSelfTest)。
 // 部屋の形と満ち潮、戦いの始まり・封印・部屋の外へ出た心臓を戻す・放棄で戻す、段階と咆哮の無敵・段階2 の 1.2 倍・人数の倍率、
 // 9 つの技が最後まで回る、ボスバーの進みとテクスチャ・模型があるか、保存されない、報酬 (天井・図鑑・欠片は一人一回・初回の選択・
 // 巨神ごとの記録・6.4節の模擬)、撃破で進みの記録 (潮殻を止めた) と、もう一度挑めるようにする
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideHeartSelfTest {
-    private static int countdown = -1;
 
     private TideHeartSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        ServerLevel back = event.getServer().getLevel(TideTravel.TIDE_BACK);
+    // 呼ぶのは SelfTestRunner: 読み込み (load) → 決まった tick 待つ → 試す (runSelfTest)
+    public static void load(MinecraftServer server) {
+        ServerLevel back = server.getLevel(TideTravel.TIDE_BACK);
         if (back != null) {
             for (int dx = -2; dx <= 1; dx++) {
                 for (int dz = -2; dz <= 1; dz++) {
@@ -49,22 +40,13 @@ public final class TideHeartSelfTest {
                 }
             }
         }
-        countdown = 30;
     }
 
-    @SubscribeEvent
-    static void onTick(LevelTickEvent.Post event) {
-        if (countdown < 0 || !(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
-            return;
-        }
-        if (--countdown != 0) {
-            return;
-        }
-        countdown = -1;
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
         try {
-            run(level.getServer(), failures, notes);
+            run(server, failures, notes);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST tide_heart crashed", e);
             failures.add("crashed: " + e);

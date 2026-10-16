@@ -719,7 +719,7 @@ public final class PeakScar {
                     } else if (raisedBox(g, x, y, z, BOX_W, BOX_H)) {
                         what = "a raised box";
                     } else if (flatFloor(g, x, y, z, FLOOR)) {
-                        what = "a flat floor";
+                        what = "a flat floor of " + name(level.getBlockState(m.set(x, y, z)));
                     } else if (SOILS.contains(c) && g.open(x, y + 1, z) && foreignSoil(level, m.set(x, y, z))) {
                         what = "soil that does not belong to the biome";
                     }
@@ -835,9 +835,17 @@ public final class PeakScar {
 
     // 砂漠・荒野・浜の地表に草や土はない (運び込まれたもの)
     static boolean foreignSoil(ServerLevel level, BlockPos pos) {
-        Holder<Biome> biome = level.getBiome(pos);
+        return foreignBiome(testBiome != null ? testBiome : level.getBiome(pos));
+    }
+
+    static boolean foreignBiome(Holder<Biome> biome) {
         return biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BADLANDS) || biome.is(BiomeTags.IS_BEACH);
     }
+
+    // 自己テストが、固定の峰を置いた場所のバイオームを決めるための口 (ふだんは null。そのときは本当のバイオームを見る)。
+    // 固定の峰は空中に置くので、そこのバイオームはワールドの種しだい (砂漠なら頂の草が「運び込まれた土」になる)
+    @Nullable
+    static Holder<Biome> testBiome;
 
     // 削る範囲のさらに外 (横に OUTER まで) の、峰の高さにある地表を見る。
     // 地表のすぐ上にブロックの光 (松明・ランタンなど) があるか、外の地表から OUTER_DEPTH 段に自然でないブロックがあれば理由

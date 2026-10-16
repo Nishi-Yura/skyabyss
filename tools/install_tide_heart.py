@@ -205,6 +205,50 @@ def ensure_bones(geo, names):
     return added
 
 
+# ---- ゲームの中の色 (2026-10-16 の見直し) ----
+# ラフの殻は面の向きの陰を焼き込み、さらに揺らぎを掛けているので平均が 165 前後の灰紫。ゲームではそこへ
+# 実体の陰と、部屋の明かり (空の光が無く、ブロックの光だけ) の暖色が掛かり、泥のような茶色に見えた。
+# 殻 (彩りの薄い画素) を段階ごとの真珠の色へ寄せて明るくし、画素の場所でごく薄く桃と青の光沢を交互に乗せる。
+# 珊瑚の赤・血管の紫・フジツボなど彩りの強い画素はそのまま。光る画素は段階 1・2 は青緑、段階 3 は白銀。
+PEARL_BASE = {1: (230, 220, 240),   # 段階 1: 薄紫がかった真珠 (バーの青緑と合う冷たい白)
+              2: (238, 230, 234),   # 段階 2: 真珠の白 (わずかに桃)
+              3: (222, 228, 244)}   # 段階 3: 銀青がかった白 (光る三日月と水滴は光を足すので、なお一段明るい)
+# 光る画素: 基のテクスチャの色 (殻と同じく陰を受ける) に、発光の絵の色を「足す」(TideHeartRenderer.GlowLayer の eyes)。
+# 足す色が光の強さになる。殻より明るく、陰の面でも沈まない
+GLOW = {"teal": ((120, 236, 214), (40, 90, 80)),     # 段階 1・2 の核と光る部屋: 基 青緑 + 足す光
+        "moon": ((214, 226, 248), (100, 100, 100)),  # 段階 3 の三日月と核: 白銀
+        "drop": ((184, 228, 250), (80, 88, 92))}     # 段階 3 の水滴の輪: 青みの白銀
+
+
+def pearlize(tex, glow, ph):
+    t = tex.astype(float)
+    a = tex[..., 3] > 0
+    lit = glow[..., 3] > 0
+    rgb = t[..., :3]
+    sat = rgb.max(-1) - rgb.min(-1)
+    shell = a & ~lit & (sat <= 40)
+    L = rgb.mean(-1)
+    lo, hi = np.percentile(L[shell], [3, 97])
+    k = 0.72 + 0.28 * np.clip((L - lo) / max(hi - lo, 1), 0, 1)
+    v, u = np.mgrid[0:tex.shape[0], 0:tex.shape[1]]
+    w = 0.5 + 0.5 * np.sin(u * 0.41 + v * 0.67) * np.cos(u * 0.13 - v * 0.29)
+    sheen = (1 - w)[..., None] * np.array([1.0, 0.975, 0.985]) + w[..., None] * np.array([0.965, 0.99, 1.0])
+    out = np.array(PEARL_BASE[ph], float) * k[..., None] * sheen
+    t[shell, :3] = out[shell]
+    g = glow.astype(float)
+    g[..., :3] = 0
+    if ph in (1, 2):
+        parts = ((lit, "teal"),)
+    else:
+        blue = lit & (rgb[..., 2] > rgb[..., 1] + 20)       # 三日月・核 (元は銀青)
+        parts = ((blue, "moon"), (lit & ~blue, "drop"))      # 水滴の輪 (元は青緑)
+    for m, key in parts:
+        base, add = GLOW[key]
+        t[m, :3] = base
+        g[m, :3] = add
+    return np.clip(t, 0, 255).astype(np.uint8), np.clip(g, 0, 255).astype(np.uint8)
+
+
 def load_png(p):
     return np.array(Image.open(p).convert("RGBA"))
 
@@ -220,6 +264,7 @@ def main():
         glow = load_png(SRC / f"phase{ph}.glow.png")
         rough[ph] = (geo, tex, glow)
         g2, t2, gl2 = H.convert_geo(geo, tex, glow)
+        t2, gl2 = pearlize(t2, gl2, ph)
         g2["minecraft:geometry"][0]["description"]["identifier"] = f"geometry.skyabyss.{NAME}"
         added = ensure_bones(g2, used)
         lit = int((gl2[..., 3] > 0).sum())
