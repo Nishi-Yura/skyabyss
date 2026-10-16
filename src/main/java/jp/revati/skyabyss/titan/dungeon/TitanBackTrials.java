@@ -1176,6 +1176,7 @@ public final class TitanBackTrials {
         }
     }
 
+    // 経験値の玉を落とさない。経験値は預かって onClone で戻すので、落とすと二重になる (02 の 7 章。背中で何度も挑むため)
     @SubscribeEvent
     static void onExperienceDrop(LivingExperienceDropEvent event) {
         if (keepsBelongings(event.getEntity())) {

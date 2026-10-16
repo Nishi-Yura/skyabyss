@@ -67,7 +67,7 @@
   "gui.skyabyss.travel.waymark_unnamed": "名もない碑",
   "gui.skyabyss.travel.waymark_of": "%sの碑",
   "gui.skyabyss.travel.detail": "%s・%s・約%s秒",
-  "gui.skyabyss.travel.lost": "碑は失われた",
+  "gui.skyabyss.travel.lost": "碑は失われた（外した）",
   "gui.skyabyss.travel.here": "ここ（近すぎる）",
   "gui.skyabyss.travel.no_waymarks": "巨神の碑に触れると、",
   "gui.skyabyss.travel.no_waymarks2": "ここに行き先が加わる",

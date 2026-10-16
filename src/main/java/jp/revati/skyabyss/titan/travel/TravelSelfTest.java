@@ -11,6 +11,7 @@ import com.mojang.serialization.DataResult;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.titan.StoneWhaleEntity;
+import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.TitanWorldData;
 import jp.revati.skyabyss.titan.WhaleKeeper;
 import net.minecraft.core.BlockPos;
@@ -19,6 +20,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -126,11 +128,32 @@ public final class TravelSelfTest {
         check(loaded.size() == 2 && "家".equals(loaded.waymark(new BlockPos(5, 70, -9)).name())
                 && "minecraft:taiga".equals(loaded.waymark(new BlockPos(-300, 80, 40)).biome()), "waymark world data did not survive save", failures);
         check(loaded.remove(new BlockPos(5, 70, -9)) && loaded.waymark(new BlockPos(5, 70, -9)) == null, "waymark removal failed", failures);
+        // 壊された碑はプレイヤーの記録から外れ、枠が空く (海図を送るときに行う)
+        TravelState holder = new TravelState();
+        holder.addWaymark(new BlockPos(5, 70, -9));
+        holder.addWaymark(new BlockPos(-300, 80, 40));
+        check(Voyages.pruneLost(holder, loaded) == 1 && holder.waymarks.equals(List.of(new BlockPos(-300, 80, 40))),
+                "a broken waymark stayed in the player's list", failures);
+        // ログアウト中の呼び笛の待ち時間は、世界の記録に残り再起動を越える
+        UUID away = UUID.fromString("7a7e1000-0000-4000-8000-00000000a7af");
+        loaded.putOfflineReady(away, 5000L);
+        loaded.putOfflineReady(away, 4000L);
+        TravelWorldData restarted = TravelWorldData.load(loaded.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+        Long ready = restarted.takeOfflineReady(away);
+        check(ready != null && ready == 5000L && restarted.takeOfflineReady(away) == null,
+                "offline call cooldown did not survive a restart: " + ready, failures);
 
         // ---- 2. 解放の条件
         FakePlayer a = FakePlayerFactory.get(level, new GameProfile(TEST_A, "[travel_test_a]"));
         FakePlayer b = FakePlayerFactory.get(level, new GameProfile(TEST_B, "[travel_test_b]"));
         FakePlayer c = FakePlayerFactory.get(level, new GameProfile(TEST_C, "[travel_test_c]"));
+        // 乗り込んだ場所の記録は、背中で倒れても残る (復活で写されるのは PERSISTED_NBT_TAG の子だけ)
+        TitanTravel.rememberBoarding(a, new Vec3(12.5, 71, -40.5));
+        check(a.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG).contains("skyabyss_boarded_from")
+                && !a.getPersistentData().contains("skyabyss_boarded_from"), "the boarding place is not under the persisted tag", failures);
+        Vec3 boarded = TitanTravel.takeBoardedFrom(a);
+        check(boarded != null && boarded.distanceTo(new Vec3(12.5, 71, -40.5)) < 1e-6 && TitanTravel.takeBoardedFrom(a) == null,
+                "the boarding place did not survive a death on the back: " + boarded, failures);
         Voyages.state(a).unlocked.clear();
         TitanMemoryData memory = TitanMemoryData.get(level.getServer());
         TitanMemoryData.Record ra = memory.record(TEST_A, TitanKind.STONE_WHALE.id());

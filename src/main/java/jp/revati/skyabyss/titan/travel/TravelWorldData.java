@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.travel;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,8 @@ public final class TravelWorldData extends SavedData {
     }
 
     private final Map<BlockPos, Waymark> waymarks = new HashMap<>();
+    // ログアウト中に旅が終わった呼んだ人 → 次に呼べる時刻 (オーバーワールドの総 tick)。再ログインで本人の記録へ移す
+    private final Map<UUID, Long> offlineReady = new HashMap<>();
 
     public static TravelWorldData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -47,6 +50,20 @@ public final class TravelWorldData extends SavedData {
         return removed;
     }
 
+    public void putOfflineReady(UUID player, long readyAt) {
+        offlineReady.merge(player, readyAt, Math::max);
+        setDirty();
+    }
+
+    @Nullable
+    public Long takeOfflineReady(UUID player) {
+        Long ready = offlineReady.remove(player);
+        if (ready != null) {
+            setDirty();
+        }
+        return ready;
+    }
+
     public int size() {
         return waymarks.size();
     }
@@ -56,6 +73,12 @@ public final class TravelWorldData extends SavedData {
         for (Tag t : tag.getList("waymarks", Tag.TAG_COMPOUND)) {
             CompoundTag c = (CompoundTag) t;
             data.waymarks.put(BlockPos.of(c.getLong("pos")), new Waymark(c.getString("name"), c.getString("biome")));
+        }
+        for (Tag t : tag.getList("offline_ready", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            if (c.hasUUID("player")) {
+                data.offlineReady.put(c.getUUID("player"), c.getLong("readyAt"));
+            }
         }
         return data;
     }
@@ -71,6 +94,14 @@ public final class TravelWorldData extends SavedData {
             list.add(c);
         });
         tag.put("waymarks", list);
+        ListTag ready = new ListTag();
+        offlineReady.forEach((id, at) -> {
+            CompoundTag c = new CompoundTag();
+            c.putUUID("player", id);
+            c.putLong("readyAt", at);
+            ready.add(c);
+        });
+        tag.put("offline_ready", ready);
         return tag;
     }
 }

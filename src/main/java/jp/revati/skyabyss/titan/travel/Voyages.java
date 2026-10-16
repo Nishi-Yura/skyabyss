@@ -185,6 +185,8 @@ public final class Voyages {
 
     static void sendChart(ServerPlayer player, Voyage voyage) {
         List<TravelNetwork.Dest> dests = destinations(player);
+        // 壊された碑は、この海図では「失われた碑」として灰色で見せ (選べない)、記録からは外して枠を空ける。次に開いたときには出ない
+        pruneLost(state(player), TravelWorldData.get(player.server));
         PacketDistributor.sendToPlayer(player, new TravelNetwork.Chart(voyage.kind.id(), voyage.leader.equals(player.getUUID()),
                 voyage.leaderName, voyage.pickup.getX(), voyage.pickup.getZ(), voyage.dest == null ? "" : voyage.dest.id(), dests));
     }
@@ -201,6 +203,13 @@ public final class Voyages {
             list.add(dest(player, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null));
         }
         return list;
+    }
+
+    // 世界にもうない碑を、プレイヤーの記録から外す。外した数を返す
+    static int pruneLost(TravelState s, TravelWorldData world) {
+        int before = s.waymarks.size();
+        s.waymarks.removeIf(pos -> world.waymark(pos) == null);
+        return before - s.waymarks.size();
     }
 
     private static TravelNetwork.Dest dest(ServerPlayer player, String id, String name, String biome, BlockPos pos, int kind, boolean valid) {
@@ -304,11 +313,9 @@ public final class Voyages {
         s.readyAt = Math.max(s.readyAt, player.server.overworld().getGameTime() + ticks);
     }
 
-    // ログアウト中の呼んだ人のクールダウン (再ログインで確かめる)
-    private static final Map<UUID, Long> OFFLINE_COOLDOWN = new HashMap<>();
-
+    // ログアウト中の呼んだ人のクールダウン。再起動でも消えないよう世界の記録 (TravelWorldData) に置き、再ログインで本人へ移す
     static void setCooldownOffline(MinecraftServer server, UUID id, int ticks) {
-        OFFLINE_COOLDOWN.put(id, server.overworld().getGameTime() + ticks);
+        TravelWorldData.get(server).putOfflineReady(id, server.overworld().getGameTime() + ticks);
     }
 
     static void markSafe(ServerPlayer player, BlockPos pos) {
@@ -421,7 +428,7 @@ public final class Voyages {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        Long ready = OFFLINE_COOLDOWN.remove(player.getUUID());
+        Long ready = TravelWorldData.get(player.server).takeOfflineReady(player.getUUID());
         if (ready != null) {
             state(player).readyAt = Math.max(state(player).readyAt, ready);
         }
@@ -477,7 +484,6 @@ public final class Voyages {
     static void onServerStopped(ServerStoppedEvent event) {
         ACTIVE.clear();
         RELEASING.clear();
-        OFFLINE_COOLDOWN.clear();
     }
 
     // ---------------------------------------------------------------- コマンド・自己テスト向け

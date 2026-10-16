@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Nullable;
+
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModSounds;
@@ -26,6 +28,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -46,7 +49,6 @@ public final class TitanTravel {
     public static final ResourceKey<Level> TITAN_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "titan_back"));
 
-    private static final String TAG_TITAN = "skyabyss_titan";
     // 引き上げの途中で抜けた (ログアウト・サーバー停止)。次のログインで背中へ乗せる
     private static final String TAG_LIFT_PENDING = "skyabyss_lift_pending";
     // 鎖の軸からこれより離れたら (押し出された・岩鯨が呼び直された) 引き上げを打ち切る
@@ -54,7 +56,8 @@ public final class TitanTravel {
     // 引き上げの速さ (ブロック/tick) と、打ち切るまでの最大時間
     private static final double LIFT_SPEED = 0.85;
     private static final int LIFT_MAX_TICKS = 160;
-    // 上った場所 (オーバーワールド)。岩鯨がここから CARRIED_AWAY より遠くへ移っていたら、降りるときはここへ戻す
+    // 上った場所 (オーバーワールド)。岩鯨がここから CARRIED_AWAY より遠くへ移っていたら、降りるときはここへ戻す。
+    // 背中で倒れても消えないよう、復活で写される Player.PERSISTED_NBT_TAG の下に置く (TitanBackTrials.persisted() と同じ)
     private static final String TAG_BOARDED_FROM = "skyabyss_boarded_from";
     private static final double CARRIED_AWAY = 128.0;
 
@@ -129,10 +132,35 @@ public final class TitanTravel {
         }
     }
 
+    // 上った場所を書く・取り出す (取り出すと消える)。前の版で persistent data の直下に書いた記録も読む
+    public static void rememberBoarding(Player player, Vec3 pos) {
+        CompoundTag root = player.getPersistentData();
+        if (!root.contains(Player.PERSISTED_NBT_TAG)) {
+            root.put(Player.PERSISTED_NBT_TAG, new CompoundTag());
+        }
+        CompoundTag from = new CompoundTag();
+        from.putDouble("x", pos.x);
+        from.putDouble("y", pos.y);
+        from.putDouble("z", pos.z);
+        root.getCompound(Player.PERSISTED_NBT_TAG).put(TAG_BOARDED_FROM, from);
+        root.remove(TAG_BOARDED_FROM);
+    }
+
+    @Nullable
+    public static Vec3 takeBoardedFrom(Player player) {
+        CompoundTag root = player.getPersistentData();
+        CompoundTag persisted = root.getCompound(Player.PERSISTED_NBT_TAG);
+        CompoundTag from = persisted.contains(TAG_BOARDED_FROM) ? persisted.getCompound(TAG_BOARDED_FROM) : root.getCompound(TAG_BOARDED_FROM);
+        persisted.remove(TAG_BOARDED_FROM);
+        root.remove(TAG_BOARDED_FROM);
+        return from.contains("x") ? new Vec3(from.getDouble("x"), from.getDouble("y"), from.getDouble("z")) : null;
+    }
+
     public static void board(ServerPlayer player, StoneWhaleEntity whale) {
         board(player, whale.getUUID());
     }
 
+    // whaleId: どの岩鯨か。岩鯨は一体だけなので今は使わない (前は skyabyss_titan に書いていたが、読む所がなく消した)
     private static void board(ServerPlayer player, UUID whaleId) {
         // 乗る資格 (10 の 3 章。岩鯨は最初の巨神なので誰でも乗れる。後の巨神と同じ入口の形にしておく)
         if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, "stone_whale")) {
@@ -143,14 +171,9 @@ public final class TitanTravel {
             SkyAbyss.LOGGER.error("Titan back dimension is missing");
             return;
         }
-        player.getPersistentData().putUUID(TAG_TITAN, whaleId);
         // 上った場所を覚えておく。背中にいる間に岩鯨が遠くへ運ばれても (巨神での移動)、降りるときはここへ戻す
         if (player.level().dimension() == Level.OVERWORLD) {
-            CompoundTag from = new CompoundTag();
-            from.putDouble("x", player.getX());
-            from.putDouble("y", player.getY());
-            from.putDouble("z", player.getZ());
-            player.getPersistentData().put(TAG_BOARDED_FROM, from);
+            rememberBoarding(player, player.position());
         }
         TitanBackData data = TitanBackData.get(back);
         if (data.needsBuild()) {
@@ -182,10 +205,8 @@ public final class TitanTravel {
             drop = new Vec3(top.x, top.y - 4, top.z);
         }
         // 背中にいる間に、岩鯨がほかの人を乗せて遠くへ泳いだ (巨神での移動)。上った場所の空へ戻す
-        CompoundTag from = player.getPersistentData().getCompound(TAG_BOARDED_FROM);
-        player.getPersistentData().remove(TAG_BOARDED_FROM);
-        if (from.contains("x")) {
-            Vec3 boarded = new Vec3(from.getDouble("x"), from.getDouble("y"), from.getDouble("z"));
+        Vec3 boarded = takeBoardedFrom(player);
+        if (boarded != null) {
             if (drop == null) {
                 drop = boarded;
             } else if (Math.hypot(boarded.x - drop.x, boarded.z - drop.z) > CARRIED_AWAY) {
