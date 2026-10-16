@@ -26,6 +26,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -66,13 +75,16 @@ public final class ChapterSkySelfTest {
             checkChapterOne(level, failures);
             checkBlockSets(failures);
             checkScars(level, failures);
+            checkRecording(level, failures);
+            checkRealPeaks(level, failures);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST chapter sky crashed", e);
             failures.add("crashed: " + e);
         }
         if (failures.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST chapter sky PASSED (moon, stages, eye conditions, outcomes, data, payloads, chapter 1, "
-                    + "peak scar: finds the peak, carves only the plan, refuses every artifact, stops when a block changes)");
+                    + "peak scar: finds the peak, carves only the plan, refuses every artifact and every stone-and-dirt build, stops when a block changes, "
+                    + "records placing and digging, still carves real mountain peaks)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
         }
@@ -483,6 +495,25 @@ public final class ChapterSkySelfTest {
                 }
             }
 
+            // 9b. 石・土・草だけで作った建築 (人が積んだ形) は削らない
+            checkBuilt(level, peak, failures);
+
+            // 9c. Mod を入れる前からあった古いチャンクは、過ごした時間の上限が短い (5分)
+            buildPeak(level);
+            LevelChunk old = level.getChunk(CX >> 4, CZ >> 4);
+            boolean wasFresh = ChapterSky.freshChunk(old);
+            long oldInhabited = old.getInhabitedTime();
+            old.setData(ChapterSkyRegistry.FRESH_CHUNK, false);
+            old.setInhabitedTime(PeakScar.OLD_MAX_INHABITED + 1);
+            expectRefused(level, peak, "players spent long here", failures);
+            old.setData(ChapterSkyRegistry.FRESH_CHUNK, true);
+            PeakScar.Result freshOk = PeakScar.plan(level, peak, dirX, dirZ, 0.5f, RandomSource.create(9), PeakScar.PLAYER_CLEAR);
+            if (freshOk.plan() == null) {
+                failures.add("a chunk made with the mod should allow " + (PeakScar.OLD_MAX_INHABITED + 1) + " ticks nearby: " + freshOk.reason());
+            }
+            old.setData(ChapterSkyRegistry.FRESH_CHUNK, wasFresh);
+            old.setInhabitedTime(oldInhabited);
+
             // 10. 低い所・平らな所は峰とみなさない
             clearArea(level);
             for (int x = -RADIUS; x <= RADIUS; x++) {
@@ -520,6 +551,161 @@ public final class ChapterSkySelfTest {
         if (r.plan() != null || !r.reason().startsWith(reason)) {
             failures.add("expected the scar to be refused for '" + reason + "' but got " + (r.plan() != null ? "a plan" : r.reason()));
         }
+    }
+
+    // ---- 石・土・草だけで作った建築 ----
+
+    private static final BlockState STONE = Blocks.STONE.defaultBlockState();
+    private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
+
+    // 峰の上に、自然のブロックだけで建てたものを一つずつ置き、どれも「人が積んだ形」として削らないことを確かめる
+    private static void checkBuilt(ServerLevel level, PeakScar.Candidate peak, List<String> failures) {
+        // 石の小屋 (5×5、壁3段、土の屋根) を斜面に
+        refuseBuilt(level, peak, "a stone hut with a dirt roof", failures, () -> {
+            int x0 = CX + 12;
+            int z0 = CZ - 14;
+            int base = highest(x0, z0, 5, 5);
+            for (int dx = 0; dx < 5; dx++) {
+                for (int dz = 0; dz < 5; dz++) {
+                    boolean edge = dx == 0 || dz == 0 || dx == 4 || dz == 4;
+                    int ground = surface(level, x0 + dx, z0 + dz).getY();
+                    for (int y = ground; y < base + 3; y++) {
+                        set(level, x0 + dx, y, z0 + dz, edge || y < base ? STONE : Blocks.AIR.defaultBlockState());
+                    }
+                    set(level, x0 + dx, base + 3, z0 + dz, DIRT);
+                }
+            }
+        });
+        // 土の塔 (1×1、6段) を岩の頂に
+        refuseBuilt(level, peak, "a dirt tower on the top", failures, () -> {
+            int y = surface(level, CX + 2, CZ + 1).getY();
+            for (int i = 0; i < 6; i++) {
+                set(level, CX + 2, y + i, CZ + 1, DIRT);
+            }
+        });
+        // 石の柱 (1×1、5段) を、草のない所 (頂の岩) に
+        refuseBuilt(level, peak, "a stone pillar", failures, () -> {
+            int y = surface(level, CX - 2, CZ - 2).getY();
+            for (int i = 0; i < 5; i++) {
+                set(level, CX - 2, y + i, CZ - 2, STONE);
+            }
+        });
+        // 石の壁 (厚さ1、長さ7、上の高さをそろえる)
+        refuseBuilt(level, peak, "a straight stone wall", failures, () -> {
+            int top = highest(CX - 14, CZ - 16, 7, 1) + 3;
+            for (int dx = 0; dx < 7; dx++) {
+                for (int y = surface(level, CX - 14 + dx, CZ - 16).getY(); y <= top; y++) {
+                    set(level, CX - 14 + dx, y, CZ - 16, STONE);
+                }
+            }
+        });
+        // 石の床 (8×8 の平らな台) を斜面に
+        refuseBuilt(level, peak, "a flat stone floor", failures, () -> {
+            int y = highest(CX - 6, CZ + 15, 8, 8);
+            for (int dx = 0; dx < 8; dx++) {
+                for (int dz = 0; dz < 8; dz++) {
+                    for (int yy = surface(level, CX - 6 + dx, CZ + 15 + dz).getY(); yy <= y; yy++) {
+                        set(level, CX - 6 + dx, yy, CZ + 15 + dz, STONE);
+                    }
+                }
+            }
+        });
+        // 草の上の土の山 (2×2、高さ1〜2)
+        refuseBuilt(level, peak, "a dirt heap on grass", failures, () -> {
+            for (int dx = 0; dx < 2; dx++) {
+                for (int dz = 0; dz < 2; dz++) {
+                    BlockPos p = surface(level, CX + 16 + dx, CZ + 8 + dz);
+                    set(level, p.getX(), p.getY(), p.getZ(), DIRT);
+                    if (dx == 0) {
+                        set(level, p.getX(), p.getY() + 1, p.getZ(), DIRT);
+                    }
+                }
+            }
+        });
+        // 土の立方体 (4×4×4) を斜面に
+        refuseBuilt(level, peak, "a solid dirt cube", failures, () -> {
+            int y = highest(CX - 20, CZ - 4, 4, 4);
+            for (int dx = 0; dx < 4; dx++) {
+                for (int dz = 0; dz < 4; dz++) {
+                    for (int yy = surface(level, CX - 20 + dx, CZ - 4 + dz).getY(); yy < y + 4; yy++) {
+                        set(level, CX - 20 + dx, yy, CZ - 4 + dz, DIRT);
+                    }
+                }
+            }
+        });
+        // 草で隠した穴 (草の下の土を掘った)
+        refuseBuilt(level, peak, "a pit hidden under grass", failures, () -> {
+            BlockPos p = surface(level, CX + 8, CZ + 18).below();
+            set(level, p.getX(), p.getY() - 1, p.getZ(), Blocks.AIR.defaultBlockState());
+            set(level, p.getX(), p.getY() - 2, p.getZ(), Blocks.AIR.defaultBlockState());
+        });
+        // 削る所から遠い (横に16より外の) 松明。昔の範囲では見えなかった
+        buildPeak(level);
+        set(level, CX + 58, 239, CZ, STONE);
+        set(level, CX + 58, 240, CZ, Blocks.TORCH.defaultBlockState());
+        PeakScar.Result far = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
+        if (far.plan() != null || !(far.reason().startsWith("light nearby") || far.reason().startsWith("non-natural torch nearby"))) {
+            failures.add("a torch 58 blocks from the peak should stop the scar, got " + (far.plan() != null ? "a plan" : far.reason()));
+        }
+        // 見つかる形の判定は、自然の峰を拒まない (作り直した峰はまた削れる)
+        buildPeak(level);
+        PeakScar.Result clean = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
+        if (clean.plan() == null) {
+            failures.add("after the built tests, the clean peak was refused: " + clean.reason());
+        }
+    }
+
+    // 建てたものを置いて、削らないことを確かめる。草が下にあるものは、時間がたって下の草が土に変わったあと
+    // (草の手がかりが消えたあと) でも、形だけで削らないことを確かめる
+    private static void refuseBuilt(ServerLevel level, PeakScar.Candidate peak, String what, List<String> failures, Runnable build) {
+        boolean grassOnly = what.contains("grass");
+        for (int pass = 0; pass < (grassOnly ? 1 : 2); pass++) {
+            buildPeak(level);
+            build.run();
+            String label = pass == 0 ? what : what + " (grass under it already turned to dirt)";
+            if (pass == 1) {
+                decayCoveredGrass(level);
+            }
+            PeakScar.Result r = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
+            if (r.plan() != null) {
+                failures.add("the peak was planned for carving with " + label);
+            } else if (!r.reason().startsWith("built shape")) {
+                failures.add("the peak with " + label + " was refused for another reason: " + r.reason());
+            } else {
+                SkyAbyss.LOGGER.info("SELFTEST chapter sky: {} -> {}", label, r.reason());
+            }
+        }
+    }
+
+    // 上がふさがった草を土に変える (ゲームの中で時間がたつと起きること)
+    private static void decayCoveredGrass(ServerLevel level) {
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int x = -CLEAR_RADIUS; x <= CLEAR_RADIUS; x++) {
+            for (int z = -CLEAR_RADIUS; z <= CLEAR_RADIUS; z++) {
+                for (int y = BASE; y <= TOP + 12; y++) {
+                    m.set(CX + x, y, CZ + z);
+                    if (level.getBlockState(m).is(Blocks.GRASS_BLOCK) && !level.getBlockState(m.above()).isAir()) {
+                        level.setBlock(m, DIRT, Block.UPDATE_CLIENTS);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void set(ServerLevel level, int x, int y, int z, BlockState s) {
+        level.setBlock(new BlockPos(x, y, z), s, Block.UPDATE_CLIENTS);
+    }
+
+    // 範囲 (x0〜x0+w-1, z0〜z0+d-1) の峰の地表のすぐ上の、いちばん高い所
+    private static int highest(int x0, int z0, int w, int d) {
+        int best = Integer.MIN_VALUE;
+        for (int dx = 0; dx < w; dx++) {
+            for (int dz = 0; dz < d; dz++) {
+                double r = Math.hypot(x0 + dx - CX, z0 + dz - CZ);
+                best = Math.max(best, (int) Math.round(TOP - r * 0.7) + 1);
+            }
+        }
+        return best;
     }
 
     private static void buildPeak(ServerLevel level) {
@@ -588,5 +774,174 @@ public final class ChapterSkySelfTest {
 
     private static void forgetTestScars(ChapterSkyData data) {
         data.scars().removeIf(s -> Math.abs(s.pos().getX() - CX) < 200 && Math.abs(s.pos().getZ() - CZ) < 200);
+    }
+
+    // ---- プレイヤーが置いた・掘った記録が本当に残るか ----
+    private static void checkRecording(ServerLevel level, List<String> failures) {
+        ChapterSkyData data = ChapterSkyData.get(level);
+        FakePlayer fake = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("5c1a3b5e-0000-4000-8000-00000000c1a3"), "skyabyss_scar_test"));
+        BlockPos placed = new BlockPos(CX + 300, 100, CZ + 300);
+        BlockPos dug = new BlockPos(CX + 340, 100, CZ + 300);
+        BlockPos walkedOver = new BlockPos(CX + 380, 100, CZ + 300);
+        long placedChunk = ChunkPos.asLong(placed);
+        long dugChunk = ChunkPos.asLong(dug);
+        long grassChunk = ChunkPos.asLong(walkedOver);
+        data.clearPlacedForTest(placedChunk);
+        data.clearPlacedForTest(dugChunk);
+        data.clearPlacedForTest(grassChunk);
+        NeoForge.EVENT_BUS.post(new BlockEvent.EntityPlaceEvent(BlockSnapshot.create(level.dimension(), level, placed),
+                Blocks.STONE.defaultBlockState(), fake));
+        NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, dug, Blocks.STONE.defaultBlockState(), fake));
+        NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, walkedOver, Blocks.SHORT_GRASS.defaultBlockState(), fake));
+        if (!data.wasPlaced(placedChunk)) {
+            failures.add("a block placed by a player was not recorded");
+        }
+        if (!data.wasPlaced(dugChunk)) {
+            failures.add("a solid block dug by a player was not recorded");
+        }
+        if (data.wasPlaced(grassChunk)) {
+            failures.add("breaking short grass should not mark the chunk");
+        }
+        // 記録は保存して読み直しても残る (ChapterSkyData はオーバーワールドの data に保存される)
+        ChapterSkyData back = ChapterSkyData.load(data.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+        if (!back.wasPlaced(placedChunk) || !back.wasPlaced(dugChunk)) {
+            failures.add("the placed-chunk record did not survive a save and load");
+        }
+        data.clearPlacedForTest(placedChunk);
+        data.clearPlacedForTest(dugChunk);
+    }
+
+    // ---- 本物の山 (ワールド生成) の峰が今までどおり削れるか ----
+    // 山岳バイオームを探してそのまわりを生成し、峰の候補をすべて計画してみる (実際には削らない)。
+    // 一つも削れなければ失敗。各判定が自然の峰で何か所当たったかも記録に出す (しきい値を決めた根拠)
+    private record Site(ResourceKey<Biome> biome, int x, int z) {
+    }
+
+    private static final Map<String, Integer> REAL_REASONS = new java.util.TreeMap<>();
+    private static final Map<String, Integer> REAL_HITS = new java.util.TreeMap<>();
+    private static final List<String> REAL_FAILURES = new ArrayList<>();
+    private static int realTried;
+    private static int realCarved;
+    private static int realGrids;
+
+    // 起動の tick の中で順に調べる (ウォッチドッグの60秒に収まるよう、12秒を過ぎたら残りの場所は飛ばす。
+    // 一度生成したチャンクは保存されるので、2回目からは全部の場所を数秒で調べられる)
+    private static void checkRealPeaks(ServerLevel level, List<String> failures) {
+        List<Site> sites = List.of(new Site(Biomes.STONY_PEAKS, -9000, 0), new Site(Biomes.JAGGED_PEAKS, 6000, 6000),
+                new Site(Biomes.FROZEN_PEAKS, -6000, 6000), new Site(Biomes.JAGGED_PEAKS, -6000, -6000),
+                new Site(Biomes.STONY_PEAKS, 6000, -6000), new Site(Biomes.FROZEN_PEAKS, 9000, 0), new Site(Biomes.JAGGED_PEAKS, 0, 9000));
+        long started = System.currentTimeMillis();
+        for (Site site : sites) {
+            if (System.currentTimeMillis() - started > 12_000) {
+                SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks, skipped {} near {} {} (time; it runs once its chunks are saved)",
+                        site.biome().location().getPath(), site.x(), site.z());
+                continue;
+            }
+            realPeakSite(level, site);
+        }
+        SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks tried {}, carved {}, reasons {}", realTried, realCarved, REAL_REASONS);
+        SkyAbyss.LOGGER.info("SELFTEST chapter sky: shape rules hit on {} natural areas: {}", realGrids, REAL_HITS);
+        if (realTried == 0) {
+            failures.add("no real mountain peak was found to test");
+        } else if (realCarved == 0) {
+            failures.add("no real mountain peak could be carved (" + REAL_REASONS + ")");
+        }
+        if (REAL_REASONS.keySet().stream().anyMatch(k -> k.startsWith("built shape"))) {
+            failures.add("a natural mountain peak was taken for a build: " + REAL_REASONS);
+        }
+        failures.addAll(REAL_FAILURES);
+        // 砂漠の地表に土があれば、運び込まれたものとみなす
+        Pair<BlockPos, Holder<Biome>> desert = level.findClosestBiome3d(h -> h.is(Biomes.DESERT), new BlockPos(0, 64, 3000), 2400, 32, 64);
+        if (desert != null && !PeakScar.foreignSoil(level, desert.getFirst())) {
+            failures.add("soil in a desert was not taken as foreign");
+        }
+    }
+
+    private static void probe(PeakScar.Grid g) {
+        realGrids++;
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (int x = g.x0; x < g.x0 + g.sx; x++) {
+            for (int z = g.z0; z < g.z0 + g.sz; z++) {
+                for (int y = g.y0; y < g.y0 + g.sy; y++) {
+                    if (g.at(x, y, z) < 2) {
+                        continue;
+                    }
+                    if (PeakScar.stackedOnGrass(g, x, y, z)) {
+                        seen.add("stackedOnGrass");
+                    }
+                    if (PeakScar.hollowUnderGrass(g, x, y, z)) {
+                        seen.add("hollowUnderGrass");
+                    }
+                    for (int h = 3; h <= 5; h++) {
+                        if (PeakScar.pillar(g, x, y, z, h)) {
+                            seen.add("pillar" + h);
+                        }
+                    }
+                    for (int[] w : new int[][]{{2, 3}, {3, 3}, {3, 4}}) {
+                        if (PeakScar.thinWall(g, x, y, z, w[0], w[1])) {
+                            seen.add("wall" + w[0] + "x" + w[1]);
+                        }
+                    }
+                    for (int[] b : new int[][]{{3, 2}, {3, 3}, {4, 3}, {4, 4}}) {
+                        if (PeakScar.raisedBox(g, x, y, z, b[0], b[1])) {
+                            seen.add("box" + b[0] + "h" + b[1]);
+                        }
+                    }
+                    for (int n = 5; n <= 9; n++) {
+                        if (PeakScar.flatFloor(g, x, y, z, n)) {
+                            seen.add("floor" + n);
+                        }
+                    }
+                }
+            }
+        }
+        seen.forEach(k -> REAL_HITS.merge(k, 1, Integer::sum));
+    }
+
+    private static void realPeakSite(ServerLevel level, Site site) {
+        Pair<BlockPos, Holder<Biome>> found = level.findClosestBiome3d(h -> h.is(site.biome()), new BlockPos(site.x(), 150, site.z()), 2400, 32, 64);
+        if (found == null) {
+            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no {} near {} {}", site.biome().location(), site.x(), site.z());
+            return;
+        }
+        BlockPos at = found.getFirst();
+        List<ChunkPos> forced = new ArrayList<>();
+        int radius = 7;
+        for (int cx = (at.getX() >> 4) - radius; cx <= (at.getX() >> 4) + radius; cx++) {
+            for (int cz = (at.getZ() >> 4) - radius; cz <= (at.getZ() >> 4) + radius; cz++) {
+                level.setChunkForced(cx, cz, true);
+                forced.add(new ChunkPos(cx, cz));
+            }
+        }
+        PeakScar.gridProbe = ChapterSkySelfTest::probe;
+        try {
+            for (ChunkPos p : forced) {
+                level.getChunk(p.x, p.z);
+            }
+            List<PeakScar.Candidate> candidates = PeakScar.findCandidates(level, at.getX() - 24, at.getZ(), 1f, 0f, 48, 24);
+            for (PeakScar.Candidate c : candidates.subList(0, Math.min(6, candidates.size()))) {
+                for (float[] dir : new float[][]{{1f, 0f}, {0f, 1f}, {-0.7f, 0.7f}}) {
+                    PeakScar.Result r = PeakScar.plan(level, c, dir[0], dir[1], 0.5f, RandomSource.create(c.x() * 31L + c.z()), PeakScar.PLAYER_CLEAR);
+                    realTried++;
+                    String key = r.plan() != null ? "ok" : r.reason().replaceAll(" at -?\\d+ -?\\d+ -?\\d+$", "");
+                    REAL_REASONS.merge(key, 1, Integer::sum);
+                    if (r.plan() != null) {
+                        realCarved++;
+                    }
+                    SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peak {} at {} {} {} dir {} {} -> {}", site.biome().location().getPath(),
+                            c.x(), c.y(), c.z(), dir[0], dir[1], r.plan() != null ? "carves " + r.plan().removed() : r.reason());
+                }
+            }
+            // 山の地表の土は、そのバイオームのもの
+            BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at).below();
+            if (PeakScar.foreignSoil(level, ground)) {
+                REAL_FAILURES.add("soil on a " + site.biome().location().getPath() + " was taken as foreign");
+            }
+        } finally {
+            PeakScar.gridProbe = null;
+            for (ChunkPos p : forced) {
+                level.setChunkForced(p.x, p.z, false);
+            }
+        }
     }
 }
