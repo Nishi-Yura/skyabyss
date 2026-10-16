@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 165,
+  "inscription_sign": "sign.skyabyss.lore_storm_west",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_west"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_storm_hub"
+  ]
+}

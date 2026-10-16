@@ -1,0 +1,18 @@
+{
+  "chapter": "chapter1",
+  "order": 172,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:thunder_wing_heart",
+      "radius": 64
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/inscription_storm_heart",
+    "chapter1/tide_heart_stilled"
+  ]
+}

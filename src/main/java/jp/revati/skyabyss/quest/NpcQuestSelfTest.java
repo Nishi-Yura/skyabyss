@@ -227,8 +227,9 @@ public final class NpcQuestSelfTest {
             }
             case "lore" -> o.targets().forEach(t -> check(LoreManager.catalog().entry(t) != null, w + ": unknown lore " + t, failures));
             case "collect" -> check(Condition.item(o.targets().get(0)) != null, w + ": unknown item", failures);
-            case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t)),
-                    w + ": unknown entity " + t, failures));
+            // 雷翼の敵と心臓は別の担当が登録する (StormLore.PENDING)。まだないうちは数えるだけで、失敗にしない
+            case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t))
+                    || jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t), w + ": unknown entity " + t, failures));
             default -> {
             }
         }
@@ -271,7 +272,8 @@ public final class NpcQuestSelfTest {
             }
             // 自由なモードのサブクエストの文は skyabyss_quest に置いた (skyabyss_npc は別の担当が直すため)
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story")) {
+            // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {

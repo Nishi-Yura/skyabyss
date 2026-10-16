@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 166,
+  "inscription_sign": "sign.skyabyss.lore_storm_east",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_east"
+    }
+  ],
+  "related": [
+    "chapter1/raiju"
+  ]
+}
