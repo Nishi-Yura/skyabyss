@@ -1,0 +1,34 @@
+{
+  "category": "sub",
+  "order": 84,
+  "repeat": "weekly",
+  "board": true,
+  "min_stage": 3,
+  "stages": [
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "heart",
+          "type": "kill",
+          "target": "skyabyss:thunder_wing_heart",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 260,
+    "items": [
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 1
+      },
+      {
+        "item": "skyabyss:thunder_wing_shard",
+        "count": 3,
+        "optional": true
+      }
+    ]
+  }
+}

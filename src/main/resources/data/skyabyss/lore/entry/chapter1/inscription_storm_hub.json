@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 164,
+  "inscription_sign": "sign.skyabyss.lore_storm_hub",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_hub"
+    }
+  ],
+  "related": [
+    "chapter1/storm_ruins",
+    "chapter1/wind_ledger"
+  ]
+}
