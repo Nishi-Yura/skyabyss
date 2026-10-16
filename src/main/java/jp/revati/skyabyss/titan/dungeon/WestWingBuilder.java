@@ -109,9 +109,9 @@ final class WestWingBuilder {
 
     private static void decorate(BuildKit kit) {
         // 休み場
-        kit.restPoint(W0, "sign.skyabyss.rest_w0", Direction.SOUTH, new BlockPos(-19, FLOOR + 3, W0.z1()));
-        kit.restPoint(W1, "sign.skyabyss.rest_w1", Direction.SOUTH, new BlockPos(-33, W1.floorY() + 3, W1.z1()));
-        kit.restPoint(W2, "sign.skyabyss.rest_w2", Direction.SOUTH, new BlockPos(-22, W2.floorY() + 3, W2.z1()));
+        kit.restPoint(W0);
+        kit.restPoint(W1);
+        kit.restPoint(W2);
         for (Box rest : List.of(W0, W1, W2)) {
             kit.wallLamps(rest, 3, rest.floorY() + 3);
         }
@@ -142,7 +142,6 @@ final class WestWingBuilder {
         kit.lantern(-31, W1.floorY() + 1, -34);
         kit.lantern(-24, W2.floorY() + 1, -56);
         kit.lantern(-12, 98, -30);
-        kit.wallSign(new BlockPos(-13, 99, -30), Direction.NORTH, "sign.skyabyss.west_end");
     }
 
 }

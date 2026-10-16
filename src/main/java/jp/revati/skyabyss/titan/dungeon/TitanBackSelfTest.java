@@ -58,6 +58,7 @@ public final class TitanBackSelfTest {
                     checkTreasury(back, PENDING);
                     checkHeart(back, PENDING);
                     checkRestPoints(back, PENDING);
+                    checkSigns(back, PENDING);
                     forceMazeChunks(back, true);
                 })),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
@@ -345,8 +346,8 @@ public final class TitanBackSelfTest {
         if (level.getBlockState(shrineSeal().get(0).below()).isAir()) {
             failures.add("shrine seal is not on the stairs at " + shrineSeal().get(0));
         }
-        // 物語の碑文: 看板があり、掛かっている壁が固いこと
-        for (Inscription lore : LORE_SIGNS) {
+        // 物語の碑文と試練の入口の看板: 看板があり、掛かっている壁が固いこと
+        for (Inscription lore : allSigns()) {
             BlockState sign = level.getBlockState(lore.pos());
             BlockPos wall = lore.pos().relative(lore.facing().getOpposite());
             if (!(sign.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
@@ -355,6 +356,53 @@ public final class TitanBackSelfTest {
                 failures.add("lore sign " + lore.key() + " has no wall behind it at " + wall);
             }
         }
+    }
+
+    // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
+    // 囁き (看板の代わりの案内) の文が lang にあること
+    private static void checkSigns(ServerLevel level, List<String> failures) {
+        Set<BlockPos> expected = new HashSet<>();
+        allSigns().forEach(i -> expected.add(i.pos()));
+        Set<String> keys = new java.util.TreeSet<>();
+        int count = 0;
+        for (int cx = (-RX - 8) >> 4; cx <= (RX + 8) >> 4; cx++) {
+            for (int cz = (-RZ - 8) >> 4; cz <= (RZ + 8) >> 4; cz++) {
+                for (var be : level.getChunk(cx, cz).getBlockEntities().values()) {
+                    if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)) {
+                        continue;
+                    }
+                    count++;
+                    if (!expected.contains(be.getBlockPos())) {
+                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                    }
+                    for (boolean front : new boolean[]{true, false}) {
+                        var text = front ? sign.getFrontText() : sign.getBackText();
+                        for (int i = 0; i < 4; i++) {
+                            var line = text.getMessage(i, false);
+                            if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+                                String k = tc.getKey();
+                                keys.add(k.substring(0, k.lastIndexOf('.')));
+                            } else if (!line.getString().isEmpty()) {
+                                failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (count != expected.size()) {
+            failures.add("found " + count + " signs on the back, expected " + expected.size());
+        }
+        failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
+        var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        var en = jp.revati.skyabyss.SignFit.lang("en_us");
+        for (String k : BackWhispers.keys()) {
+            if (!ja.containsKey(k) || !en.containsKey(k)) {
+                failures.add("whisper text missing: " + k);
+            }
+        }
+        SkyAbyss.LOGGER.info("Titan back signs: {} placed ({}), every line measured against {} px", count, keys,
+                jp.revati.skyabyss.SignFit.MAX_LINE_WIDTH);
     }
 
     // アスレチック: どの足場も次の足場へ届き、一つ飛ばしでは届かず、頭上が空いていること。谷に床が残っていないこと。
