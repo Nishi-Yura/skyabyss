@@ -47,7 +47,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// 雷翼の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST storm gear PASSED / FAILED)。03 の 12.8節の表と同じ検査:
+// 雷翼の装備の自己テスト (SKYABYSS_SELFTEST=1、SELFTEST storm gear PASSED / FAILED)。03 の 12.5節の表と同じ検査:
 //  - 表: 図鑑 10 品 (確率は 12 の 6.3節)、品と素材の登録、ID (12 の 11.1節と報酬の担当の表)、必要 Lv (レア 20・伝説 22)、炉の欠片
 //  - 数値: 攻撃力・速さ・間合い、羽衣の防御 21・強靭 14 (03 の 9.8節の雷翼の段)、一式が ×0.8 の上限内、特性の種類
 //  - 強さの曲線: GearCurve.STAGES の雷翼の段の目安 (+0 / +5 / +10、潮殻・余燼との並び)、心臓 (650、一撃 15.5) との手ごたえ、守り
@@ -257,10 +257,15 @@ public final class StormGearSelfTest {
         double hitBest = stormHit(thunder.bossHit(), 10, 0.10, true);
         double loadEasy = Double.MAX_VALUE;
         for (String id : List.of(StormGear.CLAW, StormGear.GLAIVE)) {
-            // 鉤槍は空駆けや段階 2 の空中戦で空中の上乗せが付く (いちばん楽な形には入れる)
-            double proc = id.equals(StormGear.GLAIVE) ? StormGear.GLAIVE_AERIAL_AWAKENED : 1;
-            loadEasy = Math.min(loadEasy, GearCurve.load(dpsOn(dps(id, 10) * best * proc, attack(id, 10) * 1.10 * proc, strFull),
-                    thunder.bossHp(), 0.6, 2.5, hp + 4, hitBest));
+            // 鉤槍は、心臓 (大きな相手) には自分が宙にいるときだけ空中の上乗せが付く。いちばん楽な形では、
+            // 段階 2 の空中戦 (体力の 66〜33%、3 分の 1) をずっと昇り風の中で叩くとする。地上の分と空中の分の時間を足す
+            double ground = GearCurve.load(dpsOn(dps(id, 10) * best, attack(id, 10) * 1.10, strFull), thunder.bossHp(), 0.6, 2.5, hp + 4, hitBest);
+            if (id.equals(StormGear.GLAIVE)) {
+                double p = StormGear.GLAIVE_AERIAL_AWAKENED;
+                double air = GearCurve.load(dpsOn(dps(id, 10) * best * p, attack(id, 10) * 1.10 * p, strFull), thunder.bossHp(), 0.6, 2.5, hp + 4, hitBest);
+                ground = ground * 2 / 3 + air / 3;
+            }
+            loadEasy = Math.min(loadEasy, ground);
         }
         notes.add("thunder heart load: fresh +0 " + fmt(loadFresh) + ", easiest +10/best affixes/full strength/aerial " + fmt(loadEasy)
                 + " (hit " + fmt(hit0) + " / " + fmt(hitBest) + ")");
@@ -292,7 +297,9 @@ public final class StormGearSelfTest {
     // ---------------------------------------------------------------- 効果
     private static FakePlayer player(ServerLevel level, String name, int lv) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
-        p.setPos(0.5, level.getMinBuildHeight() + 2, 0.5);
+        // 世界の出現地点の下 (読み込まれたままのチャンク。(0, 0) は出現地点が遠い世界では読み込まれない)
+        net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+        p.setPos(spawn.getX() + 0.5, level.getMinBuildHeight() + 2, spawn.getZ() + 0.5);
         Growth.get(p).level = lv;
         return p;
     }
@@ -317,6 +324,19 @@ public final class StormGearSelfTest {
         p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 1));
         check(f, StormGearEvents.setTaken(p) == 1, "the cloak must not stack with resistance");
         p.removeEffect(MobEffects.DAMAGE_RESISTANCE);
+        // 鉤槍の空中の上乗せ: 宙の小さな相手には地上からでも、大きな相手 (心臓) には自分が宙にいるときだけ
+        Zombie small = EntityType.ZOMBIE.create(level);
+        Zombie big = EntityType.ZOMBIE.create(level);
+        if (small != null && big != null) {
+            big.getAttribute(Attributes.MAX_HEALTH).setBaseValue(StormGear.GLAIVE_BIG_TARGET_HP + 50);
+            small.setOnGround(false);
+            big.setOnGround(false);
+            p.setOnGround(true);
+            check(f, WardenGlaiveItem.aerialHit(p, small), "the glaive should count a small airborne target from the ground");
+            check(f, !WardenGlaiveItem.aerialHit(p, big), "the glaive counted an airborne heart while standing on the ground");
+            p.setOnGround(false);
+            check(f, WardenGlaiveItem.aerialHit(p, big), "the glaive should count a heart while the wielder is in the air");
+        }
         // 空駆け: 4 部位・空中・待ちなしで跳べる。地面・待ちの最中・西の試練では跳べない
         check(f, StormGearEvents.canDash(p), "a 4-piece player in the air should be able to dash");
         Vec3 v = StormGearEvents.dashVelocity(p);

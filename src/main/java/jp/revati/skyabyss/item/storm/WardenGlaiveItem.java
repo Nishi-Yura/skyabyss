@@ -33,11 +33,17 @@ public class WardenGlaiveItem extends StormWeaponItem {
         return ModGear.awakened(stack) ? StormGear.GLAIVE_AERIAL_AWAKENED : StormGear.GLAIVE_AERIAL;
     }
 
-    // 空中の戦い: 相手が宙にいる (地面にも水にもいない)、または自分が落ちている
+    // 空中の戦い: 相手が宙にいる (地面にも水にもいない)、または自分が落ちている。
+    // 大きな相手 (最大体力 StormGear.GLAIVE_BIG_TARGET_HP 以上、巨神の心臓など) は宙に浮いたまま戦うので、
+    // 相手が宙にいるだけでは数えず、自分が宙にいる (昇り風の中・空駆け・滑空) ときだけ上乗せする (00 の判断)
     public static boolean aerialHit(LivingEntity attacker, LivingEntity target) {
+        boolean selfAir = !attacker.onGround() && !attacker.isInWater() && !attacker.isPassenger();
+        if (target.getMaxHealth() >= StormGear.GLAIVE_BIG_TARGET_HP) {
+            return selfAir;
+        }
         boolean targetAir = !target.onGround() && !target.isInWater() && !target.isPassenger();
         // サーバーではプレイヤーの速さは当てにならないので、バニラの会心と同じく落下の距離で見る
-        boolean falling = !attacker.onGround() && !attacker.isInWater() && attacker.fallDistance > 0;
+        boolean falling = selfAir && attacker.fallDistance > 0;
         return targetAir || falling;
     }
 }

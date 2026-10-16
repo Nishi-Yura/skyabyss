@@ -104,6 +104,8 @@ public final class StormGear {
     public static final double GLAIVE_REACH = 1.0;
     public static final double GLAIVE_AERIAL = 1.3;
     public static final double GLAIVE_AERIAL_AWAKENED = 1.4;
+    // これより大きな相手 (巨神の心臓 450〜) には、自分が宙にいるときだけ空中の上乗せ (心臓はいつも宙にいるため)
+    public static final float GLAIVE_BIG_TARGET_HP = 200;
 
     // ---------------------------------------------------------------- 護符・装飾・食べ物
     public static final int CHARM_COOLDOWN = 20 * 30;
