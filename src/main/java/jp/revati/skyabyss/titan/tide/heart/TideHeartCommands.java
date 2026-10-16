@@ -30,6 +30,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // /skyabyss tideheart reset        : 戦いを放棄して戻す。倒したあとなら、心臓をもう一度挑めるようにする
 // /skyabyss tideheart rebuild      : 部屋を建て直す
 // /skyabyss tideheart status       : 今の様子
+// /skyabyss tideheart shot <人> <名前> : その人の画面を run/screenshots/<名前>.png に写す (キーを送らずに確かめるため)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideHeartCommands {
     private TideHeartCommands() {
@@ -96,6 +97,11 @@ public final class TideHeartCommands {
                     ctx.getSource().sendSuccess(() -> Component.literal("tide heart: chamber rebuilt"), true);
                     return 1;
                 }))
+                .then(op("shot").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
+                        .then(Commands.argument("name", StringArgumentType.word()).executes(ctx -> {
+                            TideHeartNetwork.shot(net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player"), StringArgumentType.getString(ctx, "name"));
+                            return 1;
+                        }))))
                 .then(op("status").executes(ctx -> {
                     ServerLevel back = back(ctx);
                     TideHeart heart = TideHeartBattle.current(back);

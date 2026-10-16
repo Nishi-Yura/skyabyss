@@ -122,6 +122,7 @@ public final class TideHeartArena {
         return back.getBlockState(new BlockPos(CX, FLOOR - 1, CZ)).is(Blocks.CHISELED_TUFF_BRICKS)
                 && back.getBlockState(new BlockPos(CX, FLOOR - 1, CZ + EXIT_Z)).is(Blocks.SEA_LANTERN)
                 && back.getBlockState(new BlockPos(CX, CEILING - 2, CZ)).isAir()
+                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + ISLAND_OFFSET)).is(Blocks.SEA_LANTERN)
                 && back.getBlockState(descentPad(back)).is(Blocks.SEA_LANTERN)
                 && back.getBlockState(descentPad(back).offset(1, 0, 0)).is(Blocks.DARK_PRISMARINE);
     }
@@ -190,6 +191,26 @@ public final class TideHeartArena {
                 }
             }
         }
+        // 明かり: 天井だけでは床が暗く、予告の粒 (色の粒は周りの明るさで暗くなる) が見えにくいので、
+        // 床に埋めた海のランタン (半径 4.5 に 8、半径 10 に 12)、壁の足もと (12 か所)、岩の島の上の真ん中
+        for (int k = 0; k < 8; k++) {
+            double a = Math.toRadians(22.5 + 45 * k);
+            floorLamp(back, (int) Math.round(Math.cos(a) * 4.5), (int) Math.round(Math.sin(a) * 4.5), lamp, flags);
+        }
+        for (int k = 0; k < 12; k++) {
+            double a = Math.toRadians(15 + 30 * k);
+            floorLamp(back, (int) Math.round(Math.cos(a) * 10), (int) Math.round(Math.sin(a) * 10), lamp, flags);
+            int wx = (int) Math.round(Math.cos(a) * 15);
+            int wz = (int) Math.round(Math.sin(a) * 15);
+            if (!inside(CX + wx, CZ + wz) && dist(CX + wx, CZ + wz) <= RADIUS + 2) {
+                back.setBlock(new BlockPos(CX + wx, FLOOR + 1, CZ + wz), lamp, flags);
+            }
+        }
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                back.setBlock(new BlockPos(CX + sx * ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + sz * ISLAND_OFFSET), lamp, flags);
+            }
+        }
         // 溝の下は砂岩 (水の底が抜けないように)
         for (int x = CX - RADIUS; x <= CX + RADIUS; x++) {
             for (int z = CZ - RADIUS; z <= CZ + RADIUS; z++) {
@@ -243,6 +264,14 @@ public final class TideHeartArena {
         }
         fillTicks = holdTicks = drainTicks = 0;
         SkyAbyss.LOGGER.info("Built the tide heart chamber (placeholder) under the tide back island");
+    }
+
+    private static void floorLamp(ServerLevel back, int dx, int dz, BlockState lamp, int flags) {
+        int x = CX + dx;
+        int z = CZ + dz;
+        if (inside(x, z) && !groove(x, z) && !island(x, z) && !(dx == 0 && dz == 0)) {
+            back.setBlock(new BlockPos(x, FLOOR - 1, z), lamp, flags);
+        }
     }
 
     // 島の頂の降りる床の上に立っているか

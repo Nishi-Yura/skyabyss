@@ -45,6 +45,38 @@ public final class TideHeartClient {
         }
     }
 
+    // テスト用: 画面を run/screenshots/<name>.png に写す (名前は英数字と _ だけ)
+    public static void shot(String name) {
+        Minecraft mc = Minecraft.getInstance();
+        String safe = name.replaceAll("[^A-Za-z0-9_]", "_");
+        mc.execute(() -> net.minecraft.client.Screenshot.grab(mc.gameDirectory, safe + ".png", mc.getMainRenderTarget(), msg -> {
+        }));
+    }
+
+    // 泡の牢に閉じこめられている間は、画面を薄い水色の泡でおおう (中からは泡の箱が見えないため)
+    @SubscribeEvent
+    static void onRenderGui(net.neoforged.neoforge.client.event.RenderGuiEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) {
+            return;
+        }
+        net.minecraft.world.phys.Vec3 eye = mc.player.getEyePosition();
+        boolean inside = !mc.level.getEntitiesOfClass(jp.revati.skyabyss.titan.tide.heart.TideBubble.class,
+                mc.player.getBoundingBox().inflate(1.5), b -> b.getBoundingBox().contains(eye)).isEmpty();
+        if (!inside) {
+            return;
+        }
+        var g = event.getGuiGraphics();
+        int w = g.guiWidth();
+        int h = g.guiHeight();
+        g.fillGradient(0, 0, w, h, 0x5578D8F0, 0x6A3A90C8);
+        int b = Math.max(6, Math.min(w, h) / 14);
+        g.fill(0, 0, w, b, 0x50E8FAFF);
+        g.fill(0, h - b, w, h, 0x50E8FAFF);
+        g.fill(0, 0, b, h, 0x50E8FAFF);
+        g.fill(w - b, 0, w, h, 0x50E8FAFF);
+    }
+
     @SubscribeEvent
     static void onBossBar(CustomizeGuiOverlayEvent.BossEventProgress event) {
         Minecraft mc = Minecraft.getInstance();

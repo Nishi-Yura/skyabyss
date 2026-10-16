@@ -481,7 +481,7 @@ public class TideHeart extends GuardMob {
             double fy = floorY();
             for (int a = 0; a < 360; a += 20) {
                 double rad = Math.toRadians(a);
-                warn(server, dust(0xE0D0F0, 1.2f), getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
+                warn(server, dust(0x9A3FD0, 1.5f), getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
             }
         }
         if (actionTicks == 20) {
@@ -599,7 +599,7 @@ public class TideHeart extends GuardMob {
             int steps = (int) Math.min(40, d.length() / 0.7);
             for (int i = 1; i <= steps; i++) {
                 Vec3 p = from.add(d.scale((double) i / steps));
-                warn(server, dust(actionTicks < 20 ? 0x9EE8FF : 0xFFFFFF, 0.8f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
+                warn(server, dust(actionTicks < 20 ? 0x2A90E0 : 0x103070, 1.0f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
             }
         }
         if (actionTicks == 30 && bubbleTo != null) {
@@ -665,7 +665,7 @@ public class TideHeart extends GuardMob {
             for (int k = 0; k < 16; k++) {
                 double a = Math.toRadians(k * 22.5 + 7);
                 double r = 14 - ((actionTicks * 0.35 + k * 1.7) % 12);
-                warn(server, dust(0x9ED8FF, 1.0f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                warn(server, dust(0x2A70D8, 1.3f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
             }
             if (actionTicks >= 70) {
                 for (int a = 0; a < 360; a += 20) {
@@ -702,7 +702,7 @@ public class TideHeart extends GuardMob {
         double half = isBound() ? TideHeartArena.RADIUS : 12;
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.WAVE.get(), 3f, 1f);
-            // 波は人のいる側から来ない向き (人の後ろから寄せる): 四方から一つ
+            // 大波の向きは四方から一つ (寄せる側の壁ぎわに白い波頭が出る)
             int quarter = random.nextInt(4);
             waveDir = switch (quarter) {
                 case 0 -> new Vec3(1, 0, 0);
@@ -727,12 +727,12 @@ public class TideHeart extends GuardMob {
                         for (double t = 0; t <= 1.2; t += 0.4) {
                             double x = getX() + waveDir.x * (k + t) + side.x * s;
                             double z = getZ() + waveDir.z * (k + t) + side.z * s;
-                            warn(server, dust(0xA8C8FF, 0.8f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
+                            warn(server, dust(0x2A50C8, 1.4f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
                         }
                         for (int sg = -1; sg <= 1; sg += 2) {
                             double x = getX() + waveDir.x * (k + 0.8) + side.x * (s + sg * 0.5);
                             double z = getZ() + waveDir.z * (k + 0.8) + side.z * (s + sg * 0.5);
-                            warn(server, dust(0xA8C8FF, 0.8f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
+                            warn(server, dust(0x2A50C8, 1.4f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -744,10 +744,12 @@ public class TideHeart extends GuardMob {
                 for (double s = -half; s <= half; s += 1.0) {
                     double x = getX() + waveDir.x * front + side.x * s;
                     double z = getZ() + waveDir.z * front + side.z * s;
-                    warn(server, dust(0xE8F4FF, 1.6f), x, fy + 1.7, z, 1, 0.1, 0.1, 0.1, 0);
-                    warn(server, dust(0x3A70C8, 1.6f), x, fy + 0.6, z, 1, 0.1, 0.3, 0.1, 0);
-                    if (((int) s) % 3 == 0) {
-                        server.sendParticles(ParticleTypes.SPLASH, x, fy + 1.9, z, 3, 0.3, 0.1, 0.3, 0.2);
+                    warn(server, dust(0xF4FAFF, 1.8f), x, fy + 1.9, z, 1, 0.1, 0.05, 0.1, 0);
+                    warn(server, dust(0x4A80E0, 1.8f), x, fy + 1.3, z, 1, 0.1, 0.1, 0.1, 0);
+                    warn(server, dust(0x2A58C0, 1.8f), x, fy + 0.7, z, 1, 0.1, 0.1, 0.1, 0);
+                    warn(server, dust(0x1A3A90, 1.8f), x, fy + 0.2, z, 1, 0.1, 0.05, 0.1, 0);
+                    if (((int) s) % 2 == 0) {
+                        server.sendParticles(ParticleTypes.SPLASH, x, fy + 2.0, z, 6, 0.4, 0.1, 0.4, 0.3);
                     }
                 }
             }
@@ -811,7 +813,7 @@ public class TideHeart extends GuardMob {
             int points = Math.max(8, (int) (2 * Math.PI * ring.radius / 1.4));
             for (int i = 0; i < points; i++) {
                 double a = i * 2 * Math.PI / points;
-                warn(server, dust(ring.harmful ? 0xE0D0F0 : 0x9EE8FF, 1.2f),
+                warn(server, dust(ring.harmful ? 0x9A3FD0 : 0x2A90E0, 1.5f),
                         getX() + Math.cos(a) * ring.radius, ring.floorY + 0.5, getZ() + Math.sin(a) * ring.radius, 1, 0, 0, 0, 0);
             }
             double r = ring.radius + 2;
@@ -846,13 +848,13 @@ public class TideHeart extends GuardMob {
                 double r = s.spear() ? 1.3 : 2.0;
                 for (int a = 0; a < 360; a += 30) {
                     double rad = Math.toRadians(a);
-                    warn(server, dust(s.spear() ? 0xFF8A8A : 0xFFFFFF, 1.0f),
+                    warn(server, dust(s.spear() ? 0xE03050 : 0x3A5FE0, 1.3f),
                             s.x() + Math.cos(rad) * r, s.y() + 0.15, s.z() + Math.sin(rad) * r, 1, 0, 0, 0, 0);
                 }
             }
             if (!s.spear() && tickCount >= s.impactAt() - 10) {
                 double drop = (s.impactAt() - tickCount) / 10.0;
-                warn(server, dust(0xFFFFFF, 1.6f), s.x(), s.y() + 1 + drop * 8, s.z(), 2, 0.1, 0.2, 0.1, 0);
+                warn(server, ParticleTypes.END_ROD, s.x(), s.y() + 1 + drop * 8, s.z(), 2, 0.1, 0.2, 0.1, 0);
             }
             remaining.add(s);
         }
