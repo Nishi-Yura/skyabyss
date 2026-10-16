@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 178,
+  "unlock": [
+    {
+      "type": "dimension",
+      "target": "skyabyss:ember_back"
+    }
+  ],
+  "related": [
+    "chapter1/ember_titan",
+    "chapter1/inscription_ember_hub"
+  ]
+}

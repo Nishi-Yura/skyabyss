@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 178,
+  "inscription_sign": "sign.skyabyss.lore_ember_east",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_ember_east"
+    }
+  ],
+  "related": [
+    "chapter1/ash_smith",
+    "chapter1/sky_key_whole"
+  ]
+}

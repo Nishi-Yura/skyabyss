@@ -1,0 +1,78 @@
+# 余燼の装備の見た目 (03 の 13.5節)。./gradlew runShots -Pscript=tools/shots/ember_gear.txt
+# 出力: run/shots/ember_gear/shots/ember_gear/*.png と shots.log
+# 防具立てに余燼の鎧を着せ、手に武器を持たせて、前・後ろ・斜め・夜・一人称・持ち物の画面を撮る
+world shots flat
+size 1280 720
+timeout 480
+render 8
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd kill @e[type=minecraft:armor_stand,distance=0..]
+# 前 (南を向く)・後ろ (北を向く)・斜め。平らな世界の地面は y -60
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}],HandItems:[{id:"skyabyss:smith_hammer",count:1},{}]}
+cmd summon armor_stand 2.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}],HandItems:[{id:"skyabyss:ember_war_axe",count:1},{}]}
+cmd summon armor_stand -2.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}],HandItems:[{id:"skyabyss:thrall_poker",count:1},{}]}
+cmd gamemode spectator
+camera 0 -58.6 5 180 8
+waitchunks
+wait 20
+hud off
+chat clear
+shot stands_day
+camera 0 -60 2.6 180 12
+wait 10
+shot stand_front_close
+camera 2.5 -60 2.6 180 12
+wait 10
+shot stand_back_close
+camera -2.5 -60 2.6 180 12
+wait 10
+shot stand_three_quarter_close
+cmd time set midnight
+wait 10
+camera 0 -58.6 5 180 8
+wait 10
+shot stands_night
+# 一人称で手に持つ
+cmd time set noon
+cmd gamemode creative
+camera 0 -59 8 180 5
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+wait 10
+chat clear
+shot hand_smith_hammer
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+wait 10
+chat clear
+shot hand_ember_war_axe
+cmd item replace entity @s weapon.mainhand with skyabyss:thrall_poker
+wait 10
+chat clear
+shot hand_thrall_poker
+# 持ち物の画面 (アイコン)
+cmd clear @s
+cmd give @s skyabyss:ember_helmet
+cmd give @s skyabyss:ember_chestplate
+cmd give @s skyabyss:ember_leggings
+cmd give @s skyabyss:ember_boots
+cmd give @s skyabyss:ember_war_axe
+cmd give @s skyabyss:smith_hammer
+cmd give @s skyabyss:thrall_poker
+cmd give @s skyabyss:ember_mantle
+cmd give @s skyabyss:kindling_charm
+cmd give @s skyabyss:ember_lantern
+cmd give @s skyabyss:ember_horn
+cmd give @s skyabyss:ember_shard
+cmd give @s skyabyss:ember_core
+cmd give @s skyabyss:spark_dust
+cmd give @s skyabyss:cinder_husk
+cmd gamemode survival
+chat clear
+open inventory
+wait 10
+shot inventory_icons
+close
+quit
