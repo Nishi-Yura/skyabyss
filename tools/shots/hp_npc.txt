@@ -1,0 +1,56 @@
+# NPCs (storyteller, whale chaser) and the watcher before/after the high-poly pass (docs/design/15_high_poly.md).
+# ./gradlew runShots -Pscript=tools/shots/hp_npc.txt -PshotsName=hp_npc_after   (and hp_npc_before with the base assets)
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:storyteller -2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:whale_chaser 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+hud off
+camera minecraft:overworld 0 -60.7 5.2 180 0
+waitchunks
+wait 60
+shot npc_both
+camera minecraft:overworld -2 -60.5 3.0 180 0
+wait 20
+shot storyteller_front
+camera minecraft:overworld -0.4 -60.4 2.2 160 3
+wait 20
+shot storyteller_three_quarter
+camera minecraft:overworld -2 -60.0 1.6 180 4
+wait 20
+shot storyteller_face
+camera minecraft:overworld -4.2 -60.5 -2.8 -40 6
+wait 20
+shot storyteller_back
+camera minecraft:overworld 2 -60.5 3.0 180 0
+wait 20
+shot chaser_front
+camera minecraft:overworld 4.0 -60.4 2.4 200 3
+wait 20
+shot chaser_three_quarter
+camera minecraft:overworld 2 -59.9 1.8 180 4
+wait 20
+shot chaser_face
+camera minecraft:overworld 4.4 -60.5 -2.8 -150 6
+wait 20
+shot chaser_back
+# the watcher exists only on the client and stands far away (/skyabyss watcher show), so it is shot with a narrow view
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd time set midnight
+camera minecraft:overworld 0 -60.5 0 180 0
+wait 20
+cmd skyabyss watcher show
+fov 20
+wait 30
+shot watcher_far1
+wait 40
+shot watcher_far2
+quit
