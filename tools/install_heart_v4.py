@@ -1,7 +1,8 @@
 """岩鯨の心臓 (最終ボス) の第4回ラフ 案A をゲームに入れる。
 
 使い方 (リポジトリ直下で): python tools/install_heart_v4.py
-形の元: tools/sources/heart/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png (tools/rough/boss_v4.py の A 案。元は docs/roughs/v4/boss/a)
+形の元: tools/sources/heart_hp/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png (tools/rough/hp_heart_stone.py の B 案で 0.25 に彫り直したもの。
+  その元は tools/sources/heart/ = tools/rough/boss_v4.py の A 案、docs/roughs/v4/boss/a)
 出力 (src/main/resources/assets/skyabyss/ 以下):
   geo/entity/stone_whale_heart_p1|p2|p3.geo.json
   textures/entity/stone_whale_heart_p1|p2|p3.png と _glowmask.png
@@ -35,7 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools/rough"))
 from voxel import FACE_SHADE, Face, load_geo, render, sheet  # noqa: E402
 
-SRC = ROOT / "tools/sources/heart"
+SRC = ROOT / "tools/sources/heart_hp"
 ASSET = ROOT / "src/main/resources/assets/skyabyss"
 PREVIEW = ROOT / "docs/review/previews/boss.png"
 NAME = "stone_whale_heart"
