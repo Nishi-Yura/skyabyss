@@ -36,10 +36,10 @@ V = I.V
 OUT = ROOT / "src/main/resources/data/skyabyss/titan_back/whale.bin"
 PREVIEW = ROOT / "docs/review/whale_back_roughs"
 
-S = 0.7             # 1 単位あたりのブロック (ゲームの岩鯨の 1.4 倍)
-CX = 0.0            # Blockbench の x=0 (体の軸) を置く世界の x
-YW = 99.0           # geo の y=YC (体の中心) を置く世界の y
-ZOFF = 30.0         # geo の z=0 を置く世界の z
+S = float(__import__("os").environ.get("WS", "1.4"))             # 1 単位あたりのブロック (ゲームの岩鯨の 1.4 倍)
+CX = float(__import__("os").environ.get("WX", "-3"))            # Blockbench の x=0 (体の軸) を置く世界の x
+YW = float(__import__("os").environ.get("WY", "95"))           # geo の y=YC (体の中心) を置く世界の y
+ZOFF = float(__import__("os").environ.get("WZ", "24"))         # geo の z=0 を置く世界の z
 INNER_DEPTH = 5     # これより深い体の中は、凝灰岩と深層岩 (部屋を掘ると壁は深層岩のレンガになる)
 
 P = I.PARTS
@@ -51,7 +51,7 @@ GLOW = {M["glyph"], M["eye"], M["cyan"]}
 # 材料 -> [(ブロック, 重み)]。色はモデルの PAL に近いもの (tools/rough/block_colors.json の平均色で選んだ)
 BLOCKS = {
     M["stone"]: [("polished_tuff", 3), ("cyan_terracotta", 3), ("tuff_bricks", 2), ("cobbled_deepslate", 1)],
-    M["belly"]: [("white_terracotta", 3), ("diorite", 1), ("calcite", 1)],
+    M["belly"]: [("diorite", 3), ("calcite", 1), ("white_terracotta", 1)],
     M["moss"]: [("moss_block", 1)],
     M["dark"]: [("blackstone", 1)],
     M["bone"]: [("bone_block", 1)],
@@ -87,9 +87,23 @@ def axis_map(n, origin, f):
     return np.floor(f(u)).astype(int)
 
 
-def block_grid():
+def model_grid():
+    """モデルの格子 (install_stone_whale.build() は遅いので、ソースが変わらなければ scratch のキャッシュを使う)"""
+    import hashlib
+    import tempfile
+    h = hashlib.sha1()
+    for f in (ROOT / "tools/install_stone_whale.py", ROOT / "tools/rough/stone_whale_v2.py"):
+        h.update(f.read_bytes())
+    cache = Path(tempfile.gettempdir()) / ("stone_whale_grid_%s.npy" % h.hexdigest()[:12])
+    if cache.exists():
+        return np.load(cache)
     Mdl, _, _, _ = I.build()
-    K = Mdl.K
+    np.save(cache, Mdl.K)
+    return Mdl.K
+
+
+def block_grid():
+    K = model_grid()
     nx, ny, nz = K.shape
     # X は反転 (Blockbench の +X = ゲームの左 = 頭を北に向けたときの西)
     bx = axis_map(nx, V.OX, lambda u: CX - u * S)

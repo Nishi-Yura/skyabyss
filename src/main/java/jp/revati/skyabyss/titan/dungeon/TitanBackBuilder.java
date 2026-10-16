@@ -7,8 +7,6 @@ import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
@@ -17,7 +15,6 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 岩鯨の背を建てる。ワールドで初めて必要になったとき (サーバー起動時) に一度だけ実行する。
@@ -59,209 +56,62 @@ public final class TitanBackBuilder {
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
     }
 
-    // ---------------------------------------------------------------- 島
+    // ---------------------------------------------------------------- 島: 岩鯨と同じ形のブロックの鯨 (WhaleShape)
     private static void buildIsland(BuildKit kit) {
-        RandomSource random = kit.random;
-        for (int x = -RX - 2; x <= RX + 2; x++) {
-            for (int z = -RZ - 2; z <= RZ + 2; z++) {
-                double s = shape(x, z);
-                int t = top(x, z);
-                // 建て直したときに古い建物が宙に残らないよう、地表の上をきれいにする
-                for (int y = (s > 0 ? t + 1 : BASE_Y - 40); y <= t + 18; y++) {
-                    if (!kit.get(x, y, z).isAir()) {
-                        kit.set(x, y, z, BuildKit.AIR);
-                    }
-                }
-                if (s <= 0) {
-                    continue;
-                }
-                int b = bottom(x, z);
-                boolean rim = s < 0.07;
-                for (int y = b; y <= t; y++) {
-                    BlockState state;
-                    int depth = t - y;
-                    if (depth == 0) {
-                        float r = random.nextFloat();
-                        state = r < 0.55f ? Blocks.MOSS_BLOCK.defaultBlockState()
-                                : r < 0.9f ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.ROOTED_DIRT.defaultBlockState();
-                    } else if (depth <= 2) {
-                        state = random.nextFloat() < 0.7f ? Blocks.DIRT.defaultBlockState() : Blocks.ROOTED_DIRT.defaultBlockState();
-                    } else if (y == b || rim) {
-                        float r = random.nextFloat();
-                        state = r < 0.65f ? Blocks.DEEPSLATE.defaultBlockState()
-                                : r < 0.9f ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : Blocks.TUFF.defaultBlockState();
-                    } else {
-                        state = random.nextFloat() < 0.75f ? Blocks.TUFF.defaultBlockState() : Blocks.DEEPSLATE.defaultBlockState();
-                    }
-                    kit.set(x, y, z, state);
-                }
-                // 腹から垂れる根と、縁から垂れるツタ
-                if (random.nextFloat() < 0.1f) {
-                    kit.set(x, b - 1, z, Blocks.HANGING_ROOTS.defaultBlockState());
-                }
-                if (rim && random.nextFloat() < 0.35f) {
-                    hangVines(kit, x, z, t);
-                }
-            }
-        }
+        long t0 = System.currentTimeMillis();
+        int placed = WhaleShape.place(kit);
+        SkyAbyss.LOGGER.info("Placed the stone whale: {} blocks in {} ms", placed, System.currentTimeMillis() - t0);
     }
 
-    private static void hangVines(BuildKit kit, int x, int z, int t) {
-        for (Direction dir : Direction.Plane.HORIZONTAL) {
-            int ox = x + dir.getStepX();
-            int oz = z + dir.getStepZ();
-            if (shape(ox, oz) > 0) {
-                continue;
-            }
-            int length = 3 + kit.random.nextInt(9);
-            BlockState vine = Blocks.VINE.defaultBlockState().setValue(VineBlock.getPropertyForFace(dir.getOpposite()), true);
-            for (int y = t - 1; y > t - 1 - length && y >= bottom(x, z); y--) {
-                kit.set(ox, y, oz, vine);
-            }
-            return;
-        }
-    }
-
-    // ---------------------------------------------------------------- 地表: 背骨の道、柱列、門、突き出た肋骨、木々、尾の台
+    // ---------------------------------------------------------------- 背の上: 広場から祠への踏み跡、道の灯り、錨石から垂れる鎖、尾の広場
+    // 背の上の景色 (苔の背、背骨の骨、石の門のアーチ、塔、崩れた壁、岩の板) はモデルのまま。ここでは道しるべだけを足す
     private static void buildSurface(BuildKit kit) {
         RandomSource random = kit.random;
-        for (int z = -104; z <= PLATFORM_Z - 5; z++) {
-            // 祠 (南の端) から尾の台までは、磨いた石畳を敷く
-            boolean paved = z >= SHRINE_Z + 11 && z <= PLATFORM_Z - 9;
+        // 祠から広場までの踏み跡 (苔の上の石)。背骨 (x -3) の東に沿う
+        for (int z = SHRINE_Z + 11; z <= PLATFORM_Z - 9; z++) {
             for (int x = -1; x <= 1; x++) {
-                if (paved) {
-                    kit.set(x, top(x, z), z, x == 0 || z % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES);
-                } else if (random.nextFloat() < 0.75f) {
+                if (random.nextFloat() < 0.7f) {
                     BlockState path = switch (random.nextInt(3)) {
                         case 0 -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
                         case 1 -> Blocks.TUFF_BRICKS.defaultBlockState();
-                        default -> Blocks.GRAVEL.defaultBlockState();
+                        default -> Blocks.POLISHED_TUFF.defaultBlockState();
                     };
                     kit.set(x, top(x, z), z, path);
                 }
             }
         }
-        // 石畳の脇に、灯りの柱を立てる
-        for (int z : new int[]{42, 56, 70, 84}) {
-            for (int side = -1; side <= 1; side += 2) {
-                int base = top(2 * side, z) + 1;
-                kit.set(2 * side, base, z, BuildKit.POLISHED);
-                kit.set(2 * side, base + 1, z, BuildKit.POLISHED);
-                kit.set(2 * side, base + 2, z, Blocks.SOUL_LANTERN.defaultBlockState());
-            }
+        // 踏み跡の脇の灯りの柱 (石の門のアーチ z 68〜76 は避ける)
+        for (int z : new int[]{56, 84}) {
+            int base = top(3, z) + 1;
+            kit.set(3, base, z, BuildKit.POLISHED);
+            kit.set(3, base + 1, z, BuildKit.POLISHED);
+            kit.set(3, base + 2, z, Blocks.SOUL_LANTERN.defaultBlockState());
         }
-        // 道の両側の柱列。祠と尾の台のまわりは空ける。いくつかは折れている
-        for (int z = -98; z <= 84; z += 14) {
-            if (z > SHRINE_Z - 14 && z < SHRINE_Z + 14) {
-                continue;
-            }
-            for (int side = -1; side <= 1; side += 2) {
-                int height = random.nextFloat() < 0.35f ? 3 + random.nextInt(4) : 9 + random.nextInt(4);
-                pillar(kit, 11 * side, z, height);
-            }
-        }
-        gateArch(kit, -70);
-        gateArch(kit, 56);
-        // 体から突き出た巨大な肋骨の弧
-        for (int z : new int[]{-40, -24, 40, 70}) {
-            boneArc(kit, z, 26);
-        }
-        // 苔むした大岩と、アザレアの木
-        for (int i = 0; i < 10; i++) {
-            int x = (random.nextBoolean() ? 1 : -1) * (16 + random.nextInt(18));
-            int z = -95 + random.nextInt(180);
-            if (shape(x, z) > 0.15) {
-                boulder(kit, x, z);
-            }
-        }
-        var trees = kit.level().registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE).getHolder(TreeFeatures.AZALEA_TREE);
-        for (int i = 0; i < 14; i++) {
-            int x = (random.nextBoolean() ? 1 : -1) * (6 + random.nextInt(28));
-            int z = -100 + random.nextInt(190);
-            if (shape(x, z) > 0.2 && Math.abs(x) > 4 && !(z > SHRINE_Z - 14 && z < SHRINE_Z + 14)) {
-                BlockPos pos = new BlockPos(x, top(x, z) + 1, z);
-                trees.ifPresent(t -> t.value().place(kit.level(), kit.level().getChunkSource().getGenerator(), random, pos));
-            }
-        }
-        // 頭の先の見張り台: 二本の角のような柱
-        int hz = -108;
-        int hy = top(0, hz);
-        kit.fill(-3, hy, hz - 2, 3, hy, hz + 2, BuildKit.POLISHED);
-        for (int side = -1; side <= 1; side += 2) {
-            for (int i = 1; i <= 7; i++) {
-                kit.set(3 * side + (i > 4 ? side : 0), hy + i, hz - (i > 5 ? 1 : 0), BuildKit.TILES);
-            }
-        }
+        // 錨石 (左のわき腹の鉄の留め具) から、雲の海へ垂れる鎖。乗り込むときに上ってくる鎖
+        anchorChain(kit);
         buildPlatform(kit);
     }
 
-    private static void pillar(BuildKit kit, int x, int z, int height) {
-        int base = top(x, z) + 1;
-        kit.set(x, base, z, BuildKit.CHISELED);
-        for (int i = 1; i < height; i++) {
-            kit.set(x, base + i, z, i % 3 == 0 ? BuildKit.POLISHED : BuildKit.TILES);
-        }
-        if (height >= 8) {
-            kit.set(x, base + height, z, BuildKit.CHISELED);
-        } else {
-            kit.set(x, base + height, z, Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState());
-            for (int i = 0; i < 3; i++) {
-                int fx = x + kit.random.nextInt(5) - 2;
-                int fz = z + kit.random.nextInt(5) - 2;
-                kit.set(fx, top(fx, fz) + 1, fz, Blocks.CRACKED_DEEPSLATE_TILES.defaultBlockState());
+    // モデルの錨石 (左のわき腹の鉄の留め具) から、外へ張り出して雲の海の少し上まで垂れる鎖
+    // (地上で岩鯨が垂らす鎖と同じく、胴の外へ渡してから下ろす)
+    private static void anchorChain(BuildKit kit) {
+        BlockState along = Blocks.CHAIN.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
+        BlockState down = Blocks.CHAIN.defaultBlockState();
+        int y = ANCHOR_CHAIN_Y;
+        int z = ANCHOR_CHAIN_Z;
+        for (int x = ANCHOR_STONE_X; x > ANCHOR_CHAIN_X; x--) {
+            if (kit.get(x, y, z).isAir()) {
+                kit.set(x, y, z, along);
             }
+        }
+        for (int yy = y; yy >= BASE_Y - 42; yy--) {
+            kit.set(ANCHOR_CHAIN_X, yy, z, down);
         }
     }
 
-    // 道をまたぐ石の門 (2本の柱と、段のついた梁)
-    private static void gateArch(BuildKit kit, int z) {
-        int base = Math.max(top(-5, z), top(5, z)) + 1;
-        for (int side = -1; side <= 1; side += 2) {
-            for (int y = base - 3; y < base + 10; y++) {
-                kit.set(5 * side, y, z, y == base + 9 ? BuildKit.CHISELED : BuildKit.POLISHED);
-            }
-        }
-        for (int x = -6; x <= 6; x++) {
-            kit.set(x, base + 10, z, BuildKit.TILES);
-        }
-        for (int x = -3; x <= 3; x++) {
-            kit.set(x, base + 11, z, Math.abs(x) == 3 ? Blocks.DEEPSLATE_TILE_STAIRS.defaultBlockState()
-                    .setValue(StairBlock.FACING, x < 0 ? Direction.EAST : Direction.WEST) : BuildKit.CHISELED);
-        }
-    }
-
-    // 地表を割って突き出た、鯨の肋骨の弧
-    private static void boneArc(BuildKit kit, int z, int radius) {
-        BlockState bone = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
-        int cy = top(0, z) - radius / 2;
-        for (int a = 0; a <= 180; a += 2) {
-            double rad = Math.toRadians(a);
-            int x = (int) Math.round(Math.cos(rad) * radius);
-            int y = cy + (int) Math.round(Math.sin(rad) * radius);
-            if (y > top(x, z)) {
-                kit.set(x, y, z, bone);
-                kit.set(x, y, z + 1, bone);
-            }
-        }
-    }
-
-    private static void boulder(BuildKit kit, int cx, int cz) {
-        int base = top(cx, cz);
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 2; z++) {
-                for (int y = 0; y <= 2; y++) {
-                    if (x * x + z * z + y * y * 2 <= 5 + kit.random.nextInt(2)) {
-                        kit.set(cx + x, base + 1 + y, cz + z, kit.random.nextFloat() < 0.6f
-                                ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : Blocks.COBBLED_DEEPSLATE.defaultBlockState());
-                    }
-                }
-            }
-        }
-    }
-
-    // 尾の台: 到着地点の広場。円形の石畳 (外はレンガ、中ほどは市松と線、中央は扇形の模様)、
-    // 北の骨の門 (遺跡の方角)、錨石の祠、縁の柵、灯りの柱と旗、ベンチ、焚き火の休み場、三つの試練の碑文を置く
-    // 到着は (0, 107, 94)、錨石は (0, 106, 99)。どちらも動かさない
+    // 尾の付け根の広場: 到着地点。円形の石畳 (外はレンガ、中ほどは市松と線、中央は扇形の模様)、
+    // 北の骨の門 (祠の方角)、錨石の祠、縁の柵、灯りの柱と旗、ベンチ、焚き火の休み場を置く。
+    // 背の丸みは、石畳の下を埋め、上を空けて平らにする。到着は (0, 123, 98)、錨石は (0, 122, 103)
     private static final double PLAZA_RX = 7.0;
     private static final double PLAZA_RZ = 9.0;
 

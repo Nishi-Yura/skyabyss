@@ -7,7 +7,10 @@ import net.minecraft.world.phys.AABB;
 
 // 岩鯨の背の配置図。建てる側 (Builder) と仕組みの側 (試練・休憩地点・リセット) の両方がここを参照する。
 //
-// 島は Z方向に長い楕円 (頭は -Z、全長240・幅96)。体内の主な床は y=93 (床ブロック、1つ上から空間)。
+// 島は、空を泳ぐ岩鯨と同じ形のブロックの鯨 (WhaleShape。頭は -Z、全長 412、体の幅 82、ゲームの岩鯨の 2.8 倍)。
+// 試練の部屋は体の中に埋まっている。体内の主な床は y=93 (床ブロック、1つ上から空間)。
+// 尾の付け根の背 (z 100) に到着の広場と錨石、背の中ほど (z 39) に祠。祠の階段で体の中の鼓動の間へ下りる。
+// 西の翼は左のわき腹の肋骨の間 (肋骨の窓から空が見える)、東の翼は背骨に沿った広間、闇の水路は腹の中の水、心臓の間は胸の奥
 //
 //              [宝物庫]  (北: 封印の扉の奥)
 //                 |
@@ -15,7 +18,7 @@ import net.minecraft.world.phys.AABB;
 //                 |  \__ 床の穴の下に [闇の水路] (y 77〜81)
 //            [入口の通路]
 //                 |
-//             [祠] (地表) ……… 背骨の道 ……… [尾の台・錨石] (到着地点)
+//             [祠] (背の中ほど) … 背の石の門 (アーチ) … [尾の付け根の広場・錨石] (到着地点)
 //
 // 西の翼 (裂け目の回廊): 西の前室 → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 → 崩れ橋 → 共鳴石
 //                        足場の並びは毎回変わる
@@ -24,19 +27,28 @@ import net.minecraft.world.phys.AABB;
 // 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
 // 闇の水路: 3×3 の水の通路でできた迷路。毎回形が変わり、途中に息継ぎのくぼみだけがある
 public final class TitanBackLayout {
+    // 雲の海の高さの基準 (雲は BASE_Y - 55 = 45、BASE_Y - 50 より下に落ちたら地上へ)。鯨の腹の下端は y 58
     public static final int BASE_Y = 100;
-    public static final int RX = 48;
-    public static final int RZ = 120;
+    // 鯨の全体を包む範囲 (x -RX〜RX、z -RZ〜RZ)。番兵の掃除・看板の数え・地図に使う
+    public static final int RX = 100;
+    public static final int RZ = 256;
     public static final int FLOOR = 93;
 
     // 配置の版。部屋の配置を変えたら上げる。保存された版と違えば、起動時に背中を建て直す (TitanBackData)
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
     //  4: 案内の看板を減らした (試練の入口の一言と碑文だけ残す。古い看板が残らないよう建て直す)
-    public static final int LAYOUT_VERSION = 4;
+    //  5: 楕円の丘を、岩鯨のモデルと同じ形のブロックの鯨にした (部屋は体の中のまま。到着は尾の付け根、祠は背の中ほど)
+    public static final int LAYOUT_VERSION = 5;
 
     // ---------------------------------------------------------------- 地表
-    public static final int PLATFORM_Z = 96;
-    public static final int SHRINE_Z = 24;
+    // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
+    public static final int PLATFORM_Z = 100;
+    public static final int SHRINE_Z = 39;
+    // モデルの錨石 (左のわき腹の留め具、x -35〜-31、y 78〜96、z 107〜110)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
+    public static final int ANCHOR_STONE_X = -34;
+    public static final int ANCHOR_CHAIN_X = -46;
+    public static final int ANCHOR_CHAIN_Y = 86;
+    public static final int ANCHOR_CHAIN_Z = 108;
     // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
     public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
 
@@ -177,18 +189,21 @@ public final class TitanBackLayout {
         return top(0, SHRINE_Z);
     }
 
+    // 鯨の体がある柱なら 1、無ければ 0 (前の楕円の島の名残の名前。> 0 で「島の上」)
     public static double shape(double x, double z) {
-        return 1.0 - (x / RX) * (x / RX) - (z / RZ) * (z / RZ);
+        return WhaleShape.bodyTop((int) Math.floor(x), (int) Math.floor(z)) == Integer.MIN_VALUE ? 0 : 1;
     }
 
+    // 体 (頭・顎・胴・尾) の背のいちばん上。背の遺跡・背骨は含まない。体の無い柱は BASE_Y
     public static int top(int x, int z) {
-        double s = shape(x, z);
-        return s <= 0 ? BASE_Y : BASE_Y + (int) Math.floor(14.0 * Math.pow(s, 0.8));
+        int t = WhaleShape.bodyTop(x, z);
+        return t == Integer.MIN_VALUE ? BASE_Y : t;
     }
 
+    // 鯨の腹のいちばん下。無い柱は BASE_Y
     public static int bottom(int x, int z) {
-        double s = shape(x, z);
-        return s <= 0 ? BASE_Y : BASE_Y - (int) Math.floor(34.0 * Math.sqrt(s)) - 1;
+        int b = WhaleShape.bottom(x, z);
+        return b == Integer.MIN_VALUE ? BASE_Y : b;
     }
 
     // 迷路のマス (i, j) の北西の角
