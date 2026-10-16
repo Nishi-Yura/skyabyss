@@ -17,13 +17,13 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // 巨神の背中 (岩鯨・潮殻・雷翼・余燼) の体を、起動時に一気に建てず、何 tick かに分けて建てる (13 の 24.5節)。
 // 建て方の時間のほぼ全部 (9 割以上) は「体のブロックを置く」ループなので、そこを 1 列 (16 x 16 の柱) ずつ進められる形にし、
 // 1 tick に使う時間 (予算) だけ進める。残り (部屋を掘る、中身を建てる、建てた印) は体を置き終えた tick に一度に済ませる (0.2〜0.5 秒)。
-//   - 予算: 誰もいなければ 40 ms (サーバーは 20 TPS のまま)、人がいれば 15 ms
+//   - 予算: 誰もいなければ 25 ms、人がいれば 10 ms (予算のほかに、チャンクの読み込みと明るさの計算が 1 tick 20 ms ほどかかる)
 //   - 建てている途中でサーバーが止まっても、建てた印は最後に付くので、次の起動でもう一度始める (置くのは「変わるブロックだけ」なので、置いた分は飛ばせる)
 //   - 建てている途中で乗り込みなどが ensureBuilt / build を呼んだら、予定を取り消して、その場で最後まで建てる (今までどおり)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class BackBuildJobs {
-    public static final long BUDGET_IDLE_MS = 40;
-    public static final long BUDGET_PLAYERS_MS = 15;
+    public static final long BUDGET_IDLE_MS = 25;
+    public static final long BUDGET_PLAYERS_MS = 10;
 
     // 体を置く仕事。deadline (System.nanoTime) まで進める。終われば true
     public interface Job {
