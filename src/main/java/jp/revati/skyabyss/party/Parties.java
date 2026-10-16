@@ -1,0 +1,303 @@
+package jp.revati.skyabyss.party;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.rpg.Growth;
+import jp.revati.skyabyss.titan.TitanBacks;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.GameRules;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+
+// パーティの操作 (コマンドと画面の両方から) と、経験値を分ける相手の選び方 (10 の 6 章)。
+// - 最大 4 人。リーダーが招待し、招待は 60 秒で切れる
+// - 居合わせなかった仲間への分け前: 居合わせた人の取り分の skyabyssPartyShare % (既定 70、50〜80 に収める)
+//   ・同じディメンションで、居合わせた仲間の誰かから 64 ブロック以内
+//   ・巨神の背中 (ダンジョン) の中では、同じ背中にいれば距離を問わない
+//   ・居合わせた仲間のいちばん高いレベルより 10 を超えて低い人には分けない (引き上げの抜け道)
+//   ・倒れている人・観戦者には分けない
+@EventBusSubscriber(modid = SkyAbyss.MODID)
+public final class Parties {
+    public static final int MAX_MEMBERS = 4;
+    public static final double SHARE_RANGE = 64;
+    public static final int LEVEL_GAP = 10;
+    public static final int SHARE_MIN = 50;
+    public static final int SHARE_MAX = 80;
+    public static final int SHARE_DEFAULT = 70;
+    static final long INVITE_TICKS = 20 * 60;
+
+    public static GameRules.Key<GameRules.IntegerValue> PARTY_SHARE;
+
+    // 招待された人 → (招待したパーティのリーダー, 切れる時刻)
+    record Invite(UUID from, String fromName, long expires) {
+    }
+
+    private static final Map<UUID, Invite> INVITES = new HashMap<>();
+
+    private Parties() {
+    }
+
+    @SubscribeEvent
+    static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> PARTY_SHARE = GameRules.register("skyabyssPartyShare", GameRules.Category.MISC,
+                GameRules.IntegerValue.create(SHARE_DEFAULT)));
+    }
+
+    // 分け前の割合 (0.5〜0.8)
+    public static double shareRate(MinecraftServer server) {
+        int v = PARTY_SHARE == null ? SHARE_DEFAULT : server.getGameRules().getInt(PARTY_SHARE);
+        return Mth.clamp(v, SHARE_MIN, SHARE_MAX) / 100.0;
+    }
+
+    @Nullable
+    public static PartyData.Party of(ServerPlayer player) {
+        return PartyData.get(player.server).of(player.getUUID());
+    }
+
+    public static List<ServerPlayer> onlineMembers(MinecraftServer server, PartyData.Party party) {
+        List<ServerPlayer> list = new ArrayList<>();
+        for (UUID id : party.members) {
+            ServerPlayer p = server.getPlayerList().getPlayer(id);
+            if (p != null) {
+                list.add(p);
+            }
+        }
+        return list;
+    }
+
+    // ---------------------------------------------------------------- 分け前
+    // present (経験値を受け取った人) のパーティの仲間のうち、居合わせなかったが分け前を受け取る人
+    public static List<ServerPlayer> absentMates(ServerLevel level, Collection<ServerPlayer> present) {
+        MinecraftServer server = level.getServer();
+        return absentMates(level, present, id -> server.getPlayerList().getPlayer(id));
+    }
+
+    // lookup: UUID から今いる人を引く (自己テストでは偽のプレイヤーを渡す)
+    public static List<ServerPlayer> absentMates(ServerLevel level, Collection<ServerPlayer> present,
+            java.util.function.Function<UUID, ServerPlayer> lookup) {
+        List<ServerPlayer> out = new ArrayList<>();
+        if (present.isEmpty()) {
+            return out;
+        }
+        PartyData data = PartyData.get(level.getServer());
+        List<PartyData.Party> seen = new ArrayList<>();
+        for (ServerPlayer p : present) {
+            PartyData.Party party = data.of(p.getUUID());
+            if (party == null || seen.contains(party)) {
+                continue;
+            }
+            seen.add(party);
+            // 居合わせた仲間 (このパーティの人だけ)
+            List<ServerPlayer> here = new ArrayList<>();
+            int top = 0;
+            for (ServerPlayer q : present) {
+                if (party.members.contains(q.getUUID())) {
+                    here.add(q);
+                    top = Math.max(top, Growth.get(q).level);
+                }
+            }
+            for (UUID id : party.members) {
+                ServerPlayer m = lookup.apply(id);
+                if (m == null || present.contains(m) || out.contains(m) || !m.isAlive() || m.isSpectator()
+                        || m.level() != level) {
+                    continue;
+                }
+                if (top - Growth.get(m).level > LEVEL_GAP) {
+                    continue;
+                }
+                if (TitanBacks.isBack(level.dimension()) || near(m, here)) {
+                    out.add(m);
+                }
+            }
+        }
+        return out;
+    }
+
+    private static boolean near(ServerPlayer m, List<ServerPlayer> here) {
+        for (ServerPlayer q : here) {
+            if (q.level() == m.level() && q.distanceToSqr(m) <= SHARE_RANGE * SHARE_RANGE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ---------------------------------------------------------------- 操作 (成功したら true。理由はその場で本人に伝える)
+    public static boolean invite(ServerPlayer from, ServerPlayer to) {
+        MinecraftServer server = from.server;
+        PartyData data = PartyData.get(server);
+        PartyData.Party party = data.of(from.getUUID());
+        if (to == from) {
+            return deny(from, "message.skyabyss.party.invite_self");
+        }
+        if (party != null && !party.isLeader(from.getUUID())) {
+            return deny(from, "message.skyabyss.party.not_leader");
+        }
+        if (party != null && party.members.size() >= MAX_MEMBERS) {
+            return deny(from, "message.skyabyss.party.full", MAX_MEMBERS);
+        }
+        if (data.of(to.getUUID()) != null) {
+            return deny(from, "message.skyabyss.party.already_in", to.getDisplayName());
+        }
+        INVITES.put(to.getUUID(), new Invite(from.getUUID(), from.getGameProfile().getName(), server.overworld().getGameTime() + INVITE_TICKS));
+        from.sendSystemMessage(ModText.hint("message.skyabyss.party.invited", to.getDisplayName()));
+        to.sendSystemMessage(ModText.progress("message.skyabyss.party.invite_received", from.getDisplayName()));
+        to.sendSystemMessage(ModText.hint("message.skyabyss.party.invite_how"));
+        to.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.6f, 1.4f);
+        PartyNetwork.syncSoon(to);
+        return true;
+    }
+
+    @Nullable
+    static Invite inviteFor(ServerPlayer player) {
+        Invite inv = INVITES.get(player.getUUID());
+        if (inv != null && inv.expires() < player.server.overworld().getGameTime()) {
+            INVITES.remove(player.getUUID());
+            return null;
+        }
+        return inv;
+    }
+
+    public static boolean accept(ServerPlayer player) {
+        MinecraftServer server = player.server;
+        Invite inv = inviteFor(player);
+        if (inv == null) {
+            return deny(player, "message.skyabyss.party.no_invite");
+        }
+        INVITES.remove(player.getUUID());
+        PartyData data = PartyData.get(server);
+        if (data.of(player.getUUID()) != null) {
+            return deny(player, "message.skyabyss.party.leave_first");
+        }
+        ServerPlayer leader = server.getPlayerList().getPlayer(inv.from());
+        PartyData.Party party = data.of(inv.from());
+        if (party == null) {
+            if (leader == null) {
+                return deny(player, "message.skyabyss.party.invite_gone");
+            }
+            party = data.create(leader.getUUID(), leader.getGameProfile().getName());
+        } else if (!party.isLeader(inv.from())) {
+            return deny(player, "message.skyabyss.party.invite_gone");
+        }
+        if (party.members.size() >= MAX_MEMBERS) {
+            return deny(player, "message.skyabyss.party.full", MAX_MEMBERS);
+        }
+        data.add(party, player.getUUID(), player.getGameProfile().getName());
+        for (ServerPlayer m : onlineMembers(server, party)) {
+            m.sendSystemMessage(ModText.progress("message.skyabyss.party.joined", player.getDisplayName()));
+            PartyNetwork.syncSoon(m);
+        }
+        return true;
+    }
+
+    public static boolean decline(ServerPlayer player) {
+        Invite inv = INVITES.remove(player.getUUID());
+        if (inv == null) {
+            return deny(player, "message.skyabyss.party.no_invite");
+        }
+        ServerPlayer from = player.server.getPlayerList().getPlayer(inv.from());
+        if (from != null) {
+            from.sendSystemMessage(ModText.hint("message.skyabyss.party.declined", player.getDisplayName()));
+        }
+        player.sendSystemMessage(ModText.hint("message.skyabyss.party.you_declined"));
+        PartyNetwork.syncSoon(player);
+        return true;
+    }
+
+    public static boolean leave(ServerPlayer player) {
+        PartyData data = PartyData.get(player.server);
+        PartyData.Party party = data.of(player.getUUID());
+        if (party == null) {
+            return deny(player, "message.skyabyss.party.none");
+        }
+        List<ServerPlayer> before = onlineMembers(player.server, party);
+        data.remove(player.getUUID());
+        for (ServerPlayer m : before) {
+            m.sendSystemMessage(ModText.hint("message.skyabyss.party.left", player.getDisplayName()));
+            PartyNetwork.syncSoon(m);
+        }
+        return true;
+    }
+
+    public static boolean kick(ServerPlayer leader, UUID target, String targetName) {
+        PartyData data = PartyData.get(leader.server);
+        PartyData.Party party = data.of(leader.getUUID());
+        if (party == null) {
+            return deny(leader, "message.skyabyss.party.none");
+        }
+        if (!party.isLeader(leader.getUUID())) {
+            return deny(leader, "message.skyabyss.party.not_leader");
+        }
+        if (target.equals(leader.getUUID()) || !party.members.contains(target)) {
+            return deny(leader, "message.skyabyss.party.not_member", targetName);
+        }
+        List<ServerPlayer> before = onlineMembers(leader.server, party);
+        data.remove(target);
+        for (ServerPlayer m : before) {
+            m.sendSystemMessage(ModText.hint("message.skyabyss.party.kicked", targetName));
+            PartyNetwork.syncSoon(m);
+        }
+        return true;
+    }
+
+    public static boolean promote(ServerPlayer leader, UUID target, String targetName) {
+        PartyData data = PartyData.get(leader.server);
+        PartyData.Party party = data.of(leader.getUUID());
+        if (party == null) {
+            return deny(leader, "message.skyabyss.party.none");
+        }
+        if (!party.isLeader(leader.getUUID())) {
+            return deny(leader, "message.skyabyss.party.not_leader");
+        }
+        if (!party.members.contains(target) || target.equals(leader.getUUID())) {
+            return deny(leader, "message.skyabyss.party.not_member", targetName);
+        }
+        data.promote(party, target);
+        for (ServerPlayer m : onlineMembers(leader.server, party)) {
+            m.sendSystemMessage(ModText.hint("message.skyabyss.party.new_leader", targetName));
+            PartyNetwork.syncSoon(m);
+        }
+        return true;
+    }
+
+    @Nullable
+    public static UUID memberByName(PartyData.Party party, String name) {
+        for (Map.Entry<UUID, String> e : party.names.entrySet()) {
+            if (e.getValue().equalsIgnoreCase(name)) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
+    private static boolean deny(ServerPlayer player, String key, Object... args) {
+        player.displayClientMessage(ModText.deny(key, args), false);
+        return false;
+    }
+
+    // 自己テスト用
+    static void clearInvites() {
+        INVITES.clear();
+    }
+
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        INVITES.clear();
+    }
+}

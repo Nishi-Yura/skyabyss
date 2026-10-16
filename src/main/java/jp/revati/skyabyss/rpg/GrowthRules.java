@@ -34,7 +34,7 @@ public final class GrowthRules {
     // 一緒に倒した人が増えるごとに、全体の量が 25% 増える (一人あたりは減る)
     public static final double PARTY_BONUS = 0.25;
     // バニラの敵は 1 日 (ゲーム内 20 分) にこの量までは満額、そのあとは 20%
-    public static final int VANILLA_DAILY = 150;
+    public static final int VANILLA_DAILY = 100;
     public static final double VANILLA_TIRED = 0.20;
 
     private GrowthRules() {

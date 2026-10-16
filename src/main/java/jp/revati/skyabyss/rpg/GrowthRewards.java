@@ -117,6 +117,12 @@ public final class GrowthRewards {
             }
             Growth.addXp(player, amount, reason);
         }
+        // パーティの仲間で戦いにいなかった人 (同じ背中の別の所にいた人など) には、満額の分け前の割合 (初回の上乗せなし)
+        double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, seen)) {
+            int amount = (int) Math.round(base * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+            Growth.addXp(mate, amount, "growth.skyabyss.reason.party");
+        }
     }
 
     // ---------------------------------------------------------------- 敵の撃破
@@ -149,20 +155,30 @@ public final class GrowthRewards {
         List<ServerPlayer> share = sharers(level, mob, killer);
         double part = GrowthRules.partyShare(share.size());
         for (ServerPlayer player : share) {
-            double amount;
-            if (mod != null) {
-                // Mod の敵もスポナー (水路の顎の巣) から湧いたものは 1/4
-                amount = mod.xp() * part * GrowthRules.levelFalloff(Growth.get(player).level, mod.contentLevel())
-                        * (spawner ? SPAWNER_FACTOR : 1.0);
-            } else if (boss != null) {
-                amount = boss * part;
-            } else {
-                amount = vanillaBudget(level, Growth.get(player), vanillaXp(mob) * part);
-            }
-            int xp = GrowthRules.roundRandom(amount, level.random.nextDouble());
-            if (xp > 0) {
-                Growth.addXp(player, xp, "");
-            }
+            giveKill(level, player, mob, mod, boss, spawner, part, "");
+        }
+        // パーティの仲間で居合わせなかった人: 居合わせた人の取り分の割合 (10 の 6 章。距離・レベル差は Parties が見る)
+        double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, share)) {
+            giveKill(level, mate, mob, mod, boss, spawner, part * rate, "growth.skyabyss.reason.party");
+        }
+    }
+
+    private static void giveKill(ServerLevel level, ServerPlayer player, LivingEntity mob, @Nullable Source mod, @Nullable Integer boss,
+            boolean spawner, double part, String reason) {
+        double amount;
+        if (mod != null) {
+            // Mod の敵もスポナー (水路の顎の巣) から湧いたものは 1/4
+            amount = mod.xp() * part * GrowthRules.levelFalloff(Growth.get(player).level, mod.contentLevel())
+                    * (spawner ? SPAWNER_FACTOR : 1.0);
+        } else if (boss != null) {
+            amount = boss * part;
+        } else {
+            amount = vanillaBudget(level, Growth.get(player), vanillaXp(mob) * part);
+        }
+        int xp = GrowthRules.roundRandom(amount, level.random.nextDouble());
+        if (xp > 0) {
+            Growth.addXp(player, xp, reason);
         }
     }
 
@@ -188,7 +204,7 @@ public final class GrowthRewards {
         return list;
     }
 
-    // バニラの敵は日ごとに 150 までは満額、そのあとは 20%
+    // バニラの敵は日ごとに VANILLA_DAILY (100) までは満額、そのあとは 20%
     static double vanillaBudget(ServerLevel level, GrowthData data, double amount) {
         long day = level.getGameTime() / 24000L;
         if (data.vanillaDay != day) {
@@ -258,10 +274,17 @@ public final class GrowthRewards {
             boolean active = state.getBlock() instanceof ResonanceStoneBlock && state.getValue(ResonanceStoneBlock.ACTIVE);
             Boolean before = STONES.put(pos.immutable(), active);
             if (before != null && !before && active) {
-                for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),
-                        p -> p.isAlive() && !p.isSpectator())) {
+                List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),
+                        p -> p.isAlive() && !p.isSpectator());
+                for (ServerPlayer player : near) {
                     int xp = (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(player).level, STONE_WHALE_LEVEL));
                     Growth.addXp(player, xp, "growth.skyabyss.reason.trial");
+                }
+                // 同じ背中にいる仲間にも分け前
+                double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+                for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
+                    int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+                    Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
                 }
             }
         }

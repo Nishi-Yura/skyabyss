@@ -134,6 +134,10 @@ public final class TitanTravel {
     }
 
     private static void board(ServerPlayer player, UUID whaleId) {
+        // 乗る資格 (10 の 3 章。岩鯨は最初の巨神なので誰でも乗れる。後の巨神と同じ入口の形にしておく)
+        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, "stone_whale")) {
+            return;
+        }
         ServerLevel back = player.server.getLevel(TITAN_BACK);
         if (back == null) {
             SkyAbyss.LOGGER.error("Titan back dimension is missing");
