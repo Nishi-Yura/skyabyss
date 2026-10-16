@@ -87,8 +87,12 @@ public final class TitanEvents {
                         .then(Commands.literal("leave").executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                             // 潮殻の背にいれば、潮殻の巨神のもとへ戻す
+                            String back = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
                             if (player.level().dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK) {
                                 jp.revati.skyabyss.titan.tide.TideTravel.leave(player);
+                            } else if (back != null && !back.equals(jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+                                // 後の巨神の背中 (雷翼・余燼) は、Titans.bindBack で登録した道で戻す
+                                jp.revati.skyabyss.progress.Titans.sendDown(player, back);
                             } else {
                                 TitanTravel.leave(player);
                             }
