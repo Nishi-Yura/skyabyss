@@ -31,7 +31,8 @@ public final class TitanBackLayout {
 
     // 配置の版。部屋の配置を変えたら上げる。保存された版と違えば、起動時に背中を建て直す (TitanBackData)
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
-    public static final int LAYOUT_VERSION = 3;
+    //  4: 案内の看板を減らした (試練の入口の一言と碑文だけ残す。古い看板が残らないよう建て直す)
+    public static final int LAYOUT_VERSION = 4;
 
     // ---------------------------------------------------------------- 地表
     public static final int PLATFORM_Z = 96;
@@ -125,6 +126,24 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.lore_west", new BlockPos(-17, 99, -30), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_east", new BlockPos(17, 96, -30), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_below", new BlockPos(11, 83, -6), net.minecraft.core.Direction.NORTH));
+
+    // ---------------------------------------------------------------- 試練の入口の一言 (看板)。背中に置く看板は、これと碑文だけ
+    // 案内 (錨石・炉・休み場・封印の扉・台座・抜け道) は看板にせず、形・光・音と、最初の一度だけの囁き (BackWhispers) で伝える
+    public static final List<Inscription> TRIAL_SIGNS = List.of(
+            new Inscription("sign.skyabyss.chasm", new BlockPos(-9, FLOOR + 3, -25), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.arena", new BlockPos(9, FLOOR + 3, -25), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.maze", new BlockPos(5, FLOOR + 3, -32), net.minecraft.core.Direction.SOUTH));
+    // 心臓の間の入口 (最後の試練)
+    public static final Inscription HEART_GATE_SIGN =
+            new Inscription("sign.skyabyss.heart_gate", new BlockPos(1, FLOOR + 3, -62), net.minecraft.core.Direction.WEST);
+
+    // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
+    public static List<Inscription> allSigns() {
+        List<Inscription> all = new java.util.ArrayList<>(LORE_SIGNS);
+        all.addAll(TRIAL_SIGNS);
+        all.add(HEART_GATE_SIGN);
+        return List.copyOf(all);
+    }
 
     private TitanBackLayout() {
     }

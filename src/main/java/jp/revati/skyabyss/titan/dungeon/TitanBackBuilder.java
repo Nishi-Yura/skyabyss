@@ -332,11 +332,8 @@ public final class TitanBackBuilder {
                 .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
-        // 看板: 三つの試練の碑文 (北の門の柱に取り付ける)。錨石と共鳴の炉の看板は、その脇へ
-        kit.wallSign(new BlockPos(-3, py + 2, PLATFORM_Z - 6), Direction.SOUTH, "sign.skyabyss.trials");
-        kit.standingSign(new BlockPos(3, py + 1, PLATFORM_Z + 1), "sign.skyabyss.anchor");
+        // 尾の台には案内の看板を置かない。錨石と炉の使い方は、着いた最初の一度だけ囁きで伝える (BackWhispers)
         kit.set(forge(), ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.EAST));
-        kit.standingSign(forge().south(), "sign.skyabyss.forge");
     }
 
     // 円形の石畳の模様。縁はレンガ、一つ内側に彫刻の線、その内側は市松、中央は扇形の模様
@@ -460,7 +457,6 @@ public final class TitanBackBuilder {
                 kit.lantern(2, y + 2, z);
             }
         }
-        kit.standingSign(new BlockPos(4, sy + 1, SHRINE_Z + 4), "sign.skyabyss.shrine");
     }
 
     // ---------------------------------------------------------------- 鼓動の間
@@ -497,11 +493,10 @@ public final class TitanBackBuilder {
         for (int[] s : new int[][]{{-7, -14}, {7, -30}, {-6, -30}, {7, -15}}) {
             kit.stalactite(s[0], HUB.ceilingY(), s[1], 2);
         }
-        // 碑文 (封印の扉は宝物庫の壁と一緒に置く)。各試練の入口にも碑文を置く
-        kit.wallSign(new BlockPos(3, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.gate");
-        kit.wallSign(new BlockPos(-9, FLOOR + 3, -25), Direction.EAST, "sign.skyabyss.chasm");
-        kit.wallSign(new BlockPos(9, FLOOR + 3, -25), Direction.WEST, "sign.skyabyss.arena");
-        kit.wallSign(new BlockPos(5, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.maze");
+        // 看板は試練の入口の一言だけ (西・東・下)。封印の扉のことは、鼓動の間に入った最初の一度だけ囁く (BackWhispers)
+        for (Inscription s : TRIAL_SIGNS) {
+            kit.wallSign(s.pos(), s.facing(), s.key());
+        }
         // 西・東の石を鳴らすと開く抜け道 (鼓動の間の側)
         for (BlockPos p : WEST_RETURN) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
@@ -543,10 +538,6 @@ public final class TitanBackBuilder {
             kit.set(c, d.getAxis() == Direction.Axis.X ? Blocks.AMETHYST_CLUSTER.defaultBlockState()
                     : Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
         }
-        kit.wallSign(new BlockPos(3, FLOOR + 3, -44), Direction.SOUTH, "sign.skyabyss.inner_gate");
-        kit.wallSign(new BlockPos(3, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.gate");
-        kit.wallSign(new BlockPos(5, FLOOR + 3, -32), Direction.SOUTH, "sign.skyabyss.maze");
-        kit.wallSign(new BlockPos(-2, FLOOR + 3, -44), Direction.SOUTH, "sign.skyabyss.pedestal");
         for (int[] l : new int[][]{{-4, -36}, {4, -36}, {-4, -42}, {4, -42}}) {
             kit.hangingLantern(l[0], l[1], TREASURY.ceilingY(), 1);
         }

@@ -39,7 +39,8 @@ final class HeartArenaBuilder {
                 }
             }
         }
-        kit.wallSign(new BlockPos(1, FLOOR + 3, -62), Direction.WEST, "sign.skyabyss.heart_gate");
+        // 最後の試練の入口の一言 (入ると扉が閉じることだけは、入る前に知らせる)
+        kit.wallSign(HEART_GATE_SIGN.pos(), HEART_GATE_SIGN.facing(), HEART_GATE_SIGN.key());
     }
 
     // 回廊: 奥の扉 (z=-45) から心臓の間の入口 (z=-64) まで。幅3、高さ4
@@ -81,7 +82,7 @@ final class HeartArenaBuilder {
                 }
             }
         }
-        kit.restPoint(HEART_REST, "sign.skyabyss.rest_heart", Direction.EAST, new BlockPos(-3, FLOOR + 3, -54));
+        kit.restPoint(HEART_REST);
     }
 
     // 心臓の間: 円の内側は空けて床・天井を張り、壁の外側の輪は肉の壁にする

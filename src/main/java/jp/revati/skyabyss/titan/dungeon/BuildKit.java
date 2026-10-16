@@ -217,8 +217,8 @@ final class BuildKit {
         }
     }
 
-    // 休み場の設え: 青い焚き火、腰掛け、灯り、碑文
-    void restPoint(Box box, String signKey, Direction signFacing, BlockPos sign) {
+    // 休み場の設え: 青い焚き火、腰掛け、灯り。案内の看板は置かない (着いたことは焚き火と音で、先の様子は最初の一度だけの囁きで伝える: BackWhispers)
+    void restPoint(Box box) {
         BlockPos c = box.center();
         set(c.getX(), box.floorY(), c.getZ(), CHISELED);
         set(c.getX(), box.floorY() + 1, c.getZ(), Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
@@ -233,7 +233,6 @@ final class BuildKit {
         set(box.x1(), box.floorY() + 1, box.z1(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
         set(box.x2(), box.floorY() + 1, box.z2(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
         hangingLantern(c.getX() + 1, c.getZ() + 1, box.ceilingY(), 1);
-        wallSign(sign, signFacing, signKey);
     }
 
     void wallSign(BlockPos pos, Direction facing, String key) {
