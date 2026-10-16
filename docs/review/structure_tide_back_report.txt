@@ -1,0 +1,50 @@
+# tide_back  (skyabyss:tide_back, origin (-100, 38, -150), size 201x123x271, game time 169)
+block kinds 89; most common: minecraft:water[level=0] 862587, minecraft:tuff 630976, minecraft:prismarine_bricks 189489, minecraft:sand 164893, minecraft:smooth_sandstone 99471, minecraft:sandstone 58699, minecraft:dark_prismarine 48886
+
+## walk from arrival (-80, 68, 70): 35694 standing places reached
+  rest_hub (-6, 75, 10): reached in 130 steps; path -80,68,70 > -78,69,61 > -78,68,60 > -78,67,59 > -77,68,59 > -77,67,58 > -76,68,58 > -75,69,58 > -75,68,57 > -73,69,56 > -71,68,56 > -68,67,55 > -68,64,54 > -67,65,53 > -36,66,52 > -35,67,52 > -12,68,39 > -12,69,35 > -12,70,31 > -12,71,28 > -12,72,24 > -12,73,21 > -12,74,17 > -12,75,13
+  rest_g0 (-20, 69, 0): reached in 145 steps; path -80,68,70 > -78,69,61 > -78,68,60 > -78,67,59 > -77,68,59 > -77,67,58 > -76,68,58 > -75,69,58 > -75,68,57 > -73,69,56 > -71,68,56 > -68,67,55 > -68,64,54 > -67,65,53 > -36,66,52 > -35,67,52 > -12,68,39 > -12,69,35 > -12,70,31 > -12,71,28 > -12,72,24 > -12,73,21 > -12,74,17 > -12,75,13 > -13,74,1 > -14,73,1 > -15,72,1 > -16,71,1 > -17,70,1 > -18,69,1
+  rest_g1 (-47, 69, -5): reached in 177 steps; path -80,68,70 > -78,69,61 > -78,68,60 > -78,67,59 > -77,68,59 > -77,67,58 > -76,68,58 > -75,69,58 > -75,68,57 > -73,69,56 > -71,68,56 > -68,67,55 > -68,64,54 > -67,65,53 > -36,66,52 > -35,67,52 > -12,68,39 > -12,69,35 > -12,70,31 > -12,71,28 > -12,72,24 > -12,73,21 > -12,74,17 > -12,75,13 > -13,74,-1 > -14,73,-1 > -15,72,-1 > -16,71,-1 > -17,70,-1 > -18,69,-1
+  rest_s0 (26, 75, -9): reached in 201 steps; path -80,68,70 > -78,69,61 > -78,68,60 > -78,67,59 > -77,68,59 > -77,67,58 > -76,68,58 > -75,69,58 > -75,68,57 > -73,69,56 > -71,68,56 > -68,67,55 > -68,64,54 > -67,65,53 > -36,66,52 > -35,67,52 > -12,68,39 > -12,69,35 > -12,70,31 > -12,71,28 > -12,72,24 > -12,73,21 > -12,74,17 > -12,75,13 > -3,74,7 > 0,71,7 > 18,72,15 > 23,73,14 > 23,74,3 > 23,75,2
+  rest_f0 (0, 67, -24): NOT REACHED (closest reached (0, 71, -12), 162 steps)
+  rest_heart (-2, 51, -6): NOT REACHED (closest reached (-28, 65, -4), 160 steps)
+
+## openings (where an enclosed room touches open space; glass counts as wall)
+  rest_hub (-6, 75, 10): room 87837 cells, 5 opening(s)
+      310 cells around (-65, 76, 54)  (box (-65, 65, 47) .. (-65, 87, 60))
+      177 cells around (-55, 71, 61)  (box (-80, 63, 57) .. (-50, 87, 81))
+        4 cells around (-55, 108, -6)  (box (-55, 106, -6) .. (-55, 109, -6))
+        3 cells around (-70, 63, 56)  (box (-71, 63, 56) .. (-69, 63, 56))
+        2 cells around (-44, 105, 42)  (box (-44, 105, 42) .. (-44, 106, 42))
+  rest_heart (-2, 51, -6): room 7106 cells, 0 opening(s)
+
+## water: 862867 water blocks, 862867 sources, 0 flowing now
+  waterlogged blocks next to open space (water flows out once a neighbour updates): 255
+       15 in (-50, 73, 2) .. (-45, 73, 7)  e.g. (-46, 73, 2) minecraft:dead_brain_coral[waterlogged=true]
+       12 in (-27, 72, 9) .. (-24, 74, 14)  e.g. (-26, 72, 14) minecraft:dead_brain_coral[waterlogged=true]
+       10 in (-56, 73, -11) .. (-50, 73, -7)  e.g. (-52, 73, -11) minecraft:dead_fire_coral[waterlogged=true]
+        9 in (-46, 73, 17) .. (-42, 74, 21)  e.g. (-42, 73, 19) minecraft:dead_fire_coral[waterlogged=true]
+        8 in (-33, 72, -33) .. (-29, 73, -30)  e.g. (-32, 72, -31) minecraft:dead_fire_coral[waterlogged=true]
+        8 in (-31, 72, 35) .. (-28, 74, 39)  e.g. (-31, 72, 39) minecraft:dead_tube_coral_fan[waterlogged=true]
+        7 in (-60, 73, -22) .. (-58, 74, -17)  e.g. (-60, 73, -22) minecraft:dead_tube_coral_fan[waterlogged=true]
+        6 in (-27, 72, -4) .. (-26, 72, -2)  e.g. (-27, 72, -4) minecraft:dead_horn_coral[waterlogged=true]
+        6 in (-38, 72, -2) .. (-37, 73, 1)  e.g. (-38, 72, -1) minecraft:dead_fire_coral[waterlogged=true]
+        6 in (-22, 73, -27) .. (-20, 74, -24)  e.g. (-22, 73, -26) minecraft:dead_brain_coral[waterlogged=true]
+  static estimate: water could spread into 5556 open cells (5556 of them inside enclosed rooms)
+    inside rooms  5258 in (-61, 65, -41) .. (-18, 74, 39)
+    inside rooms   295 in (-34, 67, 42) .. (-12, 67, 62)
+    inside rooms     3 in (-61, 74, 35) .. (-60, 74, 36)
+
+## signs: 9
+  (-7, 67, -69) minecraft:dark_oak_sign: sign.skyabyss.lore_tide_front.1 / sign.skyabyss.lore_tide_front.2 / sign.skyabyss.lore_tide_front.3 / sign.skyabyss.lore_tide_front.4
+  (-42, 71, -36) minecraft:dark_oak_wall_sign: sign.skyabyss.lore_tide_west.1 / sign.skyabyss.lore_tide_west.2 / sign.skyabyss.lore_tide_west.3 / sign.skyabyss.lore_tide_west.4
+  (55, 94, -35) minecraft:dark_oak_wall_sign: sign.skyabyss.lore_tide_east.1 / sign.skyabyss.lore_tide_east.2 / sign.skyabyss.lore_tide_east.3 / sign.skyabyss.lore_tide_east.4
+  (3, 68, -30) minecraft:dark_oak_wall_sign: sign.skyabyss.tide_flats.1 / sign.skyabyss.tide_flats.2 / sign.skyabyss.tide_flats.3 / sign.skyabyss.tide_flats.4
+  (-19, 70, -3) minecraft:dark_oak_wall_sign: sign.skyabyss.tide_garden.1 / sign.skyabyss.tide_garden.2 / sign.skyabyss.tide_garden.3 / sign.skyabyss.tide_garden.4
+  (-4, 52, -8) minecraft:dark_oak_wall_sign: sign.skyabyss.lore_tide_heart.1 / sign.skyabyss.lore_tide_heart.2 / sign.skyabyss.lore_tide_heart.3 / sign.skyabyss.lore_tide_heart.4
+  (24, 76, -14) minecraft:dark_oak_wall_sign: sign.skyabyss.tide_watch.1 / sign.skyabyss.tide_watch.2 / sign.skyabyss.tide_watch.3 / sign.skyabyss.tide_watch.4
+  (-4, 76, 12) minecraft:dark_oak_wall_sign: sign.skyabyss.lore_tide_hub.1 / sign.skyabyss.lore_tide_hub.2 / sign.skyabyss.lore_tide_hub.3 / sign.skyabyss.lore_tide_hub.4
+  (-17, 68, 43) minecraft:dark_oak_wall_sign: sign.skyabyss.lore_tide_beach.1 / sign.skyabyss.lore_tide_beach.2 / sign.skyabyss.lore_tide_beach.3 / sign.skyabyss.lore_tide_beach.4
+## other block entities: minecraft:campfire 7
+
+done in 9.6 s; images in docs\review/structure_tide_back_*.png

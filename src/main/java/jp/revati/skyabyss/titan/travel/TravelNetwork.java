@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // 巨神での移動のパケット。ほかの担当とぶつからないように、別の版で登録する
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelNetwork {
-    private static final String PROTOCOL_VERSION = "travel-1";
+    private static final String PROTOCOL_VERSION = "travel-2";
 
     private TravelNetwork() {
     }
@@ -27,7 +27,7 @@ public final class TravelNetwork {
         // クライアント側の処理はラムダの中だけで呼ぶので、専用サーバーでも安全
         event.registrar(PROTOCOL_VERSION)
                 .playToClient(Chart.TYPE, Chart.STREAM_CODEC, (payload, context) -> TravelClient.openChart(payload))
-                .playToClient(Veil.TYPE, Veil.STREAM_CODEC, (payload, context) -> TravelClient.veil(payload.on()))
+                .playToClient(Veil.TYPE, Veil.STREAM_CODEC, (payload, context) -> TravelClient.veil(payload.on(), payload.style()))
                 .playToServer(Choose.TYPE, Choose.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         Voyages.choose(player, payload.id());
@@ -101,11 +101,14 @@ public final class TravelNetwork {
         }
     }
 
-    // サーバー → 乗っている人: 雲の帳 (画面が雲の白に包まれる) の始まりと終わり
-    public record Veil(boolean on) implements CustomPacketPayload {
+    // サーバー → 乗っている人: 雲の帳 (画面が雲の白に包まれる) の始まりと終わり。style は旅の型 (TitanKind.Style の順。1 = 潮の深み、深い青)
+    public record Veil(boolean on, int style) implements CustomPacketPayload {
         public static final Type<Veil> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "travel_veil"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Veil> STREAM_CODEC = StreamCodec.of(
-                (buf, p) -> buf.writeBoolean(p.on), buf -> new Veil(buf.readBoolean()));
+                (buf, p) -> {
+                    buf.writeBoolean(p.on);
+                    buf.writeVarInt(p.style);
+                }, buf -> new Veil(buf.readBoolean(), buf.readVarInt()));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

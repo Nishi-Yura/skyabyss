@@ -79,6 +79,15 @@ public final class RecordService {
         send(player, player, false, "");
     }
 
+    // 控え帳の「呼び戻す」。なくしていなければ何もしない (KeepsakeBonds が断りの一行を出す)
+    static void recall(ServerPlayer player, boolean key) {
+        if (throttled(LAST_CLAIM, player)) {
+            return;
+        }
+        KeepsakeBonds.recall(player, key ? KeepsakeBonds.Kind.KEY : KeepsakeBonds.Kind.FRAGMENT);
+        send(player, player, false, "");
+    }
+
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_REQUEST.remove(event.getEntity().getUUID());

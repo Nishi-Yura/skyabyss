@@ -50,7 +50,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //
 // 乗っている人は巨神の「乗客」(vanilla の騎乗) なので、画面は巨神と一緒になめらかに動く。
 // 上る・下りるあいだは重力を切って速さを与える (背中の鎖の引き上げと同じやり方)
-final class Voyage {
+class Voyage {
     enum Phase { COMING, WAITING, BOARDING, ASCENT, CRUISE, VEIL, APPROACH, LOWERING }
 
     // 行き先の前もっての読み込み (時間切れ付き。張り直しが止まれば外れる)
@@ -165,12 +165,12 @@ final class Voyage {
         if (dest != null && !beforeDeparture() && phase != Phase.LOWERING && totalTicks % 20 == 0) {
             int seconds = Math.max(1, (int) Math.round(remainingTicks(whale) / 20.0));
             for (ServerPlayer rider : players(riders)) {
-                rider.displayClientMessage(ModText.hint("message.skyabyss.travel.underway", Voyages.destName(dest), seconds), true);
+                rider.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.underway"), Voyages.destName(dest), seconds), true);
             }
         }
     }
 
-    private void setPhase(Phase next) {
+    void setPhase(Phase next) {
         phase = next;
         phaseTicks = 0;
         hoverYaw = null;
@@ -178,7 +178,7 @@ final class Voyage {
     }
 
     // ---- 迎え
-    private void tickComing(ServerLevel level, Entity whale) {
+    void tickComing(ServerLevel level, Entity whale) {
         if (relocateTo != null) {
             // 雲の向こうの入口のチャンクが読み込まれるのを待ってから移す (読み込まれていない所へ移すと止まってしまう)
             holdMoveTicket(level, new ChunkPos(BlockPos.containing(relocateTo)));
@@ -208,13 +208,13 @@ final class Voyage {
             level.playSound(null, whale.getX(), whale.getY(), whale.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
             ServerPlayer lead = player(leader);
             if (lead != null) {
-                lead.sendSystemMessage(ModText.lore("message.skyabyss.travel.arrived_pickup"));
+                lead.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.arrived_pickup")));
             }
         }
     }
 
     // ---- 乗り場で待つ
-    private void tickWaiting(ServerLevel level, Entity whale) {
+    void tickWaiting(ServerLevel level, Entity whale) {
         hover(whale);
         titan.setVoyageChain(pickup.getY());
         if (test) {
@@ -232,22 +232,22 @@ final class Voyage {
             boolean gone = lead == null || lead.level() != level || leaderAway > 200;
             if (gone && !passLeadership()) {
                 if (riders.isEmpty() && climbs.isEmpty()) {
-                    cancel("message.skyabyss.travel.cancel.gone", true);
+                    cancel(kind.text("message.skyabyss.travel.cancel.gone"), true);
                     return;
                 }
             }
             if (phaseTicks > TravelRules.WAIT_FOR_LEADER && riders.isEmpty() && climbs.isEmpty()) {
-                cancel("message.skyabyss.travel.cancel.waited", true);
+                cancel(kind.text("message.skyabyss.travel.cancel.waited"), true);
                 return;
             }
         }
         if (phaseTicks > TravelRules.WAIT_FOR_LEADER + TravelRules.CHOOSE_LIMIT) {
-            cancel("message.skyabyss.travel.cancel.waited", true);
+            cancel(kind.text("message.skyabyss.travel.cancel.waited"), true);
         }
     }
 
     // ---- 行き先が決まった。少し待って出発
-    private void tickBoarding(ServerLevel level, Entity whale) {
+    void tickBoarding(ServerLevel level, Entity whale) {
         hover(whale);
         int left = TravelRules.BOARDING_COUNTDOWN - phaseTicks;
         if (left > 0) {
@@ -264,20 +264,20 @@ final class Voyage {
             return;
         }
         if (riders.isEmpty() && !test) {
-            cancel("message.skyabyss.travel.cancel.empty", true);
+            cancel(kind.text("message.skyabyss.travel.cancel.empty"), true);
             return;
         }
         titan.setVoyageChain(Double.NaN);
         if (titan.isChainFolded() || phaseTicks > TravelRules.BOARDING_COUNTDOWN + 60) {
             setPhase(Phase.ASCENT);
             Vec3 at = whale.position();
-            level.playSound(null, at.x, at.y, at.z, TravelSetup.DEPART_SOUND.get(), SoundSource.AMBIENT, 12f, 1.0f);
+            level.playSound(null, at.x, at.y, at.z, kind.departSound().get(), SoundSource.AMBIENT, 12f, 1.0f);
             level.playSound(null, at.x, at.y, at.z, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 20f, 0.9f);
             for (ServerPlayer rider : players(riders)) {
                 // 途中でログアウトしても、行き先へ降ろす
                 Voyages.markSafe(rider, destFeet());
-                showTitle(rider, Component.translatable("title.skyabyss.travel.depart"),
-                        Component.translatable("title.skyabyss.travel.depart.sub", Voyages.destName(dest)));
+                showTitle(rider, Component.translatable(kind.text("title.skyabyss.travel.depart")),
+                        Component.translatable(kind.text("title.skyabyss.travel.depart.sub"), Voyages.destName(dest)));
             }
             holdTicket(level, new ChunkPos(destFeet()));
             tellAboard(level, "message.skyabyss.travel.aboard_departs");
@@ -285,7 +285,7 @@ final class Voyage {
     }
 
     // ---- 雲の上へ
-    private void tickAscent(ServerLevel level, Entity whale) {
+    void tickAscent(ServerLevel level, Entity whale) {
         holdTicket(level, new ChunkPos(destFeet()));
         double travelY = travelAltitude(level, whale);
         Vec3 target = Vec3.atCenterOf(destFeet());
@@ -301,7 +301,7 @@ final class Voyage {
     }
 
     // ---- 雲の海の上を泳ぐ
-    private void tickCruise(ServerLevel level, Entity whale) {
+    void tickCruise(ServerLevel level, Entity whale) {
         holdTicket(level, new ChunkPos(destFeet()));
         Vec3 target = Vec3.atCenterOf(destFeet());
         double distance = horizontal(whale.position(), target);
@@ -320,9 +320,9 @@ final class Voyage {
             veiled = true;
             veilMovedAt = -1;
             for (ServerPlayer rider : players(riders)) {
-                PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(true));
-                rider.playNotifySound(TravelSetup.VEIL_SOUND.get(), SoundSource.AMBIENT, 1f, 1f);
-                rider.sendSystemMessage(ModText.lore("message.skyabyss.travel.veil"));
+                PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(true, kind.style().ordinal()));
+                rider.playNotifySound(kind.veilSound().get(), SoundSource.AMBIENT, 1f, 1f);
+                rider.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.veil")));
             }
             return;
         }
@@ -332,7 +332,7 @@ final class Voyage {
     }
 
     // ---- 雲の帳。白くなりきったら、行き先の手前へ移す
-    private void tickVeil(ServerLevel level, Entity whale) {
+    void tickVeil(ServerLevel level, Entity whale) {
         BlockPos feet = destFeet();
         holdTicket(level, new ChunkPos(feet));
         Vec3 target = Vec3.atCenterOf(feet);
@@ -364,7 +364,7 @@ final class Voyage {
         move(whale, whale.getYRot(), speed, 0);
         if (phaseTicks - veilMovedAt >= 25) {
             for (ServerPlayer rider : players(riders)) {
-                PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(false));
+                PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(false, kind.style().ordinal()));
             }
             veiled = false;
             setPhase(Phase.APPROACH);
@@ -372,7 +372,7 @@ final class Voyage {
     }
 
     // ---- 行き先の上空へ降りる
-    private void tickApproach(ServerLevel level, Entity whale) {
+    void tickApproach(ServerLevel level, Entity whale) {
         BlockPos feet = destFeet();
         holdTicket(level, new ChunkPos(feet));
         if (landing == null && level.getChunkSource().hasChunk(feet.getX() >> 4, feet.getZ() >> 4)) {
@@ -399,14 +399,14 @@ final class Voyage {
             setPhase(Phase.LOWERING);
             level.playSound(null, whale.getX(), whale.getY(), whale.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
             for (ServerPlayer rider : players(riders)) {
-                showTitle(rider, Component.literal(Voyages.destName(dest).getString()), Component.translatable("title.skyabyss.travel.arrive.sub"));
+                showTitle(rider, Component.literal(Voyages.destName(dest).getString()), Component.translatable(kind.text("title.skyabyss.travel.arrive.sub")));
             }
             tellAboard(level, "message.skyabyss.travel.aboard_arrives");
         }
     }
 
     // ---- 鎖で降ろす
-    private void tickLowering(ServerLevel level, Entity whale) {
+    void tickLowering(ServerLevel level, Entity whale) {
         hover(whale);
         BlockPos spot = landing != null ? landing : destFeet();
         titan.setVoyageChain(spot.getY());
@@ -461,10 +461,10 @@ final class Voyage {
         // ログアウトしても宙に残さない: 迎えの場所へ戻す
         Voyages.markSafe(player, pickup);
         level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.PLAYERS, 2f, 1.1f);
-        player.displayClientMessage(ModText.hint("message.skyabyss.travel.climbing"), true);
+        player.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.climbing")), true);
     }
 
-    private void tickClimbs(ServerLevel level) {
+    void tickClimbs(ServerLevel level) {
         for (UUID id : new ArrayList<>(climbs.keySet())) {
             ServerPlayer p = player(id);
             Climb c = climbs.get(id);
@@ -512,7 +512,7 @@ final class Voyage {
         }
     }
 
-    private void seat(ServerPlayer p) {
+    void seat(ServerPlayer p) {
         Entity whale = entity();
         if (occupied() >= titan.seatCount() || !p.startRiding(whale, true)) {
             // 座れなかった (満席)。鎖で降ろし直す
@@ -526,9 +526,9 @@ final class Voyage {
             if (dest == null) {
                 Voyages.sendChart(p, this);
             }
-            p.sendSystemMessage(ModText.lore("message.skyabyss.travel.seated_leader"));
+            p.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.seated_leader")));
         } else {
-            p.sendSystemMessage(ModText.lore("message.skyabyss.travel.seated", leaderName));
+            p.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.seated"), leaderName));
         }
     }
 
@@ -542,7 +542,7 @@ final class Voyage {
         lowers.put(p.getUUID(), new Climb(false));
     }
 
-    private void tickLowers(ServerLevel level) {
+    void tickLowers(ServerLevel level) {
         BlockPos spot = phase == Phase.LOWERING ? (landing != null ? landing : destFeet()) : pickup;
         for (UUID id : new ArrayList<>(lowers.keySet())) {
             ServerPlayer p = player(id);
@@ -589,7 +589,7 @@ final class Voyage {
     }
 
     // 降ろし終えた。stuck なら (届かなかった) 緩やかに落ちる効果を長めに
-    private void releaseLower(ServerPlayer p, boolean stuck) {
+    void releaseLower(ServerPlayer p, boolean stuck) {
         p.setNoGravity(false);
         p.fallDistance = 0;
         p.setDeltaMovement(Vec3.ZERO);
@@ -613,7 +613,7 @@ final class Voyage {
     void cancel(String key, boolean lowerRiders) {
         ServerPlayer lead = player(leader);
         if (lead != null) {
-            lead.sendSystemMessage(ModText.deny(key));
+            lead.sendSystemMessage(ModText.deny(kind.text(key)));
             Voyages.setCooldown(lead, TravelRules.COOLDOWN_CANCELLED);
         }
         if (lowerRiders && (!riders.isEmpty() || !climbs.isEmpty() || !lowers.isEmpty())) {
@@ -711,8 +711,8 @@ final class Voyage {
         for (UUID id : involvedIds()) {
             ServerPlayer p = player(id);
             if (p != null) {
-                PacketDistributor.sendToPlayer(p, new TravelNetwork.Veil(false));
-                p.sendSystemMessage(ModText.deny("message.skyabyss.travel.lost"));
+                PacketDistributor.sendToPlayer(p, new TravelNetwork.Veil(false, kind.style().ordinal()));
+                p.sendSystemMessage(ModText.deny(kind.text("message.skyabyss.travel.lost")));
             }
         }
         finish(false);
@@ -726,7 +726,7 @@ final class Voyage {
     }
 
     // 乗っている人が降りずに鞍から外れた (死亡・テレポート・ログアウト)
-    private void tickRiders(ServerLevel level) {
+    void tickRiders(ServerLevel level) {
         Entity whale = entity();
         for (UUID id : new ArrayList<>(riders)) {
             ServerPlayer p = player(id);
@@ -741,7 +741,7 @@ final class Voyage {
                 }
                 Voyages.clearSafe(p);
                 if (veiled) {
-                    PacketDistributor.sendToPlayer(p, new TravelNetwork.Veil(false));
+                    PacketDistributor.sendToPlayer(p, new TravelNetwork.Veil(false, kind.style().ordinal()));
                 }
                 continue;
             }
@@ -773,13 +773,13 @@ final class Voyage {
     // 寄っていくときの、着いたときの向き。段階の初めに一度だけ決める (今の向きで目標を回し直すと、
     // 目標が巨神と一緒に回ってしまい、いつまでも円を描いて着かない。2026-10-16 の試遊で見つかった)
     @Nullable
-    private Float hoverYaw;
+    Float hoverYaw;
 
     // 止まる高さ: 鎖の下の地面の 30 上。止まる位置のまわりに丘があれば、その上 (体が丘に埋まると、
     // 光の届かない所にいることになって巨神が真っ黒に描かれ、頭の乗り場も土に埋まるため)
-    private double hoverHeightCache = Double.NaN;
+    double hoverHeightCache = Double.NaN;
 
-    private double hoverHeight(ServerLevel level, Entity whale, BlockPos spot) {
+    double hoverHeight(ServerLevel level, Entity whale, BlockPos spot) {
         if (Double.isNaN(hoverHeightCache)) {
             Vec3 point = Vec3.atBottomCenterOf(spot);
             Vec3 center = TitanKind.centerForChainAt(titan, point, hoverYaw(whale, point), 0);
@@ -797,7 +797,7 @@ final class Voyage {
         return hoverYaw;
     }
 
-    private boolean flyToHover(ServerLevel level, Entity whale, BlockPos spot, double hoverY) {
+    boolean flyToHover(ServerLevel level, Entity whale, BlockPos spot, double hoverY) {
         Vec3 point = Vec3.atBottomCenterOf(spot);
         float finalYaw = hoverYaw(whale, point);
         Vec3 center = TitanKind.centerForChainAt(titan, point, finalYaw, hoverY);
@@ -828,11 +828,11 @@ final class Voyage {
         return distance < 1.0 && Math.abs(whale.getY() - hoverY) < 1.0 && Math.abs(Mth.degreesDifference(yaw, finalYaw)) < 2f;
     }
 
-    private void hover(Entity whale) {
+    void hover(Entity whale) {
         whale.setDeltaMovement(Vec3.ZERO);
     }
 
-    private static void move(Entity whale, float yaw, double speed, double vy) {
+    static void move(Entity whale, float yaw, double speed, double vy) {
         whale.setYRot(yaw);
         double vx = -Mth.sin(yaw * Mth.DEG_TO_RAD) * speed;
         double vz = Mth.cos(yaw * Mth.DEG_TO_RAD) * speed;
@@ -842,7 +842,7 @@ final class Voyage {
     }
 
     // 雲の上の高さ。下の地形が高ければ、その上
-    private double travelAltitude(ServerLevel level, Entity whale) {
+    double travelAltitude(ServerLevel level, Entity whale) {
         double max = surfaceMax(level, whale.position());
         Vec3 ahead = whale.position().add(whale.getLookAngle().multiply(1, 0, 1).normalize().scale(64));
         max = Math.max(max, surfaceMax(level, ahead));
@@ -864,15 +864,15 @@ final class Voyage {
         return max;
     }
 
-    private static float yawTowards(Vec3 from, Vec3 to) {
+    static float yawTowards(Vec3 from, Vec3 to) {
         return (float) (Mth.atan2(to.z - from.z, to.x - from.x) * Mth.RAD_TO_DEG) - 90f;
     }
 
-    private static double horizontal(Vec3 a, Vec3 b) {
+    static double horizontal(Vec3 a, Vec3 b) {
         return Math.hypot(a.x - b.x, a.z - b.z);
     }
 
-    private static Vec3 towards(Vec3 from, Vec3 to, double speed) {
+    static Vec3 towards(Vec3 from, Vec3 to, double speed) {
         Vec3 d = to.subtract(from);
         double len = d.length();
         return len < 1e-6 ? Vec3.ZERO : d.scale(Math.min(speed, len) / len);
@@ -881,7 +881,7 @@ final class Voyage {
     // 残りの時間の見積もり (tick)
     // 残りの時間の見積もり (tick)。行き先を決めたときの見積もりから、たった時間を引く (数字が戻らないように)。
     // 着く手前で見積もりを使い切ったら、降りていく分だけを出す
-    private int remainingTicks(Entity whale) {
+    int remainingTicks(Entity whale) {
         int left = estimateAtChoose * 20 - (totalTicks - chosenAt);
         int floor = phase == Phase.APPROACH ? 120 : 60;
         return Math.max(floor, left);
@@ -891,10 +891,21 @@ final class Voyage {
     int chosenAt;
     int estimateAtChoose;
 
+    // 行き先を受け付ける。断るなら理由の翻訳キーを返す (受け付けたら null)。潮殻は近くに海のない行き先を断る
+    @Nullable
+    String accept(TravelNetwork.Dest d) {
+        return null;
+    }
+
+    // 見積もりの秒数 (巨神の型ごと)
+    int estimate(double distance) {
+        return TravelRules.estimateSeconds(distance);
+    }
+
     void chosen(TravelNetwork.Dest d) {
         dest = d;
         chosenAt = totalTicks;
-        estimateAtChoose = TravelRules.estimateSeconds(Math.hypot(d.x() + 0.5 - pickup.getX(), d.z() + 0.5 - pickup.getZ()));
+        estimateAtChoose = estimate(Math.hypot(d.x() + 0.5 - pickup.getX(), d.z() + 0.5 - pickup.getZ()));
         phase = Phase.BOARDING;
         phaseTicks = 0;
     }
@@ -913,7 +924,7 @@ final class Voyage {
 
     // ---------------------------------------------------------------- 読み込み
 
-    private void holdTicket(ServerLevel level, ChunkPos pos) {
+    void holdTicket(ServerLevel level, ChunkPos pos) {
         long now = level.getGameTime();
         if (pos.equals(ticketPos) && now - ticketRefreshed < 100) {
             return;
@@ -926,7 +937,7 @@ final class Voyage {
         ticketRefreshed = now;
     }
 
-    private void releaseTicket(ServerLevel level) {
+    void releaseTicket(ServerLevel level) {
         if (ticketPos != null) {
             level.getChunkSource().removeRegionTicket(TICKET, ticketPos, TICKET_RADIUS, ticketPos);
             ticketPos = null;
@@ -944,7 +955,7 @@ final class Voyage {
     private ChunkPos moveTicketPos;
     private long moveTicketRefreshed;
 
-    private void holdMoveTicket(ServerLevel level, ChunkPos pos) {
+    void holdMoveTicket(ServerLevel level, ChunkPos pos) {
         long now = level.getGameTime();
         if (pos.equals(moveTicketPos) && now - moveTicketRefreshed < 100) {
             return;
@@ -957,14 +968,14 @@ final class Voyage {
         moveTicketRefreshed = now;
     }
 
-    private static boolean loaded(ServerLevel level, Vec3 at) {
+    static boolean loaded(ServerLevel level, Vec3 at) {
         return level.getChunkSource().hasChunk(Mth.floor(at.x) >> 4, Mth.floor(at.z) >> 4);
     }
 
     // ---------------------------------------------------------------- 小物
 
     // 背中 (専用のディメンション) にいる人へ、足もとの巨神が泳ぎだした・着いたことを知らせる
-    private void tellAboard(ServerLevel level, String key) {
+    void tellAboard(ServerLevel level, String key) {
         ServerLevel back = level.getServer().getLevel(TitanTravel.TITAN_BACK);
         if (back != null && kind == TitanKind.STONE_WHALE) {
             for (ServerPlayer p : back.players()) {
@@ -989,7 +1000,7 @@ final class Voyage {
         return list;
     }
 
-    private static List<ServerPlayer> nearbyPlayers(ServerLevel level, Vec3 at, double radius) {
+    static List<ServerPlayer> nearbyPlayers(ServerLevel level, Vec3 at, double radius) {
         return level.players().stream().filter(p -> p.distanceToSqr(at) < radius * radius).toList();
     }
 
