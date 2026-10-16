@@ -138,13 +138,10 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSelfTest.steps());
         // 余燼の背の敵 (強さ・殻と燃え上がり・蛾の熱・燠虫の転がり・落とす物)。13 の 5.1節
         steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
-<<<<<<< HEAD
         // 余燼の三つの試練 (灰の道・鍛えの間・火守り)。13 の 4 章。建てたあと 100 tick 待ってから検査する
         steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
-=======
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く
         steps.addAll(jp.revati.skyabyss.titan.ember.smith.AshSmithSelfTest.steps());
->>>>>>> m1-sky-pass
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }
