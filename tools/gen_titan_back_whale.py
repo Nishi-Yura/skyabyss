@@ -5,15 +5,14 @@
 形の元: tools/install_stone_whale.py の build() (ゲームの geo と同じ 0.5 単位の格子。胸びれ・尾びれ・背の遺跡・
         岩の板・藤壺・錨石まで同じ)。格子は Blockbench の向き (GeckoLib は X を反転して描く) なので、X を反転して置く
         (頭は北 -Z、錨石はゲームと同じ左のわき腹 = 西 -X)。
-出力: src/main/resources/data/skyabyss/titan_back/whale.bin (gzip。BackShape.java が読む。形式は潮殻の turtle.bin と同じ)
+出力: src/main/resources/data/skyabyss/titan_back/whale.bin (gzip。WhaleShape.java が読む。形式は潮殻の turtle.bin と同じ)
       --preview で docs/review/whale_back_roughs/whale_back_{top,side}.png (上と横から見た色の地図)
       --fit で、体の中の部屋 (三つの試練・鼓動の間・宝物庫・心臓の間・水路) が殻の何ブロック内側にあるかを表にする
 
-縮尺: 1 単位 = 0.7 ブロック (ゲームの岩鯨は 0.5 ブロック。その 1.4 倍)。全長 (頭の先から尾びれの先) 206 ブロック。
-      → 体の中の部屋を今の配置のまま入れるには、体の幅が足りない (西の谷 x -37 と東の広間 x 37 の幅 74 が、
-        1.4 倍の体の幅 41 に入らない)。そこで翼を体の長さの向きに並べ直した (TitanBackLayout の WEST/EAST の移し)。
-        詳しくは --fit の表と 02 の章。
-高さ: 体の中心 (geo の y=40) を y 99 に置く。腹の下端は y 70 前後、背の上は y 128 前後 (雲の海は y 45)。
+縮尺: 1 単位 = 1.4 ブロック (ゲームの岩鯨は 0.5 ブロック。その 2.8 倍)。全長 (頭の先から尾びれの先) 412 ブロック、体の幅 82。
+      試し済みの部屋 (幅 74、高さ 31) をそのまま体の中に入れられる、いちばん小さい縮尺 (02 の 10.1節の表)。
+      体の軸は x = -3 (モデルは東が少し太いので、西の谷 WA の殻を残すため)。環境変数 WS / WY / WX / WZ で縮尺と置き場所を試せる。
+高さ: 体の中心 (geo の y=40) を y 95 に置く。腹の下端は y 58、背の上は y 131 (雲の海は y 45)。geo の z 0 を z 24 に置く。
 ブロックの決め方: ブロックに入る格子のセルの多数決。占める割合が 0.45 (細い部品は 0.3) 以上なら置く。
       光る材料 (刻文・目) は少しでもあれば残す。材料はモデルのテクスチャの色に近いバニラのブロック (下の BLOCKS)。
       背の上を向いた面は、モデルの苔の帯 (stone_whale_v2.paint) と同じ高さの割合で苔にする。
@@ -68,10 +67,6 @@ BLOCKS = {
 }
 MOSS_BLOCKS = [("moss_block", 4), ("mossy_cobblestone", 1), ("green_terracotta", 1)]
 INNER_BLOCKS = [("tuff", 3), ("deepslate", 1)]
-
-# ---------------------------------------------------------------- 体の中の部屋 (TitanBackLayout と同じ数。--fit で使う)
-# (名前, x1, x2, z1, z2, y1, y2) は壁・床・天井を含む外側の箱
-ROOMS = []
 
 
 def hash3(x, y, z, salt=0):
