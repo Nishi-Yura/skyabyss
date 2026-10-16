@@ -71,7 +71,7 @@ public final class EmberSkeletonSelfTest {
             back.setChunkForced(a.getX() >> 4, a.getZ() >> 4, false);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ember skeleton PASSED (dimension and ash plain, back list and bound back, damage types not fire, heat API, room boxes, unique IDs, titan gate)");
+            SkyAbyss.LOGGER.info("SELFTEST ember skeleton PASSED (dimension and ash plain, back list and bound back, damage types not fire, heat API, room boxes, unique IDs, titan gate, titan board ember stands on the ash plain)");
         } else {
             SkyAbyss.LOGGER.error("SELFTEST ember skeleton FAILED: {}", String.join("; ", f));
         }
@@ -217,6 +217,31 @@ public final class EmberSkeletonSelfTest {
         gate.startCooldown(g);
         expect(gate.coolingDown(g) && !gate.dwell(g, true, 20), "the return stone counts while cooling down", f);
         gate.forget(g.getUUID());
+
+        // ---- 「/skyabyss titan board ember」で灰の原 (体が建てば舌の上) に立つ。地上から、資格のある人がコマンドを打つ
+        ServerLevel overworld = server.overworld();
+        FakePlayer r = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "ember_test_board"));
+        for (String t : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING)) {
+            data.markPersonal(r.getUUID(), t);
+        }
+        r.moveTo(0.5, 200, 0.5);
+        try {
+            server.getCommands().performPrefixedCommand(r.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "skyabyss titan board ember");
+            Vec3 want = EmberTravel.arrival(back);
+            expect(r.level().dimension() == EmberIds.BACK, "titan board ember did not move the player to the ember back: " + r.level().dimension().location(), f);
+            // 偽のプレイヤーは接続が無いので、ディメンションを移る位置合わせ (connection.teleport) が効かない。立つ場所は到着点で見る
+            BlockPos at = BlockPos.containing(want);
+            expect(!back.getBlockState(at.below()).isAir() && back.getBlockState(at).isAir() && back.getBlockState(at.above()).isAir(),
+                    "the arrival " + want + " is not standing room on the ash plain (" + back.getBlockState(at.below()) + " below)", f);
+        } finally {
+            if (r.level() instanceof ServerLevel at) {
+                at.removePlayerImmediately(r, net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+            }
+            EmberTravel.PASSAGE.forget(r.getUUID());
+            for (String t : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING)) {
+                data.clearPersonal(r.getUUID(), t);
+            }
+        }
         for (String t : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING)) {
             data.clearPersonal(g.getUUID(), t);
         }

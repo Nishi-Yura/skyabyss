@@ -1084,13 +1084,15 @@ y は床のブロック（人は +1）。頭は北（-Z）。灰の原の上は 
 
 - `./gradlew compileJava --offline` が通る。
 - `SKYABYSS_SELFTEST=1 ./gradlew runServer`: `SELFTEST ember skeleton` が通り、岩鯨・潮殻の自己テスト（`tide`・`tide back`・`tide_heart`・`tide mobs`・`titan back` ほか）もすべて通る（17.7節）。
-- `SELFTEST ember skeleton` が見るもの: ディメンションと灰の原（いちばん上が滑らかな玄武岩で y 63、岩盤、バイオーム）、体が無いときの到着点が灰の原の上、背中の一覧と `bindBack`、スポーンエッグの禁止、傷の種類 3 つが `#is_fire` に無く、`heat`・`engulfed` だけ防具を通る、熱の API（足す・冷ます・上限・帯・背中の外では動かない）、部屋の箱（重ならない・体の中・休み場）、`EmberIds` の ID が重ならない・図鑑が 10 品、`TitanGate`（資格のない人を断って待たせる、資格のある人は通す、0.5 秒で一度だけ、降りたら数え直す、待ちの間は数えない）。
+- `SELFTEST ember skeleton` が見るもの: ディメンションと灰の原（いちばん上が滑らかな玄武岩で y 63、岩盤、バイオーム）、体が無いときの到着点が灰の原の上、背中の一覧と `bindBack`、スポーンエッグの禁止、傷の種類 3 つが `#is_fire` に無く、`heat`・`engulfed` だけ防具を通る、熱の API（足す・冷ます・上限・帯・背中の外では動かない）、部屋の箱（重ならない・体の中・休み場）、`EmberIds` の ID が重ならない・図鑑が 10 品、`TitanGate`（資格のない人を断って待たせる、資格のある人は通す、0.5 秒で一度だけ、降りたら数え直す、待ちの間は数えない）、地上にいる資格のある人が `/skyabyss titan board ember` を打つと余燼の背の到着点（今は灰の原の上）に立つ。
+- 試遊（ゲームの画面での確かめ）はしない（並列の担当どうしでキー入力が干渉したため）。確かめは compileJava・自己テスト・データの検査だけ。
 
 ### 17.7 結果
 
 - `compileJava` が通る。
 - 自己テスト: 新しいワールドの 1 回目は `SELFTEST whale` だけが落ちた（「the new whale is not registered」。チャンクの読み込みが遅い初回だけで、余燼の変更とは関係しない）。同じワールドの 2 回目は 22 の系統と最後のまとめ `SELFTEST PASSED` がすべて通った（`tide`・`tide back`・`tide_heart`・`tide mobs`・`story`・`progress`・岩鯨の背、`ember skeleton`）。
-- ゲーム画面: `titan board ember` で余燼の背の灰の原に立てることを確かめた（17.9節）。
+- `titan board ember` で灰の原に立てることは、ゲームの画面ではなく自己テスト（`SELFTEST ember skeleton` の最後の確かめ）で見た。偽のプレイヤーは接続が無く位置合わせが効かないので、ディメンションが移ることと、到着点が灰の原の上の立てる場所であることを見る。
+- m1-sky-pass（雷翼の伝承とクエスト）を取りこんだあとの再実行（2026-10-16）: 失敗の行は無く、`SELFTEST ember skeleton PASSED` と最後のまとめ `SELFTEST PASSED`（系統ごとの PASSED 22 行）。
 
 ### 17.8 ほかの担当への申し送り
 
