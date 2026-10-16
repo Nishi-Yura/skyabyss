@@ -688,7 +688,7 @@ public final class PeakScar {
 
     // 自然の地形としては不自然な形 (人が石・土・草だけで積んだもの) を探す。見つかれば理由
     //  - 草ブロックの上に固いブロック (草は上がふさがると土に変わる。生成では草の上に何も積まれない)
-    //  - 草ブロックのすぐ下が空き (草の床・屋根)
+    //  - 草ブロックのすぐ下が空きで、3段以内に床がある (草でふさいだ穴・草の屋根)
     //  - 細い柱 (四方が空きの固いブロックが4段。塔・足場の柱)
     //  - 細い壁 (両側が空きの固いブロックが、縦3×横3。小屋の壁・塀)
     //  - 積んだ箱・台 (上がまっ平らな4×4で、四方の側面が3段まっすぐ切り立つ)
@@ -745,9 +745,24 @@ public final class PeakScar {
         return g.at(x, y, z) == GRASS && g.solid(x, y + 1, z);
     }
 
+    // 草のすぐ下が空きで、その下 3 段以内に床がある (草でふさいだ穴・低い草の屋根)。
+    // 生成の山では、宙に浮いた草や張り出しの縁の草 (下が 4 段以上空き) がよくあるので、それは数えない
     static boolean hollowUnderGrass(Grid g, int x, int y, int z) {
-        return g.at(x, y, z) == GRASS && g.open(x, y - 1, z);
+        if (g.at(x, y, z) != GRASS || !g.open(x, y - 1, z)) {
+            return false;
+        }
+        for (int d = 2; d <= HOLLOW_MAX + 1; d++) {
+            if (g.solid(x, y - d, z)) {
+                return true;
+            }
+            if (!g.open(x, y - d, z)) {
+                return false;
+            }
+        }
+        return false;
     }
+
+    static final int HOLLOW_MAX = 3;
 
     private static boolean pillarCell(Grid g, int x, int y, int z) {
         return g.solid(x, y, z) && g.open(x + 1, y, z) && g.open(x - 1, y, z) && g.open(x, y, z + 1) && g.open(x, y, z - 1);
