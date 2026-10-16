@@ -70,6 +70,7 @@ public final class EmberBackSelfTest {
             checkFluids(back, "after building");
             checkWalk(back, false);
         })));
+        steps.add(SelfTestRunner.Step.once("ember back (flow)", 100, server -> guarded(server, back -> checkFluids(back, "100 ticks after building"))));
         steps.add(SelfTestRunner.Step.once("ember back (ring)", server -> guarded(server, back -> checkRing(back))));
         steps.add(SelfTestRunner.Step.once("ember back (gate)", EmberBackTrials.GATE_OPEN_TICKS + 20, server -> guarded(server, back -> {
             EmberBackState state = EmberBackState.get(back);
