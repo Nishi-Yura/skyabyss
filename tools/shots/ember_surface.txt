@@ -1,0 +1,74 @@
+# 余燼の巨神 (地上) の見た目を撮る。./gradlew runShots -Pscript=tools/shots/ember_surface.txt
+# 出力: run/shots/ember_surface/shots/ember_surface/*.png と shots.log
+# 平らな世界で、人を (0.5, 0.5) に南向きに立たせ、巨神を 120 ブロック先 (z 120 前後。陸の探し方で少しずれる) に西向きで呼ぶ。
+# 鼻先は中心の西 103、口の前 6 ブロックは西 109。体の軸は中心の西 103〜東 124、火山は西 20
+world ember_surface flat
+size 1280 720
+timeout 600
+render 16
+
+cmd time set 6000
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p thunder_wing
+camera 0.5 -60 0.5 0 0
+waitchunks
+cmd skyabyss titan summon ember
+cmd skyabyss titan status ember
+wait 60
+hud off
+cmd gamemode spectator
+# ---- 昼、潜っている姿 (火山の先だけが地面から出る)
+camera 10 -52 60 0 6
+waitchunks
+wait 40
+shot burrow_near
+camera 0 -45 -40 0 4
+waitchunks
+wait 40
+shot burrow_mid
+camera 0 -35 -110 0 3
+waitchunks
+wait 40
+shot burrow_far
+# ---- その場で眠らせる (夜)
+cmd skyabyss titan rest ember here
+cmd time set 18000
+wait 40
+camera 0 -30 30 0 12
+waitchunks
+wait 40
+shot sleep_near_side
+camera -60 -10 40 330 18
+wait 40
+shot sleep_near_three_quarter
+# 口の前から (舌と喉の火)
+camera -135 -52 125 270 8
+wait 40
+shot sleep_mouth_front
+camera -122 -57 125 270 2
+wait 40
+shot sleep_mouth_close
+# 中景・遠景
+camera 0 -25 -40 0 8
+wait 40
+shot sleep_mid
+camera -10 -20 -80 0 5
+waitchunks
+wait 40
+shot sleep_far
+# 真上から (上が北。頭は左 = 西)
+camera -10 140 125 180 90
+waitchunks
+wait 40
+shot sleep_top
+# ---- 温石を持つ (手の温かさの表示)
+cmd gamemode creative
+camera -40 -60 60 0 0
+cmd item replace entity @p weapon.mainhand with skyabyss:warm_stone
+hud on
+chat clear
+wait 60
+shot warm_stone_hud
+cmd skyabyss titan status ember
+quit

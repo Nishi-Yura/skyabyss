@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -40,20 +41,48 @@ public final class TideTravelSelfTest {
     private TideTravelSelfTest() {
     }
 
-    // 呼ぶのは SelfTestRunner: 読み込み (load) → 待つ → 試す (runSelfTest)
-    public static void load(MinecraftServer server) {
+    // 読み込みを待つ上限 (tick)。過ぎたら読み込めた所だけで試す
+    private static final int LOAD_WAIT_LIMIT = 1200;
+    private static int loadTicks;
+
+    // 呼ぶのは SelfTestRunner: 読み込み (load、読み込み終わるまで毎 tick) → 待つ → 試す (runSelfTest)
+    // チャンクは札 (ticket) だけ付けて裏で作らせ、毎 tick 揃ったかを見る。setChunkForced はその場で作るので、
+    // 作られていない世界では 121 チャンクを 1 tick で作って十数秒止まっていた
+    public static boolean load(MinecraftServer server) {
         ServerLevel level = server.overworld();
-        sea = SeaVoyage.seaNear(level, level.getSharedSpawnPos());
-        if (sea != null) {
+        if (loadTicks++ == 0) {
+            sea = SeaVoyage.seaNear(level, level.getSharedSpawnPos());
+            if (sea == null) {
+                return true;
+            }
             forceAround(level, sea, true);
             SkyAbyss.LOGGER.info("[selftest] tide travel: nearest sea to the spawn is at {}", sea);
+            return false;
         }
+        if (sea == null) {
+            return true;
+        }
+        int missing = 0;
+        for (int dx = -LOAD_RADIUS; dx <= LOAD_RADIUS; dx++) {
+            for (int dz = -LOAD_RADIUS; dz <= LOAD_RADIUS; dz++) {
+                // hasChunk は札が付いた時点で true になるので、出来上がったチャンクがあるかで見る
+                if (level.getChunkSource().getChunkNow((sea.getX() >> 4) + dx, (sea.getZ() >> 4) + dz) == null) {
+                    missing++;
+                }
+            }
+        }
+        if (missing == 0 || loadTicks > LOAD_WAIT_LIMIT) {
+            SkyAbyss.LOGGER.info("[selftest] tide travel: chunks around the sea ready after {} ticks ({} missing)", loadTicks, missing);
+            return true;
+        }
+        return false;
     }
 
     private static void forceAround(ServerLevel level, BlockPos at, boolean on) {
         for (int dx = -LOAD_RADIUS; dx <= LOAD_RADIUS; dx++) {
             for (int dz = -LOAD_RADIUS; dz <= LOAD_RADIUS; dz++) {
-                level.setChunkForced((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz, on);
+                // 保存される強制読み込み (setChunkForced) ではなく、その場だけの札
+                level.getChunkSource().updateChunkForced(new ChunkPos((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz), on);
             }
         }
     }
@@ -138,21 +167,24 @@ public final class TideTravelSelfTest {
             return;
         }
         BlockPos spawn = level.getSharedSpawnPos();
-        // 浜: 海から世界の初期スポーンへ向かって最初の陸
+        // 浜: 海からいちばん近い陸 (まず世界の初期スポーンの方角、なければまわりを輪で探す)。
+        // スポーンの方角だけを見ると、スポーンが川べりや水の中だと浜が見つからず飛ばされていた
         BlockPos shore = null;
         Vec3 from = Vec3.atCenterOf(sea);
-        Vec3 dir = new Vec3(spawn.getX() - sea.getX(), 0, spawn.getZ() - sea.getZ());
-        if (dir.lengthSqr() < 1) {
-            dir = new Vec3(1, 0, 0);
-        }
-        dir = dir.normalize();
+        Vec3 toSpawn = new Vec3(spawn.getX() - sea.getX(), 0, spawn.getZ() - sea.getZ());
+        double spawnAngle = toSpawn.lengthSqr() < 1 ? 0 : Math.atan2(toSpawn.z, toSpawn.x);
         for (double s = 0; s < LOAD_RADIUS * 16 - 8 && shore == null; s += 3) {
-            double x = from.x + dir.x * s;
-            double z = from.z + dir.z * s;
-            if (TideOcean.land(level, x, z)) {
-                Vec3 st = TideOcean.standableShore(level, x, z);
-                if (st != null) {
-                    shore = BlockPos.containing(st);
+            for (int i = 0; i < (s == 0 ? 1 : 24) && shore == null; i++) {
+                // 0, +1, -1, +2, -2 ... の順に、スポーンの方角から振っていく
+                int k = (i + 1) / 2 * (i % 2 == 1 ? 1 : -1);
+                double angle = spawnAngle + Math.PI * 2 * k / 24;
+                double x = from.x + Math.cos(angle) * s;
+                double z = from.z + Math.sin(angle) * s;
+                if (TideOcean.land(level, x, z)) {
+                    Vec3 st = TideOcean.standableShore(level, x, z);
+                    if (st != null) {
+                        shore = BlockPos.containing(st);
+                    }
                 }
             }
         }
@@ -166,6 +198,13 @@ public final class TideTravelSelfTest {
             notes.add("the beach " + shore + " has no shallows the tide shell can rest in; the flight was skipped");
             return;
         }
+        // 陸の奥の向き: 潮殻の休む沖から浜へ (海の点そのものが陸のこともあるので、海の点からは測らない)
+        SeaVoyage.Park restAt = SeaVoyage.parkNear(level, Vec3.atBottomCenterOf(shore));
+        Vec3 dir = restAt == null ? Vec3.ZERO : new Vec3(shore.getX() + 0.5 - restAt.center().x, 0, shore.getZ() + 0.5 - restAt.center().z);
+        if (dir.lengthSqr() < 1) {
+            dir = new Vec3(shore.getX() + 0.5 - from.x, 0, shore.getZ() + 0.5 - from.z);
+        }
+        dir = dir.lengthSqr() < 1 ? new Vec3(Math.cos(spawnAngle), 0, Math.sin(spawnAngle)) : dir.normalize();
         TitanWorldData data = TitanWorldData.get(level);
         CompoundTag saved = data.snapshot(level.registryAccess());
         TideShellEntity shell = null;
@@ -216,17 +255,23 @@ public final class TideTravelSelfTest {
                 boolean onLand = TideOcean.land(level, v.landing.getX() + 0.5, v.landing.getZ() + 0.5);
                 check(onLand, "the landing " + v.landing + " is not on land", failures);
                 double toDest = Math.hypot(v.landing.getX() - inland.getX(), v.landing.getZ() - inland.getZ());
-                check(toDest < 140, "the landing is " + (int) toDest + " blocks from the inland destination", failures);
+                // 行き先に近い海はバイオームを 32 ブロックおきの輪で探す (seaNear) ので、本当の水際より輪一つ・浜の幅ぶん遠い浜になりうる。
+                // 試す浜 (行き先から 120) より 2 輪 (64) 遠いまでは良しとする
+                double beachToDest = Math.hypot(shore.getX() - inland.getX(), shore.getZ() - inland.getZ());
+                check(toDest < beachToDest + 2 * SeaVoyage.SEA_STEP, "the landing is " + (int) toDest + " blocks from the inland destination", failures);
                 double fromShell = Math.hypot(shell.getX() - v.landing.getX(), shell.getZ() - v.landing.getZ());
                 check(fromShell < 90, "the tide shell stopped " + (int) fromShell + " blocks from the beach", failures);
-                notes.add("landing on the beach " + v.landing + " (" + (int) toDest + " blocks from the destination), shell " + (int) fromShell
-                        + " blocks off shore");
+                notes.add("landing on the beach " + v.landing + " (" + (int) toDest + " blocks from the destination " + inland + ", nearest sea "
+                        + v.seaTarget + ", the test beach " + shore + "), shell " + (int) fromShell + " blocks off shore");
             } else {
                 failures.add("no beach was chosen");
             }
             check(TideOcean.waterAtSurface(level, shell.getX(), shell.getZ()), "the tide shell finished out of the water", failures);
             check(!shell.inVoyage() && shell.isResting(), "the tide shell did not rest after the voyage", failures);
-            check(countShells(level) == 1, countShells(level) + " tide shells after the voyage", failures);
+            // 早回しは 1 tick の中で回すので、読み込みの札が効かず、潮殻は読み込まれていない浜の沖で「見えない」扱いになる。
+            // 見えている潮殻 (この潮殻を除く) と、この潮殻が消されていないことを分けて数える
+            int shells = countShells(level, shell) + (shell.isRemoved() ? 0 : 1);
+            check(shells == 1, shells + " tide shells after the voyage (this one " + (shell.isRemoved() ? "removed: " + shell.getRemovalReason() : "kept") + ")", failures);
             check(ticks < 20 * 180, "the short tide voyage took too long: " + ticks + " ticks", failures);
             notes.add("short tide voyage took " + ticks + " ticks (" + ticks / 20 + " s), snaps " + v.snaps + ", phases ended at " + timeline);
         } finally {
@@ -238,10 +283,10 @@ public final class TideTravelSelfTest {
         }
     }
 
-    private static int countShells(ServerLevel level) {
+    private static int countShells(ServerLevel level, Entity except) {
         int count = 0;
         for (Entity entity : level.getAllEntities()) {
-            if (entity instanceof TideShellEntity && !entity.isRemoved()) {
+            if (entity instanceof TideShellEntity && entity != except && !entity.isRemoved()) {
                 count++;
             }
         }

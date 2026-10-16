@@ -543,7 +543,7 @@ public class Raiju extends GuardMob {
 
     // 柱に着いた。接地していれば痺れて落ちる、そうでなければ柱の上にうずくまる
     private void arrive(ServerLevel server, int i, boolean fromRail) {
-        if (site != null && StormRods.isGrounded(site.rodTop(i))) {
+        if (site != null && StormRods.isGrounded(site.rod(i))) {
             stun(server, i);
             return;
         }
@@ -792,7 +792,7 @@ public class Raiju extends GuardMob {
         double bestD = Double.MAX_VALUE;
         for (int pass = 0; pass < 2 && best < 0; pass++) {
             for (int i = 0; i < RaijuNest.RODS; i++) {
-                if (i == rod || pass == 0 && StormRods.isGrounded(site.rodTop(i))) {
+                if (i == rod || pass == 0 && StormRods.isGrounded(site.rod(i))) {
                     continue;
                 }
                 Vec3 b = Vec3.atBottomCenterOf(site.rodBase(i));
@@ -813,7 +813,7 @@ public class Raiju extends GuardMob {
         int best = -1;
         double bestD = Double.MAX_VALUE;
         for (int i = 0; i < RaijuNest.RODS; i++) {
-            if (skipGrounded && StormRods.isGrounded(site.rodTop(i))) {
+            if (skipGrounded && StormRods.isGrounded(site.rod(i))) {
                 continue;
             }
             Vec3 b = Vec3.atBottomCenterOf(site.rodBase(i));

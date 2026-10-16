@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "skyabyss:block/kindle_stone"
+    },
+    "active=true": {
+      "model": "skyabyss:block/kindle_stone_active"
+    }
+  }
+}
