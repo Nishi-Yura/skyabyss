@@ -1,14 +1,10 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.quest.Quests;
-import jp.revati.skyabyss.quest.free.FreeQuestEvents;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
@@ -41,16 +37,10 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // 三つの試練 (C1 灰の道・C2 鍛えの間・C3 火守り) の共通の道具と、毎 tick の見回り。
 // - 試練の品 (灰の壺・火の鍵・熾) は背中の外へ持ち出せない・預からない (7.3節)。落とした壺と鍵は消す (一人一つ)
-// - 試練が済んだ合図 (石が鳴らせるようになったとき): クエストの合図 ember_trial_<west|east|south> と、共通の back_trial_cleared (仲間にも)
+// - 試練が済んだ合図 (クエストの ember_trial_<west|east|south> と共通の back_trial_cleared) は B の EmberBackTrials.ring だけが送る
+//   (石を鳴らしたとき。潮殻・雷翼と同じ。13 の 24.2節)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberTrials {
-    // クエストの合図 (tide_trial_*・storm_trial_* と同じ形)
-    public static String signalOf(EmberBackState.Trial trial) {
-        return "ember_trial_" + trial.id();
-    }
-
-    private static final Map<EmberBackState.Trial, Boolean> SIGNALLED = new EnumMap<>(EmberBackState.Trial.class);
-
     // 自己テスト用: true のあいだ、石を鳴らせるようにする・初めての打つ順を使った記録を、ワールドに書かない (呼ばれた回数だけ数える)
     public static boolean dryRun;
     public static final List<EmberBackState.Trial> READY_CALLS = new ArrayList<>();
@@ -196,42 +186,6 @@ public final class EmberTrials {
         p.displayClientMessage(ModText.hint(key, args), true);
     }
 
-    // ---------------------------------------------------------------- 合図 (試練が済んだ = 石が鳴らせる)
-    // 石が鳴らせるようになったら (西: 奥の岸に着いた、東: 鍛え手を倒した、南: 火床が 100)、その部屋にいた人へ合図を送る。
-    // 眠っている試練 (最初から鳴っている) と、リセットのとき (resetSignals) は送らない
-    public static void resetSignals(ServerLevel level) {
-        EmberBackState state = EmberBackState.get(level);
-        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
-            SIGNALLED.put(t, state.ready(t));
-        }
-    }
-
-    static void tickSignals(ServerLevel level) {
-        EmberBackState state = EmberBackState.get(level);
-        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
-            if (!state.ready(t) || SIGNALLED.getOrDefault(t, false)) {
-                continue;
-            }
-            SIGNALLED.put(t, true);
-            List<ServerPlayer> near = new ArrayList<>();
-            for (EmberBackLayout.Box box : boxesOf(t)) {
-                near.addAll(playersIn(level, box.grow(8)));
-            }
-            for (ServerPlayer p : near) {
-                Quests.signal(p, signalOf(t));
-            }
-            Quests.signalWithParty(level, near, FreeQuestEvents.TRIAL_CLEARED);
-        }
-    }
-
-    static List<EmberBackLayout.Box> boxesOf(EmberBackState.Trial t) {
-        return switch (t) {
-            case WEST -> List.of(EmberBackLayout.WEST);
-            case EAST -> List.of(EmberBackLayout.EAST, EmberBackLayout.SMITH);
-            case SOUTH -> List.of(EmberBackLayout.SOUTH);
-        };
-    }
-
     // ---------------------------------------------------------------- 見回り
     private static boolean outside(Player p, EmberBackLayout.Box... boxes) {
         for (EmberBackLayout.Box b : boxes) {
@@ -278,7 +232,6 @@ public final class EmberTrials {
             if (!level.players().isEmpty()) {
                 patrol(level, level.players());
             }
-            tickSignals(level);
         }
     }
 
@@ -331,7 +284,6 @@ public final class EmberTrials {
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        SIGNALLED.clear();
         AshPath.clearMemory();
         Forge.clearMemory();
         Hearth.clearMemory();

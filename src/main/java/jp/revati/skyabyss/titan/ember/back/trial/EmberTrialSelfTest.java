@@ -320,7 +320,6 @@ public final class EmberTrialSelfTest {
                 EmberIds.SOUND_DOOR_KINDLE, EmberIds.SOUND_VENT_HISS, EmberIds.SOUND_VENT_BURST, EmberIds.SOUND_HEARTH_FEED, EmberIds.SOUND_HEARTH_DOUSE)) {
             expect(BuiltInRegistries.SOUND_EVENT.containsKey(EmberIds.id(s)), "sound not registered: " + s);
         }
-        expect(EmberTrials.signalOf(EmberBackState.Trial.WEST).equals("ember_trial_west"), "signal id");
         expect(EmberTrialSetup.COOLED_CRUST.getId().getPath().equals(EmberIds.COOLED_CRUST), "crust id is not the EmberIds one");
     }
 
@@ -677,6 +676,16 @@ public final class EmberTrialSelfTest {
         for (BlockPos p : AshPath.crustKeys()) {
             AshPath.sink(level, p);
         }
+        // 島の上で壺を失った人 (休み場 w1 で目覚めた、落とした) には壺が戻る。入口の岸では戻らない
+        fp.getInventory().clearContent();
+        fp.setPos(-24.5, AshPath.LAVA_Y + 1, 24.5);
+        AshPath.rescueUrn(level, fp);
+        expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 1, "a player stranded on the w1 island without an urn got none");
+        fp.getInventory().clearContent();
+        fp.setPos(-24.5, AshPath.LAVA_Y + 1, -3.5);
+        AshPath.rescueUrn(level, fp);
+        expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 0, "the entry shore must hand out the urn only from the stand");
+        AshPath.giveUrn(fp);
         // 湖を出ると壺は台へ戻る
         fp.setPos(26, 82, 5);
         EmberTrials.patrol(level, List.of(fp));
