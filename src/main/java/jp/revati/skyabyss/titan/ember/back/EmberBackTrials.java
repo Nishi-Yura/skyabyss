@@ -95,7 +95,7 @@ public final class EmberBackTrials {
     static void onServerStarted(ServerStartedEvent event) {
         ServerLevel back = event.getServer().getLevel(EmberIds.BACK);
         if (back != null) {
-            EmberBodyBuilder.ensureBuilt(back);
+            EmberBodyBuilder.schedule(back);
         }
     }
 

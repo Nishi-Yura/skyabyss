@@ -3,6 +3,7 @@ package jp.revati.skyabyss.titan.dungeon;
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.BackBuildJobs;
 import jp.revati.skyabyss.forge.ResonanceForgeBlock;
 import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -24,12 +25,25 @@ public final class TitanBackBuilder {
     private TitanBackBuilder() {
     }
 
+    // その場で最後まで建てる。起動時の予約 (schedule) が途中なら取り消す (置いた分は「変わるブロックだけ」なので飛ばせる)
     public static void build(ServerLevel level, TitanBackData data) {
+        BackBuildJobs.cancel(level.dimension());
         long start = System.currentTimeMillis();
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         // アスレチックと迷路の形は、建てるたびに新しい種で決める
         data.reseed(level.getRandom());
         buildIsland(kit);
+        buildRest(level, data, kit, start);
+    }
+
+    // 起動時: 島の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
+    public static void schedule(ServerLevel level, TitanBackData data) {
+        BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
+        data.reseed(level.getRandom());
+        BackBuildJobs.schedule("stone whale back", level, WhaleShape.job(kit), () -> buildRest(level, data, kit, System.currentTimeMillis()));
+    }
+
+    private static void buildRest(ServerLevel level, TitanBackData data, BuildKit kit, long start) {
         buildSurface(kit);
         buildHub(kit);
         buildTreasury(kit);

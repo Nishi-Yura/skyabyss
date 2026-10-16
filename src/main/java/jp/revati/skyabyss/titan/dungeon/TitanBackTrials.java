@@ -195,7 +195,7 @@ public final class TitanBackTrials {
                 } else {
                     SkyAbyss.LOGGER.info("Building the stone whale's back for this world...");
                 }
-                TitanBackBuilder.build(back, data);
+                TitanBackBuilder.schedule(back, data);
             }
         }
     }

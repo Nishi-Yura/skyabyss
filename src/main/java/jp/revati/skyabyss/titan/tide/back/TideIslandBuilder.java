@@ -32,6 +32,11 @@ public final class TideIslandBuilder {
         long t0 = System.currentTimeMillis();
         int placed = TideTurtle.place(kit);
         SkyAbyss.LOGGER.info("Placed the tide turtle: {} blocks in {} ms", placed, System.currentTimeMillis() - t0);
+        buildRest(kit);
+    }
+
+    // 亀の体を置いたあと (部屋を掘る・中身を建てる)。起動時は体を何 tick かに分けて置いてから呼ぶ (BackBuildJobs)
+    public static void buildRest(TideKit kit) {
         beach(kit);
         gate(kit);
         cave(kit);

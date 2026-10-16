@@ -193,42 +193,43 @@ public final class BackShape {
 
     // 形を置く。範囲の中で、形のブロックでない所は空に戻す (前の版の形を消す)。変わるブロックだけを置く。置いた数を返す
     public int place(ServerLevel level) {
+        BackBuildJobs.Job job = job(level);
+        job.step(Long.MAX_VALUE);
+        return job.placed();
+    }
+
+    // 同じ置き方を、1 列ずつ何 tick かに分けて進められる形で返す (BackBuildJobs)
+    public BackBuildJobs.ColumnJob job(ServerLevel level) {
         Data d = data();
         BlockState air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         BlockState[] column = new BlockState[d.ny];
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        int placed = 0;
-        for (int cx = d.x0 >> 4; cx <= (d.x0 + d.nx - 1) >> 4; cx++) {
-            for (int cz = d.z0 >> 4; cz <= (d.z0 + d.nz - 1) >> 4; cz++) {
-                LevelChunk chunk = level.getChunk(cx, cz);
-                for (int lx = 0; lx < 16; lx++) {
-                    for (int lz = 0; lz < 16; lz++) {
-                        int x = (cx << 4) + lx;
-                        int z = (cz << 4) + lz;
-                        int a = x - d.x0;
-                        int c = z - d.z0;
-                        if (a < 0 || c < 0 || a >= d.nx || c >= d.nz) {
-                            continue;
-                        }
-                        java.util.Arrays.fill(column, air);
-                        short[] r = d.runs[a * d.nz + c];
-                        for (int k = 0; k < r.length; k += 3) {
-                            BlockState s = d.palette[r[k + 2]];
-                            for (int j = r[k]; j < r[k] + r[k + 1]; j++) {
-                                column[j] = s;
-                            }
-                        }
-                        for (int j = 0; j < d.ny; j++) {
-                            m.set(x, d.y0 + j, z);
-                            if (chunk.getBlockState(m) != column[j]) {
-                                level.setBlock(m, column[j], FLAGS);
-                                placed++;
-                            }
-                        }
+        return new BackBuildJobs.ColumnJob(level, d.x0, d.x0 + d.nx - 1, d.z0, d.z0 + d.nz - 1) {
+            @Override
+            protected int column(ServerLevel lv, LevelChunk chunk, int x, int z) {
+                int a = x - d.x0;
+                int c = z - d.z0;
+                if (a < 0 || c < 0 || a >= d.nx || c >= d.nz) {
+                    return 0;
+                }
+                java.util.Arrays.fill(column, air);
+                short[] r = d.runs[a * d.nz + c];
+                for (int k = 0; k < r.length; k += 3) {
+                    BlockState s = d.palette[r[k + 2]];
+                    for (int j = r[k]; j < r[k] + r[k + 1]; j++) {
+                        column[j] = s;
                     }
                 }
+                int placed = 0;
+                for (int j = 0; j < d.ny; j++) {
+                    m.set(x, d.y0 + j, z);
+                    if (chunk.getBlockState(m) != column[j]) {
+                        lv.setBlock(m, column[j], FLAGS);
+                        placed++;
+                    }
+                }
+                return placed;
             }
-        }
-        return placed;
+        };
     }
 }

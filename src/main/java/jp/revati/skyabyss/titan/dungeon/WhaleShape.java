@@ -163,41 +163,42 @@ public final class WhaleShape {
     // 鯨を置く。範囲の中で、鯨のブロックでない所は空に戻す (前の版の島や、掘った部屋を消す)。
     // 変わるブロックだけを置く (同じなら触らない)。置いたブロックの数を返す
     static int place(BuildKit kit) {
+        jp.revati.skyabyss.titan.BackBuildJobs.Job job = job(kit);
+        job.step(Long.MAX_VALUE);
+        return job.placed();
+    }
+
+    // 同じ置き方を、1 列ずつ何 tick かに分けて進められる形で返す (BackBuildJobs)
+    static jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob job(BuildKit kit) {
         Data d = data();
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState[] column = new BlockState[d.ny];
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        int placed = 0;
-        for (int cx = d.x0 >> 4; cx <= (d.x0 + d.nx - 1) >> 4; cx++) {
-            for (int cz = d.z0 >> 4; cz <= (d.z0 + d.nz - 1) >> 4; cz++) {
-                LevelChunk chunk = kit.level().getChunk(cx, cz);
-                for (int lx = 0; lx < 16; lx++) {
-                    for (int lz = 0; lz < 16; lz++) {
-                        int x = (cx << 4) + lx;
-                        int z = (cz << 4) + lz;
-                        int i = index(x, z);
-                        if (i < 0) {
-                            continue;
-                        }
-                        java.util.Arrays.fill(column, air);
-                        short[] r = d.runs[i];
-                        for (int k = 0; k < r.length; k += 3) {
-                            BlockState s = d.palette[r[k + 2]];
-                            for (int j = r[k]; j < r[k] + r[k + 1]; j++) {
-                                column[j] = s;
-                            }
-                        }
-                        for (int j = 0; j < d.ny; j++) {
-                            m.set(x, d.y0 + j, z);
-                            if (chunk.getBlockState(m) != column[j]) {
-                                kit.level().setBlock(m, column[j], BuildKit.UPDATE);
-                                placed++;
-                            }
-                        }
+        return new jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob(kit.level(), d.x0, d.x0 + d.nx - 1, d.z0, d.z0 + d.nz - 1) {
+            @Override
+            protected int column(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk, int x, int z) {
+                int i = index(x, z);
+                if (i < 0) {
+                    return 0;
+                }
+                java.util.Arrays.fill(column, air);
+                short[] r = d.runs[i];
+                for (int k = 0; k < r.length; k += 3) {
+                    BlockState s = d.palette[r[k + 2]];
+                    for (int j = r[k]; j < r[k] + r[k + 1]; j++) {
+                        column[j] = s;
                     }
                 }
+                int placed = 0;
+                for (int j = 0; j < d.ny; j++) {
+                    m.set(x, d.y0 + j, z);
+                    if (chunk.getBlockState(m) != column[j]) {
+                        lv.setBlock(m, column[j], BuildKit.UPDATE);
+                        placed++;
+                    }
+                }
+                return placed;
             }
-        }
-        return placed;
+        };
     }
 }
