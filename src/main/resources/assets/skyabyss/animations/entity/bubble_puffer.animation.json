@@ -1,0 +1,520 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.bubble_puffer.idle": {
+   "animation_length": 2.0,
+   "bones": {
+    "body": {
+     "position": [
+      "0",
+      "0.8 * math.sin(180 * query.anim_time + 0)",
+      "0"
+     ],
+     "rotation": [
+      "-(3 * math.sin(180 * query.anim_time + 90))",
+      "0",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "14 * math.sin(360 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "fin_r": {
+     "rotation": [
+      "0",
+      "16 * math.sin(540 * query.anim_time + 0)",
+      "-(10 * math.sin(540 * query.anim_time + 0))"
+     ]
+    },
+    "fin_l": {
+     "rotation": [
+      "0",
+      "-16 * math.sin(540 * query.anim_time + 0)",
+      "-(-10 * math.sin(540 * query.anim_time + 0))"
+     ]
+    }
+   },
+   "loop": true
+  },
+  "animation.bubble_puffer.walk": {
+   "animation_length": 1.0,
+   "bones": {
+    "body": {
+     "position": [
+      "0",
+      "0.6 * math.sin(360 * query.anim_time + 0)",
+      "0"
+     ],
+     "rotation": [
+      "-(-4)",
+      "4 * math.sin(360 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "26 * math.sin(720 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "fin_r": {
+     "rotation": [
+      "0",
+      "24 * math.sin(720 * query.anim_time + 0)",
+      "-(14 * math.sin(720 * query.anim_time + 0))"
+     ]
+    },
+    "fin_l": {
+     "rotation": [
+      "0",
+      "-24 * math.sin(720 * query.anim_time + 0)",
+      "-(-14 * math.sin(720 * query.anim_time + 0))"
+     ]
+    }
+   },
+   "loop": true
+  },
+  "animation.bubble_puffer.attack": {
+   "animation_length": 0.7,
+   "bones": {
+    "body": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "0.35": {
+       "vector": [
+        1.12,
+        1.1,
+        1.08
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.94,
+        0.95,
+        1.04
+       ]
+      },
+      "0.7": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      }
+     },
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.35": {
+       "vector": [
+        -6.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        12.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "tail": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.35": {
+       "vector": [
+        0.0,
+        20.0,
+        0.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.0,
+        -25.0,
+        0.0
+       ]
+      },
+      "0.7": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": false
+  },
+  "animation.bubble_puffer.hurt": {
+   "animation_length": 0.3,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        -10.0,
+        0.0,
+        -16.0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "spines": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        1.08,
+        1.08,
+        1.08
+       ]
+      },
+      "0.3": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": false
+  },
+  "animation.bubble_puffer.death": {
+   "animation_length": 1.0,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        0.0,
+        -120.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        -175.0
+       ]
+      }
+     },
+     "position": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        -2.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        -4.0,
+        0.0
+       ]
+      }
+     },
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        1.1,
+        1.1,
+        1.1
+       ]
+      },
+      "1": {
+       "vector": [
+        0.85,
+        0.8,
+        0.85
+       ]
+      }
+     }
+    },
+    "spines": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.9,
+        0.9,
+        0.9
+       ]
+      }
+     }
+    },
+    "fin_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        -30.0
+       ]
+      }
+     }
+    },
+    "fin_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        30.0
+       ]
+      }
+     }
+    },
+    "tail": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        25.0,
+        0.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": "hold_on_last_frame"
+  },
+  "animation.bubble_puffer.inflate": {
+   "animation_length": 0.35,
+   "bones": {
+    "body": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "0.2": {
+       "vector": [
+        1.55,
+        1.55,
+        1.55
+       ]
+      },
+      "0.35": {
+       "vector": [
+        1.45,
+        1.45,
+        1.45
+       ]
+      }
+     }
+    },
+    "spines": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "0.35": {
+       "vector": [
+        1.12,
+        1.12,
+        1.12
+       ]
+      }
+     }
+    }
+   },
+   "loop": "hold_on_last_frame"
+  },
+  "animation.bubble_puffer.inflated": {
+   "animation_length": 1.0,
+   "bones": {
+    "body": {
+     "scale": [
+      "1.45 + 0.03 * math.sin(360 * query.anim_time + 0)",
+      "1.45 + 0.03 * math.sin(360 * query.anim_time + 0)",
+      "1.45 + 0.03 * math.sin(360 * query.anim_time + 0)"
+     ]
+    },
+    "spines": {
+     "scale": [
+      "1.12",
+      "1.12",
+      "1.12"
+     ]
+    },
+    "fin_r": {
+     "rotation": [
+      "0",
+      "30 * math.sin(900 * query.anim_time + 0)",
+      "-(14 * math.sin(900 * query.anim_time + 0))"
+     ]
+    },
+    "fin_l": {
+     "rotation": [
+      "0",
+      "-30 * math.sin(900 * query.anim_time + 0)",
+      "-(-14 * math.sin(900 * query.anim_time + 0))"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "20 * math.sin(900 * query.anim_time + 0)",
+      "0"
+     ]
+    }
+   },
+   "loop": true
+  },
+  "animation.bubble_puffer.deflate": {
+   "animation_length": 0.5,
+   "bones": {
+    "body": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.45,
+        1.45,
+        1.45
+       ]
+      },
+      "0.5": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      }
+     }
+    },
+    "spines": {
+     "scale": {
+      "0": {
+       "vector": [
+        1.12,
+        1.12,
+        1.12
+       ]
+      },
+      "0.5": {
+       "vector": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": false
+  }
+ }
+}
