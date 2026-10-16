@@ -218,7 +218,18 @@ public final class TideTravelSelfTest {
             SeaVoyage v = new SeaVoyage(TitanKind.TIDE_SHELL, shell, a, pickup);
             v.test = true;
             // 陸の奥の行き先 (浜から 120 ブロック内陸へ)
+            // 120 ブロック先が海や川 (小さな島・入り江の世界) なら、陸の点が見つかるまで浜へ近づける (世界の種で結果が変わらないように)
             BlockPos inland = BlockPos.containing(Vec3.atCenterOf(shore).add(dir.scale(120)));
+            boolean inlandIsLand = false;
+            for (int back = 120; back > 0; back -= 10) {
+                BlockPos candidate = BlockPos.containing(Vec3.atCenterOf(shore).add(dir.scale(back)));
+                level.getChunk(candidate.getX() >> 4, candidate.getZ() >> 4);
+                if (TideOcean.land(level, candidate.getX() + 0.5, candidate.getZ() + 0.5)) {
+                    inland = candidate;
+                    inlandIsLand = true;
+                    break;
+                }
+            }
             TravelNetwork.Dest dest = new TravelNetwork.Dest("test", "inland", "", inland.getX(), level.getSeaLevel(), inland.getZ(), 2, true, 0);
             EnumSet<Voyage.Phase> seen = EnumSet.noneOf(Voyage.Phase.class);
             StringBuilder timeline = new StringBuilder();
@@ -251,7 +262,11 @@ public final class TideTravelSelfTest {
                 check(reach < 72, "the tide gate stopped " + (int) reach + " blocks from the pickup column", failures);
                 notes.add("pickup: the gate stopped " + (int) reach + " blocks from the bubble column at " + pickup);
             }
-            if (v.landing != null) {
+            if (v.landing != null && !inlandIsLand) {
+                // 浜が小さな島・砂州で、内陸の陸がない世界: 行き先が海なので、浜へ降ろす検査はできない
+                notes.add("the test beach " + shore + " has no land inland (a sandbar); the landing checks were skipped");
+            }
+            if (v.landing != null && inlandIsLand) {
                 boolean onLand = TideOcean.land(level, v.landing.getX() + 0.5, v.landing.getZ() + 0.5);
                 check(onLand, "the landing " + v.landing + " is not on land", failures);
                 double toDest = Math.hypot(v.landing.getX() - inland.getX(), v.landing.getZ() - inland.getZ());
@@ -263,7 +278,7 @@ public final class TideTravelSelfTest {
                 check(fromShell < 90, "the tide shell stopped " + (int) fromShell + " blocks from the beach", failures);
                 notes.add("landing on the beach " + v.landing + " (" + (int) toDest + " blocks from the destination " + inland + ", nearest sea "
                         + v.seaTarget + ", the test beach " + shore + "), shell " + (int) fromShell + " blocks off shore");
-            } else {
+            } else if (v.landing == null) {
                 failures.add("no beach was chosen");
             }
             check(TideOcean.waterAtSurface(level, shell.getX(), shell.getZ()), "the tide shell finished out of the water", failures);
