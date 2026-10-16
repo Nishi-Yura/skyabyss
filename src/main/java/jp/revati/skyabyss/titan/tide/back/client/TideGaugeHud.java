@@ -5,6 +5,7 @@ import jp.revati.skyabyss.titan.tide.TideTravel;
 import jp.revati.skyabyss.titan.tide.back.TideBackNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -38,6 +39,25 @@ public final class TideGaugeHud {
         }
     }
 
+    // 板の上端。右上の効き目の絵 (バニラ: 良い効き目は y 1〜、そのほかは y 27〜) があれば、その下へずらす
+    static int top(Minecraft mc) {
+        if (mc.player == null || mc.player.getActiveEffects().isEmpty()) {
+            return 6;
+        }
+        boolean other = mc.player.getActiveEffects().stream().anyMatch(e -> e.showIcon() && !e.getEffect().value().isBeneficial());
+        boolean good = mc.player.getActiveEffects().stream().anyMatch(e -> e.showIcon() && e.getEffect().value().isBeneficial());
+        return other ? 54 : good ? 28 : 6;
+    }
+
+    // 板の下端 (仲間の表示がこれより下に来るように。背中にいて板が出ているときだけ)
+    public static int bottom() {
+        Minecraft mc = Minecraft.getInstance();
+        if (gauge == null || mc.level == null || mc.level.dimension() != TideTravel.TIDE_BACK || mc.options.hideGui || age > 100) {
+            return 0;
+        }
+        return top(mc) + 30;
+    }
+
     @SubscribeEvent
     static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
@@ -45,11 +65,23 @@ public final class TideGaugeHud {
             return;
         }
         GuiGraphics g = event.getGuiGraphics();
-        int w = 112;
+        boolean alert = gauge.beckon();
+        // 文: 段階と、あと何秒。板の幅は文の長さに合わせる (日本語・英語とも枠に収める)
+        String phase = switch (gauge.phase()) {
+            case 0 -> "low";
+            case 1 -> "rising";
+            case 2 -> "high";
+            default -> "falling";
+        };
+        Component name = Component.translatable(alert ? "gui.skyabyss.tide_gauge.beckon" : "gui.skyabyss.tide_gauge." + phase);
+        Component time = ticksLeft < 0 ? Component.translatable("gui.skyabyss.tide_gauge.held")
+                : Component.translatable("gui.skyabyss.tide_gauge.left", (ticksLeft + 19) / 20);
+        int text = Math.max(mc.font.width(name), mc.font.width(time));
+        // 左の飾り (貝の溝と水位の柱) 34、文、右の石の点 10。ボスバー (中央の幅 182) との間を 4 あけた幅まで
+        int w = Mth.clamp(34 + text + 10, 112, Math.max(112, g.guiWidth() / 2 - 91 - 4 - 6));
         int h = 30;
         int x = g.guiWidth() - w - 6;
-        int y = 6;
-        boolean alert = gauge.beckon();
+        int y = top(mc);
         float pulse = alert ? 0.5f + 0.5f * Mth.sin((mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(true)) * 0.4f) : 0;
         int border = alert ? (0xFF << 24) | ((int) (180 + 75 * pulse) << 16) | 0x3020 : 0xFF5FB8B0;
         // 貝の形の枠 (角を落とした板)
@@ -76,18 +108,10 @@ public final class TideGaugeHud {
         for (int i = 1; i < 3; i++) {
             g.fill(bx - 1, by + bh * i / 3, bx + 8, by + bh * i / 3 + 1, 0xFF90A8A8);
         }
-        // 文: 段階と、あと何秒
-        String phase = switch (gauge.phase()) {
-            case 0 -> "low";
-            case 1 -> "rising";
-            case 2 -> "high";
-            default -> "falling";
-        };
-        Component name = Component.translatable(alert ? "gui.skyabyss.tide_gauge.beckon" : "gui.skyabyss.tide_gauge." + phase);
-        g.drawString(mc.font, name, bx + 11, by, alert ? 0xFFFF8060 : 0xFFE6F2EE, true);
-        Component time = ticksLeft < 0 ? Component.translatable("gui.skyabyss.tide_gauge.held")
-                : Component.translatable("gui.skyabyss.tide_gauge.left", (ticksLeft + 19) / 20);
-        g.drawString(mc.font, time, bx + 11, by + 11, 0xFFB0C8C4, true);
+        // 狭い画面で幅が足りなければ、はみ出す分を切る (枠の外へは出さない)
+        int room = w - 34 - 10;
+        g.drawString(mc.font, Language.getInstance().getVisualOrder(mc.font.substrByWidth(name, room)), bx + 11, by, alert ? 0xFFFF8060 : 0xFFE6F2EE, true);
+        g.drawString(mc.font, Language.getInstance().getVisualOrder(mc.font.substrByWidth(time, room)), bx + 11, by + 11, 0xFFB0C8C4, true);
         // 鳴った石 (小さな三つの点)
         for (int i = 0; i < 3; i++) {
             int c = i < gauge.stones() ? 0xFFF0E8B0 : 0xFF404848;

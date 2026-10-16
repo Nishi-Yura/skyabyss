@@ -121,7 +121,7 @@
   "gui.skyabyss.tide_gauge.falling": "引く",
   "gui.skyabyss.tide_gauge.beckon": "招き潮",
   "gui.skyabyss.tide_gauge.left": "あと %s 秒",
-  "gui.skyabyss.tide_gauge.held": "潮が止まっている",
+  "gui.skyabyss.tide_gauge.held": "潮止まり",
   "trial.skyabyss.tide_west": "西 (珊瑚の庭)",
   "trial.skyabyss.tide_east": "東 (潮見の間)",
   "trial.skyabyss.tide_front": "前 (群れの干潟)",

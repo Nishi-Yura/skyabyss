@@ -26,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -48,6 +49,9 @@ public final class TideTravel {
 
     // 背中のまわりの海にいる人 → 何 tick いるか
     private static final Map<UUID, Integer> ADRIFT = new HashMap<>();
+    // 背中の潮門の口にいる人 → 何 tick いるか (GATE_DWELL で地上へ)
+    private static final Map<UUID, Integer> IN_GATE = new HashMap<>();
+    private static final int GATE_DWELL = 10;
 
     private TideTravel() {
     }
@@ -159,8 +163,15 @@ public final class TideTravel {
         if (player.tickCount % 2 != 0 || (player.isCreative() && player.getAbilities().flying)) {
             return;
         }
-        // 背中の潮門をくぐると、地上へ戻る
-        if (!coolingDown(player) && TideBackBuilder.inReturnGate(player.getX(), player.getY(), player.getZ())) {
+        // 背中の潮門をくぐると、地上へ戻る。口の中に 0.5 秒いたら (かすっただけ・押し戻しの一瞬では戻さない)
+        boolean inGate = !coolingDown(player) && TideBackBuilder.inReturnGate(player.getX(), player.getY(), player.getZ());
+        int inGateTicks = inGate ? IN_GATE.merge(player.getUUID(), 2, Integer::sum) : 0;
+        if (!inGate) {
+            IN_GATE.remove(player.getUUID());
+        }
+        if (inGateTicks >= GATE_DWELL) {
+            IN_GATE.remove(player.getUUID());
+            SkyAbyss.LOGGER.info("{} went through the tide back gate at {} {} {}", player.getGameProfile().getName(), player.getX(), player.getY(), player.getZ());
             player.sendSystemMessage(ModText.lore("message.skyabyss.tide.leaving"));
             leave(player);
             return;
@@ -209,11 +220,23 @@ public final class TideTravel {
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         ADRIFT.remove(event.getEntity().getUUID());
+        IN_GATE.remove(event.getEntity().getUUID());
+    }
+
+    // 島は乗り込みの前に建てておく (サーバーの起動のとき、まだ無いか版が古ければ)。乗り込みの途中で 4〜6 秒止まらないように
+    // (08 の 20.12節: 初めての乗り込みで地上へ戻された件の手当て)。乗り込みの ensureBuilt は、念のための残し
+    @SubscribeEvent
+    static void onServerStarted(ServerStartedEvent event) {
+        ServerLevel back = event.getServer().getLevel(TIDE_BACK);
+        if (back != null) {
+            TideBackBuilder.ensureBuilt(back);
+        }
     }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         ADRIFT.clear();
+        IN_GATE.clear();
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
