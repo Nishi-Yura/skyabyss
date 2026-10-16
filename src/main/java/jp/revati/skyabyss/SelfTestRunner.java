@@ -111,6 +111,11 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
+        // 雷翼の巨神 (窓・止まり木・昇り風・一体だけ・記録・戻る先・背中の結びつけ)
+        steps.add(Step.once("storm (load)", jp.revati.skyabyss.titan.storm.StormSelfTest::load));
+        steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
+        // 雷翼の背 (鳥の形・看板・拍・鏡・柱・歩ける所・リセット)。建てたあと 100 tick 待ってから数える
+        steps.addAll(jp.revati.skyabyss.titan.storm.back.StormBackSelfTest.steps());
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
         // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
@@ -126,6 +131,15 @@ public final class SelfTestRunner {
         }
         QUEUE.clear();
         QUEUE.addAll(steps());
+        // SKYABYSS_SELFTEST_ONLY=<名前の頭> なら、その段だけ (例: "storm back")。終わるとサーバーを止める
+        String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
+        if (only != null && !only.isBlank()) {
+            QUEUE.removeIf(s -> !s.name().startsWith(only));
+            haltWhenDone = true;
+        }
+        if (QUEUE.isEmpty()) {
+            return;
+        }
         current = null;
         wait = QUEUE.peek().waitBefore();
         startedAt = System.nanoTime();
@@ -138,6 +152,8 @@ public final class SelfTestRunner {
         QUEUE.clear();
         current = null;
     }
+
+    private static boolean haltWhenDone;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -187,6 +203,9 @@ public final class SelfTestRunner {
         if (QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST runner: all steps done in {} s, slowest tick {} ms ({})", (System.nanoTime() - startedAt) / 1_000_000_000L,
                     slowestTick / 1_000_000, slowestStep);
+            if (haltWhenDone) {
+                event.getServer().halt(false);
+            }
         } else {
             wait = QUEUE.peek().waitBefore();
         }

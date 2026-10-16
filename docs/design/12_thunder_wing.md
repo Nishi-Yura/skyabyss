@@ -935,6 +935,40 @@
 
 11 章の担当ごとに、08 の 17〜21 章と同じ形で書き足す。
 
+### 17.1 担当 1: 本体と背中（2026-10-17）
+
+#### 17.1.1 作ったもの
+
+| もの | 中身 | ファイル |
+|---|---|---|
+| 共通化 | 背中の拍の周期 `BackCycle`、巨神の形の背中を読む `BackShape`（岩鯨・潮殻と同じ形式）、右上の目盛り `BackGaugeHud` | `titan/BackCycle`・`BackShape`・`client/BackGaugeHud` |
+| 背中の API（11.1） | `StormRods`（find・charge・isGrounded・ground）、`StormStrike.call`、`Updraft`、`StormBackClock`（凪 40 秒・荒れる 5 秒・嵐 40 秒・静まる 5 秒）、`StormBackLayout`（部屋・休み場・看板の座標。ほかの担当はここから読む） | `titan/storm/back/` |
+| ディメンション | `skyabyss:storm_back`（嵐の上）。`Titans.bindBack` で雷翼に結ぶ。雲の天井 y 100 より下へ落ちると、最後の休み場へ投げ返す | `data/skyabyss/dimension/storm_back.json`、`StormTravel` |
+| 鳥の形の背中 | 推奨 A（嵐の大鷲）のモデルと同じ格子・同じ色のブロックの鳥（0.85 倍、翼は横に伸ばす）。ブロック 32 万。部屋は体の中を掘る: 尾羽の上の到着 → 腰の羽根の門 → 尾の間 → 風の広間 → 左の翼の骨（風切りの骨）・右の翼の骨（雷の骨）・首と頭（眼の間）・竜骨の下の心臓の間。背の上へは尾の間の螺旋の段で出られる | `tools/gen_back_shape.py`（bird）→ `data/skyabyss/storm_back/bird.bin`、`StormBirdBuilder`、`StormKit` |
+| 休み場・リセット・眠る試練・ピースフル | 休み場 7（広間・w0・w1・e0・e1・f0・竜骨の前室）。心臓が戻るたびに試練を元に戻し、一つを眠らせる。ピースフルのあいだは腰の回廊を封じる。青い焚き火にしゃがんで触れると、試練をあきらめて尾の間へ | `StormBackTrials`、`StormBackState` |
+| 嵐の拍と目盛り | 右上の板に凪・荒れる・嵐・静まると残り秒、鳴った石の数。枠は字の幅に合わせて伸びる（英語で確かめた） | `client/StormGaugeHud` |
+| 三つの試練 | 西: 風切りの羽根（`GaleFeather`。空中でしゃがむと滑空）、割れた床 4 つ・昇り風の穴 2 つ（凪 4・嵐 13 上がる）・横風・嵐でしか届かない岩棚の石。東: 招雷の輪と避雷の柱 3 本・骨の戸 3 枚・雷獣の巣（雷獣の担当が使う）・倒すと立つ昇り風で頂の台の石。前: 眼の間の羽鏡 5x5（`EyeMirrors`。4 つの配置、最短 4/5/6/7 手）・受け羽 3・戻しの鏡（前室の取っ手） | `StormWest`・`StormEast`・`EyeMirrors` |
+| 風鳴り石と合図 | 石が鳴ると `storm_trial_<west/east/front>`（`Quests.signal`）と `back_trial_cleared`（`signalWithParty`）。三つ鳴ると竜骨の門が開く。石の近くに広間への光る床 | `StormBackTrials` |
+| 看板 | 碑文 6・入口の一言 3 の 9 枚だけ。鍵は伝承の担当の `StormLore` と同じ（`sign.skyabyss.lore_storm_*`・`sign.skyabyss.storm_{west,east,front}`）。置き場所を `StormLore.inscriptionPositions` に登録（近くで目を向けるだけで読める）。囁き 8 つは伝承の担当の `StormWhispers` に一本化し、場所の箱を `StormBackLayout` の部屋から取るようにした | `StormBackLayout.LORE_SIGNS`・`ENTRANCE_SIGNS`、`StormBackSetup`、`titan/storm/lore/StormWhispers` |
+| 地上の巨神 | 嵐の輪を描いて雲の下を飛ぶ。夕立の刻（7000〜10600）の 1 分前に 640 以内の人を選び、近くの峰へ渦を描いて降りる。止まり木の左足から 8 ブロックに昇り風の柱（入ると背中へ）。見守り（`TitanKeeper`）で一体だけ。空の影が 640 以内を通るあいだ峰でうずくまり、160 以内で見た人に伝承「うずくまる巨神」。降りる・飛び立つときに近くの人へ一行。嵐の雲は描画側 | `StormWingEntity`・`StormKeeper`・`StormPerch`・`GaleColumnEntity`・`client/StormCloudClient` |
+| 風見鶏 | `skyabyss:weathercock`。手に持つと次の夕立の刻までの時間と距離（遠い・近い・すぐそこ）。高い所で掲げると、雷（演出）が落ちて雷翼が近くの峰へ 3 分止まる（ワールドで 10 分に一度）。絵は避雷針の形を借りた仮（00 の 118） | `WeathercockItem` |
+| 本体のモデル | 3 段の LOD。近景 2277 箱（胴・翼・首・頭・尾・脚は 4 単位の段、風切りは 2 単位、冠は 1 単位、門・遺跡は 0.5 単位）、中景 468、遠景 238。重なり 0、光る画素 近景 23460・中景 20816・遠景 7749 | `tools/install_thunder_wing.py`、`docs/review/thunder_wing_roughs/install/thunder_wing_lods.png` |
+| 音 | 9 つ（鳴き声・遠雷・昇り風・背の風・荒れる/静まるの予告・横風・羽鏡・受け羽）。字幕は伝承の担当が想定した鍵に合わせた | `tools/gen_storm_sounds.py`、`sounds.json` |
+| 文 | この担当の鍵は `lang/parts/back.json`・`ground.json`（`gen_storm_lore.py` の形）。伝承の担当が想定した鍵に名前を合わせた（`wind_stone`・`catch_feather`・`storm_soon`・`calm_soon`・`keel_opened`・`stone_silent`・`door_opened`・`feather_lit` など）。`python tools/gen_storm_lore.py` でまとめた | `assets/skyabyss_storm/lang/` |
+| 道具 | 構造の書き出しに `storm_back` の型（`/skyabyss dev dump preset storm_back`、`dev arrive storm_back`）、台本 `tools/shots/storm_back.txt`。自己テストを一つの段だけ回す `SKYABYSS_SELFTEST_ONLY=<段の名前>` | `dev/StructureDump`、`SelfTestRunner` |
+
+#### 17.1.2 データでの検査（試遊はしない）
+
+- 自己テスト `SELFTEST storm back`（建てて 100 tick 置いてから数える）: 鳥の形（頭・翼の端・尾があり、部屋が体の中）、**背の穴 0**（鳥のいちばん上の 2 段が空いて空が見える柱）、**漏れ 0**（風の広間から空気をたどって、空が見える所・鳥の下へ抜ける所。羽根の門・背の上の段・天窓・割れた床だけ許す）、**流れる物 0**、休み場と部屋の真ん中が空気、看板 9 枚（どの行も 90 px・日本語 8 字以内）、嵐の拍、四つの鏡の配置を解く、柱・招雷・骨の戸、横風、歩いて行ける所（凪・嵐・戸が開いたあと・雷獣のあと・鏡のあと・竜骨の門のあと）、リセット、眠る試練、ピースフル。到着から広間まで 94 歩、立てる所 36261。
+- この検査で見つかって直したもの: 部屋の天井の縁と壁のあいだのすき間（尾の間の 154 の段、広間の縁）。掘った所の横と上が掘っていない空気なら壁でふさぐ（`StormKit.seal`、379 ブロック）。
+- 構造の書き出し（`tools/structure/check.py`、`docs/review/structure_storm_back_*`）: 到着から広間 96 歩・w0/e0 124・f0 172・w1 187・眼の間 199 で着く。外への口は割れた床 4・羽根の門 2・背の上の段 1 だけ。水 0。看板 9。
+- 見た目（台本で撮った。`docs/review/ingame_storm_back_*.png`）: 真上・到着（目盛りが枠に収まる）・尾の間・風の広間・風切りの骨・雷の骨・眼の間・竜骨の間。
+- 起動時の建設時間: 鳥を置く 0.5〜0.7 秒（初回 32 万ブロック 0.6 秒）、部屋を掘る 0.5 秒、合わせて **1.1〜1.4 秒**（自己テストの専用サーバー）。潮殻の島（0.7 秒）と同じくらいで、岩鯨（13〜20 秒）の決め（00 の 109）はいらない。
+
+#### 17.1.3 判断が要る点
+
+00 の O 群（117〜120）: 近景の箱の数（2277 を推奨）、風見鶏の絵と回るモデル（今は仮）、風見鶏の待ちを保存するか、避雷の柱・戻しの鏡を専用ブロックにするか。
+
 ### 17.6 担当 6: 伝承とクエスト（2026-10-17）
 
 #### 17.6.1 作ったもの

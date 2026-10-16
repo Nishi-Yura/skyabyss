@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "rot=0": {
+      "model": "skyabyss:block/feather_mirror",
+      "y": 0
+    },
+    "rot=1": {
+      "model": "skyabyss:block/feather_mirror",
+      "y": 90
+    },
+    "rot=2": {
+      "model": "skyabyss:block/feather_mirror",
+      "y": 180
+    },
+    "rot=3": {
+      "model": "skyabyss:block/feather_mirror",
+      "y": 270
+    }
+  }
+}

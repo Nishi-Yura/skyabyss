@@ -61,12 +61,12 @@
 ```
 ./gradlew runShots -Pscript=tools/shots/dump_backs.txt                              # 岩鯨・潮殻の背 → run/shots/dump_backs/dumps/*.sbd
 SKYABYSS_DUMP=titan_back,tide_back ./gradlew runServer                               # 専用サーバーで書いて止まる → run/dumps/*.sbd (ポートが空いているとき)
-/skyabyss dev dump preset <titan_back|tide_back>                                      # 台本の cmd や RCON から (島が無ければ建てる)
+/skyabyss dev dump preset <titan_back|tide_back|storm_back>                           # 台本の cmd や RCON から (島が無ければ建てる)
 /execute in skyabyss:titan_back run skyabyss dev dump <名前> <x1 y1 z1> <x2 y2 z2>     # 好きな範囲
 ```
 
 書き出し先は `<ゲームのフォルダ>/dumps/<名前>.sbd` (環境変数 `SKYABYSS_DUMP_OUT` で変えられる)。台本では書き終わるまで `waitdump` で待つ。
-`/skyabyss dev arrive <titan_back|tide_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
+`/skyabyss dev arrive <titan_back|tide_back|storm_back>` は到着地点へ到着の向きで移る (台本で撮るとき用)。
 
 図と検査:
 
@@ -80,7 +80,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | `walk.png` | 歩き始め (`--walk-from`、既定 `arrival`) から歩いて行ける足の位置 (高さで色) と目標の印 |
 | `report.txt` | 目標 (`--goal`) に何歩で着くか (着かなければ一番近くまで来た所。終了コード 1)、部屋 (`--seed`) から外への口の一覧、水が広がる見積もり (今流れている水、流れたら埋まる空気。部屋の中の分)、看板の一覧 (lang のキー) |
 
-起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …)。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
+起点の名前はヘッダにある (`titan_back`: `arrival` `shrine` `hub`、`tide_back`: `arrival` `rest_hub` `rest_g0` …、`storm_back`: `arrival` `hub` `rest_*` `west_stone` `east_stone` `front_stone` `eye_hall`)。雷翼の背は `tools/shots/storm_back.txt` で書き出しと撮影を一度にする。`"x,y,z"`、`"x,~,z"` (列でいちばん上の立てる所) でもよい。
 歩く決まり (上り 1・下り 3・頭 2 マス・水の中は 1 つ上へ) は背の自己テスト (`TideBackSelfTest.walk`) と同じ。水は実際より多めに出る (バニラは近くの落ち口の方へだけ流れるため)。
 部品は `sbd.py` (読む)、`analyze.py` (囲まれた空間と口・歩く・水・看板)、`render.py` (図)。新しく背中の検査を書くときは、自己テストに同じ探索を書き足す前にこれで見る。例は `docs/review/structure_*`。
 

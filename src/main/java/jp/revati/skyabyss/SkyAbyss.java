@@ -54,6 +54,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.travel.TravelSetup.register(modEventBus);
         // 第二の巨神「潮殻の巨神」(エンティティ・音)。登録は titan.tide パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.TideSetup.register(modEventBus);
+        // 第三の巨神「雷翼の巨神」(エンティティ・音・背中の結びつけ)。登録は titan.storm パッケージにまとめてある
+        jp.revati.skyabyss.titan.storm.StormSetup.register(modEventBus);
         // 潮殻の背の敵 (珊瑚憑き・磯走り・泡吹き)
         jp.revati.skyabyss.titan.tide.mob.TideMobSetup.register(modEventBus);
         // 装飾の枠 (護符 1・装飾 2。記録・画面・パケット)。登録は item.accessory パッケージにまとめてある
@@ -62,6 +64,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
         // 潮殻の背の本番 (潮鳴り石、潮の真珠、群れの巣、潮招き)
         jp.revati.skyabyss.titan.tide.back.TideBackSetup.register(modEventBus);
+        // 雷翼の背 (鳥の形の背中・三つの試練: 風鳴り石、羽鏡、受け羽、風切りの羽根)
+        jp.revati.skyabyss.titan.storm.back.StormBackSetup.register(modEventBus);
         // 1 章の終わり (天の鍵、ベータの終わり)。docs/design/14_beta.md
         jp.revati.skyabyss.story.StorySetup.register(modEventBus);
         // 潮殻の装備 (鎧・三叉槍・盾・護符・専用伝説・心核) と図鑑の表。登録は titan.tide.gear パッケージにまとめてある
