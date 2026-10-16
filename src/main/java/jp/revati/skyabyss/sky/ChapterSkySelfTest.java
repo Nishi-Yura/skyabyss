@@ -110,7 +110,7 @@ public final class ChapterSkySelfTest {
         if (FAILURES.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST chapter sky PASSED (moon, stages, eye conditions, outcomes, data, payloads, chapter 1, "
                     + "peak scar: finds the peak, carves only the plan, refuses every artifact and every stone-and-dirt build, stops when a block changes, "
-                    + "records placing and digging, still carves real mountain peaks)");
+                    + "records placing and digging, tries real mountain peaks)");
         } else {
             FAILURES.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST chapter sky FAILED: {}", f));
         }
@@ -333,6 +333,8 @@ public final class ChapterSkySelfTest {
                 forced.add(new ChunkPos(cx, cz));
             }
         }
+        // 固定の峰のバイオームは種しだいなので、草の育つ平原に決めて試す (砂漠などの判定は checkForeignSoil で決まった形で試す)
+        PeakScar.testBiome = biome(level, Biomes.PLAINS);
         try {
             forgetTestScars(data);
             float dirX = 1f;
@@ -551,12 +553,49 @@ public final class ChapterSkySelfTest {
             if (!flat.isEmpty() && flat.stream().anyMatch(c -> Math.abs(c.x() - CX) < RADIUS && Math.abs(c.z() - CZ) < RADIUS)) {
                 failures.add("a flat plateau was taken for a peak");
             }
+
+            // 11. 砂漠・荒野・浜の地表の草や土は運び込まれたもの。同じ峰でも、平原なら削り、砂漠などなら削らない
+            checkForeignSoil(level, peak, failures);
         } finally {
+            PeakScar.testBiome = null;
             clearArea(level);
             forgetTestScars(data);
             for (ChunkPos p : forced) {
                 level.setChunkForced(p.x, p.z, false);
             }
+        }
+    }
+
+    private static Holder<Biome> biome(ServerLevel level, ResourceKey<Biome> key) {
+        return level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).getHolderOrThrow(key);
+    }
+
+    // バイオームの表層に合わない土の判定を、種に頼らず決まった形で試す (終わったら平原に戻す)
+    private static void checkForeignSoil(ServerLevel level, PeakScar.Candidate peak, List<String> failures) {
+        for (ResourceKey<Biome> key : List.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.BEACH,
+                Biomes.SNOWY_BEACH)) {
+            if (!PeakScar.foreignBiome(biome(level, key))) {
+                failures.add("soil on " + key.location().getPath() + " was not taken as foreign");
+            }
+        }
+        for (ResourceKey<Biome> key : List.of(Biomes.PLAINS, Biomes.MEADOW, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.JAGGED_PEAKS,
+                Biomes.STONY_PEAKS, Biomes.FROZEN_PEAKS, Biomes.WINDSWEPT_HILLS)) {
+            if (PeakScar.foreignBiome(biome(level, key))) {
+                failures.add("soil on " + key.location().getPath() + " was taken as foreign");
+            }
+        }
+        try {
+            for (ResourceKey<Biome> key : List.of(Biomes.DESERT, Biomes.BADLANDS, Biomes.BEACH)) {
+                PeakScar.testBiome = biome(level, key);
+                buildPeak(level);
+                PeakScar.Result r = PeakScar.plan(level, peak, 1f, 0f, 0.5f, RandomSource.create(5), PeakScar.PLAYER_CLEAR);
+                if (r.plan() != null || !r.reason().startsWith("built shape: soil that does not belong")) {
+                    failures.add("a grassy peak in a " + key.location().getPath() + " should be refused as carried-in soil, got "
+                            + (r.plan() != null ? "a plan" : r.reason()));
+                }
+            }
+        } finally {
+            PeakScar.testBiome = biome(level, Biomes.PLAINS);
         }
     }
 
@@ -944,7 +983,8 @@ public final class ChapterSkySelfTest {
 
     private static void finishRealPeaks(ServerLevel level, List<String> failures) {
         int skipped = realSkipped;
-        SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks tried {}, carved {}, reasons {}", realTried, realCarved, REAL_REASONS);
+        SkyAbyss.LOGGER.info("SELFTEST chapter sky: real peaks (seed {}) tried {}, carved {}, reasons {}", level.getSeed(), realTried, realCarved,
+                REAL_REASONS);
         SkyAbyss.LOGGER.info("SELFTEST chapter sky: shape rules hit on {} natural areas: {}", realGrids, REAL_HITS);
         // 本物の山はワールドの種で変わる。新しいワールドでは生成に時間がかかり、最初の一つ二つの場所しか調べられない。
         // だから「削れる峰が一つもない」は、全部の場所を調べられたときだけ失敗にする (調べ残しがあれば、次の起動で残りを調べる)。
@@ -954,7 +994,9 @@ public final class ChapterSkySelfTest {
         if (realTried == 0 && skipped == 0) {
             failures.add("no real mountain peak was found to test");
         } else if (realCarved == 0 && skipped == 0) {
-            failures.add("no real mountain peak could be carved (" + REAL_REASONS + ")");
+            // 種によっては、見つかる峰がどれも自然の平らな面 (凍った峰の氷塊など) や蜂の巣のそばで、一つも削れない (安全側)。
+            // 削れることは固定の峰で決まった形で確かめているので、本物の峰では警告だけにする
+            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no real peak could be carved in this world (seed {}): {}", level.getSeed(), REAL_REASONS);
         } else if (realCarved == 0) {
             SkyAbyss.LOGGER.warn("SELFTEST chapter sky: no real peak carved yet in {} tries, {} sites left for the next start ({})",
                     realTried, skipped, REAL_REASONS);
@@ -964,10 +1006,12 @@ public final class ChapterSkySelfTest {
                     builtHits, realTried, REAL_REASONS);
         }
         failures.addAll(REAL_FAILURES);
-        // 砂漠の地表に土があれば、運び込まれたものとみなす
+        // 本物の砂漠でも同じに見えるか。見つかる場所は砂漠の縁で、ブロックごとのバイオームは境目でとなりのものに揺れる (種しだい)。
+        // だから警告だけにする。判定そのものは checkForeignSoil で決まった形で試している
         Pair<BlockPos, Holder<Biome>> desert = level.findClosestBiome3d(h -> h.is(Biomes.DESERT), new BlockPos(0, 64, 3000), 2400, 32, 64);
         if (desert != null && !PeakScar.foreignSoil(level, desert.getFirst())) {
-            failures.add("soil in a desert was not taken as foreign");
+            SkyAbyss.LOGGER.warn("SELFTEST chapter sky: the block biome at the found desert {} is {} (a biome edge), not taken as foreign",
+                    desert.getFirst(), level.getBiome(desert.getFirst()).getRegisteredName());
         }
     }
 
@@ -1034,8 +1078,10 @@ public final class ChapterSkySelfTest {
             }
             // 山の地表の土は、そのバイオームのもの
             BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at).below();
+            // (見つかる場所は峰のバイオームの縁なので、となりの砂漠・荒野・浜にかかることがある。種しだいなので警告だけ)
             if (PeakScar.foreignSoil(level, ground)) {
-                REAL_FAILURES.add("soil on a " + site.biome().location().getPath() + " was taken as foreign");
+                SkyAbyss.LOGGER.warn("SELFTEST chapter sky: the ground {} near the {} is in {}, taken as foreign", ground,
+                        site.biome().location().getPath(), level.getBiome(ground).getRegisteredName());
             }
         } finally {
             PeakScar.gridProbe = null;
