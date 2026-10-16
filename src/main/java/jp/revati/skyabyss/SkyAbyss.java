@@ -58,6 +58,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.tide.mob.TideMobSetup.register(modEventBus);
         // 装飾の枠 (護符 1・装飾 2。記録・画面・パケット)。登録は item.accessory パッケージにまとめてある
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
+        // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
+        jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

@@ -254,5 +254,57 @@
   "tide_back_waves": {
     "subtitle": "subtitles.skyabyss.tide_back_waves",
     "sounds": [{"name": "skyabyss:tide/back_waves", "stream": true}]
+  },
+  "tide_heart_beat": {
+    "subtitle": "subtitles.skyabyss.tide_heart_beat",
+    "sounds": [{"name": "skyabyss:tide_heart/beat"}]
+  },
+  "tide_heart_roar": {
+    "subtitle": "subtitles.skyabyss.tide_heart_roar",
+    "sounds": [{"name": "skyabyss:tide_heart/roar", "attenuation_distance": 24}]
+  },
+  "tide_heart_breath": {
+    "subtitle": "subtitles.skyabyss.tide_heart_breath",
+    "sounds": [{"name": "skyabyss:tide_heart/breath"}]
+  },
+  "tide_heart_shell": {
+    "subtitle": "subtitles.skyabyss.tide_heart_shell",
+    "sounds": [{"name": "skyabyss:tide_heart/shell"}]
+  },
+  "tide_heart_whirl": {
+    "subtitle": "subtitles.skyabyss.tide_heart_whirl",
+    "sounds": [{"name": "skyabyss:tide_heart/whirl"}]
+  },
+  "tide_heart_flood": {
+    "subtitle": "subtitles.skyabyss.tide_heart_flood",
+    "sounds": [{"name": "skyabyss:tide_heart/flood", "attenuation_distance": 24}]
+  },
+  "tide_heart_spear": {
+    "subtitle": "subtitles.skyabyss.tide_heart_spear",
+    "sounds": [{"name": "skyabyss:tide_heart/spear"}]
+  },
+  "tide_heart_bubble": {
+    "subtitle": "subtitles.skyabyss.tide_heart_bubble",
+    "sounds": [{"name": "skyabyss:tide_heart/bubble"}]
+  },
+  "tide_heart_pearl": {
+    "subtitle": "subtitles.skyabyss.tide_heart_pearl",
+    "sounds": [{"name": "skyabyss:tide_heart/pearl"}]
+  },
+  "tide_heart_ebb": {
+    "subtitle": "subtitles.skyabyss.tide_heart_ebb",
+    "sounds": [{"name": "skyabyss:tide_heart/ebb"}]
+  },
+  "tide_heart_wave": {
+    "subtitle": "subtitles.skyabyss.tide_heart_wave",
+    "sounds": [{"name": "skyabyss:tide_heart/wave", "attenuation_distance": 24}]
+  },
+  "tide_heart_rain": {
+    "subtitle": "subtitles.skyabyss.tide_heart_rain",
+    "sounds": [{"name": "skyabyss:tide_heart/rain"}]
+  },
+  "tide_heart_death": {
+    "subtitle": "subtitles.skyabyss.tide_heart_death",
+    "sounds": [{"name": "skyabyss:tide_heart/death", "attenuation_distance": 24}]
   }
 }

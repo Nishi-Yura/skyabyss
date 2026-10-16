@@ -409,7 +409,7 @@ public final class TitanLoot {
 
     // 生きていて、いまサーバーにいる人だけが、その場で受け取れる。
     // 倒れている人に渡すと、目を覚ましたときに預かり物 (TitanBackTrials) で上書きされて消えるため
-    private static boolean canReceive(@Nullable ServerPlayer player) {
+    public static boolean canReceive(@Nullable ServerPlayer player) {
         return player != null && player.isAlive() && !player.hasDisconnected();
     }
 
@@ -425,7 +425,7 @@ public final class TitanLoot {
     }
 
     // 渡せる分は手もとへ。受け取れない人の分と、あふれた分は預かる。預かった品の数を返す
-    private static int handOver(MinecraftServer server, UUID uuid, @Nullable ServerPlayer player, List<ItemStack> items, int xp) {
+    public static int handOver(MinecraftServer server, UUID uuid, @Nullable ServerPlayer player, List<ItemStack> items, int xp) {
         if (!canReceive(player)) {
             TitanMemoryData.Pending pending = memory(server).pending(uuid);
             items.forEach(s -> pending.items.add(s.copy()));
@@ -452,7 +452,7 @@ public final class TitanLoot {
         return stack;
     }
 
-    private static void tellHeld(ServerPlayer player, int held) {
+    public static void tellHeld(ServerPlayer player, int held) {
         if (held <= 0) {
             return;
         }
@@ -516,7 +516,7 @@ public final class TitanLoot {
 
     // ---------------------------------------------------------------- 知らせ
     // 受け取ったもの: 【岩鯨の欠片】×5 【共鳴の欠片】×2 … (名前にカーソルで説明)
-    private static MutableComponent rewardLine(List<ItemStack> items) {
+    public static MutableComponent rewardLine(List<ItemStack> items) {
         Map<Item, Integer> counts = new LinkedHashMap<>();
         for (ItemStack s : items) {
             counts.merge(s.getItem(), s.getCount(), Integer::sum);
@@ -556,7 +556,7 @@ public final class TitanLoot {
     }
 
     // 名前にカーソルを合わせると、装備の説明が出る
-    private static MutableComponent itemLink(ItemStack stack) {
+    public static MutableComponent itemLink(ItemStack stack) {
         return Component.literal("【").append(stack.getHoverName()).append("】")
                 .withStyle(s -> s.withColor(0xF2B53A).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(stack))));
     }
