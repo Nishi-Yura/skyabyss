@@ -108,9 +108,11 @@ public final class SiteSelfTest {
         if (camp == null || shelter == null || ribs == null) {
             return;
         }
-        // スポーンが野営地 (新しいワールドなので動かす)
+        // スポーンが野営地 (新しいワールドで計画したときだけ動かす。前から遊んでいるワールドでは動かさない)
         BlockPos spawn = level.getSharedSpawnPos();
-        check(f, OpeningSites.horizontal(spawn, camp) <= 6, "spawn " + spawn + " is not at the camp " + camp);
+        if (SiteData.get(level).plannedAt() < SiteBuilds.NEW_WORLD_TICKS) {
+            check(f, OpeningSites.horizontal(spawn, camp) <= 6, "spawn " + spawn + " is not at the camp " + camp);
+        }
         // 距離
         double ds = OpeningSites.horizontal(camp, shelter);
         double dr = OpeningSites.horizontal(camp, ribs);
