@@ -56,10 +56,65 @@ public final class NpcSpawner {
         }
         Optional<BlockPos> bell = level.getPoiManager().findClosest(h -> h.is(PoiTypes.MEETING), player.blockPosition(), VILLAGE_RADIUS,
                 PoiManager.Occupancy.ANY);
-        bell.ifPresent(b -> visitVillage(level, b, player));
+        if (bell.isPresent()) {
+            visitVillage(level, bell.get(), player);
+            return;
+        }
+        // 鐘のある村が近くに無い人のための野営 (StoryGuide が焚き火を置く)。村と同じように語り部が立ち、必要なら鯨追いも立つ
+        BlockPos camp = nearestCamp(NpcWorldData.get(level.getServer().overworld()), player.blockPosition(), VILLAGE_RADIUS);
+        if (camp != null) {
+            visitVillage(level, camp, player);
+        }
     }
 
-    static void visitVillage(ServerLevel level, BlockPos bell, ServerPlayer player) {
+    // 位置 near から水平 radius 以内の、いちばん近い野営の焚き火 (なければ null)
+    @Nullable
+    public static BlockPos nearestCamp(NpcWorldData data, BlockPos near, double radius) {
+        BlockPos best = null;
+        double bestD = radius * radius;
+        for (long packed : data.camps) {
+            BlockPos camp = BlockPos.of(packed);
+            double dx = camp.getX() - near.getX();
+            double dz = camp.getZ() - near.getZ();
+            double d = dx * dx + dz * dz;
+            if (d <= bestD) {
+                best = camp;
+                bestD = d;
+            }
+        }
+        return best;
+    }
+
+    // 語り部の野営を、位置 around の 18〜34 ブロック先の自然の地面に作る (焚き火を置き、野営として記録する)。置けなければ null。
+    // 語り部本人は、このあと visitVillage が (焚き火を鐘の代わりにして) 立たせる
+    @Nullable
+    public static BlockPos buildCamp(ServerLevel level, BlockPos around, RandomSource random) {
+        for (int i = 0; i < 80; i++) {
+            double angle = random.nextDouble() * Math.PI * 2;
+            int r = 18 + random.nextInt(17);
+            BlockPos column = around.offset((int) Math.round(Math.cos(angle) * r), 0, (int) Math.round(Math.sin(angle) * r));
+            if (!level.isLoaded(column)) {
+                continue;
+            }
+            BlockPos at = ground(level, column, 12, 16);
+            if (at == null || !openSky(level, at) || !natural(level.getBlockState(at.below()))) {
+                continue;
+            }
+            BlockPos fire = campfireSpot(level, at, random);
+            if (fire == null) {
+                continue;
+            }
+            level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), 3);
+            NpcWorldData data = NpcWorldData.get(level.getServer().overworld());
+            data.camps.add(fire.asLong());
+            data.setDirty();
+            SkyAbyss.LOGGER.info("[npc] a storyteller's camp was made at {}", fire);
+            return fire;
+        }
+        return null;
+    }
+
+    public static void visitVillage(ServerLevel level, BlockPos bell, ServerPlayer player) {
         if (!entitiesLoaded(level, bell)) {
             return;
         }
