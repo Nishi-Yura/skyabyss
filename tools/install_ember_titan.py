@@ -423,32 +423,51 @@ def snap_blocks(K, parts, q, protect=None):
     K[...] = B.reshape(a, b, c, q, q, q).transpose(0, 3, 1, 4, 2, 5).reshape(K.shape)
 
 
+def _group_crop(P, parts):
+    """格子 P のうち、組 parts のセルを含む最小の箱 (まわりに 1 セルの余白) の slice。なければ None。
+    (メモリ: ラベル付けと膨張を、格子全体でなくこの箱の中だけにする。結果は同じ)"""
+    m = np.isin(P, parts)
+    if not m.any():
+        return None, None
+    sl = []
+    for ax in range(3):
+        other = tuple(a for a in range(3) if a != ax)
+        idx = np.flatnonzero(m.any(axis=other))
+        sl.append(slice(max(int(idx[0]) - 1, 0), min(int(idx[-1]) + 2, P.shape[ax])))
+    sl = tuple(sl)
+    return sl, m[sl]
+
+
 def islands_fix(G, label):
     """組ごとに、一番大きい塊以外を消す (別の骨に接する塊は、その骨に移す)。ログを返す"""
     P = G // 32
     log = []
     for name, parts in GROUPS.items():
-        m = np.isin(P, parts)
+        sl, m = _group_crop(P, parts)
+        if sl is None:
+            continue
         lab, n = ndimage.label(m)
         if n <= 1:
             continue
         sizes = ndimage.sum(m, lab, range(1, n + 1))
         big = int(np.argmax(sizes)) + 1
+        Gs = G[sl]
         for i in range(1, n + 1):
             if i == big:
                 continue
             comp = lab == i
             ring = ndimage.binary_dilation(comp) & ~comp
-            touch = G[ring] // 32
+            touch = Gs[ring] // 32
             touch = touch[(touch != 0) & ~np.isin(touch, parts)]
             if touch.size:
                 vals, cnt = np.unique(touch, return_counts=True)
                 to = int(vals[np.argmax(cnt)])
-                G[comp] = to * 32 + G[comp] % 32
+                Gs[comp] = to * 32 + Gs[comp] % 32
                 log.append("%s %s: %d セルの塊を %s に移した" % (label, name, int(sizes[i - 1]), PART_BONE[to]))
             else:
-                G[comp] = 0
+                Gs[comp] = 0
                 log.append("%s %s: %d セルの浮いた塊を消した" % (label, name, int(sizes[i - 1])))
+        # 次の組が見る P も、移したセルの分だけ直す (元は組ごとに P を作り直さず、G の変更を見ない。同じにするため P は触らない)
     return log
 
 
@@ -456,11 +475,12 @@ def islands(G):
     P = G // 32
     out = {}
     for name, parts in GROUPS.items():
-        m = np.isin(P, parts)
-        if m.any():
-            n = ndimage.label(m)[1]
-            if n > 1:
-                out[name] = n - 1
+        sl, m = _group_crop(P, parts)
+        if sl is None:
+            continue
+        n = ndimage.label(m)[1]
+        if n > 1:
+            out[name] = n - 1
     return out
 
 

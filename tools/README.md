@@ -159,7 +159,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 2026-10-17 | `accessory_slot_roughs/` (B) | `compare.png` (片付けのときに `a.png`〜`c.png` を横に並べて作った) | `a.png`〜`c.png` |
 | 2026-10-17 | `board_roughs/` (A を仮に採用。比べ直しは 00 の 85 の比較画像で) | `compare.png`、`README.md` (選定理由) | `option_A/`〜`option_C/` |
 | 2026-10-17 | `tide_shell_roughs/` (本体 B、心臓 B、珊瑚憑き A・磯走り A・泡吹き A、00 の 55) | 比較画像 `titan.png`・`heart.png`・`coral_thrall.png`・`reef_scuttler.png`・`bubble_puffer.png`。選ばれた案のデータ `titan/b/`・`heart/b/`・`heart/bars.png`・`mobs/coral_thrall/a/`・`mobs/coral_spear/`・`mobs/reef_scuttler/a/`・`mobs/bubble_puffer/a/` (心臓と敵の担当が並行で読むので、今は場所を変えない。取り込みが済んだら `tools/sources/` へ移すか消す)。`mobs/bubble_puffer/c/` (月明かりのクラゲ混じり) も残す: 08 の 14.3節で「3 章以降の別の種に回せる」としたため。`install/` は `install_tide_shell.py` の確認用の出力。`install_tide_shell.py` は B 案を `rough/tide_shell_titan.py` から import して作り、ここのファイルは比較の絵 (`titan/b/far.png`、無ければ飛ばす) しか読まない | `titan/a/`・`titan/c/`、`heart/a/`・`heart/c/`、`mobs/coral_thrall/b/`・`c/`、`mobs/reef_scuttler/b/`・`c/`、`mobs/bubble_puffer/b/` |
-
+| 2026-10-17 | `high_poly_roughs/assets/` (全モデルのハイポリ化、15。採用は全部 C か、岩鯨・潮殻の C) | 比較画像 `*.png` と `ingame/`、採用した案 `stone_whale_C/`・`tide_shell_C/`・`storyteller_C/`・`watcher_C/`・`whale_chaser_C/` (今の `src/` と同じ中身) | 採らなかった案 `*_A/`・`*_B/` (敵 13 種・NPC 3 種・中ボス 4 種・雷翼と余燼の本体)、`raiju_Blean/`。どれも `tools/rough/hp_*.py` を回せば作り直せる (`tools/sources/hp_base/` が入力) |
 
 生成元のないもの (今の `src/` が正本): 番兵 (`bone_sentinel`) と盾、水路の顎 (`waterway_maw`)、甲殻の防具 (`geo/armor`、`textures/armor`)、`textures/item/3d/bone_spike_arrow.png`、`sounds/**/*.ogg`。
 

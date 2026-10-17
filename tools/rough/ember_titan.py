@@ -818,10 +818,15 @@ def drop_islands(min_cells=4000):
     lab, n = ndimage.label(K != 0)
     if n <= 1:
         return
-    sizes = ndimage.sum(np.ones(K.shape, np.uint8), lab, range(1, n + 1))
+    # (memory: the sizes by bincount and the small labels by a lookup table; the old ndimage.sum over a ones array and np.isin
+    #  over the whole label grid needed about 2 GB more.  Same result.)
+    sizes = np.bincount(lab.ravel(), minlength=n + 1)[1:]
     small = np.flatnonzero(sizes < min_cells) + 1
     if small.size:
-        K[np.isin(lab, small)] = 0
+        is_small = np.zeros(n + 1, bool)
+        is_small[small] = True
+        K[is_small[lab]] = 0
+        del is_small
     print(f"  islands removed: {small.size} ({int(sizes[small - 1].sum()) if small.size else 0} cells)", flush=True)
 
 

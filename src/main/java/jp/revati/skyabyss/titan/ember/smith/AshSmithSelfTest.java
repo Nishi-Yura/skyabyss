@@ -375,9 +375,15 @@ public final class AshSmithSelfTest {
         check(Math.abs(s.getMaxHealth() - AshSmith.HEALTH) < 0.01, "max health " + s.getMaxHealth(), f);
         check(AshSmithArena.inside(s.position()), "smith spawned outside the room at " + s.position(), f);
         // 部屋の外へ出たら戻される (BossRoom)
-        s.moveTo(AshSmithArena.HOME.x + 40, AshSmithArena.FLOOR + 1, AshSmithArena.HOME.z, 0f, 0f);
+        // 戻す距離 (leash 17) を少し超えるだけ動かし、動かした先のチャンクを先に読んでおく。遠く (+40) の外側のチャンクは、
+        // 新しいワールドでは強制読み込みがまだ終わっていないことがあり、そこへ動かした鍛え手が level.getEntity で見つからず
+        // BossRoom.tick が「消えた」として戦いを捨て、戻されずにまれに落ちていた
+        double outX = AshSmithArena.HOME.x + 22;
+        level.getChunk(((int) Math.floor(outX)) >> 4, ((int) Math.floor(AshSmithArena.HOME.z)) >> 4);
+        s.moveTo(outX, AshSmithArena.FLOOR + 1, AshSmithArena.HOME.z, 0f, 0f);
         AshSmithBattle.room().tick(level, AshSmithBattle.host());
-        check(s.distanceToSqr(AshSmithArena.HOME) < 1, "the smith outside the room was not brought back", f);
+        check(s.distanceToSqr(AshSmithArena.HOME) < 1, "the smith outside the room was not brought back (alive " + s.isAlive() + ", found "
+                + (level.getEntity(s.getUUID()) != null) + ", at " + s.position() + ")", f);
         AshSmithBattle.abandon(server);
     }
 
