@@ -2,6 +2,7 @@
   "opening.skyabyss.line": "……ここは、どこだ。",
   "opening.skyabyss.margin_line": "鐘の方へ。",
   "objective.skyabyss.examine_camp": "野営地に残された跡",
+  "opening.skyabyss.hint_move": "%s %s %s %s で歩く、%s で跳ぶ",
   "objective.skyabyss.follow_smoke": "煙の立つ方",
   "objective.skyabyss.watch_sky": "晴れた昼の空",
   "objective.skyabyss.ask_storyteller": "宿りの語り部",

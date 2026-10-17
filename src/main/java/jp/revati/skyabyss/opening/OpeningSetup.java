@@ -25,6 +25,7 @@ public final class OpeningSetup {
     public static final DeferredHolder<SoundEvent, SoundEvent> BELL = sound("opening_bell");
     public static final DeferredHolder<SoundEvent, SoundEvent> STEP = sound("opening_step");
     public static final DeferredHolder<SoundEvent, SoundEvent> RUMBLE = sound("opening_rumble");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WIND = sound("opening_wind");
     public static final DeferredHolder<SoundEvent, SoundEvent> SONG = sound("opening_song");
 
     private OpeningSetup() {

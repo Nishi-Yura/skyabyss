@@ -1,0 +1,33 @@
+# 新しいワールドの開幕を、入った直後から時間ごとに撮る (docs/design/17 の開幕の磨き)。
+# 使い方: ./gradlew runShots -Pscript=tools/shots/opening_v2.txt -PshotsName=<まだ使っていない名前>   (新しい名前 = 新しいワールド)
+# 暗転 → まぶた → 題字 → 一行 → 野営地の景色と目的の帯。バニラの札と伝承の書が出ていないことも絵で確かめる。操作は送らない
+world shots flat
+size 1280 720
+timeout 420
+render 8
+clouds off
+hud on
+
+wait 30
+shot v2_a
+wait 40
+shot v2_b
+wait 40
+shot v2_c
+wait 40
+shot v2_d
+wait 40
+shot v2_e
+wait 40
+shot v2_f
+wait 40
+shot v2_g
+wait 40
+shot v2_h
+wait 40
+shot v2_i
+wait 60
+shot v2_j
+wait 120
+shot v2_k
+echo done

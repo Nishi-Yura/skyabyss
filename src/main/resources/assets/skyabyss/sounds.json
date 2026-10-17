@@ -1509,6 +1509,15 @@
       }
     ]
   },
+  "opening_wind": {
+    "subtitle": "subtitles.skyabyss.opening_wind",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/wind",
+        "stream": true
+      }
+    ]
+  },
   "opening_song": {
     "subtitle": "subtitles.skyabyss.opening_song",
     "sounds": [

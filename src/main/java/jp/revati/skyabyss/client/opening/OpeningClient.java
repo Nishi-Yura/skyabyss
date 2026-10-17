@@ -72,6 +72,9 @@ public final class OpeningClient {
         switch (payload.kind()) {
             case OpeningNetwork.CUE_AWAKE -> {
                 awakeStart = clock;
+                // 低い風、かすかな地鳴り、鼓動、遠い鐘 (暗いうちに重なっていく)
+                play(OpeningSetup.WIND.get(), 0.5f, 1.0f, 0);
+                play(OpeningSetup.RUMBLE.get(), 0.22f, 0.9f, 10);
                 play(OpeningSetup.HEARTBEAT.get(), 0.8f, 1.0f, 0);
                 play(OpeningSetup.BELL.get(), 0.4f, 0.85f, 70);
             }
@@ -222,6 +225,14 @@ public final class OpeningClient {
             return;
         }
         clock++;
+        if (awakeTicks() >= 0) {
+            // 開幕の間は、バニラのチュートリアルの札 (W A S D ...) や、ほかの札を出さない。操作の案内は目的の帯 (煙の立つ方) に添える
+            if (mc.options.tutorialStep != net.minecraft.client.tutorial.TutorialSteps.NONE) {
+                // チュートリアルは、この世界の開幕でそのまま終わりにする (あとから「W A S D」の札が出てこないように。一度だけ設定を書く)
+                mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
+            }
+            mc.getToasts().clear();
+        }
         if (!PENDING.isEmpty()) {
             PENDING.removeIf(p -> {
                 if (clock >= p.at()) {

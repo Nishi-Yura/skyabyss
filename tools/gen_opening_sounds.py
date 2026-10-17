@@ -7,6 +7,7 @@
 - bell.ogg      : B0 の遠い鐘 / B2 の鐘の宿りの鐘。風のない朝の小さな音 (6 秒)
 - step.ogg      : B6 夜の足音。遠くの巨大な足音 + 地鳴り (3.2 秒。立ち上がりはなめらかで、急な大音は出さない)
 - rumble.ogg    : B6 足音の下で続く地鳴り (6 秒)
+- wind.ogg      : B0 目覚めの低い風 (9 秒。ゆっくり寄せて引く。音量は小さく、立ち上がりはなめらか)
 - song.ogg      : B9 夜の歌。低く長い歌 (40 秒。音量は小さく、5 秒かけて入って 7 秒かけて消える)
 
 ジャンプスケア禁止 (17 の 6 章): どの音も数十〜数百ミリ秒の立ち上がりを持ち、最大音量はそろえてある。
@@ -194,9 +195,32 @@ def song():
     return x
 
 
+def wind():
+    dur = 9.0
+    n = int(SR * dur)
+    t = t_axis(dur)
+    # 低い息のような風: 帯域を狭めた雑音を、ゆっくりした波 (二つの周期) で揺らす。ひゅうという高音は作らない
+    body = lowpass(band_noise(n, 40, 420), 380)
+    air = lowpass(band_noise(n, 300, 1100), 900) * 0.25
+    gust = 0.55 + 0.45 * np.sin(2 * np.pi * 0.19 * t + 0.6) * np.sin(2 * np.pi * 0.07 * t + 1.1)
+    x = (body + air) * gust
+    x = reverb(x, 2.2, 0.25)[:n]
+    x *= smooth_env(n, 2.5, 3.5)
+    return x
+
+
 if __name__ == "__main__":
+    only = set(_sys.argv[1:])
+    if only:
+        # 名前を渡したものだけ書く (採用済みの音を上書きしない)。例: SKYABYSS_ALLOW_REGEN=1 python tools/gen_opening_sounds.py wind
+        for name, fn, peak in (("heartbeat", heartbeat, 0.75), ("bell", bell, 0.7), ("step", step, 0.85), ("rumble", rumble, 0.6),
+                               ("wind", wind, 0.5), ("song", song, 0.6)):
+            if name in only:
+                write(name + ".ogg", fn(), peak)
+        _sys.exit(0)
     write("heartbeat.ogg", heartbeat(), 0.75)
     write("bell.ogg", bell(), 0.7)
     write("step.ogg", step(), 0.85)
     write("rumble.ogg", rumble(), 0.6)
+    write("wind.ogg", wind(), 0.5)
     write("song.ogg", song(), 0.6)
