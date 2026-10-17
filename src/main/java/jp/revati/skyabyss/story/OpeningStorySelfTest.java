@@ -58,6 +58,12 @@ public final class OpeningStorySelfTest {
     private OpeningStorySelfTest() {
     }
 
+    // 新しいワールドの直後は、スポーン地点の塊がまだ「エンティティが動く」状態になっておらず、足した NPC が見つからない
+    // (会話が開かない)。先に塊を強制読み込みにして、動く状態になるまで待つ (実際の遊びでは人の近くの塊は必ず動いている)
+    public static boolean ready(MinecraftServer server) {
+        return StorySelfTest.chunkReady(server, 0);
+    }
+
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
@@ -247,6 +253,7 @@ public final class OpeningStorySelfTest {
         wc.setNoGravity(true);
         level.addFreshEntity(st);
         level.addFreshEntity(wc);
+        check(level.getEntity(st.getId()) == st && level.getEntity(wc.getId()) == wc, "the npcs are not in the entity lookup (is the chunk entity-ticking?)", failures);
         spawned.add(st);
         spawned.add(wc);
 
