@@ -2,6 +2,7 @@
   "opening.skyabyss.line": "...Where am I?",
   "opening.skyabyss.margin_line": "Toward the bell.",
   "objective.skyabyss.examine_camp": "What the camp left behind",
+  "opening.skyabyss.hint_move": "%s %s %s %s to walk, %s to jump",
   "objective.skyabyss.follow_smoke": "Where the smoke rises",
   "objective.skyabyss.watch_sky": "The clear midday sky",
   "objective.skyabyss.ask_storyteller": "The storyteller at the lodge",

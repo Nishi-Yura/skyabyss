@@ -84,6 +84,13 @@ public final class ObjectiveStrip {
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
             draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), opening.target());
+            if (opening.id().equals("follow_smoke")) {
+                // 最初の目的の下に、操作の案内をひとこと控えめに (バニラのチュートリアルの札の代わり)
+                Component hint = Component.translatable("opening.skyabyss.hint_move", mc.options.keyUp.getTranslatedKeyMessage(),
+                        mc.options.keyLeft.getTranslatedKeyMessage(), mc.options.keyDown.getTranslatedKeyMessage(),
+                        mc.options.keyRight.getTranslatedKeyMessage(), mc.options.keyJump.getTranslatedKeyMessage());
+                g.drawString(mc.font, hint, QuestHud.X, QuestHud.y() + ROW - 1, 0xFFB8C4BE, true);
+            }
             return;
         }
         QuestLog log = QuestLog.of(mc.player);

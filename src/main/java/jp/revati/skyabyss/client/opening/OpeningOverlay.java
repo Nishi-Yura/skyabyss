@@ -1,9 +1,13 @@
 package jp.revati.skyabyss.client.opening;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 // B0 開幕の暗転と題字 (docs/design/17 の 3.1節): 初めてワールドに入ったときだけ。
@@ -12,6 +16,17 @@ import net.minecraft.util.Mth;
 final class OpeningOverlay {
     // 全体の長さ (18 秒)
     static final int TOTAL = 360;
+    // 題字の絵 (1536 x 384)
+    private static final int TEX_W = 1536;
+    private static final int TEX_H = 384;
+    private static final ResourceLocation TITLE_JA = tex("title_ja");
+    private static final ResourceLocation TITLE_EN = tex("title_en");
+    private static final ResourceLocation TITLE_JA_GLOW = tex("title_ja_glow");
+    private static final ResourceLocation TITLE_EN_GLOW = tex("title_en_glow");
+
+    private static ResourceLocation tex(String name) {
+        return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/opening/" + name + ".png");
+    }
 
     private OpeningOverlay() {
     }
@@ -80,29 +95,49 @@ final class OpeningOverlay {
             }
         }
         Font font = mc.font;
-        float title = textAlpha(t, 140f, 190f, 300f, 350f);
+        // 題字: 明朝体で描いた絵 (tools/gen_opening_title.py)。ゆっくり浮かび上がり、青緑のかすかな光が呼吸する。言語が日本語以外なら英語の題字
+        float title = textAlpha(t, 130f, 230f, 300f, 350f);
         if (title > 0.02f) {
-            int alpha = Math.max(4, (int) (title * 255f));
-            Component text = Component.translatable("opening.skyabyss.title");
-            float scale = 2.6f;
-            int cx = w / 2;
-            int cy = (int) (h * 0.36f);
+            boolean ja = mc.options.languageCode.startsWith("ja");
+            ResourceLocation face = ja ? TITLE_JA : TITLE_EN;
+            ResourceLocation glow = ja ? TITLE_JA_GLOW : TITLE_EN_GLOW;
+            int tw = Math.min((int) (w * 0.7f), 4 * (int) (h * 0.5f));
+            int th = tw / 4;
+            // 浮かび上がる: 少し下から上がり、わずかに大きさが落ち着く
+            float rise = 1f - smooth((t - 130f) / 120f);
+            float scale = 1f + 0.03f * rise;
+            int x = (w - tw) / 2;
+            int y = (int) (h * 0.30f - th * 0.5f + rise * 6f);
+            // 明るい空でも読めるよう、題字のまわりをうっすら暗くする
+            int shade = (int) (title * 70f);
+            int sy = y + th / 2;
+            g.fillGradient(0, sy - th, w, sy, 0x00000000, shade << 24);
+            g.fillGradient(0, sy, w, sy + th, shade << 24, 0x00000000);
             g.pose().pushPose();
-            g.pose().translate(cx, cy, 0);
+            g.pose().translate(w / 2f, y + th / 2f, 0);
             g.pose().scale(scale, scale, 1f);
-            g.drawCenteredString(font, text, 0, -4, alpha << 24 | 0xF2C14E);
+            g.pose().translate(-w / 2f, -(y + th / 2f), 0);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            float breath = 0.6f + 0.4f * Mth.sin(t * 0.05f);
+            g.setColor(1f, 1f, 1f, title * breath);
+            g.blit(glow, x, y, tw, th, 0, 0, TEX_W, TEX_H, TEX_W, TEX_H);
+            g.setColor(1f, 1f, 1f, title);
+            g.blit(face, x, y, tw, th, 0, 0, TEX_W, TEX_H, TEX_W, TEX_H);
+            g.setColor(1f, 1f, 1f, 1f);
+            RenderSystem.disableBlend();
             g.pose().popPose();
-            // 題字の左右へ伸びる細い線
-            int half = (int) (font.width(text) * scale * 0.5f) + 18;
-            int lineAlpha = Math.max(4, (int) (title * 150f));
-            int reach = (int) (60 * title);
-            g.fill(cx - half - reach, cy + 2, cx - half, cy + 3, lineAlpha << 24 | 0xF2C14E);
-            g.fill(cx + half, cy + 2, cx + half + reach, cy + 3, lineAlpha << 24 | 0xF2C14E);
         }
+        // 開幕の一行: 字幕のように、画面の下に静かに
         float line = textAlpha(t, 230f, 280f, 320f, 360f);
         if (line > 0.02f) {
             int alpha = Math.max(4, (int) (line * 255f));
-            g.drawCenteredString(font, Component.translatable("opening.skyabyss.line"), w / 2, (int) (h * 0.36f) + 34, alpha << 24 | 0xE9E3D4);
+            int y = (int) (h * 0.80f);
+            int band = (int) (line * 110f);
+            g.fillGradient(0, y - 22, w, y - 4, 0x00000000, band << 24);
+            g.fill(0, y - 4, w, y + 16, band << 24);
+            g.fillGradient(0, y + 16, w, y + 34, band << 24, 0x00000000);
+            g.drawCenteredString(font, Component.translatable("opening.skyabyss.line"), w / 2, y, alpha << 24 | 0xEEF4F0);
         }
     }
 }
