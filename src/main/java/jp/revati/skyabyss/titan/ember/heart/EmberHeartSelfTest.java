@@ -492,6 +492,8 @@ public final class EmberHeartSelfTest {
         EmberHeart heart = EmberHeartBattle.current(back);
         if (heart == null) {
             f.add("no heart after starting (difficulty " + back.getDifficulty() + ")");
+        } else {
+            heart.skipIntro();
         }
         return heart;
     }
@@ -500,6 +502,13 @@ public final class EmberHeartSelfTest {
     private static void step(EmberHeart heart) {
         heart.tickCount++;
         heart.tick();
+    }
+
+    // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
+    private static void finishDeath(EmberHeart heart) {
+        for (int i = 0; i < jp.revati.skyabyss.entity.HeartBoss.DEATH_TICKS + 5 && !heart.isRemoved(); i++) {
+            step(heart);
+        }
     }
 
     private static void tickHeart(EmberHeart heart, int ticks) {
@@ -939,6 +948,9 @@ public final class EmberHeartSelfTest {
         heart.invulnerableTime = 0;
         heart.hurt(heart.damageSources().genericKill(), 1000f);
         check(!heart.isAlive(), "heart did not die", f);
+        check(!EmberHeartBattle.isDefeated(back) && EmberHeartBattle.room().active(), "defeat was reported before the death animation finished", f);
+        finishDeath(heart);
+        check(heart.isRemoved(), "heart was not removed after the death animation", f);
         check(EmberHeartBattle.isDefeated(back), "defeat was not recorded on the back", f);
         check(!EmberHeartBattle.room().active() && !EmberHeartArena.sealed(back), "entrance did not reopen after the defeat", f);
         check(EmberBackState.get(back).everDefeated(), "the world did not record that the heart was stilled once (trials would not sleep)", f);

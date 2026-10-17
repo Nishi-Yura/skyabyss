@@ -38,6 +38,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -703,6 +704,10 @@ public final class TitanBackTrials {
             return;
         }
         Entity heart = heartId == null ? null : level.getEntity(heartId);
+        if (heart instanceof LivingEntity dying && dying.isDeadOrDying() && !dying.isRemoved()) {
+            // 倒れる演出の最中 (撃破の報告は演出が終わってから出る)。部屋は閉じたまま待つ
+            return;
+        }
         if (heart == null || !heart.isAlive()) {
             // 撃破の報告がないまま心臓が消えたので、最初に戻す。すぐには湧かせ直さない
             resetHeart(level, true);

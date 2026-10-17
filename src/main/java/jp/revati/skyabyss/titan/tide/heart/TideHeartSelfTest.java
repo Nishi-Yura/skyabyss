@@ -161,8 +161,17 @@ public final class TideHeartSelfTest {
             failures.add("no heart after starting (difficulty " + back.getDifficulty() + ", hearts nearby "
                     + back.getEntitiesOfClass(TideHeart.class, TideHeartArena.arena().inflate(8)).size() + ", chunk loaded "
                     + back.isLoaded(net.minecraft.core.BlockPos.containing(TideHeartArena.heartHome())) + ")");
+        } else {
+            heart.skipIntro();
         }
         return heart;
+    }
+
+    // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
+    private static void finishDeath(TideHeart heart) {
+        for (int i = 0; i < jp.revati.skyabyss.entity.HeartBoss.DEATH_TICKS + 5 && !heart.isRemoved(); i++) {
+            heart.tick();
+        }
     }
 
     private static void tickHeart(TideHeart heart, int ticks) {
@@ -295,6 +304,9 @@ public final class TideHeartSelfTest {
         heart.hurt(heart.damageSources().genericKill(), 1000f);
         TitanBackData data = TitanBackData.get(back);
         check(!heart.isAlive(), "heart did not die", failures);
+        check(!data.isHeartDefeated() && TideHeartBattle.room().active(), "defeat was reported before the death animation finished", failures);
+        finishDeath(heart);
+        check(heart.isRemoved(), "heart was not removed after the death animation", failures);
         check(data.isHeartDefeated(), "defeat was not recorded on the back", failures);
         check(!TideHeartBattle.room().active() && !TideHeartArena.sealed(back), "entrance did not reopen after the defeat", failures);
         check(!back.getBlockState(TideHeartArena.gate().get(0)).is(ModBlocks.SEALED_GATE.get()), "seal left after the defeat", failures);

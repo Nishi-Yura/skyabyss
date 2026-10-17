@@ -16,6 +16,11 @@
 - 専用サーバーを並べて立てるときは、worktree ごとに `run/server.properties` の `server-port` (と `rcon.port`) を別の番号にする (同じ番号だと起動時にポートを取れない)
 - 終わったら java を残さない。台本は最後に自分でゲームを閉じる (止まっても `timeout` 秒で閉じる)
 
+## モデルの透けの検査と修理・心臓の演出
+
+- `python tools/fix_geo_face_sides.py --check` : 全 geo の「透けて中が見える穴」を数える。`--apply --fill` で直す (面の左右の名前を GeckoLib に合わせ、元から抜けた面を塞ぐ。二度は直さない)。経緯は `docs/design/15_high_poly.md` の 5 章。書き出し直したら、そのあとにもう一度流す。見た目の比べは `tools/shots/geo_sides.txt`
+- `python tools/install_heart_cinematics.py` : 四つの心臓の登場 (intro) と倒れる (death) のアニメーションを各 `animation.json` に足す。`install_*_heart.py` で書き出し直したら、そのあとにもう一度流す。長さは `HeartBoss` の `INTRO_TICKS` `DEATH_TICKS` と合わせる
+
 ## 台本で撮るスクショ (`client/dev/ShotRunner`)
 
 ```

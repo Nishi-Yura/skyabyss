@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -37,6 +38,18 @@ public class EmberHeartRenderer extends GeoEntityRenderer<EmberHeart> {
     }
 
     // 光る画素 (割れ目・核・熾・火の粉) を本当に光らせる。基のテクスチャはそのまま描き、その上に _glowmask の色を
+
+    // 倒れるときは横倒しにならず、死のアニメーションで見せる (HeartBoss)。倒れている間も赤く染めない
+    @Override
+    protected float getDeathMaxRotation(EmberHeart heart) {
+        return 0f;
+    }
+
+    @Override
+    public int getPackedOverlay(EmberHeart heart, float u, float partialTick) {
+        return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
+    }
+
     // 目の光 (RenderType.eyes: 陰なし・足し合わせ) で重ねる。発光の絵の色 = 足す光の強さ (tools/install_ember_heart.py の GLOW)
     static final class GlowLayer extends GeoRenderLayer<EmberHeart> {
         GlowLayer(EmberHeartRenderer renderer) {

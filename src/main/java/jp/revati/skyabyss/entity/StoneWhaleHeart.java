@@ -51,7 +51,7 @@ import org.joml.Vector3f;
 //  段階3 (吊られた殻): 赤熱の光線 / 鎖の振り回し / 殻の落下
 // 段階が変わるときは 3 秒の咆哮を挟む。その間は傷を受けず、輪で人を押し返す。
 // 段階は同期データで全員の画面に届き、モデルとボスバーの見た目を決める。
-public class StoneWhaleHeart extends GuardMob {
+public class StoneWhaleHeart extends HeartBoss {
     // 段階の数 (1 から 3 までの模型がある)
     public static final int PHASE_COUNT = 3;
     // 段階が変わる体力の割合 (段階2 へ 66%、段階3 へ 33%)
@@ -209,6 +209,9 @@ public class StoneWhaleHeart extends GuardMob {
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 20 == 0) {
             updateBossBarViewers();
+        }
+        if (isIntroPlaying()) {
+            return;
         }
         if (cooldown > 0) {
             cooldown--;
@@ -807,7 +810,7 @@ public class StoneWhaleHeart extends GuardMob {
         super.remove(reason);
     }
 
-    // 倒れたとき: 試練の攻略を知らせる。アイテムは落とさない (戦利品表なし)
+    // 倒れたとき: 殻が剥がれて核が砕ける演出 (deathEffects) のあとで、試練の攻略を知らせる (onDeathFinished)。アイテムは落とさない (戦利品表なし)
     @Override
     public void die(DamageSource source) {
         if (defeated) {
@@ -820,10 +823,97 @@ public class StoneWhaleHeart extends GuardMob {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
                     getX(), getY() + 2.2, getZ(), 120, 1.2, 1.5, 1.2, 0.2);
             warn(server, dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
-            // 試練で湧いた心臓だけが、背中の攻略を知らせる (スポーンエッグの心臓や、地上の心臓では何も起きない)
-            if (server.dimension() == TitanTravel.TITAN_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
-                TitanBackTrials.onHeartDefeated(server, this);
+        }
+    }
+
+    // 試練で湧いた心臓だけが、背中の攻略を知らせる (スポーンエッグの心臓や、地上の心臓では何も起きない)
+    @Override
+    protected void onDeathFinished(ServerLevel server) {
+        if (server.dimension() == TitanTravel.TITAN_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
+            TitanBackTrials.onHeartDefeated(server, this);
+        }
+    }
+
+    @Override
+    protected double coreHeight() {
+        return getY() + 2.2;
+    }
+
+    // ---- 登場: 床がきしみ、石の殻が床の下から迫り上がり、八枚の板が順に閉じて、核が一つ脈を打つ (animation.stone_whale_heart.intro)
+    @Override
+    protected void introEffects(ServerLevel server, int tick) {
+        double fy = floorY();
+        if (tick == 0) {
+            sound(server, SoundEvents.WARDEN_EMERGE, 2f, 0.6f);
+        }
+        if (tick < 56 && tick % 3 == 0) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 2 + random.nextDouble() * 3.5;
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                    getX() + Math.cos(a) * r, fy + 0.2, getZ() + Math.sin(a) * r, 8, 0.3, 0.2, 0.3, 0.15);
+            if (tick % 9 == 0) {
+                server.playSound(null, getX() + Math.cos(a) * r, fy, getZ() + Math.sin(a) * r, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.5f, 0.6f);
             }
+        }
+        if (tick == 24) {
+            sound(server, SoundEvents.DEEPSLATE_BREAK, 2.5f, 0.5f);
+            for (int k = 0; k < 24; k++) {
+                double a = k * Math.PI / 12;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
+                        getX() + Math.cos(a) * 3.5, fy + 0.3, getZ() + Math.sin(a) * 3.5, 5, 0.2, 0.3, 0.2, 0.25);
+            }
+        }
+        if (tick >= 54 && tick <= 68 && (tick - 54) % 2 == 0) {
+            int i = (tick - 54) / 2;
+            double a = Math.toRadians(22.5 + 45 * i);
+            double px = getX() + Math.cos(a) * 2.6;
+            double pz = getZ() + Math.sin(a) * 2.6;
+            server.playSound(null, px, fy + 2, pz, SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.0f, 0.5f + 0.04f * i);
+            server.sendParticles(ParticleTypes.CRIT, px, fy + 2.0, pz, 6, 0.3, 0.8, 0.3, 0.1);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), px, fy + 1.0, pz, 10, 0.3, 0.5, 0.3, 0.15);
+        }
+        if (tick == 70) {
+            sound(server, SoundEvents.AMETHYST_BLOCK_RESONATE, 3f, 0.5f);
+            sound(server, SoundEvents.BELL_RESONATE, 2f, 0.5f);
+            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 60, 1.5, 1.5, 1.5, 0.1);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), coreHeight(), getZ(), 30, 1.2, 1.2, 1.2, 0.08);
+        }
+    }
+
+    // ---- 倒れる: 八枚の板が外へ剥がれ落ち、鎖が切れ、むき出しの核が細かくふるえて、光を吸い込んで砕ける (animation.stone_whale_heart.death)
+    @Override
+    protected void deathEffects(ServerLevel server, int tick) {
+        double cy = coreHeight();
+        double fy = floorY();
+        if (tick == 14 || tick == 28 || tick == 42 || tick == 56) {
+            sound(server, SoundEvents.STONE_BREAK, 2.5f, 0.6f);
+            sound(server, SoundEvents.ANVIL_LAND, 1.2f, 0.4f);
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4 + tick;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, k % 2 == 0 ? Blocks.STONE_BRICKS.defaultBlockState() : Blocks.BONE_BLOCK.defaultBlockState()),
+                        getX() + Math.cos(a) * 3, fy + 0.8, getZ() + Math.sin(a) * 3, 10, 0.4, 0.5, 0.4, 0.2);
+            }
+        }
+        if (tick == 24) {
+            sound(server, SoundEvents.CHAIN_BREAK, 2.5f, 0.6f);
+        }
+        if (tick == 34 || tick == 50) {
+            sound(server, SoundEvents.SHIELD_BREAK, 1.5f, 0.7f);
+        }
+        if (tick >= 60 && tick <= 86 && tick % 2 == 0) {
+            double a = tick * 0.5;
+            double r = 4.0 * (1 - (tick - 60) / 26.0) + 0.5;
+            warn(server, dust(0x7FF4FF, 1.2f), getX() + Math.cos(a) * r, cy + Math.sin(a * 0.7) * 0.8, getZ() + Math.sin(a) * r, 4, 0.1, 0.1, 0.1, 0);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 2, 0.4, 0.4, 0.4, 0.02);
+        }
+        if (tick == 88) {
+            sound(server, SoundEvents.BEACON_DEACTIVATE, 3f, 0.7f);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 100, 0.3, 0.3, 0.3, 0.35);
+            warn(server, dust(0x7FF4FF, 1.8f), getX(), cy, getZ(), 80, 1.0, 1.0, 1.0, 0.2);
+        }
+        if (tick == 92) {
+            sound(server, SoundEvents.AMETHYST_CLUSTER_BREAK, 2.5f, 0.5f);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), cy, getZ(), 60, 1.0, 1.0, 1.0, 0.3);
         }
     }
 

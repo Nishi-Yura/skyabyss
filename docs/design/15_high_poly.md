@@ -217,6 +217,8 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 
 ## 5. これからモデルを作る手順
 
+**geo の面の名前（GeckoLib の決まり。必ず守る）**: GeckoLib は X を鏡に写して焼くので、面の名前の位置が一般の読み方と違う。`west` の面は箱の x の**大きい**側、`east` の面は x の**小さい**側に付く（`north` は z の小さい側、`south` は大きい側、`up` `down` は同じ）。ラフの道具（`tools/rough/voxel.py`）は `west` を x の小さい側として読むので、ラフの geo をそのまま書き出すと、見える面だけを書き出した箱の東西の面が逆の側に付き、横から見ると中が見える（ベータで「一定の角度から見ると透ける」と言われた原因）。心臓（`install_heart_v4.py` の変換）は最初から合っている。それ以外の geo は `tools/fix_geo_face_sides.py --apply --fill` で直す（east/west の名前を入れ替え、north/south/east/west の画像の向きを GeckoLib に合わせ、元から面が抜けている所を塞ぐ）。書き出し直したら、そのあとにもう一度流す。`--check` が各 geo の「透ける穴」の数（休め姿勢で、あらゆる向きの光線が最初に裏の面に当たる数）を出す。
+
 1. 元の geo とテクスチャを `tools/sources/hp_base/<種類>/` に控える（やり直しはここから）。
 2. `tools/rough/hp_<モデル>.py`（`hp_sentinel.py` が見本）で: `hpkit.Model.load(名前)` → `round_all(rule=...)` → 穴（`round_cube(holes=)`）→ `add_box` の飾り → `hpkit.stats` と `hpkit.overlaps` で箱・面・重なりを確認。
 3. `voxel` 描画で「今 / A / B / C」を並べたシートを `docs/review/high_poly_roughs/` に出し、review ページで選ぶ（新しい見た目はまずラフ）。A は自動の面取りだけ、B は大きな塊の丸め + 0.25 の飾り、C は B + 手で足す細部（浮き彫りの筋など）の型。
