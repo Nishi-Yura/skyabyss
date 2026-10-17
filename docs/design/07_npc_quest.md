@@ -1056,3 +1056,13 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 ### 16.4 自己テストとゲーム画面
 
 自己テストは `SELFTEST story`（14 の 7.2 節）。ゲーム画面の確認は 14 の 8 章。
+
+## 17. 序盤の語り（2026-10-17、[17](17_opening_and_rpg_feel.md) の担当 4）
+
+全文は 17 の 11 章。ここには仕組みだけ。生成は `tools/gen_npc_content.py`（会話・メイン）と `tools/gen_opening_text.py`（伝承・17-10 の閉じ方）。
+
+- **メイン「雲の下の歌」の始まり**: 帳面（伝承 `prologue/the_book`）を拾うと始まる（影・岩鯨を先に見る、でも始まる）。段を 2 つ前に足した: `follow_smoke`（語り部の節 `shadow0` に入る）→ `watch_sky`（伝承 `prologue/shadow`）→ 従来の `ask_storyteller` …。影か岩鯨を先に見た人、空のことを先に尋ねた人（節 `shadow1` で印 `sky_asked`）は、この二段を飛ばす（`skip_if`）。
+- **語り部の入口**: `shadow0`（メインが `follow_smoke`）、`shadow_first`（影のあとの初対面。`shadow2`→`shadow3` へ続く）、`shadow_wait`（影を待つ間、一度だけ）。ループの「覚えているような」入口（`deja_vu*`）のあと、`first` の前。
+- **道すがらの見聞**: 語り部の話題に「道すがら、気になるものを見た。」（節 `seen_menu`）、イサナに「道中で、妙なものを見た。」（節 `c_seen_menu`）。伝承が記されていて、まだ話していないものだけ並ぶ（印 `<話題>_told`）。語り部の話題の節は枠の高さの上限（210）のため、もとの「岩鯨を見た」「背中に町の跡」の話題も `seen_menu` へ移した。
+- **17-10**: イサナと会う（印 `met`、`npc skyabyss:whale_chaser`）までは、言伝ての板の頼み・語り部の「ほかに、頼みごとはある？」・「数え歌の続き」を出さない。
+- 自己テスト: `SELFTEST opening story`（`story/OpeningStorySelfTest`）。このために既存の `NpcQuestSelfTest`（二度目の訪れ、段の名前で探す）と `FreeQuestSelfTest`（試す人は「イサナと会った」ことにする）を少し直した。
