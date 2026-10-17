@@ -36,7 +36,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //  - 建て終わっていない物は、BackBuildJobs と同じように、1 tick の予算 (ms) だけ進める (SiteJob)。野営地はプレイヤーが入る前に建て終える
 //  - 環境変数 SKYABYSS_SHOTS (台本の撮影) のときは、ワールド名が "opening" で始まらなければ建てない (ほかの台本の邪魔をしない)。
 //    SKYABYSS_OPENING_SITES=0 でも建てない。
-// 開発コマンド: /skyabyss dev opening <info|build|view|dump|replan> (本番の jar では登録されない)
+// 開発コマンド: /skyabyss dev opening <info|build|view|dump> (本番の jar では登録されない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SiteBuilds {
     public static final long BUDGET_IDLE_MS = 20;
@@ -311,7 +311,11 @@ public final class SiteBuilds {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         float dist = FloatArgumentType.getFloat(ctx, "dist");
         float up = FloatArgumentType.getFloat(ctx, "up");
-        float yaw = FloatArgumentType.getFloat(ctx, "yaw");
+        // yaw は、野営地からその場所を見る向きからの差 (0 = 野営地からそちらへ歩いて着いたときの向き。野営地自身は南向きが 0)
+        ServerLevel lv = ctx.getSource().getServer().overworld();
+        BlockPos campPos = SiteData.get(lv).first(Kind.CAMP.id) == null ? e.pos : SiteData.get(lv).first(Kind.CAMP.id).pos;
+        float base = e.kind.equals("camp") ? 0f : jp.revati.skyabyss.opening.OpeningSites.yawTo(campPos, e.pos);
+        float yaw = base + FloatArgumentType.getFloat(ctx, "yaw");
         float pitch = FloatArgumentType.getFloat(ctx, "pitch");
         double fx = -Math.sin(Math.toRadians(yaw));
         double fz = Math.cos(Math.toRadians(yaw));

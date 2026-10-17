@@ -50,6 +50,10 @@ public final class CampBuilder {
         BlockPos stand = job.mark("stand");
         if (stand != null) {
             job.entry.extra("stand", stand);
+            // 新しいワールドでは、野営地がスポーン地点 (場所がずれたときもそろえる。17-11)
+            if (job.data.plannedAt() >= 0 && job.data.plannedAt() < SiteBuilds.NEW_WORLD_TICKS) {
+                job.level.setDefaultSpawnPos(stand, 0f);
+            }
         }
     }
 }

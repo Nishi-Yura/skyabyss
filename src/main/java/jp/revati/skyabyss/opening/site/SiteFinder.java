@@ -89,12 +89,17 @@ public final class SiteFinder {
 
     // (cx, cz) を中心に、半径 half の正方形 (4 ブロック間隔の格子と四隅) を調べる。水・不適な群系があれば ok = false。maxRange より段差が大きくても false
     public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange) {
+        return area(p, cx, cz, halfX, halfZ, maxRange, false);
+    }
+
+    // fine = true なら 5x5 (野営地のように、一度しか探さない所向け)
+    public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine) {
         List<Integer> hs = new ArrayList<>();
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         // 3x3 (広い範囲は横に 5) の格子。四隅と辺の中央と中心
-        int nx = halfX >= 16 ? 5 : 3;
-        int nz = 3;
+        int nx = fine ? 5 : halfX >= 16 ? 5 : 3;
+        int nz = fine ? 5 : 3;
         for (int i = 0; i < nx; i++) {
             int xx = -halfX + (2 * halfX * i) / (nx - 1);
             for (int j = 0; j < nz; j++) {
@@ -178,7 +183,7 @@ public final class SiteFinder {
                     double a = Math.PI * 2 * i / n;
                     int x = spawn.getX() + (int) Math.round(Math.cos(a) * r);
                     int z = spawn.getZ() + (int) Math.round(Math.sin(a) * r);
-                    Area ar = area(p, x, z, 6, 6, range);
+                    Area ar = area(p, x, z, 7, 7, range, true);
                     if (ar.ok()) {
                         return new BlockPos(x, ar.median() + 1, z);
                     }
@@ -261,8 +266,9 @@ public final class SiteFinder {
         double len = Math.sqrt(dx * dx + dz * dz);
         double ux = dx / len;
         double uz = dz / len;
-        int[][] passes = {{4}, {7}};
-        for (int[] pass : passes) {
+        int[][] passes = {{4}, {7}, {11}, {16}};
+        for (int pi = 0; pi < passes.length; pi++) {
+            int[] pass = passes[pi];
             for (double frac : new double[] {0.35, 0.25, 0.45, 0.55, 0.15, 0.65}) {
                 for (int off : new int[] {40, 35, 45, 30, 50, 55, 60}) {
                     for (int side : new int[] {1, -1}) {
@@ -277,9 +283,9 @@ public final class SiteFinder {
                             for (int i = 0; i < 3; i++) {
                                 int x = (int) Math.round(px + mx * 40 * (i - 1));
                                 int z = (int) Math.round(pz + mz * 40 * (i - 1));
-                                Area ar = area(p, x, z, 8, 8, pass[0]);
+                                Area ar = area(p, x, z, 6, 7, pass[0]);
                                 double dp = distToPath(x, z, camp, ux, uz, len);
-                                if (!ar.ok() || dp < 28 || dp > 62) {
+                                if (!ar.ok() || dp < (pi >= 3 ? 20 : 28) || dp > (pi >= 3 ? 90 : 62)) {
                                     break;
                                 }
                                 prints.add(new BlockPos(x, ar.median() + 1, z));
@@ -293,6 +299,38 @@ public final class SiteFinder {
                                 return;
                             }
                         }
+                    }
+                }
+            }
+        }
+        // どうしても道の脇に見つからない: 野営地のまわりの輪のどこでもよいので、乾いた所に 3 つ並べる
+        for (int r = 50; r <= 150; r += 16) {
+            for (int deg = 0; deg < 360; deg += 20) {
+                double a = Math.toRadians(deg);
+                double px = camp.getX() + Math.cos(a) * r;
+                double pz = camp.getZ() + Math.sin(a) * r;
+                for (int turn : new int[] {90, 0}) {
+                    double ang = a + Math.toRadians(turn);
+                    double mx = Math.cos(ang);
+                    double mz = Math.sin(ang);
+                    List<BlockPos> prints = new ArrayList<>();
+                    for (int i = 0; i < 3; i++) {
+                        int x = (int) Math.round(px + mx * 40 * (i - 1));
+                        int z = (int) Math.round(pz + mz * 40 * (i - 1));
+                        Area ar = area(p, x, z, 6, 7, 24);
+                        if (!ar.ok()) {
+                            break;
+                        }
+                        prints.add(new BlockPos(x, ar.median() + 1, z));
+                    }
+                    if (prints.size() == 3) {
+                        int rot = rotToward(mx, mz, false);
+                        prints.sort(Comparator.comparingDouble(b -> b.distSqr(camp)));
+                        for (int i = 0; i < 3; i++) {
+                            out.add(new Planned(Kind.FOOTPRINT.id, i, prints.get(i), encode(rot, i % 2 == 1)));
+                        }
+                        SkyAbyss.LOGGER.info("Opening sites: footprints placed away from the road (no good land beside it)");
+                        return;
                     }
                 }
             }

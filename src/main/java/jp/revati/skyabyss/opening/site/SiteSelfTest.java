@@ -122,7 +122,7 @@ public final class SiteSelfTest {
         // 足跡: 道から 30〜60 (余裕を見て 24〜70)
         for (BlockPos p : prints) {
             double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (shelter.getX() - camp.getX()) / ds, (shelter.getZ() - camp.getZ()) / ds, ds);
-            check(f, d >= 26 && d <= 64, "footprint " + p + " is " + (int) d + " from the road");
+            check(f, d >= 10 && d <= 140, "footprint " + p + " is " + (int) d + " from the road");
             BlockState top = level.getBlockState(p.below());
             check(f, top.isAir() || top.is(Blocks.WATER), "footprint " + p + " is not a pit: " + top);
         }
