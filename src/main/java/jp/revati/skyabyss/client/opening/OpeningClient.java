@@ -21,7 +21,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
 
@@ -112,6 +111,11 @@ public final class OpeningClient {
     // ホラー演出 (足音・歌) の最中か (目的の帯を薄くする)
     public static boolean horrorCueActive() {
         return silence() > 0.01f || songTicks() >= 0;
+    }
+
+    // 開幕の暗転・題字の最中か (目的の帯はその間出さない)
+    public static boolean awakeActive() {
+        return awakeTicks() >= 0;
     }
 
     // 目覚めの演出の経過 tick (終わっていれば -1)
@@ -282,9 +286,10 @@ public final class OpeningClient {
         event.setRoll(event.getRoll() + (float) Math.sin(t * 2.7 + 2.0) * amount * 0.4f);
     }
 
-    // 画面 (暗転・題字・足音の間のかすかな暗さ)
+    // 画面 (暗転・題字・足音の間のかすかな暗さ)。手の込んだ HUD (ホットバーなど) より上に重ねる
     @SubscribeEvent
-    static void onRenderGui(RenderGuiEvent.Post event) {
-        OpeningOverlay.render(event.getGuiGraphics(), silence() * effectScale());
+    static void onLayers(net.neoforged.neoforge.client.event.RegisterGuiLayersEvent event) {
+        event.registerAboveAll(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "opening_overlay"),
+                (graphics, delta) -> OpeningOverlay.render(graphics, silence() * effectScale()));
     }
 }

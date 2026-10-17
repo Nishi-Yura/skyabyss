@@ -76,7 +76,8 @@ public final class ObjectiveStrip {
 
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get()) {
+        if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get()
+                || OpeningClient.awakeActive()) {
             return;
         }
         // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる

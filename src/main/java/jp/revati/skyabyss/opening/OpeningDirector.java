@@ -120,6 +120,15 @@ public final class OpeningDirector {
         run(level, player);
     }
 
+    // 野営地の帳面 (置かれた伝承の書。タグ付き) は、ふつうの拾い方では拾えない。近づいたとき OpeningLogic が「拾った」ことにして、
+    // 人ごとに伝承の書として渡す (書の項目と最初の頁が記される)。帳面そのものは野営地に残り、あとから来た人も拾える
+    @SubscribeEvent
+    static void onItemPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre event) {
+        if (event.getItemEntity().getTags().contains(jp.revati.skyabyss.opening.site.CampBuilder.NOTEBOOK_TAG)) {
+            event.setCanPickup(net.neoforged.neoforge.common.util.TriState.FALSE);
+        }
+    }
+
     @SubscribeEvent
     static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && !(player instanceof FakePlayer)) {
