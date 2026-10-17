@@ -1474,5 +1474,48 @@
         "name": "skyabyss:ember_trial/ember_hearth_douse"
       }
     ]
+  },
+  "opening_heartbeat": {
+    "subtitle": "subtitles.skyabyss.opening_heartbeat",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/heartbeat"
+      }
+    ]
+  },
+  "opening_bell": {
+    "subtitle": "subtitles.skyabyss.opening_bell",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/bell",
+        "attenuation_distance": 192
+      }
+    ]
+  },
+  "opening_step": {
+    "subtitle": "subtitles.skyabyss.opening_step",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/step",
+        "attenuation_distance": 160
+      }
+    ]
+  },
+  "opening_rumble": {
+    "subtitle": "subtitles.skyabyss.opening_rumble",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/rumble"
+      }
+    ]
+  },
+  "opening_song": {
+    "subtitle": "subtitles.skyabyss.opening_song",
+    "sounds": [
+      {
+        "name": "skyabyss:opening/song",
+        "stream": true
+      }
+    ]
   }
 }

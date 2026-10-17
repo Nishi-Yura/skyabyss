@@ -95,6 +95,9 @@ public class SkyAbyss {
         // 余燼の三つの試練 (灰の道・鍛えの間・火守り。13 の 4 章)
         jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup.register(modEventBus);
 
+        // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
+        jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

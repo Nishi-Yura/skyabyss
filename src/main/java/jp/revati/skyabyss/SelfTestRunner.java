@@ -101,6 +101,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
         // 序盤の語り (17 の 3〜6 章): 野営地の帳面から宿り・空の影・イサナまで、新しい伝承 6 つ、道すがらの見聞
         steps.add(Step.once("opening story", jp.revati.skyabyss.story.OpeningStorySelfTest::runSelfTest));
+        // 序盤の拍子 B0〜B10 (17 の 3 章): 判断の流し込み (新しいワールド・雨・洞窟・寝た人・戦闘・村なし・マルチ)、本物の人での確認
+        steps.add(Step.once("opening", jp.revati.skyabyss.opening.OpeningSelfTest::runSelfTest));
         // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
         steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
