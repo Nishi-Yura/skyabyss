@@ -42,14 +42,22 @@ def frame(a, bone, lo, hi, face, mat, *, inset=0.9, w=0.8, h=0.4, corner=1.3, ch
     mk(u1 - w, u1, v0 + corner, v1 - corner, h)
 
 
-def kabuto(a, M, *, neck=2, cheek=True, visor=True, band_h=1.0, tier_split=28.6):
-    """Helmet: two-tier dome, trim band, visor slit, cheek wings, flaring neck lames (back)."""
-    a.box(H, (-4.6, 25.2, -4.6), (4.6, tier_split, 4.6), M["main"])
-    a.box(H, (-4.9, tier_split, -4.9), (4.9, tier_split + band_h, 4.9), M["trim"])
-    a.box(H, (-4.5, tier_split + band_h, -4.5), (4.5, 32.6, 4.5), M["alt"])
-    if visor:
-        a.box(H, (-3.4, 25.8, -5.0), (3.4, 27.6, -4.6), M["void"], hide=("down",))
-        a.box(H, (-2.8, 26.5, -5.15), (2.8, 26.9, -5.0), M["glow"])
+def kabuto(a, M, *, neck=2, cheek=True, gem=(1.6, 0.6), band_h=1.0, tier_split=29.6):
+    """Open-face helmet (v3): the face stays free.  Crown dome + brow band (above the eyes, y >= 29.6), ear guards and a
+    back shell, a narrow nose guard, cheek wings beside (never in front of) the face, flaring neck lames (back).
+    Nothing sits in front of the face box |x| < 4, z = -4, y 24..29.6.  `gem` = (width, height) of the one small
+    glowing brow gem on the band, or None."""
+    a.box(H, (-4.6, 25.2, 0.4), (4.6, tier_split, 4.6), M["main"])                       # back shell
+    for sx in (-1, 1):                                                                    # ear guards (side of the head)
+        lo, hi = sorted((sx * 4.0, sx * 4.6))
+        a.box(H, (lo, 25.4, -2.8), (hi, tier_split, 0.4), M["main"])
+    a.box(H, (-4.9, tier_split, -4.9), (4.9, tier_split + band_h, 4.9), M["trim"])       # brow band
+    a.box(H, (-4.5, tier_split + band_h, -4.5), (4.5, 32.6, 4.5), M["alt"])              # crown dome
+    a.box(H, (-0.5, 26.9, -5.2), (0.5, tier_split, -4.9), M["trim"])                     # nose guard (between the eyes)
+    if gem:
+        gw, gh = gem
+        yc = tier_split + band_h / 2
+        a.box(H, (-gw / 2, yc - gh / 2, -5.3), (gw / 2, yc + gh / 2, -4.9), M["glow"])
     if cheek:
         for sx in (-1, 1):
             a.slab(H, (sx * 5.2, 27.0, -0.4), (0.8, 2.6, 6.0), M["alt"], rot=(0, 0, sx * -10))
