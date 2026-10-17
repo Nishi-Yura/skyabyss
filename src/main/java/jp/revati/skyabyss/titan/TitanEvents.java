@@ -53,7 +53,7 @@ public final class TitanEvents {
             return;
         }
         if (!whaleMayAppear(SkyEventData.get(level), SkyEvents.activePass() != null, level.getGameTime(),
-                Config.HORROR_EVENT_FREQUENCY.get())) {
+                Config.HORROR_EVENT_FREQUENCY.get(), jp.revati.skyabyss.opening.OpeningBeats.anyoneMetStoryteller(level))) {
             return;
         }
         ServerPlayer player = WhaleKeeper.randomEligible(level);
@@ -68,14 +68,23 @@ public final class TitanEvents {
     // 岩鯨が自然に現れてよいか (06 の 2.7節)。最初の空の影が済んで半日たつまでは出ない。
     // 影を起こさない設定 (頻度 0) のときだけ、この門は開けておく (影を待つと永久に出ないため)。
     // 影より前に遊んでいた古いワールド (通過の記録はあるが最初の時刻がない) は、済んでいるものとして扱う
-    public static boolean whaleMayAppear(SkyEventData sky, boolean passActive, long now, double frequency) {
+    // 17 の 3.9節に近い形: 最初の影から半日たち、だれかが語り部と話していて、夕方 (11000〜12500) に出す。
+    // 詰み止め: 5 日目 (総 tick 4 日分) を過ぎたら、語り部と話していなくても、時刻を問わず出す
+    public static boolean whaleMayAppear(SkyEventData sky, boolean passActive, long now, double frequency, boolean metStoryteller) {
         if (frequency <= 0) {
             return true;
         }
         if (sky.passCount() <= 0 || passActive) {
             return false;
         }
-        return sky.firstPassTick() < 0 || now >= sky.firstPassTick() + AFTER_FIRST_SHADOW;
+        if (sky.firstPassTick() >= 0 && now < sky.firstPassTick() + AFTER_FIRST_SHADOW) {
+            return false;
+        }
+        if (now >= 4 * 24000L) {
+            return true;
+        }
+        long t = now % 24000L;
+        return metStoryteller && t >= 11000 && t <= 12500;
     }
 
     @SubscribeEvent

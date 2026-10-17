@@ -69,7 +69,7 @@ public final class NpcSpawner {
 
     // 位置 near から水平 radius 以内の、いちばん近い野営の焚き火 (なければ null)
     @Nullable
-    static BlockPos nearestCamp(NpcWorldData data, BlockPos near, double radius) {
+    public static BlockPos nearestCamp(NpcWorldData data, BlockPos near, double radius) {
         BlockPos best = null;
         double bestD = radius * radius;
         for (long packed : data.camps) {
@@ -114,7 +114,7 @@ public final class NpcSpawner {
         return null;
     }
 
-    static void visitVillage(ServerLevel level, BlockPos bell, ServerPlayer player) {
+    public static void visitVillage(ServerLevel level, BlockPos bell, ServerPlayer player) {
         if (!entitiesLoaded(level, bell)) {
             return;
         }

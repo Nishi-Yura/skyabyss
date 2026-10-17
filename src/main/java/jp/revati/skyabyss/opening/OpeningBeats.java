@@ -1,8 +1,12 @@
-package jp.revati.skyabyss.npc;
+package jp.revati.skyabyss.opening;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.npc.NpcBonds;
+import jp.revati.skyabyss.npc.NpcSetup;
+import jp.revati.skyabyss.npc.NpcSpawner;
+import jp.revati.skyabyss.npc.NpcWorldData;
 import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
 import net.minecraft.core.BlockPos;
@@ -17,14 +21,14 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 語り部に必ず会える (07 の 3.1節、06 の 2.7節)。最初の空の影のあと、まだ語り部と話していない人を、次の順で導く。
+// 序盤の拍子の保証 (17 の担当 3 が OpeningState へ移す前の、最小の形)。語り部に必ず会える (07 の 3.1節、06 の 2.7節)。最初の空の影のあと、まだ語り部と話していない人を、次の順で導く。
 //  1. 影が去って 1 分たったら、いちばん近い村 (村の構造。まだ見ていない村も) の方角と距離を知らせる。近くに村が無ければ、すぐ 3 へ。
 //  2. 村へ向かわないまま半日 (村の知らせから 1 日) たったら、知らせ直す (最大 3 回)。それでも会えなければ 3 へ
 //  3. 本人の近く (18〜34 ブロック) に、旅の語り部の野営 (焚き火と語り部) を作る。会うまで、1 日ごとに作り直す
 // 「鐘のない村には出ない」(07 の判断 15) は、村の NPC を鐘にだけ立たせるという意味で、今も守っている。野営は村ではなく、
 // 「村へ行けない人を詰まらせないための旅の語り部」なので、判断 15 とは別に立てる。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
-public final class StoryGuide {
+public final class OpeningBeats {
     // 影が去ってから、村の方角を知らせるまで
     static final long HINT_AFTER = 1200;
     // 知らせ直す間隔と、最大の回数
@@ -41,7 +45,7 @@ public final class StoryGuide {
 
     public enum Move { DONE, WAIT, SEARCH, HINT, CAMP }
 
-    private StoryGuide() {
+    private OpeningBeats() {
     }
 
     // 次にすること (副作用なし)。テストできるよう、状態の値だけで決める
@@ -71,6 +75,16 @@ public final class StoryGuide {
     static boolean metStoryteller(ServerPlayer player) {
         NpcBonds.Bond bond = NpcBonds.of(player).bonds().get(NpcSetup.STORYTELLER_ID);
         return bond != null && (bond.talks() > 0 || bond.flags().contains("met") || bond.echoes().contains("met"));
+    }
+
+    // オーバーワールドにいる誰かが語り部と話したことがあるか (岩鯨の出現の条件)
+    public static boolean anyoneMetStoryteller(ServerLevel level) {
+        for (ServerPlayer p : level.players()) {
+            if (!p.isSpectator() && metStoryteller(p)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 案内が始まっていてよいか: 影を起こす設定なら最初の影が済んで (進行中でなく)、影を起こさない設定なら最初から

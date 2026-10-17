@@ -1,9 +1,13 @@
-package jp.revati.skyabyss.npc;
+package jp.revati.skyabyss.opening;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.npc.NpcEntity;
+import jp.revati.skyabyss.npc.NpcSetup;
+import jp.revati.skyabyss.npc.NpcSpawner;
+import jp.revati.skyabyss.npc.NpcWorldData;
 import jp.revati.skyabyss.lore.LoreEvents;
 import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
@@ -20,12 +24,12 @@ import net.minecraft.world.phys.AABB;
 //  - 書は、最初の影が済んだ人に必ず予定される
 //  - 岩鯨は、最初の影から半日たつまで自然には現れない
 //  - 語り部に会える保証: 案内の手順の判定と、鐘のない所に野営 (焚き火と語り部) が立つこと
-public final class StoryGuideSelfTest {
+public final class OpeningBeatsSelfTest {
     private static final int X = 6000;
     private static final int Z = 6000;
     private static final int Y = 150;
 
-    private StoryGuideSelfTest() {
+    private OpeningBeatsSelfTest() {
     }
 
     // 野営を立てる場所のチャンクを読み込む (プレイヤーがいないので強制で)
@@ -48,7 +52,7 @@ public final class StoryGuideSelfTest {
             guideSteps(failures);
             camp(level, failures);
         } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.error("SELFTEST story guide exception", e);
+            SkyAbyss.LOGGER.error("SELFTEST opening beats exception", e);
             failures.add("exception " + e);
         } finally {
             for (int dx = -3; dx <= 3; dx++) {
@@ -58,9 +62,9 @@ public final class StoryGuideSelfTest {
             }
         }
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST story guide PASSED");
+            SkyAbyss.LOGGER.info("SELFTEST opening beats PASSED");
         } else {
-            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST story guide FAILED: {}", f));
+            failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST opening beats FAILED: {}", f));
         }
     }
 
@@ -115,85 +119,96 @@ public final class StoryGuideSelfTest {
 
     // ---- 岩鯨の門
     private static void whaleGate(List<String> failures) {
+        long eve = 11500;
         SkyEventData none = new SkyEventData();
-        if (TitanEvents.whaleMayAppear(none, false, 1_000_000, 1.0)) {
+        if (TitanEvents.whaleMayAppear(none, false, 2 * 24000 + eve, 1.0, true)) {
             failures.add("the whale may appear before any shadow");
         }
         SkyEventData seen = new SkyEventData();
         seen.countPass(1000);
-        if (TitanEvents.whaleMayAppear(seen, true, 100_000, 1.0)) {
+        if (TitanEvents.whaleMayAppear(seen, true, 2 * 24000 + eve, 1.0, true)) {
             failures.add("the whale may appear while the shadow is passing");
         }
-        if (TitanEvents.whaleMayAppear(seen, false, 1000 + 11999, 1.0)) {
+        if (TitanEvents.whaleMayAppear(seen, false, 1000 + 11999, 1.0, true)) {
             failures.add("the whale may appear less than half a day after the first shadow");
         }
-        if (!TitanEvents.whaleMayAppear(seen, false, 1000 + 12000, 1.0)) {
-            failures.add("the whale may not appear half a day after the first shadow");
+        if (!TitanEvents.whaleMayAppear(seen, false, 2 * 24000 + eve, 1.0, true)) {
+            failures.add("the whale may not appear on the evening of day 3 after the shadow and the storyteller");
         }
-        // 影を起こさない設定 (頻度 0) では、門は開いている (永久に出ないのを避ける)
-        if (!TitanEvents.whaleMayAppear(none, false, 0, 0.0)) {
+        if (TitanEvents.whaleMayAppear(seen, false, 2 * 24000 + eve, 1.0, false)) {
+            failures.add("the whale appears before anyone met the storyteller");
+        }
+        if (TitanEvents.whaleMayAppear(seen, false, 2 * 24000 + 3000, 1.0, true)) {
+            failures.add("the whale appears outside the evening");
+        }
+        // 詰み止め: 5 日目に入ったら、語り部に会っていなくても出す
+        if (!TitanEvents.whaleMayAppear(seen, false, 4 * 24000 + 3000, 1.0, false)) {
+            failures.add("the whale never appears for someone who skipped the storyteller");
+        }
+        // 影を起こさない設定 (頻度 0) では、門は開いている
+        if (!TitanEvents.whaleMayAppear(none, false, 0, 0.0, false)) {
             failures.add("the whale never appears when shadows are disabled");
         }
-        // 影より前に遊んでいた古いワールド (通過の数だけある) は、済んでいるものとして扱う
+        // 影より前に遊んでいた古いワールド (通過の数だけある) は、最初の影は済んでいるものとして扱う
         CompoundTag old = new CompoundTag();
         old.putInt("passCount", 3);
         SkyEventData oldWorld = SkyEventData.load(old, null);
-        if (oldWorld.firstPassTick() >= 0 || !TitanEvents.whaleMayAppear(oldWorld, false, 50_000, 1.0)) {
+        if (oldWorld.firstPassTick() >= 0 || !TitanEvents.whaleMayAppear(oldWorld, false, 2 * 24000 + eve, 1.0, true)) {
             failures.add("an older world with past passes is gated");
         }
     }
 
     // ---- 案内の手順
     private static void guideSteps(List<String> failures) {
-        StoryGuide.Move m;
+        OpeningBeats.Move m;
         // 会った人は何もしない
-        if ((m = StoryGuide.decide(true, false, 2, 999999, 0, -1, 0, -1)) != StoryGuide.Move.DONE) {
+        if ((m = OpeningBeats.decide(true, false, 2, 999999, 0, -1, 0, -1)) != OpeningBeats.Move.DONE) {
             failures.add("met player: " + m);
         }
         // 村 (鐘か野営) が近ければ任せる
-        if ((m = StoryGuide.decide(false, true, 0, 999999, 0, -1, 0, -1)) != StoryGuide.Move.WAIT) {
+        if ((m = OpeningBeats.decide(false, true, 0, 999999, 0, -1, 0, -1)) != OpeningBeats.Move.WAIT) {
             failures.add("near a base: " + m);
         }
         // 影が去って 1 分: 村を探す
-        if (StoryGuide.decide(false, false, 0, StoryGuide.HINT_AFTER - 1, 0, -1, 0, -1) != StoryGuide.Move.WAIT
-                || StoryGuide.decide(false, false, 0, StoryGuide.HINT_AFTER, 0, -1, 0, -1) != StoryGuide.Move.SEARCH) {
+        if (OpeningBeats.decide(false, false, 0, OpeningBeats.HINT_AFTER - 1, 0, -1, 0, -1) != OpeningBeats.Move.WAIT
+                || OpeningBeats.decide(false, false, 0, OpeningBeats.HINT_AFTER, 0, -1, 0, -1) != OpeningBeats.Move.SEARCH) {
             failures.add("the village search is not planned at 1 minute");
         }
         // 近くに村が無い: すぐ野営
-        if ((m = StoryGuide.decide(false, false, 2, 1300, 0, -1, 0, -1)) != StoryGuide.Move.CAMP) {
+        if ((m = OpeningBeats.decide(false, false, 2, 1300, 0, -1, 0, -1)) != OpeningBeats.Move.CAMP) {
             failures.add("no village nearby but no camp: " + m);
         }
         // 村が見つかった: 知らせ直し (半日おき、3 回まで)、それでも会えなければ野営
         long hinted = 1300;
-        if (StoryGuide.decide(false, false, 1, hinted + StoryGuide.REHINT - 1, 0, hinted, 1, -1) != StoryGuide.Move.WAIT
-                || StoryGuide.decide(false, false, 1, hinted + StoryGuide.REHINT, 0, hinted, 1, -1) != StoryGuide.Move.HINT) {
+        if (OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT - 1, 0, hinted, 1, -1) != OpeningBeats.Move.WAIT
+                || OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT, 0, hinted, 1, -1) != OpeningBeats.Move.HINT) {
             failures.add("the village hint is not repeated after half a day");
         }
-        if ((m = StoryGuide.decide(false, false, 1, hinted + StoryGuide.REHINT * 2, 0, hinted, StoryGuide.MAX_HINTS, -1)) != StoryGuide.Move.WAIT) {
+        if ((m = OpeningBeats.decide(false, false, 1, hinted + OpeningBeats.REHINT + OpeningBeats.REHINT / 2, 0, hinted, OpeningBeats.MAX_HINTS, -1)) != OpeningBeats.Move.WAIT) {
             failures.add("hints go past the maximum: " + m);
         }
-        if ((m = StoryGuide.decide(false, false, 1, StoryGuide.HINT_AFTER + StoryGuide.CAMP_AFTER, 0, hinted, StoryGuide.MAX_HINTS, -1))
-                != StoryGuide.Move.CAMP) {
+        if ((m = OpeningBeats.decide(false, false, 1, OpeningBeats.HINT_AFTER + OpeningBeats.CAMP_AFTER, 0, hinted, OpeningBeats.MAX_HINTS, -1))
+                != OpeningBeats.Move.CAMP) {
             failures.add("still unmet after the village hints but no camp: " + m);
         }
         // 野営を作ったあとは、1 日待ってから作り直す
-        if (StoryGuide.decide(false, false, 2, 5000 + StoryGuide.CAMP_AFTER - 1, 0, -1, 0, 5000) != StoryGuide.Move.WAIT
-                || StoryGuide.decide(false, false, 2, 5000 + StoryGuide.CAMP_AFTER, 0, -1, 0, 5000) != StoryGuide.Move.CAMP) {
+        if (OpeningBeats.decide(false, false, 2, 5000 + OpeningBeats.CAMP_AFTER - 1, 0, -1, 0, 5000) != OpeningBeats.Move.WAIT
+                || OpeningBeats.decide(false, false, 2, 5000 + OpeningBeats.CAMP_AFTER, 0, -1, 0, 5000) != OpeningBeats.Move.CAMP) {
             failures.add("the camp is not rebuilt after a day");
         }
         // 案内は、最初の影が済んでから (影を起こさない設定なら最初から)
         SkyEventData none = new SkyEventData();
         SkyEventData seen = new SkyEventData();
         seen.countPass(0);
-        if (StoryGuide.started(none, false, 1.0) || !StoryGuide.started(seen, false, 1.0) || StoryGuide.started(seen, true, 1.0)
-                || !StoryGuide.started(none, false, 0.0)) {
+        if (OpeningBeats.started(none, false, 1.0) || !OpeningBeats.started(seen, false, 1.0) || OpeningBeats.started(seen, true, 1.0)
+                || !OpeningBeats.started(none, false, 0.0)) {
             failures.add("the guide starts at the wrong time");
         }
         // 方角: 北は -z、東は +x
         BlockPos o = BlockPos.ZERO;
-        if (StoryGuide.compass(o, new BlockPos(0, 0, -100)) != 0 || StoryGuide.compass(o, new BlockPos(100, 0, 0)) != 2
-                || StoryGuide.compass(o, new BlockPos(0, 0, 100)) != 4 || StoryGuide.compass(o, new BlockPos(-100, 0, 0)) != 6
-                || StoryGuide.compass(o, new BlockPos(100, 0, -100)) != 1) {
+        if (OpeningBeats.compass(o, new BlockPos(0, 0, -100)) != 0 || OpeningBeats.compass(o, new BlockPos(100, 0, 0)) != 2
+                || OpeningBeats.compass(o, new BlockPos(0, 0, 100)) != 4 || OpeningBeats.compass(o, new BlockPos(-100, 0, 0)) != 6
+                || OpeningBeats.compass(o, new BlockPos(100, 0, -100)) != 1) {
             failures.add("the compass directions are off");
         }
     }

@@ -26,22 +26,22 @@ public class NpcWorldData extends SavedData {
     // 鐘の位置 (BlockPos.asLong) → 役 → 立たせたゲーム時刻
     final Map<Long, Map<String, Long>> villages = new HashMap<>();
     // 野営の焚き火の位置 (BlockPos.asLong)
-    final Set<Long> camps = new LinkedHashSet<>();
+    public final Set<Long> camps = new LinkedHashSet<>();
     final Map<UUID, Guide> guides = new HashMap<>();
 
     // 語り部に会えるまでの案内の進み具合 (人ごと)。since: 案内を始めた時刻、villageState: 0 まだ探していない / 1 村が見つかった / 2 近くに村がない
-    static final class Guide {
-        long since;
-        int villageState;
-        int villageX;
-        int villageZ;
-        long hintAt = -1;
-        int hints;
-        long campAt = -1;
-        boolean done;
+    public static final class Guide {
+        public long since;
+        public int villageState;
+        public int villageX;
+        public int villageZ;
+        public long hintAt = -1;
+        public int hints;
+        public long campAt = -1;
+        public boolean done;
     }
 
-    Guide guide(UUID player, long now) {
+    public Guide guide(UUID player, long now) {
         return guides.computeIfAbsent(player, p -> {
             Guide g = new Guide();
             g.since = now;

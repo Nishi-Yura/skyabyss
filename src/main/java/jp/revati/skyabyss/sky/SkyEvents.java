@@ -49,8 +49,7 @@ public final class SkyEvents {
     private static final long FIRST_PASS_AT = 6000L;
     private static final long FIRST_PASS_MIN_WAIT = 2400L;
     private static final long FIRST_RETRY_DELAY = 200L;
-    // 予定から半日遅れたら雨でも起こす。丸一日遅れたら、空の見えない所にいる人の上にも起こす
-    private static final long FIRST_LOOSEN_RAIN = DAY / 2;
+    // 最初の一回は雨でも起こす (17 の 3.3節)。丸一日遅れたら、空の見えない所にいる人の上にも起こす
     private static final long FIRST_LOOSEN_SKY = DAY;
     private static final float SPEED = 0.35f;
     // プレイヤーの何ブロック手前から歩いてくるか
@@ -196,7 +195,7 @@ public final class SkyEvents {
     @Nullable
     private static ServerPlayer pickWitness(ServerLevel level, long firstOverdue) {
         boolean first = firstOverdue >= 0;
-        if (!level.isDay() || (level.isRaining() && !(first && firstOverdue >= FIRST_LOOSEN_RAIN))) {
+        if (!level.isDay() || (level.isRaining() && !first)) {
             return null;
         }
         List<ServerPlayer> players = new ArrayList<>(level.players());

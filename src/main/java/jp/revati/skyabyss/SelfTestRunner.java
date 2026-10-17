@@ -103,8 +103,8 @@ public final class SelfTestRunner {
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
-        steps.add(Step.once("story guide (load)", jp.revati.skyabyss.npc.StoryGuideSelfTest::load));
-        steps.add(Step.once("story guide", 60, jp.revati.skyabyss.npc.StoryGuideSelfTest::runSelfTest));
+        steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
+        steps.add(Step.once("opening beats", 60, jp.revati.skyabyss.opening.OpeningBeatsSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));
