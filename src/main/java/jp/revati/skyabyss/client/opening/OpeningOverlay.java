@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 // B0 開幕の暗転と題字 (docs/design/17 の 3.1節): 初めてワールドに入ったときだけ。
 // 黒い画面から始まり、鼓動と遠い鐘のあと、まぶたが細く開いて一度まばたきし、ゆっくり視界が戻る。題字「天と淵のあいだ」、その下に一行。
 // 時間は tick。画面の効果の強さ (screenEffectStrength) が 0 のときも、暗転と文字は出す (読めるように。足音の薄い暗がりだけを消す)
-final class OpeningOverlay {
+public final class OpeningOverlay {
     // 全体の長さ (18 秒)
     static final int TOTAL = 360;
     // 題字の絵 (1536 x 384)
@@ -74,10 +74,18 @@ final class OpeningOverlay {
             g.fill(0, 0, w, h, a << 24 | 0x03030A);
         }
         int ticks = OpeningClient.awakeTicks();
-        if (ticks < 0) {
+        // カメラの場面 (opening) が開幕を受け持つときは、場面の画面が renderIntro を呼ぶ
+        if (ticks < 0 || jp.revati.skyabyss.client.cinematic.CinematicClient.takesOverOpening()) {
             return;
         }
-        float t = ticks + mc.getTimer().getGameTimeDeltaPartialTick(false);
+        renderIntro(g, ticks + mc.getTimer().getGameTimeDeltaPartialTick(false), true);
+    }
+
+    // 開幕の暗転・まぶた・題字 (一行は withLine のときだけ。場面では台詞の欄が出す)。t = 開幕からの tick
+    public static void renderIntro(GuiGraphics g, float t, boolean withLine) {
+        Minecraft mc = Minecraft.getInstance();
+        int w = g.guiWidth();
+        int h = g.guiHeight();
         float open = eyelid(t);
         if (open < 1f) {
             if (t < 60f) {
@@ -129,7 +137,7 @@ final class OpeningOverlay {
             g.pose().popPose();
         }
         // 開幕の一行: 字幕のように、画面の下に静かに
-        float line = textAlpha(t, 230f, 280f, 320f, 360f);
+        float line = withLine ? textAlpha(t, 230f, 280f, 320f, 360f) : 0f;
         if (line > 0.02f) {
             int alpha = Math.max(4, (int) (line * 255f));
             int y = (int) (h * 0.80f);

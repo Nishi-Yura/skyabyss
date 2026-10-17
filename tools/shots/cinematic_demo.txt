@@ -1,0 +1,49 @@
+# 大事な場面のカメラ演出を撮る (docs/design/19_cinematics.md)。新しいワールドの開幕 (opening の場面) → 岩鯨の初見 (whale_first_sight)。
+# 使い方: ./gradlew runShots -Pscript=tools/shots/cinematic_demo.txt -PshotsName=<まだ使っていない名前>   (新しい名前 = 新しいワールド)
+# 開幕は入った直後に自動で始まる (36 秒 = 720 tick)。操作は送らない。絵は docs/review/previews/ へ (gitignore)
+world cinematic_demo flat
+size 1280 720
+timeout 600
+render 16
+clouds on
+
+wait 20
+shot cin_open_00
+wait 80
+shot cin_open_01_eyelid
+wait 70
+shot cin_open_02_lying
+wait 80
+shot cin_open_03_title
+wait 100
+shot cin_open_04_crane
+wait 100
+shot cin_open_05_heaven
+wait 120
+shot cin_open_06_sky
+wait 100
+shot cin_open_07_return
+wait 80
+shot cin_open_08_handback
+wait 60
+shot cin_open_09_control
+echo opening done
+
+cmd skyabyss titan summon
+wait 120
+cmd skyabyss cinematic play whale_first_sight
+wait 30
+shot cin_whale_00
+wait 100
+shot cin_whale_01_horizon
+wait 120
+shot cin_whale_02_push
+wait 100
+shot cin_whale_03_whale
+wait 100
+shot cin_whale_04_orbit
+wait 80
+shot cin_whale_05_end
+wait 120
+shot cin_whale_06_control
+echo done
