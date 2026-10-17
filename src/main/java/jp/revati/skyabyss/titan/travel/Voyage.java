@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.travel;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -19,9 +20,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
@@ -165,7 +163,7 @@ class Voyage {
         if (dest != null && !beforeDeparture() && phase != Phase.LOWERING && totalTicks % 20 == 0) {
             int seconds = Math.max(1, (int) Math.round(remainingTicks(whale) / 20.0));
             for (ServerPlayer rider : players(riders)) {
-                rider.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.underway"), Voyages.destName(dest), seconds), true);
+                Notice.bar(rider, ModText.hint(kind.text("message.skyabyss.travel.underway"), Voyages.destName(dest), seconds));
             }
         }
     }
@@ -208,7 +206,7 @@ class Voyage {
             level.playSound(null, whale.getX(), whale.getY(), whale.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
             ServerPlayer lead = player(leader);
             if (lead != null) {
-                lead.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.arrived_pickup")));
+                Notice.narrate(lead, kind.text("message.skyabyss.travel.arrived_pickup"));
             }
         }
     }
@@ -254,7 +252,7 @@ class Voyage {
             titan.setVoyageChain(pickup.getY());
             if (left % 40 == 0) {
                 for (ServerPlayer p : nearbyPlayers(level, Vec3.atCenterOf(pickup), 32)) {
-                    p.displayClientMessage(ModText.hint("message.skyabyss.travel.boarding", left / 20), true);
+                    Notice.bar(p, ModText.hint("message.skyabyss.travel.boarding", left / 20));
                 }
             }
             return;
@@ -322,7 +320,7 @@ class Voyage {
             for (ServerPlayer rider : players(riders)) {
                 PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(true, kind.style().ordinal()));
                 rider.playNotifySound(kind.veilSound().get(), SoundSource.AMBIENT, 1f, 1f);
-                rider.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.veil")));
+                Notice.narrate(rider, kind.text("message.skyabyss.travel.veil"));
             }
             return;
         }
@@ -448,11 +446,11 @@ class Voyage {
             return;
         }
         if (occupied() >= titan.seatCount()) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.travel.full"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.travel.full"));
             return;
         }
         if (phase == Phase.BOARDING && phaseTicks >= TravelRules.BOARDING_COUNTDOWN) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.travel.leaving"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.travel.leaving"));
             return;
         }
         player.stopRiding();
@@ -461,7 +459,7 @@ class Voyage {
         // ログアウトしても宙に残さない: 迎えの場所へ戻す
         Voyages.markSafe(player, pickup);
         level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.PLAYERS, 2f, 1.1f);
-        player.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.climbing")), true);
+        Notice.bar(player, ModText.hint(kind.text("message.skyabyss.travel.climbing")));
     }
 
     void tickClimbs(ServerLevel level) {
@@ -526,9 +524,9 @@ class Voyage {
             if (dest == null) {
                 Voyages.sendChart(p, this);
             }
-            p.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.seated_leader")));
+            Notice.narrate(p, kind.text("message.skyabyss.travel.seated_leader"));
         } else {
-            p.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.seated"), leaderName));
+            Notice.narrate(p, kind.text("message.skyabyss.travel.seated"), leaderName);
         }
     }
 
@@ -613,7 +611,7 @@ class Voyage {
     void cancel(String key, boolean lowerRiders) {
         ServerPlayer lead = player(leader);
         if (lead != null) {
-            lead.sendSystemMessage(ModText.deny(kind.text(key)));
+            Notice.warn(lead, kind.text(key));
             Voyages.setCooldown(lead, TravelRules.COOLDOWN_CANCELLED);
         }
         if (lowerRiders && (!riders.isEmpty() || !climbs.isEmpty() || !lowers.isEmpty())) {
@@ -712,7 +710,7 @@ class Voyage {
             ServerPlayer p = player(id);
             if (p != null) {
                 PacketDistributor.sendToPlayer(p, new TravelNetwork.Veil(false, kind.style().ordinal()));
-                p.sendSystemMessage(ModText.deny(kind.text("message.skyabyss.travel.lost")));
+                Notice.warn(p, kind.text("message.skyabyss.travel.lost"));
             }
         }
         finish(false);
@@ -758,7 +756,7 @@ class Voyage {
         for (ServerPlayer p : players(riders)) {
             leader = p.getUUID();
             leaderName = p.getGameProfile().getName();
-            p.sendSystemMessage(ModText.lore("message.skyabyss.travel.new_leader"));
+            Notice.narrate(p, "message.skyabyss.travel.new_leader");
             if (dest == null) {
                 Voyages.sendChart(p, this);
             }
@@ -979,7 +977,7 @@ class Voyage {
         ServerLevel back = level.getServer().getLevel(TitanTravel.TITAN_BACK);
         if (back != null && kind == TitanKind.STONE_WHALE) {
             for (ServerPlayer p : back.players()) {
-                p.sendSystemMessage(ModText.lore(key));
+                Notice.narrate(p, key);
             }
         }
     }
@@ -1005,8 +1003,6 @@ class Voyage {
     }
 
     static void showTitle(ServerPlayer player, Component title, Component subtitle) {
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(15, 60, 25));
-        player.connection.send(new ClientboundSetSubtitleTextPacket(subtitle.copy().withStyle(s -> s.withColor(0x7FD6D0).withItalic(true))));
-        player.connection.send(new ClientboundSetTitleTextPacket(title.copy().withStyle(net.minecraft.ChatFormatting.GOLD)));
+        Notice.place(player, title.copy().withStyle(net.minecraft.ChatFormatting.GOLD), subtitle.copy().withStyle(s -> s.withColor(0x7FD6D0).withItalic(true)));
     }
 }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.skill;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
@@ -124,7 +125,7 @@ public final class SkillManager {
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.8f, 1f);
         level.sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 18, 0.4, 0.6, 0.4, 0.02);
-        player.displayClientMessage(ModText.progress("message.skyabyss.skill.learned", Component.translatable(skill.nameKey()), rank, skill.maxRank), true);
+        Notice.send(player, Notice.Kind.LEVEL_UP, ModText.progress("message.skyabyss.skill.learned", Component.translatable(skill.nameKey()), rank, skill.maxRank));
         return r;
     }
 
@@ -198,7 +199,7 @@ public final class SkillManager {
         sync(player);
         applyModifiers(player);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 0.7f);
-        player.displayClientMessage(ModText.lore("message.skyabyss.skill.respec_done"), false);
+        Notice.send(player, ModText.lore("message.skyabyss.skill.respec_done"));
         return RespecResult.OK;
     }
 
@@ -261,14 +262,14 @@ public final class SkillManager {
         settleMana(player);
         int cost = SkillRules.manaCost(skill, rank);
         if (d.mana + 1e-4 < cost) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.skill.no_mana"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.skill.no_mana"));
             player.playNotifySound(Skills.SOUND_FAIL.get(), SoundSource.PLAYERS, 0.6f, 1f);
             sendResult(player, slot, false);
             return CastResult.NO_MANA;
         }
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
-            player.displayClientMessage(ModText.deny(failure), true);
+            Notice.bar(player, ModText.deny(failure));
             player.playNotifySound(Skills.SOUND_FAIL.get(), SoundSource.PLAYERS, 0.6f, 1f);
             sendResult(player, slot, false);
             return CastResult.FAILED;

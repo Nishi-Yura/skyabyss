@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.gear;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import jp.revati.skyabyss.ModText;
@@ -64,7 +65,7 @@ public class EmberHornItem extends Item {
         if (!level.isClientSide && entity instanceof ServerPlayer player) {
             if (level.dimension() == EmberIds.BACK) {
                 drinkOnBack(player);
-                player.displayClientMessage(ModText.lore("tooltip.skyabyss.ember.horn_drunk"), true);
+                Notice.bar(player, ModText.lore("tooltip.skyabyss.ember.horn_drunk"));
             } else {
                 player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, EmberGear.HORN_SURFACE_FIRE_TICKS, 0));
             }

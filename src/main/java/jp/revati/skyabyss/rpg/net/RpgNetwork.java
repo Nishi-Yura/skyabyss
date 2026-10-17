@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.net;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
@@ -27,7 +28,7 @@ public final class RpgNetwork {
                     if (context.player() instanceof ServerPlayer player && !Growth.allocate(player, payload.add())) {
                         // 画面が古いとき (ほかの所で振った・レベルを下げられた) など。同期し直して知らせる
                         Growth.sync(player);
-                        player.displayClientMessage(ModText.deny("message.skyabyss.growth.allocate_failed"), true);
+                        Notice.bar(player, ModText.deny("message.skyabyss.growth.allocate_failed"));
                     }
                 })
                 .playToServer(GrowthRespecPayload.TYPE, GrowthRespecPayload.STREAM_CODEC, (payload, context) -> {
@@ -40,8 +41,8 @@ public final class RpgNetwork {
                         }
                         jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult r = Growth.respecStats(player);
                         if (r != jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK) {
-                            player.displayClientMessage(ModText.deny("message.skyabyss.growth.respec_failed." + r.name().toLowerCase(),
-                                    net.minecraft.network.chat.Component.literal(String.valueOf(cost))), true);
+                            Notice.bar(player, ModText.deny("message.skyabyss.growth.respec_failed." + r.name().toLowerCase(),
+                                    net.minecraft.network.chat.Component.literal(String.valueOf(cost))));
                         }
                     }
                 });

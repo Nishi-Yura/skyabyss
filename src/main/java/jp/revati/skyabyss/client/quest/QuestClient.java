@@ -55,6 +55,7 @@ public final class QuestClient {
         @SubscribeEvent
         static void onLayers(RegisterGuiLayersEvent event) {
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "quest_tracker"), QuestHud::render);
+            event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "objective_strip"), ObjectiveStrip::render);
         }
     }
 

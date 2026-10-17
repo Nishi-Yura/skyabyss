@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.List;
@@ -149,7 +150,7 @@ final class StormWest {
             if (inWest) {
                 if (W0.contains(p.blockPosition()) && !GaleFeather.holds(p) && p.isAlive()) {
                     if (p.getInventory().add(new ItemStack(StormBackSetup.GALE_FEATHER.get()))) {
-                        p.displayClientMessage(ModText.hint("message.skyabyss.storm.gale_feather"), true);
+                        Notice.bar(p, ModText.hint("message.skyabyss.storm.gale_feather"));
                         level.playSound(null, p.blockPosition(), StormSetup.GALE.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
                     }
                 }
@@ -159,7 +160,7 @@ final class StormWest {
                 }
             } else if (GaleFeather.holds(p)) {
                 strip(p);
-                p.displayClientMessage(ModText.hint("message.skyabyss.storm.gale_feather_gone"), true);
+                Notice.bar(p, ModText.hint("message.skyabyss.storm.gale_feather_gone"));
             }
         }
     }

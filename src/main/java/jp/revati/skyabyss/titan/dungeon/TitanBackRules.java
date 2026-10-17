@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanBacks;
@@ -59,7 +60,7 @@ public final class TitanBackRules {
 
     private static void deny(Player player) {
         if (!player.level().isClientSide) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.titan_refuses"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.titan_refuses"));
         }
     }
 

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.smith;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -870,7 +871,7 @@ public class AshSmith extends EmberMob {
 
     private void broadcast(ServerLevel server, Component message) {
         for (ServerPlayer p : fighters(server)) {
-            p.displayClientMessage(message, true);
+            Notice.bar(p, message);
         }
     }
 

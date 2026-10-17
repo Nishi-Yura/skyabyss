@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
@@ -107,13 +108,13 @@ public final class Growth {
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);
-        player.sendSystemMessage(ModText.progress("message.skyabyss.growth.level_up", data.level,
-                GrowthRules.POINTS_PER_LEVEL * gained));
+        Notice.levelUp(player, "message.skyabyss.growth.level_up", data.level,
+                GrowthRules.POINTS_PER_LEVEL * gained);
         if (data.level >= GrowthRules.MAX_LEVEL) {
-            player.sendSystemMessage(ModText.lore("message.skyabyss.growth.max_level"));
+            Notice.narrate(player, "message.skyabyss.growth.max_level");
         } else if (data.unspentPoints() > 0 && (data.level <= 5 || data.unspentPoints() >= 3 * GrowthRules.POINTS_PER_LEVEL)) {
             // 振り方の手がかりは、はじめのうちと、力をためこんでいるときだけ (毎回は出さない)
-            player.sendSystemMessage(ModText.hint("message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status")));
+            Notice.hint(player, "message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status"));
         }
     }
 
@@ -179,7 +180,7 @@ public final class Growth {
         applyModifiers(player);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(),
                 net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 0.7f);
-        player.displayClientMessage(jp.revati.skyabyss.ModText.lore("message.skyabyss.growth.respec_done"), false);
+        Notice.send(player, jp.revati.skyabyss.ModText.lore("message.skyabyss.growth.respec_done"));
         return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK;
     }
 
@@ -234,8 +235,8 @@ public final class Growth {
         if (added > 0) {
             sync(player);
             player.playNotifySound(Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 1.5f);
-            player.sendSystemMessage(ModText.lore("message.skyabyss.growth.fragment_gained",
-                    Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity));
+            Notice.narrate(player, "message.skyabyss.growth.fragment_gained",
+                    Component.translatable(MemoryFragments.nameKey(id.toString())), data.fragmentCount(), data.fragmentCapacity);
         }
         return added;
     }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.item.storm;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -83,8 +84,8 @@ public class StormCharmItem extends Item implements ModGear, Accessory {
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35f, 1.6f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.7f, 1.4f);
         player.getCooldowns().addCooldown(this, StormGear.CHARM_COOLDOWN);
-        player.displayClientMessage(Component.translatable("message.skyabyss.storm_charm.armed", StormGear.CHARM_CHARGES)
-                .withStyle(s -> s.withColor(0xBFE6FF)), true);
+        Notice.bar(player, Component.translatable("message.skyabyss.storm_charm.armed", StormGear.CHARM_CHARGES)
+                .withStyle(s -> s.withColor(0xBFE6FF)));
         return true;
     }
 

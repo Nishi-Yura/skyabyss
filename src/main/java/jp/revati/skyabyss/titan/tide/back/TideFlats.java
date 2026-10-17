@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
 import java.util.ArrayList;
@@ -357,7 +358,7 @@ public final class TideFlats {
             }
         }
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(10, 10, 50))) {
-            p.sendSystemMessage(left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", 3 - left, 3)
+            Notice.send(p, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", 3 - left, 3)
                     : ModText.lore("message.skyabyss.tide.nests_all_broken"));
         }
         if (left == 0) {
@@ -405,7 +406,7 @@ public final class TideFlats {
                     if (fightTimer % 20 == 0) {
                         Component text = ModText.battle("message.skyabyss.gate_countdown", fightTimer / 20);
                         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(6, 6, 50))) {
-                            p.displayClientMessage(text, true);
+                            Notice.bar(p, text);
                         }
                     }
                     return;
@@ -485,7 +486,7 @@ public final class TideFlats {
         AABB door = new AABB(-1, TUNNEL_FLOOR + 1, MOUTH_Z + 1, 2, TUNNEL_FLOOR + 4, MOUTH_Z + 3);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, door, p -> p.isAlive() && participants.contains(p.getUUID()))) {
             pullIn(p);
-            p.displayClientMessage(ModText.battle("message.skyabyss.gate_rejoin"), true);
+            Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
         }
     }
 
@@ -616,9 +617,9 @@ public final class TideFlats {
                 }
                 Growth.addXp(p, amount, "entity.skyabyss.tide_beckoner");
                 jp.revati.skyabyss.quest.Quests.signal(p, SIGNAL);
-                p.sendSystemMessage(ModText.progress("message.skyabyss.tide.beckoner_defeated"));
+                Notice.unlock(p, "message.skyabyss.tide.beckoner_defeated");
                 if (!items.isEmpty()) {
-                    p.sendSystemMessage(TitanLoot.rewardLine(items));
+                    Notice.send(p, TitanLoot.rewardLine(items));
                 }
                 TitanLoot.tellHeld(p, held);
             }
@@ -642,7 +643,7 @@ public final class TideFlats {
 
     static void broadcast(ServerLevel level, Component message) {
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(10, 10, 50))) {
-            p.sendSystemMessage(message);
+            Notice.send(p, message);
         }
     }
 

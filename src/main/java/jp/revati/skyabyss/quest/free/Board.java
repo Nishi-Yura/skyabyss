@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.quest.free;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -167,7 +168,7 @@ public final class Board {
         for (String id : handed) {
             QuestDef def = QuestManager.quest(id);
             if (def != null) {
-                player.sendSystemMessage(ModText.hint("message.skyabyss.board.handed", Component.translatable(def.titleKey())));
+                Notice.hint(player, "message.skyabyss.board.handed", Component.translatable(def.titleKey()));
             }
         }
         if (!handed.isEmpty()) {

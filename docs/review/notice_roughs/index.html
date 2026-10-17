@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画面の知らせ ラフ 3 案</title>
+<style>
+:root { --bg:#0c0f12; --fg:#e9e3d4; --soft:#8c8ca0; --teal:#7fd6d0; --gold:#f2c14e; --panel:#121619; --edge:#2e5552; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family:"Yu Gothic","Meiryo",sans-serif; line-height:1.7; }
+main { max-width:1100px; margin:0 auto; padding:24px 16px 64px; }
+h1 { font-size:22px; } h2 { font-size:18px; margin-top:40px; border-bottom:1px solid var(--edge); padding-bottom:6px; }
+p, li { font-size:14px; color:#cfc9ba; }
+.row { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
+.stage { position:relative; height:260px; border:1px solid var(--edge); background:linear-gradient(#5b8fd6,#9cc3ee 55%,#4f7d35 55%); overflow:hidden; image-rendering:pixelated; }
+.cap { position:absolute; left:50%; bottom:46px; transform:translateX(-50%); width:70%; text-align:center; font-size:13px; padding:6px 10px; }
+.band { position:absolute; left:50%; top:28px; transform:translateX(-50%); text-align:center; white-space:nowrap; }
+.toast { position:absolute; right:6px; width:170px; font-size:11px; padding:5px 8px; }
+.strip { position:absolute; left:6px; top:6px; font-size:11px; padding:2px 8px; }
+.tag { position:absolute; left:6px; bottom:4px; font-size:11px; color:#fff; background:#0008; padding:0 6px; }
+/* A: 暗い石板 (実装済み) */
+.A .cap { background:#0a0e12cc; color:#8fe3dc; font-style:italic; border-top:1px solid #7fd6d0; border-bottom:1px solid #7fd6d0; }
+.A .band { color:var(--gold); font-size:26px; font-weight:bold; text-shadow:1px 1px 0 #000; border-bottom:1px solid var(--gold); padding:0 24px 4px; }
+.A .toast { background:#121619f0; border:1px solid var(--edge); border-left:3px solid var(--gold); color:#e9e3d4; }
+.A .strip { background:#0a0c1090; border-left:2px solid var(--gold); color:#e9e3d4; }
+/* B: 枠なしの細い文字 (Elden Ring 風) */
+.B .cap { color:#f3efe2; text-shadow:0 0 4px #000,1px 1px 0 #000; font-size:14px; }
+.B .band { color:#e8d9a8; font-size:30px; font-weight:300; letter-spacing:.3em; text-shadow:0 0 8px #000; }
+.B .toast { color:#f3efe2; text-shadow:1px 1px 0 #000; text-align:right; }
+.B .strip { color:#f3efe2cc; text-shadow:1px 1px 0 #000; }
+/* C: 青い窓と白い縁 (ドラクエ風) */
+.C .cap { background:#0a1c6cdd; border:2px solid #fff; border-radius:4px; color:#fff; box-shadow:0 0 0 2px #0a1c6c; }
+.C .band { background:#0a1c6cdd; border:2px solid #fff; border-radius:4px; color:#fff; font-size:20px; padding:6px 22px; }
+.C .toast { background:#0a1c6cdd; border:2px solid #fff; border-radius:4px; color:#fff; }
+.C .strip { background:#0a1c6cdd; border:1px solid #fff; color:#fff; }
+.rec { border:1px solid var(--gold); padding:10px 14px; margin-top:24px; background:#1a1508; }
+</style>
+</head>
+<body>
+<main>
+<h1>画面の知らせ ラフ 3 案 (17 の判断 12)</h1>
+<p>下の三つの場面を、案ごとに並べる。上から、語りの字幕 (下中央) と場所の名前の帯 (上中央)、獲得の札 (右上)、目的の帯 (左上)。実際の寸法・音・出入りの時間は <code>docs/design/18_notices.md</code>。</p>
+
+<h2>案 A 暗い石板 (クエストや伝承の札と同じ作り)</h2>
+<div class="row">
+  <div class="stage A">
+    <div class="band">巨神の記憶: 岩鯨</div>
+    <div class="strip">◆ 煙を追う　　　　40m 北東</div>
+    <div class="toast" style="top:34px"><b style="color:#f2c14e">獲得</b><br>岩鯨の心臓が遺したものが、あなたの手に渡った</div>
+    <div class="cap">背骨に沿って、古い石の門と塔が残っている。<br>頭はずっと北、胸びれの先は雲の上だ</div><span class="tag">A</span>
+  </div>
+</div>
+<p>既存の札・クエストの札と見た目がそろう。暗い帯は背景の明るさに左右されず読める。</p>
+
+<h2>案 B 枠なしの細い文字 (Elden Ring 風)</h2>
+<div class="row">
+  <div class="stage B">
+    <div class="band">巨神の記憶: 岩鯨</div>
+    <div class="strip">◆ 煙を追う　　　　40m 北東</div>
+    <div class="toast" style="top:34px"><b style="color:#e8d9a8">獲得</b><br>岩鯨の心臓が遺したものが、あなたの手に渡った</div>
+    <div class="cap">背骨に沿って、古い石の門と塔が残っている。<br>頭はずっと北、胸びれの先は雲の上だ</div><span class="tag">B</span>
+  </div>
+</div>
+<p>世界に溶ける。ただし昼の明るい空や雪の上では文字が埋もれ、日本語の細字は読みにくい。既存の札と見た目が分かれる。</p>
+
+<h2>案 C 青い窓と白い縁 (ドラクエ風)</h2>
+<div class="row">
+  <div class="stage C">
+    <div class="band">巨神の記憶: 岩鯨</div>
+    <div class="strip">◆ 煙を追う　　　　40m 北東</div>
+    <div class="toast" style="top:34px"><b>獲得</b><br>岩鯨の心臓が遺したものが、あなたの手に渡った</div>
+    <div class="cap">背骨に沿って、古い石の門と塔が残っている。<br>頭はずっと北、胸びれの先は雲の上だ</div><span class="tag">C</span>
+  </div>
+</div>
+<p>RPG らしさは最も強いが、この作品の静かな恐怖と合わない (青い窓が明るすぎ、世界観の色を壊す)。</p>
+
+<div class="rec"><b>推奨: 案 A。</b>理由: (1) 伝承・クエストの札と同じ暗い石板で、画面の言葉づかいが一つにそろう。(2) 暗い下地があるので、昼の空でも夜の闇でも文字が読める。(3) 静かな恐怖を壊さない (大きな音・原色の窓を使わない)。実装は A (client/notice)。字幕・帯の文字だけは案 B の「枠なし」に寄せる余地がある (判断は 18 の 9 章)。</div>
+</main>
+</body>
+</html>
