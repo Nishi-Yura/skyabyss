@@ -1,7 +1,7 @@
 package jp.revati.skyabyss.opening;
 
 import jp.revati.skyabyss.Config;
-import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
@@ -162,7 +162,7 @@ public final class OpeningBeats {
     private static void tellVillage(NpcWorldData.Guide g, ServerPlayer player) {
         BlockPos at = new BlockPos(g.villageX, player.getBlockY(), g.villageZ);
         int distance = (int) Math.round(horizontal(at, player.blockPosition()) / 10.0) * 10;
-        player.sendSystemMessage(ModText.lore("message.skyabyss.guide.village", directionName(player.blockPosition(), at), Math.max(distance, 10)));
+        Notice.narrate(player, "message.skyabyss.guide.village", directionName(player.blockPosition(), at), Math.max(distance, 10));
     }
 
     private static void camp(ServerLevel level, NpcWorldData data, NpcWorldData.Guide g, ServerPlayer player, long now) {
@@ -174,7 +174,7 @@ public final class OpeningBeats {
         g.campAt = now;
         data.setDirty();
         NpcSpawner.visitVillage(level, fire, player);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.guide.camp"));
+        Notice.narrate(player, "message.skyabyss.guide.camp");
     }
 
     private static double horizontal(BlockPos a, BlockPos b) {
