@@ -1,0 +1,32 @@
+# Ember titan crater rock close-ups (stripe check).
+# ./gradlew runShots -Pscript=tools/shots/ember_crater_stripes.txt -PshotsName=ember_crater_<tag>
+# Coordinates are local to the titan (^ = left ^ up ^ forward). No OS input.
+world ember_crater flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set 18000
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p thunder_wing
+camera 0.5 -60 0.5 0 0
+waitchunks
+cmd skyabyss titan summon ember
+wait 60
+cmd skyabyss titan rest ember here
+wait 60
+hud off
+cmd gamemode spectator
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^35 ^64 ^42 facing ^0 ^62 ^18
+waitchunks
+wait 40
+shot crater_a
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^-35 ^64 ^42 facing ^0 ^62 ^18
+wait 30
+shot crater_b
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^0 ^70 ^60 facing ^0 ^62 ^18
+wait 30
+shot crater_c
+quit
