@@ -118,13 +118,11 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 言伝ての板: `models/block/message_board.json`、`models/item/message_board.json`、`blockstates/message_board.json`、`textures/block/message_board_*.png` (32x32) | `gen_message_board.py` | 採用は既定で A。`--option B` などで別案に差し替えられる。ラフ 3 案と比較画像は `docs/review/board_roughs/`。`--roughs-only` なら docs にだけ書く |
 | 潮殻の装備 (三叉槍・盾・大鋏・銛): `models/item/{tide_shell_trident,coral_shield,coral_shield_blocking,tidecaller_claw,coral_harpoon}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{tide_shell_trident,coral_shield,tidecaller_claw,coral_harpoon,tide_chime_charm,moontide_pearl,tide_shell_core}.png` と護符・真珠・心核の `models/item/*.json` | `install_tide_gear.py` (ラフは `rough/tide_gear.py`、3 案と比較画像は `docs/review/tide_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/tide_gear/` から入れ直す) | 同じ物ができる。盾の持ち方 (`SHIELD_DISPLAY`) はバニラの盾の値 (03 の 11.6節) |
 | 余燼の装備 (戦斧・大鎚・火掻き): `models/item/{ember_war_axe,smith_hammer,thrall_poker}.json`、`textures/item/3d/*.png`、アイコン `textures/item/{ember_war_axe,smith_hammer,thrall_poker,ember_mantle,kindling_charm,ember_lantern,ember_horn,ember_core,ember_shard,spark_dust,cinder_husk}.png` と、アイコンだけの品の `models/item/*.json` | `gen_ember_items.py` (ラフは `rough/ember_gear.py`、3 案と比較画像は `docs/review/ember_gear_roughs/`。採用は全部 A。`--option <品>=<a\|b\|c>` で差し替え、`--from-sources` で `tools/sources/ember_gear/` から入れ直す) | 同じ物ができる。大鎚の持ち方 (`HAMMER_DISPLAY`) は目分量の最初の値 (実機で確認すること) |
-| 潮殻の鎧: `geo/armor/tide_shell_armor.geo.json`、`textures/armor/tide_shell_armor{,_glowmask}.png`、`textures/models/armor/tide_shell_layer_{1,2}.png`、`textures/item/tide_shell_{helmet,chestplate,leggings,boots}.png`、`models/item/tide_shell_*.json` | `install_tide_armor.py` (ラフは `rough/tide_armor.py`、採用は B。`--option a\|b\|c`、`--from-sources` で `tools/sources/tide_armor/` から) | 同じ物ができる |
+| 4 巨神の立体防具 (岩鯨の甲殻・潮殻の鎧・雷翼の羽衣・余燼の鎧): `geo/armor/<名前>_armor.geo.json`、`textures/armor/<名前>_armor{,_glowmask}.png`、`textures/item/<名前>_{helmet,chestplate,leggings,boots}.png` (32x32、3D の各部位を描いた絵) | `install_armor_v2.py` (設計は 16。部品は `rough/armor_v2_parts.py`、4 体の形・素材・飾りは `rough/armor_v2_sets.py`、道具は `rough/armor_kit.py`、アイコンは `rough/armor_v2_icons.py`。重なり 0・光る画素・面の予算を検査して書く。台本 `shots/armor_v2.txt`) | 同じ物ができる (決定的)。バニラ層 `textures/models/armor/*_layer_{1,2}.png` と `models/item/*.json` は触らない |
 | 雷翼の装備 (弓・爪・鉤槍と、アイコンだけの品 7 つ): `models/item/{thunder_wing_bow,thunder_wing_bow_pulling_{0,1,2},raiju_claw,warden_glaive,storm_charm,storm_anklet,storm_eye_feather,thunder_wing_shard,thunder_wing_core,cloudgap_fruit,moth_dust}.json`、`textures/item/3d/*.png`、`textures/item/*.png`、`textures/mob_effect/static_ward.png` | `install_storm_gear.py` (ラフは `rough/storm_items.py`、3 案と比較画像は `docs/review/storm_gear_roughs/`。採用は 03 の 12.4節。`--option <品>=<a\|b\|c>`、`--from-sources` で `tools/sources/storm_gear/` から) | 同じ物ができる。弓の持ち方はバニラの `item/bow.json` の値 |
-| 雷翼の羽衣: `geo/armor/thunder_wing_armor.geo.json`、`textures/armor/thunder_wing_armor{,_glowmask}.png`、`animations/armor/thunder_wing_armor.animation.json`、`textures/models/armor/thunder_wing_layer_{1,2}.png`、`textures/item/thunder_wing_{helmet,chestplate,leggings,boots}.png`、`models/item/thunder_wing_*.json` | `install_storm_armor.py` (ラフは `rough/storm_armor.py`、採用は A。`--option a\|b\|c`、`--from-sources` で `tools/sources/storm_armor/` から) | 同じ物ができる |
-| 余燼の鎧: `geo/armor/ember_armor.geo.json`、`textures/armor/ember_armor{,_glowmask}.png`、`textures/models/armor/ember_layer_{1,2}.png`、`textures/item/ember_{helmet,chestplate,leggings,boots}.png`、`animations/armor/ember_armor.animation.json`、`models/item/ember_{helmet,chestplate,leggings,boots}.json` | `install_ember_armor.py` (ラフは `rough/ember_armor.py`、採用は A 火山の背。`--option a\|b\|c`、`--from-sources` で `tools/sources/ember_armor/` から) | 同じ物ができる |
 
 `rough/boss_v4.py`、`rough/sentinel_v4.py`、`rough/voxel.py`、`rough/build_gallery.py` は `src/` を読むだけで書かない。
-`rough/` のそのほか (`armor*.py`、`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
+`rough/` のそのほか (`boss.py`、`mobs_*.py`、`stone_whale*.py`、`weapons*.py`、`captain_v2.py` など) は、片付けた `docs/roughs/` にしか書かない。履歴として残している (ラフの中身は git の 7b69ce9 以前にある)。
 
 ## 作り直しの元データ (`tools/sources/`)
 
@@ -161,7 +159,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 2026-10-17 | `tide_shell_roughs/` (本体 B、心臓 B、珊瑚憑き A・磯走り A・泡吹き A、00 の 55) | 比較画像 `titan.png`・`heart.png`・`coral_thrall.png`・`reef_scuttler.png`・`bubble_puffer.png`。選ばれた案のデータ `titan/b/`・`heart/b/`・`heart/bars.png`・`mobs/coral_thrall/a/`・`mobs/coral_spear/`・`mobs/reef_scuttler/a/`・`mobs/bubble_puffer/a/` (心臓と敵の担当が並行で読むので、今は場所を変えない。取り込みが済んだら `tools/sources/` へ移すか消す)。`mobs/bubble_puffer/c/` (月明かりのクラゲ混じり) も残す: 08 の 14.3節で「3 章以降の別の種に回せる」としたため。`install/` は `install_tide_shell.py` の確認用の出力。`install_tide_shell.py` は B 案を `rough/tide_shell_titan.py` から import して作り、ここのファイルは比較の絵 (`titan/b/far.png`、無ければ飛ばす) しか読まない | `titan/a/`・`titan/c/`、`heart/a/`・`heart/c/`、`mobs/coral_thrall/b/`・`c/`、`mobs/reef_scuttler/b/`・`c/`、`mobs/bubble_puffer/b/` |
 | 2026-10-17 | `high_poly_roughs/assets/` (全モデルのハイポリ化、15。採用は全部 C か、岩鯨・潮殻の C) | 比較画像 `*.png` と `ingame/`、採用した案 `stone_whale_C/`・`tide_shell_C/`・`storyteller_C/`・`watcher_C/`・`whale_chaser_C/` (今の `src/` と同じ中身) | 採らなかった案 `*_A/`・`*_B/` (敵 13 種・NPC 3 種・中ボス 4 種・雷翼と余燼の本体)、`raiju_Blean/`。どれも `tools/rough/hp_*.py` を回せば作り直せる (`tools/sources/hp_base/` が入力) |
 
-生成元のないもの (今の `src/` が正本): 番兵 (`bone_sentinel`) と盾、水路の顎 (`waterway_maw`)、甲殻の防具 (`geo/armor`、`textures/armor`)、`textures/item/3d/bone_spike_arrow.png`、`sounds/**/*.ogg`。
+生成元のないもの (今の `src/` が正本): 番兵 (`bone_sentinel`) と盾、水路の顎 (`waterway_maw`)、`textures/item/3d/bone_spike_arrow.png`、`sounds/**/*.ogg`。
 
 ## 止めてあるもの (引退)
 
@@ -172,7 +170,6 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | `gen_mobs.py` | 番兵・射手・苔這い・顎・番兵長の geo / png / glowmask / animation | 上の表 |
 | `gen_titan_model.py` | 岩鯨の近景 geo / png / glowmask / animation | `install_stone_whale.py` |
 | `gen_heart.py` | 心臓の animation (古い骨名に戻る) | `install_heart_v4.py` |
-| `gen_armor_model.py` | 甲殻の防具の geo / png / glowmask | なし (今の src が正本) |
 | `gen_weapon_models.py` (v1) | 武器 3 本のモデルを古い押し出しモデルに戻し、途中で止まる | `gen_weapon_models_v2.py` |
 | `rough/rib_archer_v3.py` | 射手の geo / animation を v3 に戻す | `rough/rib_archer_v4.py` |
 | `rough/captain_v3.py --install` | 番兵長を v3 に戻す (`--install` なしなら docs にだけ書くので動く) | `rough/captain_v4.py --install` |
