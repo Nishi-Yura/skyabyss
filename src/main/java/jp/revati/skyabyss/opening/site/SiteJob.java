@@ -3,10 +3,13 @@ package jp.revati.skyabyss.opening.site;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -72,6 +75,15 @@ public final class SiteJob {
     private int[] groundCache; // 範囲 + 輪の列の地面の高さ
     // true なら、チャンクを (tick を待たずに) その場で読み込む。開発コマンドと自己テスト用
     public boolean blocking;
+    // 大きな構造物 (足跡・骨) 用: 地面に沿って掘る・盛る列 (世界の列 → relief の行)、木と草を片付ける列
+    private Map<Long, int[]> reliefAt;
+    private LongOpenHashSet touched;
+    // wetOk の部品で、水だった列 (触らない)
+    private LongOpenHashSet wetCols;
+    // ANALYZE を何 tick かに分ける
+    private boolean anaInit;
+    private int anaX;
+    private List<Integer> anaHs;
 
     public SiteJob(ServerLevel level, SiteData data, SiteData.Entry entry, Blueprint bp, String label, Post post) {
         this.level = level;
@@ -101,7 +113,7 @@ public final class SiteJob {
             while (phase != Phase.DONE && System.nanoTime() < deadline) {
                 switch (phase) {
                     case LOAD -> load();
-                    case ANALYZE -> analyze();
+                    case ANALYZE -> analyze(deadline);
                     case TERRAIN -> terrain(deadline);
                     case PLACE -> place(deadline);
                     case FINISH -> finish();
@@ -111,6 +123,9 @@ public final class SiteJob {
                 }
                 if (phase == Phase.LOAD && waited > 0) {
                     break; // チャンクを待つ間は tick を譲る
+                }
+                if (phase == Phase.RELOCATE && relocSearch != null) {
+                    break; // 別のスレッドの場所探しを待つ間は tick を譲る
                 }
             }
         } finally {
@@ -201,47 +216,59 @@ public final class SiteJob {
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.SANDSTONE)
                 || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.MOSS_BLOCK) || s.is(Blocks.CALCITE)
                 || s.is(Blocks.TUFF) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.GRANITE)
-                || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH);
+                || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)
     private static boolean naturalAbove(BlockState s) {
         return s.isAir() || s.canBeReplaced() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS)
                 || isPlant(s) || s.is(BlockTags.SNOW) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.COBWEB) || s.is(Blocks.MANGROVE_ROOTS)
-                || s.is(Blocks.HANGING_ROOTS);
+                || s.is(Blocks.HANGING_ROOTS) || s.is(Blocks.MOSSY_COBBLESTONE);
     }
 
     // ---------------------------------------------------------------- ANALYZE
-    private void analyze() {
+    // 大きな範囲 (骨は 100 x 50) でも tick を使い切らないよう、列 (x) ごとに進めて、予算が尽きたら次の tick へ
+    private void analyze(long deadline) {
         int x0 = rect[0];
         int z0 = rect[1];
         int x1 = rect[2];
         int z1 = rect[3];
         int w = x1 - x0 + 1;
         int d = z1 - z0 + 1;
-        groundCache = new int[w * d];
         int[] inner = bp.worldRect(rot, mirror, new BlockPos(origin.getX(), 0, origin.getZ()));
-        List<Integer> hs = new ArrayList<>();
-        boolean conflict = false;
+        if (!anaInit) {
+            groundCache = new int[w * d];
+            wetCols = new LongOpenHashSet();
+            anaHs = new ArrayList<>();
+            anaX = x0;
+            anaInit = true;
+        }
         boolean skipCheck = entry.started;
-        int height = Math.max(bp.maxY, 3) + 3;
+        // 人の建物があるかは、地面の少し上まで見れば足りる (高い所は自然の木)
+        int height = Math.min(Math.max(bp.maxY, 3) + 3, 16);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        for (int x = x0; x <= x1 && !conflict; x++) {
+        while (anaX <= x1) {
+            int x = anaX;
             for (int z = z0; z <= z1; z++) {
                 int g = ground(x, z);
                 groundCache[(x - x0) + (z - z0) * w] = g;
                 boolean in = x >= inner[0] && x <= inner[2] && z >= inner[1] && z <= inner[3];
+                if (g == WET && bp.wetOk) {
+                    wetCols.add(BlockPos.asLong(x, 0, z));
+                    groundCache[(x - x0) + (z - z0) * w] = origin.getY() - 1;
+                    continue;
+                }
                 if (g == WET) {
                     if (in && !skipCheck) {
                         SkyAbyss.LOGGER.info("Opening site {}: water at {} {}", label, x, z);
-                        conflict = true;
-                        break;
+                        conflictFound();
+                        return;
                     }
                     groundCache[(x - x0) + (z - z0) * w] = origin.getY() - 1;
                     continue;
                 }
                 if (in) {
-                    hs.add(g);
+                    anaHs.add(g);
                 }
                 if (skipCheck) {
                     continue;
@@ -249,28 +276,28 @@ public final class SiteJob {
                 p.set(x, g, z);
                 if (!naturalGround(level.getBlockState(p))) {
                     SkyAbyss.LOGGER.info("Opening site {}: {} at {} is not natural ground", label, level.getBlockState(p), p);
-                    conflict = true;
-                    break;
+                    conflictFound();
+                    return;
                 }
                 if (in) {
                     for (int y = g + 1; y <= g + height; y++) {
                         p.setY(y);
                         if (!naturalAbove(level.getBlockState(p))) {
                             SkyAbyss.LOGGER.info("Opening site {}: {} at {} is not natural", label, level.getBlockState(p), p);
-                            conflict = true;
-                            break;
+                            conflictFound();
+                            return;
                         }
-                    }
-                    if (conflict) {
-                        break;
                     }
                 }
             }
+            anaX++;
+            if (System.nanoTime() >= deadline) {
+                return;
+            }
         }
-        if (conflict) {
-            phase = Phase.RELOCATE;
-            return;
-        }
+        anaInit = false;
+        List<Integer> hs = anaHs;
+        anaHs = null;
         if (hs.isEmpty()) {
             phase = Phase.RELOCATE;
             return;
@@ -289,11 +316,54 @@ public final class SiteJob {
             }
         }
         buildColumns(inner);
+        buildSelective();
         entry.started = true;
         data.setDirty();
         colIndex = 0;
         cellIndex = 0;
         phase = Phase.TERRAIN;
+    }
+
+    private void conflictFound() {
+        anaInit = false;
+        anaHs = null;
+        phase = Phase.RELOCATE;
+    }
+
+    // 掘る・盛る列 (relief) と、木・草を片付ける列 (relief の 1 まわり / 部品のブロックの clearNear まわり) を、世界の座標で作る
+    private void buildSelective() {
+        reliefAt = null;
+        touched = null;
+        if (bp.relief.isEmpty() && bp.clearNear <= 0) {
+            return;
+        }
+        touched = new LongOpenHashSet();
+        LongOpenHashSet base = new LongOpenHashSet();
+        int reach;
+        if (!bp.relief.isEmpty()) {
+            reliefAt = new HashMap<>();
+            for (int[] r : bp.relief) {
+                BlockPos w = Blueprint.transform(r[0], 0, r[1], rot, mirror, origin);
+                reliefAt.put(BlockPos.asLong(w.getX(), 0, w.getZ()), r);
+                base.add(BlockPos.asLong(w.getX(), 0, w.getZ()));
+            }
+            reach = 1;
+        } else {
+            for (Blueprint.Cell c : bp.cells) {
+                BlockPos w = Blueprint.transform(c.x(), 0, c.z(), rot, mirror, origin);
+                base.add(BlockPos.asLong(w.getX(), 0, w.getZ()));
+            }
+            reach = bp.clearNear;
+        }
+        for (long k : base) {
+            int bx = BlockPos.getX(k);
+            int bz = BlockPos.getZ(k);
+            for (int dx = -reach; dx <= reach; dx++) {
+                for (int dz = -reach; dz <= reach; dz++) {
+                    touched.add(BlockPos.asLong(bx + dx, 0, bz + dz));
+                }
+            }
+        }
     }
 
     // 地形を直す列 (x, z, 目標の高さ, 内側か) を決める。内側 = 部品の範囲、外側 = 輪 (なだらかにつなぐ)
@@ -330,6 +400,7 @@ public final class SiteJob {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int n = cols.length / 5;
         int clear = Math.max(bp.maxY, 4) + 4;
+        boolean selective = touched != null;
         while (colIndex < n) {
             int i = colIndex * 5;
             int x = cols[i];
@@ -338,7 +409,18 @@ public final class SiteJob {
             boolean in = cols[i + 3] == 1;
             int g = cols[i + 4];
             colIndex++;
-            if (!(bp.level && (target != g || in)) && !in) {
+            if (selective) {
+                long key = BlockPos.asLong(x, 0, z);
+                int[] rel = reliefAt == null ? null : reliefAt.get(key);
+                if (wetCols != null && wetCols.contains(key)) {
+                    // 水の列は触らない
+                } else if (rel != null) {
+                    clearAbove(p, x, z, g + 1, 22, true);
+                    applyRelief(p, x, z, g, rel);
+                } else if (touched.contains(key)) {
+                    clearAbove(p, x, z, g + 1, reliefAt != null ? 22 : clear, in);
+                }
+            } else if (!(bp.level && (target != g || in)) && !in) {
                 // 変えない列 (輪の外、または変えない部品)。木だけ片付ける
                 clearAbove(p, x, z, g + 1, clear, false);
             } else {
@@ -363,6 +445,80 @@ public final class SiteJob {
         }
         phase = Phase.PLACE;
         cellIndex = 0;
+    }
+
+    // ---------------------------------------------------------------- 地面に沿って掘る・盛る (大きな足跡)。g はその列の地面の高さ (上面)
+    private static final BlockState AIR = Blocks.AIR.defaultBlockState();
+
+    private void applyRelief(BlockPos.MutableBlockPos p, int x, int z, int g, int[] r) {
+        int a = r[3];
+        switch (r[2]) {
+            case 0 -> {
+                for (int y = g; y > g - a; y--) {
+                    if (!level.getBlockState(p.set(x, y, z)).isAir()) {
+                        set(p, AIR);
+                    }
+                }
+                set(p.set(x, g - a, z), bp.palette.get(r[4]));
+                placedCount++;
+                if (r[5] == 1 && waterOk(x, z, g, a)) {
+                    set(p.set(x, g - a + 1, z), Blocks.WATER.defaultBlockState());
+                }
+            }
+            case 1 -> {
+                BlockState top = bp.palette.get(r[4]);
+                BlockState fill = bp.palette.get(r[5]);
+                for (int k = 1; k <= a; k++) {
+                    set(p.set(x, g + k, z), k == a ? top : fill);
+                    placedCount++;
+                }
+            }
+            default -> {
+                BlockState st = Blueprint.transform(bp.palette.get(r[4]), rot, mirror);
+                for (int k = 1; k <= a; k++) {
+                    set(p.set(x, g + k, z), st);
+                    placedCount++;
+                }
+            }
+        }
+    }
+
+    // 雨水を張ってよいか: 四方が水面 (底の一つ上) より高い壁か、同じ底の高さの雨水の列 (水が横へこぼれない)。Python の Grid.pool_ok と同じ規則
+    private boolean waterOk(int x, int z, int g, int a) {
+        int yw = g - a + 1;
+        int w = rect[2] - rect[0] + 1;
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] dd : dirs) {
+            int nx = x + dd[0];
+            int nz = z + dd[1];
+            int ng = groundCache[(nx - rect[0]) + (nz - rect[1]) * w];
+            int[] nr = reliefAt.get(BlockPos.asLong(nx, 0, nz));
+            int top = ng;
+            if (nr != null) {
+                top = nr[2] == 0 ? ng - nr[3] : ng + nr[3];
+            }
+            if (top >= yw) {
+                continue;
+            }
+            if (nr != null && nr[2] == 0 && nr[3] == a && ng - nr[3] == g - a && nr[5] == 1) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // その列の、いちばん上の固い地面の一つ上 (歩いて立つ場所)。from から下へ探す
+    public BlockPos standAt(int x, int z, int from) {
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos(x, from, z);
+        for (int y = from; y > level.getMinBuildHeight(); y--) {
+            q.setY(y);
+            BlockState st = level.getBlockState(q);
+            if (!st.getCollisionShape(level, q).isEmpty() || !st.getFluidState().isEmpty()) {
+                return new BlockPos(x, y + 1, z);
+            }
+        }
+        return new BlockPos(x, from, z);
     }
 
     private void clearAbove(BlockPos.MutableBlockPos p, int x, int z, int from, int height, boolean inside) {
@@ -436,41 +592,160 @@ public final class SiteJob {
     }
 
     // ---------------------------------------------------------------- RELOCATE: 人の建物・水があった。少しずらして調べ直す
+    // 探すのは重い (地形生成の高さを何十回も問い合わせる) ので、別のスレッドでやって、できるまで tick を譲る (自己テストの blocking はその場で)。
+    // 輪ごとに 12 方向 (輪の幅 = 部品の半分の大きさの半分、最小 14) を調べ、12 の輪まで。ほかの構造物と重ならず、骨は野営地から 205〜375、足跡は道から 30〜155 に収める
+    private java.util.concurrent.CompletableFuture<BlockPos> relocSearch;
+    private BlockPos home;
+
+    private static int otherRadius(String kind) {
+        return switch (kind) {
+            case "camp" -> 12;
+            case "shelter" -> 16;
+            case "footprint" -> SiteFinder.FOOT_HALF_Z;
+            case "ribs" -> SiteFinder.RIB_HALF_LONG;
+            default -> 3;
+        };
+    }
+
     private void relocate() {
+        if (relocSearch != null) {
+            if (!relocSearch.isDone()) {
+                return;
+            }
+            BlockPos found = relocSearch.join();
+            relocSearch = null;
+            applyRelocation(found);
+            return;
+        }
         releaseTickets();
         relocations++;
-        if (relocations > 14) {
-            SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, entry.pos, relocations - 1);
+        if (home == null) {
+            home = entry.pos;
+        }
+        // 大きな構造物 (足跡・骨) は 12 の輪まで。小さな物 (野営地・宿り・積み石) は 14 回まで (輪は 3 回ごとに外へ)
+        int maxRings = bp.wetOk ? 12 : 14;
+        if (relocations > maxRings) {
+            SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, home, relocations - 1);
             data.entries().remove(entry);
             data.setDirty();
             phase = Phase.DONE;
             return;
         }
-        SiteFinder.Probe probe = new SiteFinder.Probe(level);
-        int ring = 1 + (relocations - 1) / 4;
-        int baseX = entry.pos.getX();
-        int baseZ = entry.pos.getZ();
-        // 8 方向に 12 ブロックずつ広げる
-        for (int attempt = 0; attempt < 8; attempt++) {
-            double a = Math.PI * 2 * (attempt + relocations * 0.37) / 8;
-            int x = baseX + (int) Math.round(Math.cos(a) * 12 * ring);
-            int z = baseZ + (int) Math.round(Math.sin(a) * 12 * ring);
-            int half = Math.max(bp.rx1 - bp.rx0, bp.rz1 - bp.rz0) / 2 + 1;
-            SiteFinder.Area ar = SiteFinder.area(probe, x, z, half, half, 8);
-            if (ar.ok()) {
-                SkyAbyss.LOGGER.info("Opening site {} moved from {} to {} {} (something was built or wet there)", label, entry.pos, x, z);
-                entry.pos = new BlockPos(x, ar.median() + 1, z);
-                origin = entry.pos;
-                entry.started = false;
-                data.setDirty();
-                phase = Phase.LOAD;
-                return;
+        int[] wr = bp.worldRect(rot, mirror, new BlockPos(home.getX(), 0, home.getZ()));
+        int hx = (wr[2] - wr[0]) / 2 + 1;
+        int hz = (wr[3] - wr[1]) / 2 + 1;
+        int step = Math.max(14, Math.max(hx, hz) / 2);
+        // 小さな物は輪をゆっくり広げる (3 回ごとに 1 つ外へ。道が大きく変わらない)
+        int ring = bp.wetOk ? relocations : 1 + (relocations - 1) / 3;
+        int range = Math.max(hx, hz) >= 16 ? 40 : 8;
+        BlockPos base = home;
+        List<BlockPos> others = new ArrayList<>();
+        List<Integer> radii = new ArrayList<>();
+        for (SiteData.Entry o : data.entries()) {
+            if (o != entry) {
+                others.add(o.pos);
+                radii.add(otherRadius(o.kind));
             }
         }
-        // この輪では見つからなかった。次の輪へ
-        entry.pos = new BlockPos(baseX + 12 * ring, entry.pos.getY(), baseZ);
+        int mine = Math.max(hx, hz);
+        // 水がまじってよい部品は、乾いていてほしい範囲を半分に (池は水の列を残して建てる)
+        int coreX = bp.wetOk ? hx / 2 : hx;
+        int coreZ = bp.wetOk ? hz / 2 : hz;
+        int k = relocations;
+        SiteData.Entry campE = data.first("camp");
+        SiteData.Entry shelterE = data.first("shelter");
+        BlockPos campPos = campE == null ? null : campE.pos;
+        BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
+        String kind = entry.kind;
+        List<BlockPos> otherPrints = new ArrayList<>();
+        if (kind.equals("footprint")) {
+            for (SiteData.Entry o : data.entries("footprint")) {
+                if (o != entry && Math.abs(o.index - entry.index) == 1) {
+                    otherPrints.add(o.pos);
+                }
+            }
+        }
+        SiteFinder.Probe probe = new SiteFinder.Probe(level);
+        java.util.function.Supplier<BlockPos> search = () -> {
+            for (int attempt = 0; attempt < 12; attempt++) {
+                double ang = Math.PI * 2 * (attempt + k * 0.37) / 12;
+                int x = base.getX() + (int) Math.round(Math.cos(ang) * step * ring);
+                int z = base.getZ() + (int) Math.round(Math.sin(ang) * step * ring);
+                boolean clear = true;
+                for (int i = 0; i < others.size(); i++) {
+                    if (Math.hypot(x - others.get(i).getX(), z - others.get(i).getZ()) < mine + radii.get(i) + 6) {
+                        clear = false;
+                        break;
+                    }
+                }
+                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints)) {
+                    continue;
+                }
+                SiteFinder.Area ar = SiteFinder.area(probe, x, z, coreX, coreZ, range);
+                if (ar.ok()) {
+                    return new BlockPos(x, ar.median() + 1, z);
+                }
+            }
+            return null;
+        };
+        if (blocking) {
+            applyRelocation(search.get());
+        } else {
+            relocSearch = java.util.concurrent.CompletableFuture.supplyAsync(search, net.minecraft.Util.backgroundExecutor());
+        }
+    }
+
+    // 動かしても守る距離 (骨は野営地から、足跡は道から)
+    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos camp, @Nullable BlockPos shelter, List<BlockPos> footprints) {
+        if (camp == null) {
+            return true;
+        }
+        if (kind.equals("ribs")) {
+            double d = Math.hypot(x - camp.getX(), z - camp.getZ());
+            if (d < 205 || d > 375) {
+                return false;
+            }
+            // 宿りとは違う方角 (82 度以上離す)
+            if (shelter != null) {
+                double a1 = Math.atan2(z - camp.getZ(), x - camp.getX());
+                double a2 = Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX());
+                double diff = Math.abs(Math.toDegrees(a1 - a2));
+                diff = diff > 180 ? 360 - diff : diff;
+                return diff >= 82;
+            }
+            return true;
+        }
+        if (kind.equals("footprint") && shelter != null) {
+            double dx = shelter.getX() - camp.getX();
+            double dz = shelter.getZ() - camp.getZ();
+            double len = Math.sqrt(dx * dx + dz * dz);
+            double dp = SiteFinder.distToPath(x, z, camp, dx / len, dz / len, len);
+            if (dp < 30 || dp > 155) {
+                return false;
+            }
+            // 隣の足跡との一歩の間隔 (66〜135)
+            for (BlockPos o : footprints) {
+                double dd = Math.hypot(x - o.getX(), z - o.getZ());
+                if (dd < 66 || dd > 135) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return true;
+    }
+
+    private void applyRelocation(@Nullable BlockPos found) {
+        if (found == null) {
+            phase = Phase.RELOCATE; // 次の輪へ
+            return;
+        }
+        SkyAbyss.LOGGER.info("Opening site {} moved from {} to {} {} (something was built or wet there)", label, entry.pos, found.getX(), found.getZ());
+        entry.pos = found;
         origin = entry.pos;
-        phase = Phase.RELOCATE;
+        entry.started = false;
+        data.setDirty();
+        phase = Phase.LOAD;
     }
 
     // ---------------------------------------------------------------- 道具
