@@ -1,8 +1,12 @@
 package jp.revati.skyabyss.forge;
 
+import java.util.List;
+
 import jp.revati.skyabyss.item.ModGear;
 import jp.revati.skyabyss.item.affix.AffixRules;
-import jp.revati.skyabyss.loot.TitanLoot;
+import jp.revati.skyabyss.item.TitanGearSet;
+import jp.revati.skyabyss.item.TitanGearSets;
+import jp.revati.skyabyss.loot.GearExchange;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModItems;
@@ -34,6 +38,8 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public static final int BUTTON_PICK = 4;
     // 交換: 専用伝説 0〜2 (10〜12)
     public static final int BUTTON_EXCHANGE = 10;
+    // 交換のボタン: BUTTON_EXCHANGE + 巨神の番号 (TitanGearSets の並び) × EXCHANGE_STRIDE + 専用伝説の番号
+    public static final int EXCHANGE_STRIDE = 8;
     public static final int GEAR_X = 44;
     public static final int GEAR_Y = 35;
 
@@ -45,7 +51,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         }
     };
     private final ContainerLevelAccess access;
-    // [0] 持っている専用伝説の印、[1] 交換の状態 (ForgeRules.ExchangeState の順番)
+    // 巨神ごとに二つ (TitanGearSets の並び): [2t] 持っている専用伝説の印、[2t+1] 交換の状態 (ForgeRules.ExchangeState の順番)
     private final ContainerData exchange;
 
     public ResonanceForgeMenu(int id, Inventory inventory) {
@@ -55,12 +61,14 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
     public ResonanceForgeMenu(int id, Inventory inventory, ContainerLevelAccess access) {
         super(ModMenus.RESONANCE_FORGE.get(), id);
         this.access = access;
+        int sets = TitanGearSets.all().size();
         if (inventory.player instanceof ServerPlayer server) {
             exchange = new ContainerData() {
                 @Override
                 public int get(int index) {
-                    TitanMemoryData.Record r = TitanLoot.peek(server);
-                    return index == 0 ? TitanLoot.ownedExclusiveMask(r) : TitanLoot.exchangeState(r).ordinal();
+                    TitanGearSet set = TitanGearSets.all().get(index / 2);
+                    TitanMemoryData.Record r = TitanMemoryData.get(server.server).peek(server.getUUID(), set.titan);
+                    return index % 2 == 0 ? GearExchange.ownedMask(set, r) : GearExchange.state(set, r).ordinal();
                 }
 
                 @Override
@@ -69,11 +77,11 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
 
                 @Override
                 public int getCount() {
-                    return 2;
+                    return sets * 2;
                 }
             };
         } else {
-            exchange = new SimpleContainerData(2);
+            exchange = new SimpleContainerData(sets * 2);
         }
         addDataSlots(exchange);
         addSlot(new Slot(gear, 0, GEAR_X, GEAR_Y) {
@@ -101,21 +109,25 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         return gear.getItem(0);
     }
 
-    public boolean ownsExclusive(int index) {
-        return (exchange.get(0) & (1 << index)) != 0;
+    public boolean ownsExclusive(int titan, int index) {
+        return (exchange.get(titan * 2) & (1 << index)) != 0;
     }
 
-    public ForgeRules.ExchangeState exchangeState() {
+    public ForgeRules.ExchangeState exchangeState(int titan) {
         ForgeRules.ExchangeState[] all = ForgeRules.ExchangeState.values();
-        int i = exchange.get(1);
+        int i = exchange.get(titan * 2 + 1);
         return i >= 0 && i < all.length ? all[i] : ForgeRules.ExchangeState.NO_CLEAR;
     }
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
         // 交換は装備の枠を使わない
-        if (id >= BUTTON_EXCHANGE && id < BUTTON_EXCHANGE + TitanLoot.exclusives().size()) {
-            if (!(player instanceof ServerPlayer server) || !TitanLoot.exchange(server, TitanLoot.exclusives().get(id - BUTTON_EXCHANGE))) {
+        if (id >= BUTTON_EXCHANGE) {
+            int t = (id - BUTTON_EXCHANGE) / EXCHANGE_STRIDE;
+            int i = (id - BUTTON_EXCHANGE) % EXCHANGE_STRIDE;
+            List<TitanGearSet> sets = TitanGearSets.all();
+            if (t >= sets.size() || i >= sets.get(t).exclusives().size() || !(player instanceof ServerPlayer server)
+                    || !GearExchange.exchange(server, sets.get(t), sets.get(t).exclusives().get(i))) {
                 return false;
             }
             exchangeEffects();
@@ -151,12 +163,13 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
         }
         if (id == BUTTON_DISMANTLE) {
             int[] yield = ForgeRules.dismantleYield(stack);
+            stack = stack.copy();
             gear.setItem(0, ItemStack.EMPTY);
             if (yield[0] > 0) {
                 player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.RESONANCE_SHARD.get(), yield[0]));
             }
             if (yield[1] > 0) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), yield[1]));
+                player.getInventory().placeItemBackInInventory(new ItemStack(ForgeRules.shardItem(stack), yield[1]));
             }
             if (yield[2] > 0) {
                 player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), yield[2]));

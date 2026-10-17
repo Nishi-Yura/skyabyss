@@ -2,14 +2,18 @@ package jp.revati.skyabyss.sky;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -19,6 +23,8 @@ import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -26,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.common.Tags;
 
 // 「削られた山頂」の計画。影の通過経路の下にある高い自然の峰を探し、巨大なものが擦ったように
 // 頂を平らに削り、進む向きに引きずった溝と、散った岩を残す計画を作る。
@@ -37,8 +44,11 @@ import net.minecraft.world.phys.AABB;
 //     原木だけは、自然の葉 (プレイヤーには置けない) が茂る木の幹なら周りにあってよい (削る所にあれば削らない)
 //  3. その範囲に、ブロックエンティティ (チェスト・看板・かまどなど)、防具立て・額縁・乗り物、飼いならした・名前の付いた・
 //     消えない設定の生き物がいれば削らない
-//  4. プレイヤーがブロックを置いたことのあるチャンク (ChapterSkyData) と、プレイヤーが長く過ごしたチャンク
-//     (InhabitedTime が1時間を超える) にかかるなら削らない
+//  4. プレイヤーがブロックを置いた・固いブロックを掘ったことのあるチャンク (ChapterSkyData) と、プレイヤーが長く過ごしたチャンク
+//     (InhabitedTime が1時間を超える。Mod を入れる前からあった古いチャンクは5分) にかかるなら削らない
+//  4b. 自然のブロックだけでも「人が積んだ」形 (草の上に積んだ土や石、草の下の空洞、細い柱・細い壁、まっすぐな垂直の面、
+//     宙に浮いた薄い屋根・橋、まっ平らな床、バイオームの表層に合わないもの) があれば削らない (builtShape)
+//  4c. さらに外 (横に40) の地表付近に、自然でないブロックやブロックの光があれば削らない
 //  5. ワールドの初期スポーンから160、だれかの復活地点 (ベッドなど。ログアウト中の人の分も覚えている) から128、
 //     いまいるプレイヤーから24ブロック以内は削らない。前の削り跡から64以内も削らない
 //  6. 村などの構造物にかかるなら削らない。水や溶岩に触れる所も削らない
@@ -56,6 +66,11 @@ public final class PeakScar {
     static final int ABOVE = 12;
     // これより長くプレイヤーが近くにいたチャンクは、拠点の近くとみなす (1時間 = 72000tick)
     static final long MAX_INHABITED = 72000L;
+    // Mod を入れる前からあったチャンク (置いた記録がない) は、5分 (6000tick) で拠点の近くとみなす
+    static final long OLD_MAX_INHABITED = 6000L;
+    // 光源や人の手を探す、さらに外の範囲 (削る所から横に40)。地表から4段だけ見る
+    static final int OUTER = 40;
+    static final int OUTER_DEPTH = 4;
     static final double SPAWN_CLEAR = 160.0;
     static final double HOME_CLEAR = 128.0;
     static final double PLAYER_CLEAR = 24.0;
@@ -331,10 +346,16 @@ public final class PeakScar {
         int baseCut = c.y() - shape.depth();
         int minY = Math.max(level.getMinBuildHeight(), baseCut - 3 - BELOW);
 
-        // チャンク: 読み込み済み・プレイヤーが置いていない・長く過ごしていない
+        int outMinX = minX - (OUTER - MARGIN);
+        int outMaxX = maxX + (OUTER - MARGIN);
+        int outMinZ = minZ - (OUTER - MARGIN);
+        int outMaxZ = maxZ + (OUTER - MARGIN);
+
+        // チャンク (外の範囲まで): 読み込み済み・プレイヤーが置いて (掘って) いない・長く過ごしていない。
+        // Mod を入れる前からあったチャンクは置いた記録がないので、過ごした時間の上限をずっと短くする
         ChapterSkyData data = ChapterSkyData.get(level);
-        for (int cx = minX >> 4; cx <= maxX >> 4; cx++) {
-            for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) {
+        for (int cx = outMinX >> 4; cx <= outMaxX >> 4; cx++) {
+            for (int cz = outMinZ >> 4; cz <= outMaxZ >> 4; cz++) {
                 if (!level.hasChunk(cx, cz)) {
                     return Result.no("chunk not loaded");
                 }
@@ -342,7 +363,8 @@ public final class PeakScar {
                     return Result.no("player placed blocks here");
                 }
                 LevelChunk chunk = level.getChunk(cx, cz);
-                if (chunk.getInhabitedTime() > MAX_INHABITED) {
+                long limit = ChapterSky.freshChunk(chunk) ? MAX_INHABITED : OLD_MAX_INHABITED;
+                if (chunk.getInhabitedTime() > limit) {
                     return Result.no("players spent long here");
                 }
             }
@@ -362,19 +384,37 @@ public final class PeakScar {
         // 原木だけは、自然に生えた木 (幹の上に、自然の葉が茂っている) なら周りにあってよい
         int maxY = minY;
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        java.util.Map<Long, Boolean> trees = new java.util.HashMap<>();
+        Map<Long, Boolean> trees = new HashMap<>();
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                maxY = Math.max(maxY, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1);
+            }
+        }
+        // 調べたブロックを覚えておき (Grid)、あとで「人が積んだ形」を探す
+        Grid grid = new Grid(minX, minY, minZ, maxX - minX + 1, maxY - minY + 2, maxZ - minZ + 1);
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
-                maxY = Math.max(maxY, surface);
                 for (int y = minY; y <= surface; y++) {
                     BlockState s = level.getBlockState(m.set(x, y, z));
                     if (!natural(s) && !(wildLog(s) && naturalTree(level, m, trees))) {
-                        return Result.no("non-natural " + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath()
-                                + " at " + x + " " + y + " " + z);
+                        return Result.no("non-natural " + name(s) + " at " + x + " " + y + " " + z);
                     }
+                    grid.set(x, y, z, code(s));
                 }
             }
+        }
+        if (gridProbe != null) {
+            gridProbe.accept(grid);
+        }
+        String built = builtShape(level, grid);
+        if (built != null) {
+            return Result.no(built);
+        }
+        // さらに外: 峰の高さにある地表 (4段) に自然でないブロック、または地表のすぐ上にブロックの光があれば削らない
+        String outer = nearbySigns(level, minX, maxX, minZ, maxZ, outMinX, outMaxX, outMinZ, outMaxZ, minY, trees);
+        if (outer != null) {
+            return Result.no(outer);
         }
         maxY = Math.min(level.getMaxBuildHeight() - 1, maxY + ABOVE);
         AABB area = new AABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
@@ -562,6 +602,278 @@ public final class PeakScar {
         all.addAll(whiten);
         all.addAll(debris);
         return new Result(new Plan(new BlockPos(c.x(), c.y(), c.z()), dx, dz, List.copyOf(all), removed, area), "ok");
+    }
+
+    static String name(BlockState s) {
+        return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath();
+    }
+
+    // ---- 「人が積んだ」形を探す ----
+    // 調べた範囲のブロックを、種類の番号で覚える。0 = 空き (空気・草花・雪の層)、1 = そのほかの自然のもの (原木・葉・水・氷など)、
+    // 2 以上 = 消してよい地形 (REMOVABLE) の種類ごとの番号。範囲の外は -1 (分からない。どの形にも数えない)
+    static final byte OPEN = 0;
+    static final byte OTHER = 1;
+    private static final Map<Block, Byte> CODES = new HashMap<>();
+    static final byte GRASS;
+    static final byte SNOW_CODE;
+    static final byte POWDER_CODE;
+    private static final Set<Byte> SOILS;
+
+    static {
+        byte next = 2;
+        for (Block b : REMOVABLE.stream().sorted(Comparator.comparing(Block::getDescriptionId)).toList()) {
+            CODES.put(b, next++);
+        }
+        GRASS = CODES.get(Blocks.GRASS_BLOCK);
+        SNOW_CODE = CODES.get(Blocks.SNOW_BLOCK);
+        POWDER_CODE = CODES.get(Blocks.POWDER_SNOW);
+        SOILS = Set.of(CODES.get(Blocks.GRASS_BLOCK), CODES.get(Blocks.DIRT), CODES.get(Blocks.COARSE_DIRT), CODES.get(Blocks.PODZOL),
+                CODES.get(Blocks.ROOTED_DIRT));
+    }
+
+    static byte code(BlockState s) {
+        if (s.isAir() || (vegetation(s) && s.getFluidState().isEmpty())) {
+            return OPEN;
+        }
+        Byte c = CODES.get(s.getBlock());
+        return c == null ? OTHER : c;
+    }
+
+    static final class Grid {
+        final int x0;
+        final int y0;
+        final int z0;
+        final int sx;
+        final int sy;
+        final int sz;
+        private final byte[] cells;
+
+        Grid(int x0, int y0, int z0, int sx, int sy, int sz) {
+            this.x0 = x0;
+            this.y0 = y0;
+            this.z0 = z0;
+            this.sx = sx;
+            this.sy = sy;
+            this.sz = sz;
+            this.cells = new byte[sx * sy * sz];
+        }
+
+        void set(int x, int y, int z, byte c) {
+            cells[((x - x0) * sz + (z - z0)) * sy + (y - y0)] = c;
+        }
+
+        // 範囲の外は -1
+        byte at(int x, int y, int z) {
+            int ix = x - x0;
+            int iy = y - y0;
+            int iz = z - z0;
+            if (ix < 0 || iy < 0 || iz < 0 || ix >= sx || iy >= sy || iz >= sz) {
+                return -1;
+            }
+            return cells[(ix * sz + iz) * sy + iy];
+        }
+
+        boolean solid(int x, int y, int z) {
+            return at(x, y, z) >= 2;
+        }
+
+        boolean open(int x, int y, int z) {
+            return at(x, y, z) == OPEN;
+        }
+    }
+
+    // 自己テストが、本物の山で各判定がどれだけ当たるかを数えるための口 (ふだんは null)
+    @Nullable
+    static java.util.function.Consumer<Grid> gridProbe;
+
+    // 自然の地形としては不自然な形 (人が石・土・草だけで積んだもの) を探す。見つかれば理由
+    //  - 草ブロックの上に固いブロック (草は上がふさがると土に変わる。生成では草の上に何も積まれない)
+    //  - 草ブロックのすぐ下が空きで、3段以内に床がある (草でふさいだ穴・草の屋根)
+    //  - 細い柱 (四方が空きの固いブロックが4段。塔・足場の柱)
+    //  - 細い壁 (両側が空きの固いブロックが、縦3×横3。小屋の壁・塀)
+    //  - 積んだ箱・台 (上がまっ平らな4×4で、四方の側面が3段まっすぐ切り立つ)
+    //  - まっ平らな床 (雪以外の同じ種類のブロックが同じ高さで7×7、上がすべて空き)
+    //  - バイオームの表層に合わない土 (砂漠・荒野・浜の地表に草や土)
+    @Nullable
+    static String builtShape(ServerLevel level, Grid g) {
+        int x1 = g.x0 + g.sx;
+        int y1 = g.y0 + g.sy;
+        int z1 = g.z0 + g.sz;
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int x = g.x0; x < x1; x++) {
+            for (int z = g.z0; z < z1; z++) {
+                for (int y = g.y0; y < y1; y++) {
+                    byte c = g.at(x, y, z);
+                    if (c < 2) {
+                        continue;
+                    }
+                    String what = null;
+                    if (stackedOnGrass(g, x, y, z)) {
+                        what = "a block stacked on grass";
+                    } else if (hollowUnderGrass(g, x, y, z)) {
+                        what = "hollow under grass";
+                    } else if (pillar(g, x, y, z, PILLAR_H)) {
+                        what = "a thin pillar";
+                    } else if (thinWall(g, x, y, z, WALL_H, WALL_W)) {
+                        what = "a thin wall";
+                    } else if (raisedBox(g, x, y, z, BOX_W, BOX_H)) {
+                        what = "a raised box";
+                    } else if (flatFloor(g, x, y, z, FLOOR)) {
+                        what = "a flat floor of " + name(level.getBlockState(m.set(x, y, z)));
+                    } else if (SOILS.contains(c) && g.open(x, y + 1, z) && foreignSoil(level, m.set(x, y, z))) {
+                        what = "soil that does not belong to the biome";
+                    }
+                    if (what != null) {
+                        return "built shape: " + what + " at " + x + " " + y + " " + z;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // しきい値は、生成された本物の山 (尖った峰・凍った峰・岩の峰) で一度も当たらない大きさにした (自己テストで数えている)。
+    // 細い柱3段・宙に浮いた薄い板・まっすぐな垂直の面・5×5の平らな面は、自然の山でもよく当たるので使わない
+    static final int PILLAR_H = 4;
+    static final int WALL_H = 3;
+    static final int WALL_W = 3;
+    static final int BOX_W = 4;
+    static final int BOX_H = 3;
+    static final int FLOOR = 7;
+
+    static boolean stackedOnGrass(Grid g, int x, int y, int z) {
+        return g.at(x, y, z) == GRASS && g.solid(x, y + 1, z);
+    }
+
+    // 草のすぐ下が空きで、その下 3 段以内に床がある (草でふさいだ穴・低い草の屋根)。
+    // 生成の山では、宙に浮いた草や張り出しの縁の草 (下が 4 段以上空き) がよくあるので、それは数えない
+    static boolean hollowUnderGrass(Grid g, int x, int y, int z) {
+        if (g.at(x, y, z) != GRASS || !g.open(x, y - 1, z)) {
+            return false;
+        }
+        for (int d = 2; d <= HOLLOW_MAX + 1; d++) {
+            if (g.solid(x, y - d, z)) {
+                return true;
+            }
+            if (!g.open(x, y - d, z)) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    static final int HOLLOW_MAX = 3;
+
+    private static boolean pillarCell(Grid g, int x, int y, int z) {
+        return g.solid(x, y, z) && g.open(x + 1, y, z) && g.open(x - 1, y, z) && g.open(x, y, z + 1) && g.open(x, y, z - 1);
+    }
+
+    // 四方が空きの固いブロックが h 段
+    static boolean pillar(Grid g, int x, int y, int z, int h) {
+        for (int i = 0; i < h; i++) {
+            if (!pillarCell(g, x, y + i, z)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 縦 h × 横 w の、厚さ1の壁 (x の両側が空きで z へ並ぶ、または z の両側が空きで x へ並ぶ)
+    static boolean thinWall(Grid g, int x, int y, int z, int h, int w) {
+        boolean alongZ = true;
+        boolean alongX = true;
+        for (int dy = 0; dy < h && (alongZ || alongX); dy++) {
+            for (int d = 0; d < w; d++) {
+                alongZ = alongZ && g.solid(x, y + dy, z + d) && g.open(x - 1, y + dy, z + d) && g.open(x + 1, y + dy, z + d);
+                alongX = alongX && g.solid(x + d, y + dy, z) && g.open(x + d, y + dy, z - 1) && g.open(x + d, y + dy, z + 1);
+            }
+        }
+        return alongZ || alongX;
+    }
+
+    // 積んだ箱・台: (x, z) から n×n の固いブロックの柱が、上は同じ高さ y でまっ平ら (上がすべて空き)、
+    // 四方の側面は h 段まっすぐ切り立っている (側面の外がすべて空き)
+    static boolean raisedBox(Grid g, int x, int y, int z, int n, int h) {
+        for (int dx = 0; dx < n; dx++) {
+            for (int dz = 0; dz < n; dz++) {
+                if (!g.open(x + dx, y + 1, z + dz)) {
+                    return false;
+                }
+                for (int dy = 0; dy < h; dy++) {
+                    if (!g.solid(x + dx, y - dy, z + dz)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        for (int dy = 0; dy < h; dy++) {
+            for (int i = 0; i < n; i++) {
+                if (!g.open(x - 1, y - dy, z + i) || !g.open(x + n, y - dy, z + i) || !g.open(x + i, y - dy, z - 1)
+                        || !g.open(x + i, y - dy, z + n)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 雪以外の同じ種類・同じ高さで、上が空きのブロックが n×n
+    static boolean flatFloor(Grid g, int x, int y, int z, int n) {
+        byte c = g.at(x, y, z);
+        if (c < 2 || c == SNOW_CODE || c == POWDER_CODE) {
+            return false;
+        }
+        for (int dx = 0; dx < n; dx++) {
+            for (int dz = 0; dz < n; dz++) {
+                if (g.at(x + dx, y, z + dz) != c || !g.open(x + dx, y + 1, z + dz)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 砂漠・荒野・浜の地表に草や土はない (運び込まれたもの)
+    static boolean foreignSoil(ServerLevel level, BlockPos pos) {
+        return foreignBiome(testBiome != null ? testBiome : level.getBiome(pos));
+    }
+
+    static boolean foreignBiome(Holder<Biome> biome) {
+        return biome.is(Tags.Biomes.IS_DESERT) || biome.is(BiomeTags.IS_BADLANDS) || biome.is(BiomeTags.IS_BEACH);
+    }
+
+    // 自己テストが、固定の峰を置いた場所のバイオームを決めるための口 (ふだんは null。そのときは本当のバイオームを見る)。
+    // 固定の峰は空中に置くので、そこのバイオームはワールドの種しだい (砂漠なら頂の草が「運び込まれた土」になる)
+    @Nullable
+    static Holder<Biome> testBiome;
+
+    // 削る範囲のさらに外 (横に OUTER まで) の、峰の高さにある地表を見る。
+    // 地表のすぐ上にブロックの光 (松明・ランタンなど) があるか、外の地表から OUTER_DEPTH 段に自然でないブロックがあれば理由
+    @Nullable
+    private static String nearbySigns(ServerLevel level, int minX, int maxX, int minZ, int maxZ, int outMinX, int outMaxX, int outMinZ,
+                                      int outMaxZ, int minY, Map<Long, Boolean> trees) {
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int x = outMinX; x <= outMaxX; x++) {
+            for (int z = outMinZ; z <= outMaxZ; z++) {
+                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
+                if (top < minY) {
+                    continue;
+                }
+                if (level.getBrightness(LightLayer.BLOCK, m.set(x, top + 1, z)) > 0) {
+                    return "light nearby at " + x + " " + (top + 1) + " " + z;
+                }
+                if (x >= minX && x <= maxX && z >= minZ && z <= maxZ) {
+                    continue;
+                }
+                for (int y = Math.max(minY, top - OUTER_DEPTH + 1); y <= top; y++) {
+                    BlockState s = level.getBlockState(m.set(x, y, z));
+                    if (!natural(s) && !(wildLog(s) && naturalTree(level, m, trees))) {
+                        return "non-natural " + name(s) + " nearby at " + x + " " + y + " " + z;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     static boolean snow(BlockState s) {

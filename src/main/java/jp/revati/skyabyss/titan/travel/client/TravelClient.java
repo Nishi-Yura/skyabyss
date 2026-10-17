@@ -45,9 +45,15 @@ public final class TravelClient {
         }
     }
 
-    public static void veil(boolean on) {
+    // 帳の色: 0 = 雲の白 (岩鯨)、1 = 潮の深みの青 (潮殻)
+    private static int veilStyle;
+
+    public static void veil(boolean on, int style) {
         veilOn = on;
         veilTicks = 0;
+        if (on) {
+            veilStyle = style;
+        }
     }
 
     @SubscribeEvent
@@ -90,8 +96,9 @@ public final class TravelClient {
         var g = event.getGuiGraphics();
         int w = g.guiWidth();
         int h = g.guiHeight();
-        int top = ((int) (a * 235) << 24) | 0xEEF4F2;
-        int bottom = ((int) (a * 245) << 24) | 0xC9DEDB;
+        boolean sea = veilStyle == 1;
+        int top = ((int) (a * 235) << 24) | (sea ? 0x1D5C6E : 0xEEF4F2);
+        int bottom = ((int) (a * 245) << 24) | (sea ? 0x0A2234 : 0xC9DEDB);
         g.fillGradient(0, 0, w, h, top, bottom);
     }
 
@@ -112,9 +119,10 @@ public final class TravelClient {
         if (a <= 0.01f) {
             return;
         }
-        event.setRed(Mth.lerp(a, event.getRed(), 0.92f));
-        event.setGreen(Mth.lerp(a, event.getGreen(), 0.95f));
-        event.setBlue(Mth.lerp(a, event.getBlue(), 0.94f));
+        boolean sea = veilStyle == 1;
+        event.setRed(Mth.lerp(a, event.getRed(), sea ? 0.08f : 0.92f));
+        event.setGreen(Mth.lerp(a, event.getGreen(), sea ? 0.30f : 0.95f));
+        event.setBlue(Mth.lerp(a, event.getBlue(), sea ? 0.40f : 0.94f));
     }
 
     // 乗り場で受ける風。巨神が速く泳ぐほど強く、高く鳴る

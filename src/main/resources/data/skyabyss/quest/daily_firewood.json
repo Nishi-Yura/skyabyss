@@ -1,0 +1,32 @@
+{
+  "category": "sub",
+  "order": 62,
+  "repeat": "daily",
+  "board": true,
+  "stages": [
+    {
+      "id": "wood",
+      "objectives": [
+        {
+          "id": "wood",
+          "type": "turn_in",
+          "target": "#minecraft:logs",
+          "count": 16
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 30,
+    "items": [
+      {
+        "item": "minecraft:emerald",
+        "count": 1
+      },
+      {
+        "item": "minecraft:bread",
+        "count": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+# Gear and armor before/after the high-poly pass (docs/design/15_high_poly.md, section 10).
+# ./gradlew runShots -Pscript=tools/shots/hp_gear.txt [-PshotsName=hp_gear_before]
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon armor_stand -4.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand -1.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 1.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 4.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+hud off
+camera minecraft:overworld 0 -59 6.5 180 6
+waitchunks
+wait 60
+shot armor_front
+camera minecraft:overworld -4.5 -59.4 2.8 160 8
+wait 20
+shot armor_stone_whale_close
+camera minecraft:overworld -1.5 -59.4 2.8 200 8
+wait 20
+shot armor_tide_shell_close
+camera minecraft:overworld 1.5 -59.4 2.8 160 8
+wait 20
+shot armor_thunder_wing_close
+camera minecraft:overworld 4.5 -59.4 2.8 200 8
+wait 20
+shot armor_ember_close
+camera minecraft:overworld 0 -59 -6.5 0 6
+wait 20
+shot armor_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon skyabyss:bone_sentinel -7.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -4.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:coral_thrall -1.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:thunder_supplicant 1.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_thrall 4.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_smith 7.5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -58.8 9 180 6
+wait 60
+shot weapons_row
+camera minecraft:overworld -7.5 -59.6 3.4 165 6
+wait 20
+shot weapon_sentinel_shield
+camera minecraft:overworld -1.5 -59.6 3.4 165 6
+wait 20
+shot weapon_coral_spear
+camera minecraft:overworld 1.5 -59.6 3.4 195 6
+wait 20
+shot weapon_staff
+camera minecraft:overworld 7.5 -59.6 4.4 195 6
+wait 20
+shot weapon_smith_hammer
+cmd kill @e[type=!minecraft:player,distance=..64]
+quit

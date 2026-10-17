@@ -1,0 +1,17 @@
+{
+  "chapter": "chapter1",
+  "order": 168,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "storm_back"
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/storm_ruins",
+    "chapter1/inscription_storm_hub"
+  ]
+}

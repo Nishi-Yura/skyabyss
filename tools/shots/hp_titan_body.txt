@@ -1,0 +1,90 @@
+# Near / mid / far views and the near-view frame time of the titan bodies (docs/design/15_high_poly.md, titan body record).
+# ./gradlew runShots -Pscript=tools/shots/hp_titan_body.txt -PshotsName=hp_titan_body_before   (and _after). PERF lines in shots.log.
+# The titans swim by themselves, so both are summoned in their resting mode (Mode 2, long rest timer): yaw 0 = head to the south (+z),
+# the model's left side (+X in the geo) is east. The LOD is chosen by the camera's distance to the body axis (64 whale / 80 tide, far 160).
+world shots flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera minecraft:overworld 0 -20 -150 0 0
+waitchunks
+wait 40
+perf 200 empty
+
+# ---- stone whale at (0, -10, 0)
+cmd summon skyabyss:stone_whale 0 -10 0 {Rotation:[0f,0f],Mode:2,RestTicks:999999}
+wait 20
+wait 5
+camera minecraft:overworld 0 -8 115 180 0
+wait 30
+shot whale_near_front
+perf 300 whale_near_front
+camera minecraft:overworld -30 -2 95 230 5
+wait 20
+shot whale_near_face34
+camera minecraft:overworld 58 14 20 90 22
+wait 20
+shot whale_near_fin
+camera minecraft:overworld 0 5 -125 0 15
+wait 20
+shot whale_near_fluke
+camera minecraft:overworld -130 20 60 245 8
+wait 20
+shot whale_mid
+camera minecraft:overworld -300 40 150 243 6
+wait 20
+shot whale_far
+cmd kill @e[type=skyabyss:stone_whale,distance=..400]
+wait 20
+
+# ---- tide shell at (0, -66.5, 0): its resting height is the flat world's sea level minus the draft, so the ground around is dug out first
+camera minecraft:overworld 0 -20 0 0 0
+waitchunks
+wait 20
+cmd fill -112 -61 -112 -57 -64 -57 minecraft:air
+cmd fill -112 -61 -56 -57 -64 -1 minecraft:air
+cmd fill -112 -61 0 -57 -64 55 minecraft:air
+cmd fill -112 -61 56 -57 -64 111 minecraft:air
+cmd fill -56 -61 -112 -1 -64 -57 minecraft:air
+cmd fill -56 -61 -56 -1 -64 -1 minecraft:air
+cmd fill -56 -61 0 -1 -64 55 minecraft:air
+cmd fill -56 -61 56 -1 -64 111 minecraft:air
+cmd fill 0 -61 -112 55 -64 -57 minecraft:air
+cmd fill 0 -61 -56 55 -64 -1 minecraft:air
+cmd fill 0 -61 0 55 -64 55 minecraft:air
+cmd fill 0 -61 56 55 -64 111 minecraft:air
+cmd fill 56 -61 -112 111 -64 -57 minecraft:air
+cmd fill 56 -61 -56 111 -64 -1 minecraft:air
+cmd fill 56 -61 0 111 -64 55 minecraft:air
+cmd fill 56 -61 56 111 -64 111 minecraft:air
+
+cmd summon skyabyss:tide_shell 0 -66.5 0 {Rotation:[0f,0f],Mode:2,ForcedTicks:999999}
+wait 20
+wait 5
+camera minecraft:overworld 0 -52 130 180 0
+wait 30
+shot tide_near_front
+perf 300 tide_near_front
+camera minecraft:overworld -35 -50 100 228 5
+wait 20
+shot tide_near_head34
+camera minecraft:overworld 62 -44 35 154 36
+wait 20
+shot tide_near_flipper
+camera minecraft:overworld -60 -26 -40 304 19
+wait 20
+shot tide_near_shell
+camera minecraft:overworld -110 -41 100 228 6
+wait 20
+shot tide_mid
+camera minecraft:overworld -250 -21 230 227 5
+wait 20
+shot tide_far
+cmd kill @e[type=skyabyss:tide_shell]
+quit

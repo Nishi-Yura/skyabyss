@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 178,
+  "inscription_sign": "sign.skyabyss.lore_ember_south",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_ember_south"
+    }
+  ],
+  "related": [
+    "chapter1/ember_ruins"
+  ]
+}

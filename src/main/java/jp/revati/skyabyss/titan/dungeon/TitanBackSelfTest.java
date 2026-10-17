@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.TitanTravel;
@@ -18,171 +19,210 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 開発用の自己テスト。環境変数 SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く。
-// 岩鯨の背を建て、遊べる形になっているか (通れる・届く・近道がない・空に穴が開いていない・元に戻せる) を確かめて、サーバーを止める
-@EventBusSubscriber(modid = SkyAbyss.MODID)
+// 岩鯨の背を建て、遊べる形になっているか (通れる・届く・近道がない・空に穴が開いていない・元に戻せる) を確かめて、サーバーを止める。
+// 自己テストの入口と順番は SelfTestRunner
 public final class TitanBackSelfTest {
     private TitanBackSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき)。1 tick に 1 段ずつ:
+    // 建てる → 部屋・扉・アスレ・水路などを調べる → リセットを調べる (ここまでは最初に流す)。
+    // 番兵を湧かせて 5 秒動かす → ピースフルで眠るか → 難易度を戻して封印が外れるか → まとめを書いてサーバーを止める (最後に流す)
+    public static List<SelfTestRunner.Step> buildSteps() {
+        return List.of(
+                SelfTestRunner.Step.once("titan back (build)", server -> guarded(() -> {
+                    PENDING.clear();
+                    SPAWNED.clear();
+                    stage = 0;
+                    originalDifficulty = null;
+                    ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
+                    if (back == null) {
+                        PENDING.add("titan_back dimension is missing");
+                        return;
+                    }
+                    TitanBackData built = TitanBackData.get(back);
+                    TitanBackBuilder.build(back, built);
+                    if (built.needsBuild() || built.layoutVersion() != LAYOUT_VERSION) {
+                        PENDING.add("layout version was not recorded after building (" + built.layoutVersion() + ")");
+                    }
+                })),
+                SelfTestRunner.Step.once("titan back (layout)", server -> withBack(server, back -> {
+                    checkSurface(back, PENDING);
+                    checkWhale(back, PENDING);
+                    checkRooms(back, PENDING);
+                    checkDoors(back, PENDING);
+                    checkCourses(back, PENDING);
+                    checkHalls(back, PENDING);
+                    checkMaze(back, PENDING);
+                    checkTreasury(back, PENDING);
+                    checkHeart(back, PENDING);
+                    checkRestPoints(back, PENDING);
+                    checkSigns(back, PENDING);
+                    forceMazeChunks(back, true);
+                })),
+                // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
+                SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
+                SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
+                    checkReset(back, PENDING);
+                    if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
+                        PENDING.add("resonance forge missing at " + TitanBackLayout.forge());
+                    }
+                    PENDING.addAll(jp.revati.skyabyss.loot.TitanLoot.selfTest());
+                    String mapDir = System.getenv("SKYABYSS_SELFTEST_MAP");
+                    if (mapDir != null) {
+                        writeMaps(back, java.nio.file.Path.of(mapDir));
+                    }
+                })),
+                SelfTestRunner.Step.once("titan back (reset maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> {
+                    List<String> after = new ArrayList<>();
+                    checkPockets(back, after);
+                    after.forEach(f -> PENDING.add("after reset: " + f));
+                    forceMazeChunks(back, false);
+                })));
+    }
+
+    public static List<SelfTestRunner.Step> trialSteps() {
+        return List.of(
+                SelfTestRunner.Step.once("titan back (guards)", server -> withBack(server, TitanBackSelfTest::spawnGuards)),
+                // 番兵たちを 5 秒動かしてから
+                SelfTestRunner.Step.once("titan back (peaceful)", 100, server -> withBack(server, back -> {
+                    checkGuardsAlive();
+                    enterPeaceful(server, back);
+                })),
+                SelfTestRunner.Step.once("titan back (unseal)", 40, server -> withBack(server, back -> leavePeaceful(server, back))),
+                SelfTestRunner.Step.once("titan back", 20, TitanBackSelfTest::finish));
+    }
+
+    private static void guarded(Runnable check) {
+        try {
+            check.run();
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST titan back crashed", e);
+            PENDING.add("crashed: " + e);
         }
-        MinecraftServer server = event.getServer();
+    }
+
+    private static void withBack(MinecraftServer server, java.util.function.Consumer<ServerLevel> check) {
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
-        List<String> failures = new ArrayList<>();
-        if (back == null) {
-            failures.add("titan_back dimension is missing");
-        } else {
-            TitanBackData built = TitanBackData.get(back);
-            TitanBackBuilder.build(back, built);
-            if (built.needsBuild() || built.layoutVersion() != LAYOUT_VERSION) {
-                failures.add("layout version was not recorded after building (" + built.layoutVersion() + ")");
-            }
-            checkSurface(back, failures);
-            checkRooms(back, failures);
-            checkDoors(back, failures);
-            checkCourses(back, failures);
-            checkHalls(back, failures);
-            checkMaze(back, failures);
-            checkTreasury(back, failures);
-            checkHeart(back, failures);
-            checkRestPoints(back, failures);
-            checkReset(back, failures);
-            if (!back.getBlockState(TitanBackLayout.forge()).is(ModBlocks.RESONANCE_FORGE.get())) {
-                failures.add("resonance forge missing at " + TitanBackLayout.forge());
-            }
-            failures.addAll(jp.revati.skyabyss.loot.TitanLoot.selfTest());
-            String mapDir = System.getenv("SKYABYSS_SELFTEST_MAP");
-            if (mapDir != null) {
-                writeMaps(back, java.nio.file.Path.of(mapDir));
-            }
-        }
-        PENDING.addAll(failures);
         if (back != null) {
-            // 番兵たちを実際に湧かせて、しばらく動かしてみる (落ちたり消えたりしないか)。
-            // プレイヤーがいないので、湧かせる場所のチャンクを読み込んだままにしておく
-            BlockPos at = HUB.center();
-            BlockPos waterAt = mazeCell(MAZE_START_I, MAZE_START_J);
-            for (BlockPos c : List.of(at, waterAt)) {
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        back.setChunkForced((c.getX() >> 4) + dx, (c.getZ() >> 4) + dz, true);
-                    }
-                }
-            }
-            for (String kind : List.of("sentinel", "archer", "crawler", "captain")) {
-                var mob = TitanBackTrials.spawnGuard(back, kind, at);
-                if (mob == null) {
-                    PENDING.add("could not spawn " + kind);
-                } else {
-                    SPAWNED.add(mob);
-                    // 試練の番兵は保存しない (保存して終了したあとに二重に湧かないように)
-                    if (mob.shouldBeSaved()) {
-                        PENDING.add(kind + " spawned by the trials would be saved to disk");
-                    }
-                }
-            }
-            BlockPos water = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 1, 1);
-            var maw = jp.revati.skyabyss.registry.ModEntities.WATERWAY_MAW.get().create(back);
-            if (maw != null) {
-                maw.moveTo(water.getX() + 0.5, water.getY(), water.getZ() + 0.5);
-                back.addFreshEntity(maw);
-                SPAWNED.add(maw);
-            }
+            guarded(() -> check.accept(back));
         }
-        waitTicks = 100;
     }
 
     private static final List<String> PENDING = new ArrayList<>();
     private static final List<net.minecraft.world.entity.Mob> SPAWNED = new ArrayList<>();
-    private static int waitTicks = -1;
 
     // 2 段目: ピースフルにすると、試練が眠るか (祠の封印・番兵と心臓が消える・閉じた扉が開く)。
     // 3 段目: 難易度を戻すと、祠の封印が外れるか
     private static int stage;
     private static net.minecraft.world.Difficulty originalDifficulty;
 
-    @SubscribeEvent
-    static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
-        if (waitTicks < 0 || --waitTicks > 0) {
+    // 番兵たちを実際に湧かせて、しばらく動かしてみる (落ちたり消えたりしないか)。
+    // プレイヤーがいないので、湧かせる場所のチャンクを読み込んだままにしておく
+    private static void spawnGuards(ServerLevel back) {
+        BlockPos at = HUB.center();
+        BlockPos waterAt = mazeCell(MAZE_START_I, MAZE_START_J);
+        for (BlockPos c : List.of(at, waterAt)) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    back.setChunkForced((c.getX() >> 4) + dx, (c.getZ() >> 4) + dz, true);
+                }
+            }
+        }
+        for (String kind : List.of("sentinel", "archer", "crawler", "captain")) {
+            var mob = TitanBackTrials.spawnGuard(back, kind, at);
+            if (mob == null) {
+                PENDING.add("could not spawn " + kind);
+            } else {
+                SPAWNED.add(mob);
+                // 試練の番兵は保存しない (保存して終了したあとに二重に湧かないように)
+                if (mob.shouldBeSaved()) {
+                    PENDING.add(kind + " spawned by the trials would be saved to disk");
+                }
+            }
+        }
+        BlockPos water = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 1, 1);
+        var maw = jp.revati.skyabyss.registry.ModEntities.WATERWAY_MAW.get().create(back);
+        if (maw != null) {
+            maw.moveTo(water.getX() + 0.5, water.getY(), water.getZ() + 0.5);
+            back.addFreshEntity(maw);
+            SPAWNED.add(maw);
+        }
+    }
+
+    private static void checkGuardsAlive() {
+        for (var mob : SPAWNED) {
+            if (!mob.isAlive() || mob.isRemoved()) {
+                PENDING.add(mob.getType() + " did not survive 5 seconds (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
+            }
+        }
+    }
+
+    private static void enterPeaceful(MinecraftServer server, ServerLevel back) {
+        stage = 1;
+        SPAWNED.forEach(net.minecraft.world.entity.Entity::discard);
+        SPAWNED.clear();
+        // 祠の封印の場所を読み込んでおく (プレイヤーがいないので)
+        BlockPos seal = shrineSeal().get(0);
+        back.setChunkForced(seal.getX() >> 4, seal.getZ() >> 4, true);
+        // 戦いの途中を作る: 第一の広間の入口と心臓の間の入口を閉じ、試練の番兵と心臓を置く
+        TitanBackTrials.seal(back, E1_ENTRANCE);
+        TitanBackTrials.seal(back, HEART_GATE);
+        var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center());
+        if (guard != null) {
+            SPAWNED.add(guard);
+        }
+        var heart = jp.revati.skyabyss.registry.ModEntities.STONE_WHALE_HEART.get().create(back);
+        if (heart != null) {
+            BlockPos at = HUB.center();
+            heart.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 0f, 0f);
+            heart.addTag(TitanBackTrials.HEART_TAG);
+            heart.bindArena(TitanBackTrials.heartArena(), 1);
+            back.addFreshEntity(heart);
+            SPAWNED.add(heart);
+            if (heart.shouldBeSaved()) {
+                PENDING.add("the trial heart would be saved to disk");
+            }
+        }
+        originalDifficulty = server.getWorldData().getDifficulty();
+        if (originalDifficulty == net.minecraft.world.Difficulty.PEACEFUL) {
+            originalDifficulty = net.minecraft.world.Difficulty.NORMAL;
+        }
+        server.setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
+    }
+
+    private static void leavePeaceful(MinecraftServer server, ServerLevel back) {
+        if (stage != 1) {
             return;
         }
-        waitTicks = -1;
-        ServerLevel back = event.getServer().getLevel(TitanTravel.TITAN_BACK);
-        if (stage == 0) {
-            for (var mob : SPAWNED) {
-                if (!mob.isAlive() || mob.isRemoved()) {
-                    PENDING.add(mob.getType() + " did not survive 5 seconds (" + mob.getRemovalReason() + ", hp " + mob.getHealth() + ")");
-                }
+        stage = 2;
+        for (var mob : SPAWNED) {
+            if (mob.isAlive() && !mob.isRemoved()) {
+                PENDING.add(mob.getType() + " (trial) was not put to sleep in peaceful");
             }
         }
-        if (stage == 0 && back != null) {
-            stage = 1;
-            SPAWNED.forEach(net.minecraft.world.entity.Entity::discard);
-            SPAWNED.clear();
-            // 祠の封印の場所を読み込んでおく (プレイヤーがいないので)
-            BlockPos seal = shrineSeal().get(0);
-            back.setChunkForced(seal.getX() >> 4, seal.getZ() >> 4, true);
-            // 戦いの途中を作る: 第一の広間の入口と心臓の間の入口を閉じ、試練の番兵と心臓を置く
-            TitanBackTrials.seal(back, E1_ENTRANCE);
-            TitanBackTrials.seal(back, HEART_GATE);
-            var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center());
-            if (guard != null) {
-                SPAWNED.add(guard);
+        for (BlockPos p : shrineSeal()) {
+            if (!back.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
+                PENDING.add("peaceful did not seal the shrine stairs at " + p);
+                break;
             }
-            var heart = jp.revati.skyabyss.registry.ModEntities.STONE_WHALE_HEART.get().create(back);
-            if (heart != null) {
-                BlockPos at = HUB.center();
-                heart.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 0f, 0f);
-                heart.addTag(TitanBackTrials.HEART_TAG);
-                heart.bindArena(TitanBackTrials.heartArena(), 1);
-                back.addFreshEntity(heart);
-                SPAWNED.add(heart);
-                if (heart.shouldBeSaved()) {
-                    PENDING.add("the trial heart would be saved to disk");
-                }
-            }
-            originalDifficulty = event.getServer().getWorldData().getDifficulty();
-            if (originalDifficulty == net.minecraft.world.Difficulty.PEACEFUL) {
-                originalDifficulty = net.minecraft.world.Difficulty.NORMAL;
-            }
-            event.getServer().setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
-            waitTicks = 40;
-            return;
         }
-        if (stage == 1 && back != null) {
-            stage = 2;
-            for (var mob : SPAWNED) {
-                if (mob.isAlive() && !mob.isRemoved()) {
-                    PENDING.add(mob.getType() + " (trial) was not put to sleep in peaceful");
-                }
-            }
-            for (BlockPos p : shrineSeal()) {
-                if (!back.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                    PENDING.add("peaceful did not seal the shrine stairs at " + p);
+        for (List<BlockPos> door : List.of(E1_ENTRANCE, HEART_GATE)) {
+            for (BlockPos p : door) {
+                if (!back.getBlockState(p).isAir()) {
+                    PENDING.add("peaceful did not reopen the door at " + p);
                     break;
                 }
             }
-            for (List<BlockPos> door : List.of(E1_ENTRANCE, HEART_GATE)) {
-                for (BlockPos p : door) {
-                    if (!back.getBlockState(p).isAir()) {
-                        PENDING.add("peaceful did not reopen the door at " + p);
-                        break;
-                    }
-                }
-            }
-            event.getServer().setDifficulty(originalDifficulty, true);
-            waitTicks = 20;
-            return;
         }
-        if (back != null) {
+        server.setDifficulty(originalDifficulty, true);
+    }
+
+    private static void finish(MinecraftServer server) {
+        ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
+        if (back != null && stage == 2) {
             for (BlockPos p : shrineSeal()) {
                 if (!back.getBlockState(p).isAir()) {
                     PENDING.add("leaving peaceful did not unseal the shrine stairs at " + p);
@@ -197,9 +237,9 @@ public final class TitanBackSelfTest {
             SkyAbyss.LOGGER.error("SELFTEST FAILED: {} problems", PENDING.size());
         }
         if (originalDifficulty != null) {
-            event.getServer().setDifficulty(originalDifficulty, true);
+            server.setDifficulty(originalDifficulty, true);
         }
-        event.getServer().halt(false);
+        server.halt(false);
     }
 
     private static void checkSurface(ServerLevel level, List<String> failures) {
@@ -224,6 +264,131 @@ public final class TitanBackSelfTest {
                 failures.add("stairwell blocked at z=" + z);
             }
         }
+    }
+
+    // ---------------------------------------------------------------- 鯨の形 (02 の「巨神の形の背中（作り直し）」)
+    // 頭・左右の胸びれ・左右の尾びれ・背の遺跡・錨石の鎖がある。背 (体のいちばん上) に掘った穴がない (祠と広場のほかで、背の面が空)。
+    // 体の中の部屋は外とつながっていない (鼓動の間から空気を辿って、祠の封印の面より先で外へ出ない。肋骨の窓はガラス)。
+    // 尾の付け根の広場から、背を歩いて祠へ、祠の階段で鼓動の間へ行ける
+    private static void checkWhale(ServerLevel level, List<String> failures) {
+        record Part(String name, int x, int z, int y1, int y2) {
+        }
+        for (Part part : List.of(new Part("head", -3, -150, 70, 125), new Part("left pectoral fin", -75, -30, 60, 95),
+                new Part("right pectoral fin", 69, -30, 60, 95), new Part("left fluke", -60, 238, 85, 100),
+                new Part("right fluke", 54, 238, 85, 100), new Part("back tower", -3, -38, 150, 168),
+                new Part("anchor chain", ANCHOR_CHAIN_X, ANCHOR_CHAIN_Z, BASE_Y - 40, ANCHOR_CHAIN_Y))) {
+            boolean found = false;
+            for (int y = part.y1(); y <= part.y2() && !found; y++) {
+                found = !level.getBlockState(new BlockPos(part.x(), y, part.z())).isAir();
+            }
+            if (!found) {
+                failures.add("whale " + part.name() + " is missing around (" + part.x() + ", " + part.z() + ")");
+            }
+        }
+        // 背の穴: 体のいちばん上のブロックが空いていて、その下も空 (掘った部屋が背を突き抜けた)
+        int holes = 0;
+        BlockPos firstHole = null;
+        for (int x = WhaleShape.minX(); x <= WhaleShape.maxX(); x++) {
+            for (int z = WhaleShape.minZ(); z <= WhaleShape.maxZ(); z++) {
+                int t = WhaleShape.bodyTop(x, z);
+                if (t == Integer.MIN_VALUE || (Math.abs(x) <= 6 && z >= SHRINE_Z - 11 && z <= SHRINE_Z + 11)
+                        || (Math.abs(x) <= 9 && Math.abs(z - PLATFORM_Z) <= 11)) {
+                    continue;
+                }
+                if (level.getBlockState(new BlockPos(x, t, z)).isAir() && level.getBlockState(new BlockPos(x, t - 1, z)).isAir()) {
+                    holes++;
+                    if (firstHole == null) {
+                        firstHole = new BlockPos(x, t, z);
+                    }
+                }
+            }
+        }
+        if (holes > 0) {
+            failures.add("whale back has " + holes + " holes (first at " + firstHole + ")");
+        }
+        // 体の中の空気が外へ抜けていないか。祠の封印の面 (shrineSeal) は壁とみなす
+        Set<BlockPos> seal = new HashSet<>(shrineSeal());
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        Set<BlockPos> seen = new HashSet<>();
+        BlockPos start = HUB.center();
+        queue.add(start);
+        seen.add(start);
+        BlockPos leak = null;
+        while (!queue.isEmpty() && leak == null && seen.size() < 600_000) {
+            BlockPos p = queue.poll();
+            for (Direction d : Direction.values()) {
+                BlockPos q = p.relative(d);
+                if (seen.contains(q) || seal.contains(q)) {
+                    continue;
+                }
+                BlockState st = level.getBlockState(q);
+                if (st.blocksMotion() && st.getFluidState().isEmpty()) {
+                    continue;
+                }
+                seen.add(q);
+                // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
+                if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
+                    leak = q;
+                    break;
+                }
+                queue.add(q);
+            }
+        }
+        if (leak != null) {
+            failures.add("the inside of the whale opens to the outside at " + leak + " (not through the shrine stairs)");
+        }
+        SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
+        // 歩ける道: 到着から祠、祠の階段で鼓動の間
+        int toShrine = walkSteps(level, arrival(), new BlockPos(0, shrineY() + 1, SHRINE_Z), 2);
+        int toHub = walkSteps(level, arrival(), HUB.center(), 2);
+        if (toShrine < 0) {
+            failures.add("cannot walk from the arrival on the tail to the shrine");
+        }
+        if (toHub < 0) {
+            failures.add("cannot walk from the arrival to the heartbeat hall");
+        } else if (toHub > 220) {
+            failures.add("the walk from the arrival to the hub is too long (" + toHub + " steps)");
+        }
+        SkyAbyss.LOGGER.info("Titan back walk: arrival -> shrine {} steps, -> hub {} steps", toShrine, toHub);
+    }
+
+    // 歩いて何歩で着くか (着かなければ -1)。足元が固く、足と頭が空いている所を、上り 1・下り 3 まで。目標から r 以内で着いたとみなす
+    static int walkSteps(ServerLevel level, BlockPos from, BlockPos to, int r) {
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        java.util.Map<BlockPos, Integer> dist = new java.util.HashMap<>();
+        queue.add(from);
+        dist.put(from, 0);
+        while (!queue.isEmpty() && dist.size() < 400_000) {
+            BlockPos p = queue.poll();
+            int d = dist.get(p);
+            if (Math.abs(p.getX() - to.getX()) <= r && Math.abs(p.getZ() - to.getZ()) <= r && Math.abs(p.getY() - to.getY()) <= 1) {
+                return d;
+            }
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                for (int dy = 1; dy >= -3; dy--) {
+                    BlockPos q = p.relative(dir).above(dy);
+                    if (dy == 1 && !passable(level, p.above(2))) {
+                        continue;
+                    }
+                    if (passable(level, q) && passable(level, q.above()) && !passable(level, q.below())) {
+                        if (!dist.containsKey(q)) {
+                            dist.put(q, d + 1);
+                            queue.add(q);
+                        }
+                        break;
+                    }
+                    if (!passable(level, q)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static boolean passable(ServerLevel level, BlockPos p) {
+        BlockState st = level.getBlockState(p);
+        return !st.blocksMotion() && !st.is(Blocks.LAVA) && !st.is(Blocks.WATER);
     }
 
     // どの部屋も、天井と床 (谷は溶岩の底) がそろっていて、空や奈落に穴が開いていないこと
@@ -307,8 +472,8 @@ public final class TitanBackSelfTest {
         if (level.getBlockState(shrineSeal().get(0).below()).isAir()) {
             failures.add("shrine seal is not on the stairs at " + shrineSeal().get(0));
         }
-        // 物語の碑文: 看板があり、掛かっている壁が固いこと
-        for (Inscription lore : LORE_SIGNS) {
+        // 物語の碑文と試練の入口の看板: 看板があり、掛かっている壁が固いこと
+        for (Inscription lore : allSigns()) {
             BlockState sign = level.getBlockState(lore.pos());
             BlockPos wall = lore.pos().relative(lore.facing().getOpposite());
             if (!(sign.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
@@ -317,6 +482,53 @@ public final class TitanBackSelfTest {
                 failures.add("lore sign " + lore.key() + " has no wall behind it at " + wall);
             }
         }
+    }
+
+    // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
+    // 囁き (看板の代わりの案内) の文が lang にあること
+    private static void checkSigns(ServerLevel level, List<String> failures) {
+        Set<BlockPos> expected = new HashSet<>();
+        allSigns().forEach(i -> expected.add(i.pos()));
+        Set<String> keys = new java.util.TreeSet<>();
+        int count = 0;
+        for (int cx = (-RX - 8) >> 4; cx <= (RX + 8) >> 4; cx++) {
+            for (int cz = (-RZ - 8) >> 4; cz <= (RZ + 8) >> 4; cz++) {
+                for (var be : level.getChunk(cx, cz).getBlockEntities().values()) {
+                    if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)) {
+                        continue;
+                    }
+                    count++;
+                    if (!expected.contains(be.getBlockPos())) {
+                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                    }
+                    for (boolean front : new boolean[]{true, false}) {
+                        var text = front ? sign.getFrontText() : sign.getBackText();
+                        for (int i = 0; i < 4; i++) {
+                            var line = text.getMessage(i, false);
+                            if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+                                String k = tc.getKey();
+                                keys.add(k.substring(0, k.lastIndexOf('.')));
+                            } else if (!line.getString().isEmpty()) {
+                                failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (count != expected.size()) {
+            failures.add("found " + count + " signs on the back, expected " + expected.size());
+        }
+        failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
+        var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        var en = jp.revati.skyabyss.SignFit.lang("en_us");
+        for (String k : BackWhispers.keys()) {
+            if (!ja.containsKey(k) || !en.containsKey(k)) {
+                failures.add("whisper text missing: " + k);
+            }
+        }
+        SkyAbyss.LOGGER.info("Titan back signs: {} placed ({}), every line measured against {} px", count, keys,
+                jp.revati.skyabyss.SignFit.MAX_LINE_WIDTH);
     }
 
     // アスレチック: どの足場も次の足場へ届き、一つ飛ばしでは届かず、頭上が空いていること。谷に床が残っていないこと。
@@ -447,15 +659,6 @@ public final class TitanBackSelfTest {
         if (!seen.contains(goal)) {
             failures.add("maze exit is unreachable from the ladder");
         }
-        int pockets = 0;
-        for (BlockPos p : seen) {
-            if (p.getY() == 80 && level.getBlockState(p).isAir()) {
-                pockets++;
-            }
-        }
-        if (pockets < 9 * 3) {
-            failures.add("maze has too few air pockets (" + pockets / 9 + ")");
-        }
         if (MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).links(MAZE_START_I, MAZE_START_J) < 2) {
             failures.add("maze entrance is not a junction");
         }
@@ -466,6 +669,50 @@ public final class TitanBackSelfTest {
         if (!level.getBlockState(new BlockPos(MAZE_EXIT_ROOM.x1(), FLOOR, -7)).is(Blocks.LADDER)) {
             failures.add("maze return ladder missing");
         }
+    }
+
+    // 息継ぎのくぼみを置いてから水を流す時間
+    private static final int MAZE_SETTLE_TICKS = 100;
+
+    // 迷路のチャンクを読み込んだままにする (プレイヤーがいないと、水が流れる tick が来ないため)
+    private static void forceMazeChunks(ServerLevel level, boolean forced) {
+        int x2 = MAZE_X0 + MAZE_W * (MAZE_CELL + 1);
+        int z2 = MAZE_Z0 + MAZE_H * (MAZE_CELL + 1);
+        for (int cx = MAZE_X0 >> 4; cx <= x2 >> 4; cx++) {
+            for (int cz = MAZE_Z0 >> 4; cz <= z2 >> 4; cz++) {
+                level.setChunkForced(cx, cz, forced);
+            }
+        }
+    }
+
+    // 水を流したあとでも、正しい道の息継ぎのくぼみごとに 3×3×2 の空気が残っていること (流れる水で埋まっていないこと)。
+    // くぼみの下の段は水源のままで、泳いで入れること
+    private static void checkPockets(ServerLevel level, List<String> failures) {
+        List<BlockPos> pockets = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
+        if (pockets.size() < 2) {
+            failures.add("maze has too few breathing pockets on the path (" + pockets.size() + ")");
+        }
+        int flooded = 0;
+        for (BlockPos p : pockets) {
+            String bad = null;
+            for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
+                for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
+                    for (int dy = 2; dy <= 3; dy++) {
+                        if (!level.getBlockState(p.offset(dx, dy, dz)).isAir()) {
+                            bad = level.getBlockState(p.offset(dx, dy, dz)) + " at " + p.offset(dx, dy, dz).toShortString();
+                        }
+                    }
+                    if (!level.getFluidState(p.offset(dx, 1, dz)).isSource()) {
+                        bad = "no water source under the air at " + p.offset(dx, 1, dz).toShortString();
+                    }
+                }
+            }
+            if (bad != null) {
+                flooded++;
+                failures.add("breathing pocket at " + p.toShortString() + " is flooded or blocked after " + MAZE_SETTLE_TICKS + " ticks: " + bad);
+            }
+        }
+        SkyAbyss.LOGGER.info("SELFTEST maze pockets: {} on the path, {} flooded", pockets.size(), flooded);
     }
 
     // 宝物庫: 台座は飾りとして残る。宝箱はもうない (欠片と装備は心臓を倒したときに渡す)
@@ -608,7 +855,7 @@ public final class TitanBackSelfTest {
                     for (int z = -RZ - 4; z <= RZ + 4; z++) {
                         int color = 0x1A2233;
                         if (slices[k][0] < 0) {
-                            for (int y = BASE_Y + 40; y > BASE_Y - 50; y--) {
+                            for (int y = BASE_Y + 70; y > BASE_Y - 50; y--) {
                                 BlockState st = level.getBlockState(new BlockPos(x, y, z));
                                 if (!st.isAir()) {
                                     color = shade(st.getMapColor(level, new BlockPos(x, y, z)).col, (y - BASE_Y) * 4);

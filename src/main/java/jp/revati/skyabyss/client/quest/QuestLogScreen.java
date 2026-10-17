@@ -109,6 +109,20 @@ public class QuestLogScreen extends Screen {
         section("gui.skyabyss.quest.section.main", main, GOLD);
         section("gui.skyabyss.quest.section.sub", sub, TEAL);
         section("gui.skyabyss.quest.section.done", done, SOFT);
+        // 一つ先の段階で開く頼みごとを、題を伏せて見せる (先があると分かるように。中身は明かさない。二つ先は出さない)
+        int stage = jp.revati.skyabyss.party.client.PartyClient.state().stage();
+        int ahead = 0;
+        for (QuestDef def : QuestClient.all()) {
+            if (!def.board() && !def.main() && def.minStage() == stage + 1 && log.entry(def.id()) == null) {
+                ahead++;
+            }
+        }
+        if (ahead > 0) {
+            rows.add(new Row(null, Component.translatable("gui.skyabyss.quest.locked." + (stage + 1)), DIM));
+            for (int i = 0; i < ahead; i++) {
+                rows.add(new Row(null, Component.translatable("gui.skyabyss.quest.hidden_row"), DIM));
+            }
+        }
     }
 
     private void section(String key, List<QuestDef> list, int color) {
@@ -137,6 +151,11 @@ public class QuestLogScreen extends Screen {
         if (def.giver() != null) {
             body.add(new BodyLine(Component.translatable("gui.skyabyss.quest.giver",
                     Component.translatable("entity." + def.giver().replace(':', '.'))).getString(), SOFT, 0));
+        } else if (def.board()) {
+            body.add(new BodyLine(Component.translatable("gui.skyabyss.quest.from_board").getString(), SOFT, 0));
+        }
+        if (def.repeats()) {
+            body.add(new BodyLine(Component.translatable("gui.skyabyss.quest.repeat_note." + def.repeat()).getString(), TEAL, 0));
         }
         body.add(new BodyLine("", TEXT, 0));
         String journal = entry.done ? Component.translatable(def.doneKey()).getString()
@@ -153,6 +172,10 @@ public class QuestLogScreen extends Screen {
                 QuestDef.Objective ob = stage.objectives().get(i);
                 int have = Math.min(entry.progress(i), ob.count());
                 boolean ok = have >= ob.count();
+                if (!ok && ob.type().equals("turn_in") && Minecraft.getInstance().player != null) {
+                    // 納める品は、手持ちの数を見せる (納めるまでは済みにしない)
+                    have = Math.min(jp.revati.skyabyss.quest.QuestItems.count(Minecraft.getInstance().player, ob.targets().get(0), ob.token()), ob.count());
+                }
                 String text = Component.translatable(def.objectiveKey(stage, ob)).getString();
                 List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", w - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
@@ -172,7 +195,7 @@ public class QuestLogScreen extends Screen {
         }
     }
 
-    private static String rewardText(QuestDef def) {
+    static String rewardText(QuestDef def) {
         List<String> parts = new ArrayList<>();
         int xp = def.reward().xp();
         for (QuestDef.Stage s : def.stages()) {
@@ -185,7 +208,8 @@ public class QuestLogScreen extends Screen {
             ResourceLocation key = ResourceLocation.tryParse(r.item());
             Item item = key == null ? null : BuiltInRegistries.ITEM.getOptional(key).orElse(null);
             if (item != null) {
-                parts.add(item.getDescription().getString() + (r.count() > 1 ? " ×" + r.count() : ""));
+                String name = r.name() != null ? Component.translatable(r.name()).getString() : item.getDescription().getString();
+                parts.add(name + (r.count() > 1 ? " ×" + r.count() : ""));
             }
         }
         return String.join(Component.translatable("gui.skyabyss.quest.reward_sep").getString(), parts);
@@ -260,7 +284,7 @@ public class QuestLogScreen extends Screen {
         int y = top + 26;
         for (Row r : rows) {
             if (r.quest() == null) {
-                g.drawString(font, r.label(), left + 10, y + 2, DIM, false);
+                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), LIST_W), left + 10, y + 2, DIM, false);
             } else {
                 boolean sel = r.quest().equals(selected);
                 boolean hover = mouseX >= left + 8 && mouseX < left + LIST_W + 6 && mouseY >= y && mouseY < y + ROW_H;

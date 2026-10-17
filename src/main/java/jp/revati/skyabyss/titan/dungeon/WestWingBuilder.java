@@ -45,6 +45,7 @@ final class WestWingBuilder {
         ledge(kit, -16, -12, -31, -30, 97);
 
         decorate(kit);
+        ribWindows(kit);
         placeCourses(kit, ParkourCourses.forSeed(TitanBackData.get(kit.level()).courseSeed()));
 
         // 最後の岩棚から鼓動の間へ下りる抜け道 (石が歌うまで封じられている)
@@ -72,6 +73,42 @@ final class WestWingBuilder {
             for (int z = pit.z1() - 1; z <= pit.z2() + 1; z++) {
                 blacken(kit, pit.x1() - 1, y, z);
                 blacken(kit, pit.x2() + 1, y, z);
+            }
+        }
+    }
+
+    // 肋骨の窓: 谷の西の壁 (鯨の左のわき腹) で、外までの殻が薄い所 (4 ブロック以内) を、肋骨の間の裂け目にする。
+    // 4 マスごとに骨の柱 (肋骨) を残し、その間は外の面までくり抜き、谷の壁の面にガラスをはめる。谷から雲と空が見える
+    // (外へは出られず、窓の奥に立つ所もない)
+    static final int WINDOW_Y1 = 96;
+    static final int WINDOW_Y2 = 103;
+    static final int WINDOW_DEPTH = 4;
+
+    static void ribWindows(BuildKit kit) {
+        BlockState rib = Blocks.BONE_BLOCK.defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        for (Box pit : PITS) {
+            int wall = pit.x1() - 1;
+            for (int z = pit.z1(); z <= pit.z2(); z++) {
+                for (int y = WINDOW_Y1; y <= WINDOW_Y2; y++) {
+                    int outside = Integer.MIN_VALUE;
+                    for (int x = wall - 1; x >= wall - WINDOW_DEPTH; x--) {
+                        if (WhaleShape.at(x, y, z) == null) {
+                            outside = x;
+                            break;
+                        }
+                    }
+                    if (outside == Integer.MIN_VALUE) {
+                        continue;
+                    }
+                    boolean isRib = Math.floorMod(z - pit.z1(), 4) == 0 || y == WINDOW_Y1 || y == WINDOW_Y2;
+                    for (int x = wall; x > outside; x--) {
+                        if (isRib) {
+                            kit.set(x, y, z, rib);
+                        } else {
+                            kit.set(x, y, z, x == wall ? Blocks.GLASS.defaultBlockState() : BuildKit.AIR);
+                        }
+                    }
+                }
             }
         }
     }
@@ -109,9 +146,9 @@ final class WestWingBuilder {
 
     private static void decorate(BuildKit kit) {
         // 休み場
-        kit.restPoint(W0, "sign.skyabyss.rest_w0", Direction.SOUTH, new BlockPos(-19, FLOOR + 3, W0.z1()));
-        kit.restPoint(W1, "sign.skyabyss.rest_w1", Direction.SOUTH, new BlockPos(-33, W1.floorY() + 3, W1.z1()));
-        kit.restPoint(W2, "sign.skyabyss.rest_w2", Direction.SOUTH, new BlockPos(-22, W2.floorY() + 3, W2.z1()));
+        kit.restPoint(W0);
+        kit.restPoint(W1);
+        kit.restPoint(W2);
         for (Box rest : List.of(W0, W1, W2)) {
             kit.wallLamps(rest, 3, rest.floorY() + 3);
         }
@@ -142,7 +179,6 @@ final class WestWingBuilder {
         kit.lantern(-31, W1.floorY() + 1, -34);
         kit.lantern(-24, W2.floorY() + 1, -56);
         kit.lantern(-12, 98, -30);
-        kit.wallSign(new BlockPos(-13, 99, -30), Direction.NORTH, "sign.skyabyss.west_end");
     }
 
 }

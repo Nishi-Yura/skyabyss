@@ -16,10 +16,16 @@ import net.minecraft.util.GsonHelper;
 
 // クエストの定義 (data/<名前空間>/quest/<名前>.json)。読み込んだら変えない。
 // 参加者へは表示に要る分 (段階・目的・報酬) だけを送る (条件と結果はサーバーだけが持つ)
+//   repeat   : "" (一度きり) / "daily" (ゲーム内の 1 日ごと) / "weekly" (7 日ごと)。周期は Repeats が決める
+//   board    : 言伝ての板 (quest.free.Board) に出す
+//   minStage : 受けられる物語の段階 (止めた心臓の数)。ログと板で「一つ先」を伏せて見せるのにも使う
+//   unlock   : 受けられる条件 (段階のほか。サーバーだけが持つ)
 public record QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen, boolean loopReset,
-                       List<Stage> stages, Reward reward) {
+                       List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock) {
     public static final Set<String> CATEGORIES = Set.of("main", "sub");
-    public static final Set<String> OBJECTIVE_TYPES = Set.of("talk", "kill", "collect", "lore", "visit", "near", "signal", "condition");
+    public static final Set<String> REPEATS = Set.of("", "daily", "weekly");
+    public static final Set<String> OBJECTIVE_TYPES = Set.of("talk", "kill", "collect", "lore", "visit", "near", "signal", "condition",
+            "turn_in", "herd");
 
     // 段階。mode が all なら目的をすべて、any ならどれか一つで次へ。skipIf が真なら、着いたとたんに済ませる
     public record Stage(String id, String mode, List<Objective> objectives, Condition skipIf, int xp, List<Action> actions) {
@@ -30,10 +36,17 @@ public record QuestDef(String id, String category, int order, @Nullable String g
 
     // 目的。targets は種類ごとの対象 (talk=NPC の役、kill=生き物の ID、collect=アイテム、lore=項目、visit=ディメンション、
     // near=生き物、signal=合図の名前)。count は必要な数 (lore は「targets のうちいくつ」)
-    public record Objective(String id, String type, List<String> targets, @Nullable String topic, int count, double radius, Condition condition) {
+    // party: 倒す・合図の目的を、パーティの仲間 (経験値の分け前と同じ条件) も数える。token: 品の印 (QuestItems。collect / turn_in)
+    // turn_in: 品を言伝ての板 (か依頼主の会話) で納める。herd: 受けた場所 (板) の radius 以内に、その生き物を count 頭そろえる
+    public record Objective(String id, String type, List<String> targets, @Nullable String topic, int count, double radius, Condition condition,
+                            boolean party, @Nullable String token) {
     }
 
-    public record ItemReward(String item, int count) {
+    // 品の報酬。token / name / lore を書くと、印・名前・説明の付いた品 (見た目の小物や、運ぶ品) になる (QuestItems)
+    public record ItemReward(String item, int count, @Nullable String token, @Nullable String name, List<String> lore) {
+        public ItemReward(String item, int count) {
+            this(item, count, null, null, List.of());
+        }
     }
 
     public record Reward(int xp, List<ItemReward> items, Map<String, Integer> affinity, List<Action> actions) {
@@ -42,6 +55,10 @@ public record QuestDef(String id, String category, int order, @Nullable String g
 
     public boolean main() {
         return category.equals("main");
+    }
+
+    public boolean repeats() {
+        return !repeat.isEmpty();
     }
 
     @Nullable
@@ -118,9 +135,26 @@ public record QuestDef(String id, String category, int order, @Nullable String g
             }
         }
         Reward reward = o.has("reward") && o.get("reward").isJsonObject() ? parseReward(o.getAsJsonObject("reward"), errors, where) : Reward.NONE;
+        String repeat = GsonHelper.getAsString(o, "repeat", "");
+        if (!REPEATS.contains(repeat)) {
+            errors.add(where + ": repeat must be daily or weekly");
+        }
+        if (!repeat.isEmpty()) {
+            // 繰り返しの経験値は報酬でだけ渡す (段階の経験値は一人一回の鍵なので、二度目から出ない)
+            stages.stream().filter(s -> s.xp() > 0).forEach(s -> errors.add(where + ": a repeating quest gives xp only in its reward (" + s.id() + ")"));
+            if (o.has("start_when")) {
+                errors.add(where + ": a repeating quest cannot start by itself");
+            }
+        }
+        int minStage = GsonHelper.getAsInt(o, "min_stage", 0);
+        if (minStage < 0 || minStage > 4) {
+            errors.add(where + ": min_stage must be 0-4");
+        }
         return new QuestDef(id, category, GsonHelper.getAsInt(o, "order", 100), o.has("giver") ? GsonHelper.getAsString(o, "giver") : null,
                 o.has("start_when") ? Condition.parse(o.get("start_when"), errors, where + " start_when") : null,
-                GsonHelper.getAsBoolean(o, "loop_reset", false), List.copyOf(stages), reward);
+                GsonHelper.getAsBoolean(o, "loop_reset", false), List.copyOf(stages), reward, repeat,
+                GsonHelper.getAsBoolean(o, "board", false), minStage,
+                o.has("unlock") ? Condition.parse(o.get("unlock"), errors, where + " unlock") : Condition.ALWAYS);
     }
 
     private static Stage parseStage(JsonObject o, List<String> errors, String where) {
@@ -169,6 +203,12 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         if (targets.isEmpty() && !type.equals("condition")) {
             errors.add(w + ": no target");
         }
+        if ((type.equals("collect") || type.equals("turn_in")) && targets.size() != 1) {
+            errors.add(w + ": " + type + " needs exactly one item");
+        }
+        if ((type.equals("collect") || type.equals("turn_in")) && targets.size() == 1 && !QuestItems.known(targets.get(0))) {
+            errors.add(w + ": unknown item or tag " + targets.get(0));
+        }
         int fallback = type.equals("lore") ? targets.size() : 1;
         int count = GsonHelper.getAsInt(o, "count", fallback);
         if (count < 1 || (type.equals("lore") && count > targets.size())) {
@@ -178,8 +218,10 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         if (type.equals("condition") && !o.has("if")) {
             errors.add(w + ": condition objective needs 'if'");
         }
+        double radius = GsonHelper.getAsDouble(o, "radius", type.equals("near") ? 48 : type.equals("herd") ? 10 : 32);
         return new Objective(id, type, List.copyOf(targets), o.has("topic") ? GsonHelper.getAsString(o, "topic") : null, count,
-                GsonHelper.getAsDouble(o, "radius", type.equals("near") ? 48 : 32), condition);
+                radius, condition, GsonHelper.getAsBoolean(o, "party", type.equals("kill") || type.equals("signal")),
+                o.has("token") ? GsonHelper.getAsString(o, "token") : null);
     }
 
     private static Reward parseReward(JsonObject o, List<String> errors, String where) {
@@ -188,10 +230,16 @@ public record QuestDef(String id, String category, int order, @Nullable String g
             for (JsonElement e : o.getAsJsonArray("items")) {
                 JsonObject io = e.getAsJsonObject();
                 String item = GsonHelper.getAsString(io, "item", "");
-                if (Condition.item(item) == null) {
+                // optional: 別の担当がまだ登録していない品 (雷翼の欠片・風見鶏など)。ないうちは渡さず、読み込みも止めない
+                if (Condition.item(item) == null && !GsonHelper.getAsBoolean(io, "optional", false)) {
                     errors.add(where + ": unknown reward item " + item);
                 }
-                items.add(new ItemReward(item, GsonHelper.getAsInt(io, "count", 1)));
+                List<String> lore = new ArrayList<>();
+                if (io.has("lore") && io.get("lore").isJsonArray()) {
+                    io.getAsJsonArray("lore").forEach(l -> lore.add(l.getAsString()));
+                }
+                items.add(new ItemReward(item, GsonHelper.getAsInt(io, "count", 1), io.has("token") ? GsonHelper.getAsString(io, "token") : null,
+                        io.has("name") ? GsonHelper.getAsString(io, "name") : null, List.copyOf(lore)));
             }
         }
         Map<String, Integer> affinity = new LinkedHashMap<>();
@@ -207,6 +255,9 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         buf.writeUtf(category);
         buf.writeVarInt(order);
         buf.writeUtf(giver == null ? "" : giver);
+        buf.writeUtf(repeat);
+        buf.writeBoolean(board);
+        buf.writeVarInt(minStage);
         buf.writeVarInt(stages.size());
         for (Stage s : stages) {
             buf.writeUtf(s.id());
@@ -219,6 +270,8 @@ public record QuestDef(String id, String category, int order, @Nullable String g
                 buf.writeVarInt(ob.count());
                 buf.writeVarInt(ob.targets().size());
                 ob.targets().forEach(buf::writeUtf);
+                buf.writeUtf(ob.token() == null ? "" : ob.token());
+                buf.writeBoolean(ob.party());
             }
         }
         buf.writeVarInt(reward.xp());
@@ -226,6 +279,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         for (ItemReward r : reward.items()) {
             buf.writeUtf(r.item());
             buf.writeVarInt(r.count());
+            buf.writeUtf(r.name() == null ? "" : r.name());
         }
     }
 
@@ -234,6 +288,9 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         String category = buf.readUtf();
         int order = buf.readVarInt();
         String giver = buf.readUtf();
+        String repeat = buf.readUtf();
+        boolean board = buf.readBoolean();
+        int minStage = buf.readVarInt();
         int ns = buf.readVarInt();
         List<Stage> stages = new ArrayList<>(ns);
         for (int i = 0; i < ns; i++) {
@@ -251,7 +308,10 @@ public record QuestDef(String id, String category, int order, @Nullable String g
                 for (int k = 0; k < nt; k++) {
                     targets.add(buf.readUtf());
                 }
-                objectives.add(new Objective(oid, type, List.copyOf(targets), null, count, 0, Condition.ALWAYS));
+                String token = buf.readUtf();
+                boolean party = buf.readBoolean();
+                objectives.add(new Objective(oid, type, List.copyOf(targets), null, count, 0, Condition.ALWAYS, party,
+                        token.isEmpty() ? null : token));
             }
             stages.add(new Stage(sid, mode, List.copyOf(objectives), null, xp, List.of()));
         }
@@ -259,9 +319,12 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         int ni = buf.readVarInt();
         List<ItemReward> items = new ArrayList<>(ni);
         for (int i = 0; i < ni; i++) {
-            items.add(new ItemReward(buf.readUtf(), buf.readVarInt()));
+            String item = buf.readUtf();
+            int count = buf.readVarInt();
+            String name = buf.readUtf();
+            items.add(new ItemReward(item, count, null, name.isEmpty() ? null : name, List.of()));
         }
         return new QuestDef(id, category, order, giver.isEmpty() ? null : giver, null, false, List.copyOf(stages),
-                new Reward(xp, List.copyOf(items), Map.of(), List.of()));
+                new Reward(xp, List.copyOf(items), Map.of(), List.of()), repeat, board, minStage, Condition.ALWAYS);
     }
 }

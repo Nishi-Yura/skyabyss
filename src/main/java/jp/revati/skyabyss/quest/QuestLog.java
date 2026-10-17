@@ -26,25 +26,37 @@ public final class QuestLog {
                 Codec.INT.listOf().optionalFieldOf("progress", List.of()).forGetter(e -> e.progressList()),
                 Codec.BOOL.optionalFieldOf("done", false).forGetter(e -> e.done),
                 Codec.LONG.optionalFieldOf("started", 0L).forGetter(e -> e.started),
-                Codec.LONG.optionalFieldOf("finished", 0L).forGetter(e -> e.finished)).apply(i, Entry::new));
+                Codec.LONG.optionalFieldOf("finished", 0L).forGetter(e -> e.finished),
+                Codec.LONG.optionalFieldOf("cycle", -1L).forGetter(e -> e.cycle),
+                Codec.LONG.optionalFieldOf("origin", Long.MIN_VALUE).forGetter(e -> e.origin),
+                Codec.STRING.optionalFieldOf("origin_dim", "").forGetter(e -> e.originDim)).apply(i, Entry::new));
+        public static final long NO_ORIGIN = Long.MIN_VALUE;
 
         public int stage;
         public int[] progress;
         public boolean done;
         public long started;
         public long finished;
+        // 繰り返すクエストの周期 (受けた日・週。Repeats)。一度きりは -1
+        public long cycle = -1;
+        // 受けた場所 (言伝ての板か、代わりに見せた NPC の足もと。BlockPos.asLong)。羊を連れ戻す目的 (herd) が使う
+        public long origin = NO_ORIGIN;
+        public String originDim = "";
 
         public Entry(int objectives, long started) {
             this.progress = new int[objectives];
             this.started = started;
         }
 
-        private Entry(int stage, List<Integer> progress, boolean done, long started, long finished) {
+        private Entry(int stage, List<Integer> progress, boolean done, long started, long finished, long cycle, long origin, String originDim) {
             this.stage = stage;
             this.progress = progress.stream().mapToInt(Integer::intValue).toArray();
             this.done = done;
             this.started = started;
             this.finished = finished;
+            this.cycle = cycle;
+            this.origin = origin;
+            this.originDim = originDim;
         }
 
         List<Integer> progressList() {
@@ -62,12 +74,12 @@ public final class QuestLog {
         @Override
         public boolean equals(Object o) {
             return o instanceof Entry e && e.stage == stage && java.util.Arrays.equals(e.progress, progress) && e.done == done
-                    && e.started == started && e.finished == finished;
+                    && e.started == started && e.finished == finished && e.cycle == cycle && e.origin == origin && e.originDim.equals(originDim);
         }
 
         @Override
         public int hashCode() {
-            return stage * 31 + java.util.Arrays.hashCode(progress);
+            return (stage * 31 + java.util.Arrays.hashCode(progress)) * 31 + (done ? 1 : 0) + (int) cycle * 7;
         }
 
         @Override
@@ -78,17 +90,21 @@ public final class QuestLog {
 
     public static final Codec<QuestLog> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.unboundedMap(Codec.STRING, Entry.CODEC).optionalFieldOf("quests", Map.of()).forGetter(l -> l.quests),
-            Codec.STRING.optionalFieldOf("tracked", "").forGetter(l -> l.tracked)).apply(i, QuestLog::new));
+            Codec.STRING.optionalFieldOf("tracked", "").forGetter(l -> l.tracked),
+            Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("claimed", Map.of()).forGetter(l -> l.claimed)).apply(i, QuestLog::new));
     // 同期は NBT を通す (中身が小さいので、手書きの符号化は要らない)
     public static final StreamCodec<ByteBuf, QuestLog> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     final Map<String, Entry> quests = new LinkedHashMap<>();
     String tracked = "";
+    // 繰り返すクエストの、報酬を渡した最後の周期 (同じ日・週に二度は渡さない。記録を消して受け直しても)
+    final Map<String, Long> claimed = new java.util.HashMap<>();
 
     public QuestLog() {
     }
 
-    private QuestLog(Map<String, Entry> quests, String tracked) {
+    private QuestLog(Map<String, Entry> quests, String tracked, Map<String, Long> claimed) {
+        this.claimed.putAll(claimed);
         // 保存した順を保つため、始めた時刻で並べ直す (unboundedMap は順を保たない)
         quests.entrySet().stream().sorted(java.util.Comparator.comparingLong(e -> e.getValue().started))
                 .forEach(e -> this.quests.put(e.getKey(), e.getValue()));
@@ -112,9 +128,13 @@ public final class QuestLog {
         return tracked;
     }
 
+    public long claimed(String quest) {
+        return claimed.getOrDefault(quest, Long.MIN_VALUE);
+    }
+
     @Override
     public boolean equals(Object o) {
-        return o instanceof QuestLog l && l.quests.equals(quests) && l.tracked.equals(tracked);
+        return o instanceof QuestLog l && l.quests.equals(quests) && l.tracked.equals(tracked) && l.claimed.equals(claimed);
     }
 
     @Override

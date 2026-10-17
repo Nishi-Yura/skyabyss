@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 182,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/counting_song",
+    "chapter1/sky_key_whole"
+  ]
+}

@@ -40,17 +40,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // NPC とクエストの自己テスト (SKYABYSS_SELFTEST=1 の専用サーバー、起動直後に一度)。
 // JSON の読み込みと参照先、文の有無と長さ、会話の条件分岐、ループをまたぐ「覚えているような」入口、
 // メインクエストを最初から最後まで、サブ 2 本、二人同時、倒した数の数え方、保存と死んだときの引き継ぎを確かめる。
 // 結果はログに SELFTEST npc PASSED / FAILED (サーバーを止めるのは岩鯨の背の自己テスト)
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class NpcQuestSelfTest {
     private static final String[] LANGS = {"ja_jp", "en_us"};
     // 会話画面の本文の幅 (枠 400 − 顔と余白 82) と、枠の高さの上限 (GUI 拡大率 4 の 1080p で画面の高さ 270)
@@ -60,21 +56,18 @@ public final class NpcQuestSelfTest {
     private NpcQuestSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
-        int loopBefore = WorldLoop.count(event.getServer());
+        int loopBefore = WorldLoop.count(server);
         try {
-            run(event.getServer(), failures, notes);
+            run(server, failures, notes);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
             SkyAbyss.LOGGER.error("SELFTEST npc exception", e);
         } finally {
-            WorldLoop.set(event.getServer(), loopBefore);
+            WorldLoop.set(server, loopBefore);
         }
         notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST npc: {}", n));
         if (failures.isEmpty()) {
@@ -128,7 +121,9 @@ public final class NpcQuestSelfTest {
                 "expected quests main_song, sub_song, sub_shards", failures);
         check(DialogueManager.dialogue(NpcSetup.STORYTELLER_ID) != null && DialogueManager.dialogue(NpcSetup.WHALE_CHASER_ID) != null,
                 "expected dialogues for both npcs", failures);
-        check(QuestManager.all().stream().filter(QuestDef::main).count() == 1, "exactly one main quest", failures);
+        // メインは「雲の下の歌」から一本の鎖 (1 章の続きは前のメインを終えると始まる。docs/design/14_beta.md)
+        check(QuestManager.all().stream().filter(QuestDef::main).min(java.util.Comparator.comparingInt(QuestDef::order))
+                .map(q -> q.id().equals("main_song")).orElse(false), "main_song should be the first main quest", failures);
         // 条件と結果の指す先
         List<Condition> conditions = new ArrayList<>();
         List<Action> actions = new ArrayList<>();
@@ -164,7 +159,7 @@ public final class NpcQuestSelfTest {
                 }
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
-            boolean started = q.startWhen() != null || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            boolean started = q.startWhen() != null || q.board() || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
@@ -232,8 +227,9 @@ public final class NpcQuestSelfTest {
             }
             case "lore" -> o.targets().forEach(t -> check(LoreManager.catalog().entry(t) != null, w + ": unknown lore " + t, failures));
             case "collect" -> check(Condition.item(o.targets().get(0)) != null, w + ": unknown item", failures);
-            case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t)),
-                    w + ": unknown entity " + t, failures));
+            // 雷翼の敵と心臓は別の担当が登録する (StormLore.PENDING)。まだないうちは数えるだけで、失敗にしない
+            case "kill", "near" -> o.targets().forEach(t -> check(BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.parse(t))
+                    || jp.revati.skyabyss.titan.storm.lore.StormLore.pending(t), w + ": unknown entity " + t, failures));
             default -> {
             }
         }
@@ -273,6 +269,19 @@ public final class NpcQuestSelfTest {
             JsonObject lang = json("/assets/skyabyss_npc/lang/" + code + ".json", failures);
             if (lang == null) {
                 continue;
+            }
+            // 自由なモードのサブクエストの文は skyabyss_quest に置いた (skyabyss_npc は別の担当が直すため)
+            // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
+            // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm")) {
+                JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
+                if (extra != null) {
+                    extra.entrySet().forEach(e -> {
+                        if (!lang.has(e.getKey())) {
+                            lang.add(e.getKey(), e.getValue());
+                        }
+                    });
+                }
             }
             for (String key : keys) {
                 if (!lang.has(key) || lang.get(key).getAsString().isBlank()) {

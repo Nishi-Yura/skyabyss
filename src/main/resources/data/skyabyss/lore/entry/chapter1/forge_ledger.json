@@ -1,0 +1,17 @@
+{
+  "chapter": "chapter1",
+  "order": 178,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "ember_back"
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/ember_ruins",
+    "chapter1/inscription_ember_south"
+  ]
+}

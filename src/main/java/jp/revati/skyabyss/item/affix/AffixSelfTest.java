@@ -28,29 +28,22 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 特性・再鍛造・交換の自己テスト。SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く (止めるのは TitanBackSelfTest)。
 //  - 抽選の分布 (数・種類・値の幅・重なりなし)、保存 (NBT の往復)、古い装備の扱い
 //  - 再鍛造 (3 組まで、確定・今のまま・範囲外)、交換の決まり (心臓ごとに一度、未所持だけ、欠片 30)
 //  - 修飾子 (部位ごとの ID、値)、守りの上限、冴え
 //  - 模擬: 欠片と結晶の集まり方、特性込みで岩鯨の心臓が簡単になりすぎないか
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class AffixSelfTest {
     private AffixSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("affix selftest crashed", e);
             failures.add("crashed: " + e);
@@ -291,6 +284,8 @@ public final class AffixSelfTest {
     private static void modifiers(MinecraftServer server, List<String> f, RandomSource random) {
         ServerLevel level = server.overworld();
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "affix_test_a"));
+        // 必要レベル (03 の 10章) に届いている人として試す
+        jp.revati.skyabyss.rpg.Growth.get(p).level = jp.revati.skyabyss.rpg.GrowthRules.MAX_LEVEL;
         Item[] armor = {ModItems.STONE_WHALE_HELMET.get(), ModItems.STONE_WHALE_CHESTPLATE.get(), ModItems.STONE_WHALE_LEGGINGS.get(),
                 ModItems.STONE_WHALE_BOOTS.get()};
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
@@ -316,7 +311,7 @@ public final class AffixSelfTest {
         }
         check(f, Math.abs(p.getAttributeValue(Attributes.MAX_HEALTH) - (health + 4)) < 1e-6,
                 "four vigor 1.0 pieces gave max health " + p.getAttributeValue(Attributes.MAX_HEALTH));
-        double expectTough = tough + 4 * 2.5 + 4 * 2 * jp.revati.skyabyss.item.GearEvents.TOUGHNESS_PER_LEVEL;
+        double expectTough = tough + 4 * 2.0 + 4 * 2 * jp.revati.skyabyss.item.GearEvents.TOUGHNESS_PER_LEVEL;
         check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR_TOUGHNESS) - expectTough) < 1e-6,
                 "enhance toughness of four pieces did not add up: " + p.getAttributeValue(Attributes.ARMOR_TOUGHNESS) + " vs " + expectTough);
         check(f, Math.abs(AffixEvents.ward(p) - AffixRules.WARD_CAP) < 1e-9, "ward 4 x 3% was not capped at 10%: " + AffixEvents.ward(p));
@@ -428,18 +423,24 @@ public final class AffixSelfTest {
     }
 
     // ---------------------------------------------------------------- 模擬: 岩鯨の心臓が簡単になりすぎないか
-    // 一人、初回クリアのころ (Lv 9、筋力 24 → 攻撃 ×1.144)、武器 +5、甲殻 4 部位 +0、心臓の一撃 12 (02 の 5.3節)。
+    // 一人、初回クリアのころ (Lv 9、筋力 24 → 攻撃 ×1.144)、武器 +5、甲殻 4 部位 +0、心臓の一撃 12 (02 の 5.3節)。強さの曲線全体は item/GearCurveSelfTest
     //  攻め: 1 秒あたりの傷 = 攻撃力 × 攻撃速度 (毎回振りきる)
     //  守り: 一撃の傷 (防具と強靭、甲殻の耐性 I、守り) と最大体力から「倒れるまでに耐える回数」
     private static void balance(List<String> f, RandomSource random) {
         double str = 1.144;
-        double[][] weapons = {{9, 1.0}, {8, 1.1}, {5, 2.2}}; // 武器の上乗せ (素の 1 を足すと 10・9・6)。大剣、鉾、顎牙
+        // 武器の上乗せは品の既定の値から読む (素の 1 を足すと 10・8.5・5.5。2026-10-17)。大剣、鉾、顎牙
+        Item[] items = {ModItems.WHALEBONE_GREATSWORD.get(), ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get()};
+        double[][] weapons = new double[3][];
+        double[] speeds = {1.0, 1.1, 2.2};
+        for (int w = 0; w < 3; w++) {
+            weapons[w] = new double[]{jp.revati.skyabyss.item.GearEvents.weaponAttack(items[w]) - 1, speeds[w]};
+        }
         String[] names = {"greatsword", "pike", "fang"};
         GearTier[] tiers = {GearTier.RARE, GearTier.LEGENDARY, GearTier.LEGENDARY};
         double worstAvg = 0;
         double worstMax = 0;
         for (int w = 0; w < weapons.length; w++) {
-            double dmg = weapons[w][0] + 5 * jp.revati.skyabyss.item.GearEvents.ATTACK_PER_LEVEL;
+            double dmg = weapons[w][0] + jp.revati.skyabyss.item.GearEvents.enhanceAttack(items[w], 5);
             double plain = dps(dmg, weapons[w][1], str, 0, 0);
             double sum = 0;
             int n = 20000;
@@ -455,13 +456,13 @@ public final class AffixSelfTest {
             SkyAbyss.LOGGER.info("[selftest] affix balance {}: heart 450 hp in {}s plain, {}s with average affixes (x{}), {}s at best (x{})",
                     names[w], fmt(450 / plain), fmt(450 / (plain * avg)), fmt(avg), fmt(450 / (plain * best)), fmt(best));
         }
-        // 守り: 防具 20、強靭 10、甲殻の耐性 I (×0.8)、体力 20
-        double plainHits = 20 / hit(12, 20, 10, 0);
+        // 守り: 防具 20、強靭 8 (1 部位 2。2026-10-17 に 2.5 から)、甲殻の耐性 I (×0.8)、体力 20
+        double plainHits = 20 / hit(12, 20, 8, 0);
         double sumHits = 0;
         int n = 20000;
         for (int i = 0; i < n; i++) {
             double hp = 20;
-            double tough = 10;
+            double tough = 8;
             double ward = 0;
             for (int piece = 0; piece < 4; piece++) {
                 List<Affix> list = AffixRules.roll(AffixType.Slot.ARMOR, GearTier.RARE, random);
@@ -473,7 +474,7 @@ public final class AffixSelfTest {
         }
         double avgDef = sumHits / n / plainHits;
         // いちばん守りの強い組: どの部位も 頑健 1.0 と 守り 3%
-        double bestDef = (20 + 4) / hit(12, 20, 10, AffixRules.WARD_CAP) / plainHits;
+        double bestDef = (20 + 4) / hit(12, 20, 8, AffixRules.WARD_CAP) / plainHits;
         SkyAbyss.LOGGER.info("[selftest] affix balance armor: survives {} heart hits plain, x{} with average affixes, x{} at best (vigor+ward on all 4)",
                 fmt(plainHits), fmt(avgDef), fmt(bestDef));
         // 難しさ = (倒すのにかかる時間) ÷ (耐えられる回数)。特性で 1/(攻め×守り) になる

@@ -1,12 +1,13 @@
 """岩鯨の心臓 (最終ボス) の第4回ラフ 案A をゲームに入れる。
 
 使い方 (リポジトリ直下で): python tools/install_heart_v4.py
-形の元: docs/roughs/v4/boss/a/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png (tools/rough/boss_v4.py が作る)
+形の元: tools/sources/heart_hp/phaseN.geo.json, phaseN.tex.png, phaseN.glow.png (tools/rough/hp_heart_stone.py の B 案で 0.25 に彫り直したもの。
+  その元は tools/sources/heart/ = tools/rough/boss_v4.py の A 案、docs/roughs/v4/boss/a)
 出力 (src/main/resources/assets/skyabyss/ 以下):
   geo/entity/stone_whale_heart_p1|p2|p3.geo.json
   textures/entity/stone_whale_heart_p1|p2|p3.png と _glowmask.png
   animations/entity/stone_whale_heart.animation.json
-確認用: docs/roughs/v5/boss.png (GeckoLib の読み方を真似て描いた絵と、ラフの絵を並べる)
+確認用: docs/review/previews/boss.png (GeckoLib の読み方を真似て描いた絵と、ラフの絵を並べる)
 
 向きの変換 (GeckoLib 4.9.3 のバイトコードで確かめた読み方):
 - 箱と pivot の X は反転して焼かれる (x → -(x + 幅))。骨とキーフレームの回転は X と Y の符号が反転する。
@@ -35,9 +36,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools/rough"))
 from voxel import FACE_SHADE, Face, load_geo, render, sheet  # noqa: E402
 
-SRC = ROOT / "docs/roughs/v4/boss/a"
+SRC = ROOT / "tools/sources/heart_hp"
 ASSET = ROOT / "src/main/resources/assets/skyabyss"
-PREVIEW = ROOT / "docs/roughs/v5/boss.png"
+PREVIEW = ROOT / "docs/review/previews/boss.png"
 NAME = "stone_whale_heart"
 CY = 12.0
 

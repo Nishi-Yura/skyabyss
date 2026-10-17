@@ -1,0 +1,13 @@
+{
+  "chapter": "chapter1",
+  "order": 150,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/tide_hours",
+    "chapter1/heart_stilled"
+  ]
+}

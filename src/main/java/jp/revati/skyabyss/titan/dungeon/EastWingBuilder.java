@@ -44,15 +44,14 @@ final class EastWingBuilder {
             hallInterior(kit, hall);
         }
         throneDais(kit);
-        kit.restPoint(E0, "sign.skyabyss.rest_e0", Direction.SOUTH, new BlockPos(19, FLOOR + 3, E0.z1()));
-        kit.restPoint(CE1, "sign.skyabyss.rest_e2", Direction.NORTH, new BlockPos(27, FLOOR + 3, CE1.z2()));
+        kit.restPoint(E0);
+        kit.restPoint(CE1);
         kit.wallLamps(E3_CORRIDOR, 3, FLOOR + 3);
         kit.pilasters(E0, 3);
         for (Box rest : List.of(E0, CE1)) {
             kit.wallLamps(rest, 3, FLOOR + 3);
         }
         kit.moss(E0, 0.05f);
-        kit.wallSign(new BlockPos(16, FLOOR + 3, -21 + 2), Direction.EAST, "sign.skyabyss.arena");
     }
 
     // 広間: 床の模様、身を隠す柱、壁の柱、天井の骨の梁、吊るした灯り

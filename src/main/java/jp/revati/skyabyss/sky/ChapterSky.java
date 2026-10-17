@@ -18,7 +18,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSetSpawnEvent;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 
 // 1章の空の演出の共通部分。
 // - 「1章に入った」: 巨神の背に一度でも乗った (背のディメンションに入った。伝承の書の「空の遺跡」が記されているのも同じ意味)
@@ -119,11 +121,36 @@ public final class ChapterSky {
         }
     }
 
-    // プレイヤーがブロックを置いたチャンクを覚える (そのチャンクとその周りは削らない)
+    // プレイヤーがブロックを置いたチャンクを覚える (そのチャンクは削らない)。
+    // EntityMultiPlaceEvent (ベッド・扉など) も EntityPlaceEvent の一種なので、ここに届く。FakePlayer (他の Mod の機械) も Player に入る
     @SubscribeEvent
     static void onPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof Player && event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
             ChapterSkyData.get(level).markPlaced(ChunkPos.asLong(event.getPos()));
         }
+    }
+
+    // プレイヤーが固いブロックを掘ったチャンクも覚える (山の中をくり抜いた住まいを削らない)。
+    // 草花・雪の層など、歩くだけで壊れるものは数えない
+    @SubscribeEvent
+    static void onBreak(BlockEvent.BreakEvent event) {
+        if (event.getPlayer() != null && event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD
+                && !event.getState().canBeReplaced() && !PeakScar.vegetation(event.getState())) {
+            ChapterSkyData.get(level).markPlaced(ChunkPos.asLong(event.getPos()));
+        }
+    }
+
+    // この Mod が入ってから生成されたチャンクに印を付ける (PeakScar: 印のない古いチャンクは慎重に扱う)
+    @SubscribeEvent
+    static void onChunkLoad(ChunkEvent.Load event) {
+        if (event.isNewChunk() && event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD
+                && event.getChunk() instanceof LevelChunk chunk) {
+            chunk.setData(ChapterSkyRegistry.FRESH_CHUNK, true);
+        }
+    }
+
+    // この Mod が入ってから生成されたチャンクか (プレイヤーが置いた記録がそろっているチャンク)
+    public static boolean freshChunk(LevelChunk chunk) {
+        return chunk.hasData(ChapterSkyRegistry.FRESH_CHUNK) && chunk.getData(ChapterSkyRegistry.FRESH_CHUNK);
     }
 }

@@ -28,6 +28,9 @@ import sys as _sys
 if __name__ == "__main__" and _os.environ.get("SKYABYSS_ALLOW_REGEN") != "1":
     _sys.exit("tools/gen_mobs.py は停止中です: 採用済みの素材 (番兵・射手・苔這い・顎・番兵長の geo / png / glowmask / animation) を上書きするため。"
               "採用版の生成元は tools/rough/rib_archer_v4.py、tools/rough/captain_v4.py (ほかは今の src/ が正本) です。どうしても実行するときは SKYABYSS_ALLOW_REGEN=1 を付けてください (tools/README.md)。")
+# ハイポリ化 (docs/design/15 の 8 章、担当 1a): 肋の射手・苔這い・水路の顎は、採用済みの geo / png を tools/sources/hp_base/entity/ に控えてあり、
+# tools/rough/hp_mobs_whale_tide.py (--install) がそこから細かく作り直して assets/ に置く。このスクリプトを動かす (止めてある) 場合は、
+# そのあとで hp_mobs_whale_tide.py --install を実行し直す。
 import json
 import math
 import sys

@@ -1,0 +1,37 @@
+{
+  "category": "sub",
+  "order": 44,
+  "giver": "skyabyss:whale_chaser",
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "watch",
+      "objectives": [
+        {
+          "id": "watch",
+          "type": "signal",
+          "target": "tide_low_watched",
+          "count": 3,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "fq_c_tide_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150,
+    "affinity": {
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

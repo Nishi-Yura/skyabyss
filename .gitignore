@@ -41,3 +41,6 @@ repo/
 docs/roughs/vanilla_ref/
 docs/roughs/_gallery/
 __pycache__/
+
+# 生成スクリプトの確認用の絵
+docs/review/previews/

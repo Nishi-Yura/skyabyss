@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "pressed=false": {
+      "model": "skyabyss:block/forge_bellows"
+    },
+    "pressed=true": {
+      "model": "skyabyss:block/forge_bellows_pressed"
+    }
+  }
+}

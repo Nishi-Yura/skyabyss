@@ -1,0 +1,55 @@
+# Thunder wing (near LOD high-poly) before / after + frame time near the body.
+# ./gradlew runShots -Pscript=tools/shots/hp_titans_storm.txt -PshotsName=hp_titans_storm_before   (and _after)
+# Coordinates are local to the titan (^ = left ^ up ^ forward; the head is forward). No OS input.
+world hp_titans_storm flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+cmd time set 6000
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p stone_whale
+cmd skyabyss progress grant @p tide_shell
+camera 0.5 -40 0.5 0 0
+waitchunks
+cmd skyabyss titan summon storm
+wait 40
+cmd skyabyss titan rest storm here
+wait 60
+hud off
+cmd gamemode spectator
+# the head, close (the eye, beak, crest)
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^-14 ^29 ^76 facing ^0 ^28 ^62
+wait 40
+waitchunks
+shot head_close
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^28 ^30 ^84 facing ^0 ^28 ^62
+wait 30
+shot head_three_quarter
+# the left foot and the underside
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^20 ^2 ^-8 facing ^8 ^8 ^0
+wait 30
+shot foot_close
+# near: the whole bird from the side, below the left wing
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^55 ^30 ^10 facing ^0 ^30 ^0
+wait 30
+shot near_side
+# wing tip (feathers)
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^88 ^36 ^30 facing ^100 ^30 ^0
+wait 30
+shot wingtip
+# middle and far
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^0 ^30 ^110 facing ^0 ^30 ^0
+wait 30
+shot mid
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^0 ^30 ^210 facing ^0 ^30 ^0
+wait 30
+shot far
+# frame time with the body filling the view (near LOD)
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^30 ^34 ^50 facing ^0 ^30 ^10
+wait 40
+perf 300 near_a
+perf 300 near_b
+quit

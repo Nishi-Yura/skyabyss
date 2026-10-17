@@ -8,7 +8,7 @@
   geo/entity/stone_whale_far.geo.json     遠景 (160 ブロック以上)。4 単位 (2 ブロック) の格子
   textures/entity/stone_whale.png / _glowmask.png  3 つのモデルで共有する 1 枚のテクスチャ
   animations/entity/stone_whale.animation.json
-確認用: docs/roughs/v5/stone_whale.png, docs/roughs/v5/whale_fins.png (胸びれを下から)
+確認用: docs/review/previews/stone_whale.png, docs/review/previews/whale_fins.png (胸びれを下から)
 
 ゲームでの向き (GeckoLib 4.9.3 の仕様を確かめた結果):
 - 箱の X は反転して描かれる (BakedModelFactory は x を -(origin.x + size.x) にする)。
@@ -46,8 +46,8 @@ from voxel import Face, FACE_SHADE, load_geo, render, sheet  # noqa: E402
 V.OX, V.NX = 192, 384     # x -96〜+96 単位
 
 RES = ROOT / "src/main/resources/assets/skyabyss"
-PREVIEW = ROOT / "docs/roughs/v5/stone_whale.png"
-FIN_PREVIEW = ROOT / "docs/roughs/v5/whale_fins.png"
+PREVIEW = ROOT / "docs/review/previews/stone_whale.png"
+FIN_PREVIEW = ROOT / "docs/review/previews/whale_fins.png"
 
 YC = V.YC
 HULL_Q = 1.0            # 体の断面の幅の段 (単位)
@@ -885,6 +885,9 @@ def main():
                                                          encoding="utf-8")
     for name in files:
         print(name, "cubes", cube_count(geos[name]), "quads", quads(geos[name]))
+    if "--no-hp" not in sys.argv:   # high-poly pass on the near LOD (docs/design/15_high_poly.md, titan bodies); the grid above is untouched
+        import hp_titan_body
+        hp_titan_body.install("stone_whale", "C", rebase=True)
 
     preview(geos, tex, glow)
 

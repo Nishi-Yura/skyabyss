@@ -67,7 +67,7 @@ public class TravelChartScreen extends Screen {
     private static final int DIM = 0xFF8E8A7C;
     private static final int TEAL = 0xFF7FD6D0;
     private static final int PALE = 0xFF9FE8FF;
-    private static final int DENY = 0xFFD9779A;
+    private static final int LOST = 0xFF6A6862;
 
     private TravelNetwork.Chart chart;
     private int left;
@@ -77,7 +77,8 @@ public class TravelChartScreen extends Screen {
     private String selected;
 
     public TravelChartScreen(TravelNetwork.Chart chart) {
-        super(Component.translatable("gui.skyabyss.travel.title"));
+        super(Component.translatable(net.minecraft.locale.Language.getInstance().has("gui.skyabyss.travel.title." + chart.titan())
+                ? "gui.skyabyss.travel.title." + chart.titan() : "gui.skyabyss.travel.title"));
         this.chart = chart;
         pickDefault();
     }
@@ -193,13 +194,14 @@ public class TravelChartScreen extends Screen {
             TravelNetwork.Dest d = dests.get(scroll + i);
             int x = left + LIST_X;
             int y = top + LIST_Y + i * ROW_H;
-            boolean hover = inside(mouseX, mouseY, x, y, ROW_W, ROW_H - 1);
+            boolean hover = d.valid() && inside(mouseX, mouseY, x, y, ROW_W, ROW_H - 1);
             boolean sel = d.id().equals(selected);
             blit(g, x, y, sel ? ROW_SELECTED : hover ? ROW_HOVER : ROW);
-            int color = !d.valid() ? DENY : reachable(d) ? TEXT : DIM;
+            // 失われた碑は灰色 (選べない。サーバーは海図を送ったときに記録から外している)
+            int color = !d.valid() ? LOST : reachable(d) ? TEXT : DIM;
             g.drawString(font, font.plainSubstrByWidth(name(d).getString(), ROW_W - 18), x + 5, y + 3, color, false);
-            g.drawString(font, detail(d), x + 5, y + 12, d.valid() ? DIM : DENY, false);
-            if (d.kind() == 1 && chart.leader() && hover) {
+            g.drawString(font, detail(d), x + 5, y + 12, d.valid() ? DIM : LOST, false);
+            if (d.kind() == 1 && d.valid() && chart.leader() && hover) {
                 // 碑を忘れる
                 blit(g, x + ROW_W - 11, y + 3, CROSS);
             }
@@ -271,6 +273,9 @@ public class TravelChartScreen extends Screen {
             int x = left + LIST_X;
             int y = top + LIST_Y + i * ROW_H;
             if (inside(mouseX, mouseY, x, y, ROW_W, ROW_H - 1)) {
+                if (!d.valid()) {
+                    return true;
+                }
                 if (d.kind() == 1 && chart.leader() && inside(mouseX, mouseY, x + ROW_W - 12, y + 2, 10, 10)) {
                     PacketDistributor.sendToServer(new TravelNetwork.Forget(d.id()));
                     click(0.8f);
@@ -283,7 +288,7 @@ public class TravelChartScreen extends Screen {
         }
         for (TravelNetwork.Dest d : dests) {
             int[] p = chartPoint(d);
-            if (Math.abs(mouseX - p[0]) <= 4 && Math.abs(mouseY - p[1]) <= 4) {
+            if (d.valid() && Math.abs(mouseX - p[0]) <= 4 && Math.abs(mouseY - p[1]) <= 4) {
                 selected = d.id();
                 click(1.2f);
                 return true;

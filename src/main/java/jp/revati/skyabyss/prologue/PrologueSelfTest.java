@@ -21,16 +21,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 序章の演出の自己テスト。環境変数 SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く (サーバーはほかのテストが止める)。
 // プレイヤーなしで確かめられることを確かめる:
 // 段階と間隔の数値、記録の保存と読み込み、パケットの往復、消え方の記録への反映、
 // 空中に作った足場での立ち位置選び (距離・向き・地面・見通し・壁で囲むと選ばない・水や葉の上に立たない)、
 // 近くの動物がそちらを向いて止まること
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PrologueSelfTest {
     // 足場を作る場所 (岩鯨の自己テストの場所 4000,4000 とは離す)
     private static final int CX = -4000;
@@ -41,12 +37,8 @@ public final class PrologueSelfTest {
     private PrologueSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
-        MinecraftServer server = event.getServer();
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
             checkRegistry(failures);
@@ -89,6 +81,13 @@ public final class PrologueSelfTest {
         }
         if (WatcherStage.of(0, 0.6f).index() != 1 || WatcherStage.of(5, 1f).index() != 2) {
             failures.add("a near moon does not advance the stage by one (capped)");
+        }
+        // 1 章以降も出るが、段階 2 より近くならない (00 の 2 = B)
+        for (int chapter = 1; chapter <= 3; chapter++) {
+            if (WatcherStage.of(50, 1f, chapter).index() != WatcherStage.CHAPTER_CAP
+                    || WatcherStage.of(0, 0f, chapter).index() != 0) {
+                failures.add("chapter " + chapter + " does not keep the watcher between stage 0 and the cap");
+            }
         }
         WatcherStage prev = null;
         for (WatcherStage s : WatcherStage.STAGES) {

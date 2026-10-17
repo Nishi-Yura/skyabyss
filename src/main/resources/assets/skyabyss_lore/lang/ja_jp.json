@@ -73,7 +73,7 @@
   "lore.skyabyss.chapter1.captain.title": "鯨骨の番兵長",
   "lore.skyabyss.chapter1.captain.body": "番兵長は、崩れ落ちる最後まで鉾を下ろさなかった。\n\n骨の山の中に、すり減った留め金が一つ残っていた。表には背中の民の印。裏には小さく、名前らしきものが彫ってある。読めたのは、最初の一文字だけだった。",
   "lore.skyabyss.chapter1.heart_stilled.title": "止まった鼓動",
-  "lore.skyabyss.chapter1.heart_stilled.body": "岩鯨の心臓が止まった。巨神は落ちなかった。ただ一度、深く息をついた。\n\n静かになった心臓の間で、足の裏に何かが伝わってきた。ずっと下のほうから、遅れて一つだけ。\n\nそれきり、何も聞こえなくなった。",
+  "lore.skyabyss.chapter1.heart_stilled.body": "岩鯨の心臓が止まった。巨神は落ちなかった。ただ一度、深く息をついた。\n\n静かになった心臓の間に、しばらく立っていた。石の壁には、まだ温もりが残っていた。\n\nこの鼓動は、どこから来て、どこへ行ったのだろう。",
   "lore.skyabyss.chapter1.sky_key.title": "天の鍵の欠片",
   "lore.skyabyss.chapter1.sky_key.body": "心臓が止まったとき、気づくと手の中に欠片があった。ほのかに温かく、かすかに脈を打っている。\n\n四つそろえば雲の上へ続く扉が開く、と言い伝えにはある。残る三つは、ほかの巨神が体の奥に抱えているはずだ。",
   "lore.skyabyss.chapter1.carried_people.title": "運ばれる者",
@@ -81,5 +81,7 @@
   "lore.skyabyss.chapter1.return_fire.title": "返り火",
   "lore.skyabyss.chapter1.return_fire.body": "休み場の焚き火は青く燃える。薪をくべる者もいないのに、消えたことがない。\n\n民はこの火を「返り火」と呼んだ。背で倒れた者は、目を覚ますとこの火のそばにいるからだ。",
   "lore.skyabyss.chapter1.whale_song.title": "鯨の歌",
-  "lore.skyabyss.chapter1.whale_song.body": "岩鯨が歌うのは、決まって雲の下へ降りる前だという。\n\n民はその歌を、迎えの合図だと考えていた。誰を迎えに降りるのかは、頁が破れていて読めない。"
+  "lore.skyabyss.chapter1.whale_song.body": "岩鯨が歌うのは、決まって雲の下へ降りる前だという。\n\n民はその歌を、迎えの合図だと考えていた。誰を迎えに降りるのかは、頁が破れていて読めない。",
+  "lore.skyabyss.chapter1.whale_chaser.title": "鯨追いのイサナ",
+  "lore.skyabyss.chapter1.whale_chaser.body": "村の外れで火を焚く旅人は、イサナと名乗った。古い言葉で、鯨のことだという。\n\n名乗る前に、少しだけ間があった。前にも誰かに、同じように名乗ったことがあるような顔をしていた。\n\n次に会ったとき、あの人は覚えているだろうか。"
 }

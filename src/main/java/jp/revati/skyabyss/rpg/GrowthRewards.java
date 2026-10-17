@@ -49,6 +49,10 @@ public final class GrowthRewards {
     // ---------------------------------------------------------------- 数値 (表は 04 の 3 章)
     // 岩鯨の推奨レベル。これ +3 を超えると、岩鯨で得る経験値が減っていく
     public static final int STONE_WHALE_LEVEL = 12;
+    // 潮殻の巨神の推奨レベル (04 の 11 章の判断 6 の案 A)
+    public static final int TIDE_SHELL_LEVEL = 18;
+    // 雷翼の巨神の推奨レベル (12 の 6.6節)
+    public static final int THUNDER_WING_LEVEL = 24;
 
     public record Source(int xp, int contentLevel) {
     }
@@ -63,7 +67,25 @@ public final class GrowthRewards {
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":stone_whale_heart", new Source(300, STONE_WHALE_LEVEL));
+        // 潮殻の背の敵 (08 の 6.6節。推奨レベル 18)
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":coral_thrall", new Source(14, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_scuttler", new Source(3, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bubble_puffer", new Source(10, TIDE_SHELL_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":reef_nest", new Source(20, TIDE_SHELL_LEVEL));
+        // 雷翼の背の敵 (12 の 6.6節。推奨レベル 24): 羽守 18、雷蛾 5、雷乞い 14
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":feather_warden", new Source(18, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":static_moth", new Source(5, THUNDER_WING_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_supplicant", new Source(14, THUNDER_WING_LEVEL));
+        // 雷翼の中ボス 雷獣 (12 の 6.6節。推奨レベル 24)。試練の雷獣は参加者の一覧で配る (RaijuLoot)。ここは試練の外で呼ばれたもの
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":raiju", new Source(170, THUNDER_WING_LEVEL));
+        // 余燼の背の敵 (13 の 6.6節。推奨レベル 30): 灰被り 26、火の粉蛾 4、燠虫 16
+        jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.Xp.put(MOD_ENEMIES);
+        jp.revati.skyabyss.titan.ember.heart.EmberHeartSetup.Xp.put(MOD_ENEMIES);
+        // 余燼の中ボス 灰の鍛え手 (13 の 6.6節。推奨レベル 30)。試練の鍛え手は参加者の一覧で配る (AshSmithLoot)。ここは試練の外で呼ばれたもの
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":ash_smith", new Source(220, 30));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":thunder_wing_heart", new Source(480, THUNDER_WING_LEVEL)); // 雷翼の心臓 (12 の 6.6節。試練の外で倒したとき)
     }
+
 
     // 試練のボス: 参加者それぞれが満額を受け取る (人数で強くなるぶん、取り分は減らさない)
     public static final int CAPTAIN_XP = 100;
@@ -117,6 +139,12 @@ public final class GrowthRewards {
             }
             Growth.addXp(player, amount, reason);
         }
+        // パーティの仲間で戦いにいなかった人 (同じ背中の別の所にいた人など) には、満額の分け前の割合 (初回の上乗せなし)
+        double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, seen)) {
+            int amount = (int) Math.round(base * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+            Growth.addXp(mate, amount, "growth.skyabyss.reason.party");
+        }
     }
 
     // ---------------------------------------------------------------- 敵の撃破
@@ -127,6 +155,10 @@ public final class GrowthRewards {
             return;
         }
         // 試練の番兵長と心臓は、参加者の一覧で配る (onBossDefeat)
+        if (mob instanceof jp.revati.skyabyss.titan.tide.back.TideBeckoner beckoner && beckoner.isTrialMob()) {
+            // 試練の潮招きは、参加者の一覧で配る (TideFlats)
+            return;
+        }
         if (mob.getTags().contains(TitanBackTrials.HEART_TAG)
                 || (mob.getTags().contains(TitanBackTrials.MOB_TAG) && mob.getType() == jp.revati.skyabyss.registry.ModEntities.WHALEBONE_CAPTAIN.get())) {
             return;
@@ -149,20 +181,30 @@ public final class GrowthRewards {
         List<ServerPlayer> share = sharers(level, mob, killer);
         double part = GrowthRules.partyShare(share.size());
         for (ServerPlayer player : share) {
-            double amount;
-            if (mod != null) {
-                // Mod の敵もスポナー (水路の顎の巣) から湧いたものは 1/4
-                amount = mod.xp() * part * GrowthRules.levelFalloff(Growth.get(player).level, mod.contentLevel())
-                        * (spawner ? SPAWNER_FACTOR : 1.0);
-            } else if (boss != null) {
-                amount = boss * part;
-            } else {
-                amount = vanillaBudget(level, Growth.get(player), vanillaXp(mob) * part);
-            }
-            int xp = GrowthRules.roundRandom(amount, level.random.nextDouble());
-            if (xp > 0) {
-                Growth.addXp(player, xp, "");
-            }
+            giveKill(level, player, mob, mod, boss, spawner, part, "");
+        }
+        // パーティの仲間で居合わせなかった人: 居合わせた人の取り分の割合 (10 の 6 章。距離・レベル差は Parties が見る)
+        double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, share)) {
+            giveKill(level, mate, mob, mod, boss, spawner, part * rate, "growth.skyabyss.reason.party");
+        }
+    }
+
+    private static void giveKill(ServerLevel level, ServerPlayer player, LivingEntity mob, @Nullable Source mod, @Nullable Integer boss,
+            boolean spawner, double part, String reason) {
+        double amount;
+        if (mod != null) {
+            // Mod の敵もスポナー (水路の顎の巣) から湧いたものは 1/4
+            amount = mod.xp() * part * GrowthRules.levelFalloff(Growth.get(player).level, mod.contentLevel())
+                    * (spawner ? SPAWNER_FACTOR : 1.0);
+        } else if (boss != null) {
+            amount = boss * part;
+        } else {
+            amount = vanillaBudget(level, Growth.get(player), vanillaXp(mob) * part);
+        }
+        int xp = GrowthRules.roundRandom(amount, level.random.nextDouble());
+        if (xp > 0) {
+            Growth.addXp(player, xp, reason);
         }
     }
 
@@ -188,7 +230,7 @@ public final class GrowthRewards {
         return list;
     }
 
-    // バニラの敵は日ごとに 150 までは満額、そのあとは 20%
+    // バニラの敵は日ごとに VANILLA_DAILY (100) までは満額、そのあとは 20%
     static double vanillaBudget(ServerLevel level, GrowthData data, double amount) {
         long day = level.getGameTime() / 24000L;
         if (data.vanillaDay != day) {
@@ -258,11 +300,20 @@ public final class GrowthRewards {
             boolean active = state.getBlock() instanceof ResonanceStoneBlock && state.getValue(ResonanceStoneBlock.ACTIVE);
             Boolean before = STONES.put(pos.immutable(), active);
             if (before != null && !before && active) {
-                for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),
-                        p -> p.isAlive() && !p.isSpectator())) {
+                List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),
+                        p -> p.isAlive() && !p.isSpectator());
+                for (ServerPlayer player : near) {
                     int xp = (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(player).level, STONE_WHALE_LEVEL));
                     Growth.addXp(player, xp, "growth.skyabyss.reason.trial");
                 }
+                // 同じ背中にいる仲間にも分け前
+                double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
+                for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
+                    int xp = (int) Math.round(TRIAL_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
+                    Growth.addXp(mate, xp, "growth.skyabyss.reason.party");
+                }
+                // サブクエストの「試練を踏破する」(居合わせた人と、同じ背中の仲間。quest/free)
+                jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
             }
         }
     }

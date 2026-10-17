@@ -10,7 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 // 成長のパケット。ModNetwork とは別に登録する (担当ごとに分けて、共有ファイルを触らないため)。
-// 成長の記録そのものは Data Attachment の同期で届くので、ここは「得た」の知らせと振り分けの要求だけ
+// 成長の記録そのものは Data Attachment の同期で届くので、ここは「得た」の知らせと、振り分け・振り直しの要求だけ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RpgNetwork {
     private static final String PROTOCOL_VERSION = "1";
@@ -28,6 +28,21 @@ public final class RpgNetwork {
                         // 画面が古いとき (ほかの所で振った・レベルを下げられた) など。同期し直して知らせる
                         Growth.sync(player);
                         player.displayClientMessage(ModText.deny("message.skyabyss.growth.allocate_failed"), true);
+                    }
+                })
+                .playToServer(GrowthRespecPayload.TYPE, GrowthRespecPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        int cost = jp.revati.skyabyss.rpg.GrowthRules.statRespecCost(Growth.get(player).statRespecs);
+                        // 画面に見えていた費用と違う (古い画面) ときは、払わせずに同期し直す
+                        if (payload.cost() != cost && !player.isCreative()) {
+                            Growth.sync(player);
+                            return;
+                        }
+                        jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult r = Growth.respecStats(player);
+                        if (r != jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK) {
+                            player.displayClientMessage(ModText.deny("message.skyabyss.growth.respec_failed." + r.name().toLowerCase(),
+                                    net.minecraft.network.chat.Component.literal(String.valueOf(cost))), true);
+                        }
                     }
                 });
     }

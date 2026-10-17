@@ -1,0 +1,12 @@
+{
+  "chapter": "chapter1",
+  "order": 176,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/thunder_wing"
+  ]
+}

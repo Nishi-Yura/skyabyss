@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skyabyss:block/message_board"
+    },
+    "facing=east": {
+      "model": "skyabyss:block/message_board",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skyabyss:block/message_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skyabyss:block/message_board",
+      "y": 270
+    }
+  }
+}

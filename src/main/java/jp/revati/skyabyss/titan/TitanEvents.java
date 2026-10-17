@@ -42,7 +42,7 @@ public final class TitanEvents {
         if (level.getGameTime() % 200 != 0) {
             return;
         }
-        TitanWorldData data = TitanWorldData.get(level);
+        TitanWorldData.Slot data = TitanWorldData.get(level).whale();
         // 経過日数は、時刻の操作 (/time set や昼夜の停止) に左右されないゲーム内の総 tick で数える
         if (data.spawned || level.getGameTime() / 24000L < FIRST_APPEARANCE_DAY) {
             return;
@@ -85,7 +85,17 @@ public final class TitanEvents {
                             return 1;
                         }))
                         .then(Commands.literal("leave").executes(ctx -> {
-                            TitanTravel.leave(ctx.getSource().getPlayerOrException());
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            // 潮殻の背にいれば、潮殻の巨神のもとへ戻す
+                            String back = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
+                            if (player.level().dimension() == jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK) {
+                                jp.revati.skyabyss.titan.tide.TideTravel.leave(player);
+                            } else if (back != null && !back.equals(jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+                                // 後の巨神の背中 (雷翼・余燼) は、Titans.bindBack で登録した道で戻す
+                                jp.revati.skyabyss.progress.Titans.sendDown(player, back);
+                            } else {
+                                TitanTravel.leave(player);
+                            }
                             return 1;
                         }))));
     }

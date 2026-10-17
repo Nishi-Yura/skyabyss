@@ -1,0 +1,29 @@
+{
+  "category": "sub",
+  "order": 63,
+  "repeat": "daily",
+  "board": true,
+  "min_stage": 1,
+  "stages": [
+    {
+      "id": "rounds",
+      "objectives": [
+        {
+          "id": "kill",
+          "type": "kill",
+          "target": "skyabyss:bone_sentinel",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 60,
+    "items": [
+      {
+        "item": "skyabyss:stone_whale_shard",
+        "count": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "phase=0": {
+      "model": "skyabyss:block/heat_vent_0"
+    },
+    "phase=1": {
+      "model": "skyabyss:block/heat_vent_1"
+    },
+    "phase=2": {
+      "model": "skyabyss:block/heat_vent_2"
+    }
+  }
+}

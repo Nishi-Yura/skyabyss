@@ -1,0 +1,125 @@
+# Stone-whale / tide-shell enemies before/after the high-poly pass (docs/design/15_high_poly.md, 15 section "enemies (stone whale, tide shell)").
+# ./gradlew runShots -Pscript=tools/shots/hp_mobs_whale_tide.txt -PshotsName=hp_mobs_whale_tide_after   (and _before with the old assets)
+# Output: run/shots/<name>/shots/<name>/*.png and shots.log
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:rib_archer 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -60.82 4.8 180 0
+waitchunks
+wait 50
+shot rib_archer_front
+camera minecraft:overworld 0 -59.72 1.7 180 0
+wait 15
+shot rib_archer_face
+camera minecraft:overworld 2.8 -60.82 3.2 150 6
+wait 15
+shot rib_archer_three_quarter
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:moss_crawler 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -60.82 4.6 180 8
+waitchunks
+wait 50
+shot moss_crawler_front
+camera minecraft:overworld 0 -60.52 1.9 180 0
+wait 15
+shot moss_crawler_face
+camera minecraft:overworld 3.2 -60.92 3.2 148 10
+wait 15
+shot moss_crawler_three_quarter
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:waterway_maw 0 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -61.02 4.0 180 0
+waitchunks
+wait 50
+shot waterway_maw_front
+camera minecraft:overworld 3.4 -60.82 3.0 145 8
+wait 15
+shot waterway_maw_three_quarter
+camera minecraft:overworld 4.6 -61.02 0 90 4
+wait 15
+shot waterway_maw_side
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:coral_thrall 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Statue:1b}
+camera minecraft:overworld 0 -60.62 5.2 180 0
+waitchunks
+wait 50
+shot coral_thrall_statue_front
+camera minecraft:overworld 0 -59.32 1.9 180 0
+wait 15
+shot coral_thrall_statue_face
+cmd fill -3 -60 -3 3 -60 3 minecraft:water
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:coral_thrall 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Statue:0b}
+camera minecraft:overworld 0 -60.62 5.2 180 0
+waitchunks
+wait 50
+shot coral_thrall_awake_front
+camera minecraft:overworld 0 -59.32 1.9 180 0
+wait 15
+shot coral_thrall_awake_face
+camera minecraft:overworld 3.0 -60.62 3.6 150 5
+wait 15
+shot coral_thrall_awake_three_quarter
+cmd fill -3 -60 -3 3 -60 3 minecraft:air
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:reef_scuttler 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -61.12 3.0 180 10
+waitchunks
+wait 50
+shot reef_scuttler_front
+camera minecraft:overworld 2.2 -61.02 2.4 150 14
+wait 15
+shot reef_scuttler_three_quarter
+camera minecraft:overworld 0 -61.22 1.5 180 10
+wait 15
+shot reef_scuttler_claws
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:bubble_puffer 0 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -60.92 3.2 180 0
+waitchunks
+wait 50
+shot bubble_puffer_front
+camera minecraft:overworld 2.4 -60.82 2.6 150 8
+wait 15
+shot bubble_puffer_three_quarter
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:reef_scuttler -8.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -8.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler -6.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -6.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler -5.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -5.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler -3.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -3.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler -2.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -2.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler -0.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer -0.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 0.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 0.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 2.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 2.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 3.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 3.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 5.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 5.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 6.75 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 6.75 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:reef_scuttler 8.25 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:bubble_puffer 8.25 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld 0 -60.0 6.5 180 8
+wait 100
+shot crowd
+perf 300 crowd24
+quit

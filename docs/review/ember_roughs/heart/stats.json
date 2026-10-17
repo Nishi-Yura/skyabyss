@@ -1,0 +1,319 @@
+{
+ "a1": {
+  "cubes": 835,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "kiln_glow",
+   "kiln_iron",
+   "kiln",
+   "coals",
+   "chimney_glow",
+   "grate",
+   "bellows",
+   "bellows_leather",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   110
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 2417,
+  "cells": 34331,
+  "per_bone": {
+   "heart": 126,
+   "heart_vein": 34,
+   "vessel": 40,
+   "core_ring": 43,
+   "core_eye": 10,
+   "kiln_glow": 24,
+   "kiln_iron": 86,
+   "kiln": 293,
+   "coals": 35,
+   "chimney_glow": 3,
+   "grate": 105,
+   "bellows": 15,
+   "bellows_leather": 15,
+   "cinders": 6
+  }
+ },
+ "a2": {
+  "cubes": 852,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "kiln_glow",
+   "kiln",
+   "kiln_iron",
+   "coals",
+   "grate",
+   "bellows",
+   "bellows_leather",
+   "falling_bricks",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   83
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 3623,
+  "cells": 22895,
+  "per_bone": {
+   "heart": 86,
+   "heart_vein": 31,
+   "vessel": 40,
+   "core_ring": 66,
+   "core_eye": 25,
+   "kiln_glow": 142,
+   "kiln": 215,
+   "kiln_iron": 25,
+   "coals": 35,
+   "grate": 105,
+   "bellows": 24,
+   "bellows_leather": 20,
+   "falling_bricks": 22,
+   "cinders": 16
+  }
+ },
+ "a3": {
+  "cubes": 445,
+  "bones": [
+   "heart_vein",
+   "heart_crust",
+   "heart",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "grate",
+   "ash_ring_1",
+   "ash_ring_2",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   50
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 649,
+  "cells": 10691,
+  "per_bone": {
+   "heart_vein": 13,
+   "heart_crust": 51,
+   "heart": 104,
+   "vessel": 40,
+   "core_ring": 20,
+   "core_eye": 3,
+   "grate": 53,
+   "ash_ring_1": 55,
+   "ash_ring_2": 88,
+   "cinders": 18
+  }
+ },
+ "b1": {
+  "cubes": 783,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "crust_glow",
+   "crust",
+   "drips",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   63
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 3303,
+  "cells": 18189,
+  "per_bone": {
+   "heart": 126,
+   "heart_vein": 34,
+   "vessel": 40,
+   "core_ring": 43,
+   "core_eye": 10,
+   "crust_glow": 113,
+   "crust": 404,
+   "drips": 7,
+   "cinders": 6
+  }
+ },
+ "b2": {
+  "cubes": 700,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "crust_glow",
+   "crust",
+   "drips",
+   "drops",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   50
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 4602,
+  "cells": 14519,
+  "per_bone": {
+   "heart": 86,
+   "heart_vein": 31,
+   "vessel": 40,
+   "core_ring": 66,
+   "core_eye": 25,
+   "crust_glow": 81,
+   "crust": 158,
+   "drips": 194,
+   "drops": 7,
+   "cinders": 12
+  }
+ },
+ "b3": {
+  "cubes": 707,
+  "bones": [
+   "heart_vein",
+   "heart_crust",
+   "heart",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "ash_shell",
+   "ash_drips",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   57
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 324,
+  "cells": 14821,
+  "per_bone": {
+   "heart_vein": 13,
+   "heart_crust": 51,
+   "heart": 104,
+   "vessel": 40,
+   "core_ring": 20,
+   "core_eye": 3,
+   "ash_shell": 436,
+   "ash_drips": 14,
+   "cinders": 26
+  }
+ },
+ "c1": {
+  "cubes": 796,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "spike_glow",
+   "spikes"
+  ],
+  "atlas": [
+   512,
+   33
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 1041,
+  "cells": 9290,
+  "per_bone": {
+   "heart": 126,
+   "heart_vein": 34,
+   "vessel": 40,
+   "core_ring": 43,
+   "core_eye": 10,
+   "spike_glow": 149,
+   "spikes": 394
+  }
+ },
+ "c2": {
+  "cubes": 785,
+  "bones": [
+   "heart",
+   "heart_vein",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "spike_glow",
+   "spikes",
+   "shards",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   36
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 1252,
+  "cells": 9622,
+  "per_bone": {
+   "heart": 86,
+   "heart_vein": 31,
+   "vessel": 40,
+   "core_ring": 66,
+   "core_eye": 25,
+   "spike_glow": 127,
+   "spikes": 237,
+   "shards": 161,
+   "cinders": 12
+  }
+ },
+ "c3": {
+  "cubes": 611,
+  "bones": [
+   "heart_vein",
+   "heart_crust",
+   "heart",
+   "vessel",
+   "core_ring",
+   "core_eye",
+   "stubs",
+   "orbit",
+   "cinders"
+  ],
+  "atlas": [
+   512,
+   43
+  ],
+  "overlaps": 0,
+  "ov_list": [],
+  "glow_px": 246,
+  "cells": 10779,
+  "per_bone": {
+   "heart_vein": 13,
+   "heart_crust": 51,
+   "heart": 104,
+   "vessel": 40,
+   "core_ring": 20,
+   "core_eye": 3,
+   "stubs": 29,
+   "orbit": 335,
+   "cinders": 16
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 178,
+  "inscription_sign": "sign.skyabyss.lore_ember_heart",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_ember_heart"
+    }
+  ],
+  "related": [
+    "chapter1/ember_stilled",
+    "chapter1/inscription_storm_heart"
+  ]
+}

@@ -1,0 +1,61 @@
+# 雷翼の背 (鳥の形の背中) を書き出して撮る。./gradlew runShots -Pscript=tools/shots/storm_back.txt
+# 出力: run/shots/storm_back/dumps/storm_back.sbd (python tools/structure/check.py で図と検査)、
+#       run/shots/storm_back/shots/storm_back/*.png
+world shots flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd skyabyss dev dump preset storm_back
+waitdump
+cmd gamemode spectator
+hud off
+# 鳥の南東の空から全体 (yaw 0=南 90=西 180=北 270=東)
+camera skyabyss:storm_back 170 225 190 140 30
+waitchunks
+shot storm_back_overview
+# 真上から (翼の端まで)
+camera skyabyss:storm_back 0 330 0 180 90
+waitchunks
+shot storm_back_top
+# 横から (左の翼の外、尾から頭まで)
+camera skyabyss:storm_back -150 150 0 270 5
+waitchunks
+shot storm_back_side
+# 到着の台 (目盛りが見えるよう HUD を出す)
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+hud on
+waitchunks
+chat clear
+shot storm_back_arrival
+hud off
+cmd gamemode spectator
+# 尾の間 (炉と焚き火と碑文)
+camera skyabyss:storm_back 0 149 31 180 10
+waitchunks
+shot storm_back_tail_hall
+# 風の広間 (昇り風と凪の塔、上の回廊)
+camera skyabyss:storm_back 0 146 9 180 10
+waitchunks
+shot storm_back_hub
+# 風切りの骨 (左の上腕、割れた床と梁)
+camera skyabyss:storm_back -31 149 -17 90 15
+waitchunks
+shot storm_back_windbone
+# 雷の骨 (右の上腕、避雷の柱と骨の戸)
+camera skyabyss:storm_back 32 147 -17 270 10
+waitchunks
+shot storm_back_thunderbone
+# 眼の間 (鏡の格子)
+camera skyabyss:storm_back 0 154 -71 180 35
+waitchunks
+shot storm_back_eye_hall
+# 竜骨の間
+camera skyabyss:storm_back 0 129 1 180 25
+waitchunks
+shot storm_back_heart_room
+quit

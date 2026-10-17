@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 106,
+  "inscription_sign": "sign.skyabyss.lore_tide_beach",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_tide_beach"
+    }
+  ],
+  "related": [
+    "chapter1/tide_ruins",
+    "chapter1/inscription_tide_hub"
+  ]
+}

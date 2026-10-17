@@ -82,14 +82,23 @@ public class TitanBackData extends SavedData {
     }
 
     public void markBuilt() {
-        built = true;
-        layoutVersion = TitanBackLayout.LAYOUT_VERSION;
-        setDirty();
+        markBuilt(TitanBackLayout.LAYOUT_VERSION);
     }
 
     // 建て直しが要るか: まだ建てていないか、建てたときの配置の版が今の版と違う
     public boolean needsBuild() {
-        return !built || layoutVersion != TitanBackLayout.LAYOUT_VERSION;
+        return needsBuild(TitanBackLayout.LAYOUT_VERSION);
+    }
+
+    // 巨神ごとの背中 (ディメンションごとに一つの記録) は、それぞれの配置の版で比べる (潮殻の背は TideBackBuilder.LAYOUT_VERSION)
+    public void markBuilt(int version) {
+        built = true;
+        layoutVersion = version;
+        setDirty();
+    }
+
+    public boolean needsBuild(int version) {
+        return !built || layoutVersion != version;
     }
 
     public int layoutVersion() {

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "skyabyss:block/quench_trough_top",
+    "side": "skyabyss:block/quench_trough_side",
+    "bottom": "skyabyss:block/quench_trough_side",
+    "particle": "skyabyss:block/quench_trough_side"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "skyabyss_gear.key.charm": "Use Charm",
+  "skyabyss_gear.message.level_short": "%s needs Lv %s (you are Lv %s)",
+  "skyabyss_gear.message.equipped.charm": "Put %s in the charm slot",
+  "skyabyss_gear.message.equipped.trinket": "Put %s in a trinket slot",
+  "skyabyss_gear.message.no_charm": "The charm slot is empty",
+  "skyabyss_gear.message.charm_resting": "%s is resting (%s s left)",
+  "skyabyss_gear.message.migrated": "Moved %s accessories from your inventory into the accessory slots. Accessories only work while slotted (the \"Trinkets\" tab above your inventory)",
+  "skyabyss_gear.screen.title": "Accessories",
+  "skyabyss_gear.screen.charm": "Charm",
+  "skyabyss_gear.screen.charm_key": "[%s] to use",
+  "skyabyss_gear.screen.trinket": "Trinkets",
+  "skyabyss_gear.screen.level": "Lv %s",
+  "skyabyss_gear.screen.tab_inventory": "Inventory",
+  "skyabyss_gear.screen.tab_accessories": "Trinkets",
+  "skyabyss_gear.tooltip.required_level": "Requires Lv %s",
+  "skyabyss_gear.tooltip.level_now": " (you: Lv %s)",
+  "skyabyss_gear.tooltip.short.armor": "Level too low: cannot be worn",
+  "skyabyss_gear.tooltip.short.weapon": "Level too low: no power or effects when swung",
+  "skyabyss_gear.tooltip.short.accessory": "Level too low: cannot be slotted",
+  "skyabyss_gear.tooltip.slot.charm": "Put in the charm slot, use with [%s]",
+  "skyabyss_gear.tooltip.slot.trinket": "Works while in a trinket slot"
+}

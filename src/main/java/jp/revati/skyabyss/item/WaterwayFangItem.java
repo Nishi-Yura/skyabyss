@@ -19,11 +19,11 @@ import net.neoforged.neoforge.common.SimpleTier;
 // 水路の顎牙 (伝説): 闇の水路に棲む顎の牙を削った短剣。
 // 軽く速い。水の中ではさらに速く振れ (攻撃速度 +30%、GearEvents)、斬った相手は血を流す
 public class WaterwayFangItem extends SwordItem implements ModGear {
-    public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 1400, 8.0f, 3.0f, 18,
+    public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 1400, 8.0f, 2.5f, 18,
             () -> Ingredient.of(Items.PRISMARINE_SHARD));
 
     public WaterwayFangItem(Properties properties) {
-        // 攻撃力 6、攻撃速度 2.2 (ふつうの剣より速い)
+        // 攻撃力 5.5 (2026-10-17 に 6 から)、攻撃速度 2.2 (ふつうの剣より速い)。出血込みで、ダイヤの剣の 1.1 倍ほど
         super(TIER, properties.attributes(SwordItem.createAttributes(TIER, 2, -1.8f)));
     }
 
@@ -39,6 +39,10 @@ public class WaterwayFangItem extends SwordItem implements ModGear {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        // 必要レベルに届かない人の手では、固有効果は出ない (GearLevel)
+        if (!GearLevel.usable(attacker, stack)) {
+            return super.hurtEnemy(stack, target, attacker);
+        }
         // 出血 2秒。+5 からは 3秒の出血 II
         boolean awakened = ModGear.awakened(stack);
         target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, awakened ? 60 : 40, awakened ? 1 : 0), attacker);

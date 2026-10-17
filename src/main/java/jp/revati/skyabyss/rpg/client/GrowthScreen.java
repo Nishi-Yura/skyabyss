@@ -49,6 +49,11 @@ public class GrowthScreen extends Screen {
     private final List<SmallButton> minus = new ArrayList<>();
     private Button confirm;
     private Button undo;
+    // 振り直し (00 の 3 = A)。二度押しで送る (押しまちがえで振り分けを失わないように)
+    private Button respec;
+    private int respecArmed;
+    private Component noticeText;
+    private int noticeTicks;
 
     public GrowthScreen() {
         super(Component.translatable("gui.skyabyss.growth.title"));
@@ -69,6 +74,9 @@ public class GrowthScreen extends Screen {
                 .bounds(left + 136, top + 161, 44, 16).build());
         confirm = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.confirm"), b -> send())
                 .bounds(left + 184, top + 161, 46, 16).build());
+        // 振り分けられる力の行の右。技の画面の「振り直す」と同じ費用と場所 (共鳴の炉のそば)
+        respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.growth.respec"), b -> pressRespec())
+                .bounds(left + 170, top + 45, 60, 12).build());
         // 技の画面へのつまみ (上の縁)
         jp.revati.skyabyss.rpg.client.skill.RpgTabs.add(this::addRenderableWidget, width, height, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
         refresh();
@@ -123,11 +131,51 @@ public class GrowthScreen extends Screen {
         }
         confirm.active = pendingSum() > 0;
         undo.active = pendingSum() > 0;
+        respec.active = d.spentPoints() > 0;
+        respec.setMessage(Component.translatable(respecArmed > 0 ? "gui.skyabyss.growth.respec_confirm" : "gui.skyabyss.growth.respec"));
+    }
+
+    // 振り直しは二度押し。断られる理由は先に画面の中で出す (画面を開いている間はアクションバーが見えない。最後はサーバーが検める)
+    private void pressRespec() {
+        int cost = GrowthRules.statRespecCost(data().statRespecs);
+        if (!minecraft.player.isCreative()) {
+            if (!jp.revati.skyabyss.rpg.skill.SkillManager.nearForge(minecraft.player)) {
+                notice(Component.translatable("message.skyabyss.growth.respec_failed.no_forge"));
+                return;
+            }
+            if (jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(minecraft.player.getInventory()) < cost) {
+                notice(Component.translatable("message.skyabyss.growth.respec_failed.no_crystals", cost));
+                return;
+            }
+        }
+        if (respecArmed <= 0) {
+            respecArmed = 60;
+            refresh();
+            return;
+        }
+        respecArmed = 0;
+        java.util.Arrays.fill(pending, 0);
+        PacketDistributor.sendToServer(new jp.revati.skyabyss.rpg.net.GrowthRespecPayload(cost));
+        refresh();
+    }
+
+    private void notice(Component text) {
+        noticeText = text;
+        noticeTicks = 60;
+        respecArmed = 0;
+        minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                jp.revati.skyabyss.rpg.skill.Skills.SOUND_FAIL.get(), 1.0f, 0.5f));
     }
 
     @Override
     public void tick() {
         super.tick();
+        if (respecArmed > 0) {
+            respecArmed--;
+        }
+        if (noticeTicks > 0) {
+            noticeTicks--;
+        }
         refresh();
     }
 
@@ -198,6 +246,11 @@ public class GrowthScreen extends Screen {
         g.drawString(font, Component.translatable("gui.skyabyss.growth.fragments", d.fragmentCount(), d.fragmentCapacity),
                 left + 12, top + 166, LORE, false);
 
+        // 断られた理由 (振り直し)。下の縁の上に 3 秒
+        if (noticeTicks > 0 && noticeText != null) {
+            g.drawCenteredString(font, noticeText, left + W / 2, top + H + 4, 0xD9779A);
+        }
+
         renderHover(g, d, mouseX, mouseY);
     }
 
@@ -220,6 +273,17 @@ public class GrowthScreen extends Screen {
 
     // 名前に重ねると説明、断片の行に重ねると中身、バーに重ねると合計の経験値
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
+        if (respec.isHovered()) {
+            int cost = GrowthRules.statRespecCost(d.statRespecs);
+            List<FormattedCharSequence> lines = new ArrayList<>(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable(cost == 0
+                    ? "gui.skyabyss.growth.respec_free" : "gui.skyabyss.growth.respec_cost", cost,
+                    jp.revati.skyabyss.rpg.skill.SkillRules.RESPEC_FORGE_RANGE).withColor(TEXT), 200));
+            if (respecArmed > 0) {
+                lines.addAll(jp.revati.skyabyss.rpg.client.skill.TextWrap.split(font, Component.translatable("gui.skyabyss.growth.respec_again").withColor(0xD9779A), 200));
+            }
+            g.renderTooltip(font, lines, mouseX, mouseY);
+            return;
+        }
         for (Stat stat : Stat.values()) {
             int ry = top + ROW_Y + stat.ordinal() * ROW_H;
             if (mouseX >= left + 8 && mouseX < left + 196 && mouseY >= ry && mouseY < ry + ROW_H - 2) {

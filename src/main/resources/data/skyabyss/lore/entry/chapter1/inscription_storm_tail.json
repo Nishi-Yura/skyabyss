@@ -1,0 +1,15 @@
+{
+  "chapter": "chapter1",
+  "order": 163,
+  "inscription_sign": "sign.skyabyss.lore_storm_tail",
+  "unlock": [
+    {
+      "type": "sign",
+      "target": "sign.skyabyss.lore_storm_tail"
+    }
+  ],
+  "related": [
+    "chapter1/storm_ruins",
+    "chapter1/storm_cower"
+  ]
+}

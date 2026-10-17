@@ -1,0 +1,33 @@
+{
+  "category": "sub",
+  "order": 82,
+  "repeat": "weekly",
+  "board": true,
+  "min_stage": 2,
+  "stages": [
+    {
+      "id": "heart",
+      "objectives": [
+        {
+          "id": "heart",
+          "type": "kill",
+          "target": "skyabyss:tide_heart",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 220,
+    "items": [
+      {
+        "item": "skyabyss:resonance_crystal",
+        "count": 1
+      },
+      {
+        "item": "skyabyss:tide_shell_shard",
+        "count": 3
+      }
+    ]
+  }
+}

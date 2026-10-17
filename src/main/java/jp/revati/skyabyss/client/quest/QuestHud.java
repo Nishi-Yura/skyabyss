@@ -23,6 +23,11 @@ public final class QuestHud {
     static final int POPUP_ROWS = 4;
 
     static int y() {
+        // 成長の表示を経験値バーの左に置いたときは、左上の一番上から (左上に寄せた技の枠があればその下)
+        Minecraft mc = Minecraft.getInstance();
+        if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, mc.getWindow().getGuiScaledWidth())) {
+            return 6 + jp.revati.skyabyss.rpg.client.skill.SkillHud.topLeftRowsWhenGrowthAtBottom();
+        }
         return POPUP_TOP + jp.revati.skyabyss.rpg.client.skill.SkillHud.rowsBelowXpBar() + POPUP_ROWS * 10 + 6;
     }
     static final int WIDTH = 150;
@@ -103,6 +108,9 @@ public final class QuestHud {
             int have = entry.progress(i);
             if (have >= ob.count() && !stage.any()) {
                 continue;
+            }
+            if (ob.type().equals("turn_in") && Minecraft.getInstance().player != null) {
+                have = Math.min(jp.revati.skyabyss.quest.QuestItems.count(Minecraft.getInstance().player, ob.targets().get(0), ob.token()), ob.count());
             }
             if (stage.any() && !first) {
                 out.add(new Line(Component.translatable("gui.skyabyss.quest.or").getString(), 8, SOFT));

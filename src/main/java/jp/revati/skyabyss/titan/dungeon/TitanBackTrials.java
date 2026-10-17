@@ -195,7 +195,7 @@ public final class TitanBackTrials {
                 } else {
                     SkyAbyss.LOGGER.info("Building the stone whale's back for this world...");
                 }
-                TitanBackBuilder.build(back, data);
+                TitanBackBuilder.schedule(back, data);
             }
         }
     }
@@ -1105,8 +1105,14 @@ public final class TitanBackTrials {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.level().dimension() != TitanTravel.TITAN_BACK || event.isCanceled()) {
             return;
         }
+        persisted(player).putBoolean(TAG_DIED_ON_BACK, true);
+        keepBelongings(player);
+    }
+
+    // 倒れた人の持ち物と経験値を預かる (潮殻の背など、ほかの巨神の背中からも使う)。
+    // 返すのは onClone (目を覚ました体へ) と、足して返す分の deliverExtra (ログイン・復活)。どちらも背中を問わず動く
+    public static void keepBelongings(ServerPlayer player) {
         CompoundTag tag = persisted(player);
-        tag.putBoolean(TAG_DIED_ON_BACK, true);
         if (tag.contains(TAG_KEPT)) {
             // 前に預かった物がまだ返っていない: 消さずに「足して返す分」へ移す
             CompoundTag old = tag.getCompound(TAG_KEPT);
@@ -1165,7 +1171,7 @@ public final class TitanBackTrials {
     }
 
     private static boolean keepsBelongings(Entity entity) {
-        return entity instanceof ServerPlayer player && player.level().dimension() == TitanTravel.TITAN_BACK
+        return entity instanceof ServerPlayer player && jp.revati.skyabyss.titan.TitanBacks.isBack(player.level().dimension())
                 && persisted(player).contains(TAG_KEPT);
     }
 
@@ -1176,6 +1182,7 @@ public final class TitanBackTrials {
         }
     }
 
+    // 経験値の玉を落とさない。経験値は預かって onClone で戻すので、落とすと二重になる (02 の 7 章。背中で何度も挑むため)
     @SubscribeEvent
     static void onExperienceDrop(LivingExperienceDropEvent event) {
         if (keepsBelongings(event.getEntity())) {

@@ -27,8 +27,12 @@ import net.minecraft.world.item.ItemStack;
 //   give        {item, count}      : 渡す (入りきらなければ足もとに落とす)
 //   take        {item, count}      : 受け取る (足りなければ何もしない。条件 item と組で使う)
 //   xp          {amount, once}     : 成長の経験値。once の鍵で一人一回だけ (会話をくり返して稼げないように)
+//   give は optional を書ける (まだ登録されていない品なら何もしない)
+//   give / take は token・name・lore を書ける (印の付いた品。QuestItems)。item はタグ ("#minecraft:logs") でもよい (take だけ)
+//   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 public final class Action {
-    public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp");
+    public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
+            "open_board");
 
     private final String type;
     private final JsonObject json;
@@ -105,7 +109,9 @@ public final class Action {
             errors.add(where + ": action '" + type + "' needs '" + need + "'");
             return null;
         }
-        if ((type.equals("give") || type.equals("take")) && Condition.item(GsonHelper.getAsString(o, "item")) == null) {
+        // give の optional: 別の担当がまだ登録していない品。ないうちは何も渡さない (読み込みは止めない)
+        if ((type.equals("give") ? Condition.item(GsonHelper.getAsString(o, "item")) == null && !GsonHelper.getAsBoolean(o, "optional", false)
+                : type.equals("take") && !QuestItems.known(GsonHelper.getAsString(o, "item")))) {
             errors.add(where + ": unknown item " + GsonHelper.getAsString(o, "item"));
             return null;
         }
@@ -139,17 +145,17 @@ public final class Action {
             case "give" -> {
                 Item item = Condition.item(str("item"));
                 if (item != null) {
-                    Quests.give(player, new ItemStack(item, Math.max(1, integer("count", 1))));
+                    Quests.give(player, QuestItems.make(item, Math.max(1, integer("count", 1)), optStr("token"), optStr("name"), loreKeys()));
                 }
             }
             case "take" -> {
-                Item item = Condition.item(str("item"));
                 int count = Math.max(1, integer("count", 1));
-                if (item != null && player.getInventory().countItem(item) >= count) {
-                    Quests.take(player, item, count);
-                    player.sendSystemMessage(ModText.hint("message.skyabyss.npc.handed", new ItemStack(item, count).getHoverName(), count));
+                ItemStack shown = sample(player, str("item"), optStr("token"));
+                if (QuestItems.take(player, str("item"), optStr("token"), count)) {
+                    player.sendSystemMessage(ModText.hint("message.skyabyss.npc.handed", shown.getHoverName(), count));
                 }
             }
+            case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
             case "xp" -> {
                 if (Growth.discover(player, "npc:" + str("once"))) {
                     Growth.addXp(player, integer("amount", 0), GsonHelper.getAsString(json, "reason", "growth.skyabyss.reason.npc"));
@@ -158,6 +164,25 @@ public final class Action {
             default -> {
             }
         }
+    }
+
+    private List<String> loreKeys() {
+        List<String> keys = new ArrayList<>();
+        if (json.has("lore") && json.get("lore").isJsonArray()) {
+            json.getAsJsonArray("lore").forEach(e -> keys.add(e.getAsString()));
+        }
+        return keys;
+    }
+
+    // 渡した品の名前を知らせに出すための見本 (名前の付いた品はその名前)
+    private static ItemStack sample(net.minecraft.server.level.ServerPlayer player, String target, @Nullable String token) {
+        var inv = player.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (QuestItems.matches(inv.getItem(i), target, token)) {
+                return inv.getItem(i).copy();
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override

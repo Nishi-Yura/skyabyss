@@ -5,6 +5,7 @@ import java.util.WeakHashMap;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Rpg;
+import jp.revati.skyabyss.item.GearLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,10 +60,14 @@ public final class AffixEvents {
         if (kind == AffixType.Slot.WEAPON) {
             group = EquipmentSlotGroup.MAINHAND;
             slotName = "mainhand";
-        } else {
-            EquipmentSlot slot = ((ArmorItem) stack.getItem()).getEquipmentSlot();
+        } else if (stack.getItem() instanceof ArmorItem armor) {
+            EquipmentSlot slot = armor.getEquipmentSlot();
             group = EquipmentSlotGroup.bySlot(slot);
             slotName = slot.getName();
+        } else {
+            // 盾: 左手に持っているあいだ
+            group = EquipmentSlotGroup.OFFHAND;
+            slotName = "offhand";
         }
         for (Affix affix : AffixRules.affixes(stack)) {
             AffixType t = affix.kind();
@@ -99,13 +104,19 @@ public final class AffixEvents {
                 sum += AffixRules.value(stack, AffixType.WARD);
             }
         }
+        // 左手の盾の守り (必要 Lv に届いていれば)
+        ItemStack off = entity.getOffhandItem();
+        if (off.getItem() instanceof net.minecraft.world.item.ShieldItem && AffixRules.slotOf(off.getItem()) == AffixType.Slot.ARMOR
+                && GearLevel.usable(entity, off)) {
+            sum += AffixRules.value(off, AffixType.WARD);
+        }
         return Math.min(AffixRules.WARD_CAP, sum);
     }
 
     // 技の待ちに掛ける倍率 (手の武器の冴え)
     public static double cooldownScale(Player player) {
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON) {
+        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
             return 1;
         }
         return 1 - Math.min(KEEN_CAP, AffixRules.value(hand, AffixType.KEEN));
@@ -133,7 +144,7 @@ public final class AffixEvents {
             return;
         }
         ItemStack hand = player.getMainHandItem();
-        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON) {
+        if (AffixRules.slotOf(hand.getItem()) != AffixType.Slot.WEAPON || !GearLevel.meets(player, hand)) {
             return;
         }
         double thirst = AffixRules.value(hand, AffixType.THIRST);

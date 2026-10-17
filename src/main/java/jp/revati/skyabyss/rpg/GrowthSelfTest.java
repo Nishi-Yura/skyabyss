@@ -16,26 +16,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 // 成長の自己テスト。SKYABYSS_SELFTEST=1 で専用サーバーを起動したときだけ動く (止めるのは TitanBackSelfTest)。
 // レベルの計算、保存 (NBT・同期・死亡時の引き継ぎ・プレイヤーの保存と読み込み)、修飾子の付け外し、振り分けの検めを確かめる
-@EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GrowthSelfTest {
     private GrowthSelfTest() {
     }
 
-    @SubscribeEvent
-    static void onServerStarted(ServerStartedEvent event) {
-        if (System.getenv("SKYABYSS_SELFTEST") == null) {
-            return;
-        }
+    // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
+    public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
         try {
-            run(event.getServer(), failures);
+            run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("growth selftest crashed", e);
             failures.add("crashed: " + e);
@@ -121,9 +114,12 @@ public final class GrowthSelfTest {
                 "random rounding is wrong");
         ServerLevel overworld = server.overworld();
         GrowthData budget = new GrowthData();
-        double first = GrowthRewards.vanillaBudget(overworld, budget, 140);
+        // 日ごとの上限は 100 (00 の 26)
+        check(f, GrowthRules.VANILLA_DAILY == 100, "vanilla daily cap is " + GrowthRules.VANILLA_DAILY + ", expected 100");
+        // 上限 (VANILLA_DAILY) の 10 手前まで使い、次の 20 は 10 が満額・10 が疲れ
+        double first = GrowthRewards.vanillaBudget(overworld, budget, GrowthRules.VANILLA_DAILY - 10);
         double second = GrowthRewards.vanillaBudget(overworld, budget, 20);
-        check(f, first == 140 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
+        check(f, first == GrowthRules.VANILLA_DAILY - 10 && Math.abs(second - (10 + 10 * GrowthRules.VANILLA_TIRED)) < 1e-9,
                 "vanilla daily budget is wrong: " + first + ", " + second);
 
         // ---------------------------------------------------------------- 保存 (NBT) と同期のコーデック
@@ -187,6 +183,9 @@ public final class GrowthSelfTest {
                 && p.getAttribute(Rpg.MAX_MANA).getModifier(Growth.MOD_SPIRIT) == null, "modifiers were not removed after a reset");
         check(f, p.getMaxHealth() == 20f && p.getHealth() <= 20f, "health was not clamped after a reset");
 
+        // ステータスの振り直し (00 の 3 = A): 炉のそばで、技と同じ費用 (初回無料、以後結晶)。回数は技と別
+        checkStatRespec(f, overworld, p);
+
         // 記憶の断片の器: 上限を超えて入らない
         GrowthData frag = new GrowthData();
         frag.fragmentCapacity = 2;
@@ -194,6 +193,41 @@ public final class GrowthSelfTest {
         check(f, frag.addFragments(MemoryFragments.STONE_WHALE, 1) == 0 && !frag.fragments.containsKey(MemoryFragments.STONE_WHALE),
                 "a full container accepted a fragment");
         check(f, frag.addFragments(MemoryFragments.PROLOGUE, -4) == 0, "a negative fragment count was accepted");
+    }
+
+    private static void checkStatRespec(List<String> f, ServerLevel level, FakePlayer p) {
+        check(f, GrowthRules.statRespecCost(0) == 0 && GrowthRules.statRespecCost(2) == 2
+                && GrowthRules.statRespecCost(99) == jp.revati.skyabyss.rpg.skill.SkillRules.RESPEC_MAX_COST, "stat respec cost is wrong");
+        GrowthData pd = Growth.get(p);
+        p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        java.util.Arrays.fill(pd.stats, 0);
+        pd.statRespecs = 0;
+        check(f, Growth.respecStats(p) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NOTHING, "stat respec with nothing spent did not refuse");
+        pd.level = 10;
+        pd.stats[Stat.STRENGTH.ordinal()] = 4;
+        net.minecraft.core.BlockPos at = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 8);
+        p.moveTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
+        check(f, Growth.respecStats(p) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_FORGE, "stat respec worked away from a forge");
+        net.minecraft.world.level.block.state.BlockState old = level.getBlockState(at);
+        level.setBlock(at, jp.revati.skyabyss.registry.ModBlocks.RESONANCE_FORGE.get().defaultBlockState(), 3);
+        try {
+            p.getInventory().clearContent();
+            // 初回は無料
+            check(f, Growth.respecStats(p) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK
+                    && pd.spentPoints() == 0 && pd.statRespecs == 1, "the first stat respec near a forge was not free");
+            check(f, jp.revati.skyabyss.rpg.skill.SkillManager.get(p).respecs == 0, "a stat respec counted as a skill respec");
+            // 2 回目は結晶 1 個
+            pd.stats[Stat.SPIRIT.ordinal()] = 3;
+            check(f, Growth.respecStats(p) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_CRYSTALS
+                    && pd.stats[Stat.SPIRIT.ordinal()] == 3, "the second stat respec did not ask for crystals");
+            p.getInventory().add(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.registry.ModItems.RESONANCE_CRYSTAL.get(), 3));
+            check(f, Growth.respecStats(p) == jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.OK
+                    && pd.spentPoints() == 0 && pd.statRespecs == 2
+                    && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(p.getInventory()) == 2, "the second stat respec did not take 1 crystal");
+        } finally {
+            level.setBlock(at, old, 3);
+            p.getInventory().clearContent();
+        }
     }
 
     private static boolean modifier(FakePlayer p, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
@@ -219,6 +253,7 @@ public final class GrowthSelfTest {
         a.discoveries.add("first:skyabyss:heart");
         a.vanillaDay = 4;
         a.vanillaToday = 77;
+        a.statRespecs = 3;
         return a;
     }
 
@@ -230,13 +265,15 @@ public final class GrowthSelfTest {
         to.fragments.clear();
         to.fragments.putAll(from.fragments);
         to.fragmentCapacity = from.fragmentCapacity;
+        to.statRespecs = from.statRespecs;
         to.discoveries.clear();
         to.discoveries.addAll(from.discoveries);
     }
 
     private static boolean same(GrowthData a, GrowthData b, boolean serverFields) {
         boolean ok = a.level == b.level && a.xp == b.xp && java.util.Arrays.equals(a.stats, b.stats) && a.bonusPoints == b.bonusPoints
-                && a.fragments.equals(b.fragments) && a.fragmentCapacity == b.fragmentCapacity;
+                && a.fragments.equals(b.fragments) && a.fragmentCapacity == b.fragmentCapacity
+                && a.statRespecs == b.statRespecs;
         if (serverFields) {
             ok &= a.discoveries.equals(b.discoveries);
         }

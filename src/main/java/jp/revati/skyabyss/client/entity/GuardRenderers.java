@@ -36,7 +36,7 @@ public final class GuardRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f, false,
+        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f, true,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
         event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));

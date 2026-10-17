@@ -1,0 +1,123 @@
+{
+ "near": {
+  "islands": {},
+  "cubes": 2636,
+  "quads": 11289,
+  "overlap": 0,
+  "glow_px": 197010,
+  "bounds": {
+   "x": [
+    -104.0,
+    104.0
+   ],
+   "y": [
+    0.0,
+    183.0
+   ],
+   "z": [
+    -206.0,
+    248.0
+   ]
+  },
+  "bones": {
+   "body": 669,
+   "ridge": 795,
+   "head": 703,
+   "jaw": 74,
+   "leg_fl": 55,
+   "leg_fr": 55,
+   "leg_rl": 71,
+   "leg_rr": 71,
+   "tail": 113,
+   "smoke_0": 8,
+   "smoke_1": 8,
+   "smoke_2": 7,
+   "smoke_3": 7
+  }
+ },
+ "mid": {
+  "islands": {},
+  "cubes": 1028,
+  "quads": 4507,
+  "overlap": 0,
+  "glow_px": 32116,
+  "bounds": {
+   "x": [
+    -104.0,
+    104.0
+   ],
+   "y": [
+    0.0,
+    184.0
+   ],
+   "z": [
+    -208.0,
+    248.0
+   ]
+  },
+  "bones": {
+   "body": 257,
+   "ridge": 340,
+   "head": 68,
+   "jaw": 13,
+   "leg_fl": 50,
+   "leg_fr": 50,
+   "leg_rl": 60,
+   "leg_rr": 60,
+   "tail": 113,
+   "smoke_0": 3,
+   "smoke_1": 3,
+   "smoke_2": 5,
+   "smoke_3": 6
+  }
+ },
+ "far": {
+  "islands": {},
+  "cubes": 286,
+  "quads": 1326,
+  "overlap": 0,
+  "glow_px": 12720,
+  "bounds": {
+   "x": [
+    -104.0,
+    104.0
+   ],
+   "y": [
+    0.0,
+    184.0
+   ],
+   "z": [
+    -204.0,
+    244.0
+   ]
+  },
+  "bones": {
+   "body": 70,
+   "ridge": 88,
+   "head": 21,
+   "jaw": 4,
+   "leg_fl": 14,
+   "leg_fr": 14,
+   "leg_rl": 17,
+   "leg_rr": 17,
+   "tail": 34,
+   "smoke_0": 2,
+   "smoke_1": 1,
+   "smoke_2": 2,
+   "smoke_3": 2
+  }
+ },
+ "_global": {
+  "mouth_trigger_air": true,
+  "tongue_columns": [
+   25,
+   25
+  ],
+  "volcano_rim_top": 132.0,
+  "smoke_top": 183.0,
+  "texture": [
+   2048,
+   2944
+  ]
+ }
+}

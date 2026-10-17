@@ -1,0 +1,14 @@
+{
+  "chapter": "chapter1",
+  "order": 116,
+  "unlock": [
+    {
+      "type": "kill",
+      "target": "skyabyss:tide_beckoner",
+      "radius": 40
+    }
+  ],
+  "related": [
+    "chapter1/inscription_tide_front"
+  ]
+}

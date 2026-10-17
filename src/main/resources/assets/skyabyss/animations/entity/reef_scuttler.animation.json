@@ -1,0 +1,455 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.reef_scuttler.idle": {
+   "animation_length": 2.0,
+   "bones": {
+    "body": {
+     "position": [
+      "0",
+      "0.25 * math.sin(180 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "claw_r": {
+     "rotation": [
+      "-(-4 + 6 * math.sin(360 * query.anim_time + 0))",
+      "5 * math.sin(180 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "claw_l": {
+     "rotation": [
+      "-(-4 + 6 * math.sin(360 * query.anim_time + 120))",
+      "-5 * math.sin(180 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "0",
+      "0",
+      "-(3 * math.sin(180 * query.anim_time + 0))"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "0",
+      "0",
+      "-(-3 * math.sin(180 * query.anim_time + 0))"
+     ]
+    }
+   },
+   "loop": true
+  },
+  "animation.reef_scuttler.walk": {
+   "animation_length": 0.3,
+   "bones": {
+    "leg_r": {
+     "rotation": [
+      "0",
+      "16 * math.sin(1200 * query.anim_time + 0)",
+      "-(14 * math.sin(1200 * query.anim_time + 90))"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "0",
+      "16 * math.sin(1200 * query.anim_time + 180)",
+      "-(-14 * math.sin(1200 * query.anim_time + 270))"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "0.5 * math.abs(math.sin(1200 * query.anim_time))",
+      "0"
+     ],
+     "rotation": [
+      "0",
+      "0",
+      "-(3 * math.sin(1200 * query.anim_time + 0))"
+     ]
+    },
+    "claw_r": {
+     "rotation": [
+      "-(-12)",
+      "8 * math.sin(1200 * query.anim_time + 0)",
+      "0"
+     ]
+    },
+    "claw_l": {
+     "rotation": [
+      "-(-12)",
+      "-8 * math.sin(1200 * query.anim_time + 0)",
+      "0"
+     ]
+    }
+   },
+   "loop": true
+  },
+  "animation.reef_scuttler.attack": {
+   "animation_length": 0.45,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.12": {
+       "vector": [
+        -10.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.22": {
+       "vector": [
+        14.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "position": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.12": {
+       "vector": [
+        0.0,
+        0.0,
+        -1.0
+       ]
+      },
+      "0.22": {
+       "vector": [
+        0.0,
+        0.0,
+        2.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "claw_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.12": {
+       "vector": [
+        -30.0,
+        18.0,
+        0.0
+       ]
+      },
+      "0.22": {
+       "vector": [
+        35.0,
+        -10.0,
+        0.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "claw_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.12": {
+       "vector": [
+        -30.0,
+        -18.0,
+        0.0
+       ]
+      },
+      "0.22": {
+       "vector": [
+        35.0,
+        10.0,
+        0.0
+       ]
+      },
+      "0.45": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": false
+  },
+  "animation.reef_scuttler.hurt": {
+   "animation_length": 0.3,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.06": {
+       "vector": [
+        -8.0,
+        0.0,
+        -10.0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": false
+  },
+  "animation.reef_scuttler.death": {
+   "animation_length": 1.0,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0.0,
+        0.0,
+        -120.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        0.0,
+        -180.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        -180.0
+       ]
+      }
+     },
+     "position": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.3": {
+       "vector": [
+        0.0,
+        4.0,
+        0.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        4.5,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        4.5,
+        0.0
+       ]
+      }
+     }
+    },
+    "leg_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        0.0,
+        25.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        45.0
+       ]
+      }
+     }
+    },
+    "leg_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.5": {
+       "vector": [
+        0.0,
+        0.0,
+        -25.0
+       ]
+      },
+      "1": {
+       "vector": [
+        0.0,
+        0.0,
+        -45.0
+       ]
+      }
+     }
+    },
+    "claw_r": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        -40.0,
+        20.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "claw_l": {
+     "rotation": {
+      "0": {
+       "vector": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "1": {
+       "vector": [
+        -40.0,
+        -20.0,
+        0.0
+       ]
+      }
+     }
+    }
+   },
+   "loop": "hold_on_last_frame"
+  },
+  "animation.reef_scuttler.flipped": {
+   "animation_length": 0.4,
+   "bones": {
+    "body": {
+     "rotation": [
+      "0",
+      "0",
+      "-(180 + 6 * math.sin(900 * query.anim_time + 0))"
+     ],
+     "position": [
+      "0",
+      "4.5",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "0",
+      "20 * math.sin(900 * query.anim_time + 0)",
+      "-(25 * math.sin(900 * query.anim_time + 90))"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "0",
+      "-20 * math.sin(900 * query.anim_time + 0)",
+      "-(-25 * math.sin(900 * query.anim_time + 90))"
+     ]
+    },
+    "claw_r": {
+     "rotation": [
+      "-(25 * math.sin(900 * query.anim_time + 0))",
+      "0",
+      "0"
+     ]
+    },
+    "claw_l": {
+     "rotation": [
+      "-(25 * math.sin(900 * query.anim_time + 180))",
+      "0",
+      "0"
+     ]
+    }
+   },
+   "loop": true
+  }
+ }
+}
