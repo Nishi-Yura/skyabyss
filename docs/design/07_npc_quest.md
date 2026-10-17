@@ -342,7 +342,7 @@ data/<名前空間>/quest/<名前>.json
 | `fragment2` | grave | 温かい……。脈を打っているよ。まるで、生きているみたいだ。<br>言い伝えでは、空の扉の鍵は四つに分かれているという。ひとつは鯨が。残りは……さあ、どこだろうね。 |  | ▼ `fragment3` |
 | `fragment3` | neutral | あんたは、空へ行くんだね。……止めはしないよ。<br>ただ、七日目の夜だけは、気をつけるんだよ。<br>（ここに入るとメインが終わる） |  | 「ありがとう。」→ `end`（好感度+3） |
 
-#### 鯨追い（`skyabyss:whale_chaser`）の入口
+#### 鯨追いのイサナ（`skyabyss:whale_chaser`）の入口
 
 | 順 | 条件 | 始まる節 |
 | --- | --- | --- |
@@ -351,12 +351,12 @@ data/<名前空間>/quest/<名前>.json
 | 3 | not(印 met) | `c_first` |
 | 4 | — | `c_menu` |
 
-#### 鯨追いのセリフ
+#### 鯨追いのイサナのセリフ
 
 | 節 | 顔 | セリフ | 入ったとき | 次 / 選択肢 |
 | --- | --- | --- | --- | --- |
-| `c_first` | smile | ……ん？　ああ、村の人じゃないな。<br>火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。<br>（初めて話しかけたとき） |  | ▼ `c_menu` |
-| `c_deja` | grave | どこかで会ったか？<br>……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。<br>（ループ 1 回目以降、前のループで会っていた） |  | ▼ `c_menu` |
+| `c_first` | smile | ……ん？　ああ、村の人じゃないな。<br>火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。<br>（初めて話しかけたとき (名乗る。伝承「鯨追いのイサナ」を記す)） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
+| `c_deja` | grave | どこかで会ったか？<br>……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。<br>（ループ 1 回目以降、前のループで会っていた） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
 | `c_menu` | neutral | なにか用か。<br>（話題を選ぶ節） |  | 「語り部から、あなたのことを聞いた。」→ `c_whale1`（条件: メインが「find_chaser」）<br>「鯨のことを聞かせて。」→ `c_whale1`（条件: not(印 c_whale_heard)、not(メインが「find_chaser」)）<br>「鯨は、いつ来る？」→ `c_when`（条件: 印 c_whale_heard、not(伝承 chapter1/stone_whale)）<br>「旅の途中で、何か見た？」→ `c_peak`（条件: 印 c_whale_heard、not(伝承 prologue/shaved_peak)）<br>「鯨を見た。」→ `c_saw`（条件: 伝承 chapter1/stone_whale、not(印 c_saw)）<br>「鯨の背中に乗った。」→ `c_back`（条件: 伝承 chapter1/sky_ruins、not(印 c_back_told)）<br>「何か手伝えることは？」→ `c_shards_offer`（条件: 伝承 chapter1/sky_ruins、鯨のかけらが未着手）<br>「岩鯨の欠片を持ってきた。」→ `c_shards_thanks`（条件: 鯨のかけらが「deliver」、stone_whale_shard ×3／stone_whale_shard ×3 を受け取る）<br>「じゃあ、また。」→ `end` |
 | `c_whale1` | neutral | 俺は、もう何年も鯨を追っている。<br>影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。 | 印 c_whale_heard | ▼ `c_whale2` |
 | `c_whale2` | grave | ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。<br>俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。<br>（ここに入るとメインの「鯨追いに話を聞く」が済む） |  | ▼ `c_whale3` |
@@ -404,7 +404,7 @@ data/<名前空間>/quest/<名前>.json
 
 #### クエスト「鯨のかけら」（`sub_shards`、サブ）
 
-- 依頼主: 鯨追い
+- 依頼主: 鯨追いのイサナ
 - 終えたときの報酬: 経験値 120、spyglass ×1、好感度 whale_chaser +10（一人一回）
 - 終えたあとの書き付け: イサナは、石を火にかざして、長いあいだ黙っていた。
 

@@ -335,7 +335,7 @@ st.node("fragment3",
         note="ここに入るとメインが終わる")
 
 # ================================================================ 鯨追い
-wc = Dialogue(WC, "鯨追い", "Whale Chaser")
+wc = Dialogue(WC, "鯨追いのイサナ", "Isana the Whale Chaser")
 text("message.skyabyss.whale_chaser.struck", "「おい、よせ。火に灰が入る」", "\"Hey, quit it. You'll get ash in the fire.\"")
 
 wc.entry("c_fragment", q(MAIN, stage="return"))
@@ -344,13 +344,13 @@ wc.entry("c_first", not_(flag("met")))
 wc.entry("c_menu")
 
 wc.node("c_first",
-        "……ん？　ああ、村の人じゃないな。\n火にあたっていくといい。俺は鯨を待っている。空を泳ぐ、岩の鯨をな。",
-        "...Hm? Ah, you're not from the village.\nWarm yourself by the fire. I'm waiting for the whale. The whale of rock that swims in the sky.",
-        face="smile", next="c_menu", note="初めて話しかけたとき")
+        "……ん？　ああ、村の人じゃないな。\n火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。",
+        "...Hm? Ah, you're not from the village.\nWarm yourself by the fire. I'm Isana. I'm waiting for the whale. The whale of rock that swims in the sky.",
+        face="smile", next="c_menu", do=[unlock("chapter1/whale_chaser")], note="初めて話しかけたとき (名乗る。伝承「鯨追いのイサナ」を記す)")
 wc.node("c_deja",
-        "どこかで会ったか？\n……いや、空ばかり見ていると、人の顔を忘れる。気にしないでくれ。",
-        "Have we met?\n...No. When you only watch the sky, you forget faces. Don't mind me.",
-        face="grave", next="c_menu", note="ループ 1 回目以降、前のループで会っていた")
+        "どこかで会ったか？\n……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。",
+        "Have we met?\n...No. When you only watch the sky, you forget faces. I'm Isana. Don't mind me.",
+        face="grave", next="c_menu", do=[unlock("chapter1/whale_chaser")], note="ループ 1 回目以降、前のループで会っていた")
 
 C_MENU = [
     ("whale_q", "語り部から、あなたのことを聞いた。", "The storyteller told me about you.",
@@ -530,7 +530,7 @@ quest(MAIN, "main", 10, ST,
                {"id": "storyteller", "type": "talk", "target": ST, "topic": "fragment3",
                 "ja": "語り部に、欠片を見せる", "en": "Show the fragment to the storyteller"},
                {"id": "chaser", "type": "talk", "target": WC, "topic": "c_fragment2",
-                "ja": "鯨追いに、欠片を見せる", "en": "Show the fragment to the Whale Chaser"}]},
+                "ja": "イサナに、欠片を見せる", "en": "Show the fragment to Isana"}]},
       ],
       {"xp": 200, "affinity": {ST: 5, WC: 5}},
       start_when=any_(lore("prologue/shadow"), lore("chapter1/stone_whale")))
@@ -556,19 +556,19 @@ quest(SONG, "sub", 20, ST,
 
 quest(SHARDS, "sub", 30, WC,
       ("鯨のかけら", "Pieces of the Whale"),
-      ("鯨追いのために、岩鯨の背から欠片を持ち帰る。", "Bring back Stone Whale Shards from the whale's back for the Whale Chaser."),
-      ("鯨追いは、石を火にかざして、長いあいだ黙っていた。", "The Whale Chaser held the stones to the fire and was silent for a long time."),
+      ("鯨追いのイサナのために、岩鯨の背から欠片を持ち帰る。", "Bring back Stone Whale Shards from the whale's back for Isana."),
+      ("イサナは、石を火にかざして、長いあいだ黙っていた。", "Isana held the stones to the fire and was silent for a long time."),
       [
           {"id": "gather",
-           "journal": ("鯨追いは、たどり着けなかった場所の手ざわりを知りたいという。\n背中の番兵は、ときどき岩鯨の欠片を落とす。",
-                       "The Whale Chaser wants to feel the place he never reached.\nThe guards on the back sometimes drop shards of the stone whale."),
+           "journal": ("イサナは、たどり着けなかった場所の手ざわりを知りたいという。\n背中の番兵は、ときどき岩鯨の欠片を落とす。",
+                       "Isana wants to feel the place he never reached.\nThe guards on the back sometimes drop shards of the stone whale."),
            "objectives": [{"id": "shards", "type": "collect", "target": "skyabyss:stone_whale_shard", "count": 3,
                            "ja": "岩鯨の欠片を集める", "en": "Collect stone whale shards"}]},
           {"id": "deliver",
-           "journal": ("欠片が三つそろった。\n鯨追いの火のところへ持っていこう。",
-                       "You have three shards.\nTake them to the Whale Chaser's fire."),
+           "journal": ("欠片が三つそろった。\nイサナの火のところへ持っていこう。",
+                       "You have three shards.\nTake them to Isana's fire."),
            "objectives": [{"id": "give", "type": "talk", "target": WC, "topic": "c_shards_thanks",
-                           "ja": "鯨追いに、欠片を三つ渡す", "en": "Give the Whale Chaser three shards"}]},
+                           "ja": "イサナに、欠片を三つ渡す", "en": "Give Isana three shards"}]},
       ],
       {"xp": 120, "items": [{"item": "minecraft:spyglass", "count": 1}], "affinity": {WC: 10}})
 
