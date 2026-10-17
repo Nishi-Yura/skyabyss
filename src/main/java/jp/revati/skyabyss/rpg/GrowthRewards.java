@@ -107,6 +107,19 @@ public final class GrowthRewards {
     public static final int REST_POINT_XP = 30;
     public static final int DIMENSION_XP = 50;
     public static final int BIOME_XP = 10;
+    // 序盤の「はじめて見た物」(伝承の項目が記されたとき。一人一回)。17 の 5.2、04 の 3.2。
+    // 最初の 1 時間で Lv2 (鐘の宿り) → Lv3 (最初の夜まで) に届くための配分。足音・骨・歌は、見ただけで一歩ぶんの手ごたえ
+    public static final Map<String, Integer> LORE_XP = new LinkedHashMap<>();
+    static {
+        LORE_XP.put("prologue/the_book", 5);
+        LORE_XP.put("prologue/camp", 5);
+        LORE_XP.put("prologue/footprints", 10);
+        LORE_XP.put("prologue/shadow", 15);
+        LORE_XP.put("prologue/footsteps", 10);
+        LORE_XP.put("prologue/bone_hill", 10);
+        LORE_XP.put("prologue/sky_song", 20);
+        LORE_XP.put("chapter1/stone_whale", 30);
+    }
     // 撃破の経験値を分ける範囲
     public static final double SHARE_RADIUS = 32;
     public static final double SPAWNER_FACTOR = 0.25;
@@ -144,6 +157,14 @@ public final class GrowthRewards {
         for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, seen)) {
             int amount = (int) Math.round(base * rate * GrowthRules.levelFalloff(Growth.get(mate).level, STONE_WHALE_LEVEL));
             Growth.addXp(mate, amount, "growth.skyabyss.reason.party");
+        }
+    }
+
+    // 伝承が記されたとき (Lore.unlock から)。表にある項目だけ、一人一回
+    public static void onLore(ServerPlayer player, String entry) {
+        Integer xp = LORE_XP.get(entry);
+        if (xp != null && !(player instanceof FakePlayer) && Growth.discover(player, "lore:" + entry)) {
+            Growth.addXp(player, xp, "growth.skyabyss.reason.new_sight");
         }
     }
 

@@ -59,6 +59,10 @@ public final class SkillEvents {
     // 技の点が増えたら一行で知らせる (レベルアップの知らせのすぐ後に出る)
     static void notifyPoints(ServerPlayer player, SkillData d) {
         int total = d.totalPoints(SkillManager.level(player));
+        // はじめの案内は、開幕の暗転・帳面の知らせと重ならないよう、書を持ち、Lv2 (鐘の宿り) に着くか、20 分たってから (17 の 5.2)
+        if (d.notifiedPoints == 0 && total > 0 && !firstHintReady(player)) {
+            return;
+        }
         if (total > d.notifiedPoints) {
             int gained = total - d.notifiedPoints;
             boolean first = d.notifiedPoints == 0;
@@ -76,6 +80,17 @@ public final class SkillEvents {
             d.notifiedPoints = total;
         }
     }
+
+    // 最初の技の案内を出してよいか。Lv1 の 1 点で、すぐ一つ覚えられる (04 の 10.3)
+    static boolean firstHintReady(ServerPlayer player) {
+        if (!jp.revati.skyabyss.lore.Lore.hasBook(player)) {
+            return player.tickCount >= FIRST_HINT_FALLBACK;
+        }
+        return SkillManager.level(player) >= 2 || player.tickCount >= FIRST_HINT_FALLBACK;
+    }
+
+    // 書を持たない人にも、この時間 (20 分) たてば案内を出す
+    static final int FIRST_HINT_FALLBACK = 20 * 60 * 20;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
