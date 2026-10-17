@@ -11,7 +11,6 @@ cmd gamemode spectator
 cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
 cmd kill @e[type=!minecraft:player,distance=..64]
 hud off
-cmd kill @e[type=minecraft:armor_stand]
 cmd summon armor_stand -4.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
 cmd summon armor_stand -1.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
 cmd summon armor_stand 1.5 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}

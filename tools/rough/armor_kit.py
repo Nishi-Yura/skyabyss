@@ -148,8 +148,8 @@ def paint_face(mat: Mat, face: str, w: int, h: int, rng, u_len=None):
         ph = (xx / max(w, 1)) * (5 * mat.freq) + fb * 0.9
         v = 0.5 + 0.3 * np.sin(ph * math.pi * 2) + 0.15 * (fb - 0.5)
     elif p == "feather":  # central rachis and diagonal barbs
-        ph = (yy + np.abs(xx - w / 2) * 0.8) / 2.2 * mat.freq
-        v = 0.55 + 0.2 * np.sin(ph * math.pi * 2) + 0.18 * (fb - 0.5)
+        ph = (yy + np.abs(xx - w / 2) * 1.6) / 3.0 * mat.freq
+        v = 0.55 + 0.09 * np.sin(ph * math.pi * 2) + 0.16 * (fb - 0.5)
         rach = np.abs(xx - w / 2) < max(0.6, w * 0.04)
         v = np.where(rach, 0.92, v)
     elif p == "nacre":  # smooth iridescent
@@ -167,8 +167,8 @@ def paint_face(mat: Mat, face: str, w: int, h: int, rng, u_len=None):
     v = (v - 0.5) * mat.contrast + 0.5
     rgb = _sample_ramp(mat.ramp, v)
     if p == "plate_cracked" and mat.crack is not None:
-        r = np.abs(_fbm(rng, h, w, base=5, octaves=3) - 0.5)
-        seam = r < 0.028
+        r = np.abs(_fbm(rng, h, w, base=3, octaves=2) - 0.5)
+        seam = r < 0.016
         rgb = np.where(seam[..., None], np.array(mat.crack, float), rgb)
         glow |= seam
     if p == "nacre" and mat.accent is not None:
@@ -322,7 +322,7 @@ class Armor:
             self.cubes.append(Cube(dst, no, s, rot, piv, c.mat, c.hide, c.tag))
 
     # --- checks
-    def overlaps(self, tol=2e-3, rtol=0.15):
+    def overlaps(self, tol=2e-3, rtol=0.35):
         cs = self.cubes
         obbs = [c.obb() for c in cs]
         bad = []
@@ -357,6 +357,39 @@ class Armor:
                     if sg < 0 and hi >= plane - eps and lo < plane - eps:
                         c.hide.add(f)
                         break
+
+    def pose_collisions(self, poses=None, tol=0.8):
+        """Move every bone by the pose (rotation about its pivot, bones separately) and report the cubes of
+        different bones that go deeper than `tol` into each other.  Returns {pose: [messages]} (worst per bone pair)."""
+        poses = poses or POSE_SET
+        out = {}
+        base = [(c, c.obb()) for c in self.cubes]
+        for name, pz in poses.items():
+            moved = []
+            for c, (cen, h, R) in base:
+                r = pz.get(c.bone)
+                if r:
+                    Rb = rot_matrix(r)
+                    piv = np.array(PIVOT[c.bone], float)
+                    cen = Rb @ (cen - piv) + piv
+                    R = Rb @ R
+                moved.append((c, (cen, h, R)))
+            worst = {}
+            for i in range(len(moved)):
+                ci, oi = moved[i]
+                for j in range(i + 1, len(moved)):
+                    cj, oj = moved[j]
+                    if ci.bone == cj.bone:
+                        continue
+                    if not (pz.get(ci.bone) or pz.get(cj.bone)):
+                        continue  # neither moved: rest overlaps are checked elsewhere
+                    d = _obb_overlap(oi, oj, tol)
+                    if d:
+                        k = tuple(sorted((ci.bone, cj.bone)))
+                        if d > worst.get(k, (0,))[0]:
+                            worst[k] = (d, np.round(oi[0], 1).tolist(), np.round(oj[0], 1).tolist())
+            out[name] = [f"{k[0]} x {k[1]} depth {v[0]:.2f} at {v[1]} / {v[2]}" for k, v in sorted(worst.items())]
+        return out
 
     # --- output
     def build(self, size=None, seed=1, chamfer=None):
@@ -412,6 +445,11 @@ class Armor:
                     nc += hpkit.round_cube(cd, step=step, R=R, min_dim=mind)
                 b["cubes"] = nc
             nfaces = sum(len(cd["uv"]) for b in gb for cd in b["cubes"])
+        for b in gb:
+            for cd in b["cubes"]:
+                if "rotation" in cd:
+                    r = cd["rotation"]
+                    cd["rotation"] = [r[0], r[1], -r[2] if r[2] else 0]
         self.n_out = (sum(len(b["cubes"]) for b in gb), nfaces)
         geo = {
             "format_version": "1.12.0",
@@ -511,6 +549,20 @@ def mannequin():
     return geo, tex
 
 
+POSE_SET = {
+    "walk": {"armorRightArm": (28, 0, 0), "armorLeftArm": (-28, 0, 0), "armorRightLeg": (-32, 0, 0), "armorLeftLeg": (32, 0, 0),
+             "armorRightBoot": (-32, 0, 0), "armorLeftBoot": (32, 0, 0)},
+    "walk2": {"armorRightArm": (-28, 0, 0), "armorLeftArm": (28, 0, 0), "armorRightLeg": (32, 0, 0), "armorLeftLeg": (-32, 0, 0),
+              "armorRightBoot": (32, 0, 0), "armorLeftBoot": (-32, 0, 0)},
+    "arms_up": {"armorRightArm": (-150, 0, 0), "armorLeftArm": (-150, 0, 0)},
+    "arms_out": {"armorRightArm": (0, 0, -45), "armorLeftArm": (0, 0, 45)},
+    "arms_back": {"armorRightArm": (50, 0, 0), "armorLeftArm": (50, 0, 0)},
+    "head_turn": {"armorHead": (0, 60, 0)},
+    "head_up": {"armorHead": (-45, 0, 0)},
+    "head_down": {"armorHead": (45, 0, 0)},
+    "sneak": {"armorBody": (30, 0, 0), "armorHead": (0, 0, 0)},
+    "sit": {"armorRightLeg": (-85, 0, 0), "armorLeftLeg": (-85, 0, 0), "armorRightBoot": (-85, 0, 0), "armorLeftBoot": (-85, 0, 0)},
+}
 POSES = {
     "stand": {},
     "arms_up": {"armorRightArm": (-150, 0, 0), "armorLeftArm": (-150, 0, 0)},
@@ -520,7 +572,21 @@ POSES = {
 }
 
 
+def flip_z(geo):
+    """GeckoLib turns a cube about z the opposite way to the math used here (x and y agree; measured in the game with
+    tools/shots, docs/design/16 section 6).  The geo files are written with z negated; previews negate it back."""
+    import copy as _c
+    g = _c.deepcopy(geo)
+    for b in g["minecraft:geometry"][0]["bones"]:
+        for cd in b.get("cubes", []):
+            if "rotation" in cd:
+                r = cd["rotation"]
+                cd["rotation"] = [r[0], r[1], -r[2] if r[2] else 0]
+    return g
+
+
 def faces_of(geo, tex, glow, pose=None):
+    geo = flip_z(geo)
     gm = glow if (glow is not None and (glow[..., 3] > 0).any()) else None
     return voxel.load_geo(geo, tex, glowmask=gm, pose=pose)
 

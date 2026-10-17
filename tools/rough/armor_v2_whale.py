@@ -26,6 +26,7 @@ MATS = {
 
 
 CHAMFER = (0.5, 1, 2.0)
+TITLE = {"A": "lamellae knight", "B": "living shell", "C": "vestment"}
 
 
 def new(opt):
@@ -203,12 +204,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("opts", nargs="*", default=["A"])
     ap.add_argument("--out", default="tools/rough/_out")
+    ap.add_argument("--final", action="store_true")
     ar = ap.parse_args()
     opts, out = ar.opts, Path(ar.out)
     cols, labels = [], []
     g0, t0, gl0 = c.load_current("stone_whale_armor")
     cols.append(c.column(g0, t0, gl0, size=(260, 340)))
-    labels.append("now")
+    labels.append("now (v1)")
     for o in opts:
         a = build(o)
         ov = a.overlaps()
@@ -221,6 +223,12 @@ if __name__ == "__main__":
         Image.fromarray(tex).save(d / "armor.png")
         Image.fromarray(glow).save(d / "armor_glowmask.png")
         cols.append(c.column(geo, tex, glow, size=(260, 340)))
-        labels.append(f"{o} ({n}/{q})")
+        labels.append(f"{o} {TITLE[o]} ({n}/{q})")
+    if "--final" in sys.argv or True:
+        import armor_v2_sets as FS
+        fa = FS.stone_whale()
+        fg, ft, fgl = fa.build(chamfer=FS.CHAMFER)
+        cols.append(c.column(fg, ft, fgl, size=(260, 340)))
+        labels.append("recommended: A + whale motif (%d/%d)" % fa.stats())
     rl = [v[0] for v in c.VIEWS] + [v[0] for v in c.POSE_VIEWS]
-    c.sheet("stone whale armor v2", cols, labels, rl, size=(260, 340)).save(out / "sheet.png")
+    c.sheet("stone whale armor v2: three design bases", cols, labels, rl, size=(260, 340)).save(out / "sheet.png")

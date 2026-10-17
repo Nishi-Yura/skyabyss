@@ -55,7 +55,9 @@ def sheet(title, cols, labels, rowlabels, size=(300, 400)):
     for ri, rl in enumerate(rowlabels):
         d.text((130 + ri * size[0] + 6, 40), rl, fill=(200, 200, 160), font=font(15))
     for ci, (col, lab) in enumerate(zip(cols, labels)):
-        d.text((8, 70 + ci * size[1]), lab, fill=(120, 210, 230), font=font(16))
+        import textwrap
+        for li, line in enumerate(textwrap.wrap(lab, 15)):
+            d.text((8, 70 + ci * size[1] + 20 * li), line, fill=(120, 210, 230), font=font(16))
         for ri, im in enumerate(col):
             img.paste(im.convert("RGB"), (130 + ri * size[0], 66 + ci * size[1]))
     return img
