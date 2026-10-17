@@ -59,6 +59,8 @@
 - 同じ文が続けて来たら一度だけ。
 - 札は `ToastComponent` の列（バニラの仕組み）に並ぶ。
 
+- 画面の中央まわりは一つの寸法で積む（`NoticeClient`）。上から、上の帯（PLACE・ALERT。ボスバーがあればその下へ）→ レベルアップの文字（`GrowthHud`。帯・ボスバーの下へずれる）→ 中央の演出（LEVEL_UP の知らせ。レベルアップの文字の下）→ 字幕（下中央。中央の下端より上へは伸びず、狭い画面では行を減らす）。場所の名前の最中にレベルが上がっても重ならない。ボスバーの下端は `CustomizeGuiOverlayEvent.BossEventProgress` で知る。
+
 ## 5. API（`jp.revati.skyabyss.notice.Notice`）
 
 - サーバー側: `Notice.narrate / hint / levelUp / gain / unlock / alert / warn / place / bar / send`。引数は `(player, 文の鍵, 引数...)` か、`ModText` の文。
