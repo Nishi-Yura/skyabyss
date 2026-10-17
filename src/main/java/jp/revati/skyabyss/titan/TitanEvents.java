@@ -58,7 +58,7 @@ public final class TitanEvents {
         }
         // 17 の 3.9節: 4 日目までは、影・歌・イサナを済ませた人がいるときだけ (その人の近くへ)。5 日目の詰み止めは今のまま
         ServerPlayer ready = jp.revati.skyabyss.opening.OpeningDirector.readyPlayer(level);
-        if (level.getGameTime() < 4 * 24000L && ready == null) {
+        if (!jp.revati.skyabyss.opening.OpeningLogic.whaleGateOpen(level.getGameTime(), ready != null)) {
             return;
         }
         ServerPlayer player = ready != null ? ready : WhaleKeeper.randomEligible(level);

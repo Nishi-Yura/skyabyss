@@ -381,6 +381,14 @@ public final class OpeningLogic {
     }
 
     // ---------------------------------------------------------------- 岩鯨の門 (17 の 3.9節)
+    // 詰み止め: 総 tick が 4 日分を過ぎたら (5 日目)、拍子を問わず岩鯨は出てよい
+    public static final long WHALE_FALLBACK = 4 * DAY;
+
+    // 岩鯨を自然に出してよいか (ほかの条件 TitanEvents.whaleMayAppear に重ねる): 拍子を済ませた人がいるか、5 日目に入ったか
+    public static boolean whaleGateOpen(long now, boolean anyoneReady) {
+        return anyoneReady || now >= WHALE_FALLBACK;
+    }
+
     // その人が「岩鯨を迎えられる」か: 最初の影 (B4)、歌 (B9)、イサナ (B7) を済ませている
     public static boolean whaleReady(OpeningState st) {
         return st.legacy() || (st.done(OpeningBeat.SHADOW) && st.done(OpeningBeat.SONG) && st.done(OpeningBeat.ISANA));
