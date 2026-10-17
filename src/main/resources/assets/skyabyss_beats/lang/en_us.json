@@ -1,0 +1,15 @@
+{
+  "opening.skyabyss.title": "Between Sky and Abyss",
+  "message.skyabyss.beats.page_falls": "A torn page drifts down from the sky.",
+  "message.skyabyss.beats.page_appeared": "A torn page has found its way into your pack.",
+  "commands.skyabyss.opening.go": "Opening beat B%1$s (%2$s) started for %3$s",
+  "commands.skyabyss.opening.back": "Opening beats from B%1$s (%2$s) on were rewound for %3$s",
+  "commands.skyabyss.opening.reset": "Opening beats were cleared for %1$s (B0 plays again)",
+  "commands.skyabyss.opening.status": "%1$s: %2$s",
+  "subtitles.skyabyss.opening_heartbeat": "A slow heartbeat",
+  "subtitles.skyabyss.opening_bell": "A bell rings far away",
+  "subtitles.skyabyss.opening_step": "Something enormous takes a step",
+  "subtitles.skyabyss.opening_rumble": "The ground rumbles",
+  "subtitles.skyabyss.opening_song": "A song falls from the sky",
+  "item.skyabyss.lore_page.desc.shadow": "A page that drifted down from the sky."
+}

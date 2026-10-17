@@ -144,6 +144,9 @@ public final class WatcherEvents {
         if (!isNight(level)) {
             return "not night";
         }
+        if (jp.revati.skyabyss.opening.OpeningDirector.quietNight(level, player)) {
+            return "opening night";
+        }
         if (level.isThundering()) {
             return "thunderstorm";
         }
