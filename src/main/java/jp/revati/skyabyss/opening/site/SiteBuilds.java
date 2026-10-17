@@ -1,0 +1,295 @@
+package jp.revati.skyabyss.opening.site;
+
+import java.util.ArrayDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
+import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.dev.StructureDump;
+import jp.revati.skyabyss.opening.OpeningSites.Kind;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+// 序盤の構造物の建設の起点 (docs/design/17 の 4 章、8.2 の担当 2)。
+//  - サーバーが始まったとき、まだ場所を決めていなければ決める (SiteFinder)。新しいワールドの最初の日なら、スポーン地点を野営地へ動かす (17-11)
+//  - 建て終わっていない物は、BackBuildJobs と同じように、1 tick の予算 (ms) だけ進める (SiteJob)。野営地はプレイヤーが入る前に建て終える
+//  - 環境変数 SKYABYSS_SHOTS (台本の撮影) のときは、ワールド名が "opening" で始まらなければ建てない (ほかの台本の邪魔をしない)。
+//    SKYABYSS_OPENING_SITES=0 でも建てない。
+// 開発コマンド: /skyabyss dev opening <info|build|view|dump|replan> (本番の jar では登録されない)
+@EventBusSubscriber(modid = SkyAbyss.MODID)
+public final class SiteBuilds {
+    public static final long BUDGET_IDLE_MS = 20;
+    public static final long BUDGET_PLAYERS_MS = 6;
+    // 新しいワールドとみなす経過 tick (1 日)。これを過ぎたワールドでは、スポーン地点は動かさない
+    public static final long NEW_WORLD_TICKS = 24000;
+
+    private static final ArrayDeque<SiteJob> QUEUE = new ArrayDeque<>();
+
+    private SiteBuilds() {
+    }
+
+    public static boolean enabled(MinecraftServer server) {
+        if ("0".equals(System.getenv("SKYABYSS_OPENING_SITES"))) {
+            return false;
+        }
+        if (System.getenv("SKYABYSS_SHOTS") != null && !server.getWorldData().getLevelName().startsWith("opening")) {
+            return "1".equals(System.getenv("SKYABYSS_OPENING_SITES"));
+        }
+        return true;
+    }
+
+    public static synchronized boolean busy() {
+        return !QUEUE.isEmpty();
+    }
+
+    public static synchronized int pending() {
+        return QUEUE.size();
+    }
+
+    // ---------------------------------------------------------------- 起動
+    @SubscribeEvent
+    static void onServerStarted(ServerStartedEvent event) {
+        MinecraftServer server = event.getServer();
+        if (!enabled(server)) {
+            return;
+        }
+        plan(server);
+        enqueueMissing(server);
+        // 野営地は、プレイヤーが入る前に建て終える (チャンクはスポーン地点のまわりが読み込み済み)
+        SiteJob first;
+        synchronized (SiteBuilds.class) {
+            first = QUEUE.peek();
+        }
+        if (first != null && first.label().equals("camp")) {
+            long until = System.nanoTime() + 400_000_000L;
+            for (int i = 0; i < 4 && !first.done() && System.nanoTime() < until; i++) {
+                first.step(until);
+            }
+            if (first.done()) {
+                synchronized (SiteBuilds.class) {
+                    QUEUE.remove(first);
+                }
+                SkyAbyss.LOGGER.info("Opening camp built before the first player: {} blocks, {} ms", first.placedCount, first.workNanos / 1_000_000L);
+            }
+        }
+    }
+
+    // 場所を決める (まだなら)。決めたら、新しいワールドの最初の日ならスポーン地点を野営地へ動かす
+    public static boolean plan(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        SiteData data = SiteData.get(level);
+        if (data.planned()) {
+            return false;
+        }
+        BlockPos spawn = level.getSharedSpawnPos();
+        BlockPos camp = SiteFinder.plan(level, data, spawn);
+        if (camp == null) {
+            data.clear();
+            return false;
+        }
+        boolean fresh = level.getGameTime() < NEW_WORLD_TICKS;
+        boolean move = fresh && (Math.abs(camp.getX() - spawn.getX()) > 2 || Math.abs(camp.getZ() - spawn.getZ()) > 2);
+        if (move) {
+            level.setDefaultSpawnPos(new BlockPos(camp.getX(), camp.getY(), camp.getZ()), 0f);
+            SkyAbyss.LOGGER.info("Opening sites: the world spawn moved from {} to the camp at {}", spawn, camp);
+        }
+        data.markPlanned(level.getGameTime(), spawn, move);
+        return true;
+    }
+
+    // 建て終わっていない物を、野営地 → 宿り → 積み石 → 足跡 → 骨の順で予約する
+    public static synchronized void enqueueMissing(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        SiteData data = SiteData.get(level);
+        QUEUE.clear();
+        for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, "cairn", Kind.FOOTPRINT.id, Kind.RIBS.id}) {
+            for (SiteData.Entry e : data.entries(kind)) {
+                if (!e.built) {
+                    QUEUE.add(jobFor(level, data, e));
+                }
+            }
+        }
+        if (!QUEUE.isEmpty()) {
+            SkyAbyss.LOGGER.info("Opening sites: {} to build", QUEUE.size());
+        }
+    }
+
+    public static SiteJob jobFor(ServerLevel level, SiteData data, SiteData.Entry e) {
+        return switch (e.kind) {
+            case "camp" -> CampBuilder.create(level, data, e);
+            case "shelter" -> ShelterBuilder.create(level, data, e);
+            case "footprint" -> FootprintBuilder.create(level, data, e);
+            case "ribs" -> RibBuilder.create(level, data, e);
+            default -> CairnBuilder.create(level, data, e);
+        };
+    }
+
+    // ---------------------------------------------------------------- 毎 tick
+    @SubscribeEvent
+    static void onServerTick(ServerTickEvent.Post event) {
+        SiteJob job;
+        synchronized (SiteBuilds.class) {
+            job = QUEUE.peek();
+        }
+        if (job == null) {
+            return;
+        }
+        long budget = event.getServer().getPlayerCount() > 0 ? BUDGET_PLAYERS_MS : BUDGET_IDLE_MS;
+        if (job.step(System.nanoTime() + budget * 1_000_000L)) {
+            synchronized (SiteBuilds.class) {
+                QUEUE.remove(job);
+            }
+            SkyAbyss.LOGGER.info("Built the opening site {}: {} blocks in {} ticks ({} ms of work)", job.label(), job.placedCount, job.ticks,
+                    job.workNanos / 1_000_000L);
+        }
+    }
+
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        synchronized (SiteBuilds.class) {
+            QUEUE.clear();
+        }
+    }
+
+    // 自己テスト・開発コマンド用: 予約を最後まで、チャンクをその場で読みながら進める
+    public static void buildAllNow(MinecraftServer server) {
+        while (true) {
+            SiteJob job;
+            synchronized (SiteBuilds.class) {
+                job = QUEUE.peek();
+            }
+            if (job == null) {
+                return;
+            }
+            job.blocking = true;
+            while (!job.step(System.nanoTime() + 200_000_000L)) {
+                // 次の周回
+            }
+            synchronized (SiteBuilds.class) {
+                QUEUE.remove(job);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 開発コマンド
+    @SubscribeEvent
+    static void onRegisterCommands(RegisterCommandsEvent event) {
+        if (FMLEnvironment.production) {
+            return;
+        }
+        var kinds = StringArgumentType.word();
+        event.getDispatcher().register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
+                .then(Commands.literal("dev").then(Commands.literal("opening")
+                        .then(Commands.literal("info").executes(SiteBuilds::info))
+                        .then(Commands.literal("build").executes(SiteBuilds::build))
+                        // view <種類> <番号> <離れる距離> <高さ> <yaw> <pitch>: 場所の中心から、yaw の向きを見る位置へ体ごと置く
+                        .then(Commands.literal("view").then(Commands.argument("kind", kinds).then(Commands.argument("index", IntegerArgumentType.integer(0, 9))
+                                .then(Commands.argument("dist", FloatArgumentType.floatArg(0, 400)).then(Commands.argument("up", FloatArgumentType.floatArg(-20, 80))
+                                        .then(Commands.argument("yaw", FloatArgumentType.floatArg(-360, 720)).then(Commands.argument("pitch", FloatArgumentType.floatArg(-90, 90))
+                                                .executes(SiteBuilds::view))))))))
+                        // dump <種類> <番号>: 場所のまわりを書き出す (tools/structure/check.py で調べる)
+                        .then(Commands.literal("dump").then(Commands.argument("kind", kinds).then(Commands.argument("index", IntegerArgumentType.integer(0, 9))
+                                .executes(SiteBuilds::dump)))))));
+    }
+
+    private static SiteData.Entry find(CommandContext<CommandSourceStack> ctx) {
+        String kind = StringArgumentType.getString(ctx, "kind");
+        int index = IntegerArgumentType.getInteger(ctx, "index");
+        SiteData data = SiteData.get(ctx.getSource().getServer().overworld());
+        for (SiteData.Entry e : data.entries(kind)) {
+            if (e.index == index) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    private static int info(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer server = ctx.getSource().getServer();
+        SiteData data = SiteData.get(server.overworld());
+        StringBuilder sb = new StringBuilder("opening sites: planned=" + data.planned() + " spawn=" + server.overworld().getSharedSpawnPos().toShortString()
+                + " (was " + data.originalSpawn().toShortString() + ", moved=" + data.spawnMoved() + ") pending=" + pending());
+        for (SiteData.Entry e : data.entries()) {
+            sb.append("\n  ").append(e.kind).append(' ').append(e.index).append(' ').append(e.pos.toShortString()).append(e.built ? " built" : " NOT built");
+        }
+        String s = sb.toString();
+        SkyAbyss.LOGGER.info(s);
+        ctx.getSource().sendSuccess(() -> Component.literal(s), false);
+        return 1;
+    }
+
+    private static int build(CommandContext<CommandSourceStack> ctx) {
+        MinecraftServer server = ctx.getSource().getServer();
+        plan(server);
+        enqueueMissing(server);
+        long t0 = System.nanoTime();
+        buildAllNow(server);
+        long ms = (System.nanoTime() - t0) / 1_000_000L;
+        ctx.getSource().sendSuccess(() -> Component.literal("opening sites built in " + ms + " ms"), false);
+        return 1;
+    }
+
+    private static int view(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        SiteData.Entry e = find(ctx);
+        if (e == null) {
+            ctx.getSource().sendFailure(Component.literal("no such site"));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        float dist = FloatArgumentType.getFloat(ctx, "dist");
+        float up = FloatArgumentType.getFloat(ctx, "up");
+        float yaw = FloatArgumentType.getFloat(ctx, "yaw");
+        float pitch = FloatArgumentType.getFloat(ctx, "pitch");
+        double fx = -Math.sin(Math.toRadians(yaw));
+        double fz = Math.cos(Math.toRadians(yaw));
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        double x = e.pos.getX() + 0.5 - fx * dist;
+        double z = e.pos.getZ() + 0.5 - fz * dist;
+        level.getChunk(((int) Math.floor(x)) >> 4, ((int) Math.floor(z)) >> 4);
+        player.teleportTo(level, x, e.pos.getY() + up, z, yaw, pitch);
+        ctx.getSource().sendSuccess(() -> Component.literal("view " + e.kind + " " + e.index + " at " + e.pos.toShortString()), false);
+        return 1;
+    }
+
+    private static int dump(CommandContext<CommandSourceStack> ctx) {
+        SiteData.Entry e = find(ctx);
+        if (e == null) {
+            ctx.getSource().sendFailure(Component.literal("no such site"));
+            return 0;
+        }
+        String bpName = e.kind.equals("ribs") ? "ribs" : e.kind;
+        Blueprint bp = Blueprint.get(bpName);
+        int[] r = bp.worldRect(SiteFinder.rot(e.yaw), SiteFinder.mirror(e.yaw), new BlockPos(e.pos.getX(), 0, e.pos.getZ()));
+        int pad = 8;
+        int y0 = e.pos.getY() - 10;
+        int y1 = e.pos.getY() + Math.max(bp.maxY, 4) + 8;
+        Map<String, BlockPos> points = new LinkedHashMap<>();
+        points.put("center", e.pos);
+        for (int i = 0; i < e.extraNames.size(); i++) {
+            points.put(e.extraNames.get(i), e.extraPos.get(i));
+        }
+        String name = "opening_" + e.kind + (e.kind.equals("footprint") || e.kind.equals("cairn") ? "_" + e.index : "");
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        StructureDump.queueRange(level, name, new BlockPos(r[0] - pad, y0, r[1] - pad), new BlockPos(r[2] + pad, y1, r[3] + pad), points);
+        ctx.getSource().sendSuccess(() -> Component.literal("dumping " + name), false);
+        return 1;
+    }
+}

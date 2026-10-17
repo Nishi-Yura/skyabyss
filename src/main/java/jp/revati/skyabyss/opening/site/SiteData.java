@@ -25,6 +25,8 @@ public final class SiteData extends SavedData {
         public final int index;
         public BlockPos pos;
         public boolean built;
+        // 建て始めたか (止まったあとの続きで、自分で置いた物を「人の建物」と見まちがえない)
+        public boolean started;
         public int yaw;
         public final List<String> extraNames = new ArrayList<>();
         public final List<BlockPos> extraPos = new ArrayList<>();
@@ -138,6 +140,7 @@ public final class SiteData extends SavedData {
             CompoundTag c = (CompoundTag) t;
             Entry e = new Entry(c.getString("kind"), c.getInt("index"), BlockPos.of(c.getLong("pos")), c.getInt("yaw"));
             e.built = c.getBoolean("built");
+            e.started = c.getBoolean("started");
             CompoundTag x = c.getCompound("extra");
             for (String key : x.getAllKeys()) {
                 e.extra(key, BlockPos.of(x.getLong(key)));
@@ -161,6 +164,7 @@ public final class SiteData extends SavedData {
             c.putLong("pos", e.pos.asLong());
             c.putInt("yaw", e.yaw);
             c.putBoolean("built", e.built);
+            c.putBoolean("started", e.started);
             CompoundTag x = new CompoundTag();
             for (int i = 0; i < e.extraNames.size(); i++) {
                 x.putLong(e.extraNames.get(i), e.extraPos.get(i).asLong());

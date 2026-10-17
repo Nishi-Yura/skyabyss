@@ -121,15 +121,8 @@ public final class OpeningSites {
     // 野営地から宿りへの道の積み石 (40 ブロックおき。野営地に近い順)
     public static List<BlockPos> cairns(MinecraftServer server) {
         List<BlockPos> out = new ArrayList<>();
-        SiteData.Entry shelter = data(server).first(Kind.SHELTER.id);
-        if (shelter != null) {
-            for (int i = 0;; i++) {
-                BlockPos c = shelter.extra("cairn" + i);
-                if (c == null) {
-                    break;
-                }
-                out.add(c);
-            }
+        for (SiteData.Entry e : data(server).entries("cairn")) {
+            out.add(e.pos);
         }
         return out;
     }

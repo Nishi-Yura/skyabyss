@@ -488,7 +488,7 @@ def _carve(g, mask, floor_blocks, water_top=-2):
 
 def footprint_a(g: Grid, rng):
     """足の形のくぼみ: 5 本の指・母指球・土踏まず・かかと。深さ 1〜3 (母指球とかかとが深い)、底は粘土と石、雨水が 1〜2 ブロックたまる"""
-    g.meta = {"rect": [-6, -7, 6, 7], "level": False, "water": True, "ring": 3}
+    g.meta = {"rect": [-6, -7, 6, 7], "level": True, "water": True, "ring": 3}
     mask = _foot_mask("a")
     _carve(g, mask, lambda x, z, d: "stone" if d == 3 and (x + z) % 4 == 0 else "clay")
     # 縁: 押し出された土の盛り (一段)
@@ -503,7 +503,7 @@ def footprint_a(g: Grid, rng):
 
 def footprint_b(g: Grid, rec):
     """ぬかるみの足跡: 丸みのある大きな楕円。底は泥、縁に泥の盛り、水が 2 ブロック"""
-    g.meta = {"rect": [-6, -7, 6, 7], "level": False, "water": True, "ring": 3}
+    g.meta = {"rect": [-6, -7, 6, 7], "level": True, "water": True, "ring": 3}
     mask = {}
     for x in range(-4, 5):
         for z in range(-5, 6):
@@ -521,7 +521,7 @@ def footprint_b(g: Grid, rec):
 
 def footprint_c(g: Grid, rec):
     """割れた足跡: 足の形 (左足)。周りの地面が割れて石が跳ね上がる。底は乾いた粘土、小さな水たまりだけ"""
-    g.meta = {"rect": [-7, -8, 7, 8], "level": False, "water": False, "ring": 3}
+    g.meta = {"rect": [-7, -8, 7, 8], "level": True, "water": False, "ring": 3}
     mask = _foot_mask("c", mirror=True)
     _carve(g, mask, lambda x, z, d: "terracotta" if (x + z) % 3 == 0 else "clay", water_top=-99)
     for (x, z) in list(mask):
@@ -567,16 +567,21 @@ def _rib(g, x, half, height, side, rng, broken=0, thick=2, lean=0.0):
 
 
 def ribs_common(g: Grid):
-    g.meta = {"rect": [-22, -10, 26, 10], "level": False, "anchor": True}
-    # 足もとの石板 (東の端)
-    g.set(24, 0, 0, "stone_bricks")
-    g.set(24, 1, 0, "stone_bricks")
-    g.set(24, 2, 0, "stone_brick_slab[type=bottom]")
-    g.set(24, 1, 1, "stone_brick_wall_sign[facing=south,waterlogged=false]") if False else None
-    g.set(24, 1, 1, "spruce_wall_sign[facing=south,waterlogged=false]")
-    g.mark("slab", 24, 1, 1)
-    g.set(23, 0, 1, "bone_block[axis=x]")
-    g.set(25, 0, 2, "bone_block[axis=z]")
+    g.meta = {"rect": [-22, -10, 22, 10], "level": False, "anchor": True}
+    # 足もとの石板は別の部品 (slab.json) を、骨の東の端 (この印) に、その場の地面の高さで置く
+    g.mark("slab", 24, 0, 0)
+
+
+def slab(g: Grid, rec=None):
+    """骨の足もとの石板: 石レンガの低い柱に、一行の碑文の看板 (薄青の光る文字。文は lang の sign.skyabyss.opening_slab)"""
+    g.meta = {"rect": [-2, -2, 2, 3], "level": False}
+    g.set(0, 0, 0, "stone_bricks")
+    g.set(0, 1, 0, "stone_bricks")
+    g.set(0, 2, 0, "stone_brick_slab[type=bottom]")
+    g.set(0, 1, 1, "spruce_wall_sign[facing=south,waterlogged=false]")
+    g.set(-1, 0, 1, "bone_block[axis=x]")
+    g.set(2, 0, 2, "bone_block[axis=z]")
+    g.mark("sign", 0, 1, 1)
 
 
 def ribs_a(g: Grid, rng):
@@ -939,8 +944,9 @@ def main():
             bp = blueprint(s, ADOPTED[s])
             (DATA / f"{s}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
             print("installed", s, ADOPTED[s], len(bp["blocks"]), "blocks")
-        bp = blueprint_cairn()
-        (DATA / "cairn.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
+        for name, fn in (("cairn", cairn), ("slab", slab)):
+            bp = blueprint_small(name, fn)
+            (DATA / f"{name}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
         return
     OUT.mkdir(parents=True, exist_ok=True)
     for s in args.sites.split(","):
@@ -950,16 +956,16 @@ def main():
         print("wrote", OUT / f"{s}.png")
 
 
-def blueprint_cairn():
+def blueprint_small(name, fn):
     g = Grid()
-    cairn(g)
+    fn(g)
     palette, idx, blocks = [], {}, []
     for (x, y, z), s in sorted(g.b.items(), key=lambda kv: (kv[0][1], kv[0][0], kv[0][2])):
         if s not in idx:
             idx[s] = len(palette)
             palette.append(s)
         blocks.append([x, y, z, idx[s]])
-    return {"site": "cairn", "option": "a", "palette": palette, "blocks": blocks, "marks": {}, "meta": g.meta}
+    return {"site": name, "option": "a", "palette": palette, "blocks": blocks, "marks": {k: list(v) for k, v in g.marks.items()}, "meta": g.meta}
 
 
 if __name__ == "__main__":
