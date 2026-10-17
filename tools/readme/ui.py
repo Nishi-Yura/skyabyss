@@ -201,7 +201,7 @@ def make_all():
     ]
     for c in cards:
         out.append(card(*c))
-    for ch in "JKUBOHRGVZ":
+    for ch in "JKUBOHRGVZN":
         out.append(keycap(ch, "key_%s.png" % ch))
     steps = ["campfire", "book", "bell", "footprint", "person", "cloud_shadow", "whale_icon"]
     for i, ic in enumerate(steps, 1):
