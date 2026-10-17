@@ -43,6 +43,12 @@ public final class Blueprint {
     public int ring = 3;
     public int minY;
     public int maxY;
+    // 地面に沿って掘る・盛る列 (大きな足跡): {x, z, kind, a, b, c}。kind 0 = 掘る [深さ, 底のブロック (palette の番号), 雨水か]、
+    // 1 = 盛る [高さ, 上のブロック, 中のブロック]、2 = 物を立てる [高さ, ブロック]
+    public final List<int[]> relief = new ArrayList<>();
+    public final List<BlockState> palette = new ArrayList<>();
+    // 骨など: 部品のブロックの近く (この距離まで) の木と草だけを片付ける。0 なら範囲の全部 (relief のときは relief の列の 1 まわり)
+    public int clearNear;
 
     private Blueprint(String name) {
         this.name = name;
@@ -60,7 +66,7 @@ public final class Blueprint {
             }
             JsonObject json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
             Blueprint bp = new Blueprint(name);
-            List<BlockState> palette = new ArrayList<>();
+            List<BlockState> palette = bp.palette;
             for (JsonElement e : json.getAsJsonArray("palette")) {
                 palette.add(parse(e.getAsString()));
             }
@@ -72,6 +78,16 @@ public final class Blueprint {
                 bp.cells.add(new Cell(a.get(0).getAsInt(), y, a.get(2).getAsInt(), palette.get(a.get(3).getAsInt())));
                 bp.minY = Math.min(bp.minY, y);
                 bp.maxY = Math.max(bp.maxY, y);
+            }
+            if (bp.cells.isEmpty()) {
+                bp.minY = 0;
+                bp.maxY = 0;
+            }
+            if (json.has("relief")) {
+                for (JsonElement e : json.getAsJsonArray("relief")) {
+                    JsonArray a = e.getAsJsonArray();
+                    bp.relief.add(new int[] {a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt(), a.get(3).getAsInt(), a.get(4).getAsInt(), a.get(5).getAsInt()});
+                }
             }
             // 低い段から (支えになる物が先)
             bp.cells.sort((p, q) -> Integer.compare(p.y(), q.y()));
@@ -88,6 +104,12 @@ public final class Blueprint {
             bp.level = meta.has("level") && meta.get("level").getAsBoolean();
             bp.anchor = meta.has("anchor") && meta.get("anchor").getAsBoolean();
             bp.water = meta.has("water") && meta.get("water").getAsBoolean();
+            if (meta.has("height")) {
+                bp.maxY = Math.max(bp.maxY, meta.get("height").getAsInt());
+            }
+            if (meta.has("clearNear")) {
+                bp.clearNear = meta.get("clearNear").getAsInt();
+            }
             if (meta.has("ring")) {
                 bp.ring = meta.get("ring").getAsInt();
             }
