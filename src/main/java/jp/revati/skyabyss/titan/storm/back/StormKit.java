@@ -10,9 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
+import jp.revati.skyabyss.tablet.Tablets;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
 
@@ -218,21 +216,16 @@ public final class StormKit {
         air(p.getX(), p.getY() + 1, p.getZ());
     }
 
+    // 碑 (看板の代わり)。文のキーは lang の "<key>.1"〜"<key>.4"
     public void wallSign(BlockPos pos, Direction facing, String key) {
-        put(pos.getX(), pos.getY(), pos.getZ(), Blocks.BIRCH_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing));
-        writeSign(pos, key, DyeColor.LIGHT_BLUE);
+        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.wallState(facing));
+        Tablets.write(level, pos, key);
     }
 
-    // 看板に 4 行。キーは lang の "<key>.1"〜"<key>.4"。風の民の碑文らしく、光る淡い青の字
-    public void writeSign(BlockPos pos, String key, DyeColor color) {
-        if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
-            SignText text = new SignText().setColor(color).setHasGlowingText(true);
-            for (int i = 0; i < 4; i++) {
-                text = text.setMessage(i, Component.translatable(key + "." + (i + 1)));
-            }
-            sign.setText(text, true);
-            sign.setWaxed(true);
-        }
+    // 立てた碑
+    public void standingTablet(BlockPos pos, String key) {
+        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.standingState());
+        Tablets.write(level, pos, key);
     }
 
     // 掘った所に面した、体の芯の凝灰岩を壁の石にする (どの場所の石かは styleAt で決める)

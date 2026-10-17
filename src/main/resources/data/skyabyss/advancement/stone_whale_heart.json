@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:stone_whale_trial",
+  "display": {
+    "icon": {
+      "id": "skyabyss:stone_whale_core"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.stone_whale_heart.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.stone_whale_heart.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "stopped:stone_whale"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

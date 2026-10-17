@@ -476,10 +476,10 @@ public final class TitanBackSelfTest {
         for (Inscription lore : allSigns()) {
             BlockState sign = level.getBlockState(lore.pos());
             BlockPos wall = lore.pos().relative(lore.facing().getOpposite());
-            if (!(sign.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
-                failures.add("lore sign " + lore.key() + " missing at " + lore.pos() + " (" + sign + ")");
+            if (!(sign.getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock)) {
+                failures.add("lore tablet " + lore.key() + " missing at " + lore.pos() + " (" + sign + ")");
             } else if (!level.getBlockState(wall).isFaceSturdy(level, wall, lore.facing())) {
-                failures.add("lore sign " + lore.key() + " has no wall behind it at " + wall);
+                failures.add("lore tablet " + lore.key() + " has no wall behind it at " + wall);
             }
         }
     }
@@ -494,30 +494,19 @@ public final class TitanBackSelfTest {
         for (int cx = (-RX - 8) >> 4; cx <= (RX + 8) >> 4; cx++) {
             for (int cz = (-RZ - 8) >> 4; cz <= (RZ + 8) >> 4; cz++) {
                 for (var be : level.getChunk(cx, cz).getBlockEntities().values()) {
-                    if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)) {
+                    if (!(be instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet)) {
                         continue;
                     }
                     count++;
                     if (!expected.contains(be.getBlockPos())) {
-                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                        failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions and trial entrances keep tablets)");
                     }
-                    for (boolean front : new boolean[]{true, false}) {
-                        var text = front ? sign.getFrontText() : sign.getBackText();
-                        for (int i = 0; i < 4; i++) {
-                            var line = text.getMessage(i, false);
-                            if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
-                                String k = tc.getKey();
-                                keys.add(k.substring(0, k.lastIndexOf('.')));
-                            } else if (!line.getString().isEmpty()) {
-                                failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
-                            }
-                        }
-                    }
+                    keys.add(tablet.key());
                 }
             }
         }
         if (count != expected.size()) {
-            failures.add("found " + count + " signs on the back, expected " + expected.size());
+            failures.add("found " + count + " tablets on the back, expected " + expected.size());
         }
         failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");

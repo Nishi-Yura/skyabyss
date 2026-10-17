@@ -28,7 +28,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import jp.revati.skyabyss.tablet.TabletBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
@@ -172,8 +173,8 @@ public final class EmberBackSelfTest {
         }
         for (Inscription in : all) {
             BlockState s = back.getBlockState(in.pos());
-            expect(s.getBlock() instanceof WallSignBlock && s.getValue(WallSignBlock.FACING) == in.facing(), "sign " + in.id() + " is missing at " + in.pos().toShortString());
-            expect(back.getBlockState(in.pos().relative(in.facing().getOpposite())).isSolid(), "sign " + in.id() + " has nothing behind it");
+            expect(s.getBlock() instanceof TabletBlock && s.getValue(HorizontalDirectionalBlock.FACING) == in.facing(), "tablet " + in.id() + " is missing at " + in.pos().toShortString());
+            expect(back.getBlockState(in.pos().relative(in.facing().getOpposite())).isSolid(), "tablet " + in.id() + " has nothing behind it");
         }
         for (String id : EmberIds.INSCRIPTIONS) {
             expect(keys.contains("sign.skyabyss." + id), "inscription " + id + " is not placed");
@@ -181,7 +182,7 @@ public final class EmberBackSelfTest {
         List<String> bad = SignFit.check(keys);
         FAILURES.addAll(bad);
         expect(SignFit.allSignKeys().containsAll(keys), "SignFit does not see the ember signs (skyabyss_ember lang)");
-        expect(all.size() == 9, "there should be 9 signs (6 inscriptions, 3 entrances), not " + all.size());
+        expect(all.size() == 9, "there should be 9 tablets (6 inscriptions, 3 entrances), not " + all.size());
     }
 
     // ---------------------------------------------------------------- 穴 (体の中の空気が、決めた口のほかで空へ抜けない)

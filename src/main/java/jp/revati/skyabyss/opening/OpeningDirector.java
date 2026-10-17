@@ -149,12 +149,29 @@ public final class OpeningDirector {
         long now = level.getGameTime();
         Env env = env(level, player);
         Facts facts = facts(level, player, st, env);
+        placeBeats(player, facts);
         Fx fx = new Live(level, player, st);
         OpeningLogic.step(st, env, facts, fx);
         if (st.awakeAt >= 0) {
             st.fresh = false;
         }
         syncObjective(level, player, st, facts, env, now);
+    }
+
+    // 序盤の場所に着いたことを進捗へ (半径は OpeningSites.Kind と同じ)
+    private static void placeBeats(ServerPlayer player, Facts facts) {
+        if (facts.campDist() >= 0 && facts.campDist() <= Kind.CAMP.radius) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:camp");
+        }
+        if (facts.shelterDist() >= 0 && facts.shelterDist() <= Kind.SHELTER.radius) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:shelter");
+        }
+        if (facts.footprintNear()) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:footprint");
+        }
+        if (facts.slabNear()) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:ribs");
+        }
     }
 
     static Env env(ServerLevel level, ServerPlayer player) {

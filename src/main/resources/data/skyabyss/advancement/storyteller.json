@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:bell_lodge",
+  "display": {
+    "icon": {
+      "id": "minecraft:written_book"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.storyteller.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.storyteller.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "talk:skyabyss:storyteller"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -15,7 +15,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 潮殻の背の島を建てる (08 の 21 章「巨神の形の背中」)。最初の乗り込みと、配置の版が変わったときに一度だけ動く (数秒かかる)。
@@ -1344,8 +1343,7 @@ public final class TideIslandBuilder {
         }
         for (Inscription i : LORE_SIGNS) {
             if (i.facing() == Direction.UP) {
-                kit.set(i.pos(), Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8));
-                kit.writeSign(i.pos(), i.key(), net.minecraft.world.item.DyeColor.CYAN);
+                kit.standingTablet(i.pos(), i.key());
             } else {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }

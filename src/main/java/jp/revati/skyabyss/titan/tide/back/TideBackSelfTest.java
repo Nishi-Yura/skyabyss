@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import jp.revati.skyabyss.tablet.TabletBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -153,7 +153,7 @@ public final class TideBackSelfTest {
     // ---------------------------------------------------------------- 碑文・石・休み場・門
     private static void checkFixtures(ServerLevel back, List<String> failures) {
         for (Inscription i : LORE_SIGNS) {
-            check(back.getBlockEntity(i.pos()) instanceof SignBlockEntity, "inscription " + i.key() + " missing at " + i.pos(), failures);
+            check(back.getBlockEntity(i.pos()) instanceof TabletBlockEntity, "inscription " + i.key() + " missing at " + i.pos(), failures);
         }
         for (TideBackState.Trial t : TideBackState.Trial.values()) {
             check(back.getBlockState(TideBackTrials.stonePos(t)).is(TideBackSetup.CHIME_STONE.get()), "chime stone " + t + " missing", failures);
@@ -192,25 +192,18 @@ public final class TideBackSelfTest {
         for (int cx = TideTurtle.minX() >> 4; cx <= TideTurtle.maxX() >> 4; cx++) {
             for (int cz = TideTurtle.minZ() >> 4; cz <= TideTurtle.maxZ() >> 4; cz++) {
                 for (var be : back.getChunk(cx, cz).getBlockEntities().values()) {
-                    if (!(be instanceof SignBlockEntity sign)) {
+                    if (!(be instanceof TabletBlockEntity tablet)) {
                         continue;
                     }
                     count++;
                     if (!expected.contains(be.getBlockPos())) {
-                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                        failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions and trial entrances keep tablets)");
                     }
-                    for (int i = 0; i < 4; i++) {
-                        var line = sign.getFrontText().getMessage(i, false);
-                        if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
-                            keys.add(tc.getKey().substring(0, tc.getKey().lastIndexOf('.')));
-                        } else if (!line.getString().isEmpty()) {
-                            failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
-                        }
-                    }
+                    keys.add(tablet.key());
                 }
             }
         }
-        check(count == expected.size(), "found " + count + " signs on the tide back, expected " + expected.size(), failures);
+        check(count == expected.size(), "found " + count + " tablets on the tide back, expected " + expected.size(), failures);
         failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         var en = jp.revati.skyabyss.SignFit.lang("en_us");

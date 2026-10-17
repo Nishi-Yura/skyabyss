@@ -120,6 +120,8 @@ public final class SkillManager {
         if (rank == 1) {
             autoSlot(d, skill);
         }
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:learned");
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + skill.tree.name().toLowerCase(java.util.Locale.ROOT));
         sync(player);
         applyModifiers(player);
         ServerLevel level = player.serverLevel();

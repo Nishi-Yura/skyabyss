@@ -16,11 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 序盤の構造物の自己テスト (docs/design/17 の 4 章)。新しいワールドで 4 つが必ず建つ、スポーンからの距離、陸の上、
-// 宿りに鐘 (POI) があって語り部が立てる (村のない世界でも)、足跡のくぼみ、骨と石板の看板の幅、人の建物があれば場所をずらして壊さない。
+// 宿りに鐘 (POI) があって語り部が立てる (村のない世界でも)、足跡のくぼみ、骨と石板の碑の幅、人の建物があれば場所をずらして壊さない。
 // 結果は SELFTEST opening PASSED / FAILED
 public final class SiteSelfTest {
     private static int waited;
@@ -79,7 +78,7 @@ public final class SiteSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST opening PASSED (planned, four sites built, spawn at the camp, distances, on land, bell and storyteller, footprints, ribs, slab sign)");
+            SkyAbyss.LOGGER.info("SELFTEST opening PASSED (planned, four sites built, spawn at the camp, distances, on land, bell and storyteller, footprints, ribs, slab tablet)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST opening FAILED: {}", m));
         }
@@ -168,7 +167,7 @@ public final class SiteSelfTest {
         for (BlockPos c : OpeningSites.cairns(server)) {
             check(f, level.getBlockState(c).is(Blocks.STONE), "no cairn at " + c);
         }
-        // 骨: 骨のブロックが十分あり、石板の看板に文がある
+        // 骨: 骨のブロックが十分あり、石板の碑に文がある
         int bones = 0;
         for (int x = -56; x <= 56; x++) {
             for (int z = -56; z <= 56; z++) {
@@ -181,7 +180,8 @@ public final class SiteSelfTest {
         }
         check(f, bones >= 1500, "only " + bones + " bone blocks at the ribs");
         BlockPos slab = OpeningSites.slab(server).orElse(null);
-        check(f, slab != null && level.getBlockEntity(slab) instanceof SignBlockEntity, "no slab sign at " + slab);
+        check(f, slab != null && level.getBlockEntity(slab) instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet && tablet.key().equals(SiteKit.SLAB_SIGN), "no slab tablet at " + slab);
+        check(f, slab != null && !jp.revati.skyabyss.tablet.Tablets.text(SiteKit.SLAB_SIGN).getString().isEmpty(), "slab tablet has no text");
         check(f, SignFit.check(List.of(SiteKit.SLAB_SIGN)).isEmpty(), "slab sign does not fit: " + SignFit.check(List.of(SiteKit.SLAB_SIGN)));
     }
 

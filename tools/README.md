@@ -183,3 +183,8 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 ## 自己テスト
 
 `SKYABYSS_SELFTEST=1 ./gradlew runServer` (入口は `src/main/java/jp/revati/skyabyss/SelfTestRunner.java`。18 系統を 1 tick に 1 段ずつ流し、重い段のあとはサーバーが追いつくのを待つので、`max-tick-time` は既定の 60000 のままでよい。ログの `SELFTEST <名前> PASSED / FAILED` と最後の `SELFTEST PASSED / FAILED` を見る。`SELFTEST runner:` の行に段ごとの時間)。所要時間 (2026-10-16): 空の run/ で 146〜169 秒 (うちテスト 120〜143 秒、いちばん重い tick は 1章の空の峰で約 20 秒)、既存のワールド (本体の run/) で 76〜98 秒。
+
+## 進捗と碑の生成
+
+- `python tools/gen_advancements.py`: この Mod の進捗の木 (`data/skyabyss/advancement/`)、背景の絵、lang の `advancement.skyabyss.*` を作る。何度でも動かせる。仕様は `docs/design/19_advancements_and_tablets.md`
+- `python tools/gen_tablet_texture.py`: 碑 (`skyabyss:tablet`) の絵 2 枚、ブロック状態、モデル、lang の名前を作る

@@ -105,6 +105,9 @@ public final class Growth {
 
     // レベルが上がった知らせ: 鈴のような音 (近くの仲間にも小さく聞こえる)、光の粒、チャットに一行
     private static void celebrate(ServerPlayer player, GrowthData data, int gained) {
+        for (int n = data.level - gained + 1; n <= data.level; n++) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "level:" + n);
+        }
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.9f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.45, 0.7, 0.45, 0.02);

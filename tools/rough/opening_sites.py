@@ -986,12 +986,12 @@ def _recenter(g: Grid):
 
 
 def slab(g: Grid, rec=None):
-    """骨の足もとの石板: 石レンガの低い柱に、一行の碑文の看板 (薄青の光る文字。文は lang の sign.skyabyss.opening_slab)"""
+    """骨の足もとの石板: 石レンガの低い柱に、碑 (skyabyss:tablet。見ると字幕に文が出る。文は lang の sign.skyabyss.opening_slab)"""
     g.meta = {"rect": [-2, -2, 2, 3], "level": False}
     g.set(0, 0, 0, "stone_bricks")
     g.set(0, 1, 0, "stone_bricks")
     g.set(0, 2, 0, "stone_brick_slab[type=bottom]")
-    g.set(0, 1, 1, "spruce_wall_sign[facing=south,waterlogged=false]")
+    g.set(0, 1, 1, "skyabyss:tablet[facing=south,standing=false]")
     g.set(-1, 0, 1, "bone_block[axis=x]")
     g.set(2, 0, 2, "bone_block[axis=z]")
     g.mark("sign", 0, 1, 1)
@@ -1019,7 +1019,7 @@ NAMEFIX = {
     "campfire": (70, 52, 40), "bell": (222, 182, 60), "barrel": (125, 92, 52), "lectern": (160, 125, 75),
     "lantern": (240, 190, 90), "stone_button": (126, 126, 126), "water": (50, 100, 205), "bookshelf": (130, 100, 62),
     "dirt_path": (148, 122, 65), "glass_pane": (190, 220, 230), "chain": (60, 62, 70), "mud": (60, 52, 58),
-    "oak_leaves": (60, 110, 40), "spruce_wall_sign": (115, 85, 49), "spruce_door": (110, 80, 45), "spruce_fence_gate": (115, 85, 49),
+    "oak_leaves": (60, 110, 40), "spruce_wall_sign": (115, 85, 49), "tablet": (70, 105, 120), "spruce_door": (110, 80, 45), "spruce_fence_gate": (115, 85, 49),
     "hay_block": (190, 160, 40), "clay": (160, 166, 179), "coarse_dirt": (119, 85, 59), "podzol": (91, 63, 24),
     "red_carpet": (160, 39, 34), "light_gray_carpet": (142, 142, 135), "gray_carpet": (62, 68, 71), "white_carpet": (233, 236, 236),
     "bone_block": (229, 226, 208), "calcite": (223, 224, 221), "terracotta": (152, 94, 68),
@@ -1061,7 +1061,7 @@ def shape_of(name: str):
         return SHAPES["pane"]
     if n.endswith("_wall"):
         return SHAPES["wall"]
-    if n.endswith("_wall_sign"):
+    if n.endswith("_wall_sign") or n == "tablet":
         return SHAPES["sign"]
     if n.endswith("_door"):
         return SHAPES["door"]

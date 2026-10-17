@@ -32,6 +32,8 @@ public class SkyAbyss {
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
+        jp.revati.skyabyss.advancement.Beats.register(modEventBus);
+        jp.revati.skyabyss.registry.ModBlockEntities.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
