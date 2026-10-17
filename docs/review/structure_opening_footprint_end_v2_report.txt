@@ -1,0 +1,9 @@
+# opening_footprint_1  (minecraft:overworld, origin (-61, 46, -175), size 65x35x120, game time 1728)
+block kinds 47; most common: minecraft:stone 72682, minecraft:dirt 18744, minecraft:water[level=0] 17189, minecraft:diorite 6602, minecraft:andesite 6419, minecraft:granite 3910, minecraft:gravel 2758
+
+## walk from floor (-30, 64, -90): 6936 standing places reached
+  rim (-41, 71, -88): reached in 58 steps; path -30,64,-90 > -30,63,-92 > -30,62,-94 > -30,61,-95 > -30,60,-97 > -30,61,-98 > -30,59,-99 > -34,60,-99 > -35,59,-99 > -36,60,-99 > -37,61,-99 > -38,62,-99 > -39,63,-99 > -40,64,-99 > -40,63,-100 > -41,64,-100 > -41,63,-101 > -43,64,-103 > -43,65,-104 > -44,66,-104 > -46,65,-104 > -47,64,-104 > -48,63,-104 > -49,64,-104 > -49,65,-103 > -49,64,-102 > -49,65,-101 > -49,66,-100 > -49,65,-99 > -49,64,-98
+
+## signs: 0
+
+done in 2.1 s; images in docs\review/structure_opening_footprint_end_v2_*.png

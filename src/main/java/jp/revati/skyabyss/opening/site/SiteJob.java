@@ -78,6 +78,8 @@ public final class SiteJob {
     // 大きな構造物 (足跡・骨) 用: 地面に沿って掘る・盛る列 (世界の列 → relief の行)、木と草を片付ける列
     private Map<Long, int[]> reliefAt;
     private LongOpenHashSet touched;
+    // wetOk の部品で、水だった列 (触らない)
+    private LongOpenHashSet wetCols;
     // ANALYZE を何 tick かに分ける
     private boolean anaInit;
     private int anaX;
@@ -236,6 +238,7 @@ public final class SiteJob {
         int[] inner = bp.worldRect(rot, mirror, new BlockPos(origin.getX(), 0, origin.getZ()));
         if (!anaInit) {
             groundCache = new int[w * d];
+            wetCols = new LongOpenHashSet();
             anaHs = new ArrayList<>();
             anaX = x0;
             anaInit = true;
@@ -250,6 +253,11 @@ public final class SiteJob {
                 int g = ground(x, z);
                 groundCache[(x - x0) + (z - z0) * w] = g;
                 boolean in = x >= inner[0] && x <= inner[2] && z >= inner[1] && z <= inner[3];
+                if (g == WET && bp.wetOk) {
+                    wetCols.add(BlockPos.asLong(x, 0, z));
+                    groundCache[(x - x0) + (z - z0) * w] = origin.getY() - 1;
+                    continue;
+                }
                 if (g == WET) {
                     if (in && !skipCheck) {
                         SkyAbyss.LOGGER.info("Opening site {}: water at {} {}", label, x, z);
@@ -404,7 +412,9 @@ public final class SiteJob {
             if (selective) {
                 long key = BlockPos.asLong(x, 0, z);
                 int[] rel = reliefAt == null ? null : reliefAt.get(key);
-                if (rel != null) {
+                if (wetCols != null && wetCols.contains(key)) {
+                    // 水の列は触らない
+                } else if (rel != null) {
                     clearAbove(p, x, z, g + 1, 22, true);
                     applyRelief(p, x, z, g, rel);
                 } else if (touched.contains(key)) {
@@ -583,7 +593,7 @@ public final class SiteJob {
 
     // ---------------------------------------------------------------- RELOCATE: 人の建物・水があった。少しずらして調べ直す
     // 探すのは重い (地形生成の高さを何十回も問い合わせる) ので、別のスレッドでやって、できるまで tick を譲る (自己テストの blocking はその場で)。
-    // 輪ごとに 12 方向 (輪の幅 = 部品の半分の大きさの 0.6 倍、最小 14) を調べ、4 つの輪まで。ほかの構造物と重ならない
+    // 輪ごとに 12 方向 (輪の幅 = 部品の半分の大きさの半分、最小 14) を調べ、12 の輪まで。ほかの構造物と重ならず、骨は野営地から 205〜375、足跡は道から 30〜155 に収める
     private java.util.concurrent.CompletableFuture<BlockPos> relocSearch;
     private BlockPos home;
 
@@ -612,7 +622,7 @@ public final class SiteJob {
         if (home == null) {
             home = entry.pos;
         }
-        if (relocations > 4) {
+        if (relocations > 12) {
             SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, home, relocations - 1);
             data.entries().remove(entry);
             data.setDirty();
@@ -622,7 +632,7 @@ public final class SiteJob {
         int[] wr = bp.worldRect(rot, mirror, new BlockPos(home.getX(), 0, home.getZ()));
         int hx = (wr[2] - wr[0]) / 2 + 1;
         int hz = (wr[3] - wr[1]) / 2 + 1;
-        int step = Math.max(14, (int) (Math.max(hx, hz) * 0.6));
+        int step = Math.max(14, Math.max(hx, hz) / 2);
         int ring = relocations;
         int range = Math.max(hx, hz) >= 16 ? 40 : 8;
         BlockPos base = home;
@@ -635,7 +645,23 @@ public final class SiteJob {
             }
         }
         int mine = Math.max(hx, hz);
+        // 水がまじってよい部品は、乾いていてほしい範囲を半分に (池は水の列を残して建てる)
+        int coreX = bp.wetOk ? hx / 2 : hx;
+        int coreZ = bp.wetOk ? hz / 2 : hz;
         int k = relocations;
+        SiteData.Entry campE = data.first("camp");
+        SiteData.Entry shelterE = data.first("shelter");
+        BlockPos campPos = campE == null ? null : campE.pos;
+        BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
+        String kind = entry.kind;
+        List<BlockPos> otherPrints = new ArrayList<>();
+        if (kind.equals("footprint")) {
+            for (SiteData.Entry o : data.entries("footprint")) {
+                if (o != entry && Math.abs(o.index - entry.index) == 1) {
+                    otherPrints.add(o.pos);
+                }
+            }
+        }
         SiteFinder.Probe probe = new SiteFinder.Probe(level);
         java.util.function.Supplier<BlockPos> search = () -> {
             for (int attempt = 0; attempt < 12; attempt++) {
@@ -649,10 +675,10 @@ public final class SiteJob {
                         break;
                     }
                 }
-                if (!clear) {
+                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints)) {
                     continue;
                 }
-                SiteFinder.Area ar = SiteFinder.area(probe, x, z, hx, hz, range);
+                SiteFinder.Area ar = SiteFinder.area(probe, x, z, coreX, coreZ, range);
                 if (ar.ok()) {
                     return new BlockPos(x, ar.median() + 1, z);
                 }
@@ -664,6 +690,46 @@ public final class SiteJob {
         } else {
             relocSearch = java.util.concurrent.CompletableFuture.supplyAsync(search, net.minecraft.Util.backgroundExecutor());
         }
+    }
+
+    // 動かしても守る距離 (骨は野営地から、足跡は道から)
+    private static boolean withinLimits(String kind, int x, int z, @Nullable BlockPos camp, @Nullable BlockPos shelter, List<BlockPos> footprints) {
+        if (camp == null) {
+            return true;
+        }
+        if (kind.equals("ribs")) {
+            double d = Math.hypot(x - camp.getX(), z - camp.getZ());
+            if (d < 205 || d > 375) {
+                return false;
+            }
+            // 宿りとは違う方角 (82 度以上離す)
+            if (shelter != null) {
+                double a1 = Math.atan2(z - camp.getZ(), x - camp.getX());
+                double a2 = Math.atan2(shelter.getZ() - camp.getZ(), shelter.getX() - camp.getX());
+                double diff = Math.abs(Math.toDegrees(a1 - a2));
+                diff = diff > 180 ? 360 - diff : diff;
+                return diff >= 82;
+            }
+            return true;
+        }
+        if (kind.equals("footprint") && shelter != null) {
+            double dx = shelter.getX() - camp.getX();
+            double dz = shelter.getZ() - camp.getZ();
+            double len = Math.sqrt(dx * dx + dz * dz);
+            double dp = SiteFinder.distToPath(x, z, camp, dx / len, dz / len, len);
+            if (dp < 30 || dp > 155) {
+                return false;
+            }
+            // 隣の足跡との一歩の間隔 (66〜135)
+            for (BlockPos o : footprints) {
+                double dd = Math.hypot(x - o.getX(), z - o.getZ());
+                if (dd < 66 || dd > 135) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return true;
     }
 
     private void applyRelocation(@Nullable BlockPos found) {

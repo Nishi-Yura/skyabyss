@@ -262,13 +262,19 @@ public final class SiteBuilds {
     private static SiteData.Entry find(CommandContext<CommandSourceStack> ctx) {
         String kind = StringArgumentType.getString(ctx, "kind");
         int index = IntegerArgumentType.getInteger(ctx, "index");
-        SiteData data = SiteData.get(ctx.getSource().getServer().overworld());
+        SiteData data = ctx.getSource().getServer().overworld() == null ? null : SiteData.get(ctx.getSource().getServer().overworld());
+        // footprint_last = 足跡の並びの最後 (地へ潜った穴のある足跡)
+        boolean last = kind.equals("footprint_last");
+        if (last) {
+            kind = "footprint";
+        }
+        SiteData.Entry best = null;
         for (SiteData.Entry e : data.entries(kind)) {
-            if (e.index == index) {
-                return e;
+            if (last ? best == null || e.index > best.index : e.index == index) {
+                best = e;
             }
         }
-        return null;
+        return best;
     }
 
     private static int info(CommandContext<CommandSourceStack> ctx) {

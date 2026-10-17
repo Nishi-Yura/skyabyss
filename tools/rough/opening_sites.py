@@ -81,7 +81,7 @@ class Grid:
         r = self.relief.get((x, z))
         if r is None:
             return -1
-        return -1 - r[1] if r[0] == 0 else -1 + r[1]
+        return -1 - r[1] if r[0] == 0 else -1 + r[1]  # 物 (kind 2) も固い。Java の waterOk と同じ
 
     def pool_ok(self, x, z):
         """雨水を張ってよいか (規則は SiteJob.waterOk と同じ): 四方が水面より高い壁か、同じ高さの雨水の列"""
@@ -675,21 +675,18 @@ def _recenter_rect(g: Grid, margin=2):
 
 
 def _foot_marks(g: Grid, d_at):
-    """印: floor = 土踏まずの底、rim = 縁の外 (歩いて登れるかの検査)"""
+    """印: floor = 土踏まずの底、rim = 縁の少し外 (落ちても歩いて登れるかの検査)、edge = 縁"""
     g.mark("floor", 0, 0, 3)
-    for x in range(26, 0, -1):
-        if not any((x + k, 5) in g.relief for k in range(-1, 2)):
-            g.mark("rim", x, 0, 5)
-            break
     edge = max((x for (x, z), r in g.relief.items() if z == 5 and r[0] == 0), default=8)
     g.mark("edge", edge, 0, 5)
+    g.mark("rim", edge + 5, 0, 5)
     g.mark("center", 0, 0, 3)
 
 
 def _footprint(g: Grid, rng, kind):
     xs, zs, d = foot_depth(kind, rng)
     build_relief(g, xs, zs, d, rng, front_boost=0.4)
-    g.meta = {"rect": _recenter_rect(g), "level": False, "relief": True, "height": 7, "ring": 2}
+    g.meta = {"rect": _recenter_rect(g), "level": False, "relief": True, "height": 7, "ring": 2, "wetOk": True}
     _foot_marks(g, d)
 
 
@@ -738,10 +735,11 @@ def footprint_end(g: Grid, rng=None):
             hh2 = max(0, hh - (abs(dx) > w - 1))
             if hh2 >= 1 and not (k > 18 and rng.random() < 0.18):
                 g.relief[(sway + dx, z)] = [1, hh2, M + rng.choice(RIM_TOPS), M + "dirt"]
-    g.meta = {"rect": _recenter_rect(g), "level": False, "relief": True, "height": 8, "ring": 2}
+    g.meta = {"rect": _recenter_rect(g), "level": False, "relief": True, "height": 8, "ring": 2, "wetOk": True}
     g.mark("floor", 0, 0, 3)
-    g.mark("rim", 22, 0, 5)
-    g.mark("edge", max((x for (x, z), r in g.relief.items() if z == 5 and r[0] == 0), default=8), 0, 5)
+    edge = max((x for (x, z), r in g.relief.items() if z == 5 and r[0] == 0), default=8)
+    g.mark("edge", edge, 0, 5)
+    g.mark("rim", edge + 5, 0, 5)
     g.mark("center", 0, 0, 3)
 
 
@@ -919,7 +917,7 @@ def ribs_a(g: Grid, rng):
     _ribs_common(g)
     g.mark("under", 0, 0, 12)
     g.mark("far", 0, 0, 30)
-    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "clearNear": 3, "height": 40}
+    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "wetOk": True, "clearNear": 3, "height": 40}
 
 
 def ribs_b(g: Grid, rng):
@@ -945,7 +943,7 @@ def ribs_b(g: Grid, rng):
     g.marks["slab"] = (0, 0, 9)
     g.mark("under", 0, 0, 12)
     g.mark("far", -6, 0, 30)
-    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "clearNear": 3, "height": 40}
+    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "wetOk": True, "clearNear": 3, "height": 40}
     _recenter(g)
 
 
@@ -966,7 +964,7 @@ def ribs_c(g: Grid, rng):
     g.marks["slab"] = (-12, 0, 8)
     g.mark("under", -14, 0, 8)
     g.mark("far", -14, 0, 26)
-    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "clearNear": 3, "height": 36}
+    g.meta = {"rect": _auto_rect(g), "level": False, "anchor": True, "wetOk": True, "clearNear": 3, "height": 36}
     _recenter(g)
 
 
@@ -1259,7 +1257,7 @@ def _v2_views(site, g):
                 ("縁から引いて見る", (ex + 24.0, 6.0, ez + 12), (0.0, -3.0, -6), 120),
                 ("足跡の底から見上げる", (fx + 0.5, -1 - 6 + 1.7, fz + 4), (ex + 4, 6.0, ez - 6), 90)]
     sx, _, sz = g.marks["slab"]
-    return [("遠くから (人は石板)", ((x0 + x1) / 2 - 20, 1.7, z1 + 62), ((x0 + x1) / 2, 16.0, 6.0), 190),
+    return [("斜め遠くから (人は石板)", (x0 - 30, 1.7, z1 + 60), ((x0 + x1) / 2 + 10, 14.0, 6.0), 200),
             ("骨の列の脇から", (x0 - 14, 1.7, z1 + 8), ((x0 + x1) / 2 + 6, 14.0, 4.0), 160),
             ("骨の下から見上げる", (sx - 5.5, 1.7, sz + 9), (sx + 5.0, 24.0, sz - 2.0), 120)]
 
@@ -1314,6 +1312,34 @@ def compare(site, keys="abc"):
         for i, e in enumerate(eyes):
             e.save(out / site / f"{k}_eye{i}.png")
     return cols
+
+
+def trail_figure():
+    """推奨の足跡 (A) が 4 歩並んだ道 (北へ歩いた。いちばん先の足跡は火口になり、土のうねりが続く) を真上から"""
+    import random
+    g = Grid()
+    for i in range(4):
+        sub = Grid()
+        (footprint_a if i < 3 else footprint_end)(sub, random.Random(7 + i))
+        mir = i % 2 == 1
+        ox, oz = (-14 if mir else 14), -96 * i
+        for (x, z), r in sub.relief.items():
+            g.relief[((-x if mir else x) + ox, z + oz)] = r
+        g.persons.append((ox + 40, 0, oz + 5)) if i == 0 else None
+    g.meta = {"rect": _auto_rect_relief(g)}
+    d = to_dump("footprint", g, margin=6)
+    srender._colors = lambda dd: colors_of(dd).astype(np.int16)
+    top = srender.top(d, scale=3)
+    OUTV = SITE_OUT["footprint"]
+    OUTV.mkdir(parents=True, exist_ok=True)
+    top = srender.label(top, "recommended A: 4 steps walking north, 96 blocks apart; the last one dives into a crater (yellow dot = a person)") if hasattr(srender, "label") else top
+    top.save(OUTV / "footprint_trail.png")
+
+
+def _auto_rect_relief(g):
+    xs = [k[0] for k in g.relief]
+    zs = [k[1] for k in g.relief]
+    return [min(xs) - 2, min(zs) - 2, max(xs) + 2, max(zs) + 2]
 
 
 def sheet(title, columns, note=""):
@@ -1401,6 +1427,8 @@ def main():
             (DATA / f"{name}.json").write_text(json.dumps(bp, separators=(",", ":")), encoding="utf-8")
         return
     OUT.mkdir(parents=True, exist_ok=True)
+    if "footprint" in args.sites.split(","):
+        trail_figure()
     for s in args.sites.split(","):
         cols = compare(s, args.keys)
         sh = sheet(f"{TITLES[s]} 3 案 (上から・斜め・人の目線)", cols, "ブロックの配置をそのまま描いた図。採用案は README.md")

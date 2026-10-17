@@ -49,6 +49,8 @@ public final class Blueprint {
     public final List<BlockState> palette = new ArrayList<>();
     // 骨など: 部品のブロックの近く (この距離まで) の木と草だけを片付ける。0 なら範囲の全部 (relief のときは relief の列の 1 まわり)
     public int clearNear;
+    // 範囲に池・水たまりがあってもよい (足跡は池の縁にまたがってもよい、骨は浅い水に立ってもよい)。水の列は触らない。人の建物は今までどおり避ける
+    public boolean wetOk;
 
     private Blueprint(String name) {
         this.name = name;
@@ -107,6 +109,7 @@ public final class Blueprint {
             if (meta.has("height")) {
                 bp.maxY = Math.max(bp.maxY, meta.get("height").getAsInt());
             }
+            bp.wetOk = meta.has("wetOk") && meta.get("wetOk").getAsBoolean();
             if (meta.has("clearNear")) {
                 bp.clearNear = meta.get("clearNear").getAsInt();
             }

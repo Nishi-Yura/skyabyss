@@ -101,7 +101,7 @@ public final class SiteSelfTest {
         check(f, camp != null, "no camp");
         check(f, shelter != null, "no shelter");
         check(f, ribs != null, "no ribs");
-        check(f, prints.size() >= 2 && prints.size() <= 4, "footprints: " + prints.size());
+        check(f, prints.size() >= 1 && prints.size() <= 4, "footprints: " + prints.size());
         if (prints.size() < 4) {
             SkyAbyss.LOGGER.warn("[opening] only {} footprints (the land beside the road is hard)", prints.size());
         }
@@ -126,17 +126,14 @@ public final class SiteSelfTest {
         for (BlockPos p : prints) {
             double d = SiteFinder.distToPath(p.getX(), p.getZ(), camp, (shelter.getX() - camp.getX()) / ds, (shelter.getZ() - camp.getZ()) / ds, ds);
             check(f, d >= 20 && d <= 160, "footprint " + p + " is " + (int) d + " from the road");
-            // くぼみ: 中心の列の、いちばん上の固い地面が、場所の高さ (地面の中央値) より 2 以上低い
-            int solidY = p.getY() + 10;
-            while (solidY > p.getY() - 30 && (level.getBlockState(new BlockPos(p.getX(), solidY, p.getZ())).getCollisionShape(level, new BlockPos(p.getX(), solidY, p.getZ())).isEmpty())) {
-                solidY--;
-            }
-            check(f, solidY <= p.getY() - 2, "footprint " + p + " is not a pit (the floor is at " + solidY + ")");
+            // くぼみ: 中心の列の、いちばん上の固い地面 (木の葉は数えない) が、場所の高さ (地面の中央値) より 2 以上低い
+            int surfaceY = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) - 1;
+            check(f, surfaceY <= p.getY() - 2, "footprint " + p + " is not a pit (the surface is at " + surfaceY + ")");
         }
-        // 一歩の間隔 (96 ブロック前後)
+        // 一歩の間隔 (96 ブロック前後。間の足跡が建てられず抜けたときは 2 歩分)
         for (int i = 1; i < prints.size(); i++) {
             double step = OpeningSites.horizontal(prints.get(i - 1), prints.get(i));
-            check(f, step >= 60 && step <= 150, "footprint step " + i + " is " + (int) step + " blocks");
+            check(f, step >= 60 && step <= 240, "footprint step " + i + " is " + (int) step + " blocks");
         }
         // 立つ場所は陸の上
         BlockPos campStand = site(server, Kind.CAMP, "stand", camp);

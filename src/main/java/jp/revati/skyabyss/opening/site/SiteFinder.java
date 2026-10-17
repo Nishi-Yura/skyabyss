@@ -110,6 +110,11 @@ public final class SiteFinder {
 
     // fine = true なら 5x5 (野営地のように、一度しか探さない所向け)
     public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine) {
+        return area(p, cx, cz, halfX, halfZ, maxRange, fine, true);
+    }
+
+    // biome = false なら群系を問わない (大きな構造物の最後の手段)
+    public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine, boolean biome) {
         List<Integer> hs = new ArrayList<>();
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
@@ -135,7 +140,7 @@ public final class SiteFinder {
                 }
             }
         }
-        if (!p.biomeOk(cx, cz) || !p.biomeOk(cx - halfX, cz - halfZ) || !p.biomeOk(cx + halfX, cz + halfZ)) {
+        if (biome && (!p.biomeOk(cx, cz) || !p.biomeOk(cx - halfX, cz - halfZ) || !p.biomeOk(cx + halfX, cz + halfZ))) {
             return new Area(false, min, max, 0, hs.size());
         }
         hs.sort(Comparator.naturalOrder());
@@ -289,9 +294,10 @@ public final class SiteFinder {
     // 足跡の中心から、道・宿り・野営地までの下限 (足跡の半分の大きさ + 余白)
     static final int FOOT_ROAD_MIN = 38;
     static final int FOOT_SITE_MIN = 62;
-    // 段階: {高さの差の上限, 道からの下限, 上限, 本数, 向きを全部使うか}
-    static final int[][] FOOT_STAGES = {{10, 38, 85, 4, 0}, {18, 38, 100, 4, 0}, {30, 38, 120, 4, 0}, {46, 36, 135, 4, 0}, {30, 36, 120, 3, 0},
-            {60, 34, 140, 3, 1}, {60, 34, 150, 2, 1}, {90, 32, 150, 1, 1}};
+    // 段階: {高さの差の上限, 道からの下限, 上限, 本数, 向きを全部使うか, 乾いていてほしい範囲 (部品の大きさに対する %。小さい池は水の列を残して建てる)、群系を見るか}
+    static final int[][] FOOT_STAGES = {{10, 38, 85, 4, 0, 100, 1}, {18, 38, 100, 4, 0, 100, 1}, {30, 38, 120, 4, 0, 100, 1}, {46, 36, 135, 4, 0, 100, 1},
+            {70, 36, 140, 4, 0, 100, 1}, {30, 36, 120, 3, 0, 100, 1}, {70, 36, 140, 3, 0, 100, 1}, {60, 34, 140, 3, 1, 100, 1}, {60, 34, 150, 2, 1, 100, 1},
+            {90, 32, 150, 1, 1, 100, 1}, {120, 32, 155, 3, 0, 40, 0}, {200, 30, 155, 2, 1, 40, 0}, {400, 30, 155, 1, 1, 15, 0}};
 
     static void planFootprints(Probe p, List<Planned> out, BlockPos camp, BlockPos shelter) {
         double dx = shelter.getX() - camp.getX();
@@ -317,7 +323,7 @@ public final class SiteFinder {
                         for (int[] dir : dirs) {
                             double sx = camp.getX() + ux * len * frac - uz * off * side;
                             double sz = camp.getZ() + uz * len * frac + ux * off * side;
-                            List<BlockPos> prints = trail(p, sx, sz, dir, st[0], st[3], camp, shelter, ux, uz, len, st[1], st[2]);
+                            List<BlockPos> prints = trail(p, sx, sz, dir, st[0], st[3], camp, shelter, ux, uz, len, st[1], st[2], st[5], st[6] == 1);
                             if (prints != null) {
                                 addTrail(out, prints, dir);
                                 if (st[3] < PRINTS || st[0] > 30) {
@@ -343,10 +349,10 @@ public final class SiteFinder {
     // start から dir へ、count 歩の並びを探す (一歩ごとに少し前後・左右へずらして、乾いた所を探す)。見つからなければ null
     @Nullable
     private static List<BlockPos> trail(Probe p, double sx, double sz, int[] dir, int maxRange, int count, BlockPos camp, BlockPos shelter, double ux,
-            double uz, double len, int dpMin, int dpMax) {
+            double uz, double len, int dpMin, int dpMax, int corePercent, boolean biome) {
         boolean ns = dir[0] == 0;
-        int hx = ns ? FOOT_HALF_X : FOOT_HALF_Z;
-        int hz = ns ? FOOT_HALF_Z : FOOT_HALF_X;
+        int hx = (ns ? FOOT_HALF_X : FOOT_HALF_Z) * corePercent / 100;
+        int hz = (ns ? FOOT_HALF_Z : FOOT_HALF_X) * corePercent / 100;
         // 進む向きの右手 (南向きなら西)
         int rx = -dir[1];
         int rz = dir[0];
@@ -369,7 +375,7 @@ public final class SiteFinder {
                     if (!prints.isEmpty() && Math.hypot(x - prints.get(prints.size() - 1).getX(), z - prints.get(prints.size() - 1).getZ()) < 70) {
                         continue;
                     }
-                    Area ar = area(p, x, z, hx, hz, maxRange);
+                    Area ar = area(p, x, z, hx, hz, maxRange, false, biome);
                     if (ar.ok()) {
                         prints.add(new BlockPos(x, ar.median() + 1, z));
                         found = true;
@@ -401,14 +407,15 @@ public final class SiteFinder {
     // 必ず建つように、高さの差の上限を段階的にゆるめ (18 → 30 → 46 → 70 → 120)、最後は距離 200〜380・宿りと 80 度以上離れた乾いた所ならどこでもよい
     static final int RIB_HALF_LONG = 52;
     static final int RIB_HALF_SHORT = 25;
-    static final int[] RIB_RANGES = {18, 30, 46, 70, 120};
+    // 段階: {高さの差の上限, 乾いていてほしい範囲 (骨の大きさに対する %。池は水の列を残して建てる)、群系を見るか}
+    static final int[][] RIB_PASSES = {{18, 100, 1}, {30, 100, 1}, {46, 100, 1}, {70, 100, 1}, {120, 100, 1}, {80, 50, 1}, {200, 30, 0}, {1000, 8, 0}};
 
     @Nullable
     static Spot findRibs(Probe p, BlockPos camp, double shelterAngle) {
-        for (int pass = 0; pass < RIB_RANGES.length; pass++) {
+        for (int pass = 0; pass < RIB_PASSES.length; pass++) {
             Spot best = null;
             double bestScore = -1e9;
-            boolean last = pass == RIB_RANGES.length - 1;
+            boolean last = pass >= 5;
             int degFrom = last ? 80 : 90;
             for (int deg = degFrom; deg <= 360 - degFrom; deg += last ? 8 : 10) {
                 double a = shelterAngle + Math.toRadians(deg);
@@ -417,9 +424,9 @@ public final class SiteFinder {
                     int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
                     int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
                     int rot = Math.abs(x - camp.getX()) > Math.abs(z - camp.getZ()) ? 1 : 0;
-                    int hx = rot == 1 ? RIB_HALF_SHORT : RIB_HALF_LONG;
-                    int hz = rot == 1 ? RIB_HALF_LONG : RIB_HALF_SHORT;
-                    Area ar = area(p, x, z, hx, hz, RIB_RANGES[pass]);
+                    int hx = (rot == 1 ? RIB_HALF_SHORT : RIB_HALF_LONG) * RIB_PASSES[pass][1] / 100;
+                    int hz = (rot == 1 ? RIB_HALF_LONG : RIB_HALF_SHORT) * RIB_PASSES[pass][1] / 100;
+                    Area ar = area(p, x, z, hx, hz, RIB_PASSES[pass][0], false, RIB_PASSES[pass][2] == 1);
                     if (!ar.ok()) {
                         continue;
                     }
@@ -435,7 +442,7 @@ public final class SiteFinder {
             }
             if (best != null) {
                 if (pass > 0) {
-                    SkyAbyss.LOGGER.info("Opening sites: the rib bones need a height range of up to {}", RIB_RANGES[pass]);
+                    SkyAbyss.LOGGER.info("Opening sites: the rib bones need a height range of up to {} (dry core {}%)", RIB_PASSES[pass][0], RIB_PASSES[pass][1]);
                 }
                 return best;
             }
