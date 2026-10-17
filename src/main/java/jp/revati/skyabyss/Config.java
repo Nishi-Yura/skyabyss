@@ -67,6 +67,26 @@ public final class Config {
             .comment("成長の表示 (Lv と細いバー) の置き場。TOP_LEFT = 画面の左上, XP_BAR = 下の経験値バーの左 (画面が狭くて入らなければ左上)")
             .defineEnum("growthHudPosition", GrowthHudPosition.TOP_LEFT);
 
+    // 画面の知らせ (client/notice/NoticeClient, docs/design/18_notices.md)
+    public static final ModConfigSpec.DoubleValue NOTICE_SPEED = CLIENT_BUILDER
+            .comment("字幕・中央の演出・上の帯の出ている長さの倍率 (0.5 = ゆっくり, 1 = 標準, 2 = 速い)")
+            .defineInRange("noticeSpeed", 1.0, 0.5, 2.0);
+
+    // 知らせの出し先: TOAST = 画面の演出だけ (既定)、CHAT = 今までどおりチャットだけ、BOTH = 両方
+    public enum NotifyMode {
+        TOAST,
+        CHAT,
+        BOTH
+    }
+
+    public static final ModConfigSpec.EnumValue<NotifyMode> NOTIFY_MODE = CLIENT_BUILDER
+            .comment("知らせの出し先。TOAST = 画面の演出 (字幕・札・帯) だけ, CHAT = チャットだけ (今までどおり), BOTH = 両方。流れた知らせは N の「知らせの記録」で読み返せる")
+            .defineEnum("notifyMode", NotifyMode.TOAST);
+
+    public static final ModConfigSpec.BooleanValue OBJECTIVE_STRIP = CLIENT_BUILDER
+            .comment("メインの目的を左上の細い帯に常に出すか (false = 出さない。全文は U のクエストログ)")
+            .define("objectiveStrip", true);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {

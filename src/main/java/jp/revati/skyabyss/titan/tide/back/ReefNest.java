@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -60,7 +61,7 @@ public class ReefNest extends Mob {
         if (!open() && !source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) {
             if (source.getEntity() instanceof ServerPlayer player && level().getGameTime() - lastClosedNotice > 20) {
                 lastClosedNotice = level().getGameTime();
-                player.displayClientMessage(ModText.deny("message.skyabyss.tide.nest_closed"), true);
+                Notice.bar(player, ModText.deny("message.skyabyss.tide.nest_closed"));
             }
             level().playSound(null, getX(), getY() + 1, getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1f, 0.6f);
             return false;
@@ -69,7 +70,7 @@ public class ReefNest extends Mob {
         if (hit && level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY() + 1.5, getZ(), 12, 0.8, 0.4, 0.8, 0.05);
             if (source.getEntity() instanceof ServerPlayer player && isAlive()) {
-                player.displayClientMessage(ModText.battle("message.skyabyss.tide.nest_hp", (int) Math.ceil(getHealth()), (int) getMaxHealth()), true);
+                Notice.bar(player, ModText.battle("message.skyabyss.tide.nest_hp", (int) Math.ceil(getHealth()), (int) getMaxHealth()));
             }
         }
         return hit;

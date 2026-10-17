@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
 import java.util.ArrayList;
@@ -105,16 +106,16 @@ public final class TideGarden {
         }
         TideBackState state = TideBackState.get(level);
         if (state.rung(TideBackState.Trial.WEST)) {
-            player.displayClientMessage(ModText.hint(state.sleeping() == TideBackState.Trial.WEST
-                    ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.clam_empty"), true);
+            Notice.bar(player, ModText.hint(state.sleeping() == TideBackState.Trial.WEST
+                    ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.clam_empty"));
             return true;
         }
         if (pearl != Pearl.CLAM) {
-            player.displayClientMessage(ModText.hint("message.skyabyss.tide.clam_empty"), true);
+            Notice.bar(player, ModText.hint("message.skyabyss.tide.clam_empty"));
             return true;
         }
         if (!player.getInventory().add(new ItemStack(TideBackSetup.TIDE_PEARL.get()))) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.tide.pearl_full"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.tide.pearl_full"));
             return true;
         }
         pearl = Pearl.OUT;
@@ -122,14 +123,14 @@ public final class TideGarden {
         level.setBlock(pos, Blocks.WHITE_TERRACOTTA.defaultBlockState(), 3);
         level.playSound(null, pos, TideBackSetup.PEARL_TAKE.get(), SoundSource.PLAYERS, 1.5f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.05);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.tide.pearl_taken"));
+        Notice.narrate(player, "message.skyabyss.tide.pearl_taken");
         return true;
     }
 
     // 祭壇の潮鳴り石に、真珠を据える
     static boolean placePearl(ServerLevel level, ServerPlayer player) {
         if (!holds(player)) {
-            player.displayClientMessage(ModText.hint("message.skyabyss.tide.altar_hint"), true);
+            Notice.bar(player, ModText.hint("message.skyabyss.tide.altar_hint"));
             return false;
         }
         strip(player);
@@ -160,7 +161,7 @@ public final class TideGarden {
         level.sendParticles(ParticleTypes.BUBBLE_POP, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 30, 0.4, 0.4, 0.4, 0.05);
         Component msg = ModText.deny(reasonKey);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, GARDEN.aabb().inflate(8, 10, 8))) {
-            p.sendSystemMessage(msg);
+            Notice.send(p, msg);
         }
     }
 

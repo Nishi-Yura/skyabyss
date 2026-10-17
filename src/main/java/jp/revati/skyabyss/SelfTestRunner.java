@@ -82,6 +82,8 @@ public final class SelfTestRunner {
         steps.addAll(TitanBackSelfTest.buildSteps());
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
+        // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
+        steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));

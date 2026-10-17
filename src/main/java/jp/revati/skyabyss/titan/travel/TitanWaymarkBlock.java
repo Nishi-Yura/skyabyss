@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.travel;
 
+import jp.revati.skyabyss.notice.Notice;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
@@ -98,11 +99,11 @@ public class TitanWaymarkBlock extends HorizontalDirectionalBlock {
 
     static void register(ServerPlayer player, ServerLevel level, BlockPos pos) {
         if (level.dimension() != Level.OVERWORLD) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.travel.waymark.wrong_dimension"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.travel.waymark.wrong_dimension"));
             return;
         }
         if (!level.canSeeSky(pos.above())) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.travel.waymark.no_sky"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.travel.waymark.no_sky"));
             return;
         }
         TravelWorldData.Waymark mark = remember(level, pos, "");
@@ -111,12 +112,12 @@ public class TitanWaymarkBlock extends HorizontalDirectionalBlock {
             case ADDED -> {
                 level.playSound(null, pos, TravelSetup.WAYMARK_SOUND.get(), SoundSource.BLOCKS, 1f, 1f);
                 level.sendParticles(ParticleTypes.GLOW, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 12, 0.3, 0.4, 0.3, 0.02);
-                player.sendSystemMessage(ModText.progress("message.skyabyss.travel.waymark.added",
+                Notice.unlock(player, "message.skyabyss.travel.waymark.added",
                         mark.name().isEmpty() ? Voyages.waymarkName(mark.biome()) : net.minecraft.network.chat.Component.literal(mark.name()),
-                        state.waymarks.size(), TravelState.MAX_WAYMARKS));
+                        state.waymarks.size(), TravelState.MAX_WAYMARKS);
             }
-            case ALREADY -> player.displayClientMessage(ModText.hint("message.skyabyss.travel.waymark.already"), true);
-            case FULL -> player.displayClientMessage(ModText.deny("message.skyabyss.travel.waymark.full", TravelState.MAX_WAYMARKS), true);
+            case ALREADY -> Notice.bar(player, ModText.hint("message.skyabyss.travel.waymark.already"));
+            case FULL -> Notice.bar(player, ModText.deny("message.skyabyss.travel.waymark.full", TravelState.MAX_WAYMARKS));
         }
     }
 

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.loot;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -313,7 +314,7 @@ public final class TitanLoot {
             } else if (canReceive(player) && jp.revati.skyabyss.record.Keepsakes.fragmentMissing(player)) {
                 // 受け取ったのにどこにも見当たらない欠片は、鼓動のそばで再び見つかる (11 の 4章)
                 items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
-                player.sendSystemMessage(ModText.lore("skyabyss_record.guard.fragment_restored"));
+                Notice.narrate(player, "skyabyss_record.guard.fragment_restored");
             }
             Roll roll = rollHeart(r, level.random);
             items.addAll(roll.items());
@@ -327,17 +328,17 @@ public final class TitanLoot {
                 continue;
             }
             if (fragment) {
-                player.sendSystemMessage(ModText.progress("message.skyabyss.fragment_received"));
+                Notice.unlock(player, "message.skyabyss.fragment_received");
             }
-            player.sendSystemMessage(ModText.progress("message.skyabyss.boss_reward"));
-            player.sendSystemMessage(rewardLine(items));
+            Notice.narrate(player, "message.skyabyss.boss_reward");
+            Notice.gain(player, rewardLine(items));
             announcePieces(level, player, r, roll);
             if (roll.guaranteed() != null) {
-                player.sendSystemMessage(ModText.lore("message.skyabyss.memory_guarantee"));
+                Notice.narrate(player, "message.skyabyss.memory_guarantee");
             } else if (roll.pityShards()) {
-                player.sendSystemMessage(ModText.lore("message.skyabyss.memory_all_owned"));
+                Notice.narrate(player, "message.skyabyss.memory_all_owned");
             }
-            player.sendSystemMessage(memoryLine(r));
+            Notice.gain(player, memoryLine(r));
             tellHeld(player, held);
             if (first) {
                 offerChoice(player);
@@ -357,8 +358,8 @@ public final class TitanLoot {
             if (player == null) {
                 continue;
             }
-            player.sendSystemMessage(ModText.progress("message.skyabyss.mid_boss_reward"));
-            player.sendSystemMessage(rewardLine(roll.items()));
+            Notice.narrate(player, "message.skyabyss.mid_boss_reward");
+            Notice.gain(player, rewardLine(roll.items()));
             announcePieces(level, player, r, roll);
             tellHeld(player, held);
         }
@@ -457,9 +458,9 @@ public final class TitanLoot {
             return;
         }
         if (canReceive(player)) {
-            player.sendSystemMessage(ModText.deny("message.skyabyss.reward_overflow", held));
+            Notice.warn(player, "message.skyabyss.reward_overflow", held);
         } else {
-            player.sendSystemMessage(ModText.hint("message.skyabyss.reward_pending"));
+            Notice.hint(player, "message.skyabyss.reward_pending");
         }
     }
 
@@ -468,7 +469,7 @@ public final class TitanLoot {
         TitanMemoryData data = memory(player.server);
         if (!data.hasPending(player.getUUID())) {
             if (!quietIfEmpty) {
-                player.sendSystemMessage(ModText.hint("message.skyabyss.reward_none_pending"));
+                Notice.hint(player, "message.skyabyss.reward_none_pending");
             }
             return;
         }
@@ -493,9 +494,9 @@ public final class TitanLoot {
                 held++;
             }
         }
-        player.sendSystemMessage(ModText.progress("message.skyabyss.reward_delivered"));
+        Notice.unlock(player, "message.skyabyss.reward_delivered");
         if (!given.isEmpty()) {
-            player.sendSystemMessage(rewardLine(given));
+            Notice.gain(player, rewardLine(given));
         }
         tellHeld(player, held);
     }
@@ -542,15 +543,15 @@ public final class TitanLoot {
             boolean fresh = roll.fresh().contains(piece);
             if (isExclusive(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-                player.sendSystemMessage(ModText.battle(fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", itemLink(shown)));
+                Notice.alert(player, fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", itemLink(shown));
                 for (ServerPlayer other : level.players()) {
                     if (other != player) {
-                        other.sendSystemMessage(ModText.progress("message.skyabyss.legendary_other", player.getDisplayName(), itemLink(shown)));
+                        Notice.unlock(other, "message.skyabyss.legendary_other", player.getDisplayName(), itemLink(shown));
                     }
                 }
             } else if (fresh) {
                 player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
-                player.sendSystemMessage(ModText.progress("message.skyabyss.gear_new", itemLink(shown), collected(r), collection().size()));
+                Notice.unlock(player, "message.skyabyss.gear_new", itemLink(shown), collected(r), collection().size());
             }
         }
     }
@@ -583,7 +584,7 @@ public final class TitanLoot {
 
     // 初回クリアの選択報酬: 押すと /titanmemory choose が走る
     private static void offerChoice(ServerPlayer player) {
-        player.sendSystemMessage(ModText.battle("message.skyabyss.first_clear"));
+        Notice.alert(player, "message.skyabyss.first_clear");
         MutableComponent row = Component.literal("   ");
         for (Item item : exclusives()) {
             ItemStack stack = new ItemStack(item);
@@ -674,7 +675,7 @@ public final class TitanLoot {
         ResourceLocation choice = ResourceLocationArgument.getId(ctx, "item");
         Item item = exclusives().stream().filter(i -> id(i).equals(choice.toString())).findFirst().orElse(null);
         if (!r.choicePending || item == null) {
-            player.sendSystemMessage(ModText.deny("message.skyabyss.first_clear_none"));
+            Notice.warn(player, "message.skyabyss.first_clear_none");
             return 0;
         }
         r.choicePending = false;
@@ -683,7 +684,7 @@ public final class TitanLoot {
         ItemStack gift = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
         int held = handOver(player.server, player.getUUID(), player, List.of(gift), 0);
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        player.sendSystemMessage(ModText.battle("message.skyabyss.legendary_new", itemLink(gift)));
+        Notice.alert(player, "message.skyabyss.legendary_new", itemLink(gift));
         tellHeld(player, held);
         return 1;
     }
@@ -740,7 +741,7 @@ public final class TitanLoot {
         syncOwned(player, r);
         String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player));
         if (denial != null) {
-            player.sendSystemMessage(ModText.deny(denial));
+            Notice.warn(player, denial);
             return false;
         }
         ForgeRules.payExchange(player);
@@ -750,7 +751,7 @@ public final class TitanLoot {
         ItemStack stack = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
         int held = handOver(player.server, player.getUUID(), player, List.of(stack), 0);
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        player.sendSystemMessage(ModText.battle("message.skyabyss.exchange.done", itemLink(stack)));
+        Notice.alert(player, "message.skyabyss.exchange.done", itemLink(stack));
         tellHeld(player, held);
         return true;
     }

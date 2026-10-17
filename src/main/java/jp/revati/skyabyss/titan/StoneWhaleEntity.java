@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -250,7 +251,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
             for (ServerPlayer player : level.players()) {
                 if (player.distanceToSqr(this) < 200 * 200) {
-                    player.sendSystemMessage(ModText.lore("message.skyabyss.titan_descends"));
+                    Notice.narrate(player, "message.skyabyss.titan_descends");
                 }
             }
         }
@@ -309,7 +310,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         Vec3 bottom = chainBottom();
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(bottom) < 12 * 12 && !player.isPassenger()) {
-                player.displayClientMessage(ModText.hint(voyage ? "message.skyabyss.travel.chain_hint" : "message.skyabyss.chain_hint"), true);
+                Notice.bar(player, ModText.hint(voyage ? "message.skyabyss.travel.chain_hint" : "message.skyabyss.chain_hint"));
             }
         }
     }

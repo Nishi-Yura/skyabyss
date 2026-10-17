@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.skill;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -64,12 +65,12 @@ public final class SkillEvents {
             d.notifiedPoints = total;
             if (first) {
                 // はじめて世界に来たとき: 増えたのではなく、はじめから一つ覚えられることを知らせる
-                player.sendSystemMessage(ModText.hint("message.skyabyss.skill.first_hint", Component.keybind("key.skyabyss.skills")));
+                Notice.hint(player, "message.skyabyss.skill.first_hint", Component.keybind("key.skyabyss.skills"));
                 return;
             }
-            player.sendSystemMessage(ModText.progress("message.skyabyss.skill.points_gained", gained, d.unspentPoints(SkillManager.level(player))));
+            Notice.levelUp(player, "message.skyabyss.skill.points_gained", gained, d.unspentPoints(SkillManager.level(player)));
             if (d.spentPoints() == 0 || d.unspentPoints(SkillManager.level(player)) >= 3) {
-                player.sendSystemMessage(ModText.hint("message.skyabyss.skill.open_hint", Component.keybind("key.skyabyss.skills")));
+                Notice.hint(player, "message.skyabyss.skill.open_hint", Component.keybind("key.skyabyss.skills"));
             }
         } else if (total < d.notifiedPoints) {
             d.notifiedPoints = total;

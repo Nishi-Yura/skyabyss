@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.skill.net;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.client.skill.SkillClient;
@@ -39,7 +40,7 @@ public final class SkillNetwork {
                         SkillData.LearnResult r = SkillManager.learn(player, Skill.byId(payload.skill()));
                         if (r != SkillData.LearnResult.OK) {
                             SkillManager.sync(player);
-                            player.displayClientMessage(ModText.deny("message.skyabyss.skill.learn_failed." + r.name().toLowerCase()), true);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.learn_failed." + r.name().toLowerCase()));
                         }
                     }
                 })
@@ -60,8 +61,8 @@ public final class SkillNetwork {
                         }
                         SkillManager.RespecResult r = SkillManager.respec(player);
                         if (r != SkillManager.RespecResult.OK) {
-                            player.displayClientMessage(ModText.deny("message.skyabyss.skill.respec_failed." + r.name().toLowerCase(),
-                                    Component.literal(String.valueOf(cost))), true);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.respec_failed." + r.name().toLowerCase(),
+                                    Component.literal(String.valueOf(cost))));
                         }
                     }
                 });

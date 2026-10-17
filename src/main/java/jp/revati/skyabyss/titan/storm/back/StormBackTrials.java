@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.HashSet;
@@ -166,7 +167,7 @@ public final class StormBackTrials {
         for (ServerPlayer p : level.players()) {
             level.playSound(null, p.getX(), p.getY() + 6, p.getZ(), rise ? StormSetup.RISE_WARN.get() : StormSetup.FALL_WARN.get(),
                     SoundSource.AMBIENT, 1.4f, 1f);
-            p.displayClientMessage(ModText.lore(rise ? "message.skyabyss.storm.storm_soon" : "message.skyabyss.storm.calm_soon"), true);
+            Notice.bar(p, ModText.lore(rise ? "message.skyabyss.storm.storm_soon" : "message.skyabyss.storm.calm_soon"));
         }
     }
 
@@ -187,7 +188,7 @@ public final class StormBackTrials {
             StormBirdBuilder.setKeelGate(level, true);
             level.playSound(null, HUB_CENTER, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.storm.keel_opened"));
+                Notice.narrate(p, "message.skyabyss.storm.keel_opened");
             }
         }
         if (state.keelOpen() && level.getGameTime() % 10 == 0) {
@@ -213,7 +214,7 @@ public final class StormBackTrials {
                 p.fallDistance = 0;
                 p.teleportTo(level, dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, p.getYRot(), p.getXRot());
                 level.playSound(null, dest, StormSetup.GALE.get(), SoundSource.PLAYERS, 1f, 1.2f);
-                p.displayClientMessage(ModText.hint("message.skyabyss.storm.return_path"), true);
+                Notice.bar(p, ModText.hint("message.skyabyss.storm.return_path"));
             }
         }
     }
@@ -230,14 +231,14 @@ public final class StormBackTrials {
             return;
         }
         if (state.rung(trial)) {
-            player.displayClientMessage(ModText.hint(state.sleeping() == trial ? "message.skyabyss.storm.trial_sleeping" : "message.skyabyss.storm.stone_rung"), true);
+            Notice.bar(player, ModText.hint(state.sleeping() == trial ? "message.skyabyss.storm.trial_sleeping" : "message.skyabyss.storm.stone_rung"));
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
         if (trial == StormBackState.Trial.EAST && !state.raijuDefeated()) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.storm.stone_silent"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.storm.stone_silent"));
             return;
         }
         ring(level, state, trial, player);
@@ -251,12 +252,12 @@ public final class StormBackTrials {
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 3f, 0.8f);
         level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
         if (by != null) {
-            by.displayClientMessage(ModText.hint("message.skyabyss.storm.return_opened"), true);
+            Notice.bar(by, ModText.hint("message.skyabyss.storm.return_opened"));
         }
         Component msg = ModText.progress("message.skyabyss.storm.stone_ringing", Component.translatable("trial.skyabyss.storm_" + trial.id()),
                 state.rungCount(), 3);
         for (ServerPlayer p : level.players()) {
-            p.sendSystemMessage(msg);
+            Notice.send(p, msg);
         }
         List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(16), p -> p.isAlive() && !p.isSpectator());
         for (ServerPlayer p : near) {
@@ -271,7 +272,7 @@ public final class StormBackTrials {
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
         if (state.allRung()) {
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.storm.all_rung"));
+                Notice.narrate(p, "message.skyabyss.storm.all_rung");
             }
         }
     }
@@ -314,7 +315,7 @@ public final class StormBackTrials {
         state.setRaijuDefeated(true);
         for (ServerPlayer p : level.players()) {
             if (inEast(p.position())) {
-                p.displayClientMessage(ModText.lore("message.skyabyss.raiju.defeated"), true);
+                Notice.bar(p, ModText.lore("message.skyabyss.raiju.defeated"));
             }
         }
     }
@@ -379,7 +380,7 @@ public final class StormBackTrials {
         lastPhase = null;
         if (announce) {
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.storm.trials_renewed"));
+                Notice.narrate(p, "message.skyabyss.storm.trials_renewed");
                 tellSleeping(p, state);
             }
         }
@@ -401,7 +402,7 @@ public final class StormBackTrials {
 
     static void tellSleeping(ServerPlayer p, StormBackState state) {
         if (state.sleeping() != null) {
-            p.sendSystemMessage(ModText.lore("message.skyabyss.storm.sleeping_" + state.sleeping().id()));
+            Notice.narrate(p, "message.skyabyss.storm.sleeping_" + state.sleeping().id());
         }
     }
 
@@ -425,10 +426,10 @@ public final class StormBackTrials {
                 }
                 if (pastSeal(p.position()) && !onBackTop(p.position())) {
                     toArrival(p);
-                    p.sendSystemMessage(ModText.lore("message.skyabyss.storm.peaceful"));
+                    Notice.narrate(p, "message.skyabyss.storm.peaceful");
                 }
                 if (p.tickCount % 40 < 5 && Math.abs(p.getZ() - SEAL_Z) < 4 && Math.abs(p.getX()) < 3) {
-                    p.displayClientMessage(ModText.lore("message.skyabyss.storm.peaceful"), true);
+                    Notice.bar(p, ModText.lore("message.skyabyss.storm.peaceful"));
                 }
             }
             if (!wasPeaceful) {
@@ -474,8 +475,8 @@ public final class StormBackTrials {
                     tag.putString(TAG_CHECKPOINT, r.id());
                     tag.putInt(TAG_CHECKPOINT_EPOCH, epoch);
                     if (!r.id().equals("hub")) {
-                        player.displayClientMessage(ModText.progress("message.skyabyss.checkpoint",
-                                Component.translatable("checkpoint.skyabyss.storm_" + r.id())), true);
+                        Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
+                                Component.translatable("checkpoint.skyabyss.storm_" + r.id())));
                         player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.2f);
                     }
                 }
@@ -548,7 +549,7 @@ public final class StormBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
-        player.sendSystemMessage(ModText.lore(cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back"));
+        Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);
         }
@@ -587,7 +588,7 @@ public final class StormBackTrials {
             clearCheckpoint(player);
             if (player.isAlive() && StormBackLayout.inTrial(player.position())) {
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.rest_point_lost"));
+                Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -613,9 +614,9 @@ public final class StormBackTrials {
                 clearCheckpoint(player);
                 player.fallDistance = 0;
                 player.teleportTo(level, TAIL_CENTER.getX() + 0.5, TAIL_CENTER.getY(), TAIL_CENTER.getZ() + 0.5, 180f, 0f);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.storm.gave_up"));
+                Notice.narrate(player, "message.skyabyss.storm.gave_up");
             } else {
-                player.displayClientMessage(ModText.hint("message.skyabyss.storm.campfire_hint"), true);
+                Notice.bar(player, ModText.hint("message.skyabyss.storm.campfire_hint"));
             }
         }
     }

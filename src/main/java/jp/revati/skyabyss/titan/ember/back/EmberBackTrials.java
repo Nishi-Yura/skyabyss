@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.ember.back.EmberBackLayout.*;
 
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public final class EmberBackTrials {
         level.sendParticles(ParticleTypes.FLAME, s.getX() + 0.5, s.getY() + 1.1, s.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.02);
         for (ServerPlayer p : level.players()) {
             if (p.distanceToSqr(Vec3.atCenterOf(s)) < 40 * 40) {
-                p.sendSystemMessage(ModText.hint(EmberIds.LANG_BACK + "stone_ready"));
+                Notice.hint(p, EmberIds.LANG_BACK + "stone_ready");
             }
         }
     }
@@ -188,14 +189,14 @@ public final class EmberBackTrials {
         }
         EmberBackState state = EmberBackState.get(level);
         if (state.rung(trial)) {
-            player.displayClientMessage(ModText.hint(EmberIds.LANG_BACK + (state.sleeping(trial) ? "trial_sleeping" : "stone_rung")), true);
+            Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + (state.sleeping(trial) ? "trial_sleeping" : "stone_rung")));
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
         if (trial != EmberBackState.Trial.WEST && !state.ready(trial)) {
-            player.displayClientMessage(ModText.deny(EmberIds.LANG_BACK + trial.id() + "_silent"), true);
+            Notice.bar(player, ModText.deny(EmberIds.LANG_BACK + trial.id() + "_silent"));
             return;
         }
         ring(level, trial, player);
@@ -213,12 +214,12 @@ public final class EmberBackTrials {
         level.sendParticles(ParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.05);
         level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.8, 0.3, 0.03);
         if (by != null) {
-            by.displayClientMessage(ModText.hint(EmberIds.LANG_BACK + "shortcut_opened"), true);
+            Notice.bar(by, ModText.hint(EmberIds.LANG_BACK + "shortcut_opened"));
         }
         Component msg = ModText.progress(EmberIds.LANG_BACK + "stone_ringing", Component.translatable("trial.skyabyss.ember_" + trial.id()),
                 state.rungCount(), 3);
         for (ServerPlayer p : level.players()) {
-            p.sendSystemMessage(msg);
+            Notice.send(p, msg);
         }
         // 試練の踏破の経験値 (石の近くにいた人。仲間には分け前) と、サブクエストの「試練を踏破する」
         List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(20), p -> p.isAlive() && !p.isSpectator());
@@ -240,7 +241,7 @@ public final class EmberBackTrials {
         if (state.rungCount() >= 3 && !state.gateOpen() && gateTimer == 0) {
             gateTimer = GATE_OPEN_TICKS;
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "all_rung"));
+                Notice.narrate(p, EmberIds.LANG_BACK + "all_rung");
             }
         }
     }
@@ -329,7 +330,7 @@ public final class EmberBackTrials {
         level.playSound(null, c, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 3f, 0.5f);
         level.playSound(null, c, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 2f, 0.6f);
         for (ServerPlayer p : level.players()) {
-            p.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "gate_open"));
+            Notice.narrate(p, EmberIds.LANG_BACK + "gate_open");
         }
     }
 
@@ -382,7 +383,7 @@ public final class EmberBackTrials {
                         player.fallDistance = 0;
                         player.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, player.getYRot(), 0f);
                         level.playSound(null, to, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 0.6f);
-                        player.displayClientMessage(ModText.lore(EmberIds.LANG_BACK + "shortcut"), true);
+                        Notice.bar(player, ModText.lore(EmberIds.LANG_BACK + "shortcut"));
                     }
                 }
             }
@@ -403,8 +404,8 @@ public final class EmberBackTrials {
                     tag.putString(TAG_CHECKPOINT, r.name());
                     tag.putInt(TAG_CHECKPOINT_EPOCH, epoch);
                     if (!r.name().equals("hub")) {
-                        player.displayClientMessage(ModText.progress("message.skyabyss.checkpoint",
-                                Component.translatable("checkpoint.skyabyss.ember_" + r.name())), true);
+                        Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
+                                Component.translatable("checkpoint.skyabyss.ember_" + r.name())));
                         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 0.8f);
                     }
                 }
@@ -515,7 +516,7 @@ public final class EmberBackTrials {
         applyStones(level, state);
         if (announce) {
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "trials_renewed"));
+                Notice.narrate(p, EmberIds.LANG_BACK + "trials_renewed");
                 tellSleeping(p, state);
             }
         }
@@ -533,7 +534,7 @@ public final class EmberBackTrials {
 
     static void tellSleeping(ServerPlayer p, EmberBackState state) {
         if (state.sleeping() != null) {
-            p.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "sleeping_" + state.sleeping().id()));
+            Notice.narrate(p, EmberIds.LANG_BACK + "sleeping_" + state.sleeping().id());
         }
     }
 
@@ -563,9 +564,9 @@ public final class EmberBackTrials {
                 if (!peacefulSide(p)) {
                     toArrival(p);
                     EmberHeat.reset(p);
-                    p.sendSystemMessage(ModText.lore("message.skyabyss.trials_peaceful"));
+                    Notice.narrate(p, "message.skyabyss.trials_peaceful");
                 } else if (p.tickCount % 40 < 10 && Math.abs(p.getZ() - PEACEFUL_SEAL_Z) < 5) {
-                    p.displayClientMessage(ModText.lore(EmberIds.LANG_BACK + "peaceful"), true);
+                    Notice.bar(p, ModText.lore(EmberIds.LANG_BACK + "peaceful"));
                 }
             }
         }
@@ -606,7 +607,7 @@ public final class EmberBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
-        player.sendSystemMessage(ModText.lore(cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back"));
+        Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);
         }
@@ -640,7 +641,7 @@ public final class EmberBackTrials {
             clearCheckpoint(player);
             if (player.isAlive() && inTrial(player.position())) {
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.rest_point_lost"));
+                Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -658,9 +659,9 @@ public final class EmberBackTrials {
                 clearCheckpoint(player);
                 toArrival(player);
                 EmberHeat.reset(player);
-                player.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "gave_up"));
+                Notice.narrate(player, EmberIds.LANG_BACK + "gave_up");
             } else {
-                player.displayClientMessage(ModText.hint(EmberIds.LANG_BACK + "campfire_hint"), true);
+                Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + "campfire_hint"));
             }
         }
     }

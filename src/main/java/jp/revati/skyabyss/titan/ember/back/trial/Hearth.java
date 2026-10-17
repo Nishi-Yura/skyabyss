@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,7 @@ public final class Hearth {
         add(level, FEED);
         level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_FEED.get(), SoundSource.BLOCKS, 1f, 0.9f + level.random.nextFloat() * 0.2f);
         level.sendParticles(ParticleTypes.FLAME, HEARTH.getX() + 0.5, HEARTH.getY() + 0.9, HEARTH.getZ() + 0.5, 12, 0.25, 0.2, 0.25, 0.04);
-        player.displayClientMessage(ModText.hint(EmberIds.LANG_SOUTH + "fed", Math.round(strength)), true);
+        Notice.bar(player, ModText.hint(EmberIds.LANG_SOUTH + "fed", Math.round(strength)));
         return true;
     }
 
@@ -126,7 +127,7 @@ public final class Hearth {
         level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_DOUSE.get(), SoundSource.BLOCKS, 1.2f, 1f);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, HEARTH.getX() + 0.5, HEARTH.getY() + 0.9, HEARTH.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.03);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
-            p.displayClientMessage(ModText.deny(EmberIds.LANG_SOUTH + "doused"), true);
+            Notice.bar(p, ModText.deny(EmberIds.LANG_SOUTH + "doused"));
         }
     }
 
@@ -144,7 +145,7 @@ public final class Hearth {
             // 失敗にはしない: 20 から焚き直す
             strength = START;
             for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
-                p.sendSystemMessage(ModText.lore(EmberIds.LANG_SOUTH + "dwindled"));
+                Notice.narrate(p, EmberIds.LANG_SOUTH + "dwindled");
             }
         }
         show(level);
@@ -160,7 +161,7 @@ public final class Hearth {
         level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_FEED.get(), SoundSource.BLOCKS, 2f, 0.6f);
         level.sendParticles(ParticleTypes.FLAME, HEARTH.getX() + 0.5, HEARTH.getY() + 1.2, HEARTH.getZ() + 0.5, 60, 0.4, 0.8, 0.4, 0.1);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
-            p.sendSystemMessage(ModText.lore(EmberIds.LANG_SOUTH + "burning_bright"));
+            Notice.narrate(p, EmberIds.LANG_SOUTH + "burning_bright");
         }
     }
 
@@ -210,7 +211,7 @@ public final class Hearth {
         }
         for (ServerPlayer p : in) {
             if (p.distanceToSqr(Vec3.atCenterOf(HEARTH)) < 14 * 14) {
-                p.displayClientMessage(ModText.hint(EmberIds.LANG_SOUTH + "strength", Math.round(strength)), true);
+                Notice.bar(p, ModText.hint(EmberIds.LANG_SOUTH + "strength", Math.round(strength)));
             }
         }
     }
