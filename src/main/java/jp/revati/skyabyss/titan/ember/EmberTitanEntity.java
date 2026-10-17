@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -454,7 +455,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
         lastSleepYaw = getYRot();
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(getX(), player.getY(), getZ()) < 200 * 200) {
-                player.sendSystemMessage(ModText.lore(EmberIds.LANG_SURFACE + "asleep"));
+                Notice.narrate(player, EmberIds.LANG_SURFACE + "asleep");
             }
         }
     }
@@ -586,7 +587,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
                 data.putLong(HINT_NIGHT, night);
             }
             if (data.getLong(HINT_NIGHT) == night) {
-                p.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "mouth_hint"), true);
+                Notice.bar(p, ModText.hint(EmberIds.LANG_SURFACE + "mouth_hint"));
             }
         }
     }

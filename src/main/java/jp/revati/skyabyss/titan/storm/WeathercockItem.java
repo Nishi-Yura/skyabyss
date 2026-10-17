@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import jp.revati.skyabyss.ModText;
@@ -57,22 +58,22 @@ public class WeathercockItem extends Item {
         player.getCooldowns().addCooldown(this, 40);
         BlockPos pos = sp.blockPosition();
         if (level.dimension() != Level.OVERWORLD || !level.canSeeSky(pos.above())) {
-            sp.displayClientMessage(ModText.deny("message.skyabyss.weathercock.no_sky"), true);
+            Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.no_sky"));
             return InteractionResultHolder.fail(stack);
         }
         if (!high(sl, pos)) {
-            sp.displayClientMessage(ModText.deny("message.skyabyss.weathercock.too_low"), true);
+            Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.too_low"));
             return InteractionResultHolder.fail(stack);
         }
         long now = sl.getGameTime();
         if (now - lastCall < CALL_COOLDOWN) {
             long minutes = (CALL_COOLDOWN - (now - lastCall) + 1199) / 1200;
-            sp.displayClientMessage(ModText.deny("message.skyabyss.weathercock.wait", minutes), true);
+            Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.wait", minutes));
             return InteractionResultHolder.fail(stack);
         }
         StormWingEntity titan = StormKeeper.KEEPER.current(sl);
         if (titan == null || !titan.comeRest(sp, CALL_REST)) {
-            sp.displayClientMessage(ModText.hint("message.skyabyss.weathercock.absent"), true);
+            Notice.bar(sp, ModText.hint("message.skyabyss.weathercock.absent"));
             return InteractionResultHolder.fail(stack);
         }
         lastCall = now;
@@ -82,10 +83,10 @@ public class WeathercockItem extends Item {
             bolt.setVisualOnly(true);
             sl.addFreshEntity(bolt);
         }
-        sp.sendSystemMessage(ModText.lore("message.skyabyss.weathercock.called"));
+        Notice.narrate(sp, "message.skyabyss.weathercock.called");
         for (ServerPlayer other : sl.players()) {
             if (other != sp && holds(other)) {
-                other.displayClientMessage(ModText.hint("message.skyabyss.weathercock.called_by", sp.getDisplayName()), true);
+                Notice.bar(other, ModText.hint("message.skyabyss.weathercock.called_by", sp.getDisplayName()));
             }
         }
         return InteractionResultHolder.consume(stack);
@@ -117,7 +118,7 @@ public class WeathercockItem extends Item {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         if (level instanceof ServerLevel sl && entity instanceof ServerPlayer sp && sp.tickCount % 20 == 0
                 && (selected || sp.getOffhandItem() == stack)) {
-            sp.displayClientMessage(status(sl, sp), true);
+            Notice.bar(sp, status(sl, sp));
         }
     }
 

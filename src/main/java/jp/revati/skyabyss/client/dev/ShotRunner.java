@@ -388,6 +388,7 @@ public final class ShotRunner {
                 // chat clear : チャットの欄と右上の通知 (トースト) を消す
                 mc.gui.getChat().clearMessages(false);
                 mc.getToasts().clear();
+                jp.revati.skyabyss.client.notice.NoticeClient.clear();
                 return true;
             }
             case "open" -> {
@@ -513,6 +514,7 @@ public final class ShotRunner {
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
+            case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
             default -> null;
         };
         if (s != null) {

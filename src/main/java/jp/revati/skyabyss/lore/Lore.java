@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.lore;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -134,7 +135,7 @@ public final class Lore {
             player.drop(book, false);
         }
         if (messageKey != null) {
-            player.sendSystemMessage(ModText.lore(messageKey));
+            Notice.narrate(player, messageKey);
         }
         unlock(player, BOOK_ENTRY, true);
     }

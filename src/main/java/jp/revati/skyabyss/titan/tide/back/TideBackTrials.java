@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
 import java.util.ArrayList;
@@ -197,7 +198,7 @@ public final class TideBackTrials {
         for (ServerPlayer p : level.players()) {
             level.playSound(null, p.getX(), p.getY() + 8, p.getZ(), low ? TideBackSetup.HORN_LOW.get() : TideBackSetup.HORN_HIGH.get(),
                     SoundSource.AMBIENT, 1.4f, 1f);
-            p.displayClientMessage(ModText.lore(low ? "message.skyabyss.tide.rising_soon" : "message.skyabyss.tide.falling_soon"), true);
+            Notice.bar(p, ModText.lore(low ? "message.skyabyss.tide.rising_soon" : "message.skyabyss.tide.falling_soon"));
         }
     }
 
@@ -231,7 +232,7 @@ public final class TideBackTrials {
             state.markBottomOpen();
             openBottom(level, true);
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.tide.bottom_opened"));
+                Notice.narrate(p, "message.skyabyss.tide.bottom_opened");
             }
             level.playSound(null, 0.5, HUB_FLOOR + 1, 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
             level.playSound(null, 0.5, HUB_FLOOR + 1, 0.5, jp.revati.skyabyss.titan.tide.TideSetup.SONG.get(), SoundSource.AMBIENT, 3f, 1.1f);
@@ -285,7 +286,7 @@ public final class TideBackTrials {
                 p.fallDistance = 0;
                 p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
                 level.playSound(null, to, jp.revati.skyabyss.titan.tide.TideSetup.GATE.get(), SoundSource.PLAYERS, 1f, 1.3f);
-                p.displayClientMessage(ModText.hint("message.skyabyss.tide.return_path"), true);
+                Notice.bar(p, ModText.hint("message.skyabyss.tide.return_path"));
             }
         }
     }
@@ -319,7 +320,7 @@ public final class TideBackTrials {
             return;
         }
         if (state.rung(trial)) {
-            player.displayClientMessage(ModText.hint(state.sleeping() == trial ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.stone_rung"), true);
+            Notice.bar(player, ModText.hint(state.sleeping() == trial ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.stone_rung"));
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -333,7 +334,7 @@ public final class TideBackTrials {
             }
             case FRONT -> {
                 if (!state.beckonerDefeated()) {
-                    player.displayClientMessage(ModText.deny("message.skyabyss.tide.front_silent"), true);
+                    Notice.bar(player, ModText.deny("message.skyabyss.tide.front_silent"));
                     return;
                 }
             }
@@ -350,12 +351,12 @@ public final class TideBackTrials {
         level.playSound(null, pos, TideBackSetup.CHIME.get(), SoundSource.BLOCKS, 3f, 1f);
         level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
         if (by != null) {
-            by.displayClientMessage(ModText.hint("message.skyabyss.tide.return_opened"), true);
+            Notice.bar(by, ModText.hint("message.skyabyss.tide.return_opened"));
         }
         Component msg = ModText.progress("message.skyabyss.tide.stone_ringing", Component.translatable("trial.skyabyss.tide_" + trial.id()),
                 state.rungCount(), 3);
         for (ServerPlayer p : level.players()) {
-            p.sendSystemMessage(msg);
+            Notice.send(p, msg);
         }
         // 試練の踏破の経験値 (石の近くにいた人。仲間には分け前) と、サブクエストの「試練を踏破する」
         List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(16), p -> p.isAlive() && !p.isSpectator());
@@ -371,7 +372,7 @@ public final class TideBackTrials {
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
         if (state.rungCount() >= 3) {
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.tide.all_rung"));
+                Notice.narrate(p, "message.skyabyss.tide.all_rung");
             }
         }
     }
@@ -470,7 +471,7 @@ public final class TideBackTrials {
         lastPhase = null;
         if (announce) {
             for (ServerPlayer p : level.players()) {
-                p.sendSystemMessage(ModText.lore("message.skyabyss.tide.trials_renewed"));
+                Notice.narrate(p, "message.skyabyss.tide.trials_renewed");
                 tellSleeping(p, state);
             }
         }
@@ -492,7 +493,7 @@ public final class TideBackTrials {
 
     static void tellSleeping(ServerPlayer p, TideBackState state) {
         if (state.sleeping() != null) {
-            p.sendSystemMessage(ModText.lore("message.skyabyss.tide.sleeping_" + state.sleeping().id()));
+            Notice.narrate(p, "message.skyabyss.tide.sleeping_" + state.sleeping().id());
         }
     }
 
@@ -524,10 +525,10 @@ public final class TideBackTrials {
                         || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition()) || p.getY() > TOWER_DECK - 20 && Math.abs(p.getX()) < 12 && Math.abs(p.getZ() - TOWER_CZ) < 12;
                 if (!beachSide && p.getY() < 150) {
                     toArrival(p);
-                    p.sendSystemMessage(ModText.lore("message.skyabyss.trials_peaceful"));
+                    Notice.narrate(p, "message.skyabyss.trials_peaceful");
                 }
                 if (p.tickCount % 40 < 5 && Math.abs(p.getZ() - CAVE_SEAL_Z) < 4 && p.getX() > CAVE_X1 - 2 && p.getX() < CAVE_X2 + 2) {
-                    p.displayClientMessage(ModText.lore("message.skyabyss.trials_peaceful"), true);
+                    Notice.bar(p, ModText.lore("message.skyabyss.trials_peaceful"));
                 }
             }
             if (!wasPeaceful) {
@@ -563,8 +564,8 @@ public final class TideBackTrials {
                     tag.putString(TAG_CHECKPOINT, r.id());
                     tag.putInt(TAG_CHECKPOINT_EPOCH, epoch);
                     if (!r.id().equals("hub")) {
-                        player.displayClientMessage(ModText.progress("message.skyabyss.checkpoint",
-                                Component.translatable("checkpoint.skyabyss.tide_" + r.id())), true);
+                        Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
+                                Component.translatable("checkpoint.skyabyss.tide_" + r.id())));
                         player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.2f);
                     }
                 }
@@ -643,7 +644,7 @@ public final class TideBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
-        player.sendSystemMessage(ModText.lore(cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back"));
+        Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);
         }
@@ -696,7 +697,7 @@ public final class TideBackTrials {
             }
             if (player.isAlive() && inTrial) {
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.rest_point_lost"));
+                Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -723,9 +724,9 @@ public final class TideBackTrials {
                 }
                 clearCheckpoint(player);
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.tide.gave_up"));
+                Notice.narrate(player, "message.skyabyss.tide.gave_up");
             } else {
-                player.displayClientMessage(ModText.hint("message.skyabyss.tide.campfire_hint"), true);
+                Notice.bar(player, ModText.hint("message.skyabyss.tide.campfire_hint"));
             }
         }
     }

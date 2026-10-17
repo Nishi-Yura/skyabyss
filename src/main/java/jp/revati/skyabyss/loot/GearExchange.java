@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.loot;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public final class GearExchange {
         String why = denial(set, r, itemId, ForgeRules.exchangeAffordable(player));
         Optional<Item> item = TitanGearSet.item(itemId);
         if (why != null || item.isEmpty()) {
-            player.sendSystemMessage(ModText.deny(why == null ? "message.skyabyss.exchange.owned" : why));
+            Notice.warn(player, why == null ? "message.skyabyss.exchange.owned" : why);
             return false;
         }
         ForgeRules.payExchange(player);
@@ -89,7 +90,7 @@ public final class GearExchange {
         ItemStack stack = AffixRules.withAffixes(new ItemStack(item.get()), player.getRandom());
         int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(stack), 0);
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        player.sendSystemMessage(ModText.battle("message.skyabyss.exchange.done", TitanLoot.itemLink(stack)));
+        Notice.alert(player, "message.skyabyss.exchange.done", TitanLoot.itemLink(stack));
         TitanLoot.tellHeld(player, held);
         return true;
     }

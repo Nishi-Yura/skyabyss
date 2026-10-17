@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -251,7 +252,7 @@ public final class Forge {
         level.playSound(null, FORGE, EmberTrialSetup.HEARTH_DOUSE.get(), SoundSource.BLOCKS, 1f, 1f);
         level.sendParticles(ParticleTypes.LARGE_SMOKE, FORGE.getX() + 0.5, FORGE.getY() + 0.5, FORGE.getZ() - 0.3, 14, 0.4, 0.3, 0.1, 0.03);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.EAST)) {
-            p.displayClientMessage(ModText.hint(EmberIds.LANG_EAST + "doused"), true);
+            Notice.bar(p, ModText.hint(EmberIds.LANG_EAST + "doused"));
         }
         showForge(level);
     }
@@ -282,7 +283,7 @@ public final class Forge {
         boolean last = hits + 1 >= pat.length;
         boolean right = bandOf(heat) == pat[Math.min(hits, pat.length - 1)];
         if (right && last && !hasSpace(player)) {
-            player.displayClientMessage(ModText.deny(EmberIds.LANG_EAST + "inventory_full"), true);
+            Notice.bar(player, ModText.deny(EmberIds.LANG_EAST + "inventory_full"));
             return StrikeResult.FULL;
         }
         EmberTrials.markFirstForgeUsed(level);
@@ -300,7 +301,7 @@ public final class Forge {
             }
             level.playSound(null, ANVIL, EmberTrialSetup.BLOOM_CRACK.get(), SoundSource.BLOCKS, 0.8f, 1.2f);
             level.sendParticles(ParticleTypes.SMOKE, ANVIL.getX() + 0.5, ANVIL.getY() + 1.1, ANVIL.getZ() + 0.5, 6, 0.2, 0.1, 0.2, 0.02);
-            player.displayClientMessage(ModText.deny(EmberIds.LANG_EAST + "wrong_color"), true);
+            Notice.bar(player, ModText.deny(EmberIds.LANG_EAST + "wrong_color"));
             showForge(level);
             return StrikeResult.CRACK;
         }
@@ -312,7 +313,7 @@ public final class Forge {
             return StrikeResult.DONE;
         }
         showMarks(level);
-        player.displayClientMessage(ModText.hint(EmberIds.LANG_EAST + "struck", hits, pat.length), true);
+        Notice.bar(player, ModText.hint(EmberIds.LANG_EAST + "struck", hits, pat.length));
         return StrikeResult.HIT;
     }
 
@@ -329,7 +330,7 @@ public final class Forge {
         level.sendParticles(ParticleTypes.EXPLOSION, FORGE.getX() + 0.5, FORGE.getY() + 0.5, FORGE.getZ() - 0.2, 1, 0, 0, 0, 0);
         level.sendParticles(ParticleTypes.LAVA, FORGE.getX() + 0.5, FORGE.getY() + 0.5, FORGE.getZ() - 0.3, 10, 0.3, 0.3, 0.1, 0.1);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.EAST)) {
-            p.displayClientMessage(ModText.deny(EmberIds.LANG_EAST + (tooHot ? "bloom_melted" : "bloom_cracked")), true);
+            Notice.bar(p, ModText.deny(EmberIds.LANG_EAST + (tooHot ? "bloom_melted" : "bloom_cracked")));
         }
         showForge(level);
         showMarks(level);
@@ -345,7 +346,7 @@ public final class Forge {
         cracks = 0;
         brokenUntil = level.getGameTime() + BLOOM_RETURN_TICKS;
         level.playSound(null, ANVIL, EmberTrialSetup.ANVIL_TING.get(), SoundSource.BLOCKS, 1.2f, 0.7f);
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_EAST + "key_forged"));
+        Notice.narrate(player, EmberIds.LANG_EAST + "key_forged");
         showForge(level);
         showMarks(level);
         // 鍵を持つ人に火の粉蛾が寄ってくる (D の誘い)
@@ -364,7 +365,7 @@ public final class Forge {
         player.setItemInHand(hand, new ItemStack(EmberTrialSetup.FIRE_KEY.get()));
         level.playSound(null, at, EmberTrialSetup.QUENCH.get(), SoundSource.BLOCKS, 1.2f, 1f);
         level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 18, 0.3, 0.2, 0.3, 0.05);
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_EAST + "key_quenched"));
+        Notice.narrate(player, EmberIds.LANG_EAST + "key_quenched");
         return true;
     }
 
@@ -376,7 +377,7 @@ public final class Forge {
         }
         held.shrink(1);
         startDoor(level);
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_EAST + "door_kindled"));
+        Notice.narrate(player, EmberIds.LANG_EAST + "door_kindled");
         return true;
     }
 
@@ -405,7 +406,7 @@ public final class Forge {
                 doorState = 2;
                 doorTimer = DOOR_WARNING_TICKS;
                 for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.EAST)) {
-                    p.sendSystemMessage(ModText.battle(EmberIds.LANG_EAST + "door_open"));
+                    Notice.alert(p, EmberIds.LANG_EAST + "door_open");
                 }
             }
         } else if (doorState == 2 && --doorTimer <= 0) {
@@ -499,7 +500,7 @@ public final class Forge {
                 if (now - FireKeyItem.forgedAt(s) > KEY_TICKS) {
                     inv.setItem(i, ItemStack.EMPTY);
                     level.playSound(null, p.blockPosition(), EmberTrialSetup.BLOOM_CRACK.get(), SoundSource.PLAYERS, 1f, 1.3f);
-                    p.sendSystemMessage(ModText.deny(EmberIds.LANG_EAST + "key_cracked"));
+                    Notice.warn(p, EmberIds.LANG_EAST + "key_cracked");
                 } else {
                     p.addEffect(new MobEffectInstance(MobEffects.GLOWING, 30, 0, false, false));
                 }

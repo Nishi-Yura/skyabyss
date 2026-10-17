@@ -1,11 +1,14 @@
 package jp.revati.skyabyss;
 
+import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 
-// Modが出す文の見た目をそろえる。用途ごとに色と書体を決めておき、どこからでも同じ調子で出せるようにする
+// Modが出す文の見た目をそろえる。用途ごとに色と書体を決めておき、どこからでも同じ調子で出せるようにする。
+// 返す文には知らせの種類の印が付く (notice/Notice)。プレイヤーへは Notice で送ると種類ごとの見せ方になり、
+// コマンドの返事 (sendSuccess) やツールチップにそのまま使っても見た目は変わらない
 public final class ModText {
     // 世界のささやき (語り・伝承): 青緑の斜体
     private static final TextColor LORE = TextColor.fromRgb(0x7FD6D0);
@@ -22,26 +25,26 @@ public final class ModText {
     }
 
     public static MutableComponent lore(String key, Object... args) {
-        return Component.literal("❖ ").withStyle(s -> s.withColor(LORE))
-                .append(Component.translatable(key, args).withStyle(s -> s.withColor(LORE).withItalic(true)));
+        return Notice.tag(Notice.Kind.NARRATE, Component.literal("❖ ").withStyle(s -> s.withColor(LORE)),
+                Component.translatable(key, args).withStyle(s -> s.withColor(LORE).withItalic(true)));
     }
 
     public static MutableComponent hint(String key, Object... args) {
-        return Component.translatable(key, args).withStyle(s -> s.withColor(HINT));
+        return Notice.tag(Notice.Kind.HINT, Component.translatable(key, args).withStyle(s -> s.withColor(HINT)));
     }
 
     public static MutableComponent progress(String key, Object... args) {
-        return Component.literal("✦ ").withStyle(s -> s.withColor(PROGRESS))
-                .append(Component.translatable(key, args).withStyle(s -> s.withColor(PROGRESS)));
+        return Notice.tag(Notice.Kind.UNLOCK, Component.literal("✦ ").withStyle(s -> s.withColor(PROGRESS)),
+                Component.translatable(key, args).withStyle(s -> s.withColor(PROGRESS)));
     }
 
     public static MutableComponent deny(String key, Object... args) {
-        return Component.translatable(key, args).withStyle(s -> s.withColor(DENY));
+        return Notice.tag(Notice.Kind.WARN, Component.translatable(key, args).withStyle(s -> s.withColor(DENY)));
     }
 
     public static MutableComponent battle(String key, Object... args) {
-        return Component.literal("⚔ ").withStyle(s -> s.withColor(BATTLE))
-                .append(Component.translatable(key, args).withStyle(s -> s.withColor(BATTLE).withBold(true)));
+        return Notice.tag(Notice.Kind.ALERT, Component.literal("⚔ ").withStyle(s -> s.withColor(BATTLE)),
+                Component.translatable(key, args).withStyle(s -> s.withColor(BATTLE).withBold(true)));
     }
 
     public static MutableComponent title(String key) {

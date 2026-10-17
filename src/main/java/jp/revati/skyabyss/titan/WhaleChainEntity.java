@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -43,7 +44,7 @@ public class WhaleChainEntity extends Entity {
             }
             TitanTravel.startLift(server, whale);
         } else {
-            player.displayClientMessage(ModText.deny("message.skyabyss.chain_slack"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.chain_slack"));
         }
         return InteractionResult.SUCCESS;
     }

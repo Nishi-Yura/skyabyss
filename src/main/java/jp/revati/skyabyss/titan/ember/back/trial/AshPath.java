@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -223,29 +224,29 @@ public final class AshPath {
         }
         ItemStack urn = new ItemStack(EmberTrialSetup.ASH_URN.get());
         if (!player.getInventory().add(urn)) {
-            player.displayClientMessage(ModText.deny(EmberIds.LANG_WEST + "urn_full"), true);
+            Notice.bar(player, ModText.deny(EmberIds.LANG_WEST + "urn_full"));
             return;
         }
         level.playSound(null, player.blockPosition(), EmberTrialSetup.ASH_SCATTER.get(), SoundSource.PLAYERS, 0.6f, 1.3f);
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_WEST + "urn_given"));
+        Notice.narrate(player, EmberIds.LANG_WEST + "urn_given");
     }
 
     // 灰の壺を使う: 向いている先の溶岩の面へ。まいた数 (0 ならまけなかった)
     public static int useUrn(ServerLevel level, ServerPlayer player, ItemStack stack) {
         if (AshUrnItem.charges(stack) <= 0) {
-            player.displayClientMessage(ModText.deny(EmberIds.LANG_WEST + "urn_empty"), true);
+            Notice.bar(player, ModText.deny(EmberIds.LANG_WEST + "urn_empty"));
             return 0;
         }
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getViewVector(1f).scale(REACH));
         BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, player));
         if (hit.getType() != HitResult.Type.BLOCK || !level.getBlockState(hit.getBlockPos()).is(Blocks.LAVA)) {
-            player.displayClientMessage(ModText.hint(EmberIds.LANG_WEST + "no_lava"), true);
+            Notice.bar(player, ModText.hint(EmberIds.LANG_WEST + "no_lava"));
             return 0;
         }
         int n = placeCrust(level, hit.getBlockPos().getX(), hit.getBlockPos().getZ());
         if (n == 0) {
-            player.displayClientMessage(ModText.hint(EmberIds.LANG_WEST + "no_lava"), true);
+            Notice.bar(player, ModText.hint(EmberIds.LANG_WEST + "no_lava"));
             return 0;
         }
         AshUrnItem.setCharges(stack, AshUrnItem.charges(stack) - 1);
@@ -254,7 +255,7 @@ public final class AshPath {
         level.playSound(null, at.x, at.y, at.z, EmberTrialSetup.ASH_SCATTER.get(), SoundSource.PLAYERS, 1f, 1f);
         level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE_POWDER.defaultBlockState()), at.x, at.y + 0.3, at.z, 30, 1.0,
                 0.2, 1.0, 0.05);
-        player.displayClientMessage(ModText.hint(EmberIds.LANG_WEST + "urn_left", AshUrnItem.charges(stack), URN_CHARGES), true);
+        Notice.bar(player, ModText.hint(EmberIds.LANG_WEST + "urn_left", AshUrnItem.charges(stack), URN_CHARGES));
         return n;
     }
 
@@ -311,7 +312,7 @@ public final class AshPath {
         p.invulnerableTime = 0;
         p.hurt(EmberTrials.damage(level, EmberIds.ENGULFED, null), ENGULF_DAMAGE);
         EmberHeat.add(p, ENGULF_HEAT, EmberHeat.Reason.ENGULFED);
-        p.sendSystemMessage(ModText.lore(EmberIds.LANG_WEST + "engulfed"));
+        Notice.narrate(p, EmberIds.LANG_WEST + "engulfed");
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -333,7 +334,7 @@ public final class AshPath {
             if (FAR_SHORE.contains(p.position()) && !EmberBackTrials.sleeping(level, EmberIds.WEST)
                     && !EmberBackState.get(level).ready(EmberBackState.Trial.WEST)) {
                 EmberTrials.markReady(level, EmberBackState.Trial.WEST);
-                p.sendSystemMessage(ModText.lore(EmberIds.LANG_WEST + "far_shore"));
+                Notice.narrate(p, EmberIds.LANG_WEST + "far_shore");
             }
         }
         if (!in.isEmpty() && !EmberBackTrials.sleeping(level, EmberIds.WEST)) {

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.item.accessory;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +129,7 @@ public final class Accessories {
         sync(player);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.PLAYERS, 0.8f, 1.2f);
         AccessoryKind kind = AccessoryData.kindOf(slot);
-        player.displayClientMessage(ModText.progress("skyabyss_gear.message.equipped." + kind.key, one.getHoverName()), true);
+        Notice.bar(player, ModText.progress("skyabyss_gear.message.equipped." + kind.key, one.getHoverName()));
         return true;
     }
 
@@ -136,7 +137,7 @@ public final class Accessories {
     public static void useCharm(ServerPlayer player) {
         ItemStack charm = stack(player, AccessoryData.CHARM);
         if (charm.isEmpty() || !(charm.getItem() instanceof Accessory a)) {
-            player.displayClientMessage(ModText.deny("skyabyss_gear.message.no_charm"), true);
+            Notice.bar(player, ModText.deny("skyabyss_gear.message.no_charm"));
             return;
         }
         if (!GearLevel.meets(player, charm)) {
@@ -145,7 +146,7 @@ public final class Accessories {
         }
         if (player.getCooldowns().isOnCooldown(charm.getItem())) {
             int seconds = Math.max(1, Math.round(player.getCooldowns().getCooldownPercent(charm.getItem(), 0) * cooldownTicks(charm) / 20f));
-            player.displayClientMessage(ModText.deny("skyabyss_gear.message.charm_resting", charm.getHoverName(), seconds), true);
+            Notice.bar(player, ModText.deny("skyabyss_gear.message.charm_resting", charm.getHoverName(), seconds));
             return;
         }
         a.activate(player, charm);
@@ -185,7 +186,7 @@ public final class Accessories {
         }
         if (moved > 0) {
             inventory.setChanged();
-            player.sendSystemMessage(ModText.hint("skyabyss_gear.message.migrated", moved));
+            Notice.hint(player, "skyabyss_gear.message.migrated", moved);
         }
         sync(player);
         return moved;

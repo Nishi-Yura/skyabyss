@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.ArrayDeque;
@@ -362,7 +363,7 @@ public final class EyeMirrors {
         StormFx.burst(level, ParticleTypes.END_ROD, Vec3.atCenterOf(p), 20, 0.4);
         for (ServerPlayer pl : level.players()) {
             if (inFront(pl.position())) {
-                pl.displayClientMessage(ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(state.receivers())), true);
+                Notice.bar(pl, ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(state.receivers())));
             }
         }
         if (state.receivers() == 7) {
@@ -384,12 +385,12 @@ public final class EyeMirrors {
     public static boolean resetMirrors(ServerLevel level, ServerPlayer player) {
         long now = level.getGameTime();
         if (now - lastReset < RESET_COOLDOWN) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.storm.mirrors_reset_wait", (RESET_COOLDOWN - (now - lastReset) + 19) / 20), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.storm.mirrors_reset_wait", (RESET_COOLDOWN - (now - lastReset) + 19) / 20));
             return false;
         }
         lastReset = now;
         apply(level, StormBackState.get(level), true);
-        player.displayClientMessage(ModText.hint("message.skyabyss.storm.mirrors_reset"), true);
+        Notice.bar(player, ModText.hint("message.skyabyss.storm.mirrors_reset"));
         level.playSound(null, MIRROR_RESET, StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1.5f, 0.6f);
         return true;
     }

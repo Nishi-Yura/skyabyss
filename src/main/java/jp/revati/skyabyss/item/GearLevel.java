@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.item;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -155,7 +156,7 @@ public final class GearLevel {
     }
 
     public static void denyMessage(Player player, ItemStack stack) {
-        player.displayClientMessage(ModText.deny("skyabyss_gear.message.level_short", stack.getHoverName(), required(stack), level(player)), true);
+        Notice.bar(player, ModText.deny("skyabyss_gear.message.level_short", stack.getHoverName(), required(stack), level(player)));
     }
 
     @SubscribeEvent

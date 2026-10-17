@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.quest;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -152,7 +153,7 @@ public final class Action {
                 int count = Math.max(1, integer("count", 1));
                 ItemStack shown = sample(player, str("item"), optStr("token"));
                 if (QuestItems.take(player, str("item"), optStr("token"), count)) {
-                    player.sendSystemMessage(ModText.hint("message.skyabyss.npc.handed", shown.getHoverName(), count));
+                    Notice.hint(player, "message.skyabyss.npc.handed", shown.getHoverName(), count);
                 }
             }
             case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
