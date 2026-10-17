@@ -55,8 +55,9 @@ public class NoticeLogScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mx, int my, float pt) {
-        renderTransparentBackground(g);
+    public void renderBackground(GuiGraphics g, int mx, int my, float pt) {
+        // 背景 (ぼかさない) と枠と中身を描く。クエストログと同じ流儀
+        g.fill(0, 0, width, height, 0x80000000);
         int left = (width - W) / 2;
         int top = (height - H) / 2;
         g.fill(left, top, left + W, top + H, PANEL);
@@ -77,6 +78,5 @@ public class NoticeLogScreen extends Screen {
             y += 10;
         }
         g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), left + 10, top + H - 11, SOFT, false);
-        super.render(g, mx, my, pt);
     }
 }

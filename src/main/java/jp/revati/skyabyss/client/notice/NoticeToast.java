@@ -13,7 +13,7 @@ import net.minecraft.util.FormattedCharSequence;
 // 伝承・クエストの札と同じ列 (ToastComponent) に並ぶので、重ならない。本文は枠の幅で折り返し、3 行まで
 public class NoticeToast implements Toast {
     private static final long DURATION = 4500L;
-    private static final int WIDTH = 190;
+    private static final int WIDTH = 160;
     private static final int MAX_LINES = 3;
     private final Component head;
     private final List<FormattedCharSequence> lines;

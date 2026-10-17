@@ -196,7 +196,7 @@ public final class NoticeClient {
             w = Math.max(w, font.width(l));
         }
         int h = lines.size() * 11;
-        int bottom = g.guiHeight() - 100;
+        int bottom = g.guiHeight() - 84;
         int top = bottom - h;
         int x0 = cx - w / 2 - 12;
         int x1 = cx + w / 2 + 12;
@@ -232,10 +232,11 @@ public final class NoticeClient {
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
         }
-        int y = g.guiHeight() / 2 - 20;
+        int y = (int) (g.guiHeight() * 0.36f);
         float grow = Math.min(1f, e.age() / 350f);
         int half = (int) ((w / 2 + 14) * grow);
         int lineColor = ((int) (a * 0xB0) << 24) | 0xF2C14E;
+        g.fill(cx - half - 6, y - 6, cx + half + 6, y + lines.size() * 11 + 4, ((int) (a * 0x80) << 24) | 0x0A0E12);
         g.fill(cx - half, y - 4, cx + half, y - 3, lineColor);
         for (FormattedCharSequence l : lines) {
             g.drawString(font, l, cx - font.width(l) / 2, y, alphaOf(a) | 0xFFFFFF, true);
@@ -255,13 +256,13 @@ public final class NoticeClient {
             return;
         }
         boolean place = e.kind == Notice.Kind.PLACE;
-        float scale = place ? 2.2f : 1.25f;
-        int maxW = (int) (Math.min(g.guiWidth() - 30, Math.max(200, (int) (g.guiWidth() * 0.8f))) / scale);
+        float scale = place ? 1.8f : 1.0f;
+        int maxW = (int) (Math.max(120, (int) (g.guiWidth() * 0.5f)) / scale);
         List<FormattedCharSequence> lines = font.split(e.value.text(), maxW);
         if (lines.size() > 2) {
             lines = lines.subList(0, 2);
         }
-        int y = (int) (g.guiHeight() * (place ? 0.2f : 0.14f));
+        int y = (int) (g.guiHeight() * (place ? 0.16f : 0.1f));
         int w = 0;
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
