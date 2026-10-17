@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public final class WhaleKeeper {
             level.playSound(null, x, 200, z, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 24f, 0.8f);
             for (ServerPlayer player : level.players()) {
                 if (player.distanceToSqr(x, 200, z) < NEAR * NEAR) {
-                    player.sendSystemMessage(ModText.lore("message.skyabyss.titan_appears"));
+                    Notice.narrate(player, "message.skyabyss.titan_appears");
                 }
             }
         }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.quest;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.Map;
 
@@ -58,9 +59,8 @@ public final class Quests {
         if (def.main() || log.tracked.isEmpty() || QuestLog.of(player).entry(log.tracked) == null) {
             log.tracked = questId;
         }
-        player.sendSystemMessage(ModText.progress("message.skyabyss.quest.started", Component.translatable(def.titleKey())));
         if (log.quests.size() == 1) {
-            player.sendSystemMessage(ModText.hint("message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log")));
+            Notice.hint(player, "message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log"));
         }
         notice(player, QuestNetwork.Notice.STARTED, questId);
         advance(player, def, entry, true);
@@ -340,7 +340,6 @@ public final class Quests {
         }
         StoryContext ctx = StoryContext.of(player);
         reward.actions().forEach(a -> a.run(ctx));
-        player.sendSystemMessage(ModText.progress("message.skyabyss.quest.finished", Component.translatable(def.titleKey())));
         notice(player, QuestNetwork.Notice.FINISHED, def.id());
         QuestLog log = QuestLog.of(player);
         if (log.tracked.equals(def.id())) {

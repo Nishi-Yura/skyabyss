@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
 import java.util.List;
@@ -226,7 +227,7 @@ public final class TideWatch {
             long now = level.getGameTime();
             if (now - lastReset < RESET_COOLDOWN) {
                 for (ServerPlayer p : near(level)) {
-                    p.displayClientMessage(ModText.deny("message.skyabyss.tide.reset_plug_wait", (RESET_COOLDOWN - (now - lastReset)) / 20 + 1), true);
+                    Notice.bar(p, ModText.deny("message.skyabyss.tide.reset_plug_wait", (RESET_COOLDOWN - (now - lastReset)) / 20 + 1));
                 }
             } else {
                 lastReset = now;
@@ -239,7 +240,7 @@ public final class TideWatch {
                 apply(level, before);
                 level.playSound(null, RESET_LEVER, TideBackSetup.PLUG_FLOW.get(), SoundSource.BLOCKS, 2f, 0.7f);
                 for (ServerPlayer p : near(level)) {
-                    p.sendSystemMessage(ModText.lore("message.skyabyss.tide.reset_plug"));
+                    Notice.narrate(p, "message.skyabyss.tide.reset_plug");
                 }
             }
         }
@@ -266,7 +267,7 @@ public final class TideWatch {
             boolean willOpen = doorOpen(k, next[k]);
             if (wasOpen && !willOpen && someoneInDoor(level, k)) {
                 for (ServerPlayer p : near(level)) {
-                    p.displayClientMessage(ModText.hint("message.skyabyss.tide.door_blocked"), true);
+                    Notice.bar(p, ModText.hint("message.skyabyss.tide.door_blocked"));
                 }
                 return;
             }

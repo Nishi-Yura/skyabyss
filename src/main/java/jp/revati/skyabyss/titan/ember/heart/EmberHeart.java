@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -542,7 +543,7 @@ public class EmberHeart extends GuardMob {
         }
         sound(server, EmberHeartSetup.CHILL.get(), 3f, 1f);
         for (ServerPlayer player : reachable(server, 30)) {
-            player.sendSystemMessage(ModText.lore(EmberLore.HEART_CHILL));
+            Notice.narrate(player, EmberLore.HEART_CHILL);
         }
     }
 
@@ -770,7 +771,7 @@ public class EmberHeart extends GuardMob {
             boolean was = chilled.contains(player.getUUID());
             if (!was && heat <= CHILL_FREEZE_AT) {
                 setChilled(player, true);
-                player.displayClientMessage(ModText.hint(EmberIds.LANG_HEART + "frozen"), true);
+                Notice.bar(player, ModText.hint(EmberIds.LANG_HEART + "frozen"));
             } else if (was && heat > CHILL_THAW_ABOVE) {
                 setChilled(player, false);
             }

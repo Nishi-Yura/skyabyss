@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.story;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import jp.revati.skyabyss.ModText;
@@ -73,10 +74,10 @@ public final class SkyKey {
         Lore.unlock(player, LORE, false);
         Quests.signal(player, SIGNAL);
         SkyAbyss.LOGGER.info("{} assembled the sky key from {} fragment(s) on day {}", player.getGameProfile().getName(), taken, day);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.story.key_formed"));
+        Notice.narrate(player, "message.skyabyss.story.key_formed");
         if (first) {
             List<ServerPlayer> others = player.server.getPlayerList().getPlayers().stream().filter(p -> p != player).toList();
-            others.forEach(p -> p.sendSystemMessage(ModText.lore("message.skyabyss.story.key_formed_world", player.getDisplayName())));
+            others.forEach(p -> Notice.narrate(p, "message.skyabyss.story.key_formed_world", player.getDisplayName()));
         }
         // ほかの人にも見える小さな印: 光の粒が、空から足もとへ落ちて地面に沈む
         player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 6, player.getZ(), 40, 0.4, 3.0, 0.4, 0.0);

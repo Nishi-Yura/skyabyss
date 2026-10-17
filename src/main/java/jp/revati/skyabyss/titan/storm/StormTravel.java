@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -14,9 +15,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -95,7 +93,7 @@ public final class StormTravel {
         player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, StormBackLayout.ARRIVAL_YAW, 0f);
         back.playSound(null, arrival, StormSetup.BACK_WIND.get(), SoundSource.PLAYERS, 1.2f, 1.0f);
         showTitle(player, "title.skyabyss.storm_back", "title.skyabyss.storm_back.sub");
-        player.sendSystemMessage(ModText.lore("message.skyabyss.storm.arrived"));
+        Notice.narrate(player, "message.skyabyss.storm.arrived");
         return true;
     }
 
@@ -166,7 +164,7 @@ public final class StormTravel {
         if (inGateTicks >= GATE_DWELL) {
             IN_GATE.remove(player.getUUID());
             SkyAbyss.LOGGER.info("{} went through the storm back gate at {} {} {}", player.getGameProfile().getName(), player.getX(), player.getY(), player.getZ());
-            player.sendSystemMessage(ModText.lore("message.skyabyss.storm.leaving"));
+            Notice.narrate(player, "message.skyabyss.storm.leaving");
             leave(player);
             return;
         }
@@ -186,7 +184,7 @@ public final class StormTravel {
         player.teleportTo(player.serverLevel(), p.getX() + 0.5, p.getY(), p.getZ() + 0.5, StormBackLayout.ARRIVAL_YAW, 0f);
         player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, FALL_SLOW_FALL, 0, false, false, true));
         player.hurt(player.damageSources().generic(), trial ? TRIAL_FALL_DAMAGE : FALL_DAMAGE);
-        player.displayClientMessage(ModText.hint("message.skyabyss.storm.swept_back"), true);
+        Notice.bar(player, ModText.hint("message.skyabyss.storm.swept_back"));
     }
 
     // 背中にいるあいだに島が無くなっていた (古いワールドなど) ときに建て直す。ログインの時点で
@@ -217,8 +215,6 @@ public final class StormTravel {
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(20, 60, 30));
-        player.connection.send(new ClientboundSetSubtitleTextPacket(ModText.subtitle(subtitle)));
-        player.connection.send(new ClientboundSetTitleTextPacket(ModText.title(title)));
+        Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
     }
 }

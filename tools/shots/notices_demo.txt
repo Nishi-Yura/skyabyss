@@ -1,0 +1,36 @@
+# 画面の知らせが同時に来た場面 (docs/design/18_notices.md)。./gradlew runShots -Pscript=tools/shots/notices_demo.txt
+# 語り・手がかり・レベルの知らせ・獲得・解放・戦いの知らせ・警告・場所の名前を、本番と同じ Notice の経路で一度に送る
+world shots flat
+size 1280 720
+timeout 300
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+waitchunks
+chat clear
+wait 20
+
+cmd skyabyss dev notice narrate message.skyabyss.whisper.ridge
+cmd skyabyss dev notice hint message.skyabyss.whisper.plaza
+cmd skyabyss dev notice narrate message.skyabyss.lore.book_falls
+cmd skyabyss dev notice levelup message.skyabyss.growth.max_level
+cmd skyabyss dev notice gain message.skyabyss.boss_reward
+cmd skyabyss dev notice unlock message.skyabyss.fragment_received
+cmd skyabyss dev notice alert message.skyabyss.heart_begin
+cmd skyabyss dev notice place message.skyabyss.memory_title_stone_whale message.skyabyss.heart_begin
+cmd skyabyss dev notice warn message.skyabyss.stone_silent
+wait 45
+shot notices_all_at_once
+wait 120
+shot notices_second_wave
+wait 60
+shot notices_third_wave
+open notices
+wait 10
+shot notices_log
+close
+echo done

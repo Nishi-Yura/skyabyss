@@ -465,5 +465,11 @@
   "commands.skyabyss.chapter1.status": "%s: chapter 1 %s (boarded a titan %s, lore 'sky ruins' %s)",
   "commands.skyabyss.chapter1.set": "Set 'boarded a titan' of %s to %s",
   "subtitles.skyabyss.peak_scrape": "Rock grinds in the distance",
-  "subtitles.skyabyss.sky_eye_presence": "Something above the clouds"
+  "subtitles.skyabyss.sky_eye_presence": "Something above the clouds",
+  "gui.skyabyss.notice.head.gain": "Obtained",
+  "gui.skyabyss.notice.head.unlock": "Progress",
+  "gui.skyabyss.notice.log": "Notice Log",
+  "gui.skyabyss.notice.log_empty": "Nothing has passed yet",
+  "gui.skyabyss.notice.log_hint": "Scroll to move, Esc to close",
+  "key.skyabyss.notice_log": "Notice log"
 }

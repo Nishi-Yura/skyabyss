@@ -465,5 +465,11 @@
   "commands.skyabyss.chapter1.status": "%s: 1章 %s（巨神の背に乗った %s、伝承「空の遺跡」%s）",
   "commands.skyabyss.chapter1.set": "%s の「巨神の背に乗った」を %s にした",
   "subtitles.skyabyss.peak_scrape": "遠くで岩が擦れる",
-  "subtitles.skyabyss.sky_eye_presence": "雲の上の気配"
+  "subtitles.skyabyss.sky_eye_presence": "雲の上の気配",
+  "gui.skyabyss.notice.head.gain": "獲得",
+  "gui.skyabyss.notice.head.unlock": "進展",
+  "gui.skyabyss.notice.log": "知らせの記録",
+  "gui.skyabyss.notice.log_empty": "まだ何も流れていない",
+  "gui.skyabyss.notice.log_hint": "ホイールで送る　Esc で閉じる",
+  "key.skyabyss.notice_log": "知らせの記録"
 }
