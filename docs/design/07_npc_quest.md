@@ -27,7 +27,9 @@
 
 | 段 | プレイヤーが知ること | やること | 済ませ方（フック先） |
 | --- | --- | --- | --- |
-| 始まり | 晴れた昼に空が暗くなった | — | 空の影を初めて見る（伝承 `prologue/shadow`）か、先に岩鯨を見つける（`chapter1/stone_whale`）と自動で始まる。語り部に「空のことを」と尋ねても始まる |
+| 始まり（17 で変更） | 野営地に帳面が残されていた。遠くに煙が立つ | — | 帳面を拾う（伝承 `prologue/the_book`）と自動で始まる。空の影を先に見る（`prologue/shadow`）か、先に岩鯨を見つける（`chapter1/stone_whale`）でも始まる。語り部に「空のことを」と尋ねても始まる |
+| 序 1（17 で追加） | 煙の下の「鐘の宿り」に語り部がいる | 煙の下の、鐘の宿りへ | 語り部の節 `shadow0` に入る（段 `follow_smoke`）。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす（`skip_if`） |
+| 序 2（17 で追加） | 今日あたり、空を見ていなさい | 晴れた昼の空を、見上げる | 伝承 `prologue/shadow`（段 `watch_sky`）。見たら 1 段目へ |
 | 1 | 影の年には遠い空から“歌”が聞こえる。歌を追う旅人がいる | 村の語り部に尋ねる | 語り部の節 `shadow3` に入る |
 | 2 | 歌の主は空を泳ぐ岩の鯨。降りてきて鎖を垂らす | 村の外れの鯨追いに話を聞く | 鯨追いの節 `c_whale2` に入る（鯨追いは、この段のときに村の外れへ火を焚いて現れる） |
 | 3 | 歌が聞こえたら空を見ろ | 岩鯨をその目で見る | 伝承 `chapter1/stone_whale`（160 ブロック以内に岩鯨） |
@@ -306,8 +308,11 @@ data/<名前空間>/quest/<名前>.json
 | 2 | 数え歌が「tell」 | `song_done` |
 | 3 | ループ 1 回以上、前のループの印 song_heard、not(印 met) | `deja_vu_song` |
 | 4 | ループ 1 回以上、前のループの印 met、not(印 met) | `deja_vu` |
-| 5 | not(印 met) | `first` |
-| 6 | — | `menu` |
+| 5 | メインが「follow_smoke」 | `shadow0` |
+| 6 | メインが「ask_storyteller」、not(印 met) | `shadow_first` |
+| 7 | メインが「watch_sky」、not(印 wait_told) | `shadow_wait` |
+| 8 | not(印 met) | `first` |
+| 9 | — | `menu` |
 
 #### 語り部のセリフ
 
@@ -316,8 +321,13 @@ data/<名前空間>/quest/<名前>.json
 | `first` | smile | おや、見ない顔だね。旅の人かい。<br>この村には何もないけれど、空だけは広い。……ゆっくりしておいき。<br>（初めて話しかけたとき） |  | ▼ `menu` |
 | `deja_vu` | grave | ……おや。<br>前にも、その顔を見た気がするね。……いや、年寄りの気のせいだ。このごろ、同じ夢ばかり見るんだよ。<br>（ループ 1 回目以降、前のループで会っていた (覚えているような)） |  | ▼ `menu` |
 | `deja_vu_song` | grave | ……あんた、あの歌の続きを聞きに来たんだろう。<br>……おかしいね。どうして、そう思ったんだか。<br>（ループ 1 回目以降、前のループで数え歌を聞いていた） |  | ▼ `menu` |
-| `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている）<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「空を泳ぐ岩の山を見た。」→ `whale`（条件: 伝承 chapter1/stone_whale、not(印 whale_told)）<br>「鯨の背中に、町の跡があった。」→ `back`（条件: 伝承 chapter1/sky_ruins、not(印 back_told)）<br>「また来る。」→ `end` |
-| `shadow1` | grave | 空のことかい。<br>……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。<br>（メインを始める） | クエスト開始 main_song | ▼ `shadow2` |
+| `shadow0` | smile | おや、煙を辿ってきたのかい。……見ない顔だね。<br>旅の人が火にあたりに寄るのは、珍しいことじゃない。ゆっくりしておいき。<br>（序盤: 帳面を持って宿りへ来た (メインの「煙の下の、鐘の宿りへ」が済む)） |  | ▼ `shadow0_b` |
+| `shadow0_b` | grave | 何もないけれど、空だけは広い。<br>今日あたり、空を見ていなさい。晴れた昼は、とくにね。……勧めたくは、ないんだけど。<br>（序盤: 影の前の言づけ） |  | 「分かった。」→ `menu`（好感度+1）<br>「どうして、今日だと分かる？」→ `shadow0_why` |
+| `shadow0_why` | grave | 膝が痛むのさ。それと、鐘がね。朝から、風もないのに小さく鳴っているんだよ。<br>……年寄りの気のせいなら、いいんだけどね。 |  | 「覚えておく。」→ `menu`（好感度+1） |
+| `shadow_first` | grave | ……その顔。見たんだね、昼の空を。<br>ここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。<br>（序盤: 影を見てから宿りへ来た (初対面)） |  | ▼ `shadow2` |
+| `shadow_wait` | smile | まだ、見ていないんだね。<br>慌てなくていい。昼のうちは、空はどこへも行きやしないよ。<br>（序盤: 影を待つ間に話しかけた (一度だけ)） | 印 wait_told | ▼ `menu` |
+| `menu` | neutral | 何か聞きたいことでもあるのかい。<br>（話題を選ぶ節 (条件で出る話題が変わる)） |  | 「昼間、雲の上を何かが渡っていった。」→ `shadow1`（条件: 伝承 prologue/shadow、(メインが未着手 または メインが「ask_storyteller」)）<br>「空のことを聞かせてほしい。」→ `shadow1`（条件: not(伝承 prologue/shadow)、メインが未着手）<br>「旅の人は、どこに？」→ `chaser_hint`（条件: メインが「find_chaser」）<br>「この村に伝わる歌はある？」→ `song1`（条件: not(印 song_heard)）<br>「数え歌の続きが知りたい。」→ `sub_offer`（条件: 印 song_heard、数え歌が未着手、メインが始まっている、印 met）<br>「夜、遠くに誰かが立っていた。」→ `watcher`（条件: not(伝承 prologue/watcher)、見る者に気づいた）<br>「夜に気をつけることはある？」→ `watcher`（条件: not(伝承 prologue/watcher)、not(見る者に気づいた)、好感度 10 以上）<br>「この村の決まりごとを教えてほしい。」→ `calendar`（条件: not(伝承 prologue/seventh_night)、好感度 20 以上）<br>「古い帳面を見せる。」→ `book`（条件: 伝承 prologue/the_book、not(印 book_shown)）<br>「道すがら、気になるものを見た。」→ `seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told) または 伝承 chapter1/stone_whale、not(印 whale_told) または 伝承 chapter1/sky_ruins、not(印 back_told))）<br>「また来る。」→ `end` |
+| `shadow1` | grave | 空のことかい。<br>……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。<br>（メインを始める (空のことを聞いた印。序盤の二段を飛ばす)） | 印 sky_asked、クエスト開始 main_song | ▼ `shadow2` |
 | `shadow2` | grave | あれが何なのかは、誰も知らない。見上げた者は、みんな口をつぐむ。<br>ただ、影が通った年には、決まって“歌”が聞こえるんだ。遠い空の向こうから、低く、長く。 |  | ▼ `shadow3` |
 | `shadow3` | neutral | その歌を追いかけている、物好きな旅の人がいてね。ゆうべから、村の外れで火を焚いている。<br>話を聞きたいなら、煙を目印にお行き。……あたしは、あまり勧めないけれど。<br>（ここに入るとメインの「語り部に尋ねる」が済む） |  | 「行ってみる。」→ `end`（好感度+1）<br>「どうして勧めない？」→ `shadow_why` |
 | `shadow_why` | grave | 空ばかり見ている者は、足もとを見なくなる。<br>……あの人も、いつか空へ行ってしまう気がするよ。 |  | 「それでも、行ってみる。」→ `end`（好感度+1） |
@@ -338,11 +348,19 @@ data/<名前空間>/quest/<名前>.json
 | `whale` | grave | 岩の山が、空を泳いでいた？<br>……そうかい。歌の主を、見たんだね。 | 印 whale_told | ▼ `whale2` |
 | `whale2` | grave | 母さんが言っていたよ。あれが降りてくるのは、誰かを迎えに来るときだって。<br>誰を迎えに来るのかは、言わなかったけど。 |  | ▼ `@entry` |
 | `back` | neutral | 背中に、町が……。人が住んでいたのかい。空の上で、地面も持たずに。<br>……そこで生まれて、そこで死んだのなら。その人たちにとっては、鯨が世界のすべてだったんだね。 | 印 back_told、好感度+2 | ▼ `@entry` |
+| `seen_menu` | neutral | ほう。何を見たんだい。<br>（序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話もここ)） |  | 「野営地の跡を見た。」→ `camp0`（条件: 伝承 prologue/camp、not(印 camp_told)）<br>「地面に、大きなくぼみが並んでいた。」→ `prints0`（条件: 伝承 prologue/footprints、not(印 prints_told)）<br>「夜、地面が揺れた。」→ `steps0`（条件: 伝承 prologue/footsteps、not(印 steps_told)）<br>「丘に、巨大な骨が立っていた。」→ `bones0`（条件: 伝承 prologue/bone_hill、not(印 bones_told)）<br>「夜空から、歌が降ってきた。」→ `song0`（条件: 伝承 prologue/sky_song、not(印 song_told)）<br>「空を泳ぐ岩の山を見た。」→ `whale`（条件: 伝承 chapter1/stone_whale、not(印 whale_told)）<br>「鯨の背中に、町の跡があった。」→ `back`（条件: 伝承 chapter1/sky_ruins、not(印 back_told)）<br>「やっぱり、いい。」→ `menu` |
+| `camp0` | grave | あの野営地かい。……焚き火は、いつも冷えているだろう。<br>誰かが使った跡だけが、あそこにはあるんだ。使うところを見た者は、いないけれどね。<br>（序盤: 野営地の跡） | 印 camp_told、好感度+1 | ▼ `@entry` |
+| `prints0` | grave | 足跡……かい。<br>数えたかい。数えるのは、三つまでにしておおき。四つ目を探しに行った者は、帰ってこなかったそうだよ。<br>（序盤: 巨大な足跡） | 印 prints_told、好感度+1 | ▼ `@entry` |
+| `steps0` | grave | 揺れたのかい。……三度、だったろう？<br>そういう夜は、あたしは耳をふさいで数え歌を歌うことにしている。みっつまで歌うと、いつも静かになるんだよ。<br>（序盤: 夜の足音） | 印 steps_told、好感度+1 | ▼ `@entry` |
+| `bones0` | grave | 骨、かい。弧を描いて、立っていたんだね。<br>死んだものを見ると、落ち着く者もいる。あたしは逆だよ。終わるものなら、始まりもあったはずだろう？<br>（序盤: 骨の丘） | 印 bones_told、好感度+1 | ▼ `@entry` |
+| `song0` | grave | ……聞いたんだね、空の歌を。<br>あの歌が降りる夜は、星がいくつか消えるんだよ。母さんは、何かが上を通るのだと言っていた。<br>（序盤: 空の歌） | 印 song_told、好感度+2 | ▼ `song0_b` |
+| `song0_b` | grave | みっつ、みあげちゃだめよ、と歌うのは、見えないものを見せないためだと思っていたんだ。<br>今はね、見られないためかもしれないと思うよ。 |  | 「何が、通ったんだ？」→ `song0_c`<br>「……そうか。」→ `@entry` |
+| `song0_c` | grave | 名前を呼んだら、振り向かれる気がしてね。<br>……だから、あたしは呼ばないことにしているんだ。 |  | ▼ `@entry` |
 | `fragment` | neutral | ……戻ったんだね。<br>手の中のそれ、見せておくれ。<br>（メイン最後の段階 (欠片を手にしたあと)） |  | ▼ `fragment2` |
 | `fragment2` | grave | 温かい……。脈を打っているよ。まるで、生きているみたいだ。<br>言い伝えでは、空の扉の鍵は四つに分かれているという。ひとつは鯨が。残りは……さあ、どこだろうね。 |  | ▼ `fragment3` |
 | `fragment3` | neutral | あんたは、空へ行くんだね。……止めはしないよ。<br>ただ、七日目の夜だけは、気をつけるんだよ。<br>（ここに入るとメインが終わる） |  | 「ありがとう。」→ `end`（好感度+3） |
 
-#### 鯨追い（`skyabyss:whale_chaser`）の入口
+#### 鯨追いのイサナ（`skyabyss:whale_chaser`）の入口
 
 | 順 | 条件 | 始まる節 |
 | --- | --- | --- |
@@ -351,13 +369,20 @@ data/<名前空間>/quest/<名前>.json
 | 3 | not(印 met) | `c_first` |
 | 4 | — | `c_menu` |
 
-#### 鯨追いのセリフ
+#### 鯨追いのイサナのセリフ
 
 | 節 | 顔 | セリフ | 入ったとき | 次 / 選択肢 |
 | --- | --- | --- | --- | --- |
-| `c_first` | smile | ……ん？　ああ、村の人じゃないな。<br>火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。<br>（初めて話しかけたとき） |  | ▼ `c_menu` |
-| `c_deja` | grave | どこかで会ったか？<br>……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。<br>（ループ 1 回目以降、前のループで会っていた） |  | ▼ `c_menu` |
-| `c_menu` | neutral | なにか用か。<br>（話題を選ぶ節） |  | 「語り部から、あなたのことを聞いた。」→ `c_whale1`（条件: メインが「find_chaser」）<br>「鯨のことを聞かせて。」→ `c_whale1`（条件: not(印 c_whale_heard)、not(メインが「find_chaser」)）<br>「鯨は、いつ来る？」→ `c_when`（条件: 印 c_whale_heard、not(伝承 chapter1/stone_whale)）<br>「旅の途中で、何か見た？」→ `c_peak`（条件: 印 c_whale_heard、not(伝承 prologue/shaved_peak)）<br>「鯨を見た。」→ `c_saw`（条件: 伝承 chapter1/stone_whale、not(印 c_saw)）<br>「鯨の背中に乗った。」→ `c_back`（条件: 伝承 chapter1/sky_ruins、not(印 c_back_told)）<br>「何か手伝えることは？」→ `c_shards_offer`（条件: 伝承 chapter1/sky_ruins、鯨のかけらが未着手）<br>「岩鯨の欠片を持ってきた。」→ `c_shards_thanks`（条件: 鯨のかけらが「deliver」、stone_whale_shard ×3／stone_whale_shard ×3 を受け取る）<br>「じゃあ、また。」→ `end` |
+| `c_first` | smile | ……ん？　ああ、村の人じゃないな。<br>火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。<br>（初めて話しかけたとき (名乗る。伝承「鯨追いのイサナ」を記す)） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
+| `c_deja` | grave | どこかで会ったか？<br>……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。<br>（ループ 1 回目以降、前のループで会っていた） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
+| `c_menu` | neutral | なにか用か。<br>（話題を選ぶ節） |  | 「語り部から、あなたのことを聞いた。」→ `c_whale1`（条件: メインが「find_chaser」）<br>「鯨のことを聞かせて。」→ `c_whale1`（条件: not(印 c_whale_heard)、not(メインが「find_chaser」)）<br>「鯨は、いつ来る？」→ `c_when`（条件: 印 c_whale_heard、not(伝承 chapter1/stone_whale)）<br>「旅の途中で、何か見た？」→ `c_peak`（条件: 印 c_whale_heard、not(伝承 prologue/shaved_peak)）<br>「鯨を見た。」→ `c_saw`（条件: 伝承 chapter1/stone_whale、not(印 c_saw)）<br>「鯨の背中に乗った。」→ `c_back`（条件: 伝承 chapter1/sky_ruins、not(印 c_back_told)）<br>「何か手伝えることは？」→ `c_shards_offer`（条件: 伝承 chapter1/sky_ruins、鯨のかけらが未着手）<br>「岩鯨の欠片を持ってきた。」→ `c_shards_thanks`（条件: 鯨のかけらが「deliver」、stone_whale_shard ×3／stone_whale_shard ×3 を受け取る）<br>「道中で、妙なものを見た。」→ `c_seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told))）<br>「じゃあ、また。」→ `end` |
+| `c_seen_menu` | neutral | 妙なもの？　聞かせろ。<br>（序盤: 見たものの話題 (見たものだけ並ぶ)） |  | 「野営地の跡を見た。」→ `c_camp`（条件: 伝承 prologue/camp、not(印 camp_told)）<br>「地面に、大きなくぼみが並んでいた。」→ `c_prints`（条件: 伝承 prologue/footprints、not(印 prints_told)）<br>「夜、地面が揺れた。」→ `c_steps`（条件: 伝承 prologue/footsteps、not(印 steps_told)）<br>「丘に、巨大な骨が立っていた。」→ `c_bones`（条件: 伝承 prologue/bone_hill、not(印 bones_told)）<br>「夜空から、歌が降ってきた。」→ `c_song`（条件: 伝承 prologue/sky_song、not(印 song_told)）<br>「やっぱり、いい。」→ `c_menu` |
+| `c_camp` | grave | あの野営地か。俺が寄ったときも、誰もいなかった。<br>火は冷えているのに、寝袋だけが、いま起きたばかりみたいに温かかった。<br>（序盤: 野営地の跡） | 印 camp_told、好感度+1 | ▼ `@entry` |
+| `c_prints` | grave | 三つ並んでいただろう。俺も、その先を探した。<br>何も見つからなかった。……見つからないのが、いちばん気味が悪い。<br>（序盤: 巨大な足跡） | 印 prints_told、好感度+1 | ▼ `@entry` |
+| `c_steps` | grave | ゆうべか。火のそばの湯が、三度、ゆっくり揺れていた。<br>……鯨じゃない。鯨は、歩かない。<br>（序盤: 夜の足音） | 印 steps_told、好感度+1 | ▼ `@entry` |
+| `c_bones` | grave | あの石板か。……俺じゃないぞ。字が、俺のじゃない。<br>歌が止まる、か。俺は長いこと歌を追ってきたが、止まったと思ったことは一度もない。<br>（序盤: 骨の丘） | 印 bones_told、好感度+1 | ▼ `@entry` |
+| `c_song` | grave | 聞いたか、ゆうべの歌。あれが、俺の追っている歌だ。<br>だが、いつもより近かった。……近すぎる、と思った。<br>（序盤: 空の歌） | 印 song_told、好感度+2 | ▼ `c_song2` |
+| `c_song2` | neutral | 鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。<br>覚悟しておけ。俺も、してはいるんだ。 |  | ▼ `@entry` |
 | `c_whale1` | neutral | 俺は、もう何年も鯨を追っている。<br>影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。 | 印 c_whale_heard | ▼ `c_whale2` |
 | `c_whale2` | grave | ときどき雲の下まで降りてきて、地面に届くほど長い鎖を垂らすんだ。<br>俺は……一度も、つかめたことがない。降りてくるのは、いつも遠くの誰かの上なんだ。<br>（ここに入るとメインの「鯨追いに話を聞く」が済む） |  | ▼ `c_whale3` |
 | `c_whale3` | neutral | あんたの上には、来るかもしれないな。<br>……もし鎖が届いたら、迷わずつかめ。 |  | 「つかんでみる。」→ `end`（好感度+2）<br>「怖くはないのか？」→ `c_afraid` |
@@ -377,14 +402,16 @@ data/<名前空間>/quest/<名前>.json
 #### クエスト「雲の下の歌」（`main_song`、メイン）
 
 - 依頼主: 語り部
-- 自動で始まる条件: (伝承 prologue/shadow または 伝承 chapter1/stone_whale)
+- 自動で始まる条件: (伝承 prologue/the_book または 伝承 prologue/shadow または 伝承 chapter1/stone_whale)
 - 終えたときの報酬: 経験値 200、好感度 storyteller +5、好感度 whale_chaser +5（一人一回）
 - 終えたあとの書き付け: 欠片は、ほのかに温かく脈を打っている。残る三つは、ほかの巨神が体の奥に抱えているはずだ。
 
 | 段階 | 書き付け | 目的 | 済ませ方 | 経験値 |
 | --- | --- | --- | --- | --- |
-| `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>村の年寄りなら、何か知っているかもしれない。 | 村の語り部に、空のことを尋ねる | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
-| `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、村の外れで火を焚いている。煙が目印だ。 | 村の外れの鯨追いに、話を聞く | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
+| `follow_smoke` | 野営地に残されていたのは、一冊の帳面だけだった。<br>遠くの空に、細い煙が立っている。ときおり、鐘の音も風に乗ってくる。 | 煙の下の、鐘の宿りへ | talk storyteller の節 `shadow0`<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
+| `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 晴れた昼の空を、見上げる | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
+| `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>語り部なら、何か知っているかもしれない。 | 語り部に、空のことを尋ねる | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
+| `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。 | 火を焚く鯨追いに、話を聞く | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
 | `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 空を泳ぐ岩鯨を、その目で見る | lore chapter1/stone_whale | 60 |
 | `board` | 岩鯨が、すぐそこにいる。降りてきたら、地面に届いた鎖をつかめば、背中へ引き上げられるはずだ。 | 鎖をのぼり、岩鯨の背中へ渡る | lore chapter1/sky_ruins | 60 |
 | `inscriptions` | 背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。<br>どの道の先にも、背中の民が碑文を残しているはずだ。 | 背中の碑文を三つ読む（3） | lore chapter1/inscription_west, chapter1/inscription_east, chapter1/inscription_below | 90 |
@@ -404,7 +431,7 @@ data/<名前空間>/quest/<名前>.json
 
 #### クエスト「鯨のかけら」（`sub_shards`、サブ）
 
-- 依頼主: 鯨追い
+- 依頼主: 鯨追いのイサナ
 - 終えたときの報酬: 経験値 120、spyglass ×1、好感度 whale_chaser +10（一人一回）
 - 終えたあとの書き付け: イサナは、石を火にかざして、長いあいだ黙っていた。
 
@@ -1029,3 +1056,13 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 ### 16.4 自己テストとゲーム画面
 
 自己テストは `SELFTEST story`（14 の 7.2 節）。ゲーム画面の確認は 14 の 8 章。
+
+## 17. 序盤の語り（2026-10-17、[17](17_opening_and_rpg_feel.md) の担当 4）
+
+全文は 17 の 11 章。ここには仕組みだけ。生成は `tools/gen_npc_content.py`（会話・メイン）と `tools/gen_opening_text.py`（伝承・17-10 の閉じ方）。
+
+- **メイン「雲の下の歌」の始まり**: 帳面（伝承 `prologue/the_book`）を拾うと始まる（影・岩鯨を先に見る、でも始まる）。段を 2 つ前に足した: `follow_smoke`（語り部の節 `shadow0` に入る）→ `watch_sky`（伝承 `prologue/shadow`）→ 従来の `ask_storyteller` …。影か岩鯨を先に見た人、空のことを先に尋ねた人（節 `shadow1` で印 `sky_asked`）は、この二段を飛ばす（`skip_if`）。
+- **語り部の入口**: `shadow0`（メインが `follow_smoke`）、`shadow_first`（影のあとの初対面。`shadow2`→`shadow3` へ続く）、`shadow_wait`（影を待つ間、一度だけ）。ループの「覚えているような」入口（`deja_vu*`）のあと、`first` の前。
+- **道すがらの見聞**: 語り部の話題に「道すがら、気になるものを見た。」（節 `seen_menu`）、イサナに「道中で、妙なものを見た。」（節 `c_seen_menu`）。伝承が記されていて、まだ話していないものだけ並ぶ（印 `<話題>_told`）。語り部の話題の節は枠の高さの上限（210）のため、もとの「岩鯨を見た」「背中に町の跡」の話題も `seen_menu` へ移した。
+- **17-10**: イサナと会う（印 `met`、`npc skyabyss:whale_chaser`）までは、言伝ての板の頼み・語り部の「ほかに、頼みごとはある？」・「数え歌の続き」を出さない。
+- 自己テスト: `SELFTEST opening story`（`story/OpeningStorySelfTest`）。このために既存の `NpcQuestSelfTest`（二度目の訪れ、段の名前で探す）と `FreeQuestSelfTest`（試す人は「イサナと会った」ことにする）を少し直した。

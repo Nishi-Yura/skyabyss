@@ -471,5 +471,9 @@
   "gui.skyabyss.notice.log": "知らせの記録",
   "gui.skyabyss.notice.log_empty": "まだ何も流れていない",
   "gui.skyabyss.notice.log_hint": "ホイールで送る　Esc で閉じる",
-  "key.skyabyss.notice_log": "知らせの記録"
+  "key.skyabyss.notice_log": "知らせの記録",
+  "sign.skyabyss.lore_bone_slab.1": "歌は",
+  "sign.skyabyss.lore_bone_slab.2": "ここで",
+  "sign.skyabyss.lore_bone_slab.3": "止まった",
+  "sign.skyabyss.lore_bone_slab.4": ""
 }

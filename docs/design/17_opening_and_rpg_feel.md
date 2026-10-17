@@ -394,3 +394,163 @@
 - [Eye of Cthulhu（Terraria wiki）](https://terraria.wiki.gg/wiki/Eye_of_Cthulhu)、[Guide: Game progression](https://terraria.wiki.gg/wiki/Guide:Game_progression)
 - [Minecraft horror survival（modpackindex）](https://www.modpackindex.com/modpack/85776/minecraft-horror-survival)（宣伝文。設計の根拠にはしていない）
 - ドラクエ・FF のレベルアップ、ホラーの一般論（大きさの見せ方、静かな恐怖）は、検索で裏づけが取れず、一般知識。
+
+
+---
+
+## 11. 担当 4（語り）の記録
+
+- 日付: 2026-10-17。文は「ほのめかし、言いすぎない」。巨神・見る者・ループ・天の鍵の意味は書かない（自己テスト `OpeningStorySelfTest` が言葉で確かめる）。
+- 生成元: `tools/gen_opening_text.py`（伝承・看板・開幕の一行・目的の帯・17-10 の閉じ方）、`tools/gen_npc_content.py`（語り部とイサナの足し書き、メインの始まり）。下の表は、この 2 つの文を読んで書き出したもの（印の間は手で直さない）。
+
+<!-- 担当4 生成ここから（tools/gen_opening_text.py が書く） -->
+
+#### 新しい伝承の頁（序章の章、`data/skyabyss/lore/entry/prologue/`）
+
+| ID | 順 | 記す合図（拍子の担当が `Lore.unlock(player, ID, true)`） | 題 | 本文（日本語） | 本文（英語） |
+| --- | --- | --- | --- | --- | --- |
+| `prologue/camp` | 12 | B1 帳面を拾って 3 秒後（野営地の中心から 12 ブロック以内にいるとき） | 旅の野営地<br>The Travelers' Camp | 焚き火は、輪にした石だけを残して冷えきっていた。荷車は倒れ、寝袋は口を開けたまま、人の形にくぼんでいる。<br><br>荷はあらかた持ち去られ、帳面だけが残されていた。持ち去った者の足あとは、草の上に一つもない。<br><br>誰が、ここで夜を明かしたのだろう。 | The fire had gone cold, nothing left but its ring of stones. The cart lay on its side, and the bedroll gaped open, still hollowed in the shape of a person.<br><br>Most of the baggage was gone. Only the notebook had been left behind. There was not a single footprint in the grass from whoever took it.<br><br>Who spent the night here? |
+| `prologue/the_book_margin` | 14 | 判断 17-5: 日 3 の朝（tick 0〜6000）で、メインがまだ `follow_smoke` のとき | 帳面の余白<br>A Line in the Margin | いつ書かれたのか、分からない。ゆうべまでは白かったはずの余白だ。<br><br>筆跡は、最初の頁の一行と同じだった。<br><br>誰が、先回りして書いているのだろう。<br>（碑文）鐘の方へ。 | I cannot tell when it was written. The margin was blank last night.<br><br>The handwriting matches the line on the first page.<br><br>Who keeps writing ahead of me? |
+| `prologue/footprints` | 15 | B3 足跡のくぼみの 24 ブロック以内に初めて入ったとき（起きている人だけ） | 巨大な足跡<br>Giant Footprints | 道を少し外れた地面に、足の形をしたくぼみが三つ、同じ間をおいて並んでいた。底は固い石で、雨水がたまっている。<br><br>一歩で、家が一軒、沈む。<br><br>前にも後ろにも、続きは見つからなかった。歩いた者は、どちらへ向かったのだろう。 | A little off the road, hollows in the shape of feet lay in the ground, three of them, evenly spaced. Their floors were hard stone, and rainwater had gathered in them.<br><br>One step, and a house would sink.<br><br>I could find no trace of them before or behind. Where was the one who walked here headed? |
+| `prologue/footsteps` | 27 | B6 足音の 3 度目が終わって 5 秒後 | 夜の足音<br>Night Footsteps | 日が落ちて間もなく、虫の声が止んだ。風も止んだ。<br><br>地面が三度、ゆっくりと揺れた。一度ごとに強くなり、やがて遠のいていった。<br><br>暗がりには、何も見えなかった。それでも、何かが通り過ぎたことだけは分かった。<br><br>何が、歩いていたのだろう。 | Not long after sundown, the insects fell silent. The wind stopped too.<br><br>The ground shook three times, slowly, each stronger than the last, and then faded into the distance.<br><br>I could see nothing in the dark. Even so, I knew something had passed.<br><br>What was walking? |
+| `prologue/bone_hill` | 28 | B8 石板の 12 ブロック以内に入ったとき（または石板の看板を読んだとき） | 骨の丘<br>The Bone Hill | 丘の上に、巨大なあばら骨が弧を描いて立っていた。長く風に磨かれて、石のように白い。数えようとして、途中でやめた。<br><br>足もとの石板に、一行だけ刻まれていた。<br><br>これほど大きなものにも、終わりがあるのか。<br>（碑文）歌は／ここで／止まった | On a hill stood a gigantic rib cage, arching up from the ground, polished stone-white by long years of wind. I tried to count the ribs and gave up partway.<br><br>A single line was carved into the slab at its foot.<br><br>Can something this vast really end? |
+| `prologue/sky_song` | 29 | B9 歌が終わり、星が戻ったあと | 空の歌<br>The Song from the Sky | 夜、空から歌が降ってきた。低く長く、どちらから来るとも分からない声だった。<br><br>星が、帯のかたちに消えていった。何かが、空の上を通っていくように。歌が終わると、星は何ごともなかったように戻った。<br><br>星を隠したのは、何だったのだろう。 | At night, a song came down from the sky. A low, long voice, with no way to tell where it came from.<br><br>The stars went out in a broad band, as if something were passing high above. When the song ended, the stars returned as though nothing had happened.<br><br>What was it that hid the stars? |
+
+#### 開幕の一行と目的の帯の文（`assets/skyabyss_opening/lang/`）
+
+| 鍵 | 日本語 | 英語 | 出す場面 |
+| --- | --- | --- | --- |
+| `opening.skyabyss.line` | ……ここは、どこだ。 | ...Where am I? | B0 題字「天と淵のあいだ」の下 |
+| `opening.skyabyss.margin_line` | 鐘の方へ。 | Toward the bell. | 判断 17-5 の余白の一行（頁 `prologue/the_book_margin` の碑文と同じ文） |
+| `objective.skyabyss.examine_camp` | 野営地に残された跡 | What the camp left behind | B0 目覚めてから、帳面を拾うまで |
+| `objective.skyabyss.follow_smoke` | 煙の立つ方 | Where the smoke rises | B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke) |
+| `objective.skyabyss.watch_sky` | 晴れた昼の空 | The clear midday sky | B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky) |
+| `objective.skyabyss.ask_storyteller` | 宿りの語り部 | The storyteller at the lodge | B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller) |
+| `objective.skyabyss.find_isana` | 宿りの外れの焚き火 | The fire beyond the lodge | B5 語り部のあと、イサナと話すまで (メインの段 find_chaser) |
+| `objective.skyabyss.see_whale` | 歌の主、岩鯨 | The singer: the stone whale | B7〜B10 イサナと話してから、岩鯨を見るまで (メインの段 see_whale) |
+| `objective.skyabyss.bone_hill` | 骨の丘 | The bone hill | B8 日 2 の昼の寄り道 (任意。出さなくてもよい) |
+
+#### 石板（`sign.skyabyss.lore_bone_slab.1〜4`、骨の丘の足もと。看板で置く）
+
+| 行 | 日本語 | 英語 |
+| --- | --- | --- |
+| 1 | 歌は | The song |
+| 2 | ここで | stopped |
+| 3 | 止まった | here |
+| 4 | （空） | (blank) |
+
+#### 語り部の足し書き（`tools/gen_npc_content.py`。全部の会話は 07 の生成表）
+
+入口（上から調べる。先頭の `fragment`・`song_done` のあと、`deja_vu_song` の前）:
+
+| 節 | 条件 |
+| --- | --- |
+| `shadow0` | メインが `follow_smoke` |
+| `shadow_first` | メインが `ask_storyteller` で、初めて話す |
+| `shadow_wait` | メインが `watch_sky` で、この話をまだ聞いていない |
+
+| 節 | 日本語 | 英語 | 選択肢 |
+| --- | --- | --- | --- |
+| `shadow0` | おや、煙を辿ってきたのかい。……見ない顔だね。<br>旅の人が火にあたりに寄るのは、珍しいことじゃない。ゆっくりしておいき。 | Oh, you followed the smoke, did you. ...I don't know your face.<br>Travelers stopping by to warm themselves is nothing unusual. Stay a while. | ▼ `shadow0_b` |
+| `shadow0_b` | 何もないけれど、空だけは広い。<br>今日あたり、空を見ていなさい。晴れた昼は、とくにね。……勧めたくは、ないんだけど。 | There's nothing here, but the sky is wide.<br>Keep an eye on the sky today. At midday, especially, if it's clear. ...Not that I like to recommend it. | 「分かった。」→ `menu`<br>「どうして、今日だと分かる？」→ `shadow0_why` |
+| `shadow0_why` | 膝が痛むのさ。それと、鐘がね。朝から、風もないのに小さく鳴っているんだよ。<br>……年寄りの気のせいなら、いいんだけどね。 | My knee aches. And the bell, too. Since morning it has been ringing softly, with no wind at all.<br>...I'd be glad if it were only an old woman's fancy. | 「覚えておく。」→ `menu` |
+| `shadow_first` | ……その顔。見たんだね、昼の空を。<br>ここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。 | ...That face. You saw it, didn't you. The midday sky.<br>This is where those who have seen it come first. ...Well, come and warm yourself. | ▼ `shadow2` |
+| `shadow_wait` | まだ、見ていないんだね。<br>慌てなくていい。昼のうちは、空はどこへも行きやしないよ。 | You haven't seen it yet. No need to hurry.<br>In the daytime, the sky isn't going anywhere. | ▼ `menu` |
+| `seen_menu` | ほう。何を見たんだい。 | Oh? What did you see? | 「野営地の跡を見た。」→ `camp0`<br>「地面に、大きなくぼみが並んでいた。」→ `prints0`<br>「夜、地面が揺れた。」→ `steps0`<br>「丘に、巨大な骨が立っていた。」→ `bones0`<br>「夜空から、歌が降ってきた。」→ `song0`<br>「空を泳ぐ岩の山を見た。」→ `whale`<br>「鯨の背中に、町の跡があった。」→ `back`<br>「やっぱり、いい。」→ `menu` |
+| `camp0` | あの野営地かい。……焚き火は、いつも冷えているだろう。<br>誰かが使った跡だけが、あそこにはあるんだ。使うところを見た者は、いないけれどね。 | That camp, is it. ...The fire's always cold, isn't it.<br>There's only ever the trace of someone having used it. No one has ever seen them use it. | ▼ `@entry` |
+| `prints0` | 足跡……かい。<br>数えたかい。数えるのは、三つまでにしておおき。四つ目を探しに行った者は、帰ってこなかったそうだよ。 | Footprints, is it.<br>Did you count them? Stop at three. They say the ones who went looking for a fourth never came back. | ▼ `@entry` |
+| `steps0` | 揺れたのかい。……三度、だったろう？<br>そういう夜は、あたしは耳をふさいで数え歌を歌うことにしている。みっつまで歌うと、いつも静かになるんだよ。 | It shook, did it. ...Three times, wasn't it?<br>On nights like that, I cover my ears and sing the counting song. By the time I reach "three," it has always gone quiet. | ▼ `@entry` |
+| `bones0` | 骨、かい。弧を描いて、立っていたんだね。<br>死んだものを見ると、落ち着く者もいる。あたしは逆だよ。終わるものなら、始まりもあったはずだろう？ | Bones, is it. Standing in an arc, were they.<br>Some find comfort in the sight of dead things. I'm the opposite. If a thing can end, it must have begun, mustn't it? | ▼ `@entry` |
+| `song0` | ……聞いたんだね、空の歌を。<br>あの歌が降りる夜は、星がいくつか消えるんだよ。母さんは、何かが上を通るのだと言っていた。 | ...You heard it, then. The song from the sky.<br>On nights when it comes down, some of the stars go out. My mother said something was passing overhead. | ▼ `song0_b` |
+| `song0_b` | みっつ、みあげちゃだめよ、と歌うのは、見えないものを見せないためだと思っていたんだ。<br>今はね、見られないためかもしれないと思うよ。 | I always thought we sang "three, don't you look up" so that children wouldn't see what can't be seen.<br>Now I think it may be so that we aren't seen. | 「何が、通ったんだ？」→ `song0_c`<br>「……そうか。」→ `@entry` |
+| `song0_c` | 名前を呼んだら、振り向かれる気がしてね。<br>……だから、あたしは呼ばないことにしているんだ。 | I fear that if I called its name, it would turn around.<br>...So I've decided not to call it. | ▼ `@entry` |
+
+#### イサナの足し書き（`tools/gen_npc_content.py`。全部の会話は 07 の生成表）
+
+| 節 | 日本語 | 英語 | 選択肢 |
+| --- | --- | --- | --- |
+| `c_seen_menu` | 妙なもの？　聞かせろ。 | Strange? Tell me. | 「野営地の跡を見た。」→ `c_camp`<br>「地面に、大きなくぼみが並んでいた。」→ `c_prints`<br>「夜、地面が揺れた。」→ `c_steps`<br>「丘に、巨大な骨が立っていた。」→ `c_bones`<br>「夜空から、歌が降ってきた。」→ `c_song`<br>「やっぱり、いい。」→ `c_menu` |
+| `c_camp` | あの野営地か。俺が寄ったときも、誰もいなかった。<br>火は冷えているのに、寝袋だけが、いま起きたばかりみたいに温かかった。 | That camp. When I stopped there, no one was around either.<br>The fire was cold, but the bedroll was warm, as if someone had only just got up. | ▼ `@entry` |
+| `c_prints` | 三つ並んでいただろう。俺も、その先を探した。<br>何も見つからなかった。……見つからないのが、いちばん気味が悪い。 | Three in a row, weren't there. I looked beyond them too.<br>I found nothing. ...Finding nothing is the worst part. | ▼ `@entry` |
+| `c_steps` | ゆうべか。火のそばの湯が、三度、ゆっくり揺れていた。<br>……鯨じゃない。鯨は、歩かない。 | Last night. The water by the fire shook three times, slowly.<br>...It wasn't the whale. Whales don't walk. | ▼ `@entry` |
+| `c_bones` | あの石板か。……俺じゃないぞ。字が、俺のじゃない。<br>歌が止まる、か。俺は長いこと歌を追ってきたが、止まったと思ったことは一度もない。 | That slab. ...It wasn't me. The hand isn't mine.<br>The song stopped, it says. I've chased that song a long time, and never once thought it had stopped. | ▼ `@entry` |
+| `c_song` | 聞いたか、ゆうべの歌。あれが、俺の追っている歌だ。<br>だが、いつもより近かった。……近すぎる、と思った。 | You heard it, last night's song. That's the one I chase.<br>But it was closer than ever. ...Too close, I thought. | ▼ `c_song2` |
+| `c_song2` | 鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。<br>覚悟しておけ。俺も、してはいるんだ。 | The whale usually comes down after the song. ...Tonight, or tomorrow.<br>Brace yourself. I'm trying to myself. | ▼ `@entry` |
+
+<!-- 担当4 生成ここまで -->
+
+### 11.1 プレイヤーが読む順（語りの流れ）
+
+| 拍子 | 読むもの | 一行で言うと |
+| --- | --- | --- |
+| B0 | 題字の下の一行「……ここは、どこだ。」 | 目覚めた人は何も分からない。それだけ |
+| B1 | 頁「旅の野営地」、帳面（既存の最初の頁） | 人が去った跡。足あとだけがない |
+| B2 | 目的「煙の立つ方」 | 行き先だけを示す |
+| B3 | 頁「巨大な足跡」 | 一歩で家が沈む。続きがない |
+| B4〜B5 | 語り部 `shadow0`（影の前）か `shadow_first`（影のあと） | 「今日あたり、空を見ていなさい。……鐘が、風もないのに鳴っている」 |
+| B6 | 頁「夜の足音」、語り部「耳をふさいで数え歌」、イサナ「鯨は、歩かない」 | 大きさは言わずに、三度揺れたことだけ |
+| B7 | イサナ（既存の `c_first` で名乗る） | 変えない |
+| B8 | 頁「骨の丘」、石板「歌は ここで 止まった」 | 「これほど大きなものにも、終わりがあるのか」 |
+| B9 | 頁「空の歌」、語り部「名前を呼んだら、振り向かれる気がして」、イサナ「近すぎる」 | 見えないものは、名前も呼ばれない |
+| B10 | イサナ `c_song2`「鯨が降りてくるのは、たいてい歌のあとだ」 | 岩鯨の初登場への橋渡し |
+| 余白 | 頁「帳面の余白」「鐘の方へ。」 | 日 3 の朝にも宿りへ着いていない人にだけ。筆跡は最初の頁と同じ |
+
+守ったこと:
+
+- **見る者・ループ・天の鍵・巨神の名前は書かない。** 語り部の「見られないためかもしれない」と、帳面の余白の「誰が、先回りして書いているのか」、野営地の「足あとがない」「寝袋が温かい」は、見る者と留まる者への入口を、問いのままにしてある。
+- **足跡は余燼（17-3 A）、骨の主は決めない（17-4 A）。** 足跡は「三つで途切れる」「見つからないのが気味が悪い」までで、地面の下を歩くことは書かない（章 1 の終わりで回収できる余地を残す）。骨は語り部の「終わるものなら、始まりもあったはずだろう」まで。
+- **数え歌とつなげた。** 三つの足跡、三度の揺れ、三つ目の「みあげちゃだめよ」。足跡は「三つまでにしておおき。四つ目を探しに行った者は、帰ってこなかった」（巨神が四体であることへの、まだ意味のない重なり）。
+- **語り部の人柄を保った。** 「〜だね」「〜おくれ」、言い切らず話をそらし、空を見上げる者を心配する。イサナは短く、ぶっきらぼう。
+- **頁は 2〜3 段。** 問いか物で終える（6 つとも、最後の段を問いで終える）。
+
+### 11.2 目的の帯の文を、どの状態で出すか
+
+帯の担当（1）と拍子の担当（3）が、メイン「雲の下の歌」の段から文の ID を引く表:
+
+| 状態 | 目的の ID（`objective.skyabyss.<ID>`） |
+| --- | --- |
+| 初参加から、帳面を拾うまで（メインはまだ始まっていない） | `examine_camp` |
+| メインの段 `follow_smoke` | `follow_smoke` |
+| メインの段 `watch_sky` | `watch_sky` |
+| メインの段 `ask_storyteller` | `ask_storyteller` |
+| メインの段 `find_chaser` | `find_isana` |
+| メインの段 `see_whale`（以降は 07 のクエストの目的の文を使う） | `see_whale` |
+| B8 の日 2 の昼、任意の寄り道（帯に足すなら） | `bone_hill` |
+
+文は短い名詞句（日本語は 12 字まで、英語は 34 字まで。自己テストが数える）。命令にせず、行き先を示す。方角と距離は帯が右に足す。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
+
+### 11.3 拍子の担当（3）・構造物の担当（2）・画面の担当（1）へ
+
+- **新しい `signal` は作っていない。** メインの序の二段は、既存の「会話の節に入った」（`talk`）と「伝承が記された」（`lore`）で進む。拍子の担当が送るものは、下の `Lore.unlock` だけ。
+- **伝承を記す呼び出し**（表の「記す合図」）: `Lore.unlock(player, "prologue/camp", true)` など。同じ項目を何度送ってもよい（記録済みなら何もしない）。
+- **拍子の ID**（17 の 8.1 の `OpeningState` に付ける名前の案）: B0 `awake`、B1 `camp`、B2 `trail`、B3 `footprints`、B4 `shadow`、B5 `storyteller`、B6 `footsteps`、B7 `isana`、B8 `bones`、B9 `song`、B10 `whale`。伝承の項目の名前（`prologue/footprints` など）とそろえてある。
+- **影のあとの破れた頁（17-2）**: 中身は既存の `prologue/shadow`（「雲の上の影」）の本文のまま。頁を読むと記される。
+- **開幕の一行**: `opening.skyabyss.line`（題字の下、一度だけ）。**余白の一行**（判断 17-5、日 3 の朝にも宿りに着いていない人）: 伝承 `prologue/the_book_margin` を記す。同じ文が `opening.skyabyss.margin_line` にもある（札・字幕で出すとき）。
+- **鐘の宿りの鐘**: 語り部は「朝から、風もないのに鐘が鳴っている」と言う（`shadow0_why`）。B2 の鐘の音は、この台詞と合うように、**風のない朝の小さな音**で鳴らすとよい（最初の影の日の朝は、とくに）。
+- **石板**: 骨の丘の足もとに、看板で `sign.skyabyss.lore_bone_slab` を立てる（4 行、4 行目は空）。立てたら、`prologue/bone_hill` の条件に `sign` を足せる（今は `manual`）。
+- **宿りの名前**: 「鐘の宿り」（英語 Bell Lodge）。会話では場所の名前を出さず（本物の村の語り部にも使えるように）、目的の文とクエストの書き付けにだけ出す。
+
+### 11.4 17-10: 序盤のサブクエストはイサナと会うまで出さない（データだけで実現）
+
+| 何を | どうしたか |
+| --- | --- |
+| 言伝ての板の頼み（日替わり 6・週替わり 4） | クエストの `unlock` に「イサナと話した」（条件 `flag met`、`npc skyabyss:whale_chaser`）を足した。板では「閉じた」表示になり、手がかり（`unlock_hint`）は「村外れの旅人と話すと、受けられる」（もとの手がかりがあるものはそのまま） |
+| 語り部の「ほかに、頼みごとはある？」 | 同じ条件を足した（その先の「村の頼みごと」の板の話題・影の帳面・包み・白いところの話題がまとめて閉じる） |
+| 語り部の「数え歌の続きが知りたい」（サブ「数え歌のつづき」） | 同じ条件を足した |
+| 鯨追い側の頼み | イサナ本人の話題なので、そのまま |
+
+`met` の印は、会話を開いた時点で立つ（`DialogueService.open`）ので、イサナと最初に話した直後から開く。ループで印が消えると、次のループでも最初は閉じる（目的を一本にするため。ループ本体は M4）。
+
+### 11.5 データを直した所（Java の論理は触っていない）
+
+- メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒し。段を 2 つ足した（`follow_smoke`、`watch_sky`。どちらも、影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。
+- 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件に使う）。
+- 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題の節は、話題を 1 つだけ足し、見聞の 5 つは別の節に分けた。
+- `tools/gen_npc_content.py` を、出荷済みのデータに合わせ直した（イサナの名乗り、伝承 `chapter1/whale_chaser`）。`gen_free_quests.py` と `gen_story_quests.py` は、書き出したあとの手直しと食い違っているので、再実行しない（17-10 の閉じ方は `gen_opening_text.py` がデータを直接直す）。
+
+### 11.6 確かめたこと（2026-10-17）
+
+- `./gradlew compileJava --offline` 成功。`SKYABYSS_SELFTEST=1 ./gradlew runServer`（通知の窓口 18 を取り込んだあと）で、全系統 PASSED。`SELFTEST opening story` は、伝承 6 つ（読み込み・日英の文・ページ幅・核心の言葉が出ない・石板が看板の幅に収まる）、開幕の一行と目的の帯 7 つの長さ、メインの通し（帳面 → `shadow0` → 影 → 語り部 → イサナ → `see_whale`）、影・岩鯨・空の質問を先にした人が序盤の二段を飛ばすこと、見聞 5 つ（語り部は岩鯨と背中の町も）が話すと消えること、イサナと会うまで板の頼みと語り部の頼みごとが閉じていること。
+- 字幕（`Notice.narrate`、幅 160 以上・4 行まで）と札（幅 160・3 行まで）に出る文は、開幕の一行と余白の一行だけで、どちらも一行に収まる。目的の帯は一行で切れるため、日本語 12 字・英語 34 字以内にした。会話と伝承の長文は字幕に流さず、会話画面と伝承の書で読む。
+- 推敲は 3 周: ①ほのめかしの度合い（足跡は地面の下と書かない、骨の主を決めない、野営地の「足あとがない」「寝袋が温かい」で止める）、②語り部・イサナの口調と数え歌の重ね（三つ・三度・「みっつ」）、③日本語の接続と時制（「それなのに」を外す、「昨日」を「ゆうべまで」に、碑文を過去形に）。英語も同じ段で直した。
+- 試遊はしていない（ゲームの窓へのキー送信は禁止）。画面での見え方（字幕の折り返し、会話枠の高さ）は、担当 6 の通しで見る。

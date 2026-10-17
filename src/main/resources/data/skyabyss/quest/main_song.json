@@ -7,6 +7,10 @@
     "of": [
       {
         "type": "lore",
+        "entry": "prologue/the_book"
+      },
+      {
+        "type": "lore",
         "entry": "prologue/shadow"
       },
       {
@@ -16,6 +20,67 @@
     ]
   },
   "stages": [
+    {
+      "id": "follow_smoke",
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "prologue/shadow"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/stone_whale"
+          },
+          {
+            "type": "flag",
+            "flag": "sky_asked",
+            "npc": "skyabyss:storyteller"
+          }
+        ]
+      },
+      "xp": 20,
+      "objectives": [
+        {
+          "id": "reach",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "shadow0"
+        }
+      ]
+    },
+    {
+      "id": "watch_sky",
+      "skip_if": {
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "prologue/shadow"
+          },
+          {
+            "type": "lore",
+            "entry": "chapter1/stone_whale"
+          },
+          {
+            "type": "flag",
+            "flag": "sky_asked",
+            "npc": "skyabyss:storyteller"
+          }
+        ]
+      },
+      "xp": 20,
+      "objectives": [
+        {
+          "id": "look",
+          "type": "lore",
+          "targets": [
+            "prologue/shadow"
+          ]
+        }
+      ]
+    },
     {
       "id": "ask_storyteller",
       "skip_if": {

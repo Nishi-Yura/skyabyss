@@ -377,6 +377,24 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 - 序章と一章の項目は 49 になった（自己テストの上限を 40 から 75 に。余燼の分も見込む）。
 - ほかの担当が登録する巨神・雷獣・心臓・背中は、まだないうちは「待っている」として自己テストを通す（`StormLore.PENDING`）。
 
+### 2.8.3 序盤の項目（2026-10-17、[17](17_opening_and_rpg_feel.md) の担当 4）
+
+文は `data/skyabyss/lore/entry/prologue/` と `assets/skyabyss_lore/lang`、生成は `tools/gen_opening_text.py`（全文は 17 の 11 章）。どれも `manual`（序盤の拍子の担当が `Lore.unlock(player, ID, true)` で記す。きっかけは 17 の 11 章の表）。本文は 2〜3 段、説明せず、問いか物で終える。
+
+| 項目 | 題 | 記される時 | ほのめかし |
+| --- | --- | --- | --- |
+| `prologue/camp` | 旅の野営地 | B1 帳面を拾ったあと | 人の形にくぼんだ寝袋。持ち去った者の足あとが、草の上に一つもない |
+| `prologue/the_book_margin` | 帳面の余白 | 日 3 の朝、宿りにまだ着いていないとき（17-5） | 余白に増えた「鐘の方へ。」。筆跡は最初の頁と同じ。誰が先回りして書いているのか |
+| `prologue/footprints` | 巨大な足跡 | B3 くぼみの近く | 一歩で家が一軒沈む。前にも後ろにも続きがない |
+| `prologue/footsteps` | 夜の足音 | B6 三度の揺れのあと | 虫と風が止み、地面が三度揺れる。何も見えない |
+| `prologue/bone_hill` | 骨の丘 | B8 石板の近く | 巨大なあばら骨と、一行の石板（「歌は ここで 止まった」）。大きなものにも終わりがあるのか |
+| `prologue/sky_song` | 空の歌 | B9 歌のあと | 方角のない声。星が帯の形に消え、戻る |
+
+- 序章は 6 から 12 になった。順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`footsteps` 27、`bone_hill` 28、`sky_song` 29。
+- 巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
+- 伝承の書の最初の頁（`prologue/the_book` の一行）は変えていない。書は野営地の帳面で渡し、空から落ちるのは破れた頁にする（17-2）のは拍子の担当が行う（この項目は文だけ）。
+- 石板の看板の文は `sign.skyabyss.lore_bone_slab.1〜4`（本体の `skyabyss` の lang。`SignFit` が幅を測る）。碑文の写しは `inscription_sign` で読む。看板を置く担当（構造物）が、骨の丘の足もとにこのキーの看板を立てれば、`sign` の条件を足せる。
+
 ### 2.9 二章以降の枠
 
 | 章 | しおり | 章の名（記されるまで伏せる） | 枠の数 |
