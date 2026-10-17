@@ -23,8 +23,8 @@ public final class OpeningSites {
     public enum Kind {
         CAMP("camp", 12),
         SHELTER("shelter", 16),
-        FOOTPRINT("footprint", 9),
-        RIBS("ribs", 26);
+        FOOTPRINT("footprint", 27),
+        RIBS("ribs", 45);
 
         public final String id;
         // この距離 (水平) の中にいれば「その場所にいる」とみなす半径
