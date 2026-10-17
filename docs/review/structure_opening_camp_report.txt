@@ -1,4 +1,4 @@
-# opening_camp  (minecraft:overworld, origin (14, 64, -59), size 27x23x27, game time 1467)
+# opening_camp  (minecraft:overworld, origin (14, 64, -59), size 27x23x27, game time 1799)
 block kinds 40; most common: minecraft:stone 3470, minecraft:dirt 1501, minecraft:grass_block[snowy=false] 395, minecraft:snow[layers=1] 312, minecraft:grass_block[snowy=true] 249, minecraft:gravel 215, minecraft:andesite 205
 
 ## walk from stand (27, 74, -43): 559 standing places reached
@@ -8,4 +8,4 @@ block kinds 40; most common: minecraft:stone 3470, minecraft:dirt 1501, minecraf
 ## signs: 0
 ## other block entities: minecraft:barrel 1, minecraft:campfire 1
 
-done in 3.4 s; images in docs\review/structure_opening_camp_*.png
+done in 2.7 s; images in docs\review/structure_opening_camp_*.png

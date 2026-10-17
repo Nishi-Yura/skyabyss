@@ -1,5 +1,5 @@
-# opening_ribs  (minecraft:overworld, origin (-183, 62, -244), size 61x37x37, game time 1504)
-block kinds 23; most common: minecraft:stone 14433, minecraft:dirt 6837, minecraft:grass_block[snowy=true] 2180, minecraft:snow[layers=1] 697, minecraft:coal_ore 303, minecraft:bone_block[axis=y] 240, minecraft:grass_block[snowy=false] 162
+# opening_ribs  (minecraft:overworld, origin (-183, 62, -244), size 61x37x37, game time 1820)
+block kinds 23; most common: minecraft:stone 14433, minecraft:dirt 6837, minecraft:grass_block[snowy=true] 2178, minecraft:snow[layers=1] 695, minecraft:coal_ore 303, minecraft:bone_block[axis=y] 240, minecraft:grass_block[snowy=false] 164
 
 ## walk from slab (-129, 77, -225): 2344 standing places reached
   center (-153, 72, -226): reached in 23 steps; path -129,76,-225 > -130,77,-225 > -130,75,-226 > -131,74,-226 > -132,73,-226 > -133,72,-226 > -134,73,-226 > -141,72,-226 > -142,73,-226 > -147,72,-226 > -148,73,-226 > -150,72,-226 > -151,73,-226
@@ -7,4 +7,4 @@ block kinds 23; most common: minecraft:stone 14433, minecraft:dirt 6837, minecra
 ## signs: 1
   (-129, 77, -225) minecraft:spruce_wall_sign: sign.skyabyss.opening_slab.1 / sign.skyabyss.opening_slab.2 / sign.skyabyss.opening_slab.3 / sign.skyabyss.opening_slab.4
 
-done in 1.7 s; images in docs\review/structure_opening_ribs_*.png
+done in 1.6 s; images in docs\review/structure_opening_ribs_*.png
