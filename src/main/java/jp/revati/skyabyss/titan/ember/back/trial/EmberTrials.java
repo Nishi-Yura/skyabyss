@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,7 +184,7 @@ public final class EmberTrials {
     }
 
     public static void hint(ServerPlayer p, String key, Object... args) {
-        p.displayClientMessage(ModText.hint(key, args), true);
+        Notice.bar(p, ModText.hint(key, args));
     }
 
     // ---------------------------------------------------------------- 見回り

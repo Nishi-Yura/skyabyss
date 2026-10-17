@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -845,7 +846,7 @@ public class Raiju extends GuardMob {
 
     private void broadcast(ServerLevel server, net.minecraft.network.chat.Component message) {
         for (ServerPlayer p : fighters(server)) {
-            p.displayClientMessage(message, true);
+            Notice.bar(p, message);
         }
     }
 

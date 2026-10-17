@@ -19,7 +19,7 @@ import voxel
 BASE = Path("tools/sources/hp_base")
 OUT = Path("docs/review/high_poly_roughs")
 GEAR = "ash_poker bone_sentinel_shield coral_spear coral_spear_statue hooked_glaive rib_archer_bow smith_hammer smith_tongs supplicant_staff".split()
-ARMOR = "stone_whale_armor tide_shell_armor thunder_wing_armor ember_armor".split()
+ARMOR = []  # the four armors moved to tools/install_armor_v2.py (docs/design/16); their v1 inputs were removed
 
 
 def load(n, k):

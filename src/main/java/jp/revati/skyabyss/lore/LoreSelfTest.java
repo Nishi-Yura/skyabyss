@@ -132,7 +132,7 @@ public final class LoreSelfTest {
                         }
                     }
                     case "page" -> {
-                        if (!t.target().equals("village") && !t.target().equals("titan_back")
+                        if (!t.target().equals("village") && !t.target().equals("titan_back") && !t.target().equals("shadow")
                                 && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }

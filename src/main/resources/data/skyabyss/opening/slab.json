@@ -1,0 +1,1 @@
+{"site":"slab","option":"a","palette":["minecraft:bone_block[axis=x]","minecraft:stone_bricks","minecraft:bone_block[axis=z]","minecraft:spruce_wall_sign[facing=south,waterlogged=false]","minecraft:stone_brick_slab[type=bottom]"],"blocks":[[-1,0,1,0],[0,0,0,1],[2,0,2,2],[0,1,0,1],[0,1,1,3],[0,2,0,4]],"marks":{"sign":[0,1,1]},"meta":{"rect":[-2,-2,2,3],"level":false}}

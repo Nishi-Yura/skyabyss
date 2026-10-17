@@ -1,0 +1,13 @@
+# opening_shelter  (minecraft:overworld, origin (116, 55, 118), size 33x25x36, game time 1806)
+block kinds 62; most common: minecraft:stone 6864, minecraft:dirt 2326, minecraft:grass_block[snowy=false] 1146, minecraft:diorite 389, minecraft:sand 330, minecraft:spruce_leaves[distance=2,persistent=false,waterlogged=false] 256, minecraft:granite 213
+
+## walk from stand (132, 65, 131): 1074 standing places reached
+  center (132, 65, 136): reached in 3 steps; path 132,65,131
+
+## water: 197 water blocks, 197 sources, 0 flowing now
+  static estimate: water could spread into 0 open cells (0 of them inside enclosed rooms)
+
+## signs: 0
+## other block entities: minecraft:barrel 2, minecraft:bell 1, minecraft:campfire 1, minecraft:lectern 1
+
+done in 3.3 s; images in docs\review/structure_opening_shelter_*.png

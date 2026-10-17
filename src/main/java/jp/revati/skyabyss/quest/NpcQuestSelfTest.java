@@ -521,9 +521,10 @@ public final class NpcQuestSelfTest {
         Lore.unlock(b, "prologue/shadow", false);
         Quests.poll(b, true);
         check(stage(b, "main_song").equals("ask_storyteller"), "seeing the shadow did not start the main quest", failures);
+        // 初めて話すなら shadow_first (序盤の語り、OpeningStorySelfTest)。ここは二度目の訪れ (話題を選ぶ節) を見る
+        NpcBonds.of(b).bond(ST).flags().add("met");
         DialogueService.open(b, st);
         DialogueService.open(a, st);
-        next(b);
         check(node(b).equals("menu") && shown(b, ST, "shadow_seen") && !shown(b, ST, "shadow_ask"), "menu for a shadow witness is wrong", failures);
         pick(b, ST, "shadow_seen", failures);
         check(node(a).equals("menu") && node(b).equals("shadow1"), "two players' conversations interfered (" + node(a) + ", " + node(b) + ")", failures);
@@ -684,7 +685,7 @@ public final class NpcQuestSelfTest {
         main.write(buf);
         QuestDef back = QuestDef.read(buf);
         check(back.id().equals(main.id()) && back.stages().size() == main.stages().size() && back.reward().xp() == main.reward().xp()
-                && back.stages().get(4).objectives().get(0).count() == 3, "quest catalog round trip differs", failures);
+                && back.stage("inscriptions").objectives().get(0).count() == 3, "quest catalog round trip differs", failures);
         notes.add("save/load, copy on death and the client catalog round trip");
     }
 

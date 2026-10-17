@@ -82,6 +82,8 @@ public final class SelfTestRunner {
         steps.addAll(TitanBackSelfTest.buildSteps());
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
+        // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
+        steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
@@ -96,12 +98,23 @@ public final class SelfTestRunner {
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
+        steps.add(Step.until("story (load)", jp.revati.skyabyss.story.StorySelfTest::ready));
         steps.add(Step.once("story", jp.revati.skyabyss.story.StorySelfTest::runSelfTest));
+        // 序盤の語り (17 の 3〜6 章): 野営地の帳面から宿り・空の影・イサナまで、新しい伝承 6 つ、道すがらの見聞
+        steps.add(Step.until("opening story (load)", jp.revati.skyabyss.story.OpeningStorySelfTest::ready));
+        steps.add(Step.once("opening story", jp.revati.skyabyss.story.OpeningStorySelfTest::runSelfTest));
+        // 序盤の拍子 B0〜B10 (17 の 3 章): 判断の流し込み (新しいワールド・雨・洞窟・寝た人・戦闘・村なし・マルチ)、本物の人での確認
+        steps.add(Step.once("opening", jp.revati.skyabyss.opening.OpeningSelfTest::runSelfTest));
         // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
         steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
+        // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
+        steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
+        // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
+        steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
+        steps.add(Step.once("opening beats", 60, jp.revati.skyabyss.opening.OpeningBeatsSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));

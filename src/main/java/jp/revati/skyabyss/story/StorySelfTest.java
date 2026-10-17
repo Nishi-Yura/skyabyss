@@ -89,6 +89,25 @@ public final class StorySelfTest {
         }
     }
 
+    private static int readyTicks;
+
+    // 新しいワールドの直後はスポーン地点の塊がまだエンティティの動く状態でなく、足した NPC が見つからない。強制読み込みして待つ (最長 600 tick)
+    static boolean chunkReady(MinecraftServer server, int offset) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        BlockPos at = new BlockPos(spawn.getX() + offset, 300, spawn.getZ() + offset);
+        level.setChunkForced(at.getX() >> 4, at.getZ() >> 4, true);
+        if (level.isPositionEntityTicking(at) || ++readyTicks > 600) {
+            readyTicks = 0;
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean ready(MinecraftServer server) {
+        return chunkReady(server, 40);
+    }
+
     private static void check(boolean ok, String what, List<String> f) {
         if (!ok) {
             f.add(what);
@@ -165,6 +184,7 @@ public final class StorySelfTest {
         wc.setNoGravity(true);
         level.addFreshEntity(st);
         level.addFreshEntity(wc);
+        check(level.getEntity(st.getId()) == st && level.getEntity(wc.getId()) == wc, "the npcs are not in the entity lookup (is the chunk entity-ticking?)", f);
         spawned.add(st);
         spawned.add(wc);
         FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a1e0b3c-0000-4000-8000-00000000b001"), "[story_test]"));

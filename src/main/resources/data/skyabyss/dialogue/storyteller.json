@@ -60,6 +60,51 @@
       ]
     },
     {
+      "node": "shadow0",
+      "if": {
+        "type": "quest",
+        "quest": "main_song",
+        "is": "active",
+        "stage": "follow_smoke"
+      }
+    },
+    {
+      "node": "shadow_first",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "active",
+          "stage": "ask_storyteller"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "shadow_wait",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "main_song",
+          "is": "active",
+          "stage": "watch_sky"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "wait_told"
+          }
+        }
+      ]
+    },
+    {
       "node": "first",
       "if": {
         "type": "not",
@@ -84,6 +129,58 @@
     },
     "deja_vu_song": {
       "face": "grave",
+      "next": "menu"
+    },
+    "shadow0": {
+      "face": "smile",
+      "next": "shadow0_b"
+    },
+    "shadow0_b": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ],
+          "goto": "menu"
+        },
+        {
+          "id": "why",
+          "goto": "shadow0_why"
+        }
+      ]
+    },
+    "shadow0_why": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ],
+          "goto": "menu"
+        }
+      ]
+    },
+    "shadow_first": {
+      "face": "grave",
+      "next": "shadow2"
+    },
+    "shadow_wait": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "wait_told"
+        }
+      ],
       "next": "menu"
     },
     "menu": {
@@ -174,6 +271,11 @@
               "type": "quest",
               "quest": "main_song",
               "is": "started"
+            },
+            {
+              "type": "flag",
+              "flag": "met",
+              "npc": "skyabyss:whale_chaser"
             }
           ],
           "goto": "sub_offer"
@@ -254,38 +356,104 @@
           "goto": "book"
         },
         {
-          "id": "whale",
-          "if": [
-            {
-              "type": "lore",
-              "entry": "chapter1/stone_whale"
-            },
-            {
-              "type": "not",
-              "of": {
-                "type": "flag",
-                "flag": "whale_told"
-              }
-            }
-          ],
-          "goto": "whale"
-        },
-        {
-          "id": "back",
-          "if": [
-            {
-              "type": "lore",
-              "entry": "chapter1/sky_ruins"
-            },
-            {
-              "type": "not",
-              "of": {
-                "type": "flag",
-                "flag": "back_told"
-              }
-            }
-          ],
-          "goto": "back"
+          "id": "seen",
+          "if": {
+            "type": "any",
+            "of": [
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/camp"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "camp_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/footprints"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "prints_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/footsteps"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "steps_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/bone_hill"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "bones_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/sky_song"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "song_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "chapter1/stone_whale"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "whale_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "chapter1/sky_ruins"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "back_told"
+                  }
+                }
+              ]
+            ]
+          },
+          "goto": "seen_menu"
         },
         {
           "id": "bye",
@@ -297,6 +465,10 @@
     "shadow1": {
       "face": "grave",
       "do": [
+        {
+          "type": "flag",
+          "flag": "sky_asked"
+        },
         {
           "type": "quest_start",
           "quest": "main_song"
@@ -520,6 +692,221 @@
           "amount": 2
         }
       ],
+      "next": "@entry"
+    },
+    "seen_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "camp",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/camp"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "camp_told"
+              }
+            }
+          ],
+          "goto": "camp0"
+        },
+        {
+          "id": "prints",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/footprints"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "prints_told"
+              }
+            }
+          ],
+          "goto": "prints0"
+        },
+        {
+          "id": "steps",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/footsteps"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "steps_told"
+              }
+            }
+          ],
+          "goto": "steps0"
+        },
+        {
+          "id": "bones",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/bone_hill"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "bones_told"
+              }
+            }
+          ],
+          "goto": "bones0"
+        },
+        {
+          "id": "song",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/sky_song"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "song_told"
+              }
+            }
+          ],
+          "goto": "song0"
+        },
+        {
+          "id": "whale",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/stone_whale"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "whale_told"
+              }
+            }
+          ],
+          "goto": "whale"
+        },
+        {
+          "id": "ruins",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "chapter1/sky_ruins"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "back_told"
+              }
+            }
+          ],
+          "goto": "back"
+        },
+        {
+          "id": "cancel",
+          "goto": "menu"
+        }
+      ]
+    },
+    "camp0": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "camp_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "prints0": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "prints_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "steps0": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "steps_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "bones0": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "bones_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "song0": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "song_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "song0_b"
+    },
+    "song0_b": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "who",
+          "goto": "song0_c"
+        },
+        {
+          "id": "ok",
+          "goto": "@entry"
+        }
+      ]
+    },
+    "song0_c": {
+      "face": "grave",
       "next": "@entry"
     },
     "fragment": {

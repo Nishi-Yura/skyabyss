@@ -16,13 +16,13 @@ import net.minecraft.util.Mth;
 // 追跡中のクエストの、今の目的を画面の左に小さく出す (成長の表示の下)。
 // 済んだ目的は出さない (「どれか一つ」の段階は、選べる目的を「または」でつなぐ)。F1・F3 の画面と、追跡していないときは出さない
 public final class QuestHud {
-    static final int X = 6;
+    public static final int X = 6;
     // 成長の表示の「+12」の列 (バーの下 y=25 から、マナ・技の段の分だけ下げて、最大 4 行) より下に置く。
     // 列の長さで上下に動かないよう、いつも 4 行分あける
     static final int POPUP_TOP = 25;
     static final int POPUP_ROWS = 4;
 
-    static int y() {
+    public static int y() {
         // 成長の表示を経験値バーの左に置いたときは、左上の一番上から (左上に寄せた技の枠があればその下)
         Minecraft mc = Minecraft.getInstance();
         if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, mc.getWindow().getGuiScaledWidth())) {
@@ -64,10 +64,13 @@ public final class QuestHud {
         if (def == null || entry == null || entry.done || entry.stage >= def.stages().size()) {
             return;
         }
+        if (def.main() && ObjectiveStrip.active()) {
+            return;
+        }
         Font font = mc.font;
         List<Line> lines = lines(font, def, entry);
         int h = 12 + lines.size() * 10 + 3;
-        int top = y();
+        int top = y() + ObjectiveStrip.rows();
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
         g.fill(X - 3, top - 3, X - 2, top + h - 2, def.main() ? MAIN_TITLE : TITLE);
@@ -97,6 +100,17 @@ public final class QuestHud {
             out.add(tail);
         }
         return out;
+    }
+
+    // 帯に出す、今の目的の一行 (数は「1/3」を後ろに付け、長ければ切る)
+    public static String firstObjective(Font font, QuestDef def, QuestLog.Entry entry, int width) {
+        for (Line l : lines(font, def, entry)) {
+            if (l.text.startsWith("・")) {
+                String s = l.text.substring(1);
+                return s;
+            }
+        }
+        return Component.translatable(def.titleKey()).getString();
     }
 
     static List<Line> lines(Font font, QuestDef def, QuestLog.Entry entry) {

@@ -165,5 +165,14 @@
   "quest.skyabyss.weekly_heart_again.heart.heart": "岩鯨の心臓を止める",
   "quest.skyabyss.weekly_heart_again.heart.journal": "板の隅の紙：「止めた鼓動は、また打ちはじめる。七日に一度は、確かめてきてほしい」\n誰が書いたのか、名前はない。",
   "quest.skyabyss.weekly_heart_again.summary": "岩鯨の心臓を、もう一度止める。戦いに加わった仲間も数える。",
-  "quest.skyabyss.weekly_heart_again.title": "心臓をもう一度"
+  "quest.skyabyss.weekly_heart_again.title": "心臓をもう一度",
+  "quest.skyabyss.daily_bone_sentry.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.daily_firewood.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.daily_lost_flock.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.daily_night_watch.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.daily_storm_rounds.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.daily_tide_rounds.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.weekly_heart_again.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.weekly_storm_heart.unlock_hint": "村外れの旅人と話すと、受けられる",
+  "quest.skyabyss.weekly_tide_heart.unlock_hint": "村外れの旅人と話すと、受けられる"
 }

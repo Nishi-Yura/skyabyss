@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.record;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -278,7 +279,7 @@ public final class KeepsakeBonds {
 
     // 前の代の品は砂になる
     private static void crumble(ServerPlayer player, ItemStack stack) {
-        player.sendSystemMessage(ModText.lore("skyabyss_record.bond.crumbled", stack.getHoverName()));
+        Notice.narrate(player, "skyabyss_record.bond.crumbled", stack.getHoverName());
         player.serverLevel().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.5, 0.4, 0.02);
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.SAND_BREAK, SoundSource.PLAYERS, 0.8f, 0.7f);
         SkyAbyss.LOGGER.info("[record] a stale {} (owner {}) crumbled near {}", BuiltInRegistries.ITEM.getKey(stack.getItem()), owner(stack),
@@ -289,11 +290,11 @@ public final class KeepsakeBonds {
     private static void sendHome(ServerPlayer holder, UUID ownerId, ItemStack stack) {
         MinecraftServer server = holder.server;
         ServerPlayer owner = server.getPlayerList().getPlayer(ownerId);
-        holder.sendSystemMessage(ModText.hint("skyabyss_record.bond.went_home", stack.getHoverName(),
-                owner != null ? owner.getDisplayName() : net.minecraft.network.chat.Component.literal(nameOf(server, ownerId))));
+        Notice.hint(holder, "skyabyss_record.bond.went_home", stack.getHoverName(),
+                owner != null ? owner.getDisplayName() : net.minecraft.network.chat.Component.literal(nameOf(server, ownerId)));
         if (owner != null && owner.isAlive() && !owner.hasDisconnected()) {
             Keepsakes.giveOrDrop(owner, stack);
-            owner.sendSystemMessage(ModText.lore("skyabyss_record.bond.came_home", stack.getHoverName(), holder.getDisplayName()));
+            Notice.narrate(owner, "skyabyss_record.bond.came_home", stack.getHoverName(), holder.getDisplayName());
         } else {
             TitanMemoryData.get(server).pending(ownerId).items.add(stack);
         }
@@ -390,7 +391,7 @@ public final class KeepsakeBonds {
             data.setLastClears(player.getUUID(), titan, r.clears);
             if (last >= 0 && r.clears > last && r.fragment && missing(player, Kind.FRAGMENT) > 0) {
                 int given = reissue(player, Kind.FRAGMENT);
-                player.sendSystemMessage(ModText.lore("skyabyss_record.bond.heart_restored", given));
+                Notice.narrate(player, "skyabyss_record.bond.heart_restored", given);
             }
         }
     }
@@ -400,11 +401,11 @@ public final class KeepsakeBonds {
     // 2. 控え帳から呼び戻す
     public static RecallResult recall(ServerPlayer player, Kind kind) {
         if (missing(player, kind) <= 0) {
-            player.sendSystemMessage(ModText.hint("skyabyss_record.bond.nothing_missing_" + kind.id));
+            Notice.hint(player, "skyabyss_record.bond.nothing_missing_" + kind.id);
             return RecallResult.NOTHING_MISSING;
         }
         int given = reissue(player, kind);
-        player.sendSystemMessage(ModText.lore("skyabyss_record.bond.recalled_" + kind.id, given));
+        Notice.narrate(player, "skyabyss_record.bond.recalled_" + kind.id, given);
         player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 4, player.getZ(), 24, 0.3, 2.0, 0.3, 0.0);
         player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1f, 0.8f);
         return RecallResult.RECALLED;

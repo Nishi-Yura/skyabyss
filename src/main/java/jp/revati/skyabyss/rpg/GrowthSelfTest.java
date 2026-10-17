@@ -40,6 +40,68 @@ public final class GrowthSelfTest {
         }
     }
 
+    // ---------------------------------------------------------------- 序盤の進み (17 の 5.2、04 の 3.6)
+    // 拍子どおりに進めたときの経験値を、実際のデータ (クエストの段・伝承の表・定数) から積み上げ、レベルの節目を確かめる。
+    // 敵と買い物の量は控えめに見積もる (最初の夜に 5 体、日 2 に 5 体、バイオームは 1 つ 10)。
+    static void checkOpeningPace(List<String> f) {
+        var song = jp.revati.skyabyss.quest.QuestManager.quest("main_song");
+        check(f, song != null, "main_song is missing");
+        if (song == null) {
+            return;
+        }
+        long xp = 0;
+        // B0〜B3: 目覚め (最初のバイオーム)、帳面、野営地、足跡、鐘の宿り
+        xp += GrowthRewards.BIOME_XP + lore("prologue/the_book") + lore("prologue/camp") + lore("prologue/footprints") + stage(song, "follow_smoke");
+        int lodge = levelAt(xp);
+        check(f, lodge == 2, "arriving at the lodge should give level 2, got " + lodge + " (" + xp + " xp)");
+        // B4〜B5: 最初の影、語り部
+        xp += lore("prologue/shadow") + stage(song, "watch_sky") + stage(song, "ask_storyteller") + 2 * GrowthRewards.BIOME_XP;
+        int storyteller = levelAt(xp);
+        check(f, storyteller == 3, "after the storyteller should be level 3, got " + storyteller + " (" + xp + " xp)");
+        // B6: 最初の夜 (足音と、近づく敵を 5 体)
+        xp += lore("prologue/footsteps") + 5 * 4;
+        // B7〜B8: イサナ、骨の丘、日 2 の敵
+        xp += stage(song, "find_chaser") + lore("prologue/bone_hill") + 5 * 4;
+        int hour = levelAt(xp);
+        long hourXp = xp;
+        check(f, hour == 3, "after the bone hill (about 1 hour) should be level 3, got " + hour + " (" + xp + " xp)");
+        // B9〜B10: 歌、岩鯨の初登場
+        xp += lore("prologue/sky_song") + lore("chapter1/stone_whale") + stage(song, "see_whale") + 5 * 4;
+        int whaleSeen = levelAt(xp);
+        check(f, whaleSeen >= 4 && whaleSeen <= 5, "seeing the whale should be level 4-5, got " + whaleSeen + " (" + xp + " xp)");
+        // 岩鯨の背の初回クリア: 新しい地、休み場 6 か所、道中の敵、番兵長、心臓、試練 3 つ、段「乗る」「碑文」、物語の報酬
+        long back = GrowthRewards.DIMENSION_XP + 6L * GrowthRewards.REST_POINT_XP + 172
+                + GrowthRewards.CAPTAIN_XP + GrowthRewards.CAPTAIN_FIRST_BONUS + GrowthRewards.HEART_XP + GrowthRewards.HEART_FIRST_BONUS
+                + 3L * GrowthRewards.TRIAL_XP + stage(song, "board") + stage(song, "inscriptions") + song.reward().xp();
+        long clear = xp + back;
+        int mainOnly = levelAt(clear);
+        check(f, mainOnly >= 10 && mainOnly <= 12, "first clear of the stone whale should be level 10-12, got " + mainOnly + " (" + clear + " xp)");
+        // 序盤のサブクエスト (イサナと会ったあとに開く): 数え歌 40、影の帳面 60、包み 50、白いところ 150、日替わり 2 つ (薪 30・夜回り 40)
+        long subs = 40 + 60 + 50 + 150 + 30 + 40;
+        int withSubs = levelAt(clear + subs);
+        check(f, withSubs >= 11 && withSubs <= 13, "first clear with the early side quests should be level 11-13, got " + withSubs);
+        // 技: Lv1 の 1 点で最初の一つ。Lv3 で 2 つ目、Lv5 で 3 つ目 (二段目の技の必要 Lv も 5)
+        check(f, jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(1) == 1 && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(3) == 2
+                && jp.revati.skyabyss.rpg.skill.SkillRules.pointsForLevel(5) == 3, "skill points at level 1, 3, 5 are wrong");
+        SkyAbyss.LOGGER.info("[selftest] growth opening pace: lodge Lv{} / storyteller Lv{} / bone hill (about 1 h) Lv{} ({} xp) / whale seen Lv{} / first clear Lv{} ({} xp), with side quests Lv{}",
+                lodge, storyteller, hour, hourXp, whaleSeen, mainOnly, clear, withSubs);
+    }
+
+    private static int lore(String id) {
+        return GrowthRewards.LORE_XP.getOrDefault(id, 0);
+    }
+
+    private static int stage(jp.revati.skyabyss.quest.QuestDef quest, String id) {
+        var s = quest.stage(id);
+        return s == null ? 0 : s.xp();
+    }
+
+    private static int levelAt(long totalXp) {
+        GrowthData d = new GrowthData();
+        Growth.addXpRaw(d, totalXp);
+        return d.level;
+    }
+
     private static void check(List<String> failures, boolean ok, String what) {
         if (!ok) {
             failures.add(what);
@@ -112,6 +174,7 @@ public final class GrowthSelfTest {
                 && GrowthRules.levelFalloff(40, 12) == GrowthRules.FALLOFF_FLOOR, "level falloff is wrong");
         check(f, GrowthRules.roundRandom(2.5, 0.4) == 3 && GrowthRules.roundRandom(2.5, 0.6) == 2 && GrowthRules.roundRandom(3, 0.0) == 3,
                 "random rounding is wrong");
+        checkOpeningPace(f);
         ServerLevel overworld = server.overworld();
         GrowthData budget = new GrowthData();
         // 日ごとの上限は 100 (00 の 26)

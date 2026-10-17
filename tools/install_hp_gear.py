@@ -2,7 +2,7 @@
 
   python tools/install_hp_gear.py [--option A|B|C]
 
-Input: tools/sources/hp_base/{gear,armor}/ (the models before the high-poly pass), processed by tools/rough/hp_gear.py.
+Input: tools/sources/hp_base/gear/ (the models before the high-poly pass), processed by tools/rough/hp_gear.py. (Armor left this script: tools/install_armor_v2.py, docs/design/16.)
 Output: assets/skyabyss/geo/{gear,armor}/<n>.geo.json, textures/{gear,armor}/<n>.png (+ _glowmask.png when it had one).
 Bones, pivots and the bone names (armorHead ...) are untouched.
 """

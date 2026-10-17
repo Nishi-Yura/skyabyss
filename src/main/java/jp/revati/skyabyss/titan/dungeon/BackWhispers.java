@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
 import java.util.List;
@@ -87,15 +88,15 @@ public final class BackWhispers {
         }
         heard.putBoolean(id, true);
         if (lore) {
-            player.sendSystemMessage(ModText.lore(key));
+            Notice.narrate(player, key);
             player.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.AMBIENT, 0.6f, 0.7f);
         } else {
-            player.sendSystemMessage(ModText.hint(key));
+            Notice.hint(player, key);
         }
         // 最初の休み場で、焚き火のことも一度だけ添える
         if (restFlag != null && !heard.getBoolean(restFlag)) {
             heard.putBoolean(restFlag, true);
-            player.sendSystemMessage(ModText.hint(campfireKey));
+            Notice.hint(player, campfireKey);
         }
     }
 

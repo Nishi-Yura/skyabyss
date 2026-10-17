@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ final class StormEast {
                     level.playSound(null, d, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.6f, 1.8f);
                     for (ServerPlayer p : level.players()) {
                         if (inCorridor(p.position())) {
-                            p.displayClientMessage(ModText.progress("message.skyabyss.storm.door_opened", openDoors(state)), true);
+                            Notice.bar(p, ModText.progress("message.skyabyss.storm.door_opened", openDoors(state)));
                         }
                     }
                 }

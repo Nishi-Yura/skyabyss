@@ -1,0 +1,55 @@
+# 序盤の拍子の見た目 (docs/design/17 の担当 3)。./gradlew runShots -Pscript=tools/shots/opening_beats.txt
+# B0 の暗転・まぶたの開き・題字・一行、B1 のあとの目的の帯、B9 の星の欠け (帯が西から東へ動く。月は残る)。
+# 拍子は /skyabyss opening <拍子> で起こす (本番と同じ OpeningDirector の経路)。音は台本では確かめない (撮れない)
+world shots flat
+size 1280 720
+timeout 420
+render 8
+clouds off
+
+cmd gamemode creative
+cmd time set noon
+cmd weather clear
+hud on
+waitchunks
+chat clear
+cmd skyabyss opening reset
+wait 5
+
+# B0: 目覚め。tick は演出の始めから
+cmd skyabyss opening awake
+wait 20
+shot b0_black
+wait 75
+shot b0_slit
+wait 70
+shot b0_opening
+wait 55
+shot b0_title
+wait 60
+shot b0_line
+wait 120
+shot b0_end
+
+# B1 のあと: 目的の帯 (煙の立つ方)
+cmd skyabyss opening camp
+wait 60
+shot b1_objective
+
+# B9: 星の欠け。夜にして、真上を向く
+cmd time set 15000
+cmd skyabyss opening back song
+wait 20
+camera 0 80 0 0 -75
+wait 30
+shot b9_stars_before
+cmd skyabyss opening song
+wait 150
+shot b9_band_west
+wait 150
+shot b9_band_mid
+wait 150
+shot b9_band_east
+wait 250
+shot b9_stars_after
+echo done

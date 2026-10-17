@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public final class RaijuBattle {
             for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, site.door(),
                     p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()))) {
                 moveInside(p);
-                p.displayClientMessage(ModText.battle("message.skyabyss.gate_rejoin"), true);
+                Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
             }
         }
 
@@ -148,7 +149,7 @@ public final class RaijuBattle {
         public void countdown(ServerLevel level, int secondsLeft) {
             Component text = ModText.battle("message.skyabyss.gate_countdown", secondsLeft);
             for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, site.arena().minmax(site.ante()), Entity::isAlive)) {
-                p.displayClientMessage(text, true);
+                Notice.bar(p, text);
             }
         }
 
@@ -172,7 +173,7 @@ public final class RaijuBattle {
     static void broadcast(RaijuNest.Site site, Component message) {
         AABB box = site.arena().minmax(site.ante()).inflate(2);
         for (ServerPlayer p : site.level().getEntitiesOfClass(ServerPlayer.class, box, Entity::isAlive)) {
-            p.sendSystemMessage(message);
+            Notice.send(p, message);
         }
     }
 

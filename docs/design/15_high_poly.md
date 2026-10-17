@@ -371,6 +371,8 @@
 
 ## 10. 武器と防具の記録 (担当 5)
 
+> **防具 4 組 (岩鯨・潮殻・雷翼・余燼) は、16 (`16_armor_design.md`) で重ね板の基盤から作り直した。** この章の防具の行 (箱/面、C 案) と `install_hp_gear.py` の防具の処理は過去の記録で、今の防具は `tools/install_armor_v2.py` が書く。武器・盾 (gear) の記録はそのまま有効。
+
 生成: `tools/rough/hp_gear.py` (ラフ 3 案の比較画像 `docs/review/high_poly_roughs/hp_{gear,armor}_<名前>.png`)、取り込み `tools/install_hp_gear.py` (既定は C 案)。入力は `tools/sources/hp_base/{gear,armor}/` (処理前の geo・絵・発光マスク) なので、何度回しても同じ結果になる。テクスチャの絵は変えない (item の絵 32px に従う)。item モデルは触っていない。
 
 | 案 | 内容 |

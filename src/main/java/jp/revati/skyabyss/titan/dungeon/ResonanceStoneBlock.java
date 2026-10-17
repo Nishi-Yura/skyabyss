@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.registry.ModSounds;
 import jp.revati.skyabyss.titan.TitanTravel;
@@ -48,7 +49,7 @@ public class ResonanceStoneBlock extends Block {
         int index = TitanBackLayout.RESONANCE_STONES.indexOf(pos);
         // 番兵の回廊の石は、番兵長を倒すまで黙っている
         if (onBack && index == 1 && !TitanBackTrials.isHallCleared(server, "e3")) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.stone_silent"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.stone_silent"));
             return InteractionResult.SUCCESS;
         }
         server.setBlock(pos, state.setValue(ACTIVE, true), Block.UPDATE_ALL);
@@ -63,7 +64,7 @@ public class ResonanceStoneBlock extends Block {
                 default -> TitanBackLayout.LOWER_RETURN;
             };
             TitanBackTrials.open(server, shortcut);
-            player.displayClientMessage(ModText.hint("message.skyabyss.return_opened"), true);
+            Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
             int active = countActive(server);
             int total = TitanBackLayout.RESONANCE_STONES.size();
             notifyNearby(server, ModText.progress("message.skyabyss.resonance", active, total));
@@ -102,7 +103,7 @@ public class ResonanceStoneBlock extends Block {
     private static void notifyNearby(ServerLevel level, Component message) {
         AABB area = new AABB(-60, 60, -80, 60, 130, 20);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area)) {
-            player.sendSystemMessage(message);
+            Notice.send(player, message);
         }
     }
 }

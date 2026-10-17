@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.lore;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,12 +63,12 @@ public class LorePageItem extends Item {
         }
         List<LoreEntry> choices = candidates(server, source(stack));
         if (choices.isEmpty()) {
-            server.sendSystemMessage(ModText.hint("message.skyabyss.lore.page_known"));
+            Notice.hint(server, "message.skyabyss.lore.page_known");
             return InteractionResultHolder.fail(stack);
         }
         LoreEntry picked = choices.get(level.random.nextInt(choices.size()));
         Lore.unlock(server, picked.id(), true);
-        server.sendSystemMessage(ModText.lore("message.skyabyss.lore.page_read"));
+        Notice.narrate(server, "message.skyabyss.lore.page_read");
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.9f);
         stack.consume(1, player);
         return InteractionResultHolder.consume(stack);

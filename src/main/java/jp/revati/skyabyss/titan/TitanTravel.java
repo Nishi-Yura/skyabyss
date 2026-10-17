@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,9 +18,6 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -83,7 +81,7 @@ public final class TitanTravel {
         player.setNoGravity(true);
         player.stopRiding();
         whale.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.PLAYERS, 2f, 1.0f);
-        player.displayClientMessage(ModText.hint("message.skyabyss.lifting"), true);
+        Notice.bar(player, ModText.hint("message.skyabyss.lifting"));
     }
 
     private static void tickLift(ServerPlayer player, Lift lift) {
@@ -187,7 +185,7 @@ public final class TitanTravel {
         player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, 180f, 0f);
         back.playSound(null, arrival, ModSounds.TITAN_CHAIN.get(), SoundSource.PLAYERS, 1.5f, 0.9f);
         showTitle(player, "title.skyabyss.titan_back", "title.skyabyss.titan_back.sub");
-        player.sendSystemMessage(ModText.lore("message.skyabyss.arrived_back"));
+        Notice.narrate(player, "message.skyabyss.arrived_back");
     }
 
     // 地上へ戻す。岩鯨の鎖の付け根の下へ、ゆっくり落ちる効果をつけて降ろす。
@@ -211,7 +209,7 @@ public final class TitanTravel {
                 drop = boarded;
             } else if (Math.hypot(boarded.x - drop.x, boarded.z - drop.z) > CARRIED_AWAY) {
                 drop = boarded;
-                player.sendSystemMessage(ModText.lore("message.skyabyss.travel.returned_home"));
+                Notice.narrate(player, "message.skyabyss.travel.returned_home");
             }
         }
         if (drop == null) {
@@ -249,7 +247,7 @@ public final class TitanTravel {
         }
         event.setCanceled(true);
         if (event.getEntity() instanceof ServerPlayer player) {
-            player.sendSystemMessage(ModText.lore("message.skyabyss.descending"));
+            Notice.narrate(player, "message.skyabyss.descending");
             leave(player);
         }
     }
@@ -323,8 +321,6 @@ public final class TitanTravel {
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(20, 60, 30));
-        player.connection.send(new ClientboundSetSubtitleTextPacket(ModText.subtitle(subtitle)));
-        player.connection.send(new ClientboundSetTitleTextPacket(ModText.title(title)));
+        Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
     }
 }

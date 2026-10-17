@@ -211,11 +211,253 @@
           "goto": "c_shards_thanks"
         },
         {
+          "id": "seen",
+          "if": {
+            "type": "any",
+            "of": [
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/camp"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "camp_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/footprints"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "prints_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/footsteps"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "steps_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/bone_hill"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "bones_told"
+                  }
+                }
+              ],
+              [
+                {
+                  "type": "lore",
+                  "entry": "prologue/sky_song"
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "song_told"
+                  }
+                }
+              ]
+            ]
+          },
+          "goto": "c_seen_menu"
+        },
+        {
           "id": "bye",
           "kind": "leave",
           "goto": "end"
         }
       ]
+    },
+    "c_seen_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "camp",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/camp"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "camp_told"
+              }
+            }
+          ],
+          "goto": "c_camp"
+        },
+        {
+          "id": "prints",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/footprints"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "prints_told"
+              }
+            }
+          ],
+          "goto": "c_prints"
+        },
+        {
+          "id": "steps",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/footsteps"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "steps_told"
+              }
+            }
+          ],
+          "goto": "c_steps"
+        },
+        {
+          "id": "bones",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/bone_hill"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "bones_told"
+              }
+            }
+          ],
+          "goto": "c_bones"
+        },
+        {
+          "id": "song",
+          "if": [
+            {
+              "type": "lore",
+              "entry": "prologue/sky_song"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "song_told"
+              }
+            }
+          ],
+          "goto": "c_song"
+        },
+        {
+          "id": "back",
+          "goto": "c_menu"
+        }
+      ]
+    },
+    "c_camp": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "camp_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_prints": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "prints_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_steps": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "steps_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_bones": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "bones_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "@entry"
+    },
+    "c_song": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "song_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "c_song2"
+    },
+    "c_song2": {
+      "face": "neutral",
+      "next": "@entry"
     },
     "c_whale1": {
       "face": "neutral",

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.lore;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.sky.SkyEventData;
 import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import jp.revati.skyabyss.titan.TitanTravel;
@@ -177,6 +179,7 @@ public final class LoreEvents {
             checkItems(player, state);
             String dim = level.dimension().location().toString();
             Lore.fire(player, "dimension", t -> t.target().equals(dim));
+            guaranteeBook(player, level, state, now);
             tickBookDrop(player, level, state, now);
         }
         if ((now + phase) % 40 == 0 && anyLocked(state, "near_entity")) {
@@ -200,10 +203,30 @@ public final class LoreEvents {
         if (dx * dx + dz * dz > SHADOW_WITNESS_DISTANCE * SHADOW_WITNESS_DISTANCE || !level.canSeeSky(player.blockPosition().above())) {
             return;
         }
+        // 書を持っている人は、影のあとに空から落ちる破れた頁を読んで記す (17 の 判断 2 A。落とすのは opening/OpeningDirector)
+        if (state.bookGiven && jp.revati.skyabyss.opening.OpeningDirector.deferShadowToPage(player)) {
+            return;
+        }
         if (!state.bookGiven && state.bookDropAt < 0) {
             state.bookDropAt = pass.startTick() + pass.duration() + DROP_DELAY;
         }
         Lore.fire(player, "sky_shadow", t -> true);
+    }
+
+    // 書は必ず届く (06 の 2.7節): 最初の空の影が済んだのに、書を受け取っていない人 (屋内にいて影を見なかった・
+    // 影の途中で参加した・離れていた) にも、影が去った 3 秒後に落ちてくるよう予定を入れる
+    private static void guaranteeBook(ServerPlayer player, ServerLevel level, LoreState state, long now) {
+        if (level.dimension() != Level.OVERWORLD) {
+            return;
+        }
+        if (bookOwed(state.bookGiven, state.bookDropAt, SkyEventData.get(level).passCount(), SkyEvents.activePass() != null, hasPendingDrop(player))) {
+            state.bookDropAt = now + DROP_DELAY;
+        }
+    }
+
+    // 最初の影が済み (進行中でない)、書をまだ受け取っておらず、落ちてくる予定もないか
+    public static boolean bookOwed(boolean bookGiven, long bookDropAt, int passCount, boolean passActive, boolean dropPending) {
+        return passCount > 0 && !passActive && !dropPending && !bookGiven && bookDropAt < 0;
     }
 
     static void checkItems(ServerPlayer player, LoreState state) {
@@ -279,6 +302,11 @@ public final class LoreEvents {
             Lore.giveBook(player, "message.skyabyss.lore.book_appeared");
             return;
         }
+        if (player.isInWaterOrBubble() || player.isInLava() || player.isPassenger()) {
+            // 落ちても拾えない所 (水・溶岩・乗り物の上): 荷物の中へ
+            Lore.giveBook(player, "message.skyabyss.lore.book_appeared");
+            return;
+        }
         dropBook(player, level, now);
     }
 
@@ -306,7 +334,7 @@ public final class LoreEvents {
         level.addFreshEntity(item);
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.01);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 0.6f);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.lore.book_falls"));
+        Notice.narrate(player, "message.skyabyss.lore.book_falls");
         DROPS.put(player.getUUID(), new Drop(item.getUUID(), now));
     }
 

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -18,7 +19,7 @@ public class SealedGateBlock extends Block {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
-            player.displayClientMessage(ModText.deny("message.skyabyss.sealed_gate"), true);
+            Notice.bar(player, ModText.deny("message.skyabyss.sealed_gate"));
         }
         return InteractionResult.SUCCESS;
     }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.UUID;
 
@@ -466,7 +467,7 @@ public class StormWingEntity extends Entity implements GeoEntity {
     private void tell(ServerLevel level, String key) {
         for (ServerPlayer p : level.players()) {
             if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - perchX, p.getZ() - perchZ) < TELL_RANGE) {
-                p.displayClientMessage(jp.revati.skyabyss.ModText.lore(key), true);
+                Notice.bar(p, jp.revati.skyabyss.ModText.lore(key));
             }
         }
     }

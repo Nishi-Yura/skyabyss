@@ -1,0 +1,11 @@
+# opening_ribs  (minecraft:overworld, origin (-204, 62, -259), size 116x59x63, game time 1737)
+block kinds 40; most common: minecraft:stone 43931, minecraft:dirt 19378, minecraft:grass_block[snowy=true] 5970, minecraft:snow[layers=1] 3770, minecraft:bone_block[axis=x] 3307, minecraft:bone_block[axis=y] 3292, minecraft:bone_block[axis=z] 3277
+
+## walk from slab (-160, 74, -229): 7141 standing places reached
+  under (-160, 73, -227): reached in 0 steps; path -160,73,-229
+  far (-166, 73, -209): reached in 30 steps; path -160,73,-229 > -160,72,-226 > -157,73,-224 > -157,74,-221 > -157,73,-220 > -157,71,-218 > -156,72,-215 > -156,73,-214 > -156,74,-213 > -157,73,-212 > -158,74,-212 > -158,75,-211 > -161,73,-211 > -163,74,-211 > -164,73,-211
+
+## signs: 1
+  (-160, 74, -229) minecraft:spruce_wall_sign: sign.skyabyss.opening_slab.1 / sign.skyabyss.opening_slab.2 / sign.skyabyss.opening_slab.3 / sign.skyabyss.opening_slab.4
+
+done in 1.7 s; images in docs\review/structure_opening_ribs_v2_*.png

@@ -4,8 +4,18 @@
   "repeat": "weekly",
   "board": true,
   "unlock": {
-    "type": "lore",
-    "entry": "chapter1/sky_ruins"
+    "type": "all",
+    "of": [
+      {
+        "type": "lore",
+        "entry": "chapter1/sky_ruins"
+      },
+      {
+        "type": "flag",
+        "flag": "met",
+        "npc": "skyabyss:whale_chaser"
+      }
+    ]
   },
   "stages": [
     {

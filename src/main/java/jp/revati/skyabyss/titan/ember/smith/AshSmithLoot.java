@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.smith;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -96,9 +97,9 @@ public final class AshSmithLoot {
             }
             Growth.addXp(p, amount, "entity.skyabyss.ash_smith");
             jp.revati.skyabyss.quest.Quests.signal(p, SIGNAL);
-            p.sendSystemMessage(ModText.progress("message.skyabyss.ember.smith.defeated"));
+            Notice.unlock(p, "message.skyabyss.ember.smith.defeated");
             if (!items.isEmpty()) {
-                p.sendSystemMessage(TitanLoot.rewardLine(items));
+                Notice.send(p, TitanLoot.rewardLine(items));
             }
             TitanLoot.tellHeld(p, held);
         }

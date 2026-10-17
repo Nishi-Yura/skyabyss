@@ -6,7 +6,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.sky.SkyEventData;
+import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.titan.dungeon.TitanBackBuilder;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
@@ -28,6 +31,8 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TitanEvents {
     private static final long FIRST_APPEARANCE_DAY = 2;
+    // 最初の空の影が始まってから、岩鯨が現れるまでの間 (半日)。影 → 書 → 語り部の順を、鯨が追い越さないために
+    static final long AFTER_FIRST_SHADOW = 12000L;
 
     private TitanEvents() {
     }
@@ -47,13 +52,44 @@ public final class TitanEvents {
         if (data.spawned || level.getGameTime() / 24000L < FIRST_APPEARANCE_DAY) {
             return;
         }
-        ServerPlayer player = WhaleKeeper.randomEligible(level);
+        if (!whaleMayAppear(SkyEventData.get(level), SkyEvents.activePass() != null, level.getGameTime(),
+                Config.HORROR_EVENT_FREQUENCY.get(), jp.revati.skyabyss.opening.OpeningBeats.anyoneMetStoryteller(level))) {
+            return;
+        }
+        // 17 の 3.9節: 4 日目までは、影・歌・イサナを済ませた人がいるときだけ (その人の近くへ)。5 日目の詰み止めは今のまま
+        ServerPlayer ready = jp.revati.skyabyss.opening.OpeningDirector.readyPlayer(level);
+        if (!jp.revati.skyabyss.opening.OpeningLogic.whaleGateOpen(level.getGameTime(), ready != null)) {
+            return;
+        }
+        ServerPlayer player = ready != null ? ready : WhaleKeeper.randomEligible(level);
         if (player == null) {
             return;
         }
         double angle = level.random.nextDouble() * Math.PI * 2;
         WhaleKeeper.spawn(level, player.getX() + Math.cos(angle) * WhaleKeeper.SPAWN_DISTANCE,
                 player.getZ() + Math.sin(angle) * WhaleKeeper.SPAWN_DISTANCE, null);
+    }
+
+    // 岩鯨が自然に現れてよいか (06 の 2.7節)。最初の空の影が済んで半日たつまでは出ない。
+    // 影を起こさない設定 (頻度 0) のときだけ、この門は開けておく (影を待つと永久に出ないため)。
+    // 影より前に遊んでいた古いワールド (通過の記録はあるが最初の時刻がない) は、済んでいるものとして扱う
+    // 17 の 3.9節に近い形: 最初の影から半日たち、だれかが語り部と話していて、夕方 (11000〜12500) に出す。
+    // 詰み止め: 5 日目 (総 tick 4 日分) を過ぎたら、語り部と話していなくても、時刻を問わず出す
+    public static boolean whaleMayAppear(SkyEventData sky, boolean passActive, long now, double frequency, boolean metStoryteller) {
+        if (frequency <= 0) {
+            return true;
+        }
+        if (sky.passCount() <= 0 || passActive) {
+            return false;
+        }
+        if (sky.firstPassTick() >= 0 && now < sky.firstPassTick() + AFTER_FIRST_SHADOW) {
+            return false;
+        }
+        if (now >= 4 * 24000L) {
+            return true;
+        }
+        long t = now % 24000L;
+        return metStoryteller && t >= 11000 && t <= 12500;
     }
 
     @SubscribeEvent

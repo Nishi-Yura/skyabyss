@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.lore;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -102,7 +103,7 @@ public final class EmberFinale {
     public static void fire(ServerPlayer player) {
         setDone(player, true);
         PacketDistributor.sendToPlayer(player, new WorldTurn());
-        player.sendSystemMessage(ModText.lore(EmberLore.FINALE_DAWN));
+        Notice.narrate(player, EmberLore.FINALE_DAWN);
         SkyAbyss.LOGGER.info("{} felt the world turn over at dawn (ember finale)", player.getGameProfile().getName());
     }
 

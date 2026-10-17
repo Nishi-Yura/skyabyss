@@ -25,5 +25,10 @@
         "count": 2
       }
     ]
+  },
+  "unlock": {
+    "type": "flag",
+    "flag": "met",
+    "npc": "skyabyss:whale_chaser"
   }
 }

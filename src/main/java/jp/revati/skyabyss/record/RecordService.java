@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.record;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public final class RecordService {
     // 画面を開く (コマンドから)。見てよくなければ false
     public static boolean open(ServerPlayer viewer, ServerPlayer target, String tab) {
         if (!mayView(viewer, target)) {
-            viewer.sendSystemMessage(ModText.deny("skyabyss_record.deny.inspect"));
+            Notice.warn(viewer, "skyabyss_record.deny.inspect");
             return false;
         }
         send(viewer, target, true, tab == null ? "" : tab);

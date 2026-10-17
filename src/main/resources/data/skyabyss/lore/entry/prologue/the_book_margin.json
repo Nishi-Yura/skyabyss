@@ -1,0 +1,14 @@
+{
+  "chapter": "prologue",
+  "order": 14,
+  "inscription": true,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/the_book",
+    "prologue/camp"
+  ]
+}

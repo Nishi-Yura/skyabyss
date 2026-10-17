@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,9 +14,6 @@ import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -55,7 +53,7 @@ public final class EmberTravel {
         }
         if (!Progression.canBoard(player, Titans.EMBER)) {
             PASSAGE.checkBoard(player);
-            player.sendSystemMessage(ModText.deny(EmberIds.LANG_SURFACE + "spat_out"));
+            Notice.warn(player, EmberIds.LANG_SURFACE + "spat_out");
             Vec3 out = EmberTitanEntity.offset(titan.getYRot(), 0, 0, 1);
             player.push(out.x * 1.2, 0.35, out.z * 1.2);
             player.hurtMarked = true;
@@ -91,7 +89,7 @@ public final class EmberTravel {
         teleport(player, back, at.x, at.y, at.z, EmberBackLayout.ARRIVAL_YAW);
         back.playSound(null, at.x, at.y, at.z, EmberTitanSetup.SWALLOW.get(), SoundSource.PLAYERS, 1.0f, 0.8f);
         showTitle(player, "title.skyabyss.ember_back", "title.skyabyss.ember_back.sub");
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "arrived"));
+        Notice.narrate(player, EmberIds.LANG_BACK + "arrived");
         return true;
     }
 
@@ -196,7 +194,7 @@ public final class EmberTravel {
         }
         // 見送りの石に 0.5 秒いると地上へ
         if (PASSAGE.dwell(player, EmberBackLayout.RETURN_STONE.contains(player.position()), 2)) {
-            player.sendSystemMessage(ModText.lore(EmberIds.LANG_BACK + "leaving"));
+            Notice.narrate(player, EmberIds.LANG_BACK + "leaving");
             leave(player);
             return;
         }
@@ -221,7 +219,7 @@ public final class EmberTravel {
         Vec3 at = arrival(player.serverLevel());
         player.fallDistance = 0;
         player.teleportTo(player.serverLevel(), at.x, at.y, at.z, EmberBackLayout.ARRIVAL_YAW, 0f);
-        player.displayClientMessage(ModText.hint(EmberIds.LANG_BACK + "pushed_back"), true);
+        Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + "pushed_back"));
     }
 
     @SubscribeEvent
@@ -240,9 +238,7 @@ public final class EmberTravel {
         if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
             return;
         }
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(20, 60, 30));
-        player.connection.send(new ClientboundSetSubtitleTextPacket(ModText.subtitle(subtitle)));
-        player.connection.send(new ClientboundSetTitleTextPacket(ModText.title(title)));
+        Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
     }
 
     // 自己テスト用
