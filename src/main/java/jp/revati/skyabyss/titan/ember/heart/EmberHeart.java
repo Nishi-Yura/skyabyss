@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -1265,7 +1266,7 @@ public class EmberHeart extends GuardMob {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.BASALT_HIT;
+        return MobSounds.EMBER_HEART_HURT.get();
     }
 
     @Override

@@ -1526,5 +1526,302 @@
         "stream": true
       }
     ]
+  },
+  "bone_sentinel_ambient": {
+    "subtitle": "subtitles.skyabyss.bone_sentinel_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_ambient"
+      }
+    ]
+  },
+  "bone_sentinel_hurt": {
+    "subtitle": "subtitles.skyabyss.bone_sentinel_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_1"
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_2"
+      }
+    ]
+  },
+  "bone_sentinel_death": {
+    "subtitle": "subtitles.skyabyss.bone_sentinel_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_death"
+      }
+    ]
+  },
+  "bone_sentinel_step": {
+    "subtitle": "subtitles.skyabyss.bone_sentinel_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_2"
+      }
+    ]
+  },
+  "bone_sentinel_guard": {
+    "subtitle": "subtitles.skyabyss.bone_sentinel_guard",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_guard"
+      }
+    ]
+  },
+  "rib_archer_ambient": {
+    "subtitle": "subtitles.skyabyss.rib_archer_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_ambient"
+      }
+    ]
+  },
+  "rib_archer_hurt": {
+    "subtitle": "subtitles.skyabyss.rib_archer_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_hurt_1"
+      },
+      {
+        "name": "skyabyss:mobs/rib_archer_hurt_2"
+      }
+    ]
+  },
+  "rib_archer_death": {
+    "subtitle": "subtitles.skyabyss.rib_archer_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_death"
+      }
+    ]
+  },
+  "rib_archer_step": {
+    "subtitle": "subtitles.skyabyss.rib_archer_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/rib_archer_step_2"
+      }
+    ]
+  },
+  "rib_archer_shoot": {
+    "subtitle": "subtitles.skyabyss.rib_archer_shoot",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_shoot"
+      }
+    ]
+  },
+  "moss_crawler_ambient": {
+    "subtitle": "subtitles.skyabyss.moss_crawler_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_ambient"
+      }
+    ]
+  },
+  "moss_crawler_hurt": {
+    "subtitle": "subtitles.skyabyss.moss_crawler_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_hurt"
+      }
+    ]
+  },
+  "moss_crawler_death": {
+    "subtitle": "subtitles.skyabyss.moss_crawler_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_death"
+      }
+    ]
+  },
+  "moss_crawler_step": {
+    "subtitle": "subtitles.skyabyss.moss_crawler_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/moss_crawler_step_2"
+      }
+    ]
+  },
+  "waterway_maw_ambient": {
+    "subtitle": "subtitles.skyabyss.waterway_maw_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/waterway_maw_ambient"
+      }
+    ]
+  },
+  "waterway_maw_hurt": {
+    "subtitle": "subtitles.skyabyss.waterway_maw_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/waterway_maw_hurt"
+      }
+    ]
+  },
+  "waterway_maw_death": {
+    "subtitle": "subtitles.skyabyss.waterway_maw_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/waterway_maw_death"
+      }
+    ]
+  },
+  "whalebone_captain_ambient": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_ambient"
+      }
+    ]
+  },
+  "whalebone_captain_hurt": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_hurt_1"
+      },
+      {
+        "name": "skyabyss:mobs/whalebone_captain_hurt_2"
+      }
+    ]
+  },
+  "whalebone_captain_death": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_death"
+      }
+    ]
+  },
+  "whalebone_captain_step": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/whalebone_captain_step_2"
+      }
+    ]
+  },
+  "whalebone_captain_swing": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_swing"
+      }
+    ]
+  },
+  "whalebone_captain_slam": {
+    "subtitle": "subtitles.skyabyss.whalebone_captain_slam",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/whalebone_captain_slam"
+      }
+    ]
+  },
+  "stone_whale_heart_ambient": {
+    "subtitle": "subtitles.skyabyss.stone_whale_heart_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_whale_heart_ambient"
+      }
+    ]
+  },
+  "stone_whale_heart_hurt": {
+    "subtitle": "subtitles.skyabyss.stone_whale_heart_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_whale_heart_hurt"
+      }
+    ]
+  },
+  "stone_whale_heart_death": {
+    "subtitle": "subtitles.skyabyss.stone_whale_heart_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_whale_heart_death"
+      }
+    ]
+  },
+  "ember_heart_hurt": {
+    "subtitle": "subtitles.skyabyss.ember_heart_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ember_heart_hurt"
+      }
+    ]
+  },
+  "storm_heart_hurt": {
+    "subtitle": "subtitles.skyabyss.storm_heart_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/storm_heart_hurt"
+      }
+    ]
+  },
+  "tide_heart_hurt": {
+    "subtitle": "subtitles.skyabyss.tide_heart_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/tide_heart_hurt"
+      }
+    ]
+  },
+  "ash_thrall_step": {
+    "subtitle": "subtitles.skyabyss.ash_thrall_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ash_thrall_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/ash_thrall_step_2"
+      }
+    ]
+  },
+  "coral_thrall_step": {
+    "subtitle": "subtitles.skyabyss.coral_thrall_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/coral_thrall_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/coral_thrall_step_2"
+      }
+    ]
+  },
+  "feather_warden_step": {
+    "subtitle": "subtitles.skyabyss.feather_warden_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/feather_warden_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/feather_warden_step_2"
+      }
+    ]
+  },
+  "thunder_supplicant_step": {
+    "subtitle": "subtitles.skyabyss.thunder_supplicant_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/thunder_supplicant_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/thunder_supplicant_step_2"
+      }
+    ]
   }
 }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.mob;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.EnumSet;
 
 import net.minecraft.core.particles.BlockParticleOption;
@@ -302,5 +303,10 @@ public class CoralThrall extends TideMob {
     @Override
     protected SoundEvent getDeathSound() {
         return TideMobSetup.THRALL_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.CORAL_THRALL_STEP.get(), 0.3f);
     }
 }

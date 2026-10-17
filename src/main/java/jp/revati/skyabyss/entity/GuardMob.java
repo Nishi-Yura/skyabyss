@@ -3,6 +3,7 @@ package jp.revati.skyabyss.entity;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -53,6 +54,11 @@ public abstract class GuardMob extends Monster implements GeoEntity {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
+    }
+
+    // 足音。高さの差で調子が変わらないよう、ほんの少し音程を揺らす
+    protected void modStep(SoundEvent sound, float volume) {
+        playSound(sound, volume, 0.9f + random.nextFloat() * 0.2f);
     }
 
     // 番兵は試練の一部なので、遠くに離れても消えない

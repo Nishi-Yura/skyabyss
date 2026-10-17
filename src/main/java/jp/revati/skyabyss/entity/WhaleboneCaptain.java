@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,7 +140,7 @@ public class WhaleboneCaptain extends GuardMob {
     // 薙ぎ払い: 0.45秒の振りかぶりのあと、前方 140° ・半径5 をまとめて斬る
     private void tickSweep() {
         if (actionTicks == 2) {
-            level().playSound(null, getX(), getY(), getZ(), SoundEvents.RAVAGER_ATTACK, SoundSource.HOSTILE, 1.5f, 0.6f);
+            level().playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SWING.get(), SoundSource.HOSTILE, 1.6f, 0.95f + random.nextFloat() * 0.1f);
         }
         if (actionTicks == 12) {
             Vec3 look = getViewVector(1f).multiply(1, 0, 1).normalize();
@@ -150,7 +151,7 @@ public class WhaleboneCaptain extends GuardMob {
                     player.knockback(1.2, -to.x, -to.z);
                 }
             }
-            level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 2f, 0.5f);
+            level().playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SLAM.get(), SoundSource.HOSTILE, 2f, 0.95f + random.nextFloat() * 0.1f);
             if (level() instanceof ServerLevel server) {
                 server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + look.x * 2.5, getY() + 1.5, getZ() + look.z * 2.5, 4, 1.2, 0.2, 1.2, 0);
             }
@@ -333,22 +334,27 @@ public class WhaleboneCaptain extends GuardMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WITHER_SKELETON_AMBIENT;
+        return MobSounds.WHALEBONE_CAPTAIN_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WITHER_SKELETON_HURT;
+        return MobSounds.WHALEBONE_CAPTAIN_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WITHER_SKELETON_DEATH;
+        return MobSounds.WHALEBONE_CAPTAIN_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.WHALEBONE_CAPTAIN_STEP.get(), 0.8f);
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.5f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 
     @Override

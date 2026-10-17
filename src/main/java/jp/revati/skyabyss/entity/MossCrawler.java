@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -58,21 +59,26 @@ public class MossCrawler extends GuardMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.SPIDER_AMBIENT;
+        return MobSounds.MOSS_CRAWLER_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.SPIDER_HURT;
+        return MobSounds.MOSS_CRAWLER_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.MOSS_BREAK;
+        return MobSounds.MOSS_CRAWLER_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.MOSS_CRAWLER_STEP.get(), 0.2f);
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.5f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 }

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -839,22 +840,22 @@ public class StoneWhaleHeart extends GuardMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.AMETHYST_BLOCK_RESONATE;
+        return MobSounds.STONE_WHALE_HEART_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.BONE_BLOCK_HIT;
+        return MobSounds.STONE_WHALE_HEART_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WARDEN_DEATH;
+        return MobSounds.STONE_WHALE_HEART_DEATH.get();
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.6f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -63,7 +64,7 @@ public class BoneSentinel extends GuardMob {
             if (look.dot(toSource) > 0.5) {
                 amount *= 0.5f;
                 playAction("block");
-                level().playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1f, 0.7f);
+                level().playSound(null, getX(), getY(), getZ(), MobSounds.BONE_SENTINEL_GUARD.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
             }
         }
         return super.hurt(source, amount);
@@ -80,21 +81,26 @@ public class BoneSentinel extends GuardMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.SKELETON_AMBIENT;
+        return MobSounds.BONE_SENTINEL_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.SKELETON_HURT;
+        return MobSounds.BONE_SENTINEL_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.BONE_BLOCK_BREAK;
+        return MobSounds.BONE_SENTINEL_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.BONE_SENTINEL_STEP.get(), 0.35f);
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.6f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 }
