@@ -1,7 +1,10 @@
 package jp.revati.skyabyss.npc;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +15,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 // NPC まわりのワールドの記録 (オーバーワールドに保存)。
 //   loop     : 月のループの回数 (M4 のループ本体が WorldLoop.advance で進める。それまでは 0)
+//   camps    : 語り部の野営 (鐘のある村が近くに無い人のために立てた焚き火。村と同じく、近づくと語り部が立つ。07 の 3.1節)
+//   guides   : 人ごとの「語り部に会えるまでの案内」の進み具合 (StoryGuide)
 //   villages : 村 (鐘の位置) ごとに、NPC を最後に立たせた時刻。いなくなったとき (コマンドで消した等) に、すぐ立て直さないため
 public class NpcWorldData extends SavedData {
     private static final String NAME = "skyabyss_npc";
@@ -20,6 +25,30 @@ public class NpcWorldData extends SavedData {
     int loop;
     // 鐘の位置 (BlockPos.asLong) → 役 → 立たせたゲーム時刻
     final Map<Long, Map<String, Long>> villages = new HashMap<>();
+    // 野営の焚き火の位置 (BlockPos.asLong)
+    final Set<Long> camps = new LinkedHashSet<>();
+    final Map<UUID, Guide> guides = new HashMap<>();
+
+    // 語り部に会えるまでの案内の進み具合 (人ごと)。since: 案内を始めた時刻、villageState: 0 まだ探していない / 1 村が見つかった / 2 近くに村がない
+    static final class Guide {
+        long since;
+        int villageState;
+        int villageX;
+        int villageZ;
+        long hintAt = -1;
+        int hints;
+        long campAt = -1;
+        boolean done;
+    }
+
+    Guide guide(UUID player, long now) {
+        return guides.computeIfAbsent(player, p -> {
+            Guide g = new Guide();
+            g.since = now;
+            setDirty();
+            return g;
+        });
+    }
 
     public static NpcWorldData get(ServerLevel overworld) {
         return overworld.getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -47,6 +76,22 @@ public class NpcWorldData extends SavedData {
             }
             data.villages.put(v.getLong("bell"), roles);
         }
+        for (long camp : tag.getLongArray("camps")) {
+            data.camps.add(camp);
+        }
+        for (Tag t : tag.getList("guides", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            Guide g = new Guide();
+            g.since = c.getLong("since");
+            g.villageState = c.getInt("village_state");
+            g.villageX = c.getInt("village_x");
+            g.villageZ = c.getInt("village_z");
+            g.hintAt = c.getLong("hint_at");
+            g.hints = c.getInt("hints");
+            g.campAt = c.getLong("camp_at");
+            g.done = c.getBoolean("done");
+            data.guides.put(c.getUUID("player"), g);
+        }
         return data;
     }
 
@@ -63,6 +108,22 @@ public class NpcWorldData extends SavedData {
             list.add(v);
         });
         tag.put("villages", list);
+        tag.putLongArray("camps", camps.stream().mapToLong(Long::longValue).toArray());
+        ListTag gs = new ListTag();
+        guides.forEach((id, g) -> {
+            CompoundTag c = new CompoundTag();
+            c.putUUID("player", id);
+            c.putLong("since", g.since);
+            c.putInt("village_state", g.villageState);
+            c.putInt("village_x", g.villageX);
+            c.putInt("village_z", g.villageZ);
+            c.putLong("hint_at", g.hintAt);
+            c.putInt("hints", g.hints);
+            c.putLong("camp_at", g.campAt);
+            c.putBoolean("done", g.done);
+            gs.add(c);
+        });
+        tag.put("guides", gs);
         return tag;
     }
 }

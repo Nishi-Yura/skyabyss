@@ -36,6 +36,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 序章の演出「雲の上を何かが通る」のサーバー側。
 // 晴れた昼に空の見えるプレイヤーがいると、数日おきに通過が起きる。
+// ただし最初の一回は、初日の正午以降の最初の機会に必ず起こす (条件が合わないあいだは 10 秒おきに調べ、遅れるほど条件をゆるめる)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkyEvents {
     private static final long DAY = 24000L;
@@ -43,6 +44,14 @@ public final class SkyEvents {
     private static final long MAX_GAP = DAY * 4;
     // 条件が合わなかったときに再判定するまでの時間 (1分)
     private static final long RETRY_DELAY = 1200L;
+    // 最初の通過 (06 の 2.7節): ゲーム開始の昼 (6000 tick = 初日の正午) 以降の、最初の機会に必ず起こす。
+    // 条件が合わなければ 10 秒おきに調べ直し、遅れた分だけ条件をゆるめる
+    private static final long FIRST_PASS_AT = 6000L;
+    private static final long FIRST_PASS_MIN_WAIT = 2400L;
+    private static final long FIRST_RETRY_DELAY = 200L;
+    // 予定から半日遅れたら雨でも起こす。丸一日遅れたら、空の見えない所にいる人の上にも起こす
+    private static final long FIRST_LOOSEN_RAIN = DAY / 2;
+    private static final long FIRST_LOOSEN_SKY = DAY;
     private static final float SPEED = 0.35f;
     // プレイヤーの何ブロック手前から歩いてくるか
     private static final double PATH_HALF = 220.0;
@@ -84,20 +93,31 @@ public final class SkyEvents {
             return;
         }
         SkyEventData data = SkyEventData.get(level);
+        boolean first = data.passCount() == 0;
         if (data.nextPassTick() < 0) {
-            data.schedule(now + randomGap(level, frequency));
+            data.schedule(first ? firstPassTime(now) : now + randomGap(level, frequency));
             return;
+        }
+        if (first && data.nextPassTick() > firstPassTime(now) + DAY) {
+            // 初めての通過の予定が遠すぎる記録 (頻度を下げた設定のまま始めたワールドなど)。早い予定に引き直す
+            data.schedule(firstPassTime(now));
         }
         if (now < data.nextPassTick()) {
             return;
         }
-        ServerPlayer witness = pickWitness(level);
+        long overdue = now - data.nextPassTick();
+        ServerPlayer witness = pickWitness(level, first ? overdue : -1);
         if (witness == null) {
-            data.schedule(now + RETRY_DELAY);
+            data.schedule(now + (first ? FIRST_RETRY_DELAY : RETRY_DELAY));
             return;
         }
         start(level, witness);
         data.schedule(now + randomGap(level, frequency));
+    }
+
+    // 最初の通過の予定の時刻: 初日の正午。始めたのがそれより遅ければ (古いワールド・夜に始めた) 2 分後
+    public static long firstPassTime(long now) {
+        return Math.max(now + FIRST_PASS_MIN_WAIT, FIRST_PASS_AT);
     }
 
     // 途中でログインしたプレイヤーにも、進行中の通過を見せる
@@ -168,20 +188,22 @@ public final class SkyEvents {
         int duration = (int) (PATH_HALF * 2.0 / SPEED);
 
         active = new SkyPass(level.getGameTime() + 1, originX, originZ, dirX, dirZ, SPEED, duration);
-        SkyEventData.get(level).countPass();
+        SkyEventData.get(level).countPass(level.getGameTime());
         PacketDistributor.sendToPlayersInDimension(level, new SkyPassPayload(active));
         SkyAbyss.LOGGER.debug("Sky pass started near {}", witness.getName().getString());
     }
 
     @Nullable
-    private static ServerPlayer pickWitness(ServerLevel level) {
-        if (!level.isDay() || level.isRaining()) {
+    private static ServerPlayer pickWitness(ServerLevel level, long firstOverdue) {
+        boolean first = firstOverdue >= 0;
+        if (!level.isDay() || (level.isRaining() && !(first && firstOverdue >= FIRST_LOOSEN_RAIN))) {
             return null;
         }
         List<ServerPlayer> players = new ArrayList<>(level.players());
         Collections.shuffle(players);
+        boolean anySky = first && firstOverdue >= FIRST_LOOSEN_SKY;
         for (ServerPlayer player : players) {
-            if (player.isAlive() && !player.isSpectator() && level.canSeeSky(player.blockPosition().above())) {
+            if (player.isAlive() && !player.isSpectator() && (anySky || level.canSeeSky(player.blockPosition().above()))) {
                 return player;
             }
         }
