@@ -4,6 +4,10 @@
   "unlock": [
     {
       "type": "sky_shadow"
+    },
+    {
+      "type": "page",
+      "target": "shadow"
     }
   ],
   "related": [

@@ -176,6 +176,13 @@ public final class SkyEvents {
         return 1;
     }
 
+    // その人のために影を起こす (序盤の拍子。最初の影のあとに目覚めた人に、翌日の窓で見せる。17 の 判断 6 A)。進行中ならしない
+    public static void startFor(ServerLevel level, ServerPlayer witness) {
+        if (active == null) {
+            start(level, witness);
+        }
+    }
+
     private static void start(ServerLevel level, ServerPlayer witness) {
         double angle = level.random.nextDouble() * Math.PI * 2.0;
         float dirX = (float) Math.cos(angle);

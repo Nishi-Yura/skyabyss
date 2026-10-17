@@ -5,6 +5,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.Config;
+import jp.revati.skyabyss.client.opening.OpeningClient;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import net.minecraft.client.DeltaTracker;
@@ -56,7 +57,7 @@ public final class ObjectiveStrip {
         if (!Config.OBJECTIVE_STRIP.get() || mc.player == null) {
             return false;
         }
-        return current(mc, QuestLog.of(mc.player)) != null;
+        return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
     // 帯の分だけ、下の小さな表示をずらす
@@ -78,14 +79,25 @@ public final class ObjectiveStrip {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get()) {
             return;
         }
+        // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる
+        OpeningClient.Objective opening = OpeningClient.objective();
+        if (opening != null) {
+            draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), opening.target());
+            return;
+        }
         QuestLog log = QuestLog.of(mc.player);
         QuestDef def = current(mc, log);
         if (def == null) {
             return;
         }
         QuestLog.Entry entry = log.entry(def.id());
+        String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
+        Function<String, BlockPos> provider = targets;
+        draw(g, mc, text, provider == null ? null : provider.apply(def.id()));
+    }
+
+    private static void draw(GuiGraphics g, Minecraft mc, String text, @Nullable BlockPos target) {
         Font font = mc.font;
-        String text = QuestHud.firstObjective(font, def, entry, WIDTH - 12);
         long now = net.minecraft.Util.getMillis();
         if (!text.equals(lastText)) {
             if (!lastText.isEmpty()) {
@@ -93,13 +105,12 @@ public final class ObjectiveStrip {
             }
             lastText = text;
         }
-        boolean quiet = mc.screen != null || mc.player.hurtTime > 0;
+        // 戦闘で傷を受けた直後・画面を開いている間・ホラー演出 (足音・歌) の最中は薄くする (雰囲気を壊さない)
+        boolean quiet = mc.screen != null || mc.player.hurtTime > 0 || OpeningClient.horrorCueActive();
         float a = quiet ? 0.45f : 1f;
         int x = QuestHud.X;
         int y = QuestHud.y();
         String far = "";
-        Function<String, BlockPos> provider = targets;
-        BlockPos target = provider == null ? null : provider.apply(def.id());
         if (target != null) {
             double d = Math.sqrt(mc.player.position().distanceToSqr(target.getX() + 0.5, mc.player.getY(), target.getZ() + 0.5));
             far = (Math.round(d / 10.0) * 10) + "m " + direction(mc.player.position(), target);

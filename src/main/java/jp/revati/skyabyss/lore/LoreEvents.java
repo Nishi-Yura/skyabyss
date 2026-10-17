@@ -203,6 +203,10 @@ public final class LoreEvents {
         if (dx * dx + dz * dz > SHADOW_WITNESS_DISTANCE * SHADOW_WITNESS_DISTANCE || !level.canSeeSky(player.blockPosition().above())) {
             return;
         }
+        // 書を持っている人は、影のあとに空から落ちる破れた頁を読んで記す (17 の 判断 2 A。落とすのは opening/OpeningDirector)
+        if (state.bookGiven && jp.revati.skyabyss.opening.OpeningDirector.deferShadowToPage(player)) {
+            return;
+        }
         if (!state.bookGiven && state.bookDropAt < 0) {
             state.bookDropAt = pass.startTick() + pass.duration() + DROP_DELAY;
         }

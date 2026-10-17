@@ -56,7 +56,12 @@ public final class TitanEvents {
                 Config.HORROR_EVENT_FREQUENCY.get(), jp.revati.skyabyss.opening.OpeningBeats.anyoneMetStoryteller(level))) {
             return;
         }
-        ServerPlayer player = WhaleKeeper.randomEligible(level);
+        // 17 の 3.9節: 4 日目までは、影・歌・イサナを済ませた人がいるときだけ (その人の近くへ)。5 日目の詰み止めは今のまま
+        ServerPlayer ready = jp.revati.skyabyss.opening.OpeningDirector.readyPlayer(level);
+        if (level.getGameTime() < 4 * 24000L && ready == null) {
+            return;
+        }
+        ServerPlayer player = ready != null ? ready : WhaleKeeper.randomEligible(level);
         if (player == null) {
             return;
         }
