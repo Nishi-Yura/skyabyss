@@ -212,6 +212,22 @@ public final class SiteFinder {
                 }
             }
         }
+        // 近くに陸がない (島・海のスポーン): 半径 480 まで、小さな範囲・ゆるい高さの差で探す (必ず見つける)。新しいワールドならスポーン地点を動かす
+        for (int[] pass : new int[][] {{5, 16}, {4, 28}, {3, 60}}) {
+            for (int r = 168; r <= 480; r += 28) {
+                int n = Math.max(8, (int) (Math.PI * 2 * r / 24));
+                for (int i = 0; i < n; i++) {
+                    double a = Math.PI * 2 * i / n;
+                    int x = spawn.getX() + (int) Math.round(Math.cos(a) * r);
+                    int z = spawn.getZ() + (int) Math.round(Math.sin(a) * r);
+                    Area ar = area(p, x, z, pass[0], pass[0], pass[1], true);
+                    if (ar.ok()) {
+                        SkyAbyss.LOGGER.info("Opening sites: the camp is {} blocks from the spawn (no land nearer)", r);
+                        return new BlockPos(x, ar.median() + 1, z);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -265,15 +281,18 @@ public final class SiteFinder {
         int index = 0;
         for (int k = 1; 40 * k <= len - 24; k++) {
             int side = (k % 2 == 0) ? 1 : -1;
-            for (int shift = 0; shift <= 12; shift += 4) {
+            for (int shift = 0; shift <= 24; shift += 4) {
                 for (int s = 0; s < (shift == 0 ? 1 : 2); s++) {
                     double along = 40 * k + (s == 0 ? shift : -shift);
                     int x = camp.getX() + (int) Math.round(ux * along - uz * 4 * side);
                     int z = camp.getZ() + (int) Math.round(uz * along + ux * 4 * side);
                     Area ar = area(p, x, z, 1, 1, 3);
+                    if (!ar.ok()) {
+                        ar = area(p, x, z, 1, 1, 7);
+                    }
                     if (ar.ok()) {
                         out.add(new Planned("cairn", index++, new BlockPos(x, ar.median() + 1, z), 0));
-                        shift = 99;
+                        shift = 999;
                         break;
                     }
                 }
@@ -419,7 +438,7 @@ public final class SiteFinder {
             int degFrom = last ? 80 : 90;
             for (int deg = degFrom; deg <= 360 - degFrom; deg += last ? 8 : 10) {
                 double a = shelterAngle + Math.toRadians(deg);
-                int[] dists = last ? new int[] {300, 260, 340, 280, 320, 240, 360, 220, 380, 230, 370} : new int[] {300, 270, 330, 285, 315, 255, 345, 240, 360};
+                int[] dists = last ? new int[] {300, 260, 340, 280, 320, 240, 360, 226, 374, 232, 368} : new int[] {300, 270, 330, 285, 315, 255, 345, 240, 360};
                 for (int d : dists) {
                     int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
                     int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);

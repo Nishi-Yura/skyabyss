@@ -216,14 +216,14 @@ public final class SiteJob {
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.SANDSTONE)
                 || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.MOSS_BLOCK) || s.is(Blocks.CALCITE)
                 || s.is(Blocks.TUFF) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.GRANITE)
-                || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH);
+                || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.PODZOL) || s.is(Blocks.MYCELIUM) || s.is(Blocks.BEDROCK) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.DIRT_PATH);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)
     private static boolean naturalAbove(BlockState s) {
         return s.isAir() || s.canBeReplaced() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS)
                 || isPlant(s) || s.is(BlockTags.SNOW) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.COBWEB) || s.is(Blocks.MANGROVE_ROOTS)
-                || s.is(Blocks.HANGING_ROOTS);
+                || s.is(Blocks.HANGING_ROOTS) || s.is(Blocks.MOSSY_COBBLESTONE);
     }
 
     // ---------------------------------------------------------------- ANALYZE
@@ -622,7 +622,9 @@ public final class SiteJob {
         if (home == null) {
             home = entry.pos;
         }
-        if (relocations > 12) {
+        // 大きな構造物 (足跡・骨) は 12 の輪まで。小さな物 (野営地・宿り・積み石) は 14 回まで (輪は 3 回ごとに外へ)
+        int maxRings = bp.wetOk ? 12 : 14;
+        if (relocations > maxRings) {
             SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, home, relocations - 1);
             data.entries().remove(entry);
             data.setDirty();
@@ -633,7 +635,8 @@ public final class SiteJob {
         int hx = (wr[2] - wr[0]) / 2 + 1;
         int hz = (wr[3] - wr[1]) / 2 + 1;
         int step = Math.max(14, Math.max(hx, hz) / 2);
-        int ring = relocations;
+        // 小さな物は輪をゆっくり広げる (3 回ごとに 1 つ外へ。道が大きく変わらない)
+        int ring = bp.wetOk ? relocations : 1 + (relocations - 1) / 3;
         int range = Math.max(hx, hz) >= 16 ? 40 : 8;
         BlockPos base = home;
         List<BlockPos> others = new ArrayList<>();
