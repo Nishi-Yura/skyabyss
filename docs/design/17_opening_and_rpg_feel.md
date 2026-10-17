@@ -606,3 +606,46 @@
 - 成長の自己テストに「序盤の進み」を足した。クエストの段（`main_song`）と `LORE_XP` と定数から積み上げ、Lv2（鐘の宿り）、Lv3（語り部のあと）、Lv3（骨の丘＝約 1 時間）、Lv4（岩鯨を見る）、Lv10（初回クリア）、Lv11（サブ込み）を確かめる。ログ: `growth opening pace: lodge Lv2 / storyteller Lv3 / bone hill (about 1 h) Lv3 (225 xp) / whale seen Lv4 / first clear Lv10 (1877 xp), with side quests Lv11`。数を変えて届かなくなると失敗する。
 - 試遊はしていない（ゲームの窓へのキー送信は禁止）。札の出る時機（Lv2 の帯のあと）は、担当 6 の通しで見る。
 
+---
+
+## 11. 担当 2 の記録（構造物）
+
+判断 17-1 A（4 つ）、17-2 A、17-3 A（足跡は余燼）、17-4 A（骨の主は決めない）、17-11 A（スポーンを近い陸へ動かす）で進めた。00 は編集していない。
+
+### 11.1 作ったもの
+
+| 物 | 場所（`jp.revati.skyabyss`） | 中身 |
+| --- | --- | --- |
+| 窓口 | `opening/OpeningSites` | `camp` `notebook` `shelter` `bell` `smoke` `slab` `ribs` `footprints` `cairns` `all` `siteAt(pos, 余白)` `nearest` `yawTo`。戻りは「立つ場所」（地面の一つ上）。計画前は空。`built` / `allBuilt` で建て終わりが分かる。保存は `opening/site/SiteData`（`skyabyss_opening_sites`） |
+| 場所探し | `opening/site/SiteFinder` | チャンクを作らず、地形生成の高さ（`getBaseHeight`）と群系だけで決める。陸 = 地面が海面以上、群系が海・川・浜・ジャングル・沼・暗い森・きのこ島でない、高さの差が小さい。野営地 = スポーン地点（だめなら近い陸、半径 160 まで）。宿り = 野営地から 140〜220、東を優先、だめなら 100〜320。足跡 = 道から 28〜62 ブロックの帯に、道とほぼ平行に 40 おきで 3 つ（見つからなければ帯を緩め、最後は野営地のまわりのどこかの乾いた所）。骨 = 250〜350 の丘（高さの順）、宿りの向きから 90 度以上離す。積み石 = 道に 40 おき |
+| 建設 | `opening/site/SiteJob`、`SiteBuilds`、`CampBuilder` `ShelterBuilder` `FootprintBuilder` `RibBuilder` `CairnBuilder` | `BackBuildJobs` と同じ流儀で、1 tick の予算（人がいれば 6 ms、いなければ 20 ms）だけ進める。段階: チャンクを読む（チケット）→ 実際のブロックで地面を測る・人の建物がないか見る → 平らにならす（まわり 3 ブロックはなだらかに）・木と草を片付ける → 部品を置く → つながり（柵・石垣・階段）・看板・樽の中身・帳面。野営地だけは、プレイヤーが入る前（`ServerStartedEvent`）にその場で建てる。残りの探索は別スレッドで、できたら tick の中で書く（探索は 3〜10 秒かかる） |
+| 部品 | `data/skyabyss/opening/{camp,shelter,cairn,footprint,ribs,slab}.json`、`opening/site/Blueprint` | ラフと同じブロックの配置（`tools/rough/opening_sites.py --install` が書く）。回す・左右を反転して置ける |
+| 目的の帯の口 | `client/opening/SiteTargets` + `opening/site/SiteNetwork`（版 `opening-sites-1`） | 構造物の場所をサーバーから送り（入ったとき・建て終わるたび）、`ObjectiveStrip.targets` を引き受ける。拍子の担当は `SiteTargets.bind("<クエストの id>", "camp")`（キー: `camp` `notebook` `shelter` `bell` `ribs` `footprint` `footprint1` `footprint2` `cairn0`…）か `SiteTargets.bindPos("<id>", () -> pos)` を呼ぶだけ。bind しなくても、クエストの id がキーと同じならその場所を指す |
+| 開発コマンド | `/skyabyss dev opening info\|build\|view\|dump` | `view <種類> <番号> <離れる> <高さ> <yaw> <pitch>`（yaw は野営地からそこへ着いた向きとの差）、`dump`（`tools/structure/check.py` 用）、`build`（その場で最後まで） |
+
+### 11.2 拍子・語りの担当への引き継ぎ
+
+- 帳面は **伝承の書（`LORE_BOOK`）の ItemEntity**（消えない、タグ `skyabyss_opening_notebook`、位置は `OpeningSites.notebook`）。拾ったときの扱い（最初の頁・目的）は拍子の側。専用の「古い帳面」の品が要るなら、`CampBuilder.finish` の 1 か所を差し替える。
+- 鐘は **バニラの鐘**（POI `meeting`）なので、`NpcSpawner` がそのまま語り部を立たせる（プレイヤーが鐘から 48 ブロックに入ったとき）。鯨追いも既存のまま。
+- 石板の看板の文は `assets/skyabyss_opening/lang/{ja_jp,en_us}.json` の `sign.skyabyss.opening_slab.1〜4`（「歌は / ここで / 止まった」）。語りの担当が直してよい（`SignFit` の対象に `skyabyss_opening` の名前空間を足してある）。
+- 新しいワールドの最初の日（`NEW_WORLD_TICKS` = 24000 tick 未満）は、スポーン地点を野営地へ動かす。それより古いワールドでは動かさず、人の建物（板・箱・村など、自然でない物）がある所には建てず（あれば場所を 12 ブロックずつずらし、14 回で諦める）、壊さない。
+- 環境変数: `SKYABYSS_OPENING_SITES=0` で建てない。台本の撮影（`SKYABYSS_SHOTS`）は、ワールド名が `opening` で始まらない限り建てない（ほかの台本の邪魔をしない）。
+- 野営地の目の前の向きは固定（北向きの部品）。新規プレイヤーのスポーンは野営地の中心から最大 10 ブロックばらける（バニラの `spawnRadius`）。B0 でぴったり野営地の真ん中に立たせたいなら、拍子の側で `OpeningSites.camp` へ移す。
+
+### 11.3 ラフと選び方
+
+`docs/review/opening_site_roughs/`（`README.md` に理由）。3 案ずつ: 野営地 A 焚き火を囲む輪、宿り A 小屋と柵の庭、足跡 A 足の形、骨 B 片側だけ立つ肋骨。
+
+### 11.4 確かめたこと
+
+- `python tools/structure/check.py`（書き出しは `tools/shots/opening_sites.txt`）: 野営地 = 立つ場所から焚き火・帳面へ歩いて行ける、看板 0、樽 1、焚き火 1。宿り = 庭から入口へ歩いて行ける、看板 0、鐘 1・焚き火 1・書見台 1・樽 2。骨 = 石板（看板 1、4 行）から骨へ歩いて行ける。図は `docs/review/structure_opening_*`。
+- 自己テスト `SelfTestRunner` の段 `opening`（`opening (wait)` `opening (load)` `opening` `opening (conflict)`）: 4 種類が決まる・建つ、スポーンが野営地、宿りの距離（100〜320）と骨の距離（200〜380）と向き（90 度近く）、足跡が道から外れている・くぼんでいる、立つ場所が固い地面の上、帳面、鐘と POI `meeting` と語り部が立てる（`NpcSpawner.spawnStoryteller`）、煙の焚き火、積み石、骨のブロック数、石板の看板の幅（`SignFit`）。`opening (conflict)` は板の床と箱の上に積み石を頼み、壊さずにずれることを確かめる。村がなくても宿りの鐘がある（テストのワールドの村の有無によらない）。
+- 結果: `./gradlew compileJava --offline` 成功。`SKYABYSS_SELFTEST=1 ./gradlew runServer` を空の run/ で 3 回（毎回別のワールド）すべて `SELFTEST PASSED`、`opening` と `opening (conflict)` も PASSED。台本 `tools/shots/opening_sites.txt` は `SHOTS OK 13 shots`。野営地は建てるのに 40 ms ほど（プレイヤーが入る前）、ほかは 1 tick 6 ms 以内で数 tick。
+- ゲーム内: `docs/review/ingame_opening_*.png`（`./gradlew runShots -Pscript=tools/shots/opening_sites.txt`）。
+
+### 11.5 残した課題
+
+- 探索はチャンクを作らない代わりに、高さを粗い格子（3×3、広い範囲は 5×3）で見ているので、小さな池や木は見えない。建てる直前に実際のブロックで確かめ、水・人の建物があれば場所をずらす。
+- 地形はならした長方形の外に 3 ブロックの傾斜をつなぐだけ。急な斜面では縁に土の段が見える。
+- 骨は丘の低い所に合わせて立て、脚は地面まで延ばす（最大 14）。高い所の骨は地面に埋まる（半ば埋もれた見た目）。
+- 足跡は雨水を置いた（水源ブロック）。寒い群系では凍らない（氷にはしていない）。

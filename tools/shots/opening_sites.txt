@@ -1,0 +1,68 @@
+# 序盤の構造物 4 つ (野営地・鐘の宿り・巨大な足跡・巨神の骨) を撮る。./gradlew runShots -Pscript=tools/shots/opening_sites.txt
+# ワールド名が opening で始まるので、台本の撮影でも構造物が建つ (SiteBuilds.enabled)。建て終わるまで opening build で待つ
+# 撮った絵は run/shots/opening_sites/shots/opening_sites/*.png → docs/review/ingame_opening_*.png へ
+world opening_sites normal
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd skyabyss dev opening build
+cmd skyabyss dev opening info
+hud off
+# 野営地: 目の高さ (南東から) と、上から
+cmd skyabyss dev opening view camp 0 9 1.8 135 12
+waitchunks
+shot opening_camp_eye
+cmd skyabyss dev opening view camp 0 5 4 200 28
+waitchunks
+shot opening_camp_close
+cmd skyabyss dev opening view camp 0 0 22 0 90
+waitchunks
+shot opening_camp_top
+# 鐘の宿り: 野営地から歩いて着いた向きで、遠く・近く・横から
+cmd skyabyss dev opening view shelter 0 38 4 0 4
+waitchunks
+shot opening_shelter_far
+cmd skyabyss dev opening view shelter 0 16 2 0 6
+waitchunks
+shot opening_shelter_eye
+cmd skyabyss dev opening view shelter 0 14 7 50 18
+waitchunks
+shot opening_shelter_side
+cmd skyabyss dev opening view shelter 0 0 26 0 90
+waitchunks
+shot opening_shelter_top
+# 巨大な足跡 (3 つ)
+cmd skyabyss dev opening view footprint 0 9 2 0 20
+waitchunks
+shot opening_footprint_eye
+cmd skyabyss dev opening view footprint 0 0 20 0 90
+waitchunks
+shot opening_footprint_top
+cmd skyabyss dev opening view footprint 1 22 14 30 30
+waitchunks
+shot opening_footprint_wide
+# 巨神の骨
+cmd skyabyss dev opening view ribs 0 48 6 0 -6
+waitchunks
+shot opening_ribs_far
+cmd skyabyss dev opening view ribs 0 26 2 35 -12
+waitchunks
+shot opening_ribs_eye
+cmd skyabyss dev opening view ribs 0 0 60 0 90
+waitchunks
+shot opening_ribs_top
+# 書き出し (tools/structure/check.py で穴・歩く・水・看板を調べる)
+cmd skyabyss dev opening dump camp 0
+waitdump
+cmd skyabyss dev opening dump shelter 0
+waitdump
+cmd skyabyss dev opening dump footprint 0
+waitdump
+cmd skyabyss dev opening dump ribs 0
+waitdump
+quit

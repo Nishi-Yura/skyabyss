@@ -212,6 +212,13 @@ public final class StructureDump {
         return null;
     }
 
+    // 好きな範囲 (と起点) を書き出す (序盤の構造物の検査用。opening/site/SiteBuilds の dev コマンドから)
+    public static void queueRange(ServerLevel level, String name, BlockPos a, BlockPos b, Map<String, BlockPos> points) {
+        Job job = new Job(name, level, Box.of(a, b));
+        points.forEach(job::point);
+        queue(job);
+    }
+
     // 巨神の背の次元 (titan_back / tide_back)。島がまだ建っていなければ建てる
     public static ServerLevel ensureBack(MinecraftServer server, String name) {
         ResourceKey<Level> dim = switch (name) {
