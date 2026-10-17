@@ -164,7 +164,7 @@ public final class OpeningDirector {
         boolean deep = !sky && player.getY() < level.getSeaLevel() - 24;
         boolean danger = danger(level, player);
         return new Env(level.getGameTime(), level.getDayTime(), overworld, awake, sky, deep, player.isUnderWater(), danger,
-                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePass() != null);
+                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePass() != null, !level.isRaining() && !level.isThundering());
     }
 
     // 戦っている・傷が深い・敵が近い (17 の 6 章: 殺さない。拍子は後ろへずらす)

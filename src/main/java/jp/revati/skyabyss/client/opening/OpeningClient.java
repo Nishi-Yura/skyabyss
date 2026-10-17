@@ -179,6 +179,16 @@ public final class OpeningClient {
         return (t - BAND_START) / (float) BAND_LENGTH;
     }
 
+    // 歌のあいだ、この mod 自身の星を描く強さ (0〜1)。バニラの星は雨・雲・光源 mod やシェーダーで見えないことがあるので、欠けが読めるよう自前の星を重ねる。
+    // 帯が動き出す前に 3 秒で現れ、帯が去ったあと 3 秒で消える
+    static float starLayer() {
+        int t = songTicks();
+        if (t < 0) {
+            return 0f;
+        }
+        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + BAND_LENGTH)) / 80f));
+    }
+
     // 画面の揺れ・効果の強さを掛けたもの (設定で 0 なら 0)
     static float effectScale() {
         return Config.SCREEN_EFFECT_STRENGTH.get().floatValue();
@@ -241,6 +251,10 @@ public final class OpeningClient {
                 }
                 return false;
             });
+        }
+        // 歌の保険: 歌が降り始めて 3 秒たっても足元を向いたままなら、見上げるよう促す (星の欠けは空を見ないと分からない)
+        if (songTicks() == 60 && mc.player != null && mc.player.getXRot() > -25f) {
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.translatable("message.skyabyss.song_look_up"), false);
         }
         int steps = stepsTicks();
         if (steps >= 0) {

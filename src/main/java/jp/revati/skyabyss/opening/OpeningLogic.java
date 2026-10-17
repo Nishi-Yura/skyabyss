@@ -40,6 +40,9 @@ public final class OpeningLogic {
     public static final int SONG_MAX = 2400;
     public static final int SONG_TOTAL = 900;
     public static final int SONG_LORE = 900;
+    // 歌は星が十分に出てから (一日の時刻。日没 13000 の直後は星が薄い) と、夜明けの前に終わる時刻まで。雨・雷の夜は晴れるまで待つ
+    public static final long SONG_EARLIEST = 14000L;
+    public static final long SONG_LATEST = 21000L;
     // 戦闘中などでずらすときの間隔
     static final int POSTPONE = 100;
     // 影のあとの破れた頁: 影が去って 3 秒後に落とす。落としても読まれなければ、12 分後に自動で読む
@@ -57,7 +60,13 @@ public final class OpeningLogic {
 
     // 判断に使う、その人のその時の状況
     public record Env(long now, long dayTime, boolean overworld, boolean awake, boolean skyVisible, boolean deep, boolean inWater,
-            boolean danger, boolean horror, boolean passActive) {
+            boolean danger, boolean horror, boolean passActive, boolean clearSky) {
+        // 天気を問わない (テスト用): 晴れとみなす
+        public Env(long now, long dayTime, boolean overworld, boolean awake, boolean skyVisible, boolean deep, boolean inWater,
+                boolean danger, boolean horror, boolean passActive) {
+            this(now, dayTime, overworld, awake, skyVisible, deep, inWater, danger, horror, passActive, true);
+        }
+
         long tod() {
             return Math.floorMod(dayTime, DAY);
         }
@@ -134,6 +143,11 @@ public final class OpeningLogic {
     static boolean songEligible(OpeningState st, Env env, long night) {
         return !st.done(OpeningBeat.SONG) && env.horror && st.done(OpeningBeat.FOOTSTEPS) && night > st.stepsDoneNight
                 && env.now - st.awakeAt >= NIGHT_AFTER_AWAKE;
+    }
+
+    // 星の欠けが見える空か: 晴れていて、星が十分に出ている時刻 (SONG_EARLIEST〜SONG_LATEST)
+    static boolean songSkyReady(Env env) {
+        return env.clearSky && env.tod() >= SONG_EARLIEST && env.tod() <= SONG_LATEST;
     }
 
     // ---------------------------------------------------------------- 目的の帯
@@ -366,7 +380,7 @@ public final class OpeningLogic {
                 st.songNight = night;
                 st.songAt = now + fx.random(SONG_MIN, SONG_MAX);
             } else if (st.songAt >= 0 && now >= st.songAt) {
-                if (env.calm() && env.skyVisible) {
+                if (env.calm() && env.skyVisible && songSkyReady(env)) {
                     st.markDone(OpeningBeat.SONG);
                     st.songDoneNight = night;
                     st.songAt = -1;
