@@ -465,5 +465,9 @@
   "commands.skyabyss.chapter1.status": "%s: chapter 1 %s (boarded a titan %s, lore 'sky ruins' %s)",
   "commands.skyabyss.chapter1.set": "Set 'boarded a titan' of %s to %s",
   "subtitles.skyabyss.peak_scrape": "Rock grinds in the distance",
-  "subtitles.skyabyss.sky_eye_presence": "Something above the clouds"
+  "subtitles.skyabyss.sky_eye_presence": "Something above the clouds",
+  "sign.skyabyss.lore_bone_slab.1": "The song",
+  "sign.skyabyss.lore_bone_slab.2": "stopped",
+  "sign.skyabyss.lore_bone_slab.3": "here",
+  "sign.skyabyss.lore_bone_slab.4": ""
 }

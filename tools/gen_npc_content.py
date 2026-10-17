@@ -167,6 +167,11 @@ st.entry("fragment", q(MAIN, stage="return"))
 st.entry("song_done", q(SONG, stage="tell"))
 st.entry("deja_vu_song", all_(loop(1), remembers("song_heard"), not_(flag("met"))))
 st.entry("deja_vu", all_(loop(1), remembers("met"), not_(flag("met"))))
+# 序盤 (17 の 3 章。ループの「覚えているような」入口のあと): 野営地の帳面から宿りへ来た人に、最初の話の前で「今日あたり、空を見ていなさい」と言う。
+# 影を先に見てから来た人には、見たことを察する。影を待つ間に話しかけた人には、一度だけ声をかける
+st.entry("shadow0", q(MAIN, stage="follow_smoke"))
+st.entry("shadow_first", all_(q(MAIN, stage="ask_storyteller"), not_(flag("met"))))
+st.entry("shadow_wait", all_(q(MAIN, stage="watch_sky"), not_(flag("wait_told"))))
 st.entry("first", not_(flag("met")))
 st.entry("menu")
 
@@ -183,6 +188,45 @@ st.node("deja_vu_song",
         "...You came to hear the rest of that song, didn't you.\n...How strange. I wonder why I thought so.",
         face="grave", next="menu", note="ループ 1 回目以降、前のループで数え歌を聞いていた")
 
+# 序盤の語り (17 の 3 章、担当 4)
+st.node("shadow0",
+        "おや、煙を辿ってきたのかい。……見ない顔だね。\n旅の人が火にあたりに寄るのは、珍しいことじゃない。ゆっくりしておいき。",
+        "Oh, you followed the smoke, did you. ...I don't know your face.\nTravelers stopping by to warm themselves is nothing unusual. Stay a while.",
+        face="smile", next="shadow0_b", note="序盤: 帳面を持って宿りへ来た (メインの「煙の下の、鐘の宿りへ」が済む)")
+st.node("shadow0_b",
+        "何もないけれど、空だけは広い。\n今日あたり、空を見ていなさい。晴れた昼は、とくにね。……勧めたくは、ないんだけど。",
+        "There's nothing here, but the sky is wide.\nKeep an eye on the sky today. At midday, especially, if it's clear. ...Not that I like to recommend it.",
+        face="grave", options=[
+            ("ok", "分かった。", "All right.", {"goto": "menu", "do": [add_aff(1)]}),
+            ("why", "どうして、今日だと分かる？", "How do you know it will be today?", {"goto": "shadow0_why"}),
+        ], note="序盤: 影の前の言づけ")
+st.node("shadow0_why",
+        "膝が痛むのさ。それと、鐘がね。朝から、風もないのに小さく鳴っているんだよ。\n……年寄りの気のせいなら、いいんだけどね。",
+        "My knee aches. And the bell, too. Since morning it has been ringing softly, with no wind at all.\n...I'd be glad if it were only an old woman's fancy.",
+        face="grave", options=[("ok", "覚えておく。", "I'll remember that.", {"goto": "menu", "do": [add_aff(1)]})])
+st.node("shadow_first",
+        "……その顔。見たんだね、昼の空を。\nここは、見た者が最初に寄る所なんだよ。……まあ、火にあたっておいき。",
+        "...That face. You saw it, didn't you. The midday sky.\nThis is where those who have seen it come first. ...Well, come and warm yourself.",
+        face="grave", next="shadow2", note="序盤: 影を見てから宿りへ来た (初対面)")
+st.node("shadow_wait",
+        "まだ、見ていないんだね。\n慌てなくていい。昼のうちは、空はどこへも行きやしないよ。",
+        "You haven't seen it yet. No need to hurry.\nIn the daytime, the sky isn't going anywhere.",
+        face="smile", next="menu", do=[set_flag("wait_told")], note="序盤: 影を待つ間に話しかけた (一度だけ)")
+
+# 道すがらの見聞 (序盤の痕跡と気配。伝承が記されていて、まだ話していないもの)
+SEEN = [("camp", "prologue/camp"), ("prints", "prologue/footprints"), ("steps", "prologue/footsteps"),
+        ("bones", "prologue/bone_hill"), ("song", "prologue/sky_song")]
+
+
+def seen_if(topic, entry):
+    return all_(lore(entry), not_(flag(f"{topic}_told")))
+
+
+SEEN_ANY = any_(*[seen_if(t, e) for t, e in SEEN])
+# 語り部の話題の節は選択肢を 13 個までしか置けない (枠の高さ 210)。岩鯨を見た・背中の町を見た話も、この「見たもの」の節へ移した
+SEEN_ST = SEEN + [("whale", "chapter1/stone_whale"), ("back", "chapter1/sky_ruins")]
+SEEN_ST_ANY = any_(*[seen_if(t, e) for t, e in SEEN_ST])
+
 MENU_OPTS = [
     ("shadow_seen", "昼間、雲の上を何かが渡っていった。", "Something crossed above the clouds at midday.",
      {"kind": "quest", "goto": "shadow1", "if": all_(lore("prologue/shadow"), any_(q(MAIN, "none"), q(MAIN, stage="ask_storyteller")))}),
@@ -193,7 +237,7 @@ MENU_OPTS = [
     ("song", "この村に伝わる歌はある？", "Are there any old songs in this village?",
      {"goto": "song1", "if": not_(flag("song_heard"))}),
     ("song_more", "数え歌の続きが知りたい。", "I want to know the rest of the counting song.",
-     {"kind": "quest", "goto": "sub_offer", "if": all_(flag("song_heard"), q(SONG, "none"), q(MAIN, "started"))}),
+     {"kind": "quest", "goto": "sub_offer", "if": all_(flag("song_heard"), q(SONG, "none"), q(MAIN, "started"), flag("met", WC))}),
     ("watcher_seen", "夜、遠くに誰かが立っていた。", "At night, someone was standing far off.",
      {"goto": "watcher", "if": all_(not_(lore("prologue/watcher")), watcher(1))}),
     ("watcher_ask", "夜に気をつけることはある？", "Is there anything to beware of at night?",
@@ -202,10 +246,8 @@ MENU_OPTS = [
      {"goto": "calendar", "if": all_(not_(lore("prologue/seventh_night")), aff(20))}),
     ("book", "古い帳面を見せる。", "Show her the old notebook.",
      {"goto": "book", "if": all_(lore("prologue/the_book"), not_(flag("book_shown")))}),
-    ("whale", "空を泳ぐ岩の山を見た。", "I saw a mountain of rock swimming in the sky.",
-     {"goto": "whale", "if": all_(lore("chapter1/stone_whale"), not_(flag("whale_told")))}),
-    ("back", "鯨の背中に、町の跡があった。", "There were ruins of a town on the whale's back.",
-     {"goto": "back", "if": all_(lore("chapter1/sky_ruins"), not_(flag("back_told")))}),
+    ("seen", "道すがら、気になるものを見た。", "I saw something on the way that troubled me.",
+     {"goto": "seen_menu", "if": SEEN_ST_ANY}),
     ("bye", "また来る。", "I'll come again.", {"kind": "leave"}),
 ]
 st.node("menu", "何か聞きたいことでもあるのかい。", "Is there something you want to ask?", options=MENU_OPTS,
@@ -215,7 +257,7 @@ st.node("menu", "何か聞きたいことでもあるのかい。", "Is there so
 st.node("shadow1",
         "空のことかい。\n……晴れた昼に、急に暗くなることがある。羊はうずくまり、鳥は黙る。雲の上を、何かが渡っていくんだよ。",
         "The sky, is it.\n...On a clear day it sometimes goes dark all at once. The sheep crouch, the birds fall silent. Something crosses above the clouds.",
-        face="grave", next="shadow2", do=[start(MAIN)], note="メインを始める")
+        face="grave", next="shadow2", do=[set_flag("sky_asked"), start(MAIN)], note="メインを始める (空のことを聞いた印。序盤の二段を飛ばす)")
 st.node("shadow2",
         "あれが何なのかは、誰も知らない。見上げた者は、みんな口をつぐむ。\nただ、影が通った年には、決まって“歌”が聞こえるんだ。遠い空の向こうから、低く、長く。",
         "No one knows what it is. Those who looked up all hold their tongues.\nBut in the years the shadow passes, a \"song\" is always heard. From beyond the far sky, low and long.",
@@ -319,6 +361,52 @@ st.node("back",
         "A town, on its back... People lived there? Up in the sky, with no ground of their own.\n...If they were born there and died there, then for them the whale was the whole world.",
         next="@entry", do=[set_flag("back_told"), add_aff(2)])
 
+# 序盤の見聞 (17 の 3 章。足跡・足音・骨・歌は、ほのめかすだけ。答えは言わない)
+st.node("seen_menu", "ほう。何を見たんだい。", "Oh? What did you see?", options=[
+    ("camp", "野営地の跡を見た。", "I found the remains of a camp.", {"goto": "camp0", "if": seen_if("camp", "prologue/camp")}),
+    ("prints", "地面に、大きなくぼみが並んでいた。", "Great hollows lay in a row in the ground.",
+     {"goto": "prints0", "if": seen_if("prints", "prologue/footprints")}),
+    ("steps", "夜、地面が揺れた。", "The ground shook in the night.", {"goto": "steps0", "if": seen_if("steps", "prologue/footsteps")}),
+    ("bones", "丘に、巨大な骨が立っていた。", "A huge rib cage stood on a hill.", {"goto": "bones0", "if": seen_if("bones", "prologue/bone_hill")}),
+    ("song", "夜空から、歌が降ってきた。", "A song came down from the night sky.", {"goto": "song0", "if": seen_if("song", "prologue/sky_song")}),
+    ("whale", "空を泳ぐ岩の山を見た。", "I saw a mountain of rock swimming in the sky.",
+     {"goto": "whale", "if": seen_if("whale", "chapter1/stone_whale")}),
+    ("ruins", "鯨の背中に、町の跡があった。", "There were ruins of a town on the whale's back.",
+     {"goto": "back", "if": seen_if("back", "chapter1/sky_ruins")}),
+    ("cancel", "やっぱり、いい。", "Never mind.", {"goto": "menu"}),
+], note="序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話もここ)")
+st.node("camp0",
+        "あの野営地かい。……焚き火は、いつも冷えているだろう。\n誰かが使った跡だけが、あそこにはあるんだ。使うところを見た者は、いないけれどね。",
+        "That camp, is it. ...The fire's always cold, isn't it.\nThere's only ever the trace of someone having used it. No one has ever seen them use it.",
+        face="grave", next="@entry", do=[set_flag("camp_told"), add_aff(1)], note="序盤: 野営地の跡")
+st.node("prints0",
+        "足跡……かい。\n数えたかい。数えるのは、三つまでにしておおき。四つ目を探しに行った者は、帰ってこなかったそうだよ。",
+        "Footprints, is it.\nDid you count them? Stop at three. They say the ones who went looking for a fourth never came back.",
+        face="grave", next="@entry", do=[set_flag("prints_told"), add_aff(1)], note="序盤: 巨大な足跡")
+st.node("steps0",
+        "揺れたのかい。……三度、だったろう？\nそういう夜は、あたしは耳をふさいで数え歌を歌うことにしている。みっつまで歌うと、いつも静かになるんだよ。",
+        "It shook, did it. ...Three times, wasn't it?\nOn nights like that, I cover my ears and sing the counting song. By the time I reach \"three,\" it has always gone quiet.",
+        face="grave", next="@entry", do=[set_flag("steps_told"), add_aff(1)], note="序盤: 夜の足音")
+st.node("bones0",
+        "骨、かい。弧を描いて、立っていたんだね。\n死んだものを見ると、落ち着く者もいる。あたしは逆だよ。終わるものなら、始まりもあったはずだろう？",
+        "Bones, is it. Standing in an arc, were they.\nSome find comfort in the sight of dead things. I'm the opposite. If a thing can end, it must have begun, mustn't it?",
+        face="grave", next="@entry", do=[set_flag("bones_told"), add_aff(1)], note="序盤: 骨の丘")
+st.node("song0",
+        "……聞いたんだね、空の歌を。\nあの歌が降りる夜は、星がいくつか消えるんだよ。母さんは、何かが上を通るのだと言っていた。",
+        "...You heard it, then. The song from the sky.\nOn nights when it comes down, some of the stars go out. My mother said something was passing overhead.",
+        face="grave", next="song0_b", do=[set_flag("song_told"), add_aff(2)], note="序盤: 空の歌")
+st.node("song0_b",
+        "みっつ、みあげちゃだめよ、と歌うのは、見えないものを見せないためだと思っていたんだ。\n今はね、見られないためかもしれないと思うよ。",
+        "I always thought we sang \"three, don't you look up\" so that children wouldn't see what can't be seen.\nNow I think it may be so that we aren't seen.",
+        face="grave", options=[
+            ("who", "何が、通ったんだ？", "What was passing?", {"goto": "song0_c"}),
+            ("ok", "……そうか。", "...I see.", {"goto": "@entry"}),
+        ])
+st.node("song0_c",
+        "名前を呼んだら、振り向かれる気がしてね。\n……だから、あたしは呼ばないことにしているんだ。",
+        "I fear that if I called its name, it would turn around.\n...So I've decided not to call it.",
+        face="grave", next="@entry")
+
 # 欠片 (メインの終わり)
 st.node("fragment",
         "……戻ったんだね。\n手の中のそれ、見せておくれ。",
@@ -370,9 +458,45 @@ C_MENU = [
     ("shards", "岩鯨の欠片を持ってきた。", "I brought shards of the whale.",
      {"kind": "give", "goto": "c_shards_thanks", "if": all_(q(SHARDS, stage="deliver"), item("skyabyss:stone_whale_shard", 3)),
       "do": [take("skyabyss:stone_whale_shard", 3)]}),
+    ("seen", "道中で、妙なものを見た。", "I saw something strange on the way.", {"goto": "c_seen_menu", "if": SEEN_ANY}),
     ("bye", "じゃあ、また。", "See you.", {"kind": "leave"}),
 ]
 wc.node("c_menu", "なにか用か。", "Need something?", options=C_MENU, note="話題を選ぶ節")
+
+# 序盤の見聞 (17 の 3 章)。イサナは、見たことを短く話す。足跡は余燼、骨の主は決めない (17 の判断 17-3・17-4)
+wc.node("c_seen_menu", "妙なもの？　聞かせろ。", "Strange? Tell me.", options=[
+    ("camp", "野営地の跡を見た。", "I found the remains of a camp.", {"goto": "c_camp", "if": seen_if("camp", "prologue/camp")}),
+    ("prints", "地面に、大きなくぼみが並んでいた。", "Great hollows lay in a row in the ground.",
+     {"goto": "c_prints", "if": seen_if("prints", "prologue/footprints")}),
+    ("steps", "夜、地面が揺れた。", "The ground shook in the night.", {"goto": "c_steps", "if": seen_if("steps", "prologue/footsteps")}),
+    ("bones", "丘に、巨大な骨が立っていた。", "A huge rib cage stood on a hill.", {"goto": "c_bones", "if": seen_if("bones", "prologue/bone_hill")}),
+    ("song", "夜空から、歌が降ってきた。", "A song came down from the night sky.", {"goto": "c_song", "if": seen_if("song", "prologue/sky_song")}),
+    ("back", "やっぱり、いい。", "Never mind.", {"goto": "c_menu"}),
+], note="序盤: 見たものの話題 (見たものだけ並ぶ)")
+wc.node("c_camp",
+        "あの野営地か。俺が寄ったときも、誰もいなかった。\n火は冷えているのに、寝袋だけが、いま起きたばかりみたいに温かかった。",
+        "That camp. When I stopped there, no one was around either.\nThe fire was cold, but the bedroll was warm, as if someone had only just got up.",
+        face="grave", next="@entry", do=[set_flag("camp_told"), add_aff(1)], note="序盤: 野営地の跡")
+wc.node("c_prints",
+        "三つ並んでいただろう。俺も、その先を探した。\n何も見つからなかった。……見つからないのが、いちばん気味が悪い。",
+        "Three in a row, weren't there. I looked beyond them too.\nI found nothing. ...Finding nothing is the worst part.",
+        face="grave", next="@entry", do=[set_flag("prints_told"), add_aff(1)], note="序盤: 巨大な足跡")
+wc.node("c_steps",
+        "ゆうべか。火のそばの湯が、三度、ゆっくり揺れていた。\n……鯨じゃない。鯨は、歩かない。",
+        "Last night. The water by the fire shook three times, slowly.\n...It wasn't the whale. Whales don't walk.",
+        face="grave", next="@entry", do=[set_flag("steps_told"), add_aff(1)], note="序盤: 夜の足音")
+wc.node("c_bones",
+        "あの石板か。……俺じゃないぞ。字が、俺のじゃない。\n歌が止まる、か。俺は長いこと歌を追ってきたが、止まったと思ったことは一度もない。",
+        "That slab. ...It wasn't me. The hand isn't mine.\nThe song stopped, it says. I've chased that song a long time, and never once thought it had stopped.",
+        face="grave", next="@entry", do=[set_flag("bones_told"), add_aff(1)], note="序盤: 骨の丘")
+wc.node("c_song",
+        "聞いたか、ゆうべの歌。あれが、俺の追っている歌だ。\nだが、いつもより近かった。……近すぎる、と思った。",
+        "You heard it, last night's song. That's the one I chase.\nBut it was closer than ever. ...Too close, I thought.",
+        face="grave", next="c_song2", do=[set_flag("song_told"), add_aff(2)], note="序盤: 空の歌")
+wc.node("c_song2",
+        "鯨が降りてくるのは、たいてい歌のあとだ。……今夜か、明日か。\n覚悟しておけ。俺も、してはいるんだ。",
+        "The whale usually comes down after the song. ...Tonight, or tomorrow.\nBrace yourself. I'm trying to myself.",
+        next="@entry")
 
 wc.node("c_whale1",
         "俺は、もう何年も鯨を追っている。\n影の年に、遠い空から聞こえる低い歌。あれの主が、岩の鯨だ。背中には町があると、昔、誰かに聞いた。",
@@ -483,22 +607,36 @@ def quest(qid, category, order, giver, title, summary, done, stages, reward, sta
 
 quest(MAIN, "main", 10, ST,
       ("雲の下の歌", "The Song Beneath the Clouds"),
-      ("空の影の行く先を追う。", "Follow where the shadow in the sky leads."),
+      ("煙の下の宿りへ向かい、空の影の行く先を追う。", "Follow the smoke to the lodge, and trace where the shadow in the sky leads."),
       ("欠片は、ほのかに温かく脈を打っている。残る三つは、ほかの巨神が体の奥に抱えているはずだ。",
        "The fragment is faintly warm, and it beats. The other three must be held deep inside the other titans."),
       [
+          # 序盤 (17 の 3 章): 野営地の帳面を手にして始まり、煙の下の宿りへ、そして昼の空へ。
+          # 先に影を見た人・先に岩鯨を見た人は、この二段を飛ばして「語り部に尋ねる」から
+          {"id": "follow_smoke", "xp": 20,
+           "skip_if": any_(lore("prologue/shadow"), lore("chapter1/stone_whale"), flag("sky_asked", ST)),
+           "journal": ("野営地に残されていたのは、一冊の帳面だけだった。\n遠くの空に、細い煙が立っている。ときおり、鐘の音も風に乗ってくる。",
+                       "All that was left at the camp was a single notebook.\nFar off, a thin column of smoke rises. Now and then a bell is carried on the wind."),
+           "objectives": [{"id": "reach", "type": "talk", "target": ST, "topic": "shadow0",
+                           "ja": "煙の下の、鐘の宿りへ", "en": "To the Bell Lodge beneath the smoke"}]},
+          {"id": "watch_sky", "xp": 20,
+           "skip_if": any_(lore("prologue/shadow"), lore("chapter1/stone_whale"), flag("sky_asked", ST)),
+           "journal": ("鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。\n鐘は朝から、風もないのに小さく鳴っているという。",
+                       "The storyteller at the Bell Lodge told me to keep an eye on the sky today.\nThe bell has been ringing softly since morning, she said, though there is no wind."),
+           "objectives": [{"id": "look", "type": "lore", "targets": ["prologue/shadow"],
+                           "ja": "晴れた昼の空を、見上げる", "en": "Look up at the midday sky"}]},
           {"id": "ask_storyteller", "xp": 30,
            "skip_if": lore("chapter1/stone_whale"),
-           "journal": ("晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。\n村の年寄りなら、何か知っているかもしれない。",
-                       "On a clear day, the sky went dark. Something crossed above the clouds.\nThe village elders might know something."),
+           "journal": ("晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。\n語り部なら、何か知っているかもしれない。",
+                       "On a clear day, the sky went dark. Something crossed above the clouds.\nThe storyteller might know something."),
            "objectives": [{"id": "talk", "type": "talk", "target": ST, "topic": "shadow3",
-                           "ja": "村の語り部に、空のことを尋ねる", "en": "Ask the village storyteller about the sky"}]},
+                           "ja": "語り部に、空のことを尋ねる", "en": "Ask the storyteller about the sky"}]},
           {"id": "find_chaser", "xp": 30,
            "skip_if": lore("chapter1/stone_whale"),
-           "journal": ("影が通った年には、決まって遠い空から“歌”が聞こえるという。\nその歌を追う旅人が、村の外れで火を焚いている。煙が目印だ。",
-                       "In the years the shadow passes, a \"song\" is always heard from the far sky.\nA traveler who chases that song keeps a fire at the edge of the village. Follow the smoke."),
+           "journal": ("影が通った年には、決まって遠い空から“歌”が聞こえるという。\nその歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。",
+                       "In the years the shadow passes, a \"song\" is always heard from the far sky.\nA traveler who chases that song keeps a fire a little way off. Follow the smoke."),
            "objectives": [{"id": "talk", "type": "talk", "target": WC, "topic": "c_whale2",
-                           "ja": "村の外れの鯨追いに、話を聞く", "en": "Hear what the Whale Chaser at the village edge has to say"}]},
+                           "ja": "火を焚く鯨追いに、話を聞く", "en": "Hear what the Whale Chaser by the fire has to say"}]},
           {"id": "see_whale", "xp": 60,
            "journal": ("歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。\n歌が聞こえたら、空を見ろ。",
                        "The singer is said to be a whale of rock that swims in the sky. Sometimes it comes below the clouds and lets down a chain.\nWhen you hear the song, look at the sky."),
@@ -533,7 +671,7 @@ quest(MAIN, "main", 10, ST,
                 "ja": "イサナに、欠片を見せる", "en": "Show the fragment to Isana"}]},
       ],
       {"xp": 200, "affinity": {ST: 5, WC: 5}},
-      start_when=any_(lore("prologue/shadow"), lore("chapter1/stone_whale")))
+      start_when=any_(lore("prologue/the_book"), lore("prologue/shadow"), lore("chapter1/stone_whale")))
 
 quest(SONG, "sub", 20, ST,
       ("数え歌のつづき", "The Rest of the Counting Song"),

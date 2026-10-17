@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 27,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/footprints",
+    "prologue/sky_song"
+  ]
+}

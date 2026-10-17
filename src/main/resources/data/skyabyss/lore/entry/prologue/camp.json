@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 12,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/the_book",
+    "prologue/the_book_margin"
+  ]
+}
