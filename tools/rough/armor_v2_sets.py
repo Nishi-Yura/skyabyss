@@ -70,7 +70,7 @@ def stone_whale():
     P.kabuto(a, M, neck=2, cheek=False)
     for sx in (-1, 1):  # jawbone guards, wide and bone
         a.slab(H, (sx * 5.4, 26.6, -0.4), (1.1, 3.4, 6.6), "trim", rot=(0, 0, sx * -12))
-    a.spike(H, (0, 32.9, -3.2), (-8, 0, 0), 6, 9.0, 1.2, 0.7, 4.2, 1.6, "trim", bend=(7, 0, 0))   # swept dorsal fin
+    a.spike(H, (0, 33.1, -0.5), (-34, 0, 0), 3, 3.8, 1.4, 0.8, 2.6, 1.4, "trim", bend=(10, 0, 0))   # low dorsal-fin crest swept back
     # chest: bulging rib arcs over a glow core instead of the plain ridge
     P.cuirass(a, M, ridge=False, front=False)
     a.box(B, (-1.5, 18.0, -3.8), (1.5, 22.6, -3.4), "glow")
@@ -84,7 +84,7 @@ def stone_whale():
     g = P.sode(a, M, RA, layers=3)
     a.mirror_bone(RA, LA)
     top = 2.2 + 2.0 + 1.6
-    a.spike(RA, g.point((-4.4, top, 0)), (0, 0, -26), 6, 8.0, 2.2, 0.6, 2.2, 0.6, "trim", bend=(0, 0, 6))
+    a.spike(RA, g.point((-4.4, top, 0)), (0, 0, -26), 4, 5.0, 2.0, 0.6, 2.0, 0.6, "trim", bend=(0, 0, 6))
     P.leg_set(a, M)
     P.boots(a, M)
     return a
@@ -94,15 +94,14 @@ def stone_whale():
 def tide_shell():
     a = ak.Armor("tide_shell_armor", TIDE)
     M = {"main": "main", "alt": "alt", "trim": "trim", "void": "void", "glow": "glow"}
-    P.kabuto(a, M, neck=0, cheek=True)
-    a.box(H, (-0.9, 29.7, -5.0), (0.9, 31.5, -4.5), "glow")        # brow pearl
+    P.kabuto(a, M, neck=0, cheek=True, gem=(1.4, 0.8))
     for sx in (-1, 1):  # coral antlers with a branch
-        a.spike(H, (sx * 2.4, 32.9, -0.6), (0, 0, sx * -18), 3, 7.0, 1.8, 0.6, 1.8, 0.6, "coral", bend=(0, 0, sx * 7))
-        a.spike(H, (sx * 4.4, 36.4, -0.6), (0, 0, sx * -58), 2, 3.4, 1.2, 0.5, 1.2, 0.5, "coral")
+        tip = a.spike(H, (sx * 2.6, 32.9, 0.6), (0, 0, sx * -20), 3, 3.6, 1.6, 0.6, 1.6, 0.6, "coral", bend=(0, 0, sx * 7))
+        a.spike(H, (tip[0] + sx * 0.3, tip[1] + 0.3, tip[2]), (0, 0, sx * -62), 2, 1.6, 0.9, 0.4, 0.9, 0.4, "coral")
     P.cuirass(a, M, spine=False)
     # coral spray on the upper back (above the arm swing)
     for i, (x, rz, rx) in enumerate([(-3.2, 24, 30), (0, 0, 38), (3.2, -24, 30)]):
-        a.spike(B, (x, 21.8, 4.5), (rx, 0, rz), 3, 6.0, 1.6, 0.5, 1.6, 0.5, "coral", bend=(8, 0, 0))
+        a.spike(B, (x, 21.8, 4.5), (rx, 0, rz), 3, 4.6, 1.5, 0.5, 1.5, 0.5, "coral", bend=(8, 0, 0))
     P.arm_shell(a, M, RA)
     g = P.sode(a, M, RA, layers=3, mats=["main", "alt", "main"])
     y = 2.2 + 2.0 + 1.6
@@ -121,25 +120,25 @@ def thunder_wing():
     a = ak.Armor("thunder_wing_armor", STORM)
     M = {"main": "main", "alt": "alt", "trim": "trim", "void": "void", "glow": "glow"}
     P.kabuto(a, M, neck=0, cheek=False)
-    for sx in (-1, 1):  # winged helm: three feathers fanned back from each temple
-        for i in range(3):
-            a.slab(H, (sx * (6.0 + 0.9 * i), 29.8 + 0.1 * i, -1.2 + 1.9 * i), (0.7, 1.5, 3.2), "alt", rot=(0, sx * (-12 - 14 * i), sx * -6))
-    a.spike(H, (0, 32.9, -2.0), (-6, 0, 0), 4, 8.0, 1.0, 0.6, 3.2, 1.2, "alt", bend=(14, 0, 0))
+    for sx in (-1, 1):  # winged helm: two short feathers swept back from each temple (inside +-7.5)
+        for i in range(2):
+            a.slab(H, (sx * (5.4 + 0.5 * i), 30.6 + 0.1 * i, 0.4 + 2.2 * i), (0.7, 1.4, 2.8), "alt", rot=(0, sx * (-10 - 12 * i), sx * -6))
+    a.spike(H, (0, 33.1, -0.5), (-34, 0, 0), 3, 4.0, 1.0, 0.6, 2.4, 1.2, "alt", bend=(10, 0, 0))   # low crest feather
     P.cuirass(a, M, ridge=False, front=False)
     for x0, x1, y0, y1 in [(-1.0, 2.4, 21.9, 22.7), (-1.0, -0.2, 20.5, 21.9), (-2.4, 1.0, 19.8, 20.5), (0.2, 1.0, 18.4, 19.8), (-1.4, 1.8, 17.7, 18.4)]:
         a.box(B, (x0, y0, -3.8), (x1, y1, -3.4), "glow")        # lightning bolt
-    # wings: two layers of broad tapering feathers fanning up and out from each shoulder blade (y >= 17, behind the arm swing)
+    # wings: one layer of three short broad tapering feathers fanning up and out from each shoulder blade (y >= 17, behind the arm swing)
     for sx in (-1, 1):
-        for lay, angs in enumerate(((14, 39, 64), (26, 51, 76))):
+        for lay, angs in enumerate(((3, 12, 22),)):
             for i, ang in enumerate(angs):
-                L = 14.5 - 1.5 * i - 1.8 * lay
+                L = 8.6 - 1.2 * i - 1.8 * lay
                 rot = (0, 0, -sx * ang)
-                g = a.group(B, (sx * 2.2, 22.2 - 0.5 * lay, 5.8 + 1.1 * lay), rot)
-                a.spike(B, g.point((0, 6.0, 0)), rot, 3, L, 2.8, 1.3, 1.0, 0.7, "alt" if lay == 0 else "main", bend=(0, 0, -sx * 4))
+                g = a.group(B, (sx * (1.8 + 2.4 * i), 22.2 - 0.5 * lay, 5.8 + 1.1 * lay), rot)
+                a.spike(B, g.point((0, 4.0, 0)), rot, 3, L, 2.0, 1.1, 1.0, 0.7, "alt" if lay == 0 else "main", bend=(0, 0, -sx * 3))
     P.arm_shell(a, M, RA)
     g = P.sode(a, M, RA, layers=3, mats=["main", "alt", "main"])
     for i in range(3):  # hanging feather tips
-        g.slab((-6.6 + i * 1.6, -2.6, 0), (1.4, 2.8, 0.7), "alt", rot=(0, 0, -8))
+        g.slab((-5.5 + i * 1.5, -2.6, 0), (1.4, 2.8, 0.7), "alt", rot=(0, 0, -8))
     a.mirror_bone(RA, LA)
     P.leg_set(a, M, tassets=3, tass_mat="alt")
     P.boots(a, M)
@@ -153,9 +152,9 @@ def ember():
     a = ak.Armor("ember_armor", EMBER)
     M = {"main": "main", "alt": "alt", "trim": "trim", "void": "void", "glow": "glow"}
     P.kabuto(a, M, neck=2, cheek=False)
-    a.spike(H, (3.0, 32.9, -1.0), (0, 0, -16), 4, 8.4, 2.0, 0.6, 2.0, 0.6, "alt", bend=(0, 0, 7))      # the whole horn
-    a.spike(H, (-3.0, 32.9, -1.0), (0, 0, 14), 2, 2.4, 2.0, 1.6, 2.0, 1.6, "alt")                        # the broken stump
-    a.box(H, (-3.4, 35.5, -1.4), (-2.0, 36.1, -0.2), "glow")
+    a.spike(H, (3.0, 32.9, -0.6), (0, 0, -14), 3, 4.2, 1.8, 0.6, 1.8, 0.6, "alt", bend=(0, 0, 6))      # the whole horn
+    a.spike(H, (-3.0, 32.9, -0.6), (0, 0, 14), 2, 1.8, 1.8, 1.4, 1.8, 1.4, "alt")                        # the broken stump
+    a.box(H, (-3.4, 34.7, -1.2), (-2.0, 35.2, 0.0), "glow")
     for i in range(3):
         a.spike(H, (-1.6 + i * 1.6, 32.9, 3.2), (-20, 0, 0), 2, 2.8, 1.0, 0.5, 1.0, 0.5, "trim")
     P.cuirass(a, M, ridge=False, front=False)
@@ -167,14 +166,14 @@ def ember():
     P.arm_shell(a, M, RA)
     P.sode(a, M, RA, layers=2)
     P.arm_shell(a, M, LA, sign=1)
-    gl = a.group(LA, (6.9, 23.0, 0), (0, 0, 12))
+    gl = a.group(LA, (7.6, 22.6, 0), (0, 0, 6))
     y = 0.0
-    for i, h in enumerate((1.8, 1.8, 1.6, 1.4)):
-        L = 8.6 - 1.0 * i
+    for i, h in enumerate((2.0, 1.8)):
+        L = 5.8 - 1.0 * i
         d = 4.2 - 0.5 * i
         gl.box((-0.6, y, -d), (L - 0.6, y + h, d), "main" if i % 2 == 0 else "alt")
         y += h
-    a.spike(LA, gl.point((4.0, y, 0)), (0, 0, 24), 3, 6.4, 2.4, 0.6, 2.4, 0.6, "alt", bend=(0, 0, -6))
+    a.spike(LA, gl.point((2.4, y, 0)), (0, 0, 22), 3, 3.6, 2.2, 0.6, 2.2, 0.6, "alt", bend=(0, 0, -6))
     P.leg_set(a, M, tassets=3, tass_mat="rag")
     P.boots(a, M)
     return a
