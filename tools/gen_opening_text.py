@@ -101,22 +101,27 @@ LORE = [
 BONE_SLAB = (("歌は", "ここで", "止まった", ""), ("The song", "stopped", "here", ""))
 
 # ================================================================ 開幕の一行 と 目的の帯の文 (17 の 3.1節・5.3節)
-# 目的の帯は「今やること」の行き先を、短い名詞句で示す (命令にしない。日本語は 12 字まで、英語は 34 字まで)。
+# 目的の帯は「今やること」を、ゲームらしいやさしい言い方 (〜してみよう / 〜に話しかけよう / 〜を探そう) で必ず示す (空・名前だけにしない。日本語は 20 字まで、英語は 52 字まで)。操作のキー (WASD など) は書かない。
 # 方角と距離は帯の側が右に足す。各拍子の担当 (3) は、目的の ID で文を引く: Component.translatable("objective.skyabyss." + id)
 OPENING = {
     "opening.skyabyss.line": ("……ここは、どこだ。", "...Where am I?"),
     # 判断 5: 日 3 の朝になっても宿りに着かない人へ、帳面の余白に増える一行 (伝承 prologue/the_book_margin を記す)
     "opening.skyabyss.margin_line": ("鐘の方へ。", "Toward the bell."),
+    # 骨の丘の前触れ (日 2 の昼、イサナのあと。方角のにおい・遠い白・足もとの欠片・風の止む順。字幕で一度ずつ。{0} は方角)
+    "opening.skyabyss.bone_rumor": ("乾いた石のにおいが、風に混じっている。{0}の丘のほうだ。", "A smell of dry stone rides the wind. It comes from the hills to the {0}."),
+    "opening.skyabyss.bone_far": ("遠く、丘の稜線が妙に白い。雲の影ではない。", "Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow."),
+    "opening.skyabyss.bone_mid": ("足もとに、白い欠片が転がっている。……大きすぎる。", "White fragments lie at your feet. ...Too large."),
+    "opening.skyabyss.bone_near": ("風が止んだ。丘は、丘のかたちをしていない。", "The wind has stopped. The hill is not shaped like a hill."),
 }
 OBJECTIVES = [
     # (ID, 日本語, 英語, いつ出すか)
-    ("examine_camp", "野営地に残された跡", "What the camp left behind", "B0 目覚めてから、帳面を拾うまで"),
-    ("follow_smoke", "煙の立つ方", "Where the smoke rises", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
-    ("watch_sky", "晴れた昼の空", "The clear midday sky", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
-    ("ask_storyteller", "宿りの語り部", "The storyteller at the lodge", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
-    ("find_isana", "宿りの外れの焚き火", "The fire beyond the lodge", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
-    ("see_whale", "歌の主、岩鯨", "The singer: the stone whale", "B7〜B10 イサナと話してから、岩鯨を見るまで (メインの段 see_whale)"),
-    ("bone_hill", "骨の丘", "The bone hill", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
+    ("examine_camp", "野営地の跡を調べてみよう", "Look around the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
+    ("follow_smoke", "煙の立つ方へ向かってみよう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
+    ("watch_sky", "周りを探索して強くなろう（目安 Lv5）", "Explore and grow stronger (about Lv5)", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
+    ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the storyteller at the lodge", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
+    ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire beyond the lodge", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
+    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Keep exploring, and listen for the song at night", "B7〜B10 イサナと話してから、岩鯨を見るまで (メインの段 see_whale)"),
+    ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Go and see the hill that looks white in the haze", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]
 for oid, ja, en, _ in OBJECTIVES:
     OPENING[f"objective.skyabyss.{oid}"] = (ja, en)

@@ -28,6 +28,8 @@ public class NpcWorldData extends SavedData {
     // 野営の焚き火の位置 (BlockPos.asLong)
     public final Set<Long> camps = new LinkedHashSet<>();
     final Map<UUID, Guide> guides = new HashMap<>();
+    // 鐘の位置 (BlockPos.asLong) → 鯨追いが立った焚き火の位置 (目的の帯の「宿りの外れの焚き火」の目印)
+    final Map<Long, Long> chaserFires = new HashMap<>();
 
     // 語り部に会えるまでの案内の進み具合 (人ごと)。since: 案内を始めた時刻、villageState: 0 まだ探していない / 1 村が見つかった / 2 近くに村がない
     public static final class Guide {
@@ -64,6 +66,17 @@ public class NpcWorldData extends SavedData {
         setDirty();
     }
 
+    public void markChaserFire(long bell, long fire) {
+        chaserFires.put(bell, fire);
+        setDirty();
+    }
+
+    @org.jetbrains.annotations.Nullable
+    public net.minecraft.core.BlockPos chaserFire(net.minecraft.core.BlockPos bell) {
+        Long f = chaserFires.get(bell.asLong());
+        return f == null ? null : net.minecraft.core.BlockPos.of(f);
+    }
+
     static NpcWorldData load(CompoundTag tag, HolderLookup.Provider registries) {
         NpcWorldData data = new NpcWorldData();
         data.loop = tag.getInt("loop");
@@ -75,6 +88,10 @@ public class NpcWorldData extends SavedData {
                 roles.put(key, r.getLong(key));
             }
             data.villages.put(v.getLong("bell"), roles);
+        }
+        for (Tag t : tag.getList("chaser_fires", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            data.chaserFires.put(c.getLong("bell"), c.getLong("fire"));
         }
         for (long camp : tag.getLongArray("camps")) {
             data.camps.add(camp);
@@ -108,6 +125,14 @@ public class NpcWorldData extends SavedData {
             list.add(v);
         });
         tag.put("villages", list);
+        ListTag fires = new ListTag();
+        chaserFires.forEach((bell, fire) -> {
+            CompoundTag c = new CompoundTag();
+            c.putLong("bell", bell);
+            c.putLong("fire", fire);
+            fires.add(c);
+        });
+        tag.put("chaser_fires", fires);
         tag.putLongArray("camps", camps.stream().mapToLong(Long::longValue).toArray());
         ListTag gs = new ListTag();
         guides.forEach((id, g) -> {

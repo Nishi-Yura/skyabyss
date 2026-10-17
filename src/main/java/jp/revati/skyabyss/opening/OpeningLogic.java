@@ -23,7 +23,8 @@ public final class OpeningLogic {
     // 宿りに着いたとみなす距離
     static final double SHELTER_ARRIVED = 40.0;
     // 足跡のくぼみ・石板に近づいたとみなす距離 (語りの担当の表: 足跡 24、石板 12)
-    static final double FOOTPRINT_NEAR = 24.0;
+    // 足跡の形 (見える足の形) の外へ、この距離までは「足跡の中」とみなす
+    static final int FOOTPRINT_MARGIN = 3;
     static final double SLAB_NEAR = 12.0;
     // 野営地の頁は、帳面を拾って 3 秒後 (野営地の中心から 12 ブロック以内にいるとき)
     static final long CAMP_LORE_DELAY = 60L;

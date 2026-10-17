@@ -799,9 +799,9 @@ public final class OpeningSelfTest {
         OpeningDirector.force(a, OpeningBeat.WHALE);
         check(OpeningLogic.whaleReady(sa) && !OpeningLogic.whaleReady(OpeningDirector.state(b)), "live: the whale gate is not per player", failures);
         // 目印: 場所が建っていなければ null、建っていれば場所
-        BlockPos camp = OpeningDirector.target(server, "examine_camp");
+        BlockPos camp = OpeningDirector.target(server.overworld(), "examine_camp");
         check(OpeningSites.planned(server) || camp == null, "live: a target was given for a camp that is not planned", failures);
-        check(OpeningDirector.target(server, "see_whale") == null && OpeningDirector.target(server, "watch_sky") == null, "live: a target was given for an objective without a place", failures);
+        check(OpeningDirector.target(server.overworld(), "see_whale") == null && OpeningDirector.target(server.overworld(), "watch_sky") == null, "live: a target was given for an objective without a place", failures);
 
         // コマンド: 進める・戻す・状態・全部消す
         CommandSourceStack source = a.createCommandSourceStack().withPermission(4);

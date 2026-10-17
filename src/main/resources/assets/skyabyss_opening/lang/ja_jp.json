@@ -1,16 +1,19 @@
 {
   "opening.skyabyss.line": "……ここは、どこだ。",
   "opening.skyabyss.margin_line": "鐘の方へ。",
-  "objective.skyabyss.examine_camp": "野営地に残された跡",
-  "opening.skyabyss.hint_move": "%s %s %s %s で歩く、%s で跳ぶ",
-  "objective.skyabyss.follow_smoke": "煙の立つ方",
-  "objective.skyabyss.watch_sky": "晴れた昼の空",
-  "objective.skyabyss.ask_storyteller": "宿りの語り部",
-  "objective.skyabyss.find_isana": "宿りの外れの焚き火",
-  "objective.skyabyss.see_whale": "歌の主、岩鯨",
-  "objective.skyabyss.bone_hill": "骨の丘",
+  "objective.skyabyss.examine_camp": "野営地の跡を調べてみよう",
+  "objective.skyabyss.follow_smoke": "煙の立つ方へ向かってみよう",
+  "objective.skyabyss.watch_sky": "周りを探索して強くなろう（目安 Lv5）",
+  "objective.skyabyss.ask_storyteller": "宿りの語り部に話しかけよう",
+  "objective.skyabyss.find_isana": "外れの焚き火の旅人に話しかけよう",
+  "objective.skyabyss.see_whale": "探索しながら、夜空の歌に耳をすまそう",
+  "objective.skyabyss.bone_hill": "白く霞む丘を確かめに行ってみよう",
   "sign.skyabyss.opening_slab.1": "歌は",
   "sign.skyabyss.opening_slab.2": "ここで",
   "sign.skyabyss.opening_slab.3": "止まった",
-  "sign.skyabyss.opening_slab.4": ""
+  "sign.skyabyss.opening_slab.4": "",
+  "opening.skyabyss.bone_rumor": "乾いた石のにおいが、風に混じっている。{0}の丘のほうだ。",
+  "opening.skyabyss.bone_far": "遠く、丘の稜線が妙に白い。雲の影ではない。",
+  "opening.skyabyss.bone_mid": "足もとに、白い欠片が転がっている。……大きすぎる。",
+  "opening.skyabyss.bone_near": "風が止んだ。丘は、丘のかたちをしていない。"
 }

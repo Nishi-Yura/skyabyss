@@ -93,12 +93,12 @@
 | B0 | 初参加の最初の見回りで合図。暗転 3 秒 → 鼓動と遠い鐘 → まぶたが細く開いて一度まばたき → 視界が戻る → 題字（`opening.skyabyss.title`）→ 一行（`opening.skyabyss.line`）。約 18 秒。すでに書・記録のある人（legacy）には出さない | `examine_camp`（帳面の位置を目印に） |
 | B1 | 帳面（`CampBuilder` が置いた伝承の書の ItemEntity）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す（17-2）。帳面そのものは消えず、タグ付きは通常の拾い方を止める。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。野営地の頁 `prologue/camp` は中心から 12 ブロック以内で 3 秒後 | `follow_smoke` |
 | B2 | 目的が `follow_smoke` の間、宿りの鐘を 30 秒おき（宿りの 230 ブロック以内。音 `opening_bell`、風のない朝の小さな音、減衰距離 192）。宿りの 40 ブロック以内か語り部と会えば済み | — |
-| B3 | 足跡のくぼみの 24 ブロック以内（`OpeningLogic.FOOTPRINT_NEAR`）に起きている人が入ったら `prologue/footprints` | — |
+| B3 | 足跡の**見える形**（掘る・盛る列。向きと左右反転を戻して引く `FootprintShape`）の外 3 ブロック（`OpeningLogic.FOOTPRINT_MARGIN`）以内に起きている人が入ったら `prologue/footprints`。部品の原点は踵寄りで爪先まで 37・踵まで 20 あるため、原点からの円では爪先の中が外れていた | — |
 | B4 | 影そのものは `SkyEvents`（2.3）。影が去って 3 秒後、まだ `prologue/shadow` のない人（書を持っている人・屋内で見なかった人）に**破れた頁**が空から落ちる（本人だけが拾える、2 分で荷物へ、14 分読まなければ自動で読む）。頁は `page` 条件 `shadow` で記す。書を持っている人は影を見ても記さず頁で記す（`LoreEvents.watchSky` → `OpeningDirector.deferShadowToPage`）。頁の中身は `prologue/shadow`（「雲の上の影」）の本文 | `watch_sky` |
 | B5 | 既存（`OpeningBeats.metStoryteller`）。済みの印だけ取り込む | `ask_storyteller` |
 | B6 | 2.5 | `ask_storyteller` などのまま |
 | B7 | 既存。済みの印だけ取り込む | `find_isana` → `see_whale` |
-| B8 | 石板の 12 ブロック以内（`SLAB_NEAR`）で `prologue/bone_hill`。日 2 の昼（3000〜11000）、イサナと話したあとで、メインが `find_chaser`／`see_whale` の間だけ帯が `bone_hill`（任意の寄り道。誘導は帯だけ） | `bone_hill` |
+| B8 | 石板の 12 ブロック以内（`SLAB_NEAR`）で `prologue/bone_hill`。日 2 の昼（3000〜11000）、イサナと話したあとで、メインが `find_chaser`／`see_whale` の間だけ帯が `bone_hill`（任意の寄り道）。**前触れ**（`OpeningDirector.boneForeshadow`、イサナのあと丘へ近づくにつれ字幕を一度ずつ）: 寄り道が出たとき「風のにおい（方角つき）」`bone_rumor` → 丘の中心から 220 ブロックで「遠い稜線の白」`bone_far` → 130 で「足もとの白い欠片」`bone_mid`（小さな地鳴りつき）→ 70 で「風が止む」`bone_near`。近づく速さで飛ばしたものは出さない | `bone_hill` |
 | B9 | 2.7 | — |
 | B10 | 2.9 | `see_whale` |
 
@@ -252,15 +252,15 @@
 
 ### 4.3 メインの目的を常に出す
 
-- 画面左上の小さな帯（`client/quest/ObjectiveStrip`、`SkillHud`・`GrowthHud` と同じ層の仕組み）。目的 1 行、右に距離（約 100 ブロック単位）と方角（八方位）。変わるとき一度だけ光る。
+- 画面左上の小さな帯（`client/quest/ObjectiveStrip`、幅 230、`SkillHud`・`GrowthHud` と同じ層の仕組み）。目的 1 行（折り返さず全文。帯が空・名前だけになる段はない）、右に距離（約 100 ブロック単位）と方角（八方位）。変わるとき一度だけ光る。
 - 設定 `objectiveStrip` で消せる。U のクエストログに全文。戦闘中・会話中・画面を開いている間・ホラー演出（足音・歌・影）の最中は薄くする。B0 の最中は出さない。メインが `see_whale` を過ぎたら、クエストの目的を出す。
-- 方角と距離は、構造物の場所（宿り・骨の丘・岩鯨）をサーバーが人ごとに送る。
+- 方角と距離は、目的ごとの場所をサーバーが人ごとに送る（`OpeningDirector.target`。目印が変わったら送り直す）。場所は野営地の帳面・宿りの煙・語り部（宿りの鐘）・**鯨追いの焚き火**（宿りの鐘から 18〜34 ブロック離れた別の場所。立ったときの焚き火を `NpcWorldData.chaserFires` に残す）・骨の丘。構造物の場所そのものは世界に一組で、同じ世界の全員が同じ場所を指す（人ごとに違うのは目的と、その目印の選び方）。
 
 ### 4.4 開幕の演出（B0）
 
 - 題字は絵（`tools/gen_opening_title.py` が游明朝で描く。`textures/gui/opening/title_ja|en.png` と青緑のにじみ `_glow.png`）。日本語なら「天と淵のあいだ」と英語の副題、それ以外の言語なら「Between Sky and Abyss」と「SKY ABYSS」。`OpeningOverlay` が、まぶたが開いたあとに少し下から 100 tick かけて浮かび上がらせ、光は呼吸するように明滅する。明るい空でも読めるよう題字のまわりをうっすら暗くする。
 - 開幕の一行は字幕（画面の下、薄い暗がりの帯の上）。
-- バニラの札を出さない: 開幕の演出（18 秒）の間、`OpeningClient` が札（チュートリアル、レシピなど）を毎 tick 消す。チュートリアルはこの世界の開幕で `NONE` にして終わり（`options.txt` の `tutorialStep` が書き換わる）。操作の案内は、最初の目的の帯の下に実際のキー名でひとこと（`opening.skyabyss.hint_move`）。
+- バニラの札を出さない: 開幕の演出（18 秒）の間、`OpeningClient` が札（チュートリアル、レシピなど）を毎 tick 消す。チュートリアルはこの世界の開幕で `NONE` にして終わり（`options.txt` の `tutorialStep` が書き換わる）。操作のキー（WASD・Space など）は目的の帯に書かない（帯は「何をするか」だけを言う）。
 - 音: 目覚めで 低い風（`tools/gen_opening_sounds.py wind`）→ かすかな地鳴り（音量 0.22）→ 鼓動 → 鐘の順に重ねる。字幕は「低い風が吹く」。
 - 新しいワールドの題字の場面では持ち物は空で、B1 の帳面で初めて伝承の書が入る。
 - 装備の説明文に物語の一行を足す案（17-8）は、あとで。
@@ -299,7 +299,7 @@
 | --- | --- | --- | --- | --- | --- |
 | `prologue/camp` | 12 | B1 帳面を拾って 3 秒後（野営地の中心から 12 ブロック以内） | 旅の野営地<br>The Travelers' Camp | 焚き火は、輪にした石だけを残して冷えきっていた。荷車は倒れ、寝袋は口を開けたまま、人の形にくぼんでいる。<br><br>荷はあらかた持ち去られ、帳面だけが残されていた。持ち去った者の足あとは、草の上に一つもない。<br><br>誰が、ここで夜を明かしたのだろう。 | The fire had gone cold, nothing left but its ring of stones. The cart lay on its side, and the bedroll gaped open, still hollowed in the shape of a person.<br><br>Most of the baggage was gone. Only the notebook had been left behind. There was not a single footprint in the grass from whoever took it.<br><br>Who spent the night here? |
 | `prologue/the_book_margin` | 14 | 日 3 の朝（tick 0〜6000）で、メインがまだ `follow_smoke` のとき（17-5） | 帳面の余白<br>A Line in the Margin | いつ書かれたのか、分からない。ゆうべまでは白かったはずの余白だ。<br><br>筆跡は、最初の頁の一行と同じだった。<br><br>誰が、先回りして書いているのだろう。<br>（碑文）鐘の方へ。 | I cannot tell when it was written. The margin was blank last night.<br><br>The handwriting matches the line on the first page.<br><br>Who keeps writing ahead of me? |
-| `prologue/footprints` | 15 | B3 足跡のくぼみの 24 ブロック以内に初めて入ったとき（起きている人だけ） | 巨大な足跡<br>Giant Footprints | 道を少し外れた地面に、足の形をしたくぼみが三つ、同じ間をおいて並んでいた。底は固い石で、雨水がたまっている。<br><br>一歩で、家が一軒、沈む。<br><br>前にも後ろにも、続きは見つからなかった。歩いた者は、どちらへ向かったのだろう。 | A little off the road, hollows in the shape of feet lay in the ground, three of them, evenly spaced. Their floors were hard stone, and rainwater had gathered in them.<br><br>One step, and a house would sink.<br><br>I could find no trace of them before or behind. Where was the one who walked here headed? |
+| `prologue/footprints` | 15 | B3 足跡の形（外 3 ブロックまで）に初めて入ったとき（起きている人だけ） | 巨大な足跡<br>Giant Footprints | 道を少し外れた地面に、足の形をしたくぼみが三つ、同じ間をおいて並んでいた。底は固い石で、雨水がたまっている。<br><br>一歩で、家が一軒、沈む。<br><br>前にも後ろにも、続きは見つからなかった。歩いた者は、どちらへ向かったのだろう。 | A little off the road, hollows in the shape of feet lay in the ground, three of them, evenly spaced. Their floors were hard stone, and rainwater had gathered in them.<br><br>One step, and a house would sink.<br><br>I could find no trace of them before or behind. Where was the one who walked here headed? |
 | `prologue/footsteps` | 27 | B6 足音の 3 度目が終わって 5 秒後 | 夜の足音<br>Night Footsteps | 日が落ちて間もなく、虫の声が止んだ。風も止んだ。<br><br>地面が三度、ゆっくりと揺れた。一度ごとに強くなり、やがて遠のいていった。<br><br>暗がりには、何も見えなかった。それでも、何かが通り過ぎたことだけは分かった。<br><br>何が、歩いていたのだろう。 | Not long after sundown, the insects fell silent. The wind stopped too.<br><br>The ground shook three times, slowly, each stronger than the last, and then faded into the distance.<br><br>I could see nothing in the dark. Even so, I knew something had passed.<br><br>What was walking? |
 | `prologue/bone_hill` | 28 | B8 石板の 12 ブロック以内に入ったとき（または石板の看板を読んだとき） | 骨の丘<br>The Bone Hill | 丘の上に、巨大なあばら骨が弧を描いて立っていた。長く風に磨かれて、石のように白い。数えようとして、途中でやめた。<br><br>足もとの石板に、一行だけ刻まれていた。<br><br>これほど大きなものにも、終わりがあるのか。<br>（碑文）歌は／ここで／止まった | On a hill stood a gigantic rib cage, arching up from the ground, polished stone-white by long years of wind. I tried to count the ribs and gave up partway.<br><br>A single line was carved into the slab at its foot.<br><br>Can something this vast really end? |
 | `prologue/sky_song` | 29 | B9 歌が終わり、星が戻ったあと | 空の歌<br>The Song from the Sky | 夜、空から歌が降ってきた。低く長く、どちらから来るとも分からない声だった。<br><br>星が、帯のかたちに消えていった。何かが、空の上を通っていくように。歌が終わると、星は何ごともなかったように戻った。<br><br>星を隠したのは、何だったのだろう。 | At night, a song came down from the sky. A low, long voice, with no way to tell where it came from.<br><br>The stars went out in a broad band, as if something were passing high above. When the song ended, the stars returned as though nothing had happened.<br><br>What was it that hid the stars? |
@@ -312,16 +312,20 @@
 | --- | --- | --- | --- |
 | `opening.skyabyss.line` | ……ここは、どこだ。 | ...Where am I? | B0 題字の下（一度だけ） |
 | `opening.skyabyss.margin_line` | 鐘の方へ。 | Toward the bell. | 余白の一行（頁 `prologue/the_book_margin` の碑文と同じ文） |
-| `objective.skyabyss.examine_camp` | 野営地に残された跡 | What the camp left behind | 目覚めてから帳面を拾うまで（メインはまだ始まっていない） |
-| `objective.skyabyss.follow_smoke` | 煙の立つ方 | Where the smoke rises | 帳面を拾ってから語り部と話すまで（メインの段 `follow_smoke`） |
-| `objective.skyabyss.watch_sky` | 晴れた昼の空 | The clear midday sky | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
-| `objective.skyabyss.ask_storyteller` | 宿りの語り部 | The storyteller at the lodge | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
-| `objective.skyabyss.find_isana` | 宿りの外れの焚き火 | The fire beyond the lodge | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.see_whale` | 歌の主、岩鯨 | The singer: the stone whale | イサナと話してから岩鯨を見るまで（段 `see_whale`。以降は 07 のクエストの目的の文） |
-| `objective.skyabyss.bone_hill` | 骨の丘 | The bone hill | 日 2 の昼の任意の寄り道 |
+| `opening.skyabyss.bone_rumor` | 乾いた石のにおいが、風に混じっている。{0}の丘のほうだ。 | A smell of dry stone rides the wind. It comes from the hills to the {0}. | 骨の丘の前触れ 1（{0} は方角） |
+| `opening.skyabyss.bone_far` | 遠く、丘の稜線が妙に白い。雲の影ではない。 | Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow. | 前触れ 2（丘の中心から 220 ブロック） |
+| `opening.skyabyss.bone_mid` | 足もとに、白い欠片が転がっている。……大きすぎる。 | White fragments lie at your feet. ...Too large. | 前触れ 3（130 ブロック。小さな地鳴り） |
+| `opening.skyabyss.bone_near` | 風が止んだ。丘は、丘のかたちをしていない。 | The wind has stopped. The hill is not shaped like a hill. | 前触れ 4（70 ブロック） |
+| `objective.skyabyss.examine_camp` | 野営地の跡を調べてみよう | Look around the abandoned camp | 目覚めてから帳面を拾うまで（メインはまだ始まっていない） |
+| `objective.skyabyss.follow_smoke` | 煙の立つ方へ向かってみよう | Head toward the rising smoke | 帳面を拾ってから語り部と話すまで（メインの段 `follow_smoke`） |
+| `objective.skyabyss.watch_sky` | 周りを探索して強くなろう（目安 Lv5） | Explore and grow stronger (about Lv5) | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
+| `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the storyteller at the lodge | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
+| `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire beyond the lodge | 語り部のあとイサナと話すまで（段 `find_chaser`） |
+| `objective.skyabyss.see_whale` | 探索しながら、夜空の歌に耳をすまそう | Keep exploring, and listen for the song at night | イサナと話してから岩鯨を見るまで（段 `see_whale`。以降は 07 のクエストの目的の文） |
+| `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Go and see the hill that looks white in the haze | 日 2 の昼の任意の寄り道 |
 
-- 文は短い名詞句（日本語は 12 字まで、英語は 34 字まで。自己テストが数える）。命令にせず行き先を示す。方角と距離は帯が右に足す。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
-- 字幕（`Notice.narrate`、幅 160 以上・4 行まで）と札（幅 160・3 行まで）に出る文は、開幕の一行と余白の一行だけ。会話と伝承の長文は字幕に流さない。
+- 文は「〜してみよう」「〜に話しかけよう」「〜を探そう」と次の行動を言う（日本語は 20 字まで、英語は 52 字まで。自己テストが数え、文末・キー名・名前だけの文を弾く）。方角と距離は帯が右に足す。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
+- 字幕（`Notice.narrate`、幅 160 以上・4 行まで）と札（幅 160・3 行まで）に出る文は、開幕の一行・余白の一行・骨の丘の前触れ 4 つだけ。会話と伝承の長文は字幕に流さない。
 - 石板 `sign.skyabyss.lore_bone_slab.1〜4`（日本語「歌は／ここで／止まった／（空）」、英語「The song／stopped／here／（空）」。名前空間 `skyabyss_opening` の `sign.skyabyss.opening_slab.1〜4` も同じ文。どちらも `SignFit` の対象）。
 
 ### 6.3 語り部の足し書き
@@ -398,6 +402,7 @@
 ### 6.7 メインクエスト・会話データの変更点
 
 - メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒しし、目的を「煙を追う」にした。段を 2 つ足した（`follow_smoke`、`watch_sky`。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす `skip_if`）。以後は影、語り部（`ask_storyteller`）、鯨追い（`find_chaser`）、岩鯨（`see_whale`）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。新しい `signal` は作っていない（序の二段は既存の `talk`・`lore` で進む）。
+- 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索して強くなろう（目安 Lv5）」など具体的な行動を書く。
 - 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = `see_whale`、B8 の寄り道 = `bone_hill`。
 - 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件）。
 - 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題は 1 つだけ足し、見聞の 5 つは別の節に分けた。

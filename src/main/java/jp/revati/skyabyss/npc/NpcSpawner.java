@@ -131,8 +131,20 @@ public final class NpcSpawner {
             NpcEntity npc = spawnChaser(level, bell, level.random);
             if (npc != null) {
                 data.markSpawned(bell.asLong(), NpcSetup.WHALE_CHASER_ID, now);
+                data.markChaserFire(bell.asLong(), npc.home().asLong());
             }
         }
+    }
+
+    // 鐘 bell の村の鯨追いの焚き火の位置。立っていればその今の足もと、いなければ立たせたときの記録 (なければ null)。
+    // 目的の帯の「宿りの外れの焚き火」の目印 (語り部の鐘の位置ではない)
+    @Nullable
+    public static BlockPos chaserSpot(ServerLevel level, BlockPos bell) {
+        NpcEntity live = find(level, bell, NpcSetup.WHALE_CHASER.get());
+        if (live != null) {
+            return live.home() != null ? live.home() : live.blockPosition();
+        }
+        return NpcWorldData.get(level.getServer().overworld()).chaserFire(bell);
     }
 
     private static boolean canRespawn(NpcWorldData data, BlockPos bell, String role, long now) {

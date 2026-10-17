@@ -8,6 +8,7 @@ import jp.revati.skyabyss.SignFit;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.npc.NpcEntity;
 import jp.revati.skyabyss.npc.NpcSpawner;
+import jp.revati.skyabyss.npc.NpcWorldData;
 import jp.revati.skyabyss.opening.OpeningSites;
 import jp.revati.skyabyss.opening.OpeningSites.Kind;
 import net.minecraft.core.BlockPos;
@@ -90,7 +91,54 @@ public final class SiteSelfTest {
         return !below.getCollisionShape(level, stand.below()).isEmpty() && below.getFluidState().isEmpty();
     }
 
+    // 足跡の「中」の判定は、円ではなく見える足の形 (爪先まで含む)。向き 8 通り
+    private static void footprintShape(List<String> f) {
+        BlockPos origin = new BlockPos(1000, 64, -500);
+        for (String name : new String[] {"footprint", "footprint_end"}) {
+            Blueprint bp = Blueprint.get(name);
+            for (int yaw = 0; yaw < 8; yaw++) {
+                int inside = 0;
+                int far = 0;
+                for (int[] r : bp.relief) {
+                    if (r[2] > 1) {
+                        continue;
+                    }
+                    BlockPos w = Blueprint.transform(r[0], 0, r[1], SiteFinder.rot(yaw), SiteFinder.mirror(yaw), origin);
+                    if (!FootprintShape.contains(name, origin, yaw, w, 3)) {
+                        inside++;
+                    }
+                    if (OpeningSites.horizontal(w, origin) > 24) {
+                        far++;
+                    }
+                }
+                check(f, inside == 0, name + " yaw " + yaw + ": " + inside + " dug columns count as outside the footprint");
+                check(f, far > 0, name + ": no dug column is farther than the old 24 radius (the test would prove nothing)");
+                // 見える足の形から 3 ブロックより遠い点は外 (どの向きでも)
+                for (int[] r : bp.relief) {
+                    if (r[2] > 1) {
+                        continue;
+                    }
+                    BlockPos w = Blueprint.transform(r[0], 0, r[1], SiteFinder.rot(yaw), SiteFinder.mirror(yaw), origin);
+                    BlockPos out = w.offset(0, 0, 8);
+                    boolean reallyOutside = true;
+                    for (int[] q : bp.relief) {
+                        if (q[2] <= 1 && Math.abs(Blueprint.transform(q[0], 0, q[1], SiteFinder.rot(yaw), SiteFinder.mirror(yaw), origin).getX() - out.getX()) <= 4
+                                && Math.abs(Blueprint.transform(q[0], 0, q[1], SiteFinder.rot(yaw), SiteFinder.mirror(yaw), origin).getZ() - out.getZ()) <= 4) {
+                            reallyOutside = false;
+                            break;
+                        }
+                    }
+                    if (reallyOutside) {
+                        check(f, !FootprintShape.contains(name, origin, yaw, out, 3), name + " yaw " + yaw + ": a point 8+ blocks from the footprint counts as inside");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     private static void runChecks(MinecraftServer server, List<String> f) {
+        footprintShape(f);
         ServerLevel level = server.overworld();
         check(f, OpeningSites.planned(server), "sites are not planned");
         check(f, OpeningSites.allBuilt(server), "not every site is built: " + OpeningSites.all(server));
@@ -157,6 +205,19 @@ public final class SiteSelfTest {
             if (npc != null) {
                 npc.discard();
             }
+            // 目的の帯の目印: 語り部は鐘、鯨追いは鐘から離れた自分の焚き火 (別の場所)。建物ごとに別の目印
+            check(f, bell.equals(jp.revati.skyabyss.opening.OpeningDirector.target(level, "ask_storyteller")), "ask_storyteller target is not the bell");
+            NpcEntity chaser = NpcSpawner.spawnChaser(level, bell, level.random);
+            check(f, chaser != null, "the whale chaser cannot stand near the lodge");
+            if (chaser != null) {
+                chaser.discard();
+            }
+            // 鯨追いの焚き火の記録 (立たせたときに残す) が目印になる。鐘の位置にはならない
+            BlockPos fire = bell.offset(20, 0, 5);
+            NpcWorldData.get(server.overworld()).markChaserFire(bell.asLong(), fire.asLong());
+            BlockPos t = jp.revati.skyabyss.opening.OpeningDirector.target(level, "find_isana");
+            check(f, fire.equals(t), "find_isana target " + t + " is not the recorded chaser fire " + fire + " (bell " + bell + ")");
+            check(f, !bell.equals(t) && !bell.equals(jp.revati.skyabyss.opening.OpeningDirector.target(level, "find_isana")), "find_isana points at the bell");
         }
         check(f, OpeningSites.smoke(server).map(p -> level.getBlockState(p).is(Blocks.CAMPFIRE)).orElse(false), "no smoking campfire");
         // 積み石
