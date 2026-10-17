@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,9 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -88,7 +86,7 @@ public final class TideTravel {
         player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
         back.playSound(null, arrival, TideSetup.GATE.get(), SoundSource.PLAYERS, 1.2f, 1.2f);
         showTitle(player, "title.skyabyss.tide_back", "title.skyabyss.tide_back.sub");
-        player.sendSystemMessage(ModText.lore("message.skyabyss.tide.arrived"));
+        Notice.narrate(player, "message.skyabyss.tide.arrived");
         return true;
     }
 
@@ -149,14 +147,14 @@ public final class TideTravel {
         // 背中の潮門をくぐると、地上へ戻る。口の中に 0.5 秒いたら (かすっただけ・押し戻しの一瞬では戻さない)
         if (PASSAGE.dwell(player, TideBackBuilder.inReturnGate(player.getX(), player.getY(), player.getZ()), 2)) {
             SkyAbyss.LOGGER.info("{} went through the tide back gate at {} {} {}", player.getGameProfile().getName(), player.getX(), player.getY(), player.getZ());
-            player.sendSystemMessage(ModText.lore("message.skyabyss.tide.leaving"));
+            Notice.narrate(player, "message.skyabyss.tide.leaving");
             leave(player);
             return;
         }
         if (player.tickCount % 40 == 0) {
             if (player.distanceToSqr(jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_X + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Y0,
                     jp.revati.skyabyss.titan.tide.back.TideBackLayout.GATE_Z + 1) < 6 * 6) {
-                player.displayClientMessage(ModText.hint("message.skyabyss.tide.return_hint"), true);
+                Notice.bar(player, ModText.hint("message.skyabyss.tide.return_hint"));
             }
         }
         double r = Math.hypot(player.getX(), player.getZ() - jp.revati.skyabyss.titan.tide.back.TideBackLayout.SHELL_CZ);
@@ -183,7 +181,7 @@ public final class TideTravel {
         player.fallDistance = 0;
         player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, jp.revati.skyabyss.titan.tide.back.TideBackLayout.ARRIVAL_YAW, 0f);
         player.serverLevel().playSound(null, a, TideSetup.SURF.get(), SoundSource.PLAYERS, 1.0f, 1.1f);
-        player.displayClientMessage(ModText.hint("message.skyabyss.tide.swept_back"), true);
+        Notice.bar(player, ModText.hint("message.skyabyss.tide.swept_back"));
     }
 
     // 背中にいるあいだに島が無くなっていた (古いワールドなど) ときに建て直す
@@ -217,8 +215,6 @@ public final class TideTravel {
     }
 
     private static void showTitle(ServerPlayer player, String title, String subtitle) {
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(20, 60, 30));
-        player.connection.send(new ClientboundSetSubtitleTextPacket(ModText.subtitle(subtitle)));
-        player.connection.send(new ClientboundSetTitleTextPacket(ModText.title(title)));
+        Notice.place(player, ModText.title(title), ModText.subtitle(subtitle));
     }
 }

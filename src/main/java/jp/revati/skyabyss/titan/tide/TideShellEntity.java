@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -290,7 +291,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         setMode(Mode.APPROACH);
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(restX, player.getY(), restZ) < 200 * 200) {
-                player.sendSystemMessage(ModText.lore("message.skyabyss.tide.ebb"));
+                Notice.narrate(player, "message.skyabyss.tide.ebb");
                 player.playNotifySound(TideSetup.SURF.get(), SoundSource.AMBIENT, 0.8f, 1.0f);
             }
         }
@@ -357,7 +358,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
             Vec3 gate = gateCenter();
             for (ServerPlayer player : level.players()) {
                 if (player.distanceToSqr(gate) < 16 * 16) {
-                    player.displayClientMessage(ModText.hint("message.skyabyss.tide.gate_hint"), true);
+                    Notice.bar(player, ModText.hint("message.skyabyss.tide.gate_hint"));
                 }
             }
         }

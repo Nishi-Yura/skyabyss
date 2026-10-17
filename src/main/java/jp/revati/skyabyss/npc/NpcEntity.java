@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.npc;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -185,8 +186,8 @@ public class NpcEntity extends PathfinderMob implements GeoEntity {
         if (source.getEntity() instanceof ServerPlayer player && !player.isCreative() && tickCount - lastStruck > 100) {
             lastStruck = tickCount;
             Affinity.add(player, role(), Affinity.STRUCK);
-            player.displayClientMessage(Component.translatable("message." + getType().getDescriptionId().replace("entity.", "") + ".struck")
-                    .withStyle(s -> s.withColor(0xD9779A).withItalic(true)), true);
+            Notice.bar(player, Component.translatable("message." + getType().getDescriptionId().replace("entity.", "") + ".struck")
+                    .withStyle(s -> s.withColor(0xD9779A).withItalic(true)));
             getLookControl().setLookAt(player);
         }
         return false;

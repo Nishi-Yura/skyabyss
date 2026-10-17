@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class GaleColumnEntity extends Entity {
         if (tickCount % HINT_EVERY == 0) {
             for (ServerPlayer p : level.players()) {
                 if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - baseX, p.getZ() - baseZ) < HINT_RANGE) {
-                    p.displayClientMessage(ModText.hint("message.skyabyss.storm.column_hint"), true);
+                    Notice.bar(p, ModText.hint("message.skyabyss.storm.column_hint"));
                 }
             }
         }

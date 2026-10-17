@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.lore;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -329,7 +330,7 @@ public final class LoreEvents {
         level.addFreshEntity(item);
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.01);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 0.6f);
-        player.sendSystemMessage(ModText.lore("message.skyabyss.lore.book_falls"));
+        Notice.narrate(player, "message.skyabyss.lore.book_falls");
         DROPS.put(player.getUUID(), new Drop(item.getUUID(), now));
     }
 

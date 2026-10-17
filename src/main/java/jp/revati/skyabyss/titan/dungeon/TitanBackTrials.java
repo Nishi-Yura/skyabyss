@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
 import java.util.ArrayList;
@@ -292,7 +293,7 @@ public final class TitanBackTrials {
             if (afterHeartIdle >= RESET_AFTER_HEART) {
                 resetTrials(level);
                 for (ServerPlayer player : level.players()) {
-                    player.sendSystemMessage(ModText.lore("message.skyabyss.trials_renewed"));
+                    Notice.narrate(player, "message.skyabyss.trials_renewed");
                 }
             }
         } else {
@@ -351,7 +352,7 @@ public final class TitanBackTrials {
         for (ServerPlayer player : List.copyOf(level.players())) {
             if (player.isAlive() && !player.isCreative() && !player.isSpectator() && isPastShrineSeal(player)) {
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.trials_peaceful"));
+                Notice.narrate(player, "message.skyabyss.trials_peaceful");
             }
         }
     }
@@ -592,7 +593,7 @@ public final class TitanBackTrials {
         }
         Component text = ModText.battle("message.skyabyss.gate_countdown", ticksLeft / 20);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area.aabb().inflate(12))) {
-            player.displayClientMessage(text, true);
+            Notice.bar(player, text);
         }
     }
 
@@ -662,7 +663,7 @@ public final class TitanBackTrials {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box.inflate(1.2, 0, 1.2),
                 p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()) && outsideOrInDoor(p, box, roomCenter))) {
             moveInside(level, player, box, roomCenter);
-            player.displayClientMessage(ModText.battle("message.skyabyss.gate_rejoin"), true);
+            Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
         }
     }
 
@@ -792,7 +793,7 @@ public final class TitanBackTrials {
         List<ServerPlayer> participants = onlinePlayers(level, ids);
         TitanLoot.onHeartDefeat(level, participants);
         for (ServerPlayer player : level.players()) {
-            player.sendSystemMessage(ModText.progress("message.skyabyss.heart_defeated"));
+            Notice.unlock(player, "message.skyabyss.heart_defeated");
         }
         BlockPos c = HEART.center();
         level.playSound(null, c, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 2.5f, 0.6f);
@@ -809,7 +810,7 @@ public final class TitanBackTrials {
             if (player.isAlive() && Math.abs(player.getX() - px) < 1.2 && Math.abs(player.getZ() - pz) < 1.2
                     && player.getY() > FLOOR && player.getY() < FLOOR + 12) {
                 toArrival(player);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.heart_pillar"));
+                Notice.narrate(player, "message.skyabyss.heart_pillar");
             }
         }
     }
@@ -867,7 +868,7 @@ public final class TitanBackTrials {
             if (player.isAlive() && !player.isSpectator() && isBelowSurface(player) && !inSafeArea(player)) {
                 player.fallDistance = 0;
                 player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
-                player.sendSystemMessage(ModText.lore("message.skyabyss.rest_point_lost"));
+                Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
         }
         SkyAbyss.LOGGER.info("The stone whale's trials have been reset (epoch {})", data.epoch());
@@ -916,7 +917,7 @@ public final class TitanBackTrials {
                     String cp = validCheckpoint(persisted(player), TitanBackData.get(player.serverLevel()).epoch());
                     returnTo(player, WEST_CHECKPOINTS.contains(cp) ? cp : "w0");
                     player.hurt(player.damageSources().fall(), 3f);
-                    player.displayClientMessage(ModText.deny("message.skyabyss.fell_pit"), true);
+                    Notice.bar(player, ModText.deny("message.skyabyss.fell_pit"));
                     return;
                 }
             }
@@ -927,7 +928,7 @@ public final class TitanBackTrials {
         // ピースフルで祠の封印の前まで下りてきた人に、理由を画面に出す (チャットには出さない)
         if (player.tickCount % 40 == 0 && player.level().getDifficulty() == Difficulty.PEACEFUL
                 && Math.abs(player.getX()) < 3 && pos.getZ() > SHRINE_SEAL_Z && pos.getZ() <= SHRINE_SEAL_Z + 4 && pos.getY() < shrineY()) {
-            player.displayClientMessage(ModText.lore("message.skyabyss.trials_peaceful"), true);
+            Notice.bar(player, ModText.lore("message.skyabyss.trials_peaceful"));
         }
         int epoch = TitanBackData.get(player.serverLevel()).epoch();
         CompoundTag tag = persisted(player);
@@ -941,8 +942,8 @@ public final class TitanBackTrials {
                     tag.putString(TAG_CHECKPOINT, cp.id());
                     tag.putInt(TAG_CHECKPOINT_EPOCH, epoch);
                     if (!cp.id().equals("hub")) {
-                        player.displayClientMessage(ModText.progress("message.skyabyss.checkpoint",
-                                Component.translatable("checkpoint.skyabyss." + cp.id())), true);
+                        Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
+                                Component.translatable("checkpoint.skyabyss." + cp.id())));
                         player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1.2f);
                     }
                 }
@@ -1082,7 +1083,7 @@ public final class TitanBackTrials {
                 clearCheckpoint(player);
                 if (player.isAlive() && isBelowSurface(player)) {
                     toArrival(player);
-                    player.sendSystemMessage(ModText.lore("message.skyabyss.rest_point_lost"));
+                    Notice.narrate(player, "message.skyabyss.rest_point_lost");
                 }
             }
             tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -1236,8 +1237,8 @@ public final class TitanBackTrials {
                     REVIVING.remove(player.getUUID());
                 }
                 tag.putInt(TAG_SEEN_EPOCH, epoch);
-                player.sendSystemMessage(ModText.lore(cp.isEmpty() && tag.contains(TAG_CHECKPOINT)
-                        ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back"));
+                Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT)
+                        ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
                 if (cp.isEmpty()) {
                     clearCheckpoint(player);
                 }
@@ -1259,7 +1260,7 @@ public final class TitanBackTrials {
             if (event.getEntity() instanceof ServerPlayer player) {
                 // 天の鍵の欠片をもう受け取った人には、そう伝える
                 boolean claimed = TitanBackData.get(player.serverLevel()).hasClaimedFragment(player.getUUID());
-                player.displayClientMessage(ModText.hint(claimed ? "message.skyabyss.fragment_already" : "message.skyabyss.pedestal_sleep"), true);
+                Notice.bar(player, ModText.hint(claimed ? "message.skyabyss.fragment_already" : "message.skyabyss.pedestal_sleep"));
             }
             return;
         }
@@ -1271,9 +1272,9 @@ public final class TitanBackTrials {
                     clearCheckpoint(player);
                     BlockPos a = arrival();
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
-                    player.sendSystemMessage(ModText.lore("message.skyabyss.gave_up"));
+                    Notice.narrate(player, "message.skyabyss.gave_up");
                 } else {
-                    player.displayClientMessage(ModText.hint("message.skyabyss.campfire_hint"), true);
+                    Notice.bar(player, ModText.hint("message.skyabyss.campfire_hint"));
                 }
             }
         }
@@ -1281,7 +1282,7 @@ public final class TitanBackTrials {
 
     private static void broadcast(ServerLevel level, Box area, Component message) {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area.aabb().inflate(20))) {
-            player.sendSystemMessage(message);
+            Notice.send(player, message);
         }
     }
 }

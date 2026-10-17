@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.progress;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -86,9 +87,9 @@ public final class Progression {
     public static void tellCapped(ServerPlayer player, int cap) {
         String next = nextTitan(player);
         if (next == null) {
-            player.sendSystemMessage(ModText.lore("message.skyabyss.progress.capped_end", cap));
+            Notice.narrate(player, "message.skyabyss.progress.capped_end", cap);
         } else {
-            player.sendSystemMessage(ModText.lore("message.skyabyss.progress.capped", cap, titanName(next)));
+            Notice.narrate(player, "message.skyabyss.progress.capped", cap, titanName(next));
         }
     }
 
@@ -136,9 +137,9 @@ public final class Progression {
             return true;
         }
         String prev = ProgressRules.previousTitan(titan);
-        player.displayClientMessage(ModText.deny("message.skyabyss.progress.not_ready", titanName(titan),
-                prev == null ? Component.empty() : titanName(prev)), true);
-        player.sendSystemMessage(ModText.hint("message.skyabyss.progress.not_ready_hint", titanName(prev == null ? titan : prev)));
+        Notice.bar(player, ModText.deny("message.skyabyss.progress.not_ready", titanName(titan),
+                prev == null ? Component.empty() : titanName(prev)));
+        Notice.hint(player, "message.skyabyss.progress.not_ready_hint", titanName(prev == null ? titan : prev));
         return false;
     }
 
@@ -164,8 +165,8 @@ public final class Progression {
                 announceWorld(server, player, titan);
             }
             if (!before && stage(server, id) > ProgressRules.titanIndex(titan)) {
-                player.sendSystemMessage(ModText.progress("message.skyabyss.progress.stage_up", titanName(titan),
-                        ProgressRules.levelCap(stage(server, id))));
+                Notice.unlock(player, "message.skyabyss.progress.stage_up", titanName(titan),
+                        ProgressRules.levelCap(stage(server, id)));
             }
             jp.revati.skyabyss.party.PartyNetwork.syncSoon(player);
         }

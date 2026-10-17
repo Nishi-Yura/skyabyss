@@ -48,7 +48,12 @@
         {
           "id": "errands",
           "goto": "fq_menu",
-          "kind": "quest"
+          "kind": "quest",
+          "if": {
+            "type": "flag",
+            "flag": "met",
+            "npc": "skyabyss:whale_chaser"
+          }
         }
       ]
     }

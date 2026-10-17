@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -225,17 +226,17 @@ public final class StormLoot {
             }
             hooks(player);
             if (fragment) {
-                player.sendSystemMessage(ModText.progress("message.skyabyss.fragment_received"));
+                Notice.unlock(player, "message.skyabyss.fragment_received");
             }
-            player.sendSystemMessage(ModText.progress("message.skyabyss.storm_heart.reward"));
-            player.sendSystemMessage(TitanLoot.rewardLine(items));
+            Notice.narrate(player, "message.skyabyss.storm_heart.reward");
+            Notice.gain(player, TitanLoot.rewardLine(items));
             announce(level, player, r, roll, items);
             if (roll.guaranteed() != null) {
-                player.sendSystemMessage(ModText.lore("message.skyabyss.memory_guarantee"));
+                Notice.narrate(player, "message.skyabyss.memory_guarantee");
             } else if (roll.pityShards()) {
-                player.sendSystemMessage(ModText.lore("message.skyabyss.memory_all_owned"));
+                Notice.narrate(player, "message.skyabyss.memory_all_owned");
             }
-            player.sendSystemMessage(TitanLoot.memoryLine(r));
+            Notice.gain(player, TitanLoot.memoryLine(r));
             TitanLoot.tellHeld(player, held);
             if (first) {
                 offerChoice(player, r);
@@ -279,15 +280,15 @@ public final class StormLoot {
             boolean fresh = roll.fresh().contains(piece);
             if (EXCLUSIVES.contains(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-                player.sendSystemMessage(ModText.battle(fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", TitanLoot.itemLink(shown)));
+                Notice.alert(player, fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", TitanLoot.itemLink(shown));
                 for (ServerPlayer other : level.players()) {
                     if (other != player) {
-                        other.sendSystemMessage(ModText.progress("message.skyabyss.legendary_other", player.getDisplayName(), TitanLoot.itemLink(shown)));
+                        Notice.unlock(other, "message.skyabyss.legendary_other", player.getDisplayName(), TitanLoot.itemLink(shown));
                     }
                 }
             } else if (fresh) {
                 player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.4f);
-                player.sendSystemMessage(ModText.progress("message.skyabyss.gear_new", TitanLoot.itemLink(shown), collected(r), collection().size()));
+                Notice.unlock(player, "message.skyabyss.gear_new", TitanLoot.itemLink(shown), collected(r), collection().size());
             }
         }
     }
@@ -296,10 +297,10 @@ public final class StormLoot {
     private static void offerChoice(ServerPlayer player, TitanMemoryData.Record r) {
         List<String> ready = EXCLUSIVES.stream().filter(StormLoot::registered).toList();
         if (ready.isEmpty()) {
-            player.sendSystemMessage(ModText.hint("message.skyabyss.storm_heart.choice_later"));
+            Notice.hint(player, "message.skyabyss.storm_heart.choice_later");
             return;
         }
-        player.sendSystemMessage(ModText.battle("message.skyabyss.first_clear"));
+        Notice.alert(player, "message.skyabyss.first_clear");
         MutableComponent row = Component.literal("   ");
         for (String id : ready) {
             ItemStack stack = new ItemStack(item(id).orElseThrow());
@@ -356,7 +357,7 @@ public final class StormLoot {
         TitanMemoryData.Record r = record(player);
         String choice = StringArgumentType.getString(ctx, "item").trim();
         if (!r.choicePending || !EXCLUSIVES.contains(choice) || !registered(choice)) {
-            player.sendSystemMessage(ModText.deny("message.skyabyss.first_clear_none"));
+            Notice.warn(player, "message.skyabyss.first_clear_none");
             return 0;
         }
         r.choicePending = false;
@@ -364,7 +365,7 @@ public final class StormLoot {
         ItemStack gift = AffixRules.withAffixes(new ItemStack(item(choice).orElseThrow()), player.getRandom());
         int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0);
         player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        player.sendSystemMessage(ModText.battle("message.skyabyss.legendary_new", TitanLoot.itemLink(gift)));
+        Notice.alert(player, "message.skyabyss.legendary_new", TitanLoot.itemLink(gift));
         TitanLoot.tellHeld(player, held);
         return 1;
     }

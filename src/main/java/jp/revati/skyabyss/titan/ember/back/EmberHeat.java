@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -227,7 +228,7 @@ public final class EmberHeat {
         if (h >= SCORCHING) {
             if (WARNED.add(id)) {
                 player.playNotifySound(jp.revati.skyabyss.titan.ember.EmberSetup.HEAT_WARN.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1f);
-                player.displayClientMessage(jp.revati.skyabyss.ModText.deny(EmberIds.LANG_HEAT + "scorching"), true);
+                Notice.bar(player, jp.revati.skyabyss.ModText.deny(EmberIds.LANG_HEAT + "scorching"));
             }
         } else {
             WARNED.remove(id);

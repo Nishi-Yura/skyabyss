@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.travel;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -317,7 +318,7 @@ final class SeaVoyage extends Voyage {
             level.playSound(null, shell.getX(), level.getSeaLevel(), shell.getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.9f);
             ServerPlayer lead = player(leader);
             if (lead != null) {
-                lead.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.arrived_pickup")));
+                Notice.narrate(lead, kind.text("message.skyabyss.travel.arrived_pickup"));
             }
         }
     }
@@ -358,7 +359,7 @@ final class SeaVoyage extends Voyage {
         if (totalTicks % 40 == 0) {
             for (ServerPlayer p : nearbyPlayers(level, Vec3.atCenterOf(spot), 24)) {
                 if (!involves(p.getUUID())) {
-                    p.displayClientMessage(ModText.hint(kind.text("message.skyabyss.travel.chain_hint")), true);
+                    Notice.bar(p, ModText.hint(kind.text("message.skyabyss.travel.chain_hint")));
                 }
             }
         }
@@ -423,7 +424,7 @@ final class SeaVoyage extends Voyage {
             for (ServerPlayer rider : players(riders)) {
                 PacketDistributor.sendToPlayer(rider, new TravelNetwork.Veil(true, kind.style().ordinal()));
                 rider.playNotifySound(kind.veilSound().get(), SoundSource.AMBIENT, 1f, 1f);
-                rider.sendSystemMessage(ModText.lore(kind.text("message.skyabyss.travel.veil")));
+                Notice.narrate(rider, kind.text("message.skyabyss.travel.veil"));
             }
             return;
         }
@@ -533,8 +534,8 @@ final class SeaVoyage extends Voyage {
                 showTitle(rider, Component.literal(Voyages.destName(dest).getString()),
                         Component.translatable(kind.text("title.skyabyss.travel.arrive.sub")));
                 if (far > FAR_LANDING) {
-                    rider.sendSystemMessage(ModText.hint("message.skyabyss.travel.tide_shell.far_landing", Voyages.destName(dest),
-                            Component.translatable("message.skyabyss.travel.compass." + compass(landing, destPos())), (int) Math.round(far)));
+                    Notice.hint(rider, "message.skyabyss.travel.tide_shell.far_landing", Voyages.destName(dest),
+                            Component.translatable("message.skyabyss.travel.compass." + compass(landing, destPos())), (int) Math.round(far));
                 }
             }
         }

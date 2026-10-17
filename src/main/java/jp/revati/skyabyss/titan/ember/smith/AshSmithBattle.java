@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.smith;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public final class AshSmithBattle {
             for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, AshSmithArena.DOOR.aabb().inflate(0.5, 0, 0.5),
                     p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()))) {
                 moveInside(level, p);
-                p.displayClientMessage(ModText.battle("message.skyabyss.gate_rejoin"), true);
+                Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
             }
         }
 
@@ -141,7 +142,7 @@ public final class AshSmithBattle {
             Component text = ModText.battle("message.skyabyss.gate_countdown", secondsLeft);
             AABB box = AshSmithArena.BOX.aabb().minmax(AshSmithArena.ANTE.aabb());
             for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, Entity::isAlive)) {
-                p.displayClientMessage(text, true);
+                Notice.bar(p, text);
             }
         }
 
@@ -168,7 +169,7 @@ public final class AshSmithBattle {
     static void broadcast(ServerLevel level, Component message) {
         AABB box = AshSmithArena.BOX.aabb().minmax(AshSmithArena.ANTE.aabb()).inflate(2);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, Entity::isAlive)) {
-            p.sendSystemMessage(message);
+            Notice.send(p, message);
         }
     }
 

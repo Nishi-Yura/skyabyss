@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
 import jp.revati.skyabyss.ModText;
@@ -52,27 +53,27 @@ public class WarmStoneItem extends Item {
         player.getCooldowns().addCooldown(this, 40);
         EmberTitanEntity titan = server.dimension() == Level.OVERWORLD ? EmberKeeper.KEEPER.current(server) : null;
         if (titan == null) {
-            sp.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.cold"), true);
+            Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.cold"));
             return InteractionResultHolder.consume(stack);
         }
         if (!player.onGround() || player.isInWater()) {
-            sp.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.not_land"), true);
+            Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.not_land"));
             return InteractionResultHolder.consume(stack);
         }
         EmberTitanEntity.RequestResult r = titan.request(sp);
         switch (r) {
             case OK -> {
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 0.6f);
-                sp.sendSystemMessage(ModText.lore(EmberIds.LANG_SURFACE + "stone.asked"));
+                Notice.narrate(sp, EmberIds.LANG_SURFACE + "stone.asked");
                 for (ServerPlayer other : server.players()) {
                     if (other != sp && holds(other)) {
-                        other.sendSystemMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.asked_other", sp.getDisplayName()));
+                        Notice.hint(other, EmberIds.LANG_SURFACE + "stone.asked_other", sp.getDisplayName());
                     }
                 }
             }
-            case NOT_NOW -> sp.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.not_now"), true);
-            case TAKEN -> sp.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.taken", titan.requesterTonight()), true);
-            case NO_SPOT -> sp.displayClientMessage(ModText.hint(EmberIds.LANG_SURFACE + "stone.no_spot"), true);
+            case NOT_NOW -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.not_now"));
+            case TAKEN -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.taken", titan.requesterTonight()));
+            case NO_SPOT -> Notice.bar(sp, ModText.hint(EmberIds.LANG_SURFACE + "stone.no_spot"));
         }
         return InteractionResultHolder.consume(stack);
     }
@@ -153,7 +154,7 @@ public class WarmStoneItem extends Item {
         if (!player.getInventory().add(stone)) {
             player.drop(stone, false);
         }
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_SURFACE + "stone.given"));
+        Notice.narrate(player, EmberIds.LANG_SURFACE + "stone.given");
         return true;
     }
 }

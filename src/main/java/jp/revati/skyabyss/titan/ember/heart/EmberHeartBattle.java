@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -142,7 +143,7 @@ public final class EmberHeartBattle {
             for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, door,
                     p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()))) {
                 moveInside(level, player);
-                player.displayClientMessage(ModText.battle("message.skyabyss.gate_rejoin"), true);
+                Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
             }
         }
 
@@ -185,7 +186,7 @@ public final class EmberHeartBattle {
         public void countdown(ServerLevel level, int secondsLeft) {
             Component text = ModText.battle("message.skyabyss.gate_countdown", secondsLeft);
             for (ServerPlayer player : playersIn(level, EmberHeartArena.arena().inflate(4, 2, 10))) {
-                player.displayClientMessage(text, true);
+                Notice.bar(player, text);
             }
         }
 
@@ -211,7 +212,7 @@ public final class EmberHeartBattle {
 
     static void broadcast(ServerLevel level, Component message) {
         for (ServerPlayer player : playersIn(level, EmberHeartArena.arena().inflate(4, 4, 12))) {
-            player.sendSystemMessage(message);
+            Notice.send(player, message);
         }
     }
 
@@ -281,8 +282,8 @@ public final class EmberHeartBattle {
         }
         player.fallDistance = 0;
         player.teleportTo(level, at.x, at.y, at.z, 0f, 0f);
-        player.sendSystemMessage(ModText.lore(EmberIds.LANG_HEART + "descend"));
-        player.displayClientMessage(ModText.hint(EmberIds.LANG_HEART + "exit_hint"), true);
+        Notice.narrate(player, EmberIds.LANG_HEART + "descend");
+        Notice.bar(player, ModText.hint(EmberIds.LANG_HEART + "exit_hint"));
     }
 
     // 炉心の広間へ戻る (休み場 hub の脇)
@@ -309,7 +310,7 @@ public final class EmberHeartBattle {
             if (Math.abs(player.getX() - c.x) < 1.2 && Math.abs(player.getZ() - c.z) < 1.2
                     && player.getY() >= EmberHeartArena.SURFACE - 0.5 && player.getY() < EmberHeartArena.CEILING) {
                 ascend(level, player);
-                player.sendSystemMessage(ModText.lore(EmberIds.LANG_HEART + "pillar"));
+                Notice.narrate(player, EmberIds.LANG_HEART + "pillar");
             }
         }
         afterDefeatIdle = anyone ? 0 : afterDefeatIdle + 10;
@@ -372,7 +373,7 @@ public final class EmberHeartBattle {
         }
         EmberLoot.onHeartDefeat(level, participants, ids);
         for (ServerPlayer player : level.players()) {
-            player.sendSystemMessage(ModText.progress(EmberIds.LANG_HEART + "defeated"));
+            Notice.unlock(player, EmberIds.LANG_HEART + "defeated");
         }
         Vec3 c = EmberHeartArena.heartHome();
         level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);

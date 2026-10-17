@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 15,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/camp",
+    "prologue/footsteps"
+  ]
+}

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -285,14 +286,14 @@ public final class RaijuNest {
         long now = level.getGameTime();
         if (StormRods.isGrounded(rod)) {
             if (player != null) {
-                player.displayClientMessage(ModText.hint("message.skyabyss.raiju.plug_already"), true);
+                Notice.bar(player, ModText.hint("message.skyabyss.raiju.plug_already"));
             }
             return false;
         }
         long ready = READY_AT.getOrDefault(i, 0L);
         if (now < ready) {
             if (player != null) {
-                player.displayClientMessage(ModText.deny("message.skyabyss.raiju.plug_wait", (ready - now + 19) / 20), true);
+                Notice.bar(player, ModText.deny("message.skyabyss.raiju.plug_wait", (ready - now + 19) / 20));
             }
             return false;
         }
@@ -303,7 +304,7 @@ public final class RaijuNest {
         level.playSound(null, rod, RaijuSetup.GROUND.get(), SoundSource.BLOCKS, 1.4f, 1f);
         level.sendParticles(ParticleTypes.SMOKE, top.getX() + 0.5, top.getY() + 0.5, top.getZ() + 0.5, 12, 0.2, 0.3, 0.2, 0.02);
         if (player != null) {
-            player.displayClientMessage(ModText.progress("message.skyabyss.raiju.grounded", GROUND_TICKS / 20), true);
+            Notice.bar(player, ModText.progress("message.skyabyss.raiju.grounded", GROUND_TICKS / 20));
         }
         return true;
     }

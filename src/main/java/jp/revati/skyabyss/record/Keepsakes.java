@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.record;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -365,12 +366,12 @@ public final class Keepsakes {
         ServerPlayer player = owner == null ? null : server.getPlayerList().getPlayer(owner);
         if (player != null && player.isAlive() && !player.hasDisconnected()) {
             giveOrDrop(player, stack);
-            player.sendSystemMessage(ModText.progress("skyabyss_record.guard.rescued", stack.getHoverName()));
+            Notice.unlock(player, "skyabyss_record.guard.rescued", stack.getHoverName());
         } else if (owner != null) {
             // 倒れている・いない人の分は報酬の預かりに入れる (目を覚ましたとき・入ったときに渡る)
             TitanMemoryData.get(server).pending(owner).items.add(stack);
             if (player != null) {
-                player.sendSystemMessage(ModText.hint("skyabyss_record.guard.rescued_pending", stack.getHoverName()));
+                Notice.hint(player, "skyabyss_record.guard.rescued_pending", stack.getHoverName());
             }
         } else {
             // 持ち主の分からない品は、オーバーワールドの初めの場所へ
@@ -406,7 +407,7 @@ public final class Keepsakes {
         // 投げる前に持ち物から外されているので、戻す
         giveOrDrop(player, stack.copy());
         player.containerMenu.broadcastChanges();
-        player.sendSystemMessage(ModText.deny("skyabyss_record.guard.no_toss"));
+        Notice.warn(player, "skyabyss_record.guard.no_toss");
     }
 
     // 倒れて散らばった品には投げた人が付かないので、持ち主を書いておく

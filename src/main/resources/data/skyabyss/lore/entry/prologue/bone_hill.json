@@ -1,0 +1,14 @@
+{
+  "chapter": "prologue",
+  "order": 28,
+  "inscription_sign": "sign.skyabyss.lore_bone_slab",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/footprints",
+    "prologue/sky_song"
+  ]
+}

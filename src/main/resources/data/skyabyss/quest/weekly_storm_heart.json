@@ -30,5 +30,10 @@
         "optional": true
       }
     ]
+  },
+  "unlock": {
+    "type": "flag",
+    "flag": "met",
+    "npc": "skyabyss:whale_chaser"
   }
 }

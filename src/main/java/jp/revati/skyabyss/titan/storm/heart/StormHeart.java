@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -743,7 +744,7 @@ public class StormHeart extends GuardMob {
         }
         StormHeartNetwork.warn(reachable(server, 32), null, 0);
         for (ServerPlayer p : reachable(server, 32)) {
-            p.displayClientMessage(jp.revati.skyabyss.ModText.battle("message.skyabyss.storm_heart.wings_torn"), true);
+            Notice.bar(p, jp.revati.skyabyss.ModText.battle("message.skyabyss.storm_heart.wings_torn"));
         }
     }
 
