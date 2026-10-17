@@ -36,6 +36,25 @@ def load_current(name):
     return geo, tex, glow
 
 
+V1_REV = "326cc0b"   # the last commit that still has the v1 (box) armor assets
+
+
+def load_v1(name):
+    """the v1 armor (before this redesign) straight from the repository history: (geo, texture, glowmask)"""
+    import io
+    import subprocess
+
+    def show(path):
+        cmd = ["git", "-C", str(ROOT), "show", V1_REV + ":" + path]
+        return subprocess.run(cmd, capture_output=True, check=True).stdout
+
+    base = "src/main/resources/assets/skyabyss"
+    geo = json.loads(show(f"{base}/geo/armor/{name}.geo.json").decode("utf-8"))
+    tex = np.array(Image.open(io.BytesIO(show(f"{base}/textures/armor/{name}.png"))).convert("RGBA"))
+    glow = np.array(Image.open(io.BytesIO(show(f"{base}/textures/armor/{name}_glowmask.png"))).convert("RGBA"))
+    return geo, tex, glow
+
+
 def column(geo, tex, glow, size=(300, 400), extra=True):
     """list of PIL images (views + poses) for one model"""
     ims = [ak.render_set(geo, tex, glow, "stand", y, p, size) for _, y, p in VIEWS]

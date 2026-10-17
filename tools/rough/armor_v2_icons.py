@@ -44,14 +44,14 @@ def render_piece(geo, tex, glow, slot, big=512):
             if b["name"].startswith("armorLeft"):
                 b["cubes"] = []
         faces = ak.faces_of(g, tex, glow)
-        yaw, pitch = (212, 10) if slot == "leggings" else (212, 16)
+        yaw, pitch = (190, 2) if slot == "leggings" else (200, 12)
         im = voxel.render(faces, yaw=-yaw, pitch=pitch, size=(big, big), bg="light", margin=0.02, bloom=False, ss=1)
         a1 = np.array(im.transpose(Image.FLIP_LEFT_RIGHT)).astype(float)
         m1 = np.abs(a1 - BG).max(-1) > 2
         ys, xs = np.where(m1)
         a1, m1 = a1[ys.min():ys.max() + 1, xs.min():xs.max() + 1], m1[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
         a2, m2 = a1[:, ::-1], m1[:, ::-1]
-        gap = -int(a1.shape[1] * 0.12)
+        gap = int(a1.shape[1] * (0.04 if slot == "leggings" else 0.10))
         W = a1.shape[1] * 2 + gap
         rgb = np.full((a1.shape[0], W, 3), BG, float)
         alpha = np.zeros((a1.shape[0], W), bool)

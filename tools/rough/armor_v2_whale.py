@@ -208,7 +208,7 @@ if __name__ == "__main__":
     ar = ap.parse_args()
     opts, out = ar.opts, Path(ar.out)
     cols, labels = [], []
-    g0, t0, gl0 = c.load_current("stone_whale_armor")
+    g0, t0, gl0 = c.load_v1("stone_whale_armor")
     cols.append(c.column(g0, t0, gl0, size=(260, 340)))
     labels.append("now (v1)")
     for o in opts:
