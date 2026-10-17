@@ -1,0 +1,85 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_GREATSWORD",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "GREATSWORD"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_PIKE",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "PIKE"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_GLAIVE",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "GLAIVE"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_FANG",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "FANG"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_CLAW",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "CLAW"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_AXE",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "AXE"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_HAMMER",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "HAMMER"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_POKER",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "POKER"
+      }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "SKYABYSS_BOW",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "jp/revati/skyabyss/client/weapon/WeaponArmPoses",
+        "field": "BOW"
+      }
+    }
+  ]
+}

@@ -311,6 +311,10 @@ public final class ShotRunner {
                 }
                 // 自分の側に届くまで待つ (次元を移るときは読み込みも)
                 boolean there = pending.isDone() && mc.level.dimension() == cameraDim && mc.player.position().distanceTo(cameraTarget) < 0.6;
+                if (there) {
+                    // 体の向きも視線に合わせる (そのままだと体が視線から最大 50 度ずれて、三人称の絵で武器や腕が斜めを向く)
+                    mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
+                }
                 if (stepTicks > 400) {
                     throw new IllegalStateException("the camera did not arrive at " + cameraTarget);
                 }
@@ -321,6 +325,7 @@ public final class ShotRunner {
                 mc.player.setXRot((float) line.doubleArg(1));
                 mc.player.yRotO = mc.player.getYRot();
                 mc.player.xRotO = mc.player.getXRot();
+                mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
                 return true;
             }
             case "waitchunks" -> {
@@ -363,6 +368,50 @@ public final class ShotRunner {
             }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "perspective" -> {
+                // perspective first|back|front : 視点 (一人称 / 三人称の背中側 / 三人称の正面)
+                mc.options.setCameraType(switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
+                    case "first" -> net.minecraft.client.CameraType.FIRST_PERSON;
+                    case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
+                    default -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
+                });
+                return true;
+            }
+            case "bodyyaw" -> {
+                // bodyyaw <度> : 体の向きを視線から何度ずらすか (斜めから見た絵用。人は視線と体が 50 度までしかずれない)
+                float body = mc.player.getYRot() + (float) line.doubleArg(0);
+                mc.player.yBodyRot = body;
+                mc.player.yBodyRotO = body;
+                mc.player.yHeadRot = mc.player.getYRot();
+                mc.player.yHeadRotO = mc.player.getYRot();
+                return true;
+            }
+            case "swingpose" -> {
+                // swingpose <0..1|off> : 武器を振る途中の姿で止める (一人称・三人称とも)。武器の動きの確認用
+                jp.revati.skyabyss.client.weapon.WeaponClient.forcedSwing = line.arg(0).equalsIgnoreCase("off") ? -1f : (float) line.doubleArg(0);
+                return true;
+            }
+            case "swing" -> {
+                // swing : 利き手を一振りする (止めずに動かす)
+                mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                return true;
+            }
+            case "mainhand" -> {
+                // mainhand left|right : 利き手の設定 (左利きの鏡写しの確認用)
+                mc.options.mainHand().set(line.arg(0).equalsIgnoreCase("left") ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
+                mc.options.broadcastOptions();
+                return true;
+            }
+            case "use" -> {
+                // use : 右クリックを押し続ける (弓を引く姿の確認用。KeyMapping を押したことにするだけで、OS の入力ではない)
+                mc.options.keyUse.setDown(true);
+                return true;
+            }
+            case "stopuse" -> {
+                // stopuse : 右クリックを放す (引いていた弓は矢を放つ)
+                mc.options.keyUse.setDown(false);
                 return true;
             }
             case "fov" -> {
