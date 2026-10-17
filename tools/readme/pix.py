@@ -233,10 +233,13 @@ def text_width(s, size, face="gothic"):
     return text_mask(s, size, face).shape[1]
 
 
-def fancy_title(a, cx, y, s, size=16, k=2, face="gothic", light=STONE_L, mid=STONE, dark=STONE_D, side=STONE_DD, depth=3):
+def fancy_title(a, cx, y, s, size=16, k=2, face="gothic", light=STONE_L, mid=STONE, dark=STONE_D, side=STONE_DD, depth=3, bold=False):
     """Minecraft-logo style: scaled solid face, extruded side, dark outline."""
     m = text_mask(s, size, face, pad=0)
     m = np.kron(m, np.ones((k, k), bool))
+    if bold:
+        m = m | shift(m, 1, 0)
+        m = np.pad(m, ((0, 0), (0, 0)))
     h, w = m.shape
     x = cx - w // 2
     H_, W_ = a.shape[:2]

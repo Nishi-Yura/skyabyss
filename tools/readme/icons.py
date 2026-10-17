@@ -226,7 +226,8 @@ def whale_icon():
     d.polygon([(2, 8), (0, 3), (3, 6)], fill=ROCK)
     d.polygon([(0, 13), (2, 8), (3, 11)], fill=ROCK)
     d.rectangle((3, 10, 13, 11), fill=BONE)
-    d.line((5, 4, 6, 2), fill=BONE); d.line((8, 3, 9, 1), fill=BONE); d.line((11, 4, 12, 2), fill=BONE)
+    d.arc((4, 0, 8, 5), 180, 360, fill=H("66ecff")); d.arc((9, 1, 12, 5), 180, 360, fill=H("66ecff"))
+    d.rectangle((13, 2, 13, 4), fill=ROCK_L)
     d.point((12, 7), fill=WHITE)
     return _fin(img)
 
