@@ -233,6 +233,7 @@ public final class SiteJob {
                 boolean in = x >= inner[0] && x <= inner[2] && z >= inner[1] && z <= inner[3];
                 if (g == WET) {
                     if (in && !skipCheck) {
+                        SkyAbyss.LOGGER.info("Opening site {}: water at {} {}", label, x, z);
                         conflict = true;
                         break;
                     }
@@ -247,6 +248,7 @@ public final class SiteJob {
                 }
                 p.set(x, g, z);
                 if (!naturalGround(level.getBlockState(p))) {
+                    SkyAbyss.LOGGER.info("Opening site {}: {} at {} is not natural ground", label, level.getBlockState(p), p);
                     conflict = true;
                     break;
                 }
@@ -254,6 +256,7 @@ public final class SiteJob {
                     for (int y = g + 1; y <= g + height; y++) {
                         p.setY(y);
                         if (!naturalAbove(level.getBlockState(p))) {
+                            SkyAbyss.LOGGER.info("Opening site {}: {} at {} is not natural", label, level.getBlockState(p), p);
                             conflict = true;
                             break;
                         }

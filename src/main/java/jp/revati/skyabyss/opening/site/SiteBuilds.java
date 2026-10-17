@@ -2,6 +2,8 @@ package jp.revati.skyabyss.opening.site;
 
 import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.Map;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -15,6 +17,7 @@ import jp.revati.skyabyss.dev.StructureDump;
 import jp.revati.skyabyss.opening.OpeningSites.Kind;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -92,37 +95,80 @@ public final class SiteBuilds {
         }
     }
 
-    // 場所を決める (まだなら)。決めたら、新しいワールドの最初の日ならスポーン地点を野営地へ動かす
+    // 重い探索 (宿り・足跡・骨) の結果待ち
+    private static volatile CompletableFuture<List<SiteFinder.Planned>> pendingPlan;
+
+    public static boolean planning() {
+        return pendingPlan != null;
+    }
+
+    // 場所を決める (まだなら)。野営地はその場で決めて (新しいワールドの最初の日ならスポーン地点を野営地へ動かす)、
+    // 残りは別のスレッドで探して、できたら tick の中で SiteData に書く
     public static boolean plan(MinecraftServer server) {
         ServerLevel level = server.overworld();
         SiteData data = SiteData.get(level);
-        if (data.planned()) {
+        if (data.planned() || pendingPlan != null) {
             return false;
         }
-        BlockPos spawn = level.getSharedSpawnPos();
-        BlockPos camp = SiteFinder.plan(level, data, spawn);
-        if (camp == null) {
-            data.clear();
-            return false;
+        SiteFinder.Probe probe = new SiteFinder.Probe(level);
+        SiteData.Entry campEntry = data.first(Kind.CAMP.id);
+        BlockPos camp;
+        if (campEntry != null) {
+            camp = campEntry.pos;
+        } else {
+            BlockPos spawn = level.getSharedSpawnPos();
+            long t0 = System.nanoTime();
+            camp = SiteFinder.planCamp(probe, spawn);
+            if (camp == null) {
+                SkyAbyss.LOGGER.error("Opening sites: no land for the camp within 160 blocks of the spawn {}", spawn);
+                return false;
+            }
+            data.add(Kind.CAMP.id, 0, camp, 0).extra("notebook", camp);
+            boolean fresh = level.getGameTime() < NEW_WORLD_TICKS;
+            boolean move = fresh && (Math.abs(camp.getX() - spawn.getX()) > 2 || Math.abs(camp.getZ() - spawn.getZ()) > 2);
+            if (move) {
+                level.setDefaultSpawnPos(camp, 0f);
+                SkyAbyss.LOGGER.info("Opening sites: the world spawn moved from {} to the camp at {}", spawn, camp);
+            }
+            data.markPlanned(level.getGameTime(), spawn, move);
+            data.setPlanned(false);
+            SkyAbyss.LOGGER.info("Opening camp planned at {} in {} ms", camp, (System.nanoTime() - t0) / 1_000_000L);
         }
-        boolean fresh = level.getGameTime() < NEW_WORLD_TICKS;
-        boolean move = fresh && (Math.abs(camp.getX() - spawn.getX()) > 2 || Math.abs(camp.getZ() - spawn.getZ()) > 2);
-        if (move) {
-            level.setDefaultSpawnPos(new BlockPos(camp.getX(), camp.getY(), camp.getZ()), 0f);
-            SkyAbyss.LOGGER.info("Opening sites: the world spawn moved from {} to the camp at {}", spawn, camp);
-        }
-        data.markPlanned(level.getGameTime(), spawn, move);
+        BlockPos campFinal = camp;
+        pendingPlan = CompletableFuture.supplyAsync(() -> SiteFinder.planRest(probe, campFinal), Util.backgroundExecutor());
         return true;
+    }
+
+    // 別のスレッドの探索ができていれば、結果を SiteData に書いて、建設を予約する (tick の中で)
+    private static void applyPlan(MinecraftServer server) {
+        CompletableFuture<List<SiteFinder.Planned>> f = pendingPlan;
+        if (f == null || !f.isDone()) {
+            return;
+        }
+        pendingPlan = null;
+        SiteData data = SiteData.get(server.overworld());
+        try {
+            for (SiteFinder.Planned p : f.join()) {
+                data.add(p.kind(), p.index(), p.pos(), p.yaw());
+            }
+            data.setPlanned(true);
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("Opening sites: the search failed", e);
+            return;
+        }
+        enqueueMissing(server);
+        SiteNetwork.broadcast(server);
     }
 
     // 建て終わっていない物を、野営地 → 宿り → 積み石 → 足跡 → 骨の順で予約する
     public static synchronized void enqueueMissing(MinecraftServer server) {
         ServerLevel level = server.overworld();
         SiteData data = SiteData.get(level);
-        QUEUE.clear();
+        java.util.Set<SiteData.Entry> queued = new java.util.HashSet<>();
+        QUEUE.forEach(j -> queued.add(j.entry));
         for (String kind : new String[] {Kind.CAMP.id, Kind.SHELTER.id, "cairn", Kind.FOOTPRINT.id, Kind.RIBS.id}) {
             for (SiteData.Entry e : data.entries(kind)) {
-                if (!e.built) {
+                if (!e.built && !queued.contains(e)) {
                     QUEUE.add(jobFor(level, data, e));
                 }
             }
@@ -145,6 +191,7 @@ public final class SiteBuilds {
     // ---------------------------------------------------------------- 毎 tick
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
+        applyPlan(event.getServer());
         SiteJob job;
         synchronized (SiteBuilds.class) {
             job = QUEUE.peek();
@@ -159,11 +206,13 @@ public final class SiteBuilds {
             }
             SkyAbyss.LOGGER.info("Built the opening site {}: {} blocks in {} ticks ({} ms of work)", job.label(), job.placedCount, job.ticks,
                     job.workNanos / 1_000_000L);
+            SiteNetwork.broadcast(event.getServer());
         }
     }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
+        pendingPlan = null;
         synchronized (SiteBuilds.class) {
             QUEUE.clear();
         }
@@ -239,9 +288,15 @@ public final class SiteBuilds {
     private static int build(CommandContext<CommandSourceStack> ctx) {
         MinecraftServer server = ctx.getSource().getServer();
         plan(server);
+        CompletableFuture<List<SiteFinder.Planned>> f = pendingPlan;
+        if (f != null) {
+            f.join();
+            applyPlan(server);
+        }
         enqueueMissing(server);
         long t0 = System.nanoTime();
         buildAllNow(server);
+        SiteNetwork.broadcast(server);
         long ms = (System.nanoTime() - t0) / 1_000_000L;
         ctx.getSource().sendSuccess(() -> Component.literal("opening sites built in " + ms + " ms"), false);
         return 1;

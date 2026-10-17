@@ -102,6 +102,8 @@ public final class SelfTestRunner {
         // 雷翼の伝承とクエスト (碑文・囁き・伝承の項目・嵐を渡る翼・背の周回)。docs/design/12_thunder_wing.md の 11.2 節 担当 6
         steps.add(Step.once("storm lore", jp.revati.skyabyss.titan.storm.lore.StormLoreSelfTest::runSelfTest));
         steps.add(Step.once("prologue", PrologueSelfTest::runSelfTest));
+        // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
+        steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));

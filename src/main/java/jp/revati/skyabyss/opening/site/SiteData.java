@@ -111,6 +111,11 @@ public final class SiteData extends SavedData {
         setDirty();
     }
 
+    public void setPlanned(boolean v) {
+        planned = v;
+        setDirty();
+    }
+
     // 計画を捨てる (自己テストと開発コマンドの作り直し用)
     public void clear() {
         entries.clear();

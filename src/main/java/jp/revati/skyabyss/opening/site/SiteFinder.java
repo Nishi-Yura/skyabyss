@@ -39,7 +39,6 @@ public final class SiteFinder {
         private final Climate.Sampler sampler;
         public final int seaLevel;
         private final Long2IntOpenHashMap tops = new Long2IntOpenHashMap();
-        private final Long2IntOpenHashMap surfaces = new Long2IntOpenHashMap();
 
         public Probe(ServerLevel level) {
             this.level = level;
@@ -48,7 +47,6 @@ public final class SiteFinder {
             this.sampler = random.sampler();
             this.seaLevel = gen.getSeaLevel();
             tops.defaultReturnValue(Integer.MIN_VALUE);
-            surfaces.defaultReturnValue(Integer.MIN_VALUE);
         }
 
         // 地面の一番上のブロックの高さ (海底を含む。木は数えない)
@@ -62,19 +60,9 @@ public final class SiteFinder {
             return v;
         }
 
-        // 水面 (水がなければ地面と同じ) の高さ
-        public int surface(int x, int z) {
-            long key = BlockPos.asLong(x, 0, z);
-            int v = surfaces.get(key);
-            if (v == Integer.MIN_VALUE) {
-                v = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, random) - 1;
-                surfaces.put(key, v);
-            }
-            return v;
-        }
-
+        // 水の下か (地面が海面より低い)。地形生成の高さの問い合わせは 1 回 数十 ms かかるので、1 地点 1 回だけにしている
         public boolean wet(int x, int z) {
-            return surface(x, z) > top(x, z) || top(x, z) < seaLevel - 1;
+            return top(x, z) < seaLevel;
         }
 
         public Holder<Biome> biome(int x, int z) {
@@ -104,12 +92,13 @@ public final class SiteFinder {
         List<Integer> hs = new ArrayList<>();
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
-        int stepX = Math.max(2, halfX / 3);
-        int stepZ = Math.max(2, halfZ / 3);
-        for (int x = -halfX; x <= halfX + stepX - 1; x += stepX) {
-            int xx = Math.min(x, halfX);
-            for (int z = -halfZ; z <= halfZ + stepZ - 1; z += stepZ) {
-                int zz = Math.min(z, halfZ);
+        // 3x3 (広い範囲は横に 5) の格子。四隅と辺の中央と中心
+        int nx = halfX >= 16 ? 5 : 3;
+        int nz = 3;
+        for (int i = 0; i < nx; i++) {
+            int xx = -halfX + (2 * halfX * i) / (nx - 1);
+            for (int j = 0; j < nz; j++) {
+                int zz = -halfZ + (2 * halfZ * j) / (nz - 1);
                 int wx = cx + xx;
                 int wz = cz + zz;
                 if (p.wet(wx, wz)) {
@@ -132,35 +121,39 @@ public final class SiteFinder {
     }
 
     // ---------------------------------------------------------------- 計画
-    // 場所を決めて SiteData に書く。決められなかった種類は書かない (ログに残す)。スポーン地点を動かしたか (呼び出し側が level に反映する) を返す
-    public static BlockPos plan(ServerLevel level, SiteData data, BlockPos spawn) {
-        Probe p = new Probe(level);
+    // 決めた場所 (まだ SiteData には書かない。重い探索を別のスレッドでやるため)
+    public record Planned(String kind, int index, BlockPos pos, int yaw) {
+    }
+
+    // 野営地 (スポーン地点か近い陸)。軽いので、サーバーが始まった瞬間にやる
+    @Nullable
+    public static BlockPos planCamp(Probe p, BlockPos spawn) {
+        return findCamp(p, spawn);
+    }
+
+    // 野営地以外 (宿り・積み石・足跡・骨)。重い (地形生成の高さを何百回も問い合わせる) ので、別のスレッドで呼ぶ
+    public static List<Planned> planRest(Probe p, BlockPos camp) {
         long t0 = System.nanoTime();
-        BlockPos camp = findCamp(p, spawn);
-        if (camp == null) {
-            SkyAbyss.LOGGER.error("Opening sites: no land for the camp within 160 blocks of the spawn {}", spawn);
-            return null;
-        }
-        data.add(Kind.CAMP.id, 0, camp, 0).extra("notebook", camp);
+        List<Planned> out = new ArrayList<>();
         Spot shelter = findShelter(p, camp);
         double pathYaw = 0;
         if (shelter != null) {
-            data.add(Kind.SHELTER.id, 0, shelter.pos(), encode(shelter.rot(), shelter.mirror()));
+            out.add(new Planned(Kind.SHELTER.id, 0, shelter.pos(), encode(shelter.rot(), shelter.mirror())));
             pathYaw = Math.atan2(shelter.pos().getZ() - camp.getZ(), shelter.pos().getX() - camp.getX());
-            planCairns(p, data, camp, shelter.pos());
-            planFootprints(p, data, camp, shelter.pos());
+            planCairns(p, out, camp, shelter.pos());
+            planFootprints(p, out, camp, shelter.pos());
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
         }
         Spot ribs = findRibs(p, camp, shelter == null ? 0 : pathYaw);
         if (ribs != null) {
-            data.add(Kind.RIBS.id, 0, ribs.pos(), encode(ribs.rot(), ribs.mirror()));
+            out.add(new Planned(Kind.RIBS.id, 0, ribs.pos(), encode(ribs.rot(), ribs.mirror())));
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no hill for the rib bones near {}", camp);
         }
-        SkyAbyss.LOGGER.info("Opening sites planned in {} ms: camp {} shelter {} footprints {} ribs {}", (System.nanoTime() - t0) / 1_000_000L, camp,
-                shelter == null ? "-" : shelter.pos(), data.entries(Kind.FOOTPRINT.id).size(), ribs == null ? "-" : ribs.pos());
-        return camp;
+        SkyAbyss.LOGGER.info("Opening sites planned in {} ms: camp {} shelter {} ribs {} ({} entries)", (System.nanoTime() - t0) / 1_000_000L, camp,
+                shelter == null ? "-" : shelter.pos(), ribs == null ? "-" : ribs.pos(), out.size());
+        return out;
     }
 
     public static int encode(int rot, boolean mirror) {
@@ -236,7 +229,7 @@ public final class SiteFinder {
     }
 
     // ---------------------------------------------------------------- 積み石: 道に 40 ブロックおき (道の脇 3〜4 ブロック)
-    static void planCairns(Probe p, SiteData data, BlockPos camp, BlockPos target) {
+    static void planCairns(Probe p, List<Planned> out, BlockPos camp, BlockPos target) {
         double dx = target.getX() - camp.getX();
         double dz = target.getZ() - camp.getZ();
         double len = Math.sqrt(dx * dx + dz * dz);
@@ -252,7 +245,7 @@ public final class SiteFinder {
                     int z = camp.getZ() + (int) Math.round(uz * along + ux * 4 * side);
                     Area ar = area(p, x, z, 1, 1, 3);
                     if (ar.ok()) {
-                        data.add("cairn", index++, new BlockPos(x, ar.median() + 1, z), 0);
+                        out.add(new Planned("cairn", index++, new BlockPos(x, ar.median() + 1, z), 0));
                         shift = 99;
                         break;
                     }
@@ -262,7 +255,7 @@ public final class SiteFinder {
     }
 
     // ---------------------------------------------------------------- 足跡: 道から 30〜60 ブロック外れた所に、40 ブロックおきに 3 つ (進む向きは道に対して斜め)
-    static void planFootprints(Probe p, SiteData data, BlockPos camp, BlockPos shelter) {
+    static void planFootprints(Probe p, List<Planned> out, BlockPos camp, BlockPos shelter) {
         double dx = shelter.getX() - camp.getX();
         double dz = shelter.getZ() - camp.getZ();
         double len = Math.sqrt(dx * dx + dz * dz);
@@ -275,8 +268,8 @@ public final class SiteFinder {
                     for (int side : new int[] {1, -1}) {
                         double px = camp.getX() + ux * len * frac - uz * off * side;
                         double pz = camp.getZ() + uz * len * frac + ux * off * side;
-                        // 進む向き: 道から 60 度、道から遠ざかる側へ
-                        for (int turn : new int[] {60, -60, 90}) {
+                        // 進む向き: 道とほぼ平行 (少し斜め)。3 つとも道から 30〜60 ブロックの帯に収める
+                        for (int turn : new int[] {20, 0, -20}) {
                             double ang = Math.atan2(uz, ux) + Math.toRadians(turn * side);
                             double mx = Math.cos(ang);
                             double mz = Math.sin(ang);
@@ -285,7 +278,8 @@ public final class SiteFinder {
                                 int x = (int) Math.round(px + mx * 40 * (i - 1));
                                 int z = (int) Math.round(pz + mz * 40 * (i - 1));
                                 Area ar = area(p, x, z, 8, 8, pass[0]);
-                                if (!ar.ok() || distToPath(x, z, camp, ux, uz, len) < 24) {
+                                double dp = distToPath(x, z, camp, ux, uz, len);
+                                if (!ar.ok() || dp < 28 || dp > 62) {
                                     break;
                                 }
                                 prints.add(new BlockPos(x, ar.median() + 1, z));
@@ -294,7 +288,7 @@ public final class SiteFinder {
                                 int rot = rotToward(mx, mz, false);
                                 prints.sort(Comparator.comparingDouble(b -> b.distSqr(camp)));
                                 for (int i = 0; i < 3; i++) {
-                                    data.add(Kind.FOOTPRINT.id, i, prints.get(i), encode(rot, i % 2 == 1));
+                                    out.add(new Planned(Kind.FOOTPRINT.id, i, prints.get(i), encode(rot, i % 2 == 1)));
                                 }
                                 return;
                             }
