@@ -15,6 +15,9 @@ import jp.revati.skyabyss.titan.tide.TideKeeper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -32,16 +35,16 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 大干潮 (二章の中盤の出来事。01 の 4.2、08 の 2.8節)。巨神が現れたあとの夜、海がいつもより遠くまで引き、浅い海底に遺跡の道が現れる。
-// 世界につき一度きり。安全に歩ける (水は膝まで。道の両側は壁で、海は元のまま。溺れず、敵も入らない)。道の先に潮の民の頁。
+// 人ごとに一度ずつ (自分の大干潮)。安全に歩ける (水は膝まで。道の両側は壁で、海は元のまま。溺れず、敵も入らない)。道の先に潮の民の頁。
 //
-//   始まり   巨神が現れていて (TideKeeper の記録)、夜の前半 (時刻 13500〜18500) に、二章 (段階 1) を遊ぶ人が海から 96 ブロック以内にいて、
-//            その近くに道が通せる海があるとき。道は岸の最初の水から沖へまっすぐ (北南東西のどれか) 24〜56 ブロック、幅 3、
+//   始まり   巨神が現れていて (TideKeeper の記録)、夜の前半 (時刻 13500〜18500) に、まだ自分の大干潮を迎えていない二章 (段階 1) の人が海から 96 ブロック以内にいて、
+//            近くで途中の大干潮があればそれを共有し (道の枠から 128 ブロック以内)、なければその近くに道が通せる海があるとき (途中の道と重ならない所だけ)。道は岸の最初の水から沖へまっすぐ (北南東西のどれか) 24〜56 ブロック、幅 3、
 //            海底に沿って (一歩の差は 1 まで、水深 1〜10)。海底の高さに床 (遺跡の石)、両側と先に壁 (海面まで。上の段は窓)、
 //            中は膝まで (床の上 1 ブロック) だけ水を残し、上は空気。岸の側は陸を削って床へつなぐ
 //   途中     壁の中から敵を除く。道の先 (台) に 3 ブロック以内まで来た人に、潮の民の頁 (伝承 chapter1/ch2_ebb_page) と合図 ch2_ebb_walked
 //   終わり   夜明け (23000)、または始まりから 8000 tick で、水が戻る。壁と中の水は元の海へ (床と壁の根もとは海の底の遺跡の道として残る)。
 //            中にいる人は岸へ戻す (水中呼吸つき)。終わる 400 tick 前に語りで知らせる
-//   保存     EbbData (オーバーワールド。状態 0 まだ / 1 途中 / 2 済み)。再起動をまたぐ。途中で止まっても、次に動いたとき時刻が過ぎていれば水を戻す
+//   保存     EbbData (オーバーワールド。途中の大干潮の列と、自分の大干潮を迎えた人の UUID)。再起動をまたぐ。途中で止まっても、次に動いたとき時刻が過ぎていれば水を戻す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideEbb {
     public static final String LORE_PAGE = "chapter1/ch2_ebb_page";
@@ -292,156 +295,233 @@ public final class TideEbb {
     }
 
     // ---------------------------------------------------------------- 保存
+    // 一つの大干潮 (道の計画と時刻)。途中のものだけを持つ。終われば消える
+    public static final class Run {
+        public final Plan plan;
+        public long startTick;
+        public long endTick;
+        public boolean warned;
+
+        Run(Plan plan, long startTick, long endTick) {
+            this.plan = plan;
+            this.startTick = startTick;
+            this.endTick = endTick;
+        }
+    }
+
     public static final class EbbData extends SavedData {
         private static final String NAME = "skyabyss_tide_ebb";
         private static final Factory<EbbData> FACTORY = new Factory<>(EbbData::new, EbbData::load);
 
-        public static final int NONE = 0;
-        public static final int ACTIVE = 1;
-        public static final int DONE = 2;
-
-        public int state;
-        public long startTick;
-        public long endTick;
-        public boolean warned;
-        @Nullable
-        public Plan plan;
+        // 途中の大干潮 (離れた人ごとに別々に起きうる。近い人は同じものを共有する)
+        public final List<Run> runs = new ArrayList<>();
+        // 自分の大干潮を迎えた人 (一人に一度)
+        public final java.util.Set<java.util.UUID> witnessed = new java.util.HashSet<>();
 
         public static EbbData get(ServerLevel overworld) {
             return overworld.getDataStorage().computeIfAbsent(FACTORY, NAME);
         }
 
+        public boolean active() {
+            return !runs.isEmpty();
+        }
+
         static EbbData load(CompoundTag tag, HolderLookup.Provider registries) {
             EbbData d = new EbbData();
-            d.state = tag.getInt("state");
-            d.startTick = tag.getLong("startTick");
-            d.endTick = tag.getLong("endTick");
-            d.warned = tag.getBoolean("warned");
-            if (tag.contains("floor")) {
-                d.plan = new Plan(tag.getInt("sx"), tag.getInt("sz"), tag.getInt("dx"), tag.getInt("dz"), tag.getInt("len"), tag.getIntArray("floor"));
+            ListTag list = tag.getList("runs", Tag.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                CompoundTag t = list.getCompound(i);
+                Run r = new Run(new Plan(t.getInt("sx"), t.getInt("sz"), t.getInt("dx"), t.getInt("dz"), t.getInt("len"), t.getIntArray("floor")),
+                        t.getLong("startTick"), t.getLong("endTick"));
+                r.warned = t.getBoolean("warned");
+                d.runs.add(r);
+            }
+            // 古い保存 (世界に一度きりの時代): 途中のものを一つの Run として引き継ぐ
+            if (d.runs.isEmpty() && tag.getInt("state") == 1 && tag.contains("floor")) {
+                Run r = new Run(new Plan(tag.getInt("sx"), tag.getInt("sz"), tag.getInt("dx"), tag.getInt("dz"), tag.getInt("len"), tag.getIntArray("floor")),
+                        tag.getLong("startTick"), tag.getLong("endTick"));
+                r.warned = tag.getBoolean("warned");
+                d.runs.add(r);
+            }
+            ListTag w = tag.getList("witnessed", Tag.TAG_STRING);
+            for (int i = 0; i < w.size(); i++) {
+                try {
+                    d.witnessed.add(java.util.UUID.fromString(w.getString(i)));
+                } catch (IllegalArgumentException ignored) {
+                    // 壊れた項目は捨てる
+                }
             }
             return d;
         }
 
         @Override
         public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-            tag.putInt("state", state);
-            tag.putLong("startTick", startTick);
-            tag.putLong("endTick", endTick);
-            tag.putBoolean("warned", warned);
-            if (plan != null) {
-                tag.putInt("sx", plan.startX);
-                tag.putInt("sz", plan.startZ);
-                tag.putInt("dx", plan.dx);
-                tag.putInt("dz", plan.dz);
-                tag.putInt("len", plan.len);
-                tag.putIntArray("floor", plan.floor);
+            ListTag list = new ListTag();
+            for (Run r : runs) {
+                CompoundTag t = new CompoundTag();
+                t.putInt("sx", r.plan.startX);
+                t.putInt("sz", r.plan.startZ);
+                t.putInt("dx", r.plan.dx);
+                t.putInt("dz", r.plan.dz);
+                t.putInt("len", r.plan.len);
+                t.putIntArray("floor", r.plan.floor);
+                t.putLong("startTick", r.startTick);
+                t.putLong("endTick", r.endTick);
+                t.putBoolean("warned", r.warned);
+                list.add(t);
             }
+            tag.put("runs", list);
+            ListTag w = new ListTag();
+            for (java.util.UUID id : witnessed) {
+                w.add(StringTag.valueOf(id.toString()));
+            }
+            tag.put("witnessed", w);
             return tag;
         }
     }
 
     // ---------------------------------------------------------------- 始める・終える
-    // 始められる状態か (巨神が現れていて、夜の前半で、まだ起きていない)
+    // 始められる状態か (巨神が現れていて、夜の前半)。人ごとの大干潮なので、前に起きたかどうかは見ない
     static boolean mayBegin(ServerLevel level, EbbData data) {
-        if (data.state != EbbData.NONE || !TideKeeper.KEEPER.slot(level).spawned) {
+        if (!TideKeeper.KEEPER.slot(level).spawned) {
             return false;
         }
         long t = Math.floorMod(level.getDayTime(), 24000L);
         return t >= START_FROM && t <= START_TO;
     }
 
+    // 自己テスト用: 二章の人とみなす条件を差し替える (FakePlayer を二章の人にする)
+    @Nullable
+    static java.util.function.Predicate<ServerPlayer> testEligible;
+
     // 二章 (段階 1) を遊んでいて、場面の最中でなく、オーバーワールドにいる人
     static boolean eligible(ServerPlayer p) {
+        if (testEligible != null && testEligible.test(p)) {
+            return p.isAlive() && p.level().dimension() == Level.OVERWORLD;
+        }
         return p.isAlive() && !p.isSpectator() && p.level().dimension() == Level.OVERWORLD && !Cinematics.active(p)
                 && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer) && Chapters.of(p) == Chapters.TIDE;
     }
 
-    // 計画を実行して始める。始まれば true (一度きり。状態が NONE でなければ何もしない)
-    static boolean begin(ServerLevel level, EbbData data, Plan plan) {
-        if (data.state != EbbData.NONE) {
+    // 近くの大干潮として共有してよい距離 (道の枠から水平にこれだけ以内の人は、同じ大干潮を迎える)
+    static final int SHARE_RADIUS = 128;
+    // 新しい道は、途中の道の枠からこれだけ離す (重ならない・隣り合わない)
+    static final int KEEP_APART = 48;
+
+    // この人の近くで途中の大干潮があるか
+    @Nullable
+    static Run runNear(EbbData data, ServerPlayer p) {
+        for (Run r : data.runs) {
+            AABB box = inside(p.serverLevel(), r.plan).inflate(SHARE_RADIUS, 200, SHARE_RADIUS);
+            if (box.contains(p.position())) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    // この人を、自分の大干潮を迎えた人にする (二章の人にだけ。クエスト ch2/ebb_road が始まる)。迎えたら true
+    static boolean witness(EbbData data, ServerPlayer p) {
+        if (!eligible(p) || !data.witnessed.add(p.getUUID())) {
             return false;
+        }
+        data.setDirty();
+        Notice.narrate(p, "message.skyabyss.ch2.ebb.begin");
+        // クエスト ch2/ebb_road は、この印で自動で始まる (start_when)
+        jp.revati.skyabyss.npc.NpcBonds.of(p).bond(STORYTELLER).flags().add(FLAG_EBB);
+        jp.revati.skyabyss.npc.NpcBonds.sync(p);
+        return true;
+    }
+
+    // 計画を実行して始める。始まれば true。途中の道と近すぎる (重なる) 計画は始めない
+    static boolean begin(ServerLevel level, EbbData data, Plan plan) {
+        return begin(level, data, plan, level.players());
+    }
+
+    static boolean begin(ServerLevel level, EbbData data, Plan plan, java.util.Collection<? extends ServerPlayer> players) {
+        AABB mine = inside(level, plan).inflate(KEEP_APART, 200, KEEP_APART);
+        for (Run r : data.runs) {
+            if (mine.intersects(inside(level, r.plan))) {
+                return false;
+            }
         }
         long now = level.getGameTime();
         long day = level.getDayTime();
         long toDawn = Math.floorMod(END_AT - Math.floorMod(day, 24000L), 24000L);
-        data.plan = plan;
-        data.state = EbbData.ACTIVE;
-        data.startTick = now;
-        data.endTick = now + Math.min(MAX_TICKS, toDawn);
-        data.warned = false;
+        Run run = new Run(plan, now, now + Math.min(MAX_TICKS, toDawn));
+        data.runs.add(run);
         data.setDirty();
         int n = build(level, plan);
-        SkyAbyss.LOGGER.info("[tide ebb] the great ebb begins: {} blocks, {} long, from {},{} toward {},{}", n, plan.len, plan.startX, plan.startZ, plan.dx, plan.dz);
+        SkyAbyss.LOGGER.info("[tide ebb] a great ebb begins: {} blocks, {} long, from {},{} toward {},{}", n, plan.len, plan.startX, plan.startZ, plan.dx, plan.dz);
         AABB area = inside(level, plan).inflate(120, 80, 120);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : players) {
             if (area.contains(p.position())) {
                 p.playNotifySound(TideChapterSetup.EBB_RECEDE.get(), SoundSource.AMBIENT, 1.0f, 1.0f);
-                if (eligible(p)) {
-                    Notice.narrate(p, "message.skyabyss.ch2.ebb.begin");
-                    // クエスト ch2/ebb_road は、この印で自動で始まる (start_when)
-                    jp.revati.skyabyss.npc.NpcBonds.of(p).bond(STORYTELLER).flags().add(FLAG_EBB);
-                    jp.revati.skyabyss.npc.NpcBonds.sync(p);
-                }
+                witness(data, p);
             }
         }
         return true;
     }
 
-    // 水を戻して終える。中にいる人は岸へ戻す
+    // 水を戻して終える (途中のものすべて)。中にいる人は岸へ戻す
     static void end(ServerLevel level, EbbData data) {
         end(level, data, level.players());
     }
 
-    // players は、中にいる人を岸へ戻し・知らせる相手 (自己テストは FakePlayer を足して呼ぶ)
     static void end(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
-        Plan plan = data.plan;
-        if (data.state == EbbData.ACTIVE && plan != null) {
-            AABB box = inside(level, plan);
-            BlockPos land = landfall(level, plan);
-            for (ServerPlayer p : players) {
-                if (box.contains(p.position())) {
-                    p.teleportTo(land.getX() + 0.5, land.getY(), land.getZ() + 0.5);
-                    p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WATER_BREATHING, 200, 0, false, false));
-                    Notice.narrate(p, "message.skyabyss.ch2.ebb.pushed_back");
-                }
+        for (Run r : new ArrayList<>(data.runs)) {
+            end(level, data, r, players);
+        }
+    }
+
+    // players は、中にいる人を岸へ戻し・知らせる相手 (自己テストは FakePlayer を足して呼ぶ)
+    static void end(ServerLevel level, EbbData data, Run run, java.util.Collection<? extends ServerPlayer> players) {
+        Plan plan = run.plan;
+        AABB box = inside(level, plan);
+        BlockPos land = landfall(level, plan);
+        for (ServerPlayer p : players) {
+            if (box.contains(p.position())) {
+                p.teleportTo(land.getX() + 0.5, land.getY(), land.getZ() + 0.5);
+                p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WATER_BREATHING, 200, 0, false, false));
+                Notice.narrate(p, "message.skyabyss.ch2.ebb.pushed_back");
             }
-            // 範囲のチャンクが読み込まれていなくても、水を戻す
-            for (int i = 0; i <= plan.len; i += 8) {
-                BlockPos c = lateral(plan, i, 0, 0);
-                level.getChunk(c.getX() >> 4, c.getZ() >> 4);
-            }
-            restore(level, plan);
-            AABB near = box.inflate(120, 80, 120);
-            for (ServerPlayer p : players) {
-                if (near.contains(p.position())) {
-                    p.playNotifySound(TideChapterSetup.EBB_RETURN.get(), SoundSource.AMBIENT, 1.0f, 1.0f);
-                    if (eligible(p)) {
-                        Notice.narrate(p, "message.skyabyss.ch2.ebb.return");
-                    }
+        }
+        // 範囲のチャンクが読み込まれていなくても、水を戻す
+        for (int i = 0; i <= plan.len; i += 8) {
+            BlockPos c = lateral(plan, i, 0, 0);
+            level.getChunk(c.getX() >> 4, c.getZ() >> 4);
+        }
+        restore(level, plan);
+        AABB near = box.inflate(120, 80, 120);
+        for (ServerPlayer p : players) {
+            if (near.contains(p.position())) {
+                p.playNotifySound(TideChapterSetup.EBB_RETURN.get(), SoundSource.AMBIENT, 1.0f, 1.0f);
+                if (eligible(p)) {
+                    Notice.narrate(p, "message.skyabyss.ch2.ebb.return");
                 }
             }
         }
-        data.state = EbbData.DONE;
+        data.runs.remove(run);
         data.setDirty();
-        SkyAbyss.LOGGER.info("[tide ebb] the great ebb ends");
+        SkyAbyss.LOGGER.info("[tide ebb] a great ebb ends");
     }
 
-    // 途中の見回り: 敵を除く、頁、予告、終わり
+    // 途中の見回り: 敵を除く、頁、予告、終わり (途中のものすべて)
     static void tickActive(ServerLevel level, EbbData data) {
         tickActive(level, data, level.players());
     }
 
     static void tickActive(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
-        Plan plan = data.plan;
-        if (plan == null) {
-            data.state = EbbData.DONE;
-            data.setDirty();
-            return;
+        for (Run r : new ArrayList<>(data.runs)) {
+            tickRun(level, data, r, players);
         }
+    }
+
+    static void tickRun(ServerLevel level, EbbData data, Run run, java.util.Collection<? extends ServerPlayer> players) {
+        Plan plan = run.plan;
         long now = level.getGameTime();
-        if (now >= data.endTick) {
-            end(level, data, players);
+        if (now >= run.endTick) {
+            end(level, data, run, players);
             return;
         }
         AABB box = inside(level, plan);
@@ -453,8 +533,8 @@ public final class TideEbb {
             }
             intruders.forEach(Entity::discard);
         }
-        if (!data.warned && data.endTick - now <= WARN_BEFORE) {
-            data.warned = true;
+        if (!run.warned && run.endTick - now <= WARN_BEFORE) {
+            run.warned = true;
             data.setDirty();
             for (ServerPlayer p : players) {
                 if (eligible(p) && box.inflate(60, 40, 60).contains(p.position())) {
@@ -485,19 +565,27 @@ public final class TideEbb {
         return first;
     }
 
-    // 始める人を探す (見回りごと)
+    // まだ自分の大干潮を迎えていない二章の人に、大干潮を迎えさせる (見回りごと)。
+    // 近くで途中のものがあればそれを共有し、なければ新しく道を通す (途中の道と重ならない所だけ)
     static void tryTrigger(ServerLevel level, EbbData data) {
+        tryTrigger(level, data, level.players());
+    }
+
+    static void tryTrigger(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
         if (!mayBegin(level, data)) {
             return;
         }
-        for (ServerPlayer p : level.players()) {
-            if (!eligible(p)) {
+        for (ServerPlayer p : players) {
+            if (!eligible(p) || data.witnessed.contains(p.getUUID())) {
+                continue;
+            }
+            if (runNear(data, p) != null) {
+                witness(data, p);
                 continue;
             }
             Plan plan = plan(level, p.getBlockX(), p.getBlockZ());
             if (plan != null) {
-                begin(level, data, plan);
-                return;
+                begin(level, data, plan, players);
             }
         }
     }
@@ -508,11 +596,7 @@ public final class TideEbb {
             return;
         }
         EbbData data = EbbData.get(level);
-        switch (data.state) {
-            case EbbData.NONE -> tryTrigger(level, data);
-            case EbbData.ACTIVE -> tickActive(level, data);
-            default -> {
-            }
-        }
+        tryTrigger(level, data);
+        tickActive(level, data);
     }
 }

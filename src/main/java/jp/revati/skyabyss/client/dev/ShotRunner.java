@@ -574,6 +574,7 @@ public final class ShotRunner {
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
+            case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             default -> null;
         };
         if (s != null) {

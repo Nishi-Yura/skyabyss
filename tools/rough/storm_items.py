@@ -413,7 +413,7 @@ ITEMS = {
     "storm_charm": {"kind": "icon", "draw": charm, "name": "嵐の護符"},
     "storm_anklet": {"kind": "icon", "draw": anklet, "name": "嵐纏の足環"},
     "storm_eye_feather": {"kind": "icon", "draw": eye_feather, "name": "嵐の目の羽根"},
-    "thunder_wing_shard": {"kind": "icon", "draw": shard, "name": "雷翼の欠片"},
+    "thunder_wing_shard": {"kind": "icon", "draw": shard, "name": "雷翼の羽軸"},
     "thunder_wing_core": {"kind": "icon", "draw": core, "name": "雷翼の心核"},
     "cloudgap_fruit": {"kind": "icon", "draw": fruit, "name": "雲間の干し果"},
     "moth_dust": {"kind": "icon", "draw": dust, "name": "鱗粉"},

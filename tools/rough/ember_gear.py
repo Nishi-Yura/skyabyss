@@ -238,7 +238,7 @@ def core(opt):
 
 
 def shard(opt):
-    """余燼の欠片 (素材): 玄武岩の結晶の欠片。中に熾火の筋。"""
+    """余燼の燠石 (素材): 玄武岩の結晶の欠片。中に熾火の筋。"""
     p = Pic()
     d = p.layer("basalt_lite" if opt == "c" else "basalt", bump=1)
     poly(d, [(16, 2), (23, 12), (19, 28), (12, 27), (9, 12)])
@@ -310,7 +310,7 @@ ITEMS = {
     "ember_lantern": {"kind": "icon", "draw": lantern, "name": "余燼の灯"},
     "ember_horn": {"kind": "icon", "draw": horn, "name": "熾火の角杯"},
     "ember_core": {"kind": "icon", "draw": core, "name": "余燼の心核"},
-    "ember_shard": {"kind": "icon", "draw": shard, "name": "余燼の欠片"},
+    "ember_shard": {"kind": "icon", "draw": shard, "name": "余燼の燠石"},
     "spark_dust": {"kind": "icon", "draw": spark, "name": "火の粉の粉"},
     "cinder_husk": {"kind": "icon", "draw": husk, "name": "燠の殻"},
 }

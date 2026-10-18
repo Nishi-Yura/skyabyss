@@ -23,7 +23,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 // 雷翼の背の敵が落とす物 (12 の 6.1節)。潮殻の背の敵 (TideMobLoot) と同じ型: 一体ごとに、倒した人のための抽選をし、
 // その人にだけ拾える形で落とす。雷翼の背 (storm_back) の上か、試練の印のある個体を、プレイヤーが倒したときだけ。
 //
-// | 敵     | 雷翼の欠片 | 共鳴の欠片 | 雲間の干し果 | そのほか |
+// | 敵     | 雷翼の羽軸 | 共鳴の欠片 | 雲間の干し果 | そのほか |
 // | 羽守   | 30%、1〜2  | 5%、1      | 3%、1        | 雷翼の羽衣のどれか一部位 1% |
 // | 雷蛾   | 12%、1     | 2%、1      | —            | 鱗粉 15% |
 // | 雷乞い | 25%、1〜2  | 5%、1      | 3%、1        | 破れた頁「風見の帳」5% (出どころ storm_back。まだ記していない頁があるときだけ) |
@@ -32,7 +32,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormMobLoot {
     public static final String SHARD = id("thunder_wing_shard");
-    public static final String RESONANCE = id("resonance_shard");
+    public static final String RESONANCE = id("resonance_shard_thunder_wing");
     public static final String FRUIT = id("cloudgap_fruit");
     public static final String DUST = id("moth_dust");
     public static final List<String> ARMOR = List.of(id("thunder_wing_helmet"), id("thunder_wing_chestplate"),

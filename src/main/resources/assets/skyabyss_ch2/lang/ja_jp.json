@@ -46,8 +46,8 @@
 
   "commands.skyabyss.ch2.ebb.start": "大干潮を始めた",
   "commands.skyabyss.ch2.ebb.end": "大干潮を終えた",
-  "commands.skyabyss.ch2.ebb.reset": "大干潮の記録を戻した",
-  "commands.skyabyss.ch2.ebb.not_none": "大干潮はもう始まっている (済んでいる)。reset で戻せる",
+  "commands.skyabyss.ch2.ebb.reset": "大干潮の記録 (途中のもの・迎えた人) を消した",
+  "commands.skyabyss.ch2.ebb.not_none": "この近くで、大干潮がもう起きている",
   "commands.skyabyss.ch2.ebb.no_sea": "近くに、道を通せる海がない",
   "commands.skyabyss.ch2.ebb.not_active": "大干潮は途中ではない",
 
@@ -79,5 +79,9 @@
   "dialogue.skyabyss.storyteller.ch2_ledger4": "……あなたの字に、似ているんだよ。\n変なことを言ったね。忘れておくれ。潮はいつも通り、引いていくよ。",
   "dialogue.skyabyss.storyteller.ch2_ledger4.ok": "……そうか。",
   "dialogue.skyabyss.storyteller.ch2_ledger5": "そうか。気が向いたら、いつでも。帳面は、ここにあるから。",
-  "dialogue.skyabyss.storyteller.ch2_ledger5.ok": "ああ。"
+  "dialogue.skyabyss.storyteller.ch2_ledger5.ok": "ああ。",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask": "……貝をなくしたかい。海に返したか、誰かの手に渡ったか。\n浜に流れ着いた貝を、念のため一つ取っておいたんだ。同じ音はしないだろうけれど、潮は読めるよ。",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask.yes": "ありがたく受け取る。",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask.no": "いや、また探してみる。",
+  "dialogue.skyabyss.storyteller.ch2_conch_done": "ほら。今度は、手放すんじゃないよ。\n潮は待ってくれるけれど、貝は、そうはいかないからね。"
 }

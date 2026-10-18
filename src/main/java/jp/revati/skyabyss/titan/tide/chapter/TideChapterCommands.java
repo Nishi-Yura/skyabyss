@@ -18,9 +18,9 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 二章のテスト用コマンド (OP)。
 // /skyabyss tide conch        : 潮見の貝を出す (なくしたとき。渡した印は変えない)
-// /skyabyss tide ebb start    : 今いる所の近くで大干潮を始める (時刻・章・巨神を問わない。一度きりの記録が済んでいれば何もしない)
+// /skyabyss tide ebb start    : 今いる所の近くで大干潮を始める (時刻・章・巨神を問わない。途中の道と重なるなら何もしない)
 // /skyabyss tide ebb end      : 途中の大干潮を終える (水を戻す)
-// /skyabyss tide ebb reset    : 大干潮の記録を「まだ」に戻す (道の床は海の底に残る)
+// /skyabyss tide ebb reset    : 大干潮の記録 (途中のもの・迎えた人) を消す (道の床は海の底に残る)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideChapterCommands {
     private TideChapterCommands() {
@@ -59,27 +59,26 @@ public final class TideChapterCommands {
         TideEbb.EbbData data = TideEbb.EbbData.get(level);
         switch (what) {
             case "start" -> {
-                if (data.state != TideEbb.EbbData.NONE) {
-                    ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.ch2.ebb.not_none"));
-                    return 0;
-                }
-                TideEbb.Plan plan = player.level() == level ? TideEbb.plan(level, player.getBlockX(), player.getBlockZ()) : null;
+                                TideEbb.Plan plan = player.level() == level ? TideEbb.plan(level, player.getBlockX(), player.getBlockZ()) : null;
                 if (plan == null) {
                     ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.ch2.ebb.no_sea"));
                     return 0;
                 }
-                TideEbb.begin(level, data, plan);
+                if (!TideEbb.begin(level, data, plan)) {
+                    ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.ch2.ebb.not_none"));
+                    return 0;
+                }
             }
             case "end" -> {
-                if (data.state != TideEbb.EbbData.ACTIVE) {
+                if (!data.active()) {
                     ctx.getSource().sendFailure(Component.translatable("commands.skyabyss.ch2.ebb.not_active"));
                     return 0;
                 }
                 TideEbb.end(level, data);
             }
             default -> {
-                data.state = TideEbb.EbbData.NONE;
-                data.plan = null;
+                data.runs.clear();
+                data.witnessed.clear();
                 data.setDirty();
             }
         }

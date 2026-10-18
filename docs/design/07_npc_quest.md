@@ -217,6 +217,8 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `world_stage` | `min` | 世界の進み |
 | `weather` | `thunder`, `rain` | 今いる所が雷雨・雨で、真上に空が見える（天気の記録で見る） |
 | `height` | `min` | 高さ |
+| `grave` | なし | 救える墓がある（自分の墓があり、救いの割合が 0 でない。11 の 6.4 節） |
+| `no_keepsake` | `item` | その品が、自分のどこにもない（持ち物・箱・エンダーチェスト・預かり・地面・しまった箱。`Keepsakes.locate` の合計が 0。語り部の「潮見の貝をなくした」に使う） |
 
 | 結果 `type` | 欄 | 意味 |
 | --- | --- | --- |
@@ -228,7 +230,7 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `give` / `take` | `item`, `count` | 渡す（入らなければ足もとへ、本人だけが拾える）/ 受け取る（足りなければ何もしない） |
 | `xp` | `amount`, `once` | 成長の経験値。`once` の鍵で一人一回だけ（会話のくり返しで稼げない） |
 
-- 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
+- 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `grave_choose`: 墓の一覧の画面を開く（11 の 6.4 節）。結果 `grave_rescue`: 画面なしで一番古い墓を救う。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
 
 ### 4.5 ループをまたぐ会話（「覚えているような」NPC）
 
@@ -343,7 +345,7 @@ data/<名前空間>/quest/<名前>.json
 ### 6.6 解放
 
 - 解放は個人の段階（止めた心臓の数）と伝承の記録で決める。物語を追い越さない（潮殻は「干潮に岸へ寄るものを見る」までで、背中へ入る目的は作らない。次の巨神の敵や心臓を目的にしない。自己テストで確かめる）。
-- 報酬は経験値（レベルの上限の内側）、素材（岩鯨の欠片・共鳴の欠片・結晶を少し）、伝承、見た目の小物（名前と説明の付いたバニラの品）だけ。装備は出さない（物語より強くしない）。
+- 報酬は経験値（レベルの上限の内側）、素材（岩鯨の鱗片・共鳴の欠片・結晶を少し）、伝承、見た目の小物（名前と説明の付いたバニラの品）だけ。装備は出さない（物語より強くしない）。
 - 仲間がいないと終えられない目的はない（一人でも終えられる）。
 - 段階のほかの条件は 4.4 節の `stage` / `stilled` / `world_stage`。
 
@@ -400,7 +402,7 @@ data/<名前空間>/quest/<名前>.json
 | --- | --- | --- | --- | --- | --- |
 | 雲の下の歌 `main_song` | メイン | 語り部 | 帳面を拾う / 空の影を見る / 岩鯨を見つける / 語り部に空のことを尋ねる | 2.1 節の 9 段 | 経験値 200（段階で計 310、合わせて 510）、好感度 両方 +5 |
 | 数え歌のつづき `sub_song` | サブ | 語り部 | 数え歌を聞いたあと、メインが始まっていて、イサナと会ったあとなら「続きが知りたい」 | 村の言い伝え 4 つ（数え歌・暦・峰・見る者）を伝承の書に記し、語り部に見せる | 経験値 40（段階で 40、合わせて 80）、時計、好感度 +10 |
-| 鯨のかけら `sub_shards` | サブ | イサナ | 岩鯨の背に入ったあと「何か手伝えることは？」 | 岩鯨の欠片を 3 つ集め、イサナに渡す（3 つ受け取る） | 経験値 120、遠眼鏡、好感度 +10 |
+| 鯨のかけら `sub_shards` | サブ | イサナ | 岩鯨の背に入ったあと「何か手伝えることは？」 | 岩鯨の鱗片を 3 つ集め、イサナに渡す（3 つ受け取る） | 経験値 120、遠眼鏡、好感度 +10 |
 
 - 数え歌のつづきの 4 項目は、破れた頁（村の宝箱）でも、話でも記される: 数え歌は語り部が歌う、見る者は語り部（気づいた人か好感度 10 から）、峰はイサナ、暦は語り部（好感度 20 から）。頁の運だけに頼らないので、必ず終えられる。
 - 時計は「七日目」、遠眼鏡は「空を見ろ」へのささやかなつながり。
@@ -532,7 +534,7 @@ data/<名前空間>/quest/<名前>.json
 | --- | --- | --- | --- | --- |
 | `c_first` | smile | ……ん？　ああ、村の人じゃないな。<br>火にあたっていくといい。俺はイサナ。鯨を待っている。空を泳ぐ、岩の鯨をな。<br>（初めて話しかけたとき (名乗る。伝承「鯨追いのイサナ」を記す)） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
 | `c_deja` | grave | どこかで会ったか？<br>……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。気にしないでくれ。<br>（ループ 1 回目以降、前のループで会っていた） | 伝承 chapter1/whale_chaser | ▼ `c_menu` |
-| `c_menu` | neutral | なにか用か。<br>（話題を選ぶ節） |  | 「語り部から、あなたのことを聞いた。」→ `c_whale1`（条件: メインが「find_chaser」）<br>「鯨のことを聞かせて。」→ `c_whale1`（条件: not(印 c_whale_heard)、not(メインが「find_chaser」)）<br>「鯨は、いつ来る？」→ `c_when`（条件: 印 c_whale_heard、not(伝承 chapter1/stone_whale)）<br>「旅の途中で、何か見た？」→ `c_peak`（条件: 印 c_whale_heard、not(伝承 prologue/shaved_peak)）<br>「鯨を見た。」→ `c_saw`（条件: 伝承 chapter1/stone_whale、not(印 c_saw)）<br>「鯨の背中に乗った。」→ `c_back`（条件: 伝承 chapter1/sky_ruins、not(印 c_back_told)）<br>「何か手伝えることは？」→ `c_shards_offer`（条件: 伝承 chapter1/sky_ruins、鯨のかけらが未着手）<br>「岩鯨の欠片を持ってきた。」→ `c_shards_thanks`（条件: 鯨のかけらが「deliver」、stone_whale_shard ×3／stone_whale_shard ×3 を受け取る）<br>「道中で、妙なものを見た。」→ `c_seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told))）<br>「じゃあ、また。」→ `end` |
+| `c_menu` | neutral | なにか用か。<br>（話題を選ぶ節） |  | 「語り部から、あなたのことを聞いた。」→ `c_whale1`（条件: メインが「find_chaser」）<br>「鯨のことを聞かせて。」→ `c_whale1`（条件: not(印 c_whale_heard)、not(メインが「find_chaser」)）<br>「鯨は、いつ来る？」→ `c_when`（条件: 印 c_whale_heard、not(伝承 chapter1/stone_whale)）<br>「旅の途中で、何か見た？」→ `c_peak`（条件: 印 c_whale_heard、not(伝承 prologue/shaved_peak)）<br>「鯨を見た。」→ `c_saw`（条件: 伝承 chapter1/stone_whale、not(印 c_saw)）<br>「鯨の背中に乗った。」→ `c_back`（条件: 伝承 chapter1/sky_ruins、not(印 c_back_told)）<br>「何か手伝えることは？」→ `c_shards_offer`（条件: 伝承 chapter1/sky_ruins、鯨のかけらが未着手）<br>「岩鯨の鱗片を持ってきた。」→ `c_shards_thanks`（条件: 鯨のかけらが「deliver」、stone_whale_shard ×3／stone_whale_shard ×3 を受け取る）<br>「道中で、妙なものを見た。」→ `c_seen_menu`（条件: (伝承 prologue/camp、not(印 camp_told) または 伝承 prologue/footprints、not(印 prints_told) または 伝承 prologue/footsteps、not(印 steps_told) または 伝承 prologue/bone_hill、not(印 bones_told) または 伝承 prologue/sky_song、not(印 song_told))）<br>「じゃあ、また。」→ `end` |
 | `c_seen_menu` | neutral | 妙なもの？　聞かせろ。<br>（序盤: 見たものの話題 (見たものだけ並ぶ)） |  | 「野営地の跡を見た。」→ `c_camp`（条件: 伝承 prologue/camp、not(印 camp_told)）<br>「地面に、大きなくぼみが並んでいた。」→ `c_prints`（条件: 伝承 prologue/footprints、not(印 prints_told)）<br>「夜、地面が揺れた。」→ `c_steps`（条件: 伝承 prologue/footsteps、not(印 steps_told)）<br>「丘に、巨大な骨が立っていた。」→ `c_bones`（条件: 伝承 prologue/bone_hill、not(印 bones_told)）<br>「夜空から、歌が降ってきた。」→ `c_song`（条件: 伝承 prologue/sky_song、not(印 song_told)）<br>「やっぱり、いい。」→ `c_menu` |
 | `c_camp` | grave | あの野営地か。俺が寄ったときも、誰もいなかった。<br>火は冷えているのに、寝袋だけが、いま起きたばかりみたいに温かかった。<br>（序盤: 野営地の跡） | 印 camp_told、好感度+1 | ▼ `@entry` |
 | `c_prints` | grave | 三つ並んでいただろう。俺も、その先を探した。<br>何も見つからなかった。……見つからないのが、いちばん気味が悪い。<br>（序盤: 巨大な足跡） | 印 prints_told、好感度+1 | ▼ `@entry` |
@@ -596,7 +598,7 @@ data/<名前空間>/quest/<名前>.json
 
 | 段階 | 書き付け | 目的 | 済ませ方 | 経験値 |
 | --- | --- | --- | --- | --- |
-| `gather` | イサナは、たどり着けなかった場所の手ざわりを知りたいという。<br>背中の番兵は、ときどき岩鯨の欠片を落とす。 | 岩鯨の欠片を集める（3） | collect skyabyss:stone_whale_shard | 0 |
+| `gather` | イサナは、たどり着けなかった場所の手ざわりを知りたいという。<br>背中の番兵は、ときどき岩鯨の鱗片を落とす。 | 岩鯨の鱗片を集める（3） | collect skyabyss:stone_whale_shard | 0 |
 | `deliver` | 欠片が三つそろった。<br>イサナの火のところへ持っていこう。 | イサナに、欠片を三つ渡す | talk whale_chaser の節 `c_shards_thanks` | 0 |
 
 <!-- 生成ここまで -->

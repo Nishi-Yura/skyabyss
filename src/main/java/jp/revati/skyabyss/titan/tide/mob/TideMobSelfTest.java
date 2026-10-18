@@ -149,7 +149,7 @@ public final class TideMobSelfTest {
                     if (s.is(TideMobSetup.TIDE_SHELL_SHARD.get())) {
                         shard++;
                         check(failures, s.getCount() >= r.shardMin() && s.getCount() <= r.shardMax(), row[0] + " shard count " + s.getCount());
-                    } else if (s.is(ModItems.RESONANCE_SHARD.get())) {
+                    } else if (ModItems.isResonanceShard(s.getItem())) {
                         res++;
                     } else if (s.is(TideMobSetup.TIDE_DRIED_SHELL.get())) {
                         dried++;

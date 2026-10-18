@@ -37,7 +37,7 @@ public final class TitanPages {
             return core.get();
         }
 
-        // 一覧の絵: 心核、まだなければ巨神の欠片 (shard)
+        // 一覧の絵: 心核、まだなければ巨神の素材 (shard)
         @Nullable
         public Item icon() {
             Item c = core.get();

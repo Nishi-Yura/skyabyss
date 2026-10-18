@@ -20,7 +20,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 // 潮殻の背の敵が落とす物 (08 の 6.1節)。岩鯨の道中の番兵 (TitanLoot.rollGuard) と同じ型:
 // 一体ごとに、倒した人のための抽選をし、その人にだけ拾える形で落とす。背中 (tide_back) の上で、プレイヤーが倒したときだけ。
 //
-// | 敵       | 潮殻の欠片 | 共鳴の欠片 | 潮干しの貝 | そのほか |
+// | 敵       | 潮殻の殻片 | 共鳴の欠片 | 潮干しの貝 | そのほか |
 // | 珊瑚憑き | 30%、1〜2  | 5%、1      | 3%、1      | 潮殻の鎧のどれか一部位 1% (TideGearLoot.rollThrall) |
 // | 磯走り   | 8%、1      | 1%、1      | —          | — |
 // | 泡吹き   | 25%、1〜2  | 5%、1      | 3%、1      | 泡袋 20% |
@@ -59,7 +59,7 @@ public final class TideMobLoot {
             items.add(new ItemStack(TideMobSetup.TIDE_SHELL_SHARD.get(), r.shardMin() + random.nextInt(r.shardMax() - r.shardMin() + 1)));
         }
         if (random.nextFloat() < r.resonance()) {
-            items.add(new ItemStack(ModItems.RESONANCE_SHARD.get()));
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_TIDE_SHELL.get()));
         }
         if (random.nextFloat() < r.driedShell()) {
             items.add(new ItemStack(TideMobSetup.TIDE_DRIED_SHELL.get()));

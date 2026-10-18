@@ -9,7 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
-// 素材 (岩鯨の欠片、共鳴の結晶、共鳴の欠片、岩鯨の心核)。名前の色と説明だけを持つ
+// 素材 (岩鯨の鱗片、共鳴の結晶、共鳴の欠片、岩鯨の心核)。名前の色と説明だけを持つ
 public class MaterialItem extends Item {
     private final TextColor color;
     private final String descKey;

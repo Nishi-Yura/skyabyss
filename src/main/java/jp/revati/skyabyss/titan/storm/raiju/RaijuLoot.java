@@ -34,7 +34,7 @@ public final class RaijuLoot {
     public static final String SIGNAL = "raiju_stilled";
 
     public static final String SHARD = jp.revati.skyabyss.item.storm.StormGear.SHARD;
-    public static final String RESONANCE_SHARD = id("resonance_shard");
+    public static final String RESONANCE_SHARD = id("resonance_shard_thunder_wing");
     public static final String FRUIT = jp.revati.skyabyss.item.storm.StormGear.FRUIT;
     public static final String CLAW = jp.revati.skyabyss.item.storm.StormGear.CLAW;
     public static final float CLAW_CHANCE = jp.revati.skyabyss.item.storm.StormGear.RAIJU_CLAW_CHANCE;
