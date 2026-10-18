@@ -1,0 +1,36 @@
+# 備えの三灯の確認 (21 の 1.2、11 の 9 章): 控え帳の巨神の頁の「備え」の行と、乗り込み口の一言。./gradlew runShots -Pscript=tools/shots/readiness.txt
+# 身 ▲ (ダイヤの防具の兜なし) 刃 ● (ダイヤの剣) 糧 ■ (金のリンゴ 2 個) の混ぜた状態で撮る。音はランナーが消す
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd give @s diamond_sword
+cmd give @s golden_apple 2
+cmd item replace entity @s armor.chest with diamond_chestplate
+cmd item replace entity @s armor.legs with diamond_leggings
+cmd item replace entity @s armor.feet with diamond_boots
+hud on
+waitchunks
+chat clear
+wait 400
+
+cmd skyrecord titans.stone_whale
+wait 40
+shot readiness_record
+close
+chat clear
+wait 10
+cmd skyabyss dev readiness prompt stone_whale
+wait 30
+shot readiness_boarding_note
+cmd skyabyss dev readiness whisper tide_shell
+wait 40
+wait 80
+shot readiness_whisper
+cmd clear @s
+echo done

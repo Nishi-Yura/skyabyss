@@ -55,12 +55,11 @@ public final class WeaponArmPoses {
             model.attackTime = 0;
             return forced;
         }
-        if (model.attackTime > 0 && entity.swingingArm == InteractionHand.MAIN_HAND) {
-            float t = model.attackTime;
+        // バニラの腕振りは常に止める (長い振りの間にバニラの 6 tick の動きが混ざらないように)。利き手以外で振ったときだけ残す
+        if (entity.swingingArm == InteractionHand.MAIN_HAND) {
             model.attackTime = 0;
-            return t;
         }
-        return 0;
+        return SwingClock.progress(entity, SwingClock.partial());
     }
 
     private static void apply(WeaponKind kind, HumanoidModel<?> model, LivingEntity entity, HumanoidArm arm) {

@@ -1,0 +1,20 @@
+{
+  "message.skyabyss.readiness.lamp.body": "Body ",
+  "message.skyabyss.readiness.lamp.blade": "Blade ",
+  "message.skyabyss.readiness.lamp.provisions": "Stores ",
+  "message.skyabyss.readiness.note": "Readiness  %s",
+  "message.skyabyss.readiness.advice.body": "Your body is thin. Travel gear, or armour better than iron",
+  "message.skyabyss.readiness.advice.blade": "Your blade is dull. A stronger weapon, or a whetstone",
+  "message.skyabyss.readiness.advice.provisions": "Your stores are low. Bring healing and protection",
+  "message.skyabyss.readiness.advice.body.ok": "Body is enough",
+  "message.skyabyss.readiness.advice.blade.ok": "Blade is enough",
+  "message.skyabyss.readiness.advice.provisions.ok": "Stores are enough",
+  "message.skyabyss.readiness.confirm_click": "Go up as you are? (once more, within 5 s)",
+  "message.skyabyss.readiness.confirm_walk": "Go in as you are? (step out and in again, within 5 s)",
+  "message.skyabyss.readiness.whisper.body.red": "The antechamber stone weighs your body. Thin",
+  "message.skyabyss.readiness.whisper.body.yellow": "The antechamber stone weighs your body. Almost",
+  "message.skyabyss.readiness.whisper.blade.red": "The antechamber stone weighs your blade. Dull",
+  "message.skyabyss.readiness.whisper.blade.yellow": "The antechamber stone weighs your blade. One more honing",
+  "message.skyabyss.readiness.whisper.provisions.red": "The antechamber stone weighs your stores. Scarce",
+  "message.skyabyss.readiness.whisper.provisions.yellow": "The antechamber stone weighs your stores. A little more"
+}

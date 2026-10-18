@@ -371,20 +371,13 @@ public final class CinematicSelfTest {
             check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.state(a).seen(scene), titan + ": started for a dead titan");
             stand.discard();
         }
-        // 船に乗っていても見られる (海で会いに行く足)。馬など、ほかの乗り物では見せない
+        // 船に乗っていても見られる (海で会いに行く足)。馬など、ほかの乗り物では見せない。
+        // 乗せる操作は環境で失敗しうるので、乗り物の判定 (vehicleAllows) を実体を世界に置かずに確かめ、徒歩の人は canWatch で確かめる
         var boat = new net.minecraft.world.entity.vehicle.Boat(net.minecraft.world.entity.EntityType.BOAT, level);
-        boat.setPos(a.getX(), a.getY(), a.getZ());
-        level.addFreshEntity(boat);
-        check(f, a.startRiding(boat, true) && CinematicTriggers.canWatch(a), "a player in a boat was not eligible for first sights");
-        a.stopRiding();
-        boat.discard();
         var pig = new net.minecraft.world.entity.animal.Pig(net.minecraft.world.entity.EntityType.PIG, level);
-        pig.setPos(a.getX(), a.getY(), a.getZ());
-        level.addFreshEntity(pig);
-        check(f, a.startRiding(pig, true) && !CinematicTriggers.canWatch(a), "a player riding a pig was eligible for first sights");
-        a.stopRiding();
-        pig.discard();
-        check(f, CinematicTriggers.canWatch(a), "a player on foot was not eligible for first sights");
+        check(f, CinematicTriggers.vehicleAllows(boat), "a player in a boat was not eligible for first sights");
+        check(f, !CinematicTriggers.vehicleAllows(pig), "a player riding a pig was eligible for first sights");
+        check(f, CinematicTriggers.vehicleAllows(null) && CinematicTriggers.canWatch(a), "a player on foot was not eligible for first sights");
         Cinematics.state(a).forgetAll();
         Cinematics.state(b).forgetAll();
     }

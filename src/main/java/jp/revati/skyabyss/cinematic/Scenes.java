@@ -63,6 +63,16 @@ public final class Scenes {
         return END_PREFIX + titan;
     }
 
+    // 背中の初回の場面など、あとから場面を足す (FirstRun.registerScene)。同じ名前は置き換える
+    public static void register(Scene scene) {
+        add(scene);
+    }
+
+    // 足した場面を外す (自己テスト用)
+    public static void unregister(String id) {
+        ALL.remove(id);
+    }
+
     private static void add(Scene scene) {
         ALL.put(scene.id(), scene);
     }

@@ -1,0 +1,630 @@
+# 武器の一振りを実際に振って tick ごとに撮る (tools/gen_weapon_swing_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+wait 200
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot whalebone_greatsword_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot whalebone_greatsword_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot whalebone_greatsword_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot whalebone_greatsword_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot whalebone_greatsword_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot whalebone_greatsword_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot whalebone_greatsword_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot whalebone_greatsword_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot whalebone_greatsword_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot whalebone_greatsword_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot whalebone_greatsword_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot whalebone_greatsword_new_tp_11
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot smith_hammer_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot smith_hammer_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot smith_hammer_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot smith_hammer_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot smith_hammer_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot smith_hammer_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot smith_hammer_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot smith_hammer_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot smith_hammer_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot smith_hammer_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot smith_hammer_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot smith_hammer_new_tp_11
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot ember_war_axe_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot ember_war_axe_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot ember_war_axe_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot ember_war_axe_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot ember_war_axe_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot ember_war_axe_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot ember_war_axe_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot ember_war_axe_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot ember_war_axe_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot ember_war_axe_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot ember_war_axe_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot ember_war_axe_new_tp_11
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+swingclock off
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tide_shell_trident_old_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tide_shell_trident_old_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tide_shell_trident_old_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tide_shell_trident_old_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tide_shell_trident_old_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tide_shell_trident_old_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tide_shell_trident_old_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tide_shell_trident_old_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tide_shell_trident_old_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tide_shell_trident_old_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tide_shell_trident_old_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tide_shell_trident_old_tp_11
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tide_shell_trident_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tide_shell_trident_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tide_shell_trident_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tide_shell_trident_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tide_shell_trident_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tide_shell_trident_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tide_shell_trident_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tide_shell_trident_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tide_shell_trident_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tide_shell_trident_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tide_shell_trident_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tide_shell_trident_new_tp_11
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+swingclock off
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tidecaller_claw_old_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tidecaller_claw_old_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tidecaller_claw_old_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tidecaller_claw_old_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tidecaller_claw_old_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tidecaller_claw_old_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tidecaller_claw_old_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tidecaller_claw_old_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tidecaller_claw_old_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tidecaller_claw_old_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tidecaller_claw_old_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tidecaller_claw_old_tp_11
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tidecaller_claw_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tidecaller_claw_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tidecaller_claw_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tidecaller_claw_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tidecaller_claw_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tidecaller_claw_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot tidecaller_claw_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot tidecaller_claw_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot tidecaller_claw_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot tidecaller_claw_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot tidecaller_claw_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot tidecaller_claw_new_tp_11
+cmd time set noon
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+swingclock off
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot coral_harpoon_old_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot coral_harpoon_old_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot coral_harpoon_old_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot coral_harpoon_old_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot coral_harpoon_old_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot coral_harpoon_old_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot coral_harpoon_old_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot coral_harpoon_old_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot coral_harpoon_old_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot coral_harpoon_old_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot coral_harpoon_old_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot coral_harpoon_old_tp_11
+swingclock on
+perspective first
+hud on
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot coral_harpoon_new_fp_01
+chat clear
+wait 30
+swing
+wait 3
+shot coral_harpoon_new_fp_03
+chat clear
+wait 30
+swing
+wait 5
+shot coral_harpoon_new_fp_05
+chat clear
+wait 30
+swing
+wait 7
+shot coral_harpoon_new_fp_07
+chat clear
+wait 30
+swing
+wait 9
+shot coral_harpoon_new_fp_09
+chat clear
+wait 30
+swing
+wait 11
+shot coral_harpoon_new_fp_11
+perspective front
+hud off
+wait 20
+chat clear
+wait 30
+swing
+wait 1
+shot coral_harpoon_new_tp_01
+chat clear
+wait 30
+swing
+wait 3
+shot coral_harpoon_new_tp_03
+chat clear
+wait 30
+swing
+wait 5
+shot coral_harpoon_new_tp_05
+chat clear
+wait 30
+swing
+wait 7
+shot coral_harpoon_new_tp_07
+chat clear
+wait 30
+swing
+wait 9
+shot coral_harpoon_new_tp_09
+chat clear
+wait 30
+swing
+wait 11
+shot coral_harpoon_new_tp_11
+swingclock on
+quit
