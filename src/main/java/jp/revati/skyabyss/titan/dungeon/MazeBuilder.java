@@ -8,6 +8,7 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BubbleColumnBlock;
 import net.minecraft.world.level.block.LadderBlock;
@@ -25,6 +26,8 @@ public final class MazeBuilder {
     private static final int POCKET_EVERY = 4;
     // 入口から出口までの道が、少なくともこれだけのマスを通ること
     private static final int MIN_PATH_CELLS = 26;
+    // 水路の顎のスポナーが同時に生かしておく数（既定の 6 の半分）
+    public static final int MAW_MAX_NEARBY = 3;
 
     private MazeBuilder() {
     }
@@ -132,6 +135,10 @@ public final class MazeBuilder {
                 kit.set(p, Blocks.SPAWNER.defaultBlockState());
                 if (kit.level().getBlockEntity(p) instanceof SpawnerBlockEntity be) {
                     be.setEntityId(ModEntities.WATERWAY_MAW.get(), kit.random);
+                    // 同時にいる数は既定の 6 の半分（3）まで。入った瞬間に囲まれないように
+                    CompoundTag tag = be.saveWithoutMetadata(kit.level().registryAccess());
+                    tag.putShort("MaxNearbyEntities", (short) MAW_MAX_NEARBY);
+                    be.getSpawner().load(kit.level(), p, tag);
                 }
             } else if (n % 2 == 0) {
                 kit.set(p.below(), Blocks.SAND.defaultBlockState());

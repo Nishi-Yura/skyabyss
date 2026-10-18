@@ -1150,6 +1150,8 @@ public final class TitanBackTrials {
 
     // 背中を建て直すとき: 全グループの進みを戻して試練の番号を進める (古い休み場の記録を無効にする)。扉のブロックは建て直しのあとに置き直す
     public static void resetAllGroups(ServerLevel level) {
+        // 野営の道具は、建て直しで消える前に持ち主へ戻す
+        CampBlocks.returnAllIn(level.getServer(), level.dimension());
         BackGroupData groups = BackGroupData.get(level);
         for (UUID id : groups.ids()) {
             GroupProgress.reset(level, id);

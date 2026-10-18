@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.titan.TitanKeeper;
+import jp.revati.skyabyss.titan.TitanStay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -510,6 +511,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void startSleep(ServerLevel level) {
         setPos(getX(), sleepHeight(), getZ());
         setMode(Mode.SLEEP);
+        // 眠ってから 20 分、動かず口を開け閉めする (夜明けでは沈まない。TitanStay)
+        forcedTicks = TitanStay.TICKS;
         breathTick = 0;
         hasLastSleep = true;
         lastSleepX = getX();
@@ -524,6 +527,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private void tickSleep(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
+        TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.ember");
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !EmberGround.isSleepTime(level.getDayTime());
         if (done) {
             // 夜明け。地の中へ沈み、潜行に戻る (背中に人がいても沈む。背中から出る人は、眠った場所の口の前へ戻る)
@@ -944,7 +948,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         entityData.set(BREATH, (byte) breathAt(breathTick).ordinal());
     }
 
-    int forcedTicks() {
+    public int forcedTicks() {
         return forcedTicks;
     }
 

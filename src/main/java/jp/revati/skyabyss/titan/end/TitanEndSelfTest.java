@@ -83,6 +83,7 @@ public final class TitanEndSelfTest {
             purgeGroups(server);
             state(server, f);
             bodies(server, level, f);
+            stay(server, level, f);
             carried(server, level, f);
             landing(server, level, f);
             cinematicOnce(server, level, f);
@@ -229,6 +230,104 @@ public final class TitanEndSelfTest {
         tick(ember, 2);
         check(f, ember.restTicks() == -1 && ember.mode() == EmberTitanEntity.Mode.SWIM, "the ember titan did not wake (" + ember.mode() + ")");
         ember.discard();
+    }
+
+    // ---------------------------------------------------------------- 地上での滞在 (TitanStay: 乗れるようになってから 20 分)
+    // 本体を直接 24000 tick 進める (時間を飛ばす)。乗れる姿のまま 24000 tick 残り、そのあと去ること。途中で心臓が止まれば眠りが勝つこと。
+    private static void stay(MinecraftServer server, ServerLevel level, List<String> f) {
+        int full = jp.revati.skyabyss.titan.TitanStay.TICKS;
+        check(f, full == 24000, "the stay is not 20 minutes (" + full + ")");
+        double cx = PAD_X + PAD / 2.0;
+        double cz = PAD_Z + PAD / 2.0;
+        double sea = level.getSeaLevel();
+        long clockBefore = jp.revati.skyabyss.titan.tide.back.TideClock.CYCLE;
+
+        StoneWhaleEntity whale = ModEntities.STONE_WHALE.get().create(level);
+        whale.moveTo(cx, 200, cz, 0f, 0f);
+        whale.restHere();
+        check(f, whale.stayLeft() == full, "the whale's stay did not start at 20 minutes (" + whale.stayLeft() + ")");
+        tick(whale, full - 1);
+        check(f, whale.isResting() && whale.stayLeft() == 1, "the whale left before 20 minutes (" + whale.stayLeft() + ")");
+        check(f, whale.saveState().getInt("RestTicks") == 1, "the whale's remaining stay is not saved");
+        tick(whale, 2);
+        check(f, !whale.isResting(), "the whale stayed past 20 minutes");
+        whale.restHere();
+        tick(whale, 1000);
+        TitanDormancy.begin(server, Titans.STONE_WHALE, 0);
+        tick(whale, 400);
+        check(f, whale.restTicks() >= 0 && whale.chainLength() == 0f, "a heart stop did not send the resting whale to sleep");
+        TitanDormancy.clear(server, Titans.STONE_WHALE);
+        tick(whale, 2);
+        whale.discard();
+        for (var chain : level.getEntitiesOfClass(jp.revati.skyabyss.titan.WhaleChainEntity.class, new net.minecraft.world.phys.AABB(cx - 80, 0, cz - 80, cx + 80, 320, cz + 80))) {
+            chain.discard();
+        }
+
+        TideShellEntity shell = TideSetup.TIDE_SHELL.get().create(level);
+        shell.moveTo(cx, sea - 3.5, cz, 0f, 0f);
+        shell.restHere();
+        check(f, shell.isResting() && shell.stayLeft() == full, "the tide shell's stay did not start at 20 minutes (" + shell.stayLeft() + ")");
+        tick(shell, full - 1);
+        check(f, shell.isResting() && shell.stayLeft() == 1, "the tide shell closed its gate before 20 minutes (" + shell.stayLeft() + ")");
+        check(f, shell.saveState().getInt("ForcedTicks") == 1, "the tide shell's remaining stay is not saved");
+        tick(shell, 2);
+        check(f, !shell.isResting(), "the tide shell kept its gate open past 20 minutes");
+        shell.restHere();
+        tick(shell, 1000);
+        TitanDormancy.begin(server, Titans.TIDE_SHELL, 0);
+        tick(shell, 300);
+        check(f, shell.restTicks() >= 0 && !shell.isResting(), "a heart stop did not close the resting tide shell's gate");
+        TitanDormancy.clear(server, Titans.TIDE_SHELL);
+        tick(shell, 2);
+        shell.discard();
+        check(f, jp.revati.skyabyss.titan.tide.back.TideClock.CYCLE == clockBefore && clockBefore == 2400
+                && jp.revati.skyabyss.titan.tide.back.TideClock.forced() == null, "the back dimension's tide cycle changed");
+
+        StormWingEntity wing = StormSetup.THUNDER_WING.get().create(level);
+        wing.moveTo(cx, PAD_Y, cz, 0f, 0f);
+        wing.restHere(0);
+        check(f, wing.isPerched() && wing.stayLeft() == full, "the thunder wing's stay did not start at 20 minutes (" + wing.stayLeft() + ")");
+        tick(wing, full - 1);
+        check(f, wing.isPerched() && wing.stayLeft() == 1, "the thunder wing left its perch before 20 minutes (" + wing.stayLeft() + ")");
+        check(f, wing.saveState().getInt("ForcedTicks") == 1, "the thunder wing's remaining stay is not saved");
+        tick(wing, 2);
+        check(f, !wing.isPerched(), "the thunder wing stayed perched past 20 minutes");
+        wing.restHere(0);
+        tick(wing, 1000);
+        TitanDormancy.begin(server, Titans.THUNDER_WING, 0);
+        TitanDormancy.setSpot(server, Titans.THUNDER_WING, cx + 20, PAD_Y, cz);
+        tick(wing, 200);
+        check(f, wing.restTicks() >= 0 && !wing.isPerched(), "a heart stop did not send the perched thunder wing to sleep");
+        TitanDormancy.clear(server, Titans.THUNDER_WING);
+        tick(wing, 2);
+        wing.discard();
+        for (var gale : level.getEntitiesOfClass(jp.revati.skyabyss.titan.storm.GaleColumnEntity.class, new net.minecraft.world.phys.AABB(cx - 80, PAD_Y - 20, cz - 80, cx + 80, PAD_Y + 200, cz + 80))) {
+            gale.discard();
+        }
+
+        EmberTitanEntity ember = EmberTitanSetup.EMBER_TITAN.get().create(level);
+        ember.moveTo(cx, PAD_Y - 10, PAD_Z + 10, 0f, 0f);
+        ember.sleepHere();
+        check(f, ember.isSleeping() && ember.forcedTicks() == full, "the ember titan's stay did not start at 20 minutes (" + ember.forcedTicks() + ")");
+        tick(ember, full - 1);
+        check(f, ember.isSleeping() && ember.forcedTicks() == 1, "the ember titan sank before 20 minutes (" + ember.forcedTicks() + ")");
+        check(f, ember.saveState().getInt("ForcedTicks") == 1, "the ember titan's remaining stay is not saved");
+        tick(ember, 2);
+        check(f, !ember.isSleeping(), "the ember titan stayed up past 20 minutes");
+        ember.discard();
+        ember = EmberTitanSetup.EMBER_TITAN.get().create(level);
+        ember.moveTo(cx, PAD_Y - 10, PAD_Z + 10, 0f, 0f);
+        ember.sleepHere();
+        tick(ember, 1000);
+        TitanDormancy.begin(server, Titans.EMBER, 0);
+        tick(ember, 120);
+        check(f, ember.restTicks() >= 0 && !ember.isSleeping(), "a heart stop did not sink the sleeping ember titan");
+        TitanDormancy.clear(server, Titans.EMBER);
+        tick(ember, 2);
+        ember.discard();
+        for (var mouth : level.getEntitiesOfClass(jp.revati.skyabyss.titan.ember.EmberMouthEntity.class, new net.minecraft.world.phys.AABB(cx - 80, PAD_Y - 80, PAD_Z - 80, cx + 80, PAD_Y + 80, PAD_Z + 120))) {
+            mouth.discard();
+        }
     }
 
     // ---------------------------------------------------------------- 運ばれる人

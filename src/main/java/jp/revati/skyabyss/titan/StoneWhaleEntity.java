@@ -62,7 +62,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private static final float TURN_RATE = 0.5f;
     private static final double CRUISE_CLEARANCE = 75.0;
     private static final double REST_CLEARANCE = 34.0;
-    private static final int REST_DURATION = 3600;
+    private static final int REST_DURATION = TitanStay.TICKS;
     // 降下の途中で目的地に着けないまま、これより長くたったらあきらめる
     private static final int APPROACH_GIVE_UP = 1800;
 
@@ -304,6 +304,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 hintNearbyPlayers(level);
             }
         }
+        TitanStay.warnIfDue(level, position(), restTicks, "message.skyabyss.stay_ending.whale");
         if (--restTicks <= 0) {
             mode = Mode.CRUISE;
             hasTarget = false;
@@ -667,6 +668,18 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         hasTarget = true;
         mode = Mode.APPROACH;
         approachTicks = 0;
+    }
+
+    // テスト用: その場ですぐに止まり、鎖を降ろして 20 分 (TitanStay) 乗せる
+    public void restHere() {
+        mode = Mode.REST;
+        restTicks = REST_DURATION;
+        hold = 0;
+    }
+
+    // 残りの滞在 tick (テスト用)
+    public int stayLeft() {
+        return mode == Mode.REST ? restTicks : 0;
     }
 
     public boolean isResting() {

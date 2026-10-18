@@ -1,0 +1,16 @@
+# 持ち主だけの発光: 専用サーバーに Alice で入り、Alice の頁・欠片と、別の人 (Bob) のために確保した頁・欠片を並べて撮る。
+# 同じ場所に二人の品があり、Alice の画面では Alice の分だけが光る (Bob の分は普通の落とし物)。外 (rcon) が置いて go の合図を出す
+server localhost:25671
+timeout 900
+size 854 480
+wait 100
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/glowsync7/alice_in
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/glowsync7/go
+look 0 10
+wait 60
+shot item_glow_alice_a
+wait 40
+shot item_glow_alice_b
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/glowsync7/alice_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/glowsync7/quit
+quit
