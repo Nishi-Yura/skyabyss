@@ -232,7 +232,8 @@ public final class OpeningBeatsSelfTest {
             return;
         }
         double distance = Math.sqrt(fire.distSqr(new BlockPos(X, fire.getY(), Z)));
-        if (distance < 16 || distance > 36 || !level.getBlockState(fire).is(Blocks.CAMPFIRE)) {
+        // 置き場所は半径 16〜36 の輪をブロックへ丸めたもの。丸めで 36 をわずかに超える (36.06 など) ことがある
+        if (distance < 15.25 || distance > 36.75 ||!level.getBlockState(fire).is(Blocks.CAMPFIRE)) {
             failures.add("the campfire is at a strange place: " + fire + " (" + distance + ")");
         }
         if (NpcSpawner.nearestCamp(data, center, 48) == null) {
