@@ -64,9 +64,23 @@ public final class QuestItems {
         return tag.contains(TOKEN_KEY) ? tag.getString(TOKEN_KEY) : null;
     }
 
+    // 留め袋の中の数 (印のない目的だけ。袋の品は部品のないただの品なので、印のある品は袋にない。22 の 8.3)
+    private static int pouchCount(Player player, String target, @Nullable String token) {
+        if (token != null) {
+            return 0;
+        }
+        int n = 0;
+        for (jp.revati.skyabyss.pouch.PouchEntries.Entry e : jp.revati.skyabyss.pouch.PouchEntries.all()) {
+            if (matches(new ItemStack(e.item()), target, null)) {
+                n += jp.revati.skyabyss.pouch.Pouch.count(player, e.item());
+            }
+        }
+        return n;
+    }
+
     public static int count(Player player, String target, @Nullable String token) {
         Inventory inv = player.getInventory();
-        int n = 0;
+        int n = pouchCount(player, target, token);
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
             if (matches(s, target, token)) {
@@ -83,6 +97,14 @@ public final class QuestItems {
         }
         Inventory inv = player.getInventory();
         int left = count;
+        if (token == null) {
+            // 袋の中から先に払う
+            for (jp.revati.skyabyss.pouch.PouchEntries.Entry e : jp.revati.skyabyss.pouch.PouchEntries.all()) {
+                if (left > 0 && matches(new ItemStack(e.item()), target, null)) {
+                    left -= jp.revati.skyabyss.pouch.Pouch.take(player, e.item(), left);
+                }
+            }
+        }
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
             ItemStack s = inv.getItem(i);
             if (matches(s, target, token)) {

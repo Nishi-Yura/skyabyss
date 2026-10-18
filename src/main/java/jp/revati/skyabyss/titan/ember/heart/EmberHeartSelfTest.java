@@ -1177,7 +1177,7 @@ public final class EmberHeartSelfTest {
             check(moved == 1, "the ember heart should hand over exactly one (the fourth) fragment (" + moved + ")", f);
             check(SkyKey.fragmentsHeld(p) == 4 && SkyKey.ready(p), "four fragments after the ember heart should make the key ready", f);
             check(SkyKey.assemble(p, false), "the key did not form", f);
-            check(SkyKey.fragmentsHeld(p) == 0 && p.getInventory().countItem(StorySetup.SKY_KEY.get()) == 1, "after forming: fragments " + SkyKey.fragmentsHeld(p)
+            check(SkyKey.fragmentsHeld(p) == 0 && jp.revati.skyabyss.pouch.Pouch.countAll(p, StorySetup.SKY_KEY.get()) == 1, "after forming: fragments " + SkyKey.fragmentsHeld(p)
                     + ", keys " + p.getInventory().countItem(StorySetup.SKY_KEY.get()), f);
             notes.add("the fourth fragment from the ember heart makes the sky key (stage 4, level cap 40)");
         } finally {

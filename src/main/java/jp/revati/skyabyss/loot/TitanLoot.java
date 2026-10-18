@@ -456,10 +456,9 @@ public final class TitanLoot {
         return held;
     }
 
-    // 手もとへ入れる。入りきらなかった分を返す
+    // 手もとへ入れる (留め袋に入る品は袋へ。docs/design/22 の 4.1)。入りきらなかった分を返す
     private static ItemStack give(ServerPlayer player, ItemStack stack) {
-        player.getInventory().add(stack);
-        return stack;
+        return jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
     }
 
     public static void tellHeld(ServerPlayer player, int held) {

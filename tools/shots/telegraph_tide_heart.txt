@@ -1,0 +1,88 @@
+# The tide shell heart's telegraphed patterns for a party of 6 (docs/design/08_tide_shell.md section 5.3 / 5.5)
+# ./gradlew runShots -Pscript=tools/shots/telegraph_tide_heart.txt   (mute: the shots runner sets the volume to 0)
+# One player on a barrier platform 17 blocks above the floor; "dev tideforce <heart> <attack> 6" acts as if 6 players were in the room.
+# (The heart is not bound to its chamber here: no islands and no water, so the flood only shows its spears.)
+world shots flat
+size 1280 720
+timeout 1200
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+waitchunks
+wait 60
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:tide_heart 0 -58.5 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 110
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] BREATH 6
+wait 14
+shot breath_a
+wait 50
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] SHELL_STRIKE 6
+wait 14
+shot shell_a
+wait 18
+shot shell_b
+wait 70
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] WHIRL 6
+wait 40
+shot whirl_a
+wait 70
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] FLOOD 6
+wait 62
+shot flood_a
+wait 90
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] BUBBLE 6
+wait 20
+shot bubble_a
+wait 40
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] PEARL 6
+wait 60
+shot pearl_a
+wait 80
+shot pearl_b
+wait 60
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] EBB 6
+wait 70
+shot ebb_a
+wait 40
+shot ebb_b
+wait 80
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] MOON_WAVE 6
+wait 30
+shot moon_a
+wait 28
+shot moon_b
+wait 60
+
+cmd skyabyss dev tideforce @e[type=skyabyss:tide_heart,limit=1] PEARL_RAIN 6
+wait 20
+shot rain_a
+wait 50
+
+cmd kill @e[type=skyabyss:tide_heart]
+quit

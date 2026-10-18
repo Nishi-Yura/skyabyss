@@ -143,7 +143,7 @@ public class GrowthScreen extends Screen {
                 notice(Component.translatable("message.skyabyss.growth.respec_failed.no_forge"));
                 return;
             }
-            if (jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(minecraft.player.getInventory()) < cost) {
+            if (jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(minecraft.player) < cost) {
                 notice(Component.translatable("message.skyabyss.growth.respec_failed.no_crystals", cost));
                 return;
             }

@@ -237,7 +237,8 @@ public final class LoreEvents {
             for (LoreTrigger t : entry.unlock()) {
                 if (t.type().equals("item")) {
                     Item item = item(t.target());
-                    if (item != null && (Lore.contains(player.getInventory().items, item) || Lore.contains(player.getInventory().offhand, item))) {
+                    if (item != null && (Lore.contains(player.getInventory().items, item) || Lore.contains(player.getInventory().offhand, item)
+                            || jp.revati.skyabyss.pouch.Pouch.count(player, item) > 0)) {
                         Lore.unlock(player, entry.id(), true);
                         break;
                     }
