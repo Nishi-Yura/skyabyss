@@ -106,8 +106,18 @@ public final class BackGroupData extends SavedData {
 
         // 何かしら試練が進んでいるか (進んでいなければ、元に戻す必要もない)
         public boolean hasProgress() {
-            return gateOpened || heartDefeated || !clearedHalls.isEmpty() || !data.isEmpty()
+            return gateOpened || heartDefeated || !clearedHalls.isEmpty() || hasProgressData()
                     || !openOverride.isEmpty() || !closedOverride.isEmpty();
+        }
+
+        // data に進みの欄があるか ("keep." の欄はリセットで残る記録なので、進みには数えない)
+        private boolean hasProgressData() {
+            for (String key : data.getAllKeys()) {
+                if (!key.startsWith("keep.")) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // 試練を最初に戻す: 番号を進め、進みと扉の上書きを消す (data の "keep." で始まる欄は残す)
