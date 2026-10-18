@@ -40,6 +40,8 @@ public class SkyAbyss {
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
+        // 大事な場面のカメラ演出 (見た場面の記録)。docs/design/20_cinematics.md
+        jp.revati.skyabyss.cinematic.CinematicSetup.register(modEventBus);
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);

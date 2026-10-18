@@ -118,7 +118,7 @@ public final class OpeningClient {
 
     // 開幕の暗転・題字の最中か (目的の帯はその間出さない)
     public static boolean awakeActive() {
-        return awakeTicks() >= 0;
+        return awakeTicks() >= 0 || jp.revati.skyabyss.client.cinematic.CinematicClient.active();
     }
 
     // 目覚めの演出の経過 tick (終わっていれば -1)
@@ -235,8 +235,8 @@ public final class OpeningClient {
             return;
         }
         clock++;
-        if (awakeTicks() >= 0) {
-            // 開幕の間は、バニラのチュートリアルの札 (W A S D ...) や、ほかの札を出さない。操作の案内は目的の帯 (煙の立つ方) に添える
+        if (awakeActive()) {
+            // 開幕 (カメラの場面も含む) の間は、バニラのチュートリアルの札 (W A S D ...) や、ほかの札を出さない。操作の案内は目的の帯 (煙の立つ方) に添える
             if (mc.options.tutorialStep != net.minecraft.client.tutorial.TutorialSteps.NONE) {
                 // チュートリアルは、この世界の開幕でそのまま終わりにする (あとから「W A S D」の札が出てこないように。一度だけ設定を書く)
                 mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
