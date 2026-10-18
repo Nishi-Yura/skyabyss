@@ -41,11 +41,12 @@ import net.minecraft.world.item.Item;
 //   weather {thunder, rain}    : 今いる所が雷雨 / 雨で、真上に空が見える (屋根の下では数えない)
 //   height  {min}              : 足もとの高さ (y) が min 以上
 //   grave                      : 救える墓がある (自分の墓があり、救いの割合が 0 でない。grave パッケージ)
+//   prep    {chapter, min}     : 備えの頼み (ch<n>/prep_*) を min 本以上終えた (min を省く = 三本ぜんぶ。guide.PrepQuests)
 //   no_keepsake {item}         : その品が、自分のどこにもない (持ち物・箱・エンダーチェスト・預かり・地面・しまった箱。record/Keepsakes.locate の total が 0)
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -120,6 +121,13 @@ public final class Condition {
                 }
             }
             case "lore" -> need("entry", errors, where);
+            case "prep" -> {
+                need("chapter", errors, where);
+                int ch = GsonHelper.getAsInt(json, "chapter", 0);
+                if (ch < 1 || ch > 4) {
+                    errors.add(where + ": prep condition chapter must be 1-4");
+                }
+            }
             case "flag", "remembers" -> need("flag", errors, where);
             case "item" -> {
                 need("item", errors, where);
@@ -197,6 +205,8 @@ public final class Condition {
                 Item item = item(str("item"));
                 yield item != null && jp.revati.skyabyss.record.Keepsakes.locate(ctx.player(), item).total() == 0;
             }
+            case "prep" -> jp.revati.skyabyss.guide.PrepQuests.atLeast(ctx.player(), GsonHelper.getAsInt(json, "chapter", 0),
+                    GsonHelper.getAsInt(json, "min", 3));
             case "watcher" -> PrologueData.get(ctx.player().server.overworld()).entry(ctx.player().getUUID()).sightings
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);
