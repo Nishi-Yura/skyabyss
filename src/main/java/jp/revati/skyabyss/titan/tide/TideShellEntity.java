@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.titan.TitanKeeper;
+import jp.revati.skyabyss.titan.TitanStay;
 import jp.revati.skyabyss.titan.travel.TravelTitan;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -165,6 +166,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     public boolean isApproaching() {
         return entityData.get(MODE) == Mode.APPROACH.ordinal();
+    }
+
+    // 潮門を開けておく残り tick (テスト用)
+    public int stayLeft() {
+        return mode == Mode.REST ? forcedTicks : 0;
     }
 
     Mode mode() {
@@ -388,6 +394,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     private void startRest(ServerLevel level) {
         setMode(Mode.REST);
+        // 潮門を開けておく長さは、地上の干潮の刻ではなく 20 分 (TitanStay)。背の中の潮 (TideClock) は別の時計で、触らない
+        forcedTicks = TitanStay.TICKS;
         hasLastRest = true;
         lastRestX = getX();
         lastRestZ = getZ();
@@ -397,6 +405,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private void tickRest(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
         rise(level.getSeaLevel() - REST_DRAFT, REST_RISE);
+        TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !TideOcean.isLowTide(level.getDayTime());
         if (done) {
             // 刻の終わり。縁を沈め、巡航に戻る (背中に人がいても戻る。背中から出る人は、休んだ場所の岸へ戻る)

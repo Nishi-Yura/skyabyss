@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import jp.revati.skyabyss.titan.TitanKeeper;
+import jp.revati.skyabyss.titan.TitanStay;
 import jp.revati.skyabyss.titan.storm.StormPerch.Peak;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -160,6 +161,11 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     }
 
     // ---- 外から見る
+
+    // 止まり木にとどまる残り tick (テスト用)
+    public int stayLeft() {
+        return mode == Mode.PERCH ? forcedTicks : 0;
+    }
 
     public Mode mode() {
         return mode;
@@ -514,6 +520,8 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         lastFootX = foot.x;
         lastFootZ = foot.z;
         setMode(Mode.PERCH);
+        // 止まり木には 20 分とどまる (夕立の刻の長さでは去らない。TitanStay)
+        forcedTicks = TitanStay.TICKS;
         level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.9f);
     }
 
@@ -523,7 +531,11 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
             updateLook(level);
         }
         if (forcedTicks > 0) {
-            forcedTicks--;
+            TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.storm");
+            if (--forcedTicks <= 0) {
+                // 20 分たった: 夕立の刻の内でも飛び立つ
+                beginTakeOff(level);
+            }
             return;
         }
         // 刻が終わったら飛び立つ
