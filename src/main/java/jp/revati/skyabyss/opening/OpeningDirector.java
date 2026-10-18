@@ -78,10 +78,38 @@ public final class OpeningDirector {
     private static final Map<UUID, Long> FREEZE = new HashMap<>();
     // 空の影が去る時刻 (進行中のものから覚える。再起動で消えてよい)
     private static long lastPassEnd = -1;
-    // 落とした破れた頁 (プレイヤー → 頁のエンティティ)
+    // 落とした破れた頁 (プレイヤー → 頁のエンティティ)。再起動で消えるので、頁の実体にも持ち主の印 (PAGE_OWNER_TAG) を書き、
+    // 読んだ・見送ったときは印で探して消す (再起動のあとでも地面に残らない)
     private static final Map<UUID, UUID> PAGES = new HashMap<>();
+    static final String PAGE_OWNER_TAG = "skyabyss_opening_page_owner";
 
     private OpeningDirector() {
+    }
+
+    // 自己テスト用: 再起動で覚えている頁の ID が消えた状態にする
+    static void forgetPagesForTest() {
+        PAGES.clear();
+    }
+
+    // その人のために落とした頁 (地面にあるもの) を消す。覚えている実体と、読み込まれている中の印つきの実体の両方。消した数を返す
+    public static int discardDroppedPages(MinecraftServer server, UUID owner) {
+        int n = 0;
+        UUID id = PAGES.remove(owner);
+        if (id != null) {
+            var entity = server.overworld().getEntity(id);
+            if (entity != null) {
+                entity.discard();
+                n++;
+            }
+        }
+        for (var e : server.overworld().getAllEntities()) {
+            if (e instanceof ItemEntity item && !item.isRemoved() && item.getPersistentData().hasUUID(PAGE_OWNER_TAG)
+                    && item.getPersistentData().getUUID(PAGE_OWNER_TAG).equals(owner)) {
+                item.discard();
+                n++;
+            }
+        }
+        return n;
     }
 
     public static OpeningState state(net.minecraft.world.entity.player.Player player) {
@@ -405,6 +433,7 @@ public final class OpeningDirector {
             item.setUnlimitedLifetime();
             // 落ちてきた本人だけが拾える (マルチで取り合いにならない)
             item.setTarget(player.getUUID());
+            item.getPersistentData().putUUID(PAGE_OWNER_TAG, player.getUUID());
             level.addFreshEntity(item);
             level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.9f);
@@ -423,13 +452,7 @@ public final class OpeningDirector {
         @Override
         public void readShadowPage() {
             // 読まれないまま長く経った: 地面の頁は消し、荷物の頁は読んだことにして記す (メインの段が止まらないように)
-            UUID id = PAGES.remove(player.getUUID());
-            if (id != null) {
-                var entity = level.getServer().overworld().getEntity(id);
-                if (entity != null) {
-                    entity.discard();
-                }
-            }
+            discardDroppedPages(level.getServer(), player.getUUID());
             for (ItemStack stack : player.getInventory().items) {
                 if (stack.is(LoreSetup.LORE_PAGE.get()) && LorePageItem.source(stack).equals("shadow")) {
                     stack.shrink(1);

@@ -792,8 +792,11 @@ public final class OpeningSelfTest {
                 e -> e.getItem().is(LoreSetup.LORE_PAGE.get()) && LorePageItem.source(e.getItem()).equals("shadow"));
         check(pages.size() == 1, "live: the torn page did not fall from the sky (" + pages.size() + ")", failures);
         check(LorePageItem.candidates(a, "shadow").stream().anyMatch(e -> e.id().equals("prologue/shadow")), "live: reading the torn page would not record the shadow", failures);
-        pages.forEach(ItemEntity::discard);
+        // 頁の実体に持ち主の印が付く。サーバーの再起動 (覚えている ID が消える) のあとでも、印で探して消せる (M10)
+        check(pages.get(0).getPersistentData().hasUUID(OpeningDirector.PAGE_OWNER_TAG), "live: the torn page carries no owner tag", failures);
+        OpeningDirector.forgetPagesForTest();
         fx.readShadowPage();
+        check(pages.get(0).isRemoved(), "live: the torn page stayed on the ground after a restart", failures);
         check(Lore.state(a).has("prologue/shadow"), "live: the unread page was not read automatically", failures);
         // 岩鯨を迎えられる条件は人ごと
         OpeningDirector.force(a, OpeningBeat.WHALE);

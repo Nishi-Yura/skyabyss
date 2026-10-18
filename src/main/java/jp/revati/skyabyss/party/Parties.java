@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.titan.TitanBacks;
@@ -156,9 +157,9 @@ public final class Parties {
             return deny(from, "message.skyabyss.party.already_in", to.getDisplayName());
         }
         INVITES.put(to.getUUID(), new Invite(from.getUUID(), from.getGameProfile().getName(), server.overworld().getGameTime() + INVITE_TICKS));
-        from.sendSystemMessage(ModText.hint("message.skyabyss.party.invited", to.getDisplayName()));
-        to.sendSystemMessage(ModText.progress("message.skyabyss.party.invite_received", from.getDisplayName()));
-        to.sendSystemMessage(ModText.hint("message.skyabyss.party.invite_how"));
+        Notice.hint(from, "message.skyabyss.party.invited", to.getDisplayName());
+        // 右上の札 (「進展」)。受け方 (O の画面・/party accept) は同じ札の本文に入れてある
+        Notice.unlock(to, "message.skyabyss.party.invite_received", from.getDisplayName());
         to.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.6f, 1.4f);
         PartyNetwork.syncSoon(to);
         return true;
@@ -200,7 +201,7 @@ public final class Parties {
         }
         data.add(party, player.getUUID(), player.getGameProfile().getName());
         for (ServerPlayer m : onlineMembers(server, party)) {
-            m.sendSystemMessage(ModText.progress("message.skyabyss.party.joined", player.getDisplayName()));
+            Notice.unlock(m, "message.skyabyss.party.joined", player.getDisplayName());
             PartyNetwork.syncSoon(m);
         }
         return true;
@@ -213,9 +214,9 @@ public final class Parties {
         }
         ServerPlayer from = player.server.getPlayerList().getPlayer(inv.from());
         if (from != null) {
-            from.sendSystemMessage(ModText.hint("message.skyabyss.party.declined", player.getDisplayName()));
+            Notice.hint(from, "message.skyabyss.party.declined", player.getDisplayName());
         }
-        player.sendSystemMessage(ModText.hint("message.skyabyss.party.you_declined"));
+        Notice.hint(player, "message.skyabyss.party.you_declined");
         PartyNetwork.syncSoon(player);
         return true;
     }
@@ -229,7 +230,7 @@ public final class Parties {
         List<ServerPlayer> before = onlineMembers(player.server, party);
         data.remove(player.getUUID());
         for (ServerPlayer m : before) {
-            m.sendSystemMessage(ModText.hint("message.skyabyss.party.left", player.getDisplayName()));
+            Notice.hint(m, "message.skyabyss.party.left", player.getDisplayName());
             PartyNetwork.syncSoon(m);
         }
         return true;
@@ -250,7 +251,7 @@ public final class Parties {
         List<ServerPlayer> before = onlineMembers(leader.server, party);
         data.remove(target);
         for (ServerPlayer m : before) {
-            m.sendSystemMessage(ModText.hint("message.skyabyss.party.kicked", targetName));
+            Notice.hint(m, "message.skyabyss.party.kicked", targetName);
             PartyNetwork.syncSoon(m);
         }
         return true;
@@ -270,7 +271,7 @@ public final class Parties {
         }
         data.promote(party, target);
         for (ServerPlayer m : onlineMembers(leader.server, party)) {
-            m.sendSystemMessage(ModText.hint("message.skyabyss.party.new_leader", targetName));
+            Notice.hint(m, "message.skyabyss.party.new_leader", targetName);
             PartyNetwork.syncSoon(m);
         }
         return true;
@@ -287,7 +288,7 @@ public final class Parties {
     }
 
     private static boolean deny(ServerPlayer player, String key, Object... args) {
-        player.displayClientMessage(ModText.deny(key, args), false);
+        Notice.send(player, ModText.deny(key, args));
         return false;
     }
 

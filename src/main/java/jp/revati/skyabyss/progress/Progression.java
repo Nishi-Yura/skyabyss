@@ -2,6 +2,7 @@ package jp.revati.skyabyss.progress;
 
 import jp.revati.skyabyss.notice.Notice;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -153,6 +154,7 @@ public final class Progression {
     public static void onTitanStopped(MinecraftServer server, Collection<UUID> participants, String titan) {
         ProgressData data = ProgressData.get(server);
         long day = server.overworld().getGameTime() / 24000L;
+        ServerPlayer worldFirst = null;
         for (UUID id : participants) {
             boolean before = stage(server, id) > ProgressRules.titanIndex(titan);
             data.markPersonal(id, titan);
@@ -162,13 +164,17 @@ public final class Progression {
                 continue;
             }
             if (first) {
-                announceWorld(server, player, titan);
+                worldFirst = player;
             }
             if (!before && stage(server, id) > ProgressRules.titanIndex(titan)) {
                 Notice.unlock(player, "message.skyabyss.progress.stage_up", titanName(titan),
                         ProgressRules.levelCap(stage(server, id)));
             }
             jp.revati.skyabyss.party.PartyNetwork.syncSoon(player);
+        }
+        // 参加者の進みを書き終えてから (同じ戦いの仲間も「止めた人」に数える)
+        if (worldFirst != null) {
+            announceWorld(server, worldFirst, titan);
         }
     }
 
@@ -182,14 +188,26 @@ public final class Progression {
         return "?";
     }
 
-    // ワールドで初めて止めた: 全員に一行 (次の巨神が目を覚ます)
+    // ワールドで初めて止めた: 同じ巨神をもう止めた人にだけ、画面の語りで一行 (チャットには流さない。
+    // まだ止めていない人にその巨神の名前を明かさず、次の巨神の名前も出さない)
     private static void announceWorld(MinecraftServer server, ServerPlayer by, String titan) {
         int i = ProgressRules.titanIndex(titan);
-        Component line = i + 1 < ProgressRules.TITAN_ORDER.size()
-                ? ModText.lore("message.skyabyss.progress.world_first", by.getDisplayName(), titanName(titan),
-                        titanName(ProgressRules.TITAN_ORDER.get(i + 1)))
-                : ModText.lore("message.skyabyss.progress.world_first_last", by.getDisplayName(), titanName(titan));
-        server.getPlayerList().broadcastSystemMessage(line, false);
+        String key = i + 1 < ProgressRules.TITAN_ORDER.size()
+                ? "message.skyabyss.progress.world_first" : "message.skyabyss.progress.world_first_last";
+        for (ServerPlayer p : worldFirstAudience(server.getPlayerList().getPlayers(), by, i)) {
+            Notice.narrate(p, key, by.getDisplayName(), titanName(titan));
+        }
+    }
+
+    // 世界の最初の知らせを受ける人: 自分で、その巨神を止めたことのある、ほかの人
+    public static List<ServerPlayer> worldFirstAudience(Iterable<ServerPlayer> players, ServerPlayer by, int titanIndex) {
+        List<ServerPlayer> out = new java.util.ArrayList<>();
+        for (ServerPlayer p : players) {
+            if (p != by && stage(p) > titanIndex) {
+                out.add(p);
+            }
+        }
+        return out;
     }
 
     // ---------------------------------------------------------------- 抜け道を塞ぐ

@@ -283,6 +283,20 @@ public final class StorySelfTest {
         FakePlayer q = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "story_test_q"));
         q.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 4));
         check(!SkyKey.ready(q), "a player at stage 0 with four fragments was ready", f);
+        // 欠片は持ち物だけでなく、手もと (エンダーチェスト・箱の中) も数え、そろうときは同じ範囲から取る (M11)
+        q.getInventory().clearContent();
+        q.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 2));
+        q.getEnderChestInventory().setItem(0, new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 1));
+        ItemStack shulker = new ItemStack(Items.SHULKER_BOX);
+        shulker.set(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.fromItems(List.of(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 1))));
+        q.getInventory().add(shulker);
+        check(SkyKey.fragmentsHeld(q) == 4, "fragments in the ender chest and a shulker box were not counted: " + SkyKey.fragmentsHeld(q), f);
+        check(Keepsakes.take(q, ModItems.SKY_KEY_FRAGMENT.get(), jp.revati.skyabyss.record.KeepsakeBonds.mine(q), 4) == 4 && SkyKey.fragmentsHeld(q) == 0,
+                "taking fragments from every hand-held place left some behind: " + SkyKey.fragmentsHeld(q), f);
+        q.getInventory().clearContent();
+        q.getEnderChestInventory().clearContent();
+        check(!SkyKey.busy(q), "an idle player was busy", f);
 
         Quests.poll(p, true);
         check(stage(p, "main_ember").equals("done") && stage(p, "main_key").equals("show"), "the key did not open main_key: " + stage(p, "main_key"), f);

@@ -106,6 +106,11 @@ public final class Keepsakes {
     @FunctionalInterface
     public interface Holder {
         int count(ServerPlayer player, Item item);
+
+        // 枠から n 個まで取り出す (天の鍵がそろうとき)。取れた数を返す。取り出せない枠は 0 のまま
+        default int take(ServerPlayer player, Item item, int n) {
+            return 0;
+        }
     }
 
     private static final Map<String, Holder> HOLDERS = new java.util.LinkedHashMap<>();
@@ -213,6 +218,103 @@ public final class Keepsakes {
         }
         return new Where(inventory, bags, ender, holders, pending, kept, ground(server, player.getUUID(), item),
                 KeepsakeBonds.stashed(player, item, is));
+    }
+
+    // 手もと (持ち物とその中の袋・箱、つかんでいる品、エンダーチェスト、ほかの仕組みの枠) から n 個まで取り除く。取れた数を返す。
+    // 持ち物の主の枠 -> 袋・箱の中 -> エンダーチェスト -> 枠の順 (locate の数え方と同じ範囲)
+    public static int take(ServerPlayer player, Item item, java.util.function.Predicate<ItemStack> match, int n) {
+        java.util.function.Predicate<ItemStack> is = s -> s.is(item) && match.test(s);
+        int left = n;
+        var inv = player.getInventory();
+        for (List<ItemStack> part : List.of(inv.items, inv.armor, inv.offhand)) {
+            for (ItemStack s : part) {
+                if (left > 0 && is.test(s)) {
+                    int d = Math.min(left, s.getCount());
+                    s.shrink(d);
+                    left -= d;
+                }
+            }
+        }
+        ItemStack carried = player.containerMenu == null ? ItemStack.EMPTY : player.containerMenu.getCarried();
+        if (left > 0 && is.test(carried)) {
+            int d = Math.min(left, carried.getCount());
+            carried.shrink(d);
+            left -= d;
+        }
+        for (List<ItemStack> part : List.of(inv.items, inv.armor, inv.offhand)) {
+            for (ItemStack s : part) {
+                left -= takeInside(s, is, left);
+            }
+        }
+        left -= takeInside(carried, is, left);
+        var chest = player.getEnderChestInventory();
+        for (int i = 0; i < chest.getContainerSize() && left > 0; i++) {
+            ItemStack s = chest.getItem(i);
+            if (is.test(s)) {
+                int d = Math.min(left, s.getCount());
+                s.shrink(d);
+                left -= d;
+            }
+        }
+        for (int i = 0; i < chest.getContainerSize() && left > 0; i++) {
+            left -= takeInside(chest.getItem(i), is, left);
+        }
+        if (left > 0) {
+            List<Holder> registered;
+            synchronized (Keepsakes.class) {
+                registered = new ArrayList<>(HOLDERS.values());
+            }
+            for (Holder h : registered) {
+                if (left > 0) {
+                    left -= h.take(player, item, left);
+                }
+            }
+        }
+        player.getInventory().setChanged();
+        return n - left;
+    }
+
+    // 袋や箱の中 (一段) から n 個まで取り除く。取れた数を返す
+    private static int takeInside(ItemStack holder, java.util.function.Predicate<ItemStack> is, int n) {
+        if (holder.isEmpty() || n <= 0) {
+            return 0;
+        }
+        int taken = 0;
+        ItemContainerContents box = holder.get(DataComponents.CONTAINER);
+        if (box != null) {
+            List<ItemStack> stacks = new ArrayList<>();
+            box.nonEmptyItemsCopy().forEach(stacks::add);
+            int before = taken;
+            for (ItemStack s : stacks) {
+                if (taken < n && is.test(s)) {
+                    int d = Math.min(n - taken, s.getCount());
+                    s.shrink(d);
+                    taken += d;
+                }
+            }
+            if (taken > before) {
+                stacks.removeIf(ItemStack::isEmpty);
+                holder.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(stacks));
+            }
+        }
+        BundleContents bundle = holder.get(DataComponents.BUNDLE_CONTENTS);
+        if (bundle != null && taken < n) {
+            List<ItemStack> stacks = new ArrayList<>();
+            bundle.itemsCopy().forEach(stacks::add);
+            int before = taken;
+            for (ItemStack s : stacks) {
+                if (taken < n && is.test(s)) {
+                    int d = Math.min(n - taken, s.getCount());
+                    s.shrink(d);
+                    taken += d;
+                }
+            }
+            if (taken > before) {
+                stacks.removeIf(ItemStack::isEmpty);
+                holder.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(stacks));
+            }
+        }
+        return taken;
     }
 
     // 袋や箱 (シュルカーボックスなど) の中 (一段だけ)
