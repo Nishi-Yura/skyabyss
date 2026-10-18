@@ -195,7 +195,16 @@ public final class ProgressSelfTest {
         FakePlayer e = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "progress_test_e"));
         data.add(party, c.getUUID(), "c");
         data.add(party, d.getUUID(), "d");
-        check(f, !Parties.invite(a, e), "a fifth member could be invited");
+        // 六人まで (4 人の上限は 10 の 6 章で 6 人に上げた)。四人のときはまだ招待できる
+        check(f, Parties.MAX_MEMBERS == 6, "the party size is not 6");
+        check(f, Parties.invite(a, e), "a fifth member could not be invited");
+        UUID extra1 = UUID.randomUUID();
+        UUID extra2 = UUID.randomUUID();
+        data.add(party, extra1, "x1");
+        data.add(party, extra2, "x2");
+        check(f, party.members.size() == 6 && !Parties.invite(a, e), "a seventh member could be invited");
+        data.remove(extra1);
+        data.remove(extra2);
         // リーダーを渡す・外す
         check(f, Parties.promote(a, b.getUUID(), "b") && party.isLeader(b.getUUID()), "promote failed");
         check(f, !Parties.kick(a, c.getUUID(), "c"), "a former leader could kick");

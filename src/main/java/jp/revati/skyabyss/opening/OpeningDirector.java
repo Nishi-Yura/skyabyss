@@ -217,7 +217,7 @@ public final class OpeningDirector {
         boolean deep = !sky && player.getY() < level.getSeaLevel() - 24;
         boolean danger = danger(level, player);
         return new Env(level.getGameTime(), level.getDayTime(), overworld, awake, sky, deep, player.isUnderWater(), danger,
-                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePass() != null, !level.isRaining() && !level.isThundering());
+                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePassFor(player) != null, !level.isRaining() && !level.isThundering());
     }
 
     // 戦っている・傷が深い・敵が近い (17 の 6 章: 殺さない。拍子は後ろへずらす)
@@ -266,8 +266,9 @@ public final class OpeningDirector {
         }
         SkyEventData sky = SkyEventData.get(level);
         long now = env.now();
-        boolean passEnded = lastPassEnd >= 0 && st.awakeAt >= 0 && lastPassEnd >= st.awakeAt && now >= lastPassEnd
-                && now - lastPassEnd <= OpeningLogic.PASS_END_WINDOW;
+        long passEnd = Math.max(lastPassEnd, SkyEvents.personalEnd(player));
+        boolean passEnded = passEnd >= 0 && st.awakeAt >= 0 && passEnd >= st.awakeAt && now >= passEnd
+                && now - passEnd <= OpeningLogic.PASS_END_WINDOW;
         boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || !NpcBonds.of(player).bonds().isEmpty()
                 || !QuestLog.of(player).quests().isEmpty()
                 // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
@@ -380,12 +381,19 @@ public final class OpeningDirector {
 
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
+        ServerPlayer any = null;
         for (ServerPlayer p : level.players()) {
             if (p.isAlive() && !p.isSpectator() && OpeningLogic.whaleReady(state(p))) {
-                return p;
+                // まだ岩鯨を見ていない人を先に (最初の一人の近くにだけ出て、遅れて来た人が見損ねないように)
+                if (!Lore.state(p).has("chapter1/stone_whale")) {
+                    return p;
+                }
+                if (any == null) {
+                    any = p;
+                }
             }
         }
-        return null;
+        return any;
     }
 
     // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため。17 の 3.8節)
@@ -552,7 +560,7 @@ public final class OpeningDirector {
 
         @Override
         public void startPersonalShadow() {
-            SkyEvents.startFor(level, player);
+            SkyEvents.startPersonal(level, player);
         }
 
         @Override

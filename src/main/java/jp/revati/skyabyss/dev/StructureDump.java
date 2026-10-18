@@ -235,7 +235,7 @@ public final class StructureDump {
             TitanBackData data = TitanBackData.get(level);
             if (data.needsBuild()) {
                 if (data.isBuilt()) {
-                    data.resetProgress();
+                    jp.revati.skyabyss.titan.dungeon.TitanBackTrials.resetAllGroups(level);
                 }
                 TitanBackBuilder.build(level, data);
             }

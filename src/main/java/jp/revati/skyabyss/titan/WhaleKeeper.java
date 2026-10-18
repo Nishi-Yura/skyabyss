@@ -57,10 +57,16 @@ public final class WhaleKeeper {
             return new Vec3(target.getX() + Math.cos(angle) * SPAWN_DISTANCE, 200, target.getZ() + Math.sin(angle) * SPAWN_DISTANCE);
         }
 
+        // 呼び直しの宛先は、まだ岩鯨を見ていない人を優先する (遅れて来た人のところへも来る)
+        @Override
+        protected boolean preferred(ServerPlayer player) {
+            return !jp.revati.skyabyss.lore.Lore.state(player).has("chapter1/stone_whale");
+        }
+
         @Override
         protected boolean someoneAboard(ServerLevel overworld) {
             ServerLevel back = overworld.getServer().getLevel(TitanTravel.TITAN_BACK);
-            return back != null && !back.players().isEmpty();
+            return back != null && jp.revati.skyabyss.titan.group.Activity.anyoneAboard(back);
         }
 
         @Override

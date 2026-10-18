@@ -51,8 +51,19 @@ public final class RoomLocks {
     // いまの持ち主を決め直す。部屋の中にいる人 (生きていて観戦者でない) の箱と、追い出し先を渡す。持ち主 (いなければ null) を返す
     @Nullable
     public static UUID update(ServerLevel level, String room, AABB box, BlockPos eject, int grace, Listener listener) {
-        long now = level.getGameTime();
         List<ServerPlayer> inside = level.getEntitiesOfClass(ServerPlayer.class, box, p -> p.isAlive() && !p.isSpectator());
+        return update(level, room, inside, grace, listener, p -> {
+            p.fallDistance = 0;
+            p.teleportTo(level, eject.getX() + 0.5, eject.getY(), eject.getZ() + 0.5, p.getYRot(), 0f);
+            Notice.bar(p, ModText.deny("message.skyabyss.room_busy"));
+        });
+    }
+
+    // 部屋の中にいる人を渡す形 (自己テスト用にも使う)。持ち主でないグループの人は ejector で外へ出す
+    @Nullable
+    public static UUID update(ServerLevel level, String room, List<ServerPlayer> inside, int grace, Listener listener,
+            java.util.function.Consumer<ServerPlayer> ejector) {
+        long now = level.getGameTime();
         Lock lock = LOCKS.get(room);
         if (lock != null) {
             boolean ownerInside = false;
@@ -86,9 +97,7 @@ public final class RoomLocks {
         }
         for (ServerPlayer p : inside) {
             if (!Groups.isMember(p, lock.owner)) {
-                p.fallDistance = 0;
-                p.teleportTo(level, eject.getX() + 0.5, eject.getY(), eject.getZ() + 0.5, p.getYRot(), 0f);
-                Notice.bar(p, ModText.deny("message.skyabyss.room_busy"));
+                ejector.accept(p);
             }
         }
         return lock.owner;

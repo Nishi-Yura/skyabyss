@@ -39,14 +39,24 @@ public final class GroupProgress {
         GroupOverlays.refresh(level, group);
     }
 
-    // そのグループの誰かが背中にいない (オンラインでその背中にいる人がいない) まま IDLE_TICKS たち、進みがあるグループ
+    // そのグループの動いている人 (観戦者と、長く動いていない人を除く) がその背中にいるか
+    public static boolean present(ServerLevel level, UUID group) {
+        for (ServerPlayer player : Groups.online(level, group)) {
+            if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // そのグループの誰かが背中にいない (動いている人がその背中にいない) まま IDLE_TICKS たち、進みがあるグループ
     public static List<UUID> idleGroups(ServerLevel level) {
         List<UUID> idle = new ArrayList<>();
         long now = level.getGameTime();
         BackGroupData data = BackGroupData.get(level);
         for (UUID id : data.ids()) {
             BackGroupData.Record r = data.peek(id);
-            if (r != null && r.hasProgress() && now - r.lastSeen() >= IDLE_TICKS && Groups.online(level, id).isEmpty()) {
+            if (r != null && r.hasProgress() && now - r.lastSeen() >= IDLE_TICKS && !present(level, id)) {
                 idle.add(id);
             }
         }
@@ -58,7 +68,9 @@ public final class GroupProgress {
         long now = level.getGameTime();
         BackGroupData data = BackGroupData.get(level);
         for (ServerPlayer player : level.players()) {
-            data.of(Groups.keyOf(player)).touch(now);
+            if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
+                data.of(Groups.keyOf(player)).touch(now);
+            }
         }
     }
 

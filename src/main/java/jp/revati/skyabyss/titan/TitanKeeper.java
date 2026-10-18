@@ -76,6 +76,17 @@ public abstract class TitanKeeper<T extends Entity> {
     protected abstract void announce(ServerLevel level, T titan);
 
     // 巨神での移動の最中か (この間は、動きと読み込みは旅の操縦が受け持つ)
+    // 呼び直しの宛先で優先する人 (まだこの巨神を見ていない人)。既定は誰も優先しない
+    protected boolean preferred(ServerPlayer player) {
+        return false;
+    }
+
+    // 呼び直しの宛先: 優先する人がいればその中から、いなければ誰か一人 (観戦者・倒れている人を除く)
+    protected ServerPlayer pickTarget(ServerLevel level) {
+        List<ServerPlayer> preferred = level.players().stream().filter(p -> eligible(p) && preferred(p)).toList();
+        return preferred.isEmpty() ? randomEligible(level) : preferred.get(level.random.nextInt(preferred.size()));
+    }
+
     protected boolean inVoyage(T titan) {
         return false;
     }
@@ -144,14 +155,14 @@ public abstract class TitanKeeper<T extends Entity> {
                     frozenSince = now;
                 } else if (now - frozenSince > STUCK_AFTER) {
                     SkyAbyss.LOGGER.warn("The {} stopped ticking at {}; calling it again", logName, titan.blockPosition());
-                    relocate(level, slot, titan, randomEligible(level), now);
+                    relocate(level, slot, titan, pickTarget(level), now);
                     return;
                 }
             } else {
                 frozenSince = -1;
             }
             if (unreachableSince >= 0 && !someoneAboard && now - unreachableSince > RELOCATE_AFTER) {
-                ServerPlayer target = randomEligible(level);
+                ServerPlayer target = pickTarget(level);
                 if (target != null) {
                     relocate(level, slot, titan, target, now);
                 }
@@ -171,7 +182,7 @@ public abstract class TitanKeeper<T extends Entity> {
                 missingSince = now;
             } else if (now - missingSince > RELOAD_GRACE && !busy()) {
                 // (巨神での移動の最中は、旅の操縦が巨神を持っているので呼び直さない。読み込まれれば見つかる)
-                ServerPlayer target = near != null ? near : randomEligible(level);
+                ServerPlayer target = near != null ? near : pickTarget(level);
                 if (target != null) {
                     SkyAbyss.LOGGER.warn("The {} was not found at its last position; calling it again", logName);
                     if (!relocate(level, slot, null, target, now)) {
@@ -186,7 +197,7 @@ public abstract class TitanKeeper<T extends Entity> {
         if (unreachableSince < 0) {
             unreachableSince = now;
         } else if (!someoneAboard && now - unreachableSince > RELOCATE_AFTER) {
-            ServerPlayer target = randomEligible(level);
+            ServerPlayer target = pickTarget(level);
             if (target != null) {
                 relocate(level, slot, null, target, now);
             }

@@ -177,7 +177,7 @@ public final class TitanTravel {
         if (data.needsBuild()) {
             // 起動時に建て直せなかったとき (自己テストなど) の保険。古い配置なら、進み具合も最初に戻す
             if (data.isBuilt()) {
-                data.resetProgress();
+                jp.revati.skyabyss.titan.dungeon.TitanBackTrials.resetAllGroups(back);
             }
             TitanBackBuilder.build(back, data);
         }

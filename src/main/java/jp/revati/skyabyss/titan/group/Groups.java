@@ -103,6 +103,18 @@ public final class Groups {
         return keys;
     }
 
+    // グループの人にだけ、位置つきの音を送る (範囲 64)
+    public static void sound(ServerLevel level, UUID group, double x, double y, double z, net.minecraft.sounds.SoundEvent sound,
+            net.minecraft.sounds.SoundSource source, float volume, float pitch) {
+        var holder = net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
+        var packet = new net.minecraft.network.protocol.game.ClientboundSoundPacket(holder, source, x, y, z, volume, pitch, level.random.nextLong());
+        for (ServerPlayer player : online(level, group)) {
+            if (player.distanceToSqr(x, y, z) < 64 * 64 && player.connection != null) {
+                player.connection.send(packet);
+            }
+        }
+    }
+
     // グループの人へ知らせる (そのディメンションにいる全員。倒れている人も含む)
     public static void tell(ServerLevel level, UUID group, Component message) {
         for (ServerPlayer player : online(level, group)) {
