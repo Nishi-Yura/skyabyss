@@ -53,7 +53,7 @@ public final class StormHeartArena {
     // 風穴 (中心から HOLE_OFFSET。3x3 の格子)。昇り風の半径と上の端
     public static final int HOLE_OFFSET = 5;
     public static final double UPDRAFT_RADIUS = 1.6;
-    public static final double UPDRAFT_TOP = FLOOR + 8.5;
+    public static final double UPDRAFT_TOP = FLOOR + 5.5;
     // 入口 (北の壁。前室 KEEL_ANTE の北の口 = 背中の HEART_DOOR) と、その内側の壁の厚み (z GATE_Z + 1)
     static final int GATE_Z = StormBackLayout.KEEL_ANTE.z2() + 1;
 

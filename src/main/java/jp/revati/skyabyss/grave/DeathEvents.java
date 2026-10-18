@@ -113,6 +113,8 @@ public final class DeathEvents {
             if (stack.isEmpty()) {
                 continue;
             }
+            // 留め袋の中の品は持ち物にないので、ここには来ない (袋は copyOnDeath で新しい体へ。docs/design/22 の 5 章)。
+            // 袋の外に残っている品 (掃除の前の 1 秒・袋が満杯でこぼれた品・取り出し済みの品) は、今までどおりの扱い
             boolean important = Keepsakes.guarded(stack);
             if (mode == DeathRules.Mode.VANILLA && !important) {
                 // バニラ: 大事な品以外はそのまま散らばらせる (消滅の呪いもバニラが消す)

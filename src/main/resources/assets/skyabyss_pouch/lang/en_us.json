@@ -1,0 +1,20 @@
+{
+  "skyabyss_pouch.name": "Keeper's Pouch",
+  "skyabyss_pouch.first": "Put [%2$s] into the %1$s",
+  "skyabyss_pouch.full": "The %1$s is full of [%2$s]. It went to your inventory",
+  "skyabyss_pouch.migrated": "Moved your mod items into the %1$s (%2$s)",
+  "skyabyss_pouch.category.tool": "Tools",
+  "skyabyss_pouch.category.key": "Keys and cores",
+  "skyabyss_pouch.category.resonance": "Resonance",
+  "skyabyss_pouch.category.book": "Books",
+  "skyabyss_pouch.category.material": "Titan materials",
+  "skyabyss_pouch.category.small": "Small materials",
+  "skyabyss_pouch.cmd.header": "%1$s (%2$s kinds)",
+  "skyabyss_pouch.cmd.empty": "The %1$s is empty",
+  "skyabyss_pouch.cmd.unknown": "%s is not a pouch item",
+  "skyabyss_pouch.cmd.none": "%s is not in the pouch (or does not fit your inventory)",
+  "skyabyss_pouch.cmd.took": "Took %1$s of [%2$s] out of the pouch",
+  "skyabyss_pouch.cmd.hold_on": "Sweeping paused (pouch items can stay in your inventory)",
+  "skyabyss_pouch.cmd.hold_off": "Sweeping resumed",
+  "skyabyss_pouch.cmd.migrated": "Ran the migration (%s items)"
+}

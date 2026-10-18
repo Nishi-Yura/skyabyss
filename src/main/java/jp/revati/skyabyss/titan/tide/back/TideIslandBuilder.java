@@ -53,6 +53,13 @@ public final class TideIslandBuilder {
         tower(kit);
         lightWells(kit);
         fixtures(kit);
+        fillWells(kit);
+    }
+
+    // 亀の体 (珊瑚・遺跡の形) の凹みにできた小さな縦穴を埋める (詰み監査。-52,103,23 と -57,103,25 など)
+    static void fillWells(TideKit kit) {
+        jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), TideTurtle.minX(), TideTurtle.maxX(), TideTurtle.minZ(), TideTurtle.maxZ(),
+                TideIslandBuilder::surface, TOP_Y - 2);
     }
 
     // ---------------------------------------------------------------- 甲羅の中 (掘ると見える、体の芯の石)

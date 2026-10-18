@@ -105,6 +105,7 @@
   "skyabyss_record.d.place_bags": "・持ち物の袋や箱の中 ×%s",
   "skyabyss_record.d.place_ender": "・エンダーチェスト ×%s",
   "skyabyss_record.d.place_accessory": "・装飾の枠 ×%s",
+  "skyabyss_record.d.place_pouch": "・留め袋 ×%s",
   "skyabyss_record.d.place_pending": "・報酬の預かり ×%s",
   "skyabyss_record.d.place_kept": "・背中で倒れたときの預かり ×%s",
   "skyabyss_record.d.place_ground": "・地面 ×%s：%s %s, %s, %s",
@@ -236,5 +237,11 @@
   "skyabyss_record.v.stopped_plain": "止めた",
   "skyabyss_record.r.readiness": "備え",
   "skyabyss_record.d.readiness": "%s の心臓の前に、自分の身・刃・糧がどれだけ整っているかの目安。緑は十分、黄はもう少し、赤は足りない（形でも分かる：● 緑、▲ 黄、■ 赤）。巨神ごとの目安に照らす。",
-  "skyabyss_record.d.readiness_free": "赤でも乗れるし、戦える。乗るときに一度だけ確かめられる。"
+  "skyabyss_record.d.readiness_free": "赤でも乗れるし、戦える。乗るときに一度だけ確かめられる。",
+  "skyabyss_record.r.steles": "試練の石",
+  "skyabyss_record.v.steles": "%s/%s/%s",
+  "skyabyss_record.d.steles": "試練のあとの石。右の値は「自分が鳴らした数 / 仲間が鳴らした数 / まだの数」。パーティの誰かが鳴らせば、全員が踏破として数える。",
+  "skyabyss_record.d.steles_none": "この巨神には、鳴らす石がない。",
+  "skyabyss_record.d.steles_whale": "共鳴石 %s",
+  "skyabyss_record.d.steles_line": "- %s: %s"
 }

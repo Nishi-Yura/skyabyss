@@ -177,7 +177,8 @@ public final class TideChapter {
         }
         p.getPersistentData().putBoolean(SHELL_GIVEN, true);
         ItemStack shell = new ItemStack(TideChapterSetup.TIDE_WATCHING_SHELL.get());
-        if (!p.getInventory().add(shell)) {
+        jp.revati.skyabyss.pouch.PouchRouting.give(p, shell);
+        if (!shell.isEmpty()) {
             p.drop(shell, false);
         }
         return true;

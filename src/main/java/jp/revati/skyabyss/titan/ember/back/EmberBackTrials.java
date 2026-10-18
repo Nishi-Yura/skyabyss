@@ -375,7 +375,11 @@ public final class EmberBackTrials {
         UUID group = Groups.keyOf(player);
         EmberBackState state = EmberBackState.of(level, group);
         if (state.rung(trial)) {
-            Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + (state.sleeping(trial) ? "trial_sleeping" : "stone_rung")));
+            if (state.sleeping(trial)) {
+                Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + "trial_sleeping"));
+            } else {
+                jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id());
+            }
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -417,7 +421,7 @@ public final class EmberBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, group, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id(), null);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, group, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id(), null, by);
         checkAllRung(level, group);
     }
 
@@ -769,6 +773,7 @@ public final class EmberBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
+        jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
         Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);

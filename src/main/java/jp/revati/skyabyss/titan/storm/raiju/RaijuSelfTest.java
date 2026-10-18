@@ -276,6 +276,9 @@ public final class RaijuSelfTest {
     private static void tick(Raiju r, int ticks) {
         for (int i = 0; i < ticks && r.isAlive(); i++) {
             r.tick();
+            if (r.level() instanceof ServerLevel level) {
+                jp.revati.skyabyss.combat.Telegraph.tickNow(level);
+            }
         }
     }
 
@@ -294,6 +297,21 @@ public final class RaijuSelfTest {
         check(Math.abs(Raiju.takenFor(10, 2f, true) - 7.5f) < 1e-4 && Math.abs(Raiju.takenFor(10, 1f, false) - 10f) < 1e-4, "damage taken is wrong", failures);
         check(r.mode() == Raiju.MODE_PERCH && r.rod() == 0, "raiju did not start on rod 1 (mode " + r.mode() + ", rod " + r.rod() + ")", failures);
         check(r.isNoGravity(), "perched raiju falls", failures);
+        // 雷渡りの印: 予告は 16 tick 以上、人数で枝分かれの帯が増える (1 人 1 本、6 人 4 本)
+        int[] railAreas = new int[2];
+        for (int k = 0; k < 2; k++) {
+            r.setPartyOverride(k == 0 ? 1 : 6);
+            jp.revati.skyabyss.combat.Telegraph.resetStats();
+            r.railTo(k == 0 ? 2 : 1);
+            railAreas[k] = jp.revati.skyabyss.combat.Telegraph.damagingCreated();
+            for (int w : jp.revati.skyabyss.combat.Telegraph.activeWarns(site.level())) {
+                check(w >= jp.revati.skyabyss.combat.Telegraph.MIN_WARN_TICKS, "a rail marker warns under 16 ticks (" + w + ")", failures);
+            }
+            tick(r, Raiju.RAIL_WARN + Raiju.RAIL_TRAVEL + 2);
+        }
+        check(railAreas[0] == 1 && railAreas[1] == 1 + Raiju.railForks(6), "rail areas 1p " + railAreas[0] + " / 6p " + railAreas[1] + " (expect 1 / " + (1 + Raiju.railForks(6)) + ")", failures);
+        notes.add("rail areas 1p " + railAreas[0] + " -> 6p " + railAreas[1]);
+        r.setPartyOverride(0);
         // 接地した柱へ渡ると、痺れて落ちる
         int g = 3;
         StormRods.ground(site.rod(g), 400);

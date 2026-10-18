@@ -266,6 +266,11 @@ public final class GroupEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onTarget(LivingChangeTargetEvent event) {
         LivingEntity target = event.getNewAboutToBeSetTarget();
+        // 復活・再入場の直後の守りの間は、誰にも狙われない
+        if (target instanceof ServerPlayer guarded && ReentryRules.guarded(guarded)) {
+            event.setCanceled(true);
+            return;
+        }
         if (target != null && (TitanBacks.isBack(event.getEntity().level().dimension()) || isolated(event.getEntity(), target, null))
                 && Groups.differ(event.getEntity(), target)) {
             event.setCanceled(true);

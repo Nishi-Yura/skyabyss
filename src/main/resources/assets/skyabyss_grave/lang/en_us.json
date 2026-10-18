@@ -42,5 +42,6 @@
   "skyabyss_record.d.grave_rescue_off": "The storyteller's rescue is turned off in this world.",
   "skyabyss_record.d.grave_owner_only": "Only the owner can open a grave.",
   "skyabyss_record.d.grave_open": "Anyone can open a grave.",
-  "skyabyss_record.d.grave_expire": "A grave crumbles after %s minutes and its contents spill onto the ground."
+  "skyabyss_record.d.grave_expire": "A grave crumbles after %s minutes and its contents spill onto the ground.",
+  "skyabyss_record.d.grave_marker": "Grave marker: while a grave stands, its direction and distance show on screen. It disappears within %s blocks of the grave or once emptied. Only your own grave shows, never a companion's (turn it off with the graveMarker setting)."
 }

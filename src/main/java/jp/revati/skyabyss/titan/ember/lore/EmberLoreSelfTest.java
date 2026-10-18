@@ -225,7 +225,7 @@ public final class EmberLoreSelfTest {
         check(Progression.stage(p) == SkyKey.FRAGMENTS && Progression.stopped(server, p.getUUID(), EmberIds.TITAN), "stage after the ember heart", f);
         check(SkyKey.ready(p), "four fragments after the ember heart should form the key", f);
         check(SkyKey.assemble(p, false), "assemble failed", f);
-        check(SkyKey.fragmentsHeld(p) == 0 && p.getInventory().countItem(StorySetup.SKY_KEY.get()) == 1 && Lore.state(p).has(EmberLore.LORE_SKY_KEY),
+        check(SkyKey.fragmentsHeld(p) == 0 && jp.revati.skyabyss.pouch.Pouch.countAll(p, StorySetup.SKY_KEY.get()) == 1 && Lore.state(p).has(EmberLore.LORE_SKY_KEY),
                 "after assembling: fragments " + SkyKey.fragmentsHeld(p) + ", key " + p.getInventory().countItem(StorySetup.SKY_KEY.get()), f);
         check(!SkyKey.assemble(p, false), "the key formed twice", f);
         // 「第一章 了」は SkyKey の終わりの札で出す (13 の 15 章の判断 6 を 14 の場面に合わせた)

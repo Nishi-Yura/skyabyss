@@ -42,9 +42,16 @@ public final class ReentryRules {
 
     // 戻った人に 3 秒の守りと光
     public static void guard(ServerPlayer player) {
+        guard(player, true);
+    }
+
+    // notify = false: 背中の復活の守り (RespawnGuard)。扉の再入場の知らせは出さない
+    public static void guard(ServerPlayer player, boolean notify) {
         GUARD.put(player.getUUID(), player.level().getGameTime() + Reentry.GLOW_TICKS);
         player.addEffect(new MobEffectInstance(MobEffects.GLOWING, Reentry.GLOW_TICKS, 0, false, false));
-        Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+        if (notify) {
+            Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+        }
     }
 
     public static boolean guarded(ServerPlayer player) {

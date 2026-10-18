@@ -78,6 +78,26 @@ public final class TitanBackSelfTest {
                     checkSigns(back, PENDING);
                     forceMazeChunks(back, true);
                 })),
+                // 詰み監査 (背中の到達・戻れるか・はしご・床の穴)。調べる部品は titan/audit/BackReach
+                SelfTestRunner.Step.once("titan back (reach)", server -> withBack(server, back -> {
+                    // アスレチックと迷路の形は、試練が戻るたびに変わる。何通りかで調べる (最初の形 + 4 回のリセット)
+                    java.util.Map<String, Integer> seen = new java.util.LinkedHashMap<>();
+                    for (int round = 0; round < 5; round++) {
+                        if (round > 0) {
+                            TitanBackTrials.resetTrials(back);
+                        }
+                        jp.revati.skyabyss.titan.audit.BackReach.Report r = TitanBackAudit.run(back);
+                        if (round == 0) {
+                            r.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
+                        }
+                        r.failures.forEach(f -> seen.merge(f, 1, Integer::sum));
+                    }
+                    seen.forEach((f, n) -> {
+                        String line = f + (n < 5 ? " (in " + n + " of 5 shapes)" : "");
+                        SkyAbyss.LOGGER.warn("REACH {}", line);
+                        PENDING.add(line);
+                    });
+                })),
                 SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
@@ -485,8 +505,9 @@ public final class TitanBackSelfTest {
         // 抜け道の内側 (鼓動の間の側) が柱などでふさがれていないこと
         air(level, new BlockPos(9, 94, -31), "east return (hub side)", failures);
         air(level, new BlockPos(11, 94, -31), "east return (hall side)", failures);
-        if (!level.getBlockState(new BlockPos(-9, 98, -31)).is(Blocks.LADDER)) {
-            failures.add("west return ladder missing");
+        // 頂は 97 (戸 -10, 98〜99 の足もとの石の高さ)。98 だと支えが戸になる (詰み監査)
+        if (!level.getBlockState(new BlockPos(-9, 97, -31)).is(Blocks.LADDER) || level.getBlockState(new BlockPos(-9, 98, -31)).is(Blocks.LADDER)) {
+            failures.add("west return ladder missing or too high (top must be y 97)");
         }
         if (!level.getBlockState(new BlockPos(4, FLOOR, -25)).is(Blocks.LADDER)) {
             failures.add("maze entrance ladder missing at the hub floor");

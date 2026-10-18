@@ -105,6 +105,7 @@
   "skyabyss_record.d.place_bags": "- In a bundle or box you carry x%s",
   "skyabyss_record.d.place_ender": "- Ender chest x%s",
   "skyabyss_record.d.place_accessory": "- Accessory slots x%s",
+  "skyabyss_record.d.place_pouch": "- Pouch x%s",
   "skyabyss_record.d.place_pending": "- Held rewards x%s",
   "skyabyss_record.d.place_kept": "- Kept on the back x%s",
   "skyabyss_record.d.place_ground": "- On the ground x%s: %s %s, %s, %s",
@@ -236,5 +237,11 @@
   "skyabyss_record.v.stopped_plain": "Stilled",
   "skyabyss_record.r.readiness": "Readiness",
   "skyabyss_record.d.readiness": "How ready your body, blade and stores are for %s's heart. Green is enough, yellow nearly, red short (also by shape: round green, triangle yellow, square red). Measured against that titan's benchmark.",
-  "skyabyss_record.d.readiness_free": "Red never stops you from boarding or fighting. You are asked once when boarding."
+  "skyabyss_record.d.readiness_free": "Red never stops you from boarding or fighting. You are asked once when boarding.",
+  "skyabyss_record.r.steles": "Stones",
+  "skyabyss_record.v.steles": "%s/%s/%s",
+  "skyabyss_record.d.steles": "The stones after each trial. The value reads \"rung by you / rung by the party / not yet\". When anyone in the party rings one, it counts as cleared for everyone.",
+  "skyabyss_record.d.steles_none": "This titan has no stones to ring.",
+  "skyabyss_record.d.steles_whale": "Resonance stone %s",
+  "skyabyss_record.d.steles_line": "- %s: %s"
 }

@@ -72,6 +72,12 @@ public final class TitanBackBuilder {
                 kit.set(spawn, BuildKit.AIR);
             }
         }
+        // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)
+        int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(level, TitanBackAudit::spec,
+                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, 99, -RZ, RX, 175, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+        if (repaired > 0) {
+            SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
+        }
         data.markBuilt();
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
     }
@@ -461,7 +467,8 @@ public final class TitanBackBuilder {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
         BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
-        for (int y = FLOOR + 1; y <= 98; y++) {
+        // はしごの頂は 97 まで。98 (戸と同じ高さ) だと、支えの壁が戸になって、戸が開くと浮いてしまう。頂の隣 (-10, 98〜99) が戸 = 出口
+        for (int y = FLOOR + 1; y <= 97; y++) {
             kit.set(-9, y, -31, ladderEast);
         }
         for (BlockPos p : EAST_RETURN) {

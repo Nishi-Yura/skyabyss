@@ -190,11 +190,11 @@ public final class SkillManager {
             return RespecResult.NO_FORGE;
         }
         int cost = SkillRules.respecCost(d.respecs);
-        if (!free && countCrystals(player.getInventory()) < cost) {
+        if (!free && countCrystals(player) < cost) {
             return RespecResult.NO_CRYSTALS;
         }
         if (!free) {
-            removeCrystals(player.getInventory(), cost);
+            removeCrystals(player, cost);
         }
         d.clearSkills();
         d.respecs++;
@@ -216,6 +216,17 @@ public final class SkillManager {
         return false;
     }
 
+    // 持ち物 + 留め袋の共鳴の結晶の数 (振り直しの費用の足りるか。docs/design/22 の 8.3)
+    public static int countCrystals(net.minecraft.world.entity.player.Player player) {
+        return jp.revati.skyabyss.pouch.Pouch.countAll(player, ModItems.RESONANCE_CRYSTAL.get());
+    }
+
+    // 袋から先に、足りない分を持ち物から払う
+    public static void removeCrystals(net.minecraft.world.entity.player.Player player, int count) {
+        jp.revati.skyabyss.pouch.Pouch.takeAny(player, ModItems.RESONANCE_CRYSTAL.get(), count);
+    }
+
+    // 持ち物だけの数 (留め袋は含まない)
     public static int countCrystals(Inventory inv) {
         int n = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {

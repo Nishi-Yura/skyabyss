@@ -65,7 +65,9 @@ public class ResonanceStoneBlock extends Block {
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record record = GroupProgress.of(server, group);
         if (record.flag(TitanBackTrials.STONE_FLAG + index)) {
-            return InteractionResult.PASS;
+            // すでに鳴っている石: 誰が鳴らしたかを見せる (鳴らした石はもう一度は鳴らせない)
+            jp.revati.skyabyss.titan.group.TrialSteles.tellWho(sp, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index));
+            return InteractionResult.SUCCESS;
         }
         // 番兵の回廊の石は、そのグループが番兵長を倒すまで黙っている
         if (index == 1 && !record.isHallCleared("e3")) {
@@ -90,7 +92,7 @@ public class ResonanceStoneBlock extends Block {
         Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
         // 背中の外にいる仲間にも (クエストはグループの記録から数える)
         jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),
-                Component.translatable("block.skyabyss.resonance_stone"));
+                Component.translatable("block.skyabyss.resonance_stone"), sp);
         int active = countActive(record);
         int total = TitanBackLayout.RESONANCE_STONES.size();
         notifyGroup(server, group, ModText.progress("message.skyabyss.resonance", active, total));

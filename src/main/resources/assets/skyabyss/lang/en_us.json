@@ -610,5 +610,11 @@
   "message.skyabyss.prep.ready": "You are ready for %s",
   "message.skyabyss.heartbeat_ward.used": "The heartbeat ward shattered and held you back",
   "wayfarer_notes.empty": "Nothing is written here yet.",
-  "growth.skyabyss.reason.site": "Cleared a small place"
+  "growth.skyabyss.reason.site": "Cleared a small place",
+  "message.skyabyss.steles.who": "Stone: %s",
+  "message.skyabyss.steles.who_self": "You rang it",
+  "message.skyabyss.steles.who_other": "Rung by %s (counts as cleared for you)",
+  "message.skyabyss.steles.who_other_unknown": "Rung by a companion (counts as cleared for you)",
+  "message.skyabyss.steles.who_none": "Not yet",
+  "hud.skyabyss.grave_marker": "Grave  %sm"
 }

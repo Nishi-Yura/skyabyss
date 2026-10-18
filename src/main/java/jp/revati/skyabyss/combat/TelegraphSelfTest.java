@@ -65,6 +65,7 @@ public final class TelegraphSelfTest {
             server.setDifficulty(Difficulty.NORMAL, true);
             platform(level);
             shapes(level, f, notes);
+            TelegraphDecalTest.run(server, f, notes);
             basics(level, f, notes);
             roomSizes(f, notes);
             captain(level, f, notes);

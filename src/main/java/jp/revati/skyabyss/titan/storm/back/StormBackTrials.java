@@ -406,7 +406,11 @@ public final class StormBackTrials {
             return;
         }
         if (p.rung(trial)) {
-            Notice.bar(player, ModText.hint(p.sleeping() == trial ? "message.skyabyss.storm.trial_sleeping" : "message.skyabyss.storm.stone_rung"));
+            if (p.sleeping() == trial) {
+                Notice.bar(player, ModText.hint("message.skyabyss.storm.trial_sleeping"));
+            } else {
+                jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.STORM, trial.id());
+            }
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -444,7 +448,7 @@ public final class StormBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, p.group, jp.revati.skyabyss.titan.group.TrialSteles.STORM, trial.id(), null);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, p.group, jp.revati.skyabyss.titan.group.TrialSteles.STORM, trial.id(), null, by);
         if (p.allRung()) {
             for (ServerPlayer pl : Groups.online(level, p.group)) {
                 Notice.narrate(pl, "message.skyabyss.storm.all_rung");
@@ -789,6 +793,7 @@ public final class StormBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
+        jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
         Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);

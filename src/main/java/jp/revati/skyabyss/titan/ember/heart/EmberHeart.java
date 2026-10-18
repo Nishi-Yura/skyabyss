@@ -12,6 +12,8 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
@@ -88,6 +90,31 @@ public class EmberHeart extends HeartBoss {
     public static final double CHILL_ATTACK_SPEED = -0.20;
     // 引く速さ (ブロック/tick。鞴の嵐は歩けば逆らえる)
     public static final double GALE_PULL = 0.12;
+
+    // 予告の数値 (warn は tick。予告の長さは Telegraph.MIN_WARN_TICKS = 16 以上)
+    public static final int BREATH_WARN = 24;
+    public static final double BREATH_LENGTH = 16;
+    public static final double BREATH_HALF_WIDTH = 1.5;
+    public static final int PULSE_WARN = 20;
+    public static final double PULSE_START = 3.2;
+    public static final double PULSE_REACH = 15.5;
+    public static final double LANE_HALF = Math.toRadians(20);
+    public static final int ORB_WARN = 30;
+    public static final double ORB_RADIUS = 2.3;
+    public static final double BLAZE_RADIUS = 2.0;
+    public static final int BLAZE_WARN = 20;
+    public static final int BLAZE_BURNS = 3;
+    public static final int GALE_WARN = 70;
+    public static final double GALE_RADIUS = 6;
+    public static final float GALE_WAVE_DAMAGE = 8f;
+    public static final int PELLET_WARN = 30;
+    public static final double PELLET_RADIUS = 1.6;
+    public static final int FADING_WARN = 40;
+    public static final double FADING_RADIUS = 6;
+    public static final float FADING_WAVE_DAMAGE = 10f;
+    public static final int EMBER_BURST_FIRST = 40;
+    public static final int EMBER_BURST_WARN = 16;
+    public static final int ROAR_WARN = 22;
     // 残り火: 半径 2.5、8 秒、四つ
     public static final double EMBER_RADIUS = 2.5;
     public static final int EMBER_TICKS = 160;
@@ -120,19 +147,6 @@ public class EmberHeart extends HeartBoss {
     public static final Action[] PHASE_TWO = {Action.FLOOR, Action.GALE, Action.PELLET};
     public static final Action[] PHASE_THREE = {Action.EMBERS, Action.FADING, Action.VEIL};
 
-    // 床を走る輪 (熱の脈・咆哮の押し返し)。跳べば当たらない
-    private static final class Ring {
-        double radius = 1.5;
-        final double floorY;
-        final boolean harmful;
-        final Set<UUID> hit = new HashSet<>();
-
-        Ring(double floorY, boolean harmful) {
-            this.floorY = floorY;
-            this.harmful = harmful;
-        }
-    }
-
     // 熔け玉の予告のあとに落ちる玉
     private record Orb(double x, double z, int impactAt) {
     }
@@ -141,8 +155,8 @@ public class EmberHeart extends HeartBoss {
     private record Blaze(double x, double z, int endAt) {
     }
 
-    // 残り火 (半径 2.5、8 秒)
-    private record Ember(double x, double z, int endAt) {
+    // 残り火 (半径 2.5、8 秒)。startAt は置いた tick (小さな燃え立ちの予告の時計)
+    private record Ember(double x, double z, int startAt, int endAt) {
     }
 
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -152,7 +166,6 @@ public class EmberHeart extends HeartBoss {
     private int cooldown = 40;
     private float attackYaw;
     private boolean defeated;
-    private final List<Ring> rings = new ArrayList<>();
     private final List<Orb> orbs = new ArrayList<>();
     private final List<Blaze> blazes = new ArrayList<>();
     private final List<Ember> embers = new ArrayList<>();
@@ -168,6 +181,8 @@ public class EmberHeart extends HeartBoss {
     private float toughness = 1f;
     // 自己テスト用: 技を自分で選ばない (forceAction だけで動かす)
     private boolean holdAttacks;
+    // 開発用: 熾の底にいる人数を多いことにする (0 なら実際の人数)
+    private int partyOverride;
 
     public EmberHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ember_heart", "roar_1", "roar_2", "breath", "pulse", "orb", "floor", "gale", "pellet",
@@ -338,7 +353,6 @@ public class EmberHeart extends HeartBoss {
         if (cooldown > 0) {
             cooldown--;
         }
-        tickRings(server);
         tickOrbs(server);
         tickBlazes(server);
         tickEmbers(server);
@@ -468,7 +482,7 @@ public class EmberHeart extends HeartBoss {
 
     // 心臓の中心の高さ (模型の核)
     private double coreY() {
-        return getY() + 2.0;
+        return getY() + 3.0;
     }
 
     // 床の高さ: 部屋に縛られていれば部屋の床の面。そうでなければ真下へたどって最初の床
@@ -518,10 +532,16 @@ public class EmberHeart extends HeartBoss {
             sound(server, EmberHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 40, 1.6, 1.4, 1.6, 0);
             server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 60, 1.6, 1.4, 1.6, 0.1);
-        }
-        if (actionTicks == 22) {
-            sound(server, SoundEvents.GENERIC_EXPLODE.value(), 1.2f, 0.6f);
-            rings.add(new Ring(floorY(), false));
+            // 押し返す輪 (傷はない)。広がる範囲は、始めの 1.1 秒だけ床に描く
+            tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, 0xB0B0B0)
+                    .active((int) Math.ceil((18 - 2.5) / 0.8))
+                    .onImpact(s -> sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.2f, 0.6f))
+                    .onHit((s, player) -> {
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(0.9, -to.x, -to.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             warn(server, dust(getPhase() == 0 ? 0xFFB040 : 0xE8E0D8, 1.3f), getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.05);
@@ -554,44 +574,150 @@ public class EmberHeart extends HeartBoss {
         }
     }
 
+    // ---- 予告の部品 (combat/Telegraph) の組み立てと人数 ----
+
+    // 試験用: 輪の安全な筋の向きを決める (null なら乱数)
+    @Nullable
+    public static volatile Double testGapBase;
+
+    // 開発用: 熾の底にいる人数を、実際より多いことにする (一人で複数人の技の絵を撮るため。0 なら実際の人数)
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    int present(ServerLevel server) {
+        return Math.max(partyOverride, reachable(server, 30).size());
+    }
+
+    // 人数による技の数・本数 (一人でも、印を見れば傷なしで避けられる)
+    public static int breathLines(int n) {
+        return Math.min(5, 1 + (Math.max(1, n) + 1) / 2);
+    }
+
+    public static int pulseRings(int n) {
+        return 1 + (n >= 3 ? 1 : 0) + (n >= 5 ? 1 : 0);
+    }
+
+    public static int orbCount(int n) {
+        return Math.min(9, 2 + Math.max(1, n));
+    }
+
+    public static int galeWaves(int n) {
+        return n >= 4 ? 2 : 1;
+    }
+
+    public static int pelletCount(int n) {
+        return Math.min(9, 4 + Math.max(1, n));
+    }
+
+    public static int floorCracks(int n) {
+        return n >= 4 ? 2 : 1;
+    }
+
+    public static int fadingWaves(int n) {
+        return n >= 3 ? 2 : 1;
+    }
+
+    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは熾の底の人)
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
+        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    }
+
+    // 輪の安全な筋 (緑の扇。見た目だけ。当たりはなく、輪が抜ける)
+    private double[] laneGaps() {
+        Double fixed = testGapBase;
+        double base = fixed != null ? fixed : random.nextDouble() * Math.PI * 2;
+        return new double[] {base, base + Math.PI * 2 / 3, base + Math.PI * 4 / 3};
+    }
+
+    private void showLanes(ServerLevel server, double[] gaps, int warn) {
+        for (double gap : gaps) {
+            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 13, LANE_HALF), warn, 0x40E8FF).start();
+        }
+    }
+
+    // 狙う地点: 人の足もとを、重ならないように count か所 (いま狙っている人を先頭に、人数より多いぶんは人のまわり)。
+    // 人がいなくて開発用の人数の上書きだけあるときは、心臓のまわりの点で補う。部屋の外へははみ出さない
+    List<Vec3> spots(ServerLevel server, int count, double fillMin, double fillMax) {
+        List<ServerPlayer> all = new ArrayList<>(reachable(server, 30));
+        java.util.Collections.shuffle(all, new java.util.Random(random.nextLong()));
+        LivingEntity main = getTarget();
+        if (main instanceof ServerPlayer mp && all.remove(mp)) {
+            all.add(0, mp);
+        }
+        List<Vec3> out = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            double x;
+            double z;
+            if (all.isEmpty()) {
+                if (partyOverride <= 0) {
+                    break;
+                }
+                double a = random.nextDouble() * Math.PI * 2;
+                double r = 5 + random.nextDouble() * 7;
+                x = getX() + Math.cos(a) * r;
+                z = getZ() + Math.sin(a) * r;
+            } else {
+                ServerPlayer p = all.get(i % all.size());
+                x = p.getX();
+                z = p.getZ();
+                if (i >= all.size()) {
+                    double a = random.nextDouble() * Math.PI * 2;
+                    double r = fillMin + random.nextDouble() * (fillMax - fillMin);
+                    x += Math.cos(a) * r;
+                    z += Math.sin(a) * r;
+                }
+            }
+            double dx = x - (EmberHeartArena.CX + 0.5);
+            double dz = z - (EmberHeartArena.CZ + 0.5);
+            double d = Math.hypot(dx, dz);
+            if (d > 13.0) {
+                x = EmberHeartArena.CX + 0.5 + dx * 13.0 / d;
+                z = EmberHeartArena.CZ + 0.5 + dz * 13.0 / d;
+            }
+            out.add(new Vec3(x, floorY(), z));
+        }
+        return out;
+    }
+
     // ---- 段階 1 ----
 
-    // 火の息 (1.2 秒): 心臓から人へ伸びる赤い線。幅 3・長さ 22 の帯。傷 18、熱 +15
+    // 火の息 (1.2 秒): 心臓から人へ伸びる赤い帯 (幅 3・長さ 22)。傷 18、熱 +15、押す。
+    // 人数が増えると別の人へ向けて最大五本。向きは技の初めに決まり、そのあとは追わない
     private void tickBreath(ServerLevel server) {
-        Vec3 f = forward(attackYaw);
-        double fy = floorY();
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.BREATH.get(), 2f, 1f);
-        }
-        if (actionTicks < 24 && actionTicks % 2 == 0) {
-            Vec3 side = new Vec3(-f.z, 0, f.x);
-            for (double d = 2; d <= 22; d += 1.0) {
-                for (int s = -1; s <= 1; s += 2) {
-                    warn(server, dust(0xFF3A18, 0.9f), getX() + f.x * d + side.x * s * 1.5, fy + 0.15, getZ() + f.z * d + side.z * s * 1.5, 1, 0, 0, 0, 0);
-                }
-                if (((int) d) % 3 == actionTicks % 3) {
-                    warn(server, dust(0xFFC060, 0.7f), getX() + f.x * d, fy + 0.15, getZ() + f.z * d, 1, 0, 0, 0, 0);
-                }
+            List<Double> angles = new ArrayList<>();
+            for (Vec3 p : spots(server, breathLines(present(server)), 4, 9)) {
+                angles.add(Telegraph.angleOf(p.x - getX(), p.z - getZ()));
             }
-        }
-        if (actionTicks >= 24 && actionTicks <= 34 && actionTicks % 2 == 0) {
-            for (double d = 2; d <= 22; d += 1.5) {
-                server.sendParticles(ParticleTypes.FLAME, getX() + f.x * d, fy + 0.8, getZ() + f.z * d, 6, 0.8, 0.4, 0.8, 0.05);
-                server.sendParticles(ParticleTypes.SMOKE, getX() + f.x * d, fy + 1.2, getZ() + f.z * d, 2, 0.6, 0.4, 0.6, 0.02);
+            if (angles.isEmpty()) {
+                angles.add(Telegraph.angleOf(forward(attackYaw)));
             }
-        }
-        if (actionTicks == 24) {
-            sound(server, SoundEvents.BLAZE_SHOOT, 2f, 0.6f);
-            for (ServerPlayer player : reachable(server, 24)) {
-                Vec3 v = player.position().subtract(position()).multiply(1, 0, 1);
-                double along = v.dot(f);
-                double across = v.subtract(f.scale(along)).length();
-                if (along > 0.5 && along < 22 && across < 1.5) {
-                    strike(player, BREATH_DAMAGE);
-                    EmberHeat.add(player, BREATH_HEAT, EmberHeat.Reason.HEART);
-                    player.knockback(1.2, -f.x, -f.z);
-                    player.hurtMarked = true;
-                }
+            boolean first = true;
+            for (double angle : angles) {
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                boolean lead = first;
+                first = false;
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, 0xFF3A18)
+                        .onImpact(s -> {
+                            if (lead) {
+                                sound(s, SoundEvents.BLAZE_SHOOT, 2f, 0.6f);
+                            }
+                            double fy = floorY();
+                            for (double d = 2; d <= BREATH_LENGTH; d += 2.0) {
+                                s.sendParticles(ParticleTypes.FLAME, getX() + dx * d, fy + 0.8, getZ() + dz * d, 6, 0.8, 0.4, 0.8, 0.05);
+                                s.sendParticles(ParticleTypes.SMOKE, getX() + dx * d, fy + 1.2, getZ() + dz * d, 2, 0.6, 0.4, 0.6, 0.02);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, BREATH_DAMAGE);
+                            EmberHeat.add(player, BREATH_HEAT, EmberHeat.Reason.HEART);
+                            player.knockback(1.2, -dx, -dz);
+                            player.hurtMarked = true;
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 40) {
@@ -599,56 +725,63 @@ public class EmberHeart extends HeartBoss {
         }
     }
 
-    // 熱の脈 (1.0 秒): 心臓が一度強く光り、床を走る輪。跳べば当たらない。傷 13、熱 +10
+    // 熱の脈 (1.0 秒): 心臓が一度強く光り、床を走る輪 (安全な筋が三本。跳べば当たらない)。傷 13、熱 +10。
+    // 三人から輪が二重、五人から三重 (0.7 秒の間をあける)
     private void tickPulse(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.PULSE.get(), 2f, 1f);
+            double[] gaps = laneGaps();
+            showLanes(server, gaps, PULSE_WARN);
+            int rings = pulseRings(present(server));
+            int active = (int) Math.ceil((PULSE_REACH - PULSE_START) / 0.8);
+            for (int i = 0; i < rings; i++) {
+                boolean lead = i == 0;
+                tg(server, TelegraphShape.wave(getX(), getZ(), PULSE_START, PULSE_REACH, 0.9, gaps, LANE_HALF), PULSE_WARN + i * 14, 0xFF8A20)
+                        .active(active).jumpClear(0.9)
+                        .onImpact(s -> {
+                            if (lead) {
+                                sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.0f, 1.3f);
+                                s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.1);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, PULSE_DAMAGE);
+                            EmberHeat.add(player, PULSE_HEAT, EmberHeat.Reason.HEART);
+                            Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.9, -to.x, -to.z);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
         }
         if (actionTicks < 20 && actionTicks % 3 == 0) {
-            double fy = floorY();
-            for (int a = 0; a < 360; a += 20) {
-                double rad = Math.toRadians(a);
-                warn(server, dust(0xFF8A20, 1.5f), getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
-            }
-            warn(server, dust(0xFFE8A0, 1.6f), getX(), coreY(), getZ(), 4, 0.5, 0.5, 0.5, 0.02);
-        }
-        if (actionTicks == 20) {
-            sound(server, SoundEvents.GENERIC_EXPLODE.value(), 1.0f, 1.3f);
-            double fy = floorY();
-            server.sendParticles(ParticleTypes.FLAME, getX(), fy + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.1);
-            rings.add(new Ring(fy, true));
+            warn(server, dust(0xFFE8A0, 1.6f), getX(), coreY(), getZ(), 4, 0.8, 0.8, 0.8, 0.02);
         }
         if (actionTicks >= 40) {
             finish();
         }
     }
 
-    // 熔け玉 (1.5 秒): 人の足もとに橙の輪が 3 つ。落ちた所は半径 2 に傷 15、そのあと 4 秒燃える床
+    // 熔け玉 (1.5 秒): 人の足もとに橙の円。円の中は傷 15 (半径 2.3)、落ちた所は 4 秒燃える床 (一秒ごとの燃え立ちにも予告がある)。
+    // 数は 人数 + 2 (最大 9)。人数より多いぶんは人のまわりへ
     private void tickOrb(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.ORB.get(), 2f, 1f);
-            List<ServerPlayer> players = reachable(server, 24);
-            int n = 0;
-            if (!players.isEmpty()) {
-                List<ServerPlayer> order = new ArrayList<>(players);
-                java.util.Collections.shuffle(order, new java.util.Random(random.nextLong()));
-                for (int i = 0; i < 3; i++) {
-                    ServerPlayer p = order.get(i % order.size());
-                    double x = p.getX();
-                    double z = p.getZ();
-                    if (i >= order.size()) {
-                        double a = random.nextDouble() * Math.PI * 2;
-                        double r = 2.5 + random.nextDouble() * 2.5;
-                        x += Math.cos(a) * r;
-                        z += Math.sin(a) * r;
-                    }
-                    orbs.add(new Orb(x, z, tickCount + 30));
-                    n++;
-                }
+            for (Vec3 at : spots(server, orbCount(present(server)), 2.5, 5)) {
+                double x = at.x;
+                double z = at.z;
+                orbs.add(new Orb(x, z, tickCount + ORB_WARN));
+                tg(server, TelegraphShape.circle(x, z, ORB_RADIUS), ORB_WARN, 0xFF8A20)
+                        .onImpact(s -> impactOrb(s, x, z))
+                        .onHit((s, player) -> {
+                            strike(player, ORB_DAMAGE);
+                            nudge(player, 0, 0.4, 0);
+                        })
+                        .start();
             }
         }
         if (actionTicks < 30 && actionTicks % 3 == 0) {
-            warn(server, dust(0xFFA030, 1.1f), getX(), coreY() + 0.5, getZ(), 6, 0.7, 0.7, 0.7, 0.02);
+            warn(server, dust(0xFFA030, 1.1f), getX(), coreY() + 0.5, getZ(), 6, 0.9, 0.9, 0.9, 0.02);
         }
         if (actionTicks >= 40) {
             finish();
@@ -657,15 +790,13 @@ public class EmberHeart extends HeartBoss {
 
     // ---- 段階 2 ----
 
-    // 崩れる床 (2.0 秒): 区画の一つの床が赤く割れ、ぴしぴし鳴る。8 秒溶岩に沈み、また冷え殻に戻る。人の立つ扇を優先して割る
+    // 崩れる床 (2.0 秒): 区画の一つの床が赤く割れ、ぴしぴし鳴る。印は区画の形、8 秒溶岩に沈み、また冷え殻に戻る。人の立つ扇を優先して割る。
+    // 四人から二区画を同時に
     private void tickFloor(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.FLOOR.get(), 1.4f, 1.2f);
             if (isBound()) {
-                int k = EmberHeartArena.pickSector(server, lastSector);
-                if (k >= 0 && EmberHeartArena.crack(server, k)) {
-                    lastSector = k;
-                }
+                crackSectors(server, floorCracks(present(server)));
             }
         }
         if (actionTicks < 40 && actionTicks % 4 == 0) {
@@ -676,23 +807,60 @@ public class EmberHeart extends HeartBoss {
         }
     }
 
+    // 区画を割り、その形の予告を出す (予告の最後に、区画にいた人が呑まれる。沈む瞬間の呑まれは熾の底が見るが、同じ範囲で一度だけ)
+    private void crackSectors(ServerLevel server, int count) {
+        for (int i = 0; i < count; i++) {
+            int k = EmberHeartArena.pickSector(server, lastSector);
+            if (k >= 0 && EmberHeartArena.crack(server, k)) {
+                lastSector = k;
+                tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, 0xFF4A2A)
+                        .onHit((s, player) -> EmberHeartArena.engulf(s, player, this))
+                        .start();
+            }
+        }
+    }
+
     // 段階 2 のあいだ、6〜8 秒ごとに次の区画を割る (同時に沈むのは最大 2 区画)
     private void tickFloorTimer(ServerLevel server) {
         if (--floorTimer > 0) {
             return;
         }
         floorTimer = 120 + random.nextInt(41);
-        int k = EmberHeartArena.pickSector(server, lastSector);
-        if (k >= 0 && EmberHeartArena.crack(server, k)) {
-            lastSector = k;
-        }
+        crackSectors(server, 1);
     }
 
-    // 鞴の嵐 (1.5 秒): 部屋の風が心臓へ流れはじめる。2 秒のあいだ中心へ引き (歩けば逆らえる)、終わりに半径 6 で弾ける。傷 16 と押し
+    // 鞴の嵐 (3.5 秒): 部屋の風が心臓へ流れはじめ、2 秒のあいだ中心へ引く (歩けば逆らえる)。終わりに半径 6 の円が弾けて 16 と押し、
+    // そのあと外へ走る輪 (安全な筋が三本。跳べば当たらない) 8。四人からは輪が二重
     private void tickGale(ServerLevel server) {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.GALE.get(), 2.4f, 1f);
+            double[] gaps = laneGaps();
+            tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, 0xFF4A4A)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.6f, 0.7f);
+                        s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 100, 3.0, 0.5, 3.0, 0.2);
+                    })
+                    .onHit((s, player) -> {
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        strike(player, GALE_DAMAGE);
+                        player.knockback(1.0, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            showLanes(server, gaps, GALE_WARN);
+            int active = (int) Math.ceil((PULSE_REACH - GALE_RADIUS - 0.8) / 0.8);
+            for (int i = 0; i < galeWaves(present(server)); i++) {
+                tg(server, TelegraphShape.wave(getX(), getZ(), GALE_RADIUS + 0.8, PULSE_REACH, 0.9, gaps, LANE_HALF), GALE_WARN + i * 14, 0xFFB060)
+                        .active(active).jumpClear(0.9)
+                        .onHit((s, player) -> {
+                            strike(player, GALE_WAVE_DAMAGE);
+                            Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.8, -out.x, -out.z);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
         }
         if (actionTicks < 70 && actionTicks % 2 == 0) {
             for (int k = 0; k < 16; k++) {
@@ -700,28 +868,10 @@ public class EmberHeart extends HeartBoss {
                 double r = 14 - ((actionTicks * 0.45 + k * 1.3) % 12);
                 warn(server, dust(0xFFB060, 1.2f), getX() + Math.cos(a) * r, fy + 0.4 + (k % 3) * 0.4, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
             }
-            if (actionTicks >= 40) {
-                for (int a = 0; a < 360; a += 20) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFF4A4A, 1.2f), getX() + Math.cos(rad) * 6, fy + 0.2, getZ() + Math.sin(rad) * 6, 1, 0, 0, 0, 0);
-                }
-            }
         }
         if (actionTicks >= 30 && actionTicks < 70 && actionTicks % 2 == 0) {
             for (ServerPlayer player : reachable(server, 22)) {
                 pull(player, GALE_PULL);
-            }
-        }
-        if (actionTicks == 70) {
-            sound(server, SoundEvents.GENERIC_EXPLODE.value(), 1.6f, 0.7f);
-            server.sendParticles(ParticleTypes.FLAME, getX(), fy + 0.5, getZ(), 100, 3.0, 0.5, 3.0, 0.2);
-            for (ServerPlayer player : reachable(server, 8)) {
-                Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
-                if (out.length() < 6 && player.getY() < coreY() + 2) {
-                    strike(player, GALE_DAMAGE);
-                    player.knockback(1.0, -out.x, -out.z);
-                    player.hurtMarked = true;
-                }
             }
         }
         if (actionTicks >= 82) {
@@ -729,25 +879,29 @@ public class EmberHeart extends HeartBoss {
         }
     }
 
-    // 灰の礫 (1.0 秒): 心臓から黒い礫が 5 つ浮き、人を追う (遅い。叩けば消える)
+    // 灰の礫 (1.0 秒の溜め): 心臓から黒い礫が浮き、人の足もとの円 (半径 1.6) へ落ちる。円は 1.5 秒前から見え、中は傷 10。
+    // 落ちる前に礫を叩けば円ごと消える。数は 人数 + 4 (最大 9)
     private void tickPellet(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.PELLET.get(), 2f, 1f);
         }
         if (actionTicks < 20 && actionTicks % 2 == 0) {
-            warn(server, dust(0x303030, 1.5f), getX(), coreY(), getZ(), 8, 0.9, 0.9, 0.9, 0.02);
+            warn(server, dust(0x303030, 1.5f), getX(), coreY(), getZ(), 8, 1.2, 1.2, 1.2, 0.02);
         }
         if (actionTicks == 20) {
-            List<ServerPlayer> players = reachable(server, 26);
-            if (!players.isEmpty()) {
-                players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
-                for (int i = 0; i < 5; i++) {
-                    ServerPlayer p = players.get(i % players.size());
-                    double a = Math.toRadians(attackYaw + 90 + (i - 2) * 50);
-                    EmberAshPellet pellet = new EmberAshPellet(server, this, p,
-                            new Vec3(getX() - Math.sin(a) * 2.2, coreY() + (i - 2) * 0.4, getZ() + Math.cos(a) * 2.2));
-                    server.addFreshEntity(pellet);
-                }
+            List<Vec3> targets = spots(server, pelletCount(present(server)), 2.5, 6);
+            int count = targets.size();
+            for (int i = 0; i < count; i++) {
+                Vec3 land = targets.get(i);
+                double a = Math.toRadians(attackYaw + 90 + (i - (count - 1) / 2.0) * (360.0 / Math.max(5, count)));
+                Vec3 from = new Vec3(getX() - Math.sin(a) * 3.0, coreY() + ((i % 3) - 1) * 0.5, getZ() + Math.cos(a) * 3.0);
+                EmberAshPellet pellet = new EmberAshPellet(server, this, from, land, PELLET_WARN);
+                Telegraph t = tg(server, TelegraphShape.circle(land.x, land.z, PELLET_RADIUS), PELLET_WARN, 0xFF9A50)
+                        .onImpact(s -> pellet.land())
+                        .onHit((s, player) -> strike(player, PELLET_DAMAGE))
+                        .start();
+                pellet.bind(t);
+                server.addFreshEntity(pellet);
             }
         }
         if (actionTicks >= 32) {
@@ -895,7 +1049,7 @@ public class EmberHeart extends HeartBoss {
             }
         }
         for (Vec3 at : spots) {
-            embers.add(new Ember(at.x, at.z, tickCount + EMBER_TICKS));
+            embers.add(new Ember(at.x, at.z, tickCount, tickCount + EMBER_TICKS));
             EmberHeartArena.emberLight(server, at.x, at.z, true);
             server.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.3, at.z, 20, 0.6, 0.2, 0.6, 0.03);
         }
@@ -944,37 +1098,40 @@ public class EmberHeart extends HeartBoss {
         return null;
     }
 
-    // 消えかけの鼓動 (2.0 秒): 心臓が暗くなり、低い一拍。床に半径 6 の白い輪。傷 22 (輪の外にいれば当たらない)
+    // 消えかけの鼓動 (2.0 秒): 心臓が暗くなり、低い一拍。床に半径 6 の白い円 (傷 22。円の外にいれば当たらない)。
+    // 一拍のあと、外へ走る輪 (安全な筋が三本。跳べば当たらない) 10。三人からは輪が二重
     private void tickFading(ServerLevel server) {
-        double fy = floorY();
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.FADING.get(), 2.5f, 1f);
+            double[] gaps = laneGaps();
+            tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, 0xFF7050)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
+                        s.sendParticles(ParticleTypes.ASH, getX(), floorY() + 0.5, getZ(), 120, 4.0, 0.5, 4.0, 0.1);
+                    })
+                    .onHit((s, player) -> {
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        strike(player, FADING_DAMAGE);
+                        player.knockback(0.8, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            showLanes(server, gaps, FADING_WARN);
+            int active = (int) Math.ceil((PULSE_REACH - FADING_RADIUS - 1.4) / 0.8);
+            for (int i = 0; i < fadingWaves(present(server)); i++) {
+                tg(server, TelegraphShape.wave(getX(), getZ(), FADING_RADIUS + 1.4, PULSE_REACH, 0.9, gaps, LANE_HALF), FADING_WARN + i * 16, 0xFF8A5A)
+                        .active(active).jumpClear(0.9)
+                        .onHit((s, player) -> {
+                            strike(player, FADING_WAVE_DAMAGE);
+                            Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.6, -out.x, -out.z);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
         }
-        if (actionTicks < 40 && actionTicks % 2 == 0) {
-            for (int a = 0; a < 360; a += 10) {
-                double rad = Math.toRadians(a);
-                warn(server, dust(0xF4F0E8, 1.4f), getX() + Math.cos(rad) * 6, fy + 0.2, getZ() + Math.sin(rad) * 6, 1, 0, 0, 0, 0);
-            }
-            if (actionTicks > 20) {
-                for (int a = 0; a < 360; a += 30) {
-                    double rad = Math.toRadians(a + actionTicks * 4);
-                    for (double r = 1.5; r < 6; r += 1.5) {
-                        warn(server, dust(0x9A9088, 1.0f), getX() + Math.cos(rad) * r, fy + 0.15, getZ() + Math.sin(rad) * r, 1, 0, 0, 0, 0);
-                    }
-                }
-            }
-        }
-        if (actionTicks == 40) {
-            sound(server, SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
-            server.sendParticles(ParticleTypes.ASH, getX(), fy + 0.5, getZ(), 120, 4.0, 0.5, 4.0, 0.1);
-            for (ServerPlayer player : reachable(server, 8)) {
-                Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
-                if (out.length() < 6 && player.getY() < coreY() + 3) {
-                    strike(player, FADING_DAMAGE);
-                    player.knockback(0.8, -out.x, -out.z);
-                    player.hurtMarked = true;
-                }
-            }
+        if (actionTicks < 40 && actionTicks % 4 == 0) {
+            warn(server, dust(0x9A9088, 1.2f), getX(), coreY(), getZ(), 4, 1.0, 1.0, 1.0, 0.02);
         }
         if (actionTicks == 52) {
             for (ServerPlayer player : reachable(server, 40)) {
@@ -1023,76 +1180,48 @@ public class EmberHeart extends HeartBoss {
         }
     }
 
-    // ---- 輪・玉・燃える床・残り火 (技の後も続く) ----
+    // ---- 玉・燃える床・残り火 (技の後も続く。傷は、どれも予告 (Telegraph) の印の中だけ) ----
 
-    private void tickRings(ServerLevel server) {
-        for (Ring ring : rings) {
-            ring.radius += 0.8;
-            int points = Math.max(8, (int) (2 * Math.PI * ring.radius / 1.4));
-            for (int i = 0; i < points; i++) {
-                double a = i * 2 * Math.PI / points;
-                warn(server, dust(ring.harmful ? 0xFF6A10 : 0xFFC878, 1.5f),
-                        getX() + Math.cos(a) * ring.radius, ring.floorY + 0.5, getZ() + Math.sin(a) * ring.radius, 1, 0, 0, 0, 0);
-            }
-            double r = ring.radius + 2;
-            AABB area = new AABB(getX() - r, ring.floorY - 1, getZ() - r, getX() + r, ring.floorY + 3, getZ() + r);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-                double d = to.length();
-                if (Math.abs(d - ring.radius) < 1.0 && player.getY() < ring.floorY + 0.9 && ring.hit.add(player.getUUID())) {
-                    if (ring.harmful) {
-                        strike(player, PULSE_DAMAGE);
-                        EmberHeat.add(player, PULSE_HEAT, EmberHeat.Reason.HEART);
-                    }
-                    player.knockback(0.9, -to.x, -to.z);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        rings.removeIf(w -> w.radius > 20);
-    }
-
+    // 落ちてくる玉の見た目 (傷と円は Telegraph。ここは粒だけ)
     private void tickOrbs(ServerLevel server) {
         if (orbs.isEmpty()) {
             return;
         }
         double fy = floorY();
-        List<Orb> remaining = new ArrayList<>();
+        orbs.removeIf(o -> tickCount >= o.impactAt());
         for (Orb o : orbs) {
-            if (tickCount >= o.impactAt()) {
-                impactOrb(server, o, fy);
-                continue;
-            }
-            if (tickCount % 3 == 0) {
-                for (int a = 0; a < 360; a += 30) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFF8A20, 1.3f), o.x() + Math.cos(rad) * 2, fy + 0.15, o.z() + Math.sin(rad) * 2, 1, 0, 0, 0, 0);
-                }
-            }
             if (tickCount >= o.impactAt() - 10) {
                 double drop = (o.impactAt() - tickCount) / 10.0;
                 warn(server, ParticleTypes.FLAME, o.x(), fy + 1 + drop * 8, o.z(), 3, 0.1, 0.2, 0.1, 0);
                 warn(server, ParticleTypes.LAVA, o.x(), fy + 1 + drop * 8, o.z(), 1, 0.1, 0.1, 0.1, 0);
             }
-            remaining.add(o);
         }
-        orbs.clear();
-        orbs.addAll(remaining);
     }
 
-    private void impactOrb(ServerLevel server, Orb o, double fy) {
-        server.playSound(null, o.x(), fy, o.z(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 1.5f);
-        server.sendParticles(ParticleTypes.FLAME, o.x(), fy + 0.4, o.z(), 40, 1.0, 0.2, 1.0, 0.1);
-        server.sendParticles(ParticleTypes.LAVA, o.x(), fy + 0.6, o.z(), 14, 0.8, 0.2, 0.8, 0);
-        AABB area = new AABB(o.x() - 2, fy - 1, o.z() - 2, o.x() + 2, fy + 2.5, o.z() + 2);
-        for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-            if (Math.hypot(player.getX() - o.x(), player.getZ() - o.z()) <= 2.3) {
-                strike(player, ORB_DAMAGE);
-                nudge(player, 0, 0.4, 0);
-            }
-        }
-        blazes.add(new Blaze(o.x(), o.z(), tickCount + 80));
-        EmberHeartArena.emberLight(server, o.x(), o.z(), true);
+    // 玉が落ちた: 爆ぜて、4 秒燃える床になる (一秒ごとの燃え立ちにも 1 秒の予告の円が出る)
+    private void impactOrb(ServerLevel server, double x, double z) {
+        double fy = floorY();
+        server.playSound(null, x, fy, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 1.5f);
+        server.sendParticles(ParticleTypes.FLAME, x, fy + 0.4, z, 40, 1.0, 0.2, 1.0, 0.1);
+        server.sendParticles(ParticleTypes.LAVA, x, fy + 0.6, z, 14, 0.8, 0.2, 0.8, 0);
+        blazes.add(new Blaze(x, z, tickCount + 80));
+        EmberHeartArena.emberLight(server, x, z, true);
+        blazeBurn(server, x, z, BLAZE_BURNS);
+    }
+
+    // 燃える床の燃え立ち一回 (予告 1.0 秒のあと、その円の中だけ。当たる瞬間に次の一回を予告する)
+    private void blazeBurn(ServerLevel server, double x, double z, int left) {
+        tg(server, TelegraphShape.circle(x, z, BLAZE_RADIUS), BLAZE_WARN, 0xFF6A10)
+                .onImpact(s -> {
+                    if (left > 1 && isAlive()) {
+                        blazeBurn(s, x, z, left - 1);
+                    }
+                })
+                .onHit((s, player) -> {
+                    burn(s, player, ORB_FLOOR_DAMAGE);
+                    EmberHeat.add(player, ORB_FLOOR_HEAT, EmberHeat.Reason.HEART);
+                })
+                .start();
     }
 
     private void tickBlazes(ServerLevel server) {
@@ -1112,19 +1241,6 @@ public class EmberHeart extends HeartBoss {
                     double r = Math.sqrt(random.nextDouble()) * 2.0;
                     warn(server, ParticleTypes.FLAME, b.x() + Math.cos(a) * r, fy + 0.15, b.z() + Math.sin(a) * r, 1, 0, 0.05, 0, 0.01);
                 }
-                for (int a = 0; a < 360; a += 45) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFF6A10, 1.0f), b.x() + Math.cos(rad) * 2, fy + 0.15, b.z() + Math.sin(rad) * 2, 1, 0, 0, 0, 0);
-                }
-            }
-            if (tickCount % 20 == 0) {
-                for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class,
-                        new AABB(b.x() - 2, fy - 1, b.z() - 2, b.x() + 2, fy + 1.4, b.z() + 2), this::canReach)) {
-                    if (Math.hypot(player.getX() - b.x(), player.getZ() - b.z()) <= 2.0 && player.getY() < fy + 1.2) {
-                        burn(server, player, ORB_FLOOR_DAMAGE);
-                        EmberHeat.add(player, ORB_FLOOR_HEAT, EmberHeat.Reason.HEART);
-                    }
-                }
             }
             remaining.add(b);
         }
@@ -1132,6 +1248,7 @@ public class EmberHeart extends HeartBoss {
         blazes.addAll(remaining);
     }
 
+    // 残り火: 熱を上げる場所 (傷ではない)。小さな燃え立ち (5) は 2 秒ごとに、1 秒前から円の予告が出る
     private void tickEmbers(ServerLevel server) {
         if (embers.isEmpty()) {
             return;
@@ -1142,6 +1259,16 @@ public class EmberHeart extends HeartBoss {
             if (tickCount >= e.endAt()) {
                 EmberHeartArena.emberLight(server, e.x(), e.z(), false);
                 continue;
+            }
+            int age = tickCount - e.startAt();
+            int first = EMBER_BURST_FIRST - EMBER_BURST_WARN;
+            if (age == first || age == first + 40 || age == first + 80) {
+                tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, 0xFFA040)
+                        .onHit((s, player) -> {
+                            burn(s, player, EMBER_BURN_DAMAGE);
+                            s.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);
+                        })
+                        .start();
             }
             if (tickCount % 2 == 0) {
                 warn(server, ParticleTypes.FLAME, e.x() + Mth.nextDouble(random, -1.5, 1.5), fy + 0.15, e.z() + Mth.nextDouble(random, -1.5, 1.5), 1, 0, 0.05, 0, 0.01);
@@ -1154,15 +1281,10 @@ public class EmberHeart extends HeartBoss {
                 warn(server, ParticleTypes.SMALL_FLAME, e.x(), fy + 1.0, e.z(), 1, 0.3, 0.5, 0.3, 0.02);
             }
             if (tickCount % 20 == 0) {
-                boolean burst = (e.endAt() - tickCount) % 40 == 0;
                 for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class,
                         new AABB(e.x() - EMBER_RADIUS, fy - 1, e.z() - EMBER_RADIUS, e.x() + EMBER_RADIUS, fy + 2, e.z() + EMBER_RADIUS), this::canReach)) {
                     if (Math.hypot(player.getX() - e.x(), player.getZ() - e.z()) <= EMBER_RADIUS && player.getY() < fy + 1.5) {
                         EmberHeat.add(player, EMBER_HEAT_PER_SECOND, EmberHeat.Reason.HEART);
-                        if (burst) {
-                            burn(server, player, EMBER_BURN_DAMAGE);
-                            server.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);
-                        }
                     }
                 }
             }
@@ -1172,9 +1294,9 @@ public class EmberHeart extends HeartBoss {
         embers.addAll(remaining);
     }
 
-    // 技の残り (輪・玉・燃える床・残り火・灰の帳) をすべて消す
+    // 技の残り (予告・玉・燃える床・残り火・灰の帳) をすべて消す
     void clearHazards(ServerLevel server) {
-        rings.clear();
+        Telegraph.cancelAll(this);
         orbs.clear();
         for (Blaze b : blazes) {
             EmberHeartArena.emberLight(server, b.x(), b.z(), false);
@@ -1379,30 +1501,30 @@ public class EmberHeart extends HeartBoss {
         if (!level().isClientSide) {
             return;
         }
-        double cy = getY() + 2.0;
+        double cy = getY() + 3.0;
         int phase = getPhase();
         if (phase == 0) {
             if (random.nextFloat() < 0.2f) {
-                level().addParticle(ParticleTypes.FLAME, getX() + Mth.nextDouble(random, -1.2, 1.2), cy + Mth.nextDouble(random, 0.5, 2.0),
-                        getZ() + Mth.nextDouble(random, -1.2, 1.2), 0, 0.03, 0);
+                level().addParticle(ParticleTypes.FLAME, getX() + Mth.nextDouble(random, -1.8, 1.8), cy + Mth.nextDouble(random, 0.5, 3),
+                        getZ() + Mth.nextDouble(random, -1.8, 1.8), 0, 0.03, 0);
             }
         } else if (phase == 1) {
             if (random.nextFloat() < 0.4f) {
-                level().addParticle(dust(0xFFE070, 1.0f), getX() + Mth.nextDouble(random, -1.6, 1.6), cy + Mth.nextDouble(random, -1.0, 2.0),
-                        getZ() + Mth.nextDouble(random, -1.6, 1.6), 0, 0.03, 0);
+                level().addParticle(dust(0xFFE070, 1.0f), getX() + Mth.nextDouble(random, -2.4, 2.4), cy + Mth.nextDouble(random, -1.5, 3),
+                        getZ() + Mth.nextDouble(random, -2.4, 2.4), 0, 0.03, 0);
             }
             if (random.nextFloat() < 0.25f) {
-                level().addParticle(ParticleTypes.DRIPPING_LAVA, getX() + Mth.nextDouble(random, -1.8, 1.8), cy - 0.8,
-                        getZ() + Mth.nextDouble(random, -1.8, 1.8), 0, 0, 0);
+                level().addParticle(ParticleTypes.DRIPPING_LAVA, getX() + Mth.nextDouble(random, -2.7, 2.7), cy - 0.8,
+                        getZ() + Mth.nextDouble(random, -2.7, 2.7), 0, 0, 0);
             }
         } else {
             if (random.nextFloat() < 0.5f) {
-                level().addParticle(ParticleTypes.ASH, getX() + Mth.nextDouble(random, -2.2, 2.2), cy + Mth.nextDouble(random, -1.6, 2.4),
-                        getZ() + Mth.nextDouble(random, -2.2, 2.2), 0, -0.01, 0);
+                level().addParticle(ParticleTypes.ASH, getX() + Mth.nextDouble(random, -3.3, 3.3), cy + Mth.nextDouble(random, -2.4, 3.6),
+                        getZ() + Mth.nextDouble(random, -3.3, 3.3), 0, -0.01, 0);
             }
             if (random.nextFloat() < 0.18f) {
-                level().addParticle(dust(0xE04020, 0.9f), getX() + Mth.nextDouble(random, -1.0, 1.0), cy + Mth.nextDouble(random, 0, 2.0),
-                        getZ() + Mth.nextDouble(random, -1.0, 1.0), 0, 0.03, 0);
+                level().addParticle(dust(0xE04020, 0.9f), getX() + Mth.nextDouble(random, -1.5, 1.5), cy + Mth.nextDouble(random, 0, 3),
+                        getZ() + Mth.nextDouble(random, -1.5, 1.5), 0, 0.03, 0);
             }
         }
     }

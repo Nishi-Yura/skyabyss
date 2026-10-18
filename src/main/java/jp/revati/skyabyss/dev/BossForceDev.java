@@ -52,6 +52,16 @@ public final class BossForceDev {
                 heart.setPartyOverride(party);
                 heart.forceAttack(action);
                 n++;
+            } else if (e instanceof jp.revati.skyabyss.titan.storm.heart.StormHeart storm) {
+                storm.holdAttacks();
+                storm.setPartyOverride(party);
+                storm.forceAction(jp.revati.skyabyss.titan.storm.heart.StormHeart.Action.valueOf(action.toUpperCase(java.util.Locale.ROOT)));
+                n++;
+            } else if (e instanceof jp.revati.skyabyss.titan.storm.raiju.Raiju raiju) {
+                raiju.holdAttacks();
+                raiju.setPartyOverride(party);
+                raiju.forceAction(jp.revati.skyabyss.titan.storm.raiju.Raiju.Action.valueOf(action.toUpperCase(java.util.Locale.ROOT)));
+                n++;
             }
         }
         return n;
