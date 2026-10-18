@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,23 @@ import net.minecraft.world.phys.Vec3;
 public class WhaleboneCaptain extends GuardMob {
     private enum Action { NONE, SWEEP, LEAP, ERUPT, ROAR }
 
+    // 技の数値 (印と当たりは同じ形から出る。設計書 02 の 5.2)。tick は 20 で 1 秒
+    public static final int SWEEP_WARN = 22;
+    public static final double SWEEP_RANGE = 5.2;
+    public static final double SWEEP_HALF_ANGLE = 70;
+    public static final float SWEEP_DAMAGE = 9f;
+    public static final int LEAP_TAKEOFF_TICK = 12;
+    public static final int LEAP_LAND_TICK = 27;
+    public static final double LEAP_HEIGHT = 3.2;
+    public static final double LEAP_MAX = 14;
+    public static final double STOMP_RADIUS = 4.0;
+    public static final double STOMP_RADIUS_ENRAGED = 5.0;
+    public static final int ERUPT_WARN = 30;
+    public static final double ERUPT_RADIUS = 1.4;
+    public static final float ERUPT_DAMAGE = 7f;
+    public static final int ROAR_WARN = 20;
+    public static final double ROAR_RADIUS = 5.0;
+
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
     private int actionTicks;
@@ -49,8 +68,11 @@ public class WhaleboneCaptain extends GuardMob {
     private int leapCooldown = 80;
     private int eruptCooldown = 120;
     private boolean roared;
-    private boolean airborne;
-    private final List<Vec3> eruptions = new ArrayList<>();
+    private boolean holdAttacks;
+    // 技の最中の向きと、跳躍の出発点・着地点 (印を出した時点で決まる)
+    private float lockedYaw;
+    private Vec3 leapFrom = Vec3.ZERO;
+    private Vec3 leapTo = Vec3.ZERO;
 
     public WhaleboneCaptain(EntityType<? extends Monster> type, Level level) {
         super(type, level, "whalebone_captain", "sweep", "leap", "slam", "roar");
@@ -94,6 +116,9 @@ public class WhaleboneCaptain extends GuardMob {
                 return;
             }
             getLookControl().setLookAt(target, 30f, 30f);
+            if (holdAttacks) {
+                return;
+            }
             double dist = distanceTo(target);
             boolean enraged = getHealth() < getMaxHealth() * 0.5f;
             if (enraged && !roared) {
@@ -120,6 +145,25 @@ public class WhaleboneCaptain extends GuardMob {
         }
     }
 
+    // 試験・コマンド用: 技を一つ出す (SWEEP / LEAP / ERUPT / ROAR)
+    public void forceAction(String name) {
+        Action a = Action.valueOf(name.toUpperCase());
+        begin(a, switch (a) {
+            case SWEEP -> "sweep";
+            case LEAP -> "leap";
+            default -> "roar";
+        });
+    }
+
+    // 試験用: 次の技を始めない
+    public void holdAttacks() {
+        holdAttacks = true;
+    }
+
+    public boolean isActing() {
+        return action != Action.NONE;
+    }
+
     private void begin(Action next, String animation) {
         action = next;
         actionTicks = 0;
@@ -136,150 +180,224 @@ public class WhaleboneCaptain extends GuardMob {
         return getHealth() < getMaxHealth() * 0.5f;
     }
 
-    // 薙ぎ払い: 0.45秒の振りかぶりのあと、前方 140° ・半径5 をまとめて斬る
+    // ---- 技。どれも Telegraph (combat/Telegraph) で、当たる範囲を床に描いてから、その範囲の中の人だけに当てる ----
+
+    // 技の最中の向きを固定する (予告の印は、始めの向きで決まる)
+    private void holdYaw() {
+        setYRot(lockedYaw);
+        setYBodyRot(lockedYaw);
+        setYHeadRot(lockedYaw);
+        getNavigation().stop();
+    }
+
+    private boolean canHit(ServerPlayer player) {
+        return player.isAlive() && !player.isSpectator() && canAttack(player);
+    }
+
+    private double floorY() {
+        return getY();
+    }
+
+    // 薙ぎ払い: 印の扇 (前方 5.2・140°) が 1.1 秒かけて満ちる。後半の 0.55 秒が振りかぶりと振り (アニメ)。
+    // 向きは始めに決まり、技の間は動かない。扇の外へ出れば当たらない
     private void tickSweep() {
-        if (actionTicks == 2) {
+        if (actionTicks == 1) {
+            lockedYaw = getYRot();
+            double rad = Math.toRadians(lockedYaw);
+            double angle = Telegraph.angleOf(-Math.sin(rad), Math.cos(rad));
+            Vec3 look = new Vec3(-Math.sin(rad), 0, Math.cos(rad));
+            Telegraph.in((ServerLevel) level(), TelegraphShape.cone(getX(), getZ(), angle, SWEEP_RANGE, Math.toRadians(SWEEP_HALF_ANGLE)))
+                    .floor(floorY()).warn(SWEEP_WARN).color(0xFF9A3A).owner(this)
+                    .startSound(MobSounds.CAPTAIN_ERUPT_CHARGE.get(), 1.6f, 1.5f)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        server.playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SLAM.get(), SoundSource.HOSTILE, 2f, 0.95f + random.nextFloat() * 0.1f);
+                        server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + look.x * 2.5, getY() + 1.5, getZ() + look.z * 2.5, 4, 1.2, 0.2, 1.2, 0);
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), SWEEP_DAMAGE);
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.2, -to.x, -to.z);
+                    })
+                    .start();
+        }
+        holdYaw();
+        // 振りかぶりと振りのアニメは、当たる瞬間 (SWEEP_WARN) の 12 tick 前から (アニメの振りは 0.6 秒)
+        if (actionTicks == SWEEP_WARN - 12) {
+            playAction("sweep");
             level().playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SWING.get(), SoundSource.HOSTILE, 1.6f, 0.95f + random.nextFloat() * 0.1f);
         }
-        if (actionTicks == 12) {
-            Vec3 look = getViewVector(1f).multiply(1, 0, 1).normalize();
-            for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(5, 2, 5), this::canAttack)) {
-                Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-                if (to.length() <= 5.2 && look.dot(to.normalize()) > Math.cos(Math.toRadians(70))) {
-                    player.hurt(attackSource(), 11f);
-                    player.knockback(1.2, -to.x, -to.z);
-                }
-            }
-            level().playSound(null, getX(), getY(), getZ(), MobSounds.WHALEBONE_CAPTAIN_SLAM.get(), SoundSource.HOSTILE, 2f, 0.95f + random.nextFloat() * 0.1f);
-            if (level() instanceof ServerLevel server) {
-                server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + look.x * 2.5, getY() + 1.5, getZ() + look.z * 2.5, 4, 1.2, 0.2, 1.2, 0);
-            }
-        }
-        if (actionTicks >= 22) {
+        if (actionTicks >= SWEEP_WARN + 10) {
             sweepCooldown = enraged() ? 25 : 40;
             finish();
         }
     }
 
-    // 跳躍と叩きつけ: 溜めて跳び、着地した瞬間に衝撃波
+    // 跳躍と叩きつけ (スタンプ): 着地点を始めに決めて円の印を出し (1.4 秒)、しゃがんで跳び、その点へ正確に降りる。
+    // 当たるのは印の円の中だけ (中心 8、縁 5。外へ弾かれ、鈍足)。円の外は安全
     private void tickLeap(LivingEntity target) {
-        if (actionTicks == 8 && target != null) {
-            Vec3 to = target.position().subtract(position());
-            double horizontal = Math.sqrt(to.x * to.x + to.z * to.z);
-            double vy = 0.95;
-            double airTicks = 2 * vy / 0.08;
-            Vec3 velocity = new Vec3(to.x / airTicks, vy, to.z / airTicks);
-            if (horizontal > 0.1) {
-                setDeltaMovement(velocity);
-                hasImpulse = true;
-                airborne = true;
+        if (actionTicks == 1) {
+            lockedYaw = getYRot();
+            leapFrom = position();
+            Vec3 aim = target != null ? target.position() : position();
+            Vec3 to = aim.subtract(leapFrom).multiply(1, 0, 1);
+            double dist = to.length();
+            if (dist > LEAP_MAX) {
+                to = to.scale(LEAP_MAX / dist);
             }
-            level().playSound(null, getX(), getY(), getZ(), MobSounds.CAPTAIN_LEAP_ROAR.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
+            leapTo = new Vec3(leapFrom.x + to.x, leapFrom.y, leapFrom.z + to.z);
+            double radius = stompRadius();
+            final Vec3 land = leapTo;
+            Telegraph.in((ServerLevel) level(), TelegraphShape.circle(land.x, land.z, radius))
+                    .floor(land.y).warn(LEAP_LAND_TICK).color(0xFF4A2A).owner(this)
+                    .startSound(MobSounds.CAPTAIN_ERUPT_CHARGE.get(), 2f, 0.8f)
+                    .victims(this::canHit)
+                    .onImpact(server -> stompEffects(server, land, radius))
+                    .onHit((server, player) -> {
+                        Vec3 to2 = player.position().subtract(land).multiply(1, 0, 1);
+                        double d = to2.length();
+                        float damage = (float) (stompDamage() * (1 - d / radius * 0.375));
+                        player.hurt(attackSource(), damage);
+                        Vec3 push = d > 0.01 ? to2.normalize() : new Vec3(1, 0, 0);
+                        player.setDeltaMovement(player.getDeltaMovement().add(push.x * 1.1, 0.5, push.z * 1.1));
+                        player.hurtMarked = true;
+                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
+                    })
+                    .start();
         }
-        if (airborne && actionTicks > 12 && onGround()) {
-            airborne = false;
-            playAction("slam");
-            shockwave(enraged() ? 7.5 : 6, 9f);
-            leapCooldown = enraged() ? 90 : 140;
-            finish();
-        } else if (actionTicks > 80) {
-            airborne = false;
-            leapCooldown = 100;
-            finish();
-        }
-    }
-
-    private void shockwave(double radius, float damage) {
-        if (!(level() instanceof ServerLevel server)) {
+        if (actionTicks < LEAP_TAKEOFF_TICK) {
+            // 溜め: しゃがむ (アニメ leap の前半)。着地点の方を向いたまま
+            holdYaw();
             return;
         }
-        server.playSound(null, getX(), getY(), getZ(), MobSounds.CAPTAIN_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.5f, 1.0f);
-        server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 1, 0, 0, 0, 0);
-        for (int ring = 1; ring <= (int) radius; ring++) {
-            for (int a = 0; a < 360; a += 360 / (ring * 6)) {
-                double x = getX() + Math.cos(Math.toRadians(a)) * ring;
-                double z = getZ() + Math.sin(Math.toRadians(a)) * ring;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
-                        x, getY() + 0.1, z, 2, 0.1, 0.05, 0.1, 0.05);
+        if (actionTicks < LEAP_LAND_TICK) {
+            if (actionTicks == LEAP_TAKEOFF_TICK) {
+                level().playSound(null, getX(), getY(), getZ(), MobSounds.CAPTAIN_LEAP_ROAR.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
+                setNoGravity(true);
             }
+            // 放物線で、決めた着地点へ (物理に任せず、位置を直接置く)
+            double t = (double) (actionTicks - LEAP_TAKEOFF_TICK) / (LEAP_LAND_TICK - LEAP_TAKEOFF_TICK);
+            setPos(leapFrom.x + (leapTo.x - leapFrom.x) * t, leapFrom.y + 4 * LEAP_HEIGHT * t * (1 - t), leapFrom.z + (leapTo.z - leapFrom.z) * t);
+            setDeltaMovement(Vec3.ZERO);
+            return;
         }
-        for (Player player : server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(radius, 2, radius), this::canAttack)) {
-            Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-            double d = to.length();
-            if (d <= radius) {
-                player.hurt(attackSource(), (float) (damage * (1 - d / radius * 0.5)));
-                Vec3 push = d > 0.01 ? to.normalize() : new Vec3(1, 0, 0);
-                player.setDeltaMovement(player.getDeltaMovement().add(push.x * 1.3, 0.55, push.z * 1.3));
-                player.hurtMarked = true;
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 50, 1));
+        if (actionTicks == LEAP_LAND_TICK) {
+            setNoGravity(false);
+            setPos(leapTo.x, leapTo.y, leapTo.z);
+            setDeltaMovement(Vec3.ZERO);
+            playAction("slam");
+            leapCooldown = enraged() ? 90 : 140;
+        }
+        if (actionTicks >= LEAP_LAND_TICK + 10) {
+            finish();
+        }
+    }
+
+    private double stompRadius() {
+        return enraged() ? STOMP_RADIUS_ENRAGED : STOMP_RADIUS;
+    }
+
+    private float stompDamage() {
+        return enraged() ? 9f : 8f;
+    }
+
+    private void stompEffects(ServerLevel server, Vec3 at, double radius) {
+        server.playSound(null, at.x, at.y, at.z, MobSounds.CAPTAIN_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.5f, 1.0f);
+        server.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.3, at.z, 1, 0, 0, 0, 0);
+        for (int ring = 1; ring <= 3; ring++) {
+            double r = radius * ring / 3.0;
+            int points = 8 + ring * 8;
+            for (int i = 0; i < points; i++) {
+                double a = Math.PI * 2 * i / points;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
+                        at.x + Math.cos(a) * r, at.y + 0.1, at.z + Math.sin(a) * r, 2, 0.1, 0.05, 0.1, 0.05);
             }
         }
     }
 
-    // 骨の噴出: 相手の足元と周りに白い輪を描き、1.5秒後に骨の槍が突き上がる
+    // 骨の噴出: 足元に寄った全員と周りに、半径 1.4 の円の印 (1.5 秒)。時間が来ると、その円の中だけに骨の槍が突き上がる
     private void tickErupt(LivingEntity target) {
         if (!(level() instanceof ServerLevel server)) {
             return;
         }
         if (actionTicks == 1) {
-            eruptions.clear();
-            server.playSound(null, getX(), getY(), getZ(), MobSounds.CAPTAIN_ERUPT_CHARGE.get(), SoundSource.HOSTILE, 2f, 1.0f);
+            List<Vec3> spots = new ArrayList<>();
             int count = enraged() ? 10 : 6;
             for (Player player : server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(18, 4, 18), this::canAttack)) {
-                eruptions.add(player.position());
+                spots.add(player.position());
             }
-            while (eruptions.size() < count && target != null) {
+            while (spots.size() < count && target != null) {
                 double angle = random.nextDouble() * Math.PI * 2;
                 double r = 2 + random.nextDouble() * 5;
-                eruptions.add(target.position().add(Math.cos(angle) * r, 0, Math.sin(angle) * r));
+                spots.add(target.position().add(Math.cos(angle) * r, 0, Math.sin(angle) * r));
             }
-        }
-        if (actionTicks < 30 && actionTicks % 4 == 1) {
-            for (Vec3 p : eruptions) {
-                for (int a = 0; a < 360; a += 30) {
-                    warn(server, ParticleTypes.END_ROD, p.x + Math.cos(Math.toRadians(a)) * 1.2, p.y + 0.1,
-                            p.z + Math.sin(Math.toRadians(a)) * 1.2, 1, 0, 0, 0, 0);
+            boolean first = true;
+            for (Vec3 p : spots) {
+                var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS))
+                        .floor(p.y).warn(ERUPT_WARN).color(0xE8F0FF).owner(this)
+                        .victims(this::canHit)
+                        .onImpact(s -> {
+                            s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                                    p.x, p.y + 1, p.z, 30, 0.3, 0.9, 0.3, 0.15);
+                            s.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.5, p.z, 10, 0.2, 0.8, 0.2, 0.3);
+                            s.playSound(null, BlockPos.containing(p), MobSounds.CAPTAIN_ERUPT_BURST.get(), SoundSource.HOSTILE, 1.5f, 0.95f + random.nextFloat() * 0.1f);
+                        })
+                        .onHit((s, player) -> {
+                            player.hurt(attackSource(), ERUPT_DAMAGE);
+                            player.setDeltaMovement(player.getDeltaMovement().add(0, 0.85, 0));
+                            player.hurtMarked = true;
+                        });
+                if (first) {
+                    builder.startSound(MobSounds.CAPTAIN_ERUPT_CHARGE.get(), 2f, 1.0f);
+                    first = false;
                 }
+                builder.start();
             }
         }
-        if (actionTicks == 30) {
-            for (Vec3 p : eruptions) {
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                        p.x, p.y + 1, p.z, 30, 0.3, 0.9, 0.3, 0.15);
-                server.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.5, p.z, 10, 0.2, 0.8, 0.2, 0.3);
-                server.playSound(null, BlockPos.containing(p), MobSounds.CAPTAIN_ERUPT_BURST.get(), SoundSource.HOSTILE, 1.5f, 0.95f + random.nextFloat() * 0.1f);
-                for (Player player : server.getEntitiesOfClass(Player.class, new net.minecraft.world.phys.AABB(p, p).inflate(1.3, 2, 1.3), this::canAttack)) {
-                    player.hurt(attackSource(), 7f);
-                    player.setDeltaMovement(player.getDeltaMovement().add(0, 0.85, 0));
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        if (actionTicks >= 40) {
+        if (actionTicks >= ERUPT_WARN + 10) {
             eruptCooldown = enraged() ? 130 : 200;
             finish();
         }
     }
 
-    // 咆哮: 周りを吹き飛ばし、骨の番兵を二体呼び、怒りで速くなる (一度だけ)
+    // 咆哮: 半径 5 の円の印 (1 秒)。時間が来ると円の中を吹き飛ばし、骨の番兵を二体呼び、怒りで速くなる (一度だけ)
     private void tickRoar() {
+        if (actionTicks == 1) {
+            roared = true;
+            lockedYaw = getYRot();
+            Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS))
+                    .floor(floorY()).warn(ROAR_WARN).color(0xFFD060).owner(this)
+                    .victims(this::canHit)
+                    .onImpact(server -> {
+                        shockwave(server, ROAR_RADIUS);
+                        for (int i = 0; i < 2; i++) {
+                            double angle = random.nextDouble() * Math.PI * 2;
+                            BlockPos at = BlockPos.containing(getX() + Math.cos(angle) * 3, getY(), getZ() + Math.sin(angle) * 3);
+                            TitanBackTrials.spawnGuard(server, "sentinel", at, groupId());
+                        }
+                        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, Integer.MAX_VALUE, 0, false, false));
+                        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, Integer.MAX_VALUE, 0, false, false));
+                    })
+                    .onHit((server, player) -> {
+                        player.hurt(attackSource(), 4f);
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        Vec3 push = to.length() > 0.01 ? to.normalize() : new Vec3(1, 0, 0);
+                        player.setDeltaMovement(player.getDeltaMovement().add(push.x * 1.2, 0.5, push.z * 1.2));
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+        holdYaw();
         if (actionTicks == 6) {
             level().playSound(null, getX(), getY(), getZ(), MobSounds.CAPTAIN_ROAR.get(), SoundSource.HOSTILE, 3f, 1.0f);
         }
-        if (actionTicks == 16 && level() instanceof ServerLevel server) {
-            roared = true;
-            shockwave(6, 4f);
-            for (int i = 0; i < 2; i++) {
-                double angle = random.nextDouble() * Math.PI * 2;
-                BlockPos at = BlockPos.containing(getX() + Math.cos(angle) * 3, getY(), getZ() + Math.sin(angle) * 3);
-                TitanBackTrials.spawnGuard(server, "sentinel", at, groupId());
-            }
-            addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, Integer.MAX_VALUE, 0, false, false));
-            addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, Integer.MAX_VALUE, 0, false, false));
-        }
-        if (actionTicks >= 30) {
+        if (actionTicks >= ROAR_WARN + 12) {
             finish();
         }
+    }
+
+    private void shockwave(ServerLevel server, double radius) {
+        stompEffects(server, position(), radius);
     }
 
     // 近づいてきた相手には、技の合間でもふつうに鉾で殴る
@@ -287,14 +405,6 @@ public class WhaleboneCaptain extends GuardMob {
     public boolean doHurtTarget(Entity target) {
         playAction("sweep");
         return super.doHurtTarget(target);
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (!level().isClientSide && action == Action.NONE && getTarget() != null && distanceTo(getTarget()) < 2.5 && tickCount % 25 == 0) {
-            doHurtTarget(getTarget());
-        }
     }
 
     private void updateBossBarViewers() {
