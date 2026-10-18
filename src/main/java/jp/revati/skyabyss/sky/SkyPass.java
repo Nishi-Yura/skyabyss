@@ -70,6 +70,18 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
         return (float) smooth(0.5 - d / 10.0);
     }
 
+    // 地点 (x, z) から輪郭までの距離 (ブロック。内側は負、外側は正)。描画側が、ぼかし・ゆらぎ・濃淡の層を自分で重ねるために使う。範囲の外は大きな正の値
+    public double outlineDistance(double x, double z, double age) {
+        double rx = x - centerX(age);
+        double rz = z - centerZ(age);
+        if (Math.abs(rx) > REACH || Math.abs(rz) > REACH) {
+            return 1000.0;
+        }
+        double along = rx * dirX + rz * dirZ;
+        double side = Math.abs(-rx * dirZ + rz * dirX);
+        return distance(along, side, fold(age));
+    }
+
     // 輪郭までの距離。内側は負、外側は正
     private static double distance(double along, double side, double fold) {
         double span = 135.0 - 50.0 * fold;

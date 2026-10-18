@@ -33,6 +33,7 @@
   "item.skyabyss.sky_key_fragment.desc": "ほのかに温かく、かすかに脈打つ。四つそろえば、雲の上へ続く扉が開くという",
   "block.skyabyss.resonance_stone": "共鳴石",
   "block.skyabyss.sealed_gate": "封印の扉",
+  "message.skyabyss.song_look_up": "空から、低い歌が降ってくる。見上げてみよう",
   "message.skyabyss.chain_hint": "鎖を右クリックすると、岩鯨の背へ引き上げられる",
   "message.skyabyss.descending": "錨石に触れると、鎖があなたをゆっくりと地上へ降ろしていく",
   "message.skyabyss.resonance": "共鳴石が歌い出した（%s / %s）",

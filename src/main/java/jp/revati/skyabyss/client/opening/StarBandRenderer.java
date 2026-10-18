@@ -35,6 +35,30 @@ public final class StarBandRenderer {
     // 輪の両端を地平線の少し下まで広げる (空と地平線のあいだに星が覗かないように)
     private static final float RING_EXTRA = 0.14f;
 
+    // この mod 自身の星 (歌のあいだだけ描く)。数と大きさは、バニラの星 (1500 個、ほぼ 1 ピクセル) より目立つ程度
+    private static final int STAR_COUNT = 2200;
+    private static final float[] STAR_DIR = new float[STAR_COUNT * 3];
+    private static final float[] STAR_SIZE = new float[STAR_COUNT];
+    private static final float[] STAR_LIGHT = new float[STAR_COUNT];
+    private static final float[] STAR_TINT = new float[STAR_COUNT];
+
+    static {
+        java.util.Random random = new java.util.Random(0x5EA5ABB5L);
+        for (int i = 0; i < STAR_COUNT; i++) {
+            // 球面に一様 (空は星の球ごと回るので、どの向きの星も使う)
+            float y = -1f + random.nextFloat() * 2f;
+            float phi = random.nextFloat() * (float) (Math.PI * 2);
+            float r = (float) Math.sqrt(Math.max(0f, 1f - y * y));
+            STAR_DIR[i * 3] = r * Mth.cos(phi);
+            STAR_DIR[i * 3 + 1] = y;
+            STAR_DIR[i * 3 + 2] = r * Mth.sin(phi);
+            float rank = random.nextFloat();
+            STAR_SIZE[i] = 0.2f + rank * rank * rank * 0.42f;
+            STAR_LIGHT[i] = 0.55f + 0.45f * random.nextFloat();
+            STAR_TINT[i] = random.nextFloat();
+        }
+    }
+
     private StarBandRenderer() {
     }
 
@@ -80,20 +104,16 @@ public final class StarBandRenderer {
         }
         float progress = OpeningClient.bandProgress();
         ClientLevel level = Minecraft.getInstance().level;
-        if (progress < 0f || level == null) {
+        if (level == null || (progress < 0f && OpeningClient.starLayer() <= 0.01f)) {
             return;
         }
         float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-        // 昼に起こさないはずだが、念のため星の出ていない空には描かない
-        if (level.getStarBrightness(partial) <= 0.01f) {
-            return;
-        }
-        float center = center(progress);
+        // 帯が動いていない間 (星の出入りだけ) は、帯は空の外に置く
+        float center = progress < 0f ? -10f : center(progress);
         float lo = Math.max(0f, center - HALF_WIDTH);
         float hi = Math.min((float) Math.PI, center + HALF_WIDTH);
-        if (hi <= lo) {
-            return;
-        }
+        // 昼に起こさないはずだが、念のため星の出ていない空には帯を描かない。自前の星は描く (星の出入りは時刻に頼らない)
+        boolean band = progress >= 0f && hi > lo && level.getStarBrightness(partial) > 0.01f;
         Vec3 sky = level.getSkyColor(event.getCamera().getPosition(), partial);
         float[] moon = moonDirection(level, partial);
         Matrix4f pose = new Matrix4f(event.getModelViewMatrix());
@@ -105,6 +125,18 @@ public final class StarBandRenderer {
         RenderSystem.disableCull();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
+        if (band) {
+            drawBand(pose, sky, moon, center, lo, hi);
+        }
+        drawStars(pose, level, partial, center, moon);
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
+    }
+
+    // 空色の帯 (バニラの星を覆う)
+    private static void drawBand(Matrix4f pose, Vec3 sky, float[] moon, float center, float lo, float hi) {
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         float r = (float) sky.x;
         float g = (float) sky.y;
@@ -125,10 +157,80 @@ public final class StarBandRenderer {
         if (mesh != null) {
             BufferUploader.drawWithShader(mesh);
         }
-        RenderSystem.enableCull();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableBlend();
+    }
+
+    // 自前の星。向きはバニラの空と同じ回り方 (Y を -90 度、X を空の角度)。帯の中は、帯と同じ濃さの分だけ消える (帯の外の星はそのまま光り続ける)。
+    // 星は空の描画のすぐあとに描くので、雲・地形・霧は上から被さる (雲が厚ければ見えない。それは自然)
+    private static void drawStars(Matrix4f pose, ClientLevel level, float partial, float center, float[] moon) {
+        float layer = OpeningClient.starLayer();
+        if (layer <= 0.01f) {
+            return;
+        }
+        float theta = level.getTimeOfDay(partial) * (float) (Math.PI * 2);
+        float sin = Mth.sin(theta);
+        float cos = Mth.cos(theta);
+        double twinkle = (Minecraft.getInstance().level.getGameTime() + partial) * 0.07;
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        boolean any = false;
+        for (int i = 0; i < STAR_COUNT; i++) {
+            float bx = STAR_DIR[i * 3];
+            float by = STAR_DIR[i * 3 + 1];
+            float bz = STAR_DIR[i * 3 + 2];
+            // X 軸まわりに θ、そのあと Y 軸まわりに -90 度
+            float y1 = by * cos - bz * sin;
+            float z1 = by * sin + bz * cos;
+            float[] d = {-z1, y1, bx};
+            if (d[1] < -0.03f) {
+                continue;
+            }
+            // 帯の中心との位置 (帯は X 軸からの角 psi で決まる)
+            float psi = (float) Math.acos(Mth.clamp(d[0], -1f, 1f));
+            // 帯の芯は星が完全に消え、縁だけ薄く残る (帯の濃さの 3 倍で頭打ち。帯の幅が一目で読める)
+            float gone = Mth.clamp(profile(psi, center) * awayFromMoon(d, moon) * 3f, 0f, 1f);
+            float alpha = layer * STAR_LIGHT[i] * (1f - gone) * (0.88f + 0.12f * (float) Math.sin(twinkle + i * 1.7));
+            // 地平線に近いほど薄く
+            alpha *= Mth.clamp((d[1] + 0.03f) / 0.2f, 0f, 1f);
+            if (alpha <= 0.01f) {
+                continue;
+            }
+            any = true;
+            // 星の向きに直角な 2 本の軸で四角を作る
+            float ax = 0f;
+            float ay = d[2];
+            float az = -d[1];
+            float len = (float) Math.sqrt(ay * ay + az * az);
+            if (len < 1.0e-3f) {
+                ax = 0f;
+                ay = 0f;
+                az = 1f;
+                len = 1f;
+            }
+            ax /= len;
+            ay /= len;
+            az /= len;
+            float cx = d[1] * az - d[2] * ay;
+            float cy = d[2] * ax - d[0] * az;
+            float cz = d[0] * ay - d[1] * ax;
+            float s = STAR_SIZE[i];
+            float px = d[0] * RADIUS;
+            float py = d[1] * RADIUS;
+            float pz = d[2] * RADIUS;
+            float r = 0.86f + 0.14f * STAR_TINT[i];
+            float g = 0.9f + 0.1f * STAR_TINT[i];
+            float b = 1.0f - 0.12f * STAR_TINT[i];
+            buffer.addVertex(pose, px + (-ax - cx) * s, py + (-ay - cy) * s, pz + (-az - cz) * s).setColor(r, g, b, alpha);
+            buffer.addVertex(pose, px + (ax - cx) * s, py + (ay - cy) * s, pz + (az - cz) * s).setColor(r, g, b, alpha);
+            buffer.addVertex(pose, px + (ax + cx) * s, py + (ay + cy) * s, pz + (az + cz) * s).setColor(r, g, b, alpha);
+            buffer.addVertex(pose, px + (-ax + cx) * s, py + (-ay + cy) * s, pz + (-az + cz) * s).setColor(r, g, b, alpha);
+        }
+        MeshData mesh = buffer.build();
+        if (mesh != null) {
+            if (any) {
+                BufferUploader.drawWithShader(mesh);
+            } else {
+                mesh.close();
+            }
+        }
     }
 
     private static void vertex(BufferBuilder buffer, Matrix4f pose, float psi, float ring, float center, float[] moon, float r, float g, float b) {

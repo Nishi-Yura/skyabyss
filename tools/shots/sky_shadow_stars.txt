@@ -1,0 +1,52 @@
+# 空の影 (姿の層・うねり・雲の押しのけ) と、星の欠け (自前の星)。./gradlew runShots -Pscript=tools/shots/sky_shadow_stars.txt
+world shots flat
+size 1280 720
+timeout 600
+render 12
+clouds on
+
+cmd gamemode creative
+cmd time set noon
+cmd weather clear
+hud off
+waitchunks
+cmd skyabyss opening reset
+chat clear
+wait 5
+cmd skyabyss opening shadow
+camera 0 80 0 0 -55
+wait 330
+shot shadow_a
+wait 120
+shot shadow_b
+wait 120
+look 0 -75
+shot shadow_c
+wait 100
+shot shadow_d
+wait 150
+look 90 -50
+shot shadow_e
+wait 500
+
+# 星の欠け: 夜 (14500) の真上。自前の星が出て、帯が西から東へ抜ける
+clouds off
+cmd time set 14500
+cmd skyabyss opening back song
+wait 20
+fov 100
+camera 0 80 0 0 -50
+wait 20
+shot stars_before
+cmd skyabyss opening song
+wait 70
+shot stars_in
+wait 150
+shot stars_band_west
+wait 150
+shot stars_band_mid
+wait 150
+shot stars_band_east
+wait 200
+shot stars_after
+quit

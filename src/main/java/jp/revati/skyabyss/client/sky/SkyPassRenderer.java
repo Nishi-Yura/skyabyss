@@ -38,7 +38,12 @@ public final class SkyPassRenderer {
     private static final int DECK_STEP = 8;
     private static final int DECK_RADIUS = 320;
 
+    // 姿の層の高さ (本体のバニラの雲の下 BODY_BELOW_CLOUDS を基準に、縁は上、芯は下)
+    private static final float BODY_HALO_RISE = 5f;
+    private static final float BODY_CORE_DROP = 7f;
+
     private static int[] heights = new int[0];
+    private static float[] field = new float[0];
 
     private SkyPassRenderer() {
     }
@@ -165,44 +170,99 @@ public final class SkyPassRenderer {
         b.addVertex(m, x4, y4, z4).setColor(0.02f, 0.02f, 0.05f, a);
     }
 
-    // 雲の中の巨大な姿。下から見上げると、雲の切れ間に暗い影のかたまりが見える
+    // 雲の中の巨大な姿。下から見上げると、雲の切れ間に暗い影のかたまりが見える。
+    // 輪郭までの距離を一度だけ格子で求め、高さの違う 3 層に重ねる (層の高さが違うので、歩くと層がずれて奥行きが出る):
+    //   上の層 = 広くぼやけた、明るく半透明の縁 (ひれ・肢のうすい部分)
+    //   中の層 = 本体。輪郭はノイズで崩れ、ゆっくりうねる
+    //   下の層 = 芯。胴と翼の付け根だけが一段濃く沈む
+    // 濃淡のノイズは姿に付いて動く (姿の座標で引く) ので、肌がうごめいて見える。すべて頂点の色で描くので軽い
     private static void drawBody(SkyPass pass, double age, Vec3 cam, Matrix4f pose, float height, float storm, float viewRange) {
         double cx = pass.centerX(age);
         double cz = pass.centerZ(age);
         int minX = Mth.floor((cx - SkyPass.REACH) / BODY_STEP) * BODY_STEP;
         int minZ = Mth.floor((cz - SkyPass.REACH) / BODY_STEP) * BODY_STEP;
         int cells = (int) (SkyPass.REACH * 2 / BODY_STEP) + 2;
-        float y = (float) (height - cam.y);
+        int n = cells + 1;
         float visible = Math.min(1f, storm * 1.4f);
+        if (field.length < n * n * 3) {
+            field = new float[n * n * 3];
+        }
+        double dx = pass.dirX();
+        double dz = pass.dirZ();
+        for (int i = 0; i < n; i++) {
+            for (int k = 0; k < n; k++) {
+                double x = minX + i * BODY_STEP;
+                double z = minZ + k * BODY_STEP;
+                double rx = x - cx;
+                double rz = z - cz;
+                // 姿の座標 (前後 u、横 v)
+                double u = rx * dx + rz * dz;
+                double v = -rx * dz + rz * dx;
+                double d = pass.outlineDistance(x, z, age);
+                int idx = (i * n + k) * 3;
+                if (d > 90.0) {
+                    field[idx] = field[idx + 1] = field[idx + 2] = 0f;
+                    continue;
+                }
+                // 縁の崩れ (大きなうねり + 細かい毛羽立ち)、翼を伝わる波
+                double slow = age * 0.012;
+                d += (noise(u / 34.0 + slow, v / 34.0 - slow * 0.7) - 0.5) * 22.0;
+                d += (noise(u / 11.0 - slow * 3.0 + 40.0, v / 11.0 + slow * 2.0) - 0.5) * 7.0;
+                d += Math.sin(u * 0.05 - age * 0.09) * Math.min(1.0, Math.abs(v) / 90.0) * 4.5;
+                double mottle = 0.72 + 0.28 * noise(u / 22.0 + 11.0 - slow * 1.5, v / 22.0 + 3.0 + slow);
+                float halo = (float) smooth(0.5 - (d - 6.0) / 60.0) * 0.34f;
+                float body = (float) smooth(0.5 - d / 20.0) * 0.82f * (float) mottle;
+                float core = (float) smooth(0.5 - (d + 15.0) / 22.0) * 0.88f;
+                float fade = visible * distanceFade(x - cam.x, z - cam.z, viewRange);
+                field[idx] = halo * fade;
+                field[idx + 1] = body * fade;
+                field[idx + 2] = core * fade;
+            }
+        }
+        // 上の層は奥行きを書き込まない (うすい縁がバニラの雲を四角く切り抜かないように)
+        RenderSystem.depthMask(false);
+        drawLayer(cam, pose, height + BODY_HALO_RISE, minX, minZ, cells, n, 0, 0.17f, 0.18f, 0.26f, 0.17f, 0.18f, 0.26f);
+        RenderSystem.depthMask(true);
+        drawLayer(cam, pose, height, minX, minZ, cells, n, 1, 0.10f, 0.10f, 0.15f, 0.04f, 0.04f, 0.08f);
+        drawLayer(cam, pose, height - BODY_CORE_DROP, minX, minZ, cells, n, 2, 0.03f, 0.03f, 0.06f, 0.012f, 0.012f, 0.025f);
+    }
 
+    // 格子の 1 層を描く。色は α が薄い所 (縁) → 濃い所 (中) へ (r0,g0,b0 → r1,g1,b1)
+    private static void drawLayer(Vec3 cam, Matrix4f pose, float height, int minX, int minZ, int cells, int n, int layer,
+                                  float r0, float g0, float b0, float r1, float g1, float b1) {
+        float y = (float) (height - cam.y);
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         boolean any = false;
         for (int i = 0; i < cells; i++) {
             for (int k = 0; k < cells; k++) {
-                double x = minX + i * BODY_STEP;
-                double z = minZ + k * BODY_STEP;
-                float a00 = pass.shadow(x, z, age);
-                float a10 = pass.shadow(x + BODY_STEP, z, age);
-                float a11 = pass.shadow(x + BODY_STEP, z + BODY_STEP, age);
-                float a01 = pass.shadow(x, z + BODY_STEP, age);
+                float a00 = field[(i * n + k) * 3 + layer];
+                float a01 = field[(i * n + k + 1) * 3 + layer];
+                float a11 = field[((i + 1) * n + k + 1) * 3 + layer];
+                float a10 = field[((i + 1) * n + k) * 3 + layer];
                 if (a00 + a10 + a11 + a01 <= 0.01f) {
                     continue;
                 }
                 any = true;
-                float fade = visible * distanceFade(x - cam.x, z - cam.z, viewRange);
-                float x0 = (float) (x - cam.x);
-                float z0 = (float) (z - cam.z);
-                bodyVertex(buffer, pose, x0, y, z0, a00 * fade);
-                bodyVertex(buffer, pose, x0, y, z0 + BODY_STEP, a01 * fade);
-                bodyVertex(buffer, pose, x0 + BODY_STEP, y, z0 + BODY_STEP, a11 * fade);
-                bodyVertex(buffer, pose, x0 + BODY_STEP, y, z0, a10 * fade);
+                float x0 = (float) (minX + i * BODY_STEP - cam.x);
+                float z0 = (float) (minZ + k * BODY_STEP - cam.z);
+                layerVertex(buffer, pose, x0, y, z0, a00, r0, g0, b0, r1, g1, b1);
+                layerVertex(buffer, pose, x0, y, z0 + BODY_STEP, a01, r0, g0, b0, r1, g1, b1);
+                layerVertex(buffer, pose, x0 + BODY_STEP, y, z0 + BODY_STEP, a11, r0, g0, b0, r1, g1, b1);
+                layerVertex(buffer, pose, x0 + BODY_STEP, y, z0, a10, r0, g0, b0, r1, g1, b1);
             }
         }
         draw(buffer, any);
     }
 
-    private static void bodyVertex(BufferBuilder b, Matrix4f m, float x, float y, float z, float s) {
-        b.addVertex(m, x, y, z).setColor(0.05f, 0.05f, 0.08f, Math.min(1f, s * 0.95f));
+    private static void layerVertex(BufferBuilder b, Matrix4f m, float x, float y, float z, float a,
+                                    float r0, float g0, float b0, float r1, float g1, float b1) {
+        float t = Math.min(1f, a * 1.5f);
+        b.addVertex(m, x, y, z).setColor(Mth.lerp(t, r0, r1), Mth.lerp(t, g0, g1), Mth.lerp(t, b0, b1), Math.min(1f, a));
+    }
+
+    private static double smooth(double t) {
+        t = Math.max(0.0, Math.min(1.0, t));
+        return t * t * (3.0 - 2.0 * t);
     }
 
     // 嵐の雲の層。ゆっくり流れ、切れ間からだけ上の姿が見える。呼び声の瞬間は内側から光る
@@ -225,19 +285,21 @@ public final class SkyPassRenderer {
             for (int k = 0; k < cells; k++) {
                 double x = minX + i * DECK_STEP;
                 double z = minZ + k * DECK_STEP;
-                float a00 = deckAlpha(x, z, cam, driftX, driftZ, storm, range);
-                float a10 = deckAlpha(x + DECK_STEP, z, cam, driftX, driftZ, storm, range);
-                float a11 = deckAlpha(x + DECK_STEP, z + DECK_STEP, cam, driftX, driftZ, storm, range);
-                float a01 = deckAlpha(x, z + DECK_STEP, cam, driftX, driftZ, storm, range);
+                float a00 = deckAlpha(x, z, cx, cz, cam, driftX, driftZ, storm, range);
+                float a10 = deckAlpha(x + DECK_STEP, z, cx, cz, cam, driftX, driftZ, storm, range);
+                float a11 = deckAlpha(x + DECK_STEP, z + DECK_STEP, cx, cz, cam, driftX, driftZ, storm, range);
+                float a01 = deckAlpha(x, z + DECK_STEP, cx, cz, cam, driftX, driftZ, storm, range);
                 if (a00 + a10 + a11 + a01 <= 0.01f) {
                     continue;
                 }
                 any = true;
                 double near = Math.hypot(x - cx, z - cz);
                 float lit = glow * (float) Mth.clamp(1.0 - near / 220.0, 0.0, 1.0);
-                float r = 0.30f + lit * 0.45f;
-                float g = 0.31f + lit * 0.40f;
-                float bl = 0.36f + lit * 0.55f;
+                // 姿の近くの雲は、上の影を受けて暗く沈む (光をさえぎられる)
+                float dim = 1f - 0.55f * (float) Mth.clamp(1.0 - near / 170.0, 0.0, 1.0);
+                float r = (0.30f + lit * 0.45f) * dim;
+                float g = (0.31f + lit * 0.40f) * dim;
+                float bl = (0.36f + lit * 0.55f) * dim;
                 float x0 = (float) (x - cam.x);
                 float z0 = (float) (z - cam.z);
                 buffer.addVertex(pose, x0, y, z0).setColor(r, g, bl, a00);
@@ -249,8 +311,15 @@ public final class SkyPassRenderer {
         draw(buffer, any);
     }
 
-    private static float deckAlpha(double x, double z, Vec3 cam, double driftX, double driftZ, float storm, float range) {
-        double n = noise((x - driftX) / 90.0, (z - driftZ) / 90.0) * 0.65 + noise((x - driftX) / 35.0 + 7.3, (z - driftZ) / 35.0 - 2.1) * 0.35;
+    private static float deckAlpha(double x, double z, double cx, double cz, Vec3 cam, double driftX, double driftZ, float storm, float range) {
+        // 姿の近くでは、雲が姿から押しのけられるように外へ流れる (雲の模様を中心から遠ざける向きにずらす)
+        double ox = x - cx;
+        double oz = z - cz;
+        double near = Math.hypot(ox, oz);
+        double push = 38.0 * Math.exp(-near / 90.0);
+        double sx = near > 1.0 ? ox / near * push : 0.0;
+        double sz = near > 1.0 ? oz / near * push : 0.0;
+        double n = noise((x - driftX - sx) / 90.0, (z - driftZ - sz) / 90.0) * 0.65 + noise((x - driftX - sx) / 35.0 + 7.3, (z - driftZ - sz) / 35.0 - 2.1) * 0.35;
         // 嵐が強いほど雲が厚くなり、切れ間が減る
         double threshold = 0.62 - storm * 0.3;
         double cover = Mth.clamp((n - threshold) / 0.18, 0.0, 1.0);
