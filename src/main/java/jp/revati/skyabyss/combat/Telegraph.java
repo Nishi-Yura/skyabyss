@@ -51,6 +51,26 @@ public final class Telegraph {
     // 1 tick に送る予告の粒の数 (粒 × 見る人) の上限
     static final int BUDGET = 700;
 
+    // 印の意味 (色に頼らない合図の違いもある: 危険 = 縁に山形・満ちると橙から赤から白、安全 = 青白の破線、無害 = 灰色の点)。
+    // CUSTOM は color() で選んだ色 (旧来の見え方)。新しい技は danger() / safe() / harmless() を使う
+    public enum Style {
+        CUSTOM(0xFF5A5A),
+        DANGER(0xFF8A2A),
+        SAFE(0x5CE8FF),
+        HARMLESS(0xB0B4BC);
+
+        public final int rgb;
+
+        Style(int rgb) {
+            this.rgb = rgb;
+        }
+
+        public static Style byId(int id) {
+            Style[] v = values();
+            return id >= 0 && id < v.length ? v[id] : CUSTOM;
+        }
+    }
+
     @FunctionalInterface
     public interface Hit {
         void hit(ServerLevel level, ServerPlayer victim);
@@ -72,6 +92,9 @@ public final class Telegraph {
     private final int warn;
     private final int active;
     private final int rgb;
+    private final Style style;
+    @Nullable
+    private final UUID target;
     @Nullable
     private final Entity owner;
     private final Predicate<ServerPlayer> victims;
@@ -97,6 +120,8 @@ public final class Telegraph {
         this.warn = Math.max(MIN_WARN_TICKS, b.warn);
         this.active = Math.max(0, b.active);
         this.rgb = b.rgb;
+        this.style = b.style;
+        this.target = b.target;
         this.owner = b.owner;
         this.victims = b.victims;
         this.onImpact = b.onImpact;
@@ -147,6 +172,9 @@ public final class Telegraph {
         private int warn = 24;
         private int active = 0;
         private int rgb = 0xFF5A5A;
+        private Style style = Style.CUSTOM;
+        @Nullable
+        private UUID target;
         @Nullable
         private Entity owner;
         private Predicate<ServerPlayer> victims = Telegraph::defaultVictim;
@@ -192,8 +220,42 @@ public final class Telegraph {
             return this;
         }
 
+        // 特別な色 (旧来。意味の印にならない)
         public Builder color(int rgb) {
             this.rgb = rgb;
+            this.style = Style.CUSTOM;
+            return this;
+        }
+
+        // 当たると傷が出る範囲: 橙から赤へ満ち、当たる瞬間に白く光る。縁は山形
+        public Builder danger() {
+            this.style = Style.DANGER;
+            this.rgb = Style.DANGER.rgb;
+            return this;
+        }
+
+        // 安全な場所 (輪の抜ける筋など): 青白で、縁は破線
+        public Builder safe() {
+            this.style = Style.SAFE;
+            this.rgb = Style.SAFE.rgb;
+            return this;
+        }
+
+        // 傷はなく押すだけ・見た目だけの範囲: 灰色で、縁は点
+        public Builder harmless() {
+            this.style = Style.HARMLESS;
+            this.rgb = Style.HARMLESS.rgb;
+            return this;
+        }
+
+        // この技が狙っている人。狙われた本人の画面にだけ、帯の根もとに輪と矢印が出る
+        public Builder target(@Nullable UUID player) {
+            this.target = player;
+            return this;
+        }
+
+        public Builder target(@Nullable Entity entity) {
+            this.target = entity instanceof ServerPlayer ? entity.getUUID() : null;
             return this;
         }
 
@@ -432,7 +494,7 @@ public final class Telegraph {
             }
             if (p.distanceToSqr(cx, floor, cz) < reachSq && GroupOwned.visibleTo(owner != null ? owner : p, p)) {
                 if (payload == null) {
-                    payload = TelegraphStartPayload.of(id, shape, floor, age, warn, active, rgb);
+                    payload = TelegraphStartPayload.of(id, shape, floor, age, warn, active, rgb, style.ordinal(), target);
                 }
                 PacketDistributor.sendToPlayer(p, payload);
                 notified.add(p.getUUID());

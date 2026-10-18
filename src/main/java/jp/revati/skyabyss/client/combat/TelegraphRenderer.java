@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphGeometry;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.client.Minecraft;
@@ -30,8 +31,6 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 // 奥行きは見る・書かない。床のすぐ上に少し浮かせ、遠いほど浮かせて z-fighting を避ける。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TelegraphRenderer {
-    private static final int GREEN = 0x4CFF6A;
-
     private TelegraphRenderer() {
     }
 
@@ -99,28 +98,54 @@ public final class TelegraphRenderer {
 
     private static void drawDecal(Painter p, TelegraphClient.Decal d, float t, boolean hc) {
         TelegraphShape shape = d.shape;
-        int rgb = d.rgb;
+        Telegraph.Style style = d.style;
         float areaA = hc ? 0.22f : 0.12f;
         float fillA = hc ? 0.50f : 0.34f;
         float curtain = hc ? 1.0f : 0.6f;
+        float wm = style == Telegraph.Style.DANGER ? 0.1f : 0.3f;
+        // 縁の模様 (色だけに頼らない): 危険 = 山形、安全 = 破線、無害 = 点、特別な色 = 実線
+        Pattern pattern = switch (style) {
+            case DANGER -> Pattern.CHEVRON;
+            case SAFE -> Pattern.DASH;
+            case HARMLESS -> Pattern.DOT;
+            default -> Pattern.SOLID;
+        };
+        float prog = Math.min(1f, t / d.warn);
+        // 危険は橙から赤へ (当たる瞬間に白く光る)。ほかは色のまま
+        int rgb = style == Telegraph.Style.DANGER ? mix(0xFF9A2A, 0xFF2418, prog) : d.rgb;
+        if (style == Telegraph.Style.HARMLESS) {
+            areaA *= 0.7f;
+            fillA *= 0.6f;
+        }
+        p.pattern = pattern;
+        p.centerX = shape.centerX();
+        p.centerZ = shape.centerZ();
 
         if (t < d.warn) {
-            float prog = t / d.warn;
             // 近づくと白く・濃く、最後の 1/4 は脈打つ
-            float pulse = prog > 0.75f ? 0.10f * (float) Math.sin(t * 1.3f) : 0f;
+            float pulse = prog > 0.75f && style != Telegraph.Style.HARMLESS ? 0.10f * (float) Math.sin(t * 1.3f) : 0f;
+            if (style == Telegraph.Style.SAFE) {
+                // 安全な場所は満ちない。青白の面と破線の縁がずっと同じ濃さで出る
+                p.faces(g -> TelegraphGeometry.area(shape, g), rgb, 0.26f);
+                p.lines(g -> TelegraphGeometry.outline(shape, g), mix(rgb, 0xFFFFFF, 0.6f), 0.95f, hc ? 0.22f : 0.14f, curtain * 0.7f);
+                return;
+            }
             p.faces(g -> TelegraphGeometry.area(shape, g), rgb, areaA);
-            p.faces(g -> TelegraphGeometry.fill(shape, prog, g), mix(rgb, 0xFFFFFF, 0.3f * prog), fillA + 0.22f * prog + pulse);
+            p.faces(g -> TelegraphGeometry.fill(shape, prog, g), mix(rgb, 0xFFFFFF, wm * prog), fillA + 0.22f * prog + pulse);
             if (shape.kind() == TelegraphShape.KIND_WAVE) {
                 lanes(p, shape, hc);
             }
             p.lines(g -> TelegraphGeometry.outline(shape, g), mix(rgb, 0xFFFFFF, 0.55f), 0.95f, hc ? 0.2f : 0.12f, curtain * (0.55f + 0.45f * prog));
+            p.pattern = Pattern.SOLID;
             p.lines(g -> TelegraphGeometry.front(shape, prog, g), mix(rgb, 0xFFFFFF, 0.85f), 1f, hc ? 0.3f : 0.2f, curtain * 0.6f);
+            p.pattern = pattern;
             if (shape.kind() == TelegraphShape.KIND_SWEEP) {
                 // 帯の始まりの向き (これから振り回す帯)
                 TelegraphShape blade = shape.at(0);
                 p.faces(g -> TelegraphGeometry.area(blade, g), mix(rgb, 0xFFFFFF, 0.3f), 0.28f + 0.3f * prog);
                 p.lines(g -> TelegraphGeometry.edgesOf(blade, g), mix(rgb, 0xFFFFFF, 0.85f), 1f, hc ? 0.3f : 0.2f, curtain * 0.7f);
             }
+            targetMarker(p, d, t, hc);
             return;
         }
         float after = t - d.warn;
@@ -133,23 +158,76 @@ public final class TelegraphRenderer {
             }
             p.faces(g -> TelegraphGeometry.swept(shape, q, g), rgb, fillA);
             p.faces(g -> TelegraphGeometry.area(now, g), mix(rgb, 0xFFFFFF, 0.5f), hc ? 0.85f : 0.65f);
+            p.pattern = Pattern.SOLID;
             p.lines(g -> TelegraphGeometry.edgesOf(now, g), 0xFFFFFF, 1f, hc ? 0.32f : 0.22f, curtain * 1.2f);
             return;
         }
         // 当たった瞬間の光 (非動体)、動くものは終わりの余韻
         float since = d.active > 0 ? after - d.active : after;
         float f = Math.max(0f, 1f - since / TelegraphClient.FLASH_TICKS);
+        if (style == Telegraph.Style.SAFE) {
+            p.faces(g -> TelegraphGeometry.area(shape, g), rgb, 0.26f * f);
+            return;
+        }
         if (d.active > 0) {
             p.faces(g -> TelegraphGeometry.area(shape, g), rgb, areaA * 0.7f * f);
             return;
         }
-        p.faces(g -> TelegraphGeometry.area(shape, g), mix(rgb, 0xFFFFFF, 0.75f), 0.85f * f);
+        float flash = style == Telegraph.Style.HARMLESS ? 0.5f : 0.85f;
+        p.faces(g -> TelegraphGeometry.area(shape, g), mix(rgb, 0xFFFFFF, 0.75f), flash * f);
+        p.pattern = Pattern.SOLID;
         p.lines(g -> TelegraphGeometry.outline(shape, g), 0xFFFFFF, f, hc ? 0.3f : 0.2f, curtain * 1.3f * f);
     }
 
+    // 狙われた本人にだけ: 帯 (突き・扇・振り回す帯) の根もとに輪と、向かう先を指す矢印
+    private static void targetMarker(Painter p, TelegraphClient.Decal d, float t, boolean hc) {
+        if (d.target == null || Minecraft.getInstance().player == null || !d.target.equals(Minecraft.getInstance().player.getUUID())) {
+            return;
+        }
+        int kind = d.shape.kind();
+        if (kind != TelegraphShape.KIND_LINE && kind != TelegraphShape.KIND_CONE && kind != TelegraphShape.KIND_SWEEP) {
+            return;
+        }
+        double[] prm = d.shape.params();
+        double ox = prm[0];
+        double oz = prm[1];
+        double angle = kind == TelegraphShape.KIND_SWEEP ? prm[2] + prm[3] * 0.5 : prm[2];
+        float pulse = 0.75f + 0.25f * (float) Math.sin(t * 0.5f);
+        double r = 0.9;
+        int n = 20;
+        float w = hc ? 0.2f : 0.14f;
+        p.pattern = Pattern.SOLID;
+        p.lines(g -> {
+            for (int i = 0; i < n; i++) {
+                double a0 = 2 * Math.PI * i / n;
+                double a1 = 2 * Math.PI * (i + 1) / n;
+                g.seg(ox + Math.cos(a0) * r, oz + Math.sin(a0) * r, ox + Math.cos(a1) * r, oz + Math.sin(a1) * r);
+            }
+        }, 0xFFFFFF, pulse, w, 0.5f);
+        // 矢印 (輪の外から前へ)
+        double c = Math.cos(angle);
+        double s = Math.sin(angle);
+        double tipD = 2.5;
+        double baseD = 1.5;
+        double half = 0.55;
+        p.faces(g -> g.tri(ox + c * tipD, oz + s * tipD, ox + c * baseD - s * half, oz + s * baseD + c * half,
+                ox + c * baseD + s * half, oz + s * baseD - c * half), 0xFFFFFF, pulse * 0.9f);
+    }
+
     private static void lanes(Painter p, TelegraphShape shape, boolean hc) {
-        p.faces(g -> TelegraphGeometry.lanes(shape, g), GREEN, hc ? 0.42f : 0.28f);
-        p.lines(g -> TelegraphGeometry.laneEdges(shape, g), mix(GREEN, 0xFFFFFF, 0.3f), 0.95f, hc ? 0.2f : 0.12f, hc ? 0.8f : 0.45f);
+        int safe = Telegraph.Style.SAFE.rgb;
+        Pattern keep = p.pattern;
+        p.faces(g -> TelegraphGeometry.lanes(shape, g), safe, hc ? 0.42f : 0.28f);
+        p.pattern = Pattern.DASH;
+        p.lines(g -> TelegraphGeometry.laneEdges(shape, g), mix(safe, 0xFFFFFF, 0.6f), 0.95f, hc ? 0.2f : 0.12f, hc ? 0.8f : 0.45f);
+        p.pattern = keep;
+    }
+
+    enum Pattern {
+        SOLID,
+        CHEVRON,
+        DASH,
+        DOT
     }
 
     private static int mix(int a, int b, float t) {
@@ -178,6 +256,9 @@ public final class TelegraphRenderer {
         private final boolean hc;
         private TelegraphClient.Decal decal;
         private float lift;
+        Pattern pattern = Pattern.SOLID;
+        double centerX;
+        double centerZ;
 
         Painter(BufferBuilder buf, Matrix4f pose, Vec3 cam, ClientLevel level, boolean hc) {
             this.buf = buf;
@@ -216,7 +297,7 @@ public final class TelegraphRenderer {
             float g = ((rgb >> 8) & 0xFF) / 255f;
             float b = (rgb & 0xFF) / 255f;
             float a = Math.min(1f, alpha);
-            float up = lift + 0.012f;
+            double[] acc = {0};
             source.emit((x0, z0, x1, z1) -> {
                 double dx = x1 - x0;
                 double dz = z1 - z0;
@@ -224,37 +305,90 @@ public final class TelegraphRenderer {
                 if (len < 1e-6) {
                     return;
                 }
-                // 線の両端を少し伸ばして、折れ目のすき間を埋める
-                double ex = dx / len * width * 0.5;
-                double ez = dz / len * width * 0.5;
-                double ax = x0 - ex;
-                double az = z0 - ez;
-                double bx = x1 + ex;
-                double bz = z1 + ez;
-                double nx = -dz / len * width * 0.5;
-                double nz = dx / len * width * 0.5;
-                if (hc) {
-                    // 高コントラスト: 縁の下に黒い縁取り
-                    double wx = nx * 1.9;
-                    double wz = nz * 1.9;
-                    vertex(ax + wx, az + wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                    vertex(bx + wx, bz + wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                    vertex(bx - wx, bz - wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                    vertex(ax - wx, az - wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                }
-                vertex(ax + nx, az + nz, up, r, g, b, a);
-                vertex(bx + nx, bz + nz, up, r, g, b, a);
-                vertex(bx - nx, bz - nz, up, r, g, b, a);
-                vertex(ax - nx, az - nz, up, r, g, b, a);
-                if (curtainHeight > 0.02f) {
-                    // 縁に立つ低い幕: 下は縁の色、上へ消える。低い目線では床の面が薄く見えるので、これで範囲が読める
-                    float ca = a * (hc ? 0.75f : 0.55f);
-                    vertex(x0, z0, up, r, g, b, ca);
-                    vertex(x1, z1, up, r, g, b, ca);
-                    vertex(x1, z1, up + curtainHeight, r, g, b, 0f);
-                    vertex(x0, z0, up + curtainHeight, r, g, b, 0f);
+                double ux = dx / len;
+                double uz = dz / len;
+                switch (pattern) {
+                    case SOLID -> piece(x0, z0, x1, z1, r, g, b, a, width, curtainHeight, true);
+                    case DASH, DOT -> {
+                        // 破線 (0.55 描いて 0.35 あける) / 点 (0.18 描いて 0.42 あける)。長さは続けて数える
+                        double on = pattern == Pattern.DASH ? 0.55 : 0.18;
+                        double period = pattern == Pattern.DASH ? 0.9 : 0.6;
+                        double at = 0;
+                        while (at < len) {
+                            double phase = (acc[0] + at) % period;
+                            if (phase < on) {
+                                double seg = Math.min(on - phase, len - at);
+                                piece(x0 + ux * at, z0 + uz * at, x0 + ux * (at + seg), z0 + uz * (at + seg), r, g, b, a, width, curtainHeight, false);
+                                at += Math.max(seg, 0.01);
+                            } else {
+                                at += Math.max(period - phase, 0.02);
+                            }
+                        }
+                        acc[0] += len;
+                    }
+                    case CHEVRON -> {
+                        // 細い実線 + 1.2 マスごとの山形 (頂点は範囲の中心の側)
+                        piece(x0, z0, x1, z1, r, g, b, a, width * 0.55f, curtainHeight, true);
+                        double period = 1.2;
+                        double at = acc[0] % period == 0 ? 0 : period - (acc[0] % period);
+                        for (; at < len; at += period) {
+                            double mx = x0 + ux * at;
+                            double mz = z0 + uz * at;
+                            double nx = -uz;
+                            double nz = ux;
+                            if ((centerX - mx) * nx + (centerZ - mz) * nz < 0) {
+                                nx = -nx;
+                                nz = -nz;
+                            }
+                            double ax = mx + nx * 0.34;
+                            double az = mz + nz * 0.34;
+                            piece(ax, az, mx - ux * 0.3, mz - uz * 0.3, r, g, b, a, width * 0.9f, 0f, false);
+                            piece(ax, az, mx + ux * 0.3, mz + uz * 0.3, r, g, b, a, width * 0.9f, 0f, false);
+                        }
+                        acc[0] += len;
+                    }
                 }
             });
+        }
+
+        // 線の 1 片: 平らな帯と、立つ幕。extend = 両端を少し伸ばして折れ目のすき間を埋める
+        private void piece(double x0, double z0, double x1, double z1, float r, float g, float b, float a, float width, float curtainHeight, boolean extend) {
+            double dx = x1 - x0;
+            double dz = z1 - z0;
+            double len = Math.hypot(dx, dz);
+            if (len < 1e-6) {
+                return;
+            }
+            float up = lift + 0.012f;
+            double ex = extend ? dx / len * width * 0.5 : 0;
+            double ez = extend ? dz / len * width * 0.5 : 0;
+            double ax = x0 - ex;
+            double az = z0 - ez;
+            double bx = x1 + ex;
+            double bz = z1 + ez;
+            double nx = -dz / len * width * 0.5;
+            double nz = dx / len * width * 0.5;
+            if (hc) {
+                // 高コントラスト: 縁の下に黒い縁取り
+                double wx = nx * 1.9;
+                double wz = nz * 1.9;
+                vertex(ax + wx, az + wz, lift + 0.004f, 0, 0, 0, 0.7f);
+                vertex(bx + wx, bz + wz, lift + 0.004f, 0, 0, 0, 0.7f);
+                vertex(bx - wx, bz - wz, lift + 0.004f, 0, 0, 0, 0.7f);
+                vertex(ax - wx, az - wz, lift + 0.004f, 0, 0, 0, 0.7f);
+            }
+            vertex(ax + nx, az + nz, up, r, g, b, a);
+            vertex(bx + nx, bz + nz, up, r, g, b, a);
+            vertex(bx - nx, bz - nz, up, r, g, b, a);
+            vertex(ax - nx, az - nz, up, r, g, b, a);
+            if (curtainHeight > 0.02f) {
+                // 縁に立つ低い幕: 下は縁の色、上へ消える。低い目線では床の面が薄く見えるので、これで範囲が読める
+                float ca = a * (hc ? 0.75f : 0.55f);
+                vertex(x0, z0, up, r, g, b, ca);
+                vertex(x1, z1, up, r, g, b, ca);
+                vertex(x1, z1, up + curtainHeight, r, g, b, 0f);
+                vertex(x0, z0, up + curtainHeight, r, g, b, 0f);
+            }
         }
 
         private void vertex(double x, double z, float height, float r, float g, float b, float a) {

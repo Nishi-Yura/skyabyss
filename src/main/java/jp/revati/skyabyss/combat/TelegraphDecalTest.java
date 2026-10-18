@@ -183,7 +183,9 @@ final class TelegraphDecalTest {
     private static void payloads(MinecraftServer server, Map<String, TelegraphShape> shapes, List<String> f, Random rnd) {
         for (var e : shapes.entrySet()) {
             TelegraphShape shape = e.getValue();
-            TelegraphStartPayload sent = TelegraphStartPayload.of(1234, shape, -60.0, 3, 28, shape.kind() == TelegraphShape.KIND_SWEEP ? 12 : 0, 0xFF5A5A);
+            java.util.UUID aimed = rnd.nextBoolean() ? java.util.UUID.randomUUID() : null;
+            TelegraphStartPayload sent = TelegraphStartPayload.of(1234, shape, -60.0, 3, 28, shape.kind() == TelegraphShape.KIND_SWEEP ? 12 : 0, 0xFF5A5A,
+                    Telegraph.Style.SAFE.ordinal(), aimed);
             RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
             TelegraphStartPayload.STREAM_CODEC.encode(buf, sent);
             int bytes = buf.readableBytes();
@@ -191,9 +193,9 @@ final class TelegraphDecalTest {
             String name = e.getKey();
             check(buf.readableBytes() == 0, name + ": the packet decode left " + buf.readableBytes() + " bytes", f);
             check(got.id() == 1234 && got.kind() == shape.kind() && got.floor() == -60f && got.ageAtSend() == 3 && got.warn() == 28
-                    && got.active() == sent.active() && got.rgb() == 0xFF5A5A && java.util.Arrays.equals(got.params(), sent.params()),
+                    && got.active() == sent.active() && got.rgb() == 0xFF5A5A && got.style() == Telegraph.Style.SAFE.ordinal() && java.util.Objects.equals(got.target(), aimed) && java.util.Arrays.equals(got.params(), sent.params()),
                     name + ": a packet field changed on the round trip", f);
-            check(bytes < 120, name + ": the start packet is " + bytes + " bytes (compact: under 120)", f);
+            check(bytes < 140, name + ": the start packet is " + bytes + " bytes (compact: under 140)", f);
             TelegraphShape back = got.shape();
             check(back != null && back.getClass() == shape.getClass(), name + ": the shape came back as " + (back == null ? "null" : back.getClass().getSimpleName()), f);
             if (back != null) {

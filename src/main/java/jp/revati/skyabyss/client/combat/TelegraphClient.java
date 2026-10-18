@@ -3,12 +3,14 @@ package jp.revati.skyabyss.client.combat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.combat.TelegraphStartPayload;
 import net.minecraft.client.Minecraft;
@@ -40,9 +42,13 @@ public final class TelegraphClient {
         final int warn;
         final int active;
         final int rgb;
+        final Telegraph.Style style;
+        @Nullable
+        final UUID target;
         final Map<Long, Float> heights = new HashMap<>();
 
-        Decal(int id, TelegraphShape shape, double floor, long localStart, int warn, int active, int rgb) {
+        Decal(int id, TelegraphShape shape, double floor, long localStart, int warn, int active, int rgb,
+                Telegraph.Style style, @Nullable UUID target) {
             this.id = id;
             this.shape = shape;
             this.floor = floor;
@@ -50,6 +56,8 @@ public final class TelegraphClient {
             this.warn = warn;
             this.active = active;
             this.rgb = rgb;
+            this.style = style;
+            this.target = target;
         }
 
         int lifetime() {
@@ -108,7 +116,8 @@ public final class TelegraphClient {
         if (p.warn() < 1 || p.warn() > 1200 || p.active() < 0 || p.active() > 1200) {
             return;
         }
-        DECALS.put(p.id(), new Decal(p.id(), shape, p.floor(), level.getGameTime() - p.ageAtSend(), p.warn(), p.active(), p.rgb()));
+        DECALS.put(p.id(), new Decal(p.id(), shape, p.floor(), level.getGameTime() - p.ageAtSend(), p.warn(), p.active(), p.rgb(),
+                Telegraph.Style.byId(p.style()), p.target()));
     }
 
     public static void cancel(int id) {
