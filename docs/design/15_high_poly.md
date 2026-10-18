@@ -221,7 +221,7 @@
 | --- | --- |
 | gear の geo（mob の手に付く。600 面以内） | 灰被りの火掻き棒 168、番兵の盾 420、珊瑚の槍 144（像も同じ。細い軸は元のまま）、鉤槍 401、射手の弓 246（元のまま）、鍛え手の大鎚 466・火箸 364、雷乞いの杖 274。テクスチャ 64x18〜512x64 |
 | item モデル（プレイヤーの武器） | 13 個の低ポリメッシュ（4.6.2。階級 3 × 強化 3 の絵）。GUI の 32x32 の絵と持ち方（display）は 4.6.1。元の絵を彫ったボクセル（18 モデル、要素 64〜752）は `models/item_voxel/` に戻り先として残す（`gen_weapon_models_v2.py` は停止中、`tools/sources/weapons/*/voxels.npz` が入力） |
-| 立体防具（geo/armor） | 4 組。[16](16_armor_design.md) の重ね板の基盤で作る（`tools/install_armor_v2.py`）。面 1,250〜1,463（4 部位） |
+| 立体防具 | 4 組の低ポリメッシュ（C 骨組み。4.6.3。一式の三角形は通常 627〜864、レア 699〜980、伝説 804〜1,080）。`LowPolyArmor.enabled = false` で元のキューブ（geo/armor。[16](16_armor_design.md) の重ね板の基盤、`tools/install_armor_v2.py`、面 1,250〜1,463）に戻る |
 
 gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.py`。入力は `tools/sources/hp_base/gear/`）: 大きな部品は二段丸め、厚さ 1 以上の板・柄は 0.25 の面取り、0.25 の浮き縁（板の上下の継ぎ目）、長い柄の巻き輪（8 単位ごとの 0.25 の帯）、盾・槌頭の縁のリベット。足した箱は単色で既存の箱に重ならない。**細い軸（厚さ 1 未満の槍・弓・火掻き棒の柄）は面取りすると痩せて見えるので面取りしない**。インストーラーが重なりを検査して落とす。骨の名前（`armorHead` など）・pivot・手の受け口は触らない。
 
@@ -274,7 +274,17 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 
 - 全 13 個で、一人称・三人称 × 階級 3 × 強化 3、元のボクセル、地面（`PickupDelay` 付きの item）・額縁を撮った。三人称の向きは元のボクセルと合う（大剣・鉾で確認）。階級で輪郭、強化で縁の色と光る筋が変わる。弓は引きの 3 段で弦の位置が変わる。盾は構え中も盾の姿
 - 負荷（armor stand 20 体が +10 の大剣を持つ、1280x720、垂直同期なし、他の作業と並行で目安）: 低ポリ 4.4〜5.1 ms/frame、ボクセル 8.1〜9.4 ms/frame（約 1.8 倍速い）。台本 `tools/shots/weapon_lp_perf.txt`
-- 未確認: 他のプレイヤーの手の弓の引き絵（三人称の段は自分の三人称でだけ見た）、左利きの全武器、専用サーバーのマルチ。フォイル（輝き）は描かない（`ModGear` の品に `foil` が付くものがあれば、描き足しが要る）
+- 左利き: 8 本（大剣・鉾・弓・盾・爪・斧・鉤槍・鎚）を右利きと並べて撮り、鏡写しで持つ向きに問題なし（`tools/gen_weapon_extra_shots.py` → `tools/weapon_extra_sheet.py`。`docs/review/previews/weapon_lp_extra_left.png`）。左利きで弓を引く一人称・三人称も撮った
+- 輝き（foil）: `stack.hasFoil()`（エンチャント・品の `foil`）のとき、本体のメッシュを `ItemRenderer.getFoilBuffer`（glint の描画型）へもう一度流す。光る画素（emissive）の層はそのまま。大剣・弓・盾の手（一人称・三人称）で紫の輝きを確認（`weapon_lp_extra_foil.png`）。地面の item・額縁は小さく輝きは見分けにくい
+- 盾の三人称の構え（構えていないとき）: バニラの盾の display の平行移動 [10,6,-4] は、盾の板の中心が原点から -8 ずれる前提の値だった。メッシュ・元のボクセルは中心が原点なので、盾が腕から 1 枚ぶん横に離れて浮いていた。中心の位置を合わせて [2,-2,4]（左右とも）にした（`models/item/coral_shield.json`・`item_voxel/coral_shield.json`）
+- 他の生き物の弓の引き絵: 引きの段は `holder`（`RenderLivingEvent` の間の生き物）の `isUsingItem` と使っている品の種類で決める（以前は同じ stack の参照比較で、ほかのプレイヤー・生き物の同期した stack では外れうる）。スケルトンに弓を持たせた三人称は撮ったが、横向きで弦の段までは見分けられなかった。未確認: ほかのプレイヤーの手の弓の引き絵の段（実機マルチ）、専用サーバーのマルチ
+
+#### 4.6.3 立体防具の低ポリメッシュ（C 骨組み）
+
+4 組（岩鯨・潮殻・雷翼・余燼）× 4 部位 × 階級 3（通常・レア・伝説）のメッシュ。アトラスと光る画像は強化（+0〜4 / +5 / +10）で選ぶ。コードは `client/lowpoly/LowPolyArmor`・`LowPolyArmorRenderer`（骨の付け方は GeckoLib の `GeoArmorRenderer` のまま、骨ごとに低ポリメッシュを流す）。入れ方は `python tools/install_armor_lowpoly.py`（入力 `docs/review/lowpoly_roughs/armor/c/`、作り方は `tools/rough/lowpoly/armor/`）。
+
+- 一式（4 部位）の三角形: 岩鯨 842 / 958 / 1,050、潮殻 742 / 858 / 1,008、雷翼 864 / 980 / 1,080、余燼 627 / 699 / 804（通常 / レア / 伝説）。伝説は 1,100 以下。岩鯨・雷翼の伝説は背の環を軽くし（輪を 9 → 7 点、支柱を 1 区間）、レアより増える「背の弧・羽の 3 組目」をやめた（`style_c.LEAN`、`python tools/rough/lowpoly/armor/build_legend_lean.py` で岩鯨・雷翼の伝説だけ作り直せる。環・布は残る）
+- 陰影: アトラスには面の向きの陰影（上が明るく下が暗い）が焼いてある。バニラの方向光（姿勢で回った法線）も強く効かせると、腕を上げて面が下を向いたとき（防具立ての腕上げ）に肩の板が二重に暗く沈む。防具の描画では法線を真上へ 0.4 だけ寄せて（`LowPolyArmorRenderer.SHADE_FLATTEN`、`LowPoly.drawBone` の `flatten`）、姿勢で極端に暗くならないようにした。バニラの陰（向きによる明暗）の効きはその分だけ弱くなる
 
 ## 5. これからモデルを作る手順
 

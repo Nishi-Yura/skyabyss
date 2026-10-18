@@ -29,6 +29,9 @@ size 1280 720
 timeout 1500
 render 8
 clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
 cmd skyabyss cinematic stop
 cmd time set noon
 cmd weather clear

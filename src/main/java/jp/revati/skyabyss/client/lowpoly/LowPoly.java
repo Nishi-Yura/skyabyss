@@ -24,6 +24,11 @@ public final class LowPoly {
 
     // 骨 1 本ぶんのメッシュを、今のポーズ (poseStack の先頭) で buffer へ流す。毎フレームは座標の変換だけ
     public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour) {
+        drawBone(poseStack, buffer, bone, packedLight, packedOverlay, colour, 0f);
+    }
+
+    // flatten: 0..1。法線を真上へこの割合だけ寄せる (防具用: 絵に面の向きの陰影が焼いてあるので、腕を上げて面が下を向いても二重に暗くならないように)
+    public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten) {
         PoseStack.Pose pose = poseStack.last();
         Matrix4f m = pose.pose();
         Matrix3f nm = pose.normal();
@@ -34,6 +39,15 @@ public final class LowPoly {
         for (int q = 0; q < bone.quadCount; q++) {
             nm.transform(nrm[q * 3], nrm[q * 3 + 1], nrm[q * 3 + 2], t).normalize();
             float nx = t.x, ny = t.y, nz = t.z;
+            if (flatten > 0f) {
+                nx *= 1f - flatten;
+                ny = ny * (1f - flatten) + flatten;
+                nz *= 1f - flatten;
+                float l = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
+                nx /= l;
+                ny /= l;
+                nz /= l;
+            }
             for (int k = 0; k < 4; k++) {
                 int pi = q * 12 + k * 3;
                 m.transformPosition(pos[pi], pos[pi + 1], pos[pi + 2], t);
