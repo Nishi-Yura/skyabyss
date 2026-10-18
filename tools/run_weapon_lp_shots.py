@@ -27,7 +27,7 @@ def main():
         running = [(i, p) for i, p in running if p.poll() is None]
         while queue and len(running) < jobs:
             item = queue.pop(0)
-            p = subprocess.Popen(["gradlew.bat", "runShots", f"-Pscript=tools/shots/weapon_lp_{item}.txt", "--offline", "-q"], cwd=ROOT,
+            p = subprocess.Popen([str(ROOT / "gradlew.bat"), "runShots", f"-Pscript=tools/shots/weapon_lp_{item}.txt", "--offline", "-q"], cwd=ROOT,
                                  stdout=open(ROOT / "build" / f"run_{item}.out", "w"), stderr=subprocess.STDOUT)
             running.append((item, p))
             time.sleep(25)
