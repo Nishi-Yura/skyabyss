@@ -461,7 +461,8 @@ public final class TitanBackBuilder {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
         BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
-        for (int y = FLOOR + 1; y <= 98; y++) {
+        // はしごの頂は 97 まで。98 (戸と同じ高さ) だと、支えの壁が戸になって、戸が開くと浮いてしまう。頂の隣 (-10, 98〜99) が戸 = 出口
+        for (int y = FLOOR + 1; y <= 97; y++) {
             kit.set(-9, y, -31, ladderEast);
         }
         for (BlockPos p : EAST_RETURN) {

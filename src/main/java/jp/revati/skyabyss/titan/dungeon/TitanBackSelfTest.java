@@ -82,6 +82,7 @@ public final class TitanBackSelfTest {
                 SelfTestRunner.Step.once("titan back (reach)", server -> withBack(server, back -> {
                     jp.revati.skyabyss.titan.audit.BackReach.Report r = TitanBackAudit.run(back);
                     r.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
+                    r.failures.forEach(n -> SkyAbyss.LOGGER.warn("REACH {}", n));
                     PENDING.addAll(r.failures);
                 })),
                 SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),

@@ -65,6 +65,11 @@ public final class BackReach {
         public final List<Box> allowHole = new ArrayList<>();
         // 穴・はしごを調べる範囲 (空なら bounds 全体)
         public final List<Box> scan = new ArrayList<>();
+        // この高さより下へ落ちると地上へ戻される (雲の海の底。MIN_VALUE なら無し)。そこへ落ちられる所は「出口」とみなす
+        public int voidY = Integer.MIN_VALUE;
+        public boolean verbose = false;
+        // 落ちると (溶岩・奈落の底で) 直前の休み場へ戻される所。そこへ落ちられる足場は「出口」とみなす
+        public final List<Box> resets = new ArrayList<>();
         // 何マス落ちても平気な所 (滑空・水など。位置で判断)
         public Predicate<BlockPos> glide = p -> false;
         // 歩く・跳ぶ・登る以外の道 (昇り風・泡の柱など)。立つ位置 p から行ける立つ位置を out に足す
@@ -94,6 +99,7 @@ public final class BackReach {
     public static final class Report {
         public final List<String> failures = new ArrayList<>();
         public final List<String> notes = new ArrayList<>();
+        public it.unimi.dsi.fastutil.longs.LongOpenHashSet reached;
         public int nodes;
         public int edges;
         public int roughDrops;
@@ -124,6 +130,7 @@ public final class BackReach {
         final LongOpenHashSet rough = new LongOpenHashSet();
         final LongArrayList roughFrom = new LongArrayList();
         final LongArrayList roughTo = new LongArrayList();
+        final LongOpenHashSet sinks = new LongOpenHashSet();
         final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 
         Audit(ServerLevel level, Spec spec) {
@@ -277,23 +284,35 @@ public final class BackReach {
 
         // n の真下へ、k マス目から落ちる。最初に立てるマスが落ち先
         void drop(BlockPos p, BlockPos n, int startK, List<BlockPos> out, List<BlockPos> roughOut) {
-            for (int k = startK; k <= MAX_DROP + 1; k++) {
+            for (int k = startK; k <= 400; k++) {
                 BlockPos mm = n.below(k);
                 if (!spec.bounds.contains(mm)) {
+                    if (spec.voidY != Integer.MIN_VALUE && mm.getY() < spec.voidY) {
+                        sinks.add(p.asLong());
+                    }
                     return;
                 }
                 if (valid(mm)) {
-                    int depth = k;
-                    boolean land = water(mm);
-                    if (land || depth <= SAFE_DROP || spec.glide.test(p) || spec.glide.test(mm)) {
+                    if (k > MAX_DROP && !water(mm) && !spec.glide.test(p) && !spec.glide.test(mm)) {
+                        return;
+                    }
+                    if (water(mm) || k <= SAFE_DROP || spec.glide.test(p) || spec.glide.test(mm)) {
                         out.add(mm);
-                    } else if (depth <= MAX_DROP) {
+                    } else {
                         out.add(mm);
                         roughOut.add(mm);
                     }
                     return;
                 }
                 if (!passable(mm)) {
+                    if ((info(mm) & LAVA) != 0) {
+                        for (Box b : spec.resets) {
+                            if (b.contains(mm)) {
+                                sinks.add(p.asLong());
+                                break;
+                            }
+                        }
+                    }
                     return;
                 }
             }
@@ -327,12 +346,21 @@ public final class BackReach {
                         if (!valid(dest) || !floorNode(dest)) {
                             continue;
                         }
-                        if (clearArc(p, dx, dz, dy)) {
+                        if (inResets(p) || clearArc(p, dx, dz, dy)) {
                             out.add(dest);
                         }
                     }
                 }
             }
+        }
+
+        boolean inResets(BlockPos p) {
+            for (Box b : spec.resets) {
+                if (b.contains(p)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         boolean clearArc(BlockPos p, int dx, int dz, int dy) {
@@ -415,6 +443,7 @@ public final class BackReach {
                     roughTo.add(q.asLong());
                 }
             }
+            rep.reached = forward;
             rep.nodes = forward.size();
             rep.edges = edgeFrom.size();
             rep.roughDrops = roughFrom.size();
@@ -468,6 +497,11 @@ public final class BackReach {
             }
             LongOpenHashSet back = new LongOpenHashSet();
             ArrayDeque<Long> queue = new ArrayDeque<>();
+            for (long sk : sinks) {
+                if (back.add(sk)) {
+                    queue.add(sk);
+                }
+            }
             for (BlockPos e : spec.exits) {
                 if (!forward.contains(e.asLong())) {
                     rep.failures.add(spec.name + ": exit " + e + " is not reachable from the entrance");
@@ -501,6 +535,18 @@ public final class BackReach {
                             allowed = true;
                             break;
                         }
+                    }
+                    // 調べる範囲 (scan) を決めてあるときは、その外 (背の地表の飾りなど) の行き止まりは数えない。
+                    // 地表は、縁から雲の海へ飛び降りれば地上へ戻されるので詰まない
+                    if (!allowed && !spec.scan.isEmpty()) {
+                        boolean inScan = false;
+                        for (Box b : spec.scan) {
+                            if (b.contains(p)) {
+                                inScan = true;
+                                break;
+                            }
+                        }
+                        allowed = !inScan;
                     }
                     if (!allowed) {
                         trapped.add(k);
@@ -567,6 +613,15 @@ public final class BackReach {
                     }
                 }
                 if (comps <= 12) {
+                    if (spec.verbose) {
+                        for (int i = 0; i < edgeFrom.size(); i++) {
+                            if (comp.contains(edgeTo.getLong(i)) && !comp.contains(edgeFrom.getLong(i))) {
+                                BlockPos land = BlockPos.of(edgeTo.getLong(i));
+                                jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH trap {} landing view{}", comps, ascii(land, 4, land.getY() - 1, land.getY() + 3));
+                                break;
+                            }
+                        }
+                    }
                     rep.failures.add(spec.name + ": one-way trap area of " + size + " cells " + new Box(minX, minY, minZ, maxX, maxY, maxZ) + entry);
                 }
             }
@@ -574,6 +629,27 @@ public final class BackReach {
             if (comps > 12) {
                 rep.failures.add(spec.name + ": ... and " + (comps - 12) + " more one-way trap areas");
             }
+        }
+
+        // 周りの断面を文字で (デバッグ用)。層ごとに y を 1 つずつ。# 固い . 空気 ~ 水 L 登れる G 戸 v 溶岩
+        String ascii(BlockPos c, int r, int y1, int y2) {
+            StringBuilder sb = new StringBuilder();
+            for (int y = y2; y >= y1; y--) {
+                sb.append("\n  y=").append(y).append("  (x ").append(c.getX() - r).append("..").append(c.getX() + r).append(", rows z ").append(c.getZ() - r).append("..").append(c.getZ() + r).append(")");
+                for (int z = c.getZ() - r; z <= c.getZ() + r; z++) {
+                    sb.append("\n   ");
+                    for (int x = c.getX() - r; x <= c.getX() + r; x++) {
+                        BlockPos q = new BlockPos(x, y, z);
+                        byte i = info(q);
+                        char ch = (i & GATE) != 0 ? 'G' : (i & LAVA) != 0 ? 'v' : (i & CLIMB) != 0 ? 'L' : (i & WATER) != 0 ? '~' : (i & PASS) == 0 ? '#' : (i & SUPPORT) != 0 ? '=' : '.';
+                        if (x == c.getX() && z == c.getZ() && y == c.getY()) {
+                            ch = '@';
+                        }
+                        sb.append(ch);
+                    }
+                }
+            }
+            return sb.toString();
         }
 
         static String fmt(BlockPos p) {
@@ -603,8 +679,8 @@ public final class BackReach {
             while (it.hasNext()) {
                 BlockPos p = BlockPos.of(it.nextLong());
                 // 列の頂上と底だけ調べる
-                boolean isTop = !ladders.contains(p.above().asLong());
-                boolean isBottom = !ladders.contains(p.below().asLong());
+                boolean isTop = !level.getBlockState(p.above()).is(BlockTags.CLIMBABLE);
+                boolean isBottom = !level.getBlockState(p.below()).is(BlockTags.CLIMBABLE);
                 BlockState s = level.getBlockState(p);
                 // 支え: 戸・崩れる骨・開く物の側面に付いていないこと
                 Direction face = s.hasProperty(net.minecraft.world.level.block.LadderBlock.FACING) ? s.getValue(net.minecraft.world.level.block.LadderBlock.FACING) : null;
@@ -657,7 +733,7 @@ public final class BackReach {
             int shown = 0;
             while (it.hasNext()) {
                 BlockPos p = BlockPos.of(it.nextLong());
-                if (!floorNode(p)) {
+                if (!floorNode(p) || level.getBlockState(p.below()).is(ModBlocks.CRUMBLING_BONE.get())) {
                     continue;
                 }
                 boolean inScan = false;
@@ -705,12 +781,14 @@ public final class BackReach {
                     }
                     // 落ちた先
                     String landing = "bottomless/lethal";
+                    boolean shallow = false;
                     for (int k = 1; k <= 40; k++) {
                         BlockPos mm = c.below(k);
                         if (!spec.bounds.contains(mm)) {
                             break;
                         }
                         if (valid(mm)) {
+                            shallow = k <= 1;
                             landing = "lands " + k + " below at " + fmt(mm) + (forward.contains(mm.asLong()) ? "" : " (cell not reachable otherwise)");
                             break;
                         }
@@ -718,6 +796,9 @@ public final class BackReach {
                             landing = "hits " + level.getBlockState(mm).getBlock().getDescriptionId() + " at " + fmt(mm) + " (not standable)";
                             break;
                         }
+                    }
+                    if (shallow) {
+                        continue;
                     }
                     rep.holes++;
                     if (shown++ < 40) {

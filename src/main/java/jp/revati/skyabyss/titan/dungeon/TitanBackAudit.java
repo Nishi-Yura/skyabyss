@@ -16,6 +16,8 @@ public final class TitanBackAudit {
 
     public static BackReach.Spec spec() {
         BackReach.Spec s = new BackReach.Spec("whale", new Box(-RX, 40, -RZ, RX, 175, RZ));
+        s.voidY = BASE_Y - 50;
+        s.verbose = true;
         s.entrances.add(arrival());
         s.exits.add(arrival());
         // 穴・はしごを調べるのは、体の中の部屋 (地表の背の遺跡・ひれは歩ける所だけ見る)
@@ -25,7 +27,9 @@ public final class TitanBackAudit {
         s.scan.add(new Box(-24, FLOOR - 2, -64, 24, FLOOR + 8, 6));
         // 西の谷は、落ちたら直前の休み場へ戻される (FALL_LINE) わざとの穴。足もとは溶岩
         for (TitanBackLayout.Box pit : PITS) {
-            s.allowHole.add(new Box(pit.x1() - 1, 70, pit.z1() - 1, pit.x2() + 1, pit.ceilingY(), pit.z2() + 1));
+            s.resets.add(new Box(pit.x1() - 1, 70, pit.z1() - 1, pit.x2() + 1, FLOOR, pit.z2() + 1));
+            // 足場の並びは谷の内側だけ。縁の一列 (戸口の岩棚・壁ぎわ) は穴の検査から外さない
+            s.allowHole.add(new Box(pit.x1() + 1, 70, pit.z1() + 1, pit.x2() - 1, pit.ceilingY(), pit.z2() - 1));
         }
         s.goals.put("plaza", plaza());
         s.goals.put("forge", forge().west());
@@ -50,6 +54,28 @@ public final class TitanBackAudit {
     }
 
     public static BackReach.Report run(ServerLevel level) {
-        return BackReach.run(level, spec());
+        BackReach.Spec s = spec();
+        BlockPos mz = TitanBackTrials.checkpointSpawns(level).get(TitanBackTrials.MAZE_REST);
+        if (mz != null) {
+            s.goals.put("rest mz (maze mid ledge)", mz);
+        }
+        StringBuilder dbg = new StringBuilder();
+        for (int y = 80; y <= 96; y++) {
+            dbg.append(y).append(":").append(level.getBlockState(new BlockPos(10, y, -7)).getBlock().getDescriptionId().replace("block.minecraft.", "")).append(" ");
+        }
+        jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH dbg column 10,-7: {}", dbg);
+        BackReach.Report rep = BackReach.run(level, s);
+        if (!rep.failures.isEmpty()) {
+            List<List<int[]>> courses = ParkourCourses.current(level);
+            for (int c = 0; c < courses.size(); c++) {
+                StringBuilder sb = new StringBuilder();
+                for (int[] st : courses.get(c)) {
+                    boolean ok = rep.reached.contains(new BlockPos(st[0], st[1] + 1, st[2]).asLong());
+                    sb.append(st[0]).append(",").append(st[1]).append(",").append(st[2]).append(ok ? "+ " : "- ");
+                }
+                jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH dbg course {}: {}", c, sb);
+            }
+        }
+        return rep;
     }
 }
