@@ -1,0 +1,511 @@
+# 低ポリの装飾品 (手・地面・額縁・体に付けた姿) を階級ごとに撮る (tools/gen_accessory_lp_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd setblock 0 -59 3 minecraft:stone
+cmd setblock 3 -59 3 minecraft:stone
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:kindling_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot kindling_charm_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot kindling_charm_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:kindling_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot kindling_charm_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot kindling_charm_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:kindling_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot kindling_charm_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot kindling_charm_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:kindling_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot kindling_charm_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot kindling_charm_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:kindling_charm",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:kindling_charm",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot kindling_charm_world
+camera 0 -60 8 180 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_mantle_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_mantle_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_mantle_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_mantle_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_mantle_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_mantle_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_mantle_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_mantle_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:ember_mantle",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:ember_mantle",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot ember_mantle_world
+camera 0 -60 8 180 0
+accequip ember_mantle
+hud off
+acctier common
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_front_common
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_back_common
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_mantle_worn_q_common
+perspective front
+bodyyaw 90
+chat clear
+shot ember_mantle_worn_side_common
+acctier rare
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_front_rare
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_back_rare
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_mantle_worn_q_rare
+perspective front
+bodyyaw 90
+chat clear
+shot ember_mantle_worn_side_rare
+acctier legend
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_front_legend
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_mantle_worn_back_legend
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_mantle_worn_q_legend
+perspective front
+bodyyaw 90
+chat clear
+shot ember_mantle_worn_side_legend
+acctier off
+accequip
+bodyyaw 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_lantern
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_lantern_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_lantern_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_lantern
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_lantern_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_lantern_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_lantern
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_lantern_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_lantern_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_lantern
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_lantern_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_lantern_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:ember_lantern",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:ember_lantern",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot ember_lantern_world
+camera 0 -60 8 180 0
+accequip ember_lantern
+hud off
+acctier common
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_front_common
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_back_common
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_lantern_worn_q_common
+perspective front
+bodyyaw 90
+chat clear
+shot ember_lantern_worn_side_common
+acctier rare
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_front_rare
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_back_rare
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_lantern_worn_q_rare
+perspective front
+bodyyaw 90
+chat clear
+shot ember_lantern_worn_side_rare
+acctier legend
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_front_legend
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot ember_lantern_worn_back_legend
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot ember_lantern_worn_q_legend
+perspective front
+bodyyaw 90
+chat clear
+shot ember_lantern_worn_side_legend
+acctier off
+accequip
+bodyyaw 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_horn
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_horn_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_horn_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_horn
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_horn_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_horn_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_horn
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_horn_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_horn_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_horn
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot ember_horn_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot ember_horn_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:ember_horn",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:ember_horn",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot ember_horn_world
+camera 0 -60 8 180 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:cinder_lamp
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot cinder_lamp_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot cinder_lamp_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:cinder_lamp
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot cinder_lamp_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot cinder_lamp_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:cinder_lamp
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot cinder_lamp_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot cinder_lamp_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:cinder_lamp
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot cinder_lamp_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot cinder_lamp_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:cinder_lamp",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:cinder_lamp",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot cinder_lamp_world
+camera 0 -60 8 180 0
+cmd setblock 0 -58 3 skyabyss:cinder_lamp[hanging=false]
+cmd setblock 3 -58 3 skyabyss:cinder_lamp[hanging=true]
+perspective first
+camera 1.5 -60 8 180 -4
+wait 20
+shot cinder_lamp_block
+quit
