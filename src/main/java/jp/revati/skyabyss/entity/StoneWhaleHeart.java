@@ -439,8 +439,33 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    // style: D = 傷が出る (橙から赤)、S = 安全な筋 (見た目だけ)、H = 押すだけ・見た目だけ (灰色)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        Telegraph.Builder b = Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this).victims(this::canReach).reach(3.5);
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    // 向き angle の先にいる人 (狙われた本人の画面に、帯の根もとの輪と矢印を出すため)。いなければ null
+    @org.jetbrains.annotations.Nullable
+    private java.util.UUID aimedAt(ServerLevel server, double angle) {
+        ServerPlayer best = null;
+        double bestDiff = 0.15;
+        for (ServerPlayer p : nearbyPlayers(server, 40)) {
+            double diff = Math.abs(Math.IEEEremainder(angleTo(p.position()) - angle, Math.PI * 2));
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                best = p;
+            }
+        }
+        return best == null ? null : best.getUUID();
     }
 
     private double angleTo(Vec3 spot) {
@@ -457,7 +482,7 @@ public class StoneWhaleHeart extends HeartBoss {
             sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
                     getX(), coreHeight(), getZ(), 60, 1.5, 1.2, 1.5, 0.2);
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, 0x9CFBFF)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H)
                     .onImpact(s -> sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f))
                     .onHit((s, player) -> {
                         Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
@@ -465,7 +490,7 @@ public class StoneWhaleHeart extends HeartBoss {
                     })
                     .start();
             // 広がる輪 (見た目だけ)
-            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, 0x9CFBFF).active(30).start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, H).active(30).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             warn(server, dust(0x9CFBFF, 1.2f), getX(), coreHeight(), getZ(), 6, 1.0, 1.0, 1.0, 0.05);
@@ -500,7 +525,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, THRUST_LENGTH, THRUST_HALF_WIDTH), THRUST_WARN, 0xA8D8FF)
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, THRUST_LENGTH, THRUST_HALF_WIDTH), THRUST_WARN, D).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
@@ -531,7 +556,7 @@ public class StoneWhaleHeart extends HeartBoss {
             for (int i = 0; i < arms; i++) {
                 double mid = Telegraph.angleOf(forward(attackYaw)) + Math.PI * i;
                 // 腕の通る扇 (見た目だけ。当たるのは棘の円)
-                tg(server, TelegraphShape.cone(getX(), getZ(), mid, 13, Math.toRadians(62)), 20, 0xFF9A7A).start();
+                tg(server, TelegraphShape.cone(getX(), getZ(), mid, 13, Math.toRadians(62)), 20, D).start();
             }
         }
         if (actionTicks >= 20 && actionTicks <= 68 && actionTicks % 3 == 0) {
@@ -553,7 +578,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 石棘 1 本: 半径 1.4 の円の印 (1.1 秒)。当たると少し跳ね上がる
     private void stoneSpike(ServerLevel server, double x, double y, double z) {
-        Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).floor(y).warn(SPIKE_WARN).color(0xFF5A5A).owner(this).victims(this::canReach)
+        Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).floor(y).warn(SPIKE_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.0f);
                     s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
@@ -574,7 +599,7 @@ public class StoneWhaleHeart extends HeartBoss {
             double gapBase = random.nextDouble() * Math.PI * 2;
             double[] gaps = {gapBase, gapBase + Math.PI};
             double gapHalf = Math.toRadians(22);
-            tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, 0x7FF4FF)
+            tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, D)
                     .onImpact(s -> {
                         sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
                         s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
@@ -584,12 +609,12 @@ public class StoneWhaleHeart extends HeartBoss {
                     .start();
             for (double gap : gaps) {
                 // 安全な筋 (見た目だけ)
-                tg(server, TelegraphShape.cone(getX(), getZ(), gap, 14, gapHalf), LEAP_WARN, 0x58FF9A).start();
+                tg(server, TelegraphShape.cone(getX(), getZ(), gap, 14, gapHalf), LEAP_WARN, S).start();
             }
             int rings = leapRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((LEAP_WAVE_REACH - LEAP_CORE) / 0.55);
-                tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, 0x7FF4FF)
+                tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, D)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, LEAP_WAVE_DAMAGE);
@@ -621,7 +646,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double length = Math.max(4, Math.min(26, dist + 4) - 2);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 2, getZ() + dz * 2, angle, length, CRACK_HALF_WIDTH), CRACK_WARN, 0xFF8A2A)
+                tg(server, TelegraphShape.line(getX() + dx * 2, getZ() + dz * 2, angle, length, CRACK_HALF_WIDTH), CRACK_WARN, D).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
@@ -680,7 +705,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double y0 = getY() + 3.6;
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, 0xFFD0A0)
+                tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, D).target(aimedAt(server, angle))
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
@@ -723,7 +748,7 @@ public class StoneWhaleHeart extends HeartBoss {
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;
                 boolean sounds = i == 0;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, BEAM_LENGTH, 1.1), BEAM_WARN, 0xFF3A2A)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, BEAM_LENGTH, 1.1), BEAM_WARN, D)
                         .active(BEAM_ACTIVE)
                         .onImpact(s -> {
                             if (sounds) {
@@ -772,7 +797,7 @@ public class StoneWhaleHeart extends HeartBoss {
             double base = Telegraph.angleOf(forward(attackYaw));
             for (int i = 0; i < count; i++) {
                 double mid = base + Math.PI * 2 * i / count;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, CHAIN_LENGTH, 1.2), CHAIN_WARN, 0xB02A2A)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, CHAIN_LENGTH, 1.2), CHAIN_WARN, D)
                         .active(CHAIN_ACTIVE).jumpClear(0.7)
                         .onHit((s, player) -> {
                             strike(player, CHAIN_DAMAGE);
@@ -809,7 +834,7 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     private void shellDrop(ServerLevel server, double x, double y, double z) {
-        Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).floor(y).warn(DROP_WARN).color(0x8A8A98).owner(this).victims(this::canReach)
+        Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).floor(y).warn(DROP_WARN).danger().owner(this).victims(this::canReach)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
                     s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), x, y + 0.5, z, 50, 1.4, 0.6, 1.4, 0.25);
