@@ -842,7 +842,12 @@ public class EmberHeart extends HeartBoss {
             if (k >= 0 && EmberHeartArena.crack(server, k)) {
                 lastSector = k;
                 tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, D)
-                        .onHit((s, player) -> EmberHeartArena.engulf(s, player, this))
+                        .onHit((s, player) -> {
+                            // 区画が戻された・やり直された (放棄・段階 3 への切り替え) あとは、古い予告で呑まない
+                            if (EmberHeartArena.cracking(k) || EmberHeartArena.sunk(k)) {
+                                EmberHeartArena.engulf(s, player, this);
+                            }
+                        })
                         .start();
             }
         }

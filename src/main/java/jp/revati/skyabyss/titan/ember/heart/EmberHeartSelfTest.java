@@ -356,7 +356,7 @@ public final class EmberHeartSelfTest {
     // ---------------------------------------------------------------- 区画の予告・沈み・戻り・呑まれた
     private static FakePlayer fake(ServerLevel level, String tag, double x, double z) {
         // 偽のプレイヤーは傷を受けない (FakePlayer.isInvulnerableTo が真) ので、受けるようにする
-        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.nameUUIDFromBytes(("ember heart " + tag).getBytes(java.nio.charset.StandardCharsets.UTF_8)), "[eh_" + tag + "]")) {
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "[eh_" + tag + "]")) {
             @Override
             public boolean isInvulnerableTo(net.minecraft.world.damagesource.DamageSource source) {
                 return false;
@@ -376,7 +376,10 @@ public final class EmberHeartSelfTest {
         if (testParty != null && !testParty.members.contains(p.getUUID())) {
             jp.revati.skyabyss.party.PartyData.get(level.getServer()).add(testParty, p.getUUID(), "eh_" + tag);
         }
-        level.addFreshEntity(p);
+        // 追加に失敗した (同じ UUID の残りがある等) なら、黙って進まず落とす
+        if (!level.addFreshEntity(p)) {
+            throw new IllegalStateException("could not add the fake player " + tag + " to the level");
+        }
         return p;
     }
 
@@ -733,6 +736,7 @@ public final class EmberHeartSelfTest {
             // 叩けば消える: すべて叩くと、円も消えて傷はない
             // 床の崩れ (段階 2 の 6〜8 秒ごと) の呑まれが混ざらないよう、段階 1 で
             heart.forcePhase(0);
+            jp.revati.skyabyss.combat.Telegraph.cancelAll(heart);
             EmberHeartArena.restoreAll(back);
             target.setHealth(1000);
             target.invulnerableTime = 0;
