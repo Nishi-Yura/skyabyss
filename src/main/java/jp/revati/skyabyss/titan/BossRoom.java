@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
@@ -134,6 +135,10 @@ public final class BossRoom {
             return;
         }
         Entity boss = bossId == null ? null : level.getEntity(bossId);
+        if (boss instanceof LivingEntity dying && dying.isDeadOrDying() && !dying.isRemoved()) {
+            // 倒れる演出の最中 (撃破の報告は演出が終わってから出る)。部屋は閉じたまま待つ
+            return;
+        }
         if (boss == null || !boss.isAlive()) {
             // 撃破の報告がないまま消えた (ピースフルで消えた、コマンドで消したなど)。最初に戻し、すぐには湧かせ直さない
             reset(level, host, true);

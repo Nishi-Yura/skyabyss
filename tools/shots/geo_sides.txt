@@ -1,0 +1,39 @@
+# 横から見て、モデルが透けて中が見えないかを確かめる (tools/fix_geo_face_sides.py の前後の比べ用)。
+# ./gradlew runShots -Pscript=tools/shots/geo_sides.txt [-PshotsName=geo_sides_before]
+# 出力: run/shots/<name>/shots/geo_sides/*.png と shots.log。AI なしの敵を玄武岩の床に離して並べ、東西の横から近づいて撮る
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -12 20 -61 12 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:ash_thrall -12 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:static_moth 12 -59.5 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+hud off
+cmd title @a clear
+camera minecraft:overworld -15 -59.2 0 270 6
+waitchunks
+wait 80
+shot thrall_from_west
+camera minecraft:overworld -9 -59.2 0 90 6
+wait 20
+shot thrall_from_east
+camera minecraft:overworld -3.2 -58.8 0 270 6
+wait 20
+shot sentinel_from_west
+camera minecraft:overworld 3.2 -58.8 0 90 6
+wait 20
+shot sentinel_from_east
+camera minecraft:overworld 8.5 -58.8 0 270 6
+wait 20
+shot moth_from_west
+camera minecraft:overworld 15.5 -58.8 0 90 6
+wait 20
+shot moth_from_east
+quit

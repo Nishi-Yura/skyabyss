@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.tide.TideTravel;
 import net.minecraft.core.BlockPos;
@@ -50,7 +50,7 @@ import org.joml.Vector3f;
 //  段階3 月の潮   : 引き潮 (強く引いて弾ける。島の上は半分) / 月潮の大波 (島へ逃げる) / 真珠の雨 (島の上にも来る)
 // 戦いの主題は「床と島の行き来」。段階は同期データで全員の画面に届き、模型 (段階ごとの geo) とボスバーの見た目を決める。
 // 強さは 03 の 9.8節の目安 (推奨 Lv18: 体力 540、ふつうの技の一撃 13.5 前後)
-public class TideHeart extends GuardMob {
+public class TideHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
@@ -233,6 +233,9 @@ public class TideHeart extends GuardMob {
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 20 == 0) {
             updateBossBarViewers();
+        }
+        if (isIntroPlaying()) {
+            return;
         }
         if (cooldown > 0) {
             cooldown--;
@@ -920,7 +923,7 @@ public class TideHeart extends GuardMob {
         super.remove(reason);
     }
 
-    // 倒れたとき: 試練で湧いた心臓だけが、殻の底の攻略を知らせる (報酬・進み・記録は TideHeartBattle)
+    // 倒れたとき: 殻が開いて真珠が浮かび、泡になって弾ける演出 (deathEffects) のあとで、報酬・進み・記録を渡す (onDeathFinished。TideHeartBattle)
     @Override
     public void die(DamageSource source) {
         if (defeated) {
@@ -933,9 +936,86 @@ public class TideHeart extends GuardMob {
             server.playSound(null, getX(), getY(), getZ(), TideHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
             server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 160, 1.5, 1.6, 1.5, 0.3);
             warn(server, dust(0xC8DCFA, 1.6f), getX(), coreY(), getZ(), 80, 1.5, 1.5, 1.5, 0.1);
-            if (server.dimension() == TideTravel.TIDE_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
-                TideHeartBattle.onDefeated(server, this);
-            }
+        }
+    }
+
+    // 試練で湧いた心臓だけが、殻の底の攻略を知らせる (報酬・進み・記録は TideHeartBattle)
+    @Override
+    protected void onDeathFinished(ServerLevel server) {
+        if (server.dimension() == TideTravel.TIDE_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
+            TideHeartBattle.onDefeated(server, this);
+        }
+    }
+
+    @Override
+    protected double coreHeight() {
+        return coreY();
+    }
+
+    // ---- 登場: 水の底から核が浮かび、巻貝の殻がほどけて開き、真珠のまわりを水滴の輪が回りはじめる (animation.tide_heart.intro)
+    @Override
+    protected void introEffects(ServerLevel server, int tick) {
+        double cy = coreY();
+        double fy = floorY();
+        if (tick == 0) {
+            sound(server, TideHeartSetup.BEAT.get(), 3f, 0.6f);
+            sound(server, SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, 2f, 0.7f);
+        }
+        if (tick < 52 && tick % 4 == 0) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 1.5 + random.nextDouble() * 2.5;
+            server.sendParticles(ParticleTypes.SPLASH, getX() + Math.cos(a) * r, fy + 0.1 + tick * 0.04, getZ() + Math.sin(a) * r, 12, 0.3, 0.1, 0.3, 0.1);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX() + Math.cos(a) * r, fy + 0.5 + tick * 0.04, getZ() + Math.sin(a) * r, 4, 0.2, 0.3, 0.2, 0.02);
+        }
+        if (tick == 8 || tick == 16 || tick == 24) {
+            sound(server, TideHeartSetup.BEAT.get(), 2.5f, 0.7f + 0.1f * (tick / 8));
+        }
+        if (tick == 36) {
+            sound(server, SoundEvents.GENERIC_SPLASH, 3f, 0.7f);
+            server.sendParticles(ParticleTypes.SPLASH, getX(), cy, getZ(), 100, 1.4, 1.2, 1.4, 0.25);
+        }
+        if (tick == 52) {
+            sound(server, TideHeartSetup.ROAR.get(), 2.5f, 1.4f);
+            warn(server, dust(0xC8DCFA, 1.5f), getX(), cy, getZ(), 60, 1.8, 1.5, 1.8, 0.1);
+        }
+        if (tick == 66) {
+            sound(server, SoundEvents.AMETHYST_BLOCK_CHIME, 3f, 0.8f);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), cy, getZ(), 80, 1.8, 1.5, 1.8, 0.05);
+            warn(server, dust(0x78F6DE, 1.2f), getX(), cy, getZ(), 50, 1.6, 1.4, 1.6, 0.05);
+        }
+    }
+
+    // ---- 倒れる: 殻が震えて開き、真珠が浮かび上がって脈を弱め、泡になって弾ける (animation.tide_heart.death)
+    @Override
+    protected void deathEffects(ServerLevel server, int tick) {
+        double cy = coreY();
+        if (tick == 2 || tick == 8 || tick == 14) {
+            sound(server, SoundEvents.AMETHYST_BLOCK_HIT, 2f, 0.6f + 0.1f * (tick / 6));
+        }
+        if (tick == 16) {
+            sound(server, SoundEvents.GENERIC_SPLASH, 2.5f, 0.8f);
+            server.sendParticles(ParticleTypes.SPLASH, getX(), cy, getZ(), 60, 1.6, 1.4, 1.6, 0.2);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), cy, getZ(), 30, 1.5, 1.5, 1.5, 0.05);
+        }
+        if (tick == 28) {
+            sound(server, SoundEvents.AMETHYST_CLUSTER_BREAK, 3f, 0.7f);
+            server.sendParticles(ParticleTypes.SPLASH, getX(), cy, getZ(), 120, 1.8, 1.5, 1.8, 0.3);
+            warn(server, dust(0xC8DCFA, 1.5f), getX(), cy, getZ(), 60, 1.8, 1.5, 1.8, 0.15);
+        }
+        if (tick >= 28 && tick <= 64 && tick % 3 == 0) {
+            double pearl = cy + 1.75 * Math.min(1.0, (tick - 28) / 36.0);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), pearl, getZ(), 2, 0.3, 0.3, 0.3, 0.02);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), pearl, getZ(), 3, 0.4, 0.4, 0.4, 0.02);
+        }
+        if (tick == 64 || tick == 72 || tick == 80) {
+            sound(server, SoundEvents.AMETHYST_BLOCK_CHIME, 3f, 0.8f + 0.2f * ((tick - 64) / 8));
+        }
+        if (tick == 88) {
+            double pearl = cy + 1.75;
+            sound(server, SoundEvents.BEACON_DEACTIVATE, 3f, 1.2f);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), pearl, getZ(), 200, 2.0, 2.0, 2.0, 0.2);
+            server.sendParticles(ParticleTypes.SPLASH, getX(), pearl, getZ(), 100, 1.5, 1.5, 1.5, 0.25);
+            warn(server, dust(0xC8DCFA, 1.8f), getX(), pearl, getZ(), 120, 1.5, 1.5, 1.5, 0.2);
         }
     }
 

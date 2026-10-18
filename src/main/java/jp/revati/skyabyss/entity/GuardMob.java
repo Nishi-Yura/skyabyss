@@ -46,7 +46,9 @@ public abstract class GuardMob extends Monster implements GeoEntity {
         controllers.add(new AnimationController<>(this, "move", 4, state -> state.setAndContinue(state.isMoving() ? walk : idle)));
         AnimationController<GuardMob> action = new AnimationController<>(this, "action", 0, state -> PlayState.STOP);
         for (String name : actions) {
-            action.triggerableAnim(name, RawAnimation.begin().thenPlay("animation." + animPrefix + "." + name));
+            // 倒れる動きは、終わった姿で止める (消えるまで元の姿に戻らない)
+            String id = "animation." + animPrefix + "." + name;
+            action.triggerableAnim(name, name.equals("death") ? RawAnimation.begin().thenPlayAndHold(id) : RawAnimation.begin().thenPlay(id));
         }
         controllers.add(action);
     }

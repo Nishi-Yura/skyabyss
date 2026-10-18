@@ -5,6 +5,7 @@ import jp.revati.skyabyss.titan.tide.heart.TideHeart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,6 +26,18 @@ public class TideHeartRenderer extends GeoEntityRenderer<TideHeart> {
         super(context, new Model());
         withScale(SCALE);
         addRenderLayer(new GlowLayer(this));
+    }
+
+
+    // 倒れるときは横倒しにならず、死のアニメーションで見せる (HeartBoss)。倒れている間も赤く染めない
+    @Override
+    protected float getDeathMaxRotation(TideHeart heart) {
+        return 0f;
+    }
+
+    @Override
+    public int getPackedOverlay(TideHeart heart, float u, float partialTick) {
+        return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
     }
 
     // 心臓は真珠の殻ごと、かすかに自分で光る。部屋の明かり (空の光が無く、ブロックの光 11〜13) のままだと、

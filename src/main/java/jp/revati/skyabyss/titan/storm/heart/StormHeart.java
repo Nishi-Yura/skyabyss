@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.storm.StormTravel;
 import jp.revati.skyabyss.titan.storm.back.Updraft;
@@ -34,6 +34,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -59,7 +60,7 @@ import org.joml.Vector3f;
 //                                  雷の網 (柱のあいだを回る二枚の網。すき間を通る) / 招雷の連打 (追う輪。柱のそばなら柱へ)
 // 予告は色の粒 (overrideLimiter。GuardMob.warn) に加え、技ごとに別の音と、画面の予告の印 (StormHeartNetwork.Warn) の三つで出す。
 // 強さは 03 の 9.8節の目安 (推奨 Lv24: 体力 650、ふつうの技の一撃 15.5 前後)
-public class StormHeart extends GuardMob {
+public class StormHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
@@ -69,6 +70,10 @@ public class StormHeart extends GuardMob {
     public static final float OPEN_WINGS_TAKEN = 1.2f;
     public static final float SPLIT_TAKEN = 1.5f;
     public static final int SPLIT_TICKS = 120;
+    // 段階 2 の高低の拍: 昇り風の上の端に 8 秒、床の近く (段階 1 の高さ) へ下りて 8 秒。下りている間は立ったまま殴れる。
+    // 高い所に留まりつづけて手が届かなくなるのを防ぐ (ベータで「上がったまま降りてこない」と言われた)
+    public static final int HIGH_TICKS = 160;
+    public static final int PERCH_TICKS = 160;
 
     // 技の傷 (防具で減る前。12 の 5.3節の表のまま)
     public static final float SUMMON_DAMAGE = 13f;
@@ -170,6 +175,8 @@ public class StormHeart extends GuardMob {
     private int cooldown = 40;
     private int splitTicks;
     private int safeFallTicks;
+    // 段階 2 の高低の拍の時計 (咆哮が終わった所から数える)
+    private int riseClock;
     private boolean defeated;
     private final List<Ring> rings = new ArrayList<>();
     private final List<Strike> strikes = new ArrayList<>();
@@ -317,9 +324,32 @@ public class StormHeart extends GuardMob {
     }
 
     public double targetY() {
-        // 咆哮のあいだは、次の段階の高さへ動きはじめる
+        // 咆哮のあいだは、次の段階の高さへ動きはじめる。段階 2 は、拍で下りているあいだ段階 1 の高さ
         int phase = isRoaring() ? Math.min(PHASE_COUNT - 1, getPhase() + 1) : getPhase();
+        if (isPerched()) {
+            phase = 0;
+        }
         return floorBase() + heightFor(phase, splitTicks > 0);
+    }
+
+    // 段階 2 の拍で、いま下りている (床の近くにいる) ときか
+    public boolean isPerched() {
+        return getPhase() == 1 && !isRoaring() && perchedAt(riseClock);
+    }
+
+    // 拍の時計 clock (tick) のとき、下りているか。HIGH_TICKS 高く、PERCH_TICKS 下りる、のくり返し
+    public static boolean perchedAt(int clock) {
+        return Math.floorMod(clock, HIGH_TICKS + PERCH_TICKS) >= HIGH_TICKS;
+    }
+
+    @Override
+    protected boolean ownsHeight() {
+        return true;
+    }
+
+    @Override
+    protected double coreHeight() {
+        return getY() + 2.2;
     }
 
     private void moveToHeight() {
@@ -334,6 +364,20 @@ public class StormHeart extends GuardMob {
         setPos(getX(), getY() + step, getZ());
     }
 
+    // 段階 2 の高低の拍を進める。下りはじめと上がりはじめに、翼の音と雲を出す
+    private void tickRiseClock(ServerLevel server) {
+        if (getPhase() != 1 || isRoaring() || isIntroPlaying()) {
+            riseClock = 0;
+            return;
+        }
+        riseClock++;
+        int cycle = HIGH_TICKS + PERCH_TICKS;
+        if (riseClock % cycle == HIGH_TICKS || riseClock % cycle == 0) {
+            sound(server, StormHeartSetup.WINGBEAT.get(), 2.5f, riseClock % cycle == 0 ? 1.2f : 0.8f);
+            server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 40, 2.5, 0.4, 2.5, 0.1);
+        }
+    }
+
     // ---------------------------------------------------------------- 毎 tick
     @Override
     protected void customServerAiStep() {
@@ -345,7 +389,11 @@ public class StormHeart extends GuardMob {
         if (tickCount % 20 == 0) {
             updateBossBarViewers();
         }
+        tickRiseClock(server);
         moveToHeight();
+        if (isIntroPlaying()) {
+            return;
+        }
         if (cooldown > 0) {
             cooldown--;
         }
@@ -1219,6 +1267,7 @@ public class StormHeart extends GuardMob {
         super.remove(reason);
     }
 
+    // 倒れたとき: 翼が痙攣してだらりと落ち、核が過負荷で弾ける演出 (deathEffects) のあとで、報酬・進み・記録を渡す (onDeathFinished)
     @Override
     public void die(DamageSource source) {
         if (defeated) {
@@ -1232,9 +1281,94 @@ public class StormHeart extends GuardMob {
             server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 120, 1.5, 1.6, 1.5, 0.2);
             warn(server, dust(0xF6F0C8, 1.6f), getX(), core().y, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
             StormHeartNetwork.warn(reachable(server, 32), null, 0);
-            if (server.dimension() == StormTravel.STORM_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
-                StormHeartBattle.onDefeated(server, this);
-            }
+        }
+    }
+
+    @Override
+    protected void onDeathFinished(ServerLevel server) {
+        if (server.dimension() == StormTravel.STORM_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
+            StormHeartBattle.onDefeated(server, this);
+        }
+    }
+
+    // 雷を一本、見た目だけ落とす (傷も火もない。音と閃光だけ)
+    private void visualBolt(ServerLevel server) {
+        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(server);
+        if (bolt != null) {
+            bolt.moveTo(getX(), floorBase(), getZ());
+            bolt.setVisualOnly(true);
+            server.addFreshEntity(bolt);
+        }
+    }
+
+    // ---- 登場: 小さな火花が明滅し、雷が落ちた瞬間に心臓が現れて、畳んだ翼が開く (animation.storm_heart.intro)
+    @Override
+    protected void introEffects(ServerLevel server, int tick) {
+        double cy = core().y;
+        if (tick == 0) {
+            sound(server, StormHeartSetup.BEAT.get(), 2f, 1.4f);
+        }
+        if (tick < 32 && tick % 4 == 0) {
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), cy, getZ(), 2 + tick / 8, 0.4, 0.4, 0.4, 0.1);
+        }
+        if (tick == 14 || tick == 24) {
+            sound(server, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.6f, 1.6f + tick * 0.01f);
+        }
+        if (tick == 32) {
+            visualBolt(server);
+            sound(server, SoundEvents.LIGHTNING_BOLT_THUNDER, 4f, 0.9f);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 80, 0.6, 0.8, 0.6, 0.4);
+            warn(server, dust(0xF6F0C8, 1.6f), getX(), cy, getZ(), 60, 1.2, 1.2, 1.2, 0.2);
+        }
+        if (tick == 40) {
+            sound(server, StormHeartSetup.ROAR.get(), 3f, 1.2f);
+            server.sendParticles(ParticleTypes.CLOUD, getX(), cy, getZ(), 60, 2.8, 0.6, 2.8, 0.15);
+        }
+        if (tick >= 36 && tick <= 60 && tick % 3 == 0) {
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 3, 0.5, 0.5, 0.3, 0.1);
+        }
+        if (tick == 70) {
+            sound(server, SoundEvents.COPPER_HIT, 2f, 0.7f);
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), cy, getZ(), 40, 1.8, 1.4, 1.8, 0.2);
+        }
+    }
+
+    // ---- 倒れる: 翼が痙攣してだらりと落ち、羽が散り、核が過負荷で膨らんで弾ける (animation.storm_heart.death)。体は床の近くへ降りてくる
+    @Override
+    protected void deathEffects(ServerLevel server, int tick) {
+        double cy = core().y;
+        double land = floorBase() + 1.0;
+        if (tick > 20 && getY() > land + 0.05) {
+            setPos(getX(), Math.max(land, getY() - 0.12), getZ());
+        }
+        if (tick <= 20 && tick % 3 == 0) {
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Mth.nextDouble(random, -3, 3), cy + Mth.nextDouble(random, -1, 1.5), getZ(), 4, 0.4, 0.4, 0.3, 0.1);
+        }
+        if (tick == 6 || tick == 12) {
+            sound(server, SoundEvents.LIGHTNING_BOLT_IMPACT, 1.2f, 1.2f - tick * 0.02f);
+        }
+        if (tick == 24) {
+            sound(server, SoundEvents.PHANTOM_FLAP, 3f, 0.5f);
+        }
+        if (tick >= 24 && tick <= 50 && tick % 2 == 0) {
+            server.sendParticles(ParticleTypes.CLOUD, getX() + Mth.nextDouble(random, -3, 3), cy - 0.5, getZ(), 2, 0.4, 0.2, 0.3, 0.02);
+            server.sendParticles(ParticleTypes.END_ROD, getX() + Mth.nextDouble(random, -3, 3), cy, getZ(), 1, 0.3, 0.3, 0.3, 0.02);
+        }
+        if (tick >= 40 && tick <= 78 && tick % 2 == 0) {
+            double a = tick * 0.9;
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + Math.cos(a) * 1.5, cy + Math.sin(a * 0.6), getZ() + Math.sin(a) * 1.5, 2 + (tick - 40) / 10, 0.2, 0.2, 0.2, 0.2);
+        }
+        if (tick == 60) {
+            sound(server, SoundEvents.BEACON_AMBIENT, 3f, 1.8f);
+        }
+        if (tick == 78) {
+            visualBolt(server);
+            sound(server, SoundEvents.LIGHTNING_BOLT_THUNDER, 4f, 0.8f);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 150, 0.4, 0.4, 0.4, 0.5);
+            warn(server, dust(0xF6F0C8, 1.8f), getX(), cy, getZ(), 100, 1.0, 1.0, 1.0, 0.3);
+        }
+        if (tick == 84) {
+            sound(server, SoundEvents.BEACON_DEACTIVATE, 3f, 1.4f);
         }
     }
 

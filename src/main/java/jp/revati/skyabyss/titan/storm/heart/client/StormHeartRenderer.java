@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -36,6 +37,18 @@ public class StormHeartRenderer extends GeoEntityRenderer<StormHeart> {
     @Override
     protected int getBlockLightLevel(StormHeart heart, BlockPos pos) {
         return 15;
+    }
+
+
+    // 倒れるときは横倒しにならず、死のアニメーションで見せる (HeartBoss)。倒れている間も赤く染めない
+    @Override
+    protected float getDeathMaxRotation(StormHeart heart) {
+        return 0f;
+    }
+
+    @Override
+    public int getPackedOverlay(StormHeart heart, float u, float partialTick) {
+        return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
     }
 
     static final class GlowLayer extends GeoRenderLayer<StormHeart> {

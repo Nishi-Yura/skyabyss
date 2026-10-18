@@ -271,6 +271,40 @@ public final class StormHeartSelfTest {
         check(!StormHeart.webHits(-8, 0, 0, 4), "web hit the opposite side of a single arm", failures);
     }
 
+    // 段階 2 の高低の拍 (HIGH_TICKS 高く、PERCH_TICKS 下りる)。時計の式と、心臓が実際に上がり下りすることを確かめる。
+    // heart は、段階 2 に入って 80 tick たった (時計が 80 前後の) 心臓
+    private static void checkRiseRhythm(ServerLevel back, StormHeart heart, List<String> failures) {
+        int cycle = StormHeart.HIGH_TICKS + StormHeart.PERCH_TICKS;
+        int perched = 0;
+        int longestHigh = 0;
+        int run = 0;
+        for (int clock = 0; clock < cycle * 3; clock++) {
+            if (StormHeart.perchedAt(clock)) {
+                perched++;
+                run = 0;
+            } else {
+                longestHigh = Math.max(longestHigh, ++run);
+            }
+        }
+        check(perched == StormHeart.PERCH_TICKS * 3 && longestHigh <= StormHeart.HIGH_TICKS, "rise rhythm is not high " + StormHeart.HIGH_TICKS + " / low "
+                + StormHeart.PERCH_TICKS + " (low " + perched + ", longest high " + longestHigh + ")", failures);
+        check(StormHeart.PERCH_TICKS >= 100 && StormHeart.HIGH_TICKS <= 240, "phase 2 heart stays out of reach too long", failures);
+        double floor = StormHeartArena.FLOOR;
+        double low = floor + StormHeart.heightFor(0, false);
+        check(low < floor + 1.62 + 3.0, "perched heart is out of melee reach (y " + low + ")", failures);
+        // 実際の動き: 時計が 80 前後から 320 tick 進める。160 から下りて床の近くへ、320 を過ぎて次の周の高い側で再び昇り風の上の端へ戻る
+        double lowest = Double.MAX_VALUE;
+        double highest = -Double.MAX_VALUE;
+        for (int i = 0; i < cycle; i++) {
+            tickHeart(heart, 1);
+            lowest = Math.min(lowest, heart.getY());
+            highest = Math.max(highest, heart.getY());
+        }
+        check(lowest <= low + 0.6, "heart never came down to melee height in phase 2 (lowest y " + lowest + ")", failures);
+        check(highest >= StormHeartArena.UPDRAFT_TOP - 0.3, "heart did not go back up (highest y " + highest + ")", failures);
+        check(heart.getY() >= StormHeartArena.UPDRAFT_TOP - 0.6, "heart is not back up at the start of the next cycle (y " + heart.getY() + ")", failures);
+    }
+
     private static StormHeart startHeart(ServerLevel back, List<String> failures) {
         StormHeartBattle.abandon(back);
         TitanBackData.get(back).resetProgress();
@@ -278,8 +312,17 @@ public final class StormHeartSelfTest {
         StormHeart heart = StormHeartBattle.current(back);
         if (heart == null) {
             failures.add("no heart after starting (difficulty " + back.getDifficulty() + ")");
+        } else {
+            heart.skipIntro();
         }
         return heart;
+    }
+
+    // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
+    private static void finishDeath(StormHeart heart) {
+        for (int i = 0; i < jp.revati.skyabyss.entity.HeartBoss.DEATH_TICKS + 5 && !heart.isRemoved(); i++) {
+            heart.tick();
+        }
     }
 
     private static void tickHeart(StormHeart heart, int ticks) {
@@ -328,6 +371,8 @@ public final class StormHeartSelfTest {
         tickHeart(heart, 80);
         check(Math.abs(heart.getY() - StormHeartArena.UPDRAFT_TOP) < 0.3, "heart did not rise in phase 2 (y " + heart.getY() + ")", failures);
         check(Math.abs(heart.bossBarProgress() - heart.getHealth() / heart.getMaxHealth()) < 0.01, "boss bar progress does not follow health", failures);
+        // 段階 2 の高低の拍: 高い (昇り風の上の端) → 下りる (床の近く。立ったまま殴れる) → また上がる、を時計どおりにくり返す
+        checkRiseRhythm(back, heart, failures);
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
@@ -425,6 +470,9 @@ public final class StormHeartSelfTest {
         heart.hurt(heart.damageSources().genericKill(), 1000f);
         TitanBackData data = TitanBackData.get(back);
         check(!heart.isAlive(), "heart did not die", failures);
+        check(!data.isHeartDefeated() && StormHeartBattle.room().active(), "defeat was reported before the death animation finished", failures);
+        finishDeath(heart);
+        check(heart.isRemoved(), "heart was not removed after the death animation", failures);
         check(data.isHeartDefeated(), "defeat was not recorded on the back", failures);
         check(!StormHeartBattle.room().active() && !StormHeartArena.sealed(back), "entrance did not reopen after the defeat", failures);
         check(!back.getBlockState(StormHeartArena.gate().get(0)).is(ModBlocks.SEALED_GATE.get()), "seal left after the defeat", failures);
