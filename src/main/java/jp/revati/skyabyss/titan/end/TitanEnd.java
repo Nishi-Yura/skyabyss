@@ -98,6 +98,8 @@ public final class TitanEnd {
         MinecraftServer server = back.getServer();
         Set<UUID> fought = new LinkedHashSet<>(ids);
         TitanDormancy.begin(server, titan, CARRY_AT);
+        // このグループは初回を終えた (周回の道になる。docs/design/21 の 1.7)
+        jp.revati.skyabyss.titan.group.FirstRun.onFirstCleared(back, fought);
         if (Titans.THUNDER_WING.equals(titan)) {
             chooseStormPeak(server.overworld());
         }

@@ -86,6 +86,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("camp blocks", jp.revati.skyabyss.titan.dungeon.CampSelfTest::runSelfTest));
         // パーティの石: 誰かが試練のあとの石を鳴らせば、仲間全員 (離れた人・あとから入った人) のクエストが数える。docs/design/10 の 10.9
         steps.add(Step.once("party steles", jp.revati.skyabyss.titan.group.TrialStelesSelfTest::runSelfTest));
+        // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)。docs/design/21 の 1.7、10 の 10.11
+        steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
