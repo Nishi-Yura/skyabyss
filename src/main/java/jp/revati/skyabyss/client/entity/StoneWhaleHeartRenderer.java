@@ -7,8 +7,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 
 // 岩鯨の心臓の描画。段階に応じた模型と、暗闇で光る核や割れ目を描く。模型は model 側で段階ごとに切り替える
 public class StoneWhaleHeartRenderer extends LowPolyGeoRenderer<StoneWhaleHeart> {
-    // 模型は 24 単位 (1.5 ブロック) の大きさ。判定箱 (3.4 x 4.2) に合わせて拡大する
-    private static final float SCALE = 2.5f;
+    // 模型は 24 単位 (1.5 ブロック) の大きさ。判定箱 (5.1 x 6.3) に合わせて拡大する (迫力のため、前の 3.4 x 4.2 の 1.5 倍)
+    private static final float SCALE = 3.75f;
 
     public StoneWhaleHeartRenderer(EntityRendererProvider.Context context) {
         // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ

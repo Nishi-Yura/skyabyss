@@ -10,16 +10,17 @@ import net.minecraft.world.level.block.state.BlockState;
 
 // 心臓の回廊と心臓の間 (最終ボスの部屋)。
 // 宝物庫の奥の扉 (z=-45) から北へ回廊が伸び、途中の休み場 heart を過ぎると、円形の大広間に出る。
-//  - 広間の中心は (0, 94, -80)。内側の半径 14.5、壁の外側 16.5。床は y=93、天井は y=106
+//  - 広間の中心は (0, 94, -85)。内側の半径 19、壁の外側 21。床は y=93、天井は y=106
 //    (体の表面が y=106 あたりなので、天井の高さは 12 マスになる。体の外へ出ないための限界)
 //  - 壁・天井・床は、赤土器・ネザーイボ・泥煉瓦の肉の質感。紫水晶と海のランタンが脈の光になる
 //  - 骨の肋骨が壁から天井へ反り上がる。中ほどに柱があり、身を隠せる
 //  - 床の溝に、わずかにマグマを置く
 // 入口 (HEART_GATE) は、戦いが始まると TitanBackTrials が封じる。ここでは開けたまま作る
 final class HeartArenaBuilder {
-    // 円の内側と、壁の外側の二乗距離 (14.5^2 と 16.5^2 を整数で)
-    private static final int INNER_R2 = 210;
-    private static final int OUTER_R2 = 272;
+    // 円の内側と、壁の外側の二乗距離 (19^2 と 21^2 を整数で)。自己テストも使う
+    static final int INNER_R2 = 361;
+    static final int OUTER_R2 = 441;
+    static final int EXTENT = 22;
     private static final int ARENA_TOP = HEART.ceilingY();
 
     private HeartArenaBuilder() {
@@ -88,8 +89,8 @@ final class HeartArenaBuilder {
     // 心臓の間: 円の内側は空けて床・天井を張り、壁の外側の輪は肉の壁にする
     private static void arena(BuildKit kit) {
         RandomSource r = kit.random;
-        for (int dx = -17; dx <= 17; dx++) {
-            for (int dz = -17; dz <= 17; dz++) {
+        for (int dx = -EXTENT; dx <= EXTENT; dx++) {
+            for (int dz = -EXTENT; dz <= EXTENT; dz++) {
                 int d2 = dx * dx + dz * dz;
                 if (d2 > OUTER_R2) {
                     continue;
@@ -113,7 +114,7 @@ final class HeartArenaBuilder {
 
     // 床: 肉の床に、マグマの溝 (斜めに点々と) と、わずかな脈の光
     private static BlockState floorBlock(RandomSource r, int dx, int dz) {
-        if (Math.abs(dx) == Math.abs(dz) && (Math.abs(dx) == 5 || Math.abs(dx) == 10)) {
+        if (Math.abs(dx) == Math.abs(dz) && (Math.abs(dx) == 5 || Math.abs(dx) == 10 || Math.abs(dx) == 15)) {
             return Blocks.MAGMA_BLOCK.defaultBlockState();
         }
         if (((HEART_CX + dx) * 7 + (HEART_CZ + dz) * 3) % 23 == 0 && r.nextFloat() < 0.5f) {
@@ -158,7 +159,7 @@ final class HeartArenaBuilder {
 
     // 骨の肋骨: 壁ぎわから天井の中ほどへ反り上がる弧 (x 方向の平面に立つ)。弧の下は通れる
     private static void ribs(BuildKit kit) {
-        for (int offset : new int[]{-12, -8, -4, 4, 8, 12}) {
+        for (int offset : new int[]{-16, -12, -8, -4, 4, 8, 12, 16}) {
             int x = HEART_CX + offset;
             int reach = (int) Math.floor(Math.sqrt(INNER_R2 - offset * offset));
             int prevY = Integer.MIN_VALUE;
@@ -177,7 +178,7 @@ final class HeartArenaBuilder {
 
     // 身を隠せる柱。中心 (半径3ほど) は空けておく
     private static void pillars(BuildKit kit) {
-        int[][] at = {{-6, -6}, {6, 6}, {-10, 3}, {10, -3}};
+        int[][] at = {{-6, -6}, {6, 6}, {-10, 3}, {10, -3}, {-14, -10}, {14, 10}, {-3, 15}, {3, -15}};
         for (int[] p : at) {
             int x = HEART_CX + p[0];
             int z = HEART_CZ + p[1];
