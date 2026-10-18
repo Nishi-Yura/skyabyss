@@ -29,7 +29,8 @@ public final class TideHeartArena {
     public static final int CZ = -30;
     public static final int FLOOR = 51;
     public static final int RADIUS = 14;
-    public static final int CEILING = 62;
+    // 天井の高さ: 床の上の空気が 12 段 (床 51 〜 62)。広い技 (大波・輪) と心臓 (高さ 6.3) が収まる。ボス部屋は 12 以上
+    public static final int CEILING = 63;
     // 溝 (床の外周、1 段低い水)
     static final double GROOVE_IN = 12.5;
     static final double GROOVE_OUT = 13.5;
