@@ -103,6 +103,8 @@ public class SkyAbyss {
 
         // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
+        // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
+        jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

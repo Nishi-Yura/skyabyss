@@ -31,6 +31,7 @@
 | deny（拒否・失敗） | 必要レベル不足、扉が開かない、待ち時間 | 行動のたび | アクションバー（赤紫） |
 | クエストの始まり・終わり | クエスト開始・完了 | 進行ごと | 既存のクエストの札があるので、チャットの重複を削除 |
 | カウントダウン | あと N 秒で扉が閉じる | 毎秒 | アクションバー（もとからそう） |
+| 章の題字・余韻 | 章が替わった（「一章　岩鯨」「空を泳ぐもの」）、章の終わり（見出し「一章　岩鯨　終」と一言） | 章ごとに各 1 回（人ごと） | 上の帯の列（場所の名前と同じ順番待ち。大きめ・長め）。9 章 |
 | 世界の最初・パーティ | 誰が心臓を倒した（世界の最初。同じ巨神を止めた人にだけ。次の巨神の名前は出さない）、天の鍵がそろった（心臓を一つ以上止めた人にだけ）、パーティの招待（札に受け方つき）・参加・脱退・断り | まれ | 語り（世界の最初）、右上の札（招待・参加）、手がかり（ほか）。失敗はアクションバー |
 | **チャットに残すもの** | `/titanmemory` の表示、記憶の選択肢（押せる名前）、コマンドの返事（`/party` の一覧など） | まれ | チャット（押せる・コマンド） |
 
@@ -46,6 +47,8 @@
 | GAIN / UNLOCK | 右上の札 | 暗い石板、金/青緑の縦の線、見出し「獲得」/「進展」。伝承・クエストの札と同じ列（重ならない）。幅 160、本文 3 行まで | 4.5 秒 |
 | PLACE | 上から 16% | 大きな金の文字（1.8 倍）+ 副題。線が左右へ伸びる | 3.4 秒 |
 | ALERT | 上から 10% | 金の太字の一行（等倍）。PLACE と同じ順番待ち | 2.3 秒 |
+| CHAPTER | 上から 16%（PLACE と同じ列） | 章の題字の札。「一章　岩鯨」を 2.2 倍の金の文字、線が左右へ伸び、下に題字「空を泳ぐもの」を 1.4 倍 | 5.0 秒 |
+| AFTERMATH | 上から 16%（同上） | 章の余韻の札。小さな金の見出し「一章　岩鯨　終」を線で挟み、その下に一言を 1.25 倍で（3 行まで） | 4.5〜8 秒（字数に応じて） |
 | WARN / BAR | アクションバー | 一行（警告は赤紫） | バニラの長さ |
 
 - 画面の「Lv」の文字（`GrowthHud`）は残し、その下に LEVEL_UP の一行が出る。F1 で隠れる。画面を閉じている間も進む。
@@ -64,11 +67,12 @@
 
 ## 5. API（`jp.revati.skyabyss.notice.Notice`）
 
-- サーバー側: `Notice.narrate / hint / levelUp / gain / unlock / alert / warn / place / bar / send`。引数は `(player, 文の鍵, 引数...)` か、`ModText` の文。
+- サーバー側: `Notice.narrate / hint / levelUp / gain / unlock / alert / warn / place / bar / send`、章の札は `Notice.chapter(player, 見出し, 題字)` と `Notice.aftermath(player, 見出し, 一言)`（直接は呼ばず、9 章の `ChapterCards` を使う）。引数は `(player, 文の鍵, 引数...)` か、`ModText` の文。
 - `ModText.lore/hint/progress/deny/battle` が返す文には種類の印が付く（空の部品の insertion）。`Notice.send(player, 文)` は印から種類を決め、印がなければチャット。コマンドの返事やツールチップに `ModText` をそのまま使っても見た目は変わらない。
 - `Notice.send(player, kind, 文)` で種類を決めて送る。`Notice.bar` はアクションバー。クライアントだけの呼び出し（本人の画面）は、プレイヤーがサーバー側でなければバニラの表示に落ちる。
 - パケットは `NoticePayload`（版 notice-1、`NoticeNetwork`）。クライアントは `client/notice/`（`NoticeClient`、`NoticeToast`、`NoticeLog`、`NoticeLogScreen`）。
-- 開発用（OP）: `/skyabyss dev notice <narrate|hint|levelup|gain|unlock|alert|warn|bar> <文の鍵>`、`… place <題の鍵> <副題の鍵>`（`NoticeDev`）。台本から `cmd` で使う。
+- 開発用（OP）: `/skyabyss dev notice <narrate|hint|levelup|gain|unlock|alert|warn|bar> <文の鍵>`、`… place <題の鍵> <副題の鍵>`（`NoticeDev`）。章の札は `/skyabyss dev arc <card|aftermath> <章の ID>`、記録の確認・消去は `/skyabyss dev arc <status|reset>`（`ArcSetup`）。台本から `cmd` で使う。
+- `NoticeQueue` は `CHAPTER`・`AFTERMATH` を上の帯の列に積む。`Notice.Kind` の追加はパケットが順番の番号で送るので必ず末尾に。
 
 ## 6. 設定（クライアント）
 
@@ -91,12 +95,29 @@
 - 開幕の暗転と題字（`OpeningOverlay`）は 17 の 13.5。表示の部品は `Notice.place`（題字）と `NoticeClient` の帯を使う。
 - `sky/`・`lore/`・titan の出現条件は、文を出す呼び出しの置き換えだけにした（条件は触っていない）。
 
-## 9. 確かめ
+## 9. 章の題字と余韻（`story/arc/ChapterCards`）
 
-- 台本 `tools/shots/notices_demo.txt`（語り・手がかり・レベル・獲得・解放・戦い・警告・場所が同時）。絵は `run/shots/notices_demo/shots/notices_demo/`。
-- 自己テスト `SELFTEST notice`（`notice/NoticeSelfTest`。種類分け、チャンネル表、パケットの往復、順番・重ならない・縮む・あふれ・重複、濃さ）。
+章（`Chapters`。01 の 4）が替わったことと終わりを、上の帯の列に大きな札で出す。チャットには流さない。ほかの上の帯（場所の名前・戦いの知らせ）と同じ順番待ちに並ぶので重ならない。レベルアップの文字・中央の演出・字幕は、札の下端（`bannerBottom`）より下へずれる。知らせの記録（N）には「題 + 副題」「見出し + 一言」の一行で残る。絵は `docs/review/previews/chapter_card_with_levelup_and_caption.png`（題字の札・レベルアップ・字幕が同時）、`chapter_aftermath_whale.png`（余韻の札）。
 
-## 10. 未決
+**題字の札（自動）**
+- 人の章（`Chapters.of`）が、まだ札を出していない章になったとき、見てから 5 秒（`TITLE_DELAY` = 100 tick）空けて一度だけ出す。5 秒空けるのは、前の章の余韻の札などを先に出すため。見出し = `Chapters.label()`（「一章　岩鯨」）、副題 = `Chapters.titleKey()`（「空を泳ぐもの」）。
+- 場面（シネマティック）の最中・死んでいる間・観戦中は出さず、終わってから出す（20 の場面と重ならない）。札は使い切りにならない。
+- 出さずに「出した」ことにする: 序章（開幕の題字は `OpeningOverlay`）、五章以降（中身がない）、すでに遊んでいた人（`OpeningState.legacy`）。すでに先の章にいる人は、今の章の札だけで、前の章の札は出さない。
+- 「出した」の記録は人ごと（`ArcData`、プレイヤーのデータ。死んでも引き継ぐ）。再ログイン・再起動でも二度出ない。
+
+**余韻の札（各章の担当が呼ぶ）**
+- `ChapterCards.aftermath(player, Chapters.WHALE, 一言の Component)`。一言を省くと翻訳キー `chapter.skyabyss.aftermath.<章の ID>` を使う（その章の担当が自分の lang に足す）。見出しは `chapter.skyabyss.aftermath.head`（「%s　終」）。
+- 人ごとに章ごと一度（記録は `ArcData`）。場面の間は預かり、終わってから出す（ログアウトで預かりは消える。記録していないので、もう一度呼んでよい）。受け付けたら true、すでに出した・預かっているなら false。
+- 語り部の一言は、札のあとに `Notice.narrate` を続ける（字幕は別の列）。
+
+**章の予兆の枠・空の段** は 01 の 4.1 の「予兆 3 拍」「空の異変の段」。コードは `story/arc/Foreshadow`（使い方は頭のコメント。01 の 4.1 に API の要約）と `sky/ChapterSky.Stage`。
+
+## 10. 確かめ
+
+- 台本 `tools/shots/notices_demo.txt`（語り・手がかり・レベル・獲得・解放・戦い・警告・場所が同時）。絵は `run/shots/notices_demo/shots/notices_demo/`。章の札は `tools/shots/chapter_cards.txt`。
+- 自己テスト `SELFTEST notice`（`notice/NoticeSelfTest`。種類分け、チャンネル表、パケットの往復、順番・重ならない・縮む・あふれ・重複、濃さ）。章の札・予兆は `SELFTEST arc`（`story/arc/ArcSelfTest`。題字は一度だけ・場面の間は出さない・旧セーブ、余韻、上の帯の順番待ち）。
+
+## 11. 未決
 
 | 番号 | 問い | 今の実装 |
 | --- | --- | --- |
@@ -120,5 +141,5 @@
 | 6 | 6 |
 | 7 | 7 |
 | 8 | 8（目的の帯） |
-| 9 | 8（開幕・担当の境界）、10（未決） |
-| 10 | 9 |
+| 9 | 8（開幕・担当の境界）、11（未決） |
+| 10 | 10（確かめ。旧 9 章に章の題字・余韻を足して番号が一つ繰り下がった） |

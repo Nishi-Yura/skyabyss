@@ -57,6 +57,8 @@ public final class NoticeQueue<T> {
             case LEVEL_UP -> 2600;
             case PLACE -> 3400;
             case ALERT -> 2300;
+            case CHAPTER -> 5000;
+            case AFTERMATH -> Math.max(4500, Math.min(8000, 3000 + 110L * length));
             default -> 3000;
         };
         double pressure = Math.max(0.4, 1.0 / (1.0 + 0.35 * pending));

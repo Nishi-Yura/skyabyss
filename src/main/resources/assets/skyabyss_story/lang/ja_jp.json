@@ -154,12 +154,14 @@
   "scene.skyabyss.sky_key.end_hint": "Esc かクリックで戻る　（巨神の背の周回と頼みごとは、このあとも続けられる）",
   "scene.skyabyss.sky_key.end_sub": "ベータ版はここまでです",
   "scene.skyabyss.sky_key.end_thanks": "遊んでくれて、ありがとう。",
-  "scene.skyabyss.sky_key.end_title": "一章　天の鍵",
+  "scene.skyabyss.sky_key.end_title": "巨神編　天の鍵",
   "scene.skyabyss.sky_key.line1": "四つの欠片が、手の中で触れ合った。",
   "scene.skyabyss.sky_key.line2": "継ぎ目が、ひとりでに消えていく。",
   "scene.skyabyss.sky_key.line3": "鍵は、空を指さなかった。",
   "scene.skyabyss.sky_key.line4": "足もとの、ずっと下。何かが、ゆっくりと打っている。",
   "scene.skyabyss.sky_key.title": "天の鍵",
   "subtitles.skyabyss_story.deep_beat": "足もとの遠い鼓動",
-  "subtitles.skyabyss_story.key_form": "欠片が触れ合う"
+  "subtitles.skyabyss_story.key_form": "欠片が触れ合う",
+  "chapter.skyabyss.aftermath.head": "%s　終",
+  "chapter.skyabyss.aftermath.preview": "この鼓動は、地の底から預かったもの。"
 }
