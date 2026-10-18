@@ -54,10 +54,24 @@ public final class WeaponClient {
             }
         }
         event.registerItem(new BowExtension(), jp.revati.skyabyss.item.storm.StormGearSetup.BOW.get());
+        // 珊瑚の盾: バニラの構え。見た目 (低ポリのメッシュ) だけ差し替える
+        event.registerItem(new MeshOnlyExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_shield")));
+    }
+
+    private static final class MeshOnlyExtension implements IClientItemExtensions {
+        @Override
+        public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
+            return WeaponItemRenderer.get();
+        }
     }
 
     // 雷翼の弓: 引いている間はバニラ。放したあとの反動だけ足す
     private static final class BowExtension implements IClientItemExtensions {
+        @Override
+        public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
+            return WeaponItemRenderer.get();
+        }
+
         @Override
         public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
             return hand == InteractionHand.MAIN_HAND ? WeaponArmPoses.BOW.getValue() : null;
@@ -85,6 +99,12 @@ public final class WeaponClient {
 
         Extension(WeaponKind kind) {
             this.kind = kind;
+        }
+
+        // 手・地面・額縁・頭は低ポリメッシュ (WeaponItemRenderer)
+        @Override
+        public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
+            return WeaponItemRenderer.get();
         }
 
         // 三人称の構え: 利き手に持っているときだけ (反対の手はバニラのまま)

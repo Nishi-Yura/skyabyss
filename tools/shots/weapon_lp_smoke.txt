@@ -1,0 +1,26 @@
+# 低ポリの武器の動作確認 (最小)
+world shots flat
+size 1280 720
+timeout 900
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+hud on
+wait 350
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+wait 12
+chat clear
+shot s_fp
+perspective front
+hud off
+wait 12
+shot s_tp
+cmd summon item 0 -59 5 {Item:{id:"skyabyss:whalebone_greatsword",count:1},PickupDelay:32767,Age:-32768}
+perspective first
+wait 30
+look 180 30
+shot s_ground
+quit

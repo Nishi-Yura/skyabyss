@@ -376,6 +376,16 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "weaponmesh" -> {
+                // weaponmesh on|off : プレイヤーの武器を低ポリ (on) / 元のボクセル (off) で描く
+                jp.revati.skyabyss.client.lowpoly.LowPoly.weaponMeshes = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "weapontier" -> {
+                // weapontier common|rare|legend|off : 武器のメッシュの階級を固定する (品の階級を使うのは off)
+                jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
+                return true;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
