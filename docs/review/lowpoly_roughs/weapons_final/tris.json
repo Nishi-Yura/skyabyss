@@ -1,0 +1,37 @@
+{
+ "whalebone_greatsword": {
+  "common": 228,
+  "rare": 294,
+  "legend": 342
+ },
+ "captain_pike": {
+  "common": 172,
+  "rare": 232,
+  "legend": 304
+ },
+ "waterway_fang": {
+  "common": 168,
+  "rare": 216,
+  "legend": 260
+ },
+ "tide_shell_trident": {
+  "common": 228,
+  "rare": 288,
+  "legend": 348
+ },
+ "coral_harpoon": {
+  "common": 172,
+  "rare": 220,
+  "legend": 280
+ },
+ "tidecaller_claw": {
+  "common": 168,
+  "rare": 216,
+  "legend": 284
+ },
+ "coral_shield": {
+  "common": 208,
+  "rare": 280,
+  "legend": 340
+ }
+}
