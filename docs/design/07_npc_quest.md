@@ -362,6 +362,28 @@ data/<名前空間>/quest/<名前>.json
 | 枠 | 人ごと。仲間が終えても、自分の枠は減らない |
 | 仲間が受けている | 板の札に「仲間 N 人も」（オンラインの仲間だけ）。押し付けない |
 
+### 6.8 備えの頼みと旅の覚書（章の導きの基盤。`guide/`。21 の 1.4）
+
+**備えの頼み**: 各章（一〜四章）に 3 本のサブクエスト。章の担当（一章 P6、二章 P11、三章 P15、四章 P19）は、次の規則でファイルを足すだけでよい（`PrepQuests`）。
+
+| 決まり | 中身 |
+| --- | --- |
+| 置き場・ID | `data/skyabyss/quest/ch<n>/prep_gear.json`（身ごしらえ）、`prep_blade.json`（刃を研ぐ）、`prep_pulse.json`（鼓動を聞く）。n = 1〜4。ID は `ch<n>/prep_<kind>`、文のキーは `quest.skyabyss.ch<n>.prep_<kind>.title` など |
+| 必須の欄 | `category` = `sub`、`chapter` = その章の ID（一章 `titan_whale`・二章 `titan_tide`・三章 `titan_storm`・四章 `titan_ember`）、`start_when`（章の頭にクエストログへ自動で出る）。`repeat` と `board` は付けない。違えば読み込みの警告（`QuestManager.loadErrors`。`PrepQuests.validate`） |
+| 順番 | ふさがない。どれから受けても終えてもよい（ログの並びは `order`） |
+| 合図 | 3 本が終わったとき（どの順でも）、その人へ `ch<n>_ready` の合図（`Quests.signal`）を一度だけ送る（人ごと。`Growth.discover` の鍵 `prep_ready:<n>`）。3 本の定義がそろっていない章は合図が出ない（中身のない章） |
+| 読み方 | 条件 `{"type":"prep","chapter":n,"min":k}`（k 本以上。`min` を省くと 3 本）。コードは `PrepQuests.done / ready / atLeast / groupAtLeast`（`groupAtLeast` はオンラインの仲間まで見る。一章の岩鯨の降下は「2 本終えたとき」で、グループの誰かが満たせば降りる） |
+| 覚書 | `prep_gear` を受けたとき、その章の旅の覚書を人ごとに一度渡す |
+| 結果 | 会話の結果 `give_notes {chapter}`: 覚書を渡す。受け取り済みでも、持っていなければ渡し直す（職人の補充用） |
+
+**旅の覚書**（`wayfarer_notes`。`WayfarerNotes`）: 章ごとに 1 冊の薄い手帳。1 つのアイテムで、章（0 = 序章、1〜4）は品の欄 `skyabyss:notes_chapter` に持つ。名前は「旅の覚書（一章）」。右クリックで開く（サーバー: その章のレシピを解く。クライアント: 手帳の画面 `WayfarerNotesScreen`）。
+
+- レシピの解放: `WayfarerNotes.registerRecipes(章, レシピの ID…)` で足した分を、開いたときにレシピブックへ解く（`awardRecipesByKey`。新しい画面は作らない）。存在しない ID は無視する。**作れるようになるのを解いてからにする**のは旅装・砥石の担当（P5）の仕事で、ゲームルール `doLimitedCrafting` か自前の検査で決める（ここは解く口だけ）。
+- 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
+- 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
+
+**経験値の枠**（`ChapterXpBudget`）: 21 の 1.5 の表（章ごとの 1 レベル分・既存・新しい分の上限・合計の上限）を持ち、`quest/ch<n>/` の新しいクエスト（既存の小要素に数え済みの `LEGACY` と繰り返す頼みを除く、段階と報酬の経験値の合計）と、場所の湧き台のクリアの経験値を足す。読み込みのとき（`QuestManager`）と自己テスト `xp budget` が、新しい分の上限と合計の上限を超えていないか検める。超えた章の場所の経験値は、湧き台が 0 に切る（品は渡す）。
+
 ---
 
 ## 7. 自由なモードのサブクエスト
@@ -860,6 +882,7 @@ data/<名前空間>/quest/<名前>.json
 | `quest/Condition`、`Action`、`StoryContext` | 会話とクエストで共通の条件と結果 |
 | `quest/QuestDef`、`QuestManager`、`QuestLog`、`Quests`、`QuestEvents` | クエストの定義、読み込み、記録、進行、出来事の拾い方 |
 | `quest/QuestSetup`、`QuestNetwork`、`QuestCommands`、`NpcQuestSelfTest` | Attachment `quest_log`、パケット（版 `quest-1`）、コマンド、自己テスト |
+| `guide/PrepQuests`、`WayfarerNotes`（`Item`・画面は `client/`）、`HeartbeatWard`、`ChapterXpBudget` | 備えの頼みの規則と合図、旅の覚書、鼓動守、章の経験値の枠（6.8 節）。場所の湧き台・宝・章のひとり歩きは 17 の 3.9 |
 | `client/npc/DialogueScreen`、`NpcClient`、`NpcRenderer` | 会話の画面、受け口、描画 |
 | `client/quest/QuestLogScreen`、`QuestHud`、`QuestToast`、`QuestClient` | ログ、追跡表示、札、キー（U） |
 | `tools/gen_npc_content.py` | 会話・クエスト・文・この書類の表 |
@@ -900,6 +923,7 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | `FreeQuestSelfTest`（`SELFTEST freequest`、`quest/free/`） | 自由なモードのクエストが 8〜12 本、日替わりと週替わり、板に出すものはちょうど繰り返すもの、段階は 1 まで、次の巨神の背中の敵を目的にしない。足し書きが元の会話に混ざる。一度きりを最初から最後まで。板（段階 0 で段階 1 の日替わりは伏せる、羊 2/3、薪は 15 本では受け取らず樫と白樺を合わせて 16 本で受け取る、日替わり 3 つで報酬・4 つ目は受けられない、記録を消して受け直しても報酬は二度出ない、週替わり 2 つ）。パーティ（50 ブロック先の仲間は数え、他人は数えない）。保存 |
 | `OpeningStorySelfTest`（`SELFTEST opening story`） | 序盤の伝承 6 つ、開幕の一行と目的の帯、メインの通し（帳面 → `shadow0` → 影 → 語り部 → イサナ → `see_whale`）、影・岩鯨・空の質問を先にした人が序盤の二段を飛ばすこと、見聞が話すと消えること、イサナと会うまで板の頼みと語り部の頼みごとが閉じていること |
 | `SELFTEST story` | 1 章の続き（[14](14_beta.md) の 7.2 節） |
+| `GuideSelfTest`（`SELFTEST prep chain`・`wayfarer notes`・`heartbeat ward`・`site cave`・`xp budget`） | 備えの頼みの規則（置き場・種類・`start_when`・章・繰り返し・板を検査で弾く）と流れ（自動で出る、どの順でも 3 本で `ch<n>_ready` が一度、`prep` 条件の本数、覚書は人ごとに一度で渡し直しは持っていないときだけ）。覚書のレシピの解放。鼓動守（式・心臓の戦いの参加者だけ・1 回の戦いに一度・心臓以外と虚空は耐えない・糧の灯 +0.2）。場所の湧き台（17 の 3.9）と経験値の枠 |
 
 ### 13.2 ゲーム画面（runClientTest）
 

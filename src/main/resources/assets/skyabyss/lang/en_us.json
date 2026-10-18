@@ -596,5 +596,19 @@
   "hud.skyabyss.party_pos.dim.titan_back": "Stone Whale's Back",
   "hud.skyabyss.party_pos.dim.tide_back": "Tideshell's Back",
   "hud.skyabyss.party_pos.dim.storm_back": "Thunderwing's Back",
-  "hud.skyabyss.party_pos.dim.ember_back": "Ember's Back"
+  "hud.skyabyss.party_pos.dim.ember_back": "Ember's Back",
+  "item.skyabyss.wayfarer_notes": "Wayfarer's Notes",
+  "item.skyabyss.wayfarer_notes.named": "Wayfarer's Notes (%s)",
+  "item.skyabyss.wayfarer_notes.desc": "Open it for preparations for the road ahead and how to tell the enemies apart. It also jogs your memory on what you can craft",
+  "item.skyabyss.heartbeat_ward_stone_whale": "Stone Whale Heartbeat Ward",
+  "item.skyabyss.heartbeat_ward_tide_shell": "Tide Shell Heartbeat Ward",
+  "item.skyabyss.heartbeat_ward_thunder_wing": "Thunder Wing Heartbeat Ward",
+  "item.skyabyss.heartbeat_ward_ember": "Ember Heartbeat Ward",
+  "item.skyabyss.heartbeat_ward.desc": "Worn in an accessory slot, it lets you survive one lethal blow at 1 HP, once per heart fight. It shatters when used",
+  "message.skyabyss.notes.given": "Received Wayfarer's Notes (%s)",
+  "message.skyabyss.notes.recipes": "The notes remind you of %s recipes",
+  "message.skyabyss.prep.ready": "You are ready for %s",
+  "message.skyabyss.heartbeat_ward.used": "The heartbeat ward shattered and held you back",
+  "wayfarer_notes.empty": "Nothing is written here yet.",
+  "growth.skyabyss.reason.site": "Cleared a small place"
 }

@@ -235,11 +235,18 @@ public final class GroupEvents {
     }
 
     // ---------------------------------------------------------------- 戦い
-    // 別のグループの人・敵が与える傷は、無かったことにする (背中の中だけ)
+    // 背中の外で、グループで分ける相手か: 地上の場所の敵 (guide.SiteSpawner.TAG) が関わるとき
+    private static boolean isolated(net.minecraft.world.entity.Entity a, net.minecraft.world.entity.Entity b, net.minecraft.world.entity.Entity c) {
+        return jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(a) || jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(b)
+                || jp.revati.skyabyss.guide.SiteSpawner.isSiteMob(c);
+    }
+
+    // 別のグループの人・敵が与える傷は、無かったことにする (背中の中と、地上の場所の敵)
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onDamage(LivingIncomingDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (!TitanBacks.isBack(victim.level().dimension())) {
+        // 背中の中。背中の外では、地上の場所の敵 (guide.SiteSpawner の個体) との間だけ
+        if (!TitanBacks.isBack(victim.level().dimension()) && !isolated(victim, event.getSource().getEntity(), event.getSource().getDirectEntity())) {
             return;
         }
         if (Groups.differ(event.getSource().getEntity(), victim) || Groups.differ(event.getSource().getDirectEntity(), victim)) {
@@ -259,7 +266,8 @@ public final class GroupEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onTarget(LivingChangeTargetEvent event) {
         LivingEntity target = event.getNewAboutToBeSetTarget();
-        if (target != null && TitanBacks.isBack(event.getEntity().level().dimension()) && Groups.differ(event.getEntity(), target)) {
+        if (target != null && (TitanBacks.isBack(event.getEntity().level().dimension()) || isolated(event.getEntity(), target, null))
+                && Groups.differ(event.getEntity(), target)) {
             event.setCanceled(true);
         }
     }

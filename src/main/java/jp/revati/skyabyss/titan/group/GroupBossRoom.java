@@ -97,6 +97,29 @@ public final class GroupBossRoom {
         }
     }
 
+    // この人が参加している、いま戦っている心臓の戦い (心臓以外の戦い = 中ボスの広間は対象にしない。HeartBoss が相手の部屋だけ)。なければ null
+    @Nullable
+    public static GroupBossRoom heartFightOf(ServerLevel level, UUID player) {
+        for (GroupBossRoom room : ACTIVE) {
+            if (!room.active || room.bossId == null || !(room.participants.contains(player) || room.lastInside.contains(player))) {
+                continue;
+            }
+            if (level.getEntity(room.bossId) instanceof jp.revati.skyabyss.entity.HeartBoss) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    // 鼓動守をこの戦いで使ってよいか (その人が初めてなら true にして記録する)
+    public boolean claimWard(UUID player) {
+        return wardUsed.add(player);
+    }
+
+    public boolean wardUsed(UUID player) {
+        return wardUsed.contains(player);
+    }
+
     public final UUID group;
     private boolean active;
     @Nullable
@@ -110,6 +133,8 @@ public final class GroupBossRoom {
     private final Set<UUID> died = new LinkedHashSet<>();
     // 倒れた参加者の再入場 (待ち時間・回数)。戦いが終わる・やり直しで消える
     private final Reentry reentry = new Reentry();
+    // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。21 の 1.4: 戦いに一度)
+    private final Set<UUID> wardUsed = new LinkedHashSet<>();
     private int noticeTicks;
     private int empty;
     private int gather = -1;
@@ -294,6 +319,7 @@ public final class GroupBossRoom {
         joining.clear();
         died.clear();
         reentry.clear();
+        wardUsed.clear();
         lastInside.clear();
         for (ServerPlayer player : inside) {
             participants.add(player.getUUID());
@@ -320,6 +346,7 @@ public final class GroupBossRoom {
         joining.clear();
         died.clear();
         reentry.clear();
+        wardUsed.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;
@@ -356,6 +383,7 @@ public final class GroupBossRoom {
         joining.clear();
         died.clear();
         reentry.clear();
+        wardUsed.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;
@@ -373,6 +401,7 @@ public final class GroupBossRoom {
         joining.clear();
         died.clear();
         reentry.clear();
+        wardUsed.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;
