@@ -251,6 +251,31 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 - 持ち方（display）の表は `tools/weapon_display.py`。モデルを作り直す生成スクリプトは display をバニラの値で上書きするので、そのあとに `python tools/weapon_display.py` を通す。
 - 確認: `tools/gen_weapon_pose_shots.py` の台本と `tools/weapon_pose_sheet.py`（`tools/README.md`）。
 
+#### 4.6.2 プレイヤーの武器の低ポリメッシュ（階級と強化の見た目）
+
+13 個（鯨骨の大剣・番兵長の鉾・水路の牙・潮殻の三叉槍・珊瑚の銛・潮招きの爪・珊瑚の盾・雷翼の弓・羽守の鉤槍・雷獣の爪・余燼の戦斧・鍛え手の大鎚・灰被りの火かき棒）。手に持つ・落ちている・額縁・頭の見た目だけ。GUI は元の 32x32 の絵、持ち方（display）と振りの動き（4.6.1）は変えない。階級と強化の見た目の段は [03](03_gear_and_endgame.md) の 1.2 節。
+
+| 決めるもの | 選び方 |
+| --- | --- |
+| メッシュ | 品の階級（`ModGear#tier`）。伝説以上 = legend、レア = rare、それ以下 = common。階級ごとに 1 つ（弓は引き絵の段ごとにも）。三角形は 134〜348 |
+| アトラスと光る画像 | 強化（`skyabyss:enhance`）。+0〜+4 = 基準、+5〜+9 = plus5、+10 = plus10。メッシュは強化で変わらない |
+| 引き絵 | 弓だけ。引いている間は `pull0`、引きの 0.65 から `pull1`、0.9 から `pull2`（バニラの述語と同じ。引いていないときは基準のメッシュ） |
+| 光る画素 | アトラスの色のまま `entityTranslucentEmissive` で描き足す（明るさ最大）。光る画素のない絵は足さない |
+
+仕組み（コードは `client/weapon/WeaponItemRenderer`。メッシュの読み込みと焼きは 9 章の `LowPolyMeshes`・`LowPolyMesh` をそのまま使う）:
+
+- item モデル（`models/item/<id>.json`）の base は `builtin/entity`（display と粒子の絵だけ）、gui は 32x32 の平面（`perspectives`）。base のときだけ `IClientItemExtensions#getCustomRenderer`（`BlockEntityWithoutLevelRenderer`）が呼ばれてメッシュを描く。振りの動き・構え・弓の反動の拡張と同じ拡張に同居。盾は構えを変えず（バニラの盾の構え、構え中は `coral_shield_blocking` の display）メッシュだけ差し替える
+- 置き方: item モデルの原点は block の角で、メッシュは x = 0, z = 0 が中心なので +0.5 ブロック（元の item モデルの 8）。`LowPolyMesh` は geo 向けに x を反転して焼くので、描くとき `scale(-1, 1, 1)` で戻す。元のボクセルは盾以外すべて z 軸まわり -45 度（中心 8,8,8）に傾けていて、display はその前提の値なので、メッシュ（刃を立てて作ってある）も同じだけ傾ける（盾は傾けない）。y の高さと握りは元のまま
+- アセット: `lowpoly/items/<id>/<段>[_pullN].json`、`textures/lowpoly/items/<id>/<段>[_pullN][_plus5|_plus10]_atlas.png`（光る画像は `..._atlas_glow.png` = `*_glowmask.png` の白い画素にアトラスの色を載せたもの）。入れ方は `python tools/install_lowpoly_weapons.py`（入力 `docs/review/lowpoly_roughs/weapons_final/<id>/`。何度でも流せる）。base の書き換えと、元のボクセルの `models/item_voxel/` への退避も同じスクリプト
+- 弓の引き: 一人称は自分、三人称は `RenderLivingEvent` の間だけ入れる生き物（`WeaponItemRenderer.holder`）から取る（モデルを替えずに段だけ変える）
+- スイッチ: `LowPoly.weaponMeshes`（既定 true）。false で元のボクセル（`models/item_voxel/<名>.json`。`ModelEvent.RegisterAdditional` で読む）を同じ置き方で描く。そのため `item_voxel/` と `textures/item/3d/` は消さない。台本は `weaponmesh on|off`、階級を固定して撮るのは `weapontier common|rare|legend|off`（開発用）
+
+確かめ（`python tools/gen_weapon_lp_shots.py` → `python tools/run_weapon_lp_shots.py -j 3` → `python tools/weapon_lp_sheet.py`。絵は `docs/review/previews/weapon_lp_<id>.png` がコンタクトシート、`_draw`・`_block`・`_world` が弓の引き・盾の構え・地面と額縁）:
+
+- 全 13 個で、一人称・三人称 × 階級 3 × 強化 3、元のボクセル、地面（`PickupDelay` 付きの item）・額縁を撮った。三人称の向きは元のボクセルと合う（大剣・鉾で確認）。階級で輪郭、強化で縁の色と光る筋が変わる。弓は引きの 3 段で弦の位置が変わる。盾は構え中も盾の姿
+- 負荷（armor stand 20 体が +10 の大剣を持つ、1280x720、垂直同期なし、他の作業と並行で目安）: 低ポリ 4.4〜5.1 ms/frame、ボクセル 8.1〜9.4 ms/frame（約 1.8 倍速い）。台本 `tools/shots/weapon_lp_perf.txt`
+- 未確認: 他のプレイヤーの手の弓の引き絵（三人称の段は自分の三人称でだけ見た）、左利きの全武器、専用サーバーのマルチ。フォイル（輝き）は描かない（`ModGear` の品に `foil` が付くものがあれば、描き足しが要る）
+
 ## 5. これからモデルを作る手順
 
 **geo の面の名前（GeckoLib の決まり。必ず守る）**: GeckoLib は X を鏡に写して焼くので、面の名前の位置が一般の読み方と違う。`west` の面は箱の x の**大きい**側、`east` の面は x の**小さい**側に付く（`north` は z の小さい側、`south` は大きい側、`up` `down` は同じ）。ラフの道具（`tools/rough/voxel.py`）は `west` を x の小さい側として読むので、ラフの geo をそのまま書き出すと、見える面だけを書き出した箱の東西の面が逆の側に付き、横から見ると中が見える（ベータで「一定の角度から見ると透ける」と言われた原因）。心臓（`install_heart_v4.py` の変換）は最初から合っている。それ以外の geo は `tools/fix_geo_face_sides.py --apply --fill` で直す（east/west の名前を入れ替え、north/south/east/west の画像の向きを GeckoLib に合わせ、元から面が抜けている所を塞ぐ）。書き出し直したら、そのあとにもう一度流す。`--check` が各 geo の「透ける穴」の数（休め姿勢で、あらゆる向きの光線が最初に裏の面に当たる数）を出す。
