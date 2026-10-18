@@ -1,0 +1,46 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "grave",
+          "kind": "give",
+          "if": {
+            "type": "grave"
+          },
+          "goto": "grave_ask"
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "grave_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "yes",
+          "kind": "give",
+          "if": {
+            "type": "grave"
+          },
+          "do": {
+            "type": "grave_rescue"
+          },
+          "goto": "grave_done"
+        },
+        {
+          "id": "no",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    },
+    "grave_done": {
+      "face": "neutral",
+      "next": "menu"
+    }
+  }
+}

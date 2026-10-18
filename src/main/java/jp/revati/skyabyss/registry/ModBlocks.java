@@ -39,6 +39,11 @@ public final class ModBlocks {
     public static final DeferredBlock<TabletBlock> TABLET = BLOCKS.register("tablet",
             () -> new TabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().noCollission().lightLevel(state -> 5)));
 
+    // 墓: 倒れた人の持ち物の入口。苔むした石の積み石で、かすかに光る。壊せず (クリエイティブは別)、消えない。docs/design/11 の 6 章
+    public static final DeferredBlock<jp.revati.skyabyss.grave.GraveBlock> GRAVE = BLOCKS.register("grave",
+            () -> new jp.revati.skyabyss.grave.GraveBlock(unbreakable(MapColor.COLOR_GREEN).sound(SoundType.MOSS).lightLevel(state -> 5)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
     private ModBlocks() {
     }
 
