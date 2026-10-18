@@ -44,6 +44,9 @@ displayName="${mod_name}" #mandatory
 # The authors of the mod, displayed in the mod UI (optional)
 authors="nisimoto"
 
+# 武器を持ったときの腕の構え (HumanoidModel.ArmPose の拡張。client/weapon/WeaponArmPoses)
+enumExtensions="META-INF/enumextensions.json"
+
 # The description text for the mod (multi line!) (#mandatory)
 description='''
 空を通る見えない巨大な何か、近づく月、地の底の鼓動。

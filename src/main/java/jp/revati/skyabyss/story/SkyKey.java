@@ -8,7 +8,10 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.progress.ProgressRules;
+import jp.revati.skyabyss.npc.DialogueService;
 import jp.revati.skyabyss.quest.Quests;
+import jp.revati.skyabyss.record.KeepsakeBonds;
+import jp.revati.skyabyss.record.Keepsakes;
 import jp.revati.skyabyss.registry.ModItems;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +28,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // - 伝承「天の鍵」(chapter1/sky_key_whole) を記し、クエストへ合図 sky_key_assembled を送る
 // - その人の画面に場面 (SkyKeyScene) を出す。鍵は空を指さず、足もとへ脈を打つ (2 章の深淵の心臓へのほのめかし)
 // - ワールドで最初なら、全員に一行
-// 欠片の数え方: 欠片はどの巨神のものも同じ品なので、「止めた心臓の数」(段階) と「持っている数」の両方で見る
+// 欠片の数え方: 欠片はどの巨神のものも同じ品なので、「止めた心臓の数」(段階) と「手もとにある数」の両方で見る。会話・戦闘の最中は数秒待つ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class SkyKey {
     public static final String LORE = "chapter1/sky_key_whole";
@@ -39,8 +42,26 @@ public final class SkyKey {
         return StoryData.get(player.server).assembled(player.getUUID());
     }
 
+    // 手もとにある欠片の数 (控え帳の「手もと」と同じ数え方: 持ち物・袋や箱の中・エンダーチェスト・ほかの仕組みの枠。11 の 4.3)
     public static int fragmentsHeld(ServerPlayer player) {
-        return player.getInventory().countItem(ModItems.SKY_KEY_FRAGMENT.get());
+        return KeepsakeBonds.where(player, KeepsakeBonds.Kind.FRAGMENT).safe();
+    }
+
+    public static final int BUSY_TICKS = 100;
+
+    // 場面を出してはいけないとき: 会話の最中、戦いの直後 (数秒たてば出る。鍵がそろう条件は残ったまま)
+    public static boolean busy(ServerPlayer player) {
+        if (DialogueService.currentNode(player) != null) {
+            return true;
+        }
+        // 巨神の背中にいる間・巨神に降ろされる前後・場面の最中は出さない (降ろされたあとの眠りの場面のあとで出す)
+        if (jp.revati.skyabyss.titan.TitanBacks.isBack(player.level().dimension()) || jp.revati.skyabyss.titan.end.TitanEnd.holding(player)
+                || jp.revati.skyabyss.cinematic.Cinematics.active(player)) {
+            return true;
+        }
+        int hurt = player.getLastHurtByMobTimestamp();
+        int hit = player.getLastHurtMobTimestamp();
+        return (hurt > 0 && player.tickCount - hurt < BUSY_TICKS) || (hit > 0 && player.tickCount - hit < BUSY_TICKS);
     }
 
     // 鍵がそろう条件 (記録はまだ、四つの心臓を止めた、欠片を四つ持っている)
@@ -54,7 +75,7 @@ public final class SkyKey {
                 || !player.isAlive() || player.isSpectator()) {
             return;
         }
-        if (ready(player)) {
+        if (ready(player) && !busy(player)) {
             assemble(player, true);
         }
     }
@@ -65,8 +86,8 @@ public final class SkyKey {
         if (data.assembled(player.getUUID())) {
             return false;
         }
-        int taken = player.getInventory().clearOrCountMatchingItems(s -> s.is(ModItems.SKY_KEY_FRAGMENT.get()), FRAGMENTS,
-                player.inventoryMenu.getCraftSlots());
+        int taken = Keepsakes.take(player, ModItems.SKY_KEY_FRAGMENT.get(), KeepsakeBonds.mine(player), FRAGMENTS);
+        player.containerMenu.broadcastChanges();
         player.inventoryMenu.broadcastChanges();
         long day = player.server.overworld().getDayTime() / 24000L;
         boolean first = data.mark(player.getUUID(), player.getGameProfile().getName(), day);
@@ -75,9 +96,15 @@ public final class SkyKey {
         Quests.signal(player, SIGNAL);
         SkyAbyss.LOGGER.info("{} assembled the sky key from {} fragment(s) on day {}", player.getGameProfile().getName(), taken, day);
         Notice.narrate(player, "message.skyabyss.story.key_formed");
+        // 巨神編の終わりの余韻 (四章の札・語り部の一言・足もとの拍)。場面のあとに EmberAftermath が順に出す (docs/design/13 の 17.6)
+        jp.revati.skyabyss.titan.ember.EmberAftermath.afterKey(player);
         if (first) {
-            List<ServerPlayer> others = player.server.getPlayerList().getPlayers().stream().filter(p -> p != player).toList();
-            others.forEach(p -> Notice.narrate(p, "message.skyabyss.story.key_formed_world", player.getDisplayName()));
+            // 画面の語りで、心臓を一つ以上止めた人にだけ (まだ序盤の人に鍵の話を明かさない。チャットには流さない)
+            for (ServerPlayer p : player.server.getPlayerList().getPlayers()) {
+                if (p != player && Progression.stage(p) >= 1) {
+                    Notice.narrate(p, "message.skyabyss.story.key_formed_world", player.getDisplayName());
+                }
+            }
         }
         // ほかの人にも見える小さな印: 光の粒が、空から足もとへ落ちて地面に沈む
         player.serverLevel().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 6, player.getZ(), 40, 0.4, 3.0, 0.4, 0.0);

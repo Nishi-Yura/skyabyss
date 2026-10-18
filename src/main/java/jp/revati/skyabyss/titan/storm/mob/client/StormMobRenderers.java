@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.storm.mob.StaticMoth;
 import jp.revati.skyabyss.titan.storm.mob.StormMob;
 import jp.revati.skyabyss.titan.storm.mob.StormMobSetup;
@@ -35,9 +37,11 @@ public final class StormMobRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
+        // 低ポリ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo / GearLayer に戻る
         event.registerEntityRenderer(StormMobSetup.FEATHER_WARDEN.get(), ctx -> {
             MobRenderer<jp.revati.skyabyss.titan.storm.mob.FeatherWarden> r = new MobRenderer<>(ctx, "feather_warden", 0.45f);
-            r.addRenderLayer(new GearLayer<>(r, "socket_main", "hooked_glaive", mob -> "idle"));
+            r.addRenderLayer(new GearLayer<>(r, "socket_main", "hooked_glaive", mob -> "idle").activeWhen(() -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "hooked_glaive"));
             return r;
         });
         event.registerEntityRenderer(StormMobSetup.STATIC_MOTH.get(), ctx -> {
@@ -47,15 +51,15 @@ public final class StormMobRenderers {
         });
         event.registerEntityRenderer(StormMobSetup.THUNDER_SUPPLICANT.get(), ctx -> {
             MobRenderer<jp.revati.skyabyss.titan.storm.mob.ThunderSupplicant> r = new MobRenderer<>(ctx, "thunder_supplicant", 0.4f);
-            r.addRenderLayer(new GearLayer<>(r, "socket_main", "supplicant_staff", mob -> "idle"));
+            r.addRenderLayer(new GearLayer<>(r, "socket_main", "supplicant_staff", mob -> "idle").activeWhen(() -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "supplicant_staff"));
             return r;
         });
     }
 
-    static class MobRenderer<T extends StormMob> extends GeoEntityRenderer<T> {
+    static class MobRenderer<T extends StormMob> extends LowPolyGeoRenderer<T> {
         MobRenderer(EntityRendererProvider.Context ctx, String name, float shadow) {
-            super(ctx, new DefaultedEntityGeoModel<T>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true));
-            addRenderLayer(new AutoGlowingGeoLayer<>(this));
+            super(ctx, name, 1.0f);
             this.shadowRadius = shadow;
         }
 
@@ -68,6 +72,8 @@ public final class StormMobRenderers {
     // 雷蛾の帯電: 足す光を、帯電の割合の明るさで重ねる (RenderType.eyes は足し合わせるので、色の明るさがそのまま割合になる)
     static final class ChargeLayer extends GeoRenderLayer<StaticMoth> {
         private static final RenderType TYPE = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/static_moth_charge.png"));
+        // 低ポリのアトラスの翅の面を明るくした絵 (tools/install_lowpoly_storm.py)
+        private static final RenderType TYPE_LOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/static_moth_charge.png"));
 
         ChargeLayer(GeoRenderer<StaticMoth> renderer) {
             super(renderer);
@@ -86,7 +92,8 @@ public final class StormMobRenderers {
             }
             int v = Math.round(255 * c);
             int colour = 0xFF000000 | (v << 16) | (v << 8) | v;
-            getRenderer().reRender(model, poseStack, buffers, moth, TYPE, buffers.getBuffer(TYPE), partialTick, LightTexture.FULL_BRIGHT,
+            RenderType type = LowPoly.enabled ? TYPE_LOW : TYPE;
+            getRenderer().reRender(model, poseStack, buffers, moth, type, buffers.getBuffer(type), partialTick, LightTexture.FULL_BRIGHT,
                     packedOverlay, colour);
         }
     }

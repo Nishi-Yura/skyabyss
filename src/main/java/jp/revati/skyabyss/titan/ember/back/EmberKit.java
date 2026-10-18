@@ -10,9 +10,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
+import jp.revati.skyabyss.tablet.Tablets;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -127,21 +125,13 @@ public final class EmberKit {
         set(p.above(), AIR);
     }
 
-    // 壁の看板 (facing = 文が向く向き。後ろ (facing の反対) に台のブロックを置く)
+    // 壁の碑 (facing = 文が向く向き。後ろ (facing の反対) に台のブロックを置く)
     public void wallSign(BlockPos pos, Direction facing, String key, DyeColor color) {
         BlockPos back = pos.relative(facing.getOpposite());
         if (!get(back.getX(), back.getY(), back.getZ()).isSolid()) {
             set(back, RUIN_CHISELED);
         }
-        set(pos, Blocks.CRIMSON_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing));
-        if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
-            SignText text = new SignText().setColor(color).setHasGlowingText(true);
-            for (int i = 0; i < 4; i++) {
-                text = text.setMessage(i, Component.translatable(key + "." + (i + 1)));
-            }
-            sign.setText(text, true);
-            sign.setText(text, false);
-            sign.setWaxed(true);
-        }
+        set(pos, Tablets.wallState(facing));
+        Tablets.write(level, pos, key);
     }
 }

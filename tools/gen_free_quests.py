@@ -582,7 +582,7 @@ quest("weekly_back_trials", 80, ("背中の試練", "Trials of the Back"),
                         "that's enough. —The whale chaser\""),
              [ob("trial", "signal", "岩鯨の背の試練を越える（共鳴石が鳴る）", "Clear a trial on the stone whale's back (the resonance stone rings)",
                  target="back_trial_cleared", count=3)])],
-      {"xp": 100, "items": [{"item": "skyabyss:stone_whale_shard", "count": 3}, {"item": "skyabyss:resonance_shard", "count": 1}]},
+      {"xp": 100, "items": [{"item": "skyabyss:stone_whale_shard", "count": 3}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 1}]},
       repeat="weekly", board=True, unlock_=lore("chapter1/sky_ruins"),
       unlock_hint=("岩鯨の背に渡ると、受けられる", "Available once you have reached the stone whale's back"),
       story="岩鯨の背は誰でも乗れる（10 の 3 章）。序章のうちから周回に触れる入口。")
@@ -594,7 +594,7 @@ quest("weekly_heart_again", 81, ("心臓をもう一度", "The Heart, Once More"
                        "A note in the corner of the board: \"A stilled heartbeat starts again. Go and make sure of it, once every seven days.\"\n"
                        "It is unsigned."),
              [ob("heart", "kill", "岩鯨の心臓を止める", "Still the stone whale's heart", target="skyabyss:stone_whale_heart", count=1)])],
-      {"xp": 150, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:resonance_shard", "count": 2}]},
+      {"xp": 150, "items": [{"item": "skyabyss:resonance_crystal", "count": 1}, {"item": "skyabyss:resonance_shard_stone_whale", "count": 2}]},
       repeat="weekly", board=True, min_stage=1,
       story="名前のない紙。七日という数が、月のループ（01）と七日目の夜をほのめかす。")
 
@@ -606,7 +606,7 @@ LORE = [
       "刻み目はどれも同じ向きに斜めで、峰のほうから下りてくる。\n\n最後の一本だけが、途中で止まっている。",
       "Fine notches line the doorpost of the storyteller's house. Her mother cut one with a knife each time the shadow passed.\n\n"
       "Every notch slants the same way, coming down from the direction of the peaks.\n\nOnly the last one stops halfway.")),
-    ("chapter1/tide_hours", "chapter1", 140, ["chapter1/stone_whale"],
+    ("chapter1/tide_hours", "titan_tide", 140, ["chapter1/stone_whale"],
      ("干潮の刻", "The Hour of Low Tide"),
      ("朝と夕、潮が引きはじめるころに、沖の島が岸へ寄ってくる。三度見て、三度とも同じ刻だった。\n\n"
       "寄ってきた甲羅の縁には、古い門が水から顔を出していた。\n\n刻が過ぎるまで、何かを待つように動かない。",

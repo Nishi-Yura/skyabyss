@@ -10,24 +10,25 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.BossRoom;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackRooms;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
+import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
+import jp.revati.skyabyss.titan.group.GroupBossRoom;
+import jp.revati.skyabyss.titan.group.GroupBossRooms;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,118 +39,98 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 熾の底 (心臓の間) の戦い。岩鯨・潮殻の心臓の間と同じ決まり (BossRoom):
-// 5 秒の集合 → 入口が閉じて心臓が現れる → 全員が倒れるか部屋から消えて 3 秒で放棄 (心臓を消して入口を開ける)。
+// 熾の底 (心臓の間) の戦い。岩鯨・潮殻の心臓の間と同じ決まり (GroupBossRoom。グループごとの戦い):
+// 5 秒の集合 → 入口がそのグループにだけ閉じて心臓が現れる → 全員が倒れるか部屋から消えて 3 秒で放棄 (心臓を消して入口を開ける)。
 // 心臓が部屋の外へ出たら中央へ戻す。撃破で入口が開き、中央の台に光の柱 (立つと炉心の広間へ戻る)。
-// 撃破のあと、熾の底と前室に 30 秒だれもいないと、心臓がもう一度挑める (reawaken。B の試練のリセットからも呼ばれる)。
-// 撃破の記録 (この周の心臓が止まったか) は ember_back に保存する (EmberHeartData)。
+// 熾の底は区画が溶岩に沈む (ブロックが動く) ので、一度に一つのグループ (EmberRooms の heart)。心臓・礫はそのグループのもの (GroupOwned)。
+// 撃破の記録はグループの記録 (BackGroupData.Record の心臓の撃破)。そのグループの誰も門の奥にいないまま 30 秒たつと、
+// そのグループの試練が次の周になる (EmberBackTrials のグループのリセット)。部屋は持ち主が出ていくと最初に戻る (reawaken)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberHeartBattle {
     // 試練で湧いた心臓の印 (ディスクに保存しない)
     public static final String TAG = "skyabyss_ember_heart";
-    public static final int RESET_AFTER_DEFEAT = 20 * 30;
-    private static final BossRoom ROOM = new BossRoom();
-    private static int afterDefeatIdle;
+    // 部屋の中に人がいないまま戦いを始めるとき (自己テスト) のグループ
+    public static final UUID TEST_GROUP = UUID.nameUUIDFromBytes("skyabyss ember heart test group".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    private static final GroupBossRooms ROOMS = new GroupBossRooms();
+    // 最後に戦いを始めたグループ (コマンドと自己テストが見る)
+    @Nullable
+    private static UUID lastGroup;
+    // 建ててから心臓が倒れたか (部屋を戻すときに建て直す)
+    private static boolean defeatedSinceBuild;
     private static long lastAsleepNotice;
 
     private EmberHeartBattle() {
     }
 
-    public static BossRoom room() {
-        return ROOM;
+    public static GroupBossRooms rooms() {
+        return ROOMS;
     }
 
-    // ---------------------------------------------------------------- 記録 (この周の心臓が止まったか)
-    public static class EmberHeartData extends SavedData {
-        private static final String NAME = "skyabyss_ember_heart";
-        private static final Factory<EmberHeartData> FACTORY = new Factory<>(EmberHeartData::new, EmberHeartData::load);
-        private boolean defeated;
-        private int defeats;
-
-        public static EmberHeartData get(ServerLevel level) {
-            return level.getDataStorage().computeIfAbsent(FACTORY, NAME);
-        }
-
-        private static EmberHeartData load(CompoundTag tag, HolderLookup.Provider registries) {
-            EmberHeartData d = new EmberHeartData();
-            d.defeated = tag.getBoolean("Defeated");
-            d.defeats = tag.getInt("Defeats");
-            return d;
-        }
-
-        @Override
-        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-            tag.putBoolean("Defeated", defeated);
-            tag.putInt("Defeats", defeats);
-            return tag;
-        }
-
-        public boolean isDefeated() {
-            return defeated;
-        }
-
-        public int defeats() {
-            return defeats;
-        }
-
-        void markDefeated() {
-            defeated = true;
-            defeats++;
-            setDirty();
-        }
-
-        void reset() {
-            defeated = false;
-            setDirty();
-        }
+    // 最後に戦いを始めたグループの戦い (コマンドと自己テスト)
+    public static GroupBossRoom room() {
+        return ROOMS.of(lastGroup != null ? lastGroup : TEST_GROUP);
     }
 
+    @Nullable
+    public static UUID lastGroup() {
+        return lastGroup;
+    }
+
+    // そのグループが、この周の心臓を倒したか
+    public static boolean isDefeated(ServerLevel level, UUID group) {
+        return EmberBackState.of(level, group).heartDefeated();
+    }
+
+    // 最後に戦ったグループが倒したか (コマンドと自己テスト)
     public static boolean isDefeated(ServerLevel level) {
-        return EmberHeartData.get(level).isDefeated();
+        return lastGroup != null && isDefeated(level, lastGroup);
     }
 
     // 部屋ごとの仕掛け
-    static final BossRoom.Host HOST = new BossRoom.Host() {
+    static final GroupBossRoom.Host HOST = new GroupBossRoom.Host() {
         @Override
         public List<ServerPlayer> playersInside(ServerLevel level) {
-            return playersIn(level, EmberHeartArena.arena());
+            // 部屋の持ち主 (占有) がいれば、その人たちだけ (ほかのグループの人は 10 tick のうちに外へ出される)
+            UUID owner = EmberRooms.owner(EmberRooms.HEART);
+            List<ServerPlayer> in = playersIn(level, EmberHeartArena.arena());
+            return owner == null ? in : in.stream().filter(p -> Groups.isMember(p, owner)).toList();
         }
 
         @Override
-        public void seal(ServerLevel level) {
-            EmberHeartArena.seal(level);
-            level.playSound(null, BlockPos.containing(EmberHeartArena.heartHome()), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.4f);
+        public void seal(ServerLevel level, UUID group) {
+            EmberHeartArena.seal(level, group);
+            EmberBackTrials.soundTo(level, group, EmberHeartArena.heartHome(), SoundEvents.IRON_DOOR_CLOSE, 2f, 0.4f);
         }
 
         @Override
-        public void open(ServerLevel level) {
-            EmberHeartArena.open(level);
+        public void open(ServerLevel level, UUID group) {
+            EmberHeartArena.open(level, group);
         }
 
         @Override
-        public void pullIn(ServerLevel level) {
-            // 前室と戸口にいる人を、入口の橋の奥へ
-            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, EmberHeartArena.ante().inflate(0, 1, 0),
-                    p -> p.isAlive() && !p.isSpectator())) {
+        public void pullIn(ServerLevel level, UUID group) {
+            // 前室と戸口にいる、そのグループの人を、入口の橋の奥へ
+            for (ServerPlayer player : Groups.inBox(level, group, EmberHeartArena.ante().inflate(0, 1, 0))) {
                 moveInside(level, player);
             }
         }
 
         @Override
-        public void letBack(ServerLevel level, Set<UUID> participants) {
+        public void letBack(ServerLevel level, UUID group, Set<UUID> participants) {
             // 戸口 (封印の手前 1 マス) に触れた参加者を中へ通す
             EmberBackLayout.Box d = EmberBackLayout.HEART_DOOR;
             AABB door = new AABB(d.minX() - 0.5, d.minY() - 1, d.minZ() - 2, d.maxX() + 1.5, d.maxY() + 1, d.minZ() - 0.2);
-            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, door,
-                    p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()))) {
-                moveInside(level, player);
-                Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+            for (ServerPlayer player : Groups.inBox(level, group, door)) {
+                if (participants.contains(player.getUUID())) {
+                    moveInside(level, player);
+                    Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+                }
             }
         }
 
         @Override
         @Nullable
-        public Mob spawnBoss(ServerLevel level, List<ServerPlayer> challengers) {
+        public Mob spawnBoss(ServerLevel level, UUID group, List<ServerPlayer> challengers) {
             EmberHeart heart = EmberHeartSetup.EMBER_HEART.get().create(level);
             if (heart == null) {
                 return null;
@@ -159,10 +140,12 @@ public final class EmberHeartBattle {
             heart.moveTo(home.x, home.y, home.z, 180f, 0f);
             heart.addTag(TAG);
             heart.bindArena(EmberHeartArena.arena(), challengers.size());
+            heart.setGroupId(group);
             level.addFreshEntity(heart);
-            level.playSound(null, home.x, home.y, home.z, EmberHeartSetup.ROAR.get(), SoundSource.HOSTILE, 2.5f, 1.1f);
-            level.sendParticles(ParticleTypes.FLAME, home.x, home.y + 2, home.z, 120, 2.0, 1.5, 2.0, 0.2);
-            broadcast(level, ModText.battle(EmberIds.LANG_HEART + "begin"));
+            lastGroup = group;
+            EmberBackTrials.soundTo(level, group, home, EmberHeartSetup.ROAR.get(), 2.5f, 1.1f);
+            EmberBackTrials.particlesTo(level, group, ParticleTypes.FLAME, home.x, home.y + 2, home.z, 120, 2.0, 1.5, 2.0, 0.2);
+            broadcast(level, group, ModText.battle(EmberIds.LANG_HEART + "begin"));
             EmberHeart.logBorn(challengers.size());
             return heart;
         }
@@ -178,20 +161,20 @@ public final class EmberHeartBattle {
         }
 
         @Override
-        public void broadcast(ServerLevel level, Component message) {
-            EmberHeartBattle.broadcast(level, message);
+        public void broadcast(ServerLevel level, UUID group, Component message) {
+            EmberHeartBattle.broadcast(level, group, message);
         }
 
         @Override
-        public void countdown(ServerLevel level, int secondsLeft) {
+        public void countdown(ServerLevel level, UUID group, int secondsLeft) {
             Component text = ModText.battle("message.skyabyss.gate_countdown", secondsLeft);
-            for (ServerPlayer player : playersIn(level, EmberHeartArena.arena().inflate(4, 2, 10))) {
+            for (ServerPlayer player : Groups.inBox(level, group, EmberHeartArena.arena().inflate(4, 2, 10))) {
                 Notice.bar(player, text);
             }
         }
 
         @Override
-        public void cleanup(ServerLevel level) {
+        public void cleanup(ServerLevel level, UUID group) {
             EmberHeartArena.cleanup(level);
             clearChill(level);
             for (Entity e : level.getEntitiesOfClass(Entity.class, EmberHeartArena.arena().inflate(4),
@@ -210,8 +193,9 @@ public final class EmberHeartBattle {
         return level.getEntitiesOfClass(ServerPlayer.class, box, p -> p.isAlive() && !p.isSpectator());
     }
 
-    static void broadcast(ServerLevel level, Component message) {
-        for (ServerPlayer player : playersIn(level, EmberHeartArena.arena().inflate(4, 4, 12))) {
+    // そのグループの、部屋のまわりの人へ
+    static void broadcast(ServerLevel level, UUID group, Component message) {
+        for (ServerPlayer player : Groups.inBox(level, group, EmberHeartArena.arena().inflate(4, 4, 12))) {
             Notice.send(player, message);
         }
     }
@@ -238,27 +222,28 @@ public final class EmberHeartBattle {
         if (level.players().isEmpty()) {
             return;
         }
-        if (ROOM.active()) {
+        if (ROOMS.anyActive()) {
             EmberHeartArena.tick(level, current(level));
         }
         if (level.getGameTime() % 10 != 0) {
             return;
         }
-        if (level.getGameTime() % 100 == 0 && !ROOM.active() && nearRoom(level)) {
+        if (level.getGameTime() % 100 == 0 && !ROOMS.anyActive() && nearRoom(level)) {
             EmberHeartArena.ensureBuilt(level);
         }
-        if (isDefeated(level)) {
-            tickAfterDefeat(level);
+        UUID owner = EmberRooms.owner(EmberRooms.HEART);
+        if (owner != null && isDefeated(level, owner) && !ROOMS.anyActive()) {
+            tickAfterDefeat(level, owner);
             return;
         }
-        if (HOST.asleep(level) && !playersIn(level, EmberHeartArena.arena()).isEmpty() && level.getGameTime() - lastAsleepNotice > 200) {
+        if (HOST.asleep(level) && owner != null && !HOST.playersInside(level).isEmpty() && level.getGameTime() - lastAsleepNotice > 200) {
             lastAsleepNotice = level.getGameTime();
-            broadcast(level, ModText.deny(EmberIds.LANG_HEART + "asleep"));
+            broadcast(level, owner, ModText.deny(EmberIds.LANG_HEART + "asleep"));
         }
         if (!EmberHeartArena.isBuilt(level) && !playersIn(level, EmberHeartArena.arena()).isEmpty()) {
             return;
         }
-        ROOM.tick(level, HOST);
+        ROOMS.tick(level, HOST);
     }
 
     // 部屋の 48 ブロック以内に人がいるか (離れた人のために部屋を読み込ませない)
@@ -291,79 +276,99 @@ public final class EmberHeartBattle {
         EmberBackLayout.Rest hub = EmberBackLayout.rest("hub");
         player.fallDistance = 0;
         player.teleportTo(level, hub.floor().getX() + 0.5, hub.floor().getY() + 1, hub.floor().getZ() + 3.5, hub.yaw(), 0f);
-        level.playSound(null, hub.floor(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0f, 1.2f);
+        player.playNotifySound(SoundEvents.BEACON_DEACTIVATE, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.2f);
     }
 
-    // 撃破のあと: 中央の台に光の柱 (立つと広間へ)。部屋と前室に 30 秒だれもいなければ、心臓が戻る
-    private static void tickAfterDefeat(ServerLevel level) {
+    // 撃破のあと (部屋の持ち主が倒したグループのとき): 中央の台に光の柱 (立つと広間へ)
+    private static void tickAfterDefeat(ServerLevel level, UUID group) {
         Vec3 c = EmberHeartArena.heartHome();
-        level.sendParticles(ParticleTypes.ASH, c.x, EmberHeartArena.SURFACE + 1 + (level.getGameTime() % 12), c.z, 4, 0.5, 0.3, 0.5, 0.01);
-        level.sendParticles(ParticleTypes.END_ROD, c.x, EmberHeartArena.SURFACE + (level.getGameTime() % 12), c.z, 2, 0.2, 0.2, 0.2, 0.01);
-        boolean anyone = false;
-        for (ServerPlayer player : List.copyOf(level.players())) {
-            if (!player.isAlive() || player.isSpectator()) {
-                continue;
-            }
-            if (EmberHeartArena.arena().contains(player.position()) || EmberHeartArena.ante().contains(player.position())) {
-                anyone = true;
-            }
+        EmberBackTrials.particlesTo(level, group, ParticleTypes.ASH, c.x, EmberHeartArena.SURFACE + 1 + (level.getGameTime() % 12), c.z, 4, 0.5, 0.3, 0.5,
+                0.01);
+        EmberBackTrials.particlesTo(level, group, ParticleTypes.END_ROD, c.x, EmberHeartArena.SURFACE + (level.getGameTime() % 12), c.z, 2, 0.2, 0.2, 0.2,
+                0.01);
+        for (ServerPlayer player : Groups.alive(level, group)) {
             if (Math.abs(player.getX() - c.x) < 1.2 && Math.abs(player.getZ() - c.z) < 1.2
                     && player.getY() >= EmberHeartArena.SURFACE - 0.5 && player.getY() < EmberHeartArena.CEILING) {
                 ascend(level, player);
                 Notice.narrate(player, EmberIds.LANG_HEART + "pillar");
             }
         }
-        afterDefeatIdle = anyone ? 0 : afterDefeatIdle + 10;
-        if (afterDefeatIdle >= RESET_AFTER_DEFEAT) {
-            reawaken(level);
-        }
     }
 
-    // 心臓をもう一度挑めるようにする (熾の底を建て直す。B の試練のリセットからも呼ばれる)
+    // 部屋を最初に戻す (部屋の持ち主が替わるとき。EmberBackRooms の heart)。戦いを止め、心臓が倒れたあとなら熾の底を建て直す
     public static void reawaken(ServerLevel level) {
-        EmberHeartData data = EmberHeartData.get(level);
-        boolean was = data.isDefeated();
-        data.reset();
-        ROOM.reset(level, HOST, false);
-        afterDefeatIdle = 0;
-        if (was || !EmberHeartArena.isBuilt(level)) {
+        ROOMS.resetAll(level, HOST, false);
+        if (defeatedSinceBuild || !EmberHeartArena.isBuilt(level)) {
             EmberHeartArena.build(level);
+            defeatedSinceBuild = false;
         }
         SkyAbyss.LOGGER.info("The heart of the embers sleeps again (chamber reset)");
     }
 
-    // 戦いを今すぐ始める (テスト用のコマンドと自己テスト)。部屋の中の人を挑む人とする
-    public static boolean startNow(ServerLevel level) {
-        EmberHeartArena.ensureBuilt(level);
-        if (isDefeated(level)) {
-            reawaken(level);
+    // 最後に戦ったグループの心臓をもう一度挑めるようにする (テスト用のコマンドと自己テスト。部屋も戻す)
+    public static void reawakenForTest(ServerLevel level) {
+        if (lastGroup != null) {
+            var r = EmberBackState.of(level, lastGroup).record();
+            if (r != null) {
+                r.clearHeartDefeated();
+            }
         }
-        if (ROOM.active()) {
+        reawaken(level);
+    }
+
+    // 戦いを今すぐ始める (テスト用のコマンドと自己テスト)。部屋の中の人を挑む人とする。部屋の中に人がいなければ TEST_GROUP で
+    public static boolean startNow(ServerLevel level) {
+        List<ServerPlayer> inside = playersIn(level, EmberHeartArena.arena());
+        return startNow(level, inside.isEmpty() ? TEST_GROUP : Groups.keyOf(inside.get(0)));
+    }
+
+    public static boolean startNow(ServerLevel level, UUID group) {
+        EmberHeartArena.ensureBuilt(level);
+        lastGroup = group;
+        if (isDefeated(level, group)) {
+            reawakenForTest(level);
+        }
+        // 部屋をそのグループの持ち物にする (ほかのグループの人は次の見回りで外へ出る)
+        RoomLocks.claim(EmberRooms.HEART.lock(), group, level.getGameTime());
+        GroupBossRoom room = ROOMS.of(group);
+        if (room.active()) {
             return false;
         }
-        return ROOM.start(level, HOST, playersIn(level, EmberHeartArena.arena()));
+        List<ServerPlayer> inside = playersIn(level, EmberHeartArena.arena()).stream().filter(p -> Groups.isMember(p, group)).toList();
+        return room.start(level, HOST, inside);
     }
 
+    // すべての戦いを放棄する (コマンド・自己テスト)
     public static void abandon(ServerLevel level) {
-        ROOM.reset(level, HOST, true);
+        ROOMS.resetAll(level, HOST, true);
     }
 
+    // いま戦っている心臓 (一度に一つのグループなので、多くても一つ)
     @Nullable
     public static EmberHeart current(ServerLevel level) {
-        UUID id = ROOM.bossId();
-        return id != null && level.getEntity(id) instanceof EmberHeart h ? h : null;
+        for (GroupBossRoom room : ROOMS.all()) {
+            UUID id = room.bossId();
+            if (room.active() && id != null && level.getEntity(id) instanceof EmberHeart h) {
+                return h;
+            }
+        }
+        return null;
     }
 
-    // 心臓が倒れた (EmberHeart.die から)。いま戦っている心臓なら、報酬・進み・記録を渡し、入口と光の柱を開く
+    // 心臓が倒れた (EmberHeart.die から)。いま戦っている心臓なら、そのグループに報酬・進み・記録を渡し、入口と光の柱を開く
     public static void onDefeated(ServerLevel level, EmberHeart heart) {
-        Set<UUID> ids = ROOM.finish(level, HOST, heart.getUUID());
+        GroupBossRoom room = ROOMS.byBoss(heart.getUUID());
+        if (room == null) {
+            return;
+        }
+        UUID group = room.group;
+        Set<UUID> ids = room.finish(level, HOST, heart.getUUID());
         if (ids == null) {
             return;
         }
-        EmberHeartData.get(level).markDefeated();
-        // 2 周目から試練が一つ眠る (ワールドで一度でも心臓が倒されたあと)
-        EmberBackState.get(level).markEverDefeated();
-        afterDefeatIdle = 0;
+        // この周の撃破 (グループの記録)。2 周目からそのグループの試練が一つ眠る
+        EmberBackState.of(level, group).markHeartDefeated();
+        defeatedSinceBuild = true;
         List<ServerPlayer> participants = new ArrayList<>();
         for (UUID id : ids) {
             ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
@@ -372,12 +377,12 @@ public final class EmberHeartBattle {
             }
         }
         EmberLoot.onHeartDefeat(level, participants, ids);
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Groups.online(level, group)) {
             Notice.unlock(player, EmberIds.LANG_HEART + "defeated");
         }
-        Vec3 c = EmberHeartArena.heartHome();
-        level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
-        SkyAbyss.LOGGER.info("The heart of the embers was stilled by {} participant(s)", ids.size());
+        EmberBackTrials.soundTo(level, group, EmberHeartArena.heartHome(), SoundEvents.BEACON_DEACTIVATE, 3f, 0.6f);
+        SkyAbyss.LOGGER.info("The heart of the embers was stilled by {} participant(s) of group {}", ids.size(), group);
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.EMBER, ids);
     }
 
     // 試練で湧いた心臓・礫は保存しないが、古いものが残っていれば読み込みのときに消す
@@ -415,12 +420,13 @@ public final class EmberHeartBattle {
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        ROOM.clear();
+        ROOMS.clear();
         EmberHeartArena.resetState();
-        afterDefeatIdle = 0;
+        lastGroup = null;
+        defeatedSinceBuild = false;
     }
 
-    // 骨組みの受け口 (EmberBackRooms): 体を建てるとき熾の底を建て、試練のリセットのとき心臓を眠らせ直す
+    // 骨組みの受け口 (EmberBackRooms): 体を建てるとき熾の底を建て、部屋の持ち主が替わるとき部屋を戻す
     static void registerHooks() {
         EmberHeartArena.registerRoom();
         EmberBackRooms.onReset("heart", (level, sleeping) -> reawaken(level));

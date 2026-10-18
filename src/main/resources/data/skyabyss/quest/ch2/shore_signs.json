@@ -1,0 +1,42 @@
+{
+  "category": "sub",
+  "chapter": "titan_tide",
+  "order": 45,
+  "start_when": {
+    "type": "stage",
+    "min": 1,
+    "max": 1
+  },
+  "stages": [
+    {
+      "id": "gather",
+      "xp": 120,
+      "objectives": [
+        {
+          "id": "cairn",
+          "type": "signal",
+          "target": "ch2_cairn",
+          "count": 1,
+          "party": false
+        },
+        {
+          "id": "cargo",
+          "type": "signal",
+          "target": "ch2_cargo",
+          "count": 1,
+          "party": false
+        },
+        {
+          "id": "stele",
+          "type": "signal",
+          "target": "ch2_stele",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 160
+  }
+}

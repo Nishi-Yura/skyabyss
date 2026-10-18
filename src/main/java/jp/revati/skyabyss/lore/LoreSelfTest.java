@@ -68,14 +68,14 @@ public final class LoreSelfTest {
         // ---- 読み込み
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
-        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().equals("chapter1"))).count();
+        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
-        // 1 章は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
-        if (early < 12 || early > 75) {
-            failures.add("prologue + chapter 1 should have 12-75 entries, found " + early);
+        // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
+        if (early < 12 || early > 110) {
+            failures.add("prologue + chapters 1-4 should have 12-110 entries, found " + early);
         }
         if (unlockable != early) {
-            failures.add("only the prologue and chapter 1 may be written yet (" + unlockable + " unlockable)");
+            failures.add("only the prologue and chapters 1-4 may be written yet (" + unlockable + " unlockable)");
         }
         for (String later : List.of("chapter2", "chapter3", "finale")) {
             List<LoreEntry> list = catalog.inChapter(later);
@@ -133,7 +133,9 @@ public final class LoreSelfTest {
                     }
                     case "page" -> {
                         if (!t.target().equals("village") && !t.target().equals("titan_back") && !t.target().equals("shadow")
-                                && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)) {
+                                && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_TRACE) && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_DIARY)
+                                && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)
+                                && !t.target().equals(jp.revati.skyabyss.titan.ember.EmberChapter.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }
                     }
@@ -194,7 +196,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
@@ -396,7 +398,13 @@ public final class LoreSelfTest {
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
         // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
         JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember)) {
+        // 序章・一章の旅の跡・歌石などの項目 (17 の 1.5) の文は skyabyss_ch1 にある
+        JsonObject ch1 = json("/assets/skyabyss_ch1/lang/" + code + ".json", failures);
+        // 二章「引く海」の項目 (漂着の荷の頁・浜の碑・潮の民の頁) の文は skyabyss_ch2 にある (08 の 2.8節)
+        JsonObject ch2 = json("/assets/skyabyss_ch2/lang/" + code + ".json", failures);
+        // 三章の項目 (焼けた荷の頁・風の碑・影と翼) の文は skyabyss_ch3 にある (12 の 12 章)
+        JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1, ch2, ch3)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

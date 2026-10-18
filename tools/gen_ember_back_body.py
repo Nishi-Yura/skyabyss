@@ -1,23 +1,21 @@
-"""余燼の背 (ember_back) の体を、巨神本体のモデル (推奨 A 火山の背) と同じ形・同じ色のブロックの火蜥蜴にする
-(13 の 3.2節、18 章。型は潮殻の gen_tide_back_turtle.py と 08 の 21 章)。
+"""余燼の背 (ember_back) の体を、巨神本体のモデル (低ポリ案 C 「皮が岩になる火蜥蜴」の近景メッシュ) と同じ形・同じ色の
+ブロックの火蜥蜴にする (13 の 3.2節。型は岩鯨の gen_titan_back_whale.py)。
 
 使い方 (リポジトリ直下で): python tools/gen_ember_back_body.py [--preview] [--cache]
-形の元: tools/rough/ember_titan.py の build("a") (ラフの 0.5 単位の格子。本当の向き: 頭は -Z、左 = -X。反転はない)。
-        取り込み (A の install_ember_titan.py) で形を変えたら、ここも同じ格子を読むように直す。
+形の元: docs/review/lowpoly_roughs/lp_ember_titan/c/near_{mesh.json,atlas.png,glowmask.png}。
+        tools/lowpoly_ember_voxel.py が 0.5 単位のセルの格子 (部品 * 16 + 材料) にする (向きは geo のまま。頭は -Z、反転なし)。
 出力: src/main/resources/data/skyabyss/ember_back/body.bin (gzip。TitanBodyBlocks が読む。形式は "TBT1")
-      --preview で docs/review/previews/ember_back/body_{top,side,front}.png (上・西・北から見た色の地図。git には入れない)
-      --cache で tools/rough/_ember_back_body_cache.npz (調べる用)
+      --preview で docs/review/previews/ember_back/body_{top,side,front}.png (リポジトリには入れない)
+      --cache で tools/rough/_ember_back_body_cache.npz (調べる用。tools/ember_back_c_views.py の入力)
 
-縮尺: 1 単位 = 0.85 ブロック (ゲームの巨神は 0.5 ブロック。その 1.7 倍。潮殻と同じ。15 章の判断 2)。
-      頭の先から尾の先まで 386、胴の幅 95、脚を入れた幅 202、火口の縁 y 172 前後。
-高さ: モデルの地面 (y=0) を灰の原のいちばん上 (y=63) の上 (y=64) に合わせる。顎は灰の原に下りている。
-ブロックの決め方: ブロックに入る格子のセルの多数決。占める割合が 0.45 (歯と爪は 0.3) 以上なら置く。光る材料 (継ぎ目・溶岩・熾・目) は
-      3 セル以上あれば優先する。材料はモデルの色に近いバニラのブロック (下の BLOCKS。13 の 3.2節の表)。煙は置かない (粒で出す)。
-      色の揺れはブロックの位置のハッシュで選ぶ (乱数なし。何度動かしても同じ物ができる)。
-      溶岩の材料は流れないマグマブロックにする (外の溶岩が流れ出さないように)。灰溜まりの灰色の羊毛は体に使わない (熱が冷える目印のため)。
-腹: 腹の下端 (y 67) と灰の原のあいだ (y 64〜66) を、腹の足あとの 3 ブロック内側だけ埋める (伏せている姿。中の部屋を低く掘れるように)。
+縮尺: 1 単位 = 0.85 ブロック。z に ZSHIFT (+7) ブロックずらし、火口の鉢の中心を炉心の広間の真上 z -34 に合わせる。
+高さ: モデルの地面 (y=0) を灰の原のいちばん上 (y=63) の上 (y=64) に合わせる。地面より下 (脚の先) は作らない。
+ブロックの決め方: ブロックに入る格子のセルの多数決。占める割合が 0.45 (牙・角は 0.3) 以上なら置く。
+      光る材料 (溶岩の割れ目) は 3 セル以上あれば優先する。同じ材料の中の色の揺れはブロックの位置のハッシュで選ぶ (乱数なし)。
+      溶岩は流れないマグマブロック・シュルームライトにする (流体は置かない)。煙は置かない (粒で出す)。
+腹: 頭・顎・胴・尾の足あとの 3 ブロック内側を、灰の原の上 (y 64〜69) まで埋める。
 中: 外から 5 ブロックより深い所は凝灰岩 (掘った壁は EmberBodyBuilder が「肉と骨の壁」にする)。下 (灰の原) は外に数えない。
-背: 鱗板の段 (モデルは 2 単位 = 1.7 ブロック) に面取りの帯を 1 段足し、背の上を歩けるようにする (潮殻と同じ。y 100 より上)。
+背: 隣が 2〜3 高い柱に同じ石を 1 段足し、背の上を歩けるようにする (y 100 より上)。
 """
 import gzip
 import struct
@@ -27,8 +25,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "tools/rough"))
-import ember_titan as T  # noqa: E402
+sys.path.insert(0, str(ROOT / "tools"))
+import lowpoly_ember_voxel as I  # noqa: E402
 
 OUT = ROOT / "src/main/resources/data/skyabyss/ember_back/body.bin"
 PREVIEW = ROOT / "docs/review/previews/ember_back"
@@ -37,46 +35,34 @@ S = 0.85            # 1 単位あたりのブロック (ゲームの巨神の 1.
 GROUND = 64         # モデルの y=0 を置く高さ (灰の原のいちばん上 y 63 の上)
 BELLY_Y = 67        # 腹の下端 (この段の足あとを下へ埋める)
 INNER_DEPTH = 5     # これより深い体の中は凝灰岩
+GLOW_MIN = 3        # 光る材料はブロックに 3 セル以上あれば優先 (割れ目を太らせすぎない)
+ZSHIFT = 7          # 火口の鉢の中心 (モデルでは 体の中心の 48 単位前) を炉心の広間の真上 z -34 に合わせる
 
-M = T.MAT
-P = T.PART
-# 材料 -> [(ブロック, 重み)]
+M = I.MAT
+P = I.PARTS
+# 材料 -> [(ブロック, 重み)]。色は低ポリ案 C のアトラスの色 (lowpoly_ember_voxel.classify) に近いバニラ。
+#   shell = 黒い殻の板、skin = 灰茶の皮、redskin = 赤茶の皮、belly = 腹、lava/molten = 割れ目の溶岩 (流れないマグマ・灯り)、bone = 牙・角、mouth = 冷めかけの赤・口の中
 BLOCKS = {
-    M["basalt"]: [("blackstone", 5), ("polished_basalt", 3), ("basalt", 2)],          # 鱗板
-    M["sbasalt"]: [("smooth_basalt", 5), ("polished_deepslate", 1), ("deepslate_tiles", 1)],   # 脇腹・頭
-    M["belly"]: [("polished_tuff", 2), ("tuff_bricks", 1), ("smooth_basalt", 1)],      # 腹 (中の凝灰岩と分ける)
-    M["ash"]: [("light_gray_concrete", 3), ("andesite", 1)],                          # 火山の灰
-    M["slag"]: [("mud_bricks", 2), ("packed_mud", 1), ("brown_terracotta", 1)],        # 鉱滓
-    M["deepred"]: [("red_nether_bricks", 2), ("nether_wart_block", 1)],
-    M["lava"]: [("magma_block", 1)],                                                  # 溶岩の流れ (流れないマグマ)
-    M["seam"]: [("magma_block", 1)],                                                  # 鱗板の継ぎ目 (光る、踏むと熱)
-    M["ember"]: [("magma_block", 2), ("shroomlight", 1)],                             # 喉の奥・火の井戸の壁
-    M["molten"]: [("ochre_froglight", 1)],
-    M["eye"]: [("shroomlight", 1)],
-    M["dark"]: [("black_concrete", 1)],
-    M["tongue"]: [("red_terracotta", 1)],
-    M["teeth"]: [("bone_block", 1)],
-    M["claw"]: [("polished_blackstone", 1)],
-    M["bronze"]: [("waxed_exposed_cut_copper", 1), ("waxed_weathered_cut_copper", 1)],
-    M["brick"]: [("red_nether_bricks", 1), ("polished_blackstone_bricks", 1)],
-    M["column"]: [("basalt", 2), ("polished_basalt", 1)],
-    M["slagdark"]: [("polished_blackstone", 2), ("blackstone", 1)],                    # 光らない継ぎ目
-    M["crust"]: [("blackstone", 1), ("nether_bricks", 1)],                            # 火口の底
-    M["gland"]: [("cobbled_deepslate", 1)],
-    M["cinder"]: [("tuff", 1)],
-    M["smoke"]: [], M["smoke2"]: [], M["steam"]: [],                                  # 置かない
+    M["shell"]: [("blackstone", 4), ("basalt", 3), ("polished_basalt", 2), ("smooth_basalt", 1)],
+    M["skin"]: [("tuff", 3), ("brown_terracotta", 2), ("polished_deepslate", 1), ("deepslate", 1)],
+    M["redskin"]: [("red_terracotta", 3), ("brown_terracotta", 1), ("terracotta", 1)],
+    M["belly"]: [("polished_tuff", 2), ("tuff_bricks", 1), ("smooth_basalt", 1)],
+    M["lava"]: [("magma_block", 3), ("shroomlight", 1)],
+    M["molten"]: [("shroomlight", 2), ("ochre_froglight", 1)],
+    M["bone"]: [("bone_block", 1)],
+    M["mouth"]: [("red_nether_bricks", 2), ("nether_wart_block", 1)],
 }
-GLOW_MATS = {M["lava"], M["seam"], M["ember"], M["molten"], M["eye"]}
-THIN_MATS = {M["teeth"], M["claw"]}
+GLOW_MATS = {M["lava"], M["molten"]}
+THIN_MATS = {M["bone"]}
 SHELL_PARTS = {P["body"], P["ridge"], P["tail"]}
 BELLY_BLOCKS = [("polished_tuff", 2), ("tuff_bricks", 1)]
 DEEP = "tuff"
 # block_colors.json に無いブロックの色 (見た目の確認だけに使う)
 EXTRA_COLORS = {
-    "polished_basalt": (88, 88, 92), "smooth_basalt": (72, 72, 78), "light_gray_concrete": (125, 125, 115),
-    "red_nether_bricks": (69, 7, 9), "nether_wart_block": (114, 2, 2), "magma_block": (142, 63, 31),
-    "polished_blackstone": (53, 48, 56), "waxed_exposed_cut_copper": (154, 121, 101),
-    "polished_blackstone_bricks": (48, 42, 49),
+    "polished_basalt": (88, 88, 92), "smooth_basalt": (72, 72, 78), "red_nether_bricks": (69, 7, 9),
+    "nether_wart_block": (114, 2, 2), "magma_block": (142, 63, 31), "shroomlight": (240, 146, 70),
+    "ochre_froglight": (250, 220, 150), "brown_terracotta": (77, 51, 36), "red_terracotta": (143, 61, 46),
+    "terracotta": (152, 94, 67), "bone_block": (229, 225, 207), "polished_deepslate": (72, 72, 73),
 }
 
 
@@ -89,68 +75,86 @@ def hash3(x, y, z, salt=0):
 
 
 def axis_map(n, origin, f):
-    u = origin + (np.arange(n) + 0.5) / T.CELL
+    u = (np.arange(n) - origin + 0.5) / I.CELL
     return np.floor(f(u)).astype(int)
 
 
+def model_grid():
+    """低ポリ案 C の近景メッシュの体積化 (lowpoly_ember_voxel。1 分ほどかかるので scratch にキャッシュ)"""
+    import hashlib
+    import tempfile
+    h = hashlib.sha1()
+    for f in (ROOT / "tools/lowpoly_ember_voxel.py", I.CDIR / "near_mesh.json", I.CDIR / "near_atlas.png",
+              I.CDIR / "near_glowmask.png"):
+        h.update(f.read_bytes())
+    cache = Path(tempfile.gettempdir()) / ("ember_titan_c_grid_%s.npy" % h.hexdigest()[:12])
+    if cache.exists():
+        return np.load(cache)
+    K = I.voxelize()
+    np.save(cache, K)
+    return K
+
+
 def block_grid():
-    T.build("a")
-    K = T.K
-    # 煙は置かない
-    K[(K // 32) == P["smoke"]] = 0
+    K = model_grid()
     nx, ny, nz = K.shape
-    bx = axis_map(nx, T.X0, lambda u: u * S)
-    by = axis_map(ny, T.Y0, lambda u: GROUND + u * S)
-    bz = axis_map(nz, T.Z0, lambda u: u * S)
-    x0, y0, z0 = bx.min(), by.min(), bz.min()
+    # 向きは今までと同じ (頭は -Z、反転なし。尾は -X へ曲がる)
+    bx = axis_map(nx, I.OX, lambda u: u * S)
+    by = axis_map(ny, I.OY, lambda u: GROUND + u * S)
+    bz = axis_map(nz, I.OZ, lambda u: u * S + ZSHIFT)
+    keep = by >= GROUND             # 地面より下 (脚の先) は作らない
+    x0, y0, z0 = bx.min(), GROUND, bz.min()
     NBX, NBY, NBZ = bx.max() - x0 + 1, by.max() - y0 + 1, bz.max() - z0 + 1
-    cx = np.bincount(bx - x0)
-    cy = np.bincount(by - y0)
-    cz = np.bincount(bz - z0)
+    cx = np.bincount(bx - x0, minlength=NBX)
+    cy = np.bincount(by[keep] - y0, minlength=NBY)
+    cz = np.bincount(bz - z0, minlength=NBZ)
     G = np.zeros((NBX, NBY, NBZ), np.int16)
-    glow_keys = np.zeros(512, bool)
-    thin_keys = np.zeros(512, bool)
-    for p in range(1, 16):
+    NK = 256
+    glow_keys = np.zeros(NK, bool)
+    thin_keys = np.zeros(NK, bool)
+    for p in range(1, 10):
         for gm in GLOW_MATS:
-            glow_keys[p * 32 + gm] = True
+            glow_keys[p * 16 + gm] = True
         for tm in THIN_MATS:
-            thin_keys[p * 32 + tm] = True
+            thin_keys[p * 16 + tm] = True
+    ysel = np.nonzero(keep)[0]
     for b in range(NBZ):
         ks = np.nonzero(bz - z0 == b)[0]
         if len(ks) == 0:
             continue
-        sub = K[:, :, ks]
+        sub = K[:, ysel[0]:ysel[-1] + 1, :][:, :, ks]
         nzi = np.nonzero(sub)
         if len(nzi[0]) == 0:
             continue
         key = sub[nzi].astype(np.int64)
-        lin = ((bx[nzi[0]] - x0) * NBY + (by[nzi[1]] - y0)) * 512 + key
-        cnt = np.bincount(lin, minlength=NBX * NBY * 512).reshape(NBX * NBY, 512)
+        yy = by[ysel[0] + nzi[1]] - y0
+        lin = ((bx[nzi[0]] - x0) * NBY + yy) * NK + key
+        cnt = np.bincount(lin, minlength=NBX * NBY * NK).reshape(NBX * NBY, NK)
         tot = cnt.sum(1)
         cells = (cx[:, None] * cy[None, :]).reshape(-1) * cz[b]
         best = cnt.argmax(1)
         gcnt = np.where(glow_keys[None, :], cnt, 0)
-        gbest = gcnt.argmax(1)
-        use_g = gcnt.max(1) >= 3
-        k = np.where(use_g, gbest, best)
+        use_g = gcnt.max(1) >= GLOW_MIN
+        k = np.where(use_g, gcnt.argmax(1), best)
         frac = tot / np.maximum(cells, 1)
         thr = np.where(thin_keys[k], 0.3, 0.45)
-        keep = (frac >= thr) | use_g
-        G[:, :, b] = np.where(keep, k, 0).reshape(NBX, NBY).astype(np.int16)
+        keepb = (frac >= thr) | use_g
+        G[:, :, b] = np.where(keepb, k, 0).reshape(NBX, NBY).astype(np.int16)
     return G, (int(x0), int(y0), int(z0))
 
 
 def add_belly(G, org):
-    """腹の下端の段の足あと (3 ブロック内側) を、灰の原の上まで下へ埋める"""
+    """腹の下 (灰の原の上、y 64〜69) を、体 (頭・顎・胴・尾。脚は除く) の足あとの 3 ブロック内側だけ下まで埋める。
+    首の下がくぼんでいても、喉の坂の床の下が空かないようにする"""
     from scipy import ndimage
     x0, y0, z0 = org
-    jb = BELLY_Y - y0
-    body = np.isin(G[:, jb, :] // 32, list(SHELL_PARTS))
+    jb = BELLY_Y + 3 - y0
+    body = np.isin(G[:, jb, :] // 16, [P["body"], P["ridge"], P["head"], P["jaw"], P["tail"]]) & (G[:, jb, :] != 0)
     inner = ndimage.binary_erosion(body, iterations=3)
     jl = GROUND - y0
     for j in range(jl, jb):
         layer = G[:, j, :]
-        layer[inner & (layer == 0)] = P["body"] * 32 + M["belly"]
+        layer[inner & (layer == 0)] = P["body"] * 16 + M["belly"]
     return G
 
 
@@ -171,7 +175,7 @@ def to_blocks(G, org):
     wx, wy, wz = ii + x0, jj + y0, kk + z0
     h = hash3(wx, wy, wz)
     out = np.zeros(len(keys), np.int16)
-    mats = keys % 32
+    mats = keys % 16
     for mat in np.unique(mats):
         sel = mats == mat
         opts = BLOCKS[int(mat)]
@@ -183,7 +187,7 @@ def to_blocks(G, org):
         ids = np.array([idx(o[0]) for o in opts], np.int16)
         out[sel] = ids[pick]
     # 腹の下の詰め (灰の原の上、y 64〜66)
-    fill = (mats == M["belly"]) & (wy < BELLY_Y)
+    fill = (mats == M["belly"]) & (wy < BELLY_Y + 3)
     bw = np.cumsum([o[1] for o in BELLY_BLOCKS]).astype(float)
     bw /= bw[-1]
     bp = np.minimum(np.searchsorted(bw, h[fill], side="right"), len(BELLY_BLOCKS) - 1)
@@ -208,7 +212,7 @@ def walkable_plates(B, G, org):
         occ = B != 0
         NY = B.shape[1]
         top = np.where(occ.any(1), NY - 1 - np.argmax(occ[:, ::-1, :], axis=1), -1)
-        part = np.take_along_axis(G, np.maximum(top, 0)[:, None, :], 1)[:, 0, :] // 32
+        part = np.take_along_axis(G, np.maximum(top, 0)[:, None, :], 1)[:, 0, :] // 16
         nb = np.full(top.shape, -1)
         for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             nb = np.maximum(nb, np.roll(np.roll(top, dx, 0), dz, 1))
@@ -226,7 +230,7 @@ def walkable_plates(B, G, org):
 def write(B, names, org, G):
     x0, y0, z0 = org
     NX, NY, NZ = B.shape
-    shell = np.isin(G // 32, list(SHELL_PARTS)) & (B != 0)
+    shell = np.isin(G // 16, list(SHELL_PARTS)) & (B != 0)
     buf = bytearray()
     buf += b"TBT1"
     buf += struct.pack(">iiiiii", x0, y0, z0, NX, NY, NZ)

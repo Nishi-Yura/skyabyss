@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 余燼の背の敵 (灰被り・火の粉蛾・燠虫) の登録: エンティティ、スポーンエッグ、音 (13 の 11.2節の担当 D)。
-// 名前はすべて EmberIds から取る。落とす素材 (余燼の欠片・火の粉の粉・燠の殻・熾火の角杯) と鎧は担当 G が登録し、
+// 名前はすべて EmberIds から取る。落とす素材 (余燼の燠石・火の粉の粉・燠の殻・熾火の角杯) と鎧は担当 G が登録し、
 // EmberMobLoot は ID で引く (登録されていなければ落とさない)。SkyAbyss のコンストラクタから register を呼ぶ
 public final class EmberMobSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);

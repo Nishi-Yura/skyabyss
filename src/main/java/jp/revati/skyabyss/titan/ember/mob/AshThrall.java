@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -378,5 +379,10 @@ public class AshThrall extends EmberMob {
     @Override
     protected SoundEvent getDeathSound() {
         return EmberMobSetup.THRALL_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.ASH_THRALL_STEP.get(), 0.3f);
     }
 }

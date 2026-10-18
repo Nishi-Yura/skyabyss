@@ -22,6 +22,13 @@ public class BoneSpike extends AbstractArrow {
         setBaseDamage(4.0);
     }
 
+    // 射った敵と別のグループの人には、棘を送らない (見えない)
+    @Override
+    public boolean broadcastToPlayer(net.minecraft.server.level.ServerPlayer player) {
+        return super.broadcastToPlayer(player)
+                && (getOwner() == null || jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(getOwner(), player));
+    }
+
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
         super.doPostHurtEffects(target);

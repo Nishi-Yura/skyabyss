@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.client;
 
+import jp.revati.skyabyss.client.ui.TextStyle;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
@@ -115,7 +116,9 @@ public final class GrowthHud {
         int a = Mth.clamp((int) (alpha * 255), 8, 255);
         Font font = mc.font;
         int cx = g.guiWidth() / 2;
-        int y = g.guiHeight() / 2 - 58;
+        // 上の帯やボスバーが出ていればその下へ (NoticeClient が決める)。中央の演出は、この下に積まれる
+        int y = jp.revati.skyabyss.client.notice.NoticeClient.levelUpTop(g.guiHeight());
+        jp.revati.skyabyss.client.notice.NoticeClient.noteLevelUpBottom(y + jp.revati.skyabyss.client.notice.NoticeClient.LEVEL_UP_H);
         Component head = Component.translatable("gui.skyabyss.growth.level_up_head");
         Component level = Component.translatable("gui.skyabyss.growth.level_up_level", GrowthClient.levelUpLevel);
         g.drawCenteredString(font, head, cx, y, (a << 24) | TEXT);
@@ -125,7 +128,7 @@ public final class GrowthHud {
         g.fill(cx - half, y + 11, cx + half, y + 12, lineColor);
         g.pose().pushPose();
         g.pose().translate(cx, y + 15, 0);
-        g.pose().scale(1.5f, 1.5f, 1f);
+        g.pose().scale(TextStyle.HEADING.scale(), TextStyle.HEADING.scale(), 1f);
         g.drawCenteredString(font, level, 0, 0, (a << 24) | GOLD);
         g.pose().popPose();
     }

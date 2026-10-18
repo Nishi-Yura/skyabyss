@@ -1,0 +1,27 @@
+{
+  "category": "sub",
+  "chapter": "titan_tide",
+  "order": 46,
+  "start_when": {
+    "type": "flag",
+    "flag": "ch2_ebb",
+    "npc": "skyabyss:storyteller"
+  },
+  "stages": [
+    {
+      "id": "walk",
+      "objectives": [
+        {
+          "id": "walk",
+          "type": "signal",
+          "target": "ch2_ebb_walked",
+          "count": 1,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 220
+  }
+}

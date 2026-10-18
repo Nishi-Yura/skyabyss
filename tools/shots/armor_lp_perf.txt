@@ -1,0 +1,59 @@
+# Low-poly armor (perf: 20 armored stands) on armor stands and on the player (docs/design/16_armor_design.md section 6).
+# ./gradlew runShots -Pscript=tools/shots/armor_lp_perf.txt
+world shots flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon armor_stand 0 -60 12 {Invisible:1b}
+
+cmd summon armor_stand -9.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand -7.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand -5.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand -3.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand -1.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 0.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 2.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 4.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand 6.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 8.5 -60 0.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand -9.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand -7.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand -5.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand -3.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand -1.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 0.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+cmd summon armor_stand 2.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:stone_whale_boots",count:1},{id:"skyabyss:stone_whale_leggings",count:1},{id:"skyabyss:stone_whale_chestplate",count:1},{id:"skyabyss:stone_whale_helmet",count:1}]}
+cmd summon armor_stand 4.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:tide_shell_boots",count:1},{id:"skyabyss:tide_shell_leggings",count:1},{id:"skyabyss:tide_shell_chestplate",count:1},{id:"skyabyss:tide_shell_helmet",count:1}]}
+cmd summon armor_stand 6.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+cmd summon armor_stand 8.5 -60 -2.0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:ember_boots",count:1},{id:"skyabyss:ember_leggings",count:1},{id:"skyabyss:ember_chestplate",count:1},{id:"skyabyss:ember_helmet",count:1}]}
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -57 9 180 22
+waitchunks
+wait 40
+wait 20
+perf 100 armor20_lowpoly_legend_0
+perf 100 armor20_lowpoly_legend_1
+perf 100 armor20_lowpoly_legend_2
+shot armor_lp_perf_lowpoly_legend
+armortier rare
+wait 20
+perf 100 armor20_lowpoly_rare_0
+perf 100 armor20_lowpoly_rare_1
+perf 100 armor20_lowpoly_rare_2
+shot armor_lp_perf_lowpoly_rare
+lowpoly armoroff
+wait 20
+perf 100 armor20_cubes_0
+perf 100 armor20_cubes_1
+perf 100 armor20_cubes_2
+shot armor_lp_perf_cubes
+quit

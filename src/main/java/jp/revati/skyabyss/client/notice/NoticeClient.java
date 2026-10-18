@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.notice;
 
+import jp.revati.skyabyss.client.ui.TextStyle;
 import java.util.List;
 
 import jp.revati.skyabyss.Config;
@@ -47,6 +48,31 @@ public final class NoticeClient {
     private static long lastMillis = -1;
     private static long lastChime;
 
+    // ---- 画面の中央まわりの置き場 (重ならないための共通の寸法)。上の帯 → レベルアップの文字 → 中央の演出 → 字幕、の順に積む
+    // ボスバーの下端 (その枠の描画中に BossBarLayout が記す)、上の帯の下端 (前の枠の値)、レベルアップの文字の下端 (GrowthHud が記す)、中央の演出の下端 (前の枠の値)
+    private static int bossBottom;
+    private static int bannerBottom;
+    private static int levelUpBottom;
+    private static int centerBottomPrev;
+    private static int centerBottom;
+    // レベルアップの文字の高さ (見出し 1 行 + 線 + 1.5 倍の数)
+    public static final int LEVEL_UP_H = 32;
+
+    // ボスバーを描いた分の下端を記す (複数なら一番下)
+    public static void noteBossBottom(int y) {
+        bossBottom = Math.max(bossBottom, y);
+    }
+
+    // レベルアップの文字の上端: 画面の中ほどより少し上。上の帯やボスバーが下まで来ていれば、その下へずらす
+    public static int levelUpTop(int guiHeight) {
+        return Math.max(guiHeight / 2 - 58, Math.max(bannerBottom, bossBottom) + 8);
+    }
+
+    // レベルアップの文字を描いたら、その下端を記す
+    public static void noteLevelUpBottom(int y) {
+        levelUpBottom = Math.max(levelUpBottom, y);
+    }
+
     private NoticeClient() {
     }
 
@@ -58,6 +84,12 @@ public final class NoticeClient {
         @SubscribeEvent
         static void onLayers(RegisterGuiLayersEvent event) {
             event.registerAboveAll(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "notices"), NoticeClient::render);
+        }
+
+        // ボスバーの下端を知る (上の帯・レベルアップ・中央の演出が、その下へずれるため)。ほかの担当が増分を変えたあとに見る
+        @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST, receiveCanceled = true)
+        static void onBossBar(net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent.BossEventProgress event) {
+            noteBossBottom(event.getY() + event.getIncrement());
         }
 
         @SubscribeEvent
@@ -97,13 +129,10 @@ public final class NoticeClient {
         String key = body.getString();
         Config.NotifyMode mode = Config.NOTIFY_MODE.get();
         if (kind != Notice.Kind.BAR && kind != Notice.Kind.WARN) {
-            NoticeLog.add(kind, kind == Notice.Kind.PLACE && !payload.extra().getString().isEmpty()
-                    ? Component.empty().append(payload.text()).append("  ").append(payload.extra()) : Notice.plain(payload.text()));
+            NoticeLog.add(kind, fullText(payload));
         }
         if (mode != Config.NotifyMode.TOAST) {
-            Component full = kind == Notice.Kind.PLACE && !payload.extra().getString().isEmpty()
-                    ? Component.empty().append(payload.text()).append("  ").append(payload.extra()) : Notice.plain(payload.text());
-            mc.gui.getChat().addMessage(full);
+            mc.gui.getChat().addMessage(fullText(payload));
             if (mode == Config.NotifyMode.CHAT) {
                 return;
             }
@@ -125,6 +154,9 @@ public final class NoticeClient {
             case BANNER -> {
                 BANNER.setSpeed(speed);
                 BANNER.offer(new Line(body, payload.extra()), kind, key, key.length());
+                if (kind == Notice.Kind.CHAPTER) {
+                    chime(mc, 0.7f, 0.5f);
+                }
             }
             case TOAST -> {
                 boolean gain = kind == Notice.Kind.GAIN;
@@ -134,6 +166,16 @@ public final class NoticeClient {
             }
             case ACTIONBAR -> mc.gui.setOverlayMessage(body, false);
         }
+    }
+
+    // 記録・チャットに残す文: 場所・章の札は題と副題を並べ、余韻は見出しと一言を並べる
+    private static Component fullText(NoticePayload payload) {
+        Notice.Kind kind = payload.kind();
+        if (payload.extra().getString().isEmpty() || !(kind == Notice.Kind.PLACE || kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH)) {
+            return Notice.plain(payload.text());
+        }
+        return kind == Notice.Kind.AFTERMATH ? Component.empty().append(payload.extra()).append("  ").append(payload.text())
+                : Component.empty().append(payload.text()).append("  ").append(payload.extra());
     }
 
     private static void chime(Minecraft mc, float pitch, float volume) {
@@ -163,13 +205,20 @@ public final class NoticeClient {
             BANNER.advance(dt);
         }
         if (mc.options.hideGui) {
+            bossBottom = 0;
+            levelUpBottom = 0;
             return;
         }
         Font font = mc.font;
         int cx = g.guiWidth() / 2;
-        renderCaption(g, font, cx);
-        renderCenter(g, font, cx);
+        // 上の帯を先に決め (下端を中央が使う)、中央、字幕の順に積む。字幕は中央の下端より上へは伸びない
+        centerBottom = 0;
         renderBanner(g, font, cx);
+        renderCenter(g, font, cx);
+        renderCaption(g, font, cx);
+        centerBottomPrev = Math.max(centerBottom, levelUpBottom);
+        bossBottom = 0;
+        levelUpBottom = 0;
     }
 
     private static int alphaOf(float a) {
@@ -188,15 +237,18 @@ public final class NoticeClient {
         }
         int maxW = Math.min(g.guiWidth() - 40, Math.max(160, (int) (g.guiWidth() * 0.6f)));
         List<FormattedCharSequence> lines = font.split(e.value.text(), maxW);
-        if (lines.size() > 4) {
-            lines = lines.subList(0, 4);
+        int bottom = g.guiHeight() - 84;
+        // 中央の演出の下端より上へは伸ばさない (小さい画面では行を減らす)
+        int above = Math.max(centerBottom, levelUpBottom);
+        int maxLines = above <= 0 ? 4 : Mth.clamp((bottom - 6 - (above + 8)) / 11, 1, 4);
+        if (lines.size() > maxLines) {
+            lines = lines.subList(0, maxLines);
         }
         int w = 0;
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
         }
         int h = lines.size() * 11;
-        int bottom = g.guiHeight() - 84;
         int top = bottom - h;
         int x0 = cx - w / 2 - 12;
         int x1 = cx + w / 2 + 12;
@@ -232,7 +284,11 @@ public final class NoticeClient {
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
         }
-        int y = (int) (g.guiHeight() * 0.36f);
+        // レベルアップの文字が出ているときはその下、上の帯・ボスバーがあるときはその下へ
+        int y = Math.max((int) (g.guiHeight() * 0.36f), Math.max(bannerBottom, bossBottom) + 8);
+        if (levelUpBottom > 0) {
+            y = Math.max(y, levelUpBottom + 8);
+        }
         float grow = Math.min(1f, e.age() / 350f);
         int half = (int) ((w / 2 + 14) * grow);
         int lineColor = ((int) (a * 0xB0) << 24) | 0xF2C14E;
@@ -243,11 +299,13 @@ public final class NoticeClient {
             y += 11;
         }
         g.fill(cx - half, y + 1, cx + half, y + 2, lineColor);
+        centerBottom = y + 3;
     }
 
     // 上の帯: 場所の名前は大きな金の文字と、その下に副題。戦いの知らせは小さめの一行
     private static void renderBanner(GuiGraphics g, Font font, int cx) {
         NoticeQueue.Entry<Line> e = BANNER.current();
+        bannerBottom = 0;
         if (e == null) {
             return;
         }
@@ -255,14 +313,19 @@ public final class NoticeClient {
         if (a <= 0.01f) {
             return;
         }
+        if (e.kind == Notice.Kind.CHAPTER || e.kind == Notice.Kind.AFTERMATH) {
+            bannerBottom = renderChapterCard(g, font, cx, e, a);
+            return;
+        }
         boolean place = e.kind == Notice.Kind.PLACE;
-        float scale = place ? 1.8f : 1.0f;
+        float scale = place ? TextStyle.HEADING.scale() : TextStyle.BODY.scale();
         int maxW = (int) (Math.max(120, (int) (g.guiWidth() * 0.5f)) / scale);
         List<FormattedCharSequence> lines = font.split(e.value.text(), maxW);
         if (lines.size() > 2) {
             lines = lines.subList(0, 2);
         }
-        int y = (int) (g.guiHeight() * (place ? 0.16f : 0.1f));
+        // ボスバーがあれば、その下へ
+        int y = Math.max((int) (g.guiHeight() * (place ? 0.16f : 0.1f)), bossBottom > 0 ? bossBottom + 6 : 0);
         int w = 0;
         for (FormattedCharSequence l : lines) {
             w = Math.max(w, font.width(l));
@@ -284,6 +347,7 @@ public final class NoticeClient {
         }
         g.pose().popPose();
         Component sub = e.value.extra();
+        int endY = ly + 2;
         if (place && !sub.getString().isEmpty()) {
             List<FormattedCharSequence> subLines = font.split(sub, Math.min(g.guiWidth() - 30, 340));
             int sy = ly + 6;
@@ -291,6 +355,66 @@ public final class NoticeClient {
                 g.drawString(font, l, cx - font.width(l) / 2, sy, alphaOf(a) | 0xFFFFFF, true);
                 sy += 11;
             }
+            endY = sy;
         }
+        bannerBottom = endY;
+    }
+
+    // 章の題字の札 (CHAPTER) と余韻の札 (AFTERMATH)。上の帯の列の中で一つだけ映る (順番待ち)。下端を返す (レベルアップの文字などがその下へずれる)
+    //   CHAPTER  : 「一章　岩鯨」を TITLE の金の文字で、その下に題字を HEADING で。線が左右へ伸びる
+    //   AFTERMATH: 見出し (小さな金) の下に一言を HEADING で、折り返し 3 行まで
+    private static int renderChapterCard(GuiGraphics g, Font font, int cx, NoticeQueue.Entry<Line> e, float a) {
+        boolean title = e.kind == Notice.Kind.CHAPTER;
+        int y = Math.max((int) (g.guiHeight() * 0.16f), bossBottom > 0 ? bossBottom + 6 : 0);
+        float mainScale = title ? TextStyle.TITLE.scale() : TextStyle.HEADING.scale();
+        int maxW = (int) (Math.max(140, Math.min(g.guiWidth() - 40, (int) (g.guiWidth() * 0.6f))) / mainScale);
+        List<FormattedCharSequence> lines = font.split(e.value.text(), maxW);
+        int maxLines = title ? 1 : 3;
+        if (lines.size() > maxLines) {
+            lines = lines.subList(0, maxLines);
+        }
+        int w = 0;
+        for (FormattedCharSequence l : lines) {
+            w = Math.max(w, font.width(l));
+        }
+        int textColor = title ? 0xF2C14E : 0xE9E3D4;
+        int lineColor = ((int) (a * 0x90) << 24) | 0xF2C14E;
+        int half = (int) (Math.min(1f, e.age() / 600f) * ((int) (w * mainScale) / 2 + 30));
+        Component sub = e.value.extra();
+        int by = y;
+        if (!title) {
+            // 見出しを先に (小さく、線で挟む)
+            int sw = font.width(sub);
+            g.drawString(font, sub, cx - sw / 2, y, alphaOf(a) | 0xB8923A, true);
+            int hw = (int) (Math.min(1f, e.age() / 600f) * (sw / 2 + 28));
+            g.fill(cx - hw, y + 12, cx + hw, y + 13, lineColor);
+            by = y + 20;
+        }
+        g.pose().pushPose();
+        g.pose().translate(cx, by, 0);
+        g.pose().scale(mainScale, mainScale, 1f);
+        int ty = 0;
+        for (FormattedCharSequence l : lines) {
+            g.drawString(font, l, -font.width(l) / 2, ty, alphaOf(a) | textColor, true);
+            ty += 11;
+        }
+        g.pose().popPose();
+        int endY = by + (int) (lines.size() * 11 * mainScale);
+        if (title) {
+            int ly = endY + 4;
+            g.fill(cx - half, ly, cx + half, ly + 1, lineColor);
+            endY = ly + 6;
+            if (!sub.getString().isEmpty()) {
+                float subScale = TextStyle.HEADING.scale();
+                int sw = font.width(sub);
+                g.pose().pushPose();
+                g.pose().translate(cx, endY, 0);
+                g.pose().scale(subScale, subScale, 1f);
+                g.drawString(font, sub, -sw / 2, 0, alphaOf(a) | 0xE9E3D4, true);
+                g.pose().popPose();
+                endY += (int) (11 * subScale) + 2;
+            }
+        }
+        return endY;
     }
 }

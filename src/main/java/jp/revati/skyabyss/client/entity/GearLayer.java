@@ -51,6 +51,8 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
     private final String socketBone;
     private final Function<T, String> animation;
     private final GearRenderer gear;
+    // false を返す間は何も描かない (低ポリへの切り替えで、元の geo の盾を止めるのに使う)
+    private java.util.function.BooleanSupplier active = () -> true;
     // モブ一体ごとに武器のアニメーションの状態を持つ (モブが消えれば一緒に消える)
     private final Map<Entity, GearAnimatable> states = new WeakHashMap<>();
 
@@ -61,10 +63,15 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
         this.gear = new GearRenderer(gearName);
     }
 
+    public GearLayer<T> activeWhen(java.util.function.BooleanSupplier active) {
+        this.active = active;
+        return this;
+    }
+
     @Override
     public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
                               VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        if (!bone.getName().equals(socketBone)) {
+        if (!active.getAsBoolean() || !bone.getName().equals(socketBone)) {
             return;
         }
         GearAnimatable state = states.computeIfAbsent(animatable, e -> new GearAnimatable(gear.name));
@@ -74,6 +81,19 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
         RenderUtil.translateToPivotPoint(poseStack, bone);
         gear.render(poseStack, state, bufferSource, null, null, packedLight, partialTick);
         poseStack.popPose();
+    }
+
+    // ---------------------------------------------------------------- 低ポリのメッシュを描く
+
+    // lowpoly/<meshName>.json (socket: true のメッシュ) を受け口に描く。使い方は docs/design/15_high_poly.md 9 章
+    public static <T extends Entity & GeoAnimatable> GeoRenderLayer<T> lowPoly(GeoRenderer<T> renderer, String socketBone, String meshName) {
+        return new jp.revati.skyabyss.client.lowpoly.LowPolyGearLayer<>(renderer, socketBone, meshName);
+    }
+
+    // 弓の弦のようにメッシュの中の骨が動くもの: geo/gear/<meshName>_lowpoly.geo.json と animations/gear/<meshName>.animation.json で動かす
+    public static <T extends Entity & GeoAnimatable> GeoRenderLayer<T> lowPolyAnimated(GeoRenderer<T> renderer, String socketBone, String meshName,
+                                                                                    Function<T, String> animation) {
+        return new jp.revati.skyabyss.client.lowpoly.LowPolyGearLayer<>(renderer, socketBone, meshName, animation);
     }
 
     // ---------------------------------------------------------------- アイテムを描く
@@ -88,6 +108,13 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
     // adjust は受け口の pivot を原点とする座標 (1 = 1ブロック) で、アイテムを描く直前に呼ばれる
     public static <T extends Entity & GeoAnimatable> GeoRenderLayer<T> item(GeoRenderer<T> renderer, String socketBone, Function<T, ItemStack> stack,
                                                                          ItemDisplayContext context, Consumer<PoseStack> adjust) {
+        return item(renderer, socketBone, stack, context, adjust, () -> true);
+    }
+
+    // active が false を返す間は何も描かない (低ポリへの切り替えで、元のアイテムの武器を止めるのに使う)
+    public static <T extends Entity & GeoAnimatable> GeoRenderLayer<T> item(GeoRenderer<T> renderer, String socketBone, Function<T, ItemStack> stack,
+                                                                         ItemDisplayContext context, Consumer<PoseStack> adjust,
+                                                                         java.util.function.BooleanSupplier active) {
         return new BlockAndItemGeoLayer<T>(renderer, (bone, mob) -> bone.getName().equals(socketBone) ? stack.apply(mob) : null, (bone, mob) -> null) {
             @Override
             protected ItemDisplayContext getTransformTypeForStack(GeoBone bone, ItemStack itemStack, T animatable) {
@@ -98,7 +125,7 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
             @Override
             public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
                                       VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-                ItemStack itemStack = getStackForBone(bone, animatable);
+                ItemStack itemStack = active.getAsBoolean() ? getStackForBone(bone, animatable) : null;
                 if (itemStack == null || itemStack.isEmpty()) {
                     return;
                 }

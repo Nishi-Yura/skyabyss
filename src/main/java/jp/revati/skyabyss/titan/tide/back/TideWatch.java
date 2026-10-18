@@ -29,7 +29,9 @@ import net.minecraft.world.phys.Vec3;
 // 浮き石が 5 段 (壁の灯りの目盛り) に届けば次の段へ。上の溜め T が空になると、底の戸から岩棚 (東の潮鳴り石) へ。
 // 溜めの戸は、水が 1 段以下 (T は 0) のときだけ開く。戸の中に人がいるあいだは、水は動かない (挟まない)。
 // 重石の床に誰かが立っている間は、つながった栓の向きが逆になる (二人なら近道。一人でも解ける)。
-// 前室の戻しの栓を引くと、三段を最初の水位に戻す (30 秒に一度)。潮の時計とは関係なく、栓でだけ動く
+// 前室の戻しの栓を引くと、三段を最初の水位に戻す (30 秒に一度)。潮の時計とは関係なく、栓でだけ動く。
+// 潮見の間は占有する部屋 (TideRooms.WATCH)。水位・配置・取っ手は、いまの持ち主のグループのもの (入ったときにその配置で作り直す)。
+// 溜めの戸は扉のブロック (SealedGateBlock) で、開け閉めはワールドの既定 (部屋には持ち主のグループしかいない)
 public final class TideWatch {
     public static final int RESET_COOLDOWN = 30 * 20;
     public static final String WATCH_TAG = "skyabyss_watch_mob";
@@ -65,8 +67,9 @@ public final class TideWatch {
     }
 
     // ---------------------------------------------------------------- リセット (配置を決め、取っ手と看板を置き直し、最初の水位へ)
-    static void reset(ServerLevel level, TideBackState state) {
-        config = state.eastConfig();
+    // state は新しい持ち主のグループ (null なら最初の配置。建てたあと)。岩棚の石と抜け道の床は、ワールドではいつも「まだ鳴っていない」形
+    static void reset(ServerLevel level, @javax.annotation.Nullable TideBackState.Group state) {
+        config = state == null ? 0 : state.eastConfig();
         TidePuzzle.Config c = cfg();
         // 取っ手の台をすべて片付ける
         for (BlockPos[] tier : SLOTS) {
@@ -129,11 +132,18 @@ public final class TideWatch {
             e.discard();
         }
         spawned = false;
-        // 鳴っている (眠っている) なら、岩棚の石も鳴らしておく
         level.setBlock(STONE_EAST.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState(), 3);
-        level.setBlock(STONE_EAST, TideBackSetup.CHIME_STONE.get().defaultBlockState()
-                .setValue(TideChimeStoneBlock.ACTIVE, state.rung(TideBackState.Trial.EAST)), 3);
-        level.setBlock(RETURN_EAST, state.rung(TideBackState.Trial.EAST) ? TideKit.LAMP : TideKit.DARK, 3);
+        level.setBlock(STONE_EAST, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false), 3);
+        level.setBlock(RETURN_EAST, TideKit.DARK, 3);
+    }
+
+    // 部屋を手放した: 敵を消し、取っ手を戻す (次の持ち主が入ったときに、その配置で作り直す)
+    static void release(ServerLevel level, java.util.UUID formerOwner) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, area().inflate(4), e -> e.getTags().contains(WATCH_TAG))) {
+            e.discard();
+        }
+        spawned = false;
+        lastReset = -RESET_COOLDOWN;
     }
 
     private static BlockState wall(int x, int y, int z, int k) {
@@ -157,7 +167,7 @@ public final class TideWatch {
         level.setBlock(s.above(), Blocks.AIR.defaultBlockState(), 3);
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockState n = level.getBlockState(s.relative(d));
-            if (n.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock || n.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock) {
+            if (n.getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock || n.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock) {
                 level.setBlock(s.relative(d), Blocks.AIR.defaultBlockState(), 3);
             }
         }
@@ -214,10 +224,12 @@ public final class TideWatch {
     }
 
     // ---------------------------------------------------------------- 毎 tick
-    static void tick(ServerLevel level, TideBackState state, boolean peaceful) {
-        if (level.getEntitiesOfClass(ServerPlayer.class, area().inflate(6), p -> !p.isSpectator()).isEmpty()) {
+    static void tick(ServerLevel level, boolean peaceful) {
+        java.util.UUID owner = TideRooms.owner(TideRooms.WATCH);
+        if (owner == null) {
             return;
         }
+        TideBackState.Group state = TideBackState.of(level, owner);
         if (!applied) {
             apply(level, null);
         }
@@ -246,7 +258,7 @@ public final class TideWatch {
         }
         if (!peaceful && !spawned && !state.rung(TideBackState.Trial.EAST)) {
             spawned = true;
-            spawnGuards(level);
+            spawnGuards(level, owner);
         }
         if (--flowTimer > 0) {
             return;
@@ -301,8 +313,11 @@ public final class TideWatch {
         return !level.getEntitiesOfClass(ServerPlayer.class, box, p -> !p.isSpectator()).isEmpty();
     }
 
+    // 持ち主のグループの、部屋の近くの人 (知らせを出す相手)
     private static List<ServerPlayer> near(ServerLevel level) {
-        return level.getEntitiesOfClass(ServerPlayer.class, area().inflate(6), p -> !p.isSpectator());
+        java.util.UUID owner = TideRooms.owner(TideRooms.WATCH);
+        return level.getEntitiesOfClass(ServerPlayer.class, area().inflate(6),
+                p -> !p.isSpectator() && (owner == null || jp.revati.skyabyss.titan.group.Groups.isMember(p, owner)));
     }
 
     static AABB area() {
@@ -362,33 +377,30 @@ public final class TideWatch {
                     }
                 }
             }
-            boolean open = doorOpen(k, L);
-            setDoor(level, BASIN_DOOR[k], open);
-            if (k == 2) {
-                setDoor(level, T_EXIT_DOOR, open);
-            }
+            setDoor(level, k, doorOpen(k, L));
         }
     }
 
-    private static void setDoor(ServerLevel level, BlockPos d, boolean open) {
-        BlockState want = open ? Blocks.AIR.defaultBlockState() : ModBlocks.SEALED_GATE.get().defaultBlockState();
+    // 溜めの戸 (扉のブロック) の既定を変える。部屋は持ち主のグループだけが使うので、ワールドの既定で開け閉めする
+    private static void setDoor(ServerLevel level, int k, boolean open) {
+        List<BlockPos> door = TideGates.door(k);
         boolean changed = false;
-        for (BlockPos p : new BlockPos[] {d, d.above()}) {
-            if (!level.getBlockState(p).is(want.getBlock())) {
-                level.setBlock(p, want, 3);
+        for (BlockPos p : door) {
+            if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get()) || TideGates.defaultOpen(level, p) != open) {
                 changed = true;
             }
         }
         if (changed) {
-            level.playSound(null, d, TideBackSetup.LOCK.get(), SoundSource.BLOCKS, 1.2f, open ? 1.2f : 0.8f);
+            jp.revati.skyabyss.titan.group.GroupGates.setDefault(level, door, open);
+            level.playSound(null, BASIN_DOOR[k], TideBackSetup.LOCK.get(), SoundSource.BLOCKS, 1.2f, open ? 1.2f : 0.8f);
         }
     }
 
     // 前室の手前と、中の溜めの縁に泡吹き (謎解きを急かすほど多くはしない)
-    private static void spawnGuards(ServerLevel level) {
+    private static void spawnGuards(ServerLevel level, java.util.UUID owner) {
         BlockPos[] spots = {new BlockPos(20, 78, -3), new BlockPos(42, 84, -10), new BlockPos(30, 79, -10)};
         for (BlockPos s : spots) {
-            Mob m = TideFlats.spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), s);
+            Mob m = TideFlats.spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), s, owner);
             if (m != null) {
                 m.addTag(WATCH_TAG);
             }

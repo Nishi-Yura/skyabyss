@@ -23,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 // 追跡中のクエストがメインのときは、この帯が代わりに出す (QuestHud は出さない)
 public final class ObjectiveStrip {
     private static final String[] COMPASS = {"南", "南西", "西", "北西", "北", "北東", "東", "南東"};
-    static final int WIDTH = 150;
+    static final int WIDTH = 230;
     private static final int ROW = 14;
 
     // 目的ごとの目印の位置 (クエストの id → 位置)。野営地・宿り・骨の丘・岩鯨など、位置が決まる目的を扱う担当が登録する
@@ -80,17 +80,10 @@ public final class ObjectiveStrip {
                 || OpeningClient.awakeActive()) {
             return;
         }
-        // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる
+        // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる。操作のキーは書かない
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
             draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), opening.target());
-            if (opening.id().equals("follow_smoke")) {
-                // 最初の目的の下に、操作の案内をひとこと控えめに (バニラのチュートリアルの札の代わり)
-                Component hint = Component.translatable("opening.skyabyss.hint_move", mc.options.keyUp.getTranslatedKeyMessage(),
-                        mc.options.keyLeft.getTranslatedKeyMessage(), mc.options.keyDown.getTranslatedKeyMessage(),
-                        mc.options.keyRight.getTranslatedKeyMessage(), mc.options.keyJump.getTranslatedKeyMessage());
-                g.drawString(mc.font, hint, QuestHud.X, QuestHud.y() + ROW - 1, 0xFFB8C4BE, true);
-            }
             return;
         }
         QuestLog log = QuestLog.of(mc.player);

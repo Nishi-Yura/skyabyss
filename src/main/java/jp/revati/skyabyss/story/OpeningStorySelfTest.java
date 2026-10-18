@@ -36,7 +36,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 序盤の語り (17 の 3〜6 章、担当 4) の自己テスト (SELFTEST opening story)。
 //  - 新しい伝承の項目 6 つ (野営地・帳面の余白・足跡・足音・骨の丘・空の歌): 読み込み・日英の文・折り返し・記される・核心に触れない言葉
-//  - 石板の看板の幅、開幕の一行、目的の帯の文 (7 つ。日本語 12 字、英語 34 字まで)
+//  - 石板の看板の幅、開幕の一行、目的の帯の文 (7 つ。日本語 20 字、英語 52 字まで。「〜しよう」と次の行動を言い、操作のキーは書かない。骨の丘の前触れの字幕 4 つ)
 //  - メイン「雲の下の歌」の始まり: 帳面を拾う → 煙の下の宿り (語り部の shadow0) → 空を見る → 語り部に尋ねる → イサナ、の通し。
 //    合図の代わりに、伝承を記す (Lore.unlock) と会話の節に入ることで進める (拍子の担当が送るものと同じ)
 //  - 影を先に見た人・空のことを先に尋ねた人は、序盤の二段を飛ばす
@@ -160,10 +160,40 @@ public final class OpeningStorySelfTest {
             text(json, "opening.skyabyss.margin_line", lang, failures);
             for (String id : OBJECTIVE_IDS) {
                 String s = text(json, "objective.skyabyss." + id, lang, failures);
-                int max = lang.equals("ja_jp") ? 12 : 34;
+                int max = lang.equals("ja_jp") ? 20 : 52;
                 check(s.codePointCount(0, s.length()) <= max, lang + ": objective " + id + " is too long (" + s + ")", failures);
                 for (String bad : SPOILERS) {
                     check(!s.contains(bad), lang + ": objective " + id + " says too much (" + bad + ")", failures);
+                }
+                for (String key : List.of("WASD", "Space", "スペース", "キー")) {
+                    check(!s.contains(key), lang + ": objective " + id + " mentions a raw key (" + key + ")", failures);
+                }
+                // 名前や場所だけにせず、次の行動を「〜しよう」で言う (日本語)。英語は命令形 (動詞から始まる)
+                if (lang.equals("ja_jp")) {
+                    check(s.endsWith("う") || s.endsWith("）"), "ja_jp: objective " + id + " does not tell the player what to do (" + s + ")", failures);
+                }
+            }
+            check(!json.has("opening.skyabyss.hint_move"), lang + ": the raw key hint is still there", failures);
+            for (String cue : List.of("bone_rumor", "bone_far", "bone_mid", "bone_near")) {
+                String s = text(json, "opening.skyabyss." + cue, lang, failures);
+                for (String bad : SPOILERS) {
+                    check(!s.contains(bad), lang + ": bone cue " + cue + " says too much (" + bad + ")", failures);
+                }
+            }
+            // メインの目的の文 (帯に出る) は、巨神 4 つを通して「〜しよう」で終わる (日本語)
+            if (lang.equals("ja_jp")) {
+                for (String ns : List.of("skyabyss_npc", "skyabyss_story")) {
+                    JsonObject q = json("/assets/" + ns + "/lang/ja_jp.json", failures);
+                    if (q == null) {
+                        continue;
+                    }
+                    for (String key : q.keySet()) {
+                        if (key.matches("quest\\.skyabyss\\.main_[a-z]+\\.[a-z_]+\\.[a-z_]+") && !key.endsWith(".journal") && !key.endsWith(".title")
+                                && !key.endsWith(".summary") && !key.endsWith(".done")) {
+                            String v = q.get(key).getAsString();
+                            check(v.endsWith("う"), "ja_jp: main objective " + key + " does not tell the player what to do (" + v + ")", failures);
+                        }
+                    }
                 }
             }
         }
@@ -271,7 +301,8 @@ public final class OpeningStorySelfTest {
         check(QuestLog.of(a).tracked().equals("main_song"), "the main quest should be tracked", failures);
         // 序盤のサブクエストは、イサナと会うまで出ない (17-10)
         for (QuestDef def : QuestManager.all()) {
-            if (def.board()) {
+            // 初日のお使い (story/ch1。17 の 1.5) は、日 1 から開く例外
+            if (def.board() && !def.id().startsWith("ch1/")) {
                 check(!def.unlock().test(StoryContext.of(a)), "board quest " + def.id() + " is open before meeting Isana", failures);
             }
         }

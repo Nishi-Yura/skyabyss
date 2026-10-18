@@ -67,6 +67,7 @@ public final class Lore {
             // 序盤の「はじめて見た物」の経験値 (17 の 5.2、04 の 3.2)。一人一回
             jp.revati.skyabyss.rpg.GrowthRewards.onLore(player, id);
         }
+        jp.revati.skyabyss.advancement.Beats.fire(player, "lore:" + id);
         ensureBook(player, state);
         return true;
     }

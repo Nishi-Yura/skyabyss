@@ -1,0 +1,130 @@
+# 心臓の登場 (intro 80 tick) と倒れる (death 100 tick) の演出を、時刻ごとに撮る。./gradlew runShots -Pscript=tools/shots/heart_cinematics.txt
+# 出力: run/shots/heart_cinematics/shots/heart_cinematics/*.png。観戦者の画面で、心臓を床から 1 ブロック上に湧かせる (試練の部屋と同じ高さ)
+world shots flat
+size 960 540
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+hud off
+cmd title @a clear
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+camera minecraft:overworld 0 -57 11 180 -6
+waitchunks
+wait 60
+cmd summon skyabyss:stone_whale_heart 0 -59 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 8
+shot stone_intro_08
+wait 16
+shot stone_intro_24
+wait 16
+shot stone_intro_40
+wait 16
+shot stone_intro_56
+wait 16
+shot stone_intro_72
+wait 20
+cmd kill @e[type=skyabyss:stone_whale_heart]
+wait 6
+shot stone_death_06
+wait 18
+shot stone_death_24
+wait 20
+shot stone_death_44
+wait 20
+shot stone_death_64
+wait 20
+shot stone_death_84
+wait 14
+shot stone_death_98
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+camera minecraft:overworld 0 -57 11 180 -6
+cmd summon skyabyss:tide_heart 0 -59 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 8
+shot tide_intro_08
+wait 16
+shot tide_intro_24
+wait 16
+shot tide_intro_40
+wait 16
+shot tide_intro_56
+wait 16
+shot tide_intro_72
+wait 20
+cmd kill @e[type=skyabyss:tide_heart]
+wait 6
+shot tide_death_06
+wait 18
+shot tide_death_24
+wait 20
+shot tide_death_44
+wait 20
+shot tide_death_64
+wait 20
+shot tide_death_84
+wait 14
+shot tide_death_98
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+camera minecraft:overworld 0 -57 11 180 -6
+cmd summon skyabyss:thunder_wing_heart 0 -59 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 8
+shot storm_intro_08
+wait 16
+shot storm_intro_24
+wait 16
+shot storm_intro_40
+wait 16
+shot storm_intro_56
+wait 16
+shot storm_intro_72
+wait 20
+cmd kill @e[type=skyabyss:thunder_wing_heart]
+wait 6
+shot storm_death_06
+wait 18
+shot storm_death_24
+wait 20
+shot storm_death_44
+wait 20
+shot storm_death_64
+wait 20
+shot storm_death_84
+wait 14
+shot storm_death_98
+
+cmd kill @e[type=!minecraft:player,distance=..64]
+camera minecraft:overworld 0 -57 11 180 -6
+cmd summon skyabyss:ember_heart 0 -59 0 {Rotation:[0f,0f],PersistenceRequired:1b}
+wait 8
+shot ember_intro_08
+wait 16
+shot ember_intro_24
+wait 16
+shot ember_intro_40
+wait 16
+shot ember_intro_56
+wait 16
+shot ember_intro_72
+wait 20
+cmd kill @e[type=skyabyss:ember_heart]
+wait 6
+shot ember_death_06
+wait 18
+shot ember_death_24
+wait 20
+shot ember_death_44
+wait 20
+shot ember_death_64
+wait 20
+shot ember_death_84
+wait 14
+shot ember_death_98
+
+quit

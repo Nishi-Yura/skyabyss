@@ -1,0 +1,78 @@
+# Low-poly vs cube render cost, tide crowd (15 reef scuttlers + 10 bubble puffers + 2 beckoners). PERF lines in shots.log.
+# ./gradlew runShots -Pscript=tools/shots/lp_perf.txt
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon skyabyss:reef_scuttler -9 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -9 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:reef_scuttler -1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -9 -59 3 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -7 -59 3 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -5 -59 3 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -3 -59 3 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -1 -59 3 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -9 -59 6 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -7 -59 6 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -5 -59 6 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -3 -59 6 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer -1 -59 6 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:tide_beckoner 4 -60 -12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:tide_beckoner 10 -60 -12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld -2 -59 15 180 8
+waitchunks
+wait 100
+shot lp_perf_crowd
+lowpoly on
+wait 40
+lowpoly off
+wait 40
+lowpoly on
+wait 40
+lowpoly off
+wait 40
+lowpoly on
+wait 40
+lowpoly off
+wait 40
+lowpoly on
+
+lowpoly on
+wait 40
+perf 300 tide27_on_0
+lowpoly off
+wait 40
+perf 300 tide27_off_0
+lowpoly on
+wait 40
+perf 300 tide27_on_1
+lowpoly off
+wait 40
+perf 300 tide27_off_1
+lowpoly on
+wait 40
+perf 300 tide27_on_2
+lowpoly off
+wait 40
+perf 300 tide27_off_2
+lowpoly on
+quit

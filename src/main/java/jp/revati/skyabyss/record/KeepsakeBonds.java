@@ -125,7 +125,7 @@ public final class KeepsakeBonds {
     }
 
     // その人の品として数えてよいか (まだ結ばれていない品と、その人の今の代の品)
-    static Predicate<ItemStack> mine(ServerPlayer player) {
+    public static Predicate<ItemStack> mine(ServerPlayer player) {
         return s -> {
             UUID owner = owner(s);
             return owner == null || (owner.equals(player.getUUID()) && !stale(player.server, s));

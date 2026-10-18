@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "skyabyss:block/storm_rod_bulb_off"
+    },
+    "lit=true": {
+      "model": "skyabyss:block/storm_rod_bulb_on"
+    }
+  }
+}

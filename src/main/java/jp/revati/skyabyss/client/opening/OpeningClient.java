@@ -118,7 +118,7 @@ public final class OpeningClient {
 
     // 開幕の暗転・題字の最中か (目的の帯はその間出さない)
     public static boolean awakeActive() {
-        return awakeTicks() >= 0;
+        return awakeTicks() >= 0 || jp.revati.skyabyss.client.cinematic.CinematicClient.active();
     }
 
     // 目覚めの演出の経過 tick (終わっていれば -1)
@@ -179,6 +179,16 @@ public final class OpeningClient {
         return (t - BAND_START) / (float) BAND_LENGTH;
     }
 
+    // 歌のあいだ、この mod 自身の星を描く強さ (0〜1)。バニラの星は雨・雲・光源 mod やシェーダーで見えないことがあるので、欠けが読めるよう自前の星を重ねる。
+    // 帯が動き出す前に 3 秒で現れ、帯が去ったあと 3 秒で消える
+    static float starLayer() {
+        int t = songTicks();
+        if (t < 0) {
+            return 0f;
+        }
+        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + BAND_LENGTH)) / 80f));
+    }
+
     // 画面の揺れ・効果の強さを掛けたもの (設定で 0 なら 0)
     static float effectScale() {
         return Config.SCREEN_EFFECT_STRENGTH.get().floatValue();
@@ -225,8 +235,8 @@ public final class OpeningClient {
             return;
         }
         clock++;
-        if (awakeTicks() >= 0) {
-            // 開幕の間は、バニラのチュートリアルの札 (W A S D ...) や、ほかの札を出さない。操作の案内は目的の帯 (煙の立つ方) に添える
+        if (awakeActive()) {
+            // 開幕 (カメラの場面も含む) の間は、バニラのチュートリアルの札 (W A S D ...) や、ほかの札を出さない。操作の案内は目的の帯 (煙の立つ方) に添える
             if (mc.options.tutorialStep != net.minecraft.client.tutorial.TutorialSteps.NONE) {
                 // チュートリアルは、この世界の開幕でそのまま終わりにする (あとから「W A S D」の札が出てこないように。一度だけ設定を書く)
                 mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
@@ -241,6 +251,10 @@ public final class OpeningClient {
                 }
                 return false;
             });
+        }
+        // 歌の保険: 歌が降り始めて 3 秒たっても足元を向いたままなら、見上げるよう促す (星の欠けは空を見ないと分からない)
+        if (songTicks() == 60 && mc.player != null && mc.player.getXRot() > -25f) {
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.translatable("message.skyabyss.song_look_up"), false);
         }
         int steps = stepsTicks();
         if (steps >= 0) {

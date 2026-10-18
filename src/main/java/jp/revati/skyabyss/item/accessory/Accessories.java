@@ -193,10 +193,11 @@ public final class Accessories {
     }
 
     // ---------------------------------------------------------------- 死んだとき
-    // 落とすかどうか: keepInventory なら落とさない。どの巨神の背でも、預かりの仕組み (TitanBackTrials) が落とす前に止める
+    // 落とすかどうか: keepInventory なら落とさない。倒れたときの型 (grave で装備を残す・keep・ledger。grave パッケージ) でも落とさない。どの巨神の背でも、預かりの仕組み (TitanBackTrials) が落とす前に止める
     // (止められた LivingDropsEvent はここに届かないので、枠の中身は copyOnDeath で残る)
     public static boolean keepsOnDeath(ServerPlayer player) {
-        return player.serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || keepsInDimension(player.level().dimension());
+        return player.serverLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || keepsInDimension(player.level().dimension())
+                || jp.revati.skyabyss.grave.DeathEvents.keepsAccessories(player);
     }
 
     // 背中のどれか (岩鯨・潮殻・雷翼・余燼。TitanBacks の一覧) なら、倒れても落とさない

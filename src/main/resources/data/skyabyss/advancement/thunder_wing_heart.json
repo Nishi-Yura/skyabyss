@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:thunder_wing_trial",
+  "display": {
+    "icon": {
+      "id": "skyabyss:thunder_wing_core"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.thunder_wing_heart.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.thunder_wing_heart.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "stopped:thunder_wing"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

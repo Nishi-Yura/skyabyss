@@ -73,6 +73,7 @@ public final class AshSmithSelfTest {
             if (back == null) {
                 failures.add("no ember_back level");
             } else {
+                testParty = jp.revati.skyabyss.party.PartyData.get(server).create(PARTY_LEAD, "smith_lead");
                 run(server, back, failures, notes);
             }
         } catch (RuntimeException e) {
@@ -84,6 +85,23 @@ public final class AshSmithSelfTest {
             if (back != null) {
                 AshSmithBattle.abandon(server);
                 force(back, false);
+                // 自己テストが使ったグループの記録と部屋の占有を消す
+                var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+                if (testParty != null) {
+                    var parties = jp.revati.skyabyss.party.PartyData.get(server);
+                    for (UUID m : List.copyOf(testParty.members)) {
+                        parties.remove(m);
+                        data.remove(m);
+                    }
+                    data.remove(testParty.id);
+                    testParty = null;
+                }
+                data.remove(AshSmithBattle.TEST_GROUP);
+                data.remove(OTHER_GROUP);
+                if (AshSmithBattle.lastGroup() != null) {
+                    data.remove(AshSmithBattle.lastGroup());
+                }
+                jp.revati.skyabyss.titan.group.RoomLocks.release(jp.revati.skyabyss.titan.ember.back.EmberRooms.EAST.lock());
             }
         }
         if (failures.isEmpty()) {
@@ -341,12 +359,18 @@ public final class AshSmithSelfTest {
             BlockPos mid = r.center();
             check(level.getBlockState(new BlockPos(mid.getX(), r.minY() + 2, mid.getZ())).isAir(), "reserved place was built in at " + mid, f);
         }
-        // 入口: 封じる・開ける。開けるのは封印だけ (別のブロックは消さない)
-        check(!AshSmithArena.sealed(level), "door sealed before the fight", f);
-        AshSmithArena.seal(level);
-        check(AshSmithArena.sealed(level), "seal did not close the door", f);
-        AshSmithArena.open(level);
-        check(!AshSmithArena.sealed(level) && level.getBlockState(AshSmithArena.DOOR.center()).isAir(), "open did not clear the door", f);
+        // 入口: 既定は閉じた扉 (火の鍵で開けたグループにだけ開く)。開ける・封じるはそのグループにだけで、扉のブロックはワールドに残る
+        UUID g = AshSmithBattle.TEST_GROUP;
+        jp.revati.skyabyss.titan.group.GroupGates.place(level, jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(AshSmithArena.DOOR), false);
+        check(AshSmithArena.sealed(level, g) && AshSmithArena.sealed(level, OTHER_GROUP), "the smith door is open before any key", f);
+        AshSmithArena.open(level, g);
+        check(!AshSmithArena.sealed(level, g) && AshSmithArena.sealed(level, OTHER_GROUP)
+                && level.getBlockState(AshSmithArena.DOOR.center()).is(jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get()),
+                "opening the door for one group opened it for another (or removed the door block)", f);
+        AshSmithArena.seal(level, g);
+        check(AshSmithArena.sealed(level, g), "seal did not close the door", f);
+        AshSmithArena.open(level, g);
+        check(!AshSmithArena.sealed(level, g), "open did not reopen the door", f);
         // 建て直しても同じ物になる
         AshSmithArena.build(level, AshSmithArena.BOX);
         check(level.getBlockState(AshSmithArena.TROUGHS.get(0).above()).is(Blocks.WATER) && AshSmithArena.isBuilt(level), "rebuild changed the arena", f);
@@ -355,7 +379,8 @@ public final class AshSmithSelfTest {
     // ---------------------------------------------------------------- 戦い
     private static AshSmith start(MinecraftServer server, List<String> f) {
         AshSmithBattle.reawaken(server);
-        check(AshSmithBattle.startNow(server), "battle did not start", f);
+        ServerLevel back = AshSmithBattle.level(server);
+        check(testParty != null && back != null ? AshSmithBattle.startNow(back, testParty.id) : AshSmithBattle.startNow(server), "battle did not start", f);
         AshSmith s = AshSmithBattle.current(server);
         if (s == null) {
             f.add("no ash smith after starting (boss id " + AshSmithBattle.room().bossId() + ")");
@@ -372,6 +397,14 @@ public final class AshSmithSelfTest {
         check(s.getTags().contains(TitanBackTrials.HEART_TAG) && s.getTags().contains(AshSmith.SMITH_TAG) && s.getTags().contains(EmberMob.TRIAL_TAG),
                 "smith not tagged", f);
         check(!s.shouldBeSaved(), "smith would be saved to disk", f);
+        // 鍛え手は戦うグループのもの: ほかのグループの人には見えず、狙わず、その傷を受けない
+        FakePlayer other = new FakePlayer(level, new GameProfile(OTHER_GROUP, "smith_other"));
+        check(AshSmithBattle.lastGroup() != null && AshSmithBattle.lastGroup().equals(s.groupId()), "the smith has no group", f);
+        check(!jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(s, other) && !s.canAttack(other), "another group can see or is targeted by the smith", f);
+        float hp = s.getHealth();
+        s.invulnerableTime = 0;
+        s.hurt(level.damageSources().playerAttack(other), 5f);
+        check(s.getHealth() == hp, "another group hurt the smith", f);
         check(Math.abs(s.getMaxHealth() - AshSmith.HEALTH) < 0.01, "max health " + s.getMaxHealth(), f);
         check(AshSmithArena.inside(s.position()), "smith spawned outside the room at " + s.position(), f);
         // 部屋の外へ出たら戻される (BossRoom)
@@ -395,12 +428,23 @@ public final class AshSmithSelfTest {
         check(!AshSmithBattle.room().active() && AshSmithArena.isBuilt(level), "an empty arena started a fight on the door notice", f);
     }
 
+    // 鍛え手と戦わない、もう一つのグループ
+    static final UUID OTHER_GROUP = UUID.nameUUIDFromBytes("skyabyss ash smith other group".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
     private static FakePlayer fake(ServerLevel level, String name) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
         p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(2000);
         p.setHealth(2000f);
+        // テストの人は一つのパーティにまとめ、鍛え手はそのパーティ (グループ) のものとして戦う
+        if (testParty != null) {
+            jp.revati.skyabyss.party.PartyData.get(level.getServer()).add(testParty, p.getUUID(), name);
+        }
         return p;
     }
+
+    static final UUID PARTY_LEAD = UUID.nameUUIDFromBytes("skyabyss ash smith party lead".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    @org.jetbrains.annotations.Nullable
+    private static jp.revati.skyabyss.party.PartyData.Party testParty;
 
     private static void put(FakePlayer p, double x, double y, double z) {
         p.setPos(x, y, z);
@@ -717,7 +761,10 @@ public final class AshSmithSelfTest {
         s.invulnerableTime = 0;
         s.hurt(s.damageSources().genericKill(), 1000f);
         check(!s.isAlive(), "the smith did not die", f);
-        check(AshSmithBattle.done(level) && EmberBackState.get(level).ready(EmberBackState.Trial.EAST), "the defeat did not make the east stone ready", f);
+        UUID group = AshSmithBattle.lastGroup();
+        check(group != null && AshSmithBattle.done(level) && EmberBackState.of(level, group).ready(EmberBackState.Trial.EAST),
+                "the defeat did not make the east stone ready", f);
+        check(!EmberBackState.of(level, OTHER_GROUP).ready(EmberBackState.Trial.EAST), "the defeat made another group's east stone ready", f);
         check(!AshSmithBattle.room().active() && !AshSmithArena.sealed(level), "the door did not reopen after the defeat", f);
         check(!helper.isAlive(), "the called thrall stayed after the defeat", f);
         // 倒した周は、部屋に入っても戦いは始まらない (BossRoom は動かない)

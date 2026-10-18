@@ -2,6 +2,7 @@
 
 使い方: python tools/rough/build_gallery.py
 入力: tools/rough/gallery.json (対象・案の説明・シート画像の一覧)
+使い方 (別の場所のシート): python tools/rough/build_gallery.py <manifest.json> <シートの基準フォルダ> <出力フォルダ名>
 出力: docs/roughs/_gallery/index.html と、縮めたシート画像 (JPEG)
 """
 import html
@@ -14,6 +15,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "docs/roughs"
 OUT = SRC / "_gallery"
 MAX_W = 1600
+
+
+def configure(src=None, out=None):
+    """optional: gallery sheets live somewhere else than docs/roughs (e.g. docs/review)"""
+    global SRC, OUT
+    if src:
+        SRC = ROOT / src
+    OUT = SRC / (out or "_gallery")
 
 
 def shrink(name: str) -> str:
@@ -33,6 +42,7 @@ def shrink(name: str) -> str:
 
 def main():
     import sys
+    configure(sys.argv[2] if len(sys.argv) > 2 else None, sys.argv[3] if len(sys.argv) > 3 else None)
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = sys.argv[1] if len(sys.argv) > 1 else "tools/rough/gallery.json"
     data = json.loads((ROOT / manifest).read_text(encoding="utf-8"))

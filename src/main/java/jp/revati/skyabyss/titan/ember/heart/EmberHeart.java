@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,7 +12,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-import jp.revati.skyabyss.entity.GuardMob;
+import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.ember.EmberIds;
@@ -19,6 +20,7 @@ import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.lore.EmberLore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -44,6 +46,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -55,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 //                        主題は「熱が足りない」 (ここまでの「熱をためすぎない」の逆)
 // 段階は同期データで全員の画面に届き、模型 (段階ごとの geo) とボスバーの見た目を決める。
 // 強さは 03 の 9.8節の余燼の段 (体力 790、防御 9 / 靭性 7。想定は Lv 28〜30)
-public class EmberHeart extends GuardMob {
+public class EmberHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
@@ -288,7 +291,8 @@ public class EmberHeart extends GuardMob {
     }
 
     private boolean canReach(@Nullable LivingEntity entity) {
-        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()))
+                && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p);
     }
 
     // 体力の割合からの段階
@@ -327,6 +331,9 @@ public class EmberHeart extends GuardMob {
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 20 == 0) {
             updateBossBarViewers();
+        }
+        if (isIntroPlaying()) {
+            return;
         }
         if (cooldown > 0) {
             cooldown--;
@@ -1205,7 +1212,7 @@ public class EmberHeart extends GuardMob {
             }
         }
         if (level() instanceof ServerLevel server) {
-            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40)) {
+            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p))) {
                 bossBar.addPlayer(player);
             }
         }
@@ -1221,7 +1228,7 @@ public class EmberHeart extends GuardMob {
         super.remove(reason);
     }
 
-    // 倒れたとき: 試練で湧いた心臓だけが、報酬・進み・記録を EmberHeartBattle へ渡す
+    // 倒れたとき: 鼓動が遅くなり、熱が引いて、灰になって崩れる演出 (deathEffects) のあとで、報酬・進み・記録を EmberHeartBattle へ渡す (onDeathFinished)
     @Override
     public void die(DamageSource source) {
         if (defeated) {
@@ -1236,9 +1243,90 @@ public class EmberHeart extends GuardMob {
             server.sendParticles(ParticleTypes.SMOKE, getX(), coreY(), getZ(), 60, 1.5, 1.5, 1.5, 0.05);
             clearHazards(server);
             clearChill(server);
-            if (server.dimension() == EmberIds.BACK && getTags().contains(EmberHeartBattle.TAG)) {
-                EmberHeartBattle.onDefeated(server, this);
+        }
+    }
+
+    // 試練で湧いた心臓だけが、報酬・進み・記録を EmberHeartBattle へ渡す
+    @Override
+    protected void onDeathFinished(ServerLevel server) {
+        if (server.dimension() == EmberIds.BACK && getTags().contains(EmberHeartBattle.TAG)) {
+            EmberHeartBattle.onDefeated(server, this);
+        }
+    }
+
+    @Override
+    protected double coreHeight() {
+        return coreY();
+    }
+
+    // ---- 登場: 灰の塊が鼓動のたびに熱を帯び、最後に殻を割って熱を吐く (animation.ember_heart.intro)
+    // 鼓動は 0.6・1.2・1.7・2.1・2.4 秒 (tools/install_heart_cinematics.py の EM_THUMPS)
+    @Override
+    protected void introEffects(ServerLevel server, int tick) {
+        double cy = coreY();
+        if (tick == 0) {
+            sound(server, SoundEvents.FIRE_AMBIENT, 2f, 0.6f);
+            sound(server, SoundEvents.LAVA_AMBIENT, 2f, 0.7f);
+        }
+        int[] thumps = {12, 24, 34, 42, 48};
+        for (int k = 0; k < thumps.length; k++) {
+            if (tick == thumps[k]) {
+                sound(server, EmberHeartSetup.BEAT.get(), 2.5f, 0.6f + 0.1f * k);
+                server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 4 + 2 * k, 0.8, 0.6, 0.8, 0);
+                server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 8 + 4 * k, 0.9, 0.7, 0.9, 0.02);
+                server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy + 0.5, getZ(), 4, 0.7, 0.4, 0.7, 0.02);
             }
+        }
+        if (tick < 50 && tick % 5 == 0) {
+            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 6, 1.2, 1.0, 1.2, 0.02);
+            server.sendParticles(ParticleTypes.SMOKE, getX(), cy - 0.5, getZ(), 3, 0.8, 0.5, 0.8, 0.02);
+        }
+        if (tick == 50) {
+            sound(server, SoundEvents.FIRECHARGE_USE, 3f, 0.6f);
+            sound(server, SoundEvents.LAVA_POP, 3f, 0.6f);
+            server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 40, 1.0, 1.0, 1.0, 0);
+            server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 60, 1.2, 1.2, 1.2, 0.12);
+            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 80, 1.6, 1.4, 1.6, 0.05);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 30, 1.2, 1.2, 1.2, 0.06);
+        }
+        if (tick == 58) {
+            sound(server, EmberHeartSetup.ROAR.get(), 3f, 1.1f);
+        }
+        if (tick == 76) {
+            sound(server, SoundEvents.FIRE_AMBIENT, 2f, 0.9f);
+        }
+    }
+
+    // ---- 倒れる: 鼓動がゆっくりになり、熱が引いて冷え、殻がひび割れて灰になって崩れる (animation.ember_heart.death)
+    @Override
+    protected void deathEffects(ServerLevel server, int tick) {
+        double cy = coreY();
+        if (tick == 18 || tick == 40 || tick == 70) {
+            sound(server, EmberHeartSetup.BEAT.get(), 2.5f, tick == 18 ? 0.8f : (tick == 40 ? 0.7f : 0.55f));
+        }
+        if (tick % 4 == 0 && tick < 90) {
+            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 3, 1.2, 1.2, 1.2, 0.01);
+        }
+        if (tick == 36 || tick == 60) {
+            sound(server, SoundEvents.FIRE_EXTINGUISH, 2f, 0.8f);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 20, 1.2, 1.0, 1.2, 0.03);
+        }
+        if (tick >= 56 && tick <= 86 && tick % 3 == 0) {
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BASALT.defaultBlockState()),
+                    getX() + Mth.nextDouble(random, -1.5, 1.5), cy - 0.5, getZ() + Mth.nextDouble(random, -1.5, 1.5), 8, 0.4, 0.3, 0.4, 0.1);
+        }
+        if (tick == 56) {
+            sound(server, SoundEvents.BASALT_BREAK, 2.5f, 0.6f);
+        }
+        if (tick == 74) {
+            sound(server, SoundEvents.LAVA_POP, 3f, 0.8f);
+            server.sendParticles(ParticleTypes.FLAME, getX(), cy, getZ(), 40, 0.8, 0.8, 0.8, 0.1);
+            server.sendParticles(ParticleTypes.LAVA, getX(), cy, getZ(), 20, 0.8, 0.8, 0.8, 0);
+        }
+        if (tick == 88) {
+            sound(server, SoundEvents.FIRE_EXTINGUISH, 3f, 0.6f);
+            server.sendParticles(ParticleTypes.ASH, getX(), cy, getZ(), 200, 2.0, 1.8, 2.0, 0.05);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), cy, getZ(), 40, 1.5, 1.2, 1.5, 0.04);
         }
     }
 
@@ -1265,12 +1353,13 @@ public class EmberHeart extends GuardMob {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.BASALT_HIT;
+        return MobSounds.EMBER_HEART_HURT.get();
     }
 
+    // 最後の一撃の音 (被弾と同じ)。倒れる演出は deathEffects が音も流すので、ここで別の音を重ねない
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.LAVA_EXTINGUISH;
+        return MobSounds.EMBER_HEART_HURT.get();
     }
 
     @Override

@@ -85,6 +85,15 @@ public class GaleColumnEntity extends Entity {
         if (tickCount % 2 == 0) {
             Updraft.particles(level, new Vec3(baseX, baseY, baseZ), RADIUS, top - baseY, 6);
         }
+        {
+            // 昇り風の光 (乗れる人にだけ見える。眠っているあいだは柱ごと消える)
+            java.util.List<Vec3> glow = new java.util.ArrayList<>();
+            for (double y = baseY + 2; y < top; y += 6) {
+                glow.add(new Vec3(baseX, y, baseZ));
+            }
+            glow.add(new Vec3(baseX, top, baseZ));
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, Titans.THUNDER_WING, glow);
+        }
         if (tickCount % 10 == 0) {
             StormFx.ring(level, ParticleTypes.CLOUD, new Vec3(baseX, baseY + 0.5, baseZ), RADIUS, 8);
             level.playSound(null, baseX, baseY, baseZ, StormSetup.GALE.get(), SoundSource.AMBIENT, 1.2f, 0.9f + random.nextFloat() * 0.2f);

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.mob;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.titan.storm.back.StormStrike;
@@ -216,5 +217,10 @@ public class ThunderSupplicant extends StormMob {
     @Override
     protected SoundEvent getDeathSound() {
         return StormMobSetup.SUPPLICANT_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.THUNDER_SUPPLICANT_STEP.get(), 0.2f);
     }
 }

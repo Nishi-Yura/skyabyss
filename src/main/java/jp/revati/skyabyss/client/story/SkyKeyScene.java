@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.story;
 
+import jp.revati.skyabyss.client.ui.TextStyle;
 import java.util.Random;
 
 import jp.revati.skyabyss.registry.ModItems;
@@ -248,7 +249,7 @@ public final class SkyKeyScene extends Screen {
         if (a1 > 0.02f) {
             g.pose().pushPose();
             g.pose().translate(cx, y, 0);
-            g.pose().scale(2f, 2f, 1f);
+            g.pose().scale(TextStyle.TITLE.scale(), TextStyle.TITLE.scale(), 1f);
             g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_title"), 0, 0, argb(a1, 0xF2E6C8));
             g.pose().popPose();
         }

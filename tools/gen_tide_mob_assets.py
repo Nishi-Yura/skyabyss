@@ -243,7 +243,7 @@ def bubble_texture():
 
 
 def shard_icon():
-    """潮殻の欠片: 青緑の甲羅の板のかけら、真珠層の白い筋"""
+    """潮殻の殻片: 青緑の甲羅の板のかけら、真珠層の白い筋"""
     img = np.zeros((32, 32, 4), np.uint8)
     pts = [(6, 20), (12, 6), (22, 4), (27, 13), (24, 25), (13, 28)]
     from PIL import ImageDraw

@@ -70,6 +70,10 @@ public final class StormCloudClient {
         List<StormWingEntity> wings = level.getEntitiesOfClass(StormWingEntity.class, box);
         double best = Double.MAX_VALUE;
         for (StormWingEntity w : wings) {
+            // 眠っている雷翼は嵐をまとわない (稲妻がやむ)
+            if (w.isDormantNow()) {
+                continue;
+            }
             best = Math.min(best, Math.hypot(w.getX() - mc.player.getX(), w.getZ() - mc.player.getZ()));
         }
         return best;

@@ -70,11 +70,20 @@ public final class Quests {
 
     // ---------------------------------------------------------------- 目的を進めるきっかけ
     public static void signal(ServerPlayer player, String signal) {
+        // 進捗 (advancement) へ。背中での試練の達成は、どの巨神の背かも伝える
+        jp.revati.skyabyss.advancement.Beats.fire(player, "signal:" + signal);
+        if (signal.equals(jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED)) {
+            String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
+            if (titan != null) {
+                jp.revati.skyabyss.advancement.Beats.fire(player, "trial:" + titan);
+            }
+        }
         bump(player, (def, stage, ob) -> ob.type().equals("signal") && ob.targets().contains(signal));
     }
 
     // 会話でその節 (node) に入った。topic のない talk は、その NPC と話せば何でもよい
     public static void onTalk(ServerPlayer player, String role, String node) {
+        jp.revati.skyabyss.advancement.Beats.fire(player, "talk:" + role);
         bump(player, (def, stage, ob) -> ob.type().equals("talk") && ob.targets().contains(role)
                 && (ob.topic() == null || ob.topic().equals(node)));
     }

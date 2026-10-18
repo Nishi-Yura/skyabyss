@@ -1,7 +1,10 @@
 package jp.revati.skyabyss.client.entity;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.entity.BoneSpike;
+import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.registry.ModEntities;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,14 +39,28 @@ public final class GuardRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f, true,
-                r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
-        event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
-                r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));
-        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), ctx -> geo(ctx, "moss_crawler", 1.7f));
-        event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> geo(ctx, "waterway_maw", 0.58f));
-        event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> geo(ctx, "whalebone_captain", 1.0f,
-                r -> r.addRenderLayer(GearLayer.item(r, "socket_main", captainPikeStack(), ItemDisplayContext.NONE, GuardRenderers::captainPike))));
+        // 骨の番兵は低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo と GearLayer に戻る
+        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> {
+            LowPolyGeoRenderer<jp.revati.skyabyss.entity.BoneSentinel> r = new LowPolyGeoRenderer<>(ctx, "bone_sentinel", 1.0f);
+            r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle").activeWhen(() -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_off", "bone_sentinel_shield"));
+            return r;
+        });
+        // 肋の射手・苔這い・水路の顎・番兵長・心臓も同じ。LowPoly.enabled = false で元のキューブの geo / GearLayer に戻る
+        event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> {
+            LowPolyGeoRenderer<jp.revati.skyabyss.entity.RibArcher> r = new LowPolyGeoRenderer<>(ctx, "rib_archer", 1.0f);
+            r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle").activeWhen(() -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPolyAnimated(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"));
+            return r;
+        });
+        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), GuardRenderers::mossCrawler);
+        event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> new LowPolyGeoRenderer<jp.revati.skyabyss.entity.WaterwayMaw>(ctx, "waterway_maw", 0.58f));
+        event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> {
+            LowPolyGeoRenderer<jp.revati.skyabyss.entity.WhaleboneCaptain> r = new LowPolyGeoRenderer<>(ctx, "whalebone_captain", 1.0f);
+            r.addRenderLayer(GearLayer.item(r, "socket_main", captainPikeStack(), ItemDisplayContext.NONE, GuardRenderers::captainPike, () -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "captain_pike"));
+            return r;
+        });
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
@@ -51,6 +68,16 @@ public final class GuardRenderers {
                 return SPIKE;
             }
         });
+    }
+
+    // 苔芋虫: 倒れるときは横倒しにならず、death アニメーション (丸まる) で終える
+    private static GeoEntityRenderer<MossCrawler> mossCrawler(EntityRendererProvider.Context ctx) {
+        return new LowPolyGeoRenderer<MossCrawler>(ctx, "moss_crawler", 1.3f) {
+            @Override
+            protected float getDeathMaxRotation(MossCrawler animatable) {
+                return 0f;
+            }
+        };
     }
 
     private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale) {

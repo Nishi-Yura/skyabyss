@@ -222,13 +222,16 @@ def cloud_shadow():
 
 def whale_icon():
     img, d = _new()
-    d.ellipse((2, 4, 14, 12), fill=ROCK)
-    d.polygon([(2, 8), (0, 3), (3, 6)], fill=ROCK)
-    d.polygon([(0, 13), (2, 8), (3, 11)], fill=ROCK)
-    d.rectangle((3, 10, 13, 11), fill=BONE)
-    d.arc((4, 0, 8, 5), 180, 360, fill=H("66ecff")); d.arc((9, 1, 12, 5), 180, 360, fill=H("66ecff"))
-    d.rectangle((13, 2, 13, 4), fill=ROCK_L)
-    d.point((12, 7), fill=WHITE)
+    d.ellipse((2, 4, 14, 12), fill=H("3c4658"))
+    d.polygon([(2, 8), (0, 3), (3, 6)], fill=H("3c4658"))
+    d.polygon([(0, 13), (2, 8), (3, 11)], fill=H("3c4658"))
+    # tan rock plates and pale spikes on the back, a row of teeth
+    d.chord((3, 4, 13, 10), 180, 360, fill=H("a08868"))
+    for x in (5, 8, 11):
+        d.point((x, 3), fill=H("e2d8bc"))
+    d.point((7, 5), fill=H("c8b08a")); d.point((10, 6), fill=H("6e5c48"))
+    d.line((10, 10, 13, 10), fill=H("efe8d4"))
+    d.point((12, 7), fill=H("ffc65a"))
     return _fin(img)
 
 

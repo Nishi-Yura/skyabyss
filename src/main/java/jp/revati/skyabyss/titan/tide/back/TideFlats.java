@@ -14,9 +14,12 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.loot.TitanLoot;
-import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.party.Parties;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthRules;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.tide.heart.TideLoot;
 import jp.revati.skyabyss.titan.tide.mob.BubblePuffer;
 import jp.revati.skyabyss.titan.tide.mob.ReefScuttler;
@@ -45,11 +48,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 前の試練 群れの干潟 (08 の 4.3節) と中ボス潮招き (5.2節)。
-// 巣: 6 か所の候補からリセットの種で 3 つ。干潮で口を開けて 5 秒ごとに磯走りを 2 体 (一つの巣から生きているのは 6 体、人が一人増えるごとに +2)。
+// 巣: 6 か所の候補からリセットの種で 3 つ。干潮で口を開けて 5 秒ごとに磯走りを 2 体 (一つの巣から生きているのは 3 体、人が一人増えるごとに +1)。
 //     満潮では殻を閉じて傷が通らない。体力は 60 × (1 + 0.6 × (干潟にいる人 - 1))。
 // 満潮のあいだは、泡吹きが水面の上に 2 体。
 // 潮招き: 最後の巣が壊れると 5 秒の集合 → 干潟の口が閉じる (干潟とトンネルと前室の人が参加者) → 干潮なら現れる (満潮なら引くまで待つ)。
 //   参加者が干潟にいなくなって 3 秒たつと砂に潜って消え、口が開く (壊した巣はそのまま。次は潮招きからやり直す)
+// 干潟は占有する部屋 (TideRooms.FLATS)。巣・招き潮の水・潮招き・群れは、いまの持ち主のグループ (パーティ、または一人) のもの。
+// 人数・参加者・狙う相手・報酬は持ち主のグループの人だけで数える。干潟の口と干潟の門は、戦っているグループにだけ閉じる
 public final class TideFlats {
     public static final String NEST_TAG = "skyabyss_flats_nest_";
     public static final String FLATS_TAG = "skyabyss_flats_mob";
@@ -69,6 +74,9 @@ public final class TideFlats {
     private static int empty;
     @Nullable
     private static UUID bossId;
+    // 口と門を閉じているグループ (戦いの間)
+    @Nullable
+    private static UUID sealedFor;
     private static final Set<UUID> participants = new LinkedHashSet<>();
     private static int beckonTicks;
     private static int beckonWarn;
@@ -86,7 +94,7 @@ public final class TideFlats {
         return beckonTicks > 0;
     }
 
-    // 招き潮の予告か、満ちている間 (潮見の目盛りを赤くする)
+    // 招き潮の予告か、満ちている間 (潮見の目盛りを赤くする。持ち主のグループの人にだけ)
     public static boolean beckonAlert() {
         return beckonTicks > 0 || beckonWarn > 0;
     }
@@ -118,15 +126,25 @@ public final class TideFlats {
         return participants;
     }
 
+    @Nullable
+    static UUID owner() {
+        return TideRooms.owner(TideRooms.FLATS);
+    }
+
     static AABB flatsBox() {
         return FLATS.aabb().inflate(0, 6, 0);
     }
 
+    // 干潟にいる、持ち主のグループの生きている人
     static List<ServerPlayer> inFlats(ServerLevel level) {
-        return level.getEntitiesOfClass(ServerPlayer.class, flatsBox(), p -> p.isAlive() && !p.isSpectator());
+        UUID owner = owner();
+        if (owner == null) {
+            return List.of();
+        }
+        return Groups.inBox(level, owner, flatsBox());
     }
 
-    // 潮招きが狙える人 (参加者で、干潟にいて生きている人。参加者がいなければ干潟にいる人)
+    // 潮招きが狙える人 (参加者で、干潟にいて生きている人。参加者がいなければ干潟にいる人。どちらも持ち主のグループだけ)
     public static List<ServerPlayer> fighters(ServerLevel level) {
         List<ServerPlayer> all = inFlats(level);
         if (participants.isEmpty()) {
@@ -141,18 +159,24 @@ public final class TideFlats {
         return list;
     }
 
+    // 人数 (1〜6 = パーティの上限)
     static int headcount(ServerLevel level) {
-        return Math.max(1, Math.min(4, inFlats(level).size()));
+        return Math.max(1, Math.min(Parties.MAX_MEMBERS, inFlats(level).size()));
     }
 
     // ---------------------------------------------------------------- 毎 tick (TideBackTrials から。人が背中にいるときだけ)
-    static void tick(ServerLevel level, TideBackState state, boolean peaceful) {
+    static void tick(ServerLevel level, boolean peaceful) {
         if (beckonTicks > 0) {
             beckonTicks--;
         }
         if (beckonWarn > 0) {
             beckonWarn--;
         }
+        UUID owner = owner();
+        if (owner == null) {
+            return;
+        }
+        TideBackState.Group state = TideBackState.of(level, owner);
         TideClock.Phase phase = TideClock.phase(level);
         if (phase != lastPhase) {
             onPhase(level, state, phase);
@@ -167,14 +191,13 @@ public final class TideFlats {
             }
             return;
         }
-        boolean near = !level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(20, 20, 50), p -> !p.isSpectator()).isEmpty();
-        if (near && !state.rung(TideBackState.Trial.FRONT)) {
+        if (!state.rung(TideBackState.Trial.FRONT)) {
             tickNests(level, state);
         }
         tickFight(level, state);
     }
 
-    private static void onPhase(ServerLevel level, TideBackState state, TideClock.Phase phase) {
+    private static void onPhase(ServerLevel level, TideBackState.Group state, TideClock.Phase phase) {
         // 巣の口 (干潮で開き、満ちはじめると閉じる)
         boolean open = phase == TideClock.Phase.LOW;
         for (int site = 0; site < 6; site++) {
@@ -187,7 +210,7 @@ public final class TideFlats {
             for (int i = 0; i < 2; i++) {
                 int x = -16 + level.random.nextInt(33);
                 int z = -100 + FLATS_DZ + level.random.nextInt(26);
-                Mob puffer = spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), new BlockPos(x, FLATS_FLOOR + 4, z));
+                Mob puffer = spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), new BlockPos(x, FLATS_FLOOR + 4, z), state.id);
                 if (puffer != null) {
                     puffer.addTag(FLATS_TAG);
                 }
@@ -253,7 +276,7 @@ public final class TideFlats {
         }
     }
 
-    private static void tickNests(ServerLevel level, TideBackState state) {
+    private static void tickNests(ServerLevel level, TideBackState.Group state) {
         boolean open = nestsOpen(level);
         int people = headcount(level);
         for (int site = 0; site < 6; site++) {
@@ -273,6 +296,7 @@ public final class TideFlats {
                 nest.getAttribute(Attributes.MAX_HEALTH).setBaseValue(hp);
                 nest.setHealth(hp);
                 nest.addTag(TideMob.TRIAL_TAG);
+                nest.setGroupId(state.id);
                 level.addFreshEntity(nest);
                 NESTS[site] = nest.getUUID();
                 buildNest(level, site, false);
@@ -302,10 +326,11 @@ public final class TideFlats {
             int cap = 3 + (people - 1);
             int all = 8 + 2 * (people - 1);
             String tag = NEST_TAG + site;
-            int alive = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(tag)).size();
-            int total = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG)).size();
+            int alive = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(tag) && owned(e, state.id)).size();
+            int total = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG) && owned(e, state.id)).size();
             for (int i = 0; i < NEST_BURST && alive < cap && total < all; i++, alive++, total++) {
-                Mob m = spawn(level, TideMobSetup.REEF_SCUTTLER.get(), nestPos(site).offset(level.random.nextInt(3) - 1, 2, level.random.nextInt(3) - 1));
+                Mob m = spawn(level, TideMobSetup.REEF_SCUTTLER.get(), nestPos(site).offset(level.random.nextInt(3) - 1, 2, level.random.nextInt(3) - 1),
+                        state.id);
                 if (m != null) {
                     m.addTag(tag);
                     m.addTag(FLATS_TAG);
@@ -314,22 +339,35 @@ public final class TideFlats {
         }
     }
 
+    // そのグループの印を持つ個体か
+    static boolean owned(Entity e, UUID group) {
+        return e instanceof GroupOwned o && group.equals(o.groupId());
+    }
+
+    // 試練の敵を湧かせる。group はその敵を持つグループ (ほかのグループには見えず、狙わず、傷を与え合わない)。addFreshEntity の前に入れる
     @Nullable
-    static Mob spawn(ServerLevel level, net.minecraft.world.entity.EntityType<? extends Mob> type, BlockPos at) {
+    static Mob spawn(ServerLevel level, net.minecraft.world.entity.EntityType<? extends Mob> type, BlockPos at, @Nullable UUID group) {
         Mob mob = type.create(level);
         if (mob == null) {
             return null;
         }
         mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
         mob.addTag(TideMob.TRIAL_TAG);
+        if (mob instanceof GroupOwned owned) {
+            owned.setGroupId(group);
+        }
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.MOB_SUMMONED, null);
         level.addFreshEntity(mob);
         return mob;
     }
 
-    // 巣が壊れた (ReefNest.die から)
+    // 巣が壊れた (ReefNest.die から)。進みは巣の持ち主のグループに書く
     static void onNestBroken(ServerLevel level, ReefNest nest) {
-        TideBackState state = TideBackState.get(level);
+        UUID group = nest.groupId();
+        if (group == null) {
+            return;
+        }
+        TideBackState.Group state = TideBackState.of(level, group);
         int site = nest.site();
         if (site < 0 || state.nestBroken(site)) {
             return;
@@ -339,8 +377,8 @@ public final class TideFlats {
         buildNest(level, site, true);
         level.playSound(null, nest.blockPosition(), TideBackSetup.NEST_BREAK.get(), SoundSource.HOSTILE, 2f, 1f);
         level.sendParticles(ParticleTypes.BUBBLE_POP, nest.getX(), nest.getY() + 1, nest.getZ(), 60, 1.2, 0.8, 1.2, 0.1);
-        // 落とす物 (08 の 6.1節): 巣を壊したとき干潟にいた人それぞれ。潮殻の欠片 50% で 2〜3、共鳴の欠片 10%
-        for (ServerPlayer p : inFlats(level)) {
+        // 落とす物 (08 の 6.1節): 巣を壊したとき干潟にいた、そのグループの人それぞれ。潮殻の欠片 50% で 2〜3、共鳴の欠片 10%
+        for (ServerPlayer p : Groups.inBox(level, group, flatsBox())) {
             List<ItemStack> items = new ArrayList<>();
             RandomSource r = level.random;
             if (r.nextFloat() < 0.5f) {
@@ -357,11 +395,9 @@ public final class TideFlats {
                 left++;
             }
         }
-        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(10, 10, 50))) {
-            Notice.send(p, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", 3 - left, 3)
-                    : ModText.lore("message.skyabyss.tide.nests_all_broken"));
-        }
-        if (left == 0) {
+        broadcast(level, group, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", 3 - left, 3)
+                : ModText.lore("message.skyabyss.tide.nests_all_broken"));
+        if (left == 0 && group.equals(owner())) {
             beginGather(level);
         }
     }
@@ -371,24 +407,25 @@ public final class TideFlats {
         return rl == null ? java.util.Optional.empty() : BuiltInRegistries.ITEM.getOptional(rl);
     }
 
-    // ---------------------------------------------------------------- 潮招きの戦い
+    // ---------------------------------------------------------------- 潮招きの戦い (持ち主のグループだけ)
     static void beginGather(ServerLevel level) {
-        if (fight != Fight.NONE) {
+        if (fight != Fight.NONE || owner() == null) {
             return;
         }
         fight = Fight.GATHER;
         fightTimer = GATHER_TICKS;
         participants.clear();
-        broadcast(level, ModText.battle("message.skyabyss.tide.beckoner_gathering", GATHER_TICKS / 20));
+        broadcast(level, owner(), ModText.battle("message.skyabyss.tide.beckoner_gathering", GATHER_TICKS / 20));
     }
 
-    private static void tickFight(ServerLevel level, TideBackState state) {
+    private static void tickFight(ServerLevel level, TideBackState.Group state) {
         if (state.beckonerDefeated() || state.rung(TideBackState.Trial.FRONT)) {
             if (fight != Fight.NONE) {
                 resetFight(level, false);
             }
             return;
         }
+        UUID owner = state.id;
         switch (fight) {
             case NONE -> {
                 // 巣を壊したあと、干潟へ入り直したら集合からやり直す
@@ -397,7 +434,7 @@ public final class TideFlats {
                 }
             }
             case GATHER -> {
-                if (inFlats(level).isEmpty() && level.getEntitiesOfClass(ServerPlayer.class, approach(), p -> p.isAlive()).isEmpty()) {
+                if (inFlats(level).isEmpty() && Groups.inBox(level, owner, approach()).isEmpty()) {
                     fight = Fight.NONE;
                     return;
                 }
@@ -405,17 +442,17 @@ public final class TideFlats {
                 if (fightTimer > 0) {
                     if (fightTimer % 20 == 0) {
                         Component text = ModText.battle("message.skyabyss.gate_countdown", fightTimer / 20);
-                        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(6, 6, 50))) {
+                        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(6, 6, 50), p -> Groups.isMember(p, owner))) {
                             Notice.bar(p, text);
                         }
                     }
                     return;
                 }
-                // 口を閉じ、トンネルと前室の人を干潟へ入れる。閉じたときにいた人が参加者
-                for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, approach(), p -> p.isAlive() && !p.isSpectator())) {
+                // 口を閉じ、トンネルと前室の (持ち主のグループの) 人を干潟へ入れる。閉じたときにいた人が参加者
+                for (ServerPlayer p : Groups.inBox(level, owner, approach())) {
                     pullIn(p);
                 }
-                sealMouth(level, true);
+                sealMouth(level, owner, true);
                 participants.clear();
                 for (ServerPlayer p : inFlats(level)) {
                     participants.add(p.getUUID());
@@ -423,7 +460,7 @@ public final class TideFlats {
                 fight = Fight.WAITING;
                 empty = 0;
                 if (!nestsOpen(level)) {
-                    broadcast(level, ModText.lore("message.skyabyss.tide.beckoner_waits"));
+                    broadcast(level, owner, ModText.lore("message.skyabyss.tide.beckoner_waits"));
                 }
             }
             case WAITING -> {
@@ -431,7 +468,7 @@ public final class TideFlats {
                     return;
                 }
                 if (TideClock.phase(level) == TideClock.Phase.LOW) {
-                    spawnBoss(level);
+                    spawnBoss(level, owner);
                 }
             }
             case ACTIVE -> {
@@ -490,13 +527,15 @@ public final class TideFlats {
         }
     }
 
-    private static void spawnBoss(ServerLevel level) {
+    private static void spawnBoss(ServerLevel level, UUID owner) {
         TideBeckoner boss = TideBackSetup.TIDE_BECKONER.get().create(level);
         if (boss == null) {
             return;
         }
         boss.addTag(TideMob.TRIAL_TAG);
-        boss.setChallengers(Math.max(1, Math.min(4, participants.size())));
+        boss.setGroupId(owner);
+        // 挑む人数 (1〜6 = パーティの上限)
+        boss.setChallengers(Math.max(1, Math.min(Parties.MAX_MEMBERS, participants.size())));
         Vec3 home = Vec3.atBottomCenterOf(BECKONER_HOME);
         boss.moveTo(home.x, home.y, home.z, 180f, 0);
         level.addFreshEntity(boss);
@@ -504,11 +543,11 @@ public final class TideFlats {
         bossId = boss.getUUID();
         fight = Fight.ACTIVE;
         empty = 0;
-        broadcast(level, ModText.battle("message.skyabyss.tide.beckoner_begin"));
+        broadcast(level, owner, ModText.battle("message.skyabyss.tide.beckoner_begin"));
         SkyAbyss.LOGGER.info("The tide beckoner rose with {} participant(s)", participants.size());
     }
 
-    // 戦いを戻す (全滅・放棄・ピースフル)。壊した巣はそのまま
+    // 戦いを戻す (全滅・放棄・ピースフル・部屋を手放す)。壊した巣はそのまま
     public static void resetFight(ServerLevel level, boolean announce) {
         TideBeckoner boss = boss(level);
         if (boss != null) {
@@ -522,24 +561,34 @@ public final class TideFlats {
         empty = 0;
         beckonTicks = 0;
         beckonWarn = 0;
-        sealMouth(level, false);
-        if (announce && was) {
-            broadcast(level, ModText.deny("message.skyabyss.tide.beckoner_sank"));
+        UUID group = sealedFor != null ? sealedFor : owner();
+        sealMouth(level, group, false);
+        if (announce && was && group != null) {
+            broadcast(level, group, ModText.deny("message.skyabyss.tide.beckoner_sank"));
         }
     }
 
-    static void sealMouth(ServerLevel level, boolean seal) {
-        for (int x = -1; x <= 1; x++) {
-            for (int y = TUNNEL_FLOOR + 1; y <= TUNNEL_FLOOR + 3; y++) {
-                BlockPos p = new BlockPos(x, y, MOUTH_Z);
-                if (seal) {
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                } else if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                }
+    // 干潟の口と、広間の干潟の門を、そのグループにだけ閉じる / やめる (門は潮の既定に戻る)
+    static void sealMouth(ServerLevel level, @Nullable UUID group, boolean seal) {
+        UUID who;
+        if (seal && group != null) {
+            who = group;
+            GroupGates.seal(level, who, TideGates.mouth());
+            GroupGates.seal(level, who, TideGates.flats());
+            sealedFor = who;
+        } else if (!seal && sealedFor != null) {
+            who = sealedFor;
+            GroupGates.release(level, who, TideGates.mouth());
+            GroupGates.release(level, who, TideGates.flats());
+            sealedFor = null;
+        } else {
+            return;
+        }
+        for (ServerPlayer p : Groups.online(level, who)) {
+            if (p.distanceToSqr(0.5, TUNNEL_FLOOR + 2, MOUTH_Z) < 48 * 48) {
+                p.playNotifySound(seal ? SoundEvents.IRON_DOOR_CLOSE : SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.5f);
             }
         }
-        level.playSound(null, 0.5, TUNNEL_FLOOR + 2, MOUTH_Z, seal ? SoundEvents.IRON_DOOR_CLOSE : SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.5f);
     }
 
     // 招き潮の予告 (目盛りを赤く)
@@ -554,9 +603,13 @@ public final class TideFlats {
         TideBackTrials.sendGaugeNow(level);
     }
 
-    // 怒りの咆哮: 巣のあった所から磯走りを 4 体
+    // 怒りの咆哮: 巣のあった所から磯走りを 4 体 (潮招きのグループのもの)
     static void roarSpawn(ServerLevel level, TideBeckoner boss) {
-        TideBackState state = TideBackState.get(level);
+        UUID group = boss.groupId();
+        if (group == null) {
+            return;
+        }
+        TideBackState.Group state = TideBackState.of(level, group);
         List<Integer> sites = new ArrayList<>();
         for (int s = 0; s < 6; s++) {
             if ((state.nestSites() & (1 << s)) != 0) {
@@ -565,7 +618,7 @@ public final class TideFlats {
         }
         for (int i = 0; i < 4 && !sites.isEmpty(); i++) {
             int s = sites.get(i % sites.size());
-            Mob m = spawn(level, TideMobSetup.REEF_SCUTTLER.get(), nestPos(s).above());
+            Mob m = spawn(level, TideMobSetup.REEF_SCUTTLER.get(), nestPos(s).above(), group);
             if (m != null) {
                 m.addTag(FLATS_TAG);
             }
@@ -579,20 +632,22 @@ public final class TideFlats {
     public static final String SIGNAL = "tide_beckoner_stilled";
 
     static void onBeckonerDefeated(ServerLevel level, TideBeckoner boss) {
-        if (!boss.getUUID().equals(bossId)) {
+        if (!boss.getUUID().equals(bossId) || boss.groupId() == null) {
             return;
         }
-        TideBackState state = TideBackState.get(level);
+        UUID group = boss.groupId();
+        TideBackState.Group state = TideBackState.of(level, group);
         state.markBeckonerDefeated();
+        // 参加者 = 戦いの参加者 + 倒れた瞬間に干潟にいた、そのグループの人
         Set<UUID> ids = new LinkedHashSet<>(participants);
-        for (ServerPlayer p : inFlats(level)) {
+        for (ServerPlayer p : Groups.inBox(level, group, flatsBox())) {
             ids.add(p.getUUID());
         }
         bossId = null;
         fight = Fight.NONE;
         participants.clear();
         beckonTicks = 0;
-        sealMouth(level, false);
+        sealMouth(level, group, false);
         MinecraftServer server = level.getServer();
         RandomSource r = level.random;
         for (UUID id : ids) {
@@ -632,51 +687,71 @@ public final class TideFlats {
                 present.add(p);
             }
         }
-        double rate = jp.revati.skyabyss.party.Parties.shareRate(server);
-        for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, present)) {
+        double rate = Parties.shareRate(server);
+        for (ServerPlayer mate : Parties.absentMates(level, present)) {
             Growth.addXp(mate, (int) Math.round(BECKONER_XP * rate * GrowthRules.levelFalloff(Growth.get(mate).level, TideLoot.TIDE_LEVEL)),
                     "growth.skyabyss.reason.party");
         }
-        broadcast(level, ModText.lore("message.skyabyss.tide.front_stone_ready"));
+        broadcast(level, group, ModText.lore("message.skyabyss.tide.front_stone_ready"));
         SkyAbyss.LOGGER.info("The tide beckoner was defeated by {} participant(s)", ids.size());
     }
 
-    static void broadcast(ServerLevel level, Component message) {
+    // 干潟の近くにいる、そのグループの人へ
+    static void broadcast(ServerLevel level, @Nullable UUID group, Component message) {
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, FLATS.aabb().inflate(10, 10, 50))) {
-            Notice.send(p, message);
+            if (group == null || Groups.isMember(p, group)) {
+                Notice.send(p, message);
+            }
         }
     }
 
-    // ---------------------------------------------------------------- リセット
-    static void reset(ServerLevel level, TideBackState state) {
+    // ---------------------------------------------------------------- 部屋を作り直す (新しい持ち主のグループの種と進みから。null は最初の形)
+    static void reset(ServerLevel level, @Nullable TideBackState.Group state) {
         resetFight(level, false);
+        int sites = state == null ? 0b000111 : state.nestSites();
+        boolean frontDone = state != null && state.rung(TideBackState.Trial.FRONT);
         for (int site = 0; site < 6; site++) {
             if (NESTS[site] != null && level.getEntity(NESTS[site]) instanceof ReefNest n) {
                 n.discard();
             }
             NESTS[site] = null;
             NEST_TIMER[site] = 40;
-            boolean chosen = (state.nestSites() & (1 << site)) != 0;
-            if (chosen && !state.rung(TideBackState.Trial.FRONT)) {
-                buildNest(level, site, false);
+            boolean chosen = (sites & (1 << site)) != 0;
+            if (chosen) {
+                // 壊した巣と、石が鳴った (眠っている) 干潟の巣は、崩れた形
+                buildNest(level, site, frontDone || state != null && state.nestBroken(site));
             } else {
-                buildNest(level, site, chosen);
-                if (!chosen) {
-                    // 選ばれなかった候補地は、ただの砂に戻す
-                    BlockPos c = nestPos(site);
-                    for (int dx = -2; dx <= 2; dx++) {
-                        for (int dz = -2; dz <= 2; dz++) {
-                            for (int y = 0; y <= 2; y++) {
-                                level.setBlock(c.offset(dx, y, dz), Blocks.AIR.defaultBlockState(), TideKit.FLAGS);
-                            }
+                // 選ばれなかった候補地は、ただの砂に戻す
+                BlockPos c = nestPos(site);
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        for (int y = 0; y <= 2; y++) {
+                            level.setBlock(c.offset(dx, y, dz), Blocks.AIR.defaultBlockState(), TideKit.FLAGS);
                         }
                     }
                 }
             }
         }
-        for (Entity e : level.getEntitiesOfClass(Entity.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG))) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG) || e instanceof ReefNest)) {
             e.discard();
         }
+        lastPhase = null;
+    }
+
+    // 部屋を手放した: 戦いを戻し、巣と群れを消す (次の持ち主が入ったときに、その種で作り直す)
+    static void release(ServerLevel level, UUID formerOwner) {
+        resetFight(level, false);
+        for (int site = 0; site < 6; site++) {
+            if (NESTS[site] != null && level.getEntity(NESTS[site]) instanceof ReefNest n) {
+                n.discard();
+            }
+            NESTS[site] = null;
+        }
+        for (Entity e : level.getEntitiesOfClass(Entity.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG) || e instanceof ReefNest)) {
+            e.discard();
+        }
+        beckonTicks = 0;
+        beckonWarn = 0;
         lastPhase = null;
     }
 
@@ -685,6 +760,7 @@ public final class TideFlats {
         java.util.Arrays.fill(NEST_TIMER, 0);
         fight = Fight.NONE;
         bossId = null;
+        sealedFor = null;
         participants.clear();
         empty = 0;
         beckonTicks = 0;

@@ -1,0 +1,53 @@
+# 低ポリの武器 (手・地面・額縁) を階級 x 強化で撮る (tools/gen_weapon_lp_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd setblock 0 -59 3 minecraft:stone
+cmd setblock 3 -59 3 minecraft:stone
+weapontier legend
+cmd summon armor_stand -4 -60 -2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -2 -60 -2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 0 -60 -2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 2 -60 -2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 4 -60 -2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -4 -60 0 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -2 -60 0 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 2 -60 0 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 4 -60 0 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -4 -60 2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -2 -60 2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 0 -60 2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 2 -60 2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 4 -60 2 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -4 -60 4 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand -2 -60 4 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 0 -60 4 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 2 -60 4 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+cmd summon armor_stand 4 -60 4 {ShowArms:1b,NoGravity:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1,components:{"skyabyss:enhance":10}},{}]}
+camera 0 -58 14 180 5
+hud off
+perspective first
+wait 40
+weaponmesh on
+wait 20
+perf 160 stands20_on
+weaponmesh off
+wait 20
+perf 160 stands20_off
+weaponmesh on
+wait 20
+perf 160 stands20_on
+weaponmesh off
+wait 20
+perf 160 stands20_off
+shot perf_stands
+quit

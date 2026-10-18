@@ -42,7 +42,7 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 // 大事な品 (落としたら困る品) の守りと、在りかの調べ。決めたことは docs/design/11_record_screen.md の 4章。
 //  - 守る品: 天の鍵の欠片・岩鯨の心核・岩鯨の呼び笛。伝承の書は 05 の仕組み (次の項目で戻る) があるので重ねない
 //  - 地面に落ちても消えない (時間で消えない、燃えない、爆発・サボテンで壊れない)。奈落へ落ちたら持ち主の手もとへ戻す
-//  - 天の鍵の欠片だけは投げ捨てられない (しまうのは箱へ)。一人一つで、人に渡す意味がないため
+//  - 守る品はどれも投げ捨てられない (しまうのは箱へ。人に渡すのも箱で)
 //  - 在りか: 持ち物 (中の袋・箱も)、エンダーチェスト、報酬の預かり、背中で倒れたときの預かり、地面 (DropLedger)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Keepsakes {
@@ -93,9 +93,13 @@ public final class Keepsakes {
         return !stack.isEmpty() && guardedItems().contains(stack.getItem());
     }
 
+    // 投げ捨てを拒む品: 守る品すべて (天の鍵の欠片・天の鍵・心核・呼び笛 / 呼び貝)。人に渡すなら箱へ
     public static boolean untossable(ItemStack stack) {
-        return stack.is(ModItems.SKY_KEY_FRAGMENT.get()) || stack.is(jp.revati.skyabyss.story.StorySetup.SKY_KEY.get());
+        return guarded(stack);
     }
+
+    // 拒んで戻す最中の入れ子の投げ (持ち物がいっぱいで足もとへ出す分) は拒まない (拒むと戻しが終わらない)
+    private static boolean returning;
 
     // ---------------------------------------------------------------- 在りか
     public record Ground(String dimension, BlockPos pos, int count, boolean loaded) {
@@ -106,6 +110,11 @@ public final class Keepsakes {
     @FunctionalInterface
     public interface Holder {
         int count(ServerPlayer player, Item item);
+
+        // 枠から n 個まで取り出す (天の鍵がそろうとき)。取れた数を返す。取り出せない枠は 0 のまま
+        default int take(ServerPlayer player, Item item, int n) {
+            return 0;
+        }
     }
 
     private static final Map<String, Holder> HOLDERS = new java.util.LinkedHashMap<>();
@@ -213,6 +222,103 @@ public final class Keepsakes {
         }
         return new Where(inventory, bags, ender, holders, pending, kept, ground(server, player.getUUID(), item),
                 KeepsakeBonds.stashed(player, item, is));
+    }
+
+    // 手もと (持ち物とその中の袋・箱、つかんでいる品、エンダーチェスト、ほかの仕組みの枠) から n 個まで取り除く。取れた数を返す。
+    // 持ち物の主の枠 -> 袋・箱の中 -> エンダーチェスト -> 枠の順 (locate の数え方と同じ範囲)
+    public static int take(ServerPlayer player, Item item, java.util.function.Predicate<ItemStack> match, int n) {
+        java.util.function.Predicate<ItemStack> is = s -> s.is(item) && match.test(s);
+        int left = n;
+        var inv = player.getInventory();
+        for (List<ItemStack> part : List.of(inv.items, inv.armor, inv.offhand)) {
+            for (ItemStack s : part) {
+                if (left > 0 && is.test(s)) {
+                    int d = Math.min(left, s.getCount());
+                    s.shrink(d);
+                    left -= d;
+                }
+            }
+        }
+        ItemStack carried = player.containerMenu == null ? ItemStack.EMPTY : player.containerMenu.getCarried();
+        if (left > 0 && is.test(carried)) {
+            int d = Math.min(left, carried.getCount());
+            carried.shrink(d);
+            left -= d;
+        }
+        for (List<ItemStack> part : List.of(inv.items, inv.armor, inv.offhand)) {
+            for (ItemStack s : part) {
+                left -= takeInside(s, is, left);
+            }
+        }
+        left -= takeInside(carried, is, left);
+        var chest = player.getEnderChestInventory();
+        for (int i = 0; i < chest.getContainerSize() && left > 0; i++) {
+            ItemStack s = chest.getItem(i);
+            if (is.test(s)) {
+                int d = Math.min(left, s.getCount());
+                s.shrink(d);
+                left -= d;
+            }
+        }
+        for (int i = 0; i < chest.getContainerSize() && left > 0; i++) {
+            left -= takeInside(chest.getItem(i), is, left);
+        }
+        if (left > 0) {
+            List<Holder> registered;
+            synchronized (Keepsakes.class) {
+                registered = new ArrayList<>(HOLDERS.values());
+            }
+            for (Holder h : registered) {
+                if (left > 0) {
+                    left -= h.take(player, item, left);
+                }
+            }
+        }
+        player.getInventory().setChanged();
+        return n - left;
+    }
+
+    // 袋や箱の中 (一段) から n 個まで取り除く。取れた数を返す
+    private static int takeInside(ItemStack holder, java.util.function.Predicate<ItemStack> is, int n) {
+        if (holder.isEmpty() || n <= 0) {
+            return 0;
+        }
+        int taken = 0;
+        ItemContainerContents box = holder.get(DataComponents.CONTAINER);
+        if (box != null) {
+            List<ItemStack> stacks = new ArrayList<>();
+            box.nonEmptyItemsCopy().forEach(stacks::add);
+            int before = taken;
+            for (ItemStack s : stacks) {
+                if (taken < n && is.test(s)) {
+                    int d = Math.min(n - taken, s.getCount());
+                    s.shrink(d);
+                    taken += d;
+                }
+            }
+            if (taken > before) {
+                stacks.removeIf(ItemStack::isEmpty);
+                holder.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(stacks));
+            }
+        }
+        BundleContents bundle = holder.get(DataComponents.BUNDLE_CONTENTS);
+        if (bundle != null && taken < n) {
+            List<ItemStack> stacks = new ArrayList<>();
+            bundle.itemsCopy().forEach(stacks::add);
+            int before = taken;
+            for (ItemStack s : stacks) {
+                if (taken < n && is.test(s)) {
+                    int d = Math.min(n - taken, s.getCount());
+                    s.shrink(d);
+                    taken += d;
+                }
+            }
+            if (taken > before) {
+                stacks.removeIf(ItemStack::isEmpty);
+                holder.set(DataComponents.BUNDLE_CONTENTS, new BundleContents(stacks));
+            }
+        }
+        return taken;
     }
 
     // 袋や箱 (シュルカーボックスなど) の中 (一段だけ)
@@ -391,7 +497,7 @@ public final class Keepsakes {
         }
     }
 
-    // 天の鍵の欠片は投げ捨てられない (クリエイティブは別)
+    // 守る品は投げ捨てられない (クリエイティブは別)
     @SubscribeEvent
     static void onToss(ItemTossEvent event) {
         ItemStack stack = event.getEntity().getItem();
@@ -403,11 +509,19 @@ public final class Keepsakes {
         if (event.getEntity().getOwner() != player) {
             return;
         }
+        if (returning) {
+            return;
+        }
         event.setCanceled(true);
         // 投げる前に持ち物から外されているので、戻す
-        giveOrDrop(player, stack.copy());
+        returning = true;
+        try {
+            giveOrDrop(player, stack.copy());
+        } finally {
+            returning = false;
+        }
         player.containerMenu.broadcastChanges();
-        Notice.warn(player, "skyabyss_record.guard.no_toss");
+        Notice.warn(player, "skyabyss_record.guard.no_toss", stack.getHoverName());
     }
 
     // 倒れて散らばった品には投げた人が付かないので、持ち主を書いておく

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "skyabyss:block/song_stone_top_lit",
+    "side": "skyabyss:block/song_stone_side_lit"
+  }
+}

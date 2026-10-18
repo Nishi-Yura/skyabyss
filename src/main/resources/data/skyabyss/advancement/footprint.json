@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:camp",
+  "display": {
+    "icon": {
+      "id": "minecraft:podzol"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.footprint.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.footprint.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "place:footprint"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

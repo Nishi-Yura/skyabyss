@@ -80,10 +80,14 @@ public final class SelfTestRunner {
         List<Step> steps = new ArrayList<>();
         // 岩鯨の背: 建てる・調べる (番兵を動かす段は最後。サーバーを止めるので)
         steps.addAll(TitanBackSelfTest.buildSteps());
+        // グループ (パーティ・一人) の共通部分: 部屋の占有・戦いの参加者・個人の影・乗っている人の数え方・放置の分け前。docs/design/10 の 10 章
+        steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
         steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
+        // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
+        steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
@@ -93,8 +97,15 @@ public final class SelfTestRunner {
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
+        // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
+        steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
+        steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
+        // 章の写像 (段階 × 序章、伝承の章との一致)。docs/design/10 の 3 章
+        steps.add(Step.once("chapters", jp.revati.skyabyss.story.ChaptersSelfTest::runSelfTest));
+        // 章の演出の共通部品 (題字・余韻の札、予兆の枠、クエストの章の欄、会話の追加ファイル、空の段)。docs/design/18 の 3 章、01 の 4.1
+        steps.add(Step.once("arc", jp.revati.skyabyss.story.arc.ArcSelfTest::runSelfTest));
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md
@@ -111,6 +122,8 @@ public final class SelfTestRunner {
         // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
+        // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
+        steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
@@ -123,9 +136,17 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
+        steps.add(Step.once("titan end (reset after tide_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         steps.add(Step.once("storm_heart (load)", jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::load));
         steps.add(Step.once("storm_heart", 30, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::runSelfTest));
+        steps.add(Step.once("titan end (reset after storm_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         steps.add(Step.once("storm_heart (light)", 40, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::checkLight));
+        // 心臓の登場と倒れる演出・高さの固定 (四つの心臓の共通部分 HeartBoss)
+        steps.add(Step.once("heart_cinematic (load)", jp.revati.skyabyss.entity.HeartCinematicSelfTest::load));
+        steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
+        // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
+        steps.add(Step.once("titan end (load)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::load));
+        steps.add(Step.once("titan end", 60, jp.revati.skyabyss.titan.end.TitanEndSelfTest::runSelfTest));
         steps.add(Step.once("tide (load)", TideSelfTest::load));
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
@@ -135,11 +156,18 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm", 50, jp.revati.skyabyss.titan.storm.StormSelfTest::runSelfTest));
         // 雷翼の背 (鳥の形・看板・拍・鏡・柱・歩ける所・リセット)。建てたあと 100 tick 待ってから数える
         steps.addAll(jp.revati.skyabyss.titan.storm.back.StormBackSelfTest.steps());
+        // 三章「風に逆らう嵐」(予兆 3 拍・小要素・風見の向き・影と巨神の見せ場・余韻)。docs/design/12 の 12 章
+        steps.add(Step.once("storm chapter (load)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::load));
+        steps.add(Step.until("storm chapter (wait)", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::ready));
+        steps.add(Step.once("storm chapter", jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest::runSelfTest));
+        steps.addAll(jp.revati.skyabyss.titan.storm.chapter.StormChapterSelfTest.siteSteps());
         steps.add(Step.once("storm mobs (load)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::load));
         steps.add(Step.until("storm mobs (wait)", jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::ready));
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
+        // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
+        steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
         steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
         steps.add(Step.once("raiju", 40, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));
@@ -149,10 +177,13 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.back.EmberBackSelfTest.steps());
         // 余燼の地上 (巨神・熱の口・戻る先・温石・モデルのデータ)。13 の 2章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSelfTest.steps());
+        // 四章 (余燼) の予兆・小要素・夜の浮上・余韻 (P4d)。13 の 17 章
+        steps.addAll(jp.revati.skyabyss.titan.ember.EmberChapterSelfTest.steps());
         // 余燼の背の敵 (強さ・殻と燃え上がり・蛾の熱・燠虫の転がり・落とす物)。13 の 5.1節
         steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
         // 余燼の心臓 (熾の底・区画・冷え・10 の技・凍え・報酬・天の鍵の四つ目・撃破)。13 の 5.3節
         steps.addAll(jp.revati.skyabyss.titan.ember.heart.EmberHeartSelfTest.steps());
+        steps.add(Step.once("titan end (reset after ember heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         // 余燼の三つの試練 (灰の道・鍛えの間・火守り)。13 の 4 章。建てたあと 100 tick 待ってから検査する
         steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く

@@ -3,12 +3,14 @@ package jp.revati.skyabyss.titan.ember.back;
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.ember.back.EmberBackLayout.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -17,15 +19,27 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthRules;
+import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.EmberIds;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupEvents;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.GroupProgress;
+import jp.revati.skyabyss.titan.group.Groups;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -47,15 +61,19 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 余燼の背の試練の進み (13 の 3.5節・7 章): 熾り石・抜け道の光る床・熾の底の門・リセット・眠る試練・休み場・ピースフル。
-// ほかの担当が呼ぶ API (この名前は変えない):
-//   markReady(level, trial)        石を鳴らせるようにする (東: E が鍛え手を倒したとき、南: C3 が火床を 100 にしたとき。西は奥の岸に着けばいつでも)
-//   ring(level, trial, player)     石を鳴らす (ふつうは人が石を右クリックしたとき useStone から。テスト用)
-//   sleeping(level, room)          この周、その部屋が眠っているか (east が眠ると smith も)
-//   EmberBackState.get(level).seed() リセットの種 (島の並び・打つ順を決める)
-//   inTrial(pos)・toHub(player)    試練の箱の中か / 広間の休み場へ移す (熱は 0)
+// 進みはグループ (パーティ、または一人) ごと (docs/design/10 の 9 章、EmberBackState)。背中は一つで、同じ背中に別のグループが同時にいてよい:
+//  - 熾り石の光・光る床・広間の炉の火と囲いの口は、グループごとの見かけ (GroupOverlays)。ワールドのブロックは「まだ何も鳴っていない」姿
+//  - 熾の底の門 (格子と囲いの南の口)・鍛え手の扉・熾の底の入口は、いつも置いてある扉 (SealedGateBlock)。開け閉めはグループごと (GroupGates)
+//  - ブロックが動く試練の部屋 (灰の道・鍛えの間と鍛え手の間・火守り・熾の底) は一度に一つのグループ (EmberRooms)
+// ほかの担当が呼ぶ API:
+//   markReady(level, group, trial)      石を鳴らせるようにする (東: E が鍛え手を倒したとき、南: C3 が火床を 100 にしたとき。西は奥の岸に着けばいつでも)
+//   ring(level, group, trial, player)   石を鳴らす (ふつうは人が石を右クリックしたとき useStone から。テスト用)
+//   sleeping(level, room)               部屋の持ち主にとって、この周その部屋が眠っているか (east が眠ると smith も)
+//   EmberBackState.forRoom(level, room) 部屋の持ち主の状態 (リセットの種で島の並び・打つ順を決める)
+//   inTrial(pos)・toHub(player)         試練の箱の中か / 広間の休み場へ移す (熱は 0)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberBackTrials {
-    public static final int RESET_AFTER_IDLE = 20 * 60 * 3;
+    public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
     public static final int TRIAL_XP = 60;
     public static final int EMBER_LEVEL = 30;
@@ -68,15 +86,61 @@ public final class EmberBackTrials {
     private static final String TAG_SEEN_EPOCH = "skyabyss_ember_epoch";
     private static final String TAG_DIED = "skyabyss_died_on_ember";
 
-    private static int idleTicks;
-    private static int afterHeartIdle;
-    private static boolean wasPeaceful;
-    // 門の開く演出の残り (0 = 動いていない)
-    private static int gateTimer;
+    // 熾の底の門: 広間の中央の炉の底の格子 (3 × 3)・その上の火 (3 × 3。見かけだけ)・炉の囲いの南の口 (3 × 2)
+    public static final List<BlockPos> HUB_PLUG = hubPlug();
+    public static final List<BlockPos> HUB_FIRE = hubFire();
+    public static final List<BlockPos> HUB_WALL = hubWall();
+
+    // グループごとの門の開く演出の残り tick と、心臓を倒したあと門の奥にグループの誰もいない時間
+    private static final Map<UUID, Integer> GATE_TIMERS = new HashMap<>();
+    private static final Map<UUID, Integer> AFTER_HEART = new HashMap<>();
     private static final Map<UUID, Integer> ON_PAD = new HashMap<>();
     private static final Set<UUID> REVIVING = new HashSet<>();
 
     private EmberBackTrials() {
+    }
+
+    private static List<BlockPos> hubPlug() {
+        List<BlockPos> out = new ArrayList<>();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                out.add(HUB_CENTER.offset(dx, 0, dz));
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    private static List<BlockPos> hubFire() {
+        List<BlockPos> out = new ArrayList<>();
+        for (BlockPos p : hubPlug()) {
+            out.add(p.above());
+        }
+        return List.copyOf(out);
+    }
+
+    private static List<BlockPos> hubWall() {
+        List<BlockPos> out = new ArrayList<>();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int y = 1; y <= 2; y++) {
+                out.add(HUB_CENTER.offset(dx, y, 2));
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    // 熾の底の門の扉ブロック (格子と囲いの口)。グループごとに開ける・閉める
+    public static List<BlockPos> gateBlocks() {
+        List<BlockPos> out = new ArrayList<>(HUB_PLUG);
+        out.addAll(HUB_WALL);
+        return out;
+    }
+
+    public static List<BlockPos> boxBlocks(Box b) {
+        List<BlockPos> out = new ArrayList<>();
+        for (BlockPos p : BlockPos.betweenClosed(b.min(), b.max())) {
+            out.add(p.immutable());
+        }
+        return out;
     }
 
     public static boolean onBack(ServerLevel level) {
@@ -91,46 +155,167 @@ public final class EmberBackTrials {
         return root.getCompound(Player.PERSISTED_NBT_TAG);
     }
 
+    // ---------------------------------------------------------------- グループの見かけ・音 (EmberBackSetup から一度だけ)
+    static void registerGroupHooks() {
+        GroupOverlays.register(EmberBackTrials::overlay);
+        GroupEvents.addMembershipHook(EmberBackTrials::onGroupChanged);
+    }
+
+    // グループに見せる姿: 鳴った石と光る床、門が閉じていれば炉の火と囲いの口
+    static void overlay(ServerLevel level, UUID group, BiConsumer<BlockPos, BlockState> out) {
+        if (!onBack(level)) {
+            return;
+        }
+        EmberBackState state = EmberBackState.peek(level, group);
+        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
+            if (!state.rung(t)) {
+                continue;
+            }
+            out.accept(stonePos(t), EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, true));
+            BlockPos pad = padPos(t);
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    out.accept(pad.offset(dx, 0, dz), dx == 0 && dz == 0 ? EmberKit.EMBERLIGHT : Blocks.SHROOMLIGHT.defaultBlockState());
+                }
+            }
+        }
+        if (!gateOpenFor(level, group)) {
+            BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, fireLit(group)).setValue(CampfireBlock.SIGNAL_FIRE, false);
+            for (BlockPos p : HUB_FIRE) {
+                out.accept(p, fire);
+            }
+            for (BlockPos p : HUB_WALL) {
+                out.accept(p, p.getY() == HUB_CENTER.getY() + 1 ? EmberKit.RUIN_CHISELED : EmberKit.RUIN);
+            }
+        }
+    }
+
+    // 門の開く演出のうち、火が灯っているか (0・20・40 tick で消え、10 tick あとにまた灯る。最後は消えたまま)
+    static boolean fireLit(UUID group) {
+        Integer timer = GATE_TIMERS.get(group);
+        if (timer == null || timer <= 0) {
+            return true;
+        }
+        int t = GATE_OPEN_TICKS - timer;
+        return t < 50 && t % 20 >= 10;
+    }
+
+    // グループの人 (近くにいる) にだけ音を送る
+    public static void soundTo(ServerLevel level, UUID group, Vec3 at, SoundEvent sound, float volume, float pitch) {
+        Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
+        ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, SoundSource.BLOCKS, at.x, at.y, at.z, volume, pitch, level.random.nextLong());
+        for (ServerPlayer p : Groups.online(level, group)) {
+            if (p.distanceToSqr(at) < 64 * 64 && p.connection != null) {
+                p.connection.send(packet);
+            }
+        }
+    }
+
+    // グループの人 (近くにいる) にだけ粒を送る
+    public static void particlesTo(ServerLevel level, UUID group, ParticleOptions particle, double x, double y, double z, int count, double dx, double dy,
+            double dz, double speed) {
+        for (ServerPlayer p : Groups.online(level, group)) {
+            if (p.distanceToSqr(x, y, z) < 64 * 64) {
+                level.sendParticles(p, particle, false, x, y, z, count, dx, dy, dz, speed);
+            }
+        }
+    }
+
+    // グループの鍵が変わった人 (組む・入る・抜ける): 試練の体の中にいれば広間へ。休み場の記録は試練の番号が違えば無効になる
+    static void onGroupChanged(ServerPlayer player) {
+        if (!onBack(player.serverLevel())) {
+            return;
+        }
+        if (player.isAlive() && !player.isSpectator() && inTrial(player.position())) {
+            toHub(player);
+            Notice.narrate(player, EmberIds.LANG_BACK + "group_changed");
+        }
+        int epoch = EmberBackState.of(player.serverLevel(), player).epoch();
+        CompoundTag tag = persisted(player);
+        if (tag.contains(TAG_CHECKPOINT) && tag.getInt(TAG_CHECKPOINT_EPOCH) != epoch) {
+            clearCheckpoint(player);
+        }
+        tag.putInt(TAG_SEEN_EPOCH, epoch);
+    }
+
     // ---------------------------------------------------------------- 起動・建てたあと
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void onServerStarted(ServerStartedEvent event) {
         ServerLevel back = event.getServer().getLevel(EmberIds.BACK);
         if (back != null) {
             EmberBodyBuilder.schedule(back);
+            TitanBackData data = TitanBackData.get(back);
+            if (data.isBuilt() && !data.needsBuild(EmberBodyBuilder.buildVersion())) {
+                // 建て直さない起動でも、扉のブロックと石の既定の姿をそろえる (何度呼んでも同じ)
+                placeFixtures(back);
+            }
         }
     }
 
-    // 体を建てた直後 (EmberBodyBuilder から)。種を引き、試練を最初の形にする (眠らせない)
+    // 体を建てた直後 (EmberBodyBuilder から)。扉と石を置き、すべてのグループの試練を最初の形にする (眠らせない)
     static void afterBuild(ServerLevel level) {
-        EmberBackState state = EmberBackState.get(level);
-        state.reset(level.random, null, true);
-        EmberBackRooms.resetAll(level, state::roomSleeping);
-        idleTicks = 0;
-        afterHeartIdle = 0;
-        gateTimer = 0;
-        applyGate(level, false);
-        applyStones(level, state);
+        GATE_TIMERS.clear();
+        AFTER_HEART.clear();
+        placeFixtures(level);
+        for (UUID id : BackGroupData.get(level).ids()) {
+            EmberBackState state = EmberBackState.of(level, id);
+            if (state.record() != null && state.record().hasProgress()) {
+                GroupProgress.reset(level, id);
+                state.afterReset(level.random, null, true);
+            }
+        }
+        EmberRooms.releaseAll(level);
+    }
+
+    // ワールドのブロック (どのグループにも同じ): 扉はいつも扉のブロックとして置く (門と鍛え手の扉は閉じた既定、熾の底の入口は開いた既定)。
+    // 石と光る床は鳴っていない姿、炉の火の所は空気 (火はグループの見かけ)
+    public static void placeFixtures(ServerLevel level) {
+        GroupGates.place(level, gateBlocks(), false);
+        for (BlockPos p : HUB_FIRE) {
+            if (!level.getBlockState(p).isAir()) {
+                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+        GroupGates.place(level, boxBlocks(SMITH_DOOR), false);
+        GroupGates.place(level, boxBlocks(HEART_DOOR), true);
+        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
+            BlockPos s = stonePos(t);
+            BlockState want = EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, false);
+            if (!level.getBlockState(s).equals(want)) {
+                level.setBlock(s, want, 3);
+            }
+            BlockPos pad = padPos(t);
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    BlockState p = dx == 0 && dz == 0 ? EmberKit.RUIN_CHISELED : EmberKit.RUIN_DARK;
+                    if (!level.getBlockState(pad.offset(dx, 0, dz)).equals(p)) {
+                        level.setBlock(pad.offset(dx, 0, dz), p, 3);
+                    }
+                }
+            }
+        }
     }
 
     // ---------------------------------------------------------------- API
-    public static void markReady(ServerLevel level, EmberBackState.Trial trial) {
-        EmberBackState state = EmberBackState.get(level);
+    public static void markReady(ServerLevel level, UUID group, EmberBackState.Trial trial) {
+        EmberBackState state = EmberBackState.of(level, group);
         if (state.ready(trial)) {
             return;
         }
         state.markReady(trial);
         BlockPos s = stonePos(trial);
-        level.playSound(null, s, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 2f, 0.7f);
-        level.sendParticles(ParticleTypes.FLAME, s.getX() + 0.5, s.getY() + 1.1, s.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.02);
-        for (ServerPlayer p : level.players()) {
+        soundTo(level, group, Vec3.atCenterOf(s), SoundEvents.AMETHYST_BLOCK_RESONATE, 2f, 0.7f);
+        particlesTo(level, group, ParticleTypes.FLAME, s.getX() + 0.5, s.getY() + 1.1, s.getZ() + 0.5, 20, 0.3, 0.4, 0.3, 0.02);
+        for (ServerPlayer p : Groups.online(level, group)) {
             if (p.distanceToSqr(Vec3.atCenterOf(s)) < 40 * 40) {
                 Notice.hint(p, EmberIds.LANG_BACK + "stone_ready");
             }
         }
     }
 
+    // 部屋の持ち主にとって、この周その部屋が眠っているか (持ち主がいなければ false)
     public static boolean sleeping(ServerLevel level, String room) {
-        return EmberBackState.get(level).roomSleeping(room);
+        return EmberBackState.forRoom(level, room).roomSleeping(room);
     }
 
     public static BlockPos stonePos(EmberBackState.Trial t) {
@@ -187,7 +372,8 @@ public final class EmberBackTrials {
         if (trial == null) {
             return;
         }
-        EmberBackState state = EmberBackState.get(level);
+        UUID group = Groups.keyOf(player);
+        EmberBackState state = EmberBackState.of(level, group);
         if (state.rung(trial)) {
             Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + (state.sleeping(trial) ? "trial_sleeping" : "stone_rung")));
             return;
@@ -199,30 +385,28 @@ public final class EmberBackTrials {
             Notice.bar(player, ModText.deny(EmberIds.LANG_BACK + trial.id() + "_silent"));
             return;
         }
-        ring(level, trial, player);
+        ring(level, group, trial, player);
     }
 
-    public static void ring(ServerLevel level, EmberBackState.Trial trial, @Nullable ServerPlayer by) {
-        EmberBackState state = EmberBackState.get(level);
+    public static void ring(ServerLevel level, UUID group, EmberBackState.Trial trial, @Nullable ServerPlayer by) {
+        EmberBackState state = EmberBackState.of(level, group);
         if (state.rung(trial)) {
             return;
         }
         state.ring(trial);
-        applyStones(level, state);
+        GroupOverlays.refresh(level, group);
         BlockPos pos = stonePos(trial);
-        level.playSound(null, pos, EmberBackSetup.STONE_RING.get(), SoundSource.BLOCKS, 3f, 1f);
-        level.sendParticles(ParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.05);
-        level.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.8, 0.3, 0.03);
+        soundTo(level, group, Vec3.atCenterOf(pos), EmberBackSetup.STONE_RING.get(), 3f, 1f);
+        particlesTo(level, group, ParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.05);
+        particlesTo(level, group, ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.8, 0.3, 0.03);
         if (by != null) {
             Notice.bar(by, ModText.hint(EmberIds.LANG_BACK + "shortcut_opened"));
         }
         Component msg = ModText.progress(EmberIds.LANG_BACK + "stone_ringing", Component.translatable("trial.skyabyss.ember_" + trial.id()),
                 state.rungCount(), 3);
-        for (ServerPlayer p : level.players()) {
-            Notice.send(p, msg);
-        }
-        // 試練の踏破の経験値 (石の近くにいた人。仲間には分け前) と、サブクエストの「試練を踏破する」
-        List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(20), p -> p.isAlive() && !p.isSpectator());
+        Groups.tell(level, group, msg);
+        // 試練の踏破の経験値 (石の近くにいた、そのグループの人。仲間には分け前) と、サブクエストの「試練を踏破する」
+        List<ServerPlayer> near = Groups.inBox(level, group, new AABB(pos).inflate(20));
         for (ServerPlayer p : near) {
             Growth.addXp(p, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(p).level, EMBER_LEVEL)), "growth.skyabyss.reason.ember_trial");
             jp.revati.skyabyss.quest.Quests.signal(p, "ember_trial_" + trial.id());
@@ -233,105 +417,70 @@ public final class EmberBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-        checkAllRung(level, state);
+        checkAllRung(level, group);
     }
 
-    // 三つそろったら、炉の火を三度弱めて門を開く
-    static void checkAllRung(ServerLevel level, EmberBackState state) {
-        if (state.rungCount() >= 3 && !state.gateOpen() && gateTimer == 0) {
-            gateTimer = GATE_OPEN_TICKS;
-            for (ServerPlayer p : level.players()) {
+    // 三つそろったら、そのグループの炉の火を三度弱めて門を開く
+    static void checkAllRung(ServerLevel level, UUID group) {
+        EmberBackState state = EmberBackState.of(level, group);
+        if (state.rungCount() >= 3 && !state.gateOpen() && !GATE_TIMERS.containsKey(group)) {
+            GATE_TIMERS.put(group, GATE_OPEN_TICKS);
+            for (ServerPlayer p : Groups.online(level, group)) {
                 Notice.narrate(p, EmberIds.LANG_BACK + "all_rung");
             }
         }
     }
 
-    // 三つの石・抜け道の床を、いまの状態に合わせる
-    static void applyStones(ServerLevel level, EmberBackState state) {
-        for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
-            boolean rung = state.rung(t);
-            BlockPos s = stonePos(t);
-            BlockState want = EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, rung);
-            if (!level.getBlockState(s).equals(want)) {
-                level.setBlock(s, want, 3);
-            }
-            BlockPos pad = padPos(t);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    BlockState p = rung ? (dx == 0 && dz == 0 ? EmberKit.EMBERLIGHT : Blocks.SHROOMLIGHT.defaultBlockState())
-                            : (dx == 0 && dz == 0 ? EmberKit.RUIN_CHISELED : EmberKit.RUIN_DARK);
-                    level.setBlock(pad.offset(dx, 0, dz), p, 3);
-                }
-            }
-        }
-    }
-
     // ---------------------------------------------------------------- 熾の底の門 (広間の中央の大きな炉の底の格子)
-    // closed: 格子 (封印) と、その上の炉の火。open: どちらも無く、下の螺旋の段が見える。炉の囲いの南の口も開く
-    static void applyGate(ServerLevel level, boolean open) {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        int fy = HUB_CENTER.getY();
-        BlockState gate = ModBlocks.SEALED_GATE.get().defaultBlockState();
-        BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false);
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                level.setBlock(new BlockPos(cx + dx, fy, cz + dz), open ? Blocks.AIR.defaultBlockState() : gate, 3);
-                level.setBlock(new BlockPos(cx + dx, fy + 1, cz + dz), open ? Blocks.AIR.defaultBlockState() : fire, 3);
-            }
-            for (int y = fy + 1; y <= fy + 2; y++) {
-                level.setBlock(new BlockPos(cx + dx, y, cz + 2), open ? Blocks.AIR.defaultBlockState()
-                        : (y == fy + 1 ? EmberKit.RUIN_CHISELED : EmberKit.RUIN), 3);
-            }
-        }
-    }
-
-    // 炉の火をともす・消す (門の開く演出)
-    private static void setFire(ServerLevel level, boolean lit) {
-        int cx = HUB_CENTER.getX();
-        int cz = HUB_CENTER.getZ();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                BlockPos p = new BlockPos(cx + dx, HUB_CENTER.getY() + 1, cz + dz);
-                BlockState s = level.getBlockState(p);
-                if (s.is(Blocks.CAMPFIRE)) {
-                    level.setBlock(p, s.setValue(CampfireBlock.LIT, lit), 3);
-                }
-            }
-        }
-    }
-
-    private static void tickGate(ServerLevel level, EmberBackState state) {
-        if (gateTimer <= 0) {
+    private static void tickGates(ServerLevel level) {
+        if (GATE_TIMERS.isEmpty()) {
             return;
         }
-        int t = GATE_OPEN_TICKS - gateTimer;
-        BlockPos c = HUB_CENTER.above();
-        // 三度弱まる (0・20・40 tick で消え、10 tick あとにまた灯る)
-        if (t == 0 || t == 20 || t == 40) {
-            setFire(level, false);
-            level.playSound(null, c, EmberBackSetup.FORGE_DIM.get(), SoundSource.BLOCKS, 3f, 1f - t / 100f);
-            level.sendParticles(ParticleTypes.LARGE_SMOKE, c.getX() + 0.5, c.getY() + 0.5, c.getZ() + 0.5, 30, 1, 0.5, 1, 0.02);
-        } else if (t == 10 || t == 30) {
-            setFire(level, true);
-        }
-        gateTimer -= 1;
-        if (gateTimer == 0) {
-            openGate(level, state);
+        for (UUID group : List.copyOf(GATE_TIMERS.keySet())) {
+            int timer = GATE_TIMERS.get(group);
+            int t = GATE_OPEN_TICKS - timer;
+            Vec3 c = Vec3.atCenterOf(HUB_CENTER.above());
+            // 三度弱まる (0・20・40 tick で消え、10 tick あとにまた灯る)
+            if (t == 0 || t == 20 || t == 40) {
+                soundTo(level, group, c, EmberBackSetup.FORGE_DIM.get(), 3f, 1f - t / 100f);
+                particlesTo(level, group, ParticleTypes.LARGE_SMOKE, c.x, c.y, c.z, 30, 1, 0.5, 1, 0.02);
+                GroupOverlays.refresh(level, group);
+            } else if (t == 10 || t == 30 || t == 50) {
+                GroupOverlays.refresh(level, group);
+            }
+            timer -= 1;
+            if (timer <= 0) {
+                openGate(level, group);
+            } else {
+                GATE_TIMERS.put(group, timer);
+            }
         }
     }
 
-    // 門を開く (コマンド・テストからも)
-    public static void openGate(ServerLevel level, EmberBackState state) {
-        gateTimer = 0;
-        state.markGateOpen();
-        applyGate(level, true);
-        BlockPos c = HUB_CENTER;
-        level.playSound(null, c, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 3f, 0.5f);
-        level.playSound(null, c, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 2f, 0.6f);
-        for (ServerPlayer p : level.players()) {
+    // そのグループに門を開く (コマンド・テストからも)
+    public static void openGate(ServerLevel level, UUID group) {
+        GATE_TIMERS.remove(group);
+        EmberBackState.of(level, group).markGateOpen();
+        GroupGates.open(level, group, gateBlocks());
+        GroupOverlays.refresh(level, group);
+        Vec3 c = Vec3.atCenterOf(HUB_CENTER);
+        soundTo(level, group, c, SoundEvents.IRON_DOOR_OPEN, 3f, 0.5f);
+        soundTo(level, group, c, SoundEvents.FIRE_EXTINGUISH, 2f, 0.6f);
+        for (ServerPlayer p : Groups.online(level, group)) {
             Notice.narrate(p, EmberIds.LANG_BACK + "gate_open");
         }
+    }
+
+    // そのグループに門を閉じる (コマンド用。進みの記録は変えない)
+    public static void closeGate(ServerLevel level, UUID group) {
+        GATE_TIMERS.remove(group);
+        GroupGates.seal(level, group, gateBlocks());
+        GroupOverlays.refresh(level, group);
+    }
+
+    // そのグループにとって門が開いているか
+    public static boolean gateOpenFor(ServerLevel level, UUID group) {
+        return GroupGates.isOpen(level, group, HUB_PLUG.get(0));
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -340,23 +489,12 @@ public final class EmberBackTrials {
         if (!(event.getLevel() instanceof ServerLevel level) || !onBack(level)) {
             return;
         }
-        EmberBackState state = EmberBackState.get(level);
-        tickGate(level, state);
+        tickGates(level);
         if (level.getGameTime() % 10 != 0) {
             return;
         }
-        TitanBackData data = TitanBackData.get(level);
-        if (data.isHeartDefeated() && !state.everDefeated()) {
-            state.markEverDefeated();
-        }
-        boolean anyone = false;
-        for (ServerPlayer p : level.players()) {
-            if (!p.isSpectator()) {
-                anyone = true;
-                break;
-            }
-        }
-        tickReset(level, data, state, anyone);
+        EmberRooms.tick(level);
+        tickReset(level);
         tickPeaceful(level, level.getDifficulty() == Difficulty.PEACEFUL);
     }
 
@@ -367,8 +505,8 @@ public final class EmberBackTrials {
             return;
         }
         ServerLevel level = player.serverLevel();
-        // 光る床: 鳴った石のそばの 3 × 3 に 0.5 秒いると、広間の扉の内側へ
-        EmberBackState state = EmberBackState.get(level);
+        // 光る床: そのグループが鳴らした石のそばの 3 × 3 に 0.5 秒いると、広間の扉の内側へ
+        EmberBackState state = EmberBackState.of(level, player);
         boolean onPad = false;
         if (!player.isSpectator()) {
             for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
@@ -382,7 +520,7 @@ public final class EmberBackTrials {
                         BlockPos to = shortcutTo(t);
                         player.fallDistance = 0;
                         player.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, player.getYRot(), 0f);
-                        level.playSound(null, to, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.8f, 0.6f);
+                        soundTo(level, state.group(), Vec3.atCenterOf(to), SoundEvents.FIRECHARGE_USE, 0.8f, 0.6f);
                         Notice.bar(player, ModText.lore(EmberIds.LANG_BACK + "shortcut"));
                     }
                 }
@@ -391,8 +529,8 @@ public final class EmberBackTrials {
         if (!onPad) {
             ON_PAD.remove(player.getUUID());
         }
-        // 休み場の記録
-        int epoch = TitanBackData.get(level).epoch();
+        // 休み場の記録 (試練の番号は、その人のグループのもの)
+        int epoch = state.epoch();
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -406,7 +544,7 @@ public final class EmberBackTrials {
                     if (!r.name().equals("hub")) {
                         Notice.bar(player, ModText.progress("message.skyabyss.checkpoint",
                                 Component.translatable("checkpoint.skyabyss.ember_" + r.name())));
-                        level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 0.8f);
+                        player.playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 0.8f);
                     }
                 }
                 return;
@@ -422,8 +560,13 @@ public final class EmberBackTrials {
         return EmberIds.RESTS.contains(id) ? id : "";
     }
 
+    // 休み場の記録 (その人のグループの試練の番号で確かめる)。背中にいない人は、背中のディメンションの記録で見る
     public static String checkpoint(ServerPlayer player) {
-        return validCheckpoint(persisted(player), TitanBackData.get(player.serverLevel()).epoch());
+        ServerLevel back = player.server.getLevel(EmberIds.BACK);
+        if (back == null) {
+            return "";
+        }
+        return validCheckpoint(persisted(player), EmberBackState.of(back, player).epoch());
     }
 
     static void clearCheckpoint(Player player) {
@@ -447,7 +590,7 @@ public final class EmberBackTrials {
         p.teleportTo(p.serverLevel(), ARRIVAL.getX() + 0.5, ARRIVAL.getY() + 1, ARRIVAL.getZ() + 0.5, ARRIVAL_YAW, 0f);
     }
 
-    // 広間の休み場へ移す (リセット・ピースフル)。熱は 0
+    // 広間の休み場へ移す (リセット・ピースフル・グループが変わった)。熱は 0
     public static void toHub(ServerPlayer p) {
         BlockPos h = rest("hub").floor().above();
         p.fallDistance = 0;
@@ -459,77 +602,93 @@ public final class EmberBackTrials {
         return Vec3.atBottomCenterOf(rest("hub").floor().above());
     }
 
-    // ---------------------------------------------------------------- リセット
-    private static void tickReset(ServerLevel level, TitanBackData data, EmberBackState state, boolean anyone) {
-        if (!anyone) {
-            idleTicks += 10;
-            if (idleTicks >= RESET_AFTER_IDLE && (state.rungCount() > (state.sleeping() != null ? 1 : 0) || data.isHeartDefeated() || state.gateOpen())) {
-                idleTicks = 0;
-                reset(level, false);
+    // ---------------------------------------------------------------- リセット (グループごと。7.1節)
+    // - 放置: そのグループの誰も背中にいないまま 3 分 (GroupProgress.idleGroups) たち、試練が進んでいれば
+    // - 心臓のあと: そのグループが心臓を倒し、そのグループの誰も門の奥にいないまま 30 秒たったら、次の周へ
+    private static void tickReset(ServerLevel level) {
+        for (UUID group : GroupProgress.idleGroups(level)) {
+            if (EmberBackState.of(level, group).hasProgress()) {
+                resetGroup(level, group, false, null, false);
             }
-        } else {
-            idleTicks = 0;
         }
-        // 心臓を倒したあと、熾の底の門より奥に誰もいなくなって 30 秒たったら、次の周へ
-        if (data.isHeartDefeated()) {
+        BackGroupData data = BackGroupData.get(level);
+        for (UUID group : data.ids()) {
+            BackGroupData.Record r = data.peek(group);
+            if (r == null || !r.isHeartDefeated()) {
+                AFTER_HEART.remove(group);
+                continue;
+            }
             boolean inside = false;
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, group)) {
                 if (!p.isSpectator() && pastGate(p.position())) {
                     inside = true;
                     break;
                 }
             }
-            afterHeartIdle = inside ? 0 : afterHeartIdle + 10;
-            if (afterHeartIdle >= RESET_AFTER_HEART) {
-                afterHeartIdle = 0;
-                reset(level, true);
+            int idle = inside ? 0 : AFTER_HEART.getOrDefault(group, 0) + 10;
+            if (idle >= RESET_AFTER_HEART) {
+                AFTER_HEART.remove(group);
+                resetGroup(level, group, true, null, false);
+            } else {
+                AFTER_HEART.put(group, idle);
             }
-        } else {
-            afterHeartIdle = 0;
         }
     }
 
-    public static void reset(ServerLevel level, boolean announce) {
-        reset(level, announce, null, false);
-    }
-
-    // 試練を最初に戻す (7.1節)。試練の中の人は広間へ (熱は 0)、試練の番号が進む (古い休み場の記録は無効)。2 周目からは一つ眠る
-    public static void reset(ServerLevel level, boolean announce, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
-        TitanBackData data = TitanBackData.get(level);
-        EmberBackState state = EmberBackState.get(level);
-        if (data.isHeartDefeated()) {
-            state.markEverDefeated();
-        }
-        data.resetProgress();
-        state.reset(level.random, forceSleep, noSleep);
-        // 見守る人がいない時間の数え直し (他の背中と同じ。数え直さないと、起動してから 3 分たったあとの最初の石で、すぐ戻ってしまう)
-        idleTicks = 0;
-        afterHeartIdle = 0;
-        for (ServerPlayer p : List.copyOf(level.players())) {
+    // そのグループの試練を最初に戻す (7.1節)。そのグループの試練の中の人は広間へ (熱は 0)、試練の番号が進む (古い休み場の記録は無効)。
+    // そのグループが持っている部屋は手放して最初に戻す。ほかのグループの進み・部屋・人には触らない。2 周目からは一つ眠る
+    public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.EMBER);
+        GATE_TIMERS.remove(group);
+        AFTER_HEART.remove(group);
+        for (ServerPlayer p : Groups.online(level, group)) {
             if (!p.isSpectator() && inTrial(p.position())) {
                 toHub(p);
             }
         }
-        gateTimer = 0;
-        EmberBackRooms.resetAll(level, state::roomSleeping);
-        applyGate(level, false);
-        applyStones(level, state);
+        // 部屋 (戦いの部屋も) を先に戻す。戦いの放棄は扉をそのグループに開け直すので、そのあとで扉の上書きを記録ごと消す
+        EmberRooms.releaseHeldBy(level, group);
+        resetRecord(level, group, forceSleep, noSleep);
+        for (ServerPlayer p : Groups.online(level, group)) {
+            jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.strip(p, jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.allTrialItems());
+        }
+        EmberBackState state = EmberBackState.of(level, group);
         if (announce) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, group)) {
                 Notice.narrate(p, EmberIds.LANG_BACK + "trials_renewed");
                 tellSleeping(p, state);
             }
         }
-        SkyAbyss.LOGGER.info("Ember back trials reset (sleeping: {}, seed {})", state.sleeping() == null ? "none" : state.sleeping().id(), state.seed());
+        SkyAbyss.LOGGER.info("Ember back trials reset for group {} (sleeping: {}, seed {})", group,
+                state.sleeping() == null ? "none" : state.sleeping().id(), state.seed());
     }
 
-    // 眠る試練をコマンドで決める (今の周に効かせる)
-    public static void setSleeping(ServerLevel level, @Nullable EmberBackState.Trial t) {
-        EmberBackState state = EmberBackState.get(level);
+    private static void resetRecord(ServerLevel level, UUID group, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
+        GroupProgress.reset(level, group);
+        EmberBackState.of(level, group).afterReset(level.random, forceSleep, noSleep);
+        GroupOverlays.refresh(level, group);
+    }
+
+    // すべてのグループの試練を最初に戻す (コマンド)
+    public static void resetAll(ServerLevel level, boolean announce) {
+        for (UUID group : BackGroupData.get(level).ids()) {
+            resetGroup(level, group, announce, null, false);
+        }
+        EmberRooms.releaseAll(level);
+    }
+
+    // 眠る試練をコマンドで決める (そのグループの今の周に効かせる)。そのグループが持っている部屋は作り直す
+    public static void setSleeping(ServerLevel level, UUID group, @Nullable EmberBackState.Trial t) {
+        EmberBackState state = EmberBackState.of(level, group);
         state.setSleeping(t);
-        EmberBackRooms.resetAll(level, state::roomSleeping);
-        applyStones(level, state);
-        checkAllRung(level, state);
+        for (EmberRooms.Room r : EmberRooms.ALL) {
+            if (group.equals(EmberRooms.owner(r))) {
+                EmberBackRooms.resetRoom(level, r);
+            }
+        }
+        GroupOverlays.refresh(level, group);
+        checkAllRung(level, group);
     }
 
     static void tellSleeping(ServerPlayer p, EmberBackState state) {
@@ -539,22 +698,25 @@ public final class EmberBackTrials {
     }
 
     // ---------------------------------------------------------------- ピースフル (7.4節): 喉の坂の上を封じる。口と見送りの段は歩ける
+    // 封じる所は、いつも扉のブロックとして置いてあり、ワールド全体の既定 (開いている・閉じている) だけを変える
     static boolean peacefulSide(ServerPlayer p) {
         return p.getZ() < PEACEFUL_SEAL_Z;
     }
 
     private static void tickPeaceful(ServerLevel level, boolean peaceful) {
+        int f = EmberBodyBuilder.throatFloor(PEACEFUL_SEAL_Z);
+        List<BlockPos> seal = new ArrayList<>();
         for (int x = -3; x <= 3; x++) {
-            int f = EmberBodyBuilder.throatFloor(PEACEFUL_SEAL_Z);
             for (int y = f + 1; y <= f + 5; y++) {
                 BlockPos p = new BlockPos(x, y, PEACEFUL_SEAL_Z);
-                boolean sealed = level.getBlockState(p).is(ModBlocks.SEALED_GATE.get());
-                if (peaceful && !sealed && level.getBlockState(p).isAir()) {
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                } else if (!peaceful && sealed) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+                BlockState s = level.getBlockState(p);
+                if (s.isAir() || s.is(ModBlocks.SEALED_GATE.get()) && s.getValue(SealedGateBlock.OPEN) == peaceful) {
+                    seal.add(p);
                 }
             }
+        }
+        if (!seal.isEmpty()) {
+            GroupGates.setDefault(level, seal, !peaceful);
         }
         if (peaceful) {
             for (ServerPlayer p : List.copyOf(level.players())) {
@@ -570,7 +732,6 @@ public final class EmberBackTrials {
                 }
             }
         }
-        wasPeaceful = peaceful;
     }
 
     // ---------------------------------------------------------------- 倒れたとき (7.3節)
@@ -597,7 +758,7 @@ public final class EmberBackTrials {
         if (back == null) {
             return;
         }
-        int epoch = TitanBackData.get(back).epoch();
+        int epoch = EmberBackState.of(back, player).epoch();
         String cp = validCheckpoint(tag, epoch);
         BlockPos spawn = cp.isEmpty() ? ARRIVAL.above() : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
@@ -623,19 +784,20 @@ public final class EmberBackTrials {
             clearCheckpoint(player);
             ServerLevel back = player.server.getLevel(EmberIds.BACK);
             if (event.getTo() == EmberIds.BACK && back != null) {
-                persisted(player).putInt(TAG_SEEN_EPOCH, TitanBackData.get(back).epoch());
-                tellSleeping(player, EmberBackState.get(back));
+                EmberBackState state = EmberBackState.of(back, player);
+                persisted(player).putInt(TAG_SEEN_EPOCH, state.epoch());
+                tellSleeping(player, state);
             }
         }
     }
 
-    // ログイン: 背中にいて、その間にリセットされていて、試練の中にいるなら到着点へ
+    // ログイン: 背中にいて、その間にそのグループの試練がリセットされていて、試練の中にいるなら到着点へ
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !onBack(player.serverLevel())) {
             return;
         }
-        int epoch = TitanBackData.get(player.serverLevel()).epoch();
+        int epoch = EmberBackState.of(player.serverLevel(), player).epoch();
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             clearCheckpoint(player);
@@ -668,16 +830,14 @@ public final class EmberBackTrials {
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        idleTicks = 0;
-        afterHeartIdle = 0;
-        wasPeaceful = false;
-        gateTimer = 0;
+        GATE_TIMERS.clear();
+        AFTER_HEART.clear();
         ON_PAD.clear();
         REVIVING.clear();
     }
 
     // テスト用
-    static boolean gateOpening() {
-        return gateTimer > 0;
+    static boolean gateOpening(UUID group) {
+        return GATE_TIMERS.containsKey(group);
     }
 }

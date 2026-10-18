@@ -15,6 +15,7 @@ import jp.revati.skyabyss.lore.LorePageItem;
 import jp.revati.skyabyss.lore.LoreSetup;
 import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.npc.NpcSpawner;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.opening.OpeningLogic.Env;
@@ -78,10 +79,38 @@ public final class OpeningDirector {
     private static final Map<UUID, Long> FREEZE = new HashMap<>();
     // 空の影が去る時刻 (進行中のものから覚える。再起動で消えてよい)
     private static long lastPassEnd = -1;
-    // 落とした破れた頁 (プレイヤー → 頁のエンティティ)
+    // 落とした破れた頁 (プレイヤー → 頁のエンティティ)。再起動で消えるので、頁の実体にも持ち主の印 (PAGE_OWNER_TAG) を書き、
+    // 読んだ・見送ったときは印で探して消す (再起動のあとでも地面に残らない)
     private static final Map<UUID, UUID> PAGES = new HashMap<>();
+    static final String PAGE_OWNER_TAG = "skyabyss_opening_page_owner";
 
     private OpeningDirector() {
+    }
+
+    // 自己テスト用: 再起動で覚えている頁の ID が消えた状態にする
+    static void forgetPagesForTest() {
+        PAGES.clear();
+    }
+
+    // その人のために落とした頁 (地面にあるもの) を消す。覚えている実体と、読み込まれている中の印つきの実体の両方。消した数を返す
+    public static int discardDroppedPages(MinecraftServer server, UUID owner) {
+        int n = 0;
+        UUID id = PAGES.remove(owner);
+        if (id != null) {
+            var entity = server.overworld().getEntity(id);
+            if (entity != null) {
+                entity.discard();
+                n++;
+            }
+        }
+        for (var e : server.overworld().getAllEntities()) {
+            if (e instanceof ItemEntity item && !item.isRemoved() && item.getPersistentData().hasUUID(PAGE_OWNER_TAG)
+                    && item.getPersistentData().getUUID(PAGE_OWNER_TAG).equals(owner)) {
+                item.discard();
+                n++;
+            }
+        }
+        return n;
     }
 
     public static OpeningState state(net.minecraft.world.entity.player.Player player) {
@@ -143,18 +172,42 @@ public final class OpeningDirector {
         lastPassEnd = -1;
     }
 
+    // 自己テスト用: 古いセーブを読み込んだ直後の人にする (拍子の記録は空、「コマンドで消した直後」ではない)
+    public static void resetAsLoadedSave(ServerPlayer player) {
+        reset(player);
+        state(player).fresh = false;
+    }
+
     // 一人の見回り (テストからも呼べる)
     public static void run(ServerLevel level, ServerPlayer player) {
         OpeningState st = state(player);
         long now = level.getGameTime();
         Env env = env(level, player);
         Facts facts = facts(level, player, st, env);
+        placeBeats(player, facts);
         Fx fx = new Live(level, player, st);
         OpeningLogic.step(st, env, facts, fx);
         if (st.awakeAt >= 0) {
             st.fresh = false;
         }
         syncObjective(level, player, st, facts, env, now);
+        boneForeshadow(level, player, st, env);
+    }
+
+    // 序盤の場所に着いたことを進捗へ (半径は OpeningSites.Kind と同じ)
+    private static void placeBeats(ServerPlayer player, Facts facts) {
+        if (facts.campDist() >= 0 && facts.campDist() <= Kind.CAMP.radius) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:camp");
+        }
+        if (facts.shelterDist() >= 0 && facts.shelterDist() <= Kind.SHELTER.radius) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:shelter");
+        }
+        if (facts.footprintNear()) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:footprint");
+        }
+        if (facts.slabNear()) {
+            jp.revati.skyabyss.advancement.Beats.fire(player, "place:ribs");
+        }
     }
 
     static Env env(ServerLevel level, ServerPlayer player) {
@@ -164,7 +217,7 @@ public final class OpeningDirector {
         boolean deep = !sky && player.getY() < level.getSeaLevel() - 24;
         boolean danger = danger(level, player);
         return new Env(level.getGameTime(), level.getDayTime(), overworld, awake, sky, deep, player.isUnderWater(), danger,
-                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePass() != null);
+                Config.HORROR_EVENT_FREQUENCY.get() > 0, SkyEvents.activePassFor(player) != null);
     }
 
     // 戦っている・傷が深い・敵が近い (17 の 6 章: 殺さない。拍子は後ろへずらす)
@@ -204,12 +257,7 @@ public final class OpeningDirector {
         }
         boolean footNear = false;
         if (planned && OpeningSites.built(server, Kind.FOOTPRINT)) {
-            for (BlockPos p : OpeningSites.footprints(server)) {
-                if (OpeningSites.horizontal(p, pos) <= OpeningLogic.FOOTPRINT_NEAR) {
-                    footNear = true;
-                    break;
-                }
-            }
+            footNear = OpeningSites.insideFootprint(server, pos, OpeningLogic.FOOTPRINT_MARGIN);
         }
         boolean slabNear = false;
         if (planned && OpeningSites.built(server, Kind.RIBS)) {
@@ -218,10 +266,13 @@ public final class OpeningDirector {
         }
         SkyEventData sky = SkyEventData.get(level);
         long now = env.now();
-        boolean passEnded = lastPassEnd >= 0 && st.awakeAt >= 0 && lastPassEnd >= st.awakeAt && now >= lastPassEnd
-                && now - lastPassEnd <= OpeningLogic.PASS_END_WINDOW;
+        long passEnd = Math.max(lastPassEnd, SkyEvents.personalEnd(player));
+        boolean passEnded = passEnd >= 0 && st.awakeAt >= 0 && passEnd >= st.awakeAt && now >= passEnd
+                && now - passEnd <= OpeningLogic.PASS_END_WINDOW;
         boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || !NpcBonds.of(player).bonds().isEmpty()
-                || !QuestLog.of(player).quests().isEmpty());
+                || !QuestLog.of(player).quests().isEmpty()
+                // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
+                || jp.revati.skyabyss.progress.Progression.stage(player) > 0);
         return new Facts(legacy, Lore.hasBook(player), campBuilt, notebook, campDist, shelterDist, footNear, slabNear,
                 OpeningBeats.metStoryteller(player), metIsana(player), lore.has("prologue/camp"), lore.has("prologue/footprints"),
                 lore.has("prologue/shadow"), lore.has("prologue/bone_hill"), lore.has("prologue/the_book_margin"),
@@ -249,27 +300,77 @@ public final class OpeningDirector {
     // ---------------------------------------------------------------- 目的の帯
     private static void syncObjective(ServerLevel level, ServerPlayer player, OpeningState st, Facts facts, Env env, long now) {
         String id = OpeningLogic.objective(st, facts, env);
-        if (id.equals(st.sentObjective) && now - st.sentAt < RESEND) {
+        // 目印は人ごと・今の目的ごとに決める (宿りの鐘と鯨追いの焚き火を取り違えない)。目印が変わったら送り直す
+        BlockPos target = target(level, id);
+        long tl = target == null ? Long.MIN_VALUE : target.asLong();
+        if (id.equals(st.sentObjective) && tl == st.sentTarget && now - st.sentAt < RESEND) {
             return;
         }
         st.sentObjective = id;
+        st.sentTarget = tl;
         st.sentAt = now;
-        PacketDistributor.sendToPlayer(player, ObjectivePayload.of(id, target(level.getServer(), id)));
+        PacketDistributor.sendToPlayer(player, ObjectivePayload.of(id, target));
     }
 
-    // 目的ごとの目印 (場所のない目的は null)
+    // 目的ごとの目印 (場所のない目的は null)。野営地・宿りの鐘・鯨追いの焚き火・骨の丘は、それぞれ別の場所を指す
     @Nullable
-    public static BlockPos target(MinecraftServer server, String id) {
+    public static BlockPos target(ServerLevel level, String id) {
+        MinecraftServer server = level.getServer();
         if (!OpeningSites.planned(server)) {
             return null;
         }
         return switch (id) {
             case "examine_camp" -> OpeningSites.notebook(server).or(() -> OpeningSites.camp(server)).orElse(null);
             case "follow_smoke" -> OpeningSites.smoke(server).or(() -> OpeningSites.shelter(server)).orElse(null);
-            case "ask_storyteller", "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
+            case "ask_storyteller" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
+            // 鯨追いは宿りの鐘から 18〜34 ブロック離れた焚き火のそばにいる。鐘の位置ではなく、その焚き火 (まだ立っていなければ目印なし)
+            case "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server))
+                    .map(bell -> NpcSpawner.chaserSpot(server.overworld(), bell)).orElse(null);
             case "bone_hill" -> OpeningSites.ribs(server).orElse(null);
             default -> null;
         };
+    }
+
+    // ---------------------------------------------------------------- 骨の丘の前触れ (17 の 3.5節)
+    // 丘が急に目の前に現れないように、イサナのあとで骨の丘へ近づくにつれて字幕を一度ずつ: 風のにおい (方角) → 遠い稜線の白 → 足もとの欠片 (低い地鳴り) → 風が止む
+    private static final String[] COMPASS = {"南", "南西", "西", "北西", "北", "北東", "東", "南東"};
+    static final double BONE_FAR = 220;
+    static final double BONE_MID = 130;
+    static final double BONE_NEAR = 70;
+
+    static void boneForeshadow(ServerLevel level, ServerPlayer player, OpeningState st, Env env) {
+        if (st.legacy() || st.awakeAt() < 0 || !env.overworld() || !env.awake() || !st.done(OpeningBeat.ISANA) || st.done(OpeningBeat.BONES)) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        if (!OpeningSites.planned(server) || !OpeningSites.built(server, Kind.RIBS)) {
+            return;
+        }
+        Optional<BlockPos> ribs = OpeningSites.ribs(server);
+        if (ribs.isEmpty()) {
+            return;
+        }
+        double d = OpeningSites.horizontal(ribs.get(), player.blockPosition());
+        int want = d <= BONE_NEAR ? 4 : d <= BONE_MID ? 3 : d <= BONE_FAR ? 2 : OpeningLogic.boneOffer(st, env) ? 1 : 0;
+        if (want <= st.boneCue) {
+            return;
+        }
+        st.boneCue = want;
+        switch (want) {
+            case 1 -> {
+                float yaw = OpeningSites.yawTo(player.blockPosition(), ribs.get());
+                Notice.narrate(player, "opening.skyabyss.bone_rumor", COMPASS[Math.floorMod(Math.round(yaw / 45f), 8)]);
+            }
+            case 2 -> Notice.narrate(player, "opening.skyabyss.bone_far");
+            case 3 -> {
+                Notice.narrate(player, "opening.skyabyss.bone_mid");
+                // 丘のほうから、ごく低い地鳴り (小さく、一度だけ)
+                BlockPos at = ribs.get();
+                player.connection.send(new ClientboundSoundPacket(OpeningSetup.RUMBLE, SoundSource.AMBIENT, at.getX() + 0.5, at.getY(), at.getZ() + 0.5,
+                        0.5f, 0.8f, level.random.nextLong()));
+            }
+            default -> Notice.narrate(player, "opening.skyabyss.bone_near");
+        }
     }
 
     // ---------------------------------------------------------------- 岩鯨 (17 の 3.9節)
@@ -280,12 +381,19 @@ public final class OpeningDirector {
 
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
+        ServerPlayer any = null;
         for (ServerPlayer p : level.players()) {
             if (p.isAlive() && !p.isSpectator() && OpeningLogic.whaleReady(state(p))) {
-                return p;
+                // まだ岩鯨を見ていない人を先に (最初の一人の近くにだけ出て、遅れて来た人が見損ねないように)
+                if (!Lore.state(p).has("chapter1/stone_whale")) {
+                    return p;
+                }
+                if (any == null) {
+                    any = p;
+                }
             }
         }
-        return null;
+        return any;
     }
 
     // 見る者を、最初の二晩は出さない (足音と歌を邪魔しないため。17 の 3.8節)
@@ -303,6 +411,18 @@ public final class OpeningDirector {
     public static boolean deferShadowToPage(ServerPlayer player) {
         OpeningState st = state(player);
         return !st.legacy() && st.awakeAt() >= 0 && Lore.hasBook(player);
+    }
+
+    // ---------------------------------------------------------------- 章の小要素 (story/ch1) 向けの窓口 (追加のみ)
+    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」。17 の 1.2)
+    public static boolean cueBusy(ServerPlayer player) {
+        OpeningState st = state(player);
+        return st.cueUntil > player.level().getGameTime() || FREEZE.getOrDefault(player.getUUID(), -1L) > player.level().getGameTime();
+    }
+
+    // 小さな異変・予兆を起こしてよい静かな状態か: 起きていて、戦っておらず、体力が十分で、敵が近くになく、水中でなく、影の最中でも演出の最中でもない
+    public static boolean quiet(ServerLevel level, ServerPlayer player) {
+        return env(level, player).calm() && !cueBusy(player);
     }
 
     // ---------------------------------------------------------------- 足音の間、動物が固まる
@@ -329,6 +449,10 @@ public final class OpeningDirector {
         public void awake() {
             st.cueUntil = level.getGameTime() + 300;
             PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
+            // 開幕はカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。docs/design/20_cinematics.md
+            BlockPos goal = target(level, "follow_smoke");
+            jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
+                    goal == null ? null : Vec3.atBottomCenterOf(goal));
         }
 
         @Override
@@ -405,6 +529,7 @@ public final class OpeningDirector {
             item.setUnlimitedLifetime();
             // 落ちてきた本人だけが拾える (マルチで取り合いにならない)
             item.setTarget(player.getUUID());
+            item.getPersistentData().putUUID(PAGE_OWNER_TAG, player.getUUID());
             level.addFreshEntity(item);
             level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.01);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.9f);
@@ -423,13 +548,7 @@ public final class OpeningDirector {
         @Override
         public void readShadowPage() {
             // 読まれないまま長く経った: 地面の頁は消し、荷物の頁は読んだことにして記す (メインの段が止まらないように)
-            UUID id = PAGES.remove(player.getUUID());
-            if (id != null) {
-                var entity = level.getServer().overworld().getEntity(id);
-                if (entity != null) {
-                    entity.discard();
-                }
-            }
+            discardDroppedPages(level.getServer(), player.getUUID());
             for (ItemStack stack : player.getInventory().items) {
                 if (stack.is(LoreSetup.LORE_PAGE.get()) && LorePageItem.source(stack).equals("shadow")) {
                     stack.shrink(1);
@@ -441,7 +560,7 @@ public final class OpeningDirector {
 
         @Override
         public void startPersonalShadow() {
-            SkyEvents.startFor(level, player);
+            SkyEvents.startPersonal(level, player);
         }
 
         @Override

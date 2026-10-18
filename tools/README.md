@@ -16,6 +16,21 @@
 - 専用サーバーを並べて立てるときは、worktree ごとに `run/server.properties` の `server-port` (と `rcon.port`) を別の番号にする (同じ番号だと起動時にポートを取れない)
 - 終わったら java を残さない。台本は最後に自分でゲームを閉じる (止まっても `timeout` 秒で閉じる)
 
+## 低ポリメッシュのモデルを入れる (`install_lowpoly.py`)
+
+```
+python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/bone_sentinel_shield_mesh.json:docs/review/lowpoly_roughs/bone_sentinel_shield_atlas.png:bone_sentinel_shield:socket_off
+```
+
+`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら）。5 体 (番兵長・苔這い・射手・水路の顎・心臓) は `python tools/install_lowpoly_five.py` で一度に入る。確認の台本は `python tools/gen_lowpoly_five_shots.py` が `tools/shots/lp_<名>.txt` に書く。雷翼の背の 5 体と珊瑚憑きは `python tools/install_lowpoly_storm.py`、確認の台本は `python tools/gen_lowpoly_storm_shots.py`、比較シートは `python tools/lowpoly_storm_sheets.py`。余燼の背の敵・心臓・鍛え手、語り部・イサナ・見る者は `python tools/install_lowpoly_ember_npc.py`、確認の台本は `python tools/gen_lowpoly_ember_npc_shots.py`、比較シートは `python tools/lowpoly_ember_npc_sheets.py` (15 の 9.6)。
+
+## モデルの透けの検査と修理・心臓の演出
+
+- `python tools/fix_geo_face_sides.py --check` : 全 geo の「透けて中が見える穴」を数える。`--apply --fill` で直す (面の左右の名前を GeckoLib に合わせ、元から抜けた面を塞ぐ。二度は直さない)。経緯は `docs/design/15_high_poly.md` の 5 章。書き出し直したら、そのあとにもう一度流す。見た目の比べは `tools/shots/geo_sides.txt`
+- `python tools/install_heart_cinematics.py` : 四つの心臓の登場 (intro) と倒れる (death) のアニメーションを各 `animation.json` に足す。`install_*_heart.py` で書き出し直したら、そのあとにもう一度流す。長さは `HeartBoss` の `INTRO_TICKS` `DEATH_TICKS` と合わせる
+
+- 巨神の眠り (心臓を止めたあと。`docs/design/20_cinematics.md` の 3.4) の絵: `tools/shots/titan_end_whale.txt`・`titan_end_ember.txt`・`titan_end_storm.txt` (平らな世界。巨神を眠らせて場面を流し、見せ場を撮る)、`titan_end_tide.txt` (普通の世界の海。座標は `titan_end_scout.txt` が `locate` で探す)、乗り込み口の光 `titan_end_glow.txt`、到着の台と登りの階段 `titan_end_arrival.txt`。絵は `docs/review/previews/titan_end_*.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan end" ./gradlew runServer` (server.properties の `max-tick-time=-1` を付けると、重い読み込みでウォッチドッグに止められない)
+
 ## 台本で撮るスクショ (`client/dev/ShotRunner`)
 
 ```
@@ -41,16 +56,45 @@
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
 | `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
-| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
 | `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
 | `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |
+| `perspective first\|back\|front` | 視点 (一人称 / 三人称の背中側 / 三人称の正面) |
+| `swingpose <0..1\|off>` | 武器を振る途中の姿で止める (自分だけ。一人称・三人称とも。`client/weapon/WeaponClient.forcedSwing`)。弓は 0 = 放した直後の反動の最大、1 = 戻りきった |
+| `swing` | 利き手を一振りする (止めずに動かす) |
+| `use` / `stopuse` | 右クリックを押し続ける / 放す (KeyMapping。弓を引く姿と放す動きの確認用) |
+| `mainhand left\|right` | 利き手の設定 (左利きの確認用。終わったら `right` に戻す) |
+| `bodyyaw <度>` | 体の向きを視線から何度ずらすか (人は 50 度までしかずれないので、それ以上は効かない。斜めの絵用) |
 | `echo <文>` | 記録に書くだけ |
 | `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
 
 例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
+
+### 武器を持った姿 (一人称・三人称・振りの途中)
+
+```
+python tools/gen_weapon_pose_shots.py [--left] [武器の id ...]   # 台本 tools/shots/weapon_poses.txt を作る (id を省くと全部。--left は左利き)
+./gradlew runShots -Pscript=tools/shots/weapon_poses.txt           # 約 2 分 (195 枚)
+python tools/weapon_pose_sheet.py                                  # 武器ごとの 1 枚 docs/review/previews/weapon_pose_<id>.png (行 = 一人称 / 三人称正面 / 横向き、列 = 構え・進み 0.2 / 0.4 / 0.55 / 0.75)
+./gradlew runShots -Pscript=tools/shots/weapon_bow.txt             # 雷翼の弓: 引く・放す
+python tools/weapon_display.py [--check]                            # 持ち方 (display) の表を models/item に反映 / 食い違いの確認
+```
+
+持ち方と動きの決まりは `docs/design/15_high_poly.md` の 4.6.1。
+
+### 武器の低ポリメッシュ (手・地面・額縁。15 の 4.6.2)
+
+```
+python tools/install_lowpoly_weapons.py        # weapons_final/ のメッシュ・アトラス・光る画像を入れ、models/item/<id>.json の base を builtin/entity にする (何度でも)
+python tools/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/weapon_lp_<id>.txt (階級 3 x 強化 3 x 一人称/三人称、ボクセル版、弓の引き、盾の構え、地面・額縁) と weapon_lp_perf.txt
+./gradlew runShots -Pscript=tools/shots/weapon_lp_<id>.txt
+python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか
+```
+
+台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`gen_ember_items.py` `install_storm_gear.py` `install_tide_gear.py` `gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `install_lowpoly_weapons.py` と `weapon_display.py` を流す。
 
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
@@ -91,11 +135,14 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | `textures/item/*.png` (32x32)、`textures/block/*.png` | `rough/items_blocks_32.py` | 出力先 (`docs/roughs/`) は片付けた。作り直すときは一時フォルダに書き出し、採用した物だけ src へ手でコピーする |
 | 岩鯨: `geo/entity/stone_whale{,_mid,_far}.geo.json`、`textures/entity/stone_whale{,_glowmask}.png`、`animations/entity/stone_whale.animation.json` | `install_stone_whale.py` | 実行しても今の素材と同じ物ができる |
 | 潮殻の巨神: `geo/entity/tide_shell{,_mid,_far}.geo.json`、`textures/entity/tide_shell{,_glowmask}.png`、`animations/entity/tide_shell.animation.json`、`sounds/tide/*.ogg` | `install_tide_shell.py` (形の元は `rough/tide_shell_titan.py` の案 B。珊瑚の LOD の塊・塔・段々の庭は install 側で足す)、音は `gen_tide_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/tide_shell_roughs/install/`。アニメの角度は `install_tide_shell.py` の `ANIM` に意図した向きで書く (GeckoLib の符号はスクリプトが直す) |
-| 潮殻の背の島 (巨神 B と同じ形のブロックの亀、08 の 21 章): `data/skyabyss/tide_back/turtle.bin` | `gen_tide_back_turtle.py` (形の元は `install_tide_shell.build_grid()`。ブロックの色は `rough/block_colors.json`。`--preview` で上と横の色の地図、`--cache` で調べる用の npz) | 同じ物ができる。変えたら配置の版 (`TideBackLayout.LAYOUT_VERSION`) を上げる |
+| 潮殻の背の島 (低ポリ案 B「段になった珊瑚礁の島」をブロックにした亀、08 の 3.2・3.8節): `data/skyabyss/tide_back/turtle.bin` | `gen_tide_back_turtle.py` (形は `lowpoly_tide_voxel.py` が案 B の近景メッシュから作る格子。材料はアトラスの色にいちばん近いバニラのブロック。置き方・体の中・腹の板は共通の `gen_back_shape.py` の turtle。`--preview` で上・横・正面の色の地図)。構造の書き出しとメッシュの並べ描きは `tide_back_b_views.py` | 同じ物ができる。変えたら配置の版 (`TideBackLayout.LAYOUT_VERSION`) を上げる |
 | 潮殻の背の敵: `geo/entity/{coral_thrall,reef_scuttler,bubble_puffer}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (珊瑚憑きは `_statue` も)、`animations/entity/<名前>.animation.json`、銛 `geo/gear/coral_spear{,_statue}.geo.json` など | `install_tide_mobs.py` (形の元は `rough/tide_mobs_v2.py` の A 案。頭と泡吹きの目を変えた) | 同じ物ができる。`--eyes original` で泡吹きの目をラフ A に戻す。目の比較は `docs/review/tide_shell_roughs/bubble_puffer_eyes.png`、確認用の絵は `docs/review/previews/tide_mobs/` |
 | 雷翼の背の敵: `geo/entity/{feather_warden,static_moth,thunder_supplicant}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (雷蛾は帯電で足す光 `static_moth_charge.png` も)、`animations/entity/<名前>.animation.json`、鉤槍と杖 `geo/gear/{hooked_glaive,supplicant_staff}.geo.json` など | `install_storm_mobs.py` (形の元は `rough/thunder_mobs.py`。既定は 12 の 14 章の推奨 羽守 B・雷蛾 B・雷乞い C、`--warden/--moth/--supplicant a\|b\|c` で選び直せる。面の隠れは同じ骨の中だけで数える) | 同じ物ができる。確認用の絵は `docs/review/previews/storm_mobs/` |
 | 雷翼の背の敵の音 `sounds/storm_mobs/*.ogg` と `sounds.json` の 18 行、スポーンエッグのモデル | `gen_storm_mob_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。`sounds.json` は自分の行だけ書き直す |
 | 余燼の背の敵: `geo/entity/{ash_thrall,ember_moth,cinder_roller}.geo.json`、`textures/entity/<名前>{,_glowmask}.png` (灰被りは燃え上がった姿の `ash_thrall_flared` も)、`animations/entity/<名前>.animation.json`、火掻き棒 `geo/gear/ash_poker.geo.json` など。音 `sounds/ember_mobs/*.ogg` | `install_ember_mobs.py` (形の元は `rough/ember_mobs_{thrall,moth,roller}.py` の A 案。`--option thrall=c` などで差し替え。アニメの姿勢の重なりも検査する。約 2 分)、音は `gen_ember_mob_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/previews/ember_mobs/`、ゲームの中は台本 `tools/shots/ember_mobs.txt` (13 の 18 章) |
+| モブの鳴き声・足音・攻撃音 (岩鯨の背の番兵たち・各心臓の被弾・背の敵の足音): `sounds/mobs/*.ogg` | `gen_mob_sounds.py` (登録は `registry/MobSounds`、`sounds.json` は末尾の行) | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
+| 岩鯨の心臓と鯨骨の番兵長 (石鎧の将) の技の音: `sounds/mobs/stone_heart_*.ogg` 22 本と `captain_*.ogg` 5 本、`sounds.json` の同名の行、字幕 `skyabyss_mobsounds/lang` (登録は `registry/MobSounds`) | `gen_boss_skill_sounds.py` (部品は `gen_mob_sounds.py`。石の共鳴・板の軋み・鎖・鯨の骨と石の鎧。バニラの音は使わない。使い分けは `docs/design/02` の 5 章) | 同じ物ができる (ogg はバイト列だけ毎回変わる)。`sounds.json` は自分の行だけ書き直す |
+| 避雷の柱 (`storm_rod`・`storm_rod_bulb`・`storm_rod_shaft`・`storm_rod_tip`)・戻しの鏡 (`reset_mirror`)・燠の灯 (`cinder_lamp`): `models/block/*.json`、`blockstates/*.json`、`textures/block/{storm_rod_*,reset_mirror,cinder_lamp}.png` (32x32)、`models/item/cinder_lamp.json`、`data/skyabyss/{loot_table/blocks,recipe}/cinder_lamp.json` | `gen_back_blocks.py` (雷翼は磨いた銅・青白い光・白い羽、燠の灯は鉄と黒石の籠の熾。確認は台本 `shots/back_blocks.txt` のあと `back_blocks_sheet.py` で `docs/review/previews/blocks_*.png`) | 同じ物ができる (決定的)。ブロックの置き換えは `docs/design/12` の 3.5 と `13` の 6.4 |
 | 余燼の中ボス 灰の鍛え手: `geo/entity/ash_smith.geo.json`、`textures/entity/ash_smith{,_glowmask,_glowmask_white}.png`、`animations/entity/ash_smith.animation.json`、大鎚・火箸 `geo/gear/{smith_hammer,smith_tongs}.*` (受け口 socket_main / socket_off に付く別モデル)、ボスバー `textures/gui/boss/ash_smith_{frame,notches,icon}.png`。音 `sounds/ember_smith/*.ogg` と `sounds.json` の ash_smith_* の行 | `install_ember_smith.py` (形の元は `rough/ember_smith.py` の案 A 鞴の巨人。`--option b\|c` で差し替え。基のテクスチャを持ち上げ、白の発光とバーも作る。アニメの姿勢の重なりも検査する。約 2.5 分)、音は `gen_ember_smith_sounds.py` | 同じ物ができる (ogg はバイト列だけ毎回変わる)。確認用の絵は `docs/review/previews/ember_smith/`。体を前へ倒す技では、腹・前掛けが脚の箱に数単位食い込む (姿勢の検査が数える。リグの限界) |
 | 天の鍵 `textures/item/sky_key.png`、場面の音 `assets/skyabyss_story/sounds/*.ogg` と `sounds.json` (14 の 4 章) | `gen_story_assets.py` (`--option A\|B\|C`、既定 C。比較は `docs/review/sky_key_roughs/compare.png`) | 同じ物ができる (ogg はバイト列だけ毎回変わる) |
 | 1 章の続きのクエスト・会話の足し書き `data/skyabyss/{quest,dialogue/*_story.json,lore/entry/chapter1}`、文 `assets/skyabyss_story/lang`、07 の 16 章の表 | `gen_story_quests.py` (雷翼・余燼の仮の名は `NAMES`) | 同じ物ができる |
@@ -103,7 +150,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 心臓: `geo/entity/stone_whale_heart_p1..p3.geo.json`、`textures/entity/stone_whale_heart_p*`、`animations/entity/stone_whale_heart.animation.json` | `install_heart_v4.py` (形の元は `tools/sources/heart/`。`rough/boss_v4.py` の A 案) | |
 | 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | `rough/rib_archer_v4.py` | 同じ物ができる |
 | 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | `rough/captain_v4.py --install` | 同じ物ができる |
-| 苔這い: geo / png / glowmask / animation | `rough/moss_crawler_v3.py` | 監査では今の素材と比べていない |
+| 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる。`gen_mobs.py` の苔這いは古い版なので走らせない |
 | `textures/gui/sky_vignette.png` | `gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
 | 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | `rough/watcher.py --install` | ラフ 3 案は `docs/review/watcher_roughs/`。`--install` なしなら docs にだけ書く |
@@ -183,3 +230,19 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 ## 自己テスト
 
 `SKYABYSS_SELFTEST=1 ./gradlew runServer` (入口は `src/main/java/jp/revati/skyabyss/SelfTestRunner.java`。18 系統を 1 tick に 1 段ずつ流し、重い段のあとはサーバーが追いつくのを待つので、`max-tick-time` は既定の 60000 のままでよい。ログの `SELFTEST <名前> PASSED / FAILED` と最後の `SELFTEST PASSED / FAILED` を見る。`SELFTEST runner:` の行に段ごとの時間)。所要時間 (2026-10-16): 空の run/ で 146〜169 秒 (うちテスト 120〜143 秒、いちばん重い tick は 1章の空の峰で約 20 秒)、既存のワールド (本体の run/) で 76〜98 秒。
+
+## 進捗と碑の生成
+
+- `python tools/gen_advancements.py`: この Mod の進捗の木 (`data/skyabyss/advancement/`)、背景の絵、lang の `advancement.skyabyss.*` を作る。何度でも動かせる。仕様は `docs/design/19_advancements_and_tablets.md`
+- `python tools/gen_tablet_texture.py`: 碑 (`skyabyss:tablet`) の絵 2 枚、ブロック状態、モデル、lang の名前を作る
+
+| 岩鯨の背の島 (低ポリ案 C をブロックにした鯨、02 の 3.1 章): `data/skyabyss/titan_back/whale.bin` | `gen_titan_back_whale.py` (形は `lowpoly_whale_voxel.py` が案 C の近景メッシュから作る。`--fit` で部屋と殻の距離、`--preview` で上と横の色の地図)。構造の書き出しとメッシュの並べ描きは `whale_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`TitanBackLayout.LAYOUT_VERSION`) を上げる |
+| 余燼の背の体 (低ポリ案 C「皮が岩になる火蜥蜴」をブロックにした火蜥蜴、13 の 3.2 章): `data/skyabyss/ember_back/body.bin` | `gen_ember_back_body.py` (形は `lowpoly_ember_voxel.py` が案 C の近景メッシュから作る。`--preview` で上・横・前の色の地図、`--cache` で `rough/_ember_back_body_cache.npz`)。メッシュとの並べ描きは `--cache` のあとで `ember_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`EmberBackLayout.LAYOUT_VERSION`) を上げる |
+
+雷翼の背の鳥: `data/skyabyss/storm_back/bird.bin` は `python tools/gen_back_shape.py bird [--preview]`。形・骨は `install_thunder_wing.build_grid()`、材料は低ポリ案 A の近景メッシュ (`lowpoly_thunder_voxel.py` が体積化。`recolor` で近いセルの材料を写す)。変えたら `StormBackLayout.LAYOUT_VERSION` を上げる。ブロックの鳥と案 A のメッシュの並べ描きは `storm_back_a_views.py` (`SKYABYSS_DUMP=storm_back ./gradlew runServer` で書き出した `.sbd` を渡す)。
+
+## 装備まわりの文と絵 (2026-10-18)
+
+- `python tools/gen_gear_story.py` : 装備 40 点のツールチップの「物語の一行」(`assets/skyabyss_gear_story/lang/`)。03 の 3.4節
+- `python tools/gen_resonance_shards.py` : 巨神ごとの共鳴の欠片の絵 4 枚 (`textures/item/resonance_shard_<巨神>.png`。共通の欠片の色味を替える)。03 の 2.2節
+- `python tools/gen_grave_assets.py` : 墓の絵・モデル・語り部の墓の会話と文 (墓の一覧の画面の文も含む)。11 の 6.4節

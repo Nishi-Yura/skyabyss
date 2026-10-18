@@ -91,10 +91,10 @@ public final class StructureDump {
         }
     }
 
-    // 巨神の背の島全体。鯨は x ±100・z ±256・y 58〜 (WhaleShape)、亀は甲羅 x ±71・z -88〜82 に頭と尾、海底 41
+    // 巨神の背の島全体。鯨は x ±100・z ±256・y 58〜 (WhaleShape)、亀は甲羅 x ±71・z -88〜82 に頭と尾・ひれ x ±116・y 〜181 (頂の塔)、海底 41
     public static final Map<String, Box> PRESETS = Map.of(
-            "titan_back", new Box(-100, 50, -256, 100, 190, 256),
-            "tide_back", new Box(-100, 38, -150, 100, 160, 120),
+            "titan_back", new Box(-116, 50, -256, 110, 190, 270),
+            "tide_back", new Box(-120, 38, -152, 120, 186, 108),
             // 雷翼の鳥は翼 x ±227・頭 z -124〜尾 132・y 110〜172 (StormBirdBuilder.BIRD)
             "storm_back", new Box(-232, 96, -136, 232, 176, 140));
     private static final int CHUNKS_PER_TICK = 6;
@@ -235,7 +235,7 @@ public final class StructureDump {
             TitanBackData data = TitanBackData.get(level);
             if (data.needsBuild()) {
                 if (data.isBuilt()) {
-                    data.resetProgress();
+                    jp.revati.skyabyss.titan.dungeon.TitanBackTrials.resetAllGroups(level);
                 }
                 TitanBackBuilder.build(level, data);
             }
@@ -393,6 +393,19 @@ public final class StructureDump {
                         o.addProperty("block", BlockStateParser.serialize(be.getBlockState()));
                         o.add("front", text(sign.getFrontText()));
                         o.add("back", text(sign.getBackText()));
+                        signs.add(o);
+                    } else if (be instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet) {
+                        // 碑は看板と同じ欄に、4 行のキーとして書く (tools/structure の「signs」で見える)
+                        o.addProperty("block", BlockStateParser.serialize(be.getBlockState()));
+                        JsonArray front = new JsonArray();
+                        for (int i = 1; i <= 4; i++) {
+                            JsonObject line = new JsonObject();
+                            line.addProperty("key", tablet.key() + "." + i);
+                            line.addProperty("text", Component.translatable(tablet.key() + "." + i).getString());
+                            front.add(line);
+                        }
+                        o.add("front", front);
+                        o.add("back", new JsonArray());
                         signs.add(o);
                     } else {
                         blockEntities.add(o);

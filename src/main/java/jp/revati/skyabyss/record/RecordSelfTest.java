@@ -82,6 +82,14 @@ public final class RecordSelfTest {
                 }
             }
         }
+        // 縁と頁の伝承の行: 序章と一〜四章 (巨神ごと) が章ごとに並び、中身のない五章以降と旧 chapter1 は出ない (05 の 2 章、11 の 3 章)
+        RecordSnapshot.Tab bonds = snap.tab(RecordSnapshot.BONDS);
+        if (bonds != null) {
+            for (jp.revati.skyabyss.story.Chapters c : jp.revati.skyabyss.story.Chapters.values()) {
+                check(f, (bonds.row("lore." + c.id()) != null) == !c.reserved(), "lore row for chapter " + c.id() + " should " + (c.reserved() ? "not " : "") + "exist");
+            }
+            check(f, bonds.row("lore.chapter1") == null, "the old chapter1 lore row must be gone");
+        }
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
         RecordSnapshot.STREAM_CODEC.encode(buf, snap);
         int bytes = buf.readableBytes();
@@ -185,7 +193,16 @@ public final class RecordSelfTest {
         ItemEntity tossCore = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(ModItems.STONE_WHALE_CORE.get()));
         ItemTossEvent coreEvent = new ItemTossEvent(tossCore, a);
         NeoForge.EVENT_BUS.post(coreEvent);
-        check(f, !coreEvent.isCanceled(), "tossing a core should be allowed");
+        check(f, !coreEvent.isCanceled(), "the /give display drop of a core should pass untouched");
+        // 心核と呼び笛も、自分で投げれば拒んで戻す
+        for (net.minecraft.world.item.Item guardedItem : List.of(ModItems.STONE_WHALE_CORE.get(), jp.revati.skyabyss.titan.travel.TravelSetup.STONE_WHALE_CALL.get())) {
+            a.getInventory().clearContent();
+            ItemEntity own = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(guardedItem));
+            own.setThrower(a);
+            ItemTossEvent ownEvent = new ItemTossEvent(own, a);
+            NeoForge.EVENT_BUS.post(ownEvent);
+            check(f, ownEvent.isCanceled() && Keepsakes.locate(a, guardedItem).inventory() == 1, "tossing " + guardedItem + " should be refused and returned");
+        }
         a.getInventory().clearContent();
 
         // ---------------------------------------------------------------- ほかの仕組みの枠 (装飾品のスロット用)
@@ -256,7 +273,7 @@ public final class RecordSelfTest {
         a.getEnderChestInventory().clearContent();
         memory.takePending(a.getUUID());
         memory.takePending(b.getUUID());
-        // a は岩鯨と潮殻の欠片を受け取った (撃破の記録 1)
+        // a は岩鯨と潮殻の殻片を受け取った (撃破の記録 1)
         TitanMemoryData.Record whale = memory.record(a.getUUID(), "stone_whale");
         TitanMemoryData.Record tide = memory.record(a.getUUID(), "tide_shell");
         boolean[] saved = {whale.fragment, tide.fragment};

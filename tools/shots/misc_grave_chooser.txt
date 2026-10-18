@@ -1,0 +1,18 @@
+# 語り部の墓の一覧の画面 (見本。サーバーとは話さない) を撮る。./gradlew runShots -Pscript=tools/shots/misc_grave_chooser.txt
+# 出力 run/shots/misc_grave_chooser/shots/misc_grave_chooser/misc_grave_chooser.png → docs/review/previews/misc_grave_chooser.png に写す
+world shots flat
+size 960 540
+timeout 300
+render 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+waitchunks
+chat clear
+wait 20
+open grave
+wait 20
+shot misc_grave_chooser
+quit

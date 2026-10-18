@@ -1,0 +1,95 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "add_options": {
+    "menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "grave",
+          "kind": "give",
+          "if": {
+            "type": "any",
+            "of": [
+              {
+                "type": "grave"
+              },
+              {
+                "type": "all",
+                "of": [
+                  {
+                    "type": "stage",
+                    "min": 1
+                  },
+                  {
+                    "type": "no_keepsake",
+                    "item": "skyabyss:tide_watching_shell"
+                  }
+                ]
+              }
+            ]
+          },
+          "goto": "lost_ask"
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "lost_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "grave",
+          "kind": "give",
+          "if": {
+            "type": "grave"
+          },
+          "goto": "grave_ask"
+        },
+        {
+          "id": "conch",
+          "kind": "give",
+          "if": {
+            "type": "all",
+            "of": [
+              {
+                "type": "stage",
+                "min": 1
+              },
+              {
+                "type": "no_keepsake",
+                "item": "skyabyss:tide_watching_shell"
+              }
+            ]
+          },
+          "goto": "ch2_conch_ask"
+        },
+        {
+          "id": "no",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    },
+    "grave_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "yes",
+          "kind": "give",
+          "if": {
+            "type": "grave"
+          },
+          "do": {
+            "type": "grave_choose"
+          }
+        },
+        {
+          "id": "no",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    }
+  }
+}

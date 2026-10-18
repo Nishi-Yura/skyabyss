@@ -59,6 +59,8 @@ public final class SkyEvents {
 
     @Nullable
     private static SkyPass active;
+    // 遅れて来た人のための個人の影 (その人にだけ送り、世界の影 (active) は立てない。ほかの人の空・足音・歌・岩鯨の出現を止めない)
+    private static final java.util.Map<java.util.UUID, SkyPass> PERSONAL = new java.util.HashMap<>();
 
     private SkyEvents() {
     }
@@ -69,12 +71,38 @@ public final class SkyEvents {
         return active;
     }
 
+    // その人に見えている影 (個人の影があればそれ、なければ世界の影)。なければ null
+    @Nullable
+    public static SkyPass activePassFor(ServerPlayer player) {
+        SkyPass personal = PERSONAL.get(player.getUUID());
+        if (personal != null && player.level().getGameTime() <= personal.startTick() + personal.duration()) {
+            return personal;
+        }
+        return active;
+    }
+
+    // その人の個人の影が去る時刻 (なければ -1)。序盤の拍子が「影が去った」を見るのに使う
+    public static long personalEnd(ServerPlayer player) {
+        SkyPass personal = PERSONAL.get(player.getUUID());
+        return personal == null ? -1 : personal.startTick() + personal.duration();
+    }
+
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
             return;
         }
         long now = level.getGameTime();
+        if (!PERSONAL.isEmpty()) {
+            PERSONAL.values().removeIf(p -> now > p.startTick() + p.duration() + 600);
+            if (now % 2 == 0) {
+                for (SkyPass personal : PERSONAL.values()) {
+                    if (personal.isActive(now)) {
+                        frightenAnimals(level, personal, now);
+                    }
+                }
+            }
+        }
         if (active != null && !active.isActive(now)) {
             active = null;
         }
@@ -119,6 +147,19 @@ public final class SkyEvents {
         return Math.max(now + FIRST_PASS_MIN_WAIT, FIRST_PASS_AT);
     }
 
+    // その人のためだけの影 (序盤の拍子の遅れた人)。世界の影はそのまま (進行中でも起こせる)。影の通過数も数えない
+    public static void startPersonal(ServerLevel level, ServerPlayer witness) {
+        SkyPass current = PERSONAL.get(witness.getUUID());
+        if (current != null && current.isActive(level.getGameTime())) {
+            return;
+        }
+        SkyPass pass = makePass(level, witness);
+        PERSONAL.put(witness.getUUID(), pass);
+        if (witness.connection != null) {
+            PacketDistributor.sendToPlayer(witness, new SkyPassPayload(pass));
+        }
+    }
+
     // 途中でログインしたプレイヤーにも、進行中の通過を見せる
     @SubscribeEvent
     static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
@@ -139,6 +180,7 @@ public final class SkyEvents {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         active = null;
+        PERSONAL.clear();
     }
 
     @SubscribeEvent
@@ -184,6 +226,13 @@ public final class SkyEvents {
     }
 
     private static void start(ServerLevel level, ServerPlayer witness) {
+        active = makePass(level, witness);
+        SkyEventData.get(level).countPass(level.getGameTime());
+        PacketDistributor.sendToPlayersInDimension(level, new SkyPassPayload(active));
+        SkyAbyss.LOGGER.debug("Sky pass started near {}", witness.getName().getString());
+    }
+
+    private static SkyPass makePass(ServerLevel level, ServerPlayer witness) {
         double angle = level.random.nextDouble() * Math.PI * 2.0;
         float dirX = (float) Math.cos(angle);
         float dirZ = (float) Math.sin(angle);
@@ -193,10 +242,7 @@ public final class SkyEvents {
         double originZ = witness.getZ() - dirZ * PATH_HALF + dirX * offset;
         int duration = (int) (PATH_HALF * 2.0 / SPEED);
 
-        active = new SkyPass(level.getGameTime() + 1, originX, originZ, dirX, dirZ, SPEED, duration);
-        SkyEventData.get(level).countPass(level.getGameTime());
-        PacketDistributor.sendToPlayersInDimension(level, new SkyPassPayload(active));
-        SkyAbyss.LOGGER.debug("Sky pass started near {}", witness.getName().getString());
+        return new SkyPass(level.getGameTime() + 1, originX, originZ, dirX, dirZ, SPEED, duration);
     }
 
     @Nullable

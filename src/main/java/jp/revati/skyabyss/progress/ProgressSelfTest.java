@@ -113,6 +113,33 @@ public final class ProgressSelfTest {
             check(f, !Progression.canBoard(b, "tide_shell"), "a player who did not stop the heart can board the tide shell");
             check(f, ProgressRules.levelCap(Progression.stage(a)) == 21 && ProgressRules.levelCap(Progression.stage(b)) == 15, "caps by stage are wrong");
 
+            // 世界の最初の知らせ (M2): まだその巨神を止めていない人・本人には送らない (チャットにも流さない)
+            check(f, Progression.worldFirstAudience(List.of(a, b, c), b, 0).equals(List.of(a)), "world-first audience should be only those who stopped that titan");
+            check(f, Progression.worldFirstAudience(List.of(a, b, c), a, 0).isEmpty(), "the one who stopped it first got the notice too");
+            check(f, Progression.worldFirstAudience(List.of(a, b, c), b, 1).isEmpty(), "players who have not stopped the tide shell were told its name");
+
+            // 心臓の戦いのあとに切断した人 (M1): 岩鯨の心臓も UUID で渡す。オフラインでも進み・欠片・報酬が付く
+            ServerLevel whaleBack = server.getLevel(TitanTravel.TITAN_BACK);
+            if (whaleBack != null) {
+                UUID gone = UUID.randomUUID();
+                jp.revati.skyabyss.loot.TitanMemoryData mem = jp.revati.skyabyss.loot.TitanMemoryData.get(server);
+                jp.revati.skyabyss.loot.TitanLoot.onHeartDefeat(whaleBack, List.of(), List.of(gone));
+                check(f, Progression.stopped(server, gone, "stone_whale") && Progression.stage(server, gone) == 1, "the whale heart did not advance a disconnected participant");
+                jp.revati.skyabyss.loot.TitanMemoryData.Record rec = mem.peek(gone, "stone_whale");
+                check(f, rec != null && rec.fragment && rec.firstCleared, "the whale heart did not record a disconnected participant");
+                check(f, mem.hasPending(gone) && mem.pending(gone).items.stream().anyMatch(s -> s.is(jp.revati.skyabyss.registry.ModItems.SKY_KEY_FRAGMENT.get())),
+                        "the whale heart did not hold the fragment for a disconnected participant");
+                mem.takePending(gone);
+                data.clearPersonal(gone, "stone_whale");
+            }
+
+            // 日替わりの数え方 (M3): 昼夜が止まっていてもゲーム時間で進み、寝て進んだ日も落とさない
+            check(f, jp.revati.skyabyss.quest.Repeats.day(0, 0) == 0 && jp.revati.skyabyss.quest.Repeats.day(0, 24000 * 3L + 5) == 3,
+                    "the day did not advance with game time while the daylight cycle was frozen");
+            check(f, jp.revati.skyabyss.quest.Repeats.day(24000 * 5L, 24000 * 2L) == 5, "a day skipped by sleeping was lost");
+            check(f, jp.revati.skyabyss.quest.Repeats.untilNext(0, 24000 * 3L + 1000, "daily") == 23000, "next swap should be measured on game time when the cycle is frozen");
+            check(f, jp.revati.skyabyss.quest.Repeats.untilNext(24000 * 5L + 1000, 24000, "daily") == 23000, "next swap should be measured on day time after sleeping");
+
             // 抜け道: 後の巨神だけの記録では進まない
             data.markPersonal(c.getUUID(), "tide_shell");
             check(f, Progression.stage(c) == 0 && !Progression.canBoard(c, "thunder_wing") && !Progression.canBoard(c, "tide_shell"),
@@ -168,7 +195,16 @@ public final class ProgressSelfTest {
         FakePlayer e = new FakePlayer(overworld, new GameProfile(UUID.randomUUID(), "progress_test_e"));
         data.add(party, c.getUUID(), "c");
         data.add(party, d.getUUID(), "d");
-        check(f, !Parties.invite(a, e), "a fifth member could be invited");
+        // 六人まで (4 人の上限は 10 の 6 章で 6 人に上げた)。四人のときはまだ招待できる
+        check(f, Parties.MAX_MEMBERS == 6, "the party size is not 6");
+        check(f, Parties.invite(a, e), "a fifth member could not be invited");
+        UUID extra1 = UUID.randomUUID();
+        UUID extra2 = UUID.randomUUID();
+        data.add(party, extra1, "x1");
+        data.add(party, extra2, "x2");
+        check(f, party.members.size() == 6 && !Parties.invite(a, e), "a seventh member could be invited");
+        data.remove(extra1);
+        data.remove(extra2);
         // リーダーを渡す・外す
         check(f, Parties.promote(a, b.getUUID(), "b") && party.isLeader(b.getUUID()), "promote failed");
         check(f, !Parties.kick(a, c.getUUID(), "c"), "a former leader could kick");

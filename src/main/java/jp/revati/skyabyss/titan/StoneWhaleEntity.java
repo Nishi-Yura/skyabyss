@@ -34,10 +34,12 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 第一の巨神「岩鯨」。背中に古代の遺跡を乗せ、雲の高さをゆっくり泳ぐ。
 // ときどきプレイヤーの近くまで降りてきて、背中の尾の側にある錨石から脇腹ごしに鎖を地上へ垂らす。
 // 鎖を右クリックすると、巻き上げられて背中へ引き上げられる。
-public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
+public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan {
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
     // 鎖が頭の乗り場から垂れているか (巨神での移動。titan.travel)。false なら背中の錨石から垂れる
     private static final EntityDataAccessor<Boolean> HEAD_CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.BOOLEAN);
+    // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って沈みはじめてからは tick (600 で止まる)
+    private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.stone_whale.swim");
 
     // 鎖の付け根まわり (採用案 B のモデルに合わせる。geo の 1 単位は 0.5 ブロック。ゲームでは geo の +X が左)
@@ -67,10 +69,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
     private enum Mode { CRUISE, APPROACH, REST }
 
     // ---- 巨神での移動 (titan.travel) の乗り場。頭の上の平らな所 (geo の z -76〜-116 単位、高さ 64 単位前後)
-    // 座席 (横, 上, 前)。横は左が +。頭の付け根 (前 30 ブロック) から 12〜16 ブロック先なので、泳ぎの揺れは 1 ブロック未満
+    // 座席 (横, 上, 前)。横は左が +。高さは低ポリ案 C のメッシュの頭の上面から測った (tools/titan_align_check.py。旧キューブより 0.2〜0.8 低い)。頭の付け根 (前 30 ブロック) から 12〜16 ブロック先なので、泳ぎの揺れは 1 ブロック未満
     private static final double[][] SEATS = {
-            {-1.5, 32.3, 46.0}, {1.5, 32.3, 46.0}, {-1.5, 32.2, 42.0}, {1.5, 32.2, 42.0},
-            {-4.5, 31.7, 46.0}, {4.5, 31.7, 46.0}, {-4.5, 31.5, 42.0}, {4.5, 31.5, 42.0}};
+            {-1.5, 32.0, 46.0}, {1.5, 32.0, 46.0}, {-1.5, 32.0, 42.0}, {1.5, 32.0, 42.0},
+            {-4.5, 31.2, 46.0}, {4.5, 31.2, 46.0}, {-4.5, 31.2, 42.0}, {4.5, 31.2, 42.0}};
     // 乗り場の鎖: 頭の上の留め具 → 頭の丸みに沿った曲がり目 → 左の頬の外の垂れ口 (横, 上)。前へ 44 ブロックの所
     private static final double HEAD_CHAIN_FORWARD = 44.0;
     private static final double[][] HEAD_CHAIN_PATH = {{6.0, 31.6}, {13.0, 25.2}, {14.5, 22.5}};
@@ -85,11 +87,16 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
     private int restTicks;
     private int approachTicks;
     private int songCooldown = 200;
+    // 章の出来事の間、鎖を垂らさず歌わない残り tick (保存しない。読み込み直したら普通に降ろす)
+    private int hold;
     private double groundY = 64;
     // 旅の操縦中 (保存しない。読み込み直したら自分で泳ぐ)
     private boolean voyage;
     private double voyageGround = Double.NaN;
     private double surroundingMax = 64;
+    // 眠っているあいだ (TitanDormancy)。沈みの目標の高さ (まだ決めていなければ NaN)
+    private double sleepY = Double.NaN;
+    private boolean wasDormant;
     @Nullable
     private WhaleChainEntity chainHandle;
 
@@ -109,6 +116,12 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(CHAIN, 0f);
         builder.define(HEAD_CHAIN, false);
+        builder.define(REST, -1);
+    }
+
+    @Override
+    public int restTicks() {
+        return entityData.get(REST);
     }
 
     // 腹から垂れている鎖の長さ (0 = たたんでいる)
@@ -194,10 +207,17 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         if (tickCount % 20 == 0) {
             sampleGround(level);
         }
+        if (tickDormant(level)) {
+            return;
+        }
         switch (mode) {
             case CRUISE -> tickCruise(level);
             case APPROACH -> tickApproach(level);
             case REST -> tickRest(level);
+        }
+        if (hold > 0 && songCooldown < 200) {
+            // 出来事の間は歌わない
+            songCooldown = 200;
         }
         if (--songCooldown <= 0) {
             songCooldown = 1600 + random.nextInt(1600);
@@ -247,11 +267,18 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         if (arrived) {
             mode = Mode.REST;
             restTicks = REST_DURATION;
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
-            for (ServerPlayer player : level.players()) {
-                if (player.distanceToSqr(this) < 200 * 200) {
-                    Notice.narrate(player, "message.skyabyss.titan_descends");
+            // 一章の中盤の出来事 (story.ch1.WhaleHush。docs/design/02 の 2.3): 初めて降りるときだけ、空の影が通り過ぎるまで歌わず、鎖を垂らさない
+            int held = jp.revati.skyabyss.story.ch1.WhaleHush.onArrive(this, level);
+            if (held > 0) {
+                hold = held;
+                restTicks += held;
+            } else {
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
+                for (ServerPlayer player : level.players()) {
+                    if (player.distanceToSqr(this) < 200 * 200) {
+                        Notice.narrate(player, "message.skyabyss.titan_descends");
+                    }
                 }
             }
         }
@@ -262,11 +289,17 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         setDeltaMovement(getDeltaMovement().scale(0.9));
         move(net.minecraft.world.entity.MoverType.SELF, getDeltaMovement());
         float wanted = (float) Math.max(0, chainTop().y - groundY - CHAIN_END_HEIGHT);
+        if (hold > 0) {
+            // 出来事の間は鎖をたたんだまま
+            hold--;
+            wanted = 0;
+        }
         float chain = chainLength();
         float step = chain < wanted ? Math.min(wanted - chain, CHAIN_GROW) : -Math.min(chain - wanted, CHAIN_SHRINK);
         entityData.set(CHAIN, chain + step);
         if (isChainDown()) {
             keepChainHandle(level);
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow());
             if (tickCount % 40 == 0) {
                 hintNearbyPlayers(level);
             }
@@ -278,6 +311,79 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
             dropChainHandle();
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.7f);
         }
+    }
+
+    // 眠り (docs/design/02 の 7.2節): 心臓が止まると歌をやめ、光が消え、鎖を巻き上げて、雲の海へゆっくり沈む。目覚めると巡航に戻って歌いだす。
+    // 戻り = 眠っている (通常の動きを飛ばす)
+    private boolean tickDormant(ServerLevel level) {
+        int age = jp.revati.skyabyss.titan.end.TitanDormancy.age(level.getServer(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+        if (age < 0) {
+            if (wasDormant) {
+                wasDormant = false;
+                sleepY = Double.NaN;
+                entityData.set(REST, -1);
+                // 鼓動が戻った: すぐ巡航に戻り、少ししてから歌う
+                mode = Mode.CRUISE;
+                hasTarget = false;
+                restCooldown = 1800 + random.nextInt(1200);
+                songCooldown = 400;
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
+            }
+            return false;
+        }
+        if (!wasDormant) {
+            wasDormant = true;
+            dropChainHandle();
+            hold = 0;
+            // 沈む先: 今から 50 ブロック下。ただし周りの地形より 22 ブロックは上に残す
+            sleepY = Math.max(surroundingMax + 22, getY() - 50);
+        }
+        // 鎖を巻き上げ、動きを止めて、ゆっくり沈む
+        retractChain();
+        setDeltaMovement(Vec3.ZERO);
+        if (!Double.isNaN(sleepY) && getY() > sleepY) {
+            setPos(getX(), Math.max(sleepY, getY() - 0.07), getZ());
+            if (tickCount % 3 == 0) {
+                // 雲の海へ沈むように、体のまわりに雲がまとわりつく
+                for (ServerPlayer p : level.players()) {
+                    if (p.distanceToSqr(this) < 300 * 300) {
+                        Vec3 c = position().add(0, 14, 0);
+                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                    }
+                }
+            }
+        }
+        if (tickCount % 5 == 0) {
+            entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        return true;
+    }
+
+    // 章の出来事 (story.ch1.WhaleHush) が終わった: 鎖を降ろし、歌をまた許す
+    public void releaseHold() {
+        if (hold > 0 || mode == Mode.REST) {
+            hold = 0;
+            songCooldown = Math.max(songCooldown, 1200);
+            if (level() instanceof ServerLevel level) {
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+            }
+        }
+    }
+
+    public boolean isHolding() {
+        return hold > 0;
+    }
+
+    // 鎖の乗り込み口の光の点 (付け根から下端まで 7 ブロックおき。下端が右クリックを受ける所)
+    private List<Vec3> chainGlow() {
+        Vec3 top = chainTop();
+        Vec3 bottom = chainBottom();
+        List<Vec3> points = new java.util.ArrayList<>();
+        for (double y = bottom.y; y < top.y; y += 7.0) {
+            points.add(new Vec3(top.x, y, top.z));
+        }
+        points.add(new Vec3(top.x, top.y, top.z));
+        return points;
     }
 
     // 鎖の根元に、右クリックを受け取る見えない当たり判定を置き続ける
@@ -426,6 +532,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         entityData.set(CHAIN, chain + step);
         if (isChainDown()) {
             keepChainHandle(level);
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow());
             if (tickCount % 40 == 0) {
                 hintNearbyPlayers(level);
             }
@@ -640,6 +747,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         restTicks = tag.getInt("RestTicks");
         approachTicks = tag.getInt("ApproachTicks");
         entityData.set(CHAIN, tag.getFloat("Chain"));
+        if (tag.contains("SleepY")) {
+            sleepY = tag.getDouble("SleepY");
+            wasDormant = true;
+        }
     }
 
     @Override
@@ -653,6 +764,9 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         tag.putInt("ApproachTicks", approachTicks);
         // 旅の途中 (頭の鎖) の長さは残さない。読み込み直した岩鯨は自分で泳ぐ
         tag.putFloat("Chain", voyage || entityData.get(HEAD_CHAIN) ? 0f : chainLength());
+        if (wasDormant && !Double.isNaN(sleepY)) {
+            tag.putDouble("SleepY", sleepY);
+        }
     }
 
     @Override

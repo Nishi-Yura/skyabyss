@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:tide_shell_heart",
+  "display": {
+    "icon": {
+      "id": "skyabyss:thunder_wing_shard"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.thunder_wing_board.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.thunder_wing_board.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "skyabyss:storm_back"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

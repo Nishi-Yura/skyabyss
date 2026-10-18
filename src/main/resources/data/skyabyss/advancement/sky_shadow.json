@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:footprint",
+  "display": {
+    "icon": {
+      "id": "minecraft:phantom_membrane"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.sky_shadow.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.sky_shadow.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "signal:sky_shadow_seen"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

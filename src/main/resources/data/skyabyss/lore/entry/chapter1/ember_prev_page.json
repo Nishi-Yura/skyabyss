@@ -1,0 +1,16 @@
+{
+  "chapter": "titan_ember",
+  "order": 179,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "ember_hearth"
+    },
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/ember_hearth"
+  ]
+}

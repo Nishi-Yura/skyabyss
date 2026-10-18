@@ -12,6 +12,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -49,7 +50,7 @@ public final class RaijuCommands {
         event.getDispatcher().register(op(SkyAbyss.MODID).then(op("raiju")
                 .then(op("go").executes(RaijuCommands::go))
                 .then(op("start").executes(ctx -> {
-                    boolean ok = RaijuBattle.startNow(ctx.getSource().getServer());
+                    boolean ok = RaijuBattle.startNow(ctx.getSource().getServer(), Groups.keyOf(ctx.getSource().getPlayerOrException()));
                     ctx.getSource().sendSuccess(() -> Component.literal(ok ? "raiju: started" : "raiju: already active or failed"), true);
                     return ok ? 1 : 0;
                 }))
@@ -65,12 +66,12 @@ public final class RaijuCommands {
                     return 1;
                 }))
                 .then(op("reset").executes(ctx -> {
-                    RaijuBattle.reawaken(ctx.getSource().getServer());
+                    RaijuBattle.reawaken(ctx.getSource().getServer(), Groups.keyOf(ctx.getSource().getPlayerOrException()));
                     ctx.getSource().sendSuccess(() -> Component.literal("raiju: reset"), true);
                     return 1;
                 }))
                 .then(op("rebuild").executes(ctx -> {
-                    RaijuBattle.abandon(ctx.getSource().getServer());
+                    RaijuBattle.abandonAll(ctx.getSource().getServer());
                     RaijuNest.build(RaijuNest.site(ctx.getSource().getServer()));
                     ctx.getSource().sendSuccess(() -> Component.literal("raiju: nest rebuilt"), true);
                     return 1;
@@ -105,9 +106,11 @@ public final class RaijuCommands {
                     for (int i = 0; i < RaijuNest.RODS; i++) {
                         rods.append(StormRods.isGrounded(site.rod(i)) ? 'G' : '-');
                     }
+                    java.util.UUID group = Groups.keyOf(ctx.getSource().getPlayerOrException());
                     String s = "site=" + site.level().dimension().location() + " " + site.center()
-                            + " built=" + RaijuNest.isBuilt(site) + " active=" + RaijuBattle.room().active()
-                            + " gathering=" + RaijuBattle.room().gathering() + " defeated=" + RaijuState.get(server).defeated()
+                            + " built=" + RaijuNest.isBuilt(site) + " active=" + RaijuBattle.room(group).active()
+                            + " gathering=" + RaijuBattle.room(group).gathering() + " defeated=" + RaijuBattle.defeated(site.level(), group)
+                            + " nest owner=" + jp.revati.skyabyss.titan.group.RoomLocks.owner(RaijuBattle.ROOM)
                             + " rods=" + rods
                             + (r == null ? "" : " hp=" + Math.round(r.getHealth()) + "/" + Math.round(r.getMaxHealth()) + " x" + r.multiplier()
                                     + " mode=" + r.mode() + " action=" + r.currentAction() + " rod=" + (r.rod() + 1) + " angry=" + r.isAngry());

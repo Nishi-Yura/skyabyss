@@ -15,7 +15,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 潮殻の背の島を建てる (08 の 21 章「巨神の形の背中」)。最初の乗り込みと、配置の版が変わったときに一度だけ動く (数秒かかる)。
@@ -23,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 //       広間 (月の窓の縦穴は頂の塔の柱の段まで) → 回り道と東の回廊 → 珊瑚の庭 (甲羅の中の洞) → 潮見の間 → 干潟 (甲羅の前の洞) →
 //       螺旋の階段と殻の底 → 掘った所の内壁を潮の民の石に (skin) → 甲羅の上へ上る段 → 頂の塔の中 → 光の井戸 →
 //       休み場・碑文・石・抜け道の床
+// (上の三つの台地の予約の間 upper は、月の窓の縦穴を広間 (hub) が通す前に掘る)
 // 潮で動く所 (水、門の開け閉め、庭の道の形、潮見の間の水位、巣) は試練の側 (TideBackTrials ほか) が置く
 public final class TideIslandBuilder {
     private TideIslandBuilder() {
@@ -40,6 +40,7 @@ public final class TideIslandBuilder {
         beach(kit);
         gate(kit);
         cave(kit);
+        upper(kit);
         hub(kit);
         ramp(kit);
         garden(kit);
@@ -167,7 +168,7 @@ public final class TideIslandBuilder {
                 for (int y = 60; y <= l.floor(); y++) {
                     kit.set(x, y, z, y == l.floor() ? landingFloor(x, z) : TideKit.SANDSTONE);
                 }
-                for (int y = l.floor() + 1; y <= l.floor() + 6; y++) {
+                for (int y = l.floor() + 1; y <= l.floor() + 8; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
             }
@@ -1189,95 +1190,76 @@ public final class TideIslandBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 頂の塔の中
-    // 南の口 (甲羅の地表から) → 土台の部屋 (縦穴のまわりの輪、床 114) → 縦穴のまわりの螺旋 (中心から 5) → 柱の段 (床 133)。
-    // 柱の段の真ん中はガラスの床 (下に広間の水盤が見える。縦穴は hub が掘る)。柱の段の縁に低い手すり。屋根の真ん中はガラス (月の光)
-    public static List<int[]> towerRing() {
-        List<int[]> ring = new ArrayList<>();
-        int r = 5;
-        // 南の真ん中から東へ (上から見て反時計回り)
-        int x = 0;
-        int z = TOWER_CZ + r;
-        int[][] dirs = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
-        int d = 0;
-        for (int i = 0; i < 8 * r; i++) {
-            ring.add(new int[] {x, z});
-            int nx = x + dirs[d][0];
-            int nz = z + dirs[d][1];
-            if (Math.max(Math.abs(nx), Math.abs(nz - TOWER_CZ)) != r) {
-                d = (d + 1) % 4;
-                nx = x + dirs[d][0];
-                nz = z + dirs[d][1];
-            }
-            x = nx;
-            z = nz;
-        }
-        return ring;
-    }
-
-    private static void tower(TideKit kit) {
-        int cz = TOWER_CZ;
-        int floor = shellTop(0, cz);
-        // 土台の部屋: 中心から 5〜7 の輪 (縦穴の壁の外)、高さ 4
-        for (int dx = -7; dx <= 7; dx++) {
-            for (int dz = -7; dz <= 7; dz++) {
-                int cheb = Math.max(Math.abs(dx), Math.abs(dz));
-                if (cheb < 5) {
-                    continue;
+    // ---------------------------------------------------------------- 封じた予約の間 (上の三つの台地の中。08 の 3.8節)
+    // 中は空の部屋だけ。入口は西の崖の封印の戸 (開かない) で、将来の巨神の内容を足すための空き。
+    // 部屋の床は台地の地面の高さ (101・114・126)。階段は 1 段ずつ、どの段の上も 3 マス空いている
+    private static void upper(TideKit kit) {
+        for (Area a : UPPER_ROOMS) {
+            kit.room(a, TideKit.FLOOR);
+            // 天井の灯り (8 マスおき)
+            for (int x = a.x1() + 3; x <= a.x2(); x += 8) {
+                for (int z = a.z1() + 3; z <= a.z2(); z += 8) {
+                    kit.set(x, a.floor() + a.height() + 1, z, TideKit.LAMP);
                 }
-                kit.set(dx, floor, cz + dz, (dx + dz) % 3 == 0 ? TideKit.DARK : TideKit.FLOOR);
-                for (int y = floor + 1; y <= floor + 4; y++) {
-                    kit.set(dx, y, cz + dz, TideKit.AIR);
-                }
-                kit.set(dx, floor + 5, cz + dz, cheb == 7 && (dx == 0 || dz == 0) ? TideKit.LAMP : TideKit.DARK);
             }
         }
-        // 南の口 (x -1〜1)。土台の外の地表まで
-        for (int z = cz + 8; z <= cz + 14; z++) {
-            int top = shellTop(0, z);
-            if (z > cz + 9 && TideTurtle.top(0, z) <= top) {
-                break;
-            }
-            for (int x = -1; x <= 1; x++) {
-                kit.set(x, floor, z, TideKit.FLOOR);
-                for (int y = floor + 1; y <= floor + 3; y++) {
+        // 入口の廊下 (x -48〜-33、z -1〜1、高さ 4) と、崖の前の窪み (x -51〜-50)。戸は廊下の西の端
+        int gx = UPPER_GATE_X;
+        kit.room(gx + 1, UPPER_HALL_X2, UPPER_GATE_Z - 1, UPPER_GATE_Z + 1, UPPER_1.floor(), 4, TideKit.FLOOR);
+        for (int x = gx - 2; x <= gx - 1; x++) {
+            for (int z = UPPER_GATE_Z - 1; z <= UPPER_GATE_Z + 1; z++) {
+                for (int y = UPPER_1.floor() + 1; y <= UPPER_1.floor() + 4; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
-                kit.set(x, floor + 4, z, Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
             }
         }
-        // 螺旋: 中心から 5 の輪を、土台の部屋の床の上から柱の段 (TOWER_DECK) まで
-        List<int[]> ring = towerRing();
-        int y = floor + 1;
-        int[] prev = {0, cz + 6};
-        for (int k = 0; y <= TOWER_DECK; k++) {
-            int[] c = ring.get(k % ring.size());
-            Direction facing = Direction.fromDelta(c[0] - prev[0], 0, c[1] - prev[1]);
-            kit.stair(c[0], y, c[1], facing == null ? Direction.EAST : facing, Blocks.STONE_BRICK_STAIRS.defaultBlockState());
-            for (int yy = y + 1; yy <= y + 3; yy++) {
-                kit.set(c[0], yy, c[1], TideKit.AIR);
+        for (int z = UPPER_GATE_Z - 1; z <= UPPER_GATE_Z + 1; z++) {
+            for (int y = UPPER_1.floor() + 1; y <= UPPER_1.floor() + 3; y++) {
+                kit.set(gx, y, z, ModBlocks.SEALED_GATE.get().defaultBlockState());
             }
-            prev = c;
-            y++;
+            kit.set(gx, UPPER_1.floor() + 4, z, TideKit.DARK);
         }
-        // 柱の段の縁の手すり (中心から 6、柱のない所)。床は塔の胴の上 (TOWER_DECK)
-        for (int dx = -6; dx <= 6; dx++) {
-            for (int dz = -6; dz <= 6; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != 6) {
-                    continue;
+        // 階段 1: UPPER_1 の床 → UPPER_2 の床 (登る向き +z)
+        for (int k = 1; k <= 12; k++) {
+            int z = UPPER_STAIR12_Z0 + k - 1;
+            int y = UPPER_1.floor() + k;
+            for (int x = UPPER_STAIR12_X; x <= UPPER_STAIR12_X + 2; x++) {
+                for (int yy = UPPER_1.floor() + 1; yy < y; yy++) {
+                    kit.set(x, yy, z, TideKit.BRICK);
                 }
-                if (kit.get(dx, TOWER_DECK + 1, cz + dz).isAir() && !kit.get(dx, TOWER_DECK, cz + dz).isAir()) {
-                    kit.set(dx, TOWER_DECK + 1, cz + dz, Blocks.PRISMARINE_WALL.defaultBlockState());
+                kit.stair(x, y, z, Direction.SOUTH, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
+                for (int yy = y + 1; yy <= y + 3; yy++) {
+                    kit.set(x, yy, z, TideKit.AIR);
                 }
             }
         }
-        // 屋根の真ん中 (半径 2.5) はガラス: 日と月の光が、縦穴を通って広間の水盤まで落ちる
+        // 階段 2: UPPER_2 の床 → UPPER_3 の床 (登る向き +x)
+        for (int k = 1; k <= 11; k++) {
+            int x = UPPER_STAIR23_X0 + k;
+            int y = UPPER_2.floor() + k;
+            for (int z = UPPER_STAIR23_Z; z <= UPPER_STAIR23_Z + 2; z++) {
+                for (int yy = UPPER_2.floor() + 1; yy < y; yy++) {
+                    kit.set(x, yy, z, TideKit.BRICK);
+                }
+                kit.stair(x, y, z, Direction.EAST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
+                for (int yy = y + 1; yy <= y + 3; yy++) {
+                    kit.set(x, yy, z, TideKit.AIR);
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 頂の塔の屋根 (月の窓の光)
+    // 塔の中は詰まっている (縦穴は広間が掘る)。縦穴の上端 (TOWER_DECK のガラス) から塔の頂まで、半径 2.5 の柱をガラスにする。
+    // 日と月の光が、縦穴を通って広間の水盤まで落ちる
+    private static void tower(TideKit kit) {
+        int cz = TOWER_CZ;
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 if (Math.hypot(dx, dz) > 2.5) {
                     continue;
                 }
-                for (int yy = TOWER_DECK + 2; yy <= TideTurtle.maxY(); yy++) {
+                for (int yy = TOWER_DECK + 1; yy <= TideTurtle.maxY(); yy++) {
                     if (!kit.get(dx, yy, cz + dz).isAir()) {
                         kit.set(dx, yy, cz + dz, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
                     }
@@ -1287,7 +1269,7 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 光の井戸: 庭と干潟の天井から甲羅の地表まで 2x2 の縦穴。上はガラス
-    public static final int[][] GARDEN_WELLS = {{-50, -28}, {-47, 17}, {-31, 31}, {-33, -16}, {-55, -6}};
+    public static final int[][] GARDEN_WELLS = {{-50, -28}, {-47, 17}, {-40, 30}, {-40, -18}, {-55, -6}};
     public static final int[][] FLATS_WELLS = {{-12, -70}, {12, -60}, {3, -76}, {-8, -56}};
 
     private static void lightWells(TideKit kit) {
@@ -1344,8 +1326,7 @@ public final class TideIslandBuilder {
         }
         for (Inscription i : LORE_SIGNS) {
             if (i.facing() == Direction.UP) {
-                kit.set(i.pos(), Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8));
-                kit.writeSign(i.pos(), i.key(), net.minecraft.world.item.DyeColor.CYAN);
+                kit.standingTablet(i.pos(), i.key());
             } else {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }

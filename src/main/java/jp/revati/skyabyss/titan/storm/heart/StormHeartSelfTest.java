@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +15,20 @@ import jp.revati.skyabyss.progress.ProgressData;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.rpg.GrowthRewards;
-import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.RoomLocks;
+import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
+import jp.revati.skyabyss.titan.storm.back.StormProgress;
+import jp.revati.skyabyss.titan.storm.back.StormTestPlayer;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.phys.Vec3;
 
 // 雷翼の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST storm_heart PASSED / FAILED。
@@ -28,7 +36,9 @@ import net.minecraft.world.phys.Vec3;
 // 閃光の向きの判定 (向いている / 背を向けている / 柱の陰)、風の刃 (しゃがむと当たらない)、雷の網 (すき間)、
 // 戦いの始まり・封印・保存されない・段階と咆哮の無敵・段階 2 の 1.2 倍・翼が裂けて 1.5 倍・人数の倍率・段階の高さ、
 // 9 つの技が最後まで回る、部屋の外へ出た心臓を戻す・放棄、報酬 (天井・図鑑・欠片は一人一回・作られていない品は外す・
-// 巨神ごとの記録・6.4節の模擬)、撃破で雷翼を止めた記録と入口が開く、立ったままでは勝てない (段階 2 に届かない、受ける傷の数)
+// 巨神ごとの記録・6.4節の模擬)、撃破で雷翼を止めた記録と入口が開く、立ったままでは勝てない (段階 2 に届かない、受ける傷の数)。
+// グループ: 心臓は起こしたグループのもの (ほかのグループには見えず・狙わず・傷を受けない)、入口はそのグループにだけ閉じ、
+// 撃破はそのグループの記録だけを変える。6 人の倍率
 public final class StormHeartSelfTest {
 
     private StormHeartSelfTest() {
@@ -203,7 +213,7 @@ public final class StormHeartSelfTest {
         for (int i = 0; i < 4; i++) {
             BlockPos r = StormHeartArena.rod(i);
             check(back.getBlockState(r.above(StormHeartArena.ROD_HEIGHT - 1)).is(Blocks.END_ROD), "rod " + i + " has no glowing tip", failures);
-            check(back.getBlockState(r.above(1)).is(Blocks.WAXED_COPPER_BULB), "rod " + i + " has no charge bulbs", failures);
+            check(back.getBlockState(r.above(1)).is(StormBackSetup.ROD_BULB.get()), "rod " + i + " has no charge bulbs", failures);
             check(Math.abs(StormHeartArena.dist(r.getX(), r.getZ()) - 9) < 1.0, "rod " + i + " is not about 9 from the centre", failures);
         }
         for (int k = 0; k < 4; k++) {
@@ -219,7 +229,8 @@ public final class StormHeartSelfTest {
         check(back.getBlockState(new BlockPos(StormHeartArena.CX + 3, StormHeartArena.CEILING - 1, StormHeartArena.CZ + 3)).isAir()
                 && !back.getBlockState(new BlockPos(StormHeartArena.CX + 3, StormHeartArena.CEILING, StormHeartArena.CZ + 3)).isAir(), "chamber ceiling is wrong", failures);
         for (BlockPos g : StormHeartArena.gate()) {
-            check(back.getBlockState(g).isAir(), "entrance is closed at " + g, failures);
+            check(back.getBlockState(g).is(ModBlocks.SEALED_GATE.get()) && back.getBlockState(g).getValue(SealedGateBlock.OPEN)
+                    && GroupGates.isOpen(back, GROUP_A, g), "entrance is not an open gate at " + g, failures);
         }
         check(StormHeartArena.ante().contains(StormHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", failures);
         check(!StormHeartArena.arena().contains(StormHeartArena.anteSpawn()), "antechamber spawn is inside the fight", failures);
@@ -228,8 +239,8 @@ public final class StormHeartSelfTest {
         StormHeartArena.resetRods(back);
         StormHeartArena.addCharge(back, 0);
         StormHeartArena.addCharge(back, 0);
-        check(StormHeartArena.charge(0) == 2 && back.getBlockState(StormHeartArena.rod(0).above(2)).getValue(CopperBulbBlock.LIT)
-                && !back.getBlockState(StormHeartArena.rod(0).above(3)).getValue(CopperBulbBlock.LIT), "rod bulbs do not show the charge", failures);
+        check(StormHeartArena.charge(0) == 2 && back.getBlockState(StormHeartArena.rod(0).above(2)).getValue(StormBlocks.RodBulb.LIT)
+                && !back.getBlockState(StormHeartArena.rod(0).above(3)).getValue(StormBlocks.RodBulb.LIT), "rod bulbs do not show the charge", failures);
         for (int i = 0; i < 4; i++) {
             for (int k = 0; k < 4; k++) {
                 StormHeartArena.addCharge(back, i);
@@ -271,15 +282,82 @@ public final class StormHeartSelfTest {
         check(!StormHeart.webHits(-8, 0, 0, 4), "web hit the opposite side of a single arm", failures);
     }
 
+    // 段階 2 の高低の拍 (HIGH_TICKS 高く、PERCH_TICKS 下りる)。時計の式と、心臓が実際に上がり下りすることを確かめる。
+    // heart は、段階 2 に入って 80 tick たった (時計が 80 前後の) 心臓
+    private static void checkRiseRhythm(ServerLevel back, StormHeart heart, List<String> failures) {
+        int cycle = StormHeart.HIGH_TICKS + StormHeart.PERCH_TICKS;
+        int perched = 0;
+        int longestHigh = 0;
+        int run = 0;
+        for (int clock = 0; clock < cycle * 3; clock++) {
+            if (StormHeart.perchedAt(clock)) {
+                perched++;
+                run = 0;
+            } else {
+                longestHigh = Math.max(longestHigh, ++run);
+            }
+        }
+        check(perched == StormHeart.PERCH_TICKS * 3 && longestHigh <= StormHeart.HIGH_TICKS, "rise rhythm is not high " + StormHeart.HIGH_TICKS + " / low "
+                + StormHeart.PERCH_TICKS + " (low " + perched + ", longest high " + longestHigh + ")", failures);
+        check(StormHeart.PERCH_TICKS >= 100 && StormHeart.HIGH_TICKS <= 240, "phase 2 heart stays out of reach too long", failures);
+        double floor = StormHeartArena.FLOOR;
+        double low = floor + StormHeart.heightFor(0, false);
+        check(low < floor + 1.62 + 3.0, "perched heart is out of melee reach (y " + low + ")", failures);
+        // 実際の動き: 時計が 80 前後から 320 tick 進める。160 から下りて床の近くへ、320 を過ぎて次の周の高い側で再び昇り風の上の端へ戻る
+        double lowest = Double.MAX_VALUE;
+        double highest = -Double.MAX_VALUE;
+        for (int i = 0; i < cycle; i++) {
+            tickHeart(heart, 1);
+            lowest = Math.min(lowest, heart.getY());
+            highest = Math.max(highest, heart.getY());
+        }
+        check(lowest <= low + 0.6, "heart never came down to melee height in phase 2 (lowest y " + lowest + ")", failures);
+        check(highest >= StormHeartArena.UPDRAFT_TOP - 0.3, "heart did not go back up (highest y " + highest + ")", failures);
+        check(heart.getY() >= StormHeartArena.UPDRAFT_TOP - 0.6, "heart is not back up at the start of the next cycle (y " + heart.getY() + ")", failures);
+    }
+
+    // 自己テストのグループ (合成の鍵。一人のグループ = 人の UUID)
+    static final UUID GROUP_A = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005ea001");
+    static final UUID GROUP_B = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005eb002");
+
     private static StormHeart startHeart(ServerLevel back, List<String> failures) {
-        StormHeartBattle.abandon(back);
-        TitanBackData.get(back).resetProgress();
-        check(StormHeartBattle.startNow(back), "battle did not start", failures);
-        StormHeart heart = StormHeartBattle.current(back);
+        StormHeartBattle.abandonAll(back);
+        RoomLocks.release(StormHeartBattle.ROOM);
+        StormBackTrials.resetGroup(back, GROUP_A, false, null, true, false);
+        check(StormHeartBattle.startNow(back, GROUP_A), "battle did not start", failures);
+        StormHeart heart = StormHeartBattle.current(back, GROUP_A);
         if (heart == null) {
             failures.add("no heart after starting (difficulty " + back.getDifficulty() + ")");
+        } else {
+            heart.skipIntro();
         }
         return heart;
+    }
+
+    // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
+    // グループ: A の心臓は A のもの。B には見えず、B を狙わず、B の傷は届かない。6 人の倍率
+    private static void checkGroups(ServerLevel back, StormHeart heart, List<String> failures) {
+        StormTestPlayer pa = StormTestPlayer.make(back, GROUP_A, "[heart_a]");
+        StormTestPlayer pb = StormTestPlayer.make(back, GROUP_B, "[heart_b]");
+        check(GROUP_A.equals(heart.groupId()), "the heart does not belong to the group that woke it (" + heart.groupId() + ")", failures);
+        check(GroupOwned.visibleTo(heart, pa) && !GroupOwned.visibleTo(heart, pb), "the heart is shown to another group", failures);
+        check(heart.canAttack(pa) && !heart.canAttack(pb), "the heart may target another group", failures);
+        check(!damageCancelled(heart, heart.damageSources().playerAttack(pa)) && damageCancelled(heart, heart.damageSources().playerAttack(pb)),
+                "damage from another group should not reach the heart", failures);
+        check(Math.abs(StormHeart.scaleFor(6) - 4.0f) < 1e-4 && StormHeart.scaleFor(7) > StormHeart.scaleFor(6), "party of 6 scale should be 4.0 (uncapped)", failures);
+    }
+
+    static boolean damageCancelled(net.minecraft.world.entity.LivingEntity victim, net.minecraft.world.damagesource.DamageSource source) {
+        var event = new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(victim,
+                new net.neoforged.neoforge.common.damagesource.DamageContainer(source, 4f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event);
+        return event.isCanceled();
+    }
+
+    private static void finishDeath(StormHeart heart) {
+        for (int i = 0; i < jp.revati.skyabyss.entity.HeartBoss.DEATH_TICKS + 5 && !heart.isRemoved(); i++) {
+            heart.tick();
+        }
     }
 
     private static void tickHeart(StormHeart heart, int ticks) {
@@ -293,7 +371,9 @@ public final class StormHeartSelfTest {
         if (heart == null) {
             return;
         }
-        check(StormHeartArena.sealed(back), "entrance not sealed when the fight starts", failures);
+        check(StormHeartArena.sealed(back, GROUP_A), "entrance not sealed when the fight starts", failures);
+        check(!StormHeartArena.sealed(back, GROUP_B), "entrance sealed for another group", failures);
+        checkGroups(back, heart, failures);
         check(heart.getTags().contains(TitanBackTrials.HEART_TAG) && heart.isBound(), "heart not tagged / bound", failures);
         check(!heart.shouldBeSaved(), "heart would be saved to disk", failures);
         check(Math.abs(heart.getMaxHealth() - StormHeart.MAX_HEALTH) < 0.01, "max health is " + heart.getMaxHealth(), failures);
@@ -328,6 +408,8 @@ public final class StormHeartSelfTest {
         tickHeart(heart, 80);
         check(Math.abs(heart.getY() - StormHeartArena.UPDRAFT_TOP) < 0.3, "heart did not rise in phase 2 (y " + heart.getY() + ")", failures);
         check(Math.abs(heart.bossBarProgress() - heart.getHealth() / heart.getMaxHealth()) < 0.01, "boss bar progress does not follow health", failures);
+        // 段階 2 の高低の拍: 高い (昇り風の上の端) → 下りる (床の近く。立ったまま殴れる) → また上がる、を時計どおりにくり返す
+        checkRiseRhythm(back, heart, failures);
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
@@ -354,7 +436,7 @@ public final class StormHeartSelfTest {
         for (int i = 0; i < 6; i++) {
             StormHeartBattle.tick(back);
         }
-        check(!StormHeartBattle.room().active() && !heart.isAlive() && !StormHeartArena.sealed(back), "empty room was not abandoned", failures);
+        check(!StormHeartBattle.room(GROUP_A).active() && !heart.isAlive() && !StormHeartArena.sealed(back, GROUP_A), "empty room was not abandoned", failures);
     }
 
     private static void checkLoot(MinecraftServer server, ServerLevel back, List<String> failures, List<String> notes) {
@@ -423,13 +505,23 @@ public final class StormHeartSelfTest {
         heart.setHealth(1f);
         heart.invulnerableTime = 0;
         heart.hurt(heart.damageSources().genericKill(), 1000f);
-        TitanBackData data = TitanBackData.get(back);
+        StormProgress a = StormProgress.of(back, GROUP_A);
+        StormProgress b = StormProgress.of(back, GROUP_B);
+        int epochB = b.epoch();
         check(!heart.isAlive(), "heart did not die", failures);
-        check(data.isHeartDefeated(), "defeat was not recorded on the back", failures);
-        check(!StormHeartBattle.room().active() && !StormHeartArena.sealed(back), "entrance did not reopen after the defeat", failures);
-        check(!back.getBlockState(StormHeartArena.gate().get(0)).is(ModBlocks.SEALED_GATE.get()), "seal left after the defeat", failures);
-        StormHeartBattle.reawaken(back, data);
-        check(!data.isHeartDefeated(), "reawaken did not reset the heart", failures);
+        check(!a.heartDefeated() && StormHeartBattle.room(GROUP_A).active(), "defeat was reported before the death animation finished", failures);
+        finishDeath(heart);
+        check(heart.isRemoved(), "heart was not removed after the death animation", failures);
+        check(a.heartDefeated() && a.everDefeated(), "defeat was not recorded in the group's record", failures);
+        check(!b.heartDefeated() && b.epoch() == epochB, "the heart killed by group A changed group B's record", failures);
+        check(!StormHeartBattle.room(GROUP_A).active() && !StormHeartArena.sealed(back, GROUP_A), "entrance did not reopen after the defeat", failures);
+        check(GroupGates.isOpen(back, GROUP_A, StormHeartArena.gate().get(0)), "seal left after the defeat", failures);
+        int epochA = a.epoch();
+        StormHeartBattle.reawaken(back, GROUP_A);
+        check(!a.heartDefeated() && a.epoch() != epochA, "reawaken did not reset the group's heart", failures);
+        check(b.epoch() == epochB, "reawakening group A's heart changed group B's trial number", failures);
+        BackGroupData.get(back).remove(GROUP_A);
+        BackGroupData.get(back).remove(GROUP_B);
         if (!worldBefore) {
             ProgressData.get(server).clearWorld(StormLoot.TITAN);
         }

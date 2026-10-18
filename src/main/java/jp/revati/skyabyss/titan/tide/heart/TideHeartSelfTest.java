@@ -11,7 +11,7 @@ import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.progress.ProgressData;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.registry.ModBlocks;
-import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.tide.TideTravel;
 import net.minecraft.core.BlockPos;
@@ -24,7 +24,8 @@ import net.minecraft.world.level.block.Blocks;
 // 潮殻の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide_heart PASSED / FAILED (サーバーを止めるのは TitanBackSelfTest)。
 // 部屋の形と満ち潮、戦いの始まり・封印・部屋の外へ出た心臓を戻す・放棄で戻す、段階と咆哮の無敵・段階2 の 1.2 倍・人数の倍率、
 // 9 つの技が最後まで回る、ボスバーの進みとテクスチャ・模型があるか、保存されない、報酬 (天井・図鑑・欠片は一人一回・初回の選択・
-// 巨神ごとの記録・6.4節の模擬)、撃破で進みの記録 (潮殻を止めた) と、もう一度挑めるようにする
+// 巨神ごとの記録・6.4節の模擬)、撃破で進みの記録 (潮殻を止めた) と、もう一度挑めるようにする。
+// 戦いと撃破はグループごと: 心臓はグループの印を持ち、ほかのグループには見えず狙わない。A の撃破は B の記録に触れない
 public final class TideHeartSelfTest {
 
     private TideHeartSelfTest() {
@@ -122,8 +123,10 @@ public final class TideHeartSelfTest {
         check(back.getBlockState(new BlockPos(3, f, TideHeartArena.CZ + 3)).isAir() && back.getBlockState(new BlockPos(3, TideHeartArena.CEILING - 1, TideHeartArena.CZ + 3)).isAir(),
                 "chamber interior is not open", failures);
         check(!back.getBlockState(new BlockPos(0, TideHeartArena.CEILING, TideHeartArena.CZ + 0)).isAir(), "chamber has no ceiling", failures);
+        // 入口はいつも扉のブロックで、ふだんは既定で開いている (戦いの間だけ閉じる)
         for (BlockPos g : TideHeartArena.gate()) {
-            check(back.getBlockState(g).isAir(), "entrance is closed at " + g, failures);
+            check(back.getBlockState(g).is(ModBlocks.SEALED_GATE.get()) && back.getBlockState(g).getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN),
+                    "entrance is not an open gate at " + g, failures);
         }
         check(TideHeartArena.ante().contains(TideHeartArena.anteSpawn()), "antechamber spawn is outside the antechamber", failures);
         check(!TideHeartArena.arena().contains(TideHeartArena.anteSpawn()), "antechamber spawn is inside the fight", failures);
@@ -152,17 +155,30 @@ public final class TideHeartSelfTest {
         check(back.getBlockState(new BlockPos(13, f - 1, TideHeartArena.CZ + 0)).is(Blocks.WATER), "draining emptied the groove", failures);
     }
 
+    // テストのグループ (一人のグループの鍵)。心臓の戦いと撃破の記録はグループごと
+    static final UUID GROUP_A = UUID.fromString("7e1de0c4-0000-4000-8000-0000000000a1");
+    static final UUID GROUP_B = UUID.fromString("7e1de0c4-0000-4000-8000-0000000000b1");
+
     private static TideHeart startHeart(ServerLevel back, List<String> failures) {
-        TideHeartBattle.abandon(back);
-        TitanBackData.get(back).resetProgress();
-        check(TideHeartBattle.startNow(back), "battle did not start", failures);
-        TideHeart heart = TideHeartBattle.current(back);
+        TideHeartBattle.abandon(back, GROUP_A);
+        jp.revati.skyabyss.titan.tide.back.TideBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        check(TideHeartBattle.startNow(back, GROUP_A), "battle did not start", failures);
+        TideHeart heart = TideHeartBattle.current(back, GROUP_A);
         if (heart == null) {
             failures.add("no heart after starting (difficulty " + back.getDifficulty() + ", hearts nearby "
                     + back.getEntitiesOfClass(TideHeart.class, TideHeartArena.arena().inflate(8)).size() + ", chunk loaded "
                     + back.isLoaded(net.minecraft.core.BlockPos.containing(TideHeartArena.heartHome())) + ")");
+        } else {
+            heart.skipIntro();
         }
         return heart;
+    }
+
+    // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
+    private static void finishDeath(TideHeart heart) {
+        for (int i = 0; i < jp.revati.skyabyss.entity.HeartBoss.DEATH_TICKS + 5 && !heart.isRemoved(); i++) {
+            heart.tick();
+        }
     }
 
     private static void tickHeart(TideHeart heart, int ticks) {
@@ -178,6 +194,16 @@ public final class TideHeartSelfTest {
         }
         check(TideHeartArena.sealed(back), "entrance not sealed when the fight starts", failures);
         check(heart.getTags().contains(TitanBackTrials.HEART_TAG) && heart.isBound(), "heart not tagged / bound", failures);
+        check(GROUP_A.equals(heart.groupId()) && GROUP_A.equals(TideHeartBattle.owner()), "the heart is not group A's / the shell bottom is not held by A", failures);
+        // 人数の倍率: パーティは 6 人まで (1 + 0.6 × 5)
+        check(Math.abs(TideHeart.scaleFor(jp.revati.skyabyss.party.Parties.MAX_MEMBERS) - 4.0f) < 1e-4, "heart scale for 6 is wrong", failures);
+        // A の心臓は B には見えず、B を狙わない
+        net.neoforged.neoforge.common.util.FakePlayer b = net.neoforged.neoforge.common.util.FakePlayerFactory.get(back,
+                new com.mojang.authlib.GameProfile(GROUP_B, "[TideHeartB]"));
+        check(!jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(heart, b) && !jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(heart, b),
+                "group A's heart is visible to / targets group B", failures);
+        // 殻の底は A が持っている: B が持とうとしても、A の戦いの間は TideHeartBattle の占有のまま (持ち主は A)
+        check(TideHeartBattle.room(GROUP_B).bossId() == null, "group B has a heart while A fights", failures);
         check(!heart.shouldBeSaved(), "heart would be saved to disk", failures);
         check(!new TideBubble(TideHeartSetup.TIDE_BUBBLE.get(), back).shouldBeSaved()
                 && !new TidePearl(TideHeartSetup.TIDE_PEARL.get(), back).shouldBeSaved(), "bubble or pearl would be saved", failures);
@@ -220,12 +246,12 @@ public final class TideHeartSelfTest {
         notes.add(ran + "/9 moves ran to the end");
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
         heart.moveTo(0.5, TideHeartArena.FLOOR + 1, -12.5);
-        TideHeartBattle.room().tick(back, TideHeartBattle.HOST);
+        TideHeartBattle.room(GROUP_A).tick(back, TideHeartBattle.HOST);
         check(heart.distanceToSqr(TideHeartArena.heartHome()) < 1, "heart outside the room was not brought back", failures);
         for (int i = 0; i < 6; i++) {
-            TideHeartBattle.room().tick(back, TideHeartBattle.HOST);
+            TideHeartBattle.room(GROUP_A).tick(back, TideHeartBattle.HOST);
         }
-        check(!TideHeartBattle.room().active() && !heart.isAlive() && !TideHeartArena.sealed(back), "empty room was not abandoned", failures);
+        check(!TideHeartBattle.room(GROUP_A).active() && !heart.isAlive() && !TideHeartArena.sealed(back), "empty room was not abandoned", failures);
     }
 
     private static void checkLoot(MinecraftServer server, List<String> failures, List<String> notes) {
@@ -266,9 +292,9 @@ public final class TideHeartSelfTest {
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null, "tide defeat wrote to the stone whale record", failures);
         check(memory.hasPending(fake), "rewards for an absent player were not held", failures);
         TitanMemoryData.Pending held = memory.takePending(fake);
-        check(TideLoot.registered(TideLoot.SHARD) && TideLoot.registered(TideLoot.CLAM), "tide shell shard / dried shell are not registered", failures);
+        check(TideLoot.registered(TideLoot.SHARD) && TideLoot.registered(TideLoot.CLAM), "tide shell flake / dried shell are not registered", failures);
         check(held.items.stream().anyMatch(s -> TitanLoot.id(s.getItem()).equals(TideLoot.SHARD) && s.getCount() >= 4),
-                "heart reward did not give tide shell shards", failures);
+                "heart reward did not give tide shell flakes", failures);
         long fragments = held.items.stream().filter(s -> TitanLoot.id(s.getItem()).equals(TideLoot.SKY_KEY_FRAGMENT)).count();
         check(fragments == 1, "first defeat should give one sky key fragment (" + fragments + ")", failures);
         TideLoot.onHeartDefeat(back, List.of(), List.of(fake));
@@ -292,14 +318,29 @@ public final class TideHeartSelfTest {
         heart.forcePhase(2);
         heart.setHealth(1f);
         heart.invulnerableTime = 0;
+        BackGroupData groups = BackGroupData.get(back);
+        BackGroupData.Record b = groups.of(GROUP_B);
+        int epochB = b.epoch();
         heart.hurt(heart.damageSources().genericKill(), 1000f);
-        TitanBackData data = TitanBackData.get(back);
+        BackGroupData.Record a = groups.of(GROUP_A);
         check(!heart.isAlive(), "heart did not die", failures);
-        check(data.isHeartDefeated(), "defeat was not recorded on the back", failures);
-        check(!TideHeartBattle.room().active() && !TideHeartArena.sealed(back), "entrance did not reopen after the defeat", failures);
-        check(!back.getBlockState(TideHeartArena.gate().get(0)).is(ModBlocks.SEALED_GATE.get()), "seal left after the defeat", failures);
-        TideHeartBattle.reawaken(back, data);
-        check(!data.isHeartDefeated(), "reawaken did not reset the heart", failures);
+        check(!a.isHeartDefeated() && TideHeartBattle.room(GROUP_A).active(), "defeat was reported before the death animation finished", failures);
+        finishDeath(heart);
+        check(heart.isRemoved(), "heart was not removed after the death animation", failures);
+        check(a.isHeartDefeated(), "defeat was not recorded for group A", failures);
+        // ほかのグループの記録には触れない
+        check(!b.isHeartDefeated() && b.epoch() == epochB, "group A's kill changed group B's record", failures);
+        check(jp.revati.skyabyss.titan.tide.back.TideBackState.of(back, GROUP_A).everDefeated()
+                && !jp.revati.skyabyss.titan.tide.back.TideBackState.of(back, GROUP_B).everDefeated(), "ever-defeated is not per group", failures);
+        check(!TideHeartBattle.room(GROUP_A).active() && !TideHeartArena.sealed(back), "entrance did not reopen after the defeat", failures);
+        check(TideHeartArena.gate().stream().allMatch(g -> back.getBlockState(g).is(ModBlocks.SEALED_GATE.get())
+                && back.getBlockState(g).getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN)), "the entrance is not an open gate after the defeat", failures);
+        // そのグループの試練ごと戻すと、もう一度挑める
+        jp.revati.skyabyss.titan.tide.back.TideBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        check(!groups.of(GROUP_A).isHeartDefeated(), "reset did not let group A fight the heart again", failures);
+        TideHeartBattle.releaseAll(back);
+        groups.remove(GROUP_A);
+        groups.remove(GROUP_B);
         if (!worldBefore) {
             ProgressData.get(server).clearWorld(TideLoot.TITAN);
         }

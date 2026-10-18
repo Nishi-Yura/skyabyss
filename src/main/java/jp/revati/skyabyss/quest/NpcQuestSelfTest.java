@@ -159,7 +159,8 @@ public final class NpcQuestSelfTest {
                 }
             }
             // クエストを始める道がある (自動で始まるか、どこかの会話が始める)
-            boolean started = q.startWhen() != null || q.board() || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
+            // 序章・一章の小要素 (story/ch1) の頼みは、章の小要素に着いたときにコードが始める (ChapterSites の onArrive)
+            boolean started = q.startWhen() != null || q.board() || q.id().startsWith("ch1/") || DialogueManager.all().values().stream().flatMap(d -> d.nodes().values().stream())
                     .anyMatch(n -> n.actions().stream().anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))
                             || n.options().stream().anyMatch(o -> o.actions().stream()
                             .anyMatch(a -> a.type().equals("quest_start") && a.str("quest").equals(q.id()))));
@@ -273,7 +274,9 @@ public final class NpcQuestSelfTest {
             // 自由なモードのサブクエストの文は skyabyss_quest に置いた (skyabyss_npc は別の担当が直すため)
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm")) {
+            // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
+            // 章ごとのクエスト・追加の会話の文は skyabyss_ch1〜ch4 にある
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch1", "skyabyss_ch2", "skyabyss_ch3", "skyabyss_ch4")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {

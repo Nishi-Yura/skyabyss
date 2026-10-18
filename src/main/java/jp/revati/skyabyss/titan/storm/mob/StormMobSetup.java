@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 雷翼の背の敵 (羽守・雷蛾・雷乞い) の登録: エンティティ、スポーンエッグ、音。12 の 5.1節、11.2 の担当 2。
-// 落とす素材 (雷翼の欠片など) は装備の担当 (担当 5) が登録するので、ここでは登録しない (StormMobLoot が ID で引く)。
+// 落とす素材 (雷翼の羽軸など) は装備の担当 (担当 5) が登録するので、ここでは登録しない (StormMobLoot が ID で引く)。
 // SkyAbyss のコンストラクタから register を呼ぶ (共有の ModEntities・ModItems・ModSounds には手を入れない)
 public final class StormMobSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);

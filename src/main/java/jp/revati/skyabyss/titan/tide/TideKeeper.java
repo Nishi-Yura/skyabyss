@@ -64,7 +64,7 @@ public final class TideKeeper {
         @Override
         protected boolean someoneAboard(ServerLevel overworld) {
             ServerLevel back = overworld.getServer().getLevel(TideTravel.TIDE_BACK);
-            return back != null && !back.players().isEmpty();
+            return back != null && jp.revati.skyabyss.titan.group.Activity.anyoneAboard(back);
         }
 
         // 巨神での移動の最中は、動きと読み込みは旅の操縦 (titan.travel.SeaVoyage) が受け持つ

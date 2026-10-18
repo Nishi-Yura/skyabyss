@@ -11,7 +11,21 @@ import java.util.Set;
 import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
+import java.util.UUID;
+
+import com.mojang.authlib.GameProfile;
+
+import jp.revati.skyabyss.entity.StoneWhaleHeart;
+import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.titan.TitanTravel;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.GroupProgress;
+import jp.revati.skyabyss.titan.group.Groups;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,6 +58,7 @@ public final class TitanBackSelfTest {
                     }
                     TitanBackData built = TitanBackData.get(back);
                     TitanBackBuilder.build(back, built);
+                    TitanBackTrials.installGates(back);
                     if (built.needsBuild() || built.layoutVersion() != LAYOUT_VERSION) {
                         PENDING.add("layout version was not recorded after building (" + built.layoutVersion() + ")");
                     }
@@ -62,6 +77,7 @@ public final class TitanBackSelfTest {
                     checkSigns(back, PENDING);
                     forceMazeChunks(back, true);
                 })),
+                SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
                 SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
@@ -168,9 +184,9 @@ public final class TitanBackSelfTest {
         BlockPos seal = shrineSeal().get(0);
         back.setChunkForced(seal.getX() >> 4, seal.getZ() >> 4, true);
         // 戦いの途中を作る: 第一の広間の入口と心臓の間の入口を閉じ、試練の番兵と心臓を置く
-        TitanBackTrials.seal(back, E1_ENTRANCE);
-        TitanBackTrials.seal(back, HEART_GATE);
-        var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center());
+        TitanBackTrials.seal(back, TEST_GROUP, E1_ENTRANCE);
+        TitanBackTrials.seal(back, TEST_GROUP, HEART_GATE);
+        var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center(), TEST_GROUP);
         if (guard != null) {
             SPAWNED.add(guard);
         }
@@ -204,17 +220,15 @@ public final class TitanBackSelfTest {
             }
         }
         for (BlockPos p : shrineSeal()) {
-            if (!back.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
+            BlockState st = back.getBlockState(p);
+            if (!st.is(ModBlocks.SEALED_GATE.get()) || st.getValue(SealedGateBlock.OPEN)) {
                 PENDING.add("peaceful did not seal the shrine stairs at " + p);
                 break;
             }
         }
         for (List<BlockPos> door : List.of(E1_ENTRANCE, HEART_GATE)) {
-            for (BlockPos p : door) {
-                if (!back.getBlockState(p).isAir()) {
-                    PENDING.add("peaceful did not reopen the door at " + p);
-                    break;
-                }
+            if (!GroupGates.isOpen(back, TEST_GROUP, door)) {
+                PENDING.add("peaceful did not reopen the door at " + door.get(0));
             }
         }
         server.setDifficulty(originalDifficulty, true);
@@ -224,7 +238,8 @@ public final class TitanBackSelfTest {
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         if (back != null && stage == 2) {
             for (BlockPos p : shrineSeal()) {
-                if (!back.getBlockState(p).isAir()) {
+                BlockState st = back.getBlockState(p);
+                if (st.is(ModBlocks.SEALED_GATE.get()) && !st.getValue(SealedGateBlock.OPEN)) {
                     PENDING.add("leaving peaceful did not unseal the shrine stairs at " + p);
                     break;
                 }
@@ -275,7 +290,7 @@ public final class TitanBackSelfTest {
         }
         for (Part part : List.of(new Part("head", -3, -150, 70, 125), new Part("left pectoral fin", -75, -30, 60, 95),
                 new Part("right pectoral fin", 69, -30, 60, 95), new Part("left fluke", -60, 238, 85, 100),
-                new Part("right fluke", 54, 238, 85, 100), new Part("back tower", -3, -38, 150, 168),
+                new Part("right fluke", 54, 238, 85, 100), new Part("ruined pillar on the back", -4, -21, 125, 142),
                 new Part("anchor chain", ANCHOR_CHAIN_X, ANCHOR_CHAIN_Z, BASE_Y - 40, ANCHOR_CHAIN_Y))) {
             boolean found = false;
             for (int y = part.y1(); y <= part.y2() && !found; y++) {
@@ -339,6 +354,22 @@ public final class TitanBackSelfTest {
         }
         SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
         // 歩ける道: 到着から祠、祠の階段で鼓動の間
+        // 到着 (左のわき腹の台) から、錨石・炉・登り口の階段・背の広場へ歩けること
+        int toAnchor = walkSteps(level, arrival(), anchor().west(), 1);
+        int toForge = walkSteps(level, arrival(), forge().west(), 1);
+        int toPlaza = walkSteps(level, arrival(), plaza(), 1);
+        if (toAnchor < 0) {
+            failures.add("cannot walk from the arrival to the anchor stone on the flank platform");
+        }
+        if (toForge < 0) {
+            failures.add("cannot walk from the arrival to the resonance forge on the flank platform");
+        }
+        if (toPlaza < 0) {
+            failures.add("cannot walk from the arrival on the flank platform up the stair to the plaza on the back");
+        } else if (toPlaza > 80) {
+            failures.add("the climb from the flank platform to the plaza is too long (" + toPlaza + " steps)");
+        }
+        SkyAbyss.LOGGER.info("Titan back flank: arrival -> anchor {} steps, -> forge {} steps, -> plaza {} steps", toAnchor, toForge, toPlaza);
         int toShrine = walkSteps(level, arrival(), new BlockPos(0, shrineY() + 1, SHRINE_Z), 2);
         int toHub = walkSteps(level, arrival(), HUB.center(), 2);
         if (toShrine < 0) {
@@ -476,10 +507,10 @@ public final class TitanBackSelfTest {
         for (Inscription lore : allSigns()) {
             BlockState sign = level.getBlockState(lore.pos());
             BlockPos wall = lore.pos().relative(lore.facing().getOpposite());
-            if (!(sign.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock)) {
-                failures.add("lore sign " + lore.key() + " missing at " + lore.pos() + " (" + sign + ")");
+            if (!(sign.getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock)) {
+                failures.add("lore tablet " + lore.key() + " missing at " + lore.pos() + " (" + sign + ")");
             } else if (!level.getBlockState(wall).isFaceSturdy(level, wall, lore.facing())) {
-                failures.add("lore sign " + lore.key() + " has no wall behind it at " + wall);
+                failures.add("lore tablet " + lore.key() + " has no wall behind it at " + wall);
             }
         }
     }
@@ -494,30 +525,19 @@ public final class TitanBackSelfTest {
         for (int cx = (-RX - 8) >> 4; cx <= (RX + 8) >> 4; cx++) {
             for (int cz = (-RZ - 8) >> 4; cz <= (RZ + 8) >> 4; cz++) {
                 for (var be : level.getChunk(cx, cz).getBlockEntities().values()) {
-                    if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)) {
+                    if (!(be instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet)) {
                         continue;
                     }
                     count++;
                     if (!expected.contains(be.getBlockPos())) {
-                        failures.add("unexpected sign at " + be.getBlockPos() + " (only inscriptions and trial entrances keep signs)");
+                        failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions and trial entrances keep tablets)");
                     }
-                    for (boolean front : new boolean[]{true, false}) {
-                        var text = front ? sign.getFrontText() : sign.getBackText();
-                        for (int i = 0; i < 4; i++) {
-                            var line = text.getMessage(i, false);
-                            if (line.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
-                                String k = tc.getKey();
-                                keys.add(k.substring(0, k.lastIndexOf('.')));
-                            } else if (!line.getString().isEmpty()) {
-                                failures.add("sign at " + be.getBlockPos() + " has untranslated text: " + line.getString());
-                            }
-                        }
-                    }
+                    keys.add(tablet.key());
                 }
             }
         }
         if (count != expected.size()) {
-            failures.add("found " + count + " signs on the back, expected " + expected.size());
+            failures.add("found " + count + " tablets on the back, expected " + expected.size());
         }
         failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
@@ -779,20 +799,21 @@ public final class TitanBackSelfTest {
         }
     }
 
-    // 試練を進めた状態から、リセットで元に戻ること
+    // 試練を進めた状態から、リセットで元に戻ること (グループごと)
     private static void checkReset(ServerLevel level, List<String> failures) {
-        for (BlockPos p : RESONANCE_STONES) {
-            level.setBlock(p, level.getBlockState(p).setValue(ResonanceStoneBlock.ACTIVE, true), 3);
+        BackGroupData.Record record = GroupProgress.of(level, TEST_GROUP);
+        for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+            record.setFlag(TitanBackTrials.STONE_FLAG + i, true);
         }
-        TitanBackTrials.open(level, GATE);
-        TitanBackTrials.open(level, E1_EXIT);
+        GroupGates.open(level, TEST_GROUP, GATE);
+        GroupGates.open(level, TEST_GROUP, E1_EXIT);
+        record.markGateOpened();
+        record.markHallCleared("e1");
+        record.markHeartDefeated();
         TitanBackData data = TitanBackData.get(level);
-        data.markGateOpened();
-        data.markHallCleared("e1");
-        data.markHeartDefeated();
         long courseSeed = data.courseSeed();
         long mazeSeed = data.mazeSeed();
-        int epoch = data.epoch();
+        int epoch = record.epoch();
         // 休み場の記録は、同じ番号の間だけ有効。リセットのあとは無効 (尾の台) になること
         net.minecraft.nbt.CompoundTag rest = new net.minecraft.nbt.CompoundTag();
         TitanBackTrials.writeCheckpoint(rest, "heart", epoch);
@@ -805,10 +826,10 @@ public final class TitanBackSelfTest {
             failures.add("a rest point without an epoch (older than this fix) was accepted");
         }
         TitanBackTrials.resetTrials(level);
-        if (data.epoch() == epoch) {
+        if (record.epoch() == epoch) {
             failures.add("reset did not advance the epoch");
         }
-        if (!TitanBackTrials.validCheckpoint(rest, data.epoch()).isEmpty()) {
+        if (!TitanBackTrials.validCheckpoint(rest, record.epoch()).isEmpty()) {
             failures.add("a rest point from before the reset was still accepted");
         }
         if (data.courseSeed() == courseSeed || data.mazeSeed() == mazeSeed) {
@@ -818,27 +839,141 @@ public final class TitanBackSelfTest {
         checkCourses(level, after);
         checkMaze(level, after);
         after.forEach(f -> failures.add("after reset: " + f));
-        for (BlockPos p : RESONANCE_STONES) {
-            if (level.getBlockState(p).getValue(ResonanceStoneBlock.ACTIVE)) {
-                failures.add("reset left a stone singing at " + p);
+        for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+            if (record.flag(TitanBackTrials.STONE_FLAG + i)) {
+                failures.add("reset left a stone singing for the group: " + i);
             }
         }
         for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, E1_EXIT)) {
-            for (BlockPos p : sealed) {
-                if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                    failures.add("reset did not reseal " + p);
-                }
+            if (GroupGates.isOpen(level, TEST_GROUP, sealed)) {
+                failures.add("reset did not reseal " + sealed.get(0));
             }
         }
-        for (BlockPos p : HEART_GATE) {
-            if (!level.getBlockState(p).isAir()) {
-                failures.add("reset did not open the heart gate at " + p);
-            }
+        if (!GroupGates.isOpen(level, TEST_GROUP, HEART_GATE)) {
+            failures.add("reset did not open the heart gate");
         }
-        if (data.hasProgress()) {
+        if (record.hasProgress()) {
             failures.add("reset left progress in the saved data");
         }
     }
+
+    // 同じ背中の二つのグループ: 進み・扉・敵・心臓・パーティの引き継ぎが、グループごとに分かれていること
+    private static void checkGroups(MinecraftServer server, ServerLevel back) {
+        List<String> f = PENDING;
+        FakePlayer pa = new FakePlayer(back, new GameProfile(UUID.randomUUID(), "groupa"));
+        FakePlayer pb = new FakePlayer(back, new GameProfile(UUID.randomUUID(), "groupb"));
+        UUID a = Groups.keyOf(pa);
+        UUID b = Groups.keyOf(pb);
+        if (a.equals(b)) {
+            f.add("two solo players got the same group key");
+            return;
+        }
+        // 扉: A が宝物庫の封印を開けても、B には閉じたまま
+        GroupGates.open(back, a, GATE);
+        if (!GroupGates.isOpen(back, a, GATE) || GroupGates.isOpen(back, b, GATE)) {
+            f.add("group A opened the treasury seal but group B's view changed (A open " + GroupGates.isOpen(back, a, GATE)
+                    + ", B open " + GroupGates.isOpen(back, b, GATE) + ")");
+        }
+        BlockPos gatePos = GATE.get(0);
+        BlockState gateState = back.getBlockState(gatePos);
+        if (gateState.getValue(SealedGateBlock.OPEN)) {
+            f.add("the world gate block changed instead of the group's override");
+        }
+        if (!gateState.getCollisionShape(back, gatePos, CollisionContext.of(pa)).isEmpty()) {
+            f.add("the opened gate still blocks group A's player on the server");
+        }
+        if (gateState.getCollisionShape(back, gatePos, CollisionContext.of(pb)).isEmpty()) {
+            f.add("the sealed gate lets group B's player through on the server");
+        }
+        // 見かけ (クライアントへ送る上書き): A には開いた扉、B には何もない
+        BlockState shownToA = GroupOverlays.compute(back, a).get(gatePos);
+        if (shownToA == null || !shownToA.getValue(SealedGateBlock.OPEN) || GroupOverlays.compute(back, b).containsKey(gatePos)) {
+            f.add("the per-group overlay for the opened gate is wrong");
+        }
+        // 敵: A の番兵は B に見えず・狙われず・傷を受けない
+        var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center(), a);
+        if (guard == null) {
+            f.add("could not spawn a group guard");
+        } else {
+            if (!a.equals(Groups.keyOf(guard))) {
+                f.add("the guard does not belong to group A");
+            }
+            if (!GroupOwned.visibleTo(guard, pa) || GroupOwned.visibleTo(guard, pb)) {
+                f.add("a group A guard is visible to the wrong players");
+            }
+            if (!guard.canAttack(pa) || guard.canAttack(pb)) {
+                f.add("a group A guard targets the wrong players (A " + guard.canAttack(pa) + ", B " + guard.canAttack(pb) + ")");
+            }
+            float hp = guard.getHealth();
+            guard.hurt(back.damageSources().playerAttack(pb), 4f);
+            if (guard.getHealth() < hp) {
+                f.add("group B's attack hurt a group A guard");
+            }
+            guard.hurt(back.damageSources().playerAttack(pa), 4f);
+            if (guard.getHealth() >= hp) {
+                f.add("group A's own attack did not hurt its guard");
+            }
+            float php = pb.getHealth();
+            pb.hurt(back.damageSources().mobAttack(guard), 4f);
+            if (pb.getHealth() < php) {
+                f.add("a group A guard hurt a group B player");
+            }
+            guard.discard();
+        }
+        // 心臓・広間: A が倒しても B の記録は変わらない
+        GroupProgress.of(back, a).markHeartDefeated();
+        GroupProgress.of(back, a).markHallCleared("e1");
+        if (GroupProgress.of(back, b).isHeartDefeated() || GroupProgress.of(back, b).isHallCleared("e1")) {
+            f.add("group A's progress leaked into group B");
+        }
+        // 心臓の戦いは、グループごとに別の部屋
+        if (TitanBackTrials.heartRooms().of(a) == TitanBackTrials.heartRooms().of(b)) {
+            f.add("two groups share one heart room");
+        }
+        // パーティ: 六人まで。組むとリーダーの進みの写しから始まり、抜けると進みを持っていく
+        if (jp.revati.skyabyss.party.Parties.MAX_MEMBERS != 6) {
+            f.add("the party size is not 6");
+        }
+        if (StoneWhaleHeart.scaleFor(6) < 3.99f || StoneWhaleHeart.scaleFor(6) > 4.01f) {
+            f.add("the heart scaling for 6 players is " + StoneWhaleHeart.scaleFor(6));
+        }
+        PartyData parties = PartyData.get(server);
+        var snapshot = parties.snapshot(server.registryAccess());
+        try {
+            parties.clearAll();
+            PartyData.Party party = parties.create(pa.getUUID(), "groupa");
+            parties.add(party, pb.getUUID(), "groupb");
+            for (int i = 0; i < 4; i++) {
+                parties.add(party, UUID.randomUUID(), "mate" + i);
+            }
+            if (party.members.size() != 6) {
+                f.add("a party of six was not formed");
+            }
+            if (!Groups.keyOf(pa).equals(party.id) || !Groups.keyOf(pb).equals(party.id)) {
+                f.add("party members do not share the party's group key");
+            }
+            BackGroupData.Record partyRecord = GroupProgress.of(back, party.id);
+            if (!partyRecord.isHeartDefeated() || !partyRecord.isHallCleared("e1")) {
+                f.add("the new party did not start from the leader's progress");
+            }
+            if (!GroupGates.isOpen(back, party.id, GATE)) {
+                f.add("the new party did not inherit the leader's opened gate");
+            }
+            // B が抜けると、B はそのときのパーティの進みを持つ
+            parties.remove(pb.getUUID());
+            if (!GroupProgress.of(back, b).isHeartDefeated() || !GroupGates.isOpen(back, b, GATE)) {
+                f.add("a member who left did not keep the party's progress");
+            }
+        } finally {
+            parties.restore(snapshot, server.registryAccess());
+        }
+        // 後始末
+        for (UUID id : List.of(a, b)) {
+            GroupProgress.reset(back, id);
+        }
+    }
+
+    private static final UUID TEST_GROUP = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
 
     // 見取り図を画像で書き出す (地表を真上から、体内の歩く高さ、アスレの高さ、水路の高さ)
     private static void writeMaps(ServerLevel level, java.nio.file.Path dir) {
@@ -896,7 +1031,9 @@ public final class TitanBackSelfTest {
     }
 
     private static void air(ServerLevel level, BlockPos pos, String what, List<String> failures) {
-        if (!level.getBlockState(pos).isAir()) {
+        BlockState st = level.getBlockState(pos);
+        // 開いた状態の扉のブロックは、空気と同じに通れる
+        if (!st.isAir() && !(st.is(ModBlocks.SEALED_GATE.get()) && st.getValue(SealedGateBlock.OPEN))) {
             failures.add(what + " is blocked at " + pos + " by " + level.getBlockState(pos));
         }
     }

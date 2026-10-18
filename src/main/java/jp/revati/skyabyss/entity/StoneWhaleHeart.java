@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -22,7 +23,6 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
@@ -51,7 +51,7 @@ import org.joml.Vector3f;
 //  段階3 (吊られた殻): 赤熱の光線 / 鎖の振り回し / 殻の落下
 // 段階が変わるときは 3 秒の咆哮を挟む。その間は傷を受けず、輪で人を押し返す。
 // 段階は同期データで全員の画面に届き、モデルとボスバーの見た目を決める。
-public class StoneWhaleHeart extends GuardMob {
+public class StoneWhaleHeart extends HeartBoss {
     // 段階の数 (1 から 3 までの模型がある)
     public static final int PHASE_COUNT = 3;
     // 段階が変わる体力の割合 (段階2 へ 66%、段階3 へ 33%)
@@ -185,7 +185,8 @@ public class StoneWhaleHeart extends GuardMob {
 
     // 技と狙いの対象になれるか。心臓の間に縛られているときは、その内側にいる人だけ
     private boolean canReach(@Nullable LivingEntity entity) {
-        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()))
+                && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p);
     }
 
     // 体力の割合から、いまあるべき段階
@@ -209,6 +210,9 @@ public class StoneWhaleHeart extends GuardMob {
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickCount % 20 == 0) {
             updateBossBarViewers();
+        }
+        if (isIntroPlaying()) {
+            return;
         }
         if (cooldown > 0) {
             cooldown--;
@@ -344,12 +348,12 @@ public class StoneWhaleHeart extends GuardMob {
     private void tickRoar(ServerLevel server) {
         if (actionTicks == 1) {
             setRoaring(true);
-            sound(server, SoundEvents.WARDEN_ROAR, 3f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
                     getX(), getY() + 2.2, getZ(), 60, 1.5, 1.2, 1.5, 0.2);
         }
         if (actionTicks == 22) {
-            sound(server, SoundEvents.GENERIC_EXPLODE.value(), 2f, 0.7f);
+            sound(server, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f);
             waves.add(new Wave(floorY(), false));
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
@@ -358,7 +362,7 @@ public class StoneWhaleHeart extends GuardMob {
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
             setPhase(getPhase() + 1);
-            sound(server, SoundEvents.BEACON_ACTIVATE, 3f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_PHASE.get(), 3f, 1.0f);
             finish();
             cooldown = 40;
         }
@@ -370,7 +374,7 @@ public class StoneWhaleHeart extends GuardMob {
     private void tickThrust(ServerLevel server) {
         Vec3 f = forward(getYRot());
         if (actionTicks == 1) {
-            sound(server, SoundEvents.DEEPSLATE_BREAK, 1.5f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_GRIND.get(), 2f, 1.0f);
         }
         if (actionTicks < 24 && actionTicks % 2 == 0) {
             for (int i = -2; i <= 2; i++) {
@@ -380,7 +384,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         }
         if (actionTicks == 24) {
-            sound(server, SoundEvents.ANVIL_LAND, 2f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
             server.sendParticles(ParticleTypes.CRIT, getX() + f.x * 4, getY() + 2.0, getZ() + f.z * 4, 30, 1.5, 1.2, 1.5, 0.3);
             for (ServerPlayer player : nearbyPlayers(server, 8)) {
                 Vec3 v = player.position().subtract(position()).multiply(1, 0, 1);
@@ -400,7 +404,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 石棘の掃射: 殻の縁が鳴り (1秒)、弧を描く腕の先から石の棘が地を割って出る。棘の間に入れば避けられる
     private void tickSweep(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.BONE_BLOCK_BREAK, 1.6f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_SPIKE_CHARGE.get(), 2f, 1.0f);
         }
         if (actionTicks < 20 && actionTicks % 3 == 0) {
             for (int a = 0; a < 360; a += 30) {
@@ -426,7 +430,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 跳躍の叩きつけ: 心臓が沈み (1秒、鼓動が鳴る)、着地の輪が床を広がる。足元の人は直接打たれる
     private void tickLeap(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.WARDEN_HEARTBEAT, 2.5f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_PULSE.get(), 3f, 1.0f);
         }
         if (actionTicks < 24 && actionTicks % 3 == 0) {
             double fy = floorY();
@@ -437,7 +441,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         }
         if (actionTicks == 24) {
-            sound(server, SoundEvents.GENERIC_EXPLODE.value(), 2f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
             double fy = floorY();
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
                     getX(), fy + 0.5, getZ(), 50, 2.0, 0.4, 2.0, 0.2);
@@ -458,7 +462,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 亀裂の爆発: 人へ向かう三本のひびが光る (1.5秒)。そのあと、ひびの線に沿って床から炎が上がる
     private void tickCrack(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.BLAZE_AMBIENT, 2f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_FLAME_CHARGE.get(), 2.5f, 1.0f);
             cracks.clear();
             List<ServerPlayer> players = nearbyPlayers(server, 26);
             players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
@@ -490,7 +494,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         }
         if (actionTicks == 30) {
-            sound(server, SoundEvents.FIRECHARGE_USE, 2f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
             for (double[] line : cracks) {
                 double len = Math.hypot(line[2] - line[0], line[3] - line[1]);
                 int i = 0;
@@ -510,7 +514,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 殻の再閉: 殻が震え (1.5秒)、閉じる。閉じたあと一秒は、この心臓の攻撃が弱まり、傷は一・五倍に効く
     private void tickReclose(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.CHAIN_PLACE, 1.6f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2f, 0.8f);
         }
         if (actionTicks < 30 && actionTicks % 3 == 0) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
@@ -518,7 +522,7 @@ public class StoneWhaleHeart extends GuardMob {
                     2, 0.1, 0.1, 0.1, 0.05);
         }
         if (actionTicks == 30) {
-            sound(server, SoundEvents.ANVIL_LAND, 2f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_PLATE_LOCK.get(), 2.5f, 1.0f);
             warn(server, dust(0xFFB347, 1.4f), getX(), getY() + 2.0, getZ(), 60, 1.8, 1.8, 1.8, 0.1);
             weakTicks = 20;
         }
@@ -531,7 +535,7 @@ public class StoneWhaleHeart extends GuardMob {
     private void tickVolley(ServerLevel server) {
         LivingEntity target = getTarget();
         if (actionTicks == 1) {
-            sound(server, SoundEvents.CROSSBOW_LOADING_END.value(), 1.5f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_SPIKE_CHARGE.get(), 1.8f, 1.25f);
         }
         if (target != null && actionTicks < 30 && actionTicks % 2 == 0) {
             Vec3 from = position().add(0, 2.4, 0);
@@ -544,7 +548,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         }
         if (actionTicks == 30 && target != null) {
-            sound(server, SoundEvents.SKELETON_SHOOT, 2f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
             Vec3 origin = position().add(0, 2.4, 0).add(forward(getYRot()).scale(1.2));
             Vec3 aim = target.position().add(0, target.getBbHeight() * 0.5, 0).subtract(origin);
             double base = Math.atan2(aim.z, aim.x);
@@ -569,7 +573,7 @@ public class StoneWhaleHeart extends GuardMob {
         Vec3 f = forward(attackYaw);
         Vec3 origin = position().add(0, 2.6, 0).add(f.scale(1.0));
         if (actionTicks == 1) {
-            sound(server, SoundEvents.BEACON_POWER_SELECT, 2f, 0.6f);
+            sound(server, MobSounds.STONE_HEART_BEAM_CHARGE.get(), 2.5f, 1.0f);
         }
         if (actionTicks < 40) {
             if (actionTicks % 2 == 0) {
@@ -587,7 +591,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         } else if (actionTicks < 64) {
             if (actionTicks == 40) {
-                sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, 1.6f);
+                sound(server, MobSounds.STONE_HEART_BEAM_FIRE.get(), 3f, 1.0f);
             }
             double p = (actionTicks - 40) / 24.0;
             Vec3 dir = forward((float) (attackYaw + (-8 + 16 * p)));
@@ -620,7 +624,7 @@ public class StoneWhaleHeart extends GuardMob {
     private void tickChain(ServerLevel server) {
         if (actionTicks == 1) {
             chainY = floorY();
-            sound(server, SoundEvents.CHAIN_STEP, 2f, 0.5f);
+            sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2.5f, 1.0f);
         }
         if (actionTicks < 24 && actionTicks % 2 == 0) {
             Vec3 f = forward(attackYaw);
@@ -658,7 +662,7 @@ public class StoneWhaleHeart extends GuardMob {
     // 殻の落下: 人の足元に二つの影が広がり (1.5秒)、そこへ殻の塊が落ちる
     private void tickShellDrop(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, SoundEvents.GRINDSTONE_USE, 1.8f, 0.4f);
+            sound(server, MobSounds.STONE_HEART_GRIND.get(), 2f, 0.8f);
             List<ServerPlayer> players = nearbyPlayers(server, 26);
             players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
             for (int i = 0; i < Math.min(2, players.size()); i++) {
@@ -739,13 +743,13 @@ public class StoneWhaleHeart extends GuardMob {
     private void impact(ServerLevel server, Spike s) {
         switch (s.kind()) {
             case BONE -> {
-                server.playSound(null, s.x(), s.y(), s.z(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.6f, 0.6f);
+                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 2f, 1.0f);
                 server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
                         s.x(), s.y() + 0.5, s.z(), 30, 0.6, 0.4, 0.6, 0.2);
                 hurtArea(server, s, 1.4, 9f, 0.4);
             }
             case FIRE -> {
-                server.playSound(null, s.x(), s.y(), s.z(), SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 1.2f, 0.9f);
+                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_FLAME_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.15f);
                 server.sendParticles(ParticleTypes.FLAME, s.x(), s.y() + 0.3, s.z(), 18, 0.5, 0.6, 0.5, 0.05);
                 server.sendParticles(ParticleTypes.LAVA, s.x(), s.y() + 0.3, s.z(), 4, 0.4, 0.2, 0.4, 0);
                 for (ServerPlayer player : areaPlayers(server, s, 1.2)) {
@@ -754,7 +758,7 @@ public class StoneWhaleHeart extends GuardMob {
                 }
             }
             case SHELL -> {
-                server.playSound(null, s.x(), s.y(), s.z(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 2.2f, 0.5f);
+                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
                 server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
                         s.x(), s.y() + 0.5, s.z(), 60, 1.4, 0.6, 1.4, 0.25);
                 hurtArea(server, s, 2.5, 12f, 0.6);
@@ -780,7 +784,7 @@ public class StoneWhaleHeart extends GuardMob {
     public boolean hurt(DamageSource source, float amount) {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
-                server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.5f);
+                server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
                 server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 2.2, getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
             }
             return false;
@@ -795,7 +799,7 @@ public class StoneWhaleHeart extends GuardMob {
             }
         }
         if (level() instanceof ServerLevel server) {
-            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40)) {
+            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p))) {
                 bossBar.addPlayer(player);
             }
         }
@@ -807,7 +811,7 @@ public class StoneWhaleHeart extends GuardMob {
         super.remove(reason);
     }
 
-    // 倒れたとき: 試練の攻略を知らせる。アイテムは落とさない (戦利品表なし)
+    // 倒れたとき: 殻が剥がれて核が砕ける演出 (deathEffects) のあとで、試練の攻略を知らせる (onDeathFinished)。アイテムは落とさない (戦利品表なし)
     @Override
     public void die(DamageSource source) {
         if (defeated) {
@@ -820,10 +824,95 @@ public class StoneWhaleHeart extends GuardMob {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
                     getX(), getY() + 2.2, getZ(), 120, 1.2, 1.5, 1.2, 0.2);
             warn(server, dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
-            // 試練で湧いた心臓だけが、背中の攻略を知らせる (スポーンエッグの心臓や、地上の心臓では何も起きない)
-            if (server.dimension() == TitanTravel.TITAN_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
-                TitanBackTrials.onHeartDefeated(server, this);
+        }
+    }
+
+    // 試練で湧いた心臓だけが、背中の攻略を知らせる (スポーンエッグの心臓や、地上の心臓では何も起きない)
+    @Override
+    protected void onDeathFinished(ServerLevel server) {
+        if (server.dimension() == TitanTravel.TITAN_BACK && getTags().contains(TitanBackTrials.HEART_TAG)) {
+            TitanBackTrials.onHeartDefeated(server, this);
+        }
+    }
+
+    @Override
+    protected double coreHeight() {
+        return getY() + 2.2;
+    }
+
+    // ---- 登場: 床がきしみ、石の殻が床の下から迫り上がり、八枚の板が順に閉じて、核が一つ脈を打つ (animation.stone_whale_heart.intro)
+    @Override
+    protected void introEffects(ServerLevel server, int tick) {
+        double fy = floorY();
+        if (tick == 0) {
+            sound(server, MobSounds.STONE_HEART_EMERGE.get(), 2.5f, 1.0f);
+        }
+        if (tick < 56 && tick % 3 == 0) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 2 + random.nextDouble() * 3.5;
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                    getX() + Math.cos(a) * r, fy + 0.2, getZ() + Math.sin(a) * r, 8, 0.3, 0.2, 0.3, 0.15);
+            if (tick % 9 == 0) {
+                server.playSound(null, getX() + Math.cos(a) * r, fy, getZ() + Math.sin(a) * r, MobSounds.STONE_HEART_PLATE_LOCK.get(), SoundSource.HOSTILE, 1.2f, 0.7f);
             }
+        }
+        if (tick == 24) {
+            sound(server, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 0.8f);
+            for (int k = 0; k < 24; k++) {
+                double a = k * Math.PI / 12;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE_BRICKS.defaultBlockState()),
+                        getX() + Math.cos(a) * 3.5, fy + 0.3, getZ() + Math.sin(a) * 3.5, 5, 0.2, 0.3, 0.2, 0.25);
+            }
+        }
+        if (tick >= 54 && tick <= 68 && (tick - 54) % 2 == 0) {
+            int i = (tick - 54) / 2;
+            double a = Math.toRadians(22.5 + 45 * i);
+            double px = getX() + Math.cos(a) * 2.6;
+            double pz = getZ() + Math.sin(a) * 2.6;
+            server.playSound(null, px, fy + 2, pz, MobSounds.STONE_HEART_PLATE_LOCK.get(), SoundSource.HOSTILE, 1.4f, 0.8f + 0.04f * i);
+            server.sendParticles(ParticleTypes.CRIT, px, fy + 2.0, pz, 6, 0.3, 0.8, 0.3, 0.1);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), px, fy + 1.0, pz, 10, 0.3, 0.5, 0.3, 0.15);
+        }
+        if (tick == 70) {
+            sound(server, MobSounds.STONE_HEART_RESONANCE.get(), 3f, 1.0f);
+            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 60, 1.5, 1.5, 1.5, 0.1);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), coreHeight(), getZ(), 30, 1.2, 1.2, 1.2, 0.08);
+        }
+    }
+
+    // ---- 倒れる: 八枚の板が外へ剥がれ落ち、鎖が切れ、むき出しの核が細かくふるえて、光を吸い込んで砕ける (animation.stone_whale_heart.death)
+    @Override
+    protected void deathEffects(ServerLevel server, int tick) {
+        double cy = coreHeight();
+        double fy = floorY();
+        if (tick == 14 || tick == 28 || tick == 42 || tick == 56) {
+            sound(server, MobSounds.STONE_HEART_PLATE_FALL.get(), 2.5f, 0.9f + 0.05f * (tick / 14));
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4 + tick;
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, k % 2 == 0 ? Blocks.STONE_BRICKS.defaultBlockState() : Blocks.BONE_BLOCK.defaultBlockState()),
+                        getX() + Math.cos(a) * 3, fy + 0.8, getZ() + Math.sin(a) * 3, 10, 0.4, 0.5, 0.4, 0.2);
+            }
+        }
+        if (tick == 24) {
+            sound(server, MobSounds.STONE_HEART_CHAIN_BREAK.get(), 2.5f, 1.0f);
+        }
+        if (tick == 34 || tick == 50) {
+            sound(server, MobSounds.STONE_HEART_PLATE_FALL.get(), 1.6f, 1.2f);
+        }
+        if (tick >= 60 && tick <= 86 && tick % 2 == 0) {
+            double a = tick * 0.5;
+            double r = 4.0 * (1 - (tick - 60) / 26.0) + 0.5;
+            warn(server, dust(0x7FF4FF, 1.2f), getX() + Math.cos(a) * r, cy + Math.sin(a * 0.7) * 0.8, getZ() + Math.sin(a) * r, 4, 0.1, 0.1, 0.1, 0);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 2, 0.4, 0.4, 0.4, 0.02);
+        }
+        if (tick == 88) {
+            sound(server, MobSounds.STONE_HEART_CORE_SHATTER.get(), 3f, 1.0f);
+            server.sendParticles(ParticleTypes.END_ROD, getX(), cy, getZ(), 100, 0.3, 0.3, 0.3, 0.35);
+            warn(server, dust(0x7FF4FF, 1.8f), getX(), cy, getZ(), 80, 1.0, 1.0, 1.0, 0.2);
+        }
+        if (tick == 92) {
+            sound(server, MobSounds.STONE_HEART_SHARD.get(), 2.5f, 0.9f);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), getX(), cy, getZ(), 60, 1.0, 1.0, 1.0, 0.3);
         }
     }
 
@@ -839,22 +928,23 @@ public class StoneWhaleHeart extends GuardMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.AMETHYST_BLOCK_RESONATE;
+        return MobSounds.STONE_WHALE_HEART_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.BONE_BLOCK_HIT;
+        return MobSounds.STONE_WHALE_HEART_HURT.get();
     }
 
+    // 最後の一撃の音 (被弾と同じ)。倒れる演出は deathEffects が音も流すので、ここで別の音を重ねない
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WARDEN_DEATH;
+        return MobSounds.STONE_WHALE_HEART_HURT.get();
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.6f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 
     @Override

@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:forge",
+  "display": {
+    "icon": {
+      "id": "minecraft:anvil"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.forge_enhance.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.forge_enhance.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "forge:enhance"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

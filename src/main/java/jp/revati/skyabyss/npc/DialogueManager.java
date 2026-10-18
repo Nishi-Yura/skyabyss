@@ -96,7 +96,7 @@ public final class DialogueManager extends SimpleJsonResourceReloadListener {
         SkyAbyss.LOGGER.info("[dialogue] loaded {} dialogues", loaded.size());
     }
 
-    static void merge(com.google.gson.JsonObject base, com.google.gson.JsonObject ext, String where, List<String> errors) {
+    public static void merge(com.google.gson.JsonObject base, com.google.gson.JsonObject ext, String where, List<String> errors) {
         if (!base.has("nodes")) {
             base.add("nodes", new com.google.gson.JsonObject());
         }

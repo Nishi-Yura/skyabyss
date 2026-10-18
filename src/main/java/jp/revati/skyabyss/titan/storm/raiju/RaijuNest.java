@@ -1,10 +1,13 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +15,7 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.storm.back.StormBackBuilder;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
@@ -28,7 +32,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -43,13 +46,14 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 // 柱は本物の避雷の柱 (StormRods)。根元 (StormBackLayout.raijuRods()) で登録し、満ちた (3 段) 柱として置く:
 // 段の電球 3 つが灯っているのが「雷が通る柱」、接地すると消える (StormEast.showRods と同じ決まり)。
 // 柱の根元の「接地の栓」(レバー) を右クリックすると、柱が 8 秒接地する (電球が消え、栓が倒れる)。栓は接地が切れてから 4 秒待つ。
-// 入口は雷の骨の回廊の突き当たり (StormBackLayout.RAIJU_NEST_MOUTH の x)。戦いのあいだ回廊の幅と高さいっぱいを封じる
+// 入口は雷の骨の回廊の突き当たり (StormBackLayout.RAIJU_NEST_MOUTH の x)。回廊の幅と高さいっぱいに封印の扉のブロックを置き (既定は開いている)、
+// 戦っているグループにだけ閉じる (GroupGates)。巣は一度に一つのグループだけが入れる部屋 (RaijuBattle.ROOM) なので、柱の接地と栓は持ち主のもの
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RaijuNest {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
     // 2: 背中の担当の本物の巣を使う (自前の洞を建てない)
-    public static final int LAYOUT_VERSION = 2;
+    public static final int LAYOUT_VERSION = 3;
     public static final int RODS = 6;
     public static final int ROD_RADIUS = StormBackLayout.RAIJU_ROD_RADIUS;
     // 柱: 根元 (床のブロックの高さ) の銅、電球 3 つ、銅、5 段上に避雷針。雷獣は避雷針の上に立つ
@@ -209,7 +213,7 @@ public final class RaijuNest {
     // 背中の鳥が建っていて、巣の柱が本物の柱として登録されている
     public static boolean isBuilt(Site site) {
         for (int i = 0; i < RODS; i++) {
-            if (!site.level().getBlockState(site.rodTop(i)).is(Blocks.LIGHTNING_ROD) || StormRods.get(site.level(), site.rod(i)) == null) {
+            if (!site.level().getBlockState(site.rodTop(i)).is(StormBackSetup.ROD_TIP.get()) || StormRods.get(site.level(), site.rod(i)) == null) {
                 return false;
             }
         }
@@ -231,7 +235,7 @@ public final class RaijuNest {
         }
         StormBackBuilder.ensureBuilt(level);
         RaijuState state = RaijuState.get(level.getServer());
-        if (!level.getBlockState(site.rodTop(0)).is(Blocks.LIGHTNING_ROD) && state.built() < LAYOUT_VERSION) {
+        if (!level.getBlockState(site.rodTop(0)).is(StormBackSetup.ROD_TIP.get()) && state.built() < LAYOUT_VERSION) {
             SkyAbyss.LOGGER.info("Found the raiju nest of an older version; rebuilding the storm back once");
             StormBackBuilder.build(level, TitanBackData.get(level));
         }
@@ -243,29 +247,40 @@ public final class RaijuNest {
             StormRods.charge(level, rod, StormRods.FULL);
             show(site, i, false);
         }
-        open(site);
+        placeGate(site);
     }
 
-    // ---------------------------------------------------------------- 封印
+    // ---------------------------------------------------------------- 封印 (グループごとの扉。既定は開いている)
 
-    public static void seal(Site site) {
+    // 入口の扉のブロックの座標 (回廊の幅と高さのうち、空気か扉の所)
+    public static List<BlockPos> gateBlocks(Site site) {
+        List<BlockPos> out = new ArrayList<>();
         for (BlockPos p : site.gate()) {
-            if (site.level().getBlockState(p).isAir()) {
-                site.level().setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
+            BlockState s = site.level().getBlockState(p);
+            if (s.isAir() || s.is(ModBlocks.SEALED_GATE.get())) {
+                out.add(p);
             }
         }
+        return out;
     }
 
-    public static void open(Site site) {
-        for (BlockPos p : site.gate()) {
-            if (site.level().getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                site.level().setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-            }
-        }
+    // 扉のブロックを置く (開いた扉。何度呼んでも同じ)
+    public static void placeGate(Site site) {
+        GroupGates.place(site.level(), gateBlocks(site), true);
     }
 
-    public static boolean sealed(Site site) {
-        return site.level().getBlockState(site.gateCenter()).is(ModBlocks.SEALED_GATE.get());
+    // 戦っているグループにだけ閉じる
+    public static void seal(Site site, UUID group) {
+        GroupGates.seal(site.level(), group, gateBlocks(site));
+    }
+
+    public static void open(Site site, UUID group) {
+        GroupGates.release(site.level(), group, gateBlocks(site));
+    }
+
+    // そのグループにとって入口が閉じているか
+    public static boolean sealed(Site site, UUID group) {
+        return !GroupGates.isOpen(site.level(), group, site.gateCenter());
     }
 
     // ---------------------------------------------------------------- 接地の栓
@@ -316,8 +331,8 @@ public final class RaijuNest {
         for (int k = 1; k <= 3; k++) {
             BlockPos bulb = b.above(k);
             BlockState s = level.getBlockState(bulb);
-            if (s.is(Blocks.WAXED_COPPER_BULB) && s.getValue(CopperBulbBlock.LIT) == grounded) {
-                level.setBlock(bulb, s.setValue(CopperBulbBlock.LIT, !grounded), 2);
+            if (s.is(StormBackSetup.ROD_BULB.get()) && s.getValue(StormBlocks.RodBulb.LIT) == grounded) {
+                level.setBlock(bulb, s.setValue(StormBlocks.RodBulb.LIT, !grounded), 2);
             }
         }
         BlockPos plug = site.plug(i);

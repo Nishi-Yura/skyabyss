@@ -57,10 +57,16 @@ public final class WhaleKeeper {
             return new Vec3(target.getX() + Math.cos(angle) * SPAWN_DISTANCE, 200, target.getZ() + Math.sin(angle) * SPAWN_DISTANCE);
         }
 
+        // 呼び直しの宛先は、まだ岩鯨を見ていない人を優先する (遅れて来た人のところへも来る)
+        @Override
+        protected boolean preferred(ServerPlayer player) {
+            return !jp.revati.skyabyss.lore.Lore.state(player).has("chapter1/stone_whale");
+        }
+
         @Override
         protected boolean someoneAboard(ServerLevel overworld) {
             ServerLevel back = overworld.getServer().getLevel(TitanTravel.TITAN_BACK);
-            return back != null && !back.players().isEmpty();
+            return back != null && jp.revati.skyabyss.titan.group.Activity.anyoneAboard(back);
         }
 
         @Override
@@ -93,6 +99,18 @@ public final class WhaleKeeper {
     @Nullable
     public static StoneWhaleEntity current(ServerLevel overworld) {
         return KEEPER.current(overworld);
+    }
+
+    // 岩鯨が一度でも現れたか (章の予兆 story.ch1 が、現れる前だけ起こすために)
+    public static boolean everSpawned(ServerLevel overworld) {
+        return TitanWorldData.get(overworld).whale().spawned;
+    }
+
+    // 最後に見た位置 (記録がなければ null)。見張りの丘の方角に使う
+    @Nullable
+    public static net.minecraft.core.BlockPos lastKnown(ServerLevel overworld) {
+        TitanWorldData.Slot slot = TitanWorldData.get(overworld).whale();
+        return slot.hasLast ? net.minecraft.core.BlockPos.containing(slot.lastX, slot.lastY, slot.lastZ) : null;
     }
 
     // 毎 tick、オーバーワールドで呼ばれる

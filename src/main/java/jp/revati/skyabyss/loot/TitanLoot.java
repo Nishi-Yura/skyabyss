@@ -173,7 +173,7 @@ public final class TitanLoot {
         int memory = r.memory;
         List<ItemStack> items = new ArrayList<>();
         items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 4, 7)));
-        items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), between(random, 1, 3)));
+        items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), between(random, 1, 3)));
         // 心核は初めての撃破で必ず、そのあとは 25%
         if (r.clears == 1 || random.nextFloat() < CORE_CHANCE) {
             items.add(new ItemStack(ModItems.STONE_WHALE_CORE.get()));
@@ -197,7 +197,7 @@ public final class TitanLoot {
             List<Item> missing = collection().stream().filter(i -> !r.owned.contains(id(i))).toList();
             if (missing.isEmpty()) {
                 pityShards = true;
-                items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), PITY_SHARDS));
+                items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), PITY_SHARDS));
                 r.memory = 0;
             } else {
                 guaranteed = missing.get(random.nextInt(missing.size()));
@@ -221,7 +221,7 @@ public final class TitanLoot {
             items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 2, 4)));
         }
         if (random.nextFloat() < CAPTAIN_RESONANCE_CHANCE) {
-            items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), between(random, 1, 2)));
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), between(random, 1, 2)));
         }
         if (random.nextFloat() < CAPTAIN_JERKY_CHANCE) {
             items.add(new ItemStack(ModItems.CLOUD_JERKY.get(), between(random, 1, 2)));
@@ -266,7 +266,7 @@ public final class TitanLoot {
             items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 1, 2)));
         }
         if (random.nextFloat() < 0.05f) {
-            items.add(new ItemStack(ModItems.RESONANCE_SHARD.get()));
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get()));
         }
         if (random.nextFloat() < 0.03f) {
             items.add(new ItemStack(ModItems.CLOUD_JERKY.get()));
@@ -288,15 +288,17 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 入口 (T が撃破時に呼ぶ。FIX_PLAN の約束)
-    // participants: その戦いに参加した人 (途中で倒れて復活待ちの人も含む)
-    public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants) {
+    // participants: その戦いに参加したオンラインの人 (途中で倒れて復活待ちの人も含む。経験値はこの人たちへ)
+    // ids: 参加者の UUID (切断した人も含む。進み・欠片・報酬は UUID で渡し、オフラインの人は預かりへ入る)
+    public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
+        List<UUID> all = allIds(participants, ids);
         // 物語の進み (経験値より先に。レベルの上限が上がってから心臓の経験値を渡す。progress/Progression)
-        jp.revati.skyabyss.progress.Progression.onTitanStopped(level.getServer(), unique(participants), STONE_WHALE);
+        jp.revati.skyabyss.progress.Progression.onTitanStopped(level.getServer(), all, STONE_WHALE);
         // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
         jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "heart");
         MinecraftServer server = level.getServer();
         TitanBackData data = TitanBackData.get(level);
-        for (UUID uuid : unique(participants)) {
+        for (UUID uuid : all) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             TitanMemoryData.Record r = memory(server).record(uuid, STONE_WHALE);
             if (canReceive(player)) {
@@ -346,11 +348,11 @@ public final class TitanLoot {
         }
     }
 
-    public static void onCaptainDefeat(ServerLevel level, List<ServerPlayer> participants) {
+    public static void onCaptainDefeat(ServerLevel level, List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
         // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
         jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "captain");
         MinecraftServer server = level.getServer();
-        for (UUID uuid : unique(participants)) {
+        for (UUID uuid : allIds(participants, ids)) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             TitanMemoryData.Record r = memory(server).record(uuid, STONE_WHALE);
             Roll roll = rollCaptain(r, level.random);
@@ -397,6 +399,13 @@ public final class TitanLoot {
                 seen.add(p.getUUID());
             }
         }
+        return new ArrayList<>(seen);
+    }
+
+    // オンラインの人と UUID の集合を合わせる (切断した人も落とさない)
+    static List<UUID> allIds(List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
+        Set<UUID> seen = new LinkedHashSet<>(unique(participants));
+        seen.addAll(ids);
         return new ArrayList<>(seen);
     }
 
@@ -516,7 +525,7 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 知らせ
-    // 受け取ったもの: 【岩鯨の欠片】×5 【共鳴の欠片】×2 … (名前にカーソルで説明)
+    // 受け取ったもの: 【岩鯨の鱗片】×5 【共鳴の欠片】×2 … (名前にカーソルで説明)
     public static MutableComponent rewardLine(List<ItemStack> items) {
         Map<Item, Integer> counts = new LinkedHashMap<>();
         for (ItemStack s : items) {
@@ -739,12 +748,12 @@ public final class TitanLoot {
     public static boolean exchange(ServerPlayer player, Item item) {
         TitanMemoryData.Record r = record(player);
         syncOwned(player, r);
-        String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player));
+        String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player, STONE_WHALE));
         if (denial != null) {
             Notice.warn(player, denial);
             return false;
         }
-        ForgeRules.payExchange(player);
+        ForgeRules.payExchange(player, STONE_WHALE);
         r.owned.add(id(item));
         r.lastExchangeClears = r.clears;
         r.exchanges++;

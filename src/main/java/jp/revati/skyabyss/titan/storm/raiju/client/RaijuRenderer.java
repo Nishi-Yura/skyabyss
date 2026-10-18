@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.storm.raiju.Raiju;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -19,13 +21,19 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 // 背の鬣の棘・瞳・耳の先・爪・尾の芯を光らせる (GlowLayer: 基のテクスチャの上に _glowmask の色を目の光で足す。
 // 潮殻の心臓と同じ描き方。GeckoLib の AutoGlowingGeoLayer は光る画素を基から抜いて面の陰を受けるため、暗い巣で沈む)。
 // 死ぬときはバニラの「横に倒れる」回転をせず、模型の死のアニメで倒れる
-public class RaijuRenderer extends GeoEntityRenderer<Raiju> {
+public class RaijuRenderer extends LowPolyGeoRenderer<Raiju> {
     private static final ResourceLocation GLOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/raiju_glowmask.png");
 
     public RaijuRenderer(EntityRendererProvider.Context context) {
-        super(context, new DefaultedEntityGeoModel<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "raiju"), false));
+        // 低ポリ (client/lowpoly): LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る。低ポリのときは LowPolyGeoRenderer の発光層
+        super(context, new LowPolyGeoRenderer.Model<>("raiju", false), r -> "raiju", 1.0f);
         addRenderLayer(new GlowLayer(this));
         this.shadowRadius = 1.0f;
+    }
+
+    @Override
+    protected boolean autoGlow() {
+        return LowPoly.enabled;
     }
 
     @Override
@@ -41,7 +49,7 @@ public class RaijuRenderer extends GeoEntityRenderer<Raiju> {
         @Override
         public void render(PoseStack poseStack, Raiju raiju, BakedGeoModel model, RenderType renderType,
                            MultiBufferSource buffers, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            if (raiju.isInvisible()) {
+            if (raiju.isInvisible() || LowPoly.enabled) {
                 return;
             }
             RenderType glow = RenderType.eyes(GLOW);

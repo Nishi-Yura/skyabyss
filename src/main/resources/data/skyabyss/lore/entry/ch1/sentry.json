@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_whale",
+  "order": 6,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/bone_hill"
+  ]
+}

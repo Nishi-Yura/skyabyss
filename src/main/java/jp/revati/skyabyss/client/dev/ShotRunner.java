@@ -311,6 +311,10 @@ public final class ShotRunner {
                 }
                 // 自分の側に届くまで待つ (次元を移るときは読み込みも)
                 boolean there = pending.isDone() && mc.level.dimension() == cameraDim && mc.player.position().distanceTo(cameraTarget) < 0.6;
+                if (there) {
+                    // 体の向きも視線に合わせる (そのままだと体が視線から最大 50 度ずれて、三人称の絵で武器や腕が斜めを向く)
+                    mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
+                }
                 if (stepTicks > 400) {
                     throw new IllegalStateException("the camera did not arrive at " + cameraTarget);
                 }
@@ -321,6 +325,7 @@ public final class ShotRunner {
                 mc.player.setXRot((float) line.doubleArg(1));
                 mc.player.yRotO = mc.player.getYRot();
                 mc.player.xRotO = mc.player.getXRot();
+                mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
                 return true;
             }
             case "waitchunks" -> {
@@ -361,8 +366,103 @@ public final class ShotRunner {
                 }
                 return false;
             }
+            case "lowpoly" -> {
+                // lowpoly on|off|debug|nodebug : 低ポリ描画の切り替え (off = 元のキューブ。debug = 骨の箱を半透明の赤で重ねる)
+                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
+                    case "on" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = true;
+                    case "off" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = false;
+                    case "debug" -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = true;
+                    case "armoroff" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = false;
+                    case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
+                    default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
+                }
+                return true;
+            }
+            case "armortier" -> {
+                // armortier common|rare|legend|auto : 低ポリ防具の階級を決め打つ (品は全部レア。auto = 品の階級)
+                String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);
+                jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedTier = t.equals("auto") ? null : t;
+                return true;
+            }
+            case "sneak" -> {
+                // sneak on|off : しゃがむキーを押し続ける / 放す (防具の姿勢の確認用。KeyMapping だけ。OS の入力ではない)
+                mc.options.keyShift.setDown(line.arg(0).equalsIgnoreCase("on"));
+                return true;
+            }
+            case "walk" -> {
+                // walk on|off : 前進キーを押し続ける / 放す (歩く姿の確認用)
+                mc.options.keyUp.setDown(line.arg(0).equalsIgnoreCase("on"));
+                return true;
+            }
+            case "armorlevel" -> {
+                // armorlevel <0..10|auto> : 低ポリ防具の強化段階を決め打つ (auto = 品の強化段階)
+                jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
+                return true;
+            }
+            case "weaponmesh" -> {
+                // weaponmesh on|off : プレイヤーの武器を低ポリ (on) / 元のボクセル (off) で描く
+                jp.revati.skyabyss.client.lowpoly.LowPoly.weaponMeshes = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "weapontier" -> {
+                // weapontier common|rare|legend|off : 武器のメッシュの階級を固定する (品の階級を使うのは off)
+                jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
+                return true;
+            }
+            case "watcher" -> {
+                // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
+                if (first) {
+                    jp.revati.skyabyss.client.prologue.WatcherClient.placeForShot(line.doubleArg(0), line.doubleArg(1), line.doubleArg(2),
+                            (float) line.doubleArg(3));
+                }
+                return true;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "perspective" -> {
+                // perspective first|back|front : 視点 (一人称 / 三人称の背中側 / 三人称の正面)
+                mc.options.setCameraType(switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
+                    case "first" -> net.minecraft.client.CameraType.FIRST_PERSON;
+                    case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
+                    default -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
+                });
+                return true;
+            }
+            case "bodyyaw" -> {
+                // bodyyaw <度> : 体の向きを視線から何度ずらすか (斜めから見た絵用。人は視線と体が 50 度までしかずれない)
+                float body = mc.player.getYRot() + (float) line.doubleArg(0);
+                mc.player.yBodyRot = body;
+                mc.player.yBodyRotO = body;
+                mc.player.yHeadRot = mc.player.getYRot();
+                mc.player.yHeadRotO = mc.player.getYRot();
+                return true;
+            }
+            case "swingpose" -> {
+                // swingpose <0..1|off> : 武器を振る途中の姿で止める (一人称・三人称とも)。武器の動きの確認用
+                jp.revati.skyabyss.client.weapon.WeaponClient.forcedSwing = line.arg(0).equalsIgnoreCase("off") ? -1f : (float) line.doubleArg(0);
+                return true;
+            }
+            case "swing" -> {
+                // swing : 利き手を一振りする (止めずに動かす)
+                mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                return true;
+            }
+            case "mainhand" -> {
+                // mainhand left|right : 利き手の設定 (左利きの鏡写しの確認用)
+                mc.options.mainHand().set(line.arg(0).equalsIgnoreCase("left") ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
+                mc.options.broadcastOptions();
+                return true;
+            }
+            case "use" -> {
+                // use : 右クリックを押し続ける (弓を引く姿の確認用。KeyMapping を押したことにするだけで、OS の入力ではない)
+                mc.options.keyUse.setDown(true);
+                return true;
+            }
+            case "stopuse" -> {
+                // stopuse : 右クリックを放す (引いていた弓は矢を放つ)
+                mc.options.keyUse.setDown(false);
                 return true;
             }
             case "fov" -> {
@@ -377,6 +477,9 @@ public final class ShotRunner {
             case "render" -> {
                 // render <チャンク> : 描く距離 (統合サーバーの見える距離もこれに合わせて変わる)
                 mc.options.renderDistance().set(line.intArg(0));
+                // 統合サーバーが各プレイヤーに送る範囲 (エンティティの追跡) は、プレイヤーの申告 (ClientInformation) で決まる。設定を変えただけでは
+                // 申告が古い (既定の 12) ままで、約 190 ブロックより遠い巨神が消えるので、ここで申告し直す
+                mc.options.broadcastOptions();
                 return true;
             }
             case "guiscale" -> {
@@ -515,6 +618,7 @@ public final class ShotRunner {
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
+            case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             default -> null;
         };
         if (s != null) {

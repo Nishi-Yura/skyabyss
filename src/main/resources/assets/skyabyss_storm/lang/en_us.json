@@ -77,7 +77,7 @@
   "item.skyabyss.thunder_wing_core": "Thunder Wing Core",
   "item.skyabyss.thunder_wing_helmet": "Thunder Wing Mantle Helm",
   "item.skyabyss.thunder_wing_leggings": "Thunder Wing Mantle Leggings",
-  "item.skyabyss.thunder_wing_shard": "Thunder Wing Shard",
+  "item.skyabyss.thunder_wing_shard": "Thunder Wing Quill",
   "item.skyabyss.warden_hook_spear": "Warden's Hook Spear",
   "item.skyabyss.weathercock": "Weathercock",
   "item.skyabyss.weathercock.desc": "The cock points not at the wind, but at the storm",
@@ -152,7 +152,8 @@
   "message.skyabyss.storm.swept_back": "The storm threw you back",
   "message.skyabyss.storm.taking_off": "The thunder wing spreads its wings. The hour of the squall is over",
   "message.skyabyss.storm.trial_sleeping": "This trial is asleep for now. Its stone is already singing",
-  "message.skyabyss.storm.trials_renewed": "The thunder wing's heart beats again. The trials on its back are as they were",
+  "message.skyabyss.storm.trials_renewed": "The thunder wing's heart beats again, a beat returning from deep beneath the ground. The trials on its back are as they were",
+  "message.skyabyss.storm.party_changed": "Your party changed, and the trials with it. The wind carries you back to the wind hall",
   "message.skyabyss.storm_heart.asleep": "The heart is in a deep sleep (it does not wake on Peaceful)",
   "message.skyabyss.storm_heart.begin": "The entrance seals. In the middle of the keel chamber, the thunder wing's heart begins to beat",
   "message.skyabyss.storm_heart.choice_later": "Your first-victory gift (one of the unique legendaries) can be chosen with /titanmemory storm once the items exist",
@@ -285,5 +286,8 @@
   "title.skyabyss.storm_back.sub": "A bird's back, flying above the storm",
   "trial.skyabyss.storm_east": "East (Thunderbone)",
   "trial.skyabyss.storm_front": "Front (Eye Hall)",
-  "trial.skyabyss.storm_west": "West (Windbone)"
+  "trial.skyabyss.storm_west": "West (Windbone)",
+  "block.skyabyss.storm_rod_bulb": "Lightning Pillar Bulb",
+  "block.skyabyss.storm_rod_shaft": "Lightning Pillar Shaft",
+  "block.skyabyss.storm_rod_tip": "Lightning Pillar Needle"
 }

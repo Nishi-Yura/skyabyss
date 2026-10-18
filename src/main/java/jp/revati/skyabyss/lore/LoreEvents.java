@@ -98,7 +98,7 @@ public final class LoreEvents {
     }
 
     // ---------------------------------------------------------------- 碑文
-    // 看板を右クリックしたら、書いてある文のキーで「碑文を読んだ」とする (蝋引きの看板でも届く)
+    // (碑は TabletBlock が読む。ここは古い看板の右クリック。)看板を右クリックしたら、書いてある文のキーで「碑文を読んだ」とする (蝋引きの看板でも届く)
     @SubscribeEvent
     static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
@@ -190,7 +190,7 @@ public final class LoreEvents {
     // 空の影: 空の見える所で、影の中心から一定の距離にいれば「見た」。
     // 初めて見た人には、影が去ったあと書が落ちてくるよう予定を入れる (記すより先に入れ、Lore.ensureBook が先に渡さないように)
     private static void watchSky(ServerPlayer player, ServerLevel level, LoreState state, long now) {
-        SkyPass pass = SkyEvents.activePass();
+        SkyPass pass = SkyEvents.activePassFor(player);
         if (pass == null || !pass.isActive(now) || !anyLocked(state, "sky_shadow")) {
             return;
         }
@@ -219,7 +219,7 @@ public final class LoreEvents {
         if (level.dimension() != Level.OVERWORLD) {
             return;
         }
-        if (bookOwed(state.bookGiven, state.bookDropAt, SkyEventData.get(level).passCount(), SkyEvents.activePass() != null, hasPendingDrop(player))) {
+        if (bookOwed(state.bookGiven, state.bookDropAt, SkyEventData.get(level).passCount(), SkyEvents.activePassFor(player) != null, hasPendingDrop(player))) {
             state.bookDropAt = now + DROP_DELAY;
         }
     }

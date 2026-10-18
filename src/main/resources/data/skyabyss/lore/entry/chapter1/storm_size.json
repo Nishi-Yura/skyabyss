@@ -1,0 +1,13 @@
+{
+  "chapter": "titan_storm",
+  "order": 173,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/storm_wing",
+    "chapter1/storm_cower"
+  ]
+}

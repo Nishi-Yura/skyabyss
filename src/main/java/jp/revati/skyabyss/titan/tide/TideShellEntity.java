@@ -39,9 +39,11 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック
 // 巨神での移動 (09 の 16 章): TravelTitan を実装する。旅の間は自分の動き (巡航・干潮) を止め、動きは旅の操縦 (titan.travel.SeaVoyage) が決める。
 // 乗り場は潮門の前の水 (泡の柱)、座席は甲羅の頂
-public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
+public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BOOLEAN);
+    // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って沈みはじめてからは tick (600 で止まる)
+    private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.tide_shell.walk");
     private static final RawAnimation REST_ANIM = RawAnimation.begin().thenLoop("animation.tide_shell.rest");
@@ -67,10 +69,13 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     // 休むときの水面は底から 3.5 ブロック上 (潮門の敷居 geo y=9 が水面の 1 ブロック上)。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
     public static final double REST_DRAFT = 3.5;
     public static final double CRUISE_DRAFT_MAX = 29.0;
+    // 眠るときの沈み: 甲羅の頂が海から 2 ブロックだけ出る (珊瑚の段だけが水の上に残る)
+    public static final double SLEEP_DRAFT = 32.0;
+    private static final double SLEEP_SINK = 0.04;
     // 浅い所でも、底から 22 ブロック上までしか浮かない (甲羅の頂が海から 12 ブロックまで。ゲームで見て、もっと浮くと島に見えなかった)
     public static final double CRUISE_DRAFT_MIN = 22.0;
-    // 甲羅の頂 (光を測る所)
-    public static final double DOME_TOP = 34.0;
+    // 甲羅の頂 (光を測る所。低ポリ案 B の上の段の高さ。塔の高さ約 71 は測らない)
+    public static final double DOME_TOP = 47.0;
 
     // ---- 動き
     static final float CRUISE_SPEED = 0.08f;
@@ -107,6 +112,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private boolean hasLastRest;
     private double lastRestX;
     private double lastRestZ;
+    // 潮見の貝で呼んだ人 (08 の 2.6節。一つの刻に一人)
+    private java.util.UUID requester;
+    private String requesterName = "";
+    private long requestWindow = Long.MIN_VALUE;
     private int songCooldown = 1200;
     private int stepCooldown = 160;
     private int blockedCooldown;
@@ -118,11 +127,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private int column;
     private boolean columnWanted;
     static final int COLUMN_UP = 20;
-    // 座席 (横, 上, 前)。甲羅の頂の真ん中には塔が立つので、塔の前の平らな所 (前へ 11、高さ 34) と、その前の高台 (前へ 17、高さ 36) に 4 人ずつ。
-    // 高さは geo から測った (tide_shell.geo.json の上面。中心の塔は横 -6〜+4・前 -2〜+8)
+    // 座席 (横, 上, 前)。低ポリ案 B の甲羅は段になった島 (外の段 34、中の段 41、上の段 47 ブロック) で、中心に塔 (高さ約 71) が立つ。
+    // 塔は横 -6〜+6・前 -4〜+6 なので、その前の上の段 (高さ 47、平ら) の前へ 10 と 13 に 4 人ずつ (旧: 前へ 11 と 17 の高さ 34・36)。
+    // 高さは低ポリのメッシュ (lowpoly/tide_shell.json) の上面から測った (tools/titan_align_check.py)。座席は面の 0.4 上
     static final double[][] SEATS = {
-            {2.0, 34.4, 11.0}, {-2.0, 34.4, 11.0}, {6.0, 34.4, 11.0}, {-6.0, 34.4, 11.0},
-            {2.0, 36.4, 17.0}, {-2.0, 36.4, 17.0}, {6.0, 36.4, 17.0}, {-6.0, 36.4, 17.0}};
+            {2.0, 47.4, 10.0}, {-2.0, 47.4, 10.0}, {6.0, 47.4, 10.0}, {-6.0, 47.4, 10.0},
+            {2.0, 47.4, 13.0}, {-2.0, 47.4, 13.0}, {6.0, 47.4, 13.0}, {-6.0, 47.4, 13.0}};
 
     private int lerpSteps;
     private double lerpX;
@@ -140,10 +150,17 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(MODE, (byte) 0);
         builder.define(LOOK, false);
+        builder.define(REST, -1);
     }
 
+    @Override
+    public int restTicks() {
+        return entityData.get(REST);
+    }
+
+    // 干潮の刻で休んでいる (眠っているあいだは、潮門は出ない)
     public boolean isResting() {
-        return entityData.get(MODE) == Mode.REST.ordinal();
+        return entityData.get(MODE) == Mode.REST.ordinal() && entityData.get(REST) < 0;
     }
 
     public boolean isApproaching() {
@@ -220,6 +237,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
             tickVoyage(level);
             return;
         }
+        if (tickDormant(level)) {
+            return;
+        }
         switch (mode) {
             case CRUISE -> tickCruise(level);
             case APPROACH -> tickApproach(level);
@@ -229,6 +249,47 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
             songCooldown = 2400 + random.nextInt(2400);
             level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.1f);
         }
+    }
+
+    private boolean wasDormant;
+
+    // 眠り (docs/design/08): 心臓が止まると歌をやめ、光が消え、海へゆっくり沈んで、珊瑚の段だけが水の上に残る。目覚めると巡航に戻る
+    // 戻り = 眠っている (通常の動きを飛ばす)
+    private boolean tickDormant(ServerLevel level) {
+        int age = jp.revati.skyabyss.titan.end.TitanDormancy.age(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
+        if (age < 0) {
+            if (wasDormant) {
+                wasDormant = false;
+                entityData.set(REST, -1);
+                setMode(Mode.CRUISE);
+                hasTarget = false;
+                songCooldown = 400;
+                level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
+            }
+            return false;
+        }
+        if (!wasDormant) {
+            wasDormant = true;
+            forcedTicks = 0;
+            setMode(Mode.REST);
+            entityData.set(LOOK, false);
+        }
+        setDeltaMovement(Vec3.ZERO);
+        rise(level.getSeaLevel() - SLEEP_DRAFT, SLEEP_SINK);
+        if (tickCount % 8 == 0 && getY() > level.getSeaLevel() - SLEEP_DRAFT + 0.5) {
+            // 沈むあいだ、甲羅のまわりの海面に泡と波紋
+            for (ServerPlayer p : level.players()) {
+                if (p.distanceToSqr(this) < 300 * 300) {
+                    double y = level.getSeaLevel() + 0.5;
+                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.BUBBLE_POP, true, getX(), y, getZ(), 30, 28, 0.3, 28, 0.02);
+                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.SPLASH, true, getX(), y, getZ(), 20, 30, 0.2, 30, 0.1);
+                }
+            }
+        }
+        if (tickCount % 5 == 0) {
+            entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        return true;
     }
 
     private void tickCruise(ServerLevel level) {
@@ -344,6 +405,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
             hasTarget = false;
             level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SURF.get(), SoundSource.AMBIENT, 8f, 0.8f);
             return;
+        }
+        {
+            // 潮門の光 (乗れる人にだけ見える。眠っているあいだは出ない)
+            Vec3 g = gateCenter();
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(g, g.add(0, 5, 0), g.add(0, -5, 0)));
         }
         if (tickCount % 4 == 0) {
             Vec3 gate = gateCenter();
@@ -468,6 +534,36 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
 
     private double horizontalDistanceTo(double x, double z) {
         return Math.hypot(x - getX(), z - getZ());
+    }
+
+    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT }
+
+    // 潮見の貝 (08 の 2.6節): 刻の 1 分前から刻の途中までに、自分のそばへ寄るよう頼む。一つの刻に一人 (すでに寄る場所を決めていれば NOT_NOW)
+    public RequestResult request(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) level();
+        long day = level.getDayTime();
+        long window = TideOcean.windowId(day);
+        if (requester != null && requestWindow == window && !requester.equals(player.getUUID())) {
+            return RequestResult.TAKEN;
+        }
+        if (voyage || mode != Mode.CRUISE || !TideOcean.isGathering(day) || lastWindow == window) {
+            return RequestResult.NOT_NOW;
+        }
+        Vec3 spot = TideOcean.findRestSpot(level, player.getX(), player.getZ());
+        if (spot == null) {
+            return RequestResult.NO_SPOT;
+        }
+        requester = player.getUUID();
+        requesterName = player.getGameProfile().getName();
+        requestWindow = window;
+        lastWindow = window;
+        beginApproach(level, spot, 0);
+        return RequestResult.OK;
+    }
+
+    // この刻に呼んだ人の名前 (いなければ空)
+    public String requesterNow() {
+        return requestWindow == TideOcean.windowId(level().getDayTime()) ? requesterName : "";
     }
 
     // テスト用: このプレイヤーの近くの浅瀬へ寄せ、休ませる (刻を待たない)。休む場所がなければ false
@@ -654,10 +750,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる。
-    // モデルは横 ±76、前 87〜後ろ 62 ブロック、底 (位置の y) から塔の上 60 ブロックまで
+    // モデルは横 ±68、前 87.5〜後ろ 61.5 ブロック、底 (位置の y) から塔の上 73 ブロックまで (低ポリの寸法。塔が高くなったので余裕を持って 80)
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(92.0, 0.0, 92.0).expandTowards(0, 60.0, 0);
+        return getBoundingBox().inflate(92.0, 0.0, 92.0).expandTowards(0, 80.0, 0);
     }
 
     // 光を測る所。体の中心は水の底や海底の中にあるので (岩鯨は丘の中で真っ黒になった)、甲羅の頂の上 (海面より上) で測る
@@ -703,6 +799,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         hasLastRest = tag.contains("LastRestX");
         lastRestX = tag.getDouble("LastRestX");
         lastRestZ = tag.getDouble("LastRestZ");
+        requester = tag.hasUUID("Requester") ? tag.getUUID("Requester") : null;
+        requesterName = tag.getString("RequesterName");
+        requestWindow = tag.contains("RequestWindow") ? tag.getLong("RequestWindow") : Long.MIN_VALUE;
     }
 
     @Override
@@ -717,6 +816,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         tag.putInt("ApproachTicks", approachTicks);
         tag.putInt("ForcedTicks", forcedTicks);
         tag.putLong("LastWindow", lastWindow);
+        if (requester != null) {
+            tag.putUUID("Requester", requester);
+        }
+        tag.putString("RequesterName", requesterName);
+        tag.putLong("RequestWindow", requestWindow);
         if (hasLastRest) {
             tag.putDouble("LastRestX", lastRestX);
             tag.putDouble("LastRestZ", lastRestZ);

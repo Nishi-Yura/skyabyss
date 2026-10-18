@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:sky_shadow",
+  "display": {
+    "icon": {
+      "id": "minecraft:bell"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.bell_lodge.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.bell_lodge.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "place:shelter"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

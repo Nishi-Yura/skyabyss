@@ -130,7 +130,17 @@ public class QuestLogScreen extends Screen {
             return;
         }
         rows.add(new Row(null, Component.translatable(key), DIM));
-        for (QuestDef def : list) {
+        // 章の欄があるクエストは章ごとの見出し (「一章　岩鯨」) の下に並べる。章のないものが先、章は番号順。一覧の中の順 (order) は保つ
+        jp.revati.skyabyss.story.Chapters current = null;
+        boolean grouped = list.stream().anyMatch(d -> d.chapterOrNull() != null);
+        List<QuestDef> sorted = new ArrayList<>(list);
+        sorted.sort(java.util.Comparator.comparingInt(d -> d.chapterOrNull() == null ? -1 : d.chapterOrNull().number()));
+        for (QuestDef def : sorted) {
+            jp.revati.skyabyss.story.Chapters ch = def.chapterOrNull();
+            if (grouped && ch != null && ch != current) {
+                rows.add(new Row(null, Component.literal("· ").append(ch.label()), SOFT));
+            }
+            current = ch;
             rows.add(new Row(def.id(), Component.translatable(def.titleKey()), color));
         }
     }
@@ -147,6 +157,9 @@ public class QuestLogScreen extends Screen {
         updateTrackButton(def, entry, log);
         if (def == null || entry == null) {
             return;
+        }
+        if (def.chapterOrNull() != null) {
+            body.add(new BodyLine(def.chapterOrNull().label().getString(), SOFT, 0));
         }
         if (def.giver() != null) {
             body.add(new BodyLine(Component.translatable("gui.skyabyss.quest.giver",
@@ -284,7 +297,7 @@ public class QuestLogScreen extends Screen {
         int y = top + 26;
         for (Row r : rows) {
             if (r.quest() == null) {
-                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), LIST_W), left + 10, y + 2, DIM, false);
+                g.drawString(font, font.plainSubstrByWidth(r.label().getString(), LIST_W), left + 10, y + 2, r.color(), false);
             } else {
                 boolean sel = r.quest().equals(selected);
                 boolean hover = mouseX >= left + 8 && mouseX < left + LIST_W + 6 && mouseY >= y && mouseY < y + ROW_H;

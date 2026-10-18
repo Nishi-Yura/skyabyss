@@ -191,7 +191,7 @@ quest("daily_storm_rounds", 66, ("雷翼の背の見回り", "Rounds on the Thun
       {"stage": "rounds", "id": "kill", "type": "kill", "targets": ["skyabyss:feather_warden", "skyabyss:static_moth", "skyabyss:thunder_supplicant"],
        "count": 8, "text": ("雷翼の背で、羽守・雷蛾・雷乞いを倒す", "Defeat feather wardens, static moths and thunder supplicants on the thunder wing")},
       {"xp": 110, "items": [{"item": "skyabyss:thunder_wing_shard", "count": 2, "optional": True},
-                            {"item": "skyabyss:resonance_shard", "count": 1}]},
+                            {"item": "skyabyss:resonance_shard_thunder_wing", "count": 1}]},
       "daily", "雷翼の背の周回の入口 (段階 3)。潮殻の「潮殻の背の見回り」と同じ形")
 quest("weekly_storm_heart", 84, ("嵐の鼓動をもう一度", "The Storm's Heart, Once More"),
       ("雷翼の心臓を、もう一度止める。戦いに加わった仲間も数える。", "Still the thunder wing's heart once more. Party members in the fight count too."),
@@ -388,7 +388,7 @@ for k, ja, en in [
 
 # ---- 担当 5: 装備 (6 章)
 for k, ja, en in [
-    ("item.skyabyss.thunder_wing_shard", "雷翼の欠片", "Thunder Wing Shard"),
+    ("item.skyabyss.thunder_wing_shard", "雷翼の羽軸", "Thunder Wing Quill"),
     ("item.skyabyss.thunder_wing_core", "雷翼の心核", "Thunder Wing Core"),
     ("item.skyabyss.cloudgap_fruit", "雲間の干し果", "Cloudgap Dried Fruit"),
     ("item.skyabyss.cloudgap_fruit.desc", "食べると、しばらく静電を帯びない", "After eating, you carry no static for a while"),
@@ -511,7 +511,7 @@ def main():
         sys.exit("signs do not fit")
     report = merge_parts()
     for lid, order, unlock_, related, title, body, sign in LORE:
-        entry = {"chapter": "chapter1", "order": order}
+        entry = {"chapter": "titan_storm", "order": order}
         if sign:
             key = f"sign.skyabyss.lore_storm_{sign}"
             entry["inscription_sign"] = key

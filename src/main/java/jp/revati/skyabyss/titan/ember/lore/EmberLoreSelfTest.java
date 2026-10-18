@@ -36,7 +36,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  - 看板: 碑文 6 枚と入口の一言 3 枚がはみ出さない (SignFit、1 行 90 px)
 //  - 囁きと語りの文 (ほかの担当が使う鍵): 日英にある、%s の数がそろう
 //  - 品の名前と説明: 日英にある
-//  - 天の鍵との継ぎ目: 余燼の欠片が四つ目として story の SkyKey につながる (四体を止めて四つで鍵、三つでは組まない、止めていなければ組まない)。
+//  - 天の鍵との継ぎ目: 余燼の燠石が四つ目として story の SkyKey につながる (四体を止めて四つで鍵、三つでは組まない、止めていなければ組まない)。
 //    「第一章 了」は SkyKey の終わりの札 (一章　天の鍵 / ベータ版はここまでです) で出す
 //  - 夜明けの地鳴り (EmberFinale): 余燼を止めた人だけ、地上の夜明けに一度
 // 記録は写して試し、最後に戻す
@@ -108,7 +108,7 @@ public final class EmberLoreSelfTest {
                 f.add("missing lore " + id);
                 continue;
             }
-            check(e.chapter().equals("chapter1") && e.unlockable(), id + " should be an unlockable chapter 1 entry", f);
+            check(e.chapter().equals("titan_ember") && e.unlockable(), id + " should be an unlockable chapter 4 (titan_ember) entry", f);
             for (JsonObject lang : langs) {
                 for (String key : List.of(e.titleKey(), e.bodyKey())) {
                     check(has(lang, key), "missing text " + key, f);
@@ -217,7 +217,7 @@ public final class EmberLoreSelfTest {
         }
         p.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 3));
         check(!SkyKey.ready(p), "the key should not form from three fragments", f);
-        // 余燼の欠片を手にしても、余燼を止めていなければ組まない (人から貰った四つ目)
+        // 余燼の燠石を手にしても、余燼を止めていなければ組まない (人から貰った四つ目)
         p.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 1));
         check(!SkyKey.ready(p), "the key should not form before the ember heart is stopped", f);
         // 余燼を止める (心臓の担当 F が報酬より先に呼ぶ): 四つ目で鍵になる

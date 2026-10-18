@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -526,15 +525,15 @@ public final class StormBirdBuilder {
         vent(kit, RAIJU_VENT);
     }
 
-    // 避雷の柱 (根元 base、高さ 6)。根元の銅、段の電球 3 つ、銅、先の避雷針
+    // 避雷の柱 (根元 base、高さ 6)。専用のブロック: 根元の台、段の電球 3 つ、軸、先の針 (12 の 120)
     static void rod(StormKit kit, BlockPos base, int charge) {
-        kit.put(base.getX(), base.getY(), base.getZ(), StormKit.COPPER_BLOCK);
+        kit.put(base.getX(), base.getY(), base.getZ(), StormBackSetup.ROD_BASE.get().defaultBlockState());
         for (int i = 0; i < 3; i++) {
-            kit.put(base.getX(), base.getY() + 1 + i, base.getZ(), Blocks.WAXED_COPPER_BULB.defaultBlockState()
-                    .setValue(net.minecraft.world.level.block.CopperBulbBlock.LIT, charge > i));
+            kit.put(base.getX(), base.getY() + 1 + i, base.getZ(), StormBackSetup.ROD_BULB.get().defaultBlockState()
+                    .setValue(StormBlocks.RodBulb.LIT, charge > i));
         }
-        kit.put(base.getX(), base.getY() + 4, base.getZ(), StormKit.COPPER);
-        kit.put(base.getX(), base.getY() + 5, base.getZ(), Blocks.LIGHTNING_ROD.defaultBlockState());
+        kit.put(base.getX(), base.getY() + 4, base.getZ(), StormBackSetup.ROD_SHAFT.get().defaultBlockState());
+        kit.put(base.getX(), base.getY() + 5, base.getZ(), StormBackSetup.ROD_TIP.get().defaultBlockState());
     }
 
     // ---------------------------------------------------------------- 前の試練 首と眼の間
@@ -587,8 +586,8 @@ public final class StormBirdBuilder {
         }
         // 戻しの鏡の台 (前室)
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY() - 1, MIRROR_RESET.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
-        kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), Blocks.LEVER.defaultBlockState()
-                .setValue(LeverBlock.FACE, AttachFace.FLOOR).setValue(LeverBlock.FACING, Direction.EAST));
+        kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
+                .setValue(StormBlocks.ReturnMirror.FACING, Direction.EAST));
     }
 
     // ---------------------------------------------------------------- 竜骨の門の下: 低い道・螺旋・床 121 の道・前室・竜骨の間
@@ -741,8 +740,7 @@ public final class StormBirdBuilder {
         }
         for (Inscription i : LORE_SIGNS) {
             if (i.facing() == Direction.UP) {
-                kit.put(i.pos().getX(), i.pos().getY(), i.pos().getZ(), Blocks.BIRCH_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8));
-                kit.writeSign(i.pos(), i.key(), net.minecraft.world.item.DyeColor.LIGHT_BLUE);
+                kit.standingTablet(i.pos(), i.key());
             } else {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }
@@ -767,39 +765,49 @@ public final class StormBirdBuilder {
         kit.put(7, EYE_HALL.floor() + 3, EYE_HALL.z1() - 1, Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
     }
 
-    // 竜骨の門を開ける・閉じる (三つの石がそろうと開く)。開くと床の輪の下に 3 段の階段
-    public static void setKeelGate(net.minecraft.server.level.ServerLevel level, boolean open) {
-        BlockState seal = ModBlocks.SEALED_GATE.get().defaultBlockState();
+    // 竜骨の門の栓 (広間の床の 5x5。グループごとの扉 = 封印の扉のブロック。三つの石がそろったグループにだけ開く)
+    public static List<BlockPos> keelPlug() {
+        List<BlockPos> out = new ArrayList<>();
+        for (int x = -2; x <= 2; x++) {
+            for (int z = -6; z <= -2; z++) {
+                out.add(new BlockPos(x, HUB.floor(), z));
+            }
+        }
+        return out;
+    }
+
+    // 竜骨の門の下 (いつも同じ形。栓だけがグループごとに開く): 栓の下の 2 段を空け、低い道の床、東から西へ下る 2 段の階段、
+    // 低い道とのつなぎ、穴の底の灯り。何度呼んでも同じ (起動のあと・建てたあと)
+    public static void carveKeel(net.minecraft.server.level.ServerLevel level) {
         BlockState stair = Blocks.POLISHED_DIORITE_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, Direction.EAST);
         for (int x = -2; x <= 2; x++) {
             for (int z = -6; z <= -2; z++) {
                 BlockPos p = new BlockPos(x, HUB.floor(), z);
-                level.setBlock(p, open ? Blocks.AIR.defaultBlockState() : seal, 3);
-                level.setBlock(p.below(), Blocks.AIR.defaultBlockState(), 3);
-                level.setBlock(p.below(2), Blocks.AIR.defaultBlockState(), 3);
-                level.setBlock(p.below(3), StormKit.floor(Style.KEEL, x, z), 3);
+                setIfDifferent(level, p.below(), Blocks.AIR.defaultBlockState());
+                setIfDifferent(level, p.below(2), Blocks.AIR.defaultBlockState());
+                setIfDifferent(level, p.below(3), StormKit.floor(Style.KEEL, x, z));
             }
-            // 階段 (東から西へ下る): x 2 は床の高さ、x 1 は 1 下、x 0 は 2 下。x -1・-2 は低い道の床
+            // 階段 (東から西へ下る): x 1 は床の 1 下、x 0 は 2 下。x -1・-2 は低い道の床。x 2 は栓の高さ (栓が開くと 1 段下りる)
             for (int z = -5; z <= -3; z++) {
-                if (open) {
-                    if (x == 2) {
-                        level.setBlock(new BlockPos(x, HUB.floor(), z), stair, 3);
-                    } else if (x == 1) {
-                        level.setBlock(new BlockPos(x, HUB.floor() - 1, z), stair, 3);
-                    } else if (x == 0) {
-                        level.setBlock(new BlockPos(x, HUB.floor() - 2, z), stair, 3);
-                    }
+                if (x == 1) {
+                    setIfDifferent(level, new BlockPos(x, HUB.floor() - 1, z), stair);
+                } else if (x == 0) {
+                    setIfDifferent(level, new BlockPos(x, HUB.floor() - 2, z), stair);
                 }
             }
         }
         // 低い道とつなぐ (x -2 の西の壁を空ける)
         for (int z = -5; z <= -3; z++) {
             for (int y = KEEL_TUNNEL_FLOOR + 1; y <= KEEL_TUNNEL_FLOOR + 2; y++) {
-                level.setBlock(new BlockPos(-3, y, z), Blocks.AIR.defaultBlockState(), 3);
+                setIfDifferent(level, new BlockPos(-3, y, z), Blocks.AIR.defaultBlockState());
             }
         }
-        if (open) {
-            level.setBlock(new BlockPos(0, HUB.floor() - 4, -4), StormKit.LAMP, 3);
+        setIfDifferent(level, new BlockPos(0, HUB.floor() - 4, -4), StormKit.LAMP);
+    }
+
+    private static void setIfDifferent(net.minecraft.server.level.ServerLevel level, BlockPos p, BlockState s) {
+        if (!level.getBlockState(p).equals(s)) {
+            level.setBlock(p, s, 3);
         }
     }
 

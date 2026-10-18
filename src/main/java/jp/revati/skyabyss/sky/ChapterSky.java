@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.lore.Lore;
+import jp.revati.skyabyss.story.Chapters;
 import jp.revati.skyabyss.titan.TitanTravel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -26,9 +27,72 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 // - 「1章に入った」: 巨神の背に一度でも乗った (背のディメンションに入った。伝承の書の「空の遺跡」が記されているのも同じ意味)
 // - 「月の近さ」(0〜1): ループと月の接近は M4 で入る。それまでは日数で増える仮の値を使い、M4 が setMoonSource で差し替える
 // - 拠点の目安を覚える: 復活地点と、プレイヤーがブロックを置いたチャンク (削られた山頂の安全策。PeakScar)
+//
+// ---------------------------------------------------------------- 章の段 (docs/design/01 の 4.1「空の異変の段」。中身は各章の担当 (P4) が足す)
+// 今の動き (影・雲の目・山頂の削れ・見る者) は、章に直すと「巨神編 (一〜四章) の空」: inChapterOne = 巨神編に入った (旧「1 章」)。
+// 章ごとの差は Stage で足す。何も登録しなければ全章 Stage.NONE で、今までと同じ動きのまま。
+//   ChapterSky.setStage(Chapters.TIDE, new ChapterSky.Stage(0.05f, 0x8FB8C8, 0.06f));   // 自分の章の Setup から (静的でよい)
+//   moonBias  : その章の人にとっての月の近さに足す値 (0〜1 の範囲で切る)。ChapterSky.moonNearness(level, player) が足す
+//   tint      : 空と遠景の霧の色を、その色へ strength (0〜0.35) だけ寄せる。本人のクライアントにだけ送る (ChapterTintPayload)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ChapterSky {
     public static final String CHAPTER_ONE_LORE = "chapter1/sky_ruins";
+
+    // 章ごとの空の段。moonBias は月の近さへの加算、tintRgb/tintStrength は空の色味 (strength 0 = なし)
+    public record Stage(float moonBias, int tintRgb, float tintStrength) {
+        public static final Stage NONE = new Stage(0f, 0, 0f);
+    }
+
+    private static final java.util.Map<Chapters, Stage> STAGES = new java.util.concurrent.ConcurrentHashMap<>();
+    // 人ごとに最後に送った色味 (保存しない。ログインのたびに送り直す)
+    private static final java.util.Map<java.util.UUID, Stage> SENT_TINT = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void setStage(Chapters chapter, Stage stage) {
+        if (stage == null || stage.equals(Stage.NONE)) {
+            STAGES.remove(chapter);
+        } else {
+            STAGES.put(chapter, stage);
+        }
+    }
+
+    public static Stage stage(Chapters chapter) {
+        return STAGES.getOrDefault(chapter, Stage.NONE);
+    }
+
+    // その人の章の段
+    public static Stage stage(ServerPlayer player) {
+        return stage(Chapters.of(player));
+    }
+
+    // その人にとっての月の近さ: 世界の値に、その人の章の moonBias を足す (0〜1)
+    public static float moonNearness(ServerLevel level, ServerPlayer player) {
+        return Math.max(0f, Math.min(1f, moonNearness(level) + stage(player).moonBias()));
+    }
+
+    // 自己テスト用: 登録を空にする
+    static void clearStages() {
+        STAGES.clear();
+    }
+
+    @SubscribeEvent
+    static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player && player.tickCount % 100 == 17 && player.connection != null
+                && !(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            syncTint(player, stage(player));
+        }
+    }
+
+    // 色味が替わっていれば送る (替わっていなければ何もしない)。送ったら true
+    static boolean syncTint(ServerPlayer player, Stage stage) {
+        Stage shown = new Stage(0f, stage.tintRgb(), stage.tintStrength());
+        Stage last = SENT_TINT.get(player.getUUID());
+        if ((last == null && stage.tintStrength() <= 0f) || shown.equals(last)) {
+            return false;
+        }
+        SENT_TINT.put(player.getUUID(), shown);
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new ChapterTintPayload(stage.tintRgb(), stage.tintStrength()));
+        return true;
+    }
 
     // 月の近さの出どころ。null なら日数による仮の値 (provisionalMoon)
     @Nullable
@@ -110,6 +174,7 @@ public final class ChapterSky {
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            SENT_TINT.remove(player.getUUID());
             rememberHome(player, player.getRespawnPosition(), player.getRespawnDimension());
         }
     }

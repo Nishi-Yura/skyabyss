@@ -1,10 +1,12 @@
 package jp.revati.skyabyss.titan.tide.heart.client;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.titan.tide.heart.TideHeart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -17,14 +19,32 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 潮殻の心臓の描画。段階ごとの geo とテクスチャ (巻貝の殻 → 破れた殻と光る部屋 → 内側の螺旋と三日月と水滴の輪) を切り替え、
 // 核・部屋・月・水滴を光らせる (GlowLayer)。模型は tools/install_tide_heart.py が書く
-public class TideHeartRenderer extends GeoEntityRenderer<TideHeart> {
+public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<TideHeart> {
     // 模型は 約 36 単位 (2.25 ブロック) の大きさ。判定箱 (3 x 4.2) に合わせて 2 倍
     private static final float SCALE = 2.0f;
 
     public TideHeartRenderer(EntityRendererProvider.Context context) {
-        super(context, new Model());
-        withScale(SCALE);
+        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る
+        super(context, new Model(), h -> "tide_heart_p" + Model.phase(h), SCALE);
         addRenderLayer(new GlowLayer(this));
+    }
+
+    // 低ポリのときは LowPolyGeoRenderer の発光層、キューブのときは下の GlowLayer
+    @Override
+    protected boolean autoGlow() {
+        return LowPoly.enabled;
+    }
+
+
+    // 倒れるときは横倒しにならず、死のアニメーションで見せる (HeartBoss)。倒れている間も赤く染めない
+    @Override
+    protected float getDeathMaxRotation(TideHeart heart) {
+        return 0f;
+    }
+
+    @Override
+    public int getPackedOverlay(TideHeart heart, float u, float partialTick) {
+        return OverlayTexture.pack(OverlayTexture.u(u), OverlayTexture.v(heart.hurtTime > 0));
     }
 
     // 心臓は真珠の殻ごと、かすかに自分で光る。部屋の明かり (空の光が無く、ブロックの光 11〜13) のままだと、
@@ -47,7 +67,7 @@ public class TideHeartRenderer extends GeoEntityRenderer<TideHeart> {
         @Override
         public void render(PoseStack poseStack, TideHeart heart, BakedGeoModel model, RenderType renderType,
                            MultiBufferSource buffers, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-            if (heart.isInvisible()) {
+            if (heart.isInvisible() || LowPoly.enabled) {
                 return;
             }
             RenderType glow = RenderType.eyes(Model.path("textures/entity/tide_heart_p" + Model.phase(heart) + "_glowmask.png"));
@@ -61,11 +81,17 @@ public class TideHeartRenderer extends GeoEntityRenderer<TideHeart> {
 
         @Override
         public ResourceLocation getModelResource(TideHeart heart) {
+            if (LowPoly.enabled) {
+                return path("geo/entity/tide_heart_p" + phase(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
+            }
             return path("geo/entity/tide_heart_p" + phase(heart) + ".geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(TideHeart heart) {
+            if (LowPoly.enabled) {
+                return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/tide_heart_p" + phase(heart) + ".png");
+            }
             return path("textures/entity/tide_heart_p" + phase(heart) + ".png");
         }
 

@@ -366,7 +366,8 @@ public class AshSmith extends EmberMob {
         }
         List<ServerPlayer> out = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (p.isAlive() && !p.isSpectator() && !p.isCreative() && AshSmithArena.inside(p.position())) {
+            if (p.isAlive() && !p.isSpectator() && !p.isCreative() && AshSmithArena.inside(p.position())
+                    && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
                 out.add(p);
             }
         }
@@ -687,6 +688,7 @@ public class AshSmith extends EmberMob {
                 thrall.addTag(EmberMob.TRIAL_TAG);
                 thrall.addTag(SMITH_TAG);
                 thrall.setPersistenceRequired();
+                thrall.setGroupId(groupId());
                 server.addFreshEntity(thrall);
                 warn(server, ParticleTypes.FLAME, at.x, at.y + 1, at.z, 20, 0.4, 0.8, 0.4, 0.05);
             }
@@ -940,7 +942,7 @@ public class AshSmith extends EmberMob {
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (isAlive() && p.distanceToSqr(this) < 48 * 48) {
+            if (isAlive() && p.distanceToSqr(this) < 48 * 48 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }
         }

@@ -147,6 +147,10 @@
     "en": "The storm's breath changes. The trials on the back have returned.",
     "ja": "嵐の息が変わった。背中の試練が元に戻った。"
   },
+  "message.skyabyss.storm.party_changed": {
+    "en": "Your party changed, and the trials with it. The wind carries you back to the wind hall.",
+    "ja": "仲間が変わり、試練の進みも変わった。風があなたを風の広間へ運んだ。"
+  },
   "message.skyabyss.storm.sleeping_west": {
     "en": "The Windbone sleeps this time. Its stone already sings.",
     "ja": "今回は風切りの骨が眠っている。石はもう鳴っている。"
@@ -212,5 +216,25 @@
   "subtitles.skyabyss.storm_crosswind": "",
   "subtitles.skyabyss.storm_mirror": "",
   "subtitles.skyabyss.storm_feather": "",
-  "entity.skyabyss.thunder_wing": ""
+  "entity.skyabyss.thunder_wing": "",
+  "block.skyabyss.storm_rod": {
+    "en": "Lightning Pillar",
+    "ja": "避雷の柱"
+  },
+  "block.skyabyss.storm_rod_bulb": {
+    "en": "Lightning Pillar Bulb",
+    "ja": "避雷の柱の電球"
+  },
+  "block.skyabyss.storm_rod_shaft": {
+    "en": "Lightning Pillar Shaft",
+    "ja": "避雷の柱の軸"
+  },
+  "block.skyabyss.storm_rod_tip": {
+    "en": "Lightning Pillar Needle",
+    "ja": "避雷の柱の針"
+  },
+  "block.skyabyss.reset_mirror": {
+    "en": "Return Mirror",
+    "ja": "戻しの鏡"
+  }
 }

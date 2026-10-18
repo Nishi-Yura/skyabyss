@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:tide_shell_trial",
+  "display": {
+    "icon": {
+      "id": "skyabyss:tide_shell_core"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.tide_shell_heart.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.tide_shell_heart.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "stopped:tide_shell"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

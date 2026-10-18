@@ -1,0 +1,15 @@
+# 開幕の題字 (バニラのフォント + 光)。新しい世界で撮る: ./gradlew runShots -Pscript=tools/shots/font_opening.txt -PshotsName=<まだ使っていない名前>
+world shots flat
+size 1280 720
+timeout 300
+render 8
+clouds off
+hud on
+
+wait 150
+shot font_opening_rise
+wait 80
+shot font_opening_title
+wait 50
+shot font_opening_line
+echo done

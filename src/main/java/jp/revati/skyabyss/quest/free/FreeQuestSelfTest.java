@@ -94,6 +94,8 @@ public final class FreeQuestSelfTest {
         // 雷翼の背の周回 (段階 3。titan/storm/lore/StormLoreSelfTest が確かめる) も数えない
         return QuestManager.all().stream().filter(q -> !jp.revati.skyabyss.story.StorySelfTest.STORY_QUESTS.contains(q.id()))
                 .filter(q -> !jp.revati.skyabyss.titan.storm.lore.StormLore.QUESTS.contains(q.id()))
+                // 序章・一章の小要素のお使い (story/ch1。story/ch1/Ch1SelfTest が確かめる)
+                .filter(q -> !q.id().startsWith("ch1/"))
                 .filter(q -> q.board() || q.id().startsWith("sub_") && !List.of("sub_song", "sub_shards").contains(q.id()))
                 .toList();
     }

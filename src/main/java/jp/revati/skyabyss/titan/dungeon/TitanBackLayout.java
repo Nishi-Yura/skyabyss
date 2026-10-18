@@ -38,19 +38,34 @@ public final class TitanBackLayout {
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
     //  4: 案内の看板を減らした (試練の入口の一言と碑文だけ残す。古い看板が残らないよう建て直す)
     //  5: 楕円の丘を、岩鯨のモデルと同じ形のブロックの鯨にした (部屋は体の中のまま。到着は尾の付け根、祠は背の中ほど)
-    public static final int LAYOUT_VERSION = 5;
+    //  7: 到着を、左わき腹の錨石の外の台にした (台から背の広場まで体の中を登る階段を足した。錨石・炉は台へ)
+    public static final int LAYOUT_VERSION = 7;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
     public static final int PLATFORM_Z = 100;
     public static final int SHRINE_Z = 39;
-    // 広場と祠のあいだの、背の石の門 (モデルのアーチ、z 68〜76)
-    public static final int RIDGE_Z = 72;
-    // モデルの錨石 (左のわき腹の留め具、x -35〜-31、y 78〜96、z 107〜110)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
-    public static final int ANCHOR_STONE_X = -34;
-    public static final int ANCHOR_CHAIN_X = -46;
-    public static final int ANCHOR_CHAIN_Y = 86;
-    public static final int ANCHOR_CHAIN_Z = 108;
+    // 広場と祠のあいだの、背の石の門 (モデルの半ば埋まったアーチ、z 48〜60)
+    public static final int RIDGE_Z = 53;
+    // モデルの錨石 (左のわき腹の留め具、x -38〜-27、y 83〜95、z 107〜113)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
+    public static final int ANCHOR_STONE_X = -38;
+    public static final int ANCHOR_CHAIN_X = -48;
+    public static final int ANCHOR_CHAIN_Y = 92;
+    public static final int ANCHOR_CHAIN_Z = 110;
+    // 左のわき腹の台 (到着): 錨石 (モデルの鉄の留め具) の外に張り出した石の台。床の高さ・範囲 (x は西の端から体の面まで、z)。
+    // 台の北の端から、体の中を東へ登る階段が、背の広場 (尾の付け根) の石畳へ出る
+    public static final int FLANK_FLOOR_Y = 88;
+    public static final int FLANK_X0 = -47;
+    public static final int FLANK_X1 = -31;
+    public static final int FLANK_Z0 = 100;
+    public static final int FLANK_Z1 = 116;
+    // 到着の向き (東 = 体のほう。錨石・炉・登り口の階段が見える)
+    public static final float ARRIVAL_YAW = 270f;
+    // 登り口の階段: x = STAIR_X0 から東へ、1 ブロックごとに 1 上がる。幅 3 (z STAIR_Z0〜STAIR_Z1)
+    public static final int STAIR_X0 = -34;
+    public static final int STAIR_Z0 = 104;
+    public static final int STAIR_Z1 = 106;
+
     // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
     public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
 
@@ -168,19 +183,29 @@ public final class TitanBackLayout {
         return wall(-1, 1, step + 1, step + 4, SHRINE_SEAL_Z, true);
     }
 
-    // 尾の台。乗り移ってきた人はここに立つ
+    // 到着の場所: 左のわき腹の台。乗り移ってきた人はここに立つ (向きは ARRIVAL_YAW)
     public static BlockPos arrival() {
+        return new BlockPos(-41, FLANK_FLOOR_Y + 1, 108);
+    }
+
+    // 尾の付け根の広場 (背の上)。台から階段を登った先。倒れたとき・あきらめたとき・光の柱の行き先 (記録がなければ)
+    public static BlockPos plaza() {
         return new BlockPos(0, platformY() + 1, PLATFORM_Z - 2);
     }
 
-    // 錨石。右クリックすると地上へ降りる
-    // 尾の台に置かれた共鳴の炉 (着いてすぐ装備を鍛えられる)
+    // 台に置かれた共鳴の炉 (着いてすぐ装備を鍛えられる)
     public static BlockPos forge() {
-        return new BlockPos(-3, platformY() + 1, PLATFORM_Z);
+        return new BlockPos(-40, FLANK_FLOOR_Y + 1, 105);
     }
 
+    // 錨石 (台の上、モデルの留め具の外の面に寄せた石の磁石)。右クリックすると地上へ降りる
     public static BlockPos anchor() {
-        return new BlockPos(0, platformY(), PLATFORM_Z + 3);
+        return new BlockPos(ANCHOR_STONE_X + 1, FLANK_FLOOR_Y + 1, ANCHOR_CHAIN_Z);
+    }
+
+    // 登り口の階段の段数 (台の高さから広場の石畳の高さまで。段 i の足の高さ = FLANK_FLOOR_Y + 1 + i)
+    public static int stairSteps() {
+        return platformY() - FLANK_FLOOR_Y;
     }
 
     // 広場の石畳の高さ: 広場 (x -8〜8、z ±10) の背のいちばん高い所。背の丸みに沈まず、北の背を見渡せる

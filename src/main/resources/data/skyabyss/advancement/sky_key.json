@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:ember_heart",
+  "display": {
+    "icon": {
+      "id": "skyabyss:sky_key"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.sky_key.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.sky_key.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "signal:sky_key_assembled"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

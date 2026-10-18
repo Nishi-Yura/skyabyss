@@ -11,6 +11,7 @@ import jp.revati.skyabyss.registry.ModEffects;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.registry.ModMenus;
+import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.registry.ModSounds;
 
 import net.neoforged.bus.api.IEventBus;
@@ -29,13 +30,18 @@ public class SkyAbyss {
     public SkyAbyss(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
+        MobSounds.register(modEventBus);
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
+        jp.revati.skyabyss.advancement.Beats.register(modEventBus);
+        jp.revati.skyabyss.registry.ModBlockEntities.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
+        // 大事な場面のカメラ演出 (見た場面の記録)。docs/design/20_cinematics.md
+        jp.revati.skyabyss.cinematic.CinematicSetup.register(modEventBus);
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
@@ -97,6 +103,8 @@ public class SkyAbyss {
 
         // 序盤の拍子 (プレイヤーごとの状態・音)。docs/design/17 の担当 3
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
+        // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
+        jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

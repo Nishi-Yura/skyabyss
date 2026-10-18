@@ -1,0 +1,53 @@
+# ember mouth: boarding-spot close-ups across one inhale, player standing in the mouth
+# ./gradlew runShots -Pscript=tools/shots/ember_mouth.txt
+world ember_mouth flat
+size 1280 720
+timeout 1500
+render 16
+clouds off
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p thunder_wing
+camera 0.5 -60 0.5 0 0
+waitchunks
+cmd execute if entity @e[type=skyabyss:ember_titan] run kill @e[type=skyabyss:ember_titan]
+cmd skyabyss titan summon ember
+wait 40
+cmd skyabyss titan rest ember here
+wait 20
+hud off
+cmd gamemode spectator
+lowpoly on
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^0 ^3.6 ^92 facing ^0 ^6 ^78
+wait 24
+shot ember_mouth_in_0
+wait 24
+shot ember_mouth_in_1
+wait 24
+shot ember_mouth_in_2
+wait 24
+shot ember_mouth_in_3
+wait 24
+shot ember_mouth_in_4
+wait 24
+shot ember_mouth_in_5
+wait 24
+shot ember_mouth_in_6
+wait 24
+shot ember_mouth_in_7
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^26 ^5 ^100 facing ^0 ^6 ^80
+wait 20
+shot ember_mouth_side_a
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^60 ^6 ^90 facing ^0 ^6 ^84
+wait 20
+shot ember_mouth_side_b
+cmd gamemode creative
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^0 ^3.0 ^78 facing ^0 ^6 ^110
+perspective front
+wait 20
+shot ember_mouth_player
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^1.5 ^3.0 ^76 facing ^0 ^6 ^110
+wait 20
+shot ember_mouth_player_b

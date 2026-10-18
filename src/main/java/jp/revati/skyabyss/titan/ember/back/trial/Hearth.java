@@ -11,6 +11,8 @@ import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
+import jp.revati.skyabyss.party.Parties;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.EmberMoth;
@@ -85,18 +87,18 @@ public final class Hearth {
         strength = Math.max(0f, Math.min(MAX, v));
     }
 
-    // 弱まる速さ (1 秒に)。n は谷にいる人数 (最大 4 まで数える)
+    // 弱まる速さ (1 秒に)。n は谷にいる人数 (パーティの上限 6 人まで数える)
     public static float decayPerSecond(int players) {
-        return DECAY_PER_SECOND + DECAY_PER_PLAYER * (Math.max(1, Math.min(4, players)) - 1);
+        return DECAY_PER_SECOND + DECAY_PER_PLAYER * (Math.max(1, Math.min(Parties.MAX_MEMBERS, players)) - 1);
     }
 
     // 灰運びの間隔 (tick)。人が増えるほど多く来る
     public static int carrierInterval(int players) {
-        return Math.round(CARRIER_INTERVAL / (1f + 0.5f * (Math.max(1, Math.min(4, players)) - 1)));
+        return Math.round(CARRIER_INTERVAL / (1f + 0.5f * (Math.max(1, Math.min(Parties.MAX_MEMBERS, players)) - 1)));
     }
 
     public static int carrierCap(int players) {
-        return 2 + Math.max(1, Math.min(4, players));
+        return 2 + Math.max(1, Math.min(Parties.MAX_MEMBERS, players));
     }
 
     public static int level(float s) {
@@ -265,7 +267,7 @@ public final class Hearth {
     }
 
     static void spawnWaves(ServerLevel level, List<ServerPlayer> in, long now) {
-        int n = Math.max(1, Math.min(4, in.size()));
+        int n = Math.max(1, Math.min(Parties.MAX_MEMBERS, in.size()));
         if (!spawned) {
             spawned = true;
             lastCarrier = now;
@@ -282,7 +284,7 @@ public final class Hearth {
             lastMoths = now;
             int cap = EmberMoth.roomCap(n);
             int want = 2 + 2 * n;
-            for (int i = 0; i < want && EmberMoth.countIn(level, EmberBackLayout.SOUTH.aabb()) < cap; i++) {
+            for (int i = 0; i < want && EmberMoth.countIn(level, EmberBackLayout.SOUTH.aabb(), EmberRooms.owner(EmberIds.SOUTH)) < cap; i++) {
                 EmberTrials.spawn(level, EmberMobSetup.EMBER_MOTH.get(), MOTH_SPAWN.getX() - 2 + i, MOTH_SPAWN.getY(), MOTH_SPAWN.getZ() + (i % 3));
             }
         }
@@ -304,7 +306,6 @@ public final class Hearth {
     public static void reset(ServerLevel level, boolean sleeping) {
         EmberTrials.clearMobs(level, EmberBackLayout.SOUTH);
         EmberTrials.clearItems(level, EmberBackLayout.SOUTH, EmberTrialSetup.LIVE_COAL.get());
-        EmberTrials.stripAll(level, EmberTrialSetup.LIVE_COAL.get());
         clearMemory();
         HearthRoom.buildInner(level);
     }

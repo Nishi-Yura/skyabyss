@@ -281,7 +281,7 @@ GEAR = [
     ("ember_horn", "熾火の角杯", "Ember Horn",
      "熾を溶かした温かい飲み物。余燼の背で飲むと熱がたまりにくくなり、ほかの場所では少しのあいだ火を防ぐ",
      "A warm drink with embers melted into it. On the ember titan's back it slows your heat; elsewhere it wards off fire for a while"),
-    ("ember_shard", "余燼の欠片", "Ember Shard",
+    ("ember_shard", "余燼の燠石", "Ember Cinder",
      "余燼の巨神から欠けた、まだ温かい殻。余燼の装備を鍛える",
      "A still-warm flake of the ember titan's shell. Used to temper ember gear"),
     ("ember_core", "余燼の心核", "Ember Core",
@@ -311,7 +311,7 @@ text("tooltip.skyabyss.ember.horn_drunk", "体の芯が、ゆっくり温まっ�
 def write_lore() -> None:
     DATA.mkdir(parents=True, exist_ok=True)
     for lid, order, unlock, related, title, body, sign in LORE:
-        entry: dict = {"chapter": "chapter1", "order": order}
+        entry: dict = {"chapter": "titan_ember", "order": order}
         if sign:
             entry["inscription_sign"] = sign
         entry["unlock"] = unlock

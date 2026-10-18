@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -113,17 +114,17 @@ public class WaterwayMaw extends Monster implements GeoEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.GUARDIAN_AMBIENT;
+        return MobSounds.WATERWAY_MAW_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.GUARDIAN_HURT;
+        return MobSounds.WATERWAY_MAW_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.GUARDIAN_DEATH;
+        return MobSounds.WATERWAY_MAW_DEATH.get();
     }
 
     @Override

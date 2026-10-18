@@ -23,6 +23,18 @@ import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.titan.TitanTravel;
+import jp.revati.skyabyss.titan.group.Activity;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupBossRoom;
+import jp.revati.skyabyss.titan.group.GroupBossRooms;
+import jp.revati.skyabyss.titan.group.GroupEvents;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.GroupProgress;
+import jp.revati.skyabyss.titan.group.Groups;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,6 +50,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -135,7 +148,13 @@ public final class TitanBackTrials {
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
                     List.of("captain"))));
 
+    // ---------------------------------------------------------------- 状態 (グループごと)
+    // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
+    // (BackGroupData.Record) にある。ここにあるのは、戦いの最中のメモリの状態 (保存しない) だけで、(グループ, 広間) ごとに持つ。
+    // 同じ広間・心臓の間で、グループごとに別々の戦いが同時に動く (敵・ボスはグループの印つきで、ほかのグループには見えない)
     private static final class HallState {
+        final UUID group;
+        final Hall hall;
         // 0 = 集合中 (扉は開いている)、1 以上 = 戦っている波の番号
         int wave;
         int gather = GATHER_TICKS;
@@ -145,26 +164,31 @@ public final class TitanBackTrials {
         int emptyTicks;
         // 戦いの参加者 (扉が閉じたときに中にいた人。途中で倒れた人も残す)
         final Set<UUID> participants = new LinkedHashSet<>();
+
+        HallState(UUID group, Hall hall) {
+            this.group = group;
+            this.hall = hall;
+        }
     }
 
     private static final Map<String, HallState> HALL_STATES = new HashMap<>();
-    // 集合の知らせを最後にチャットへ出した時刻 (出入りを繰り返しても流れ続けないように)
+    // 集合の知らせを最後に出した時刻 (出入りを繰り返しても流れ続けないように)
     private static final Map<String, Long> LAST_GATHER_NOTICE = new HashMap<>();
     // 背中で倒れ、背中へ連れ戻している途中の人 (次元の移動で休み場の記録を消さないため)
     private static final Set<UUID> REVIVING = new HashSet<>();
     private static boolean cleanedAfterLoad;
-    private static int idleTicks;
-    private static int afterHeartIdle;
+    private static boolean gatesInstalled;
+    // 背中に動いている人がいない時間 (世界のリセット: アスレチックと迷路を作り直す)
+    private static int emptyWorldTicks;
+    private static boolean sharedRenewed;
+    // グループごとに、心臓を倒してから封印の先に誰もいない時間
+    private static final Map<UUID, Integer> AFTER_HEART_IDLE = new HashMap<>();
+    // 心臓の間の戦い (グループごと)
+    private static final GroupBossRooms HEART_ROOMS = new GroupBossRooms();
 
-    // ---------------------------------------------------------------- 心臓の間 (最終ボス)
-    private static boolean heartActive;
-    @Nullable
-    private static UUID heartId;
-    private static final Set<UUID> heartParticipants = new LinkedHashSet<>();
-    private static int heartEmpty;
-    // 集合の残り時間。-1 なら集合していない
-    private static int heartGather = -1;
-    private static int heartCooldown;
+    // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
+    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT);
+    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE);
 
     private TitanBackTrials() {
     }
@@ -178,6 +202,71 @@ public final class TitanBackTrials {
         return root.getCompound(Player.PERSISTED_NBT_TAG);
     }
 
+    private static BackGroupData.Record record(ServerLevel level, UUID group) {
+        return GroupProgress.of(level, group);
+    }
+
+    // 人のいまの試練の番号 (その人のグループの記録の番号)
+    private static int epochOf(ServerLevel level, Player player) {
+        return player instanceof ServerPlayer sp ? record(level, Groups.keyOf(sp)).epoch() : 1;
+    }
+
+    // 扉のブロックを置く (建てたあと・起動のあと・建て直しのあと。何度呼んでもよい)
+    static void installGates(ServerLevel level) {
+        for (List<BlockPos> gate : CLOSED_GATES) {
+            GroupGates.place(level, gate, false);
+        }
+        for (List<BlockPos> gate : OPEN_GATES) {
+            GroupGates.place(level, gate, true);
+        }
+        boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
+        GroupGates.place(level, shrineSeal(), !peaceful);
+    }
+
+    // 世界の共有の見かけ以外の、グループごとの見かけ (鳴らした共鳴石)
+    @SubscribeEvent
+    static void onCommonSetup(FMLCommonSetupEvent event) {
+        GroupOverlays.register((level, group, out) -> {
+            if (level.dimension() != TitanTravel.TITAN_BACK) {
+                return;
+            }
+            BackGroupData.Record r = BackGroupData.get(level).peek(group);
+            if (r == null) {
+                return;
+            }
+            for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+                if (r.flag(STONE_FLAG + i)) {
+                    out.accept(RESONANCE_STONES.get(i), ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
+                }
+            }
+        });
+        GroupEvents.addMembershipHook(player -> {
+            if (player.level().dimension() == TitanTravel.TITAN_BACK && player.level() instanceof ServerLevel level) {
+                moveOutOfBody(level, player);
+                BackGroupData.Record r = record(level, Groups.keyOf(player));
+                clearCheckpointIfStale(player, r.epoch());
+                persisted(player).putInt(TAG_SEEN_EPOCH, r.epoch());
+            }
+        });
+    }
+
+    // 試練の中 (体内で、鼓動の間とその周り以外) にいるなら、鼓動の間へ移す (記録が変わるので、先の部屋に取り残さない)
+    private static void moveOutOfBody(ServerLevel level, ServerPlayer player) {
+        if (player.isAlive() && !player.isSpectator() && isBelowSurface(player) && !inSafeArea(player)) {
+            BlockPos hub = safeSpot(level, checkpointSpawnRaw("hub"));
+            player.fallDistance = 0;
+            player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
+            Notice.narrate(player, "message.skyabyss.rest_point_lost");
+        }
+    }
+
+    private static void clearCheckpointIfStale(Player player, int epoch) {
+        CompoundTag tag = persisted(player);
+        if (tag.contains(TAG_CHECKPOINT) && tag.getInt(TAG_CHECKPOINT_EPOCH) != epoch) {
+            clearCheckpoint(player);
+        }
+    }
+
     // ---------------------------------------------------------------- 起動時: 背中がまだなければ建てる
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
@@ -189,13 +278,17 @@ public final class TitanBackTrials {
             TitanBackData data = TitanBackData.get(back);
             if (data.needsBuild()) {
                 if (data.isBuilt()) {
-                    // 配置の版が変わった古いワールド: 島ごと建て直す。進み具合を戻して試練の番号を進めるので、
+                    // 配置の版が変わった古いワールド: 島ごと建て直す。全グループの進みを戻して試練の番号を進めるので、
                     // 古い休み場の記録は無効になり、体内でログアウトしていた人は次のログインで尾の台へ出る
                     SkyAbyss.LOGGER.info("Rebuilding the stone whale's back (layout {} -> {})...", data.layoutVersion(), LAYOUT_VERSION);
-                    data.resetProgress();
+                    BackGroupData groups = BackGroupData.get(back);
+                    for (UUID id : groups.ids()) {
+                        groups.of(id).resetProgress();
+                    }
                 } else {
                     SkyAbyss.LOGGER.info("Building the stone whale's back for this world...");
                 }
+                gatesInstalled = false;
                 TitanBackBuilder.schedule(back, data);
             }
         }
@@ -206,15 +299,12 @@ public final class TitanBackTrials {
         HALL_STATES.clear();
         LAST_GATHER_NOTICE.clear();
         REVIVING.clear();
-        heartActive = false;
-        heartId = null;
-        heartParticipants.clear();
-        heartEmpty = 0;
-        heartGather = -1;
-        heartCooldown = 0;
+        HEART_ROOMS.clear();
+        AFTER_HEART_IDLE.clear();
         cleanedAfterLoad = false;
-        idleTicks = 0;
-        afterHeartIdle = 0;
+        gatesInstalled = false;
+        emptyWorldTicks = 0;
+        sharedRenewed = false;
     }
 
     // 試練で湧いた番兵と心臓は保存しないが、この仕組みより前に保存されたものが残っていれば、読み込みのときに消す
@@ -228,6 +318,20 @@ public final class TitanBackTrials {
         }
     }
 
+    // 背中に動いている人 (観戦者と、長く動いていない人を除く) がいるグループ
+    private static List<UUID> activeGroups(ServerLevel level) {
+        List<UUID> keys = new ArrayList<>();
+        for (ServerPlayer player : level.players()) {
+            if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
+                UUID key = Groups.keyOf(player);
+                if (!keys.contains(key)) {
+                    keys.add(key);
+                }
+            }
+        }
+        return keys;
+    }
+
     // ---------------------------------------------------------------- 毎tick: 広間と心臓の進行、リセット
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
@@ -238,90 +342,103 @@ public final class TitanBackTrials {
         if (!data.isBuilt()) {
             return;
         }
+        if (!gatesInstalled) {
+            gatesInstalled = true;
+            installGates(level);
+        }
         if (!cleanedAfterLoad) {
-            // 前回、戦いの途中でサーバーが止まっていたら、その名残を片付ける (閉じた扉を開け直す)
+            // 前回、戦いの途中でサーバーが止まっていたら、その名残を片付ける (戦いの間だけ閉じる入口を既定の開いた状態に戻す)
             cleanedAfterLoad = true;
-            for (Hall hall : HALLS) {
-                if (data.isHallCleared(hall.id())) {
-                    open(level, hall.entrance());
-                    open(level, hall.exit());
-                } else {
-                    resetHall(level, hall, false);
+            BackGroupData groups = BackGroupData.get(level);
+            for (UUID id : groups.ids()) {
+                for (List<BlockPos> gate : OPEN_GATES) {
+                    GroupGates.release(level, id, gate);
                 }
             }
-            resetHeart(level, false);
         }
-        // ピースフル: 祠の階段を封じ、戦いを静かに終わらせ、体内の人を尾の台へ出す。広間と心臓は動かさない
+        // ピースフル: 祠の階段を封じ、戦いを静かに終わらせ、体内の人を尾の台へ出す
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
         tickShrineSeal(level, peaceful);
+        // 試練を動かすのは、動いている人のいるグループだけ (観戦者・放置の人がいても、ほかのグループの進行を止めない)
+        List<UUID> groups = activeGroups(level);
         if (peaceful) {
             sleepForPeaceful(level, data);
         } else {
-            for (Hall hall : HALLS) {
-                if (!data.isHallCleared(hall.id())) {
-                    tickHall(level, data, hall);
+            for (UUID group : groups) {
+                BackGroupData.Record record = record(level, group);
+                for (Hall hall : HALLS) {
+                    if (!record.isHallCleared(hall.id())) {
+                        tickHall(level, record, group, hall);
+                    }
                 }
             }
-        }
-        // 宝物庫の封印が開いていれば、奥の扉も一緒に開く (三つの石がそろったとき)
-        if (data.isGateOpened()) {
-            open(level, INNER_GATE);
-        }
-        if (!peaceful) {
-            tickHeart(level, data);
-        }
-        // 誰もいなくなってしばらくたったら、試練を元に戻す
-        if (level.players().isEmpty()) {
-            idleTicks += 10;
-            if (idleTicks >= RESET_AFTER_IDLE && (data.hasProgress() || anyStoneActive(level))) {
-                resetTrials(level);
+            // 誰もいなくなったグループの戦いは、最初に戻す
+            for (HallState state : List.copyOf(HALL_STATES.values())) {
+                if (!groups.contains(state.group)) {
+                    resetHall(level, state.hall, state.group, false);
+                }
             }
-        } else {
-            idleTicks = 0;
+            tickHearts(level);
         }
-        // 心臓を倒したあと、封印の先 (宝物庫より奥) に誰もいなくなって30秒たったら、試練を元に戻す。
+        // 心臓を倒したグループは、封印の先に誰もいなくなって30秒たったら試練が戻る。
         // 島のほかの場所 (尾の台など) で誰かが待っていても、次の周回へ挑み直せる
-        if (data.isHeartDefeated()) {
+        BackGroupData all = BackGroupData.get(level);
+        for (UUID id : all.ids()) {
+            BackGroupData.Record record = all.peek(id);
+            if (record == null || !record.isHeartDefeated()) {
+                AFTER_HEART_IDLE.remove(id);
+                continue;
+            }
             boolean anyoneInside = false;
-            for (ServerPlayer player : level.players()) {
+            for (ServerPlayer player : Groups.online(level, id)) {
                 if (!player.isSpectator() && isPastHeartSeal(player)) {
                     anyoneInside = true;
                     break;
                 }
             }
-            afterHeartIdle = anyoneInside ? 0 : afterHeartIdle + 10;
-            if (afterHeartIdle >= RESET_AFTER_HEART) {
-                resetTrials(level);
-                for (ServerPlayer player : level.players()) {
+            int idle = anyoneInside ? 0 : AFTER_HEART_IDLE.getOrDefault(id, 0) + 10;
+            AFTER_HEART_IDLE.put(id, idle);
+            if (idle >= RESET_AFTER_HEART) {
+                resetGroup(level, id);
+                for (ServerPlayer player : Groups.online(level, id)) {
                     Notice.narrate(player, "message.skyabyss.trials_renewed");
                 }
             }
+        }
+        // 誰も背中にいなくなって (または動かなくなって) 3 分たったグループは、試練が戻る
+        for (UUID id : GroupProgress.idleGroups(level)) {
+            resetGroup(level, id);
+        }
+        // 世界: 動いている人が誰もいなくなって 3 分たったら、アスレチックと迷路 (みんなで共有する形) を新しい種で作り直す
+        if (groups.isEmpty()) {
+            emptyWorldTicks += 10;
+            if (emptyWorldTicks >= RESET_AFTER_IDLE && !sharedRenewed) {
+                sharedRenewed = true;
+                renewShared(level);
+            }
         } else {
-            afterHeartIdle = 0;
+            emptyWorldTicks = 0;
+            sharedRenewed = false;
         }
     }
 
     // ---------------------------------------------------------------- ピースフル (試練は眠る)
-    // 祠の階段の封印: ピースフルのあいだだけ置き、ほかの難易度に戻ると外す (読み込まれているときだけ触る)
+    // 祠の階段の封印: ピースフルのあいだだけ閉じ (扉のブロックの既定を変える)、ほかの難易度に戻ると開ける (読み込まれているときだけ触る)
     private static void tickShrineSeal(ServerLevel level, boolean peaceful) {
         List<BlockPos> seal = shrineSeal();
         if (!level.isLoaded(seal.get(0))) {
             return;
         }
-        boolean sealed = level.getBlockState(seal.get(0)).is(ModBlocks.SEALED_GATE.get());
-        if (peaceful && !sealed) {
-            // 封印の面に立っている人は先に尾の台へ出す (sleepForPeaceful)。人のいない所だけ埋める
-            for (BlockPos p : seal) {
-                if (level.getBlockState(p).isAir() && level.getEntitiesOfClass(Player.class, new AABB(p)).isEmpty()) {
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                }
+        BlockState first = level.getBlockState(seal.get(0));
+        boolean gate = first.is(ModBlocks.SEALED_GATE.get());
+        boolean closed = gate && !first.getValue(SealedGateBlock.OPEN);
+        if (peaceful && !closed) {
+            // 封印の面に立っている人は先に尾の台へ出す (sleepForPeaceful)。人のいない所だけ閉じる
+            if (level.getEntitiesOfClass(Player.class, doorBox(seal)).isEmpty()) {
+                GroupGates.setDefault(level, seal, false);
             }
-        } else if (!peaceful && sealed) {
-            for (BlockPos p : seal) {
-                if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                }
-            }
+        } else if (!peaceful && (closed || !gate)) {
+            GroupGates.setDefault(level, seal, true);
         }
     }
 
@@ -340,14 +457,16 @@ public final class TitanBackTrials {
                 e -> e.getTags().contains(MOB_TAG) || e.getTags().contains(HEART_TAG)))) {
             e.discard();
         }
-        for (Hall hall : HALLS) {
-            if (HALL_STATES.containsKey(hall.id()) || (!data.isHallCleared(hall.id()) && isSealed(level, hall.entrance()))) {
-                resetHall(level, hall, false);
-            }
+        for (HallState state : List.copyOf(HALL_STATES.values())) {
+            resetHall(level, state.hall, state.group, false);
         }
-        if (heartActive || heartGather >= 0 || isSealed(level, HEART_GATE)) {
-            resetHeart(level, false);
-            heartCooldown = 0;
+        HEART_ROOMS.resetAll(level, HEART_HOST, false);
+        // 戦いの間だけ閉じる入口は、どのグループにも開け直す
+        BackGroupData records = BackGroupData.get(level);
+        for (UUID id : records.ids()) {
+            for (List<BlockPos> gate : OPEN_GATES) {
+                GroupGates.release(level, id, gate);
+            }
         }
         for (ServerPlayer player : List.copyOf(level.players())) {
             if (player.isAlive() && !player.isCreative() && !player.isSpectator() && isPastShrineSeal(player)) {
@@ -357,15 +476,13 @@ public final class TitanBackTrials {
         }
     }
 
-    private static boolean isSealed(ServerLevel level, List<BlockPos> door) {
-        return !door.isEmpty() && level.isLoaded(door.get(0)) && level.getBlockState(door.get(0)).is(ModBlocks.SEALED_GATE.get());
-    }
-
     // 心臓の回廊 (宝物庫の奥の扉から心臓の間の入口まで)
     private static final Box HEART_CORRIDOR = new Box(-2, 2, -63, -45, FLOOR, 5);
     // リセットで作り直したり封じたりしない場所 (鼓動の間とその周り)。リセットのとき、ここにいる人は動かさない
     private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0,
-            new Box(-15, -10, -23, -21, FLOOR, 4), new Box(10, 15, -23, -21, FLOOR, 4));
+            new Box(-15, -10, -23, -21, FLOOR, 4), new Box(10, 15, -23, -21, FLOOR, 4),
+            // 台から背の広場へ登る階段 (到着の道。リセットで動かさない)
+            new Box(STAIR_X0, STAIR_X0 + 40, STAIR_Z0, STAIR_Z1, FLANK_FLOOR_Y, 44));
 
     // 封印の先 (宝物庫・心臓の回廊・心臓の前室・心臓の間) にいるか
     static boolean isPastHeartSeal(Player player) {
@@ -379,54 +496,60 @@ public final class TitanBackTrials {
         return shape(p.getX(), p.getZ()) > 0 && p.getY() <= top(p.getX(), p.getZ());
     }
 
-    private static void tickHall(ServerLevel level, TitanBackData data, Hall hall) {
-        HallState state = HALL_STATES.get(hall.id());
+    // ---------------------------------------------------------------- 番兵の広間 (グループごと)
+    private static String hallKey(UUID group, String hall) {
+        return group + "|" + hall;
+    }
+
+    private static void tickHall(ServerLevel level, BackGroupData.Record record, UUID group, Hall hall) {
+        String key = hallKey(group, hall.id());
+        HallState state = HALL_STATES.get(key);
         if (state == null || state.wave == 0) {
-            List<ServerPlayer> inside = playersInside(level, hall);
+            List<ServerPlayer> inside = playersInside(level, hall, group);
             if (state == null) {
                 if (!inside.isEmpty()) {
                     // 集合: 扉は開いたまま、5 秒待つ
-                    state = new HallState();
-                    HALL_STATES.put(hall.id(), state);
-                    announceGathering(level, hall.id(), hall.box());
+                    state = new HallState(group, hall);
+                    HALL_STATES.put(key, state);
+                    announceGathering(level, group, key, hall.box());
                 }
                 return;
             }
-            if (inside.isEmpty() && playersInHall(level, hall).isEmpty()) {
+            if (inside.isEmpty() && playersInHall(level, hall, group).isEmpty()) {
                 // 中から人がいなくなったので、集合を取りやめる
-                HALL_STATES.remove(hall.id());
+                HALL_STATES.remove(key);
                 return;
             }
             state.gather -= 10;
             if (state.gather > 0) {
-                countdown(level, hall.box(), state.gather);
+                countdown(level, group, hall.box(), state.gather);
                 return;
             }
             // 扉が閉じる: 戸口と前室にいる人も中へ入れ、中にいる人を参加者として数える
-            pullIn(level, hall.entrance(), hall.box().center(), hall.ante());
-            for (ServerPlayer player : playersInHall(level, hall)) {
+            pullIn(level, group, hall.entrance(), hall.box().center(), hall.ante());
+            for (ServerPlayer player : playersInHall(level, hall, group)) {
                 state.participants.add(player.getUUID());
             }
             if (state.participants.isEmpty()) {
-                HALL_STATES.remove(hall.id());
+                HALL_STATES.remove(key);
                 return;
             }
             state.wave = 1;
             state.players = state.participants.size();
-            seal(level, hall.entrance());
-            level.playSound(null, hall.entrance().get(0), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
-            broadcast(level, hall.box(), ModText.battle("message.skyabyss.hall_begin"));
-            SkyAbyss.LOGGER.info("Hall {} sealed with {} challenger(s)", hall.id(), state.players);
+            GroupGates.seal(level, group, hall.entrance());
+            playToGroup(level, group, hall.entrance().get(0), SoundEvents.IRON_DOOR_CLOSE, 2f, 0.5f);
+            broadcast(level, group, hall.box(), ModText.battle("message.skyabyss.hall_begin"));
+            SkyAbyss.LOGGER.info("Hall {} sealed with {} challenger(s) of group {}", hall.id(), state.players, group);
             spawnWave(level, hall, state);
             return;
         }
         // 戦いが始まったら、壁ぎわや戸口に立っていても「中にいる」と数える。
         // 全員が倒れて (休み場へ戻されて) 3秒たったときだけ、広間を最初に戻す
-        List<ServerPlayer> inHall = playersInHall(level, hall);
+        List<ServerPlayer> inHall = playersInHall(level, hall, group);
         if (inHall.isEmpty()) {
             state.emptyTicks += 10;
             if (state.emptyTicks >= 60) {
-                resetHall(level, hall, true);
+                resetHall(level, hall, group, true);
             }
             return;
         }
@@ -435,14 +558,14 @@ public final class TitanBackTrials {
         }
         state.emptyTicks = 0;
         // 倒れて前室で目を覚ました参加者は、戦いが続いている間、扉に触れると内側へ戻れる
-        letParticipantsBack(level, hall.entrance(), hall.box().center(), state.participants);
-        if (aliveGuards(level, hall) > 0) {
+        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants);
+        if (aliveGuards(level, hall, group) > 0) {
             return;
         }
         if (state.delay == 0) {
             state.delay = WAVE_DELAY;
             if (state.wave < hall.waves().size()) {
-                broadcast(level, hall.box(), ModText.battle("message.skyabyss.arena_next"));
+                broadcast(level, group, hall.box(), ModText.battle("message.skyabyss.arena_next"));
             }
             return;
         }
@@ -452,41 +575,48 @@ public final class TitanBackTrials {
         }
         state.delay = 0;
         if (state.wave >= hall.waves().size()) {
-            // 制圧: 出口と入口の両方が開く (倒れて控えの間で目を覚ました仲間も、先へ進める)
-            data.markHallCleared(hall.id());
-            HALL_STATES.remove(hall.id());
-            open(level, hall.exit());
-            open(level, hall.entrance());
-            level.playSound(null, hall.box().center(), SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 2f, 0.8f);
-            broadcast(level, hall.box(), ModText.progress(hall.exit().isEmpty() ? "message.skyabyss.arena_cleared" : "message.skyabyss.hall_cleared"));
+            // 制圧: 出口と入口の両方が (このグループには) 開く。倒れて控えの間で目を覚ました仲間も、先へ進める
+            record.markHallCleared(hall.id());
+            HALL_STATES.remove(key);
+            GroupGates.open(level, group, hall.exit());
+            GroupGates.release(level, group, hall.entrance());
+            playToGroup(level, group, hall.box().center(), SoundEvents.BEACON_POWER_SELECT, 2f, 0.8f);
+            broadcast(level, group, hall.box(), ModText.progress(hall.exit().isEmpty() ? "message.skyabyss.arena_cleared" : "message.skyabyss.hall_cleared"));
         } else {
             state.wave++;
             spawnWave(level, hall, state);
         }
     }
 
-    // 中にいた全員が倒れたので、番兵を眠らせて最初に戻す (入口が開き、休み場からやり直せる)。出口は閉じたまま
-    private static void resetHall(ServerLevel level, Hall hall, boolean announce) {
-        for (Entity e : level.getEntitiesOfClass(Entity.class, hall.box().aabb().inflate(4), e -> e.getTags().contains(MOB_TAG))) {
+    // 中にいた全員が倒れたので、そのグループの番兵を眠らせて最初に戻す (入口が開き、休み場からやり直せる)。出口は閉じたまま
+    private static void resetHall(ServerLevel level, Hall hall, UUID group, boolean announce) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, hall.box().aabb().inflate(4),
+                e -> e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e)))) {
             e.discard();
         }
-        HALL_STATES.remove(hall.id());
-        open(level, hall.entrance());
-        seal(level, hall.exit());
+        HALL_STATES.remove(hallKey(group, hall.id()));
+        GroupGates.release(level, group, hall.entrance());
+        if (!record(level, group).isHallCleared(hall.id())) {
+            GroupGates.release(level, group, hall.exit());
+        }
         if (announce) {
-            broadcast(level, hall.box(), ModText.deny("message.skyabyss.arena_reset"));
+            broadcast(level, group, hall.box(), ModText.deny("message.skyabyss.arena_reset"));
         }
     }
 
-    private static int aliveGuards(ServerLevel level, Hall hall) {
-        return level.getEntitiesOfClass(Mob.class, hall.box().aabb().inflate(3), e -> e.isAlive() && e.getTags().contains(MOB_TAG)).size();
+    private static int aliveGuards(ServerLevel level, Hall hall, UUID group) {
+        return level.getEntitiesOfClass(Mob.class, hall.box().aabb().inflate(3),
+                e -> e.isAlive() && e.getTags().contains(MOB_TAG) && group.equals(Groups.keyOf(e))).size();
     }
+
+    // 人数の上限 (パーティは最大 6 人)
+    private static final int MAX_SCALE_PLAYERS = jp.revati.skyabyss.party.Parties.MAX_MEMBERS;
 
     private static void spawnWave(ServerLevel level, Hall hall, HallState state) {
         List<BlockPos> spawns = EastWingBuilder.spawnPoints(hall.box());
         List<String> wave = new ArrayList<>(hall.waves().get(state.wave - 1));
-        // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大4人分)
-        for (int extra = 1; extra < Math.min(state.players, 4); extra++) {
+        // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)
+        for (int extra = 1; extra < Math.min(state.players, MAX_SCALE_PLAYERS); extra++) {
             if (wave.get(0).equals("captain")) {
                 wave.add("sentinel");
                 wave.add("archer");
@@ -497,7 +627,7 @@ public final class TitanBackTrials {
         }
         for (int i = 0; i < wave.size(); i++) {
             BlockPos at = wave.get(i).equals("captain") ? hall.box().center() : spawns.get(i % spawns.size());
-            Mob mob = spawnGuard(level, wave.get(i), at);
+            Mob mob = spawnGuard(level, wave.get(i), at, state.group);
             if (mob instanceof WhaleboneCaptain captain) {
                 // 番兵長は心臓と同じ式で、人数に応じて体力が増える (280 × (1 + 0.6 × (人数 − 1)))
                 var health = captain.getAttribute(Attributes.MAX_HEALTH);
@@ -507,11 +637,17 @@ public final class TitanBackTrials {
                 }
             }
         }
-        broadcast(level, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, hall.waves().size()));
+        broadcast(level, state.group, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, hall.waves().size()));
     }
 
     @Nullable
     public static Mob spawnGuard(ServerLevel level, String kind, BlockPos pos) {
+        return spawnGuard(level, kind, pos, null);
+    }
+
+    // group: そのグループの敵として湧かせる (ほかのグループには見えず、狙われず、傷を受けない)。null なら所属なし
+    @Nullable
+    public static Mob spawnGuard(ServerLevel level, String kind, BlockPos pos, @Nullable UUID group) {
         EntityType<? extends Mob> type = switch (kind) {
             case "archer" -> ModEntities.RIB_ARCHER.get();
             case "crawler" -> ModEntities.MOSS_CRAWLER.get();
@@ -527,24 +663,49 @@ public final class TitanBackTrials {
         mob.setPersistenceRequired();
         // この印があると、ディスクに保存されない (GuardMob.shouldBeSaved)
         mob.addTag(MOB_TAG);
+        if (group != null && mob instanceof GroupOwned owned) {
+            owned.setGroupId(group);
+        }
         level.addFreshEntity(mob);
-        level.sendParticles(ParticleTypes.SOUL, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.02);
-        level.playSound(null, pos, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.5f, 0.6f);
+        sendParticlesTo(level, group, ParticleTypes.SOUL, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 20, 0.4, 0.8, 0.4, 0.02);
+        if (group == null) {
+            level.playSound(null, pos, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.5f, 0.6f);
+        } else {
+            playToGroup(level, group, pos, SoundEvents.SOUL_ESCAPE.value(), 1.5f, 0.6f);
+        }
         return mob;
     }
 
-    // 封印された広間の中にいる人 (壁ぎわも含む)
-    private static List<ServerPlayer> playersInHall(ServerLevel level, Hall hall) {
-        return level.getEntitiesOfClass(ServerPlayer.class, hall.box().aabb().inflate(0, 1, 0), p -> p.isAlive() && !p.isSpectator());
+    // 粒を、グループの人にだけ送る (group が null なら近くの全員)
+    private static void sendParticlesTo(ServerLevel level, @Nullable UUID group, net.minecraft.core.particles.ParticleOptions particle,
+            double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
+        if (group == null) {
+            level.sendParticles(particle, x, y, z, count, dx, dy, dz, speed);
+            return;
+        }
+        for (ServerPlayer player : Groups.online(level, group)) {
+            if (player.distanceToSqr(x, y, z) < 64 * 64) {
+                level.sendParticles(player, particle, false, x, y, z, count, dx, dy, dz, speed);
+            }
+        }
     }
 
-    private static List<ServerPlayer> playersInside(ServerLevel level, Hall hall) {
+    // 音を、グループの人にだけ送る
+    private static void playToGroup(ServerLevel level, UUID group, BlockPos pos, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
+        Groups.sound(level, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, sound, SoundSource.BLOCKS, volume, pitch);
+    }
+
+    // 封印された広間の中にいる、そのグループの人 (壁ぎわも含む)
+    private static List<ServerPlayer> playersInHall(ServerLevel level, Hall hall, UUID group) {
+        return Groups.inBox(level, group, hall.box().aabb().inflate(0, 1, 0));
+    }
+
+    private static List<ServerPlayer> playersInside(ServerLevel level, Hall hall, UUID group) {
         // 戸口に立っているだけでは始まらないよう、内側に1マス入ったところから数える
-        AABB area = hall.box().aabb().deflate(1, 0, 1);
-        return level.getEntitiesOfClass(ServerPlayer.class, area, p -> p.isAlive() && !p.isSpectator());
+        return Groups.inBox(level, group, hall.box().aabb().deflate(1, 0, 1));
     }
 
-    // 番兵長が倒れたら、E3 の参加者に中ボスの報酬を渡す (TitanLoot)
+    // 番兵長が倒れたら、そのグループの E3 の参加者に中ボスの報酬を渡す (TitanLoot)
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onCaptainDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof WhaleboneCaptain captain) || event.isCanceled()
@@ -552,15 +713,22 @@ public final class TitanBackTrials {
                 || !captain.getTags().contains(MOB_TAG)) {
             return;
         }
-        HallState state = HALL_STATES.get("e3");
+        UUID group = captain.groupId();
         Set<UUID> ids = new LinkedHashSet<>();
-        if (state != null) {
-            ids.addAll(state.participants);
+        if (group != null) {
+            HallState state = HALL_STATES.get(hallKey(group, "e3"));
+            if (state != null) {
+                ids.addAll(state.participants);
+            }
+            for (ServerPlayer player : Groups.inBox(level, group, E3.aabb().inflate(0, 1, 0))) {
+                ids.add(player.getUUID());
+            }
+        } else {
+            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, E3.aabb().inflate(0, 1, 0), p -> !p.isSpectator())) {
+                ids.add(player.getUUID());
+            }
         }
-        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, E3.aabb().inflate(0, 1, 0), p -> !p.isSpectator())) {
-            ids.add(player.getUUID());
-        }
-        TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids));
+        TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids), ids);
     }
 
     // UUID の一覧から、いまサーバーにいる人を集める (倒れて復活を待っている人も含む)
@@ -576,23 +744,23 @@ public final class TitanBackTrials {
     }
 
     // ---------------------------------------------------------------- 集合と扉
-    private static void announceGathering(ServerLevel level, String key, Box area) {
+    private static void announceGathering(ServerLevel level, UUID group, String key, Box area) {
         long now = level.getGameTime();
         Long last = LAST_GATHER_NOTICE.get(key);
         if (last == null || now - last > 400) {
             LAST_GATHER_NOTICE.put(key, now);
-            broadcast(level, area, ModText.battle("message.skyabyss.gate_gathering", GATHER_TICKS / 20));
+            broadcast(level, group, area, ModText.battle("message.skyabyss.gate_gathering", GATHER_TICKS / 20));
         }
-        level.playSound(null, area.center(), SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.5f, 0.6f);
+        playToGroup(level, group, area.center(), SoundEvents.BELL_RESONATE, 1.5f, 0.6f);
     }
 
-    // 扉が閉じるまでの残りを、近くの人の画面に出す (1 秒ごと)
-    private static void countdown(ServerLevel level, Box area, int ticksLeft) {
+    // 扉が閉じるまでの残りを、近くのそのグループの人の画面に出す (1 秒ごと)
+    private static void countdown(ServerLevel level, UUID group, Box area, int ticksLeft) {
         if (ticksLeft % 20 != 0) {
             return;
         }
         Component text = ModText.battle("message.skyabyss.gate_countdown", ticksLeft / 20);
-        for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, area.aabb().inflate(12))) {
+        for (ServerPlayer player : Groups.inBox(level, group, area.aabb().inflate(12))) {
             Notice.bar(player, text);
         }
     }
@@ -639,174 +807,186 @@ public final class TitanBackTrials {
         return (self - c) * Math.signum(room - c) < 0.8;
     }
 
-    // 扉が閉じるとき: 戸口と前室 (ante) にいる人を中へ入れる
-    private static void pullIn(ServerLevel level, List<BlockPos> door, BlockPos roomCenter, AABB ante) {
+    // 扉が閉じるとき: 戸口と前室 (ante) にいる、そのグループの人を中へ入れる
+    private static void pullIn(ServerLevel level, UUID group, List<BlockPos> door, BlockPos roomCenter, AABB ante) {
         if (door.isEmpty()) {
             return;
         }
         AABB box = doorBox(door);
         Set<ServerPlayer> movers = new LinkedHashSet<>();
         movers.addAll(level.getEntitiesOfClass(ServerPlayer.class, box.inflate(2, 1, 2),
-                p -> p.isAlive() && !p.isSpectator() && outsideOrInDoor(p, box, roomCenter)));
-        movers.addAll(level.getEntitiesOfClass(ServerPlayer.class, ante.inflate(0, 1, 0), p -> p.isAlive() && !p.isSpectator()));
+                p -> p.isAlive() && !p.isSpectator() && Groups.isMember(p, group) && outsideOrInDoor(p, box, roomCenter)));
+        movers.addAll(level.getEntitiesOfClass(ServerPlayer.class, ante.inflate(0, 1, 0),
+                p -> p.isAlive() && !p.isSpectator() && Groups.isMember(p, group)));
         for (ServerPlayer player : movers) {
             moveInside(level, player, box, roomCenter);
         }
     }
 
     // 戦いの途中: 扉に触れた参加者だけを内側へ通す (倒れて前室で目を覚ました人が戻れるように)
-    private static void letParticipantsBack(ServerLevel level, List<BlockPos> door, BlockPos roomCenter, Set<UUID> participants) {
+    private static void letParticipantsBack(ServerLevel level, UUID group, List<BlockPos> door, BlockPos roomCenter, Set<UUID> participants) {
         if (door.isEmpty() || participants.isEmpty()) {
             return;
         }
         AABB box = doorBox(door);
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box.inflate(1.2, 0, 1.2),
-                p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()) && outsideOrInDoor(p, box, roomCenter))) {
+                p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()) && Groups.isMember(p, group)
+                        && outsideOrInDoor(p, box, roomCenter))) {
             moveInside(level, player, box, roomCenter);
             Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
         }
     }
 
-    // ---------------------------------------------------------------- 心臓の間 (最終ボス)
-    // 内側に人が入ると 5 秒の集合ののち入口が閉じ、心臓が現れる。全員が倒れるか島から消えて数秒たつと、心臓を眠らせて入口を開け直す
-    private static void tickHeart(ServerLevel level, TitanBackData data) {
-        if (data.isHeartDefeated()) {
-            tickHeartPillar(level);
-            return;
-        }
-        List<ServerPlayer> inside = playersInHeart(level);
-        if (!heartActive) {
-            if (heartCooldown > 0) {
-                heartCooldown -= 10;
-                return;
+    // ---------------------------------------------------------------- 心臓の間 (最終ボス・グループごと)
+    // グループの人が内側に入ると 5 秒の集合ののち、そのグループの入口が閉じ、そのグループの心臓が現れる。
+    // 全員が倒れるか島から消えて数秒たつと、そのグループの心臓を眠らせて入口を開け直す。
+    // 心臓の間の物理 (床・壁) は戦いで変わらないので、グループごとに同時に戦える (ほかのグループには見えない)
+    private static void tickHearts(ServerLevel level) {
+        HEART_ROOMS.tick(level, HEART_HOST);
+        // 心臓を倒したグループには、光の柱が見える
+        BackGroupData groups = BackGroupData.get(level);
+        for (UUID id : groups.ids()) {
+            BackGroupData.Record r = groups.peek(id);
+            if (r != null && r.isHeartDefeated()) {
+                tickHeartPillar(level, id);
             }
-            if (heartGather < 0) {
-                if (!inside.isEmpty()) {
-                    heartGather = GATHER_TICKS;
-                    announceGathering(level, "heart", HEART);
-                }
-                return;
-            }
-            if (inside.isEmpty()) {
-                heartGather = -1;
-                return;
-            }
-            heartGather -= 10;
-            if (heartGather > 0) {
-                countdown(level, HEART, heartGather);
-                return;
-            }
-            heartGather = -1;
-            // 戸口と前室 (心臓の前室から入口までの回廊) にいる人も中へ入れる
-            pullIn(level, HEART_GATE, HEART.center(), HEART_ANTE);
-            startHeart(level, playersInHeart(level));
-            return;
         }
-        Entity heart = heartId == null ? null : level.getEntity(heartId);
-        if (heart == null || !heart.isAlive()) {
-            // 撃破の報告がないまま心臓が消えたので、最初に戻す。すぐには湧かせ直さない
-            resetHeart(level, true);
-            heartCooldown = HEART_RETRY_COOLDOWN;
-            return;
-        }
-        // 戦いの中で心臓が部屋の外へ出たら、中央へ戻す
-        if (heart.distanceToSqr(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5) > 20 * 20) {
-            heart.moveTo(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5, heart.getYRot(), 0f);
-        }
-        if (inside.isEmpty()) {
-            heartEmpty += 10;
-            if (heartEmpty >= HEART_ABANDON_DELAY) {
-                resetHeart(level, true);
-            }
-            return;
-        }
-        heartEmpty = 0;
-        for (ServerPlayer player : inside) {
-            heartParticipants.add(player.getUUID());
-        }
-        letParticipantsBack(level, HEART_GATE, HEART.center(), heartParticipants);
     }
 
     // 心臓の間の前室: 心臓の前室 (休み場) から入口までの回廊
     private static final AABB HEART_ANTE = new AABB(-3, FLOOR + 1, HEART_GATE_Z + 1, 4, FLOOR + 6, HEART_REST.z2() + 1);
 
-    private static void startHeart(ServerLevel level, List<ServerPlayer> inside) {
-        if (inside.isEmpty()) {
-            return;
+    private static final GroupBossRoom.Host HEART_HOST = new GroupBossRoom.Host() {
+        @Override
+        public List<ServerPlayer> playersInside(ServerLevel level) {
+            return playersInHeart(level);
         }
-        heartActive = true;
-        heartEmpty = 0;
-        heartParticipants.clear();
-        for (ServerPlayer player : inside) {
-            heartParticipants.add(player.getUUID());
+
+        @Override
+        public void seal(ServerLevel level, UUID group) {
+            GroupGates.seal(level, group, HEART_GATE);
+            playToGroup(level, group, HEART.center(), SoundEvents.IRON_DOOR_CLOSE, 2f, 0.5f);
         }
-        seal(level, HEART_GATE);
-        level.playSound(null, HEART.center(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
-        StoneWhaleHeart heart = ModEntities.STONE_WHALE_HEART.get().create(level);
-        if (heart != null) {
+
+        @Override
+        public void open(ServerLevel level, UUID group) {
+            GroupGates.release(level, group, HEART_GATE);
+        }
+
+        @Override
+        public void pullIn(ServerLevel level, UUID group) {
+            // 戸口と前室 (心臓の前室から入口までの回廊) にいる人も中へ入れる
+            TitanBackTrials.pullIn(level, group, HEART_GATE, HEART.center(), HEART_ANTE);
+        }
+
+        @Override
+        public void letBack(ServerLevel level, UUID group, Set<UUID> participants) {
+            letParticipantsBack(level, group, HEART_GATE, HEART.center(), participants);
+        }
+
+        @Override
+        @Nullable
+        public Mob spawnBoss(ServerLevel level, UUID group, List<ServerPlayer> challengers) {
+            if (challengers.isEmpty()) {
+                return null;
+            }
+            StoneWhaleHeart heart = ModEntities.STONE_WHALE_HEART.get().create(level);
+            if (heart == null) {
+                return null;
+            }
             heart.moveTo(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5, 0f, 0f);
             heart.addTag(HEART_TAG);
-            heart.bindArena(heartArena(), inside.size());
+            heart.setGroupId(group);
+            heart.bindArena(heartArena(), challengers.size());
             level.addFreshEntity(heart);
-            heartId = heart.getUUID();
+            TitanBackTrials.broadcast(level, group, HEART, ModText.battle("message.skyabyss.heart_begin"));
+            SkyAbyss.LOGGER.info("The heart of the stone whale woke with {} challenger(s) of group {}", challengers.size(), group);
+            return heart;
         }
-        broadcast(level, HEART, ModText.battle("message.skyabyss.heart_begin"));
-        SkyAbyss.LOGGER.info("The heart of the stone whale woke with {} challenger(s)", inside.size());
+
+        @Override
+        public Vec3 home() {
+            return new Vec3(HEART_CX + 0.5, FLOOR + 1, HEART_CZ + 0.5);
+        }
+
+        @Override
+        public double leash() {
+            return 20;
+        }
+
+        @Override
+        public void broadcast(ServerLevel level, UUID group, Component message) {
+            TitanBackTrials.broadcast(level, group, HEART, message);
+        }
+
+        @Override
+        public void countdown(ServerLevel level, UUID group, int secondsLeft) {
+            TitanBackTrials.countdown(level, group, HEART, secondsLeft * 20);
+        }
+
+        @Override
+        public void cleanup(ServerLevel level, UUID group) {
+            // 心臓の間に残った、そのグループの心臓の印つきの個体を片付ける
+            for (Entity e : level.getEntitiesOfClass(Entity.class, HEART.aabb().inflate(6),
+                    e -> e.getTags().contains(HEART_TAG) && group.equals(Groups.keyOf(e)))) {
+                e.discard();
+            }
+        }
+
+        @Override
+        public boolean asleep(ServerLevel level) {
+            return level.getDifficulty() == Difficulty.PEACEFUL;
+        }
+    };
+
+    // 心臓を今すぐ始める (自己テスト・コマンド用)。そのグループの、部屋にいる人を挑む人にする
+    public static boolean startHeartNow(ServerLevel level, UUID group) {
+        GroupBossRoom room = HEART_ROOMS.of(group);
+        if (room.active()) {
+            return false;
+        }
+        return room.start(level, HEART_HOST, Groups.inBox(level, group, heartArena()));
     }
 
-    // 心臓を消して、入口を開ける。心臓の間に残った心臓の印も片付ける
-    private static void resetHeart(ServerLevel level, boolean announce) {
-        boolean wasActive = heartActive;
-        for (Entity e : level.getEntitiesOfClass(Entity.class, HEART.aabb().inflate(6), e -> e.getTags().contains(HEART_TAG))) {
-            e.discard();
-        }
-        heartActive = false;
-        heartId = null;
-        heartParticipants.clear();
-        heartEmpty = 0;
-        heartGather = -1;
-        open(level, HEART_GATE);
-        if (announce && wasActive) {
-            broadcast(level, HEART, ModText.deny("message.skyabyss.heart_abandoned"));
-        }
+    public static GroupBossRooms heartRooms() {
+        return HEART_ROOMS;
     }
 
-    // 岩鯨の心臓を倒したときに、心臓そのものが呼ぶ。参加者に報酬を渡し、入口と光の柱を開く
+    // 岩鯨の心臓を倒したときに、心臓そのものが呼ぶ。そのグループの参加者に報酬を渡し、入口と光の柱を開く
     public static void onHeartDefeated(ServerLevel level, StoneWhaleHeart heart) {
-        TitanBackData data = TitanBackData.get(level);
+        GroupBossRoom room = HEART_ROOMS.byBoss(heart.getUUID());
         // いま戦っている心臓でなければ (古い個体など) 何もしない
-        if (data.isHeartDefeated() || !heartActive || !heart.getUUID().equals(heartId)) {
+        if (room == null) {
             return;
         }
-        data.markHeartDefeated();
-        Set<UUID> ids = new LinkedHashSet<>(heartParticipants);
-        for (ServerPlayer player : playersInHeart(level)) {
-            ids.add(player.getUUID());
+        UUID group = room.group;
+        BackGroupData.Record record = record(level, group);
+        Set<UUID> ids = room.finish(level, HEART_HOST, heart.getUUID());
+        if (ids == null || record.isHeartDefeated()) {
+            return;
         }
-        heartActive = false;
-        heartId = null;
-        heartParticipants.clear();
-        heartEmpty = 0;
-        afterHeartIdle = 0;
+        record.markHeartDefeated();
+        AFTER_HEART_IDLE.put(group, 0);
         // 入口は開けたまま。奥の扉から来た道を戻れる
-        open(level, HEART_GATE);
         List<ServerPlayer> participants = onlinePlayers(level, ids);
-        TitanLoot.onHeartDefeat(level, participants);
-        for (ServerPlayer player : level.players()) {
+        TitanLoot.onHeartDefeat(level, participants, ids);
+        for (ServerPlayer player : Groups.online(level, group)) {
             Notice.unlock(player, "message.skyabyss.heart_defeated");
         }
         BlockPos c = HEART.center();
-        level.playSound(null, c, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 2.5f, 0.6f);
-        level.playSound(null, c, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.7f);
-        SkyAbyss.LOGGER.info("The heart of the stone whale was defeated by {} participant(s)", participants.size());
+        playToGroup(level, group, c, SoundEvents.WITHER_DEATH, 2.5f, 0.6f);
+        playToGroup(level, group, c, SoundEvents.BEACON_ACTIVATE, 3f, 0.7f);
+        SkyAbyss.LOGGER.info("The heart of the stone whale was defeated by {} participant(s) of group {}", participants.size(), group);
+        // 借りものの鼓動が止まり、岩鯨は眠りに落ちる。戦った人は少しあとに地上へ降ろされる (docs/design/02 の 2.11節)
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, ids);
     }
 
-    // 心臓を倒したあとの光の柱。中央に立つと尾の台へ戻される
-    private static void tickHeartPillar(ServerLevel level) {
+    // 心臓を倒したあとの光の柱 (そのグループにだけ見える)。中央に立つと尾の台へ戻される
+    private static void tickHeartPillar(ServerLevel level, UUID group) {
         double px = HEART_CX + 0.5;
         double pz = HEART_CZ + 0.5;
-        level.sendParticles(ParticleTypes.END_ROD, px, FLOOR + 1 + (level.getGameTime() % 12), pz, 3, 0.25, 0.2, 0.25, 0.02);
-        for (ServerPlayer player : level.players()) {
+        sendParticlesTo(level, group, ParticleTypes.END_ROD, px, FLOOR + 1 + (level.getGameTime() % 12), pz, 3, 0.25, 0.2, 0.25, 0.02);
+        for (ServerPlayer player : Groups.online(level, group)) {
             if (player.isAlive() && Math.abs(player.getX() - px) < 1.2 && Math.abs(player.getZ() - pz) < 1.2
                     && player.getY() > FLOOR && player.getY() < FLOOR + 12) {
                 toArrival(player);
@@ -816,7 +996,7 @@ public final class TitanBackTrials {
     }
 
     private static void toArrival(ServerPlayer player) {
-        BlockPos a = arrival();
+        BlockPos a = plaza();
         player.fallDistance = 0;
         player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, player.getYRot(), 0f);
     }
@@ -830,77 +1010,99 @@ public final class TitanBackTrials {
         return level.getEntitiesOfClass(ServerPlayer.class, heartArena(), p -> p.isAlive() && !p.isSpectator());
     }
 
-    // ---------------------------------------------------------------- リセット
-    public static void resetTrials(ServerLevel level) {
-        TitanBackData data = TitanBackData.get(level);
-        resetHeart(level, false);
-        heartCooldown = 0;
-        for (BlockPos p : RESONANCE_STONES) {
-            BlockState s = level.getBlockState(p);
-            if (s.getBlock() instanceof ResonanceStoneBlock) {
-                level.setBlock(p, s.setValue(ResonanceStoneBlock.ACTIVE, false), 3);
+    // そのグループの人の近く (範囲 area の周り) へ知らせる
+    private static void broadcast(ServerLevel level, UUID group, Box area, Component message) {
+        for (ServerPlayer player : Groups.online(level, group)) {
+            if (area.aabb().inflate(20).contains(player.position())) {
+                Notice.send(player, message);
             }
         }
-        for (List<BlockPos> gate : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
-            seal(level, gate);
-        }
+    }
+
+    // ---------------------------------------------------------------- リセット (グループごと)
+    // そのグループの試練を最初に戻す: 戦いと敵を片付け、進みと扉を消し、試練の番号を進める。
+    // ほかのグループの進み・敵・戦いには触れない。体内の、作り直す所・封じる所にいるそのグループの人は鼓動の間へ出す
+    public static void resetGroup(ServerLevel level, UUID group) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         for (Hall hall : HALLS) {
-            resetHall(level, hall, false);
+            resetHall(level, hall, group, false);
         }
-        // アスレチックと迷路を、新しい種で作り直す
-        BuildKit kit = new BuildKit(level, RandomSource.create(level.getRandom().nextLong()));
-        WestWingBuilder.clearCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
-        data.reseed(level.getRandom());
-        WestWingBuilder.placeCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
-        MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
+        GroupBossRoom room = HEART_ROOMS.peek(group);
+        if (room != null) {
+            room.reset(level, HEART_HOST, false);
+        }
+        // そのグループの敵が残っていれば消す
+        AABB island = new AABB(-RX - 4, BASE_Y - 60, -RZ - 4, RX + 4, BASE_Y + 40, RZ + 4);
+        for (Entity e : List.copyOf(level.getEntitiesOfClass(Entity.class, island,
+                e -> (e.getTags().contains(MOB_TAG) || e.getTags().contains(HEART_TAG)) && group.equals(Groups.keyOf(e))))) {
+            e.discard();
+        }
         // 進み具合を消し、試練の番号を進める (古い休み場の記録は、これで無効になる)
-        data.resetProgress();
-        idleTicks = 0;
-        afterHeartIdle = 0;
-        // 体内で、作り直す所や封じる所 (翼・水路・広間・宝物庫より奥) にいる人は、鼓動の間へ出す
-        // (閉じた封印の奥や、作り直した足場の中に取り残さない)。鼓動の間と地表にいる人はそのまま
+        GroupProgress.reset(level, group);
+        AFTER_HEART_IDLE.remove(group);
+        int epoch = record(level, group).epoch();
         BlockPos hub = safeSpot(level, checkpointSpawnRaw("hub"));
-        for (ServerPlayer player : List.copyOf(level.players())) {
+        for (ServerPlayer player : Groups.online(level, group)) {
             CompoundTag tag = persisted(player);
             tag.remove(TAG_CHECKPOINT);
             tag.remove(TAG_CHECKPOINT_EPOCH);
-            tag.putInt(TAG_SEEN_EPOCH, data.epoch());
+            tag.putInt(TAG_SEEN_EPOCH, epoch);
             if (player.isAlive() && !player.isSpectator() && isBelowSurface(player) && !inSafeArea(player)) {
                 player.fallDistance = 0;
                 player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
                 Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
         }
-        SkyAbyss.LOGGER.info("The stone whale's trials have been reset (epoch {})", data.epoch());
+        SkyAbyss.LOGGER.info("The stone whale's trials have been reset for group {} (epoch {})", group, epoch);
     }
 
-    private static boolean anyStoneActive(ServerLevel level) {
-        for (BlockPos p : RESONANCE_STONES) {
-            BlockState s = level.getBlockState(p);
-            if (s.getBlock() instanceof ResonanceStoneBlock && s.getValue(ResonanceStoneBlock.ACTIVE)) {
-                return true;
-            }
+    // 世界のリセット: 動いている人が誰もいなくなって久しいとき。みんなで共有するアスレチックと迷路を、新しい種で作り直す
+    public static void renewShared(ServerLevel level) {
+        TitanBackData data = TitanBackData.get(level);
+        BuildKit kit = new BuildKit(level, RandomSource.create(level.getRandom().nextLong()));
+        WestWingBuilder.clearCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
+        data.reseed(level.getRandom());
+        WestWingBuilder.placeCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
+        MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
+        // 進みのない古いグループの記録を捨てる
+        SkyAbyss.LOGGER.info("The stone whale's shared courses were renewed");
+    }
+
+    // 背中を建て直すとき: 全グループの進みを戻して試練の番号を進める (古い休み場の記録を無効にする)。扉のブロックは建て直しのあとに置き直す
+    public static void resetAllGroups(ServerLevel level) {
+        BackGroupData groups = BackGroupData.get(level);
+        for (UUID id : groups.ids()) {
+            GroupProgress.reset(level, id);
         }
-        return false;
+        HEART_ROOMS.clear();
+        HALL_STATES.clear();
+        gatesInstalled = false;
     }
 
-    public static boolean isHallCleared(ServerLevel level, String id) {
-        return TitanBackData.get(level).isHallCleared(id);
-    }
-
-    static void seal(ServerLevel level, List<BlockPos> blocks) {
-        for (BlockPos p : blocks) {
-            level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
+    // すべてのグループを戻して共有の形も作り直す (コマンド・自己テスト・昇降の戻し)
+    public static void resetTrials(ServerLevel level) {
+        for (UUID id : BackGroupData.get(level).ids()) {
+            resetGroup(level, id);
         }
+        renewShared(level);
+        gatesInstalled = false;
     }
 
-    static void open(ServerLevel level, List<BlockPos> blocks) {
-        for (BlockPos p : blocks) {
-            if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.02);
-            }
-        }
+    public static boolean isHallCleared(ServerLevel level, UUID group, String id) {
+        return record(level, group).isHallCleared(id);
+    }
+
+    // 共鳴石 (index) の記録の名前
+    public static final String STONE_FLAG = "stone";
+
+    // そのグループにだけ開ける・閉める (旧: ワールド全体の setBlock)
+    static void open(ServerLevel level, UUID group, List<BlockPos> blocks) {
+        GroupGates.open(level, group, blocks);
+    }
+
+    static void seal(ServerLevel level, UUID group, List<BlockPos> blocks) {
+        GroupGates.seal(level, group, blocks);
     }
 
     // ---------------------------------------------------------------- 休憩地点・落下
@@ -914,7 +1116,7 @@ public final class TitanBackTrials {
         if (player.getY() < FALL_LINE && player.getY() > FALL_LINE - 6) {
             for (Box pit : PITS) {
                 if (pos.getX() >= pit.x1() - 1 && pos.getX() <= pit.x2() + 1 && pos.getZ() >= pit.z1() - 1 && pos.getZ() <= pit.z2() + 1) {
-                    String cp = validCheckpoint(persisted(player), TitanBackData.get(player.serverLevel()).epoch());
+                    String cp = validCheckpoint(persisted(player), epochOf(player.serverLevel(), player));
                     returnTo(player, WEST_CHECKPOINTS.contains(cp) ? cp : "w0");
                     player.hurt(player.damageSources().fall(), 3f);
                     Notice.bar(player, ModText.deny("message.skyabyss.fell_pit"));
@@ -930,7 +1132,7 @@ public final class TitanBackTrials {
                 && Math.abs(player.getX()) < 3 && pos.getZ() > SHRINE_SEAL_Z && pos.getZ() <= SHRINE_SEAL_Z + 4 && pos.getY() < shrineY()) {
             Notice.bar(player, ModText.lore("message.skyabyss.trials_peaceful"));
         }
-        int epoch = TitanBackData.get(player.serverLevel()).epoch();
+        int epoch = epochOf(player.serverLevel(), player);
         CompoundTag tag = persisted(player);
         // いまの試練の番号を見た、という印 (ログインしたときの検査に使う)
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
@@ -1003,7 +1205,7 @@ public final class TitanBackTrials {
                 return cp.spawn();
             }
         }
-        return arrival();
+        return plaza();
     }
 
     private static BlockPos checkpointSpawn(ServerLevel level, String id) {
@@ -1012,7 +1214,7 @@ public final class TitanBackTrials {
                 return safeSpot(level, cp.spawn());
             }
         }
-        return arrival();
+        return plaza();
     }
 
     // 立てる場所か: 足元と頭が空いていて (当たり判定も液体もない)、床が固い
@@ -1064,7 +1266,7 @@ public final class TitanBackTrials {
             clearCheckpoint(player);
             ServerLevel back = player.server.getLevel(TitanTravel.TITAN_BACK);
             if (event.getTo() == TitanTravel.TITAN_BACK && back != null) {
-                persisted(player).putInt(TAG_SEEN_EPOCH, TitanBackData.get(back).epoch());
+                persisted(player).putInt(TAG_SEEN_EPOCH, epochOf(back, player));
             }
         }
     }
@@ -1078,7 +1280,7 @@ public final class TitanBackTrials {
         }
         CompoundTag tag = persisted(player);
         if (player.level().dimension() == TitanTravel.TITAN_BACK && player.level() instanceof ServerLevel back) {
-            int epoch = TitanBackData.get(back).epoch();
+            int epoch = epochOf(back, player);
             if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
                 clearCheckpoint(player);
                 if (player.isAlive() && isBelowSurface(player)) {
@@ -1227,9 +1429,9 @@ public final class TitanBackTrials {
             if (back != null) {
                 // 地上のリスポーン地点 (ベッドなど) は変えず、背中の休み場へ連れ戻すだけ。
                 // 記録が古い (リセットより前) か無ければ、尾の台へ
-                int epoch = TitanBackData.get(back).epoch();
+                int epoch = epochOf(back, player);
                 String cp = validCheckpoint(tag, epoch);
-                BlockPos spawn = cp.isEmpty() ? arrival() : checkpointSpawn(back, cp);
+                BlockPos spawn = cp.isEmpty() ? plaza() : checkpointSpawn(back, cp);
                 REVIVING.add(player.getUUID());
                 try {
                     player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -1270,7 +1472,7 @@ public final class TitanBackTrials {
             if (event.getEntity() instanceof ServerPlayer player) {
                 if (player.isShiftKeyDown()) {
                     clearCheckpoint(player);
-                    BlockPos a = arrival();
+                    BlockPos a = plaza();
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
                     Notice.narrate(player, "message.skyabyss.gave_up");
                 } else {

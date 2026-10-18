@@ -2,6 +2,7 @@ package jp.revati.skyabyss.registry;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.forge.ResonanceForgeBlock;
+import jp.revati.skyabyss.tablet.TabletBlock;
 import jp.revati.skyabyss.titan.dungeon.CrumblingBoneBlock;
 import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
 import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
@@ -23,7 +24,9 @@ public final class ModBlocks {
                     .lightLevel(state -> state.getValue(ResonanceStoneBlock.ACTIVE) ? 11 : 0)));
     // 封印の扉。共鳴石がそろうまで壊せない
     public static final DeferredBlock<SealedGateBlock> SEALED_GATE = BLOCKS.register("sealed_gate",
-            () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).lightLevel(state -> 3)));
+            () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).noOcclusion().dynamicShape()
+                    .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
+                    .lightLevel(state -> state.getValue(SealedGateBlock.OPEN) ? 0 : 3)));
 
     // 乗ると崩れ、しばらくすると戻る骨の足場
     public static final DeferredBlock<CrumblingBoneBlock> CRUMBLING_BONE = BLOCKS.register("crumbling_bone",
@@ -33,6 +36,15 @@ public final class ModBlocks {
     public static final DeferredBlock<ResonanceForgeBlock> RESONANCE_FORGE = BLOCKS.register("resonance_forge",
             () -> new ResonanceForgeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(3.5f, 1200f)
                     .requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> 9)));
+
+    // 碑: 看板の代わりの刻まれた石。目を向けるか右クリックで、字幕に文が出る。かすかに光る
+    public static final DeferredBlock<TabletBlock> TABLET = BLOCKS.register("tablet",
+            () -> new TabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().noCollission().lightLevel(state -> 5)));
+
+    // 墓: 倒れた人の持ち物の入口。苔むした石の積み石で、かすかに光る。壊せず (クリエイティブは別)、消えない。docs/design/11 の 6 章
+    public static final DeferredBlock<jp.revati.skyabyss.grave.GraveBlock> GRAVE = BLOCKS.register("grave",
+            () -> new jp.revati.skyabyss.grave.GraveBlock(unbreakable(MapColor.COLOR_GREEN).sound(SoundType.MOSS).lightLevel(state -> 5)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
     private ModBlocks() {
     }
