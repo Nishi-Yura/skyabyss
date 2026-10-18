@@ -303,10 +303,23 @@ public class AshSmith extends EmberMob {
         return Math.min(14, Math.max(SPARK_COUNT, 2 + 2 * Math.max(1, n)));
     }
 
-    // 予告の組み立て (形・長さ・色。持ち主は鍛え手、当たるのは部屋の中の戦っている人)
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this)
-                .victims(p -> fighters(server).contains(p)).reach(3.5);
+    // 予告の組み立て (形・長さ・印の種類。持ち主は鍛え手、当たるのは部屋の中の戦っている人)
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this)
+                .victims(p -> fighters(server).contains(p)).reach(3.5), style);
     }
 
     // 狙う方向・地点の候補: 戦っている人 (いま狙っている人を先頭に、残りは入れ替え)。人がいなくて人数の上書きだけあるときは空
@@ -523,7 +536,7 @@ public class AshSmith extends EmberMob {
         boolean cold = slamCold;
         float damage = SLAM_DAMAGE * (cold ? COLD_MULT : 1f);
         double angle = Telegraph.angleOf(dir.x, dir.z);
-        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), SLAM_WINDUP, cold ? 0xFF9A2A : 0xFF5A2A)
+        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), SLAM_WINDUP, D)
                 .onImpact(s -> {
                     Vec3 impact = origin.add(dir.scale(3.5));
                     if (lead) {
@@ -544,9 +557,9 @@ public class AshSmith extends EmberMob {
             double base = fixed != null ? fixed : random.nextDouble() * Math.PI * 2;
             double[] gaps = {base, base + Math.PI * 2 / 3, base + Math.PI * 4 / 3};
             for (double gap : gaps) {
-                tg(server, TelegraphShape.cone(impact.x, impact.z, gap, RING_MAX + 1, RING_LANE_HALF), SLAM_WINDUP, 0x40E8FF).start();
+                tg(server, TelegraphShape.cone(impact.x, impact.z, gap, RING_MAX + 1, RING_LANE_HALF), SLAM_WINDUP, S).start();
             }
-            tg(server, TelegraphShape.wave(impact.x, impact.z, RING_START, RING_MAX, 0.9, gaps, RING_LANE_HALF), SLAM_WINDUP, 0xFFB040)
+            tg(server, TelegraphShape.wave(impact.x, impact.z, RING_START, RING_MAX, 0.9, gaps, RING_LANE_HALF), SLAM_WINDUP, D)
                     .active((int) Math.ceil((RING_MAX - RING_START) / RING_SPEED)).jumpClear(0.6)
                     .onHit((s, p) -> hurtPlayer(p, attackSource(), RING_DAMAGE, "ring"))
                     .start();
@@ -563,7 +576,7 @@ public class AshSmith extends EmberMob {
         if (lead) {
             sound(server, EmberSmithSetup.INHALE.get(), 1.2f, 2.0f);
         }
-        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, 0xFFC060)
+        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, D)
                 .onImpact(s -> {
                     sound(s, EmberSmithSetup.BLAST.get(), lead ? 2.5f : 1.2f, 0.9f);
                     for (double t = 0.8; t <= SLAM_LENGTH; t += 0.6) {
@@ -636,7 +649,7 @@ public class AshSmith extends EmberMob {
         for (Vec3 d : dirs) {
             boolean first = lead;
             lead = false;
-            tg(server, TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(d.x, d.z), BREATH_LENGTH, Math.toRadians(BREATH_HALF_ANGLE)), BREATH_INHALE, 0xFF8C26)
+            tg(server, TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(d.x, d.z), BREATH_LENGTH, Math.toRadians(BREATH_HALF_ANGLE)), BREATH_INHALE, D)
                     .onImpact(s -> {
                         if (first) {
                             sound(s, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
@@ -784,7 +797,7 @@ public class AshSmith extends EmberMob {
     private void startSpark(ServerLevel server, double x, double z, int index) {
         double y = floorY();
         sparks.add(new Spark(new Vec3(x, y, z), index * SPARK_GAP));
-        tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, 0xFF2A10)
+        tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, D)
                 .onImpact(s -> {
                     warn(s, ParticleTypes.LAVA, x, y + 0.2, z, 14, 0.5, 0.2, 0.5, 0.1);
                     warn(s, ParticleTypes.FLAME, x, y + 0.2, z, 18, 0.5, 0.3, 0.5, 0.08);
