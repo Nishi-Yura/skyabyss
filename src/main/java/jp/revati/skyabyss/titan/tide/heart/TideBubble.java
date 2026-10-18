@@ -97,7 +97,7 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
             }
             return;
         }
-        ServerPlayer player = trapped == null ? null : server.getServer().getPlayerList().getPlayer(trapped);
+        ServerPlayer player = trapped == null ? null : (server.getPlayerByUUID(trapped) instanceof ServerPlayer sp ? sp : null);
         if (player == null || !player.isAlive() || player.level() != level() || player.isSpectator() || tickCount > MAX_AGE) {
             pop(server, player);
             return;
@@ -143,7 +143,7 @@ public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group
         health -= Math.max(1f, amount);
         server.playSound(null, getX(), getY() + 1, getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.HOSTILE, 1.2f, 1.6f);
         if (health <= 0) {
-            ServerPlayer player = trapped == null ? null : server.getServer().getPlayerList().getPlayer(trapped);
+            ServerPlayer player = trapped == null ? null : (server.getPlayerByUUID(trapped) instanceof ServerPlayer sp ? sp : null);
             pop(server, player);
         }
         return true;

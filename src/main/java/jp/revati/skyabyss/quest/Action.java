@@ -190,6 +190,15 @@ public final class Action {
                 return inv.getItem(i).copy();
             }
         }
+        // 留め袋の中の品 (印のない目的)
+        if (token == null) {
+            for (jp.revati.skyabyss.pouch.PouchEntries.Entry e : jp.revati.skyabyss.pouch.PouchEntries.all()) {
+                ItemStack proto = new ItemStack(e.item());
+                if (QuestItems.matches(proto, target, null) && jp.revati.skyabyss.pouch.Pouch.count(player, e.item()) > 0) {
+                    return proto;
+                }
+            }
+        }
         return ItemStack.EMPTY;
     }
 

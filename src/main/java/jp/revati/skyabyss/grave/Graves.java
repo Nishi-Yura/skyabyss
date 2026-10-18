@@ -218,7 +218,8 @@ public final class Graves {
             ItemStack s = it.next();
             ItemStack copy = s.copy();
             int before = copy.getCount();
-            player.getInventory().add(copy);
+            // 留め袋に入る品は袋へ (22 の 4.2)
+            jp.revati.skyabyss.pouch.PouchRouting.give(player, copy);
             int moved = before - copy.getCount();
             movedItems += moved;
             if (copy.isEmpty()) {
@@ -244,6 +245,18 @@ public final class Graves {
             Notice.warn(player, "skyabyss_grave.collected_part", movedItems, left);
         }
         return new Collected(movedStacks, movedItems, xp, left);
+    }
+
+    // 中身を外から減らしたあと (留め袋への移し替え。docs/design/22 の 8.4) に呼ぶ: 空になった墓は控えとブロックを消し、残るなら控えを保存し直す
+    public static void settle(MinecraftServer server, GraveData.Grave grave) {
+        GraveData data = GraveData.get(server);
+        grave.items.removeIf(ItemStack::isEmpty);
+        if (grave.isEmpty()) {
+            data.remove(grave.id);
+            removeBlock(server, grave);
+        } else {
+            data.touch();
+        }
     }
 
     private static void removeBlock(MinecraftServer server, GraveData.Grave grave) {
@@ -349,7 +362,7 @@ public final class Graves {
         for (ItemStack s : back) {
             ItemStack copy = s.copy();
             int before = copy.getCount();
-            player.getInventory().add(copy);
+            jp.revati.skyabyss.pouch.PouchRouting.give(player, copy);
             given += before - copy.getCount();
             if (!copy.isEmpty()) {
                 TitanMemoryData.get(server).pending(player.getUUID()).items.add(copy);

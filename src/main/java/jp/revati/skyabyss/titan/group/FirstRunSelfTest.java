@@ -156,7 +156,7 @@ public final class FirstRunSelfTest {
                 List<ItemStack> mats = List.of(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3));
                 FirstRun.grantMaterials(a, mats);
                 FirstRun.grantMaterials(a, mats);
-                check(f, a.getInventory().countItem(ModItems.STONE_WHALE_SHARD.get()) == 6, "optional-wing materials did not repeat");
+                check(f, jp.revati.skyabyss.pouch.Pouch.countAll(a, ModItems.STONE_WHALE_SHARD.get()) == 6, "optional-wing materials did not repeat");
                 // 周回のグループでも (宝は人ごと): c は初めてなので受け取れる
                 check(f, FirstRun.grantKeepsake(c, KEEPSAKE, treat), "a first-timer in a cleared group could not take the keepsake");
                 store.forgetKeepsake(a.getUUID(), KEEPSAKE);

@@ -30,6 +30,10 @@ public final class TideHeartNetwork {
 
     // 人の速さに足す (渦潮・引き潮の引き寄せ、跳ね上げ)。サーバーは人の本当の速さを知らないので、クライアントで足す
     public static void nudge(ServerPlayer player, double x, double y, double z) {
+        // 試験用の作り物の人 (FakePlayer) には画面がない
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            return;
+        }
         PacketDistributor.sendToPlayer(player, new Nudge((float) x, (float) y, (float) z));
     }
 

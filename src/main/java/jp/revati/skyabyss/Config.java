@@ -30,6 +30,11 @@ public final class Config {
             .comment("「雲の切れ間の目」(1章・月が半分以上近い夜) の頻度の倍率 (0 = 開かない, 1 = 標準)。horrorEventFrequency にも掛かる")
             .defineInRange("cloudEyeFrequency", 1.0, 0.0, 3.0);
 
+    // 技の予告 (combat/Telegraph): 床の印はクライアントが描く。サーバーが粒も送るかどうか
+    public static final ModConfigSpec.BooleanValue TELEGRAPH_SERVER_PARTICLES = SERVER_BUILDER
+            .comment("技の予告の粒 (旧来の点線) を、床の印とは別にサーバーからも送るか。false = 送らない (床の印と、クライアントの telegraphStyle の粒だけ)")
+            .define("telegraphServerParticles", false);
+
     static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
 
     // --- クライアント設定: プレイヤーごとの見え方の好み ---
@@ -98,6 +103,21 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue GRAVE_MARKER = CLIENT_BUILDER
             .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
             .define("graveMarker", true);
+
+    // 技の予告の見せ方 (client/combat/TelegraphRenderer): DECAL = 床に満ちる面と縁 (既定)、PARTICLES = 点線の粒、BOTH = 両方
+    public enum TelegraphStyle {
+        DECAL,
+        PARTICLES,
+        BOTH
+    }
+
+    public static final ModConfigSpec.EnumValue<TelegraphStyle> TELEGRAPH_STYLE = CLIENT_BUILDER
+            .comment("技の予告の見せ方。DECAL = 床に満ちる面と縁 (既定), PARTICLES = 点線の粒, BOTH = 両方")
+            .defineEnum("telegraphStyle", TelegraphStyle.DECAL);
+
+    public static final ModConfigSpec.BooleanValue TELEGRAPH_HIGH_CONTRAST = CLIENT_BUILDER
+            .comment("技の予告の高コントラスト (面を濃く、縁を太く、縁の下に黒い縁取りを敷く)")
+            .define("telegraphHighContrast", false);
 
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 

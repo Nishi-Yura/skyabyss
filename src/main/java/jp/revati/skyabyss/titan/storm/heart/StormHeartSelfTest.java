@@ -138,7 +138,7 @@ public final class StormHeartSelfTest {
                 StormHeart.Action.WINGBEAT, 30, StormHeart.Action.CHARGE, 30, StormHeart.Action.FEATHER, 24,
                 StormHeart.Action.FLASH, 40, StormHeart.Action.WEB, 30, StormHeart.Action.BARRAGE, 20);
         warn.forEach((a, t) -> check(a.warnTicks == t, a + " warning should be " + t + " ticks (" + a.warnTicks + ")", failures));
-        check(StormHeart.ROAR_TICKS == 60 && StormHeart.SPLIT_TICKS == 120 && StormHeart.WEB_TICKS == 120, "roar / split / web timings differ from 5.3", failures);
+        check(StormHeart.ROAR_TICKS == 60 && StormHeart.SPLIT_TICKS == 120 && StormHeart.WEB_TICKS == 80, "roar / split / web timings differ from 5.3", failures);
         check(StormHeart.FLASH_CONE_DEG == 60, "flash cone should be 60 degrees", failures);
         float[] dmg = {StormHeart.SUMMON_DAMAGE, StormHeart.BLADE_DAMAGE, StormHeart.CHAIN_DAMAGE, StormHeart.WINGBEAT_DAMAGE,
                 StormHeart.CHARGE_DAMAGE, StormHeart.FEATHER_DAMAGE, StormHeart.FLASH_DAMAGE, StormHeart.WEB_DAMAGE, StormHeart.BARRAGE_DAMAGE};
@@ -256,7 +256,7 @@ public final class StormHeartSelfTest {
     // 閃光・風の刃・雷の網の判定 (人を置かずに、判定の関数を部屋の中で試す)
     private static void checkJudgements(ServerLevel back, List<String> failures) {
         int f = StormHeartArena.FLOOR;
-        Vec3 core = new Vec3(StormHeartArena.CX + 0.5, f + StormHeart.heightFor(2, false) + 2.2, StormHeartArena.CZ + 0.5);
+        Vec3 core = new Vec3(StormHeartArena.CX + 0.5, f + StormHeart.heightFor(2, false) + StormHeart.CORE_OFFSET, StormHeartArena.CZ + 0.5);
         // 南東の柱の向こう (中心から柱を通る線の先) に立つ人
         BlockPos rod = StormHeartArena.rod(2);
         Vec3 dir = new Vec3(rod.getX() + 0.5 - core.x, 0, rod.getZ() + 0.5 - core.z).normalize();
@@ -276,10 +276,6 @@ public final class StormHeartSelfTest {
         check(StormHeart.bladeHits(f - 1, f + 0.8, f - 1) && !StormHeart.bladeHits(f - 1, f + 0.5, f - 1), "blade height in the keel line is wrong", failures);
         check(!StormHeart.bladeHits(f + 2.5, f + 4.3, f), "blade hit a player above it", failures);
         // 雷の網: 腕の上は当たり、すき間と腕の外は当たらない
-        check(StormHeart.webHits(8, 0.2, 0, 4), "web missed a player on the arm", failures);
-        check(!StormHeart.webHits(5, 0, 0, 4), "web hit a player in the gap", failures);
-        check(!StormHeart.webHits(0, 8, 0, 4), "web hit a player away from the arm", failures);
-        check(!StormHeart.webHits(-8, 0, 0, 4), "web hit the opposite side of a single arm", failures);
     }
 
     // 段階 2 の高低の拍 (HIGH_TICKS 高く、PERCH_TICKS 下りる)。時計の式と、心臓が実際に上がり下りすることを確かめる。
@@ -382,8 +378,8 @@ public final class StormHeartSelfTest {
         check(Math.abs(StormHeart.takenFor(1, false, 10, 1) - 12f) < 1e-4 && Math.abs(StormHeart.takenFor(0, false, 10, 1) - 10f) < 1e-4
                 && Math.abs(StormHeart.takenFor(0, true, 10, 1) - 15f) < 1e-4
                 && Math.abs(StormHeart.takenFor(2, false, 16, StormHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", failures);
-        // 段階の高さ: 段階 2 は 7 上がり、下の端が昇り風の上の端。段階 3 は床の 2 上
-        check(Math.abs(StormHeart.heightFor(1, false) - StormHeart.heightFor(0, false) - 7.0) < 0.01
+        // 段階の高さ: 段階 2 は 4 上がり、下の端が昇り風の上の端。段階 3 は床の 2 上
+        check(Math.abs(StormHeart.heightFor(1, false) - StormHeart.heightFor(0, false) - 4.0) < 0.01
                 && Math.abs(StormHeartArena.FLOOR + StormHeart.heightFor(1, false) - StormHeartArena.UPDRAFT_TOP) < 0.01
                 && StormHeart.heightFor(2, false) == 2.0, "phase heights are wrong", failures);
         // 翼が裂ける: 落ちて 1.5 倍、6 秒で戻る

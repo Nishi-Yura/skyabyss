@@ -72,6 +72,11 @@ public final class EmberBackSelfTest {
             checkHoles(back);
             checkFluids(back, "after building");
             checkWalk(back, false);
+            // 詰み監査 (到達・戻れるか・はしご・床の穴)。戸は開いているものとして、灰の道の湖は冷え殻で渡れるものとして
+            jp.revati.skyabyss.titan.audit.BackReach.Report reach = EmberBackAudit.run(back);
+            reach.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
+            reach.failures.forEach(f -> SkyAbyss.LOGGER.warn("REACH {}", f));
+            reach.failures.forEach(f -> expect(false, f));
         })));
         steps.add(SelfTestRunner.Step.once("ember back (flow)", 100, server -> guarded(server, back -> checkFluids(back, "100 ticks after building"))));
         steps.add(SelfTestRunner.Step.once("ember back (ring)", server -> guarded(server, back -> checkRing(back))));

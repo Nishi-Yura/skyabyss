@@ -63,7 +63,7 @@ public final class RecordSelfTest {
         ServerLevel overworld = server.overworld();
         FakePlayer a = FakePlayerFactory.get(overworld, new GameProfile(UUID.fromString("5c1e0a2b-0000-4000-8000-00000000b001"), "[record_test_a]"));
         FakePlayer b = FakePlayerFactory.get(overworld, new GameProfile(UUID.fromString("5c1e0a2b-0000-4000-8000-00000000b002"), "[record_test_b]"));
-        a.getInventory().clearContent();
+        wipe(a);
         a.getEnderChestInventory().clearContent();
         TitanMemoryData memory = TitanMemoryData.get(server);
         memory.takePending(a.getUUID());
@@ -133,7 +133,7 @@ public final class RecordSelfTest {
         check(f, inspected != null && inspected.action() == RecordSnapshot.ACTION_NONE, "an inspected ledger must not offer the claim button");
         persisted.remove(Keepsakes.KEPT_TAG);
         memory.takePending(a.getUUID());
-        a.getInventory().clearContent();
+        wipe(a);
         a.getEnderChestInventory().clearContent();
 
         // ---------------------------------------------------------------- 変わった値
@@ -146,7 +146,7 @@ public final class RecordSelfTest {
         check(f, changes.stream().anyMatch(c -> c.key().equals("keepsakes/fragments")), "fragment change was not found");
         check(f, RecordSnapshot.isVolatile("growth/mana") && !RecordSnapshot.isVolatile("growth/level"), "volatile rows are wrong");
         Growth.setLevel(a, level);
-        a.getInventory().clearContent();
+        wipe(a);
 
         // ---------------------------------------------------------------- 落ちた品の守り
         BlockPos spawn = overworld.getSharedSpawnPos();
@@ -176,14 +176,14 @@ public final class RecordSelfTest {
         plain.discard();
 
         // ---------------------------------------------------------------- 投げ捨て
-        a.getInventory().clearContent();
+        wipe(a);
         ItemEntity toss = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(fragment));
         toss.setThrower(a);
         ItemTossEvent tossEvent = new ItemTossEvent(toss, a);
         NeoForge.EVENT_BUS.post(tossEvent);
-        check(f, tossEvent.isCanceled() && Keepsakes.locate(a, fragment).inventory() == 1, "tossing a fragment should be refused and returned");
+        check(f, tossEvent.isCanceled() && Keepsakes.locate(a, fragment).safe() == 1, "tossing a fragment should be refused and returned");
         // /give は持ち物に入れたあと、見せかけの品を投げた人なしで落とす。拒んで戻すと 1 つ増えてしまう
-        a.getInventory().clearContent();
+        wipe(a);
         a.getInventory().add(new ItemStack(fragment));
         ItemEntity giveShow = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(fragment));
         ItemTossEvent giveEvent = new ItemTossEvent(giveShow, a);
@@ -196,14 +196,14 @@ public final class RecordSelfTest {
         check(f, !coreEvent.isCanceled(), "the /give display drop of a core should pass untouched");
         // 心核と呼び笛も、自分で投げれば拒んで戻す
         for (net.minecraft.world.item.Item guardedItem : List.of(ModItems.STONE_WHALE_CORE.get(), jp.revati.skyabyss.titan.travel.TravelSetup.STONE_WHALE_CALL.get())) {
-            a.getInventory().clearContent();
+            wipe(a);
             ItemEntity own = new ItemEntity(overworld, a.getX(), a.getY(), a.getZ(), new ItemStack(guardedItem));
             own.setThrower(a);
             ItemTossEvent ownEvent = new ItemTossEvent(own, a);
             NeoForge.EVENT_BUS.post(ownEvent);
-            check(f, ownEvent.isCanceled() && Keepsakes.locate(a, guardedItem).inventory() == 1, "tossing " + guardedItem + " should be refused and returned");
+            check(f, ownEvent.isCanceled() && Keepsakes.locate(a, guardedItem).safe() == 1, "tossing " + guardedItem + " should be refused and returned");
         }
-        a.getInventory().clearContent();
+        wipe(a);
 
         // ---------------------------------------------------------------- ほかの仕組みの枠 (装飾品のスロット用)
         Keepsakes.registerHolder("accessory", (player, item) -> player == a && item == fragment ? 1 : 0);
@@ -252,7 +252,8 @@ public final class RecordSelfTest {
     }
 
     private static int count(FakePlayer p, net.minecraft.world.item.Item item, MinecraftServer server) {
-        int n = 0;
+        // 手もとの数: 持ち物 (前の代を除く) + 留め袋
+        int n = jp.revati.skyabyss.pouch.Pouch.count(p, item);
         for (ItemStack s : p.getInventory().items) {
             if (s.is(item) && !KeepsakeBonds.stale(server, s)) {
                 n += s.getCount();
@@ -268,8 +269,8 @@ public final class RecordSelfTest {
         BondData bond = BondData.get(server);
         bond.forget(a.getUUID());
         bond.forget(b.getUUID());
-        a.getInventory().clearContent();
-        b.getInventory().clearContent();
+        wipe(a);
+        wipe(b);
         a.getEnderChestInventory().clearContent();
         memory.takePending(a.getUUID());
         memory.takePending(b.getUUID());
@@ -324,7 +325,7 @@ public final class RecordSelfTest {
             check(f, w.stashCount() == 1 && w.total() == 2, "the chest should be noted as the fragment's place, got " + w);
             check(f, KeepsakeBonds.missing(a, KeepsakeBonds.Kind.FRAGMENT) == 0, "a fragment in a noted chest is not lost");
             // コマンドで消えた (/clear): 手もとの一つを消す → 1 つ足りない
-            a.getInventory().clearContent();
+            wipe(a);
             check(f, KeepsakeBonds.missing(a, KeepsakeBonds.Kind.FRAGMENT) == 1, "one cleared fragment should be missing, got "
                     + KeepsakeBonds.missing(a, KeepsakeBonds.Kind.FRAGMENT));
             // 呼び戻す: 手もとにない分 (箱の分も) が戻り、箱の中の前の代は崩れる。合わせて 2 (一人一つ)
@@ -346,10 +347,13 @@ public final class RecordSelfTest {
             whale.clears++;
             KeepsakeBonds.checkHearts(a);
             check(f, count(a, fragment, server) == 2, "a re-clear with nothing missing should not add a fragment");
-            for (ItemStack s : a.getInventory().items) {
-                if (s.is(fragment)) {
-                    s.shrink(1);
-                    break;
+            // 手もとの欠片を一つ消す (袋にあれば袋から。なければ持ち物から)
+            if (jp.revati.skyabyss.pouch.Pouch.take(a, fragment, 1) == 0) {
+                for (ItemStack s : a.getInventory().items) {
+                    if (s.is(fragment)) {
+                        s.shrink(1);
+                        break;
+                    }
                 }
             }
             KeepsakeBonds.sweep(a);
@@ -358,7 +362,7 @@ public final class RecordSelfTest {
             KeepsakeBonds.checkHearts(a);
             check(f, count(a, fragment, server) == 2, "re-stilling a heart should restore the lost fragment to 2, got " + count(a, fragment, server));
             // 天の鍵: そろえた人だけが呼び戻せる。鍵は一つ
-            a.getInventory().clearContent();
+            wipe(a);
             jp.revati.skyabyss.story.StoryData.get(server).mark(a.getUUID(), "[record_test_a]", 0);
             check(f, KeepsakeBonds.expected(a, KeepsakeBonds.Kind.FRAGMENT) == 0, "fragments are not expected after the key is made");
             check(f, KeepsakeBonds.missing(a, KeepsakeBonds.Kind.KEY) == 1, "a missing key should be noticed");
@@ -384,12 +388,18 @@ public final class RecordSelfTest {
             tide.fragment = saved[1];
             whale.clears = clears[0];
             tide.clears = clears[1];
-            a.getInventory().clearContent();
-            b.getInventory().clearContent();
+            wipe(a);
+            wipe(b);
             memory.takePending(a.getUUID());
             memory.takePending(b.getUUID());
             bond.forget(a.getUUID());
             bond.forget(b.getUUID());
         }
+    }
+
+    // 持ち物と留め袋を空にする (品がなくなったことにしたいとき。袋は持ち物とは別の入れ物なので、袋も空にする)
+    private static void wipe(net.minecraft.world.entity.player.Player p) {
+        p.getInventory().clearContent();
+        jp.revati.skyabyss.pouch.Pouch.clear(p);
     }
 }

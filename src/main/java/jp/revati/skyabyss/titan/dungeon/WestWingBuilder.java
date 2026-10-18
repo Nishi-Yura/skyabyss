@@ -42,7 +42,8 @@ final class WestWingBuilder {
         ledge(kit, -30, -28, -44, -44, W1.floorY());
         ledge(kit, -24, -22, -56, -56, W2.floorY());
         ledge(kit, -18, -16, -52, -52, W2.floorY());
-        ledge(kit, -16, -12, -31, -30, 97);
+        // 戸 (x -10) の足もとの石までつなぐ (x -11 を空けると、岩棚と戸のあいだに溶岩の一マスの穴が開く)
+        ledge(kit, -16, -11, -31, -30, 97);
 
         decorate(kit);
         ribWindows(kit);

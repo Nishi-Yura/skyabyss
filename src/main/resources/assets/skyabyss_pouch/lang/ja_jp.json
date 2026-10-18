@@ -1,0 +1,20 @@
+{
+  "skyabyss_pouch.name": "留め袋",
+  "skyabyss_pouch.first": "【%2$s】を、%1$sへ入れた",
+  "skyabyss_pouch.full": "%1$sの【%2$s】がいっぱいだ。持ち物へ入れた",
+  "skyabyss_pouch.migrated": "持ち物の mod の品を、%1$sへ移した（%2$s 個）",
+  "skyabyss_pouch.category.tool": "使う道具",
+  "skyabyss_pouch.category.key": "鍵と心核",
+  "skyabyss_pouch.category.resonance": "共鳴",
+  "skyabyss_pouch.category.book": "書",
+  "skyabyss_pouch.category.material": "巨神の素材",
+  "skyabyss_pouch.category.small": "小さな素材",
+  "skyabyss_pouch.cmd.header": "%1$s（%2$s 種）",
+  "skyabyss_pouch.cmd.empty": "%1$sは空だ",
+  "skyabyss_pouch.cmd.unknown": "%s は袋の品ではない",
+  "skyabyss_pouch.cmd.none": "%s は袋にない（または持ち物に入らない）",
+  "skyabyss_pouch.cmd.took": "袋から %1$s 個、【%2$s】を出した",
+  "skyabyss_pouch.cmd.hold_on": "掃除を止めた（袋の品を持ち物に残せる）",
+  "skyabyss_pouch.cmd.hold_off": "掃除を戻した",
+  "skyabyss_pouch.cmd.migrated": "移し替えを流した（%s 個）"
+}

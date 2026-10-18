@@ -3,13 +3,12 @@ package jp.revati.skyabyss.titan.tide.heart;
 import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.tide.TideTravel;
@@ -52,6 +51,8 @@ import org.joml.Vector3f;
 // 強さは 03 の 9.8節の目安 (推奨 Lv18: 体力 540、ふつうの技の一撃 13.5 前後)
 public class TideHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
+    // 見た目と判定箱の大きさ (前の 1.5 倍。TideHeartSetup の sized と TideHeartRenderer の SCALE を合わせる)
+    public static final double BODY_SCALE = 1.5;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
     public static final int ROAR_TICKS = 60;
@@ -93,23 +94,6 @@ public class TideHeart extends HeartBoss {
     public static final Action[] PHASE_TWO = {Action.FLOOD, Action.BUBBLE, Action.PEARL};
     public static final Action[] PHASE_THREE = {Action.EBB, Action.MOON_WAVE, Action.PEARL_RAIN};
 
-    // 床を走る輪 (殻打ち・咆哮の押し返し)。跳べば当たらない
-    private static final class Ring {
-        double radius = 1.5;
-        final double floorY;
-        final boolean harmful;
-        final Set<UUID> hit = new HashSet<>();
-
-        Ring(double floorY, boolean harmful) {
-            this.floorY = floorY;
-            this.harmful = harmful;
-        }
-    }
-
-    // 予告の輪のあとに当たる一撃 (珊瑚の槍・真珠の雨)
-    private record Strike(double x, double y, double z, int impactAt, boolean spear) {
-    }
-
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
     private Action last = Action.NONE;
@@ -117,14 +101,15 @@ public class TideHeart extends HeartBoss {
     private int cooldown = 40;
     private float attackYaw;
     private boolean defeated;
-    private final List<Ring> rings = new ArrayList<>();
-    private final List<Strike> strikes = new ArrayList<>();
-    // 泡の牢の線 (心臓の前から、溜めの最初の人の位置まで)
+    // 技の始めに決めて覚える数・向き (人数で変わる本数、返し波の安全な筋、大波の本数と角)
+    private int lockedCount;
     @Nullable
-    private Vec3 bubbleTo;
-    // 大波の向き (水平の単位ベクトル。波はこの向きへ進む) と、当たった人
-    private Vec3 waveDir = new Vec3(0, 0, 1);
-    private final Set<UUID> waveHit = new HashSet<>();
+    private double[] ebbGaps;
+    private double moonSpan;
+    private double moonBase;
+    // 試験用: 次の技を始めない。開発用: 心臓の間の人数を多いことにする (0 なら実際の人数)
+    private boolean holdAttacks;
+    private int partyOverride;
     @Nullable
     private AABB arena;
     private float toughness = 1f;
@@ -242,8 +227,6 @@ public class TideHeart extends HeartBoss {
         if (cooldown > 0) {
             cooldown--;
         }
-        tickRings(server);
-        tickStrikes(server);
 
         if (action == Action.NONE) {
             if (getPhase() < phaseForHealth()) {
@@ -259,7 +242,7 @@ public class TideHeart extends HeartBoss {
                 return;
             }
             faceTarget(target);
-            if (cooldown == 0) {
+            if (cooldown == 0 && !holdAttacks) {
                 begin(pickAttack(), null);
             }
             return;
@@ -358,7 +341,7 @@ public class TideHeart extends HeartBoss {
 
     // 心臓の中心の高さ (模型の核)
     private double coreY() {
-        return getY() + 2.0;
+        return getY() + 2.0 * BODY_SCALE;
     }
 
     // 床の高さ: 部屋に縛られていれば部屋の床。そうでなければ真下へたどって最初の床
@@ -398,6 +381,217 @@ public class TideHeart extends HeartBoss {
         TideHeartNetwork.nudge(player, x, y, z);
     }
 
+    // ---- 人数で増える数 (n = 心臓の間にいる人数。1〜6)。自己テストが同じ式を見る ----
+
+    // 潮の吐息の帯: 一人なら一本、人数ぶん別の人へ (最大 4)
+    public static int breathLines(int n) {
+        return Math.min(Math.max(n, 1), 4);
+    }
+
+    // 殻打ちの輪: 三人から二重、五人から三重。安全な筋は二本 (五人から三本)
+    public static int shellRings(int n) {
+        return n >= 5 ? 3 : n >= 3 ? 2 : 1;
+    }
+
+    public static int shellLanes(int n) {
+        return n >= 5 ? 3 : 2;
+    }
+
+    // 渦潮の横の渦: 二人から、人数 - 1 (最大 3)
+    public static int whirlPools(int n) {
+        return Math.min(Math.max(n - 1, 0), 3);
+    }
+
+    // 満ち潮の槍 (一度に突き上がる本数): 人数ぶん (最大 5) と、三人から 1、五人からもう 1 の「だれも立っていない所」
+    public static int spearCount(int n) {
+        return Math.min(Math.max(n, 1), 5) + (n >= 3 ? 1 : 0) + (n >= 5 ? 1 : 0);
+    }
+
+    // 泡の柱: 一人は 1、二人は 2、三人からは人数 (最大 5) + 1
+    public static int bubblePillars(int n) {
+        return n <= 2 ? Math.max(n, 1) : Math.min(n, 5) + 1;
+    }
+
+    // 追う真珠: 一人は 3、二人から 2 + 人数 (最大 8)
+    public static int pearlCount(int n) {
+        return n <= 1 ? 3 : Math.min(2 + n, 8);
+    }
+
+    // 引き潮の返し波 (跳び越える輪): 三人から 1、五人から 2
+    public static int ebbRipples(int n) {
+        return n >= 5 ? 2 : n >= 3 ? 1 : 0;
+    }
+
+    // 月潮の大波の本数 (回る波頭): 三人から 2、五人から 3。一本あたりの回る角は (本数が増えるほど狭い)
+    public static int moonBars(int n) {
+        return n >= 5 ? 3 : n >= 3 ? 2 : 1;
+    }
+
+    public static double moonSpanDegrees(int bars) {
+        return bars == 1 ? 110 : bars == 2 ? 90 : 70;
+    }
+
+    // 真珠の雨の円の数: 人数 × 3 (最大 14)
+    public static int rainCircles(int n) {
+        return Math.min(14, 3 * Math.max(n, 1));
+    }
+
+    // ---- 範囲と予告の長さ ----
+    public static final int BREATH_WARN = 24;
+    public static final double BREATH_LENGTH = 17;
+    public static final double BREATH_HALF_WIDTH = 1.5;
+    public static final int SHELL_WARN = 20;
+    public static final double SHELL_CORE = 3.6;
+    public static final double SHELL_REACH = 15.5;
+    public static final double SHELL_SPEED = 0.6;
+    public static final float SHELL_CORE_DAMAGE = 8f;
+    public static final int WHIRL_WARN = 70;
+    public static final double WHIRL_BLAST = 5.0;
+    public static final double WHIRL_POOL = 3.0;
+    public static final float WHIRL_POOL_DAMAGE = 9f;
+    public static final int SPEAR_WARN = 20;
+    public static final double SPEAR_RADIUS = 1.3;
+    public static final int BUBBLE_WARN = 30;
+    public static final double BUBBLE_RADIUS = 1.6;
+    public static final int PEARL_CHASE = 100;
+    public static final int PEARL_WARN = 20;
+    public static final double PEARL_RADIUS = 2.2;
+    public static final int EBB_WARN = 100;
+    public static final double EBB_BLAST = 5.5;
+    public static final float EBB_RIPPLE_DAMAGE = 9f;
+    public static final int MOON_WARN = 40;
+    public static final int MOON_ACTIVE = 40;
+    public static final double MOON_LENGTH = 15;
+    public static final double MOON_HALF_WIDTH = 1.4;
+    public static final int RAIN_WARN = 30;
+    public static final double RAIN_RADIUS = 2.0;
+    public static final double ROAR_PUSH_RADIUS = 8;
+    public static final int ROAR_PUSH_WARN = 22;
+    // 島の上に立つ人は、床の技 (reach を低くしたもの) に当たらない: 床 + 1.9 より上
+    private static final double FLOOR_REACH = 1.9;
+
+    // ---- 開発用・試験用 ----
+
+    // 試験・コマンド用: 次の技を始めない (forceAction で出した技だけを見たいとき)
+    public void holdAttacks() {
+        holdAttacks = true;
+    }
+
+    public int actionTickCount() {
+        return actionTicks;
+    }
+
+    // 開発用: 心臓の間にいる人数を、実際より多いことにする (一人で複数人の技の絵を撮るため。0 なら実際の人数)
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    private int present(ServerLevel server) {
+        return Math.max(partyOverride, reachable(server, 40).size());
+    }
+
+    // 狙う地点 (人の足元) を最大 want か所 (いま狙っている人を先頭に、残りは入れ替える)。
+    // fill が真なら、人が足りないぶんは床の適当な点で補う (開発用の人数の上書きと、「だれも立っていない所」の分)
+    private List<Vec3> pickSpots(ServerLevel server, int want, boolean fill) {
+        List<ServerPlayer> all = new ArrayList<>(reachable(server, 40));
+        java.util.Collections.shuffle(all, new java.util.Random(random.nextLong()));
+        LivingEntity main = getTarget();
+        if (main instanceof ServerPlayer mp && all.remove(mp)) {
+            all.add(0, mp);
+        }
+        List<Vec3> spots = new ArrayList<>();
+        for (ServerPlayer p : all) {
+            if (spots.size() < want) {
+                spots.add(p.position());
+            }
+        }
+        while (fill && spots.size() < want) {
+            spots.add(randomFloorSpot());
+        }
+        return spots;
+    }
+
+    // 床の上の適当な点 (心臓から 4〜11。部屋の中なら島の上は避ける)
+    private Vec3 randomFloorSpot() {
+        double x = getX();
+        double z = getZ();
+        for (int tries = 0; tries < 12; tries++) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 4 + random.nextDouble() * 7;
+            x = getX() + Math.cos(a) * r;
+            z = getZ() + Math.sin(a) * r;
+            if (!isBound() || !nearIsland(x, z)) {
+                break;
+            }
+        }
+        return new Vec3(x, standY(x, z), z);
+    }
+
+    private static boolean nearIsland(double x, double z) {
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                if (Math.hypot(x - (TideHeartArena.CX + 0.5 + sx * TideHeartArena.ISLAND_OFFSET), z - (TideHeartArena.CZ + 0.5 + sz * TideHeartArena.ISLAND_OFFSET)) < 3.6) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)。床の技: 島の上は当たらない
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
+        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(FLOOR_REACH);
+    }
+
+    // 立っている所への予告 (島の上の人には島の上の高さで円を置く。円の高さ + 1.9 までの人に当たる: 床の円は島の上の人に、島の円は床の人に当たらない)
+    private Telegraph.Builder tgAt(ServerLevel server, TelegraphShape shape, double y, int warn, int color) {
+        return Telegraph.in(server, shape).floor(y).warn(warn).color(color).owner(this).victims(this::canReach).reach(FLOOR_REACH);
+    }
+
+    private double angleTo(Vec3 spot) {
+        return Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
+    }
+
+    // 輪が抜ける安全な筋 (角度の一覧)。基準の角から等間隔
+    private static double[] lanes(double base, int count) {
+        double[] gaps = new double[count];
+        for (int i = 0; i < count; i++) {
+            gaps[i] = base + Math.PI * 2 * i / count;
+        }
+        return gaps;
+    }
+
+    private static final double LANE_HALF = Math.toRadians(22);
+
+    // 安全な筋の印 (見た目だけ。緑の扇)
+    private void laneMarks(ServerLevel server, double[] gaps, int warn) {
+        for (double gap : gaps) {
+            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 15, LANE_HALF), warn, 0x3AE8FF).start();
+        }
+    }
+
+    // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
+    private void ripple(ServerLevel server, double r0, int warn, double[] gaps, float damage, boolean slow, boolean first) {
+        int active = (int) Math.ceil((SHELL_REACH - r0) / SHELL_SPEED);
+        tg(server, TelegraphShape.wave(getX(), getZ(), r0, SHELL_REACH, 0.9, gaps, LANE_HALF), warn, 0xFF5A1A).active(active).jumpClear(0.9)
+                .onImpact(s -> {
+                    if (first) {
+                        sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.5f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.2);
+                    }
+                })
+                .onHit((s, player) -> {
+                    strike(player, damage);
+                    if (slow) {
+                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
+                    }
+                    Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                    player.knockback(0.9, -to.x, -to.z);
+                    player.hurtMarked = true;
+                })
+                .start();
+    }
+
     // 水平に中心へ引く (2 tick ごとに呼ぶ。足す量は、地面の摩擦で釣り合う速さが speed になる値)
     private void pull(ServerPlayer player, double speed) {
         Vec3 to = new Vec3(getX() - player.getX(), 0, getZ() - player.getZ());
@@ -411,24 +605,32 @@ public class TideHeart extends HeartBoss {
     }
 
     // ---- 咆哮 (段階の変わり目) ----
+    // 傷はない。半径 8 の円の中は 1.1 秒の予告のあと押し返される (円の外は動かない)
     private void tickRoar(ServerLevel server) {
         if (actionTicks == 1) {
             entityData.set(DATA_ROARING, true);
             sound(server, TideHeartSetup.ROAR.get(), 3f, 1f);
-            server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 80, 1.6, 1.4, 1.6, 0.3);
-        }
-        if (actionTicks == 22) {
-            sound(server, SoundEvents.GENERIC_SPLASH, 2f, 0.6f);
-            rings.add(new Ring(floorY(), false));
+            server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 80, 1.6 * BODY_SCALE, 1.4 * BODY_SCALE, 1.6 * BODY_SCALE, 0.3);
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, 0xB8C0C8).reach(3.5)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.6f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 80, 4.0, 0.3, 4.0, 0.4);
+                    })
+                    .onHit((s, player) -> {
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.0, -to.x, -to.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            warn(server, dust(getPhase() == 0 ? 0xF0E4EC : 0xC8DCFA, 1.3f), getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.05);
+            warn(server, dust(getPhase() == 0 ? 0xF0E4EC : 0xC8DCFA, 1.3f), getX(), coreY(), getZ(), 6, 1.2 * BODY_SCALE, 1.2 * BODY_SCALE, 1.2 * BODY_SCALE, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             entityData.set(DATA_ROARING, false);
             entityData.set(DATA_PHASE, Math.min(PHASE_COUNT - 1, getPhase() + 1));
             sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, 1.4f);
-            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), coreY(), getZ(), 60, 1.8, 1.6, 1.8, 0.1);
+            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), coreY(), getZ(), 60, 1.8 * BODY_SCALE, 1.6 * BODY_SCALE, 1.8 * BODY_SCALE, 0.1);
             finish();
             cooldown = 40;
         }
@@ -436,41 +638,40 @@ public class TideHeart extends HeartBoss {
 
     // ---- 段階1 ----
 
-    // 潮の吐息 (1.2 秒): 心臓から人へ伸びる水の線。幅 3・長さ 20 の帯を押し流す
+    // 潮の吐息 (1.2 秒): 心臓から人へ伸びる水の線 (幅 3・長さ 20)。人数が増えると、別の人へ向けた線が最大 4 本
     private void tickBreath(ServerLevel server) {
-        Vec3 f = forward(attackYaw);
-        double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.BREATH.get(), 2f, 1f);
-        }
-        if (actionTicks < 24 && actionTicks % 2 == 0) {
-            Vec3 side = new Vec3(-f.z, 0, f.x);
-            for (double d = 2; d <= 20; d += 1.0) {
-                for (int s = -1; s <= 1; s += 2) {
-                    warn(server, dust(0x5FD6E0, 0.9f), getX() + f.x * d + side.x * s * 1.5, fy + 0.15, getZ() + f.z * d + side.z * s * 1.5, 1, 0, 0, 0, 0);
-                }
-                if (((int) d) % 3 == actionTicks % 3) {
-                    warn(server, dust(0xBFF6F4, 0.7f), getX() + f.x * d, fy + 0.15, getZ() + f.z * d, 1, 0, 0, 0, 0);
-                }
+            List<Vec3> targets = pickSpots(server, breathLines(present(server)), true);
+            List<Double> angles = new ArrayList<>();
+            for (Vec3 p : targets) {
+                angles.add(angleTo(p));
             }
-        }
-        if (actionTicks >= 24 && actionTicks <= 34 && actionTicks % 2 == 0) {
-            for (double d = 2; d <= 20; d += 1.5) {
-                server.sendParticles(ParticleTypes.SPLASH, getX() + f.x * d, fy + 0.8, getZ() + f.z * d, 6, 0.8, 0.4, 0.8, 0.2);
-                server.sendParticles(ParticleTypes.BUBBLE_POP, getX() + f.x * d, fy + 1.2, getZ() + f.z * d, 2, 0.6, 0.4, 0.6, 0.05);
+            if (angles.isEmpty()) {
+                angles.add(Telegraph.angleOf(forward(attackYaw)));
             }
-        }
-        if (actionTicks == 24) {
-            sound(server, SoundEvents.GENERIC_SPLASH, 2f, 0.7f);
-            for (ServerPlayer player : reachable(server, 22)) {
-                Vec3 v = player.position().subtract(position()).multiply(1, 0, 1);
-                double along = v.dot(f);
-                double across = v.subtract(f.scale(along)).length();
-                if (along > 0.5 && along < 20 && across < 1.5) {
-                    strike(player, BREATH_DAMAGE);
-                    player.knockback(1.5, -f.x, -f.z);
-                    player.hurtMarked = true;
-                }
+            boolean first = true;
+            for (double angle : angles) {
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                boolean sounds = first;
+                first = false;
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, 0xFF8A1A)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.7f);
+                            }
+                            for (double d = 2.5; d <= BREATH_LENGTH; d += 2.5) {
+                                s.sendParticles(ParticleTypes.SPLASH, getX() + dx * d, floorY() + 0.8, getZ() + dz * d, 5, 0.7, 0.4, 0.7, 0.2);
+                                s.sendParticles(ParticleTypes.BUBBLE_POP, getX() + dx * d, floorY() + 1.2, getZ() + dz * d, 2, 0.5, 0.4, 0.5, 0.05);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, BREATH_DAMAGE);
+                            player.knockback(1.5, -dx, -dz);
+                            player.hurtMarked = true;
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 40) {
@@ -478,92 +679,123 @@ public class TideHeart extends HeartBoss {
         }
     }
 
-    // 殻打ち (1.0 秒): 殻が開きかけて震え、床を走る輪。跳べば当たらない。輪は 3 秒の鈍足 I
+    // 殻打ち (1.0 秒): 殻が開きかけて震え、足もとの円 (半径 3.6) を打ち、そこから床を走る輪が広がる。
+    // 円の中は傷。輪は跳べば当たらず、安全な筋 (緑の扇) は何もない。三人から輪は二重 (0.7 秒おき)、五人から三重、筋も三本
     private void tickShellStrike(ServerLevel server) {
+        int rings = 1;
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.SHELL.get(), 2f, 1f);
-        }
-        if (actionTicks < 20 && actionTicks % 3 == 0) {
-            double fy = floorY();
-            for (int a = 0; a < 360; a += 20) {
-                double rad = Math.toRadians(a);
-                warn(server, dust(0x9A3FD0, 1.5f), getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
+            int n = present(server);
+            lockedCount = shellRings(n);
+            double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, 0xFF5A1A)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.2);
+                    })
+                    .onHit((s, player) -> {
+                        strike(player, SHELL_CORE_DAMAGE);
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.0, -to.x, -to.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            laneMarks(server, gaps, SHELL_WARN);
+            for (int i = 0; i < lockedCount; i++) {
+                ripple(server, SHELL_CORE + 1.0, SHELL_WARN + i * 14, gaps, SHELL_RING_DAMAGE, true, i == 0);
             }
         }
-        if (actionTicks == 20) {
-            sound(server, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
-            double fy = floorY();
-            server.sendParticles(ParticleTypes.SPLASH, getX(), fy + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.2);
-            rings.add(new Ring(fy, true));
-        }
-        if (actionTicks >= 40) {
+        rings = Math.max(1, lockedCount);
+        int active = (int) Math.ceil((SHELL_REACH - SHELL_CORE - 1.0) / SHELL_SPEED);
+        if (actionTicks >= SHELL_WARN + (rings - 1) * 14 + active + 8) {
             finish();
         }
     }
 
-    // 渦潮 (1.5 秒の溜め): 足もとの水の渦。2 秒のあいだ中心へゆっくり引き (歩けば逆らえる)、終わりに半径 4 で弾ける
+    // 渦潮 (1.5 秒の溜め): 床の水が中心へ渦を巻く。2 秒のあいだ中心へゆっくり引き (歩けば逆らえる)、終わりに半径 5 の円が弾ける。
+    // 二人から、心臓のまわりの渦だまり (半径 3) が別の場所で同時に弾ける (人数 - 1 か所、最大 3)
     private void tickWhirl(ServerLevel server) {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.WHIRL.get(), 2.2f, 1f);
+            tg(server, TelegraphShape.circle(getX(), getZ(), WHIRL_BLAST), WHIRL_WARN, 0xFF3A2A)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.6f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 120, 3.0, 0.5, 3.0, 0.4);
+                    })
+                    .onHit((s, player) -> {
+                        strike(player, WHIRL_DAMAGE);
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(0.8, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            int pools = whirlPools(present(server));
+            double base = random.nextDouble() * Math.PI * 2;
+            for (int i = 0; i < pools; i++) {
+                double a = base + Math.PI * 2 * i / pools;
+                double r = 9.5;
+                double x = getX() + Math.cos(a) * r;
+                double z = getZ() + Math.sin(a) * r;
+                double y = standY(x, z);
+                tgAt(server, TelegraphShape.circle(x, z, WHIRL_POOL), y, WHIRL_WARN, 0xFF8A1A)
+                        .onImpact(s -> {
+                            s.playSound(null, x, y, z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.5f, 0.8f);
+                            s.sendParticles(ParticleTypes.SPLASH, x, y + 0.5, z, 60, 1.5, 0.4, 1.5, 0.3);
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, WHIRL_POOL_DAMAGE);
+                            Vec3 out = player.position().subtract(x, y, z).multiply(1, 0, 1);
+                            player.knockback(0.8, -out.x, -out.z);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
         }
-        if (actionTicks < 70 && actionTicks % 2 == 0) {
-            // 渦: 回りながら縮む粒の腕
+        if (actionTicks < WHIRL_WARN && actionTicks % 4 == 0) {
+            // 渦: 回りながら縮む粒の腕 (見た目だけ。傷は円の印のとおり)
             for (int arm = 0; arm < 4; arm++) {
-                for (double r = 1.5; r <= 9; r += 1.5) {
+                for (double r = 3.0; r <= 12; r += 3.0) {
                     double a = Math.toRadians(arm * 90 + actionTicks * 9 + r * 25);
-                    warn(server, dust(0x2FA8B8, 1.0f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-                }
-            }
-            // 弾ける範囲 (半径 4)
-            if (actionTicks >= 40) {
-                for (int a = 0; a < 360; a += 24) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFF7A7A, 1.1f), getX() + Math.cos(rad) * 4, fy + 0.2, getZ() + Math.sin(rad) * 4, 1, 0, 0, 0, 0);
+                    warn(server, dust(0x9AA4AE, 1.0f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
             }
         }
-        if (actionTicks < 30 && actionTicks % 6 == 0) {
-            for (ServerPlayer player : reachable(server, 20)) {
-                warn(server, dust(0x2FA8B8, 0.9f), player.getX(), player.getY() + 0.1, player.getZ(), 8, 0.6, 0.02, 0.6, 0);
-            }
-        }
-        if (actionTicks >= 30 && actionTicks < 70 && actionTicks % 2 == 0) {
-            for (ServerPlayer player : reachable(server, 20)) {
+        if (actionTicks >= 30 && actionTicks < WHIRL_WARN && actionTicks % 2 == 0) {
+            for (ServerPlayer player : reachable(server, 22)) {
                 pull(player, WHIRL_PULL);
             }
         }
-        if (actionTicks == 70) {
-            sound(server, SoundEvents.GENERIC_SPLASH, 2.5f, 0.6f);
-            server.sendParticles(ParticleTypes.SPLASH, getX(), fy + 0.5, getZ(), 120, 3.0, 0.5, 3.0, 0.4);
-            for (ServerPlayer player : reachable(server, 6)) {
-                if (player.position().subtract(position()).multiply(1, 0, 1).length() < 4 && player.getY() < coreY() + 2) {
-                    strike(player, WHIRL_DAMAGE);
-                    Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
-                    player.knockback(0.8, -out.x, -out.z);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        if (actionTicks >= 82) {
+        if (actionTicks >= WHIRL_WARN + 12) {
             finish();
         }
     }
 
     // ---- 段階2 ----
 
-    // 満ち潮と珊瑚の槍 (1.5 秒): 床が 6 秒満ちる (島の上は濡れない)。満ちている間、水の上の人の足もとに輪が出て、槍が 3 回突き上がる
+    // 満ち潮と珊瑚の槍 (1.5 秒): 床が 6 秒満ちる (島の上は濡れない。島の上に緑の印)。満ちている間、床の人の足もとに円が 1 秒出て、槍が 3 回突き上がる。
+    // 島の上に立つ人には当たらない。人数ぶんの槍 (最大 5) と、三人から「だれも立っていない所」にも (最大 +2)
     private void tickFlood(ServerLevel server) {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.FLOOD.get(), 2.5f, 1f);
+            if (isBound()) {
+                // 水に濡れない所 (岩の島の上) を緑で示す
+                for (int sx = -1; sx <= 1; sx += 2) {
+                    for (int sz = -1; sz <= 1; sz += 2) {
+                        double ix = TideHeartArena.CX + 0.5 + sx * TideHeartArena.ISLAND_OFFSET;
+                        double iz = TideHeartArena.CZ + 0.5 + sz * TideHeartArena.ISLAND_OFFSET;
+                        tgAt(server, TelegraphShape.circle(ix, iz, 2.2), fy + TideHeartArena.ISLAND_HEIGHT, 30, 0x3AE8FF).start();
+                    }
+                }
+            }
         }
         if (actionTicks < 30 && actionTicks % 3 == 0) {
             // 溝から水が上がる予告 (外周の輪)
             for (int a = 0; a < 360; a += 10) {
                 double rad = Math.toRadians(a + actionTicks * 2);
                 double r = isBound() ? 13 : 9;
-                warn(server, dust(0x4FC8E8, 1.1f), getX() + Math.cos(rad) * r, fy + 0.2 + actionTicks / 40.0, getZ() + Math.sin(rad) * r, 1, 0, 0, 0, 0);
+                warn(server, dust(0x9AA4AE, 1.1f), getX() + Math.cos(rad) * r, fy + 0.2 + actionTicks / 40.0, getZ() + Math.sin(rad) * r, 1, 0, 0, 0, 0);
             }
         }
         if (actionTicks == 30 && isBound()) {
@@ -572,83 +804,107 @@ public class TideHeart extends HeartBoss {
         // 槍は満ちてから (30 + 20 tick 後) 3 回、30 tick おき
         for (int k = 0; k < 3; k++) {
             if (actionTicks == 50 + k * 30) {
-                List<ServerPlayer> players = reachable(server, 22);
-                int n = 0;
-                for (ServerPlayer p : players) {
-                    if (onIsland(p) || n >= 4) {
-                        continue;
-                    }
-                    strikes.add(new Strike(p.getX(), fy, p.getZ(), tickCount + 16, true));
-                    n++;
-                }
+                spears(server, fy);
             }
         }
-        if (actionTicks >= 130) {
+        if (actionTicks >= 50 + 2 * 30 + SPEAR_WARN + 10) {
             finish();
         }
     }
 
-    // 泡の牢 (1.5 秒): 人へ伸びる泡の線。線の上にいた人を泡に閉じこめて浮かせる (最長 4 秒)。泡は叩けば割れる
+    private void spears(ServerLevel server, double fy) {
+        int n = present(server);
+        int want = spearCount(n);
+        // 床の人 (島の上の人は狙わない) を先頭に、足りないぶんは床の適当な点
+        List<ServerPlayer> onFloor = new ArrayList<>();
+        for (ServerPlayer p : reachable(server, 24)) {
+            if (!onIsland(p)) {
+                onFloor.add(p);
+            }
+        }
+        java.util.Collections.shuffle(onFloor, new java.util.Random(random.nextLong()));
+        List<Vec3> spots = new ArrayList<>();
+        for (ServerPlayer p : onFloor) {
+            if (spots.size() < Math.min(Math.max(n, 1), 5)) {
+                spots.add(p.position());
+            }
+        }
+        while (spots.size() < want) {
+            spots.add(randomFloorSpot());
+        }
+        boolean first = true;
+        for (Vec3 p : spots) {
+            double x = p.x;
+            double z = p.z;
+            boolean sounds = first;
+            first = false;
+            Telegraph.in(server, TelegraphShape.circle(x, z, SPEAR_RADIUS)).floor(fy).warn(SPEAR_WARN).color(0xFF3A2A).owner(this).victims(this::canReach)
+                    .reach(FLOOR_REACH)
+                    .onImpact(s -> {
+                        s.playSound(null, x, fy, z, TideHeartSetup.SPEAR.get(), SoundSource.HOSTILE, sounds ? 1.6f : 0.9f, 1f);
+                        s.sendParticles(dust(0xFF7A80, 1.4f), x, fy + 1.0, z, 30, 0.25, 1.0, 0.25, 0.05);
+                        s.sendParticles(ParticleTypes.SPLASH, x, fy + 0.6, z, 20, 0.5, 0.3, 0.5, 0.2);
+                    })
+                    .onHit((s, player) -> {
+                        strike(player, SPEAR_DAMAGE);
+                        nudge(player, 0, 0.6, 0);
+                    })
+                    .start();
+        }
+    }
+
+    // 泡の牢 (1.5 秒): 人のいる所に泡の柱が立つ (半径 1.6 の円、1.5 秒の予告)。柱の中の人は泡に閉じこめられて浮かぶ (最長 4 秒。泡は叩けば割れる)。
+    // 人数が増えると、別の人の足もとに一本ずつ (最大 5) と、三人から「だれも立っていない所」に 1 本
     private void tickBubble(ServerLevel server) {
-        LivingEntity target = getTarget();
-        Vec3 from = new Vec3(getX(), coreY(), getZ());
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.BUBBLE.get(), 2f, 1f);
-            bubbleTo = target != null ? target.position().add(0, 0.9, 0) : null;
-        }
-        // 0.5 秒前まで人を追い、そこで線が決まる
-        if (target != null && actionTicks < 20) {
-            bubbleTo = target.position().add(0, 0.9, 0);
-        }
-        if (bubbleTo != null && actionTicks < 30 && actionTicks % 2 == 0) {
-            Vec3 d = bubbleTo.subtract(from);
-            int steps = (int) Math.min(40, d.length() / 0.7);
-            for (int i = 1; i <= steps; i++) {
-                Vec3 p = from.add(d.scale((double) i / steps));
-                warn(server, dust(actionTicks < 20 ? 0x2A90E0 : 0x103070, 1.0f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
+            List<Vec3> spots = pickSpots(server, bubblePillars(present(server)), true);
+            boolean first = true;
+            for (Vec3 p : spots) {
+                double x = p.x;
+                double z = p.z;
+                double y = standY(x, z);
+                boolean sounds = first;
+                first = false;
+                tgAt(server, TelegraphShape.circle(x, z, BUBBLE_RADIUS), y, BUBBLE_WARN, 0xFF8A1A)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                s.playSound(null, x, y, z, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.HOSTILE, 2f, 1f);
+                            }
+                            s.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, x, y + 0.3, z, 30, 0.5, 0.3, 0.5, 0.1);
+                        })
+                        .onHit((s, player) -> {
+                            if (!TideBubble.isTrapped(s, player)) {
+                                s.addFreshEntity(new TideBubble(s, player, this));
+                            }
+                        })
+                        .start();
             }
         }
-        if (actionTicks == 30 && bubbleTo != null) {
-            Vec3 d = bubbleTo.subtract(from);
-            Vec3 dir = d.normalize();
-            double len = d.length() + 2;
-            server.playSound(null, bubbleTo.x, bubbleTo.y, bubbleTo.z, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.HOSTILE, 2f, 1f);
-            int caught = 0;
-            for (ServerPlayer player : reachable(server, 24)) {
-                Vec3 v = player.position().add(0, 0.9, 0).subtract(from);
-                double along = v.dot(dir);
-                if (along < 0 || along > len || caught >= 2) {
-                    continue;
-                }
-                if (v.subtract(dir.scale(along)).length() < 1.4 && !TideBubble.isTrapped(server, player)) {
-                    TideBubble bubble = new TideBubble(server, player, this);
-                    server.addFreshEntity(bubble);
-                    caught++;
-                }
-            }
-        }
-        if (actionTicks >= 40) {
+        if (actionTicks >= BUBBLE_WARN + 12) {
             finish();
         }
     }
 
-    // 真珠の脈 (1.0 秒): 心臓が白く光り、追ってくる真珠を 3 つ放つ (遅い。叩けば消える)
+    // 真珠の脈 (1.0 秒): 心臓が白く光り、追ってくる真珠を放つ (一人 3 つ、人数が増えると 2 + 人数で最大 8)。
+    // 真珠は触れても傷にならない。触れたとき・追いつづけて 5 秒たったときに止まり、足もとに半径 2.2 の円が 1 秒出て弾ける。叩けば消える
     private void tickPearl(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.PEARL.get(), 2f, 1f);
         }
         if (actionTicks < 20 && actionTicks % 2 == 0) {
-            warn(server, dust(0xFFFFFF, 1.5f), getX(), coreY(), getZ(), 8, 0.9, 0.9, 0.9, 0.02);
+            warn(server, dust(0xFFFFFF, 1.5f), getX(), coreY(), getZ(), 8, 0.9 * BODY_SCALE, 0.9 * BODY_SCALE, 0.9 * BODY_SCALE, 0.02);
         }
         if (actionTicks == 20) {
             List<ServerPlayer> players = reachable(server, 26);
             if (!players.isEmpty()) {
                 players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
-                for (int i = 0; i < 3; i++) {
+                int count = pearlCount(present(server));
+                for (int i = 0; i < count; i++) {
                     ServerPlayer p = players.get(i % players.size());
-                    double a = Math.toRadians(attackYaw + 90 + (i - 1) * 60);
+                    double a = Math.toRadians(attackYaw + 90 + (i - (count - 1) / 2.0) * (180.0 / Math.max(3, count)));
                     TidePearl pearl = new TidePearl(server, this, p,
-                            new Vec3(getX() - Math.sin(a) * 2.2, coreY() + (i - 1) * 0.6, getZ() + Math.cos(a) * 2.2));
+                            new Vec3(getX() - Math.sin(a) * 3.4, coreY() + (i % 3 - 1) * 0.6, getZ() + Math.cos(a) * 3.4));
                     server.addFreshEntity(pearl);
                 }
             }
@@ -658,144 +914,162 @@ public class TideHeart extends HeartBoss {
         }
     }
 
+    // 真珠が止まったところの予告 (半径 2.2、1 秒)。返すのは取り消せる予告 (真珠が叩かれたとき)
+    Telegraph pearlBurst(ServerLevel server, double x, double z) {
+        double y = standY(x, z);
+        return tgAt(server, TelegraphShape.circle(x, z, PEARL_RADIUS), y, PEARL_WARN, 0xFF6A2A)
+                .onImpact(s -> {
+                    s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.6f, 1.2f);
+                    s.sendParticles(ParticleTypes.END_ROD, x, y + 0.6, z, 24, 0.9, 0.4, 0.9, 0.08);
+                })
+                .onHit((s, player) -> {
+                    strike(player, PEARL_DAMAGE);
+                    nudge(player, 0, 0.3, 0);
+                })
+                .start();
+    }
+
     // ---- 段階3 ----
 
-    // 引き潮 (2 秒): 床の水が中心へ流れはじめる。3 秒のあいだ中心へ引く (島の上では半分)。終わりに半径 5 で弾ける
+    // 引き潮 (2 秒の溜めのあと 3 秒): 床の水が中心へ流れる。3 秒のあいだ中心へ引く (島の上では半分)。終わりに半径 5.5 の円が弾ける (予告は最初から)。
+    // 三人から、弾けたあと跳び越える輪 (返し波) が一重ずつ増える (五人から二重)。輪の安全な筋は緑
     private void tickEbb(ServerLevel server) {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.EBB.get(), 2.2f, 1f);
-        }
-        if (actionTicks < 100 && actionTicks % 2 == 0) {
-            // 中心へ流れる水の筋 (外から内へ動く)
-            for (int k = 0; k < 16; k++) {
-                double a = Math.toRadians(k * 22.5 + 7);
-                double r = 14 - ((actionTicks * 0.35 + k * 1.7) % 12);
-                warn(server, dust(0x2A70D8, 1.3f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-            }
-            if (actionTicks >= 70) {
-                for (int a = 0; a < 360; a += 20) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(0xFF7A7A, 1.2f), getX() + Math.cos(rad) * 5, fy + 0.2, getZ() + Math.sin(rad) * 5, 1, 0, 0, 0, 0);
+            int n = present(server);
+            lockedCount = ebbRipples(n);
+            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), EBB_WARN, 0xFF3A2A)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);
+                    })
+                    .onHit((s, player) -> {
+                        strike(player, EBB_DAMAGE);
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.0, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            if (lockedCount > 0) {
+                double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+                ebbGaps = gaps;
+                for (int i = 0; i < lockedCount; i++) {
+                    ripple(server, EBB_BLAST + 1.0, EBB_WARN + i * 14, gaps, EBB_RIPPLE_DAMAGE, true, false);
                 }
             }
         }
-        if (actionTicks >= 40 && actionTicks < 100 && actionTicks % 2 == 0) {
+        if (actionTicks == EBB_WARN - 30 && lockedCount > 0 && ebbGaps != null) {
+            laneMarks(server, ebbGaps, 30);
+        }
+        if (actionTicks < EBB_WARN && actionTicks % 4 == 0) {
+            // 中心へ流れる水の筋 (外から内へ動く。見た目だけ)
+            for (int k = 0; k < 12; k++) {
+                double a = Math.toRadians(k * 30 + 7);
+                double r = 14 - ((actionTicks * 0.35 + k * 1.7) % 12);
+                warn(server, dust(0x9AA4AE, 1.3f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            }
+        }
+        if (actionTicks >= 40 && actionTicks < EBB_WARN && actionTicks % 2 == 0) {
             for (ServerPlayer player : reachable(server, 22)) {
                 pull(player, onIsland(player) ? EBB_PULL * 0.5 : EBB_PULL);
             }
         }
-        if (actionTicks == 100) {
-            sound(server, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
-            server.sendParticles(ParticleTypes.SPLASH, getX(), fy + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);
-            for (ServerPlayer player : reachable(server, 7)) {
-                Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
-                if (out.length() < 5 && player.getY() < coreY() + 2) {
-                    strike(player, EBB_DAMAGE);
-                    player.knockback(1.0, -out.x, -out.z);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        if (actionTicks >= 112) {
+        int ripples = lockedCount;
+        int active = (int) Math.ceil((SHELL_REACH - EBB_BLAST - 1.0) / SHELL_SPEED);
+        if (actionTicks >= EBB_WARN + (ripples > 0 ? (ripples - 1) * 14 + active + 8 : 12)) {
             finish();
         }
     }
 
-    // 月潮の大波 (2 秒): 片側の壁ぎわに白い波頭、床に向きの線。高さ 2 の波が部屋を横切る。岩の島の上なら越えられる
+    // 月潮の大波 (2 秒): 心臓から伸びる波頭が、印の扇のなかを 2 秒かけて一度薙ぐ (幅 2.8・長さ 15)。波の高さは 2 なので、岩の島の上に立てば越える。
+    // 扇の外は何もない。三人から 2 本、五人から 3 本 (一本あたりの扇は狭くなり、扇のあいだに安全な楔が残る)
     private void tickMoonWave(ServerLevel server) {
         double fy = floorY();
-        double half = isBound() ? TideHeartArena.RADIUS : 12;
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.WAVE.get(), 3f, 1f);
-            // 大波の向きは四方から一つ (寄せる側の壁ぎわに白い波頭が出る)
-            int quarter = random.nextInt(4);
-            waveDir = switch (quarter) {
-                case 0 -> new Vec3(1, 0, 0);
-                case 1 -> new Vec3(-1, 0, 0);
-                case 2 -> new Vec3(0, 0, 1);
-                default -> new Vec3(0, 0, -1);
-            };
-            waveHit.clear();
-        }
-        Vec3 side = new Vec3(-waveDir.z, 0, waveDir.x);
-        if (actionTicks < 40 && actionTicks % 2 == 0) {
-            // 寄せる側の壁ぎわの白い波頭
-            for (double s = -half; s <= half; s += 1.0) {
-                double x = getX() - waveDir.x * (half - 0.5) + side.x * s;
-                double z = getZ() - waveDir.z * (half - 0.5) + side.z * s;
-                warn(server, dust(0xFFFFFF, 1.4f), x, fy + 0.5 + random.nextDouble() * 1.5, z, 1, 0, 0, 0, 0);
+            int bars = moonBars(present(server));
+            lockedCount = bars;
+            moonSpan = Math.toRadians(moonSpanDegrees(bars));
+            moonBase = random.nextDouble() * Math.PI * 2;
+            for (int i = 0; i < bars; i++) {
+                double start = moonBase + Math.PI * 2 * i / bars;
+                tg(server, TelegraphShape.sweep(getX(), getZ(), start, moonSpan, MOON_LENGTH, MOON_HALF_WIDTH), MOON_WARN, 0xFF4A1A).active(MOON_ACTIVE)
+                        .onImpact(s -> sound(s, TideHeartSetup.WAVE.get(), 2f, 1.3f))
+                        .onHit((s, player) -> {
+                            strike(player, WAVE_DAMAGE);
+                            Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(1.6, -out.x, -out.z);
+                            nudge(player, 0, 0.35, 0);
+                            player.hurtMarked = true;
+                        })
+                        .start();
             }
-            // 床の向きの線 (矢じり)
-            if (actionTicks % 6 == 0) {
-                for (double s = -half + 2; s <= half - 2; s += 4) {
-                    for (double k = -half + 3; k <= half - 3; k += 4) {
-                        for (double t = 0; t <= 1.2; t += 0.4) {
-                            double x = getX() + waveDir.x * (k + t) + side.x * s;
-                            double z = getZ() + waveDir.z * (k + t) + side.z * s;
-                            warn(server, dust(0x2A50C8, 1.4f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
-                        }
-                        for (int sg = -1; sg <= 1; sg += 2) {
-                            double x = getX() + waveDir.x * (k + 0.8) + side.x * (s + sg * 0.5);
-                            double z = getZ() + waveDir.z * (k + 0.8) + side.z * (s + sg * 0.5);
-                            warn(server, dust(0x2A50C8, 1.4f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
-                        }
-                    }
+        }
+        // 波頭の白い波しぶき (当たりの帯のとおり)
+        if (actionTicks > MOON_WARN && actionTicks <= MOON_WARN + MOON_ACTIVE && actionTicks % 2 == 0) {
+            double p = (actionTicks - MOON_WARN) / (double) MOON_ACTIVE;
+            for (int i = 0; i < lockedCount; i++) {
+                double a = moonBase + Math.PI * 2 * i / lockedCount + moonSpan * p;
+                for (double d = 3; d <= MOON_LENGTH; d += 2.0) {
+                    double x = getX() + Math.cos(a) * d;
+                    double z = getZ() + Math.sin(a) * d;
+                    server.sendParticles(ParticleTypes.SPLASH, x, fy + 1.6, z, 3, 0.3, 0.1, 0.3, 0.2);
+                    server.sendParticles(ParticleTypes.CLOUD, x, fy + 1.0, z, 1, 0.2, 0.2, 0.2, 0.01);
                 }
             }
         }
-        if (actionTicks >= 40 && actionTicks <= 40 + (int) (2 * half)) {
-            double front = -half + (actionTicks - 40);
-            if (actionTicks % 2 == 0) {
-                for (double s = -half; s <= half; s += 1.0) {
-                    double x = getX() + waveDir.x * front + side.x * s;
-                    double z = getZ() + waveDir.z * front + side.z * s;
-                    warn(server, dust(0xF4FAFF, 1.8f), x, fy + 1.9, z, 1, 0.1, 0.05, 0.1, 0);
-                    warn(server, dust(0x4A80E0, 1.8f), x, fy + 1.3, z, 1, 0.1, 0.1, 0.1, 0);
-                    warn(server, dust(0x2A58C0, 1.8f), x, fy + 0.7, z, 1, 0.1, 0.1, 0.1, 0);
-                    warn(server, dust(0x1A3A90, 1.8f), x, fy + 0.2, z, 1, 0.1, 0.05, 0.1, 0);
-                    if (((int) s) % 2 == 0) {
-                        server.sendParticles(ParticleTypes.SPLASH, x, fy + 2.0, z, 6, 0.4, 0.1, 0.4, 0.3);
-                    }
-                }
-            }
-            for (ServerPlayer player : reachable(server, half + 4)) {
-                Vec3 v = player.position().subtract(position()).multiply(1, 0, 1);
-                double along = v.dot(waveDir);
-                // 波の高さは 2。島の上 (床 + 2) は越える
-                if (Math.abs(along - front) < 1.2 && player.getY() < fy + 1.95 && waveHit.add(player.getUUID())) {
-                    strike(player, WAVE_DAMAGE);
-                    player.knockback(1.6, -waveDir.x, -waveDir.z);
-                    nudge(player, 0, 0.35, 0);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        if (actionTicks >= 46 + (int) (2 * half)) {
+        if (actionTicks >= MOON_WARN + MOON_ACTIVE + 6) {
             finish();
         }
     }
 
-    // 真珠の雨 (1.5 秒): 人の足もとと周りに白い輪。島の上にも来る。当たると少し跳ね上がる
+    // 真珠の雨 (1.5 秒): 人の足もとと周りに円 (半径 2、1.5 秒の予告)。島の上にも来る。当たると少し跳ね上がる。
+    // 人数 × 3 の円 (最大 14)。本人の足もと 1 つと、そのまわり 2 つ
     private void tickPearlRain(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.RAIN.get(), 2f, 1f);
-            List<ServerPlayer> players = reachable(server, 24);
-            int n = 0;
-            for (ServerPlayer p : players) {
-                if (n >= 8) {
-                    break;
+            int n = present(server);
+            int total = rainCircles(n);
+            List<Vec3> mains = pickSpots(server, Math.max(1, n), true);
+            List<Vec3> circles = new ArrayList<>();
+            for (Vec3 p : mains) {
+                if (circles.size() < total) {
+                    circles.add(p);
                 }
-                strikes.add(new Strike(p.getX(), standY(p.getX(), p.getZ()), p.getZ(), tickCount + 30, false));
-                n++;
-                for (int k = 0; k < 2 && n < 8; k++) {
-                    double a = random.nextDouble() * Math.PI * 2;
-                    double r = 2.5 + random.nextDouble() * 2.0;
-                    double x = p.getX() + Math.cos(a) * r;
-                    double z = p.getZ() + Math.sin(a) * r;
-                    strikes.add(new Strike(x, standY(x, z), z, tickCount + 30, false));
-                    n++;
-                }
+            }
+            int around = 0;
+            while (circles.size() < total) {
+                Vec3 p = mains.get(around % mains.size());
+                around++;
+                double a = random.nextDouble() * Math.PI * 2;
+                double r = 2.8 + random.nextDouble() * 2.0;
+                circles.add(new Vec3(p.x + Math.cos(a) * r, p.y, p.z + Math.sin(a) * r));
+            }
+            boolean first = true;
+            for (Vec3 c : circles) {
+                double x = c.x;
+                double z = c.z;
+                double y = standY(x, z);
+                boolean sounds = first;
+                first = false;
+                tgAt(server, TelegraphShape.circle(x, z, RAIN_RADIUS), y, RAIN_WARN, 0xFF7A1A)
+                        .onImpact(s -> {
+                            s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, sounds ? 1.6f : 0.8f, 1.4f);
+                            s.sendParticles(ParticleTypes.END_ROD, x, y + 0.3, z, 16, 0.8, 0.2, 0.8, 0.05);
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, RAIN_DAMAGE);
+                            nudge(player, 0, 0.5, 0);
+                        })
+                        .start();
+            }
+        }
+        // 降ってくる光 (最後の 0.5 秒。見た目だけ)
+        if (actionTicks >= RAIN_WARN - 10 && actionTicks < RAIN_WARN && actionTicks % 2 == 0) {
+            double drop = (RAIN_WARN - actionTicks) / 10.0;
+            for (ServerPlayer p : reachable(server, 24)) {
+                warn(server, ParticleTypes.END_ROD, p.getX(), standY(p.getX(), p.getZ()) + 1 + drop * 8, p.getZ(), 2, 0.1, 0.2, 0.1, 0);
             }
         }
         if (actionTicks >= 44) {
@@ -809,83 +1083,6 @@ public class TideHeart extends HeartBoss {
             return TideHeartArena.island(Mth.floor(x), Mth.floor(z)) ? TideHeartArena.FLOOR + TideHeartArena.ISLAND_HEIGHT : TideHeartArena.FLOOR;
         }
         return floorAt(Mth.floor(x), Mth.floor(z));
-    }
-
-    // ---- 輪と一撃 (技の後も続く) ----
-
-    private void tickRings(ServerLevel server) {
-        for (Ring ring : rings) {
-            ring.radius += 0.8;
-            int points = Math.max(8, (int) (2 * Math.PI * ring.radius / 1.4));
-            for (int i = 0; i < points; i++) {
-                double a = i * 2 * Math.PI / points;
-                warn(server, dust(ring.harmful ? 0x9A3FD0 : 0x2A90E0, 1.5f),
-                        getX() + Math.cos(a) * ring.radius, ring.floorY + 0.5, getZ() + Math.sin(a) * ring.radius, 1, 0, 0, 0, 0);
-            }
-            double r = ring.radius + 2;
-            AABB area = new AABB(getX() - r, ring.floorY - 1, getZ() - r, getX() + r, ring.floorY + 3, getZ() + r);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-                double d = to.length();
-                if (Math.abs(d - ring.radius) < 1.0 && player.getY() < ring.floorY + 0.9 && ring.hit.add(player.getUUID())) {
-                    if (ring.harmful) {
-                        strike(player, SHELL_RING_DAMAGE);
-                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
-                    }
-                    player.knockback(0.9, -to.x, -to.z);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        rings.removeIf(w -> w.radius > 20);
-    }
-
-    private void tickStrikes(ServerLevel server) {
-        if (strikes.isEmpty()) {
-            return;
-        }
-        List<Strike> remaining = new ArrayList<>();
-        for (Strike s : strikes) {
-            if (tickCount >= s.impactAt()) {
-                impact(server, s);
-                continue;
-            }
-            if (tickCount % 3 == 0) {
-                double r = s.spear() ? 1.3 : 2.0;
-                for (int a = 0; a < 360; a += 30) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(s.spear() ? 0xE03050 : 0x3A5FE0, 1.3f),
-                            s.x() + Math.cos(rad) * r, s.y() + 0.15, s.z() + Math.sin(rad) * r, 1, 0, 0, 0, 0);
-                }
-            }
-            if (!s.spear() && tickCount >= s.impactAt() - 10) {
-                double drop = (s.impactAt() - tickCount) / 10.0;
-                warn(server, ParticleTypes.END_ROD, s.x(), s.y() + 1 + drop * 8, s.z(), 2, 0.1, 0.2, 0.1, 0);
-            }
-            remaining.add(s);
-        }
-        strikes.clear();
-        strikes.addAll(remaining);
-    }
-
-    private void impact(ServerLevel server, Strike s) {
-        double radius = s.spear() ? 1.3 : 2.0;
-        server.playSound(null, s.x(), s.y(), s.z(), s.spear() ? TideHeartSetup.SPEAR.get() : SoundEvents.AMETHYST_CLUSTER_BREAK,
-                SoundSource.HOSTILE, 1.6f, s.spear() ? 1f : 1.4f);
-        if (s.spear()) {
-            server.sendParticles(dust(0xFF7A80, 1.4f), s.x(), s.y() + 1.0, s.z(), 30, 0.25, 1.0, 0.25, 0.05);
-            server.sendParticles(ParticleTypes.SPLASH, s.x(), s.y() + 0.6, s.z(), 20, 0.5, 0.3, 0.5, 0.2);
-        } else {
-            server.sendParticles(ParticleTypes.END_ROD, s.x(), s.y() + 0.3, s.z(), 16, 0.8, 0.2, 0.8, 0.05);
-        }
-        AABB area = new AABB(s.x() - radius, s.y() - 1, s.z() - radius, s.x() + radius, s.y() + 2.5, s.z() + radius);
-        for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-            if (Math.hypot(player.getX() - s.x(), player.getZ() - s.z()) > radius + 0.3) {
-                continue;
-            }
-            strike(player, s.spear() ? SPEAR_DAMAGE : RAIN_DAMAGE);
-            nudge(player, 0, s.spear() ? 0.6 : 0.5, 0);
-        }
     }
 
     // 咆哮の間は傷を受けない (殻が鳴って弾く)。段階2 の開いた殻は 1.2 倍。人数の分だけ割る
@@ -1072,7 +1269,7 @@ public class TideHeart extends HeartBoss {
         if (!level().isClientSide) {
             return;
         }
-        double cy = getY() + 2.0;
+        double cy = getY() + 2.0 * BODY_SCALE;
         int phase = getPhase();
         if (phase == 0) {
             if (random.nextFloat() < 0.15f) {

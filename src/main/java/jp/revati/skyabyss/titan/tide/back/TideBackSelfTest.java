@@ -85,6 +85,11 @@ public final class TideBackSelfTest {
             checkWaterlogged(back, FAILURES, NOTES, "ebb");
             checkOpenings(back, FAILURES, NOTES);
             checkWalk(back, FAILURES, NOTES);
+            // 詰み監査 (到達・戻れるか・はしご・床の穴)。干潮、戸は開いているものとして
+            jp.revati.skyabyss.titan.audit.BackReach.Report reach = TideBackAudit.runAll(back, TEST);
+            reach.notes.forEach(n -> jp.revati.skyabyss.SkyAbyss.LOGGER.info("SELFTEST {}", n));
+            reach.failures.forEach(f -> jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH {}", f));
+            FAILURES.addAll(reach.failures);
             checkPuzzle(back, FAILURES, NOTES);
             checkGarden(back, FAILURES);
             checkFlats(back, FAILURES);

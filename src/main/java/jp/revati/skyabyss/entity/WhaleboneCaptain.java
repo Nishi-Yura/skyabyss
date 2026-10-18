@@ -213,7 +213,8 @@ public class WhaleboneCaptain extends GuardMob {
             double angle = Telegraph.angleOf(-Math.sin(rad), Math.cos(rad));
             Vec3 look = new Vec3(-Math.sin(rad), 0, Math.cos(rad));
             Telegraph.in((ServerLevel) level(), TelegraphShape.cone(getX(), getZ(), angle, SWEEP_RANGE, Math.toRadians(SWEEP_HALF_ANGLE)))
-                    .floor(floorY()).warn(SWEEP_WARN).color(0xFF9A3A).owner(this)
+                    .floor(floorY()).warn(SWEEP_WARN).danger().owner(this)
+                    .target(getTarget())
                     .startSound(MobSounds.CAPTAIN_ERUPT_CHARGE.get(), 1.6f, 1.5f)
                     .victims(this::canHit)
                     .onImpact(server -> {
@@ -255,7 +256,7 @@ public class WhaleboneCaptain extends GuardMob {
             double radius = stompRadius();
             final Vec3 land = leapTo;
             Telegraph.in((ServerLevel) level(), TelegraphShape.circle(land.x, land.z, radius))
-                    .floor(land.y).warn(LEAP_LAND_TICK).color(0xFF4A2A).owner(this)
+                    .floor(land.y).warn(LEAP_LAND_TICK).danger().owner(this)
                     .startSound(MobSounds.CAPTAIN_ERUPT_CHARGE.get(), 2f, 0.8f)
                     .victims(this::canHit)
                     .onImpact(server -> stompEffects(server, land, radius))
@@ -340,7 +341,7 @@ public class WhaleboneCaptain extends GuardMob {
             boolean first = true;
             for (Vec3 p : spots) {
                 var builder = Telegraph.in(server, TelegraphShape.circle(p.x, p.z, ERUPT_RADIUS))
-                        .floor(p.y).warn(ERUPT_WARN).color(0xE8F0FF).owner(this)
+                        .floor(p.y).warn(ERUPT_WARN).danger().owner(this)
                         .victims(this::canHit)
                         .onImpact(s -> {
                             s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
@@ -372,7 +373,7 @@ public class WhaleboneCaptain extends GuardMob {
             roared = true;
             lockedYaw = getYRot();
             Telegraph.in((ServerLevel) level(), TelegraphShape.circle(getX(), getZ(), ROAR_RADIUS))
-                    .floor(floorY()).warn(ROAR_WARN).color(0xFFD060).owner(this)
+                    .floor(floorY()).warn(ROAR_WARN).danger().owner(this)
                     .victims(this::canHit)
                     .onImpact(server -> {
                         shockwave(server, ROAR_RADIUS);

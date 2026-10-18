@@ -132,7 +132,7 @@ public class SkillScreen extends Screen {
                 notice(Component.translatable("message.skyabyss.skill.respec_failed.no_forge"));
                 return;
             }
-            if (SkillManager.countCrystals(minecraft.player.getInventory()) < cost) {
+            if (SkillManager.countCrystals(minecraft.player) < cost) {
                 notice(Component.translatable("message.skyabyss.skill.respec_failed.no_crystals", cost));
                 return;
             }

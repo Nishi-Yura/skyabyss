@@ -134,7 +134,9 @@ public final class Lore {
         state.bookGiven = true;
         state.bookDropAt = -1;
         ItemStack book = new ItemStack(LoreSetup.LORE_BOOK.get());
-        if (!player.getInventory().add(book)) {
+        // 袋に入る設定のとき (使う入力ができたあと) は袋へ。今は書は手に持って使うので持ち物へ入る (22 の 2 章)
+        jp.revati.skyabyss.pouch.PouchRouting.give(player, book);
+        if (!book.isEmpty()) {
             player.drop(book, false);
         }
         if (messageKey != null) {
@@ -144,7 +146,8 @@ public final class Lore {
     }
 
     public static boolean hasBook(Player player) {
-        return contains(player.getInventory().items, LoreSetup.LORE_BOOK.get())
+        return jp.revati.skyabyss.pouch.Pouch.count(player, LoreSetup.LORE_BOOK.get()) > 0
+                || contains(player.getInventory().items, LoreSetup.LORE_BOOK.get())
                 || contains(player.getInventory().offhand, LoreSetup.LORE_BOOK.get())
                 || containsEnder(player);
     }

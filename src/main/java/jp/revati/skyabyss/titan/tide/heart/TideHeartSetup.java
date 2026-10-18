@@ -19,10 +19,10 @@ public final class TideHeartSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
-    // 判定は 3 x 4.2。模型は描画で 2 倍 (巻貝の殻の幅は約 4.5 ブロック)
+    // 判定は 4.5 x 6.3 (前の 1.5 倍。迫力のため)。模型は描画で 3 倍 (巻貝の殻の幅は約 6.75 ブロック)。TideHeart.BODY_SCALE と TideHeartRenderer の SCALE を合わせる
     public static final DeferredHolder<EntityType<?>, EntityType<TideHeart>> TIDE_HEART = ENTITIES.register("tide_heart",
             () -> EntityType.Builder.<TideHeart>of(TideHeart::new, MobCategory.MONSTER)
-                    .sized(3.0f, 4.2f)
+                    .sized(4.5f, 6.3f)
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":tide_heart"));
