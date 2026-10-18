@@ -1,0 +1,45 @@
+"""manifest 書き出しとメッシュの検査。python tools/rough/lowpoly/storyteller/manifest.py"""
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[4]
+R = ROOT / "docs/review/lowpoly_roughs"
+geo = json.load(open(ROOT / "src/main/resources/assets/skyabyss/geo/entity/storyteller.geo.json"))["minecraft:geometry"][0]["bones"]
+gb = {b["name"]: (b.get("parent"), b["pivot"], b.get("rotation")) for b in geo}
+tri = {}
+for k in "abc":
+    d = R / "lp_storyteller" / k
+    m = json.load(open(d / f"storyteller_{k}_lowpoly_mesh.json"))
+    assert set(m["bones"]) == set(gb)
+    for n, b in m["bones"].items():
+        assert b["parent"] == gb[n][0] and b["pivot"] == gb[n][1], n
+        if gb[n][2] and n != "root":
+            assert b.get("rotation") == gb[n][2], n
+        nv = len(b["vertices"])
+        assert all(0 <= i < nv for t in b["triangles"] for i in t)
+        assert all(-0.001 <= u <= 1.001 for uv in b["uvs"] for u in uv)
+    tri[k] = m["triangle_count"]
+    print(k, m["triangle_count"], sorted(p.name for p in d.iterdir()))
+
+man = {
+    "id": "lp_storyteller", "short": "語り部 低ポリ", "kind": "低ポリ 3案",
+    "title": "語り部 (storyteller) — 低ポリ非立方体 + ドット絵 3 案 (村の鐘のそばの老婆)",
+    "sheets": ["lowpoly_roughs/lp_storyteller.png"],
+    "extra": "統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の NPC。選んだ「頭巾の語り部」(藍の頭巾、顔は頭巾の開口の中、白い眉と房、淡く光る目) の人物像は変えず、"
+             "顔が浮かないよう頭巾の開口の縁を太い筒にして、その内側に顔を収めた。骨 11 本 (root[Y 180 度] > body > head > hair・hair2 / shawl / armL / armR / legL / legR / cord) の名前・階層・pivot は今の geo のまま、"
+             "今のアニメ 3 本 (idle・walk・talk) がそのまま動く (頭の向きはコードのまま)。割り当て: head = 顔と鼻、hair = 白い眉と房、hair2 = 頭巾の殻と縁。"
+             "三角形 (本体のみ): A %d / B %d / C %d (上限 約 800)。今は箱 688 個 / 1,981 面。アトラス 128x128。光る画素は目の瞳だけ。"
+             "メッシュは lowpoly_roughs/lp_storyteller/{a,b,c}/storyteller_{a,b,c}_lowpoly_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/storyteller/sheet.py。" % (tri["a"], tri["b"], tri["c"]),
+    "options": {
+        "a": {"name": "A 頭巾の語り部",
+              "desc": "今の B 頭巾の語り部を忠実に写した案。藍の尖り頭巾、顔は縁の筒の内側、眉は内側が高く外側が下がるやさしい形、白い房、淡い青白の目、ゆるい笑み。"
+                      "藍の肩掛け、灰茶の長衣に橙の縄の帯 (端が垂れる)、組んだ手。"},
+        "b": {"name": "B 毛糸の語り部",
+              "desc": "もっと年老いてあたたかい祖母の案。丸くやわらかい頭巾 (頂に赤い小さな房)、ふくよかな頬と赤み、笑いじわ、広い肩。"
+                      "房飾りの肩掛け、茶の長衣にクリーム色の前掛けとポケット、手に毛糸玉。藍は少しあたたかく、縄の帯は残す。"},
+        "c": {"name": "C 鐘守の語り部",
+              "desc": "鐘のそばに立つ、神秘的で儀式の人の案。尖頭アーチの細長い頭巾 (縁に銀青の糸の刺繍)、長く細い白い眉と房、強めの目の光、控えめな笑み。"
+                      "長衣は鐘の形に裾が広がり、波形の縁と鐘形の刺繍の帯。胸に真鍮の鐘の飾り、縄の帯の端にも鐘、袖も鐘形。"},
+    },
+}
+json.dump(man, open(R / "lp_storyteller_manifest.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
