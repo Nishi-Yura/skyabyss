@@ -165,6 +165,70 @@ public final class TitanEndSelfTest {
         }
     }
 
+    // 滞在の知らせ (T-2): 残り 2 分と 30 秒に一度ずつ。残りが跳んでも (旅の降り・延長) 境をまたぐ時は一度知らせる。再読み込みで繰り返さない
+    private static void stayWarnings(List<String> f, ServerLevel level) {
+        var at = new Vec3(PAD_X, PAD_Y, PAD_Z);
+        int[] counts = {0};
+        var warner = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        for (int left = jp.revati.skyabyss.titan.TitanStay.TICKS; left >= 0; left--) {
+            if (warner.tick(level, at, left, "message.skyabyss.stay_ending.whale")) {
+                counts[0]++;
+                int expected = counts[0] == 1 ? jp.revati.skyabyss.titan.TitanStay.WARN_TICKS : jp.revati.skyabyss.titan.TitanStay.WARN_LAST;
+                check(f, left == expected, "a stay warning came at " + left + " instead of " + expected);
+            }
+        }
+        check(f, counts[0] == 2, "a 20-minute stay gave " + counts[0] + " warnings instead of 2 (2 minutes and 30 seconds left)");
+        // 跳び: 2500 → 2000 (延長が切れた・短い休みで降りた) でも 2 分の知らせは一度
+        warner = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        check(f, !warner.tick(level, at, 2500, "message.skyabyss.stay_ending.whale"), "warned at 2500");
+        check(f, warner.tick(level, at, 2000, "message.skyabyss.stay_ending.whale"), "a jump over the 2-minute line gave no warning");
+        check(f, !warner.tick(level, at, 1999, "message.skyabyss.stay_ending.whale"), "the jump warned twice");
+        // 増える跳び (WhaleHush の延長) では知らせない。そのあとの減りで境を通れば知らせる
+        warner = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        warner.tick(level, at, 2100, "x");
+        check(f, !warner.tick(level, at, 5000, "x"), "a stay extension warned");
+        int walked = 0;
+        for (int left = 4999; left >= 2300; left--) {
+            if (warner.tick(level, at, left, "x")) {
+                walked++;
+            }
+        }
+        check(f, walked == 1, "after an extension the 2-minute warning came " + walked + " times");
+        // 再読み込み (前回なし): 境の幅の外なら知らせない
+        warner = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        check(f, !warner.tick(level, at, 1000, "x") && !warner.tick(level, at, 999, "x"), "a reload outside the window warned");
+        // 残り 0 以下 (去る・やり直し) では知らせない
+        warner = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        warner.tick(level, at, 3000, "x");
+        check(f, !warner.tick(level, at, 0, "x"), "a stay ending warned");
+        // 境の幅をもつ版
+        for (int b : new int[] {jp.revati.skyabyss.titan.TitanStay.WARN_TICKS, jp.revati.skyabyss.titan.TitanStay.WARN_LAST}) {
+            check(f, jp.revati.skyabyss.titan.TitanStay.boundary(b) == b && jp.revati.skyabyss.titan.TitanStay.boundary(b - 19) == b
+                    && jp.revati.skyabyss.titan.TitanStay.boundary(b - 20) == 0 && jp.revati.skyabyss.titan.TitanStay.boundary(b + 1) == 0,
+                    "the warning window around " + b + " is wrong");
+        }
+    }
+
+    // 旅の最中に心臓が止まる (T-4): 旅の間は眠りに入らない (鎖を落とさない)。降りて停泊に入った最初の数 tick で眠りに入る
+    private static void voyageHeartStop(MinecraftServer server, ServerLevel level, List<String> f, double cx, double cz) {
+        StoneWhaleEntity whale = ModEntities.STONE_WHALE.get().create(level);
+        whale.moveTo(cx, 200, cz, 0f, 0f);
+        tick(whale, 3);
+        whale.beginVoyage();
+        TitanDormancy.begin(server, Titans.STONE_WHALE, 0);
+        tick(whale, 400);
+        check(f, whale.inVoyage() && whale.restTicks() < 0, "a heart stop sent the whale to sleep in the middle of a voyage (" + whale.restTicks() + ")");
+        whale.endVoyage(jp.revati.skyabyss.titan.TitanStay.TICKS);
+        tick(whale, 400);
+        check(f, !whale.inVoyage() && whale.restTicks() >= 0 && whale.chainLength() == 0f, "the whale did not go to sleep after the voyage ended with the heart stopped (" + whale.restTicks() + ")");
+        TitanDormancy.clear(server, Titans.STONE_WHALE);
+        tick(whale, 2);
+        whale.discard();
+        for (var chain : level.getEntitiesOfClass(jp.revati.skyabyss.titan.WhaleChainEntity.class, new net.minecraft.world.phys.AABB(cx - 80, 0, cz - 80, cx + 80, 320, cz + 80))) {
+            chain.discard();
+        }
+    }
+
     private static void bodies(MinecraftServer server, ServerLevel level, List<String> f) {
         buildPad(level);
         double cx = PAD_X + PAD / 2.0;
@@ -262,6 +326,8 @@ public final class TitanEndSelfTest {
         for (var chain : level.getEntitiesOfClass(jp.revati.skyabyss.titan.WhaleChainEntity.class, new net.minecraft.world.phys.AABB(cx - 80, 0, cz - 80, cx + 80, 320, cz + 80))) {
             chain.discard();
         }
+        stayWarnings(f, level);
+        voyageHeartStop(server, level, f, cx, cz);
 
         TideShellEntity shell = TideSetup.TIDE_SHELL.get().create(level);
         shell.moveTo(cx, sea - 3.5, cz, 0f, 0f);

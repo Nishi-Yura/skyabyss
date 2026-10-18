@@ -20,15 +20,70 @@ public final class TitanStay {
     private TitanStay() {
     }
 
-    // 残りが知らせの境ちょうどなら、近くの人に一行 (key = message.skyabyss.stay_ending.<titan>)
+    // 知らせの境の幅 (残りの値が跳んでも、この幅の中で一度は見る)
+    public static final int WARN_WINDOW = 20;
+
+    // 前回の値を持たない版: 残りが境から WARN_WINDOW tick の中にあれば、近くの人に一行 (key = message.skyabyss.stay_ending.<titan>)。
+    // 毎 tick 呼ぶ前提 (値が 1 ずつ減るときは境ちょうどの 1 回だけ。幅の中で値が減り続けるあいだは、境ちょうどの値のときだけ)
     public static void warnIfDue(ServerLevel level, Vec3 at, int left, String key) {
-        if (left != WARN_TICKS && left != WARN_LAST) {
-            return;
+        if (boundary(left) > 0 && left == boundary(left)) {
+            send(level, at, key);
         }
+    }
+
+    // left が境 (WARN_TICKS / WARN_LAST) の幅の中なら、その境。そうでなければ 0
+    public static int boundary(int left) {
+        for (int b : new int[] {WARN_LAST, WARN_TICKS}) {
+            if (left <= b && left > b - WARN_WINDOW) {
+                return b;
+            }
+        }
+        return 0;
+    }
+
+    private static void send(ServerLevel level, Vec3 at, String key) {
         for (ServerPlayer p : level.players()) {
             if (TitanKeeper.eligible(p) && p.distanceToSqr(at.x, p.getY(), at.z) < RANGE * RANGE) {
                 Notice.bar(p, ModText.lore(key));
             }
         }
+    }
+
+    // 巨神ごとの知らせ係。前回の残りを覚えて、残りが跳んで境をまたいだとき (旅の降り・WhaleHush の延長など) も一度だけ知らせる。
+    // 保存はしない (再読み込みの直後は、境の幅の中にいるときだけ知らせる)
+    public static final class Warner {
+        private int last = -1;
+
+        // 毎 tick、残りを渡す。またいだ境のうち一番小さいものを一度だけ知らせる。知らせたら true
+        public boolean tick(ServerLevel level, Vec3 at, int left, String key) {
+            int due = crossed(last, left);
+            last = left;
+            if (due > 0) {
+                send(level, at, key);
+                return true;
+            }
+            return false;
+        }
+
+        // 巨神が去る・やり直すとき。次の滞在で前回の値を持ち越さない
+        public void reset() {
+            last = -1;
+        }
+    }
+
+    // prev から left へ減る間にまたいだ境の、一番小さいもの (またいでいなければ 0)。prev < 0 (前回なし) は幅の中だけ見る
+    public static int crossed(int prev, int left) {
+        if (left <= 0) {
+            return 0;
+        }
+        if (prev < 0) {
+            return boundary(left);
+        }
+        for (int b : new int[] {WARN_LAST, WARN_TICKS}) {
+            if (prev > b && left <= b) {
+                return b;
+            }
+        }
+        return 0;
     }
 }

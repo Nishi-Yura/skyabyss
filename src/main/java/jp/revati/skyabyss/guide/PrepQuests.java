@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 //            守っていなければ読み込みの警告 (QuestManager.loadErrors) になる (PrepQuests.validate)。
 //   順番     ふさがない。どれから受けても終えてもよい (ログの並びは order で 1→2→3)。
 //   合図     三本が終わったとき (どの順でも)、その人に合図 `ch<n>_ready` (Quests.signal) を一度だけ送る。以降はいつでも `ready(player, n)` が真。
-//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章の岩鯨の降下は「2 本終えたとき」(3.2)。
+//            クエストの条件では {"type":"prep","chapter":n,"min":k} (k 本以上。省くと全部) で読める。一章の岩鯨の降下の条件 (日 4 の朝以降で 2 本、または日 6 以降。21 の 3.2) は story.ch1.Ch1Descent が見る (実装済み。初めて現れる条件は別で、OpeningLogic / TitanEvents.whaleMayAppear)。
 //            三本ぜんぶの定義がそろっていない章は、合図は出ない (まだ中身がない章)。
 //   覚書     ch<n>/prep_gear を受けたとき、その章の旅の覚書 (WayfarerNotes) を人ごとに一度渡す。
 //   マルチ   ready / atLeast は人ごと。「グループの誰かが満たせば」は groupAtLeast (オンラインの仲間まで)。

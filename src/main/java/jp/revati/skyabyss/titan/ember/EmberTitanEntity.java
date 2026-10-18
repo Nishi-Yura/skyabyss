@@ -525,9 +525,11 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         }
     }
 
+    private final TitanStay.Warner stayWarner = new TitanStay.Warner();
+
     private void tickSleep(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
-        TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.ember");
+        stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.ember");
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !EmberGround.isSleepTime(level.getDayTime());
         if (done) {
             // 夜明け。地の中へ沈み、潜行に戻る (背中に人がいても沈む。背中から出る人は、眠った場所の口の前へ戻る)

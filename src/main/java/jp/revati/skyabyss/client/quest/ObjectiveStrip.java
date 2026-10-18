@@ -94,7 +94,15 @@ public final class ObjectiveStrip {
         QuestLog.Entry entry = log.entry(def.id());
         String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
         Function<String, BlockPos> provider = targets;
-        draw(g, mc, text, provider == null ? null : provider.apply(def.id()));
+        // 目印は「クエスト/段」で先に探し (SiteTargets.bind("main_song/board", ...))、なければクエストの id で探す
+        BlockPos target = null;
+        if (provider != null) {
+            target = provider.apply(def.id() + "/" + def.stages().get(entry.stage).id());
+            if (target == null) {
+                target = provider.apply(def.id());
+            }
+        }
+        draw(g, mc, text, target);
     }
 
     private static void draw(GuiGraphics g, Minecraft mc, String text, @Nullable BlockPos target) {

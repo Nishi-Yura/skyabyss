@@ -59,6 +59,12 @@ public final class RaijuBattle {
         return ROOMS;
     }
 
+    // 戦いの最中か (そのグループの部屋が集合中か戦闘中)。倒れた人の復活先の判断に使う (P1-1)
+    public static boolean fighting(UUID group) {
+        GroupBossRoom room = ROOMS.peek(group);
+        return room != null && (room.active() || room.gathering());
+    }
+
     public static GroupBossRoom room(UUID group) {
         return ROOMS.of(group);
     }

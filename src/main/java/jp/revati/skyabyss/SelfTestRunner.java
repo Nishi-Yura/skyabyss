@@ -92,6 +92,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
         // 使い心地の磨き: 背中の復活の守り・石の「誰が鳴らしたか」・墓の標 (rpg_brushup A3 / A4 / A8)
         steps.add(Step.once("ux polish", jp.revati.skyabyss.titan.group.UxPolishSelfTest::runSelfTest));
+        // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
+        steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
+        steps.add(Step.once("lang", LangSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));

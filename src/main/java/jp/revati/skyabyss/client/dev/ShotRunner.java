@@ -333,14 +333,30 @@ public final class ShotRunner {
                         player.teleportTo(level, x, y, z, yaw, pitch);
                     }, "camera");
                 }
-                // 自分の側に届くまで待つ (次元を移るときは読み込みも)
-                boolean there = pending.isDone() && mc.level.dimension() == cameraDim && mc.player.position().distanceTo(cameraTarget) < 0.6;
+                // 自分の側に届くまで待つ (次元を移るときは読み込みも)。着いた直後に重力で y がずれても着いたと見る (水平 0.6・縦 2)。
+                // 初回は次元の読み込みと背の建設の最中で teleportTo が遅れるので、待ちは 1200 tick。100 tick 着かなければ置き直す
+                double dx = mc.player.getX() - cameraTarget.x;
+                double dz = mc.player.getZ() - cameraTarget.z;
+                boolean there = pending.isDone() && mc.level.dimension() == cameraDim && dx * dx + dz * dz < 0.36
+                        && Math.abs(mc.player.getY() - cameraTarget.y) < 2.0;
+                if (!there && pending.isDone() && stepTicks > 0 && stepTicks % 100 == 0) {
+                    double rx = cameraTarget.x, ry = cameraTarget.y, rz = cameraTarget.z;
+                    float ryaw = mc.player.getYRot(), rpitch = mc.player.getXRot();
+                    ResourceKey<Level> rd = cameraDim;
+                    pending = onServer(mc, (server, player) -> {
+                        ServerLevel lv = server.getLevel(rd);
+                        if (lv != null) {
+                            player.teleportTo(lv, rx, ry, rz, ryaw, rpitch);
+                        }
+                    }, "camera (retry)");
+                }
                 if (there) {
                     // 体の向きも視線に合わせる (そのままだと体が視線から最大 50 度ずれて、三人称の絵で武器や腕が斜めを向く)
                     mc.player.yBodyRot = mc.player.yBodyRotO = mc.player.yHeadRot = mc.player.yHeadRotO = mc.player.getYRot();
                 }
-                if (stepTicks > 400) {
-                    throw new IllegalStateException("the camera did not arrive at " + cameraTarget);
+                if (stepTicks > 1200) {
+                    throw new IllegalStateException("the camera did not arrive at " + cameraTarget + " in " + cameraDim.location() + " (now at "
+                            + mc.player.position() + " in " + mc.level.dimension().location() + "; spectator or a short wait for chunks usually fixes it)");
                 }
                 return there;
             }

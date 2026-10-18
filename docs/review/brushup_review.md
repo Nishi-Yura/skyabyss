@@ -16,6 +16,7 @@
 ## P0（壊れている・直さないと困る）
 
 ### P0-1 同じ lang キーが 2 つのファイルで違う文のまま二重に定義されている（A + B 少し） 〔雷翼の装備 17 キー〕
+- **【修正済み 2026-10-19】** 重複は `skyabyss_storm_gear` 側の 1 か所に一本化 (ja/en)。名前は設計書 12 の「雷翼の羽衣・兜/胸当て/脚衣/靴」・「嵐纏の足環」(en は storm 側の Mantle 系・Stormclad)、説明文は長い storm_gear 側。`opening.skyabyss.title` は `skyabyss_opening` に一本化。再発防止は自己テスト `lang` (`LangSelfTest`: 名前空間をまたぐ重複・同じファイル内の二度書き・ja/en のキーと `%s` の数の一致)。`tools/lang_dups.py` で手でも確かめられる。
 - `assets/skyabyss_storm/lang/{ja_jp,en_us}.json`（`item.skyabyss.thunder_wing_*`・`storm_anklet`・`storm_charm`・`raiju_claw`・`cloudgap_fruit(.desc)`・`moth_dust(.desc)` ほか）と `assets/skyabyss_storm_gear/lang/{ja_jp,en_us}.json` が同じキーを持つ。値が違うもの: 兜・胸当て・脚衣・靴の名前（storm 側「雷翼の羽衣・兜」「羽衣・胸当て」「羽衣・脚衣」「羽衣・靴」／storm_gear 側「羽兜」「羽衣」「羽袴」「羽沓」。en は Mantle Helm / Plume Helm など）、`storm_anklet`（Stormclad / Stormwoven）、`cloudgap_fruit.desc`・`moth_dust.desc`（説明の長さが違う）。
 - どちらが勝つかは名前空間の読み込み順しだいで、環境で変わりうる。設計書 12 の 6〜7 章（`12_thunder_wing.md:490` ほか）は「雷翼の羽衣（兜・胸当て・脚衣・靴）」で、storm 側の名前と合う。
 - 同じ型の重複がもう一つ: `opening.skyabyss.title`（`skyabyss_beats` と `skyabyss_opening`。値は同じなので害は無い）。
@@ -26,6 +27,7 @@
 ## P1（紛らわしい・規則の食い違い）
 
 ### P1-1 戦いの最中の「鼓動の間で目覚める」が岩鯨の背だけにある（B）
+- **【修正済み 2026-10-19】** B-1 は (a) で実装。潮殻・雷翼・余燼の `respawnCheckpoint` / `isFightNear` を各 `*BackTrials` に追加 (岩鯨と同じ形)。心臓の休み場 `heart` は三体とも、そのグループの心臓の部屋が集合中・戦闘中なら `hub` で目覚める。中ボスは、雷翼の雷獣 (東の端の休み場 `e1`) と余燼の灰の鍛え手 (東の試練の休み場 `e0`) も。潮殻の潮招きは部屋ではなく干潟の野良なので対象外。復活の守り (`RespawnGuard.begin`)・再入場の待ちはそのまま。自己テスト `brushup` が三体 (と雷獣・鍛え手) で「戦いの最中だけ hub・別のグループでは動かない・終われば戻る」を見る。
 - 実装は `TitanBackTrials.java:1568`（`respawnCheckpoint` → `isFightNear` → `"hub"`、`1589-1594`）だけ。潮殻・雷翼・余燼の復活は休み場へ直接（`TideBackTrials.java:787`・`StormBackTrials.java:788`・`EmberBackTrials.java:768`）。設計書は 02 の 7.3（`02_stone_whale.md:639`）に岩鯨のこととして書いてあるだけで、08・12・13 には無い。復活の守り（3 秒）は四つの背にある（`02:641` の「四つの背のどれでも」は正しい）。
 - 影響: 心臓の前室の休み場で倒れると、岩鯨以外は戦場の入口のすぐ前で目覚める。再入場の 20 秒の待ち（`Reentry.WAIT_TICKS` = 400）があるので「すぐ入り直す」は防がれるが、扉の前で待つ形になり、岩鯨とだけ体験が違う。
 - 選択肢: (a) 三体にも同じ「戦いの最中は鼓動の間」を入れる（体験がそろう。作りは `respawnCheckpoint` を共通化。休み場が 3 体で広間の前室かを見る）。(b) 岩鯨からもやめて、20 秒の待ち + 3 秒の守りだけにそろえる。(c) 今のままにして 02 に「岩鯨だけ」と書く。推奨は (a)。
@@ -36,12 +38,14 @@
 - 直し（A）: 助言の文を、今ある品だけの言い方にする（身 =「身が薄い。鉄の鎧か、体力を伸ばそう」、刃 =「刃が鈍い。強い武器に替えよう」）。旅装・砥石の語は、P5・P6 で品が入る時に戻す。最終的な形（品を先に入れるか）は **B-5**。
 
 ### P1-3 岩鯨の降下の条件（日 4 + 備えの頼み 2 本 / 日 6）は未実装で、初見・降下・5 日目の三つの規則の持ち主が分かれている（A + B）
+- **【修正済み 2026-10-19】** このレビューのあとに `story/ch1/Ch1Descent` が入って降下の門は実装済み (自己テスト `Ch1SitesSelfTest`)。残っていた `PrepQuests.java` のコメントを実装の持ち主 (Ch1Descent) を指す形に直した。規則の持ち主の一覧は `17 §2.8` の表の「降りる条件」の行にある。待ちの帯の文は P1-8 で入れた (`main_song.board.ride.wait`)。
 - 設計書 21 の 3.2（`21:249`）は「日 3 夕方の初見は変えない。鎖が降りるのは日 4 の朝以降で備えの頼み 2 本、または日 6 以降」。コードにこの条件は無い（`PrepQuests.java:29` のコメントは「降下は 2 本終えたとき」と事実のように書いているが、`PrepQuests.atLeast` を呼ぶのは `quest/Condition.java:208` だけ）。
 - 別に、17 の 2.8（`17_opening_and_rpg_feel.md:199-209`）と `TitanEvents.whaleMayAppear` / `OpeningLogic.WHALE_FALLBACK`（`OpeningLogic.java:405`、4 日分 = 5 日目）と `beta_how_to_play.md`（「五日目の夕方には現れます」）が **初めて現れる**条件を決めている。降下（鎖が垂れる）の条件はこれと別物で、二つの門が重なる。
 - 影響: 21 を実装すると、「見える → 降りない → 備えを促す」の間、帯と日誌が何も言わない（今の `main_song.board.journal`・`board.ride` は「降りてきたら、鎖をつかめ」だけ。`see_whale.see.wait` のような待ちの文が `board` には無い）。マルチの条件（誰かが満たせば降りる）も 21 にしか無い。
 - 直し（A）: `PrepQuests.java:29` のコメントを「(3.2。未実装)」に直す。`17 §2.8` に「降下の条件は 21 の 3.2」と一行足す。実装時のために、`board.ride.wait`（待ち版の文）を先に用意する。条件そのものの最終決定は **B-2**。
 
 ### P1-4 復活の守りの記録 `ReentryRules.GUARD` がサーバー停止・退出で消えない（A）
+- **【修正済み 2026-10-19】** `GUARD` の値を (切れる時刻・サーバーの同一性・次元) にし、`ServerStoppedEvent`・`PlayerLoggedOutEvent` で消し、別の次元へ移ったとき (守りを受けた次元と違うとき) も捨てる。`guarded` はサーバー・次元・残りが長すぎる (巻き戻った時刻) の記録を無効と見る。自己テスト `brushup`。
 - `ReentryRules.java:28`（static の `HashMap`）。`RespawnGuard.ZONES` は `ServerStoppedEvent` で消す（`RespawnGuard.java:88-91`）が、`GUARD` は消さない。切れる時刻は「ゲーム時刻 + 60」の絶対値で、守りが残っている 3 秒以内に世界を出て、ゲーム時刻が小さい別の世界（新しいワールド・別のサーバー。一人用で続けて遊ぶとき）に入ると、同じ UUID が `until` の過ぎるまで（最大で前の世界の時刻の差）傷を受けない。
 - 直し（A）: `ReentryRules` に `ServerStoppedEvent` と `PlayerEvent.PlayerLoggedOutEvent` で `GUARD` を消す処理を足す。自己テスト `ux polish` に「退出で消える」を一行。
 
@@ -69,6 +73,7 @@
 - 直し（A）: 今日の機能の一覧、今の版（0.2.1）、自己テストの段の数（実機で数え直す）、「未実装の導き（旅装・砥石・職人・備えの頼み・覚書・降下の条件）」を書く。
 
 ### P1-8 序盤の流れの穴（下の「最初の 1 時間」に詳細）
+- **【修正済み 2026-10-19】** 開幕の場面の「目的」の行を「目的: 野営地の跡を調べる」(en: Goal: look around the abandoned camp) にして最初の帯 `examine_camp` と合わせた (天の声の「煙をたどれ」は続く道しるべのまま)。章のクエストの帯の方角と距離: サーバーが巨神の最後の位置 (`titan.<名前>`) を `SiteNetwork` で送り (10 秒ごと、8 ブロック以上動いたときだけ送り直す)、クライアントは `SiteTargets.bind` で `main_song/board`・`main_tide/see|board`・`main_thunder/see|board`・`main_ember/see` に結びつけた (帯は「クエスト/段」で先に探す。地上以外の次元では出さない)。初見のあと鎖が降りるまでは、帯が待ち版の文 (`board.ride.wait`「鎖が降りるまで、備えを整えよう」) になる。鍵の操作 (J・K・U・B・N・O) の案内は未対応のまま。
 - 開幕の場面の台詞「煙をたどれ」と最初の帯（`objective.skyabyss.examine_camp`「野営地の跡を調べてみよう」）が食い違う。
 - 目的の帯の「方角と距離」は序盤の拍子（`OpeningNetwork`）の分だけ。章のクエスト（`board`・`inscriptions`・`main_tide.see` ほか）は `SiteTargets.lookup(questId)` を通るが、`bind` / `bindPos`（`SiteTargets.java:35,39`。コメントは「岩鯨などは bindPos」）はどこからも呼ばれず、送られる位置は `camp`・`bell` などの固定名だけ（`SiteNetwork.java:44-58`）。岩鯨の鎖・潮殻・雷翼の位置は帯に出ない。
 - 鍵の操作（J・K・U・B・N・O）をゲーム内で教える文は、確かめた範囲では、レベルアップ（`message.skyabyss.growth.open_hint`）と各画面だけ。U・B・N の最初の案内が見つからなかった（遊び方の文書にだけある）。
@@ -99,6 +104,7 @@
 - `PrepQuests.java:29` など、コードの設計書参照の古い節番号（`17 の 11.2節` ほか）。
 
 ### P2-3 コードの小さな点（A）
+- **【修正済み 2026-10-19】** `TitanStay.warnIfDue` の幅つきの判定は、巨神ごとの `TitanStay.Warner` (前回の残りを覚えて、またいだ境のうち一番小さいものを一度だけ知らせる。残り 0 以下・増える跳びでは知らせない) に置き換えた。旅の最中の心臓停止は `TitanEndSelfTest` の `voyageHeartStop` で見る。RespawnGuard の波の番兵の注記は設計書側 (別担当)。
 - `TitanStay.warnIfDue` は残りが `2400`・`600` ちょうどのときだけ知らせる（`TitanStay.java:25`）。`endVoyage(restFor)` や `WhaleHush` の `restTicks += held` で値が跳んでも、境をまたぐ時は知らせない（呼ばれた tick に等しくない）。`left <= WARN && left > WARN - 20` のように幅を持たせるか、各巨神が前回の値を持つ。
 - `RespawnGuard` の「敵が湧かない」は `isPersistenceRequired()` の敵を止めない（`RespawnGuard.java` の `onJoin`）。広間の波の番兵は `setPersistenceRequired()` つき（`TitanBackTrials.java:697`）なので、半径 8 の中でも湧く。意図どおりだが、設計書 02:641 は「新しく加わる敵を止める」としか言わない。「波の番兵・ボスは止めない」を足す。
 - 旅（`Voyage`）の最中に別のグループが心臓を止めると、岩鯨は `voyage` の間は眠りに入らず（`StoneWhaleEntity.java:204-207`）、降りたあと停泊 20 分の最初の tick で眠りに入る（鎖を落として昇る）。仕様どおりに見えるが、自己テストが無い（T-4）。
@@ -130,6 +136,7 @@
 ## テストの穴と、不安定だったもの
 
 ### 足りないテスト
+- **【修正済み 2026-10-19】** T-1 `lang` (重複・ja/en・`%s` 数。(4) のコード中キーの存在は未対応) / T-2 `TitanEndSelfTest.stayWarnings` (20 分は既存の `stay`、知らせは今回) / T-3 `brushup` / T-4 `TitanEndSelfTest.voyageHeartStop` / T-5 `brushup` / T-8 `brushup` の `titanTargets` (サーバー側: 巨神の位置が送られる)。T-6 は助言を今ある品に絞る別の直しのため不要、T-7 (帯の幅) は未対応。
 - T-1（A）lang 全体の自己テスト: (1) 全 `lang/*.json` で同じキーが重複しない（P0-1 を見つける）、(2) ja と en のキーが一致、(3) `%s` の数の一致、(4) コード中の `translatable("…")` のキーが存在する（接頭辞は除く）。今は系統ごとの自己テスト（`SignFit`・`GuideSelfTest`・`OpeningStorySelfTest` ほか）が部分的に見ているだけ。
 - T-2（A）`TitanStay`: 四体とも停泊が 24000 tick（`StoneWhaleEntity` の `REST_DURATION`・`TideShellEntity`・`StormWingEntity`・`EmberTitanEntity` の `forcedTicks`）、残り 2 分・30 秒の知らせが一度ずつ出る、保存して読み直しても残りが続く。今は `TitanEndSelfTest`/`HeartAftermathSelfTest` が `stay` に触れる程度で、20 分そのものと知らせは見ていない。
 - T-3（A）`ReentryRules.GUARD`: 退出・停止で消える（P1-4）。
@@ -140,6 +147,7 @@
 - T-8（A）`SiteTargets`: `bind`/`bindPos` が使われていない（P1-8）。使うなら、`board` の帯が岩鯨の方向を出す自己テスト。
 
 ### 不安定だったテストの原因の見立てと直し（すべて A）
+- **【修正済み 2026-10-19】** 1 (墓の散らばり) は半径 8 を先に掃除し、エメラルド・金の個数の合計で見る形にした。4 (撮影のカメラ) は水平 0.6・縦 2 にゆるめ、待ちを 1200 tick に、100 tick ごとに置き直し、着かないときは位置と次元を出す。2 (余燼の偽のプレイヤー) は別の担当が直す。
 1. **墓の「期限が来て散らばる」**（`GraveSelfTest.java:651-667`、`spilled.size() == 1`）: 足もとの `ItemEntity` を `AABB(old).inflate(3)` で数え、「ちょうど 1 個」かつ「個数 7」を期待している。同じ足場（`platform(level)`）で前の検査（`noReplace`・各種の死）が出した品や、`Graves.patrol` が落とした品がまだ残る・並びがずれると 2 個になる。直し: 検査の前に半径 8 の `ItemEntity` をすべて消す。`size() == 1` ではなく、`Items.EMERALD` の個数の合計が 7 かで見る。壊れた墓の検査（`:677`）と同じ形に。
 2. **余燼の心臓の偽のプレイヤー検索**（`EmberHeartSelfTest.java:357-392`）: `fake()` は（`:359`）タグごとに決まった UUID（`nameUUIDFromBytes`）の `FakePlayer` を作り、`level.addFreshEntity(p)`（`:376`）の戻り値を見ない。前の段の同じタグの偽の人が残っていると UUID の重複で追加に失敗し、`getEntitiesOfClass(...).contains(p)` が偽になる（「the fake player is not found in the arena」）。直し: `addFreshEntity` の戻り値を検査し、追加の前に `level.getEntity(uuid)` があれば `discard`。各段の `finally` で偽の人を `discard`。区画を読み込んでおく（`forceChunk`）。
 3. **場面の乗り物**（`CinematicSelfTest.java:375-380`）: 乗せる操作は環境で失敗するので、`vehicleAllows` を実体なしで確かめる形に直し済み（`c44cd703`）。実際の `startRiding` の経路（舟・馬）の検査は無い。直しは今のままでよい。実機の確認を `docs/design/14` の確認表に一行足す。

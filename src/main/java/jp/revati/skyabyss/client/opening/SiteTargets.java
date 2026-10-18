@@ -45,8 +45,26 @@ public final class SiteTargets {
         return sites.get(key);
     }
 
+    // 巨神の位置 (サーバーが SiteNetwork で送る。キー titan.<巨神の名前>)。章のクエストの帯が方角と距離を出す
+    public static final String TITAN_PREFIX = "titan.";
+
+    // 章のクエストの段ごとの目印: "<クエストの id>/<段の id>"。地上 (オーバーワールド) のときだけ出す
+    private static void bindChapterTargets() {
+        bind("main_song/board", TITAN_PREFIX + "stone_whale");
+        bind("main_tide/see", TITAN_PREFIX + "tide_shell");
+        bind("main_tide/board", TITAN_PREFIX + "tide_shell");
+        bind("main_thunder/see", TITAN_PREFIX + "thunder_wing");
+        bind("main_thunder/board", TITAN_PREFIX + "thunder_wing");
+        bind("main_ember/see", TITAN_PREFIX + "ember");
+    }
+
     @Nullable
     public static BlockPos lookup(String questId) {
+        // 位置はどれも地上のもの。背中・ほかの次元の中では出さない (距離が意味を持たない)
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null && mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+            return null;
+        }
         java.util.function.Supplier<BlockPos> d = DIRECT.get(questId);
         if (d != null) {
             BlockPos p = d.get();
@@ -63,6 +81,7 @@ public final class SiteTargets {
         @SubscribeEvent
         static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
+                bindChapterTargets();
                 Function<String, BlockPos> previous = ObjectiveStrip.targets;
                 ObjectiveStrip.targets = id -> {
                     BlockPos p = lookup(id);

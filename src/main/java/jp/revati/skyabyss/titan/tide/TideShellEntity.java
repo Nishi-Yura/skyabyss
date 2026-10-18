@@ -402,10 +402,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         level.playSound(null, getX(), level.getSeaLevel(), getZ(), TideSetup.SONG.get(), SoundSource.AMBIENT, 16f, 0.8f);
     }
 
+    private final TitanStay.Warner stayWarner = new TitanStay.Warner();
+
     private void tickRest(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
         rise(level.getSeaLevel() - REST_DRAFT, REST_RISE);
-        TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
+        stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !TideOcean.isLowTide(level.getDayTime());
         if (done) {
             // 刻の終わり。縁を沈め、巡航に戻る (背中に人がいても戻る。背中から出る人は、休んだ場所の岸へ戻る)
