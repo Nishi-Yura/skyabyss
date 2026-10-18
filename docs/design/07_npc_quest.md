@@ -382,6 +382,8 @@ data/<名前空間>/quest/<名前>.json
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
+**一章の備えの頼み（P6。実装済み）**: `quest/ch1/prep_gear`（80）・`prep_blade`（160）・`prep_pulse`（60）、依頼主は職人（P4）が入るまで語り部。開始条件は「一章（段階 0）・イサナと会った（伝承 `chapter1/whale_chaser`）・日 2 以降」。身ごしらえは「鉄 8・岩殻片 12 を持ち物に（`collect`）→ 語り部の入口 `ch1p_gear_weave`（材料を見る。受け取らない）」か、P5 の旅装の合図 `ch1_travel_gear_made`（段の目的は `any`）。刃を研ぐは割れ殻の洞のクリアの合図 `site_clear:ch1_cleft_shell_cave`（段の経験値 60）→ 入口 `ch1p_blade_report`、報酬で伝承 `ch1/cleft_cave`。鼓動を聞くは護り糸（`skyabyss:rock_shell_thread`、洞の宝）→ 入口 `ch1p_pulse_weave`（護り糸を受け取る）、報酬が岩鯨の鼓動守。会話は `dialogue/ch1/storyteller_prep.json`、イサナの備えの一言は `whale_chaser_prep.json`（17 の 1.5）。一章の降下の条件の読み方は 02 の 2.3。
+
 **経験値の枠**（`ChapterXpBudget`）: 21 の 1.5 の表（章ごとの 1 レベル分・既存・新しい分の上限・合計の上限）を持ち、`quest/ch<n>/` の新しいクエスト（既存の小要素に数え済みの `LEGACY` と繰り返す頼みを除く、段階と報酬の経験値の合計）と、場所の湧き台のクリアの経験値を足す。読み込みのとき（`QuestManager`）と自己テスト `xp budget` が、新しい分の上限と合計の上限を超えていないか検める。超えた章の場所の経験値は、湧き台が 0 に切る（品は渡す）。
 
 ---

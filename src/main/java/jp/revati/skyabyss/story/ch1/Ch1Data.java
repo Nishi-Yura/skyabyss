@@ -70,6 +70,8 @@ public final class Ch1Data extends SavedData {
     public long hushEnd = -1;
     // 宿りの炉端 (ベッド・かまど・言伝ての板) を置いたか
     public boolean nook;
+    // 歌の間 (鐘の下の部屋。SongChamber): 0 = まだ / 1 = 置いた (戸は閉じている) / 2 = 戸が開いた / -1 = 置けなかった (人の手が入っていた)
+    public int chamber;
 
     private final Map<UUID, Player> players = new HashMap<>();
 
@@ -91,6 +93,7 @@ public final class Ch1Data extends SavedData {
         tag.putLong("hushStart", hushStart);
         tag.putLong("hushEnd", hushEnd);
         tag.putBoolean("nook", nook);
+        tag.putInt("chamber", chamber);
         CompoundTag all = new CompoundTag();
         players.forEach((id, p) -> all.put(id.toString(), p.save()));
         tag.put("players", all);
@@ -103,6 +106,7 @@ public final class Ch1Data extends SavedData {
         d.hushStart = tag.contains("hushStart") ? tag.getLong("hushStart") : -1;
         d.hushEnd = tag.contains("hushEnd") ? tag.getLong("hushEnd") : -1;
         d.nook = tag.getBoolean("nook");
+        d.chamber = tag.getInt("chamber");
         CompoundTag all = tag.getCompound("players");
         for (String key : all.getAllKeys()) {
             try {

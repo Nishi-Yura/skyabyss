@@ -53,24 +53,15 @@ public final class LodgeNook {
         if (door == null || bell == null || !level.hasChunkAt(door) || !level.hasChunkAt(bell)) {
             return false;
         }
-        Blueprint bp = Blueprint.get("shelter");
-        BlockPos origin = door.below();
-        int rot = -1;
-        boolean mirror = false;
-        for (int r = 0; r < 4 && rot < 0; r++) {
-            for (int m = 0; m < 2; m++) {
-                if (matches(bp, "bell", r, m == 1, origin, bell) && matches(bp, "door", r, m == 1, origin, door)) {
-                    rot = r;
-                    mirror = m == 1;
-                    break;
-                }
-            }
-        }
-        if (rot < 0) {
+        Frame frame = frameOf(door, bell);
+        if (frame == null) {
             // 向きが割り出せない (人の手が入って部品と食い違う): あきらめて済みにする
             SkyAbyss.LOGGER.warn("[ch1] could not read the lodge orientation; the nook is skipped");
             return true;
         }
+        BlockPos origin = frame.origin();
+        int rot = frame.rot();
+        boolean mirror = frame.mirror();
         BlockPos foot = at(-2, 1, -3, rot, mirror, origin);
         BlockPos head = at(-2, 1, -4, rot, mirror, origin);
         if (level.getBlockState(foot).isAir() && level.getBlockState(head).isAir()) {
@@ -87,6 +78,44 @@ public final class LodgeNook {
             level.setBlock(oven, Blueprint.transform(smoker, rot, mirror), 3);
         }
         return true;
+    }
+
+    // 宿りの向き (原点 = 戸の一つ下。部品の座標 → 世界: Blueprint.transform(x, y + 1, z, rot, mirror, origin))
+    record Frame(BlockPos origin, int rot, boolean mirror, Blueprint bp) {
+        // 宿りの部品の座標 (x, y, z。y は最初の段 = 0) の世界の位置
+        BlockPos at(int x, int y, int z) {
+            return Blueprint.transform(x, y + 1, z, rot, mirror, origin);
+        }
+    }
+
+    // 戸 (door) と鐘 (bell) の位置から、宿りの向きを割り出す。合わなければ null
+    @Nullable
+    static Frame frameOf(BlockPos door, BlockPos bell) {
+        Blueprint bp = Blueprint.get("shelter");
+        BlockPos origin = door.below();
+        for (int r = 0; r < 4; r++) {
+            for (int m = 0; m < 2; m++) {
+                if (matches(bp, "bell", r, m == 1, origin, bell) && matches(bp, "door", r, m == 1, origin, door)) {
+                    return new Frame(origin, r, m == 1, bp);
+                }
+            }
+        }
+        return null;
+    }
+
+    // 建て終わった宿りの向き (まだ・読み込まれていなければ null)
+    @Nullable
+    static Frame frame(ServerLevel level) {
+        SiteData.Entry entry = SiteData.get(level.getServer().overworld()).first("shelter");
+        if (entry == null) {
+            return null;
+        }
+        BlockPos door = entry.extra("door");
+        BlockPos bell = entry.extra("bell");
+        if (door == null || bell == null || !level.hasChunkAt(door) || !level.hasChunkAt(bell)) {
+            return null;
+        }
+        return frameOf(door, bell);
     }
 
     private static BlockPos at(int x, int y, int z, int rot, boolean mirror, BlockPos origin) {

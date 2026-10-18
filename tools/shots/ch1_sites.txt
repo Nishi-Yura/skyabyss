@@ -1,0 +1,96 @@
+# 一章の地上の新しい場所 (21 の 3.1、P6) を平らな世界へ置いて撮る。./gradlew runShots -Pscript=tools/shots/ch1_sites.txt
+# 絵は run/shots/ch1_sites/shots/ch1_sites/*.png。python tools/ch1_sites_sheet.py で docs/review/previews/ch1_sites_sheet.png にまとめる
+# (開発コマンド skyabyss dev ch1 place / chamber は story/ch1/Ch1Dev。音は台本が自分で消す)
+world ch1sites flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd gamerule doDaylightCycle false
+hud off
+
+# ---- 平らな地面の場所 (地面の上面 y=-61)
+cmd forceload add 0 -10 120 20
+wait 120
+cmd skyabyss dev ch1 place ch1_road_cairn 0 -61 0 0
+cmd skyabyss dev ch1 place ch1_road_shrine 30 -61 0 0
+cmd skyabyss dev ch1 place ch1_bone_cache 60 -61 0 0
+cmd skyabyss dev ch1 place ch1_lost_cart 90 -61 0 0
+cmd skyabyss dev ch1 place ch1_cart_track 102 -61 0 0
+
+# ---- 洞の台地 (石の塊の上に草。地面の上面 y=-30。洞の床は -45)
+cmd forceload add 150 -16 192 34
+wait 120
+cmd fill 150 -49 -16 170 -31 34 stone
+cmd fill 171 -49 -16 192 -31 34 stone
+cmd fill 150 -30 -16 192 -30 34 grass_block
+cmd skyabyss dev ch1 place ch1_cleft_shell_cave 160 -30 0 0
+
+# ---- 歌の間の台地 (宿り + 鐘の下の部屋。地面の上面 y=-30)
+cmd forceload add 215 -15 250 20
+wait 120
+cmd fill 215 -49 -15 250 -31 20 stone
+cmd fill 215 -30 -15 250 -30 20 grass_block
+cmd skyabyss dev ch1 chamber 230 -30 0 open
+
+cmd skyabyss cinematic stop
+camera 0.5 -58 8.5 180 18
+waitchunks
+wait 20
+shot 01_road_cairn
+camera 30.5 -57.5 9.5 180 18
+waitchunks
+wait 20
+shot 02_road_shrine
+camera 60.5 -57.5 10 180 22
+waitchunks
+wait 20
+shot 03_bone_cache
+camera 96 -56 12 180 25
+waitchunks
+wait 20
+shot 04_cart_track
+
+camera 160.5 -22 -9 0 32
+waitchunks
+wait 20
+shot 05_cave_mouth
+camera 160.5 -31 2.5 0 12
+waitchunks
+wait 20
+shot 06_cave_stairs
+camera 160.5 -44 15.5 0 8
+waitchunks
+wait 20
+shot 07_cave_room1
+camera 172.5 -44 21 270 8
+waitchunks
+wait 20
+shot 08_cave_room2_plates
+camera 177.5 -44 24.5 180 6
+waitchunks
+wait 20
+shot 09_cave_gate
+camera 177.5 -44 6.5 180 6
+waitchunks
+wait 20
+shot 10_cave_room3
+
+camera 229.5 -27.5 10 180 35
+waitchunks
+wait 20
+shot 11_song_chamber_door
+camera 229.5 -34 6.5 180 10
+waitchunks
+wait 20
+shot 12_song_chamber_mural
+cmd forceload remove all
+quit

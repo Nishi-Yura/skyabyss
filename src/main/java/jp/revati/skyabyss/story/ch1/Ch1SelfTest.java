@@ -84,8 +84,15 @@ public final class Ch1SelfTest {
         steps.add(Step.once("ch1 sites (start)", Ch1SelfTest::start));
         steps.add(Step.until("ch1 sites (plan)", Ch1SelfTest::settled));
         steps.add(Step.once("ch1 sites", Ch1SelfTest::checkSites));
+        steps.add(Step.once("ch1 p6 (load)", s -> Ch1SitesSelfTest.load(s, base)));
+        steps.add(Step.until("ch1 p6 (wait)", Ch1SitesSelfTest::loaded));
+        steps.add(Step.once("ch1 p6", s -> Ch1SitesSelfTest.run(s, base)));
         steps.add(Step.once("ch1 end", Ch1SelfTest::end));
         return steps;
+    }
+
+    static BlockPos baseAt() {
+        return baseAt;
     }
 
     private static void check(boolean ok, String what) {
@@ -313,8 +320,15 @@ public final class Ch1SelfTest {
         }
         check(ChapterSites.elements(Chapters.PROLOGUE).stream().map(ChapterSites.Element::id).sorted().toList().equals(Sites.PROLOGUE.stream().sorted().toList()),
                 "prologue elements are not registered as expected");
-        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id).sorted().toList().equals(Sites.WHALE.stream().sorted().toList()),
+        List<String> whaleIds = new ArrayList<>(Sites.WHALE);
+        whaleIds.addAll(Sites.WHALE_P6);
+        check(ChapterSites.elements(Chapters.WHALE).stream().map(ChapterSites.Element::id).sorted().toList().equals(whaleIds.stream().sorted().toList()),
                 "chapter 1 elements are not registered as expected");
+        for (String id : Sites.WHALE_P6) {
+            var el = ChapterSites.elements(Chapters.WHALE).stream().filter(e -> e.id().equals(id)).findFirst().orElse(null);
+            Blueprint bp = el == null ? null : Blueprint.get(el.blueprint());
+            check(bp != null && !bp.cells.isEmpty() && bp.marks.containsKey("stand"), id + ": empty blueprint or no stand mark");
+        }
         check(ChapterSites.elements(Chapters.PROLOGUE).size() >= 3, "the prologue needs at least 3 traces");
         // 歌石の積み石は 1〜5 段
         for (int n = 1; n <= 5; n++) {

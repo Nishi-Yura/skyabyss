@@ -1,0 +1,116 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch1p_c_all",
+      "if": [
+        {
+          "type": "prep",
+          "chapter": 1,
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1p_all_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1p_c_some",
+      "if": [
+        {
+          "type": "prep",
+          "chapter": 1,
+          "min": 1
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "prep",
+            "chapter": 1,
+            "min": 3
+          }
+        },
+        {
+          "type": "day",
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1p_some_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1p_c_none",
+      "if": [
+        {
+          "type": "stage",
+          "max": 0
+        },
+        {
+          "type": "day",
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "prep",
+            "chapter": 1,
+            "min": 1
+          }
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1p_none_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch1p_c_all": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1p_all_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1p_c_some": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1p_some_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1p_c_none": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1p_none_told"
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}
