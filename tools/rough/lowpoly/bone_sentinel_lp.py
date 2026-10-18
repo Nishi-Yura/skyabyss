@@ -100,16 +100,15 @@ def paint(faces, size, P, N, M, extras=None):
     # ひび: 面の中を骨の長さの向き (島の v 方向) にくねらせて入れる。形に沿って 1 枚の面の中で止まる
     hf = hash1(fi, 5)
     nverts = np.array([len(f.verts) for f in faces])[fi]
-    crack_on = (hf < 0.30) & (area > 30) & (mats != "tooth") & (nverts <= 4)
+    crack_on = (hf < 0.24) & (area > np.where(bones == "body", 14, 30)) & (mats != "tooth") & (nverts <= 4)
     c0 = (hash1(fi, 6) * np.maximum(CW - 2, 1)).astype(int) + 1
     v0 = (hash1(fi, 7) * 0.35 * CH).astype(int)
-    v1 = v0 + (CH * (0.4 + 0.4 * hash1(fi, 8))).astype(int)
-    zig = np.round(1.1 * np.sin(LV * 0.8 + fi * 1.7)).astype(int)
+    v1 = v0 + (CH * (0.35 + 0.35 * hash1(fi, 8))).astype(int)
+    zig = np.round(0.62 * np.sin(LV * 0.7 + fi * 1.7)).astype(int)
     seg = INS & (LV >= v0) & (LV <= v1)
     on_crack = crack_on & seg & (LU == c0 + zig)
     idx = np.where(on_crack, 1, idx)
     nb = crack_on & seg & (LU == c0 + zig + 1) & (lit > -0.2)
-    idx = np.where(nb & ~on_crack, np.minimum(idx + 1, 5), idx)
     idx = np.clip(idx, 0, 5)
     col = BONE[idx].astype(float)
 
@@ -117,7 +116,7 @@ def paint(faces, size, P, N, M, extras=None):
     mn = 0.62 * vnoise(P * 0.21 + 21, 4) + 0.38 * vnoise(P * 0.52 + 7, 9)
     mscore = mn + 0.34 * np.clip(ny, 0, 1) + 0.36 * near_concave + 0.12 * (1 - np.clip(P[..., 1] / 34, 0, 1))
     thr = 0.90
-    moss = (mscore + 0.06 * bay > thr) & (ny > -0.25) & (mats != "tooth") & (mats != "stone")
+    moss = (mscore + 0.06 * bay + 0.07 * (bones == "body") > thr) & (ny > -0.25) & (mats != "tooth") & (mats != "stone")
     depth = np.clip(((mscore - thr) * 7 + 0.4 * lit + 0.6 * bay), 0, 3.99)
     midx = np.clip(np.floor(depth).astype(int), 0, 3)
     midx = np.where(convex & (ny > 0.3), 3, midx)
@@ -170,20 +169,22 @@ def paint(faces, size, P, N, M, extras=None):
         dx = (P[..., 0] - c[0]) * s
         dy = P[..., 1] - c[1]
         dyy = dy - 0.34 * dx                                      # 目尻が上がる
-        r = np.sqrt((dx / 1.7) ** 2 + (dyy / 1.12) ** 2)
+        r = np.sqrt((dx / 1.5) ** 2 + (dyy / 1.0) ** 2)
         sock = hd & (r + 0.06 * bay < 1.0)
         dkv = np.clip(np.floor(2.9 - (1.0 - r) * 4.0 + 0.4 * bay).astype(int), 0, 2)
         col = np.where(sock[..., None], DARK[dkv], col)
-        pr = np.sqrt(((dx - 0.2) / 0.95) ** 2 + (dyy / 0.46) ** 2)
+        pr = np.sqrt(((dx - 0.2) / 0.85) ** 2 + (dyy / 0.42) ** 2)
         pup = hd & (pr + 0.05 * bay < 1.0)
         col = np.where(pup[..., None], np.where(pr[..., None] < 0.5, PUPIL[1], PUPIL[0]), col)
         glow |= pup
     if "nose" in extras:
         c = extras["nose"]
-        t = np.clip((P[..., 1] - (c[1] - 1.0)) / 2.0, -1, 2)
-        hw = 0.62 * (1 - t) + 0.12
-        nz = hd & (np.abs(P[..., 0] - c[0]) < hw + 0.05 * bay) & (t > 0) & (t < 1.0)
-        col = np.where(nz[..., None], DARK[np.clip(np.floor(1.0 + 1.2 * hash1(LU + LV * 5 + fi, 4)).astype(int), 0, 2)], col)
+        t = (P[..., 1] - (c[1] - 0.8)) / 1.6
+        ax = np.abs(P[..., 0] - c[0])
+        core = hd & (ax < 0.5 * (1 - t) + 0.08) & (t > 0) & (t < 1.0)
+        rim = hd & (ax < 0.5 * (1 - t) + 0.62) & (t > -0.3) & (t < 1.25) & ~core
+        col = np.where(rim[..., None], DARK[2], col)
+        col = np.where(core[..., None], DARK[0], col)
 
     col = np.clip(col, 0, 255)
     img = np.zeros((H, W, 4), np.uint8)
