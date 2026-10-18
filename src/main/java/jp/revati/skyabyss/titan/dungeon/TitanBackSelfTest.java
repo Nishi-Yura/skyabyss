@@ -505,8 +505,9 @@ public final class TitanBackSelfTest {
         // 抜け道の内側 (鼓動の間の側) が柱などでふさがれていないこと
         air(level, new BlockPos(9, 94, -31), "east return (hub side)", failures);
         air(level, new BlockPos(11, 94, -31), "east return (hall side)", failures);
-        if (!level.getBlockState(new BlockPos(-9, 98, -31)).is(Blocks.LADDER)) {
-            failures.add("west return ladder missing");
+        // 頂は 97 (戸 -10, 98〜99 の足もとの石の高さ)。98 だと支えが戸になる (詰み監査)
+        if (!level.getBlockState(new BlockPos(-9, 97, -31)).is(Blocks.LADDER) || level.getBlockState(new BlockPos(-9, 98, -31)).is(Blocks.LADDER)) {
+            failures.add("west return ladder missing or too high (top must be y 97)");
         }
         if (!level.getBlockState(new BlockPos(4, FLOOR, -25)).is(Blocks.LADDER)) {
             failures.add("maze entrance ladder missing at the hub floor");

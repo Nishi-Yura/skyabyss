@@ -25,7 +25,7 @@ public final class StormBackAudit {
         // 床の穴・はしごを調べるのは体の中 (外の羽毛のすきまは、落ちても嵐に投げ返されるだけ)
         s.scan.add(new Box(-16, 128, 12, 16, 160, 45));
         s.scan.add(new Box(-16, 129, -20, 16, 162, 12));
-        s.scan.add(new Box(-150, 138, -26, 150, 163, 2));
+        s.scan.add(new Box(-150, 138, -26, 150, 158, 2));
         s.scan.add(new Box(-12, 144, -100, 12, 160, -18));
         s.scan.add(new Box(-28, 112, -40, 22, 137, 6));
         // 西の骨の割れた床 (WEST_GAPS): わざとの穴。落ちると雲の下へ出て嵐に投げ返される

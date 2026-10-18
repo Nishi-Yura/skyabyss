@@ -63,12 +63,6 @@ public final class StormBirdBuilder {
         // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
         if (BIRD.exists()) {
             jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -200, 200, -125, 125, BIRD::top, 140);
-            // それでも残る、翼の付け根の裂け目のような行き止まり (出られない小さな穴) を、監査で見つけて埋める。部屋より上 (y 159 以上) だけ
-            int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(kit.level(), () -> StormBackAudit.spec(kit.level()),
-                    List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-225, 159, -145, 225, 200, 145)), 8, 6, StormKit.FEATHER);
-            if (repaired > 0) {
-                SkyAbyss.LOGGER.info("Storm back: filled {} blocks of dead-end pockets on the bird's surface", repaired);
-            }
         }
         SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed in {} ms", kit.carved().size(), skinned, sealed,
                 System.currentTimeMillis() - t0);
