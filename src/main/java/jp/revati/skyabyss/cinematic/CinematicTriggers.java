@@ -84,8 +84,12 @@ public final class CinematicTriggers {
 
     // 見回る対象か。船 (海で潮殻に会いに行く足) に乗っている人は対象。それ以外の騎乗 (馬・巨神の背の乗り物など) は見せない
     static boolean canWatch(ServerPlayer player) {
-        boolean riding = player.isPassenger() && !(player.getVehicle() instanceof Boat);
-        return player.isAlive() && !player.isSpectator() && !Cinematics.active(player) && !riding;
+        return player.isAlive() && !player.isSpectator() && !Cinematics.active(player) && vehicleAllows(player.isPassenger() ? player.getVehicle() : null);
+    }
+
+    // 乗り物の条件だけ (null = 徒歩)。船は可、ほかは不可
+    static boolean vehicleAllows(@Nullable Entity vehicle) {
+        return vehicle == null || vehicle instanceof Boat;
     }
 
     // 初見の場面の名前 (岩鯨だけ昔からの名前)
