@@ -104,6 +104,8 @@ BONE_SLAB = (("歌は", "ここで", "止まった", ""), ("The song", "stopped"
 # 目的の帯は「今やること」を、ゲームらしいやさしい言い方 (〜してみよう / 〜に話しかけよう / 〜を探そう) で必ず示す (空・名前だけにしない。日本語は 20 字まで、英語は 52 字まで)。操作のキー (WASD など) は書かない。
 # 方角と距離は帯の側が右に足す。各拍子の担当 (3) は、目的の ID で文を引く: Component.translatable("objective.skyabyss." + id)
 OPENING = {
+    "opening.skyabyss.title": ("天と淵のあいだ", "Between Sky and Abyss"),
+    "opening.skyabyss.title_sub": ("BETWEEN SKY AND ABYSS", "SKY ABYSS"),
     "opening.skyabyss.line": ("……ここは、どこだ。", "...Where am I?"),
     # 判断 5: 日 3 の朝になっても宿りに着かない人へ、帳面の余白に増える一行 (伝承 prologue/the_book_margin を記す)
     "opening.skyabyss.margin_line": ("鐘の方へ。", "Toward the bell."),

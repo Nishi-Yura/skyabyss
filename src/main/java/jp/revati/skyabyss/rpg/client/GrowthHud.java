@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.rpg.client;
 
+import jp.revati.skyabyss.client.ui.TextStyle;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
@@ -127,7 +128,7 @@ public final class GrowthHud {
         g.fill(cx - half, y + 11, cx + half, y + 12, lineColor);
         g.pose().pushPose();
         g.pose().translate(cx, y + 15, 0);
-        g.pose().scale(1.5f, 1.5f, 1f);
+        g.pose().scale(TextStyle.HEADING.scale(), TextStyle.HEADING.scale(), 1f);
         g.drawCenteredString(font, level, 0, 0, (a << 24) | GOLD);
         g.pose().popPose();
     }

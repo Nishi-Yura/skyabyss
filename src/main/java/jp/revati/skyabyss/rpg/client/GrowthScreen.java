@@ -209,7 +209,7 @@ public class GrowthScreen extends Screen {
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
         g.pose().pushPose();
         g.pose().translate(left + 12, top + 24, 0);
-        g.pose().scale(1.5f, 1.5f, 1f);
+        g.pose().scale(jp.revati.skyabyss.client.ui.TextStyle.HEADING.scale(), jp.revati.skyabyss.client.ui.TextStyle.HEADING.scale(), 1f);
         g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), 0, 0, GOLD, true);
         g.pose().popPose();
         float fraction = max ? 1f : (float) d.xp / Math.max(1, GrowthRules.xpToNext(d.level));

@@ -330,7 +330,7 @@
 
 ### 4.4 開幕の演出（B0）
 
-- 題字は絵（`tools/gen_opening_title.py` が游明朝で描く。`textures/gui/opening/title_ja|en.png` と青緑のにじみ `_glow.png`）。日本語なら「天と淵のあいだ」と英語の副題、それ以外の言語なら「Between Sky and Abyss」と「SKY ABYSS」。`OpeningOverlay` が、まぶたが開いたあとに少し下から 100 tick かけて浮かび上がらせ、光は呼吸するように明滅する。明るい空でも読めるよう題字のまわりをうっすら暗くする。
+- 題字は絵にせず、バニラのフォントで描く（`TextStyle.TITLE` を `OpeningOverlay` が画面の高さに応じて拡大。副題は `TextStyle.HEADING`。文は lang の `opening.skyabyss.title` / `title_sub`: 日本語は「天と淵のあいだ」と「BETWEEN SKY AND ABYSS」、それ以外は「Between Sky and Abyss」と「SKY ABYSS」）。まぶたが開いたあとに少し下から浮かび上がり、青緑の光（フォントを少しずつずらして重ねたもの）が呼吸するように明滅する。明るい空でも読めるよう、字には影をつけ、題字のまわりをうっすら暗くする。文字の絵（`textures/gui/opening/`）と生成スクリプトは持たない（18 の 7 章）。
 - 開幕の一行は場面の台詞（心の声。画面の下、黒帯のすぐ上）。場面を見ない設定（`cinematicScenes` を切る）のときだけ、元の字幕（画面の下、薄い暗がりの帯の上）を `OpeningOverlay` が出す。
 - バニラの札を出さない: 開幕の演出（18 秒）の間、`OpeningClient` が札（チュートリアル、レシピなど）を毎 tick 消す。チュートリアルはこの世界の開幕で `NONE` にして終わり（`options.txt` の `tutorialStep` が書き換わる）。操作のキー（WASD・Space など）は目的の帯に書かない（帯は「何をするか」だけを言う）。
 - 音: 目覚めで 低い風（`tools/gen_opening_sounds.py wind`）→ かすかな地鳴り（音量 0.22）→ 鼓動 → 鐘の順に重ねる。字幕は「低い風が吹く」。

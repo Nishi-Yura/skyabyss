@@ -1,0 +1,38 @@
+# 字の見た目の確認 (TextStyle): 章の題字・ボスバー・控え帳・伝承の書・技の画面。./gradlew runShots -Pscript=tools/shots/font_ui.txt
+world shots flat
+size 1280 720
+timeout 400
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+waitchunks
+chat clear
+wait 20
+
+cmd skyabyss dev arc card titan_whale
+wait 60
+shot font_chapter_card
+wait 250
+cmd summon skyabyss:raiju 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera 0 -58 6 180 5
+wait 60
+shot font_boss_bar
+cmd kill @e[type=skyabyss:raiju]
+wait 10
+open lore
+wait 20
+shot font_lore_book
+close
+open skills
+wait 20
+shot font_skill_screen
+close
+key key.skyabyss_record.open
+wait 40
+shot font_record_screen
+close
+echo done
