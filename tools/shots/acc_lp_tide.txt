@@ -1,0 +1,368 @@
+# 低ポリの装飾品 (手・地面・額縁・体に付けた姿) を階級ごとに撮る (tools/gen_accessory_lp_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd setblock 0 -59 3 minecraft:stone
+cmd setblock 3 -59 3 minecraft:stone
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_chime_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_chime_charm_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_chime_charm_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_chime_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_chime_charm_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_chime_charm_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_chime_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_chime_charm_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_chime_charm_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_chime_charm
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_chime_charm_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_chime_charm_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:tide_chime_charm",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:tide_chime_charm",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot tide_chime_charm_world
+camera 0 -60 8 180 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot moontide_pearl_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot moontide_pearl_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot moontide_pearl_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot moontide_pearl_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot moontide_pearl_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot moontide_pearl_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot moontide_pearl_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot moontide_pearl_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:moontide_pearl",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:moontide_pearl",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot moontide_pearl_world
+camera 0 -60 8 180 0
+accequip moontide_pearl
+hud off
+acctier common
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_front_common
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_back_common
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot moontide_pearl_worn_q_common
+perspective front
+bodyyaw 90
+chat clear
+shot moontide_pearl_worn_side_common
+acctier rare
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_front_rare
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_back_rare
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot moontide_pearl_worn_q_rare
+perspective front
+bodyyaw 90
+chat clear
+shot moontide_pearl_worn_side_rare
+acctier legend
+perspective front
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_front_legend
+perspective back
+bodyyaw 0
+wait 8
+chat clear
+shot moontide_pearl_worn_back_legend
+perspective front
+bodyyaw 50
+wait 8
+chat clear
+shot moontide_pearl_worn_q_legend
+perspective front
+bodyyaw 90
+chat clear
+shot moontide_pearl_worn_side_legend
+acctier off
+accequip
+bodyyaw 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_watching_shell
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_watching_shell_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_watching_shell_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_watching_shell
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_watching_shell_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_watching_shell_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_watching_shell
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_watching_shell_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_watching_shell_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_watching_shell
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_watching_shell_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_watching_shell_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:tide_watching_shell",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:tide_watching_shell",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot tide_watching_shell_world
+camera 0 -60 8 180 0
+accequip
+acctier common
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_pearl_fp_common
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_pearl_tp_common
+acctier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_pearl_fp_rare
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_pearl_tp_rare
+acctier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_pearl_fp_legend
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_pearl_tp_legend
+acctier off
+accmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot tide_pearl_fp_flat
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot tide_pearl_tp_flat
+accmesh on
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd execute if entity @e[type=item] run kill @e[type=item]
+cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:tide_pearl",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:tide_pearl",count:1},Invulnerable:1b}
+perspective first
+hud off
+bodyyaw 0
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot tide_pearl_world
+camera 0 -60 8 180 0
+quit

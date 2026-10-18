@@ -85,6 +85,18 @@ python tools/weapon_display.py [--check]                            # 持ち方 
 
 持ち方と動きの決まりは `docs/design/15_high_poly.md` の 4.6.1。
 
+### 装飾品の低ポリメッシュ (手・地面・額縁と、体に付けた姿。15 の 4.6.3)
+
+```
+cd tools/rough/lowpoly/accessories && python build_final.py   # 採用した A 案 16 品 x 階級 3 -> docs/review/lowpoly_roughs/accessories_final/<id>/ (面数は summary.json)
+python tools/install_lowpoly_accessories.py                     # メッシュ・アトラス・光る画像を入れ、models/item/<id>.json の base を builtin/entity にする (何度でも)
+python tools/gen_accessory_lp_shots.py [thunder|ember|whale|tide]  # 台本 tools/shots/acc_lp_<巨神>.txt (手・平絵・地面・額縁・体に付けた姿)
+./gradlew runShots -Pscript=tools/shots/acc_lp_<巨神>.txt
+python tools/accessory_lp_sheet.py [巨神]                       # docs/review/previews/acc_lp_<巨神>.png (コンタクトシート)
+```
+
+台本の手順 `acctier common|rare|legend|off` (階級を固定)、`accmesh on|off` (低ポリ / 平絵)、`accworn on|off` (体に付けた姿の入り切り)、`accequip <id> [<id>]` (自分のクライアントの装飾の枠に品を入れる。見た目だけ)。元の平絵のモデルは `models/item_flat/` に退避してある (`LowPoly.accessoryMeshes = false` の戻り先)。ラフの形は `tools/rough/lowpoly/accessories/{thunder,ember,whale,tide}.py` (A 案)。`gen_accessory_assets.py` 以外で models/item/<id>.json を書き直す生成スクリプトを動かしたら `install_lowpoly_accessories.py` を流し直す。燠の灯 (ブロック) の持ち物欄の絵は `tools/rough/lowpoly/accessories/cinder_sprite.py`。
+
 ### 武器の低ポリメッシュ (手・地面・額縁。15 の 4.6.2)
 
 ```

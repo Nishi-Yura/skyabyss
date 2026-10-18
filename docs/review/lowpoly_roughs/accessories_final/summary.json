@@ -1,0 +1,178 @@
+{
+ "storm_charm": {
+  "jp": "嵐の護符",
+  "kind": "charm",
+  "rar": "rare",
+  "titan": "thunder",
+  "tris": {
+   "common": 132,
+   "rare": 144,
+   "legend": 144
+  }
+ },
+ "storm_anklet": {
+  "jp": "嵐纏の足環",
+  "kind": "worn",
+  "rar": "rare",
+  "titan": "thunder",
+  "tris": {
+   "common": 112,
+   "rare": 176,
+   "legend": 176
+  }
+ },
+ "storm_eye_feather": {
+  "jp": "嵐の目の羽根",
+  "kind": "worn",
+  "rar": "legend",
+  "titan": "thunder",
+  "tris": {
+   "common": 100,
+   "rare": 112,
+   "legend": 136
+  }
+ },
+ "gale_feather": {
+  "jp": "風切りの羽根",
+  "kind": "held",
+  "rar": "common",
+  "titan": "thunder",
+  "tris": {
+   "common": 112,
+   "rare": 124,
+   "legend": 124
+  }
+ },
+ "kindling_charm": {
+  "jp": "熾りの護符",
+  "kind": "charm",
+  "rar": "rare",
+  "titan": "ember",
+  "tris": {
+   "common": 92,
+   "rare": 104,
+   "legend": 104
+  }
+ },
+ "ember_mantle": {
+  "jp": "熾火の外套",
+  "kind": "worn",
+  "rar": "rare",
+  "titan": "ember",
+  "tris": {
+   "common": 128,
+   "rare": 140,
+   "legend": 140
+  }
+ },
+ "ember_lantern": {
+  "jp": "余燼の灯",
+  "kind": "worn",
+  "rar": "legend",
+  "titan": "ember",
+  "tris": {
+   "common": 84,
+   "rare": 96,
+   "legend": 120
+  }
+ },
+ "ember_horn": {
+  "jp": "熾火の角杯",
+  "kind": "held",
+  "rar": "common",
+  "titan": "ember",
+  "tris": {
+   "common": 96,
+   "rare": 108,
+   "legend": 108
+  }
+ },
+ "cinder_lamp": {
+  "jp": "燠の灯 (吊り灯)",
+  "kind": "held",
+  "rar": "common",
+  "titan": "ember",
+  "tris": {
+   "common": 132,
+   "rare": 132,
+   "legend": 132
+  }
+ },
+ "resonance_charm": {
+  "jp": "共鳴の護符",
+  "kind": "charm",
+  "rar": "rare",
+  "titan": "whale",
+  "tris": {
+   "common": 136,
+   "rare": 148,
+   "legend": 148
+  }
+ },
+ "moss_talisman": {
+  "jp": "苔の護石",
+  "kind": "worn",
+  "rar": "rare",
+  "titan": "whale",
+  "tris": {
+   "common": 132,
+   "rare": 144,
+   "legend": 164
+  }
+ },
+ "stone_whale_plating": {
+  "jp": "岩鯨の補強板",
+  "kind": "worn",
+  "rar": "legend",
+  "titan": "whale",
+  "tris": {
+   "common": 116,
+   "rare": 128,
+   "legend": 164
+  }
+ },
+ "tide_chime_charm": {
+  "jp": "潮鳴りの護符",
+  "kind": "charm",
+  "rar": "rare",
+  "titan": "tide",
+  "tris": {
+   "common": 122,
+   "rare": 134,
+   "legend": 134
+  }
+ },
+ "moontide_pearl": {
+  "jp": "月潮の真珠",
+  "kind": "worn",
+  "rar": "legend",
+  "titan": "tide",
+  "tris": {
+   "common": 154,
+   "rare": 166,
+   "legend": 196
+  }
+ },
+ "tide_watching_shell": {
+  "jp": "潮見の貝",
+  "kind": "held",
+  "rar": "common",
+  "titan": "tide",
+  "tris": {
+   "common": 132,
+   "rare": 144,
+   "legend": 144
+  }
+ },
+ "tide_pearl": {
+  "jp": "潮の真珠",
+  "kind": "held",
+  "rar": "common",
+  "titan": "tide",
+  "tris": {
+   "common": 100,
+   "rare": 136,
+   "legend": 136
+  }
+ }
+}

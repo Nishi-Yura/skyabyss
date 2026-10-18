@@ -19,6 +19,13 @@ public final class LowPoly {
     // 開発用: 武器のメッシュの階級を common|rare|legend に固定する (null = 品の階級)。台本の `weapontier <階級|off>`
     public static volatile String weaponTier = null;
 
+    // 装飾品・補助の品 16 種 (手・地面・額縁) を低ポリメッシュで描くか。false にすると元の平絵のモデル (models/item_flat/) で描く (client/accessory/AccessoryItemRenderer)。台本の `accmesh on|off`
+    public static volatile boolean accessoryMeshes = true;
+    // 装飾の枠に付けた品を、プレイヤーの体に低ポリメッシュで描くか (client/accessory/AccessoryWornLayer)。台本の `accworn on|off`
+    public static volatile boolean accessoryWorn = true;
+    // 開発用: 装飾品のメッシュの階級を common|rare|legend に固定する (null = 品の階級)。台本の `acctier <階級|off>`
+    public static volatile String accessoryTier = null;
+
     private LowPoly() {
     }
 

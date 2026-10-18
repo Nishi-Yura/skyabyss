@@ -409,6 +409,35 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
                 return true;
             }
+            case "acctier" -> {
+                // acctier common|rare|legend|off : 装飾品のメッシュの階級を固定する (品の階級を使うのは off)
+                String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);
+                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryTier = t.equals("off") ? null : t;
+                return true;
+            }
+            case "accmesh" -> {
+                // accmesh on|off : 装飾品を低ポリ (on) / 元の平絵 (off) で描く (手・地面・額縁)
+                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryMeshes = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "accworn" -> {
+                // accworn on|off : 体に付けた装飾の描画 (AccessoryWornLayer) の入り切り
+                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryWorn = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "accequip" -> {
+                // accequip <装飾の id> [<装飾の id>] : 自分のクライアントの装飾の枠 (1・2 番) に品を入れる (見た目の確認用。サーバーには送らない)。引数なし = 空にする
+                jp.revati.skyabyss.item.accessory.AccessoryData data = mc.player.getData(jp.revati.skyabyss.item.accessory.AccessorySetup.DATA);
+                for (int i = 1; i < jp.revati.skyabyss.item.accessory.AccessoryData.SIZE; i++) {
+                    data.items.set(i, net.minecraft.world.item.ItemStack.EMPTY);
+                }
+                for (int i = 0; i < Math.min(2, line.args().length); i++) {
+                    net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                            ResourceLocation.fromNamespaceAndPath("skyabyss", line.arg(i)));
+                    data.items.set(1 + i, new net.minecraft.world.item.ItemStack(item));
+                }
+                return true;
+            }
             case "watcher" -> {
                 // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
                 if (first) {
