@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.HeartBoss;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.storm.StormTravel;
@@ -52,12 +54,13 @@ import org.joml.Vector3f;
 // 雷翼の心臓: 雷翼の巨神の最終ボス (12 の 5.3節)。竜骨の間の中央に宙に浮いて現れ、動かず向きだけ変える (段階 2 だけ高さを変える)。
 // 体力の割合で三段階 (66% 未満で段階 2、33% 未満で段階 3)。変わり目は 3 秒の咆哮で、その間は傷を受けず輪が押し返す。
 // 三つの段階は、三つの試練で覚えたことを一つずつ使う:
-//  段階 1 畳んだ翼 (東 = 避雷の柱): 招雷 (輪が柱の近くなら柱へ落ちて柱が満ちる。4 本満ちると翼が裂けて 6 秒落ちる・受ける傷 1.5 倍) /
-//                                  風の刃 (頭の高さ。しゃがめば当たらない) / 雷の鎖 (人へ伸びる帯)
-//  段階 2 開いた翼 (西 = 昇り風): 心臓は 7 ブロック上がり、4 つの風穴に昇り風が立つ (空中戦)。受ける傷 1.2 倍。
-//                                  羽ばたき (昇り風が止まり、空中の人を下へ) / 帯電の床 (床の人だけ) / 羽根の雨 (人の上の輪)
-//  段階 3 骨だけの翼 (前 = 光): 心臓は床の 2 ブロック上へ。閃光 (心臓を見ている人だけ。背を向けるか柱の陰) /
-//                                  雷の網 (柱のあいだを回る二枚の網。すき間を通る) / 招雷の連打 (追う輪。柱のそばなら柱へ)
+// 傷のある技はすべて Telegraph (combat。02 の 5.4節): 印と当たりは同じ形。人数 n (心臓の間にいる人) で円・線・腕が増える。
+//  段階 1 畳んだ翼 (東 = 避雷の柱): 招雷 (円が満ちる。円が柱の近くなら柱へ落ちて柱が満ちる。4 本満ちると翼が裂けて 6 秒落ちる・受ける傷 1.5 倍) /
+//                                  風の刃 (回る帯。頭の高さ。しゃがめば当たらない) / 雷の鎖 (心臓 → 人 → 人 と渡る線)
+//  段階 2 開いた翼 (西 = 昇り風): 心臓は 4 ブロック上がり (足もと 5.5)、4 つの風穴に昇り風が立つ (空中戦)。受ける傷 1.2 倍。
+//                                  羽ばたき (風穴の下降風と、跳べる突風の輪) / 帯電の床 (床の円。空中なら当たらない) / 羽根の雨 (人の上の円)
+//  段階 3 骨だけの翼 (前 = 光): 心臓は床の 2 ブロック上へ。閃光 (人へ向く扇の中で、心臓を見ている人だけ。背を向けるか柱の陰) /
+//                                  雷の網 (回る雷の腕。跳べば越える) / 招雷の連打 (円が三度。柱のそばなら柱へ)
 // 予告は色の粒 (overrideLimiter。GuardMob.warn) に加え、技ごとに別の音と、画面の予告の印 (StormHeartNetwork.Warn) の三つで出す。
 // 強さは 03 の 9.8節の目安 (推奨 Lv24: 体力 650、ふつうの技の一撃 15.5 前後)
 public class StormHeart extends HeartBoss {
@@ -92,14 +95,32 @@ public class StormHeart extends HeartBoss {
     public static final double BLADE_HIGH = 2.4;
     public static final double CHAIN_HALF_WIDTH = 1.0;
     public static final double CHAIN_LENGTH = 20;
+    public static final double CHAIN_NODE_RADIUS = 1.8;
     public static final double FEATHER_RADIUS = 2.0;
     public static final double FLASH_CONE_DEG = 60;
-    public static final double WEB_INNER = 2.0;
-    public static final double WEB_OUTER = 14.5;
-    public static final double WEB_GAP = 2.6;
-    public static final double WEB_HALF_WIDTH = 0.7;
-    public static final double WEB_HEIGHT = 2.4;
-    public static final int WEB_TICKS = 120;
+    // 風の刃 (回る帯): 長さ・半幅・予告・振れる tick。人数ぶん増えても、振れる角の合計は 180 度のまま
+    public static final double BLADE_REACH = 13;
+    public static final double BLADE_HALF_WIDTH = 1.3;
+    public static final int BLADE_WARN = 24;
+    public static final int BLADE_ACTIVE = 30;
+    // 雷の網 (回る腕。跳び越えられる): 長さ・半幅・振れる tick。腕の数が増えても、振れる角の合計は 180 度
+    public static final double WEB_REACH = 13;
+    public static final double WEB_HALF_WIDTH = 1.0;
+    public static final int WEB_TICKS = 80;
+    public static final double WEB_JUMP = 1.0;
+    // 帯電の床の円の半径と当たりの続く tick (0.5 秒ごと、3 秒)
+    public static final double CHARGE_RADIUS = 3.0;
+    public static final int CHARGE_ACTIVE = 50;
+    // 閃光の扇 (一本あたり半角 22 度・射程 13)
+    public static final double FLASH_RANGE = 13;
+    public static final double FLASH_HALF_ANGLE = 22;
+    // 咆哮の押し返し (円)
+    public static final double ROAR_PUSH_RADIUS = 7.5;
+    // 突風の輪 (羽ばたき): 輪の中の筋 (安全な床) の半角と、風穴の下降風の半径
+    public static final double GUST_GAP_DEG = 24;
+    public static final double DOWNDRAFT_RADIUS = StormHeartArena.UPDRAFT_RADIUS + 0.5;
+    // 模型の核の高さ (足もとから。模型は描画で 3 倍)
+    public static final double CORE_OFFSET = 3.3;
 
     private static final EntityDataAccessor<Integer> DATA_PHASE = SynchedEntityData.defineId(StormHeart.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(StormHeart.class, EntityDataSerializers.BOOLEAN);
@@ -129,44 +150,6 @@ public class StormHeart extends HeartBoss {
     public static final Action[] PHASE_TWO = {Action.WINGBEAT, Action.CHARGE, Action.FEATHER};
     public static final Action[] PHASE_THREE = {Action.FLASH, Action.WEB, Action.BARRAGE};
 
-    // 押し返す輪 (咆哮)
-    private static final class Ring {
-        double radius = 1.5;
-        final double floorY;
-        final Set<UUID> hit = new HashSet<>();
-
-        Ring(double floorY) {
-            this.floorY = floorY;
-        }
-    }
-
-    // 予告の輪のあとに落ちる一撃 (招雷・羽根の雨・招雷の連打)
-    enum StrikeKind { SUMMON, FEATHER, BARRAGE }
-
-    private static final class Strike {
-        double x;
-        double y;
-        double z;
-        final int impactAt;
-        final StrikeKind kind;
-        @Nullable
-        final UUID follow;
-        final int followUntil;
-
-        Strike(double x, double y, double z, int impactAt, StrikeKind kind, @Nullable UUID follow, int followUntil) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.impactAt = impactAt;
-            this.kind = kind;
-            this.follow = follow;
-            this.followUntil = followUntil;
-        }
-
-        double radius() {
-            return kind == StrikeKind.FEATHER ? FEATHER_RADIUS : SUMMON_RADIUS;
-        }
-    }
 
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
@@ -178,16 +161,16 @@ public class StormHeart extends HeartBoss {
     // 段階 2 の高低の拍の時計 (咆哮が終わった所から数える)
     private int riseClock;
     private boolean defeated;
-    private final List<Ring> rings = new ArrayList<>();
-    private final List<Strike> strikes = new ArrayList<>();
-    // 雷の鎖の向き (水平の単位ベクトル)。風の刃の進む向き
-    private Vec3 chainDir = new Vec3(0, 0, 1);
-    private Vec3 bladeDir = new Vec3(0, 0, 1);
-    private final Set<UUID> bladeHit = new HashSet<>();
-    // 雷の網: 二枚の腕の始めの角度とすき間の位置、人ごとの当たりの待ち
-    private double webAngle;
-    private final double[] webGap = new double[2];
-    private final Map<UUID, Integer> webHitAt = new HashMap<>();
+    // 風の刃の腕 (始めの角度の一覧と、一本の振れる角)。雷の網の腕も同じ形
+    private double[] armStart = new double[0];
+    private double armSpan;
+    // 雷の鎖: 一度の鎖で同じ人に二度当たらない
+    private final Set<UUID> chainHit = new HashSet<>();
+    // 閃光を受けた人 (画面の白い瞬きに使う)
+    private final List<ServerPlayer> flashSeen = new ArrayList<>();
+    // 試験・開発用: 次の技を始めない / 心臓の間にいる人数を実際より多いことにする (0 なら実際の人数)
+    private boolean holdAttacks;
+    private int partyOverride;
     // 昇り風: 止まっている (羽ばたき) / 強まっている (帯電の床)
     private boolean updraftStopped;
     private boolean updraftStrong;
@@ -245,6 +228,7 @@ public class StormHeart extends HeartBoss {
         entityData.set(DATA_PHASE, Mth.clamp(phase, 0, PHASE_COUNT - 1));
         entityData.set(DATA_ROARING, false);
         endSplit();
+        Telegraph.cancelAll(this);
         action = Action.NONE;
         updraftStopped = false;
         updraftStrong = false;
@@ -306,7 +290,7 @@ public class StormHeart extends HeartBoss {
     }
 
     // ---------------------------------------------------------------- 高さ (段階で変わる)
-    // 床からの心臓の足もとの高さ: 段階 1 は 1.5、翼が裂けると 0.3、段階 2 は 7 上がって 8.5 (下の端が昇り風の上の端に来る)、
+    // 床からの心臓の足もとの高さ: 段階 1 は 1.5、翼が裂けると 0.3、段階 2 は 5.5 (下の端が昇り風の上の端に来る。判定箱の高さ 6 で天井の下に収まる)、
     // 段階 3 は床の 2 上へ下りる
     public static double heightFor(int phase, boolean split) {
         if (split) {
@@ -352,7 +336,7 @@ public class StormHeart extends HeartBoss {
 
     @Override
     protected double coreHeight() {
-        return getY() + 2.2;
+        return getY() + CORE_OFFSET;
     }
 
     private void moveToHeight() {
@@ -400,8 +384,6 @@ public class StormHeart extends HeartBoss {
         if (cooldown > 0) {
             cooldown--;
         }
-        tickRings(server);
-        tickStrikes(server);
         tickUpdrafts(server);
         if (safeFallTicks > 0) {
             safeFallTicks--;
@@ -430,7 +412,7 @@ public class StormHeart extends HeartBoss {
                 return;
             }
             faceTarget(target);
-            if (cooldown == 0) {
+            if (cooldown == 0 && !holdAttacks) {
                 begin(pickAttack(), null);
             }
             return;
@@ -528,9 +510,9 @@ public class StormHeart extends HeartBoss {
         player.hurt(attackSource(), amount);
     }
 
-    // 心臓の核の高さ (模型の核。描画 2 倍で足もとから約 2.2)
+    // 心臓の核の高さ (模型の核。描画 3 倍で足もとから 3.3)
     public Vec3 core() {
-        return new Vec3(getX(), getY() + 2.2, getZ());
+        return new Vec3(getX(), getY() + CORE_OFFSET, getZ());
     }
 
     // その場所の床の高さ (部屋では竜骨の筋が 1 段低い。部屋の外では真下へたどる)
@@ -598,16 +580,154 @@ public class StormHeart extends HeartBoss {
         server.playSound(null, x, yBottom, z, StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2.2f, 0.9f + random.nextFloat() * 0.2f);
     }
 
+    // ---- 試験・開発用 ----
+    // 次の技を始めない (forceAction で出した技だけを見たいとき)
+    public void holdAttacks() {
+        holdAttacks = true;
+    }
+
+    // 心臓の間にいる人数を、実際より多いことにする (一人で複数人の技の絵を撮るため。0 なら実際の人数)
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    public int actionTickCount() {
+        return actionTicks;
+    }
+
+    int present(ServerLevel server) {
+        return Math.max(partyOverride, reachable(server, 40).size());
+    }
+
+    // ---- 人数 n で増えるもの (一人でも、印を見れば傷なしで避けられる。12 の 5.3節) ----
+    // 風の刃・雷の網の腕の数 (振れる角の合計は 180 度のまま。数が増えるぶん一本は狭く短くなる)
+    public static int bladeArms(int n) {
+        return n >= 5 ? 3 : n >= 3 ? 2 : 1;
+    }
+
+    public static int webArms(int n) {
+        return n >= 5 ? 4 : n >= 3 ? 3 : 2;
+    }
+
+    // 雷の鎖が渡る人の数 (心臓 → 人 → 人 …)
+    public static int chainTargets(int n) {
+        return Math.min(n, 5);
+    }
+
+    // 帯電の床の円の数
+    public static int chargePads(int n) {
+        return Math.min(7, 2 + n);
+    }
+
+    // 閃光の扇の数
+    public static int flashFans(int n) {
+        return Math.min(n, 4);
+    }
+
+    // 突風の輪の数 (3 人から二重)
+    public static int gustRings(int n) {
+        return n >= 3 ? 2 : 1;
+    }
+
+    // 人の足もとのほかに落ちる雷・羽根の数 (3 人から)
+    public static int extraStrikes(int n) {
+        return n >= 5 ? 3 : n >= 3 ? 2 : 0;
+    }
+
+    // 技の床の高さ。部屋の中は床 (竜骨の筋が 1 段低くても同じ高さで測る)
+    private double floorY() {
+        return isBound() ? StormHeartArena.FLOOR : floorAt(getX(), getZ());
+    }
+
+    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
+        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    }
+
+    // 部屋の中のどこかの点 (壁から margin 離す)
+    private Vec3 randomSpot(double margin) {
+        double a = random.nextDouble() * Math.PI * 2;
+        double r = Math.sqrt(random.nextDouble()) * Math.max(2, roomRadius() - margin);
+        return new Vec3(centerX() + Math.cos(a) * r, floorY(), centerZ() + Math.sin(a) * r);
+    }
+
+    // 狙う地点 (人の足もと) を最大 max か所。いま狙っている人を先頭に、残りは入れ替える。
+    // 開発用の人数の上書きで人が足りないぶんは、部屋のどこかの点で補う
+    private List<Vec3> pickSpots(ServerLevel server, int max) {
+        List<ServerPlayer> all = new ArrayList<>(reachable(server, 40));
+        java.util.Collections.shuffle(all, new java.util.Random(random.nextLong()));
+        LivingEntity main = getTarget();
+        if (main instanceof ServerPlayer mp && all.remove(mp)) {
+            all.add(0, mp);
+        }
+        List<Vec3> spots = new ArrayList<>();
+        for (ServerPlayer p : all) {
+            if (spots.size() >= max) {
+                break;
+            }
+            spots.add(p.position());
+        }
+        while (spots.size() < Math.min(max, partyOverride)) {
+            spots.add(randomSpot(2.5));
+        }
+        return spots;
+    }
+
+    // 招雷の輪 1 つ: 半径 radius の円が満ちて、落ちる。輪が避雷の柱から 3 ブロック以内なら雷は柱へ落ち (傷なし。charges なら柱が 1 段満ちる)、
+    // そうでなければ円の中の人に damage と短い鈍足。柱へ落ちる輪は黄色く、柱へ線が伸びる
+    private void lightningCircle(ServerLevel server, double x, double y, double z, double radius, int warn, float damage, boolean charges) {
+        int rod = isBound() ? StormHeartArena.nearestRod(x, z, ROD_REACH) : -1;
+        if (rod >= 0 && charges && StormHeartArena.charge(rod) >= StormHeartArena.ROD_STAGES) {
+            rod = -1;
+        }
+        final int toRod = rod;
+        double ceiling = isBound() ? StormHeartArena.CEILING - 0.5 : y + 12;
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(x, z, radius), warn, toRod >= 0 ? 0xFFE278 : 0xFFFFFF)
+                .floor(y)
+                .onImpact(s -> {
+                    if (toRod >= 0) {
+                        Vec3 tip = StormHeartArena.rodTip(toRod);
+                        bolt(s, tip.x, ceiling, tip.z, tip.y, true);
+                        if (charges && getPhase() == 0) {
+                            StormHeartArena.addCharge(s, toRod);
+                            if (StormHeartArena.allFull() && splitTicks == 0 && !isRoaring()) {
+                                startSplit(s);
+                            }
+                        }
+                    } else {
+                        bolt(s, x, ceiling, z, y, false);
+                    }
+                });
+        if (toRod < 0) {
+            b.onHit((s, player) -> {
+                strike(player, damage);
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 1));
+            });
+        } else {
+            BlockPos base = StormHeartArena.rod(toRod);
+            for (double t = 0; t <= 1; t += 0.1) {
+                warn(server, dust(0xFFE278, 0.9f), Mth.lerp(t, x, base.getX() + 0.5), y + 0.2, Mth.lerp(t, z, base.getZ() + 0.5), 1, 0, 0, 0, 0);
+            }
+        }
+        b.start();
+    }
+
     // ---- 咆哮 (段階の変わり目) ----
+    // 3 秒。咆哮し、足もとの円 (半径 7.5。始めの 1.1 秒だけ印) に入っている人を押し返す (傷なし)。広がる輪は見た目だけ
     private void tickRoar(ServerLevel server) {
         if (actionTicks == 1) {
             entityData.set(DATA_ROARING, true);
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.CLOUD, getX(), core().y, getZ(), 60, 1.6, 1.4, 1.6, 0.15);
             safeFallTicks = ROAR_TICKS + 60;
-        }
-        if (actionTicks == 22) {
-            rings.add(new Ring(floorAt(getX(), getZ())));
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, 0xA8D8FF)
+                    .onHit((s, player) -> {
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(0.9, -to.x, -to.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, 0xA8D8FF).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             warn(server, dust(getPhase() == 0 ? 0xA8D8FF : 0xF6F0C8, 1.3f), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
@@ -627,16 +747,17 @@ public class StormHeart extends HeartBoss {
     }
 
     // ---------------------------------------------------------------- 段階 1
-    // 招雷 (1.2 秒): 人それぞれの足もとに白い輪。輪が柱から 3 ブロック以内なら雷は柱へ落ち、柱が 1 段満ちる (満ちた柱は受けない)
+    // 招雷 (1.2 秒): 人それぞれの足もとに半径 1.5 の円が満ちて雷が落ちる。3 人から、人のいない所にも 2〜3 か所落ちる。
+    // 円が柱から 3 ブロック以内なら雷は柱へ落ち (傷なし)、柱が 1 段満ちる (満ちた柱は受けない)。柱のそばに立てば自分への雷は柱が受ける
     private void tickSummon(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.SUMMON.get(), 2.2f, 1f);
-            int n = 0;
-            for (ServerPlayer p : reachable(server, 24)) {
-                if (n++ >= 6) {
-                    break;
-                }
-                strikes.add(new Strike(p.getX(), floorAt(p.getX(), p.getZ()), p.getZ(), tickCount + Action.SUMMON.warnTicks, StrikeKind.SUMMON, null, 0));
+            List<Vec3> spots = pickSpots(server, 6);
+            for (int i = 0; i < extraStrikes(present(server)); i++) {
+                spots.add(randomSpot(2.5));
+            }
+            for (Vec3 spot : spots) {
+                lightningCircle(server, spot.x, floorY(), spot.z, SUMMON_RADIUS, Action.SUMMON.warnTicks, SUMMON_DAMAGE, true);
             }
         }
         if (actionTicks < 24 && actionTicks % 3 == 0) {
@@ -647,78 +768,55 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    // 風の刃 (1.2 秒): 片側の壁から、頭の高さ (床から 1.6〜2.4) を白い筋が流れはじめ、三日月の刃が部屋を横切る。しゃがめば当たらない
+    // 風の刃 (1.2 秒): 心臓を中心に、風の帯 (幅 2.6・長さ 13) が回る。振れる扇を床に描いて満ち、そのあと帯が一度その扇を薙ぐ (1.5 秒)。
+    // 頭の高さ (床から 1.6〜2.4) を通るので、**しゃがめば当たらない**。人数で腕が 1 → 2 → 3 本 (扇の合計は 180 度のまま)
     private void tickBlade(ServerLevel server) {
-        double half = roomRadius();
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.BLADE.get(), 2.5f, 1f);
-            int quarter = random.nextInt(4);
-            bladeDir = switch (quarter) {
-                case 0 -> new Vec3(1, 0, 0);
-                case 1 -> new Vec3(-1, 0, 0);
-                case 2 -> new Vec3(0, 0, 1);
-                default -> new Vec3(0, 0, -1);
-            };
-            bladeHit.clear();
-        }
-        Vec3 side = new Vec3(-bladeDir.z, 0, bladeDir.x);
-        double cx = centerX();
-        double cz = centerZ();
-        if (actionTicks < 24 && actionTicks % 2 == 0) {
-            // 寄せる側の壁ぎわの白い筋 (頭の高さに二本) と、床の向きの線
-            for (double s = -half; s <= half; s += 0.8) {
-                double x = cx - bladeDir.x * (half - 1.0) + side.x * s;
-                double z = cz - bladeDir.z * (half - 1.0) + side.z * s;
-                double fy = floorAt(x, z);
-                warn(server, dust(0xF0F8FF, 1.4f), x, fy + BLADE_LOW + 0.1, z, 1, 0, 0, 0, 0);
-                warn(server, dust(0xBFE0FF, 1.4f), x, fy + BLADE_HIGH - 0.1, z, 1, 0, 0, 0, 0);
+            int arms = bladeArms(present(server));
+            LivingEntity target = getTarget();
+            double base = target != null ? Telegraph.angleOf(target.getX() - getX(), target.getZ() - getZ()) : random.nextDouble() * Math.PI * 2;
+            armSpan = Math.PI / arms;
+            armStart = new double[arms];
+            for (int i = 0; i < arms; i++) {
+                double mid = base + i * 2 * Math.PI / arms;
+                armStart[i] = mid - armSpan / 2;
+                boolean first = i == 0;
+                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, 0xBFE0FF)
+                        .active(BLADE_ACTIVE)
+                        .victims(p -> canReach(p) && bladeCrosses(p))
+                        .onImpact(s -> {
+                            if (first) {
+                                s.playSound(null, getX(), getY(), getZ(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.HOSTILE, 2f, 1.6f);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            Vec3 away = player.position().subtract(position()).multiply(1, 0, 1);
+                            away = away.lengthSqr() < 1e-4 ? new Vec3(1, 0, 0) : away.normalize();
+                            strike(player, BLADE_DAMAGE);
+                            push(player, away.x * 0.8, 0.15, away.z * 0.8);
+                        })
+                        .start();
             }
-            if (actionTicks % 6 == 0) {
-                for (double s = -half + 2; s <= half - 2; s += 4) {
-                    for (double k = -half + 3; k <= half - 3; k += 5) {
-                        double x = cx + bladeDir.x * k + side.x * s;
-                        double z = cz + bladeDir.z * k + side.z * s;
-                        double fy = floorAt(x, z);
-                        warn(server, dust(0x6FA8E8, 1.2f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
-                        warn(server, dust(0x6FA8E8, 1.2f), x + bladeDir.x * 0.6, fy + 0.1, z + bladeDir.z * 0.6, 1, 0, 0, 0, 0);
-                    }
+        }
+        // 頭の高さの白い筋: 予告のあいだは扇の始めの縁に、薙いでいるあいだは帯の上に
+        if (actionTicks % 2 == 0 && actionTicks <= BLADE_WARN + BLADE_ACTIVE) {
+            double progress = actionTicks < BLADE_WARN ? 0 : (double) (actionTicks - BLADE_WARN) / BLADE_ACTIVE;
+            for (double start : armStart) {
+                double ang = start + armSpan * progress;
+                for (double d = 2.5; d <= BLADE_REACH; d += actionTicks < BLADE_WARN ? 2.2 : 1.1) {
+                    warn(server, dust(0xFFFFFF, 1.5f), getX() + Math.cos(ang) * d, floorY() + 2.0, getZ() + Math.sin(ang) * d, 1, 0.05, 0.25, 0.05, 0);
                 }
             }
         }
-        int sweepTicks = (int) Math.ceil(2 * half / 1.2);
-        if (actionTicks >= 24 && actionTicks <= 24 + sweepTicks) {
-            double front = -half + (actionTicks - 24) * 1.2;
-            if (actionTicks == 24) {
-                server.playSound(null, cx, StormHeartArena.FLOOR + 2, cz, SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.HOSTILE, 2f, 1.6f);
-            }
-            for (double s = -half; s <= half; s += 0.9) {
-                // 三日月: 真ん中が前へ出る
-                double bow = 1.5 * (1 - (s / half) * (s / half));
-                double x = cx + bladeDir.x * (front + bow) + side.x * s;
-                double z = cz + bladeDir.z * (front + bow) + side.z * s;
-                double fy = floorAt(x, z);
-                warn(server, dust(0xFFFFFF, 1.7f), x, fy + 2.0, z, 1, 0.05, 0.25, 0.05, 0);
-                if (((int) (s * 2)) % 3 == 0) {
-                    warn(server, ParticleTypes.SWEEP_ATTACK, x, fy + 2.0, z, 1, 0, 0, 0, 0);
-                }
-            }
-            for (ServerPlayer player : reachable(server, half + 4)) {
-                Vec3 v = new Vec3(player.getX() - cx, 0, player.getZ() - cz);
-                double along = v.dot(bladeDir);
-                double across = v.dot(side);
-                double bow = 1.5 * (1 - Math.min(1, (across / half) * (across / half)));
-                if (Math.abs(along - (front + bow)) < 1.0 && bladeHit.add(player.getUUID())) {
-                    AABB bb = player.getBoundingBox();
-                    if (bladeHits(bb.minY, bb.maxY, floorAt(player.getX(), player.getZ()))) {
-                        strike(player, BLADE_DAMAGE);
-                        push(player, bladeDir.x * 0.8, 0.15, bladeDir.z * 0.8);
-                    }
-                }
-            }
-        }
-        if (actionTicks >= 30 + sweepTicks) {
+        if (actionTicks >= BLADE_WARN + BLADE_ACTIVE + 8) {
             finish();
         }
+    }
+
+    private boolean bladeCrosses(ServerPlayer player) {
+        AABB bb = player.getBoundingBox();
+        return bladeHits(bb.minY, bb.maxY, floorAt(player.getX(), player.getZ()));
     }
 
     // 風の刃に当たるか (人の体の上下が、床から 1.6〜2.4 の刃にかかるか。しゃがむと背は 1.5)
@@ -726,49 +824,40 @@ public class StormHeart extends HeartBoss {
         return maxY > floorY + BLADE_LOW && minY < floorY + BLADE_HIGH;
     }
 
-    // 雷の鎖 (1.0 秒): 心臓から人へ伸びる光る線 (0.6 秒まで人を追い、そこで決まる)。幅 2・長さ 20 の帯
+    // 雷の鎖 (1.0 秒): 稲妻が心臓から人へ、人から次の人へ渡る。人の位置 (始めに決まる) を結ぶ幅 2 の線と、人の位置の円 (半径 1.8) が満ちる。
+    // 一人のときは、人の方へ伸びる長さ 20 の線。人数で渡る人が増える (最大 5 人。近い順につなぐ)。同じ鎖に二度は当たらない
     private void tickChain(ServerLevel server) {
-        LivingEntity target = getTarget();
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.CHAIN.get(), 2.2f, 1f);
-        }
-        if (target != null && actionTicks <= 12) {
-            Vec3 d = new Vec3(target.getX() - getX(), 0, target.getZ() - getZ());
-            if (d.lengthSqr() > 0.01) {
-                chainDir = d.normalize();
+            chainHit.clear();
+            List<Vec3> targets = pickSpots(server, chainTargets(present(server)));
+            if (targets.isEmpty()) {
+                targets.add(position().add(Vec3.directionFromRotation(0, getYRot()).scale(8)));
             }
-        }
-        double fy = floorAt(getX(), getZ());
-        Vec3 side = new Vec3(-chainDir.z, 0, chainDir.x);
-        if (actionTicks < 20 && actionTicks % 2 == 0) {
-            for (double d = 1.5; d <= CHAIN_LENGTH; d += 0.8) {
-                double x = getX() + chainDir.x * d;
-                double z = getZ() + chainDir.z * d;
-                double y = Mth.lerp(Math.min(1, d / 6), core().y, floorAt(x, z) + 0.9);
-                warn(server, dust(actionTicks <= 12 ? 0xFFE278 : 0xFFFFFF, 1.1f), x, y, z, 1, 0, 0, 0, 0);
-                if (actionTicks > 12 && ((int) (d * 1.25)) % 2 == 0) {
-                    for (int s = -1; s <= 1; s += 2) {
-                        warn(server, dust(0xC8A040, 0.9f), x + side.x * s * CHAIN_HALF_WIDTH, floorAt(x, z) + 0.1,
-                                z + side.z * s * CHAIN_HALF_WIDTH, 1, 0, 0, 0, 0);
+            if (targets.size() == 1) {
+                Vec3 t = targets.get(0);
+                chainSegment(server, getX(), getZ(), Telegraph.angleOf(t.x - getX(), t.z - getZ()), CHAIN_LENGTH, true);
+            } else {
+                List<Vec3> rest = new ArrayList<>(targets);
+                double cx = getX();
+                double cz = getZ();
+                boolean first = true;
+                while (!rest.isEmpty()) {
+                    Vec3 next = rest.get(0);
+                    for (Vec3 t : rest) {
+                        if (Math.hypot(t.x - cx, t.z - cz) < Math.hypot(next.x - cx, next.z - cz)) {
+                            next = t;
+                        }
                     }
-                }
-            }
-        }
-        if (actionTicks == 20) {
-            for (double d = 1.5; d <= CHAIN_LENGTH; d += 0.5) {
-                double x = getX() + chainDir.x * d;
-                double z = getZ() + chainDir.z * d;
-                warn(server, ParticleTypes.ELECTRIC_SPARK, x, floorAt(x, z) + 1.0, z, 3, 0.3, 0.4, 0.3, 0.1);
-                warn(server, dust(0xFFFFFF, 1.6f), x, floorAt(x, z) + 1.0, z, 1, 0.1, 0.3, 0.1, 0);
-            }
-            server.playSound(null, getX(), fy, getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2f, 1.3f);
-            for (ServerPlayer player : reachable(server, CHAIN_LENGTH + 2)) {
-                Vec3 v = new Vec3(player.getX() - getX(), 0, player.getZ() - getZ());
-                double along = v.dot(chainDir);
-                double across = Math.abs(v.dot(side));
-                if (along > 0.5 && along < CHAIN_LENGTH && across < CHAIN_HALF_WIDTH + 0.3 && player.getY() < core().y + 2) {
-                    strike(player, CHAIN_DAMAGE);
-                    push(player, chainDir.x * 0.5, 0.2, chainDir.z * 0.5);
+                    rest.remove(next);
+                    double len = Math.hypot(next.x - cx, next.z - cz);
+                    if (len > 0.5) {
+                        chainSegment(server, cx, cz, Telegraph.angleOf(next.x - cx, next.z - cz), len, first);
+                    }
+                    chainNode(server, next.x, next.z);
+                    cx = next.x;
+                    cz = next.z;
+                    first = false;
                 }
             }
         }
@@ -777,13 +866,46 @@ public class StormHeart extends HeartBoss {
         }
     }
 
+    private void chainSegment(ServerLevel server, double x, double z, double angle, double length, boolean sound) {
+        double dx = Math.cos(angle);
+        double dz = Math.sin(angle);
+        tg(server, TelegraphShape.line(x, z, angle, length, CHAIN_HALF_WIDTH), Action.CHAIN.warnTicks, 0xFFE278)
+                .onImpact(s -> {
+                    if (sound) {
+                        s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2f, 1.3f);
+                    }
+                    for (double d = 0.5; d <= length; d += 0.8) {
+                        warn(s, ParticleTypes.ELECTRIC_SPARK, x + dx * d, floorY() + 1.0, z + dz * d, 2, 0.3, 0.4, 0.3, 0.1);
+                    }
+                })
+                .onHit((s, player) -> {
+                    if (chainHit.add(player.getUUID())) {
+                        strike(player, CHAIN_DAMAGE);
+                        push(player, dx * 0.5, 0.2, dz * 0.5);
+                    }
+                })
+                .start();
+    }
+
+    private void chainNode(ServerLevel server, double x, double z) {
+        tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, 0xFFE278)
+                .onImpact(s -> warn(s, ParticleTypes.ELECTRIC_SPARK, x, floorY() + 1.0, z, 12, 0.6, 0.6, 0.6, 0.2))
+                .onHit((s, player) -> {
+                    if (chainHit.add(player.getUUID())) {
+                        strike(player, CHAIN_DAMAGE);
+                        push(player, 0, 0.2, 0);
+                    }
+                })
+                .start();
+    }
+
     // 翼が裂ける: 4 本の柱がすべて満ちた。心臓は 6 秒落ちて、受ける傷 1.5 倍。柱は空に戻る
     private void startSplit(ServerLevel server) {
         splitTicks = SPLIT_TICKS;
         entityData.set(DATA_SPLIT, true);
         action = Action.NONE;
         actionTicks = 0;
-        strikes.removeIf(s -> s.kind == StrikeKind.SUMMON);
+        Telegraph.cancelAll(this);
         playAction("split");
         sound(server, StormHeartSetup.SPLIT.get(), 3f, 1f);
         server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 80, 2.0, 1.5, 2.0, 0.15);
@@ -863,21 +985,52 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    // 羽ばたき (1.5 秒): 翼を高く上げ、風穴の粒が下を向く。2 秒、昇り風が止まり、空中の人を下へ押す (傷 6)
+    // 羽ばたき (1.5 秒): 翼を高く上げ、風穴の粒が下を向く。次の二つが印になる:
+    //  - 風穴の下降風: 4 つの風穴の円 (半径 2.1)。円の中の空中の人に 6 と下向きの力 (昇り風に乗っている人への技)
+    //  - 突風の輪: 心臓から広がる輪 (3 人から二重)。跳べば当たらない。輪には安全な筋が 2 本あり、そこは何もない。当たると 6 と外への押し
+    // 2 秒、昇り風が止まる
     private void tickWingbeat(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.WINGBEAT.get(), 2.6f, 1f);
+            if (isBound()) {
+                for (int k = 0; k < 4; k++) {
+                    Vec3 h = StormHeartArena.hole(k);
+                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, 0x6FA8E8)
+                            .reach(StormHeartArena.UPDRAFT_TOP - StormHeartArena.FLOOR + 3)
+                            .victims(p -> canReach(p) && airborne(p))
+                            .onHit((s, player) -> {
+                                strike(player, WINGBEAT_DAMAGE);
+                                player.setDeltaMovement(player.getDeltaMovement().x * 0.3, -1.0, player.getDeltaMovement().z * 0.3);
+                                player.hurtMarked = true;
+                            })
+                            .start();
+                }
+            }
+            double gapBase = random.nextDouble() * Math.PI * 2;
+            double[] gaps = {gapBase, gapBase + Math.PI};
+            double gapHalf = Math.toRadians(GUST_GAP_DEG);
+            double reach = Math.max(8, roomRadius() - 1);
+            for (double gap : gaps) {
+                // 安全な筋 (見た目だけ)
+                tg(server, TelegraphShape.cone(getX(), getZ(), gap, reach, gapHalf), Action.WINGBEAT.warnTicks, 0x58FF9A).start();
+            }
+            int rings = gustRings(present(server));
+            for (int i = 0; i < rings; i++) {
+                int active = (int) Math.ceil((reach - 2.5) / 0.55);
+                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, 0xA8D8FF)
+                        .active(active).jumpClear(0.9)
+                        .onHit((s, player) -> {
+                            strike(player, WINGBEAT_DAMAGE);
+                            Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.7, -to.x, -to.z);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
         }
         if (actionTicks == 30) {
             updraftStopped = true;
             server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 80, 6, 0.5, 6, 0.2);
-            for (ServerPlayer player : reachable(server, 24)) {
-                if (airborne(player)) {
-                    strike(player, WINGBEAT_DAMAGE);
-                    player.setDeltaMovement(player.getDeltaMovement().x * 0.3, -1.0, player.getDeltaMovement().z * 0.3);
-                    player.hurtMarked = true;
-                }
-            }
             safeFallTicks = Math.max(safeFallTicks, 60);
         }
         if (actionTicks > 30 && actionTicks < 70 && actionTicks % 5 == 0) {
@@ -890,61 +1043,77 @@ public class StormHeart extends HeartBoss {
         if (actionTicks >= 70) {
             updraftStopped = false;
         }
-        if (actionTicks >= 76) {
+        if (actionTicks >= 76 + 14 * (gustRings(present(server)) - 1)) {
             finish();
         }
     }
 
-    // 帯電の床 (1.5 秒): 床を青い火花が這う。3 秒、床に立つ人に 0.5 秒ごとに 3 と鈍足 I。昇り風の中 (空中) なら当たらない。昇り風は強まる
+    // 帯電の床 (1.5 秒): 床の円 (半径 3) の中を青い火花が這い、3 秒のあいだ 0.5 秒ごとに、円に立つ人へ 3 と鈍足 I。
+    // **昇り風の中 (空中) なら当たらない**。円の数は 3 → 7 (人数 + 2)。人の足もとのほか、残りは部屋のあちこち。昇り風は強まる
     private void tickCharge(ServerLevel server) {
-        double half = roomRadius();
-        double cx = centerX();
-        double cz = centerZ();
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.CHARGE.get(), 2.4f, 1f);
             updraftStrong = true;
-        }
-        if (actionTicks < 90 && actionTicks % 2 == 0) {
-            int count = actionTicks < 30 ? 24 : 48;
-            for (int i = 0; i < count; i++) {
-                double a = random.nextDouble() * Math.PI * 2;
-                double r = Math.sqrt(random.nextDouble()) * (half - 0.5);
-                double x = cx + Math.cos(a) * r;
-                double z = cz + Math.sin(a) * r;
-                warn(server, dust(actionTicks < 30 ? 0x5A8CFF : 0x9CC8FF, 1.1f), x, floorAt(x, z) + 0.1, z, 1, 0, 0, 0, 0);
-            }
-            if (actionTicks >= 30) {
-                for (int i = 0; i < 6; i++) {
-                    double x = cx + (random.nextDouble() - 0.5) * 2 * half;
-                    double z = cz + (random.nextDouble() - 0.5) * 2 * half;
-                    warn(server, ParticleTypes.ELECTRIC_SPARK, x, floorAt(x, z) + 0.2, z, 2, 0.3, 0.1, 0.3, 0.1);
+            int count = chargePads(present(server));
+            List<Vec3> pads = new ArrayList<>(pickSpots(server, count));
+            int guard = 0;
+            while (pads.size() < count && guard++ < 60) {
+                Vec3 c = randomSpot(CHARGE_RADIUS + 0.5);
+                boolean ok = true;
+                for (Vec3 q : pads) {
+                    if (Math.hypot(c.x - q.x, c.z - q.z) < CHARGE_RADIUS * 1.8) {
+                        ok = false;
+                    }
+                }
+                if (ok) {
+                    pads.add(c);
                 }
             }
-        }
-        if (actionTicks >= 30 && actionTicks < 90 && (actionTicks - 30) % 10 == 0) {
-            for (ServerPlayer player : reachable(server, half + 2)) {
-                if (player.getY() < floorAt(player.getX(), player.getZ()) + 0.6) {
-                    strike(player, CHARGE_DAMAGE);
-                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 0));
-                }
+            for (Vec3 c : pads) {
+                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, 0x5A8CFF)
+                        .active(CHARGE_ACTIVE).repeatEvery(10).jumpClear(0.6)
+                        .onHit((s, player) -> {
+                            strike(player, CHARGE_DAMAGE);
+                            player.invulnerableTime = 0;
+                            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 0));
+                        })
+                        .start();
             }
         }
-        if (actionTicks >= 96) {
+        if (actionTicks >= 30 + CHARGE_ACTIVE + 10) {
             finish();
         }
     }
 
-    // 羽根の雨 (1.2 秒): 人の上に白い輪 (空中の人にも)。半径 2、少し下へ押す。輪の高さから 1.5 ずれれば当たらない
+    // 羽根の雨 (1.2 秒): 人の位置に白い輪 (半径 2。空中の人にはその高さに) が満ちて、羽根が降る。10 と下への力。
+    // 輪の高さから 1.5 ずれれば当たらない。3 人から、人のいない所にも 2〜3 か所
     private void tickFeather(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.FEATHER.get(), 2.2f, 1f);
-            int n = 0;
-            for (ServerPlayer p : reachable(server, 24)) {
-                if (n++ >= 6) {
-                    break;
-                }
-                strikes.add(new Strike(p.getX(), p.getY(), p.getZ(), tickCount + Action.FEATHER.warnTicks, StrikeKind.FEATHER, null, 0));
+            List<Vec3> spots = pickSpots(server, 6);
+            for (int i = 0; i < extraStrikes(present(server)); i++) {
+                spots.add(randomSpot(2.5));
             }
+            for (Vec3 spot : spots) {
+                double x = spot.x;
+                double y = spot.y;
+                double z = spot.z;
+                tg(server, TelegraphShape.circle(x, z, FEATHER_RADIUS), Action.FEATHER.warnTicks, 0xF0F8FF)
+                        .floor(y).reach(1.5)
+                        .onImpact(s -> {
+                            s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
+                            s.sendParticles(ParticleTypes.WHITE_ASH, x, y + 1.5, z, 40, 1.2, 1.0, 1.2, 0.05);
+                            warn(s, ParticleTypes.END_ROD, x, y + 1.0, z, 10, 0.8, 0.5, 0.8, 0.02);
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, FEATHER_DAMAGE);
+                            push(player, 0, -0.5, 0);
+                        })
+                        .start();
+            }
+        }
+        if (actionTicks < 24 && actionTicks % 3 == 0) {
+            warn(server, ParticleTypes.WHITE_ASH, getX(), core().y, getZ(), 6, 3.0, 0.6, 3.0, 0);
         }
         if (actionTicks >= 34) {
             finish();
@@ -952,12 +1121,25 @@ public class StormHeart extends HeartBoss {
     }
 
     // ---------------------------------------------------------------- 段階 3
-    // 閃光 (2.0 秒): 心臓が光を吸い込み (画面が暗くなる)、高まる音、画面の眼の印。心臓の方を向いている (視線から 60 度以内) 人は
-    // 盲目 3 秒と 12。背を向けていれば何もない。柱の陰 (心臓との間にブロックがある) でもよい
+    // 閃光 (2.0 秒): 心臓が光を吸い込み (画面が暗くなる)、高まる音、画面の眼の印。人のいる方へ光の扇 (半角 22 度・射程 13) が満ちる。
+    // 扇の中で、心臓の方を向いている (視線から 60 度以内) 人は盲目 3 秒と 12。扇から出る・背を向ける・柱の陰 (心臓との間にブロックがある) のどれかでよい。
+    // 扇は人数で 1 → 4 本 (別の人へ)
     private void tickFlash(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.FLASH.get(), 3f, 1f);
             StormHeartNetwork.flash(reachable(server, 32), Action.FLASH.warnTicks, false);
+            flashSeen.clear();
+            for (Vec3 spot : pickSpots(server, flashFans(present(server)))) {
+                double angle = Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, 0xFFFAE0)
+                        .victims(p -> canReach(p) && flashHits(level(), p.getEyePosition(), p.getViewVector(1f), core(), p))
+                        .onHit((s, player) -> {
+                            strike(player, FLASH_DAMAGE);
+                            player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
+                            flashSeen.add(player);
+                        })
+                        .start();
+            }
         }
         if (actionTicks < 40 && actionTicks % 2 == 0) {
             // 光を吸い込む (外から心臓へ寄る粒)
@@ -973,16 +1155,10 @@ public class StormHeart extends HeartBoss {
             Vec3 core = core();
             server.sendParticles(ParticleTypes.FLASH, core.x, core.y, core.z, 3, 0.5, 0.5, 0.5, 0);
             warn(server, ParticleTypes.END_ROD, core.x, core.y, core.z, 60, 0.4, 0.4, 0.4, 0.6);
-            List<ServerPlayer> seen = new ArrayList<>();
-            for (ServerPlayer player : reachable(server, 32)) {
-                boolean hit = flashHits(level(), player.getEyePosition(), player.getViewVector(1f), core, player);
-                if (hit) {
-                    strike(player, FLASH_DAMAGE);
-                    player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
-                    seen.add(player);
-                }
-            }
-            StormHeartNetwork.flashResult(reachable(server, 32), seen);
+        }
+        if (actionTicks == 42) {
+            // 扇の当たりは予告の最後の tick (40) で済んでいる。当たった人には白い瞬き
+            StormHeartNetwork.flashResult(reachable(server, 32), new ArrayList<>(flashSeen));
         }
         if (actionTicks >= 50) {
             finish();
@@ -1005,109 +1181,74 @@ public class StormHeart extends HeartBoss {
         return hit.getType() == HitResult.Type.MISS;
     }
 
-    // 雷の網 (1.5 秒): 4 本の柱の先が光り、柱と柱の間に線。そのあと二枚の網が中心のまわりを回る (一周 6 秒)。
-    // 網はそれぞれ一か所すき間がある (すき間の位置は網ごとに違う)。触れると 14
+    // 雷の網 (1.5 秒): 4 本の柱の先が光り、柱と柱の間に線。心臓を中心に、雷の腕 (幅 2・長さ 13) が回る。振れる扇を床に描いて満ち、
+    // そのあと腕が 4 秒かけてその扇を一度通る。**跳べば越えられる**。触れると 14。腕は 2 本 → 3 本 → 4 本 (人数。扇の合計は 180 度のまま)
     private void tickWeb(ServerLevel server) {
-        double cx = centerX();
-        double cz = centerZ();
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.WEB.get(), 2.6f, 1f);
-            webAngle = random.nextDouble() * Math.PI * 2;
-            for (int s = 0; s < 2; s++) {
-                webGap[s] = 4.0 + random.nextDouble() * 7.0;
+            int arms = webArms(present(server));
+            double base = random.nextDouble() * Math.PI * 2;
+            armSpan = Math.PI / arms;
+            armStart = new double[arms];
+            for (int i = 0; i < arms; i++) {
+                double mid = base + i * 2 * Math.PI / arms;
+                armStart[i] = mid - armSpan / 2;
+                double armAngle = mid;
+                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, 0x6FA8E8)
+                        .active(WEB_TICKS).jumpClear(WEB_JUMP)
+                        .onHit((s, player) -> {
+                            strike(player, WEB_DAMAGE);
+                            Vec3 to = player.position().subtract(centerX(), 0, centerZ());
+                            double a = Math.atan2(to.z, to.x) + Math.PI / 2;
+                            push(player, Math.cos(a) * 0.4, 0.2, Math.sin(a) * 0.4);
+                        })
+                        .start();
             }
-            webHitAt.clear();
         }
-        if (actionTicks < 30 && actionTicks % 2 == 0 && isBound()) {
+        if (actionTicks < 30 && actionTicks % 4 == 0 && isBound()) {
             for (int i = 0; i < 4; i++) {
                 Vec3 a = StormHeartArena.rodTip(i);
                 warn(server, ParticleTypes.ELECTRIC_SPARK, a.x, a.y, a.z, 3, 0.2, 0.2, 0.2, 0.1);
                 Vec3 b = StormHeartArena.rodTip(i == 0 ? 1 : i == 1 ? 3 : i == 3 ? 2 : 0);
-                for (double t = 0; t <= 1; t += 0.08) {
+                for (double t = 0; t <= 1; t += 0.12) {
                     Vec3 q = a.lerp(b, t);
                     warn(server, dust(0xAAD2FF, 0.9f), q.x, q.y - 0.4, q.z, 1, 0, 0, 0, 0);
                 }
             }
         }
-        // 網の腕の向き: 予告のあいだも最初の位置に線を出す (どこから来るか分かる)
-        if (actionTicks % 2 == 0 && actionTicks < 30 + WEB_TICKS) {
-            int t = Math.max(0, actionTicks - 30);
-            for (int s = 0; s < 2; s++) {
-                double ang = webAngle + s * Math.PI + t * (2 * Math.PI / WEB_TICKS);
-                for (double r = WEB_INNER; r <= WEB_OUTER; r += 0.7) {
-                    if (r >= webGap[s] && r <= webGap[s] + WEB_GAP) {
-                        continue;
-                    }
-                    double x = cx + Math.cos(ang) * r;
-                    double z = cz + Math.sin(ang) * r;
-                    double fy = floorAt(x, z);
-                    int color = actionTicks < 30 ? 0x6FA8E8 : 0xD8ECFF;
-                    if (actionTicks < 30) {
-                        warn(server, dust(color, 1.0f), x, fy + 0.1, z, 1, 0, 0, 0, 0);
-                    } else {
-                        warn(server, dust(color, 1.3f), x, fy + 0.5, z, 1, 0, 0.1, 0, 0);
-                        warn(server, dust(0xFFFFFF, 1.3f), x, fy + 1.4, z, 1, 0, 0.1, 0, 0);
-                        warn(server, dust(color, 1.3f), x, fy + 2.2, z, 1, 0, 0.1, 0, 0);
-                        if (random.nextFloat() < 0.15f) {
-                            warn(server, ParticleTypes.ELECTRIC_SPARK, x, fy + 1.2, z, 1, 0.1, 0.5, 0.1, 0.05);
-                        }
-                    }
-                }
-                // すき間の両端に印 (通り道)
-                if (actionTicks >= 30) {
-                    for (double r : new double[] {webGap[s], webGap[s] + WEB_GAP}) {
-                        double x = cx + Math.cos(ang) * r;
-                        double z = cz + Math.sin(ang) * r;
-                        warn(server, dust(0xFFE278, 1.0f), x, floorAt(x, z) + 0.1, z, 1, 0, 0, 0, 0);
+        // 回っている腕の稲妻 (印の上を通る)
+        if (actionTicks >= Action.WEB.warnTicks && actionTicks <= Action.WEB.warnTicks + WEB_TICKS && actionTicks % 2 == 0) {
+            double progress = (double) (actionTicks - Action.WEB.warnTicks) / WEB_TICKS;
+            for (double start : armStart) {
+                double ang = start + armSpan * progress;
+                for (double r = 2.0; r <= WEB_REACH; r += 1.3) {
+                    double x = centerX() + Math.cos(ang) * r;
+                    double z = centerZ() + Math.sin(ang) * r;
+                    double fy = floorY();
+                    warn(server, dust(0xD8ECFF, 1.3f), x, fy + 0.5, z, 1, 0, 0.1, 0, 0);
+                    warn(server, dust(0xFFFFFF, 1.3f), x, fy + 1.4, z, 1, 0, 0.1, 0, 0);
+                    if (random.nextFloat() < 0.12f) {
+                        warn(server, ParticleTypes.ELECTRIC_SPARK, x, fy + 1.2, z, 1, 0.1, 0.5, 0.1, 0.05);
                     }
                 }
             }
         }
-        if (actionTicks >= 30 && actionTicks < 30 + WEB_TICKS) {
-            int t = actionTicks - 30;
-            for (ServerPlayer player : reachable(server, WEB_OUTER + 2)) {
-                double px = player.getX() - cx;
-                double pz = player.getZ() - cz;
-                for (int s = 0; s < 2; s++) {
-                    double ang = webAngle + s * Math.PI + t * (2 * Math.PI / WEB_TICKS);
-                    if (webHits(px, pz, ang, webGap[s]) && player.getY() < floorAt(player.getX(), player.getZ()) + WEB_HEIGHT) {
-                        Integer at = webHitAt.get(player.getUUID());
-                        if (at == null || tickCount - at > 20) {
-                            webHitAt.put(player.getUUID(), tickCount);
-                            strike(player, WEB_DAMAGE);
-                            push(player, -Math.sin(ang) * 0.4, 0.2, Math.cos(ang) * 0.4);
-                        }
-                    }
-                }
-            }
-        }
-        if (actionTicks >= 36 + WEB_TICKS) {
+        if (actionTicks >= Action.WEB.warnTicks + WEB_TICKS + 6) {
             finish();
         }
     }
 
-    // 網の腕 (中心からの向き ang) に触れているか (人の位置は中心からの (px, pz))。すき間 [gap, gap + WEB_GAP] は通れる
-    public static boolean webHits(double px, double pz, double ang, double gap) {
-        double ux = Math.cos(ang);
-        double uz = Math.sin(ang);
-        double along = px * ux + pz * uz;
-        double across = Math.abs(-px * uz + pz * ux);
-        if (along < WEB_INNER || along > WEB_OUTER || across > WEB_HALF_WIDTH) {
-            return false;
-        }
-        return along < gap || along > gap + WEB_GAP;
-    }
-
-    // 招雷の連打 (1.0 秒ごとに 3 回): 人の足もとを追う輪 (0.5 秒追って止まり、0.5 秒後に落ちる)。柱のそばなら柱へ (段階 3 では柱は満ちない)
+    // 招雷の連打 (1.0 秒ごとに 3 回): 人の足もとに半径 1.5 の円が満ちて (1.0 秒) 落ちる。3 人から、人のいない所にも 2〜3 か所。
+    // 円は始めの位置で決まり、そのあとは追わない。柱のそばなら柱へ (傷なし。段階 3 では柱は満ちない)
     private void tickBarrage(ServerLevel server) {
         if (actionTicks == 1 || actionTicks == 21 || actionTicks == 41) {
             sound(server, StormHeartSetup.BARRAGE.get(), 2.2f, 1f + actionTicks / 60f);
-            int n = 0;
-            for (ServerPlayer p : reachable(server, 24)) {
-                if (n++ >= 6) {
-                    break;
-                }
-                strikes.add(new Strike(p.getX(), floorAt(p.getX(), p.getZ()), p.getZ(), tickCount + 20, StrikeKind.BARRAGE, p.getUUID(), tickCount + 10));
+            List<Vec3> spots = pickSpots(server, 6);
+            for (int i = 0; i < extraStrikes(present(server)); i++) {
+                spots.add(randomSpot(2.5));
+            }
+            for (Vec3 spot : spots) {
+                lightningCircle(server, spot.x, floorY(), spot.z, SUMMON_RADIUS, 20, BARRAGE_DAMAGE, false);
             }
             if (actionTicks > 1) {
                 StormHeartNetwork.warn(reachable(server, 32), Action.BARRAGE, 20);
@@ -1118,113 +1259,6 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    // ---------------------------------------------------------------- 輪と一撃 (技の後も続く)
-    private void tickRings(ServerLevel server) {
-        for (Ring ring : rings) {
-            ring.radius += 0.8;
-            int points = Math.max(8, (int) (2 * Math.PI * ring.radius / 1.4));
-            for (int i = 0; i < points; i++) {
-                double a = i * 2 * Math.PI / points;
-                warn(server, dust(0xA8D8FF, 1.5f), getX() + Math.cos(a) * ring.radius, ring.floorY + 0.5, getZ() + Math.sin(a) * ring.radius, 1, 0, 0, 0, 0);
-            }
-            double r = ring.radius + 2;
-            AABB area = new AABB(getX() - r, ring.floorY - 2, getZ() - r, getX() + r, ring.floorY + 12, getZ() + r);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-                double d = to.length();
-                if (Math.abs(d - ring.radius) < 1.0 && ring.hit.add(player.getUUID())) {
-                    player.knockback(0.9, -to.x, -to.z);
-                    player.hurtMarked = true;
-                }
-            }
-        }
-        rings.removeIf(w -> w.radius > 20);
-    }
-
-    private void tickStrikes(ServerLevel server) {
-        if (strikes.isEmpty()) {
-            return;
-        }
-        List<Strike> remaining = new ArrayList<>();
-        for (Strike s : new ArrayList<>(strikes)) {
-            if (s.follow != null && tickCount < s.followUntil && server.getEntity(s.follow) instanceof ServerPlayer p && canReach(p)) {
-                s.x = p.getX();
-                s.z = p.getZ();
-                s.y = floorAt(p.getX(), p.getZ());
-            }
-            if (tickCount >= s.impactAt) {
-                impact(server, s);
-                continue;
-            }
-            if (tickCount % 2 == 0) {
-                double r = s.radius();
-                int color = s.kind == StrikeKind.FEATHER ? 0xF0F8FF : (s.follow != null && tickCount < s.followUntil ? 0xFFE278 : 0xFFFFFF);
-                for (int a = 0; a < 360; a += 24) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(color, 1.3f), s.x + Math.cos(rad) * r, s.y + (s.kind == StrikeKind.FEATHER ? 2.4 : 0.15),
-                            s.z + Math.sin(rad) * r, 1, 0, 0, 0, 0);
-                }
-                // 輪の中心から柱への線 (柱が受けるか分かる)
-                if (s.kind != StrikeKind.FEATHER && isBound()) {
-                    int rod = StormHeartArena.nearestRod(s.x, s.z, ROD_REACH);
-                    if (rod >= 0 && (s.kind == StrikeKind.BARRAGE || StormHeartArena.charge(rod) < StormHeartArena.ROD_STAGES)) {
-                        BlockPos b = StormHeartArena.rod(rod);
-                        for (double t = 0; t <= 1; t += 0.2) {
-                            warn(server, dust(0xFFE278, 0.8f), Mth.lerp(t, s.x, b.getX() + 0.5), s.y + 0.15, Mth.lerp(t, s.z, b.getZ() + 0.5), 1, 0, 0, 0, 0);
-                        }
-                    }
-                }
-            }
-            if (s.kind == StrikeKind.FEATHER && tickCount % 3 == 0) {
-                warn(server, ParticleTypes.WHITE_ASH, s.x, s.y + 3.0, s.z, 6, 1.2, 0.3, 1.2, 0);
-            }
-            remaining.add(s);
-        }
-        strikes.clear();
-        strikes.addAll(remaining);
-    }
-
-    private void impact(ServerLevel server, Strike s) {
-        double ceiling = isBound() ? StormHeartArena.CEILING - 0.5 : s.y + 12;
-        if (s.kind == StrikeKind.FEATHER) {
-            server.playSound(null, s.x, s.y, s.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
-            server.sendParticles(ParticleTypes.WHITE_ASH, s.x, s.y + 1.5, s.z, 40, 1.2, 1.0, 1.2, 0.05);
-            warn(server, ParticleTypes.END_ROD, s.x, s.y + 1.0, s.z, 10, 0.8, 0.5, 0.8, 0.02);
-            AABB area = new AABB(s.x - FEATHER_RADIUS, s.y - 1.5, s.z - FEATHER_RADIUS, s.x + FEATHER_RADIUS, s.y + 1.5, s.z + FEATHER_RADIUS);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                if (Math.hypot(player.getX() - s.x, player.getZ() - s.z) <= FEATHER_RADIUS + 0.3) {
-                    strike(player, FEATHER_DAMAGE);
-                    push(player, 0, -0.5, 0);
-                }
-            }
-            return;
-        }
-        // 招雷・連打: 柱から 3 ブロック以内なら柱へ (招雷は満ちていない柱だけ)
-        int rod = isBound() ? StormHeartArena.nearestRod(s.x, s.z, ROD_REACH) : -1;
-        if (rod >= 0 && s.kind == StrikeKind.SUMMON && StormHeartArena.charge(rod) >= StormHeartArena.ROD_STAGES) {
-            rod = -1;
-        }
-        if (rod >= 0) {
-            Vec3 tip = StormHeartArena.rodTip(rod);
-            bolt(server, tip.x, ceiling, tip.z, tip.y, true);
-            if (s.kind == StrikeKind.SUMMON && getPhase() == 0) {
-                StormHeartArena.addCharge(server, rod);
-                if (StormHeartArena.allFull() && splitTicks == 0 && !isRoaring()) {
-                    startSplit(server);
-                }
-            }
-            return;
-        }
-        bolt(server, s.x, ceiling, s.z, s.y, false);
-        float damage = s.kind == StrikeKind.SUMMON ? SUMMON_DAMAGE : BARRAGE_DAMAGE;
-        AABB area = new AABB(s.x - SUMMON_RADIUS, s.y - 1, s.z - SUMMON_RADIUS, s.x + SUMMON_RADIUS, s.y + 3, s.z + SUMMON_RADIUS);
-        for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-            if (Math.hypot(player.getX() - s.x, player.getZ() - s.z) <= SUMMON_RADIUS + 0.3) {
-                strike(player, damage);
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 1));
-            }
-        }
-    }
 
     // ---------------------------------------------------------------- 受ける傷
     // 咆哮の間は傷を受けない。段階 2 は 1.2 倍、翼が裂けている間は 1.5 倍。人数の分だけ割る
@@ -1426,7 +1460,7 @@ public class StormHeart extends HeartBoss {
         if (!level().isClientSide) {
             return;
         }
-        double cy = getY() + 2.2;
+        double cy = getY() + CORE_OFFSET;
         int phase = getPhase();
         if (phase == 0) {
             if (random.nextFloat() < 0.2f) {
