@@ -95,6 +95,18 @@ public final class WhaleKeeper {
         return KEEPER.current(overworld);
     }
 
+    // 岩鯨が一度でも現れたか (章の予兆 story.ch1 が、現れる前だけ起こすために)
+    public static boolean everSpawned(ServerLevel overworld) {
+        return TitanWorldData.get(overworld).whale().spawned;
+    }
+
+    // 最後に見た位置 (記録がなければ null)。見張りの丘の方角に使う
+    @Nullable
+    public static net.minecraft.core.BlockPos lastKnown(ServerLevel overworld) {
+        TitanWorldData.Slot slot = TitanWorldData.get(overworld).whale();
+        return slot.hasLast ? net.minecraft.core.BlockPos.containing(slot.lastX, slot.lastY, slot.lastZ) : null;
+    }
+
     // 毎 tick、オーバーワールドで呼ばれる
     static void tick(ServerLevel level) {
         KEEPER.tick(level);

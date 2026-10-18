@@ -301,7 +301,8 @@ public final class OpeningStorySelfTest {
         check(QuestLog.of(a).tracked().equals("main_song"), "the main quest should be tracked", failures);
         // 序盤のサブクエストは、イサナと会うまで出ない (17-10)
         for (QuestDef def : QuestManager.all()) {
-            if (def.board()) {
+            // 初日のお使い (story/ch1。17 の 1.5) は、日 1 から開く例外
+            if (def.board() && !def.id().startsWith("ch1/")) {
                 check(!def.unlock().test(StoryContext.of(a)), "board quest " + def.id() + " is open before meeting Isana", failures);
             }
         }

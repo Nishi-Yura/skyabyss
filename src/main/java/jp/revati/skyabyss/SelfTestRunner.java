@@ -119,6 +119,8 @@ public final class SelfTestRunner {
         // 序盤の構造物 (野営地・鐘の宿り・巨大な足跡・巨神の骨)。docs/design/17 の 4 章
         steps.addAll(jp.revati.skyabyss.opening.site.SiteSelfTest.steps());
         steps.addAll(ChapterSkySelfTest.steps());
+        // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
+        steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));

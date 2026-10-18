@@ -71,8 +71,8 @@ public final class LoreSelfTest {
         long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
         // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
-        if (early < 12 || early > 75) {
-            failures.add("prologue + chapters 1-4 should have 12-75 entries, found " + early);
+        if (early < 12 || early > 110) {
+            failures.add("prologue + chapters 1-4 should have 12-110 entries, found " + early);
         }
         if (unlockable != early) {
             failures.add("only the prologue and chapters 1-4 may be written yet (" + unlockable + " unlockable)");
@@ -133,6 +133,7 @@ public final class LoreSelfTest {
                     }
                     case "page" -> {
                         if (!t.target().equals("village") && !t.target().equals("titan_back") && !t.target().equals("shadow")
+                                && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_TRACE) && !t.target().equals(jp.revati.skyabyss.story.ch1.Ch1.PAGE_DIARY)
                                 && !t.target().equals(jp.revati.skyabyss.titan.storm.lore.StormLore.PAGE_SOURCE) && !t.target().equals(jp.revati.skyabyss.titan.ember.lore.EmberLore.PAGE_SOURCE)) {
                             failures.add(entry.id() + ": unknown page source " + t.target());
                         }
@@ -396,7 +397,9 @@ public final class LoreSelfTest {
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
         // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
         JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember)) {
+        // 序章・一章の旅の跡・歌石などの項目 (17 の 1.5) の文は skyabyss_ch1 にある
+        JsonObject ch1 = json("/assets/skyabyss_ch1/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch1)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_whale",
+  "order": 3,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/camp"
+  ]
+}

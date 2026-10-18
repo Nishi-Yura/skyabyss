@@ -85,6 +85,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
     private int restTicks;
     private int approachTicks;
     private int songCooldown = 200;
+    // 章の出来事の間、鎖を垂らさず歌わない残り tick (保存しない。読み込み直したら普通に降ろす)
+    private int hold;
     private double groundY = 64;
     // 旅の操縦中 (保存しない。読み込み直したら自分で泳ぐ)
     private boolean voyage;
@@ -199,6 +201,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
             case APPROACH -> tickApproach(level);
             case REST -> tickRest(level);
         }
+        if (hold > 0 && songCooldown < 200) {
+            // 出来事の間は歌わない
+            songCooldown = 200;
+        }
         if (--songCooldown <= 0) {
             songCooldown = 1600 + random.nextInt(1600);
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.9f + random.nextFloat() * 0.15f);
@@ -247,11 +253,18 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         if (arrived) {
             mode = Mode.REST;
             restTicks = REST_DURATION;
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
-            level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
-            for (ServerPlayer player : level.players()) {
-                if (player.distanceToSqr(this) < 200 * 200) {
-                    Notice.narrate(player, "message.skyabyss.titan_descends");
+            // 一章の中盤の出来事 (story.ch1.WhaleHush。docs/design/02 の 2.3): 初めて降りるときだけ、空の影が通り過ぎるまで歌わず、鎖を垂らさない
+            int held = jp.revati.skyabyss.story.ch1.WhaleHush.onArrive(this, level);
+            if (held > 0) {
+                hold = held;
+                restTicks += held;
+            } else {
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
+                for (ServerPlayer player : level.players()) {
+                    if (player.distanceToSqr(this) < 200 * 200) {
+                        Notice.narrate(player, "message.skyabyss.titan_descends");
+                    }
                 }
             }
         }
@@ -262,6 +275,11 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
         setDeltaMovement(getDeltaMovement().scale(0.9));
         move(net.minecraft.world.entity.MoverType.SELF, getDeltaMovement());
         float wanted = (float) Math.max(0, chainTop().y - groundY - CHAIN_END_HEIGHT);
+        if (hold > 0) {
+            // 出来事の間は鎖をたたんだまま
+            hold--;
+            wanted = 0;
+        }
         float chain = chainLength();
         float step = chain < wanted ? Math.min(wanted - chain, CHAIN_GROW) : -Math.min(chain - wanted, CHAIN_SHRINK);
         entityData.set(CHAIN, chain + step);
@@ -278,6 +296,21 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan {
             dropChainHandle();
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.7f);
         }
+    }
+
+    // 章の出来事 (story.ch1.WhaleHush) が終わった: 鎖を降ろし、歌をまた許す
+    public void releaseHold() {
+        if (hold > 0 || mode == Mode.REST) {
+            hold = 0;
+            songCooldown = Math.max(songCooldown, 1200);
+            if (level() instanceof ServerLevel level) {
+                level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
+            }
+        }
+    }
+
+    public boolean isHolding() {
+        return hold > 0;
     }
 
     // 鎖の根元に、右クリックを受け取る見えない当たり判定を置き続ける

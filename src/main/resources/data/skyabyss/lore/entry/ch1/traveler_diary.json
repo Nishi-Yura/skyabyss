@@ -1,0 +1,13 @@
+{
+  "chapter": "titan_whale",
+  "order": 5,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "ch1_diary"
+    }
+  ],
+  "related": [
+    "prologue/the_book"
+  ]
+}
