@@ -288,6 +288,28 @@ public final class CinematicSelfTest {
         check(f, !Cinematics.active(a) && ends.get() == 2 && skips.get() == 2, "server stop did not apply the effects");
         // 心臓の呼び口: 心臓がいなければ何もしない (呼ばれていない間は何も起きない)
         check(f, TitanCinematics.heartAppears(level, "no_such_titan", a) == 0, "heart hook with an unknown titan");
+        // 心臓の場面: 範囲内の人それぞれに一度だけ (a, b は近く、c は遠い)。もう一度呼んでも出さない。遠い人・別の人の記録は変わらない
+        FakePlayer c = fake(level, "0003", "[cinematic_c]");
+        List<FakePlayer> crowd = List.of(a, b, c);
+        c.setPos(a.getX() + 500, a.getY(), a.getZ());
+        Cinematics.state(c).forgetAll();
+        Cinematics.stop(c, false);
+        Cinematics.state(a).forgetAll();
+        Cinematics.state(b).forgetAll();
+        Cinematics.stop(a, false);
+        Cinematics.stop(b, false);
+        check(f, TitanCinematics.heartAppears(crowd, Titans.STONE_WHALE, a, TitanCinematics.RANGE) == 2, "heart scene did not start for every player in range");
+        check(f, Cinematics.active(a) && Cinematics.active(b) && !Cinematics.active(c), "heart scene reached the wrong players");
+        Cinematics.stop(a, false);
+        Cinematics.stop(b, false);
+        check(f, TitanCinematics.heartAppears(crowd, Titans.STONE_WHALE, a, TitanCinematics.RANGE) == 0, "heart scene started twice for the same players");
+        check(f, !Cinematics.state(c).seen(Scenes.heartId(Titans.STONE_WHALE)), "far player was marked as having seen the heart scene");
+        c.setPos(a.getX() + 5, a.getY(), a.getZ());
+        check(f, TitanCinematics.heartAppears(crowd, Titans.STONE_WHALE, a, TitanCinematics.RANGE) == 1 && Cinematics.active(c), "a later player did not get the heart scene on their own");
+        Cinematics.stop(c, false);
+        Cinematics.state(c).forgetAll();
+        Cinematics.state(a).forgetAll();
+        Cinematics.state(b).forgetAll();
         // 岩鯨の初見の条件: 伝承で岩鯨を知っている人には出さず、見たことにする
         Cinematics.state(b).forgetAll();
         Lore.reset(b);

@@ -10,7 +10,11 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // パケットの登録。プロトコルを変えたらバージョンを上げる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ModNetwork {
-    private static final String PROTOCOL_VERSION = "1";
+    // 版は mod の版そのもの。版の違う client と server は、NeoForge の接続の段階で「版が合わない」と断る
+    // (版が合わないまま入れると、パケットだけが黙って落ち、入った人には演出も帯も何も出ない)。ほかの通信の版は個別に上げる
+    private static String protocolVersion() {
+        return net.neoforged.fml.ModList.get().getModContainerById(SkyAbyss.MODID).map(c -> c.getModInfo().getVersion().toString()).orElse("1");
+    }
 
     private ModNetwork() {
     }
@@ -18,7 +22,7 @@ public final class ModNetwork {
     @SubscribeEvent
     static void register(RegisterPayloadHandlersEvent event) {
         // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
-        event.registrar(PROTOCOL_VERSION)
+        event.registrar(protocolVersion())
                 .playToClient(SkyPassPayload.TYPE, SkyPassPayload.STREAM_CODEC, (payload, context) -> SkyPassClient.receive(payload.pass()));
     }
 }

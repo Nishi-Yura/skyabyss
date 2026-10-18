@@ -1,0 +1,8 @@
+# マルチの確かめ (専用サーバー): 一人目。入って、そのまま最後まで残る
+server localhost:25666
+timeout 1500
+size 854 480
+wait 100
+shot mp_alice_join
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit

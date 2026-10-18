@@ -112,6 +112,27 @@ public final class NpcBonds {
         return bonds.computeIfAbsent(role, r -> new Bond());
     }
 
+    // 読むだけ (作らない)。条件の判定・表示用。bond() で読むと、読んだだけで記録ができ、「すでに遊んでいた人」と取り違えられる
+    public boolean hasFlag(String role, String flag) {
+        Bond b = bonds.get(role);
+        return b != null && b.flags.contains(flag);
+    }
+
+    public boolean hasEcho(String role, String flag) {
+        Bond b = bonds.get(role);
+        return b != null && b.echoes.contains(flag);
+    }
+
+    // 何か残っているか (会話の回数・印・好感度)。空の記録は「遊んだ」うちに入らない
+    public boolean hasSubstance() {
+        for (Bond b : bonds.values()) {
+            if (b.talks > 0 || b.affinity != 0 || !b.flags.isEmpty() || !b.echoes.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 読むだけ (作らない)。クライアントの表示用
     public int affinity(String role) {
         Bond b = bonds.get(role);

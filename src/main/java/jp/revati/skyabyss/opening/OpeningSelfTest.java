@@ -765,8 +765,20 @@ public final class OpeningSelfTest {
         OpeningState sa = OpeningDirector.state(a);
         check(sa.done(OpeningBeat.AWAKE) && !sa.legacy() && sa.awakeAt() >= 0, "live: B0 did not start for a new player: " + sa, failures);
         check(OpeningDirector.state(b).awakeAt() == -1, "live: the first player's B0 reached the second player", failures);
+        // あとから入った人: クエストの条件が語り部との記録を「読んだだけ」で空の記録ができていても、遊んでいた人 (legacy) と取り違えず、開幕の場面が始まる
+        // (マルチで二人目に開幕が出なかった原因)
+        jp.revati.skyabyss.cinematic.Cinematics.stop(b, false);
+        jp.revati.skyabyss.cinematic.Cinematics.state(b).forgetAll();
+        jp.revati.skyabyss.npc.NpcBonds.of(b).hasFlag(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID, "x");
+        check(jp.revati.skyabyss.npc.NpcBonds.of(b).bonds().isEmpty(), "live: reading a bond flag created a record", failures);
+        jp.revati.skyabyss.npc.NpcBonds.of(b).bond(jp.revati.skyabyss.npc.NpcSetup.STORYTELLER_ID);
+        check(!jp.revati.skyabyss.npc.NpcBonds.of(b).hasSubstance(), "live: an empty bond counted as played", failures);
         OpeningDirector.run(level, b);
-        check(OpeningDirector.state(b).done(OpeningBeat.AWAKE), "live: the second player's B0 did not start", failures);
+        check(OpeningDirector.state(b).done(OpeningBeat.AWAKE) && !OpeningDirector.state(b).legacy(), "live: the second player's B0 did not start (empty bond made them legacy)", failures);
+        check(jp.revati.skyabyss.cinematic.Cinematics.active(b) && jp.revati.skyabyss.cinematic.Scenes.OPENING.equals(jp.revati.skyabyss.cinematic.Cinematics.activeScene(b)),
+                "live: the second player did not get the opening scene", failures);
+        check(jp.revati.skyabyss.cinematic.Cinematics.state(b).seen(jp.revati.skyabyss.cinematic.Scenes.OPENING), "live: the opening was not recorded for the second player", failures);
+        jp.revati.skyabyss.cinematic.Cinematics.stop(b, false);
         // 帳面を拾う → 伝承の書と最初の頁 (B1)。野営地の頁も
         check(!Lore.hasBook(a), "live: the player held the book before the notebook", failures);
         OpeningDirector.force(a, OpeningBeat.CAMP);

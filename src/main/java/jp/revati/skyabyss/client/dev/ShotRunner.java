@@ -186,6 +186,14 @@ public final class ShotRunner {
 
     private static void enterWorld() {
         Minecraft mc = Minecraft.getInstance();
+        if (script.server != null) {
+            // 専用サーバーへ入る (マルチの確かめ)。権限・コマンドはサーバー側 (rcon) から
+            say("connecting to " + script.server);
+            net.minecraft.client.multiplayer.resolver.ServerAddress address = net.minecraft.client.multiplayer.resolver.ServerAddress.parseString(script.server);
+            net.minecraft.client.gui.screens.ConnectScreen.startConnecting(new TitleScreen(), mc, address,
+                    new net.minecraft.client.multiplayer.ServerData("shots", script.server, net.minecraft.client.multiplayer.ServerData.Type.OTHER), false, null);
+            return;
+        }
         String name = script.world;
         boolean exists = mc.getLevelSource().levelExists(name);
         say((exists ? "opening world " : "creating world ") + name + (exists ? "" : " (" + script.worldType + ")"));
@@ -279,6 +287,20 @@ public final class ShotRunner {
                 return stepTicks + 1 >= line.intArg(0);
             }
             case "echo" -> {
+                return true;
+            }
+            case "waitfile" -> {
+                // 外から (マルチの確かめの台本が) ファイルを置くまで待つ。同期用
+                return Files.exists(Path.of(line.rest()));
+            }
+            case "signal" -> {
+                try {
+                    Path f = Path.of(line.rest());
+                    Files.createDirectories(f.toAbsolutePath().getParent());
+                    Files.writeString(f, "1");
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
                 return true;
             }
             case "cmd" -> {

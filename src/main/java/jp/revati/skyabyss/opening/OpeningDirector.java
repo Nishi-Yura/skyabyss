@@ -269,7 +269,7 @@ public final class OpeningDirector {
         long passEnd = Math.max(lastPassEnd, SkyEvents.personalEnd(player));
         boolean passEnded = passEnd >= 0 && st.awakeAt >= 0 && passEnd >= st.awakeAt && now >= passEnd
                 && now - passEnd <= OpeningLogic.PASS_END_WINDOW;
-        boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || !NpcBonds.of(player).bonds().isEmpty()
+        boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || NpcBonds.of(player).hasSubstance()
                 || !QuestLog.of(player).quests().isEmpty()
                 // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
                 || jp.revati.skyabyss.progress.Progression.stage(player) > 0);

@@ -1,0 +1,46 @@
+# マルチの確かめ (専用サーバー): 二人目。入った直後 (開幕) → 岩鯨 → 心臓 → 眠りの場面を、外 (rcon) からの合図 p2..p4 で撮る
+server localhost:25666
+timeout 1500
+size 854 480
+shot mp_cinematic_1_open_a
+wait 100
+shot mp_cinematic_1_open_b
+wait 200
+shot mp_cinematic_1_open_c
+wait 300
+shot mp_cinematic_1_open_d
+wait 400
+shot mp_cinematic_1_open_e
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/b_open_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/p2
+wait 20
+shot mp_cinematic_2_whale_a
+wait 80
+shot mp_cinematic_2_whale_b
+wait 80
+shot mp_cinematic_2_whale_c
+wait 120
+shot mp_cinematic_2_whale_d
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/b_p2_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/p3
+wait 20
+shot mp_cinematic_3_heart_a
+wait 80
+shot mp_cinematic_3_heart_b
+wait 80
+shot mp_cinematic_3_heart_c
+wait 120
+shot mp_cinematic_3_heart_d
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/b_p3_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/p4
+wait 20
+shot mp_cinematic_4_end_a
+wait 80
+shot mp_cinematic_4_end_b
+wait 80
+shot mp_cinematic_4_end_c
+wait 120
+shot mp_cinematic_4_end_d
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/b_p4_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit

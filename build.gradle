@@ -49,6 +49,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 // (Project には script という名前の別の値があるので、-P で渡された値を直接読む)
 def shotScript = providers.gradleProperty('script').getOrElse('tools/shots/example_tide_back.txt')
 def shotName = providers.gradleProperty('shotsName').getOrElse(file(shotScript).name.replaceFirst(/\.[^.]*$/, ''))
+def shotUser = providers.gradleProperty('shotsUser').getOrElse('')
 
 neoForge {
     // Specify the version of NeoForge to use.
@@ -85,6 +86,8 @@ neoForge {
             client()
             gameDirectory = project.file("run/shots/${shotName}")
             environment 'SKYABYSS_SHOTS', file(shotScript).absolutePath
+            // マルチの確かめ: -PshotsUser=<名前> でユーザー名を変える (オフラインの専用サーバーへ別の人として入る)
+            if (shotUser) { programArguments.addAll '--username', shotUser }
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

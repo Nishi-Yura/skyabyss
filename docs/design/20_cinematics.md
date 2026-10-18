@@ -136,10 +136,18 @@
 
 ## 4. 開発・確認
 
-- OP コマンド（確かめ・台本用）: `/skyabyss cinematic play <場面>`（岩鯨の場面は今いる岩鯨、いなければ前方を狙う）、`/skyabyss cinematic stop`、`/skyabyss cinematic reset`（見た記録を消す）。
+- OP コマンド（確かめ・台本用）: `/skyabyss cinematic play <場面> [targets]`（岩鯨の場面は今いる岩鯨、いなければ前方を狙う）、`/skyabyss cinematic stop [targets]`、`/skyabyss cinematic reset [targets]`（見た記録を消す）。`targets` はセレクタ（`@a`・名前など）。省くと自分。場面は人ごとに独立。
 - 自己テスト `SELFTEST cinematic`（`cinematic/CinematicSelfTest`）: 台本（長さ・台詞が場面に収まる・重ならない・撮影がつながる・開幕が 40 秒以内で最後が本人の目）、日英の文（すべての鍵・長さ）、座標（前・右・向きの往復・カメラが飛ばない・範囲外は両端）、パケットの往復と記録の保存、サーバーの流れ（始める・二重に始めない・名前違いの End は無視・スキップで効果が一度だけ・本人だけ無敵で終われば傷つく・見た場面は繰り返さない・サーバーの打ち切りでも効果・条件）。
 - ゲーム内の撮影: `./gradlew runShots -Pscript=tools/shots/cinematic_demo.txt -PshotsName=<新しい名前>`（開幕 → 岩鯨の初見。絵は `docs/review/previews/` に置く）。巨神の眠りは `tools/shots/titan_end_whale.txt`・`titan_end_tide.txt`・`titan_end_storm.txt`・`titan_end_ember.txt`（場面の見せ場の絵）と、乗り込み口の光の `titan_end_glow.txt`（絵は `docs/review/previews/titan_end_*.png`）。
-- 試遊はまだ: スキップの長押し、字幕の折り返し、旧ワールド・マルチ 2 人での確認。
+- マルチの確認（専用サーバー + 二人）: `tools/shots/mp_alice.txt`（一人目）と `mp_bob.txt`（二人目）を `./gradlew runShots -Pscript=... -PshotsUser=<名前>` で動かす（台本の `server localhost:25666` で専用サーバーへ入る）。二人目の開幕・岩鯨・心臓・眠りの絵が `docs/review/previews/mp_cinematic_*.png`。外からの合図は `waitfile`/`signal`、サーバーへの命令は `tools/rcon.py`。
+- 試遊はまだ: スキップの長押し、字幕の折り返し、旧ワールド。
+
+### 4.1 マルチ（人ごとに一度ずつ）
+
+- 場面の記録 `skyabyss:cinematic` も、開幕の判定 `skyabyss:opening` も人ごと。Start パケットはその人にだけ送る。ホスト・開放した統合サーバー（LAN・Essential などの中継）・専用サーバーのどれでも同じで、クライアントは「ホストか」を見ない。
+- 開幕 (B0) は、その人の最初の見回りで「すでに遊んでいた人 (legacy)」でなければ始まる。legacy の根拠に使うのは中身のある記録だけ（会話の回数・印・好感度のある NPC の記録、伝承、クエスト、止めた巨神）。**読むだけで作られた空の NPC の記録は根拠にしない**（`NpcBonds.hasFlag/hasEcho/hasSubstance`。条件の判定で `bond()` を読み用に使わない）。これを取り違えて、二人目が開幕を見られず、目的の帯や章の案内も出なかった。
+- 心臓の場面は心臓から 64 ブロック以内の人それぞれに、眠りの場面は運び出される人（戦った人とそのパーティ）それぞれに、岩鯨の初見は条件を満たした人それぞれに、一度ずつ。
+- 版: `ModNetwork` の通信の版は mod の版そのもの。版の違うクライアントとサーバーは、接続の段階で NeoForge が「版が合わない」と断る（パケットだけが黙って落ちることがない）。
 
 ## 5. 今はないもの
 

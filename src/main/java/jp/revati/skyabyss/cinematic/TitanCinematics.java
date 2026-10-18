@@ -29,13 +29,18 @@ public final class TitanCinematics {
     }
 
     public static int heartAppears(ServerLevel level, String titanId, Entity heart, double range) {
+        return heartAppears(level.players(), titanId, heart, range);
+    }
+
+    // 見せる人の一覧を渡す形 (自己テストが、いる人の一覧を作って確かめる)
+    public static int heartAppears(Iterable<? extends ServerPlayer> players, String titanId, Entity heart, double range) {
         String scene = Scenes.heartId(titanId);
         if (Scenes.get(scene) == null) {
             SkyAbyss.LOGGER.warn("no cinematic for titan heart '{}'", titanId);
             return 0;
         }
         int started = 0;
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : players) {
             if (player.distanceToSqr(heart) <= range * range && Cinematics.startOnce(player, scene, heart, heart.position())) {
                 started++;
             }

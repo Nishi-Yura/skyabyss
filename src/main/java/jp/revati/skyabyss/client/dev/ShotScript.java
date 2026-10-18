@@ -33,6 +33,8 @@ public final class ShotScript {
     public final List<Line> steps = new ArrayList<>();
     public String world = "shots";
     public String worldType = "flat";
+    // 専用サーバー (host:port) へ入る台本 (マルチの確かめ用。null なら一人用の世界)
+    public String server = null;
     public int timeoutSeconds = 600;
     public int width = 0;
     public int height = 0;
@@ -63,12 +65,13 @@ public final class ShotScript {
                         script.worldType = args[1].toLowerCase(Locale.ROOT);
                     }
                 }
+                case "server" -> script.server = line.arg(0);
                 case "timeout" -> script.timeoutSeconds = line.intArg(0);
                 case "size" -> {
                     script.width = line.intArg(0);
                     script.height = line.intArg(1);
                 }
-                case "wait", "cmd", "camera", "waitchunks", "hud", "fov", "guiscale", "open", "key", "close", "shot",
+                case "waitfile", "signal", "wait", "cmd", "camera", "waitchunks", "hud", "fov", "guiscale", "open", "key", "close", "shot",
                         "echo", "quit", "waitdump", "chat", "look", "render", "clouds", "perf", "perspective", "swingpose", "swing", "use", "stopuse", "mainhand", "bodyyaw", "lowpoly", "weaponmesh", "weapontier", "acctier", "accmesh", "accworn", "accequip", "watcher", "armortier", "armorlevel", "sneak", "walk" -> script.steps.add(line);
                 default -> throw new IllegalArgumentException("line " + (i + 1) + ": unknown step '" + op + "' (" + Arrays.toString(args) + ")");
             }

@@ -208,6 +208,7 @@
 | `/skyabyss progress world grant <巨神>` | ワールドの進みだけ進めて、次の巨神を出す |
 | `/skyabyss level set <人> <1-50>`、`level addxp <人> <量>` | レベルを決める、経験値を足す |
 | `/skyabyss quest list <人>`、`quest next <人> <クエスト>` | クエストの進みを見る、一段進める |
+| `/skyabyss cinematic play <場面> [人]`、`cinematic stop [人]`、`cinematic reset [人]` | 場面（`opening`・`whale_first_sight`・`heart_<巨神>`・`titan_end_<巨神>`）を流す・止める・「見た記録」を消す。`[人]` は `@a` や名前（省くと自分）。マルチで他の人に見せたいときに |
 | `/skyabyss titan summon <名前>` | 巨神を近くに呼ぶ。名前は `tide`・`storm`・`ember`（省略すると岩鯨） |
 | `/skyabyss titan rest <名前>`（`here` を足すとその場で） | 巨神をすぐ休ませる（乗るため） |
 | `/skyabyss titan board <名前>`、`titan leave` | 背中へ直接渡る、背中から地上へ戻る |

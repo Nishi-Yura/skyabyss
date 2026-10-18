@@ -108,6 +108,9 @@ python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_
 
 台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`gen_ember_items.py` `install_storm_gear.py` `install_tide_gear.py` `gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `install_lowpoly_weapons.py` と `weapon_display.py` を流す。
 
+### マルチの確かめ (専用サーバー + 二人)
+`run/server.properties` に `online-mode=false`・`server-port=25666`・`enable-rcon=true`・`rcon.port=25766`・`rcon.password=test`・新しい `level-name`・`level-seed=4242`、`run/eula.txt` に `eula=true`。`./gradlew runServer` で起動し、台本の頭の `server localhost:25666` で専用サーバーへ入るクライアントを `./gradlew runShots -Pscript=tools/shots/mp_alice.txt -PshotsUser=Alice`、`mp_bob.txt -PshotsUser=Bob` で動かす (Alice が入ってから Bob を起動)。台本の `waitfile <ファイル>` は外 (`signal` か手) がファイルを置くまで待つ。サーバーへの命令は `python tools/rcon.py "<命令>"` (OP の権限。`skyabyss cinematic play <場面> Bob` など)。
+
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
 ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。

@@ -166,11 +166,11 @@ public final class Condition {
             }
             case "flag" -> {
                 String role = ctx.role(optStr("npc"));
-                yield role != null && NpcBonds.of(ctx.player()).bond(role).flags().contains(str("flag"));
+                yield role != null && NpcBonds.of(ctx.player()).hasFlag(role, str("flag"));
             }
             case "remembers" -> {
                 String role = ctx.role(optStr("npc"));
-                yield role != null && NpcBonds.of(ctx.player()).bond(role).echoes().contains(str("flag"));
+                yield role != null && NpcBonds.of(ctx.player()).hasEcho(role, str("flag"));
             }
             case "loop" -> {
                 int n = WorldLoop.count(ctx.player().server);
