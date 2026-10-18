@@ -38,7 +38,7 @@ public final class GearCurveSelfTest {
             f.add("crashed: " + e);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST gear curve PASSED (item values, fresh gear vs diamond, +10 vs netherite, heart load, titan ladder)");
+            SkyAbyss.LOGGER.info("SELFTEST gear curve PASSED (tooltip story lines, item values, fresh gear vs diamond, +10 vs netherite, heart load, titan ladder)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST gear curve FAILED: {}", x));
         }
@@ -54,7 +54,50 @@ public final class GearCurveSelfTest {
         return String.format(Locale.ROOT, "%.2f", v);
     }
 
+    // 装備のツールチップの物語の一行 (assets/skyabyss_gear_story/lang。生成元 tools/gen_gear_story.py): 登録された装備のすべてに日英であり、短く、重複がない
+    static void story(List<String> f) {
+        java.util.Map<String, String> ja = lang("/assets/skyabyss_gear_story/lang/ja_jp.json", f);
+        java.util.Map<String, String> en = lang("/assets/skyabyss_gear_story/lang/en_us.json", f);
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        int gear = 0;
+        for (Item item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+            if (!(item instanceof ModGear) || !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(SkyAbyss.MODID)) {
+                continue;
+            }
+            gear++;
+            String key = ModGear.storyKey(item);
+            String j = ja.get(key);
+            String e = en.get(key);
+            check(f, j != null && e != null, "gear story line missing (ja/en): " + key);
+            if (j == null || e == null) {
+                continue;
+            }
+            check(f, j.codePointCount(0, j.length()) <= 28, "gear story line too long (" + j.codePointCount(0, j.length()) + "): " + key);
+            check(f, e.length() <= 70, "gear story line too long in English (" + e.length() + "): " + key);
+            check(f, j.startsWith("「") && j.endsWith("」") && !j.contains("\n"), "gear story line should be one quoted line: " + key);
+            check(f, seen.add(j), "gear story line repeated: " + key);
+        }
+        check(f, gear == 40, "expected 40 mod gear items with a story line, found " + gear);
+        check(f, ja.size() == 40 && en.size() == 40, "story line tables should hold 40 lines each: " + ja.size() + "/" + en.size());
+    }
+
+    private static java.util.Map<String, String> lang(String path, List<String> f) {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        try (java.io.InputStream in = GearCurveSelfTest.class.getResourceAsStream(path)) {
+            if (in == null) {
+                f.add("lang file missing: " + path);
+                return map;
+            }
+            com.google.gson.JsonObject o = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+            o.entrySet().forEach(e -> map.put(e.getKey(), e.getValue().getAsString()));
+        } catch (java.io.IOException | RuntimeException e) {
+            f.add("lang file unreadable: " + path + " " + e);
+        }
+        return map;
+    }
+
     static void run(List<String> f) {
+        story(f);
         // ---- 品の値
         Item sword = ModItems.WHALEBONE_GREATSWORD.get();
         Item pike = ModItems.CAPTAIN_PIKE.get();

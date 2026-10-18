@@ -32,7 +32,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // - 手に持つ: 画面に巨神の向き (手の温かさの左右)、距離の三段、眠っている／地の中、次の眠りまで (EmberTitanClient が描く)
 // - 握る (右クリック): 日没の 1 分前から眠りの始まりまでに、陸の上で握ると、その夜は自分のそばで眠るよう頼める (一夜に一人)
 // - 入手: 自分で雷翼の心臓を止めた人に一つ渡す (雷翼のファイルは触らず、進みの記録を 5 秒ごとに見る)。
-//   なくしたら作業台で作り直せる (余燼の欠片 + 石 4 + マグマブロック。data/skyabyss/recipe/warm_stone.json)
+//   なくしたら作業台で作り直せる (余燼の燠石 + 石 4 + マグマブロック。data/skyabyss/recipe/warm_stone.json)
 public class WarmStoneItem extends Item {
     // 渡したかの印 (人の持続データ)
     static final String GIVEN = "skyabyss_warm_stone_given";

@@ -987,10 +987,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         return distance < 768.0 * 768.0;
     }
 
-    // 見た目は当たり判定よりずっと大きい。モデルは横 ±60、前 103〜後ろ 124 ブロック、底から煙の上まで 92 ブロック
+    // 見た目は当たり判定よりずっと大きい。モデルは横 ±54、前 103〜後ろ 124 ブロック、底から煙の上まで 92 ブロック (低ポリは頭の後ろの角まで 96 ブロック。余裕を持って 100)
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(128.0, 0.0, 128.0).expandTowards(0, 94.0, 0);
+        return getBoundingBox().inflate(128.0, 0.0, 128.0).expandTowards(0, 100.0, 0);
     }
 
     // 光を測る所。体の中心は地の中にあるので (岩鯨は丘の中で真っ黒になった)、火山の上で測る

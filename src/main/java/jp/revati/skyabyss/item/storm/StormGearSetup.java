@@ -38,7 +38,7 @@ public final class StormGearSetup {
     // 静電避け (雲間の干し果): 雷蛾の放電の連鎖を受けない・受けても次へ跳ばない (判定は雷蛾の担当が ID で引く)
     public static final DeferredHolder<MobEffect, MobEffect> STATIC_WARD = EFFECTS.register("static_ward", StaticWardEffect::new);
 
-    // 雷翼の羽衣の素材: 防御 3/8/7/3 (21)、強靭 3.5 (4 部位 14 = 03 の 9.8節)、ノックバック耐性 0.05。雷翼の欠片で直せる
+    // 雷翼の羽衣の素材: 防御 3/8/7/3 (21)、強靭 3.5 (4 部位 14 = 03 の 9.8節)、ノックバック耐性 0.05。雷翼の羽軸で直せる
     public static final Holder<ArmorMaterial> MATERIAL = MATERIALS.register("thunder_wing", () -> new ArmorMaterial(
             new EnumMap<>(Map.of(
                     ArmorItem.Type.HELMET, StormGear.ARMOR_DEFENSE[0],

@@ -33,7 +33,7 @@ public final class TideGearSetup {
     private static final DeferredRegister<ArmorMaterial> MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, SkyAbyss.MODID);
 
     // 潮殻の鎧の素材: 防御 3/8/6/3 (ダイヤと同じ 20)、強靭 2.25 (4 部位 9。2 部位の一式で +3 して 03 の 9.8節の 12)、ノックバック耐性 0.05。
-    // 潮殻の欠片で直せる
+    // 潮殻の殻片で直せる
     public static final Holder<ArmorMaterial> MATERIAL = MATERIALS.register("tide_shell", () -> new ArmorMaterial(
             new EnumMap<>(Map.of(
                     ArmorItem.Type.HELMET, TideGear.ARMOR_DEFENSE[0],
@@ -76,7 +76,7 @@ public final class TideGearSetup {
     private TideGearSetup() {
     }
 
-    // 潮殻の欠片 (背中の敵の担当の登録)
+    // 潮殻の殻片 (背中の敵の担当の登録)
     public static Item shard() {
         return TideMobSetup.TIDE_SHELL_SHARD.get();
     }

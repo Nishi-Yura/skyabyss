@@ -325,6 +325,22 @@ public final class TideBackSelfTest {
             failures.add("openings: no enclosed room around " + seed.toShortString());
             return;
         }
+        int[] box = {x0, x1, z0, z1, y0, y1};
+        flood(start, open, enclosed, box, failures, notes, "rooms", true);
+        // 封じた予約の間 (08 の 3.8節): 戸は固いので広間からは行けない。中から調べて、外へ抜ける口が 0 であること
+        BlockPos up = new BlockPos(20, UPPER_1.floor() + 1, 20);
+        check(open.test(up) && enclosed.test(up), "reserved room 1 is not an enclosed room at " + up.toShortString(), failures);
+        flood(up, open, enclosed, box, failures, notes, "reserved rooms", false);
+    }
+
+    private static void flood(BlockPos start, java.util.function.Predicate<BlockPos> open, java.util.function.Predicate<BlockPos> enclosed,
+            int[] box, List<String> failures, List<String> notes, String label, boolean allowIntended) {
+        int x0 = box[0];
+        int x1 = box[1];
+        int z0 = box[2];
+        int z1 = box[3];
+        int y0 = box[4];
+        int y1 = box[5];
         Set<Long> seen = new HashSet<>();
         ArrayDeque<BlockPos> q = new ArrayDeque<>();
         seen.add(start.asLong());
@@ -350,22 +366,22 @@ public final class TideBackSelfTest {
                 }
             }
             if (mouth) {
-                if (intendedOpening(p)) {
+                if (allowIntended && intendedOpening(p)) {
                     expected++;
                 } else if (++unexpected <= 5) {
-                    failures.add("hole from the rooms to the outside at " + p.toShortString());
+                    failures.add("hole from the " + label + " to the outside at " + p.toShortString());
                 }
             }
         }
-        notes.add("rooms " + seen.size() + " cells, openings " + expected + " intended / " + unexpected + " unexpected");
+        notes.add(label + " " + seen.size() + " cells, openings " + expected + " intended / " + unexpected + " unexpected");
     }
 
     // わざと開けた口: 潮門と到着の段・ひれ・見送りの段 (左後ろの縁)、甲羅の上へ出る段の口
     private static boolean intendedOpening(BlockPos p) {
-        if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 1 && p.getY() <= GATE_FLOOR + 24) {
+        if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 6 && p.getY() <= GATE_FLOOR + 32) {
             return true;
         }
-        return p.getY() >= 100 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
+        return p.getY() >= 95 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
     }
 
     private static boolean nearOpening(int x, int z) {
@@ -375,6 +391,9 @@ public final class TideBackSelfTest {
             return true;
         }
         if (Math.abs(x) <= 11 && Math.abs(z - TOWER_CZ) <= 14) {
+            return true;
+        }
+        if (Math.abs(x - UPPER_GATE_X) <= 3 && Math.abs(z - UPPER_GATE_Z) <= 3) {
             return true;
         }
         for (int[][] wells : new int[][][] {TideIslandBuilder.GARDEN_WELLS, TideIslandBuilder.FLATS_WELLS}) {
@@ -660,8 +679,9 @@ public final class TideBackSelfTest {
         // 甲羅の上 (外) と頂の塔の柱の段へは、浜の西の壁の段と塔の螺旋で行ける (21 章)
         should.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
         should.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
-        should.put("shell top (far)", new BlockPos(30, shellTop(30, -40) + 1, -40));
-        should.put("tower deck", new BlockPos(4, TOWER_DECK + 1, TOWER_CZ));
+        should.put("shell top (far)", new BlockPos(50, shellTop(50, -40) + 1, -40));
+        should.put("shell top (north)", new BlockPos(0, TideTurtle.top(0, -66) + 1, -66));
+        should.put("shell top (before the reserved gate)", new BlockPos(UPPER_GATE_X - 3, TOP_Y + 1, UPPER_GATE_Z));
         for (Map.Entry<String, BlockPos> e : should.entrySet()) {
             BlockPos g = e.getValue();
             if (!dist.containsKey(g.asLong())) {
@@ -688,6 +708,8 @@ public final class TideBackSelfTest {
         shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
         shouldNot.put("east ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32));
         shouldNot.put("heart rest", RESTS.get(5).spawn());
+        shouldNot.put("reserved room 1 (sealed)", new BlockPos(20, UPPER_1.floor() + 1, 20));
+        shouldNot.put("terrace 2", new BlockPos(0, TERRACE_Y[1] + 1, 46));
         shouldNot.put("garden from above", new BlockPos(PLAT_C[0], PLATFORM_TOP + 1, PLAT_C[1]).above(30));
         shouldNot.put("garden wall top", new BlockPos(-30, GARDEN_WALL_TOP + 1, 20));
         for (Map.Entry<String, BlockPos> e : shouldNot.entrySet()) {
@@ -695,6 +717,19 @@ public final class TideBackSelfTest {
                 failures.add("can walk to " + e.getKey() + " without solving (" + e.getValue() + "): " + pathTo(e.getValue()));
             }
         }
+        // 封じた予約の間の中は歩ける: 廊下の奥から階段で、三つの部屋の床へ
+        Map<Long, Integer> inUpper = walk(back, new BlockPos(UPPER_GATE_X + 2, UPPER_1.floor() + 1, UPPER_GATE_Z));
+        Map<String, BlockPos> upper = new java.util.LinkedHashMap<>();
+        upper.put("reserved room 1", new BlockPos(20, UPPER_1.floor() + 1, 20));
+        upper.put("reserved room 2", new BlockPos(16, UPPER_2.floor() + 1, 10));
+        upper.put("reserved room 3", new BlockPos(6, UPPER_3.floor() + 1, 8));
+        for (Map.Entry<String, BlockPos> e : upper.entrySet()) {
+            if (!inUpper.containsKey(e.getValue().asLong())) {
+                failures.add("cannot walk inside the reserved rooms to " + e.getKey() + " " + e.getValue() + " (standable " + standable(back, e.getValue()) + ")");
+            }
+        }
+        notes.add("reserved rooms walkable " + inUpper.size() + " spots");
+        PARENT.clear();
         String mapDir = System.getenv("SKYABYSS_TIDE_MAP");
         if (mapDir != null) {
             writeMap(back, dist, java.nio.file.Path.of(mapDir, "tide_walk.png"));

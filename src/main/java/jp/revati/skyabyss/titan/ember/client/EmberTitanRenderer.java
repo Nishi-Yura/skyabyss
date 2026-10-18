@@ -15,21 +15,31 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyLodModel;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
 // 余燼の巨神の描画 (13 の 2.7節)。モデルを 8 倍に拡大し (近景・中景・遠景の 3 段、潮殻と同じ作り)、溶岩の割れ目・目・口の奥・火口を光らせる。
 // 光の強さは巨神の様子で変える: 潜っているあいだは弱く、眠っているあいだは強く、息を止める 2 秒は口の奥まで最も強い。
 // 光の明るさは体の中心 (地の中) ではなく火山の上で測る (EmberTitanEntity.getLightProbePosition)
-public class EmberTitanRenderer extends GeoEntityRenderer<EmberTitanEntity> {
+public class EmberTitanRenderer extends LowPolyGeoRenderer<EmberTitanEntity> {
     private static final float SCALE = 8f;
 
     public EmberTitanRenderer(EntityRendererProvider.Context context) {
-        super(context, new LodModel());
-        withScale(SCALE);
+        this(context, new LodModel());
+    }
+
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。
+    // 光の強さを巨神の様子で変えるので、LowPolyGeoRenderer の発光層は使わず自前の DimmableGlowLayer をどちらの描画でも足す
+    private EmberTitanRenderer(EntityRendererProvider.Context context, LodModel model) {
+        super(context, model, model::meshName, SCALE);
         addRenderLayer(new DimmableGlowLayer(this));
         this.shadowRadius = 0f;
+    }
+
+    @Override
+    protected boolean autoGlow() {
+        return false;
     }
 
     // GeckoLib 4.9.3 は LivingEntity でないエンティティの向きを描画に使わない (いつも南を向く。潮殻の 17.8節)。エンティティの yaw で回す
@@ -74,10 +84,7 @@ public class EmberTitanRenderer extends GeoEntityRenderer<EmberTitanEntity> {
     }
 
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (鼻先から尾の先までの線分) までの距離で選ぶ
-    private static final class LodModel extends DefaultedEntityGeoModel<EmberTitanEntity> {
-        private static final ResourceLocation NEAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/ember_titan.geo.json");
-        private static final ResourceLocation MID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/ember_titan_mid.geo.json");
-        private static final ResourceLocation FAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/ember_titan_far.geo.json");
+    private static final class LodModel extends LowPolyLodModel<EmberTitanEntity> {
         // 体が長い (230 ブロック) ので、潮殻 (80 / 160) より少し遠くまで近景にする
         static final double MID_DISTANCE_SQ = 96.0 * 96.0;
         static final double FAR_DISTANCE_SQ = 192.0 * 192.0;
@@ -86,17 +93,17 @@ public class EmberTitanRenderer extends GeoEntityRenderer<EmberTitanEntity> {
         private static final double AXIS_UP_BURROWED = 58.0;
 
         LodModel() {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "ember_titan"));
+            super("ember_titan");
         }
 
         @Override
-        public ResourceLocation getModelResource(EmberTitanEntity titan) {
+        protected int lod(EmberTitanEntity titan) {
             Entity camera = Minecraft.getInstance().cameraEntity;
             if (camera == null) {
-                return NEAR;
+                return 0;
             }
             double d = axisDistanceSq(titan, camera.getEyePosition());
-            return d < MID_DISTANCE_SQ ? NEAR : d < FAR_DISTANCE_SQ ? MID : FAR;
+            return d < MID_DISTANCE_SQ ? 0 : d < FAR_DISTANCE_SQ ? 1 : 2;
         }
 
         private static double axisDistanceSq(EmberTitanEntity titan, Vec3 eye) {

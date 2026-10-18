@@ -17,8 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の欠片での交換 (03 の 2.4節・8.1節) を巨神ごとに。決まりは岩鯨と同じ:
-//  共鳴の欠片 30 で、その巨神の専用伝説のうち持っていない品を一つ。その巨神の心臓を倒すごとに一度。天井は戻さない。
-// 記録はその巨神の巨神の記憶 (TitanMemoryData の set.titan)。共鳴の欠片はどの巨神でも共通 (判断は 00)
+//  その巨神の共鳴の欠片 30 で、その巨神の専用伝説のうち持っていない品を一つ。その巨神の心臓を倒すごとに一度。天井は戻さない。
+// 記録はその巨神の巨神の記憶 (TitanMemoryData の set.titan)。共鳴の欠片は巨神ごと (古い共通の欠片はどの巨神にも使える)
 public final class GearExchange {
     private GearExchange() {
     }
@@ -77,13 +77,13 @@ public final class GearExchange {
     public static boolean exchange(ServerPlayer player, TitanGearSet set, String itemId) {
         TitanMemoryData.Record r = TitanMemoryData.get(player.server).record(player.getUUID(), set.titan);
         syncOwned(player, set, r);
-        String why = denial(set, r, itemId, ForgeRules.exchangeAffordable(player));
+        String why = denial(set, r, itemId, ForgeRules.exchangeAffordable(player, set.titan));
         Optional<Item> item = TitanGearSet.item(itemId);
         if (why != null || item.isEmpty()) {
             Notice.warn(player, why == null ? "message.skyabyss.exchange.owned" : why);
             return false;
         }
-        ForgeRules.payExchange(player);
+        ForgeRules.payExchange(player, set.titan);
         r.owned.add(itemId);
         r.lastExchangeClears = r.clears;
         r.exchanges++;

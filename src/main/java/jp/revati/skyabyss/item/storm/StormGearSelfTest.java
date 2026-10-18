@@ -53,7 +53,7 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 //  - 強さの曲線: GearCurve.STAGES の雷翼の段の目安 (+0 / +5 / +10、潮殻・余燼との並び)、心臓 (650、一撃 15.5) との手ごたえ、守り
 //  - 効果: 落下の傷、嵐の衣、空駆けの判定 (西の試練では効かない)、弓の矢の倍率、護符、羽根のそらし、干し果
 //  - 報酬: 図鑑の抽選・天井・模擬の撃破数、羽守 1%・雷獣 5%、図鑑に記す
-//  - 炉: 雷翼の欠片で強化 (弓も)、分解、交換
+//  - 炉: 雷翼の羽軸で強化 (弓も)、分解、交換
 public final class StormGearSelfTest {
     // 雷翼の心臓 (12 の 5.3節): 防御 9 / 靭性 6
     private static final double HEART_ARMOR = 9;
@@ -124,7 +124,7 @@ public final class StormGearSelfTest {
                 && near(StormGear.SET.chance(StormGear.ANKLET), 0.20) && near(StormGear.SET.chance(StormGear.CHARM), 0.20)
                 && near(StormGear.SET.chance(StormGear.CLAW), 0.04) && near(StormGear.SET.chance(StormGear.GLAIVE), 0.04)
                 && near(StormGear.SET.chance(StormGear.EYE_FEATHER), 0.02), "heart chances do not match 12 6.3");
-        check(f, TitanGearSets.shardFor(new ItemStack(item(StormGear.BOW))) == StormGearSetup.SHARD.get(), "the bow should use thunder wing shards");
+        check(f, TitanGearSets.shardFor(new ItemStack(item(StormGear.BOW))) == StormGearSetup.SHARD.get(), "the bow should use thunder wing quills");
         // 雷翼の段 (03 の 9.8節)
         GearCurve.Stage s = stage(StormGear.TITAN);
         check(f, s.level() == 24 && near(s.dps0(), 15.2) && near(s.dps10(), 19.8) && near(s.armor(), 21) && near(s.toughness(), 14)
@@ -499,14 +499,14 @@ public final class StormGearSelfTest {
         Item shard = StormGearSetup.SHARD.get();
         ItemStack glaive = new ItemStack(item(StormGear.GLAIVE));
         ItemStack bow = new ItemStack(item(StormGear.BOW));
-        check(f, ForgeRules.shardItem(glaive) == shard && ForgeRules.shardItem(bow) == shard, "storm gear should be enhanced with thunder wing shards");
+        check(f, ForgeRules.shardItem(glaive) == shard && ForgeRules.shardItem(bow) == shard, "storm gear should be enhanced with thunder wing quills");
         FakePlayer p = player(level, "storm_gear_forge", 24);
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 64));
         p.getInventory().add(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 8));
-        check(f, !ForgeRules.enhance(p, bow), "bow was enhanced with stone whale shards");
+        check(f, !ForgeRules.enhance(p, bow), "bow was enhanced with stone whale scales");
         p.getInventory().add(new ItemStack(shard, 10));
-        check(f, ForgeRules.accepts(bow) && ForgeRules.enhance(p, bow) && ModGear.enhance(bow) == 1, "bow was not enhanced with thunder wing shards");
-        check(f, ForgeRules.count(p.getInventory(), shard) == 6, "enhance should take 4 thunder wing shards");
+        check(f, ForgeRules.accepts(bow) && ForgeRules.enhance(p, bow) && ModGear.enhance(bow) == 1, "bow was not enhanced with thunder wing quills");
+        check(f, ForgeRules.count(p.getInventory(), shard) == 6, "enhance should take 4 thunder wing quills");
         check(f, ForgeRules.enhance(p, glaive) && ModGear.enhance(glaive) == 1, "glaive enhance");
         int[] y = ForgeRules.dismantleYield(new ItemStack(item(StormGear.CLAW)));
         check(f, y[0] == 10 && y[2] == 2, "claw dismantle yield");
@@ -516,7 +516,7 @@ public final class StormGearSelfTest {
         check(f, GearExchange.state(StormGear.SET, r) == ForgeRules.ExchangeState.NO_CLEAR, "exchange before a thunder heart clear");
         r.clears = 1;
         check(f, GearExchange.state(StormGear.SET, r) == ForgeRules.ExchangeState.READY, "exchange should be ready after a clear");
-        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD.get(), 30));
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_THUNDER_WING.get(), 30));
         check(f, !GearExchange.exchange(p, StormGear.SET, StormGear.BOW), "a non-exclusive was traded");
         check(f, GearExchange.exchange(p, StormGear.SET, StormGear.GLAIVE), "glaive exchange failed");
         check(f, r.owned.contains(StormGear.GLAIVE) && r.exchanges == 1 && GearExchange.state(StormGear.SET, r) == ForgeRules.ExchangeState.USED,

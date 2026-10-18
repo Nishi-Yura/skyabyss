@@ -119,7 +119,7 @@ OBJECTIVES = [
     # (ID, 日本語, 英語, いつ出すか)
     ("examine_camp", "野営地の跡を調べてみよう", "Look around the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
     ("follow_smoke", "煙の立つ方へ向かってみよう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
-    ("watch_sky", "周りを探索して強くなろう（目安 Lv5）", "Explore and grow stronger (about Lv5)", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
+    ("watch_sky", "周りを探索して強くなろう", "Explore and grow stronger", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the storyteller at the lodge", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire beyond the lodge", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
     ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Keep exploring, and listen for the song at night", "B7〜B10 イサナと話してから、岩鯨を見るまで (メインの段 see_whale)"),

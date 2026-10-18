@@ -1044,9 +1044,10 @@ public class TideHeart extends HeartBoss {
         return MobSounds.TIDE_HEART_HURT.get();
     }
 
+    // 最後の一撃の音 (被弾と同じ)。倒れる演出は deathEffects が音も流すので、ここで別の音を重ねない
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.GENERIC_SPLASH;
+        return MobSounds.TIDE_HEART_HURT.get();
     }
 
     @Override

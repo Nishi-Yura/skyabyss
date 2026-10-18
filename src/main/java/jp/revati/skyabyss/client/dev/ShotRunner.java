@@ -376,6 +376,14 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "watcher" -> {
+                // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
+                if (first) {
+                    jp.revati.skyabyss.client.prologue.WatcherClient.placeForShot(line.doubleArg(0), line.doubleArg(1), line.doubleArg(2),
+                            (float) line.doubleArg(3));
+                }
+                return true;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
@@ -436,6 +444,9 @@ public final class ShotRunner {
             case "render" -> {
                 // render <チャンク> : 描く距離 (統合サーバーの見える距離もこれに合わせて変わる)
                 mc.options.renderDistance().set(line.intArg(0));
+                // 統合サーバーが各プレイヤーに送る範囲 (エンティティの追跡) は、プレイヤーの申告 (ClientInformation) で決まる。設定を変えただけでは
+                // 申告が古い (既定の 12) ままで、約 190 ブロックより遠い巨神が消えるので、ここで申告し直す
+                mc.options.broadcastOptions();
                 return true;
             }
             case "guiscale" -> {
@@ -574,6 +585,7 @@ public final class ShotRunner {
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
+            case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;
             default -> null;
         };
         if (s != null) {

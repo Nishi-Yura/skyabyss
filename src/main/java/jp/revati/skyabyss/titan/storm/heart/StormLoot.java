@@ -63,7 +63,7 @@ public final class StormLoot {
 
     // 品の ID は装備の担当の StormGear (12 の 11.1節の名前)。まだ登録されていない品は抽選から外す
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");
-    public static final String RESONANCE_SHARD = id("resonance_shard");
+    public static final String RESONANCE_SHARD = id("resonance_shard_thunder_wing");
     public static final String RESONANCE_CRYSTAL = id("resonance_crystal");
     public static final String SHARD = jp.revati.skyabyss.item.storm.StormGear.SHARD;
     public static final String CORE = jp.revati.skyabyss.item.storm.StormGear.CORE;

@@ -8,6 +8,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.CinderRoller;
@@ -22,9 +24,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 
 // 余燼の背の敵の描画 (素材は tools/install_ember_mobs.py)。GeckoLib のモデルと、熾・割れ目・目を暗闇で光らせる層。
 // 灰被り: 殻のある姿と燃え上がった姿で、テクスチャ (ash_thrall / ash_thrall_flared) と見せる骨 (crust_* / flare_*) を替える。
@@ -47,14 +46,16 @@ public final class EmberMobRenderers {
         event.registerEntityRenderer(EmberMobSetup.CINDER_ROLLER.get(), RollerRenderer::new);
     }
 
-    static class MobRenderer<T extends EmberMob> extends GeoEntityRenderer<T> {
+    // 低ポリ (client/lowpoly): 骨・アニメは GeckoLib、骨ごとのメッシュは自前。発光層 (熾・割れ目・目) は LowPolyGeoRenderer が付ける。
+    // LowPoly.enabled = false で元のキューブの geo / GearLayer に戻る
+    static class MobRenderer<T extends EmberMob> extends LowPolyGeoRenderer<T> {
         MobRenderer(EntityRendererProvider.Context ctx, String name, float shadow) {
-            this(ctx, new DefaultedEntityGeoModel<T>(id(name), true), shadow);
+            super(ctx, name, 1.0f);
+            this.shadowRadius = shadow;
         }
 
-        MobRenderer(EntityRendererProvider.Context ctx, DefaultedEntityGeoModel<T> model, float shadow) {
-            super(ctx, model);
-            addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        MobRenderer(EntityRendererProvider.Context ctx, LowPolyGeoRenderer.Model<T> model, String meshName, float shadow) {
+            super(ctx, model, t -> meshName, 1.0f);
             this.shadowRadius = shadow;
         }
 
@@ -70,23 +71,29 @@ public final class EmberMobRenderers {
             "crust_leg_r", "crust_leg_l");
     static final List<String> FLARE = List.of("flare_body", "flare_head");
 
-    static final class ThrallModel extends DefaultedEntityGeoModel<AshThrall> {
+    static final class ThrallModel extends LowPolyGeoRenderer.Model<AshThrall> {
         private static final ResourceLocation FLARED = id("textures/entity/ash_thrall_flared.png");
+        // 低ポリ: 同じメッシュ・UV で、燃え上がった姿は別のアトラス (と発光マスク)
+        private static final ResourceLocation FLARED_LOW = id("textures/lowpoly/ash_thrall_flared.png");
 
         ThrallModel() {
-            super(id(EmberIds.ASH_THRALL), true);
+            super(EmberIds.ASH_THRALL);
         }
 
         @Override
         public ResourceLocation getTextureResource(AshThrall thrall) {
+            if (LowPoly.enabled && !LowPoly.debug) {
+                return thrall.isFlared() ? FLARED_LOW : super.getTextureResource(thrall);
+            }
             return thrall.isFlared() ? FLARED : super.getTextureResource(thrall);
         }
     }
 
     static final class ThrallRenderer extends MobRenderer<AshThrall> {
         ThrallRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new ThrallModel(), 0.45f);
-            addRenderLayer(new GearLayer<>(this, "socket_main", "ash_poker", mob -> "idle"));
+            super(ctx, new ThrallModel(), EmberIds.ASH_THRALL, 0.45f);
+            addRenderLayer(new GearLayer<>(this, "socket_main", "ash_poker", mob -> "idle").activeWhen(() -> !LowPoly.enabled));
+            addRenderLayer(GearLayer.lowPoly(this, "socket_main", "ash_poker"));
         }
 
         @Override

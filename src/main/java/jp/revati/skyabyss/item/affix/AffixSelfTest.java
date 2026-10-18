@@ -356,7 +356,7 @@ public final class AffixSelfTest {
                 List<ItemStack> got = new ArrayList<>(TitanLoot.rollCaptain(r, random).items());
                 got.addAll(TitanLoot.rollHeart(r, random).items());
                 for (ItemStack s : got) {
-                    if (s.is(ModItems.RESONANCE_SHARD.get())) {
+                    if (ModItems.isResonanceShard(s.getItem())) {
                         shards += s.getCount();
                     } else if (s.is(ModItems.RESONANCE_CRYSTAL.get())) {
                         crystals += s.getCount();
@@ -404,7 +404,7 @@ public final class AffixSelfTest {
                 r.owned.add(TitanLoot.id(ex.get(random.nextInt(ex.size()))));
             }
             for (ItemStack s : got) {
-                if (s.is(ModItems.RESONANCE_SHARD.get())) {
+                if (ModItems.isResonanceShard(s.getItem())) {
                     shards += s.getCount();
                 } else if (s.getItem() instanceof ModGear && !kept.add(s.getItem())) {
                     shards += ForgeRules.dismantleYield(s)[0];

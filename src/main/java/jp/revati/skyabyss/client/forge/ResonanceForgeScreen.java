@@ -198,7 +198,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
         List<Item> exclusives = exclusives();
         boolean ready = menu.exchangeState(titan) == ForgeRules.ExchangeState.READY;
-        boolean affordable = ForgeRules.exchangeAffordable(minecraft.player);
+        boolean affordable = ForgeRules.exchangeAffordable(minecraft.player, set().titan);
         titanButton.visible = exchangeTab && TitanGearSets.all().size() > 1;
         titanButton.setMessage(Component.translatable("gui.skyabyss.forge.exchange_titan", Component.translatable(set().originKey())));
         titanButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.exchange_titan_hint")));
@@ -371,7 +371,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         g.drawString(font, Component.translatable("gui.skyabyss.forge.dismantle_yields"), x, 92, TEXT, false);
         int[] yield = ForgeRules.dismantleYield(gear);
         int y = 103;
-        Item[] items = {ModItems.RESONANCE_SHARD.get(), ForgeRules.shardItem(gear), ModItems.RESONANCE_CRYSTAL.get()};
+        Item[] items = {ForgeRules.resonanceItem(gear), ForgeRules.shardItem(gear), ModItems.RESONANCE_CRYSTAL.get()};
         for (int i = 0; i < 3; i++) {
             if (yield[i] > 0) {
                 g.drawString(font, Component.literal("・").append(Component.translatable(items[i].getDescriptionId())).append(" ×" + yield[i]), x, y, DIM, false);
@@ -411,9 +411,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     // ---------------------------------------------------------------- 右: 交換
     private void exchangePanel(GuiGraphics g) {
         int x = SIDE_X + 10;
-        int have = ForgeRules.count(minecraft.player.getInventory(), ModItems.RESONANCE_SHARD.get());
+        int have = ForgeRules.resonanceHeld(minecraft.player.getInventory(), set().titan);
         boolean enough = minecraft.player.isCreative() || have >= ForgeRules.EXCHANGE_SHARDS;
-        g.drawString(font, Component.translatable("gui.skyabyss.forge.exchange_shards", have, ForgeRules.EXCHANGE_SHARDS), x, 26, enough ? OK : LACK, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.forge.exchange_shards", Component.translatable(ModItems.resonanceShard(set().titan).getDescriptionId()), have, ForgeRules.EXCHANGE_SHARDS), x, 26, enough ? OK : LACK, false);
         String state = switch (menu.exchangeState(titan)) {
             case READY -> "gui.skyabyss.forge.exchange_ready";
             case USED -> "gui.skyabyss.forge.exchange_used";

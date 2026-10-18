@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.phys.Vec3;
 
 // 雷翼の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST storm_heart PASSED / FAILED。
@@ -203,7 +204,7 @@ public final class StormHeartSelfTest {
         for (int i = 0; i < 4; i++) {
             BlockPos r = StormHeartArena.rod(i);
             check(back.getBlockState(r.above(StormHeartArena.ROD_HEIGHT - 1)).is(Blocks.END_ROD), "rod " + i + " has no glowing tip", failures);
-            check(back.getBlockState(r.above(1)).is(Blocks.WAXED_COPPER_BULB), "rod " + i + " has no charge bulbs", failures);
+            check(back.getBlockState(r.above(1)).is(StormBackSetup.ROD_BULB.get()), "rod " + i + " has no charge bulbs", failures);
             check(Math.abs(StormHeartArena.dist(r.getX(), r.getZ()) - 9) < 1.0, "rod " + i + " is not about 9 from the centre", failures);
         }
         for (int k = 0; k < 4; k++) {
@@ -228,8 +229,8 @@ public final class StormHeartSelfTest {
         StormHeartArena.resetRods(back);
         StormHeartArena.addCharge(back, 0);
         StormHeartArena.addCharge(back, 0);
-        check(StormHeartArena.charge(0) == 2 && back.getBlockState(StormHeartArena.rod(0).above(2)).getValue(CopperBulbBlock.LIT)
-                && !back.getBlockState(StormHeartArena.rod(0).above(3)).getValue(CopperBulbBlock.LIT), "rod bulbs do not show the charge", failures);
+        check(StormHeartArena.charge(0) == 2 && back.getBlockState(StormHeartArena.rod(0).above(2)).getValue(StormBlocks.RodBulb.LIT)
+                && !back.getBlockState(StormHeartArena.rod(0).above(3)).getValue(StormBlocks.RodBulb.LIT), "rod bulbs do not show the charge", failures);
         for (int i = 0; i < 4; i++) {
             for (int k = 0; k < 4; k++) {
                 StormHeartArena.addCharge(back, i);

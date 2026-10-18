@@ -18,12 +18,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyLodModel;
 
 // 岩鯨の描画。モデルを8倍に拡大し (近景・中景・遠景の 3 段)、目と背中の紋様を暗闇で光らせる。背中から地上へ垂れる巨大な鎖もここで描く
-public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
+public class StoneWhaleRenderer extends LowPolyGeoRenderer<StoneWhaleEntity> {
     private static final float SCALE = 8f;
     private static final ResourceLocation CHAIN = ResourceLocation.withDefaultNamespace("textures/block/chain.png");
     // 鎖1つの見た目の太さと、模様が繰り返す長さ (ブロック)
@@ -31,9 +30,12 @@ public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
     private static final float CHAIN_REPEAT = 3.0f;
 
     public StoneWhaleRenderer(EntityRendererProvider.Context context) {
-        super(context, new LodModel());
-        withScale(SCALE);
-        addRenderLayer(new jp.revati.skyabyss.client.titan.DormantGlowLayer<>(this));
+        this(context, new LodModel());
+    }
+
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+    private StoneWhaleRenderer(EntityRendererProvider.Context context, LodModel model) {
+        super(context, model, model::meshName, SCALE);
         this.shadowRadius = 0f;
     }
 
@@ -95,10 +97,7 @@ public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
 
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (頭の先から尾びれの先までの線分) までの距離で選ぶ。
     // 体が長い (約 147 ブロック) ので、中心からの距離では頭や尾の近くにいるときに粗いモデルが出てしまう
-    private static final class LodModel extends DefaultedEntityGeoModel<StoneWhaleEntity> {
-        private static final ResourceLocation NEAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/stone_whale.geo.json");
-        private static final ResourceLocation MID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/stone_whale_mid.geo.json");
-        private static final ResourceLocation FAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/stone_whale_far.geo.json");
+    private static final class LodModel extends LowPolyLodModel<StoneWhaleEntity> {
         private static final double MID_DISTANCE_SQ = 64.0 * 64.0;
         private static final double FAR_DISTANCE_SQ = 160.0 * 160.0;
         // 体の軸 (ブロック): 頭の先は前へ 66、尾びれの先は後ろへ 81、高さは体の中心 20
@@ -107,17 +106,17 @@ public class StoneWhaleRenderer extends GeoEntityRenderer<StoneWhaleEntity> {
         private static final double AXIS_UP = 20.0;
 
         LodModel() {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "stone_whale"));
+            super("stone_whale");
         }
 
         @Override
-        public ResourceLocation getModelResource(StoneWhaleEntity whale) {
+        protected int lod(StoneWhaleEntity whale) {
             Entity camera = Minecraft.getInstance().cameraEntity;
             if (camera == null) {
-                return NEAR;
+                return 0;
             }
             double d = axisDistanceSq(whale, camera.getEyePosition());
-            return d < MID_DISTANCE_SQ ? NEAR : d < FAR_DISTANCE_SQ ? MID : FAR;
+            return d < MID_DISTANCE_SQ ? 0 : d < FAR_DISTANCE_SQ ? 1 : 2;
         }
 
         private static double axisDistanceSq(StoneWhaleEntity whale, Vec3 eye) {

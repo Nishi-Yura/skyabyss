@@ -49,9 +49,9 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // - 一人ずつ別々の抽選で、持ち物へ直接。倒れていた・持ち物がいっぱいの人の分は預かる (TitanMemoryData の預かり)
 // - 巨神の記憶 (天井) と図鑑は巨神ごとの記録 (TitanMemoryData の "tide_shell")。岩鯨の記録とは別に数える
 //   新しい品の出ない撃破で +1、3 以上で図鑑の確率 2 倍、5 で未所持を一つ保証。図鑑にない品を手にすると 0
-// - 天の鍵の欠片は一人一回 (巨神ごと。岩鯨の欠片とは別の一つ)
+// - 天の鍵の欠片は一人一回 (巨神ごと。岩鯨の鱗片とは別の一つ)
 // - 初めての撃破では、専用伝説三つから一つを選ぶ
-// 潮殻の欠片と潮干しの貝は背中の敵の担当が登録した (TideMobSetup)。心核・鎧・三叉槍・盾・護符・専用伝説はまだ作られていない (ラフから)。
+// 潮殻の殻片と潮干しの貝は背中の敵の担当が登録した (TideMobSetup)。心核・鎧・三叉槍・盾・護符・専用伝説はまだ作られていない (ラフから)。
 // 表は品の ID で持ち、登録されていない品は抽選から外す (図鑑にも記さない)。品が登録されれば、そのまま出るようになる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideLoot {
@@ -63,9 +63,9 @@ public final class TideLoot {
 
     // 品の ID (まだ登録されていないものを含む)
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");
-    public static final String RESONANCE_SHARD = id("resonance_shard");
+    public static final String RESONANCE_SHARD = id("resonance_shard_tide_shell");
     public static final String RESONANCE_CRYSTAL = id("resonance_crystal");
-    // 潮殻の欠片と潮干しの貝は、背中の敵の担当が登録したもの (TideMobSetup) を使う
+    // 潮殻の殻片と潮干しの貝は、背中の敵の担当が登録したもの (TideMobSetup) を使う
     public static final String SHARD = jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.getId().toString();
     public static final String CORE = id("tide_shell_core");
     public static final String CLAM = jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.getId().toString();

@@ -91,10 +91,10 @@ public final class StructureDump {
         }
     }
 
-    // 巨神の背の島全体。鯨は x ±100・z ±256・y 58〜 (WhaleShape)、亀は甲羅 x ±71・z -88〜82 に頭と尾、海底 41
+    // 巨神の背の島全体。鯨は x ±100・z ±256・y 58〜 (WhaleShape)、亀は甲羅 x ±71・z -88〜82 に頭と尾・ひれ x ±116・y 〜181 (頂の塔)、海底 41
     public static final Map<String, Box> PRESETS = Map.of(
             "titan_back", new Box(-116, 50, -256, 110, 190, 270),
-            "tide_back", new Box(-100, 38, -150, 100, 160, 120),
+            "tide_back", new Box(-120, 38, -152, 120, 186, 108),
             // 雷翼の鳥は翼 x ±227・頭 z -124〜尾 132・y 110〜172 (StormBirdBuilder.BIRD)
             "storm_back", new Box(-232, 96, -136, 232, 176, 140));
     private static final int CHUNKS_PER_TICK = 6;
