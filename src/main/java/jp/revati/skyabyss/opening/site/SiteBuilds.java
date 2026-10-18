@@ -173,6 +173,26 @@ public final class SiteBuilds {
                 }
             }
         }
+        // 章の小要素 (ChapterSites)。進行方向の先に置いたもの (離れた人の分) は先に建てる
+        List<SiteJob> front = new java.util.ArrayList<>();
+        for (SiteData.ChapterPlan plan : data.plans()) {
+            for (SiteData.Entry e : new java.util.ArrayList<>(plan.sites)) {
+                if (!e.built && !queued.contains(e)) {
+                    SiteJob job = ChapterSites.jobFor(level, data, e);
+                    if (job == null) {
+                        continue;
+                    }
+                    if (plan.ahead) {
+                        front.add(job);
+                    } else {
+                        QUEUE.add(job);
+                    }
+                }
+            }
+        }
+        for (int i = front.size() - 1; i >= 0; i--) {
+            QUEUE.addFirst(front.get(i));
+        }
         if (!QUEUE.isEmpty()) {
             SkyAbyss.LOGGER.info("Opening sites: {} to build", QUEUE.size());
         }
