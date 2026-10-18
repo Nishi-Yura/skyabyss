@@ -1,0 +1,206 @@
+# 低ポリの武器 (手・地面・額縁) を階級 x 強化で撮る (tools/gen_weapon_lp_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+hud on
+wait 350
+cmd setblock 0 -59 3 minecraft:stone
+cmd setblock 3 -59 3 minecraft:stone
+weapontier common
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_common_p0
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_common_p0
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=5]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_common_p5
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_common_p5
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=10]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_common_p10
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_common_p10
+weapontier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_rare_p0
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_rare_p0
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=5]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_rare_p5
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_rare_p5
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=10]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_rare_p10
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_rare_p10
+weapontier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_legend_p0
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_legend_p0
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=5]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_legend_p5
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_legend_p5
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=10]
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_legend_p10
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_legend_p10
+weapontier off
+weaponmesh off
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+bodyyaw 0
+wait 10
+chat clear
+shot coral_shield_fp_voxel
+perspective front
+hud off
+bodyyaw 35
+wait 10
+chat clear
+shot coral_shield_tp_voxel
+weaponmesh on
+weapontier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+wait 10
+use
+wait 14
+shot coral_shield_fp_block_rare_p0
+stopuse
+wait 10
+perspective front
+hud off
+wait 10
+use
+wait 14
+shot coral_shield_tp_block_rare_p0
+stopuse
+wait 10
+weapontier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[skyabyss:enhance=10]
+perspective first
+hud on
+wait 10
+use
+wait 14
+shot coral_shield_fp_block_legend_p10
+stopuse
+wait 10
+perspective front
+hud off
+wait 10
+use
+wait 14
+shot coral_shield_tp_block_legend_p10
+stopuse
+wait 10
+weapontier off
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:coral_shield",count:1},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:coral_shield",count:1},Invulnerable:1b}
+perspective first
+hud off
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot coral_shield_world_p0
+cmd kill @e[type=item]
+cmd kill @e[type=item_frame]
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:coral_shield",count:1,components:{"skyabyss:enhance":10}},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:coral_shield",count:1,components:{"skyabyss:enhance":10}},Invulnerable:1b}
+perspective first
+hud off
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot coral_shield_world_p10
+quit
