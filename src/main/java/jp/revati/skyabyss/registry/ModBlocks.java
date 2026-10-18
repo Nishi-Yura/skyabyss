@@ -24,7 +24,9 @@ public final class ModBlocks {
                     .lightLevel(state -> state.getValue(ResonanceStoneBlock.ACTIVE) ? 11 : 0)));
     // 封印の扉。共鳴石がそろうまで壊せない
     public static final DeferredBlock<SealedGateBlock> SEALED_GATE = BLOCKS.register("sealed_gate",
-            () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).lightLevel(state -> 3)));
+            () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).noOcclusion().dynamicShape()
+                    .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)
+                    .lightLevel(state -> state.getValue(SealedGateBlock.OPEN) ? 0 : 3)));
 
     // 乗ると崩れ、しばらくすると戻る骨の足場
     public static final DeferredBlock<CrumblingBoneBlock> CRUMBLING_BONE = BLOCKS.register("crumbling_bone",

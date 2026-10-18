@@ -19,6 +19,11 @@ public final class TitanBacks {
     private TitanBacks() {
     }
 
+    // 背中のディメンションすべて (岩鯨・潮殻・雷翼・余燼)
+    public static java.util.List<ResourceKey<Level>> all() {
+        return java.util.List.of(TitanTravel.TITAN_BACK, TideTravel.TIDE_BACK, jp.revati.skyabyss.titan.storm.StormTravel.STORM_BACK, EmberIds.BACK);
+    }
+
     public static boolean isBack(ResourceKey<Level> dimension) {
         return BACKS.contains(dimension)
                 // 余燼の背 (13 の 3.1節)

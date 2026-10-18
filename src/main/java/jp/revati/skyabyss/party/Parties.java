@@ -27,7 +27,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 // パーティの操作 (コマンドと画面の両方から) と、経験値を分ける相手の選び方 (10 の 6 章)。
-// - 最大 4 人。リーダーが招待し、招待は 60 秒で切れる
+// - 最大 6 人。リーダーが招待し、招待は 60 秒で切れる
 // - 居合わせなかった仲間への分け前: 居合わせた人の取り分の skyabyssPartyShare % (既定 70、50〜80 に収める)
 //   ・同じディメンションで、居合わせた仲間の誰かから 64 ブロック以内
 //   ・巨神の背中 (ダンジョン) の中では、同じ背中にいれば距離を問わない
@@ -35,7 +35,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 //   ・倒れている人・観戦者には分けない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Parties {
-    public static final int MAX_MEMBERS = 4;
+    public static final int MAX_MEMBERS = 6;
     public static final double SHARE_RANGE = 64;
     public static final int LEVEL_GAP = 10;
     public static final int SHARE_MIN = 50;

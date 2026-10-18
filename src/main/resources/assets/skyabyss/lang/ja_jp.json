@@ -38,6 +38,7 @@
   "message.skyabyss.descending": "錨石に触れると、鎖があなたをゆっくりと地上へ降ろしていく",
   "message.skyabyss.resonance": "共鳴石が歌い出した（%s / %s）",
   "message.skyabyss.gate_opened": "三つの歌が重なり、封印が息を吐いた",
+  "message.skyabyss.room_busy": "別のパーティーがこの試練に挑んでいる。出てくるのを待とう",
   "message.skyabyss.sealed_gate": "封印が固く閉ざしている。どこかで石が歌うのを待っているようだ",
   "title.skyabyss.titan_back": "岩鯨の背",
   "title.skyabyss.titan_back.sub": "雲の海を渡る、古き守護者",
