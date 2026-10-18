@@ -1,0 +1,83 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "quest",
+            "quest": "ch4/fragments",
+            "is": "active",
+            "stage": "teller"
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "any",
+              "of": [
+                {
+                  "type": "quest",
+                  "quest": "main_tide",
+                  "is": "active",
+                  "stage": "report"
+                },
+                {
+                  "type": "quest",
+                  "quest": "main_thunder",
+                  "is": "active",
+                  "stage": "rumor"
+                },
+                {
+                  "type": "quest",
+                  "quest": "main_thunder",
+                  "is": "active",
+                  "stage": "report"
+                },
+                {
+                  "type": "quest",
+                  "quest": "main_key",
+                  "is": "active",
+                  "stage": "show"
+                },
+                {
+                  "type": "quest",
+                  "quest": "sub_warm_coal",
+                  "is": "active",
+                  "stage": "tell"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "node": "ch4_s_one"
+    }
+  ],
+  "nodes": {
+    "ch4_s_one": {
+      "face": "grave",
+      "next": "ch4_s_two"
+    },
+    "ch4_s_two": {
+      "face": "grave",
+      "next": "ch4_s_three"
+    },
+    "ch4_s_three": {
+      "face": "smile",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

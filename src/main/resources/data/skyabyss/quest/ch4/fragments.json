@@ -1,0 +1,42 @@
+{
+  "category": "main",
+  "chapter": "titan_ember",
+  "order": 45,
+  "giver": "skyabyss:storyteller",
+  "min_stage": 3,
+  "start_when": {
+    "type": "stage",
+    "min": 3
+  },
+  "stages": [
+    {
+      "id": "teller",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch4_s_three"
+        }
+      ]
+    },
+    {
+      "id": "isana",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ch4_i_three"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 400,
+    "affinity": {
+      "skyabyss:storyteller": 3,
+      "skyabyss:whale_chaser": 3
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "chapter": "titan_ember",
+  "order": 179,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/ember_ruins",
+    "chapter1/ember_prev_page"
+  ]
+}

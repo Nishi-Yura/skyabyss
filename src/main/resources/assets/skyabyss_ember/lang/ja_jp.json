@@ -428,5 +428,10 @@
   "gui.skyabyss.forge.exchange_no_clear.ember": "余燼の心臓を倒すと、選べるようになる",
   "gui.skyabyss.forge.exchange_all_owned.ember": "余燼の専用伝説は、すべて手にしている",
   "skyabyss_record.h.ember": "余燼",
-  "tooltip.skyabyss.ember.horn_drunk": "体の芯が、ゆっくり温まった。しばらく熱がたまりにくい"
+  "tooltip.skyabyss.ember.horn_drunk": "体の芯が、ゆっくり温まった。しばらく熱がたまりにくい",
+  "__ember.H": "四章の伝承 (lore.skyabyss.chapter1.ember_hearth、ember_prev_page。生成元 tools/gen_ch4_content.py)",
+  "lore.skyabyss.chapter1.ember_hearth.title": "灰の民の炉跡",
+  "lore.skyabyss.chapter1.ember_hearth.body": "地面に、焼き締めた石で小さな炉が組んである。灰は、手のかたちに掻き寄せられていた。\n\n炉の口は、いつも丘のほうを向いている。火を絶やさないためではなく、丘を起こさないために焚いていたのだろう。",
+  "lore.skyabyss.chapter1.ember_prev_page.title": "炉跡の頁",
+  "lore.skyabyss.chapter1.ember_prev_page.body": "破れた頁。見覚えのある字で、短い覚え書きが残っている。\n\n「足の下が温かい日は、丘を見ない。見ると、目が合う気がするから」\n\n……この字は、自分のものに似ている。"
 }

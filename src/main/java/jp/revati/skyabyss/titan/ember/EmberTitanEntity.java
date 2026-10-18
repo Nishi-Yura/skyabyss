@@ -418,6 +418,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
         moveTicks = 0;
         setMode(Mode.RISE);
         level.playSound(null, ridgePoint().x, restGround, ridgePoint().z, EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.7f);
+        // 四章の中盤の出来事: ワールドで初めて浮かぶ夜だけ (粒・音・揺れ。ブロックは触らない)
+        EmberRising.onRiseStart(level, this);
     }
 
     double sleepHeight() {

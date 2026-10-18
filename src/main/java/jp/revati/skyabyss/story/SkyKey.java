@@ -91,6 +91,8 @@ public final class SkyKey {
         Quests.signal(player, SIGNAL);
         SkyAbyss.LOGGER.info("{} assembled the sky key from {} fragment(s) on day {}", player.getGameProfile().getName(), taken, day);
         Notice.narrate(player, "message.skyabyss.story.key_formed");
+        // 巨神編の終わりの余韻 (四章の札・語り部の一言・足もとの拍)。場面のあとに EmberAftermath が順に出す (docs/design/13 の 17.6)
+        jp.revati.skyabyss.titan.ember.EmberAftermath.afterKey(player);
         if (first) {
             // 画面の語りで、心臓を一つ以上止めた人にだけ (まだ序盤の人に鍵の話を明かさない。チャットには流さない)
             for (ServerPlayer p : player.server.getPlayerList().getPlayers()) {

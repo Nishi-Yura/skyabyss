@@ -1,0 +1,47 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "add_options": {
+    "c_menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "ch4",
+          "goto": "ch4_i_one",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch4/fragments",
+            "is": "active",
+            "stage": "isana"
+          }
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "ch4_i_one": {
+      "face": "neutral",
+      "next": "ch4_i_two"
+    },
+    "ch4_i_two": {
+      "face": "grave",
+      "next": "ch4_i_three"
+    },
+    "ch4_i_three": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end",
+          "do": [
+            {
+              "type": "affinity",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
