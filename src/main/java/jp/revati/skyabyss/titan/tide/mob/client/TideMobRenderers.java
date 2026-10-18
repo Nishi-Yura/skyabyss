@@ -8,6 +8,7 @@ import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.tide.mob.BubblePuffer;
 import jp.revati.skyabyss.titan.tide.mob.BubbleShot;
@@ -86,25 +87,39 @@ public final class TideMobRenderers {
 
     // ---------------------------------------------------------------- 珊瑚憑き
 
-    static final class ThrallModel extends DefaultedEntityGeoModel<CoralThrall> {
+    // 低ポリ (client/lowpoly): 像のときは白い石のアトラス (textures/lowpoly/coral_thrall_statue.png)。LowPoly.enabled = false で元のキューブに戻る
+    static final class ThrallModel extends LowPolyGeoRenderer.Model<CoralThrall> {
         private static final ResourceLocation STATUE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/coral_thrall_statue.png");
+        private static final ResourceLocation STATUE_LOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/coral_thrall_statue.png");
 
         ThrallModel() {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_thrall"), true);
+            super("coral_thrall");
         }
 
         @Override
         public ResourceLocation getTextureResource(CoralThrall thrall) {
-            return thrall.isStatue() ? STATUE : super.getTextureResource(thrall);
+            if (thrall.isStatue() && !LowPoly.debug) {
+                return LowPoly.enabled ? STATUE_LOW : STATUE;
+            }
+            return super.getTextureResource(thrall);
         }
     }
 
-    static final class ThrallRenderer extends MobRenderer<CoralThrall> {
+    static final class ThrallRenderer extends LowPolyGeoRenderer<CoralThrall> {
         ThrallRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new ThrallModel(), 0.4f);
+            super(ctx, new ThrallModel(), t -> "coral_thrall", 1.0f);
+            this.shadowRadius = 0.4f;
             addRenderLayer(new Either<>(this, CoralThrall::isStatue,
-                    new GearLayer<>(this, "socket_main", "coral_spear_statue", mob -> "idle"),
-                    new GearLayer<>(this, "socket_main", "coral_spear", mob -> "idle")));
+                    new GearLayer<>(this, "socket_main", "coral_spear_statue", mob -> "idle").activeWhen(() -> !LowPoly.enabled),
+                    new GearLayer<>(this, "socket_main", "coral_spear", mob -> "idle").activeWhen(() -> !LowPoly.enabled)));
+            addRenderLayer(new Either<CoralThrall>(this, CoralThrall::isStatue,
+                    GearLayer.lowPoly(this, "socket_main", "coral_spear_statue"),
+                    GearLayer.lowPoly(this, "socket_main", "coral_spear")));
+        }
+
+        @Override
+        protected float getDeathMaxRotation(CoralThrall animatable) {
+            return 0f;
         }
 
         @Override

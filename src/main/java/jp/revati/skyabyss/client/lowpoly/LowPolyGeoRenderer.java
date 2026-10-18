@@ -89,13 +89,17 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     }
 
     // 低ポリのときは geo/entity/<name>_lowpoly(.debug).geo.json と textures/lowpoly/<name>.png、そうでなければ元の素材
-    private static final class Model<T extends GeoAnimatable> extends DefaultedEntityGeoModel<T> {
+    public static class Model<T extends GeoAnimatable> extends DefaultedEntityGeoModel<T> {
         private final ResourceLocation lowGeo;
         private final ResourceLocation debugGeo;
         private final ResourceLocation atlas;
 
-        Model(String name) {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true);
+        public Model(String name) {
+            this(name, true);
+        }
+
+        public Model(String name, boolean turnsHead) {
+            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), turnsHead);
             this.lowGeo = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/" + name + "_lowpoly.geo.json");
             this.debugGeo = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/" + name + "_lowpoly_debug.geo.json");
             this.atlas = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + name + ".png");
