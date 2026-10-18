@@ -1,0 +1,211 @@
+<title>人物3体・岩鯨 低ポリ 3案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>人物3体・岩鯨 低ポリ 3案</h1>
+    <p class="intro">語り部とイサナは、前に選んだキャラデザイン（頭巾の語り部・つば広帽の旅人）を低ポリで作り直した3案です。顔は頭の中に収め、浮いた板にはしていません。見る者は「人らしくしすぎない」決まりのまま、遠くから見て少し不気味な3案です。岩鯨は巨神本体の最初の1体で、近・中・遠の3段の細かさで作りました（左右のひれは同じ形）。B と C を選ぶと、背中のダンジョンの外形と色も作り直しになります。採用する案を選び、直してほしい点があれば書いてください。</p>
+    <details class="done"><summary>選ばれてゲームに入れたもの (2)</summary><ul><li>岩鯨・潮殻の背の敵をゲームに入れた（箱のモデルより約3倍軽い）</li><li>珊瑚憑きと雷翼の背の5体（すべて A）をゲームに入れている途中。余燼の背の5体（灰被り A・火の粉蛾 A・燠虫 B・鍛え手 A・心臓 C）はその次</li></ul></details>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 4 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#lp_storyteller" data-nav="lp_storyteller">語り部 低ポリ</a><a href="#lp_isana" data-nav="lp_isana">イサナ 低ポリ</a><a href="#lp_watcher" data-nav="lp_watcher">見る者 低ポリ</a><a href="#lp_stone_whale" data-nav="lp_stone_whale">岩鯨 低ポリ</a></nav>
+    <main>
+<section class="subject" id="lp_storyteller" data-id="lp_storyteller">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>語り部 (storyteller) — 低ポリ非立方体 + ドット絵 3 案 (村の鐘のそばの老婆)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の NPC。選んだ「頭巾の語り部」(藍の頭巾、顔は頭巾の開口の中、白い眉と房、淡く光る目) の人物像は変えず、顔が浮かないよう頭巾の開口の縁を太い筒にして、その内側に顔を収めた。骨 11 本 (root[Y 180 度] &gt; body &gt; head &gt; hair・hair2 / shawl / armL / armR / legL / legR / cord) の名前・階層・pivot は今の geo のまま、今のアニメ 3 本 (idle・walk・talk) がそのまま動く (頭の向きはコードのまま)。割り当て: head = 顔と鼻、hair = 白い眉と房、hair2 = 頭巾の殻と縁。三角形 (本体のみ): A 714 / B 797 / C 801 (上限 約 800)。今は箱 688 個 / 1,981 面。アトラス 128x128。光る画素は目の瞳だけ。メッシュは lowpoly_roughs/lp_storyteller/{a,b,c}/storyteller_{a,b,c}_lowpoly_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/storyteller/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_storyteller.jpg" aria-label="語り部 (storyteller) — 低ポリ非立方体 + ドット絵 3 案 (村の鐘のそばの老婆) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_storyteller.jpg" alt="語り部 (storyteller) — 低ポリ非立方体 + ドット絵 3 案 (村の鐘のそばの老婆) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_storyteller-a"><input type="radio" name="lp_storyteller" id="lp_storyteller-a" value="a"><span class="letter">A</span><span class="otext"><b>A 頭巾の語り部</b><span>今の B 頭巾の語り部を忠実に写した案。藍の尖り頭巾、顔は縁の筒の内側、眉は内側が高く外側が下がるやさしい形、白い房、淡い青白の目、ゆるい笑み。藍の肩掛け、灰茶の長衣に橙の縄の帯 (端が垂れる)、組んだ手。</span></span></label><label class="opt" for="lp_storyteller-b"><input type="radio" name="lp_storyteller" id="lp_storyteller-b" value="b"><span class="letter">B</span><span class="otext"><b>B 毛糸の語り部</b><span>もっと年老いてあたたかい祖母の案。丸くやわらかい頭巾 (頂に赤い小さな房)、ふくよかな頬と赤み、笑いじわ、広い肩。房飾りの肩掛け、茶の長衣にクリーム色の前掛けとポケット、手に毛糸玉。藍は少しあたたかく、縄の帯は残す。</span></span></label><label class="opt" for="lp_storyteller-c"><input type="radio" name="lp_storyteller" id="lp_storyteller-c" value="c"><span class="letter">C</span><span class="otext"><b>C 鐘守の語り部</b><span>鐘のそばに立つ、神秘的で儀式の人の案。尖頭アーチの細長い頭巾 (縁に銀青の糸の刺繍)、長く細い白い眉と房、強めの目の光、控えめな笑み。長衣は鐘の形に裾が広がり、波形の縁と鐘形の刺繍の帯。胸に真鍮の鐘の飾り、縄の帯の端にも鐘、袖も鐘形。</span></span></label></fieldset>
+  <label class="note-l" for="lp_storyteller-note">直してほしい点 (任意)</label>
+  <textarea id="lp_storyteller-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_isana" data-id="lp_isana">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>イサナ (whale_chaser) — 低ポリ非立方体 + ドット絵 3 案 (鯨追い・巨神へ導く旅人)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) のイサナ。選んだ「つば広帽の旅人」(つばが額に影を落とす・無精髭・細めた目・小さな荷) の人物像を守った 3 つの解釈。骨 11 本 (root[Y 180 度] &gt; body &gt; head &gt; hat / hair / hood2、body &gt; armL / armR / legL / legR / pack) の名前・階層・pivot は今の geo のまま、今のアニメ 3 本 (idle・walk・talk) がそのまま動く。顔は頭の面に描いた画素 (白目・黒目・まぶた・眉・髭・口) と鼻の小さな三角錐で、頭の中に収まり浮いた板なし。光る画素なし (glowmask は置かない)。三角形 (全身): A 736、B 737、C 785 (NPC の目安 約 800 以下)。アトラス A・C 128x128、B 256x256。今は箱 690 個。シートは今 / A / B / C を前・前 3/4 (待機)・横・後ろ・顔のアップ・顔の 3/4・話す・歩く・アトラスで並べる。メッシュは lowpoly_roughs/lp_isana/{a,b,c}/whale_chaser_{a,b,c}_lowpoly_mesh.json (+ atlas)。生成: tools/rough/lowpoly/lp_isana/sheet.py と manifest.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_isana.jpg" aria-label="イサナ (whale_chaser) — 低ポリ非立方体 + ドット絵 3 案 (鯨追い・巨神へ導く旅人) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_isana.jpg" alt="イサナ (whale_chaser) — 低ポリ非立方体 + ドット絵 3 案 (鯨追い・巨神へ導く旅人) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_isana-a"><input type="radio" name="lp_isana" id="lp_isana-a" value="a"><span class="letter">A</span><span class="otext"><b>A つば広帽の旅人</b><span>今の A に忠実。深緑の長い外套 (縦の縫い目・裾が広がる)・赤い襟巻き (二本の尾)・茶の帽子に帯と白い羽・革の帯と留め金・灰色のズボンと茶の長靴。背に茶の荷と巻いた寝袋。帽子の影で額が暗く、細めた目と無精髭。三案のうち最も今の面影が残る。</span></span></label><label class="opt" for="lp_isana-b"><input type="radio" name="lp_isana" id="lp_isana-b" value="b"><span class="letter">B</span><span class="otext"><b>B 荒くれの鯨獲り</b><span>鯨を追って長い、くたびれた旅人。紺の油布の長い外套 (高い襟・ぎざぎざの裾) に灰の襟巻きと骨の留め具、胸を斜めに銛の綱が通る。低くしおれた灰褐色の帽子。顔は灰色の髭・頬の古傷・眉間と目尻のしわ。背に小さな荷と、頭の上へ立つ銛 (返し付き) と綱の束。一番影が重く、鯨獲りの職が見える。</span></span></label><label class="opt" for="lp_isana-c"><input type="radio" name="lp_isana" id="lp_isana-c" value="c"><span class="letter">C</span><span class="otext"><b>C 若い旅人</b><span>軽装の若いイサナ。青緑の短いジャケット (裾は腰) と明るいズボン、細いつばの麦わら帽に橙の帯。長い黄の襟巻きが背へ流れる。目は大きめで眉も穏やか、口はわずかに上がり、頬にそばかす、髭はほとんどない。腰に真鍮の望遠鏡 (巨神を探す)、背に小さな荷と寝袋。一番親しみやすい。</span></span></label></fieldset>
+  <label class="note-l" for="lp_isana-note">直してほしい点 (任意)</label>
+  <textarea id="lp_isana-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_watcher" data-id="lp_watcher">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>見る者 (watcher) — 低ポリ非立方体 + ドット絵 3 案 (夜、遠くに立つ「前のループの自分」の影)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の見る者。夜に遠くの丘から見つめてくる、プレイヤーが前のループに残した影。プレイヤーの比率 (頭 8・胴 12・腕 12・脚 12) の人影で、鼻・眉・指などの顔や手の細部は作らない。目は縦の切れ目 1 本だけ (横に 2 つ並べるとエンダーマンに見えた、という過去の教訓)。骨 7 本 (root[Y 180 度] &gt; body &gt; hem / mantle / head / mist、head &gt; eyes) の名前・階層・pivot は今の geo と同じで、今のアニメ idle がそのまま動く。骨の割り当て: body = 胴、hem = 脚、mantle = 腕、head = 頭、eyes = 目の光 1 枚、mist = 漂う欠片。描画は entityTranslucent (半透明・裏面も描く) 前提。閉じた塊は裏の壁が透けて見えるので、内側の面は C の意図した二重の殻だけにし、A・B は単層。三角形: A 300、B 548、C 568 (普通の敵の目安 約 600 以下)。今は箱 226 個 (面 1290)。アトラス: A 96、B 112、C 112 (正方形)。B はテクスチャの alpha 0 の画素が焼け抜けた穴・ほつれになる (alpha は 0 か 255 だけ)。青白い光 (目・欠片) は全案で今の見る者と同じ。A・C は今と同じ冷たい青灰、B だけ焼け紙の灰茶。シートは今 / A / B / C を前・前 3/4・横・後ろ 3/4・夜の遠く (40 ブロックと 14 ブロック先、1080p・視野 70 度の縮尺、目のにじみ込み)・顔のアップ・アトラスで並べる。メッシュは lowpoly_roughs/lp_watcher/{a,b,c}/watcher_{a,b,c}_mesh.json (+ _atlas・_glowmask)。生成: tools/rough/lowpoly/lp_watcher/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_watcher.jpg" aria-label="見る者 (watcher) — 低ポリ非立方体 + ドット絵 3 案 (夜、遠くに立つ「前のループの自分」の影) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_watcher.jpg" alt="見る者 (watcher) — 低ポリ非立方体 + ドット絵 3 案 (夜、遠くに立つ「前のループの自分」の影) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_watcher-a"><input type="radio" name="lp_watcher" id="lp_watcher-a" value="a"><span class="letter">A</span><span class="otext"><b>A 伸びた影</b><span>プレイヤーの輪郭を少しだけ引き伸ばした影。脚と腕が長く (指先が膝の下まで届く)、肩が細く、頭が縦に長く前へ傾く。手足の先は指のない尖り。顔は目の切れ目 1 本だけで、他は何もない。単層の面取りした低ポリで、最も軽く、遠くからは「人に似ているが何かが違う」輪郭だけが残る。三角形 300。</span></span></label><label class="opt" for="lp_watcher-b"><input type="radio" name="lp_watcher" id="lp_watcher-b" value="b"><span class="letter">B</span><span class="otext"><b>B 焼け紙の人</b><span>プレイヤーの形に切り抜いた焼け紙。厚み 2 ほどの薄い板で、縁は千切れて欠け (冠・肩・腕の先・裾)、ところどころ前から後ろへ焼け抜けた穴が空く。縁の厚みの帯と穴のふちに、暗い青い火の粉が這う。横から見ると細い線になり、正面だけが人に見える。目は焼け跡の縦の切れ目 1 本。三角形 548。</span></span></label><label class="opt" for="lp_watcher-c"><input type="radio" name="lp_watcher" id="lp_watcher-c" value="c"><span class="letter">C</span><span class="otext"><b>C うつろな殻</b><span>プレイヤーの形の、中が空っぽの薄い殻 (外と内の二重の面)。背中に縦の割れ目、手足と腰は口が開いた筒で、頭は肩から少し浮く。胸と頭の中にだけ、かすかな青白い灯 (小さな八面体) が浮き、背中の割れ目と顔の切れ目 (目) から透けて見える。半透明で内側が見えるのが売り。三角形 568。</span></span></label></fieldset>
+  <label class="note-l" for="lp_watcher-note">直してほしい点 (任意)</label>
+  <textarea id="lp_watcher-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_stone_whale" data-id="lp_stone_whale">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>岩鯨 — 低ポリ非立方体 + ドット絵 3 案 (第一の巨神。近・中・遠の 3 段階)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 低解像度のドット絵) の岩鯨。骨名・階層・pivot は今の geo と同じ (休めの回転なし) なので、今のアニメがそのまま動く。全長 約 294 単位 (ゲームでは約 147 ブロック)。左右の胸びれは完全な鏡像 (今は左右でわずかに大きさが違う)。三角形 (近 / 中 / 遠): A 2,614・836・292 / B 3,064・850・252 / C 4,355・980・242。今は箱 近 2,838 (三角形 約 34,056 相当) / 中 839 / 遠 248。予算案: 近 6,000 以下 / 中 2,000 以下 / 遠 500 以下 (3 案ともそれ以下)。テクセル密度の提案: 近 2 テクセル/単位 (1 ブロック 4 テクセル、1 テクセルが 1/4 ブロック。普通のモブの 1/8 の細かさ)、中 1 (2/ブロック)、遠 0.5 (1/ブロック)。近景はアトラス 1024² 1 枚で今の 2048x1058 の約半分、中 512²、遠 256²。遠くから見ても 1 テクセルが 0.15 度以下でドット絵のまま読める。背中のダンジョンへの影響: 体の外形 (太さ・長さ・背の高さ) は 3 案とも今と同じ骨格の断面を使うので、鎖の錨石の位置 (+X のわき腹 z=60) と背の広場はそのまま。ただし B は背の台・柱廊で背が最大 約 20 単位高くなり、C は背の殻の起伏と額・肩のふくらみで外形が少し変わるので、ダンジョンの外形は新しいメッシュを体積化して作り直す必要がある。A は今のブロックの形のまま (色だけ今の格子の材料に合わせる) で済む。メッシュは lowpoly_roughs/lp_stone_whale/{a,b,c}/{near,mid,far}_mesh.json (+ atlas・glowmask)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_stone_whale.jpg" aria-label="岩鯨 — 低ポリ非立方体 + ドット絵 3 案 (第一の巨神。近・中・遠の 3 段階) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_stone_whale.jpg" alt="岩鯨 — 低ポリ非立方体 + ドット絵 3 案 (第一の巨神。近・中・遠の 3 段階) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_stone_whale-a"><input type="radio" name="lp_stone_whale" id="lp_stone_whale-a" value="a"><span class="letter">A</span><span class="otext"><b>A 忠実な面取りの石の鯨</b><span>今の姿 (太い青鯨型・背に二つのアーチと塔・骨の背骨・琥珀の目) を、斜めの面だけで刻んだ素直な低ポリ。青灰色の石の皮に地層の筋と苔のまだら、腹は砂色、顔は 2 段のまぶた + 縦の瞳の線 + 眉 + 唇の黒い帯、上顎の先にひげ板。背の遺跡 (崩れたアーチ 2・光る刻文の塔・折れた柱) と、わき腹の石の板・藤壺は今と同じ配置。最も今に近く、遠くから見ても輪郭が変わらない。背のダンジョンは今の形のまま使える。</span></span></label><label class="opt" for="lp_stone_whale-b"><input type="radio" name="lp_stone_whale" id="lp_stone_whale-b" value="b"><span class="letter">B</span><span class="otext"><b>B 彫刻の記念碑</b><span>胴の脇を地層のテラス (段) で刻み、全体を一つの古い彫刻にした案。温かい砂岩色の地層の帯に光る刻文の帯が巻き、背には三段の台に崩れた柱廊・階段・塔・アーチが載る、動く遺跡の都市。顔は彫った仮面 (四角い 2 段のまぶた・分厚い眉・唇に並ぶ石の歯)。最も背が高く、遠くからでも「建物を背負った鯨」と読める。背のダンジョンの形は大きく変わる (台と柱廊の分、背が盛り上がる)。</span></span></label><label class="opt" for="lp_stone_whale-c"><input type="radio" name="lp_stone_whale" id="lp_stone_whale-c" value="c"><span class="letter">C</span><span class="otext"><b>C 皮が岩になる鯨</b><span>やわらかい鯨の体 (額のふくらみ・喉のひだ・長い胸びれ・切れ込みの尾びれ) の背から、石の殻が広がって皮を覆っていく案。下は青灰色の風化した皮、上は割れた茶色い岩。顔は丸みのあるまぶたと額のこぶ、あごに藤壺のような石の円錐。遺跡は半ば埋もれた傾くアーチと折れた柱だけで、生き物らしさが強い。最も三角形が多く (近景)、背のダンジョンは殻の起伏に合わせて作り直す。</span></span></label></fieldset>
+  <label class="note-l" for="lp_stone_whale-note">直してほしい点 (任意)</label>
+  <textarea id="lp_stone_whale-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 4;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>

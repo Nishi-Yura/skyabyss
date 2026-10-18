@@ -234,5 +234,8 @@
   "skyabyss_record.bond.nothing_missing_key": "The sky key's place is known. Check the ledger",
   "skyabyss_record.bond.recalled_fragment": "Answering the call, your lost fragments returned to you (%s)",
   "skyabyss_record.bond.recalled_key": "Answering the call, the sky key returned to you",
-  "skyabyss_record.v.stopped_plain": "Stilled"
+  "skyabyss_record.v.stopped_plain": "Stilled",
+  "skyabyss_record.r.readiness": "Readiness",
+  "skyabyss_record.d.readiness": "How ready your body, blade and stores are for %s's heart. Green is enough, yellow nearly, red short (also by shape: round green, triangle yellow, square red). Measured against that titan's benchmark.",
+  "skyabyss_record.d.readiness_free": "Red never stops you from boarding or fighting. You are asked once when boarding."
 }

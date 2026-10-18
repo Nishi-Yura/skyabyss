@@ -1,0 +1,223 @@
+<title>潮殻の背 低ポリ 3案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>潮殻の背 低ポリ 3案</h1>
+    <p class="intro">岩鯨の背と同じ作り方（低ポリの非立方体＋1ブロック32画素のドット絵、軽さ重視）で、潮殻の背の5体を3案ずつ作りました。どの案も骨の名前と位置は今のモデルと同じで、今のアニメーションがそのまま動きます。武器は別のモデルです。採用する案を選び、直してほしい点があれば書いてください。</p>
+    <details class="done"><summary>選ばれてゲームに入れたもの (1)</summary><ul><li>岩鯨の背: 番兵長 A 石鎧の将・苔這い B 骨・棘・肋の射手 C ひげ板の頭巾・水路の顎 B 提灯鮟鱇・心臓 A 地層の板 をゲームに入れている途中</li></ul></details>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 5 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#lp_coral_thrall" data-nav="lp_coral_thrall">珊瑚憑き 低ポリ</a><a href="#lp_reef_scuttler" data-nav="lp_reef_scuttler">磯走り</a><a href="#lp_bubble_puffer" data-nav="lp_bubble_puffer">泡吹き 低ポリ</a><a href="#lp_tide_beckoner" data-nav="lp_tide_beckoner">潮招き 低ポリ</a><a href="#lp_tide_heart" data-nav="lp_tide_heart">潮殻の心臓 低ポリ</a></nav>
+    <main>
+<section class="subject" id="lp_coral_thrall" data-id="lp_coral_thrall">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>珊瑚憑き (coral_thrall) 低ポリ非立方体 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 珊瑚に憑かれた潮の民 (光る目の点・珊瑚の冠・珊瑚の銛) の同一性を保ち、統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) で 3 方向の輪郭を作り比べる。骨名・階層・pivot は現行 geo と同じ (root は Y 180 度、forearm_r は休め X 70 度、socket_main は X -150 度。頂点は回転前の geo 空間)。銛は socket_main の局所座標の別メッシュ。像は同じモデルに骨 statue_coral を足し、白い石のアトラス (*_statue_atlas.png) に替える。三角形: A 本体 616 + 銛 118 + 像の珊瑚 118 / B 本体 615 + 銛 126 + 像 65 / C 本体 617 + 銛 191 + 像 45 (目標: 普通の敵 約 600、銛 250 以下)。アトラス 128x128 (銛 64x64)、光るマスクは目の点 + 銛の海硝子。出力: docs/review/lowpoly_roughs/coral_thrall/{a,b,c}/。生成: tools/rough/lowpoly/coral_thrall/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_coral_thrall.jpg" aria-label="珊瑚憑き (coral_thrall) 低ポリ非立方体 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_coral_thrall.jpg" alt="珊瑚憑き (coral_thrall) 低ポリ非立方体 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_coral_thrall-a"><input type="radio" name="lp_coral_thrall" id="lp_coral_thrall-a" value="a"><span class="letter">A</span><span class="otext"><b>A 枝角の冠</b><span>細く背の高い白骨に、鹿の角のように枝分かれする枝珊瑚の冠と肩の枝。肋 3 対、腰に昆布の前垂れ。銛は枝珊瑚の三つ又で先が光る海硝子。縦へ尖る輪郭。</span></span></label><label class="opt" for="lp_coral_thrall-b"><input type="radio" name="lp_coral_thrall" id="lp_coral_thrall-b" value="b"><span class="letter">B</span><span class="otext"><b>B 扇珊瑚の背負い</b><span>石になった体に、卓珊瑚の重ね板の肩当てと脳珊瑚の頭巾、背に縁のぎざついた扇珊瑚の大円盤。銛は扇珊瑚の平たい葉の穂先。幅広で板の重なる輪郭。</span></span></label><label class="opt" for="lp_coral_thrall-c"><input type="radio" name="lp_coral_thrall" id="lp_coral_thrall-c" value="c"><span class="letter">C</span><span class="otext"><b>C 磯巾着の鬣</b><span>干物のような猫背の体に、イソギンチャクの触手が鬣になって頭・肩・背から放射状に垂れる。左手は触手の爪。銛は反った節の角と根元の触手の襟。丸く垂れる輪郭。</span></span></label></fieldset>
+  <label class="note-l" for="lp_coral_thrall-note">直してほしい点 (任意)</label>
+  <textarea id="lp_coral_thrall-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_reef_scuttler" data-id="lp_reef_scuttler">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>磯走り (reef_scuttler) 低ポリ・ドット絵 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">潮殻の背の群れの小蟹 (体力10・速い・群れで追う・裏返ると弱い) の低ポリ化。骨は body / leg_r / leg_l / claw_r / claw_l (名前・階層・pivot は今の geo と同じ) で、今のアニメ (idle/walk/attack/hurt/death/flipped) がそのまま動く。1ブロック=32テクセル・最近傍・限られたパレット・手で打った陰影。光る画素 (glowmask) は目のシアンだけ。三角形 A 514 / B 577 / C 490 (目安 約600)。メッシュ・アトラス・glowmask は docs/review/lowpoly_roughs/reef_scuttler/{a,b,c}/ 。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_reef_scuttler.jpg" aria-label="磯走り (reef_scuttler) 低ポリ・ドット絵 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_reef_scuttler.jpg" alt="磯走り (reef_scuttler) 低ポリ・ドット絵 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_reef_scuttler-a"><input type="radio" name="lp_reef_scuttler" id="lp_reef_scuttler-a" value="a"><span class="letter">A</span><span class="otext"><b>A 岩礁蟹 (514 三角形)</b><span>今の磯走りに一番忠実。面取りした4段の銅色の甲羅、背に斜めに乗る海石の板、縁と鋏のフジツボ、光る目の柄、関節の太い脚。右の鋏が大きい。「潮殻の背の岩礁の小蟹」と一目で分かる安全な案。</span></span></label><label class="opt" for="lp_reef_scuttler-b"><input type="radio" name="lp_reef_scuttler" id="lp_reef_scuttler-b" value="b"><span class="letter">B</span><span class="otext"><b>B 真珠の扇 (577 三角形)</b><span>背に貝の扇 (ホタテ型、蝶番側がピンク) を斜めに立てて背負う青灰の石の楔形。鋏は細く反った象牙色の鎌、脚は太く短く前向き、目は甲羅の縁から覗く。珊瑚の庭・真珠の色に合う。</span></span></label><label class="opt" for="lp_reef_scuttler-c"><input type="radio" name="lp_reef_scuttler" id="lp_reef_scuttler-c" value="c"><span class="letter">C</span><span class="otext"><b>C 蜘蛛蟹 (490 三角形)</b><span>緑青 (酸化した銅) の矢尻形の甲羅を、長い細脚4本ずつで高く持ち上げた走り屋。鼻先の角、背に流れる棘の列、先が交わる珊瑚色の刃の鋏。速い群れの脅威が輪郭から読める。</span></span></label></fieldset>
+  <label class="note-l" for="lp_reef_scuttler-note">直してほしい点 (任意)</label>
+  <textarea id="lp_reef_scuttler-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_bubble_puffer" data-id="lp_bubble_puffer">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>泡吹き (bubble_puffer) 低ポリ非立方体 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 泡を吹くフグ (唇・2 本の前歯・まぶたの目・ひれ・膨らみ) の同一性を保ち、統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) で 3 方向の輪郭を作り比べる。骨の名前・階層・pivot は現行 geo と同じ (root は Y 180 度回転、spines / fin_r / fin_l / tail は body の子。頂点は geo 空間) なので、今のアニメ (idle・walk・attack・hurt・death・inflate・inflated・deflate) がそのまま動く。膨らみは body 1.45 倍・spines さらに 1.12 倍で、どの案も膨らんだ姿を比較画像に載せた。光るマスクは瞳のみ。 三角形: A 488 / B 451 / C 424 (目標: 普通の敵 約 600)。アトラス A 128x128 / B 128x128 / C 128x128。出力: docs/review/lowpoly_roughs/lp_bubble_puffer/{a,b,c}/。生成: tools/rough/lowpoly/bubble_puffer/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_bubble_puffer.jpg" aria-label="泡吹き (bubble_puffer) 低ポリ非立方体 3 案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_bubble_puffer.jpg" alt="泡吹き (bubble_puffer) 低ポリ非立方体 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_bubble_puffer-a"><input type="radio" name="lp_bubble_puffer" id="lp_bubble_puffer-a" value="a"><span class="letter">A</span><span class="otext"><b>A まんまる提灯</b><span>面取りした丸い玉の体に、半分まぶたの大きな目、すぼめた赤い唇と 2 本の前歯。全身に先の細い短い棘、丸い扇の胸びれ、二股の尾。いちばんフグらしい輪郭で、膨らむとそのまま玉が大きくなる。青緑の背・クリーム色の腹・赤い唇。</span></span></label><label class="opt" for="lp_bubble_puffer-b"><input type="radio" name="lp_bubble_puffer" id="lp_bubble_puffer-b" value="b"><span class="letter">B</span><span class="otext"><b>B 棘玉の鎧</b><span>ウニと潮殻を混ぜた八角の甲冑。骨色の帯 2 本から長い棘が星形に出て、目は吊り上がった細い目と重いまゆ板、横広の口に太い牙 2 本。ひれは骨ばった刃、尾は短い 3 本棘。藍の殻・骨色の帯・橙の縞の棘。いちばん敵らしく怖い。</span></span></label><label class="opt" for="lp_bubble_puffer-c"><input type="radio" name="lp_bubble_puffer" id="lp_bubble_puffer-c" value="c"><span class="letter">C</span><span class="otext"><b>C ラッパ喉</b><span>後ろへ細くなる涙形に、前へ突き出したラッパ形の口とあごの下の泡袋。短い柄の先に大きな目、背の扇びれ、翼のような胸びれ、三枚のひらひらの尾。棘は控えめで「泡を吹く」道具を前に出す。藍の背・ミントの腹と袋・珊瑚色のひれ。</span></span></label></fieldset>
+  <label class="note-l" for="lp_bubble_puffer-note">直してほしい点 (任意)</label>
+  <textarea id="lp_bubble_puffer-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_tide_beckoner" data-id="lp_tide_beckoner">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>潮招き (tide_beckoner) — 低ポリ非立方体 + ドット絵 3 案 (潮殻の背の中ボス)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の中ボス。骨 12 本 (root[Y 180 度] &gt; body &gt; claw_big &gt; claw_big_pincer / claw_small / eyes / leg_r1-3・leg_l1-3) の名前・階層・pivot は今の geo のまま、今のアニメ 13 本 (idle・slam_raise・beckon など) がそのまま動く。武器はなく別メッシュなし。三角形 (全身): A 1,489 / B 1,398 / C 1,386 (上限 約 1,500)。今は箱 1,356 個。アトラス 512×512 (体が 4 ブロック幅で面が大きいため)。光る画素は海硝子 (はさみの先・目の瞳。C は塔の灯も) のみ。シートは今 / A / B / C を前 3/4・後ろ 3/4・大鋏・頭まわり・打ち下ろしの構え (slam_raise 1.0 s)・招き潮 (beckon 0.45 s)・横から・アトラスで並べる。メッシュは lowpoly_roughs/lp_tide_beckoner/{a,b,c}/tide_beckoner_{a,b,c}_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/tide_beckoner/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_tide_beckoner.jpg" aria-label="潮招き (tide_beckoner) — 低ポリ非立方体 + ドット絵 3 案 (潮殻の背の中ボス) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_tide_beckoner.jpg" alt="潮招き (tide_beckoner) — 低ポリ非立方体 + ドット絵 3 案 (潮殻の背の中ボス) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_tide_beckoner-a"><input type="radio" name="lp_tide_beckoner" id="lp_tide_beckoner-a" value="a"><span class="letter">A</span><span class="otext"><b>A 瓦の大蟹</b><span>今の延長。重ね瓦のように庇の出る 5 段の青灰の石の甲羅 (苔・藤壺)、背に墓石のような石板、縁に太い角。大鋏は赤茶の殻の分厚い塊で、外側に瓦のような石板を 3 枚ずらして重ね、牙のある長い指が顎のように噛み合う (先だけ光る)。広く低く重い、山のような輪郭。最も今に近い。</span></span></label><label class="opt" for="lp_tide_beckoner-b"><input type="radio" name="lp_tide_beckoner" id="lp_tide_beckoner-b" value="b"><span class="letter">B</span><span class="otext"><b>B 珊瑚の山</b><span>岩のこぶの甲羅に、枝分かれする珊瑚が冠のように生える蟹 (背の大きな角、管サンゴの束、脳サンゴ、ウチワサンゴ)。蟹の殻は暗い臙脂、珊瑚は桃白。大鋏は鹿の角のように枝を持つ指と背の珊瑚。棘の多い、荒々しく生き物らしい輪郭。珊瑚憑きの敵と世界観がつながる。</span></span></label><label class="opt" for="lp_tide_beckoner-c"><input type="radio" name="lp_tide_beckoner" id="lp_tide_beckoner-c" value="c"><span class="letter">C</span><span class="otext"><b>C 潮見の塔</b><span>高い膝の細長い脚で構える骨白の蟹。背に潮位を測る石の塔 (目盛り・真鍮の見張り台・光る灯の部屋・尖り屋根) が立ち、潮を呼ぶ戦いの『目盛りが赤く光る』合図に結びつく。大鋏は青緑の殻の細長い手と、真鍮の輪を巻いた長い骨白の指 (招く鉤)。縦に高く、遠くからも塔で見分けがつく。</span></span></label></fieldset>
+  <label class="note-l" for="lp_tide_beckoner-note">直してほしい点 (任意)</label>
+  <textarea id="lp_tide_beckoner-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_tide_heart" data-id="lp_tide_heart">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>潮殻の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の心臓。骨名・pivot は今の geo (段階 1/2/3。親なし・休めの回転なし) のまま、今の intro/death を含むアニメがそのまま動く。三角形 (段階 1 / 2 / 3): A 1,585・1,282・1,455 / B 1,561・1,155・1,301 / C 1,523・1,280・1,485。今は箱 1628/1488/1242 個 (面 数千)。上限は 2,000 三角形/段階。メッシュは lowpoly_roughs/lp_tide_heart/{a,b,c}/p{1,2,3}_mesh.json (+ atlas・glowmask)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_tide_heart.jpg" aria-label="潮殻の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_tide_heart.jpg" alt="潮殻の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_tide_heart-a"><input type="radio" name="lp_tide_heart" id="lp_tide_heart-a" value="a"><span class="letter">A</span><span class="otext"><b>A 真珠の巻貝</b><span>今の姿の延長。殻はなめらかな八角断面の渦で、気室の仕切りの稜が横切り、口の縁が広がる。心臓は放射状の溝を持つ丸い真珠で、溝から核の光が漏れ、紫の血管が這う。桃・橙の珊瑚の枝と紫のいぼ。段階が進むと殻が欠けて青い室が見え、段階 3 で月と滴が回る。最も今に近く、一番まとまっている。</span></span></label><label class="opt" for="lp_tide_heart-b"><input type="radio" name="lp_tide_heart" id="lp_tide_heart-b" value="b"><span class="letter">B</span><span class="otext"><b>B 珊瑚の殻</b><span>殻が十一枚ほどの厚い板に割れ、珊瑚 (橙・桃・紫・青緑) が生えてのしかかる。口の縁は冠の棘、心臓は珊瑚の血管といぼに包まれ、核の環はイソギンチャクの触手。暖かい色が多く、シルエットが荒く賑やか。段階 2・3 で板が離れて減り、青い室が現れる。</span></span></label><label class="opt" for="lp_tide_heart-c"><input type="radio" name="lp_tide_heart" id="lp_tide_heart-c" value="c"><span class="letter">C</span><span class="otext"><b>C 深海の殻</b><span>暗い藍のアンモナイト。菱形の稜が前に立ち、外周に鋭い棘が並ぶ。心臓は七枚の花弁が閉じた蕾で、下の暗い玉が隙間から青く光る (段階 2 で花弁が開き、段階 3 で反り返って玉が燃える)。縁・割れ目・糸が青く光る、静かに不気味な案。</span></span></label></fieldset>
+  <label class="note-l" for="lp_tide_heart-note">直してほしい点 (任意)</label>
+  <textarea id="lp_tide_heart-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 5;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>

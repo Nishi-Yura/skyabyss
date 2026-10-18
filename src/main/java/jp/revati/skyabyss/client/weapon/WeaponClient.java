@@ -31,7 +31,7 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 //  - 一人称: 手元の動き (IClientItemExtensions#applyForgeHandTransform)。種類ごとの SwingMove から作る
 //  - 三人称・ほかのプレイヤー: 腕の構え (WeaponArmPoses。HumanoidModel.ArmPose の拡張)
 //  - 体の傾き: 大きな武器は、振るときに体ごと前へ倒れる (RenderLivingEvent)
-// 動きは全部、バニラの「振り」の進み (attackAnim) から作るので、サーバーに何も送らず、ほかのプレイヤーにも同じに見える
+// 動きは全部、バニラの「振り」の合図から始めた SwingClock の進み (攻撃速度で長さが変わる) から作るので、サーバーに何も送らず、ほかのプレイヤーにも同じに見える
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class WeaponClient {
     // 開発用: 0..1 にすると、自分の振りをその進みで止める (台本 swingpose。スクショ用)。負 = 使わない
@@ -119,7 +119,7 @@ public final class WeaponClient {
                 float equipProcess, float swingProcess) {
             int i = arm == HumanoidArm.RIGHT ? 1 : -1;
             pose.translate(i * 0.56f, -0.52f + equipProcess * -0.6f, -0.72f);
-            float t = forcedSwing >= 0 ? forcedSwing : swingProcess;
+            float t = forcedSwing >= 0 ? forcedSwing : SwingClock.progress(player, partialTick);
             if (t > 0f) {
                 SwingMove mv = kind.move;
                 float w = mv.weight(t);
@@ -145,7 +145,7 @@ public final class WeaponClient {
             return;
         }
         float t = player == Minecraft.getInstance().player && forcedSwing >= 0 ? forcedSwing
-                : player.swingingArm == InteractionHand.MAIN_HAND ? player.getAttackAnim(event.getPartialTick()) : 0f;
+                : SwingClock.progress(player, event.getPartialTick());
         if (t <= 0f) {
             return;
         }

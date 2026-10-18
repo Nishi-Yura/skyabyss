@@ -23,7 +23,9 @@ render 6
 cmd time set noon
 cmd weather clear
 cmd gamemode creative
+wait 200
 camera 0 -60 8 180 0
+waitchunks
 hud on
 wait 350
 """

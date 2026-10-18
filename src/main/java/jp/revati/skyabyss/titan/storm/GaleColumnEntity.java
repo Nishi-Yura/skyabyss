@@ -113,6 +113,11 @@ public class GaleColumnEntity extends Entity {
                 }
                 continue;
             }
+            // 備えの三灯 (21 の 1.2): 赤があれば一度は持ち上げず、柱を出て入り直した二度目 (5 秒以内) で上る。上りの途中は聞かない
+            if (!lifting.contains(p.getUUID()) && !jp.revati.skyabyss.readiness.BoardReadiness.attempt(p, Titans.THUNDER_WING,
+                    jp.revati.skyabyss.readiness.BoardReadiness.Mode.WALK_IN)) {
+                continue;
+            }
             lifting.add(p.getUUID());
             if (Updraft.lift(p, top)) {
                 lifting.remove(p.getUUID());

@@ -1,0 +1,20 @@
+{
+ "id": "ch1_icons_pulse",
+ "short": "鼓動守",
+ "kind": "アイテム 2案",
+ "title": "鼓動守 (岩鯨の心臓の護り、装飾品) — 32x32 ドット絵 2 案",
+ "sheets": [
+  "ch1_roughs/icons_ch1_32.png"
+ ],
+ "extra": "第一章の鼓動守 (岩鯨) の 32x32 原寸ドット絵 2 案。材料は岩殻の護り糸 (岩殻虫の素材)。装飾品の枠に置く。琥珀の核が鼓動の光の役 (A は螺旋の巻き貝の口の中の核、B は鼓動の線が中を走る)。ファイル: docs/review/ch1_roughs/icons/pulse_ward_a_32.png、pulse_ward_b_32.png。シートは 1x (暗い・明るい背景)・8x 最近傍・インベントリの枠 (4x) を並べた。描き方は tools/rough/lowpoly/ch1/icons_ch1.py。A は巻き貝の形 (螺旋の段と渦の筋)、B は丸い骨の護り。材質 (岩殻と骨) と紐の色も違う。",
+ "options": {
+  "a": {
+   "name": "A 螺旋の岩殻 (spiral rock shell)",
+   "desc": "灰青の螺旋の巻き貝 (螺塔の段・体の渦の筋・口の縁)。口の中に琥珀の核の光、琥珀の紐。岩鯨の『殻』の言葉。"
+  },
+  "b": {
+   "name": "B 骨白の護り (bone shell with heartbeat line)",
+   "desc": "骨白の貝の面に濃い石の縁、中を琥珀の鼓動の線が横切る。深緑の紐。心臓の線を一番はっきり見せる案。"
+  }
+ }
+}

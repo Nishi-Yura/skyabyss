@@ -248,9 +248,11 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 - **一人称**: `IClientItemExtensions#applyForgeHandTransform`。バニラの手元の置き方（`applyItemArmTransform`）と同じ位置から、種類ごとのキーフレーム（`SwingMove`。移動と回転）で動かす。振りの進み（`attackAnim`）0..1 から作る。
 - **三人称・ほかのプレイヤー**: `HumanoidModel.ArmPose` を NeoForge の拡張 enum（`META-INF/enumextensions.json`、`neoforge.mods.toml` の `enumExtensions`）で種類ごとに足し、`IClientItemExtensions#getArmPose` で利き手の武器にだけ返す（反対の手はバニラ）。構えの中でバニラの腕振り・胴ひねりを止め、同じ進み（`model.attackTime`）から利き腕・反対の腕（何も持っていないときだけ）・胴のひねり・肩の前後を作る。普段の構えは長柄・火かき棒だけ腕を前へ出す（ほかはバニラの片手持ち）。
 - **体の傾き**: 大剣・鎚・斧・爪・長柄は、振るとき `RenderLivingEvent` で腰を中心に体ごと前へ倒す（先に少し反ってから前へ）。
-- 動きは全部バニラの「振り」の進みから作るので、サーバーへ何も送らず、ほかのプレイヤーにも同じに見える。左利きは左右反転する（左手の display は `weapon_display.py` の `left_of`）。振りの長さはバニラの 6 tick（約 0.3 秒）のまま。
+- **振りの長さ（`SwingClock`）**: バニラの振り（`attackAnim`）は武器に関係なく 6 tick（約 0.3 秒）で終わり、攻撃速度 0.8〜1.0（次の一撃まで 1 秒前後）の大剣・大鎚が拳と同じ速さで振られて軽く見えた。そこで、バニラの `swing` の合図（自分もほかのプレイヤーも同じ `ClientboundAnimatePacket` から `swinging` が立つ）を見つけたら、クライアントだけで自分の時計を回す。長さ = `12 tick / 攻撃速度`（6〜16 tick に収める。強化・敏捷・特性の攻撃速度も効く）。大鎚 0.8 → 15 tick、大剣・斧・潮招きの爪 1.0 → 12 tick、鉾 1.1 → 11 tick、三叉槍・鉤槍 1.5 → 8 tick、火かき棒 1.6 → 8 tick、銛 1.8 → 7 tick、牙 2.2・雷獣の爪 2.0 → 6 tick。一人称の手元・三人称の腕と胴・体の傾きは全部この時計の進み（0..1）から作り、バニラの 6 tick の腕振りは構えの中で常に止める（長い振りに短い動きが混ざらない）。振りの途中でバニラが振り直したら（`swingTime` が戻る）時計も振り直す。開発用に台本 `swingclock off` で昔の 6 tick に戻せる（変更前後の比べ用）
+- 動きは全部バニラの「振り」の合図から作るので、サーバーへ何も送らず、ほかのプレイヤーにも同じに見える（専用サーバー + 二人のマルチで、見る側のクライアントにも振りが同じ長さの時計で出ることを確認）。左利きは左右反転する（左手の display は `weapon_display.py` の `left_of`）。
+- 一人称の見え方: 大剣・大鎚は、叩きつけの瞬間に武器が画面の下へ抜けて見えなくなっていた。叩きつけの高さの下がりを小さくし、前（奥）へ出す量を増やして、当たりの瞬間も武器が画面に残るようにした。
 - 持ち方（display）の表は `tools/weapon_display.py`。モデルを作り直す生成スクリプトは display をバニラの値で上書きするので、そのあとに `python tools/weapon_display.py` を通す。
-- 確認: `tools/gen_weapon_pose_shots.py` の台本と `tools/weapon_pose_sheet.py`（`tools/README.md`）。
+- 確認: `tools/gen_weapon_pose_shots.py` の台本と `tools/weapon_pose_sheet.py`（止めた姿）、`tools/gen_weapon_swing_shots.py` と `tools/weapon_swing_sheet.py`（実際に振って tick ごと。昔 / 今の比べは `docs/review/previews/weapon_swing_sheet.png`）、マルチは `tools/gen_weapon_swing_mp_shots.py`（`tools/README.md`）。
 
 #### 4.6.2 プレイヤーの武器の低ポリメッシュ（階級と強化の見た目）
 
