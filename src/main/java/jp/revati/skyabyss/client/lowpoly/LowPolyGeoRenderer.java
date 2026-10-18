@@ -17,6 +17,7 @@ import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
+import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
@@ -27,12 +28,18 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 // LowPoly.enabled が false のときは元の geo / テクスチャに戻り、普通の GeckoLib の描画になる。
 public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEntityRenderer<T> {
     private static final ResourceLocation DEBUG_TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
-    private final String meshName;
+    private final java.util.function.Function<T, String> meshName;
     private MultiBufferSource currentSource;
 
     public LowPolyGeoRenderer(EntityRendererProvider.Context ctx, String name, float scale) {
-        super(ctx, new Model<T>(name));
-        this.meshName = name;
+        this(ctx, new Model<T>(name), e -> name, scale);
+    }
+
+    // 自前の GeoModel (段階ごとに geo が変わる心臓など)。model は LowPoly.enabled のとき lowPolyGeo / lowPolyAtlas を返す。
+    // meshName は今のモブのメッシュ (lowpoly/<meshName>.json) の名前
+    public LowPolyGeoRenderer(EntityRendererProvider.Context ctx, GeoModel<T> model, java.util.function.Function<T, String> meshName, float scale) {
+        super(ctx, model);
+        this.meshName = meshName;
         withScale(scale);
         // 光る所があるときだけ (発光マスクの画像があるときだけ) 光らせる。LowPoly.enabled の切り替えにも付いていく
         addRenderLayer(new GlowLayer<>(this));
@@ -49,7 +56,7 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
 
     @Override
     public void renderCubesOfBone(PoseStack poseStack, GeoBone bone, VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
-        LowPolyMesh mesh = LowPoly.enabled ? LowPolyMeshes.get(meshName) : null;
+        LowPolyMesh mesh = LowPoly.enabled && animatable != null ? LowPolyMeshes.get(meshName.apply(animatable)) : null;
         LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
         if (meshBone == null) {
             super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour);
