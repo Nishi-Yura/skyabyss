@@ -1,0 +1,106 @@
+# The thunder wing heart's and the raiju's telegraphed patterns for a party of 6 (docs/design/12_thunder_wing.md section 5.2 / 5.3 / 5.5)
+# ./gradlew runShots -Pscript=tools/shots/telegraph_storm.txt   (mute: the shots runner sets the volume to 0)
+# One player on a barrier platform 17 blocks above the floor; "force <boss> <attack> 6" acts as if 6 players were in the room.
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:thunder_wing_heart 0 -58 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 120
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] SUMMON 6
+wait 16
+shot summon_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BLADE 6
+wait 16
+shot blade_a
+wait 26
+shot blade_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHAIN 6
+wait 14
+shot chain_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WINGBEAT 6
+wait 18
+shot wingbeat_a
+wait 24
+shot wingbeat_b
+wait 80
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] CHARGE 6
+wait 20
+shot charge_a
+wait 40
+shot charge_b
+wait 80
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FEATHER 6
+wait 16
+shot feather_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] FLASH 6
+wait 28
+shot flash_a
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] WEB 6
+wait 22
+shot web_a
+wait 40
+shot web_b
+wait 100
+
+cmd skyabyss dev force @e[type=skyabyss:thunder_wing_heart,limit=1] BARRAGE 6
+wait 14
+shot barrage_a
+wait 60
+cmd kill @e[type=skyabyss:thunder_wing_heart]
+wait 20
+
+cmd summon skyabyss:raiju 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 20
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] POUNCE 6
+wait 12
+shot pounce_a
+wait 40
+shot pounce_b
+wait 60
+
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] CLAW 6
+wait 12
+shot claw_a
+wait 50
+
+cmd skyabyss dev force @e[type=skyabyss:raiju,limit=1] ROAR 6
+wait 44
+shot roar_a
+wait 40
+cmd kill @e[type=skyabyss:raiju]
+cmd kill @e[type=skyabyss:static_moth]
+quit

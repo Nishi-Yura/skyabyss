@@ -191,6 +191,8 @@ public final class SelfTestRunner {
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)
         steps.add(Step.once("raiju (load)", jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::load));
         steps.add(Step.once("raiju", 40, jp.revati.skyabyss.titan.storm.raiju.RaijuSelfTest::runSelfTest));
+        // 雷翼の心臓・雷獣の予告 (Telegraph): 印と当たりが同じ形・予告 0.8 秒以上・安全な床・人数で増える・部屋に収まる。docs/design/12 の 5.4
+        steps.addAll(jp.revati.skyabyss.titan.storm.StormTelegraphSelfTest.steps());
         // 余燼の骨組み (ディメンション・熱の API・部屋の箱・ID)。docs/design/13_ember.md の 11章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSkeletonSelfTest.steps());
         // 余燼の背の体と広間 (体の穴・歩いて行ける所・液体・看板・石と門・リセット・熱)。13 の 18章
