@@ -14,6 +14,7 @@ import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,10 +38,11 @@ public final class GroupSelfTest {
                 f.add("titan_back dimension is missing");
             } else {
                 roomLocks(back, f);
-                bossRoom(back, f);
+                bossRoom(server.overworld(), f);
                 presence(back, f);
                 shadow(server, f);
                 share(server, back, f);
+                perf(back, f);
             }
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST group crashed", e);
@@ -100,11 +102,12 @@ public final class GroupSelfTest {
     }
 
     // 戦いの参加者 (M6): 倒れる瞬間に部屋にいた人・部屋で倒れた人・切断した人だけ。ほんの一瞬いた人、出て行った人は数えない
+    // 地表の読み込み済みの所 (世界の出生地) で試す: 湧かせたボスがすぐ見つかる (背中のチャンクはこの tick には読み込み済みと限らない)
     private static void bossRoom(ServerLevel back, List<String> f) {
         FakePlayer a = player(back, "boss_a");
         UUID group = Groups.keyOf(a);
         List<ServerPlayer> inside = new ArrayList<>(List.of(a));
-        Mob boss = TitanBackTrials.spawnGuard(back, "sentinel", TitanBackLayout.HUB.center(), group);
+        Mob boss = TitanBackTrials.spawnGuard(back, "sentinel", back.getSharedSpawnPos().above(2), group);
         if (boss == null) {
             f.add("could not spawn the test boss");
             return;
@@ -310,6 +313,36 @@ public final class GroupSelfTest {
             parties.restore(snapshot, server.registryAccess());
             Activity.setLastActive(far, back.getGameTime());
             Activity.setLastActive(near, back.getGameTime());
+        }
+    }
+
+    // 負荷 (10 の 10.8): 扉の当たり判定 (動く者が扉に当たるたびに引く) と、グループへ送る見かけの組み立て
+    private static void perf(ServerLevel back, List<String> f) {
+        FakePlayer p = player(back, "perf_a");
+        BlockPos pos = TitanBackLayout.GATE.get(0);
+        back.setBlock(pos, jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get().defaultBlockState(), 2);
+        var state = back.getBlockState(pos);
+        UUID group = Groups.keyOf(p);
+        GroupGates.open(back, group, TitanBackLayout.GATE);
+        var ctx = net.minecraft.world.phys.shapes.CollisionContext.of(p);
+        int calls = 200_000;
+        long t0 = System.nanoTime();
+        int sink = 0;
+        for (int i = 0; i < calls; i++) {
+            sink += state.getCollisionShape(back, pos, ctx).isEmpty() ? 1 : 0;
+        }
+        long shapeNs = System.nanoTime() - t0;
+        t0 = System.nanoTime();
+        int overlays = 2000;
+        for (int i = 0; i < overlays; i++) {
+            sink += GroupOverlays.compute(back, group).size();
+        }
+        long overlayNs = System.nanoTime() - t0;
+        GroupProgress.reset(back, group);
+        SkyAbyss.LOGGER.info("SELFTEST group perf: gate collision {} ns per query ({} queries), overlay build {} us per player ({} builds, {})",
+                shapeNs / calls, calls, overlayNs / overlays / 1000, overlays, sink);
+        if (shapeNs / calls > 20_000 || overlayNs / overlays > 2_000_000) {
+            f.add("the per-group gate lookups are too slow");
         }
     }
 }
