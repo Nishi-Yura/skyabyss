@@ -8,6 +8,7 @@ import com.mojang.math.Axis;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.tide.mob.BubblePuffer;
 import jp.revati.skyabyss.titan.tide.mob.BubbleShot;
 import jp.revati.skyabyss.titan.tide.mob.CoralThrall;
@@ -47,9 +48,23 @@ public final class TideMobRenderers {
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(TideMobSetup.CORAL_THRALL.get(), ThrallRenderer::new);
-        event.registerEntityRenderer(TideMobSetup.REEF_SCUTTLER.get(), ctx -> new MobRenderer<ReefScuttler>(ctx, "reef_scuttler", 0.45f));
-        event.registerEntityRenderer(TideMobSetup.BUBBLE_PUFFER.get(), ctx -> new MobRenderer<BubblePuffer>(ctx, "bubble_puffer", 0.35f));
+        event.registerEntityRenderer(TideMobSetup.REEF_SCUTTLER.get(), ctx -> lowPoly(ctx, "reef_scuttler", 0.45f));
+        event.registerEntityRenderer(TideMobSetup.BUBBLE_PUFFER.get(), ctx -> lowPoly(ctx, "bubble_puffer", 0.35f));
         event.registerEntityRenderer(TideMobSetup.BUBBLE_SHOT.get(), BubbleRenderer::new);
+    }
+
+    // 低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo に戻る。死ぬときは横に倒れない
+    static <T extends TideMob> LowPolyGeoRenderer<T> lowPoly(EntityRendererProvider.Context ctx, String name, float shadow) {
+        return new LowPolyGeoRenderer<T>(ctx, name, 1.0f) {
+            {
+                this.shadowRadius = shadow;
+            }
+
+            @Override
+            protected float getDeathMaxRotation(T animatable) {
+                return 0f;
+            }
+        };
     }
 
     static class MobRenderer<T extends TideMob> extends GeoEntityRenderer<T> {

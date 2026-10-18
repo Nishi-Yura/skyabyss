@@ -346,6 +346,10 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 | 肋の射手 rib_archer | C ひげ板の頭巾 | 605 + 弓 102（弦の骨 2） | 10 | `rib_archer/c/`（弓 `rib_archer_bow` は `socket_off`） |
 | 水路の顎 waterway_maw | B 提灯鮟鱇 | 643 | 11 | `waterway_maw/b/` |
 | 岩鯨の心臓 stone_whale_heart | A 地層の板 | 1,336 / 1,322 / 1,364（段階 1 / 2 / 3） | 30 / 32 / 47 | `lp_whale_heart/a/p1..p3`（段階ごとに別の geo・メッシュ・アトラス） |
+| 磯走り reef_scuttler | A 岩礁蟹 | 514 | 6 | `reef_scuttler/a/` |
+| 泡吹き bubble_puffer | A まんまる提灯 | 488 | 6 | `lp_bubble_puffer/a/`（ふくらみは体の骨の拡大と棘の骨のアニメ。ふくらんだ姿も棘・体とも合っている） |
+| 潮招き tide_beckoner | A 瓦の大蟹 | 1,489 | 12 | `lp_tide_beckoner/a/`（アトラス 512） |
+| 潮殻の心臓 tide_heart | B 珊瑚の殻 | 1,561 / 1,155 / 1,301（段階 1 / 2 / 3） | 14 / 14 / 14 | `lp_tide_heart/b/p1..p3`（`tide_heart_pN`。`TideHeartRenderer` は `LowPolyGeoRenderer` の派生で、キューブのときだけ自前の発光層、低ポリのときは `autoGlow()` の発光層） |
 
 入れ方で直した共通部分（`tools/install_lowpoly.py` と `client/lowpoly/`）:
 
@@ -357,6 +361,8 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 - 元の箱の描画は、5 体とも `LowPoly.enabled = false` で出る。動きの確認用に `/skyabyss dev anim` は GuardMob 以外の GeckoLib のモブ（水路の顎）にも効く
 
 確かめ（台本 `tools/shots/lp_<名>.txt`、`tools/gen_lowpoly_five_shots.py` が書く。絵は `docs/review/previews/lp_*.png`）: 待機の前・斜め・横・後ろ、顔、番兵長の薙ぎ払い・叩きつけ・咆哮、射手の構えと弦、苔這いの飛びかかり・被弾・死、水路の顎の噛みつき、心臓の段階 1〜3 と登場・倒れる。動きは同じ姿勢の箱版（`cubes_*`）と並べて見た。負荷（1280x720、垂直同期なし、苔這い 20 + 射手 10 の 30 体、`tools/shots/lp_perf.txt`）: 低ポリ 6.5〜7.4 ms/frame、箱 22.1〜24.5 ms/frame（約 3.3 倍速い）。
+
+潮殻の背の 4 体は `python tools/install_lowpoly_tide.py` で一度に入る（珊瑚憑きは作り直し中なので含めない）。磯走り・泡吹きは `TideMobRenderers.lowPoly()`、潮招きは `TideBackClient.BeckonerRenderer`、心臓は `TideHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。確かめの台本は `python tools/gen_lowpoly_tide_shots.py` が `tools/shots/lp_tide_{scuttler,puffer,beckoner,heart}.txt` に書く（心臓の段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が自分で吠えて進むのを待って撮る）。絵は `docs/review/previews/lp_tide_*`（箱版は `cubes_tide_*`、モブごとの比較シートは `lp_tide_<名>_sheet.png`、心臓の登場・倒れるは `lp_tide_heart_cinematic_sheet.png`。`python tools/lowpoly_tide_sheets.py`）。負荷（`tools/shots/lp_tide_perf.txt`、磯走り 15 + 泡吹き 10 + 潮招き 2 = 27 体、1280x720、垂直同期なし）: 低ポリ 5.1〜5.6 ms/frame、箱 15.5〜16.8 ms/frame（約 3 倍速い）。
 
 ## 旧節番号の対応
 
