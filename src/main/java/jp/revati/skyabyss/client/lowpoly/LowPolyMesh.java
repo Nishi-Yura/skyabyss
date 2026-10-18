@@ -60,7 +60,7 @@ public final class LowPolyMesh {
         String texName = textureName(json, name);
         ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + texName + ".png");
         ResourceLocation glow = glowExists ? ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + texName + "_glowmask.png") : null;
-        boolean socket = json.has("socket") && json.get("socket").getAsBoolean();
+        boolean socket = (json.has("socket") && json.get("socket").getAsBoolean()) || json.has("attach");
         JsonObject bonesJson = json.getAsJsonObject("bones");
 
         Map<String, Bone> baked = new LinkedHashMap<>();

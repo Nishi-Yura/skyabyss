@@ -50,6 +50,8 @@ def main():
     ap.add_argument("--glow")
     ap.add_argument("--geo-name")
     ap.add_argument("--split", action="append", default=[])
+    ap.add_argument("--gear", action="append", default=[],
+                    help="MESH.json:ATLAS.png:NAME:SOCKET - a separate socket mesh with its own atlas (vertices relative to the socket pivot)")
     a = ap.parse_args()
 
     rough = os.path.join(ROOT, "docs", "review", "lowpoly_roughs")
@@ -59,6 +61,7 @@ def main():
     geo_name = a.geo_name or a.name
 
     # split bones -> gear meshes
+    gear_rel = {}
     sockets = {}  # socket bone name -> (parent, pivot)
     for spec in a.split:
         bone, socket, gear = spec.split(":")
@@ -76,6 +79,18 @@ def main():
         write_json(os.path.join(ASSETS, "lowpoly", gear + ".json"), gear_mesh)
         sockets[socket] = (b["parent"], p, rel)
         print("split %s -> lowpoly/%s.json (socket %s, %d tris)" % (bone, gear, socket, len(b["triangles"])))
+    for spec in a.gear:
+        gm_path, ga_path, gname, socket = spec.split(":", 3) if spec.count(":") >= 3 else (spec.split(":") + [None])[:4]
+        gm = json.load(open(gm_path, encoding="utf-8"))
+        bone = next(iter(gm["bones"].values()))
+        gm["socket"] = True
+        gm["name"] = gname
+        gm["texture"] = gname
+        write_json(os.path.join(ASSETS, "lowpoly", gname + ".json"), gm)
+        os.makedirs(os.path.join(ASSETS, "textures", "lowpoly"), exist_ok=True)
+        shutil.copyfile(ga_path, os.path.join(ASSETS, "textures", "lowpoly", gname + ".png"))
+        gear_rel[socket] = bone
+        print("gear %s -> lowpoly/%s.json (socket %s, %d tris)" % (gm_path, gname, socket, len(bone["triangles"])))
     mesh["triangle_count"] = sum(len(b["triangles"]) for b in mesh["bones"].values())
     mesh["name"] = a.name
     mesh["texture"] = a.name
@@ -84,8 +99,10 @@ def main():
     tex_dir = os.path.join(ASSETS, "textures", "lowpoly")
     os.makedirs(tex_dir, exist_ok=True)
     shutil.copyfile(atlas_path, os.path.join(tex_dir, a.name + ".png"))
-    if a.glow:
-        shutil.copyfile(a.glow, os.path.join(tex_dir, a.name + "_glow.png"))
+    glow = a.glow or os.path.join(rough, a.name + "_lowpoly_glowmask.png")
+    if os.path.exists(glow):
+        shutil.copyfile(glow, os.path.join(tex_dir, a.name + "_glowmask.png"))
+        print("glowmask installed")
 
     # bones the mesh lacks but the original geo has (sockets...) keep their original place unless split
     orig_path = os.path.join(ASSETS, "geo", "entity", a.name + ".geo.json")
@@ -124,8 +141,11 @@ def main():
     for e in bones:
         b = mesh["bones"].get(e["name"])
         verts = None
-        if b:
+        if b and b["vertices"]:
             verts = b["vertices"]
+        elif e["name"] in gear_rel:
+            p = e["pivot"]
+            verts = [[v[i] + p[i] for i in range(3)] for v in gear_rel[e["name"]]["vertices"]]
         elif e["name"] in sockets:
             rel = sockets[e["name"]][2]
             p = sockets[e["name"]][1]

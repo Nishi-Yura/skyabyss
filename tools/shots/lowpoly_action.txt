@@ -17,27 +17,36 @@ perspective front
 waitchunks
 wait 20
 cmd gamemode survival
-cmd summon skyabyss:bone_sentinel 5 -60 0 {Rotation:[90f,0f],PersistenceRequired:1b}
-wait 7
+cmd summon skyabyss:bone_sentinel 3.5 -60 0 {Rotation:[90f,0f],PersistenceRequired:1b}
+wait 40
+wait 5
 shot lowpoly_move_00
-wait 7
+wait 5
 shot lowpoly_move_01
-wait 7
+wait 5
 shot lowpoly_move_02
-wait 7
+wait 5
 shot lowpoly_move_03
-wait 7
+wait 5
 shot lowpoly_move_04
-wait 7
+wait 5
 shot lowpoly_move_05
-wait 7
+wait 5
 shot lowpoly_move_06
-wait 7
+wait 5
 shot lowpoly_move_07
-wait 7
+wait 5
 shot lowpoly_move_08
-wait 7
+wait 5
 shot lowpoly_move_09
+wait 5
+shot lowpoly_move_10
+wait 5
+shot lowpoly_move_11
+wait 5
+shot lowpoly_move_12
+wait 5
+shot lowpoly_move_13
 cmd damage @e[type=skyabyss:bone_sentinel,limit=1] 1 minecraft:generic
 wait 1
 shot lowpoly_hurt
