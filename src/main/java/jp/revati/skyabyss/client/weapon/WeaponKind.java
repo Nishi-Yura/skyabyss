@@ -37,9 +37,9 @@ public enum WeaponKind {
             .set(BY, 0f, 0.45f, -0.5f, -0.3f, 0f)
             .set(LEAN, 0f, -6f, 14f, 6f, 0f)
             .set(TX, 0f, 0.05f, -0.1f, -0.05f, 0f)
-            .set(TY, 0f, 0.45f, -0.3f, -0.12f, 0f)
-            .set(TZ, 0f, 0.05f, -0.35f, -0.1f, 0f)
-            .set(RX, 0f, 5f, -80f, -30f, 0f)
+            .set(TY, 0f, 0.4f, -0.08f, -0.04f, 0f)
+            .set(TZ, 0f, 0.05f, -0.5f, -0.15f, 0f)
+            .set(RX, 0f, 5f, -70f, -28f, 0f)
             .set(RY, 0f, 0f, -12f, -5f, 0f)
             .set(RZ, 0f, 10f, 15f, 6f, 0f)),
     // 長柄 (番兵長の鉾・三叉槍・銛): 肩ごと引いて、まっすぐ突く
@@ -114,9 +114,9 @@ public enum WeaponKind {
             .set(OZ, 0f, -0.3f, 0f, 0f, 0f)
             .set(BY, 0f, 0.2f, -0.2f, -0.1f, 0f)
             .set(LEAN, 0f, -10f, 20f, 18f, 0f)
-            .set(TY, 0f, 0.55f, -0.4f, -0.32f, 0f)
-            .set(TZ, 0f, 0f, -0.35f, -0.3f, 0f)
-            .set(RX, 0f, 5f, -75f, -60f, 0f)),
+            .set(TY, 0f, 0.4f, -0.12f, -0.1f, 0f)
+            .set(TZ, 0f, 0f, -0.5f, -0.45f, 0f)
+            .set(RX, 0f, 5f, -65f, -50f, 0f)),
     // 火かき棒: 短く鋭い突き
     POKER(SwingMove.at(0f, 0.3f, 0.5f, 0.75f, 1f)
             .idle(-1.0f, -0.1f)
