@@ -128,6 +128,8 @@ public final class ShotRunner {
         // 焦点が外れても止めない。最初の案内の画面も出さない
         mc.options.pauseOnLostFocus = false;
         mc.options.onboardAccessibility = false;
+        // 台本の撮影は音を鳴らさない (主音量 0。台本の options.txt に残っても、撮影のフォルダだけのこと)
+        mc.options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(0.0);
         if (script.width > 0 && script.height > 0) {
             GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), script.width, script.height);
         }
