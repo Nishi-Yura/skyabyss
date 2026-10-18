@@ -101,6 +101,7 @@ public final class SelfTestRunner {
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
+        steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
         // 章の写像 (段階 × 序章、伝承の章との一致)。docs/design/10 の 3 章
