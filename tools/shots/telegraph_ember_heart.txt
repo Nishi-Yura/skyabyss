@@ -1,0 +1,85 @@
+# The ember heart's telegraphed patterns for a party of 6 (docs/design/13_ember.md section 18)
+# ./gradlew runShots -Pscript=tools/shots/telegraph_ember_heart.txt   (mute: the shots runner sets the volume to 0)
+# One player on a barrier platform 17 blocks above the floor; "dev emberforce <heart> <attack> 6" acts as if 6 players were in the chamber.
+# The heart is summoned unbound in the flat world (no chamber): the floor-collapse sectors and the embers need the chamber and are checked by the self test.
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -4 -44 11 4 -44 17 minecraft:air
+cmd fill -4 -44 11 4 -44 17 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+cmd summon skyabyss:ember_heart 0 -58 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 10
+cmd skyabyss cinematic stop
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 100
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] BREATH 6
+wait 12
+shot breath_a
+wait 20
+shot breath_hit
+wait 40
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] PULSE 6
+wait 12
+shot pulse_a
+wait 14
+shot pulse_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] ORB 6
+wait 14
+shot orb_a
+wait 22
+shot orb_hit
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] GALE 6
+wait 30
+shot gale_a
+wait 50
+shot gale_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] PELLET 6
+wait 30
+shot pellet_a
+wait 30
+shot pellet_b
+wait 60
+
+camera minecraft:overworld 0.5 -43 14.5 180 38
+wait 5
+cmd skyabyss dev emberforce @e[type=skyabyss:ember_heart,limit=1] FADING 6
+wait 24
+shot fading_a
+wait 30
+shot fading_b
+cmd kill @e[type=skyabyss:ember_heart]
+quit
