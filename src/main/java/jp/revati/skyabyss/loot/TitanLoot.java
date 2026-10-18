@@ -173,7 +173,7 @@ public final class TitanLoot {
         int memory = r.memory;
         List<ItemStack> items = new ArrayList<>();
         items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 4, 7)));
-        items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), between(random, 1, 3)));
+        items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), between(random, 1, 3)));
         // 心核は初めての撃破で必ず、そのあとは 25%
         if (r.clears == 1 || random.nextFloat() < CORE_CHANCE) {
             items.add(new ItemStack(ModItems.STONE_WHALE_CORE.get()));
@@ -197,7 +197,7 @@ public final class TitanLoot {
             List<Item> missing = collection().stream().filter(i -> !r.owned.contains(id(i))).toList();
             if (missing.isEmpty()) {
                 pityShards = true;
-                items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), PITY_SHARDS));
+                items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), PITY_SHARDS));
                 r.memory = 0;
             } else {
                 guaranteed = missing.get(random.nextInt(missing.size()));
@@ -221,7 +221,7 @@ public final class TitanLoot {
             items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 2, 4)));
         }
         if (random.nextFloat() < CAPTAIN_RESONANCE_CHANCE) {
-            items.add(new ItemStack(ModItems.RESONANCE_SHARD.get(), between(random, 1, 2)));
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), between(random, 1, 2)));
         }
         if (random.nextFloat() < CAPTAIN_JERKY_CHANCE) {
             items.add(new ItemStack(ModItems.CLOUD_JERKY.get(), between(random, 1, 2)));
@@ -266,7 +266,7 @@ public final class TitanLoot {
             items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 1, 2)));
         }
         if (random.nextFloat() < 0.05f) {
-            items.add(new ItemStack(ModItems.RESONANCE_SHARD.get()));
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get()));
         }
         if (random.nextFloat() < 0.03f) {
             items.add(new ItemStack(ModItems.CLOUD_JERKY.get()));
@@ -525,7 +525,7 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 知らせ
-    // 受け取ったもの: 【岩鯨の欠片】×5 【共鳴の欠片】×2 … (名前にカーソルで説明)
+    // 受け取ったもの: 【岩鯨の鱗片】×5 【共鳴の欠片】×2 … (名前にカーソルで説明)
     public static MutableComponent rewardLine(List<ItemStack> items) {
         Map<Item, Integer> counts = new LinkedHashMap<>();
         for (ItemStack s : items) {
@@ -748,12 +748,12 @@ public final class TitanLoot {
     public static boolean exchange(ServerPlayer player, Item item) {
         TitanMemoryData.Record r = record(player);
         syncOwned(player, r);
-        String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player));
+        String denial = exchangeDenial(r, item, ForgeRules.exchangeAffordable(player, STONE_WHALE));
         if (denial != null) {
             Notice.warn(player, denial);
             return false;
         }
-        ForgeRules.payExchange(player);
+        ForgeRules.payExchange(player, STONE_WHALE);
         r.owned.add(id(item));
         r.lastExchangeClears = r.clears;
         r.exchanges++;

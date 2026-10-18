@@ -1,0 +1,18 @@
+# 四巨神の武器のツールチップ (物語の一行つき) を並べて撮る。./gradlew runShots -Pscript=tools/shots/misc_gear_tooltip.txt
+# 出力 run/shots/misc_gear_tooltip/shots/misc_gear_tooltip/misc_gear_tooltip.png → docs/review/previews/misc_gear_tooltip.png に写す
+world shots flat
+size 1280 300
+timeout 300
+render 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+waitchunks
+chat clear
+wait 20
+open jp.revati.skyabyss.client.dev.GearTooltipScreen
+wait 20
+shot misc_gear_tooltip
+quit

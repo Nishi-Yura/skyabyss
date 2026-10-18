@@ -86,8 +86,18 @@ public final class ModItems {
             () -> new MaterialItem(new Item.Properties(), 0xC9C2B0, "item.skyabyss.stone_whale_shard.desc", false));
     public static final DeferredItem<Item> RESONANCE_CRYSTAL = ITEMS.register("resonance_crystal",
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0x9FE8FF, "item.skyabyss.resonance_crystal.desc", false));
+    // 共鳴の欠片 (交換の通貨) は巨神ごと。交換は、その巨神の欠片で払う (ForgeRules.exchangeAffordable)。
+    // 以前の共通の共鳴の欠片 (resonance_shard) は古い品として残し、どの巨神の交換にも使える (炉が手もちの欠片へ換えて払う)。新しくは落ちない
     public static final DeferredItem<Item> RESONANCE_SHARD = ITEMS.register("resonance_shard",
             () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xB89CFF, "item.skyabyss.resonance_shard.desc", false));
+    public static final DeferredItem<Item> RESONANCE_SHARD_STONE_WHALE = ITEMS.register("resonance_shard_stone_whale",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xD9CBA6, "item.skyabyss.resonance_shard_stone_whale.desc", false));
+    public static final DeferredItem<Item> RESONANCE_SHARD_TIDE_SHELL = ITEMS.register("resonance_shard_tide_shell",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0x7FE0D2, "item.skyabyss.resonance_shard_tide_shell.desc", false));
+    public static final DeferredItem<Item> RESONANCE_SHARD_THUNDER_WING = ITEMS.register("resonance_shard_thunder_wing",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xFFD866, "item.skyabyss.resonance_shard_thunder_wing.desc", false));
+    public static final DeferredItem<Item> RESONANCE_SHARD_EMBER = ITEMS.register("resonance_shard_ember",
+            () -> new MaterialItem(new Item.Properties().rarity(Rarity.RARE), 0xFF9A5A, "item.skyabyss.resonance_shard_ember.desc", false));
     public static final DeferredItem<Item> STONE_WHALE_CORE = ITEMS.register("stone_whale_core",
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant(), 0x7FD6D0,
                     "item.skyabyss.stone_whale_core.desc", true));
@@ -130,6 +140,10 @@ public final class ModItems {
                 output.accept(BONE_SPIKE_ARROW.get());
                 output.accept(STONE_WHALE_SHARD.get());
                 output.accept(RESONANCE_CRYSTAL.get());
+                output.accept(RESONANCE_SHARD_STONE_WHALE.get());
+                output.accept(RESONANCE_SHARD_TIDE_SHELL.get());
+                output.accept(RESONANCE_SHARD_THUNDER_WING.get());
+                output.accept(RESONANCE_SHARD_EMBER.get());
                 output.accept(RESONANCE_SHARD.get());
                 output.accept(STONE_WHALE_CORE.get());
                 output.accept(RESONANCE_FORGE.get());
@@ -146,6 +160,22 @@ public final class ModItems {
             .build());
 
     private ModItems() {
+    }
+
+    // 巨神の id (stone_whale / tide_shell / thunder_wing / ember) に合う共鳴の欠片。知らない巨神は岩鯨のもの
+    public static Item resonanceShard(String titan) {
+        return switch (titan) {
+            case "tide_shell" -> RESONANCE_SHARD_TIDE_SHELL.get();
+            case "thunder_wing" -> RESONANCE_SHARD_THUNDER_WING.get();
+            case "ember" -> RESONANCE_SHARD_EMBER.get();
+            default -> RESONANCE_SHARD_STONE_WHALE.get();
+        };
+    }
+
+    // 共鳴の欠片か (巨神ごとのものと、古い共通のもの)
+    public static boolean isResonanceShard(Item item) {
+        return item == RESONANCE_SHARD.get() || item == RESONANCE_SHARD_STONE_WHALE.get() || item == RESONANCE_SHARD_TIDE_SHELL.get()
+                || item == RESONANCE_SHARD_THUNDER_WING.get() || item == RESONANCE_SHARD_EMBER.get();
     }
 
     public static void register(IEventBus modEventBus) {

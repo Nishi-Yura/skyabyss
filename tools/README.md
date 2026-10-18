@@ -54,7 +54,7 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
 | `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
-| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
@@ -227,3 +227,9 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 余燼の背の体 (低ポリ案 C「皮が岩になる火蜥蜴」をブロックにした火蜥蜴、13 の 3.2 章): `data/skyabyss/ember_back/body.bin` | `gen_ember_back_body.py` (形は `lowpoly_ember_voxel.py` が案 C の近景メッシュから作る。`--preview` で上・横・前の色の地図、`--cache` で `rough/_ember_back_body_cache.npz`)。メッシュとの並べ描きは `--cache` のあとで `ember_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`EmberBackLayout.LAYOUT_VERSION`) を上げる |
 
 雷翼の背の鳥: `data/skyabyss/storm_back/bird.bin` は `python tools/gen_back_shape.py bird [--preview]`。形・骨は `install_thunder_wing.build_grid()`、材料は低ポリ案 A の近景メッシュ (`lowpoly_thunder_voxel.py` が体積化。`recolor` で近いセルの材料を写す)。変えたら `StormBackLayout.LAYOUT_VERSION` を上げる。ブロックの鳥と案 A のメッシュの並べ描きは `storm_back_a_views.py` (`SKYABYSS_DUMP=storm_back ./gradlew runServer` で書き出した `.sbd` を渡す)。
+
+## 装備まわりの文と絵 (2026-10-18)
+
+- `python tools/gen_gear_story.py` : 装備 40 点のツールチップの「物語の一行」(`assets/skyabyss_gear_story/lang/`)。03 の 3.4節
+- `python tools/gen_resonance_shards.py` : 巨神ごとの共鳴の欠片の絵 4 枚 (`textures/item/resonance_shard_<巨神>.png`。共通の欠片の色味を替える)。03 の 2.2節
+- `python tools/gen_grave_assets.py` : 墓の絵・モデル・語り部の墓の会話と文 (墓の一覧の画面の文も含む)。11 の 6.4節

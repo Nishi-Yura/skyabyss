@@ -110,6 +110,63 @@ public final class GraveSelfTest {
         SkyAbyss.LOGGER.info("[selftest] grave: started from mode {}", mode);
     }
 
+    // 語り部の救いで、墓を選べる (一覧は古い順。選んだ墓だけ救われる。会話から開いていなければ・人の墓・なくなった墓は断る)
+    private static void chooser(MinecraftServer server, ServerLevel level, GraveData data, List<String> f) {
+        BlockPos site = platform(level);
+        FakePlayer cr = player(level, "[grave_choose]");
+        FakePlayer other = player(level, "[grave_choose_other]");
+        List<GraveData.Grave> made = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            place(cr, site.offset(i * 4 - 4, 0, 0));
+            fill(cr);
+            DeathEvents.Outcome o = DeathEvents.handleDeath(cr);
+            if (o != null && o.grave() != null) {
+                made.add(o.grave());
+            }
+            DeathEvents.persisted(cr).remove(DeathEvents.KEEP_TAG);
+            cr.getInventory().clearContent();
+        }
+        check(f, made.size() == 3, "the chooser test needs three graves, got " + made.size());
+        if (made.size() < 3) {
+            return;
+        }
+        place(other, site.offset(0, 0, 8));
+        fill(other);
+        DeathEvents.Outcome oo = DeathEvents.handleDeath(other);
+        // 会話から開いていなければ断る
+        GraveChooser.forget(cr);
+        check(f, GraveChooser.pick(cr, made.get(2).id) == null && data.get(made.get(2).id) != null, "picking without the chooser being opened should be refused");
+        GraveChooser.open(cr);
+        List<GraveNetwork.Entry> entries = GraveChooser.entries(cr);
+        check(f, GraveChooser.isOffered(cr) && entries.size() == 3 && entries.get(0).id().equals(made.get(0).id) && entries.get(2).id().equals(made.get(2).id)
+                && entries.get(0).items() == made.get(0).itemCount() && entries.get(0).xp() == made.get(0).xp
+                && entries.get(0).x() == made.get(0).pos.getX() && entries.get(0).age() >= 0, "the chooser list should show the owner's graves oldest first");
+        // 人の墓は選べない
+        if (oo != null && oo.grave() != null) {
+            check(f, GraveChooser.pick(cr, oo.grave().id) == null && data.get(oo.grave().id) != null, "another player's grave must not be chosen");
+        }
+        // 真ん中を選ぶ: 古い墓も新しい墓も残る
+        Graves.Rescued r = GraveChooser.pick(cr, made.get(1).id);
+        check(f, r != null && data.get(made.get(1).id) == null && data.get(made.get(0).id) != null && data.get(made.get(2).id) != null
+                && data.owned(cr.getUUID()).size() == 2, "choosing the middle grave should rescue only that one");
+        check(f, GraveChooser.isOffered(cr), "the chooser should stay open while graves remain");
+        // もうない墓は断る
+        check(f, GraveChooser.pick(cr, made.get(1).id) == null && data.owned(cr.getUUID()).size() == 2, "a grave that is already gone must be refused");
+        // 救いが 0% なら断る (墓は残る)
+        rule(server, DeathRules.RESCUE, 0);
+        check(f, GraveChooser.pick(cr, made.get(0).id) == null && data.get(made.get(0).id) != null, "a rescue at 0% must be refused");
+        rule(server, DeathRules.RESCUE, 50);
+        GraveChooser.open(cr);
+        check(f, GraveChooser.pick(cr, made.get(2).id) != null && GraveChooser.pick(cr, made.get(0).id) != null && data.owned(cr.getUUID()).isEmpty(),
+                "choosing the rest should empty the list");
+        check(f, !GraveChooser.isOffered(cr), "the chooser should close when the list is empty");
+        if (oo != null && oo.grave() != null) {
+            data.remove(oo.grave().id);
+        }
+        cr.getInventory().clearContent();
+        TitanMemoryData.get(server).takePending(cr.getUUID());
+    }
+
     private static void check(List<String> f, boolean ok, String what) {
         if (!ok) {
             f.add(what);
@@ -355,6 +412,7 @@ public final class GraveSelfTest {
         check(f, data.owned(r.getUUID()).size() == 3, "multiple graves should all stay, got " + data.owned(r.getUUID()).size());
         check(f, made.stream().map(g -> g.pos).distinct().count() == 3, "graves should not share a spot");
         check(f, Graves.rescueAvailable(r), "rescue should be available with graves");
+        chooser(server, level, data, f);
         GraveData.Grave oldest = made.get(0);
         int oldestItems = oldest.itemCount();
         Map<String, Integer> oldestTally = tally(oldest.items);
@@ -392,7 +450,7 @@ public final class GraveSelfTest {
         rule(server, DeathRules.RESCUE, 50);
         // 語り部の会話から (条件・結果)
         Dialogue st = DialogueManager.dialogue("skyabyss:storyteller");
-        check(f, st != null && st.nodes().containsKey("grave_ask") && st.nodes().containsKey("grave_done"), "storyteller has no grave nodes");
+        check(f, st != null && st.nodes().containsKey("grave_ask"), "storyteller has no grave node");
         if (st != null) {
             Dialogue.Node menu = st.nodes().get("menu");
             Dialogue.Option menuGrave = menu == null ? null : menu.options().stream().filter(o -> o.id().equals("grave")).findFirst().orElse(null);
@@ -405,8 +463,13 @@ public final class GraveSelfTest {
             Dialogue.Option yes = ask.options().stream().filter(o -> o.id().equals("yes")).findFirst().orElse(null);
             check(f, menuGrave != null && menuGrave.condition().test(ctx) && yes != null && yes.condition().test(ctx), "the grave option should show while a grave exists");
             if (yes != null) {
+                // 「お願いする」は墓の一覧の画面を開いて会話を終える (FakePlayer には送らないが、選べる状態になる)。選ぶと救われる
                 yes.actions().forEach(act -> act.run(ctx));
-                check(f, data.owned(r.getUUID()).isEmpty() && yes.target().equals("grave_done"), "the dialogue rescue did not consume the grave");
+                check(f, yes.target().equals(Dialogue.END) && GraveChooser.isOffered(r) && data.owned(r.getUUID()).size() == 1,
+                        "the dialogue should open the chooser, end the talk and keep the grave until one is picked");
+                GraveData.Grave last = data.owned(r.getUUID()).get(0);
+                check(f, GraveChooser.pick(r, last.id) != null && data.owned(r.getUUID()).isEmpty(), "picking in the chooser did not consume the grave");
+                check(f, !GraveChooser.isOffered(r), "the offer should close once no grave is left");
                 check(f, !yes.condition().test(ctx) && (menuGrave == null || !menuGrave.condition().test(ctx)), "the grave option should hide once no grave is left");
             }
         }

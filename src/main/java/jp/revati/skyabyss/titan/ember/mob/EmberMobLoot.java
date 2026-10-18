@@ -25,12 +25,12 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 // 一体ごとに、倒した人のための抽選をし、その人にだけ拾える形で落とす。余燼の背の上で、プレイヤーが倒したときだけ
 // (燃え尽きた灰被りは、最後に叩いた人が倒した扱い。AshThrall.burnOut)。
 //
-// | 敵     | 余燼の欠片 | 共鳴の欠片 | 熾火の角杯 | そのほか |
+// | 敵     | 余燼の燠石 | 共鳴の欠片 | 熾火の角杯 | そのほか |
 // | 灰被り | 35%、1〜2  | 6%、1      | 4%、1      | 余燼の鎧のどれか一部位 1%。火守り (EmberBackLayout.SOUTH) では熾 1 (必ず。だれでも拾える) |
 // | 火の粉蛾 | 5%、1    | 1%、1      | —          | 火の粉の粉 15% |
 // | 燠虫   | 25%、1〜2  | 5%、1      | 3%、1      | 燠の殻 20% |
 //
-// 品 (余燼の欠片・角杯・粉・殻・鎧) は担当 G、熾は担当 C3 が登録する。表は ID で持ち、登録されていない品は落とさない
+// 品 (余燼の燠石・角杯・粉・殻・鎧) は担当 G、熾は担当 C3 が登録する。表は ID で持ち、登録されていない品は落とさない
 // (品が登録されればそのまま出る)。鎧の 1% は図鑑に記さない (図鑑の記録は心臓の報酬 EmberLoot の担当 F)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberMobLoot {
@@ -38,7 +38,7 @@ public final class EmberMobLoot {
     }
 
     public static final ResourceLocation SHARD = EmberIds.id(EmberIds.EMBER_SHARD);
-    public static final ResourceLocation RESONANCE = EmberIds.id("resonance_shard");
+    public static final ResourceLocation RESONANCE = EmberIds.id("resonance_shard_ember");
     public static final ResourceLocation HORN = EmberIds.id(EmberIds.EMBER_HORN);
     public static final ResourceLocation SPARK_DUST = EmberIds.id(EmberIds.SPARK_DUST);
     public static final ResourceLocation CINDER_HUSK = EmberIds.id(EmberIds.CINDER_HUSK);

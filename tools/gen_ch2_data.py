@@ -1,7 +1,7 @@
 """二章「引く海」(潮殻。docs/design/08 の 2.8節) のデータ JSON を書く: 伝承の項目 3、クエスト 2、語り部の追加の会話。
 
 使い方: python tools/gen_ch2_data.py
-出力:
+出力 (語り部の追加の会話には、貝をなくした人への「新しい貝」の節 ch2_conch_ask も含む。入口は墓の話題 lost_ask):
   src/main/resources/data/skyabyss/lore/entry/chapter1/ch2_drift_log.json, ch2_beach_stele.json, ch2_ebb_page.json
   src/main/resources/data/skyabyss/quest/ch2/shore_signs.json, ebb_road.json   (クエスト ID は ch2/shore_signs, ch2/ebb_road)
   src/main/resources/data/skyabyss/dialogue/ch2/storyteller.json                (追加の会話。"extends": true、節の名前は ch2_ で始める)
@@ -55,7 +55,17 @@ def dialogue():
             ]},
             "node": "ch2_ledger",
         }],
+        # 潮見の貝をなくした人 (二章以降で、どこにも持っていない) に、語り部が新しい貝をくれる。
+        # 話題の入口は、墓の話題と一つにまとめた「なくしたものがある」(storyteller_aa_grave.json の lost_ask。tools/gen_grave_assets.py)
         "nodes": {
+            "ch2_conch_ask": {"face": "grave", "options": [
+                {"id": "yes", "kind": "give",
+                 "if": {"type": "no_keepsake", "item": "skyabyss:tide_watching_shell"},
+                 "do": {"type": "give", "item": "skyabyss:tide_watching_shell", "count": 1},
+                 "goto": "ch2_conch_done"},
+                {"id": "no", "kind": "talk", "goto": "menu"},
+            ]},
+            "ch2_conch_done": {"face": "smile", "next": "menu"},
             "ch2_ledger": {"face": "neutral", "next": "ch2_ledger2"},
             "ch2_ledger2": {"face": "grave", "next": "ch2_ledger3"},
             "ch2_ledger3": {"face": "grave", "options": [

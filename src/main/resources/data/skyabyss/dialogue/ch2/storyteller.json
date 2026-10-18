@@ -24,6 +24,34 @@
     }
   ],
   "nodes": {
+    "ch2_conch_ask": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "yes",
+          "kind": "give",
+          "if": {
+            "type": "no_keepsake",
+            "item": "skyabyss:tide_watching_shell"
+          },
+          "do": {
+            "type": "give",
+            "item": "skyabyss:tide_watching_shell",
+            "count": 1
+          },
+          "goto": "ch2_conch_done"
+        },
+        {
+          "id": "no",
+          "kind": "talk",
+          "goto": "menu"
+        }
+      ]
+    },
+    "ch2_conch_done": {
+      "face": "smile",
+      "next": "menu"
+    },
     "ch2_ledger": {
       "face": "neutral",
       "next": "ch2_ledger2"

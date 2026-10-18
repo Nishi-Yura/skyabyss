@@ -116,6 +116,14 @@ def model():
 
 
 # ---------------------------------------------------------------- 会話
+# 潮見の貝をなくした人 (二章以降で、どこにも持っていない)。選択肢の先 ch2_conch_ask は tools/gen_ch2_data.py が書く
+CONCH_IF = {"type": "all", "of": [
+    {"type": "stage", "min": 1},
+    {"type": "no_keepsake", "item": "skyabyss:tide_watching_shell"},
+]}
+LOST_IF = {"type": "any", "of": [{"type": "grave"}, CONCH_IF]}
+
+
 def dialogue():
     return {
         "npc": "skyabyss:storyteller",
@@ -123,18 +131,27 @@ def dialogue():
         "add_options": {
             "menu": {
                 "before": "bye",
-                "options": [{"id": "grave", "kind": "give", "if": {"type": "grave"}, "goto": "grave_ask"}],
+                # 話題の枠は 13 まで (会話の枠の高さ)。墓と潮見の貝 (二章の語り部の足し書き。ch2/storyteller.json) は一つの話題「なくしたものがある」にまとめる
+                "options": [{"id": "grave", "kind": "give", "if": LOST_IF, "goto": "lost_ask"}],
             }
         },
         "nodes": {
-            "grave_ask": {
+            "lost_ask": {
                 "face": "grave",
                 "options": [
-                    {"id": "yes", "kind": "give", "if": {"type": "grave"}, "do": {"type": "grave_rescue"}, "goto": "grave_done"},
+                    {"id": "grave", "kind": "give", "if": {"type": "grave"}, "goto": "grave_ask"},
+                    {"id": "conch", "kind": "give", "if": CONCH_IF, "goto": "ch2_conch_ask"},
                     {"id": "no", "kind": "talk", "goto": "menu"},
                 ],
             },
-            "grave_done": {"face": "neutral", "next": "menu"},
+            "grave_ask": {
+                "face": "grave",
+                "options": [
+                    # 「お願いする」は墓の一覧の画面を開いて会話を終える (どの墓かは画面で選ぶ。GraveChooser)
+                    {"id": "yes", "kind": "give", "if": {"type": "grave"}, "do": {"type": "grave_choose"}},
+                    {"id": "no", "kind": "talk", "goto": "menu"},
+                ],
+            },
         },
     }
 
@@ -150,19 +167,36 @@ JA = {
     "skyabyss_grave.rescue_none": "呼び戻せる墓はない",
     "skyabyss_grave.rescued": "語り部の呼びかけで、品 %s 個と経験値 %s が戻った（墓の %s％）。墓は土に還った",
     "skyabyss_grave.rescued_pending": "入りきらなかった %s 個は、報酬の預かりに入れた。控え帳から受け取れる",
-    "dialogue.skyabyss.storyteller.menu.grave": "取りに行けない墓がある。",
-    "dialogue.skyabyss.storyteller.grave_ask": "……墓かい。土の下の荷は、足の遠い者には重すぎることがある。\nあたしが土に呼びかければ、決まった分だけ戻ってくる。残りは土に還って、墓も消えるよ。いちばん古い墓から、一つずつだ。",
+    "dialogue.skyabyss.storyteller.menu.grave": "なくしたものがある。",
+    "dialogue.skyabyss.storyteller.lost_ask": "……なくしたのかい。何をだい。",
+    "dialogue.skyabyss.storyteller.lost_ask.grave": "取りに行けない墓がある。",
+    "dialogue.skyabyss.storyteller.lost_ask.conch": "潮見の貝をなくしてしまった。",
+    "dialogue.skyabyss.storyteller.lost_ask.no": "やめておく。",
+    "dialogue.skyabyss.storyteller.grave_ask": "……墓かい。土の下の荷は、足の遠い者には重すぎることがある。\nあたしが土に呼びかければ、決まった分だけ戻ってくる。残りは土に還って、墓も消えるよ。どの墓か、あなたが選ぶといい。一つずつだ。",
     "dialogue.skyabyss.storyteller.grave_ask.yes": "お願いする。",
     "dialogue.skyabyss.storyteller.grave_ask.no": "やめておく。",
-    "dialogue.skyabyss.storyteller.grave_done": "……戻ったね。土は、返した分しか覚えていない。\nあとのことは、忘れておしまい。",
     # 控え帳 (B) の「墓」の行
+    "gui.skyabyss.grave.title": "語り部に頼む墓",
+    "gui.skyabyss.grave.count": "墓 %s つ",
+    "gui.skyabyss.grave.share": "選んだ墓の中身の %s％ が戻る。墓は消え、残りは失う。",
+    "gui.skyabyss.grave.pick": "呼び戻す",
+    "gui.skyabyss.grave.place": "%s　%s, %s, %s",
+    "gui.skyabyss.grave.contents": "品 %s 個・経験値 %s",
+    "gui.skyabyss.grave.footer": "Esc でやめる",
+    "gui.skyabyss.grave.age.now": "たった今",
+    "gui.skyabyss.grave.age.minutes": "%s 分前",
+    "gui.skyabyss.grave.age.hours": "%s 時間前",
+    "gui.skyabyss.grave.age.days": "%s 日前",
+    "gui.skyabyss.grave.dim.overworld": "地上",
+    "gui.skyabyss.grave.dim.nether": "ネザー",
+    "gui.skyabyss.grave.dim.end": "エンド",
     "skyabyss_record.r.grave": "墓",
     "skyabyss_record.v.grave_none": "なし",
     "skyabyss_record.v.graves": "%s つ",
     "skyabyss_record.d.grave_none": "いま、あなたの墓はない。倒れたとき、持ち物の一部が墓に入る（装備とホットバーと大事な品は手もとに残る）。",
     "skyabyss_record.d.grave_has": "あなたの墓。倒れた場所のそばに立っていて、時間では消えない。右クリックで中身が手もとへ移る。",
     "skyabyss_record.d.grave_item": "- %s　品 %s 個・経験値 %s　%s（%s, %s, %s）",
-    "skyabyss_record.d.grave_rescue": "取りに行けないときは、語り部に頼むと、いちばん古い墓から中身の %s％ が戻る（墓は消え、残りは失う）。",
+    "skyabyss_record.d.grave_rescue": "取りに行けないときは、語り部に頼むと、選んだ墓の中身の %s％ が戻る（墓は消え、残りは失う）。",
     "skyabyss_record.d.grave_rescue_off": "語り部の救いは、このワールドでは使えない。",
     "skyabyss_record.d.grave_owner_only": "墓は持ち主だけが開けられる。",
     "skyabyss_record.d.grave_open": "墓はほかの人も開けられる。",
@@ -180,18 +214,35 @@ EN = {
     "skyabyss_grave.rescue_none": "There is no grave to call back",
     "skyabyss_grave.rescued": "At the storyteller's call, %s items and %s experience came back (%s%% of the grave). The grave returned to the earth",
     "skyabyss_grave.rescued_pending": "%s items did not fit and were set aside as held rewards. Claim them in the record book",
-    "dialogue.skyabyss.storyteller.menu.grave": "There is a grave I can't reach.",
-    "dialogue.skyabyss.storyteller.grave_ask": "...A grave, is it. A load under the earth can be too heavy for those who are far from it.\nIf I call to the earth, a set share will come back. The rest returns to the soil, and the grave goes with it. From the oldest grave, one at a time.",
+    "dialogue.skyabyss.storyteller.menu.grave": "I've lost something.",
+    "dialogue.skyabyss.storyteller.lost_ask": "...Lost something, have you. What?",
+    "dialogue.skyabyss.storyteller.lost_ask.grave": "There is a grave I can't reach.",
+    "dialogue.skyabyss.storyteller.lost_ask.conch": "I lost my tide-watching conch.",
+    "dialogue.skyabyss.storyteller.lost_ask.no": "Never mind.",
+    "dialogue.skyabyss.storyteller.grave_ask": "...A grave, is it. A load under the earth can be too heavy for those who are far from it.\nIf I call to the earth, a set share will come back. The rest returns to the soil, and the grave goes with it. You choose which grave, one at a time.",
     "dialogue.skyabyss.storyteller.grave_ask.yes": "Please do.",
     "dialogue.skyabyss.storyteller.grave_ask.no": "Never mind.",
-    "dialogue.skyabyss.storyteller.grave_done": "...There. The earth remembers only what it gave back.\nForget the rest.",
+    "gui.skyabyss.grave.title": "Which grave to call back",
+    "gui.skyabyss.grave.count": "%s graves",
+    "gui.skyabyss.grave.share": "%s%% of its contents comes back; the rest is lost.",
+    "gui.skyabyss.grave.pick": "Call back",
+    "gui.skyabyss.grave.place": "%s  %s, %s, %s",
+    "gui.skyabyss.grave.contents": "%s items, %s experience",
+    "gui.skyabyss.grave.footer": "Esc to cancel",
+    "gui.skyabyss.grave.age.now": "just now",
+    "gui.skyabyss.grave.age.minutes": "%s min ago",
+    "gui.skyabyss.grave.age.hours": "%s h ago",
+    "gui.skyabyss.grave.age.days": "%s days ago",
+    "gui.skyabyss.grave.dim.overworld": "Overworld",
+    "gui.skyabyss.grave.dim.nether": "Nether",
+    "gui.skyabyss.grave.dim.end": "The End",
     "skyabyss_record.r.grave": "Graves",
     "skyabyss_record.v.grave_none": "None",
     "skyabyss_record.v.graves": "%s",
     "skyabyss_record.d.grave_none": "You have no grave now. When you fall, part of your pack goes into one (equipment, hotbar and key items stay with you).",
     "skyabyss_record.d.grave_has": "Your graves. Each stands near where you fell and never fades. Right-click one to move its contents to your pack.",
     "skyabyss_record.d.grave_item": "- %s: %s items, %s experience  %s (%s, %s, %s)",
-    "skyabyss_record.d.grave_rescue": "If you cannot reach one, ask the storyteller: %s%% of the oldest grave's contents comes back (the grave vanishes and the rest is lost).",
+    "skyabyss_record.d.grave_rescue": "If you cannot reach one, ask the storyteller: %s%% of the grave you choose comes back (the grave vanishes and the rest is lost).",
     "skyabyss_record.d.grave_rescue_off": "The storyteller's rescue is turned off in this world.",
     "skyabyss_record.d.grave_owner_only": "Only the owner can open a grave.",
     "skyabyss_record.d.grave_open": "Anyone can open a grave.",

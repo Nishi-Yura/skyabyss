@@ -188,7 +188,7 @@
 ### 2.7 夜 2 の歌と星の欠け（B9）
 
 - 狙い: 「上に、見えない大きなものがいる」。
-- 資格: 足音の次の夜以降、空の見える所で、夜の最初の 30〜120 秒のうちの一時点（足音と同じ安全の決め）。さらに**晴れていて（雨・雷でない）、一日の時刻が 14000〜21000**のときだけ起こす（日没直後は星が薄いため。合わなければ 5 秒おきにずらし、夜が明ければ次の夜。`OpeningLogic.songSkyReady`）。寝て見逃したら次の夜。
+- 資格: 足音の次の夜以降、空の見える所で、夜の最初の 30〜120 秒のうちの一時点（足音と同じ安全の決め）。さらに**一日の時刻が 14000〜21000**のときだけ起こす（天気は問わない。雨・雷の夜でも起こり、星の欠けはこの mod 自前の星で読める。日没直後は星が薄いため。合わなければ 5 秒おきにずらし、夜が明ければ次の夜。`OpeningLogic.songSkyReady`）。寝て見逃したら次の夜。
 - 歌: 低く長い鯨の歌、40 秒（`opening_song`、5 秒で入って 7 秒で消える）。小さな音量、方向なし。クエスト「雲の下の歌」の歌と同じ。
 - 星の欠け: 5 秒後から 30 秒、西 → 真上 → 東へ幅約 50 度の帯が星を消す。バニラの星は暗く小さく、雨・雲・シェーダーで見えないことがあるため、歌のあいだは**この mod 自身の星**（2200 個、バニラより大きく明るい）を重ねて描く（`StarBandRenderer`。歌の始まりの 1 秒後から 4 秒で現れ、帯が去ると 4 秒で消える）。バニラの星は空色の帯で覆い、自前の星は帯の中だけ個別に消す（芯は完全に消え、縁だけ薄く残る）。月の近くは薄くして月を残す。
 - 見落としの保険: 歌が降り始めて 3 秒たっても足元を向いている（見上げ角が 25 度未満）と、画面下に「空から、低い歌が降ってくる。見上げてみよう」（`message.skyabyss.song_look_up`）を出す。
@@ -335,7 +335,7 @@
 - バニラの札を出さない: 開幕の演出（18 秒）の間、`OpeningClient` が札（チュートリアル、レシピなど）を毎 tick 消す。チュートリアルはこの世界の開幕で `NONE` にして終わり（`options.txt` の `tutorialStep` が書き換わる）。操作のキー（WASD・Space など）は目的の帯に書かない（帯は「何をするか」だけを言う）。
 - 音: 目覚めで 低い風（`tools/gen_opening_sounds.py wind`）→ かすかな地鳴り（音量 0.22）→ 鼓動 → 鐘の順に重ねる。字幕は「低い風が吹く」。
 - 新しいワールドの題字の場面では持ち物は空で、B1 の帳面で初めて伝承の書が入る。
-- 装備の説明文に物語の一行を足す案（17-8）は、あとで。
+- 装備の説明文の物語の一行は、03 の 3.4節（巨神の声で、装備 40 点）。
 
 ---
 
@@ -390,7 +390,7 @@
 | `opening.skyabyss.bone_near` | 風が止んだ。丘は、丘のかたちをしていない。 | The wind has stopped. The hill is not shaped like a hill. | 前触れ 4（70 ブロック） |
 | `objective.skyabyss.examine_camp` | 野営地の跡を調べてみよう | Look around the abandoned camp | 目覚めてから帳面を拾うまで（メインはまだ始まっていない） |
 | `objective.skyabyss.follow_smoke` | 煙の立つ方へ向かってみよう | Head toward the rising smoke | 帳面を拾ってから語り部と話すまで（メインの段 `follow_smoke`） |
-| `objective.skyabyss.watch_sky` | 周りを探索して強くなろう（目安 Lv5） | Explore and grow stronger (about Lv5) | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
+| `objective.skyabyss.watch_sky` | 周りを探索して強くなろう | Explore and grow stronger | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the storyteller at the lodge | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire beyond the lodge | 語り部のあとイサナと話すまで（段 `find_chaser`） |
 | `objective.skyabyss.see_whale` | 探索しながら、夜空の歌に耳をすまそう | Keep exploring, and listen for the song at night | イサナと話してから岩鯨を見るまで（段 `see_whale`。以降は 07 のクエストの目的の文） |
@@ -476,7 +476,7 @@
 ### 6.7 メインクエスト・会話データの変更点
 
 - メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒しし、目的を「煙を追う」にした。段を 2 つ足した（`follow_smoke`、`watch_sky`。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす `skip_if`）。以後は影、語り部（`ask_storyteller`）、鯨追い（`find_chaser`）、岩鯨（`see_whale`）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。新しい `signal` は作っていない（序の二段は既存の `talk`・`lore` で進む）。
-- 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索して強くなろう（目安 Lv5）」など具体的な行動を書く。
+- 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索して強くなろう」など具体的な行動を書く。
 - 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = `see_whale`、B8 の寄り道 = `bone_hill`。
 - 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件）。
 - 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題は 1 つだけ足し、見聞の 5 つは別の節に分けた。
@@ -543,7 +543,6 @@
 
 ## 未決
 
-- 00 の 181（旧 17-8）: 装備の説明文に物語の一行（Elden Ring 風）を足すか。今は足していない（あとで）。
 
 ## 旧節番号の対応
 
