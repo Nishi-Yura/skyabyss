@@ -229,6 +229,11 @@ public final class Growth {
         return get(player).discoveries.add(key);
     }
 
+    // 記録していなければ書かずに false (控え帳など、読むだけの所から)
+    public static boolean discovered(Player player, String key) {
+        return get(player).discoveries.contains(key);
+    }
+
     // ---------------------------------------------------------------- 記憶の断片
     // 記憶の断片を付ける。器に入りきらない分は付けず、付けた数を返す。
     // 効果 (永続強化の枝) はまだない。入れ物と記録だけ (03 の 5.1 節、E9)

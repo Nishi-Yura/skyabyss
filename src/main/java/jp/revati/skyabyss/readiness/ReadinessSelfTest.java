@@ -12,6 +12,13 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.guide.HeartbeatWard;
+import jp.revati.skyabyss.guide.SiteProgressData;
+import jp.revati.skyabyss.guide.SiteSpawner;
+import jp.revati.skyabyss.story.Chapters;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import jp.revati.skyabyss.item.GearCurve;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.readiness.BoardReadiness.Flow;
@@ -74,6 +81,8 @@ public final class ReadinessSelfTest {
         formula(f);
         flow(f, p);
         lang(f);
+        advice(f);
+        summary(f, overworld);
         inventory(f, p);
         whisper(f, p);
         record(f, p);
@@ -252,6 +261,92 @@ public final class ReadinessSelfTest {
         p.getInventory().clearContent();
     }
 
+    // ---------------------------------------------------------------- 理由 + 手段の一行 (A7)
+    private static String keyOf(Component c) {
+        return c.getContents() instanceof TranslatableContents tc ? tc.getKey() : "";
+    }
+
+    private static Object[] argsOf(Component c) {
+        return c.getContents() instanceof TranslatableContents tc ? tc.getArgs() : new Object[0];
+    }
+
+    static void advice(List<String> f) {
+        String p = "message.skyabyss.readiness.";
+        // 理由: 刃は割合 (62%)、何も持たないときは別の言い回し
+        check(f, ReadinessAdvice.reasonKey(Lamp.BLADE, 0.62, 1, 1).equals(p + "reason.blade"), "blade reason key");
+        check(f, ReadinessAdvice.reasonKey(Lamp.BLADE, 0, 1, 1).equals(p + "reason.blade.none"), "no weapon reason key");
+        check(f, ReadinessAdvice.reasonKey(Lamp.PROVISIONS, 0.4, 1, 1).equals(p + "reason.provisions"), "provisions reason key");
+        check(f, ReadinessAdvice.reasonKey(Lamp.PROVISIONS, 0, 1, 1).equals(p + "reason.provisions.none"), "no provisions reason key");
+        check(f, ReadinessAdvice.percent(Lamp.BLADE, 0.62, 1, 1) == 62, "blade percent 62, got " + ReadinessAdvice.percent(Lamp.BLADE, 0.62, 1, 1));
+        // 身は低い方の内訳 (防具か体力) を言い分ける
+        check(f, ReadinessAdvice.reasonKey(Lamp.BODY, 0.7, 0.5, 0.9).equals(p + "reason.body.armor"), "body: armour is the weaker part");
+        check(f, ReadinessAdvice.reasonKey(Lamp.BODY, 0.7, 1.0, 0.7).equals(p + "reason.body.health"), "body: health is the weaker part");
+        check(f, ReadinessAdvice.percent(Lamp.BODY, 0.7, 0.5, 0.9) == 50 && ReadinessAdvice.percent(Lamp.BODY, 0.7, 1.0, 0.7) == 70, "body percent is the weaker part");
+        // 手段: 登録がなければ一般の言い回し (砥石)、あれば名前つき
+        Component line = ReadinessAdvice.line(Lamp.BLADE, 0.62, 1, 1, List.of(), false);
+        check(f, keyOf(line).equals(p + "line"), "advice line is the shared template");
+        Object[] args = argsOf(line);
+        boolean shaped = args.length == 3 && args[0] instanceof Component a0 && args[1] instanceof Component a1 && args[2] instanceof Component a2
+                && keyOf(a0).equals(p + "name.blade") && keyOf(a1).equals(p + "reason.blade") && argsOf(a1).length == 1 && argsOf(a1)[0].equals(62)
+                && keyOf(a2).equals(p + "remedy.blade.generic");
+        check(f, shaped, "blade line without remedies: only things that exist now");
+        Component stoned = ReadinessAdvice.line(Lamp.BLADE, 0.62, 1, 1, List.of(), true);
+        check(f, argsOf(stoned)[2] instanceof Component r && keyOf(r).equals(p + "remedy.blade.whetstone"), "a registered whetstone switches the blade remedy");
+        Component withRemedy = ReadinessAdvice.line(Lamp.PROVISIONS, 0.4, 1, 1, List.of(Component.literal("X")), false);
+        check(f, argsOf(withRemedy)[2] instanceof Component r && keyOf(r).equals(p + "remedy.provisions.with"), "registered remedy is named");
+        Component health = ReadinessAdvice.line(Lamp.BODY, 0.7, 1.0, 0.7, List.of(Component.literal("X")), false);
+        check(f, argsOf(health)[2] instanceof Component r && keyOf(r).equals(p + "remedy.body.health.generic"), "thin health gets the health remedy, not armour");
+        // 登録口: 鼓動守は糧の手段に入っている
+        HeartbeatWard.init();
+        check(f, !Readiness.remedies(Lamp.PROVISIONS).isEmpty(), "the heartbeat ward is a registered provisions remedy");
+        int before = Readiness.remedies(Lamp.BLADE).size();
+        Readiness.registerRemedy(Lamp.BLADE, () -> Component.literal("test"));
+        check(f, Readiness.remedies(Lamp.BLADE).size() == before + 1, "registerRemedy adds a name");
+        // 文: すべての鍵が日英にある
+        Map<String, String> ja = read("/assets/skyabyss_readiness/lang/ja_jp.json", f);
+        Map<String, String> en = read("/assets/skyabyss_readiness/lang/en_us.json", f);
+        List<String> keys = new ArrayList<>(List.of(p + "line", p + "remedy.sep", p + "remedy.name.ward", p + "summary", p + "summary.others",
+                p + "remedy.body.health.generic", p + "reason.body.armor", p + "reason.body.health", p + "reason.blade", p + "reason.blade.none",
+                p + "reason.provisions", p + "reason.provisions.none"));
+        for (Lamp l : Lamp.values()) {
+            keys.add(p + "name." + l.id());
+            keys.add(p + "remedy." + l.id() + ".with");
+            if (l != Lamp.BODY) {
+                keys.add(p + "remedy." + l.id() + ".generic");
+            }
+            if (l == Lamp.BLADE) {
+                keys.add(p + "remedy.blade.whetstone");
+            }
+        }
+        keys.add(p + "remedy.body.generic");
+        for (String k : keys) {
+            check(f, ja.containsKey(k) && !ja.get(k).isBlank(), "ja lang missing " + k);
+            check(f, en.containsKey(k) && !en.get(k).isBlank(), "en lang missing " + k);
+        }
+        check(f, ja.get(p + "line").split("%s", -1).length == 4, "ja line template has three slots");
+    }
+
+    // ---------------------------------------------------------------- 扉の予告の準備確認 (A2)
+    static void summary(List<String> f, ServerLevel overworld) {
+        String p = "message.skyabyss.readiness.";
+        Readiness.Result green = new Readiness.Result(Titans.STONE_WHALE, 1.0, 1.0, 1.0);
+        Readiness.Result red = new Readiness.Result(Titans.STONE_WHALE, 1.0, 0.5, 0.8);
+        Readiness.Result redLower = new Readiness.Result(Titans.STONE_WHALE, 0.6, 0.3, 1.0);
+        check(f, !ReadinessSummary.anyoneRed(List.of(green, green)) && ReadinessSummary.anyoneRed(List.of(green, red)), "anyoneRed");
+        check(f, ReadinessSummary.worstRed(green) == null && ReadinessSummary.worstRed(red) == Lamp.BLADE, "worstRed of a single red lamp");
+        check(f, ReadinessSummary.worstRed(redLower) == Lamp.BLADE, "worstRed picks the lowest red lamp");
+        // 赤でない人: だれかが赤なら「仲間の誰かの備えが低い」を足す (名前も人数もなし)。だれも赤でなければ足さない
+        MutableComponent othersLow = ReadinessSummary.barLine(green, true, 3);
+        check(f, keyOf(othersLow).equals(p + "summary") && othersLow.getSiblings().size() == 1
+                && keyOf(othersLow.getSiblings().get(0)).equals(p + "summary.others"), "a green player sees the generic party line");
+        check(f, argsOf(othersLow).length == 2 && argsOf(othersLow)[0].equals(3), "the summary carries only the seconds and the player's own lamps");
+        check(f, ReadinessSummary.barLine(green, false, 2).getSiblings().isEmpty(), "no party line when nobody is red");
+        // 赤の本人: ほかの人の赤は足さない (自分の三灯だけ。一行の直し方は字幕で別に出る)
+        check(f, ReadinessSummary.barLine(red, true, 3).getSiblings().isEmpty(), "a red player sees no party line");
+        // 人がいなければ何もしない
+        ReadinessSummary.show(overworld, List.of(), 3, true);
+    }
+
     // ---------------------------------------------------------------- 前室の囁き
     static void whisper(List<String> f, FakePlayer p) {
         for (String titan : Titans.all()) {
@@ -321,11 +416,36 @@ public final class ReadinessSelfTest {
             check(f, row.detail().size() == 5, "readiness row detail has the intro, three lamps and the free note, got " + row.detail().size());
             check(f, row.mark() == RecordSnapshot.MARK_LOST, "a bare player's readiness row is marked as short (red)");
         }
+        // 章のチェックリスト (A9): 一章の頁に頼み・覚書の行 (寄り道は場所が登録されていれば)。見ていない巨神には出さない
+        check(f, page.row("h.checklist") != null, "whale page has the chapter checklist header");
+        RecordSnapshot.Row prep = page.row("check_prep");
+        check(f, !jp.revati.skyabyss.guide.PrepQuests.defined(1) || (prep != null && prep.detail().size() == 4), "prep row (when the chapter has its requests): three requests and the note");
+        check(f, jp.revati.skyabyss.guide.PrepQuests.defined(1) == (prep != null), "prep row appears exactly when the chapter has its requests");
+        check(f, page.row("check_notes") != null, "notebook row on the whale page");
+        long whaleSites = SiteSpawner.defs().stream().filter(d -> d.chapter() == Chapters.WHALE).count();
+        check(f, (page.row("check_sites") != null) == (whaleSites > 0), "sites row appears exactly when the chapter has sites");
+        // 見つけた数: 近づくと数える (クリアも見つけたことになる)
+        SiteProgressData sites = SiteProgressData.get(p.server);
+        check(f, !sites.found(p.getUUID(), "selftest_site"), "site not found yet");
+        check(f, sites.markFound(p.getUUID(), "selftest_site") && !sites.markFound(p.getUUID(), "selftest_site"), "markFound once");
+        check(f, sites.found(p.getUUID(), "selftest_site"), "found is remembered");
+        sites.forget(p.getUUID(), "selftest_site");
+        check(f, !sites.found(p.getUUID(), "selftest_site"), "forget clears found");
+        check(f, sites.markCleared(p.getUUID(), "selftest_site2") && sites.found(p.getUUID(), "selftest_site2"), "cleared implies found");
+        sites.forget(p.getUUID(), "selftest_site2");
+        for (String lang : new String[] {"ja_jp", "en_us"}) {
+            Map<String, String> rl = read("/assets/skyabyss_record/lang/" + lang + ".json", f);
+            for (String k : List.of("h.checklist", "r.check_prep", "d.check_prep", "r.check_sites", "v.check_sites", "d.check_sites", "d.check_sites_hint",
+                    "r.check_notes", "v.check_notes_yes", "v.check_notes_no", "d.check_notes")) {
+                check(f, rl.containsKey("skyabyss_record." + k), lang + " record lang missing " + k);
+            }
+        }
         // 見知らぬ巨神 (まだ見ていない頁) には出さない
         String last = Titans.all().get(Titans.all().size() - 1);
         RecordSnapshot.Tab hidden = snap.tab(RecordSnapshot.TITANS + RecordSnapshot.SUB + last);
         if (hidden != null && hidden.row("unknown") != null) {
             check(f, hidden.row("readiness") == null, "a hidden titan's page has no readiness row");
+            check(f, hidden.row("h.checklist") == null && hidden.row("check_prep") == null, "a hidden titan's page has no checklist");
         }
     }
 

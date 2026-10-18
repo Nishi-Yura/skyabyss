@@ -177,7 +177,25 @@ public final class TravelSelfTest {
         check(lim == TravelRules.BOARDING_COUNTDOWN + TravelRules.BOARDING_EXTEND_MAX, "the extension did not reach its cap: " + lim, failures);
         check(TravelRules.boardingLimit(TravelRules.BOARDING_COUNTDOWN, TravelRules.BOARDING_COUNTDOWN - 10, true)
                 == TravelRules.BOARDING_COUNTDOWN - 10 + TravelRules.BOARDING_EXTEND_HOLD, "the wait was not held near its end", failures);
-        check(TravelRules.earlyStartAllowed(0) && !TravelRules.earlyStartAllowed(1), "early start rule is wrong", failures);
+        // 自動出発 (A6): 全員乗った時刻から 5 秒。乗っていない人がいれば (負) そのまま。待ちの終わりより遅くはならない
+        check(TravelRules.AUTO_DEPART == 100, "auto depart is not 5 s", failures);
+        check(TravelRules.autoDepartLimit(1200, -1, 300) == 1200, "auto depart applied with someone not aboard", failures);
+        check(TravelRules.autoDepartLimit(1200, 40, 300) == 140, "auto depart is not 5 s after everyone boarded", failures);
+        check(TravelRules.autoDepartLimit(1200, 0, 0) == 100, "a solo rider does not leave in 5 s", failures);
+        check(TravelRules.autoDepartLimit(90, 40, 60) == 90, "auto depart outlasted the countdown", failures);
+        // 近づいてきた仲間がいれば、5 秒の保ちで延び直す
+        check(TravelRules.boardingLimit(140, 100, true) == 200, "a late party member did not re-extend the wait", failures);
+        for (String lang : new String[] {"ja_jp", "en_us"}) {
+            try (var in = TravelSelfTest.class.getResourceAsStream("/assets/skyabyss_travel/lang/" + lang + ".json")) {
+                String text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                for (String key : new String[] {"message.skyabyss.travel.all_aboard", "message.skyabyss.travel.waiting_party"}) {
+                    check(text.contains("\"" + key + "\""), lang + " lacks " + key, failures);
+                }
+                check(!text.contains("travel.early_"), lang + " still has the early-depart lines", failures);
+            } catch (Exception e) {
+                failures.add("cannot read travel lang " + lang + ": " + e);
+            }
+        }
         check(TravelRules.cruiseTicks(1e9) == TravelRules.CRUISE_MAX && TravelRules.cruiseTicks(0) == TravelRules.CRUISE_MIN, "cruise ticks not clamped", failures);
 
         // ---- 4. 降ろす場所 (空高くに小さな台を作って試す)

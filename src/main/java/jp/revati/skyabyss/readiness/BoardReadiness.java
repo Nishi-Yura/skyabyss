@@ -123,6 +123,11 @@ public final class BoardReadiness {
     public static void showPrompt(ServerPlayer player, Readiness.Result result, Mode mode) {
         // 字幕は一つずつ順番に出るので、一言は三灯の一行だけにする。足りない灯の言い回しは控え帳と前室の碑にある
         Notice.hint(player, "message.skyabyss.readiness.note", lamps(result));
+        // 赤の灯の「理由 + 手段」(A7)。一番低い灯を一つだけ
+        Readiness.Lamp worst = ReadinessSummary.worstRed(result);
+        if (worst != null) {
+            Notice.send(player, Notice.Kind.HINT, ReadinessAdvice.line(player, result.titan(), result, worst));
+        }
         Notice.bar(player, ModText.hint(mode == Mode.RIGHT_CLICK ? "message.skyabyss.readiness.confirm_click"
                 : "message.skyabyss.readiness.confirm_walk"));
     }

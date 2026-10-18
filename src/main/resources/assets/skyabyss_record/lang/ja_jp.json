@@ -243,5 +243,16 @@
   "skyabyss_record.d.steles": "試練のあとの石。右の値は「自分が鳴らした数 / 仲間が鳴らした数 / まだの数」。パーティの誰かが鳴らせば、全員が踏破として数える。",
   "skyabyss_record.d.steles_none": "この巨神には、鳴らす石がない。",
   "skyabyss_record.d.steles_whale": "共鳴石 %s",
-  "skyabyss_record.d.steles_line": "- %s: %s"
+  "skyabyss_record.d.steles_line": "- %s: %s",
+  "skyabyss_record.h.checklist": "この章の進み",
+  "skyabyss_record.r.check_prep": "備えの頼み",
+  "skyabyss_record.d.check_prep": "章の頭に出る三つの頼み。どれから受けても、順番はない。",
+  "skyabyss_record.r.check_sites": "寄り道",
+  "skyabyss_record.v.check_sites": "見つけた %s / 全 %s（終えた %s）",
+  "skyabyss_record.d.check_sites": "この章の寄り道: 見つけた %s、終えた %s、全部で %s。名前は、見つけるまで伏せてある。",
+  "skyabyss_record.d.check_sites_hint": "地上を歩いて、近くまで行くと見つかる。",
+  "skyabyss_record.r.check_notes": "旅の覚書",
+  "skyabyss_record.v.check_notes_yes": "受け取り済み",
+  "skyabyss_record.v.check_notes_no": "まだ",
+  "skyabyss_record.d.check_notes": "備えの頼み「身ごしらえ」を受けると、職人から渡される。"
 }

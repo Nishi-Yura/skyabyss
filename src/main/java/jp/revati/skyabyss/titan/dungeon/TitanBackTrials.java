@@ -786,6 +786,7 @@ public final class TitanBackTrials {
             broadcast(level, group, area, ModText.battle("message.skyabyss.gate_gathering", GATHER_TICKS / 20));
         }
         playToGroup(level, group, area.center(), SoundEvents.BELL_RESONATE, 1.5f, 0.6f);
+        jp.revati.skyabyss.readiness.ReadinessSummary.show(level, Groups.inBox(level, group, area.aabb().inflate(12)), GATHER_TICKS / 20, true);
     }
 
     // 扉が閉じるまでの残りを、近くのそのグループの人の画面に出す (1 秒ごと)
@@ -794,9 +795,12 @@ public final class TitanBackTrials {
             return;
         }
         Component text = ModText.battle("message.skyabyss.gate_countdown", ticksLeft / 20);
-        for (ServerPlayer player : Groups.inBox(level, group, area.aabb().inflate(12))) {
+        List<ServerPlayer> near = Groups.inBox(level, group, area.aabb().inflate(12));
+        for (ServerPlayer player : near) {
             Notice.bar(player, text);
         }
+        // 準備確認 (A2): 扉までの秒は一行に入る (後から出すので、上の秒の表示を置き換える)
+        jp.revati.skyabyss.readiness.ReadinessSummary.show(level, near, ticksLeft / 20, false);
     }
 
     // 扉の範囲 (封印のブロックがある所)

@@ -1,0 +1,54 @@
+# 使い心地の磨き 2 (rpg_brushup A2 / A6 / A7 / A9) の確認: 扉の予告の準備確認・赤の理由と手段の一行・出発の帯・控え帳の章の進み。
+# ./gradlew runShots -Pscript=tools/shots/ux_polish2.txt   (音はランナーが消す。見本は /skyabyss dev readiness summary ... /skyabyss dev ux depart で本番と同じ経路に出す)
+# 何も持たない状態 (身・刃・糧が赤) で撮る
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd clear @s
+hud on
+waitchunks
+chat clear
+wait 400
+
+# A2: 扉の予告のあいだ。赤の本人 (自分の灯と、一行の直し方の字幕)
+cmd skyabyss dev readiness summary red
+wait 30
+shot summary_red
+chat clear
+wait 200
+
+# A2: 赤でない人。仲間の誰かが赤とだけ出る (名指しなし)
+cmd skyabyss dev readiness summary others
+wait 30
+shot summary_others
+chat clear
+wait 200
+
+# A7: 乗り込み口の一度目の確認。赤の灯の理由 + 手段の一行
+cmd skyabyss dev readiness prompt stone_whale
+wait 160
+shot boarding_note_advice
+chat clear
+wait 200
+
+# A6: 近くの全員が乗ったときの出発の帯
+cmd skyabyss dev ux depart
+wait 20
+shot depart_bar
+cmd skyabyss dev ux clear
+chat clear
+wait 20
+
+# A7 + A9: 控え帳の巨神の頁 (備えの行の詳細 / この章の進み)
+cmd skyrecord titans.stone_whale
+wait 40
+shot record_checklist
+close
+chat clear
+echo done

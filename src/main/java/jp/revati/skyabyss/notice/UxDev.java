@@ -27,9 +27,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   /skyabyss dev ux stele <self|other|none>   石の「誰が鳴らしたか」の知らせを自分に一つ出す
 //   /skyabyss dev ux grave <dx> <dz>           自分の墓を、いまいる所から (dx, dz) ずらした場所に作る (中身はパンと経験値)
 //   /skyabyss dev ux party                     仲間の札の見本 (体力の違う 3 人) を自分にだけ送る
+//   /skyabyss dev ux depart                    全員乗ったときの出発の帯「全員乗った。5 秒で出発」(A6)
 //   /skyabyss dev ux clear                     見本の墓と札を消す
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class UxDev {
+    private static final net.minecraft.server.level.ServerBossEvent DEPART_BAR = new net.minecraft.server.level.ServerBossEvent(Component.empty(),
+            net.minecraft.world.BossEvent.BossBarColor.GREEN, net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS);
+
     private UxDev() {
     }
 
@@ -71,8 +75,17 @@ public final class UxDev {
                                     new PartyLocator.Entry("sample-3", "Carol", dim, x + 14, y, z + 30, 10))));
                             return 1;
                         }))
+                        .then(Commands.literal("depart").executes(ctx -> {
+                            // A6: 全員乗ったときの出発の帯 (Voyage.updateBoardingBar と同じ文・色)
+                            ServerPlayer p = ctx.getSource().getPlayerOrException();
+                            DEPART_BAR.setName(ModText.hint("message.skyabyss.travel.all_aboard", 5));
+                            DEPART_BAR.setProgress(1f);
+                            DEPART_BAR.addPlayer(p);
+                            return 1;
+                        }))
                         .then(Commands.literal("clear").executes(ctx -> {
                             ServerPlayer p = ctx.getSource().getPlayerOrException();
+                            DEPART_BAR.removeAllPlayers();
                             GraveData data = GraveData.get(p.server);
                             for (GraveData.Grave g : data.owned(p.getUUID())) {
                                 ServerLevel l = p.server.getLevel(g.dimension);

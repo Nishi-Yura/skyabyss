@@ -48,7 +48,7 @@ public final class TravelRules {
     public static final int BOARDING_EXTEND_MAX = 600;
     // 延ばしているあいだ、残りをこの tick 数に保つ
     public static final int BOARDING_EXTEND_HOLD = 100;
-    // この距離内の仲間 (同じパーティ) は、乗るのを待つ・全員乗っていれば早く出発できる
+    // この距離内の仲間 (同じパーティ) は、乗るのを待つ。全員乗っていれば 5 秒で自動出発する
     public static final double BOARDING_PARTY_RADIUS = 64;
     // 見積もり (海図の「約〇秒」) に入れる出発の待ち。延ばす待ちは含めない
     public static final int BOARDING_ESTIMATE = 160;
@@ -91,9 +91,15 @@ public final class TravelRules {
         return Math.max(limit, Math.min(cap, phaseTicks + BOARDING_EXTEND_HOLD));
     }
 
-    // 呼んだ人が笛で早く出発できるか: 近くの仲間が全員乗っている (まだの人が 0 人) とき
-    public static boolean earlyStartAllowed(int partyNotAboard) {
-        return partyNotAboard <= 0;
+    // 近くの仲間が全員乗ってから出発するまで (5 秒)。笛をもう一度吹いて早く出す操作はない (自動出発)
+    public static final int AUTO_DEPART = 100;
+
+    // 出発の待ちの上限に、自動出発を重ねる。allAboardSince は全員乗った時刻 (phaseTicks)、乗っていない人がいれば負の値
+    public static int autoDepartLimit(int limit, int allAboardSince, int phaseTicks) {
+        if (allAboardSince < 0) {
+            return limit;
+        }
+        return Math.min(limit, allAboardSince + AUTO_DEPART);
     }
 
     // 乗り場で行き先を決めてから降ろされるまでの、おおよその秒数 (画面に出す。実際は地形や向きで少し変わる)

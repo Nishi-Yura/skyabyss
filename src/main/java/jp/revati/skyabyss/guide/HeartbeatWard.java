@@ -31,6 +31,7 @@ public final class HeartbeatWard {
     static {
         // 持っている (枠に付けている) 人は糧の灯に +0.2。持ち物にあるだけでは足さない (効くのは枠に付けているとき)
         Readiness.registerCharm(player -> wornSlot(player) >= 0);
+        Readiness.registerRemedy(Readiness.Lamp.PROVISIONS, () -> net.minecraft.network.chat.Component.translatable("message.skyabyss.readiness.remedy.name.ward"));
     }
 
     // 呼ぶだけで static の登録が走る (SkyAbyss の初期化から)

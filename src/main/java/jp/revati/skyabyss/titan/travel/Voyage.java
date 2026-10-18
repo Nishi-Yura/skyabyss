@@ -98,6 +98,8 @@ class Voyage {
     int leaderAway;
     // 出発の待ちの上限 (tick)。近くの仲間がまだ乗っていないあいだ延びる。笛での早い出発では今の tick に縮む
     int boardingLimit = TravelRules.BOARDING_COUNTDOWN;
+    // 近くの仲間が全員乗った時刻 (phaseTicks)。乗っていない人がいれば -1
+    int allAboardSince = -1;
     // 出発の待ちを近くの全員に見せる帯 (ボスバー)
     @Nullable
     net.minecraft.server.level.ServerBossEvent boardingBar;
@@ -253,7 +255,16 @@ class Voyage {
     void tickBoarding(ServerLevel level, Entity whale) {
         hover(whale);
         if (dest != null && !pendingCancel && !test) {
-            boardingLimit = TravelRules.boardingLimit(boardingLimit, phaseTicks, !partyNotAboard(level).isEmpty());
+            List<ServerPlayer> notAboard = partyNotAboard(level);
+            boardingLimit = TravelRules.boardingLimit(boardingLimit, phaseTicks, !notAboard.isEmpty());
+            // 近くの仲間が全員乗った (上っている人もいない): 5 秒で出発。だれかが近づいてきたら、数え直す
+            boolean everyoneAboard = notAboard.isEmpty() && climbs.isEmpty() && !riders.isEmpty();
+            if (!everyoneAboard) {
+                allAboardSince = -1;
+            } else if (allAboardSince < 0) {
+                allAboardSince = phaseTicks;
+            }
+            boardingLimit = TravelRules.autoDepartLimit(boardingLimit, allAboardSince, phaseTicks);
         }
         int left = boardingLimit - phaseTicks;
         if (left > 0) {
@@ -310,10 +321,12 @@ class Voyage {
                     net.minecraft.world.BossEvent.BossBarColor.WHITE, net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS);
         }
         boolean extended = boardingLimit > TravelRules.BOARDING_COUNTDOWN;
-        boardingBar.setName(ModText.hint(kind.text(extended ? "message.skyabyss.travel.boarding_wait" : "message.skyabyss.travel.boarding"),
-                (left + 19) / 20));
-        boardingBar.setProgress(Mth.clamp(left / (float) Math.max(1, boardingLimit), 0f, 1f));
-        boardingBar.setColor(extended ? net.minecraft.world.BossEvent.BossBarColor.YELLOW : net.minecraft.world.BossEvent.BossBarColor.WHITE);
+        boolean auto = allAboardSince >= 0;
+        boardingBar.setName(ModText.hint(kind.text(auto ? "message.skyabyss.travel.all_aboard"
+                : extended ? "message.skyabyss.travel.boarding_wait" : "message.skyabyss.travel.boarding"), (left + 19) / 20));
+        boardingBar.setProgress(Mth.clamp(left / (float) Math.max(1, auto ? TravelRules.AUTO_DEPART : boardingLimit), 0f, 1f));
+        boardingBar.setColor(auto ? net.minecraft.world.BossEvent.BossBarColor.GREEN
+                : extended ? net.minecraft.world.BossEvent.BossBarColor.YELLOW : net.minecraft.world.BossEvent.BossBarColor.WHITE);
         double r2 = TravelRules.BOARDING_PARTY_RADIUS * TravelRules.BOARDING_PARTY_RADIUS;
         Vec3 at = Vec3.atCenterOf(pickup);
         for (ServerPlayer p : new ArrayList<>(boardingBar.getPlayers())) {
@@ -329,13 +342,11 @@ class Voyage {
         if (phaseTicks % 100 == 50) {
             callParty(level, false);
         }
-        if (phaseTicks % 40 == 0) {
+        if (phaseTicks % 40 == 0 && !(allAboardSince >= 0)) {
+            // まだ乗っていない仲間がいるあいだ、呼んだ人に残り人数を知らせる (出発は全員乗れば自動)
             ServerPlayer lead = player(leader);
             if (lead != null && riders.contains(leader)) {
-                int waiting = partyNotAboard(level).size();
-                Notice.bar(lead, waiting == 0
-                        ? ModText.hint(kind.text("message.skyabyss.travel.early_ready"))
-                        : ModText.hint(kind.text("message.skyabyss.travel.early_wait"), waiting));
+                Notice.bar(lead, ModText.hint(kind.text("message.skyabyss.travel.waiting_party"), partyNotAboard(level).size()));
             }
         }
     }
@@ -365,20 +376,6 @@ class Voyage {
             boardingBar.removeAllPlayers();
             boardingBar = null;
         }
-    }
-
-    // 呼んだ人が笛を吹いた (出発の待ちのあいだ): 近くの仲間が全員乗っていれば、すぐ出発する
-    boolean requestEarlyStart(ServerPlayer player) {
-        if (phase != Phase.BOARDING || dest == null || pendingCancel || !leader.equals(player.getUUID()) || !riders.contains(player.getUUID())) {
-            return false;
-        }
-        int waiting = partyNotAboard(level()).size();
-        if (!TravelRules.earlyStartAllowed(waiting)) {
-            Notice.bar(player, ModText.deny(kind.text("message.skyabyss.travel.early_wait"), waiting));
-            return true;
-        }
-        boardingLimit = Math.min(boardingLimit, phaseTicks);
-        return true;
     }
 
     // ---- 雲の上へ

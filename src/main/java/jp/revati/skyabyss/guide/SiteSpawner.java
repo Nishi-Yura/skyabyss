@@ -198,6 +198,9 @@ public final class SiteSpawner {
                     }
                 }
                 for (var entry : near.entrySet()) {
+                    for (ServerPlayer p : entry.getValue()) {
+                        SiteProgressData.get(server).markFound(p.getUUID(), def.id());
+                    }
                     String key = key(def, origin, entry.getKey());
                     seen.add(key);
                     Instance inst = INSTANCES.get(key);

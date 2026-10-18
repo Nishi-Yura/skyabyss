@@ -38,6 +38,7 @@ import jp.revati.skyabyss.rpg.MemoryFragments;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.readiness.BoardReadiness;
+import jp.revati.skyabyss.readiness.ReadinessAdvice;
 import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
@@ -82,7 +83,7 @@ public final class RecordBuilder {
                 RecordSnapshot.ACTION_NONE);
     }
 
-    private static Row value(String key, Component label, Component value, int mark, List<Component> detail) {
+    static Row value(String key, Component label, Component value, int mark, List<Component> detail) {
         return new Row(key, Kind.VALUE, ItemStack.EMPTY, label, value, mark, -1, detail, RecordSnapshot.ACTION_NONE);
     }
 
@@ -105,7 +106,7 @@ public final class RecordBuilder {
         return revealed(p, titan) ? Progression.titanName(titan) : t("r.unknown");
     }
 
-    private static Row header(String key, Component label) {
+    static Row header(String key, Component label) {
         return new Row("h." + key, Kind.HEADER, ItemStack.EMPTY, label, Component.empty(), RecordSnapshot.MARK_NONE, -1, List.of(),
                 RecordSnapshot.ACTION_NONE);
     }
@@ -466,6 +467,8 @@ public final class RecordBuilder {
         }
         rows.add(header(titan, Progression.titanName(titan)));
         rows.add(readinessRow(p, titan));
+        // この章の進み (A9): 備えの頼み・寄り道・旅の覚書。まだ現れない巨神 (page == null) の章も、頼みと覚書は見える
+        rows.addAll(ChapterChecklist.rows(p, titan));
         if (page == null) {
             // 順番は来たが、この世界にまだ現れない (ベータでは本体がない)
             rows.add(value("not_risen", t("r.not_risen"), t("v.not_risen"), RecordSnapshot.MARK_LOCKED,
@@ -528,8 +531,14 @@ public final class RecordBuilder {
         List<Component> detail = new ArrayList<>();
         for (Readiness.Lamp lamp : Readiness.Lamp.values()) {
             Readiness.Colour c = r.colour(lamp);
-            MutableComponent line = BoardReadiness.lamp(lamp, c).append(Component.literal(" " + Math.round(r.value(lamp) * 100) + "%  "));
-            line.append(Component.translatable("message.skyabyss.readiness.advice." + lamp.id() + (c == Readiness.Colour.GREEN ? ".ok" : "")));
+            // 赤・黄は「形 + 理由 + 手段」の一行 (A7。灯の名前と割合は一行の中に入っている)、緑は「灯 + 割合 + 足りている」
+            MutableComponent line;
+            if (c == Readiness.Colour.GREEN) {
+                line = BoardReadiness.lamp(lamp, c).append(Component.literal(" " + Math.round(r.value(lamp) * 100) + "%  "))
+                        .append(Component.translatable("message.skyabyss.readiness.advice." + lamp.id() + ".ok"));
+            } else {
+                line = Component.literal(BoardReadiness.shape(c) + " ").withColor(BoardReadiness.rgb(c)).append(ReadinessAdvice.line(p, titan, r, lamp));
+            }
             detail.add(line);
         }
         detail.add(t("d.readiness", Progression.titanName(titan)));

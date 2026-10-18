@@ -25,9 +25,25 @@ public final class SiteProgressData extends SavedData {
     private final Map<UUID, Set<String>> cleared = new HashMap<>();
     private final Map<UUID, Map<String, Long>> repeatAt = new HashMap<>();
     private final Map<UUID, Set<String>> treasure = new HashMap<>();
+    // 近くまで行った (湧き台の動く範囲に入った) 場所。控え帳の「見つけた数」(A9)。クリアした場所も見つけたことになる
+    private final Map<UUID, Set<String>> found = new HashMap<>();
 
     public static SiteProgressData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
+    }
+
+    public boolean found(UUID player, String site) {
+        Set<String> set = found.get(player);
+        return (set != null && set.contains(site)) || cleared(player, site);
+    }
+
+    // 初めてなら true
+    public boolean markFound(UUID player, String site) {
+        boolean added = found.computeIfAbsent(player, k -> new HashSet<>()).add(site);
+        if (added) {
+            setDirty();
+        }
+        return added;
     }
 
     public boolean cleared(UUID player, String site) {
@@ -78,6 +94,8 @@ public final class SiteProgressData extends SavedData {
         changed |= r != null && r.remove(site) != null;
         Set<String> t = treasure.get(player);
         changed |= t != null && t.remove(site);
+        Set<String> fd = found.get(player);
+        changed |= fd != null && fd.remove(site);
         if (changed) {
             setDirty();
         }
@@ -94,6 +112,7 @@ public final class SiteProgressData extends SavedData {
         SiteProgressData data = new SiteProgressData();
         readSets(tag.getCompound("Cleared"), data.cleared);
         readSets(tag.getCompound("Treasure"), data.treasure);
+        readSets(tag.getCompound("Found"), data.found);
         CompoundTag rep = tag.getCompound("RepeatAt");
         for (String key : rep.getAllKeys()) {
             Map<String, Long> m = new HashMap<>();
@@ -130,6 +149,7 @@ public final class SiteProgressData extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put("Cleared", writeSets(cleared));
         tag.put("Treasure", writeSets(treasure));
+        tag.put("Found", writeSets(found));
         CompoundTag rep = new CompoundTag();
         repeatAt.forEach((player, m) -> {
             CompoundTag inner = new CompoundTag();

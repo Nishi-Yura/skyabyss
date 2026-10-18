@@ -179,6 +179,23 @@ public final class GroupBossRoom {
         return host.playersInside(level).stream().filter(p -> Groups.isMember(p, group)).toList();
     }
 
+    // 扉の予告を見せる人: 中にいる人と、その近く (前室・戸口) にいる同じグループの人
+    private List<ServerPlayer> gatherParty(ServerLevel level, List<ServerPlayer> inside) {
+        List<ServerPlayer> party = new java.util.ArrayList<>(inside);
+        for (ServerPlayer p : Groups.alive(level, group)) {
+            if (party.contains(p)) {
+                continue;
+            }
+            for (ServerPlayer in : inside) {
+                if (p.distanceToSqr(in) <= 24 * 24) {
+                    party.add(p);
+                    break;
+                }
+            }
+        }
+        return party;
+    }
+
     // 10 tick ごとに呼ぶ
     public void tick(ServerLevel level, Host host) {
         List<ServerPlayer> inside = mine(level, host);
@@ -195,6 +212,7 @@ public final class GroupBossRoom {
                 if (!inside.isEmpty()) {
                     gather = GATHER_TICKS;
                     host.broadcast(level, group, ModText.battle("message.skyabyss.gate_gathering", GATHER_TICKS / 20));
+                    jp.revati.skyabyss.readiness.ReadinessSummary.show(level, gatherParty(level, inside), GATHER_TICKS / 20, true);
                 }
                 return;
             }
@@ -206,6 +224,8 @@ public final class GroupBossRoom {
             if (gather > 0) {
                 if (gather % 20 == 0) {
                     host.countdown(level, group, gather / 20);
+                    // 準備確認 (A2): 同じ tick の後に出すので、扉までの秒もそこに入る
+                    jp.revati.skyabyss.readiness.ReadinessSummary.show(level, gatherParty(level, inside), gather / 20, false);
                 }
                 return;
             }

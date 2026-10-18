@@ -171,6 +171,38 @@ public final class Readiness {
         CHARMS.add(has);
     }
 
+    // 手段の登録口 (A7): 灯が赤・黄のとき、理由のあとに「〇〇を作ろう」と出す品の名前。登録がなければ、灯ごとの一般の言い回し
+    private static final java.util.Map<Lamp, List<java.util.function.Supplier<net.minecraft.network.chat.Component>>> REMEDIES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void registerRemedy(Lamp lamp, java.util.function.Supplier<net.minecraft.network.chat.Component> name) {
+        REMEDIES.computeIfAbsent(lamp, l -> new CopyOnWriteArrayList<>()).add(name);
+    }
+
+    // 砥石が一つでも登録されているか (登録があれば、刃の手段に「砥石で鍛える」を出す。なければ今ある炉の強化を勧める)
+    public static boolean hasWhetstone() {
+        return !WHETSTONES.isEmpty();
+    }
+
+    public static List<net.minecraft.network.chat.Component> remedies(Lamp lamp) {
+        List<net.minecraft.network.chat.Component> out = new ArrayList<>();
+        for (java.util.function.Supplier<net.minecraft.network.chat.Component> s : REMEDIES.getOrDefault(lamp, List.of())) {
+            out.add(s.get());
+        }
+        return out;
+    }
+
+    // 身の内訳 {防具の割合, 体力の割合} (0〜CAP)。身が低い理由を言い分けるため
+    public static double[] bodyParts(Player player, String titan) {
+        GearCurve.Stage stage = stage(titan);
+        if (stage == null) {
+            return new double[] {CAP, CAP};
+        }
+        return new double[] {
+                cap((player.getAttributeValue(Attributes.ARMOR) + player.getAttributeValue(Attributes.ARMOR_TOUGHNESS)) / (stage.armor() + stage.toughness())),
+                cap(player.getMaxHealth() / (goalHearts(titan) * 2))};
+    }
+
     // ---------------------------------------------------------------- プレイヤーから
     public static Result of(Player player, String titan) {
         GearCurve.Stage stage = stage(titan);
