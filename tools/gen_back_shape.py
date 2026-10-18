@@ -95,6 +95,13 @@ def turtle_cfg():
     )
 
 
+def _bird_grid(IW):
+    """形・骨は今のモデルの格子 (部屋の座標が頼る)。材料 (色・羽の縞・光る所) は採用した低ポリ案 A の近景メッシュから
+    (tools/lowpoly_thunder_voxel.py)"""
+    import lowpoly_thunder_voxel as LV
+    return LV.recolor(IW.build_grid(), LV.cached_grid())
+
+
 def bird_cfg():
     """雷翼の鳥 (12 の 3.2節)。格子は install_thunder_wing.build_grid() (骨の番号、左 = +X で返る)"""
     import install_thunder_wing as IW
@@ -139,7 +146,7 @@ def bird_cfg():
     return dict(
         name="bird", out=ROOT / "src/main/resources/data/skyabyss/storm_back/bird.bin",
         preview_prefix="storm_back_bird", preview_dir=BIRD_PREVIEW,
-        build=lambda: np.ascontiguousarray(IW.build_grid()[::-1]),   # install の左 (+X) を本当の向き (左 = -X) に戻す
+        build=lambda: np.ascontiguousarray(_bird_grid(IW)[::-1]),   # install の左 (+X) を本当の向き (左 = -X) に戻す
         mat_of=M,
         cell=TW.CELL, origin=(TW.X0, TW.Y0, TW.Z0), S=0.85,
         # 体の中心 (geo の y=40) を y=140 に置く
