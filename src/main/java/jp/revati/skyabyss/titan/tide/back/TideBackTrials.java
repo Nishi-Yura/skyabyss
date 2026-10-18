@@ -4,8 +4,10 @@ import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,11 +15,17 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupEvents;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.GroupProgress;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.tide.TideTravel;
 import jp.revati.skyabyss.titan.tide.heart.TideHeartBattle;
 import jp.revati.skyabyss.titan.tide.heart.TideLoot;
@@ -28,6 +36,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -35,12 +44,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -51,17 +60,23 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 潮殻の背の試練の進行 (08 の 3〜4・7 章)。岩鯨の TitanBackTrials と同じ決まりを、潮殻の背の配置で動かす。
-//  - 潮の時計 (TideClock) を進め、潮の溜め (広間の水盤・庭の水路・干潟) を満ち引きさせる。干潟の門は干潮のあいだだけ開く
-//  - 三つの試練 (TideGarden・TideWatch・TideFlats) と潮鳴り石。三つが鳴ると水盤が引ききり、潮の底の門が開く
-//  - 休み場 (hub・g0・g1・s0・f0・heart): 着くと記録、倒れるとそこで目を覚ます (記録は試練の番号つき)。焚き火にしゃがんで触れると浜へ
+// 背中は一つだが、試練の進みはグループ (パーティ、または一人) ごと (TideBackState.Group。08 の 7.5節):
+//  - 潮の時計 (TideClock) は島で一つ。潮の溜め (広間の水盤・庭の水路・干潟) は潮で満ち引きする。干潟の門の既定は潮で開け閉めする
+//  - 三つの試練 (TideGarden・TideWatch・TideFlats) は占有する部屋 (TideRooms)。潮鳴り石・広間の灯り・抜け道の床は、
+//    鳴らしたグループにだけ光って見える (見かけの上書き GroupOverlays)。抜け道は踏んだ人のグループの石で動く
+//  - 三つの石を鳴らしたグループは、水盤が引ききったとき、そのグループにだけ潮の底の門が開く
+//  - 休み場 (hub・g0・g1・s0・f0・heart): 着くと記録、倒れるとそこで目を覚ます (記録はその人のグループの試練の番号つき)。
+//    焚き火にしゃがんで触れると浜へ
 //  - 倒れても持ち物と経験値は預かる (岩鯨と同じ部品 TitanBackTrials.keepBelongings)
-//  - リセット: 島に誰もいなくなって 3 分、または心臓を倒したあと潮の底の門より奥に 30 秒だれもいない。
-//    2 周目から試練が一つ眠る (TideBackState.reset)
+//  - リセットはグループごと: そのグループの誰も島にいなくなって 3 分 (GroupProgress.idleGroups)、
+//    またはそのグループが心臓を倒したあと、そのグループの誰も潮の底の門より奥にいないまま 30 秒。
+//    心臓を一度でも倒したグループは、2 周目から試練が一つ眠る (TideBackState.Group.reset)
+//  - 島に誰もいなくなって 3 分: 部屋の占有をすべて手放し、試練の敵を片付ける (グループの進みはそのまま)
 //  - ピースフル: 縁のくぐり道を封じ、試練の中の人は浜へ。試練の敵は消える (潮の時計は景色として動く)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideBackTrials {
     public static final TideField FIELD = new TideField();
-    public static final int RESET_AFTER_IDLE = 20 * 60 * 3;
+    public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
     public static final int TRIAL_XP = 50;
     private static final String TAG_CHECKPOINT = "skyabyss_tide_checkpoint";
@@ -71,7 +86,8 @@ public final class TideBackTrials {
 
     private static boolean ready;
     private static int idleTicks;
-    private static int afterHeartIdle;
+    // グループごとの「心臓を倒したあと、潮の底の門より奥に誰もいない」tick
+    private static final Map<UUID, Integer> AFTER_HEART = new HashMap<>();
     private static boolean wasPeaceful;
     private static TideClock.Phase lastPhase;
     private static final Set<UUID> REVIVING = new HashSet<>();
@@ -91,19 +107,127 @@ public final class TideBackTrials {
         return e.level().dimension() == TideTravel.TIDE_BACK;
     }
 
+    // その人のグループの進み
+    public static TideBackState.Group state(ServerLevel level, ServerPlayer player) {
+        return TideBackState.of(level, Groups.keyOf(player));
+    }
+
+    // その人のグループの試練の番号
+    static int epochOf(ServerLevel level, ServerPlayer player) {
+        return GroupProgress.epoch(level, Groups.keyOf(player));
+    }
+
+    // ---------------------------------------------------------------- 見かけの上書きと、グループが変わったときの後始末
+    @SubscribeEvent
+    static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            GroupOverlays.register(TideBackTrials::overlay);
+            GroupEvents.addMembershipHook(TideBackTrials::membershipChanged);
+        });
+    }
+
+    // 鳴らしたグループにだけ見せる: 潮鳴り石の光・広間の床の灯り・抜け道の床・西の祭壇の真珠の光
+    static void overlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, net.minecraft.world.level.block.state.BlockState> out) {
+        if (level.dimension() != TideTravel.TIDE_BACK) {
+            return;
+        }
+        BackGroupData.Record record = BackGroupData.get(level).peek(group);
+        if (record == null) {
+            return;
+        }
+        TideBackState.Group state = new TideBackState.Group(group, record);
+        for (TideBackState.Trial t : TideBackState.Trial.values()) {
+            if (!state.rung(t)) {
+                continue;
+            }
+            out.accept(stonePos(t), TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, true));
+            out.accept(lampPos(t), Blocks.SEA_LANTERN.defaultBlockState());
+            out.accept(padPos(t), TideKit.LAMP);
+            if (t == TideBackState.Trial.WEST) {
+                out.accept(STONE_WEST.above(), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
+            }
+        }
+    }
+
+    // グループの鍵が変わった人 (パーティを組んだ・入った・抜けた) が潮殻の背にいる: 記録が変わるので、試練の体内にいれば広間へ移す
+    static void membershipChanged(ServerPlayer player) {
+        if (player.level().dimension() != TideTravel.TIDE_BACK) {
+            return;
+        }
+        ServerLevel level = player.serverLevel();
+        // 庭の真珠は持ち越さない (持ち主のグループの真珠なら大貝へ戻す。もうそのグループの人ではないので、ここでは戻すだけ)
+        if (TideGarden.holds(player)) {
+            TideGarden.strip(player);
+            TideGarden.returnPearl(level, "message.skyabyss.tide.pearl_left_garden");
+        }
+        int epoch = epochOf(level, player);
+        CompoundTag tag = persisted(player);
+        boolean differs = tag.getInt(TAG_SEEN_EPOCH) != epoch;
+        if (inTrialBody(player.position()) && player.isAlive() && !player.isSpectator()) {
+            clearCheckpoint(player);
+            BlockPos hub = RESTS.get(0).spawn();
+            player.fallDistance = 0;
+            player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
+            Notice.narrate(player, "message.skyabyss.rest_point_lost");
+        } else if (differs) {
+            clearCheckpoint(player);
+        }
+        tag.putInt(TAG_SEEN_EPOCH, epoch);
+        PacketDistributor.sendToPlayer(player, gauge(level, player));
+    }
+
+    // 試練の中 (リセットで広間へ移す所): 三つの試練の部屋と、潮の底の門より奥
+    static boolean inTrialBody(Vec3 pos) {
+        if (pastBottomGate(pos)) {
+            return true;
+        }
+        for (Area a : trialAreas()) {
+            if (a.aabb().contains(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------------------------------------------------------- 建てたあと・起動のあとの用意
-    // 島を建てた直後 (TideBackBuilder から)。種を引き、試練を最初の形にする
+    // 島を建てた直後 (TideBackBuilder から)。扉を既定の形で置き、部屋を最初の形にし、試練の敵を片付ける
     public static void afterBuild(ServerLevel level) {
-        TideBackState state = TideBackState.get(level);
-        state.reset(level.random, null, true);
-        applyTrials(level, state);
+        TideRooms.releaseAll(level);
+        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG)
+                && !(e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart))) {
+            e.discard();
+        }
+        GroupGates.place(level, TideGates.flats(), false);
+        GroupGates.place(level, TideGates.bottom(), false);
+        GroupGates.place(level, TideGates.bottomFixed(), false);
+        GroupGates.place(level, TideGates.mouth(), true);
+        for (int k = 0; k < 3; k++) {
+            GroupGates.place(level, TideGates.door(k), false);
+        }
+        GroupGates.place(level, TideGates.cave(), true);
+        level.setBlock(new BlockPos(0, HUB_FLOOR, 0), TideKit.LAMP, 3);
+        TideGarden.reset(level, null);
+        TideWatch.reset(level, null);
+        TideFlats.reset(level, null);
+        applyStones(level);
         initPools(level);
+    }
+
+    // 建て直し (古い配置の島): どのグループの進みも最初に戻す (試練の番号が進み、古い休み場の記録は無効になる)
+    public static void resetAllRecords(ServerLevel level) {
+        BackGroupData data = BackGroupData.get(level);
+        for (UUID id : data.ids()) {
+            BackGroupData.Record r = data.peek(id);
+            if (r != null) {
+                new TideBackState.Group(id, r).reset(level.random, null, true);
+            }
+        }
     }
 
     // 潮の溜め (水を置く所) を、いまのブロックから作る
     public static void initPools(ServerLevel level) {
         FIELD.clear();
-        // 広間の水盤 (床 70 の上の 3 段)。干潟の門は閉じているものとして囲う
+        // 広間の水盤 (床 70 の上の 3 段)。干潟の門は閉じているものとして囲う (扉はいつもブロックなので、水はそこで止まる)
         List<BlockPos> hubSeeds = List.of(new BlockPos(0, 0, 6), new BlockPos(6, 0, -6), new BlockPos(-6, 0, -6), new BlockPos(14, 0, 8));
         FIELD.put("hub", HUB_FLOOR + 1, TideField.flood(level, -HUB_R - 1, 26, -HUB_R - 1, 20, hubSeeds, HUB_FLOOR + 1, 3,
                 p -> p.getZ() <= FLATS_GATE_Z || (Math.abs(p.getX()) <= BOTTOM_GATE_R && Math.abs(p.getZ()) <= BOTTOM_GATE_R && p.getY() <= HUB_FLOOR)));
@@ -126,12 +250,11 @@ public final class TideBackTrials {
                 GARDEN_DEPTH, p -> false));
     }
 
-    // 目標の段の数
+    // 目標の段の数。潮は島で一つなので、どの溜めも時計だけで決まる (干潟は、持ち主のグループの招き潮でも満ちる)
     static int target(ServerLevel level, TideField.Pool p) {
-        TideBackState state = TideBackState.get(level);
         double full = TideClock.fullness(level);
         return switch (p.id) {
-            case "hub" -> state.bottomOpen() || state.rungCount() >= 3 ? 0 : TideClock.levelFor(full, 3);
+            case "hub" -> TideClock.levelFor(full, 3);
             case "flats" -> Math.max(TideClock.levelFor(full, FLATS_DEPTH), TideFlats.beckonLevel());
             default -> TideClock.levelFor(full, p.depth());
         };
@@ -147,33 +270,33 @@ public final class TideBackTrials {
         if (!data.isBuilt() || data.needsBuild(LAYOUT_VERSION)) {
             return;
         }
-        TideBackState state = TideBackState.get(level);
         boolean anyone = level.players().stream().anyMatch(p -> !p.isSpectator());
         if (level.getGameTime() % 10 == 0) {
-            tickReset(level, data, state, anyone);
+            tickReset(level, anyone);
         }
         if (!anyone) {
             return;
         }
         if (!ready) {
+            TideGates.ensureAll(level);
             initPools(level);
-            TideGarden.reset(level, state);
-            TideWatch.reset(level, state);
-            TideFlats.reset(level, state);
-            applyStones(level, state);
+            applyStones(level);
         }
         TideClock.advance(level);
-        tickHorns(level, state);
+        tickHorns(level);
         FIELD.tick(level, p -> target(level, p));
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        TideGarden.tick(level, state, peaceful);
-        if (!peaceful) {
-            TideWatch.tick(level, state, false);
+        if (level.getGameTime() % 10 == 0) {
+            TideRooms.tick(level);
         }
-        TideFlats.tick(level, state, peaceful);
+        TideGarden.tick(level, peaceful);
+        if (!peaceful) {
+            TideWatch.tick(level, false);
+        }
+        TideFlats.tick(level, peaceful);
         if (level.getGameTime() % 5 == 0) {
-            tickGates(level, state);
-            tickPads(level, state);
+            tickGates(level);
+            tickPads(level);
             tickPeaceful(level, peaceful);
             tickFrost(level);
         }
@@ -184,12 +307,12 @@ public final class TideBackTrials {
         }
     }
 
-    // 満ちはじめる 10 秒前に低い潮鳴り、引きはじめる 10 秒前に高い音 (島じゅう)
-    private static void tickHorns(ServerLevel level, TideBackState state) {
+    // 満ちはじめる 10 秒前に低い潮鳴り、引きはじめる 10 秒前に高い音 (島じゅう。潮は全員のもの)
+    private static void tickHorns(ServerLevel level) {
         if (TideClock.forced() != null) {
             return;
         }
-        int t = state.clock();
+        int t = TideBackState.get(level).clock();
         boolean low = t == TideClock.LOW_TICKS - TideClock.WARN_TICKS;
         boolean high = t == TideClock.LOW_TICKS + TideClock.RISE_TICKS + TideClock.HIGH_TICKS - TideClock.WARN_TICKS;
         if (!low && !high) {
@@ -202,92 +325,101 @@ public final class TideBackTrials {
         }
     }
 
-    // 干潟の門: 干潮のあいだ (広間の水が引ききってから) だけ開く。潮招きの戦いの間は閉じたまま
-    private static void tickGates(ServerLevel level, TideBackState state) {
+    // 干潟の門: 既定は干潮のあいだ (広間の水が引ききってから) だけ開く (潮招きと戦うグループには TideFlats が閉じる)。
+    // 潮の底の門: 三つの石を鳴らしたグループにだけ、水盤が引ききったときに開く
+    private static void tickGates(ServerLevel level) {
         TideField.Pool hub = FIELD.pool("hub");
-        boolean open = TideClock.phase(level) == TideClock.Phase.LOW && hub != null && hub.level() == 0 && !TideFlats.fightSealed();
-        boolean changed = false;
-        for (int x = -1; x <= 1; x++) {
-            for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
-                BlockPos p = new BlockPos(x, y, FLATS_GATE_Z);
-                BlockState s = level.getBlockState(p);
-                if (open && s.is(ModBlocks.SEALED_GATE.get())) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                    changed = true;
-                } else if (!open && !s.is(ModBlocks.SEALED_GATE.get())) {
-                    // 戸口に立っている人は、広間の側へ出す
+        boolean open = TideClock.phase(level) == TideClock.Phase.LOW && hub != null && hub.level() == 0;
+        List<BlockPos> flats = TideGates.flats();
+        if (TideGates.defaultOpen(level, flats.get(0)) != open || !GroupGates.isGate(level, flats.get(0))) {
+            if (!open) {
+                // 戸口に立っている人は、広間の側へ出す
+                for (BlockPos p : flats) {
                     for (ServerPlayer pl : level.getEntitiesOfClass(ServerPlayer.class, new AABB(p))) {
                         pl.teleportTo(pl.getX(), pl.getY(), FLATS_GATE_Z + 1.6);
                     }
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                    changed = true;
                 }
             }
-        }
-        if (changed) {
+            GroupGates.setDefault(level, flats, open);
             level.playSound(null, 0.5, HUB_FLOOR + 2, FLATS_GATE_Z, open ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.6f);
         }
-        // 潮の底の門: 三つの石が鳴り、水盤が引ききったら開く (以後リセットまで水盤は満ちない)
-        if (!state.bottomOpen() && state.rungCount() >= 3 && hub != null && hub.level() == 0) {
-            state.markBottomOpen();
-            openBottom(level, true);
-            for (ServerPlayer p : level.players()) {
-                Notice.narrate(p, "message.skyabyss.tide.bottom_opened");
+        if (hub == null || hub.level() != 0) {
+            return;
+        }
+        for (UUID group : presentGroups(level)) {
+            TideBackState.Group state = TideBackState.of(level, group);
+            if (!state.bottomOpen() && state.rungCount() >= 3) {
+                state.markBottomOpen();
+                openBottom(level, group);
+                for (ServerPlayer p : Groups.online(level, group)) {
+                    Notice.narrate(p, "message.skyabyss.tide.bottom_opened");
+                    notify(p, SoundEvents.BEACON_ACTIVATE, 3f, 0.6f);
+                    notify(p, jp.revati.skyabyss.titan.tide.TideSetup.SONG.get(), 3f, 1.1f);
+                }
+            } else if (state.bottomOpen() && !GroupGates.isOpen(level, group, TideGates.bottom())) {
+                openBottom(level, group);
             }
-            level.playSound(null, 0.5, HUB_FLOOR + 1, 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
-            level.playSound(null, 0.5, HUB_FLOOR + 1, 0.5, jp.revati.skyabyss.titan.tide.TideSetup.SONG.get(), SoundSource.AMBIENT, 3f, 1.1f);
         }
     }
 
+    // その人にだけ鳴らす
+    static void notify(ServerPlayer p, SoundEvent sound, float volume, float pitch) {
+        p.playNotifySound(sound, SoundSource.BLOCKS, volume, pitch);
+    }
+
+    // 背中にいる人 (観戦者を除く) のグループ
+    static List<UUID> presentGroups(ServerLevel level) {
+        List<UUID> list = new ArrayList<>();
+        for (ServerPlayer p : level.players()) {
+            if (p.isSpectator()) {
+                continue;
+            }
+            UUID g = Groups.keyOf(p);
+            if (!list.contains(g)) {
+                list.add(g);
+            }
+        }
+        return list;
+    }
+
     // 自己テスト用
-    static void tickGatesForTest(ServerLevel level, TideBackState state) {
-        tickGates(level, state);
+    static void tickGatesForTest(ServerLevel level) {
+        tickGates(level);
     }
 
     static void tickPeacefulForTest(ServerLevel level, boolean peaceful) {
         tickPeaceful(level, peaceful);
     }
 
-    // 潮の底の門の格子 (西の列の 3 マスが沈み、螺旋の階段の上が開く)
-    static void openBottom(ServerLevel level, boolean open) {
-        for (int z = -1; z <= 1; z++) {
-            BlockPos p = new BlockPos(-1, HUB_FLOOR, z);
-            level.setBlock(p, open ? Blocks.AIR.defaultBlockState() : ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-            if (open) {
-                level.sendParticles(ParticleTypes.BUBBLE_POP, p.getX() + 0.5, p.getY() + 1, p.getZ() + 0.5, 12, 0.3, 0.2, 0.3, 0.05);
-            }
-        }
-        for (int x = 0; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                level.setBlock(new BlockPos(x, HUB_FLOOR, z), x == 0 && z == 0 ? TideKit.LAMP : ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-            }
-        }
+    // 潮の底の門の格子 (西の列の 3 マス) を、そのグループにだけ沈める
+    static void openBottom(ServerLevel level, UUID group) {
+        GroupGates.open(level, group, TideGates.bottom());
     }
 
-    // 抜け道の床 (石が鳴ると光る。踏むと広間の近くへ)
-    private static void tickPads(ServerLevel level, TideBackState state) {
+    // 抜け道の床 (石が鳴ると光る。踏むと広間の近くへ)。踏んだ人のグループの石で決める
+    private static void tickPads(ServerLevel level) {
         for (ServerPlayer p : List.copyOf(level.players())) {
             if (!p.isAlive() || p.isSpectator()) {
                 continue;
             }
             BlockPos under = p.blockPosition().below();
-            BlockPos to = null;
-            if (under.equals(RETURN_WEST) && state.rung(TideBackState.Trial.WEST)) {
-                to = RETURN_WEST_TO;
-            } else if (under.equals(RETURN_EAST) && state.rung(TideBackState.Trial.EAST)) {
-                to = RETURN_EAST_TO;
-            } else if (under.equals(RETURN_FRONT) && state.rung(TideBackState.Trial.FRONT)) {
-                to = RETURN_FRONT_TO;
+            TideBackState.Trial trial = under.equals(RETURN_WEST) ? TideBackState.Trial.WEST
+                    : under.equals(RETURN_EAST) ? TideBackState.Trial.EAST : under.equals(RETURN_FRONT) ? TideBackState.Trial.FRONT : null;
+            if (trial == null || !state(level, p).rung(trial)) {
+                continue;
             }
-            if (to != null) {
-                if (TideGarden.holds(p)) {
-                    continue;
-                }
-                p.fallDistance = 0;
-                p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
-                level.playSound(null, to, jp.revati.skyabyss.titan.tide.TideSetup.GATE.get(), SoundSource.PLAYERS, 1f, 1.3f);
-                Notice.bar(p, ModText.hint("message.skyabyss.tide.return_path"));
+            BlockPos to = switch (trial) {
+                case WEST -> RETURN_WEST_TO;
+                case EAST -> RETURN_EAST_TO;
+                case FRONT -> RETURN_FRONT_TO;
+            };
+            if (TideGarden.holds(p)) {
+                continue;
             }
+            p.fallDistance = 0;
+            p.teleportTo(level, to.getX() + 0.5, to.getY(), to.getZ() + 0.5, p.getYRot(), 0f);
+            level.playSound(null, to, jp.revati.skyabyss.titan.tide.TideSetup.GATE.get(), SoundSource.PLAYERS, 1f, 1.3f);
+            Notice.bar(p, ModText.hint("message.skyabyss.tide.return_path"));
         }
     }
 
@@ -308,12 +440,12 @@ public final class TideBackTrials {
         }
     }
 
-    // ---------------------------------------------------------------- 潮鳴り石
+    // ---------------------------------------------------------------- 潮鳴り石 (触れた人のグループの石)
     public static void useStone(ServerLevel level, BlockPos pos, ServerPlayer player, ItemStack stack) {
         if (level.dimension() != TideTravel.TIDE_BACK) {
             return;
         }
-        TideBackState state = TideBackState.get(level);
+        TideBackState.Group state = state(level, player);
         TideBackState.Trial trial = pos.equals(STONE_WEST) ? TideBackState.Trial.WEST
                 : pos.equals(STONE_EAST) ? TideBackState.Trial.EAST : pos.equals(STONE_FRONT) ? TideBackState.Trial.FRONT : null;
         if (trial == null) {
@@ -344,22 +476,25 @@ public final class TideBackTrials {
         ring(level, state, trial, player);
     }
 
-    static void ring(ServerLevel level, TideBackState state, TideBackState.Trial trial, @Nullable ServerPlayer by) {
+    // 石を鳴らす (そのグループの記録に書き、そのグループの人にだけ光って見せる)
+    static void ring(ServerLevel level, TideBackState.Group state, TideBackState.Trial trial, @Nullable ServerPlayer by) {
         state.ring(trial);
-        applyStones(level, state);
+        GroupOverlays.refresh(level, state.id);
         BlockPos pos = stonePos(trial);
-        level.playSound(null, pos, TideBackSetup.CHIME.get(), SoundSource.BLOCKS, 3f, 1f);
+        for (ServerPlayer p : Groups.online(level, state.id)) {
+            if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 48 * 48) {
+                notify(p, TideBackSetup.CHIME.get(), 3f, 1f);
+            }
+        }
         level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
         if (by != null) {
             Notice.bar(by, ModText.hint("message.skyabyss.tide.return_opened"));
         }
         Component msg = ModText.progress("message.skyabyss.tide.stone_ringing", Component.translatable("trial.skyabyss.tide_" + trial.id()),
                 state.rungCount(), 3);
-        for (ServerPlayer p : level.players()) {
-            Notice.send(p, msg);
-        }
-        // 試練の踏破の経験値 (石の近くにいた人。仲間には分け前) と、サブクエストの「試練を踏破する」
-        List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(16), p -> p.isAlive() && !p.isSpectator());
+        Groups.tell(level, state.id, msg);
+        // 試練の踏破の経験値 (石の近くにいた、そのグループの人。仲間には分け前) と、サブクエストの「試練を踏破する」
+        List<ServerPlayer> near = Groups.inBox(level, state.id, new AABB(pos).inflate(16));
         for (ServerPlayer p : near) {
             Growth.addXp(p, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(p).level, TideLoot.TIDE_LEVEL)), "growth.skyabyss.reason.tide_trial");
             jp.revati.skyabyss.quest.Quests.signal(p, "tide_trial_" + trial.id());
@@ -371,7 +506,7 @@ public final class TideBackTrials {
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
         if (state.rungCount() >= 3) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, state.id)) {
                 Notice.narrate(p, "message.skyabyss.tide.all_rung");
             }
         }
@@ -385,113 +520,126 @@ public final class TideBackTrials {
         };
     }
 
-    // 三つの石・広間の床の灯り・抜け道の床を、いまの状態に合わせる
-    static void applyStones(ServerLevel level, TideBackState state) {
-        for (TideBackState.Trial t : TideBackState.Trial.values()) {
-            boolean rung = state.rung(t);
-            BlockPos s = stonePos(t);
-            BlockState want = TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, rung);
-            if (!level.getBlockState(s).equals(want)) {
-                level.setBlock(s, want, 3);
-            }
-            BlockPos lamp = switch (t) {
-                case WEST -> LAMP_WEST;
-                case EAST -> LAMP_EAST;
-                case FRONT -> LAMP_FRONT;
-            };
-            level.setBlock(lamp, rung ? Blocks.SEA_LANTERN.defaultBlockState() : TideKit.DARK, 3);
-            BlockPos pad = switch (t) {
-                case WEST -> RETURN_WEST;
-                case EAST -> RETURN_EAST;
-                case FRONT -> RETURN_FRONT;
-            };
-            level.setBlock(pad, rung ? TideKit.LAMP : TideKit.DARK, 3);
-        }
-        BlockPos pearlTop = STONE_WEST.above();
-        level.setBlock(pearlTop, state.rung(TideBackState.Trial.WEST) ? Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);
+    static BlockPos lampPos(TideBackState.Trial t) {
+        return switch (t) {
+            case WEST -> LAMP_WEST;
+            case EAST -> LAMP_EAST;
+            case FRONT -> LAMP_FRONT;
+        };
     }
 
-    // ---------------------------------------------------------------- リセット
-    private static void tickReset(ServerLevel level, TitanBackData data, TideBackState state, boolean anyone) {
+    static BlockPos padPos(TideBackState.Trial t) {
+        return switch (t) {
+            case WEST -> RETURN_WEST;
+            case EAST -> RETURN_EAST;
+            case FRONT -> RETURN_FRONT;
+        };
+    }
+
+    // 三つの石・広間の床の灯り・抜け道の床を、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
+    static void applyStones(ServerLevel level) {
+        for (TideBackState.Trial t : TideBackState.Trial.values()) {
+            net.minecraft.world.level.block.state.BlockState want = TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false);
+            if (!level.getBlockState(stonePos(t)).equals(want)) {
+                level.setBlock(stonePos(t), want, 3);
+            }
+            level.setBlock(lampPos(t), TideKit.DARK, 3);
+            level.setBlock(padPos(t), TideKit.DARK, 3);
+        }
+        level.setBlock(STONE_WEST.above(), Blocks.AIR.defaultBlockState(), 3);
+    }
+
+    // ---------------------------------------------------------------- リセット (グループごと)
+    private static void tickReset(ServerLevel level, boolean anyone) {
         if (!anyone) {
             idleTicks += 10;
-            if (idleTicks >= RESET_AFTER_IDLE && (state.rungCount() > (state.sleeping() != null ? 1 : 0) || data.isHeartDefeated()
-                    || state.nestsBrokenAny() || TideGarden.pearlOut())) {
-                idleTicks = 0;
-                reset(level, false);
+            if (idleTicks == RESET_AFTER_IDLE) {
+                cleanupWorld(level);
             }
         } else {
             idleTicks = 0;
         }
-        // 心臓を倒したあと、潮の底の門より奥に誰もいなくなって 30 秒たったら、次の周へ
-        if (data.isHeartDefeated()) {
+        // そのグループの誰も島にいないまま 3 分たち、試練が進んでいたグループ
+        for (UUID group : GroupProgress.idleGroups(level)) {
+            BackGroupData.Record r = BackGroupData.get(level).peek(group);
+            if (r != null && new TideBackState.Group(group, r).hasTrialProgress()) {
+                resetGroup(level, group, false, null, false);
+            }
+        }
+        // 心臓を倒したグループ: そのグループの誰も潮の底の門より奥にいなくなって 30 秒たったら、次の周へ
+        BackGroupData data = BackGroupData.get(level);
+        for (UUID group : data.ids()) {
+            BackGroupData.Record r = data.peek(group);
+            if (r == null || !r.isHeartDefeated()) {
+                AFTER_HEART.remove(group);
+                continue;
+            }
             boolean inside = false;
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, group)) {
                 if (!p.isSpectator() && pastBottomGate(p.position())) {
                     inside = true;
                     break;
                 }
             }
-            afterHeartIdle = inside ? 0 : afterHeartIdle + 10;
-            if (afterHeartIdle >= RESET_AFTER_HEART) {
-                afterHeartIdle = 0;
-                reset(level, true);
+            int t = inside ? 0 : AFTER_HEART.getOrDefault(group, 0) + 10;
+            AFTER_HEART.put(group, t);
+            if (t >= RESET_AFTER_HEART) {
+                resetGroup(level, group, true, null, false);
             }
-        } else {
-            afterHeartIdle = 0;
         }
     }
 
-    // 試練を最初に戻す (08 の 7.1節)。心臓も眠り直し、試練の番号が進む (古い休み場の記録は無効になる)
-    public static void reset(ServerLevel level, boolean announce) {
-        reset(level, announce, null, false);
+    // 島に誰もいなくなって久しい: 部屋の占有をすべて手放し、残った試練の敵を片付ける (グループの進みはそのまま)
+    static void cleanupWorld(ServerLevel level) {
+        TideRooms.releaseAll(level);
+        TideHeartBattle.releaseAll(level);
+        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG))) {
+            e.discard();
+        }
+        lastPhase = null;
     }
 
-    public static void reset(ServerLevel level, boolean announce, @Nullable TideBackState.Trial forceSleep, boolean noSleep) {
-        TitanBackData data = TitanBackData.get(level);
-        TideHeartBattle.reawaken(level, data);
-        TideBackState state = TideBackState.get(level);
+    // そのグループの試練を最初に戻す (08 の 7.1節)。心臓も眠り直し、試練の番号が進む (古い休み場の記録は無効になる)。
+    // ほかのグループの進み・部屋・敵・人には触れない
+    public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable TideBackState.Trial forceSleep, boolean noSleep) {
+        TideHeartBattle.reawaken(level, group);
+        TideRooms.releaseGroup(level, group);
+        TideBackState.Group state = TideBackState.of(level, group);
         state.reset(level.random, forceSleep, noSleep);
-        // 試練の中の人は、潮の広間へ移す
+        GroupOverlays.refresh(level, group);
+        AFTER_HEART.remove(group);
+        // そのグループの試練の敵 (印のある個体) を片付ける
+        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90),
+                e -> e.getTags().contains(TideMob.TRIAL_TAG) && e instanceof GroupOwned o && group.equals(o.groupId()))) {
+            e.discard();
+        }
+        // 試練の中の、そのグループの人は、潮の広間へ移す
         BlockPos hub = RESTS.get(0).spawn();
-        for (ServerPlayer p : List.copyOf(level.players())) {
-            boolean inTrial = pastBottomGate(p.position());
-            for (Area a : trialAreas()) {
-                if (a.aabb().contains(p.position())) {
-                    inTrial = true;
-                }
-            }
-            if (inTrial && !p.isSpectator()) {
+        for (ServerPlayer p : Groups.online(level, group)) {
+            if (inTrialBody(p.position()) && !p.isSpectator()) {
                 p.fallDistance = 0;
                 p.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, p.getYRot(), 0f);
             }
+            persisted(p).putInt(TAG_SEEN_EPOCH, state.epoch());
         }
-        applyTrials(level, state);
-        initGardenPool(level);
-        lastPhase = null;
         if (announce) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, group)) {
                 Notice.narrate(p, "message.skyabyss.tide.trials_renewed");
                 tellSleeping(p, state);
             }
         }
-        SkyAbyss.LOGGER.info("Tide back trials reset (sleeping: {}, east config {}, garden route {})",
+        SkyAbyss.LOGGER.info("Tide back trials reset for group {} (sleeping: {}, east config {}, garden route {})", group,
                 state.sleeping() == null ? "none" : state.sleeping().id(), state.eastConfig(), state.gardenRoute());
     }
 
-    static void applyTrials(ServerLevel level, TideBackState state) {
-        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG)
-                && !(e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart))) {
-            e.discard();
+    // 記録のあるグループをすべて戻す (コマンドで、人を指さないとき)
+    public static void resetAllGroups(ServerLevel level, boolean announce, @Nullable TideBackState.Trial forceSleep, boolean noSleep) {
+        for (UUID id : BackGroupData.get(level).ids()) {
+            resetGroup(level, id, announce, forceSleep, noSleep);
         }
-        TideGarden.reset(level, state);
-        TideWatch.reset(level, state);
-        TideFlats.reset(level, state);
-        openBottom(level, state.bottomOpen());
-        applyStones(level, state);
     }
 
-    static void tellSleeping(ServerPlayer p, TideBackState state) {
+    static void tellSleeping(ServerPlayer p, TideBackState.Group state) {
         if (state.sleeping() != null) {
             Notice.narrate(p, "message.skyabyss.tide.sleeping_" + state.sleeping().id());
         }
@@ -499,18 +647,10 @@ public final class TideBackTrials {
 
     // ---------------------------------------------------------------- ピースフル
     private static void tickPeaceful(ServerLevel level, boolean peaceful) {
-        // くぐり道の封印 (ピースフルのあいだだけ)
-        int f = TideIslandBuilder.caveFloor(CAVE_SEAL_Z);
-        for (int x = CAVE_X1; x <= CAVE_X2; x++) {
-            for (int y = f + 1; y <= f + 4; y++) {
-                BlockPos p = new BlockPos(x, y, CAVE_SEAL_Z);
-                boolean sealed = level.getBlockState(p).is(ModBlocks.SEALED_GATE.get());
-                if (peaceful && !sealed) {
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                } else if (!peaceful && sealed) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                }
-            }
+        // くぐり道の封印 (ピースフルのあいだだけ。難しさは島で一つなので、ワールドの既定)
+        List<BlockPos> cave = TideGates.cave();
+        if (TideGates.defaultOpen(level, cave.get(0)) == peaceful || !GroupGates.isGate(level, cave.get(0))) {
+            GroupGates.setDefault(level, cave, !peaceful);
         }
         if (peaceful) {
             for (ServerPlayer p : List.copyOf(level.players())) {
@@ -547,13 +687,13 @@ public final class TideBackTrials {
         p.teleportTo(p.serverLevel(), ARRIVAL.getX() + 0.5, ARRIVAL.getY(), ARRIVAL.getZ() + 0.5, ARRIVAL_YAW, 0f);
     }
 
-    // ---------------------------------------------------------------- 休み場
+    // ---------------------------------------------------------------- 休み場 (記録の番号は、その人のグループの試練の番号)
     @SubscribeEvent
     static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.level().dimension() != TideTravel.TIDE_BACK || player.tickCount % 5 != 0) {
             return;
         }
-        int epoch = TitanBackData.get(player.serverLevel()).epoch();
+        int epoch = epochOf(player.serverLevel(), player);
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -635,7 +775,7 @@ public final class TideBackTrials {
         if (back == null) {
             return;
         }
-        int epoch = TitanBackData.get(back).epoch();
+        int epoch = epochOf(back, player);
         String cp = validCheckpoint(tag, epoch);
         BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
@@ -652,7 +792,7 @@ public final class TideBackTrials {
     }
 
     // 乗り込み・地上へ戻る (次元の移動) では休み場の記録を消す。背中で倒れて連れ戻すときだけは残す。
-    // 背中を出る人の真珠は大貝へ戻す。乗り込んだ人には、眠っている試練を知らせる
+    // 背中を出る人の真珠は取り上げる (庭の持ち主のグループの真珠なら大貝へ戻す)。乗り込んだ人には、そのグループの眠っている試練を知らせる
     @SubscribeEvent
     static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
@@ -660,9 +800,8 @@ public final class TideBackTrials {
         }
         if (event.getFrom() == TideTravel.TIDE_BACK) {
             ServerLevel back = player.server.getLevel(TideTravel.TIDE_BACK);
-            if (back != null && TideGarden.holds(player)) {
-                TideGarden.strip(player);
-                TideGarden.returnPearl(back, "message.skyabyss.tide.pearl_left_garden");
+            if (back != null) {
+                TideGarden.dropOut(back, player, TideRooms.owns(TideRooms.GARDEN, player));
             }
         }
         if (REVIVING.contains(player.getUUID())) {
@@ -672,31 +811,28 @@ public final class TideBackTrials {
             clearCheckpoint(player);
             ServerLevel back = player.server.getLevel(TideTravel.TIDE_BACK);
             if (event.getTo() == TideTravel.TIDE_BACK && back != null) {
-                persisted(player).putInt(TAG_SEEN_EPOCH, TitanBackData.get(back).epoch());
-                tellSleeping(player, TideBackState.get(back));
+                persisted(player).putInt(TAG_SEEN_EPOCH, epochOf(back, player));
+                tellSleeping(player, state(back, player));
             }
         }
     }
 
-    // ログイン: 背中にいて、最後に見た試練の番号が古く (その間にリセットされた)、試練の中にいるなら浜へ。真珠は持ち越さない
+    // ログイン: 背中にいて、最後に見た試練の番号 (その人のグループの) が違い (その間にリセットされた・グループが変わった)、
+    // 試練の中にいるなら浜へ。真珠は持ち越さない (いまの庭の持ち主のグループの、取り出し中の真珠でなければ取り上げる)
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.level().dimension() != TideTravel.TIDE_BACK) {
             return;
         }
         ServerLevel back = player.serverLevel();
-        if (TideGarden.holds(player) && !TideGarden.pearlOut()) {
+        if (TideGarden.holds(player) && !(TideGarden.pearlOut() && TideRooms.owns(TideRooms.GARDEN, player))) {
             TideGarden.strip(player);
         }
-        int epoch = TitanBackData.get(back).epoch();
+        int epoch = epochOf(back, player);
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             clearCheckpoint(player);
-            boolean inTrial = pastBottomGate(player.position());
-            for (Area a : trialAreas()) {
-                inTrial |= a.aabb().contains(player.position());
-            }
-            if (player.isAlive() && inTrial) {
+            if (player.isAlive() && inTrialBody(player.position())) {
                 toArrival(player);
                 Notice.narrate(player, "message.skyabyss.rest_point_lost");
             }
@@ -719,10 +855,7 @@ public final class TideBackTrials {
         if (level.getBlockState(pos).is(Blocks.SOUL_CAMPFIRE)) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
-                if (TideGarden.holds(player)) {
-                    TideGarden.strip(player);
-                    TideGarden.returnPearl(level, "message.skyabyss.tide.pearl_left_garden");
-                }
+                TideGarden.dropOut(level, player, TideRooms.owns(TideRooms.GARDEN, player));
                 clearCheckpoint(player);
                 toArrival(player);
                 Notice.narrate(player, "message.skyabyss.tide.gave_up");
@@ -746,21 +879,21 @@ public final class TideBackTrials {
         FIELD.clear();
         ready = false;
         idleTicks = 0;
-        afterHeartIdle = 0;
+        AFTER_HEART.clear();
         wasPeaceful = false;
         lastPhase = null;
         REVIVING.clear();
+        TideRooms.forget();
         TideGarden.clear();
         TideWatch.clear();
         TideFlats.clear();
         TideClock.force(null);
     }
 
-    // ---------------------------------------------------------------- 潮見の目盛り (画面右上)
+    // ---------------------------------------------------------------- 潮見の目盛り (画面右上。鳴った石の数と招き潮は、その人のグループのもの)
     static void sendGauge(ServerLevel level) {
-        TideBackNetwork.Gauge g = gauge(level);
         for (ServerPlayer p : level.players()) {
-            PacketDistributor.sendToPlayer(p, g);
+            PacketDistributor.sendToPlayer(p, gauge(level, p));
         }
     }
 
@@ -768,11 +901,12 @@ public final class TideBackTrials {
         sendGauge(level);
     }
 
-    static TideBackNetwork.Gauge gauge(ServerLevel level) {
+    static TideBackNetwork.Gauge gauge(ServerLevel level, ServerPlayer player) {
         TideClock.Phase phase = TideClock.phase(level);
         int left = TideClock.ticksLeft(level);
-        TideBackState state = TideBackState.get(level);
-        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), TideFlats.beckonAlert(), state.rungCount());
+        TideBackState.Group state = state(level, player);
+        boolean alert = TideFlats.beckonAlert() && TideRooms.owns(TideRooms.FLATS, player);
+        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), alert, state.rungCount());
     }
 
     public static Vec3 hubSpawn() {

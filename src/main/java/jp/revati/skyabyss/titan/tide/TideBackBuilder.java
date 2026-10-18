@@ -39,7 +39,7 @@ public final class TideBackBuilder {
             if (data.isBuilt()) {
                 // 古い版 (仮の島) の上に建て直す。進み具合を戻して試練の番号を進める (古い休み場の記録は無効)
                 SkyAbyss.LOGGER.info("Rebuilding the tide back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
-                data.resetProgress();
+                TideBackTrials.resetAllRecords(back);
             }
             build(back, data);
         }
@@ -62,7 +62,7 @@ public final class TideBackBuilder {
         }
         if (data.isBuilt()) {
             SkyAbyss.LOGGER.info("Rebuilding the tide back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
-            data.resetProgress();
+            TideBackTrials.resetAllRecords(back);
         }
         TideKit kit = new TideKit(back, RandomSource.create(20261017L));
         BackBuildJobs.schedule("tide back island", back, TideTurtle.job(kit), () -> finish(back, data, kit, System.currentTimeMillis()));

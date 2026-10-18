@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.tide.TideTravel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -27,7 +26,8 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // /skyabyss tideheart phase <1-3>  : 段階を決める (体力もその段階の頭に合わせる)
 // /skyabyss tideheart action <技>  : 技を今すぐ使わせる (breath, shell_strike, whirl, flood, bubble, pearl, ebb, moon_wave, pearl_rain, roar)
 // /skyabyss tideheart win          : 心臓を倒したことにする (報酬・進み・記録まで通す)
-// /skyabyss tideheart reset        : 戦いを放棄して戻す。倒したあとなら、心臓をもう一度挑めるようにする
+// /skyabyss tideheart reset        : 戦いを放棄して戻す。倒したあとなら、そのグループの試練ごと戻して心臓をもう一度挑めるようにする
+// (start・reset・status・phase などは、コマンドを打った人のグループの戦いに効く。殻の底は一度に一つのグループが使う)
 // /skyabyss tideheart rebuild      : 部屋を建て直す
 // /skyabyss tideheart status       : 今の様子
 // /skyabyss tideheart shot <人> <名前> : その人の画面を run/screenshots/<名前>.png に写す (キーを送らずに確かめるため)
@@ -46,7 +46,7 @@ public final class TideHeartCommands {
                 .then(op("go").executes(TideHeartCommands::go))
                 .then(op("start").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    boolean ok = TideHeartBattle.startNow(back);
+                    boolean ok = TideHeartBattle.startNow(back, group(ctx));
                     ctx.getSource().sendSuccess(() -> Component.literal(ok ? "tide heart: started" : "tide heart: already active or failed"), true);
                     return ok ? 1 : 0;
                 }))
@@ -81,18 +81,19 @@ public final class TideHeartCommands {
                 }))
                 .then(op("reset").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    TitanBackData data = TitanBackData.get(back);
-                    if (data.isHeartDefeated()) {
-                        TideHeartBattle.reawaken(back, data);
+                    java.util.UUID group = group(ctx);
+                    if (TideHeartBattle.defeated(back, group)) {
+                        // 倒したあとなら、そのグループの試練ごと戻す (心臓の撃破はグループの記録にある)
+                        jp.revati.skyabyss.titan.tide.back.TideBackTrials.resetGroup(back, group, true, null, true);
                     } else {
-                        TideHeartBattle.abandon(back);
+                        TideHeartBattle.abandon(back, group);
                     }
                     ctx.getSource().sendSuccess(() -> Component.literal("tide heart: reset"), true);
                     return 1;
                 }))
                 .then(op("rebuild").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    TideHeartBattle.abandon(back);
+                    TideHeartBattle.releaseAll(back);
                     TideHeartArena.build(back);
                     ctx.getSource().sendSuccess(() -> Component.literal("tide heart: chamber rebuilt"), true);
                     return 1;
@@ -104,9 +105,11 @@ public final class TideHeartCommands {
                         }))))
                 .then(op("status").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    TideHeart heart = TideHeartBattle.current(back);
-                    String s = "active=" + TideHeartBattle.room().active() + " gathering=" + TideHeartBattle.room().gathering()
-                            + " defeated=" + TitanBackData.get(back).isHeartDefeated() + " built=" + TideHeartArena.isBuilt(back)
+                    java.util.UUID group = group(ctx);
+                    TideHeart heart = TideHeartBattle.current(back, group);
+                    String s = "active=" + TideHeartBattle.room(group).active() + " gathering=" + TideHeartBattle.room(group).gathering()
+                            + " defeated=" + TideHeartBattle.defeated(back, group) + " owner=" + TideHeartBattle.owner()
+                            + " built=" + TideHeartArena.isBuilt(back)
                             + " flooding=" + TideHeartArena.flooding()
                             + (heart == null ? "" : " phase=" + (heart.getPhase() + 1) + " hp=" + Math.round(heart.getHealth()) + "/" + Math.round(heart.getMaxHealth())
                                     + " x" + heart.toughness() + " action=" + heart.currentAction());
@@ -123,8 +126,13 @@ public final class TideHeartCommands {
         return back;
     }
 
+    // コマンドを打った人のグループ (進みと戦いはグループごと)
+    private static java.util.UUID group(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.getSource().getPlayerOrException());
+    }
+
     private static TideHeart heart(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        TideHeart heart = TideHeartBattle.current(back(ctx));
+        TideHeart heart = TideHeartBattle.current(back(ctx), group(ctx));
         if (heart == null) {
             throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(Component.literal("no tide heart is fighting (use /skyabyss tideheart start)")).create();
         }

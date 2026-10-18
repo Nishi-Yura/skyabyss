@@ -5,6 +5,8 @@ import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -122,6 +124,7 @@ public final class TideHeartArena {
         if (!isBuilt(back)) {
             build(back);
         }
+        ensureGate(back);
     }
 
     public static void build(ServerLevel back) {
@@ -249,6 +252,7 @@ public final class TideHeartArena {
             }
         }
         fillTicks = holdTicks = drainTicks = 0;
+        GroupGates.place(back, gate(), true);
         SkyAbyss.LOGGER.info("Built the tide heart chamber (shell bottom)");
     }
 
@@ -364,23 +368,35 @@ public final class TideHeartArena {
     }
 
     // ---------------------------------------------------------------- 入口
+    // 入口はいつも扉のブロック (SealedGateBlock)。ふだんは既定で開いていて、戦いのあいだは既定で閉じる。
+    // 殻の底は一度に一つのグループしか使わない (RoomLocks) ので、グループごとの上書きではなく既定で動かす
+    // (開いた扉のブロックは水を通してしまうので、満ち潮の水を止めるには、ワールドで閉じている必要がある)
     static void seal(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-        }
+        GroupGates.setDefault(level, gate(), false);
     }
 
     static void open(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+        boolean was = sealed(level);
+        GroupGates.setDefault(level, gate(), true);
+        if (was) {
+            for (BlockPos p : gate()) {
                 level.sendParticles(ParticleTypes.BUBBLE_POP, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.02);
             }
         }
     }
 
+    // 入口の扉がなければ置く (建てたあと・起動のあと。開いた形で)
+    static void ensureGate(ServerLevel level) {
+        for (BlockPos p : gate()) {
+            if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
+                GroupGates.place(level, List.of(p), true);
+            }
+        }
+    }
+
     static boolean sealed(ServerLevel level) {
-        return level.getBlockState(gate().get(0)).is(ModBlocks.SEALED_GATE.get());
+        BlockState s = level.getBlockState(gate().get(0));
+        return s.is(ModBlocks.SEALED_GATE.get()) && !s.getValue(SealedGateBlock.OPEN);
     }
 
     static void resetState() {

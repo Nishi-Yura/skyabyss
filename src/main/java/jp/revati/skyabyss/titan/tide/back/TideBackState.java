@@ -1,5 +1,8 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import java.util.UUID;
+
+import jp.revati.skyabyss.titan.group.BackGroupData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -7,7 +10,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.saveddata.SavedData;
 
 // 潮殻の背の試練の状態 (tide_back のディメンションに保存)。
-// 試練の番号 (休み場の記録を無効にする番号) と心臓の撃破は、岩鯨と共通の TitanBackData に置く。ここには潮殻だけのものを置く
+//  - 島で一つのもの (ここに保存): 潮の時計の位置。潮は景色なので、全員が同じ潮を見る
+//  - グループ (パーティ、または一人) ごとのもの: Group (BackGroupData の記録の data 欄に "tide." で書く)。
+//    鳴った石・眠る試練・種 (庭の道の形・潮見の間の配置・巣の場所)・壊した巣・潮招き・潮の底の門。
+//    試練の番号 (休み場の記録を無効にする番号) と心臓の撃破も、そのグループの記録 (BackGroupData.Record) が持つ。
+//    "keep." で始まる欄 (前に眠った試練・心臓を一度でも倒したか・やさしい配置を使ったか・リセットの数) はリセットでも残る
 public class TideBackState extends SavedData {
     private static final String NAME = "skyabyss_tide_back";
     private static final Factory<TideBackState> FACTORY = new Factory<>(TideBackState::new, TideBackState::load);
@@ -31,25 +38,6 @@ public class TideBackState extends SavedData {
 
     // 潮の時計 (一周 2400 tick の中の位置)
     int clock;
-    // 三つの潮鳴り石が鳴っているか
-    private final boolean[] rung = new boolean[3];
-    // 眠っている試練 (なければ null) と、前回眠った試練
-    private Trial sleeping;
-    private Trial lastSleeping;
-    // ワールドで潮殻の心臓が一度でも倒されたか (2 周目から試練が一つ眠る)
-    private boolean everDefeated;
-    // 潮見の間で、いちばんやさしい配置をもう使ったか
-    private boolean eastFirstUsed;
-    // リセットの種で決めたもの: 庭の道の形 (0〜2)、潮見の間の配置 (0〜3)、巣の場所 (6 か所の中の 3 つ。ビット)
-    private int gardenRoute;
-    private int eastConfig;
-    private int nestSites = 0b000111;
-    // 壊した巣 (ビット)、潮招きを倒したか
-    private int nestsBroken;
-    private boolean beckonerDefeated;
-    // 潮の底の門が開いたか (三つの石がそろい、水盤が引ききった)
-    private boolean bottomOpen;
-    private int resets;
 
     public static TideBackState get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -58,40 +46,12 @@ public class TideBackState extends SavedData {
     private static TideBackState load(CompoundTag tag, HolderLookup.Provider registries) {
         TideBackState s = new TideBackState();
         s.clock = tag.getInt("Clock");
-        for (int i = 0; i < 3; i++) {
-            s.rung[i] = tag.getBoolean("Rung" + i);
-        }
-        s.sleeping = Trial.byId(tag.getString("Sleeping"));
-        s.lastSleeping = Trial.byId(tag.getString("LastSleeping"));
-        s.everDefeated = tag.getBoolean("EverDefeated");
-        s.eastFirstUsed = tag.getBoolean("EastFirstUsed");
-        s.gardenRoute = tag.getInt("GardenRoute");
-        s.eastConfig = tag.getInt("EastConfig");
-        s.nestSites = tag.contains("NestSites") ? tag.getInt("NestSites") : 0b000111;
-        s.nestsBroken = tag.getInt("NestsBroken");
-        s.beckonerDefeated = tag.getBoolean("BeckonerDefeated");
-        s.bottomOpen = tag.getBoolean("BottomOpen");
-        s.resets = tag.getInt("Resets");
         return s;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putInt("Clock", clock);
-        for (int i = 0; i < 3; i++) {
-            tag.putBoolean("Rung" + i, rung[i]);
-        }
-        tag.putString("Sleeping", sleeping == null ? "" : sleeping.id());
-        tag.putString("LastSleeping", lastSleeping == null ? "" : lastSleeping.id());
-        tag.putBoolean("EverDefeated", everDefeated);
-        tag.putBoolean("EastFirstUsed", eastFirstUsed);
-        tag.putInt("GardenRoute", gardenRoute);
-        tag.putInt("EastConfig", eastConfig);
-        tag.putInt("NestSites", nestSites);
-        tag.putInt("NestsBroken", nestsBroken);
-        tag.putBoolean("BeckonerDefeated", beckonerDefeated);
-        tag.putBoolean("BottomOpen", bottomOpen);
-        tag.putInt("Resets", resets);
         return tag;
     }
 
@@ -104,139 +64,191 @@ public class TideBackState extends SavedData {
         setDirty();
     }
 
-    public boolean rung(Trial t) {
-        return rung[t.ordinal()];
+    // そのグループの進み (記録がなければ作り、種がなければ引く)
+    public static Group of(ServerLevel level, UUID group) {
+        Group g = new Group(group, BackGroupData.get(level).of(group));
+        g.ensureSeeded(level.random);
+        return g;
     }
 
-    public void ring(Trial t) {
-        rung[t.ordinal()] = true;
-        setDirty();
-    }
+    // ---------------------------------------------------------------- グループごとの進み
+    public static final class Group {
+        private static final String RUNG = "tide.rung";
+        private static final String SLEEPING = "tide.sleeping";
+        private static final String SEEDED = "tide.seeded";
+        private static final String ROUTE = "tide.route";
+        private static final String EAST = "tide.east";
+        private static final String NEST_SITES = "tide.nest_sites";
+        private static final String NESTS_BROKEN = "tide.nests_broken";
+        private static final String BECKONER = "tide.beckoner";
+        private static final String BOTTOM = "tide.bottom";
+        private static final String LAST_SLEEPING = "keep.tide.last_sleeping";
+        private static final String EVER_DEFEATED = "keep.tide.ever_defeated";
+        private static final String EAST_FIRST_USED = "keep.tide.east_first_used";
+        private static final String RESETS = "keep.tide.resets";
 
-    public int rungCount() {
-        int n = 0;
-        for (boolean b : rung) {
-            n += b ? 1 : 0;
+        public final UUID id;
+        public final BackGroupData.Record record;
+
+        Group(UUID id, BackGroupData.Record record) {
+            this.id = id;
+            this.record = record;
         }
-        return n;
-    }
 
-    public Trial sleeping() {
-        return sleeping;
-    }
-
-    public boolean everDefeated() {
-        return everDefeated;
-    }
-
-    public void markEverDefeated() {
-        everDefeated = true;
-        setDirty();
-    }
-
-    public int gardenRoute() {
-        return gardenRoute;
-    }
-
-    public int eastConfig() {
-        return eastConfig;
-    }
-
-    public int nestSites() {
-        return nestSites;
-    }
-
-    public boolean nestBroken(int site) {
-        return (nestsBroken & (1 << site)) != 0;
-    }
-
-    public void breakNest(int site) {
-        nestsBroken |= 1 << site;
-        setDirty();
-    }
-
-    public boolean nestsBrokenAny() {
-        return (nestsBroken & nestSites) != 0;
-    }
-
-    // 選ばれた巣がすべて壊れたか
-    public boolean allNestsBroken() {
-        return (nestsBroken & nestSites) == nestSites;
-    }
-
-    public boolean beckonerDefeated() {
-        return beckonerDefeated;
-    }
-
-    public void markBeckonerDefeated() {
-        beckonerDefeated = true;
-        setDirty();
-    }
-
-    public boolean bottomOpen() {
-        return bottomOpen;
-    }
-
-    public void markBottomOpen() {
-        bottomOpen = true;
-        setDirty();
-    }
-
-    public int resets() {
-        return resets;
-    }
-
-    // 試練を最初に戻す (07 の 7.1節)。新しい種を引き、2 周目からは試練を一つ眠らせる (同じ試練は二回続けて眠らない)
-    public void reset(RandomSource random, Trial forceSleep, boolean noSleep) {
-        java.util.Arrays.fill(rung, false);
-        nestsBroken = 0;
-        beckonerDefeated = false;
-        bottomOpen = false;
-        clock = 0;
-        gardenRoute = random.nextInt(3);
-        if (!eastFirstUsed) {
-            eastConfig = 0;
-            eastFirstUsed = true;
-        } else {
-            eastConfig = 1 + random.nextInt(3);
+        // 種がまだなければ引く (初めて来たグループ。リセットのときは reset が引き直す)
+        void ensureSeeded(RandomSource random) {
+            if (!record.flag(SEEDED)) {
+                seed(random);
+            }
         }
-        // 6 か所から 3 つ
-        int sites = 0;
-        while (Integer.bitCount(sites) < 3) {
-            sites |= 1 << random.nextInt(6);
-        }
-        nestSites = sites;
-        Trial next = null;
-        if (forceSleep != null) {
-            next = forceSleep;
-        } else if (everDefeated && !noSleep) {
-            java.util.List<Trial> pool = new java.util.ArrayList<>(java.util.List.of(Trial.values()));
-            pool.remove(lastSleeping);
-            next = pool.get(random.nextInt(pool.size()));
-        }
-        sleeping = next;
-        if (next != null) {
-            lastSleeping = next;
-            rung[next.ordinal()] = true;
-        }
-        resets++;
-        setDirty();
-    }
 
-    // 眠る試練をコマンドで決める (今の周に効かせる)
-    public void setSleeping(Trial t) {
-        if (sleeping != null && sleeping != t) {
-            rung[sleeping.ordinal()] = false;
+        private void seed(RandomSource random) {
+            record.putInt(ROUTE, random.nextInt(3));
+            if (!record.flag(EAST_FIRST_USED)) {
+                // そのグループの初めての周は、いちばんやさしい配置
+                record.putInt(EAST, 0);
+                record.setFlag(EAST_FIRST_USED, true);
+            } else {
+                record.putInt(EAST, 1 + random.nextInt(3));
+            }
+            // 6 か所から 3 つ
+            int sites = 0;
+            while (Integer.bitCount(sites) < 3) {
+                sites |= 1 << random.nextInt(6);
+            }
+            record.putInt(NEST_SITES, sites);
+            record.setFlag(SEEDED, true);
         }
-        sleeping = t;
-        if (t != null) {
-            rung[t.ordinal()] = true;
-            lastSleeping = t;
-        }
-        setDirty();
-    }
 
-    public boolean eastFirstUsed() {
-        return eastFirstUsed;
+        public int epoch() {
+            return record.epoch();
+        }
+
+        public boolean heartDefeated() {
+            return record.isHeartDefeated();
+        }
+
+        public boolean rung(Trial t) {
+            return (record.getInt(RUNG) & (1 << t.ordinal())) != 0;
+        }
+
+        public void ring(Trial t) {
+            record.putInt(RUNG, record.getInt(RUNG) | (1 << t.ordinal()));
+        }
+
+        public int rungCount() {
+            return Integer.bitCount(record.getInt(RUNG) & 0b111);
+        }
+
+        public Trial sleeping() {
+            return Trial.byId(record.getString(SLEEPING));
+        }
+
+        public boolean everDefeated() {
+            return record.flag(EVER_DEFEATED);
+        }
+
+        public void markEverDefeated() {
+            record.setFlag(EVER_DEFEATED, true);
+        }
+
+        public int gardenRoute() {
+            return record.getInt(ROUTE);
+        }
+
+        public int eastConfig() {
+            return record.getInt(EAST);
+        }
+
+        public boolean eastFirstUsed() {
+            return record.flag(EAST_FIRST_USED);
+        }
+
+        public int nestSites() {
+            int s = record.getInt(NEST_SITES);
+            return s == 0 ? 0b000111 : s;
+        }
+
+        public boolean nestBroken(int site) {
+            return (record.getInt(NESTS_BROKEN) & (1 << site)) != 0;
+        }
+
+        public void breakNest(int site) {
+            record.putInt(NESTS_BROKEN, record.getInt(NESTS_BROKEN) | (1 << site));
+        }
+
+        public boolean nestsBrokenAny() {
+            return (record.getInt(NESTS_BROKEN) & nestSites()) != 0;
+        }
+
+        // 選ばれた巣がすべて壊れたか
+        public boolean allNestsBroken() {
+            return (record.getInt(NESTS_BROKEN) & nestSites()) == nestSites();
+        }
+
+        public boolean beckonerDefeated() {
+            return record.flag(BECKONER);
+        }
+
+        public void markBeckonerDefeated() {
+            record.setFlag(BECKONER, true);
+        }
+
+        public boolean bottomOpen() {
+            return record.flag(BOTTOM);
+        }
+
+        public void markBottomOpen() {
+            record.setFlag(BOTTOM, true);
+        }
+
+        public int resets() {
+            return record.getInt(RESETS);
+        }
+
+        // 戻す値打ちのある進みがあるか (眠っている試練の石は数えない。種だけでは戻さない)
+        public boolean hasTrialProgress() {
+            return rungCount() > (sleeping() != null ? 1 : 0) || heartDefeated() || nestsBrokenAny() || beckonerDefeated() || bottomOpen();
+        }
+
+        // 試練を最初に戻す (08 の 7.1節)。試練の番号を進め (記録の進みと扉の上書きも消える)、新しい種を引く。
+        // 心臓を一度でも倒したグループは、試練を一つ眠らせる (同じ試練は二回続けて眠らない)
+        public void reset(RandomSource random, Trial forceSleep, boolean noSleep) {
+            if (heartDefeated()) {
+                markEverDefeated();
+            }
+            Trial last = Trial.byId(record.getString(LAST_SLEEPING));
+            record.resetProgress();
+            seed(random);
+            Trial next = null;
+            if (forceSleep != null) {
+                next = forceSleep;
+            } else if (everDefeated() && !noSleep) {
+                java.util.List<Trial> pool = new java.util.ArrayList<>(java.util.List.of(Trial.values()));
+                pool.remove(last);
+                next = pool.get(random.nextInt(pool.size()));
+            }
+            if (next != null) {
+                record.putString(SLEEPING, next.id());
+                record.putString(LAST_SLEEPING, next.id());
+                ring(next);
+            }
+            record.putInt(RESETS, resets() + 1);
+        }
+
+        // 眠る試練をコマンドで決める (今の周に効かせる)
+        public void setSleeping(Trial t) {
+            Trial was = sleeping();
+            if (was != null && was != t) {
+                record.putInt(RUNG, record.getInt(RUNG) & ~(1 << was.ordinal()));
+            }
+            if (t == null) {
+                record.remove(SLEEPING);
+            } else {
+                record.putString(SLEEPING, t.id());
+                record.putString(LAST_SLEEPING, t.id());
+                ring(t);
+            }
+        }
     }
 }

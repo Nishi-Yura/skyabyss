@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 
 // 泡の牢 (潮殻の心臓の段階2 の技)。当たった人を包み、1.5 ブロック浮かせる。最長 4 秒、毎秒 2 の傷。
 // 泡の体力は 12。中からも外からも叩いて割れる (中にいる人の照準は泡の判定に当たる)。保存しない
-public class TideBubble extends Entity {
+public class TideBubble extends Entity implements jp.revati.skyabyss.titan.group.GroupOwned {
     public static final float HEALTH = 12f;
     public static final int MAX_AGE = 80;
     private static final double LIFT = 1.5;
@@ -39,10 +39,31 @@ public class TideBubble extends Entity {
         this.noPhysics = true;
     }
 
+    // 心臓のグループ (ほかのグループの人には送らない)
+    @Nullable
+    private UUID groupId;
+
+    @Override
+    @Nullable
+    public UUID groupId() {
+        return groupId;
+    }
+
+    @Override
+    public void setGroupId(@Nullable UUID group) {
+        this.groupId = group;
+    }
+
+    @Override
+    public boolean broadcastToPlayer(ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, player);
+    }
+
     public TideBubble(ServerLevel level, ServerPlayer player, TideHeart heart) {
         this(TideHeartSetup.TIDE_BUBBLE.get(), level);
         this.trapped = player.getUUID();
         this.heartId = heart.getUUID();
+        this.groupId = heart.groupId();
         this.baseY = player.getY();
         moveTo(player.getX(), player.getY() - 0.2, player.getZ(), 0f, 0f);
         player.fallDistance = 0;

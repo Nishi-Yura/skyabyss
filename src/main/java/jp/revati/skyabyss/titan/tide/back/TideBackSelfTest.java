@@ -24,6 +24,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import jp.revati.skyabyss.tablet.TabletBlockEntity;
@@ -37,10 +38,13 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 // 潮殻の背の本番の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide back PASSED / FAILED。
 // 配置の形 (歩いて行ける所・行けない所、休み場の復活位置、碑文と石)、潮の時計、潮の溜め (満ちても漏れない、引けば残らない)、
-// 三つの試練の進み (真珠、四つの配置が解けること・水位と戸、巣と潮招き)、三つの石で潮の底が開く、リセットと眠る試練、ピースフルの封印
+// 三つの試練の進み (真珠、四つの配置が解けること・水位と戸、巣と潮招き)、三つの石で潮の底が開く、リセットと眠る試練、ピースフルの封印、
+// 二つのグループが同じ背中で (石・扉の当たり判定・敵の印・リセット・部屋の占有・6 人の数え方・パーティの記録の引き継ぎ)
 public final class TideBackSelfTest {
     // 水を流してから数えるまでの tick (流れる水が広がりきるのを待つ。岩鯨の水路の息継ぎの穴が、隣の水で埋まっていた反省)
     public static final int SETTLE_TICKS = 100;
+    // テストのグループ (一人のグループ = 偽のプレイヤーの UUID)。進みはグループごと
+    static final java.util.UUID TEST = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-000000000001");
     private static final List<String> FAILURES = new ArrayList<>();
     private static final List<String> NOTES = new ArrayList<>();
 
@@ -86,7 +90,9 @@ public final class TideBackSelfTest {
             checkFlats(back, FAILURES);
             checkBottom(back, FAILURES);
             checkReset(back, FAILURES, NOTES);
-            // リセットのあと (庭の道の形が変わる) にも、もう一度満たして漏れを数える
+            checkGroups(back, FAILURES, NOTES);
+            // リセットのあと (庭の道の形が変わる) にも、もう一度満たして漏れを数える。新しい道の形は、庭を持ったときに掘る
+            TideRooms.claim(back, TideRooms.GARDEN, TEST);
             TideBackTrials.initPools(back);
             fillPools(back, FAILURES, NOTES);
         })));
@@ -99,7 +105,10 @@ public final class TideBackSelfTest {
             checkDrained(back, FAILURES, "after a reset");
             checkPeaceful(back, FAILURES);
             TideClock.force(null);
-            TideBackTrials.reset(back, false, null, true);
+            // テストのグループの記録を消し、部屋を手放す (ほかのグループの記録には触れない)
+            TideBackTrials.resetGroup(back, TEST, false, null, true);
+            TideRooms.releaseAll(back);
+            jp.revati.skyabyss.titan.group.BackGroupData.get(back).remove(TEST);
             forceChunks(back, false);
             if (FAILURES.isEmpty()) {
                 SkyAbyss.LOGGER.info("SELFTEST tide back PASSED ({})", String.join("; ", NOTES));
@@ -165,9 +174,16 @@ public final class TideBackSelfTest {
         }
         check(TitanBackTrials.isSafeStand(back, ARRIVAL), "cannot stand at the arrival", failures);
         check(back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "the clam has no pearl", failures);
-        check(back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, FLATS_GATE_Z)).is(ModBlocks.SEALED_GATE.get())
-                || back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, FLATS_GATE_Z)).isAir(), "flats gate cell is neither open nor sealed", failures);
-        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 0)).is(ModBlocks.SEALED_GATE.get()), "bottom gate is not closed after building", failures);
+        // 扉はいつもブロック (開いているものも OPEN の扉)
+        for (List<BlockPos> gate : List.of(TideGates.flats(), TideGates.bottom(), TideGates.mouth(), TideGates.door(0), TideGates.door(1), TideGates.door(2),
+                TideGates.cave(), jp.revati.skyabyss.titan.tide.heart.TideHeartArena.gate())) {
+            for (BlockPos p : gate) {
+                check(back.getBlockState(p).is(ModBlocks.SEALED_GATE.get()), "gate block missing at " + p.toShortString(), failures);
+            }
+        }
+        check(!TideGates.defaultOpen(back, new BlockPos(-1, HUB_FLOOR, 0)), "bottom gate is not closed after building", failures);
+        check(TideGates.defaultOpen(back, TideGates.mouth().get(0)) && TideGates.defaultOpen(back, TideGates.cave().get(0))
+                && TideGates.defaultOpen(back, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.gate().get(0)), "mouth, cave seal or heart entrance is not open by default", failures);
         check(back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, 0)).isAir(), "hub is not open above the bottom gate", failures);
         check(back.getBlockState(TideWatch.RESET_LEVER.above()).is(Blocks.LEVER), "reset plug missing", failures);
         // 螺旋の階段の段がある
@@ -419,12 +435,8 @@ public final class TideBackSelfTest {
             }
         }
         notes.add("pools " + sizes.toString().trim());
-        // 満ちるときは干潟の門が閉じている
-        for (int x = -1; x <= 1; x++) {
-            for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
-                back.setBlock(new BlockPos(x, y, FLATS_GATE_Z), ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-            }
-        }
+        // 満ちるときは干潟の門が (既定で) 閉じている
+        jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), false);
         TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
         for (List<BlockPos> layer : hub.layers) {
             for (BlockPos c : layer) {
@@ -467,7 +479,7 @@ public final class TideBackSelfTest {
             }
         }
         check(leaks == 0, "tidewatch " + when + ": water outside the basins at " + leaks + " cells (first " + first + ")", failures);
-        TideWatch.reset(back, TideBackState.get(back));
+        TideWatch.reset(back, null);
     }
 
     // 溜めの箱 (置く所のまわり 2 マス、水の段の高さだけ)
@@ -553,9 +565,17 @@ public final class TideBackSelfTest {
     }
 
     // ---------------------------------------------------------------- 歩いて行ける所 (干潮、門は閉じたまま。干潟の門だけ開ける)
+    // 扉は、walkGroup のグループにとって開いていれば通れる (null ならワールドの既定)
+    @javax.annotation.Nullable
+    static java.util.UUID walkGroup;
+
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
-        return s.getCollisionShape(l, p).isEmpty() && !s.is(ModBlocks.SEALED_GATE.get());
+        if (s.is(ModBlocks.SEALED_GATE.get())) {
+            return walkGroup == null ? s.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN)
+                    : jp.revati.skyabyss.titan.group.GroupGates.isOpen(l, walkGroup, p);
+        }
+        return s.getCollisionShape(l, p).isEmpty();
     }
 
     static boolean standable(ServerLevel l, BlockPos p) {
@@ -563,7 +583,9 @@ public final class TideBackSelfTest {
             return false;
         }
         BlockState below = l.getBlockState(p.below());
-        return !below.getCollisionShape(l, p.below()).isEmpty() || l.getBlockState(p).is(Blocks.WATER);
+        // 足もとの扉は、walkGroup にとって閉じていれば床
+        boolean floor = below.is(ModBlocks.SEALED_GATE.get()) ? !passable(l, p.below()) : !below.getCollisionShape(l, p.below()).isEmpty();
+        return floor || l.getBlockState(p).is(Blocks.WATER);
     }
 
     // 到着地点から歩いて (跳んで 1 段、落ちて 3 段まで) 行ける所と、その歩数
@@ -654,15 +676,14 @@ public final class TideBackSelfTest {
         for (TideField.Pool p : TideBackTrials.FIELD.pools()) {
             TideField.settleNow(back, p, 0);
         }
-        TideBackState state = TideBackState.get(back);
-        state.reset(back.random, null, true);
-        TideBackTrials.applyTrials(back, state);
-        // 干潟の門を開ける (干潮で水盤が空)
-        for (int x = -1; x <= 1; x++) {
-            for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
-                back.setBlock(new BlockPos(x, y, FLATS_GATE_Z), Blocks.AIR.defaultBlockState(), 3);
-            }
-        }
+        // テストのグループの新しい周で、三つの部屋をそのグループの形にする
+        TideBackTrials.resetGroup(back, TEST, false, null, true);
+        TideRooms.claim(back, TideRooms.GARDEN, TEST);
+        TideRooms.claim(back, TideRooms.WATCH, TEST);
+        TideRooms.claim(back, TideRooms.FLATS, TEST);
+        // 干潟の門を (既定で) 開ける (干潮で水盤が空)
+        jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), true);
+        walkGroup = TEST;
         Map<Long, Integer> dist = walk(back, ARRIVAL);
         Map<String, BlockPos> should = new java.util.LinkedHashMap<>();
         for (Rest r : RESTS) {
@@ -734,6 +755,7 @@ public final class TideBackSelfTest {
         if (mapDir != null) {
             writeMap(back, dist, java.nio.file.Path.of(mapDir, "tide_walk.png"));
         }
+        walkGroup = null;
     }
 
     // 上から見た地図: 歩いて行ける所は高さで色、立てるが行けない所は灰、立てない所は黒。1 マス 4 画素
@@ -811,24 +833,27 @@ public final class TideBackSelfTest {
         }
         check(water == 25, "lower basin at level 1 has " + water + " water", failures);
         check(!back.getBlockState(new BlockPos(36, TIER_FLOOR[0] + 1, -10)).isAir(), "lower float is not at level 1", failures);
-        check(back.getBlockState(BASIN_DOOR[0]).isAir(), "lower door closed at level 1", failures);
-        check(back.getBlockState(BASIN_DOOR[1]).is(ModBlocks.SEALED_GATE.get()), "middle door open at level 5", failures);
-        check(back.getBlockState(BASIN_DOOR[2]).isAir() && back.getBlockState(T_EXIT_DOOR).isAir(), "upper doors closed while empty", failures);
+        // 溜めの戸は扉のブロックのまま、既定 (OPEN) で開け閉めする
+        check(TideGates.defaultOpen(back, BASIN_DOOR[0]), "lower door closed at level 1", failures);
+        check(back.getBlockState(BASIN_DOOR[1]).is(ModBlocks.SEALED_GATE.get()) && !TideGates.defaultOpen(back, BASIN_DOOR[1]), "middle door open at level 5", failures);
+        check(TideGates.defaultOpen(back, BASIN_DOOR[2]) && TideGates.defaultOpen(back, T_EXIT_DOOR), "upper doors closed while empty", failures);
+        check(back.getBlockState(T_EXIT_DOOR).is(ModBlocks.SEALED_GATE.get()), "the open upper door is not a gate block", failures);
         // 浮き石が 5 段なら、次の段の床へ一段で上がれる高さ
         check(TIER_FLOOR[1] + 1 - (TIER_FLOOR[1] + TidePuzzle.REACH + 1) <= 1, "middle float at 5 cannot reach the upper tier", failures);
         check(TIER_FLOOR[0] + TidePuzzle.REACH + 1 >= TIER_FLOOR[1], "lower float at 5 cannot reach the middle tier", failures);
         TideWatch.setLevels(back, 0, 0, 3);
-        check(back.getBlockState(BASIN_DOOR[2]).is(ModBlocks.SEALED_GATE.get()), "upper door open with water", failures);
-        TideWatch.reset(back, TideBackState.get(back));
+        check(!TideGates.defaultOpen(back, BASIN_DOOR[2]), "upper door open with water", failures);
+        TideWatch.reset(back, TideBackState.of(back, TEST));
     }
 
     // ---------------------------------------------------------------- 珊瑚の庭 (真珠)
     private static void checkGarden(ServerLevel back, List<String> failures) {
-        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(java.util.UUID.fromString("7e1de0c4-0000-4000-8000-000000000001"), "[TideTest]"));
+        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(TEST, "[TideTest]"));
         BlockPos at = new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1]);
         fake.setPos(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         fake.getInventory().clearContent();
-        TideBackState state = TideBackState.get(back);
+        TideRooms.claim(back, TideRooms.GARDEN, TEST);
+        TideBackState.Group state = TideBackState.of(back, TEST);
         check(TideGarden.useClam(back, TideGarden.pearlBlock(), fake), "clam did not react", failures);
         check(TideGarden.holds(fake) && TideGarden.pearlOut(), "pearl was not given", failures);
         check(!back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "clam still shows the pearl", failures);
@@ -841,8 +866,11 @@ public final class TideBackSelfTest {
         TideBackTrials.useStone(back, STONE_WEST, fake, fake.getMainHandItem());
         check(state.rung(TideBackState.Trial.WEST), "placing the pearl did not ring the west stone", failures);
         check(!TideGarden.holds(fake), "pearl stayed in the inventory after placing", failures);
-        check(back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "west stone not lit", failures);
-        check(back.getBlockState(RETURN_WEST).is(Blocks.SEA_LANTERN), "west return floor not lit", failures);
+        // 光るのは鳴らしたグループの見かけだけ。ワールドの石は「まだ鳴っていない」形のまま
+        Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
+        check(overlay.containsKey(STONE_WEST) && overlay.get(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "west stone not lit for the group", failures);
+        check(TideKit.LAMP.equals(overlay.get(RETURN_WEST)), "west return floor not lit for the group", failures);
+        check(!back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "the world's west stone was lit (it should stay unlit for other groups)", failures);
         // 前の石は潮招きを倒すまで黙る
         TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);
         check(!state.rung(TideBackState.Trial.FRONT), "front stone rang before the beckoner fell", failures);
@@ -850,7 +878,8 @@ public final class TideBackSelfTest {
 
     // ---------------------------------------------------------------- 群れの干潟 (巣と潮招き)
     private static void checkFlats(ServerLevel back, List<String> failures) {
-        TideBackState state = TideBackState.get(back);
+        TideBackState.Group state = TideBackState.of(back, TEST);
+        TideRooms.claim(back, TideRooms.FLATS, TEST);
         check(Integer.bitCount(state.nestSites()) == 3, "nest sites should be 3 of 6", failures);
         for (int s = 0; s < 6; s++) {
             if ((state.nestSites() & (1 << s)) != 0) {
@@ -862,6 +891,9 @@ public final class TideBackSelfTest {
         if (boss != null) {
             boss.setChallengers(3);
             check(Math.abs(boss.multiplier() - 2.2f) < 1e-4, "beckoner health multiplier for 3 is " + boss.multiplier(), failures);
+            // パーティは 6 人まで: 1 + 0.6 × 5
+            boss.setChallengers(jp.revati.skyabyss.party.Parties.MAX_MEMBERS);
+            check(Math.abs(boss.multiplier() - 4.0f) < 1e-4, "beckoner health multiplier for 6 is " + boss.multiplier(), failures);
             check(Math.abs(boss.getMaxHealth() - TideBeckoner.HEALTH) < 0.01, "beckoner max health " + boss.getMaxHealth(), failures);
             boss.addTag(jp.revati.skyabyss.titan.tide.mob.TideMob.TRIAL_TAG);
             check(!boss.shouldBeSaved(), "trial beckoner would be saved", failures);
@@ -869,41 +901,53 @@ public final class TideBackSelfTest {
         }
         // 潮招きを倒した記録で、前の石が鳴らせる
         state.markBeckonerDefeated();
-        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(java.util.UUID.fromString("7e1de0c4-0000-4000-8000-000000000001"), "[TideTest]"));
+        FakePlayer fake = FakePlayerFactory.get(back, new GameProfile(TEST, "[TideTest]"));
         TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);
         check(state.rung(TideBackState.Trial.FRONT), "front stone did not ring after the beckoner", failures);
     }
 
-    // ---------------------------------------------------------------- 三つの石で潮の底が開く
+    // ---------------------------------------------------------------- 三つの石で潮の底が開く (そのグループにだけ)
     private static void checkBottom(ServerLevel back, List<String> failures) {
-        TideBackState state = TideBackState.get(back);
+        TideBackState.Group state = TideBackState.of(back, TEST);
         TideBackTrials.ring(back, state, TideBackState.Trial.EAST, null);
         check(state.rungCount() == 3, "three stones did not ring", failures);
         TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
-        check(TideBackTrials.target(back, hub) == 0, "hub keeps filling after three stones", failures);
+        check(TideBackTrials.target(back, hub) == 0, "hub is not empty at low tide", failures);
         TideField.settleNow(back, hub, 0);
-        TideBackTrials.tickGatesForTest(back, state);
+        // 門を開けるのは、背中にいるグループ (人を入れて調べる)
+        TestPlayer p = join(back, TEST, "[TideTest]", RESTS.get(0).spawn());
+        try {
+            TideBackTrials.tickGatesForTest(back);
+        } finally {
+            leave(back, p);
+        }
         check(state.bottomOpen(), "bottom gate did not open", failures);
-        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 1)).isAir(), "the grate did not sink", failures);
+        check(jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, TEST, TideGates.bottom()), "the grate did not sink for the group", failures);
+        check(!TideGates.defaultOpen(back, new BlockPos(-1, HUB_FLOOR, 1)), "the grate sank for everyone", failures);
+        walkGroup = TEST;
         Map<Long, Integer> dist = walk(back, RESTS.get(0).spawn());
+        walkGroup = null;
         check(dist.containsKey(RESTS.get(5).spawn().asLong()), "cannot walk from the hall down to the heart rest", failures);
         check(dist.containsKey(BlockPos.containing(jp.revati.skyabyss.titan.tide.heart.TideHeartArena.anteSpawn()).asLong()),
                 "cannot walk to the heart antechamber", failures);
+        // ほかのグループ (ワールドの既定) には閉じたまま
+        Map<Long, Integer> other = walk(back, RESTS.get(0).spawn());
+        check(!other.containsKey(RESTS.get(5).spawn().asLong()), "another group can walk down to the heart rest", failures);
         check(TideHeartArenaAccess.chamberBuilt(back), "heart chamber is not built at the shell bottom", failures);
     }
 
-    // ---------------------------------------------------------------- リセットと眠る試練
+    // ---------------------------------------------------------------- リセットと眠る試練 (そのグループだけ)
     private static void checkReset(ServerLevel back, List<String> failures, List<String> notes) {
-        TitanBackData data = TitanBackData.get(back);
-        TideBackState state = TideBackState.get(back);
-        int epoch = data.epoch();
-        boolean ever = state.everDefeated();
-        TideBackTrials.reset(back, false, null, true);
-        check(data.epoch() == epoch + 1, "reset did not advance the trial number", failures);
+        jp.revati.skyabyss.titan.group.BackGroupData.Record record = jp.revati.skyabyss.titan.group.BackGroupData.get(back).of(TEST);
+        int epoch = record.epoch();
+        TideBackTrials.resetGroup(back, TEST, false, null, true);
+        TideBackState.Group state = TideBackState.of(back, TEST);
+        check(record.epoch() == epoch + 1, "reset did not advance the trial number", failures);
         check(state.rungCount() == 0 && !state.bottomOpen() && !state.beckonerDefeated(), "reset left progress", failures);
-        check(back.getBlockState(new BlockPos(-1, HUB_FLOOR, 0)).is(ModBlocks.SEALED_GATE.get()), "reset did not close the bottom gate", failures);
-        check(!back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "reset left the west stone lit", failures);
+        check(!jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, TEST, TideGates.bottom()), "reset did not close the bottom gate", failures);
+        check(!jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST).containsKey(STONE_WEST), "reset left the west stone lit", failures);
         check(back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "reset did not return the pearl", failures);
+        check(TideRooms.owner(TideRooms.GARDEN) == null && TideRooms.owner(TideRooms.FLATS) == null, "reset kept the group's rooms", failures);
         // 2 周目から: 一つ眠る。同じ試練が二回続けて眠らない
         state.markEverDefeated();
         TideBackState.Trial last = null;
@@ -922,20 +966,162 @@ public final class TideBackSelfTest {
         }
         notes.add("sleeping west/east/front " + counts[0] + "/" + counts[1] + "/" + counts[2]);
         check(counts[0] > 0 && counts[1] > 0 && counts[2] > 0, "some trial never sleeps", failures);
-        // 眠った試練は石が鳴っていて、残り二つで潮の底が開く
-        TideBackTrials.reset(back, false, TideBackState.Trial.EAST, false);
+        check(state.everDefeated(), "a reset forgot that the group once defeated the heart", failures);
+        // 眠った試練は石が鳴っていて (そのグループに光って見える)、残り二つで潮の底が開く
+        TideBackTrials.resetGroup(back, TEST, false, TideBackState.Trial.EAST, false);
+        Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
         check(state.sleeping() == TideBackState.Trial.EAST && state.rung(TideBackState.Trial.EAST)
-                && back.getBlockState(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE), "forced sleeping trial is not lit", failures);
-        // 休み場の記録は、リセットの番号で無効になる
+                && overlay.containsKey(STONE_EAST) && overlay.get(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE), "forced sleeping trial is not lit", failures);
+        // 休み場の記録は、そのグループのリセットの番号で無効になる
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.putString("skyabyss_tide_checkpoint", "f0");
-        tag.putInt("skyabyss_tide_checkpoint_epoch", data.epoch() - 1);
-        check(TideBackTrials.validCheckpoint(tag, data.epoch()).isEmpty(), "old checkpoint survived a reset", failures);
-        tag.putInt("skyabyss_tide_checkpoint_epoch", data.epoch());
-        check(TideBackTrials.validCheckpoint(tag, data.epoch()).equals("f0"), "current checkpoint is not valid", failures);
-        if (!ever) {
-            // 元に戻す (ほかの自己テストのため)
-            notes.add("ever defeated set by this test");
+        tag.putInt("skyabyss_tide_checkpoint_epoch", record.epoch() - 1);
+        check(TideBackTrials.validCheckpoint(tag, record.epoch()).isEmpty(), "old checkpoint survived a reset", failures);
+        tag.putInt("skyabyss_tide_checkpoint_epoch", record.epoch());
+        check(TideBackTrials.validCheckpoint(tag, record.epoch()).equals("f0"), "current checkpoint is not valid", failures);
+    }
+
+    // ---------------------------------------------------------------- 二つのグループが同じ背中で (08 の 7.5節)
+    static final java.util.UUID GROUP_A = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-00000000000a");
+    static final java.util.UUID GROUP_B = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-00000000000b");
+
+    private static void checkGroups(ServerLevel back, List<String> failures, List<String> notes) {
+        jp.revati.skyabyss.titan.group.BackGroupData data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+        TestPlayer a = join(back, GROUP_A, "[TideA]", RESTS.get(0).spawn());
+        TestPlayer b = join(back, GROUP_B, "[TideB]", RESTS.get(0).spawn().east(2));
+        List<Mob> made = new ArrayList<>();
+        try {
+            TideBackTrials.resetGroup(back, GROUP_A, false, null, true);
+            TideBackTrials.resetGroup(back, GROUP_B, false, null, true);
+            check(jp.revati.skyabyss.titan.group.Groups.keyOf(a).equals(GROUP_A) && jp.revati.skyabyss.titan.group.Groups.keyOf(b).equals(GROUP_B),
+                    "solo players are not their own group", failures);
+            // 石: A が鳴らしても、B の石は鳴っていない。光って見えるのも A だけ
+            TideBackTrials.ring(back, TideBackState.of(back, GROUP_A), TideBackState.Trial.EAST, null);
+            check(TideBackState.of(back, GROUP_A).rung(TideBackState.Trial.EAST) && !TideBackState.of(back, GROUP_B).rung(TideBackState.Trial.EAST),
+                    "a stone rung by group A also rang for group B", failures);
+            check(jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, GROUP_A).containsKey(STONE_EAST)
+                    && !jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, GROUP_B).containsKey(STONE_EAST), "stone overlay is not per group", failures);
+            // 抜け道: B が踏んでも動かない (B の石は鳴っていない)
+            check(TideBackTrials.gauge(back, a).stones() == 1 && TideBackTrials.gauge(back, b).stones() == 0, "the tide gauge does not count the viewer's stones", failures);
+            // 扉: A にだけ開けた扉は、A の体には当たらず、B の体には当たる
+            List<BlockPos> bottom = TideGates.bottom();
+            jp.revati.skyabyss.titan.group.GroupGates.open(back, GROUP_A, bottom);
+            BlockPos g = bottom.get(0);
+            BlockState gs = back.getBlockState(g);
+            check(gs.getCollisionShape(back, g, net.minecraft.world.phys.shapes.CollisionContext.of(a)).isEmpty(), "the gate opened for A still blocks A", failures);
+            check(!gs.getCollisionShape(back, g, net.minecraft.world.phys.shapes.CollisionContext.of(b)).isEmpty(), "the gate opened for A lets B through", failures);
+            check(jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_A, g, false) && !jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_B, g, false),
+                    "gate overrides are not per group", failures);
+            // 干潟の門: 潮の既定は全員に効き、戦っているグループにだけ閉じる
+            jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), true);
+            jp.revati.skyabyss.titan.group.GroupGates.seal(back, GROUP_A, TideGates.flats());
+            check(!jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, GROUP_A, TideGates.flats())
+                    && jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, GROUP_B, TideGates.flats()), "the flats gate sealed for A also closed for B", failures);
+            jp.revati.skyabyss.titan.group.GroupGates.release(back, GROUP_A, TideGates.flats());
+            check(jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, GROUP_A, TideGates.flats()), "releasing A's seal did not go back to the tide's default", failures);
+            jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), false);
+            // 敵: A の敵は A の印を持ち、B には見えず、B を狙わず、B の傷を受けない
+            BlockPos spot = new BlockPos(0, HUB_LEDGE + 1, 10);
+            Mob mob = TideFlats.spawn(back, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.REEF_SCUTTLER.get(), spot, GROUP_A);
+            if (mob == null) {
+                failures.add("could not spawn a trial mob");
+            } else {
+                made.add(mob);
+                check(mob instanceof jp.revati.skyabyss.titan.group.GroupOwned o && GROUP_A.equals(o.groupId()), "trial mob has no group", failures);
+                check(jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(mob, a) && !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(mob, b),
+                        "A's mob is visible to B", failures);
+                check(mob.canAttack(a) && !mob.canAttack(b), "A's mob may target B (" + mob.canAttack(a) + "/" + mob.canAttack(b) + ")", failures);
+                mob.invulnerableTime = 0;
+                float hp = mob.getHealth();
+                boolean hitB = mob.hurt(back.damageSources().playerAttack(b), 2f);
+                check(!hitB && mob.getHealth() == hp, "B damaged A's mob", failures);
+                mob.invulnerableTime = 0;
+                boolean hitA = mob.hurt(back.damageSources().playerAttack(a), 2f);
+                check(hitA && mob.getHealth() < hp, "A could not damage its own mob", failures);
+                // そのグループのリセットは、そのグループの敵だけを片付ける
+                Mob other = TideFlats.spawn(back, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.REEF_SCUTTLER.get(), spot.east(), GROUP_B);
+                if (other != null) {
+                    made.add(other);
+                    int epochB = data.of(GROUP_B).epoch();
+                    TideBackState.of(back, GROUP_B).ring(TideBackState.Trial.WEST);
+                    TideBackTrials.resetGroup(back, GROUP_A, false, null, true);
+                    check(mob.isRemoved() && !other.isRemoved(), "resetting group A touched group B's mob or kept A's", failures);
+                    check(!TideBackState.of(back, GROUP_A).rung(TideBackState.Trial.EAST), "resetting group A did not reset A's stones", failures);
+                    check(data.of(GROUP_B).epoch() == epochB && TideBackState.of(back, GROUP_B).rung(TideBackState.Trial.WEST),
+                            "resetting group A changed group B's record", failures);
+                }
+            }
+            // 部屋の占有: A が庭にいるあいだ、B は庭へ入れない (入口の外へ戻す)
+            TideRooms.releaseAll(back);
+            BlockPos inGarden = RESTS.get(1).spawn();
+            a.moveTo(inGarden.getX() + 0.5, inGarden.getY(), inGarden.getZ() + 0.5);
+            TideRooms.tick(back);
+            check(GROUP_A.equals(TideRooms.owner(TideRooms.GARDEN)), "A did not take the garden", failures);
+            b.moveTo(inGarden.getX() + 1.5, inGarden.getY(), inGarden.getZ() + 0.5);
+            TideRooms.tick(back);
+            check(GROUP_A.equals(TideRooms.owner(TideRooms.GARDEN)), "B took the garden from A", failures);
+            check(!TideRooms.gardenBox().contains(b.position()) && b.blockPosition().distSqr(TideRooms.GARDEN_EJECT) < 4,
+                    "B was not sent out of the garden (at " + b.blockPosition().toShortString() + ")", failures);
+            // 6 人のパーティの数え方: 庭の珊瑚憑き 5 + 2 × 5 = 15、磯走り 3 + 5 = 8
+            TideGarden.spawnForTest(back, GROUP_A, jp.revati.skyabyss.party.Parties.MAX_MEMBERS);
+            int guards = TideGarden.guards(back, GROUP_A);
+            notes.add("garden guards for 6: " + guards);
+            check(guards == 15 + 8, "garden guards for a party of 6 are " + guards + " (want 23)", failures);
+            check(TideGarden.guards(back, GROUP_B) == 0, "group B has garden guards", failures);
+            TideRooms.releaseAll(back);
+            check(TideGarden.guards(back, GROUP_A) == 0, "releasing the garden left its guards", failures);
+            checkPartyRecord(back, failures);
+        } finally {
+            made.forEach(Mob::discard);
+            leave(back, a);
+            leave(back, b);
+            TideRooms.releaseAll(back);
+            data.remove(GROUP_A);
+            data.remove(GROUP_B);
+        }
+    }
+
+    // パーティを組む・入る・抜けるときの記録 (GroupEvents の決まり): 組む = リーダーの写し、入る = パーティの記録、抜ける = パーティの写し
+    private static void checkPartyRecord(ServerLevel back, List<String> failures) {
+        jp.revati.skyabyss.party.PartyData parties = jp.revati.skyabyss.party.PartyData.get(back.getServer());
+        jp.revati.skyabyss.titan.group.BackGroupData data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+        java.util.UUID leader = java.util.UUID.randomUUID();
+        java.util.UUID mate = java.util.UUID.randomUUID();
+        TideBackState.of(back, leader).ring(TideBackState.Trial.WEST);
+        TideBackState.of(back, mate).ring(TideBackState.Trial.FRONT);
+        jp.revati.skyabyss.party.PartyData.Party party = parties.create(leader, "[TideLeader]");
+        java.util.UUID pid = party.id;
+        try {
+            check(TideBackState.of(back, pid).rung(TideBackState.Trial.WEST), "a new party did not start from the leader's record", failures);
+            parties.add(party, mate, "[TideMate]");
+            java.util.UUID key = jp.revati.skyabyss.titan.group.Groups.keyOf(back.getServer(), mate);
+            check(key.equals(pid), "the joined player's group is not the party", failures);
+            TideBackState.Group joined = TideBackState.of(back, key);
+            check(joined.rung(TideBackState.Trial.WEST) && !joined.rung(TideBackState.Trial.FRONT), "the joined player did not adopt the party's record", failures);
+            TideBackState.of(back, pid).ring(TideBackState.Trial.EAST);
+            // 6 人まで入れる
+            List<java.util.UUID> more = new ArrayList<>();
+            for (int i = 0; i < jp.revati.skyabyss.party.Parties.MAX_MEMBERS - 2; i++) {
+                java.util.UUID m = java.util.UUID.randomUUID();
+                more.add(m);
+                parties.add(party, m, "[TideMate" + i + "]");
+            }
+            check(party.members.size() == 6, "party size is " + party.members.size(), failures);
+            for (java.util.UUID m : more) {
+                parties.remove(m);
+                data.remove(m);
+            }
+            parties.remove(mate);
+            check(TideBackState.of(back, mate).rung(TideBackState.Trial.EAST) && TideBackState.of(back, mate).rung(TideBackState.Trial.WEST),
+                    "the player who left did not keep a copy of the party's record", failures);
+        } finally {
+            if (parties.of(leader) != null) {
+                parties.disband(parties.of(leader));
+            }
+            parties.remove(mate);
+            data.remove(leader);
+            data.remove(mate);
+            data.remove(pid);
         }
     }
 
@@ -945,16 +1131,49 @@ public final class TideBackSelfTest {
         back.getServer().setDifficulty(Difficulty.PEACEFUL, true);
         TideBackTrials.tickPeacefulForTest(back, true);
         BlockPos seal = new BlockPos(CAVE_X1, TideIslandBuilder.caveFloor(CAVE_SEAL_Z) + 1, CAVE_SEAL_Z);
-        check(back.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()), "peaceful did not seal the cave", failures);
+        check(back.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()) && !TideGates.defaultOpen(back, seal), "peaceful did not seal the cave", failures);
         back.getServer().setDifficulty(before == Difficulty.PEACEFUL ? Difficulty.NORMAL : before, true);
         TideBackTrials.tickPeacefulForTest(back, false);
-        check(!back.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()), "leaving peaceful did not unseal the cave", failures);
+        check(TideGates.defaultOpen(back, seal), "leaving peaceful did not unseal the cave", failures);
     }
 
     // 心臓の間が建っているか (TideHeartArena.isBuilt を使う)
     static final class TideHeartArenaAccess {
         static boolean chamberBuilt(ServerLevel back) {
             return jp.revati.skyabyss.titan.tide.heart.TideHeartArena.isBuilt(back);
+        }
+    }
+
+    // ---------------------------------------------------------------- 自己テストの人
+    // ワールドに入れられ (部屋の占有・門を開けるグループの判定で見つかる)、同じディメンションの中の移動 (teleportTo) が効く偽のプレイヤー
+    static final class TestPlayer extends FakePlayer {
+        TestPlayer(ServerLevel level, java.util.UUID id, String name) {
+            super(level, new GameProfile(id, name));
+        }
+
+        @Override
+        public void teleportTo(ServerLevel level, double x, double y, double z, float yaw, float pitch) {
+            if (level == level()) {
+                moveTo(x, y, z, yaw, pitch);
+            }
+        }
+
+        @Override
+        public void teleportTo(double x, double y, double z) {
+            moveTo(x, y, z);
+        }
+    }
+
+    static TestPlayer join(ServerLevel back, java.util.UUID id, String name, BlockPos at) {
+        TestPlayer p = new TestPlayer(back, id, name);
+        p.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0f, 0f);
+        back.addNewPlayer(p);
+        return p;
+    }
+
+    static void leave(ServerLevel back, net.minecraft.server.level.ServerPlayer p) {
+        if (p.level() == back && !p.isRemoved()) {
+            back.removePlayerImmediately(p, net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
         }
     }
 }
