@@ -640,8 +640,31 @@ public class StormHeart extends HeartBoss {
     }
 
     // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
+    private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
+        for (ServerPlayer p : server.players()) {
+            if (p.position().equals(spot)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this).victims(this::canReach).reach(3.5), style);
     }
 
     // 部屋の中のどこかの点 (壁から margin 離す)
@@ -682,7 +705,7 @@ public class StormHeart extends HeartBoss {
         }
         final int toRod = rod;
         double ceiling = isBound() ? StormHeartArena.CEILING - 0.5 : y + 12;
-        Telegraph.Builder b = tg(server, TelegraphShape.circle(x, z, radius), warn, toRod >= 0 ? 0xFFE278 : 0xFFFFFF)
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(x, z, radius), warn, D)
                 .floor(y)
                 .onImpact(s -> {
                     if (toRod >= 0) {
@@ -698,6 +721,10 @@ public class StormHeart extends HeartBoss {
                         bolt(s, x, ceiling, z, y, false);
                     }
                 });
+        if (toRod >= 0) {
+            // 避雷針へ落ちる稲妻には傷がない。黄色は避雷針の印 (特別な色として残す。danger の橙赤にはしない)
+            b.color(0xFFE278);
+        }
         if (toRod < 0) {
             b.onHit((s, player) -> {
                 strike(player, damage);
@@ -720,14 +747,14 @@ public class StormHeart extends HeartBoss {
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.CLOUD, getX(), core().y, getZ(), 60, 1.6, 1.4, 1.6, 0.15);
             safeFallTicks = ROAR_TICKS + 60;
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, 0xA0A0A8)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, H)
                     .onHit((s, player) -> {
                         Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
                         player.knockback(0.9, -to.x, -to.z);
                         player.hurtMarked = true;
                     })
                     .start();
-            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, 0xA0A0A8).active(24).start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, H).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             warn(server, dust(getPhase() == 0 ? 0xA8D8FF : 0xF6F0C8, 1.3f), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
@@ -782,7 +809,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 boolean first = i == 0;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, 0xFF8A2A)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, D).target(first ? target : null)
                         .active(BLADE_ACTIVE)
                         .victims(p -> canReach(p) && bladeCrosses(p))
                         .onImpact(s -> {
@@ -836,7 +863,7 @@ public class StormHeart extends HeartBoss {
             }
             if (targets.size() == 1) {
                 Vec3 t = targets.get(0);
-                chainSegment(server, getX(), getZ(), Telegraph.angleOf(t.x - getX(), t.z - getZ()), CHAIN_LENGTH, true);
+                chainSegment(server, getX(), getZ(), Telegraph.angleOf(t.x - getX(), t.z - getZ()), CHAIN_LENGTH, true, playerAt(server, t));
             } else {
                 List<Vec3> rest = new ArrayList<>(targets);
                 double cx = getX();
@@ -852,7 +879,7 @@ public class StormHeart extends HeartBoss {
                     rest.remove(next);
                     double len = Math.hypot(next.x - cx, next.z - cz);
                     if (len > 0.5) {
-                        chainSegment(server, cx, cz, Telegraph.angleOf(next.x - cx, next.z - cz), len, first);
+                        chainSegment(server, cx, cz, Telegraph.angleOf(next.x - cx, next.z - cz), len, first, playerAt(server, next));
                     }
                     chainNode(server, next.x, next.z);
                     cx = next.x;
@@ -866,10 +893,10 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    private void chainSegment(ServerLevel server, double x, double z, double angle, double length, boolean sound) {
+    private void chainSegment(ServerLevel server, double x, double z, double angle, double length, boolean sound, ServerPlayer aim) {
         double dx = Math.cos(angle);
         double dz = Math.sin(angle);
-        tg(server, TelegraphShape.line(x, z, angle, length, CHAIN_HALF_WIDTH), Action.CHAIN.warnTicks, 0xFFE278)
+        tg(server, TelegraphShape.line(x, z, angle, length, CHAIN_HALF_WIDTH), Action.CHAIN.warnTicks, D).target(aim)
                 .onImpact(s -> {
                     if (sound) {
                         s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2f, 1.3f);
@@ -888,7 +915,7 @@ public class StormHeart extends HeartBoss {
     }
 
     private void chainNode(ServerLevel server, double x, double z) {
-        tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, 0xFFE278)
+        tg(server, TelegraphShape.circle(x, z, CHAIN_NODE_RADIUS), Action.CHAIN.warnTicks, D)
                 .onImpact(s -> warn(s, ParticleTypes.ELECTRIC_SPARK, x, floorY() + 1.0, z, 12, 0.6, 0.6, 0.6, 0.2))
                 .onHit((s, player) -> {
                     if (chainHit.add(player.getUUID())) {
@@ -995,7 +1022,7 @@ public class StormHeart extends HeartBoss {
             if (isBound()) {
                 for (int k = 0; k < 4; k++) {
                     Vec3 h = StormHeartArena.hole(k);
-                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, 0xFF7A3A)
+                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, D)
                             .reach(StormHeartArena.UPDRAFT_TOP - StormHeartArena.FLOOR + 3)
                             .victims(p -> canReach(p) && airborne(p))
                             .onHit((s, player) -> {
@@ -1012,12 +1039,12 @@ public class StormHeart extends HeartBoss {
             double reach = Math.max(8, roomRadius() - 1);
             for (double gap : gaps) {
                 // 安全な筋 (見た目だけ)
-                tg(server, TelegraphShape.cone(getX(), getZ(), gap, reach, gapHalf), Action.WINGBEAT.warnTicks, 0x40E8FF).start();
+                tg(server, TelegraphShape.cone(getX(), getZ(), gap, reach, gapHalf), Action.WINGBEAT.warnTicks, S).start();
             }
             int rings = gustRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((reach - 2.5) / 0.55);
-                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, 0xFFA040)
+                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, D)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, WINGBEAT_DAMAGE);
@@ -1070,7 +1097,7 @@ public class StormHeart extends HeartBoss {
                 }
             }
             for (Vec3 c : pads) {
-                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, 0xFF6A2A)
+                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, D)
                         .active(CHARGE_ACTIVE).repeatEvery(10).jumpClear(0.6)
                         .onHit((s, player) -> {
                             strike(player, CHARGE_DAMAGE);
@@ -1098,7 +1125,7 @@ public class StormHeart extends HeartBoss {
                 double x = spot.x;
                 double y = spot.y;
                 double z = spot.z;
-                tg(server, TelegraphShape.circle(x, z, FEATHER_RADIUS), Action.FEATHER.warnTicks, 0xF0F8FF)
+                tg(server, TelegraphShape.circle(x, z, FEATHER_RADIUS), Action.FEATHER.warnTicks, D)
                         .floor(y).reach(1.5)
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 1.6f);
@@ -1131,7 +1158,7 @@ public class StormHeart extends HeartBoss {
             flashSeen.clear();
             for (Vec3 spot : pickSpots(server, flashFans(present(server)))) {
                 double angle = Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
-                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, 0xFFB030)
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, D).target(playerAt(server, spot))
                         .victims(p -> canReach(p) && flashHits(level(), p.getEyePosition(), p.getViewVector(1f), core(), p))
                         .onHit((s, player) -> {
                             strike(player, FLASH_DAMAGE);
@@ -1194,7 +1221,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 double armAngle = mid;
-                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, 0xFF5A3A)
+                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, D)
                         .active(WEB_TICKS).jumpClear(WEB_JUMP)
                         .onHit((s, player) -> {
                             strike(player, WEB_DAMAGE);

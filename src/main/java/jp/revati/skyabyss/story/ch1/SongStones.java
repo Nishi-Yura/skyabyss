@@ -124,6 +124,10 @@ public final class SongStones {
         }
         Notice.narrate(player, "message.skyabyss.ch1.stone.answer");
         Lore.unlock(player, Ch1.SONG, true);
+        // 鐘の下の戸 (歌の間。21 の 3.1) が開く
+        if (SongChamber.open(player.serverLevel())) {
+            Tasks.later(60, () -> Notice.narrate(player, "message.skyabyss.ch1.stone.chamber"));
+        }
     }
 
     // n 回、澄んだ音を鳴らす (数えるように)

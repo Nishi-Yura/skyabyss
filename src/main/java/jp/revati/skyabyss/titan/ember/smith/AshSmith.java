@@ -2,14 +2,14 @@ package jp.revati.skyabyss.titan.ember.smith;
 
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
@@ -45,14 +45,16 @@ import org.joml.Vector3f;
 // 中ボス「灰の鍛え手」(13 の 5.2節)。灰の民の大炉を守る、背の曲がった大きな鍛冶。背に二つの鞴、右手に大鎚、左手に赤く焼けた塊の火箸
 // (大鎚・火箸は別のモデルで、手の受け口 socket_main / socket_off に付く。AshSmithRenderer)。背丈 4.5 ブロック。
 //
-// 技 (予告は粒 (制限を無視)・技ごとの音・動き。人がいなければ回らない):
-//   鎚打ち   距離 7 未満。1.0 秒、鎚を高く振り上げる (帯の予告と低い音)。前方 幅 3・長さ 8 の帯を打つ (16)。
-//            打った帯の床に亀裂が走り、1.2 秒後にその帯から熱が噴く (噴気 10 と熱 +20。予告は亀裂の白い光としゅうという音)
+// 傷のある技はすべて予告 (combat/Telegraph。02 の 5.4節) で出す。印の範囲と当たりは同じ形で、予告は 0.8 秒以上、向き・落ちる点は技の初めに決まる
+// (そのあとは追わない)。人数 (部屋にいる人) が増えると、技の本数・数が増える (一人でも、印を見れば傷なしで避けられる)。
+// 技 (技ごとの音・動き。人がいなければ回らない):
+//   鎚打ち   距離 7 未満。1.0 秒、鎚を高く振り上げる (帯の予告と低い音)。前方 幅 3・長さ 8 の帯を打つ (16)。二人から別の人へ向けた帯が増える (最大 3 本)。
+//            打った帯の床に亀裂が走り、1.2 秒後にその帯から熱が噴く (噴気 10 と熱 +20。亀裂の帯も予告で、白い線としゅうという音)
 //   鞴の息   距離 10 未満、12 秒ごと。1.5 秒、背の鞴が膨らむ (吸いこむ音)。前方 60 度・長さ 10 の扇に熱風 (8、強い押し、熱 +35)。
-//            吐いたあと 3 秒、背の鞴が白く光り、後ろからの傷が 1.5 倍
+//            二人から別の人へ向けた扇が増える (最大 3 本)。吐いたあと 3 秒、背の鞴が白く光り、後ろからの傷が 1.5 倍
 //   焼き入れ 30 秒ごと。部屋の焼き入れの槽へ歩き、鎚を沈める。部屋の半分が 6 秒、湯気でおおわれる (濃い白い粒)。
-//            鎚が冷えて、次の 3 回の鎚打ちは噴気が出ない代わりに、打ち 1.5 倍 (24) と、床を走る輪 (12。跳べば当たらない)
-//   火花散らし 距離 18 未満。0.8 秒の溜めのあと、火花が人の足もとへ弧を描いて 6 つ (落ちる所に赤い輪 1.0 秒。10)
+//            鎚が冷えて、次の 3 回の鎚打ちは噴気が出ない代わりに、打ち 1.5 倍 (24) と、打った点から広がる輪 (12。安全な筋が三本、跳べば当たらない)
+//   火花散らし 距離 18 未満。0.8 秒の溜めのあと、火花が人の足もとへ弧を描いて落ちる (落ちる所に赤い円 1.0 秒以上。10)。6 つ、人数が増えると 2 人増えるごとに 4 つ増える (最大 14)
 //   怒り     体力 50% を初めて切ったとき一度。1.5 秒、前掛けを投げ捨て、鞴が赤から白へ。以後、鎚打ちの間隔が 2 割短い。
 //            奥の炉の扉が開き、灰被りが 2 体出る
 // 体力 520 ×(1 + 0.6 ×(参加者 - 1))(受ける傷を割る)。防御 12・靭性 6・ノックバック耐性 0.95
@@ -99,7 +101,10 @@ public class AshSmith extends EmberMob {
     public static final int RAGE_TICKS = 30;
     public static final float RAGE_SLAM_FACTOR = 0.8f;
     public static final double RING_SPEED = 0.55;
-    public static final double RING_MAX = 9;
+    public static final double RING_MAX = 8;
+    public static final double RING_START = 1.2;
+    public static final double RING_LANE_HALF = Math.toRadians(24);
+    public static final double SPARK_FILL_MAX = 3.0;
 
     private static final EntityDataAccessor<Boolean> ENRAGED = SynchedEntityData.defineId(AshSmith.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> WEAK = SynchedEntityData.defineId(AshSmith.class, EntityDataSerializers.BOOLEAN);
@@ -121,12 +126,29 @@ public class AshSmith extends EmberMob {
     @Nullable
     public static volatile DamageLog testLog;
 
+    // 試験用: 冷えた鎚の輪の安全な筋の向きを決める (null なら乱数)
+    @Nullable
+    public static volatile Double testGapBase;
+
     private void hurtPlayer(ServerPlayer p, DamageSource source, float amount, String kind) {
         DamageLog log = testLog;
         if (log != null) {
             log.hit(p, amount, kind);
         }
         p.hurt(source, amount);
+    }
+
+    // 開発用・試験用: 鍛え手の間の外 (平らな世界など) でも、近くの人を戦っている人にして技を出せるようにする (EmberForceDev)
+    public void armForDev(java.util.List<ServerPlayer> players, int party) {
+        testFighters = players;
+        partyOverride = party;
+        passive = true;
+    }
+
+    // 試験用: 次の鎚打ちから冷えた鎚にする
+    public void armCold() {
+        coldSlams = COLD_SLAMS;
+        entityData.set(COLD, true);
     }
 
     // 試験用: true なら、技を自分では選ばない (forceAction で呼んだ技だけ回す。怒りは体力で自動)
@@ -153,39 +175,14 @@ public class AshSmith extends EmberMob {
     private Vec3 aimDir = new Vec3(0, 0, 1);
     private Vec3 slamOrigin = Vec3.ZERO;
     private boolean slamCold;
-    private final List<Vent> vents = new ArrayList<>();
-    private final List<Ring> rings = new ArrayList<>();
     private final List<Spark> sparks = new ArrayList<>();
-    private final Set<java.util.UUID> ringHit = new HashSet<>();
+    // 開発用: 部屋にいる人数を多いことにする (0 なら実際の人数)
+    private int partyOverride;
 
-    // 噴く予定の帯 (打った帯)。ticks が 0 で噴く
-    private static final class Vent {
-        final Vec3 origin;
-        final Vec3 dir;
-        int ticks = VENT_DELAY;
-
-        Vent(Vec3 origin, Vec3 dir) {
-            this.origin = origin;
-            this.dir = dir;
-        }
-    }
-
-    // 床を走る輪 (冷えた鎚)。半径が広がる。跳んでいる (床から 0.6 以上) と当たらない
-    private static final class Ring {
-        final Vec3 center;
-        double radius = 1;
-        final Set<java.util.UUID> hit = new HashSet<>();
-
-        Ring(Vec3 center) {
-            this.center = center;
-        }
-    }
-
-    // 火花: launch tick 後に着地点へ弧、land tick 後に着く
+    // 火花の弧 (見た目だけ): launch tick 後に着地点へ弧を描く。傷と円は Telegraph
     private static final class Spark {
         final Vec3 pos;
         int launch;
-        int land = -1;
 
         Spark(Vec3 pos, int launch) {
             this.pos = pos;
@@ -274,16 +271,65 @@ public class AshSmith extends EmberMob {
         return steamSide;
     }
 
-    public int ventCount() {
-        return vents.size();
-    }
-
-    public int ringCount() {
-        return rings.size();
-    }
-
+    // 飛んでいる火花 (弧がまだ描かれていないもの)
     public int sparkCount() {
         return sparks.size();
+    }
+
+    // 開発用: 部屋にいる人数を、実際より多いことにする (一人で複数人の技の絵を撮るため。0 なら実際の人数)
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    int present(ServerLevel server) {
+        return Math.max(partyOverride, fighters(server).size());
+    }
+
+    // 床の高さ (人が立つ高さ)。鍛え手の間の中ならその床。ほかの場所 (開発用の平らな世界) では足もと
+    private double floorY() {
+        return AshSmithArena.inside(position()) ? AshSmithArena.FLOOR + 1 : getY();
+    }
+
+    // 人数による技の本数・数 (一人でも、印を見れば傷なしで避けられる)
+    public static int slamLines(int n) {
+        return n >= 4 ? 3 : n >= 2 ? 2 : 1;
+    }
+
+    public static int breathCones(int n) {
+        return Math.min(3, 1 + Math.max(1, n) / 2);
+    }
+
+    public static int sparkTotal(int n) {
+        return Math.min(14, Math.max(SPARK_COUNT, 2 + 2 * Math.max(1, n)));
+    }
+
+    // 予告の組み立て (形・長さ・印の種類。持ち主は鍛え手、当たるのは部屋の中の戦っている人)
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this)
+                .victims(p -> fighters(server).contains(p)).reach(3.5), style);
+    }
+
+    // 狙う方向・地点の候補: 戦っている人 (いま狙っている人を先頭に、残りは入れ替え)。人がいなくて人数の上書きだけあるときは空
+    private List<ServerPlayer> shuffledFighters(ServerLevel server) {
+        List<ServerPlayer> all = new ArrayList<>(fighters(server));
+        java.util.Collections.shuffle(all, new java.util.Random(random.nextLong()));
+        if (target != null && all.remove(target)) {
+            all.add(0, target);
+        }
+        return all;
     }
 
     public float bossBarProgress() {
@@ -399,11 +445,13 @@ public class AshSmith extends EmberMob {
                 faceToward(position().add(aimDir));
                 playAction(slamCold ? "slam_cold" : "slam");
                 sound(server, EmberSmithSetup.SLAM.get(), 2.5f, slamCold ? 0.7f : 0.85f);
+                startSlams(server);
             }
             case BREATH -> {
                 playAction("breath");
                 sound(server, EmberSmithSetup.INHALE.get(), 3f, 1f);
                 broadcast(server, ModText.battle("message.skyabyss.ember.smith.breath"));
+                startBreath(server);
             }
             case QUENCH -> {
                 trough = AshSmithArena.nearestTrough(position());
@@ -444,11 +492,108 @@ public class AshSmith extends EmberMob {
     }
 
     // ---- 鎚打ち
+    // 帯は技の初めに決まる (向きは溜めの始まりで、そのあとは追わない)。二人から、別の人へ向けた帯が増える
+    private void startSlams(ServerLevel server) {
+        List<Vec3> dirs = new ArrayList<>();
+        dirs.add(aimDir);
+        int want = slamLines(present(server));
+        for (ServerPlayer p : shuffledFighters(server)) {
+            if (dirs.size() >= want) {
+                break;
+            }
+            if (p == target) {
+                continue;
+            }
+            Vec3 d = new Vec3(p.getX() - getX(), 0, p.getZ() - getZ());
+            if (d.lengthSqr() < 1e-4) {
+                continue;
+            }
+            addDirection(dirs, d.normalize());
+        }
+        // 人が足りない (開発用の人数の上書き): 主の向きから左右へ広げる
+        for (int i = 1; dirs.size() < want && i < 8; i++) {
+            addDirection(dirs, rotateY(aimDir, Math.toRadians(40 * ((i + 1) / 2) * (i % 2 == 1 ? 1 : -1))));
+        }
+        boolean lead = true;
+        for (Vec3 d : dirs) {
+            slamStrip(server, d, lead);
+            lead = false;
+        }
+    }
+
+    // 向きの一覧に、近すぎない向きだけ足す (25 度以上あける)
+    private static void addDirection(List<Vec3> dirs, Vec3 d) {
+        for (Vec3 o : dirs) {
+            if (o.dot(d) > Math.cos(Math.toRadians(25))) {
+                return;
+            }
+        }
+        dirs.add(d);
+    }
+
+    private void slamStrip(ServerLevel server, Vec3 dir, boolean lead) {
+        Vec3 origin = slamOrigin;
+        boolean cold = slamCold;
+        float damage = SLAM_DAMAGE * (cold ? COLD_MULT : 1f);
+        double angle = Telegraph.angleOf(dir.x, dir.z);
+        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), SLAM_WINDUP, D)
+                .onImpact(s -> {
+                    Vec3 impact = origin.add(dir.scale(3.5));
+                    if (lead) {
+                        sound(s, EmberSmithSetup.SLAM.get(), 3.5f, cold ? 0.6f : 0.75f);
+                    }
+                    warn(s, ParticleTypes.EXPLOSION, impact.x, impact.y + 0.2, impact.z, 1, 0, 0, 0, 0);
+                    warn(s, ParticleTypes.POOF, impact.x, impact.y + 0.2, impact.z, 24, 1.2, 0.1, 1.2, 0.08);
+                    if (!cold) {
+                        crackStrip(s, origin, dir, angle, lead);
+                    }
+                })
+                .onHit((s, p) -> hurtPlayer(p, attackSource(), damage, "slam"))
+                .start();
+        if (cold && lead) {
+            // 冷えた鎚: 打った点から広がる輪 (安全な筋が三本。跳べば当たらない)。打つ 1 秒前から、輪の始まりと筋が見える
+            Vec3 impact = origin.add(dir.scale(3.5));
+            Double fixed = testGapBase;
+            double base = fixed != null ? fixed : random.nextDouble() * Math.PI * 2;
+            double[] gaps = {base, base + Math.PI * 2 / 3, base + Math.PI * 4 / 3};
+            for (double gap : gaps) {
+                tg(server, TelegraphShape.cone(impact.x, impact.z, gap, RING_MAX + 1, RING_LANE_HALF), SLAM_WINDUP, S).start();
+            }
+            tg(server, TelegraphShape.wave(impact.x, impact.z, RING_START, RING_MAX, 0.9, gaps, RING_LANE_HALF), SLAM_WINDUP, D)
+                    .active((int) Math.ceil((RING_MAX - RING_START) / RING_SPEED)).jumpClear(0.6)
+                    .onHit((s, p) -> hurtPlayer(p, attackSource(), RING_DAMAGE, "ring"))
+                    .start();
+        }
+    }
+
+    // 打った帯に亀裂が走り、1.2 秒後にその帯から噴く (噴く帯も予告で、白い線としゅうという音)
+    private void crackStrip(ServerLevel server, Vec3 origin, Vec3 dir, double angle, boolean lead) {
+        Vec3 side = new Vec3(-dir.z, 0, dir.x);
+        for (double t = 0.8; t <= SLAM_LENGTH; t += 0.55) {
+            Vec3 c = origin.add(dir.scale(t)).add(side.scale(Math.sin(t * 2.3) * 0.5));
+            warn(server, ParticleTypes.END_ROD, c.x, origin.y + 0.15, c.z, 1, 0.02, 0, 0.02, 0);
+        }
+        if (lead) {
+            sound(server, EmberSmithSetup.INHALE.get(), 1.2f, 2.0f);
+        }
+        tg(server, TelegraphShape.line(origin.x, origin.z, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), VENT_DELAY, D)
+                .onImpact(s -> {
+                    sound(s, EmberSmithSetup.BLAST.get(), lead ? 2.5f : 1.2f, 0.9f);
+                    for (double t = 0.8; t <= SLAM_LENGTH; t += 0.6) {
+                        Vec3 c = origin.add(dir.scale(t));
+                        warn(s, ParticleTypes.FLAME, c.x, origin.y + 0.3, c.z, 4, SLAM_HALF_WIDTH * 0.5, 0.2, SLAM_HALF_WIDTH * 0.5, 0.12);
+                        warn(s, ParticleTypes.LAVA, c.x, origin.y + 0.3, c.z, 1, 0.5, 0.1, 0.5, 0.0);
+                    }
+                })
+                .onHit((s, p) -> {
+                    hurtPlayer(p, damage(EmberIds.HEAT_BURST, this), VENT_DAMAGE, "vent");
+                    EmberHeat.add(p, VENT_HEAT, EmberHeat.Reason.SMITH);
+                })
+                .start();
+    }
+
     private void tickSlam(ServerLevel server) {
         if (actionTick < SLAM_WINDUP) {
-            if (actionTick % 2 == 0) {
-                stripOutline(server, slamOrigin, aimDir, slamCold ? new Vector3f(0.55f, 0.75f, 1.0f) : new Vector3f(0.35f, 0.30f, 0.30f), 1.4f);
-            }
             if (actionTick % 4 == 0) {
                 // 鎚の影: 帯の上を暗い煙で
                 for (int i = 0; i < 4; i++) {
@@ -459,26 +604,10 @@ public class AshSmith extends EmberMob {
             }
             return;
         }
-        if (actionTick == SLAM_WINDUP) {
-            float damage = SLAM_DAMAGE * (slamCold ? COLD_MULT : 1f);
-            for (ServerPlayer p : fighters(server)) {
-                if (inStrip(p.position(), slamOrigin, aimDir, SLAM_LENGTH, SLAM_HALF_WIDTH)) {
-                    hurtPlayer(p, attackSource(), damage, "slam");
-                }
-            }
-            Vec3 impact = slamOrigin.add(aimDir.scale(3.5));
-            sound(server, EmberSmithSetup.SLAM.get(), 3.5f, slamCold ? 0.6f : 0.75f);
-            warn(server, ParticleTypes.EXPLOSION, impact.x, impact.y + 0.2, impact.z, 1, 0, 0, 0, 0);
-            warn(server, ParticleTypes.POOF, impact.x, impact.y + 0.2, impact.z, 24, 1.2, 0.1, 1.2, 0.08);
-            if (slamCold) {
-                coldSlams--;
-                if (coldSlams <= 0) {
-                    entityData.set(COLD, false);
-                }
-                rings.add(new Ring(impact));
-            } else {
-                vents.add(new Vent(slamOrigin, aimDir));
-                sound(server, EmberSmithSetup.INHALE.get(), 1.2f, 2.0f);
+        if (actionTick == SLAM_WINDUP && slamCold) {
+            coldSlams--;
+            if (coldSlams <= 0) {
+                entityData.set(COLD, false);
             }
         }
         if (actionTick >= 34) {
@@ -496,29 +625,56 @@ public class AshSmith extends EmberMob {
         return t >= 0 && t <= len && lat <= half + 0.3;
     }
 
-    private void stripOutline(ServerLevel server, Vec3 origin, Vec3 dir, Vector3f color, float size) {
-        DustParticleOptions dust = new DustParticleOptions(color, size);
-        Vec3 side = new Vec3(-dir.z, 0, dir.x);
-        for (double t = 0.5; t <= SLAM_LENGTH; t += 0.8) {
-            Vec3 c = origin.add(dir.scale(t));
-            for (int s = -1; s <= 1; s += 2) {
-                Vec3 e = c.add(side.scale(s * SLAM_HALF_WIDTH));
-                warn(server, dust, e.x, origin.y + 0.1, e.z, 1, 0, 0, 0, 0);
+    // ---- 鞴の息
+    // 扇は技の初めに決まる (吸っているあいだ、向きは追わない)。二人から、別の人へ向けた扇が増える
+    private void startBreath(ServerLevel server) {
+        Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
+        List<Vec3> dirs = new ArrayList<>();
+        dirs.add(look);
+        int want = breathCones(present(server));
+        for (ServerPlayer p : shuffledFighters(server)) {
+            if (dirs.size() >= want) {
+                break;
             }
+            Vec3 d = new Vec3(p.getX() - getX(), 0, p.getZ() - getZ());
+            if (d.lengthSqr() < 1e-4) {
+                continue;
+            }
+            addDirection(dirs, d.normalize());
         }
-        Vec3 end = origin.add(dir.scale(SLAM_LENGTH));
-        for (double w = -SLAM_HALF_WIDTH; w <= SLAM_HALF_WIDTH; w += 0.75) {
-            Vec3 e = end.add(side.scale(w));
-            warn(server, dust, e.x, origin.y + 0.1, e.z, 1, 0, 0, 0, 0);
+        for (int i = 1; dirs.size() < want && i < 8; i++) {
+            addDirection(dirs, rotateY(look, Math.toRadians(70 * ((i + 1) / 2) * (i % 2 == 1 ? 1 : -1))));
+        }
+        boolean lead = true;
+        for (Vec3 d : dirs) {
+            boolean first = lead;
+            lead = false;
+            tg(server, TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(d.x, d.z), BREATH_LENGTH, Math.toRadians(BREATH_HALF_ANGLE)), BREATH_INHALE, D)
+                    .onImpact(s -> {
+                        if (first) {
+                            sound(s, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
+                        }
+                        for (int i = 0; i < 30; i++) {
+                            double a = Math.toRadians((random.nextDouble() - 0.5) * 2 * BREATH_HALF_ANGLE);
+                            double r = 1.5 + random.nextDouble() * (BREATH_LENGTH - 1.5);
+                            Vec3 q = position().add(rotateY(d, a).scale(r)).add(0, 1.0 + random.nextDouble(), 0);
+                            warn(s, i % 3 == 0 ? ParticleTypes.FLAME : ParticleTypes.LARGE_SMOKE, q.x, q.y, q.z, 2, 0.2, 0.2, 0.2, 0.02);
+                        }
+                    })
+                    .onHit((s, p) -> {
+                        hurtPlayer(p, attackSource(), BREATH_DAMAGE, "breath");
+                        Vec3 away = p.position().subtract(position());
+                        away = new Vec3(away.x, 0, away.z).normalize();
+                        p.setDeltaMovement(away.x * 1.9, 0.45, away.z * 1.9);
+                        p.hurtMarked = true;
+                        EmberHeat.add(p, BREATH_HEAT, EmberHeat.Reason.SMITH);
+                    })
+                    .start();
         }
     }
 
-    // ---- 鞴の息
     private void tickBreath(ServerLevel server) {
         if (actionTick < BREATH_INHALE) {
-            if (target != null && actionTick < BREATH_INHALE - 6) {
-                faceToward(target.position());
-            }
             if (actionTick % 3 == 0) {
                 Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
                 // 吸いこむ粒: 前から体の背へ
@@ -531,30 +687,9 @@ public class AshSmith extends EmberMob {
                     warn(server, ParticleTypes.CLOUD, p.x, p.y, p.z, 0, v.x, v.y, v.z, 1.0);
                 }
             }
-            if (actionTick % 4 == 0) {
-                fanOutline(server, new Vector3f(1.0f, 0.55f, 0.15f));
-            }
             return;
         }
         if (actionTick == BREATH_INHALE) {
-            Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
-            sound(server, EmberSmithSetup.BLAST.get(), 3.5f, 1f);
-            for (ServerPlayer p : fighters(server)) {
-                if (inFan(p.position(), position(), look)) {
-                    hurtPlayer(p, attackSource(), BREATH_DAMAGE, "breath");
-                    Vec3 away = p.position().subtract(position());
-                    away = new Vec3(away.x, 0, away.z).normalize();
-                    p.setDeltaMovement(away.x * 1.9, 0.45, away.z * 1.9);
-                    p.hurtMarked = true;
-                    EmberHeat.add(p, BREATH_HEAT, EmberHeat.Reason.SMITH);
-                }
-            }
-            for (int i = 0; i < 30; i++) {
-                double a = Math.toRadians((random.nextDouble() - 0.5) * 2 * BREATH_HALF_ANGLE);
-                double d = 1.5 + random.nextDouble() * (BREATH_LENGTH - 1.5);
-                Vec3 p = position().add(rotateY(look, a).scale(d)).add(0, 1.0 + random.nextDouble(), 0);
-                warn(server, i % 3 == 0 ? ParticleTypes.FLAME : ParticleTypes.LARGE_SMOKE, p.x, p.y, p.z, 2, 0.2, 0.2, 0.2, 0.02);
-            }
             weakTicks = WEAK_TICKS;
             entityData.set(WEAK, true);
             breathCooldown = BREATH_COOLDOWN;
@@ -580,22 +715,6 @@ public class AshSmith extends EmberMob {
         }
         double cos = (dx * look.x + dz * look.z) / (d * Math.sqrt(look.x * look.x + look.z * look.z));
         return cos >= Math.cos(Math.toRadians(BREATH_HALF_ANGLE));
-    }
-
-    private void fanOutline(ServerLevel server, Vector3f color) {
-        DustParticleOptions dust = new DustParticleOptions(color, 1.3f);
-        Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
-        for (int e = -1; e <= 1; e += 2) {
-            Vec3 edge = rotateY(look, Math.toRadians(e * BREATH_HALF_ANGLE));
-            for (double d = 1.5; d <= BREATH_LENGTH; d += 1.2) {
-                Vec3 p = position().add(edge.scale(d));
-                warn(server, dust, p.x, position().y + 0.1, p.z, 1, 0, 0, 0, 0);
-            }
-        }
-        for (double a = -BREATH_HALF_ANGLE; a <= BREATH_HALF_ANGLE; a += 7.5) {
-            Vec3 p = position().add(rotateY(look, Math.toRadians(a)).scale(BREATH_LENGTH));
-            warn(server, dust, p.x, position().y + 0.1, p.z, 1, 0, 0, 0, 0);
-        }
     }
 
     // ---- 焼き入れ
@@ -650,11 +769,21 @@ public class AshSmith extends EmberMob {
             List<ServerPlayer> ps = fighters(server);
             sound(server, EmberSmithSetup.BLAST.get(), 1.5f, 1.6f);
             if (!ps.isEmpty()) {
-                for (int i = 0; i < SPARK_COUNT; i++) {
+                int total = sparkTotal(present(server));
+                for (int i = 0; i < total; i++) {
                     ServerPlayer p = ps.get(i % ps.size());
-                    double ox = i < ps.size() ? 0 : (random.nextDouble() - 0.5) * 3.0;
-                    double oz = i < ps.size() ? 0 : (random.nextDouble() - 0.5) * 3.0;
-                    sparks.add(new Spark(new Vec3(p.getX() + ox, AshSmithArena.FLOOR + 1.0, p.getZ() + oz), i * SPARK_GAP));
+                    double ox = i < ps.size() ? 0 : (random.nextDouble() * 2 - 1) * SPARK_FILL_MAX;
+                    double oz = i < ps.size() ? 0 : (random.nextDouble() * 2 - 1) * SPARK_FILL_MAX;
+                    double x = p.getX() + ox;
+                    double z = p.getZ() + oz;
+                    double dx = x - (AshSmithArena.CX + 0.5);
+                    double dz = z - (AshSmithArena.CZ + 0.5);
+                    double d = Math.hypot(dx, dz);
+                    if (AshSmithArena.inside(position()) && d > AshSmithArena.RADIUS - 1.5) {
+                        x = AshSmithArena.CX + 0.5 + dx * (AshSmithArena.RADIUS - 1.5) / d;
+                        z = AshSmithArena.CZ + 0.5 + dz * (AshSmithArena.RADIUS - 1.5) / d;
+                    }
+                    startSpark(server, x, z, i);
                 }
             }
         }
@@ -662,6 +791,20 @@ public class AshSmith extends EmberMob {
             sparksCooldown = SPARKS_COOLDOWN + random.nextInt(60);
             finish();
         }
+    }
+
+    // 火花一つ: 足もとの円 (半径 1.8。予告 1.0 秒以上、4 tick ずつずらして落ちる)。弧の見た目は tickEffects
+    private void startSpark(ServerLevel server, double x, double z, int index) {
+        double y = floorY();
+        sparks.add(new Spark(new Vec3(x, y, z), index * SPARK_GAP));
+        tg(server, TelegraphShape.circle(x, z, SPARK_RADIUS), SPARK_WARN + index * SPARK_GAP, D)
+                .onImpact(s -> {
+                    warn(s, ParticleTypes.LAVA, x, y + 0.2, z, 14, 0.5, 0.2, 0.5, 0.1);
+                    warn(s, ParticleTypes.FLAME, x, y + 0.2, z, 18, 0.5, 0.3, 0.5, 0.08);
+                    s.playSound(null, x, y, z, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 1.5f, 0.8f);
+                })
+                .onHit((s, p) -> hurtPlayer(p, attackSource(), SPARK_DAMAGE, "spark"))
+                .start();
     }
 
     private Vec3 handPos() {
@@ -698,66 +841,14 @@ public class AshSmith extends EmberMob {
         }
     }
 
-    // ---------------------------------------------------------------- 続いている効果 (噴く帯・輪・火花・湯気・弱み)
+    // ---------------------------------------------------------------- 続いている効果 (火花の弧・湯気・弱み。傷は Telegraph が出す)
     private void tickEffects(ServerLevel server) {
-        Iterator<Vent> vi = vents.iterator();
-        while (vi.hasNext()) {
-            Vent v = vi.next();
-            v.ticks--;
-            if (v.ticks % 2 == 0) {
-                crackParticles(server, v);
-            }
-            if (v.ticks == VENT_DELAY - 2 || v.ticks == 10) {
-                sound(server, EmberSmithSetup.INHALE.get(), 1.0f, 2.2f);
-            }
-            if (v.ticks <= 0) {
-                burst(server, v);
-                vi.remove();
-            }
-        }
-        Iterator<Ring> ri = rings.iterator();
-        while (ri.hasNext()) {
-            Ring r = ri.next();
-            r.radius += RING_SPEED;
-            ringParticles(server, r);
-            for (ServerPlayer p : fighters(server)) {
-                double dx = p.getX() - r.center.x;
-                double dz = p.getZ() - r.center.z;
-                double d = Math.sqrt(dx * dx + dz * dz);
-                if (!r.hit.contains(p.getUUID()) && Math.abs(d - r.radius) <= 0.9 && p.getY() - r.center.y < 0.6) {
-                    r.hit.add(p.getUUID());
-                    hurtPlayer(p, attackSource(), RING_DAMAGE, "ring");
-                }
-            }
-            if (r.radius > RING_MAX) {
-                ri.remove();
-            }
-        }
         Iterator<Spark> si = sparks.iterator();
         while (si.hasNext()) {
-            Spark s = si.next();
-            if (s.land < 0) {
-                if (--s.launch <= 0) {
-                    s.land = SPARK_WARN;
-                    sparkArc(server, handPos(), s.pos);
-                    sound(server, EmberSmithSetup.SPARKS.get(), 1.2f, 1.3f);
-                }
-                continue;
-            }
-            if (s.land % 2 == 0) {
-                sparkRing(server, s.pos, s.land / (float) SPARK_WARN);
-            }
-            if (--s.land <= 0) {
-                for (ServerPlayer p : fighters(server)) {
-                    double dx = p.getX() - s.pos.x;
-                    double dz = p.getZ() - s.pos.z;
-                    if (dx * dx + dz * dz <= SPARK_RADIUS * SPARK_RADIUS && p.getY() - s.pos.y < 2.0) {
-                        hurtPlayer(p, attackSource(), SPARK_DAMAGE, "spark");
-                    }
-                }
-                warn(server, ParticleTypes.LAVA, s.pos.x, s.pos.y + 0.2, s.pos.z, 14, 0.5, 0.2, 0.5, 0.1);
-                warn(server, ParticleTypes.FLAME, s.pos.x, s.pos.y + 0.2, s.pos.z, 18, 0.5, 0.3, 0.5, 0.08);
-                server.playSound(null, s.pos.x, s.pos.y, s.pos.z, SoundEvents.FIRECHARGE_USE, SoundSource.HOSTILE, 1.5f, 0.8f);
+            Spark sp = si.next();
+            if (--sp.launch <= 0) {
+                sparkArc(server, handPos(), sp.pos);
+                sound(server, EmberSmithSetup.SPARKS.get(), 1.2f, 1.3f);
                 si.remove();
             }
         }
@@ -775,60 +866,10 @@ public class AshSmith extends EmberMob {
         }
     }
 
-    private void crackParticles(ServerLevel server, Vent v) {
-        DustParticleOptions white = new DustParticleOptions(new Vector3f(1.0f, 1.0f, 0.95f), 1.1f);
-        Vec3 side = new Vec3(-v.dir.z, 0, v.dir.x);
-        for (double t = 0.8; t <= SLAM_LENGTH; t += 0.55) {
-            double zig = Math.sin(t * 2.3) * 0.5;
-            Vec3 c = v.origin.add(v.dir.scale(t)).add(side.scale(zig));
-            warn(server, ParticleTypes.END_ROD, c.x, v.origin.y + 0.15, c.z, 1, 0.02, 0, 0.02, 0);
-            if (random.nextInt(3) == 0) {
-                warn(server, white, c.x + side.x * 0.5, v.origin.y + 0.15, c.z + side.z * 0.5, 1, 0, 0, 0, 0);
-            }
-        }
-    }
-
-    private void burst(ServerLevel server, Vent v) {
-        sound(server, EmberSmithSetup.BLAST.get(), 2.5f, 0.9f);
-        Vec3 side = new Vec3(-v.dir.z, 0, v.dir.x);
-        for (double t = 0.8; t <= SLAM_LENGTH; t += 0.6) {
-            Vec3 c = v.origin.add(v.dir.scale(t));
-            warn(server, ParticleTypes.FLAME, c.x, v.origin.y + 0.3, c.z, 4, SLAM_HALF_WIDTH * 0.5, 0.2, SLAM_HALF_WIDTH * 0.5, 0.12);
-            warn(server, ParticleTypes.LAVA, c.x, v.origin.y + 0.3, c.z, 1, 0.5, 0.1, 0.5, 0.0);
-        }
-        for (ServerPlayer p : fighters(server)) {
-            if (inStrip(p.position(), v.origin, v.dir, SLAM_LENGTH, SLAM_HALF_WIDTH)) {
-                hurtPlayer(p, damage(EmberIds.HEAT_BURST, this), VENT_DAMAGE, "vent");
-                EmberHeat.add(p, VENT_HEAT, EmberHeat.Reason.SMITH);
-            }
-        }
-    }
-
-    private void ringParticles(ServerLevel server, Ring r) {
-        DustParticleOptions dust = new DustParticleOptions(new Vector3f(0.7f, 0.85f, 1.0f), 1.5f);
-        int n = Math.max(12, (int) (r.radius * 6));
-        for (int i = 0; i < n; i++) {
-            double a = i * Math.PI * 2 / n;
-            Vec3 p = r.center.add(Math.cos(a) * r.radius, 0.15, Math.sin(a) * r.radius);
-            if (AshSmithArena.inside(p)) {
-                warn(server, dust, p.x, p.y, p.z, 1, 0, 0, 0, 0);
-            }
-        }
-    }
-
     private void sparkArc(ServerLevel server, Vec3 from, Vec3 to) {
         for (double t = 0; t <= 1; t += 0.06) {
             Vec3 p = from.lerp(to, t).add(0, 4.0 * t * (1 - t) * 3.5, 0);
             warn(server, ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
-        }
-    }
-
-    private void sparkRing(ServerLevel server, Vec3 at, float left) {
-        DustParticleOptions dust = new DustParticleOptions(new Vector3f(1.0f, 0.15f, 0.05f), 1.4f);
-        double r = SPARK_RADIUS * (0.55 + 0.45 * (1 - left));
-        for (int i = 0; i < 20; i++) {
-            double a = i * Math.PI * 2 / 20;
-            warn(server, dust, at.x + Math.cos(a) * r, at.y + 0.1, at.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
     }
 
@@ -925,8 +966,6 @@ public class AshSmith extends EmberMob {
         bossBar.removeAllPlayers();
         entityData.set(WEAK, false);
         entityData.set(COLD, false);
-        vents.clear();
-        rings.clear();
         sparks.clear();
         if (level() instanceof ServerLevel server) {
             AshSmithBattle.onDefeated(server, this);
@@ -935,6 +974,7 @@ public class AshSmith extends EmberMob {
 
     @Override
     public void remove(RemovalReason reason) {
+        Telegraph.cancelAll(this);
         bossBar.removeAllPlayers();
         super.remove(reason);
     }

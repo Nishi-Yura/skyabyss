@@ -1,0 +1,67 @@
+{
+  "category": "sub",
+  "order": 42,
+  "giver": "skyabyss:storyteller",
+  "chapter": "titan_whale",
+  "start_when": {
+    "type": "all",
+    "of": [
+      {
+        "type": "stage",
+        "max": 0
+      },
+      {
+        "type": "lore",
+        "entry": "chapter1/whale_chaser"
+      },
+      {
+        "type": "day",
+        "min": 1
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "gather",
+      "mode": "all",
+      "objectives": [
+        {
+          "id": "iron",
+          "type": "collect",
+          "target": "minecraft:iron_ingot",
+          "count": 8,
+          "party": false
+        },
+        {
+          "id": "scrap",
+          "type": "collect",
+          "target": "skyabyss:rock_shell_scrap",
+          "count": 12,
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "weave",
+      "mode": "any",
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:storyteller",
+          "topic": "ch1p_gear_weave"
+        },
+        {
+          "id": "made",
+          "type": "signal",
+          "target": "ch1_travel_gear_made",
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 80,
+    "items": []
+  }
+}

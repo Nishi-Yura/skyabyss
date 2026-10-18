@@ -236,9 +236,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         retractChain();
 
         if (--restCooldown <= 0) {
-            ServerPlayer player = nearestPlayer(level, 320);
+            // 一章の降下の条件 (story.ch1.Ch1Descent。docs/design/21 の 3.2): 条件を満たす人 (グループの誰か) がいないあいだは、雲の下を巡って降りない
+            ServerPlayer player = jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), 320);
             if (player == null) {
-                restCooldown = 1200;
+                restCooldown = nearestPlayer(level, 320) == null ? 1200 : 600;
                 return;
             }
             // プレイヤーの少し横に降り、鎖がすぐ近くに届くようにする

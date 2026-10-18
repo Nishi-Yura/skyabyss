@@ -292,8 +292,21 @@ public class TideBeckoner extends TideMob {
     }
 
     // 予告の組み立て (持ち主は潮招き、当たるのは戦いの人)
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, double floor, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floor).warn(warn).color(color).owner(this).victims(this::isFighter).reach(3.5);
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, double floor, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floor).warn(warn).owner(this).victims(this::isFighter).reach(3.5), style);
     }
 
     private static double[] lanes(double base, int count) {
@@ -307,7 +320,7 @@ public class TideBeckoner extends TideMob {
     // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
     private void ripple(ServerLevel server, double cx, double cz, double floor, double r0, double r1, int warn, double[] gaps, float damage) {
         int active = (int) Math.ceil((r1 - r0) / 0.55);
-        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, 0xFF7A1A).active(active).jumpClear(0.9)
+        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, D).active(active).jumpClear(0.9)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), damage);
                     Vec3 away = p.position().subtract(cx, floor, cz).multiply(1, 0, 1);
@@ -319,7 +332,7 @@ public class TideBeckoner extends TideMob {
                 .start();
         // 安全な筋 (見た目だけ。緑の扇)
         for (double gap : gaps) {
-            tg(server, TelegraphShape.cone(cx, cz, gap, r1, LANE_HALF), floor, warn, 0x3AE8FF).start();
+            tg(server, TelegraphShape.cone(cx, cz, gap, r1, LANE_HALF), floor, warn, S).start();
         }
     }
 
@@ -440,13 +453,13 @@ public class TideBeckoner extends TideMob {
             double dx = Math.cos(angle);
             double dz = Math.sin(angle);
             boolean first = i == 0;
-            tg(server, TelegraphShape.line(getX(), getZ(), angle, SLAM_LENGTH, SLAM_HALF_WIDTH), ground, SLAM_WINDUP, 0xE62614)
+            tg(server, TelegraphShape.line(getX(), getZ(), angle, SLAM_LENGTH, SLAM_HALF_WIDTH), ground, SLAM_WINDUP, D).target(target)
                     .onImpact(s -> slamImpact(s, dx, dz, SLAM_LENGTH, 0, flooded, first))
                     .onHit((s, p) -> p.hurt(attackSource(), SLAM_DAMAGE))
                     .start();
             if (flooded) {
                 // 水の線 (後ろの半分)。岩の上 (島) に立つ人には当たらない
-                tg(server, TelegraphShape.line(getX() + dx * SLAM_LENGTH, getZ() + dz * SLAM_LENGTH, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), ground, SLAM_WINDUP, 0xFF8A1A)
+                tg(server, TelegraphShape.line(getX() + dx * SLAM_LENGTH, getZ() + dz * SLAM_LENGTH, angle, SLAM_LENGTH, SLAM_HALF_WIDTH), ground, SLAM_WINDUP, D)
                         .reach(2.5)
                         .onImpact(s -> slamImpact(s, dx, dz, SLAM_LENGTH, SLAM_LENGTH, true, false))
                         .onHit((s, p) -> p.hurt(attackSource(), SLAM_DAMAGE))
@@ -497,9 +510,11 @@ public class TideBeckoner extends TideMob {
         }
         Vec3 m = mouth();
         List<Double> centers = new ArrayList<>();
+        List<ServerPlayer> aimed = new ArrayList<>();
         for (ServerPlayer p : all) {
             if (centers.size() < breathTargets(n)) {
                 centers.add(Telegraph.angleOf(p.getX() - m.x, p.getZ() - m.z));
+                aimed.add(p);
             }
         }
         Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
@@ -513,14 +528,16 @@ public class TideBeckoner extends TideMob {
         double fan = n <= 1 ? 0.22 : 0.12;
         int perTarget = n <= 1 ? 3 : 2;
         boolean first = true;
-        for (double center : centers) {
+        for (int c = 0; c < centers.size(); c++) {
+            double center = centers.get(c);
+            ServerPlayer aim = c < aimed.size() ? aimed.get(c) : null;
             for (int k = 0; k < perTarget; k++) {
                 double angle = center + (perTarget == 3 ? (k - 1) * fan : (k == 0 ? -fan : fan));
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, 0xFF9A2A)
+                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, D).target(aim)
                         .onImpact(s -> {
                             if (sounds) {
                                 s.playSound(null, m.x, m.y, m.z, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_POP.get(), SoundSource.HOSTILE, 1.2f, 1f);
@@ -545,7 +562,7 @@ public class TideBeckoner extends TideMob {
         double ground = groundY(position());
         double cx = getX();
         double cz = getZ();
-        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, 0xE04030)
+        tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), ROAR_DAMAGE);
                     Vec3 away = p.position().subtract(position()).multiply(1, 0, 1);
@@ -612,7 +629,7 @@ public class TideBeckoner extends TideMob {
         double bx = burrowAt.x;
         double bz = burrowAt.z;
         double by = burrowAt.y;
-        tg(server, TelegraphShape.circle(bx, bz, BURROW_RADIUS), by, warn, 0xFF8A1A)
+        tg(server, TelegraphShape.circle(bx, bz, BURROW_RADIUS), by, warn, D)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), BURROW_DAMAGE);
                     TideHeartNetwork.nudge(p, 0, 0.9, 0);
@@ -642,7 +659,7 @@ public class TideBeckoner extends TideMob {
             double fx = gx;
             double fz = gz;
             double fy = gy;
-            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, 0xFF8A1A)
+            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, D)
                     .onImpact(s -> {
                         s.playSound(null, fx, fy, fz, net.minecraft.sounds.SoundEvents.SAND_BREAK, SoundSource.HOSTILE, 1.6f, 0.7f);
                         s.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.SAND.defaultBlockState()),

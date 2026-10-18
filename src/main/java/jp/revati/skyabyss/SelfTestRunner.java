@@ -232,6 +232,11 @@ public final class SelfTestRunner {
             haltWhenDone = true;
         }
         if (QUEUE.isEmpty()) {
+            // 名前の頭に合う段が無いときは、待ち続けずに知らせて止める
+            if (haltWhenDone) {
+                SkyAbyss.LOGGER.error("SELFTEST FAILED: no step name starts with \"{}\"", only);
+                event.getServer().halt(false);
+            }
             return;
         }
         current = null;

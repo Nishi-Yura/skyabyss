@@ -2,8 +2,11 @@ package jp.revati.skyabyss.story.ch1;
 
 import java.util.List;
 
+import jp.revati.skyabyss.guide.SiteTreasure;
+import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.lore.LorePageItem;
 import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.opening.site.Blueprint;
 import jp.revati.skyabyss.opening.site.ChapterSites;
 import jp.revati.skyabyss.opening.site.ChapterSites.Prefer;
 import jp.revati.skyabyss.opening.site.SiteJob;
@@ -34,8 +37,25 @@ public final class Sites {
     public static final String DIARY_SPOT = "ch1_diary_spot";
     public static final List<String> WHALE = List.of(TRACE_WELL, TRACE_PACK, LOOKOUT, LOST_CART, DIARY_SPOT,
             songStoneId(1), songStoneId(2), songStoneId(3), songStoneId(4), songStoneId(5));
+    // 一章の地上の新しい場所 (21 の 3.1、P6): 鯨道の石標 7 (7 つ目が祠)・骨の集め場・割れ殻の洞。荷車の傍らの道は失せ物の荷車の隣 (LOST_CART の post)、
+    // 歌の間は宿りの鐘の下 (SongChamber)
+    public static final List<String> WHALE_P6 = buildP6();
 
     private Sites() {
+    }
+
+    private static List<String> buildP6() {
+        java.util.ArrayList<String> ids = new java.util.ArrayList<>();
+        for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
+            ids.add(roadCairnId(n));
+        }
+        ids.add(Ch1Prep.BONE_CACHE);
+        ids.add(Ch1Prep.CLEFT_CAVE);
+        return List.copyOf(ids);
+    }
+
+    public static String roadCairnId(int n) {
+        return Ch1Prep.CAIRN_PREFIX + n;
     }
 
     public static String songStoneId(int n) {
@@ -58,10 +78,15 @@ public final class Sites {
         ChapterSites.element(LOOKOUT, Chapters.WHALE, LOOKOUT).dist(60, 150).prefer(Prefer.HIGH).arriveRadius(12)
                 .onArrive((p, s) -> arrive(p, s)).register();
         ChapterSites.element(LOST_CART, Chapters.WHALE, LOST_CART).dist(60, 140).arriveRadius(10)
-                .post(job -> fill(job, false, null))
+                .post(job -> {
+                    fill(job, false, null);
+                    placeCartTrack(job);
+                })
                 .onArrive((p, s) -> {
                     arrive(p, s);
                     Quests.start(p, Ch1.Q_TRAVELLER);
+                    // 荷車の傍らの道 (轍の先の旅の職人の荷。職人 P4 が立つまでは荷だけ)
+                    Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch1.arrive.ch1_cart_track"));
                 }).register();
         ChapterSites.element(DIARY_SPOT, Chapters.WHALE, DIARY_SPOT).dist(100, 150).arriveRadius(8)
                 .post(job -> fill(job, false, Ch1.PAGE_DIARY))
@@ -69,6 +94,46 @@ public final class Sites {
         for (int n = 1; n <= SongStones.COUNT; n++) {
             ChapterSites.element(songStoneId(n), Chapters.WHALE, songStoneId(n)).dist(50, 150).arriveRadius(8)
                     .onArrive((p, s) -> arrive(p, s)).register();
+        }
+        registerP6();
+    }
+
+    // ---------------------------------------------------------------- 21 の 3.1 の新しい場所 (P6)
+    static void registerP6() {
+        // 鯨道の石標: 拠点から外へ、空の下へ向かう道すじ (n 番目は 24 + 18 (n-1) から 16 ブロックの幅の輪に置く。扇の 3 方向に散る)。7 つ目は祠
+        for (int n = 1; n <= Ch1Prep.CAIRNS; n++) {
+            int min = 24 + 18 * (n - 1);
+            int last = n;
+            ChapterSites.element(roadCairnId(n), Chapters.WHALE, last == Ch1Prep.CAIRNS ? "ch1_road_shrine" : "ch1_road_cairn").dist(min, Math.min(150, min + 16))
+                    .arriveRadius(6).onArrive((p, s) -> {
+                        arrive(p, s);
+                        if (last == Ch1Prep.CAIRNS) {
+                            Tasks.later(40, () -> Lore.unlock(p, Ch1Prep.ROAD_CAIRNS, true));
+                        }
+                    }).register();
+        }
+        // 骨の集め場: 骨の山。人ごとの一度きりの抽選 (旅装の素材 + 道の固焼き 3)。TODO(P7): 骨負いがここへ導く (ch1/follow_hauler)
+        SiteTreasure.register(Ch1Prep.BONE_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 3),
+                new SiteTreasure.Entry("skyabyss:bone_chip", 3),
+                // TODO(P5): 道の固焼き (road_hardtack) に替える
+                new SiteTreasure.Entry("minecraft:bread", 3))));
+        ChapterSites.element(Ch1Prep.BONE_CACHE, Chapters.WHALE, Ch1Prep.BONE_CACHE).dist(60, 140).arriveRadius(8).onArrive((p, s) -> {
+            arrive(p, s);
+            if (!SiteTreasure.claim(p, Ch1Prep.BONE_CACHE).isEmpty()) {
+                Tasks.later(40, () -> Notice.narrate(p, "message.skyabyss.ch1.cache.found"));
+            }
+        }).register();
+        CleftCave.register();
+        Ch1Prep.register();
+        Ch1Mobs.registerWanderers();
+    }
+
+    // 荷車の傍らの道: 失せ物の荷車の隣 (東へ 10) に轍と荷を置く。印 "artisan" (職人が立つ所) を記録に残す
+    static void placeCartTrack(SiteJob job) {
+        BlockPos at = Blueprint.transform(10, 0, 0, job.rot, job.mirror, job.origin);
+        BlockPos sign = job.placeSmall(Blueprint.get(Ch1Prep.CART_TRACK_BLUEPRINT), at.getX(), at.getZ(), job.rot);
+        if (sign != null) {
+            job.entry.extra("artisan", sign);
         }
     }
 

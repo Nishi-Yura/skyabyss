@@ -755,16 +755,20 @@ public final class GuideSelfTest {
             for (String id : ChapterXpBudget.LEGACY) {
                 check(f, QuestManager.quest(id) != null, "LEGACY lists a quest that does not exist: " + id);
             }
-            // 新しい分の数え方: 備えの頼み (80 + 160 + 60) を足すと数える。既存・繰り返し・ほかの章は数えない
+            // 新しい分の数え方: 一章の新しいクエスト (10 + 10 + 10。本物の備えの頼みと重ならない ID) を足すと数える。既存・繰り返し・ほかの章は数えない
+            // (一章の本物の備えの頼み 300 と洞 40 が入っているので、足せるのは 60 まで)
             List<String> errors = new ArrayList<>();
-            List<QuestDef> defs = new ArrayList<>(prepDefs(errors, "titan_whale", 1));
+            List<QuestDef> defs = new ArrayList<>();
+            for (String probe : List.of("a", "b", "c")) {
+                defs.add(quest("ch1/xp_probe_" + probe, prepJson("t_xp_" + probe, 10), errors));
+            }
             int before = ChapterXpBudget.newQuestXp(QuestManager.all(), 1);
             int before2 = ChapterXpBudget.newQuestXp(QuestManager.all(), 2);
             restore = QuestManager.addTemporary(defs);
             int after = ChapterXpBudget.newQuestXp(QuestManager.all(), 1);
-            check(f, after - before == 300 && ChapterXpBudget.newQuestXp(QuestManager.all(), 2) == before2,
+            check(f, after - before == 30 && ChapterXpBudget.newQuestXp(QuestManager.all(), 2) == before2,
                     "the new quests were not counted (" + before + " -> " + after + ") or leaked into another chapter");
-            check(f, ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "300 new xp in chapter 1 was flagged though the budget is 400");
+            check(f, ChapterXpBudget.overruns(QuestManager.all()).isEmpty(), "30 more new xp in chapter 1 was flagged though the budget has room");
             restore.run();
             // 超えたら見つける (読み込みの検査と自己テストの両方)
             defs.add(quest("ch1/prep_extra", prepJson("t_extra", 700), errors));

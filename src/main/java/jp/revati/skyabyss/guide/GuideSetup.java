@@ -33,6 +33,14 @@ public final class GuideSetup {
     public static final DeferredItem<Item> HEARTBEAT_WARD_THUNDER_WING = ward("thunder_wing");
     public static final DeferredItem<Item> HEARTBEAT_WARD_EMBER = ward("ember");
 
+    // 一章の地上の素材 (21 の 3.1、P6 が先に置いた仮の登録。絵は仮 = tools/gen_ch1_materials.py。落とす敵は P7、旅装・砥石のレシピは P5 が足す。
+    // ID は 21 の表のとおり。P5・P7 は、同じ ID を二重に登録せず、この 4 つを使うこと)
+    public static final DeferredItem<Item> ROCK_SHELL_SCRAP = ITEMS.register("rock_shell_scrap", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> BONE_CHIP = ITEMS.register("bone_chip", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> HARE_QUILL = ITEMS.register("hare_quill", () -> new Item(new Item.Properties()));
+    // 岩殻の護り糸 (鼓動守 岩鯨の材料)
+    public static final DeferredItem<Item> ROCK_SHELL_THREAD = ITEMS.register("rock_shell_thread", () -> new Item(new Item.Properties()));
+
     private GuideSetup() {
     }
 
@@ -51,6 +59,10 @@ public final class GuideSetup {
             for (int c = 0; c <= WayfarerNotes.MAX_CHAPTER; c++) {
                 event.accept(WayfarerNotes.make(c));
             }
+            event.accept(ROCK_SHELL_SCRAP.get());
+            event.accept(BONE_CHIP.get());
+            event.accept(HARE_QUILL.get());
+            event.accept(ROCK_SHELL_THREAD.get());
             event.accept(HEARTBEAT_WARD_STONE_WHALE.get());
             event.accept(HEARTBEAT_WARD_TIDE_SHELL.get());
             event.accept(HEARTBEAT_WARD_THUNDER_WING.get());

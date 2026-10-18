@@ -411,8 +411,21 @@ public class Raiju extends GuardMob {
         return site != null ? site.floor() : getY();
     }
 
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canFight).reach(3.5);
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this).victims(this::canFight).reach(3.5), style);
     }
 
     // ---------------------------------------------------------------- 技
@@ -600,7 +613,7 @@ public class Raiju extends GuardMob {
     // 雷渡りの当たる所: 線の下の床の帯 (幅 2.6。両端の柱のそば 1.8 ブロックは除く)。印が満ちて、雷になって渡りはじめる瞬間に帯の中の人に 12。
     // 人数で、着いた柱から別の柱 (ほかの人にいちばん近い柱) へ枝分かれの帯が増える (最大 3 本。9)
     private void railMarkers(ServerLevel server, Vec3 a, Vec3 b) {
-        railBand(server, a, b, RAIL_HALF_WIDTH, RAIL_DAMAGE, 0xFF9A3A);
+        railBand(server, a, b, RAIL_HALF_WIDTH, RAIL_DAMAGE, D);
         int forks = railForks(present(server));
         if (forks == 0 || site == null) {
             return;
@@ -623,18 +636,18 @@ public class Raiju extends GuardMob {
             }
         }
         for (int r : picks) {
-            railBand(server, b, perchSpot(r), RAIL_FORK_HALF_WIDTH, RAIL_FORK_DAMAGE, 0xFFB060);
+            railBand(server, b, perchSpot(r), RAIL_FORK_HALF_WIDTH, RAIL_FORK_DAMAGE, D);
         }
     }
 
-    private void railBand(ServerLevel server, Vec3 a, Vec3 b, double halfWidth, float damage, int color) {
+    private void railBand(ServerLevel server, Vec3 a, Vec3 b, double halfWidth, float damage, int style) {
         double len = Math.hypot(b.x - a.x, b.z - a.z);
         if (len < 2) {
             return;
         }
         double t = trim(len);
         double angle = Telegraph.angleOf(b.x - a.x, b.z - a.z);
-        tg(server, TelegraphShape.line(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, angle, len * (1 - 2 * t), halfWidth), RAIL_WARN + 1, color)
+        tg(server, TelegraphShape.line(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, angle, len * (1 - 2 * t), halfWidth), RAIL_WARN + 1, style)
                 .onHit((s, player) -> {
                     if (hit.add(player.getUUID())) {
                         player.hurt(attackSource(), damage);
@@ -677,7 +690,7 @@ public class Raiju extends GuardMob {
     private void pounceMarkers(ServerLevel server, int total) {
         Vec3 land = clampToNest(aim);
         pounceLand = land;
-        tg(server, TelegraphShape.circle(land.x, land.z, POUNCE_RADIUS), total, 0xFFDB59)
+        tg(server, TelegraphShape.circle(land.x, land.z, POUNCE_RADIUS), total, D)
                 .onImpact(s -> StormStrike.bolt(s, new Vec3(land.x, floorY() + 14, land.z), new Vec3(land.x, floorY(), land.z)))
                 .onHit((s, player) -> {
                     if (hit.add(player.getUUID())) {
@@ -700,7 +713,7 @@ public class Raiju extends GuardMob {
         }
         for (int i = 0; i < pounceEchoes(n); i++) {
             Vec3 at = spots.get(i);
-            tg(server, TelegraphShape.circle(at.x, at.z, ECHO_RADIUS), total, 0xFFF2A0)
+            tg(server, TelegraphShape.circle(at.x, at.z, ECHO_RADIUS), total, D)
                     .onImpact(s -> StormStrike.bolt(s, new Vec3(at.x, floorY() + 14, at.z), new Vec3(at.x, floorY(), at.z)))
                     .onHit((s, player) -> {
                         if (hit.add(player.getUUID())) {
@@ -715,7 +728,7 @@ public class Raiju extends GuardMob {
             double gapHalf = Math.toRadians(26);
             int active = (int) Math.ceil((POUNCE_RING_REACH - POUNCE_RADIUS) / 0.45);
             for (int i = 0; i < (n >= 3 ? 2 : 1); i++) {
-                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, 0xFFA040)
+                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, D)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> player.hurt(attackSource(), POUNCE_RING_DAMAGE))
                         .start();
@@ -759,7 +772,7 @@ public class Raiju extends GuardMob {
     private void clawMarkers(ServerLevel server) {
         double angle = target != null ? Telegraph.angleOf(target.getX() - getX(), target.getZ() - getZ())
                 : Telegraph.angleOf(Vec3.directionFromRotation(0, getYRot()));
-        tg(server, TelegraphShape.cone(getX(), getZ(), angle, CLAW_RANGE, Math.toRadians(CLAW_HALF_ANGLE)), CLAW_WARN, 0xFFE9A0)
+        tg(server, TelegraphShape.cone(getX(), getZ(), angle, CLAW_RANGE, Math.toRadians(CLAW_HALF_ANGLE)), CLAW_WARN, D).target(target)
                 .active(20).repeatEvery(10)
                 .onHit((s, player) -> {
                     player.hurt(attackSource(), CLAW_DAMAGE);
@@ -776,7 +789,7 @@ public class Raiju extends GuardMob {
         for (int i = 0; i < shocks; i++) {
             double a = i < others.size() ? Telegraph.angleOf(others.get(i).getX() - getX(), others.get(i).getZ() - getZ())
                     : angle + Math.PI * 2 * (i + 1) / (shocks + 1);
-            tg(server, TelegraphShape.line(getX(), getZ(), a, CLAW_SHOCK_LENGTH, 1.0), CLAW_WARN, 0xFFF2A0)
+            tg(server, TelegraphShape.line(getX(), getZ(), a, CLAW_SHOCK_LENGTH, 1.0), CLAW_WARN, D).target(i < others.size() ? others.get(i) : null)
                     .onHit((s, player) -> player.hurt(attackSource(), CLAW_SHOCK_DAMAGE))
                     .start();
         }
@@ -833,7 +846,7 @@ public class Raiju extends GuardMob {
             rodPos = null;
         }
         final BlockPos toRod = rodPos;
-        Telegraph.Builder b = tg(server, TelegraphShape.circle(at.x, at.z, StormStrike.RADIUS), RING_WARN, toRod != null ? 0xFFE278 : 0xFFFFFF)
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(at.x, at.z, StormStrike.RADIUS), RING_WARN, D)
                 .onImpact(s -> {
                     if (toRod != null) {
                         Vec3 tip = new Vec3(toRod.getX() + 0.5, toRod.getY() + StormRods.HEIGHT, toRod.getZ() + 0.5);
@@ -842,6 +855,10 @@ public class Raiju extends GuardMob {
                         StormStrike.bolt(s, new Vec3(at.x, y + 18, at.z), new Vec3(at.x, y, at.z));
                     }
                 });
+        if (toRod != null) {
+            // 避雷針へ落ちる稲妻には傷がない。黄色は避雷針の印 (特別な色として残す。danger の橙赤にはしない)
+            b.color(0xFFE278);
+        }
         if (toRod == null) {
             b.onHit((s, player) -> {
                 player.hurt(attackSource(), ROAR_STRIKE_DAMAGE);

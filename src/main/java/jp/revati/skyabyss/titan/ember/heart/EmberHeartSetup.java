@@ -19,10 +19,10 @@ public final class EmberHeartSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
-    // 判定は 3 x 4.2。模型は描画で 2 倍 (殻の幅は約 3 ブロック。火の粉は判定の外まで上る)
+    // 判定は 4.5 x 6.3 (迫力のため、前の 3 x 4.2 の 1.5 倍)。模型は描画で 3 倍 (殻の幅は約 4.5 ブロック。火の粉は判定の外まで上る)
     public static final DeferredHolder<EntityType<?>, EntityType<EmberHeart>> EMBER_HEART = ENTITIES.register(EmberIds.EMBER_HEART,
             () -> EntityType.Builder.<EmberHeart>of(EmberHeart::new, MobCategory.MONSTER)
-                    .sized(3.0f, 4.2f)
+                    .sized(4.5f, 6.3f)
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(SkyAbyss.MODID + ":" + EmberIds.EMBER_HEART));

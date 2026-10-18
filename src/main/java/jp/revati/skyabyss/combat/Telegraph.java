@@ -83,6 +83,8 @@ public final class Telegraph {
     private static int damagingCreated;
     private static List<Vec3> probes;
     private static boolean[] probeHit;
+    // 試験用: 傷のある予告を作るたびに、その形を記録する (印と当たりが同じ形かを、実際の技で確かめるため)
+    private static List<TelegraphShape> recorded;
 
     private final ServerLevel level;
     private final TelegraphShape shape;
@@ -131,6 +133,9 @@ public final class Telegraph {
         this.decal = b.shape.kind() != TelegraphShape.KIND_NONE;
         if (b.onHit != null) {
             damagingCreated++;
+            if (recorded != null) {
+                recorded.add(b.shape);
+            }
         }
     }
 
@@ -157,6 +162,11 @@ public final class Telegraph {
 
     public static boolean[] probeHits() {
         return probeHit;
+    }
+
+    // 傷のある予告の形を sink に記録する。null で止める
+    public static void record(List<TelegraphShape> sink) {
+        recorded = sink;
     }
 
     // ---- 作る ----

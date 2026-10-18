@@ -77,8 +77,25 @@ public final class SiteSpawner {
     public record Pad(String room, int dx, int dy, int dz, List<Spawn> spawns) {
     }
 
+    // yawOf: 場所の基点 → ChapterSites の向き (SiteFinder の符号化。回す・反転する)。部屋の位置 (pads のずれ) を部品の向きに合わせて回すときだけ渡す。
+    //        null なら回さない (ずれはそのまま世界の座標)
     public record Def(String id, Chapters chapter, List<Pad> pads, int xp, @Nullable String treasure, @Nullable String repeatTreasure, int maxMobs,
-                      Function<MinecraftServer, List<BlockPos>> origins) {
+                      Function<MinecraftServer, List<BlockPos>> origins, @Nullable java.util.function.ToIntFunction<BlockPos> yawOf) {
+        public Def(String id, Chapters chapter, List<Pad> pads, int xp, @Nullable String treasure, @Nullable String repeatTreasure, int maxMobs,
+                   Function<MinecraftServer, List<BlockPos>> origins) {
+            this(id, chapter, pads, xp, treasure, repeatTreasure, maxMobs, origins, null);
+        }
+
+        // 湧き台 pad の世界の位置 (基点 + 向きに合わせて回したずれ)
+        public BlockPos padAt(Pad pad, BlockPos origin) {
+            if (yawOf == null) {
+                return origin.offset(pad.dx(), pad.dy(), pad.dz());
+            }
+            int yaw = yawOf.applyAsInt(origin);
+            return jp.revati.skyabyss.opening.site.Blueprint.transform(pad.dx(), pad.dy(), pad.dz(), jp.revati.skyabyss.opening.site.SiteFinder.rot(yaw),
+                    jp.revati.skyabyss.opening.site.SiteFinder.mirror(yaw), origin);
+        }
+
         public String lastRoom() {
             return pads.isEmpty() ? "" : pads.get(pads.size() - 1).room();
         }
@@ -321,7 +338,7 @@ public final class SiteSpawner {
             }
             return null;
         }
-        BlockPos at = inst.origin.offset(task.pad().dx(), task.pad().dy(), task.pad().dz());
+        BlockPos at = inst.def.padAt(task.pad(), inst.origin);
         mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
         if (mob instanceof GroupOwned owned) {
             owned.setGroupId(inst.group);

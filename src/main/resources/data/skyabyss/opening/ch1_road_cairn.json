@@ -1,0 +1,1 @@
+{"site":"ch1_road_cairn","note":"P4a (docs/design/17 の 1.5)。tools/gen_ch1_blueprints.py が書く","palette":["minecraft:cobblestone","minecraft:mossy_cobblestone","minecraft:cobblestone_slab[type=bottom]"],"blocks":[[-1,0,-1,2],[0,0,-2,0],[0,0,-1,1],[0,0,0,0],[1,0,-1,2],[0,1,0,1],[0,2,0,0],[0,3,0,2]],"marks":{"stand":[0,0,2]},"meta":{"rect":[-2,-2,2,2],"level":true,"ring":1}}
