@@ -24,8 +24,9 @@ import net.minecraft.world.phys.Vec3;
 // 決まり (旧 BossRoom と同じ):
 //  - 部屋の内側にグループの人が入ると 5 秒の集合。閉じるとき、戸口と前室の人 (そのグループだけ) も中へ入れる
 //  - 入口をそのグループにだけ封じ、ボスを湧かせる。挑む人数で強さが決まる
-//  - 戦いの途中で倒れた参加者は、戦いが終わる (倒す・やり直し) まで扉から戻れない (報酬の参加者には残る。fallen())。
-//    戻れるのは、倒れていない参加者だけ (離れて戻ってきた人)
+//  - 戦いの途中で倒れた参加者は、前室で目を覚まして 20 秒たつと扉から戻れる (戻った直後は 3 秒の守り)。戻れる回数は
+//    ゲームルール skyabyssHeartReentryLimit (既定 3、0 = 数えない)。使い切ると、戦いが終わる (倒す・やり直し) まで通れない。
+//    報酬の参加者には残る (fallen())。倒れていない参加者 (離れて戻ってきた人) はいつでも戻れる。Reentry を見る
 //  - ボスが部屋の外へ出たら中央へ戻す
 //  - 内側にグループの人がいなくなって 3 秒たつと放棄としてボスを消し入口を開ける。撃破の報告がないまま消えたときも戻す (5 秒は湧かせ直さない)
 // 参加者は「ボスが倒れる瞬間に部屋にいた、またはその前に部屋で戦い続けて倒れた人」(M6)。一瞬いただけの人は数えない:
@@ -91,6 +92,7 @@ public final class GroupBossRoom {
         for (GroupBossRoom room : ACTIVE) {
             if (room.lastInside.contains(player)) {
                 room.died.add(player);
+                room.reentry.fell(player);
             }
         }
     }
@@ -106,6 +108,9 @@ public final class GroupBossRoom {
     private final Set<UUID> lastInside = new LinkedHashSet<>();
     // 戦いの最中に部屋の中で倒れた人 (倒れて前室から戻っても参加者に数える)
     private final Set<UUID> died = new LinkedHashSet<>();
+    // 倒れた参加者の再入場 (待ち時間・回数)。戦いが終わる・やり直しで消える
+    private final Reentry reentry = new Reentry();
+    private int noticeTicks;
     private int empty;
     private int gather = -1;
     private int cooldown;
@@ -132,9 +137,13 @@ public final class GroupBossRoom {
         return participants;
     }
 
-    // この戦いの最中に部屋の中で倒れた人。戦いが続くあいだは扉から戻れない (参加者には数える)
+    // この戦いの最中に部屋の中で倒れた人 (参加者には数える。戻れるかは Reentry で決まる)
     public Set<UUID> fallen() {
         return died;
+    }
+
+    public Reentry reentry() {
+        return reentry;
     }
 
     public int challengers() {
@@ -219,13 +228,51 @@ public final class GroupBossRoom {
                 joining.remove(id);
             }
         }
-        host.letBack(level, group, rejoinable());
+        long now = level.getGameTime();
+        int limit = ReentryRules.limit(level.getServer());
+        java.util.Set<UUID> insideIds = new LinkedHashSet<>();
+        for (ServerPlayer player : inside) {
+            insideIds.add(player.getUUID());
+        }
+        noticeTicks += STEP;
+        boolean notice = noticeTicks >= 20;
+        if (notice) {
+            noticeTicks = 0;
+        }
+        for (UUID id : reentry.fallenIds()) {
+            if (insideIds.contains(id)) {
+                // 扉から戻った (まだ目を覚ましていない人が中にいるのは数えない)
+                if (reentry.entered(id)) {
+                    for (ServerPlayer player : inside) {
+                        if (player.getUUID().equals(id)) {
+                            ReentryRules.guard(player);
+                        }
+                    }
+                }
+                continue;
+            }
+            ServerPlayer outside = level.getServer().getPlayerList().getPlayer(id);
+            if (outside == null || !outside.isAlive() || outside.level() != level) {
+                continue;
+            }
+            reentry.observeAwake(id, now);
+            if (notice) {
+                ReentryRules.tell(outside, reentry.status(id, now, limit), reentry.remaining(id, now), reentry.used(id), limit);
+            }
+        }
+        host.letBack(level, group, rejoinable(level));
     }
 
-    // 戦いの途中で扉から戻してよい参加者 (倒れた人は除く)
-    public Set<UUID> rejoinable() {
-        Set<UUID> ids = new LinkedHashSet<>(participants);
-        ids.removeAll(died);
+    // 戦いの途中で扉から戻してよい参加者 (倒れた人は、20 秒たち回数が残っているときだけ)
+    public Set<UUID> rejoinable(ServerLevel level) {
+        long now = level.getGameTime();
+        int limit = ReentryRules.limit(level.getServer());
+        Set<UUID> ids = new LinkedHashSet<>();
+        for (UUID id : participants) {
+            if (reentry.mayEnter(id, now, limit)) {
+                ids.add(id);
+            }
+        }
         return ids;
     }
 
@@ -246,6 +293,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        reentry.clear();
         lastInside.clear();
         for (ServerPlayer player : inside) {
             participants.add(player.getUUID());
@@ -271,6 +319,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        reentry.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;
@@ -306,6 +355,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        reentry.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;
@@ -322,6 +372,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        reentry.clear();
         lastInside.clear();
         empty = 0;
         gather = -1;

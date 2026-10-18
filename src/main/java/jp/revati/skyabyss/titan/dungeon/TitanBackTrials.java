@@ -33,6 +33,8 @@ import jp.revati.skyabyss.titan.group.GroupOverlays;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.Reentry;
+import jp.revati.skyabyss.titan.group.ReentryRules;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
@@ -192,8 +194,8 @@ public final class TitanBackTrials {
         int emptyTicks;
         // 戦いの参加者 (扉が閉じたときに中にいた人。途中で倒れた人も残す)
         final Set<UUID> participants = new LinkedHashSet<>();
-        // 戦いの最中に倒れた参加者。この戦いが終わる (制圧・やり直し) まで、扉から戻れない (報酬の参加者には残る)
-        final Set<UUID> fallen = new LinkedHashSet<>();
+        // 戦いの最中に倒れた参加者の再入場 (20 秒の待ち・回数。戦いが終わる・やり直しで消える。報酬の参加者には残る)
+        final Reentry reentry = new Reentry();
 
         HallState(UUID group, Hall hall) {
             this.group = group;
@@ -587,9 +589,10 @@ public final class TitanBackTrials {
             state.participants.add(player.getUUID());
         }
         state.emptyTicks = 0;
-        // 倒れていない参加者 (離れて戻ってきた人) だけが、戦いが続いている間、扉に触れると内側へ戻れる。
-        // 倒れた人は戦いが終わるまで通さない
-        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants, state.fallen);
+        // 倒れていない参加者 (離れて戻ってきた人) は、戦いが続いている間、扉に触れると内側へ戻れる。
+        // 倒れた人は、前室で目を覚まして 20 秒たち、回数 (skyabyssHeartReentryLimit) が残っているときだけ
+        tellFallen(level, state.reentry, inHall, state.participants);
+        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants, state.reentry);
         if (aliveGuards(level, hall, group) > 0) {
             return;
         }
@@ -855,37 +858,56 @@ public final class TitanBackTrials {
     }
 
     // 戦いの途中: 扉に触れた参加者だけを内側へ通す (倒れて前室で目を覚ました人が戻れるように)
-    // 戻してよいか: 参加者で、この戦いで倒れていない人 (自己テスト用に切り出し)
-    static boolean mayRejoin(UUID player, Set<UUID> participants, Set<UUID> fallen) {
-        return participants.contains(player) && !fallen.contains(player);
+    // 倒れた人が、いま戻ってよいか (reentry が null なら倒れた記録なし = 戻ってよい)。自己テスト用に切り出し
+    static boolean mayRejoin(UUID player, Set<UUID> participants, @Nullable Reentry reentry, long now, int limit) {
+        return participants.contains(player) && (reentry == null || reentry.mayEnter(player, now, limit));
     }
 
-    // fallen = この戦いで倒れた人。戦いが続くあいだは通さない (倒れては戻って削る「ゾンビ戦法」を防ぐ。docs/design/02 の 4.2)
     private static void letParticipantsBack(ServerLevel level, UUID group, List<BlockPos> door, BlockPos roomCenter, Set<UUID> participants,
-            Set<UUID> fallen) {
+            @Nullable Reentry reentry) {
         if (door.isEmpty() || participants.isEmpty()) {
             return;
         }
         AABB box = doorBox(door);
+        long now = level.getGameTime();
+        int limit = ReentryRules.limit(level.getServer());
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box.inflate(1.2, 0, 1.2),
                 p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()) && Groups.isMember(p, group)
                         && outsideOrInDoor(p, box, roomCenter))) {
-            if (fallen.contains(player.getUUID())) {
-                if (player.tickCount % 40 == 0) {
-                    Notice.bar(player, ModText.deny("message.skyabyss.gate_fallen"));
-                }
+            if (!mayRejoin(player.getUUID(), participants, reentry, now, limit)) {
                 continue;
             }
             moveInside(level, player, box, roomCenter);
-            Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+            if (reentry != null && reentry.entered(player.getUUID())) {
+                ReentryRules.guard(player);
+            } else {
+                Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
+            }
         }
     }
 
-    // 戦いの最中に倒れた参加者を覚える (扉から戻さない)。LivingDeathEvent から
+    // 外にいる倒れた人へ、待ち時間・戻れる・戻れない、を 1 秒ごとに画面の下へ。目を覚ました時刻もここで取る
+    private static void tellFallen(ServerLevel level, Reentry reentry, List<ServerPlayer> inHall, Set<UUID> participants) {
+        long now = level.getGameTime();
+        int limit = ReentryRules.limit(level.getServer());
+        boolean notice = now % 20 < 10;
+        for (UUID id : reentry.fallenIds()) {
+            ServerPlayer p = level.getServer().getPlayerList().getPlayer(id);
+            if (p == null || !p.isAlive() || p.level() != level || inHall.contains(p)) {
+                continue;
+            }
+            reentry.observeAwake(id, now);
+            if (notice) {
+                ReentryRules.tell(p, reentry.status(id, now, limit), reentry.remaining(id, now), reentry.used(id), limit);
+            }
+        }
+    }
+
+    // 戦いの最中に倒れた参加者を覚える (20 秒の待ちの起点)。LivingDeathEvent から
     static void noteFallen(ServerPlayer player) {
         for (HallState state : HALL_STATES.values()) {
             if (state.wave > 0 && state.participants.contains(player.getUUID())) {
-                state.fallen.add(player.getUUID());
+                state.reentry.fell(player.getUUID());
             }
         }
     }
@@ -910,10 +932,16 @@ public final class TitanBackTrials {
         }
     }
 
-    // 戦いの最中に倒れ、扉から戻れない人か (自己テスト用)
-    static boolean isFallen(UUID group, String hall, UUID player) {
+    // その広間の戦いの再入場の記録 (戦っていなければ null。自己テスト用)
+    @Nullable
+    static Reentry reentryOf(UUID group, String hall) {
         HallState state = HALL_STATES.get(hallKey(group, hall));
-        return state != null && state.fallen.contains(player);
+        return state == null ? null : state.reentry;
+    }
+
+    static boolean isFallen(UUID group, String hall, UUID player) {
+        Reentry r = reentryOf(group, hall);
+        return r != null && r.isFallen(player);
     }
 
     // ---------------------------------------------------------------- 心臓の間 (最終ボス・グループごと)
@@ -960,7 +988,7 @@ public final class TitanBackTrials {
 
         @Override
         public void letBack(ServerLevel level, UUID group, Set<UUID> participants) {
-            letParticipantsBack(level, group, HEART_GATE, HEART.center(), participants, Set.of());
+            letParticipantsBack(level, group, HEART_GATE, HEART.center(), participants, null);
         }
 
         @Override
