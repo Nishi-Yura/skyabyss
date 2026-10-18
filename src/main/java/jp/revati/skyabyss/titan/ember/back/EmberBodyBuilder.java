@@ -111,6 +111,7 @@ public final class EmberBodyBuilder {
         EmberBackRooms.buildAll(back);
         long tRooms = System.currentTimeMillis() - t0;
         b.fixtures();
+        b.repairPockets(back);
         data.markBuilt(buildVersion());
         EmberBackTrials.afterBuild(back);
         long ms = System.currentTimeMillis() - start;
@@ -118,6 +119,20 @@ public final class EmberBodyBuilder {
         SkyAbyss.LOGGER.info("Built the ember back (build {}): {} body blocks in {} ms, carving {} ms, rooms {} ms, total {} ms",
                 buildVersion(), placed, tBody, tCarve, tRooms, ms);
         return ms;
+    }
+
+    // 体の外 (脚のあいだ・火口の縁など) の、落ちたら出られない凹みを、詰み監査で見つけて埋める (部屋・通路の中は触らない)。docs/design/13 の詰み監査
+    void repairPockets(ServerLevel back) {
+        List<jp.revati.skyabyss.titan.audit.BackReach.Box> within = List.of(
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-125, 63, 60, -50, 100, 140),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(50, 63, 60, 125, 100, 140),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-45, 125, -75, 45, 230, 30),
+                new jp.revati.skyabyss.titan.audit.BackReach.Box(-60, 63, -140, 60, 125, -50));
+        int filled = jp.revati.skyabyss.titan.audit.BackReach.repair(back, () -> EmberBackAudit.spec(back), within, 200, 14,
+                Blocks.BASALT.defaultBlockState());
+        if (filled > 0) {
+            SkyAbyss.LOGGER.info("Ember back: filled {} blocks of dead-end pockets on the body's outside", filled);
+        }
     }
 
     // 最後に建てたときの時間 (自己テストの報告用。建てていなければ -1)

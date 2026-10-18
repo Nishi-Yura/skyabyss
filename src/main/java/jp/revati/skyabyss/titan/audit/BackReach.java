@@ -69,6 +69,8 @@ public final class BackReach {
         public int voidY = Integer.MIN_VALUE;
         // 12 マスより高い所から落ちると倒れて戻される (島の縁から落ちる) ので、そこへ落ちられる所を出口とみなす
         public boolean longFallIsExit = false;
+        // 冷え殻などで足場になるものとして歩く溶岩 (灰の道の湖)
+        public Predicate<BlockPos> walkableLava = p -> false;
         public boolean verbose = System.getenv("SKYABYSS_REACH_VERBOSE") != null;
         // 穴として報告する最小の深さ (1 の落差は段差として許す既定は 2)
         public int minHoleDepth = 2;
@@ -112,6 +114,10 @@ public final class BackReach {
         public int ladders;
         public int holes;
         public int traps;
+        // 行き止まりのかたまりごとの足場 (repair が埋める)
+        public final List<List<BlockPos>> trapAreas = new ArrayList<>();
+        // 各かたまりに入る道のうち、いちばん低い入口の足の高さ (その 1 つ下まで埋めれば、出られる浅い穴になる)
+        public final List<Integer> trapRimY = new ArrayList<>();
     }
 
     // 落ちて痛くない (3 マスまで)、落ちられる (12 マスまで)
@@ -123,6 +129,66 @@ public final class BackReach {
 
     public static Report run(ServerLevel level, Spec spec) {
         return new Audit(level, spec).run();
+    }
+
+    // 建てたあとの修復: 行き止まりのかたまり (落ちたら出られない小さな穴) のうち、within の箱の中に収まる maxCells 以下のものを、
+    // 足もとの石で埋める。埋めると一段浅い穴になることがあるので、無くなるまで (最大 iterations 回) 繰り返す。埋めたマスの数を返す。
+    // 部屋・通路の中は within に含めないこと (地表の飾りの凹みだけ)
+    public static int repair(ServerLevel level, java.util.function.Supplier<Spec> spec, List<Box> within, int maxCells, int iterations,
+            BlockState fallback) {
+        int filled = 0;
+        for (int it = 0; it < iterations; it++) {
+            Spec sp = spec.get();
+            Report r = new Audit(level, sp).runTrapsOnly();
+            int before = filled;
+            for (int ai = 0; ai < r.trapAreas.size(); ai++) {
+                List<BlockPos> area = r.trapAreas.get(ai);
+                int rim = r.trapRimY.get(ai);
+                if (area.size() > maxCells) {
+                    continue;
+                }
+                boolean inside = true;
+                for (BlockPos p : area) {
+                    // 調べる範囲 (scan = 部屋・通路) にかかる行き止まりは、直さずに報告に残す
+                    for (Box b : sp.scan) {
+                        if (b.contains(p)) {
+                            inside = false;
+                        }
+                    }
+                    boolean in = false;
+                    for (Box b : within) {
+                        if (b.contains(p)) {
+                            in = true;
+                            break;
+                        }
+                    }
+                    if (!in) {
+                        inside = false;
+                        break;
+                    }
+                }
+                if (!inside) {
+                    continue;
+                }
+                // 入口の足の高さの 2 つ下まで (= 入口より 1 低い床になるまで) 柱ごと埋める
+                for (BlockPos p : area) {
+                    BlockState below = level.getBlockState(p.below());
+                    BlockState fill = below.isSolidRender(level, p.below()) ? below : fallback;
+                    int top = rim == Integer.MAX_VALUE ? p.getY() : Math.max(p.getY(), rim - 2);
+                    for (int y = p.getY(); y <= top; y++) {
+                        BlockPos q = new BlockPos(p.getX(), y, p.getZ());
+                        if (level.getBlockState(q).getCollisionShape(level, q).isEmpty()) {
+                            level.setBlock(q, fill, net.minecraft.world.level.block.Block.UPDATE_CLIENTS | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE);
+                            filled++;
+                        }
+                    }
+                }
+            }
+            if (filled == before) {
+                break;
+            }
+        }
+        return filled;
     }
 
     private static final class Audit {
@@ -179,6 +245,9 @@ public final class BackReach {
                 }
             }
             byte v = KNOWN;
+            if (lava && spec.walkableLava.test(p)) {
+                return (byte) (v | SUPPORT);
+            }
             // 戸は開いているものとして通る。低い物 (じゅうたん・たき火・ろうそく・半ブロック) は段差として越える
             boolean door = s.is(BlockTags.DOORS);
             if (!lava && (empty || climb || door || top <= 0.6)) {
@@ -431,8 +500,26 @@ public final class BackReach {
             }
         }
 
+        // 行き止まりだけ調べる (repair 用)
+        Report runTrapsOnly() {
+            walk();
+            checkReturn();
+            return rep;
+        }
+
         // ---------------------------------------------------------------- 本体
         Report run() {
+            walk();
+            checkGoals();
+            checkReturn();
+            checkLadders();
+            checkHoles();
+            rep.notes.add(spec.name + " reach: " + rep.nodes + " cells, " + rep.edges + " moves, " + rep.roughDrops + " long drops, "
+                    + rep.ladders + " ladder columns");
+            return rep;
+        }
+
+        void walk() {
             for (BlockPos e : spec.entrances) {
                 if (!valid(e)) {
                     rep.failures.add(spec.name + ": entrance " + e + " is not a standable cell");
@@ -474,13 +561,6 @@ public final class BackReach {
             rep.nodes = forward.size();
             rep.edges = edgeFrom.size();
             rep.roughDrops = roughFrom.size();
-            checkGoals();
-            checkReturn();
-            checkLadders();
-            checkHoles();
-            rep.notes.add(spec.name + " reach: " + rep.nodes + " cells, " + rep.edges + " moves, " + rep.roughDrops + " long drops, "
-                    + rep.ladders + " ladder columns");
-            return rep;
         }
 
         // ---------------------------------------------------------------- 目標
@@ -628,6 +708,18 @@ public final class BackReach {
                         entry = " entered from " + fmt(a) + " -> " + fmt(b);
                     }
                 }
+                List<BlockPos> area = new ArrayList<>();
+                for (long ck : comp) {
+                    area.add(BlockPos.of(ck));
+                }
+                rep.trapAreas.add(area);
+                int rim = Integer.MAX_VALUE;
+                for (int i = 0; i < edgeFrom.size(); i++) {
+                    if (comp.contains(edgeTo.getLong(i)) && !comp.contains(edgeFrom.getLong(i))) {
+                        rim = Math.min(rim, BlockPos.of(edgeFrom.getLong(i)).getY());
+                    }
+                }
+                rep.trapRimY.add(rim);
                 if (comps <= 12) {
                     if (spec.verbose) {
                         for (int i = 0; i < edgeFrom.size(); i++) {
@@ -777,7 +869,9 @@ public final class BackReach {
                         }
                     }
                     BlockPos far = c.relative(d);
-                    opposite = floorNode(far) || valid(far.above());
+                    // 向こう側が崩れる骨の足場なら、アスレチックの跳び越える溝 (わざと)
+                    opposite = (floorNode(far) || valid(far.above())) && !level.getBlockState(far.below()).is(ModBlocks.CRUMBLING_BONE.get())
+                            && !level.getBlockState(far.above().below()).is(ModBlocks.CRUMBLING_BONE.get());
                     boolean tile = floors >= 3;
                     boolean trench = !tile && opposite;
                     if (!tile && !trench) {
@@ -800,6 +894,7 @@ public final class BackReach {
                     String landing = "bottomless/lethal";
                     boolean shallow = false;
                     boolean lethal = true;
+                    boolean oneWay = false;
                     for (int k = 1; k <= 40; k++) {
                         BlockPos mm = c.below(k);
                         if (!spec.bounds.contains(mm)) {
@@ -808,6 +903,7 @@ public final class BackReach {
                         if (valid(mm)) {
                             shallow = k < spec.minHoleDepth;
                             lethal = false;
+                            oneWay = backSet != null && !backSet.contains(mm.asLong());
                             landing = "lands " + k + " below at " + fmt(mm) + (backSet != null && !backSet.contains(mm.asLong()) ? " (ONE-WAY PIT: no way back from there)" : "");
                             break;
                         }
@@ -816,7 +912,8 @@ public final class BackReach {
                             break;
                         }
                     }
-                    if (shallow || (trench && !lethal)) {
+                    // 落ちた先から戻れる穴 (階段の上の口・段差) は詰みではない。報告するのは、落ちて死ぬ穴と、落ちると戻れない穴
+                    if (shallow || !(lethal || oneWay)) {
                         continue;
                     }
                     rep.holes++;

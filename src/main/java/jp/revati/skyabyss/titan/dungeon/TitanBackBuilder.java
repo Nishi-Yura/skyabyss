@@ -72,6 +72,12 @@ public final class TitanBackBuilder {
                 kit.set(spawn, BuildKit.AIR);
             }
         }
+        // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)
+        int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(level, TitanBackAudit::spec,
+                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, 99, -RZ, RX, 175, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+        if (repaired > 0) {
+            SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
+        }
         data.markBuilt();
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
     }

@@ -56,85 +56,10 @@ public final class TideIslandBuilder {
         fillWells(kit);
     }
 
-    // 亀の体 (珊瑚・遺跡の形) の凹みに、小さな縦穴 (まわりが壁で、上だけ空いている。1〜4 マス) ができていることがある。
-    // 落ちると自力では出られない (詰み監査 BackReach で見つかった。-52,103,23 と -57,103,25 など)。縁の高さまで、まわりと同じ石で埋める。
-    // 底が固い所だけ (光の井戸・塔の窓のように掘った穴の上は触らない)
+    // 亀の体 (珊瑚・遺跡の形) の凹みにできた小さな縦穴を埋める (詰み監査。-52,103,23 と -57,103,25 など)
     static void fillWells(TideKit kit) {
-        net.minecraft.server.level.ServerLevel level = kit.level();
-        int filled = 0;
-        for (int x = TideTurtle.minX(); x <= TideTurtle.maxX(); x++) {
-            for (int z = TideTurtle.minZ(); z <= TideTurtle.maxZ(); z++) {
-                int top = surface(x, z);
-                if (top == Integer.MIN_VALUE || top < TOP_Y - 2) {
-                    continue;
-                }
-                for (int y = top + 1; y <= top + 10; y++) {
-                    List<BlockPos> comp = wellLayer(level, new BlockPos(x, y, z));
-                    if (comp == null) {
-                        break;
-                    }
-                    BlockState wall = null;
-                    for (BlockPos c : comp) {
-                        for (Direction d : Direction.Plane.HORIZONTAL) {
-                            BlockPos nb = c.relative(d);
-                            if (!comp.contains(nb) && solidAt(level, nb)) {
-                                wall = level.getBlockState(nb);
-                            }
-                        }
-                    }
-                    if (wall == null) {
-                        break;
-                    }
-                    for (BlockPos c : comp) {
-                        kit.set(c, wall);
-                        filled++;
-                    }
-                }
-            }
-        }
-        if (filled > 0) {
-            SkyAbyss.LOGGER.info("Tide back: filled {} blocks of small wells in the shell surface", filled);
-        }
-    }
-
-    private static boolean solidAt(net.minecraft.server.level.ServerLevel level, BlockPos p) {
-        BlockState s = level.getBlockState(p);
-        return !s.getCollisionShape(level, p).isEmpty() && s.isSolidRender(level, p);
-    }
-
-    // p の高さで、まわりが全部壁で、底が固い、4 マス以下の空気のかたまり (縦穴の一段)。そうでなければ null
-    private static List<BlockPos> wellLayer(net.minecraft.server.level.ServerLevel level, BlockPos p) {
-        if (!level.getBlockState(p).isAir()) {
-            return null;
-        }
-        List<BlockPos> comp = new ArrayList<>();
-        List<BlockPos> crawl = new ArrayList<>();
-        comp.add(p);
-        for (int i = 0; i < comp.size(); i++) {
-            BlockPos c = comp.get(i);
-            if (!solidAt(level, c.below())) {
-                return null;
-            }
-            for (Direction d : Direction.Plane.HORIZONTAL) {
-                BlockPos nb = c.relative(d);
-                if (comp.contains(nb) || crawl.contains(nb)) {
-                    continue;
-                }
-                if (level.getBlockState(nb).isAir() && solidAt(level, nb.above())) {
-                    // 頭の上が石の、立てない低いすきま (1 マスの高さ) も、穴の一部として埋める (ここから先へはたどらない)
-                    crawl.add(nb);
-                } else if (level.getBlockState(nb).isAir()) {
-                    comp.add(nb);
-                    if (comp.size() > 4) {
-                        return null;
-                    }
-                } else if (!solidAt(level, nb)) {
-                    return null;
-                }
-            }
-        }
-        comp.addAll(crawl);
-        return comp;
+        jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), TideTurtle.minX(), TideTurtle.maxX(), TideTurtle.minZ(), TideTurtle.maxZ(),
+                TideIslandBuilder::surface, TOP_Y - 2);
     }
 
     // ---------------------------------------------------------------- 甲羅の中 (掘ると見える、体の芯の石)

@@ -78,6 +78,11 @@ public final class StormBackSelfTest {
             checkRods(back, FAILURES);
             checkWind(back, FAILURES);
             checkWalk(back, FAILURES, NOTES);
+            // 詰み監査 (到達・戻れるか・はしご・床の穴)。戸は開いているものとして、嵐の昇り風も使える
+            jp.revati.skyabyss.titan.audit.BackReach.Report reach = StormBackAudit.run(back);
+            reach.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
+            reach.failures.forEach(f -> SkyAbyss.LOGGER.warn("REACH {}", f));
+            FAILURES.addAll(reach.failures);
             checkReset(back, FAILURES);
             checkGroups(back, FAILURES);
             checkParty(back, FAILURES);
