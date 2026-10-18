@@ -97,6 +97,10 @@ public final class Voyages {
     public static CallResult call(ServerPlayer player, TitanKind kind, boolean bypass) {
         Voyage current = active(kind);
         if (current != null && current.involves(player.getUUID())) {
+            // 出発の待ちのあいだに、呼んだ人がもう一度吹く: 仲間が全員乗っていれば、すぐ出発する
+            if (current.requestEarlyStart(player)) {
+                return CallResult.REOPENED;
+            }
             // 乗っている人がもう一度吹いた: 決める人なら海図を開き直す
             if (current.riders.contains(player.getUUID()) && current.dest == null && current.leader.equals(player.getUUID())) {
                 sendChart(player, current);
@@ -311,6 +315,7 @@ public final class Voyages {
         for (ServerPlayer rider : v.players(v.riders)) {
             Notice.unlock(rider, "message.skyabyss.travel.chosen", destName(chosen), TravelRules.BOARDING_COUNTDOWN / 20);
         }
+        v.callParty(v.level(), true);
     }
 
     static void forget(ServerPlayer player, String id) {
