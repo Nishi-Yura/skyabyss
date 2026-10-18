@@ -67,9 +67,15 @@ public final class BackReach {
         public final List<Box> scan = new ArrayList<>();
         // この高さより下へ落ちると地上へ戻される (雲の海の底。MIN_VALUE なら無し)。そこへ落ちられる所は「出口」とみなす
         public int voidY = Integer.MIN_VALUE;
-        public boolean verbose = false;
+        // 12 マスより高い所から落ちると倒れて戻される (島の縁から落ちる) ので、そこへ落ちられる所を出口とみなす
+        public boolean longFallIsExit = false;
+        public boolean verbose = System.getenv("SKYABYSS_REACH_VERBOSE") != null;
+        // 穴として報告する最小の深さ (1 の落差は段差として許す既定は 2)
+        public int minHoleDepth = 2;
         // 落ちると (溶岩・奈落の底で) 直前の休み場へ戻される所。そこへ落ちられる足場は「出口」とみなす
         public final List<Box> resets = new ArrayList<>();
+        // 海に落ちて押し戻される所など、ここへ入ったら戻される立ち位置 (出口。ここから先はたどらない)
+        public Predicate<BlockPos> exitNode = p -> false;
         // 何マス落ちても平気な所 (滑空・水など。位置で判断)
         public Predicate<BlockPos> glide = p -> false;
         // 歩く・跳ぶ・登る以外の道 (昇り風・泡の柱など)。立つ位置 p から行ける立つ位置を out に足す
@@ -130,6 +136,7 @@ public final class BackReach {
         final LongOpenHashSet rough = new LongOpenHashSet();
         final LongArrayList roughFrom = new LongArrayList();
         final LongArrayList roughTo = new LongArrayList();
+        LongOpenHashSet backSet;
         final LongOpenHashSet sinks = new LongOpenHashSet();
         final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 
@@ -294,6 +301,10 @@ public final class BackReach {
                 }
                 if (valid(mm)) {
                     if (k > MAX_DROP && !water(mm) && !spec.glide.test(p) && !spec.glide.test(mm)) {
+                        // 島の縁から高い所へ落ちる = 倒れて戻される (詰みではない)。落ちた先の部屋へは行けないものとする
+                        if (spec.longFallIsExit) {
+                            sinks.add(p.asLong());
+                        }
                         return;
                     }
                     if (water(mm) || k <= SAFE_DROP || spec.glide.test(p) || spec.glide.test(mm)) {
@@ -364,19 +375,31 @@ public final class BackReach {
         }
 
         boolean clearArc(BlockPos p, int dx, int dz, int dy) {
-            int steps = (int) Math.ceil(Math.hypot(dx, dz) * 4);
+            int steps = (int) Math.ceil(Math.hypot(dx, dz) * 8);
             int lastX = p.getX();
             int lastZ = p.getZ();
-            for (int s = 1; s < steps; s++) {
+            for (int s = 1; s <= steps; s++) {
                 double t = s / (double) steps;
                 int x = (int) Math.floor(p.getX() + 0.5 + dx * t);
                 int z = (int) Math.floor(p.getZ() + 0.5 + dz * t);
-                if ((x == lastX && z == lastZ) || (x == p.getX() && z == p.getZ()) || (x == p.getX() + dx && z == p.getZ() + dz)) {
+                if (x == lastX && z == lastZ) {
                     continue;
+                }
+                int y = p.getY() + (dy > 0 && t > 0.4 ? dy : 0);
+                // 斜めに隣のマスへ移るとき、角の二つのマスのどちらかは通れること (壁の角のすきまはすり抜けられない)
+                if (x != lastX && z != lastZ) {
+                    BlockPos c1 = new BlockPos(x, y, lastZ);
+                    BlockPos c2 = new BlockPos(lastX, y, z);
+                    if (!(passable(c1) && passable(c1.above())) && !(passable(c2) && passable(c2.above()))) {
+                        return false;
+                    }
                 }
                 lastX = x;
                 lastZ = z;
-                int y = p.getY() + (dy > 0 && t > 0.4 ? dy : 0);
+                boolean last = x == p.getX() + dx && z == p.getZ() + dz;
+                if (last) {
+                    continue;
+                }
                 BlockPos c = new BlockPos(x, y, z);
                 if (!passable(c) || !passable(c.above()) || (dy > 0 && !passable(c.above(2)))) {
                     return false;
@@ -428,6 +451,10 @@ public final class BackReach {
                 }
                 long k = queue.poll();
                 BlockPos p = BlockPos.of(k);
+                if (spec.exitNode.test(p)) {
+                    sinks.add(k);
+                    continue;
+                }
                 next.clear();
                 roughNext.clear();
                 expand(p, next, roughNext);
@@ -523,6 +550,7 @@ public final class BackReach {
                     }
                 }
             }
+            backSet = back;
             LongOpenHashSet trapped = new LongOpenHashSet();
             var it = forward.iterator();
             while (it.hasNext()) {
@@ -535,18 +563,6 @@ public final class BackReach {
                             allowed = true;
                             break;
                         }
-                    }
-                    // 調べる範囲 (scan) を決めてあるときは、その外 (背の地表の飾りなど) の行き止まりは数えない。
-                    // 地表は、縁から雲の海へ飛び降りれば地上へ戻されるので詰まない
-                    if (!allowed && !spec.scan.isEmpty()) {
-                        boolean inScan = false;
-                        for (Box b : spec.scan) {
-                            if (b.contains(p)) {
-                                inScan = true;
-                                break;
-                            }
-                        }
-                        allowed = !inScan;
                     }
                     if (!allowed) {
                         trapped.add(k);
@@ -748,7 +764,8 @@ public final class BackReach {
                 }
                 for (Direction d : Direction.Plane.HORIZONTAL) {
                     BlockPos c = p.relative(d);
-                    if (!passable(c) || !passable(c.above()) || support(c.below()) || (info(c) & (WATER | CLIMB | LAVA)) != 0 || valid(c)) {
+                    if (!passable(c) || !passable(c.above()) || support(c.below()) || (info(c) & (WATER | CLIMB | LAVA | GATE)) != 0 || valid(c)
+                            || (info(c.below()) & GATE) != 0) {
                         continue;
                     }
                     // c は足の高さの空きで、足もとが無い。まわりの床の数
@@ -782,14 +799,16 @@ public final class BackReach {
                     // 落ちた先
                     String landing = "bottomless/lethal";
                     boolean shallow = false;
+                    boolean lethal = true;
                     for (int k = 1; k <= 40; k++) {
                         BlockPos mm = c.below(k);
                         if (!spec.bounds.contains(mm)) {
                             break;
                         }
                         if (valid(mm)) {
-                            shallow = k <= 1;
-                            landing = "lands " + k + " below at " + fmt(mm) + (forward.contains(mm.asLong()) ? "" : " (cell not reachable otherwise)");
+                            shallow = k < spec.minHoleDepth;
+                            lethal = false;
+                            landing = "lands " + k + " below at " + fmt(mm) + (backSet != null && !backSet.contains(mm.asLong()) ? " (ONE-WAY PIT: no way back from there)" : "");
                             break;
                         }
                         if (!passable(mm)) {
@@ -797,10 +816,13 @@ public final class BackReach {
                             break;
                         }
                     }
-                    if (shallow) {
+                    if (shallow || (trench && !lethal)) {
                         continue;
                     }
                     rep.holes++;
+                    if (spec.verbose && tile) {
+                        jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH hole view at {}{}", fmt(c), ascii(c, 3, c.getY() - 6, c.getY() + 2));
+                    }
                     if (shown++ < 40) {
                         rep.failures.add(spec.name + ": " + (tile ? "MISSING FLOOR TILE" : "1-wide gap") + " at " + fmt(c) + " beside " + fmt(p) + ", " + landing);
                     }
