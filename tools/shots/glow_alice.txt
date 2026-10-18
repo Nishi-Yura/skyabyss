@@ -1,0 +1,15 @@
+# 持ち主だけの発光 (二人): 同じ場所に立ち、同じ落とし物を二人の画面で撮る (Alice の頁と欠片 / Bob の頁と欠片)
+server localhost:25671
+timeout 1500
+size 854 480
+wait 100
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/alice_in
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/go
+look 0 12
+wait 40
+shot item_glow_alice_a
+wait 30
+shot item_glow_alice_b
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/alice_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit

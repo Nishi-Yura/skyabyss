@@ -405,7 +405,7 @@ public final class Keepsakes {
 
     // ---------------------------------------------------------------- 守り
     @Nullable
-    static UUID owner(ItemEntity entity) {
+    public static UUID owner(ItemEntity entity) {
         CompoundTag data = entity.getPersistentData();
         if (data.hasUUID(OWNER_TAG)) {
             return data.getUUID(OWNER_TAG);
