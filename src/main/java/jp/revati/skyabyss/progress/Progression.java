@@ -161,6 +161,7 @@ public final class Progression {
             if (player == null) {
                 continue;
             }
+            jp.revati.skyabyss.advancement.Beats.fire(player, "stopped:" + titan);
             if (first) {
                 announceWorld(server, player, titan);
             }

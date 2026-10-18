@@ -157,7 +157,7 @@ public final class TideWatch {
         level.setBlock(s.above(), Blocks.AIR.defaultBlockState(), 3);
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockState n = level.getBlockState(s.relative(d));
-            if (n.getBlock() instanceof net.minecraft.world.level.block.WallSignBlock || n.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock) {
+            if (n.getBlock() instanceof jp.revati.skyabyss.tablet.TabletBlock || n.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock) {
                 level.setBlock(s.relative(d), Blocks.AIR.defaultBlockState(), 3);
             }
         }

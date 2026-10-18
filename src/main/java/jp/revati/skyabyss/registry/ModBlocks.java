@@ -2,6 +2,7 @@ package jp.revati.skyabyss.registry;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.forge.ResonanceForgeBlock;
+import jp.revati.skyabyss.tablet.TabletBlock;
 import jp.revati.skyabyss.titan.dungeon.CrumblingBoneBlock;
 import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
 import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
@@ -33,6 +34,10 @@ public final class ModBlocks {
     public static final DeferredBlock<ResonanceForgeBlock> RESONANCE_FORGE = BLOCKS.register("resonance_forge",
             () -> new ResonanceForgeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).strength(3.5f, 1200f)
                     .requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE_BRICKS).lightLevel(state -> 9)));
+
+    // 碑: 看板の代わりの刻まれた石。目を向けるか右クリックで、字幕に文が出る。かすかに光る
+    public static final DeferredBlock<TabletBlock> TABLET = BLOCKS.register("tablet",
+            () -> new TabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().noCollission().lightLevel(state -> 5)));
 
     private ModBlocks() {
     }

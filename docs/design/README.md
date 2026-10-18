@@ -33,6 +33,7 @@ Minecraft Java 1.21.1（NeoForge）の RPG mod「天と淵のあいだ」の設�
 | [16 防具のデザイン](16_armor_design.md) | 立体防具と装備のデザインの決まり、手順 |
 | [17 序盤の体験と RPG 感](17_opening_and_rpg_feel.md) | ワールドに入ってから岩鯨に乗るまで。序盤の拍子、構造物、目的の帯、語り、ホラーの拍子 |
 | [18 画面の知らせ](18_notices.md) | チャットをやめた通知の仕組み（字幕・帯・札・目的の帯・知らせの記録 N） |
+| [19 進捗と碑](19_advancements_and_tablets.md) | この Mod 専用の進捗の木（バニラの進捗画面で見える）と、看板に代わる石の碑 |
 
 ほかの資料: [テスター向けの遊び方](../beta_how_to_play.md)、ラフの比較は `docs/review/`、生成スクリプトと確かめ方は `tools/README.md`。
 

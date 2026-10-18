@@ -32,7 +32,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import jp.revati.skyabyss.tablet.TabletBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -298,27 +298,27 @@ public final class StormBackSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 看板 (ちょうど 9 枚、どの行も 90 px に収まる)
+    // ---------------------------------------------------------------- 碑 (ちょうど 9 枚、どの行も 90 px に収まる)
     private static void checkSigns(ServerLevel l, List<String> f) {
         Set<String> keys = new HashSet<>();
         int n = 0;
         for (int cx = -220 >> 4; cx <= 220 >> 4; cx++) {
             for (int cz = -140 >> 4; cz <= 140 >> 4; cz++) {
                 for (BlockEntity be : l.getChunk(cx, cz).getBlockEntities().values()) {
-                    if (be instanceof SignBlockEntity) {
+                    if (be instanceof TabletBlockEntity) {
                         n++;
                     }
                 }
             }
         }
-        check(n == 9, "there should be exactly 9 signs on the storm back, found " + n, f);
+        check(n == 9, "there should be exactly 9 tablets on the storm back, found " + n, f);
         for (Inscription i : LORE_SIGNS) {
             keys.add(i.key());
-            check(l.getBlockEntity(i.pos()) instanceof SignBlockEntity, "sign " + i.key() + " is missing at " + i.pos(), f);
+            check(l.getBlockEntity(i.pos()) instanceof TabletBlockEntity, "sign " + i.key() + " is missing at " + i.pos(), f);
         }
         for (Inscription i : ENTRANCE_SIGNS) {
             keys.add(i.key());
-            check(l.getBlockEntity(i.pos()) instanceof SignBlockEntity, "sign " + i.key() + " is missing at " + i.pos(), f);
+            check(l.getBlockEntity(i.pos()) instanceof TabletBlockEntity, "sign " + i.key() + " is missing at " + i.pos(), f);
         }
         // 文の幅: 伝承の担当がまとめた lang (skyabyss_storm) で測る
         for (String lang : SignFit.LANGUAGES) {

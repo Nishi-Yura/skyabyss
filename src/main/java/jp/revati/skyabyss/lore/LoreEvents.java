@@ -98,7 +98,7 @@ public final class LoreEvents {
     }
 
     // ---------------------------------------------------------------- 碑文
-    // 看板を右クリックしたら、書いてある文のキーで「碑文を読んだ」とする (蝋引きの看板でも届く)
+    // (碑は TabletBlock が読む。ここは古い看板の右クリック。)看板を右クリックしたら、書いてある文のキーで「碑文を読んだ」とする (蝋引きの看板でも届く)
     @SubscribeEvent
     static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {

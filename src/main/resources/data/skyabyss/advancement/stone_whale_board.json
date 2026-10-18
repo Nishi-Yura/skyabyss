@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:bone_hill",
+  "display": {
+    "icon": {
+      "id": "skyabyss:stone_whale_plating"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.stone_whale_board.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.stone_whale_board.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "skyabyss:titan_back"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

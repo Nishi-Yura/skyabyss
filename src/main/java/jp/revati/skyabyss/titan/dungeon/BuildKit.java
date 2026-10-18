@@ -15,9 +15,7 @@ import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
+import jp.revati.skyabyss.tablet.Tablets;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.Half;
@@ -235,25 +233,14 @@ final class BuildKit {
         hangingLantern(c.getX() + 1, c.getZ() + 1, box.ceilingY(), 1);
     }
 
+    // 碑 (看板の代わり)。文のキーは lang の "<key>.1" 〜 "<key>.4"
     void wallSign(BlockPos pos, Direction facing, String key) {
-        set(pos, Blocks.SPRUCE_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing));
-        writeSign(pos, key);
+        set(pos, Tablets.wallState(facing));
+        Tablets.write(level, pos, key);
     }
 
     void standingSign(BlockPos pos, String key) {
-        set(pos, Blocks.SPRUCE_SIGN.defaultBlockState());
-        writeSign(pos, key);
-    }
-
-    // 看板に4行の文を書く。キーは lang の "<key>.1" 〜 "<key>.4"。古い碑文らしく、淡い青の光る文字にする
-    private void writeSign(BlockPos pos, String key) {
-        if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
-            SignText text = new SignText().setColor(DyeColor.LIGHT_BLUE).setHasGlowingText(true);
-            for (int i = 0; i < 4; i++) {
-                text = text.setMessage(i, Component.translatable(key + "." + (i + 1)));
-            }
-            sign.setText(text, true);
-            sign.setWaxed(true);
-        }
+        set(pos, Tablets.standingState());
+        Tablets.write(level, pos, key);
     }
 }

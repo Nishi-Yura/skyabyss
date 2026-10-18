@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:thunder_wing_board",
+  "display": {
+    "icon": {
+      "id": "skyabyss:resonance_crystal"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.thunder_wing_trial.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.thunder_wing_trial.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "trial:thunder_wing"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

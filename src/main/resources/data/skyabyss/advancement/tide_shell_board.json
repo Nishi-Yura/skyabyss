@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:stone_whale_heart",
+  "display": {
+    "icon": {
+      "id": "skyabyss:tide_dried_shell"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.tide_shell_board.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.tide_shell_board.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "skyabyss:tide_back"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

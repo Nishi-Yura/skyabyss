@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -741,8 +740,7 @@ public final class StormBirdBuilder {
         }
         for (Inscription i : LORE_SIGNS) {
             if (i.facing() == Direction.UP) {
-                kit.put(i.pos().getX(), i.pos().getY(), i.pos().getZ(), Blocks.BIRCH_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8));
-                kit.writeSign(i.pos(), i.key(), net.minecraft.world.item.DyeColor.LIGHT_BLUE);
+                kit.standingTablet(i.pos(), i.key());
             } else {
                 kit.wallSign(i.pos(), i.facing(), i.key());
             }

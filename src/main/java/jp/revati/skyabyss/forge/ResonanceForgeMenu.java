@@ -143,6 +143,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             }
             gear.setChanged();
             reforgeEffects(false);
+            fireForge(player, "reforge");
             return true;
         }
         if (id >= BUTTON_KEEP && id < BUTTON_PICK + AffixRules.MAX_TRIALS) {
@@ -159,6 +160,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             }
             gear.setChanged();
             effects(player, true, ModGear.enhance(stack));
+            fireForge(player, "enhance");
             return true;
         }
         if (id == BUTTON_DISMANTLE) {
@@ -175,9 +177,17 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
                 player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), yield[2]));
             }
             effects(player, false, 0);
+            fireForge(player, "dismantle");
             return true;
         }
         return false;
+    }
+
+    // 炉で何かしたことを進捗へ (一行)
+    private static void fireForge(Player player, String what) {
+        if (player instanceof ServerPlayer server) {
+            jp.revati.skyabyss.advancement.Beats.fire(server, "forge:" + what);
+        }
     }
 
     private void effects(Player player, boolean enhanced, int level) {

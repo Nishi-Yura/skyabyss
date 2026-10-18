@@ -394,6 +394,19 @@ public final class StructureDump {
                         o.add("front", text(sign.getFrontText()));
                         o.add("back", text(sign.getBackText()));
                         signs.add(o);
+                    } else if (be instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet) {
+                        // 碑は看板と同じ欄に、4 行のキーとして書く (tools/structure の「signs」で見える)
+                        o.addProperty("block", BlockStateParser.serialize(be.getBlockState()));
+                        JsonArray front = new JsonArray();
+                        for (int i = 1; i <= 4; i++) {
+                            JsonObject line = new JsonObject();
+                            line.addProperty("key", tablet.key() + "." + i);
+                            line.addProperty("text", Component.translatable(tablet.key() + "." + i).getString());
+                            front.add(line);
+                        }
+                        o.add("front", front);
+                        o.add("back", new JsonArray());
+                        signs.add(o);
                     } else {
                         blockEntities.add(o);
                     }

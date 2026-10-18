@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:ember_board",
+  "display": {
+    "icon": {
+      "id": "skyabyss:resonance_crystal"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.ember_trial.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.ember_trial.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "trial:ember"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:thunder_wing_heart",
+  "display": {
+    "icon": {
+      "id": "skyabyss:ember_shard"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.ember_board.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.ember_board.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "skyabyss:ember_back"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

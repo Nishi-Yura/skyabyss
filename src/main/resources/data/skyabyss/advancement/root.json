@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "skyabyss:sky_key_fragment"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.root.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "skyabyss:textures/gui/advancements/backgrounds/skyabyss.png"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}
