@@ -56,6 +56,8 @@ import org.joml.Vector3f;
 public class StoneWhaleHeart extends HeartBoss {
     // 段階の数 (1 から 3 までの模型がある)
     public static final int PHASE_COUNT = 3;
+    // 見た目と判定箱の大きさ (前の 1.5 倍。ModEntities の sized と StoneWhaleHeartRenderer の SCALE を合わせる)
+    public static final double BODY_SCALE = 1.5;
     // 段階が変わる体力の割合 (段階2 へ 66%、段階3 へ 33%)
     private static final float PHASE_TWO_AT = 0.66f;
     private static final float PHASE_THREE_AT = 0.33f;
@@ -363,14 +365,14 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 技の数値 (印と当たりは同じ形。tick は 20 で 1 秒)
     public static final int THRUST_WARN = 24;
-    public static final double THRUST_LENGTH = 7;
+    public static final double THRUST_LENGTH = 9;
     public static final double THRUST_HALF_WIDTH = 2.0;
     public static final float THRUST_DAMAGE = 11f;
     public static final int SPIKE_WARN = 22;
     public static final double SPIKE_RADIUS = 1.4;
     public static final float SPIKE_DAMAGE = 9f;
     public static final int LEAP_WARN = 24;
-    public static final double LEAP_CORE = 3.5;
+    public static final double LEAP_CORE = 4.5;
     public static final float LEAP_CORE_DAMAGE = 10f;
     public static final double LEAP_WAVE_REACH = 16;
     public static final float LEAP_WAVE_DAMAGE = 8f;
@@ -454,7 +456,7 @@ public class StoneWhaleHeart extends HeartBoss {
             setRoaring(true);
             sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
-                    getX(), getY() + 2.2, getZ(), 60, 1.5, 1.2, 1.5, 0.2);
+                    getX(), coreHeight(), getZ(), 60, 1.5, 1.2, 1.5, 0.2);
             tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, 0x9CFBFF)
                     .onImpact(s -> sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f))
                     .onHit((s, player) -> {
@@ -466,7 +468,7 @@ public class StoneWhaleHeart extends HeartBoss {
             tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, 0x9CFBFF).active(30).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            warn(server, dust(0x9CFBFF, 1.2f), getX(), getY() + 2.2, getZ(), 6, 1.0, 1.0, 1.0, 0.05);
+            warn(server, dust(0x9CFBFF, 1.2f), getX(), coreHeight(), getZ(), 6, 1.0, 1.0, 1.0, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
@@ -656,7 +658,7 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         if (actionTicks == 30) {
             sound(server, MobSounds.STONE_HEART_PLATE_LOCK.get(), 2.5f, 1.0f);
-            warn(server, dust(0xFFB347, 1.4f), getX(), getY() + 2.0, getZ(), 60, 1.8, 1.8, 1.8, 0.1);
+            warn(server, dust(0xFFB347, 1.4f), getX(), coreHeight(), getZ(), 60, 1.8, 1.8, 1.8, 0.1);
             weakTicks = 20;
         }
         if (actionTicks >= 40) {
@@ -675,7 +677,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 double angle = angleTo(p);
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
-                double y0 = getY() + 2.4;
+                double y0 = getY() + 3.6;
                 boolean sounds = first;
                 first = false;
                 tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, 0xFFD0A0)
@@ -715,7 +717,7 @@ public class StoneWhaleHeart extends HeartBoss {
         double span = Math.toRadians(count == 3 ? 40 : 50);
         double base = Telegraph.angleOf(forward(attackYaw));
         Vec3 f = forward(attackYaw);
-        Vec3 origin = position().add(0, 2.6, 0).add(f.scale(1.0));
+        Vec3 origin = position().add(0, 3.9, 0).add(f.scale(1.0));
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_BEAM_CHARGE.get(), 2.5f, 1.0f);
             for (int i = 0; i < count; i++) {
@@ -826,7 +828,7 @@ public class StoneWhaleHeart extends HeartBoss {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
-                server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 2.2, getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
+                server.sendParticles(ParticleTypes.CRIT, getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
             }
             return false;
         }
@@ -868,8 +870,8 @@ public class StoneWhaleHeart extends HeartBoss {
         bossBar.removeAllPlayers();
         if (level() instanceof ServerLevel server) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                    getX(), getY() + 2.2, getZ(), 120, 1.2, 1.5, 1.2, 0.2);
-            warn(server, dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
+                    getX(), coreHeight(), getZ(), 120, 1.2, 1.5, 1.2, 0.2);
+            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 80, 1.5, 1.5, 1.5, 0.1);
         }
     }
 
@@ -883,7 +885,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     @Override
     protected double coreHeight() {
-        return getY() + 2.2;
+        return getY() + 2.2 * BODY_SCALE;
     }
 
     // ---- 登場: 床がきしみ、石の殻が床の下から迫り上がり、八枚の板が順に閉じて、核が一つ脈を打つ (animation.stone_whale_heart.intro)
@@ -1004,7 +1006,7 @@ public class StoneWhaleHeart extends HeartBoss {
         super.tick();
         if (level().isClientSide && random.nextFloat() < 0.2f) {
             level().addParticle(dust(0x7FF4FF, 1.0f),
-                    getX() + Mth.nextDouble(random, -0.8, 0.8), getY() + 2.2 + Mth.nextDouble(random, -0.8, 0.8),
+                    getX() + Mth.nextDouble(random, -0.8, 0.8), coreHeight() + Mth.nextDouble(random, -1.2, 1.2),
                     getZ() + Mth.nextDouble(random, -0.5, 0.5), 0, 0.02, 0);
         }
     }

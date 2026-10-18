@@ -66,6 +66,7 @@ public final class TelegraphSelfTest {
             platform(level);
             shapes(level, f, notes);
             basics(level, f, notes);
+            roomSizes(f, notes);
             captain(level, f, notes);
             heart(level, f, notes);
         } catch (RuntimeException e) {
@@ -281,6 +282,22 @@ public final class TelegraphSelfTest {
         } finally {
             drop(players);
         }
+    }
+
+    // 番兵長の広間の広さ: いちばん広い技の範囲 (スタンプの円・薙ぎ払いの扇) が床の 4 割以下
+    private static void roomSizes(List<String> f, List<String> notes) {
+        var e3 = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.E3;
+        var e1 = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.E1;
+        double floor = (e3.x2() - e3.x1() + 1) * (double) (e3.z2() - e3.z1() + 1);
+        double stomp = Math.PI * WhaleboneCaptain.STOMP_RADIUS_ENRAGED * WhaleboneCaptain.STOMP_RADIUS_ENRAGED;
+        double sweep = Math.PI * WhaleboneCaptain.SWEEP_RANGE * WhaleboneCaptain.SWEEP_RANGE * (2 * WhaleboneCaptain.SWEEP_HALF_ANGLE / 360);
+        double ratio = Math.max(stomp, sweep) / floor;
+        check(ratio <= 0.4, "the largest captain area is " + Math.round(ratio * 100) + "% of the captain hall floor (limit 40%)", f);
+        double heartFloor = Math.PI * 19 * 19;
+        double chain = Math.PI * 14 * 14 / 2;
+        check(chain / heartFloor <= 0.4, "the chain sector covers too much of the heart chamber", f);
+        notes.add("rooms: captain hall " + (e3.x2() - e3.x1() + 1) + "x" + (e3.z2() - e3.z1() + 1) + " (largest area " + Math.round(ratio * 100) + "%), first hall "
+                + (e1.x2() - e1.x1() + 1) + "x" + (e1.z2() - e1.z1() + 1) + ", heart chamber radius 19");
     }
 
     // ---------------------------------------------------------------- C. 番兵長

@@ -69,6 +69,7 @@ public class WhaleboneCaptain extends GuardMob {
     private int eruptCooldown = 120;
     private boolean roared;
     private boolean holdAttacks;
+    private Vec3 devAim;
     // 技の最中の向きと、跳躍の出発点・着地点 (印を出した時点で決まる)
     private float lockedYaw;
     private Vec3 leapFrom = Vec3.ZERO;
@@ -155,6 +156,11 @@ public class WhaleboneCaptain extends GuardMob {
         });
     }
 
+    // 開発用: 狙う人がいないときの跳躍の着地点 (台本のスクショ用)
+    public void setDevAim(Vec3 aim) {
+        devAim = aim;
+    }
+
     // 試験用: 次の技を始めない
     public void holdAttacks() {
         holdAttacks = true;
@@ -239,7 +245,7 @@ public class WhaleboneCaptain extends GuardMob {
         if (actionTicks == 1) {
             lockedYaw = getYRot();
             leapFrom = position();
-            Vec3 aim = target != null ? target.position() : position();
+            Vec3 aim = target != null ? target.position() : devAim != null ? devAim : position();
             Vec3 to = aim.subtract(leapFrom).multiply(1, 0, 1);
             double dist = to.length();
             if (dist > LEAP_MAX) {

@@ -492,7 +492,7 @@ public final class TitanBackSelfTest {
             failures.add("maze entrance ladder missing at the hub floor");
         }
         // 配置の版 2 で除いた第二の広間・旧番兵長の控えの間・その間の通路は、埋まっていること (古いワールドを建て直したとき)
-        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -60), new BlockPos(17, 94, -55))) {
+        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -66), new BlockPos(17, 94, -66))) {
             if (level.getBlockState(p).isAir()) {
                 failures.add("removed east hall space is still open at " + p);
             }
@@ -786,14 +786,14 @@ public final class TitanBackSelfTest {
             failures.add("heart arena floor or ceiling is not solid");
         }
         int holes = 0;
-        for (int dx = -17; dx <= 17; dx++) {
-            for (int dz = -17; dz <= 17; dz++) {
+        for (int dx = -HeartArenaBuilder.EXTENT; dx <= HeartArenaBuilder.EXTENT; dx++) {
+            for (int dz = -HeartArenaBuilder.EXTENT; dz <= HeartArenaBuilder.EXTENT; dz++) {
                 int d2 = dx * dx + dz * dz;
-                if (d2 > 272) {
+                if (d2 > HeartArenaBuilder.OUTER_R2) {
                     continue;
                 }
                 BlockPos ceil = new BlockPos(cx + dx, HEART.ceilingY(), cz + dz);
-                if (d2 <= 210) {
+                if (d2 <= HeartArenaBuilder.INNER_R2) {
                     // 内側の天井は、すべて固体であること
                     if (!level.getBlockState(ceil).isSolid()) {
                         holes++;

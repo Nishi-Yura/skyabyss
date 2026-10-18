@@ -62,7 +62,7 @@ public final class ModEntities {
     // 岩鯨の心臓: 最終ボス。石と骨の殻に包まれ、空中にとどまる
     public static final DeferredHolder<EntityType<?>, EntityType<StoneWhaleHeart>> STONE_WHALE_HEART = ENTITIES.register("stone_whale_heart",
             () -> EntityType.Builder.<StoneWhaleHeart>of(StoneWhaleHeart::new, MobCategory.MONSTER)
-                    .sized(3.4f, 4.2f).clientTrackingRange(16).updateInterval(2).fireImmune()
+                    .sized(5.1f, 6.3f).clientTrackingRange(16).updateInterval(2).fireImmune()
                     .build(SkyAbyss.MODID + ":stone_whale_heart"));
     public static final DeferredHolder<EntityType<?>, EntityType<BoneSpike>> BONE_SPIKE = ENTITIES.register("bone_spike",
             () -> EntityType.Builder.<BoneSpike>of(BoneSpike::new, MobCategory.MISC)

@@ -41,6 +41,10 @@ public final class BossForceDev {
         for (Entity e : targets) {
             if (e instanceof WhaleboneCaptain captain) {
                 captain.holdAttacks();
+                var nearest = captain.level().getNearestPlayer(captain, 60);
+                if (nearest != null) {
+                    captain.setDevAim(nearest.position());
+                }
                 captain.forceAction(action);
                 n++;
             } else if (e instanceof StoneWhaleHeart heart) {

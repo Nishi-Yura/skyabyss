@@ -423,7 +423,7 @@ public final class Telegraph {
         int r = lerp((rgb >> 16) & 0xFF, 255, p2 * 0.55);
         int g = lerp((rgb >> 8) & 0xFF, 255, p2 * 0.55);
         int bl = lerp(rgb & 0xFF, 255, p2 * 0.55);
-        DustParticleOptions dust = new DustParticleOptions(new Vector3f(r / 255f, g / 255f, bl / 255f), (float) (0.7 + 0.4 * p2) * sizeBoost);
+        DustParticleOptions dust = new DustParticleOptions(new Vector3f(r / 255f, g / 255f, bl / 255f), (float) (1.0 + 0.5 * p2) * sizeBoost);
         // 粒が多すぎる形は、間隔を広げる
         double step = spacing;
         int[] counter = {0};
