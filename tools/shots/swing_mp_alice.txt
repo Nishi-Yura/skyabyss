@@ -1,0 +1,38 @@
+# 武器の振りのマルチ確認: 振る側 (tools/gen_weapon_swing_mp_shots.py が作る)
+server localhost:25683
+timeout 900
+size 854 480
+wait 100
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_joined
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/go
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+swing
+wait 25
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit

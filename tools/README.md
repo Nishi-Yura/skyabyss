@@ -66,6 +66,7 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 | `perspective first\|back\|front` | 視点 (一人称 / 三人称の背中側 / 三人称の正面) |
 | `swingpose <0..1\|off>` | 武器を振る途中の姿で止める (自分だけ。一人称・三人称とも。`client/weapon/WeaponClient.forcedSwing`)。弓は 0 = 放した直後の反動の最大、1 = 戻りきった |
 | `swing` | 利き手を一振りする (止めずに動かす) |
+| `swingclock on\|off` | 武器の振りの長さ (攻撃速度で決まる。`client/weapon/SwingClock`) の入り切り。`off` = 昔のバニラの 6 tick (変更前後の比べ用) |
 | `use` / `stopuse` | 右クリックを押し続ける / 放す (KeyMapping。弓を引く姿と放す動きの確認用) |
 | `mainhand left\|right` | 利き手の設定 (左利きの確認用。終わったら `right` に戻す) |
 | `bodyyaw <度>` | 体の向きを視線から何度ずらすか (人は 50 度までしかずれないので、それ以上は効かない。斜めの絵用) |
@@ -81,6 +82,10 @@ python tools/gen_weapon_pose_shots.py [--left] [武器の id ...]   # 台本 too
 ./gradlew runShots -Pscript=tools/shots/weapon_poses.txt           # 約 2 分 (195 枚)
 python tools/weapon_pose_sheet.py                                  # 武器ごとの 1 枚 docs/review/previews/weapon_pose_<id>.png (行 = 一人称 / 三人称正面 / 横向き、列 = 構え・進み 0.2 / 0.4 / 0.55 / 0.75)
 ./gradlew runShots -Pscript=tools/shots/weapon_bow.txt             # 雷翼の弓: 引く・放す
+python tools/gen_weapon_swing_shots.py [--new-only] [id[!] ...]    # 台本 tools/shots/weapon_swing.txt: 実際に `swing` して 1,3,5,7,9,11 tick 後を撮る (一人称・三人称、昔 old / 今 new。id の末尾 ! = new だけ)
+./gradlew runShots -Pscript=tools/shots/weapon_swing.txt
+python tools/weapon_swing_sheet.py                                 # docs/review/previews/weapon_swing_sheet.png (代表 4 本の昔 / 今) と weapon_swing_<id>.png
+python tools/gen_weapon_swing_mp_shots.py <合図の置き場>            # マルチ: swing_mp_alice.txt (振る側) / swing_mp_bob.txt (見る側。old → new で 60 枚ずつ)。下の「マルチの確かめ」で二人入れ、rcon で Alice に武器・Bob を正面 4 ブロックに置き、置き場に go を作る
 python tools/weapon_display.py [--check]                            # 持ち方 (display) の表を models/item に反映 / 食い違いの確認
 ```
 
