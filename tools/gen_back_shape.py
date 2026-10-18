@@ -54,44 +54,40 @@ FALLBACK_COLORS = {
 # ---------------------------------------------------------------- 設定
 
 def turtle_cfg():
-    """潮殻の亀 (08 の 21 章)。格子は install_tide_shell.build_grid() (tide の番号)"""
-    import install_tide_shell as I
-    import tide_shell_titan as TT
-    M = TT.MAT
-    blocks = {
-        M["shell"]: [("prismarine", 6), ("oxidized_cut_copper", 3), ("oxidized_copper", 1)],
-        M["scute"]: [("prismarine_bricks", 1)],
-        M["stone"]: [("smooth_sandstone", 1), ("cut_sandstone", 1)],
-        M["ruin"]: [("stone_bricks", 5), ("mossy_stone_bricks", 3), ("cracked_stone_bricks", 2)],
-        M["cpink"]: [("pink_concrete", 1), ("pink_wool", 1)],
-        M["corange"]: [("orange_wool", 3), ("orange_concrete", 1)],
-        M["cpurple"]: [("purpur_block", 1), ("purple_wool", 1)],
-        M["cyellow"]: [("yellow_wool", 3), ("yellow_concrete", 1)],
-        M["kelp"]: [("moss_block", 1), ("green_wool", 1)],
-        M["skin"]: [("waxed_weathered_cut_copper", 2), ("waxed_weathered_copper", 1), ("prismarine", 1)],
-        M["belly"]: [("smooth_sandstone", 1)],
-        M["dark"]: [("polished_deepslate", 1)],
-        M["eye"]: [("shroomlight", 1)],
-        M["cyan"]: [("sea_lantern", 1)],
-        M["pool"]: [("water", 1)],
-        M["gate"]: [("sea_lantern", 1)],
-        M["flip"]: [("oxidized_cut_copper", 1), ("prismarine", 1)],
-        M["ray"]: [("dark_prismarine", 1)],
-        M["barnacle"]: [("calcite", 1)],
-    }
+    """潮殻の亀 (08 の 3.2節)。形は低ポリ案 B「段になった珊瑚礁の島」の近景メッシュ (tools/lowpoly_tide_voxel.py の格子。
+    部品 * 32 + 材料。材料の番号は lowpoly_tide_voxel.NAMES の 1 始まり)"""
+    import hashlib
+    import tempfile
+    import lowpoly_tide_voxel as LV
+    blocks = {i + 1: [(n, 1)] for i, n in enumerate(LV.NAMES)}
+    glow = [LV.GLOW_BASE, LV.GLOW_BASE + 1]
+
+    def build():
+        h = hashlib.sha1()
+        for f in (ROOT / "tools/lowpoly_tide_voxel.py", LV.CDIR / "near_mesh.json", LV.CDIR / "near_atlas.png", LV.CDIR / "near_glowmask.png"):
+            h.update(f.read_bytes())
+        cache = Path(tempfile.gettempdir()) / ("tide_shell_b_grid_%s.npy" % h.hexdigest()[:12])
+        if cache.exists():
+            K = np.load(cache)
+        else:
+            K = LV.voxelize()
+            np.save(cache, K)
+        return np.ascontiguousarray(K[::-1])   # GeckoLib 用の反転を戻す (本当の向き。頭は北、潮門は左後ろ = 南西)
+
     return dict(
         name="turtle", out=ROOT / "src/main/resources/data/skyabyss/tide_back/turtle.bin",
         preview_prefix="tide_back_turtle", preview_dir=PREVIEW,
-        build=lambda: np.ascontiguousarray(I.build_grid()[::-1]), mat_of=M,   # GeckoLib 用の反転を戻す (本当の向き)
-        cell=TT.CELL, origin=(TT.X0, TT.Y0, TT.Z0), S=0.85,
+        build=build, mat_of=None,
+        cell=LV.CELL, origin=(-LV.OX / LV.CELL, -LV.OY / LV.CELL, -LV.OZ / LV.CELL), S=0.85,
         # 水面 (geo の y=7) を海面 (y=63) に合わせる
         ymap=lambda u: 63 + (u - 7.0) * 0.85, S_y=0.85, sea=63, wl=7.0,
-        blocks=blocks, wet={M["shell"], M["scute"], M["stone"], M["ruin"], M["skin"], M["flip"], M["belly"]},
-        wet_blocks=[("dark_prismarine", 3), ("mossy_stone_bricks", 1)],
-        glow=list(I.GLOW_MATS), thin={2, 4, 5, 6, 7, 8, 10, I.GATE_PART}, max_part=11,
+        blocks=blocks, wet=set(), wet_blocks=[],
+        glow=glow, thin={2, 3, 4, 5, 7, 8}, max_part=8,
         deep_parts=None,            # 体 (骨 1) だけ
-        wing=None, belly=True, plates=True, belly_mat=M["belly"], belly_y0=47, water=True,
-        water_rest=I.WATER_REST, water_band=I.WATER_BAND,
+        wing=None, belly=True, plates=True, belly_mat=1, belly_y0=47, water=False,
+        water_rest=0.0, water_band=1.0,
+        # 前の版 (x -141〜140、z -148〜115) の島が残らないよう、置く範囲 (表の大きさ) は前の版も含める (古いワールドの建て直し)
+        pad=((-141, 47, -153), (140, 188, 115)),
     )
 
 
@@ -469,6 +465,17 @@ def run(kind, preview_on=False):
     B, names = to_blocks(G, org, c)
     if c["plates"]:
         walkable_plates(B, G, org)
+    if c.get("pad"):
+        (px0, py0, pz0), (px1, py1, pz1) = c["pad"]
+        ox, oy, oz = org
+        nx0, ny0, nz0 = min(ox, px0), min(oy, py0), min(oz, pz0)
+        nx1, ny1, nz1 = max(ox + B.shape[0] - 1, px1), max(oy + B.shape[1] - 1, py1), max(oz + B.shape[2] - 1, pz1)
+        NB = np.zeros((nx1 - nx0 + 1, ny1 - ny0 + 1, nz1 - nz0 + 1), B.dtype)
+        NG = np.zeros(NB.shape, G.dtype)
+        sl = (slice(ox - nx0, ox - nx0 + B.shape[0]), slice(oy - ny0, oy - ny0 + B.shape[1]), slice(oz - nz0, oz - nz0 + B.shape[2]))
+        NB[sl] = B
+        NG[sl] = G
+        B, G, org = NB, NG, (nx0, ny0, nz0)
     nz = np.argwhere(B != 0)
     lo, hi = nz.min(0), nz.max(0)
     print("origin", org, "shape", B.shape, "blocks", len(nz))

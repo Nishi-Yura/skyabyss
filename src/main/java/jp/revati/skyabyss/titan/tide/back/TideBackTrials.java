@@ -522,8 +522,9 @@ public final class TideBackTrials {
                         || (p.getZ() > CAVE_SEAL_Z && p.getX() > CAVE_X1 - 2 && p.getX() < CAVE_X2 + 2)
                         || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
                         || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
-                        || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition()) || p.getY() > TOWER_DECK - 20 && Math.abs(p.getX()) < 12 && Math.abs(p.getZ() - TOWER_CZ) < 12;
-                if (!beachSide && p.getY() < 150) {
+                        || UPPER_ROOMS.stream().anyMatch(a -> a.aabb().inflate(2, 2, 2).contains(p.position()))
+                        || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition());
+                if (!beachSide) {
                     toArrival(p);
                     Notice.narrate(p, "message.skyabyss.trials_peaceful");
                 }
