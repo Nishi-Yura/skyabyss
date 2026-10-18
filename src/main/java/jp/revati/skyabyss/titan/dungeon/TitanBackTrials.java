@@ -937,6 +937,12 @@ public final class TitanBackTrials {
         public boolean asleep(ServerLevel level) {
             return level.getDifficulty() == Difficulty.PEACEFUL;
         }
+
+        @Override
+        public boolean defeated(ServerLevel level, UUID group) {
+            var record = jp.revati.skyabyss.titan.group.BackGroupData.get(level).peek(group);
+            return record != null && record.isHeartDefeated();
+        }
     };
 
     // 心臓を今すぐ始める (自己テスト・コマンド用)。そのグループの、部屋にいる人を挑む人にする
@@ -946,6 +952,11 @@ public final class TitanBackTrials {
             return false;
         }
         return room.start(level, HEART_HOST, Groups.inBox(level, group, heartArena()));
+    }
+
+    // 心臓の間の部屋の仕組み (自己テストが、倒したあとに湧き直さないことを確かめる)
+    public static GroupBossRoom.Host heartHost() {
+        return HEART_HOST;
     }
 
     public static GroupBossRooms heartRooms() {
