@@ -23,7 +23,10 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 //   begin       : 心臓が止まった (TitanEnd.onHeartStopped)。visualDelay tick あとから「眠る姿」(entity の REST) が始まる。
 //                 その前から、巨神への乗り込みは断る (isResting)
 //   requestWake : 背中の試練が元に戻った (各巨神の背の reset)。眠りは少なくとも MIN_TICKS は続け、そのあとで目覚める
-//   目覚め      : requestWake の時刻、または眠りが MAX_TICKS を超えたとき (背中に居座る人がいても、巨神が眠りっぱなしにならない)
+//   目覚め      : 眠りが最短を過ぎ (requestWake の時刻)、かつ背中の中で続けているグループがいなくなったとき (GroupProgress.activeInside)。
+//                 眠りが MAX_TICKS を超えても、続けているグループがいる間は待つ (HARD_MAX_TICKS が安全弁)
+//   眠りは世界に一つ: どれかのグループが心臓を止めると巨神は元の世界から去り、新しく乗ることはだれにもできなくなる (isResting)。
+//   すでに背中にいるグループは、そのまま試練・中ボス・心臓まで続けられる (自分の心臓を止めれば、同じ報酬・運び出し・場面)。眠りは数え直さない
 //
 // 保存する (オーバーワールドの SavedData)。時刻はオーバーワールドのゲーム時間。巨神の本体 (entity) は毎 tick これを見て、動かず・歌わず・光らずに過ごす
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -31,6 +34,8 @@ public final class TitanDormancy extends SavedData {
     // 眠りの最短 (90 秒)・最長 (15 分)
     public static final long MIN_TICKS = 20L * 90;
     public static final long MAX_TICKS = 20L * 60 * 15;
+    // 背中の中で続けているグループがいるときの最長 (60 分)。それでも居座る人がいても、巨神が眠りっぱなしにならない安全弁
+    public static final long HARD_MAX_TICKS = 20L * 60 * 60;
     // entity の REST の同期は、これを超えたら止める (光が消えきったあとは動かない)
     public static final int SYNC_CAP = 600;
 
@@ -56,6 +61,11 @@ public final class TitanDormancy extends SavedData {
 
     public static TitanDormancy get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(FACTORY, "skyabyss_titan_rest");
+    }
+
+    // 自己テスト用: 保存の読み戻しで取り出した眠りの記録
+    Map<String, Rest> rests() {
+        return rests;
     }
 
     private static long now(MinecraftServer server) {
@@ -166,6 +176,13 @@ public final class TitanDormancy extends SavedData {
         }
     }
 
+    // その巨神の背中の中で続けているグループの数 (背中がなければ 0)
+    public static int activeGroups(MinecraftServer server, String titan) {
+        var dim = jp.revati.skyabyss.progress.Titans.backOf(titan);
+        net.minecraft.server.level.ServerLevel back = dim == null ? null : server.getLevel(dim);
+        return back == null ? 0 : jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back);
+    }
+
     // 目覚める時刻を過ぎた巨神を起こす。起こした数 (自己テストは時刻をずらして直接呼ぶ)
     public static int tickWake(MinecraftServer server) {
         TitanDormancy data = get(server);
@@ -175,7 +192,8 @@ public final class TitanDormancy extends SavedData {
         long now = now(server);
         List<String> woken = new ArrayList<>();
         data.rests.forEach((titan, r) -> {
-            if (now >= r.wakeAt || now >= r.since + MAX_TICKS) {
+            boolean due = now >= r.wakeAt || now >= r.since + MAX_TICKS;
+            if (due && (now >= r.since + HARD_MAX_TICKS || activeGroups(server, titan) == 0)) {
                 woken.add(titan);
             }
         });
