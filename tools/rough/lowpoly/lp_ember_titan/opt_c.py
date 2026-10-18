@@ -1,6 +1,7 @@
 """C 皮が岩になる火蜥蜴: 生きた火蜥蜴の体 (丸い腹・喉のひだ・関節のある足と長い指・まぶたのある目) の背から、
 冷えかけた玄武岩の殻が広がって皮を覆っていく案。割れ目の下に溶岩が脈打ち、背の火山は殻を破ってふくらむ傷口のよう。"""
 from parts import *  # noqa
+from common import _mk  # noqa
 
 TMPL = [[(0, 0), (0.52, 0.0), (0.82, 0.07), (0.97, 0.24), (1.0, 0.46), (0.93, 0.68), (0.76, 0.87), (0.45, 0.98), (0, 1.0)],
         [(0, 0), (0.7, 0.0), (1.0, 0.36), (0.9, 0.78), (0.45, 1.0), (0, 1.0)],
@@ -20,9 +21,84 @@ def hook(z, k, u, t, x, y, hw, yb, yt):
     return x, y
 
 
+# ---- 口の洞 (13 の 2.4節): 上あごの下面を y 12 に上げ、下あごの舌の上面を y 6 (= 眠るときの地面) に下げる。
+# 閉じた姿でも 6 単位 (3 ブロック) の隙間があり、息を吸うと顎が開いて約 11.5 単位 (5.7 ブロック) になる。奥は喉 (光る) で閉じる
+CEIL = 12.0
+TONGUE_Y = 6.0
+KEYS_C = []
+for _z, _cx, _hw, _yb, _yt in KEYS:
+    if _z <= -152:
+        _yb = CEIL
+    elif _z == -144:
+        _yb = 3.0
+    KEYS_C.append((_z, _cx, _hw, _yb, _yt))
+    if _z == -152:
+        KEYS_C.append((-150, 0, 40, 3.0, 38.5))    # 喉の壁: 天井 (12) から地面の下 (3) まで一気に下がる
+JAW_KEYS_C = [(z, cx, hw, yb, TONGUE_Y) for z, cx, hw, yb, yt in JAW_KEYS]
+
+
+def head_mat(zc, lo, hi, bone):
+    if hi <= 2 and zc < -138:
+        return "mouth" if zc < -157 else "throat"      # 上あごの下面は暗い赤、喉の斜めの壁と奥は光る
+    if hi <= 1:
+        return "belly"
+    return skin_mat(zc, lo, hi, bone)
+
+
+def jaw_c(lod, jit=0.03, seed=8):
+    h = Hull(JAW_T[lod], JAW_KEYS_C, JAW_ST[lod], jit=jit, jit_y=0.0, bone_fn=lambda zc, lo, hi: "jaw",
+             mat_fn=lambda zc, lo, hi, bone: ("belly" if hi <= 1 else ("tongue" if lo >= h.K - 2 else "skin")), seed=seed)
+    return h
+
+
+def teeth_c(head, jaw_h, lod, size=0.95, tag=11):
+    """口の縁の牙: 上は頭の下がり角 (s=3) から下へ、下は顎の上の縁から上へ。互い違いに噛み合う。正面の列は鼻先の下"""
+    fs = []
+    if lod >= 2:
+        return fs
+    step = 11.0 if lod == 0 else 22.0
+    z = -200.0
+    i = 0
+    while z <= -154:
+        for side in (1, -1):
+            hh = (7.5 + 3.0 * hash1(i * 2, 41 + tag)) * size
+            p, n = head.at(z, 3.0, side)
+            fs += spike("head", "tooth", p + V(0, 0.8, 0), V(0, -1, 0), hh, 1.6 * size, sides=3, rings=1, hint=(0, 0, 1), phase=90)
+            zz = z + step * 0.5
+            if zz < -152:
+                pj, nj = jaw_h.at(zz, jaw_h.K - 2, side)
+                hh2 = (5.0 + 2.5 * hash1(i * 2, 43 + tag)) * size
+                fs += spike("jaw", "tooth", pj - V(0, 0.6, 0), V(0, 1, 0), hh2, 1.4 * size, sides=3, rings=1, hint=(0, 0, 1), phase=90)
+        z += step
+        i += 1
+    if lod == 0:
+        for xx in (-9, -3, 3, 9):
+            fs += spike("head", "tooth", V(xx, CEIL + 0.6, -206.0 + abs(xx) * 0.25), V(0, -0.8, -0.6), 5.4 * size, 1.5 * size, sides=3, rings=1, hint=(1, 0, 0), phase=90)
+    return fs
+
+
+def throat(lod):
+    """喉の奥の壁 (光る)。頭の下面の斜面のすぐ奥、舌の延長で床から天井まで立つ。口の中から見て橙に光る"""
+    fs = []
+    return fs
+    zf = -146.0
+    for sd in (0,):
+        top = 14.0
+        # 床 (顎の奥 -150 から壁まで) と奥の壁 (z=-142, 床の上 6 から天井へ)。内向き (南から見て正面) に向けた面
+        pts = [V(-30, 3.0, zf), V(30, 3.0, zf), V(26, 17.0, zf - 2.0), V(-26, 17.0, zf - 2.0)]
+        f = lpkit_face(pts, "head", "throat", V(0, 8, zf + 60))
+        if f:
+            fs.append(f)
+    return fs
+
+
+def lpkit_face(pts, bone, mat, ref):
+    return _mk(pts, bone, mat, ref)
+
+
 def hull(lod):
-    return Hull(TMPL[lod], KEYS, STATIONS[lod], hook=hook, jit=0.035 if lod == 0 else 0.02, jit_y=0.9 if lod == 0 else 0.4,
-                bone_fn=bone_fn, mat_fn=skin_mat, seed=4)
+    return Hull(TMPL[lod], KEYS_C, STATIONS[lod], hook=hook, jit=0.035 if lod == 0 else 0.02, jit_y=0.9 if lod == 0 else 0.4,
+                bone_fn=bone_fn, mat_fn=head_mat, seed=4)
 
 
 def skin_mat(zc, lo, hi, bone):
@@ -201,15 +277,22 @@ def toes_leg(front, lod, tag):
     return fs
 
 
+def cheeks(lod):
+    """口の奥半分の脇の壁 (ほお)。前の 28 単位は唇がなく、牙が見える"""
+    fs = []
+    for sd in (1, -1):
+        fs += slab("head", "skin", (sd * 37.6, 12.0, -166.0), (3.6, 17.0, 32.0), taper=0.7)
+    return fs
+
+
 def build(lod):
     h = hull(lod)
     fs = h.faces()
-    jw = jaw(lod, jit=0.03, seed=8)
-    for f in jw.faces():
-        if f.mat == "rock":
-            f.mat = "skin"
-        fs.append(f)
-    fs += teeth(h, jw, lod, count_scale=0.75, size=0.95, tag=11)
+    jw = jaw_c(lod)
+    fs += jw.faces()
+    fs += teeth_c(h, jw, lod)
+    fs += throat(lod)
+    fs += cheeks(lod)
     fs += eyes(h, lod, sc=0.9) if lod > 0 else []
     fs += nostrils(h, lod, mat="plate")
     fs += lids_and_face(h, lod)
@@ -253,7 +336,18 @@ def crust_hook(col, e):
     return np.where((sk & (rock | mix))[..., None], ro, col)
 
 
-CTX = dict(nz=0.6, rock_lw=0.24, heat=heat, crack_w=0.95, crack_cell=13.0, seam_p=0.5, seam_mats=["plate", "cone"], streaks=9, streak_w=0.05, ash_dust=0.09, cone_c=VOLC_C,
+def throat_hook(col, glow, e):
+    """喉の奥は橙に光る (奥ほど明るく、縁は暗い赤)。口の中から見て、息を吸うあいだ燃えて見える"""
+    m = e["mats"] == "throat"
+    X, Y = e["X"], e["Y"]
+    v = np.clip(0.42 + 0.30 * (1.0 - np.abs(X) / 32.0) + 0.18 * (e["n_mid"] - 0.5) * 2 + 0.2 * e["bay"] + 0.15 * np.clip((Y - 3.0) / 14.0, 0, 1), 0, 0.999)
+    col = np.where(m[..., None], e["ramp"](PAL["LAVA"], v), col)
+    mo = e["mats"] == "mouth"
+    col = np.where(mo[..., None], e["pick"](PAL["MOUTH"], e["shaded"](PAL["MOUTH"], 0.85, 0.2, 0.2, ed=False)), col)
+    return col, glow | m
+
+
+CTX = dict(hook=throat_hook, nz=0.6, rock_lw=0.24, heat=heat, crack_w=0.95, crack_cell=13.0, seam_p=0.5, seam_mats=["plate", "cone"], streaks=9, streak_w=0.05, ash_dust=0.09, cone_c=VOLC_C,
            ash_cap_y=128.0, eye_z=EYE_Z, crack_mats=["skin", "cone"], crust_hook=crust_hook,
            skin=np.array([(58, 48, 46), (80, 68, 63), (104, 90, 82), (128, 112, 102), (152, 134, 122)]),
            plate=np.array([(14, 12, 14), (24, 20, 21), (36, 30, 30), (50, 42, 40), (66, 56, 52)]),
