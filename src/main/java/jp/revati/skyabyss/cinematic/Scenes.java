@@ -10,7 +10,7 @@ import jp.revati.skyabyss.progress.Titans;
 // 場面の定義 (Java の台本。docs/design/20_cinematics.md)。場面の座標は (右, 上, 前) で、前は場面ごとに決める向き
 //   opening           : 世界の始まり。前 = 最初の目的 (煙) の向き。約 36 秒
 //   whale_first_sight : 岩鯨を初めて見る。前 = 岩鯨の向き。狙う物 = 岩鯨 (動いても追う)。約 20 秒
-//   heart_<titan>     : 巨神の心臓が現れる (ボスの担当が TitanCinematics.heartAppears から呼ぶ)。前 = 心臓の向き。狙う物 = 心臓。約 8 秒
+//   heart_<titan>     : 巨神の心臓が現れる (心臓の登場の演出が始まると TitanCinematics が見せる)。前 = 心臓の向き。狙う物 = 心臓。約 4 秒
 public final class Scenes {
     public static final String OPENING = "opening";
     public static final String WHALE_FIRST_SIGHT = "whale_first_sight";
@@ -85,15 +85,15 @@ public final class Scenes {
                 .build();
     }
 
-    // 巨神の心臓が現れる (8 秒)。心臓を見上げ、横へ回り込んで全体を収める。台詞は巨神ごとに差し替えてよい (今は共通)
+    // 巨神の心臓が現れる (4 秒。心臓の登場の演出 HeartBoss.INTRO_TICKS と同じ長さ)。心臓を見上げ、横へ回り込んで全体を収める。台詞は巨神ごとに差し替えてよい (今は共通)
     private static Scene heartAppears(String titan) {
         return Scene.of(heartId(titan)).handBack()
-                .shot(Shot.of(3.5f).pos(0, 1.9, 0.5).posTo(0, 3.0, 1.5)
+                .shot(Shot.of(1.8f).pos(0, 1.9, 0.5).posTo(0, 3.0, 1.5)
                         .look(Look.target(0, 3, 0)).lookTo(Look.target(0, 4, 0)).fov(70f, 64f).sway(0.2f).build())
-                .shot(Shot.of(4.5f).pos(0, 3.0, 1.5).posTo(7.0, 7.0, 4.0)
+                .shot(Shot.of(2.2f).pos(0, 3.0, 1.5).posTo(7.0, 7.0, 4.0)
                         .look(Look.target(0, 4, 0)).lookTo(Look.target(0, 4, 0)).fov(64f, 58f).sway(0.2f).build())
-                .line(0.6f, 3.4f, Speaker.HEAVEN, "cinematic.skyabyss.heart.heaven")
-                .line(4.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.heart.hero")
+                .line(0.2f, 1.8f, Speaker.HEAVEN, "cinematic.skyabyss.heart.heaven")
+                .line(2.1f, 1.9f, Speaker.HERO, "cinematic.skyabyss.heart.hero")
                 .build();
     }
 }

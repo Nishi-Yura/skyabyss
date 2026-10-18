@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import jp.revati.skyabyss.SkyAbyss;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
@@ -20,5 +21,7 @@ public final class CinematicSetup {
 
     public static void register(IEventBus modEventBus) {
         ATTACHMENTS.register(modEventBus);
+        // 心臓の登場の演出 (HeartBoss が投げる) が始まったら、近くの人に心臓の場面を見せる
+        NeoForge.EVENT_BUS.addListener(TitanCinematics::onHeartCinematic);
     }
 }

@@ -394,7 +394,7 @@ public final class OpeningDirector {
             st.cueUntil = level.getGameTime() + 300;
             PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_AWAKE, level.getGameTime(), 0f));
             // 開幕はカメラの場面 (36 秒。スキップできる)。最初の目的 (煙の立つ方) へ向きを合わせて、その向きで操作へ戻す。docs/design/20_cinematics.md
-            BlockPos goal = target(level.getServer(), "follow_smoke");
+            BlockPos goal = target(level, "follow_smoke");
             jp.revati.skyabyss.cinematic.Cinematics.start(player, jp.revati.skyabyss.cinematic.Scenes.OPENING, null,
                     goal == null ? null : Vec3.atBottomCenterOf(goal));
         }
