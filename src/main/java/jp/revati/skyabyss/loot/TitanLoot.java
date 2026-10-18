@@ -288,15 +288,17 @@ public final class TitanLoot {
     }
 
     // ---------------------------------------------------------------- 入口 (T が撃破時に呼ぶ。FIX_PLAN の約束)
-    // participants: その戦いに参加した人 (途中で倒れて復活待ちの人も含む)
-    public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants) {
+    // participants: その戦いに参加したオンラインの人 (途中で倒れて復活待ちの人も含む。経験値はこの人たちへ)
+    // ids: 参加者の UUID (切断した人も含む。進み・欠片・報酬は UUID で渡し、オフラインの人は預かりへ入る)
+    public static void onHeartDefeat(ServerLevel level, List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
+        List<UUID> all = allIds(participants, ids);
         // 物語の進み (経験値より先に。レベルの上限が上がってから心臓の経験値を渡す。progress/Progression)
-        jp.revati.skyabyss.progress.Progression.onTitanStopped(level.getServer(), unique(participants), STONE_WHALE);
+        jp.revati.skyabyss.progress.Progression.onTitanStopped(level.getServer(), all, STONE_WHALE);
         // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
         jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "heart");
         MinecraftServer server = level.getServer();
         TitanBackData data = TitanBackData.get(level);
-        for (UUID uuid : unique(participants)) {
+        for (UUID uuid : all) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             TitanMemoryData.Record r = memory(server).record(uuid, STONE_WHALE);
             if (canReceive(player)) {
@@ -346,11 +348,11 @@ public final class TitanLoot {
         }
     }
 
-    public static void onCaptainDefeat(ServerLevel level, List<ServerPlayer> participants) {
+    public static void onCaptainDefeat(ServerLevel level, List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
         // 成長の経験値 (参加者それぞれに満額。rpg/GrowthRewards)
         jp.revati.skyabyss.rpg.GrowthRewards.onBossDefeat(level, participants, "captain");
         MinecraftServer server = level.getServer();
-        for (UUID uuid : unique(participants)) {
+        for (UUID uuid : allIds(participants, ids)) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
             TitanMemoryData.Record r = memory(server).record(uuid, STONE_WHALE);
             Roll roll = rollCaptain(r, level.random);
@@ -397,6 +399,13 @@ public final class TitanLoot {
                 seen.add(p.getUUID());
             }
         }
+        return new ArrayList<>(seen);
+    }
+
+    // オンラインの人と UUID の集合を合わせる (切断した人も落とさない)
+    static List<UUID> allIds(List<ServerPlayer> participants, java.util.Collection<UUID> ids) {
+        Set<UUID> seen = new LinkedHashSet<>(unique(participants));
+        seen.addAll(ids);
         return new ArrayList<>(seen);
     }
 

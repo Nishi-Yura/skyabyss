@@ -561,7 +561,7 @@ public final class TitanBackTrials {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, E3.aabb().inflate(0, 1, 0), p -> !p.isSpectator())) {
             ids.add(player.getUUID());
         }
-        TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids));
+        TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids), ids);
     }
 
     // UUID の一覧から、いまサーバーにいる人を集める (倒れて復活を待っている人も含む)
@@ -796,7 +796,7 @@ public final class TitanBackTrials {
         // 入口は開けたまま。奥の扉から来た道を戻れる
         open(level, HEART_GATE);
         List<ServerPlayer> participants = onlinePlayers(level, ids);
-        TitanLoot.onHeartDefeat(level, participants);
+        TitanLoot.onHeartDefeat(level, participants, ids);
         for (ServerPlayer player : level.players()) {
             Notice.unlock(player, "message.skyabyss.heart_defeated");
         }
