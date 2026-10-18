@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
+
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -20,16 +22,19 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// 灰の礫 (余燼の心臓の段階 2 の技)。狙った人をゆっくり追い (人の歩きより遅い)、触れると傷 10。
-// 叩けば消える。8 秒で消える。壁と床はすり抜ける (部屋の中だけで使う)。保存しない
+// 灰の礫 (余燼の心臓の段階 2 の技)。心臓から浮かび、予告の円 (Telegraph。半径 1.6、傷 10) の上へ弧を描いて落ちる。
+// 傷は円の中の人だけ (礫は見た目)。落ちる前に叩けば、礫も円も消える。壁と床はすり抜ける (部屋の中だけで使う)。保存しない
 public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.skyabyss.titan.group.GroupOwned {
     public static final double SPEED = 0.18;
     public static final int LIFE = 160;
 
     @Nullable
-    private UUID targetId;
-    @Nullable
     private UUID heartId;
+    private Vec3 from = Vec3.ZERO;
+    private Vec3 to = Vec3.ZERO;
+    private int fall = 30;
+    @Nullable
+    private Telegraph telegraph;
 
     public EmberAshPellet(EntityType<? extends EmberAshPellet> type, Level level) {
         super(type, level);
@@ -37,12 +42,27 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
         this.setNoGravity(true);
     }
 
-    public EmberAshPellet(ServerLevel level, EmberHeart heart, ServerPlayer target, Vec3 at) {
+    // from から、fall tick かけて to (床の上の落ちる点) へ落ちる
+    public EmberAshPellet(ServerLevel level, EmberHeart heart, Vec3 from, Vec3 to, int fall) {
         this(EmberHeartSetup.ASH_PELLET.get(), level);
         this.heartId = heart.getUUID();
-        this.targetId = target.getUUID();
         this.groupId = heart.groupId();
-        moveTo(at.x, at.y, at.z, 0f, 0f);
+        this.from = from;
+        this.to = to.add(0, 0.6, 0);
+        this.fall = Math.max(1, fall);
+        moveTo(from.x, from.y, from.z, 0f, 0f);
+    }
+
+    // この礫が落ちる予告 (叩いて消すと、この予告も消える)
+    public void bind(Telegraph telegraph) {
+        this.telegraph = telegraph;
+    }
+
+    // 予告の最後に落ちた (傷は予告が出す)。見た目だけ出して消える
+    public void land() {
+        if (level() instanceof ServerLevel server) {
+            pop(server);
+        }
     }
 
     // 心臓と同じグループのもの (ほかのグループの人には見えない。docs/design/10 の 9 章)
@@ -86,21 +106,17 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
             }
             return;
         }
-        ServerPlayer target = targetId == null ? null : server.getServer().getPlayerList().getPlayer(targetId);
-        if (tickCount > LIFE || target == null || !target.isAlive() || target.level() != level()) {
+        Entity heart = heartId == null ? null : server.getEntity(heartId);
+        if (tickCount > LIFE || !(heart instanceof EmberHeart h) || !h.isAlive()) {
             pop(server);
             return;
         }
-        Vec3 to = target.position().add(0, 1.0, 0).subtract(position());
-        double d = to.length();
-        Vec3 step = d < 1e-3 ? Vec3.ZERO : to.scale(Math.min(SPEED, d) / d);
-        setPos(getX() + step.x, getY() + step.y, getZ() + step.z);
-        setDeltaMovement(step);
-        if (getBoundingBox().inflate(0.3).intersects(target.getBoundingBox())) {
-            Entity heart = heartId == null ? null : server.getEntity(heartId);
-            DamageSource source = heart instanceof EmberHeart h ? h.attackSource() : damageSources().magic();
-            target.hurt(source, EmberHeart.PELLET_DAMAGE);
-            pop(server);
+        double t = Math.min(1.0, (double) tickCount / fall);
+        // 浮かんでから、落ちる点へ。前半は少し上がり、あとは速く落ちる
+        Vec3 at = from.lerp(to, t * t * (3 - 2 * t)).add(0, Math.sin(t * Math.PI) * 1.6, 0);
+        setPos(at.x, at.y, at.z);
+        if (tickCount % 3 == 0) {
+            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 0.3, getZ(), 2, 0.2, 0.2, 0.2, 0.02);
         }
     }
 
@@ -115,6 +131,9 @@ public class EmberAshPellet extends Entity implements ItemSupplier, jp.revati.sk
     public boolean hurt(DamageSource source, float amount) {
         if (isInvulnerableTo(source) || !(level() instanceof ServerLevel server)) {
             return false;
+        }
+        if (telegraph != null) {
+            telegraph.cancel();
         }
         pop(server);
         return true;

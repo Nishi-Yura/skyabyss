@@ -11,6 +11,8 @@ import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.item.GearCurve;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.rpg.GrowthRewards;
@@ -47,6 +49,7 @@ public final class AshSmithSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(
                 SelfTestRunner.Step.once("ash smith (load)", AshSmithSelfTest::load),
+                SelfTestRunner.Step.once("ash smith telegraph", 40, AshSmithSelfTest::runTelegraph),
                 SelfTestRunner.Step.once("ash smith", 40, AshSmithSelfTest::runSelfTest));
     }
 
@@ -82,6 +85,8 @@ public final class AshSmithSelfTest {
         } finally {
             AshSmith.testFighters = null;
             AshSmith.testLog = null;
+            AshSmith.testGapBase = null;
+            dropFakes();
             if (back != null) {
                 AshSmithBattle.abandon(server);
                 force(back, false);
@@ -435,6 +440,10 @@ public final class AshSmithSelfTest {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), name));
         p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(2000);
         p.setHealth(2000f);
+        // 予告 (Telegraph) は、世界にいる人だけに当てる。鍛え手の間の真ん中に置いて世界へ足す (使い終わったら dropFakes)
+        p.setPos(AshSmithArena.CX + 0.5, AshSmithArena.FLOOR + 1, AshSmithArena.CZ + 0.5);
+        level.addFreshEntity(p);
+        FAKES.add(p);
         // テストの人は一つのパーティにまとめ、鍛え手はそのパーティ (グループ) のものとして戦う
         if (testParty != null) {
             jp.revati.skyabyss.party.PartyData.get(level.getServer()).add(testParty, p.getUUID(), name);
@@ -445,6 +454,15 @@ public final class AshSmithSelfTest {
     static final UUID PARTY_LEAD = UUID.nameUUIDFromBytes("skyabyss ash smith party lead".getBytes(java.nio.charset.StandardCharsets.UTF_8));
     @org.jetbrains.annotations.Nullable
     private static jp.revati.skyabyss.party.PartyData.Party testParty;
+
+    private static final List<FakePlayer> FAKES = new ArrayList<>();
+
+    private static void dropFakes() {
+        for (FakePlayer p : FAKES) {
+            p.discard();
+        }
+        FAKES.clear();
+    }
 
     private static void put(FakePlayer p, double x, double y, double z) {
         p.setPos(x, y, z);
@@ -457,6 +475,7 @@ public final class AshSmithSelfTest {
                 p.invulnerableTime = 0;
             }
             s.tick();
+            Telegraph.tickNow((ServerLevel) s.level());
         }
     }
 
@@ -487,6 +506,7 @@ public final class AshSmithSelfTest {
         AshSmith.testFighters = List.of(p);
         AshSmith.testLog = (pl, amount, kind) -> LOG.merge(kind, amount, Float::sum);
         LOG.clear();
+        AshSmith.testGapBase = 0.0;
         s.passive = true;
         double fy = AshSmithArena.FLOOR + 1;
         double bx = AshSmithArena.CX + 0.5;
@@ -500,13 +520,13 @@ public final class AshSmithSelfTest {
         check(lost(p) == 0, "the slam hit before its 1.0 s wind-up ended (" + lost(p) + ")", f);
         tick(s, p, 2);
         check(Math.abs(got("slam") - AshSmith.SLAM_DAMAGE) < 0.01f, "slam damage should be 16 (" + got("slam") + ")", f);
-        check(s.ventCount() == 1, "the slam left no vent (" + s.ventCount() + ")", f);
+        check(Telegraph.activeWarns(level).contains(AshSmith.VENT_DELAY), "the slam left no vent telegraph (" + Telegraph.activeWarns(level) + ")", f);
         tick(s, p, AshSmith.VENT_DELAY - 4);
         check(got("vent") == 0, "the vent hurt before 1.2 s (" + got("vent") + ")", f);
         tick(s, p, 8);
         check(Math.abs(got("vent") - AshSmith.VENT_DAMAGE) < 0.01f, "vent damage should be 10 (" + got("vent") + ")", f);
         check(EmberHeat.get(p) > 7 && EmberHeat.get(p) <= AshSmith.VENT_HEAT + 0.01f, "vent heat should be about +20 (" + EmberHeat.get(p) + ")", f);
-        check(s.ventCount() == 0, "the vent did not end", f);
+        check(Telegraph.activeWarns(level).isEmpty(), "telegraphs were left after the vent (" + Telegraph.activeWarns(level) + ")", f);
         tick(s, p, 40);
         check(s.currentAction() == AshSmith.Action.NONE, "the slam did not finish (" + s.currentAction() + ")", f);
         heal(p);
@@ -580,9 +600,9 @@ public final class AshSmithSelfTest {
         s.moveTo(bx, fy, s.getZ(), 0f, 0f);
         float coldSlam = coldSlam(s, p, 0f, fy);
         check(Math.abs(got("slam") - AshSmith.SLAM_DAMAGE * AshSmith.COLD_MULT) < 0.01f, "cold slam should be 24 (" + got("slam") + ")", f);
-        check(s.ventCount() == 0 && s.ringCount() == 1, "a cold slam makes a ring and no vent (" + s.ventCount() + ", " + s.ringCount() + ")", f);
+        check(!Telegraph.activeWarns(level).contains(AshSmith.VENT_DELAY), "a cold slam made a vent telegraph", f);
         check(s.coldSlams() == 2, "cold slams left " + s.coldSlams(), f);
-        // 輪: 立っていれば 12、跳んでいれば当たらない
+        // 輪: 立っていれば 12、跳んでいれば当たらない。安全な筋は三本 (輪が抜ける。筋の向きは、冷えた鎚を打つ前に 0 度で決めてある)
         heal(p);
         Vec3 impact = s.position().add(0, 0, 3.5);
         put(p, impact.x, fy, impact.z + 6.0);
@@ -609,11 +629,12 @@ public final class AshSmithSelfTest {
         heal(p);
         s.moveTo(bx, fy, AshSmithArena.CZ - 6.5, 0f, 0f);
         put(p, bx, fy, AshSmithArena.CZ + 8);
+        Telegraph.resetStats();
         s.forceAction(AshSmith.Action.SPARKS);
         tick(s, p, AshSmith.SPARKS_CHARGE - 1);
-        check(s.sparkCount() == 0, "sparks appeared before the 0.8 s charge ended", f);
+        check(Telegraph.damagingCreated() == 0, "sparks appeared before the 0.8 s charge ended", f);
         tick(s, p, 2);
-        check(s.sparkCount() == AshSmith.SPARK_COUNT, "sparks should be 6 (" + s.sparkCount() + ")", f);
+        check(Telegraph.damagingCreated() == AshSmith.SPARK_COUNT, "sparks should be 6 (" + Telegraph.damagingCreated() + ")", f);
         check(lost(p) == 0, "a spark landed at once", f);
         int firstLand = AshSmith.SPARK_WARN;
         tick(s, p, firstLand + 2);
@@ -625,6 +646,8 @@ public final class AshSmithSelfTest {
         check(s.currentAction() == AshSmith.Action.NONE, "sparks did not finish", f);
         notes.add("moves ran: slam, vent, cold slam and ring, breath and weak, quench and steam, sparks");
         AshSmith.testFighters = null;
+        AshSmith.testGapBase = null;
+        dropFakes();
         AshSmithBattle.abandon(server);
     }
 
@@ -677,6 +700,7 @@ public final class AshSmithSelfTest {
         tick(s, p, 2);
         check(s.currentAction() != AshSmith.Action.RAGE, "the rage came twice", f);
         AshSmith.testFighters = null;
+        dropFakes();
         AshSmithBattle.abandon(server);
         check(level.getEntitiesOfClass(AshThrall.class, AshSmithArena.BOX.aabb().inflate(6), t -> t.getTags().contains(AshSmith.SMITH_TAG)).stream()
                 .noneMatch(AshThrall::isAlive) || level.getEntitiesOfClass(AshThrall.class, AshSmithArena.BOX.aabb().inflate(6),
@@ -694,6 +718,205 @@ public final class AshSmithSelfTest {
             AshSmithBattle.room().tick(level, AshSmithBattle.host());
         }
         check(!AshSmithBattle.room().active() && !s.isAlive() && !AshSmithArena.sealed(level), "the empty room was not abandoned", f);
+    }
+
+    // ---------------------------------------------------------------- 予告 (Telegraph) の自己テスト
+    // 鎚打ち・冷えた鎚打ち (噴気と輪)・鞴の息・火花散らしを、一人と六人で実際に回し、
+    //  - 印と当たりが同じ: 技が作った傷のある予告の形 (Telegraph.record) の中にいた人だけが傷を受ける
+    //  - 予告は 16 tick (0.8 秒) 以上
+    //  - 安全な床が残る (15% 以上)、技が掃く範囲は鍛え手の間の床の 4 割以下 (Telegraph.probe)
+    //  - 六人の技は一人の技より範囲が多い
+    static void runTelegraph(MinecraftServer server) {
+        List<String> failures = new ArrayList<>();
+        List<String> notes = new ArrayList<>();
+        ServerLevel back = server.getLevel(EmberIds.BACK);
+        try {
+            if (back == null) {
+                failures.add("no ember_back level");
+            } else {
+                testParty = jp.revati.skyabyss.party.PartyData.get(server).create(PARTY_LEAD, "smith_lead");
+                telegraph(server, back, failures, notes);
+            }
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST ash smith telegraph crashed", e);
+            failures.add("crashed: " + e);
+        } finally {
+            Telegraph.probe(null);
+            Telegraph.record(null);
+            AshSmith.testFighters = null;
+            AshSmith.testLog = null;
+            AshSmith.testGapBase = null;
+            dropFakes();
+            if (back != null) {
+                AshSmithBattle.abandon(server);
+                var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+                if (testParty != null) {
+                    var parties = jp.revati.skyabyss.party.PartyData.get(server);
+                    for (UUID m : List.copyOf(testParty.members)) {
+                        parties.remove(m);
+                        data.remove(m);
+                    }
+                    data.remove(testParty.id);
+                    testParty = null;
+                }
+                data.remove(AshSmithBattle.TEST_GROUP);
+                if (AshSmithBattle.lastGroup() != null) {
+                    data.remove(AshSmithBattle.lastGroup());
+                }
+                jp.revati.skyabyss.titan.group.RoomLocks.release(jp.revati.skyabyss.titan.ember.back.EmberRooms.EAST.lock());
+            }
+        }
+        notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST ash smith telegraph note: {}", n));
+        if (failures.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST ash smith telegraph PASSED ({})", String.join("; ", notes));
+        } else {
+            failures.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ash smith telegraph FAILED: {}", m));
+        }
+    }
+
+    private static boolean everInside(List<TelegraphShape> shapes, double x, double z) {
+        for (TelegraphShape shape : shapes) {
+            for (int i = 0; i <= 24; i++) {
+                if (shape.at(i / 24.0).contains(x, z)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void telegraph(MinecraftServer server, ServerLevel back, List<String> f, List<String> notes) {
+        String[] cases = {"SLAM", "COLD_SLAM", "BREATH", "SPARKS"};
+        java.util.Map<String, int[]> areas = new java.util.LinkedHashMap<>();
+        java.util.Map<String, int[]> covers = new java.util.LinkedHashMap<>();
+        int mismatches = 0;
+        int samples = 0;
+        double fy = AshSmithArena.FLOOR + 1;
+        double cx = AshSmithArena.CX + 0.5;
+        double cz = AshSmithArena.CZ + 0.5;
+        double floor = Math.PI * AshSmithArena.RADIUS * AshSmithArena.RADIUS;
+        double farthest = 0;
+        for (int n : new int[] {1, 6}) {
+            for (int variant = 0; variant < 2; variant++) {
+              boolean edge = variant == 1;
+              for (String base : cases) {
+                String name = base;
+                AshSmith s = start(server, f);
+                if (s == null) {
+                    return;
+                }
+                s.passive = true;
+                List<FakePlayer> ps = new ArrayList<>();
+                List<Vec3> spots = new ArrayList<>();
+                java.util.Set<UUID> hurt = new java.util.HashSet<>();
+                try {
+                    for (int i = 0; i < n; i++) {
+                        double a = Math.PI * 2 * i / n + 0.5;
+                        double r = 4 + (i % 3) * 2.5;
+                        FakePlayer p = fake(back, "tg" + n + "_" + i);
+                        Vec3 at = new Vec3(cx + Math.cos(a) * r, fy, cz + Math.sin(a) * r);
+                        put(p, at.x, at.y, at.z);
+                        ps.add(p);
+                        spots.add(at);
+                    }
+                    AshSmith.testFighters = new ArrayList<>(ps);
+                    AshSmith.testLog = (pl, amount, kind) -> hurt.add(pl.getUUID());
+                    // 部屋の端 (中心から 11) から、部屋の中を向いて撃つ場合も見る
+                    s.moveTo(edge ? cx + 11 : cx, fy, cz, edge ? 90f : 0f, 0f);
+                    s.setYBodyRot(edge ? 90f : 0f);
+                    if (name.equals("COLD_SLAM")) {
+                        s.armCold();
+                    }
+                    List<Vec3> probes = new ArrayList<>();
+                    double radius = AshSmithArena.RADIUS - 0.5;
+                    for (double x = cx - radius; x <= cx + radius; x += 1.0) {
+                        for (double z = cz - radius; z <= cz + radius; z += 1.0) {
+                            if (Math.hypot(x - cx, z - cz) <= radius) {
+                                probes.add(new Vec3(x, fy, z));
+                            }
+                        }
+                    }
+                    Telegraph.probe(probes);
+                    Telegraph.resetStats();
+                    List<TelegraphShape> shapes = new ArrayList<>();
+                    Telegraph.record(shapes);
+                    s.forceAction(name.equals("COLD_SLAM") ? AshSmith.Action.SLAM : AshSmith.Action.valueOf(name));
+                    int minWarn = Integer.MAX_VALUE;
+                    boolean done = false;
+                    double sx = s.getX();
+                    double sz = s.getZ();
+                    for (int t = 1; t <= 400 && !done; t++) {
+                        s.tick();
+                        Telegraph.tickNow(back);
+                        for (int w : Telegraph.activeWarns(back)) {
+                            minWarn = Math.min(minWarn, w);
+                        }
+                        for (int i = 0; i < ps.size(); i++) {
+                            put(ps.get(i), spots.get(i).x, spots.get(i).y, spots.get(i).z);
+                        }
+                        done = t > 10 && s.currentAction() == AshSmith.Action.NONE && Telegraph.activeCount(back) == 0 && s.sparkCount() == 0;
+                    }
+                    check(done, name + " (n=" + n + ") did not finish", f);
+                    double[] reach = {0};
+                    for (TelegraphShape shape : shapes) {
+                        for (int k = 0; k <= 4; k++) {
+                            shape.at(k / 4.0).outline((px, pz) -> reach[0] = Math.max(reach[0], Math.hypot(px - sx, pz - sz)), 1.0);
+                        }
+                    }
+                    farthest = Math.max(farthest, reach[0]);
+                    check(minWarn >= Telegraph.MIN_WARN_TICKS, name + " (n=" + n + ") has a telegraph under 16 ticks (" + minWarn + ")", f);
+                    boolean[] hits = Telegraph.probeHits();
+                    int hitCount = 0;
+                    for (boolean h : hits) {
+                        hitCount += h ? 1 : 0;
+                    }
+                    int cover = Math.round(100f * hitCount / hits.length);
+                    // 技が掃く範囲は部屋の床の 4 割以下 (部屋に収まる)。安全な床は 6 割以上残る
+                    check(cover <= 40, name + " (n=" + n + ") sweeps " + cover + "% of the arena floor (limit 40%)", f);
+                    // 部屋の端から撃っても、安全な床が 15% 以上残る
+                    check(cover <= 85, name + " (n=" + n + (edge ? ", from the edge" : "") + ") leaves under 15% of the floor safe", f);
+                    String key = name + (edge ? "_edge" : "");
+                    areas.computeIfAbsent(key, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
+                    covers.computeIfAbsent(key, k -> new int[2])[n == 1 ? 0 : 1] = cover;
+                    for (int i = 0; i < ps.size(); i++) {
+                        boolean expected = everInside(shapes, spots.get(i).x, spots.get(i).z);
+                        boolean wasHurt = hurt.contains(ps.get(i).getUUID());
+                        samples++;
+                        if (expected != wasHurt) {
+                            mismatches++;
+                            f.add(name + " (n=" + n + ") player " + i + " at " + Math.round(spots.get(i).x - cx) + "," + Math.round(spots.get(i).z - cz)
+                                    + ": marker says " + expected + ", hurt " + wasHurt);
+                        }
+                    }
+                } finally {
+                    Telegraph.probe(null);
+                    Telegraph.record(null);
+                    AshSmith.testFighters = null;
+                    AshSmith.testLog = null;
+                    dropFakes();
+                    AshSmithBattle.abandon(server);
+                    for (int i = 0; i < 3; i++) {
+                        Telegraph.tickNow(back);
+                    }
+                }
+              }
+            }
+        }
+        // 部屋の検査: 使える床の半径が、いちばん遠くへ届く予告の 0.8 倍以上、天井は床から 12 以上
+        double usable = AshSmithArena.RADIUS - 0.5;
+        check(usable >= 0.8 * farthest, "usable floor radius " + usable + " is under 0.8 x the farthest telegraph reach " + farthest, f);
+        int headroom = AshSmithArena.BOX.maxY() - (AshSmithArena.FLOOR + 1);
+        check(headroom >= 12, "the smith room ceiling is only " + headroom + " above the floor (need 12)", f);
+        notes.add("room: usable radius " + usable + ", farthest telegraph reach " + Math.round(farthest * 10) / 10.0 + ", headroom " + headroom);
+        StringBuilder sb = new StringBuilder("smith (areas 1p -> 6p / swept floor 1p -> 6p):");
+        for (var e : areas.entrySet()) {
+            int[] a = e.getValue();
+            int[] c = covers.get(e.getKey());
+            sb.append(' ').append(e.getKey().toLowerCase()).append(' ').append(a[0]).append("->").append(a[1]).append('/').append(c[0]).append("%->").append(c[1]).append('%');
+            check(a[1] > a[0], e.getKey() + ": 6 players made " + a[1] + " areas, 1 player made " + a[0] + " (must grow with the party)", f);
+        }
+        notes.add(sb.toString());
+        notes.add("marker == hit: " + samples + " player positions, " + mismatches + " mismatches; arena floor " + Math.round(floor) + " blocks");
     }
 
     // ---------------------------------------------------------------- 報酬

@@ -12,6 +12,8 @@ import com.mojang.authlib.GameProfile;
 
 import jp.revati.skyabyss.SelfTestRunner;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.loot.TitanLoot;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.progress.ProgressData;
@@ -36,6 +38,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 // 余燼の心臓の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST ember heart PASSED / FAILED。
@@ -50,6 +53,7 @@ public final class EmberHeartSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(
                 SelfTestRunner.Step.once("ember heart (load)", EmberHeartSelfTest::load),
+                SelfTestRunner.Step.once("ember heart telegraph", 30, EmberHeartSelfTest::runTelegraph),
                 SelfTestRunner.Step.once("ember heart", 30, EmberHeartSelfTest::runSelfTest));
     }
 
@@ -522,6 +526,7 @@ public final class EmberHeartSelfTest {
     private static void step(EmberHeart heart) {
         heart.tickCount++;
         heart.tick();
+        Telegraph.tickNow((ServerLevel) heart.level());
     }
 
     // 倒れる演出 (100 tick) を最後まで流す。撃破の報告は演出が終わってから出る
@@ -675,15 +680,19 @@ public final class EmberHeartSelfTest {
             }
         }
         // 熱の脈 (床を走る輪) は、跳べば当たらない: 跳んでいる人 (床より 1.2 上) は無傷、地面の人は傷
+        // 輪の安全な筋は三本 (筋の向きは試験で決める: 0 度・120 度・240 度。地面の人は 90 度の向きで、筋の外)
         heart.forcePhase(0);
+        EmberHeart.testGapBase = 0.0;
         FakePlayer ground = fake(back, "ring_ground", EmberHeartArena.CX + 0.5, EmberHeartArena.CZ + 7.5);
-        FakePlayer air = fake(back, "ring_air", EmberHeartArena.CX + 7.5, EmberHeartArena.CZ + 0.5);
+        FakePlayer air = fake(back, "ring_air", EmberHeartArena.CX + 0.5, EmberHeartArena.CZ + 9.5);
+        FakePlayer lane = fake(back, "ring_lane", EmberHeartArena.CX + 0.5 + Math.cos(Math.toRadians(120)) * 8, EmberHeartArena.CZ + 0.5 + Math.sin(Math.toRadians(120)) * 8);
         try {
             heart.forceAction(EmberHeart.Action.PULSE);
             int groundHit = -1;
             for (int i = 1; i <= 80; i++) {
                 step(heart);
-                air.moveTo(EmberHeartArena.CX + 7.5, EmberHeartArena.SURFACE + 1.3, EmberHeartArena.CZ + 0.5);
+                air.moveTo(EmberHeartArena.CX + 0.5, EmberHeartArena.SURFACE + 1.3, EmberHeartArena.CZ + 9.5);
+                lane.moveTo(EmberHeartArena.CX + 0.5 + Math.cos(Math.toRadians(120)) * 8, EmberHeartArena.SURFACE, EmberHeartArena.CZ + 0.5 + Math.sin(Math.toRadians(120)) * 8);
                 if (ground.getHealth() < 1000 && groundHit < 0) {
                     groundHit = i;
                 }
@@ -693,14 +702,17 @@ public final class EmberHeartSelfTest {
             float lost = 1000 - ground.getHealth();
             check(lost >= EmberHeart.PULSE_DAMAGE * 0.4f && lost <= EmberHeart.PULSE_DAMAGE * 1.6f, "pulse damage " + lost, f);
             check(air.getHealth() == 1000, "a jumping player was hit by the pulse ring", f);
+            check(lane.getHealth() == 1000, "a player in a safe lane was hit by the pulse ring", f);
             check(EmberHeat.get(ground) > 0, "pulse added no heat", f);
         } finally {
+            EmberHeart.testGapBase = null;
             EmberHeat.reset(ground);
             EmberHeat.reset(air);
             ground.discard();
             air.discard();
+            lane.discard();
         }
-        // 灰の礫: 5 つ浮かぶ (予告 1.0 秒)。礫の傷は 10。叩けば消える
+        // 灰の礫: 5 つ浮かぶ (溜め 1.0 秒)。人の足もとの円へ落ち (予告 1.5 秒)、傷は円の中だけで 10。落ちる前に叩けば礫も円も消える
         heart.forcePhase(1);
         FakePlayer target = fake(back, "pellet", EmberHeartArena.CX + 0.5, EmberHeartArena.CZ + 8.5);
         try {
@@ -709,11 +721,25 @@ public final class EmberHeartSelfTest {
             tickHeart(heart, 19);
             int early = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena()).size();
             tickHeart(heart, 2);
-            int pellets = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena()).size();
-            // 偽のプレイヤーは名簿にいないので、礫はすぐ消える。湧いたこと (5 つ) は礫の数で見る
-            check(early == 0, "pellets appeared before the 1.0 s warning (" + early + ")", f);
-            check(pellets == 5 || pellets == 0, "pellet count " + pellets, f);
-            check(EmberHeart.PELLET_DAMAGE == 10f && EmberAshPellet.LIFE == 160, "pellet numbers", f);
+            List<EmberAshPellet> pellets = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena());
+            check(early == 0, "pellets appeared before the 1.0 s charge (" + early + ")", f);
+            check(pellets.size() == EmberHeart.pelletCount(1), "pellet count " + pellets.size() + " (want " + EmberHeart.pelletCount(1) + ")", f);
+            check(EmberHeart.PELLET_DAMAGE == 10f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
+            check(1000 - target.getHealth() == 0, "a pellet hurt before landing", f);
+            tickHeart(heart, EmberHeart.PELLET_WARN + 3);
+            float lost = 1000 - target.getHealth();
+            check(lost >= EmberHeart.PELLET_DAMAGE * 0.4f && lost <= EmberHeart.PELLET_DAMAGE * 1.6f, "the pellet circle under the player did " + lost, f);
+            check(back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena()).isEmpty(), "pellets stayed after landing", f);
+            // 叩けば消える: すべて叩くと、円も消えて傷はない
+            target.setHealth(1000);
+            target.invulnerableTime = 0;
+            heart.forceAction(EmberHeart.Action.PELLET);
+            tickHeart(heart, 22);
+            for (EmberAshPellet pel : back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena())) {
+                pel.hurt(back.damageSources().generic(), 1f);
+            }
+            tickHeart(heart, EmberHeart.PELLET_WARN + 5);
+            check(target.getHealth() == 1000, "a struck pellet's circle still hurt (" + (1000 - target.getHealth()) + ")", f);
         } finally {
             target.discard();
             heart.setTarget(null);
@@ -836,6 +862,204 @@ public final class EmberHeartSelfTest {
             EmberHeartBattle.abandon(back);
         }
         check(back.getEntitiesOfClass(EmberHeart.class, EmberHeartArena.arena().inflate(8)).isEmpty(), "heart left after abandon", f);
+    }
+
+    // ---------------------------------------------------------------- 予告 (Telegraph) の自己テスト
+    // 心臓の傷のある技 (火の息・熱の脈・熔け玉・崩れる床・鞴の嵐・灰の礫・残り火・消えかけの鼓動) を、一人と六人で実際に回し、
+    //  - 印と当たりが同じ: 技が作った傷のある予告の形 (Telegraph.record) の中にいた人だけが傷を受ける
+    //  - 予告は 16 tick (0.8 秒) 以上
+    //  - 安全な床が 15% 以上残る (Telegraph.probe)
+    //  - 六人の技は一人の技より範囲が多い
+    //  - いちばん広い一つの予告 (動かない形) が熾の底の床の 4 割以下
+    private record Case(EmberHeart.Action action, int phase) {
+    }
+
+    private static final List<Case> CASES = List.of(new Case(EmberHeart.Action.BREATH, 0), new Case(EmberHeart.Action.PULSE, 0),
+            new Case(EmberHeart.Action.ORB, 0), new Case(EmberHeart.Action.FLOOR, 1), new Case(EmberHeart.Action.GALE, 1),
+            new Case(EmberHeart.Action.PELLET, 1), new Case(EmberHeart.Action.EMBERS, 2), new Case(EmberHeart.Action.FADING, 2));
+
+    static void runTelegraph(MinecraftServer server) {
+        List<String> failures = new ArrayList<>();
+        List<String> notes = new ArrayList<>();
+        ServerLevel back = server.getLevel(EmberIds.BACK);
+        try {
+            if (back == null) {
+                failures.add("ember_back is missing");
+            } else {
+                testParty = jp.revati.skyabyss.party.PartyData.get(server).create(PARTY_LEAD, "eh_lead");
+                telegraph(back, failures, notes);
+            }
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST ember heart telegraph crashed", e);
+            failures.add("crashed: " + e);
+        } finally {
+            Telegraph.probe(null);
+            Telegraph.record(null);
+            EmberHeart.testGapBase = null;
+            if (back != null) {
+                EmberHeartBattle.abandon(back);
+                EmberHeartArena.cleanup(back);
+                forgetGroups(back);
+            }
+        }
+        notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST ember heart telegraph note: {}", n));
+        if (failures.isEmpty()) {
+            SkyAbyss.LOGGER.info("SELFTEST ember heart telegraph PASSED ({})", String.join("; ", notes));
+        } else {
+            failures.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ember heart telegraph FAILED: {}", m));
+        }
+    }
+
+    private static List<Vec3> floorGrid(double radius) {
+        List<Vec3> probes = new ArrayList<>();
+        double cx = EmberHeartArena.CX + 0.5;
+        double cz = EmberHeartArena.CZ + 0.5;
+        for (double x = cx - radius; x <= cx + radius; x += 1.0) {
+            for (double z = cz - radius; z <= cz + radius; z += 1.0) {
+                if (Math.hypot(x - cx, z - cz) <= radius) {
+                    probes.add(new Vec3(x, EmberHeartArena.SURFACE, z));
+                }
+            }
+        }
+        return probes;
+    }
+
+    // 形のどこかの瞬間に点が入るか (動く形は進み 0〜1 を 25 に分けて)
+    static boolean everInside(List<TelegraphShape> shapes, double x, double z) {
+        for (TelegraphShape shape : shapes) {
+            for (int i = 0; i <= 24; i++) {
+                if (shape.at(i / 24.0).contains(x, z)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void telegraph(ServerLevel back, List<String> f, List<String> notes) {
+        java.util.Map<String, int[]> areas = new java.util.LinkedHashMap<>();
+        java.util.Map<String, int[]> safes = new java.util.LinkedHashMap<>();
+        double widest = 0;
+        double farthest = 0;
+        int mismatches = 0;
+        int samples = 0;
+        for (int n : new int[] {1, 6}) {
+            for (Case c : CASES) {
+                String name = c.action().name();
+                EmberHeart heart = startHeart(back, f);
+                if (heart == null) {
+                    return;
+                }
+                heart.holdAttacks(true);
+                heart.forcePhase(c.phase());
+                List<FakePlayer> ps = new ArrayList<>();
+                List<Vec3> spots = new ArrayList<>();
+                try {
+                    for (int i = 0; i < n; i++) {
+                        double a = Math.PI * 2 * i / n + 0.3;
+                        double r = 5 + (i % 3) * 2.5;
+                        double x = EmberHeartArena.CX + 0.5 + Math.cos(a) * r;
+                        double z = EmberHeartArena.CZ + 0.5 + Math.sin(a) * r;
+                        spots.add(new Vec3(x, EmberHeartArena.SURFACE, z));
+                        ps.add(fake(back, "tg" + n + "_" + i, x, z));
+                    }
+                    heart.setTarget(ps.get(0));
+                    List<Vec3> probes = floorGrid(14);
+                    Telegraph.probe(probes);
+                    Telegraph.resetStats();
+                    List<TelegraphShape> shapes = new ArrayList<>();
+                    Telegraph.record(shapes);
+                    heart.forceAction(c.action());
+                    int minWarn = Integer.MAX_VALUE;
+                    boolean done = false;
+                    for (int t = 1; t <= 420 && !done; t++) {
+                        step(heart);
+                        EmberHeartArena.tick(back, heart);
+                        for (int w : Telegraph.activeWarns(back)) {
+                            minWarn = Math.min(minWarn, w);
+                        }
+                        for (int i = 0; i < ps.size(); i++) {
+                            ps.get(i).moveTo(spots.get(i).x, EmberHeartArena.SURFACE, spots.get(i).z);
+                        }
+                        done = t > 10 && heart.currentAction() == EmberHeart.Action.NONE && Telegraph.activeCount(back) == 0
+                                && (c.action() != EmberHeart.Action.EMBERS || heart.emberCount() == 0);
+                    }
+                    check(done, name + " (n=" + n + ") did not finish", f);
+                    check(minWarn >= Telegraph.MIN_WARN_TICKS, name + " (n=" + n + ") has a telegraph under 16 ticks (" + minWarn + ")", f);
+                    double[] reach = {0};
+                    boolean[] hits = Telegraph.probeHits();
+                    int safe = 0;
+                    for (boolean h : hits) {
+                        safe += h ? 0 : 1;
+                    }
+                    int percent = Math.round(100f * safe / hits.length);
+                    check(percent >= 15, name + " (n=" + n + ") leaves only " + percent + "% of the floor safe", f);
+                    areas.computeIfAbsent(name, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
+                    safes.computeIfAbsent(name, k -> new int[2])[n == 1 ? 0 : 1] = percent;
+                    // 印と当たりが同じ: 形の中にいた人だけが傷を受けた
+                    for (int i = 0; i < ps.size(); i++) {
+                        boolean expected = everInside(shapes, spots.get(i).x, spots.get(i).z);
+                        boolean hurt = ps.get(i).getHealth() < 1000;
+                        samples++;
+                        if (expected != hurt) {
+                            mismatches++;
+                            f.add(name + " (n=" + n + ") player " + i + " at " + Math.round(spots.get(i).x - EmberHeartArena.CX) + ","
+                                    + Math.round(spots.get(i).z - EmberHeartArena.CZ) + ": marker says " + expected + ", hurt " + hurt);
+                        }
+                    }
+                    // いちばん遠くへ届く予告 (心臓の位置から、印の輪郭の点までの距離)
+                    for (TelegraphShape shape : shapes) {
+                        for (int k = 0; k <= 4; k++) {
+                            shape.at(k / 4.0).outline((px, pz) -> reach[0] = Math.max(reach[0], Math.hypot(px - heart.getX(), pz - heart.getZ())), 1.0);
+                        }
+                    }
+                    farthest = Math.max(farthest, reach[0]);
+                    // いちばん広い一つの予告 (動かない形)。動く輪は、安全な筋と跳び越えがあるので、掃く面ではなく安全な床で見る
+                    for (TelegraphShape shape : shapes) {
+                        if (shape.at(0.0) != shape) {
+                            continue;
+                        }
+                        int inside = 0;
+                        for (Vec3 pt : probes) {
+                            inside += shape.contains(pt.x, pt.z) ? 1 : 0;
+                        }
+                        widest = Math.max(widest, inside / (double) probes.size());
+                    }
+                } finally {
+                    Telegraph.probe(null);
+                    Telegraph.record(null);
+                    for (FakePlayer pl : ps) {
+                        EmberHeat.reset(pl);
+                        pl.discard();
+                    }
+                    heart.setTarget(null);
+                    EmberHeartBattle.abandon(back);
+                    EmberHeartArena.restoreAll(back);
+                    for (int i = 0; i < 3; i++) {
+                        Telegraph.tickNow(back);
+                    }
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder("heart (areas 1p -> 6p / safe floor 1p -> 6p):");
+        for (var e : areas.entrySet()) {
+            int[] a = e.getValue();
+            int[] sf = safes.get(e.getKey());
+            sb.append(' ').append(e.getKey().toLowerCase()).append(' ').append(a[0]).append("->").append(a[1]).append('/').append(sf[0]).append("%->").append(sf[1]).append('%');
+            if (!e.getKey().equals("EMBERS")) {
+                check(a[1] > a[0], e.getKey() + ": 6 players made " + a[1] + " areas, 1 player made " + a[0] + " (must grow with the party)", f);
+            }
+        }
+        // 部屋の検査: 使える床の半径 (区画の外の縁) が、いちばん遠くへ届く予告の 0.8 倍以上、天井は床から 12 以上
+        double usable = EmberHeartArena.SECTION_R;
+        check(usable >= 0.8 * farthest, "usable floor radius " + usable + " is under 0.8 x the farthest telegraph reach " + farthest, f);
+        int headroom = EmberHeartArena.CEILING - EmberHeartArena.SURFACE;
+        check(headroom >= 12, "the chamber ceiling is only " + headroom + " above the floor (need 12)", f);
+        notes.add("room: usable radius " + usable + ", farthest telegraph reach " + Math.round(farthest * 10) / 10.0 + ", headroom " + headroom);
+        check(widest <= 0.40, "the widest single telegraph covers " + Math.round(widest * 100) + "% of the chamber floor (limit 40%)", f);
+        notes.add(sb.toString());
+        notes.add("marker == hit: " + samples + " player positions, " + mismatches + " mismatches; widest single area " + Math.round(widest * 100) + "% of the floor; "
+                + "heart size " + EmberHeartSetup.EMBER_HEART.get().getWidth() + " x " + EmberHeartSetup.EMBER_HEART.get().getHeight());
     }
 
     // ---------------------------------------------------------------- 報酬
