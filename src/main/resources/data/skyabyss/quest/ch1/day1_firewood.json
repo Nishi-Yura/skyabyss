@@ -1,0 +1,29 @@
+{
+  "category": "sub",
+  "order": 59,
+  "repeat": "weekly",
+  "board": true,
+  "chapter": "prologue",
+  "stages": [
+    {
+      "id": "wood",
+      "objectives": [
+        {
+          "id": "wood",
+          "type": "turn_in",
+          "target": "#minecraft:logs",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 20,
+    "items": [
+      {
+        "item": "minecraft:torch",
+        "count": 4
+      }
+    ]
+  }
+}

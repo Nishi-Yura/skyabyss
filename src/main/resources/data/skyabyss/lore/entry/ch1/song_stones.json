@@ -1,0 +1,12 @@
+{
+  "chapter": "titan_whale",
+  "order": 4,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/counting_song"
+  ]
+}

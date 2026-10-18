@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "skyabyss:block/song_stone"
+    },
+    "lit=true": {
+      "model": "skyabyss:block/song_stone_lit"
+    }
+  }
+}

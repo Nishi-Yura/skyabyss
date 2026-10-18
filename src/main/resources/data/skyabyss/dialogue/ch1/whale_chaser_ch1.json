@@ -1,0 +1,157 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch1_c_why1",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "chapter1/whale_chaser"
+        },
+        {
+          "type": "day",
+          "min": 2
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_why_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1_c_diary",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "ch1/traveler_diary"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_diary_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1_c_hush",
+      "if": [
+        {
+          "type": "lore",
+          "entry": "ch1/whale_hush"
+        },
+        {
+          "type": "day",
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_hush_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1_c_after",
+      "if": [
+        {
+          "type": "stage",
+          "min": 1
+        },
+        {
+          "type": "day",
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1_after_told"
+          }
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ch1_c_why1": {
+      "face": "neutral",
+      "next": "ch1_c_why2"
+    },
+    "ch1_c_why2": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "then",
+          "goto": "ch1_c_why3"
+        }
+      ]
+    },
+    "ch1_c_why3": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_why_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1_c_diary": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_diary_told"
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1_c_hush": {
+      "face": "grave",
+      "next": "ch1_c_hush2"
+    },
+    "ch1_c_hush2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_hush_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "c_menu"
+    },
+    "ch1_c_after": {
+      "face": "smile",
+      "next": "ch1_c_after2"
+    },
+    "ch1_c_after2": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1_after_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 3
+        }
+      ],
+      "next": "c_menu"
+    }
+  }
+}

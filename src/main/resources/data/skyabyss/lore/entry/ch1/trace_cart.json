@@ -1,0 +1,10 @@
+{
+  "chapter": "prologue",
+  "order": 32,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "ch1_trace"
+    }
+  ]
+}

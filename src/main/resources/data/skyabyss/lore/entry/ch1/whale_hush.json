@@ -1,0 +1,13 @@
+{
+  "chapter": "titan_whale",
+  "order": 15,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/stone_whale",
+    "prologue/shadow"
+  ]
+}

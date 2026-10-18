@@ -397,6 +397,18 @@ public final class OpeningDirector {
         return !st.legacy() && st.awakeAt() >= 0 && Lore.hasBook(player);
     }
 
+    // ---------------------------------------------------------------- 章の小要素 (story/ch1) 向けの窓口 (追加のみ)
+    // 目覚め・足音・歌の画面の演出の最中か。小さな異変などを重ねないために (「一度に一つ」。17 の 1.2)
+    public static boolean cueBusy(ServerPlayer player) {
+        OpeningState st = state(player);
+        return st.cueUntil > player.level().getGameTime() || FREEZE.getOrDefault(player.getUUID(), -1L) > player.level().getGameTime();
+    }
+
+    // 小さな異変・予兆を起こしてよい静かな状態か: 起きていて、戦っておらず、体力が十分で、敵が近くになく、水中でなく、影の最中でも演出の最中でもない
+    public static boolean quiet(ServerLevel level, ServerPlayer player) {
+        return env(level, player).calm() && !cueBusy(player);
+    }
+
     // ---------------------------------------------------------------- 足音の間、動物が固まる
     private static void freezeAnimals(ServerLevel level, ServerPlayer player) {
         for (Animal animal : level.getEntitiesOfClass(Animal.class, player.getBoundingBox().inflate(FREEZE_RADIUS))) {

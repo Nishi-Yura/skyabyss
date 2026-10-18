@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 31,
+  "unlock": [
+    {
+      "type": "page",
+      "target": "ch1_trace"
+    }
+  ],
+  "related": [
+    "prologue/camp"
+  ]
+}
