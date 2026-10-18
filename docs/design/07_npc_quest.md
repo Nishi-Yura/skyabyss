@@ -103,7 +103,7 @@
 
 ### 3.4 見た目
 
-素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。生成: `tools/rough/npc.py`（画面の見本は `tools/rough/npc_ui_mock.py`）。
+素材: `docs/review/npc_roughs/`（比較シートと選定の表 `README.md`）。今のモデルは滑らか版（15 の 4.5。語り部 B 頭巾・イサナ A つば広帽）で、`tools/install_smooth_npcs.py` が入れる。下の表は役の見た目の方針。生成: `tools/rough/npc.py`（画面の見本は `tools/rough/npc_ui_mock.py`）。
 
 | | 選んだ案 | 特徴 |
 | --- | --- | --- |
