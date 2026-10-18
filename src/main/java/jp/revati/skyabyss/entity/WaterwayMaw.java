@@ -32,11 +32,21 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 // 水路の顎: 闇の水路を泳ぐ、骨の顎を持つ長い魚。水の中でだけ生き、泳ぐ者に噛みつく
 public class WaterwayMaw extends Monster implements GeoEntity {
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.waterway_maw.swim");
     private static final RawAnimation BITE = RawAnimation.begin().thenPlay("animation.waterway_maw.bite");
+    // 来てから襲うまでの猶予（5 秒）と、来た人を数える範囲（16 ブロック。外へ 24 ブロック離れると忘れる）
+    private static final int ARRIVAL_GRACE = 100;
+    private static final double ARRIVAL_RANGE_SQR = 16 * 16;
+    private static final double FORGET_RANGE_SQR = 24 * 24;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    // 近くに来た人 → 来た時刻 (tickCount)
+    private final Map<UUID, Integer> arrivals = new HashMap<>();
 
     public WaterwayMaw(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -49,8 +59,8 @@ public class WaterwayMaw extends Monster implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 18)
-                .add(Attributes.ATTACK_DAMAGE, 5)
-                .add(Attributes.MOVEMENT_SPEED, 1.1)
+                .add(Attributes.ATTACK_DAMAGE, 3.5)
+                .add(Attributes.MOVEMENT_SPEED, 0.77)
                 .add(Attributes.FOLLOW_RANGE, 16);
     }
 
@@ -60,7 +70,7 @@ public class WaterwayMaw extends Monster implements GeoEntity {
         goalSelector.addGoal(4, new RandomSwimmingGoal(this, 1.0, 10));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8f));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater()));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && graced(p.getUUID())));
     }
 
     @Override
@@ -93,12 +103,33 @@ public class WaterwayMaw extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!level().isClientSide && tickCount % 10 == 0) {
+            updateArrivals();
+        }
         // 水の中では息が続き、水から出ると弱っていく
         if (isInWaterOrBubble()) {
             setAirSupply(getMaxAirSupply());
         } else if (!level().isClientSide && tickCount % 20 == 0) {
             hurt(damageSources().dryOut(), 2f);
         }
+    }
+
+    // 近くに来た人を覚える。来てから ARRIVAL_GRACE の間は、この人を新しく狙わない
+    private void updateArrivals() {
+        for (Player p : level().players()) {
+            if (p.distanceToSqr(this) <= ARRIVAL_RANGE_SQR) {
+                arrivals.putIfAbsent(p.getUUID(), tickCount);
+            }
+        }
+        arrivals.keySet().removeIf(id -> {
+            Player p = level().getPlayerByUUID(id);
+            return p == null || p.distanceToSqr(this) > FORGET_RANGE_SQR;
+        });
+    }
+
+    private boolean graced(UUID id) {
+        Integer since = arrivals.get(id);
+        return since != null && tickCount - since >= ARRIVAL_GRACE;
     }
 
     @Override

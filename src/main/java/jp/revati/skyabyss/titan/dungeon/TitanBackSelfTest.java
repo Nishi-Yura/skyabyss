@@ -682,6 +682,19 @@ public final class TitanBackSelfTest {
         if (MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).links(MAZE_START_I, MAZE_START_J) < 2) {
             failures.add("maze entrance is not a junction");
         }
+        // 水路の顎のスポナーは、同時に生かす数が半分（MAW_MAX_NEARBY）に絞ってあること
+        var deadEnds = MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).deadEnds();
+        for (int n = 1; n < deadEnds.size(); n += 3) {
+            BlockPos sp = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(1, 0, 1);
+            if (!(level.getBlockEntity(sp) instanceof net.minecraft.world.level.block.entity.SpawnerBlockEntity be)) {
+                failures.add("waterway maw spawner missing at " + sp);
+                continue;
+            }
+            int cap = be.saveWithoutMetadata(level.registryAccess()).getShort("MaxNearbyEntities");
+            if (cap != MazeBuilder.MAW_MAX_NEARBY) {
+                failures.add("waterway maw spawner cap is " + cap + " (want " + MazeBuilder.MAW_MAX_NEARBY + ") at " + sp);
+            }
+        }
         BlockPos exit = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(1, 0, 1);
         if (!level.getBlockState(new BlockPos(exit.getX(), MAZE_EXIT_ROOM.floorY(), exit.getZ())).is(Blocks.BUBBLE_COLUMN)) {
             failures.add("maze exit has no rising bubble column");
