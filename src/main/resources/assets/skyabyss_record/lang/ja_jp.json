@@ -233,5 +233,8 @@
   "skyabyss_record.bond.nothing_missing_key": "天の鍵の在りかは分かっている。控え帳で確かめよう",
   "skyabyss_record.bond.recalled_fragment": "呼び声に応えて、なくした欠片が手もとに戻った（%s）",
   "skyabyss_record.bond.recalled_key": "呼び声に応えて、天の鍵が手もとに戻った",
-  "skyabyss_record.v.stopped_plain": "止めた"
+  "skyabyss_record.v.stopped_plain": "止めた",
+  "skyabyss_record.r.readiness": "備え",
+  "skyabyss_record.d.readiness": "%s の心臓の前に、自分の身・刃・糧がどれだけ整っているかの目安。緑は十分、黄はもう少し、赤は足りない（形でも分かる：● 緑、▲ 黄、■ 赤）。巨神ごとの目安に照らす。",
+  "skyabyss_record.d.readiness_free": "赤でも乗れるし、戦える。乗るときに一度だけ確かめられる。"
 }

@@ -1,0 +1,223 @@
+<title>余燼の背 低ポリ 3案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>余燼の背 低ポリ 3案</h1>
+    <p class="intro">余燼の背の5体の3案です。どれも余燼の言葉（灰・燠火・玄武岩・冷えかけの溶岩・熱のひび・鍛冶）だけで作り、ほかの巨神の敵と形や素材が重ならないようにしました。火の粉蛾は雷蛾と並べて違いが分かるようにしています。骨の名前と位置は今のモデルと同じで、今のアニメーションがそのまま動きます。採用する案を選び、直してほしい点があれば書いてください。</p>
+    <details class="done"><summary>選ばれてゲームに入れたもの (2)</summary><ul><li>岩鯨の背の5体と潮殻の背の4体をゲームに入れた（箱のモデルより約3倍軽い）</li><li>珊瑚憑き（作り直し A）と雷翼の背の5体（すべて A）をゲームに入れている途中</li></ul></details>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 5 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#lp_ash_thrall" data-nav="lp_ash_thrall">灰被り 低ポリ</a><a href="#lp_ember_moth" data-nav="lp_ember_moth">火の粉蛾 低ポリ</a><a href="#lp_cinder_roller" data-nav="lp_cinder_roller">燠虫</a><a href="#lp_ash_smith" data-nav="lp_ash_smith">鍛え手 低ポリ</a><a href="#lp_ember_heart" data-nav="lp_ember_heart">余燼の心臓 低ポリ</a></nav>
+    <main>
+<section class="subject" id="lp_ash_thrall" data-id="lp_ash_thrall">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>灰被り (ash_thrall) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の敵。灰の殻をまとう下僕、割れると燃え上がる)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の敵。骨 20 本 (root[Y 180 度] &gt; body &gt; head / arm_r &gt; forearm_r &gt; socket_main / arm_l &gt; forearm_l、leg_r・leg_l、殻 crust_* 8 本、炎 flare_* 2 本) の名前・階層・pivot・socket_main の初期回転 (-8 度) は今の geo のまま、今のアニメ 7 本 (idle・walk・walk_flared・attack・hurt・shell_break・death) がそのまま動く。殻の姿は flare_* を隠し、燃え上がりは crust_* を隠してアトラスを替える (UV は同じ。今の ash_thrall / ash_thrall_flared と同じ仕組み)。火掻き棒 (ash_poker) は別メッシュで socket_main に付く (geo/gear と同じ局所座標)。三角形 (殻の姿 / 燃え上がり / 棒): A 577 / 387 / 152、B 557 / 372 / 117、C 592 / 364 / 120 (普通の敵の目安 約 600 以下。棒は 250 以下)。今は箱 328 (殻 302 / 燃え上がり 3619 面) + 棒 20。アトラス: 本体 A 144・B 160・C 144 (殻・燃え上がりで 2 枚) / 棒 A 64・B 80・C 80。光る画素: 目・覗き穴・炎・燃え上がりのひび・棒の先。全案、余燼の言葉 (灰・熾・玄武岩・冷える溶岩・ひび・鍛冶と窯) だけで作り、象牙の骨・珊瑚・貝・羽根・銅の嵐は使っていない。シートは今 / A / B / C を前 3/4・後ろ 3/4・顔のアップ (殻の姿と燃え上がり)・攻撃の振りかぶり (0.45 s) と振り下ろし (0.55 s、燃え上がり)・火掻き棒のアップ・アトラスで並べる。メッシュは lowpoly_roughs/lp_ash_thrall/{a,b,c}/ash_thrall_{a,b,c}_mesh.json (+ _atlas・_glowmask・_atlas_flared・_glowmask_flared) と _poker_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/ash_thrall/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_ash_thrall.jpg" aria-label="灰被り (ash_thrall) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の敵。灰の殻をまとう下僕、割れると燃え上がる) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_ash_thrall.jpg" alt="灰被り (ash_thrall) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の敵。灰の殻をまとう下僕、割れると燃え上がる) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_ash_thrall-a"><input type="radio" name="lp_ash_thrall" id="lp_ash_thrall-a" value="a"><span class="letter">A</span><span class="otext"><b>A 灰衣の火番</b><span>灰をかぶった頭巾と外套の火の番。縦に細長い輪郭。灰の板を重ねた尖り頭巾 (前が開いて、黒い顔に光る目)、肩の二段の灰の板、前が割れた長い外套 (裾は欠け)。殻の面には冷えた割れ目と、ところどころ赤い熱の線。殻が割れると黒く焦げた細い体に溶岩のひびが走り、頭と肩・背から炎が上がる。棒は鉄・青銅の輪・先の鉤に燠火。今のモデルの延長で、最も読みやすい。</span></span></label><label class="opt" for="lp_ash_thrall-b"><input type="radio" name="lp_ash_thrall" id="lp_ash_thrall-b" value="b"><span class="letter">B</span><span class="otext"><b>B 鉱滓の鍛冶像</b><span>溶けた鉄のかす (鉱滓) が冷えて固まった、肩幅の広い鍛冶の像。不ぞろいな鉱滓の塊の肩当てと棘、鉄の前掛け (錆びた鉄の板)、平たい兜 (覗き穴が一本の光る線、天辺に鉱滓の棘の冠)。ところどころ火の粉が光る。殻が割れると胸の火口が開き、熱い鉄の体に溶岩のひび。肩と背から炎。棒は太い鉄に鉱滓のこぶ、先は鉄床の角の鉤。最も重く幅広い輪郭。</span></span></label><label class="opt" for="lp_ash_thrall-c"><input type="radio" name="lp_ash_thrall" id="lp_ash_thrall-c" value="c"><span class="letter">C</span><span class="otext"><b>C 窯の人</b><span>灰の民の窯がそのまま人になった焼き物の像。煙突の頭 (縁が煤け、前に光る通気の覗き穴)、輪を重ねた焼き物の腹と胸の火口の戸、背に煙道の管、肩に灰のかかった蓋。殻が割れると煙突の口から炎が吹き上がり、体の赤いひびが透ける。棒は粘土の握りに熊手の羽根 (縁が光る)。煙突の頭と管で、他の 2 案と最も違う縦の輪郭。</span></span></label></fieldset>
+  <label class="note-l" for="lp_ash_thrall-note">直してほしい点 (任意)</label>
+  <textarea id="lp_ash_thrall-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_ember_moth" data-id="lp_ember_moth">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>火の粉蛾 (ember_moth) 低ポリ非立方体 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 余燼の巨神の言葉 (灰・くすぶる熾・炭・玄武岩・縁が熱で光る) で作り、雷翼の雷蛾 (選んだ A 綿毛の雷蛾: 丸く波打つ翅・白い綿毛・銅の翅脈・コバルトの目玉、青灰・白・銅) と輪郭も色もはっきり変えた。雷蛾は丸く柔らかいが、こちらは 3 案ともぎざぎざ・矢じり・裂けた指と、青と白を使わない黒・灰・赤橙の熱の色。統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) 。骨の名前・階層・pivot は現行 geo と同じ (root は Y 180 度回転、body の子が head / wing_l / wing_r。頂点は geo 空間で、x と z を反転して書き出してある)。翅は両面の薄い板で縁に厚みがある (描画は no-cull)。羽ばたき・体のゆれ・死に方など今のアニメがそのまま動く。光る画素は目・熾の縁や筋・腹の帯・触角の先・火の粉。 三角形: A 683 / B 549 / C 593 (目標: 普通の敵 約 600、蛾は小さいので軽め可)。アトラス A 96x96 / B 96x96 / C 96x96。出力: docs/review/lowpoly_roughs/lp_ember_moth/{a,b,c}/。生成: tools/rough/lowpoly/ember_moth/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_ember_moth.jpg" aria-label="火の粉蛾 (ember_moth) 低ポリ非立方体 3 案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_ember_moth.jpg" alt="火の粉蛾 (ember_moth) 低ポリ非立方体 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_ember_moth-a"><input type="radio" name="lp_ember_moth" id="lp_ember_moth-a" value="a"><span class="letter">A</span><span class="otext"><b>A 燃え殻の灰蛾</b><span>燃え残りの紙のようにぼろぼろに焦げた幅広の翅。縁はぎざぎざに焼け落ちて炭の黒から橙へ光り、焼け抜けた穴のふちも熾の橙。灰かぶりの炭の体、焦げた小枝の触角、赤熱の目。灰の巨神の「燃えかす」らしい。</span></span></label><label class="opt" for="lp_ember_moth-b"><input type="radio" name="lp_ember_moth" id="lp_ember_moth-b" value="b"><span class="letter">B</span><span class="otext"><b>B 玄武の剣翅蛾</b><span>スズメガ型。後ろへ流れる剣のような矢じりの翅は黒い玄武岩の板で、割れ目と継ぎ目に熔けた橙〜黄が走る。背びれ・肩当て・尾の針、節ごとに光る腹、前へ突き出す 2 本の角、吊り上がった赤い目。いちばん敵らしく硬い。</span></span></label><label class="opt" for="lp_ember_moth-c"><input type="radio" name="lp_ember_moth" id="lp_ember_moth-c" value="c"><span class="letter">C</span><span class="otext"><b>C 火の粉のはね飾り蛾</b><span>トリバネガ型。翅が 4 本の細い羽の指に裂け、指の先ほど赤→橙→黄の炎の舌になる。指のあいだは空き、先から火の粉が離れて漂う。細長い炭の体で腹の節は石炭のように光る。いちばん軽やかで「火の粉」そのもの。</span></span></label></fieldset>
+  <label class="note-l" for="lp_ember_moth-note">直してほしい点 (任意)</label>
+  <textarea id="lp_ember_moth-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_cinder_roller" data-id="lp_cinder_roller">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>燠虫 (cinder_roller) 低ポリ・ドット絵 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">団子虫が丸まって転がる敵。熾の巨人の言葉 (灰・熾・玄武の板・冷える溶岩・熱の割れ目) で、潮殻の蟹に見えない形に描き直した。骨 37 本の名前・階層・pivot・休めの回転は今の geo と同じで、今のアニメ (歩く・丸まる・転がる・開く・目を回す) がそのまま動く。1ブロック=32テクセル・最近傍・限られたパレット。三角形 A 514 / B 550 / C 523 (目安 約600)。各節の甲は x 軸まわりの回転体の板 (外の層・段・次の節の下へ上がる溶岩の床) で作り、玉では40度ごとに隙間も交差もなく一周する (殻の面どうしの交差は休め・玉とも0を検査)。玉では脚・触角・尾・膜の骨を隠す想定。光る画素は熱い割れ目・継ぎ目・腹・目・触角の先。メッシュ・アトラス・glowmask は docs/review/lowpoly_roughs/lp_cinder_roller/{a,b,c}/ 。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_cinder_roller.jpg" aria-label="燠虫 (cinder_roller) 低ポリ・ドット絵 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_cinder_roller.jpg" alt="燠虫 (cinder_roller) 低ポリ・ドット絵 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_cinder_roller-a"><input type="radio" name="lp_cinder_roller" id="lp_cinder_roller-a" value="a"><span class="letter">A</span><span class="otext"><b>A 玄武の層鎧 (514 三角形)</b><span>広く平たい玄武の板が屋根瓦のように重なる、青黒い石の団子虫。柱状節理のような継ぎ目にところどころ熱い割れ目が走り、板のすき間と腹は溶岩色。頭は低い兜形で目は琥珀色。今の「玄武の殻」に最も近く、落ち着いて読みやすい。</span></span></label><label class="opt" for="lp_cinder_roller-b"><input type="radio" name="lp_cinder_roller" id="lp_cinder_roller-b" value="b"><span class="letter">B</span><span class="otext"><b>B 熔皮の棘玉 (550 三角形)</b><span>丸く盛り上がった冷えかけの溶岩の皮殻。背に一節一本の棘 (先が熱く光る)、割れ目から赤く透ける。頭は尖った鼻づらと長い触角、尾は長い二本の針。丸まると棘の玉になり、転がる姿が危険に見える。三案でいちばん派手で発光が多い。</span></span></label><label class="opt" for="lp_cinder_roller-c"><input type="radio" name="lp_cinder_roller" id="lp_cinder_roller-c" value="c"><span class="letter">C</span><span class="otext"><b>C 灰炭の団子 (523 三角形)</b><span>黒い炭のかたまり。ワニ皮のような細かい割れ目の交点だけ熾が赤く光り、上面に灰が積もる。背に灰の板 (縁だけ熾) が一列に立つ。ふっくらした丸い体と短い脚で、丸まるとずんぐりした灰まみれの玉。発光は控えめ。</span></span></label></fieldset>
+  <label class="note-l" for="lp_cinder_roller-note">直してほしい点 (任意)</label>
+  <textarea id="lp_cinder_roller-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_ash_smith" data-id="lp_ash_smith">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>灰の鍛え手 (ash_smith) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の中ボス)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の中ボス。骨 15 本 (root[Y 180 度] &gt; body &gt; belly &gt; apron / head / arm_r &gt; forearm_r &gt; socket_main[休め 45 度] / arm_l &gt; forearm_l &gt; socket_off / leg_r・l / bellows_r・l) の名前・階層・pivot は今の geo のまま、今のアニメ 10 本 (idle・walk・slam・breath・quench・sparks・rage など) がそのまま動く。大鎚 (socket_main) と火箸 (socket_off) は別メッシュ。三角形 (本体 / 大鎚 / 火箸): A 1,517 / 104 / 124、B 1,349 / 140 / 76、C 1,529 / 152 / 124 (上限 本体 約 1,500・武器 約 250)。今は箱 1,225 個。アトラス 512×512 (本体)。余燼の主題 (灰・熾・玄武岩・冷えかけの溶岩・熱割れ・炉と鍛冶の道具) だけで組み、前の三体の敵と重ならない。光る画素は熱割れ・覗き窓・目・鞴の煙突の縁・大鎚の打面・火箸の塊のみ。シートは今 / A / B / C を前 3/4・後ろ 3/4・頭のアップ・大鎚の振りかぶりと着地・火箸・武器単体・アトラスで並べる。メッシュは lowpoly_roughs/lp_ash_smith/{a,b,c}/ash_smith_{a,b,c}_lowpoly_mesh.json と smith_hammer_*・smith_tongs_*_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/ash_smith/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_ash_smith.jpg" aria-label="灰の鍛え手 (ash_smith) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の中ボス) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_ash_smith.jpg" alt="灰の鍛え手 (ash_smith) — 低ポリ非立方体 + ドット絵 3 案 (余燼の背の中ボス) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_ash_smith-a"><input type="radio" name="lp_ash_smith" id="lp_ash_smith-a" value="a"><span class="letter">A</span><span class="otext"><b>A 玄武の鍛冶王</b><span>六角の玄武岩の柱を束ねた重い体。胸に柱のよろい、肩に柱を積んだ肩当てと外へ突き出す角。柱の継ぎ目に冷えかけの溶岩の熱割れが走る (下ほど太く熱い)。兜は覗き穴が橙に光り、柱の冠と角。鞴は黒鉄の蛇腹で継ぎ目から炉の光が漏れ、先の煙突の縁が燻る。前掛けは重なる鉄の鱗。大鎚は六角の玄武岩の頭、打面が光る。</span></span></label><label class="opt" for="lp_ash_smith-b"><input type="radio" name="lp_ash_smith" id="lp_ash_smith-b" value="b"><span class="letter">B</span><span class="otext"><b>B 灰被りの炉守</b><span>灰色の外套を羽織った背の高い炉守。胴が炉の樽で、腹の開いた口 (れんがの枠、格子) が燃える。尖った頭巾に灰色の仮面、目だけが熾のように光り、頭巾の頂に小さな煙突。外套はぎざぎざの裾、火の粉が付く。鞴は革の洋梨形で、煙突が外へ曲がって先が燻る。手は燃える石炭。大鎚の頭は冷えかけの溶岩の塊。</span></span></label><label class="opt" for="lp_ash_smith-c"><input type="radio" name="lp_ash_smith" id="lp_ash_smith-c" value="c"><span class="letter">C</span><span class="otext"><b>C 金床頭の鋳鉄巨人</b><span>頭が金床 (平らな天板と前へ突き出す角、くびれの覗き窓が光る)。肩にも小さな金床、胴は青黒い鋳鉄の板で、前に三本の光る吹き出し口と溶けた鉄の細い筋。腰から青銅の輪の鎖が下がり、前掛けの裾から溶岩の滴が垂れる。鞴はドラム形で先の漏斗が前を向く。大鎚はインゴットの頭の本物の大鎚。</span></span></label></fieldset>
+  <label class="note-l" for="lp_ash_smith-note">直してほしい点 (任意)</label>
+  <textarea id="lp_ash_smith-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_ember_heart" data-id="lp_ember_heart">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>余燼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の心臓。骨名・pivot は今の geo (段階 1/2/3。親なし・pivot (0,16,0)・休めの回転なし) のまま、intro/death を含む今のアニメがそのまま動く。余燼の言葉 (灰の殻・玄武岩の板・ボロノイの板割れ・割れ目の床が光る・火の粉・遅くなる鼓動・冷え) で、採用済みの「B 板割れ」を低ポリにした。段階ごとの進み (1 細い橙の割れ目 → 2 広く黄に白熱 → 3 灰で鈍い赤) と体力バーの段階を保つ。三角形 (段階 1 / 2 / 3): A 828・1,275・1,323 / B 522・1,089・1,037 / C 1,570・1,567・1,661。今は箱 2,586/1,806/1,557 個。上限は 2,000 三角形/段階。メッシュは lowpoly_roughs/lp_ember_heart/{a,b,c}/p{1,2,3}_mesh.json (+ atlas・glowmask)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_ember_heart.jpg" aria-label="余燼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_ember_heart.jpg" alt="余燼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_ember_heart-a"><input type="radio" name="lp_ember_heart" id="lp_ember_heart-a" value="a"><span class="letter">A</span><span class="otext"><b>A 玄武岩の板割れ</b><span>採用済みの「B 板割れ」の素直な低ポリ化。丸い玉を、黒い玄武岩の板 (面取りした低い屋根) が隙間なく覆い、細い割れ目の底が熾の橙に光る。段階 2 は上が熔け落ちて板の椀になり、割れ目が広がって黄に白熱、むき出しの心臓と核、熔けた垂れが下がる。段階 3 は白い灰の板に穴があき、割れ目は鈍い赤、中に小さく暗い残り火。最も今に近く、まとまっている。</span></span></label><label class="opt" for="lp_ember_heart-b"><input type="radio" name="lp_ember_heart" id="lp_ember_heart-b" value="b"><span class="letter">B</span><span class="otext"><b>B ずれた熔岩板</b><span>少数の大きな板が、傾きと段差をつけて浮いた殻。割れ目が広く深く、板の側面の下ほど熾に光る (板の下に熔岩が見える)。焼けた赤褐色のスコリアで、一枚一枚が重く見える。段階 2 は縁の板が外へめくれて椀になり、段階 3 は灰になった板がずれて大きな穴をあける。三角形が最も少なく軽い (約 520 / 1,090 / 1,040)。</span></span></label><label class="opt" for="lp_ember_heart-c"><input type="radio" name="lp_ember_heart" id="lp_ember_heart-c" value="c"><span class="letter">C</span><span class="otext"><b>C 黒曜の鱗</b><span>小さな板を多く並べ、それぞれが尖った頂点を持つ結晶のうろこにした殻。継ぎ目の角から細い棘が立ち、割れ目は細く明るい。赤みのある黒いガラス質で、面の縁がきらりと光る。段階 2 は椀の縁に鱗が逆立ち、段階 3 は灰に曇って棘が折れる。最も細かく鋭い案で、三角形は一番多い (約 1,570 / 1,570 / 1,660)。</span></span></label></fieldset>
+  <label class="note-l" for="lp_ember_heart-note">直してほしい点 (任意)</label>
+  <textarea id="lp_ember_heart-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 5;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>

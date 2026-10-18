@@ -1,0 +1,192 @@
+<title>天と淵 未決の回答</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 回答の帳面: 左に章の目次、右に問いの列。選んだ答えは共鳴の水色、未回答は石の灰。ラフ選定ページと同じ石の地 */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --now:#e2e7ea;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --now:#1f252e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --now:#1f252e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 80px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding-block:12px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.4vw,32px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);margin:0;max-width:72ch;font-size:14px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:14px}
+.bar{flex:1 1 200px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save{color:var(--muted);font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover,button.b:focus-visible{border-color:var(--accent);outline:none}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:start;margin-top:20px}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 150px);display:grid;gap:2px;font-size:13px}
+nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+nav a span{font-variant-numeric:tabular-nums}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:hover,nav a:focus-visible{color:var(--accent);outline:none}
+section.g{display:grid;gap:10px;padding-block:18px}
+section.g h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.item{display:grid;gap:8px;padding:12px 14px;background:var(--panel);border:1px solid var(--line)}
+.item[data-done="1"]{border-left:3px solid var(--ok)}
+.qrow{display:flex;gap:10px;align-items:baseline;min-width:0}
+.num{font-family:var(--display);color:var(--muted);font-size:13px;flex:none;min-width:3.6em}
+.q{margin:0;font-weight:700;min-width:0}
+.doc{color:var(--muted);font-size:12px;flex:none;margin-left:auto}
+.opts{display:flex;flex-wrap:wrap;gap:6px;border:0;margin:0;padding:0;min-width:0}
+.opt{position:relative;display:flex;align-items:flex-start;gap:6px;padding:5px 10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:13px;max-width:100%}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .tag{font-size:11px;color:var(--muted);flex:none;padding-top:1px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt:has(input:checked) .tag{color:var(--accent-ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt.now{background:var(--now)}
+.note{width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:6px 8px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+.empty{color:var(--muted);font-size:13px}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line)}
+  nav a.done{border-bottom-color:var(--ok)}
+  .doc{display:none}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>未決の回答</h1>
+    <p class="intro">まだ決まっていない判断をすべて並べました。上の「今回の作業で出た判断」は新しいもの、その下は設計書 00 の一覧です。灰色の「今のまま」が今の実装です。選ぶと自動で保存され、こちらで読んで設計書に反映します。迷うものは「今のまま」で構いません。</p>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 175 回答済み</span><span class="save" id="save">読み込み中…</span></div>
+    <div class="tools"><button class="b" id="fillnow" type="button">未回答をすべて「今のまま」にする</button></div>
+  </header>
+  <div class="layout">
+    <nav id="nav" aria-label="章"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+(() => {
+  const GROUPS = [{"title": "今回の作業で出た判断", "items": [{"id": "s_kaeshi", "num": "S1", "q": "返し刃（常に効く技）を技の枠に置けるようにするか", "now": "枠に置かない（常に効く技は枠不要、と案内を出す）", "alts": ["枠に置ける能動の技に作り直す"], "doc": "04"}, {"id": "s_dungeon", "num": "S2", "q": "背中のダンジョンをパーティごとの別の場所（インスタンス）にするか", "now": "巨神ごとに一つの背中をみんなで共有", "alts": ["パーティ（ソロ含む）ごとに別の複製。同じ背中のディメンション内に間隔をあけて建て、使い終わったら再利用する（推奨）", "共有のまま、他のパーティを見えなくするだけ"], "doc": "02・10"}, {"id": "s_mp_mid", "num": "S3", "q": "マルチの中くらいの問題（遅れて来た人の影が全員の進行を止める・観戦者が背中にいるとリセットが止まる・1 tick いただけで参加扱い・パーティの放置稼ぎ）を直すか", "now": "未対応", "alts": ["今直す（推奨。S2 をインスタンスにするなら一部は不要になる）", "S2 の結論のあとで直す"], "doc": "beta2_proposals 4章"}, {"id": "s_level5", "num": "S4", "q": "序盤の目的の帯「周りを探索して強くなろう（目安 Lv5）」の目安レベル", "now": "Lv5", "alts": ["Lv4", "Lv6", "数字を出さない"], "doc": "17"}, {"id": "s_bonehill", "num": "S5", "q": "骨の丘の目的の帯に距離と方角を出すか", "now": "距離と方角を出す", "alts": ["方角だけ（前触れを効かせる）"], "doc": "17"}, {"id": "s_song_rain", "num": "S6", "q": "星が欠ける歌を雨の夜には起こさない（晴れるまで遅らせる）", "now": "晴れた夜だけ（5 日目の詰み止めあり）", "alts": ["雨でも起こす"], "doc": "06"}, {"id": "s_tablet", "num": "S7", "q": "看板に代わる碑の文を出す条件", "now": "見るだけで出る（4.5 ブロック以内で目を向ける）＋右クリック", "alts": ["右クリックでだけ出す"], "doc": "19"}, {"id": "s_tablet_look", "num": "S8", "q": "碑の見た目（1 案だけで作った）", "now": "今のまま", "alts": ["ラフ 3 案を作って選ぶ"], "doc": "19"}, {"id": "s_adv", "num": "S9", "q": "進捗の数と隠し方（36 個、潮殻以降と Lv30 は隠し）", "now": "今のまま", "alts": ["減らす", "隠しを増やす", "隠しを減らす"], "doc": "19"}, {"id": "s_cine_lines", "num": "S10", "q": "場面の台詞（天の声「空は、まだ眠っていない。」「煙をたどれ。人の居る所へ。」など）", "now": "今のまま", "alts": ["書き直す（メモに方向を）"], "doc": "20"}, {"id": "s_heart_scene", "num": "S11", "q": "心臓の登場の場面の台詞を巨神ごとに変えるか", "now": "4 体共通", "alts": ["巨神ごとに書く"], "doc": "20"}, {"id": "s_intro_len", "num": "S12", "q": "心臓の登場の長さ", "now": "4 秒", "alts": ["2 秒", "6 秒"], "doc": "02・08・12・13"}, {"id": "s_storm_rhythm", "num": "S13", "q": "雷翼の心臓（段階 2）の高い・低いの拍", "now": "高 8 秒 / 低 8 秒", "alts": ["高 6 / 低 10（殴りやすく）", "高 10 / 低 6"], "doc": "12"}, {"id": "s_weapon_motion", "num": "S14", "q": "プレイヤーの武器ごとの振り（大剣の断ち下ろし・槍の突きなど）と弓の反動", "now": "今のまま（試遊で調整）", "alts": ["弓の反動を強く", "珊瑚の盾にも殴りの動きを付ける"], "doc": "15"}, {"id": "s_boss_sfx", "num": "S15", "q": "岩鯨の心臓・番兵長の技の音（今はバニラの音のまま）を専用の音にするか", "now": "バニラのまま", "alts": ["専用の音を作る"], "doc": "02"}, {"id": "s_grave_mode", "num": "S16", "q": "死亡のゲームルール skyabyssDeathMode を数字（0〜3）でなく名前（grave など）で指定できるようにするか", "now": "数字", "alts": ["名前でも指定できるようにする"], "doc": "11"}, {"id": "s_grave_rescue", "num": "S17", "q": "語り部の救いで、救う墓を選べるようにするか", "now": "いちばん古い墓から一つずつ", "alts": ["墓を選べる画面を作る"], "doc": "11"}, {"id": "s_ebb_once", "num": "S18", "q": "二章の大干潮（世界で一度）のあとに二章に入った人", "now": "道は歩けない（床が海底に残るだけ）", "alts": ["人ごとに一度起こす", "二章に入った人がいれば月に一度起こす"], "doc": "08"}, {"id": "s_conch", "num": "S19", "q": "潮見の貝をなくした人の作り直し", "now": "OP のコマンドだけ", "alts": ["語り部が渡し直す", "難破船の箱にも入れる"], "doc": "08"}, {"id": "s_tide_heart_glow", "num": "S20", "q": "潮殻の心臓（B 珊瑚の殻）の核の水色の光が箱のモデルより目立たない", "now": "今のまま", "alts": ["核の光を強くする"], "doc": "15"}, {"id": "s_storm_back_tone", "num": "S21", "q": "雷翼の背中のブロックがモデル A より少し暗い灰色", "now": "今のまま", "alts": ["明るい青灰に寄せる"], "doc": "12"}, {"id": "s_archer_hood", "num": "S22", "q": "肋の射手 C の頭巾が大きく、遠くで箱版と印象が違う", "now": "今のまま", "alts": ["頭巾を小さくする"], "doc": "15"}, {"id": "s_whale_fin_pivot", "num": "S23", "q": "岩鯨の胸びれの回転の中心が左右で非対称（26 / -31）", "now": "今のまま", "alts": ["±28.5 に揃える（アニメも合わせる）"], "doc": "15"}, {"id": "s_lowpoly_next", "num": "S24", "q": "低ポリ化の次の順番（敵・人物・巨神は決定済み）", "now": "武器 → 防具", "alts": ["防具 → 武器", "アイテムの手持ちと地面の見た目も含める"], "doc": "15・16"}, {"id": "s_ch_later", "num": "S25", "q": "五章（深淵）以降の中身を作り始める時期", "now": "巨神編を試遊してから", "alts": ["今から設計を始める"], "doc": "01"}]}, {"title": "進行・マルチ・レベル", "items": [{"id": "dI70", "num": "I-70", "q": "巨神の順番を固定するか（49 の潮殻の出現条件もこれに合わせる）", "now": "固定", "alts": ["岩鯨だけ先、あとの 3 体は自由"], "doc": "10"}, {"id": "dI71", "num": "I-71", "q": "乗る資格の例外", "now": "なし", "alts": ["リーダーが資格を持てば全員乗れる"], "doc": "10"}, {"id": "dI72", "num": "I-72", "q": "物語の進みで決まるレベルの上限", "now": "15・21・27・33・40", "alts": ["推奨 +5 にゆるめる", "上限なし"], "doc": "10"}, {"id": "dI73", "num": "I-73", "q": "上限であふれた経験値", "now": "捨てる（1 レベル分まで貯める）", "alts": ["全部貯める"], "doc": "10"}, {"id": "d74", "num": "74", "q": "パーティの人数", "now": "4", "alts": ["6", "8（背中の人数の調整も要る）"], "doc": "10"}, {"id": "d75", "num": "75", "q": "遅れて来た人の追い風（+50%）", "now": "入れない（推奨: 試遊してから）", "alts": ["入れる"], "doc": "10"}, {"id": "d76", "num": "76", "q": "居合わせなかった仲間の分け前", "now": "70%（ゲームルールで 50〜80）", "alts": [], "doc": "10"}, {"id": "d77", "num": "77", "q": "分け前を受けるレベル差", "now": "10", "alts": ["なし", "5"], "doc": "10"}, {"id": "d78", "num": "78", "q": "パーティの画面のキー", "now": "O", "alts": ["P（バニラとぶつかる）"], "doc": "10"}, {"id": "d79", "num": "79", "q": "創造モードの人を乗る資格の検査から外す", "now": "外す", "alts": ["外さない"], "doc": "10"}, {"id": "d80", "num": "80", "q": "ギルドを作る条件（設計だけ）", "now": "岩鯨の心臓を止めた人", "alts": ["誰でも"], "doc": "10"}, {"id": "d94", "num": "94", "q": "深淵・月・雲海の推奨 Lv（必要 Lv の元）", "now": "仮に 36・42・48", "alts": ["上限の案（I-72）と合わせて決める"], "doc": "03"}, {"id": "d178", "num": "178", "q": "ベータで順番（skyabyssStoryGate）とレベル上限（skyabyssStoryLevelCap）のゲームルールを入れたまま配るか", "now": "入れたまま", "alts": ["切って配る"], "doc": "10、14"}]}, {"title": "巨神に共通", "items": [{"id": "d51", "num": "51", "q": "眠る試練（2 周目から試練の一つが休む）を全巨神に入れるか", "now": "共通の部品（推奨）", "alts": ["潮殻だけ"], "doc": "08"}, {"id": "d109", "num": "109・143", "q": "背中の島の起動時の建設（titan/BackBuildJobs で tick を分けて建て、起動から約 41 秒で 4 体ぶん。サーバーは止めない）", "now": "そのまま", "alts": ["体の深い所を空洞に", "チャンクに直接書く", "初めて乗るときに建てる"], "doc": "02、13"}, {"id": "d56", "num": "56", "q": "欠片の二つ目を持ったときの「互いに引き合う」演出", "now": "推奨: 入れる", "alts": ["何も変えない"], "doc": "08"}, {"id": "d54", "num": "54", "q": "素材の名前「〇〇の欠片」（共鳴の欠片・天の鍵の欠片と紛らわしい）", "now": "「潮殻の欠片」のような同じ型", "alts": ["「欠片」を避ける（用語の整理は全体で一度に）"], "doc": "08"}, {"id": "dT5", "num": "T5", "q": "背中で倒れたとき経験値も預かって戻す（バニラの経験値の玉を落とさない。「バニラを置き換えない」の例外）", "now": "預かる（追認待ち）", "alts": ["玉を落とす"], "doc": "02"}, {"id": "d137", "num": "137", "q": "空の影から巨神さえ隠れる演出", "now": "雷翼は影のあいだ峰でうずくまる（推奨: 余裕があれば全巨神に）", "alts": ["入れない"], "doc": "12"}]}, {"title": "岩鯨", "items": [{"id": "d107", "num": "107", "q": "背中の大きさ", "now": "ゲームの岩鯨の 2.8 倍（全長 412）", "alts": ["1.4〜1.7 倍（翼を並べ直す）"], "doc": "02"}, {"id": "d108", "num": "108", "q": "到着の場所と向き", "now": "尾の付け根の広場、北を向く", "alts": ["左わき腹の錨石の外の台", "背の中ほど"], "doc": "02"}, {"id": "d110", "num": "110", "q": "肋骨の窓（西の谷から空が見える）", "now": "肋骨の谷の西の壁だけ", "alts": ["竪穴・崩れ橋にも"], "doc": "02"}]}, {"title": "潮殻", "items": [{"id": "d46", "num": "46", "q": "乗り方", "now": "潮門をくぐる", "alts": ["甲羅の脇の段", "前ひれが運ぶ"], "doc": "08"}, {"id": "d47", "num": "47", "q": "背中のディメンション", "now": "岩鯨と分ける（tide_back）", "alts": ["岩鯨の背と共有"], "doc": "08"}, {"id": "d48", "num": "48", "q": "潮見の貝の入手", "now": "イサナのサブクエスト＋難破船の宝箱", "alts": ["作業台で作る", "なし"], "doc": "08"}, {"id": "d49", "num": "49", "q": "出現の条件", "now": "I-70 の順番に従う", "alts": [], "doc": "08"}, {"id": "d50", "num": "50", "q": "潮の周期", "now": "干潮 50・満潮 50・切り替え 10 秒ずつ（2 分）", "alts": ["3 分", "すべてプレイヤーが動かす"], "doc": "08"}, {"id": "d53", "num": "53", "q": "碑文の伝承の項目", "now": "碑文ごとに 1 項目", "alts": ["6 枚を 1 項目に"], "doc": "08"}, {"id": "dH70", "num": "H-70", "q": "背中の大きさ", "now": "ゲームの巨神の 1.7 倍", "alts": ["1 倍（試練を作り直す）"], "doc": "08"}, {"id": "dH71", "num": "H-71", "q": "到着の場所", "now": "左後ろのひれの上、潮門と甲羅を向く", "alts": ["甲羅の上", "潮門の中"], "doc": "08"}, {"id": "dH72", "num": "H-72", "q": "潮見の間の栓の印", "now": "溜めの色（台 = 元、敷物 = 行き先）", "alts": ["小さな旗を足す", "看板"], "doc": "08"}, {"id": "d166", "num": "166", "q": "心臓のバーの段階 2 の色", "now": "真珠の白", "alts": ["紅"], "doc": "08"}, {"id": "d167", "num": "167", "q": "心臓の技の傷（08 の表より 1〜2 割高い）と真珠の追う速さ 0.18", "now": "今のまま（試遊で調整）", "alts": ["08 の表どおり（0.3）"], "doc": "08"}, {"id": "d168", "num": "168", "q": "潮招きのモデル", "now": "瓦の大蟹（振り上げの姿勢は次に見直す）", "alts": ["珊瑚の山", "潮見の塔"], "doc": "08"}, {"id": "d169", "num": "169", "q": "潮見の間の決まり", "now": "T を空にすると底の戸から岩棚へ、水は上限で止まる（一人で解ける）", "alts": ["浮き石で最上段まで"], "doc": "08"}, {"id": "d170", "num": "170", "q": "抜け道の形", "now": "石が鳴ると光る床（踏むと広間の近くへ）", "alts": ["通路"], "doc": "08"}, {"id": "d171", "num": "171", "q": "磯走りの数", "now": "巣ごと 3（+1/人）、干潟全体 8（+2/人）", "alts": ["6"], "doc": "08"}, {"id": "d172", "num": "172", "q": "群れの巣の見た目", "now": "ブロックの塚", "alts": ["エンティティのモデル"], "doc": "08"}, {"id": "d173", "num": "173", "q": "潮の真珠・潮鳴り石の絵", "now": "仮（推奨: ラフ 3 案から選ぶ。ベータの外でよい）", "alts": ["仮のまま"], "doc": "08"}, {"id": "d174", "num": "174", "q": "潮見の間の回り道", "now": "約 20 秒", "alts": ["40 秒"], "doc": "08"}, {"id": "d175", "num": "175", "q": "心臓のあとのリセットの範囲", "now": "潮の底の門より奥に 30 秒", "alts": ["背中全体"], "doc": "08"}]}, {"title": "雷翼", "items": [{"id": "d128", "num": "128", "q": "乗り方", "now": "止まり木の足もとの昇り風", "alts": ["足の爪につかまる", "風見鶏に雷を受けて背中へ"], "doc": "12"}, {"id": "d129", "num": "129", "q": "背中の鳥の大きさ", "now": "嵐の大鷲の形。1 単位 0.85 ブロック（ゲームの巨神の 1.7 倍）、翼の芯は 1.4 倍の厚み、ブロック 32 万", "alts": ["もっと小さく", "大きく"], "doc": "12"}, {"id": "d130", "num": "130", "q": "嵐の拍と雲の天井", "now": "凪 40・荒れる 5・嵐 40・静まる 5（90 秒）、雲は y 100", "alts": ["120 秒", "拍なし"], "doc": "12"}, {"id": "d131", "num": "131", "q": "夕立の刻（峰に降りる時間）", "now": "一日一度、午後（7000〜10600）", "alts": ["一日二度", "本物の雷雨のときだけ"], "doc": "12"}, {"id": "d132", "num": "132", "q": "風見鶏の入手", "now": "イサナの「古い地図」のサブクエスト", "alts": ["作業台で作る", "なし"], "doc": "12"}, {"id": "d133", "num": "133", "q": "心臓の閃光の判定", "now": "心臓の方を向いている（60 度以内）と当たる", "alts": ["見える所にいると当たる", "盲目だけ"], "doc": "12"}, {"id": "d134", "num": "134", "q": "心臓の段階 2 の空中戦", "now": "昇り風で浮いて戦う", "alts": ["床の帯電だけ"], "doc": "12"}, {"id": "d135", "num": "135", "q": "背中から落ちたとき", "now": "嵐に投げ返されて休み場へ", "alts": ["地上へ滑空"], "doc": "12"}, {"id": "d138", "num": "138", "q": "伝承 storm_wing（遠くの嵐）と thunder_wing（近くの鳥）", "now": "両方残す", "alts": ["一つにまとめる"], "doc": "12"}, {"id": "d139", "num": "139", "q": "満ちた雷蛾が弾ける音の字幕", "now": "別の字幕", "alts": ["死の字幕と一つに"], "doc": "12"}, {"id": "d140", "num": "140", "q": "本体・心臓・敵・雷獣のラフ", "now": "推奨で実装（羽守 B・雷蛾 B・雷乞い C・雷獣 A・心臓 C・本体 A）。選び直してよい", "alts": [], "doc": "12"}, {"id": "d117", "num": "117", "q": "本体の近景の箱の数", "now": "2277", "alts": ["3257", "6787"], "doc": "12"}, {"id": "d118", "num": "118", "q": "風見鶏の絵と、回る手の中のモデル", "now": "仮（避雷針の形）。推奨: ラフ 3 案から選ぶ", "alts": ["仮のまま"], "doc": "12"}, {"id": "d119", "num": "119", "q": "風見鶏で呼ぶ「10 分に一度」の待ち", "now": "サーバーを止めると忘れる", "alts": ["ワールドに保存"], "doc": "12"}, {"id": "d120", "num": "120", "q": "避雷の柱・戻しの鏡", "now": "バニラの避雷針と銅の台", "alts": ["専用のブロック"], "doc": "12"}]}, {"title": "余燼", "items": [{"id": "d141", "num": "141", "q": "乗り方", "now": "吸うあいだに口へ歩いて入る", "alts": ["背の亀裂から降りる", "舌で運ぶ"], "doc": "13"}, {"id": "d142", "num": "142", "q": "背の体の大きさ", "now": "ゲームの 1.7 倍（全長約 370）", "alts": ["1.8 倍", "1 倍"], "doc": "13"}, {"id": "d144", "num": "144", "q": "熱（人ごとの熱の目盛り）", "now": "入れる", "alts": ["溶岩と噴気の傷だけ"], "doc": "13"}, {"id": "d145", "num": "145", "q": "眠る時刻", "now": "夜（12500〜23000）", "alts": ["一日二回", "温石で呼んだときだけ"], "doc": "13"}, {"id": "d146", "num": "146", "q": "心臓の段階 3 の「下から返る拍」（音だけ）", "now": "入れる（2 章の決定と合わなければ消す）", "alts": ["入れない"], "doc": "13"}, {"id": "d147", "num": "147", "q": "眠る場所が人の建物のそばになる", "now": "気にしない（ブロックは壊さない）", "alts": ["ベッド・作業台の近くを避ける"], "doc": "13"}, {"id": "d148", "num": "148", "q": "温石の入手", "now": "雷翼を止めたとき一人一つ＋作り直し", "alts": ["サブクエスト", "なし"], "doc": "13"}, {"id": "d149", "num": "149", "q": "熾火の外套", "now": "装飾の枠（熱 −25%、燃焼の傷 −30%）", "alts": ["防具で火炎耐性 I"], "doc": "13"}, {"id": "d150", "num": "150", "q": "東の試練が眠る周は鍛え手も眠る", "now": "眠る", "alts": ["鍛え手は毎回出る"], "doc": "13"}, {"id": "d151", "num": "151", "q": "灰被りの「燃え尽きて倒れる」（15 秒）", "now": "入れる", "alts": ["入れない"], "doc": "13"}, {"id": "d152", "num": "152", "q": "本体・心臓・敵・中ボスのラフ", "now": "推奨で実装。差し替えは install の 1 行", "alts": [], "doc": "13"}, {"id": "d153", "num": "153", "q": "燃え尽きた灰被りの撃破の名義", "now": "最後に叩いた人", "alts": ["殻を割った人", "撃破にしない"], "doc": "13"}, {"id": "d154", "num": "154", "q": "火の粉蛾が火の鍵を持つ人に寄る強さ", "now": "焼き入れ前 +60・後 +30", "alts": ["焼き入れ前だけ"], "doc": "13"}, {"id": "d155", "num": "155", "q": "燠虫の転がる速さ", "now": "0.55 ブロック/tick", "alts": ["0.45"], "doc": "13"}, {"id": "d156", "num": "156", "q": "灰の道の溶岩の面", "now": "床と同じ 76", "alts": ["75"], "doc": "13"}, {"id": "d157", "num": "157", "q": "鍛えの間の「打つ順」4 通り", "now": "赤橙黄・赤黄橙・橙赤黄・赤橙黄赤", "alts": ["赤黄橙・橙赤黄・黄橙赤・赤橙黄赤"], "doc": "13"}, {"id": "d158", "num": "158", "q": "灰の道の島のあいだ", "now": "3〜8 ブロック、長い一跳びは島飛ばし", "alts": ["箱を広げて 8〜12"], "doc": "13"}, {"id": "d160", "num": "160", "q": "鍛え手の「冷えた鎚打ち 24」", "now": "そのまま（+0 の防具で 3.0 回で倒れる）", "alts": ["1.3 倍軽く"], "doc": "13"}, {"id": "d161", "num": "161", "q": "鍛え手の湯気", "now": "そのまま（傷なし）", "alts": ["湯気の中で熱を冷やす"], "doc": "13"}, {"id": "d162", "num": "162", "q": "鍛え手の前倒しで腹が脚へ食い込む", "now": "そのまま（見えない）", "alts": ["脚を体の子にする"], "doc": "13"}, {"id": "d163", "num": "163", "q": "心臓の熱の脈を跳んで避ける高さ", "now": "輪の高さ + 0.9 未満に当てる", "alts": ["0.9 を上げて緩く"], "doc": "13"}, {"id": "d164", "num": "164", "q": "段階 3 の冷えとふだんの冷えの重なり", "now": "推奨: 段階 3 のあいだふだんの冷えを止める", "alts": ["−8 を −5 に", "試遊で"], "doc": "13"}, {"id": "d165", "num": "165", "q": "熔けた溝を黒石に固める", "now": "固める", "alts": ["溶岩を残す"], "doc": "13"}]}, {"title": "装備", "items": [{"id": "d7", "num": "7", "q": "交換の「1 周回に 1 回」の 1 周回", "now": "心臓の撃破 1 回（ループを作るときに決める）", "alts": ["月のループ 1 回", "現実の 1 日"], "doc": "03"}, {"id": "d23", "num": "23", "q": "交換の対象", "now": "未所持の専用伝説だけ（様子を見る）", "alts": ["全部持ったあとは 2 本目も"], "doc": "03"}, {"id": "d66", "num": "66", "q": "防具の強化", "now": "強靭だけ（+10 で耐える回数 ×1.17）", "alts": ["割合の軽減も足す"], "doc": "03"}, {"id": "d92", "num": "92", "q": "巡礼者の翼の枠", "now": "装飾の枠", "alts": ["背中の枠を足す", "雲海で装飾の 3 枠目"], "doc": "03"}, {"id": "d93", "num": "93", "q": "護符の待ちを HUD に出すか", "now": "出さない（キーで残りの秒を知らせる）。推奨: 技の枠の隣に小さな枠", "alts": [], "doc": "03"}, {"id": "d101", "num": "101", "q": "潮殻の鎧・潮鳴りの護符の階級", "now": "レア（必要 Lv 14）", "alts": ["伝説（交換が早まる）"], "doc": "03"}, {"id": "d102", "num": "102", "q": "月潮の真珠の枠", "now": "装飾の枠", "alts": ["護符の枠"], "doc": "03"}, {"id": "d103", "num": "103", "q": "共鳴の欠片を巨神ごとに分けるか", "now": "共通", "alts": ["巨神ごと"], "doc": "03"}, {"id": "d104", "num": "104", "q": "珊瑚の盾の、防げない傷の軽減の上限", "now": "20%（+10）", "alts": ["15%"], "doc": "03"}, {"id": "d105", "num": "105", "q": "潮殻 +10 で雷翼の心臓の手ごたえ 3.3", "now": "今のまま", "alts": ["雷翼のボスを 1 割硬く"], "doc": "03"}, {"id": "d106", "num": "106", "q": "珊瑚の盾の一人称の向き", "now": "裏（取っ手）を見せる", "alts": ["表を見せる"], "doc": "03"}, {"id": "d114", "num": "114", "q": "羽守の鉤槍の空中の上乗せ", "now": "大きな相手には自分が宙にいるときだけ", "alts": ["×1.1 で相手が宙なら常に"], "doc": "03"}, {"id": "d115", "num": "115", "q": "雷翼の弓に特性", "now": "付けない（特性は矢に効かない）", "alts": ["弓用の特性を足す"], "doc": "03"}, {"id": "d116", "num": "116", "q": "雷翼の装備の絵", "now": "推奨のまま（ゲームでの見た目は未確認）", "alts": [], "doc": "03"}, {"id": "d121", "num": "121", "q": "余燼の鎧の階級", "now": "レア（必要 Lv 26）", "alts": ["伝説"], "doc": "03"}, {"id": "d124", "num": "124", "q": "余燼の戦斧の「燃焼中に +10%」", "now": "火に強い相手にも「くすぶり」の印で効く", "alts": ["バニラの燃焼だけ"], "doc": "03"}, {"id": "d125", "num": "125", "q": "鍛え手の大鎚の「両手」", "now": "説明と持ち方だけ（左手の盾は使える）", "alts": ["左手を使えなくする"], "doc": "03"}, {"id": "d126", "num": "126", "q": "燠の灯（吊り灯）", "now": "後回し", "alts": ["ベータで作る"], "doc": "03"}]}, {"title": "巨神での移動・控え帳", "items": [{"id": "d57", "num": "57", "q": "移動のクールダウン", "now": "3 分", "alts": ["長く", "サーバー設定"], "doc": "09"}, {"id": "d58", "num": "58", "q": "長い旅の途中を雲の帳で移す", "now": "移す", "alts": ["全行程を飛ぶ"], "doc": "09"}, {"id": "d59", "num": "59", "q": "行き先の種類", "now": "はじまりの地と碑だけ", "alts": ["寝床・語り部の村・最後に乗った場所"], "doc": "09"}, {"id": "d60", "num": "60", "q": "巨神ごとの飛び方の性格", "now": "共通。推奨: 巨神ごとに変える（TravelRules）", "alts": [], "doc": "09"}, {"id": "d61", "num": "61", "q": "旅の途中でログアウト", "now": "次のログインで行き先へ降ろす", "alts": ["乗り直し"], "doc": "09"}, {"id": "d62", "num": "62", "q": "試練中でも巨神を呼べる", "now": "呼べる", "alts": ["試練中は呼べない"], "doc": "09"}, {"id": "d63", "num": "63", "q": "碑を手で壊せる", "now": "手で壊せる。推奨: ツルハシを要る", "alts": [], "doc": "09"}, {"id": "d112", "num": "112", "q": "潮殻の旅で行き先が陸の奥のとき", "now": "いちばん近い浜で降ろし方角と距離を知らせる", "alts": ["遠い行き先は断る"], "doc": "09"}, {"id": "d113", "num": "113", "q": "潮殻の座席（geo から測って決めた）", "now": "今のまま（画面で見たら直す）", "alts": [], "doc": "09"}, {"id": "d176", "num": "176", "q": "雷翼・余燼での移動", "now": "ベータの後（TitanKind は岩鯨と潮殻だけ）", "alts": ["ベータで入れる"], "doc": "09、14"}, {"id": "d87", "num": "87", "q": "自分の控え帳のコマンド", "now": "/skyrecord", "alts": ["/skyabyss me"], "doc": "11"}, {"id": "d89", "num": "89", "q": "心核と呼び笛の投げ捨てを拒む（欠片は拒む）", "now": "拒まない（人に渡せる）", "alts": ["拒む"], "doc": "11"}, {"id": "d90", "num": "90", "q": "控え帳のキー", "now": "B", "alts": ["ほかのキー"], "doc": "11"}, {"id": "d91", "num": "91", "q": "コマンドで「変わった値」を出す範囲", "now": "管理者の /skyabyss だけ", "alts": ["/titanmemory・/growth なども"], "doc": "11"}, {"id": "d111", "num": "111", "q": "欠片・天の鍵の「呼び戻す」の代償", "now": "なし・待ちなし", "alts": ["費用", "一日に一度"], "doc": "11"}]}, {"title": "クエスト・NPC・伝承", "items": [{"id": "d13", "num": "13", "q": "ループで好感度を戻すか", "now": "0 に戻す（M4 で試遊してから）", "alts": ["1/4 だけ残す"], "doc": "07"}, {"id": "d27", "num": "27", "q": "破れた頁の確率（村の宝箱 25%、背中の番兵 5%）", "now": "遊んでから", "alts": [], "doc": "05"}, {"id": "d81", "num": "81", "q": "自由なモードの日替わりの枠", "now": "一日 3 つ（Board.QUOTA）", "alts": ["5", "枠なし"], "doc": "07、10"}, {"id": "d82", "num": "82", "q": "日替わりの受け口", "now": "言伝ての板（語り部の「村の頼みごと」も同じ画面）", "alts": ["NPC に話すだけ"], "doc": "07、10"}, {"id": "d83", "num": "83", "q": "サブクエストの解放の見せ方", "now": "一つ先の段階だけ題を伏せて出す", "alts": ["全部出す", "出さない"], "doc": "10"}, {"id": "d84", "num": "84", "q": "言伝ての板を村に自動で立てる", "now": "立てる（村ごとに一度）", "alts": ["立てない"], "doc": "07"}, {"id": "d85", "num": "85", "q": "言伝ての板の見た目", "now": "二本柱と庇", "alts": ["横長の板", "一本柱"], "doc": "07"}, {"id": "d86", "num": "86", "q": "週替わりの区切り", "now": "7 日（M4 でループに替える。Repeats.cycle）", "alts": [], "doc": "07"}, {"id": "d100", "num": "100", "q": "雷翼・余燼のメインの依頼主", "now": "雷翼 = 語り部、余燼 = イサナ", "alts": ["両方イサナ"], "doc": "07、14"}, {"id": "d177", "num": "177", "q": "伝承「止まった鼓動」がどの欠片でも開く", "now": "今のまま", "alts": ["岩鯨の心臓を倒したときだけ"], "doc": "14"}]}, {"title": "ベータ・配布", "items": [{"id": "d95", "num": "95", "q": "ベータで月を落とすか", "now": "落とさない（七日目の夜・雲の目・天の鍵でほのめかすだけ）", "alts": ["七日目の夜だけ月を大きく", "雷翼のあと一度だけ落ちる演出"], "doc": "14"}, {"id": "d96", "num": "96", "q": "天の鍵が足もとへ脈を打つ", "now": "今のまま（2 章の扉は「下」から開く前提）", "alts": ["空を指す"], "doc": "14"}, {"id": "d97", "num": "97", "q": "天の鍵の場面を全員で見るか", "now": "そろえた人だけ", "alts": ["ワールドで最初の一人のとき全員に"], "doc": "14"}, {"id": "d98", "num": "98", "q": "天の鍵の絵", "now": "円盤から下へ柄が伸びる鍵", "alts": ["四つが組んだ円盤", "四色の輪"], "doc": "14"}, {"id": "d99", "num": "99", "q": "数え歌のいつつめ「いつつ　いきづく　つちのそこ」を明かす", "now": "明かす", "alts": ["途中で途切れさせる"], "doc": "14"}, {"id": "d122", "num": "122", "q": "「第一章 了」の表示", "now": "天の鍵の場面の終わりの札で出す", "alts": ["別に画面中央へ"], "doc": "14"}, {"id": "d179", "num": "179", "q": "配布名（mod_version 0.1.0）", "now": "0.1.0。推奨: 0.1.0-beta.1 のように版が分かる名前", "alts": [], "doc": "gradle.properties"}, {"id": "d180", "num": "180", "q": "テスターの感想の集め方", "now": "遊び方ページの欄は空欄（決めてから配る）", "alts": ["別のフォーム・連絡先"], "doc": "docs/beta_how_to_play.md"}]}, {"title": "序章・画面・モデル（00 に番号がなかったもの）", "items": [{"id": "d181", "num": "181", "q": "装備の説明文に物語の一行を足す（旧 17-8）", "now": "足していない（あとで）", "alts": ["今足す", "足さない"], "doc": "17"}, {"id": "d182", "num": "182", "q": "山頂を削るとき、記録のない古いチャンクの扱い", "now": "5 分以上プレイヤーがいなかった所だけ削る", "alts": ["古いチャンクは削らない"], "doc": "06"}, {"id": "d183", "num": "183", "q": "山頂を削る頻度", "now": "通過の 6 割", "alts": ["毎回", "もっと稀に"], "doc": "06"}, {"id": "d184", "num": "184", "q": "月の近さ（雲の目・見る者が使う）", "now": "M4 まで日数の仮の値", "alts": ["M4 まで雲の目を出さない"], "doc": "06"}, {"id": "d185", "num": "185", "q": "伝承「平らな峰」を削り跡を見たら記すか", "now": "村の頁で記す（sub_song が使う）", "alts": ["削り跡でも記す"], "doc": "06、05、07"}, {"id": "d186", "num": "186", "q": "見る者と雲の目が同じ夜に重なってよいか", "now": "重なりうる", "alts": ["雲の目の条件に「見る者が立っていない」"], "doc": "06"}, {"id": "d187", "num": "187", "q": "字幕・帯を枠なし（案 B）に寄せるか", "now": "暗い石板（案 A）", "alts": ["枠なし"], "doc": "18"}, {"id": "d188", "num": "188", "q": "目的の帯・知らせの専用音", "now": "帯の専用音なし（札は既存の鈴）", "alts": ["作る"], "doc": "18"}, {"id": "d189", "num": "189", "q": "知らせの記録をワールドをまたいで残すか", "now": "この遊びの間だけ（200 件）", "alts": ["残す"], "doc": "18"}, {"id": "d190", "num": "190", "q": "護符の枠の数", "now": "1", "alts": ["増やす"], "doc": "03"}, {"id": "d191", "num": "191", "q": "創造モードの持ち物の画面に装飾のつまみがない", "now": "このまま", "alts": ["足す"], "doc": "03"}, {"id": "d192", "num": "192", "q": "顔・手だけ 64px 密度のテクスチャにするか", "now": "保留（32px のまま。描くなら語り部・イサナの顔から）", "alts": ["64px にする"], "doc": "15"}, {"id": "d193", "num": "193", "q": "描画の予算を低い PC 向けにするか（値はこの PC で測ったもの）", "now": "このまま", "alts": ["敵 1,000 面など。ユーザーの PC で perf を測り直す"], "doc": "15"}, {"id": "d194", "num": "194", "q": "番兵の光る目", "now": "採っている", "alts": ["戻す"], "doc": "15"}, {"id": "d195", "num": "195", "q": "灰被りの面の上限を状態ごとに数えるか", "now": "合計で 1,500", "alts": ["状態ごと（炎に +400 面）"], "doc": "15"}, {"id": "d196", "num": "196", "q": "余燼の火口の縞", "now": "保留", "alts": ["薄い壁板を 1 枚の厚い板にまとめる"], "doc": "15"}, {"id": "d197", "num": "197", "q": "手に持つ武器の 3D を防具と同じ基盤で作り直すか", "now": "作り直していない", "alts": ["作り直す"], "doc": "16"}, {"id": "d198", "num": "198", "q": "レア・伝説の見た目の差、強化での見た目の変化をいつ作るか", "now": "決まりだけ、実装なし", "alts": [], "doc": "16、03"}, {"id": "d199", "num": "199", "q": "防具の脚と靴の境（y 4.6）", "now": "今のまま", "alts": ["y 3 に下げる"], "doc": "16"}]}, {"title": "物語", "items": [{"id": "d64", "num": "64", "q": "裏ボスの題材（見る者は使わない）", "now": "終章を作る前に決める", "alts": [], "doc": "01"}]}];
+  const total = GROUPS.reduce((n, g) => n + g.items.length, 0);
+  const main = document.getElementById('main');
+  const nav = document.getElementById('nav');
+  const saveEl = document.getElementById('save');
+  let db = null;
+  const timers = {};
+  const answers = {};
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  GROUPS.forEach((g, gi) => {
+    const sec = el('section', 'g'); sec.id = 'g' + gi;
+    sec.appendChild(el('h2', null, g.title));
+    const a = el('a'); a.href = '#g' + gi; a.dataset.g = gi;
+    a.appendChild(el('span', null, g.title.replace(/（.*）/, ''))); a.appendChild(el('span', 'cnt', '0/' + g.items.length));
+    nav.appendChild(a);
+    g.items.forEach(it => {
+      const box = el('div', 'item'); box.id = it.id; box.dataset.g = gi;
+      const qr = el('div', 'qrow');
+      qr.appendChild(el('span', 'num', it.num));
+      qr.appendChild(el('p', 'q', it.q));
+      if (it.doc) qr.appendChild(el('span', 'doc', it.doc));
+      box.appendChild(qr);
+      const fs = el('fieldset', 'opts');
+      const choices = [{v: 'now', tag: '今のまま', text: it.now, cls: 'now'}]
+        .concat(it.alts.map((t, i) => ({v: 'alt' + (i + 1), tag: '案' + (i + 1), text: t})))
+        .concat([{v: 'other', tag: 'その他', text: 'メモに書く'}]);
+      choices.forEach(c => {
+        const lab = el('label', 'opt' + (c.cls ? ' ' + c.cls : ''));
+        const inp = el('input'); inp.type = 'radio'; inp.name = it.id; inp.value = c.v; inp.id = it.id + '-' + c.v;
+        lab.htmlFor = inp.id;
+        lab.appendChild(inp); lab.appendChild(el('span', 'tag', c.tag)); lab.appendChild(el('span', null, c.text));
+        inp.addEventListener('change', () => { answers[it.id] = Object.assign(answers[it.id] || {}, {option: c.v}); refresh(); save(it.id); });
+        fs.appendChild(lab);
+      });
+      box.appendChild(fs);
+      const note = el('textarea', 'note'); note.rows = 1; note.id = it.id + '-note'; note.placeholder = 'メモ（任意）';
+      note.setAttribute('aria-label', it.num + ' のメモ');
+      note.addEventListener('input', () => {
+        answers[it.id] = Object.assign(answers[it.id] || {}, {note: note.value});
+        clearTimeout(timers[it.id]); timers[it.id] = setTimeout(() => save(it.id), 800);
+      });
+      box.appendChild(note);
+      sec.appendChild(box);
+    });
+    main.appendChild(sec);
+  });
+
+  function refresh() {
+    let n = 0;
+    document.querySelectorAll('.item').forEach(b => {
+      const done = !!(answers[b.id] && answers[b.id].option);
+      b.dataset.done = done ? '1' : '0'; if (done) n++;
+    });
+    GROUPS.forEach((g, gi) => {
+      const d = g.items.filter(it => answers[it.id] && answers[it.id].option).length;
+      const a = nav.querySelector('[data-g="' + gi + '"]');
+      a.querySelector('.cnt').textContent = d + '/' + g.items.length;
+      a.classList.toggle('done', d === g.items.length);
+    });
+    document.getElementById('pcount').textContent = n + ' / ' + total + ' 回答済み';
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) { saveEl.textContent = 'この表示では保存できません（サインインして開いてください）'; return; }
+    const a = answers[id] || {};
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('answers/' + id).set({option: a.option || '', note: a.note || '', at: Date.now()});
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+
+  document.getElementById('fillnow').addEventListener('click', async () => {
+    const todo = [];
+    GROUPS.forEach(g => g.items.forEach(it => {
+      if (!(answers[it.id] && answers[it.id].option)) {
+        answers[it.id] = Object.assign(answers[it.id] || {}, {option: 'now'});
+        const r = document.getElementById(it.id + '-now'); if (r) r.checked = true;
+        todo.push(it.id);
+      }
+    }));
+    refresh();
+    for (const id of todo) { await save(id); }
+    saveEl.textContent = todo.length ? todo.length + ' 件を「今のまま」で保存しました' : '未回答はありません';
+  });
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では保存できません（サインインして開いてください）'; return; }
+    try {
+      const snap = await db.collection('answers').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        if (!data) continue;
+        answers[d.id] = {option: data.option || '', note: data.note || ''};
+        if (data.option) { const r = document.getElementById(d.id + '-' + data.option); if (r) r.checked = true; }
+        const n = document.getElementById(d.id + '-note'); if (n && data.note) n.value = data.note;
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の回答を読み込めませんでした'; }
+    refresh();
+  })();
+})();
+</script>

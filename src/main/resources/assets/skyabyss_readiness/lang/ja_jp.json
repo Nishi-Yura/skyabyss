@@ -1,0 +1,20 @@
+{
+  "message.skyabyss.readiness.lamp.body": "身",
+  "message.skyabyss.readiness.lamp.blade": "刃",
+  "message.skyabyss.readiness.lamp.provisions": "糧",
+  "message.skyabyss.readiness.note": "備え　%s",
+  "message.skyabyss.readiness.advice.body": "身が薄い。旅装か、鉄の上の鎧を",
+  "message.skyabyss.readiness.advice.blade": "刃が鈍い。強い武器か、砥石を",
+  "message.skyabyss.readiness.advice.provisions": "糧が少ない。回復と護りの品を持っていこう",
+  "message.skyabyss.readiness.advice.body.ok": "身は足りている",
+  "message.skyabyss.readiness.advice.blade.ok": "刃は足りている",
+  "message.skyabyss.readiness.advice.provisions.ok": "糧は足りている",
+  "message.skyabyss.readiness.confirm_click": "このまま乗る？（もう一度、5 秒以内）",
+  "message.skyabyss.readiness.confirm_walk": "このまま乗る？（出て入り直す、5 秒以内）",
+  "message.skyabyss.readiness.whisper.body.red": "前室の石が、あなたの身を測る。薄い",
+  "message.skyabyss.readiness.whisper.body.yellow": "前室の石が、あなたの身を測る。もうひと息",
+  "message.skyabyss.readiness.whisper.blade.red": "前室の石が、あなたの刃を測る。鈍い",
+  "message.skyabyss.readiness.whisper.blade.yellow": "前室の石が、あなたの刃を測る。もうひと研ぎ",
+  "message.skyabyss.readiness.whisper.provisions.red": "前室の石が、あなたの糧を測る。乏しい",
+  "message.skyabyss.readiness.whisper.provisions.yellow": "前室の石が、あなたの糧を測る。もう少し欲しい"
+}

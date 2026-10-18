@@ -1,0 +1,235 @@
+<title>珊瑚憑きの作り直し・雷翼の背 低ポリ 3案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>珊瑚憑きの作り直し・雷翼の背 低ポリ 3案</h1>
+    <p class="intro">いちばん上は、「鯨の時の敵の再利用みたい」とのことで作り直した珊瑚憑きの3案です（骨・肋・頭蓋をやめ、色も鯨の背と分けました）。その下は雷翼の背の5体の3案です。どれも雷翼の言葉（嵐・静電気・銅・羽・鳥籠）だけで作り、ほかの巨神の敵と形や素材が重ならないようにしました。骨の名前と位置は今のモデルと同じで、今のアニメーションがそのまま動きます。採用する案を選び、直してほしい点があれば書いてください。</p>
+    <details class="done"><summary>選ばれてゲームに入れたもの (2)</summary><ul><li>岩鯨の背の5体（番兵長 A・苔這い B・肋の射手 C・水路の顎 B・心臓 A）をゲームに入れた（箱のモデルより約3.3倍軽い）</li><li>潮殻の背の4体（磯走り A・泡吹き A・潮招き A・心臓 B）をゲームに入れている途中</li></ul></details>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 6 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#lp_coral_thrall2" data-nav="lp_coral_thrall2">珊瑚憑き 低ポリ 第2弾</a><a href="#lp_feather_warden" data-nav="lp_feather_warden">羽守 低ポリ</a><a href="#lp_static_moth" data-nav="lp_static_moth">雷蛾 低ポリ</a><a href="#lp_thunder_supplicant" data-nav="lp_thunder_supplicant">雷乞い 低ポリ</a><a href="#lp_raiju" data-nav="lp_raiju">雷獣 低ポリ</a><a href="#lp_storm_heart" data-nav="lp_storm_heart">雷翼の心臓 低ポリ</a></nav>
+    <main>
+<section class="subject" id="lp_coral_thrall2" data-id="lp_coral_thrall2">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>珊瑚憑き (coral_thrall) 低ポリ 第2弾: 骨格に見えない 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">前回 A (枝角の冠) を選んだが、鯨の背の敵 (bone_sentinel / rib_archer) の骨格の使い回しに見えるとの指摘。枝分かれする珊瑚の冠は残し、肋骨・象牙色の骨・頭蓋骨の顔をやめて、体そのものが珊瑚・岩・海綿でできた「珊瑚に憑かれた溺れ人」に作り直した。パレットは珊瑚の桃・橙・紅、海の青緑、深い青紫、濡れた石 (象牙色と苔緑は鯨の背のものなので使わない)。骨名・階層・pivot は現行 geo と同じ (root は Y 180 度、forearm_r は休め X 70 度、socket_main は X -150 度。頂点は回転前の geo 空間)。銛は socket_main の局所座標の別メッシュ。像は同じモデルに骨 statue_coral を足し、白い石のアトラス (*_statue_atlas.png) に替える。三角形: A 本体 650 + 銛 118 + 像の珊瑚 72 / B 本体 619 + 銛 126 + 像 72 / C 本体 629 + 銛 118 + 像 45 (目標: 普通の敵 約 600、銛 250 以下)。アトラス 128x128 (銛 64x64)、光るマスクは目の点 + 銛の海硝子。出力: docs/review/lowpoly_roughs/coral_thrall2/{a,b,c}/。生成: tools/rough/lowpoly/coral_thrall2/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_coral_thrall2.jpg" aria-label="珊瑚憑き (coral_thrall) 低ポリ 第2弾: 骨格に見えない 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_coral_thrall2.jpg" alt="珊瑚憑き (coral_thrall) 低ポリ 第2弾: 骨格に見えない 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_coral_thrall2-a"><input type="radio" name="lp_coral_thrall2" id="lp_coral_thrall2-a" value="a"><span class="letter">A</span><span class="otext"><b>A 岩礁の溺れ人</b><span>濡れた岩礁そのものになった重い猫背の体。胸にフジツボと短い珊瑚のかたまり、左肩に脳珊瑚。顔は平らな石の面に海硝子の目 (歯も顎もない)。頭・肩・背から枝分かれする枝珊瑚の冠 (前回選んだ冠のまま)。銛は枝珊瑚の三つ又。</span></span></label><label class="opt" for="lp_coral_thrall2-b"><input type="radio" name="lp_coral_thrall2" id="lp_coral_thrall2-b" value="b"><span class="letter">B</span><span class="otext"><b>B 海綿と昆布の外套</b><span>黄橙色の穴だらけの海綿の体。深い青紫の昆布を外套のように肩から背へ垂らし、肩と背に管海綿の筒。顔はイソギンチャクの円盤で、触手の襟の中の暗い窪みに目。頭の上に細い枝珊瑚。銛は巻貝の尖塔。丸く垂れる輪郭。</span></span></label><label class="opt" for="lp_coral_thrall2-c"><input type="radio" name="lp_coral_thrall2" id="lp_coral_thrall2-c" value="c"><span class="letter">C</span><span class="otext"><b>C 枝珊瑚の長身</b><span>背が高く細い枝珊瑚の影。胴は深い青紫の芯で、桃・橙・紅の枝が四方へ伸びて輪郭がぎざつく。頭は筋入りの二枚貝の殻に枝角の冠、殻の隙間の窪みに目。銛は枝分かれした珊瑚の小枝。縦に伸びる輪郭。</span></span></label></fieldset>
+  <label class="note-l" for="lp_coral_thrall2-note">直してほしい点 (任意)</label>
+  <textarea id="lp_coral_thrall2-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_feather_warden" data-id="lp_feather_warden">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>羽守 (feather_warden) 低ポリ非立方体 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 雷翼の巨神の背の番人 (銅の兜・灰青の羽の外套・光る目の点・別メッシュの鉤槍) の同一性を保ち、統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) で 3 方向の輪郭を作り比べる。岩鯨の骨の番兵とかぶらないよう、骨・珊瑚・貝は使わず、羽・銅・避雷針・猛禽の体で組む。骨名・階層・pivot は現行 geo と同じ (root は Y 180 度、socket_main は休め -15 度を持つ。頂点は geo 空間)。鉤槍は socket_main の局所座標の別メッシュ (骨 glaive)。三角形: A 本体 610 + 槍 109 / B 本体 565 + 槍 107 / C 本体 604 + 槍 149 (目標: 普通の敵 約 600、武器 250 以下)。アトラス 256x256 (槍 64〜128)、光るマスクは目の点と避雷針・鉤の先。出力: docs/review/lowpoly_roughs/lp_feather_warden/{a,b,c}/。生成: tools/rough/lowpoly/feather_warden/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_feather_warden.jpg" aria-label="羽守 (feather_warden) 低ポリ非立方体 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_feather_warden.jpg" alt="羽守 (feather_warden) 低ポリ非立方体 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_feather_warden-a"><input type="radio" name="lp_feather_warden" id="lp_feather_warden-a" value="a"><span class="letter">A</span><span class="otext"><b>A 鷲兜の番人</b><span>直立した騎士の輪郭。銅の鷲の嘴の兜に避雷針の冠、重ね羽の肩当てと胸の鎧羽、背から垂れる 2 枚の風切りのマント、鳥の逆関節の脚。灰青の鋼と白い羽に銅の縁取り。鉤槍は木の葉の穂先と鷲の爪の鉤。</span></span></label><label class="opt" for="lp_feather_warden-b"><input type="radio" name="lp_feather_warden" id="lp_feather_warden-b" value="b"><span class="letter">B</span><span class="otext"><b>B 嵐の隼</b><span>前のめりで首を突き出した隼。藍黒の鎧で嘴と爪だけ銅、後ろへ流れる冠羽と尾羽、胸の龍骨、折りたたんだ翼のマント、長い逆関節と大きな爪。鉤槍は細い二股の銛と羽の吹き流し。夜は暗く、白金の羽の縁で読ませる。</span></span></label><label class="opt" for="lp_feather_warden-c"><input type="radio" name="lp_feather_warden" id="lp_feather_warden-c" value="c"><span class="letter">C</span><span class="otext"><b>C 鐘の守り手</b><span>低く幅広い鐘の輪郭。丸い銅の面の中は空で、放射状の避雷針の冠、緑青の浮いた青銅の胴、地面まで届く重ね羽の裾、体を抱くマント。鉤槍は大きな環の鉤の重い杖。動かず待つ重さを見せる。</span></span></label></fieldset>
+  <label class="note-l" for="lp_feather_warden-note">直してほしい点 (任意)</label>
+  <textarea id="lp_feather_warden-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_static_moth" data-id="lp_static_moth">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>雷蛾 (static_moth) 低ポリ非立方体 3 案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 雷翼の巨神の嵐と静電気 (灰青・白・銅・稲妻の白青) で、余燼の火の粒蛾 (ember_moth: 暗い石の灰色・橙の火) とはっきり別の見た目にする。統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) で 3 方向の輪郭を作り比べた。骨の名前・階層・pivot は現行 geo と同じ (root は Y 180 度回転、wing_l / wing_r / antennae は body の子。頂点は geo 空間)。翅は両面の薄い板で、厚みのある縁を付けてある (描画は no-cull)。今のアニメ (羽ばたき・体のゆれ・死に方) がそのまま動く。光る画素は目と稲妻の筋・目玉模様の中心・触角の先 (帯電すると翅の模様が明るくなる設計に合わせ、翅の光る面積が帯電の量になる)。 三角形: A 622 / B 498 / C 644 (目標: 普通の敵 約 600)。アトラス A 128x128 / B 128x128 / C 128x128。出力: docs/review/lowpoly_roughs/lp_static_moth/{a,b,c}/。生成: tools/rough/lowpoly/static_moth/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_static_moth.jpg" aria-label="雷蛾 (static_moth) 低ポリ非立方体 3 案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_static_moth.jpg" alt="雷蛾 (static_moth) 低ポリ非立方体 3 案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_static_moth-a"><input type="radio" name="lp_static_moth" id="lp_static_moth-a" value="a"><span class="letter">A</span><span class="otext"><b>A 綿毛の雷蛾</b><span>ヤママユガ型。丸く波打つ大きな翅に白い綿毛の縁取りと銅の翅脈、コバルトの目玉模様 (中心が白く光る)。ふさふさの灰青の胸、羽枝のある銅の触角、翅の先に小さな放電。やわらかく可愛いが静電気を帯びた感じ。</span></span></label><label class="opt" for="lp_static_moth-b"><input type="radio" name="lp_static_moth" id="lp_static_moth-b" value="b"><span class="letter">B</span><span class="otext"><b>B 稲妻翅</b><span>嵐雲色 (暗い藍) のぎざぎざ翅。縁は稲妻の折れ線で後ろの翅は長い雷の尾、翅脈は白金に光る稲妻そのもの。銅の肩当て・背びれ・腹の帯、前へ突き出す 2 本の避雷針の角、吊り上がった細い目。いちばん敵らしく攻撃的。</span></span></label><label class="opt" for="lp_static_moth-c"><input type="radio" name="lp_static_moth" id="lp_static_moth-c" value="c"><span class="letter">C</span><span class="otext"><b>C 銅コイルの燕尾蛾</b><span>長い燕尾の翅は銅の枠と淡い水色のガラス板を組んだ窓で、枠の交点が小さなコンデンサのように青く光る。腹は銅線を巻いたコイル (輪のすき間が光る)、大きな複眼と光の玉の付いた細い鞭の触角。緑青のさびで発電機の質感。</span></span></label></fieldset>
+  <label class="note-l" for="lp_static_moth-note">直してほしい点 (任意)</label>
+  <textarea id="lp_static_moth-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_thunder_supplicant" data-id="lp_thunder_supplicant">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>雷乞い (thunder_supplicant) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の敵。鳥籠の頭の法衣)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の敵。骨 9 本 (root[Y 180 度] &gt; body &gt; head / robe / arm_r &gt; forearm_r &gt; socket_main / arm_l &gt; forearm_l) の名前・階層・pivot・socket_main の初期回転 (-25 度) は今の geo のまま、今のアニメ 6 本 (idle・walk・cast・attack・hurt・death) がそのまま動く。杖 (supplicant_staff) は別メッシュで socket_main に付く (geo/gear と同じ局所座標)。三角形 (本体 + 杖): A 600 + 76 / B 598 + 122 / C 549 + 110 (普通の敵の目安 約 600 以下)。今は箱 295 + 杖 49。アトラス: 本体 A 128・B 128・C 256 / 杖 128。光る画素: A 籠の稲妻・胸の珠・杖の先 / B 籠の鳥・杖の羽 / C 灯籠の紙の面・杖の珠。全案、雷翼の言葉 (嵐・静電気・銅・羽・鳥籠・法衣) だけで作り、岩鯨の骨の敵などとは重ねていない。シートは今 / A / B / C を前 3/4・後ろ 3/4・籠の頭のアップ・祈り (cast 0.6 s) 前 3/4 と横・杖のアップ・アトラスで並べる。メッシュは lowpoly_roughs/lp_thunder_supplicant/{a,b,c}/thunder_supplicant_{a,b,c}_mesh.json と _staff_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/thunder_supplicant/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_thunder_supplicant.jpg" aria-label="雷乞い (thunder_supplicant) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の敵。鳥籠の頭の法衣) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_thunder_supplicant.jpg" alt="雷乞い (thunder_supplicant) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の敵。鳥籠の頭の法衣) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_thunder_supplicant-a"><input type="radio" name="lp_thunder_supplicant" id="lp_thunder_supplicant-a" value="a"><span class="letter">A</span><span class="otext"><b>A 風見の籠</b><span>縦に細長い鐘と灯籠。銅の鳥籠の頭 (腹のふくらんだ 6 本の柱、玉ねぎ屋根、天辺に風見の鶏) の中に、稲妻が前と後ろに走る。法衣は襞のある青灰の鐘形で、裾は白い羽の鋸歯、背に尾羽。肩に羽板、銅の襟と棘の飾り、胸に光る珠、袖口は銅。杖は銅の避雷針の三叉 (先に光る珠)。今のモデルの延長で、最も落ち着いた輪郭。</span></span></label><label class="opt" for="lp_thunder_supplicant-b"><input type="radio" name="lp_thunder_supplicant" id="lp_thunder_supplicant-b" value="b"><span class="letter">B</span><span class="otext"><b>B 羽の司祭</b><span>白と灰の羽の外套を着た鳥の司祭。肩から 3 段に垂れる羽の外套、袖から翼のように垂れる羽板。丸い銅の鳥籠の中に翼を広げた金白の雷の鳥、頭の後ろに羽の扇、天に銅の避雷針 7 本の冠。杖は止まり木の鉤で、先から金白の羽の灯がぶら下がる。針の冠と広がる白い羽で、最も鳥らしく読める輪郭。</span></span></label><label class="opt" for="lp_thunder_supplicant-c"><input type="radio" name="lp_thunder_supplicant" id="lp_thunder_supplicant-c" value="c"><span class="letter">C</span><span class="otext"><b>C 蓑の雷乞い</b><span>雨乞いの巡礼。藁の蓑を何段も重ねた裾広がりの外套 (藁の鋸歯、銅線がささくれ立つ)、縁から銅線の立つ大きな笠。笠の下は六角の紙の灯籠のような籠で、光る面に黒い稲妻の影。藍の細い袖に銅の腕輪。杖は錫杖 (銅の輪の冠に光る珠)。大きな笠と藁山の輪郭で、他の 2 案と最も違う。</span></span></label></fieldset>
+  <label class="note-l" for="lp_thunder_supplicant-note">直してほしい点 (任意)</label>
+  <textarea id="lp_thunder_supplicant-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_raiju" data-id="lp_raiju">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>雷獣 (raiju) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の中ボス)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の中ボス。骨 17 本 (root[Y 180 度] &gt; body &gt; chest &gt; head &gt; jaw / mane / tail &gt; tail_2 &gt; tail_3 / leg_fl・fr・bl・br &gt; 各 *_lo) の名前・階層・pivot は今の geo のまま、今のアニメ 16 本 (idle・walk・perch・pounce_leap・claw・roar など) がそのまま動く。武器・別メッシュはなし。三角形 (全身): A 1,305 / B 1,202 / C 1,516 (上限 約 1,500)。今は箱 1,322 個。アトラス 512×512。雷翼の主題 (嵐・静電気・銅・水晶の鬣・羽根) だけで組み、前の二体 (岩鯨の骨・石・苔、潮殻の貝・珊瑚・海硝子) の敵と形・素材が重ならない。光る画素は水晶・稲妻の線・羽根の先・瞳のみ (青白)。シートは今 / A / B / C を前 3/4・後ろ 3/4・頭のアップ・横から・飛びかかり (pounce_leap 0.5 s)・爪の連打 (claw 0.35 s)・アトラスで並べる。メッシュは lowpoly_roughs/lp_raiju/{a,b,c}/raiju_{a,b,c}_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/raiju/sheet.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_raiju.jpg" aria-label="雷獣 (raiju) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の中ボス) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_raiju.jpg" alt="雷獣 (raiju) — 低ポリ非立方体 + ドット絵 3 案 (雷翼の背の中ボス) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_raiju-a"><input type="radio" name="lp_raiju" id="lp_raiju-a" value="a"><span class="letter">A</span><span class="otext"><b>A 嵐の狼</b><span>今の延長 (推奨ラフ A 狼型)。脚の長い走る狼。灰青の毛に、体の横を走る白い稲妻の模様 (光る)、胸に霜色の毛の房。背に後ろへ倒れた水晶の鬣 (青白く光る) が二列、大きな耳 (内側は銅)、折れ線の尾の先に水晶の刃。爪は銅。細く速く、牙と耳の尖った輪郭。</span></span></label><label class="opt" for="lp_raiju-b"><input type="radio" name="lp_raiju" id="lp_raiju-b" value="b"><span class="letter">B</span><span class="otext"><b>B 羽鬣の獅子</b><span>胸と肩の厚い獅子。頭のまわりに三重の羽根の大きな襟 (後ろへ流れる)、背に羽根の稜線、前脚・腿・尾に羽根の袴、尾の先は羽根の扇。羽根は嵐の紺から先へ明るくなり、軸は銅、先は白く光る。雷翼の『翼』と直接つながる、堂々とした輪郭。</span></span></label><label class="opt" for="lp_raiju-c"><input type="radio" name="lp_raiju" id="lp_raiju-c" value="c"><span class="letter">C</span><span class="otext"><b>C 銅角の雷獣</b><span>肩が高く腰の低い鉄色の獣に、後ろへ重なる銅の鎧の帯と肩の板。頭に稲妻の形に折れて枝分かれする水晶の大角と、反った水晶の牙。背に銅の避雷針 (がいしの板つき)、四肢に銅の巻き線、尾は銅の輪を巻いた棒で、先に帯電した水晶の球。縦に高く、遠くから角と避雷針で見分けがつく。</span></span></label></fieldset>
+  <label class="note-l" for="lp_raiju-note">直してほしい点 (任意)</label>
+  <textarea id="lp_raiju-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_storm_heart" data-id="lp_storm_heart">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>雷翼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の心臓。骨名・pivot は今の geo (段階 1/2/3。親なし・休めの回転なし) のまま、intro/death を含む今のアニメがそのまま動く。雷翼の言葉 (嵐・羽軸と羽枝・静電気・銅・稲妻の傷) で、段階ごとの灯りの増加を保つ。三角形 (段階 1 / 2 / 3): A 1,127・1,519・1,857 / B 1,185・1,211・1,719 / C 1,030・1,366・1,845。今は箱 1169/1343/1052 個。上限は 2,000 三角形/段階。メッシュは lowpoly_roughs/lp_storm_heart/{a,b,c}/p{1,2,3}_mesh.json (+ atlas・glowmask)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_storm_heart.jpg" aria-label="雷翼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_storm_heart.jpg" alt="雷翼の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_storm_heart-a"><input type="radio" name="lp_storm_heart" id="lp_storm_heart-a" value="a"><span class="letter">A</span><span class="otext"><b>A 風切りの殻</b><span>嵐の傷 (採用済みの C) の素直な低ポリ化。丸い石の心臓を、銅の軸と羽枝の縞を持つ大きな羽根の板が抱き、先は切れ込み、石の傷から稲妻が漏れる。段階 2 で翼が開いて上に冠の羽、段階 3 で羽が抜け、骨と光の網が残る。最も今に近く、まとまっている。</span></span></label><label class="opt" for="lp_storm_heart-b"><input type="radio" name="lp_storm_heart" id="lp_storm_heart-b" value="b"><span class="letter">B</span><span class="otext"><b>B 避雷針の骨籠</b><span>銅 (緑青の吹いた避雷針) の言葉。心臓は銅の輪の籠に入り、大動脈の先に静電気の玉が灯る。翼は銅の軸に櫛の歯の羽枝が並ぶ、細く軽いシルエット。段階 3 は輪が割れ、骨の枠に銅の棒と稲妻が走る。暗い鋼・緑青・電光の渋い案。</span></span></label><label class="opt" for="lp_storm_heart-c"><input type="radio" name="lp_storm_heart" id="lp_storm_heart-c" value="c"><span class="letter">C</span><span class="otext"><b>C 帯電の羽冠</b><span>暗い藍の面取りの心臓から、帯電した針羽が四方へ逆立ち、先が光る (段階ごとに数・長さ・灯りが増す)。翼は稲妻の形に折れた幅広の板 (嵐の布) で、縁は深く裂ける。段階 3 は稲妻の骨と太い光の網に針が刺さる。最も激しく、一番光る案。</span></span></label></fieldset>
+  <label class="note-l" for="lp_storm_heart-note">直してほしい点 (任意)</label>
+  <textarea id="lp_storm_heart-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 6;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>
