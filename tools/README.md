@@ -220,3 +220,5 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 
 - `python tools/gen_advancements.py`: この Mod の進捗の木 (`data/skyabyss/advancement/`)、背景の絵、lang の `advancement.skyabyss.*` を作る。何度でも動かせる。仕様は `docs/design/19_advancements_and_tablets.md`
 - `python tools/gen_tablet_texture.py`: 碑 (`skyabyss:tablet`) の絵 2 枚、ブロック状態、モデル、lang の名前を作る
+
+| 岩鯨の背の島 (低ポリ案 C をブロックにした鯨、02 の 3.1 章): `data/skyabyss/titan_back/whale.bin` | `gen_titan_back_whale.py` (形は `lowpoly_whale_voxel.py` が案 C の近景メッシュから作る。`--fit` で部屋と殻の距離、`--preview` で上と横の色の地図)。構造の書き出しとメッシュの並べ描きは `whale_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`TitanBackLayout.LAYOUT_VERSION`) を上げる |

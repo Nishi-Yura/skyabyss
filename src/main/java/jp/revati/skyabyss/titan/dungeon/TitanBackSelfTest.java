@@ -275,7 +275,7 @@ public final class TitanBackSelfTest {
         }
         for (Part part : List.of(new Part("head", -3, -150, 70, 125), new Part("left pectoral fin", -75, -30, 60, 95),
                 new Part("right pectoral fin", 69, -30, 60, 95), new Part("left fluke", -60, 238, 85, 100),
-                new Part("right fluke", 54, 238, 85, 100), new Part("back tower", -3, -38, 150, 168),
+                new Part("right fluke", 54, 238, 85, 100), new Part("ruined pillar on the back", -4, -21, 125, 142),
                 new Part("anchor chain", ANCHOR_CHAIN_X, ANCHOR_CHAIN_Z, BASE_Y - 40, ANCHOR_CHAIN_Y))) {
             boolean found = false;
             for (int y = part.y1(); y <= part.y2() && !found; y++) {
