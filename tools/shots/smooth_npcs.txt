@@ -1,0 +1,48 @@
+# Smooth storyteller (B) and Isana (A) in daylight: front / side / back / face close-ups.
+# ./gradlew runShots -Pscript=tools/shots/smooth_npcs.txt
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:storyteller -2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:whale_chaser 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+hud off
+camera minecraft:overworld 0 -60.7 5.2 180 0
+waitchunks
+wait 40
+cmd skyabyss cinematic stop
+wait 40
+shot smooth_npc_both
+camera minecraft:overworld -2 -60.5 3.0 180 0
+wait 20
+shot smooth_storyteller_front
+camera minecraft:overworld -2 -60.0 1.5 180 4
+wait 20
+shot smooth_storyteller_face
+camera minecraft:overworld -5.0 -60.5 0 270 0
+wait 20
+shot smooth_storyteller_side
+camera minecraft:overworld -2 -60.5 -3.0 0 0
+wait 20
+shot smooth_storyteller_back
+camera minecraft:overworld 2 -60.5 3.0 180 0
+wait 20
+shot smooth_chaser_front
+camera minecraft:overworld 2 -59.9 1.6 180 4
+wait 20
+shot smooth_chaser_face
+camera minecraft:overworld 5.0 -60.5 0 90 0
+wait 20
+shot smooth_chaser_side
+camera minecraft:overworld 2 -60.5 -3.0 0 0
+wait 20
+shot smooth_chaser_back
+quit
