@@ -121,11 +121,24 @@ public final class GroupEvents {
     }
 
     // ---------------------------------------------------------------- 見かけの送り直し
+    // 上書き (扉・光る石) と、見えなくする人の一覧は、クライアントのワールドが作り直されるたび (ログイン・次元の移動・死んで戻る)
+    // と、グループが変わるたびに、送り直す。倒れて戻るときはワールドが二度作り直される (地上 → 背中) ので、
+    // 届くのが作り直しと同じ tick になってもよいよう、少し後にもう一度送る (RESEND)。念のため、背中にいる人には 10 秒ごとにも送る
+    private static final Map<UUID, Integer> RESEND = new HashMap<>();
+    private static final int RESEND_AFTER = 20;
+    private static final int PERIODIC = 200;
+
+    // 人のいまの見かけ (上書きと、見えなくする人) を送り、少し後にもう一度送る。ログイン・次元の移動・復活から呼ぶ
+    public static void resync(ServerPlayer player) {
+        GroupOverlays.send(player);
+        LAST_HIDDEN.remove(player.getUUID());
+        RESEND.put(player.getUUID(), RESEND_AFTER);
+    }
+
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            GroupOverlays.send(player);
-            LAST_HIDDEN.remove(player.getUUID());
+            resync(player);
         }
     }
 
@@ -133,28 +146,30 @@ public final class GroupEvents {
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         GroupOverlays.forget(event.getEntity().getUUID());
         LAST_HIDDEN.remove(event.getEntity().getUUID());
+        RESEND.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
     static void onDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            GroupOverlays.send(player);
-            LAST_HIDDEN.remove(player.getUUID());
-            PacketDistributor.sendToPlayer(player, new GroupNetwork.Hidden(new int[0]));
+            resync(player);
+            if (player.connection != null) {
+                PacketDistributor.sendToPlayer(player, new GroupNetwork.Hidden(new int[0]));
+            }
         }
     }
 
     @SubscribeEvent
     static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            GroupOverlays.send(player);
-            LAST_HIDDEN.remove(player.getUUID());
+            resync(player);
         }
     }
 
     @SubscribeEvent
     static void onStopped(ServerStoppedEvent event) {
         LAST_HIDDEN.clear();
+        RESEND.clear();
         GroupOverlays.clear();
     }
 
@@ -171,6 +186,20 @@ public final class GroupEvents {
             }
         }
         List<ServerPlayer> players = level.players();
+        for (ServerPlayer p : players) {
+            Integer left = RESEND.get(p.getUUID());
+            if (left != null) {
+                if (left <= 10) {
+                    RESEND.remove(p.getUUID());
+                    GroupOverlays.send(p);
+                    LAST_HIDDEN.remove(p.getUUID());
+                } else {
+                    RESEND.put(p.getUUID(), left - 10);
+                }
+            } else if ((level.getGameTime() / 10 + p.getId()) % (PERIODIC / 10) == 0) {
+                GroupOverlays.send(p);
+            }
+        }
         if (players.size() < 2) {
             for (ServerPlayer viewer : players) {
                 sendHidden(viewer, new int[0]);
