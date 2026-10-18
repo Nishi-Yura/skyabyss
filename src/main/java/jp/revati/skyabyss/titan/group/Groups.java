@@ -17,7 +17,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.AABB;
 
 // 「グループ」= パーティ、またはパーティに入っていない一人 (一人のグループ)。
-// 試練の進み・扉・宝箱・休み場・心臓の撃破・リセットの番号は、グループごとに持つ (docs/design/10 の 9 章)。
+// 試練の進み・扉・宝箱・休み場・心臓の撃破・リセットの番号は、グループごとに持つ (docs/design/10 の 10 章)。
 // グループの鍵 (UUID): パーティならパーティの id、一人ならプレイヤーの UUID。
 public final class Groups {
     private Groups() {

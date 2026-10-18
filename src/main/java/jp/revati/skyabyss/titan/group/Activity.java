@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 人が「動いている」か (放置していないか) の記録 (docs/design/10 の 9 章・6.2)。
+// 人が「動いている」か (放置していないか) の記録 (docs/design/10 の 10 章・6.2)。
 // 動いた (位置が 1 ブロック以上、または向きが 20 度以上変わった)・戦った (傷を与えた/受けた)・触れた (ブロック・アイテム) と、最後に動いた時刻を更新する。
 // 使い道:
 //  - 背中の試練: 動いていない人 (放置・観戦) が一人いるだけで、誰もいない扱いにならずリセットや呼び直しが止まるのを防ぐ

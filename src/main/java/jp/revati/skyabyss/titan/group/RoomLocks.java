@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 
-// 部屋の占有 (docs/design/10 の 9 章)。
+// 部屋の占有 (docs/design/10 の 10 章)。
 // 水・溶岩・足場・水路のように、当たり判定や水の動きが変わる仕掛けは、見る人ごとに変えられない。
 // そういう部屋 (庭・潮見の間・干潟・灰の道・鍛えの間・火守りなど) は「一度に一つのグループだけ」が入れる。
 //  - 最初に部屋へ入ったグループが持ち主になる。ほかのグループが入ると、入口の外へ戻して理由を出す

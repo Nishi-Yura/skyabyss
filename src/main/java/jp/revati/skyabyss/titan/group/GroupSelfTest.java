@@ -22,7 +22,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
-// グループの共通部分の自己テスト (docs/design/10 の 9 章): 部屋の占有・戦いの参加者 (M6)・影 (M4)・乗っている人の数え方 (M5)・放置の分け前 (M7)。
+// グループの共通部分の自己テスト (docs/design/10 の 10 章): 部屋の占有・戦いの参加者 (M6)・影 (M4)・乗っている人の数え方 (M5)・放置の分け前 (M7)。
 // 扉・敵・記録・パーティの引き継ぎは、各背中の自己テスト (titan back (groups) など) が見る。
 // 偽のプレイヤー (FakePlayer) はレベルの人の一覧に入らないので、一覧を渡す形の部品で確かめる
 public final class GroupSelfTest {

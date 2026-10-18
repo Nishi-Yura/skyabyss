@@ -13,7 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-// 試練の敵・ボスが、どのグループ (パーティ、または一人) のものかを持つ印 (docs/design/10 の 9 章)。
+// 試練の敵・ボスが、どのグループ (パーティ、または一人) のものかを持つ印 (docs/design/10 の 10 章)。
 // 実装する基底クラス (GuardMob・TideMob・StormMob・EmberMob) は、次の三つを必ず上書きする:
 //   broadcastToPlayer → 他グループの人にはパケットを送らない (描画も当たり判定も音も届かない)
 //   canAttack         → 他グループの人を狙わない (最寄りの探索に入れない)

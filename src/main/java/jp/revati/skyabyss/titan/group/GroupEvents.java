@@ -29,7 +29,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-// グループ (Groups) まわりの共通の動き (docs/design/10 の 9 章)。
+// グループ (Groups) まわりの共通の動き (docs/design/10 の 10 章)。
 //  - 背中のグループの鍵が変わったとき (組む・入る・抜ける): 進みの引き継ぎ
 //      ・組む: パーティの記録は、組んだ側 (リーダー) のグループの記録の写しから始まる
 //      ・入る: パーティの記録をそのまま使う (入った人の元の一人の記録は使われない)
@@ -218,7 +218,7 @@ public final class GroupEvents {
         }
     }
 
-    // 戦いの部屋の中で倒れた参加者を覚える (撃破の参加者に数える。docs/design/10 の 9 章)
+    // 戦いの部屋の中で倒れた参加者を覚える (撃破の参加者に数える。docs/design/10 の 10 章)
     @SubscribeEvent
     static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && TitanBacks.isBack(player.level().dimension())) {
