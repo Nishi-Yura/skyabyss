@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,waterlogged=false": {
+      "model": "skyabyss:block/cinder_lamp"
+    },
+    "hanging=false,waterlogged=true": {
+      "model": "skyabyss:block/cinder_lamp"
+    },
+    "hanging=true,waterlogged=false": {
+      "model": "skyabyss:block/cinder_lamp_hanging"
+    },
+    "hanging=true,waterlogged=true": {
+      "model": "skyabyss:block/cinder_lamp_hanging"
+    }
+  }
+}

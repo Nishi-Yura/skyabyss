@@ -212,5 +212,25 @@
   "subtitles.skyabyss.storm_crosswind": "",
   "subtitles.skyabyss.storm_mirror": "",
   "subtitles.skyabyss.storm_feather": "",
-  "entity.skyabyss.thunder_wing": ""
+  "entity.skyabyss.thunder_wing": "",
+  "block.skyabyss.storm_rod": {
+    "en": "Lightning Pillar",
+    "ja": "避雷の柱"
+  },
+  "block.skyabyss.storm_rod_bulb": {
+    "en": "Lightning Pillar Bulb",
+    "ja": "避雷の柱の電球"
+  },
+  "block.skyabyss.storm_rod_shaft": {
+    "en": "Lightning Pillar Shaft",
+    "ja": "避雷の柱の軸"
+  },
+  "block.skyabyss.storm_rod_tip": {
+    "en": "Lightning Pillar Needle",
+    "ja": "避雷の柱の針"
+  },
+  "block.skyabyss.reset_mirror": {
+    "en": "Return Mirror",
+    "ja": "戻しの鏡"
+  }
 }

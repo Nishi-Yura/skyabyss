@@ -285,5 +285,8 @@
   "title.skyabyss.storm_back.sub": "A bird's back, flying above the storm",
   "trial.skyabyss.storm_east": "East (Thunderbone)",
   "trial.skyabyss.storm_front": "Front (Eye Hall)",
-  "trial.skyabyss.storm_west": "West (Windbone)"
+  "trial.skyabyss.storm_west": "West (Windbone)",
+  "block.skyabyss.storm_rod_bulb": "Lightning Pillar Bulb",
+  "block.skyabyss.storm_rod_shaft": "Lightning Pillar Shaft",
+  "block.skyabyss.storm_rod_tip": "Lightning Pillar Needle"
 }

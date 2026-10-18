@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +30,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -49,7 +50,7 @@ public final class RaijuNest {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
     // 2: 背中の担当の本物の巣を使う (自前の洞を建てない)
-    public static final int LAYOUT_VERSION = 2;
+    public static final int LAYOUT_VERSION = 3;
     public static final int RODS = 6;
     public static final int ROD_RADIUS = StormBackLayout.RAIJU_ROD_RADIUS;
     // 柱: 根元 (床のブロックの高さ) の銅、電球 3 つ、銅、5 段上に避雷針。雷獣は避雷針の上に立つ
@@ -209,7 +210,7 @@ public final class RaijuNest {
     // 背中の鳥が建っていて、巣の柱が本物の柱として登録されている
     public static boolean isBuilt(Site site) {
         for (int i = 0; i < RODS; i++) {
-            if (!site.level().getBlockState(site.rodTop(i)).is(Blocks.LIGHTNING_ROD) || StormRods.get(site.level(), site.rod(i)) == null) {
+            if (!site.level().getBlockState(site.rodTop(i)).is(StormBackSetup.ROD_TIP.get()) || StormRods.get(site.level(), site.rod(i)) == null) {
                 return false;
             }
         }
@@ -231,7 +232,7 @@ public final class RaijuNest {
         }
         StormBackBuilder.ensureBuilt(level);
         RaijuState state = RaijuState.get(level.getServer());
-        if (!level.getBlockState(site.rodTop(0)).is(Blocks.LIGHTNING_ROD) && state.built() < LAYOUT_VERSION) {
+        if (!level.getBlockState(site.rodTop(0)).is(StormBackSetup.ROD_TIP.get()) && state.built() < LAYOUT_VERSION) {
             SkyAbyss.LOGGER.info("Found the raiju nest of an older version; rebuilding the storm back once");
             StormBackBuilder.build(level, TitanBackData.get(level));
         }
@@ -316,8 +317,8 @@ public final class RaijuNest {
         for (int k = 1; k <= 3; k++) {
             BlockPos bulb = b.above(k);
             BlockState s = level.getBlockState(bulb);
-            if (s.is(Blocks.WAXED_COPPER_BULB) && s.getValue(CopperBulbBlock.LIT) == grounded) {
-                level.setBlock(bulb, s.setValue(CopperBulbBlock.LIT, !grounded), 2);
+            if (s.is(StormBackSetup.ROD_BULB.get()) && s.getValue(StormBlocks.RodBulb.LIT) == grounded) {
+                level.setBlock(bulb, s.setValue(StormBlocks.RodBulb.LIT, !grounded), 2);
             }
         }
         BlockPos plug = site.plug(i);
