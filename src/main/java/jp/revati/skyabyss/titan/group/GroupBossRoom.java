@@ -24,7 +24,8 @@ import net.minecraft.world.phys.Vec3;
 // 決まり (旧 BossRoom と同じ):
 //  - 部屋の内側にグループの人が入ると 5 秒の集合。閉じるとき、戸口と前室の人 (そのグループだけ) も中へ入れる
 //  - 入口をそのグループにだけ封じ、ボスを湧かせる。挑む人数で強さが決まる
-//  - 戦いの途中で倒れて前室から戻った参加者は、扉に触れると中へ通す
+//  - 戦いの途中で倒れた参加者は、戦いが終わる (倒す・やり直し) まで扉から戻れない (報酬の参加者には残る。fallen())。
+//    戻れるのは、倒れていない参加者だけ (離れて戻ってきた人)
 //  - ボスが部屋の外へ出たら中央へ戻す
 //  - 内側にグループの人がいなくなって 3 秒たつと放棄としてボスを消し入口を開ける。撃破の報告がないまま消えたときも戻す (5 秒は湧かせ直さない)
 // 参加者は「ボスが倒れる瞬間に部屋にいた、またはその前に部屋で戦い続けて倒れた人」(M6)。一瞬いただけの人は数えない:
@@ -125,6 +126,11 @@ public final class GroupBossRoom {
         return participants;
     }
 
+    // この戦いの最中に部屋の中で倒れた人。戦いが続くあいだは扉から戻れない (参加者には数える)
+    public Set<UUID> fallen() {
+        return died;
+    }
+
     public int challengers() {
         return challengers;
     }
@@ -207,7 +213,14 @@ public final class GroupBossRoom {
                 joining.remove(id);
             }
         }
-        host.letBack(level, group, participants);
+        host.letBack(level, group, rejoinable());
+    }
+
+    // 戦いの途中で扉から戻してよい参加者 (倒れた人は除く)
+    public Set<UUID> rejoinable() {
+        Set<UUID> ids = new LinkedHashSet<>(participants);
+        ids.removeAll(died);
+        return ids;
     }
 
     // 戦いを始める (集合の終わり、またはテスト用のコマンドから)

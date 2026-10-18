@@ -60,17 +60,26 @@ public final class GroupOverlays {
         return map;
     }
 
+    // 最後に送った (送る内容を決めた) 上書き。自己テストが「何を送ったか」を見るため
+    private static final Map<UUID, Map<BlockPos, BlockState>> LAST_SENT = new java.util.HashMap<>();
+
+    public static Map<BlockPos, BlockState> lastSent(UUID player) {
+        return LAST_SENT.get(player);
+    }
+
     public static void send(ServerPlayer player) {
-        if (player.connection == null) {
-            return;
-        }
         if (!(player.level() instanceof ServerLevel level) || !TitanBacks.isBack(level.dimension())) {
-            if (SENT.remove(player.getUUID())) {
+            LAST_SENT.put(player.getUUID(), Map.of());
+            if (SENT.remove(player.getUUID()) && player.connection != null) {
                 PacketDistributor.sendToPlayer(player, new GroupNetwork.Overlay(new long[0], new int[0]));
             }
             return;
         }
         Map<BlockPos, BlockState> map = compute(level, Groups.keyOf(player));
+        LAST_SENT.put(player.getUUID(), map);
+        if (player.connection == null) {
+            return;
+        }
         long[] pos = new long[map.size()];
         int[] states = new int[map.size()];
         int i = 0;
@@ -92,9 +101,11 @@ public final class GroupOverlays {
 
     public static void forget(UUID player) {
         SENT.remove(player);
+        LAST_SENT.remove(player);
     }
 
     public static void clear() {
         SENT.clear();
+        LAST_SENT.clear();
     }
 }

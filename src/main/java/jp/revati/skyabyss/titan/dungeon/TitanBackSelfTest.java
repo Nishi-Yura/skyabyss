@@ -19,6 +19,7 @@ import jp.revati.skyabyss.entity.StoneWhaleHeart;
 import jp.revati.skyabyss.party.PartyData;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupEvents;
 import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.group.GroupOverlays;
 import jp.revati.skyabyss.titan.group.GroupOwned;
@@ -726,10 +727,19 @@ public final class TitanBackSelfTest {
             failures.add("maze has too few breathing pockets on the path (" + pockets.size() + ")");
         }
         int flooded = 0;
+        BlockPos mid = pockets.isEmpty() ? null : MazeBuilder.midPocket(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
         for (BlockPos p : pockets) {
             String bad = null;
             for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
                 for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
+                    // 中ほどの休み場の四隅は乾いた足場 (水の二段目が石、その上は紫水晶があってもよい)
+                    boolean ledge = p.equals(mid) && dx != 1 && dz != 1;
+                    if (ledge) {
+                        if (!level.getBlockState(p.offset(dx, 1, dz)).is(Blocks.POLISHED_DEEPSLATE)) {
+                            bad = "the rest ledge corner is missing at " + p.offset(dx, 1, dz).toShortString();
+                        }
+                        continue;
+                    }
                     for (int dy = 2; dy <= 3; dy++) {
                         if (!level.getBlockState(p.offset(dx, dy, dz)).isAir()) {
                             bad = level.getBlockState(p.offset(dx, dy, dz)) + " at " + p.offset(dx, dy, dz).toShortString();
@@ -804,11 +814,90 @@ public final class TitanBackSelfTest {
 
     // 休み場の復活位置: 足元と頭が空いていて、床が固いこと (鼓動の間の台座や腰掛けに埋まらない)
     private static void checkRestPoints(ServerLevel level, List<String> failures) {
-        for (var e : TitanBackTrials.checkpointSpawns().entrySet()) {
+        for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
             if (!TitanBackTrials.isSafeStand(level, e.getValue())) {
                 failures.add("rest point " + e.getKey() + " spawn is not a safe standing spot at " + e.getValue()
                         + " (feet " + level.getBlockState(e.getValue()) + ", floor " + level.getBlockState(e.getValue().below()) + ")");
             }
+        }
+        checkRespawnSafety(level, failures);
+    }
+
+    // 倒れて目覚める場所は、戦いの部屋の中ではなく、戦いの扉から離れていること (目の前が戦場にならない)。
+    // 休み場がいまの戦いの前室なら、鼓動の間で目覚めること。闇の水路の中ほどの休み場は水路の中の乾いた足場であること
+    private static void checkRespawnSafety(ServerLevel level, List<String> failures) {
+        List<TitanBackLayout.Box> fights = List.of(E1, E3, HEART);
+        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, CE1_WEST_DOOR, E3_ENTRANCE, HEART_GATE);
+        for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
+            BlockPos spawn = e.getValue();
+            for (TitanBackLayout.Box room : fights) {
+                if (room.aabb().inflate(0.5).contains(spawn.getX() + 0.5, spawn.getY() + 0.5, spawn.getZ() + 0.5)) {
+                    failures.add("rest point " + e.getKey() + " respawns inside a fight room at " + spawn);
+                }
+            }
+            for (List<BlockPos> door : doors) {
+                BlockPos d = door.get(door.size() / 2);
+                double dist = Math.sqrt((double) (spawn.getX() - d.getX()) * (spawn.getX() - d.getX())
+                        + (double) (spawn.getZ() - d.getZ()) * (spawn.getZ() - d.getZ()));
+                // 近すぎるのは、扉の高さが近い (同じ階) 休み場のとき
+                if (Math.abs(spawn.getY() - d.getY()) < 6 && dist < 4.5) {
+                    failures.add("rest point " + e.getKey() + " respawns " + String.format("%.1f", dist) + " blocks from a fight door at " + d);
+                }
+            }
+        }
+        // 水路の中ほど: 乾いた足場 (足元と頭が空気で、液体が無い)。迷路の中で、息継ぎのくぼみの上
+        BlockPos mz = TitanBackTrials.checkpointSpawns(level).get(TitanBackTrials.MAZE_REST);
+        if (mz == null) {
+            failures.add("the dark waterway has no mid-way rest point");
+        } else {
+            if (mz.getX() < MAZE_X0 || mz.getX() > MAZE_X0 + MAZE_W * (MAZE_CELL + 1) || mz.getZ() < MAZE_Z0
+                    || mz.getZ() > MAZE_Z0 + MAZE_H * (MAZE_CELL + 1) || mz.getY() <= MAZE_FLOOR) {
+                failures.add("the waterway rest point is outside the maze at " + mz);
+            }
+            if (!level.getFluidState(mz).isEmpty() || !level.getFluidState(mz.above()).isEmpty()) {
+                failures.add("the waterway rest point is under water at " + mz);
+            }
+            if (level.getBlockState(mz.above(2)).getCollisionShape(level, mz.above(2)).isEmpty()) {
+                failures.add("the waterway rest point has no ceiling at " + mz);
+            }
+        }
+        // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
+        UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
+        UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
+        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e3"}}) {
+            if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
+                failures.add("rest point " + pair[0] + " moved without a fight");
+            }
+            TitanBackTrials.testBeginFight(group, pair[1], Set.of());
+            if (!"hub".equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
+                failures.add("a player who fell in " + pair[1] + " would wake up next to the fight (rest point " + pair[0] + ")");
+            }
+            if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, other, pair[0]))) {
+                failures.add("another group's fight moved this group's rest point " + pair[0]);
+            }
+            TitanBackTrials.testEndFight(level, group, pair[1]);
+            if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
+                failures.add("rest point " + pair[0] + " stayed moved after the fight ended");
+            }
+        }
+        // 倒れた参加者は、戦いが続くあいだ扉から戻れない。戦いが終わると覚えを消す
+        UUID member = UUID.fromString("00000000-0000-0000-0000-0000000000c1");
+        UUID mate = UUID.fromString("00000000-0000-0000-0000-0000000000c2");
+        net.neoforged.neoforge.common.util.FakePlayer dead = new net.neoforged.neoforge.common.util.FakePlayer(level,
+                new com.mojang.authlib.GameProfile(member, "fallen_member"));
+        TitanBackTrials.testBeginFight(group, "e1", Set.of(member, mate));
+        TitanBackTrials.noteFallen(dead);
+        if (!TitanBackTrials.isFallen(group, "e1", member) || TitanBackTrials.isFallen(group, "e1", mate)) {
+            failures.add("a participant who died in the hall was not remembered as fallen (or the survivor was)");
+        }
+        Set<UUID> participants = Set.of(member, mate);
+        Set<UUID> fallen = Set.of(member);
+        if (TitanBackTrials.mayRejoin(member, participants, fallen) || !TitanBackTrials.mayRejoin(mate, participants, fallen)) {
+            failures.add("the door lets a fallen participant back in during the fight (zombie tactic), or blocks one who did not fall");
+        }
+        TitanBackTrials.testEndFight(level, group, "e1");
+        if (TitanBackTrials.isFallen(group, "e1", member)) {
+            failures.add("the fallen list survived the end of the fight");
         }
     }
 
@@ -903,6 +992,22 @@ public final class TitanBackSelfTest {
         if (shownToA == null || !shownToA.getValue(SealedGateBlock.OPEN) || GroupOverlays.compute(back, b).containsKey(gatePos)) {
             f.add("the per-group overlay for the opened gate is wrong");
         }
+        // 倒れて戻る (復活・次元の移動・ログイン): 新しい体はクライアントの状態を何も覚えていないので、
+        // 上書きを送り直す。送る内容が、倒れる前と同じで、開けた扉・閉じた広間を含むこと
+        GroupGates.seal(back, a, E1_ENTRANCE);
+        GroupOverlays.send(pa);
+        var before = GroupOverlays.lastSent(pa.getUUID());
+        GroupOverlays.forget(pa.getUUID());
+        if (GroupOverlays.lastSent(pa.getUUID()) != null) {
+            f.add("the overlay record survived forgetting the old body");
+        }
+        GroupEvents.resync(pa);
+        var after = GroupOverlays.lastSent(pa.getUUID());
+        if (before == null || after == null || !before.equals(after) || !after.containsKey(gatePos) || !after.containsKey(E1_ENTRANCE.get(0))
+                || after.get(E1_ENTRANCE.get(0)).getValue(SealedGateBlock.OPEN)) {
+            f.add("the group overlay was not re-sent after a respawn (before " + before + ", after " + after + ")");
+        }
+        GroupGates.release(back, a, E1_ENTRANCE);
         // 敵: A の番兵は B に見えず・狙われず・傷を受けない
         var guard = TitanBackTrials.spawnGuard(back, "sentinel", HUB.center(), a);
         if (guard == null) {
@@ -962,6 +1067,20 @@ public final class TitanBackSelfTest {
             if (party.members.size() != 6) {
                 f.add("a party of six was not formed");
             }
+            // 同じパーティの二人には、同じ上書き (開けた扉・閉じた広間) が送られる。一人が倒れて戻っても揃ったまま
+            UUID partyKey = Groups.keyOf(pa);
+            GroupGates.open(back, partyKey, GATE);
+            GroupGates.seal(back, partyKey, E3_ENTRANCE);
+            GroupEvents.resync(pa);
+            GroupEvents.resync(pb);
+            GroupOverlays.forget(pb.getUUID());
+            GroupEvents.resync(pb);
+            if (!partyKey.equals(Groups.keyOf(pb)) || GroupOverlays.lastSent(pa.getUUID()) == null
+                    || !GroupOverlays.lastSent(pa.getUUID()).equals(GroupOverlays.lastSent(pb.getUUID()))
+                    || !GroupOverlays.lastSent(pb.getUUID()).containsKey(E3_ENTRANCE.get(0))) {
+                f.add("two members of one party were sent different overlays after one of them respawned");
+            }
+            GroupGates.release(back, partyKey, E3_ENTRANCE);
             if (!Groups.keyOf(pa).equals(party.id) || !Groups.keyOf(pb).equals(party.id)) {
                 f.add("party members do not share the party's group key");
             }
