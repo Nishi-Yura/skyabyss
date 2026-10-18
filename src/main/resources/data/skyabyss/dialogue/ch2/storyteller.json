@@ -1,0 +1,83 @@
+{
+  "npc": "skyabyss:storyteller",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "stage",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "ch2_ledger"
+            }
+          }
+        ]
+      },
+      "node": "ch2_ledger"
+    }
+  ],
+  "nodes": {
+    "ch2_ledger": {
+      "face": "neutral",
+      "next": "ch2_ledger2"
+    },
+    "ch2_ledger2": {
+      "face": "grave",
+      "next": "ch2_ledger3"
+    },
+    "ch2_ledger3": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "look",
+          "goto": "ch2_ledger4"
+        },
+        {
+          "id": "decline",
+          "goto": "ch2_ledger5"
+        }
+      ]
+    },
+    "ch2_ledger4": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2_ledger"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    },
+    "ch2_ledger5": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch2_ledger"
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}

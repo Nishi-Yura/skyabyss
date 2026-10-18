@@ -41,5 +41,7 @@ public final class TideSetup {
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         SOUNDS.register(modEventBus);
+        // 二章「引く海」(潮見の貝・章の音)
+        jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.register(modEventBus);
     }
 }
