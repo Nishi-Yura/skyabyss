@@ -59,6 +59,12 @@ public final class Pouch {
         return n;
     }
 
+    // 袋を空にする (管理者・自己テスト用。いちど入れた印・取り出しの印は残す)
+    public static void clear(Player player) {
+        data(player).clear();
+        sync(player);
+    }
+
     // ---------------------------------------------------------------- 入れる
     // 袋へ入れてよい品か (登録にあり、部品が付いていない。欠片・天の鍵は、ほかの人の品・前の代の品でない)
     public static boolean storable(Player player, ItemStack stack) {

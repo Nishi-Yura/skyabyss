@@ -278,7 +278,7 @@ public final class StormLoreSelfTest {
         }
         Quests.poll(p, true);
         check(stage(p, "daily_storm_rounds").equals("done"), "eight back kills did not finish the rounds", f);
-        check(p.getInventory().countItem(item("skyabyss:resonance_shard_thunder_wing")) >= 1, "the rounds paid no resonance shard", f);
+        check(jp.revati.skyabyss.pouch.Pouch.countAll(p, item("skyabyss:resonance_shard_thunder_wing")) >= 1, "the rounds paid no resonance shard", f);
         Quests.start(p, "weekly_storm_heart");
         Quests.onKill(p, "skyabyss:tide_heart", true, 2);
         Quests.poll(p, true);
@@ -286,11 +286,11 @@ public final class StormLoreSelfTest {
         Quests.onKill(p, StormLore.HEART, true, 2);
         Quests.poll(p, true);
         check(stage(p, "weekly_storm_heart").equals("done"), "stilling the heart did not finish the weekly", f);
-        check(p.getInventory().countItem(item("skyabyss:resonance_crystal")) >= 1, "the weekly paid no resonance crystal", f);
+        check(jp.revati.skyabyss.pouch.Pouch.countAll(p, item("skyabyss:resonance_crystal")) >= 1, "the weekly paid no resonance crystal", f);
         boolean shard = BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(StormLore.SHARD));
         boolean cock = BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(StormLore.WEATHERCOCK));
         if (shard) {
-            check(p.getInventory().countItem(item(StormLore.SHARD)) >= 5, "the board quests paid no thunder wing quills", f);
+            check(jp.revati.skyabyss.pouch.Pouch.countAll(p, item(StormLore.SHARD)) >= 5, "the board quests paid no thunder wing quills", f);
         }
         // 古い地図の報酬に風見鶏 (品ができていれば渡る)
         QuestDef map = QuestManager.quest("sub_old_map");

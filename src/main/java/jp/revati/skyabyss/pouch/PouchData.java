@@ -97,6 +97,10 @@ public final class PouchData {
         return new LinkedHashMap<>(counts);
     }
 
+    public void clear() {
+        counts.clear();
+    }
+
     public boolean isEmpty() {
         return counts.isEmpty();
     }
