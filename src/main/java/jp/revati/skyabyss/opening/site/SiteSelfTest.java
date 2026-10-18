@@ -37,6 +37,8 @@ public final class SiteSelfTest {
         steps.add(Step.once("opening (load)", SiteSelfTest::load));
         steps.add(Step.once("opening", 30, SiteSelfTest::run));
         steps.add(Step.once("opening (conflict)", SiteSelfTest::conflict));
+        // 章の小要素の共通基盤 (ChapterSites)。SKYABYSS_SELFTEST_ONLY="chapter sites" でこれだけ流せる
+        steps.addAll(ChapterSitesSelfTest.steps());
         return steps;
     }
 

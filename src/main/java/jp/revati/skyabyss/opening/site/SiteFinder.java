@@ -32,8 +32,23 @@ public final class SiteFinder {
     public record Spot(BlockPos pos, int rot, boolean mirror) {
     }
 
+    // 「地形の高さ」の問い合わせ先 (Probe = 本物の地形生成、自己テストでは合成の地形)
+    public interface Ground {
+        int top(int x, int z);
+
+        int topCoarse(int x, int z);
+
+        boolean wet(int x, int z);
+
+        boolean wetCoarse(int x, int z);
+
+        boolean biomeOk(int x, int z);
+
+        int sea();
+    }
+
     // 「地形の高さ」を問い合わせる道具 (チャンクを作らない)
-    public static final class Probe {
+    public static final class Probe implements Ground {
         private final ServerLevel level;
         private final ChunkGenerator gen;
         private final RandomState random;
@@ -54,6 +69,7 @@ public final class SiteFinder {
         }
 
         // 地面の一番上のブロックの高さ (海底を含む。木は数えない)
+        @Override
         public int top(int x, int z) {
             long key = BlockPos.asLong(x, 0, z);
             int v = tops.get(key);
@@ -68,23 +84,32 @@ public final class SiteFinder {
         }
 
         // 大きな範囲 (足跡・骨) を調べる用: 8 ブロックの格子に丸めて問い合わせる (候補どうしで同じ点を使い回せる = 速い)
+        @Override
         public int topCoarse(int x, int z) {
             return top(Math.floorDiv(x + 4, 8) * 8, Math.floorDiv(z + 4, 8) * 8);
         }
 
         // 水の下か (地面が海面より低い)。地形生成の高さの問い合わせは 1 回 数十 ms かかるので、1 地点 1 回だけにしている
+        @Override
         public boolean wet(int x, int z) {
             return top(x, z) < seaLevel;
         }
 
+        @Override
         public boolean wetCoarse(int x, int z) {
             return topCoarse(x, z) < seaLevel;
+        }
+
+        @Override
+        public int sea() {
+            return seaLevel;
         }
 
         public Holder<Biome> biome(int x, int z) {
             return gen.getBiomeSource().getNoiseBiome(x >> 2, top(x, z) >> 2, z >> 2, sampler);
         }
 
+        @Override
         public boolean biomeOk(int x, int z) {
             Holder<Biome> b = biome(x, z);
             return !(b.is(BiomeTags.IS_OCEAN) || b.is(BiomeTags.IS_RIVER) || b.is(BiomeTags.IS_JUNGLE) || b.is(BiomeTags.IS_BEACH)
@@ -104,17 +129,17 @@ public final class SiteFinder {
     }
 
     // (cx, cz) を中心に、半径 half の正方形 (4 ブロック間隔の格子と四隅) を調べる。水・不適な群系があれば ok = false。maxRange より段差が大きくても false
-    public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange) {
+    public static Area area(Ground p, int cx, int cz, int halfX, int halfZ, int maxRange) {
         return area(p, cx, cz, halfX, halfZ, maxRange, false);
     }
 
     // fine = true なら 5x5 (野営地のように、一度しか探さない所向け)
-    public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine) {
+    public static Area area(Ground p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine) {
         return area(p, cx, cz, halfX, halfZ, maxRange, fine, true);
     }
 
     // biome = false なら群系を問わない (大きな構造物の最後の手段)
-    public static Area area(Probe p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine, boolean biome) {
+    public static Area area(Ground p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine, boolean biome) {
         List<Integer> hs = new ArrayList<>();
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;

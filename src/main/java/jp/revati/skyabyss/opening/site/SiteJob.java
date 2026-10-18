@@ -597,6 +597,10 @@ public final class SiteJob {
     private java.util.concurrent.CompletableFuture<BlockPos> relocSearch;
     private BlockPos home;
 
+    static int radiusOf(SiteData.Entry e) {
+        return e.radius > 0 ? e.radius : otherRadius(e.kind);
+    }
+
     private static int otherRadius(String kind) {
         return switch (kind) {
             case "camp" -> 12;
@@ -626,8 +630,7 @@ public final class SiteJob {
         int maxRings = bp.wetOk ? 12 : 14;
         if (relocations > maxRings) {
             SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, home, relocations - 1);
-            data.entries().remove(entry);
-            data.setDirty();
+            data.remove(entry);
             phase = Phase.DONE;
             return;
         }
@@ -641,10 +644,10 @@ public final class SiteJob {
         BlockPos base = home;
         List<BlockPos> others = new ArrayList<>();
         List<Integer> radii = new ArrayList<>();
-        for (SiteData.Entry o : data.entries()) {
+        for (SiteData.Entry o : data.allEntries()) {
             if (o != entry) {
                 others.add(o.pos);
-                radii.add(otherRadius(o.kind));
+                radii.add(radiusOf(o));
             }
         }
         int mine = Math.max(hx, hz);
@@ -657,6 +660,8 @@ public final class SiteJob {
         BlockPos campPos = campE == null ? null : campE.pos;
         BlockPos shelterPos = shelterE == null ? null : shelterE.pos;
         String kind = entry.kind;
+        BlockPos anchor = entry.anchor;
+        int maxDist = entry.maxDist;
         List<BlockPos> otherPrints = new ArrayList<>();
         if (kind.equals("footprint")) {
             for (SiteData.Entry o : data.entries("footprint")) {
@@ -678,7 +683,7 @@ public final class SiteJob {
                         break;
                     }
                 }
-                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints)) {
+                if (!clear || !withinLimits(kind, x, z, campPos, shelterPos, otherPrints) || (anchor != null && Math.hypot(x - anchor.getX(), z - anchor.getZ()) > maxDist)) {
                     continue;
                 }
                 SiteFinder.Area ar = SiteFinder.area(probe, x, z, coreX, coreZ, range);
