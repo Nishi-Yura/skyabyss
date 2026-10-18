@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +23,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 // ボス・中ボスの技の予告 (テレグラフ)。「当たる範囲」を床に粒で描き、時間が来たらその範囲の中にいる人だけに当てる。
 //
@@ -35,7 +38,10 @@ import net.minecraft.world.phys.Vec3;
 //           .onHit((lvl, player) -> player.hurt(...))        // 範囲の中の人それぞれに一度ずつ (傷・ノックバック)
 //           .start();
 //
-// 範囲の判定と印の描画は、同じ TelegraphShape から出る (contains と outline/edge)。印が満ちる縁は範囲の内側にしか出ない。
+// 範囲の判定と印の描画は、同じ TelegraphShape から出る。印はクライアントの床の面 (decal): 開始パケット (TelegraphStartPayload) を
+// 見える人へ送り、client/combat/TelegraphRenderer が満ちる面と縁を床の高さに沿って描く (形の刻みは TelegraphGeometry)。
+// 旧来の点線の粒 (outline/edge) は、クライアントの telegraphStyle か、サーバー設定 telegraphServerParticles。
+// 印が満ちる縁は範囲の内側にしか出ない。
 // 振り回す帯 (sweep) は active(ticks) の間、いまの帯 (shape.at(進み具合)) の中の人に一度ずつ当てる。
 // jumpClear(h): 床から h 以上跳んでいる人は当たらない (跳び越える技)。粒は 1 tick ごとの総数に上限がある (BUDGET)。
 // 設計書: docs/design/02_stone_whale.md の 5.4 (予告の部品)。
@@ -74,6 +80,10 @@ public final class Telegraph {
     @Nullable
     private final Hit onHit;
     private final Set<UUID> hit = new HashSet<>();
+    // 床の印 (decal) のパケットを送った人。あとから近づいた人にも送る
+    private final Set<UUID> notified = new HashSet<>();
+    private final boolean decal;
+    private static int decalsSent;
     private final int id = created++;
     private int age;
     private boolean done;
@@ -91,6 +101,7 @@ public final class Telegraph {
         this.victims = b.victims;
         this.onImpact = b.onImpact;
         this.onHit = b.onHit;
+        this.decal = b.shape.kind() != TelegraphShape.KIND_NONE;
         if (b.onHit != null) {
             damagingCreated++;
         }
@@ -100,6 +111,11 @@ public final class Telegraph {
 
     public static void resetStats() {
         damagingCreated = 0;
+    }
+
+    // 試験用: 床の印のパケットを送った数 (人 × 予告)
+    public static int decalsSent() {
+        return decalsSent;
     }
 
     public static int damagingCreated() {
@@ -269,7 +285,22 @@ public final class Telegraph {
     }
 
     public void cancel() {
-        done = true;
+        kill();
+    }
+
+    // 取り消し: 床の印も消す (自然に当たり終えたときは送らない。クライアントが自分の時間で消す)
+    private void kill() {
+        if (!done) {
+            done = true;
+            if (!notified.isEmpty()) {
+                TelegraphCancelPayload payload = new TelegraphCancelPayload(id);
+                for (ServerPlayer p : level.players()) {
+                    if (notified.contains(p.getUUID())) {
+                        PacketDistributor.sendToPlayer(p, payload);
+                    }
+                }
+            }
+        }
     }
 
     public static int activeCount(ServerLevel level) {
@@ -282,7 +313,7 @@ public final class Telegraph {
         for (List<Telegraph> list : ACTIVE.values()) {
             for (Telegraph t : list) {
                 if (t.owner == owner) {
-                    t.done = true;
+                    t.kill();
                 }
             }
         }
@@ -330,10 +361,13 @@ public final class Telegraph {
 
     private void tick() {
         if (owner != null && (owner.isRemoved() || (owner instanceof LivingEntity le && le.isDeadOrDying()))) {
-            done = true;
+            kill();
             return;
         }
         age++;
+        if (decal && (age == 1 || age % 4 == 2) && age <= warn + active) {
+            syncViewers();
+        }
         if (age < warn) {
             drawWarning();
             return;
@@ -354,7 +388,7 @@ public final class Telegraph {
         double progress = Math.min(1.0, (double) (age - warn) / active);
         TelegraphShape now = shape.at(progress);
         strike(now);
-        if (age % 2 == 0) {
+        if (age % 2 == 0 && serverParticles()) {
             draw(now::outline, 1.6, 1.0, 0.0, 1.5f);
         }
         if (age - warn >= active) {
@@ -385,7 +419,44 @@ public final class Telegraph {
 
     // ---- 印を描く ----
 
+    // 床の印を、まだ送っていない見える人へ送る (始まりと、そのあと 4 tick ごと)
+    private void syncViewers() {
+        double cx = shape.centerX();
+        double cz = shape.centerZ();
+        double[] b = shape.bounds();
+        double reachSq = Math.pow(96 + Math.hypot(b[2] - b[0], b[3] - b[1]) / 2, 2);
+        TelegraphStartPayload payload = null;
+        for (ServerPlayer p : level.players()) {
+            if (p instanceof FakePlayer || notified.contains(p.getUUID())) {
+                continue;
+            }
+            if (p.distanceToSqr(cx, floor, cz) < reachSq && GroupOwned.visibleTo(owner != null ? owner : p, p)) {
+                if (payload == null) {
+                    payload = TelegraphStartPayload.of(id, shape, floor, age, warn, active, rgb);
+                }
+                PacketDistributor.sendToPlayer(p, payload);
+                notified.add(p.getUUID());
+                decalsSent++;
+            }
+        }
+    }
+
+    // 旧来の点線の粒をサーバーからも送るか (床の印が出せない形は、いつも送る)
+    private boolean serverParticles() {
+        if (!decal) {
+            return true;
+        }
+        try {
+            return Config.TELEGRAPH_SERVER_PARTICLES.get();
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
     private void drawWarning() {
+        if (!serverParticles()) {
+            return;
+        }
         double progress = (double) age / warn;
         // 輪郭: 序盤は 4 tick ごと、近づくと 2 tick ごと (id をずらして、同時に何本あっても粒が一度に集中しない)
         double[] b = shape.bounds();
