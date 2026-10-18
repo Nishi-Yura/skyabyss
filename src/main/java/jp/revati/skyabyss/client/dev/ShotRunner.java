@@ -436,6 +436,9 @@ public final class ShotRunner {
             case "render" -> {
                 // render <チャンク> : 描く距離 (統合サーバーの見える距離もこれに合わせて変わる)
                 mc.options.renderDistance().set(line.intArg(0));
+                // 統合サーバーが各プレイヤーに送る範囲 (エンティティの追跡) は、プレイヤーの申告 (ClientInformation) で決まる。設定を変えただけでは
+                // 申告が古い (既定の 12) ままで、約 190 ブロックより遠い巨神が消えるので、ここで申告し直す
+                mc.options.broadcastOptions();
                 return true;
             }
             case "guiscale" -> {

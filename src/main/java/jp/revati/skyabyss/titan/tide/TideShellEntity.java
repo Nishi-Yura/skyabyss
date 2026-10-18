@@ -69,8 +69,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     public static final double CRUISE_DRAFT_MAX = 29.0;
     // 浅い所でも、底から 22 ブロック上までしか浮かない (甲羅の頂が海から 12 ブロックまで。ゲームで見て、もっと浮くと島に見えなかった)
     public static final double CRUISE_DRAFT_MIN = 22.0;
-    // 甲羅の頂 (光を測る所)
-    public static final double DOME_TOP = 34.0;
+    // 甲羅の頂 (光を測る所。低ポリ案 B の上の段の高さ。塔の高さ約 71 は測らない)
+    public static final double DOME_TOP = 47.0;
 
     // ---- 動き
     static final float CRUISE_SPEED = 0.08f;
@@ -122,11 +122,12 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private int column;
     private boolean columnWanted;
     static final int COLUMN_UP = 20;
-    // 座席 (横, 上, 前)。甲羅の頂の真ん中には塔が立つので、塔の前の平らな所 (前へ 11、高さ 34) と、その前の高台 (前へ 17、高さ 36) に 4 人ずつ。
-    // 高さは geo から測った (tide_shell.geo.json の上面。中心の塔は横 -6〜+4・前 -2〜+8)
+    // 座席 (横, 上, 前)。低ポリ案 B の甲羅は段になった島 (外の段 34、中の段 41、上の段 47 ブロック) で、中心に塔 (高さ約 71) が立つ。
+    // 塔は横 -6〜+6・前 -4〜+6 なので、その前の上の段 (高さ 47、平ら) の前へ 10 と 13 に 4 人ずつ (旧: 前へ 11 と 17 の高さ 34・36)。
+    // 高さは低ポリのメッシュ (lowpoly/tide_shell.json) の上面から測った (tools/titan_align_check.py)。座席は面の 0.4 上
     static final double[][] SEATS = {
-            {2.0, 34.4, 11.0}, {-2.0, 34.4, 11.0}, {6.0, 34.4, 11.0}, {-6.0, 34.4, 11.0},
-            {2.0, 36.4, 17.0}, {-2.0, 36.4, 17.0}, {6.0, 36.4, 17.0}, {-6.0, 36.4, 17.0}};
+            {2.0, 47.4, 10.0}, {-2.0, 47.4, 10.0}, {6.0, 47.4, 10.0}, {-6.0, 47.4, 10.0},
+            {2.0, 47.4, 13.0}, {-2.0, 47.4, 13.0}, {6.0, 47.4, 13.0}, {-6.0, 47.4, 13.0}};
 
     private int lerpSteps;
     private double lerpX;
@@ -688,10 +689,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる。
-    // モデルは横 ±76、前 87〜後ろ 62 ブロック、底 (位置の y) から塔の上 60 ブロックまで
+    // モデルは横 ±68、前 87.5〜後ろ 61.5 ブロック、底 (位置の y) から塔の上 73 ブロックまで (低ポリの寸法。塔が高くなったので余裕を持って 80)
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(92.0, 0.0, 92.0).expandTowards(0, 60.0, 0);
+        return getBoundingBox().inflate(92.0, 0.0, 92.0).expandTowards(0, 80.0, 0);
     }
 
     // 光を測る所。体の中心は水の底や海底の中にあるので (岩鯨は丘の中で真っ黒になった)、甲羅の頂の上 (海面より上) で測る
