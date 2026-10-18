@@ -65,7 +65,7 @@ public class NoticeLogScreen extends Screen {
         g.drawString(font, title, left + 10, top + 8, TEAL, false);
         g.fill(left + 8, top + 20, left + W - 8, top + 21, EDGE);
         List<Row> rows = rows(font, W - 64);
-        int visible = (H - 34) / 10;
+        int visible = (H - 27 - 14) / 10;
         scroll = Mth.clamp(scroll, 0, Math.max(0, rows.size() - visible));
         if (rows.isEmpty()) {
             g.drawString(font, Component.translatable("gui.skyabyss.notice.log_empty"), left + 10, top + 30, SOFT, false);

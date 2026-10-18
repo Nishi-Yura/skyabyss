@@ -56,6 +56,35 @@ public final class SkillSelfTest {
     }
 
     static void run(MinecraftServer server, List<String> f) {
+        // ---------------------------------------------------------------- 全技の表の整合 (前提・段・枠・アイコン・翻訳)
+        java.util.Set<String> ids = new java.util.HashSet<>();
+        for (Skill s : Skill.values()) {
+            check(f, ids.add(s.id), "duplicate skill id " + s.id);
+            check(f, s.maxRank >= 1 && s.iconIndex() >= 0, s.id + " has a bad rank or icon");
+            for (Skill r : s.requires()) {
+                check(f, r.tree == s.tree && r.tier < s.tier, s.id + " requires a skill that is not in the same tree or an earlier tier: " + r.id);
+            }
+            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる
+            check(f, (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
+            SkillData d = new SkillData();
+            for (Skill r : s.requires()) {
+                // 前提の前提も覚えておく (そうでないと検めで全部戻る)
+                for (Skill q : Skill.inTree(s.tree)) {
+                    if (q.tier < r.tier) {
+                        d.ranks.put(q.id, 1);
+                    }
+                }
+                d.ranks.put(r.id, 1);
+            }
+            d.bonusPoints = 10;
+            check(f, d.canLearn(s, 50) == SkillData.LearnResult.OK, s.id + " cannot be learned with its requirements");
+            d.ranks.put(s.id, 1);
+            SkillManager.autoSlot(d, s);
+            boolean slotted = java.util.Arrays.asList(d.slots).contains(s.id);
+            check(f, slotted == s.active, s.id + " slotting disagrees with active=" + s.active);
+            d.sanitize(50);
+            check(f, java.util.Arrays.asList(d.slots).contains(s.id) == s.active, s.id + " slot changed by sanitize");
+        }
         // ---------------------------------------------------------------- 技の点
         check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 1 && SkillRules.pointsForLevel(3) == 2
                 && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(12) == 6 && SkillRules.pointsForLevel(50) == 25,

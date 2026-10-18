@@ -236,6 +236,9 @@ public class SkillScreen extends Screen {
             } else if (selected != null && selected.active && d.knows(selected)) {
                 PacketDistributor.sendToServer(new SkillSlotPayload(slot, selected.id));
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(Skills.SOUND_LEARN.get(), 1.6f, 0.35f));
+            } else if (selected != null && !selected.active && d.knows(selected)) {
+                // 常に効く技は枠に置かない。黙って何も起きないと壊れて見えるので理由を出す
+                notice(Component.translatable("gui.skyabyss.skill.passive_no_slot", Component.translatable(selected.nameKey())));
             } else if (d.slot(slot) != null) {
                 // 置いてある技を選ぶ (木も合わせる)
                 selected = d.slot(slot);
@@ -256,6 +259,14 @@ public class SkillScreen extends Screen {
             return true;
         }
         // 技を選んでいるとき、枠のキー (R・G・V・Z) でその枠に置ける
+        if (selected != null && !selected.active && data().knows(selected)) {
+            for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
+                if (SkillClientSetup.SLOT_KEYS[i].matches(keyCode, scanCode)) {
+                    notice(Component.translatable("gui.skyabyss.skill.passive_no_slot", Component.translatable(selected.nameKey())));
+                    return true;
+                }
+            }
+        }
         if (selected != null && selected.active && data().knows(selected)) {
             for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
                 if (SkillClientSetup.SLOT_KEYS[i].matches(keyCode, scanCode)) {
@@ -425,6 +436,8 @@ public class SkillScreen extends Screen {
             int r = Math.max(1, rank);
             lines.add(Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(s, r),
                     SkillRules.fmtSeconds(SkillRules.cooldownTicks(s, r))).withColor(0x9FB8FF).getVisualOrderText());
+        } else if (rank > 0) {
+            lines.add(Component.translatable("gui.skyabyss.skill.passive_active").withColor(0x9FE8FF).getVisualOrderText());
         }
         // 今の段の効果 (まだ覚えていなければ段 1 の効果)。次の段は「習得」のボタンに重ねると出る
         List<FormattedCharSequence> body = new ArrayList<>();
@@ -528,6 +541,8 @@ public class SkillScreen extends Screen {
             lines.add(Component.translatable(node.active ? "gui.skyabyss.skill.kind_active" : "gui.skyabyss.skill.kind_passive").withColor(SOFT));
             if (node.active && d.knows(node)) {
                 lines.add(Component.translatable("gui.skyabyss.skill.slot_hint").withColor(DIM));
+            } else if (!node.active && d.knows(node)) {
+                lines.add(Component.translatable("gui.skyabyss.skill.passive_hint").withColor(DIM));
             }
             g.renderComponentTooltip(font, lines, mx, my);
             return;
@@ -539,7 +554,8 @@ public class SkillScreen extends Screen {
             lines.add(s == null ? Component.translatable("gui.skyabyss.skill.slot_empty").withColor(SOFT)
                     : Component.translatable(s.nameKey()).withColor(GOLD));
             lines.add(Component.translatable("gui.skyabyss.skill.slot_key", SkillClientSetup.SLOT_KEYS[slot].getTranslatedKeyMessage()).withColor(SOFT));
-            lines.add(Component.translatable(selected != null && selected.active && d.knows(selected)
+            lines.add(Component.translatable(selected != null && !selected.active && d.knows(selected) ? "gui.skyabyss.skill.passive_no_slot"
+                    : selected != null && selected.active && d.knows(selected)
                     ? "gui.skyabyss.skill.slot_put" : "gui.skyabyss.skill.slot_how", selected == null ? "" : Component.translatable(selected.nameKey()))
                     .withColor(DIM));
             g.renderComponentTooltip(font, lines, mx, my);
