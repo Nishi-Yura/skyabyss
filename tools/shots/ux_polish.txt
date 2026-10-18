@@ -1,0 +1,56 @@
+# 使い心地の磨き (rpg_brushup A4 / A8 / A11) の確認: 石の「誰が鳴らしたか」の知らせ・自分の墓の標・仲間の札の記号。
+# ./gradlew runShots -Pscript=tools/shots/ux_polish.txt   (音はランナーが消す。見本は /skyabyss dev ux ... で本番と同じ経路に出す)
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev ux clear
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+# A11: 仲間の札 (体力 100 / 40 / 10)。記号と体力の棒で、色がなくても状態が分かる
+cmd skyabyss dev ux party
+wait 40
+cmd skyabyss dev ux party
+wait 40
+shot party_symbols
+cmd skyabyss dev ux clear
+wait 20
+
+# A8: 自分の墓の標。画面の中 (札) と、画面の外 (縁の矢印)
+cmd skyabyss dev ux grave 4 44
+wait 40
+shot grave_marker_tag
+look 90 0
+wait 10
+shot grave_marker_arrow
+look 0 0
+cmd skyabyss dev ux clear
+wait 20
+
+# A4: 石の知らせ
+cmd skyabyss dev ux stele self
+wait 15
+shot stele_self
+cmd skyabyss dev ux stele other
+wait 15
+shot stele_other
+cmd skyabyss dev ux stele none
+wait 15
+shot stele_none
+
+# A4/A8: 控え帳の巨神の頁 (試練の石の行)・墓の行
+cmd skyrecord titans.stone_whale
+wait 40
+shot record_titan_page
+close
+chat clear
+echo done

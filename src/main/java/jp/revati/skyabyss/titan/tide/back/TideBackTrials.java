@@ -452,7 +452,11 @@ public final class TideBackTrials {
             return;
         }
         if (state.rung(trial)) {
-            Notice.bar(player, ModText.hint(state.sleeping() == trial ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.stone_rung"));
+            if (state.sleeping() == trial) {
+                Notice.bar(player, ModText.hint("message.skyabyss.tide.trial_sleeping"));
+            } else {
+                jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id());
+            }
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -505,7 +509,7 @@ public final class TideBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, state.id, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id(), null);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, state.id, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id(), null, by);
         if (state.rungCount() >= 3) {
             for (ServerPlayer p : Groups.online(level, state.id)) {
                 Notice.narrate(p, "message.skyabyss.tide.all_rung");
@@ -788,6 +792,7 @@ public final class TideBackTrials {
             REVIVING.remove(player.getUUID());
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
+        jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
         Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT) ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
         if (cp.isEmpty()) {
             clearCheckpoint(player);

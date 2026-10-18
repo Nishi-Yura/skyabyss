@@ -89,24 +89,28 @@ public final class PartyMarkers {
         return new int[] { 14, 46, w - PartyClient.W - 44, h - 56 };
     }
 
+    // 状態の記号 (色のほかに形でも分かるように。A11): 無事 = 塗りつぶし、傷 = 枠と下半分、瀕死 = 感嘆符、墓 = 十字
+    public enum Symbol {
+        HEALTHY, HURT, LOW, GRAVE
+    }
+
+    public static Symbol symbolOf(int hp) {
+        return hp > 50 ? Symbol.HEALTHY : hp > 20 ? Symbol.HURT : Symbol.LOW;
+    }
+
+    // HUD を出してよい場面か (場面の最中・画面を開いている間・F1・デバッグ画面では出さない)
+    public static boolean hudAllowed(Minecraft mc) {
+        return mc.player != null && mc.level != null && !mc.options.hideGui && mc.screen == null && !mc.getDebugOverlay().showDebugScreen()
+                && !CinematicClient.active();
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (entries.isEmpty() || !Config.PARTY_MARKERS.get() || mc.player == null || mc.level == null || mc.options.hideGui
-                || mc.screen != null || mc.getDebugOverlay().showDebugScreen() || CinematicClient.active()) {
+        if (entries.isEmpty() || !Config.PARTY_MARKERS.get() || !hudAllowed(mc)) {
             return;
         }
-        Font font = mc.font;
-        Camera cam = mc.gameRenderer.getMainCamera();
-        Vec3 camPos = cam.getPosition();
-        Vector3f look = cam.getLookVector();
-        Vector3f up = cam.getUpVector();
-        Vector3f left = cam.getLeftVector();
-        int w = g.guiWidth();
-        int h = g.guiHeight();
-        float tanHalf = (float) Math.tan(Math.toRadians(mc.options.fov().get()) / 2.0);
         float partial = delta.getGameTimeDeltaPartialTick(false);
         String here = mc.level.dimension().location().toString();
-        int[] rect = arrowRect(w, h);
         List<int[]> taken = new ArrayList<>();
         for (PartyLocator.Entry e : entries) {
             if (!e.dimension().equals(here)) {
@@ -126,65 +130,121 @@ public final class PartyMarkers {
             if (live != null && dist < 4) {
                 continue;
             }
-            Vec3 d = pos.subtract(camPos);
-            float fwd = (float) (d.x * look.x + d.y * look.y + d.z * look.z);
-            float upv = (float) (d.x * up.x + d.y * up.y + d.z * up.z);
-            float rightv = -(float) (d.x * left.x + d.y * left.y + d.z * left.z);
-            Component label = Component.literal(e.name() + "  " + dist + "m");
-            int lw = font.width(label);
-            if (fwd > 0.3f) {
-                float sx = w / 2f + (rightv / fwd) / tanHalf * (h / 2f);
-                float sy = h / 2f - (upv / fwd) / tanHalf * (h / 2f);
-                if (sx > lw / 2f + 6 && sx < w - lw / 2f - 6 && sy > 14 && sy < h - 14) {
-                    drawTag(g, font, label, Math.round(sx), Math.round(sy), lw, taken, e.healthPercent());
-                    continue;
-                }
-            }
-            // 画面の外: 中心から向きに延ばして、長方形の縁に矢印
-            float vx = rightv;
-            float vy = -upv;
-            float len = Mth.sqrt(vx * vx + vy * vy);
-            if (len < 1e-4f) {
-                vx = 0;
-                vy = 1;
-                len = 1;
-            }
-            vx /= len;
-            vy /= len;
-            float cx = w / 2f;
-            float cy = h / 2f;
-            float hw = Math.max(1, vx > 0 ? rect[2] - cx : cx - rect[0]);
-            float hh = Math.max(1, vy > 0 ? rect[3] - cy : cy - rect[1]);
-            float t = Math.min(Math.abs(vx) < 1e-4f ? Float.MAX_VALUE : hw / Math.abs(vx), Math.abs(vy) < 1e-4f ? Float.MAX_VALUE : hh / Math.abs(vy));
-            int ax = Math.round(cx + vx * t);
-            int ay = Math.round(cy + vy * t);
-            drawArrow(g, ax, ay, (float) Math.atan2(vy, vx) + (float) Math.PI / 2f, e.healthPercent());
-            int lx = Mth.clamp(ax, lw / 2 + 4, w - PartyClient.W - 12 - lw / 2);
-            int ly = ay + 8;
-            if (ay > cy) {
-                ly = ay - 18;
-            }
-            placeLabel(g, font, label, lx, ly, lw, taken);
+            drawMarker(g, pos, Component.literal(e.name() + "  " + dist + "m"), hpColor(e.healthPercent()), symbolOf(e.healthPercent()),
+                    e.healthPercent(), taken);
         }
     }
 
-    // 頭の上の札: 小さな三角 + 名前と距離。重なったら上へずらす
-    private static void drawTag(GuiGraphics g, Font font, Component label, int sx, int sy, int lw, List<int[]> taken, int hp) {
+    // 世界の位置 pos を画面に投影して、札 (画面の中) か矢印 (画面の外の縁) を描く。仲間の札と墓の標 (GraveMarkerHud) が共用する。
+    // hp: 0..100 なら札のそばに体力の棒 (長さ = 体力。色に頼らない)。負なら棒なし
+    public static void drawMarker(GuiGraphics g, Vec3 pos, Component text, int rgb, Symbol symbol, int hp, List<int[]> taken) {
+        Minecraft mc = Minecraft.getInstance();
+        Font font = mc.font;
+        Camera cam = mc.gameRenderer.getMainCamera();
+        Vec3 camPos = cam.getPosition();
+        Vector3f look = cam.getLookVector();
+        Vector3f up = cam.getUpVector();
+        Vector3f left = cam.getLeftVector();
+        int w = g.guiWidth();
+        int h = g.guiHeight();
+        float tanHalf = (float) Math.tan(Math.toRadians(mc.options.fov().get()) / 2.0);
+        int[] rect = arrowRect(w, h);
+        Vec3 d = pos.subtract(camPos);
+        float fwd = (float) (d.x * look.x + d.y * look.y + d.z * look.z);
+        float upv = (float) (d.x * up.x + d.y * up.y + d.z * up.z);
+        float rightv = -(float) (d.x * left.x + d.y * left.y + d.z * left.z);
+        int lw = font.width(text) + ICON_W;
+        if (fwd > 0.3f) {
+            float sx = w / 2f + (rightv / fwd) / tanHalf * (h / 2f);
+            float sy = h / 2f - (upv / fwd) / tanHalf * (h / 2f);
+            if (sx > lw / 2f + 6 && sx < w - lw / 2f - 6 && sy > 14 && sy < h - 14) {
+                drawTag(g, font, text, Math.round(sx), Math.round(sy), lw, taken, rgb, symbol, hp);
+                return;
+            }
+        }
+        // 画面の外: 中心から向きに延ばして、長方形の縁に矢印
+        float vx = rightv;
+        float vy = -upv;
+        float len = Mth.sqrt(vx * vx + vy * vy);
+        if (len < 1e-4f) {
+            vx = 0;
+            vy = 1;
+            len = 1;
+        }
+        vx /= len;
+        vy /= len;
+        float cx = w / 2f;
+        float cy = h / 2f;
+        float hw = Math.max(1, vx > 0 ? rect[2] - cx : cx - rect[0]);
+        float hh = Math.max(1, vy > 0 ? rect[3] - cy : cy - rect[1]);
+        float t = Math.min(Math.abs(vx) < 1e-4f ? Float.MAX_VALUE : hw / Math.abs(vx), Math.abs(vy) < 1e-4f ? Float.MAX_VALUE : hh / Math.abs(vy));
+        int ax = Math.round(cx + vx * t);
+        int ay = Math.round(cy + vy * t);
+        drawArrow(g, ax, ay, (float) Math.atan2(vy, vx) + (float) Math.PI / 2f, rgb);
+        int lx = Mth.clamp(ax, lw / 2 + 4, w - PartyClient.W - 12 - lw / 2);
+        int ly = ay + 8;
+        if (ay > cy) {
+            ly = ay - 18;
+        }
+        placeLabel(g, font, text, lx, ly, lw, taken, rgb, symbol, hp);
+    }
+
+    private static final int ICON_W = 9;
+
+    // 5x5 の記号を (x, y) に描く
+    static void drawSymbol(GuiGraphics g, int x, int y, Symbol symbol, int rgb) {
+        int c = 0xFF000000 | rgb;
+        switch (symbol) {
+            case HEALTHY -> g.fill(x, y, x + 5, y + 5, c);
+            case HURT -> {
+                g.fill(x, y, x + 5, y + 1, c);
+                g.fill(x, y + 4, x + 5, y + 5, c);
+                g.fill(x, y, x + 1, y + 5, c);
+                g.fill(x + 4, y, x + 5, y + 5, c);
+                g.fill(x + 1, y + 2, x + 4, y + 4, c);
+            }
+            case LOW -> {
+                g.fill(x + 2, y, x + 3, y + 3, c);
+                g.fill(x + 2, y + 4, x + 3, y + 5, c);
+            }
+            case GRAVE -> {
+                g.fill(x + 2, y - 1, x + 3, y + 6, c);
+                g.fill(x, y + 1, x + 5, y + 2, c);
+            }
+        }
+    }
+
+    // 体力の棒 (幅 14、長さ = 体力)
+    private static void drawBar(GuiGraphics g, int x, int y, int hp, int rgb) {
+        g.fill(x, y, x + 14, y + 2, 0x66000000);
+        g.fill(x, y, x + Math.round(14 * Mth.clamp(hp, 0, 100) / 100f), y + 2, 0xFF000000 | rgb);
+    }
+
+    // 頭の上の札: 記号 + 名前と距離 + 体力の棒 + 小さな三角。重なったら上へずらす
+    private static void drawTag(GuiGraphics g, Font font, Component label, int sx, int sy, int lw, List<int[]> taken, int rgb, Symbol symbol, int hp) {
         int y = sy - 14;
         int[] box = place(sx - lw / 2 - 3, y - 2, lw + 6, 12, taken, -12);
         g.fill(box[0], box[1], box[0] + box[2], box[1] + box[3], 0x58000000);
-        g.drawString(font, label, box[0] + 3, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.BODY.color(), true);
+        drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
+        g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.BODY.color(), true);
         int ty = box[1] + box[3] + 1;
-        int color = TextStyle.alpha(0.8f) | hpColor(hp);
+        int color = TextStyle.alpha(0.8f) | rgb;
         g.fill(sx - 2, ty, sx + 3, ty + 1, color);
         g.fill(sx - 1, ty + 1, sx + 2, ty + 2, color);
         g.fill(sx, ty + 2, sx + 1, ty + 3, color);
+        if (hp >= 0) {
+            drawBar(g, box[0] + 3 + ICON_W, box[1] + box[3] - 2, hp, rgb);
+        }
     }
 
-    private static void placeLabel(GuiGraphics g, Font font, Component label, int cx, int y, int lw, List<int[]> taken) {
+    private static void placeLabel(GuiGraphics g, Font font, Component label, int cx, int y, int lw, List<int[]> taken, int rgb, Symbol symbol, int hp) {
         int[] box = place(cx - lw / 2 - 3, y - 2, lw + 6, 12, taken, 12);
         g.fill(box[0], box[1], box[0] + box[2], box[1] + box[3], 0x58000000);
-        g.drawString(font, label, box[0] + 3, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020, true);
+        drawSymbol(g, box[0] + 3, box[1] + 3, symbol, rgb);
+        g.drawString(font, label, box[0] + 3 + ICON_W, box[1] + 2, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020, true);
+        if (hp >= 0) {
+            drawBar(g, box[0] + 3 + ICON_W, box[1] + box[3] - 2, hp, rgb);
+        }
     }
 
     // すでに置いたものと重ならない場所へ、step ずつずらして置く
@@ -207,17 +267,17 @@ public final class PartyMarkers {
         return box;
     }
 
-    private static int hpColor(int hp) {
+    public static int hpColor(int hp) {
         return hp > 50 ? 0x9FE8B0 : hp > 20 ? 0xF2D27A : 0xF08A7A;
     }
 
     // 上向きの小さな三角を angle だけ回して描く
-    private static void drawArrow(GuiGraphics g, int x, int y, float angle, int hp) {
+    private static void drawArrow(GuiGraphics g, int x, int y, float angle, int rgb) {
         var pose = g.pose();
         pose.pushPose();
         pose.translate(x, y, 0);
         pose.mulPose(com.mojang.math.Axis.ZP.rotation(angle));
-        int c = TextStyle.alpha(0.85f) | hpColor(hp);
+        int c = TextStyle.alpha(0.85f) | rgb;
         for (int j = 0; j < 9; j++) {
             int half = j / 2;
             g.fill(-half, -5 + j, half + 1, -4 + j, c);

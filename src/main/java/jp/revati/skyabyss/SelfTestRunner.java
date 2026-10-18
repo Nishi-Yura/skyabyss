@@ -90,6 +90,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("party steles", jp.revati.skyabyss.titan.group.TrialStelesSelfTest::runSelfTest));
         // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)。docs/design/21 の 1.7、10 の 10.11
         steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
+        // 使い心地の磨き: 背中の復活の守り・石の「誰が鳴らしたか」・墓の標 (rpg_brushup A3 / A4 / A8)
+        steps.add(Step.once("ux polish", jp.revati.skyabyss.titan.group.UxPolishSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));

@@ -95,6 +95,10 @@ public final class Config {
             .comment("パーティの仲間の位置 (頭の上の札・画面の端の矢印・別の場所の一行) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
             .define("partyMarkers", true);
 
+    public static final ModConfigSpec.BooleanValue GRAVE_MARKER = CLIENT_BUILDER
+            .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
+            .define("graveMarker", true);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {

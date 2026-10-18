@@ -1573,6 +1573,7 @@ public final class TitanBackTrials {
                     REVIVING.remove(player.getUUID());
                 }
                 tag.putInt(TAG_SEEN_EPOCH, epoch);
+                jp.revati.skyabyss.titan.group.RespawnGuard.begin(player);
                 Notice.narrate(player, cp.isEmpty() && tag.contains(TAG_CHECKPOINT)
                         ? "message.skyabyss.rest_point_lost" : "message.skyabyss.revived_on_back");
                 if (cp.isEmpty()) {

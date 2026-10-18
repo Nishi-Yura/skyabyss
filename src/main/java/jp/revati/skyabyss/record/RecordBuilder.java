@@ -254,11 +254,37 @@ public final class RecordBuilder {
         return rows;
     }
 
+    // 試練の石の「誰が鳴らしたか」(10 の 10.9、rpg_brushup A4)。自分が鳴らした数 / 仲間が鳴らした数 / まだ。石のない巨神は「—」
+    private static Row stelesRow(ServerPlayer p, String titan) {
+        List<String> signals = jp.revati.skyabyss.titan.group.TrialSteles.signalsOf(titan);
+        if (signals.isEmpty()) {
+            return value("steles", t("r.steles"), t("r.unknown"), RecordSnapshot.MARK_LOCKED, List.of(t("d.steles_none")));
+        }
+        java.util.UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(p);
+        int[] n = jp.revati.skyabyss.titan.group.TrialSteles.counts(p.server, group, p.getUUID(), titan);
+        List<Component> detail = new ArrayList<>();
+        detail.add(t("d.steles"));
+        for (String signal : signals) {
+            String stone = signal.substring(signal.indexOf("_trial_") + "_trial_".length());
+            String kind = signal.substring(0, signal.indexOf("_trial_"));
+            Component name = kind.equals(jp.revati.skyabyss.titan.group.TrialSteles.WHALE)
+                    ? t("d.steles_whale", Integer.parseInt(stone) + 1)
+                    : Component.translatable("trial.skyabyss." + kind + "_" + stone);
+            detail.add(t("d.steles_line", name, jp.revati.skyabyss.titan.group.TrialSteles
+                    .whoText(jp.revati.skyabyss.titan.group.TrialSteles.who(p.server, group, p.getUUID(), signal))));
+        }
+        return value("steles", t("r.steles"), t("v.steles", n[0], n[1], n[2]),
+                n[2] == 0 ? RecordSnapshot.MARK_SAFE : n[0] + n[1] > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE, detail);
+    }
+
     // 墓 (grave パッケージ。倒れたときの持ち物の入口)。場所・中身の数・救いの決まりを出す
     private static Row graveRow(ServerPlayer p) {
         List<jp.revati.skyabyss.grave.GraveData.Grave> graves = jp.revati.skyabyss.grave.GraveData.get(p.server).owned(p.getUUID());
         List<Component> detail = new ArrayList<>();
         detail.add(t(graves.isEmpty() ? "d.grave_none" : "d.grave_has"));
+        if (!graves.isEmpty()) {
+            detail.add(t("d.grave_marker", jp.revati.skyabyss.grave.GraveMarkers.NEAR_BLOCKS));
+        }
         int n = 0;
         for (jp.revati.skyabyss.grave.GraveData.Grave g : graves) {
             if (++n > 40) {
@@ -454,6 +480,7 @@ public final class RecordBuilder {
                 t(r.memory >= TitanLoot.HARD_PITY - 1 ? "d.memory_next_guaranteed" : r.memory >= TitanLoot.SOFT_PITY - 1 ? "d.memory_next_soft"
                         : "d.memory_next_plain"))));
         rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
+        rows.add(stelesRow(p, titan));
         List<Item> collection = page.collection().get();
         int owned = 0;
         for (Item item : collection) {

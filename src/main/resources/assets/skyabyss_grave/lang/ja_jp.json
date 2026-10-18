@@ -42,5 +42,6 @@
   "skyabyss_record.d.grave_rescue_off": "語り部の救いは、このワールドでは使えない。",
   "skyabyss_record.d.grave_owner_only": "墓は持ち主だけが開けられる。",
   "skyabyss_record.d.grave_open": "墓はほかの人も開けられる。",
-  "skyabyss_record.d.grave_expire": "墓は %s 分で崩れて、中身が地面に散らばる。"
+  "skyabyss_record.d.grave_expire": "墓は %s 分で崩れて、中身が地面に散らばる。",
+  "skyabyss_record.d.grave_marker": "墓の標: 墓があるあいだ、墓のある方向と距離が画面に出る。墓の %s ブロック以内に近づくか、拾い終えると消える。あなたの墓だけで、仲間の墓の標は出ない（設定 graveMarker で消せる）。"
 }

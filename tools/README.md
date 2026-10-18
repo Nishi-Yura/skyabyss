@@ -30,6 +30,7 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 - `python tools/install_heart_cinematics.py` : 四つの心臓の登場 (intro) と倒れる (death) のアニメーションを各 `animation.json` に足す。`install_*_heart.py` で書き出し直したら、そのあとにもう一度流す。長さは `HeartBoss` の `INTRO_TICKS` `DEATH_TICKS` と合わせる
 
 - 備えの三灯 (`docs/design/11` の 9 章): `tools/shots/readiness.txt` (控え帳の巨神の頁の「備え」の行、乗り込み口の一言、前室の囁き。`/skyabyss dev readiness prompt|whisper <巨神>` を使う)。絵は `docs/review/previews/readiness_sheet.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=readiness ./gradlew runServer`
+- 使い心地の磨き (rpg_brushup A4 / A8 / A11): `tools/shots/ux_polish.txt` (仲間の札の記号・自分の墓の標の札と矢印・石の「誰が鳴らしたか」の知らせ・控え帳の試練の石の行。見本は `/skyabyss dev ux stele|grave|party|clear` で出す)。絵は `python tools/ux_polish_sheet.py` で `docs/review/previews/ux_polish_sheet.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="ux polish" ./gradlew runServer` (背中の復活の守り・誰が鳴らしたか・墓の標のパケット)
 - 巨神の眠り (心臓を止めたあと。`docs/design/20_cinematics.md` の 3.4) の絵: `tools/shots/titan_end_whale.txt`・`titan_end_ember.txt`・`titan_end_storm.txt` (平らな世界。巨神を眠らせて場面を流し、見せ場を撮る)、`titan_end_tide.txt` (普通の世界の海。座標は `titan_end_scout.txt` が `locate` で探す)、乗り込み口の光 `titan_end_glow.txt`、到着の台と登りの階段 `titan_end_arrival.txt`。絵は `docs/review/previews/titan_end_*.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan end" ./gradlew runServer` (server.properties の `max-tick-time=-1` を付けると、重い読み込みでウォッチドッグに止められない)
 
 ## 台本で撮るスクショ (`client/dev/ShotRunner`)

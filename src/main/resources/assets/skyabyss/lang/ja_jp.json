@@ -610,5 +610,11 @@
   "message.skyabyss.prep.ready": "%s の備えができた",
   "message.skyabyss.heartbeat_ward.used": "鼓動守が砕けて、あなたを引き止めた",
   "wayfarer_notes.empty": "まだ、何も書かれていない。",
-  "growth.skyabyss.reason.site": "小さな場所を抜けた"
+  "growth.skyabyss.reason.site": "小さな場所を抜けた",
+  "message.skyabyss.steles.who": "石: %s",
+  "message.skyabyss.steles.who_self": "あなたが鳴らした",
+  "message.skyabyss.steles.who_other": "%s が鳴らした（あなたは踏破として数える）",
+  "message.skyabyss.steles.who_other_unknown": "仲間が鳴らした（あなたは踏破として数える）",
+  "message.skyabyss.steles.who_none": "まだ",
+  "hud.skyabyss.grave_marker": "墓  %sm"
 }

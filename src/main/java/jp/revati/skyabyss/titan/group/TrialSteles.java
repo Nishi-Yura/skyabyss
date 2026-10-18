@@ -98,6 +98,14 @@ public final class TrialSteles {
     // 石が鳴った直後に呼ぶ。そのグループのオンラインの人のうち、石のある背中にいない人へ静かに一度だけ知らせ、
     // クエストを今の記録に合わせる (オフラインの人は次のログインで poll が合わせる)。背中の中の人は、石の鳴った知らせをすでに受けている
     public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name) {
+        onRung(back, group, titan, trial, name, null);
+    }
+
+    // by: 鳴らした人 (わかれば。「誰が鳴らしたか」の表示のために控える。踏破の数え方には使わない)
+    public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name, @Nullable ServerPlayer by) {
+        if (by != null) {
+            SteleRingers.get(back.getServer()).put(group, signal(titan, trial), by.getUUID(), by.getGameProfile().getName());
+        }
         for (ServerPlayer p : back.getServer().getPlayerList().getPlayers()) {
             if (!Groups.isMember(p, group)) {
                 continue;
@@ -108,5 +116,71 @@ public final class TrialSteles {
             }
             Quests.poll(p, false);
         }
+    }
+
+    // ---------------------------------------------------------------- 誰が鳴らしたか (表示だけ。rpg_brushup A4)
+    public enum Who {
+        // 見ている人が鳴らした
+        SELF,
+        // 仲間が鳴らした (見ている人は踏破として数える)
+        OTHER,
+        // まだ鳴っていない
+        NONE
+    }
+
+    public record WhoRang(Who who, String name) {
+    }
+
+    // 石の合図 signal の石を、viewer (そのグループの人) の目から見て誰が鳴らしたか。鳴っていなければ NONE。
+    // 鳴っているが誰か控えにない (この機能より前に鳴った石・コマンドで鳴らした) ときは OTHER で名前が空
+    public static WhoRang who(MinecraftServer server, UUID group, UUID viewer, String signal) {
+        if (!rung(server, group, signal)) {
+            return new WhoRang(Who.NONE, "");
+        }
+        SteleRingers.Ringer r = SteleRingers.get(server).get(group, signal);
+        if (r == null) {
+            return new WhoRang(Who.OTHER, "");
+        }
+        return new WhoRang(r.id().equals(viewer) ? Who.SELF : Who.OTHER, r.name());
+    }
+
+    // 石の触ったときの知らせの文 (そのグループの一人ひとりの目から見た状態)
+    public static Component whoText(WhoRang w) {
+        return switch (w.who()) {
+            case SELF -> Component.translatable("message.skyabyss.steles.who_self");
+            case OTHER -> w.name().isEmpty() ? Component.translatable("message.skyabyss.steles.who_other_unknown")
+                    : Component.translatable("message.skyabyss.steles.who_other", w.name());
+            case NONE -> Component.translatable("message.skyabyss.steles.who_none");
+        };
+    }
+
+    // すでに鳴っている石に触ったとき、画面の下に「あなたが鳴らした / 〇〇が鳴らした」を出す
+    public static void tellWho(ServerPlayer player, String titan, String trial) {
+        WhoRang w = who(player.server, Groups.keyOf(player), player.getUUID(), signal(titan, trial));
+        Notice.bar(player, jp.revati.skyabyss.ModText.hint("message.skyabyss.steles.who", whoText(w)));
+    }
+
+    // 控え帳の頁用: 巨神 (進行の名前: stone_whale / tide_shell / thunder_wing / ember) の石の合図の一覧。石のない巨神は空
+    public static List<String> signalsOf(String progressTitan) {
+        return switch (progressTitan) {
+            case "stone_whale" -> List.of(signal(WHALE, "0"), signal(WHALE, "1"), signal(WHALE, "2"));
+            case "tide_shell" -> List.of(signal(TIDE, "west"), signal(TIDE, "east"), signal(TIDE, "front"));
+            case "thunder_wing" -> List.of(signal(STORM, "west"), signal(STORM, "east"), signal(STORM, "front"));
+            case "ember" -> List.of(signal(EMBER, "west"), signal(EMBER, "east"), signal(EMBER, "south"));
+            default -> List.of();
+        };
+    }
+
+    // [自分が鳴らした数, 仲間が鳴らした数, まだの数]
+    public static int[] counts(MinecraftServer server, UUID group, UUID viewer, String progressTitan) {
+        int[] n = new int[3];
+        for (String signal : signalsOf(progressTitan)) {
+            n[switch (who(server, group, viewer, signal).who()) {
+                case SELF -> 0;
+                case OTHER -> 1;
+                case NONE -> 2;
+            }]++;
+        }
+        return n;
     }
 }
