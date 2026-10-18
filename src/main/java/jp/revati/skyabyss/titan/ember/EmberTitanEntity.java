@@ -34,6 +34,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -45,9 +46,11 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 息 (18 秒): 吸う 8 秒・止める 2 秒・吐く 6 秒・間 2 秒。吸うと止めるのあいだだけ、熱の口 (EmberMouthEntity) から背中へ渡れる
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (岩鯨・潮殻と同じ。巨大なモデルには当たり判定を付けない)。
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック。頭は前 (geo の -Z)
-public class EmberTitanEntity extends Entity implements GeoEntity {
+public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> BREATH = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
+    // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って土に埋まりはじめてからは tick (600 で止まる)
+    private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation SWIM_ANIM = RawAnimation.begin().thenLoop("animation.ember_titan.swim");
     private static final RawAnimation SLEEP_ANIM = RawAnimation.begin().thenLoop("animation.ember_titan.sleep");
@@ -158,6 +161,12 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(MODE, (byte) 0);
         builder.define(BREATH, (byte) Breath.PAUSE.ordinal());
+        builder.define(REST, -1);
+    }
+
+    @Override
+    public int restTicks() {
+        return entityData.get(REST);
     }
 
     // ---------------------------------------------------------------- 状態 (クライアントでも読める)
@@ -291,6 +300,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
             return;
         }
         ServerLevel level = (ServerLevel) level();
+        if (tickDormant(level)) {
+            return;
+        }
         switch (mode) {
             case SWIM -> tickSwim(level);
             case APPROACH -> tickApproach(level);
@@ -304,6 +316,54 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
         if (tickCount % 40 == 0) {
             recordFinders(level);
         }
+    }
+
+    private boolean wasDormant;
+    // 眠ったとき、さらに土へ埋まる深さ (ブロック)。尾根だけが冷えた丘のように残る
+    private static final double BURY_EXTRA = 4.0;
+
+    // 眠り (docs/design/13): 心臓が止まると熱が引き、浮いていれば土の中へ沈んで、動かず埋まる。尾根だけが冷えた丘になる。目覚めると潜行に戻る。
+    // 戻り = 眠っている (通常の動きを飛ばす)
+    private boolean tickDormant(ServerLevel level) {
+        int age = jp.revati.skyabyss.titan.end.TitanDormancy.age(level.getServer(), jp.revati.skyabyss.progress.Titans.EMBER);
+        if (age < 0) {
+            if (wasDormant) {
+                wasDormant = false;
+                entityData.set(REST, -1);
+                setMode(Mode.SWIM);
+                hasTarget = false;
+                rumble(level, 96, 1.5f, 0.6f);
+            }
+            return false;
+        }
+        wasDormant = true;
+        setDeltaMovement(Vec3.ZERO);
+        switch (mode) {
+            case RISE, SLEEP -> {
+                // 眠る (浮いている) 途中なら、地の中へ沈む
+                forcedTicks = 0;
+                moveFromY = getY();
+                moveTicks = 0;
+                setMode(Mode.SINK);
+                removeMouth(level);
+                level.playSound(null, getX(), getY() + 10, getZ(), EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 12f, 0.5f);
+            }
+            case SINK -> tickSink(level);
+            default -> {
+                // 潜っている: 動かず、さらに土へ埋まる
+                if (mode == Mode.APPROACH) {
+                    setMode(Mode.SWIM);
+                }
+                rise(burrowHeight(level) - BURY_EXTRA, 0.02);
+                if (mouthId != null) {
+                    removeMouth(level);
+                }
+            }
+        }
+        if (tickCount % 5 == 0) {
+            entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        return true;
     }
 
     private void tickSwim(ServerLevel level) {
@@ -496,6 +556,14 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
         }
         if (tickCount % 40 == 0 && now == Breath.IN) {
             mouthHint(level);
+        }
+        if (mouthOpen()) {
+            // 乗り込み口の光 (乗れる人にだけ見える。眠っているあいだは出ない)
+            java.util.List<Vec3> glow = new java.util.ArrayList<>();
+            for (double f : new double[] {0, 2, 5}) {
+                glow.add(position().add(offset(getYRot(), 0, TONGUE_UP + 2.0, MOUTH_FORWARD + f)));
+            }
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.EMBER, glow);
         }
     }
 
@@ -1009,7 +1077,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
     // ---------------------------------------------------------------- アニメ: 体 (泳ぐ・眠る)、息 (口と頭)、煙 (いつも)
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "body", 20, state -> state.setAndContinue(isSurfaced() ? SLEEP_ANIM : SWIM_ANIM)));
+        controllers.add(new AnimationController<>(this, "body", 20, state -> state.setAndContinue(isSurfaced() || isDormantNow() ? SLEEP_ANIM : SWIM_ANIM)));
         controllers.add(new AnimationController<>(this, "breath", 10, state -> {
             if (!isSleeping()) {
                 return state.setAndContinue(BREATH_OUT_ANIM);
@@ -1017,7 +1085,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity {
             Breath b = syncedBreath();
             return state.setAndContinue(b == Breath.IN || b == Breath.HOLD ? BREATH_IN_ANIM : BREATH_OUT_ANIM);
         }));
-        controllers.add(new AnimationController<>(this, "smoke", 0, state -> state.setAndContinue(SMOKE_ANIM)));
+        controllers.add(new AnimationController<>(this, "smoke", 0, state -> isDormantNow() ? PlayState.STOP : state.setAndContinue(SMOKE_ANIM)));
     }
 
     @Override

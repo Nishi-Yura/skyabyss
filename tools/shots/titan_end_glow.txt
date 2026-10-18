@@ -1,0 +1,67 @@
+# 乗り込み口の光 (乗れる人にだけ見える脈打つ光。docs/design/01 の 4.3) を撮る。平らな世界の夜。岩鯨の鎖・雷翼の昇り風・余燼の口。
+# ./gradlew runShots -Pscript=tools/shots/titan_end_glow.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/<名前>/ → docs/review/previews/titan_end_glow_*.png へ
+# 潮殻の潮門は海が要るので titan_end_tide.txt の中で撮る。クリエイティブの人は資格の検査から外れるので、光が見える
+world titan_end_glow flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+
+cmd time set midnight
+cmd weather clear
+cmd skyabyss cinematic stop
+wait 20
+cmd gamemode creative
+cmd skyabyss progress grant @p stone_whale
+cmd skyabyss progress grant @p tide_shell
+cmd skyabyss progress grant @p thunder_wing
+hud off
+camera minecraft:overworld 0 -60 0 0 0
+waitchunks
+wait 40
+
+# ---- 岩鯨の鎖: 低く降りて休んでいる岩鯨 (頭は西)。鎖は背中の左のわき腹から垂れる
+cmd summon skyabyss:stone_whale 40 -26 140 {Rotation:[90f,0f],Mode:2,RestTicks:999999}
+camera minecraft:overworld 0 -58 0 335 -6
+wait 140
+shot glow_whale_far
+camera minecraft:overworld 30 -58 60 336 -8
+wait 30
+shot glow_whale_mid
+camera minecraft:overworld 55 -58 120 333 -20
+wait 30
+shot glow_whale_near
+cmd kill @e[type=skyabyss:stone_whale,distance=..400]
+wait 20
+
+# ---- 雷翼の昇り風: 止まっている雷翼の足もとに立つ柱の光
+camera minecraft:overworld 0 -60 0 0 0
+wait 20
+cmd skyabyss titan summon storm
+wait 60
+cmd skyabyss titan rest storm here
+wait 100
+shot glow_storm_far
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^40 ^0 ^-10 facing ^8 ^8 ^0
+wait 40
+shot glow_storm_mid
+cmd execute as @e[type=skyabyss:thunder_wing,limit=1] at @s run tp @p ^16 ^0 ^-6 facing ^8 ^10 ^-4
+wait 30
+shot glow_storm_near
+cmd kill @e[type=skyabyss:thunder_wing,distance=..600]
+wait 20
+
+# ---- 余燼の口: 眠っている余燼が息を吸うあいだ、口の中が光る
+camera minecraft:overworld 0 -60 0 0 0
+wait 20
+cmd skyabyss titan summon ember
+wait 100
+cmd skyabyss titan rest ember here
+wait 30
+shot glow_ember_far
+cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^6 ^0 ^120 facing ^0 ^3 ^84
+wait 30
+shot glow_ember_near
+cmd kill @e[type=skyabyss:ember_titan,distance=..600]
+wait 10
+quit

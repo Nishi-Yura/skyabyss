@@ -38,9 +38,11 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 空の影が 640 ブロック以内を通るあいだは、近くの峰へ急いで降りてうずくまる (演出だけ)
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (潮殻と同じ)。位置の y はモデルの底 (geo の y=0)
 // 地上の人には、この中心の周りを回る巨神として見える。地形は変えない (エンティティと粒だけ)
-public class StormWingEntity extends Entity implements GeoEntity {
+public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BOOLEAN);
+    // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って峰へ向かいはじめてからは tick (600 で止まる)
+    private static final EntityDataAccessor<Integer> REST = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.INT);
 
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.thunder_wing.fly");
     private static final RawAnimation GLIDE = RawAnimation.begin().thenLoop("animation.thunder_wing.glide");
@@ -149,6 +151,12 @@ public class StormWingEntity extends Entity implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(MODE, (byte) 0);
         builder.define(LOOK, false);
+        builder.define(REST, -1);
+    }
+
+    @Override
+    public int restTicks() {
+        return entityData.get(REST);
     }
 
     // ---- 外から見る
@@ -163,7 +171,7 @@ public class StormWingEntity extends Entity implements GeoEntity {
 
     // うずくまっているか (空の影から隠れている。三章の見せ場 chapter/StormShowcase が見る)
     public boolean cowering() {
-        return mode == Mode.COWER;
+        return mode == Mode.COWER && entityData.get(REST) < 0;
     }
 
     // 今の動きになってからの tick
@@ -276,6 +284,9 @@ public class StormWingEntity extends Entity implements GeoEntity {
         }
         ServerLevel level = (ServerLevel) level();
         modeTicks++;
+        if (tickDormant(level)) {
+            return;
+        }
         switch (mode) {
             case CRUISE -> tickCruise(level);
             case DESCEND -> tickDescend(level);
@@ -286,6 +297,75 @@ public class StormWingEntity extends Entity implements GeoEntity {
         if (mode == Mode.PERCH) {
             ensureGale(level);
         }
+    }
+
+    private boolean wasDormant;
+    // 眠る場所 (峰の地表)
+    private double sleepX;
+    private double sleepY;
+    private double sleepZ;
+
+    // 眠り (docs/design/12): 心臓が止まると稲妻がやみ、近くの峰へ降りて翼を畳み、うずくまって岩の峰のようになる。目覚めると飛び立つ。
+    // 戻り = 眠っている (通常の動きを飛ばす)
+    private boolean tickDormant(ServerLevel level) {
+        int age = jp.revati.skyabyss.titan.end.TitanDormancy.age(level.getServer(), jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+        if (age < 0) {
+            if (wasDormant) {
+                wasDormant = false;
+                entityData.set(REST, -1);
+                hasCover = false;
+                level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.8f);
+                beginTakeOff(level);
+            }
+            return false;
+        }
+        if (!wasDormant) {
+            wasDormant = true;
+            forcedTicks = 0;
+            dropGale(level);
+            chooseSleepSpot(level);
+            setMode(Mode.COWER);
+        }
+        double dx = sleepX - getX();
+        double dz = sleepZ - getZ();
+        double dist = Math.hypot(dx, dz);
+        if (dist > 1.0) {
+            setYRot(Mth.approachDegrees(getYRot(), (float) Math.toDegrees(Math.atan2(-dx, dz)), 3f));
+            double step = Math.min(COVER_SPEED, dist);
+            double ny = getY() + Mth.clamp(sleepY - getY(), -COVER_SPEED, COVER_SPEED);
+            setPos(getX() + dx / dist * step, ny, getZ() + dz / dist * step);
+        } else {
+            setPos(sleepX, sleepY, sleepZ);
+        }
+        if (tickCount % 5 == 0) {
+            entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        return true;
+    }
+
+    private void chooseSleepSpot(ServerLevel level) {
+        var rest = jp.revati.skyabyss.titan.end.TitanDormancy.rest(level.getServer(), jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+        Vec3 spot = rest == null ? null : rest.spot();
+        if (spot == null) {
+            Peak p = StormPerch.find(level, getX(), getZ(), 0, 160);
+            if (p != null) {
+                spot = new Vec3(p.x(), p.y(), p.z());
+            } else {
+                double gy = StormPerch.surfaceAt(level, getX(), getZ());
+                spot = new Vec3(getX(), Double.isNaN(gy) ? getY() : gy, getZ());
+            }
+        }
+        sleepX = spot.x;
+        sleepY = spot.y;
+        sleepZ = spot.z;
+    }
+
+    private void dropGale(ServerLevel level) {
+        Entity e = gale == null ? null : level.getEntity(gale);
+        if (e != null) {
+            e.discard();
+        }
+        gale = null;
     }
 
     private void tickCruise(ServerLevel level) {

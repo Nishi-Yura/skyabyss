@@ -110,6 +110,7 @@
 - `ChapterCards.aftermath(player, Chapters.WHALE, 一言の Component)`。一言を省くと翻訳キー `chapter.skyabyss.aftermath.<章の ID>` を使う（その章の担当が自分の lang に足す）。見出しは `chapter.skyabyss.aftermath.head`（「%s　終」）。
 - 人ごとに章ごと一度（記録は `ArcData`）。場面の間は預かり、終わってから出す（ログアウトで預かりは消える。記録していないので、もう一度呼んでよい）。受け付けたら true、すでに出した・預かっているなら false。
 - 語り部の一言は、札のあとに `Notice.narrate` を続ける（字幕は別の列）。
+- 心臓を止めた章の余韻は、巨神に地上へ降ろされたあと（初めての人は、地上から眠りを見る場面 20 の 3.4 のあと）に出る。背中にいる間は、各章の余韻が見る条件（地上にいる）を満たさないので出ず、場面の間は `ChapterCards` が預かる。四章は、さらに天の鍵が一つになる場面（`SkyKey`）のあと。
 
 **章の予兆の枠・空の段** は 01 の 4.1 の「予兆 3 拍」「空の異変の段」。コードは `story/arc/Foreshadow`（使い方は頭のコメント。01 の 4.1 に API の要約）と `sky/ChapterSky.Stage`。
 

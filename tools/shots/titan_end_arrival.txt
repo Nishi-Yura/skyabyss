@@ -1,0 +1,42 @@
+# 岩鯨の背の到着 (左のわき腹の錨石の外の台) と、台から背の広場へ登る階段を撮る (docs/design/02 の 3.1・3.2)。
+# ./gradlew runShots -Pscript=tools/shots/titan_end_arrival.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/<名前>/ → docs/review/previews/titan_end_arrival_*.png へ
+world titan_end_arrival flat
+size 1280 720
+timeout 600
+render 16
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 40
+chat clear
+hud off
+shot arrival_00_view
+# 錨石と炉と鎖のあたりを近くから (北東)
+camera skyabyss:titan_back -40 92 114 225 22
+wait 30
+shot arrival_01_anchor
+# 台を西の外から (体のほうへ)
+camera skyabyss:titan_back -58 96 108 270 8
+wait 30
+shot arrival_02_platform_from_sea
+# 登りの階段の口 (台の北寄り)
+camera skyabyss:titan_back -38 92 104 270 6
+wait 30
+shot arrival_03_stair_mouth
+cmd gamemode spectator
+# 階段の中ほど
+camera skyabyss:titan_back -16 112 105 270 -4
+wait 30
+shot arrival_04_stair_inside
+# 階段の出口 (広場の石畳)
+camera skyabyss:titan_back -6 127 105 270 8
+wait 30
+shot arrival_05_stair_exit
+# 全体を左のわき腹の外から斜め上に
+camera skyabyss:titan_back -90 140 60 315 35
+wait 40
+shot arrival_06_flank_overview
+quit

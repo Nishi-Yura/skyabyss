@@ -638,6 +638,8 @@ public final class EmberBackTrials {
     // そのグループの試練を最初に戻す (7.1節)。そのグループの試練の中の人は広間へ (熱は 0)、試練の番号が進む (古い休み場の記録は無効)。
     // そのグループが持っている部屋は手放して最初に戻す。ほかのグループの進み・部屋・人には触らない。2 周目からは一つ眠る
     public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.EMBER);
         GATE_TIMERS.remove(group);
         AFTER_HEART.remove(group);
         for (ServerPlayer p : Groups.online(level, group)) {

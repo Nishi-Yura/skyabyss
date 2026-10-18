@@ -1,0 +1,39 @@
+# 余燼の巨神が眠る場面 titan_end_ember の見せ場を撮る (docs/design/20_cinematics.md の 3.4、13 の 2.10)。平らな世界。
+# ./gradlew runShots -Pscript=tools/shots/titan_end_ember.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/<名前>/ → docs/review/previews/titan_end_ember_*.png へ
+# 余燼を人の南 120 ブロックに呼び、浮いて眠っている姿から眠らせる (土へ埋もれて丘になる)。場面は 16 秒 = 320 tick
+world titan_end_ember flat
+size 1280 720
+timeout 900
+render 12
+clouds on
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+camera minecraft:overworld 0 -60 0 0 0
+waitchunks
+wait 40
+cmd skyabyss titan summon ember
+wait 100
+cmd skyabyss titan rest ember here
+wait 80
+shot ember_00_awake
+cmd skyabyss titan end ember sleep
+cmd skyabyss cinematic play titan_end_ember
+wait 20
+shot ember_01_heat_fades
+wait 100
+shot ember_02_sinking
+wait 90
+shot ember_03_buried
+wait 80
+shot ember_04_pullback
+wait 40
+shot ember_05_dormant
+wait 120
+shot ember_06_control
+cmd skyabyss titan end ember wake
+cmd kill @e[type=skyabyss:ember_titan,distance=..600]
+wait 10
+quit

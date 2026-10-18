@@ -54,6 +54,11 @@ public final class SkyKey {
         if (DialogueService.currentNode(player) != null) {
             return true;
         }
+        // 巨神の背中にいる間・巨神に降ろされる前後・場面の最中は出さない (降ろされたあとの眠りの場面のあとで出す)
+        if (jp.revati.skyabyss.titan.TitanBacks.isBack(player.level().dimension()) || jp.revati.skyabyss.titan.end.TitanEnd.holding(player)
+                || jp.revati.skyabyss.cinematic.Cinematics.active(player)) {
+            return true;
+        }
         int hurt = player.getLastHurtByMobTimestamp();
         int hit = player.getLastHurtMobTimestamp();
         return (hurt > 0 && player.tickCount - hurt < BUSY_TICKS) || (hit > 0 && player.tickCount - hit < BUSY_TICKS);

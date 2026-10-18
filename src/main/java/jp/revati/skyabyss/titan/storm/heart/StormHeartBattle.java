@@ -415,6 +415,7 @@ public final class StormHeartBattle {
             }
         }
         SkyAbyss.LOGGER.info("The heart of the thunder wing was defeated by {} participant(s) (group {})", ids.size(), group);
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, ids);
     }
 
     // 心臓が倒れたグループ (自己テスト用): 心臓の持ち主

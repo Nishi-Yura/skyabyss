@@ -1,0 +1,20 @@
+# 巨神の眠りの絵を撮る場所を探す (普通の世界の種 20261016 で、海・峰・平原の座標をログに出す)。docs/design/20_cinematics.md の 4 章
+# ./gradlew runShots -Pscript=tools/shots/titan_end_scout.txt -PshotsName=titan_end_scout   → run/shots/titan_end_scout/shots/titan_end_scout/shots.log の locate の返事を読む
+world titan_end_scout normal
+size 640 360
+timeout 600
+render 8
+clouds off
+
+cmd gamemode spectator
+waitchunks
+wait 40
+cmd locate biome minecraft:deep_ocean
+cmd locate biome minecraft:ocean
+cmd locate biome minecraft:jagged_peaks
+cmd locate biome minecraft:stony_peaks
+cmd locate biome minecraft:frozen_peaks
+cmd locate biome minecraft:windswept_hills
+cmd locate biome minecraft:plains
+wait 20
+quit

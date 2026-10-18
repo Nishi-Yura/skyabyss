@@ -382,6 +382,7 @@ public final class EmberHeartBattle {
         }
         EmberBackTrials.soundTo(level, group, EmberHeartArena.heartHome(), SoundEvents.BEACON_DEACTIVATE, 3f, 0.6f);
         SkyAbyss.LOGGER.info("The heart of the embers was stilled by {} participant(s) of group {}", ids.size(), group);
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.EMBER, ids);
     }
 
     // 試練で湧いた心臓・礫は保存しないが、古いものが残っていれば読み込みのときに消す

@@ -602,6 +602,8 @@ public final class TideBackTrials {
     // そのグループの試練を最初に戻す (08 の 7.1節)。心臓も眠り直し、試練の番号が進む (古い休み場の記録は無効になる)。
     // ほかのグループの進み・部屋・敵・人には触れない
     public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable TideBackState.Trial forceSleep, boolean noSleep) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
         TideHeartBattle.reawaken(level, group);
         TideRooms.releaseGroup(level, group);
         TideBackState.Group state = TideBackState.of(level, group);

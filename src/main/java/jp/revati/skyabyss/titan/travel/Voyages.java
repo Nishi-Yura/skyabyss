@@ -107,6 +107,11 @@ public final class Voyages {
             }
             return CallResult.REFUSED;
         }
+        if (!bypass && jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.server, kind.id())) {
+            // 眠っている巨神は、呼び笛に応えない
+            Notice.bar(player, ModText.deny("message.skyabyss.titan_end.sleeping_call", jp.revati.skyabyss.progress.Progression.titanName(kind.id())));
+            return CallResult.REFUSED;
+        }
         TravelRules.Refusal refusal = TravelRules.check(player, kind, bypass);
         if (current != null && !current.leader.equals(player.getUUID()) && current.beforeDeparture() && !current.pendingCancel
                 && refusal != TravelRules.Refusal.WRONG_DIMENSION && refusal != TravelRules.Refusal.RIDING

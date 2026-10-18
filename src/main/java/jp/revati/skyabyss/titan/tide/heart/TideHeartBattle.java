@@ -405,6 +405,7 @@ public final class TideHeartBattle {
             }
         }
         SkyAbyss.LOGGER.info("The heart of the tide shell was defeated by {} participant(s)", ids.size());
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, ids);
     }
 
     // 試練で湧いた心臓・泡・真珠は保存しないが、古いものが残っていれば読み込みのときに消す

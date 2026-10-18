@@ -354,6 +354,22 @@ public final class TitanBackSelfTest {
         }
         SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
         // 歩ける道: 到着から祠、祠の階段で鼓動の間
+        // 到着 (左のわき腹の台) から、錨石・炉・登り口の階段・背の広場へ歩けること
+        int toAnchor = walkSteps(level, arrival(), anchor().west(), 1);
+        int toForge = walkSteps(level, arrival(), forge().west(), 1);
+        int toPlaza = walkSteps(level, arrival(), plaza(), 1);
+        if (toAnchor < 0) {
+            failures.add("cannot walk from the arrival to the anchor stone on the flank platform");
+        }
+        if (toForge < 0) {
+            failures.add("cannot walk from the arrival to the resonance forge on the flank platform");
+        }
+        if (toPlaza < 0) {
+            failures.add("cannot walk from the arrival on the flank platform up the stair to the plaza on the back");
+        } else if (toPlaza > 80) {
+            failures.add("the climb from the flank platform to the plaza is too long (" + toPlaza + " steps)");
+        }
+        SkyAbyss.LOGGER.info("Titan back flank: arrival -> anchor {} steps, -> forge {} steps, -> plaza {} steps", toAnchor, toForge, toPlaza);
         int toShrine = walkSteps(level, arrival(), new BlockPos(0, shrineY() + 1, SHRINE_Z), 2);
         int toHub = walkSteps(level, arrival(), HUB.center(), 2);
         if (toShrine < 0) {

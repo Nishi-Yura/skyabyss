@@ -1,0 +1,17 @@
+{
+  "message.skyabyss.titan_end.silence": "鼓動が止まった。背中が、しんと静まりかえる。",
+  "message.skyabyss.titan_end.tremble.stone_whale": "岩鯨の背が、かすかに震える。大きな胸が、ゆっくりと息を吸う。",
+  "message.skyabyss.titan_end.tremble.tide_shell": "甲羅がきしみ、遠くで潮が引いていく。殻が、ゆっくりと息を吐く。",
+  "message.skyabyss.titan_end.tremble.thunder_wing": "翼の骨が鳴る。風が止み、雷がひとつ遠ざかっていく。",
+  "message.skyabyss.titan_end.tremble.ember": "体の底の熱が、ゆっくりと引いていく。足もとが、冷えはじめる。",
+  "message.skyabyss.titan_end.again.stone_whale": "岩鯨は歌をやめ、雲の海へ沈んでいく。",
+  "message.skyabyss.titan_end.again.tide_shell": "潮殻は海へ沈み、珊瑚の段だけが波の上に残った。",
+  "message.skyabyss.titan_end.again.thunder_wing": "雷翼は翼を畳み、峰の上で岩のように眠った。",
+  "message.skyabyss.titan_end.again.ember": "余燼の巨神は土の下へ埋もれ、冷えた丘になった。",
+  "message.skyabyss.titan_end.wake.stone_whale": "遠い空で、また歌が鳴りはじめた。",
+  "message.skyabyss.titan_end.wake.tide_shell": "海の遠くで、巨大なものがまた動きだした。",
+  "message.skyabyss.titan_end.wake.thunder_wing": "峰の向こうで、雷がまた鳴りはじめた。",
+  "message.skyabyss.titan_end.wake.ember": "足もとが、ほんのり温かくなった。",
+  "message.skyabyss.titan_end.sleeping": "%sは深い眠りの中にいる。鼓動が戻るまで、乗れない。",
+  "message.skyabyss.titan_end.sleeping_call": "%sは深い眠りの中にいて、笛に応えない。"
+}

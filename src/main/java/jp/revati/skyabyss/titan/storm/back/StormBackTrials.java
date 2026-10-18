@@ -584,6 +584,8 @@ public final class StormBackTrials {
     // そのグループが持っている部屋を手放し、そのグループの試練の敵と雷を消し、moveOut ならそのグループの試練の中の人を広間へ
     public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep,
             boolean moveOut) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.THUNDER_WING);
         StormProgress p = StormProgress.of(level, group);
         p.reset(level.random, forceSleep, noSleep);
         AFTER_HEART.remove(group);

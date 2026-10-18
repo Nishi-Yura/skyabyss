@@ -480,7 +480,9 @@ public final class TitanBackTrials {
     private static final Box HEART_CORRIDOR = new Box(-2, 2, -63, -45, FLOOR, 5);
     // リセットで作り直したり封じたりしない場所 (鼓動の間とその周り)。リセットのとき、ここにいる人は動かさない
     private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0,
-            new Box(-15, -10, -23, -21, FLOOR, 4), new Box(10, 15, -23, -21, FLOOR, 4));
+            new Box(-15, -10, -23, -21, FLOOR, 4), new Box(10, 15, -23, -21, FLOOR, 4),
+            // 台から背の広場へ登る階段 (到着の道。リセットで動かさない)
+            new Box(STAIR_X0, STAIR_X0 + 40, STAIR_Z0, STAIR_Z1, FLANK_FLOOR_Y, 44));
 
     // 封印の先 (宝物庫・心臓の回廊・心臓の前室・心臓の間) にいるか
     static boolean isPastHeartSeal(Player player) {
@@ -975,6 +977,8 @@ public final class TitanBackTrials {
         playToGroup(level, group, c, SoundEvents.WITHER_DEATH, 2.5f, 0.6f);
         playToGroup(level, group, c, SoundEvents.BEACON_ACTIVATE, 3f, 0.7f);
         SkyAbyss.LOGGER.info("The heart of the stone whale was defeated by {} participant(s) of group {}", participants.size(), group);
+        // 借りものの鼓動が止まり、岩鯨は眠りに落ちる。戦った人は少しあとに地上へ降ろされる (docs/design/02 の 2.11節)
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, ids);
     }
 
     // 心臓を倒したあとの光の柱 (そのグループにだけ見える)。中央に立つと尾の台へ戻される
@@ -992,7 +996,7 @@ public final class TitanBackTrials {
     }
 
     private static void toArrival(ServerPlayer player) {
-        BlockPos a = arrival();
+        BlockPos a = plaza();
         player.fallDistance = 0;
         player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, player.getYRot(), 0f);
     }
@@ -1019,6 +1023,8 @@ public final class TitanBackTrials {
     // そのグループの試練を最初に戻す: 戦いと敵を片付け、進みと扉を消し、試練の番号を進める。
     // ほかのグループの進み・敵・戦いには触れない。体内の、作り直す所・封じる所にいるそのグループの人は鼓動の間へ出す
     public static void resetGroup(ServerLevel level, UUID group) {
+        // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.STONE_WHALE);
         for (Hall hall : HALLS) {
             resetHall(level, hall, group, false);
         }
@@ -1199,7 +1205,7 @@ public final class TitanBackTrials {
                 return cp.spawn();
             }
         }
-        return arrival();
+        return plaza();
     }
 
     private static BlockPos checkpointSpawn(ServerLevel level, String id) {
@@ -1208,7 +1214,7 @@ public final class TitanBackTrials {
                 return safeSpot(level, cp.spawn());
             }
         }
-        return arrival();
+        return plaza();
     }
 
     // 立てる場所か: 足元と頭が空いていて (当たり判定も液体もない)、床が固い
@@ -1425,7 +1431,7 @@ public final class TitanBackTrials {
                 // 記録が古い (リセットより前) か無ければ、尾の台へ
                 int epoch = epochOf(back, player);
                 String cp = validCheckpoint(tag, epoch);
-                BlockPos spawn = cp.isEmpty() ? arrival() : checkpointSpawn(back, cp);
+                BlockPos spawn = cp.isEmpty() ? plaza() : checkpointSpawn(back, cp);
                 REVIVING.add(player.getUUID());
                 try {
                     player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -1466,7 +1472,7 @@ public final class TitanBackTrials {
             if (event.getEntity() instanceof ServerPlayer player) {
                 if (player.isShiftKeyDown()) {
                     clearCheckpoint(player);
-                    BlockPos a = arrival();
+                    BlockPos a = plaza();
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);
                     Notice.narrate(player, "message.skyabyss.gave_up");
                 } else {
