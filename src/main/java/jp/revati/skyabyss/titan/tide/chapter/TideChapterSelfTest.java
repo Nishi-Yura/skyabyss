@@ -202,7 +202,9 @@ public final class TideChapterSelfTest {
         check(f, titan != null, "could not spawn the tide shell");
         // 二章の人だけ: 一章・三章・四章の人には出ない
         for (Chapters other : List.of(Chapters.WHALE, Chapters.STORM, Chapters.EMBER, Chapters.PROLOGUE)) {
-            check(f, Foreshadow.next(p, other, 100000, 6000) == null, "tide beats must not be eligible for " + other);
+            // 他の章の枠の拍は条件しだいで出うる。潮殻の拍が混ざらないことだけを確かめる
+            Beat got = Foreshadow.next(p, other, 100000, 6000);
+            check(f, got == null || got.chapter() != Chapters.TIDE, "tide beats must not be eligible for " + other);
         }
         check(f, Chapters.of(p) != Chapters.TIDE, "a stage-0 player should not be in chapter 2 (so the real tick never fires the beats)");
         // 1 拍目: 昼、水辺。まだ荷などが置かれていない人は水辺で足りる

@@ -150,10 +150,17 @@ public final class Foreshadow {
         if (player.tickCount < MIN_TICK_COUNT || !player.isAlive() || player.isSpectator() || Cinematics.active(player)) {
             return;
         }
+        fireForCurrentChapter(player, player.level().getGameTime(), player.level().getDayTime());
+    }
+
+    // その人の今の章の拍だけを一つ起こす (前の章・先の章の拍は調べない。既存のセーブで先の章にいる人にも、過去の章の予兆は出ない)。
+    // 四章までの章でなければ何もしない。起きたらその拍
+    @Nullable
+    public static Beat fireForCurrentChapter(ServerPlayer player, long gameTime, long dayTime) {
         Chapters current = Chapters.of(player);
         if (!current.titanChapter()) {
-            return;
+            return null;
         }
-        tryFire(player, current, player.level().getGameTime(), player.level().getDayTime());
+        return tryFire(player, current, gameTime, dayTime);
     }
 }

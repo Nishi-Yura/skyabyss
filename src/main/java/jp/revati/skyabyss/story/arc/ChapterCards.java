@@ -96,7 +96,7 @@ public final class ChapterCards {
     }
 
     // 試せる形: chapter = 人の今の章、legacy = すでに遊んでいた人、now = ゲーム時間。札を出した (送った) なら true
-    static boolean tick(ServerPlayer player, Chapters chapter, boolean legacy, long now) {
+    public static boolean tick(ServerPlayer player, Chapters chapter, boolean legacy, long now) {
         UUID id = player.getUUID();
         boolean sent = false;
         ArcData data = ArcData.of(player);

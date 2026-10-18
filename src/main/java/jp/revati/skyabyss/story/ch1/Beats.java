@@ -41,10 +41,14 @@ public final class Beats {
     static final String CHAIN = "chain_link";
     public static final List<String> IDS = List.of(Chapters.WHALE.id() + "/" + DUST, Chapters.WHALE.id() + "/" + SHADOW, Chapters.WHALE.id() + "/" + CHAIN);
 
+    // 一章の空の段 (docs/design/01 の 4.1「空の異変の段」): 四章までで一番ごく弱い。月がほんの少し近く、空に石灰色が薄く (二章 0.02/0.05、三章 0.04/0.07、四章 0.08/0.12 と順に濃くなる)
+    public static final ChapterSky.Stage SKY = new ChapterSky.Stage(0.01f, 0x7C838C, 0.03f);
+
     private Beats() {
     }
 
     static void register(ForeshadowRegisterEvent event) {
+        ChapterSky.setStage(Chapters.WHALE, SKY);
         event.register(Beat.of(Chapters.WHALE, 1, DUST, Beats::dust).time(Beat.Time.DAY).cooldown(2400).when(Beats::ready));
         event.register(Beat.of(Chapters.WHALE, 2, SHADOW, Beats::shadow).time(Beat.Time.DAY).cooldown(4800).when(Beats::ready));
         event.register(Beat.of(Chapters.WHALE, 3, CHAIN, Beats::chain).time(Beat.Time.DUSK).cooldown(4800).when(Beats::ready));
