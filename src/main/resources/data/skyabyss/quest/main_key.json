@@ -1,5 +1,6 @@
 {
   "category": "main",
+  "chapter": "titan_ember",
   "order": 50,
   "giver": "skyabyss:storyteller",
   "start_when": {

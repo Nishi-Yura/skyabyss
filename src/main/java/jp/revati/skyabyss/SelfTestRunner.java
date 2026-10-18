@@ -101,6 +101,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
         // 章の写像 (段階 × 序章、伝承の章との一致)。docs/design/10 の 3 章
         steps.add(Step.once("chapters", jp.revati.skyabyss.story.ChaptersSelfTest::runSelfTest));
+        // 章の演出の共通部品 (題字・余韻の札、予兆の枠、クエストの章の欄、会話の追加ファイル、空の段)。docs/design/18 の 3 章、01 の 4.1
+        steps.add(Step.once("arc", jp.revati.skyabyss.story.arc.ArcSelfTest::runSelfTest));
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md

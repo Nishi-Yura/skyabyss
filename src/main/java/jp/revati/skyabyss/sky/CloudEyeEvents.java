@@ -102,7 +102,7 @@ public final class CloudEyeEvents {
         ChapterSkyData.Entry entry = ChapterSkyData.get(level).entry(player.getUUID());
         boolean awake = player.isAlive() && !player.isSpectator() && !player.isSleeping();
         boolean outdoors = !player.isUnderWater() && level.canSeeSky(player.blockPosition().above());
-        return blocker(frequency(), ChapterSky.inChapterOne(player), ChapterSky.moonNearness(level), level.getDayTime(),
+        return blocker(frequency(), ChapterSky.inChapterOne(player), ChapterSky.moonNearness(level, player), level.getDayTime(),
                 level.isThundering(), outdoors, awake, level.getGameTime(), entry.nextEye, ACTIVE.containsKey(player.getUUID()));
     }
 

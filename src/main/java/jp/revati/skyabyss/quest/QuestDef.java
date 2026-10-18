@@ -20,8 +20,21 @@ import net.minecraft.util.GsonHelper;
 //   board    : 言伝ての板 (quest.free.Board) に出す
 //   minStage : 受けられる物語の段階 (止めた心臓の数)。ログと板で「一つ先」を伏せて見せるのにも使う
 //   unlock   : 受けられる条件 (段階のほか。サーバーだけが持つ)
+//   chapter  : 所属する章 (Chapters の ID: prologue / titan_whale / titan_tide / titan_storm / titan_ember / chapter2 …)。"" = どの章にも属さない。
+//              クエストログがメイン・サブの中を章ごとの見出し (「一章　岩鯨」) で分ける。ID・段階・進行には関わらない
 public record QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen, boolean loopReset,
-                       List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock) {
+                       List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock, String chapter) {
+    public QuestDef(String id, String category, int order, @Nullable String giver, Condition startWhen, boolean loopReset,
+                    List<Stage> stages, Reward reward, String repeat, boolean board, int minStage, Condition unlock) {
+        this(id, category, order, giver, startWhen, loopReset, stages, reward, repeat, board, minStage, unlock, "");
+    }
+
+    // 章 (なければ null)
+    @Nullable
+    public jp.revati.skyabyss.story.Chapters chapterOrNull() {
+        return chapter.isEmpty() ? null : jp.revati.skyabyss.story.Chapters.byId(chapter);
+    }
+
     public static final Set<String> CATEGORIES = Set.of("main", "sub");
     public static final Set<String> REPEATS = Set.of("", "daily", "weekly");
     public static final Set<String> OBJECTIVE_TYPES = Set.of("talk", "kill", "collect", "lore", "visit", "near", "signal", "condition",
@@ -150,11 +163,16 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         if (minStage < 0 || minStage > 4) {
             errors.add(where + ": min_stage must be 0-4");
         }
+        String chapter = GsonHelper.getAsString(o, "chapter", "");
+        if (!chapter.isEmpty() && jp.revati.skyabyss.story.Chapters.byId(chapter) == null) {
+            errors.add(where + ": unknown chapter '" + chapter + "'");
+            chapter = "";
+        }
         return new QuestDef(id, category, GsonHelper.getAsInt(o, "order", 100), o.has("giver") ? GsonHelper.getAsString(o, "giver") : null,
                 o.has("start_when") ? Condition.parse(o.get("start_when"), errors, where + " start_when") : null,
                 GsonHelper.getAsBoolean(o, "loop_reset", false), List.copyOf(stages), reward, repeat,
                 GsonHelper.getAsBoolean(o, "board", false), minStage,
-                o.has("unlock") ? Condition.parse(o.get("unlock"), errors, where + " unlock") : Condition.ALWAYS);
+                o.has("unlock") ? Condition.parse(o.get("unlock"), errors, where + " unlock") : Condition.ALWAYS, chapter);
     }
 
     private static Stage parseStage(JsonObject o, List<String> errors, String where) {
@@ -258,6 +276,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         buf.writeUtf(repeat);
         buf.writeBoolean(board);
         buf.writeVarInt(minStage);
+        buf.writeUtf(chapter);
         buf.writeVarInt(stages.size());
         for (Stage s : stages) {
             buf.writeUtf(s.id());
@@ -291,6 +310,7 @@ public record QuestDef(String id, String category, int order, @Nullable String g
         String repeat = buf.readUtf();
         boolean board = buf.readBoolean();
         int minStage = buf.readVarInt();
+        String chapter = buf.readUtf();
         int ns = buf.readVarInt();
         List<Stage> stages = new ArrayList<>(ns);
         for (int i = 0; i < ns; i++) {
@@ -325,6 +345,6 @@ public record QuestDef(String id, String category, int order, @Nullable String g
             items.add(new ItemReward(item, count, null, name.isEmpty() ? null : name, List.of()));
         }
         return new QuestDef(id, category, order, giver.isEmpty() ? null : giver, null, false, List.copyOf(stages),
-                new Reward(xp, List.copyOf(items), Map.of(), List.of()), repeat, board, minStage, Condition.ALWAYS);
+                new Reward(xp, List.copyOf(items), Map.of(), List.of()), repeat, board, minStage, Condition.ALWAYS, chapter);
     }
 }
