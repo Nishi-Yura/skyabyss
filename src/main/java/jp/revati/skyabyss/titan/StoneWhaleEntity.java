@@ -94,6 +94,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private boolean voyage;
     private double voyageGround = Double.NaN;
     private double surroundingMax = 64;
+    // 眠りの始まりで低い所にいた (停泊していた) とき、昇って去っている (沈まない)
+    private boolean departing;
     // 眠っているあいだ (TitanDormancy)。沈みの目標の高さ (まだ決めていなければ NaN)
     private double sleepY = Double.NaN;
     private boolean wasDormant;
@@ -336,13 +338,33 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             wasDormant = true;
             dropChainHandle();
             hold = 0;
-            // 沈む先: 今から 50 ブロック下。ただし周りの地形より 22 ブロックは上に残す
-            sleepY = Math.max(surroundingMax + 22, getY() - 50);
+            // 沈む先: 今から 50 ブロック下。ただし周りの地形より 22 ブロックは上に残す。
+            // 地上に降りて停泊 (REST・20 分の滞在 TitanStay) していたときは、眠りが勝つ: 沈む余地がほとんど無いので (停泊の高さは地形の 34 ブロック上)、
+            // 動かずに地上の人の真上に居座ってしまう。そのときは巡航の高さまで昇って雲の海へ去る (sleepY は昇る先)
+            double far = Math.min(level.getMaxBuildHeight() - 40, Math.max(surroundingMax + CRUISE_CLEARANCE, 170));
+            if (getY() < far - 20) {
+                sleepY = far;
+                departing = true;
+            } else {
+                sleepY = Math.max(surroundingMax + 22, getY() - 50);
+                departing = false;
+            }
         }
         // 鎖を巻き上げ、動きを止めて、ゆっくり沈む
         retractChain();
         setDeltaMovement(Vec3.ZERO);
-        if (!Double.isNaN(sleepY) && getY() > sleepY) {
+        if (departing && !Double.isNaN(sleepY) && getY() < sleepY) {
+            // 昇って去る (秒速 5 ブロック。80 ブロックなら 16 秒。体のまわりに雲がまとわりつく)
+            setPos(getX(), Math.min(sleepY, getY() + 0.25), getZ());
+            if (tickCount % 3 == 0) {
+                for (ServerPlayer p : level.players()) {
+                    if (p.distanceToSqr(this) < 300 * 300) {
+                        Vec3 c = position().add(0, -4, 0);
+                        level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
+                    }
+                }
+            }
+        } else if (!departing && !Double.isNaN(sleepY) && getY() > sleepY) {
             setPos(getX(), Math.max(sleepY, getY() - 0.07), getZ());
             if (tickCount % 3 == 0) {
                 // 雲の海へ沈むように、体のまわりに雲がまとわりつく

@@ -1268,6 +1268,11 @@ public class StormHeart extends HeartBoss {
     }
 
     @Override
+    protected ServerBossEvent heartBar() {
+        return bossBar;
+    }
+
+    @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
         super.remove(reason);

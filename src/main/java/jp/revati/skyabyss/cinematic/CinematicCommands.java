@@ -88,6 +88,13 @@ public final class CinematicCommands {
                 target = whale;
                 face = whale.position();
             }
+        } else if (id.startsWith(Scenes.FIRST_PREFIX)) {
+            // 潮殻・雷翼・余燼の初見: その巨神を狙う (いなければ前方)
+            Entity e = CinematicTriggers.currentTitan(p.server.overworld(), id.substring(Scenes.FIRST_PREFIX.length()));
+            if (e != null) {
+                target = e;
+                face = e.position();
+            }
         } else if (id.startsWith(Scenes.HEART_PREFIX) || id.startsWith(Scenes.END_PREFIX)) {
             // 心臓・眠りの場面: その巨神の本体を狙う (いなければ岩鯨、それもなければ前方)
             String titan = id.substring(id.startsWith(Scenes.HEART_PREFIX) ? Scenes.HEART_PREFIX.length() : Scenes.END_PREFIX.length());

@@ -505,6 +505,7 @@ public final class TideBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, state.id, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id(), null);
         if (state.rungCount() >= 3) {
             for (ServerPlayer p : Groups.online(level, state.id)) {
                 Notice.narrate(p, "message.skyabyss.tide.all_rung");

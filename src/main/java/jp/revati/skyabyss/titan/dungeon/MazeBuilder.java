@@ -54,6 +54,17 @@ public final class MazeBuilder {
         return result;
     }
 
+    // 迷路の中ほどの休み場にする息継ぎのくぼみ (正しい道の途中。マスの北西の隅の水の一段目)
+    public static BlockPos midPocket(FloodedMaze maze) {
+        List<BlockPos> pockets = pockets(maze);
+        return pockets.get(pockets.size() / 2);
+    }
+
+    // 中ほどの休み場の復活位置: くぼみの北西の隅の足場の上 (足元は空気の層の一段目)
+    public static BlockPos restSpot(BlockPos pocket) {
+        return pocket.offset(0, 2, 0);
+    }
+
     // 迷路の部分 (水と壁と仕掛け) だけを掘り直す。試練のリセットのたびに呼ばれる
     public static void buildMaze(BuildKit kit, long seed) {
         FloodedMaze maze = maze(seed);
@@ -100,6 +111,15 @@ public final class MazeBuilder {
                 }
                 for (int[] corner : new int[][]{{0, 0}, {2, 0}, {0, 2}, {2, 2}}) {
                     kit.set(p.getX() + corner[0], p.getY(), p.getZ() + corner[1], Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, 3));
+                }
+                if (p.equals(midPocket(maze))) {
+                    // 中ほどの休み場: 四隅に乾いた足場 (水の二段目の高さ) を置く。真ん中は水のままで、そこから浮かび上がって上がれる。
+                    // 空気の層 (足元と頭の二段) は通路の口が壁でふさがれているので、魚は入れない。紫水晶が目印。
+                    // 隅の足場は水の一段目 (y = p.y) のシーピクルスの上に重ねる
+                    for (int[] corner : new int[][]{{0, 0}, {2, 0}, {0, 2}, {2, 2}}) {
+                        kit.set(p.getX() + corner[0], p.getY() + 1, p.getZ() + corner[1], BuildKit.POLISHED);
+                    }
+                    kit.set(p.getX() + 2, p.getY() + 2, p.getZ() + 2, Blocks.AMETHYST_CLUSTER.defaultBlockState());
                 }
             } else if (k % POCKET_EVERY == 2 && k % 3 == 2) {
                 // 下へ引きずり込む流れ: このマスから次のマスへの通路いっぱいに

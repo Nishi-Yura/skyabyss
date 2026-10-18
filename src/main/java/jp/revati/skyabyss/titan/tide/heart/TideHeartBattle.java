@@ -203,7 +203,18 @@ public final class TideHeartBattle {
         public boolean asleep(ServerLevel level) {
             return level.getDifficulty() == Difficulty.PEACEFUL;
         }
+
+        @Override
+        public boolean defeated(ServerLevel level, UUID group) {
+            var record = jp.revati.skyabyss.titan.group.BackGroupData.get(level).peek(group);
+            return record != null && record.isHeartDefeated();
+        }
     };
+
+    // 心臓の間の部屋の仕組み (自己テストが、倒したあとに湧き直さないことを確かめる)
+    public static GroupBossRoom.Host host() {
+        return HOST;
+    }
 
     static List<ServerPlayer> playersIn(ServerLevel level, AABB box) {
         return level.getEntitiesOfClass(ServerPlayer.class, box, p -> p.isAlive() && !p.isSpectator());

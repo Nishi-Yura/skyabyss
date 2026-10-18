@@ -128,10 +128,38 @@ public final class TitanBackTrials {
             new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
             new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
-            new Checkpoint("e0", E0, E0.center().offset(2, 0, 2)),
-            new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, 2)),
+            // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
+            // 倒れて目覚めた所の目の前が戦場、にならないように
+            new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
+            new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, -2)),
             new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)));
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
+
+    // 闇の水路の中ほどの休み場 (息継ぎのくぼみの一つに、乾いた足場を作ってある)。迷路は種で形が変わるので、場所は種から出す
+    public static final String MAZE_REST = "mz";
+    private static long mazeRestSeed = Long.MIN_VALUE;
+    private static Checkpoint mazeRest;
+
+    private static Checkpoint mazeRest(ServerLevel level) {
+        long seed = TitanBackData.get(level).mazeSeed();
+        if (mazeRest == null || mazeRestSeed != seed) {
+            BlockPos p = MazeBuilder.midPocket(MazeBuilder.maze(seed));
+            // 足場の床 (y = p.y + 1) の上の空気の層。中は 3×3
+            mazeRest = new Checkpoint(MAZE_REST, new Box(p.getX(), p.getX() + 2, p.getZ(), p.getZ() + 2, p.getY() + 1, 3),
+                    MazeBuilder.restSpot(p));
+            mazeRestSeed = seed;
+        }
+        return mazeRest;
+    }
+
+    private static List<Checkpoint> checkpointsOf(ServerLevel level) {
+        if (!TitanBackData.get(level).isBuilt()) {
+            return CHECKPOINTS;
+        }
+        List<Checkpoint> all = new ArrayList<>(CHECKPOINTS);
+        all.add(mazeRest(level));
+        return all;
+    }
 
     // ---------------------------------------------------------------- 番兵の広間
     // ante は入口の手前の前室 (扉が閉じるとき、ここにいる人も中へ入れる)
@@ -164,6 +192,8 @@ public final class TitanBackTrials {
         int emptyTicks;
         // 戦いの参加者 (扉が閉じたときに中にいた人。途中で倒れた人も残す)
         final Set<UUID> participants = new LinkedHashSet<>();
+        // 戦いの最中に倒れた参加者。この戦いが終わる (制圧・やり直し) まで、扉から戻れない (報酬の参加者には残る)
+        final Set<UUID> fallen = new LinkedHashSet<>();
 
         HallState(UUID group, Hall hall) {
             this.group = group;
@@ -557,8 +587,9 @@ public final class TitanBackTrials {
             state.participants.add(player.getUUID());
         }
         state.emptyTicks = 0;
-        // 倒れて前室で目を覚ました参加者は、戦いが続いている間、扉に触れると内側へ戻れる
-        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants);
+        // 倒れていない参加者 (離れて戻ってきた人) だけが、戦いが続いている間、扉に触れると内側へ戻れる。
+        // 倒れた人は戦いが終わるまで通さない
+        letParticipantsBack(level, group, hall.entrance(), hall.box().center(), state.participants, state.fallen);
         if (aliveGuards(level, hall, group) > 0) {
             return;
         }
@@ -824,7 +855,14 @@ public final class TitanBackTrials {
     }
 
     // 戦いの途中: 扉に触れた参加者だけを内側へ通す (倒れて前室で目を覚ました人が戻れるように)
-    private static void letParticipantsBack(ServerLevel level, UUID group, List<BlockPos> door, BlockPos roomCenter, Set<UUID> participants) {
+    // 戻してよいか: 参加者で、この戦いで倒れていない人 (自己テスト用に切り出し)
+    static boolean mayRejoin(UUID player, Set<UUID> participants, Set<UUID> fallen) {
+        return participants.contains(player) && !fallen.contains(player);
+    }
+
+    // fallen = この戦いで倒れた人。戦いが続くあいだは通さない (倒れては戻って削る「ゾンビ戦法」を防ぐ。docs/design/02 の 4.2)
+    private static void letParticipantsBack(ServerLevel level, UUID group, List<BlockPos> door, BlockPos roomCenter, Set<UUID> participants,
+            Set<UUID> fallen) {
         if (door.isEmpty() || participants.isEmpty()) {
             return;
         }
@@ -832,9 +870,50 @@ public final class TitanBackTrials {
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, box.inflate(1.2, 0, 1.2),
                 p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()) && Groups.isMember(p, group)
                         && outsideOrInDoor(p, box, roomCenter))) {
+            if (fallen.contains(player.getUUID())) {
+                if (player.tickCount % 40 == 0) {
+                    Notice.bar(player, ModText.deny("message.skyabyss.gate_fallen"));
+                }
+                continue;
+            }
             moveInside(level, player, box, roomCenter);
             Notice.bar(player, ModText.battle("message.skyabyss.gate_rejoin"));
         }
+    }
+
+    // 戦いの最中に倒れた参加者を覚える (扉から戻さない)。LivingDeathEvent から
+    static void noteFallen(ServerPlayer player) {
+        for (HallState state : HALL_STATES.values()) {
+            if (state.wave > 0 && state.participants.contains(player.getUUID())) {
+                state.fallen.add(player.getUUID());
+            }
+        }
+    }
+
+    // 自己テスト用: そのグループの広間の戦いを始めた状態にする / 終える (やり直しと同じ後始末)
+    static void testBeginFight(UUID group, String hallId, Set<UUID> participants) {
+        for (Hall hall : HALLS) {
+            if (hall.id().equals(hallId)) {
+                HallState state = new HallState(group, hall);
+                state.wave = 1;
+                state.participants.addAll(participants);
+                HALL_STATES.put(hallKey(group, hallId), state);
+            }
+        }
+    }
+
+    static void testEndFight(ServerLevel level, UUID group, String hallId) {
+        for (Hall hall : HALLS) {
+            if (hall.id().equals(hallId)) {
+                resetHall(level, hall, group, false);
+            }
+        }
+    }
+
+    // 戦いの最中に倒れ、扉から戻れない人か (自己テスト用)
+    static boolean isFallen(UUID group, String hall, UUID player) {
+        HallState state = HALL_STATES.get(hallKey(group, hall));
+        return state != null && state.fallen.contains(player);
     }
 
     // ---------------------------------------------------------------- 心臓の間 (最終ボス・グループごと)
@@ -881,7 +960,7 @@ public final class TitanBackTrials {
 
         @Override
         public void letBack(ServerLevel level, UUID group, Set<UUID> participants) {
-            letParticipantsBack(level, group, HEART_GATE, HEART.center(), participants);
+            letParticipantsBack(level, group, HEART_GATE, HEART.center(), participants, Set.of());
         }
 
         @Override
@@ -937,6 +1016,12 @@ public final class TitanBackTrials {
         public boolean asleep(ServerLevel level) {
             return level.getDifficulty() == Difficulty.PEACEFUL;
         }
+
+        @Override
+        public boolean defeated(ServerLevel level, UUID group) {
+            var record = jp.revati.skyabyss.titan.group.BackGroupData.get(level).peek(group);
+            return record != null && record.isHeartDefeated();
+        }
     };
 
     // 心臓を今すぐ始める (自己テスト・コマンド用)。そのグループの、部屋にいる人を挑む人にする
@@ -946,6 +1031,11 @@ public final class TitanBackTrials {
             return false;
         }
         return room.start(level, HEART_HOST, Groups.inBox(level, group, heartArena()));
+    }
+
+    // 心臓の間の部屋の仕組み (自己テストが、倒したあとに湧き直さないことを確かめる)
+    public static GroupBossRoom.Host heartHost() {
+        return HEART_HOST;
     }
 
     public static GroupBossRooms heartRooms() {
@@ -1140,7 +1230,7 @@ public final class TitanBackTrials {
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             tag.putInt(TAG_SEEN_EPOCH, epoch);
         }
-        for (Checkpoint cp : CHECKPOINTS) {
+        for (Checkpoint cp : checkpointsOf(player.serverLevel())) {
             if (cp.area().contains(pos) && pos.getY() > cp.area().floorY() && pos.getY() < cp.area().ceilingY()) {
                 if (!cp.id().equals(validCheckpoint(tag, epoch))) {
                     tag.putString(TAG_CHECKPOINT, cp.id());
@@ -1162,6 +1252,9 @@ public final class TitanBackTrials {
         if (id.isEmpty() || tag.getInt(TAG_CHECKPOINT_EPOCH) != epoch) {
             return "";
         }
+        if (MAZE_REST.equals(id)) {
+            return id;
+        }
         for (Checkpoint cp : CHECKPOINTS) {
             if (cp.id().equals(id)) {
                 return id;
@@ -1182,10 +1275,19 @@ public final class TitanBackTrials {
         tag.remove(TAG_CHECKPOINT_EPOCH);
     }
 
-    // 休み場ごとの復活位置 (自己テスト用)
+    // 決まった場所の休み場の復活位置 (闇の水路の中ほどは含まない)
     public static Map<String, BlockPos> checkpointSpawns() {
         Map<String, BlockPos> map = new HashMap<>();
         for (Checkpoint cp : CHECKPOINTS) {
+            map.put(cp.id(), cp.spawn());
+        }
+        return map;
+    }
+
+    // 休み場ごとの復活位置 (闇の水路の中ほどを含む。自己テスト用)
+    public static Map<String, BlockPos> checkpointSpawns(ServerLevel level) {
+        Map<String, BlockPos> map = new HashMap<>();
+        for (Checkpoint cp : checkpointsOf(level)) {
             map.put(cp.id(), cp.spawn());
         }
         return map;
@@ -1211,7 +1313,7 @@ public final class TitanBackTrials {
     }
 
     private static BlockPos checkpointSpawn(ServerLevel level, String id) {
-        for (Checkpoint cp : CHECKPOINTS) {
+        for (Checkpoint cp : checkpointsOf(level)) {
             if (cp.id().equals(id)) {
                 return safeSpot(level, cp.spawn());
             }
@@ -1311,6 +1413,7 @@ public final class TitanBackTrials {
             return;
         }
         persisted(player).putBoolean(TAG_DIED_ON_BACK, true);
+        noteFallen(player);
         keepBelongings(player);
     }
 
@@ -1433,7 +1536,8 @@ public final class TitanBackTrials {
                 // 記録が古い (リセットより前) か無ければ、尾の台へ
                 int epoch = epochOf(back, player);
                 String cp = validCheckpoint(tag, epoch);
-                BlockPos spawn = cp.isEmpty() ? plaza() : checkpointSpawn(back, cp);
+                // 休み場が、いまの戦いの扉の前室なら、戦場の目の前で目覚めないよう鼓動の間 (安全な所) にする
+                BlockPos spawn = cp.isEmpty() ? plaza() : checkpointSpawn(back, respawnCheckpoint(back, Groups.keyOf(player), cp));
                 REVIVING.add(player.getUUID());
                 try {
                     player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);
@@ -1449,6 +1553,32 @@ public final class TitanBackTrials {
             }
         }
         deliverExtra(player);
+    }
+
+    // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間にする
+    // (倒れて戻れない扉の前、または戦場のすぐそばで目覚めないように。02 の 7.3)
+    static String respawnCheckpoint(ServerLevel level, UUID group, String cp) {
+        return isFightNear(group, cp) ? "hub" : cp;
+    }
+
+    // 休み場 cp が、そのグループの戦っている部屋の前室か
+    static boolean isFightNear(UUID group, String cp) {
+        switch (cp) {
+            case "e0":
+                return hallFighting(group, "e1");
+            case "ce1":
+                return hallFighting(group, "e3");
+            case "heart":
+                GroupBossRoom room = HEART_ROOMS.peek(group);
+                return room != null && (room.active() || room.gathering());
+            default:
+                return false;
+        }
+    }
+
+    private static boolean hallFighting(UUID group, String hall) {
+        HallState state = HALL_STATES.get(hallKey(group, hall));
+        return state != null;
     }
 
     // ---------------------------------------------------------------- 台座と焚き火

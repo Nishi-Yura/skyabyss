@@ -10,21 +10,29 @@ import jp.revati.skyabyss.progress.Titans;
 // 場面の定義 (Java の台本。docs/design/20_cinematics.md)。場面の座標は (右, 上, 前) で、前は場面ごとに決める向き
 //   opening           : 世界の始まり。前 = 最初の目的 (煙) の向き。約 36 秒
 //   whale_first_sight : 岩鯨を初めて見る。前 = 岩鯨の向き。狙う物 = 岩鯨 (動いても追う)。約 20 秒
+//   titan_first_<titan>: 潮殻・雷翼・余燼を初めて見る (岩鯨の初見と同じ作り。CinematicTriggers)。前 = 巨神の向き。狙う物 = 巨神。約 20 秒
 //   heart_<titan>     : 巨神の心臓が現れる (心臓の登場の演出が始まると TitanCinematics が見せる)。前 = 心臓の向き。狙う物 = 心臓。約 4 秒。台詞は巨神ごと
 //   titan_end_<titan> : 心臓を止めた人が地上へ降ろされたあと、巨神が眠りへ沈むのを地上から見る (初回だけ。TitanEnd)。前 = 巨神の向き。狙う物 = 巨神。約 16 秒
 public final class Scenes {
     public static final String OPENING = "opening";
     public static final String WHALE_FIRST_SIGHT = "whale_first_sight";
+    public static final String FIRST_PREFIX = "titan_first_";
     public static final String HEART_PREFIX = "heart_";
     public static final String END_PREFIX = "titan_end_";
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
+
+    // 岩鯨以外で、初見の場面を持つ巨神 (岩鯨は whale_first_sight)
+    public static final String[] FIRST_SIGHT_TITANS = {Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER};
 
     private static final Map<String, Scene> ALL = new LinkedHashMap<>();
 
     static {
         add(opening());
         add(whaleFirstSight());
+        for (String titan : FIRST_SIGHT_TITANS) {
+            add(titanFirstSight(titan));
+        }
         for (String titan : new String[] {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER}) {
             add(heartAppears(titan));
             add(titanEnd(titan));
@@ -41,6 +49,10 @@ public final class Scenes {
 
     public static Iterable<Scene> all() {
         return ALL.values();
+    }
+
+    public static String firstId(String titan) {
+        return FIRST_PREFIX + titan;
     }
 
     public static String heartId(String titan) {
@@ -89,6 +101,44 @@ public final class Scenes {
                 .line(6.0f, 3.8f, Speaker.HERO, "cinematic.skyabyss.whale.hero2")
                 .line(11.2f, 5.0f, Speaker.HEAVEN, "cinematic.skyabyss.whale.heaven")
                 .line(16.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.whale.hero3")
+                .build();
+    }
+
+    // 潮殻・雷翼・余燼の初見 (20 秒。岩鯨の初見と同じ流れ)。地平を見る → 巨神へ寄る → 全身を横から。
+    // 見る点の高さ (巨神の位置から) と視野は巨神の大きさに合わせる。台詞は cinematic.skyabyss.first.<巨神>.hero1 / hero2 / heaven / hero3
+    private static Scene titanFirstSight(String titan) {
+        // 地平を見る高さ (場面の座標。本人から)、全身の中ほどの高さ、視野
+        double horizon;
+        double mid;
+        float[] fov;
+        switch (titan) {
+            case Titans.TIDE_SHELL -> {
+                horizon = 3;
+                mid = 14;
+                fov = new float[] {62f, 54f};
+            }
+            case Titans.THUNDER_WING -> {
+                horizon = 26;
+                mid = 22;
+                fov = new float[] {62f, 52f};
+            }
+            default -> {
+                horizon = 8;
+                mid = 28;
+                fov = new float[] {62f, 52f};
+            }
+        }
+        return Scene.of(firstId(titan)).handBack()
+                .shot(Shot.of(5f).pos(0, 1.9, 0.5).posTo(0, 2.6, 1.0)
+                        .look(Look.frame(0, horizon, 120)).lookTo(Look.frame(0, horizon + 4, 150)).fov(70f, 70f).sway(0.3f).build())
+                .shot(Shot.of(6f).pos(0, 2.6, 1.0).posTo(3.0, 6.0, 3.0)
+                        .look(Look.frame(0, horizon + 4, 150)).lookTo(Look.target(0, mid, 0)).fov(70f, fov[0]).ease(Ease.SMOOTHER).sway(0.2f).build())
+                .shot(Shot.of(9f).pos(3.0, 6.0, 3.0).posTo(-9.0, 10.0, 4.0)
+                        .look(Look.target(0, mid, 0)).lookTo(Look.target(0, mid, 0)).fov(fov[0], fov[1]).ease(Ease.SMOOTH).sway(0.3f).build())
+                .line(0.8f, 3.8f, Speaker.HERO, "cinematic.skyabyss.first." + titan + ".hero1")
+                .line(6.0f, 3.8f, Speaker.HERO, "cinematic.skyabyss.first." + titan + ".hero2")
+                .line(11.2f, 5.0f, Speaker.HEAVEN, "cinematic.skyabyss.first." + titan + ".heaven")
+                .line(16.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.first." + titan + ".hero3")
                 .build();
     }
 

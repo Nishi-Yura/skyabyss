@@ -1,6 +1,7 @@
 {
   "block.skyabyss.grave": "Grave",
   "skyabyss_grave.made": "A grave has risen near where you fell: %s (%s, %s, %s). Its place is written in the record book (B)",
+  "skyabyss_grave.no_spot": "No safe place for a grave was found, so your belongings were set aside as pending rewards. Collect them from the record book (B)",
   "skyabyss_grave.kept_all": "Your belongings stayed with you",
   "skyabyss_grave.not_yours": "This is %s's grave. It will not open for you",
   "skyabyss_grave.collected": "You opened the grave and took back %s items and %s experience",

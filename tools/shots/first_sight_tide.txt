@@ -1,0 +1,40 @@
+# 潮殻の初見 titan_first_tide_shell を撮る (docs/design/20_cinematics.md の 3.2.1)。titan_end_tide.txt と同じ深い海・石の足場。場面は約 20 秒 = 400 tick
+# ./gradlew runShots -Pscript=tools/shots/first_sight_tide.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/first_sight_tide/
+world first_sight_tide normal
+size 1280 720
+timeout 1200
+render 12
+clouds on
+
+cmd time set noon
+cmd weather clear
+cmd skyabyss cinematic stop
+wait 20
+cmd gamemode creative
+cmd skyabyss progress grant @p stone_whale
+camera minecraft:overworld -1406 64 -1411 0 0
+waitchunks 900
+wait 60
+cmd fill -1410 62 -1415 -1402 62 -1407 minecraft:stone
+camera minecraft:overworld -1406 63 -1411 0 0
+hud off
+wait 20
+cmd skyabyss titan summon tide
+wait 80
+cmd skyabyss cinematic reset
+cmd skyabyss cinematic play titan_first_tide_shell
+wait 30
+shot ft_00_horizon
+wait 100
+shot ft_01_push
+wait 120
+shot ft_02_shell
+wait 100
+shot ft_03_orbit
+wait 80
+shot ft_04_end
+wait 100
+shot ft_05_control
+cmd kill @e[type=skyabyss:tide_shell,distance=..900]
+wait 10
+quit

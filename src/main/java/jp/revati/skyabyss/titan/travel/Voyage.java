@@ -96,6 +96,11 @@ class Voyage {
     int snaps;
     // 呼んだ人が迎えの場所から離れている tick 数
     int leaderAway;
+    // 出発の待ちの上限 (tick)。近くの仲間がまだ乗っていないあいだ延びる。笛での早い出発では今の tick に縮む
+    int boardingLimit = TravelRules.BOARDING_COUNTDOWN;
+    // 出発の待ちを近くの全員に見せる帯 (ボスバー)
+    @Nullable
+    net.minecraft.server.level.ServerBossEvent boardingBar;
 
     // 鎖を上る (dir > 0) ・下りる (dir < 0) 人の進み具合
     static final class Climb {
@@ -247,16 +252,18 @@ class Voyage {
     // ---- 行き先が決まった。少し待って出発
     void tickBoarding(ServerLevel level, Entity whale) {
         hover(whale);
-        int left = TravelRules.BOARDING_COUNTDOWN - phaseTicks;
+        if (dest != null && !pendingCancel && !test) {
+            boardingLimit = TravelRules.boardingLimit(boardingLimit, phaseTicks, !partyNotAboard(level).isEmpty());
+        }
+        int left = boardingLimit - phaseTicks;
         if (left > 0) {
             titan.setVoyageChain(pickup.getY());
-            if (left % 40 == 0) {
-                for (ServerPlayer p : nearbyPlayers(level, Vec3.atCenterOf(pickup), 32)) {
-                    Notice.bar(p, ModText.hint("message.skyabyss.travel.boarding", left / 20));
-                }
+            if (dest != null && !pendingCancel) {
+                updateBoardingBar(level, left);
             }
             return;
         }
+        closeBoardingBar();
         if (!climbs.isEmpty()) {
             // 上っている途中の人を待つ
             return;
@@ -266,7 +273,7 @@ class Voyage {
             return;
         }
         titan.setVoyageChain(Double.NaN);
-        if (titan.isChainFolded() || phaseTicks > TravelRules.BOARDING_COUNTDOWN + 60) {
+        if (titan.isChainFolded() || phaseTicks > boardingLimit + 60) {
             setPhase(Phase.ASCENT);
             Vec3 at = whale.position();
             level.playSound(null, at.x, at.y, at.z, kind.departSound().get(), SoundSource.AMBIENT, 12f, 1.0f);
@@ -280,6 +287,98 @@ class Voyage {
             holdTicket(level, new ChunkPos(destFeet()));
             tellAboard(level, "message.skyabyss.travel.aboard_departs");
         }
+    }
+
+    // 同じパーティで、乗り場の近くにいて、まだ乗っていない (上っている途中も含む) 人
+    List<ServerPlayer> partyNotAboard(ServerLevel level) {
+        List<ServerPlayer> list = new ArrayList<>();
+        UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(level.getServer(), leader);
+        double r2 = TravelRules.BOARDING_PARTY_RADIUS * TravelRules.BOARDING_PARTY_RADIUS;
+        for (ServerPlayer p : jp.revati.skyabyss.titan.group.Groups.alive(level, group)) {
+            if (!riders.contains(p.getUUID()) && !lowers.containsKey(p.getUUID())
+                    && p.distanceToSqr(Vec3.atCenterOf(pickup)) <= r2) {
+                list.add(p);
+            }
+        }
+        return list;
+    }
+
+    // 近くの全員に出発までの残りを見せる。呼んだ人には、笛で早く出発できることも知らせる
+    void updateBoardingBar(ServerLevel level, int left) {
+        if (boardingBar == null) {
+            boardingBar = new net.minecraft.server.level.ServerBossEvent(Component.empty(),
+                    net.minecraft.world.BossEvent.BossBarColor.WHITE, net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS);
+        }
+        boolean extended = boardingLimit > TravelRules.BOARDING_COUNTDOWN;
+        boardingBar.setName(ModText.hint(kind.text(extended ? "message.skyabyss.travel.boarding_wait" : "message.skyabyss.travel.boarding"),
+                (left + 19) / 20));
+        boardingBar.setProgress(Mth.clamp(left / (float) Math.max(1, boardingLimit), 0f, 1f));
+        boardingBar.setColor(extended ? net.minecraft.world.BossEvent.BossBarColor.YELLOW : net.minecraft.world.BossEvent.BossBarColor.WHITE);
+        double r2 = TravelRules.BOARDING_PARTY_RADIUS * TravelRules.BOARDING_PARTY_RADIUS;
+        Vec3 at = Vec3.atCenterOf(pickup);
+        for (ServerPlayer p : new ArrayList<>(boardingBar.getPlayers())) {
+            if (p.level() != level || p.distanceToSqr(at) > r2 * 1.5 && !riders.contains(p.getUUID())) {
+                boardingBar.removePlayer(p);
+            }
+        }
+        for (ServerPlayer p : level.players()) {
+            if (p.distanceToSqr(at) <= r2 || riders.contains(p.getUUID())) {
+                boardingBar.addPlayer(p);
+            }
+        }
+        if (phaseTicks % 100 == 50) {
+            callParty(level, false);
+        }
+        if (phaseTicks % 40 == 0) {
+            ServerPlayer lead = player(leader);
+            if (lead != null && riders.contains(leader)) {
+                int waiting = partyNotAboard(level).size();
+                Notice.bar(lead, waiting == 0
+                        ? ModText.hint(kind.text("message.skyabyss.travel.early_ready"))
+                        : ModText.hint(kind.text("message.skyabyss.travel.early_wait"), waiting));
+            }
+        }
+    }
+
+    // まだ乗っていない同じパーティの人 (同じ空にいる全員) に、鎖の方角と距離を知らせる
+    void callParty(ServerLevel level, boolean first) {
+        UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(level.getServer(), leader);
+        for (ServerPlayer p : jp.revati.skyabyss.titan.group.Groups.alive(level, group)) {
+            if (riders.contains(p.getUUID()) || climbs.containsKey(p.getUUID()) || lowers.containsKey(p.getUUID())
+                    || p.getUUID().equals(leader)) {
+                continue;
+            }
+            int far = (int) Math.round(Math.hypot(p.getX() - pickup.getX(), p.getZ() - pickup.getZ()));
+            Component text = ModText.hint(kind.text("message.skyabyss.travel.party_call"), leaderName,
+                    Component.translatable("message.skyabyss.travel.compass." + SeaVoyage.compass(p.blockPosition(), pickup)), far);
+            if (first) {
+                Notice.unlock(p, kind.text("message.skyabyss.travel.party_call"), leaderName,
+                        Component.translatable("message.skyabyss.travel.compass." + SeaVoyage.compass(p.blockPosition(), pickup)), far);
+            } else {
+                Notice.bar(p, text);
+            }
+        }
+    }
+
+    void closeBoardingBar() {
+        if (boardingBar != null) {
+            boardingBar.removeAllPlayers();
+            boardingBar = null;
+        }
+    }
+
+    // 呼んだ人が笛を吹いた (出発の待ちのあいだ): 近くの仲間が全員乗っていれば、すぐ出発する
+    boolean requestEarlyStart(ServerPlayer player) {
+        if (phase != Phase.BOARDING || dest == null || pendingCancel || !leader.equals(player.getUUID()) || !riders.contains(player.getUUID())) {
+            return false;
+        }
+        int waiting = partyNotAboard(level()).size();
+        if (!TravelRules.earlyStartAllowed(waiting)) {
+            Notice.bar(player, ModText.deny(kind.text("message.skyabyss.travel.early_wait"), waiting));
+            return true;
+        }
+        boardingLimit = Math.min(boardingLimit, phaseTicks);
+        return true;
     }
 
     // ---- 雲の上へ
@@ -449,7 +548,7 @@ class Voyage {
             Notice.bar(player, ModText.deny("message.skyabyss.travel.full"));
             return;
         }
-        if (phase == Phase.BOARDING && phaseTicks >= TravelRules.BOARDING_COUNTDOWN) {
+        if (phase == Phase.BOARDING && phaseTicks >= boardingLimit) {
             Notice.bar(player, ModText.deny("message.skyabyss.travel.leaving"));
             return;
         }
@@ -609,6 +708,7 @@ class Voyage {
 
     // 取りやめる。乗っている人は鎖で迎えの場所へ降ろす (出発の前だけ。出発のあとは行き先まで運ぶ)
     void cancel(String key, boolean lowerRiders) {
+        closeBoardingBar();
         ServerPlayer lead = player(leader);
         if (lead != null) {
             Notice.warn(lead, kind.text(key));
@@ -658,6 +758,7 @@ class Voyage {
             return;
         }
         finished = true;
+        closeBoardingBar();
         ServerLevel level = level();
         for (ServerPlayer p : players(riders)) {
             dismount(p);
@@ -906,6 +1007,7 @@ class Voyage {
         estimateAtChoose = estimate(Math.hypot(d.x() + 0.5 - pickup.getX(), d.z() + 0.5 - pickup.getZ()));
         phase = Phase.BOARDING;
         phaseTicks = 0;
+        boardingLimit = test ? TravelRules.BOARDING_ESTIMATE : TravelRules.BOARDING_COUNTDOWN;
     }
 
     BlockPos destPos() {
