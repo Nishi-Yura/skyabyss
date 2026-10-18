@@ -23,6 +23,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 // 落ちている間は小さな光の粒を引く
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class ItemGlowClient {
+    private static final int FLAG_GLOWING = 6; // Entity の共有フラグ「光る」
     private static final Map<Integer, Byte> TRACKED = new HashMap<>();
     private static final String TEAM_PAGE = "skyabyss_glow_page";
     private static final String TEAM_KEEPSAKE = "skyabyss_glow_keepsake";
@@ -53,7 +54,7 @@ public final class ItemGlowClient {
 
     private static void release(Minecraft mc, int id) {
         if (mc.level != null && mc.level.getEntity(id) instanceof ItemEntity item) {
-            item.setGlowingTag(false);
+            item.setSharedFlag(FLAG_GLOWING, false);
             mc.level.getScoreboard().removePlayerFromTeam(item.getScoreboardName());
         }
     }
@@ -82,7 +83,7 @@ public final class ItemGlowClient {
             if (!(entity instanceof ItemEntity item) || item.isRemoved()) {
                 continue;
             }
-            item.setGlowingTag(true);
+            item.setSharedFlag(FLAG_GLOWING, true);
             PlayerTeam want = e.getValue() == ItemGlow.KEEPSAKE ? keep : page;
             if (board.getPlayersTeam(item.getScoreboardName()) != want) {
                 board.addPlayerToTeam(item.getScoreboardName(), want);
