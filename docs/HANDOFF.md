@@ -5,7 +5,7 @@
 ## 0. 再開の手順
 
 1. `git fetch origin` → `git checkout m1-sky-pass` → `git pull`
-2. 途中の作業（wip ブランチ）は今は無い。前回の 4 本は 1 章のとおり m1-sky-pass に取り込んだ。origin に残っている `wip/*` の 5 本（per-party-progress・titan-defeat-ending・ember-mouth-whale-fins・armor-install・weapon-install）は、どれも取り込み済みなので消してよい。
+2. 途中の作業（wip ブランチ）は今は無い。前回の 4 本は 1 章のとおり m1-sky-pass に取り込み、main にもマージした（PR #4）。次にやることは 3 章。origin に残っている `wip/*` の 5 本（per-party-progress・titan-defeat-ending・ember-mouth-whale-fins・armor-install・weapon-install）は、どれも取り込み済みなので消してよい。
 3. ビルド: `./gradlew compileJava --offline`（初回は `--offline` を外す）。
 4. 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer`（一部だけは `SKYABYSS_SELFTEST_ONLY=<名前の頭>`）。**新しいワールドと `level-seed=4242`** で回す（古いワールドは建物の配置が古くて落ちる段がある）。今は 58 段ぜんぶ PASSED（約 6 分）。
 5. 設計書は `docs/design/README.md` から。未決の一覧 `docs/design/00_decisions_needed.md` は今は空（全部回答済み、変えた答えは付録に「（実装中）」付き）。
@@ -32,13 +32,26 @@
 - README を今の mod に合わせた（章、眠る巨神、ローポリとドット絵、墓、パーティ 6 人とパーティごとの背中の進み）。巨神 4 枚・題字の絵・下の絵・鯨のアイコンを、採用した低ポリ案（岩鯨 C・潮殻 B・雷翼 A・余燼 C）の姿で描き直した（`tools/readme/`。`python make_all.py`）。README は心臓・巨神の眠りの理由など物語の核心を書かない。Windows のフォントが無い環境では IPA ゴシックで代わりに描く（字形が少し変わる）ので、字の入った絵を作り直すときは Windows で流す。
 - 武器 13 本の低ポリをゲームに入れた（階級でメッシュ、強化で絵と光る画素が変わる。`LowPoly.weaponMeshes = false` で元のボクセルに戻る）。未確認: 他のプレイヤーが持つ弓の引き絵、左利き、マルチ、輝き（foil）。素材を作り直す古い生成スクリプトを動かしたら `tools/install_lowpoly_weapons.py` と `weapon_display.py` を流し直す。
 
-## 3. まだ手を付けていないこと
+## 3. 次にやること（おすすめの順）
 
-- 雷翼・余燼の装飾品（足環・護符・外套・灯など）の低ポリ化。
-- 取り込まれていない古い作業コピー 3 つ（`.claude/worktrees/agent-a2188628431d3bc03`、`a56c7abd31fd65baf`、`aba09111be057701d`。この PC だけ）の中身の確認。
-- ゲーム内での通しの確認（シネマティック、小要素、日本語の題字、低ポリの見え方など）は人の目でまだ見ていない。
+Claude だけで進められるもの:
 
-## 4. 続けるときの注意
+1. **余燼の背の体を口のある形に**: 背中の体（`data/skyabyss/ember_back/body.bin`）は口を開ける前のメッシュから作ったまま。`tools/lowpoly_ember_voxel.py` → `tools/gen_ember_back_body.py` を流し直し、`EmberBackLayout.LAYOUT_VERSION` を上げ、全体の自己テスト（`ember back` の穴・歩き・到着点）で確かめる。
+2. **低ポリ装備の気になった点**: 防具立ての腕上げで肩の板が暗く見える件を調べる。岩鯨・雷翼の伝説の防具の三角形を減らす（1,110 / 1,144）。武器の未確認（左利き、輝き（foil）、他の人が持つ弓の引き絵）を台本で撮って確かめる。
+3. **雷翼・余燼の装飾品の低ポリ化**: 決まりどおり、まず 3 案のラフを選定ページに載せて、ユーザーに選んでもらってから作る。
+4. **ゲームの中の見え方を撮ってまとめる**: シネマティック・章の題字（日本語）・小さな仕掛け・低ポリの見え方を台本で撮り、人の目での確認の下見になるページにする。
+
+ユーザーにしかできないもの:
+
+- origin の `wip/*` 5 本の削除（全部取り込み済み。クラウドの環境からは消せない）: `git push origin --delete wip/armor-install wip/ember-mouth-whale-fins wip/per-party-progress wip/titan-defeat-ending wip/weapon-install`
+- ゲームの通しの確認と、2 グループが同じ背中にいるときのマルチの実機の確認。
+- 「一つのグループが心臓を止めると巨神はみんなにとって眠る」で良いかの判断（変えるなら未決 200 番から）。
+
+## 4. ほかに残っていること
+
+- 取り込まれていない古い作業コピー 3 つ（`.claude/worktrees/agent-a2188628431d3bc03`、`a56c7abd31fd65baf`、`aba09111be057701d`）の中身の確認。元の Windows の PC にだけある（クラウドの環境には無い）。
+
+## 5. 続けるときの注意
 
 - **やり方**: 大きな作業はサブエージェントに分けて並列（担当するファイルを分ける）。モデルは作業で使い分ける: 単純な作業（移動・文書や lang の書き換え・既存の手順どおりの組み込み・片付け）は Haiku 5.5、設計・モデル・ゲームのコード・不具合調べは Sonnet 5.5。各エージェントは worktree で動かし、終わったら m1-sky-pass に取り込む。
 - **見た目の決め方**: モブ・武器・防具は、まず 3 案のラフを選定ページ（https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM 、`tools/rough/build_gallery.py` で作る。選んだ結果は artifact の db `choices`）で選んでもらってから作る。共通のアートの決まり: 非立方体の低ポリ＋1 ブロック 32 画素のドット絵、軽さ重視（敵 約 600 三角形）。巨神ごとに形と色の言葉を分ける（他の巨神の敵の使い回しに見えると嫌がられた）。
@@ -54,7 +67,7 @@
 - **古いワールド**: 背の配置の版（`LAYOUT_VERSION`）を上げると次の起動で背が一度建て直され、試練の進みと休み場の記録が戻る。
 - **このメモの更新**: セッションの残りが少なくなったら、このファイルを今の状態に書き直して push する。
 
-## 5. 関連のページ
+## 6. 関連のページ
 
 - 選定ページ（ラフの比較と選択）: https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM
 - 未決の回答ページ（175 問、回答済み）: https://claude.ai/artifact/EHPMvP8tusfKdAyLM5s38d
