@@ -32,6 +32,9 @@ public final class BackGroupData extends SavedData {
     private static final String NAME = "skyabyss_back_groups";
     private static final Factory<BackGroupData> FACTORY = new Factory<>(BackGroupData::new, BackGroupData::load);
 
+    // 初回を終えた印 (data の欄。"keep." で始まるのでリセットで残る)
+    public static final String FIRST_CLEARED = "keep.first_cleared";
+
     public static final class Record {
         public final UUID id;
         private int epoch = 1;
@@ -103,8 +106,18 @@ public final class BackGroupData extends SavedData {
 
         // 何かしら試練が進んでいるか (進んでいなければ、元に戻す必要もない)
         public boolean hasProgress() {
-            return gateOpened || heartDefeated || !clearedHalls.isEmpty() || !data.isEmpty()
+            return gateOpened || heartDefeated || !clearedHalls.isEmpty() || hasProgressData()
                     || !openOverride.isEmpty() || !closedOverride.isEmpty();
+        }
+
+        // data に進みの欄があるか ("keep." の欄はリセットで残る記録なので、進みには数えない)
+        private boolean hasProgressData() {
+            for (String key : data.getAllKeys()) {
+                if (!key.startsWith("keep.")) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // 試練を最初に戻す: 番号を進め、進みと扉の上書きを消す (data の "keep." で始まる欄は残す)
@@ -132,6 +145,19 @@ public final class BackGroupData extends SavedData {
         public void touch(long gameTime) {
             lastSeen = gameTime;
             // 保存は急がない (次の保存のときに書かれる)
+        }
+
+        // ---- 初回・周回 (docs/design/21 の 1.7)。"keep." の欄なので、試練のリセットでは消えない
+        // そのグループがこの巨神の心臓を一度でも止めたか (FirstRun.onFirstCleared が立てる。パーティの組む・入る・抜けるでは記録ごと写る)
+        public boolean isFirstCleared() {
+            return data.getBoolean(FIRST_CLEARED);
+        }
+
+        public void markFirstCleared() {
+            if (!data.getBoolean(FIRST_CLEARED)) {
+                data.putBoolean(FIRST_CLEARED, true);
+                dirty();
+            }
         }
 
         // ---- 自由な欄 (巨神ごとの進み)
