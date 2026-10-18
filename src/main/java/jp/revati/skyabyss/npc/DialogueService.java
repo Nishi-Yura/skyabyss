@@ -227,7 +227,40 @@ public final class DialogueService {
         Session s = SESSIONS.get(player.getUUID());
         if (s != null && (!player.isAlive() || npc(player, s) == null)) {
             close(player);
+            return;
         }
+        if (s != null) {
+            refresh(player, s);
+        }
+    }
+
+    // 話している間に状態が変わった (空の影を見た・頁を読んだ・品を得た、など) ら、今の節の選択肢を映し直す。
+    // 変わる前の選択肢のまま話を続けて、新しく開いた話題 (影を見たあとの「あの影のこと」など) を取りこぼさないように
+    static boolean refresh(ServerPlayer player, Session s) {
+        NpcEntity npc = npc(player, s);
+        Dialogue dialogue = DialogueManager.dialogue(s.role());
+        Dialogue.Node node = dialogue == null ? null : dialogue.nodes().get(s.node());
+        if (npc == null || node == null || node.options().isEmpty()) {
+            return false;
+        }
+        StoryContext ctx = new StoryContext(player, s.role(), npc);
+        List<Integer> now = new ArrayList<>();
+        for (int i = 0; i < node.options().size(); i++) {
+            if (node.options().get(i).condition().test(ctx)) {
+                now.add(i);
+            }
+        }
+        if (now.equals(s.shown())) {
+            return false;
+        }
+        enter(player, npc, dialogue, node, false);
+        return true;
+    }
+
+    // 自己テスト用: いま (時間を進めずに) 見回りを一度行う
+    public static boolean refreshForTest(ServerPlayer player) {
+        Session s = SESSIONS.get(player.getUUID());
+        return s != null && refresh(player, s);
     }
 
     @SubscribeEvent

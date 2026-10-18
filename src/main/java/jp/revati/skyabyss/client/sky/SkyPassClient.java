@@ -6,6 +6,7 @@ import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModSounds;
 import jp.revati.skyabyss.sky.SkyPass;
+import net.minecraft.core.BlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -15,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -51,6 +53,8 @@ public final class SkyPassClient {
     private static float underShadow;
     private static float shake;
     private static float glow;
+    // 頭の上がどれだけ覆われているか (0 = 空が見える、1 = 屋根・岩・地下で空の光が届かない)。ゆっくり追いかける (戸口を出入りしても急に変わらない)
+    private static float cover;
 
     // 天候を上書きする前の、サーバーから届いた本来の値
     private static boolean weatherOverridden;
@@ -98,15 +102,43 @@ public final class SkyPassClient {
         return glow;
     }
 
+    static float cover() {
+        return cover;
+    }
+
+    // 影の真下の効果 (暗さ・縁の暗がり・霧・視野) にかける係数。空が見えれば 1、まったく覆われていれば 0.12 (外の気配がうっすら伝わる程度)
+    static float exposure() {
+        return 1f - 0.88f * cover;
+    }
+
+    // 近くを通るだけの効果 (嵐の暗さ・近さ) にかける係数。屋内でも外が暗くなった気配は残す (1 → 0.3)
+    static float nearExposure() {
+        return 1f - 0.7f * cover;
+    }
+
+    // 音は壁の向こうから聞こえる: 覆われているほど小さく、低くこもる
+    static float muffle() {
+        return 1f - 0.5f * cover;
+    }
+
     static float droneVolume() {
-        return current == null ? 0f : (float) Math.pow(proximity, 1.3) * 0.9f + storm * 0.25f;
+        return current == null ? 0f : ((float) Math.pow(proximity, 1.3) * 0.9f + storm * 0.25f) * muffle();
+    }
+
+    // 頭の上の覆い (0〜1)。空が見えれば 0。見えないとき、空の光 (その場所の天空光) が届くほど薄い (木の葉の下は 0.3 まで、屋根・地下は 1)
+    static float measureCover(ClientLevel level, Vec3 eye) {
+        BlockPos head = BlockPos.containing(eye);
+        if (level.canSeeSky(head)) {
+            return 0f;
+        }
+        return Mth.clamp(1f - level.getBrightness(LightLayer.SKY, head) / 15f, 0.3f, 1f);
     }
 
     @SubscribeEvent
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         current = null;
         drone = null;
-        proximity = storm = underShadow = shake = glow = 0f;
+        proximity = storm = underShadow = shake = glow = cover = 0f;
         weatherOverridden = false;
         appliedRain = -1f;
     }
@@ -125,16 +157,14 @@ public final class SkyPassClient {
         float targetProximity = 0f;
         float targetStorm = 0f;
         float targetShadow = 0f;
+        cover += (measureCover(level, mc.player.getEyePosition()) - cover) * 0.12f;
         if (current != null && current.isActive(level.getGameTime())) {
             double age = current.age(level.getGameTime(), 0f);
             Vec3 pos = mc.player.position();
             double distance = Math.hypot(pos.x - current.centerX(age), pos.z - current.centerZ(age));
             targetProximity = (float) Mth.clamp(1.0 - distance / HEARING_RANGE, 0.0, 1.0);
             targetStorm = current.storm(age) * (float) Mth.clamp(1.0 - distance / STORM_RANGE, 0.0, 1.0);
-            targetShadow = current.shadow(pos.x, pos.z, age);
-            if (!level.canSeeSky(mc.player.blockPosition().above())) {
-                targetShadow *= 0.4f;
-            }
+            targetShadow = current.shadow(pos.x, pos.z, age) * exposure();
             playPassSounds(mc, level, current, age, targetProximity);
         }
         proximity += (targetProximity - proximity) * 0.1f;
@@ -144,7 +174,7 @@ public final class SkyPassClient {
         glow *= 0.93f;
         if (Config.SCREEN_SHAKE.get() && proximity > 0.4f) {
             // 真下に近いと、空気そのものが細かく震える
-            shake = Math.max(shake, (proximity - 0.4f) * 0.25f);
+            shake = Math.max(shake, (proximity - 0.4f) * 0.25f * (0.4f + 0.6f * exposure()));
         }
 
         if (proximity > 0.05f) {
@@ -165,14 +195,14 @@ public final class SkyPassClient {
         if (wingbeat != lastWingbeat) {
             lastWingbeat = wingbeat;
             if (near > 0f) {
-                playGlobal(mc, ModSounds.SKY_WINGBEAT.get(), 0.25f + near * 0.95f, 0.85f + RANDOM.nextFloat() * 0.15f);
+                playGlobal(mc, ModSounds.SKY_WINGBEAT.get(), (0.25f + near * 0.95f) * muffle(), (0.85f + RANDOM.nextFloat() * 0.15f) * (1f - 0.1f * cover));
             }
         }
         int peak = pass.flapIndex(age);
         if (peak != lastPeak) {
             lastPeak = peak;
             if (near > 0f && Config.SCREEN_SHAKE.get()) {
-                shake = Math.max(shake, near * near * 1.2f);
+                shake = Math.max(shake, near * near * 1.2f * (0.4f + 0.6f * exposure()));
             }
         }
         // 呼び声は遠くまで届き、雲の中が一瞬光る
@@ -181,7 +211,7 @@ public final class SkyPassClient {
             lastCall = call;
             float heard = Math.max(near, storm);
             if (heard > 0f) {
-                playGlobal(mc, ModSounds.SKY_CALL.get(), 0.5f + heard * 0.7f, 0.9f + RANDOM.nextFloat() * 0.1f);
+                playGlobal(mc, ModSounds.SKY_CALL.get(), (0.5f + heard * 0.7f) * muffle(), (0.9f + RANDOM.nextFloat() * 0.1f) * (1f - 0.1f * cover));
                 glow = 1f;
                 level.setSkyFlashTime(3);
             }

@@ -53,6 +53,10 @@ public final class LoreClient {
         refreshScreen();
     }
 
+    public static boolean has(String id) {
+        return UNLOCKED.contains(id);
+    }
+
     public static void openBook() {
         Minecraft.getInstance().setScreen(new LoreBookScreen());
     }

@@ -102,6 +102,18 @@ public final class QuestHud {
         return out;
     }
 
+    // 目的の文。序盤の帯が「歌のあと」(wait_whale) の間は、その段の「待つ」版の文 (<鍵>.wait があれば) を出す (クエストログと帯の言うことを合わせる)
+    public static String objectiveText(QuestDef def, QuestDef.Stage stage, QuestDef.Objective ob) {
+        String key = def.objectiveKey(stage, ob);
+        jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
+        // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
+        boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
+        if (waiting && net.minecraft.locale.Language.getInstance().has(key + ".wait")) {
+            key = key + ".wait";
+        }
+        return Component.translatable(key).getString();
+    }
+
     // 帯に出す、今の目的の一行 (折り返さず全文。数は「（1/3）」を後ろに付ける。長ければ帯が切る)
     public static String firstObjective(Font font, QuestDef def, QuestLog.Entry entry, int width) {
         for (Line l : lines(font, def, entry, 100000)) {
@@ -113,7 +125,7 @@ public final class QuestHud {
         // 全部済んでいて次へ進む前の一瞬: 題名だけにせず、この段の最初のやることを出す
         QuestDef.Stage stage = def.stages().get(entry.stage);
         if (!stage.objectives().isEmpty()) {
-            return Component.translatable(def.objectiveKey(stage, stage.objectives().get(0))).getString();
+            return objectiveText(def, stage, stage.objectives().get(0));
         }
         return Component.translatable(def.titleKey()).getString();
     }
@@ -135,7 +147,7 @@ public final class QuestHud {
                 out.add(new Line(Component.translatable("gui.skyabyss.quest.or").getString(), 8, SOFT));
             }
             first = false;
-            String text = Component.translatable(def.objectiveKey(stage, ob)).getString();
+            String text = objectiveText(def, stage, ob);
             List<String> wrapped = wrapWithCount(text, ob.count() > 1 ? Math.min(have, ob.count()) + "/" + ob.count() : "", width, font);
             for (int k = 0; k < wrapped.size(); k++) {
                 out.add(new Line((k == 0 ? "・" : "") + wrapped.get(k), k == 0 ? 0 : 9, TEXT));

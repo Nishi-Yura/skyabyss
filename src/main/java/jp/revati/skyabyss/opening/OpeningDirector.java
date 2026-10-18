@@ -407,6 +407,11 @@ public final class OpeningDirector {
         return st.cueUntil > now || day <= st.awakeDay() + 1;
     }
 
+    // 語り部などと話している間、場面の間は、破れた頁を落とさない (読めず、見えもしない。画面を閉じたあとの見回りで落ちる)
+    public static boolean pageBusy(ServerPlayer player) {
+        return jp.revati.skyabyss.npc.DialogueService.currentNode(player) != null || jp.revati.skyabyss.cinematic.Cinematics.active(player);
+    }
+
     // 書を持っている人の「空の影を見た」は、頁を読んで記す (LoreEvents から。17 の 判断 2 A)。持っていなければ今までどおり
     public static boolean deferShadowToPage(ServerPlayer player) {
         OpeningState st = state(player);
@@ -543,6 +548,11 @@ public final class OpeningDirector {
                 player.drop(page, false);
             }
             Notice.narrate(player, "message.skyabyss.beats.page_appeared");
+        }
+
+        @Override
+        public boolean pageBusy() {
+            return OpeningDirector.pageBusy(player);
         }
 
         @Override

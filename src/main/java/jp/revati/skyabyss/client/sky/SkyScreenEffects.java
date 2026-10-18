@@ -34,7 +34,7 @@ public final class SkyScreenEffects {
 
     // 近くを通っているだけでも少しかける
     private static float near() {
-        return Math.max(SkyPassClient.storm() * 0.5f, SkyPassClient.proximity() * 0.35f) * strength();
+        return Math.max(SkyPassClient.storm() * 0.5f, SkyPassClient.proximity() * 0.35f) * strength() * SkyPassClient.nearExposure();
     }
 
     @SubscribeEvent
@@ -61,7 +61,8 @@ public final class SkyScreenEffects {
     @SubscribeEvent
     static void onRenderFog(ViewportEvent.RenderFog event) {
         float amount = Mth.clamp(under() * 0.7f + near() * 0.3f, 0f, 0.85f);
-        if (amount < 0.01f) {
+        // 水中・溶岩・盲目の霧は、バニラのものを残す (上書きすると視界が壊れる)
+        if (amount < 0.01f || event.getCamera().getFluidInCamera() != net.minecraft.world.level.material.FogType.NONE) {
             return;
         }
         event.setFarPlaneDistance(Mth.lerp(amount, event.getFarPlaneDistance(), Math.max(24f, event.getFarPlaneDistance() * 0.25f)));
