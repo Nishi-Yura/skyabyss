@@ -37,6 +37,8 @@ import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 import jp.revati.skyabyss.rpg.MemoryFragments;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
+import jp.revati.skyabyss.readiness.BoardReadiness;
+import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.titan.travel.TitanKind;
@@ -437,6 +439,7 @@ public final class RecordBuilder {
             return rows;
         }
         rows.add(header(titan, Progression.titanName(titan)));
+        rows.add(readinessRow(p, titan));
         if (page == null) {
             // 順番は来たが、この世界にまだ現れない (ベータでは本体がない)
             rows.add(value("not_risen", t("r.not_risen"), t("v.not_risen"), RecordSnapshot.MARK_LOCKED,
@@ -487,6 +490,24 @@ public final class RecordBuilder {
             rows.add(value("collection_none", t("r.collection_none"), Component.empty(), RecordSnapshot.MARK_LOCKED, List.of(t("d.collection_none"))));
         }
         return rows;
+    }
+
+    // 備えの三灯 (21 の 1.2、11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
+    static Row readinessRow(ServerPlayer p, String titan) {
+        Readiness.Result r = Readiness.of(p, titan);
+        Readiness.Colour worst = r.worst();
+        int mark = worst == Readiness.Colour.RED ? RecordSnapshot.MARK_LOST : worst == Readiness.Colour.YELLOW ? RecordSnapshot.MARK_ATTENTION
+                : RecordSnapshot.MARK_SAFE;
+        List<Component> detail = new ArrayList<>();
+        for (Readiness.Lamp lamp : Readiness.Lamp.values()) {
+            Readiness.Colour c = r.colour(lamp);
+            MutableComponent line = BoardReadiness.lamp(lamp, c).append(Component.literal(" " + Math.round(r.value(lamp) * 100) + "%  "));
+            line.append(Component.translatable("message.skyabyss.readiness.advice." + lamp.id() + (c == Readiness.Colour.GREEN ? ".ok" : "")));
+            detail.add(line);
+        }
+        detail.add(t("d.readiness", Progression.titanName(titan)));
+        detail.add(t("d.readiness_free"));
+        return new Row("readiness", Kind.VALUE, ItemStack.EMPTY, t("r.readiness"), BoardReadiness.shapes(r), mark, -1, detail, RecordSnapshot.ACTION_NONE);
     }
 
     static MutableComponent memoryBar(int memory) {

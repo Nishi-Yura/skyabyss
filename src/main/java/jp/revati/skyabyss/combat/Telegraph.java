@@ -1,0 +1,452 @@
+package jp.revati.skyabyss.combat;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
+
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
+
+// ボス・中ボスの技の予告 (テレグラフ)。「当たる範囲」を床に粒で描き、時間が来たらその範囲の中にいる人だけに当てる。
+//
+//   Telegraph.in(level, TelegraphShape.circle(x, z, 4))      // 形: 円・輪・帯・扇・振り回す帯
+//           .floor(y)                                        // 床の高さ (描く高さと、当たる高さの基準)
+//           .warn(28)                                        // 予告の長さ tick。MIN_WARN_TICKS (16 = 0.8 秒) より短くはならない
+//           .color(0xFF5A5A)                                 // 印の色 (近づくほど白くなる)
+//           .owner(this)                                     // 持ち主。倒れる・消えると予告は黙って取り消される (傷は出ない)
+//           .startSound(sound, 2f, 1f)                       // 予告の始まりの音 (省略可)
+//           .onImpact(lvl -> { ... })                        // 当たる瞬間の見た目・音 (省略可)
+//           .onHit((lvl, player) -> player.hurt(...))        // 範囲の中の人それぞれに一度ずつ (傷・ノックバック)
+//           .start();
+//
+// 範囲の判定と印の描画は、同じ TelegraphShape から出る (contains と outline/edge)。印が満ちる縁は範囲の内側にしか出ない。
+// 振り回す帯 (sweep) は active(ticks) の間、いまの帯 (shape.at(進み具合)) の中の人に一度ずつ当てる。
+// jumpClear(h): 床から h 以上跳んでいる人は当たらない (跳び越える技)。粒は 1 tick ごとの総数に上限がある (BUDGET)。
+// 設計書: docs/design/02_stone_whale.md の 5.4 (予告の部品)。
+public final class Telegraph {
+    // 傷が出るまでの最短の予告 (0.8 秒)
+    public static final int MIN_WARN_TICKS = 16;
+    // 1 tick に送る予告の粒の数 (粒 × 見る人) の上限
+    static final int BUDGET = 700;
+
+    @FunctionalInterface
+    public interface Hit {
+        void hit(ServerLevel level, ServerPlayer victim);
+    }
+
+    private static final Map<ServerLevel, List<Telegraph>> ACTIVE = new HashMap<>();
+    private static int budget = BUDGET;
+    private static int created;
+    // 試験用: 傷のある予告を作った数と、印の判定を調べる点 (人の代わり。傷のある予告が一度でも当てた点が probeHit)
+    private static int damagingCreated;
+    private static List<Vec3> probes;
+    private static boolean[] probeHit;
+
+    private final ServerLevel level;
+    private final TelegraphShape shape;
+    private final double floor;
+    private final double reach;
+    private final double jumpClear;
+    private final int warn;
+    private final int active;
+    private final int rgb;
+    @Nullable
+    private final Entity owner;
+    private final Predicate<ServerPlayer> victims;
+    @Nullable
+    private final Consumer<ServerLevel> onImpact;
+    @Nullable
+    private final Hit onHit;
+    private final Set<UUID> hit = new HashSet<>();
+    private final int id = created++;
+    private int age;
+    private boolean done;
+
+    private Telegraph(Builder b) {
+        this.level = b.level;
+        this.shape = b.shape;
+        this.floor = b.floor;
+        this.reach = b.reach;
+        this.jumpClear = b.jumpClear;
+        this.warn = Math.max(MIN_WARN_TICKS, b.warn);
+        this.active = Math.max(0, b.active);
+        this.rgb = b.rgb;
+        this.owner = b.owner;
+        this.victims = b.victims;
+        this.onImpact = b.onImpact;
+        this.onHit = b.onHit;
+        if (b.onHit != null) {
+            damagingCreated++;
+        }
+    }
+
+    // ---- 試験用 ----
+
+    public static void resetStats() {
+        damagingCreated = 0;
+    }
+
+    public static int damagingCreated() {
+        return damagingCreated;
+    }
+
+    // 床の高さの点を並べて、傷のある予告が (どの瞬間でも) 当たる点を記録する。null で止める
+    public static void probe(List<Vec3> points) {
+        probes = points;
+        probeHit = points == null ? null : new boolean[points.size()];
+    }
+
+    public static boolean[] probeHits() {
+        return probeHit;
+    }
+
+    // ---- 作る ----
+
+    public static Builder in(ServerLevel level, TelegraphShape shape) {
+        return new Builder(level, shape);
+    }
+
+    public static final class Builder {
+        private final ServerLevel level;
+        private final TelegraphShape shape;
+        private double floor;
+        private double reach = 3.0;
+        private double jumpClear = 0;
+        private int warn = 24;
+        private int active = 0;
+        private int rgb = 0xFF5A5A;
+        @Nullable
+        private Entity owner;
+        private Predicate<ServerPlayer> victims = Telegraph::defaultVictim;
+        @Nullable
+        private Consumer<ServerLevel> onImpact;
+        @Nullable
+        private Hit onHit;
+        @Nullable
+        private SoundEvent sound;
+        private float soundVolume = 2f;
+        private float soundPitch = 1f;
+
+        private Builder(ServerLevel level, TelegraphShape shape) {
+            this.level = level;
+            this.shape = shape;
+        }
+
+        public Builder floor(double y) {
+            this.floor = y;
+            return this;
+        }
+
+        // 床からこの高さまでの人に当たる (既定 3)
+        public Builder reach(double height) {
+            this.reach = height;
+            return this;
+        }
+
+        // 床から clearance 以上跳んでいる人は当たらない (0 なら跳び越えられない)
+        public Builder jumpClear(double clearance) {
+            this.jumpClear = clearance;
+            return this;
+        }
+
+        public Builder warn(int ticks) {
+            this.warn = ticks;
+            return this;
+        }
+
+        // 当たりが続く tick 数 (振り回す技)。0 なら予告のあと一度だけ
+        public Builder active(int ticks) {
+            this.active = ticks;
+            return this;
+        }
+
+        public Builder color(int rgb) {
+            this.rgb = rgb;
+            return this;
+        }
+
+        public Builder owner(@Nullable Entity owner) {
+            this.owner = owner;
+            return this;
+        }
+
+        // 当たる人の条件 (既定: 生きていて、観戦でない人)。ボスは自分の canReach を渡す
+        public Builder victims(Predicate<ServerPlayer> victims) {
+            this.victims = victims;
+            return this;
+        }
+
+        public Builder startSound(SoundEvent sound, float volume, float pitch) {
+            this.sound = sound;
+            this.soundVolume = volume;
+            this.soundPitch = pitch;
+            return this;
+        }
+
+        public Builder onImpact(Consumer<ServerLevel> onImpact) {
+            this.onImpact = onImpact;
+            return this;
+        }
+
+        public Builder onHit(Hit onHit) {
+            this.onHit = onHit;
+            return this;
+        }
+
+        public Telegraph start() {
+            Telegraph t = new Telegraph(this);
+            ACTIVE.computeIfAbsent(level, l -> new ArrayList<>()).add(t);
+            if (sound != null) {
+                level.playSound(null, shape.centerX(), floor + 1, shape.centerZ(), sound, SoundSource.HOSTILE, soundVolume, soundPitch);
+            }
+            return t;
+        }
+    }
+
+    private static boolean defaultVictim(ServerPlayer p) {
+        return p.isAlive() && !p.isSpectator();
+    }
+
+    // ---- 範囲の判定 (印と同じ形) ----
+
+    // この人は、いまの形の中にいるか (高さも見る)
+    public boolean inside(TelegraphShape current, Entity e) {
+        return inside(current, floor, reach, jumpClear, e);
+    }
+
+    public static boolean inside(TelegraphShape shape, double floor, double reach, double jumpClear, Entity e) {
+        double y = e.getY();
+        if (y < floor - 1.5 || y > floor + reach) {
+            return false;
+        }
+        if (jumpClear > 0 && y >= floor + jumpClear) {
+            return false;
+        }
+        return shape.contains(e.getX(), e.getZ());
+    }
+
+    // 向き (x, z のベクトル) の角度。Telegraph の角度の約束 (cos a, sin a) に合わせる
+    public static double angleOf(double dx, double dz) {
+        return Math.atan2(dz, dx);
+    }
+
+    public static double angleOf(Vec3 v) {
+        return Math.atan2(v.z, v.x);
+    }
+
+    // ---- 状態 (自己テスト・呼び出し側用) ----
+
+    public int age() {
+        return age;
+    }
+
+    public int warnTicks() {
+        return warn;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public TelegraphShape shape() {
+        return shape;
+    }
+
+    public void cancel() {
+        done = true;
+    }
+
+    public static int activeCount(ServerLevel level) {
+        List<Telegraph> list = ACTIVE.get(level);
+        return list == null ? 0 : list.size();
+    }
+
+    // 持ち主の予告をすべて取り消す (倒れたとき、段階が変わるとき)
+    public static void cancelAll(Entity owner) {
+        for (List<Telegraph> list : ACTIVE.values()) {
+            for (Telegraph t : list) {
+                if (t.owner == owner) {
+                    t.done = true;
+                }
+            }
+        }
+    }
+
+    // 試験用: 1 tick 分進める (サーバーの tick に任せず、自己テストが手で進めるとき)
+    public static void tickNow(ServerLevel level) {
+        tickLevel(level);
+    }
+
+    // 試験用: 動いている予告の予告 tick 数の一覧
+    public static List<Integer> activeWarns(ServerLevel level) {
+        List<Integer> out = new ArrayList<>();
+        for (Telegraph t : ACTIVE.getOrDefault(level, List.of())) {
+            if (!t.done) {
+                out.add(t.warn);
+            }
+        }
+        return out;
+    }
+
+    static void clearAll() {
+        ACTIVE.clear();
+    }
+
+    // ---- 毎 tick (TelegraphEvents から) ----
+
+    static void tickLevel(ServerLevel level) {
+        List<Telegraph> list = ACTIVE.get(level);
+        if (list == null) {
+            return;
+        }
+        budget = BUDGET;
+        for (int i = 0; i < list.size(); i++) {
+            Telegraph t = list.get(i);
+            if (!t.done) {
+                t.tick();
+            }
+        }
+        list.removeIf(t -> t.done);
+        if (list.isEmpty()) {
+            ACTIVE.remove(level);
+        }
+    }
+
+    private void tick() {
+        if (owner != null && (owner.isRemoved() || (owner instanceof LivingEntity le && le.isDeadOrDying()))) {
+            done = true;
+            return;
+        }
+        age++;
+        if (age < warn) {
+            drawWarning();
+            return;
+        }
+        if (age == warn) {
+            if (onImpact != null) {
+                onImpact.accept(level);
+            }
+            if (active == 0) {
+                strike(shape.at(1.0));
+                done = true;
+            } else {
+                strike(shape.at(0.0));
+            }
+            return;
+        }
+        // 振り回し: 進み具合に合わせた帯の中の人に一度ずつ
+        double progress = Math.min(1.0, (double) (age - warn) / active);
+        TelegraphShape now = shape.at(progress);
+        strike(now);
+        if (age % 2 == 0) {
+            draw(now::outline, 1.6, 1.0, 0.0, 1.5f);
+        }
+        if (age - warn >= active) {
+            done = true;
+        }
+    }
+
+    private void strike(TelegraphShape current) {
+        if (onHit == null) {
+            return;
+        }
+        if (probes != null) {
+            for (int i = 0; i < probes.size(); i++) {
+                Vec3 p = probes.get(i);
+                if (!probeHit[i] && p.y >= floor - 0.5 && p.y <= floor + 0.5 && current.contains(p.x, p.z)) {
+                    probeHit[i] = true;
+                }
+            }
+        }
+        double[] b = current.bounds();
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(b[0] - 1, floor - 1.5, b[1] - 1, b[2] + 1, floor + reach + 1, b[3] + 1);
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, victims)) {
+            if (inside(current, p) && hit.add(p.getUUID())) {
+                onHit.hit(level, p);
+            }
+        }
+    }
+
+    // ---- 印を描く ----
+
+    private void drawWarning() {
+        double progress = (double) age / warn;
+        // 輪郭: 序盤は 4 tick ごと、近づくと 2 tick ごと (id をずらして、同時に何本あっても粒が一度に集中しない)
+        double[] b = shape.bounds();
+        // 小さい形 (棘の円など) は粒が少ないぶん、間隔をあけて数を抑える
+        boolean small = Math.max(b[2] - b[0], b[3] - b[1]) < 4.5;
+        int period = (progress < 0.6 ? 4 : 2) * (small ? 2 : 1);
+        if ((age + id) % period == 0) {
+            draw(shape::outline, 0.9, progress, 0.0, 1.0f);
+        }
+        // 満ちていく縁: 2 tick ごと (小さい形は 4 tick ごと)
+        if ((age + id) % (small ? 4 : 2) == 1) {
+            draw((sink, spacing) -> shape.edge(progress, sink, spacing), 1.0, progress, 0.12, 1.2f);
+        }
+    }
+
+    private interface Painter {
+        void paint(TelegraphShape.PointSink sink, double spacing);
+    }
+
+    private void draw(Painter painter, double spacing, double progress, double lift, float sizeBoost) {
+        List<ServerPlayer> viewers = new ArrayList<>();
+        double cx = shape.centerX();
+        double cz = shape.centerZ();
+        double[] b = shape.bounds();
+        double reachSq = Math.pow(64 + Math.hypot(b[2] - b[0], b[3] - b[1]) / 2, 2);
+        for (ServerPlayer p : level.players()) {
+            if (p.distanceToSqr(cx, floor, cz) < reachSq && GroupOwned.visibleTo(owner != null ? owner : p, p)) {
+                viewers.add(p);
+            }
+        }
+        if (viewers.isEmpty()) {
+            return;
+        }
+        double p2 = Math.max(0, Math.min(1, progress));
+        int r = lerp((rgb >> 16) & 0xFF, 255, p2 * 0.55);
+        int g = lerp((rgb >> 8) & 0xFF, 255, p2 * 0.55);
+        int bl = lerp(rgb & 0xFF, 255, p2 * 0.55);
+        DustParticleOptions dust = new DustParticleOptions(new Vector3f(r / 255f, g / 255f, bl / 255f), (float) (1.0 + 0.5 * p2) * sizeBoost);
+        // 粒が多すぎる形は、間隔を広げる
+        double step = spacing;
+        int[] counter = {0};
+        painter.paint((x, z) -> counter[0]++, step);
+        while (counter[0] > 64 && step < 4) {
+            step *= 1.5;
+            counter[0] = 0;
+            final double s = step;
+            painter.paint((x, z) -> counter[0]++, s);
+        }
+        if (counter[0] * viewers.size() > budget) {
+            return;
+        }
+        budget -= counter[0] * viewers.size();
+        double y = floor + 0.1 + lift;
+        painter.paint((x, z) -> {
+            for (ServerPlayer p : viewers) {
+                level.sendParticles(p, dust, true, x, y, z, 1, 0, 0, 0, 0);
+            }
+        }, step);
+    }
+
+    private static int lerp(int a, int b, double t) {
+        return (int) Math.round(a + (b - a) * t);
+    }
+}

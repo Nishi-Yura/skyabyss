@@ -87,12 +87,22 @@ public final class CinematicSelfTest {
                 check(f, end.distanceTo(new Vec3(0, CameraMath.EYE, 0)) < 1.0e-6, s.id() + ": seamless scene does not end at the eye");
             }
         }
-        check(f, count == 10, "expected 10 scenes (opening, whale, 4 hearts, 4 dormancies), got " + count);
+        check(f, count == 13, "expected 13 scenes (opening, whale, 3 first sights, 4 hearts, 4 dormancies), got " + count);
         Scene opening = Scenes.get(Scenes.OPENING);
         check(f, opening != null && opening.duration() <= 40f && opening.duration() >= 25f, "opening should be 25-40 s");
         check(f, opening != null && opening.intro() && opening.handBack() && opening.seamless(), "opening flags");
         Scene whale = Scenes.get(Scenes.WHALE_FIRST_SIGHT);
         check(f, whale != null && whale.duration() <= 25f, "whale first sight too long");
+        for (String titan : Scenes.FIRST_SIGHT_TITANS) {
+            // 潮殻・雷翼・余燼の初見 (岩鯨と同じ作り: 約 20 秒、台詞 4 行、カメラは巨神を狙う、スキップ可)
+            Scene first = Scenes.get(Scenes.firstId(titan));
+            check(f, first != null && first.duration() >= 15f && first.duration() <= 25f && first.lines().size() == 4 && !first.seamless() && first.handBack(),
+                    "the first-sight scene for " + titan + " is missing or has odd length / lines");
+            if (first != null) {
+                check(f, first.shots().get(first.shots().size() - 1).lookTo().kind() == Look.Kind.TARGET, "the first-sight scene for " + titan + " does not end on the titan");
+            }
+            check(f, CinematicTriggers.sceneOf(titan).equals(Scenes.firstId(titan)), "trigger scene name for " + titan);
+        }
         for (String titan : new String[] {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER}) {
             check(f, Scenes.get(Scenes.heartId(titan)) != null, "no heart scene for " + titan);
             // 眠りの場面 (約 16 秒。カメラは巨神を狙い、台詞は 3 行)
@@ -320,6 +330,54 @@ public final class CinematicSelfTest {
         check(f, !CinematicTriggers.run(b) && !Cinematics.active(b), "whale trigger fired with no whale in range");
         Cinematics.stop(a, false);
         Cinematics.stop(b, false);
+        Cinematics.state(a).forgetAll();
+        Cinematics.state(b).forgetAll();
+        firstSights(level, a, b, f);
+    }
+
+    // 潮殻・雷翼・余燼の初見の条件 (人ごと・二人目・再入室・範囲・船)。巨神の代わりに置物を立てて、条件の判定 (firstSight) だけを確かめる
+    private static void firstSights(ServerLevel level, FakePlayer a, FakePlayer b, List<String> f) {
+        for (String titan : Scenes.FIRST_SIGHT_TITANS) {
+            String scene = Scenes.firstId(titan);
+            Cinematics.state(a).forgetAll();
+            Cinematics.state(b).forgetAll();
+            Cinematics.stop(a, false);
+            Cinematics.stop(b, false);
+            a.setPos(b.getX(), b.getY(), b.getZ());
+            net.minecraft.world.entity.decoration.ArmorStand stand = new net.minecraft.world.entity.decoration.ArmorStand(net.minecraft.world.entity.EntityType.ARMOR_STAND, level);
+            // 範囲の内側 (200 ブロック。潮殻 90〜280・雷翼 130〜300・余燼 90〜240 のどれにも入る)
+            stand.setPos(a.getX() + 200, a.getY(), a.getZ());
+            check(f, CinematicTriggers.firstSight(level, a, titan, null) == false && !Cinematics.active(a), titan + ": started with no titan");
+            // 範囲の外: 遠すぎる・近すぎる。記録は付かない
+            stand.setPos(a.getX() + 2000, a.getY(), a.getZ());
+            check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.state(a).seen(scene), titan + ": started from too far");
+            stand.setPos(a.getX() + 20, a.getY(), a.getZ());
+            check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.state(a).seen(scene), titan + ": started from too close");
+            stand.setPos(a.getX() + 200, a.getY(), a.getZ());
+            // 一人目: 始まる。同じ人にはもう出ない
+            check(f, CinematicTriggers.firstSight(level, a, titan, stand) && scene.equals(Cinematics.activeScene(a)), titan + ": first player did not get the first-sight scene");
+            Cinematics.stop(a, false);
+            check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.active(a), titan + ": first-sight scene repeated for the same player");
+            // 二人目: 一人目が見たあとでも、自分の分は見る (記録は人ごと)。もう一人の記録は変わらない
+            check(f, !Cinematics.state(b).seen(scene), titan + ": another player's record was set by the first player");
+            check(f, CinematicTriggers.firstSight(level, b, titan, stand) && Cinematics.active(b), titan + ": second player did not get the first-sight scene");
+            Cinematics.stop(b, false);
+            // 再入室 (記録の保存と読み戻し) のあとも、見た人には出ない
+            CinematicState reloaded = CinematicState.CODEC.parse(JsonOps.INSTANCE, CinematicState.CODEC.encodeStart(JsonOps.INSTANCE, Cinematics.state(a)).getOrThrow()).getOrThrow();
+            check(f, reloaded.seen(scene), titan + ": seen record lost across save / relog");
+            // 巨神が死んでいる・読み込まれていない (null) ときは出ない。出し逃した人は、あとで条件が合えば見られる
+            Cinematics.state(a).forget(scene);
+            stand.kill();
+            check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.state(a).seen(scene), titan + ": started for a dead titan");
+            stand.discard();
+        }
+        // 船に乗っていても見られる (海で会いに行く足)。馬など、ほかの乗り物では見せない。
+        // 乗せる操作は環境で失敗しうるので、乗り物の判定 (vehicleAllows) を実体を世界に置かずに確かめ、徒歩の人は canWatch で確かめる
+        var boat = new net.minecraft.world.entity.vehicle.Boat(net.minecraft.world.entity.EntityType.BOAT, level);
+        var pig = new net.minecraft.world.entity.animal.Pig(net.minecraft.world.entity.EntityType.PIG, level);
+        check(f, CinematicTriggers.vehicleAllows(boat), "a player in a boat was not eligible for first sights");
+        check(f, !CinematicTriggers.vehicleAllows(pig), "a player riding a pig was eligible for first sights");
+        check(f, CinematicTriggers.vehicleAllows(null) && CinematicTriggers.canWatch(a), "a player on foot was not eligible for first sights");
         Cinematics.state(a).forgetAll();
         Cinematics.state(b).forgetAll();
     }

@@ -161,6 +161,23 @@ public final class TravelSelfTest {
             check(sec >= 20 && sec <= 90, "estimate out of range at " + d + ": " + sec, failures);
             prev = sec;
         }
+        // 出発の待ち: 60 秒、近くの仲間がまだなら延び (上限 +30 秒)、全員乗っていれば笛で早く出発できる
+        check(TravelRules.BOARDING_COUNTDOWN == 1200, "boarding wait is not 60 s", failures);
+        int lim = TravelRules.BOARDING_COUNTDOWN;
+        for (int t = 0; t < 5000; t++) {
+            lim = TravelRules.boardingLimit(lim, t, false);
+        }
+        check(lim == TravelRules.BOARDING_COUNTDOWN, "the wait grew with nobody approaching: " + lim, failures);
+        check(TravelRules.boardingLimit(lim, 100, true) == lim, "the wait grew too early", failures);
+        for (int t = 0; t < 5000; t++) {
+            lim = TravelRules.boardingLimit(lim, t, true);
+            check(lim >= TravelRules.BOARDING_COUNTDOWN && lim <= TravelRules.BOARDING_COUNTDOWN + TravelRules.BOARDING_EXTEND_MAX,
+                    "the extended wait left its range: " + lim, failures);
+        }
+        check(lim == TravelRules.BOARDING_COUNTDOWN + TravelRules.BOARDING_EXTEND_MAX, "the extension did not reach its cap: " + lim, failures);
+        check(TravelRules.boardingLimit(TravelRules.BOARDING_COUNTDOWN, TravelRules.BOARDING_COUNTDOWN - 10, true)
+                == TravelRules.BOARDING_COUNTDOWN - 10 + TravelRules.BOARDING_EXTEND_HOLD, "the wait was not held near its end", failures);
+        check(TravelRules.earlyStartAllowed(0) && !TravelRules.earlyStartAllowed(1), "early start rule is wrong", failures);
         check(TravelRules.cruiseTicks(1e9) == TravelRules.CRUISE_MAX && TravelRules.cruiseTicks(0) == TravelRules.CRUISE_MIN, "cruise ticks not clamped", failures);
 
         // ---- 4. 降ろす場所 (空高くに小さな台を作って試す)

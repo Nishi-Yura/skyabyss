@@ -1,0 +1,54 @@
+# The whalebone captain's stomp and sweep telegraphs (docs/design/02_stone_whale.md section 5.4)
+# ./gradlew runShots -Pscript=tools/shots/telegraph_stomp.txt   (mute: the shots runner sets the volume to 0)
+# The player stands on a barrier platform 8 blocks above the floor (survival + resistance V), the captain aims at the player's x/z.
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival Dev
+cmd data get entity Dev playerGameType
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd fill -5 -53 -5 5 -53 10 minecraft:air
+cmd fill -5 -53 -5 5 -53 10 minecraft:barrier
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+
+# ---- stomp: the circle appears under the player, the captain crouches, jumps and lands exactly in it
+cmd summon skyabyss:whalebone_captain 0 -60 10 {PersistenceRequired:1b,Rotation:[180f,0f]}
+camera minecraft:overworld 0.5 -52 -4.5 0 55
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+wait 40
+cmd data get entity @e[type=skyabyss:whalebone_captain,limit=1] Brain
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 6
+shot stomp_a
+wait 8
+shot stomp_b
+wait 8
+shot stomp_c
+wait 5
+shot stomp_hit
+wait 40
+cmd kill @e[type=skyabyss:whalebone_captain]
+
+# ---- sweep: the cone in front of the captain fills for 1.1 s, then it swings
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+camera minecraft:overworld 0.5 -52 8.5 180 42
+wait 40
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] SWEEP
+wait 6
+shot sweep_a
+wait 10
+shot sweep_b
+wait 6
+shot sweep_hit
+cmd kill @e[type=skyabyss:whalebone_captain]
+quit

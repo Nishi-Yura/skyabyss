@@ -197,8 +197,8 @@ public final class GroupSelfTest {
         }
         room.tick(back, host);
         GroupBossRoom.noteDeath(a.getUUID());
-        // 倒れた参加者は、戦いが続くあいだ扉から戻れない (参加者には残る)
-        if (!room.fallen().contains(a.getUUID()) || room.rejoinable().contains(a.getUUID()) || !room.participants().contains(a.getUUID())) {
+        // 倒れた参加者は、倒れた直後は扉から戻れない (参加者には残る。20 秒の待ちは heart reentry で見る)
+        if (!room.fallen().contains(a.getUUID()) || room.rejoinable(back).contains(a.getUUID()) || !room.participants().contains(a.getUUID())) {
             f.add("a participant who died in the room can still be let back through the door during the fight");
         }
         inside.clear();

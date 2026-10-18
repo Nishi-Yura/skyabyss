@@ -1,0 +1,223 @@
+<title>岩鯨の背 低ポリ 3案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 作業台: 左に対象の目次、右に対象ごとのシートと選択。暗い石の地に、共鳴の水色を一点だけ使う */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+.top{display:grid;gap:10px;margin-bottom:22px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,38px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);max-width:68ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.bar{flex:1 1 220px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save-state{color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:2px}
+nav a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);font-size:14px}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:focus-visible,nav a:hover{color:var(--accent)}
+.subject{padding-block:26px;border-top:1px solid var(--line);display:grid;gap:14px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kind{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0;flex:1 1 auto}
+.state{font-size:13px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.state[data-state="chosen"]{border-color:var(--ok);color:var(--ok)}
+.extra{margin:0;color:var(--muted);max-width:72ch}
+.sheets{display:grid;gap:12px}
+.sheet{margin:0}
+.zoom{all:unset;cursor:zoom-in;display:block;border:1px solid var(--line);background:#0e1015}
+.zoom:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sheet img{display:block;width:100%;height:auto}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opts legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-family:var(--display);font-size:22px;line-height:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.otext{display:grid;gap:2px;min-width:0;font-size:13px;color:var(--muted)}
+.otext b{color:var(--ink);font-size:14px}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note-l{font-size:13px;color:var(--muted)}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+dialog{border:0;padding:0;background:transparent;max-width:96vw;max-height:94vh}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
+.signed-out{display:none;color:var(--muted);font-size:13px}
+.done{color:var(--muted);font-size:14px;max-width:72ch}
+.done summary{cursor:pointer;color:var(--ink)}
+.done ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line);padding:4px 8px}
+  nav a.done{border-bottom-color:var(--ok)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>岩鯨の背 低ポリ 3案</h1>
+    <p class="intro">新しい共通の作り方（低ポリの非立方体＋1ブロック32画素のドット絵、軽さ重視）で、岩鯨の背の5体を3案ずつ作りました。骨の番兵は見本で方向が決まったので外しています。どの案も骨の名前と位置は今のモデルと同じで、今のアニメーションがそのまま動きます。武器は別のモデルです。採用する案を選び、直してほしい点があれば書いてください。</p>
+    <details class="done"><summary>選ばれてゲームに入れたもの (1)</summary><ul><li>骨の番兵: 見本の低ポリ版をゲームに入れた（今の箱のモデルより約2.5倍軽い）</li></ul></details>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 5 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+  </div>
+  <div class="layout">
+    <nav aria-label="対象"><a href="#lp_rib_archer" data-nav="lp_rib_archer">肋の射手 低ポリ</a><a href="#lp_moss_crawler" data-nav="lp_moss_crawler">苔這い</a><a href="#lp_waterway_maw" data-nav="lp_waterway_maw">水路の顎 低ポリ</a><a href="#lp_captain" data-nav="lp_captain">番兵長</a><a href="#lp_whale_heart" data-nav="lp_whale_heart">岩鯨の心臓 低ポリ</a></nav>
+    <main>
+<section class="subject" id="lp_rib_archer" data-id="lp_rib_archer">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>肋の射手 (rib_archer) 低ポリ非立方体 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">設計の狙い: 鯨骨の細身の射手 (光る目の点・別メッシュの弓) の同一性を保ち、統一スタイル (非立方体の低ポリ + 32テクセル/ブロックのドット絵) で 3 方向の輪郭を作り比べる。骨名・階層・pivot は現行 geo と同じ (root は Y 180 度回転を持ち、頂点は geo 空間)。弓は socket_off の局所座標の別メッシュで、string_up / string_lo の骨を維持 (draw アニメで弦が動く)。三角形: A 本体 625 + 弓 90 / B 本体 545 + 弓 99 / C 本体 605 + 弓 102 (目標: 普通の敵 約 600)。アトラス 128x128 (弓 64x64)、光るマスクは目の点のみ。出力: docs/review/lowpoly_roughs/rib_archer/{a,b,c}/。生成: tools/rough/lowpoly/rib_archer/compare.py。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_rib_archer.jpg" aria-label="肋の射手 (rib_archer) 低ポリ非立方体 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_rib_archer.jpg" alt="肋の射手 (rib_archer) 低ポリ非立方体 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_rib_archer-a"><input type="radio" name="lp_rib_archer" id="lp_rib_archer-a" value="a"><span class="letter">A</span><span class="otext"><b>A 巻き角の長頭</b><span>鯨の頭骨のように前へ長い頭と、後ろへ流れる長い角 2 本。細く縦長の輪郭、4 対の肋の弧、逆関節の脚。弓は鯨の肋骨を削った反りの強い刃の弓 (外へ棘)。象牙色の骨に藻の緑。</span></span></label><label class="opt" for="lp_rib_archer-b"><input type="radio" name="lp_rib_archer" id="lp_rib_archer-b" value="b"><span class="letter">B</span><span class="otext"><b>B 棘背の猫背</b><span>前かがみで首を突き出す獣。短い嘴と横へ張る頬の棘、背骨に沿う棘の列、前へ爪のように出る肋、尻尾。弓は棘だらけの角を曲げたような荒い弓。煤けた骨に錆色。</span></span></label><label class="opt" for="lp_rib_archer-c"><input type="radio" name="lp_rib_archer" id="lp_rib_archer-c" value="c"><span class="letter">C</span><span class="otext"><b>C ひげ板の頭巾</b><span>鯨のひげ板を段に重ねた尖った頭巾の奥に光る 2 点の目。肩の重ね板・胸の前垂れ・背のマントもひげ板。細く真っ直ぐな脚。弓は薄い積層の長弓。尖りでなく面の重なりで見せる。</span></span></label></fieldset>
+  <label class="note-l" for="lp_rib_archer-note">直してほしい点 (任意)</label>
+  <textarea id="lp_rib_archer-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_moss_crawler" data-id="lp_moss_crawler">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>苔這い (moss_crawler) 低ポリ・ドット絵 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">キャラは選んだ「苔芋虫」のまま (5節・骨の輪・背の苔・オレンジ虹彩の一つ目・誘いの光の触角)。骨 27 本の名前・階層・pivot は今の geo と同じで、今のアニメ (idle/walk/pounce/hurt/death) がそのまま動く。1ブロック=32テクセル・最近傍・限られたパレット (肉5/骨6/苔5/虹彩5)。三角形 A 615 / B 601 / C 640 (目安 約600)。光る画素 (glowmask) は虹彩と誘いの光。メッシュ・アトラス・glowmask は docs/review/lowpoly_roughs/lp_moss_crawler/{a,b,c}/ 。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_moss_crawler.jpg" aria-label="苔這い (moss_crawler) 低ポリ・ドット絵 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_moss_crawler.jpg" alt="苔這い (moss_crawler) 低ポリ・ドット絵 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_moss_crawler-a"><input type="radio" name="lp_moss_crawler" id="lp_moss_crawler-a" value="a"><span class="letter">A</span><span class="otext"><b>A 忠実 (615 三角形)</b><span>今の苔芋虫をそのまま低ポリにした形。八角の丸い節に3面の骨の輪、背の丸い苔のクッション、丸い一つ目、先の丸い誘いの光。素直で読みやすい。</span></span></label><label class="opt" for="lp_moss_crawler-b"><input type="radio" name="lp_moss_crawler" id="lp_moss_crawler-b" value="b"><span class="letter">B</span><span class="otext"><b>B 骨・棘 (601 三角形)</b><span>骨寄り。六角のやせた節に太い骨の輪と背のとげ、頭に角と眉の骨と牙、細く尖った脚と節くれた触角。苔は少なめで、より不気味。</span></span></label><label class="opt" for="lp_moss_crawler-c"><input type="radio" name="lp_moss_crawler" id="lp_moss_crawler-c" value="c"><span class="letter">C</span><span class="otext"><b>C 肉・苔 (640 三角形)</b><span>肉・苔寄り。ぽってりした桃色がかった皮に、でこぼこした厚い苔が背と脇をおおう。短く太い脚、大きな目、丸い頭と小さな歯。骨は控えめで、やわらかく生き物らしい。</span></span></label></fieldset>
+  <label class="note-l" for="lp_moss_crawler-note">直してほしい点 (任意)</label>
+  <textarea id="lp_moss_crawler-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_waterway_maw" data-id="lp_waterway_maw">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>水路の顎 (waterway_maw) 低ポリ 3案</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">水路の顎を、全モデル共通の新しい作風 (非立方体の低ポリ + マイクラ調のドット絵 32 テクセル/ブロック) で作った 3 案。骨の名前・階層・pivot は今の geo のまま (root・seg0〜seg5・tail・head・jaw・lure) なので今のアニメーション (swim・bite) がそのまま動く。歯は上 10 対・下 7 対の先細りの棘で、噛みつきの姿勢 (顎 -32°・頭 -5) でも読める。三角形: A 625 / B 643 / C 663 (今は箱 288 個・1,393 面)。光るのは目とルアー (C は頭の刻印も)。テクスチャは案ごとに atlas と glowmask の PNG。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_waterway_maw.jpg" aria-label="水路の顎 (waterway_maw) 低ポリ 3案 のシートを拡大"><img loading="lazy" src="lowpoly_roughs_waterway_maw.jpg" alt="水路の顎 (waterway_maw) 低ポリ 3案 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_waterway_maw-a"><input type="radio" name="lp_waterway_maw" id="lp_waterway_maw-a" value="a"><span class="letter">A</span><span class="otext"><b>A 川カマス型 (625 三角形)</b><span>細長く鋭い楔形の頭と、針のように細い歯 (前の二対は長い牙)。鱗のある青緑の濡れた肌、背に紫の刃を連ねたひれ、細い竿の先に光る玉。素早く泳ぎ噛みつく水路の捕食者の印象。顎が長く、歯が一番はっきり読める。</span></span></label><label class="opt" for="lp_waterway_maw-b"><input type="radio" name="lp_waterway_maw" id="lp_waterway_maw-b" value="b"><span class="letter">B</span><span class="otext"><b>B 提灯鮟鱇型 (643 三角形)</b><span>深く丸い頭と前へ突き出る大きな下あご。前の一対が大きな曲がった牙、後ろへ小さくなる。なめらかな深い青の肉の皮膚と赤黒い口、枝分かれした提灯、うちわ形の尾。一番不気味で、闇の水路の怪物らしい。</span></span></label><label class="opt" for="lp_waterway_maw-c"><input type="radio" name="lp_waterway_maw" id="lp_waterway_maw-c" value="c"><span class="letter">C</span><span class="otext"><b>C 古代甲冑魚型 (663 三角形)</b><span>角ばった象牙色の骨板を重ねた鎧の頭と、幅の広い刃 (のこぎり) の歯。石肌の胴に背の高い帆、頭に光る刻印、骨の角灯のルアー。岩鯨の背の石・骨の世界とよくなじむ。</span></span></label></fieldset>
+  <label class="note-l" for="lp_waterway_maw-note">直してほしい点 (任意)</label>
+  <textarea id="lp_waterway_maw-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_captain" data-id="lp_captain">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>鯨骨の番兵長 whalebone_captain (中ボス) — 低ポリ非立方体 + ドット絵テクスチャ</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">石の鯨の背の中ボス「鯨骨の番兵長」を、統一スタイル（斜めの面・面取り・先細りの棘のメッシュ + 1 ブロック 32 テクセルのドット絵、最近傍）で 3 方向に描き分けた。骨 20 本の名前・階層・pivot は今の geo と同じで、今のアニメーション (idle / walk / sweep / slam / leap / roar) がそのまま動く。鉾は別メッシュ (番兵長の鉾。socket_main の pivot が原点、アイテムの 3D と同じ寸法・向きで 1.8 倍込み)。数字: 本体 A 1,266 / B 1,503 / C 1,238 三角形 (上限 約 1,500)、鉾 A 148 / B 145 / C 164 三角形 (上限 約 250)。アトラスは本体 256×256、鉾 128×128。今は箱 1,318 個 / 4,616 面。シートは今 + A/B/C を前 3/4・後ろ 3/4、頭のアップ (前・後ろ)、鉾、薙ぎ払い (sweep 0.50 s)、叩きつけ (slam 0.18 s)、アトラスの順。メッシュ・アトラス・発光マスク・鉾は docs/review/lowpoly_roughs/whalebone_captain/{a,b,c}/ にある。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_whalebone_captain.jpg" aria-label="鯨骨の番兵長 whalebone_captain (中ボス) — 低ポリ非立方体 + ドット絵テクスチャ のシートを拡大"><img loading="lazy" src="lowpoly_roughs_whalebone_captain.jpg" alt="鯨骨の番兵長 whalebone_captain (中ボス) — 低ポリ非立方体 + ドット絵テクスチャ の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_captain-a"><input type="radio" name="lp_captain" id="lp_captain-a" value="a"><span class="letter">A</span><span class="otext"><b>石鎧の将 (本体 1,266 + 鉾 148 三角形)</b><span>青灰の石の板金を着た騎士。重ね板 3 枚の肩 (右肩だけ牙が大きい)、覗き窓に庇のある兜と後ろへ流れる背びれの冠、胸の中央に竜骨の稜と肋の弧、核の水色。背は 8 つの骨ごとに背びれの板が並ぶ。鉾は骨の穂先 + 垂れた尾びれの刃。最も今のイメージに近い。</span></span></label><label class="opt" for="lp_captain-b"><input type="radio" name="lp_captain" id="lp_captain-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の亡者将軍 (本体 1,503 + 鉾 145 三角形)</b><span>鎧より骨。前へ長い鯨の頭骨の兜 (開いた顎・牙・石の額当て・骨のたてがみ)、胸は開いた肋の籠に光る核、椎骨の円盤の肩、背骨と尾椎と尾びれ。石は籠手と膝だけ。鉾は返しが 2 対の骨の銛。輪郭が最も尖って軽く、不気味。</span></span></label><label class="opt" for="lp_captain-c"><input type="radio" name="lp_captain" id="lp_captain-c" value="c"><span class="letter">C</span><span class="otext"><b>岩鯨の石像守 (本体 1,238 + 鉾 164 三角形)</b><span>岩を切り出した重い石像。胸びれの形の肩、水平の尾びれの冠、横一文字の覗き窓、胸の骨の円盤に核、前垂れに尾びれの印、背に一枚の大きな背びれ、苔の多い暖かい灰色。鉾は石の穂先 + 尾びれの三日月。最も重く、岩鯨の眷属らしい。</span></span></label></fieldset>
+  <label class="note-l" for="lp_captain-note">直してほしい点 (任意)</label>
+  <textarea id="lp_captain-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="lp_whale_heart" data-id="lp_whale_heart">
+  <header class="shead">
+    <p class="kind">低ポリ 3案</p>
+    <h2>岩鯨の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3)</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">統一モデル様式 (低ポリ + 1 ブロック 32 テクセルのドット絵) の心臓。骨名・階層・pivot・休めの回転は今の geo (段階 1/2/3) のまま、今の intro/death を含むアニメがそのまま動く。三角形 (段階 1 / 2 / 3): A 1,336・1,322・1,364 / B 1,287・1,159・1,262 / C 1,466・1,438・1,512。今は箱 1157/1475/1473 個 (面 5,000〜6,000)。上限は 2,000 三角形/段階。メッシュは lowpoly_roughs/lp_whale_heart/{a,b,c}/p{1,2,3}_mesh.json (+ atlas・glowmask)。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="lowpoly_roughs_lp_whale_heart.jpg" aria-label="岩鯨の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) のシートを拡大"><img loading="lazy" src="lowpoly_roughs_lp_whale_heart.jpg" alt="岩鯨の心臓 — 低ポリ非立方体 + ドット絵 3 案 (最終ボス・段階 1/2/3) の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="lp_whale_heart-a"><input type="radio" name="lp_whale_heart" id="lp_whale_heart-a" value="a"><span class="letter">A</span><span class="otext"><b>A 地層の板</b><span>今の殻の延長。八枚の楔を 4 段の斜めの板 (庇が出る) に作り直し、段の境に影が落ちる。冠は面取りした八角、棘は骨色の細い牙、心臓は解剖図の低ポリ心臓 (心尖が細く、上の割れ目、大動脈と肺動脈)。青灰の石 + 苔。最も今に近く、一番まとまっている。</span></span></label><label class="opt" for="lp_whale_heart-b"><input type="radio" name="lp_whale_heart" id="lp_whale_heart-b" value="b"><span class="letter">B</span><span class="otext"><b>B 割れ岩</b><span>砕けかけた大岩。板の縁を斜めに落とした不揃いな多面体で、板のあいだに太い溶岩の溝 (継ぎ目) が走る。冠は荒い岩の帽子と立った欠片、棘は黒い結晶、心臓は面ごとに平らに光る赤い宝石の塊と突き出る結晶。焦げた鉄色の岩 + 錆。最も荒々しく、シルエットが強い。</span></span></label><label class="opt" for="lp_whale_heart-c"><input type="radio" name="lp_whale_heart" id="lp_whale_heart-c" value="c"><span class="letter">C</span><span class="otext"><b>C 眼球</b><span>元の参考画像 (青白い眼球・赤い棘・細かい虹彩) に寄せた案。ほぼ真球の白い石の殻に赤い棘が生え、正面の継ぎ目はレンズ形の光る瞳孔、まわりに虹彩を描く (段階 2 で光る)。心臓は血管の走る眼球で、段階 3 は核が虹彩になる。一番キャラクター性が高いが、石の殻の面影は薄い。</span></span></label></fieldset>
+  <label class="note-l" for="lp_whale_heart-note">直してほしい点 (任意)</label>
+  <textarea id="lp_whale_heart-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section></main>
+  </div>
+</div>
+<dialog id="viewer"><img id="viewer-img" alt="拡大したシート"></dialog>
+
+<script>
+(() => {
+  const total = 5;
+  const sections = [...document.querySelectorAll('.subject')];
+  const saveState = document.getElementById('savestate');
+  let db = null;
+  const timers = {};
+
+  function refresh() {
+    let n = 0;
+    for (const s of sections) {
+      const chosen = s.querySelector('input[type=radio]:checked');
+      const st = s.querySelector('.state');
+      if (chosen) { n++; st.dataset.state = 'chosen'; st.textContent = chosen.value.toUpperCase() + ' を採用'; }
+      else { st.dataset.state = 'none'; st.textContent = '未選択'; }
+      const nav = document.querySelector(`[data-nav="${s.dataset.id}"]`);
+      if (nav) nav.classList.toggle('done', !!chosen);
+    }
+    document.getElementById('pcount').textContent = `${n} / ${total} 選択済み`;
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) return;
+    const s = document.getElementById(id);
+    const chosen = s.querySelector('input[type=radio]:checked');
+    const note = s.querySelector('.note').value;
+    saveState.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen ? chosen.value : '', note, at: Date.now() });
+      saveState.textContent = '保存しました';
+    } catch (e) {
+      saveState.textContent = '保存できませんでした。もう一度選び直してください';
+    }
+  }
+
+  for (const s of sections) {
+    const id = s.dataset.id;
+    s.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => { refresh(); save(id); }));
+    s.querySelector('.note').addEventListener('input', () => {
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => save(id), 800);
+    });
+  }
+
+  const viewer = document.getElementById('viewer');
+  const vimg = document.getElementById('viewer-img');
+  document.querySelectorAll('.zoom').forEach(b => b.addEventListener('click', () => {
+    vimg.src = b.dataset.src; viewer.showModal();
+  }));
+  viewer.addEventListener('click', () => viewer.close());
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveState.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        const s = document.getElementById(d.id);
+        if (!s || !data) continue;
+        if (data.option) { const r = s.querySelector(`input[value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) s.querySelector('.note').value = data.note;
+      }
+      saveState.textContent = '選ぶと自動で保存されます';
+    } catch (e) {
+      saveState.textContent = '前回の選択を読み込めませんでした';
+    }
+    refresh();
+  })();
+})();
+</script>

@@ -1,6 +1,7 @@
 {
   "block.skyabyss.grave": "墓",
   "skyabyss_grave.made": "倒れた場所のそばに、墓が立った。%s（%s, %s, %s）。控え帳（B）に場所が載っている",
+  "skyabyss_grave.no_spot": "墓を立てられる場所が見つからなかったので、持ち物は報酬の預かりに入った。控え帳（B）から受け取れる",
   "skyabyss_grave.kept_all": "持ち物は手もとに残った",
   "skyabyss_grave.not_yours": "%s の墓だ。開けられない",
   "skyabyss_grave.collected": "墓を開けた。品 %s 個と、経験値 %s を取り戻した",

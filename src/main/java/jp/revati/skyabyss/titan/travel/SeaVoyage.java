@@ -226,7 +226,7 @@ final class SeaVoyage extends Voyage {
     // 見積もり: 出発の待ち 8 秒、沈む 6 秒、歩く (または歩いて潮の深みへ)、浜の沖へ寄る 20 秒、降ろす 8 秒
     @Override
     int estimate(double distance) {
-        double seconds = TravelRules.BOARDING_COUNTDOWN / 20.0 + 2 + 6;
+        double seconds = TravelRules.BOARDING_ESTIMATE / 20.0 + 2 + 6;
         if (distance <= DIRECT_LIMIT) {
             seconds += distance / (SEA_SPEED * 20) * 1.25;
         } else {
@@ -331,7 +331,7 @@ final class SeaVoyage extends Voyage {
 
     @Override
     void tickBoarding(ServerLevel level, Entity shell) {
-        if (phaseTicks < TravelRules.BOARDING_COUNTDOWN) {
+        if (phaseTicks < boardingLimit) {
             tickColumn(level, pickup, true);
         }
         super.tickBoarding(level, shell);

@@ -170,12 +170,16 @@ public final class DeathEvents {
         for (ItemStack s : grave) {
             graveItems += s.getCount();
         }
+        boolean noSpot = made == null && (!grave.isEmpty() || xp > 0);
         Outcome outcome = new Outcome(mode, keptStacks, grave.size(), graveItems, xp, made, accessoryStacks);
         // 復活したとき知らせる
         CompoundTag note = new CompoundTag();
         note.putString("mode", mode.name());
         if (made != null) {
             note.putUUID("grave", made.id);
+        }
+        if (noSpot) {
+            note.putBoolean("no_spot", true);
         }
         tag.put(NOTE_TAG, note);
         return outcome;
@@ -271,6 +275,8 @@ public final class DeathEvents {
                 BlockPos p = g.pos;
                 Notice.narrate(player, "skyabyss_grave.made", jp.revati.skyabyss.record.RecordBuilder.dimension(g.dimension.location().toString()), p.getX(), p.getY(), p.getZ());
             }
+        } else if (note.getBoolean("no_spot")) {
+            Notice.warn(player, "skyabyss_grave.no_spot");
         } else if (DeathRules.Mode.valueOf(note.getString("mode")) != DeathRules.Mode.VANILLA) {
             Notice.hint(player, "skyabyss_grave.kept_all");
         }

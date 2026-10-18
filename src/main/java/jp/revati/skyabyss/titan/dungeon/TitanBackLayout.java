@@ -40,8 +40,10 @@ public final class TitanBackLayout {
     //  5: 楕円の丘を、岩鯨のモデルと同じ形のブロックの鯨にした (部屋は体の中のまま。到着は尾の付け根、祠は背の中ほど)
     //  7: 到着を、左わき腹の錨石の外の台にした (台から背の広場まで体の中を登る階段を足した。錨石・炉は台へ)
     //  8: 闇の水路の中ほどの息継ぎのくぼみに休み場の足場を足した。東の前室・控えの間の復活位置を扉から離した
-    //  9: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
-    public static final int LAYOUT_VERSION = 9;
+    //  9: 東の第一の広間 (E1) を 13×23 → 13×30、番兵長の広間 (E3) を 9×23 → 9×31 に延ばした。心臓の間を内側の半径 14.5 → 19 に広げ、
+    //     中心を 5 北へ (z -85)。テレグラフの円 (スタンプ 半径 5 など) が床の 4 割以下に収まり、避ける広さが残る (02 の 4.2、5.2)
+    // 10: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
+    public static final int LAYOUT_VERSION = 10;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
@@ -85,10 +87,10 @@ public final class TitanBackLayout {
     // ---------------------------------------------------------------- 心臓の回廊と心臓の間 (最終ボス)
     // 奥の扉から北へ伸びる回廊 (x -1〜1、z -46〜-63)。途中に休み場 heart がある
     public static final Box HEART_REST = new Box(-3, 3, -57, -51, FLOOR, 4);
-    // 心臓の間: 中心 (0, 94, -80)、床 y=93、天井 y=106 (体の表面の内側に収まる)。内側の半径 14.5、壁の外側 16.5
+    // 心臓の間: 中心 (0, 94, -85)、床 y=93、天井 y=106 (体の表面の内側に収まる)。内側の半径 19、壁の外側 21 (入口の壁 z=-64 が円の南の端)
     public static final int HEART_CX = 0;
-    public static final int HEART_CZ = -80;
-    public static final Box HEART = new Box(-16, 16, -96, -64, FLOOR, 12);
+    public static final int HEART_CZ = -85;
+    public static final Box HEART = new Box(-21, 21, -106, -64, FLOOR, 12);
     // 心臓の間の入口 (戦いが始まると閉じる)。z=HEART_GATE_Z の壁
     public static final int HEART_GATE_Z = -64;
     public static final List<BlockPos> HEART_GATE = wall(-1, 1, 94, 97, HEART_GATE_Z, true);
@@ -111,10 +113,10 @@ public final class TitanBackLayout {
 
     // ---------------------------------------------------------------- 東の翼 (戦闘)
     public static final Box E0 = new Box(16, 22, -26, -18, FLOOR, 6);
-    public static final Box E1 = new Box(24, 36, -34, -12, FLOOR, 8);
+    public static final Box E1 = new Box(24, 36, -34, -5, FLOOR, 8);
     // 番兵長の控えの間 (休み場 ce1)。E1 の出口の先。西の壁の戸口から短い通路で番兵長の広間へ
     public static final Box CE1 = new Box(26, 32, -42, -36, FLOOR, 5);
-    public static final Box E3 = new Box(11, 19, -52, -30, FLOOR, 8);
+    public static final Box E3 = new Box(11, 19, -60, -30, FLOOR, 8);
     // 控えの間 → 番兵長の広間の通路 (x 21〜24)。両端の壁 x=25 (戸口) と x=20 (番兵長の広間の入口)
     public static final Box E3_CORRIDOR = new Box(21, 24, -40, -38, FLOOR, 4);
     public static final List<BlockPos> E1_ENTRANCE = wall(-23, -21, 94, 97, 23, false);

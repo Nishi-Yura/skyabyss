@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.BlockPos;
@@ -54,6 +56,8 @@ import org.joml.Vector3f;
 public class StoneWhaleHeart extends HeartBoss {
     // 段階の数 (1 から 3 までの模型がある)
     public static final int PHASE_COUNT = 3;
+    // 見た目と判定箱の大きさ (前の 1.5 倍。ModEntities の sized と StoneWhaleHeartRenderer の SCALE を合わせる)
+    public static final double BODY_SCALE = 1.5;
     // 段階が変わる体力の割合 (段階2 へ 66%、段階3 へ 33%)
     private static final float PHASE_TWO_AT = 0.66f;
     private static final float PHASE_THREE_AT = 0.33f;
@@ -77,26 +81,6 @@ public class StoneWhaleHeart extends HeartBoss {
     private static final Action[] PHASE_TWO = {Action.CRACK, Action.RECLOSE, Action.VOLLEY};
     private static final Action[] PHASE_THREE = {Action.BEAM, Action.CHAIN, Action.SHELL_DROP};
 
-    // 落ちてくるものの種類。骨の棘、足元の炎、殻の塊
-    private enum Kind { BONE, FIRE, SHELL }
-
-    // 衝撃の輪。床をはい、跳び越えない相手に当たる (harmful が偽なら押し返すだけ)
-    private static final class Wave {
-        double radius = 1.5;
-        final double floorY;
-        final boolean harmful;
-        final Set<UUID> hit = new HashSet<>();
-
-        Wave(double floorY, boolean harmful) {
-            this.floorY = floorY;
-            this.harmful = harmful;
-        }
-    }
-
-    // 落ちてくる (または噴き出す) 一撃。予告の輪が impactAt まで見え、そのあと当たる
-    private record Spike(double x, double y, double z, int impactAt, Kind kind) {
-    }
-
     private static final double BEAM_LENGTH = 24;
     private static final double CHAIN_LENGTH = 14;
 
@@ -109,9 +93,10 @@ public class StoneWhaleHeart extends HeartBoss {
     private float attackYaw;
     private boolean defeated;
     private double chainY;
-    private final List<Wave> waves = new ArrayList<>();
-    private final List<Spike> spikes = new ArrayList<>();
-    private final List<double[]> cracks = new ArrayList<>();
+    // 技の始めに決めた本数 (人数による。掃射の腕・光線)
+    private int lockedCount = 1;
+    private boolean holdAttacks;
+    private int partyOverride;
     // 試練で湧いたときの心臓の間の範囲。技と狙いは、この中にいる人だけに向く (前室や回廊には届かない)
     @Nullable
     private AABB arena;
@@ -221,9 +206,6 @@ public class StoneWhaleHeart extends HeartBoss {
             weakTicks--;
         }
 
-        tickWaves(server);
-        tickSpikes(server);
-
         if (action == Action.NONE) {
             if (getPhase() < phaseForHealth()) {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
@@ -239,7 +221,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 return;
             }
             faceTarget(target);
-            if (cooldown == 0) {
+            if (cooldown == 0 && !holdAttacks) {
                 begin(pickAttack(), null);
             }
             return;
@@ -342,22 +324,151 @@ public class StoneWhaleHeart extends HeartBoss {
         return server.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(range, 12, range), this::canReach);
     }
 
+    // ---- 人数に応じた数 (人数 = 心臓の間にいる人。設計書 02 の 5.3)。一人でも避けられ、人数が増えるほど派手になる ----
+
+    public static int thrustLines(int n) {
+        return Mth.clamp(n, 1, 3);
+    }
+
+    public static int sweepArms(int n) {
+        return n >= 3 ? 2 : 1;
+    }
+
+    public static int leapRings(int n) {
+        return n >= 3 ? 2 : 1;
+    }
+
+    public static int crackLines(int n) {
+        return Mth.clamp(n, 1, 5);
+    }
+
+    public static int volleyLines(int n) {
+        return Mth.clamp(n, 1, 4);
+    }
+
+    public static int beamCount(int n) {
+        return n <= 2 ? 1 : n <= 4 ? 2 : 3;
+    }
+
+    public static int chainCount(int n) {
+        return n <= 2 ? 1 : n <= 4 ? 2 : 3;
+    }
+
+    // 殻の落下: 人の足元に一つずつ (四人まで)、三人からは足元以外にも二つ
+    public static int dropTargets(int n) {
+        return Mth.clamp(n, 1, 4);
+    }
+
+    public static int dropExtras(int n) {
+        return n >= 3 ? 2 : 0;
+    }
+
+    // 技の数値 (印と当たりは同じ形。tick は 20 で 1 秒)
+    public static final int THRUST_WARN = 24;
+    public static final double THRUST_LENGTH = 9;
+    public static final double THRUST_HALF_WIDTH = 2.0;
+    public static final float THRUST_DAMAGE = 11f;
+    public static final int SPIKE_WARN = 22;
+    public static final double SPIKE_RADIUS = 1.4;
+    public static final float SPIKE_DAMAGE = 9f;
+    public static final int LEAP_WARN = 24;
+    public static final double LEAP_CORE = 4.5;
+    public static final float LEAP_CORE_DAMAGE = 10f;
+    public static final double LEAP_WAVE_REACH = 16;
+    public static final float LEAP_WAVE_DAMAGE = 8f;
+    public static final int CRACK_WARN = 30;
+    public static final double CRACK_HALF_WIDTH = 1.2;
+    public static final float CRACK_DAMAGE = 8f;
+    public static final int VOLLEY_WARN = 30;
+    public static final double VOLLEY_HALF_WIDTH = 1.0;
+    public static final float VOLLEY_DAMAGE = 7f;
+    public static final int BEAM_WARN = 40;
+    public static final int BEAM_ACTIVE = 24;
+    public static final float BEAM_DAMAGE = 10f;
+    public static final int CHAIN_WARN = 24;
+    public static final int CHAIN_ACTIVE = 36;
+    public static final float CHAIN_DAMAGE = 10f;
+    public static final int DROP_WARN = 30;
+    public static final double DROP_RADIUS = 2.5;
+    public static final float DROP_DAMAGE = 12f;
+    public static final int ROAR_PUSH_WARN = 22;
+    public static final double ROAR_PUSH_RADIUS = 8;
+
+    // 試験・コマンド用: 技を一つ出す (段階に関係なく)。咆哮は段階が進む
+    public void forceAttack(String name) {
+        begin(Action.valueOf(name.toUpperCase()), null);
+    }
+
+    // 試験用: 次の技を始めない (forceAttack で出した技だけを見たいとき)
+    public void holdAttacks() {
+        holdAttacks = true;
+    }
+
+    public int actionTickCount() {
+        return actionTicks;
+    }
+
+    // 開発用: 心臓の間にいる人数を、実際より多いことにする (一人で複数人の技の絵を撮るため。0 なら実際の人数)
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    private int present(ServerLevel server) {
+        return Math.max(partyOverride, nearbyPlayers(server, 40).size());
+    }
+
+    // 狙う地点 (人の足元) を、重ならないように最大 max か所 (いま狙っている人を先頭に、残りは入れ替える)。
+    // 開発用の人数の上書きで人が足りないぶんは、心臓の周りのどこかの点で補う
+    private List<Vec3> pickSpots(ServerLevel server, int max) {
+        List<ServerPlayer> all = new ArrayList<>(nearbyPlayers(server, 40));
+        java.util.Collections.shuffle(all, new java.util.Random(random.nextLong()));
+        LivingEntity main = getTarget();
+        if (main instanceof ServerPlayer mp && all.remove(mp)) {
+            all.add(0, mp);
+        }
+        List<Vec3> spots = new ArrayList<>();
+        for (ServerPlayer p : all) {
+            spots.add(p.position());
+        }
+        while (spots.size() < Math.min(max, partyOverride)) {
+            double a = random.nextDouble() * Math.PI * 2;
+            double r = 5 + random.nextDouble() * 7;
+            spots.add(new Vec3(getX() + Math.cos(a) * r, getY(), getZ() + Math.sin(a) * r));
+        }
+        return spots.size() > max ? new ArrayList<>(spots.subList(0, max)) : spots;
+    }
+
+    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
+        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    }
+
+    private double angleTo(Vec3 spot) {
+        return Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
+    }
+
     // ---- 咆哮 (段階の切り替え) ----
 
-    // 三秒。最初に咆哮し、中ほどで輪が人を押し返す。終わると段階が一つ進む (下の二枚の殻が落ちるのはモデル側)
+    // 三秒。最初に咆哮し、輪が広がって人を押し返す (傷はない)。押し返される範囲は、始めの 1.1 秒だけ床に描く。
+    // 終わると段階が一つ進む (下の二枚の殻が落ちるのはモデル側)
     private void tickRoar(ServerLevel server) {
         if (actionTicks == 1) {
             setRoaring(true);
             sound(server, MobSounds.STONE_HEART_ROAR.get(), 3f, 1.0f);
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
-                    getX(), getY() + 2.2, getZ(), 60, 1.5, 1.2, 1.5, 0.2);
-        }
-        if (actionTicks == 22) {
-            sound(server, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f);
-            waves.add(new Wave(floorY(), false));
+                    getX(), coreHeight(), getZ(), 60, 1.5, 1.2, 1.5, 0.2);
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, 0x9CFBFF)
+                    .onImpact(s -> sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 1.0f))
+                    .onHit((s, player) -> {
+                        Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.0, -to.x, -to.z);
+                    })
+                    .start();
+            // 広がる輪 (見た目だけ)
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, 0x9CFBFF).active(30).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
-            warn(server, dust(0x9CFBFF, 1.2f), getX(), getY() + 2.2, getZ(), 6, 1.0, 1.0, 1.0, 0.05);
+            warn(server, dust(0x9CFBFF, 1.2f), getX(), coreHeight(), getZ(), 6, 1.0, 1.0, 1.0, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
@@ -370,30 +481,37 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // ---- 段階1の技 ----
 
-    // 殻の突き: 手前の殻がふくらみ (1秒)、前へ突き出す。前の帯の中の人に当たる
+    // 殻の突き: 手前の殻がふくらみ、前へ突き出す (1.2 秒)。印の帯の中の人に当たる。人数が増えると、別の人へ向けて最大三本
     private void tickThrust(ServerLevel server) {
-        Vec3 f = forward(getYRot());
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_GRIND.get(), 2f, 1.0f);
-        }
-        if (actionTicks < 24 && actionTicks % 2 == 0) {
-            for (int i = -2; i <= 2; i++) {
-                Vec3 side = new Vec3(-f.z, 0, f.x).scale(i * 1.1);
-                warn(server, dust(0xA8C8D0, 1.0f),
-                        getX() + f.x * 3.2 + side.x, getY() + 2.0, getZ() + f.z * 3.2 + side.z, 1, 0, 0, 0, 0);
+            List<Vec3> targets = pickSpots(server, thrustLines(present(server)));
+            List<Double> angles = new ArrayList<>();
+            for (Vec3 p : targets) {
+                angles.add(angleTo(p));
             }
-        }
-        if (actionTicks == 24) {
-            sound(server, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
-            server.sendParticles(ParticleTypes.CRIT, getX() + f.x * 4, getY() + 2.0, getZ() + f.z * 4, 30, 1.5, 1.2, 1.5, 0.3);
-            for (ServerPlayer player : nearbyPlayers(server, 8)) {
-                Vec3 v = player.position().subtract(position()).multiply(1, 0, 1);
-                double along = v.dot(f);
-                double across = v.subtract(f.scale(along)).length();
-                if (along > 0.5 && along < 7 && across < 2.6 && player.getY() < getY() + 3) {
-                    strike(player, 12f);
-                    player.knockback(1.2, -f.x, -f.z);
-                }
+            if (angles.isEmpty()) {
+                Vec3 f = forward(getYRot());
+                angles.add(Telegraph.angleOf(f));
+            }
+            boolean first = true;
+            for (double angle : angles) {
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                boolean sounds = first;
+                first = false;
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, THRUST_LENGTH, THRUST_HALF_WIDTH), THRUST_WARN, 0xA8D8FF)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                sound(s, MobSounds.STONE_HEART_SLAM.get(), 2.5f, 1.0f);
+                            }
+                            s.sendParticles(ParticleTypes.CRIT, getX() + dx * 4, getY() + 1.5, getZ() + dz * 4, 24, 1.2, 0.8, 1.2, 0.3);
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, THRUST_DAMAGE);
+                            player.knockback(1.2, -dx, -dz);
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 40) {
@@ -401,25 +519,31 @@ public class StoneWhaleHeart extends HeartBoss {
         }
     }
 
-    // 石棘の掃射: 殻の縁が鳴り (1秒)、弧を描く腕の先から石の棘が地を割って出る。棘の間に入れば避けられる
+    // 石棘の掃射: 殻の縁が鳴り、弧を描く腕の先から石の棘が地を割って出る。出る前に半径 1.4 の円が 1.1 秒見える。
+    // 腕が通る扇は最初の 1 秒で床に描く。三人からは腕が二本 (反対向き)。棘の間と、円の外が安全
     private void tickSweep(ServerLevel server) {
         if (actionTicks == 1) {
-            sound(server, MobSounds.STONE_HEART_SPIKE_CHARGE.get(), 2f, 1.0f);
+            lockedCount = sweepArms(present(server));
         }
-        if (actionTicks < 20 && actionTicks % 3 == 0) {
-            for (int a = 0; a < 360; a += 30) {
-                double rad = Math.toRadians(a);
-                warn(server, dust(0xFF5A5A, 1.0f),
-                        getX() + Math.cos(rad) * 4.5, getY() - 1.0, getZ() + Math.sin(rad) * 4.5, 1, 0, 0, 0, 0);
+        int arms = lockedCount;
+        if (actionTicks == 1) {
+            sound(server, MobSounds.STONE_HEART_SPIKE_CHARGE.get(), 2f, 1.0f);
+            for (int i = 0; i < arms; i++) {
+                double mid = Telegraph.angleOf(forward(attackYaw)) + Math.PI * i;
+                // 腕の通る扇 (見た目だけ。当たるのは棘の円)
+                tg(server, TelegraphShape.cone(getX(), getZ(), mid, 13, Math.toRadians(62)), 20, 0xFF9A7A).start();
             }
         }
         if (actionTicks >= 20 && actionTicks <= 68 && actionTicks % 3 == 0) {
             double t = (actionTicks - 20) / 48.0;
-            Vec3 f = forward((float) (attackYaw + (-60 + 120 * t)));
-            for (double d : new double[] {5, 8.5, 12}) {
-                double x = getX() + f.x * d;
-                double z = getZ() + f.z * d;
-                spikes.add(new Spike(x, floorAt(Mth.floor(x), Mth.floor(z)), z, tickCount + 22, Kind.BONE));
+            double[] radii = arms == 1 ? new double[] {5, 8.5, 12} : new double[] {6.5, 10.5};
+            for (int i = 0; i < arms; i++) {
+                double angle = Telegraph.angleOf(forward((float) (attackYaw + (-60 + 120 * t)))) + Math.PI * i;
+                for (double d : radii) {
+                    double x = getX() + Math.cos(angle) * d;
+                    double z = getZ() + Math.sin(angle) * d;
+                    stoneSpike(server, x, floorAt(Mth.floor(x), Mth.floor(z)), z);
+                }
             }
         }
         if (actionTicks >= 80) {
@@ -427,29 +551,53 @@ public class StoneWhaleHeart extends HeartBoss {
         }
     }
 
-    // 跳躍の叩きつけ: 心臓が沈み (1秒、鼓動が鳴る)、着地の輪が床を広がる。足元の人は直接打たれる
+    // 石棘 1 本: 半径 1.4 の円の印 (1.1 秒)。当たると少し跳ね上がる
+    private void stoneSpike(ServerLevel server, double x, double y, double z) {
+        Telegraph.in(server, TelegraphShape.circle(x, z, SPIKE_RADIUS)).floor(y).warn(SPIKE_WARN).color(0xFF5A5A).owner(this).victims(this::canReach)
+                .onImpact(s -> {
+                    s.playSound(null, x, y, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.0f);
+                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, y + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
+                })
+                .onHit((s, player) -> {
+                    strike(player, SPIKE_DAMAGE);
+                    player.setDeltaMovement(player.getDeltaMovement().add(0, 0.4, 0));
+                    player.hurtMarked = true;
+                })
+                .start();
+    }
+
+    // 跳躍の叩きつけ: 心臓が沈み (1.2 秒、鼓動が鳴る)、足元の円 (半径 3.5) に叩きつけ、そこから輪が広がる。
+    // 円の中は傷。輪は跳べば当たらない。輪には安全な筋 (緑の扇) が二本あり、そこは何もない。三人からは輪が 0.7 秒の間をあけて二重
     private void tickLeap(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_PULSE.get(), 3f, 1.0f);
-        }
-        if (actionTicks < 24 && actionTicks % 3 == 0) {
-            double fy = floorY();
-            for (int a = 0; a < 360; a += 20) {
-                double rad = Math.toRadians(a);
-                warn(server, dust(0x7FF4FF, 1.2f),
-                        getX() + Math.cos(rad) * 3, fy + 0.2, getZ() + Math.sin(rad) * 3, 1, 0, 0, 0, 0);
+            double gapBase = random.nextDouble() * Math.PI * 2;
+            double[] gaps = {gapBase, gapBase + Math.PI};
+            double gapHalf = Math.toRadians(22);
+            tg(server, TelegraphShape.circle(getX(), getZ(), LEAP_CORE), LEAP_WARN, 0x7FF4FF)
+                    .onImpact(s -> {
+                        sound(s, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
+                        s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
+                                getX(), floorY() + 0.5, getZ(), 50, 2.0, 0.4, 2.0, 0.2);
+                    })
+                    .onHit((s, player) -> strike(player, LEAP_CORE_DAMAGE))
+                    .start();
+            for (double gap : gaps) {
+                // 安全な筋 (見た目だけ)
+                tg(server, TelegraphShape.cone(getX(), getZ(), gap, 14, gapHalf), LEAP_WARN, 0x58FF9A).start();
             }
-        }
-        if (actionTicks == 24) {
-            sound(server, MobSounds.STONE_HEART_SHOCKWAVE.get(), 2.5f, 0.85f);
-            double fy = floorY();
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
-                    getX(), fy + 0.5, getZ(), 50, 2.0, 0.4, 2.0, 0.2);
-            waves.add(new Wave(fy, true));
-            for (ServerPlayer player : nearbyPlayers(server, 4)) {
-                if (player.getY() < fy + 0.9 && player.position().subtract(position()).multiply(1, 0, 1).length() < 3.5) {
-                    strike(player, 10f);
-                }
+            int rings = leapRings(present(server));
+            for (int i = 0; i < rings; i++) {
+                int active = (int) Math.ceil((LEAP_WAVE_REACH - LEAP_CORE) / 0.55);
+                tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, 0x7FF4FF)
+                        .active(active).jumpClear(0.9)
+                        .onHit((s, player) -> {
+                            strike(player, LEAP_WAVE_DAMAGE);
+                            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+                            Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.9, -to.x, -to.z);
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 44) {
@@ -459,51 +607,38 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // ---- 段階2の技 ----
 
-    // 亀裂の爆発: 人へ向かう三本のひびが光る (1.5秒)。そのあと、ひびの線に沿って床から炎が上がる
+    // 亀裂の爆発: 人へ向かうひびが光る (1.5 秒)。そのあと、ひびの帯の中に炎が上がる。人数が増えると最大五本 (別の人へ)
     private void tickCrack(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_FLAME_CHARGE.get(), 2.5f, 1.0f);
-            cracks.clear();
-            List<ServerPlayer> players = nearbyPlayers(server, 26);
-            players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
-            Vec3 f = forward(getYRot());
-            for (int i = 0; i < Math.min(3, players.size()); i++) {
-                ServerPlayer p = players.get(i);
-                double dx = p.getX() - getX();
-                double dz = p.getZ() - getZ();
-                double len = Math.hypot(dx, dz);
-                if (len < 0.01) {
-                    dx = f.x;
-                    dz = f.z;
-                    len = 1;
-                }
-                double ux = dx / len;
-                double uz = dz / len;
-                cracks.add(new double[] {getX(), getZ(), p.getX() + ux * 4, p.getZ() + uz * 4});
-            }
-        }
-        if (actionTicks < 30 && actionTicks % 2 == 0) {
-            for (double[] line : cracks) {
-                double len = Math.hypot(line[2] - line[0], line[3] - line[1]);
-                for (double d = 2; d <= len; d += 1.2) {
-                    double t = d / len;
-                    double x = line[0] + (line[2] - line[0]) * t;
-                    double z = line[1] + (line[3] - line[1]) * t;
-                    warn(server, dust(0xFF8A2A, 0.9f), x, floorAt(Mth.floor(x), Mth.floor(z)) + 0.1, z, 1, 0, 0, 0, 0);
-                }
-            }
-        }
-        if (actionTicks == 30) {
-            sound(server, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
-            for (double[] line : cracks) {
-                double len = Math.hypot(line[2] - line[0], line[3] - line[1]);
-                int i = 0;
-                for (double d = 3; d <= len; d += 1.6, i++) {
-                    double t = d / len;
-                    double x = line[0] + (line[2] - line[0]) * t;
-                    double z = line[1] + (line[3] - line[1]) * t;
-                    spikes.add(new Spike(x, floorAt(Mth.floor(x), Mth.floor(z)), z, tickCount + 6 + i * 2, Kind.FIRE));
-                }
+            List<Vec3> targets = pickSpots(server, crackLines(present(server)));
+            boolean first = true;
+            for (Vec3 p : targets) {
+                double angle = angleTo(p);
+                double dist = Math.hypot(p.x - getX(), p.z - getZ());
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                double length = Math.max(4, Math.min(26, dist + 4) - 2);
+                boolean sounds = first;
+                first = false;
+                tg(server, TelegraphShape.line(getX() + dx * 2, getZ() + dz * 2, angle, length, CRACK_HALF_WIDTH), CRACK_WARN, 0xFF8A2A)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                sound(s, MobSounds.STONE_HEART_FLAME_BURST.get(), 2.5f, 1.0f);
+                            }
+                            for (double d = 0; d <= length; d += 1.8) {
+                                double x = getX() + dx * (2 + d);
+                                double z = getZ() + dz * (2 + d);
+                                double y = floorAt(Mth.floor(x), Mth.floor(z));
+                                s.sendParticles(ParticleTypes.FLAME, x, y + 0.3, z, 6, 0.4, 0.5, 0.4, 0.05);
+                                s.sendParticles(ParticleTypes.LAVA, x, y + 0.3, z, 1, 0.3, 0.2, 0.3, 0);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, CRACK_DAMAGE);
+                            player.setRemainingFireTicks(60);
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 60) {
@@ -523,7 +658,7 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         if (actionTicks == 30) {
             sound(server, MobSounds.STONE_HEART_PLATE_LOCK.get(), 2.5f, 1.0f);
-            warn(server, dust(0xFFB347, 1.4f), getX(), getY() + 2.0, getZ(), 60, 1.8, 1.8, 1.8, 0.1);
+            warn(server, dust(0xFFB347, 1.4f), getX(), coreHeight(), getZ(), 60, 1.8, 1.8, 1.8, 0.1);
             weakTicks = 20;
         }
         if (actionTicks >= 40) {
@@ -531,34 +666,38 @@ public class StoneWhaleHeart extends HeartBoss {
         }
     }
 
-    // 骨の棘の投射: 体の棘が人へ向く (1.5秒)。その線の上へ、三本の棘を放つ
+    // 骨の棘の投射: 体の棘が人へ向く (1.5 秒)。印の帯 (幅 2、長さ 30) を骨の棘が貫く。人数が増えると最大四本 (別の人へ)。
+    // 向きは始めに決まる (人が動けば帯から出られる)
     private void tickVolley(ServerLevel server) {
-        LivingEntity target = getTarget();
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_SPIKE_CHARGE.get(), 1.8f, 1.25f);
-        }
-        if (target != null && actionTicks < 30 && actionTicks % 2 == 0) {
-            Vec3 from = position().add(0, 2.4, 0);
-            Vec3 to = target.position().add(0, target.getBbHeight() * 0.5, 0);
-            Vec3 d = to.subtract(from);
-            int steps = (int) Math.min(40, d.length() / 0.8);
-            for (int i = 1; i <= steps; i++) {
-                Vec3 p = from.add(d.scale((double) i / steps));
-                warn(server, dust(0xFFD0A0, 0.7f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
-            }
-        }
-        if (actionTicks == 30 && target != null) {
-            sound(server, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
-            Vec3 origin = position().add(0, 2.4, 0).add(forward(getYRot()).scale(1.2));
-            Vec3 aim = target.position().add(0, target.getBbHeight() * 0.5, 0).subtract(origin);
-            double base = Math.atan2(aim.z, aim.x);
-            double horiz = Math.hypot(aim.x, aim.z);
-            for (double spread : new double[] {-0.12, 0, 0.12}) {
-                BoneSpike spike = new BoneSpike(server, this);
-                spike.setPos(origin.x, origin.y, origin.z);
-                double a = base + spread;
-                spike.shoot(Math.cos(a) * horiz, aim.y, Math.sin(a) * horiz, 1.6f, 0f);
-                server.addFreshEntity(spike);
+            List<Vec3> targets = pickSpots(server, volleyLines(present(server)));
+            boolean first = true;
+            for (Vec3 p : targets) {
+                double angle = angleTo(p);
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                double y0 = getY() + 3.6;
+                boolean sounds = first;
+                first = false;
+                tg(server, TelegraphShape.line(getX() + dx * 1.2, getZ() + dz * 1.2, angle, 30, VOLLEY_HALF_WIDTH), VOLLEY_WARN, 0xFFD0A0)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                sound(s, MobSounds.STONE_HEART_VOLLEY_SHOT.get(), 2.5f, 1.0f);
+                            }
+                            for (double d = 1.5; d <= 30; d += 1.3) {
+                                s.sendParticles(ParticleTypes.END_ROD, getX() + dx * d, floorY() + 1.0 + (y0 - floorY() - 1.0) * (1 - d / 30), getZ() + dz * d, 1, 0.05, 0.05, 0.05, 0.01);
+                                if (((int) (d / 1.3)) % 3 == 0) {
+                                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
+                                            getX() + dx * d, floorY() + 1.0, getZ() + dz * d, 4, 0.2, 0.2, 0.2, 0.1);
+                                }
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, VOLLEY_DAMAGE);
+                            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 40) {
@@ -568,90 +707,79 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // ---- 段階3の技 ----
 
-    // 赤熱の光線: 核が白く光り (2秒)、向きは溜めの最初に決まる。光線は細く一秒ほど薙ぐ
+    // 赤熱の光線: 核が白く光り (2秒)、向きは溜めの最初に決まる。光線が薙ぐ扇 (角度 50°、長さ 24) を床に描く。
+    // 扇の外が安全 (人数が増えると光線は最大三本で、扇のあいだに安全な楔が残る)。光線は 1.2 秒でその扇を一度だけ薙ぐ
     private void tickBeam(ServerLevel server) {
+        if (actionTicks == 1) {
+            lockedCount = beamCount(present(server));
+        }
+        int count = lockedCount;
+        double span = Math.toRadians(count == 3 ? 40 : 50);
+        double base = Telegraph.angleOf(forward(attackYaw));
         Vec3 f = forward(attackYaw);
-        Vec3 origin = position().add(0, 2.6, 0).add(f.scale(1.0));
+        Vec3 origin = position().add(0, 3.9, 0).add(f.scale(1.0));
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_BEAM_CHARGE.get(), 2.5f, 1.0f);
+            for (int i = 0; i < count; i++) {
+                double mid = base + Math.PI * 2 * i / count;
+                boolean sounds = i == 0;
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, BEAM_LENGTH, 1.1), BEAM_WARN, 0xFF3A2A)
+                        .active(BEAM_ACTIVE)
+                        .onImpact(s -> {
+                            if (sounds) {
+                                sound(s, MobSounds.STONE_HEART_BEAM_FIRE.get(), 3f, 1.0f);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, BEAM_DAMAGE);
+                            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
+                        })
+                        .start();
+            }
         }
-        if (actionTicks < 40) {
+        if (actionTicks < BEAM_WARN) {
             if (actionTicks % 2 == 0) {
-                double r = 2.6 * (1 - actionTicks / 40.0) + 0.3;
+                double r = 2.6 * (1 - actionTicks / (double) BEAM_WARN) + 0.3;
                 for (int a = 0; a < 360; a += 45) {
                     double rad = Math.toRadians(a + actionTicks * 6);
                     warn(server, dust(0xFF3A2A, 1.0f),
                             origin.x + Math.cos(rad) * r, origin.y + Math.sin(rad) * r, origin.z, 1, 0, 0, 0, 0);
                 }
             }
-            if (actionTicks % 4 == 0) {
-                for (double d = 2; d <= 12; d += 1.0) {
-                    warn(server, dust(0xFF8A7A, 0.6f), origin.x + f.x * d, origin.y, origin.z + f.z * d, 1, 0, 0, 0, 0);
-                }
-            }
-        } else if (actionTicks < 64) {
-            if (actionTicks == 40) {
-                sound(server, MobSounds.STONE_HEART_BEAM_FIRE.get(), 3f, 1.0f);
-            }
-            double p = (actionTicks - 40) / 24.0;
-            Vec3 dir = forward((float) (attackYaw + (-8 + 16 * p)));
-            for (double d = 1; d <= BEAM_LENGTH; d += 0.8) {
-                warn(server, dust(0xFF3A2A, 1.4f),
-                        origin.x + dir.x * d, origin.y, origin.z + dir.z * d, 1, 0.05, 0.05, 0.05, 0);
-            }
-            if (actionTicks % 6 == 0) {
-                AABB area = new AABB(origin, origin.add(dir.scale(BEAM_LENGTH))).inflate(1.5, 2, 1.5);
-                for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                    Vec3 v = player.position().add(0, player.getBbHeight() * 0.6, 0).subtract(origin);
-                    double along = v.dot(dir);
-                    if (along < 0 || along > BEAM_LENGTH) {
-                        continue;
-                    }
-                    Vec3 perp = v.subtract(dir.scale(along));
-                    if (perp.length() < 1.1) {
-                        strike(player, 10f);
-                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
-                    }
+        } else if (actionTicks <= BEAM_WARN + BEAM_ACTIVE) {
+            // 光線の芯 (いまの向き)
+            double p = (actionTicks - BEAM_WARN) / (double) BEAM_ACTIVE;
+            for (int i = 0; i < count; i++) {
+                double angle = base + Math.PI * 2 * i / count - span / 2 + span * p;
+                for (double d = 1; d <= BEAM_LENGTH; d += 1.6) {
+                    warn(server, dust(0xFF3A2A, 1.4f), origin.x + Math.cos(angle) * d, origin.y, origin.z + Math.sin(angle) * d, 1, 0.05, 0.05, 0.05, 0);
                 }
             }
         }
-        if (actionTicks >= 66) {
+        if (actionTicks >= BEAM_WARN + BEAM_ACTIVE + 2) {
             finish();
         }
     }
 
-    // 鎖の振り回し: 鎖が床に線を引き (1.2秒)、その線が半円を描いて振られる。線を跳び越えれば当たらない
+    // 鎖の振り回し: 鎖が床に線を引き (1.2 秒)、その線が扇を振られる (1.8 秒)。振られる扇を床に描く。
+    // 腰の高さを通るので、跳べば越えられる。人数が増えると鎖は最大三本 (一本あたりの扇は 180°÷本数)。扇の外が安全
     private void tickChain(ServerLevel server) {
         if (actionTicks == 1) {
             chainY = floorY();
             sound(server, MobSounds.STONE_HEART_CHAIN.get(), 2.5f, 1.0f);
-        }
-        if (actionTicks < 24 && actionTicks % 2 == 0) {
-            Vec3 f = forward(attackYaw);
-            for (double d = 1; d <= CHAIN_LENGTH; d += 1.0) {
-                warn(server, dust(0x8A1C1C, 1.0f), getX() + f.x * d, chainY + 0.1, getZ() + f.z * d, 1, 0, 0, 0, 0);
-            }
-        }
-        if (actionTicks >= 24 && actionTicks <= 60) {
-            double t = (actionTicks - 24) / 36.0;
-            Vec3 f = forward((float) (attackYaw + (-90 + 180 * t)));
-            for (double d = 1; d <= CHAIN_LENGTH; d += 1.5) {
-                warn(server, dust(0xB02A2A, 1.2f), getX() + f.x * d, chainY + 1.0, getZ() + f.z * d, 1, 0, 0, 0, 0);
-            }
-            if (actionTicks % 4 == 0) {
-                for (ServerPlayer player : nearbyPlayers(server, CHAIN_LENGTH + 2)) {
-                    Vec3 v = player.position().subtract(getX(), chainY, getZ());
-                    double along = v.dot(f);
-                    if (along < 0 || along > CHAIN_LENGTH) {
-                        continue;
-                    }
-                    double across = v.subtract(f.scale(along)).length();
-                    // 鎖は腰の高さを通る。跳び越えた人は当たらない
-                    if (across < 1.2 && player.getY() < chainY + 1.0) {
-                        strike(player, 10f);
-                        player.knockback(0.9, f.x, f.z);
-                    }
-                }
+            int count = chainCount(present(server));
+            double span = Math.PI / count;
+            double base = Telegraph.angleOf(forward(attackYaw));
+            for (int i = 0; i < count; i++) {
+                double mid = base + Math.PI * 2 * i / count;
+                tg(server, TelegraphShape.sweep(getX(), getZ(), mid - span / 2, span, CHAIN_LENGTH, 1.2), CHAIN_WARN, 0xB02A2A)
+                        .active(CHAIN_ACTIVE).jumpClear(0.7)
+                        .onHit((s, player) -> {
+                            strike(player, CHAIN_DAMAGE);
+                            Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
+                            player.knockback(0.9, -to.x, -to.z);
+                        })
+                        .start();
             }
         }
         if (actionTicks >= 62) {
@@ -659,15 +787,20 @@ public class StoneWhaleHeart extends HeartBoss {
         }
     }
 
-    // 殻の落下: 人の足元に二つの影が広がり (1.5秒)、そこへ殻の塊が落ちる
+    // 殻の落下: 人の足元に円 (半径 2.5) が広がり (1.5 秒)、そこへ殻の塊が落ちる。四人までは一人に一つ、三人からは足元以外にも二つ
     private void tickShellDrop(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, MobSounds.STONE_HEART_GRIND.get(), 2f, 0.8f);
-            List<ServerPlayer> players = nearbyPlayers(server, 26);
-            players.sort(Comparator.comparingDouble(p -> p.distanceToSqr(this)));
-            for (int i = 0; i < Math.min(2, players.size()); i++) {
-                ServerPlayer p = players.get(i);
-                spikes.add(new Spike(p.getX(), floorAt(Mth.floor(p.getX()), Mth.floor(p.getZ())), p.getZ(), tickCount + 30, Kind.SHELL));
+            int n = present(server);
+            for (Vec3 p : pickSpots(server, dropTargets(n))) {
+                shellDrop(server, p.x, floorAt(Mth.floor(p.x), Mth.floor(p.z)), p.z);
+            }
+            for (int i = 0; i < dropExtras(n); i++) {
+                double a = random.nextDouble() * Math.PI * 2;
+                double r = 4 + random.nextDouble() * 8;
+                double x = getX() + Math.cos(a) * r;
+                double z = getZ() + Math.sin(a) * r;
+                shellDrop(server, x, floorAt(Mth.floor(x), Mth.floor(z)), z);
             }
         }
         if (actionTicks >= 50) {
@@ -675,108 +808,18 @@ public class StoneWhaleHeart extends HeartBoss {
         }
     }
 
-    // ---- 輪と落下物 (技の途中でも、技の後も続く) ----
-
-    // 輪を広げ、跳び越えなかった相手に当てる。輪は一人一度だけ当たる
-    private void tickWaves(ServerLevel server) {
-        for (Wave wave : waves) {
-            wave.radius += 0.8;
-            int points = Math.max(8, (int) (2 * Math.PI * wave.radius / 1.6));
-            for (int i = 0; i < points; i++) {
-                double a = i * 2 * Math.PI / points;
-                warn(server, dust(0x7FF4FF, 1.2f),
-                        getX() + Math.cos(a) * wave.radius, wave.floorY + 0.6, getZ() + Math.sin(a) * wave.radius, 1, 0, 0, 0, 0);
-            }
-            double r = wave.radius + 2;
-            AABB area = new AABB(getX() - r, wave.floorY - 1, getZ() - r, getX() + r, wave.floorY + 3, getZ() + r);
-            for (ServerPlayer player : server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach)) {
-                Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
-                double d = to.length();
-                // 地に立ったままの人だけに当たる (跳べば輪の下を抜けられる)
-                if (Math.abs(d - wave.radius) < 1.0 && player.getY() < wave.floorY + 0.9 && wave.hit.add(player.getUUID())) {
-                    if (wave.harmful) {
-                        strike(player, 8f);
-                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
-                    }
-                    player.knockback(0.9, -to.x, -to.z);
-                }
-            }
-        }
-        waves.removeIf(w -> w.radius > 22);
-    }
-
-    // 落ちてくる (噴き出す) ものたち: 予告の輪が見え、impactAt で当たる
-    private void tickSpikes(ServerLevel server) {
-        if (spikes.isEmpty()) {
-            return;
-        }
-        List<Spike> remaining = new ArrayList<>();
-        for (Spike s : spikes) {
-            if (tickCount >= s.impactAt()) {
-                impact(server, s);
-                continue;
-            }
-            if (tickCount % 4 == 0) {
-                int color = switch (s.kind()) {
-                    case BONE -> 0xFF5A5A;
-                    case FIRE -> 0xFF8A2A;
-                    case SHELL -> 0x6B6B78;
-                };
-                for (int a = 0; a < 360; a += 30) {
-                    double rad = Math.toRadians(a);
-                    warn(server, dust(color, 1.0f),
-                            s.x() + Math.cos(rad) * 1.4, s.y() + 0.1, s.z() + Math.sin(rad) * 1.4, 1, 0, 0, 0, 0);
-                }
-            }
-            if (s.kind() != Kind.FIRE && tickCount >= s.impactAt() - 12) {
-                double drop = (s.impactAt() - tickCount) / 12.0;
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK,
-                                (s.kind() == Kind.SHELL ? Blocks.STONE_BRICKS : Blocks.BONE_BLOCK).defaultBlockState()),
-                        s.x(), s.y() + 1 + drop * 9, s.z(), 2, 0.05, 0.1, 0.05, 0);
-            }
-            remaining.add(s);
-        }
-        spikes.clear();
-        spikes.addAll(remaining);
-    }
-
-    private void impact(ServerLevel server, Spike s) {
-        switch (s.kind()) {
-            case BONE -> {
-                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 2f, 1.0f);
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                        s.x(), s.y() + 0.5, s.z(), 30, 0.6, 0.4, 0.6, 0.2);
-                hurtArea(server, s, 1.4, 9f, 0.4);
-            }
-            case FIRE -> {
-                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_FLAME_BURST.get(), SoundSource.HOSTILE, 1.4f, 1.15f);
-                server.sendParticles(ParticleTypes.FLAME, s.x(), s.y() + 0.3, s.z(), 18, 0.5, 0.6, 0.5, 0.05);
-                server.sendParticles(ParticleTypes.LAVA, s.x(), s.y() + 0.3, s.z(), 4, 0.4, 0.2, 0.4, 0);
-                for (ServerPlayer player : areaPlayers(server, s, 1.2)) {
-                    strike(player, 8f);
-                    player.setRemainingFireTicks(60);
-                }
-            }
-            case SHELL -> {
-                server.playSound(null, s.x(), s.y(), s.z(), MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
-                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
-                        s.x(), s.y() + 0.5, s.z(), 60, 1.4, 0.6, 1.4, 0.25);
-                hurtArea(server, s, 2.5, 12f, 0.6);
-            }
-        }
-    }
-
-    private List<ServerPlayer> areaPlayers(ServerLevel server, Spike s, double radius) {
-        AABB area = new AABB(s.x() - radius, s.y() - 1, s.z() - radius, s.x() + radius, s.y() + 2.5, s.z() + radius);
-        return server.getEntitiesOfClass(ServerPlayer.class, area, this::canReach);
-    }
-
-    private void hurtArea(ServerLevel server, Spike s, double radius, float amount, double lift) {
-        for (ServerPlayer player : areaPlayers(server, s, radius)) {
-            strike(player, amount);
-            player.setDeltaMovement(player.getDeltaMovement().add(0, lift, 0));
-            player.hurtMarked = true;
-        }
+    private void shellDrop(ServerLevel server, double x, double y, double z) {
+        Telegraph.in(server, TelegraphShape.circle(x, z, DROP_RADIUS)).floor(y).warn(DROP_WARN).color(0x8A8A98).owner(this).victims(this::canReach)
+                .onImpact(s -> {
+                    s.playSound(null, x, y, z, MobSounds.STONE_HEART_SLAM.get(), SoundSource.HOSTILE, 2.5f, 0.9f);
+                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), x, y + 0.5, z, 50, 1.4, 0.6, 1.4, 0.25);
+                })
+                .onHit((s, player) -> {
+                    strike(player, DROP_DAMAGE);
+                    player.setDeltaMovement(player.getDeltaMovement().add(0, 0.6, 0));
+                    player.hurtMarked = true;
+                })
+                .start();
     }
 
     // 咆哮の間は傷を受けない。殻が鳴って弾く。殻が閉じた直後は、傷が一・五倍に効く
@@ -785,7 +828,7 @@ public class StoneWhaleHeart extends HeartBoss {
         if (isRoaring()) {
             if (level() instanceof ServerLevel server) {
                 server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
-                server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 2.2, getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
+                server.sendParticles(ParticleTypes.CRIT, getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
             }
             return false;
         }
@@ -806,6 +849,11 @@ public class StoneWhaleHeart extends HeartBoss {
     }
 
     @Override
+    protected ServerBossEvent heartBar() {
+        return bossBar;
+    }
+
+    @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
         super.remove(reason);
@@ -822,8 +870,8 @@ public class StoneWhaleHeart extends HeartBoss {
         bossBar.removeAllPlayers();
         if (level() instanceof ServerLevel server) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
-                    getX(), getY() + 2.2, getZ(), 120, 1.2, 1.5, 1.2, 0.2);
-            warn(server, dust(0x7FF4FF, 1.5f), getX(), getY() + 2.2, getZ(), 80, 1.5, 1.5, 1.5, 0.1);
+                    getX(), coreHeight(), getZ(), 120, 1.2, 1.5, 1.2, 0.2);
+            warn(server, dust(0x7FF4FF, 1.5f), getX(), coreHeight(), getZ(), 80, 1.5, 1.5, 1.5, 0.1);
         }
     }
 
@@ -837,7 +885,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     @Override
     protected double coreHeight() {
-        return getY() + 2.2;
+        return getY() + 2.2 * BODY_SCALE;
     }
 
     // ---- 登場: 床がきしみ、石の殻が床の下から迫り上がり、八枚の板が順に閉じて、核が一つ脈を打つ (animation.stone_whale_heart.intro)
@@ -958,7 +1006,7 @@ public class StoneWhaleHeart extends HeartBoss {
         super.tick();
         if (level().isClientSide && random.nextFloat() < 0.2f) {
             level().addParticle(dust(0x7FF4FF, 1.0f),
-                    getX() + Mth.nextDouble(random, -0.8, 0.8), getY() + 2.2 + Mth.nextDouble(random, -0.8, 0.8),
+                    getX() + Mth.nextDouble(random, -0.8, 0.8), coreHeight() + Mth.nextDouble(random, -1.2, 1.2),
                     getZ() + Mth.nextDouble(random, -0.5, 0.5), 0, 0.02, 0);
         }
     }

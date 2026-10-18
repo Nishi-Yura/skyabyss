@@ -50,7 +50,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class GraveSelfTest {
     private static int platformIndex;
 
-    private static final int PLATFORMS = 12;
+    private static final int PLATFORMS = 16;
 
     private GraveSelfTest() {
     }
@@ -644,6 +644,9 @@ public final class GraveSelfTest {
         check(f, wo != null && wo.grave() != null && level.getBlockState(wo.grave().pos).is(ModBlocks.GRAVE.get()) && wo.grave().pos.getY() >= vs.getY(),
                 "a death inside stone should put the grave above the surface: " + (wo == null || wo.grave() == null ? null : wo.grave().pos));
 
+        // ---------------------------------------------------------------- 墓はブロックを壊さない・置き換えない
+        noReplace(server, level, f);
+
         // ---------------------------------------------------------------- 壊れる・時間・控えのない墓
         BlockPos es = platform(level);
         FakePlayer e1 = player(level, "[grave_expire]");
@@ -732,6 +735,140 @@ public final class GraveSelfTest {
             return new HashSet<>(o.keySet());
         } catch (Exception e) {
             return Set.of();
+        }
+    }
+
+    // 墓の置き場所の検査: どの死に方でも、墓の位置はもともと空気で、ほかのブロックは一つも変わらない。品は失われない
+    private static Map<BlockPos, net.minecraft.world.level.block.state.BlockState> snap(ServerLevel level, BlockPos c) {
+        Map<BlockPos, net.minecraft.world.level.block.state.BlockState> m = new java.util.HashMap<>();
+        for (int dx = -8; dx <= 8; dx++) {
+            for (int dy = -8; dy <= 8; dy++) {
+                for (int dz = -8; dz <= 8; dz++) {
+                    BlockPos p = c.offset(dx, dy, dz);
+                    m.put(p, level.getBlockState(p));
+                }
+            }
+        }
+        return m;
+    }
+
+    private static void judge(List<String> f, ServerLevel level, String what, Map<BlockPos, net.minecraft.world.level.block.state.BlockState> before,
+            DeathEvents.Outcome o, Map<String, Integer> items) {
+        if (o == null || o.grave() == null) {
+            f.add(what + ": no grave was made");
+            return;
+        }
+        BlockPos g = o.grave().pos;
+        check(f, level.getBlockState(g).is(ModBlocks.GRAVE.get()), what + ": no grave block at " + g);
+        net.minecraft.world.level.block.state.BlockState was = before.get(g);
+        check(f, was == null || was.isAir(), what + ": the grave replaced " + was + " at " + g);
+        for (var e : before.entrySet()) {
+            if (!e.getKey().equals(g) && level.getBlockState(e.getKey()) != e.getValue()) {
+                f.add(what + ": block changed at " + e.getKey() + " " + e.getValue() + " -> " + level.getBlockState(e.getKey()));
+                break;
+            }
+        }
+        check(f, level.getBlockState(g.below()).isFaceSturdy(level, g.below(), net.minecraft.core.Direction.UP), what + ": the grave floats at " + g);
+        check(f, tally(o.grave().items).equals(items), what + ": grave items " + tally(o.grave().items) + " want " + items);
+    }
+
+    private static final Map<String, Integer> GRAVE_ITEMS = Map.of("minecraft:diamond", 5, "minecraft:golden_apple", 3, "minecraft:bread", 16);
+
+    private static void noReplace(MinecraftServer server, ServerLevel level, List<String> f) {
+        rule(server, DeathRules.MODE, 0);
+        // 1x2 の穴に、まわりは全部ブロックの中で倒れる (穴だけが空気)
+        BlockPos hc = platform(level);
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dz = -4; dz <= 4; dz++) {
+                for (int dy = 0; dy <= 5; dy++) {
+                    level.setBlock(hc.offset(dx, dy, dz), Blocks.STONE.defaultBlockState(), 2);
+                }
+            }
+        }
+        level.setBlock(hc, Blocks.AIR.defaultBlockState(), 2);
+        level.setBlock(hc.above(), Blocks.AIR.defaultBlockState(), 2);
+        var before = snap(level, hc);
+        FakePlayer hole = player(level, "[grave_hole]");
+        place(hole, hc);
+        fill(hole);
+        judge(f, level, "hole death", before, DeathEvents.handleDeath(hole), GRAVE_ITEMS);
+        // 草・雪のような置き換えられるブロックの上には置かない (本物の空気だけ)
+        BlockPos gc = platform(level);
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                level.setBlock(gc.offset(dx, 0, dz), Blocks.SNOW.defaultBlockState(), 2);
+            }
+        }
+        level.setBlock(gc, Blocks.SHORT_GRASS.defaultBlockState(), 2);
+        var before2 = snap(level, gc);
+        FakePlayer snow = player(level, "[grave_snow]");
+        place(snow, gc);
+        fill(snow);
+        judge(f, level, "snow/grass death", before2, DeathEvents.handleDeath(snow), GRAVE_ITEMS);
+        // 水の中
+        BlockPos wc = platform(level);
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
+                for (int dy = 0; dy <= 3; dy++) {
+                    level.setBlock(wc.offset(dx, dy, dz), Blocks.WATER.defaultBlockState(), 2);
+                }
+            }
+        }
+        var before3 = snap(level, wc);
+        FakePlayer water = player(level, "[grave_water]");
+        place(water, wc.above());
+        fill(water);
+        DeathEvents.Outcome wo = DeathEvents.handleDeath(water);
+        judge(f, level, "water death", before3, wo, GRAVE_ITEMS);
+        check(f, wo != null && wo.grave() != null && level.getFluidState(wo.grave().pos).isEmpty(), "the grave must not stand in water");
+        // 宙づり・奈落の上 (記録なし): 地面の上へ
+        BlockPos ac = platform(level);
+        var before4 = snap(level, ac);
+        FakePlayer air = player(level, "[grave_air]");
+        place(air, ac.offset(0, 5, 0));
+        fill(air);
+        judge(f, level, "mid-air death", before4, DeathEvents.handleDeath(air), GRAVE_ITEMS);
+        var before4b = snap(level, ac);
+        FakePlayer abyss = player(level, "[grave_abyss]");
+        abyss.setPos(ac.getX() + 1.5, level.getMinBuildHeight() - 30, ac.getZ() + 1.5);
+        fill(abyss);
+        judge(f, level, "abyss death", before4b, DeathEvents.handleDeath(abyss), GRAVE_ITEMS);
+        // 床が仕掛けのブロックなら、その上には置かない
+        BlockPos mc = platform(level);
+        level.setBlock(mc.below(), Blocks.TNT.defaultBlockState(), 2);
+        check(f, !Graves.isSafeSpot(level, mc) && Graves.isSafeSpot(level, mc.offset(2, 0, 2)), "a grave must not stand on a mechanism block");
+        // 巨神の背中の戦いの部屋は置き場所にならない
+        ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
+        if (back != null) {
+            var heart = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HEART;
+            BlockPos hp = new BlockPos((heart.x1() + heart.x2()) / 2, heart.floorY() + 1, (heart.z1() + heart.z2()) / 2);
+            check(f, jp.revati.skyabyss.titan.dungeon.CampBlocks.inArena(TitanTravel.TITAN_BACK, hp) && !Graves.isSafeSpot(back, hp),
+                    "the heart arena must not be a grave spot");
+        }
+        // 置ける所がどこにもないとき: 墓は作らず、品と経験値は報酬の預かりへ。ブロックは変わらない
+        Graves.testNoSpot = true;
+        try {
+            BlockPos nc = platform(level);
+            var before5 = snap(level, nc);
+            FakePlayer none = player(level, "[grave_nospot]");
+            place(none, nc);
+            fill(none);
+            int graves = GraveData.get(server).all().size();
+            DeathEvents.Outcome no = DeathEvents.handleDeath(none);
+            TitanMemoryData.Pending pend = TitanMemoryData.get(server).pending(none.getUUID());
+            Map<String, Integer> pm = new LinkedHashMap<>();
+            pend.items.forEach(s -> add(pm, s));
+            check(f, no != null && no.grave() == null && GraveData.get(server).all().size() == graves, "no-spot death must not make a grave");
+            check(f, pm.equals(GRAVE_ITEMS) && pend.xp == 70, "no-spot items should be in the pending box: " + pm + " xp " + pend.xp);
+            check(f, DeathEvents.persisted(none).getCompound(DeathEvents.NOTE_TAG).getBoolean("no_spot"), "no-spot death should leave a note for the respawn message");
+            for (var e : before5.entrySet()) {
+                if (level.getBlockState(e.getKey()) != e.getValue()) {
+                    f.add("no-spot death changed a block at " + e.getKey());
+                    break;
+                }
+            }
+        } finally {
+            Graves.testNoSpot = false;
         }
     }
 

@@ -512,7 +512,7 @@ public final class TitanBackSelfTest {
             failures.add("maze entrance ladder missing at the hub floor");
         }
         // 配置の版 2 で除いた第二の広間・旧番兵長の控えの間・その間の通路は、埋まっていること (古いワールドを建て直したとき)
-        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -60), new BlockPos(17, 94, -55))) {
+        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -66), new BlockPos(17, 94, -66))) {
             if (level.getBlockState(p).isAir()) {
                 failures.add("removed east hall space is still open at " + p);
             }
@@ -806,14 +806,14 @@ public final class TitanBackSelfTest {
             failures.add("heart arena floor or ceiling is not solid");
         }
         int holes = 0;
-        for (int dx = -17; dx <= 17; dx++) {
-            for (int dz = -17; dz <= 17; dz++) {
+        for (int dx = -HeartArenaBuilder.EXTENT; dx <= HeartArenaBuilder.EXTENT; dx++) {
+            for (int dz = -HeartArenaBuilder.EXTENT; dz <= HeartArenaBuilder.EXTENT; dz++) {
                 int d2 = dx * dx + dz * dz;
-                if (d2 > 272) {
+                if (d2 > HeartArenaBuilder.OUTER_R2) {
                     continue;
                 }
                 BlockPos ceil = new BlockPos(cx + dx, HEART.ceilingY(), cz + dz);
-                if (d2 <= 210) {
+                if (d2 <= HeartArenaBuilder.INNER_R2) {
                     // 内側の天井は、すべて固体であること
                     if (!level.getBlockState(ceil).isSolid()) {
                         holes++;
@@ -900,24 +900,57 @@ public final class TitanBackSelfTest {
                 failures.add("rest point " + pair[0] + " stayed moved after the fight ended");
             }
         }
-        // 倒れた参加者は、戦いが続くあいだ扉から戻れない。戦いが終わると覚えを消す
-        UUID member = UUID.fromString("00000000-0000-0000-0000-0000000000c1");
-        UUID mate = UUID.fromString("00000000-0000-0000-0000-0000000000c2");
+    }
+
+    // 倒れた参加者の再入場 (広間): 20 秒の待ち・回数 (limit 2 のとき)・戦いの終わりで消える。自己テスト heart reentry から
+    public static void checkHallReentry(ServerLevel level, List<String> failures) {
+        UUID group = UUID.randomUUID();
+        UUID member = UUID.randomUUID();
+        UUID mate = UUID.randomUUID();
         net.neoforged.neoforge.common.util.FakePlayer dead = new net.neoforged.neoforge.common.util.FakePlayer(level,
                 new com.mojang.authlib.GameProfile(member, "fallen_member"));
+        long now = level.getGameTime();
         TitanBackTrials.testBeginFight(group, "e1", Set.of(member, mate));
         TitanBackTrials.noteFallen(dead);
-        if (!TitanBackTrials.isFallen(group, "e1", member) || TitanBackTrials.isFallen(group, "e1", mate)) {
-            failures.add("a participant who died in the hall was not remembered as fallen (or the survivor was)");
+        jp.revati.skyabyss.titan.group.Reentry r = TitanBackTrials.reentryOf(group, "e1");
+        if (r == null || !r.isFallen(member) || r.isFallen(mate)) {
+            failures.add("hall: a participant who died in the hall was not remembered as fallen (or the survivor was)");
+            TitanBackTrials.testEndFight(level, group, "e1");
+            return;
         }
         Set<UUID> participants = Set.of(member, mate);
-        Set<UUID> fallen = Set.of(member);
-        if (TitanBackTrials.mayRejoin(member, participants, fallen) || !TitanBackTrials.mayRejoin(mate, participants, fallen)) {
-            failures.add("the door lets a fallen participant back in during the fight (zombie tactic), or blocks one who did not fall");
+        r.observeAwake(member, now);
+        long[] at = {now, now + jp.revati.skyabyss.titan.group.Reentry.WAIT_TICKS - 1, now + jp.revati.skyabyss.titan.group.Reentry.WAIT_TICKS};
+        boolean[] expect = {false, false, true};
+        for (int i = 0; i < at.length; i++) {
+            if (TitanBackTrials.mayRejoin(member, participants, r, at[i], 2) != expect[i]) {
+                failures.add("hall: the door decision at +" + (at[i] - now) + " ticks after waking is wrong");
+            }
+        }
+        if (!TitanBackTrials.mayRejoin(mate, participants, r, now, 2)) {
+            failures.add("hall: the door blocks one who did not fall");
+        }
+        // 2 回戻って、また倒れる: 回数を使い切ったので通らない。limit 0 なら通る
+        for (int i = 0; i < 2; i++) {
+            if (i > 0) {
+                r.fell(member);
+                r.observeAwake(member, now - 5000);
+            }
+            if (!r.entered(member)) {
+                failures.add("hall: return " + (i + 1) + " was not counted");
+            }
+        }
+        r.fell(member);
+        r.observeAwake(member, now - 5000);
+        if (TitanBackTrials.mayRejoin(member, participants, r, now, 2)) {
+            failures.add("hall: the door opened after the returns were used up");
+        }
+        if (!TitanBackTrials.mayRejoin(member, participants, r, now, 0)) {
+            failures.add("hall: limit 0 still blocked a returning participant");
         }
         TitanBackTrials.testEndFight(level, group, "e1");
-        if (TitanBackTrials.isFallen(group, "e1", member)) {
-            failures.add("the fallen list survived the end of the fight");
+        if (TitanBackTrials.reentryOf(group, "e1") != null) {
+            failures.add("hall: the return counts survived the end of the fight");
         }
     }
 
