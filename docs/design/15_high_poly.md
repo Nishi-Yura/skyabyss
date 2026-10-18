@@ -286,6 +286,50 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 | 4 | 灰被りの上限を、状態ごと（殻の姿・燃え上がり）で数えてよいか | 合計で守っている。状態ごとなら、燃え上がりの炎に 400 面ほど足せる |
 | 5 | 余燼の火口の縞（7）を直すか | 保留 |
 
+## 9. 低ポリメッシュの描画（非キューブのモデル）
+
+新しい統一スタイル: 三角形の低ポリメッシュ + マイクラ風のドット絵テクスチャ（最近傍サンプリング）。GeckoLib 4.9.3 は geo の `poly_mesh` を読むだけで描かないので、**骨とアニメは GeckoLib、骨ごとのメッシュは自前で描く**。1〜8 章の箱のモデルとは別の道で、モブごとに切り替える。実装は `client/lowpoly/`。
+
+### 9.1 素材と形式
+
+| ファイル | 中身 |
+| --- | --- |
+| `assets/skyabyss/lowpoly/<name>.json` | メッシュ（下の形式） |
+| `assets/skyabyss/textures/lowpoly/<name>.png` | アトラス（32 画素/ブロック = `texels_per_unit` 2）。`<name>_glowmask.png` があれば光る画素（目）。光る画素 0 のマスクは置かない（GeckoLib が落ちる） |
+| `assets/skyabyss/geo/entity/<name>_lowpoly.geo.json` | 骨だけの geo（cube なし。メッシュの骨名・pivot と同じ） |
+| `assets/skyabyss/geo/entity/<name>_lowpoly_debug.geo.json` | 骨ごとにメッシュにぴったりの箱を 1 つ持つ geo（重ね合わせの確認用） |
+| `assets/skyabyss/animations/entity/<name>.animation.json` | 元のものをそのまま使う（骨名が同じなので変わらない） |
+
+メッシュ JSON: `{format_version:1, units:"1/16 block, y up, front = -Z", texture, texture_size:[w,h], texels_per_unit, bones:{<骨名>:{parent, pivot:[x,y,z], vertices:[[x,y,z]..], uvs:[[u,v]..], triangles:[[i,j,k]..]}}}`
+
+- 頂点は**骨の相対でなくモデル全体の絶対座標**で、GeckoLib の geo の cube の座標（Bedrock 流、1/16 ブロック、y 上、正面が -Z）と同じ。GeckoLib が cube を焼くときの x 反転は、メッシュを焼くときに同じように掛ける（`LowPolyMesh`）
+- uvs は頂点ごと。0..1 に正規化し v は画像の上から下（1 を超える値があれば画素座標とみなして割る）。triangles は頂点の添字で、geo 空間で反時計回りが外向き
+- 盾・武器の別メッシュは `"socket": true`（または `attach`）を持ち、頂点は**受け口の骨の pivot を原点とした相対座標**（`geo/gear/` と同じ置き方）。自分のアトラスを持てる
+
+### 9.2 描画の仕組み
+
+- `LowPolyMeshes`（リソースの再読み込みで `lowpoly/*.json` を読む）が `LowPolyMesh` へ焼く: 骨ごとの頂点・uv・面の法線の配列。三角形は QUADS の描画型に合わせて四角にする（位置も uv も平行四辺形に並ぶ隣の二枚は一枚に、残りは 4 つ目の頂点を繰り返す）。法線は面ごと（フラット）に先に計算する
+- `LowPolyGeoRenderer`（`GeoEntityRenderer` の派生）が `renderCubesOfBone` を差し替え、cube の代わりにその骨のメッシュを GeckoLib が渡す buffer へ流す。骨のポーズは GeckoLib がかけ終えた PoseStack をそのまま使うので、向き・アニメ・被弾の赤・死に方・明るさ・発光層（`AutoGlowingGeoLayer`、マスクがあるときだけ）は cube のモデルと同じ。毎フレームは頂点の座標変換だけ（頂点 1 つあたり行列 1 回、法線は面ごとに 1 回）
+- テクスチャは `textures/lowpoly/<name>.png`、描画型は GeckoLib の `entityCutoutNoCull`（最近傍）
+- 受け口: `GearLayer.lowPoly(renderer, "socket_off", "<meshName>")`（`LowPolyGearLayer`）が受け口の骨のポーズでメッシュを描く。アイテム・geo を描く元の `GearLayer` は他のモブのためにそのまま動く
+- **スイッチ**: `LowPoly.enabled`（既定 true）。false にすると低ポリ対応のモブは元の cube の geo・テクスチャ・`GearLayer` に戻る。モブごとには `GuardRenderers` の登録の行を `LowPolyGeoRenderer` から `geo(...)` へ戻せば元に戻る。台本では `lowpoly on|off|debug|nodebug`
+
+### 9.3 予算
+
+- 普通の敵: **1 体 約 600 三角形**、テクスチャ密度 32/ブロック。画面に多く見える数は 8〜12 体
+- 負荷は面の数でなく送る頂点の数（四角 = 4 頂点）に比例する。cube の GeckoLib の描画より 1 面あたりずっと軽い（9.5）
+- 光る目があると発光層がもう一度メッシュを描く（頂点が 2 倍）
+
+### 9.4 入れ方
+
+`python tools/install_lowpoly.py <name> [--gear メッシュ.json:アトラス.png:名前:受け口の骨]`（`tools/README.md`）。`docs/review/lowpoly_roughs/<name>_lowpoly_mesh.json`・`_lowpoly_atlas.png`・`_lowpoly_glowmask.png` を assets に入れ、骨だけの geo と debug geo を書く。元の geo とアニメは触らない。入れ直しは同じ名前で何度でもよい。
+
+### 9.5 骨の番兵での確かめ（`tools/shots/lowpoly_*.txt`、`docs/review/previews/lowpoly_*.png`）
+
+- 重ね合わせ: `lowpoly_align_front/side.png`。骨ごとの箱（GeckoLib の cube）の面にメッシュの端がぴったり付く（x 反転も合っている）
+- 動き・被弾・夜の松明: `lowpoly_walk_a/b`・`lowpoly_attack`・`lowpoly_hurt`・`lowpoly_night_torch_front/side`。盾は受け口の骨に付いて動く
+- 負荷（この PC、1280x720、垂直同期なし、目の発光あり、他の作業と並行なので目安）: 番兵 36 体は低ポリ 7.8〜11.0 ms、cube（1,416 面）24.4〜29.7 ms。20 体は低ポリ 5.2〜7.1 ms、cube 12.0〜15.1 ms。目のマスクが無かった先の試走では 36 体 3.3〜4.3 ms 対 cube 19.5〜23.4 ms
+
 ## 旧節番号の対応
 
 コードのコメントにある旧い節番号が、今どこにあるか。この書類は担当ごとの記録で見出し番号が重複していたので、見出しの題も添える。

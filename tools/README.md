@@ -16,6 +16,14 @@
 - 専用サーバーを並べて立てるときは、worktree ごとに `run/server.properties` の `server-port` (と `rcon.port`) を別の番号にする (同じ番号だと起動時にポートを取れない)
 - 終わったら java を残さない。台本は最後に自分でゲームを閉じる (止まっても `timeout` 秒で閉じる)
 
+## 低ポリメッシュのモデルを入れる (`install_lowpoly.py`)
+
+```
+python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/bone_sentinel_shield_mesh.json:docs/review/lowpoly_roughs/bone_sentinel_shield_atlas.png:bone_sentinel_shield:socket_off
+```
+
+`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。
+
 ## モデルの透けの検査と修理・心臓の演出
 
 - `python tools/fix_geo_face_sides.py --check` : 全 geo の「透けて中が見える穴」を数える。`--apply --fill` で直す (面の左右の名前を GeckoLib に合わせ、元から抜けた面を塞ぐ。二度は直さない)。経緯は `docs/design/15_high_poly.md` の 5 章。書き出し直したら、そのあとにもう一度流す。見た目の比べは `tools/shots/geo_sides.txt`
