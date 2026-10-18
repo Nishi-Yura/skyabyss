@@ -533,7 +533,7 @@ public class EmberHeart extends HeartBoss {
             server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 40, 1.6, 1.4, 1.6, 0);
             server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 60, 1.6, 1.4, 1.6, 0.1);
             // 押し返す輪 (傷はない)。広がる範囲は、始めの 1.1 秒だけ床に描く
-            tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, 0xB0B0B0)
+            tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, 18, 1.0, new double[0], 0), ROAR_WARN, H)
                     .active((int) Math.ceil((18 - 2.5) / 0.8))
                     .onImpact(s -> sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.2f, 0.6f))
                     .onHit((s, player) -> {
@@ -618,9 +618,32 @@ public class EmberHeart extends HeartBoss {
         return n >= 3 ? 2 : 1;
     }
 
-    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは熾の底の人)
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(3.5);
+    // 予告の組み立て (形・長さ・印の種類。持ち主は心臓、当たるのは熾の底の人)
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
+    private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
+        for (ServerPlayer p : server.players()) {
+            if (p.position().equals(spot)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this).victims(this::canReach).reach(3.5), style);
     }
 
     // 輪の安全な筋 (緑の扇。見た目だけ。当たりはなく、輪が抜ける)
@@ -632,7 +655,7 @@ public class EmberHeart extends HeartBoss {
 
     private void showLanes(ServerLevel server, double[] gaps, int warn) {
         for (double gap : gaps) {
-            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 13, LANE_HALF), warn, 0x40E8FF).start();
+            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 13, LANE_HALF), warn, S).start();
         }
     }
 
@@ -688,19 +711,24 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.BREATH.get(), 2f, 1f);
             List<Double> angles = new ArrayList<>();
+            List<ServerPlayer> aimed = new ArrayList<>();
             for (Vec3 p : spots(server, breathLines(present(server)), 4, 9)) {
                 angles.add(Telegraph.angleOf(p.x - getX(), p.z - getZ()));
+                aimed.add(playerAt(server, p));
             }
             if (angles.isEmpty()) {
                 angles.add(Telegraph.angleOf(forward(attackYaw)));
+                aimed.add(null);
             }
             boolean first = true;
-            for (double angle : angles) {
+            for (int c = 0; c < angles.size(); c++) {
+                double angle = angles.get(c);
+                ServerPlayer aim = aimed.get(c);
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
                 boolean lead = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, 0xFF3A18)
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).target(aim)
                         .onImpact(s -> {
                             if (lead) {
                                 sound(s, SoundEvents.BLAZE_SHOOT, 2f, 0.6f);
@@ -736,7 +764,7 @@ public class EmberHeart extends HeartBoss {
             int active = (int) Math.ceil((PULSE_REACH - PULSE_START) / 0.8);
             for (int i = 0; i < rings; i++) {
                 boolean lead = i == 0;
-                tg(server, TelegraphShape.wave(getX(), getZ(), PULSE_START, PULSE_REACH, 0.9, gaps, LANE_HALF), PULSE_WARN + i * 14, 0xFF8A20)
+                tg(server, TelegraphShape.wave(getX(), getZ(), PULSE_START, PULSE_REACH, 0.9, gaps, LANE_HALF), PULSE_WARN + i * 14, D)
                         .active(active).jumpClear(0.9)
                         .onImpact(s -> {
                             if (lead) {
@@ -771,7 +799,7 @@ public class EmberHeart extends HeartBoss {
                 double x = at.x;
                 double z = at.z;
                 orbs.add(new Orb(x, z, tickCount + ORB_WARN));
-                tg(server, TelegraphShape.circle(x, z, ORB_RADIUS), ORB_WARN, 0xFF8A20)
+                tg(server, TelegraphShape.circle(x, z, ORB_RADIUS), ORB_WARN, D)
                         .onImpact(s -> impactOrb(s, x, z))
                         .onHit((s, player) -> {
                             strike(player, ORB_DAMAGE);
@@ -813,7 +841,7 @@ public class EmberHeart extends HeartBoss {
             int k = EmberHeartArena.pickSector(server, lastSector);
             if (k >= 0 && EmberHeartArena.crack(server, k)) {
                 lastSector = k;
-                tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, 0xFF4A2A)
+                tg(server, new EmberSectorShape(k), EmberHeartArena.CRACK_TICKS, D)
                         .onHit((s, player) -> EmberHeartArena.engulf(s, player, this))
                         .start();
             }
@@ -836,7 +864,7 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.GALE.get(), 2.4f, 1f);
             double[] gaps = laneGaps();
-            tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, 0xFF4A4A)
+            tg(server, TelegraphShape.circle(getX(), getZ(), GALE_RADIUS), GALE_WARN, D)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_EXPLODE.value(), 1.6f, 0.7f);
                         s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 100, 3.0, 0.5, 3.0, 0.2);
@@ -851,7 +879,7 @@ public class EmberHeart extends HeartBoss {
             showLanes(server, gaps, GALE_WARN);
             int active = (int) Math.ceil((PULSE_REACH - GALE_RADIUS - 0.8) / 0.8);
             for (int i = 0; i < galeWaves(present(server)); i++) {
-                tg(server, TelegraphShape.wave(getX(), getZ(), GALE_RADIUS + 0.8, PULSE_REACH, 0.9, gaps, LANE_HALF), GALE_WARN + i * 14, 0xFFB060)
+                tg(server, TelegraphShape.wave(getX(), getZ(), GALE_RADIUS + 0.8, PULSE_REACH, 0.9, gaps, LANE_HALF), GALE_WARN + i * 14, D)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, GALE_WAVE_DAMAGE);
@@ -896,7 +924,7 @@ public class EmberHeart extends HeartBoss {
                 double a = Math.toRadians(attackYaw + 90 + (i - (count - 1) / 2.0) * (360.0 / Math.max(5, count)));
                 Vec3 from = new Vec3(getX() - Math.sin(a) * 3.0, coreY() + ((i % 3) - 1) * 0.5, getZ() + Math.cos(a) * 3.0);
                 EmberAshPellet pellet = new EmberAshPellet(server, this, from, land, PELLET_WARN);
-                Telegraph t = tg(server, TelegraphShape.circle(land.x, land.z, PELLET_RADIUS), PELLET_WARN, 0xFF9A50)
+                Telegraph t = tg(server, TelegraphShape.circle(land.x, land.z, PELLET_RADIUS), PELLET_WARN, D)
                         .onImpact(s -> pellet.land())
                         .onHit((s, player) -> strike(player, PELLET_DAMAGE))
                         .start();
@@ -1104,7 +1132,7 @@ public class EmberHeart extends HeartBoss {
         if (actionTicks == 1) {
             sound(server, EmberHeartSetup.FADING.get(), 2.5f, 1f);
             double[] gaps = laneGaps();
-            tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, 0xFF7050)
+            tg(server, TelegraphShape.circle(getX(), getZ(), FADING_RADIUS), FADING_WARN, D)
                     .onImpact(s -> {
                         sound(s, SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
                         s.sendParticles(ParticleTypes.ASH, getX(), floorY() + 0.5, getZ(), 120, 4.0, 0.5, 4.0, 0.1);
@@ -1119,7 +1147,7 @@ public class EmberHeart extends HeartBoss {
             showLanes(server, gaps, FADING_WARN);
             int active = (int) Math.ceil((PULSE_REACH - FADING_RADIUS - 1.4) / 0.8);
             for (int i = 0; i < fadingWaves(present(server)); i++) {
-                tg(server, TelegraphShape.wave(getX(), getZ(), FADING_RADIUS + 1.4, PULSE_REACH, 0.9, gaps, LANE_HALF), FADING_WARN + i * 16, 0xFF8A5A)
+                tg(server, TelegraphShape.wave(getX(), getZ(), FADING_RADIUS + 1.4, PULSE_REACH, 0.9, gaps, LANE_HALF), FADING_WARN + i * 16, D)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, FADING_WAVE_DAMAGE);
@@ -1211,7 +1239,7 @@ public class EmberHeart extends HeartBoss {
 
     // 燃える床の燃え立ち一回 (予告 1.0 秒のあと、その円の中だけ。当たる瞬間に次の一回を予告する)
     private void blazeBurn(ServerLevel server, double x, double z, int left) {
-        tg(server, TelegraphShape.circle(x, z, BLAZE_RADIUS), BLAZE_WARN, 0xFF6A10)
+        tg(server, TelegraphShape.circle(x, z, BLAZE_RADIUS), BLAZE_WARN, D)
                 .onImpact(s -> {
                     if (left > 1 && isAlive()) {
                         blazeBurn(s, x, z, left - 1);
@@ -1263,7 +1291,7 @@ public class EmberHeart extends HeartBoss {
             int age = tickCount - e.startAt();
             int first = EMBER_BURST_FIRST - EMBER_BURST_WARN;
             if (age == first || age == first + 40 || age == first + 80) {
-                tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, 0xFFA040)
+                tg(server, TelegraphShape.circle(e.x(), e.z(), EMBER_RADIUS), EMBER_BURST_WARN, D)
                         .onHit((s, player) -> {
                             burn(s, player, EMBER_BURN_DAMAGE);
                             s.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.3, player.getZ(), 10, 0.3, 0.2, 0.3, 0.05);

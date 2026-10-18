@@ -538,14 +538,37 @@ public class TideHeart extends HeartBoss {
         return false;
     }
 
-    // 予告の組み立て (形・長さ・色。持ち主は心臓、当たるのは心臓の間の人)。床の技: 島の上は当たらない
-    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
-        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canReach).reach(FLOOR_REACH);
+    // 予告の組み立て (形・長さ・印の種類。持ち主は心臓、当たるのは心臓の間の人)。床の技: 島の上は当たらない
+    // 印の種類 (Telegraph の preset): D = 傷が出る (danger)、S = 安全な筋 (safe)、H = 押すだけ・見た目だけ (harmless)
+    private static final int D = 0;
+    private static final int S = 1;
+    private static final int H = 2;
+
+    private static Telegraph.Builder preset(Telegraph.Builder b, int style) {
+        return switch (style) {
+            case S -> b.safe();
+            case H -> b.harmless();
+            default -> b.danger();
+        };
+    }
+
+    // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
+    private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
+        for (ServerPlayer p : server.players()) {
+            if (p.position().equals(spot)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(floorY()).warn(warn).owner(this).victims(this::canReach).reach(FLOOR_REACH), style);
     }
 
     // 立っている所への予告 (島の上の人には島の上の高さで円を置く。円の高さ + 1.9 までの人に当たる: 床の円は島の上の人に、島の円は床の人に当たらない)
-    private Telegraph.Builder tgAt(ServerLevel server, TelegraphShape shape, double y, int warn, int color) {
-        return Telegraph.in(server, shape).floor(y).warn(warn).color(color).owner(this).victims(this::canReach).reach(FLOOR_REACH);
+    private Telegraph.Builder tgAt(ServerLevel server, TelegraphShape shape, double y, int warn, int style) {
+        return preset(Telegraph.in(server, shape).floor(y).warn(warn).owner(this).victims(this::canReach).reach(FLOOR_REACH), style);
     }
 
     private double angleTo(Vec3 spot) {
@@ -566,14 +589,14 @@ public class TideHeart extends HeartBoss {
     // 安全な筋の印 (見た目だけ。緑の扇)
     private void laneMarks(ServerLevel server, double[] gaps, int warn) {
         for (double gap : gaps) {
-            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 15, LANE_HALF), warn, 0x3AE8FF).start();
+            tg(server, TelegraphShape.cone(getX(), getZ(), gap, 15, LANE_HALF), warn, S).start();
         }
     }
 
     // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
     private void ripple(ServerLevel server, double r0, int warn, double[] gaps, float damage, boolean slow, boolean first) {
         int active = (int) Math.ceil((SHELL_REACH - r0) / SHELL_SPEED);
-        tg(server, TelegraphShape.wave(getX(), getZ(), r0, SHELL_REACH, 0.9, gaps, LANE_HALF), warn, 0xFF5A1A).active(active).jumpClear(0.9)
+        tg(server, TelegraphShape.wave(getX(), getZ(), r0, SHELL_REACH, 0.9, gaps, LANE_HALF), warn, D).active(active).jumpClear(0.9)
                 .onImpact(s -> {
                     if (first) {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.5f);
@@ -611,7 +634,7 @@ public class TideHeart extends HeartBoss {
             entityData.set(DATA_ROARING, true);
             sound(server, TideHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 80, 1.6 * BODY_SCALE, 1.4 * BODY_SCALE, 1.6 * BODY_SCALE, 0.3);
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, 0xB8C0C8).reach(3.5)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), ROAR_PUSH_WARN, H).reach(3.5)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.6f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 80, 4.0, 0.3, 4.0, 0.4);
@@ -644,19 +667,24 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.BREATH.get(), 2f, 1f);
             List<Vec3> targets = pickSpots(server, breathLines(present(server)), true);
             List<Double> angles = new ArrayList<>();
+            List<ServerPlayer> aimed = new ArrayList<>();
             for (Vec3 p : targets) {
                 angles.add(angleTo(p));
+                aimed.add(playerAt(server, p));
             }
             if (angles.isEmpty()) {
                 angles.add(Telegraph.angleOf(forward(attackYaw)));
+                aimed.add(null);
             }
             boolean first = true;
-            for (double angle : angles) {
+            for (int c = 0; c < angles.size(); c++) {
+                double angle = angles.get(c);
+                ServerPlayer aim = aimed.get(c);
                 double dx = Math.cos(angle);
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, 0xFF8A1A)
+                tg(server, TelegraphShape.line(getX() + dx * 0.5, getZ() + dz * 0.5, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), BREATH_WARN, D).target(aim)
                         .onImpact(s -> {
                             if (sounds) {
                                 sound(s, SoundEvents.GENERIC_SPLASH, 2f, 0.7f);
@@ -688,7 +716,7 @@ public class TideHeart extends HeartBoss {
             int n = present(server);
             lockedCount = shellRings(n);
             double[] gaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
-            tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, 0xFF5A1A)
+            tg(server, TelegraphShape.circle(getX(), getZ(), SHELL_CORE), SHELL_WARN, D)
                     .onImpact(s -> {
                         sound(s, SoundEvents.TURTLE_EGG_CRACK, 2f, 0.4f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.4, getZ(), 50, 2.0, 0.3, 2.0, 0.2);
@@ -718,7 +746,7 @@ public class TideHeart extends HeartBoss {
         double fy = floorY();
         if (actionTicks == 1) {
             sound(server, TideHeartSetup.WHIRL.get(), 2.2f, 1f);
-            tg(server, TelegraphShape.circle(getX(), getZ(), WHIRL_BLAST), WHIRL_WARN, 0xFF3A2A)
+            tg(server, TelegraphShape.circle(getX(), getZ(), WHIRL_BLAST), WHIRL_WARN, D)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.6f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 120, 3.0, 0.5, 3.0, 0.4);
@@ -738,7 +766,7 @@ public class TideHeart extends HeartBoss {
                 double x = getX() + Math.cos(a) * r;
                 double z = getZ() + Math.sin(a) * r;
                 double y = standY(x, z);
-                tgAt(server, TelegraphShape.circle(x, z, WHIRL_POOL), y, WHIRL_WARN, 0xFF8A1A)
+                tgAt(server, TelegraphShape.circle(x, z, WHIRL_POOL), y, WHIRL_WARN, D)
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 1.5f, 0.8f);
                             s.sendParticles(ParticleTypes.SPLASH, x, y + 0.5, z, 60, 1.5, 0.4, 1.5, 0.3);
@@ -785,7 +813,7 @@ public class TideHeart extends HeartBoss {
                     for (int sz = -1; sz <= 1; sz += 2) {
                         double ix = TideHeartArena.CX + 0.5 + sx * TideHeartArena.ISLAND_OFFSET;
                         double iz = TideHeartArena.CZ + 0.5 + sz * TideHeartArena.ISLAND_OFFSET;
-                        tgAt(server, TelegraphShape.circle(ix, iz, 2.2), fy + TideHeartArena.ISLAND_HEIGHT, 30, 0x3AE8FF).start();
+                        tgAt(server, TelegraphShape.circle(ix, iz, 2.2), fy + TideHeartArena.ISLAND_HEIGHT, 30, S).start();
                     }
                 }
             }
@@ -838,7 +866,7 @@ public class TideHeart extends HeartBoss {
             double z = p.z;
             boolean sounds = first;
             first = false;
-            Telegraph.in(server, TelegraphShape.circle(x, z, SPEAR_RADIUS)).floor(fy).warn(SPEAR_WARN).color(0xFF3A2A).owner(this).victims(this::canReach)
+            Telegraph.in(server, TelegraphShape.circle(x, z, SPEAR_RADIUS)).floor(fy).warn(SPEAR_WARN).danger().owner(this).victims(this::canReach)
                     .reach(FLOOR_REACH)
                     .onImpact(s -> {
                         s.playSound(null, x, fy, z, TideHeartSetup.SPEAR.get(), SoundSource.HOSTILE, sounds ? 1.6f : 0.9f, 1f);
@@ -866,7 +894,7 @@ public class TideHeart extends HeartBoss {
                 double y = standY(x, z);
                 boolean sounds = first;
                 first = false;
-                tgAt(server, TelegraphShape.circle(x, z, BUBBLE_RADIUS), y, BUBBLE_WARN, 0xFF8A1A)
+                tgAt(server, TelegraphShape.circle(x, z, BUBBLE_RADIUS), y, BUBBLE_WARN, D)
                         .onImpact(s -> {
                             if (sounds) {
                                 s.playSound(null, x, y, z, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.HOSTILE, 2f, 1f);
@@ -917,7 +945,7 @@ public class TideHeart extends HeartBoss {
     // 真珠が止まったところの予告 (半径 2.2、1 秒)。返すのは取り消せる予告 (真珠が叩かれたとき)
     Telegraph pearlBurst(ServerLevel server, double x, double z) {
         double y = standY(x, z);
-        return tgAt(server, TelegraphShape.circle(x, z, PEARL_RADIUS), y, PEARL_WARN, 0xFF6A2A)
+        return tgAt(server, TelegraphShape.circle(x, z, PEARL_RADIUS), y, PEARL_WARN, D)
                 .onImpact(s -> {
                     s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.6f, 1.2f);
                     s.sendParticles(ParticleTypes.END_ROD, x, y + 0.6, z, 24, 0.9, 0.4, 0.9, 0.08);
@@ -939,7 +967,7 @@ public class TideHeart extends HeartBoss {
             sound(server, TideHeartSetup.EBB.get(), 2.2f, 1f);
             int n = present(server);
             lockedCount = ebbRipples(n);
-            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), EBB_WARN, 0xFF3A2A)
+            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), EBB_WARN, D)
                     .onImpact(s -> {
                         sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
                         s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);
@@ -994,7 +1022,7 @@ public class TideHeart extends HeartBoss {
             moonBase = random.nextDouble() * Math.PI * 2;
             for (int i = 0; i < bars; i++) {
                 double start = moonBase + Math.PI * 2 * i / bars;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), start, moonSpan, MOON_LENGTH, MOON_HALF_WIDTH), MOON_WARN, 0xFF4A1A).active(MOON_ACTIVE)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), start, moonSpan, MOON_LENGTH, MOON_HALF_WIDTH), MOON_WARN, D).active(MOON_ACTIVE)
                         .onImpact(s -> sound(s, TideHeartSetup.WAVE.get(), 2f, 1.3f))
                         .onHit((s, player) -> {
                             strike(player, WAVE_DAMAGE);
@@ -1053,7 +1081,7 @@ public class TideHeart extends HeartBoss {
                 double y = standY(x, z);
                 boolean sounds = first;
                 first = false;
-                tgAt(server, TelegraphShape.circle(x, z, RAIN_RADIUS), y, RAIN_WARN, 0xFF7A1A)
+                tgAt(server, TelegraphShape.circle(x, z, RAIN_RADIUS), y, RAIN_WARN, D)
                         .onImpact(s -> {
                             s.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, sounds ? 1.6f : 0.8f, 1.4f);
                             s.sendParticles(ParticleTypes.END_ROD, x, y + 0.3, z, 16, 0.8, 0.2, 0.8, 0.05);
