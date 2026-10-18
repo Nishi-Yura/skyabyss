@@ -107,6 +107,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
     private boolean hasLastRest;
     private double lastRestX;
     private double lastRestZ;
+    // 潮見の貝で呼んだ人 (08 の 2.6節。一つの刻に一人)
+    private java.util.UUID requester;
+    private String requesterName = "";
+    private long requestWindow = Long.MIN_VALUE;
     private int songCooldown = 1200;
     private int stepCooldown = 160;
     private int blockedCooldown;
@@ -470,6 +474,36 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         return Math.hypot(x - getX(), z - getZ());
     }
 
+    public enum RequestResult { OK, NOT_NOW, TAKEN, NO_SPOT }
+
+    // 潮見の貝 (08 の 2.6節): 刻の 1 分前から刻の途中までに、自分のそばへ寄るよう頼む。一つの刻に一人 (すでに寄る場所を決めていれば NOT_NOW)
+    public RequestResult request(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) level();
+        long day = level.getDayTime();
+        long window = TideOcean.windowId(day);
+        if (requester != null && requestWindow == window && !requester.equals(player.getUUID())) {
+            return RequestResult.TAKEN;
+        }
+        if (voyage || mode != Mode.CRUISE || !TideOcean.isGathering(day) || lastWindow == window) {
+            return RequestResult.NOT_NOW;
+        }
+        Vec3 spot = TideOcean.findRestSpot(level, player.getX(), player.getZ());
+        if (spot == null) {
+            return RequestResult.NO_SPOT;
+        }
+        requester = player.getUUID();
+        requesterName = player.getGameProfile().getName();
+        requestWindow = window;
+        lastWindow = window;
+        beginApproach(level, spot, 0);
+        return RequestResult.OK;
+    }
+
+    // この刻に呼んだ人の名前 (いなければ空)
+    public String requesterNow() {
+        return requestWindow == TideOcean.windowId(level().getDayTime()) ? requesterName : "";
+    }
+
     // テスト用: このプレイヤーの近くの浅瀬へ寄せ、休ませる (刻を待たない)。休む場所がなければ false
     public boolean comeRestNear(ServerPlayer player) {
         Vec3 spot = TideOcean.findRestSpot((ServerLevel) level(), player.getX(), player.getZ());
@@ -703,6 +737,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         hasLastRest = tag.contains("LastRestX");
         lastRestX = tag.getDouble("LastRestX");
         lastRestZ = tag.getDouble("LastRestZ");
+        requester = tag.hasUUID("Requester") ? tag.getUUID("Requester") : null;
+        requesterName = tag.getString("RequesterName");
+        requestWindow = tag.contains("RequestWindow") ? tag.getLong("RequestWindow") : Long.MIN_VALUE;
     }
 
     @Override
@@ -717,6 +754,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan {
         tag.putInt("ApproachTicks", approachTicks);
         tag.putInt("ForcedTicks", forcedTicks);
         tag.putLong("LastWindow", lastWindow);
+        if (requester != null) {
+            tag.putUUID("Requester", requester);
+        }
+        tag.putString("RequesterName", requesterName);
+        tag.putLong("RequestWindow", requestWindow);
         if (hasLastRest) {
             tag.putDouble("LastRestX", lastRestX);
             tag.putDouble("LastRestZ", lastRestZ);

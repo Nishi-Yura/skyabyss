@@ -1,0 +1,13 @@
+{
+  "chapter": "titan_tide",
+  "order": 143,
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/tide_ruins",
+    "chapter1/ch2_beach_stele"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "conch_far": {
+    "sounds": [
+      {
+        "name": "skyabyss_ch2:conch_far",
+        "stream": false
+      }
+    ],
+    "subtitle": "subtitles.skyabyss_ch2.conch_far"
+  },
+  "ebb_recede": {
+    "sounds": [
+      {
+        "name": "skyabyss_ch2:ebb_recede",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.skyabyss_ch2.ebb_recede"
+  },
+  "ebb_return": {
+    "sounds": [
+      {
+        "name": "skyabyss_ch2:ebb_return",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.skyabyss_ch2.ebb_return"
+  }
+}

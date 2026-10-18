@@ -347,21 +347,22 @@ public final class ArcSelfTest {
 
     // ---------------------------------------------------------------- 空の段の口
     private static void sky(MinecraftServer server, List<String> f) {
-        // 登録がなければ全章 NONE (今の動きのまま)
+        // 中身のない章 (序章・五章以降) に空の段はない。一〜四章は、各章の担当が本物の段を登録している (本物の登録はこのテストのあとで元に戻す)
         for (Chapters c : Chapters.values()) {
-            // 巨神編の各章の担当 (三章 = StormForeshadow など) が自分の段を登録している。そこは別に確かめる
-            if (c.titanChapter()) {
-                continue;
+            // 巨神編の各章の担当 (二章 = TideChapter、三章 = StormForeshadow など) が自分の段を登録している。そこは別に確かめる
+            if (!c.titanChapter()) {
+                check(f, ChapterSky.stage(c).equals(ChapterSky.Stage.NONE), "no sky stage should be registered for a chapter without content: " + c);
             }
-            check(f, ChapterSky.stage(c).equals(ChapterSky.Stage.NONE), "no sky stage should be registered by default: " + c);
         }
+        ChapterSky.Stage realTide = ChapterSky.stage(Chapters.TIDE);
         ChapterSky.setStage(Chapters.TIDE, new ChapterSky.Stage(0.1f, 0x8FB8C8, 0.05f));
         try {
-            check(f, ChapterSky.stage(Chapters.TIDE).moonBias() == 0.1f && ChapterSky.stage(Chapters.WHALE).equals(ChapterSky.Stage.NONE), "a sky stage should register per chapter");
+            check(f, ChapterSky.stage(Chapters.TIDE).moonBias() == 0.1f && ChapterSky.stage(Chapters.PROLOGUE).equals(ChapterSky.Stage.NONE), "a sky stage should register per chapter");
         } finally {
             ChapterSky.setStage(Chapters.TIDE, null);
         }
         check(f, ChapterSky.stage(Chapters.TIDE).equals(ChapterSky.Stage.NONE), "clearing a stage should restore NONE");
+        ChapterSky.setStage(Chapters.TIDE, realTide);
         net.minecraft.network.RegistryFriendlyByteBuf pb = new net.minecraft.network.RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
         jp.revati.skyabyss.sky.ChapterTintPayload tint = new jp.revati.skyabyss.sky.ChapterTintPayload(0x8FB8C8, 0.05f);
         jp.revati.skyabyss.sky.ChapterTintPayload.STREAM_CODEC.encode(pb, tint);
