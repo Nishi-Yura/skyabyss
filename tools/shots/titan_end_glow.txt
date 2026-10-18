@@ -9,6 +9,8 @@ clouds off
 
 cmd time set midnight
 cmd weather clear
+cmd skyabyss cinematic stop
+wait 20
 cmd gamemode creative
 cmd skyabyss progress grant @p stone_whale
 cmd skyabyss progress grant @p tide_shell
