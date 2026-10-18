@@ -387,12 +387,14 @@ def banner():
     fancy_title(a, W // 2, 7, "天と淵のあいだ", 30, 1, face="biz", depth=3, bold=True)
     sub_s = "BETWEEN THE SKY AND THE ABYSS"
     wsub = text_width(sub_s, 12)
-    sx = W // 2 - wsub // 2
+    sx = W // 2 - wsub // 2 - 24
     text(a, sx, 84, sub_s, TEAL_L, 12, shadow=ABYSS0)
     for ox in (sx - 11, sx + wsub + 6):
         for d in range(0, 4):
             a[88 - d:89 + d, ox + 2] = TEAL if d else TEAL_L
             a[88, ox + 2 - d:ox + 3 + d] = TEAL if d else TEAL_L
+    import extras
+    extras.version_plaque(a, W - 5 - (text_width("v0.2.0", 12) + 8) + 1, 83)
     return a
 
 

@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS">
+  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS  v0.2.0">
 </p>
 
 <p align="center">
   <img alt="Minecraft 1.21.1" src="https://img.shields.io/badge/Minecraft-1.21.1-5aa9e6?style=for-the-badge&labelColor=17264a">
   <img alt="NeoForge" src="https://img.shields.io/badge/NeoForge-1.21.1-e8742a?style=for-the-badge&labelColor=17264a">
   <img alt="GeckoLib" src="https://img.shields.io/badge/GeckoLib-required-3aa6a0?style=for-the-badge&labelColor=17264a">
-  <img alt="Beta v0.1.0" src="https://img.shields.io/badge/BETA-v0.1.0-e8b83a?style=for-the-badge&labelColor=17264a">
+  <img alt="Beta v0.2.0" src="https://img.shields.io/badge/BETA-v0.2.0-e8b83a?style=for-the-badge&labelColor=17264a">
 </p>
 
 <p align="center">
@@ -15,10 +15,15 @@
 </p>
 
 <p align="center">
-  <a href="#features"><b>できること</b></a> &nbsp;|&nbsp;
+  <a href="#titans"><b>巨神と章</b></a> &nbsp;|&nbsp;
+  <a href="#gear"><b>装備</b></a> &nbsp;|&nbsp;
+  <a href="#grave"><b>墓</b></a> &nbsp;|&nbsp;
+  <a href="#party"><b>パーティ</b></a> &nbsp;|&nbsp;
   <a href="#start"><b>はじめかた</b></a> &nbsp;|&nbsp;
   <a href="#keys"><b>操作</b></a> &nbsp;|&nbsp;
-  <a href="#more"><b>もっと知りたいとき</b></a>
+  <a href="#rules"><b>ゲームルール</b></a> &nbsp;|&nbsp;
+  <a href="#changes"><b>0.2.0</b></a> &nbsp;|&nbsp;
+  <a href="#issues"><b>既知の問題</b></a>
 </p>
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
@@ -26,53 +31,123 @@
 **天と淵のあいだ** は、Minecraft Java 版 1.21.1（NeoForge）向けの RPG mod です。
 
 目を開けると、そこは見知らぬ野営地。人が去った跡と、一冊の古い帳面だけがあります。
-遠くの煙。ときどき響く鐘。道の脇の、巨大すぎる足跡。夜、地面を伝う足音。空を横切る影。
-やがてあなたは、空を泳ぎ、海を歩き、嵐をまとい、地の底を泳ぐ **四体の巨神** に出会い、その背に乗り込むことになります。
+遠くの煙、ときどき響く鐘、道の脇の巨大すぎる足跡、夜に地面を伝う足音、空を横切る影。
+やがてあなたは、空を泳ぎ、海を歩き、嵐をまとい、地の底を泳ぐ **四体の巨神** に出会い、その背に乗り込みます。
 
 建築も、採掘も、いつものマイクラのまま。そこに、怖さと冒険と、少しずつ解けていく謎が重なります。
 
-> **ベータ版（v0.1.0）** です。序章と、巨神 1 体ごとの四つの章（一章 岩鯨・二章 潮殻・三章 雷翼・四章 余燼）を越えて、「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
+> **ベータ版（v0.2.0）** です。序章と、巨神 1 体ごとの四つの章を越えて「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
 
-<h2 align="center"><a name="features"></a><img src="docs/readme/plate_features.png" alt="できること"></h2>
+<h2 align="center"><a name="titans"></a><img src="docs/readme/plate_titans.png" alt="巨神と章"></h2>
 
-<p align="center">
-  <img src="docs/readme/card_ride.png" alt="進捗：巨神の背に乗る。背中はそれ自体がダンジョン。三つの試練と、奥で待つ守護者。"><br>
-  <img src="docs/readme/card_omen.png" alt="進捗：静かに迫る異変。雲の上を通る、巨大な影。驚かせない、静かな怖さ。"><br>
-  <img src="docs/readme/card_grow.png" alt="進捗：強くなる手ごたえ。力を振り分け、技を組む。装備は周回で。天井つき。"><br>
-  <img src="docs/readme/card_lore.png" alt="進捗：謎を集める。見たもの、読んだ碑文が伝承の書に記されていく。"><br>
-  <img src="docs/readme/card_party.png" alt="進捗：みんなで。パーティで経験値を分け合う。報酬は一人ずつ別に抽選。">
-</p>
+物語は **巨神 1 体につき 1 章** で進みます。章が開くと題字の札が出て、拠点の近くにその章の小さな仕掛けが現れ、巨神が姿を見せる前には予兆が起きます。
+
+<p align="center"><img src="docs/readme/chapters.png" alt="序章、一章 岩鯨、二章 潮殻、三章 雷翼、四章 余燼、五章以降は続く"></p>
 
 <table align="center">
   <tr>
-    <td align="center"><img src="docs/readme/titan_whale.png" alt="岩鯨（空を泳ぐ）"><br><sub><b>岩鯨</b>　雲の上を泳ぐ、岩をまとった鯨</sub></td>
-    <td align="center"><img src="docs/readme/titan_tide.png" alt="潮殻（海を歩く）"><br><sub><b>潮殻</b>　海を歩く、塔を載せた段々の島</sub></td>
+    <td align="center"><img src="docs/readme/titan_whale.png" alt="岩鯨（空を泳ぐ）"><br><sub><b>一章　岩鯨</b>　雲の上を泳ぐ、岩をまとった鯨</sub></td>
+    <td align="center"><img src="docs/readme/titan_tide.png" alt="潮殻（海を歩く）"><br><sub><b>二章　潮殻</b>　海を歩く、塔を載せた段々の島</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/readme/titan_storm.png" alt="雷翼（嵐をまとう）"><br><sub><b>雷翼</b>　嵐をまとう、雷雲の大鷲</sub></td>
-    <td align="center"><img src="docs/readme/titan_ember.png" alt="余燼（地を泳ぐ）"><br><sub><b>余燼</b>　地を泳ぐ、皮が岩になる火蜥蜴</sub></td>
+    <td align="center"><img src="docs/readme/titan_storm.png" alt="雷翼（嵐をまとう）"><br><sub><b>三章　雷翼</b>　嵐をまとう、雷雲の大鷲</sub></td>
+    <td align="center"><img src="docs/readme/titan_ember.png" alt="余燼（地を泳ぐ）"><br><sub><b>四章　余燼</b>　地を泳ぐ、皮が岩になる火蜥蜴</sub></td>
   </tr>
 </table>
 
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_whale_icon.png" width="48" alt=""></td>
+    <td><b>巨神の背はダンジョン。</b> 鎖、潮門、昇り風、熱い口と、乗り方も巨神ごとに違います。背中には三つの試練と、体の奥で待つ守護者。毎回少しずつ形が変わります。乗れるときは、乗り込み口が遠くからほのかに光ります。巨神に乗って移動できるのは、いまは岩鯨と潮殻です。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_party.png" width="48" alt=""></td>
+    <td><b>背中の進みはパーティごと。</b> 開けた扉や越えた守護者は、同じ背中にいる別のパーティとは混ざりません。守護者を越えた巨神は、深い眠りに落ちて元の世界から去り、戦った人を足もとへそっと降ろします（すでに背中にいるほかのパーティは、そのまま最後まで進められます）。巨神はしばらくすると目を覚まします。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_book.png" width="48" alt=""></td>
+    <td><b>低ポリとドット絵。</b> 巨神も敵も装備も、斜めの面を組んだ立体（ローポリ）に、マイクラと同じ手ざわりのドット絵を貼っています。巨神は距離で作りを変えるので、遠くからでも形が分かります。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_tablet.png" width="48" alt=""></td>
+    <td><b>碑と伝承の書。</b> 看板のかわりに、石の碑を読みます。見たもの、読んだ碑文、聞いた話が <b>伝承の書</b> に記されます。鐘の宿りの語り部や、空を追う旅人イサナとの会話、メインクエスト、サブクエストと日替わり・週替わりの依頼もあります。</td>
+  </tr>
+</table>
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
+<h2 align="center"><a name="gear"></a><img src="docs/readme/plate_gear.png" alt="装備と成長"></h2>
+
+<p align="center"><img src="docs/readme/rarity.png" alt="階級の色（コモン・アンコモン・レア・伝説）と、強化 +0 / +5 / +10 での見た目の違い"></p>
+
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_chestplate.png" width="48" alt=""></td>
+    <td><b>巨神ごとの武器と防具。</b> 素材も巨神ごと（鱗片・殻片・羽軸・燠石）。ランダムな特性、必要レベル、共鳴の炉での強化と再鍛造があり、説明にはその巨神の物語が一行ずつ添えられています。階級（コモン・アンコモン・レア・伝説）で形が変わり、強化 <b>+5</b>・<b>+10</b> で絵と光る画素が変わります。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_ring.png" width="48" alt=""></td>
+    <td><b>装飾品。</b> 護符、護石などは、持ち物の画面の「装飾」の専用枠に付けたときだけ効きます。<b>H キー</b> で護符を使えます。体に付けた姿も見えます。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_gem.png" width="48" alt=""></td>
+    <td><b>周回と天井。</b> 欲しい装備は周回で狙います。運が悪くても、いつかは必ず手に入る「天井」つきです。</td>
+  </tr>
+</table>
+
+- **レベルとステータス**：力・敏捷・精神・耐久を自分で振り分け。物語の進みでレベルの上限が決まります（15 → 21 → 27 → 33 → 40）。
+- **技**：剣士と弓使いの技を組み合わせ、4 つの枠（R・G・V・Z）にセットしてキーひとつで放ちます。
+
 <p align="center"><img src="docs/readme/inventory.png" alt="技の枠、巨神ごとの装備、伝承の書"></p>
 
-<details>
-<summary><b>くわしく見る</b></summary>
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
-- **巨神の背**：鎖、潮門、昇り風、熱い口。乗り方も巨神ごとに違います。乗れるときは、乗り込み口が遠くからでもほのかに光って見えます。背中には、それぞれ違う **三つの試練** と、体の奥で待つ強大な守護者。アスレチック、謎解き、群れとの戦い。毎回少しずつ形が変わるので、何度でも挑めます。巨神に乗って移動できるのは、いまのところ岩鯨と潮殻です。
-- **眠る巨神**：守護者を越えても、巨神は死にません。深い眠りに落ちた巨神は、戦った人を足もとの地面へそっと降ろします。初めてのときは、巨神が眠りにつく姿を地上から見届けます。しばらくすると、巨神はまた目を覚まします。
-- **章で進む物語**：物語は巨神 1 体ごとの章に分かれています。章が開くと題字の札が出て、自分の拠点の近くに、その章の小さな仕掛け（積み石、見晴らしの丘、流れ着いた荷、炉跡など）が現れます。巨神が姿を見せる前には、少しずつ予兆が起きます。
-- **静かな異変**：始まりの暗転と題字から、野営地、煙と鐘、巨大な足跡、昼の空を通る影、最初の夜の足音、丘に立つ巨大な骨、夜空から星が欠けていく夜の歌まで。驚かせる演出には頼りません。「いつもと何かが違う」怖さです。
-- **画面の知らせ**：語りは画面下の字幕、レベルアップは画面中央の演出、獲得は右上の札。今やることは画面の「目的の帯」に出ます。流れてしまった知らせは **N キー** の「知らせの記録」で読み返せます。チャット欄はほとんど埋まりません。
-- **レベルとステータス**：力・敏捷・精神・耐久を自分で振り分け。
-- **技**：剣士と弓使いの技を自由に組み合わせ、4つの枠（R・G・V・Z）にセットしてキーひとつで放つ。
-- **巨神ごとの装備**：巨神ごとに違う立体の防具と武器、ランダムな特性、必要レベル、共鳴の炉での強化と再鍛造。素材も巨神ごと（鱗片・殻片・羽軸・燠石）で、どの装備の説明にも、その巨神の物語が一行ずつ添えられています。階級と強化の段階で、見た目も変わります。装飾品は専用の枠に着けて、**H キー** で護符を使えます。欲しい装備は周回で狙う。運が悪くても、いつかは必ず手に入る「天井」つき。
-- **ローポリとドット絵**：巨神も、敵も、装備も、斜めの面を組んだ立体（ローポリ）に、マイクラと同じ手ざわりのドット絵を貼って描きます。巨神は遠くからでも形が分かるように、距離で作りを変えています。
-- **墓**：地上で倒れると、苔むした積み石の墓が立ち、持ち物の残りと経験値がそこに入ります。装備中の防具や大事な品は持ったまま復活します。墓は時間で消えず、開けられるのは持ち主だけ。取りに行けないときは、語り部に頼む手もあります。
-- **伝承の書**：見たもの、読んだ碑文、聞いた話が少しずつ記されていく。鐘の宿りの **語り部** や、空を追う旅人 **イサナ** との会話。メインクエストと、自由に遊べるサブクエスト、日替わり・週替わりの依頼。
-- **マルチプレイ**：**パーティ**（6 人まで）を組めば、近くの仲間と経験値を分け合えます。背中の試練の進み（開けた扉、鳴らした石、越えた守護者）はパーティごとで、同じ背中にいる別のパーティとは混ざりません。一人で遊ぶ人は、一人のパーティとして進みます。試練は人数に合わせて敵が増え、報酬は一人ずつ別々に抽選されるので、取り合いになりません。
+<h2 align="center"><a name="grave"></a><img src="docs/readme/plate_grave.png" alt="墓と救い"></h2>
 
-</details>
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_grave.png" width="48" alt=""></td>
+    <td>地上で倒れると、苔むした積み石の <b>墓</b> が立ち、持ち物の残りと経験値がそこに入ります。装備中の防具や大事な品は持ったまま復活します。墓は時間で消えず、開けられるのは持ち主だけです。場所は <b>B キー</b> の控え帳で分かります。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_bell.png" width="48" alt=""></td>
+    <td>取りに行けないときは、鐘の宿りの <b>語り部</b> に頼めます。選んだ墓の中身の半分が戻ります。</td>
+  </tr>
+</table>
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
+<h2 align="center"><a name="party"></a><img src="docs/readme/plate_party.png" alt="みんなで遊ぶ"></h2>
+
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_party.png" width="48" alt=""></td>
+    <td><b>パーティは 6 人まで。</b> 近くの仲間と経験値を分け合えます（<b>O キー</b>）。試練は人数に合わせて敵が増え、報酬は一人ずつ別々に抽選されるので、取り合いになりません。一人で遊ぶ人は、一人のパーティとして進みます。</td>
+  </tr>
+</table>
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
+<h2 align="center"><a name="screen"></a><img src="docs/readme/plate_screen.png" alt="演出と画面"></h2>
+
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_clapper.png" width="48" alt=""></td>
+    <td><b>シネマティック。</b> 始まりの暗転と題字、巨神が眠る場面、章の節目などは、短い場面として流れます。見たくない場面は、いつでも <b>スキップ</b> できます。驚かせる演出には頼りません。「いつもと何かが違う」怖さです。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_flag.png" width="48" alt=""></td>
+    <td><b>目的の帯。</b> 今やることが、画面の「目的の帯」に一行で出ます。語りは画面下の字幕、レベルアップは画面中央の演出、獲得は右上の札。チャット欄はほとんど埋まりません。流れた知らせは <b>N キー</b> の「知らせの記録」で読み返せます。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_trophy.png" width="48" alt=""></td>
+    <td><b>進捗（実績）。</b> 巨神の背の試練、装備、章の節目など、遊びの区切りに進捗が付きます。</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/readme/icon_scroll.png" width="48" alt=""></td>
+    <td><b>字はバニラのフォント。</b> mod の画面も、マイクラ標準のフォントでそろえています。</td>
+  </tr>
+</table>
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
@@ -87,11 +162,16 @@
 | GeckoLib | NeoForge 1.21.1 用 |
 | Java | 21 |
 
-`skyabyss-0.1.0.jar` と GeckoLib を `mods` フォルダに入れて起動します。最初の起動のとき、巨神の背中の建物は裏で少しずつ建てられます。
-ソースから作るときは `./gradlew build`（`build/libs/` にできます）。
+<table>
+  <tr>
+    <td width="56" align="center"><img src="docs/readme/icon_jar.png" width="48" alt=""></td>
+    <td><code>skyabyss-0.2.0.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダに入れて起動します（サーバーなら、サーバーの <code>mods</code> にも同じものを）。ソースから作るときは <code>./gradlew build</code>（<code>build/libs/</code> にできます）。</td>
+  </tr>
+</table>
 
 - **新しいワールド** で始めてください。一人でも、仲間と（6 人まで）でも遊べます。
 - 難易度は **ピースフル以外** に（ピースフルでは巨神の試練が眠ったままです）。
+- 最初の起動のあと、巨神の背中の建物は裏で少しずつ建ちます。数分は動きが少し重いことがあります。
 - 最初に世界へ入ると、暗い画面から始まります。少し待ってください。
 
 ### 最初の道のり
@@ -99,15 +179,15 @@
 <table>
   <tr>
     <td width="72"><img src="docs/readme/step_1.png" alt="1"></td>
-    <td><b>野営地で目覚める。</b><br>暗い画面から、題字とともに視界が戻ります。人が去った跡の野営地。消えた焚き火、倒れた荷車、開いたままの寝袋。</td>
+    <td><b>野営地で目覚める。</b><br>暗い画面から、題字とともに視界が戻ります。人が去った跡の野営地です。</td>
   </tr>
   <tr>
     <td><img src="docs/readme/step_2.png" alt="2"></td>
-    <td><b>古い帳面を拾う。</b><br>落ちている帳面が、<b>伝承の書</b> の最初のページになります。画面の「目的の帯」が次にやることを教えてくれます。</td>
+    <td><b>古い帳面を拾う。</b><br>帳面が <b>伝承の書</b> の最初のページになります。次にやることは「目的の帯」が教えてくれます。</td>
   </tr>
   <tr>
     <td><img src="docs/readme/step_3.png" alt="3"></td>
-    <td><b>煙と鐘の音を追う。</b><br>遠くに細い煙の柱。ときどき鐘の音。道には積み石が並び、着いた先が <b>鐘の宿り</b> です。</td>
+    <td><b>煙と鐘の音を追う。</b><br>遠くの細い煙の柱。道には積み石が並び、着いた先が <b>鐘の宿り</b> です。</td>
   </tr>
   <tr>
     <td><img src="docs/readme/step_4.png" alt="4"></td>
@@ -119,15 +199,15 @@
   </tr>
   <tr>
     <td><img src="docs/readme/step_6.png" alt="6"></td>
-    <td><b>空を見上げる。</b><br>昼の雲の上を、大きな影が通ります。そのあと、空から何かが落ちてきます。拾ってください。</td>
+    <td><b>空を見上げる。</b><br>昼の雲の上を、大きな影が通ります。そのあと、空から何かが落ちてきます。</td>
   </tr>
   <tr>
     <td><img src="docs/readme/step_7.png" alt="7"></td>
-    <td><b>空を泳ぐものを追う。</b><br>旅人イサナが、岩鯨の話をしてくれます。そのあいだに、夜の足音や、丘に立つ巨大な骨、夜空の歌に出会うかもしれません。あとは、自分の目で確かめてください。</td>
+    <td><b>空を泳ぐものを追う。</b><br>旅人イサナが、岩鯨の話をしてくれます。あとは、自分の目で確かめてください。</td>
   </tr>
 </table>
 
-迷ったら画面の「目的の帯」を見るか、**U キー**（クエストログ）を開きましょう。次に何をすればいいかが書いてあります。見逃した知らせは **N キー** で読み返せます。
+迷ったら「目的の帯」を見るか、**U キー**（クエストログ）を開いてください。
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
@@ -144,7 +224,7 @@
     <td align="center"><img src="docs/readme/key_U.png" alt="U"></td>
     <td>クエストログ</td>
     <td align="center"><img src="docs/readme/key_B.png" alt="B"></td>
-    <td>控え帳（巨神の記録・大事な品）</td>
+    <td>控え帳（巨神の記録・墓の場所・大事な品）</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/readme/key_O.png" alt="O"></td>
@@ -169,17 +249,62 @@
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
+<h2 align="center"><a name="rules"></a><img src="docs/readme/plate_rules.png" alt="ゲームルール"></h2>
+
+`/gamerule` で、決まりを変えられます（サーバーの管理者向け）。
+
+| ゲームルール | 内容 |
+| --- | --- |
+| `skyabyssStoryGate` | `false` で巨神の順番と乗る資格の決まりを切る（好きな順に乗れる） |
+| `skyabyssStoryLevelCap` | `false` で物語の進みによるレベル上限を切る |
+| `skyabyssPartyShare` | その場にいなかった仲間への経験値の分け前（50〜80 %） |
+| `skyabyssDeathMode` | 地上で倒れたときの型（0 墓 / 1 バニラ / 2 全部残す / 3 耐久だけ減る。既定 0） |
+| `skyabyssGraveKeepGear` | 墓の型で、装備中の防具を持って復活する（既定 true） |
+| `skyabyssGraveOwnerOnly` | 墓を開けられるのは持ち主だけ（既定 true） |
+| `skyabyssGraveExpire` | 墓が消えるまでの分（0 で消えない） |
+| `skyabyssGraveRescue` | 語り部の救いで戻る割合（％。0 で救いなし） |
+| `skyabyssDeathDurability` | 耐久だけ減る型での減る割合（％） |
+
+設定ファイルでは、不穏な出来事の頻度を変えられます（`horrorEventFrequency` など。0 で出なくなります）。画面の揺れや暗さは、クライアント設定で弱められます。
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
+<h2 align="center"><a name="changes"></a><img src="docs/readme/plate_changes.png" alt="0.2.0 の変更点"></h2>
+
+**0.1.0 から 0.2.0 へ**
+
+- 巨神 1 体ごとの **章** に分かれました（題字の札、章の終わりの札、予兆、拠点の近くの小さな仕掛け）。
+- 巨神と敵、装備（武器・防具・装飾品）が **ローポリ + ドット絵** になりました。階級と強化 +5・+10 で見た目が変わります。
+- 巨神の背のダンジョンの外形を、選んだ巨神の形に建て直しました。
+- 背中の進みが **パーティごと** に。パーティは 6 人までに。ほかのパーティが進めている巨神は、元の世界から去ったあとも、すでに背中にいる人が最後まで進められます。
+- 守護者を越えると巨神が眠り、運び出される場面が入りました。
+- **墓** と、語り部による救いが入りました。
+- シネマティック（スキップできます）、**目的の帯**、画面中央・右上の知らせ、進捗、石の碑が入りました。字はバニラのフォントにそろえました。
+- 二章で **潮見の貝** を拾えます。ほか、一章の岩鯨が降りる場面、二章の大干潮、三章、四章の場面が加わりました。
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
+<h2 align="center"><a name="issues"></a><img src="docs/readme/plate_issues.png" alt="既知の問題"></h2>
+
+作りかけの部分があります。気づいたことがあれば、ぜひ教えてください。
+
+- **マルチプレイは、まだ人の手で通しの確認をしていません。** 特に、2 つのパーティが同じ背中にいるときの動きです。
+- 雷翼と余燼では、巨神に乗って移動する旅がまだできません。
+- 序盤の演出、章の小さな仕掛けや予兆は、通しで遊んで確かめていません。濃さ（出すぎる・気づかない）の感想をください。
+- 余燼の背中の部屋のつなぎ目で、最後まで歩けないことがあります。管理者は `/skyabyss titan reset ember` で戻せます。
+- 世界を開いた直後の数分は、背中の島を建てているので動きが重いことがあります。
+- 風見鶏や潮の真珠の絵は、仮のものです。
+- 知らせの記録（N）は、その遊びのあいだだけの記録です。
+- 五章以降は、まだ枠だけです。
+
+<p align="center"><img src="docs/readme/divider.png" alt=""></p>
+
 <h2 align="center"><a name="more"></a><img src="docs/readme/plate_more.png" alt="もっと知りたいとき"></h2>
 
 - テスター向けの詳しい遊び方：[docs/beta_how_to_play.md](docs/beta_how_to_play.md)
 - ベータ版の範囲と既知の問題：[docs/design/14_beta.md](docs/design/14_beta.md)
 
 > **注意** `docs/design/` の設計書には、物語の核心が書かれています。まっさらな気持ちで遊びたい人は、開かないでください。
-
-<h2 align="center"><img src="docs/readme/plate_beta.png" alt="ベータ版について"></h2>
-
-まだ作りかけの部分があります。ベータ版は四体の巨神を越えて「天の鍵」がそろうところまでで、その先の物語は、これから続いていきます。
-遊んでみて気づいたことがあれば、ぜひ教えてください。
 
 <p align="center">
   <img src="docs/readme/footer.png" alt="空と地の底のあいだで、あなたを待っているものがあります。">
