@@ -581,6 +581,20 @@ public final class EmberBackTrials {
     }
 
     // 休み場の復活位置 (焚き火の前の台の上。立てる場所を探す)
+    // 倒れて目覚める休み場。その休み場が戦いの部屋の前室で、そのグループがいま戦っている最中なら、鼓動の間 (hub) にする
+    // (岩鯨の背と同じ。戦場のすぐそばで目覚めないように。02 の 7.3、brushup P1-1)
+    public static String respawnCheckpoint(java.util.UUID group, String cp) {
+        return isFightNear(group, cp) ? "hub" : cp;
+    }
+
+    static boolean isFightNear(java.util.UUID group, String cp) {
+        return switch (cp) {
+            case "heart" -> jp.revati.skyabyss.titan.ember.heart.EmberHeartBattle.fighting(group);
+            case "e0" -> jp.revati.skyabyss.titan.ember.smith.AshSmithBattle.fighting(group);
+            default -> false;
+        };
+    }
+
     public static BlockPos restSpawn(ServerLevel level, String id) {
         for (Rest r : RESTS) {
             if (r.name().equals(id)) {
@@ -765,7 +779,7 @@ public final class EmberBackTrials {
         }
         int epoch = EmberBackState.of(back, player).epoch();
         String cp = validCheckpoint(tag, epoch);
-        BlockPos spawn = cp.isEmpty() ? ARRIVAL.above() : restSpawn(back, cp);
+        BlockPos spawn = cp.isEmpty() ? ARRIVAL.above() : restSpawn(back, respawnCheckpoint(Groups.keyOf(player), cp));
         REVIVING.add(player.getUUID());
         try {
             player.teleportTo(back, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5, player.getYRot(), 0f);

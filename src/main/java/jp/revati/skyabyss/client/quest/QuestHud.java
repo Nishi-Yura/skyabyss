@@ -103,11 +103,29 @@ public final class QuestHud {
     }
 
     // 目的の文。序盤の帯が「歌のあと」(wait_whale) の間は、その段の「待つ」版の文 (<鍵>.wait があれば) を出す (クエストログと帯の言うことを合わせる)
+    // 近く (クライアントが追っている範囲) の岩鯨が、鎖を地上へ垂らしているか
+    static boolean chainDown() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level == null) {
+            return false;
+        }
+        for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
+            if (e instanceof jp.revati.skyabyss.titan.StoneWhaleEntity whale && whale.isChainDown()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String objectiveText(QuestDef def, QuestDef.Stage stage, QuestDef.Objective ob) {
         String key = def.objectiveKey(stage, ob);
         jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
         // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
         boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
+        // 岩鯨の「鎖を上る」段: 鎖が降りるまでは待ち版の文 (備えを進める・探索する。story.ch1.Ch1Descent の条件が整うまで降りてこない)
+        if (!waiting && def.id().equals("main_song") && stage.id().equals("board") && !chainDown()) {
+            waiting = true;
+        }
         if (waiting && net.minecraft.locale.Language.getInstance().has(key + ".wait")) {
             key = key + ".wait";
         }

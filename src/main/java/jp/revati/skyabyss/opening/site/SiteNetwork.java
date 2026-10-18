@@ -56,6 +56,45 @@ public final class SiteNetwork {
         for (BlockPos p : OpeningSites.cairns(server)) {
             m.put("cairn" + i++, p);
         }
+        // 巨神の最後の位置 (章のクエストの帯の方角と距離。動くので、下の onTick が変わるたびに送り直す)
+        net.minecraft.server.level.ServerLevel overworld = server.overworld();
+        if (overworld != null) {
+            var data = jp.revati.skyabyss.titan.TitanWorldData.get(overworld);
+            for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+                var slot = data.slot(titan);
+                if (slot != null && slot.hasLast) {
+                    m.put(SiteTargets.TITAN_PREFIX + titan, BlockPos.containing(slot.lastX, slot.lastY, slot.lastZ));
+                }
+            }
+        }
         return new SiteTargetsPayload(m);
+    }
+
+    private static Map<String, BlockPos> lastSent = Map.of();
+
+    // 200 tick (10 秒) ごとに、巨神の位置が 8 ブロック以上動いていたら全員へ送り直す
+    @SubscribeEvent
+    static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 200 != 0 || server.getPlayerList().getPlayers().isEmpty()) {
+            return;
+        }
+        SiteTargetsPayload p = payload(server);
+        if (moved(lastSent, p.sites())) {
+            lastSent = Map.copyOf(p.sites());
+            PacketDistributor.sendToAllPlayers(p);
+        }
+    }
+
+    public static boolean moved(Map<String, BlockPos> before, Map<String, BlockPos> now) {
+        if (before.size() != now.size() || !before.keySet().equals(now.keySet())) {
+            return true;
+        }
+        for (var e : now.entrySet()) {
+            if (e.getValue().distSqr(before.get(e.getKey())) >= 64) {
+                return true;
+            }
+        }
+        return false;
     }
 }

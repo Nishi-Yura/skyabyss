@@ -62,6 +62,12 @@ public final class TideHeartBattle {
         return ROOMS.of(group);
     }
 
+    // 戦いの最中か (そのグループの部屋が集合中か戦闘中)。倒れた人の復活先の判断に使う (P1-1)
+    public static boolean fighting(UUID group) {
+        GroupBossRoom room = ROOMS.peek(group);
+        return room != null && (room.active() || room.gathering());
+    }
+
     // 殻の底を持っているグループ (いなければ null)
     @Nullable
     public static UUID owner() {

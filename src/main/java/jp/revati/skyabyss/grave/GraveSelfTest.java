@@ -660,10 +660,14 @@ public final class GraveSelfTest {
         check(f, data.get(ancient.id) != null && level.getBlockState(old).is(ModBlocks.GRAVE.get()), "a grave must not expire when the rule is 0");
         // 時間の設定 (1 分): 来たら中身が足もとに落ち、墓は消える
         rule(server, DeathRules.EXPIRE, 1);
+        // 前の検査 (置き換えない・各種の死・見回り) の落とし物が足場に残っていても数えが狂わないよう、先に半径 8 を掃除し、
+        // 「ちょうど 1 個」ではなく、エメラルドの合計が 7 かで見る (brushup: 不安定だった検査)
+        clearItems(level, old);
         Graves.patrol(level, old, ModBlocks.GRAVE.get());
         check(f, data.get(ancient.id) == null && level.getBlockState(old).isAir(), "an expired grave should break");
         List<ItemEntity> spilled = level.getEntitiesOfClass(ItemEntity.class, new AABB(old).inflate(3));
-        check(f, spilled.size() == 1 && spilled.get(0).getItem().is(Items.EMERALD) && spilled.get(0).getItem().getCount() == 7, "expired grave spill: " + spilled.size());
+        int emeralds = spilled.stream().filter(i -> i.getItem().is(Items.EMERALD)).mapToInt(i -> i.getItem().getCount()).sum();
+        check(f, emeralds == 7 && spilled.stream().allMatch(i -> i.getItem().is(Items.EMERALD)), "expired grave spill: " + spilled.size() + " items, " + emeralds + " emeralds");
         spilled.forEach(ItemEntity::discard);
         rule(server, DeathRules.EXPIRE, 0);
         // 壊された (クリエイティブ・コマンド): 中身は足もとに落ちる (失わない)
@@ -672,9 +676,11 @@ public final class GraveSelfTest {
                 new ArrayList<>(List.of(new ItemStack(Items.GOLD_INGOT, 3))));
         data.add(breakable);
         level.setBlock(br, ModBlocks.GRAVE.get().defaultBlockState(), 3);
+        clearItems(level, br);
         level.setBlock(br, Blocks.AIR.defaultBlockState(), 3);
         List<ItemEntity> broken = level.getEntitiesOfClass(ItemEntity.class, new AABB(br).inflate(3));
-        check(f, data.get(breakable.id) == null && broken.size() == 1 && broken.get(0).getItem().getCount() == 3, "a broken grave should spill its items: " + broken.size());
+        int gold = broken.stream().filter(i -> i.getItem().is(Items.GOLD_INGOT)).mapToInt(i -> i.getItem().getCount()).sum();
+        check(f, data.get(breakable.id) == null && gold == 3, "a broken grave should spill its items: " + broken.size() + " items, " + gold + " gold");
         broken.forEach(ItemEntity::discard);
         // 控えのない墓 (語り部の救いのあとにチャンクが読み込まれていなかった墓): 見回りで消える
         BlockPos orphan = es.offset(-4, 0, 0);
@@ -773,6 +779,11 @@ public final class GraveSelfTest {
     }
 
     private static final Map<String, Integer> GRAVE_ITEMS = Map.of("minecraft:diamond", 5, "minecraft:golden_apple", 3, "minecraft:bread", 16);
+
+    // 足場のまわり (半径 8) の落とし物を消す
+    private static void clearItems(ServerLevel level, BlockPos at) {
+        level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(8)).forEach(ItemEntity::discard);
+    }
 
     private static void noReplace(MinecraftServer server, ServerLevel level, List<String> f) {
         rule(server, DeathRules.MODE, 0);

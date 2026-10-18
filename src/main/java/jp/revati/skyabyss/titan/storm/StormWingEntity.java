@@ -525,13 +525,15 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.9f);
     }
 
+    private final TitanStay.Warner stayWarner = new TitanStay.Warner();
+
     private void tickPerch(ServerLevel level) {
         setPos(perchX, perchY, perchZ);
         if (tickCount % 10 == 0) {
             updateLook(level);
         }
         if (forcedTicks > 0) {
-            TitanStay.warnIfDue(level, position(), forcedTicks, "message.skyabyss.stay_ending.storm");
+            stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.storm");
             if (--forcedTicks <= 0) {
                 // 20 分たった: 夕立の刻の内でも飛び立つ
                 beginTakeOff(level);

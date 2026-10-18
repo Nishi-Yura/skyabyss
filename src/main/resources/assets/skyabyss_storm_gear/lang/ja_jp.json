@@ -1,9 +1,9 @@
 {
   "gear.skyabyss.origin.thunder_wing": "雷翼の専用装備",
-  "item.skyabyss.thunder_wing_helmet": "雷翼の羽兜",
-  "item.skyabyss.thunder_wing_chestplate": "雷翼の羽衣",
-  "item.skyabyss.thunder_wing_leggings": "雷翼の羽袴",
-  "item.skyabyss.thunder_wing_boots": "雷翼の羽沓",
+  "item.skyabyss.thunder_wing_helmet": "雷翼の羽衣・兜",
+  "item.skyabyss.thunder_wing_chestplate": "雷翼の羽衣・胸当て",
+  "item.skyabyss.thunder_wing_leggings": "雷翼の羽衣・脚衣",
+  "item.skyabyss.thunder_wing_boots": "雷翼の羽衣・靴",
   "item.skyabyss.thunder_wing_armor.desc": "二つで落ちる傷が半分になり、四つで嵐が身を包む。空中では守りが増し、宙でもう一度跳ぶと前へ駆ける（駆けると8秒は眠る）",
   "item.skyabyss.thunder_wing_bow": "雷翼の弓",
   "item.skyabyss.thunder_wing_bow.desc": "放つ矢が重い。当たった敵は光り、そばの別の敵へ小さな雷が跳ぶ",
