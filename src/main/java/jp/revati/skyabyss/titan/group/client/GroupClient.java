@@ -35,6 +35,10 @@ public final class GroupClient {
     private static final Map<Long, BlockState> APPLIED = new HashMap<>();
     private static Set<Integer> hidden = Set.of();
     private static ClientLevel lastLevel;
+    // いまの DESIRED を受け取ったときのワールド。死んで戻る・次元の移動では、新しいワールドの作り直しと同じ tick のうちに
+    // 上書きの知らせが届くことがあり、「ワールドが変わった」で消すと、届いたばかりの上書きまで消える (扉が透けて見える原因だった)
+    private static ClientLevel desiredLevel;
+    private static ClientLevel hiddenLevel;
 
     private GroupClient() {
     }
@@ -48,6 +52,13 @@ public final class GroupClient {
                 wanted.put(overlay.pos()[i], Block.stateById(overlay.states()[i]));
             }
             ClientLevel level = Minecraft.getInstance().level;
+            if (level != desiredLevel) {
+                // 前のワールドの上書きは、新しいワールドのブロックには当たっていない (戻すものはない)
+                DESIRED.clear();
+                ORIGINAL.clear();
+                APPLIED.clear();
+            }
+            desiredLevel = level;
             // 外れた上書きを元に戻す
             for (Long key : new HashSet<>(DESIRED.keySet())) {
                 if (next.contains(key)) {
@@ -68,6 +79,7 @@ public final class GroupClient {
                 set.add(id);
             }
             hidden = set;
+            hiddenLevel = Minecraft.getInstance().level;
         });
     }
 
@@ -112,10 +124,16 @@ public final class GroupClient {
         ClientLevel level = Minecraft.getInstance().level;
         if (level != lastLevel) {
             lastLevel = level;
-            DESIRED.clear();
-            ORIGINAL.clear();
-            APPLIED.clear();
-            hidden = Set.of();
+            // 新しいワールド。受け取った上書きがこのワールドのものなら、記録ごと残す (ワールドの作り直しと同じ tick のうちに届いたもの)。
+            // 古いワールドのものなら、当てた記録ごと捨てる
+            if (desiredLevel != level) {
+                DESIRED.clear();
+                ORIGINAL.clear();
+                APPLIED.clear();
+            }
+            if (hiddenLevel != level) {
+                hidden = Set.of();
+            }
         }
         apply(level);
     }
