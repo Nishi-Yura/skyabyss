@@ -171,7 +171,7 @@
 | --- | --- | --- | --- | --- |
 | 骨の番兵 bone_sentinel | 236 / 1,243 | 9 | `gen_mobs.py` | 頭蓋を丸め、眼窩を掘って**目が光る**（今まで光る所が無かった）、頬骨・眉・縁の枠・リベット・指・肋・膝 |
 | 肋の射手 rib_archer | 183 / 882 | 10 | `gen_mobs.py` | 頭蓋 3 段、眼窩に光る点、角は先細り、眉・頬骨、歯 10 本、指 4 本、膝・肘・肋の先 |
-| 苔這い moss_crawler | 294 / 1,497 | 18 | `gen_mobs.py` | 牙の列、爪の足、苔の房を細い葉に、まぶた（前面は板があるので丸めない） |
+| 苔這い moss_crawler | 646 / 2,121 | 27 | `install_moss_crawler_b.py`（ラフ `rough/smooth_mob2.py` の B 苔芋虫） | 滑らか版（上限 1,500 は超える。ラフの 672 / 2,171 から、体の下に隠れる膝の丸を外した）。五つの節（骨 `seg1`〜`seg5` が尾から頭へ鎖になり、前の節は後ろの節の回転を引き継ぐ）に骨の輪と背の苔、一つ目（骨 `eyes`。虹彩と瞳が光る）、顎と歯、2 本の触角と先の誘いの光（`ant_*`・`lure_*`）、六本の脚（`l1..3_u/_l`・`r1..3_u/_l`）、尾。描画は 1.3 倍。アニメは idle（節の呼吸・触角・瞬きと見回し）、walk（節に沿って進む波と脚）、pounce（前の節を起こして飛び込む）、hurt、death（渦を巻いて丸まる）。入れ方は `python tools/install_moss_crawler_b.py`（geo・png・glowmask・animation を書き、`fix_geo_face_sides.py --apply` と重なり検査 0 まで回す）。ゲーム内の絵は `docs/review/previews/moss_b_*.png`（台本 `tools/shots/moss_crawler_b.txt`。`/skyabyss dev anim` で動きの途中を撮る） |
 | 水路の顎 waterway_maw | 288 / 1,393 | 11 | `gen_mobs.py` | 大箱を 2〜3 段で丸め、歯（3 段の先細り、上 10 対・下 7 対）、えらのすじ、背のとげ、ルアーの襟 |
 | 珊瑚憑き coral_thrall | 1,332 / 1,494 | 11 | `install_tide_mobs.py` | 歯 6 本・眉・頬の飾り・指・こぶし、冠と肩の珊瑚に細い穂先、布の裾にぼろ。像の珊瑚（`statue_coral`）は 3 枚の板を重ねた塊に作り直し（約 160 面）。像の姿は「起きた体 + 像の珊瑚」が全部見える |
 | 磯走り reef_scuttler | 151 / 785 | 6 | `install_tide_mobs.py` | はさみの噛み合う歯、脚の面取り、甲羅の縁の飾り、目の柄の輪、脚先のつめ |

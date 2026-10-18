@@ -127,7 +127,7 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 心臓: `geo/entity/stone_whale_heart_p1..p3.geo.json`、`textures/entity/stone_whale_heart_p*`、`animations/entity/stone_whale_heart.animation.json` | `install_heart_v4.py` (形の元は `tools/sources/heart/`。`rough/boss_v4.py` の A 案) | |
 | 射手: `geo/entity/rib_archer.geo.json`、弓の `geo/gear/rib_archer_bow.geo.json` など | `rough/rib_archer_v4.py` | 同じ物ができる |
 | 番兵長: `geo/entity/whalebone_captain.geo.json` / png / glowmask / animation | `rough/captain_v4.py --install` | 同じ物ができる |
-| 苔這い: geo / png / glowmask / animation | `rough/moss_crawler_v3.py` | 監査では今の素材と比べていない |
+| 苔這い (苔芋虫 B 案): geo / png / glowmask / animation | `install_moss_crawler_b.py` (形の元は `rough/smooth_mob2.py` の `opt_b`。ラフの出力 `docs/review/smooth_mob_roughs2/moss_crawler/b/` も更新する) | 同じ物ができる。`gen_mobs.py` の苔這いは古い版なので走らせない |
 | `textures/gui/sky_vignette.png` | `gen_vignette.py` | 同じ物ができる |
 | 成長: `textures/gui/growth/{status,hud}.png`、`sounds/rpg/level_up.ogg` | `gen_growth_assets.py` | 同じ物ができる (ogg はバイト列だけ毎回変わるが、音は同じ)。画面の配置を変えたら `GrowthScreen.java` と値をそろえる |
 | 見る者: `geo/entity/watcher.geo.json`、`textures/entity/watcher{,_glowmask,_glint}.png`、`animations/entity/watcher.animation.json` | `rough/watcher.py --install` | ラフ 3 案は `docs/review/watcher_roughs/`。`--install` なしなら docs にだけ書く |
