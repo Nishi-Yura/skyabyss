@@ -52,8 +52,10 @@ def build_a(k):
     F += part("head", ellipsoid("head", "fur", (0, 8.2, -6.6), (2.7, 2.6, 2.7), segs=8, rings=3))
     F += part("muzzle", ellipsoid("head", "flesh", (0, 7.2, -9.2), (1.4, 1.1, 1.2), segs=5, rings=1))
     for s in (-1, 1):
+        # 葉の形の耳: 幅 (ra) は z 方向 (横から見える面)、厚み (rb) は x 方向。根元は細く、中ほどで広く、先は尖る。
         F += part("ear_l" if s < 0 else "ear_r", tube("ear_l" if s < 0 else "ear_r", "fur",
-                  [(s * 1.1, 10.2, -6.4), (s * 1.4, 15.0, -6.0), (s * 1.8, 19.6, -5.4)], ra=[1.0, 0.8, 0.3], sides=5, hint=(1, 0, 0)))
+                  [(s * 1.0, 10.0, -6.6), (s * 1.3, 13.6, -6.4), (s * 1.7, 17.4, -5.9), (s * 2.0, 20.2, -5.2)],
+                  ra=[0.7, 1.35, 1.0, 0.1], rb=[0.22, 0.34, 0.24, 0.04], sides=6, hint=(0, 0, 1)))
         F += part(f"thigh{s}", ellipsoid(f"hind_{'l' if s < 0 else 'r'}", "fur", (s * 3.0, 6.0, 3.6), (2.3, 3.0, 3.3), segs=6, rings=2))
         F += part(f"hindf{s}", tube(f"hind_{'l' if s < 0 else 'r'}", "flesh",
                   [(s * 2.6, 3.4, 2.5), (s * 2.7, 1.0, 5.0), (s * 2.8, 0.5, 8.6)], ra=[1.0, 0.8, 0.7], sides=4, hint=(1, 0, 0)))
@@ -117,8 +119,10 @@ SP_UP = {"spine%d" % i: (0, 0, 0) for i in range(len(SPINE_Z))}
 POSES = {
     "idle": dict(SP),
     # 予告: しゃがむ (胴の前を下げ、前脚を曲げる) と同時に棘が立つ
-    "telegraph": dict(SP_UP, body=(-8, 0, 0), head=(-14, 0, 0), fore_l=(-20, 0, 0), fore_r=(-20, 0, 0),
-                      hind_l=(-22, 0, 0), hind_r=(-22, 0, 0), ear_l=(-20, 0, 0), ear_r=(-20, 0, 0)),
+    # 体の前を深く下げ、尻を上げる。棘は体の傾きを打ち消して真上へ立てる (own +14 + 体 -14 = 0)。耳は後ろへ倒す。
+    "telegraph": dict(SP_UP, body=(-14, 0, 0), head=(-22, 0, 0), fore_l=(-34, 0, 0), fore_r=(-34, 0, 0),
+                      hind_l=(-30, 0, 0), hind_r=(-30, 0, 0), ear_l=(60, 0, 0), ear_r=(60, 0, 0),
+                      **{"spine%d" % i: (14, 0, 0) for i in range(len(SPINE_Z))}),
     # 撃って跳ねる: 胴を前へ上げ、後ろ脚を蹴り出す。棘は寝ている
     "shoot": dict(SP, body=(12, 0, 0), head=(8, 0, 0), fore_l=(-25, 0, 0), fore_r=(-25, 0, 0),
                   hind_l=(-35, 0, 0), hind_r=(-35, 0, 0)),

@@ -33,7 +33,8 @@ def legs(F, hip_y, foot_len, thick):
         b = "leg_" + nm
         F += part(b, tube(b, "hide", [(s * 3.2, hip_y, z), (s * 3.4, hip_y * 0.5, z + 0.2), (s * 3.5, 0.0, z + 0.4)],
                           ra=[thick, thick * 0.85, thick * 0.8], sides=5, hint=(1, 0, 0)))
-        F += part(b + "f", ellipsoid(b, "dark", (s * 3.5, 0.6, z + 0.9), (1.1, 0.6, 1.5), segs=5, rings=1))
+        # 大きい蹄: 地面に座る暗い楕円体 (下端 y=0)。遠くからでも足元の黒が読める。
+        F += part(b + "f", ellipsoid(b, "dark", (s * 3.5, 1.0, z + 0.7), (1.6, 1.0, 2.1), segs=5, rings=1))
 
 
 def ring_loop(cx, cy, cz, r, n=8):

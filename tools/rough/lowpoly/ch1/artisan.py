@@ -33,11 +33,14 @@ INDIGO = [(14, 18, 40), (30, 42, 80), (60, 80, 120)]
 MADDER = [(50, 18, 16), (100, 40, 34), (150, 72, 58)]
 
 # 章ごとの色 (apron = 前掛け, trim = 縁の飾り, guard = 腕当て)。ch1: 灰青の外套は全章で同じ
+EMBER = [(70, 22, 8), (150, 58, 14), (206, 110, 30), (240, 160, 60)]
 CHAPTERS = {
-    "a": dict(apron=(STONE, 0.66), trim=CORD, guard=BROWN),        # 一章 岩殻の前掛け
-    "b": dict(apron=(SALT, 0.7), trim=CORD, guard=BROWN),          # 二章 塩で白い前掛け
-    "c": dict(apron=(BROWN, 0.66), trim=COPPER, guard=BROWN),      # 三章 銅の針金の飾り
-    "d": dict(apron=(BROWN, 0.66), trim=CORD, guard=SOOT),         # 四章 煤けた腕当て
+    # hem = 外套の裾の帯 (一章 岩殻の縁・二章 塩の縁・三章 は外套のまま・四章 煤の裾)
+    # acc = 襟・袖口・前の釦 (章の飾りの色)
+    "a": dict(apron=(STONE, 0.66), trim=CORD, guard=BROWN, acc=(STONE, 0.66), stitch=CORD, hem=(STONE, 0.7)),
+    "b": dict(apron=(SALT, 0.7), trim=CORD, guard=BROWN, acc=(SALT, 0.7), stitch=SALT, hem=(SALT, 0.74)),
+    "c": dict(apron=(BROWN, 0.66), trim=COPPER, guard=BROWN, acc=(COPPER, 0.7), stitch=COPPER, hem=(CLOAK, 0.7)),
+    "d": dict(apron=(BROWN, 0.66), trim=CORD, guard=SOOT, acc=(SOOT, 0.6), stitch=EMBER, hem=(SOOT, 0.6)),
 }
 
 
@@ -48,6 +51,9 @@ def pal_for(key):
         "apron": mat(c["apron"][0], c["apron"][1], crack=0.12, noise=0.08),
         "trim": mat(c["trim"], 0.7, crack=0.0),
         "guard": mat(c["guard"], 0.64, crack=0.04, noise=0.15),
+        "acc": mat(c["acc"][0], c["acc"][1], crack=0.1, noise=0.1),
+        "hem": mat(c["hem"][0], c["hem"][1], crack=0.1, noise=0.1),
+        "stitch": mat(c["stitch"], 0.72, crack=0.0),
         "skin": mat(SKIN, 0.72, crack=0.0, noise=0.05),
         "hair": mat(HAIR, 0.6, crack=0.0),
         "linen": mat(LINEN, 0.7, crack=0.0, noise=0.2),
@@ -76,14 +82,16 @@ FACE = {"dy": 0.0, "dz": 0.0}
 
 # ====================================================================== 共通の部品
 
-def head_std(sx=1.0, sy=1.0, dy=0.0, dz=0.0):
+def head_std(sx=1.0, sy=1.0, dy=0.0, dz=0.0, neck_y=23.0):
+    """neck_y = 襟 (外套の上端の面) の高さ。首はそこから始め、襟の中に埋めない。"""
     FACE["dy"], FACE["dz"] = dy, dz
     F = []
     F += part("head", ellipsoid("head", "skin", (0, 26.2 + dy, -0.2 + dz), (3.6 * sx, 4.2 * sy, 3.5), segs=8, rings=4))
     F += part("nose", ellipsoid("head", "skin", (0, 25.8 + dy, -3.5 + dz), (0.55, 1.0, 0.6), segs=4, rings=1))
     for s in (-1, 1):
         F += part("ear", ellipsoid("head", "skin", (s * 3.5 * sx, 26.2 + dy, -0.2 + dz), (0.6, 1.1, 0.9), segs=4, rings=1))
-    F += part("neck", tube("head", "skin", [(0, 20.6, 0.2 + dz * 0.4), (0, 23.4, dz * 0.4)], ra=[1.5, 1.6], sides=5))
+    # 首は襟の面 (neck_y) から短く出し、先は頭の球の中に入れる (襟や頭の中へ深く埋めない)
+    F += part("neck", tube("head", "skin", [(0, neck_y, 0.2 + dz * 0.4), (0, neck_y + 0.4, dz * 0.4)], ra=[1.5, 1.5], sides=5))
     return F
 
 
@@ -96,7 +104,7 @@ def arm(side, up=1.5, fore=1.35, hand=1.1, sh=None, el=None, wr=None):
     F = []
     F += part(b + "u", tube(b, "cloak", [sh, el], ra=[up, up * 0.92], sides=5))
     F += part(b + "f", tube(b, "guard", [el, wr], ra=[fore, fore * 0.85], sides=5))
-    F += part(b + "h", ellipsoid(b, "skin", (wr[0], wr[1] - 0.8, wr[2] - 0.2), (hand, 1.2, 1.0), segs=5, rings=2))
+    F += part(b + "h", ellipsoid(b, "skin", (wr[0], wr[1] - 0.8, wr[2] - 0.2), (hand, 1.2, 1.0), segs=4, rings=2))
     return F
 
 
@@ -191,18 +199,28 @@ def build_b(k):
     F += part("tool_b_h", ellipsoid("body", "iron", (1.3, 16.6, -5.1), (0.4, 0.8, 0.4), segs=4, rings=1))
     # 縁の銅 (前掛けの底と両脇)
     F += part("trim_b", tube("body", "trim", [(-4.0, 9.5, -4.0), (0, 9.4, -4.05), (4.0, 9.5, -4.0)], ra=[0.22] * 3, sides=4))
-    F += part("trim_l", tube("body", "trim", [(-3.9, 9.6, -3.95), (-4.0, 13.5, -3.9), (-4.1, 17.4, -3.6)], ra=[0.2] * 3, sides=4))
-    F += part("trim_r", tube("body", "trim", [(3.9, 9.6, -3.95), (4.0, 13.5, -3.9), (4.1, 17.4, -3.6)], ra=[0.2] * 3, sides=4))
+    F += part("trim_l", tube("body", "trim", [(-3.9, 9.6, -3.95), (-4.1, 17.4, -3.6)], ra=[0.2] * 2, sides=4))
+    F += part("trim_r", tube("body", "trim", [(3.9, 9.6, -3.95), (4.1, 17.4, -3.6)], ra=[0.2] * 2, sides=4))
     # 腰の砥石 (左) と槌 (右)
-    F += part("whet", ellipsoid("body", "whet", (-5.4, 9.5, -2.2), (0.75, 1.5, 0.6), segs=5, rings=2))
+    F += part("whet", ellipsoid("body", "whet", (-5.4, 9.5, -2.2), (0.75, 1.5, 0.6), segs=4, rings=2))
     F += part("hammer_h", tube("body", "wood", [(4.4, 10.2, -3.3), (5.4, 6.6, -3.8)], ra=[0.42, 0.36], sides=4))
     F += part("hammer_head", ellipsoid("body", "iron", (5.5, 6.3, -4.0), (1.0, 0.55, 0.6), segs=4, rings=1))
-    # 眼鏡 (額の上へ押し上げた)
-    F += part("goggle_strap", tube("head", "leather", [(-3.3, 28.2, -1.6), (-1.6, 28.9, -2.8), (0, 29.1, -3.0),
-                                                       (1.6, 28.9, -2.8), (3.3, 28.2, -1.6)], ra=[0.3] * 5, sides=4))
+    # 眼鏡 (額の上へ押し上げた輪。レンズは丸い小さな楕円体)
+    F += part("goggle_strap", tube("head", "leather", [(-3.3, 28.2, -1.6), (0, 29.1, -3.0), (3.3, 28.2, -1.6)],
+                                   ra=[0.3] * 3, sides=3))
     for s in (-1, 1):
-        F += part("lens", ellipsoid("head", "glass", (s * 2.0, 28.9, -3.2), (1.0, 0.9, 0.35), segs=5, rings=2))
-    F += part("hair", ellipsoid("head", "hair", (0, 28.2, 1.0), (3.7, 2.2, 3.0), segs=6, rings=2))
+        cx, cy = s * 2.0, 28.9
+        F += part("lens", ellipsoid("head", "glass", (cx, cy, -3.2), (0.95, 0.95, 0.42), segs=6, rings=2))
+        ring_pts = [(cx + 1.05 * np.cos(2 * np.pi * k / 6), cy + 1.05 * np.sin(2 * np.pi * k / 6), -3.25) for k in range(7)]
+        F += part("lens_rim", tube("head", "leather", ring_pts, ra=[0.22] * 7, sides=3))
+    F += part("hair", ellipsoid("head", "hair", (0, 28.6, 0.9), (3.7, 2.3, 3.2), segs=8, rings=3))
+    # 裾の飾り (章ごとの色・三章だけ外套の色)
+    F += part("hem_b", loft("body", "hem", [ring(8.8, 4.7, -3.0, 3.0), ring(9.6, 4.8, -3.05, 3.05)]))
+    # 襟の帯 (章ごとの飾り色。首はこの上から出る)
+    F += part("collar", loft("body", "acc", [ring(22.5, 4.8, -2.6, 2.5), ring(23.3, 4.3, -2.2, 2.2)]))
+    # 釦 (前、章ごとの飾り色)
+    for y, z in ((18.6, -3.3), (21.2, -2.85)):
+        F += part("button", ellipsoid("body", "acc", (0, y, z), (0.36, 0.36, 0.22), segs=4, rings=1))
     F += arm(-1, up=1.6, fore=1.45, hand=1.25)
     F += arm(1, up=1.6, fore=1.45, hand=1.25)
     F += legs(boot_r=1.6)
@@ -212,7 +230,7 @@ def build_b(k):
 # ====================================================================== 案 C 長い外套の灯し人 (細い・高い・提灯と革の筒)
 
 def build_c(k):
-    F = head_std(sx=0.85, sy=1.1, dy=0.4)
+    F = head_std(sx=0.85, sy=1.1, dy=0.4, neck_y=22.6)
     F += part("coat", loft("body", "cloak", [ring(2.0, 5.2, -4.2, 4.0), ring(6.0, 4.4, -3.8, 3.4),
                                               ring(11.0, 3.8, -3.0, 3.0), ring(15.5, 3.7, -2.8, 2.8),
                                               ring(20.5, 3.8, -2.9, 2.8), ring(22.6, 3.4, -2.4, 2.3)], caps=(False, "cloak")))
@@ -221,7 +239,8 @@ def build_c(k):
     F += part("trim_c", tube("body", "trim", [(-3.6, 8.2, -4.15), (0, 8.0, -4.2), (3.6, 8.2, -4.15)], ra=[0.2] * 3, sides=4))
     F += part("belt", loft("body", "leather", [ring(10.2, 3.9, -3.0, 3.0), ring(11.0, 3.9, -3.0, 3.0)]))
     # headscarf (糸の巻き布)
-    F += part("scarf", loft("head", "linen", [ring(27.4, 3.1, -3.25, 3.2), ring(28.0, 3.1, -3.2, 3.2)]))
+    F += part("scarf", loft("head", "linen", [ring(26.9, 3.4, -3.95, 3.8), ring(27.9, 3.3, -3.85, 3.7),
+                                              ring(28.9, 2.9, -3.45, 3.0)]))
     # 提灯 (左の腰に下げる。覆いの円錐。光らない)
     F += part("lantern_chain", tube("body", "iron", [(-3.4, 10.6, -3.0), (-3.9, 9.6, -3.4)], ra=[0.18, 0.18], sides=4))
     F += part("lantern", ellipsoid("body", "iron", (-4.4, 8.4, -3.8), (0.9, 1.2, 0.9), segs=5, rings=2))
@@ -280,7 +299,7 @@ SPEC = dict(
 COL_SPEC = dict(
     id="artisan_colorways", short="旅の職人の色", kind="NPC 4章の色",
     title="旅の職人 — 章ごとの 4 色 (推奨案 B の形)",
-    sub=["同じ形・同じ顔。一章 灰青の外套と岩殻の前掛け、二章 塩の前掛け、三章 銅の針金の縁、四章 煤けた腕当て。",
+    sub=["同じ形・同じ顔・同じ灰青の外套。章の飾りは、裾の帯・襟の帯・釦・袖口・前掛けの色で出す。",
          "下の一行は各章の色の要点。左から一章・二章・三章・四章。"],
     labels=["一章 岩殻の前掛け", "二章 塩の前掛け", "三章 銅の縁", "四章 煤の腕当て"],
     rows=[("前から", "idle", 180, 6, 420, (0, 14.5, 0), 12.0),
@@ -314,10 +333,10 @@ if __name__ == "__main__":
                   "埋まった部品の検査: " + bur_txt +
                   "。メッシュ・アトラスは docs/review/ch1_roughs/artisan_colorways/{a,b,c,d}/。生成: tools/rough/lowpoly/ch1/artisan.py。"),
         "options": {
-            "a": {"name": "一章 灰青の外套・岩殻の前掛け", "desc": "灰青の外套に、岩殻の石の色の前掛け。茶の革と暗い紐の縁。一章の地上の色 (岩殻虫の殻・石標) と揃える。"},
-            "b": {"name": "二章 塩で白い前掛け", "desc": "前掛けを塩で白く。外套と腕当ては一章と同じ。潮の民の色 (塩結晶・真珠) と並んで見える。"},
-            "c": {"name": "三章 銅の針金の縁", "desc": "前掛けを茶の革に戻し、縁の飾りを銅の針金に。雷の章の金属の色。"},
-            "d": {"name": "四章 煤けた腕当て", "desc": "腕当てを煤けた黒に。前掛けは茶の革、縁は暗い紐。四章の火の色を腕だけに置く。"}},
+            "a": {"name": "一章 岩殻の縁", "desc": "灰青の外套。裾と襟の帯、釦を岩殻の石の色に。前掛けも岩殻の色。一章の地上の色 (岩殻虫の殻・石標) と揃える。"},
+            "b": {"name": "二章 塩の縁", "desc": "外套の裾と襟の帯、釦、前掛けを塩で白く。潮の民の色 (塩結晶・真珠) と並んで見える。"},
+            "c": {"name": "三章 銅の針金の襟", "desc": "外套の色は変えず、襟・袖口・釦を銅の針金に。前掛けは茶の革。雷の章の金属の色。"},
+            "d": {"name": "四章 煤の裾・火の糸", "desc": "裾の帯と釦を煤けた黒に、袖口も煤。前掛けの縫い目は火の糸 (橙)。四章の火の色を縫いに置く。"}},
     }
     (OUTC / "artisan_colorways_manifest.json").write_text(json.dumps(ent, ensure_ascii=False, indent=1), encoding="utf-8")
     print("wrote", OUTC / "artisan_colorways.png")

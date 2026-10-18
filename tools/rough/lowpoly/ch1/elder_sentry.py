@@ -12,10 +12,67 @@ import math
 
 from ck import *  # noqa
 from bone_sentinel_model import build_model  # noqa
+import ck as _ck  # noqa
 
-S_E = 1.12          # 全体の大きさ (骨の番兵より背が高い)
+# 盾の割れた目は光る (材質 eyeglow の面の画素は琥珀で光らせ、光る画素のマスクに入れる)。ck の paint を包む。
+_paint0 = _ck.paint
+
+
+def _paint_glow(faces, size, P, N, M, pal, eyes=()):
+    atlas, glow = _paint0(faces, size, P, N, M, pal, eyes)
+    ids = [i for i, f in enumerate(faces) if f.mat == "eyeglow"]
+    if ids:
+        sel = np.isin(np.where(M >= 0, M, 0), ids) & (M >= 0)
+        atlas = atlas.copy()
+        atlas[sel, :3] = (255, 196, 84)
+        atlas[sel, 3] = 255
+        glow = glow | sel
+    return atlas, glow
+
+
+_ck.paint = _paint_glow
+
+
+def _check_buried_hull(faces, thr=0.45, tol=0.35):
+    """ck.check_buried と同じ意味の埋まり検査。ただし Delaunay を使わず凸包の不等式だけで判定する
+    (薄い板の盾は Delaunay が平面に退化して、何でも中に入ったと出るため)。このファイルの出力だけに使う。"""
+    from scipy.spatial import ConvexHull
+    parts = {}
+    for f in faces:
+        parts.setdefault(getattr(f, "part", f.bone), []).append(f)
+    samp, hulls = {}, {}
+    for k, fs in parts.items():
+        v = np.vstack([f.verts for f in fs])
+        samp[k] = np.vstack([f.verts.mean(0)[None] for f in fs] + [f.verts for f in fs])
+        try:
+            hulls[k] = (ConvexHull(v), v)
+        except Exception:
+            hulls[k] = None
+    bad = []
+    for a in parts:
+        for b in parts:
+            if a == b or hulls[b] is None or hulls[a] is None:
+                continue
+            hb, vb = hulls[b]
+            if np.ptp(samp[a], 0).prod() > np.ptp(vb, 0).prod():
+                continue
+            s = samp[a] @ hb.equations[:, :3].T + hb.equations[:, 3]
+            inside = s.max(1) <= 0
+            if not inside.any():
+                continue
+            depth = -s.max(1)
+            frac = float(((depth > tol) & inside).sum()) / len(samp[a])
+            if frac > thr:
+                bad.append((a, b, round(frac, 2)))
+    return bad
+
+
+_ck.check_buried = _check_buried_hull
+
+S_E = 1.12         # 全体の大きさ (骨の番兵より背が高い)
 SHIELD_E = 1.15     # 盾の大きさ
 SOCK = np.array([7.5, 9.0, 0.0])   # 盾の握り (骨の番兵の socket_off の pivot)
+SHIELD_OFF = np.array([0.8, 0.0, 0.0])   # 盾を手から外へ離す (手首が盾に埋まらないように)
 
 # 骨の名前・親・pivot (骨の番兵の geo と同じ。盾は socket_off の代わりに shield を左前腕の下へ置く)
 BASE_BONES = {
@@ -65,7 +122,7 @@ def part_cloak(F):
                                 A, ref=(0, 17, 0)))
     for s in (-1, 1):
         F += part(f"hemmoss{s}", ellipsoid("body", "moss", (s * 2.9, 11.9, 3.2), (1.2, 0.8, 1.1), segs=6, rings=2))
-    F += part("mosstuft", ellipsoid("body", "moss", (0.0, 16.5, 3.7), (1.0, 2.2, 0.8), segs=6, rings=2))
+    F += part("mosstuft", ellipsoid("body", "moss", (0.0, 16.5, 4.3), (1.0, 2.2, 0.8), segs=6, rings=2))
 
 
 def part_plates(F):
@@ -74,7 +131,10 @@ def part_plates(F):
     F += part("belly_plate", ellipsoid("body", "stone", (0, 13.6, -3.0), (2.6, 1.2, 0.9), segs=6, rings=2))
     for s in (-1, 1):
         F += part(f"forearm_plate{s}", ellipsoid("left_forearm" if s > 0 else "right_forearm", "stone",
-                                                 (s * 5.4, 12.2, -0.4), (2.2, 2.4, 1.6), segs=6, rings=2))
+                                                 (s * 3.9, 12.5, -0.2), (1.6, 2.2, 1.5), segs=6, rings=2))
+    # 矢の代わりの骨笛: 右の前腕の先から前へ伸びる (予告で口へ上げる)
+    F += part("flute", tube("right_forearm", "bone", [(-5.5, 9.6, -1.4), (-5.5, 9.2, -4.5), (-5.5, 8.9, -7.5)],
+                            ra=[0.45, 0.4, 0.35], rb=[0.45, 0.4, 0.35], sides=4, hint=(1, 0, 0)))
     F += part("horn_l", spike("head", "bone", (2.6, 31.2, -0.8), (0.45, 1.0, -0.05), 4.0, 0.9, sides=4, rings=2))
     F += part("horn_r", spike("head", "stone", (-2.6, 31.2, -0.8), (-0.4, 1.0, 0.0), 1.6, 0.8, sides=4, rings=1))
 
@@ -109,8 +169,8 @@ def part_big(F):
         rows = [[np.array([x + dx, y, -3.2]) for dx in (-0.8, 0.0, 0.8)] for y in (13.4, 11.6, 9.8, 8.0)]
         F += part(f"tassel{x}", grid("body", "cloth", rows, ref=(0, 15, 0)))
     for s in (-1, 1):
-        F += part(f"thigh{s}", ellipsoid("leg_l" if s > 0 else "leg_r", "stone", (s * 2.4, 6.6, -1.6),
-                                         (2.0, 1.8, 0.9), segs=6, rings=3))
+        F += part(f"thigh{s}", ellipsoid("leg_l" if s > 0 else "leg_r", "stone", (s * 2.4, 6.6, -2.2),
+                                         (1.9, 1.7, 0.8), segs=6, rings=3))
 
 
 # ====================================================================== 組み立て
@@ -118,7 +178,9 @@ def part_big(F):
 def build_variant(k, S, shield_s, big=False):
     """k = a/b/c。骨の番兵の本体と盾を読み、部品を足して S 倍する。戻り値: (faces, eyes)。"""
     body, sf, ex = build_model()
-    xf(sf, lambda p: SOCK + p * shield_s)
+    # 盾の中央の骨の棘は、琥珀の割れ目の目の場所に当たるので外す (目を盾の面の中央に置く)
+    sf = [f for f in sf if not (f.mat == "bone" and f.verts[:, 0].mean() > 0.5 and 0 < f.verts[:, 1].mean() < 4.5)]
+    xf(sf, lambda p: SOCK + SHIELD_OFF + p * shield_s)
     smap = {"shield": "plate", "shield_back": "stone", "shield_edge": "stone"}
     if k == "b":
         smap["shield"] = "stone"        # B は盾も石の板
@@ -131,8 +193,11 @@ def build_variant(k, S, shield_s, big=False):
     F += part("tuft_l", ellipsoid("left_arm", "moss", (7.6, 21.0, -1.8), (1.2, 1.8, 1.0), segs=6, rings=2))
     F += part("tuft_r", ellipsoid("right_arm", "moss", (-7.6, 21.0, -1.8), (1.2, 1.8, 1.0), segs=6, rings=2))
     sh = shield_s
-    F += part("shield_eye", ellipsoid("shield", "amber", (7.5 + 1.8 * sh, 9.0 + 2.5 * sh, 0.0),
-                                      (0.6 * sh, 1.2 * sh, 1.0 * sh), segs=6, rings=2))
+    ex_ = SOCK + SHIELD_OFF + np.array([1.3 * sh + 0.25 * sh, 2.5 * sh, 0.0])
+    F += part("shield_eye", ellipsoid("shield", "eyeglow", ex_, (0.45 * sh, 1.1 * sh, 0.9 * sh), segs=6, rings=2))
+    # 割れ目: 目の上に細い骨の欠片を一本 (埋まらないよう外へ)
+    F += part("shield_crack", spike("shield", "bone", ex_ + np.array([0.3 * sh, 1.2 * sh, 0.0]),
+                                    (0.1, 1.0, 0.0), 1.2 * sh, 0.25 * sh, sides=3, rings=1))
     if k == "a":
         part_cloak(F)
     elif k == "b":
@@ -172,11 +237,13 @@ def build(k):
 # 予告の姿勢 (骨の剛体の回転 (x, y, z 度)。前 = -Z。盾は左前腕の下で、前腕を y 軸で 90 度回すと板が前を向く)
 POSES = {
     "idle": {},
-    "charge": {"body": (-12, 0, 0), "left_arm": (34, 0, 0), "left_forearm": (0, 85, 0),
-               "right_arm": (22, 0, 0), "leg_l": (-16, 0, 0), "leg_r": (14, 0, 0)},
-    "whistle": {"body": (-4, 0, 0), "head": (-6, 0, 0), "right_arm": (120, 0, -20),
-                "right_forearm": (-120, 0, 0)},
-    "stomp": {"body": (5, 0, 0), "leg_r": (58, 0, 0), "right_arm": (72, 0, 0), "left_arm": (-8, 0, 0)},
+    # 盾の突進: 体を沈めて前へ傾け、盾を前に低く構える (板は前を向く)
+    "charge": {"body": (-26, 0, 0), "head": (-8, 0, 0), "left_arm": (62, 0, 0), "left_forearm": (0, 90, 0),
+               "right_arm": (40, 0, 0), "right_forearm": (-30, 0, 0), "leg_l": (30, 0, 0), "leg_r": (-14, 0, 0)},
+    # 骨笛: 頭を後ろへ反らし、右腕を曲げて笛を口へ (solver の値)
+    "whistle": {"head": (14, 0, 0), "right_arm": (180, -40, 10), "right_forearm": (-150, 0, 0)},
+    # 足踏みの輪: 片脚を高く上げ、拳を頭の上へ
+    "stomp": {"body": (4, 0, 0), "leg_r": (80, 0, 0), "right_arm": (170, 0, 0), "left_arm": (-8, 0, 0)},
 }
 
 SPEC = dict(
@@ -188,8 +255,10 @@ SPEC = dict(
     rows=[("前 3/4 (待機。盾の琥珀の割れ目と肩の苔)", "idle", 212, 10, 420, (0, 18, 0), 9.0),
           ("横 (A の背の幕、B の折れた角、C の竿)", "idle", 270, 6, 420, (0, 18, 0), 9.0),
           ("予告 1: 盾の突進 (床の線 1.2 秒)", "charge", 240, 8, 420, (0, 18, 0), 9.0),
-          ("予告 2: 骨笛 (射手を呼ぶ)", "whistle", 212, 6, 420, (0, 18, 0), 9.0),
-          ("予告 3: 足踏みの輪 (片脚を上げる)", "stomp", 212, 8, 420, (0, 18, 0), 9.0),
+          ("予告 2: 骨笛 (右腕で口へ・頭を反らす。反対側の前 3/4)", "whistle", 148, 6, 420, (0, 18, 0), 9.0),
+          ("予告 2: 骨笛 (横から)", "whistle", 90, 4, 420, (0, 18, 0), 9.0),
+          ("予告 3: 足踏みの輪 (片脚を高く・拳を頭上へ。反対側の前 3/4)", "stomp", 148, 8, 420, (0, 18, 0), 9.0),
+          ("予告 3: 足踏みの輪 (横から)", "stomp", 90, 4, 420, (0, 18, 0), 9.0),
           ("後ろ 3/4 (背の幕・頭巾・旗)", "idle", 32, 12, 420, (0, 18, 0), 9.0)],
     options={
         "a": dict(name="A 苔の守り手", desc="背が高く、肩に苔の塊、背には苔の幕（背だけ。前は開く）。裾がちぎれた苔。盾は骨の板で琥珀の割れ目の目。苔の緑が洞の奥の影で一番目立つ。突進は盾を前へ傾けて、幕が後ろへ流れる。"),
@@ -200,4 +269,4 @@ SPEC = dict(
     atlas_h=300)
 
 if __name__ == "__main__":
-    run(SPEC, build, pal_for(S_E), bones_for(S_E), POSES)
+    run(SPEC, build, pal_for(S_E), bones_for(S_E), POSES, hint=176)

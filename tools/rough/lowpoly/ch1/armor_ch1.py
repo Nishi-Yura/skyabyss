@@ -4,7 +4,8 @@
 
 実行: python tools/rough/lowpoly/ch1/armor_ch1.py
 出力: docs/review/ch1_roughs/armor_ch1/{a,b,c}/<部位>_{mesh.json,atlas.png,glowmask.png}、
-      docs/review/ch1_roughs/armor_ch1.png (シート)、docs/review/ch1_roughs/armor_ch1_manifest.json
+      docs/review/ch1_roughs/armor_ch1/icons/{a,b,c}_<部位>_32.png (インベントリの 32x32、4 部位 x 3 案)、
+      docs/review/ch1_roughs/armor_ch1.png (シート。下の段にアイコンの 1x と 4x)、docs/review/ch1_roughs/armor_ch1_manifest.json
 """
 from __future__ import annotations
 
@@ -29,6 +30,7 @@ import lpkit  # noqa: E402
 from wkit import pick, ramp, LIGHT  # noqa: E402
 import aview  # noqa: E402  (armor/aview.py: 描画)
 import pose_check  # noqa: E402  (armor/pose_check.py: 姿勢の重なり検査。読むだけ)
+import scene  # noqa: E402  (weapons/scene.py: aview が使う描画の土台。アイコンの 1 部位描画に使う)
 
 OUT = ROOT / "docs/review/ch1_roughs"
 MESH_OUT = OUT / "armor_ch1"
@@ -223,9 +225,10 @@ def paint(faces, size, _pos, N, M, L, pal):
     gm = m("gem")
     put(gm, ramp(P["gem"], 0.35 + 0.45 * (0.5 + 0.5 * lit) * (0.7 + 0.6 * n_mid) + 0.08 * bay))
     glow |= gm
-    # 琥珀の糸 (縫い目): 布と革の島の縁に 1 テクセルおきの点線。光らない
-    big = np.minimum(CW, CH) >= 8   # 小さい島 (兜の輪の細い帯など) には縫わない。大きい面の縁だけ
-    stitch = edge & INS & big & np.isin(mats, ["main", "leather", "acc", "cloth"]) & (((LU + LV) % 4) == 0)
+    # 琥珀の糸 (縫い目): 布と革の島の縁の 2 テクセル幅の点線 (2x2 の点を 2 つおき)。光らない
+    big = np.minimum(CW, CH) >= 12  # 小さい島 (兜の輪の細い帯など) には縫わない。大きい面の縁だけ
+    band = (D < 2.05) & INS         # 縁から 2 列目まで (1 列だと読めない)
+    stitch = band & big & np.isin(mats, ["main", "leather", "acc", "cloth"]) & ((((LU // 2) + (LV // 2)) % 3) == 0)
     put(stitch, pick(P["gem"], np.full((H, W), 1)))
     col = np.clip(col, 0, 255)
     img = np.zeros((H, W, 4), np.uint8)
@@ -302,6 +305,122 @@ def pose_report(o):
     return rest_sum, worst
 
 
+# ------------------------------------------------------------------ インベントリのアイコン (4 部位 x 3 案、32x32)
+# 既存の防具アイコン (tools/rough/armor_v2_icons.py) と同じ作り: 3D の部位を 3/4 の角度で描き、
+# 縮めて色を減らし、1 画素の暗い輪郭を付ける。絵は 3D と同じ陰影・琥珀の光を使う。
+
+ICON_DIR = MESH_OUT / "icons"
+ICON_VIEW = {"helmet": (200, 14), "chestplate": (188, 8)}  # 兜と胸: armor_v2_icons と同じ角度
+ICON_BOX, ICON_COLORS, ICON_OUTLINE = 28, 22, (26, 24, 30)
+ICON_SLOT = (46, 52, 62)   # 暗い枠の底
+PIECES = ["helmet", "chestplate", "leggings", "boots"]
+PIECE_ICON_JP = dict(helmet="兜", chestplate="胸", leggings="脚", boots="靴")
+
+
+# 脚と靴は 2 本が接して正面では 1 枚の板に見えるので、右の 1 本を斜めから描き、その左右反転を並べる (armor_v2_icons と同じ)
+PAIR_BONE = {"leggings": (LEG[-1], 190, 6), "boots": (BOOT[-1], 200, 14)}
+
+
+def _render(faces, atlas, glow, yaw, pitch, size=512):
+    allv = np.concatenate([np.asarray(f.verts, float) for f in faces])
+    lo, hi = allv.min(0), allv.max(0)
+    center = tuple(float(v) for v in (lo + hi) / 2)
+    scale = 440.0 / float(np.linalg.norm(hi - lo))
+    im = scene.view(faces, atlas, glow, "whale", yaw, pitch, (size, size), center, scale, ss=1)
+    return np.array(im.transpose(Image.FLIP_LEFT_RIGHT)).astype(float)
+
+
+def icon_rgba(res, piece):
+    """1 部位の 3/4 の絵 (透明な背景の RGBA)。脚と靴は右の 1 本の絵と、その反転を並べたもの。"""
+    r = res[piece]
+    if piece in PAIR_BONE:
+        bone, yaw, pitch = PAIR_BONE[piece]
+        faces = [f for f in r["faces"] if f.bone == bone]
+        a = _render(faces, r["atlas"], r["glow"], yaw, pitch)
+        ys, xs = np.where(a[..., 3] > 0.5)
+        a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        gap = np.zeros((a.shape[0], max(2, a.shape[1] // 10), 4))
+        return np.concatenate([a, gap, a[:, ::-1]], axis=1)
+    faces, atlas, glow = aview.scene_of({piece: r}, mann=False)
+    yaw, pitch = ICON_VIEW[piece]
+    return _render(faces, atlas, glow, yaw, pitch)
+
+
+def to_icon(rgba):
+    """透明の外形で切り、面積平均で ICON_BOX に縮め、色を ICON_COLORS 色に減らし、輪郭を付けて 32x32 にする。"""
+    A = rgba[..., 3] / 255.0
+    ys, xs = np.where(A > 0.5)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    rgb, A = rgba[y0:y1, x0:x1, :3], A[y0:y1, x0:x1]
+    h, w = A.shape
+    sc = ICON_BOX / max(h, w)
+    nw, nh = max(1, round(w * sc)), max(1, round(h * sc))
+    prem = np.dstack([rgb * A[..., None], A])
+    chans = [np.array(Image.fromarray(prem[..., i].astype(np.float32), "F").resize((nw, nh), Image.BOX)) for i in range(4)]
+    prem2 = np.dstack(chans)
+    a2 = prem2[..., 3]
+    col = prem2[..., :3] / np.maximum(a2[..., None], 1e-6)
+    mask = a2 > 0.5
+    lum = col.mean(-1, keepdims=True)
+    col = np.clip(lum + (col - lum) * 1.18, 0, 255)            # 彩度を少し上げる (小さい板が読めるように)
+    col = np.clip((col - 128) * 1.12 + 128 + 6, 0, 255)
+    q = Image.fromarray(col.astype(np.uint8), "RGB").quantize(colors=ICON_COLORS, method=Image.MEDIANCUT, dither=Image.NONE)
+    q = np.array(q.convert("RGB"))
+    out = np.zeros((32, 32, 4), np.uint8)
+    oy, ox = (32 - nh) // 2, (32 - nw) // 2
+    sub = out[oy:oy + nh, ox:ox + nw]
+    sub[mask, :3] = q[mask]
+    sub[mask, 3] = 255
+    solid = out[..., 3] > 0
+    ring = np.zeros_like(solid)
+    for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+        ring |= np.roll(np.roll(solid, dy, 0), dx, 1)
+    ring &= ~solid
+    out[ring, :3] = ICON_OUTLINE
+    out[ring, 3] = 255
+    return out
+
+
+def make_icons(results):
+    """{(案, 部位): 32x32 の RGBA の配列} を作り、ICON_DIR に a_helmet_32.png の形で保存する。"""
+    ICON_DIR.mkdir(parents=True, exist_ok=True)
+    out = {}
+    for o in "abc":
+        for piece in PIECES:
+            ic = to_icon(icon_rgba(results[o], piece))
+            Image.fromarray(ic).save(ICON_DIR / f"{o}_{piece}_32.png")
+            out[(o, piece)] = ic
+    return out
+
+
+def icon_band(icons):
+    """シートの下の段: 案ごとに 1 行。1x (原寸) の 4 つと、4x (最近傍) の 4 つ。暗い枠の底に置く。"""
+    LABW = 130
+    names = {"a": "A 殻肩", "b": "B 長い外套", "c": "C 苔の頭巾"}
+    W = LABW + 5 * TW + 16
+    RH = 150
+    top = 40
+    band = Image.new("RGB", (W, top + 3 * RH + 8), (24, 28, 36))
+    dr = ImageDraw.Draw(band)
+    label(dr, (8, 8), "インベントリのアイコン (32x32 の原寸 1x と 4x 最近傍。暗い枠の底に置いた)", 16, (255, 255, 255))
+    x1 = LABW
+    x4 = LABW + 4 * 48 + 40
+    for k, piece in enumerate(PIECES):
+        label(dr, (x1 + k * 48 + 8, 26), PIECE_ICON_JP[piece], 12, (200, 205, 215))
+        label(dr, (x4 + k * 144 + 52, 26), PIECE_ICON_JP[piece], 12, (200, 205, 215))
+    for i, o in enumerate("abc"):
+        y = top + i * RH
+        label(dr, (8, y + 52), names[o], 16, (255, 232, 160))
+        for k, piece in enumerate(PIECES):
+            ic = Image.fromarray(icons[(o, piece)])
+            for x, size, pad, cell in ((x1 + k * 48, 32, 4, 40), (x4 + k * 144, 128, 4, 136)):
+                slot = Image.new("RGBA", (cell, cell), ICON_SLOT + (255,))
+                ImageDraw.Draw(slot).rectangle([0, 0, cell - 1, cell - 1], outline=(78, 88, 104, 255))
+                slot.alpha_composite(ic.resize((size, size), Image.NEAREST), (pad, pad))
+                band.paste(slot.convert("RGB"), (x, y))
+    return band
+
+
 # ------------------------------------------------------------------ 絵 (シート)
 
 TW, TH = 210, 310   # 1 枚の絵
@@ -334,7 +453,7 @@ def tiles(res):
     return out
 
 
-def sheet(results):
+def sheet(results, icons):
     LABW = 130
     names = {"a": "A 殻肩", "b": "B 長い外套", "c": "C 苔の頭巾"}
     cols = ["正面", "背面", "横", "3/4", "兜と胸 (拡大)"]
@@ -358,7 +477,8 @@ def sheet(results):
         for i, c in enumerate(cols):
             label(dr, (x + i * TW + 6, TH + 16), c, 14, (200, 205, 215))
         rows.append(im)
-    H = sum(r.size[1] for r in rows) + 124
+    band = icon_band(icons)
+    H = sum(r.size[1] for r in rows) + 124 + band.size[1]
     S = Image.new("RGB", (W, H), (24, 28, 36))
     dr = ImageDraw.Draw(S)
     label(dr, (10, 8), f"{TITLE_JP} 3 案 (第一章の旅装。防具の低ポリ様式 C の箱と板。1 ブロック 32 テクセル)", 22, (255, 255, 255))
@@ -370,6 +490,7 @@ def sheet(results):
     for r in rows:
         S.paste(r, (0, y))
         y += r.size[1]
+    S.paste(band, (0, y))
     p = OUT / "armor_ch1.png"
     S.save(p)
     print("sheet", p, S.size)
@@ -382,7 +503,9 @@ def main():
         save_set(res, o)
         results[o] = res
         print(o, {k: v["tris"] for k, v in res.items()}, "set", set_tris(res))
-    sheet(results)
+    icons = make_icons(results)
+    print("icons", ICON_DIR)
+    sheet(results, icons)
     for o in "abc":
         rest, worst = pose_report(o)
         print(o, "rest overlap (voxels)", rest)
