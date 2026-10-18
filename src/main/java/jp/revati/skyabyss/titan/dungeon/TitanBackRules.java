@@ -10,6 +10,8 @@ import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 import java.util.List;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
@@ -68,6 +70,13 @@ public final class TitanBackRules {
     @SubscribeEvent
     static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (restricted(event.getEntity().level(), event.getEntity())) {
+            // 野営の道具は、持ち主 (と同じグループ) なら一瞬で外せる (外す処理は onBreak)
+            if (event.getEntity() instanceof ServerPlayer sp && event.getPosition().isPresent()
+                    && CampBlocks.at(sp.server, sp.level().dimension(), event.getPosition().get()) instanceof CampBlocks.Entry e
+                    && CampBlocks.mayBreak(sp, e)) {
+                event.setNewSpeed(100000f);
+                return;
+            }
             event.setCanceled(true);
         }
     }
@@ -84,6 +93,17 @@ public final class TitanBackRules {
     static void onBreak(BlockEvent.BreakEvent event) {
         if (restricted(event.getLevel(), event.getPlayer())) {
             event.setCanceled(true);
+            if (event.getPlayer() instanceof ServerPlayer sp && event.getLevel() instanceof ServerLevel sl) {
+                CampBlocks.Entry camp = CampBlocks.at(sp.server, sl.dimension(), event.getPos());
+                if (camp != null && CampBlocks.mayBreak(sp, camp)) {
+                    CampBlocks.breakByPlayer(sp, sl, camp);
+                    return;
+                }
+                if (camp != null) {
+                    Notice.bar(sp, ModText.deny("message.skyabyss.camp.stranger"));
+                    return;
+                }
+            }
             deny(event.getPlayer());
         }
     }
@@ -91,6 +111,24 @@ public final class TitanBackRules {
     @SubscribeEvent
     static void onPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof Player player && restricted(event.getLevel(), player)) {
+            // 野営の道具 (作業台・かまど・たいまつ・チェストなど) は、決まりの中で置いてよい (CampBlocks)
+            if (player instanceof ServerPlayer sp && event.getLevel() instanceof ServerLevel sl) {
+                CampBlocks.Refusal why = CampBlocks.evaluate(sp, sl, event.getPos(), event.getPlacedBlock());
+                if (why == null) {
+                    CampBlocks.record(sp, sl, event.getPos(), event.getPlacedBlock());
+                    return;
+                }
+                event.setCanceled(true);
+                CampBlocks.refuse(sp, why);
+                // 置けなかった: 手持ちが消えたように見えないよう、持ち物と置こうとした場所をクライアントへ送り直す
+                List<BlockPos> touched = new java.util.ArrayList<>();
+                touched.add(event.getPos());
+                if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
+                    multi.getReplacedBlockSnapshots().forEach(snap -> touched.add(snap.getPos()));
+                }
+                CampBlocks.resync(sp, sl, touched);
+                return;
+            }
             event.setCanceled(true);
             deny(player);
         }
