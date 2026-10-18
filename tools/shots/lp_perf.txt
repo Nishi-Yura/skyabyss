@@ -1,0 +1,67 @@
+# Low-poly vs cube render cost, five-mob crowd (20 moss crawlers + 10 rib archers) (docs/design/15_high_poly.md section 9). PERF lines in shots.log.
+# ./gradlew runShots -Pscript=tools/shots/lp_perf.txt
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon skyabyss:moss_crawler -9 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -9 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -9 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -3 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -1 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -9 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -7 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -5 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -3 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -1 -60 6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -9 -60 9 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -7 -60 9 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -5 -60 9 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -3 -60 9 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer -1 -60 9 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld -2 -59 15 180 8
+waitchunks
+wait 100
+shot lp_perf_crowd
+lowpoly on
+wait 40
+perf 300 crowd30_on_0
+lowpoly off
+wait 40
+perf 300 crowd30_off_0
+lowpoly on
+wait 40
+perf 300 crowd30_on_1
+lowpoly off
+wait 40
+perf 300 crowd30_off_1
+lowpoly on
+wait 40
+perf 300 crowd30_on_2
+lowpoly off
+wait 40
+perf 300 crowd30_off_2
+lowpoly on
+quit

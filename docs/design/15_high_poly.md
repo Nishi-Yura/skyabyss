@@ -128,6 +128,8 @@
 
 ### 4.2 心臓（最終ボス。段階 1 / 2 / 3 で別の geo。上限 6,000）
 
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（`LowPoly.enabled = false` で出る姿）の記録。
+
 | 心臓 | 面（段階 1 / 2 / 3） | 採用 | 中身 | 生成元（入力） |
 | --- | --- | --- | --- | --- |
 | 岩鯨 | 5,040 / 5,990 / 5,948 | B 彫り | 板を一つの球に削って段々を無くし、地層の溝・欠け・苔、割れ目（段階 2 から光る）。段階 3 は筋繊維・脂の溝・盛った血管 | `tools/sources/heart/`（`install_heart_v4.py`） |
@@ -151,6 +153,8 @@
 
 ### 4.3 中ボス（上限 8,000）
 
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（`LowPoly.enabled = false` で出る姿）の記録。
+
 | モデル | 箱 / 面 | 骨 | 生成元 | 足したもの |
 | --- | --- | --- | --- | --- |
 | 番兵長 whalebone_captain | 1,318 / 4,616 | 20 | `gen_mobs.py`（+ ラフ `captain_v4.py`）。鉾は別モデル（item） | 兜・拳・腿の二段丸め（腕・脚の骨は縦の辺だけ）、鼻梁、覗き窓の縁、冠の継ぎ目、拳の関節、腕当て、指 4 本 + 親指、兜の口の格子 6 枚 |
@@ -166,6 +170,8 @@
 - 戻し方: `tools/sources/hp_base/entity/` から geo・テクスチャ・発光マスクを戻す。
 
 ### 4.4 敵（上限 1,500。たまに出る敵は 2,500）
+
+> 低ポリのメッシュに切り替え済みのモデルは、9.6 の表が今の見た目。この節の表は元の箱のモデル（`LowPoly.enabled = false` で出る姿）の記録。
 
 | モデル | 箱 / 面 | 骨 | 生成元 | 中身 |
 | --- | --- | --- | --- | --- |
@@ -329,6 +335,28 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 - 重ね合わせ: `lowpoly_align_front/side.png`。骨ごとの箱（GeckoLib の cube）の面にメッシュの端がぴったり付く（x 反転も合っている）
 - 動き・被弾・夜の松明: `lowpoly_walk_a/b`・`lowpoly_attack`・`lowpoly_hurt`・`lowpoly_night_torch_front/side`。盾は受け口の骨に付いて動く
 - 負荷（この PC、1280x720、垂直同期なし、目の発光あり、他の作業と並行なので目安）: 番兵 36 体は低ポリ 7.8〜11.0 ms、cube（1,416 面）24.4〜29.7 ms。20 体は低ポリ 5.2〜7.1 ms、cube 12.0〜15.1 ms。目のマスクが無かった先の試走では 36 体 3.3〜4.3 ms 対 cube 19.5〜23.4 ms
+
+### 9.6 採用した低ポリ（番兵のあとの 5 体。`python tools/install_lowpoly_five.py` で一度に入れ直せる）
+
+| モブ | 採用 | 三角形 | 骨 | 入力（`docs/review/lowpoly_roughs/`） |
+| --- | --- | --- | --- | --- |
+| 骨の番兵 bone_sentinel | 先の試作 | 584 + 盾 60 | 9 | `bone_sentinel_*` |
+| 鯨骨の番兵長 whalebone_captain | A 石鎧の将 | 1,266 + 鉾 148 | 20 | `whalebone_captain/a/`（鉾 `captain_pike` は `socket_main`、1.8 倍込み） |
+| 苔這い moss_crawler | B 骨・棘 | 601 | 27 | `lp_moss_crawler/b/` |
+| 肋の射手 rib_archer | C ひげ板の頭巾 | 605 + 弓 102（弦の骨 2） | 10 | `rib_archer/c/`（弓 `rib_archer_bow` は `socket_off`） |
+| 水路の顎 waterway_maw | B 提灯鮟鱇 | 643 | 11 | `waterway_maw/b/` |
+| 岩鯨の心臓 stone_whale_heart | A 地層の板 | 1,336 / 1,322 / 1,364（段階 1 / 2 / 3） | 30 / 32 / 47 | `lp_whale_heart/a/p1..p3`（段階ごとに別の geo・メッシュ・アトラス） |
+
+入れ方で直した共通部分（`tools/install_lowpoly.py` と `client/lowpoly/`）:
+
+- **骨の休めの回転**: 骨だけの geo（と debug geo）に、元の geo の `rotation`（メッシュ JSON に書いてあればそちら）を書く。射手・苔這いの root の yaw 180、射手の `socket_off`、心臓の殻の板や継ぎ目は、これが無いと向きがずれる。メッシュの頂点は、回転をかける前の geo の cube と同じ座標。GeckoLib が掛けた PoseStack の上にそのまま流すので、cube を回した骨の下に置いたのと同じになる。親・pivot・回転が元の geo と違えば入れるときに警告する
+- **回転の符号の流儀**: 試作ごとに回転の符号の書き方が違っても、メッシュは回さない静的なものなので、骨の回転は元の geo をそのまま使えば合う（アニメは触っていない）
+- **動く部品のある武器**（弓の弦）: 複数の骨のメッシュは、骨だけの `geo/gear/<名>_lowpoly.geo.json` と元の `animations/gear/<名>.animation.json` で動かす（`GearLayer.lowPolyAnimated`）。今は動く武器の発光には未対応
+- **武器の光る画素**: マスク（白）に元のアトラスの色を載せた `textures/lowpoly/<名>_glow.png` を焼く（`LowPolyMeshes` はこれを探す）
+- **光る画素 0 のマスクは入れない**（GeckoLib が落ちる）。段階ごとのモブは `LowPolyGeoRenderer` に GeoModel と「メッシュ名の関数」を渡す（心臓は `StoneWhaleHeartModel.meshName`）
+- 元の箱の描画は、5 体とも `LowPoly.enabled = false` で出る。動きの確認用に `/skyabyss dev anim` は GuardMob 以外の GeckoLib のモブ（水路の顎）にも効く
+
+確かめ（台本 `tools/shots/lp_<名>.txt`、`tools/gen_lowpoly_five_shots.py` が書く。絵は `docs/review/previews/lp_*.png`）: 待機の前・斜め・横・後ろ、顔、番兵長の薙ぎ払い・叩きつけ・咆哮、射手の構えと弦、苔這いの飛びかかり・被弾・死、水路の顎の噛みつき、心臓の段階 1〜3 と登場・倒れる。動きは同じ姿勢の箱版（`cubes_*`）と並べて見た。負荷（1280x720、垂直同期なし、苔這い 20 + 射手 10 の 30 体、`tools/shots/lp_perf.txt`）: 低ポリ 6.5〜7.4 ms/frame、箱 22.1〜24.5 ms/frame（約 3.3 倍速い）。
 
 ## 旧節番号の対応
 

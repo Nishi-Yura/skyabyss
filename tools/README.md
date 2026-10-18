@@ -22,7 +22,7 @@
 python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/bone_sentinel_shield_mesh.json:docs/review/lowpoly_roughs/bone_sentinel_shield_atlas.png:bone_sentinel_shield:socket_off
 ```
 
-`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。
+`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら）。5 体 (番兵長・苔這い・射手・水路の顎・心臓) は `python tools/install_lowpoly_five.py` で一度に入る。確認の台本は `python tools/gen_lowpoly_five_shots.py` が `tools/shots/lp_<名>.txt` に書く。
 
 ## モデルの透けの検査と修理・心臓の演出
 

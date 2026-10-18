@@ -45,7 +45,7 @@ public final class LowPolyMeshes implements ResourceManagerReloadListener {
             try (BufferedReader r = e.getValue().openAsReader()) {
                 JsonObject json = JsonParser.parseReader(r).getAsJsonObject();
                 String tex = LowPolyMesh.textureName(json, name);
-                boolean glow = manager.getResource(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + tex + "_glowmask.png")).isPresent();
+                boolean glow = manager.getResource(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + tex + "_glow.png")).isPresent();
                 LowPolyMesh mesh = LowPolyMesh.parse(name, json, glow);
                 loaded.put(name, mesh);
                 SkyAbyss.LOGGER.info("[lowpoly] {}: {} bones, {} triangles -> {} quads{}", name, mesh.bones.size(), mesh.triangles, mesh.quads, glow ? ", glowmask" : "");

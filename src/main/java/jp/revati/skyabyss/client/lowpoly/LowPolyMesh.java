@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class LowPolyMesh {
     public final String name;
     public final ResourceLocation texture;
-    public final ResourceLocation glowMask; // 光る画素だけを置いた画像。無ければ null
+    public final ResourceLocation glowMask; // 光る画素だけに元の色を置いた画像 (<name>_glow.png、install_lowpoly.py が --gear のときに焼く)。無ければ null
     // true: 頂点は受け口の骨の原点が基準 (武器・盾)。false: モデル全体の絶対座標 (GeckoLib の geo の cube と同じ)
     public final boolean socket;
     public final Map<String, Bone> bones = new LinkedHashMap<>();
@@ -59,7 +59,7 @@ public final class LowPolyMesh {
         }
         String texName = textureName(json, name);
         ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + texName + ".png");
-        ResourceLocation glow = glowExists ? ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + texName + "_glowmask.png") : null;
+        ResourceLocation glow = glowExists ? ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + texName + "_glow.png") : null;
         boolean socket = (json.has("socket") && json.get("socket").getAsBoolean()) || json.has("attach");
         JsonObject bonesJson = json.getAsJsonObject("bones");
 
