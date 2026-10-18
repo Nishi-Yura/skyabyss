@@ -1,0 +1,112 @@
+{
+  "npc": "skyabyss:whale_chaser",
+  "extends": true,
+  "entries": [
+    {
+      "if": {
+        "type": "quest",
+        "quest": "ch3/sub_isana_wait",
+        "is": "active",
+        "stage": "tell"
+      },
+      "node": "ch3_wait_done"
+    },
+    {
+      "if": {
+        "type": "all",
+        "of": [
+          {
+            "type": "stage",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "type": "quest",
+            "quest": "ch3/sub_isana_wait",
+            "is": "none"
+          },
+          {
+            "type": "not",
+            "of": {
+              "type": "flag",
+              "flag": "c_ch3_asked"
+            }
+          }
+        ]
+      },
+      "node": "ch3_wait_offer"
+    }
+  ],
+  "nodes": {
+    "ch3_wait_offer": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_ch3_asked"
+        }
+      ],
+      "next": "ch3_wait_offer2"
+    },
+    "ch3_wait_offer2": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "go",
+          "goto": "end",
+          "kind": "quest",
+          "do": [
+            {
+              "type": "quest_start",
+              "quest": "ch3/sub_isana_wait"
+            },
+            {
+              "type": "affinity",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "ch3_wait_done": {
+      "face": "grave",
+      "options": [
+        {
+          "id": "wind",
+          "goto": "ch3_wait_done2"
+        },
+        {
+          "id": "quiet",
+          "goto": "ch3_wait_done2"
+        }
+      ]
+    },
+    "ch3_wait_done2": {
+      "face": "grave",
+      "next": "ch3_wait_done3"
+    },
+    "ch3_wait_done3": {
+      "face": "neutral",
+      "next": "ch3_wait_done4"
+    },
+    "ch3_wait_done4": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "c_ch3_seeoff"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "options": [
+        {
+          "id": "ok",
+          "goto": "end"
+        }
+      ]
+    }
+  }
+}
