@@ -630,9 +630,11 @@ public final class RecordBuilder {
             if (n == 0) {
                 continue;
             }
-            rows.add(value("lore." + chapter.id(), Component.translatable(chapter.nameKey()), t("v.of", k, n),
+            // 行の名は「一章　岩鯨」のように章の番号と名前 (story/Chapters.label と同じ)
+            rows.add(value("lore." + chapter.id(), Component.translatable(chapter.tabKey()).append("　").append(Component.translatable(chapter.nameKey())),
+                    t("v.of", k, n),
                     k >= n ? RecordSnapshot.MARK_SAFE : k == 0 ? RecordSnapshot.MARK_LOCKED : RecordSnapshot.MARK_NONE,
-                    List.of(Component.translatable(chapter.tabKey()), t("d.lore_chapter"))));
+                    List.of(t("d.lore_chapter"))));
         }
         rows.add(header("world"));
         rows.add(value("loop", t("r.loop"), t("v.times", WorldLoop.count(p.server)), RecordSnapshot.MARK_NONE, List.of(t("d.loop"))));

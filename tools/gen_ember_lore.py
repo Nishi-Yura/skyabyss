@@ -311,7 +311,7 @@ text("tooltip.skyabyss.ember.horn_drunk", "体の芯が、ゆっくり温まっ�
 def write_lore() -> None:
     DATA.mkdir(parents=True, exist_ok=True)
     for lid, order, unlock, related, title, body, sign in LORE:
-        entry: dict = {"chapter": "chapter1", "order": order}
+        entry: dict = {"chapter": "titan_ember", "order": order}
         if sign:
             entry["inscription_sign"] = sign
         entry["unlock"] = unlock

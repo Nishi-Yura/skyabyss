@@ -68,14 +68,14 @@ public final class LoreSelfTest {
         // ---- 読み込み
         LoreManager.loadErrors().forEach(e -> failures.add("load: " + e));
         long unlockable = catalog.entries().stream().filter(LoreEntry::unlockable).count();
-        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().equals("chapter1"))).count();
+        long early = catalog.entries().stream().filter(e -> e.unlockable() && (e.chapter().equals("prologue") || e.chapter().startsWith("titan_"))).count();
         // 12〜20 に、自由なモードのサブクエストが記す 2 項目 (07 の 15 章) と、その先の余裕を足した
-        // 1 章は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
+        // 一〜四章 (旧 1 章) は巨神ごとに碑文と項目が増える (岩鯨・潮殻で 30 前後、雷翼の 11 を足して 50 前後。余燼の分も見込む)
         if (early < 12 || early > 75) {
-            failures.add("prologue + chapter 1 should have 12-75 entries, found " + early);
+            failures.add("prologue + chapters 1-4 should have 12-75 entries, found " + early);
         }
         if (unlockable != early) {
-            failures.add("only the prologue and chapter 1 may be written yet (" + unlockable + " unlockable)");
+            failures.add("only the prologue and chapters 1-4 may be written yet (" + unlockable + " unlockable)");
         }
         for (String later : List.of("chapter2", "chapter3", "finale")) {
             List<LoreEntry> list = catalog.inChapter(later);

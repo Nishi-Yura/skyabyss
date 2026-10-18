@@ -19,6 +19,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from regroup_lore_chapters import CHAPTERS  # 章の名前は 1 か所 (story/Chapters.java と同じ表)
+
 ROOT = Path(__file__).resolve().parent.parent / "src/main/resources"
 ADV = ROOT / "data/skyabyss/advancement"
 LANG = ROOT / "assets/skyabyss/lang"
@@ -123,6 +125,30 @@ add("forge_dismantle", "forge_enhance", "minecraft:grindstone", "task", beat("fo
     ("砕いて、残す", "要らない装備を分解して、素材に変えた。"), ("Break It Down", "You turned unwanted gear into materials."))
 
 
+# 章 (docs/design/05 の 2 章、story/Chapters.java)。進捗の id は変えず、文の頭に章の名前を付けて枝を章ごとに読めるようにする。
+# 序章 = B0〜B6 (野営地から足音まで)、一章 = イサナ (B7) から岩鯨の心臓まで。巨神の背・試練・心臓はその巨神の章。天の鍵は四章の終わり
+CHAPTER_OF = {}
+for _id in ("camp", "footprint", "sky_shadow", "bell_lodge", "storyteller", "lore_book"):
+    CHAPTER_OF[_id] = "prologue"
+for _id in ("isana", "bone_hill", "stone_whale_board", "tablet", "stone_whale_trial", "stone_whale_heart", "voyage"):
+    CHAPTER_OF[_id] = "titan_whale"
+for _id, _ch in (("tide_shell", "titan_tide"), ("thunder_wing", "titan_storm"), ("ember", "titan_ember")):
+    for _suffix in ("board", "trial", "heart"):
+        CHAPTER_OF[f"{_id}_{_suffix}"] = _ch
+CHAPTER_OF["sky_key"] = "titan_ember"
+_CH = {c[0]: c for c in CHAPTERS}
+
+
+def chaptered(a, idx):
+    """(題, 文) の文の頭に「一章　岩鯨　」を付ける。idx 0 = ja、1 = en"""
+    title, desc = a[("ja", "en")[idx]]
+    ch = CHAPTER_OF.get(a["id"])
+    if ch is None:
+        return title, desc
+    tab, name, _ = _CH[ch][2 + idx]
+    return title, (f"{tab}　{name}　" if idx == 0 else f"Ch. {tab} {name}: ") + desc
+
+
 def build():
     out = {}
     for a in A:
@@ -174,7 +200,7 @@ def main():
         for k in [k for k in lang if k.startswith("advancement.skyabyss.")]:
             del lang[k]
         for a in A:
-            title, desc = a[idx]
+            title, desc = chaptered(a, 0 if idx == "ja" else 1)
             lang[f"advancement.skyabyss.{a['id']}.title"] = title
             lang[f"advancement.skyabyss.{a['id']}.description"] = desc
         p.write_text(json.dumps(lang, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

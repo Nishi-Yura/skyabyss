@@ -606,7 +606,7 @@ LORE = [
       "刻み目はどれも同じ向きに斜めで、峰のほうから下りてくる。\n\n最後の一本だけが、途中で止まっている。",
       "Fine notches line the doorpost of the storyteller's house. Her mother cut one with a knife each time the shadow passed.\n\n"
       "Every notch slants the same way, coming down from the direction of the peaks.\n\nOnly the last one stops halfway.")),
-    ("chapter1/tide_hours", "chapter1", 140, ["chapter1/stone_whale"],
+    ("chapter1/tide_hours", "titan_tide", 140, ["chapter1/stone_whale"],
      ("干潮の刻", "The Hour of Low Tide"),
      ("朝と夕、潮が引きはじめるころに、沖の島が岸へ寄ってくる。三度見て、三度とも同じ刻だった。\n\n"
       "寄ってきた甲羅の縁には、古い門が水から顔を出していた。\n\n刻が過ぎるまで、何かを待つように動かない。",

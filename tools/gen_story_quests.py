@@ -22,6 +22,8 @@ import json
 import re
 from pathlib import Path
 
+from regroup_lore_chapters import chapter_of as _chapter_of  # 伝承の章 (巨神ごと)。写像は regroup_lore_chapters.py
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "src/main/resources/data/skyabyss"
 LANG = ROOT / "src/main/resources/assets/skyabyss_story/lang"
@@ -804,7 +806,7 @@ def main():
     write_json(DATA / "dialogue" / "storyteller_story.json", S.json())
     write_json(DATA / "dialogue" / "whale_chaser_story.json", C.json())
     for lid, order, related, _, _, unlock_ in LORE:
-        write_json(DATA / "lore" / "entry" / f"{lid}.json", {"chapter": "chapter1", "order": order, "unlock": unlock_, "related": related})
+        write_json(DATA / "lore" / "entry" / f"{lid}.json", {"chapter": _chapter_of(lid.split("/")[-1]), "order": order, "unlock": unlock_, "related": related})
     write_json(LANG / "ja_jp.json", dict(sorted(JA.items())))
     write_json(LANG / "en_us.json", dict(sorted(EN.items())))
     doc = DOC.read_text(encoding="utf-8")

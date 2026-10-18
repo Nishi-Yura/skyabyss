@@ -105,7 +105,7 @@ public final class StormLoreSelfTest {
                 f.add("missing lore " + id);
                 continue;
             }
-            check(e.chapter().equals("chapter1") && e.unlockable(), id + " should be a chapter 1 entry", f);
+            check(e.chapter().equals("titan_storm") && e.unlockable(), id + " should be a chapter 3 (titan_storm) entry", f);
             for (JsonObject lang : langs) {
                 for (String key : List.of(e.titleKey(), e.bodyKey())) {
                     check(lang.has(key) && !lang.get(key).getAsString().isBlank(), "missing text " + key, f);

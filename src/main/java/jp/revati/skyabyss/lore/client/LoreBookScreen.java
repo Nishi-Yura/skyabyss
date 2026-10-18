@@ -57,9 +57,10 @@ public class LoreBookScreen extends Screen {
     // 見開きの大きさと、頁の内側 (書の左上からの位置)
     private static final int BW = 304;
     private static final int BH = 192;
+    // 章は 8 枚 (序章・一〜六章・終章)。書の幅 304 に収めるため、しおりは重ねて並べる (見える幅 TAB_STEP、右のしおりが左のしおりの端に載る)
     private static final int TAB_W = 52;
-    private static final int TAB_STEP = 56;
-    private static final int TAB_X0 = 14;
+    private static final int TAB_STEP = 34;
+    private static final int TAB_X0 = 6;
     private static final int LEFT_X = 18;
     private static final int LEFT_W = 126;
     private static final int RIGHT_X = 160;
@@ -312,15 +313,15 @@ public class LoreBookScreen extends Screen {
         if (!on && hoverTab(index, mouseX, mouseY)) {
             color = TEAL;
         }
-        g.drawString(font, label, x + (TAB_W - font.width(label)) / 2, y + 5, color, false);
+        g.drawString(font, label, x + (TAB_STEP - font.width(label)) / 2, y + 5, color, false);
         if (chapterHasNew(chapter)) {
-            blitWidget(g, x + TAB_W - 9, y + 2, W_MARK_NEW);
+            blitWidget(g, x + TAB_STEP - 9, y + 2, W_MARK_NEW);
         }
     }
 
     private boolean hoverTab(int index, double mouseX, double mouseY) {
         int x = left + TAB_X0 + index * TAB_STEP;
-        return mouseX >= x && mouseX < x + TAB_W && mouseY >= top - 18 && mouseY < top + 1;
+        return mouseX >= x && mouseX < x + TAB_STEP && mouseY >= top - 18 && mouseY < top + 1;
     }
 
     private void drawLeftPage(GuiGraphics g, LoreChapter chapter, int mouseX, int mouseY) {
