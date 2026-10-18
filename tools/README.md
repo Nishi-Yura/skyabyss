@@ -83,6 +83,17 @@ python tools/weapon_display.py [--check]                            # 持ち方 
 
 持ち方と動きの決まりは `docs/design/15_high_poly.md` の 4.6.1。
 
+### 武器の低ポリメッシュ (手・地面・額縁。15 の 4.6.2)
+
+```
+python tools/install_lowpoly_weapons.py        # weapons_final/ のメッシュ・アトラス・光る画像を入れ、models/item/<id>.json の base を builtin/entity にする (何度でも)
+python tools/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/weapon_lp_<id>.txt (階級 3 x 強化 3 x 一人称/三人称、ボクセル版、弓の引き、盾の構え、地面・額縁) と weapon_lp_perf.txt
+./gradlew runShots -Pscript=tools/shots/weapon_lp_<id>.txt
+python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか
+```
+
+台本の手順 `weaponmesh on|off` (低ポリ / 元のボクセル)、`weapontier common|rare|legend|off` (メッシュの階級を固定。開発用)。元のボクセル版の models/item/*.json は `models/item_voxel/` に退避してある (`LowPoly.weaponMeshes = false` の戻り先)。`gen_ember_items.py` `install_storm_gear.py` `install_tide_gear.py` `gen_weapon_models_v2.py` は models/item/<id>.json をボクセルで書き直すので、動かしたあとに `install_lowpoly_weapons.py` と `weapon_display.py` を流す。
+
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
 ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。
