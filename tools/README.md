@@ -222,5 +222,6 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 - `python tools/gen_tablet_texture.py`: 碑 (`skyabyss:tablet`) の絵 2 枚、ブロック状態、モデル、lang の名前を作る
 
 | 岩鯨の背の島 (低ポリ案 C をブロックにした鯨、02 の 3.1 章): `data/skyabyss/titan_back/whale.bin` | `gen_titan_back_whale.py` (形は `lowpoly_whale_voxel.py` が案 C の近景メッシュから作る。`--fit` で部屋と殻の距離、`--preview` で上と横の色の地図)。構造の書き出しとメッシュの並べ描きは `whale_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`TitanBackLayout.LAYOUT_VERSION`) を上げる |
+| 余燼の背の体 (低ポリ案 C「皮が岩になる火蜥蜴」をブロックにした火蜥蜴、13 の 3.2 章): `data/skyabyss/ember_back/body.bin` | `gen_ember_back_body.py` (形は `lowpoly_ember_voxel.py` が案 C の近景メッシュから作る。`--preview` で上・横・前の色の地図、`--cache` で `rough/_ember_back_body_cache.npz`)。メッシュとの並べ描きは `--cache` のあとで `ember_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`EmberBackLayout.LAYOUT_VERSION`) を上げる |
 
 雷翼の背の鳥: `data/skyabyss/storm_back/bird.bin` は `python tools/gen_back_shape.py bird [--preview]`。形・骨は `install_thunder_wing.build_grid()`、材料は低ポリ案 A の近景メッシュ (`lowpoly_thunder_voxel.py` が体積化。`recolor` で近いセルの材料を写す)。変えたら `StormBackLayout.LAYOUT_VERSION` を上げる。ブロックの鳥と案 A のメッシュの並べ描きは `storm_back_a_views.py` (`SKYABYSS_DUMP=storm_back ./gradlew runServer` で書き出した `.sbd` を渡す)。
