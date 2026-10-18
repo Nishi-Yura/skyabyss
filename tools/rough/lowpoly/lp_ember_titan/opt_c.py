@@ -1,7 +1,6 @@
 """C 皮が岩になる火蜥蜴: 生きた火蜥蜴の体 (丸い腹・喉のひだ・関節のある足と長い指・まぶたのある目) の背から、
 冷えかけた玄武岩の殻が広がって皮を覆っていく案。割れ目の下に溶岩が脈打ち、背の火山は殻を破ってふくらむ傷口のよう。"""
 from parts import *  # noqa
-from common import _mk  # noqa
 
 TMPL = [[(0, 0), (0.52, 0.0), (0.82, 0.07), (0.97, 0.24), (1.0, 0.46), (0.93, 0.68), (0.76, 0.87), (0.45, 0.98), (0, 1.0)],
         [(0, 0), (0.7, 0.0), (1.0, 0.36), (0.9, 0.78), (0.45, 1.0), (0, 1.0)],
@@ -75,25 +74,6 @@ def teeth_c(head, jaw_h, lod, size=0.95, tag=11):
         for xx in (-9, -3, 3, 9):
             fs += spike("head", "tooth", V(xx, CEIL + 0.6, -206.0 + abs(xx) * 0.25), V(0, -0.8, -0.6), 5.4 * size, 1.5 * size, sides=3, rings=1, hint=(1, 0, 0), phase=90)
     return fs
-
-
-def throat(lod):
-    """喉の奥の壁 (光る)。頭の下面の斜面のすぐ奥、舌の延長で床から天井まで立つ。口の中から見て橙に光る"""
-    fs = []
-    return fs
-    zf = -146.0
-    for sd in (0,):
-        top = 14.0
-        # 床 (顎の奥 -150 から壁まで) と奥の壁 (z=-142, 床の上 6 から天井へ)。内向き (南から見て正面) に向けた面
-        pts = [V(-30, 3.0, zf), V(30, 3.0, zf), V(26, 17.0, zf - 2.0), V(-26, 17.0, zf - 2.0)]
-        f = lpkit_face(pts, "head", "throat", V(0, 8, zf + 60))
-        if f:
-            fs.append(f)
-    return fs
-
-
-def lpkit_face(pts, bone, mat, ref):
-    return _mk(pts, bone, mat, ref)
 
 
 def hull(lod):
@@ -291,7 +271,6 @@ def build(lod):
     jw = jaw_c(lod)
     fs += jw.faces()
     fs += teeth_c(h, jw, lod)
-    fs += throat(lod)
     fs += cheeks(lod)
     fs += eyes(h, lod, sc=0.9) if lod > 0 else []
     fs += nostrils(h, lod, mat="plate")
