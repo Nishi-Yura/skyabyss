@@ -101,7 +101,7 @@ public class AshSmith extends EmberMob {
     public static final int RAGE_TICKS = 30;
     public static final float RAGE_SLAM_FACTOR = 0.8f;
     public static final double RING_SPEED = 0.55;
-    public static final double RING_MAX = 8.5;
+    public static final double RING_MAX = 8;
     public static final double RING_START = 1.2;
     public static final double RING_LANE_HALF = Math.toRadians(24);
     public static final double SPARK_FILL_MAX = 3.0;

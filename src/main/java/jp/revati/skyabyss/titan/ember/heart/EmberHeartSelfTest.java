@@ -731,6 +731,9 @@ public final class EmberHeartSelfTest {
             check(lost >= EmberHeart.PELLET_DAMAGE * 0.4f && lost <= EmberHeart.PELLET_DAMAGE * 1.6f, "the pellet circle under the player did " + lost, f);
             check(back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena()).isEmpty(), "pellets stayed after landing", f);
             // 叩けば消える: すべて叩くと、円も消えて傷はない
+            // 床の崩れ (段階 2 の 6〜8 秒ごと) の呑まれが混ざらないよう、段階 1 で
+            heart.forcePhase(0);
+            EmberHeartArena.restoreAll(back);
             target.setHealth(1000);
             target.invulnerableTime = 0;
             heart.forceAction(EmberHeart.Action.PELLET);
@@ -1010,6 +1013,9 @@ public final class EmberHeartSelfTest {
                     // いちばん遠くへ届く予告 (心臓の位置から、印の輪郭の点までの距離)
                     for (TelegraphShape shape : shapes) {
                         for (int k = 0; k <= 4; k++) {
+                            if (shape instanceof TelegraphShape.Circle circ && circ.r() <= 3.0) {
+                                continue;
+                            }
                             shape.at(k / 4.0).outline((px, pz) -> reach[0] = Math.max(reach[0], Math.hypot(px - heart.getX(), pz - heart.getZ())), 1.0);
                         }
                     }

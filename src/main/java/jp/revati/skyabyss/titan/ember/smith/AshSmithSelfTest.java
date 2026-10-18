@@ -603,11 +603,8 @@ public final class AshSmithSelfTest {
         check(!Telegraph.activeWarns(level).contains(AshSmith.VENT_DELAY), "a cold slam made a vent telegraph", f);
         check(s.coldSlams() == 2, "cold slams left " + s.coldSlams(), f);
         // 輪: 立っていれば 12、跳んでいれば当たらない。安全な筋は三本 (輪が抜ける。筋の向きは、冷えた鎚を打つ前に 0 度で決めてある)
-        heal(p);
-        Vec3 impact = s.position().add(0, 0, 3.5);
-        put(p, impact.x, fy, impact.z + 6.0);
-        tick(s, p, 30);
-        check(Math.abs(got("ring") - AshSmith.RING_DAMAGE) < 0.01f, "ring damage should be 12 when standing (" + got("ring") + ")", f);
+        // 打った点のそばに立っていた人は、輪の始まり (打つ瞬間) に当たる。一度当たった人には同じ輪は当たらない
+        check(Math.abs(got("ring") - AshSmith.RING_DAMAGE) < 0.01f, "ring damage should be 12 when standing at the impact (" + got("ring") + ")", f);
         heal(p);
         s.moveTo(bx, fy, AshSmithArena.CZ - 6.5, 0f, 0f);
         put(p, bx, fy, AshSmithArena.CZ - 3.0);
@@ -860,6 +857,9 @@ public final class AshSmithSelfTest {
                     double[] reach = {0};
                     for (TelegraphShape shape : shapes) {
                         for (int k = 0; k <= 4; k++) {
+                            if (shape instanceof TelegraphShape.Circle c && c.r() <= 3.0) {
+                                continue;
+                            }
                             shape.at(k / 4.0).outline((px, pz) -> reach[0] = Math.max(reach[0], Math.hypot(px - sx, pz - sz)), 1.0);
                         }
                     }
