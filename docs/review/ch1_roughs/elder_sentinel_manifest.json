@@ -1,0 +1,24 @@
+{
+ "id": "ch1_elder_sentinel",
+ "short": "老番兵",
+ "kind": "詰所の長 (中ボス・変種の大きな版) 3案",
+ "title": "老番兵 (elder_sentinel) — 老いた歩哨の大きな版・低ポリ + ドット絵 3 案",
+ "sheets": [
+  "ch1_roughs/elder_sentinel.png"
+ ],
+ "extra": "老いた歩哨の変種を 1.2 倍に大きくし、盾を 1.3 倍、腰の房（5 本）と腿の石の板を足す。骨の番兵の骨 9 本。老いた歩哨と同じ姿勢を使う（中ボスの予告は歩哨と同じ読み）。 三角形 (全身): A 1040 / B 1068 / C 1149 (目安 1,000〜1,300)。埋まった部品の検査: A left_forearm-shield:0.5, shield_eye-shield:1.0 / B left_forearm-shield:0.5, shield_eye-shield:1.0, forearm_plate1-shield:0.51 / C left_forearm-shield:0.5, shield_eye-shield:1.0 。メッシュ・アトラス・光る画素のマスクは docs/review/ch1_roughs/elder_sentinel/{a,b,c}/。生成: tools/rough/lowpoly/ch1/elder_sentinel.py。",
+ "options": {
+  "a": {
+   "name": "A 苔の守り手 (1040 三角形)",
+   "desc": "歩哨の A の大きな版。肩の苔の塊と背の苔の幕、腰の房（布の房が前へ垂れる）と腿の石の板。盾は骨の板で琥珀の割れ目の目。詰所の長として、苔の緑と房で一目で「歩哨より上」と分かる。"
+  },
+  "b": {
+   "name": "B 石板の守り手 (1068 三角形)",
+   "desc": "歩哨の B の大きな版。胸・腹・前腕に石の板、折れた角、大きな石の盾。灰青の重い輪郭で、体当たりのように読める。骨笛は石の板の上で胸の前に下がる。"
+  },
+  "c": {
+   "name": "C 頭巾の長老 (1149 三角形)",
+   "desc": "歩哨の C の大きな版。頭巾が頭と背を覆い、首の骨の笛の鎖、背の破れた旗（大きな竿）。腰の房も加わり、縦に長い。骨笛の予告で鎖と笛が揺れる。"
+  }
+ }
+}
