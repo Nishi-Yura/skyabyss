@@ -26,10 +26,10 @@ public final class TideBackClient {
         event.registerEntityRenderer(TideBackSetup.TIDE_BECKONER.get(), BeckonerRenderer::new);
     }
 
-    static final class BeckonerRenderer extends GeoEntityRenderer<TideBeckoner> {
+    // 低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+    static final class BeckonerRenderer extends jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<TideBeckoner> {
         BeckonerRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new DefaultedEntityGeoModel<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tide_beckoner"), false));
-            addRenderLayer(new AutoGlowingGeoLayer<>(this));
+            super(ctx, "tide_beckoner", 1.0f);
             this.shadowRadius = 1.8f;
         }
 

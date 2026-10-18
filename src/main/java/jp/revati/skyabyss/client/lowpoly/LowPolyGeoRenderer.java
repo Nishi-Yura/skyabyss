@@ -42,7 +42,12 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
         this.meshName = meshName;
         withScale(scale);
         // 光る所があるときだけ (発光マスクの画像があるときだけ) 光らせる。LowPoly.enabled の切り替えにも付いていく
-        addRenderLayer(new GlowLayer<>(this));
+        addRenderLayer(new GlowLayer<>(this, this::autoGlow));
+    }
+
+    // false のときは発光層 (AutoGlowingGeoLayer) を描かない。潮殻の心臓のように、元のキューブ版が自前の発光層を持つモブが上書きする
+    protected boolean autoGlow() {
+        return true;
     }
 
     @Override
@@ -111,13 +116,19 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     private static final class GlowLayer<T extends Entity & GeoAnimatable> extends AutoGlowingGeoLayer<T> {
         private static final Map<ResourceLocation, Boolean> HAS_MASK = new HashMap<>();
 
-        GlowLayer(GeoRenderer<T> renderer) {
+        private final java.util.function.BooleanSupplier enabled;
+
+        GlowLayer(GeoRenderer<T> renderer, java.util.function.BooleanSupplier enabled) {
             super(renderer);
+            this.enabled = enabled;
         }
 
         @Override
         public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType, MultiBufferSource bufferSource,
                            @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+            if (!enabled.getAsBoolean()) {
+                return;
+            }
             ResourceLocation tex = getTextureResource(animatable);
             boolean has = HAS_MASK.computeIfAbsent(tex, t -> Minecraft.getInstance().getResourceManager().getResource(
                     t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p)).isPresent());
