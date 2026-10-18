@@ -95,6 +95,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
+        // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
+        steps.add(Step.once("grave", jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
