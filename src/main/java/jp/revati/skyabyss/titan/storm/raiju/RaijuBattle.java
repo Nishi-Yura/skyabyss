@@ -1,6 +1,7 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
 import jp.revati.skyabyss.notice.Notice;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -9,9 +10,13 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.BossRoom;
-import jp.revati.skyabyss.titan.storm.back.StormBackState;
+import jp.revati.skyabyss.titan.group.GroupBossRoom;
+import jp.revati.skyabyss.titan.group.GroupBossRooms;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
+import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormBackTrials;
+import jp.revati.skyabyss.titan.storm.back.StormProgress;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -32,65 +37,85 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-// 雷獣の巣の戦い (12 の 5.2節・7.5節)。岩鯨の番兵長・潮殻の心臓と同じ決まり (BossRoom):
+// 雷獣の巣の戦い (12 の 5.2節・7.5節)。岩鯨の番兵長・潮殻の心臓と同じ決まり (GroupBossRoom):
 // 巣の中に人が入ると 5 秒の集合 → 入口が閉じて、雷とともに雷獣が柱の先へ落ちてくる → 全員が倒れるか巣から消えて 3 秒で放棄。
-// 雷獣が巣の外へ出たら中央へ戻す。撃破で入口が開き、報酬 (RaijuLoot)。
-// 撃破の記録 (RaijuState.defeated) は、背中のリセットが reawaken で戻すまで残る (そのあいだ巣に入っても戦いは始まらない)。
-// 撃破は StormBackTrials.onRaijuDefeated で背中の記録にも書く (東の風鳴り石・巣の昇り風は背中の担当がそちらを読む)
+// 雷獣が巣の外へ出たら中央へ戻す。撃破で入口が開き、報酬 (RaijuLoot。参加した一人ずつ)。
+// グループ (docs/design/10 の 9 章):
+//  - 巣は部屋の占有 (RoomLocks。ROOM): 柱の接地と栓が戦いで変わるので、一度に一つのグループだけが入れる。ほかのグループは肩の門の休み場 (e0) へ戻す。
+//    持ち主が変わると巣を戦いの前の姿に戻す (柱は満ち、栓は起きる)
+//  - 戦い・入口の封印・雷獣と雷蛾はグループのもの (GroupBossRooms。GroupOwned で、ほかのグループには見えず狙わない)
+//  - 撃破はグループの記録 (StormProgress.raijuDefeated)。倒したグループの人は巣に入っても戦いは始まらない (頂の東の石へ行ける)
+//    グループの試練が戻ると (StormBackTrials.resetGroup) 記録も消え、また挑める
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RaijuBattle {
-    private static final BossRoom ROOM = new BossRoom();
+    public static final String ROOM = "storm.raiju";
+    private static final GroupBossRooms ROOMS = new GroupBossRooms();
     private static long lastAsleepNotice;
 
     private RaijuBattle() {
     }
 
-    public static BossRoom room() {
-        return ROOM;
+    public static GroupBossRooms rooms() {
+        return ROOMS;
     }
 
-    // 東の風鳴り石が鳴れるか (この周で雷獣が倒された)
-    public static boolean defeated(MinecraftServer server) {
-        return RaijuState.get(server).defeated();
+    public static GroupBossRoom room(UUID group) {
+        return ROOMS.of(group);
     }
 
-    static final class Host implements BossRoom.Host {
+    // そのグループが、この周で雷獣を倒したか (東の風鳴り石が鳴らせる)
+    public static boolean defeated(ServerLevel level, UUID group) {
+        return StormProgress.of(level, group).raijuDefeated();
+    }
+
+    static final class Host implements GroupBossRoom.Host {
         private final RaijuNest.Site site;
 
         Host(RaijuNest.Site site) {
             this.site = site;
         }
 
+        // 戦える人: 巣の中の、雷獣をまだ倒していないグループの人
         @Override
         public List<ServerPlayer> playersInside(ServerLevel level) {
-            return level.getEntitiesOfClass(ServerPlayer.class, site.arena(), p -> p.isAlive() && !p.isSpectator() && site.inside(p.position()));
+            List<ServerPlayer> out = new ArrayList<>();
+            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, site.arena(),
+                    p -> p.isAlive() && !p.isSpectator() && site.inside(p.position()))) {
+                if (!StormProgress.of(level, p).raijuDefeated()) {
+                    out.add(p);
+                }
+            }
+            return out;
         }
 
         @Override
-        public void seal(ServerLevel level) {
-            RaijuNest.seal(site);
-            level.playSound(null, site.gateCenter(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.5f);
+        public void seal(ServerLevel level, UUID group) {
+            RaijuNest.seal(site, group);
+            for (ServerPlayer p : Groups.online(level, group)) {
+                p.playNotifySound(SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1f, 0.5f);
+            }
         }
 
         @Override
-        public void open(ServerLevel level) {
-            RaijuNest.open(site);
+        public void open(ServerLevel level, UUID group) {
+            RaijuNest.open(site, group);
         }
 
         @Override
-        public void pullIn(ServerLevel level) {
+        public void pullIn(ServerLevel level, UUID group) {
             AABB box = site.ante().minmax(site.door());
-            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, p -> p.isAlive() && !p.isSpectator())) {
+            for (ServerPlayer p : Groups.inBox(level, group, box)) {
                 moveInside(p);
             }
         }
 
         @Override
-        public void letBack(ServerLevel level, Set<UUID> participants) {
-            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, site.door(),
-                    p -> p.isAlive() && !p.isSpectator() && participants.contains(p.getUUID()))) {
-                moveInside(p);
-                Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
+        public void letBack(ServerLevel level, UUID group, Set<UUID> participants) {
+            for (ServerPlayer p : Groups.inBox(level, group, site.door())) {
+                if (participants.contains(p.getUUID())) {
+                    moveInside(p);
+                    Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
+                }
             }
         }
 
@@ -102,7 +127,7 @@ public final class RaijuBattle {
 
         @Override
         @Nullable
-        public Mob spawnBoss(ServerLevel level, List<ServerPlayer> challengers) {
+        public Mob spawnBoss(ServerLevel level, UUID group, List<ServerPlayer> challengers) {
             Raiju raiju = RaijuSetup.RAIJU.get().create(level);
             if (raiju == null) {
                 return null;
@@ -111,6 +136,7 @@ public final class RaijuBattle {
             int start = 0;
             raiju.moveTo(site.home().x, site.floor() + 7, site.home().z, 90f, 0f);
             raiju.bind(site, challengers.size(), start);
+            raiju.setGroupId(group);
             if (!level.addFreshEntity(raiju)) {
                 SkyAbyss.LOGGER.warn("The raiju could not be added to {} at {}", level.dimension().location(), raiju.position());
                 return null;
@@ -122,11 +148,15 @@ public final class RaijuBattle {
                 bolt.moveTo(top.x, top.y, top.z);
                 level.addFreshEntity(bolt);
             }
-            level.playSound(null, top.x, top.y, top.z, RaijuSetup.ROAR.get(), SoundSource.HOSTILE, 3f, 1.15f);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y + 1, top.z, 80, 1.0, 1.0, 1.0, 0.4);
-            broadcast(level, ModText.battle("message.skyabyss.raiju.begin"));
-            broadcast(level, ModText.hint("message.skyabyss.raiju.hint_plug"));
-            SkyAbyss.LOGGER.info("The raiju woke with {} challenger(s)", challengers.size());
+            for (ServerPlayer p : Groups.online(level, group)) {
+                if (p.distanceToSqr(top) < 48 * 48) {
+                    p.playNotifySound(RaijuSetup.ROAR.get(), SoundSource.HOSTILE, 3f, 1.15f);
+                    level.sendParticles(p, ParticleTypes.ELECTRIC_SPARK, false, top.x, top.y + 1, top.z, 80, 1.0, 1.0, 1.0, 0.4);
+                }
+            }
+            RaijuBattle.broadcast(site, group, ModText.battle("message.skyabyss.raiju.begin"));
+            RaijuBattle.broadcast(site, group, ModText.hint("message.skyabyss.raiju.hint_plug"));
+            SkyAbyss.LOGGER.info("The raiju woke with {} challenger(s) (group {})", challengers.size(), group);
             return raiju;
         }
 
@@ -141,21 +171,23 @@ public final class RaijuBattle {
         }
 
         @Override
-        public void broadcast(ServerLevel level, Component message) {
-            RaijuBattle.broadcast(site, message);
+        public void broadcast(ServerLevel level, UUID group, Component message) {
+            RaijuBattle.broadcast(site, group, message);
         }
 
         @Override
-        public void countdown(ServerLevel level, int secondsLeft) {
+        public void countdown(ServerLevel level, UUID group, int secondsLeft) {
             Component text = ModText.battle("message.skyabyss.gate_countdown", secondsLeft);
-            for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, site.arena().minmax(site.ante()), Entity::isAlive)) {
+            for (ServerPlayer p : Groups.inBox(level, group, site.arena().minmax(site.ante()))) {
                 Notice.bar(p, text);
             }
         }
 
         @Override
-        public void cleanup(ServerLevel level) {
-            for (Entity e : level.getEntitiesOfClass(Entity.class, site.arena().inflate(6), e -> e.getTags().contains(Raiju.TRIAL_TAG))) {
+        public void cleanup(ServerLevel level, UUID group) {
+            for (Entity e : level.getEntitiesOfClass(Entity.class, site.arena().inflate(6),
+                    e -> e.getTags().contains(Raiju.TRIAL_TAG) && e instanceof jp.revati.skyabyss.titan.group.GroupOwned owned
+                            && group.equals(owned.groupId()))) {
                 e.discard();
             }
         }
@@ -170,11 +202,32 @@ public final class RaijuBattle {
         return new Host(RaijuNest.site(server));
     }
 
-    static void broadcast(RaijuNest.Site site, Component message) {
+    // そのグループの、巣のまわりにいる人へ
+    static void broadcast(RaijuNest.Site site, UUID group, Component message) {
         AABB box = site.arena().minmax(site.ante()).inflate(2);
         for (ServerPlayer p : site.level().getEntitiesOfClass(ServerPlayer.class, box, Entity::isAlive)) {
-            Notice.send(p, message);
+            if (Groups.isMember(p, group)) {
+                Notice.send(p, message);
+            }
         }
+    }
+
+    private static RoomLocks.Listener lock(RaijuNest.Site site) {
+        return new RoomLocks.Listener() {
+            @Override
+            public void acquired(ServerLevel level, UUID group) {
+                RaijuNest.build(site);
+            }
+
+            @Override
+            public void released(ServerLevel level, UUID formerOwner) {
+                GroupBossRoom room = ROOMS.peek(formerOwner);
+                if (room != null && room.active()) {
+                    room.reset(level, new Host(site), true);
+                }
+                RaijuNest.build(site);
+            }
+        };
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -184,7 +237,6 @@ public final class RaijuBattle {
             return;
         }
         RaijuNest.Site site = RaijuNest.site(level.getServer());
-        RaijuState state = RaijuState.get(level.getServer());
         if (!level.isLoaded(site.center())) {
             return;
         }
@@ -194,55 +246,111 @@ public final class RaijuBattle {
         if (level.getGameTime() % 10 != 0) {
             return;
         }
-        if (level.getGameTime() % 100 == 0 && !ROOM.active()) {
+        if (level.getGameTime() % 100 == 0 && !ROOMS.anyActive()) {
             RaijuNest.ensureBuilt(site);
         }
-        // 背中のリセット (StormBackTrials.reset) が背中の記録を戻したら、雷獣もまた挑めるようにする
-        if (state.defeated() && !ROOM.active() && !StormBackState.get(level).raijuDefeated()) {
-            state.setDefeated(false);
-        }
-        if (state.defeated()) {
-            return;
-        }
+        tick(site);
+    }
+
+    // 10 tick ごと: 巣の占有を決め直し (ほかのグループは e0 へ)、グループごとの戦いを動かす
+    static void tick(RaijuNest.Site site) {
+        ServerLevel level = site.level();
+        RoomLocks.update(level, ROOM, site.arena(), StormBackLayout.rest("e0"), RoomLocks.DEFAULT_GRACE, lock(site));
         Host host = new Host(site);
         if (host.asleep(level) && !host.playersInside(level).isEmpty() && level.getGameTime() - lastAsleepNotice > 200) {
             lastAsleepNotice = level.getGameTime();
-            broadcast(site, ModText.deny("message.skyabyss.raiju.asleep"));
+            for (ServerPlayer p : host.playersInside(level)) {
+                Notice.send(p, ModText.deny("message.skyabyss.raiju.asleep"));
+            }
         }
-        ROOM.tick(level, host);
+        ROOMS.tick(level, host);
     }
 
-    // 戦いを今すぐ始める (テスト用のコマンドと自己テスト)。巣の中の人を挑む人とする
-    public static boolean startNow(MinecraftServer server) {
+    // 戦いを今すぐ始める (テスト用のコマンドと自己テスト)。巣の中のそのグループの人を挑む人とする
+    public static boolean startNow(MinecraftServer server, UUID group) {
         RaijuNest.Site site = RaijuNest.site(server);
         RaijuNest.ensureBuilt(site);
-        if (RaijuState.get(server).defeated()) {
-            reawaken(server);
+        if (defeated(site.level(), group)) {
+            reawaken(server, group);
         }
-        if (ROOM.active()) {
+        GroupBossRoom room = ROOMS.of(group);
+        if (room.active()) {
             return false;
         }
         Host host = new Host(site);
-        return ROOM.start(site.level(), host, host.playersInside(site.level()));
+        List<ServerPlayer> inside = new ArrayList<>();
+        for (ServerPlayer p : host.playersInside(site.level())) {
+            if (Groups.isMember(p, group)) {
+                inside.add(p);
+            }
+        }
+        return room.start(site.level(), host, inside);
     }
 
-    public static void abandon(MinecraftServer server) {
-        ROOM.reset(RaijuNest.site(server).level(), host(server), true);
+    public static void abandon(MinecraftServer server, UUID group) {
+        GroupBossRoom room = ROOMS.peek(group);
+        if (room != null) {
+            room.reset(RaijuNest.site(server).level(), host(server), true);
+        }
     }
 
-    // 雷獣をもう一度挑めるようにする (背中のリセット・テスト用)
-    public static void reawaken(MinecraftServer server) {
-        RaijuState.get(server).setDefeated(false);
+    public static void abandonAll(MinecraftServer server) {
+        ROOMS.resetAll(RaijuNest.site(server).level(), host(server), true);
+    }
+
+    // そのグループの雷獣をもう一度挑めるようにする (テスト用。背中のリセットはグループの記録ごと戻す)
+    public static void reawaken(MinecraftServer server, UUID group) {
         ServerLevel level = RaijuNest.site(server).level();
         if (RaijuNest.isNestLevel(level)) {
-            StormBackState.get(level).setRaijuDefeated(false);
+            StormProgress.of(level, group).setRaijuDefeated(false);
         }
-        ROOM.reset(RaijuNest.site(server).level(), host(server), false);
+        GroupBossRoom room = ROOMS.peek(group);
+        if (room != null) {
+            room.reset(level, host(server), false);
+        }
+    }
+
+    // グループの試練が戻った (StormBackTrials.resetGroup から): そのグループの戦いを止め、巣を持っていれば手放す
+    public static void onGroupReset(ServerLevel level, UUID group) {
+        if (!RaijuNest.isNestLevel(level)) {
+            return;
+        }
+        RaijuNest.Site site = RaijuNest.site(level.getServer());
+        GroupBossRoom room = ROOMS.peek(group);
+        if (room != null && (room.active() || room.gathering())) {
+            room.reset(level, new Host(site), false);
+        }
+        if (group.equals(RoomLocks.owner(ROOM))) {
+            RoomLocks.release(ROOM);
+            if (level.isLoaded(site.center())) {
+                RaijuNest.build(site);
+            }
+        }
+    }
+
+    // いま戦っている雷獣 (巣の持ち主の。いなければどれか一つ)
+    @Nullable
+    public static Raiju current(MinecraftServer server) {
+        UUID owner = RoomLocks.owner(ROOM);
+        if (owner != null) {
+            Raiju r = current(server, owner);
+            if (r != null) {
+                return r;
+            }
+        }
+        for (GroupBossRoom room : ROOMS.all()) {
+            Raiju r = current(server, room.group);
+            if (r != null) {
+                return r;
+            }
+        }
+        return null;
     }
 
     @Nullable
-    public static Raiju current(MinecraftServer server) {
-        UUID id = ROOM.bossId();
+    public static Raiju current(MinecraftServer server, UUID group) {
+        GroupBossRoom room = ROOMS.peek(group);
+        UUID id = room == null ? null : room.bossId();
         if (id == null) {
             return null;
         }
@@ -260,24 +368,33 @@ public final class RaijuBattle {
         if (site.level() != level) {
             return;
         }
-        Set<UUID> ids = ROOM.finish(level, new Host(site), raiju.getUUID());
+        GroupBossRoom room = ROOMS.byBoss(raiju.getUUID());
+        if (room == null) {
+            return;
+        }
+        UUID group = room.group;
+        Set<UUID> ids = room.finish(level, new Host(site), raiju.getUUID());
         if (ids == null) {
             return;
         }
         RaijuState.get(level.getServer()).setDefeated(true);
-        // 背中の記録へ (巣の真ん中の昇り風が立ち、東の風鳴り石が鳴らせる)
-        StormBackTrials.onRaijuDefeated(level);
+        // グループの記録へ (巣の真ん中の昇り風が立ち、東の風鳴り石が鳴らせる)
+        StormBackTrials.onRaijuDefeated(level, group);
         RaijuLoot.onDefeat(level, ids);
-        broadcast(site, ModText.lore("message.skyabyss.raiju.after"));
-        broadcast(site, ModText.progress("message.skyabyss.raiju.east_stone_ready"));
+        broadcast(site, group, ModText.lore("message.skyabyss.raiju.after"));
+        broadcast(site, group, ModText.progress("message.skyabyss.raiju.east_stone_ready"));
         Vec3 c = site.home();
-        level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 1.2f);
-        // 行き場をなくした雷が柱を行き来する (9.3節の伝承の絵)
-        for (int i = 0; i < RaijuNest.RODS; i++) {
-            Vec3 t = Vec3.atCenterOf(site.rodTop(i));
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, t.x, t.y + 0.5, t.z, 40, 0.3, 0.6, 0.3, 0.3);
+        for (ServerPlayer p : Groups.online(level, group)) {
+            if (p.distanceToSqr(c) < 48 * 48) {
+                p.playNotifySound(SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 1.2f);
+                // 行き場をなくした雷が柱を行き来する (9.3節の伝承の絵)
+                for (int i = 0; i < RaijuNest.RODS; i++) {
+                    Vec3 t = Vec3.atCenterOf(site.rodTop(i));
+                    level.sendParticles(p, ParticleTypes.ELECTRIC_SPARK, false, t.x, t.y + 0.5, t.z, 40, 0.3, 0.6, 0.3, 0.3);
+                }
+            }
         }
-        SkyAbyss.LOGGER.info("The raiju was defeated by {} participant(s)", ids.size());
+        SkyAbyss.LOGGER.info("The raiju was defeated by {} participant(s) (group {})", ids.size(), group);
     }
 
     // 試練で湧いた雷獣は保存しないが、古いものが残っていれば読み込みのときに消す
@@ -290,7 +407,8 @@ public final class RaijuBattle {
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        ROOM.clear();
+        ROOMS.clear();
+        RoomLocks.release(ROOM);
     }
 
 }

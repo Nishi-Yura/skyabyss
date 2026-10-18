@@ -3,10 +3,14 @@ package jp.revati.skyabyss.titan.storm.back;
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -17,14 +21,28 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupEvents;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.GroupProgress;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormSetup;
 import jp.revati.skyabyss.titan.storm.StormTravel;
+import jp.revati.skyabyss.titan.storm.heart.StormHeartBattle;
+import jp.revati.skyabyss.titan.storm.raiju.RaijuBattle;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
@@ -46,33 +64,79 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 雷翼の背の試練の進み (12 の 3〜4・7 章)。岩鯨・潮殻と同じ決まりを、雷翼の背の配置で動かす。
-//  - 嵐の拍 (StormBackClock) を進め、荒れる・静まるの 10 秒前に島じゅうに音を鳴らす
+//  - 嵐の拍 (StormBackClock) を進め、荒れる・静まるの 10 秒前に島じゅうに音を鳴らす (拍は全員に同じ)
 //  - 三つの試練 (StormWest・StormEast・EyeMirrors) と風鳴り石。三つが鳴ると広間の床の竜骨の門が開く
-//  - 休み場 (hub・w0・w1・e0・e1・f0・heart): 着くと記録、倒れるとそこで目を覚ます (記録は試練の番号つき)。焚き火にしゃがんで触れると尾の間へ
+//  - 休み場 (hub・w0・w1・e0・e1・f0・heart): 着くと記録、倒れるとそこで目を覚ます (記録はグループの試練の番号つき)。焚き火にしゃがんで触れると尾の間へ
 //  - 倒れても持ち物と経験値は預かる (岩鯨と同じ部品 TitanBackTrials.keepBelongings)
-//  - リセット: 背中に誰もいなくなって 3 分、または心臓を倒したあと竜骨の門より奥に 30 秒だれもいない。2 周目から一つ眠る
 //  - ピースフル: 腰の回廊を封じ、体の中の人は到着へ。試練の敵は消える (嵐の拍は景色として動く)
 //
-// ほかの担当へ: 試練で湧かせた敵には TRIAL_TAG を付けると、リセットとピースフルで消える。雷獣を倒したら onRaijuDefeated を呼ぶ
+// グループ (docs/design/10 の 9 章): 背中は一つで、進みはグループ (パーティ、または一人) ごと (StormProgress)。
+//  - 扉 (封印の扉のブロック。いつも置いてある): 竜骨の門の栓・東の骨の戸 3 枚・嘴の小部屋の戸は、既定で閉じていて、
+//    そのグループの進みが開けた所だけ、そのグループに開く (GroupGates)。ピースフルの封印は全員に同じ (既定を変える)
+//  - 見かけ (当たり判定の変わらない物): 鳴った風鳴り石・広間の床の灯り・抜け道の床は、グループの記録から各人の画面に出す (overlay)
+//  - 部屋の占有 (RoomLocks): 眼の間 (鏡と受け羽) と東の回廊 (柱の段・招雷・予告線) は一度に一つのグループだけ。
+//    竜骨の間 (心臓) と雷獣の巣は StormHeartBattle・RaijuBattle が持つ
+//  - リセットはグループごと: そのグループのだれも背中にいないまま 3 分 (GroupProgress.idleGroups)、
+//    または心臓を倒したあと、そのグループのだれも竜骨の門より奥にいないまま 30 秒。2 周目から試練が一つ眠る
+//  - 背中にだれもいなくなって 3 分: 背中そのものを片付ける (試練の敵・雷・部屋の占有、風切りの骨の道を引き直す)
+//  - パーティを組む・入る・抜けると記録が変わる: 体の中 (試練の中) にいる人は広間へ移す (onMembershipChanged)
+//
+// ほかの担当へ: 試練で湧かせた敵には TRIAL_TAG とグループ (GroupOwned.setGroupId) を付けると、そのグループのリセットとピースフルで消える。
+// 雷獣を倒したら onRaijuDefeated(level, group) を呼ぶ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormBackTrials {
     public static final String TRIAL_TAG = "skyabyss_storm_trial";
-    public static final int RESET_AFTER_IDLE = 20 * 60 * 3;
+    public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
     public static final int TRIAL_XP = 60;
     // 雷翼の推奨レベル (12 の 6.6節)
     public static final int STORM_LEVEL = 24;
+    // 部屋の占有の名前
+    public static final String EYE_ROOM = "storm.eye";
+    public static final String EAST_ROOM = "storm.east";
     private static final String TAG_CHECKPOINT = "skyabyss_storm_checkpoint";
     private static final String TAG_CHECKPOINT_EPOCH = "skyabyss_storm_checkpoint_epoch";
     private static final String TAG_SEEN_EPOCH = "skyabyss_storm_epoch";
     private static final String TAG_DIED = "skyabyss_died_on_storm";
+    private static final AABB BODY = new AABB(-150, 100, -120, 150, 170, 130);
 
     private static boolean ready;
+    // 背中にだれもいない時間 (背中そのものの片付け)
     private static int idleTicks;
-    private static int afterHeartIdle;
+    // 心臓を倒したグループの、竜骨の門より奥にだれもいない時間
+    private static final Map<UUID, Integer> AFTER_HEART = new HashMap<>();
     private static boolean wasPeaceful;
     private static StormBackClock.Phase lastPhase;
     private static final Set<UUID> REVIVING = new HashSet<>();
+
+    static {
+        GroupEvents.addMembershipHook(StormBackTrials::onMembershipChanged);
+        GroupOverlays.register(StormBackTrials::overlay);
+    }
+
+    private static final RoomLocks.Listener EYE_LISTENER = new RoomLocks.Listener() {
+        @Override
+        public void acquired(ServerLevel level, UUID group) {
+            EyeMirrors.apply(level, StormProgress.of(level, group));
+        }
+
+        @Override
+        public void released(ServerLevel level, UUID formerOwner) {
+            EyeMirrors.applyNeutral(level);
+        }
+    };
+
+    private static final RoomLocks.Listener EAST_LISTENER = new RoomLocks.Listener() {
+        @Override
+        public void acquired(ServerLevel level, UUID group) {
+            StormEast.apply(level, StormProgress.of(level, group));
+        }
+
+        @Override
+        public void released(ServerLevel level, UUID formerOwner) {
+            StormEast.applyNeutral(level);
+        }
+    };
 
     private StormBackTrials() {
     }
@@ -89,13 +153,18 @@ public final class StormBackTrials {
         return e.level().dimension() == StormTravel.STORM_BACK;
     }
 
+    // その人のグループの試練の番号 (休み場の記録の番号)
+    static int epochOf(ServerLevel back, ServerPlayer player) {
+        return GroupProgress.epoch(back, Groups.keyOf(player));
+    }
+
     // 嵐に投げ返されたときに戻す所 (最後の休み場、なければ到着)
     public static BlockPos fallbackPoint(ServerPlayer player) {
         ServerLevel back = player.server.getLevel(StormTravel.STORM_BACK);
         if (back == null) {
             return ARRIVAL;
         }
-        String cp = validCheckpoint(persisted(player), TitanBackData.get(back).epoch());
+        String cp = validCheckpoint(persisted(player), epochOf(back, player));
         return cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
     }
 
@@ -105,11 +174,85 @@ public final class StormBackTrials {
     }
 
     // ---------------------------------------------------------------- 建てたあと・起動のあと
+    // 建て直したあと: 全グループの進みを戻し (形が変わったので)、背中そのものを置き直す
     public static void afterBuild(ServerLevel level) {
-        StormBackState state = StormBackState.get(level);
-        state.reset(level.random, null, true);
-        applyTrials(level, state);
+        for (UUID id : BackGroupData.get(level).ids()) {
+            resetGroup(level, id, false, null, true, false);
+        }
+        applyWorld(level);
         ready = true;
+    }
+
+    // 背中そのもの (全員に同じ所) を置き直す。何度呼んでも同じ: 風切りの骨の道、竜骨の門の下の形、扉のブロック、
+    // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
+    static void applyWorld(ServerLevel level) {
+        StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
+        StormBirdBuilder.carveKeel(level);
+        placeGates(level);
+        applyStones(level);
+        UUID east = RoomLocks.owner(EAST_ROOM);
+        if (east == null) {
+            StormEast.applyNeutral(level);
+        } else {
+            StormEast.apply(level, StormProgress.of(level, east));
+        }
+        UUID eye = RoomLocks.owner(EYE_ROOM);
+        if (eye == null) {
+            EyeMirrors.applyNeutral(level);
+        } else {
+            EyeMirrors.apply(level, StormProgress.of(level, eye));
+        }
+    }
+
+    // ---------------------------------------------------------------- 扉 (グループごと)
+    // ピースフルの封印 (腰の回廊。全員に同じ)
+    static List<BlockPos> sealBlocks() {
+        List<BlockPos> out = new ArrayList<>();
+        for (int x = -1; x <= 1; x++) {
+            for (int y = TAIL_HALL.floor() + 1; y <= TAIL_HALL.floor() + 4; y++) {
+                out.add(new BlockPos(x, y, SEAL_Z));
+            }
+        }
+        return out;
+    }
+
+    // 扉のブロックを置く (既定: 竜骨の門・骨の戸・嘴の戸は閉じている。封印はピースフルのときだけ閉じている)
+    static void placeGates(ServerLevel level) {
+        GroupGates.place(level, StormBirdBuilder.keelPlug(), false);
+        for (int i = 0; i < EAST_DOORS.length; i++) {
+            GroupGates.place(level, StormEast.doorBlocks(i), false);
+        }
+        GroupGates.place(level, EyeMirrors.beakDoor(), false);
+        GroupGates.place(level, sealBlocks(), level.getDifficulty() != Difficulty.PEACEFUL);
+    }
+
+    // そのグループの扉を、記録のとおりに開け閉めする (リセットのあと・着いたとき・パーティが変わったとき)
+    public static void syncGates(ServerLevel level, UUID group) {
+        StormProgress p = StormProgress.of(level, group);
+        for (int i = 0; i < EAST_DOORS.length; i++) {
+            GroupGates.set(level, group, StormEast.doorBlocks(i), p.eastDoorPassable(i));
+        }
+        GroupGates.set(level, group, EyeMirrors.beakDoor(), p.beakOpen());
+        GroupGates.set(level, group, StormBirdBuilder.keelPlug(), p.keelOpen());
+    }
+
+    // ---------------------------------------------------------------- 見かけ (グループごと)
+    // 鳴った風鳴り石・広間の床の灯り・抜け道の床 (当たり判定は同じ)。ワールドのブロックはまだ鳴っていない姿
+    static void overlay(ServerLevel level, UUID group, BiConsumer<BlockPos, BlockState> out) {
+        if (level.dimension() != StormTravel.STORM_BACK) {
+            return;
+        }
+        StormProgress p = StormProgress.peek(level, group);
+        if (p == null) {
+            return;
+        }
+        for (StormBackState.Trial t : StormBackState.Trial.values()) {
+            if (p.rung(t)) {
+                out.accept(stonePos(t), StormBackSetup.CHIME_STONE.get().defaultBlockState().setValue(StormBlocks.ChimeStone.ACTIVE, true));
+                out.accept(lampPos(t), StormKit.LAMP);
+                out.accept(padPos(t), StormKit.LAMP);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -122,35 +265,37 @@ public final class StormBackTrials {
         if (!data.isBuilt() || data.needsBuild(LAYOUT_VERSION)) {
             return;
         }
-        StormBackState state = StormBackState.get(level);
-        if (data.isHeartDefeated() && !state.everDefeated()) {
-            state.markDefeated();
-        }
         boolean anyone = level.players().stream().anyMatch(p -> !p.isSpectator());
         if (level.getGameTime() % 10 == 0) {
-            tickReset(level, data, state, anyone);
+            tickReset(level, anyone);
         }
         if (!anyone) {
             return;
         }
         if (!ready) {
-            applyTrials(level, state);
+            applyWorld(level);
             ready = true;
+        }
+        long gt = level.getGameTime();
+        if (gt % 10 == 0) {
+            tickRooms(level);
         }
         StormBackClock.Phase warn = StormBackClock.advance(level);
         if (warn != null) {
             horn(level, warn);
         }
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
-        StormWest.tick(level, state, peaceful);
-        StormEast.tick(level, state, peaceful);
-        long gt = level.getGameTime();
-        if (gt % 4 == 0 && level.players().stream().anyMatch(p -> inFront(p.position()))) {
-            EyeMirrors.tick(level, state);
+        StormWest.tick(level, peaceful);
+        StormEast.tick(level, RoomLocks.owner(EAST_ROOM), peaceful);
+        if (gt % 4 == 0) {
+            UUID eye = RoomLocks.owner(EYE_ROOM);
+            if (eye != null) {
+                EyeMirrors.tick(level, StormProgress.of(level, eye));
+            }
         }
         if (gt % 5 == 0) {
-            tickKeel(level, state);
-            tickPads(level, state);
+            tickKeel(level);
+            tickPads(level);
             tickPeaceful(level, peaceful);
             tickGateFace(level);
         }
@@ -159,6 +304,17 @@ public final class StormBackTrials {
             lastPhase = phase;
             sendGauge(level);
         }
+    }
+
+    // 眼の間の占有の箱 (眼の間と嘴の小部屋)
+    static AABB eyeRoom() {
+        return EYE_HALL.aabb().minmax(BEAK_ROOM.aabb());
+    }
+
+    // 部屋の占有 (10 tick ごと): 最初に入ったグループが持ち主。ほかのグループは入口の外の休み場へ戻す
+    static void tickRooms(ServerLevel level) {
+        RoomLocks.update(level, EYE_ROOM, eyeRoom(), rest("f0"), RoomLocks.DEFAULT_GRACE, EYE_LISTENER);
+        RoomLocks.update(level, EAST_ROOM, StormEast.room(), rest("e0"), RoomLocks.DEFAULT_GRACE, EAST_LISTENER);
     }
 
     // 荒れる 10 秒前に低い風の唸り、静まる 10 秒前に遠い高い鳴き声 (島じゅう)
@@ -181,24 +337,43 @@ public final class StormBackTrials {
         StormFx.ring(level, ParticleTypes.END_ROD, Vec3.atBottomCenterOf(DOWNDRAFT), 1.4, 8);
     }
 
-    // ---------------------------------------------------------------- 竜骨の門
-    private static void tickKeel(ServerLevel level, StormBackState state) {
-        if (!state.keelOpen() && state.allRung()) {
-            state.setKeelOpen(true);
-            StormBirdBuilder.setKeelGate(level, true);
-            level.playSound(null, HUB_CENTER, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
-            for (ServerPlayer p : level.players()) {
-                Notice.narrate(p, "message.skyabyss.storm.keel_opened");
+    // 背中にいるグループ (重複なし)
+    static List<UUID> presentGroups(ServerLevel level) {
+        List<UUID> out = new ArrayList<>();
+        for (ServerPlayer p : level.players()) {
+            UUID k = Groups.keyOf(p);
+            if (!out.contains(k)) {
+                out.add(k);
             }
         }
-        if (state.keelOpen() && level.getGameTime() % 10 == 0) {
-            // 下から風が吹き上がる
-            StormFx.forced(level, ParticleTypes.CLOUD, 0.5, HUB.floor() + 0.5, -3.5, 0, 0, 1, 0, 0.3);
+        return out;
+    }
+
+    // ---------------------------------------------------------------- 竜骨の門 (グループごと)
+    private static void tickKeel(ServerLevel level) {
+        for (UUID group : presentGroups(level)) {
+            StormProgress p = StormProgress.of(level, group);
+            if (!p.keelOpen() && p.allRung()) {
+                openKeel(level, p);
+            }
+            if (p.keelOpen() && level.getGameTime() % 10 == 0) {
+                // 下から風が吹き上がる (開いたグループにだけ見える)
+                StormFx.to(group, () -> StormFx.forced(level, ParticleTypes.CLOUD, 0.5, HUB.floor() + 0.5, -3.5, 0, 0, 1, 0, 0.3));
+            }
         }
     }
 
-    // ---------------------------------------------------------------- 抜け道の床 (石が鳴ると光り、踏むと広間の近くへ)
-    private static void tickPads(ServerLevel level, StormBackState state) {
+    static void openKeel(ServerLevel level, StormProgress p) {
+        p.setKeelOpen(true);
+        GroupGates.open(level, p.group, StormBirdBuilder.keelPlug());
+        groupSound(level, p.group, HUB_CENTER, SoundEvents.BEACON_ACTIVATE, 3f, 0.6f);
+        for (ServerPlayer pl : Groups.online(level, p.group)) {
+            Notice.narrate(pl, "message.skyabyss.storm.keel_opened");
+        }
+    }
+
+    // ---------------------------------------------------------------- 抜け道の床 (石が鳴ると光り、踏むと広間の近くへ。その人のグループの石で)
+    private static void tickPads(ServerLevel level) {
         for (ServerPlayer p : level.players()) {
             if (p.isSpectator()) {
                 continue;
@@ -209,7 +384,7 @@ public final class StormBackTrials {
                 continue;
             }
             StormBackState.Trial t = StormBackState.Trial.byId(to);
-            if (t != null && state.rung(t)) {
+            if (t != null && StormProgress.of(level, p).rung(t)) {
                 BlockPos dest = RETURN_TO.get(to);
                 p.fallDistance = 0;
                 p.teleportTo(level, dest.getX() + 0.5, dest.getY(), dest.getZ() + 0.5, p.getYRot(), p.getXRot());
@@ -219,50 +394,49 @@ public final class StormBackTrials {
         }
     }
 
-    // ---------------------------------------------------------------- 風鳴り石
+    // ---------------------------------------------------------------- 風鳴り石 (グループごと)
     public static void useStone(ServerLevel level, BlockPos pos, ServerPlayer player) {
         if (level.dimension() != StormTravel.STORM_BACK) {
             return;
         }
-        StormBackState state = StormBackState.get(level);
+        StormProgress p = StormProgress.of(level, player);
         StormBackState.Trial trial = pos.equals(WEST_STONE) ? StormBackState.Trial.WEST
                 : pos.equals(EAST_STONE) ? StormBackState.Trial.EAST : pos.equals(FRONT_STONE) ? StormBackState.Trial.FRONT : null;
         if (trial == null) {
             return;
         }
-        if (state.rung(trial)) {
-            Notice.bar(player, ModText.hint(state.sleeping() == trial ? "message.skyabyss.storm.trial_sleeping" : "message.skyabyss.storm.stone_rung"));
+        if (p.rung(trial)) {
+            Notice.bar(player, ModText.hint(p.sleeping() == trial ? "message.skyabyss.storm.trial_sleeping" : "message.skyabyss.storm.stone_rung"));
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
-        if (trial == StormBackState.Trial.EAST && !state.raijuDefeated()) {
+        if (trial == StormBackState.Trial.EAST && !p.raijuDefeated()) {
             Notice.bar(player, ModText.deny("message.skyabyss.storm.stone_silent"));
             return;
         }
-        ring(level, state, trial, player);
+        ring(level, p, trial, player);
     }
 
-    public static void ring(ServerLevel level, StormBackState state, StormBackState.Trial trial, @Nullable ServerPlayer by) {
-        state.setRung(trial, true);
-        applyStones(level, state);
+    // 石を鳴らす (そのグループの記録に)。音・粒・知らせ・経験値はそのグループの人へ (石の 16 ブロック以内の人と、いないパーティの仲間)
+    public static void ring(ServerLevel level, StormProgress p, StormBackState.Trial trial, @Nullable ServerPlayer by) {
+        p.setRung(trial, true);
+        GroupOverlays.refresh(level, p.group);
         BlockPos pos = stonePos(trial);
-        level.playSound(null, pos, StormSetup.RECEIVER_LIT.get(), SoundSource.BLOCKS, 3f, 0.7f);
-        level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 3f, 0.8f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
+        groupSound(level, p.group, pos, StormSetup.RECEIVER_LIT.get(), 3f, 0.7f);
+        groupSound(level, p.group, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, 3f, 0.8f);
+        StormFx.to(p.group, () -> StormFx.forced(level, ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05));
         if (by != null) {
             Notice.bar(by, ModText.hint("message.skyabyss.storm.return_opened"));
         }
         Component msg = ModText.progress("message.skyabyss.storm.stone_ringing", Component.translatable("trial.skyabyss.storm_" + trial.id()),
-                state.rungCount(), 3);
-        for (ServerPlayer p : level.players()) {
-            Notice.send(p, msg);
-        }
-        List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(16), p -> p.isAlive() && !p.isSpectator());
-        for (ServerPlayer p : near) {
-            Growth.addXp(p, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(p).level, STORM_LEVEL)), "growth.skyabyss.reason.storm_trial");
-            jp.revati.skyabyss.quest.Quests.signal(p, "storm_trial_" + trial.id());
+                p.rungCount(), 3);
+        Groups.tell(level, p.group, msg);
+        List<ServerPlayer> near = Groups.inBox(level, p.group, new AABB(pos).inflate(16));
+        for (ServerPlayer pl : near) {
+            Growth.addXp(pl, (int) Math.round(TRIAL_XP * GrowthRules.levelFalloff(Growth.get(pl).level, STORM_LEVEL)), "growth.skyabyss.reason.storm_trial");
+            jp.revati.skyabyss.quest.Quests.signal(pl, "storm_trial_" + trial.id());
         }
         double rate = jp.revati.skyabyss.party.Parties.shareRate(level.getServer());
         for (ServerPlayer mate : jp.revati.skyabyss.party.Parties.absentMates(level, near)) {
@@ -270,9 +444,9 @@ public final class StormBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
-        if (state.allRung()) {
-            for (ServerPlayer p : level.players()) {
-                Notice.narrate(p, "message.skyabyss.storm.all_rung");
+        if (p.allRung()) {
+            for (ServerPlayer pl : Groups.online(level, p.group)) {
+                Notice.narrate(pl, "message.skyabyss.storm.all_rung");
             }
         }
     }
@@ -285,140 +459,203 @@ public final class StormBackTrials {
         };
     }
 
-    // 三つの石・広間の床の灯り・抜け道の床を、いまの状態に合わせる
-    static void applyStones(ServerLevel level, StormBackState state) {
+    static BlockPos lampPos(StormBackState.Trial t) {
+        return switch (t) {
+            case WEST -> LAMP_WEST;
+            case EAST -> LAMP_EAST;
+            case FRONT -> LAMP_FRONT;
+        };
+    }
+
+    static BlockPos padPos(StormBackState.Trial t) {
+        return switch (t) {
+            case WEST -> RETURN_WEST;
+            case EAST -> RETURN_EAST;
+            case FRONT -> RETURN_FRONT;
+        };
+    }
+
+    // 三つの石・広間の床の灯り・抜け道の床のワールドの姿 (まだ鳴っていない)。鳴った姿はグループごとの見かけ (overlay)
+    static void applyStones(ServerLevel level) {
         for (StormBackState.Trial t : StormBackState.Trial.values()) {
-            boolean rung = state.rung(t);
-            BlockState want = StormBackSetup.CHIME_STONE.get().defaultBlockState().setValue(StormBlocks.ChimeStone.ACTIVE, rung);
+            BlockState want = StormBackSetup.CHIME_STONE.get().defaultBlockState().setValue(StormBlocks.ChimeStone.ACTIVE, false);
             BlockPos s = stonePos(t);
             if (!level.getBlockState(s).equals(want)) {
                 level.setBlock(s, want, 3);
             }
-            BlockPos lamp = switch (t) {
-                case WEST -> LAMP_WEST;
-                case EAST -> LAMP_EAST;
-                case FRONT -> LAMP_FRONT;
-            };
-            level.setBlock(lamp, rung ? StormKit.LAMP : StormKit.SLATE, 3);
-            BlockPos pad = switch (t) {
-                case WEST -> RETURN_WEST;
-                case EAST -> RETURN_EAST;
-                case FRONT -> RETURN_FRONT;
-            };
-            level.setBlock(pad, rung ? StormKit.LAMP : StormKit.SLATE, 3);
+            if (!level.getBlockState(lampPos(t)).equals(StormKit.SLATE)) {
+                level.setBlock(lampPos(t), StormKit.SLATE, 3);
+            }
+            if (!level.getBlockState(padPos(t)).equals(StormKit.SLATE)) {
+                level.setBlock(padPos(t), StormKit.SLATE, 3);
+            }
         }
     }
 
-    // 雷獣を倒した (雷獣の担当が呼ぶ)。巣の真ん中の昇り風が立ち、頂の東の石へ届く
-    public static void onRaijuDefeated(ServerLevel level) {
-        StormBackState state = StormBackState.get(level);
-        state.setRaijuDefeated(true);
+    // そのグループの人の近くでだけ鳴る音
+    static void groupSound(ServerLevel level, UUID group, BlockPos pos, SoundEvent sound, float volume, float pitch) {
+        Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
+        ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, SoundSource.BLOCKS, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                volume, pitch, level.random.nextLong());
+        double range = Math.max(16, volume * 16);
         for (ServerPlayer p : level.players()) {
+            if ((p.isSpectator() || Groups.isMember(p, group)) && p.distanceToSqr(Vec3.atCenterOf(pos)) < range * range && p.connection != null) {
+                p.connection.send(packet);
+            }
+        }
+    }
+
+    // 雷獣を倒した (雷獣の担当が、倒したグループで呼ぶ)。そのグループに、巣の真ん中の昇り風が立ち、頂の東の石へ届く
+    public static void onRaijuDefeated(ServerLevel level, UUID group) {
+        StormProgress.of(level, group).setRaijuDefeated(true);
+        for (ServerPlayer p : Groups.online(level, group)) {
             if (inEast(p.position())) {
                 Notice.bar(p, ModText.lore("message.skyabyss.raiju.defeated"));
             }
         }
     }
 
-    // ---------------------------------------------------------------- リセット
-    private static void tickReset(ServerLevel level, TitanBackData data, StormBackState state, boolean anyone) {
+    // ---------------------------------------------------------------- リセット (グループごと)
+    private static void tickReset(ServerLevel level, boolean anyone) {
         if (!anyone) {
             idleTicks += 10;
-            if (idleTicks >= RESET_AFTER_IDLE && (state.rungCount() > (state.sleeping() != null ? 1 : 0) || data.isHeartDefeated()
-                    || state.receivers() != 0 || state.raijuDefeated() || anyDoor(state))) {
-                idleTicks = 0;
-                reset(level, false);
+            if (idleTicks == RESET_AFTER_IDLE) {
+                cleanupWorld(level);
             }
         } else {
             idleTicks = 0;
         }
-        if (data.isHeartDefeated()) {
+        // そのグループのだれも背中にいないまま 3 分
+        if (level.getGameTime() % 100 == 0) {
+            for (UUID group : GroupProgress.idleGroups(level)) {
+                if (StormProgress.of(level, group).needsReset()) {
+                    resetGroup(level, group, false, null, false, true);
+                }
+            }
+        }
+        // 心臓を倒したあと、そのグループのだれも竜骨の門より奥にいないまま 30 秒
+        BackGroupData groups = BackGroupData.get(level);
+        for (UUID group : groups.ids()) {
+            BackGroupData.Record r = groups.peek(group);
+            if (r == null || !r.isHeartDefeated()) {
+                AFTER_HEART.remove(group);
+                continue;
+            }
             boolean inside = false;
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Groups.online(level, group)) {
                 if (!p.isSpectator() && pastKeel(p.position())) {
                     inside = true;
                     break;
                 }
             }
-            afterHeartIdle = inside ? 0 : afterHeartIdle + 10;
-            if (afterHeartIdle >= RESET_AFTER_HEART) {
-                afterHeartIdle = 0;
-                reset(level, true);
+            int t = inside ? 0 : AFTER_HEART.getOrDefault(group, 0) + 10;
+            if (t >= RESET_AFTER_HEART) {
+                AFTER_HEART.remove(group);
+                resetGroup(level, group, true, null, false, true);
+            } else {
+                AFTER_HEART.put(group, t);
             }
-        } else {
-            afterHeartIdle = 0;
         }
     }
 
-    private static boolean anyDoor(StormBackState state) {
-        for (int i = 0; i < EAST_DOORS.length; i++) {
-            if (state.eastDoorOpen(i)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static void reset(ServerLevel level, boolean announce) {
-        reset(level, announce, null, false);
-    }
-
-    // 試練を最初に戻す (12 の 7.1節)。試練の番号が進み (古い休み場の記録は無効)、心臓も眠り直す (TitanBackData)
-    public static void reset(ServerLevel level, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep) {
-        TitanBackData data = TitanBackData.get(level);
-        data.resetProgress();
-        StormBackState state = StormBackState.get(level);
-        state.reset(level.random, forceSleep, noSleep);
-        BlockPos hub = RESTS.get(0).spawn();
-        for (ServerPlayer p : List.copyOf(level.players())) {
-            if (!p.isSpectator() && StormBackLayout.inTrial(p.position())) {
-                p.fallDistance = 0;
-                p.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, p.getYRot(), 0f);
-            }
-        }
-        applyTrials(level, state);
-        lastPhase = null;
-        if (announce) {
-            for (ServerPlayer p : level.players()) {
-                Notice.narrate(p, "message.skyabyss.storm.trials_renewed");
-                tellSleeping(p, state);
-            }
-        }
-        SkyAbyss.LOGGER.info("Storm back trials reset (sleeping: {}, mirror config {}, west route {})",
-                state.sleeping() == null ? "none" : state.sleeping().id(), state.mirrorConfig(), state.westRoute());
-    }
-
-    static void applyTrials(ServerLevel level, StormBackState state) {
-        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-150, 100, -120, 150, 170, 130), e -> e.getTags().contains(TRIAL_TAG))) {
+    // 背中にだれもいなくなって 3 分: 背中そのものを片付ける (グループの進みは消さない。グループごとの放置のリセットは別)
+    static void cleanupWorld(ServerLevel level) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, BODY, e -> e.getTags().contains(TRIAL_TAG))) {
             e.discard();
         }
         StormStrike.cancelAll(level);
-        StormBirdBuilder.carveWestRoute(new StormKit(level), state.westRoute());
-        StormEast.apply(level, state);
-        EyeMirrors.apply(level, state, false);
-        StormBirdBuilder.setKeelGate(level, state.keelOpen());
-        applyStones(level, state);
+        for (String room : List.of(EYE_ROOM, EAST_ROOM, StormHeartBattle.ROOM, RaijuBattle.ROOM)) {
+            RoomLocks.release(room);
+        }
+        StormBackState.get(level).reroll(level.random);
+        ready = false;
+        lastPhase = null;
+        SkyAbyss.LOGGER.info("Storm back cleaned up (nobody on the back; west route {})", StormBackState.get(level).westRoute());
     }
 
-    static void tellSleeping(ServerPlayer p, StormBackState state) {
-        if (state.sleeping() != null) {
-            Notice.narrate(p, "message.skyabyss.storm.sleeping_" + state.sleeping().id());
+    // 試練を最初に戻す (コマンド・建て直し): 記録のあるすべてのグループ
+    public static void resetAll(ServerLevel level, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep) {
+        for (UUID id : BackGroupData.get(level).ids()) {
+            resetGroup(level, id, announce, forceSleep, noSleep, true);
         }
     }
 
-    // ---------------------------------------------------------------- ピースフル
-    private static void tickPeaceful(ServerLevel level, boolean peaceful) {
-        for (int x = -1; x <= 1; x++) {
-            for (int y = TAIL_HALL.floor() + 1; y <= TAIL_HALL.floor() + 4; y++) {
-                BlockPos p = new BlockPos(x, y, SEAL_Z);
-                boolean sealed = level.getBlockState(p).is(ModBlocks.SEALED_GATE.get());
-                if (peaceful && !sealed) {
-                    level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-                } else if (!peaceful && sealed) {
-                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+    // そのグループの試練を最初に戻す (12 の 7.1節)。記録の番号が進み (古い休み場の記録は無効)、心臓も眠り直す。
+    // そのグループが持っている部屋を手放し、そのグループの試練の敵と雷を消し、moveOut ならそのグループの試練の中の人を広間へ
+    public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep,
+            boolean moveOut) {
+        StormProgress p = StormProgress.of(level, group);
+        p.reset(level.random, forceSleep, noSleep);
+        AFTER_HEART.remove(group);
+        EyeMirrors.forget(group);
+        if (group.equals(RoomLocks.owner(EYE_ROOM))) {
+            RoomLocks.release(EYE_ROOM);
+            EyeMirrors.applyNeutral(level);
+        }
+        if (group.equals(RoomLocks.owner(EAST_ROOM))) {
+            RoomLocks.release(EAST_ROOM);
+            StormEast.applyNeutral(level);
+        }
+        StormHeartBattle.onGroupReset(level, group);
+        RaijuBattle.onGroupReset(level, group);
+        syncGates(level, group);
+        GroupOverlays.refresh(level, group);
+        if (moveOut) {
+            BlockPos hub = RESTS.get(0).spawn();
+            for (ServerPlayer pl : Groups.online(level, group)) {
+                if (!pl.isSpectator() && StormBackLayout.inTrial(pl.position())) {
+                    pl.fallDistance = 0;
+                    pl.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, pl.getYRot(), 0f);
                 }
             }
         }
+        for (Entity e : level.getEntitiesOfClass(Entity.class, BODY,
+                e -> e.getTags().contains(TRIAL_TAG) && e instanceof GroupOwned owned && group.equals(owned.groupId()))) {
+            e.discard();
+        }
+        StormStrike.cancel(level, group);
+        if (announce) {
+            for (ServerPlayer pl : Groups.online(level, group)) {
+                Notice.narrate(pl, "message.skyabyss.storm.trials_renewed");
+                tellSleeping(pl, p);
+            }
+        }
+        SkyAbyss.LOGGER.info("Storm back trials reset for group {} (sleeping: {}, mirror config {})", group,
+                p.sleeping() == null ? "none" : p.sleeping().id(), p.mirrorConfig());
+    }
+
+    static void tellSleeping(ServerPlayer pl, StormProgress p) {
+        if (p.sleeping() != null) {
+            Notice.narrate(pl, "message.skyabyss.storm.sleeping_" + p.sleeping().id());
+        }
+    }
+
+    // ---------------------------------------------------------------- パーティが変わった人
+    // 記録が変わるので、体の中 (試練の中) にいる人は広間へ移す。休み場の記録の番号が変われば記録を消す。扉を新しい記録に合わせる
+    static void onMembershipChanged(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level) || level.dimension() != StormTravel.STORM_BACK) {
+            return;
+        }
+        UUID group = Groups.keyOf(player);
+        syncGates(level, group);
+        int epoch = GroupProgress.epoch(level, group);
+        CompoundTag tag = persisted(player);
+        if (tag.getInt(TAG_CHECKPOINT_EPOCH) != epoch) {
+            clearCheckpoint(player);
+        }
+        tag.putInt(TAG_SEEN_EPOCH, epoch);
+        if (player.isAlive() && !player.isSpectator() && StormBackLayout.inTrial(player.position())) {
+            BlockPos hub = RESTS.get(0).spawn();
+            player.fallDistance = 0;
+            player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
+            Notice.narrate(player, "message.skyabyss.storm.party_changed");
+        }
+        PacketDistributor.sendToPlayer(player, gauge(level, player));
+    }
+
+    // ---------------------------------------------------------------- ピースフル (全員に同じ)
+    private static void tickPeaceful(ServerLevel level, boolean peaceful) {
+        GroupGates.setDefault(level, sealBlocks(), !peaceful);
         if (peaceful) {
             for (ServerPlayer p : List.copyOf(level.players())) {
                 if (p.isCreative() || p.isSpectator() || !p.isAlive()) {
@@ -433,7 +670,7 @@ public final class StormBackTrials {
                 }
             }
             if (!wasPeaceful) {
-                for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-150, 100, -120, 150, 170, 130), e -> e.getTags().contains(TRIAL_TAG))) {
+                for (Entity e : level.getEntitiesOfClass(Entity.class, BODY, e -> e.getTags().contains(TRIAL_TAG))) {
                     e.discard();
                 }
                 StormStrike.cancelAll(level);
@@ -463,7 +700,7 @@ public final class StormBackTrials {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.level().dimension() != StormTravel.STORM_BACK || player.tickCount % 5 != 0) {
             return;
         }
-        int epoch = TitanBackData.get(player.serverLevel()).epoch();
+        int epoch = epochOf(player.serverLevel(), player);
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             tag.putInt(TAG_SEEN_EPOCH, epoch);
@@ -539,7 +776,7 @@ public final class StormBackTrials {
         if (back == null) {
             return;
         }
-        int epoch = TitanBackData.get(back).epoch();
+        int epoch = epochOf(back, player);
         String cp = validCheckpoint(tag, epoch);
         BlockPos spawn = cp.isEmpty() ? ARRIVAL : restSpawn(back, cp);
         REVIVING.add(player.getUUID());
@@ -570,8 +807,9 @@ public final class StormBackTrials {
             clearCheckpoint(player);
             ServerLevel back = player.server.getLevel(StormTravel.STORM_BACK);
             if (event.getTo() == StormTravel.STORM_BACK && back != null) {
-                persisted(player).putInt(TAG_SEEN_EPOCH, TitanBackData.get(back).epoch());
-                tellSleeping(player, StormBackState.get(back));
+                persisted(player).putInt(TAG_SEEN_EPOCH, epochOf(back, player));
+                syncGates(back, Groups.keyOf(player));
+                tellSleeping(player, StormProgress.of(back, player));
             }
         }
     }
@@ -582,7 +820,7 @@ public final class StormBackTrials {
             return;
         }
         ServerLevel back = player.serverLevel();
-        int epoch = TitanBackData.get(back).epoch();
+        int epoch = epochOf(back, player);
         CompoundTag tag = persisted(player);
         if (tag.getInt(TAG_SEEN_EPOCH) != epoch) {
             clearCheckpoint(player);
@@ -592,6 +830,7 @@ public final class StormBackTrials {
             }
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
+        syncGates(back, Groups.keyOf(player));
     }
 
     // ---------------------------------------------------------------- 焚き火・戻しの鏡
@@ -625,20 +864,21 @@ public final class StormBackTrials {
     static void onServerStopped(ServerStoppedEvent event) {
         ready = false;
         idleTicks = 0;
-        afterHeartIdle = 0;
+        AFTER_HEART.clear();
         wasPeaceful = false;
         lastPhase = null;
         REVIVING.clear();
+        RoomLocks.release(EYE_ROOM);
+        RoomLocks.release(EAST_ROOM);
         StormEast.clear();
         EyeMirrors.clear();
         StormBackClock.force(null);
     }
 
-    // ---------------------------------------------------------------- 風見の目盛り (画面右上)
+    // ---------------------------------------------------------------- 風見の目盛り (画面右上。石の数はその人のグループの)
     static void sendGauge(ServerLevel level) {
-        StormBackNetwork.Gauge g = gauge(level);
         for (ServerPlayer p : level.players()) {
-            PacketDistributor.sendToPlayer(p, g);
+            PacketDistributor.sendToPlayer(p, gauge(level, p));
         }
     }
 
@@ -646,17 +886,21 @@ public final class StormBackTrials {
         sendGauge(level);
     }
 
-    static StormBackNetwork.Gauge gauge(ServerLevel level) {
-        StormBackState state = StormBackState.get(level);
-        int stones = 0;
-        for (StormBackState.Trial t : StormBackState.Trial.values()) {
-            stones += state.rung(t) ? 1 : 0;
-        }
+    static StormBackNetwork.Gauge gauge(ServerLevel level, ServerPlayer player) {
         return new StormBackNetwork.Gauge(StormBackClock.phase(level).ordinal(), StormBackClock.ticksLeft(level),
-                (float) StormBackClock.strength(level), stones);
+                (float) StormBackClock.strength(level), StormProgress.of(level, player).rungCount());
     }
 
     public static Vec3 hubSpawn() {
         return Vec3.atBottomCenterOf(RESTS.get(0).spawn());
+    }
+
+    // そのグループで、扉がその人にとって開いているか (自己テスト・コマンド)
+    public static boolean gateOpenFor(ServerLevel level, UUID group, List<BlockPos> door) {
+        return GroupGates.isOpen(level, group, door);
+    }
+
+    static boolean isGate(ServerLevel level, BlockPos p) {
+        return level.getBlockState(p).is(ModBlocks.SEALED_GATE.get());
     }
 }

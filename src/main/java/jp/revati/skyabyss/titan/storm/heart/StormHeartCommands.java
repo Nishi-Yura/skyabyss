@@ -8,7 +8,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import java.util.UUID;
+
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.storm.back.StormProgress;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -27,7 +30,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // /skyabyss stormheart action <技>  : 技を今すぐ使わせる (summon, blade, chain, wingbeat, charge, feather, flash, web, barrage, roar)
 // /skyabyss stormheart split        : 4 本の柱を満たしたことにする (翼が裂ける)
 // /skyabyss stormheart win          : 心臓を倒したことにする (報酬・進み・記録まで通す)
-// /skyabyss stormheart reset        : 戦いを放棄して戻す。倒したあとなら、心臓をもう一度挑めるようにする
+// /skyabyss stormheart reset        : 打った人のグループの戦いを放棄して戻す。倒したあとなら、心臓をもう一度挑めるようにする
 // /skyabyss stormheart rebuild      : 部屋を建て直す
 // /skyabyss stormheart status       : 今の様子
 // /skyabyss stormheart shot <人> <名前> : その人の画面を run/screenshots/<名前>.png に写す (キーを送らずに確かめるため)
@@ -45,7 +48,7 @@ public final class StormHeartCommands {
         event.getDispatcher().register(op(SkyAbyss.MODID).then(op("stormheart")
                 .then(op("go").executes(StormHeartCommands::go))
                 .then(op("start").executes(ctx -> {
-                    boolean ok = StormHeartBattle.startNow(back(ctx));
+                    boolean ok = StormHeartBattle.startNow(back(ctx), Groups.keyOf(ctx.getSource().getPlayerOrException()));
                     ctx.getSource().sendSuccess(() -> Component.literal(ok ? "storm heart: started" : "storm heart: already active or failed"), true);
                     return ok ? 1 : 0;
                 }))
@@ -99,18 +102,18 @@ public final class StormHeartCommands {
                 }))
                 .then(op("reset").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    TitanBackData data = TitanBackData.get(back);
-                    if (data.isHeartDefeated()) {
-                        StormHeartBattle.reawaken(back, data);
+                    UUID group = Groups.keyOf(ctx.getSource().getPlayerOrException());
+                    if (StormProgress.of(back, group).heartDefeated()) {
+                        StormHeartBattle.reawaken(back, group);
                     } else {
-                        StormHeartBattle.abandon(back);
+                        StormHeartBattle.abandon(back, group);
                     }
                     ctx.getSource().sendSuccess(() -> Component.literal("storm heart: reset"), true);
                     return 1;
                 }))
                 .then(op("rebuild").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    StormHeartBattle.abandon(back);
+                    StormHeartBattle.abandonAll(back);
                     StormHeartArena.build(back);
                     ctx.getSource().sendSuccess(() -> Component.literal("storm heart: chamber rebuilt"), true);
                     return 1;
@@ -127,8 +130,10 @@ public final class StormHeartCommands {
                     for (int i = 0; i < 4; i++) {
                         rods.append(StormHeartArena.charge(i));
                     }
-                    String s = "active=" + StormHeartBattle.room().active() + " gathering=" + StormHeartBattle.room().gathering()
-                            + " defeated=" + TitanBackData.get(back).isHeartDefeated() + " built=" + StormHeartArena.isBuilt(back)
+                    UUID group = Groups.keyOf(ctx.getSource().getPlayerOrException());
+                    String s = "active=" + StormHeartBattle.room(group).active() + " gathering=" + StormHeartBattle.room(group).gathering()
+                            + " defeated=" + StormProgress.of(back, group).heartDefeated() + " built=" + StormHeartArena.isBuilt(back)
+                            + " room owner=" + jp.revati.skyabyss.titan.group.RoomLocks.owner(StormHeartBattle.ROOM)
                             + " rods=" + rods
                             + (heart == null ? "" : " phase=" + (heart.getPhase() + 1) + " hp=" + Math.round(heart.getHealth()) + "/" + Math.round(heart.getMaxHealth())
                                     + " x" + heart.toughness() + " action=" + heart.currentAction().key() + " split=" + heart.splitTicks()

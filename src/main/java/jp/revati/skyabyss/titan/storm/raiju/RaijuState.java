@@ -5,8 +5,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 雷獣の巣の記録 (オーバーワールドのデータに一つ): いまの周で倒されたか、ワールドで一度でも倒されたか、巣を支度した版。
-// 「倒された」は背中の記録 (StormBackState.raijuDefeated) と合わせる。背中のリセットがそちらを戻すと、RaijuBattle がこちらも戻す
+// 雷獣の巣の記録 (オーバーワールドのデータに一つ): ワールドで一度でも倒されたか、巣を支度した版。
+// 「この周で倒したか」はグループごとの記録 (StormProgress.raijuDefeated) にある。defeated は最後にだれかが倒した印 (状態の表示だけ)
 public class RaijuState extends SavedData {
     private static final String NAME = "skyabyss_raiju";
     private static final Factory<RaijuState> FACTORY = new Factory<>(RaijuState::new, RaijuState::load);

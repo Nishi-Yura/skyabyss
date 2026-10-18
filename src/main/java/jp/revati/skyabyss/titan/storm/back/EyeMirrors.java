@@ -8,10 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormSetup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -32,7 +37,10 @@ import org.joml.Vector3f;
 // - 羽鏡は片面。ROT k は二つの向きをつなぐ: 0 = 北と東、1 = 東と南、2 = 南と西、3 = 西と北。ほかの向きから来た光は止まる
 // - 光が格子の外へ出た所 (壁) に受け羽があれば光り、そのあとは光が外れても消えない。三つとも光ると嘴の小部屋の戸が開く
 // - 雷蛾 (static_moth) が光の筋の上にいると、光をさえぎる
-// - 配置は手で作った四つ (最短 4・5・6・7 手)。ワールドで初めて挑むときは、いちばんやさしい 0。自己テストで全配置を解く
+// - 配置は手で作った四つ (最短 4・5・6・7 手)。グループが初めて挑むときは、いちばんやさしい 0。自己テストで全配置を解く
+// グループ (docs/design/10 の 9 章): 眼の間 (嘴の小部屋まで) は部屋の占有 (RoomLocks。StormBackTrials.EYE_ROOM)。一度に一つのグループだけが入れる。
+// 鏡の向き・光った受け羽・配置はグループの記録 (StormProgress) にあり、持ち主が変わると部屋の鏡と受け羽をその記録から置き直す。
+// 光のたどりも記録の向きで計算する (世界の鏡のブロックは持ち主の記録を写したもの)。嘴の戸はグループごとの扉 (beakDoor)
 public final class EyeMirrors {
     // 向き: 0 北 (-z)、1 東 (+x)、2 南 (+z)、3 西 (-x)
     static final int[][] STEP = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
@@ -60,8 +68,9 @@ public final class EyeMirrors {
                     List.of(new Wall(3, 2), new Wall(0, 1), new Wall(2, 4))));
     public static final int[] MIN_MOVES = {4, 5, 6, 7};
 
-    private static long lastReset = -RESET_COOLDOWN;
-    // 今の光の筋 (粒を出す点)。毎秒作り直す
+    // 戻しの鏡を最後に使った時刻 (グループごと)
+    private static final Map<UUID, Long> LAST_RESET = new HashMap<>();
+    // 今の光の筋 (粒を出す点。部屋の持ち主の光)。4 tick ごとに作り直す
     private static List<Vec3> beam = List.of();
 
     private EyeMirrors() {
@@ -75,9 +84,6 @@ public final class EyeMirrors {
         return List.copyOf(out);
     }
 
-    public static Config config(StormBackState state) {
-        return CONFIGS.get(Math.floorMod(state.mirrorConfig(), CONFIGS.size()));
-    }
 
     // ---------------------------------------------------------------- 光のたどり方 (格子だけで。自己テストと世界の両方で使う)
     public interface Grid {
@@ -241,62 +247,75 @@ public final class EyeMirrors {
         return gridCell(0, cfg.entry()).offset(-GRID_STEP + 1, 0, 0).west();
     }
 
-    // 配置を置き直す (リセット・戻しの鏡)。鏡を最初の向きに、受け羽は消す (keepLit なら光ったものは残す)
-    public static void apply(ServerLevel level, StormBackState state, boolean keepLit) {
-        Config cfg = config(state);
+    // 部屋をグループの記録のとおりに置く (持ち主が変わったとき・戻しの鏡)。鏡の向きと光った受け羽は記録から
+    public static void apply(ServerLevel level, StormProgress progress) {
+        place(level, progress.config(), progress.mirrorRots(), progress.receivers());
+        beam = List.of();
+    }
+
+    // だれも持っていない部屋の姿 (配置 0 の最初の向き、受け羽は消えている)
+    public static void applyNeutral(ServerLevel level) {
+        place(level, CONFIGS.get(0), CONFIGS.get(0).init(), 0);
+        beam = List.of();
+    }
+
+    private static void place(ServerLevel level, Config cfg, int[] rots, int receivers) {
         // 台の上を空ける
         for (int c = 0; c < 5; c++) {
             for (int r = 0; r < 5; r++) {
-                level.setBlock(gridCell(c, r), Blocks.AIR.defaultBlockState(), 3);
+                set(level, gridCell(c, r), Blocks.AIR.defaultBlockState());
             }
         }
         for (int i = 0; i < cfg.mirrors().size(); i++) {
             int[] m = cfg.mirrors().get(i);
-            level.setBlock(gridCell(m[0], m[1]), StormBackSetup.MIRROR.get().defaultBlockState().setValue(StormBlocks.Mirror.ROT, cfg.init()[i]), 3);
+            set(level, gridCell(m[0], m[1]), StormBackSetup.MIRROR.get().defaultBlockState().setValue(StormBlocks.Mirror.ROT, rots[i]));
         }
         // 壁: どの配置でも受け羽になりうる所はいったん壁の石に戻す (西の壁は窓のガラス)
         for (Config c : CONFIGS) {
             for (Wall w : c.receivers()) {
-                level.setBlock(wallPos(w), w.side() == 3 ? StormKit.LENS : StormKit.CALCITE, 3);
+                set(level, wallPos(w), w.side() == 3 ? StormKit.LENS : StormKit.CALCITE);
             }
         }
         for (int r = 0; r < 5; r++) {
-            level.setBlock(gridCell(0, r).offset(-GRID_STEP + 1, 0, 0).west(), StormKit.LENS, 3);
+            set(level, gridCell(0, r).offset(-GRID_STEP + 1, 0, 0).west(), StormKit.LENS);
         }
-        level.setBlock(entryPos(cfg), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState(), 3);
-        if (!keepLit) {
-            state.setReceivers(0);
-        }
+        set(level, entryPos(cfg), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
         for (int i = 0; i < cfg.receivers().size(); i++) {
-            boolean lit = (state.receivers() & (1 << i)) != 0;
-            level.setBlock(wallPos(cfg.receivers().get(i)), StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, lit), 3);
+            boolean lit = (receivers & (1 << i)) != 0;
+            set(level, wallPos(cfg.receivers().get(i)), StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, lit));
         }
-        setDoor(level, state.receivers() == 7 || state.rung(StormBackState.Trial.FRONT));
     }
 
-    public static void setDoor(ServerLevel level, boolean open) {
+    private static void set(ServerLevel level, BlockPos p, BlockState s) {
+        if (!level.getBlockState(p).equals(s)) {
+            level.setBlock(p, s, 3);
+        }
+    }
+
+    // 嘴の小部屋の戸 (グループごとの扉。座標)
+    public static List<BlockPos> beakDoor() {
+        List<BlockPos> out = new ArrayList<>();
         for (int z = BEAK_DOOR_Z1; z <= BEAK_DOOR_Z2; z++) {
             for (int x = -1; x <= 1; x++) {
                 for (int y = EYE_HALL.floor() + 1; y <= EYE_HALL.floor() + 3; y++) {
-                    BlockPos p = new BlockPos(x, y, z);
-                    BlockState want = open ? Blocks.AIR.defaultBlockState() : jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get().defaultBlockState();
-                    if (!level.getBlockState(p).equals(want)) {
-                        level.setBlock(p, want, 3);
-                    }
+                    out.add(new BlockPos(x, y, z));
                 }
             }
         }
+        return out;
     }
 
-    // 世界の格子 (鏡のブロックの向きと、雷蛾)
-    static Grid worldGrid(ServerLevel level) {
+    // グループの格子: 鏡の向きはグループの記録から、雷蛾はそのグループの (またはグループのない) 雷蛾だけがさえぎる
+    static Grid worldGrid(ServerLevel level, StormProgress progress) {
+        Config cfg = progress.config();
+        Grid base = grid(cfg, progress.mirrorRots());
         List<Entity> moths = level.getEntities((Entity) null, EYE_HALL.aabb(),
-                e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath().equals("static_moth") && e.isAlive());
+                e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath().equals("static_moth") && e.isAlive()
+                        && (!(e instanceof GroupOwned owned) || owned.groupId() == null || owned.groupId().equals(progress.group)));
         return new Grid() {
             @Override
             public int mirror(int c, int r) {
-                BlockState s = level.getBlockState(gridCell(c, r));
-                return s.is(StormBackSetup.MIRROR.get()) ? s.getValue(StormBlocks.Mirror.ROT) : -1;
+                return base.mirror(c, r);
             }
 
             @Override
@@ -313,14 +332,26 @@ public final class EyeMirrors {
         };
     }
 
-    // 4 tick ごと (眼の間に人がいる間)
-    static void tick(ServerLevel level, StormBackState state) {
-        if (state.rung(StormBackState.Trial.FRONT) && state.receivers() == 7) {
+    // 世界の鏡のブロックの向きでたどる格子 (自己テストが、記録と世界の鏡が合っているかを見る)
+    static Grid blockGrid(ServerLevel level) {
+        return (c, r) -> {
+            BlockState s = level.getBlockState(gridCell(c, r));
+            return s.is(StormBackSetup.MIRROR.get()) ? s.getValue(StormBlocks.Mirror.ROT) : -1;
+        };
+    }
+
+    // 4 tick ごと (眼の間に持ち主がいる間)。光と粒は持ち主のグループのもの
+    static void tick(ServerLevel level, StormProgress progress) {
+        if (progress.rung(StormBackState.Trial.FRONT) && progress.receivers() == 7) {
             beam = List.of();
             return;
         }
-        Config cfg = config(state);
-        Trace t = trace(cfg.entry(), worldGrid(level));
+        StormFx.to(progress.group, () -> traceAndDraw(level, progress));
+    }
+
+    private static void traceAndDraw(ServerLevel level, StormProgress progress) {
+        Config cfg = progress.config();
+        Trace t = trace(cfg.entry(), worldGrid(level, progress));
         // 粒の点: 入口から格子の中心を結ぶ線
         List<Vec3> pts = new ArrayList<>();
         BlockPos in = entryPos(cfg);
@@ -331,8 +362,8 @@ public final class EyeMirrors {
         if (t.exit() != null) {
             pts.add(Vec3.atCenterOf(wallPos(t.exit())));
             int i = cfg.receivers().indexOf(t.exit());
-            if (i >= 0 && (state.receivers() & (1 << i)) == 0) {
-                light(level, state, cfg, i);
+            if (i >= 0 && (progress.receivers() & (1 << i)) == 0) {
+                light(level, progress, cfg, i);
             }
         }
         beam = pts;
@@ -342,7 +373,7 @@ public final class EyeMirrors {
         }
         // 受け羽の近くを光が通ると、羽が少し揺れる (あと一つで届く、が分かる)
         for (int i = 0; i < cfg.receivers().size(); i++) {
-            if ((state.receivers() & (1 << i)) != 0) {
+            if ((progress.receivers() & (1 << i)) != 0) {
                 continue;
             }
             Vec3 w = Vec3.atCenterOf(wallPos(cfg.receivers().get(i)));
@@ -355,48 +386,88 @@ public final class EyeMirrors {
         }
     }
 
-    static void light(ServerLevel level, StormBackState state, Config cfg, int i) {
-        state.setReceivers(state.receivers() | (1 << i));
+    static void light(ServerLevel level, StormProgress progress, Config cfg, int i) {
+        progress.setReceivers(progress.receivers() | (1 << i));
         BlockPos p = wallPos(cfg.receivers().get(i));
-        level.setBlock(p, StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, true), 3);
-        level.playSound(null, p, StormSetup.RECEIVER_LIT.get(), SoundSource.BLOCKS, 2f, 1f + 0.15f * Integer.bitCount(state.receivers()));
+        if (progress.group.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM))) {
+            level.setBlock(p, StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, true), 3);
+        }
+        level.playSound(null, p, StormSetup.RECEIVER_LIT.get(), SoundSource.BLOCKS, 2f, 1f + 0.15f * Integer.bitCount(progress.receivers()));
         StormFx.burst(level, ParticleTypes.END_ROD, Vec3.atCenterOf(p), 20, 0.4);
-        for (ServerPlayer pl : level.players()) {
+        for (ServerPlayer pl : Groups.online(level, progress.group)) {
             if (inFront(pl.position())) {
-                Notice.bar(pl, ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(state.receivers())));
+                Notice.bar(pl, ModText.progress("message.skyabyss.storm.feather_lit", Integer.bitCount(progress.receivers())));
             }
         }
-        if (state.receivers() == 7) {
-            setDoor(level, true);
+        if (progress.receivers() == 7) {
+            GroupGates.open(level, progress.group, beakDoor());
         }
     }
 
-    // 羽鏡を回す (右クリック)
+    // 羽鏡を回す (右クリック)。眼の間の持ち主のグループの人だけが回せる
     public static void turn(ServerLevel level, BlockPos pos, ServerPlayer player) {
         BlockState s = level.getBlockState(pos);
         if (!s.is(StormBackSetup.MIRROR.get())) {
             return;
         }
-        level.setBlock(pos, s.setValue(StormBlocks.Mirror.ROT, (s.getValue(StormBlocks.Mirror.ROT) + 1) % 4), 3);
-        level.playSound(null, pos, StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1f, 1f);
+        UUID group = Groups.keyOf(player);
+        if (!group.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM))) {
+            Notice.bar(player, ModText.deny("message.skyabyss.room_busy"));
+            return;
+        }
+        turnFor(level, StormProgress.of(level, group), pos);
     }
 
-    // 戻しの鏡 (前室の取っ手)。30 秒に一度
-    public static boolean resetMirrors(ServerLevel level, ServerPlayer player) {
-        long now = level.getGameTime();
-        if (now - lastReset < RESET_COOLDOWN) {
-            Notice.bar(player, ModText.deny("message.skyabyss.storm.mirrors_reset_wait", (RESET_COOLDOWN - (now - lastReset) + 19) / 20));
+    // 持ち主のグループの記録の鏡を一つ回し、世界の鏡も合わせる (自己テストからも)
+    static boolean turnFor(ServerLevel level, StormProgress progress, BlockPos pos) {
+        Config cfg = progress.config();
+        int index = -1;
+        for (int i = 0; i < cfg.mirrors().size(); i++) {
+            int[] m = cfg.mirrors().get(i);
+            if (gridCell(m[0], m[1]).equals(pos)) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) {
             return false;
         }
-        lastReset = now;
-        apply(level, StormBackState.get(level), true);
+        int rot = (progress.mirrorRots()[index] + 1) % 4;
+        progress.setMirrorRot(index, rot);
+        BlockState s = level.getBlockState(pos);
+        if (s.is(StormBackSetup.MIRROR.get())) {
+            level.setBlock(pos, s.setValue(StormBlocks.Mirror.ROT, rot), 3);
+        }
+        level.playSound(null, pos, StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1f, 1f);
+        return true;
+    }
+
+    // 戻しの鏡 (前室の取っ手)。グループごとに 30 秒に一度。鏡を最初の向きに戻す (光った受け羽は残る)
+    public static boolean resetMirrors(ServerLevel level, ServerPlayer player) {
+        long now = level.getGameTime();
+        UUID group = Groups.keyOf(player);
+        long last = LAST_RESET.getOrDefault(group, (long) -RESET_COOLDOWN);
+        if (now - last < RESET_COOLDOWN) {
+            Notice.bar(player, ModText.deny("message.skyabyss.storm.mirrors_reset_wait", (RESET_COOLDOWN - (now - last) + 19) / 20));
+            return false;
+        }
+        LAST_RESET.put(group, now);
+        StormProgress progress = StormProgress.of(level, group);
+        progress.resetMirrorRots();
+        if (group.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM))) {
+            apply(level, progress);
+        }
         Notice.bar(player, ModText.hint("message.skyabyss.storm.mirrors_reset"));
         level.playSound(null, MIRROR_RESET, StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1.5f, 0.6f);
         return true;
     }
 
+    static void forget(UUID group) {
+        LAST_RESET.remove(group);
+    }
+
     static void clear() {
-        lastReset = -RESET_COOLDOWN;
+        LAST_RESET.clear();
         beam = List.of();
     }
 
