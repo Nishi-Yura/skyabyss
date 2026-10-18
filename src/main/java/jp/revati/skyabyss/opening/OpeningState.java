@@ -53,6 +53,10 @@ public final class OpeningState {
     // 画面の目的の帯に最後に送った目的 (保存しない。参加し直したら送り直す)
     transient String sentObjective = null;
     transient long sentAt = -1;
+    // 最後に送った目印の位置 (BlockPos.asLong。なしは Long.MIN_VALUE)。動く目印 (鯨追いの焚き火) が決まったら送り直す
+    transient long sentTarget = Long.MIN_VALUE;
+    // 骨の丘の前触れをどこまで出したか (0 なし / 1 においの字幕 / 2 遠い白 / 3 足もとの欠片 / 4 風が止む。保存しない: 参加し直したら近さに応じて出し直す)
+    transient int boneCue = 0;
     // コマンドで全部なかったことにした直後 (すでに遊んでいた人の判定をせず、B0 から)
     transient boolean fresh;
 

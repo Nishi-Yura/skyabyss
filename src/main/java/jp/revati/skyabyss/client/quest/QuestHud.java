@@ -68,7 +68,7 @@ public final class QuestHud {
             return;
         }
         Font font = mc.font;
-        List<Line> lines = lines(font, def, entry);
+        List<Line> lines = lines(font, def, entry, WIDTH - 12);
         int h = 12 + lines.size() * 10 + 3;
         int top = y() + ObjectiveStrip.rows();
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
@@ -102,18 +102,23 @@ public final class QuestHud {
         return out;
     }
 
-    // 帯に出す、今の目的の一行 (数は「1/3」を後ろに付け、長ければ切る)
+    // 帯に出す、今の目的の一行 (折り返さず全文。数は「（1/3）」を後ろに付ける。長ければ帯が切る)
     public static String firstObjective(Font font, QuestDef def, QuestLog.Entry entry, int width) {
-        for (Line l : lines(font, def, entry)) {
+        for (Line l : lines(font, def, entry, 100000)) {
             if (l.text.startsWith("・")) {
                 String s = l.text.substring(1);
                 return s;
             }
         }
+        // 全部済んでいて次へ進む前の一瞬: 題名だけにせず、この段の最初のやることを出す
+        QuestDef.Stage stage = def.stages().get(entry.stage);
+        if (!stage.objectives().isEmpty()) {
+            return Component.translatable(def.objectiveKey(stage, stage.objectives().get(0))).getString();
+        }
         return Component.translatable(def.titleKey()).getString();
     }
 
-    static List<Line> lines(Font font, QuestDef def, QuestLog.Entry entry) {
+    static List<Line> lines(Font font, QuestDef def, QuestLog.Entry entry, int width) {
         QuestDef.Stage stage = def.stages().get(entry.stage);
         List<Line> out = new ArrayList<>();
         boolean first = true;
@@ -131,7 +136,7 @@ public final class QuestHud {
             }
             first = false;
             String text = Component.translatable(def.objectiveKey(stage, ob)).getString();
-            List<String> wrapped = wrapWithCount(text, ob.count() > 1 ? Math.min(have, ob.count()) + "/" + ob.count() : "", WIDTH - 12, font);
+            List<String> wrapped = wrapWithCount(text, ob.count() > 1 ? Math.min(have, ob.count()) + "/" + ob.count() : "", width, font);
             for (int k = 0; k < wrapped.size(); k++) {
                 out.add(new Line((k == 0 ? "・" : "") + wrapped.get(k), k == 0 ? 0 : 9, TEXT));
             }

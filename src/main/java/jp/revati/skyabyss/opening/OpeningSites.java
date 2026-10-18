@@ -114,6 +114,17 @@ public final class OpeningSites {
         return out;
     }
 
+    // pos (水平) が、巨大な足跡のどれかの形 (見える足の形) + margin ブロックの中か。円ではなく形で調べる
+    public static boolean insideFootprint(MinecraftServer server, BlockPos pos, int margin) {
+        SiteData d = data(server);
+        for (SiteData.Entry e : d.entries(Kind.FOOTPRINT.id)) {
+            if (jp.revati.skyabyss.opening.site.FootprintShape.contains(d, e, pos, margin)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Optional<BlockPos> ribs(MinecraftServer server) {
         return pos(server, Kind.RIBS);
     }

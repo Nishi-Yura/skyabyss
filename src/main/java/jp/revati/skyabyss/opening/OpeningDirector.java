@@ -15,6 +15,7 @@ import jp.revati.skyabyss.lore.LorePageItem;
 import jp.revati.skyabyss.lore.LoreSetup;
 import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.npc.NpcSpawner;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
 import jp.revati.skyabyss.opening.OpeningLogic.Env;
@@ -155,6 +156,7 @@ public final class OpeningDirector {
             st.fresh = false;
         }
         syncObjective(level, player, st, facts, env, now);
+        boneForeshadow(level, player, st, env);
     }
 
     static Env env(ServerLevel level, ServerPlayer player) {
@@ -204,12 +206,7 @@ public final class OpeningDirector {
         }
         boolean footNear = false;
         if (planned && OpeningSites.built(server, Kind.FOOTPRINT)) {
-            for (BlockPos p : OpeningSites.footprints(server)) {
-                if (OpeningSites.horizontal(p, pos) <= OpeningLogic.FOOTPRINT_NEAR) {
-                    footNear = true;
-                    break;
-                }
-            }
+            footNear = OpeningSites.insideFootprint(server, pos, OpeningLogic.FOOTPRINT_MARGIN);
         }
         boolean slabNear = false;
         if (planned && OpeningSites.built(server, Kind.RIBS)) {
@@ -249,27 +246,77 @@ public final class OpeningDirector {
     // ---------------------------------------------------------------- 目的の帯
     private static void syncObjective(ServerLevel level, ServerPlayer player, OpeningState st, Facts facts, Env env, long now) {
         String id = OpeningLogic.objective(st, facts, env);
-        if (id.equals(st.sentObjective) && now - st.sentAt < RESEND) {
+        // 目印は人ごと・今の目的ごとに決める (宿りの鐘と鯨追いの焚き火を取り違えない)。目印が変わったら送り直す
+        BlockPos target = target(level, id);
+        long tl = target == null ? Long.MIN_VALUE : target.asLong();
+        if (id.equals(st.sentObjective) && tl == st.sentTarget && now - st.sentAt < RESEND) {
             return;
         }
         st.sentObjective = id;
+        st.sentTarget = tl;
         st.sentAt = now;
-        PacketDistributor.sendToPlayer(player, ObjectivePayload.of(id, target(level.getServer(), id)));
+        PacketDistributor.sendToPlayer(player, ObjectivePayload.of(id, target));
     }
 
-    // 目的ごとの目印 (場所のない目的は null)
+    // 目的ごとの目印 (場所のない目的は null)。野営地・宿りの鐘・鯨追いの焚き火・骨の丘は、それぞれ別の場所を指す
     @Nullable
-    public static BlockPos target(MinecraftServer server, String id) {
+    public static BlockPos target(ServerLevel level, String id) {
+        MinecraftServer server = level.getServer();
         if (!OpeningSites.planned(server)) {
             return null;
         }
         return switch (id) {
             case "examine_camp" -> OpeningSites.notebook(server).or(() -> OpeningSites.camp(server)).orElse(null);
             case "follow_smoke" -> OpeningSites.smoke(server).or(() -> OpeningSites.shelter(server)).orElse(null);
-            case "ask_storyteller", "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
+            case "ask_storyteller" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).orElse(null);
+            // 鯨追いは宿りの鐘から 18〜34 ブロック離れた焚き火のそばにいる。鐘の位置ではなく、その焚き火 (まだ立っていなければ目印なし)
+            case "find_isana" -> OpeningSites.bell(server).or(() -> OpeningSites.shelter(server))
+                    .map(bell -> NpcSpawner.chaserSpot(server.overworld(), bell)).orElse(null);
             case "bone_hill" -> OpeningSites.ribs(server).orElse(null);
             default -> null;
         };
+    }
+
+    // ---------------------------------------------------------------- 骨の丘の前触れ (17 の 3.5節)
+    // 丘が急に目の前に現れないように、イサナのあとで骨の丘へ近づくにつれて字幕を一度ずつ: 風のにおい (方角) → 遠い稜線の白 → 足もとの欠片 (低い地鳴り) → 風が止む
+    private static final String[] COMPASS = {"南", "南西", "西", "北西", "北", "北東", "東", "南東"};
+    static final double BONE_FAR = 220;
+    static final double BONE_MID = 130;
+    static final double BONE_NEAR = 70;
+
+    static void boneForeshadow(ServerLevel level, ServerPlayer player, OpeningState st, Env env) {
+        if (st.legacy() || st.awakeAt() < 0 || !env.overworld() || !env.awake() || !st.done(OpeningBeat.ISANA) || st.done(OpeningBeat.BONES)) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        if (!OpeningSites.planned(server) || !OpeningSites.built(server, Kind.RIBS)) {
+            return;
+        }
+        Optional<BlockPos> ribs = OpeningSites.ribs(server);
+        if (ribs.isEmpty()) {
+            return;
+        }
+        double d = OpeningSites.horizontal(ribs.get(), player.blockPosition());
+        int want = d <= BONE_NEAR ? 4 : d <= BONE_MID ? 3 : d <= BONE_FAR ? 2 : OpeningLogic.boneOffer(st, env) ? 1 : 0;
+        if (want <= st.boneCue) {
+            return;
+        }
+        st.boneCue = want;
+        switch (want) {
+            case 1 -> {
+                float yaw = OpeningSites.yawTo(player.blockPosition(), ribs.get());
+                Notice.narrate(player, "opening.skyabyss.bone_rumor", COMPASS[Math.floorMod(Math.round(yaw / 45f), 8)]);
+            }
+            case 2 -> Notice.narrate(player, "opening.skyabyss.bone_far");
+            case 3 -> {
+                Notice.narrate(player, "opening.skyabyss.bone_mid");
+                // 丘のほうから、ごく低い地鳴り (小さく、一度だけ)
+                BlockPos at = ribs.get();
+                player.connection.send(new ClientboundSoundPacket(OpeningSetup.RUMBLE, SoundSource.AMBIENT, at.getX() + 0.5, at.getY(), at.getZ() + 0.5,
+                        0.5f, 0.8f, level.random.nextLong()));
+            }
+            default -> Notice.narrate(player, "opening.skyabyss.bone_near");
+        }
     }
 
     // ---------------------------------------------------------------- 岩鯨 (17 の 3.9節)
