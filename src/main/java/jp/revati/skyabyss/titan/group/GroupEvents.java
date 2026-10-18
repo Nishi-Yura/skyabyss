@@ -164,6 +164,12 @@ public final class GroupEvents {
         if (!(event.getLevel() instanceof ServerLevel level) || level.getGameTime() % 10 != 0 || !TitanBacks.isBack(level.dimension())) {
             return;
         }
+        if (level.getGameTime() % 200 == 0) {
+            GroupProgress.touch(level);
+            if (level.getGameTime() % 2400 == 0) {
+                GroupProgress.prune(level);
+            }
+        }
         List<ServerPlayer> players = level.players();
         if (players.size() < 2) {
             for (ServerPlayer viewer : players) {
@@ -209,6 +215,14 @@ public final class GroupEvents {
         }
         if (Groups.differ(event.getSource().getEntity(), victim) || Groups.differ(event.getSource().getDirectEntity(), victim)) {
             event.setCanceled(true);
+        }
+    }
+
+    // 戦いの部屋の中で倒れた参加者を覚える (撃破の参加者に数える。docs/design/10 の 9 章)
+    @SubscribeEvent
+    static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && TitanBacks.isBack(player.level().dimension())) {
+            GroupBossRoom.noteDeath(player.getUUID());
         }
     }
 
