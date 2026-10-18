@@ -43,6 +43,12 @@ public final class StormSites {
         registered = true;
         ChapterSites.element(VANE, Chapters.STORM, "ch3_vane").dist(40, 140).prefer(Prefer.HIGH).arriveRadius(10)
                 .post(StormVane::finish)
+                .erase((level, e, mark) -> {
+                    BlockPos top = mark.apply("top");
+                    if (top != null) {
+                        StormVane.clear(level, top);
+                    }
+                })
                 .onArrive((p, s) -> {
                     Quests.signal(p, "ch3_vane");
                     Notice.narrate(p, "message.skyabyss.ch3.vane");

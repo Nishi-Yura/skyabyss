@@ -119,6 +119,18 @@ public final class StormVane {
         return changed;
     }
 
+    // 矢 (柱の頭と横の針・尾) を全部片づける。重複を掃除するとき用
+    static void clear(ServerLevel level, BlockPos top) {
+        for (int dx = -ARM; dx <= ARM; dx++) {
+            for (int dz = -ARM; dz <= ARM; dz++) {
+                BlockPos at = top.offset(dx, 0, dz);
+                if (level.hasChunkAt(at) && ours(level.getBlockState(at))) {
+                    level.setBlock(at, Blocks.AIR.defaultBlockState(), FLAGS);
+                }
+            }
+        }
+    }
+
     // 立っている矢の向き (いちばん遠い横向きの針の方角)。矢がなければ NaN (テスト・確認用)
     public static double readBearing(ServerLevel level, BlockPos top) {
         double best = -1;

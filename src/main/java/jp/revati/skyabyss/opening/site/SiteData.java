@@ -251,6 +251,10 @@ public final class SiteData extends SavedData {
                 for (Tag u : sc.getList("arrived", Tag.TAG_STRING)) {
                     e.arrived.add(UUID.fromString(u.getAsString()));
                 }
+                CompoundTag ex = sc.getCompound("extra");
+                for (String key : ex.getAllKeys()) {
+                    e.extra(key, BlockPos.of(ex.getLong(key)));
+                }
                 p.sites.add(e);
             }
             d.chapterPlans.add(p);
@@ -309,6 +313,11 @@ public final class SiteData extends SavedData {
                 ListTag ar = new ListTag();
                 e.arrived.forEach(u -> ar.add(StringTag.valueOf(u.toString())));
                 sc.put("arrived", ar);
+                CompoundTag ex = new CompoundTag();
+                for (int i = 0; i < e.extraNames.size(); i++) {
+                    ex.putLong(e.extraNames.get(i), e.extraPos.get(i).asLong());
+                }
+                sc.put("extra", ex);
                 sl.add(sc);
             }
             c.put("sites", sl);
