@@ -49,6 +49,7 @@ public class DialogueScreen extends Screen {
     private float revealed;
     private int selected;
     private boolean closedByServer;
+    private boolean closeSent;
     // 選択を送ってから次の節が届くまで、二度押しを受けない
     private boolean waiting;
 
@@ -367,9 +368,21 @@ public class DialogueScreen extends Screen {
 
     @Override
     public void onClose() {
-        if (!closedByServer) {
+        sendClosed();
+        super.onClose();
+    }
+
+    // 別の画面 (場面・書など) に差し替えられたときも、サーバーの会話を閉じる (onClose は差し替えでは呼ばれない)
+    @Override
+    public void removed() {
+        sendClosed();
+        super.removed();
+    }
+
+    private void sendClosed() {
+        if (!closedByServer && !closeSent) {
+            closeSent = true;
             PacketDistributor.sendToServer(new NpcNetwork.Closed());
         }
-        super.onClose();
     }
 }

@@ -573,7 +573,7 @@ data/<名前空間>/quest/<名前>.json
 | `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 探索して強くなろう。晴れた昼には空を見上げてみよう | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
 | `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>語り部なら、何か知っているかもしれない。 | 語り部に、空のことを尋ねよう | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
 | `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。 | 火を焚く鯨追いに、話を聞きに行こう | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
-| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう | lore chapter1/stone_whale | 60 |
+| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう（歌のあとは「夕方に空を見上げ、岩鯨を待とう。待つあいだ、探索で力をつけておこう」。`see_whale.see.wait`） | lore chapter1/stone_whale | 60 |
 | `board` | 岩鯨が、すぐそこにいる。降りてきたら、地面に届いた鎖をつかめば、背中へ引き上げられるはずだ。 | 垂れた鎖をのぼって、岩鯨の背中へ渡ろう | lore chapter1/sky_ruins | 60 |
 | `inscriptions` | 背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。<br>どの道の先にも、背中の民が碑文を残しているはずだ。 | 背中の碑文を三つ読んでみよう（3） | lore chapter1/inscription_west, chapter1/inscription_east, chapter1/inscription_below | 90 |
 | `heart` | 封印が解けた。奥の扉の向こうで、何かが脈を打っている。<br>鍵は、鼓動のそばに納められているという。 | 体の奥で脈打つものを、止めに行こう<br>天の鍵の欠片を手に取ろう | lore chapter1/heart_stilled<br>lore chapter1/sky_key | 0 |

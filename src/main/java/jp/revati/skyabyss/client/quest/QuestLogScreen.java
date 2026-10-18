@@ -189,7 +189,7 @@ public class QuestLogScreen extends Screen {
                     // 納める品は、手持ちの数を見せる (納めるまでは済みにしない)
                     have = Math.min(jp.revati.skyabyss.quest.QuestItems.count(Minecraft.getInstance().player, ob.targets().get(0), ob.token()), ob.count());
                 }
-                String text = Component.translatable(def.objectiveKey(stage, ob)).getString();
+                String text = QuestHud.objectiveText(def, stage, ob);
                 List<String> wrapped = QuestHud.wrapWithCount(text, ob.count() > 1 ? have + "/" + ob.count() : "", w - 12, font);
                 for (int k = 0; k < wrapped.size(); k++) {
                     body.add(new BodyLine((k == 0 ? (ok ? "■ " : "□ ") : "") + wrapped.get(k), ok ? SOFT : TEXT, k == 0 ? 0 : 11));

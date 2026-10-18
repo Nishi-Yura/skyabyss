@@ -17,6 +17,7 @@ import jp.revati.skyabyss.lore.Lore;
 import jp.revati.skyabyss.lore.LoreEntry;
 import jp.revati.skyabyss.lore.LoreManager;
 import jp.revati.skyabyss.lore.LoreWrap;
+import jp.revati.skyabyss.opening.OpeningDirector;
 import jp.revati.skyabyss.npc.Dialogue;
 import jp.revati.skyabyss.npc.DialogueManager;
 import jp.revati.skyabyss.npc.DialogueService;
@@ -49,7 +50,7 @@ public final class OpeningStorySelfTest {
     private static final List<String> LORE_IDS = List.of("prologue/camp", "prologue/the_book_margin", "prologue/footprints",
             "prologue/footsteps", "prologue/bone_hill", "prologue/sky_song");
     private static final List<String> OBJECTIVE_IDS = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana",
-            "see_whale", "bone_hill");
+            "see_whale", "wait_whale", "bone_hill");
     // 序盤で明かさない言葉 (巨神・見る者・ループ・天の鍵・ほかの巨神の名前)
     private static final List<String> SPOILERS = List.of("巨神", "見る者", "ループ", "天の鍵", "余燼", "潮殻", "雷翼", "titan", "Titan", "Watcher",
             "loop", "Sky Key", "Ember", "Tide Shell", "Thunder Wing");
@@ -180,6 +181,15 @@ public final class OpeningStorySelfTest {
                     check(!s.contains(bad), lang + ": bone cue " + cue + " says too much (" + bad + ")", failures);
                 }
             }
+            // 歌のあとの「待つ」版の文 (クエストログと、帯が出ないときの目的): 日英ともにあり、日本語は「〜しよう」で終わる
+            JsonObject npcText = json("/assets/skyabyss_npc/lang/" + lang + ".json", failures);
+            if (npcText != null) {
+                String wait = text(npcText, "quest.skyabyss.main_song.see_whale.see.wait", lang, failures);
+                check(!lang.equals("ja_jp") || wait.endsWith("う"), lang + ": the waiting objective does not tell the player what to do (" + wait + ")", failures);
+                for (String bad : SPOILERS) {
+                    check(!wait.contains(bad), lang + ": the waiting objective says too much (" + bad + ")", failures);
+                }
+            }
             // メインの目的の文 (帯に出る) は、巨神 4 つを通して「〜しよう」で終わる (日本語)
             if (lang.equals("ja_jp")) {
                 for (String ns : List.of("skyabyss_npc", "skyabyss_story")) {
@@ -261,6 +271,42 @@ public final class OpeningStorySelfTest {
         }
         failures.add("option " + optionId + " does not exist at " + nodeId);
         return false;
+    }
+
+    // 語り部と話している最中に空の影が過ぎる (影を見る・頁を読むで伝承が記される): 会話の選択肢が古いまま取り残されず、
+    // 目的が止まらず、序盤の拍子 (破れた頁) が会話に割り込まない
+    private static void shadowDuringTalk(ServerLevel level, NpcEntity st, List<String> failures, List<String> notes) {
+        BlockPos at = st.blockPosition();
+        FakePlayer p = player(level, 62, at);
+        FakePlayer other = player(level, 63, at.offset(40, 0, 0));
+        OpeningDirector.reset(p);
+        OpeningDirector.force(p, jp.revati.skyabyss.opening.OpeningBeat.CAMP);
+        Quests.poll(p, true);
+        check(stage(p, "main_song").equals("follow_smoke"), "talk-through: the main quest did not start: " + stage(p, "main_song"), failures);
+        DialogueService.open(p, st);
+        check(node(p).equals("shadow0") && stage(p, "main_song").equals("watch_sky"), "talk-through: expected shadow0 / watch_sky, got " + node(p) + " / " + stage(p, "main_song"), failures);
+        next(p);
+        pick(p, ST, "ok", failures);
+        check(node(p).equals("menu") && !shown(p, ST, "shadow_seen"), "talk-through: the menu before the shadow shows the shadow topic", failures);
+        // 話している人には頁を落とさない。もう一人 (話していない) には落とせる
+        check(OpeningDirector.pageBusy(p) && !OpeningDirector.pageBusy(other), "talk-through: the page route is not paused for the talker only", failures);
+        // 話している最中に影が済み、頁が読まれて伝承が記された
+        Lore.unlock(p, "prologue/shadow", false);
+        Quests.poll(p, true);
+        check(stage(p, "main_song").equals("ask_storyteller"), "talk-through: the shadow did not advance the quest during the talk: " + stage(p, "main_song"), failures);
+        check(node(p).equals("menu") && !shown(p, ST, "shadow_seen"), "talk-through: expected the stale menu before the refresh", failures);
+        check(DialogueService.refreshForTest(p) && shown(p, ST, "shadow_seen"), "talk-through: the open menu did not gain the shadow topic after the shadow", failures);
+        check(!DialogueService.refreshForTest(p), "talk-through: the menu was re-sent without any change", failures);
+        // 古い画面から押された選択も、会話の記録を失わない: 続けて話を進めれば目的が進む
+        pick(p, ST, "shadow_seen", failures);
+        next(p);
+        next(p);
+        check(node(p).equals("shadow3") && stage(p, "main_song").equals("find_chaser"), "talk-through: the talk after the shadow did not advance the quest: " + stage(p, "main_song"), failures);
+        pick(p, ST, "go", failures);
+        check(!OpeningDirector.pageBusy(p), "talk-through: the page route stayed paused after the talk", failures);
+        DialogueService.close(p);
+        OpeningDirector.reset(p);
+        notes.add("talk through the shadow: open menu refreshed, quest advanced, page route paused only while talking");
     }
 
     private static void next(FakePlayer p) {
@@ -357,6 +403,7 @@ public final class OpeningStorySelfTest {
         DialogueService.open(a, st);
         check(node(a).equals("menu") && shown(a, ST, "errands"), "errands should appear once Isana has been met", failures);
         DialogueService.close(a);
+        shadowDuringTalk(level, st, failures, notes);
         notes.add("main quest: notebook → follow_smoke → shadow0 → watch_sky → shadow → ask_storyteller → find_chaser → see_whale, errands closed until Isana");
 
         // ---- 道すがらの見聞: 伝承が記されたものだけ並び、話した話題は消える (語り部とイサナの両方)

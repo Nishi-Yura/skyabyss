@@ -1,0 +1,70 @@
+# 空の影の通過中に、ブロックの下 (屋根の下・木の下・洞窟の入口) と、開けた所で見え方を比べる。
+# ./gradlew runShots -Pscript=tools/shots/shadow_indoor.txt -PshotsName=shadow_indoor_after   (絵は run/shots/<名前>/shots/shadow_indoor/*.png)
+# 組み立ては python tools/shadow_indoor_sheet.py <before のフォルダ> <after のフォルダ>
+world shadow_indoor flat
+size 960 540
+timeout 900
+render 12
+clouds on
+
+cmd gamemode creative
+cmd time set noon
+cmd weather clear
+hud off
+waitchunks
+
+# 建てる (地面は y=-61、立つのは y=-60)
+# 屋根の下: 石れんがの家 (中は x -3..3, y -60..-57)。東側に戸口 (外が見える)
+cmd fill -4 -61 -4 4 -56 4 stone_bricks hollow
+cmd fill 4 -60 -1 4 -58 1 air
+cmd setblock 0 -57 0 glowstone
+# 木の下: 幹と、広い葉 (散らないように persistent)
+cmd fill -20 -60 0 -20 -54 0 oak_log
+cmd fill -24 -55 -4 -16 -52 4 oak_leaves[persistent=true]
+# 洞窟の入口: 石の山を東向きにくり抜く
+cmd fill 14 -60 -6 28 -52 6 stone
+cmd fill 17 -60 -1 28 -58 1 air
+
+cmd skyabyss opening reset
+wait 45
+# 開幕の場面が始まっていたら打ち切る (カメラの移動を止めるので)
+cmd skyabyss cinematic stop
+chat clear
+wait 10
+camera 0.5 -60 0.5 270 0
+wait 5
+cmd skyabyss opening shadow
+wait 330
+
+# 1. 開けた所 (比べの基準): 上と、地平
+camera 40.5 -60 0.5 270 -55
+wait 80
+shot open_up
+look 270 5
+wait 15
+shot open_out
+
+# 2. 屋根の下 (家の中。上を見る / 戸口の外を見る)
+camera 0.5 -60 0.5 270 -50
+wait 80
+shot roof_up
+look 270 0
+wait 15
+shot roof_out
+
+# 3. 木の下 (葉の下。上を見る / 葉の外を見る)
+camera -19.5 -60 3.5 270 -55
+wait 80
+shot tree_up
+look 270 0
+wait 15
+shot tree_out
+
+# 4. 洞窟の入口の中 (上を見る = 岩 / 入口の外を見る)
+camera 19.5 -60 0.5 270 -40
+wait 80
+shot cave_up
+look 270 0
+wait 15
+shot cave_out
+quit

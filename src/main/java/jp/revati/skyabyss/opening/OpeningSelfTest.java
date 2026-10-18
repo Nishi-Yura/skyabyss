@@ -49,6 +49,7 @@ public final class OpeningSelfTest {
             margin(failures);
             horrorOff(failures);
             multiplayer(failures);
+            talkingThroughShadow(failures);
             legacy(failures);
             objectives(failures);
             whaleGate(failures);
@@ -79,6 +80,9 @@ public final class OpeningSelfTest {
         LongPredicate sleeping = t -> false;
         LongPredicate danger = t -> false;
         LongPredicate raining = t -> false;
+        // 会話・場面の画面を開いている (破れた頁は落とさない) / 見回りが回らない (別の次元などにいる)
+        LongPredicate busy = t -> false;
+        LongPredicate away = t -> false;
         // 帳面の場所に立つ (2 秒後)、宿りに向かって歩き出す、足跡のそば、語り部と話す、イサナと話す、石板のそば
         long padAt = 200;
         long leaveCampAt = 1500;
@@ -165,7 +169,7 @@ public final class OpeningSelfTest {
                     firstPassTick = t;
                 }
             }
-            if (t < r.joinAt) {
+            if (t < r.joinAt || r.away.test(t)) {
                 return;
             }
             if (t >= r.whaleAt) {
@@ -298,6 +302,11 @@ public final class OpeningSelfTest {
         }
 
         @Override
+        public boolean pageBusy() {
+            return r.busy.test(now);
+        }
+
+        @Override
         public void readShadowPage() {
             shadowLore = true;
             events.add(new Event(now, "pageAutoRead"));
@@ -399,7 +408,7 @@ public final class OpeningSelfTest {
             check(sim.st.done(beat), "new world: beat " + beat.id + " is not done at the end: " + all, failures);
         }
         // 目的の帯の移り変わり: 野営地 → 煙 → 空 → 宿り → イサナ → 骨の丘 (寄り道) → 岩鯨
-        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "bone_hill", "see_whale");
+        List<String> want = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "bone_hill", "see_whale", "wait_whale");
         int at = 0;
         for (String id : sim.objectives) {
             if (at < want.size() && id.equals(want.get(at))) {
@@ -562,6 +571,36 @@ public final class OpeningSelfTest {
         check(b.count("footsteps") == 1 && a.count("footsteps") == 1, "multi: footsteps counts", failures);
     }
 
+    // ---- 影の最中に語り部と話している人・影が去った瞬間に見回りが回らなかった人 (別の次元にいた): 頁は遅れても必ず落ち、目的が止まらない。
+    // 屋内で話している人と、外にいる人で、それぞれ自分の拍子 (外の人は遅れない)
+    private static void talkingThroughShadow(List<String> failures) {
+        long end = 6000 + 1257;
+        Route talker = new Route();
+        talker.busy = t -> t >= end - 300 && t < end + 3000;
+        Route outside = new Route();
+        Sim a = new Sim(talker);
+        Sim b = new Sim(outside);
+        for (long t = 0; t < 3 * 24000L; t += 20) {
+            a.tick(t);
+            b.tick(t);
+        }
+        check(!a.violation && !b.violation, "talk: " + a.violationText + b.violationText, failures);
+        check(b.count("page") == 1 && b.first("page") >= end && b.first("page") <= end + 200, "talk: the player outside did not get the page on time: " + listEvents(b), failures);
+        check(a.count("page") == 1 && a.first("page") >= end + 3000 && a.first("page") <= end + 3200,
+                "talk: the page was dropped during the talk or never after it: " + listEvents(a), failures);
+        check(a.shadowLore && b.shadowLore && a.first("shadowLore") > b.first("shadowLore"), "talk: the shadow lore did not reach both players: " + listEvents(a), failures);
+        check(a.objectives.contains("watch_sky") && a.objectives.contains("ask_storyteller"), "talk: the talker's objective did not advance: " + a.objectives, failures);
+        // 去った瞬間に見回りが回らない (別の次元・場面の中): 戻ってから頁が落ちる
+        Route away = new Route();
+        away.away = t -> t >= end - 100 && t < end + 1500;
+        Sim c = new Sim(away);
+        for (long t = 0; t < 3 * 24000L; t += 20) {
+            c.tick(t);
+        }
+        check(c.count("page") == 1 && c.first("page") >= end + 1500 && c.shadowLore, "talk: a player away at the pass end never got the page: " + listEvents(c), failures);
+        check(c.objectives.contains("ask_storyteller"), "talk: the away player's objective did not advance: " + c.objectives, failures);
+    }
+
     // ---- すでに遊んでいた人 (書や記録がある): 何も起こさない
     private static void legacy(List<String> failures) {
         OpeningState st = new OpeningState();
@@ -678,11 +717,38 @@ public final class OpeningSelfTest {
         check(OpeningLogic.objective(st, seeWhale, day2night).equals("see_whale"), "objective: the bone hill was offered at night", failures);
         st.markDone(OpeningBeat.BONES);
         check(OpeningLogic.objective(st, seeWhale, day2noon).equals("see_whale"), "objective: the bone hill stayed after the visit", failures);
+        // 歌のあと: 帯が「歌を待つ」のままにならず、次の行き先 (イサナ → 夕方の空) へ進む。状態ごと・人ごと
+        Env noon1 = new Env(6000, 6000, true, true, true, false, false, false, true, false);
+        Facts atWhale = new Facts(false, true, true, 5, 5, 100, false, false, true, true, false, false, true, false, false, false, false, 1, 100, "see_whale");
+        OpeningState heard = new OpeningState();
+        heard.awakeAt = 0;
+        heard.awakeDay = 0;
+        heard.markDone(OpeningBeat.CAMP);
+        heard.markDone(OpeningBeat.ISANA);
+        OpeningState notYet = new OpeningState();
+        notYet.awakeAt = 0;
+        notYet.awakeDay = 0;
+        notYet.markDone(OpeningBeat.CAMP);
+        notYet.markDone(OpeningBeat.ISANA);
+        check(OpeningLogic.objective(heard, atWhale, noon1).equals("see_whale"), "objective: before the song the band should wait for the song", failures);
+        heard.markDone(OpeningBeat.SONG);
+        check(OpeningLogic.objective(heard, atWhale, noon1).equals("wait_whale"), "objective: the band did not advance after the song: " + OpeningLogic.objective(heard, atWhale, noon1), failures);
+        check(OpeningLogic.objective(notYet, atWhale, noon1).equals("see_whale"), "objective: one player's song moved another player's band", failures);
+        // 歌は聞いたがイサナに会っていない (別の道で先に進んだ人): イサナへ
+        OpeningState songOnly = new OpeningState();
+        songOnly.awakeAt = 0;
+        songOnly.awakeDay = 0;
+        songOnly.markDone(OpeningBeat.CAMP);
+        songOnly.markDone(OpeningBeat.SONG);
+        check(OpeningLogic.objective(songOnly, atWhale, noon1).equals("find_isana"), "objective: song heard but Isana not met did not point to Isana", failures);
+        // 骨の丘の寄り道の時間は、そちらが先 (日 2 の昼)。夕方 (11000〜) には待つ帯へ戻る
+        Env day2dusk = new Env(24000 + 11500, 24000 + 11500, true, true, true, false, false, false, true, false);
+        check(OpeningLogic.objective(heard, atWhale, day2dusk).equals("wait_whale"), "objective: the band did not return to waiting for the whale at dusk", failures);
         // 夜の番号
         check(OpeningLogic.nightId(12999) == -1 && OpeningLogic.nightId(13000) == 0 && OpeningLogic.nightId(24000 + 20000) == 1 && OpeningLogic.nightId(24000 + 22000) == -1,
                 "night ids", failures);
         // 帯に出る文の鍵が、すべて語りの担当の表にある (日英の長さは OpeningStorySelfTest が数える)
-        for (String id : new String[]{"examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "see_whale", "bone_hill"}) {
+        for (String id : new String[]{"examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "see_whale", "wait_whale", "bone_hill"}) {
             check(OpeningSelfTest.class.getResourceAsStream("/assets/skyabyss_opening/lang/ja_jp.json") != null, "objective lang file", failures);
             try (var in = OpeningSelfTest.class.getResourceAsStream("/assets/skyabyss_opening/lang/en_us.json")) {
                 String text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);

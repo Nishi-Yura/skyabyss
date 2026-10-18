@@ -122,7 +122,8 @@ OBJECTIVES = [
     ("watch_sky", "周りを探索して強くなろう", "Explore and grow stronger", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the storyteller at the lodge", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire beyond the lodge", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
-    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Keep exploring, and listen for the song at night", "B7〜B10 イサナと話してから、岩鯨を見るまで (メインの段 see_whale)"),
+    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Keep exploring, and listen for the song at night", "B7〜B10 イサナと話してから、歌を聞くまで (メインの段 see_whale)"),
+    ("wait_whale", "夕方、空を見上げて岩鯨を待とう", "At dusk, look up and wait for the stone whale", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
     ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Go and see the hill that looks white in the haze", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]
 for oid, ja, en, _ in OBJECTIVES:

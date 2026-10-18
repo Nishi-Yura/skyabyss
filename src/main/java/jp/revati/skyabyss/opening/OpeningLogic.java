@@ -49,8 +49,9 @@ public final class OpeningLogic {
     // 影のあとの破れた頁: 影が去って 3 秒後に落とす。落としても読まれなければ、12 分後に自動で読む
     static final long PAGE_DELAY = 60L;
     static final long PAGE_AUTO_READ = 14400L;
-    // 影の直後に「影が去った」と数える幅 (見回りの間隔より長く)
-    public static final long PASS_END_WINDOW = 400L;
+    // 影が去ってから「影が去った」と数える幅。見回りの間隔より十分長く取る: 去った瞬間に会話や場面の最中だったり、別の次元にいたりしても、
+    // 戻ってきたあとの見回りで頁が落ちる (空の影の拍子と「空を見る」の目的が止まらない)
+    public static final long PASS_END_WINDOW = 6000L;
     // 夜の拍子は、目覚めてからこれだけたつまで起こさない (開幕と帳面の邪魔をしない)
     static final long NIGHT_AFTER_AWAKE = 6000L;
     // 影を見ていなくても、目覚めてこれだけたてば足音の資格を与える (詰み止め)
@@ -110,6 +111,11 @@ public final class OpeningLogic {
 
         void startPersonalShadow();
 
+        // 会話・場面の画面を開いている最中か。破れた頁は、その間は落とさず (読めない・見えない)、閉じたあとの見回りで落とす
+        default boolean pageBusy() {
+            return false;
+        }
+
         void bonesLore();
 
         void marginPage();
@@ -164,6 +170,10 @@ public final class OpeningLogic {
             case "see_whale" -> "see_whale";
             default -> "";
         };
+        if (stage.equals("see_whale")) {
+            // 歌を聞くまでは歌を待つ。歌のあとは、イサナに会っていなければ会いに行き、済んでいれば夕方の空を見て岩鯨を待つ (帯が歌のあとも変わらないままにならない)
+            id = !st.done(OpeningBeat.SONG) ? "see_whale" : !st.done(OpeningBeat.ISANA) ? "find_isana" : "wait_whale";
+        }
         if (!id.isEmpty() && boneOffer(st, env) && (stage.equals("find_chaser") || stage.equals("see_whale"))) {
             return "bone_hill";
         }
@@ -294,7 +304,7 @@ public final class OpeningLogic {
     // B4 最初の影 (空の影そのものは SkyEvents が必ず起こす。ここは人ごとの拍子)
     private static void shadow(OpeningState st, Env env, Facts f, Fx fx, long now) {
         // 落とす予定の破れた頁
-        if (st.pageAt >= 0 && now >= st.pageAt) {
+        if (st.pageAt >= 0 && now >= st.pageAt && !fx.pageBusy()) {
             st.pageAt = -1;
             fx.dropShadowPage();
             st.pageReadAt = now + PAGE_AUTO_READ;
@@ -302,7 +312,7 @@ public final class OpeningLogic {
         if (st.pageReadAt >= 0) {
             if (f.shadowLore()) {
                 st.pageReadAt = -1;
-            } else if (now >= st.pageReadAt) {
+            } else if (now >= st.pageReadAt && !fx.pageBusy()) {
                 st.pageReadAt = -1;
                 fx.readShadowPage();
             }

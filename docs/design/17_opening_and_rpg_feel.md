@@ -144,7 +144,7 @@
 | B1 | 帳面（`CampBuilder` が置いた伝承の書の ItemEntity）の 2.5 ブロック以内で「拾った」とみなし、人ごとに伝承の書を渡す（17-2）。帳面そのものは消えず、タグ付きは通常の拾い方を止める。野営地へ行かなくても届く: 離れて 1 分・目覚めて 5 分・野営地のない世界は 20 秒後。野営地の頁 `prologue/camp` は中心から 12 ブロック以内で 3 秒後 | `follow_smoke` |
 | B2 | 目的が `follow_smoke` の間、宿りの鐘を 30 秒おき（宿りの 230 ブロック以内。音 `opening_bell`、風のない朝の小さな音、減衰距離 192）。宿りの 40 ブロック以内か語り部と会えば済み | — |
 | B3 | 足跡の**見える形**（掘る・盛る列。向きと左右反転を戻して引く `FootprintShape`）の外 3 ブロック（`OpeningLogic.FOOTPRINT_MARGIN`）以内に起きている人が入ったら `prologue/footprints`。部品の原点は踵寄りで爪先まで 37・踵まで 20 あるため、原点からの円では爪先の中が外れていた | — |
-| B4 | 影そのものは `SkyEvents`（2.3）。影が去って 3 秒後、まだ `prologue/shadow` のない人（書を持っている人・屋内で見なかった人）に**破れた頁**が空から落ちる（本人だけが拾える、2 分で荷物へ、14 分読まなければ自動で読む）。頁は `page` 条件 `shadow` で記す。書を持っている人は影を見ても記さず頁で記す（`LoreEvents.watchSky` → `OpeningDirector.deferShadowToPage`）。頁の中身は `prologue/shadow`（「雲の上の影」）の本文 | `watch_sky` |
+| B4 | 影そのものは `SkyEvents`（2.3）。会話・場面の間は頁を落とさず、閉じたあとに落とす（`pageBusy`。語り部と話している最中に影が過ぎても、頁・伝承・目的は止まらない。開いている会話の選択肢も、状態が変わったら映し直す `DialogueService.refresh`）。影が去って 3 秒後、まだ `prologue/shadow` のない人（書を持っている人・屋内で見なかった人）に**破れた頁**が空から落ちる（本人だけが拾える、2 分で荷物へ、14 分読まなければ自動で読む）。頁は `page` 条件 `shadow` で記す。書を持っている人は影を見ても記さず頁で記す（`LoreEvents.watchSky` → `OpeningDirector.deferShadowToPage`）。頁の中身は `prologue/shadow`（「雲の上の影」）の本文 | `watch_sky` |
 | B5 | 既存（`OpeningBeats.metStoryteller`）。済みの印だけ取り込む | `ask_storyteller` |
 | B6 | 2.5 | `ask_storyteller` などのまま |
 | B7 | 既存。済みの印だけ取り込む | `find_isana` → `see_whale` |
@@ -393,7 +393,8 @@
 | `objective.skyabyss.watch_sky` | 周りを探索して強くなろう | Explore and grow stronger | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the storyteller at the lodge | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire beyond the lodge | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.see_whale` | 探索しながら、夜空の歌に耳をすまそう | Keep exploring, and listen for the song at night | イサナと話してから岩鯨を見るまで（段 `see_whale`。以降は 07 のクエストの目的の文） |
+| `objective.skyabyss.see_whale` | 探索しながら、夜空の歌に耳をすまそう | Keep exploring, and listen for the song at night | 段 `see_whale` で、歌 (B9) をまだ聞いていない間 |
+| `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up and wait for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「探索で力をつけておこう」の一文つきの文（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Go and see the hill that looks white in the haze | 日 2 の昼の任意の寄り道 |
 
 - 文は「〜してみよう」「〜に話しかけよう」「〜を探そう」と次の行動を言う（日本語は 20 字まで、英語は 52 字まで。自己テストが数え、文末・キー名・名前だけの文を弾く）。方角と距離は帯が右に足す。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
@@ -477,7 +478,7 @@
 
 - メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒しし、目的を「煙を追う」にした。段を 2 つ足した（`follow_smoke`、`watch_sky`。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす `skip_if`）。以後は影、語り部（`ask_storyteller`）、鯨追い（`find_chaser`）、岩鯨（`see_whale`）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。新しい `signal` は作っていない（序の二段は既存の `talk`・`lore` で進む）。
 - 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索して強くなろう」など具体的な行動を書く。
-- 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = `see_whale`、B8 の寄り道 = `bone_hill`。
+- 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = 歌 (B9) の前は `see_whale`、歌のあとは `wait_whale`（イサナに会っていなければ `find_isana`）、B8 の寄り道 = `bone_hill`。
 - 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件）。
 - 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題は 1 つだけ足し、見聞の 5 つは別の節に分けた。
 - `tools/gen_npc_content.py` は出荷済みのデータに合わせてある（イサナの名乗り、伝承 `chapter1/whale_chaser`）。`gen_free_quests.py` と `gen_story_quests.py` は書き出し後の手直しと食い違うので再実行しない（6.6 の閉じ方は `gen_opening_text.py` がデータを直接直す）。
