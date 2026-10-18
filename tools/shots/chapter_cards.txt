@@ -1,0 +1,32 @@
+# 章の題字の札と余韻の札 (docs/design/18_notices.md の 3 章、01 の 4.1)。./gradlew runShots -Pscript=tools/shots/chapter_cards.txt
+# 本番と同じ Notice の経路 (Notice.chapter / Notice.aftermath)。開発コマンド /skyabyss dev arc card|aftermath <章の ID> で送る。
+# 札は上の帯の列に一つずつ映る (順番待ち)。レベルアップ・字幕と重ならないことも一枚に撮る
+world shots flat
+size 1280 720
+timeout 300
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud on
+waitchunks
+chat clear
+wait 20
+
+cmd skyabyss dev arc card titan_whale
+wait 45
+shot chapter_card_whale
+wait 200
+cmd skyabyss dev arc aftermath titan_whale
+wait 60
+shot chapter_aftermath_whale
+wait 220
+cmd skyabyss dev arc card titan_ember
+cmd skyabyss dev notice levelup message.skyabyss.growth.max_level
+cmd skyabyss dev notice narrate message.skyabyss.whisper.ridge
+wait 60
+shot chapter_card_with_levelup_and_caption
+wait 60
+echo done

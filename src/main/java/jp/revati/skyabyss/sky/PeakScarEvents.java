@@ -142,7 +142,7 @@ public final class PeakScarEvents {
         if (witness == null || best > 120 || !ChapterSky.inChapterOne(witness)) {
             return;
         }
-        float strength = ChapterSky.moonNearness(level);
+        float strength = ChapterSky.moonNearness(level, witness);
         schedule(level, pass.originX(), pass.originZ(), pass.dirX(), pass.dirZ(), pass.speed(), length,
                 pass.startTick(), strength);
     }

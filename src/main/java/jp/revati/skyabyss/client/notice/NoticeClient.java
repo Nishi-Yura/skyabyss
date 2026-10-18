@@ -128,13 +128,10 @@ public final class NoticeClient {
         String key = body.getString();
         Config.NotifyMode mode = Config.NOTIFY_MODE.get();
         if (kind != Notice.Kind.BAR && kind != Notice.Kind.WARN) {
-            NoticeLog.add(kind, kind == Notice.Kind.PLACE && !payload.extra().getString().isEmpty()
-                    ? Component.empty().append(payload.text()).append("  ").append(payload.extra()) : Notice.plain(payload.text()));
+            NoticeLog.add(kind, fullText(payload));
         }
         if (mode != Config.NotifyMode.TOAST) {
-            Component full = kind == Notice.Kind.PLACE && !payload.extra().getString().isEmpty()
-                    ? Component.empty().append(payload.text()).append("  ").append(payload.extra()) : Notice.plain(payload.text());
-            mc.gui.getChat().addMessage(full);
+            mc.gui.getChat().addMessage(fullText(payload));
             if (mode == Config.NotifyMode.CHAT) {
                 return;
             }
@@ -156,6 +153,9 @@ public final class NoticeClient {
             case BANNER -> {
                 BANNER.setSpeed(speed);
                 BANNER.offer(new Line(body, payload.extra()), kind, key, key.length());
+                if (kind == Notice.Kind.CHAPTER) {
+                    chime(mc, 0.7f, 0.5f);
+                }
             }
             case TOAST -> {
                 boolean gain = kind == Notice.Kind.GAIN;
@@ -165,6 +165,16 @@ public final class NoticeClient {
             }
             case ACTIONBAR -> mc.gui.setOverlayMessage(body, false);
         }
+    }
+
+    // 記録・チャットに残す文: 場所・章の札は題と副題を並べ、余韻は見出しと一言を並べる
+    private static Component fullText(NoticePayload payload) {
+        Notice.Kind kind = payload.kind();
+        if (payload.extra().getString().isEmpty() || !(kind == Notice.Kind.PLACE || kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH)) {
+            return Notice.plain(payload.text());
+        }
+        return kind == Notice.Kind.AFTERMATH ? Component.empty().append(payload.extra()).append("  ").append(payload.text())
+                : Component.empty().append(payload.text()).append("  ").append(payload.extra());
     }
 
     private static void chime(Minecraft mc, float pitch, float volume) {
@@ -302,6 +312,10 @@ public final class NoticeClient {
         if (a <= 0.01f) {
             return;
         }
+        if (e.kind == Notice.Kind.CHAPTER || e.kind == Notice.Kind.AFTERMATH) {
+            bannerBottom = renderChapterCard(g, font, cx, e, a);
+            return;
+        }
         boolean place = e.kind == Notice.Kind.PLACE;
         float scale = place ? 1.8f : 1.0f;
         int maxW = (int) (Math.max(120, (int) (g.guiWidth() * 0.5f)) / scale);
@@ -343,5 +357,63 @@ public final class NoticeClient {
             endY = sy;
         }
         bannerBottom = endY;
+    }
+
+    // 章の題字の札 (CHAPTER) と余韻の札 (AFTERMATH)。上の帯の列の中で一つだけ映る (順番待ち)。下端を返す (レベルアップの文字などがその下へずれる)
+    //   CHAPTER  : 「一章　岩鯨」を 2.2 倍の金の文字で、その下に題字を 1.4 倍で。線が左右へ伸びる
+    //   AFTERMATH: 見出し (小さな金) の下に一言を 1.25 倍で、折り返し 3 行まで
+    private static int renderChapterCard(GuiGraphics g, Font font, int cx, NoticeQueue.Entry<Line> e, float a) {
+        boolean title = e.kind == Notice.Kind.CHAPTER;
+        int y = Math.max((int) (g.guiHeight() * 0.16f), bossBottom > 0 ? bossBottom + 6 : 0);
+        float mainScale = title ? 2.2f : 1.25f;
+        int maxW = (int) (Math.max(140, Math.min(g.guiWidth() - 40, (int) (g.guiWidth() * 0.6f))) / mainScale);
+        List<FormattedCharSequence> lines = font.split(e.value.text(), maxW);
+        int maxLines = title ? 1 : 3;
+        if (lines.size() > maxLines) {
+            lines = lines.subList(0, maxLines);
+        }
+        int w = 0;
+        for (FormattedCharSequence l : lines) {
+            w = Math.max(w, font.width(l));
+        }
+        int textColor = title ? 0xF2C14E : 0xE9E3D4;
+        int lineColor = ((int) (a * 0x90) << 24) | 0xF2C14E;
+        int half = (int) (Math.min(1f, e.age() / 600f) * ((int) (w * mainScale) / 2 + 30));
+        Component sub = e.value.extra();
+        int by = y;
+        if (!title) {
+            // 見出しを先に (小さく、線で挟む)
+            int sw = font.width(sub);
+            g.drawString(font, sub, cx - sw / 2, y, alphaOf(a) | 0xB8923A, true);
+            int hw = (int) (Math.min(1f, e.age() / 600f) * (sw / 2 + 28));
+            g.fill(cx - hw, y + 12, cx + hw, y + 13, lineColor);
+            by = y + 20;
+        }
+        g.pose().pushPose();
+        g.pose().translate(cx, by, 0);
+        g.pose().scale(mainScale, mainScale, 1f);
+        int ty = 0;
+        for (FormattedCharSequence l : lines) {
+            g.drawString(font, l, -font.width(l) / 2, ty, alphaOf(a) | textColor, true);
+            ty += 11;
+        }
+        g.pose().popPose();
+        int endY = by + (int) (lines.size() * 11 * mainScale);
+        if (title) {
+            int ly = endY + 4;
+            g.fill(cx - half, ly, cx + half, ly + 1, lineColor);
+            endY = ly + 6;
+            if (!sub.getString().isEmpty()) {
+                float subScale = 1.4f;
+                int sw = font.width(sub);
+                g.pose().pushPose();
+                g.pose().translate(cx, endY, 0);
+                g.pose().scale(subScale, subScale, 1f);
+                g.drawString(font, sub, -sw / 2, 0, alphaOf(a) | 0xE9E3D4, true);
+                g.pose().popPose();
+                endY += (int) (11 * subScale) + 2;
+            }
+        }
+        return endY;
     }
 }

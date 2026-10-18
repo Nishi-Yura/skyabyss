@@ -21,6 +21,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //   gain    : 獲得・解放          → 右上の札 (伝承・クエストの札と同じ列)
 //   place   : 場所の名前          → 画面中央上のタイトル
 //   alert   : 戦いの始まり・出現  → 同じ上の帯 (小さめ)
+//   chapter / aftermath : 章の題字・余韻 → 同じ上の帯の列 (順番待ち。大きめ・長め。story/arc/ChapterCards が送る)
 //   warn    : 失敗・入れない      → アクションバー
 // チャットに残すのは、他の人に伝えるべきこと (誰が心臓を倒した等) とコマンドの結果だけ
 public final class Notice {
@@ -30,7 +31,10 @@ public final class Notice {
 
     public enum Kind {
         NARRATE(Channel.CAPTION), HINT(Channel.CAPTION), LEVEL_UP(Channel.CENTER), GAIN(Channel.TOAST), UNLOCK(Channel.TOAST),
-        PLACE(Channel.BANNER), ALERT(Channel.BANNER), WARN(Channel.ACTIONBAR), BAR(Channel.ACTIONBAR);
+        PLACE(Channel.BANNER), ALERT(Channel.BANNER), WARN(Channel.ACTIONBAR), BAR(Channel.ACTIONBAR),
+        // 章の題字の札 (text = 「一章　岩鯨」、extra = 題字) と余韻の札 (text = 一言、extra = 見出し)。上の帯と同じ順番待ち。
+        // 追加した種類は必ず末尾に (パケットは順番の番号で送る)
+        CHAPTER(Channel.BANNER), AFTERMATH(Channel.BANNER);
 
         private final Channel channel;
 
@@ -126,6 +130,16 @@ public final class Notice {
     // 場所の名前: title は大きく、subtitle (空でもよい) はその下に
     public static void place(Player p, Component title, @Nullable Component subtitle) {
         deliver(p, new NoticePayload(Kind.PLACE, title, subtitle == null ? Component.empty() : subtitle));
+    }
+
+    // 章の題字の札: title は「一章　岩鯨」、subtitle は題字「空を泳ぐもの」。story/arc/ChapterCards が人ごとに一度だけ送る
+    public static void chapter(Player p, Component title, Component subtitle) {
+        deliver(p, new NoticePayload(Kind.CHAPTER, title, subtitle));
+    }
+
+    // 章の余韻の札: line は一言 (碑文など)、heading は「一章　岩鯨　終」のような見出し
+    public static void aftermath(Player p, Component heading, Component line) {
+        deliver(p, new NoticePayload(Kind.AFTERMATH, line, heading));
     }
 
     // 種類を文の印から決める (印がなければチャット)。既存の呼び出しの置き換え先
