@@ -5,7 +5,7 @@
 ## 0. 再開の手順
 
 1. `git fetch origin` → `git checkout m1-sky-pass` → `git pull`
-2. 途中の作業（wip ブランチ）は今は無い。前回の 4 本は 1 章のとおり m1-sky-pass に取り込み、main にもマージした（PR #4）。次にやることは 3 章。origin に残っている `wip/*` の 5 本（per-party-progress・titan-defeat-ending・ember-mouth-whale-fins・armor-install・weapon-install）は、どれも取り込み済みなので消してよい。
+2. 途中の作業（wip ブランチ）は今は無い。前回の 4 本は 1 章のとおり m1-sky-pass に取り込み、main にもマージした（PR #4）。次にやることは 3 章。ブランチは `main` と `m1-sky-pass` だけ（`wip/*` と作業用コピーは消した）。
 3. ビルド: `./gradlew compileJava --offline`（初回は `--offline` を外す）。
 4. 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer`（一部だけは `SKYABYSS_SELFTEST_ONLY=<名前の頭>`）。**新しいワールドと `level-seed=4242`** で回す（古いワールドは建物の配置が古くて落ちる段がある）。今は 58 段ぜんぶ PASSED（約 6 分）。
 5. 設計書は `docs/design/README.md` から。未決の一覧 `docs/design/00_decisions_needed.md` は今は空（全部回答済み、変えた答えは付録に「（実装中）」付き）。
@@ -43,13 +43,12 @@ Claude だけで進められるもの:
 
 ユーザーにしかできないもの:
 
-- origin の `wip/*` 5 本の削除（全部取り込み済み。クラウドの環境からは消せない）: `git push origin --delete wip/armor-install wip/ember-mouth-whale-fins wip/per-party-progress wip/titan-defeat-ending wip/weapon-install`
 - ゲームの通しの確認と、2 グループが同じ背中にいるときのマルチの実機の確認。
 - 「一つのグループが心臓を止めると巨神はみんなにとって眠る」で良いかの判断（変えるなら未決 200 番から）。
 
 ## 4. ほかに残っていること
 
-- 取り込まれていない古い作業コピー 3 つ（`.claude/worktrees/agent-a2188628431d3bc03`、`a56c7abd31fd65baf`、`aba09111be057701d`）の中身の確認。元の Windows の PC にだけある（クラウドの環境には無い）。
+- なし（古い作業用コピーは中身が本体に入っていたので消した）。
 
 ## 5. 続けるときの注意
 
