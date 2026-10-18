@@ -1,0 +1,44 @@
+{
+  "category": "sub",
+  "chapter": "titan_storm",
+  "order": 46,
+  "giver": "skyabyss:whale_chaser",
+  "min_stage": 2,
+  "unlock": {
+    "type": "stage",
+    "min": 2,
+    "max": 2
+  },
+  "stages": [
+    {
+      "id": "climb",
+      "xp": 60,
+      "objectives": [
+        {
+          "id": "foot",
+          "type": "signal",
+          "target": "ch3_perch_foot",
+          "party": false
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "xp": 0,
+      "objectives": [
+        {
+          "id": "talk",
+          "type": "talk",
+          "target": "skyabyss:whale_chaser",
+          "topic": "ch3_wait_done2"
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 200,
+    "affinity": {
+      "skyabyss:whale_chaser": 5
+    }
+  }
+}

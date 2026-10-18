@@ -1,0 +1,59 @@
+{
+  "site": "ch3_tablet",
+  "note": "三章 風の碑。碑は仕上げで置く",
+  "palette": [
+    "minecraft:stone_bricks",
+    "minecraft:mossy_stone_bricks",
+    "minecraft:cobblestone_wall",
+    "minecraft:stone_brick_slab[type=bottom]"
+  ],
+  "blocks": [
+    [
+      -1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      -1,
+      1,
+      0,
+      2
+    ],
+    [
+      1,
+      1,
+      0,
+      2
+    ]
+  ],
+  "marks": {
+    "tablet": [
+      0,
+      1,
+      0
+    ]
+  },
+  "meta": {
+    "rect": [
+      -2,
+      -1,
+      2,
+      1
+    ],
+    "level": true,
+    "ring": 2
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "category": "sub",
+  "chapter": "titan_storm",
+  "order": 44,
+  "min_stage": 2,
+  "start_when": {
+    "type": "stage",
+    "min": 2,
+    "max": 2
+  },
+  "stages": [
+    {
+      "id": "trace",
+      "xp": 150,
+      "objectives": [
+        {
+          "id": "vane",
+          "type": "signal",
+          "target": "ch3_vane",
+          "party": false
+        },
+        {
+          "id": "ruin",
+          "type": "signal",
+          "target": "ch3_ruin",
+          "party": false
+        },
+        {
+          "id": "pack",
+          "type": "signal",
+          "target": "ch3_pack",
+          "party": false
+        },
+        {
+          "id": "tablets",
+          "type": "signal",
+          "targets": [
+            "ch3_wind_1",
+            "ch3_wind_2",
+            "ch3_wind_3"
+          ],
+          "count": 3,
+          "party": false
+        }
+      ]
+    }
+  ],
+  "reward": {
+    "xp": 150
+  }
+}

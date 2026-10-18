@@ -194,7 +194,7 @@ public final class LoreSelfTest {
             }
             // 潮殻の背の看板の文は skyabyss_tide にある
             // 雷翼の背の看板の文は skyabyss_storm にある
-            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember")) {
+            for (String ns : List.of("skyabyss_tide", "skyabyss_storm", "skyabyss_ember", "skyabyss_ch3")) {
                 JsonObject backSigns = json("/assets/" + ns + "/lang/" + lang + ".json", failures);
                 if (backSigns != null) {
                     backSigns.entrySet().forEach(e -> {
@@ -396,7 +396,9 @@ public final class LoreSelfTest {
         JsonObject storm = json("/assets/skyabyss_storm/lang/" + code + ".json", failures);
         // 余燼の項目 (地を泳ぐもの・灰の民の炉・碑文・鍛え手・消えた火・鍛えの帳) の文は skyabyss_ember にある (13 の 9 章、担当 G)
         JsonObject ember = json("/assets/skyabyss_ember/lang/" + code + ".json", failures);
-        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember)) {
+        // 三章の項目 (焼けた荷の頁・風の碑・影と翼) の文は skyabyss_ch3 にある (12 の 12 章)
+        JsonObject ch3 = json("/assets/skyabyss_ch3/lang/" + code + ".json", failures);
+        for (JsonObject extra : java.util.Arrays.asList(quest, tide, story, storm, ember, ch3)) {
             if (lang != null && extra != null) {
                 extra.entrySet().forEach(e -> {
                     if (!lang.has(e.getKey())) {

@@ -161,6 +161,16 @@ public class StormWingEntity extends Entity implements GeoEntity {
         return mode == Mode.PERCH;
     }
 
+    // うずくまっているか (空の影から隠れている。三章の見せ場 chapter/StormShowcase が見る)
+    public boolean cowering() {
+        return mode == Mode.COWER;
+    }
+
+    // 今の動きになってからの tick
+    public int modeTicks() {
+        return modeTicks;
+    }
+
     public boolean hasLastFoot() {
         return hasLastFoot;
     }

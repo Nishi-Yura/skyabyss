@@ -274,7 +274,7 @@ public final class NpcQuestSelfTest {
             // 1 章の続き (メイン 4 本・サブ 4 本) の文は skyabyss_story に置いた
             // 雷翼の背の周回のクエスト (*storm*) と風見鶏の文は skyabyss_storm にある (12 の 11.2 節、伝承の担当)
             // 語り部の墓の救いの文は skyabyss_grave にある (11 の 6 章)
-            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave")) {
+            for (String ns : List.of("skyabyss_quest", "skyabyss_story", "skyabyss_storm", "skyabyss_grave", "skyabyss_ch3")) {
                 JsonObject extra = json("/assets/" + ns + "/lang/" + code + ".json", failures);
                 if (extra != null) {
                     extra.entrySet().forEach(e -> {
