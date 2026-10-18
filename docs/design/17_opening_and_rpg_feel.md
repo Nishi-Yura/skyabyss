@@ -2,7 +2,7 @@
 
 - 文書番号: 17
 - 範囲: 序章（日 1）と一章の前半（日 2 から最初の巨神「岩鯨」に乗るまで）の流れ・構造物・ホラーの拍子・語り・数値と、RPG 感の見せ方。章の全体の構成は [01 の 4](01_overview.md)。
-- 関連: [01 全体設計](01_overview.md)、[05 伝承の書](05_lore_npc_quest.md)、[06 序章](06_prologue.md)、[07 NPC・クエスト](07_npc_quest.md)（07 の 17 章に序盤の語りの要約）、[10 進行](10_progression_multiplayer.md)、[14 ベータ](14_beta.md)、[18 画面の知らせ](18_notices.md)
+- 関連: [01 全体設計](01_overview.md)、[05 伝承の書](05_lore_npc_quest.md)、[06 序章](06_prologue.md)、[07 NPC・クエスト](07_npc_quest.md)（07 の 2.2 節に序盤の語りの要約）、[10 進行](10_progression_multiplayer.md)、[14 ベータ](14_beta.md)、[18 画面の知らせ](18_notices.md)
 
 ---
 

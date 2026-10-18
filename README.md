@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS  v0.2.1">
+  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS  v0.2.2">
 </p>
 
 <p align="center">
   <img alt="Minecraft 1.21.1" src="https://img.shields.io/badge/Minecraft-1.21.1-5aa9e6?style=for-the-badge&labelColor=17264a">
   <img alt="NeoForge" src="https://img.shields.io/badge/NeoForge-1.21.1-e8742a?style=for-the-badge&labelColor=17264a">
   <img alt="GeckoLib" src="https://img.shields.io/badge/GeckoLib-required-3aa6a0?style=for-the-badge&labelColor=17264a">
-  <img alt="Beta v0.2.1" src="https://img.shields.io/badge/BETA-v0.2.1-e8b83a?style=for-the-badge&labelColor=17264a">
+  <img alt="Beta v0.2.2" src="https://img.shields.io/badge/BETA-v0.2.2-e8b83a?style=for-the-badge&labelColor=17264a">
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@
 
 建築も、採掘も、いつものマイクラのまま。そこに、怖さと冒険と、少しずつ解けていく謎が重なります。
 
-> **ベータ版（v0.2.1）** です。序章と、巨神 1 体ごとの四つの章を越えて「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
+> **ベータ版（v0.2.2）** です。序章と、巨神 1 体ごとの四つの章を越えて「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
 
 <h2 align="center"><a name="titans"></a><img src="docs/readme/plate_titans.png" alt="巨神と章"></h2>
 
@@ -73,6 +73,13 @@
     <td><b>碑と伝承の書。</b> 看板のかわりに、石の碑を読みます。見たもの、読んだ碑文、聞いた話が <b>伝承の書</b> に記されます。鐘の宿りの語り部や、空を追う旅人イサナとの会話、メインクエスト、サブクエストと日替わり・週替わりの依頼もあります。</td>
   </tr>
 </table>
+
+<ul>
+  <li><b>倒れても、戻れる。</b> 戦いの中で倒れたら、20 秒たつと扉から戻れます（一つの戦いで 3 回まで）。戻った人は 3 秒のあいだ傷を受けません。</li>
+  <li><b>床で読める予告。</b> 敵の技は床に範囲が出てから来ます。橙は傷の出る所、青白い破線は安全な筋、灰色は押すだけです。</li>
+  <li><b>備えの三灯。</b> 乗り込み口で、身・刃・糧の備えを三つの灯で見せます。足りなくても、確かめれば乗れます。</li>
+  <li><b>停まっている時間。</b> 巨神は止まってから約 20 分のあいだ乗れて、残り 2 分と 30 秒に知らせが出ます。</li>
+</ul>
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
@@ -165,7 +172,7 @@
 <table>
   <tr>
     <td width="56" align="center"><img src="docs/readme/icon_jar.png" width="48" alt=""></td>
-    <td><code>skyabyss-0.2.1.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダに入れて起動します（サーバーなら、サーバーの <code>mods</code> にも同じものを）。ソースから作るときは <code>./gradlew build</code>（<code>build/libs/</code> にできます）。</td>
+    <td><code>skyabyss-0.2.2.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダに入れて起動します（サーバーなら、サーバーの <code>mods</code> にも同じものを）。ソースから作るときは <code>./gradlew build</code>（<code>build/libs/</code> にできます）。</td>
   </tr>
 </table>
 
@@ -264,12 +271,15 @@
 | `skyabyssGraveExpire` | 墓が消えるまでの分（0 で消えない） |
 | `skyabyssGraveRescue` | 語り部の救いで戻る割合（％。0 で救いなし） |
 | `skyabyssDeathDurability` | 耐久だけ減る型での減る割合（％） |
+| `skyabyssHeartReentryLimit` | 戦いで倒れた人が、20 秒のあとに戻れる回数（既定 3。0 で数えない） |
 
 設定ファイルでは、不穏な出来事の頻度を変えられます（`horrorEventFrequency` など。0 で出なくなります）。画面の揺れや暗さは、クライアント設定で弱められます。
 
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
 <h2 align="center"><a name="changes"></a><img src="docs/readme/plate_changes.png" alt="0.2.0 の変更点"></h2>
+
+**0.2.2**: 巨神の技は、すべて床に範囲が出てから来るようになりました（橙は傷、青白い破線は安全な筋、灰は押すだけ）。部屋と心臓を広げ、倒れたあとは 20 秒で再入場できます（一つの戦いで 3 回まで）。備えの三灯、四体すべての初見の場面、野営の道具を背中に置けるようになりました。詰まりの修正と、マルチの不具合も多く直しました。遊ぶ人はみんな同じ版の jar を入れてください（版が違うと接続のときに断られます）。
 
 **0.2.1**: マルチで後から入った人に、開幕の場面や目的の帯などが出なかった不具合を直した。遊ぶ人はみんな同じ版の jar を入れる（版が違うと接続のときに断られる）。すでに遊んだ扱いになってしまったセーブは、OP が `/skyabyss opening reset <名前>` と `/skyabyss cinematic reset <名前>` で戻せる。
 
@@ -293,7 +303,7 @@
 - **マルチプレイは、まだ人の手で通しの確認をしていません。** 特に、2 つのパーティが同じ背中にいるときの動きです。
 - 雷翼と余燼では、巨神に乗って移動する旅がまだできません。
 - 序盤の演出、章の小さな仕掛けや予兆は、通しで遊んで確かめていません。濃さ（出すぎる・気づかない）の感想をください。
-- 余燼の背中の部屋のつなぎ目で、最後まで歩けないことがあります。管理者は `/skyabyss titan reset ember` で戻せます。
+- 余燼の背中は、部屋のつなぎ目と歩いて行ける道を監査して直しましたが、まだ人が通しで遊んでいません。噛み合わない所があれば教えてください。管理者は `/skyabyss titan reset ember` で戻せます。
 - 世界を開いた直後の数分は、背中の島を建てているので動きが重いことがあります。
 - 風見鶏や潮の真珠の絵は、仮のものです。
 - 知らせの記録（N）は、その遊びのあいだだけの記録です。
