@@ -98,9 +98,20 @@ public final class ChapterSites {
     // 拠点・置いた場所のどれからもこれだけ離れたら、進行方向の先に 1 つ足す
     public static final int AWAY_DIST = 300;
     public static final int MAX_AHEAD = 6;
+    // 同じ要素を作り足さない範囲 = 要素の maxDist + これ
+    public static final int REUSE_MARGIN = 10;
+    // 作り直し (掃除) で「同じ場所」とみなす水平の距離
+    public static final int DUP_DIST = 64;
     public static final String KIND_PREFIX = "ch:";
 
     private static final Map<String, Element> ELEMENTS = new ConcurrentHashMap<>();
+    private static final Map<String, Eraser> ERASERS = new ConcurrentHashMap<>();
+
+    // 重複を掃除するとき、部品のブロックのほかに片づける物 (風見の矢など。人が置いたブロックは触らない)。mark は部品の印の世界座標
+    @FunctionalInterface
+    public interface Eraser {
+        void erase(ServerLevel level, SiteData.Entry entry, java.util.function.Function<String, BlockPos> mark);
+    }
 
     private ChapterSites() {
     }
@@ -121,6 +132,7 @@ public final class ChapterSites {
         private int arrive = 16;
         private SiteJob.Post post;
         private OnArrive onArrive;
+        private Eraser eraser;
 
         private Builder(String id, Chapters chapter, String blueprint) {
             this.id = id;
@@ -159,10 +171,18 @@ public final class ChapterSites {
             return this;
         }
 
+        public Builder erase(Eraser e) {
+            this.eraser = e;
+            return this;
+        }
+
         public Element register() {
             Element e = new Element(id, chapter, blueprint, new Rules(min, max, count, prefer, arrive), post, onArrive);
             if (ELEMENTS.putIfAbsent(id, e) != null) {
                 throw new IllegalStateException("chapter site element registered twice: " + id);
+            }
+            if (eraser != null) {
+                ERASERS.put(id, eraser);
             }
             return e;
         }
@@ -171,6 +191,7 @@ public final class ChapterSites {
     // 自己テスト用
     static void unregister(String id) {
         ELEMENTS.remove(id);
+        ERASERS.remove(id);
     }
 
     public static List<Element> elements(Chapters chapter) {
@@ -254,6 +275,14 @@ public final class ChapterSites {
     }
 
     private static final List<Task> TASKS = new ArrayList<>();
+    // 探している最中に来た頼み。今の探しが終わったら順に頼み直す (同時に二つ探さないため)
+    private static final List<Runnable> LATER = new ArrayList<>();
+
+    private static void later(Runnable r) {
+        if (LATER.size() < 64) {
+            LATER.add(r);
+        }
+    }
     private static final Set<String> IN_FLIGHT = new HashSet<>();
     // 人ごとの前回の位置 (進行方向を出す。保存しない)
     private static final Map<UUID, BlockPos> LAST = new HashMap<>();
@@ -295,8 +324,24 @@ public final class ChapterSites {
                     return false;
                 }
             }
-            schedule(server, data, key, chapter, base, false, Double.NaN, Set.of(player), els, null);
-            return true;
+            // すでに近くにある同じ要素は作り足さず、その拠点の人として使う (別の拠点でも同じ避雷針の柱が二つ並ばないように)
+            List<Element> fresh = new ArrayList<>();
+            for (Element e : els) {
+                SiteData.ChapterPlan owner = nearbyOwner(data, e, base);
+                if (owner == null) {
+                    fresh.add(e);
+                } else if (owner.players.add(player)) {
+                    data.setDirty();
+                }
+            }
+            if (fresh.isEmpty()) {
+                return false;
+            }
+            if (!TASKS.isEmpty()) {
+                later(() -> request(server, player, chapter, base));
+                return false;
+            }
+            return schedule(server, data, key, chapter, base, false, Double.NaN, Set.of(player), fresh, null);
         }
         if (plan.players.add(player)) {
             data.setDirty();
@@ -319,8 +364,43 @@ public final class ChapterSites {
         if (missing.isEmpty() || IN_FLIGHT.contains(key)) {
             return false;
         }
-        schedule(server, data, key, chapter, plan.anchor, false, Double.NaN, Set.of(), missing, plan);
-        return true;
+        List<Element> fresh = new ArrayList<>();
+        for (Element e : missing) {
+            if (nearbyOwner(data, e, plan.anchor) == null) {
+                fresh.add(e);
+            } else {
+                plan.attempted.add(e.id());
+                data.setDirty();
+            }
+        }
+        if (fresh.isEmpty()) {
+            return false;
+        }
+        if (!TASKS.isEmpty()) {
+            later(() -> topUp(server, data, plan, chapter));
+            return false;
+        }
+        return schedule(server, data, key, chapter, plan.anchor, false, Double.NaN, Set.of(), fresh, plan);
+    }
+
+    // base から見て、この要素がすでに (計画済みでも) 手の届く所にある拠点。あればそこの要素を使い回す。なければ null
+    @Nullable
+    static SiteData.ChapterPlan nearbyOwner(SiteData data, Element el, BlockPos base) {
+        for (SiteData.ChapterPlan p : data.plans()) {
+            if (p.ahead || !p.chapter.equals(el.chapter().id())) {
+                continue;
+            }
+            int have = 0;
+            for (SiteData.Entry e : p.sites) {
+                if (e.siteId.equals(el.id()) && horizontal(e.pos, base) <= el.rules().maxDist() + REUSE_MARGIN) {
+                    have++;
+                }
+            }
+            if (have >= el.rules().count()) {
+                return p;
+            }
+        }
+        return null;
     }
 
     // 進行方向の先に 1 つ足す。戻り値 = 予約したか
@@ -349,12 +429,15 @@ public final class ChapterSites {
         }
         // 要素を順に回す (遠くへ行くたびに別の要素)
         Element pick = els.get(total % els.size());
-        schedule(server, data, key, chapter, pos, true, angle, Set.of(player), List.of(pick), null);
-        return true;
+        return schedule(server, data, key, chapter, pos, true, angle, Set.of(player), List.of(pick), null);
     }
 
-    private static void schedule(MinecraftServer server, SiteData data, String key, Chapters chapter, BlockPos base, boolean ahead, double angle,
+    private static boolean schedule(MinecraftServer server, SiteData data, String key, Chapters chapter, BlockPos base, boolean ahead, double angle,
             Set<UUID> players, List<Element> els, @Nullable SiteData.ChapterPlan existing) {
+        // 探すのは一度に一つだけ。二つ同時に走ると、お互いの置き場所を知らないまま同じ所を選ぶ (障害物は探し始めの時点のもの)
+        if (!TASKS.isEmpty()) {
+            return false;
+        }
         ServerLevel level = server.overworld();
         List<ChapterPlanner.Req> reqs = new ArrayList<>();
         List<String> ids = new ArrayList<>();
@@ -387,9 +470,129 @@ public final class ChapterSites {
         IN_FLIGHT.add(key);
         TASKS.add(new Task(key, chapter.id(), at, ahead, new java.util.LinkedHashSet<>(players), ids, f));
         SkyAbyss.LOGGER.info("Chapter sites: planning {} for {} near {} ({} sites{})", chapter.id(), players, base, reqs.size(), ahead ? ", ahead" : "");
+        return true;
     }
 
     // 同じ章で、base から SHARE_DIST 以内の (進行方向の先に置いたのではない) 拠点のうち、いちばん近いもの
+    // 同じ要素・同じ番号が、except 以外ですでに DUP_DIST 以内にあるか
+    static boolean duplicates(SiteData data, String id, int index, BlockPos pos, @Nullable SiteData.Entry except) {
+        for (SiteData.Entry o : data.allEntries()) {
+            if (o != except && o.siteId.equals(id) && o.index == index && horizontal(o.pos, pos) <= DUP_DIST) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 古い世界に残った重複 (同じ要素・同じ番号が近くに二つ以上) を片づける。建て終わったものを残し、ほかは記録を消して、
+    // 部品のブロックが同じ形で残っていれば消す (同じ場所に重なっていた分は、残す方と同じブロックなので何もしない。人が置いたブロックは触らない)。
+    // 消した側の拠点の人は、残す側の拠点の人にする。消した数を返す
+    public static int dedupe(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        SiteData data = SiteData.get(level);
+        List<SiteData.Entry> order = new ArrayList<>();
+        for (SiteData.ChapterPlan p : data.plans()) {
+            order.addAll(p.sites);
+        }
+        order.sort((a, b) -> Boolean.compare(b.built, a.built));
+        List<SiteData.Entry> kept = new ArrayList<>();
+        int removed = 0;
+        for (SiteData.Entry e : order) {
+            SiteData.Entry twin = null;
+            for (SiteData.Entry k : kept) {
+                if (k.siteId.equals(e.siteId) && k.index == e.index && horizontal(k.pos, e.pos) <= DUP_DIST) {
+                    twin = k;
+                    break;
+                }
+            }
+            if (twin == null) {
+                kept.add(e);
+                continue;
+            }
+            SiteData.ChapterPlan from = planOf(data, e);
+            SiteData.ChapterPlan into = planOf(data, twin);
+            if (from != null && into != null) {
+                into.players.addAll(from.players);
+                twin.arrived.addAll(e.arrived);
+            }
+            if (e.built || e.started) {
+                eraseBuilt(level, e, twin);
+            }
+            data.remove(e);
+            removed++;
+            SkyAbyss.LOGGER.warn("Chapter sites: removed the duplicate {} #{} at {} (kept {})", e.siteId, e.index, e.pos, twin.pos);
+        }
+        if (removed > 0) {
+            data.setDirty();
+        }
+        return removed;
+    }
+
+    @Nullable
+    private static SiteData.ChapterPlan planOf(SiteData data, SiteData.Entry e) {
+        for (SiteData.ChapterPlan p : data.plans()) {
+            if (p.sites.contains(e)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private static void eraseBuilt(ServerLevel level, SiteData.Entry e, SiteData.Entry twin) {
+        Element el = ELEMENTS.get(e.siteId);
+        if (el == null) {
+            return;
+        }
+        Blueprint bp;
+        try {
+            bp = Blueprint.get(e.blueprint.isEmpty() ? el.blueprint() : e.blueprint);
+        } catch (RuntimeException ex) {
+            return;
+        }
+        int rot = SiteFinder.rot(e.yaw);
+        boolean mirror = SiteFinder.mirror(e.yaw);
+        // 建てたときの高さは動いていることがあるので、部品のブロックがいちばん合う高さを探す
+        int bestDy = 0;
+        int best = -1;
+        int total = 0;
+        for (Blueprint.Cell c : bp.cells) {
+            if (!c.state().isAir()) {
+                total++;
+            }
+        }
+        for (int dy = -8; dy <= 8; dy++) {
+            int hit = 0;
+            BlockPos origin = e.pos.above(dy);
+            for (Blueprint.Cell c : bp.cells) {
+                BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
+                if (!c.state().isAir() && level.hasChunkAt(at) && level.getBlockState(at).equals(Blueprint.transform(c.state(), rot, mirror))) {
+                    hit++;
+                }
+            }
+            if (hit > best) {
+                best = hit;
+                bestDy = dy;
+            }
+        }
+        BlockPos origin = e.pos.above(bestDy);
+        boolean shares = horizontal(e.pos, twin.pos) <= 2;
+        if (!shares && total > 0 && best * 10 >= total * 6) {
+            for (Blueprint.Cell c : bp.cells) {
+                BlockPos at = Blueprint.transform(c.x(), c.y() + 1, c.z(), rot, mirror, origin);
+                if (!c.state().isAir() && level.hasChunkAt(at) && level.getBlockState(at).equals(Blueprint.transform(c.state(), rot, mirror))) {
+                    level.setBlock(at, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2 | 16);
+                }
+            }
+            Eraser er = ERASERS.get(e.siteId);
+            if (er != null) {
+                er.erase(level, e, name -> {
+                    int[] m = bp.marks.get(name);
+                    return m == null ? null : Blueprint.transform(m[0], m[1] + 1, m[2], rot, mirror, origin);
+                });
+            }
+        }
+    }
+
     @Nullable
     static SiteData.ChapterPlan nearestPlan(SiteData data, String chapter, BlockPos base) {
         SiteData.ChapterPlan best = null;
@@ -464,6 +667,10 @@ public final class ChapterSites {
             plan.players.addAll(t.players());
             plan.attempted.addAll(t.ids());
             for (ChapterPlanner.Placed p : placed) {
+                if (duplicates(data, p.id(), p.index(), p.pos(), null)) {
+                    SkyAbyss.LOGGER.warn("Chapter sites: {} #{} at {} is already placed nearby, skipped", p.id(), p.index(), p.pos());
+                    continue;
+                }
                 SiteData.Entry e = new SiteData.Entry(KIND_PREFIX + p.id(), p.index(), p.pos(), p.yaw());
                 e.siteId = p.id();
                 Element el = ELEMENTS.get(p.id());
@@ -510,6 +717,13 @@ public final class ChapterSites {
             return;
         }
         applyTasks(server);
+        if (TASKS.isEmpty() && !LATER.isEmpty()) {
+            List<Runnable> run = new ArrayList<>(LATER);
+            LATER.clear();
+            for (Runnable r : run) {
+                r.run();
+            }
+        }
         int tick = server.getTickCount();
         if (tick % ARRIVE_EVERY == 0 && server.getPlayerCount() > 0) {
             poll(server, tick % OPEN_EVERY == 0);
@@ -519,6 +733,7 @@ public final class ChapterSites {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         TASKS.clear();
+        LATER.clear();
         IN_FLIGHT.clear();
         LAST.clear();
     }

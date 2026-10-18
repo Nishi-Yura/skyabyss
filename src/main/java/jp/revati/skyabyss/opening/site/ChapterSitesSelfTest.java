@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 // 章の小要素の共通基盤 (ChapterSites / ChapterPlanner) の自己テスト。段の名前は "chapter sites ..."。
 //  (synthetic) 合成の地形 6 種 (海辺・山・雪原・森・砂漠・小島) × 拠点 3 つで、2 つ以上が拠点から 150 ブロック以内・間隔・陸の上・扇の広がり、
@@ -59,6 +60,7 @@ public final class ChapterSitesSelfTest {
         steps.add(Step.until("chapter sites (plan ahead)", s -> settled(s, "ahead")));
         steps.add(Step.once("chapter sites (check ahead)", ChapterSitesSelfTest::checkAhead));
         steps.add(Step.once("chapter sites (conflict)", ChapterSitesSelfTest::conflict));
+        steps.add(Step.once("chapter sites (duplicates)", ChapterSitesSelfTest::duplicates));
         steps.add(Step.once("chapter sites (end)", ChapterSitesSelfTest::end));
         return steps;
     }
@@ -449,6 +451,59 @@ public final class ChapterSitesSelfTest {
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST chapter sites (conflict) crashed", e);
             F.add("conflict crashed: " + e);
+        }
+    }
+
+    // 同じ要素が近くに二つ (別々の拠点の計画が同時に走った、などの古い世界) あっても、読み込み時の掃除で一つになる。人が置いたブロックは触らない
+    static void duplicates(MinecraftServer server) {
+        try {
+            ServerLevel level = server.overworld();
+            SiteData data = SiteData.get(level);
+            SiteData.ChapterPlan first = plans(server).stream().filter(p -> p.sites.stream().anyMatch(e -> e.siteId.equals(HUT) && e.index == 0)).findFirst().orElse(null);
+            check(first != null, "no hut to duplicate");
+            if (first == null) {
+                return;
+            }
+            SiteData.Entry orig = first.sites.stream().filter(e -> e.siteId.equals(HUT) && e.index == 0).findFirst().get();
+            SiteData.ChapterPlan other = data.addPlan(CH.id(), orig.pos.offset(30, 0, 30), false);
+            other.players.add(C);
+            SiteData.Entry dup = new SiteData.Entry(ChapterSites.KIND_PREFIX + HUT, 0, orig.pos.offset(18, 0, 0), 0);
+            dup.siteId = HUT;
+            dup.blueprint = "chapter_test_hut";
+            dup.anchor = other.anchor;
+            dup.maxDist = 150;
+            dup.radius = 6;
+            other.sites.add(dup);
+            SiteJob job = ChapterSites.jobFor(level, data, dup);
+            check(job != null, "no job for the duplicate");
+            if (job == null) {
+                return;
+            }
+            job.blocking = true;
+            int guard = 0;
+            while (!job.step(System.nanoTime() + 200_000_000L) && guard++ < 200) {
+                // 進める
+            }
+            BlockPos at = dup.pos;
+            check(dup.built && level.getBlockState(at).is(Blocks.MOSSY_COBBLESTONE), "the duplicate hut was not built for the test");
+            BlockPos marker = at.offset(0, 3, 0);
+            BlockPos mine = orig.pos.offset(-12, 0, 12);
+            BlockState keep = level.getBlockState(mine);
+            level.setBlock(mine, Blocks.OAK_PLANKS.defaultBlockState(), 2 | 16);
+            int removed = ChapterSites.dedupe(server);
+            check(removed == 1, "dedupe removed " + removed + " (expected 1)");
+            check(!other.sites.contains(dup) && first.sites.contains(orig), "dedupe kept the wrong site");
+            check(first.players.contains(C), "the removed site's player was not moved to the kept base");
+            check(level.getBlockState(orig.pos).is(Blocks.MOSSY_COBBLESTONE), "the kept hut was damaged");
+            check(ChapterSites.horizontal(at, orig.pos) <= 2 || !level.getBlockState(at).is(Blocks.MOSSY_COBBLESTONE), "the duplicate hut's blocks were left standing");
+            check(level.getBlockState(mine).is(Blocks.OAK_PLANKS), "dedupe touched a player's block");
+            check(ChapterSites.dedupe(server) == 0, "a second dedupe removed more");
+            level.setBlock(mine, keep, 2 | 16);
+            data.plans().remove(other);
+            data.setDirty();
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.error("SELFTEST chapter sites (duplicates) crashed", e);
+            F.add("duplicates crashed: " + e);
         }
     }
 

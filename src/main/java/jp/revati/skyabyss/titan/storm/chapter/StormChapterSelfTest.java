@@ -627,6 +627,42 @@ public final class StormChapterSelfTest {
             }
             check(f, vanes >= 1 && packs >= 1 && tablets == StormSites.TABLETS && keys.size() == StormSites.TABLETS,
                     "finished: vane " + vanes + ", pack barrels " + packs + ", tablets " + tablets + " (keys " + keys + ")");
+            // 重複しない: 要素ごとに決まった数だけ。別の人・再ログイン (開き直し) でも増えず、風見は何度向きを直しても針が増えない
+            for (ChapterSites.Element e : ChapterSites.elements(Chapters.STORM)) {
+                int n = 0;
+                for (SiteData.Entry en : SiteData.get(level).allEntries()) {
+                    if (en.siteId.equals(e.id())) {
+                        n++;
+                    }
+                }
+                check(f, n == e.rules().count(), e.id() + " exists " + n + " times (expected " + e.rules().count() + ")");
+            }
+            FakePlayer p2 = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skyabyss_storm_chapter_test_sites_2".getBytes()), "skyabyss_ch3_sites2"));
+            p2.setPos(siteBase.getX() + 70.5, siteBase.getY(), siteBase.getZ() + 60.5);
+            check(f, !ChapterSites.open(p, Chapters.STORM) && !ChapterSites.open(p, Chapters.STORM), "logging in again plans nothing new");
+            ChapterSites.open(p2, Chapters.STORM);
+            for (SiteData.Entry en : SiteData.get(level).allEntries()) {
+                if (en.siteId.equals(StormSites.VANE) && en.built && en.extra("top") != null) {
+                    BlockPos top = en.extra("top");
+                    for (int deg : new int[] {45, 200, 315, 135, 90, 180, 0}) {
+                        StormVane.orient(level, top, Math.toRadians(deg));
+                    }
+                    int rods = 0;
+                    int bars = 0;
+                    for (int dx = -StormVane.ARM; dx <= StormVane.ARM; dx++) {
+                        for (int dz = -StormVane.ARM; dz <= StormVane.ARM; dz++) {
+                            BlockState bs = level.getBlockState(top.offset(dx, 0, dz));
+                            if ((dx != 0 || dz != 0) && bs.is(Blocks.LIGHTNING_ROD)) {
+                                rods++;
+                            }
+                            if (bs.is(Blocks.IRON_BARS)) {
+                                bars++;
+                            }
+                        }
+                    }
+                    check(f, rods == StormVane.ARM && bars == 1, "after several re-aims the vane has " + rods + " rods and " + bars + " tail bars");
+                }
+            }
             // 着いたときの知らせ → クエスト「風の跡」が済む (合図の名前と、段の目的が合っている)
             if (QuestLog.of(p).entry("ch3/sub_wind_marks") == null) {
                 Quests.start(p, "ch3/sub_wind_marks");

@@ -75,6 +75,7 @@ public final class SiteBuilds {
             return;
         }
         plan(server);
+        ChapterSites.dedupe(server);
         enqueueMissing(server);
         // 野営地は、プレイヤーが入る前に建て終える (チャンクはスポーン地点のまわりが読み込み済み)
         SiteJob first;
