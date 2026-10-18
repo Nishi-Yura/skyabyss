@@ -52,10 +52,28 @@
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
 | `shot <名前>` | 次に描いた絵を `<名前>.png` に保存 |
 | `waitdump` | 構造の書き出し (`cmd skyabyss dev dump ...`) が終わるまで待つ |
+| `perspective first\|back\|front` | 視点 (一人称 / 三人称の背中側 / 三人称の正面) |
+| `swingpose <0..1\|off>` | 武器を振る途中の姿で止める (自分だけ。一人称・三人称とも。`client/weapon/WeaponClient.forcedSwing`)。弓は 0 = 放した直後の反動の最大、1 = 戻りきった |
+| `swing` | 利き手を一振りする (止めずに動かす) |
+| `use` / `stopuse` | 右クリックを押し続ける / 放す (KeyMapping。弓を引く姿と放す動きの確認用) |
+| `mainhand left\|right` | 利き手の設定 (左利きの確認用。終わったら `right` に戻す) |
+| `bodyyaw <度>` | 体の向きを視線から何度ずらすか (人は 50 度までしかずれないので、それ以上は効かない。斜めの絵用) |
 | `echo <文>` | 記録に書くだけ |
 | `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
 
 例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
+
+### 武器を持った姿 (一人称・三人称・振りの途中)
+
+```
+python tools/gen_weapon_pose_shots.py [--left] [武器の id ...]   # 台本 tools/shots/weapon_poses.txt を作る (id を省くと全部。--left は左利き)
+./gradlew runShots -Pscript=tools/shots/weapon_poses.txt           # 約 2 分 (195 枚)
+python tools/weapon_pose_sheet.py                                  # 武器ごとの 1 枚 docs/review/previews/weapon_pose_<id>.png (行 = 一人称 / 三人称正面 / 横向き、列 = 構え・進み 0.2 / 0.4 / 0.55 / 0.75)
+./gradlew runShots -Pscript=tools/shots/weapon_bow.txt             # 雷翼の弓: 引く・放す
+python tools/weapon_display.py [--check]                            # 持ち方 (display) の表を models/item に反映 / 食い違いの確認
+```
+
+持ち方と動きの決まりは `docs/design/15_high_poly.md` の 4.6.1。
 
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 

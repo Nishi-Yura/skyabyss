@@ -1,0 +1,56 @@
+# 雷翼の弓: 引いている姿 (use = 右クリックを押し続ける) と、放したあとの反動 (stopuse = 放す。続けて撮ると 2 tick おき) を、一人称と三人称で撮る
+# ./gradlew runShots -Pscript=tools/shots/weapon_bow.txt
+world shots flat
+size 1280 720
+timeout 600
+render 6
+cmd gamemode creative
+camera 0 -60 8 180 0
+wait 350
+cmd time set noon
+cmd weather clear
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+swingpose off
+
+perspective first
+hud on
+wait 12
+chat clear
+shot bow_fp_idle
+use
+wait 6
+shot bow_fp_draw_early
+wait 18
+shot bow_fp_draw_full
+stopuse
+shot bow_fp_release_a
+shot bow_fp_release_b
+shot bow_fp_release_c
+wait 20
+
+perspective front
+hud off
+wait 12
+shot bow_tp_idle
+use
+wait 6
+shot bow_tp_draw_early
+wait 18
+shot bow_tp_draw_full
+stopuse
+shot bow_tp_release_a
+shot bow_tp_release_b
+shot bow_tp_release_c
+wait 20
+
+perspective back
+wait 12
+shot bow_tpb_idle
+use
+wait 26
+shot bow_tpb_draw_full
+stopuse
+shot bow_tpb_release_a
+shot bow_tpb_release_b
+wait 10
+quit
