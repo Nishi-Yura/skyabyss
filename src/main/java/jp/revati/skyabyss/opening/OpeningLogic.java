@@ -61,12 +61,7 @@ public final class OpeningLogic {
 
     // 判断に使う、その人のその時の状況
     public record Env(long now, long dayTime, boolean overworld, boolean awake, boolean skyVisible, boolean deep, boolean inWater,
-            boolean danger, boolean horror, boolean passActive, boolean clearSky) {
-        // 天気を問わない (テスト用): 晴れとみなす
-        public Env(long now, long dayTime, boolean overworld, boolean awake, boolean skyVisible, boolean deep, boolean inWater,
-                boolean danger, boolean horror, boolean passActive) {
-            this(now, dayTime, overworld, awake, skyVisible, deep, inWater, danger, horror, passActive, true);
-        }
+            boolean danger, boolean horror, boolean passActive) {
 
         long tod() {
             return Math.floorMod(dayTime, DAY);
@@ -146,9 +141,9 @@ public final class OpeningLogic {
                 && env.now - st.awakeAt >= NIGHT_AFTER_AWAKE;
     }
 
-    // 星の欠けが見える空か: 晴れていて、星が十分に出ている時刻 (SONG_EARLIEST〜SONG_LATEST)
+    // 星の欠けが見える空か: 星が十分に出ている時刻 (SONG_EARLIEST〜SONG_LATEST)。天気は問わない (雨の夜でも、この mod 自前の星の層を重ねて読めるようにする)
     static boolean songSkyReady(Env env) {
-        return env.clearSky && env.tod() >= SONG_EARLIEST && env.tod() <= SONG_LATEST;
+        return env.tod() >= SONG_EARLIEST && env.tod() <= SONG_LATEST;
     }
 
     // ---------------------------------------------------------------- 目的の帯

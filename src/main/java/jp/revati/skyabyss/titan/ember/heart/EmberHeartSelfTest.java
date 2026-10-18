@@ -869,7 +869,7 @@ public final class EmberHeartSelfTest {
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null && memory.peek(fake, "tide_shell") == null, "ember defeat wrote to another titan's record", f);
         check(memory.hasPending(fake), "rewards for an absent player were not held", f);
         TitanMemoryData.Pending held = memory.takePending(fake);
-        check(held.items.stream().anyMatch(s -> TitanLoot.id(s.getItem()).equals(EmberLoot.SHARD) && s.getCount() >= 4), "heart reward did not give ember shards", f);
+        check(held.items.stream().anyMatch(s -> TitanLoot.id(s.getItem()).equals(EmberLoot.SHARD) && s.getCount() >= 4), "heart reward did not give ember cinders", f);
         long fragments = held.items.stream().filter(s -> TitanLoot.id(s.getItem()).equals(EmberLoot.SKY_KEY_FRAGMENT)).count();
         check(fragments == 1, "first defeat should give one sky key fragment (" + fragments + ")", f);
         EmberLoot.onHeartDefeat(back, List.of(), List.of(fake));

@@ -168,7 +168,7 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             stack = stack.copy();
             gear.setItem(0, ItemStack.EMPTY);
             if (yield[0] > 0) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.RESONANCE_SHARD.get(), yield[0]));
+                player.getInventory().placeItemBackInInventory(new ItemStack(ForgeRules.resonanceItem(stack), yield[0]));
             }
             if (yield[1] > 0) {
                 player.getInventory().placeItemBackInInventory(new ItemStack(ForgeRules.shardItem(stack), yield[1]));

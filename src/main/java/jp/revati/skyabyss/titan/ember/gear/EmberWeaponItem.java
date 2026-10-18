@@ -15,7 +15,7 @@ import net.neoforged.neoforge.common.SimpleTier;
 // 余燼の手の武器 (戦斧・大鎚・火掻き) の共通の形: 由来は余燼、名前は階級の色、ツールチップは岩鯨・潮殻と同じ並び。
 // 強化 (攻撃力の 3%/段) と特性は SwordItem なので GearEvents・AffixEvents がそのまま扱う (潮殻の TideWeaponItem と同じ)
 public abstract class EmberWeaponItem extends SwordItem implements ModGear {
-    // 品の素の攻撃力の上乗せ 5 (攻撃力 = 1 + 5 + 品ごとの値)。余燼の欠片で直す。耐久はネザライトの剣より少し多い
+    // 品の素の攻撃力の上乗せ 5 (攻撃力 = 1 + 5 + 品ごとの値)。余燼の燠石で直す。耐久はネザライトの剣より少し多い
     public static final SimpleTier TIER = new SimpleTier(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 2600, 8.0f, 5.0f, 15,
             () -> Ingredient.of(EmberGearSetup.SHARD.get()));
 

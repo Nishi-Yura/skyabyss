@@ -12,10 +12,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // 共鳴の炉の決まりごと (画面の表示とサーバーの処理で同じ計算を使う)
-//  強化: 由来の巨神の欠片 (岩鯨の品は岩鯨の欠片、潮殻の品は潮殻の欠片。TitanGearSets.shardFor) と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
-//  分解: 装備を壊し、共鳴の欠片 (伝説) か由来の巨神の欠片 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
+//  強化: 由来の巨神の素材 (岩鯨の品は岩鯨の鱗片、潮殻の品は潮殻の殻片。TitanGearSets.shardFor) と共鳴の結晶を持ち物から使い、段階を一つ上げる。失敗はない
+//  分解: 装備を壊し、由来の巨神の共鳴の欠片 (伝説) か由来の巨神の素材 (それ以外) に戻す。鍛えた分の欠片も半分戻る。特性の付く品は結晶も
 //  再鍛造: 共鳴の結晶 1 つで特性の候補を一組 (最大 3 組)。今のものか候補を選んで確定する (item/affix/AffixRules)
-//  交換: 共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)
+//  交換: その巨神の共鳴の欠片 30 で、まだ持っていない専用伝説を一つ。心臓を倒すごとに一度 (loot/TitanLoot.exchange)。
+//        共鳴の欠片は巨神ごと (岩鯨・潮殻・雷翼・余燼。ModItems.resonanceShard)。古い共通の共鳴の欠片は、どの巨神の交換にも使える
 public final class ForgeRules {
     private ForgeRules() {
     }
@@ -45,7 +46,7 @@ public final class ForgeRules {
         return total;
     }
 
-    // 分解で得るもの: [共鳴の欠片の数, 由来の巨神の欠片の数 (shardItem), 共鳴の結晶の数]
+    // 分解で得るもの: [共鳴の欠片の数 (resonanceItem), 由来の巨神の素材の数 (shardItem), 共鳴の結晶の数]
     // 結晶は特性の付く武器・防具だけ (レア 1、伝説 2)。重なった甲殻や大剣が、再鍛造の結晶になる
     public static int[] dismantleYield(ItemStack stack) {
         if (!(stack.getItem() instanceof ModGear gear)) {
@@ -87,14 +88,30 @@ public final class ForgeRules {
         READY, NO_CLEAR, USED, ALL_OWNED
     }
 
-    public static boolean exchangeAffordable(Player player) {
-        return player.isCreative() || count(player.getInventory(), ModItems.RESONANCE_SHARD.get()) >= EXCHANGE_SHARDS;
+    // その巨神の共鳴の欠片の手もちの数 (古い共通の共鳴の欠片も、どの巨神の分にも数える)
+    public static int resonanceHeld(Inventory inventory, String titan) {
+        return count(inventory, ModItems.resonanceShard(titan)) + count(inventory, ModItems.RESONANCE_SHARD.get());
     }
 
-    public static void payExchange(Player player) {
+    // 巨神 titan (stone_whale / tide_shell / thunder_wing / ember) の専用伝説を交換する分の共鳴の欠片があるか
+    public static boolean exchangeAffordable(Player player, String titan) {
+        return player.isCreative() || resonanceHeld(player.getInventory(), titan) >= EXCHANGE_SHARDS;
+    }
+
+    // 払う: その巨神の共鳴の欠片から先に、足りない分を古い共通の欠片から (炉が古い欠片を換えて払う)
+    public static void payExchange(Player player, String titan) {
         if (!player.isCreative()) {
-            remove(player.getInventory(), ModItems.RESONANCE_SHARD.get(), EXCHANGE_SHARDS);
+            Item own = ModItems.resonanceShard(titan);
+            int fromOwn = Math.min(EXCHANGE_SHARDS, count(player.getInventory(), own));
+            remove(player.getInventory(), own, fromOwn);
+            remove(player.getInventory(), ModItems.RESONANCE_SHARD.get(), EXCHANGE_SHARDS - fromOwn);
         }
+    }
+
+    // 分解で戻る共鳴の欠片 (伝説。由来の巨神の欠片)
+    public static Item resonanceItem(ItemStack stack) {
+        jp.revati.skyabyss.item.TitanGearSet set = TitanGearSets.of(stack.getItem());
+        return ModItems.resonanceShard(set == null ? "stone_whale" : set.titan);
     }
 
     public static int count(Inventory inventory, Item item) {
@@ -119,12 +136,12 @@ public final class ForgeRules {
         }
     }
 
-    // 強化と分解で使う欠片 (由来の巨神の欠片)
+    // 強化と分解で使う素材 (由来の巨神の素材)
     public static Item shardItem(ItemStack stack) {
         return TitanGearSets.shardFor(stack);
     }
 
-    // 欠片を使わない費用 (再鍛造) か、岩鯨の欠片で払う費用
+    // 欠片を使わない費用 (再鍛造) か、岩鯨の鱗片で払う費用
     public static boolean affordable(Player player, Cost cost) {
         return affordable(player, cost, ModItems.STONE_WHALE_SHARD.get());
     }

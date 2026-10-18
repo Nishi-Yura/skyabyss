@@ -84,16 +84,15 @@ public final class TideChapterSelfTest {
         TitanWorldData data = TitanWorldData.get(level);
         CompoundTag saved = data.snapshot(level.registryAccess());
         TideEbb.EbbData ebb = TideEbb.EbbData.get(level);
-        int ebbState = ebb.state;
-        TideEbb.Plan ebbPlan = ebb.plan;
-        long ebbStart = ebb.startTick;
-        long ebbEnd = ebb.endTick;
+        List<TideEbb.Run> ebbRuns = new ArrayList<>(ebb.runs);
+        java.util.Set<UUID> ebbSeen = new java.util.HashSet<>(ebb.witnessed);
         try {
             data(f);
             buildSea(level);
             beats(server, level, f);
             conch(server, level, data, f);
             ebb(server, level, data, f);
+            conchRegrant(level, f);
             budget(f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ch2 crashed", e);
@@ -106,10 +105,11 @@ public final class TideChapterSelfTest {
             }
             TideKeeper.KEEPER.releaseTicket(level);
             data.restoreSlot(TideKeeper.SLOT, saved, level.registryAccess());
-            ebb.state = ebbState;
-            ebb.plan = ebbPlan;
-            ebb.startTick = ebbStart;
-            ebb.endTick = ebbEnd;
+            TideEbb.testEligible = null;
+            ebb.runs.clear();
+            ebb.runs.addAll(ebbRuns);
+            ebb.witnessed.clear();
+            ebb.witnessed.addAll(ebbSeen);
             ebb.setDirty();
             for (int dx = 0; dx < CX; dx++) {
                 for (int dz = 0; dz < CZ; dz++) {
@@ -119,7 +119,7 @@ public final class TideChapterSelfTest {
             forced = false;
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST ch2 PASSED (3 beats only in chapter 2 and once each, conch direction/tier/request, great ebb road/safe/restored/once, elements, lore, quests, dialogue, sky, xp)");
+            SkyAbyss.LOGGER.info("SELFTEST ch2 PASSED (3 beats only in chapter 2 and once each, conch direction/tier/request, great ebb road/safe/restored/once per player/shared by neighbours, elements, lore, quests, dialogue, sky, xp)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST ch2 FAILED: {}", m));
         }
@@ -301,8 +301,8 @@ public final class TideChapterSelfTest {
     private static void ebb(MinecraftServer server, ServerLevel level, TitanWorldData data, List<String> f) {
         int sea = level.getSeaLevel();
         TideEbb.EbbData d = TideEbb.EbbData.get(level);
-        d.state = TideEbb.EbbData.NONE;
-        d.plan = null;
+        d.runs.clear();
+        d.witnessed.clear();
         FakePlayer p = fake(level, "ebb");
         p.setPos(X + 10, sea + 1, Z + 64);
         TideEbb.Plan plan = TideEbb.plan(level, X + 10, Z + 64);
@@ -328,12 +328,13 @@ public final class TideChapterSelfTest {
         level.setDayTime(15000);
         // 二章の人 (段階 1) だけが引き金: 段階 0 の人 (と FakePlayer) では始まらない
         TideEbb.tryTrigger(level, d);
-        check(f, d.state == TideEbb.EbbData.NONE, "nobody in chapter 2 is here, so the ebb must not begin");
+        check(f, !d.active(), "nobody in chapter 2 is here, so the ebb must not begin");
 
         // 始める
         long now = level.getGameTime();
-        check(f, TideEbb.begin(level, d, plan) && d.state == TideEbb.EbbData.ACTIVE, "the great ebb should begin");
-        check(f, d.endTick - now > 1000 && d.endTick - now <= TideEbb.MAX_TICKS, "the ebb should last 1000-" + TideEbb.MAX_TICKS + " ticks: " + (d.endTick - now));
+        check(f, TideEbb.begin(level, d, plan) && d.active(), "the great ebb should begin");
+        TideEbb.Run run = d.runs.get(0);
+        check(f, run.endTick - now > 1000 && run.endTick - now <= TideEbb.MAX_TICKS, "the ebb should last 1000-" + TideEbb.MAX_TICKS + " ticks: " + (run.endTick - now));
         int i = Math.min(10, plan.len() - 5);
         BlockPos c = plan.center(i);
         int fy = c.getY();
@@ -353,12 +354,12 @@ public final class TideChapterSelfTest {
             z.moveTo(c.getX() + 0.5, fy + 1, c.getZ() + 0.5, 0, 0);
             level.addFreshEntity(z);
         }
-        // 二度目は始まらない (一度きり)
-        check(f, !TideEbb.begin(level, d, plan) && !TideEbb.mayBegin(level, d), "the great ebb must happen only once");
+        // 同じ所に重ねては始まらない (途中の道と重なる計画は断る)
+        check(f, !TideEbb.begin(level, d, plan) && d.runs.size() == 1, "a second ebb must not overlap one that is running");
         // 保存の往復
         TideEbb.EbbData back = TideEbb.EbbData.load(d.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
-        check(f, back.state == TideEbb.EbbData.ACTIVE && back.plan != null && back.plan.len() == plan.len() && back.plan.startX() == plan.startX()
-                && java.util.Arrays.equals(back.plan.floor(), plan.floor()) && back.endTick == d.endTick, "the ebb record should survive save and load");
+        check(f, back.runs.size() == 1 && back.runs.get(0).plan.len() == plan.len() && back.runs.get(0).plan.startX() == plan.startX()
+                && java.util.Arrays.equals(back.runs.get(0).plan.floor(), plan.floor()) && back.runs.get(0).endTick == run.endTick && back.witnessed.equals(d.witnessed), "the ebb record should survive save and load");
         // 途中の見回り: 敵が消え、台に着いた人に頁と合図
         BlockPos dais = plan.dais();
         p.setPos(dais.getX() + 0.5, dais.getY(), dais.getZ() + 0.5);
@@ -366,18 +367,17 @@ public final class TideChapterSelfTest {
         TideEbb.tickActive(level, d, List.of(p));
         check(f, z == null || z.isRemoved(), "a hostile mob inside the road should be removed");
         check(f, Lore.state(p).has(TideEbb.LORE_PAGE), "the page should be given at the end of the road");
-        check(f, d.state == TideEbb.EbbData.ACTIVE, "the ebb should still be under way");
+        check(f, d.active(), "the ebb should still be under way");
         // 終わり: 中にいる人は岸へ戻され、水が戻る
         check(f, TideEbb.inside(level, plan).contains(p.position()), "the player should be inside the road box before the end");
         TideEbb.end(level, d, List.of(p));
-        check(f, d.state == TideEbb.EbbData.DONE, "the ebb should be done");
+        check(f, !d.active(), "the ebb should be done");
         // (FakePlayer は teleportTo で動かないので、戻し先が道の外の陸であることを見る)
         BlockPos land = TideEbb.landfall(level, plan);
         check(f, !TideEbb.inside(level, plan).contains(new Vec3(land.getX() + 0.5, land.getY(), land.getZ() + 0.5)) && land.getX() < SHORE, "the landing spot for people caught in the road should be on land outside it: " + land);
         check(f, level.getBlockState(new BlockPos(c.getX(), fy + 2, c.getZ())).is(Blocks.WATER) && level.getBlockState(wall).is(Blocks.WATER)
                 && level.getBlockState(new BlockPos(c.getX(), sea - 1, c.getZ())).is(Blocks.WATER), "the sea should be back inside and over the walls");
         check(f, !level.getBlockState(c).isAir() && !level.getBlockState(c).is(Blocks.WATER), "the road floor should remain on the seabed");
-        check(f, !TideEbb.begin(level, d, plan) && !TideEbb.mayBegin(level, d), "no second great ebb after the first has ended");
         // 後始末の水: 全部水に戻っている (台の海のランタンも)
         for (int k = 0; k <= plan.len(); k++) {
             BlockPos cc = plan.center(k);
@@ -391,7 +391,84 @@ public final class TideChapterSelfTest {
                 }
             }
         }
-        d.state = TideEbb.EbbData.NONE;
+        perPlayer(level, d, f);
+    }
+
+    // 大干潮は人ごとに一度ずつ: 近くの二章の人は同じものを迎え、迎えた人には二度起きず、まだの人には（前のが終わっていても）新しく起きる
+    private static void perPlayer(ServerLevel level, TideEbb.EbbData d, List<String> f) {
+        int sea = level.getSeaLevel();
+        FakePlayer a = fake(level, "ebb_a");
+        FakePlayer b = fake(level, "ebb_b");
+        FakePlayer c = fake(level, "ebb_c");
+        TideEbb.testEligible = pl -> pl == a || pl == b || pl == c;
+        d.runs.clear();
+        d.witnessed.clear();
+        level.setDayTime(15000);
+        a.setPos(X + 10, sea + 1, Z + 64);
+        b.setPos(X + 14, sea + 1, Z + 66);
+        c.setPos(X + 12, sea + 1, Z + 62);
+        TideEbb.tryTrigger(level, d, List.of(a));
+        check(f, d.runs.size() == 1 && d.witnessed.contains(a.getUUID()) && !d.witnessed.contains(b.getUUID()), "a chapter 2 player near the sea should get an ebb of their own");
+        TideEbb.tryTrigger(level, d, List.of(a, b));
+        check(f, d.runs.size() == 1 && d.witnessed.contains(b.getUUID()), "a neighbour should share the running ebb, not start a second road: runs " + d.runs.size());
+        TideEbb.tryTrigger(level, d, List.of(a, b));
+        check(f, d.runs.size() == 1, "people who already had their ebb must not start another");
+        TideEbb.end(level, d, List.of(a, b));
+        check(f, !d.active(), "the shared ebb should end");
+        TideEbb.tryTrigger(level, d, List.of(a, b));
+        check(f, !d.active(), "a and b already had their ebb: no second one for them");
+        TideEbb.tryTrigger(level, d, List.of(a, b, c));
+        check(f, d.runs.size() == 1 && d.witnessed.contains(c.getUUID()), "a player who has not had their ebb gets one even after an earlier ebb ended");
+        TideEbb.EbbData back = TideEbb.EbbData.load(d.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+        check(f, back.witnessed.size() == 3 && back.witnessed.contains(a.getUUID()), "who had their ebb should survive save and load");
+        TideEbb.end(level, d, List.of(a, b, c));
+        check(f, !d.active(), "the last ebb should end");
+        TideEbb.testEligible = null;
+    }
+
+    // 潮見の貝をなくした人に、語り部が新しい貝をくれる (選択肢は二章以降でどこにも持っていない人にだけ)
+    private static void conchRegrant(ServerLevel level, List<String> f) {
+        var dialogue = DialogueManager.dialogue("skyabyss:storyteller");
+        check(f, dialogue != null && dialogue.nodes().containsKey("ch2_conch_ask") && dialogue.nodes().containsKey("ch2_conch_done"), "the storyteller conch nodes are not merged");
+        if (dialogue == null) {
+            return;
+        }
+        check(f, DialogueManager.loadErrors().stream().noneMatch(e -> e.contains("ch2")), "dialogue load errors: " + DialogueManager.loadErrors());
+        // 話題の入口は墓の話題と一つ (「なくしたものがある」)。話題の枠は 13 まで
+        var menu = dialogue.nodes().get("menu");
+        check(f, menu.options().size() <= 13, "the storyteller menu should hold within 13 options");
+        var lost = dialogue.nodes().get("lost_ask");
+        check(f, lost != null, "the storyteller 'lost something' node is missing");
+        if (lost == null) {
+            return;
+        }
+        var option = lost.options().stream().filter(o -> o.id().equals("conch")).findFirst().orElse(null);
+        var yes = dialogue.nodes().get("ch2_conch_ask").options().stream().filter(o -> o.id().equals("yes")).findFirst().orElse(null);
+        check(f, option != null && yes != null, "the conch option or its yes answer is missing");
+        if (option == null || yes == null) {
+            return;
+        }
+        FakePlayer p = fake(level, "regrant");
+        p.getInventory().clearContent();
+        var ctx = jp.revati.skyabyss.quest.StoryContext.of(p);
+        var shell = TideChapterSetup.TIDE_WATCHING_SHELL.get();
+        // 段階 0 (一章の人) には出ない。持っていない二章以降の人には出る (段階の条件は人工的に外して見る)
+        check(f, !option.condition().test(ctx), "a chapter 1 player should not be offered a new conch");
+        var menuLost = menu.options().stream().filter(o -> o.id().equals("grave")).findFirst().orElse(null);
+        check(f, menuLost != null && !menuLost.condition().test(ctx), "a chapter 1 player with no grave should not see the lost-something topic");
+        check(f, option.target().equals("ch2_conch_ask"), "the conch option should lead to the storyteller's conch node");
+        check(f, yes.condition().test(ctx), "without a conch, the answer should be possible");
+        yes.actions().forEach(a -> a.run(ctx));
+        check(f, jp.revati.skyabyss.record.Keepsakes.locate(p, shell).total() == 1, "the storyteller should give one conch");
+        check(f, !yes.condition().test(ctx), "with a conch in the pack, no second conch");
+        // 手もとのどこかにあれば (箱の中でも) 数える
+        var chest = p.getEnderChestInventory();
+        p.getInventory().clearContent();
+        chest.setItem(0, new net.minecraft.world.item.ItemStack(shell));
+        check(f, !yes.condition().test(ctx), "a conch in the ender chest counts as owned");
+        chest.setItem(0, net.minecraft.world.item.ItemStack.EMPTY);
+        check(f, yes.condition().test(ctx), "an empty ender chest and pack should allow a new conch");
+        p.getInventory().clearContent();
     }
 
     // ---------------------------------------------------------------- 経験値の枠 (小要素の経験値は 1〜1.5 レベル分まで)

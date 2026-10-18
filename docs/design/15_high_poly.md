@@ -110,6 +110,8 @@
 
 ### 4.1 巨神本体（近 <64 ブロック、中 <160、遠 それ以上の 3 段 LOD。近景だけ作り直した）
 
+> **今の描画は低ポリのメッシュ**（9.6 の「巨神本体」）。岩鯨は案 C「皮が岩になる鯨」、潮殻は案 B「段になった珊瑚礁の島」、雷翼は案 A「嵐の大鷲」、余燼は案 C「皮が岩になる火蜥蜴」。LOD の切り替えの距離（近 <64 / 80 / 120 / 96、中 <160 / 160 / 240 / 192、遠はそれ以上。軸までの距離）はそのままで、近・中・遠それぞれが別のメッシュ。**以下の表と説明は、`LowPoly.enabled = false` のときに出る箱版（戻し先）の記録。**
+
 | モデル | 近 箱 / 面 | 中 箱 | 遠 箱 | テクスチャ | 近景に足したもの |
 | --- | --- | --- | --- | --- | --- |
 | 岩鯨 stone_whale | 2,838 / 11,650 | 839 | 248 | 2048x1056（足した行ぶん増） | 顔（瞼 2 段・眉・瞳の縦線・唇の帯・下顎の歯）、ひれの前縁の筋と肋、尾びれの肋、背の遺跡・塔の上面の筋 |
@@ -205,6 +207,7 @@
 | イサナ whale_chaser | 690 / 2,362 | 9 | `tools/install_smooth_npcs.py`（ラフ `rough/smooth_npc.py` の A つば広帽の旅人） | 滑らか版。頭は 1 つの丸い塊で、顔は表面に描く（太い眉・目・口）。つば広の帽子は頭にかぶさる殻、マフラー、ボタンつきのコート、手袋、ブーツ、背負い袋（丸めた地図）。`hair`・`hood2` の骨は箱なしの空 |
 | 見る者 watcher | 226 / 1,290 | 7 | `gen_npc_content.py`（ラフ `watcher_v2.py`） | **人らしくしすぎない**（鼻・眉・指・口は作らない）。頭を丸め首との間に隙間を残し、外套の長い襞、裾と袖口のほつれ、埃の粒。目（`eyes` 骨）はそのままで、まわりに暗い縁取りを置いて切れ込みに見せる。元の glowmask をそのまま保つ |
 
+- 語り部・イサナ・見る者は低ポリのメッシュに差し替えた（9.6）。下の滑らか版の記述は、`LowPoly.enabled = false` のときの箱の描画の話になる。
 - 語り部とイサナは滑らか版（顔が頭の塊に収まる作り）に差し替えた。入れ方は `python tools/install_smooth_npcs.py`（geo と png を入れ、`fix_geo_face_sides.py --apply` で面の左右を GeckoLib の並びにする。穴 0、重なり 0、glowmask は光る画素が無いので入れない）。比較シートは `docs/review/smooth_npc_roughs/{storyteller,whale_chaser}.png`、ゲーム内は `docs/review/previews/smooth_*.png`（台本 `tools/shots/smooth_npcs.txt`）。以下の `hp_npc.py` の記述は見る者にだけ当てはまる。
 - 作り方は `tools/rough/hp_npc.py`（`python tools/rough/hp_npc.py` でシート、`--install C` でゲームの assets へ）。NPC は発光層なし。小道具 `band`（巻き帯）・`vstrips`/`hstrips`（襞と縫い目）・`round_one`（小さな箱の 0.25 面取り）は `hp_npc.py` の中にあり、他でも写して使える。`add_box(safe=True)` が落とした数: 語り部 32、イサナ 43、見る者 11。
 - 語り部とイサナの顔のアイコン（`gui/face`）は絵なのでそのまま。
@@ -377,6 +380,55 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 - **雷翼の心臓の発光**: `AutoGlowingGeoLayer` は光る画素に面の陰をかけるため、核・稲妻が灰青に沈んだ（実測で本来の色の 0.6 倍）。心臓は低ポリでも箱と同じく目の光で足す（`StormHeartRenderer.GlowLayer`、`autoGlow()` = false）。足す絵は、アトラスの光る画素の色（0.8 倍）だけを載せた `textures/lowpoly/storm_heart_pN_glow.png`。ラフの段階 2・3 は、白飛びした光と、石の殻（`heart`・`vessel`）にばらまかれた 1 画素の光（ゲームではブロックの点に見えた）があったので、インストール先のコピーだけで、殻の骨の光る画素を消し、白・ほぼ白の光る色を氷色（186,220,250 など）に和らげた。ラフの入力は触らない。ゲームでは段階 3 の核は淡い氷色の六角、稲妻は青い線で読める。
 - **確かめ**: 台本は `python tools/gen_lowpoly_storm_shots.py` が `tools/shots/lp_storm_{warden,moth,moth_charged,supplicant,raiju,heart_p1,heart_p2,heart_p3,perf}.txt` と `lp_coral_thrall.txt` に書く（心臓は段階ごとに別の台本。段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が吠えて進むのを待ち、そのあと NoAI にして原点へ戻して撮る。珊瑚憑きの像は `tidemob tide high` で潮を満ちに止めてから）。比較シートは `python tools/lowpoly_storm_sheets.py` が `docs/review/previews/lp_storm_<名>_sheet.png`・`lp_coral_thrall_sheet.png` に書く（上が低ポリ、下が箱）。負荷（`tools/shots/lp_storm_perf.txt`、羽守 8 + 雷蛾 8 + 雷乞い 8 + 雷獣 2 = 26 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 6.4〜7.3 ms/frame、箱 19.8〜22.8 ms/frame（約 3 倍速い）。
 - 雷蛾の帯電の明るさは、台本（`lp_storm_moth_charged`）では動く蛾が画面からはずれ、明るい翅を確かに撮れていない（箱版との並べも未確認）。
+
+#### 巨神本体（岩鯨・潮殻・雷翼・余燼。近・中・遠の 3 段 LOD、`python tools/install_lowpoly_titans.py` で一度に入る）
+
+| 巨神 | 採用 | 三角形 近 / 中 / 遠 | 骨 | アトラス 近 / 中 / 遠 | 入力（`docs/review/lowpoly_roughs/`） |
+| --- | --- | --- | --- | --- | --- |
+| 岩鯨 stone_whale | C 皮が岩になる鯨 | 4,355 / 980 / 242 | 10 | 1024 / 512 / 256（遠は光る画素なし） | `lp_stone_whale/c/{near,mid,far}_*` |
+| 潮殻 tide_shell | B 段になった珊瑚礁の島 | 4,554 / 1,481 / 466 | 11 | 同上 | `lp_tide_shell/b/` |
+| 雷翼 thunder_wing | A 嵐の大鷲（薄い羽根は両面） | 3,528 / 1,436 / 452 | 14 | 同上 | `lp_thunder_wing/a/` |
+| 余燼 ember_titan | C 皮が岩になる火蜥蜴 | 5,414 / 1,426 / 373 | 13 | 同上 | `lp_ember_titan/c/` |
+
+- テクセル密度は近 2 / 中 1 / 遠 0.5（1 単位あたり）。段ごとに別のモデル名で入れる: 近 `<名>`、中 `<名>_mid`、遠 `<名>_far`（元の箱の geo `geo/entity/<名>{,_mid,_far}.geo.json` と同じ名前なので、骨・pivot・休めの回転は 3 段とも元と一致する。入れるときの警告は 0）。`lowpoly/<名>*.json`、`textures/lowpoly/<名>*.png`（`_glowmask.png` は光る画素があるときだけ）、`geo/entity/<名>*_lowpoly{,_debug}.geo.json`。
+- 描画: 4 体とも `LowPolyGeoRenderer` の派生（岩鯨 `client/titan/StoneWhaleRenderer`、潮殻 `TideShellRenderer`、雷翼 `StormWingRenderer`、余燼 `EmberTitanRenderer`）。段の選び方は今まで通り（カメラから体の軸までの距離）を `LowPolyLodModel`（`client/lowpoly/`。`lod()` が 0 近・1 中・2 遠を返す）に移しただけ。段ごとにモデル名・geo・アトラス・メッシュが替わる（心臓の段階と同じ仕組み）。`LowPoly.enabled = false` で、元の箱の geo・`textures/entity/<名>.png`・自動の発光層に戻る。岩鯨の鎖の描画（`render`）、4 体の向き（`applyRotations`）は触っていない。
+- 発光: 岩鯨・潮殻・雷翼は `LowPolyGeoRenderer` の `autoGlow`（目・刻文・稲妻の筋・潮門・手首の瘤。マスクのある段だけ）。余燼は光の強さを巨神の様子で変える `DimmableGlowLayer`（`autoGlow()` を false にして、箱・低ポリのどちらにも足す）。
+- 背のディメンション（ブロックの複製）は触っていない（もう案に合わせて作り直してある）。
+- **当たり・乗り場との整合**（`python tools/titan_align_check.py` が、メッシュ・箱の geo に対して座席の面の高さ・鎖の取り付け・潮門・口を測る）:
+  - 岩鯨: 頭の座席の面は箱より 0〜0.8 ブロック低い（メッシュ 31.1〜32.0）ので座席の高さを下げた（`SEATS` を上 32.0 / 31.2 に）。錨石（後ろ 30.5・左 10.5・上 19.5）と鎖の根元は今のまま合っている（メッシュの錨石は y 31.7〜41.1 単位で、鎖の根元 28 単位はその直下）。頭の乗り場の鎖の経路（前 44、頬の外）も頬の面から 1 ブロック以内。**胸びれの付け根は左右で非対称**（geo の `fin_left` pivot x=26、`fin_right` x=-31）。そのままにしてある。
+  - 潮殻: **要修正だったので直した**。甲羅が 34 → 47 ブロック（外の段 34、中の段 41、上の段 47）、中心に塔（高さ約 71）が立つ。旧座席（前 11・高さ 34.4 と前 17・高さ 36.4）は段の中に埋まるので、塔の前の上の段（高さ 47、平ら。塔は横 ±6・前 -4〜+6）の前 10 と 13、高さ 47.4 に動かした（`TideShellEntity.SEATS`）。光を測る甲羅の頂 `DOME_TOP` は 34 → 47。潮門は合っている（アーチ x 33〜38・後ろ 25〜39・高さ 5〜22.6 ブロックが、判定の横 29〜39・後ろ 27.5〜36.5・高さ 1.5〜15 と重なる。敷居は水面 3.5 の 1.5 上で、旧は 1）。
+  - 雷翼: 合っている。足（左右 ±6、メッシュの脚は横 0.9〜11.1・後ろ 5.5〜21、足先は底の 6.6 上）、腰の羽根の門（高さ 25〜35）、頭の先（前 62）は箱と同じ。昇り風の柱は足の外に立ち、台本の画で足の真下に出ている。
+  - 余燼: **口が合わない（要判断）**。メッシュ案 C は口が閉じている: 顎の上面が 3.8 ブロック、頭の下面が 4.0 ブロックで、あいだの隙間は 0.2 ブロック。顎のアニメは 6 度しか開かない（口の位置で 0.85 ブロック）。箱版は舌の上 3 から上顎の下 7.5 まで 4.5 ブロックの空洞が先端から奥へ続いていた。判定（`inMouth`: 横 ±2.5・前 81〜85・高さ 2.5〜7）と息の扇は、メッシュの頭の中に入る。口に入るのは見た目ではただの頭への突入になる。口の空洞を作る（案 C のメッシュに洞を足す、または顎のアニメを大きく開く + 地面の高さを舌の上に合わせる）かの決定が要る。体の寸法は合っている（鼻先 前 104、尾の先 後ろ 124、尾根の縁 69.5 ≒ 68）。
+- 画面外の判定（`getBoundingBoxForCulling`）: 潮殻の塔が 73 ブロックに伸びたので、上へ 60 → 80、余燼は頭の後ろの角が 96 ブロックなので上へ 94 → 100。岩鯨（上 36.5、前後 -81.5〜66、横 ±37）と雷翼（翼 ±115、上 45）は今の範囲の内。
+- 実機の確かめ: 台本は `python tools/gen_lowpoly_titan_shots.py` が `tools/shots/lp_titan_{whale,tide,storm,ember}.txt` に書く（近・中・遠 × 地面から・少し上から、座席・鎖・潮門・昇り風・口・顔・尾根のクローズアップ。メッシュ `lp_titan_<名>_<視点>.png` と箱 `cubes_titan_<名>_<視点>.png`）。比較シートは `python tools/lowpoly_titan_sheets.py` が `docs/review/previews/lp_titan_<名>_sheet.png`（上がメッシュ、下が箱）に書く。**遠景の撮影には、プレイヤーの追跡の範囲が要る**: 統合サーバーがエンティティを送る距離は、プレイヤーが申告した見える距離で決まる。`render` の台本の手順は設定を書き換えるだけで申告し直さず、約 190 ブロックより遠い巨神が消えていた（`ShotRunner` の `render` に `broadcastOptions()` を足して直した）。普通の遊びでも、見える距離が 12 チャンクなら、雷翼の遠景（軸から 240 ブロック超）はそもそも見えない。
+- 負荷（1280x720、垂直同期なし、近景に巨神が画面いっぱい、他の作業と並行なので目安。`perf 300` ×2 の平均、ms/frame）: 
+
+| 巨神 | 低ポリ | 箱 | 
+| --- | --- | --- |
+| 岩鯨 | 4.1〜4.7（先の試走 3.2） | 6.5〜6.8（先の試走 8.7） |
+| 潮殻 | 2.5〜2.9 | 11.0〜11.2 |
+| 雷翼 | 5.1〜5.8 | 10.4〜10.9 |
+| 余燼 | 5.2 | 11.8〜12.2 |
+
+余燼の背の敵・心臓・鍛え手、NPC、見る者（`python tools/install_lowpoly_ember_npc.py` で一度に入る）:
+
+| モブ | 採用 | 三角形 | 骨 | 入力（`docs/review/lowpoly_roughs/`） |
+| --- | --- | --- | --- | --- |
+| 灰被り ash_thrall | A 灰衣の火番 | 726 + 火掻き棒 152 | 20 | `lp_ash_thrall/a/`（殻と燃え上がりは同じメッシュ・UV で、骨 `crust_*` / `flare_*` の出し分けと、アトラス `_atlas` / `_atlas_flared`・マスクを替える） |
+| 火の粉蛾 ember_moth | A 燃え殻の灰蛾 | 683 | 5 | `lp_ember_moth/a/`（両面の薄い翅） |
+| 燠虫 cinder_roller | B 熔皮の棘玉 | 550 | 37 | `lp_cinder_roller/b/`（丸まっている間の脚・触角・尾肢・節の間の膜の骨隠しは、箱のときからの `RollerRenderer.preRender`。そのまま効く） |
+| 鍛え手 ash_smith | A 玄武の鍛冶王 | 1,517 + 大鎚 104 + 火箸 124 | 15 | `lp_ash_smith/a/`（大鎚 `smith_hammer` は `socket_main`、火箸 `smith_tongs` は `socket_off`） |
+| 余燼の心臓 ember_heart | C 黒曜の鱗 | 1,570 / 1,567 / 1,661（段階 1 / 2 / 3） | 13 | `lp_ember_heart/c/p1..p3`（`ember_heart_pN`） |
+| 語り部 storyteller | A | 714 | 11 | `lp_storyteller/a/`（滑らかなボクセル版の geo は `LowPoly.enabled = false` の箱の描画として assets に残る） |
+| イサナ whale_chaser | A | 736 | 11 | `lp_isana/a/` |
+| 見る者 watcher | A | 300 | 7 | `lp_watcher/a/`（半透明のまま。単層のメッシュ） |
+
+- **描画**: 敵 3 種は `EmberMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生。発光は `LowPolyGeoRenderer` の `AutoGlowingGeoLayer`）、灰被りは `ThrallModel` が燃え上がりのときだけ `textures/lowpoly/ash_thrall_flared.png` を返す（火掻き棒は `GearLayer.lowPoly(.., "socket_main", "ash_poker")`、箱の `GearLayer` は `activeWhen(!LowPoly.enabled)`）。心臓は `EmberHeartRenderer`、鍛え手は `AshSmithClient.SmithRenderer`（大鎚・火箸は `GearLayer.lowPoly`）、NPC は `NpcRenderer`（`LowPolyGeoRenderer.Model` を継ぎ、頭が相手を向く処理はそのまま）、見る者は `WatcherRenderer`。どれも `LowPoly.enabled = false` で元の箱の geo・テクスチャ・`GearLayer` に戻る。
+- **発光**: 心臓と鍛え手は `autoGlow()` = false。`AutoGlowingGeoLayer` は光る画素に面の陰をかけるので、暗い部屋で沈む（箱のときと同じ理由）。スクリプトが焼く `textures/lowpoly/ember_heart_pN_glow.png`・`ash_smith_glow.png`・`ash_smith_glow_white.png`（鞴が白く光る間・怒りの白い光。アトラスの光る画素の色だけを黒の上に置き、1 画素に足す強さは 0.7〜0.8 倍）を、箱のときと同じ `RenderType.eyes`（陰なし・足し合わせ）の層で重ねる。段階 2 の「白熱」は箱では黄が飛んでいたが、メッシュでは核の形が読める。
+- **見る者**: `WatcherRenderer` は `LowPolyGeoRenderer` の派生で、半透明の描画（`entityTranslucent`）と「薄れる」濃さ、目のにじみ（glint）は箱のときのまま。目の座標は、箱では骨 `eyes` の cube の頂点の平均だったが、低ポリの geo には cube が無いので、メッシュの骨 `eyes` の頂点の平均（焼いたあとの座標）から取る。目の光は `textures/lowpoly/watcher_glow.png`（アトラスの光る画素の色を黒の上に）。台本用に `ShotRunner` に `watcher x y z yaw`（足元の位置・体の向き。消えずに立つ。`WatcherClient.placeForShot`）を足した。
+- **確かめ**: 台本は `python tools/gen_lowpoly_ember_npc_shots.py` が `tools/shots/lp_ember_{thrall,moth,roller,smith,heart_p1,heart_p2,heart_p3,perf}.txt`・`lp_npc.txt`・`lp_watcher.txt` に書く（新しい世界は最初の約 360 tick が開幕の字幕なので、最初の絵の前に 330 tick 待つ。心臓の段階 2・3 は体力を下げた AI ありの心臓が吠えて進むのを待つ。燠虫の丸まりは、AI の燠虫と生存者の人が 3〜14 ブロックにいると丸まる）。比較シートは `python tools/lowpoly_ember_npc_sheets.py` が `docs/review/previews/lp_ember_{thrall,moth,roller,smith,heart,heart_cinematic}_sheet.png`・`lp_npc_{storyteller,isana}_sheet.png`・`lp_watcher_sheet.png` に書く（上がメッシュ、下が箱）。見る者の夜の 14・40 ブロックは暗いので、シートでは明るさを 3 倍にしてある（元の絵は `run/shots/lp_watcher/` に出る）。
+- **負荷**（`tools/shots/lp_ember_perf.txt`、灰被り 8（殻 4・燃え上がり 4）+ 火の粉蛾 8 + 燠虫 8 + 鍛え手 1 = 25 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 7.6〜11.3 ms/frame（最初の一回は 11.3、あとの二回は 7.6）、箱 16.8〜27.4 ms/frame（2〜3 倍ほど速い）。
+- **滑らかな NPC のラフ**（`docs/review/smooth_npc_roughs/<名前>/<案>/`）は消した（`tools/install_smooth_npcs.py` が読んでいたが、その入力は `LowPoly.enabled = false` の箱の描画としてすでに assets に入っている。スクリプトは回らなくなったので、冒頭に書いた）。
 
 ## 旧節番号の対応
 

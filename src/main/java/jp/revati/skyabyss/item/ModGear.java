@@ -50,13 +50,28 @@ public interface ModGear {
         return name;
     }
 
-    // ツールチップ: 階級と由来、説明、強化の段階
+    // 物語の一行の翻訳キー (品ごと。防具は部位ごと)
+    static String storyKey(ItemStack stack) {
+        return storyKey(stack.getItem());
+    }
+
+    static String storyKey(net.minecraft.world.item.Item item) {
+        return "item." + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getNamespace() + "."
+                + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath() + ".story";
+    }
+
+    // ツールチップ: 階級と由来、説明、物語の一行、強化の段階
     static void tooltip(ItemStack stack, List<Component> tooltip, GearTier tier, String descKey, boolean enhanceable) {
         tooltip.add(Component.translatable("gear.skyabyss.tier." + tier.key).withStyle(s -> s.withColor(tier.color))
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.translatable("gear.skyabyss.origin." + (stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale"))
                         .withStyle(ChatFormatting.GRAY)));
         tooltip.add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        // 物語の一行 (巨神の声で、短く。灰色の斜体)。キー item.skyabyss.<id>.story があるときだけ (assets/skyabyss_gear_story/lang)
+        String storyKey = storyKey(stack);
+        if (net.minecraft.locale.Language.getInstance().has(storyKey)) {
+            tooltip.add(Component.translatable(storyKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
         // ランダムな特性。まだ決まっていない装備 (創造の持ち物や古いセーブの品) は、手にしたときに決まると書く
         if (AffixRules.eligible(stack)) {
             if (!stack.has(ModDataComponents.AFFIXES.get())) {

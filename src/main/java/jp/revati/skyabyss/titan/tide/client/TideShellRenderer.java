@@ -8,19 +8,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
+import jp.revati.skyabyss.client.lowpoly.LowPolyLodModel;
 
 // 潮殻の巨神の描画。モデルを 8 倍に拡大し (近景・中景・遠景の 3 段、岩鯨と同じ作り)、遺跡の灯り・潮門・目を暗闇で光らせる。
 // 光の明るさは、体の中心 (水の底) ではなく甲羅の頂の上で測る (TideShellEntity.getLightProbePosition)
-public class TideShellRenderer extends GeoEntityRenderer<TideShellEntity> {
+public class TideShellRenderer extends LowPolyGeoRenderer<TideShellEntity> {
     private static final float SCALE = 8f;
 
     public TideShellRenderer(EntityRendererProvider.Context context) {
-        super(context, new LodModel());
-        withScale(SCALE);
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        this(context, new LodModel());
+    }
+
+    // 低ポリ (client/lowpoly, 15 の 9.6): 近・中・遠のメッシュ。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
+    private TideShellRenderer(EntityRendererProvider.Context context, LodModel model) {
+        super(context, model, model::meshName, SCALE);
         this.shadowRadius = 0f;
     }
 
@@ -34,10 +36,7 @@ public class TideShellRenderer extends GeoEntityRenderer<TideShellEntity> {
     }
 
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (頭の先から尾の先までの線分) までの距離で選ぶ
-    private static final class LodModel extends DefaultedEntityGeoModel<TideShellEntity> {
-        private static final ResourceLocation NEAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/tide_shell.geo.json");
-        private static final ResourceLocation MID = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/tide_shell_mid.geo.json");
-        private static final ResourceLocation FAR = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/tide_shell_far.geo.json");
+    private static final class LodModel extends LowPolyLodModel<TideShellEntity> {
         // 横に広い (ひれの先まで ±75) ので、岩鯨 (64) より少し遠くまで近景にする
         private static final double MID_DISTANCE_SQ = 80.0 * 80.0;
         private static final double FAR_DISTANCE_SQ = 160.0 * 160.0;
@@ -47,17 +46,17 @@ public class TideShellRenderer extends GeoEntityRenderer<TideShellEntity> {
         private static final double AXIS_UP = 20.0;
 
         LodModel() {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "tide_shell"));
+            super("tide_shell");
         }
 
         @Override
-        public ResourceLocation getModelResource(TideShellEntity titan) {
+        protected int lod(TideShellEntity titan) {
             Entity camera = Minecraft.getInstance().cameraEntity;
             if (camera == null) {
-                return NEAR;
+                return 0;
             }
             double d = axisDistanceSq(titan, camera.getEyePosition());
-            return d < MID_DISTANCE_SQ ? NEAR : d < FAR_DISTANCE_SQ ? MID : FAR;
+            return d < MID_DISTANCE_SQ ? 0 : d < FAR_DISTANCE_SQ ? 1 : 2;
         }
 
         private static double axisDistanceSq(TideShellEntity titan, Vec3 eye) {

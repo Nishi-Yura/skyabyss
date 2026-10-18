@@ -41,10 +41,11 @@ import net.minecraft.world.item.Item;
 //   weather {thunder, rain}    : 今いる所が雷雨 / 雨で、真上に空が見える (屋根の下では数えない)
 //   height  {min}              : 足もとの高さ (y) が min 以上
 //   grave                      : 救える墓がある (自分の墓があり、救いの割合が 0 でない。grave パッケージ)
+//   no_keepsake {item}         : その品が、自分のどこにもない (持ち物・箱・エンダーチェスト・預かり・地面・しまった箱。record/Keepsakes.locate の total が 0)
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -126,6 +127,12 @@ public final class Condition {
                     errors.add(where + ": unknown item " + GsonHelper.getAsString(json, "item", ""));
                 }
             }
+            case "no_keepsake" -> {
+                need("item", errors, where);
+                if (item(GsonHelper.getAsString(json, "item", "")) == null && !GsonHelper.getAsBoolean(json, "optional", false)) {
+                    errors.add(where + ": unknown item " + GsonHelper.getAsString(json, "item", ""));
+                }
+            }
             case "stilled" -> {
                 need("titan", errors, where);
                 if (!jp.revati.skyabyss.progress.ProgressRules.TITAN_ORDER.contains(GsonHelper.getAsString(json, "titan", ""))) {
@@ -186,6 +193,10 @@ public final class Condition {
             }
             case "height" -> ctx.player().getY() >= GsonHelper.getAsDouble(json, "min", 0);
             case "grave" -> jp.revati.skyabyss.grave.Graves.rescueAvailable(ctx.player());
+            case "no_keepsake" -> {
+                Item item = item(str("item"));
+                yield item != null && jp.revati.skyabyss.record.Keepsakes.locate(ctx.player(), item).total() == 0;
+            }
             case "watcher" -> PrologueData.get(ctx.player().server.overworld()).entry(ctx.player().getUUID()).sightings
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);

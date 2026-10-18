@@ -11,7 +11,7 @@
     - sounds/titan/travel/tide_depart.ogg        巨神が歩き出す、大きな波と低いうめき (約 3.5 秒)
     - sounds/titan/travel/tide_current.ogg       深い潮流へ潜る、水中のうなりと泡 (約 3 秒)
 
-色は潮殻の欠片 (tide_shell_shard.png) と真珠、珊瑚の淡い色、碑文の青緑 (gen_forge_assets.py の TEAL)。
+色は潮殻の殻片 (tide_shell_shard.png) と真珠、珊瑚の淡い色、碑文の青緑 (gen_forge_assets.py の TEAL)。
 岩鯨の呼び笛 (骨の角笛) の形は真似ない。案 A は巻貝、B は甲羅の欠片、C は細長い錐貝。
 何度実行しても同じ物ができる (乱数の種を固定)。
 """
@@ -42,7 +42,7 @@ rng = G.rng
 # 採用した案 (ラフの比較は docs/review/tide_call_roughs/compare_call.png)
 ADOPTED_CALL = "a"
 
-# 潮殻の欠片と真珠と珊瑚の色 (tide_shell_shard.png / tide_pearl.png に合わせる)
+# 潮殻の殻片と真珠と珊瑚の色 (tide_shell_shard.png / tide_pearl.png に合わせる)
 SEA_LIGHT = (96, 186, 178, 255)
 SEA = (56, 134, 132, 255)
 SEA_DARK = (28, 80, 84, 255)

@@ -47,7 +47,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //  - 強さの曲線: +0 / +10 の 1 秒あたりが 03 の 9.8節の段に入るか、潮殻の心臓・雷翼・余燼の目安のボスとの手ごたえ、守り
 //  - 一式の効果、盾、護符、真珠、必要 Lv の打ち消し (左手の盾)
 //  - 報酬: 心臓の抽選 (作られた品だけ・特性つき)、道中と潮招きの確率、図鑑に記す、天井、模擬の撃破数
-//  - 炉: 潮殻の欠片で強化・分解、交換 (巨神ごと)
+//  - 炉: 潮殻の殻片で強化・分解、交換 (巨神ごと)
 public final class TideGearSelfTest {
     private TideGearSelfTest() {
     }
@@ -399,15 +399,15 @@ public final class TideGearSelfTest {
     private static void forge(MinecraftServer server, List<String> f) {
         ServerLevel level = server.overworld();
         ItemStack trident = new ItemStack(item(TideGear.TRIDENT));
-        check(f, ForgeRules.shardItem(trident) == TideGearSetup.shard(), "trident should be enhanced with tide shell shards");
+        check(f, ForgeRules.shardItem(trident) == TideGearSetup.shard(), "trident should be enhanced with tide shell flakes");
         check(f, ForgeRules.shardItem(new ItemStack(ModItems.WHALEBONE_GREATSWORD.get())) == ModItems.STONE_WHALE_SHARD.get(), "greatsword shard");
         FakePlayer p = player(level, "tide_gear_forge", 20);
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 64));
         p.getInventory().add(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 8));
-        check(f, !ForgeRules.enhance(p, trident), "trident was enhanced with stone whale shards");
+        check(f, !ForgeRules.enhance(p, trident), "trident was enhanced with stone whale scales");
         p.getInventory().add(new ItemStack(TideGearSetup.shard(), 10));
-        check(f, ForgeRules.enhance(p, trident) && ModGear.enhance(trident) == 1, "trident was not enhanced with tide shell shards");
-        check(f, ForgeRules.count(p.getInventory(), TideGearSetup.shard()) == 6, "enhance should take 4 tide shell shards");
+        check(f, ForgeRules.enhance(p, trident) && ModGear.enhance(trident) == 1, "trident was not enhanced with tide shell flakes");
+        check(f, ForgeRules.count(p.getInventory(), TideGearSetup.shard()) == 6, "enhance should take 4 tide shell flakes");
         ItemStack shield = new ItemStack(item(TideGear.SHIELD));
         check(f, ForgeRules.canEnhance(shield) && ForgeRules.accepts(shield), "the coral shield should be enhanceable");
         int[] y = ForgeRules.dismantleYield(new ItemStack(item(TideGear.CLAW)));
@@ -417,12 +417,26 @@ public final class TideGearSelfTest {
         check(f, GearExchange.state(TideGear.SET, r) == ForgeRules.ExchangeState.NO_CLEAR, "exchange before a tide heart clear");
         r.clears = 1;
         check(f, GearExchange.state(TideGear.SET, r) == ForgeRules.ExchangeState.READY, "exchange should be ready after a clear");
-        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD.get(), 30));
+        // 共鳴の欠片は巨神ごと: 岩鯨の欠片 30 では潮殻の専用伝説は買えない (払われもしない)
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get(), 30));
+        check(f, !GearExchange.exchange(p, TideGear.SET, TideGear.PEARL) && ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD_STONE_WHALE.get()) == 30
+                && !r.owned.contains(TideGear.PEARL), "stone whale resonance fragments paid for a tide exclusive");
+        p.getInventory().clearContent();
+        // 潮殻の欠片 20 と古い共通の欠片 10 で買える (古い欠片は、どの巨神の分にも数える。潮殻の欠片から先に払う)
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_TIDE_SHELL.get(), 20));
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD.get(), 10));
+        check(f, ForgeRules.resonanceHeld(p.getInventory(), TideGear.TITAN) == 30 && ForgeRules.resonanceHeld(p.getInventory(), TitanLoot.STONE_WHALE) == 10,
+                "the old generic fragments should count for every titan, the tide ones only for tide");
         check(f, !GearExchange.exchange(p, TideGear.SET, TideGear.TRIDENT), "a non-exclusive was traded");
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_TIDE_SHELL.get(), 10));
         check(f, GearExchange.exchange(p, TideGear.SET, TideGear.PEARL), "pearl exchange failed");
         check(f, r.owned.contains(TideGear.PEARL) && r.exchanges == 1 && GearExchange.state(TideGear.SET, r) == ForgeRules.ExchangeState.USED,
                 "exchange state after trading");
         check(f, ForgeRules.count(p.getInventory(), item(TideGear.PEARL)) == 1, "pearl not handed over");
+        // 払ったのは潮殻の欠片 30 (40 のうち)。古い共通の欠片は手つかずで残る
+        check(f, ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD_TIDE_SHELL.get()) == 0 && ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD.get()) == 10,
+                "the exchange should take the tide fragments first: tide " + ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD_TIDE_SHELL.get())
+                        + " old " + ForgeRules.count(p.getInventory(), ModItems.RESONANCE_SHARD.get()));
         TitanMemoryData.Record whale = TitanMemoryData.get(server).peek(p.getUUID(), TitanLoot.STONE_WHALE);
         check(f, whale == null || whale.exchanges == 0, "tide exchange touched the stone whale record");
         check(f, GearExchange.ownedMask(TideGear.SET, r) == 0b100, "owned mask " + GearExchange.ownedMask(TideGear.SET, r));

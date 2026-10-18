@@ -46,8 +46,8 @@
 
   "commands.skyabyss.ch2.ebb.start": "The great ebb has begun",
   "commands.skyabyss.ch2.ebb.end": "The great ebb has ended",
-  "commands.skyabyss.ch2.ebb.reset": "The great ebb record was reset",
-  "commands.skyabyss.ch2.ebb.not_none": "The great ebb is already under way (or done). Use reset",
+  "commands.skyabyss.ch2.ebb.reset": "The great ebb records (running ones and who had theirs) were cleared",
+  "commands.skyabyss.ch2.ebb.not_none": "A great ebb is already under way near here",
   "commands.skyabyss.ch2.ebb.no_sea": "No sea nearby where a road can be laid",
   "commands.skyabyss.ch2.ebb.not_active": "The great ebb is not under way",
 
@@ -79,5 +79,9 @@
   "dialogue.skyabyss.storyteller.ch2_ledger4": "...It looks like your writing.\nA strange thing to say. Forget it. The tide goes out as it always does.",
   "dialogue.skyabyss.storyteller.ch2_ledger4.ok": "...I see.",
   "dialogue.skyabyss.storyteller.ch2_ledger5": "I see. Whenever you like. The ledger will be here.",
-  "dialogue.skyabyss.storyteller.ch2_ledger5.ok": "Yes."
+  "dialogue.skyabyss.storyteller.ch2_ledger5.ok": "Yes.",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask": "...Lost it, did you. Returned to the sea, or into someone else's hands.\nI kept one more shell that washed up on the shore, just in case. It won't sound the same, but it will read the tide.",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask.yes": "I'll gladly take it.",
+  "dialogue.skyabyss.storyteller.ch2_conch_ask.no": "No, I'll look for it again.",
+  "dialogue.skyabyss.storyteller.ch2_conch_done": "There. Don't let go of this one.\nThe tide will wait for you, but a shell won't."
 }

@@ -22,7 +22,7 @@
 python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/bone_sentinel_shield_mesh.json:docs/review/lowpoly_roughs/bone_sentinel_shield_atlas.png:bone_sentinel_shield:socket_off
 ```
 
-`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら）。5 体 (番兵長・苔這い・射手・水路の顎・心臓) は `python tools/install_lowpoly_five.py` で一度に入る。確認の台本は `python tools/gen_lowpoly_five_shots.py` が `tools/shots/lp_<名>.txt` に書く。雷翼の背の 5 体と珊瑚憑きは `python tools/install_lowpoly_storm.py`、確認の台本は `python tools/gen_lowpoly_storm_shots.py`、比較シートは `python tools/lowpoly_storm_sheets.py`。
+`docs/review/lowpoly_roughs/<名前>_lowpoly_mesh.json` / `_lowpoly_atlas.png` / `_lowpoly_glowmask.png` を `assets/skyabyss/lowpoly/` と `textures/lowpoly/` に入れ、骨だけの geo (`geo/entity/<名前>_lowpoly.geo.json`) と、骨ごとの箱の debug geo を書く。元の geo・アニメは触らない（`LowPoly.enabled = false` で元に戻る）。盾などを別メッシュにするときは `--gear`、メッシュの中の骨を切り出すときは `--split 骨:受け口:名前`。台本の `lowpoly on|off|debug|nodebug` で切り替えて撮る (`tools/shots/lowpoly_basic.txt` `lowpoly_action.txt` `lowpoly_perf.txt`)。仕様は `docs/design/15_high_poly.md` の 9 章。骨の休めの回転・親・pivot は元の geo から写す（メッシュ JSON に書いてあればそちら）。5 体 (番兵長・苔這い・射手・水路の顎・心臓) は `python tools/install_lowpoly_five.py` で一度に入る。確認の台本は `python tools/gen_lowpoly_five_shots.py` が `tools/shots/lp_<名>.txt` に書く。雷翼の背の 5 体と珊瑚憑きは `python tools/install_lowpoly_storm.py`、確認の台本は `python tools/gen_lowpoly_storm_shots.py`、比較シートは `python tools/lowpoly_storm_sheets.py`。余燼の背の敵・心臓・鍛え手、語り部・イサナ・見る者は `python tools/install_lowpoly_ember_npc.py`、確認の台本は `python tools/gen_lowpoly_ember_npc_shots.py`、比較シートは `python tools/lowpoly_ember_npc_sheets.py` (15 の 9.6)。
 
 ## モデルの透けの検査と修理・心臓の演出
 
@@ -54,7 +54,7 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
 | `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
-| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory`、または引数なしで作れる画面のクラスの完全な名前 |
+| `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |
 | `close` | 画面を閉じる |
 | `chat clear` | チャット欄と右上の通知 (トースト) を消す |
@@ -238,3 +238,9 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 | 余燼の背の体 (低ポリ案 C「皮が岩になる火蜥蜴」をブロックにした火蜥蜴、13 の 3.2 章): `data/skyabyss/ember_back/body.bin` | `gen_ember_back_body.py` (形は `lowpoly_ember_voxel.py` が案 C の近景メッシュから作る。`--preview` で上・横・前の色の地図、`--cache` で `rough/_ember_back_body_cache.npz`)。メッシュとの並べ描きは `--cache` のあとで `ember_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`EmberBackLayout.LAYOUT_VERSION`) を上げる |
 
 雷翼の背の鳥: `data/skyabyss/storm_back/bird.bin` は `python tools/gen_back_shape.py bird [--preview]`。形・骨は `install_thunder_wing.build_grid()`、材料は低ポリ案 A の近景メッシュ (`lowpoly_thunder_voxel.py` が体積化。`recolor` で近いセルの材料を写す)。変えたら `StormBackLayout.LAYOUT_VERSION` を上げる。ブロックの鳥と案 A のメッシュの並べ描きは `storm_back_a_views.py` (`SKYABYSS_DUMP=storm_back ./gradlew runServer` で書き出した `.sbd` を渡す)。
+
+## 装備まわりの文と絵 (2026-10-18)
+
+- `python tools/gen_gear_story.py` : 装備 40 点のツールチップの「物語の一行」(`assets/skyabyss_gear_story/lang/`)。03 の 3.4節
+- `python tools/gen_resonance_shards.py` : 巨神ごとの共鳴の欠片の絵 4 枚 (`textures/item/resonance_shard_<巨神>.png`。共通の欠片の色味を替える)。03 の 2.2節
+- `python tools/gen_grave_assets.py` : 墓の絵・モデル・語り部の墓の会話と文 (墓の一覧の画面の文も含む)。11 の 6.4節

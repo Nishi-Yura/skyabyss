@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.ember.heart.EmberHeart;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,21 +16,26 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 余燼の心臓の描画。段階ごとの geo とテクスチャ (熔岩の殻 → 熔け落ちる殻と白熱の心臓 → 灰の殻と暗い残り火) を切り替え、
 // 割れ目・核・熾・火の粉を光らせる (GlowLayer)。模型は tools/install_ember_heart.py が書く。
 // 色が沈まない描き方は潮殻の心臓 (08 の 19.8節) と同じ: ブロックの光を最大にして殻を白い光で描き、
 // 光る画素は基のテクスチャの上に _glowmask の色を目の光 (陰なし・足し合わせ) で重ねる
-public class EmberHeartRenderer extends GeoEntityRenderer<EmberHeart> {
+public class EmberHeartRenderer extends LowPolyGeoRenderer<EmberHeart> {
     // 模型は 約 24 単位 (1.5 ブロック) の大きさ。判定箱 (3 x 4.2) に合わせて 2 倍
     private static final float SCALE = 2.0f;
 
     public EmberHeartRenderer(EntityRendererProvider.Context context) {
-        super(context, new Model());
-        withScale(SCALE);
+        // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ (ember_heart_pN)。LowPoly.enabled = false で元のキューブの geo に戻る
+        super(context, new Model(), h -> "ember_heart_p" + Model.phase(h), SCALE);
         addRenderLayer(new GlowLayer(this));
+    }
+
+    // 発光は低ポリでもキューブでも下の GlowLayer (目の光で足す)。AutoGlowingGeoLayer は光る画素に面の陰がかかり、核・割れ目が沈む
+    @Override
+    protected boolean autoGlow() {
+        return false;
     }
 
     // 部屋の明かり (段階 3 では血管が消えて暗い) に殻が沈まないよう、ブロックの光を最大にする。面の陰は残るので形は読める
@@ -62,7 +69,10 @@ public class EmberHeartRenderer extends GeoEntityRenderer<EmberHeart> {
             if (heart.isInvisible()) {
                 return;
             }
-            RenderType glow = RenderType.eyes(Model.path("textures/entity/ember_heart_p" + Model.phase(heart) + "_glowmask.png"));
+            // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_ember_npc.py が焼く)
+            RenderType glow = RenderType.eyes(Model.path(LowPoly.enabled
+                    ? "textures/lowpoly/ember_heart_p" + Model.phase(heart) + "_glow.png"
+                    : "textures/entity/ember_heart_p" + Model.phase(heart) + "_glowmask.png"));
             getRenderer().reRender(model, poseStack, buffers, heart, glow, buffers.getBuffer(glow), partialTick,
                     LightTexture.FULL_BRIGHT, packedOverlay, getRenderer().getRenderColor(heart, partialTick, packedLight).argbInt());
         }
@@ -73,11 +83,17 @@ public class EmberHeartRenderer extends GeoEntityRenderer<EmberHeart> {
 
         @Override
         public ResourceLocation getModelResource(EmberHeart heart) {
+            if (LowPoly.enabled) {
+                return path("geo/entity/ember_heart_p" + phase(heart) + "_lowpoly" + (LowPoly.debug ? "_debug" : "") + ".geo.json");
+            }
             return path("geo/entity/ember_heart_p" + phase(heart) + ".geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(EmberHeart heart) {
+            if (LowPoly.enabled) {
+                return LowPoly.debug ? path("textures/lowpoly/debug.png") : path("textures/lowpoly/ember_heart_p" + phase(heart) + ".png");
+            }
             return path("textures/entity/ember_heart_p" + phase(heart) + ".png");
         }
 
