@@ -76,6 +76,8 @@ neoForge {
         clientTest {
             client()
             programArguments.addAll '--quickPlaySingleplayer', 'New World'
+            // 確かめ用は音を鳴らさない (client/dev/TestMute)
+            environment 'SKYABYSS_MUTE', '1'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

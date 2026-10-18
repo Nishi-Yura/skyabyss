@@ -219,6 +219,10 @@ public final class GrowthSelfTest {
         check(f, Math.abs(p.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * 1.04) < 1e-6, "agility did not add on top of the base speed");
         check(f, Math.abs(p.getMaxHealth() - 22f) < 1e-4, "vitality 9 should give 22 max health, got " + p.getMaxHealth());
         check(f, Math.abs(p.getHealth() - 22f) < 1e-4, "a full-health player was not topped up to the new max");
+        // 表示はハート: 耐久 9 は +2 点 = 1❤、点は 0.5 の倍数で 2 桁まで
+        check(f, "1❤".equals(jp.revati.skyabyss.Hearts.of(GrowthRules.bonusHealth(9))) && "0.25❤".equals(jp.revati.skyabyss.Hearts.of(GrowthRules.bonusHealth(2)))
+                && "0.5".equals(jp.revati.skyabyss.Hearts.number(1.0)) && "0".equals(jp.revati.skyabyss.Hearts.number(0)),
+                "vitality is not shown in hearts");
         check(f, p.getAttributeValue(Rpg.MAX_MANA) == 30, "spirit 5 should give 30 mana, got " + p.getAttributeValue(Rpg.MAX_MANA));
         // 付け直しても重ならない
         Growth.applyModifiers(p);

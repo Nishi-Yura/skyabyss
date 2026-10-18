@@ -267,7 +267,7 @@
   "gui.skyabyss.growth.desc.strength": "Each point raises melee damage by 0.6%, multiplied with your weapon.",
   "gui.skyabyss.growth.desc.agility": "Each point: movement speed +0.2%, attack speed +0.2%, projectile damage +0.4%.",
   "gui.skyabyss.growth.desc.spirit": "Each point adds 2 max mana. The arts that use mana have not yet awakened.",
-  "gui.skyabyss.growth.desc.vitality": "Every 2 points add 0.5 max health (half a heart).",
+  "gui.skyabyss.growth.desc.vitality": "Every 2 points add 0.25❤ of max health.",
   "gui.skyabyss.growth.cap": "Each stat caps at %s. Hold Shift to add 5 at a time.",
   "gui.skyabyss.growth.lifetime": "Lifetime experience %s / %s",
   "gui.skyabyss.growth.level_up_head": "Strength wells up",

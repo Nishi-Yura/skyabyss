@@ -131,7 +131,7 @@ public final class PartyScreen extends Screen {
             String line = (m.leader() ? "★" : "・") + m.name();
             g.drawString(font, font.plainSubstrByWidth(line, 60), left, y, m.online() ? TEXT : 0x707070, false);
             if (m.online()) {
-                g.drawString(font, "Lv" + m.level() + " " + Math.round(m.health()) + "/" + Math.round(m.maxHealth()), left + 62, y,
+                g.drawString(font, "Lv" + m.level() + " " + jp.revati.skyabyss.Hearts.number(m.health()) + "/" + jp.revati.skyabyss.Hearts.of(m.maxHealth()), left + 62, y,
                         m.sameDim() ? SOFT : 0x707070, false);
             }
             y += 16;

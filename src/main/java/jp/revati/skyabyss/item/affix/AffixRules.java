@@ -223,6 +223,9 @@ public final class AffixRules {
     }
 
     public static String number(AffixType t, double v) {
+        if (t == AffixType.VIGOR) {
+            return jp.revati.skyabyss.Hearts.of(v);
+        }
         if (t.percent) {
             double pct = v * 100;
             return Math.abs(pct - Math.round(pct)) < 1e-6 ? String.valueOf(Math.round(pct)) : String.format(Locale.ROOT, "%.1f", pct);
