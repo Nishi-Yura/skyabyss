@@ -349,6 +349,9 @@ public final class ArcSelfTest {
     private static void sky(MinecraftServer server, List<String> f) {
         // 登録がなければ全章 NONE (今の動きのまま)
         for (Chapters c : Chapters.values()) {
+            if (c.titanChapter()) {
+                continue; // 一〜四章は各章の担当が本物の空の段を登録している (P4)
+            }
             check(f, ChapterSky.stage(c).equals(ChapterSky.Stage.NONE), "no sky stage should be registered by default: " + c);
         }
         ChapterSky.setStage(Chapters.TIDE, new ChapterSky.Stage(0.1f, 0x8FB8C8, 0.05f));

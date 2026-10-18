@@ -160,6 +160,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.back.EmberBackSelfTest.steps());
         // 余燼の地上 (巨神・熱の口・戻る先・温石・モデルのデータ)。13 の 2章
         steps.addAll(jp.revati.skyabyss.titan.ember.EmberSelfTest.steps());
+        // 四章 (余燼) の予兆・小要素・夜の浮上・余韻 (P4d)。13 の 17 章
+        steps.addAll(jp.revati.skyabyss.titan.ember.EmberChapterSelfTest.steps());
         // 余燼の背の敵 (強さ・殻と燃え上がり・蛾の熱・燠虫の転がり・落とす物)。13 の 5.1節
         steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
         // 余燼の心臓 (熾の底・区画・冷え・10 の技・凍え・報酬・天の鍵の四つ目・撃破)。13 の 5.3節

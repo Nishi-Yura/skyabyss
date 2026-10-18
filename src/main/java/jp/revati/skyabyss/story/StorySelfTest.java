@@ -346,6 +346,8 @@ public final class StorySelfTest {
         pick(p, WC, "ok", f);
         level.setWeatherParameters(6000, 0, false, false);
 
+        // 四章の語り部の話 (ch4/fragments) は、話しかけると先に始まる入口。ここは頼みごとの流れを見るので、あらかじめ済ませておく (13 の 17.5)
+        jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
         // 冷めない炭: ネザーへ行き、マグマクリーム 4 つ → 語り部
         DialogueService.open(p, st);
         pick(p, ST, "errands", f);
