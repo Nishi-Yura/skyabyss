@@ -79,6 +79,7 @@
   "message.skyabyss.camp.support": "Camp tools can only be placed on the ground or a wall of the back (not on another tool or in mid-air)",
   "message.skyabyss.camp.stranger": "You cannot take down another person's camp tool",
   "message.skyabyss.camp.returned": "Your camp tools came back to you (%s)",
+  "message.skyabyss.steles.party_rung": "A companion rang a stone: %s",
   "message.skyabyss.stone_silent": "While the guards are awake, the stone stays silent",
   "message.skyabyss.return_opened": "A sealed shortcut back the way you came slides open without a sound",
   "message.skyabyss.arena_wave": "Guard wave %s / %s",

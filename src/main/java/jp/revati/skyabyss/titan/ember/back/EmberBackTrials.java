@@ -417,6 +417,7 @@ public final class EmberBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, group, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id(), null);
         checkAllRung(level, group);
     }
 
