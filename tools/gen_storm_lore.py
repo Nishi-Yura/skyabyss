@@ -511,7 +511,7 @@ def main():
         sys.exit("signs do not fit")
     report = merge_parts()
     for lid, order, unlock_, related, title, body, sign in LORE:
-        entry = {"chapter": "chapter1", "order": order}
+        entry = {"chapter": "titan_storm", "order": order}
         if sign:
             key = f"sign.skyabyss.lore_storm_{sign}"
             entry["inscription_sign"] = key

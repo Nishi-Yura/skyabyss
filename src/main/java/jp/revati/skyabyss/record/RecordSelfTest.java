@@ -82,6 +82,14 @@ public final class RecordSelfTest {
                 }
             }
         }
+        // 縁と頁の伝承の行: 序章と一〜四章 (巨神ごと) が章ごとに並び、中身のない五章以降と旧 chapter1 は出ない (05 の 2 章、11 の 3 章)
+        RecordSnapshot.Tab bonds = snap.tab(RecordSnapshot.BONDS);
+        if (bonds != null) {
+            for (jp.revati.skyabyss.story.Chapters c : jp.revati.skyabyss.story.Chapters.values()) {
+                check(f, (bonds.row("lore." + c.id()) != null) == !c.reserved(), "lore row for chapter " + c.id() + " should " + (c.reserved() ? "not " : "") + "exist");
+            }
+            check(f, bonds.row("lore.chapter1") == null, "the old chapter1 lore row must be gone");
+        }
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
         RecordSnapshot.STREAM_CODEC.encode(buf, snap);
         int bytes = buf.readableBytes();

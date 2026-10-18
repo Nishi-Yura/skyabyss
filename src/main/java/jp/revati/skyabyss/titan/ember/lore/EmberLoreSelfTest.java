@@ -108,7 +108,7 @@ public final class EmberLoreSelfTest {
                 f.add("missing lore " + id);
                 continue;
             }
-            check(e.chapter().equals("chapter1") && e.unlockable(), id + " should be an unlockable chapter 1 entry", f);
+            check(e.chapter().equals("titan_ember") && e.unlockable(), id + " should be an unlockable chapter 4 (titan_ember) entry", f);
             for (JsonObject lang : langs) {
                 for (String key : List.of(e.titleKey(), e.bodyKey())) {
                     check(has(lang, key), "missing text " + key, f);

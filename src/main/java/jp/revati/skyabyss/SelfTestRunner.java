@@ -97,6 +97,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
+        // 章の写像 (段階 × 序章、伝承の章との一致)。docs/design/10 の 3 章
+        steps.add(Step.once("chapters", jp.revati.skyabyss.story.ChaptersSelfTest::runSelfTest));
         steps.add(Step.once("npc", NpcQuestSelfTest::runSelfTest));
         steps.add(Step.once("freequest", FreeQuestSelfTest::runSelfTest));
         // 1 章を 4 体分で (順番・乗る資格・上限・天の鍵・メインクエストの続き)。docs/design/14_beta.md

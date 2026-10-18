@@ -28,6 +28,7 @@
 | 成長 | `skill` 最初の技 → `tree_sword` 剣の道 / `tree_bow` 弓の道。`level_5` → `level_10` → `level_20` → `level_30`（hidden）→ `level_40` → `level_50` |
 | 鍛え | `forge` 共鳴の炉 → `forge_enhance` 一打ち → `forge_dismantle` 砕いて、残す |
 
+- **章**（[05](05_lore_npc_quest.md) の 8 章、`story/Chapters`）: 進捗の id・親子・条件は変えず、**文（description）の頭に章の名前を付けて**枝を章ごとに読めるようにする（「一章　岩鯨　岩の鯨の背に乗った。」、英語は「Ch. I Stone Whale: …」）。序章 = `camp`〜`lore_book`（B0〜B6）、一章 = `isana`・`bone_hill`・岩鯨の枝・`voyage`、二章 = 潮殻の枝、三章 = 雷翼の枝、四章 = 余燼の枝と `sky_key`。根・成長・鍛えの枝は章に属さない。章の名は `tools/regroup_lore_chapters.py` の表を `gen_advancements.py` が読む（`CHAPTER_OF` が id → 章）。
 - 枠: 通常は `task`、巨神の背・最初の試練・技の木・巨神の旅は `goal`、心臓・天の鍵・高いレベルは `challenge`。
 - チャットには流さない（`announce_to_chat: false`）。画面の右上に札（トースト）だけ出す。
 - クラスを選ぶ画面はない（04 の 7 章）ので、「クラスの選択」は「その木の最初の技を覚えた」（`tree_*`）で代える。
