@@ -30,8 +30,13 @@ FONT_PATHS = {
 }
 
 
+FALLBACK_FONT = "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf"
+
+
 def font(size, face="gothic"):
-    return ImageFont.truetype(FONT_PATHS[face], size)
+    # Windows のフォントが無いとき (Linux) は IPA ゴシックで代わりに描く (字形が少し違う)
+    path = FONT_PATHS[face]
+    return ImageFont.truetype(path if os.path.exists(path) else FALLBACK_FONT, size)
 
 
 # ---- canvas ------------------------------------------------------------------

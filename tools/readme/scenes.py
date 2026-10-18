@@ -11,84 +11,90 @@ def sparkle(a, pts, col):
             a[y, x] = col
 
 
-WHALE_PAL = dict(body=H("4d5568"), lite=H("6b7590"), dark=H("363c4c"), mortar=H("2c3140"), belly=H("d2c8a8"), belly_d=H("a89e80"),
-                 moss=H("5f8a42"), ol=INK, glow=H("66ecff"), glow_l=H("d6fbff"), ruin=H("7d7a88"), ruin_d=H("5a5766"), eye=H("ffc65a"), bricks=True)
-WHALE_HAZE = dict(body=H("7f95b8"), lite=H("9fb2cf"), dark=H("6a82a8"), mortar=H("6a82a8"), belly=H("c9d5e4"), belly_d=H("aebfd4"),
-                  moss=H("8fb09c"), ol=H("5d7499"), glow=H("a8f0f4"), glow_l=H("e0fbff"), ruin=H("9aa9c2"), ruin_d=H("8294b2"), eye=H("e8d8a0"), bricks=False)
+WHALE_PAL = dict(body=H("3c4658"), lite=H("5a6a84"), dark=H("262c3a"), side=H("4a5770"), plate=H("a08868"), plate_l=H("c8b08a"),
+                 plate_d=H("6e5c48"), moss=H("6f8a4a"), spike=H("e2d8bc"), ol=INK, tooth=H("efe8d4"), eye=H("ffc65a"), detail=True)
+WHALE_HAZE = dict(body=H("7f95b8"), lite=H("9fb2cf"), dark=H("6a82a8"), side=H("8aa0c2"), plate=H("a7b4c8"), plate_l=H("bcc7d8"),
+                  plate_d=H("8d9cb6"), moss=H("98aebc"), spike=H("c9d5e4"), ol=H("5d7499"), tooth=H("c9d5e4"), eye=H("e8d8a0"), detail=False)
 
 
-def whale(a, x0, y0, L, pal, ruins=True, chain=True):
-    """Stone whale seen from the side, facing right: long slate-brick body, beige belly,
-    trailing pectoral fin, tail flukes, and the old ruins (glowing arches, pillar, tower) on its back."""
+def whale(a, x0, y0, L, pal, chain=True):
+    """Stone whale (low-poly option C) seen from the side, facing right: a long slate-blue body whose back is
+    crusted with tan rock plates and pale spikes, a row of teeth along the jaw, a long thin pectoral fin and thin flukes."""
     h, w = a.shape[:2]
     ts = [0, .12, .35, .6, .85, 1.0]
-    rs = [.012, .03, .075, .088, .075, .045]
+    rs = [.012, .03, .075, .088, .078, .05]
     n = 100
     path = bez3((x0, y0 + .03 * L), (x0 + .3 * L, y0 + .12 * L), (x0 + .65 * L, y0 + .1 * L), (x0 + L, y0 - .02 * L), n)
     rad = [max(1.0, float(np.interp(i / n, ts, rs)) * L) for i in range(n + 1)]
     m = tube(w, h, path, rad)
     tx, ty = path[0]
-    fl = mask(w, h, lambda d: d.polygon([(tx + .02 * L, ty), (tx - .06 * L, ty - .11 * L), (tx - .02 * L, ty - .005 * L), (tx - .07 * L, ty + .08 * L), (tx + .02 * L, ty + .02 * L)], fill=255))
-    bx, by = path[60][0], path[60][1] + rad[60] * .55
-    fin = mask(w, h, lambda d: d.polygon([(bx + .02 * L, by), (bx - .03 * L, by - .01 * L), (bx - .15 * L, by + .15 * L), (bx - .03 * L, by + .09 * L)], fill=255))
+    fl = mask(w, h, lambda d: d.polygon([(tx + .02 * L, ty), (tx - .08 * L, ty - .1 * L), (tx - .03 * L, ty - .005 * L), (tx - .09 * L, ty + .07 * L), (tx + .02 * L, ty + .02 * L)], fill=255))
+    bx, by = path[66][0], path[66][1] + rad[66] * .5
+    fin = mask(w, h, lambda d: d.polygon([(bx + .02 * L, by), (bx - .02 * L, by - .01 * L), (bx - .2 * L, by + .2 * L), (bx - .17 * L, by + .2 * L)], fill=255))
     full = m | fl | fin
     outline(a, full, pal["ol"])
     a[full] = pal["body"]
-    yy = np.mgrid[0:h, 0:w][0]
     cols = np.where(m.any(axis=0))[0]
     tops = {}
     for x in cols:
         ys = np.where(m[:, x])[0]
         top, bot = ys.min(), ys.max()
         tops[x] = top
-        thr = top + 0.6 * (bot - top)
+        # lower flank a shade lighter (the mesh's blue side), the back covered by rock plates
         for y in ys:
-            if y >= thr and x > x0 + .07 * L:
-                a[y, x] = pal["belly"] if y > thr + 0.6 or (x % 2 == 0) else pal["belly_d"]
-        if x0 + .22 * L < x < x0 + .85 * L:
-            a[top, x] = pal["moss"]
-            if (x % 3) != 0:
-                a[top + 1, x] = pal["moss"]
-    if pal["bricks"]:
-        for y in range(h):
-            for x in cols:
-                if m[y, x] and tuple(a[y, x]) == pal["body"] and y % 3 == 0 and ((x + (y // 3) * 3) % 7 != 0):
-                    a[y, x] = pal["mortar"]
+            if y > top + 0.62 * (bot - top):
+                a[y, x] = pal["side"] if (x + y) % 3 else pal["body"]
+        if x0 + .1 * L < x < x0 + .86 * L:
+            depth = int(max(2, 0.42 * (bot - top)))
+            for y in range(top, top + depth):
+                a[y, x] = pal["plate"]
     bevel(a, m, pal["lite"], pal["dark"])
+    if pal["detail"]:
+        # hex plate seams on the back
+        for x in cols:
+            if not (x0 + .1 * L < x < x0 + .86 * L):
+                continue
+            top = tops[x]
+            depth = int(max(2, 0.42 * (np.where(m[:, x])[0].max() - top)))
+            for y in range(top + 1, top + depth):
+                u = (x - x0) / L * 100
+                cell = int((u + (y // 4) * 2.5) // 5)
+                if int(u + (y // 4) * 2.5) % 5 == 0 or (y - top) % 4 == 0:
+                    a[y, x] = pal["plate_d"]
+                elif (cell * 7 + y) % 5 == 0:
+                    a[y, x] = pal["plate_l"]
+                elif (cell * 3 + x) % 11 == 0:
+                    a[y, x] = pal["moss"]
+            a[top, x] = pal["plate_l"]
+        # pale spikes poking up from the plates
+        for k, t in enumerate(np.arange(.16, .9, .055)):
+            x = int(path[int(t * 100)][0])
+            if x in tops:
+                hgt = 2 + (k % 3 == 1)
+                for d_ in range(hgt):
+                    if tops[x] - 1 - d_ >= 0:
+                        a[tops[x] - 1 - d_, x] = pal["spike"]
+                a[tops[x] - 1, x - 1] = pal["ol"]
+    else:
+        for k, t in enumerate(np.arange(.16, .9, .055)):
+            x = int(path[int(t * 100)][0])
+            if x in tops and tops[x] - 1 >= 0:
+                a[tops[x] - 1, x] = pal["spike"]
     a[fl | fin] = pal["body"]
     bevel(a, fl | fin, pal["lite"], pal["dark"])
-    # eye + mouth line
-    ex, ey = path[88]
-    a[int(ey + .01 * L), int(ex)] = pal["eye"]
-    a[int(ey + .01 * L), int(ex) - 1] = pal["eye"]
+    # eye, mouth line and teeth
+    ex, ey = path[90]
+    a[int(ey + .005 * L), int(ex)] = pal["eye"]
     mx, my = path[100]
-    a[int(my + .35 * rad[100]), int(mx - .16 * L):int(mx - .01 * L)] = pal["dark"] if pal["bricks"] else pal["ol"]
-    if ruins:
-        def top_at(t):
-            x = int(path[int(t * 100)][0])
-            return x, tops.get(x, int(path[int(t * 100)][1]))
-        # two arches
-        for t, wd in ((.44, .14), (.6, .115)):
-            x, ty_ = top_at(t)
-            wd = int(wd * L); r_ = wd // 2
-            arc = mask(w, h, lambda d, x=x, ty_=ty_, r_=r_: (d.pieslice((x - r_, ty_ - r_ - 1, x + r_, ty_ + r_ - 1), 180, 360, fill=255),
-                                                              d.pieslice((x - r_ + 2, ty_ - r_ + 1, x + r_ - 2, ty_ + r_ - 3), 180, 360, fill=0)))
-            arc[ty_ - 0:, :] = False
-            outline(a, arc, pal["ol"])
-            a[arc] = pal["ruin"]
-            glow = arc & (((np.mgrid[0:h, 0:w][1]) + yy) % 3 == 0)
-            a[glow] = pal["glow"]
-            a[arc & (yy == ty_ - r_ - 1)] = pal["glow_l"] if pal["bricks"] else pal["glow"]
-        # pillar and tower
-        x, ty_ = top_at(.76)
-        pw, ph = max(2, int(.03 * L)), int(.09 * L)
-        pil = mask(w, h, lambda d: d.rectangle((x - pw // 2, ty_ - ph, x + pw // 2, ty_), fill=255))
-        outline(a, pil & ~m, pal["ol"]); a[pil] = pal["ruin"]; a[pil & (np.mgrid[0:h, 0:w][1] > x)] = pal["ruin_d"]
-        x, ty_ = top_at(.28)
-        tw, th = max(4, int(.065 * L)), int(.1 * L)
-        tw_ = mask(w, h, lambda d: (d.rectangle((x - tw // 2, ty_ - th, x + tw // 2, ty_), fill=255), d.rectangle((x - tw // 2 - 1, ty_ - th - 2, x + tw // 2 + 1, ty_ - th), fill=255)))
-        outline(a, tw_ & ~m, pal["ol"]); a[tw_] = pal["ruin"]; a[tw_ & (np.mgrid[0:h, 0:w][1] > x)] = pal["ruin_d"]
-        a[ty_ - th // 2 - 1:ty_ - th // 2 + 1, x:x + 1] = pal["glow"]
+    x_a, x_b = int(mx - .17 * L), int(mx - .01 * L)
+    ys = np.where(m[:, x_a])[0]
+    jy = int(ys.max() - .3 * (ys.max() - ys.min()))
+    a[jy, x_a:x_b] = pal["ol"]
+    if pal["detail"]:
+        for x in range(x_a + 1, x_b, 2):
+            a[jy - 1, x] = pal["tooth"]
+            if (x // 2) % 2 == 0:
+                a[jy + 1, x + 1] = pal["tooth"]
     if chain:
         cx = int(path[30][0]); cy = int(path[30][1] + rad[30])
         for k in range(int(.14 * L)):
@@ -117,128 +123,154 @@ SEA1 = H("3a86c0"); SEA2 = H("2c6aa8"); SEA3 = H("1f4e88"); SEA4 = H("163a6a")
 
 
 def scene_tide():
+    """Tide shell (low-poly option B): a four-terrace reef island of sand on a teal reef skirt, a stone watch tower with a
+    glowing lantern on the top terrace, coral on the steps, the tide gate in its flank and a long tiled head low in the sea."""
     a = canvas(TW, TH)
     vgrad(a, [(10, H("6fa8d0")), (20, H("a8d0e0")), (28, H("f0cfa8")), (29, H("f6dcb4"))])
-    sea_y = 29
-    vgrad(a, [(34, SEA1), (42, SEA2), (48, SEA3), (TH, SEA4)], y0=sea_y)
-    cloud(a, 22, 12, 24, 4, H("fbe9d0"), H("e8c8b0"))
-    cloud(a, 82, 9, 18, 3, H("fbe9d0"), H("e8c8b0"))
-    a[27:30, 70:80] = H("f8e8c0")
-    cx, cy = 54, 38
-    # shell dome, partly sunk in the sea
-    dome = mask(TW, TH, lambda d: d.pieslice((cx - 31, cy - 27, cx + 31, cy + 27), 180, 360, fill=255))
-    # flippers: big front paddle (left, forward) and rear paddle (right)
-    ff = mask(TW, TH, lambda d: d.polygon([(30, 36), (24, 40), (12, 46), (6, 52), (16, 51), (30, 46), (38, 40)], fill=255))
-    rf = mask(TW, TH, lambda d: d.polygon([(72, 38), (82, 44), (90, 50), (84, 52), (74, 47), (68, 42)], fill=255))
-    ff2 = mask(TW, TH, lambda d: d.polygon([(42, 40), (40, 47), (34, 52), (44, 52), (50, 46), (50, 40)], fill=255))
-    # head on a neck, facing left
-    neck = mask(TW, TH, lambda d: d.polygon([(26, 28), (32, 26), (36, 36), (26, 38)], fill=255))
-    head = mask(TW, TH, lambda d: (d.ellipse((12, 20, 28, 33), fill=255), d.polygon([(12, 27), (7, 30), (13, 33)], fill=255)))
-    full = dome | ff | rf | ff2 | neck | head
-    outline(a, full)
-    a[ff | rf | ff2] = TS_D
-    a[neck] = TS_D
-    a[head] = H("e2d8b0")
-    a[dome] = TS
+    sea_y = 31
+    vgrad(a, [(36, SEA1), (43, SEA2), (48, SEA3), (TH, SEA4)], y0=sea_y)
+    cloud(a, 20, 10, 24, 4, H("fbe9d0"), H("e8c8b0"))
+    cloud(a, 84, 8, 18, 3, H("fbe9d0"), H("e8c8b0"))
+    a[29:31, 72:84] = H("f8e8c0")
+    SAND = H("d8c49a"); SAND_L = H("efe0b8"); SAND_D = H("a8946c"); SAND_DD = H("7c6a4c")
+    REEF = H("3f9a8e"); REEF_L = H("6cc8b4"); REEF_D = H("27685f")
     yy, xx = np.mgrid[0:TH, 0:TW]
-    # concentric brick rings on the shell
-    for r in range(8, 30, 5):
-        ring = dome & (np.hypot((xx - cx) / 1.0, (yy - cy) * 1.15) >= r) & (np.hypot((xx - cx), (yy - cy) * 1.15) < r + 1)
-        a[ring] = TS_D
-    for ang in range(-80, 81, 20):
-        t = np.radians(ang)
-        for r in range(2, 30):
-            x = int(cx + np.sin(t) * r * 1.05)
-            y = int(cy - np.cos(t) * r)
-            if 0 <= y < TH and dome[y, x] and (r // 5) % 2 == 0:
-                a[y, x] = TS_D
-    bevel(a, dome, TS_L, TS_DD)
-    bevel(a, ff | rf | ff2 | neck, TS, TS_DD)
-    bevel(a, head, H("f6f0d0"), H("a89e78"))
-    # eye + beak line
-    a[25, 17] = INK; a[25, 18] = INK; a[24, 17] = WHITE
-    a[31, 9:15] = H("a89e78")
-    # coral patches on the shell
-    for (px, py, c) in ((36, 17, H("e8607e")), (68, 21, H("f0883a")), (30, 24, H("a864c8")), (60, 24, H("e8607e")), (42, 28, H("f0883a"))):
-        a[py:py + 2, px:px + 3] = c
-        a[py + 1, px + 2] = tuple(int(v * .7) for v in c[:3]) + (255,)
-    # stone lantern pavilion with a glowing top
-    px, py = 52, 11
-    pav = mask(TW, TH, lambda d: (d.rectangle((px - 5, py, px + 5, py + 9), fill=255), d.rectangle((px - 6, py - 3, px + 6, py), fill=255)))
-    outline(a, pav & ~dome)
-    a[pav] = H("8a8a94")
-    a[py + 3:py + 9, px - 2:px + 3] = H("2a2a34")
-    a[py - 3:py, px - 6:px + 7] = H("aeaeb8")
-    a[py - 4, px - 2:px + 3] = H("8cf0ff"); a[py - 5, px - 1:px + 2] = WHITE
-    a[py:py + 10, px + 3:px + 6][pav[py:py + 10, px + 3:px + 6]] = H("62626c")
-    # water: dither over the lower flippers, ripples, foam
-    for y in range(36, TH):
+    cx = 54
+    # head: long, low, tile-plated, facing left; flippers: flat paddles at the waterline
+    head = mask(TW, TH, lambda d: d.polygon([(30, 31), (14, 33), (6, 36), (12, 38), (30, 38)], fill=255))
+    ff = mask(TW, TH, lambda d: d.polygon([(30, 36), (20, 41), (14, 45), (24, 44), (36, 39)], fill=255))
+    rf = mask(TW, TH, lambda d: d.polygon([(76, 36), (86, 40), (92, 44), (84, 44), (72, 39)], fill=255))
+    skirt = mask(TW, TH, lambda d: d.ellipse((cx - 32, 27, cx + 32, 41), fill=255))
+    tiers = []
+    for k, (hw, top) in enumerate(((28, 28), (22, 23), (16, 18), (10, 13))):
+        bot = top + 5 if k < 3 else 29
+        tiers.append(mask(TW, TH, lambda d, hw=hw, top=top, bot=bot: d.polygon([(cx - hw, bot), (cx - hw + 2, top), (cx + hw - 2, top), (cx + hw, bot)], fill=255)))
+    isle = tiers[0] | tiers[1] | tiers[2] | tiers[3]
+    tx = cx + 1
+    tower = mask(TW, TH, lambda d: (d.rectangle((tx - 2, 3, tx + 2, 14), fill=255), d.rectangle((tx - 3, 1, tx + 3, 4), fill=255)))
+    full = head | ff | rf | skirt | isle | tower
+    outline(a, full)
+    a[ff | rf] = REEF_D
+    bevel(a, ff | rf, REEF, H("1b4a48"))
+    a[head] = H("e2d8b8")
+    for x in range(8, 30, 3):
+        a[33:38, x][head[33:38, x]] = H("b8ac88")
+    bevel(a, head, H("f6f0dc"), H("a89e78"))
+    a[34, 12] = INK; a[33, 12] = WHITE
+    for x in range(7, 26, 2):
+        if head[37, x]:
+            a[37, x] = WHITE
+    a[skirt] = REEF
+    a[skirt & ((xx * 3 + yy * 5) % 7 == 0)] = REEF_L
+    bevel(a, skirt, REEF_L, REEF_D)
+    # sand terraces: lit tops, dark risers, a darker band at each step
+    for k, t in enumerate(tiers):
+        a[t] = SAND
+        a[t & ((xx + yy * 3) % 9 == 0)] = SAND_L
+        edge = t & ~shift(t, 0, 1)
+        a[edge] = SAND_L
+    bevel(a, isle, SAND_L, SAND_DD)
+    # the step below each upper terrace: a dark shadow row, then the lit ledge of the terrace under it
+    for k in range(1, 4):
+        t = tiers[k]
+        a[t & ~shift(t, 0, -1)] = SAND_DD
+        a[t & ~shift(t, 0, -2) & shift(t, 0, -1)] = SAND_D
+    # tide gate in the right flank: dark frame, glowing water
+    gx, gy = cx + 20, 24
+    a[gy:gy + 9, gx:gx + 6] = H("2a2e3a")
+    a[gy + 1:gy + 9, gx + 1:gx + 5] = H("5ad8e0")
+    a[gy + 2:gy + 9:2, gx + 1:gx + 5] = H("9af0f0")
+    # watch tower with a glowing lantern
+    a[tower] = H("8a8a94")
+    a[tower & (xx > tx)] = H("62626c")
+    a[1:4, tx - 3:tx + 4] = H("aeaeb8")
+    a[4:7, tx - 1:tx + 2] = H("8cf0ff"); a[5, tx] = WHITE
+    for y in range(8, 14, 3):
+        a[y, tx - 2:tx + 3] = H("74747e")
+    # coral on the steps: orange heads, purple crystals, pink branches, yellow fans
+    for (px, py, c) in ((36, 25, H("f0883a")), (68, 21, H("f0883a")), (44, 16, H("f0883a")), (63, 15, H("a864c8")), (40, 21, H("a864c8")),
+                        (72, 26, H("e8607e")), (48, 11, H("e8b83a")), (30, 27, H("e8b83a"))):
+        a[py:py + 2, px:px + 2] = c
+        a[py - 1, px] = c
+        a[py + 1, px + 1] = tuple(int(v * .7) for v in c[:3]) + (255,)
+    # water over the lower skirt and flippers, ripples, foam
+    for y in range(37, TH):
         for x in range(TW):
-            if (ff | rf | ff2)[y, x] and y >= 43 and (x + y) % 2 == 0:
-                a[y, x] = SEA3
-    for (rx, ry, rw) in ((20, 44, 14), (62, 43, 12), (46, 49, 20), (82, 47, 12), (10, 49, 8)):
+            if (skirt | ff | rf)[y, x] and (x + y) % 2 == 0:
+                a[y, x] = SEA2
+    for (rx, ry, rw) in ((16, 46, 14), (60, 45, 16), (40, 50, 20), (84, 48, 12), (8, 41, 8)):
         a[ry, rx - rw // 2:rx + rw // 2] = H("9ad0f0")
         a[ry + 1, rx - rw // 2 + 2:rx + rw // 2 - 2] = H("5a98d0")
-    a[36, 28:72][dome[36, 28:72]] = TS_DD
+    a[37, 22:86][(skirt | ff | rf)[37, 22:86]] = H("cfeef0")
     return a
 
 
 def scene_storm():
+    """Thunder wing (low-poly option A, the storm eagle) in flight, facing left: slate-blue back, pale grey belly,
+    long swept wings with white feather tips, a hooked yellow beak, a tan crest and two small spires on its back."""
     a = canvas(TW, TH)
     vgrad(a, [(12, H("141a38")), (24, H("232e5a")), (36, H("34457a")), (TH, H("4a5f90"))])
-    for (x, y, w_) in ((16, 10, 40), (80, 8, 36), (50, 5, 50)):
+    for (x, y, w_) in ((16, 10, 40), (80, 6, 36), (50, 4, 50)):
         cloud(a, x, y, w_, 7, H("2c3562"), H("1e2548"), H("1e2548"))
     cloud(a, 14, 50, 36, 7, H("56688f"), H("46557c"), H("38456a"))
     cloud(a, 84, 51, 40, 7, H("56688f"), H("46557c"), H("38456a"))
-    SL = H("4a526a"); SLL = H("6e7a96"); SLD = H("2e3448"); FE = H("dfe3ee"); FE_D = H("a8b0c4")
-    cx, cy = 48, 30
-
-    def wing(sign):
-        pts = [(cx, cy - 6), (cx + sign * 14, cy - 17), (cx + sign * 32, cy - 21), (cx + sign * 46, cy - 16), (cx + sign * 47, cy - 8)]
-        for k in range(8):
-            xk = cx + sign * (46 - k * 5.2)
-            pts += [(xk, cy + 1 - (3 if k % 2 else 0) + k * 0.5), (xk - sign * 2.5, cy + 6 + k * 0.4 - (0 if k % 2 else 2))]
-        pts += [(cx + sign * 4, cy + 6), (cx, cy + 4)]
+    SL = H("3e4a66"); SLL = H("62708e"); SLD = H("262c40"); BELLY = H("b4bcca"); BELLY_D = H("8a94a8")
+    FE = H("e8ecf4"); FE_D = H("aab2c4"); BEAK = H("e8c04a"); BEAK_D = H("a8801e"); CREST = H("c8a878")
+    yy, xx = np.mgrid[0:TH, 0:TW]
+    cy = 30
+    # far wing (behind, darker) and near wing: broad, raised and swept back, ending in spread primary feathers
+    def wing(root, tip, chord, fingers=5):
+        (rx, ry), (tx_, ty_) = root, tip
+        lead = [(rx, ry), (rx + (tx_ - rx) * .35, ry - (ry - ty_) * .55), (tx_ - 4, ty_)]
+        trail = []
+        for k in range(fingers):
+            u = k / (fingers - 1.0)
+            fx = tx_ - 1 - k * 2.2
+            fy = ty_ + 2 + k * 2.4
+            trail += [(fx + 4, fy - 1), (fx + 1, fy + 1)]
+        trail += [(tx_ - 14, ty_ + chord + 2), (rx + (tx_ - rx) * .45, ry - (ry - ty_) * .2 + chord), (rx + 6, ry + chord)]
+        pts = lead + trail
         return mask(TW, TH, lambda d: d.polygon(pts, fill=255))
-    wl, wr = wing(-1), wing(1)
-    body = mask(TW, TH, lambda d: (d.ellipse((cx - 8, cy - 8, cx + 8, cy + 12), fill=255),
-                                   d.polygon([(cx - 4, cy + 9), (cx + 4, cy + 9), (cx + 3, cy + 20), (cx, cy + 24), (cx - 3, cy + 20)], fill=255)))
-    head = mask(TW, TH, lambda d: d.ellipse((cx - 5, cy - 16, cx + 5, cy - 6), fill=255))
-    # crest: orange flame fan
-    crest = mask(TW, TH, lambda d: d.polygon([(cx - 3, cy - 14), (cx - 9, cy - 22), (cx - 5, cy - 20), (cx - 5, cy - 26), (cx - 2, cy - 21), (cx, cy - 28), (cx + 2, cy - 21), (cx + 5, cy - 26), (cx + 5, cy - 20), (cx + 9, cy - 22), (cx + 3, cy - 14)], fill=255))
-    beak = mask(TW, TH, lambda d: d.polygon([(cx - 3, cy - 9), (cx + 3, cy - 9), (cx, cy - 1)], fill=255))
-    wings = wl | wr
-    full = wings | body | head | crest | beak
+    far = wing((48, cy - 3), (74, 2), 8)
+    near = wing((40, cy - 1), (92, 6), 11, 6)
+    body = mask(TW, TH, lambda d: d.ellipse((22, cy - 5, 62, cy + 7), fill=255))
+    tail = mask(TW, TH, lambda d: d.polygon([(58, cy - 2), (74, cy - 3), (77, cy + 2), (72, cy + 6), (58, cy + 5)], fill=255))
+    head = mask(TW, TH, lambda d: d.ellipse((12, cy - 8, 28, cy + 3), fill=255))
+    beak = mask(TW, TH, lambda d: d.polygon([(14, cy - 5), (7, cy - 4), (4, cy - 1), (7, cy + 1), (9, cy - 1), (14, cy)], fill=255))
+    crest = mask(TW, TH, lambda d: d.polygon([(21, cy - 7), (27, cy - 12), (26, cy - 8), (31, cy - 11), (29, cy - 7), (33, cy - 8), (29, cy - 4)], fill=255))
+    legs = mask(TW, TH, lambda d: (d.polygon([(36, cy + 5), (39, cy + 5), (38, cy + 10), (34, cy + 11)], fill=255),
+                                   d.polygon([(44, cy + 5), (47, cy + 5), (46, cy + 10), (42, cy + 11)], fill=255)))
+    full = far | near | body | tail | head | beak | crest | legs
     outline(a, full)
-    a[wings] = SL
-    a[body | head] = SLL
-    band(a, body, SL, cy + 4)
-    a[crest] = H("c8643a")
-    a[crest & (np.mgrid[0:TH, 0:TW][0] < cy - 21)] = H("ffd070")
-    a[beak] = H("e0cc9c")
-    a[cy - 11, cx - 3] = H("ffd070"); a[cy - 11, cx + 2] = H("ffd070")
-    # white feather tips along the trailing edge
-    tipm = wings & ~shift(wings, 0, -2)
-    a[tipm] = FE
-    a[wings & ~shift(wings, 0, -3) & ~tipm] = FE_D
-    bevel(a, wings, SLL, SLD)
-    bevel(a, body | head, H("9aa8c8"), SLD)
-    # gold lightning veins + orange glowing discs on each wing
-    for sign in (-1, 1):
-        gx, gy = cx + sign * 7, cy - 6
-        for step_ in range(13):
-            x = gx + sign * step_ * 3
-            y = gy - 6 * np.sin(step_ / 12 * np.pi / 1.2) + (2 if step_ % 2 else 0)
-            for k in range(2):
-                xx_, yy_ = int(x), int(y) + k
-                if 0 <= yy_ < TH and 0 <= xx_ < TW and wings[yy_, xx_]:
-                    a[yy_, xx_] = GOLD_L
-        dx, dy = cx + sign * 26, cy - 4
-        disc = mask(TW, TH, lambda d: d.ellipse((dx - 4, dy - 4, dx + 4, dy + 4), fill=255)) & wings
-        a[disc] = H("c8643a")
-        a[mask(TW, TH, lambda d: d.ellipse((dx - 2, dy - 2, dx + 2, dy + 2), fill=255)) & wings] = H("ffb04a")
-        a[dy, dx] = GOLD_L
-    sparkle(a, [(8, 12), (88, 10), (26, 38), (70, 40), (4, 28), (92, 26)], GOLD_L)
+    a[far] = SLD
+    bevel(a, far, SL, H("1a1e2e"))
+    a[tail] = SL
+    a[tail & (xx > 73)] = FE_D
+    a[body | head] = SL
+    a[(body | head) & (yy > cy + 1)] = BELLY
+    a[(body | head) & (yy == cy + 1)] = BELLY_D
+    bevel(a, body | head, SLL, SLD)
+    a[crest] = CREST
+    a[crest & (yy < cy - 9)] = H("ecd8a8")
+    a[beak] = BEAK
+    a[beak & (yy > cy - 2)] = BEAK_D
+    a[legs] = BEAK_D
+    a[cy - 4, 17] = H("ffd070"); a[cy - 4, 16] = INK
+    a[near] = SL
+    # covert rows, then white tips along the trailing edge of the near wing
+    a[near & ((yy + xx // 6) % 4 == 0)] = SLL
+    tip = near & ~shift(near, 0, -1)
+    a[tip] = FE
+    a[near & ~shift(near, 0, -2) & ~tip] = FE_D
+    bevel(a, near, SLL, SLD)
+    a[tip] = FE
+    # two small spires on the back, with gold tips
+    for x in (36, 46):
+        top = np.where(body[:, x])[0].min()
+        a[top - 4:top, x] = H("8a90a0")
+        a[top - 5, x] = GOLD_L
+        a[top - 4:top, x + 1] = SLD
+    sparkle(a, [(8, 12), (88, 46), (26, 44), (70, 42), (4, 28), (60, 16)], GOLD_L)
 
     def bolt(x, y, pts, col=GOLD_L):
         px, py = x, y
@@ -249,62 +281,75 @@ def scene_storm():
                     a[py, px] = col
                     if px + 1 < TW: a[py, px + 1] = col
             px += dx
-    bolt(8, 14, [(3, 5), (-3, 4), (4, 6), (-2, 6), (3, 8)])
-    bolt(88, 12, [(-3, 5), (3, 5), (-4, 6), (2, 5), (-3, 9)])
+    bolt(10, 2, [(3, 4), (-3, 3), (3, 4)])
+    bolt(84, 30, [(-3, 5), (3, 5), (-4, 6), (2, 6)])
     return a
 
 
 def scene_ember():
+    """Ember titan (low-poly option C, skin turning to rock): a low grey-brown salamander whose back is crusting over
+    with black basalt plates split by glowing cracks, a rocky volcano with a burning crater, and an open, toothed mouth."""
     a = canvas(TW, TH)
     vgrad(a, [(10, H("1a1418")), (20, H("2e2024")), (30, H("5a2c26")), (38, H("a8431e")), (TH, H("e8742a"))])
     far = mask(TW, TH, lambda d: d.polygon([(0, 40), (10, 34), (18, 38), (28, 32), (40, 40), (60, 40), (72, 34), (84, 38), (95, 34), (95, 42), (0, 42)], fill=255))
     a[far] = H("3a1c1c")
-    G = H("3e3a42"); GL = H("5e5a64"); GD = H("26222a")
-    # ground
+    SK = H("80706a"); SK_L = H("a8968a"); SK_D = H("4e423e"); CR = H("24201f"); CR_L = H("3e3634"); CR_D = H("141112")
+    yy, xx = np.mgrid[0:TH, 0:TW]
     ground = mask(TW, TH, lambda d: d.polygon([(0, 46), (95, 46), (95, 53), (0, 53)], fill=255))
-    # body: low, long, splayed lizard
-    body = mask(TW, TH, lambda d: (d.ellipse((18, 30, 82, 48), fill=255), d.polygon([(22, 36), (4, 44), (2, 47), (24, 46)], fill=255)))
+    body = mask(TW, TH, lambda d: (d.ellipse((18, 31, 80, 48), fill=255), d.polygon([(22, 37), (4, 44), (2, 47), (24, 46)], fill=255)))
     legs = np.zeros((TH, TW), bool)
-    for pts in (((24, 40), (30, 40), (22, 50), (16, 51), (17, 47)), ((38, 42), (44, 42), (42, 50), (36, 51)),
-                ((60, 42), (66, 42), (68, 50), (74, 51), (60, 49)), ((72, 40), (78, 38), (86, 48), (91, 50), (80, 51), (72, 46))):
+    for pts in (((24, 41), (30, 41), (22, 50), (15, 51), (17, 47)), ((38, 43), (44, 43), (42, 50), (35, 51)),
+                ((58, 43), (64, 43), (67, 50), (73, 51), (59, 49)), ((70, 41), (76, 39), (84, 48), (89, 50), (78, 51), (70, 46))):
         legs |= mask(TW, TH, lambda d, pts=pts: d.polygon(list(pts), fill=255))
-    head = mask(TW, TH, lambda d: d.polygon([(74, 32), (86, 34), (92, 38), (92, 44), (80, 47), (72, 44)], fill=255))
-    # volcano on the back
-    volc = mask(TW, TH, lambda d: d.polygon([(30, 36), (43, 14), (59, 14), (72, 36)], fill=255))
-    rim = mask(TW, TH, lambda d: d.polygon([(41, 18), (43, 10), (59, 10), (61, 18)], fill=255))
+    head = mask(TW, TH, lambda d: d.polygon([(72, 33), (85, 34), (93, 37), (94, 41), (90, 46), (78, 47), (70, 44)], fill=255))
+    volc = mask(TW, TH, lambda d: d.polygon([(28, 38), (36, 26), (44, 14), (58, 14), (64, 24), (74, 38)], fill=255))
+    rim = mask(TW, TH, lambda d: d.polygon([(42, 18), (44, 11), (58, 11), (60, 18)], fill=255))
     a[ground] = COAL
     full = body | legs | head | volc | rim
     outline(a, full)
-    a[legs] = H("4a464e")
-    bevel(a, legs, GL, GD)
-    a[body | head] = G
-    band(a, body | head, GD, 42)
-    a[volc] = COAL
-    a[rim] = H("c8c2b8")
-    # lava veins
+    # skin: grey-brown, lighter on the flank, toes and jaw
+    a[body | head | legs] = SK
+    a[(body | head) & (yy > 42)] = SK_D
+    bevel(a, legs, SK_L, SK_D)
+    # basalt crust spreading down from the back over the skin (ragged lower edge)
+    crust = (body | head) & (yy < 38 + ((xx * 7) % 5) - (xx > 70) * 3)
+    a[crust] = CR
+    a[crust & ((xx * 5 + yy * 3) % 11 == 0)] = CR_L
+    bevel(a, body | head, SK_L, SK_D)
+    # volcano of dark stones, lava cracks running down, a burning crater
+    a[volc] = CR
+    cell = ((xx // 2 + (yy // 2) * 2) * 2654435761 + (yy // 2) * 40503) % 97
+    a[volc & (cell % 4 == 0)] = CR_L
+    a[volc & (cell % 7 == 1)] = CR_D
+    a[volc & ~shift(volc, -1, 0)] = CR_D
     for x0_, wob in ((47, 1), (52, -1), (56, 1), (40, -1), (63, 1)):
         x = x0_
-        for y in range(15 if x0_ in (47, 52, 56) else 22, 38):
-            if volc[y, int(x)]:
+        for y in range(15 if x0_ in (47, 52, 56) else 24, 40):
+            if (volc | crust)[y, int(x)]:
                 a[y, int(x)] = EMBER
                 if y % 3 == 0:
                     a[y, int(x) + 1] = EMBER_L
             x += (wob * 0.45 if y % 2 else 0) + (x0_ - 52) * 0.12
-    a[rim & (np.mgrid[0:TH, 0:TW][0] > 12)] = H("e6dfd2")
-    a[10:13, 44:58] = EMBER_L
+    # cracks in the crust of the back
+    for (x, y, l) in ((24, 37, 6), (66, 36, 5), (31, 40, 4), (73, 37, 4)):
+        a[y, x:x + l][crust[y, x:x + l]] = EMBER_D
+        a[y - 1, x + 1:x + l - 1][crust[y - 1, x + 1:x + l - 1]] = EMBER
+    a[rim] = CR_L
+    a[rim & (yy < 13)] = EMBER_D
+    a[10:12, 44:58] = EMBER_L
     a[10, 47:55] = GOLD_L
-    bevel(a, body | head, GL, GD)
-    # glowing eye + red mouth with teeth
-    a[36, 83:86] = GOLD_L; a[37, 84] = INK
-    mouth = mask(TW, TH, lambda d: d.polygon([(77, 41), (92, 42), (92, 44), (81, 46)], fill=255)) & head
+    # glowing eye under a heavy lid, open red mouth with teeth
+    a[36, 84:87] = GOLD_L; a[35, 83:88] = CR
+    mouth = mask(TW, TH, lambda d: d.polygon([(76, 41), (93, 40), (93, 42), (88, 45), (80, 45)], fill=255)) & head
     a[mouth] = H("c0281c")
-    for x in (79, 82, 85, 88, 91):
-        a[41 if x > 80 else 42, x] = WHITE
+    a[mouth & (yy == 43)] = H("ff6a2a")
+    for x in (78, 81, 84, 87, 90):
+        a[41, x] = WHITE
+        a[44 if x < 88 else 43, x + 1] = WHITE
     # smoke plume above the crater
     cloud(a, 52, 8, 14, 3, H("5a5660"), H("423e48"), H("423e48"))
     cloud(a, 60, 3, 18, 3, H("5a5660"), H("423e48"), H("423e48"))
     a[0:2, 62:80] = H("423e48")
-    # ground cracks with embers
     for (x, y) in ((4, 48), (22, 51), (40, 49), (54, 51), (72, 50), (88, 48), (12, 52), (46, 52)):
         a[y, x:x + 5] = EMBER
         a[y + (1 if y < 52 else 0), x + 2:x + 4] = EMBER_L
@@ -321,7 +366,7 @@ def banner():
     for (x, y, w_) in ((24, 54, 40), (250, 52, 44), (150, 47, 28)):
         cloud(a, x, y, w_, 5, SKY4, SKY3)
     # the far stone whale, hazy, swimming behind the cloud banks
-    whale(a, 78, 48, 192, WHALE_HAZE, ruins=True, chain=True)
+    whale(a, 78, 48, 192, WHALE_HAZE, chain=True)
     cloud(a, 40, 68, 90, 8)
     cloud(a, 150, 71, 110, 9)
     cloud(a, 245, 68, 80, 8)

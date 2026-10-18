@@ -173,8 +173,9 @@ def footer(fname="footer.png"):
     for (x, y) in ((40, 6), (210, 10), (130, 4), (260, 20)):
         a[y, x] = WHITE; a[y, x - 1] = SKY3; a[y, x + 1] = SKY3; a[y - 1, x] = SKY3; a[y + 1, x] = SKY3
     from scenes import whale
-    pal = dict(body=ABYSS3, lite=H("3a5688"), dark=ABYSS2, mortar=ABYSS2, belly=H("4a6a98"), belly_d=H("3a5688"), moss=ABYSS3, ol=ABYSS1, glow=TEAL, glow_l=TEAL_L, ruin=H("3a5688"), ruin_d=ABYSS2, eye=TEAL_L, bricks=False)
-    whale(a, 100, 20, 80, pal, ruins=True, chain=False)
+    pal = dict(body=ABYSS3, lite=H("3a5688"), dark=ABYSS2, side=H("2c4676"), plate=H("3a5688"), plate_l=H("4a6a98"), plate_d=ABYSS2,
+               moss=ABYSS3, spike=H("4a6a98"), ol=ABYSS1, tooth=H("4a6a98"), eye=TEAL_L, detail=False)
+    whale(a, 100, 20, 80, pal, chain=False)
     cloud(a, 40, 56, 80, 6, ABYSS3, ABYSS2, ABYSS1)
     cloud(a, 230, 56, 90, 6, ABYSS3, ABYSS2, ABYSS1)
     l1, l2 = "空と地の底のあいだで、", "あなたを待っているものがあります。"
