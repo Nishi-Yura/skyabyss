@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
+import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -84,6 +85,11 @@ public class EmberMoth extends EmberMob {
         return level.getEntitiesOfClass(EmberMoth.class, room, EmberMoth::isAlive).size();
     }
 
+    // 部屋の中の、そのグループの生きている蛾の数 (group が null なら全部)
+    public static int countIn(ServerLevel level, AABB room, @javax.annotation.Nullable java.util.UUID group) {
+        return level.getEntitiesOfClass(EmberMoth.class, room, m -> m.isAlive() && (group == null || group.equals(m.groupId()))).size();
+    }
+
     private int touchCooldown;
     private Vec3 lure;
     private Player lurePlayer;
@@ -161,7 +167,7 @@ public class EmberMoth extends EmberMob {
         Vec3 here = position();
         double best = -Double.MAX_VALUE;
         Vec3 bestPos = null;
-        Player bestPlayer = hottestPlayer(server.players(), here);
+        Player bestPlayer = hottestPlayer(server.players().stream().filter(p -> GroupOwned.mayTarget(this, p)).toList(), here);
         if (bestPlayer != null) {
             best = score(bestPlayer, here);
             bestPos = bestPlayer.position().add(0, bestPlayer.getBbHeight() * 0.6, 0);
@@ -243,7 +249,7 @@ public class EmberMoth extends EmberMob {
 
     // 人に触れた: 3 の傷と熱 +8
     public void touch(Player p) {
-        if (touchCooldown > 0 || !targetable(p)) {
+        if (touchCooldown > 0 || !targetable(p) || !GroupOwned.mayTarget(this, p)) {
             return;
         }
         touchCooldown = TOUCH_COOLDOWN;
@@ -271,7 +277,7 @@ public class EmberMoth extends EmberMob {
     void sparks(ServerLevel server) {
         server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 5, 0.3, 0.2, 0.3, 0.05);
         server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3, getZ(), 14, 0.5, 0.3, 0.5, 0.06);
-        sparkPlayers(server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(SPARK_RADIUS)), position());
+        sparkPlayers(server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(SPARK_RADIUS), p -> GroupOwned.mayTarget(this, p)), position());
     }
 
     // 散った火の粉: at から 3 ブロック以内の人に熱 +4。熱を足した人数を返す

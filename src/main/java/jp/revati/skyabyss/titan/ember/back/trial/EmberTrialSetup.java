@@ -119,6 +119,7 @@ public final class EmberTrialSetup {
         EmberBackRooms.register(EmberIds.SOUTH, HearthRoom::build);
         EmberBackRooms.onReset(EmberIds.SOUTH, Hearth::reset);
         Hearth.registerLure();
+        Forge.registerOverlay();
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

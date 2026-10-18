@@ -13,6 +13,8 @@ import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
+import jp.revati.skyabyss.party.Parties;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.mob.CinderRoller;
 import jp.revati.skyabyss.titan.ember.mob.EmberMoth;
@@ -101,8 +103,9 @@ public final class AshPath {
             List.of(new Island(-25, 6, 1), new Island(-31, 13, 1), new Island(-19, 13, 2), new Island(-25, 24, 2), new Island(-25, 33, 1),
                     new Island(-31, 40, 2), new Island(-19, 41, 1)));
 
+    // 島の並び: 部屋の持ち主のグループの種から (持ち主がいなければ種 0 の並び)
     public static int patternOf(ServerLevel level) {
-        return Math.floorMod(EmberBackState.get(level).seed(), PATTERNS.size());
+        return Math.floorMod(EmberBackState.forRoom(level, EmberIds.WEST).seed(), PATTERNS.size());
     }
 
     // ---------------------------------------------------------------- 冷え殻の時計
@@ -118,6 +121,8 @@ public final class AshPath {
     private static final Map<UUID, BlockPos> LAST_STAND = new HashMap<>();
     private static boolean spawned;
     private static long lastMothSpawn;
+    // いま湖に建ててある島の並び (-1 = わからない。起動のあとは建て直す)
+    private static int builtPattern = -1;
 
     private AshPath() {
     }
@@ -155,6 +160,7 @@ public final class AshPath {
         CRUSTS.clear();
         LAST_STAND.clear();
         spawned = false;
+        builtPattern = -1;
     }
 
     static void forget(UUID id) {
@@ -332,7 +338,7 @@ public final class AshPath {
             trackStand(level, p);
             rescueUrn(level, p);
             if (FAR_SHORE.contains(p.position()) && !EmberBackTrials.sleeping(level, EmberIds.WEST)
-                    && !EmberBackState.get(level).ready(EmberBackState.Trial.WEST)) {
+                    && !EmberBackState.forRoom(level, EmberIds.WEST).ready(EmberBackState.Trial.WEST)) {
                 EmberTrials.markReady(level, EmberBackState.Trial.WEST);
                 Notice.narrate(p, EmberIds.LANG_WEST + "far_shore");
             }
@@ -447,8 +453,9 @@ public final class AshPath {
     }
 
     // ---------------------------------------------------------------- 敵
+    // 最初の蛾の数 (一人 6、一人増えるごとに +2。パーティの上限 6 人まで数える)
     public static int mothTarget(int players) {
-        return 6 + 2 * (Math.max(1, Math.min(4, players)) - 1);
+        return 6 + 2 * (Math.max(1, Math.min(Parties.MAX_MEMBERS, players)) - 1);
     }
 
     private static void keepEnemies(ServerLevel level, List<ServerPlayer> in, long now) {
@@ -469,7 +476,7 @@ public final class AshPath {
         } else if (now - lastMothSpawn >= 100) {
             lastMothSpawn = now;
             int cap = Math.min(EmberMoth.roomCap(in.size()), mothTarget(in.size()));
-            if (EmberMoth.countIn(level, room) < cap) {
+            if (EmberMoth.countIn(level, room, EmberRooms.owner(EmberIds.WEST)) < cap) {
                 spawnMoth(level, (int) now);
             }
         }
@@ -482,14 +489,26 @@ public final class AshPath {
     }
 
     // ---------------------------------------------------------------- リセット (EmberBackRooms.onReset("west", ...))
+    // 部屋の持ち主が替わるたび (手放した・新しい持ち主が入った)。冷え殻を溶岩に戻し、島の並びが持ち主の種と違えば湖を建て直す
     public static void reset(ServerLevel level, boolean sleeping) {
         EmberTrials.clearMobs(level, EmberBackLayout.WEST);
         EmberTrials.clearItems(level, EmberBackLayout.WEST, EmberTrialSetup.ASH_URN.get());
-        EmberTrials.stripAll(level, EmberTrialSetup.ASH_URN.get());
+        for (BlockPos p : crustKeys()) {
+            sink(level, p);
+        }
         CRUSTS.clear();
         LAST_STAND.clear();
         spawned = false;
-        AshPathRoom.buildLake(level, patternOf(level));
+        int pattern = patternOf(level);
+        if (pattern != builtPattern) {
+            AshPathRoom.buildLake(level, pattern);
+            builtPattern = pattern;
+        }
+    }
+
+    // 湖を建て直したことを覚える (AshPathRoom から)
+    static void lakeBuilt(int pattern) {
+        builtPattern = pattern;
     }
 
     // 試練の敵の数 (テスト用)

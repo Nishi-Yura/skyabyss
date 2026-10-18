@@ -3,12 +3,19 @@ package jp.revati.skyabyss.titan.ember.back.trial;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.ember.mob.EmberMob;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -40,6 +47,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 // - 試練の品 (灰の壺・火の鍵・熾) は背中の外へ持ち出せない・預からない (7.3節)。落とした壺と鍵は消す (一人一つ)
 // - 試練が済んだ合図 (クエストの ember_trial_<west|east|south> と共通の back_trial_cleared) は B の EmberBackTrials.ring だけが送る
 //   (石を鳴らしたとき。潮殻・雷翼と同じ。13 の 24.2節)
+// - 試練の部屋は一度に一つのグループ (EmberRooms)。部屋の仕掛けは持ち主のグループのために動く: 部屋の中の人は持ち主の人だけを数え、
+//   湧かせた敵は持ち主のグループのもの (GroupOwned)、済んだ合図は持ち主のグループの記録へ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class EmberTrials {
     // 自己テスト用: true のあいだ、石を鳴らせるようにする・初めての打つ順を使った記録を、ワールドに書かない (呼ばれた回数だけ数える)
@@ -50,17 +59,20 @@ public final class EmberTrials {
     private EmberTrials() {
     }
 
-    // 試練が済んだ (石を鳴らせるようにする)
+    // 試練が済んだ (部屋の持ち主のグループに、石を鳴らせるようにする)
     static void markReady(ServerLevel level, EmberBackState.Trial trial) {
         if (dryRun) {
             READY_CALLS.add(trial);
-        } else {
-            jp.revati.skyabyss.titan.ember.back.EmberBackTrials.markReady(level, trial);
+            return;
+        }
+        UUID owner = EmberRooms.owner(trial.id());
+        if (owner != null) {
+            jp.revati.skyabyss.titan.ember.back.EmberBackTrials.markReady(level, owner, trial);
         }
     }
 
     static void markFirstForgeUsed(ServerLevel level) {
-        EmberBackState state = EmberBackState.get(level);
+        EmberBackState state = EmberBackState.forRoom(level, EmberIds.EAST);
         if (dryRun) {
             firstForgeCalls++;
         } else if (!state.firstForgeUsed()) {
@@ -77,23 +89,33 @@ public final class EmberTrials {
         return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(type), by);
     }
 
-    // 箱の中にいる、生きている (観戦者でない) 人
+    // 箱の中にいる、生きている (観戦者でない) 人。箱が占有の部屋 (EmberRooms) の中なら、持ち主のグループの人だけ
+    // (ほかのグループの人は 10 tick のうちに外へ出されるので、そのあいだも数えない)
     public static List<ServerPlayer> playersIn(ServerLevel level, EmberBackLayout.Box box) {
-        return playersIn(level.players(), box);
+        return playersIn(level.players(), box, EmberRooms.ownerAt(Vec3.atCenterOf(box.center())));
     }
 
     public static List<ServerPlayer> playersIn(List<ServerPlayer> all, EmberBackLayout.Box box) {
+        return playersIn(all, box, null);
+    }
+
+    public static List<ServerPlayer> playersIn(List<ServerPlayer> all, EmberBackLayout.Box box, @Nullable UUID group) {
         List<ServerPlayer> out = new ArrayList<>();
         for (ServerPlayer p : all) {
-            if (p.isAlive() && !p.isSpectator() && box.contains(p.position())) {
+            if (p.isAlive() && !p.isSpectator() && box.contains(p.position()) && (group == null || Groups.isMember(p, group))) {
                 out.add(p);
             }
         }
         return out;
     }
 
-    // 試練の敵を湧かせる (保存しない印を付ける)。湧かせられなければ null
+    // 試練の敵を湧かせる (保存しない印を付ける)。湧く所の部屋の持ち主のグループの敵になる (部屋の外・持ち主なしなら無所属)。湧かせられなければ null
     public static <T extends Mob> T spawn(ServerLevel level, EntityType<T> type, double x, double y, double z, String... tags) {
+        return spawn(level, EmberRooms.ownerAt(new Vec3(x, y, z)), type, x, y, z, tags);
+    }
+
+    // グループを決めて湧かせる (addFreshEntity の前にグループを入れる)
+    public static <T extends Mob> T spawn(ServerLevel level, @Nullable UUID group, EntityType<T> type, double x, double y, double z, String... tags) {
         T mob = type.create(level);
         if (mob == null) {
             return null;
@@ -104,14 +126,23 @@ public final class EmberTrials {
         for (String t : tags) {
             mob.addTag(t);
         }
+        if (mob instanceof GroupOwned owned) {
+            owned.setGroupId(group);
+        }
         level.addFreshEntity(mob);
         return mob;
     }
 
-    // 箱の中の試練の敵を消す
+    // 箱の中の試練の敵を消す (部屋を最初に戻すとき。占有の部屋なので、中の敵はみな手放した持ち主のもの)
     public static int clearMobs(ServerLevel level, EmberBackLayout.Box box) {
+        return clearMobs(level, box, null);
+    }
+
+    // 箱の中の、そのグループの試練の敵を消す (group が null なら全部)
+    public static int clearMobs(ServerLevel level, EmberBackLayout.Box box, @Nullable UUID group) {
         int n = 0;
-        for (Mob m : level.getEntitiesOfClass(Mob.class, box.aabb(), e -> e.getTags().contains(EmberMob.TRIAL_TAG))) {
+        for (Mob m : level.getEntitiesOfClass(Mob.class, box.aabb(), e -> e.getTags().contains(EmberMob.TRIAL_TAG)
+                && (group == null || e instanceof GroupOwned o && group.equals(o.groupId())))) {
             m.discard();
             n++;
         }
@@ -176,10 +207,12 @@ public final class EmberTrials {
                 EmberTrialSetup.LIVE_COAL.get()};
     }
 
-    // 全員の持ち物から消す (リセット)
-    public static void stripAll(ServerLevel level, Item... items) {
+    // そのグループの人の持ち物から消す (ほかのグループの人には触らない)
+    public static void stripGroup(ServerLevel level, UUID group, Item... items) {
         for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
-            strip(p, items);
+            if (Groups.isMember(p, group)) {
+                strip(p, items);
+            }
         }
     }
 
@@ -256,7 +289,8 @@ public final class EmberTrials {
             event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
             return;
         }
-        if (EmberBackLayout.SMITH_DOOR.contains(pos) && level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get())) {
+        if (EmberBackLayout.SMITH_DOOR.contains(pos) && level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.SEALED_GATE.get())
+                && !GroupGates.isOpen(level, Groups.keyOf(p), pos)) {
             if (!Forge.openDoor(level, p, event.getHand())) {
                 hint(p, EmberIds.LANG_EAST + "door_hint");
             }

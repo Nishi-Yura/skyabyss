@@ -52,7 +52,9 @@ public final class EmberHeartCommands {
                 .then(op("go").executes(EmberHeartCommands::go))
                 .then(op("start").executes(ctx -> {
                     ServerLevel back = back(ctx);
-                    boolean ok = EmberHeartBattle.startNow(back);
+                    boolean ok = ctx.getSource().getPlayer() != null
+                            ? EmberHeartBattle.startNow(back, jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.getSource().getPlayer()))
+                            : EmberHeartBattle.startNow(back);
                     ctx.getSource().sendSuccess(() -> Component.literal(ok ? "ember heart: started" : "ember heart: already active or failed"), true);
                     return ok ? 1 : 0;
                 }))
@@ -94,7 +96,7 @@ public final class EmberHeartCommands {
                 .then(op("reset").executes(ctx -> {
                     ServerLevel back = back(ctx);
                     if (EmberHeartBattle.isDefeated(back)) {
-                        EmberHeartBattle.reawaken(back);
+                        EmberHeartBattle.reawakenForTest(back);
                     } else {
                         EmberHeartBattle.abandon(back);
                     }
