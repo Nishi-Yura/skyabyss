@@ -1,0 +1,112 @@
+# 苔芋虫 (苔這い B 案) を昼に撮る: 正面・横・後ろ・真上・顔のアップ、歩きの途中、飛びかかりの途中、倒れる。
+# ./gradlew runShots -Pscript=tools/shots/moss_crawler_b.txt   (出力 docs/review/previews/moss_b_*.png へ手でコピー)
+world shots flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:moss_crawler 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["mc"]}
+hud off
+camera minecraft:overworld 0 -61.0 5.5 180 4
+waitchunks
+wait 40
+cmd skyabyss cinematic stop
+wait 40
+fov 40
+shot moss_b_front
+camera minecraft:overworld -5.5 -61.2 0 270 4
+wait 15
+shot moss_b_side
+camera minecraft:overworld 0 -61.0 -5.5 0 4
+wait 15
+shot moss_b_back
+camera minecraft:overworld 0 -57.1 0.2 180 90
+wait 15
+shot moss_b_top
+camera minecraft:overworld 0.6 -61.5 3.4 180 3
+wait 15
+shot moss_b_face
+camera minecraft:overworld 2.8 -61.5 3.6 150 10
+wait 15
+shot moss_b_three_quarter
+# 歩きの途中 (Motion で前へ押す。AI のない個体は止まるので、AI を入れた別の個体を使う)
+cmd kill @e[tag=mc]
+cmd summon skyabyss:moss_crawler -2.5 -60 1.5 {Rotation:[270f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["mw"]}
+camera minecraft:overworld 0 -61.0 5.5 180 4
+wait 5
+
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+shot moss_b_walk_1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+shot moss_b_walk_2
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd data merge entity @e[tag=mw,limit=1] {Motion:[0.12,0.0,0.0]}
+wait 1
+cmd kill @e[tag=mw]
+wait 60
+# 飛びかかりの途中
+cmd summon skyabyss:moss_crawler 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["mp"]}
+camera minecraft:overworld -5.5 -61.2 0 270 4
+wait 20
+cmd skyabyss dev anim @e[tag=mp] pounce
+wait 1
+shot moss_b_pounce_1
+wait 2
+shot moss_b_pounce_2
+wait 2
+shot moss_b_pounce_3
+wait 2
+shot moss_b_pounce_4
+wait 3
+shot moss_b_pounce_5
+wait 4
+shot moss_b_pounce_6
+wait 25
+cmd skyabyss dev anim @e[tag=mp] hurt
+wait 3
+shot moss_b_hurt
+wait 30
+cmd skyabyss dev anim @e[tag=mp] death
+wait 8
+shot moss_b_death_1
+wait 14
+shot moss_b_death_2
+camera minecraft:overworld 0 -57.1 0.2 180 90
+wait 5
+shot moss_b_death_top
+quit
+

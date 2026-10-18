@@ -49,8 +49,10 @@ public final class ModEntities {
             BoneSentinel::new, 0.8f, 2.4f);
     public static final DeferredHolder<EntityType<?>, EntityType<RibArcher>> RIB_ARCHER = monster("rib_archer",
             RibArcher::new, 0.7f, 2.2f);
-    public static final DeferredHolder<EntityType<?>, EntityType<MossCrawler>> MOSS_CRAWLER = monster("moss_crawler",
-            MossCrawler::new, 1.3f, 0.9f);
+    // 苔芋虫は長く低い (描画は 1.3 倍で、体の長さ 2.4 マス・幅 0.85・頭の高さ 0.8)。当たりは正方形の箱なので、体の幅より少し広く取る
+    public static final DeferredHolder<EntityType<?>, EntityType<MossCrawler>> MOSS_CRAWLER = ENTITIES.register("moss_crawler",
+            () -> EntityType.Builder.of(MossCrawler::new, MobCategory.MONSTER)
+                    .sized(1.2f, 0.9f).eyeHeight(0.5f).clientTrackingRange(8).build(SkyAbyss.MODID + ":moss_crawler"));
     public static final DeferredHolder<EntityType<?>, EntityType<WaterwayMaw>> WATERWAY_MAW = monster("waterway_maw",
             WaterwayMaw::new, 1.2f, 0.7f);
     public static final DeferredHolder<EntityType<?>, EntityType<WhaleboneCaptain>> WHALEBONE_CAPTAIN = ENTITIES.register("whalebone_captain",

@@ -2,6 +2,7 @@ package jp.revati.skyabyss.client.entity;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.entity.BoneSpike;
+import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.registry.ModEntities;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,7 +41,7 @@ public final class GuardRenderers {
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
         event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));
-        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), ctx -> geo(ctx, "moss_crawler", 1.7f));
+        event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), GuardRenderers::mossCrawler);
         event.registerEntityRenderer(ModEntities.WATERWAY_MAW.get(), ctx -> geo(ctx, "waterway_maw", 0.58f));
         event.registerEntityRenderer(ModEntities.WHALEBONE_CAPTAIN.get(), ctx -> geo(ctx, "whalebone_captain", 1.0f,
                 r -> r.addRenderLayer(GearLayer.item(r, "socket_main", captainPikeStack(), ItemDisplayContext.NONE, GuardRenderers::captainPike))));
@@ -51,6 +52,20 @@ public final class GuardRenderers {
                 return SPIKE;
             }
         });
+    }
+
+    // 苔芋虫: 倒れるときは横倒しにならず、death アニメーション (丸まる) で終える
+    private static GeoEntityRenderer<MossCrawler> mossCrawler(EntityRendererProvider.Context ctx) {
+        GeoEntityRenderer<MossCrawler> renderer = new GeoEntityRenderer<>(ctx,
+                new DefaultedEntityGeoModel<MossCrawler>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "moss_crawler"), true)) {
+            @Override
+            protected float getDeathMaxRotation(MossCrawler animatable) {
+                return 0f;
+            }
+        };
+        renderer.withScale(1.3f);
+        renderer.addRenderLayer(new AutoGlowingGeoLayer<>(renderer));
+        return renderer;
     }
 
     private static <T extends Entity & GeoAnimatable> GeoEntityRenderer<T> geo(EntityRendererProvider.Context ctx, String name, float scale) {
