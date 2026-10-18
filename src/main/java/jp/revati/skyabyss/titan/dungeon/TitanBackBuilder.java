@@ -84,7 +84,7 @@ public final class TitanBackBuilder {
     }
 
     // ---------------------------------------------------------------- 背の上: 広場から祠への踏み跡、道の灯り、錨石から垂れる鎖、尾の広場
-    // 背の上の景色 (苔の背、背骨の骨、石の門のアーチ、塔、崩れた壁、岩の板) はモデルのまま。ここでは道しるべだけを足す
+    // 背の上の景色 (岩の殻、背骨の骨、半ば埋まった石の門のアーチ、折れた柱、岩の板) はモデルのまま。ここでは道しるべだけを足す
     private static void buildSurface(BuildKit kit) {
         RandomSource random = kit.random;
         // 祠から広場までの踏み跡 (苔の上の石)。背骨 (x -3) の東に沿う
@@ -100,8 +100,8 @@ public final class TitanBackBuilder {
                 }
             }
         }
-        // 踏み跡の脇の灯りの柱 (石の門のアーチ z 68〜76 は避ける)
-        for (int z : new int[]{56, 84}) {
+        // 踏み跡の脇の灯りの柱 (石の門のアーチ z 48〜60 は避ける)
+        for (int z : new int[]{64, 84}) {
             int base = top(3, z) + 1;
             kit.set(3, base, z, BuildKit.POLISHED);
             kit.set(3, base + 1, z, BuildKit.POLISHED);

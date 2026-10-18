@@ -38,19 +38,19 @@ public final class TitanBackLayout {
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
     //  4: 案内の看板を減らした (試練の入口の一言と碑文だけ残す。古い看板が残らないよう建て直す)
     //  5: 楕円の丘を、岩鯨のモデルと同じ形のブロックの鯨にした (部屋は体の中のまま。到着は尾の付け根、祠は背の中ほど)
-    public static final int LAYOUT_VERSION = 5;
+    public static final int LAYOUT_VERSION = 6;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
     public static final int PLATFORM_Z = 100;
     public static final int SHRINE_Z = 39;
-    // 広場と祠のあいだの、背の石の門 (モデルのアーチ、z 68〜76)
-    public static final int RIDGE_Z = 72;
-    // モデルの錨石 (左のわき腹の留め具、x -35〜-31、y 78〜96、z 107〜110)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
-    public static final int ANCHOR_STONE_X = -34;
-    public static final int ANCHOR_CHAIN_X = -46;
-    public static final int ANCHOR_CHAIN_Y = 86;
-    public static final int ANCHOR_CHAIN_Z = 108;
+    // 広場と祠のあいだの、背の石の門 (モデルの半ば埋まったアーチ、z 48〜60)
+    public static final int RIDGE_Z = 53;
+    // モデルの錨石 (左のわき腹の留め具、x -38〜-27、y 83〜95、z 107〜113)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
+    public static final int ANCHOR_STONE_X = -38;
+    public static final int ANCHOR_CHAIN_X = -48;
+    public static final int ANCHOR_CHAIN_Y = 89;
+    public static final int ANCHOR_CHAIN_Z = 110;
     // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
     public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
 

@@ -1,22 +1,20 @@
-"""岩鯨の背 (titan_back) の島を、空を泳ぐ岩鯨のモデル (採用案 B) と同じ形・同じ色のブロックの鯨にする
-(02 の「巨神の形の背中（作り直し）」の章)。潮殻の tools/gen_tide_back_turtle.py と同じ方法。
+"""岩鯨の背 (titan_back) の島を、空を泳ぐ岩鯨のモデル (低ポリ案 C 「皮が岩になる鯨」の近景メッシュ) と同じ形・同じ色の
+ブロックの鯨にする (02 の 3.1 章)。潮殻の tools/gen_tide_back_turtle.py と同じ方法。
 
-使い方 (リポジトリ直下で): python tools/gen_titan_back_whale.py [--preview] [--fit]
-形の元: tools/install_stone_whale.py の build() (ゲームの geo と同じ 0.5 単位の格子。胸びれ・尾びれ・背の遺跡・
-        岩の板・藤壺・錨石まで同じ)。格子は Blockbench の向き (GeckoLib は X を反転して描く) なので、X を反転して置く
-        (頭は北 -Z、錨石はゲームと同じ左のわき腹 = 西 -X)。
+使い方 (リポジトリ直下で): python tools/gen_titan_back_whale.py [--preview] [--fit] [--nowrite]
+形の元: docs/review/lowpoly_roughs/lp_stone_whale/c/near_{mesh.json,atlas.png,glowmask.png}。
+        tools/lowpoly_whale_voxel.py が 0.5 単位のセルの格子 (部品 * 16 + 材料) にする (メッシュの座標は geo と同じ。+X がゲームの左)。
+        格子は X を反転して置く (頭は北 -Z、錨石は左のわき腹 = 西 -X)。材料の分け方 (皮・岩の殻・割れた岩・腹・苔) は
+        lowpoly_whale_voxel.classify (アトラスの色と骨と高さ)。ブロックは下の BLOCKS。
 出力: src/main/resources/data/skyabyss/titan_back/whale.bin (gzip。WhaleShape.java が読む。形式は潮殻の turtle.bin と同じ)
       --preview で docs/review/whale_back_roughs/whale_back_{top,side}.png (上と横から見た色の地図)
-      --fit で、体の中の部屋 (三つの試練・鼓動の間・宝物庫・心臓の間・水路) が殻の何ブロック内側にあるかを表にする
+      --fit で、体の中の部屋が殻の何ブロック内側にあるかを表にする (東の広間 e1 が 1 以上、肋骨の谷 wa が 3 ほど)
+      建て直したあとの図と案 C のメッシュとの並べ描きは tools/whale_back_c_views.py
 
-縮尺: 1 単位 = 1.4 ブロック (ゲームの岩鯨は 0.5 ブロック。その 2.8 倍)。全長 (頭の先から尾びれの先) 412 ブロック、体の幅 82。
-      試し済みの部屋 (幅 74、高さ 31) をそのまま体の中に入れられる、いちばん小さい縮尺 (02 の 10.1節の表)。
-      体の軸は x = -3 (モデルは東が少し太いので、西の谷 WA の殻を残すため)。環境変数 WS / WY / WX / WZ で縮尺と置き場所を試せる。
-高さ: 体の中心 (geo の y=40) を y 95 に置く。腹の下端は y 58、背の上は y 131 (雲の海は y 45)。geo の z 0 を z 24 に置く。
+縮尺: 1 単位 = 1.43 ブロック。体の軸 x = -2。環境変数 WS / WY / WX / WZ で縮尺と置き場所を試せる。
+高さ: 体の中心 (geo の y=40) を y 95 に置く。geo の z 0 を z 24 に置く。
 ブロックの決め方: ブロックに入る格子のセルの多数決。占める割合が 0.45 (細い部品は 0.3) 以上なら置く。
-      光る材料 (刻文・目) は少しでもあれば残す。材料はモデルのテクスチャの色に近いバニラのブロック (下の BLOCKS)。
-      背の上を向いた面は、モデルの苔の帯 (stone_whale_v2.paint) と同じ高さの割合で苔にする。
-      同じ材料の中の色の揺れは、ブロックの位置のハッシュで選ぶ (乱数なし)。
+      光る材料 (目) は少しでもあれば残す。同じ材料の中の色の揺れは、ブロックの位置のハッシュで選ぶ (乱数なし)。
 """
 import gzip
 import struct
@@ -29,14 +27,17 @@ from scipy import ndimage
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 sys.path.insert(0, str(ROOT / "tools/rough"))
-import install_stone_whale as I  # noqa: E402
+import lowpoly_whale_voxel as I  # noqa: E402
 
-V = I.V
+class V:  # 格子の決まり (lowpoly_whale_voxel と同じ)
+    CELL, OX, OY, OZ, YC = I.CELL, I.OX, I.OY, I.OZ, I.YC
+
+
 OUT = ROOT / "src/main/resources/data/skyabyss/titan_back/whale.bin"
 PREVIEW = ROOT / "docs/review/whale_back_roughs"
 
-S = float(__import__("os").environ.get("WS", "1.4"))             # 1 単位あたりのブロック (ゲームの岩鯨の 1.4 倍)
-CX = float(__import__("os").environ.get("WX", "-3"))            # Blockbench の x=0 (体の軸) を置く世界の x
+S = float(__import__("os").environ.get("WS", "1.43"))             # 1 単位あたりのブロック (ゲームの岩鯨の 1.4 倍)
+CX = float(__import__("os").environ.get("WX", "-2"))            # Blockbench の x=0 (体の軸) を置く世界の x
 YW = float(__import__("os").environ.get("WY", "95"))           # geo の y=YC (体の中心) を置く世界の y
 ZOFF = float(__import__("os").environ.get("WZ", "24"))         # geo の z=0 を置く世界の z
 INNER_DEPTH = 5     # これより深い体の中は、凝灰岩と深層岩 (部屋を掘ると壁は深層岩のレンガになる)
@@ -47,12 +48,13 @@ BODY_PARTS = {P["head"], P["jaw"], P["body"], P["tail"]}
 THIN = {P["fin_left"], P["fin_right"], P["fluke"], P["spine"], P["chain"]}
 GLOW = {M["glyph"], M["eye"], M["cyan"]}
 
-# 材料 -> [(ブロック, 重み)]。色はモデルの PAL に近いもの (tools/rough/block_colors.json の平均色で選んだ)
+# 材料 -> [(ブロック, 重み)]。色は低ポリ案 C のアトラスの色 (lowpoly_whale_voxel.classify の分類) に近いバニラ。
+#   stone = 青灰の皮 (風化した皮)、plate = 明るい茶の岩の殻、crust = 暗い割れた岩、belly = 腹、dark = 暗い皮・口
 BLOCKS = {
-    M["stone"]: [("polished_tuff", 3), ("cyan_terracotta", 3), ("tuff_bricks", 2), ("cobbled_deepslate", 1)],
-    M["belly"]: [("diorite", 3), ("calcite", 1), ("white_terracotta", 1)],
+    M["stone"]: [("tuff", 3), ("polished_tuff", 2), ("cobbled_deepslate", 2), ("cyan_terracotta", 1)],
+    M["belly"]: [("andesite", 3), ("diorite", 2), ("stone", 1)],
     M["moss"]: [("moss_block", 1)],
-    M["dark"]: [("blackstone", 1)],
+    M["dark"]: [("deepslate", 2), ("polished_deepslate", 1)],
     M["bone"]: [("bone_block", 1)],
     M["fin"]: [("cobbled_deepslate", 3), ("polished_deepslate", 2), ("deepslate_tiles", 1)],
     M["ruin"]: [("tuff", 3), ("stone_bricks", 2), ("cracked_stone_bricks", 1), ("mossy_stone_bricks", 1)],
@@ -60,12 +62,12 @@ BLOCKS = {
     M["eye"]: [("ochre_froglight", 1)],
     M["cyan"]: [("sea_lantern", 1)],
     M["iron"]: [("deepslate_tiles", 2), ("polished_deepslate", 1)],
-    M["plate"]: [("stone_bricks", 3), ("cracked_stone_bricks", 1), ("stone", 1)],
+    M["plate"]: [("packed_mud", 3), ("coarse_dirt", 1), ("mud_bricks", 2), ("granite", 1), ("dripstone_block", 2)],
     M["baleen"]: [("bone_block", 1)],
     M["brow"]: [("deepslate_tiles", 1)],
-    M["crust"]: [("andesite", 2), ("mossy_cobblestone", 1)],
+    M["crust"]: [("brown_terracotta", 3), ("gray_terracotta", 2), ("mud_bricks", 1), ("blackstone", 1), ("dripstone_block", 1)],
 }
-MOSS_BLOCKS = [("moss_block", 4), ("mossy_cobblestone", 1), ("green_terracotta", 1)]
+MOSS_BLOCKS = [("moss_block", 4), ("green_terracotta", 1)]
 INNER_BLOCKS = [("tuff", 3), ("deepslate", 1)]
 
 
@@ -83,18 +85,19 @@ def axis_map(n, origin, f):
 
 
 def model_grid():
-    """モデルの格子 (install_stone_whale.build() は遅いので、ソースが変わらなければ scratch のキャッシュを使う)"""
+    """低ポリ案 C の近景メッシュの体積化 (lowpoly_whale_voxel。数十秒かかるので scratch にキャッシュ)"""
     import hashlib
     import tempfile
     h = hashlib.sha1()
-    for f in (ROOT / "tools/install_stone_whale.py", ROOT / "tools/rough/stone_whale_v2.py"):
+    for f in (ROOT / "tools/lowpoly_whale_voxel.py", I.CDIR / "near_mesh.json", I.CDIR / "near_atlas.png",
+              I.CDIR / "near_glowmask.png"):
         h.update(f.read_bytes())
-    cache = Path(tempfile.gettempdir()) / ("stone_whale_grid_%s.npy" % h.hexdigest()[:12])
+    cache = Path(tempfile.gettempdir()) / ("stone_whale_c_grid_%s.npy" % h.hexdigest()[:12])
     if cache.exists():
         return np.load(cache)
-    Mdl, _, _, _ = I.build()
-    np.save(cache, Mdl.K)
-    return Mdl.K
+    K = I.voxelize()
+    np.save(cache, K)
+    return K
 
 
 def block_grid():
@@ -175,7 +178,7 @@ def to_blocks(G, org):
     above_air[:, :-1, :] = G[:, 1:, :] == 0
     above_air[:, -1, :] = True
     yu = V.YC + (wy + 0.5 - YW) / S
-    mp = np.clip((yu - (V.YC + 6)) / 10.0, 0, 1) * 0.6
+    mp = 0.0 * yu   # 案 C は苔をアトラスの色 (moss 材料) で持つ。塗り足さない
     stone = (mats == M["stone"]) & np.isin(keys // 16, list(BODY_PARTS)) & above_air[ii, jj, kk]
     hm = hash3(wx // 2, wy, wz // 2, 3)
     moss = stone & (hm < mp)
@@ -258,7 +261,10 @@ def preview(B, names, org):
     from PIL import Image
     col = json.load(open(ROOT / "tools/rough/block_colors.json"))
     extra = {"sea_lantern": (172, 200, 191), "ochre_froglight": (250, 220, 150), "bone_block": (229, 225, 207),
-             "moss_block": (89, 110, 45), "calcite": (223, 224, 220), "white_terracotta": (210, 178, 161)}
+             "moss_block": (89, 110, 45), "calcite": (223, 224, 220), "white_terracotta": (210, 178, 161),
+             "packed_mud": (142, 106, 79), "coarse_dirt": (119, 85, 59), "mud_bricks": (137, 104, 79), "granite": (149, 103, 85),
+             "dripstone_block": (134, 107, 92), "brown_terracotta": (77, 51, 36), "gray_terracotta": (57, 42, 35),
+             "green_terracotta": (76, 83, 42), "cyan_terracotta": (86, 91, 91)}
     pal = np.array([extra.get(n, col.get(n, (255, 0, 255)))[:3] if n != "air" else (0, 0, 0) for n in names], np.uint8)
     NX, NY, NZ = B.shape
     occ = B != 0
