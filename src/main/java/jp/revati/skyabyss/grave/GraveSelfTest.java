@@ -50,7 +50,33 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class GraveSelfTest {
     private static int platformIndex;
 
+    private static final int PLATFORMS = 12;
+
     private GraveSelfTest() {
+    }
+
+    // 台の位置 (台ごとに東へ 30 ずつ離す)
+    private static BlockPos platformCenter(MinecraftServer server, int index) {
+        BlockPos spawn = server.overworld().getSharedSpawnPos();
+        return new BlockPos(spawn.getX() + 60 + 30 * index, 150, spawn.getZ() + 60);
+    }
+
+    // 台のまわりの区画を読み込んでおく。散らばった品は動いている区画にしか現れず、区画が動くのは次の tick からなので、本体の段の前に別の段で行う
+    // (既定の世界では、ほかの検査が残した読み込みに助けられて通っていただけだった)
+    public static void load(MinecraftServer server) {
+        forceAround(server, true);
+    }
+
+    private static void forceAround(MinecraftServer server, boolean on) {
+        ServerLevel level = server.overworld();
+        for (int i = 0; i < PLATFORMS; i++) {
+            BlockPos c = platformCenter(server, i);
+            for (int cx = (c.getX() - 12) >> 4; cx <= (c.getX() + 12) >> 4; cx++) {
+                for (int cz = (c.getZ() - 12) >> 4; cz <= (c.getZ() + 12) >> 4; cz++) {
+                    level.setChunkForced(cx, cz, on);
+                }
+            }
+        }
     }
 
     public static void runSelfTest(MinecraftServer server) {
@@ -66,6 +92,7 @@ public final class GraveSelfTest {
             SkyAbyss.LOGGER.error("grave selftest crashed", e);
             failures.add("crashed: " + e);
         } finally {
+            forceAround(server, false);
             GameRules rules = server.getGameRules();
             rules.getRule(DeathRules.MODE).set(saved[0], server);
             rules.getRule(DeathRules.EXPIRE).set(saved[1], server);
@@ -106,8 +133,7 @@ public final class GraveSelfTest {
 
     // 平らな石の台 (15x15、床は y=149) と、その上の空き。台ごとに離す
     private static BlockPos platform(ServerLevel level) {
-        BlockPos spawn = level.getSharedSpawnPos();
-        BlockPos c = new BlockPos(spawn.getX() + 60 + 30 * (platformIndex++), 150, spawn.getZ() + 60);
+        BlockPos c = platformCenter(level.getServer(), platformIndex++);
         for (int dx = -9; dx <= 9; dx++) {
             for (int dz = -9; dz <= 9; dz++) {
                 for (int y = 140; y <= 158; y++) {
