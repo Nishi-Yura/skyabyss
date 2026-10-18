@@ -51,6 +51,8 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
     private final String socketBone;
     private final Function<T, String> animation;
     private final GearRenderer gear;
+    // false を返す間は何も描かない (低ポリへの切り替えで、元の geo の盾を止めるのに使う)
+    private java.util.function.BooleanSupplier active = () -> true;
     // モブ一体ごとに武器のアニメーションの状態を持つ (モブが消えれば一緒に消える)
     private final Map<Entity, GearAnimatable> states = new WeakHashMap<>();
 
@@ -61,10 +63,15 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
         this.gear = new GearRenderer(gearName);
     }
 
+    public GearLayer<T> activeWhen(java.util.function.BooleanSupplier active) {
+        this.active = active;
+        return this;
+    }
+
     @Override
     public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
                               VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        if (!bone.getName().equals(socketBone)) {
+        if (!active.getAsBoolean() || !bone.getName().equals(socketBone)) {
             return;
         }
         GearAnimatable state = states.computeIfAbsent(animatable, e -> new GearAnimatable(gear.name));
@@ -74,6 +81,13 @@ public class GearLayer<T extends Entity & GeoAnimatable> extends GeoRenderLayer<
         RenderUtil.translateToPivotPoint(poseStack, bone);
         gear.render(poseStack, state, bufferSource, null, null, packedLight, partialTick);
         poseStack.popPose();
+    }
+
+    // ---------------------------------------------------------------- 低ポリのメッシュを描く
+
+    // lowpoly/<meshName>.json (socket: true のメッシュ) を受け口に描く。使い方は docs/design/15_high_poly.md 9 章
+    public static <T extends Entity & GeoAnimatable> GeoRenderLayer<T> lowPoly(GeoRenderer<T> renderer, String socketBone, String meshName) {
+        return new jp.revati.skyabyss.client.lowpoly.LowPolyGearLayer<>(renderer, socketBone, meshName);
     }
 
     // ---------------------------------------------------------------- アイテムを描く

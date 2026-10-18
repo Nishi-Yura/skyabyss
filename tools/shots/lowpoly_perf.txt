@@ -1,0 +1,117 @@
+# Low-poly vs cube render cost, bone_sentinel crowd (docs/design/15_high_poly.md section 9). PERF lines in shots.log.
+# ./gradlew runShots -Pscript=tools/shots/lowpoly_perf.txt
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon skyabyss:bone_sentinel -9 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -59 13 180 8
+waitchunks
+wait 100
+shot lowpoly_crowd20
+lowpoly on
+wait 40
+perf 300 crowd20_on_0
+lowpoly off
+wait 40
+perf 300 crowd20_off_0
+lowpoly on
+wait 40
+perf 300 crowd20_on_1
+lowpoly off
+wait 40
+perf 300 crowd20_off_1
+lowpoly on
+wait 40
+perf 300 crowd20_on_2
+lowpoly off
+wait 40
+perf 300 crowd20_off_2
+lowpoly on
+wait 40
+shot lowpoly_crowd20_after
+cmd kill @e[type=skyabyss:bone_sentinel]
+cmd summon skyabyss:bone_sentinel -9 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -6 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 -3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -9 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -3 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel -1 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 1 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 3 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bone_sentinel 7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+wait 100
+shot lowpoly_crowd36
+lowpoly on
+wait 40
+perf 300 crowd36_on_0
+lowpoly off
+wait 40
+perf 300 crowd36_off_0
+lowpoly on
+wait 40
+perf 300 crowd36_on_1
+lowpoly off
+wait 40
+perf 300 crowd36_off_1
+lowpoly on
+wait 40
+perf 300 crowd36_on_2
+lowpoly off
+wait 40
+perf 300 crowd36_off_2
+lowpoly on
+quit

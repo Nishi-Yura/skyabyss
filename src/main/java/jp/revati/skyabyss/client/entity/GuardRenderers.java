@@ -1,6 +1,8 @@
 package jp.revati.skyabyss.client.entity;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.entity.BoneSpike;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.registry.ModEntities;
@@ -37,8 +39,13 @@ public final class GuardRenderers {
 
     @SubscribeEvent
     static void register(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.BoneSentinel>geo(ctx, "bone_sentinel", 1.0f, true,
-                r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle"))));
+        // 骨の番兵は低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo と GearLayer に戻る
+        event.registerEntityRenderer(ModEntities.BONE_SENTINEL.get(), ctx -> {
+            LowPolyGeoRenderer<jp.revati.skyabyss.entity.BoneSentinel> r = new LowPolyGeoRenderer<>(ctx, "bone_sentinel", 1.0f);
+            r.addRenderLayer(new GearLayer<>(r, "socket_off", "bone_sentinel_shield", mob -> mob.isBlockingAnim() ? "block_impact" : "idle").activeWhen(() -> !LowPoly.enabled));
+            r.addRenderLayer(GearLayer.lowPoly(r, "socket_off", "bone_sentinel_shield"));
+            return r;
+        });
         event.registerEntityRenderer(ModEntities.RIB_ARCHER.get(), ctx -> GuardRenderers.<jp.revati.skyabyss.entity.RibArcher>geo(ctx, "rib_archer", 1.0f,
                 r -> r.addRenderLayer(new GearLayer<>(r, "socket_off", "rib_archer_bow", mob -> mob.isDrawingBow() ? "draw" : "idle"))));
         event.registerEntityRenderer(ModEntities.MOSS_CRAWLER.get(), GuardRenderers::mossCrawler);

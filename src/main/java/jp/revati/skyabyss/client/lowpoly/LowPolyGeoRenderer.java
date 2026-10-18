@@ -1,0 +1,122 @@
+package jp.revati.skyabyss.client.lowpoly;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nullable;
+import jp.revati.skyabyss.SkyAbyss;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import org.joml.Matrix4f;
+import software.bernie.geckolib.animatable.GeoAnimatable;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.model.DefaultedEntityGeoModel;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.GeoRenderer;
+import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
+
+// GeckoLib の骨とアニメーションをそのまま使い、各骨の cube の代わりに低ポリメッシュを流す GeoEntityRenderer。
+// geo は cube の無い骨だけの版 (geo/entity/<name>_lowpoly.geo.json、tools/install_lowpoly.py が書く)。
+// 骨のポーズは GeckoLib がかけ終えた poseStack をそのまま使うので、向き・アニメ・被弾の赤・死に方・明るさは cube のモデルと同じ。
+// LowPoly.enabled が false のときは元の geo / テクスチャに戻り、普通の GeckoLib の描画になる。
+public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEntityRenderer<T> {
+    private static final ResourceLocation DEBUG_TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
+    private final String meshName;
+    private MultiBufferSource currentSource;
+
+    public LowPolyGeoRenderer(EntityRendererProvider.Context ctx, String name, float scale) {
+        super(ctx, new Model<T>(name));
+        this.meshName = name;
+        withScale(scale);
+        // 光る所があるときだけ (発光マスクの画像があるときだけ) 光らせる。LowPoly.enabled の切り替えにも付いていく
+        addRenderLayer(new GlowLayer<>(this));
+    }
+
+    @Override
+    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel model, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer,
+                          boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (bufferSource != null) {
+            currentSource = bufferSource;
+        }
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
+    }
+
+    @Override
+    public void renderCubesOfBone(PoseStack poseStack, GeoBone bone, VertexConsumer buffer, int packedLight, int packedOverlay, int colour) {
+        LowPolyMesh mesh = LowPoly.enabled ? LowPolyMeshes.get(meshName) : null;
+        LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
+        if (meshBone == null) {
+            super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour);
+            return;
+        }
+        if (bone.isHidden()) {
+            return;
+        }
+        if (LowPoly.debug && currentSource != null) {
+            // メッシュを本来のテクスチャで先に描き、そのあと GeckoLib の箱 (半透明の赤) を重ねる
+            LowPoly.drawBone(poseStack, currentSource.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), meshBone, packedLight, packedOverlay, colour);
+            // バッファを切り替えると渡された buffer は閉じるので、箱の側は取り直す
+            super.renderCubesOfBone(poseStack, bone, currentSource.getBuffer(RenderType.entityTranslucent(DEBUG_TEXTURE)), packedLight, packedOverlay, colour);
+            return;
+        }
+        LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour);
+    }
+
+    @Override
+    public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+        if (LowPoly.enabled && LowPoly.debug && !animatable.isInvisible()) {
+            return RenderType.entityTranslucent(DEBUG_TEXTURE);
+        }
+        return super.getRenderType(animatable, texture, bufferSource, partialTick);
+    }
+
+    // 低ポリのときは geo/entity/<name>_lowpoly(.debug).geo.json と textures/lowpoly/<name>.png、そうでなければ元の素材
+    private static final class Model<T extends GeoAnimatable> extends DefaultedEntityGeoModel<T> {
+        private final ResourceLocation lowGeo;
+        private final ResourceLocation debugGeo;
+        private final ResourceLocation atlas;
+
+        Model(String name) {
+            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), true);
+            this.lowGeo = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/" + name + "_lowpoly.geo.json");
+            this.debugGeo = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/" + name + "_lowpoly_debug.geo.json");
+            this.atlas = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + name + ".png");
+        }
+
+        @Override
+        public ResourceLocation getModelResource(T animatable) {
+            return LowPoly.enabled ? (LowPoly.debug ? debugGeo : lowGeo) : super.getModelResource(animatable);
+        }
+
+        @Override
+        public ResourceLocation getTextureResource(T animatable) {
+            return LowPoly.enabled ? (LowPoly.debug ? DEBUG_TEXTURE : atlas) : super.getTextureResource(animatable);
+        }
+    }
+
+    // 発光マスク (<テクスチャ>_glowmask.png) があるテクスチャのときだけ AutoGlowingGeoLayer の描画をする
+    private static final class GlowLayer<T extends Entity & GeoAnimatable> extends AutoGlowingGeoLayer<T> {
+        private static final Map<ResourceLocation, Boolean> HAS_MASK = new HashMap<>();
+
+        GlowLayer(GeoRenderer<T> renderer) {
+            super(renderer);
+        }
+
+        @Override
+        public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType, MultiBufferSource bufferSource,
+                           @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+            ResourceLocation tex = getTextureResource(animatable);
+            boolean has = HAS_MASK.computeIfAbsent(tex, t -> Minecraft.getInstance().getResourceManager().getResource(
+                    t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p)).isPresent());
+            if (has) {
+                super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+            }
+        }
+    }
+}

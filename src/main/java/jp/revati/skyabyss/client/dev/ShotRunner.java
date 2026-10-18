@@ -366,6 +366,16 @@ public final class ShotRunner {
                 }
                 return false;
             }
+            case "lowpoly" -> {
+                // lowpoly on|off|debug|nodebug : 低ポリ描画の切り替え (off = 元のキューブ。debug = 骨の箱を半透明の赤で重ねる)
+                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
+                    case "on" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = true;
+                    case "off" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = false;
+                    case "debug" -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = true;
+                    default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
+                }
+                return true;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
