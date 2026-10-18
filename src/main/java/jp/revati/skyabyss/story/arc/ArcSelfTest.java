@@ -354,6 +354,17 @@ public final class ArcSelfTest {
                 check(f, ChapterSky.stage(c).equals(ChapterSky.Stage.NONE), "no sky stage should be registered for a chapter without content: " + c);
             }
         }
+        // 一章〜四章は順に濃くなり、どれも「ごくわずか」(月 0.1 未満、色味 0.15 未満)。一章の段は story/ch1/Beats が登録する
+        float prevBias = 0f;
+        float prevTint = 0f;
+        for (Chapters c : List.of(Chapters.WHALE, Chapters.TIDE, Chapters.STORM, Chapters.EMBER)) {
+            ChapterSky.Stage st = ChapterSky.stage(c);
+            check(f, !st.equals(ChapterSky.Stage.NONE), "chapter sky stage not registered: " + c);
+            check(f, st.moonBias() > prevBias && st.tintStrength() > prevTint && st.moonBias() < 0.1f && st.tintStrength() < 0.15f,
+                    "sky stage of " + c + " should be subtle and grow with the chapter: " + st);
+            prevBias = st.moonBias();
+            prevTint = st.tintStrength();
+        }
         ChapterSky.Stage realTide = ChapterSky.stage(Chapters.TIDE);
         ChapterSky.setStage(Chapters.TIDE, new ChapterSky.Stage(0.1f, 0x8FB8C8, 0.05f));
         try {

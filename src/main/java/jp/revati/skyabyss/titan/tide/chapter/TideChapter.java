@@ -244,7 +244,7 @@ public final class TideChapter {
         static void onCommonSetup(FMLCommonSetupEvent event) {
             event.enqueueWork(() -> {
                 registerSites();
-                // 空の段は「ごくわずか」: 月が少し近く、空に青緑が薄く (一章の段よりさらに控えめ)
+                // 空の段は「ごくわずか」: 月が少し近く、空に青緑が薄く (一章 0.01/0.03 → 二章 0.02/0.05 → 三章 → 四章と順に濃くなる)
                 ChapterSky.setStage(Chapters.TIDE, new ChapterSky.Stage(0.02f, 0x4A7C8C, 0.05f));
             });
         }

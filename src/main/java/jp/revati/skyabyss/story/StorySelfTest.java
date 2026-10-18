@@ -15,6 +15,11 @@ import jp.revati.skyabyss.npc.DialogueService;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcEntity;
 import jp.revati.skyabyss.npc.NpcSetup;
+import jp.revati.skyabyss.opening.OpeningDirector;
+import jp.revati.skyabyss.story.arc.ArcData;
+import jp.revati.skyabyss.story.arc.Beat;
+import jp.revati.skyabyss.story.arc.ChapterCards;
+import jp.revati.skyabyss.story.arc.Foreshadow;
 import jp.revati.skyabyss.progress.ProgressData;
 import jp.revati.skyabyss.progress.ProgressRules;
 import jp.revati.skyabyss.progress.Progression;
@@ -71,6 +76,7 @@ public final class StorySelfTest {
             rules.getRule(Progression.STORY_GATE).set(true, server);
             order(server, failures, notes);
             mainQuests(server, level, spawned, failures, notes);
+            migration(server, level, failures, notes);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
             SkyAbyss.LOGGER.error("SELFTEST story exception", e);
@@ -86,6 +92,59 @@ public final class StorySelfTest {
             SkyAbyss.LOGGER.info("SELFTEST story PASSED (4 titans in order, boarding, level caps, sky key, main quests to the key, {} checks)", notes.size());
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST story FAILED: {}", f));
+        }
+    }
+
+    // ---------------------------------------------------------------- 既存のワールドの移行 (docs/review/chapter_per_titan_plan.md 2.3)
+    // 段階 2 まで進んだ古いセーブ (記録は段階だけ。章の記録・拍子の記録は空) を読み込んだ人:
+    //   章が三章、すでに遊んでいた人として題字の札は出ず、前の章の予兆は出ず、今の章 (三章) の拍だけが起きうる
+    private static void migration(MinecraftServer server, ServerLevel level, List<String> f, List<String> notes) {
+        ProgressData data = ProgressData.get(server);
+        FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skyabyss_story_migration".getBytes()), "[migration]"));
+        ArcData arc = ArcData.of(p);
+        arc.reset();
+        Lore.reset(p);
+        OpeningDirector.resetAsLoadedSave(p);
+        data.markPersonal(p.getUUID(), Titans.STONE_WHALE);
+        data.markPersonal(p.getUUID(), Titans.TIDE_SHELL);
+        try {
+            check(Chapters.of(p) == Chapters.STORM, "migration: a save at stage 2 should be chapter 3: " + Chapters.of(p), f);
+            // 見回りが一度走ると「すでに遊んでいた人」になる (記録が伝承・クエストになくても、段階が先に進んでいる)
+            OpeningDirector.run(level, p);
+            check(OpeningDirector.state(p).legacy(), "migration: a stage-2 save should be treated as a player who already played", f);
+            check(Chapters.of(p) == Chapters.STORM, "migration: the chapter changed after the opening check: " + Chapters.of(p), f);
+            // 題字: すでに遊んでいた人には札を出さず、今の章までを出した扱いにする
+            check(!ChapterCards.tick(p, Chapters.STORM, true, 1000), "migration: a legacy player was shown a chapter card", f);
+            for (Chapters c : Chapters.values()) {
+                check(arc.titleShown(c) == (c.number() <= Chapters.STORM.number()), "migration: legacy title flag wrong for " + c + ": " + arc.titleShown(c), f);
+            }
+            // 予兆: 今の章の拍だけ。何度か時刻を変えて呼んでも、前の章 (一・二章) の拍は起きず記録もされない
+            level.setDayTime(6000);
+            long t = 500_000;
+            for (int i = 0; i < 12; i++) {
+                long day = (i % 3 == 0) ? 6000 : (i % 3 == 1) ? 12000 : 18000;
+                Beat b = Foreshadow.fireForCurrentChapter(p, t, day);
+                check(b == null || b.chapter() == Chapters.STORM, "migration: a stage-2 player got a beat of " + (b == null ? null : b.chapter()), f);
+                t += 20_000;
+            }
+            for (Chapters past : List.of(Chapters.WHALE, Chapters.TIDE)) {
+                check(Foreshadow.count(p, past) == 0, "migration: past chapter " + past + " beats were recorded", f);
+            }
+            check(Foreshadow.count(p, Chapters.EMBER) == 0, "migration: a later chapter's beats were recorded", f);
+            // 題字 (すでに遊んでいた人ではない、先の章で始めた人): 前の章は出さず、今の章だけを一度出す
+            arc.reset();
+            check(!ChapterCards.tick(p, Chapters.STORM, false, 2000), "migration: the title card came out without the delay", f);
+            check(arc.titleShown(Chapters.WHALE) && arc.titleShown(Chapters.TIDE) && !arc.titleShown(Chapters.STORM),
+                    "migration: past chapter titles should be skipped and the current one waits", f);
+            check(ChapterCards.tick(p, Chapters.STORM, false, 2000 + ChapterCards.TITLE_DELAY), "migration: the current chapter's title card was not shown", f);
+            check(!ChapterCards.tick(p, Chapters.STORM, false, 3000 + ChapterCards.TITLE_DELAY), "migration: the title card was shown twice", f);
+            notes.add("migration: a stage-2 save is chapter 3, counts as an old player (no title card), gets no beats of chapters 1-2, and a non-legacy late starter gets only chapter 3's title");
+        } finally {
+            data.clearPersonal(p.getUUID(), Titans.TIDE_SHELL);
+            data.clearPersonal(p.getUUID(), Titans.STONE_WHALE);
+            arc.reset();
+            Lore.reset(p);
+            OpeningDirector.reset(p);
         }
     }
 

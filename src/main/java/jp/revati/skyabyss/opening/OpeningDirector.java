@@ -172,6 +172,12 @@ public final class OpeningDirector {
         lastPassEnd = -1;
     }
 
+    // 自己テスト用: 古いセーブを読み込んだ直後の人にする (拍子の記録は空、「コマンドで消した直後」ではない)
+    public static void resetAsLoadedSave(ServerPlayer player) {
+        reset(player);
+        state(player).fresh = false;
+    }
+
     // 一人の見回り (テストからも呼べる)
     public static void run(ServerLevel level, ServerPlayer player) {
         OpeningState st = state(player);
@@ -263,7 +269,9 @@ public final class OpeningDirector {
         boolean passEnded = lastPassEnd >= 0 && st.awakeAt >= 0 && lastPassEnd >= st.awakeAt && now >= lastPassEnd
                 && now - lastPassEnd <= OpeningLogic.PASS_END_WINDOW;
         boolean legacy = !st.fresh && (!lore.unlocked().isEmpty() || lore.bookGiven() || !NpcBonds.of(player).bonds().isEmpty()
-                || !QuestLog.of(player).quests().isEmpty());
+                || !QuestLog.of(player).quests().isEmpty()
+                // 巨神をすでに止めた人 (記録が消えていても、序盤は終えている。章の移行: chapter_per_titan_plan 2.3)
+                || jp.revati.skyabyss.progress.Progression.stage(player) > 0);
         return new Facts(legacy, Lore.hasBook(player), campBuilt, notebook, campDist, shelterDist, footNear, slabNear,
                 OpeningBeats.metStoryteller(player), metIsana(player), lore.has("prologue/camp"), lore.has("prologue/footprints"),
                 lore.has("prologue/shadow"), lore.has("prologue/bone_hill"), lore.has("prologue/the_book_margin"),
