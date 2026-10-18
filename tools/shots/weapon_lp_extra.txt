@@ -1,0 +1,519 @@
+# 低ポリ武器の左利き・輝き・他の生き物の弓の引き (tools/gen_weapon_extra_shots.py が作る)
+world shots flat
+size 1280 720
+timeout 2400
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+wait 20
+cmd setblock 0 -59 3 minecraft:stone
+cmd setblock 3 -59 3 minecraft:stone
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_whalebone_greatsword_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_whalebone_greatsword_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_whalebone_greatsword_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_captain_pike_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_captain_pike_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_captain_pike_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_thunder_wing_bow_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_thunder_wing_bow_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_thunder_wing_bow_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_coral_shield_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_coral_shield_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_coral_shield_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:raiju_claw
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_raiju_claw_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_raiju_claw_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_raiju_claw_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_ember_war_axe_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_ember_war_axe_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_ember_war_axe_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:warden_glaive
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_warden_glaive_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_warden_glaive_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_warden_glaive_tp34_r
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_smith_hammer_fp_r
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_smith_hammer_tp_r
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_smith_hammer_tp34_r
+mainhand left
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_whalebone_greatsword_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_whalebone_greatsword_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_whalebone_greatsword_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_captain_pike_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_captain_pike_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_captain_pike_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_thunder_wing_bow_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_thunder_wing_bow_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_thunder_wing_bow_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_coral_shield_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_coral_shield_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_coral_shield_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:raiju_claw
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_raiju_claw_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_raiju_claw_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_raiju_claw_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_war_axe
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_ember_war_axe_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_ember_war_axe_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_ember_war_axe_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:warden_glaive
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_warden_glaive_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_warden_glaive_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_warden_glaive_tp34_l
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+perspective first
+bodyyaw 0
+hud on
+wait 10
+chat clear
+shot left_smith_hammer_fp_l
+perspective front
+bodyyaw 0
+hud off
+wait 10
+chat clear
+shot left_smith_hammer_tp_l
+perspective front
+bodyyaw 80
+hud off
+wait 10
+chat clear
+shot left_smith_hammer_tp34_l
+mainhand right
+bodyyaw 0
+mainhand left
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+perspective first
+hud on
+wait 10
+use
+wait 24
+shot leftdraw_fp_1
+wait 14
+shot leftdraw_fp_2
+stopuse
+wait 20
+perspective front
+hud off
+wait 10
+use
+wait 24
+shot leftdraw_tp_1
+wait 14
+shot leftdraw_tp_2
+stopuse
+wait 20
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword[minecraft:enchantments={levels:{"minecraft:unbreaking":1}}]
+perspective first
+hud on
+wait 10
+chat clear
+shot foil_whalebone_greatsword_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot foil_whalebone_greatsword_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+hud on
+wait 10
+chat clear
+shot nofoil_whalebone_greatsword_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot nofoil_whalebone_greatsword_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow[minecraft:enchantments={levels:{"minecraft:unbreaking":1}}]
+perspective first
+hud on
+wait 10
+chat clear
+shot foil_thunder_wing_bow_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot foil_thunder_wing_bow_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+perspective first
+hud on
+wait 10
+chat clear
+shot nofoil_thunder_wing_bow_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot nofoil_thunder_wing_bow_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield[minecraft:enchantments={levels:{"minecraft:unbreaking":1}}]
+perspective first
+hud on
+wait 10
+chat clear
+shot foil_coral_shield_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot foil_coral_shield_tp
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+perspective first
+hud on
+wait 10
+chat clear
+shot nofoil_coral_shield_fp
+perspective front
+hud off
+wait 10
+chat clear
+shot nofoil_coral_shield_tp
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd kill @e[type=item]
+cmd kill @e[type=item_frame]
+cmd summon item -1 -59 4 {Item:{id:"skyabyss:whalebone_greatsword",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 3.0 -59 4 {Facing:3b,Item:{id:"skyabyss:whalebone_greatsword",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},Invulnerable:1b}
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:thunder_wing_bow",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 4.0 -59 4 {Facing:3b,Item:{id:"skyabyss:thunder_wing_bow",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},Invulnerable:1b}
+cmd summon item 1 -59 4 {Item:{id:"skyabyss:coral_shield",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},PickupDelay:32767,Age:-32768}
+cmd summon item_frame 5.0 -59 4 {Facing:3b,Item:{id:"skyabyss:coral_shield",count:1,components:{"minecraft:enchantments":{levels:{"minecraft:unbreaking":1}}}},Invulnerable:1b}
+perspective first
+hud off
+camera 1.5 -60 8 180 12
+wait 20
+chat clear
+shot foil_world
+cmd kill @e[type=item]
+cmd kill @e[type=item_frame]
+cmd gamemode survival
+cmd effect give @s minecraft:resistance 999 4 true
+cmd effect give @s minecraft:instant_health 1 10 true
+cmd summon skeleton 0 -60 -6 {PersistenceRequired:1b,attributes:[{id:"minecraft:generic.movement_speed",base:0}],HandItems:[{id:"skyabyss:thunder_wing_bow",count:1},{}],ArmorItems:[{},{},{},{id:"minecraft:iron_helmet",count:1}],HandDropChances:[0f,0f],ArmorDropChances:[0f,0f,0f,0f]}
+camera 0 -60 0 180 0
+perspective first
+hud off
+wait 2
+shot skel_00
+wait 2
+shot skel_01
+wait 2
+shot skel_02
+wait 2
+shot skel_03
+wait 2
+shot skel_04
+wait 2
+shot skel_05
+wait 2
+shot skel_06
+wait 2
+shot skel_07
+wait 2
+shot skel_08
+wait 2
+shot skel_09
+wait 2
+shot skel_10
+wait 2
+shot skel_11
+wait 2
+shot skel_12
+wait 2
+shot skel_13
+wait 2
+shot skel_14
+wait 2
+shot skel_15
+wait 2
+shot skel_16
+wait 2
+shot skel_17
+wait 2
+shot skel_18
+wait 2
+shot skel_19
+wait 2
+shot skel_20
+wait 2
+shot skel_21
+wait 2
+shot skel_22
+wait 2
+shot skel_23
+wait 2
+shot skel_24
+wait 2
+shot skel_25
+wait 2
+shot skel_26
+wait 2
+shot skel_27
+wait 2
+shot skel_28
+wait 2
+shot skel_29
+wait 2
+shot skel_30
+wait 2
+shot skel_31
+wait 2
+shot skel_32
+wait 2
+shot skel_33
+wait 2
+shot skel_34
+wait 2
+shot skel_35
+wait 2
+shot skel_36
+wait 2
+shot skel_37
+wait 2
+shot skel_38
+wait 2
+shot skel_39
+cmd kill @e[type=skeleton]
+quit

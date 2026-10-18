@@ -7,8 +7,11 @@ cmd time set noon
 cmd weather clear
 cmd gamemode creative
 camera 0 -60 8 180 0
+waitchunks
 hud on
 wait 350
+cmd skyabyss cinematic stop
+wait 20
 cmd setblock 0 -59 3 minecraft:stone
 cmd setblock 3 -59 3 minecraft:stone
 weapontier common

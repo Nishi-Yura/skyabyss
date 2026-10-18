@@ -7,6 +7,8 @@ from common import motif, gem, band, back_sig, halo
 from style_b import cape
 
 NAME = "C 骨組み (frame)"
+# 伝説の三角形を 1,100 以下に収める 2 巨神: 背の環を軽くし、背の弧・羽の 3 組目 (レアより増える分) をやめる
+LEAN = ("whale", "thunder")
 FR = dict(whale="sec", tide="acc", thunder="acc", ember="sec")
 
 
@@ -67,7 +69,7 @@ def chest(T, rar):
     f += bx(B, "main", (0, 19.0, 3.2), (2.0, 10.0, 1.0), taper=(0.7, 1.0), skip=("b", "-z"))
     if T in ("whale", "tide"):
         for s in (-1, 1):
-            for k in range(2 if rar != "legend" else 3):
+            for k in range(2 if (rar != "legend" or T in LEAN) else 3):
                 y = 22.6 - 3.4 * k
                 pts = [(s * 0.9, y, 3.3), (s * 2.6, y + 0.8, 4.9), (s * 5.0, y + 1.0, 5.5), (s * 6.6, y - 1.0, 5.0)]
                 f += arc(B, fm, pts, 0.62)
@@ -76,9 +78,9 @@ def chest(T, rar):
         if T == "whale":
             f += motif(T, B, (0, 23.4, 3.6), (0, 0.5, 1), 4.0, 1.8, bend=(0, -0.6, 1.0))
     else:
-        f += back_sig(T, B, 1.0, nf=2 if rar != 'legend' else 3)
+        f += back_sig(T, B, 1.0, nf=2 if (rar != 'legend' or T in LEAN) else 3)
     if rar == "legend":   # 伝説: 背の環と、背の長い布 (祭具の帯)
-        f += halo(T, B, fm)
+        f += halo(T, B, fm, lean=T in LEAN)
         f += cape(T, B, "cloth", -2.2, 2.2, 23.2, 12.6, 3.0, 0.8, 2, flare=0.5)
     out = {B: f}
     for s in (-1, 1):
