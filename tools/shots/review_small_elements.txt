@@ -1,0 +1,43 @@
+# 章の小さな仕掛けの見た目 (レビュー用パック)。歌石 (song_stone)・風見鶏の塔 (storm_vane)・旅の目印 (titan_waymark)・潮見の貝 (tide_watching_shell) を、平らな世界に直接置いて撮る。
+# 本番の章の拠点 (ChapterSites) の配置ではなく、置き物として並べたもの。
+# ./gradlew runShots -Pscript=tools/shots/review_small_elements.txt -PshotsName=<新しい名前>
+world review_small flat
+size 1280 720
+timeout 600
+render 12
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+cmd fill -30 -61 -20 30 -61 20 minecraft:grass_block
+cmd fill -30 -60 -20 30 -60 20 minecraft:air
+waitchunks
+wait 20
+
+cmd setblock -8 -60 0 skyabyss:song_stone
+cmd setblock -4 -60 0 skyabyss:song_stone
+cmd setblock 0 -60 0 skyabyss:song_stone
+cmd setblock 4 -60 0 skyabyss:song_stone
+cmd setblock 8 -60 0 skyabyss:song_stone
+# 風見鶏の塔 (storm_vane) は置けるブロックではない (章の拠点の型)。代わりに避雷の柱の根元を置き、風見鶏の品を渡す
+cmd setblock -14 -60 8 skyabyss:storm_rod
+cmd give @p skyabyss:weathercock
+cmd setblock 14 -60 8 skyabyss:titan_waymark
+cmd setblock -20 -60 -6 skyabyss:titan_waymark
+cmd give @p skyabyss:tide_watching_shell
+cmd gamemode spectator
+camera minecraft:overworld 0 -57 -9 0 -8
+wait 30
+shot small_song_stones_row
+camera minecraft:overworld -5 -58 -4 15 -6
+wait 20
+shot small_song_stone_close
+camera minecraft:overworld -12 -57.5 5 300 -8
+wait 20
+shot small_storm_vane
+camera minecraft:overworld 12 -57.5 5 240 -8
+wait 20
+shot small_travel_waymark
+echo small elements done
+quit
