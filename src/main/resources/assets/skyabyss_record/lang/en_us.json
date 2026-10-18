@@ -130,7 +130,7 @@
   "skyabyss_record.d.piece_owned": "You have held this.",
   "skyabyss_record.d.piece_missing": "Not obtained yet.",
   "skyabyss_record.d.piece_chance": "Heart drop chance: %s%% (with your current titan memory)",
-  "skyabyss_record.d.travel_unlocked": "Titans whose heart you stilled come when you blow their whistle.",
+  "skyabyss_record.d.travel_unlocked": "Titans whose heart you stilled come when you blow their whistle. For travel between places on the surface, not for entering the back.",
   "skyabyss_record.d.waymark": "- %s (%s, %s, %s)",
   "skyabyss_record.d.waymark_unnamed": "Unnamed waymark",
   "skyabyss_record.d.waymarks_none": "No waymarks yet.",

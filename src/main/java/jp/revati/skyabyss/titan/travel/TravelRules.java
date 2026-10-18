@@ -42,8 +42,16 @@ public final class TravelRules {
     public static final int WAIT_FOR_LEADER = 1200;
     // 乗り場で、行き先を決めるまで待つ
     public static final int CHOOSE_LIMIT = 1800;
-    // 行き先が決まってから身を起こすまで (ほかの人が乗る時間)
-    public static final int BOARDING_COUNTDOWN = 160;
+    // 行き先が決まってから身を起こすまで (ほかの人が乗る時間)。60 秒
+    public static final int BOARDING_COUNTDOWN = 1200;
+    // 近くの仲間がまだ乗っていないあいだ、最大でここまで延ばす (30 秒)
+    public static final int BOARDING_EXTEND_MAX = 600;
+    // 延ばしているあいだ、残りをこの tick 数に保つ
+    public static final int BOARDING_EXTEND_HOLD = 100;
+    // この距離内の仲間 (同じパーティ) は、乗るのを待つ・全員乗っていれば早く出発できる
+    public static final double BOARDING_PARTY_RADIUS = 64;
+    // 見積もり (海図の「約〇秒」) に入れる出発の待ち。延ばす待ちは含めない
+    public static final int BOARDING_ESTIMATE = 160;
     // 雲の海を泳ぐ時間 (雲の帳まで)。距離に応じて伸びる
     public static final int CRUISE_MIN = 240;
     public static final int CRUISE_MAX = 420;
@@ -74,9 +82,23 @@ public final class TravelRules {
         return (int) Math.max(CRUISE_MIN, Math.min(CRUISE_MAX, 200 + distance / 30.0));
     }
 
+    // 出発の待ちの上限を、毎 tick 更新する。近くの仲間がまだ乗っていなければ、残りが HOLD になるまで延ばし、上限で止める
+    public static int boardingLimit(int limit, int phaseTicks, boolean partyApproaching) {
+        if (!partyApproaching) {
+            return limit;
+        }
+        int cap = BOARDING_COUNTDOWN + BOARDING_EXTEND_MAX;
+        return Math.max(limit, Math.min(cap, phaseTicks + BOARDING_EXTEND_HOLD));
+    }
+
+    // 呼んだ人が笛で早く出発できるか: 近くの仲間が全員乗っている (まだの人が 0 人) とき
+    public static boolean earlyStartAllowed(int partyNotAboard) {
+        return partyNotAboard <= 0;
+    }
+
     // 乗り場で行き先を決めてから降ろされるまでの、おおよその秒数 (画面に出す。実際は地形や向きで少し変わる)
     public static int estimateSeconds(double distance) {
-        double ticks = BOARDING_COUNTDOWN + 40 /* 鎖をたたむ */ + 160 /* 身を起こす */;
+        double ticks = BOARDING_ESTIMATE + 40 /* 鎖をたたむ */ + 160 /* 身を起こす */;
         if (distance > VEIL_DISTANCE) {
             ticks += cruiseTicks(distance) + VEIL_FADE * 2 + 40 + VEIL_EXIT / TRAVEL_SPEED * 1.3;
         } else {
