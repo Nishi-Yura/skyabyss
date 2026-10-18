@@ -69,6 +69,7 @@
   "message.skyabyss.titan_appears": "遠い空で、何かが歌っている…",
   "message.skyabyss.titan_descends": "岩鯨が高度を下げてくる。背の錨石から、鎖が地上へ垂れた",
   "message.skyabyss.titan_refuses": "巨神の体は、よそ者の手を拒んでいる",
+  "message.skyabyss.steles.party_rung": "仲間が石を鳴らした: %s",
   "message.skyabyss.stone_silent": "番兵が目を覚ましている限り、石は黙っている",
   "message.skyabyss.return_opened": "来た道へ戻る抜け道が、音もなく開いた",
   "message.skyabyss.arena_wave": "番兵の波 %s / %s",

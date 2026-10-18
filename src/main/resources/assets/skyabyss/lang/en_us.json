@@ -69,6 +69,7 @@
   "message.skyabyss.titan_appears": "Somewhere in the distant sky, something is singing...",
   "message.skyabyss.titan_descends": "The Stone Whale descends. A chain falls from the anchor on its back",
   "message.skyabyss.titan_refuses": "The titan's body refuses a stranger's hand",
+  "message.skyabyss.steles.party_rung": "A companion rang a stone: %s",
   "message.skyabyss.stone_silent": "While the guards are awake, the stone stays silent",
   "message.skyabyss.return_opened": "A sealed shortcut back the way you came slides open without a sound",
   "message.skyabyss.arena_wave": "Guard wave %s / %s",

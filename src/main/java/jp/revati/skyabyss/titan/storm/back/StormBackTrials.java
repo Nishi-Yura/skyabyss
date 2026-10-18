@@ -444,6 +444,7 @@ public final class StormBackTrials {
                     "growth.skyabyss.reason.party");
         }
         jp.revati.skyabyss.quest.Quests.signalWithParty(level, near, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(level, p.group, jp.revati.skyabyss.titan.group.TrialSteles.STORM, trial.id(), null);
         if (p.allRung()) {
             for (ServerPlayer pl : Groups.online(level, p.group)) {
                 Notice.narrate(pl, "message.skyabyss.storm.all_rung");

@@ -209,7 +209,7 @@ public final class EmberBackState {
     }
 
     // ---------------------------------------------------------------- 書く (EmberBackTrials・試練の担当から)
-    void ring(Trial t) {
+    public void ring(Trial t) {
         if (record != null) {
             record.setFlag(RUNG + t.id(), true);
             record.setFlag(READY + t.id(), true);
