@@ -572,5 +572,13 @@
   "advancement.skyabyss.forge_enhance.title": "一打ち",
   "advancement.skyabyss.forge_enhance.description": "炉で装備を鍛えた。",
   "advancement.skyabyss.forge_dismantle.title": "砕いて、残す",
-  "advancement.skyabyss.forge_dismantle.description": "要らない装備を分解して、素材に変えた。"
+  "advancement.skyabyss.forge_dismantle.description": "要らない装備を分解して、素材に変えた。",
+  "hud.skyabyss.party_pos.elsewhere": "別の場所: %s",
+  "hud.skyabyss.party_pos.dim.overworld": "地上",
+  "hud.skyabyss.party_pos.dim.the_nether": "ネザー",
+  "hud.skyabyss.party_pos.dim.the_end": "エンド",
+  "hud.skyabyss.party_pos.dim.titan_back": "岩鯨の背",
+  "hud.skyabyss.party_pos.dim.tide_back": "潮殻の背",
+  "hud.skyabyss.party_pos.dim.storm_back": "雷翼の背",
+  "hud.skyabyss.party_pos.dim.ember_back": "余燼の背"
 }

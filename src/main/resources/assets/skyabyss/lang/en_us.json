@@ -572,5 +572,13 @@
   "advancement.skyabyss.forge_enhance.title": "A Single Strike",
   "advancement.skyabyss.forge_enhance.description": "You tempered gear at the forge.",
   "advancement.skyabyss.forge_dismantle.title": "Break It Down",
-  "advancement.skyabyss.forge_dismantle.description": "You turned unwanted gear into materials."
+  "advancement.skyabyss.forge_dismantle.description": "You turned unwanted gear into materials.",
+  "hud.skyabyss.party_pos.elsewhere": "Elsewhere: %s",
+  "hud.skyabyss.party_pos.dim.overworld": "Overworld",
+  "hud.skyabyss.party_pos.dim.the_nether": "Nether",
+  "hud.skyabyss.party_pos.dim.the_end": "End",
+  "hud.skyabyss.party_pos.dim.titan_back": "Stone Whale's Back",
+  "hud.skyabyss.party_pos.dim.tide_back": "Tideshell's Back",
+  "hud.skyabyss.party_pos.dim.storm_back": "Thunderwing's Back",
+  "hud.skyabyss.party_pos.dim.ember_back": "Ember's Back"
 }

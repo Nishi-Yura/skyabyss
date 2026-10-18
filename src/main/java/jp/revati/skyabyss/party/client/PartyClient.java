@@ -54,6 +54,9 @@ public final class PartyClient {
 
     public static void receive(PartyNetwork.Sync sync) {
         last = sync;
+        if (sync.members().isEmpty()) {
+            PartyMarkers.clear();
+        }
         if (Minecraft.getInstance().screen instanceof PartyScreen screen) {
             screen.refresh();
         }
@@ -106,6 +109,14 @@ public final class PartyClient {
                 g.fill(x, y + 10, x + W, y + 13, 0xFF3A1E22);
                 int hp = f > 0.5f ? 0xFF6BD06B : f > 0.25f ? 0xFFE8C04A : 0xFFE05050;
                 g.fill(x, y + 10, x + Math.round(W * f), y + 13, m.sameDim() ? hp : 0xFF7A7A7A);
+            }
+            net.minecraft.network.chat.Component away = m.online() ? PartyMarkers.elsewhereLine(m.id()) : null;
+            if (away != null) {
+                int tw = Math.min(font.width(away), 150);
+                int x0 = x + W - tw;
+                g.fill(x0 - 2, y + 15, x + W + 2, y + 25, 0x60000000);
+                g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(away, tw)), x0, y + 16, 0x9AA6B8, true);
+                y += 10;
             }
             y += 19;
         }

@@ -1,0 +1,8 @@
+# 仲間の位置: 二人目 (見られる側)。入って、最後まで残る
+server localhost:25669
+timeout 900
+size 854 480
+wait 100
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/b_joined
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit

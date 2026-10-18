@@ -114,6 +114,10 @@
 
 **章の予兆の枠・空の段** は 01 の 4.1 の「予兆 3 拍」「空の異変の段」。コードは `story/arc/Foreshadow`（使い方は頭のコメント。01 の 4.1 に API の要約）と `sky/ChapterSky.Stage`。
 
+### 8.1 仲間の位置の置き場（`party/client/PartyMarkers`）
+
+頭の上の札は世界に重なる HUD。画面の外の矢印は、左上の目的の帯（上から 46 まで）・右の仲間の一覧（幅 84 と余白）・下のホットバー（下から 56）を避けた長方形の縁にだけ置く。札・矢印の名前は重なったらずらす。別の次元の仲間は右の仲間の一覧の行に一行足す。場面（シネマティック）の最中は出さない。設定は `partyMarkers`。
+
 ## 10. 確かめ
 
 - 台本 `tools/shots/notices_demo.txt`（語り・手がかり・レベル・獲得・解放・戦い・警告・場所が同時）。絵は `run/shots/notices_demo/shots/notices_demo/`。章の札は `tools/shots/chapter_cards.txt`。

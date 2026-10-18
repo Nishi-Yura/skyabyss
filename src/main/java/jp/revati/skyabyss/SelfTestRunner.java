@@ -82,6 +82,7 @@ public final class SelfTestRunner {
         steps.addAll(TitanBackSelfTest.buildSteps());
         // グループ (パーティ・一人) の共通部分: 部屋の占有・戦いの参加者・個人の影・乗っている人の数え方・放置の分け前。docs/design/10 の 10 章
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
+        steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md

@@ -91,6 +91,10 @@ public final class Config {
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);
 
+    public static final ModConfigSpec.BooleanValue PARTY_MARKERS = CLIENT_BUILDER
+            .comment("パーティの仲間の位置 (頭の上の札・画面の端の矢印・別の場所の一行) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
+            .define("partyMarkers", true);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {

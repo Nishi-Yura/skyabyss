@@ -1,0 +1,24 @@
+# 仲間の位置 (docs/design/10 の 10.9): 一人目 (見る側)。専用サーバー 25669。外 (rcon) の合図 q1..q4 で撮る
+server localhost:25669
+timeout 900
+size 854 480
+wait 100
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_joined
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/q1
+wait 40
+shot party_marker_1_wall
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_q1_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/q2
+wait 40
+shot party_marker_2_side
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_q2_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/q3
+wait 40
+shot party_marker_3_other_dimension
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_q3_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/q4
+wait 40
+shot party_marker_4_wall
+signal C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/a_q4_done
+waitfile C:/Users/nisimoto/AppData/Local/Temp/claude/C--Users-nisimoto-Desktop-mod/0d7095a3-890c-441f-8914-2a0d5f2d6123/scratchpad/sync/quit
+quit
