@@ -102,6 +102,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("ember gear", jp.revati.skyabyss.titan.ember.gear.EmberGearSelfTest::runSelfTest));
         steps.add(Step.once("ember lore", jp.revati.skyabyss.titan.ember.lore.EmberLoreSelfTest::runSelfTest));
         steps.add(Step.once("record", RecordSelfTest::runSelfTest));
+        // 備えの三灯 (式・色の境目・乗り込みの確認の流れ・前室の囁き・控え帳の行)。docs/design/21 の 1.2、11 の 9 章
+        steps.add(Step.once("readiness", jp.revati.skyabyss.readiness.ReadinessSelfTest::runSelfTest));
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
