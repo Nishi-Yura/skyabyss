@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -189,8 +190,8 @@ public final class StormHeartArena {
         for (int s = 0; s < ROD_STAGES; s++) {
             BlockPos p = base.above(1 + s);
             BlockState st = level.getBlockState(p);
-            if (st.is(Blocks.WAXED_COPPER_BULB)) {
-                level.setBlock(p, st.setValue(CopperBulbBlock.LIT, s < CHARGE[i]), 2);
+            if (st.is(StormBackSetup.ROD_BULB.get())) {
+                level.setBlock(p, st.setValue(StormBlocks.RodBulb.LIT, s < CHARGE[i]), 2);
             }
         }
     }
@@ -286,7 +287,7 @@ public final class StormHeartArena {
             BlockPos b = rod(i);
             back.setBlock(b, Blocks.WAXED_CUT_COPPER.defaultBlockState(), flags);
             for (int s = 0; s < ROD_STAGES; s++) {
-                back.setBlock(b.above(1 + s), Blocks.WAXED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, false), flags);
+                back.setBlock(b.above(1 + s), StormBackSetup.ROD_BULB.get().defaultBlockState().setValue(StormBlocks.RodBulb.LIT, false), flags);
             }
             back.setBlock(b.above(4), Blocks.WAXED_CUT_COPPER.defaultBlockState(), flags);
             back.setBlock(b.above(5), Blocks.END_ROD.defaultBlockState(), flags);

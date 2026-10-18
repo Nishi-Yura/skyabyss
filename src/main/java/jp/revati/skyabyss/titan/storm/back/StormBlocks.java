@@ -14,6 +14,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -107,6 +111,70 @@ public final class StormBlocks {
         @Override
         protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
             b.add(LIT);
+        }
+    }
+
+    // ---- 避雷の柱 (12 の 120。銅の台・段の電球 3 つ・軸・先の針。StormBirdBuilder.rod が積み、StormRods が満ちかけを調べる) ----
+
+    // 柱の台と軸と針。形だけで、状態を持たない
+    public static class RodPost extends Block {
+        private final VoxelShape shape;
+
+        public RodPost(Properties p, VoxelShape shape) {
+            super(p);
+            this.shape = shape;
+        }
+
+        @Override
+        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+            return shape;
+        }
+    }
+
+    // 段の電球。柱が満ちた段だけ青白く光る (LIT)。光の段は StormEast・RaijuNest・StormHeartArena が切り替える
+    public static class RodBulb extends Block {
+        public static final BooleanProperty LIT = BlockStateProperties.LIT;
+        private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 16, 13);
+
+        public RodBulb(Properties p) {
+            super(p);
+            registerDefaultState(stateDefinition.any().setValue(LIT, false));
+        }
+
+        @Override
+        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
+            b.add(LIT);
+        }
+
+        @Override
+        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+            return SHAPE;
+        }
+    }
+
+    // 戻しの鏡 (前室の台の上の取っ手つきの手鏡。12 の 120)。引く動作は StormBackTrials の右クリックが受ける (座標 MIRROR_RESET)
+    public static class ReturnMirror extends Block {
+        public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+        private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 14, 14);
+
+        public ReturnMirror(Properties p) {
+            super(p);
+            registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        }
+
+        @Override
+        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
+            b.add(FACING);
+        }
+
+        @Override
+        public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+            return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        }
+
+        @Override
+        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+            return SHAPE;
         }
     }
 }

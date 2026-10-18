@@ -285,5 +285,8 @@
   "title.skyabyss.storm_back.sub": "嵐の上を飛ぶ、鳥の背",
   "trial.skyabyss.storm_east": "東 (雷の骨)",
   "trial.skyabyss.storm_front": "前 (眼の間)",
-  "trial.skyabyss.storm_west": "西 (風切りの骨)"
+  "trial.skyabyss.storm_west": "西 (風切りの骨)",
+  "block.skyabyss.storm_rod_bulb": "避雷の柱の電球",
+  "block.skyabyss.storm_rod_shaft": "避雷の柱の軸",
+  "block.skyabyss.storm_rod_tip": "避雷の柱の針"
 }

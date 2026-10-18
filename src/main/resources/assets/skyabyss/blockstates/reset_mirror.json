@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "skyabyss:block/reset_mirror"
+    },
+    "facing=east": {
+      "model": "skyabyss:block/reset_mirror",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "skyabyss:block/reset_mirror",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "skyabyss:block/reset_mirror",
+      "y": 270
+    }
+  }
+}
