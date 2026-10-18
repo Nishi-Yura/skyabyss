@@ -525,7 +525,9 @@ public final class Voyages {
             s.callGiven.add(kind.id());
             s.unlocked.add(kind.id());
             ItemStack call = new ItemStack(kind.callItem().get());
-            if (!player.getInventory().add(call)) {
+            // 袋に入る設定のとき (使う入力ができたあと) は袋へ。今は笛は手に持って使うので持ち物へ (docs/design/22)
+            jp.revati.skyabyss.pouch.PouchRouting.give(player, call);
+            if (!call.isEmpty()) {
                 player.drop(call, false);
             }
             Notice.narrate(player, kind.text("message.skyabyss.travel.recognized"));

@@ -491,7 +491,9 @@ public final class Keepsakes {
 
     static void giveOrDrop(ServerPlayer player, ItemStack stack) {
         ItemStack left = stack.copy();
-        if (!player.getInventory().add(left) && !left.isEmpty()) {
+        // 袋に入る品は先に留め袋へ (22 の 4.1)。入りきらない分は持ち物 → 足もとの順
+        jp.revati.skyabyss.pouch.PouchRouting.give(player, left);
+        if (!left.isEmpty() && !player.getInventory().add(left) && !left.isEmpty()) {
             // 入りきらない分は足もとへ (落ちた品も守られる。投げた人として持ち主が付く)
             player.drop(left, false, true);
         }

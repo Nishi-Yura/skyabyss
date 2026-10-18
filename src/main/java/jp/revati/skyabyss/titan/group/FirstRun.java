@@ -304,7 +304,7 @@ public final class FirstRun {
 
     private static void give(ServerPlayer player, List<ItemStack> stacks) {
         for (ItemStack s : stacks) {
-            player.getInventory().placeItemBackInInventory(s.copy());
+            jp.revati.skyabyss.pouch.PouchRouting.placeBack(player, s.copy());
         }
     }
 }

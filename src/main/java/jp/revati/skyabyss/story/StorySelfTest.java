@@ -333,9 +333,11 @@ public final class StorySelfTest {
         p.getInventory().add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get(), 1));
         check(SkyKey.ready(p), "four fragments at stage 4 should be ready", f);
         check(SkyKey.assemble(p, false), "assemble failed", f);
-        check(SkyKey.fragmentsHeld(p) == 0 && p.getInventory().countItem(StorySetup.SKY_KEY.get()) == 1, "fragments were not turned into one key", f);
+        check(SkyKey.fragmentsHeld(p) == 0 && p.getInventory().countItem(StorySetup.SKY_KEY.get()) + jp.revati.skyabyss.pouch.Pouch.count(p, StorySetup.SKY_KEY.get()) == 1,
+                "fragments were not turned into one key", f);
         check(Lore.state(p).has(SkyKey.LORE) && SkyKey.assembled(p), "the key was not recorded", f);
-        check(!SkyKey.assemble(p, false) && p.getInventory().countItem(StorySetup.SKY_KEY.get()) == 1, "the key formed twice", f);
+        check(!SkyKey.assemble(p, false) && p.getInventory().countItem(StorySetup.SKY_KEY.get()) + jp.revati.skyabyss.pouch.Pouch.count(p, StorySetup.SKY_KEY.get()) == 1,
+                "the key formed twice", f);
         check(!Keepsakes.fragmentMissing(p), "after the key, the whale heart would give a lost fragment again", f);
         check(Keepsakes.untossable(new ItemStack(StorySetup.SKY_KEY.get())), "the key can be tossed", f);
         // 段階が足りない人は、欠片を 4 つ持っていても組まない (コマンドで配った欠片など)

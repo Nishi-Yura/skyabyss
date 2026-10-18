@@ -168,19 +168,28 @@ public class ResonanceForgeMenu extends AbstractContainerMenu {
             stack = stack.copy();
             gear.setItem(0, ItemStack.EMPTY);
             if (yield[0] > 0) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(ForgeRules.resonanceItem(stack), yield[0]));
+                placeBack(player, new ItemStack(ForgeRules.resonanceItem(stack), yield[0]));
             }
             if (yield[1] > 0) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(ForgeRules.shardItem(stack), yield[1]));
+                placeBack(player, new ItemStack(ForgeRules.shardItem(stack), yield[1]));
             }
             if (yield[2] > 0) {
-                player.getInventory().placeItemBackInInventory(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), yield[2]));
+                placeBack(player, new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), yield[2]));
             }
             effects(player, false, 0);
             fireForge(player, "dismantle");
             return true;
         }
         return false;
+    }
+
+    // 分解で戻る素材は、留め袋に入る品なら袋へ (22 の 8.3)
+    private static void placeBack(Player player, ItemStack stack) {
+        if (player instanceof ServerPlayer server) {
+            jp.revati.skyabyss.pouch.PouchRouting.placeBack(server, stack);
+        } else {
+            player.getInventory().placeItemBackInInventory(stack);
+        }
     }
 
     // 炉で何かしたことを進捗へ (一行)

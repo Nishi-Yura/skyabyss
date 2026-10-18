@@ -171,11 +171,11 @@ public final class Growth {
             return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_FORGE;
         }
         int cost = GrowthRules.statRespecCost(data.statRespecs);
-        if (!free && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(player.getInventory()) < cost) {
+        if (!free && jp.revati.skyabyss.rpg.skill.SkillManager.countCrystals(player) < cost) {
             return jp.revati.skyabyss.rpg.skill.SkillManager.RespecResult.NO_CRYSTALS;
         }
         if (!free) {
-            jp.revati.skyabyss.rpg.skill.SkillManager.removeCrystals(player.getInventory(), cost);
+            jp.revati.skyabyss.rpg.skill.SkillManager.removeCrystals(player, cost);
         }
         java.util.Arrays.fill(data.stats, 0);
         data.statRespecs++;

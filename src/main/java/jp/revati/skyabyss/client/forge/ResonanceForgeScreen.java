@@ -389,7 +389,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             return;
         }
         List<List<Affix>> offers = AffixRules.offers(gear);
-        int have = ForgeRules.count(minecraft.player.getInventory(), ModItems.RESONANCE_CRYSTAL.get());
+        int have = ForgeRules.count(minecraft.player, ModItems.RESONANCE_CRYSTAL.get());
         boolean enough = minecraft.player.isCreative() || have >= AffixRules.TRIAL_CRYSTALS;
         g.drawString(font, Component.translatable("gui.skyabyss.forge.trials", offers.size(), AffixRules.MAX_TRIALS), x, 24, TEXT, false);
         g.drawString(font, Component.translatable("gui.skyabyss.forge.crystals", have), x, 33, enough ? OK : LACK, false);
@@ -411,7 +411,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     // ---------------------------------------------------------------- 右: 交換
     private void exchangePanel(GuiGraphics g) {
         int x = SIDE_X + 10;
-        int have = ForgeRules.resonanceHeld(minecraft.player.getInventory(), set().titan);
+        int have = ForgeRules.resonanceHeld(minecraft.player, set().titan);
         boolean enough = minecraft.player.isCreative() || have >= ForgeRules.EXCHANGE_SHARDS;
         g.drawString(font, Component.translatable("gui.skyabyss.forge.exchange_shards", Component.translatable(ModItems.resonanceShard(set().titan).getDescriptionId()), have, ForgeRules.EXCHANGE_SHARDS), x, 26, enough ? OK : LACK, false);
         String state = switch (menu.exchangeState(titan)) {
@@ -459,7 +459,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     }
 
     private void costLine(GuiGraphics g, Item material, int need, int x, int y) {
-        int have = ForgeRules.count(minecraft.player.getInventory(), material);
+        int have = ForgeRules.count(minecraft.player, material);
         boolean enough = minecraft.player.isCreative() || have >= need;
         Component line = Component.literal("・").append(Component.translatable(material.getDescriptionId())).append(" " + have + "/" + need);
         g.drawString(font, line, x, y, enough ? OK : LACK, false);

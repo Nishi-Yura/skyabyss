@@ -462,7 +462,9 @@ public final class Quests {
     }
 
     public static void give(ServerPlayer player, ItemStack stack) {
-        if (!player.getInventory().add(stack) && !stack.isEmpty()) {
+        // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
+        jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
+        if (!stack.isEmpty()) {
             ItemEntity drop = player.drop(stack, false);
             if (drop != null) {
                 drop.setNoPickUpDelay();
@@ -472,6 +474,8 @@ public final class Quests {
     }
 
     public static void take(ServerPlayer player, Item item, int count) {
+        // 留め袋の中から先に払う (22 の 8.3)
+        count -= jp.revati.skyabyss.pouch.Pouch.take(player, item, count);
         var inv = player.getInventory();
         int left = count;
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
