@@ -600,7 +600,7 @@ public class Raiju extends GuardMob {
     // 雷渡りの当たる所: 線の下の床の帯 (幅 2.6。両端の柱のそば 1.8 ブロックは除く)。印が満ちて、雷になって渡りはじめる瞬間に帯の中の人に 12。
     // 人数で、着いた柱から別の柱 (ほかの人にいちばん近い柱) へ枝分かれの帯が増える (最大 3 本。9)
     private void railMarkers(ServerLevel server, Vec3 a, Vec3 b) {
-        railBand(server, a, b, RAIL_HALF_WIDTH, RAIL_DAMAGE, 0x9CD8FF);
+        railBand(server, a, b, RAIL_HALF_WIDTH, RAIL_DAMAGE, 0xFF9A3A);
         int forks = railForks(present(server));
         if (forks == 0 || site == null) {
             return;
@@ -623,7 +623,7 @@ public class Raiju extends GuardMob {
             }
         }
         for (int r : picks) {
-            railBand(server, b, perchSpot(r), RAIL_FORK_HALF_WIDTH, RAIL_FORK_DAMAGE, 0xC8E8FF);
+            railBand(server, b, perchSpot(r), RAIL_FORK_HALF_WIDTH, RAIL_FORK_DAMAGE, 0xFFB060);
         }
     }
 
@@ -715,7 +715,7 @@ public class Raiju extends GuardMob {
             double gapHalf = Math.toRadians(26);
             int active = (int) Math.ceil((POUNCE_RING_REACH - POUNCE_RADIUS) / 0.45);
             for (int i = 0; i < (n >= 3 ? 2 : 1); i++) {
-                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, 0x9CD8FF)
+                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, 0xFFA040)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> player.hurt(attackSource(), POUNCE_RING_DAMAGE))
                         .start();

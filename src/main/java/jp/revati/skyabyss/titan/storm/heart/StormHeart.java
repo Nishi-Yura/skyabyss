@@ -94,7 +94,7 @@ public class StormHeart extends HeartBoss {
     public static final double BLADE_LOW = 1.6;
     public static final double BLADE_HIGH = 2.4;
     public static final double CHAIN_HALF_WIDTH = 1.0;
-    public static final double CHAIN_LENGTH = 20;
+    public static final double CHAIN_LENGTH = 18;
     public static final double CHAIN_NODE_RADIUS = 1.8;
     public static final double FEATHER_RADIUS = 2.0;
     public static final double FLASH_CONE_DEG = 60;
@@ -720,14 +720,14 @@ public class StormHeart extends HeartBoss {
             sound(server, StormHeartSetup.ROAR.get(), 3f, 1f);
             server.sendParticles(ParticleTypes.CLOUD, getX(), core().y, getZ(), 60, 1.6, 1.4, 1.6, 0.15);
             safeFallTicks = ROAR_TICKS + 60;
-            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, 0xA8D8FF)
+            tg(server, TelegraphShape.circle(getX(), getZ(), ROAR_PUSH_RADIUS), 22, 0xA0A0A8)
                     .onHit((s, player) -> {
                         Vec3 to = player.position().subtract(position()).multiply(1, 0, 1);
                         player.knockback(0.9, -to.x, -to.z);
                         player.hurtMarked = true;
                     })
                     .start();
-            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, 0xA8D8FF).active(24).start();
+            tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, 0xA0A0A8).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
             warn(server, dust(getPhase() == 0 ? 0xA8D8FF : 0xF6F0C8, 1.3f), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
@@ -782,7 +782,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 boolean first = i == 0;
-                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, 0xBFE0FF)
+                tg(server, TelegraphShape.sweep(getX(), getZ(), armStart[i], armSpan, BLADE_REACH, BLADE_HALF_WIDTH), BLADE_WARN, 0xFF8A2A)
                         .active(BLADE_ACTIVE)
                         .victims(p -> canReach(p) && bladeCrosses(p))
                         .onImpact(s -> {
@@ -995,7 +995,7 @@ public class StormHeart extends HeartBoss {
             if (isBound()) {
                 for (int k = 0; k < 4; k++) {
                     Vec3 h = StormHeartArena.hole(k);
-                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, 0x6FA8E8)
+                    tg(server, TelegraphShape.circle(h.x, h.z, DOWNDRAFT_RADIUS), Action.WINGBEAT.warnTicks, 0xFF7A3A)
                             .reach(StormHeartArena.UPDRAFT_TOP - StormHeartArena.FLOOR + 3)
                             .victims(p -> canReach(p) && airborne(p))
                             .onHit((s, player) -> {
@@ -1012,12 +1012,12 @@ public class StormHeart extends HeartBoss {
             double reach = Math.max(8, roomRadius() - 1);
             for (double gap : gaps) {
                 // 安全な筋 (見た目だけ)
-                tg(server, TelegraphShape.cone(getX(), getZ(), gap, reach, gapHalf), Action.WINGBEAT.warnTicks, 0x58FF9A).start();
+                tg(server, TelegraphShape.cone(getX(), getZ(), gap, reach, gapHalf), Action.WINGBEAT.warnTicks, 0x40E8FF).start();
             }
             int rings = gustRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((reach - 2.5) / 0.55);
-                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, 0xA8D8FF)
+                tg(server, TelegraphShape.wave(getX(), getZ(), 2.5, reach, 0.9, gaps, gapHalf), Action.WINGBEAT.warnTicks + i * 14, 0xFFA040)
                         .active(active).jumpClear(0.9)
                         .onHit((s, player) -> {
                             strike(player, WINGBEAT_DAMAGE);
@@ -1070,7 +1070,7 @@ public class StormHeart extends HeartBoss {
                 }
             }
             for (Vec3 c : pads) {
-                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, 0x5A8CFF)
+                tg(server, TelegraphShape.circle(c.x, c.z, CHARGE_RADIUS), Action.CHARGE.warnTicks, 0xFF6A2A)
                         .active(CHARGE_ACTIVE).repeatEvery(10).jumpClear(0.6)
                         .onHit((s, player) -> {
                             strike(player, CHARGE_DAMAGE);
@@ -1131,7 +1131,7 @@ public class StormHeart extends HeartBoss {
             flashSeen.clear();
             for (Vec3 spot : pickSpots(server, flashFans(present(server)))) {
                 double angle = Telegraph.angleOf(spot.x - getX(), spot.z - getZ());
-                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, 0xFFFAE0)
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FLASH_RANGE, Math.toRadians(FLASH_HALF_ANGLE)), Action.FLASH.warnTicks, 0xFFB030)
                         .victims(p -> canReach(p) && flashHits(level(), p.getEyePosition(), p.getViewVector(1f), core(), p))
                         .onHit((s, player) -> {
                             strike(player, FLASH_DAMAGE);
@@ -1194,7 +1194,7 @@ public class StormHeart extends HeartBoss {
                 double mid = base + i * 2 * Math.PI / arms;
                 armStart[i] = mid - armSpan / 2;
                 double armAngle = mid;
-                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, 0x6FA8E8)
+                tg(server, TelegraphShape.sweep(centerX(), centerZ(), armStart[i], armSpan, WEB_REACH, WEB_HALF_WIDTH), Action.WEB.warnTicks, 0xFF5A3A)
                         .active(WEB_TICKS).jumpClear(WEB_JUMP)
                         .onHit((s, player) -> {
                             strike(player, WEB_DAMAGE);

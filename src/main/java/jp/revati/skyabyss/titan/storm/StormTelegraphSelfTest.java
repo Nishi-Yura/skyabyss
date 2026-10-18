@@ -208,14 +208,17 @@ public final class StormTelegraphSelfTest {
         for (int phase = 0; phase < 3; phase++) {
             all.addAll(List.of(StormHeart.bagFor(phase)));
         }
-        for (int n : new int[] {1, 6}) {
+        int edgeMin = 100;
+        for (int pass = 0; pass < 3; pass++) {
+            int n = pass == 0 ? 1 : 6;
+            boolean edge = pass == 2;
             for (StormHeart.Action attack : all) {
                 StormHeart heart = spawnHeart(level);
                 List<FakePlayer> ps = new ArrayList<>();
                 try {
                     for (int i = 0; i < n; i++) {
                         double a = Math.PI * 2 * i / n + 0.4;
-                        ps.add(fake(level, "h" + n + "_" + i, SX + Math.cos(a) * 8, FLOOR, SZ + Math.sin(a) * 8));
+                        ps.add(fake(level, "h" + n + "_" + i, SX + Math.cos(a) * (edge ? 11 : 8), FLOOR, SZ + Math.sin(a) * (edge ? 11 : 8)));
                     }
                     heart.setTarget(ps.get(0));
                     heart.tick();
@@ -243,9 +246,13 @@ public final class StormTelegraphSelfTest {
                     check(minWarn >= Telegraph.MIN_WARN_TICKS, attack + " has a telegraph under 16 ticks (" + minWarn + ")", f);
                     boolean[] hits = Telegraph.probeHits();
                     int percent = Math.round(100f * safeCount(hits) / hits.length);
-                    check(percent >= 25, attack + " (n=" + n + ") leaves only " + percent + "% of the floor safe (needs 25%)", f);
-                    counts.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
-                    safePercent.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = percent;
+                    check(percent >= (edge ? 15 : 25), attack + " (n=" + n + (edge ? ", players at the room edge" : "") + ") leaves only " + percent + "% of the floor safe (needs 25%)", f);
+                    if (!edge) {
+                        counts.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
+                        safePercent.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = percent;
+                    } else {
+                        edgeMin = Math.min(edgeMin, percent);
+                    }
                 } finally {
                     Telegraph.probe(null);
                     drop(ps);
@@ -263,6 +270,7 @@ public final class StormTelegraphSelfTest {
             sb.append(' ').append(attack.key()).append(' ').append(c[0]).append("->").append(c[1]).append('/').append(s[0]).append("%->").append(s[1]).append('%');
             check(c[1] > c[0], attack + ": 6 players made " + c[1] + " areas, 1 player made " + c[0] + " (must grow with the party)", f);
         }
+        sb.append(" / worst safe floor with players at the edge ").append(edgeMin).append('%');
         notes.add(sb.toString());
     }
 
@@ -304,9 +312,9 @@ public final class StormTelegraphSelfTest {
             h.tick();
             h.forceAction(StormHeart.Action.CHAIN);
             tickHeart(level, h, 2);
-            FakePlayer onLine = fake(level, "ch_in", SX + 14, FLOOR, SZ + 0.4);
-            FakePlayer beside = fake(level, "ch_out", SX + 14, FLOOR, SZ + 2.8);
-            FakePlayer beyond = fake(level, "ch_far", SX + 21, FLOOR, SZ);
+            FakePlayer onLine = fake(level, "ch_in", SX + 13, FLOOR, SZ + 0.4);
+            FakePlayer beside = fake(level, "ch_out", SX + 13, FLOOR, SZ + 2.8);
+            FakePlayer beyond = fake(level, "ch_far", SX + 18.5, FLOOR, SZ);
             extra.addAll(List.of(onLine, beside, beyond));
             tickHeart(level, h, 40);
             check(lost(onLine) >= StormHeart.CHAIN_DAMAGE * 0.7f, "chain: a player on the line was not hurt (" + lost(onLine) + ")", f);
@@ -524,7 +532,10 @@ public final class StormTelegraphSelfTest {
         // 人数で増える: 爪の線 / 飛びかかりの雷の円 / 咆哮の輪 (1 人と 6 人)。雷獣の技の合計が巣の床の 4 割以下
         Map<String, int[]> counts = new HashMap<>();
         Map<String, int[]> union = new HashMap<>();
-        for (int n : new int[] {1, 6}) {
+        int raijuEdgeMin = 100;
+        for (int pass = 0; pass < 3; pass++) {
+            int n = pass == 0 ? 1 : 6;
+            boolean edge = pass == 2;
             for (Raiju.Action a : new Raiju.Action[] {Raiju.Action.CLAW, Raiju.Action.POUNCE, Raiju.Action.ROAR}) {
                 for (boolean angry : new boolean[] {false, true}) {
                     if (a == Raiju.Action.ROAR && angry) {
@@ -532,9 +543,13 @@ public final class StormTelegraphSelfTest {
                     }
                     Raiju rr = spawnRaiju(level);
                     try {
+                        if (edge) {
+                            rr.moveTo(SX + DISC - 2, FLOOR, SZ, 0f, 0f);
+                        }
                         for (int i = 0; i < n; i++) {
                             double ang = Math.PI * 2 * i / n + 0.4;
-                            ps.add(fake(level, "rj" + n + "_" + i, SX + Math.cos(ang) * 8, FLOOR, SZ + Math.sin(ang) * 8));
+                            double rad = edge ? DISC - 1 : 8;
+                            ps.add(fake(level, "rj" + n + "_" + i, SX + Math.cos(ang) * rad, FLOOR, SZ + Math.sin(ang) * rad));
                         }
                         if (angry) {
                             rr.makeAngryForTest();
@@ -557,6 +572,11 @@ public final class StormTelegraphSelfTest {
                         boolean[] hits = Telegraph.probeHits();
                         int hitPercent = 100 - Math.round(100f * safeCount(hits) / hits.length);
                         String key = a.name() + (angry ? " (angry)" : "");
+                        if (edge) {
+                            raijuEdgeMin = Math.min(raijuEdgeMin, 100 - hitPercent);
+                            check(100 - hitPercent >= 15, "raiju " + key + " fired from the room edge leaves only " + (100 - hitPercent) + "% safe", f);
+                            continue;
+                        }
                         check(hitPercent <= 40, "raiju " + key + " (n=" + n + ") covers " + hitPercent + "% of the floor (limit 40%)", f);
                         counts.computeIfAbsent(key, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
                         union.computeIfAbsent(key, k -> new int[2])[n == 1 ? 0 : 1] = hitPercent;
@@ -579,6 +599,7 @@ public final class StormTelegraphSelfTest {
             sb.append(' ').append(e.getKey().toLowerCase()).append(' ').append(c[0]).append("->").append(c[1]).append('/').append(u[0]).append("%->").append(u[1]).append('%');
             check(c[1] > c[0], "raiju " + e.getKey() + ": 6 players made " + c[1] + " areas, 1 player made " + c[0] + " (must grow with the party)", f);
         }
+        sb.append(" / worst safe floor fired from the edge ").append(raijuEdgeMin).append('%');
         notes.add(sb.toString());
     }
 
@@ -597,6 +618,15 @@ public final class StormTelegraphSelfTest {
         double ring = Math.PI * Raiju.POUNCE_RING_REACH * Raiju.POUNCE_RING_REACH;
         double roar = 12 * Math.PI * 1.5 * 1.5;
         check(Raiju.POUNCE_RING_REACH <= RaijuNest.RADIUS - 2 && ring / nest <= 0.4 && roar / nest <= 0.4, "the raiju areas do not fit the nest", f);
+        // 使える床の半径 ≥ 最も遠い印の届きの 0.8 倍 / 天井 12 以上
+        double heartReach = Math.max(Math.max(StormHeart.CHAIN_LENGTH, StormHeart.BLADE_REACH), Math.max(StormHeart.WEB_REACH, StormHeart.FLASH_RANGE));
+        check(radius >= 0.8 * heartReach, "keel chamber radius " + radius + " is under 0.8 x the farthest heart reach " + heartReach, f);
+        double nestReach = Math.max(Raiju.POUNCE_RING_REACH, Math.max(Raiju.CLAW_SHOCK_LENGTH, RaijuNest.ROD_RADIUS));
+        check(RaijuNest.RADIUS >= 0.8 * nestReach, "nest radius " + RaijuNest.RADIUS + " is under 0.8 x the farthest raiju reach " + nestReach, f);
+        int heartCeiling = StormHeartArena.CEILING - StormHeartArena.FLOOR;
+        int nestCeiling = jp.revati.skyabyss.titan.storm.back.StormBackLayout.RAIJU_NEST_CEILING - (jp.revati.skyabyss.titan.storm.back.StormBackLayout.RAIJU_NEST.getY() + 1);
+        check(heartCeiling >= 12 && nestCeiling >= 12, "boss room ceiling is under 12 (keel " + heartCeiling + ", nest " + nestCeiling + ")", f);
+        notes.add("room checks: keel radius " + radius + " >= 0.8 x " + heartReach + ", nest radius " + RaijuNest.RADIUS + " >= 0.8 x " + nestReach + ", ceilings " + heartCeiling + " / " + nestCeiling);
         notes.add(String.format("rooms: keel chamber radius %.0f (half-disc sweep %.0f%%, four fans %.0f%%), nest radius %.1f (pounce ring %.0f%%, twelve roar circles %.0f%%)",
                 radius, 100 * halfDisc / floor, 100 * flash / floor, RaijuNest.RADIUS, 100 * ring / nest, 100 * roar / nest));
     }
