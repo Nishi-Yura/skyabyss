@@ -33,6 +33,40 @@ public interface TelegraphShape {
     // {minX, minZ, maxX, maxZ}: 動く範囲も含む全体
     double[] bounds();
 
+    // ---- 通信 (クライアントの床の印へ形を送る): 形の種類と数値。種類が -1 の形 (独自の実装) は床の印を出さない ----
+    int KIND_NONE = -1;
+    int KIND_CIRCLE = 0;
+    int KIND_RING = 1;
+    int KIND_LINE = 2;
+    int KIND_CONE = 3;
+    int KIND_SWEEP = 4;
+    int KIND_WAVE = 5;
+
+    default int kind() {
+        return KIND_NONE;
+    }
+
+    default double[] params() {
+        return new double[0];
+    }
+
+    // kind() と params() から形を戻す。壊れた入力は null
+    static TelegraphShape decode(int kind, double[] p) {
+        try {
+            return switch (kind) {
+                case KIND_CIRCLE -> p.length == 3 ? circle(p[0], p[1], p[2]) : null;
+                case KIND_RING -> p.length == 4 ? ring(p[0], p[1], p[2], p[3]) : null;
+                case KIND_LINE -> p.length == 5 ? line(p[0], p[1], p[2], p[3], p[4]) : null;
+                case KIND_CONE -> p.length == 5 ? cone(p[0], p[1], p[2], p[3], p[4]) : null;
+                case KIND_SWEEP -> p.length == 6 ? sweep(p[0], p[1], p[2], p[3], p[4], p[5]) : null;
+                case KIND_WAVE -> p.length >= 6 ? wave(p[0], p[1], p[2], p[3], p[4], java.util.Arrays.copyOfRange(p, 6, p.length), p[5]) : null;
+                default -> null;
+            };
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     default double centerX() {
         double[] b = bounds();
         return (b[0] + b[2]) / 2;
@@ -108,6 +142,16 @@ public interface TelegraphShape {
 
     record Circle(double cx, double cz, double r) implements TelegraphShape {
         @Override
+        public int kind() {
+            return KIND_CIRCLE;
+        }
+
+        @Override
+        public double[] params() {
+            return new double[] {cx, cz, r};
+        }
+
+        @Override
         public boolean contains(double x, double z) {
             double dx = x - cx;
             double dz = z - cz;
@@ -132,6 +176,16 @@ public interface TelegraphShape {
     }
 
     record Ring(double cx, double cz, double inner, double outer) implements TelegraphShape {
+        @Override
+        public int kind() {
+            return KIND_RING;
+        }
+
+        @Override
+        public double[] params() {
+            return new double[] {cx, cz, inner, outer};
+        }
+
         @Override
         public boolean contains(double x, double z) {
             double dx = x - cx;
@@ -159,6 +213,16 @@ public interface TelegraphShape {
     }
 
     record Line(double x, double z, double angle, double length, double halfWidth) implements TelegraphShape {
+        @Override
+        public int kind() {
+            return KIND_LINE;
+        }
+
+        @Override
+        public double[] params() {
+            return new double[] {x, z, angle, length, halfWidth};
+        }
+
         @Override
         public boolean contains(double px, double pz) {
             double dx = px - x;
@@ -210,6 +274,16 @@ public interface TelegraphShape {
 
     record Cone(double x, double z, double angle, double range, double halfAngle) implements TelegraphShape {
         @Override
+        public int kind() {
+            return KIND_CONE;
+        }
+
+        @Override
+        public double[] params() {
+            return new double[] {x, z, angle, range, halfAngle};
+        }
+
+        @Override
         public boolean contains(double px, double pz) {
             double dx = px - x;
             double dz = pz - z;
@@ -241,6 +315,16 @@ public interface TelegraphShape {
 
     // 回る帯。at(progress) がその瞬間の帯。contains は動く範囲の全体 (印の目安。当たりには at を使う)
     record Sweep(double x, double z, double start, double span, double length, double halfWidth) implements TelegraphShape {
+        @Override
+        public int kind() {
+            return KIND_SWEEP;
+        }
+
+        @Override
+        public double[] params() {
+            return new double[] {x, z, start, span, length, halfWidth};
+        }
+
         @Override
         public TelegraphShape at(double progress) {
             return new Line(x, z, start + span * Math.max(0, Math.min(1, progress)), length, halfWidth);
@@ -283,6 +367,28 @@ public interface TelegraphShape {
 
     // 広がる輪。at(progress) がその瞬間の輪 (Band)。警告のあいだは、はじまりの輪 (半径 r0) の線だけ描く
     record Wave(double cx, double cz, double r0, double r1, double halfThickness, double[] gaps, double gapHalf) implements TelegraphShape {
+        @Override
+        public int kind() {
+            return KIND_WAVE;
+        }
+
+        @Override
+        public double[] params() {
+            return wireParams();
+        }
+
+        private double[] wireParams() {
+            double[] out = new double[6 + gaps.length];
+            out[0] = cx;
+            out[1] = cz;
+            out[2] = r0;
+            out[3] = r1;
+            out[4] = halfThickness;
+            out[5] = gapHalf;
+            System.arraycopy(gaps, 0, out, 6, gaps.length);
+            return out;
+        }
+
         @Override
         public TelegraphShape at(double progress) {
             return new Band(cx, cz, r0 + (r1 - r0) * Math.max(0, Math.min(1, progress)), halfThickness, gaps, gapHalf);

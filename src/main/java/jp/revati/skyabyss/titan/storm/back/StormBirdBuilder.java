@@ -60,6 +60,10 @@ public final class StormBirdBuilder {
         int skinned = kit.skin(StormBirdBuilder::styleAt);
         int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
         fixtures(kit);
+        // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
+        if (BIRD.exists()) {
+            jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -200, 200, -125, 125, BIRD::top, 140);
+        }
         SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed in {} ms", kit.carved().size(), skinned, sealed,
                 System.currentTimeMillis() - t0);
     }
@@ -631,6 +635,15 @@ public final class StormBirdBuilder {
         kit.room(bx - 1, bx + 1, KEEL_ANTE.z1() - 1 + 3, bz, KEEL_ANTE.floor(), 3, Style.KEEL, 5);
         kit.room(bx - 1, KEEL_ANTE.x1() - 1, KEEL_ANTE.z1() + 1, KEEL_ANTE.z1() + 3, KEEL_ANTE.floor(), 3, Style.KEEL, 5);
         kit.room(KEEL_ANTE, Style.KEEL, 3);
+        // 床 121 の道を掘ると、螺旋のいちばん下の手前の段 (床 122) が削られて 2 段の落差になり、上れなくなる (詰み監査)。下の数段を置き直す
+        for (int k = Math.max(0, steps - 3); k <= steps; k++) {
+            int[] c = ring.get(Math.floorMod(start - k, 16));
+            int y = tf - k;
+            kit.put(c[0], y, c[1], StormKit.floor(Style.KEEL, c[0], c[1]));
+            for (int yy = y + 1; yy <= y + 3 && yy <= tf + 2; yy++) {
+                kit.air(c[0], yy, c[1]);
+            }
+        }
         // 竜骨の間の入口 (前室の北の口、z -30)
         for (int x = -1; x <= 1; x++) {
             for (int y = KEEL_ANTE.floor() + 1; y <= KEEL_ANTE.floor() + 3; y++) {
@@ -719,14 +732,18 @@ public final class StormBirdBuilder {
         for (int yy = y + 1; yy <= Math.max(y + 3, top(last[0], last[1]) + 3); yy++) {
             kit.air(last[0], yy, last[1]);
         }
+        // 口の次の外周のマスは、最後の段より 1 段だけ高い段にして、空へ開けておく。最後の段 → この段 → 屋根の上 (屋根は最後の段の 2 上) と、
+        // 1 段ずつ上がって背の上へ出られる (前は最後の段の真上だけが屋根の穴で、2 段の縦穴になり、上の口から出られなかった。詰み監査)
         int[] exit = ring.get(Math.floorMod(start + k + 1, 16));
-        int et = top(exit[0], exit[1]);
-        for (int yy = y; yy <= et; yy++) {
+        for (int yy = y; yy <= y + 1; yy++) {
             kit.put(exit[0], yy, exit[1], StormKit.FEATHER);
         }
-        // 螺旋の屋根 (縦穴を空から見てふさぐ。口だけ空ける)
+        for (int yy = y + 2; yy <= y + 4; yy++) {
+            kit.air(exit[0], yy, exit[1]);
+        }
+        // 螺旋の屋根 (縦穴を空から見てふさぐ。口とその次の段だけ空ける)
         for (int[] c : ring) {
-            if (c != last) {
+            if (c != last && c != exit) {
                 kit.solid(c[0], surface + 2, c[1], StormKit.FEATHER);
             }
         }
