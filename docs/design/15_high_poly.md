@@ -221,7 +221,8 @@
 | --- | --- |
 | gear の geo（mob の手に付く。600 面以内） | 灰被りの火掻き棒 168、番兵の盾 420、珊瑚の槍 144（像も同じ。細い軸は元のまま）、鉤槍 401、射手の弓 246（元のまま）、鍛え手の大鎚 466・火箸 364、雷乞いの杖 274。テクスチャ 64x18〜512x64 |
 | item モデル（プレイヤーの武器） | 13 個の低ポリメッシュ（4.6.2。階級 3 × 強化 3 の絵）。GUI の 32x32 の絵と持ち方（display）は 4.6.1。元の絵を彫ったボクセル（18 モデル、要素 64〜752）は `models/item_voxel/` に戻り先として残す（`gen_weapon_models_v2.py` は停止中、`tools/sources/weapons/*/voxels.npz` が入力） |
-| 立体防具（geo/armor） | 4 組。[16](16_armor_design.md) の重ね板の基盤で作る（`tools/install_armor_v2.py`）。面 1,250〜1,463（4 部位） |
+| item モデル（装飾品・補助の品） | 16 個の低ポリメッシュ（4.6.4。階級 3 の絵、鍛えないので強化の段なし）。GUI の 32x32 の絵は今のまま。元の平絵のモデルは `models/item_flat/` に戻り先として残す。装飾の枠に付けた姿はプレイヤーの体に描く（`AccessoryWornLayer`） |
+| 立体防具 | 4 組の低ポリメッシュ（C 骨組み。4.6.3。一式の三角形は通常 627〜864、レア 699〜980、伝説 804〜1,080）。`LowPolyArmor.enabled = false` で元のキューブ（geo/armor。[16](16_armor_design.md) の重ね板の基盤、`tools/install_armor_v2.py`、面 1,250〜1,463）に戻る |
 
 gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.py`。入力は `tools/sources/hp_base/gear/`）: 大きな部品は二段丸め、厚さ 1 以上の板・柄は 0.25 の面取り、0.25 の浮き縁（板の上下の継ぎ目）、長い柄の巻き輪（8 単位ごとの 0.25 の帯）、盾・槌頭の縁のリベット。足した箱は単色で既存の箱に重ならない。**細い軸（厚さ 1 未満の槍・弓・火掻き棒の柄）は面取りすると痩せて見えるので面取りしない**。インストーラーが重なりを検査して落とす。骨の名前（`armorHead` など）・pivot・手の受け口は触らない。
 
@@ -274,7 +275,40 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 
 - 全 13 個で、一人称・三人称 × 階級 3 × 強化 3、元のボクセル、地面（`PickupDelay` 付きの item）・額縁を撮った。三人称の向きは元のボクセルと合う（大剣・鉾で確認）。階級で輪郭、強化で縁の色と光る筋が変わる。弓は引きの 3 段で弦の位置が変わる。盾は構え中も盾の姿
 - 負荷（armor stand 20 体が +10 の大剣を持つ、1280x720、垂直同期なし、他の作業と並行で目安）: 低ポリ 4.4〜5.1 ms/frame、ボクセル 8.1〜9.4 ms/frame（約 1.8 倍速い）。台本 `tools/shots/weapon_lp_perf.txt`
-- 未確認: 他のプレイヤーの手の弓の引き絵（三人称の段は自分の三人称でだけ見た）、左利きの全武器、専用サーバーのマルチ。フォイル（輝き）は描かない（`ModGear` の品に `foil` が付くものがあれば、描き足しが要る）
+- 左利き: 8 本（大剣・鉾・弓・盾・爪・斧・鉤槍・鎚）を右利きと並べて撮り、鏡写しで持つ向きに問題なし（`tools/gen_weapon_extra_shots.py` → `tools/weapon_extra_sheet.py`。`docs/review/previews/weapon_lp_extra_left.png`）。左利きで弓を引く一人称・三人称も撮った
+- 輝き（foil）: `stack.hasFoil()`（エンチャント・品の `foil`）のとき、本体のメッシュを `ItemRenderer.getFoilBuffer`（glint の描画型）へもう一度流す。光る画素（emissive）の層はそのまま。大剣・弓・盾の手（一人称・三人称）で紫の輝きを確認（`weapon_lp_extra_foil.png`）。地面の item・額縁は小さく輝きは見分けにくい
+- 盾の三人称の構え（構えていないとき）: バニラの盾の display の平行移動 [10,6,-4] は、盾の板の中心が原点から -8 ずれる前提の値だった。メッシュ・元のボクセルは中心が原点なので、盾が腕から 1 枚ぶん横に離れて浮いていた。中心の位置を合わせて [2,-2,4]（左右とも）にした（`models/item/coral_shield.json`・`item_voxel/coral_shield.json`）
+- 他の生き物の弓の引き絵: 引きの段は `holder`（`RenderLivingEvent` の間の生き物）の `isUsingItem` と使っている品の種類で決める（以前は同じ stack の参照比較で、ほかのプレイヤー・生き物の同期した stack では外れうる）。スケルトンに弓を持たせた三人称は撮ったが、横向きで弦の段までは見分けられなかった。未確認: ほかのプレイヤーの手の弓の引き絵の段（実機マルチ）、専用サーバーのマルチ
+
+#### 4.6.3 立体防具の低ポリメッシュ（C 骨組み）
+
+4 組（岩鯨・潮殻・雷翼・余燼）× 4 部位 × 階級 3（通常・レア・伝説）のメッシュ。アトラスと光る画像は強化（+0〜4 / +5 / +10）で選ぶ。コードは `client/lowpoly/LowPolyArmor`・`LowPolyArmorRenderer`（骨の付け方は GeckoLib の `GeoArmorRenderer` のまま、骨ごとに低ポリメッシュを流す）。入れ方は `python tools/install_armor_lowpoly.py`（入力 `docs/review/lowpoly_roughs/armor/c/`、作り方は `tools/rough/lowpoly/armor/`）。
+
+- 一式（4 部位）の三角形: 岩鯨 842 / 958 / 1,050、潮殻 742 / 858 / 1,008、雷翼 864 / 980 / 1,080、余燼 627 / 699 / 804（通常 / レア / 伝説）。伝説は 1,100 以下。岩鯨・雷翼の伝説は背の環を軽くし（輪を 9 → 7 点、支柱を 1 区間）、レアより増える「背の弧・羽の 3 組目」をやめた（`style_c.LEAN`、`python tools/rough/lowpoly/armor/build_legend_lean.py` で岩鯨・雷翼の伝説だけ作り直せる。環・布は残る）
+- 陰影: アトラスには面の向きの陰影（上が明るく下が暗い）が焼いてある。バニラの方向光（姿勢で回った法線）も強く効かせると、腕を上げて面が下を向いたとき（防具立ての腕上げ）に肩の板が二重に暗く沈む。防具の描画では法線を真上へ 0.4 だけ寄せて（`LowPolyArmorRenderer.SHADE_FLATTEN`、`LowPoly.drawBone` の `flatten`）、姿勢で極端に暗くならないようにした。バニラの陰（向きによる明暗）の効きはその分だけ弱くなる
+
+#### 4.6.4 装飾品・補助の品の低ポリメッシュ（A 案。階級と体に付けた姿）
+
+16 個。雷翼 = 嵐の護符・嵐纏の足環・嵐の目の羽根・風切りの羽根、余燼 = 熾りの護符・熾火の外套・余燼の灯・熾火の角杯・燠の灯、岩鯨 = 共鳴の護符・苔の護石・岩鯨の補強板、潮殻 = 潮鳴りの護符・月潮の真珠・潮見の貝・潮の真珠。形は各巨神の武器の A 案と同じ言葉（雷翼 = 風切羽の重ね、余燼 = 割れ板、岩鯨 = 肋の曲刃（鯨骨・石・苔）、潮殻 = 珊瑚の枝槍（真珠層・濡れた石・珊瑚）。材質は武器と共通）。嵐の護符の稲妻は、矢に見えないよう右へ折り返す 3 枚の折れ板。GUI は今の 32x32 の絵のまま（燠の灯だけ今まで絵が無くブロックの 3D を出していたので、メッシュから 32x32 の絵を作った）。
+
+| 決めるもの | 選び方 |
+| --- | --- |
+| メッシュ | 品の階級（`ModGear#tier`。`ModGear` でない品はコモン）。コモン・レア・伝説の 3 段。レア = 部品を 1 つ足す + 青みの縁、伝説 = 輪郭を変える大きな一点 + 金の縁 + 縁がまだらに光る。三角形は身につける品 200 以下、護符・手に持つ品 150 以下（実際の階級の段は全部収まる） |
+| アトラスと光る画像 | 階級ごとに 1 枚。**装飾品は鍛えない**（03 の 4 章）ので +5 / +10 の絵は無い |
+| 光る画素 | アトラスの色のまま `entityTranslucentEmissive` で描き足す |
+
+三角形（コモン / レア / 伝説。★ が実際の階級）: 嵐の護符 132 / 144★ / 144、嵐纏の足環 112 / 176★ / 176、嵐の目の羽根 100 / 112 / 136★、風切りの羽根 112★ / 124 / 124、熾りの護符 92 / 104★ / 104、熾火の外套 128 / 140★ / 140、余燼の灯 84 / 96 / 120★、熾火の角杯 96★ / 108 / 108、燠の灯 132★、共鳴の護符 136 / 148★ / 148、苔の護石 132 / 144★ / 164、岩鯨の補強板 116 / 128 / 164★、潮鳴りの護符 122 / 134★ / 134、月潮の真珠 154 / 166 / 196★、潮見の貝 132★ / 144 / 144、潮の真珠 100★ / 136 / 136。
+
+仕組み（コードは `client/accessory/`）:
+
+- **手・地面・額縁・頭**: `AccessoryItemRenderer`（`BlockEntityWithoutLevelRenderer`）。item モデルの base は `builtin/entity`（display はバニラの generated の表を土台にした全品共通の値）、gui は 32x32 の平面。メッシュは中心が原点・正面が -Z なので、+0.5 ブロック・y 軸まわり 180 度・x 反転（`LowPolyMesh` は x 反転で焼く）で置く。メッシュの選び方と描き方は `AccessoryMeshes`（手と体の描画が共有）
+- **体に付けた姿**: `AccessoryWornLayer`（プレイヤーの描画に足す `RenderLayer`。`default`・`slim` の両方）。枠（`AccessoryData`）の 1・2 番（装飾）だけ描く。護符（0 番）は使って効く品で身につけないので描かない。付け場所と大きさ（モデルの部位の中の座標）: 足環 = 右足首（0.5 倍）、嵐の目の羽根 = 右耳の後ろ（頭、外へ傾ける 0.8 倍）、熾火の外套 = 背中（体、肩から垂れる 0.85 倍）、余燼の灯 = 腰の左（0.45 倍）、苔の護石 = 腰の右（0.5 倍）、岩鯨の補強板 = 背中（0.6 倍）、月潮の真珠 = 胸の前（0.5 倍）。一人称では自分の体が描かれないので出ない。ほかのプレイヤーにも見える（枠の同期を持ち主だけから、周りで追うプレイヤー全員へ広げた。`AccessorySetup.DATA`）。透明・観戦のプレイヤーは描かない。体のほかの装備（防具）の上に重なる
+- 防具立て（armor stand）は装飾の枠を持たないので、付けた姿は出ない
+- 燠の灯（ブロック）: 置いたブロックは今までのキューブのモデル（`block/cinder_lamp{,_hanging}`）のまま。非立方体のブロック描画は専用のブロックエンティティが要り、1 灯のために重いので入れない。持つ・落とす・額縁・頭は低ポリのメッシュ
+- アセット: `lowpoly/items/<id>/<段>.json`、`textures/lowpoly/items/<id>/<段>_atlas.png`（光る画像は `_atlas_glow.png`）。形のラフは `tools/rough/lowpoly/accessories/{thunder,ember,whale,tide}.py`、書き出しは `build_final.py`（出力 `docs/review/lowpoly_roughs/accessories_final/`）、入れ方は `python tools/install_lowpoly_accessories.py`（何度でも。元の平絵は `models/item_flat/` へ退避）
+- スイッチ（戻しの旗）: `LowPoly.accessoryMeshes`（既定 true。false で平絵、`item_flat/` を同じ置き方で描く）、`LowPoly.accessoryWorn`（既定 true。false で体に描かない）。台本は `accmesh on|off`、`accworn on|off`、`acctier common|rare|legend|off`、`accequip <id> [<id>]`
+
+確かめ（`python tools/gen_accessory_lp_shots.py` → `./gradlew runShots -Pscript=tools/shots/acc_lp_<巨神>.txt` → `python tools/accessory_lp_sheet.py`。絵は `docs/review/previews/acc_lp_<巨神>.png`）。
 
 ## 5. これからモデルを作る手順
 

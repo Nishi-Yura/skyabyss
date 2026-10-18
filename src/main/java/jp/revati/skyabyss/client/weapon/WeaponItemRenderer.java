@@ -70,7 +70,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (LowPoly.weaponMeshes) {
             LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(stack) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
-                renderMesh(mesh, id, level(stack), pose, buffers, light, overlay);
+                renderMesh(mesh, id, level(stack), stack.hasFoil(), pose, buffers, light, overlay);
                 return;
             }
         }
@@ -79,7 +79,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     // ---------------------------------------------------------------- メッシュ
 
-    private static void renderMesh(LowPolyMesh mesh, String id, int level, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    private static void renderMesh(LowPolyMesh mesh, String id, int level, boolean foil, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         ResourceLocation[] tex = variant(mesh.texture, level);
         pose.pushPose();
         // 元のボクセルは盾以外、全部の要素を z 軸まわりに -45 度 (中心 8,8,8) 傾けていて、display (持ち方) はその傾きを前提にしている。メッシュは刃を立てて作ってあるので、同じだけ傾ける
@@ -91,7 +91,9 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         // item モデルの原点は block の角 (この時点で -0.5 ずみ)。メッシュは x = 0, z = 0 が中心で、LowPolyMesh は geo (GeckoLib) 向けに x を反転して焼くので、ここで戻す
         pose.translate(0.5f, 0f, 0.5f);
         pose.scale(-1f, 1f, 1f);
-        LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0])), mesh, light, overlay, WHITE);
+        // 輝き (foil: エンチャント・品の foil): 本体のメッシュを glint の描画型へもう一度流す (バニラの item と同じ getFoilBuffer。UV はアトラスのまま)
+        VertexConsumer body = foil ? ItemRenderer.getFoilBuffer(buffers, RenderType.entityCutoutNoCull(tex[0]), true, true) : buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0]));
+        LowPoly.drawAll(pose, body, mesh, light, overlay, WHITE);
         if (tex[1] != null) {
             LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
         }
@@ -133,7 +135,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
             return -1;
         }
         LivingEntity e = context.firstPerson() ? Minecraft.getInstance().player : holder;
-        if (e == null || !e.isUsingItem() || e.getUseItem() != stack) {
+        if (e == null || !e.isUsingItem() || !e.getUseItem().is(stack.getItem())) {
             return -1;
         }
         float pull = (stack.getUseDuration(e) - e.getUseItemRemainingTicks()) / 20f;

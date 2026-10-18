@@ -1,0 +1,71 @@
+# 四巨神の背の敵の並び (各巨神の背に出る 4 種。低ポリ版)。レビュー用パック (docs/review/review_pack.md) の撮影。
+# ./gradlew runShots -Pscript=tools/shots/review_backs_lineup.txt -PshotsName=<新しい名前>
+# 各組は x の位置を分けて並べる: 岩鯨 x=0 / 潮殻 x=40 / 雷翼 x=80 / 余燼 x=120 (z=0、顔は南=+z 向き、カメラは北から見る)
+world review_backs flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+hud off
+lowpoly on
+
+cmd fill -20 -61 -12 140 -61 12 minecraft:smooth_basalt
+cmd kill @e[type=!minecraft:player]
+waitchunks
+wait 20
+
+cmd summon skyabyss:bone_sentinel -6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:moss_crawler -2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:rib_archer 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:whalebone_captain 6 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 0 -58.5 12 180 -4
+waitchunks
+wait 30
+shot backs_whale_lineup
+camera minecraft:overworld 3 -58.5 7 160 -4
+wait 20
+shot backs_whale_lineup_close
+cmd kill @e[type=!minecraft:player]
+
+cmd summon skyabyss:reef_scuttler 34 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:bubble_puffer 38 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:tide_beckoner 42 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:coral_thrall 46 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 40 -58.5 12 180 -4
+waitchunks
+wait 30
+shot backs_tide_lineup
+camera minecraft:overworld 43 -58.5 7 160 -4
+wait 20
+shot backs_tide_lineup_close
+cmd kill @e[type=!minecraft:player]
+
+cmd summon skyabyss:static_moth 74 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:raiju 78 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:thunder_supplicant 82 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:feather_warden 86 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 80 -58.5 12 180 -4
+waitchunks
+wait 30
+shot backs_storm_lineup
+camera minecraft:overworld 83 -58.5 7 160 -4
+wait 20
+shot backs_storm_lineup_close
+cmd kill @e[type=!minecraft:player]
+
+cmd summon skyabyss:ash_thrall 114 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ember_moth 118 -59 0 {NoAI:1b,NoGravity:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:cinder_roller 122 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:ash_smith 126 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+camera minecraft:overworld 120 -58.5 12 180 -4
+waitchunks
+wait 30
+shot backs_ember_lineup
+camera minecraft:overworld 123 -58.5 7 160 -4
+wait 20
+shot backs_ember_lineup_close
+echo backs done
+quit

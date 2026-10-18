@@ -26,11 +26,12 @@ public final class AccessorySetup {
             DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SkyAbyss.MODID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, SkyAbyss.MODID);
 
-    // 枠の中身。死んでも落とさない場面 (keepInventory・岩鯨の背) では copyOnDeath で残る。持ち主にだけ同期する
+    // 枠の中身。死んでも落とさない場面 (keepInventory・岩鯨の背) では copyOnDeath で残る。付けた品はほかのプレイヤーにも見える (体に描く AccessoryWornLayer) ので、
+    // 持ち主と、その周りで追っているプレイヤーみんなへ同期する (中身は付けている品だけで、隠すものはない)
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<AccessoryData>> DATA = ATTACHMENTS.register("accessories",
             () -> AttachmentType.serializable(AccessoryData::new)
                     .copyOnDeath()
-                    .sync((holder, to) -> holder == to, AccessoryData.STREAM_CODEC)
+                    .sync((holder, to) -> true, AccessoryData.STREAM_CODEC)
                     .build());
 
     public static final DeferredHolder<MenuType<?>, MenuType<AccessoryMenu>> MENU = MENUS.register("accessories",

@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
 //   z   32                                                                     [鍛え手の間 SMITH]
 //   z   62  (谷の奥)
 public final class EmberBackLayout {
-    // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く
-    public static final int LAYOUT_VERSION = 4;
+    // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く、4: 体を低ポリ案 C の火蜥蜴に、5: 体を口が開いた案 C から作り直し
+    public static final int LAYOUT_VERSION = 5;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。2.5節の 220 ブロック)

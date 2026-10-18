@@ -72,6 +72,17 @@ public final class Titans {
         return BACKS.get(dimension);
     }
 
+    // その巨神の背中のディメンション (まだ無ければ null)
+    @Nullable
+    public static synchronized ResourceKey<Level> backOf(String titan) {
+        for (Map.Entry<ResourceKey<Level>, String> e : BACKS.entrySet()) {
+            if (e.getValue().equals(titan)) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
     // その巨神の背中がもうあるか (本体の担当が bindBack を呼んだか)
     public static boolean hasBack(String titan) {
         return LEAVE.containsKey(titan);

@@ -21,6 +21,9 @@ import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends GeoArmorRenderer<T> {
     private static final ResourceLocation LOW_GEO = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/armor/lowpoly_armor.geo.json");
 
+    // 絵に面の向きの陰影が焼いてあるので、バニラの方向光 (姿勢で回った法線) も強く効かせると、腕を上げたとき下を向いた面が二重に暗い。法線を真上へ寄せる割合
+    static final float SHADE_FLATTEN = 0.4f;
+
     private final String set;
 
     protected LowPolyArmorRenderer(String set) {
@@ -56,7 +59,7 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
         LowPolyMesh mesh = LowPolyMeshes.get(LowPolyArmor.meshName(set, currentSlot, currentStack));
         LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
         if (meshBone != null) {
-            LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour);
+            LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, SHADE_FLATTEN);
         }
     }
 

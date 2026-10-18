@@ -1,7 +1,7 @@
 """Section plates, dividers, advancement cards, keycaps, step slots, inventory, footer."""
 import numpy as np
 from pix import *
-import icons
+import icons, icons2  # noqa: F401
 
 S3 = 3
 
@@ -187,9 +187,12 @@ def footer(fname="footer.png"):
 
 def make_all():
     out = []
-    plates = [("できること", "sword", "plate_features.png"), ("はじめかた", "campfire", "plate_start.png"),
-              ("操作", "star", "plate_keys.png"), ("もっと知りたいとき", "book", "plate_more.png"),
-              ("ベータ版について", "bell", "plate_beta.png")]
+    plates = [("巨神と章", "whale_icon", "plate_titans.png"), ("装備と成長", "chestplate", "plate_gear.png"),
+              ("墓と救い", "grave", "plate_grave.png"), ("みんなで遊ぶ", "party", "plate_party.png"),
+              ("演出と画面", "clapper", "plate_screen.png"), ("はじめかた", "campfire", "plate_start.png"),
+              ("操作", "star", "plate_keys.png"), ("ゲームルール", "cog", "plate_rules.png"),
+              ("0.2.0 の変更点", "scroll", "plate_changes.png"), ("既知の問題", "warning", "plate_issues.png"),
+              ("もっと知りたいとき", "book", "plate_more.png")]
     for i, (t, ic, f) in enumerate(plates):
         out.append(plate(t, ic, f, 11 + i))
     out.append(divider())
@@ -200,8 +203,7 @@ def make_all():
         ("謎を集める", ["見たもの、読んだ碑文が", "伝承の書に記されていく。"], "book", TEAL_L, "card_lore.png", TEAL),
         ("みんなで", ["パーティで経験値を分け合う。", "報酬は一人ずつ別に抽選。"], "party", H("c8f0a0"), "card_party.png", MOSS),
     ]
-    for c in cards:
-        out.append(card(*c))
+    # the advancement-style cards are no longer used by the README (kept for reuse; pass cards to card() to render)
     for ch in "JKUBOHRGVZN":
         out.append(keycap(ch, "key_%s.png" % ch))
     steps = ["campfire", "book", "bell", "footprint", "person", "cloud_shadow", "whale_icon"]

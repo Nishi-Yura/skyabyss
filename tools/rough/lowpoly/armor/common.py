@@ -71,16 +71,20 @@ def back_sig(T, B, sc=1.0, y0=22.4, z0=3.5, nf=3):
     return f
 
 
-def halo(T, bone, mat, cy=27.6, R=7.4, z=5.8, span=128, r=0.7):
-    """背の環 (伝説): 頭の後ろに立つ開いた輪。両端は背へ支柱でつなぐ。巨神の飾りを上に 3 つ。"""
+def halo(T, bone, mat, cy=27.6, R=7.4, z=5.8, span=128, r=0.7, lean=False):
+    """背の環 (伝説): 頭の後ろに立つ開いた輪。両端は背へ支柱でつなぐ。巨神の飾りを上に 1 つ。
+    lean=True: 輪の分割を 9 → 7 点、支柱を 2 区間 → 1 区間にして三角形を 36 減らす (岩鯨・雷翼の伝説が 1,100 を超えるため)。"""
     import math as _m
-    n = 9
+    n = 7 if lean else 9
     pts = []
     for i in range(n):
         th = _m.radians(-span + 2.0 * span * i / (n - 1))
         pts.append((R * _m.sin(th), cy + R * _m.cos(th), z))
     f = crv(bone, mat, pts, [r] * n, sides=3, hint=(0, 0, 1))
     for end in (pts[0], pts[-1]):
+        if lean:
+            f += crv(bone, mat, [(end[0], end[1], end[2]), (end[0] * 0.62, end[1] - 2.2, 3.5)], [r * 0.9, r * 0.7], sides=3, hint=(0, 0, 1))
+            continue
         f += crv(bone, mat, [(end[0], end[1], end[2]), (end[0] * 0.8, end[1] - 1.0, 4.6), (end[0] * 0.62, end[1] - 2.2, 3.5)],
                  [r * 0.9, r * 0.9, r * 0.7], sides=3, hint=(0, 0, 1))
     for k in (0,):
