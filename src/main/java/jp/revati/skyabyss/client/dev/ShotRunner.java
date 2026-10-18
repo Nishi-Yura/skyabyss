@@ -372,8 +372,31 @@ public final class ShotRunner {
                     case "on" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = true;
                     case "off" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = false;
                     case "debug" -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = true;
+                    case "armoroff" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = false;
+                    case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
                     default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
                 }
+                return true;
+            }
+            case "armortier" -> {
+                // armortier common|rare|legend|auto : 低ポリ防具の階級を決め打つ (品は全部レア。auto = 品の階級)
+                String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);
+                jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedTier = t.equals("auto") ? null : t;
+                return true;
+            }
+            case "sneak" -> {
+                // sneak on|off : しゃがむキーを押し続ける / 放す (防具の姿勢の確認用。KeyMapping だけ。OS の入力ではない)
+                mc.options.keyShift.setDown(line.arg(0).equalsIgnoreCase("on"));
+                return true;
+            }
+            case "walk" -> {
+                // walk on|off : 前進キーを押し続ける / 放す (歩く姿の確認用)
+                mc.options.keyUp.setDown(line.arg(0).equalsIgnoreCase("on"));
+                return true;
+            }
+            case "armorlevel" -> {
+                // armorlevel <0..10|auto> : 低ポリ防具の強化段階を決め打つ (auto = 品の強化段階)
+                jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
                 return true;
             }
             case "watcher" -> {

@@ -1,0 +1,239 @@
+# Low-poly armor (thunder_wing) on armor stands and on the player (docs/design/16_armor_design.md section 6).
+# ./gradlew runShots -Pscript=tools/shots/armor_lp_thunder_wing.txt
+world shots flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon armor_stand 0 -60 12 {Invisible:1b}
+
+armortier common
+armorlevel 0
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_common_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_common_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_common_q34
+armortier rare
+armorlevel 0
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_rare_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_rare_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_rare_q34
+armortier legend
+armorlevel 0
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend_q34
+armortier rare
+armorlevel 5
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_rare5_front
+armortier rare
+armorlevel 10
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_rare10_front
+armortier legend
+armorlevel 10
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend10_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend10_back
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[40f,0f],ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_legend10_q34
+armortier legend
+armorlevel 10
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],Pose:{LeftArm:[-150f,0f,10f],RightArm:[-150f,0f,-10f]},ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_pose_armsup
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],Pose:{LeftArm:[0f,0f,-75f],RightArm:[0f,0f,75f]},ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_pose_armsside
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],Pose:{LeftArm:[0f,0f,-45f],RightArm:[0f,0f,45f]},ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_pose_armsside45
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],Pose:{LeftArm:[40f,0f,0f],RightArm:[40f,0f,0f],LeftLeg:[-30f,0f,0f],RightLeg:[30f,0f,0f]},ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_pose_armsback
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],Pose:{LeftArm:[-28f,0f,0f],RightArm:[28f,0f,0f],LeftLeg:[32f,0f,0f],RightLeg:[-32f,0f,0f]},ArmorItems:[{id:"skyabyss:thunder_wing_boots",count:1},{id:"skyabyss:thunder_wing_leggings",count:1},{id:"skyabyss:thunder_wing_chestplate",count:1},{id:"skyabyss:thunder_wing_helmet",count:1}]}
+camera minecraft:overworld 0 -60.6 3.7 180 0
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_pose_walk
+cmd kill @e[type=minecraft:armor_stand]
+cmd gamemode creative
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+armortier common
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_player_common_idle
+perspective back
+wait 4
+shot armor_lp_thunder_wing_player_common_back
+perspective front
+swing
+wait 2
+shot armor_lp_thunder_wing_player_common_attack
+wait 20
+sneak on
+wait 12
+shot armor_lp_thunder_wing_player_common_crouch
+sneak off
+walk on
+wait 9
+shot armor_lp_thunder_wing_player_common_walk
+wait 4
+shot armor_lp_thunder_wing_player_common_walk2
+walk off
+wait 10
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_player_rare_idle
+perspective back
+wait 4
+shot armor_lp_thunder_wing_player_rare_back
+perspective front
+swing
+wait 2
+shot armor_lp_thunder_wing_player_rare_attack
+wait 20
+sneak on
+wait 12
+shot armor_lp_thunder_wing_player_rare_crouch
+sneak off
+walk on
+wait 9
+shot armor_lp_thunder_wing_player_rare_walk
+wait 4
+shot armor_lp_thunder_wing_player_rare_walk2
+walk off
+wait 10
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot armor_lp_thunder_wing_player_legend10_idle
+perspective back
+wait 4
+shot armor_lp_thunder_wing_player_legend10_back
+perspective front
+swing
+wait 2
+shot armor_lp_thunder_wing_player_legend10_attack
+wait 20
+sneak on
+wait 12
+shot armor_lp_thunder_wing_player_legend10_crouch
+sneak off
+walk on
+wait 9
+shot armor_lp_thunder_wing_player_legend10_walk
+wait 4
+shot armor_lp_thunder_wing_player_legend10_walk2
+walk off
+wait 10
+armortier legend
+armorlevel 10
+cmd summon minecraft:boat 0 -60 0
+cmd ride @s mount @e[type=minecraft:boat,limit=1,sort=nearest]
+wait 20
+perspective front
+shot armor_lp_thunder_wing_player_riding
+perspective back
+wait 4
+shot armor_lp_thunder_wing_player_riding_back
+quit
