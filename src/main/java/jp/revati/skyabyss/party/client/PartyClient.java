@@ -112,7 +112,7 @@ public final class PartyClient {
             }
             net.minecraft.network.chat.Component away = m.online() ? PartyMarkers.elsewhereLine(m.id()) : null;
             if (away != null) {
-                int tw = Math.min(font.width(away), 150);
+                int tw = Math.min(font.width(away), 200);
                 int x0 = x + W - tw;
                 g.fill(x0 - 2, y + 15, x + W + 2, y + 25, 0x60000000);
                 g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(away, tw)), x0, y + 16, 0x9AA6B8, true);
