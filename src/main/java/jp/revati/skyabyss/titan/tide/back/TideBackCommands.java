@@ -26,13 +26,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 潮殻の背の本番のテスト用コマンド (OP)。08 の 12章の案に合わせた:
-// /skyabyss titan reset tide                       : 試練だけ戻す (心臓も眠り直す)
+// /skyabyss titan reset tide                       : 打った人のグループの試練だけ戻す (心臓も眠り直す。コンソールからは記録のあるすべてのグループ)
 // /skyabyss titan tide <low|high|cycle>            : 潮を干潮・満潮に止める / 時計に戻す (潮殻の背だけの潮)
-// /skyabyss titan sleep tide <west|east|front|none> : 眠る試練を決めて、試練を戻す
+// /skyabyss titan sleep tide <west|east|front|none> : 打った人のグループの眠る試練を決めて、そのグループの試練を戻す
 // 確かめるための操作 (/skyabyss tideback ...):
 //   go <場所>           : 浜・広間・庭・大貝・祭壇・潮見・岩棚・干潟の前室・干潟・殻の底の前室へ移る
-//   ring <west|east|front> : 石を鳴らす (試練を飛ばす)
-//   status              : 潮・石・眠る試練・種・巣・潮招き
+//   ring <west|east|front> : 打った人のグループの石を鳴らす (試練を飛ばす)
+//   status              : 潮と、打った人のグループの石・眠る試練・種・巣・潮招き、部屋の持ち主
 //   watch <下> <中> <上> : 潮見の間の水位を直接決める
 //   nests               : 群れの巣をすべて壊す (潮招きの集合が始まる)
 //   route <x> <y> <z>   : 自分の足もとから、そこまで歩いて (跳んで 1 段・落ちて 3 段) 行く道の曲がり角を出す。
@@ -107,15 +107,34 @@ public final class TideBackCommands {
         return back;
     }
 
+    // 進みはグループごと。コマンドを打った人のグループ (人でなければ、記録のあるすべてのグループ) を戻す
     private static int reset(CommandContext<CommandSourceStack> ctx) {
+        return resetFor(ctx, null, false, "commands.skyabyss.tideback.reset", null);
+    }
+
+    private static int resetFor(CommandContext<CommandSourceStack> ctx, TideBackState.Trial force, boolean noSleep, String key, String arg) {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        TideBackTrials.reset(back, true);
-        TideBackState.Trial s = TideBackState.get(back).sleeping();
-        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.reset", s == null ? "none" : s.id()), true);
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player != null) {
+            java.util.UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(player);
+            TideBackTrials.resetGroup(back, group, true, force, noSleep);
+            TideBackState.Trial s = TideBackState.of(back, group).sleeping();
+            String shown = arg != null ? arg : s == null ? "none" : s.id();
+            ctx.getSource().sendSuccess(() -> ModText.hint(key, shown), true);
+        } else {
+            TideBackTrials.resetAllGroups(back, true, force, noSleep);
+            String shown = arg != null ? arg : "-";
+            ctx.getSource().sendSuccess(() -> ModText.hint(key, shown), true);
+        }
         return 1;
+    }
+
+    // コマンドを打った人のグループの進み (人でなければ失敗)
+    private static TideBackState.Group groupState(CommandContext<CommandSourceStack> ctx, ServerLevel back) throws CommandSyntaxException {
+        return TideBackTrials.state(back, ctx.getSource().getPlayerOrException());
     }
 
     private static int tide(CommandContext<CommandSourceStack> ctx, String phase) {
@@ -133,14 +152,8 @@ public final class TideBackCommands {
     }
 
     private static int sleep(CommandContext<CommandSourceStack> ctx, String id) {
-        ServerLevel back = back(ctx);
-        if (back == null) {
-            return 0;
-        }
         TideBackState.Trial t = TideBackState.Trial.byId(id);
-        TideBackTrials.reset(back, true, t, t == null);
-        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.sleep", id), true);
-        return 1;
+        return resetFor(ctx, t, t == null, "commands.skyabyss.tideback.sleep", id);
     }
 
     private static int go(CommandContext<CommandSourceStack> ctx, String place) throws CommandSyntaxException {
@@ -156,12 +169,12 @@ public final class TideBackCommands {
         return 1;
     }
 
-    private static int ring(CommandContext<CommandSourceStack> ctx, TideBackState.Trial t) {
+    private static int ring(CommandContext<CommandSourceStack> ctx, TideBackState.Trial t) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        TideBackState state = TideBackState.get(back);
+        TideBackState.Group state = groupState(ctx, back);
         if (t == TideBackState.Trial.FRONT) {
             state.markBeckonerDefeated();
         }
@@ -170,12 +183,12 @@ public final class TideBackCommands {
         return 1;
     }
 
-    private static int status(CommandContext<CommandSourceStack> ctx) {
+    private static int status(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        TideBackState s = TideBackState.get(back);
+        TideBackState.Group s = groupState(ctx, back);
         int nests = 0;
         for (int i = 0; i < 6; i++) {
             if ((s.nestSites() & (1 << i)) != 0 && !s.nestBroken(i)) {
@@ -188,7 +201,14 @@ public final class TideBackCommands {
                 s.beckonerDefeated() ? "defeated" : TideFlats.fightActive() ? "fighting" : "waiting", s.bottomOpen() ? "open" : "closed"), false);
         int[] lv = TideWatch.levels();
         ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.watch", lv[0], lv[1], lv[2], TideWatch.config()), false);
+        ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.rooms", shortId(TideRooms.owner(TideRooms.GARDEN)),
+                shortId(TideRooms.owner(TideRooms.WATCH)), shortId(TideRooms.owner(TideRooms.FLATS)),
+                shortId(jp.revati.skyabyss.titan.tide.heart.TideHeartBattle.owner()), shortId(s.id)), false);
         return 1;
+    }
+
+    private static String shortId(java.util.UUID id) {
+        return id == null ? "-" : id.toString().substring(0, 8);
     }
 
     private static int watch(CommandContext<CommandSourceStack> ctx) {

@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.tide.back;
 
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.titan.group.GroupOwned;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,13 +18,47 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 // 群れの巣 (reef_nest、08 の 4.3節・5.1節)。干潟の砂の上の珊瑚の塚 (見た目は島のブロック)。このエンティティは当たり判定と体力だけを持つ。
-// 干潮で口を開け、磯走りを出す。満潮では殻を閉じて傷が通らない。湧き方・壊れたあとは TideFlats が決める。保存しない (TideFlats が置き直す)
-public class ReefNest extends Mob {
+// 干潮で口を開け、磯走りを出す。満潮では殻を閉じて傷が通らない。湧き方・壊れたあとは TideFlats が決める。保存しない (TideFlats が置き直す)。
+// 巣は干潟を持っているグループのもの (GroupOwned): ほかのグループの人には見えず (当たり判定も届かない)、傷も受けない
+public class ReefNest extends Mob implements GroupOwned {
     public static final float BASE_HEALTH = 60;
     public static final float ARMOR = 6;
 
     int site = -1;
     private long lastClosedNotice;
+    @javax.annotation.Nullable
+    private java.util.UUID groupId;
+
+    @Override
+    @javax.annotation.Nullable
+    public java.util.UUID groupId() {
+        return groupId;
+    }
+
+    @Override
+    public void setGroupId(@javax.annotation.Nullable java.util.UUID group) {
+        this.groupId = group;
+    }
+
+    // 別のグループの人にはパケットを送らない (見えない・当たらない・音も届かない)
+    @Override
+    public boolean broadcastToPlayer(ServerPlayer player) {
+        return super.broadcastToPlayer(player) && GroupOwned.visibleTo(this, player);
+    }
+
+    // 別のグループの人を狙わない (巣は狙わないが、決まりをそろえる)
+    @Override
+    public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
+        return super.canAttack(target) && GroupOwned.mayTarget(this, target);
+    }
+
+    // 音は自分のグループにだけ
+    @Override
+    public void playSound(net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
+        if (!GroupOwned.playToGroup(this, sound, volume, pitch)) {
+            super.playSound(sound, volume, pitch);
+        }
+    }
 
     public ReefNest(EntityType<? extends Mob> type, Level level) {
         super(type, level);

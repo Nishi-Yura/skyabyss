@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 潮殻の背の敵の自己テスト (SKYABYSS_SELFTEST)。結果はログに SELFTEST tide mobs PASSED / FAILED (サーバーを止めるのは TitanBackSelfTest)。
 // 登録と強さ、試練の個体は保存されないこと、経験値の表、落とす物の表 (2 万回の抽選)、潮の周期、像になる・目覚める、
-// 裏返りの 2 倍、泡が真上にだけ浮かせること
+// 裏返りの 2 倍、泡が真上にだけ浮かせること、グループの印 (ほかのグループの人には見えず、狙わない)
 public final class TideMobSelfTest {
     private static final int TEST_X = -4200;
     private static final int TEST_Z = 4200;
@@ -48,7 +48,7 @@ public final class TideMobSelfTest {
             level.setChunkForced(TEST_X >> 4, TEST_Z >> 4, false);
         }
         if (failures.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tide mobs PASSED (registry, stats, not saved, xp, drop table, tide cycle, statue, flip, bubble lift)");
+            SkyAbyss.LOGGER.info("SELFTEST tide mobs PASSED (registry, stats, not saved, xp, drop table, tide cycle, statue, flip, bubble lift, group marks)");
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST tide mobs FAILED: {}", f));
         }
@@ -77,6 +77,7 @@ public final class TideMobSelfTest {
             checkStatue(level, floor, made, failures);
             checkFlip(level, floor, made, failures);
             checkBubble(level, floor, made, failures);
+            checkGroup(level, floor, made, failures);
         } finally {
             made.forEach(Mob::discard);
             for (int dx = -3; dx <= 3; dx++) {
@@ -221,6 +222,36 @@ public final class TideMobSelfTest {
         check(failures, s.isFlipped(), "scuttler flips");
         s.hurt(level.damageSources().generic(), 2);
         check(failures, Math.abs(s.getHealth() - 6) < 1e-3, "flipped scuttler takes double damage (hp " + s.getHealth() + ")");
+    }
+
+    // グループの印 (GroupOwned): 印のある敵は、そのグループの人にだけ見え、そのグループの人だけを狙う。印のない敵 (スポーンエッグ) は誰にでも。
+    // 群れの巣 (ReefNest) も同じ。泡の弾の持ち主のグループも引ける
+    private static void checkGroup(ServerLevel level, BlockPos floor, List<Mob> made, List<String> failures) {
+        java.util.UUID ga = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-0000000000c1");
+        java.util.UUID gb = java.util.UUID.fromString("7e1de0c4-0000-4000-8000-0000000000c2");
+        net.neoforged.neoforge.common.util.FakePlayer a = net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,
+                new com.mojang.authlib.GameProfile(ga, "[TideMobA]"));
+        net.neoforged.neoforge.common.util.FakePlayer b = net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,
+                new com.mojang.authlib.GameProfile(gb, "[TideMobB]"));
+        CoralThrall t = make(level, TideMobSetup.CORAL_THRALL.get(), floor, made);
+        check(failures, t instanceof jp.revati.skyabyss.titan.group.GroupOwned, "tide mobs are not group owned");
+        check(failures, jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(t, b) && t.canAttack(b), "a mob without a group is not for everyone");
+        t.setGroupId(ga);
+        check(failures, jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(t, a) && !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(t, b),
+                "group A's thrall is visible to group B");
+        check(failures, t.canAttack(a) && !t.canAttack(b), "group A's thrall may target group B");
+        check(failures, jp.revati.skyabyss.titan.group.Groups.differ(t, b) && !jp.revati.skyabyss.titan.group.Groups.differ(t, a), "group keys of mob and players");
+        BubbleShot shot = new BubbleShot(level, t, new net.minecraft.world.phys.Vec3(0, 0, 1));
+        check(failures, ga.equals(jp.revati.skyabyss.titan.group.Groups.keyOf(shot)), "a bubble shot does not carry its puffer's group");
+        shot.discard();
+        jp.revati.skyabyss.titan.tide.back.ReefNest nest = jp.revati.skyabyss.titan.tide.back.TideBackSetup.REEF_NEST.get().create(level);
+        check(failures, nest != null, "reef nest cannot be created");
+        if (nest != null) {
+            nest.setGroupId(ga);
+            check(failures, !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(nest, b) && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(nest, a),
+                    "group A's nest is visible to group B");
+            nest.discard();
+        }
     }
 
     // 泡は真上へだけ浮かせる (横の速さは当たる前のまま)

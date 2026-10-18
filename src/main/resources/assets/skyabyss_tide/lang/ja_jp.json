@@ -230,6 +230,7 @@
   "commands.skyabyss.tideback.go": "%s へ移った",
   "commands.skyabyss.tideback.status": "潮: %s (あと %s tick)、石 %s/3、眠る試練 %s、庭の道 %s、潮見の配置 %s、巣 %s、潮招き %s、潮の底 %s",
   "commands.skyabyss.tideback.watch": "潮見の間の水位: 下 %s / 中 %s / 上 %s (配置 %s)",
+  "commands.skyabyss.tideback.rooms": "部屋の持ち主: 庭 %s / 潮見の間 %s / 干潟 %s / 殻の底 %s (自分のグループ %s)",
   "commands.skyabyss.tideback.not_built": "潮殻の背がまだ建っていない (/skyabyss titan board tide)",
   "growth.skyabyss.reason.tide_trial": "潮鳴り石が鳴った",
   "message.skyabyss.whisper.tide_landing": "巨神のひれの上に立っている。甲羅の脇の大きな門が、中へ通じている",

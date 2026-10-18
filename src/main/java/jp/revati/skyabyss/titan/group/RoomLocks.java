@@ -107,4 +107,12 @@ public final class RoomLocks {
     public static List<String> heldBy(UUID group) {
         return LOCKS.entrySet().stream().filter(e -> e.getValue().owner.equals(group)).map(Map.Entry::getKey).toList();
     }
+
+    // 持ち主をその場で決める (自己テストとコマンド用。部屋の中に人がいなくても持たせる)。前の持ち主 (いなければ null) を返す。
+    // 次の update で持ち主が中にいなければ、grace のあとで手放す
+    @Nullable
+    public static UUID claim(ServerLevel level, String room, UUID group) {
+        Lock old = LOCKS.put(room, new Lock(group, level.getGameTime()));
+        return old == null ? null : old.owner;
+    }
 }
