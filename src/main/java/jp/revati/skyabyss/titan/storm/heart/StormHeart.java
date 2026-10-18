@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1259,7 +1260,7 @@ public class StormHeart extends GuardMob {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.COPPER_HIT;
+        return MobSounds.STORM_HEART_HURT.get();
     }
 
     @Override

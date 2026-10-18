@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -79,7 +80,7 @@ public class RibArcher extends GuardMob implements RangedAttackMob {
         double d = Math.sqrt(dx * dx + dz * dz);
         spike.shoot(dx, dy + d * 0.18, dz, 1.7f, 4f);
         level().addFreshEntity(spike);
-        level().playSound(null, getX(), getY(), getZ(), SoundEvents.SKELETON_SHOOT, SoundSource.HOSTILE, 1f, 0.6f);
+        level().playSound(null, getX(), getY(), getZ(), MobSounds.RIB_ARCHER_SHOOT.get(), SoundSource.HOSTILE, 1f, 0.9f + random.nextFloat() * 0.2f);
     }
 
     // 描画側 (弓の GearLayer) が使う: shoot の動作アニメーションが流れている間は弓の弦を引く (draw)
@@ -90,21 +91,26 @@ public class RibArcher extends GuardMob implements RangedAttackMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.SKELETON_AMBIENT;
+        return MobSounds.RIB_ARCHER_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.SKELETON_HURT;
+        return MobSounds.RIB_ARCHER_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.BONE_BLOCK_BREAK;
+        return MobSounds.RIB_ARCHER_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.RIB_ARCHER_STEP.get(), 0.25f);
     }
 
     @Override
     public float getVoicePitch() {
-        return 0.8f;
+        return 1.0f + (random.nextFloat() - random.nextFloat()) * 0.08f;
     }
 }

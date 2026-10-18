@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.heart;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -960,7 +961,7 @@ public class TideHeart extends GuardMob {
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.AMETHYST_BLOCK_HIT;
+        return MobSounds.TIDE_HEART_HURT.get();
     }
 
     @Override

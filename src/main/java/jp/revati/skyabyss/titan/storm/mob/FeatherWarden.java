@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.storm.mob;
 
+import jp.revati.skyabyss.registry.MobSounds;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -457,5 +458,10 @@ public class FeatherWarden extends StormMob {
     @Override
     protected SoundEvent getDeathSound() {
         return StormMobSetup.WARDEN_DEATH.get();
+    }
+
+    @Override
+    protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        modStep(MobSounds.FEATHER_WARDEN_STEP.get(), 0.2f);
     }
 }

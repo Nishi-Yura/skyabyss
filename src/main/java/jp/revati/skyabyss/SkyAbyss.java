@@ -11,6 +11,7 @@ import jp.revati.skyabyss.registry.ModEffects;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.registry.ModMenus;
+import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.registry.ModSounds;
 
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +30,7 @@ public class SkyAbyss {
     public SkyAbyss(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         ModSounds.register(modEventBus);
+        MobSounds.register(modEventBus);
         ModEffects.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
