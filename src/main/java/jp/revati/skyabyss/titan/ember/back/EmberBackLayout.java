@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 //   z   62  (谷の奥)
 public final class EmberBackLayout {
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く
-    public static final int LAYOUT_VERSION = 3;
+    public static final int LAYOUT_VERSION = 4;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。2.5節の 220 ブロック)
@@ -42,7 +42,7 @@ public final class EmberBackLayout {
     public static final int BODY_CZ = 0;
     public static final double FAR = 230;
     // 体の外形の箱 (body.bin の表の範囲: x -107〜106、y 64〜226、z -179〜212。ブロックは頭の先 z -175・尾の先 z 210・脚を入れた幅 x -101〜100・火口の縁 y 175。熾の底は灰の原の下 y 46 から)
-    public static final Box BODY = new Box(-108, 44, -180, 108, 230, 214);
+    public static final Box BODY = new Box(-100, 44, -180, 100, 200, 226);
 
     // ---------------------------------------------------------------- 箱 (両端を含む整数の箱)
     public record Box(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {

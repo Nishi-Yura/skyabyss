@@ -222,3 +222,4 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 - `python tools/gen_tablet_texture.py`: 碑 (`skyabyss:tablet`) の絵 2 枚、ブロック状態、モデル、lang の名前を作る
 
 | 岩鯨の背の島 (低ポリ案 C をブロックにした鯨、02 の 3.1 章): `data/skyabyss/titan_back/whale.bin` | `gen_titan_back_whale.py` (形は `lowpoly_whale_voxel.py` が案 C の近景メッシュから作る。`--fit` で部屋と殻の距離、`--preview` で上と横の色の地図)。構造の書き出しとメッシュの並べ描きは `whale_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`TitanBackLayout.LAYOUT_VERSION`) を上げる |
+| 余燼の背の体 (低ポリ案 C「皮が岩になる火蜥蜴」をブロックにした火蜥蜴、13 の 3.2 章): `data/skyabyss/ember_back/body.bin` | `gen_ember_back_body.py` (形は `lowpoly_ember_voxel.py` が案 C の近景メッシュから作る。`--preview` で上・横・前の色の地図、`--cache` で `rough/_ember_back_body_cache.npz`)。メッシュとの並べ描きは `--cache` のあとで `ember_back_c_views.py` | 同じ物ができる。変えたら配置の版 (`EmberBackLayout.LAYOUT_VERSION`) を上げる |

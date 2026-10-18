@@ -387,7 +387,7 @@ public final class EmberBackSelfTest {
         goals.put("south stone", STONE_SOUTH.north());
         goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 8, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
         goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, 4));
-        goals.put("crack rail", new BlockPos(5, 115, 30));
+        goals.put("crack rail", new BlockPos(5, EmberBodyBuilder.BODY.top(5, 30) + 1, 30));
         if (gateOpen) {
             goals.put("heart door", HEART_DOOR.min());
         }
