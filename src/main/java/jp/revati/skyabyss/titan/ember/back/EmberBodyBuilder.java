@@ -166,12 +166,12 @@ public final class EmberBodyBuilder {
     }
 
     // ---------------------------------------------------------------- 口 (舌の上の到着点と、顎の先への段)
-    // モデルの口はもともと開いている (床 68 の舌、天井 77 前後)。到着の床をならし、顎の先に段を切る
+    // モデルの口は開いている (舌の上面 y 69、上あごの下面 y 74、奥は喉の壁 z -148)。到着の床を舌より 1 低い 68 にならし、天井はモデルの上あごの下 (y 73) のまま。顎の先に段を切る
     private void mouth() {
         for (int z = -166; z <= -134; z++) {
             for (int x = -6; x <= 6; x++) {
                 kit.set(x, MOUTH_FLOOR, z, Math.abs(x) <= 3 ? Blocks.RED_TERRACOTTA.defaultBlockState() : EmberKit.ruinFloor(x, z));
-                for (int y = MOUTH_FLOOR + 1; y <= MOUTH_FLOOR + (Math.abs(x) <= 4 ? 7 : 5); y++) {
+                for (int y = MOUTH_FLOOR + 1; y <= MOUTH_FLOOR + 5; y++) {
                     kit.set(x, y, z, EmberKit.AIR);
                 }
             }
