@@ -7,10 +7,14 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 雷翼の背の試練の状態 (storm_back のディメンションに保存)。
-// 試練の番号 (休み場の記録を無効にする番号) と心臓の撃破は、岩鯨・潮殻と共通の TitanBackData に置く。ここには雷翼だけのものを置く
+// 雷翼の背の「背中そのもの」の状態 (storm_back のディメンションに保存。全員で一つ)。
+//  - 嵐の拍 (clock): 景色と昇り風・横風の強さ。全員に同じ
+//  - 風切りの骨の道の形 (westRoute): 割れた床の梁の位置はブロックに彫るので、見る人ごとに変えられない。全員で一つの道
+//    (背中にだれもいなくなって 3 分たったときに、引き直して彫り直す)
+// 試練の進み (鳴った石・骨の戸・受け羽・雷獣・竜骨の門・眠る試練・眼の間の配置) はグループごと: StormProgress (BackGroupData の記録)
 public class StormBackState extends SavedData {
     private static final String NAME = "skyabyss_storm_back";
     private static final Factory<StormBackState> FACTORY = new Factory<>(StormBackState::new, StormBackState::load);
@@ -35,27 +39,8 @@ public class StormBackState extends SavedData {
 
     // 嵐の拍 (一周 1800 tick の中の位置)
     int clock;
-    // 三つの風鳴り石が鳴っているか
-    private final boolean[] rung = new boolean[3];
-    @Nullable
-    private Trial sleeping;
-    @Nullable
-    private Trial lastSleeping;
-    // ワールドで雷翼の心臓が一度でも倒されたか (2 周目から試練が一つ眠る)
-    private boolean everDefeated;
-    // 眼の間で、いちばんやさしい配置をもう使ったか
-    private boolean mirrorsFirstUsed;
-    // リセットの種で決めたもの: 風切りの骨の道の形 (0〜2)、眼の間の配置 (0〜3)
+    // 風切りの骨の道の形 (0〜2)
     private int westRoute;
-    private int mirrorConfig;
-    // 東の骨の戸 (ビット)、雷獣を倒したか、竜骨の門が開いたか
-    private int eastDoors;
-    private boolean raijuDefeated;
-    private boolean keelOpen;
-    // 眼の間の受け羽 (ビット) と、鏡の向き (台ごとに 2 ビット)
-    private int receivers;
-    private long mirrorFacing;
-    private int resets;
 
     public static StormBackState get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -64,42 +49,14 @@ public class StormBackState extends SavedData {
     private static StormBackState load(CompoundTag tag, HolderLookup.Provider registries) {
         StormBackState s = new StormBackState();
         s.clock = tag.getInt("Clock");
-        for (int i = 0; i < 3; i++) {
-            s.rung[i] = tag.getBoolean("Rung" + i);
-        }
-        s.sleeping = Trial.byId(tag.getString("Sleeping"));
-        s.lastSleeping = Trial.byId(tag.getString("LastSleeping"));
-        s.everDefeated = tag.getBoolean("EverDefeated");
-        s.mirrorsFirstUsed = tag.getBoolean("MirrorsFirstUsed");
         s.westRoute = tag.getInt("WestRoute");
-        s.mirrorConfig = tag.getInt("MirrorConfig");
-        s.eastDoors = tag.getInt("EastDoors");
-        s.raijuDefeated = tag.getBoolean("RaijuDefeated");
-        s.keelOpen = tag.getBoolean("KeelOpen");
-        s.receivers = tag.getInt("Receivers");
-        s.mirrorFacing = tag.getLong("MirrorFacing");
-        s.resets = tag.getInt("Resets");
         return s;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putInt("Clock", clock);
-        for (int i = 0; i < 3; i++) {
-            tag.putBoolean("Rung" + i, rung[i]);
-        }
-        tag.putString("Sleeping", sleeping == null ? "" : sleeping.id());
-        tag.putString("LastSleeping", lastSleeping == null ? "" : lastSleeping.id());
-        tag.putBoolean("EverDefeated", everDefeated);
-        tag.putBoolean("MirrorsFirstUsed", mirrorsFirstUsed);
         tag.putInt("WestRoute", westRoute);
-        tag.putInt("MirrorConfig", mirrorConfig);
-        tag.putInt("EastDoors", eastDoors);
-        tag.putBoolean("RaijuDefeated", raijuDefeated);
-        tag.putBoolean("KeelOpen", keelOpen);
-        tag.putInt("Receivers", receivers);
-        tag.putLong("MirrorFacing", mirrorFacing);
-        tag.putInt("Resets", resets);
         return tag;
     }
 
@@ -112,162 +69,19 @@ public class StormBackState extends SavedData {
         setDirty();
     }
 
-    public boolean rung(Trial t) {
-        return rung[t.ordinal()];
-    }
-
-    public void setRung(Trial t, boolean v) {
-        rung[t.ordinal()] = v;
-        setDirty();
-    }
-
-    public int rungCount() {
-        int n = 0;
-        for (boolean b : rung) {
-            n += b ? 1 : 0;
-        }
-        return n;
-    }
-
-    // 三つとも鳴ったか (眠っている試練の石は鳴っている)
-    public boolean allRung() {
-        return rungCount() >= 3;
-    }
-
-    @Nullable
-    public Trial sleeping() {
-        return sleeping;
-    }
-
-    @Nullable
-    public Trial lastSleeping() {
-        return lastSleeping;
-    }
-
-    // 眠る試練をコマンドで決める (今の周に効かせる)
-    public void setSleeping(@Nullable Trial t) {
-        if (sleeping != null && sleeping != t) {
-            rung[sleeping.ordinal()] = false;
-        }
-        sleeping = t;
-        if (t != null) {
-            rung[t.ordinal()] = true;
-            lastSleeping = t;
-        }
-        setDirty();
-    }
-
-    public boolean everDefeated() {
-        return everDefeated;
-    }
-
-    public void markDefeated() {
-        everDefeated = true;
-        setDirty();
-    }
-
-    public boolean mirrorsFirstUsed() {
-        return mirrorsFirstUsed;
-    }
-
-    public void markMirrorsFirstUsed() {
-        mirrorsFirstUsed = true;
-        setDirty();
-    }
-
     public int westRoute() {
         return westRoute;
     }
 
-    public int mirrorConfig() {
-        return mirrorConfig;
-    }
-
-    public void setRoutes(int westRoute, int mirrorConfig) {
-        this.westRoute = westRoute;
-        this.mirrorConfig = mirrorConfig;
+    public void setWestRoute(int route) {
+        westRoute = Math.floorMod(route, 3);
         setDirty();
     }
 
-    public boolean eastDoorOpen(int i) {
-        return (eastDoors & (1 << i)) != 0;
-    }
-
-    public void openEastDoor(int i) {
-        eastDoors |= 1 << i;
-        setDirty();
-    }
-
-    public boolean raijuDefeated() {
-        return raijuDefeated;
-    }
-
-    public void setRaijuDefeated(boolean v) {
-        raijuDefeated = v;
-        setDirty();
-    }
-
-    public boolean keelOpen() {
-        return keelOpen;
-    }
-
-    public void setKeelOpen(boolean v) {
-        keelOpen = v;
-        setDirty();
-    }
-
-    public int receivers() {
-        return receivers;
-    }
-
-    public void setReceivers(int bits) {
-        receivers = bits;
-        setDirty();
-    }
-
-    public int mirrorFacing(int i) {
-        return (int) ((mirrorFacing >> (i * 2)) & 3);
-    }
-
-    public void setMirrorFacing(int i, int facing) {
-        mirrorFacing = (mirrorFacing & ~(3L << (i * 2))) | ((long) (facing & 3) << (i * 2));
-        setDirty();
-    }
-
-    public int resets() {
-        return resets;
-    }
-
-    // 試練を最初に戻す (12 の 7.1節)。新しい種を引き、2 周目からは試練を一つ眠らせる (同じ試練は二回続けて眠らない)。拍は凪の始まりへ
-    public void reset(net.minecraft.util.RandomSource random, @Nullable Trial forceSleep, boolean noSleep) {
-        java.util.Arrays.fill(rung, false);
-        eastDoors = 0;
-        raijuDefeated = false;
-        keelOpen = false;
-        receivers = 0;
-        mirrorFacing = 0;
-        clock = 0;
+    // 道の形を引き直し、拍を凪の始まりへ (背中にだれもいなくなったとき)
+    public void reroll(RandomSource random) {
         westRoute = random.nextInt(3);
-        if (!mirrorsFirstUsed) {
-            mirrorConfig = 0;
-            mirrorsFirstUsed = true;
-        } else {
-            mirrorConfig = 1 + random.nextInt(3);
-        }
-        Trial next = null;
-        if (forceSleep != null) {
-            next = forceSleep;
-        } else if (everDefeated && !noSleep) {
-            java.util.List<Trial> pool = new java.util.ArrayList<>(java.util.List.of(Trial.values()));
-            pool.remove(lastSleeping);
-            next = pool.get(random.nextInt(pool.size()));
-        }
-        sleeping = next;
-        if (next != null) {
-            lastSleeping = next;
-            rung[next.ordinal()] = true;
-        }
-        resets++;
+        clock = 0;
         setDirty();
     }
 }

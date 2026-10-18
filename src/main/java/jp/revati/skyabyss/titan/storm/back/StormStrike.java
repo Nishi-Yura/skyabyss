@@ -3,11 +3,13 @@ package jp.revati.skyabyss.titan.storm.back;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.group.Groups;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -32,6 +34,8 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 // - 輪が避雷の柱から 3 ブロック以内なら、雷は柱へ落ちる (人には当たらない。柱が 1 段満ちる)
 // - そうでなければ輪の半径 1.5 の中の人 (と、持ち主でない生き物) に damage と 0.5 秒の鈍足
 // 輪の粒は overrideLimiter で送り、音も鳴らす。雷は見た目だけ (火も地形の変化もない)
+// グループ (docs/design/10 の 9 章): 招雷はグループを持つ (持ち主の敵のグループ、または試練が狙ったグループ)。
+// グループのある招雷は、そのグループの人と敵にだけ当たり、輪の粒もそのグループの人にだけ見える。グループのない招雷 (卵の敵) は誰にでも当たる
 public final class StormStrike {
     public static final double RADIUS = 1.5;
     public static final double ROD_REACH = 3.0;
@@ -47,6 +51,9 @@ public final class StormStrike {
         public final float damage;
         @Nullable
         public final Entity owner;
+        // この招雷のグループ (null なら誰にでも)
+        @Nullable
+        public final UUID group;
         public final int warnTicks;
         int left;
         // 柱へ落ちたらその柱。輪を出した時点で決める (輪のあいだに柱が満ちても同じ柱へ)
@@ -57,13 +64,14 @@ public final class StormStrike {
         // 段を満たすか (段階 3 の招雷の連打は柱へ落ちても満たさない)
         public boolean charges = true;
 
-        Strike(ServerLevel level, Vec3 pos, int warnTicks, float damage, @Nullable Entity owner) {
+        Strike(ServerLevel level, Vec3 pos, int warnTicks, float damage, @Nullable Entity owner, @Nullable UUID group) {
             this.level = level;
             this.pos = pos;
             this.warnTicks = warnTicks;
             this.left = warnTicks;
             this.damage = damage;
             this.owner = owner;
+            this.group = group;
         }
 
         public boolean landed() {
@@ -89,7 +97,12 @@ public final class StormStrike {
     }
 
     public static Strike call(ServerLevel level, Vec3 at, int warnTicks, float damage, @Nullable Entity owner) {
-        Strike s = new Strike(level, at, Math.max(1, warnTicks), damage, owner);
+        return call(level, at, warnTicks, damage, owner, Groups.keyOf(owner));
+    }
+
+    // グループを決めて呼ぶ (試練が人を狙うとき: その人のグループ)
+    public static Strike call(ServerLevel level, Vec3 at, int warnTicks, float damage, @Nullable Entity owner, @Nullable UUID group) {
+        Strike s = new Strike(level, at, Math.max(1, warnTicks), damage, owner, group);
         s.rod = StormRods.find(level, at, ROD_REACH);
         PENDING.add(s);
         level.playSound(null, at.x, at.y, at.z, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 0.8f, 1.9f);
@@ -108,6 +121,16 @@ public final class StormStrike {
     // そのディメンションの予告中の雷を消す (リセット・戦いの終わり)
     public static void cancelAll(ServerLevel level) {
         PENDING.removeIf(s -> s.level == level);
+    }
+
+    // そのグループの予告中の雷を消す (グループのリセット)
+    public static void cancel(ServerLevel level, UUID group) {
+        PENDING.removeIf(s -> s.level == level && group.equals(s.group));
+    }
+
+    // 箱の中の予告中の雷を消す (部屋の持ち主が変わったとき)
+    public static void cancelIn(ServerLevel level, AABB box) {
+        PENDING.removeIf(s -> s.level == level && box.contains(s.pos));
     }
 
     // public: 敵の自己テストが予告から落雷までを進めるために呼ぶ
@@ -129,7 +152,7 @@ public final class StormStrike {
                 continue;
             }
             it.remove();
-            land(s);
+            StormFx.to(s.group, () -> land(s));
             landed.add(s);
         }
         for (Strike s : landed) {
@@ -140,6 +163,10 @@ public final class StormStrike {
     }
 
     private static void warn(Strike s) {
+        StormFx.to(s.group, () -> warnFx(s));
+    }
+
+    private static void warnFx(Strike s) {
         // 白い輪 (外の縁と内の輪)、柱へ落ちる輪は柱の先へ向かう火花も
         StormFx.ring(s.level, RING, s.pos, RADIUS, 16);
         StormFx.ring(s.level, RING, s.pos, RADIUS * 0.5, 8);
@@ -165,6 +192,11 @@ public final class StormStrike {
         AABB box = new AABB(s.pos.x - RADIUS, s.pos.y - 1, s.pos.z - RADIUS, s.pos.x + RADIUS, s.pos.y + 2.5, s.pos.z + RADIUS);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box)) {
             if (e == s.owner || !e.isAlive()) {
+                continue;
+            }
+            // 別のグループの人・敵には当たらない
+            UUID other = Groups.keyOf(e);
+            if (s.group != null && other != null && !s.group.equals(other)) {
                 continue;
             }
             // 持ち主の仲間 (同じ種類の敵) には当てない。人には必ず当てる

@@ -272,6 +272,7 @@ public class StormHeart extends HeartBoss {
         this.toughness = scaleFor(challengers);
     }
 
+    // 挑む人数の倍率 (上限なし。パーティの 6 人で 4.0)
     public static float scaleFor(int challengers) {
         return 1f + 0.6f * (Math.max(1, challengers) - 1);
     }
@@ -284,8 +285,10 @@ public class StormHeart extends HeartBoss {
         return arena != null;
     }
 
+    // 狙える・技が届く人: 部屋の中の、この心臓のグループの人 (グループのない心臓なら誰でも)
     private boolean canReach(@Nullable LivingEntity entity) {
-        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()))
+                && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p);
     }
 
     public static int phaseFor(float fraction) {
@@ -1250,12 +1253,15 @@ public class StormHeart extends HeartBoss {
 
     private void updateBossBarViewers() {
         for (ServerPlayer player : List.copyOf(bossBar.getPlayers())) {
-            if (!player.isAlive() || player.distanceToSqr(this) > 48 * 48 || player.level() != level()) {
+            if (!player.isAlive() || player.distanceToSqr(this) > 48 * 48 || player.level() != level()
+                    || !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, player)) {
                 bossBar.removePlayer(player);
             }
         }
         if (level() instanceof ServerLevel server) {
-            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40)) {
+            // 体力のバーは、この心臓が見える (同じグループの) 人にだけ
+            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40
+                    && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p))) {
                 bossBar.addPlayer(player);
             }
         }

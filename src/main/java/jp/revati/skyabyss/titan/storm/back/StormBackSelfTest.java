@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -23,6 +24,9 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.TitanBacks;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormTravel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,10 +39,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import jp.revati.skyabyss.tablet.TabletBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 // 雷翼の背の自己テスト (SELFTEST storm back)。SelfTestRunner の段に入れる。
 // 建てる (時間を測る) → 100 tick 待つ (落ちるブロック・空気の置き換えが落ち着いてから) → 形・看板・囁き・拍・鏡・柱・横風・
-// 歩いて行ける所 (凪・嵐・戸が開いたあと・雷獣のあと・鏡のあと・竜骨の門のあと)・リセット・眠る試練・ピースフル
+// 歩いて行ける所 (凪・嵐・戸が開いたあと・雷獣のあと・鏡のあと・竜骨の門のあと。進めたグループと進めていないグループ)・
+// グループごとのリセット・眠る試練・二つのグループが同じ背中で (扉の当たり判定・部屋の占有・見かけ・雷)・パーティの記録の引き継ぎ・ピースフル
 public final class StormBackSelfTest {
     private static final List<String> FAILURES = new ArrayList<>();
     private static final List<String> NOTES = new ArrayList<>();
@@ -73,10 +79,13 @@ public final class StormBackSelfTest {
             checkWind(back, FAILURES);
             checkWalk(back, FAILURES, NOTES);
             checkReset(back, FAILURES);
+            checkGroups(back, FAILURES);
+            checkParty(back, FAILURES);
             checkPeaceful(back, FAILURES);
             check(TitanBacks.isBack(StormTravel.STORM_BACK), "storm_back is not in the back list", FAILURES);
             StormBackClock.force(null);
-            StormBackTrials.reset(back, false, null, true);
+            BackGroupData.get(back).remove(GROUP_A);
+            BackGroupData.get(back).remove(GROUP_B);
             forceChunks(back, false);
             if (FAILURES.isEmpty()) {
                 SkyAbyss.LOGGER.info("SELFTEST storm back PASSED ({})", String.join("; ", NOTES));
@@ -193,7 +202,8 @@ public final class StormBackSelfTest {
                     continue;
                 }
                 var st = l.getBlockState(q);
-                if (st.blocksMotion() && st.getFluidState().isEmpty()) {
+                // 封印の扉は (開いた扉も) 壁として数える。扉の先は「開けたグループだけが入れる所」で、ここでは広間から空気をたどる
+                if ((st.blocksMotion() || st.is(ModBlocks.SEALED_GATE.get())) && st.getFluidState().isEmpty()) {
                     continue;
                 }
                 seen.add(q);
@@ -364,9 +374,25 @@ public final class StormBackSelfTest {
         }
     }
 
+    // ---------------------------------------------------------------- 二つのグループ (自己テストの合成の鍵。一人のグループ = 人の UUID)
+    static final UUID GROUP_A = UUID.fromString("5c1e0a2b-0000-4000-8000-00000057a001");
+    static final UUID GROUP_B = UUID.fromString("5c1e0a2b-0000-4000-8000-00000057b002");
+
+    // グループの記録を最初に戻す (眠る試練なし、人は動かさない)
+    static StormProgress fresh(ServerLevel l, UUID group) {
+        StormBackTrials.resetGroup(l, group, false, null, true, false);
+        return StormProgress.of(l, group);
+    }
+
+    // そのグループの人にとって、そのブロックを通れるか (扉はそのグループの開け閉め。当たり判定はその人の当たり判定で見る)
+    static boolean blocksFor(ServerLevel l, BlockPos p, net.minecraft.world.entity.Entity who) {
+        return !l.getBlockState(p).getCollisionShape(l, p, CollisionContext.of(who)).isEmpty();
+    }
+
     // ---------------------------------------------------------------- 眼の間 (四つの配置を解く。世界の鏡でも同じ手で解ける)
     private static void checkMirrors(ServerLevel l, List<String> f, List<String> notes) {
-        StormBackState state = StormBackState.get(l);
+        StormProgress state = fresh(l, GROUP_A);
+        RoomLocks.release(StormBackTrials.EYE_ROOM);
         List<String> mins = new ArrayList<>();
         for (int i = 0; i < EyeMirrors.CONFIGS.size(); i++) {
             EyeMirrors.Config cfg = EyeMirrors.CONFIGS.get(i);
@@ -375,14 +401,16 @@ public final class StormBackSelfTest {
             check(m == EyeMirrors.MIN_MOVES[i], "mirror config " + i + " needs " + m + " moves (planned " + EyeMirrors.MIN_MOVES[i] + ")", f);
             check(m >= 4 && m <= 7, "mirror config " + i + " should take 4-7 moves", f);
             check(cfg.mirrors().size() >= 6 && cfg.mirrors().size() <= 8, "mirror config " + i + " should have 6-8 mirrors", f);
-            // 世界の格子でたどった光が、格子だけの計算と同じ
-            state.setRoutes(state.westRoute(), i);
-            EyeMirrors.apply(l, state, false);
-            EyeMirrors.Trace a = EyeMirrors.trace(cfg.entry(), EyeMirrors.worldGrid(l));
+            // 世界の格子でたどった光が、格子だけの計算と同じ (部屋を A の記録で置く)
+            state = fresh(l, GROUP_A);
+            state.setMirrorConfig(i);
+            EyeMirrors.apply(l, state);
+            EyeMirrors.Trace a = EyeMirrors.trace(cfg.entry(), EyeMirrors.blockGrid(l));
             EyeMirrors.Trace b = EyeMirrors.trace(cfg.entry(), EyeMirrors.grid(cfg, cfg.init()));
             check(java.util.Objects.equals(a.exit(), b.exit()), "mirror config " + i + ": the world beam differs from the grid", f);
-            check(l.getBlockState(new BlockPos(0, EYE_HALL.floor() + 1, BEAK_DOOR_Z1)).is(ModBlocks.SEALED_GATE.get()), "beak door should start closed", f);
-            // 世界の鏡を、解き方のとおりに回す
+            BlockPos door = new BlockPos(0, EYE_HALL.floor() + 1, BEAK_DOOR_Z1);
+            check(l.getBlockState(door).is(ModBlocks.SEALED_GATE.get()) && !GroupGates.isOpen(l, GROUP_A, door), "beak door should start closed", f);
+            // 鏡を、解き方のとおりに回す (A の記録と世界の鏡の両方)
             List<Integer> path = EyeMirrors.solvePath(cfg);
             if (path == null) {
                 f.add("mirror config " + i + " has no solution");
@@ -390,33 +418,39 @@ public final class StormBackSelfTest {
             }
             for (int k : path) {
                 int[] c = cfg.mirrors().get(k);
-                BlockPos p = gridCell(c[0], c[1]);
-                BlockState s = l.getBlockState(p);
-                l.setBlock(p, s.setValue(StormBlocks.Mirror.ROT, (s.getValue(StormBlocks.Mirror.ROT) + 1) % 4), 3);
+                EyeMirrors.turnFor(l, state, gridCell(c[0], c[1]));
                 EyeMirrors.tick(l, state);
             }
+            EyeMirrors.Trace w = EyeMirrors.trace(cfg.entry(), EyeMirrors.blockGrid(l));
+            EyeMirrors.Trace r = EyeMirrors.trace(cfg.entry(), EyeMirrors.grid(cfg, state.mirrorRots()));
+            check(java.util.Objects.equals(w.exit(), r.exit()), "mirror config " + i + ": the world mirrors differ from the group's record", f);
             check(state.receivers() == 7, "mirror config " + i + ": receivers lit " + Integer.toBinaryString(state.receivers()) + " after solving", f);
-            check(l.getBlockState(new BlockPos(0, EYE_HALL.floor() + 1, BEAK_DOOR_Z1)).isAir(), "mirror config " + i + ": beak door did not open", f);
+            check(GroupGates.isOpen(l, GROUP_A, door), "mirror config " + i + ": beak door did not open for the group", f);
+            check(!GroupGates.isOpen(l, GROUP_B, door), "mirror config " + i + ": beak door opened for another group", f);
         }
         notes.add("mirror moves " + String.join("/", mins));
-        state.setRoutes(state.westRoute(), 0);
-        EyeMirrors.apply(l, state, false);
+        fresh(l, GROUP_A);
+        fresh(l, GROUP_B);
+        EyeMirrors.applyNeutral(l);
     }
 
     // ---------------------------------------------------------------- 避雷の柱・招雷・骨の戸・予告線
     private static void checkRods(ServerLevel l, List<String> f) {
-        StormBackState state = StormBackState.get(l);
+        StormProgress state = fresh(l, GROUP_A);
+        fresh(l, GROUP_B);
         StormEast.apply(l, state);
         BlockPos rod = EAST_RODS.get(0);
         check(StormRods.find(l, rod.offset(2, 0, 1), 3.0) != null, "a ring 2 blocks from the rod should go to the rod", f);
         check(StormRods.find(l, rod.offset(5, 0, 0), 3.0) == null, "a ring 5 blocks from the rod should not go to the rod", f);
-        StormStrike.Strike s = StormStrike.call(l, net.minecraft.world.phys.Vec3.atBottomCenterOf(rod.offset(1, 0, 1)), 1, 11f, null);
-        check(s.rod != null, "the strike next to the rod did not pick the rod", f);
+        StormStrike.Strike s = StormStrike.call(l, net.minecraft.world.phys.Vec3.atBottomCenterOf(rod.offset(1, 0, 1)), 1, 11f, null, GROUP_A);
+        check(s.rod != null && GROUP_A.equals(s.group), "the strike next to the rod did not pick the rod (or lost its group)", f);
         // 落雷は次の tick。ここでは柱を満たして、戸が開くのを見る
         StormRods.charge(l, rod, StormRods.FULL);
         check(StormRods.isFull(l, rod), "the first rod is not full after 3 charges", f);
         StormEast.openFullDoors(l, state);
-        check(state.eastDoorOpen(0) && l.getBlockState(new BlockPos(EAST_DOORS[0], BONE_FLOOR + 1, -17)).isAir(), "the first bone door did not open", f);
+        BlockPos door = new BlockPos(EAST_DOORS[0], BONE_FLOOR + 1, -17);
+        check(state.eastDoorOpen(0) && GroupGates.isOpen(l, GROUP_A, door), "the first bone door did not open", f);
+        check(!StormProgress.of(l, GROUP_B).eastDoorOpen(0) && !GroupGates.isOpen(l, GROUP_B, door), "the first bone door opened for another group", f);
         StormRods.ground(rod, 40);
         check(StormRods.isGrounded(rod) && StormRods.groundedTicks(rod) > 0, "grounding the rod", f);
         // 予告線: 低い線は跳べば当たらない、高い線はしゃがめば当たらない
@@ -424,6 +458,8 @@ public final class StormBackSelfTest {
         check(StormEast.hits(fl, 1.8, false) && !StormEast.hits(fl + 0.8, 1.8, false), "low line: jumping should dodge", f);
         check(StormEast.hits(fl, 1.8, true) && !StormEast.hits(fl, 1.5, true), "high line: crouching should dodge", f);
         StormStrike.cancelAll(l);
+        fresh(l, GROUP_A);
+        StormEast.applyNeutral(l);
     }
 
     // ---------------------------------------------------------------- 横風
@@ -436,10 +472,16 @@ public final class StormBackSelfTest {
         StormBackClock.force(null);
     }
 
-    // ---------------------------------------------------------------- 歩いて行ける所
+    // ---------------------------------------------------------------- 歩いて行ける所 (あるグループの人として)
+    // 歩くグループ (扉の開け閉めはこのグループの記録で見る)
+    private static UUID walker = GROUP_A;
+
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
-        return s.getCollisionShape(l, p).isEmpty() && !s.is(ModBlocks.SEALED_GATE.get());
+        if (s.is(ModBlocks.SEALED_GATE.get())) {
+            return GroupGates.isOpen(l, walker, p);
+        }
+        return s.getCollisionShape(l, p).isEmpty();
     }
 
     static boolean standable(ServerLevel l, BlockPos p) {
@@ -447,7 +489,11 @@ public final class StormBackSelfTest {
             return false;
         }
         BlockPos b = p.below();
-        return !l.getBlockState(b).getCollisionShape(l, b).isEmpty();
+        BlockState below = l.getBlockState(b);
+        if (below.is(ModBlocks.SEALED_GATE.get())) {
+            return !GroupGates.isOpen(l, walker, b);
+        }
+        return !below.getCollisionShape(l, b).isEmpty();
     }
 
     // 昇り風の穴 (中心の床、上がる高さ)
@@ -455,20 +501,21 @@ public final class StormBackSelfTest {
     }
 
     static List<Lift> lifts(ServerLevel l, boolean storm) {
-        StormBackState state = StormBackState.get(l);
+        StormProgress state = StormProgress.of(l, walker);
         double h = storm ? StormBackClock.STORM_LIFT : StormBackClock.CALM_LIFT;
         List<Lift> out = new ArrayList<>();
         for (StormWest.Vent v : StormWest.vents()) {
             out.add(new Lift(v.floor(), v.fixedHeight() >= 0 ? v.fixedHeight() : h));
         }
-        if (state.raijuDefeated() || state.rung(StormBackState.Trial.EAST)) {
+        if (state.raijuVent()) {
             out.add(new Lift(RAIJU_VENT, EAST_PERCH.floor() + 2 - RAIJU_VENT.getY() - 1));
         }
         return out;
     }
 
     // 到着から歩いて (跳んで 1 段、落ちて 3 段。西の骨の中は風切りの羽根で滑空するので何段でも落ちられる)、昇り風の穴にも乗って行ける所
-    static Map<Long, Integer> walk(ServerLevel l, BlockPos start, boolean storm) {
+    static Map<Long, Integer> walk(ServerLevel l, UUID group, BlockPos start, boolean storm) {
+        walker = group;
         List<Lift> lifts = lifts(l, storm);
         Map<Long, Integer> dist = new HashMap<>();
         ArrayDeque<BlockPos> q = new ArrayDeque<>();
@@ -554,10 +601,10 @@ public final class StormBackSelfTest {
     }
 
     private static void checkWalk(ServerLevel l, List<String> f, List<String> notes) {
-        StormBackState state = StormBackState.get(l);
-        StormBackTrials.reset(l, false, null, true);
+        StormProgress state = fresh(l, GROUP_A);
+        StormProgress other = fresh(l, GROUP_B);
         // 凪、戸は閉じたまま
-        Map<Long, Integer> calm = walk(l, ARRIVAL, false);
+        Map<Long, Integer> calm = walk(l, GROUP_A, ARRIVAL, false);
         Map<String, BlockPos> yes = new LinkedHashMap<>();
         for (String id : List.of("hub", "w0", "w1", "e0", "f0")) {
             yes.put("rest " + id, rest(id));
@@ -579,45 +626,62 @@ public final class StormBackSelfTest {
         notes.add("arrival to hall " + toHub + " steps");
         check(toHub != null && toHub <= 220, "the wind hall is too far from the arrival (" + toHub + " steps)", f);
         // 嵐: 西の岩棚へ届く
-        Map<Long, Integer> storm = walk(l, ARRIVAL, true);
+        Map<Long, Integer> storm = walk(l, GROUP_A, ARRIVAL, true);
         expect(storm, l, "west stone ledge in storm", WEST_STONE.offset(1, 0, 0), true, f);
         expect(storm, l, "gallery in storm (by the hub updraft)", new BlockPos(0, UPPER_GALLERY_Y + 1, -15), true, f);
-        // 骨の戸が開くと、肘・雷獣の巣へ。雷獣のあとは頂の台へ
+        // 骨の戸が開くと、肘・雷獣の巣へ。雷獣のあとは頂の台へ (A だけ)
         for (int i = 0; i < EAST_DOORS.length; i++) {
             state.openEastDoor(i);
-            StormEast.setDoor(l, i, true);
         }
         state.setRaijuDefeated(true);
-        Map<Long, Integer> open = walk(l, ARRIVAL, false);
+        StormBackTrials.syncGates(l, GROUP_A);
+        Map<Long, Integer> open = walk(l, GROUP_A, ARRIVAL, false);
         expect(open, l, "rest e1 after the doors", rest("e1"), true, f);
         expect(open, l, "raiju nest after the doors", RAIJU_NEST.offset(-6, 1, 0), true, f);
         expect(open, l, "east perch after the raiju", EAST_STONE.offset(-1, 0, 0), true, f);
         // 鏡を解く (戸を開ける) と嘴の小部屋へ。三つの石で竜骨の門が開くと、前室と竜骨の間へ
-        EyeMirrors.setDoor(l, true);
+        state.setReceivers(7);
         state.setKeelOpen(true);
-        StormBirdBuilder.setKeelGate(l, true);
-        Map<Long, Integer> all = walk(l, ARRIVAL, false);
+        StormBackTrials.syncGates(l, GROUP_A);
+        Map<Long, Integer> all = walk(l, GROUP_A, ARRIVAL, false);
         expect(all, l, "beak room after the mirrors", FRONT_STONE.offset(1, 0, 0), true, f);
         expect(all, l, "keel antechamber", rest("heart"), true, f);
         expect(all, l, "heart room", HEART_ROOM.offset(0, 2, 8), true, f);
         notes.add("standing spots " + all.size());
-        StormBackTrials.reset(l, false, null, true);
+        // 同じ背中の、何も進めていないグループ B には、戸も竜骨の門も閉じたまま
+        check(other.openDoorCount() == 0 && !other.keelOpen(), "group B's record changed while A played", f);
+        Map<Long, Integer> b = walk(l, GROUP_B, ARRIVAL, false);
+        expect(b, l, "rest e1 for group B (doors closed for B)", rest("e1"), false, f);
+        expect(b, l, "beak room for group B", FRONT_STONE.offset(1, 0, 0), false, f);
+        expect(b, l, "keel antechamber for group B", rest("heart"), false, f);
+        expect(b, l, "rest hub for group B", rest("hub"), true, f);
+        fresh(l, GROUP_A);
+        fresh(l, GROUP_B);
+        walker = GROUP_A;
     }
 
-    // ---------------------------------------------------------------- リセットと眠る試練
+    // ---------------------------------------------------------------- リセットと眠る試練 (グループごと)
     private static void checkReset(ServerLevel l, List<String> f) {
-        StormBackState state = StormBackState.get(l);
-        TitanBackData data = TitanBackData.get(l);
-        int epoch = data.epoch();
+        StormProgress state = fresh(l, GROUP_A);
+        StormProgress other = fresh(l, GROUP_B);
+        other.setRung(StormBackState.Trial.EAST, true);
+        int epochB = other.epoch();
+        int epoch = state.epoch();
         state.setRung(StormBackState.Trial.WEST, true);
-        StormBackTrials.reset(l, false, null, true);
-        check(data.epoch() != epoch, "reset should advance the trial number", f);
+        state.setKeelOpen(true);
+        StormBackTrials.syncGates(l, GROUP_A);
+        check(GroupGates.isOpen(l, GROUP_A, new BlockPos(0, HUB.floor(), -4)), "the keel gate did not open for the group", f);
+        check(state.needsReset() && !StormProgress.of(l, UUID.randomUUID()).needsReset(), "needsReset is wrong", f);
+        StormBackTrials.resetGroup(l, GROUP_A, false, null, true, false);
+        state = StormProgress.of(l, GROUP_A);
+        check(state.epoch() != epoch, "reset should advance the group's trial number", f);
         check(state.rungCount() == 0 && !state.keelOpen() && state.receivers() == 0, "reset should clear the stones, keel and receivers", f);
-        check(StormBackClock.phaseAt(state.clock()) == StormBackClock.Phase.CALM && state.clock() == 0, "reset should go back to the start of calm", f);
-        check(l.getBlockState(new BlockPos(0, HUB.floor(), -4)).is(ModBlocks.SEALED_GATE.get()), "the keel gate should be closed after reset", f);
-        // 眠る試練: 2 周目から一つ眠り、同じものは続けない。24 回で三つとも眠る
-        boolean was = state.everDefeated();
-        state.markDefeated();
+        check(l.getBlockState(new BlockPos(0, HUB.floor(), -4)).is(ModBlocks.SEALED_GATE.get()) && !GroupGates.isOpen(l, GROUP_A, new BlockPos(0, HUB.floor(), -4)),
+                "the keel gate should be closed after reset", f);
+        check(other.epoch() == epochB && other.rung(StormBackState.Trial.EAST), "resetting group A touched group B's record", f);
+        check(state.mirrorConfig() >= 1, "the next round should draw a harder mirror config (" + state.mirrorConfig() + ")", f);
+        // 眠る試練: 心臓を倒したグループは 2 周目から一つ眠り、同じものは続けない。24 回で三つとも眠る
+        state.markEverDefeated();
         StormBackState.Trial prev = null;
         Set<StormBackState.Trial> seen = new HashSet<>();
         for (int i = 0; i < 24; i++) {
@@ -625,26 +689,155 @@ public final class StormBackSelfTest {
             StormBackState.Trial s = state.sleeping();
             check(s != null && s != prev, "sleeping trial repeated or missing at reset " + i, f);
             check(s == null || state.rung(s), "the sleeping trial's stone should be ringing", f);
+            check(state.everDefeated(), "the heart record of the group was lost by a reset", f);
             seen.add(s);
             prev = s;
         }
         check(seen.size() == 3, "all three trials should sleep sometimes", f);
-        if (!was) {
-            // 心臓の撃破の記録は消せないので、テストのあとも 2 周目の扱い (自己テストのワールドだけ)
-            SkyAbyss.LOGGER.info("SELFTEST storm back: marked the world as having defeated the heart");
-        }
-        state.reset(l.random, null, true);
+        // 東が眠ると、そのグループにだけ骨の戸が開いている
+        StormBackTrials.resetGroup(l, GROUP_A, false, StormBackState.Trial.EAST, false, false);
+        BlockPos door = new BlockPos(EAST_DOORS[1], BONE_FLOOR + 2, -17);
+        check(GroupGates.isOpen(l, GROUP_A, door) && !GroupGates.isOpen(l, GROUP_B, door), "east sleeping should open the bone doors for that group only", f);
+        // まっさらな記録に戻す (心臓の記録も。自己テストのグループだけ)
+        BackGroupData.get(l).remove(GROUP_A);
+        BackGroupData.get(l).remove(GROUP_B);
+        fresh(l, GROUP_A);
+        fresh(l, GROUP_B);
     }
 
-    // ---------------------------------------------------------------- ピースフル (腰の回廊を封じる)
+    // ---------------------------------------------------------------- 二つのグループが同じ背中で
+    // A が骨の戸を開け・石を鳴らしても、B には閉じたまま (扉の当たり判定もその人のグループで決まる)。
+    // A が眼の間・東の回廊を持っているあいだ、B は入れない (外の休み場へ戻される)。パーティが変わった人は広間へ
+    private static void checkGroups(ServerLevel l, List<String> f) {
+        StormProgress a = fresh(l, GROUP_A);
+        StormProgress b = fresh(l, GROUP_B);
+        RoomLocks.release(StormBackTrials.EYE_ROOM);
+        RoomLocks.release(StormBackTrials.EAST_ROOM);
+        StormTestPlayer pa = StormTestPlayer.join(l, GROUP_A, "[storm_a]", net.minecraft.world.phys.Vec3.atBottomCenterOf(new BlockPos(40, BONE_FLOOR + 1, -17)));
+        StormTestPlayer pb = StormTestPlayer.join(l, GROUP_B, "[storm_b]", net.minecraft.world.phys.Vec3.atBottomCenterOf(rest("hub")));
+        try {
+            check(jp.revati.skyabyss.titan.group.Groups.keyOf(pa).equals(GROUP_A) && jp.revati.skyabyss.titan.group.Groups.keyOf(pb).equals(GROUP_B),
+                    "test players are not in their own groups", f);
+            check(l.players().contains(pa) && l.players().contains(pb), "test players did not join the storm back", f);
+            // 東の回廊: A が入って持ち主に。A の柱を満たすと A にだけ戸が開く
+            StormBackTrials.tickRooms(l);
+            check(GROUP_A.equals(RoomLocks.owner(StormBackTrials.EAST_ROOM)), "group A does not own the east corridor (" + RoomLocks.owner(StormBackTrials.EAST_ROOM) + ")", f);
+            StormRods.charge(l, EAST_RODS.get(0), StormRods.FULL);
+            StormEast.openFullDoors(l, a);
+            BlockPos door = new BlockPos(EAST_DOORS[0], BONE_FLOOR + 2, -17);
+            BlockState gate = l.getBlockState(door);
+            check(gate.is(ModBlocks.SEALED_GATE.get()) && !gate.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN), "the bone door block should stay closed by default", f);
+            check(GroupGates.effective(l, GROUP_A, door, false) && !GroupGates.effective(l, GROUP_B, door, false), "the bone door override is wrong", f);
+            check(!blocksFor(l, door, pa) && blocksFor(l, door, pb), "the bone door collision should let A through and stop B", f);
+            check(!b.eastDoorOpen(0), "group B's bone door opened", f);
+            // B が回廊に入ると、肩の門の休み場へ戻される
+            pb.moveTo(45.5, BONE_FLOOR + 1, -16.5);
+            StormBackTrials.tickRooms(l);
+            check(!StormEast.room().contains(pb.position()), "group B was not sent out of the corridor A holds (at " + pb.position() + ")", f);
+            check(GROUP_A.equals(RoomLocks.owner(StormBackTrials.EAST_ROOM)), "group B took the east corridor from A", f);
+            // 眼の間: A が持っているあいだ、B は入れない。B は鏡を回せない
+            pa.moveTo(EYE_HALL_CENTER.getX() + 0.5, EYE_HALL.floor() + 1, EYE_HALL_CENTER.getZ() + 6.5);
+            StormBackTrials.tickRooms(l);
+            check(GROUP_A.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM)), "group A does not own the eye hall", f);
+            pb.moveTo(EYE_HALL_CENTER.getX() + 2.5, EYE_HALL.floor() + 1, EYE_HALL_CENTER.getZ() + 4.5);
+            StormBackTrials.tickRooms(l);
+            check(!StormBackTrials.eyeRoom().contains(pb.position()), "group B was not sent out of the eye hall A holds (at " + pb.position() + ")", f);
+            int[] mc = a.config().mirrors().get(0);
+            BlockPos mirror = gridCell(mc[0], mc[1]);
+            int before = l.getBlockState(mirror).getValue(StormBlocks.Mirror.ROT);
+            EyeMirrors.turn(l, mirror, pb);
+            check(l.getBlockState(mirror).getValue(StormBlocks.Mirror.ROT) == before && !b.record.has(StormProgress.MIRROR_ROTS),
+                    "group B turned a mirror in the hall A holds", f);
+            EyeMirrors.turn(l, mirror, pa);
+            check(l.getBlockState(mirror).getValue(StormBlocks.Mirror.ROT) == (before + 1) % 4 && a.mirrorRots()[0] == (before + 1) % 4,
+                    "group A could not turn a mirror in its hall", f);
+            // 風鳴り石: A が鳴らすと A の見かけと記録だけ
+            StormBackTrials.ring(l, a, StormBackState.Trial.WEST, null);
+            BlockPos stone = StormBackTrials.stonePos(StormBackState.Trial.WEST);
+            BlockState shownA = jp.revati.skyabyss.titan.group.GroupOverlays.compute(l, GROUP_A).get(stone);
+            check(a.rung(StormBackState.Trial.WEST) && !b.rung(StormBackState.Trial.WEST), "ringing the west stone for A changed B", f);
+            check(shownA != null && shownA.getValue(StormBlocks.ChimeStone.ACTIVE), "A does not see its rung stone", f);
+            check(!jp.revati.skyabyss.titan.group.GroupOverlays.compute(l, GROUP_B).containsKey(stone), "B sees A's rung stone", f);
+            check(!l.getBlockState(stone).getValue(StormBlocks.ChimeStone.ACTIVE), "the world stone should stay silent (the rung look is per group)", f);
+            // 竜骨の門: A の三つの石がそろうと A にだけ開く
+            a.setRung(StormBackState.Trial.EAST, true);
+            a.setRung(StormBackState.Trial.FRONT, true);
+            StormBackTrials.openKeel(l, a);
+            BlockPos keel = new BlockPos(0, HUB.floor(), -4);
+            check(!blocksFor(l, keel, pa) && blocksFor(l, keel, pb), "the keel gate collision should let A through and stop B", f);
+            // 招雷: A の雷は B に当たらない
+            pb.moveTo(pa.getX(), pa.getY(), pa.getZ());
+            float hb = pb.getHealth();
+            StormStrike.Strike s = StormStrike.call(l, pa.position(), 1, 4f, null, GROUP_A);
+            StormStrike.tick(l);
+            check(s.landed() && !s.hit.contains(pb) && pb.getHealth() == hb, "group A's lightning hit group B", f);
+            // パーティが変わった人: 試練の中なら広間へ、休み場の記録は番号が違えば消える
+            pa.moveTo(rest("w0").getX() + 0.5, rest("w0").getY(), rest("w0").getZ() + 0.5);
+            StormBackTrials.writeCheckpoint(pa, "w0", a.epoch() + 100);
+            jp.revati.skyabyss.titan.group.GroupEvents.membershipChanged(pa);
+            check(pa.position().distanceToSqr(net.minecraft.world.phys.Vec3.atBottomCenterOf(rest("hub"))) < 4, "a player whose party changed was not moved to the hall", f);
+            check(StormBackTrials.validCheckpoint(StormBackTrials.persisted(pa), a.epoch()).isEmpty()
+                    && !StormBackTrials.persisted(pa).contains("skyabyss_storm_checkpoint"), "the old rest point was kept after the party changed", f);
+        } finally {
+            pa.leave();
+            pb.leave();
+            StormStrike.cancelAll(l);
+            RoomLocks.release(StormBackTrials.EYE_ROOM);
+            RoomLocks.release(StormBackTrials.EAST_ROOM);
+            StormEast.applyNeutral(l);
+            EyeMirrors.applyNeutral(l);
+            BackGroupData.get(l).remove(GROUP_A);
+            BackGroupData.get(l).remove(GROUP_B);
+        }
+    }
+
+    // ---------------------------------------------------------------- パーティを組む・入る・抜ける (記録の引き継ぎ。6 人まで)
+    private static void checkParty(ServerLevel l, List<String> f) {
+        MinecraftServer server = l.getServer();
+        check(jp.revati.skyabyss.party.Parties.MAX_MEMBERS == 6, "a party should hold 6", f);
+        UUID leader = UUID.fromString("5c1e0a2b-0000-4000-8000-00000057c003");
+        UUID mate = UUID.fromString("5c1e0a2b-0000-4000-8000-00000057c004");
+        jp.revati.skyabyss.party.PartyData parties = jp.revati.skyabyss.party.PartyData.get(server);
+        parties.remove(leader);
+        parties.remove(mate);
+        StormProgress lead = fresh(l, leader);
+        StormProgress solo = fresh(l, mate);
+        lead.setRung(StormBackState.Trial.WEST, true);
+        solo.setRung(StormBackState.Trial.FRONT, true);
+        jp.revati.skyabyss.party.PartyData.Party party = parties.create(leader, "[storm_lead]");
+        try {
+            StormProgress p = StormProgress.of(l, party.id);
+            check(p.rung(StormBackState.Trial.WEST) && !p.rung(StormBackState.Trial.FRONT), "a new party should start from the leader's record", f);
+            parties.add(party, mate, "[storm_mate]");
+            check(jp.revati.skyabyss.titan.group.Groups.keyOf(server, mate).equals(party.id), "the joining player is not in the party's group", f);
+            check(StormProgress.of(l, jp.revati.skyabyss.titan.group.Groups.keyOf(server, mate)).rung(StormBackState.Trial.WEST),
+                    "the joining player does not use the party's record", f);
+            p.setRung(StormBackState.Trial.EAST, true);
+            parties.remove(mate);
+            StormProgress after = StormProgress.of(l, mate);
+            check(after.rung(StormBackState.Trial.WEST) && after.rung(StormBackState.Trial.EAST) && !after.rung(StormBackState.Trial.FRONT),
+                    "a player leaving a party should keep a copy of the party's record", f);
+            check(StormProgress.of(l, leader).rung(StormBackState.Trial.EAST), "the leader left alone should keep a copy of the party's record", f);
+        } finally {
+            parties.remove(leader);
+            parties.remove(mate);
+            BackGroupData.get(l).remove(party.id);
+            BackGroupData.get(l).remove(leader);
+            BackGroupData.get(l).remove(mate);
+        }
+    }
+
+    // ---------------------------------------------------------------- ピースフル (腰の回廊を封じる。全員に同じ)
     private static void checkPeaceful(ServerLevel l, List<String> f) {
         Difficulty before = l.getDifficulty();
+        BlockPos seal = new BlockPos(0, TAIL_HALL.floor() + 2, SEAL_Z);
         l.getServer().setDifficulty(Difficulty.PEACEFUL, true);
         StormBackTrials.tickPeacefulForTest(l, true);
-        check(l.getBlockState(new BlockPos(0, TAIL_HALL.floor() + 2, SEAL_Z)).is(ModBlocks.SEALED_GATE.get()), "peaceful should seal the waist corridor", f);
+        check(l.getBlockState(seal).is(ModBlocks.SEALED_GATE.get()) && !GroupGates.isOpen(l, GROUP_A, seal) && !GroupGates.isOpen(l, GROUP_B, seal),
+                "peaceful should seal the waist corridor for everyone", f);
         l.getServer().setDifficulty(before, true);
         StormBackTrials.tickPeacefulForTest(l, false);
-        check(!l.getBlockState(new BlockPos(0, TAIL_HALL.floor() + 2, SEAL_Z)).is(ModBlocks.SEALED_GATE.get()), "the seal should open again", f);
-        check(l.getBlockState(new BlockPos(0, TAIL_HALL.floor() + 2, SEAL_Z)).is(Blocks.AIR), "the corridor should be air after peaceful", f);
+        check(GroupGates.isOpen(l, GROUP_A, seal) && GroupGates.isOpen(l, GROUP_B, seal), "the seal should open again", f);
+        check(l.getBlockState(seal).getCollisionShape(l, seal).isEmpty(), "the corridor should be passable after peaceful", f);
     }
 }

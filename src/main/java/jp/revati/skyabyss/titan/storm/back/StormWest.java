@@ -22,6 +22,8 @@ import net.minecraft.world.phys.Vec3;
 // - 昇り風の穴: 凪は 4、嵐は 13 上がる (広間・骨・西の瘤)。雷獣の巣の頂の穴は、雷獣を倒したあといつも 12
 // - 横風: 嵐のあいだ 6 秒ごと。1.5 秒前に雨の筋と笛の音、吹く 2 秒は梁の陰 (風上 3 ブロック以内に壁や柱) にいないと肩の側へ押し戻す
 // - 跳躍と低速落下の効き目は、西の試練の中では消す
+// グループ: 拍・横風・道の形 (StormBackState.westRoute) は全員に同じ (梁はブロックなので見る人ごとに変えられない)。
+// 雷獣の巣の頂の昇り風だけは、雷獣を倒した (東が鳴った・眠っている) グループの人だけを持ち上げる
 final class StormWest {
     static final int GUST_PERIOD = 120;
     static final int GUST_WARN = 30;
@@ -79,15 +81,13 @@ final class StormWest {
         return v.fixedHeight() >= 0 ? v.fixedHeight() : StormBackClock.liftHeight(level);
     }
 
-    static void tick(ServerLevel level, StormBackState state, boolean peaceful) {
+    static void tick(ServerLevel level, boolean peaceful) {
         long gt = level.getGameTime();
         // 昇り風の穴 (人がいれば持ち上げ、4 tick ごとに粒)
         for (Vent v : vents()) {
-            liftVent(level, v.floor(), liftFor(level, v), gt);
+            liftVent(level, v.floor(), liftFor(level, v), gt, p -> true);
         }
-        if (state.raijuDefeated() || state.sleeping() == StormBackState.Trial.EAST || state.rung(StormBackState.Trial.EAST)) {
-            liftVent(level, RAIJU_VENT, EAST_PERCH.floor() + 2 - RAIJU_VENT.getY() - 1, gt);
-        }
+        liftVent(level, RAIJU_VENT, EAST_PERCH.floor() + 2 - RAIJU_VENT.getY() - 1, gt, p -> StormProgress.of(level, p).raijuVent());
         int gust = gust(level);
         if (gust == 1 && gt % 6 == 0) {
             // 雨の筋 (手首の側から肩の側へ流れる)
@@ -125,20 +125,22 @@ final class StormWest {
         }
     }
 
-    static void liftVent(ServerLevel level, BlockPos floor, double height, long gt) {
+    static void liftVent(ServerLevel level, BlockPos floor, double height, long gt, java.util.function.Predicate<ServerPlayer> who) {
         Vec3 base = new Vec3(floor.getX() + 0.5, floor.getY() + 1, floor.getZ() + 0.5);
         double maxY = base.y + height;
+        boolean any = false;
         for (ServerPlayer p : level.players()) {
-            if (p.isSpectator() || p.getAbilities().flying) {
+            if (p.isSpectator() || p.getAbilities().flying || p.distanceToSqr(base) > 48 * 48 || !who.test(p)) {
                 continue;
             }
+            any = true;
             double dx = p.getX() - base.x;
             double dz = p.getZ() - base.z;
             if (dx * dx + dz * dz <= 1.6 * 1.6 && p.getY() >= base.y - 0.2 && p.getY() <= maxY + 1.5) {
                 Updraft.lift(p, maxY);
             }
         }
-        if (gt % 4 == 0 && !level.getPlayers(pl -> pl.distanceToSqr(base) < 48 * 48).isEmpty()) {
+        if (gt % 4 == 0 && any) {
             Updraft.particles(level, base, 1.3, height, 3);
         }
     }
