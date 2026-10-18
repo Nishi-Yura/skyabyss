@@ -1,10 +1,10 @@
 package jp.revati.skyabyss.client.npc;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.npc.NpcEntity;
 import jp.revati.skyabyss.npc.NpcSetup;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,11 +13,9 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 import software.bernie.geckolib.model.data.EntityModelData;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-// 語り部と鯨追いの描画 (GeckoLib)。光る所はないので発光層は付けない (光る画素ゼロのマスクは落ちるため)。
+// 語り部と鯨追いの描画 (GeckoLib + 低ポリのメッシュ)。光る画素が無いアトラスは発光層を描かない (LowPolyGeoRenderer.GlowLayer がマスクの有無で決める)。
 // 頭は相手の方を向く。geo の root 骨が yaw 180 度回してあるので、上下の向き (pitch) は符号を反転して入れる
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class NpcRenderer {
@@ -34,17 +32,18 @@ public final class NpcRenderer {
         event.registerEntityRenderer(NpcSetup.WHALE_CHASER.get(), ctx -> create(ctx, "whale_chaser", 0.42f));
     }
 
-    private static GeoEntityRenderer<NpcEntity> create(EntityRendererProvider.Context ctx, String name, float shadow) {
-        return new GeoEntityRenderer<>(ctx, new Model(name)) {
+    // 低ポリ (client/lowpoly): LowPoly.enabled = false で元の滑らかなボクセルの geo (geo/entity/<name>.geo.json) に戻る
+    private static LowPolyGeoRenderer<NpcEntity> create(EntityRendererProvider.Context ctx, String name, float shadow) {
+        return new LowPolyGeoRenderer<>(ctx, new Model(name), e -> name, 1.0f) {
             {
                 this.shadowRadius = shadow;
             }
         };
     }
 
-    static final class Model extends DefaultedEntityGeoModel<NpcEntity> {
+    static final class Model extends LowPolyGeoRenderer.Model<NpcEntity> {
         Model(String name) {
-            super(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name), false);
+            super(name, false);
         }
 
         @Override

@@ -376,6 +376,14 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "watcher" -> {
+                // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
+                if (first) {
+                    jp.revati.skyabyss.client.prologue.WatcherClient.placeForShot(line.doubleArg(0), line.doubleArg(1), line.doubleArg(2),
+                            (float) line.doubleArg(3));
+                }
+                return true;
+            }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
