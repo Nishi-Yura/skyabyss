@@ -408,6 +408,9 @@ public final class StormTelegraphSelfTest {
                 ground.add(fake(level, "web_g" + i, SX + Math.cos(a) * 6, FLOOR, SZ + Math.sin(a) * 6));
                 air.add(fake(level, "web_a" + i, SX + Math.cos(a) * 9, FLOOR + 1.5, SZ + Math.sin(a) * 9));
             }
+            // 腕の向きは乱数で決まる。腕は 4 本 (90 度おき) で、一本が通る 45 度 + 腕の幅の約 19 度 (半径 6) の 64 度ぶん。人は 30 度おきなので、
+            // 腕の隙間 (26 度) が人に当たる向きだと 8 人、外れる向きだと 12 人全員が傷を負う。数え方を安定させるため向きを固定する
+            h.getRandom().setSeed(4242L);
             h.setTarget(ground.get(0));
             h.tick();
             h.forceAction(StormHeart.Action.WEB);
@@ -420,7 +423,16 @@ public final class StormTelegraphSelfTest {
             for (FakePlayer q : air) {
                 hurtAir += lost(q) > 0 ? 1 : 0;
             }
-            check(hurtGround >= 3 && hurtGround <= 9, "web: " + hurtGround + " of 12 players on the floor were hurt (expect about half: 180 degrees swept)", f);
+            StringBuilder why = new StringBuilder();
+            if (hurtGround < 3 || hurtGround > 9) {
+                why.append(" [heart y=").append(h.getY()).append(" telegraphs left=").append(Telegraph.activeCount(level))
+                        .append(" lost=");
+                for (FakePlayer q : ground) {
+                    why.append(lost(q)).append(',');
+                }
+                why.append(']');
+            }
+            check(hurtGround >= 3 && hurtGround <= 9, "web: " + hurtGround + " of 12 players on the floor were hurt (expect about half: 180 degrees swept)" + why, f);
             check(hurtAir == 0, "web: " + hurtAir + " players above the arm (jumping) were hurt", f);
             notes.add("web: " + hurtGround + "/12 on the floor hurt, " + hurtAir + "/12 jumping hurt");
         } finally {
