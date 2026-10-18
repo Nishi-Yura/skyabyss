@@ -23,7 +23,7 @@ public final class GrowthRules {
     // 精神: 最大マナ。素の値 20 に、1 あたり +2
     public static final double BASE_MANA = 20;
     public static final double SPIRIT_MANA = 2;
-    // 耐久: 2 ごとに最大体力 +0.5 (半分のハート)
+    // 耐久: 2 ごとに最大体力 +0.5 点 (ハート 0.25 個。表示は Hearts)
     public static final double VITALITY_HEALTH_PER_TWO = 0.5;
 
     // ---------------------------------------------------------------- 経験値の補正

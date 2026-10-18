@@ -86,7 +86,7 @@ public final class PartyCommands {
             if (m == null) {
                 row.append(Component.translatable("message.skyabyss.party.offline")).withStyle(ChatFormatting.DARK_GRAY);
             } else {
-                row.append(Component.literal("  Lv " + Growth.get(m).level + "  " + Math.round(m.getHealth()) + "/" + Math.round(m.getMaxHealth())))
+                row.append(Component.literal("  Lv " + Growth.get(m).level + "  " + jp.revati.skyabyss.Hearts.number(m.getHealth()) + "/" + jp.revati.skyabyss.Hearts.of(m.getMaxHealth())))
                         .withStyle(ChatFormatting.WHITE);
             }
             text.append(row);

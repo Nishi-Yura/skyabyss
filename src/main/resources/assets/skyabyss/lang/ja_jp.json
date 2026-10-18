@@ -267,7 +267,7 @@
   "gui.skyabyss.growth.desc.strength": "1 につき近接攻撃の威力が 0.6% 上がる。武器の威力ごと掛かる。",
   "gui.skyabyss.growth.desc.agility": "1 につき移動の速さ +0.2%、攻撃の速さ +0.2%、矢などの飛び道具の威力 +0.4%。",
   "gui.skyabyss.growth.desc.spirit": "1 につき最大マナが 2 増える。マナを使う術は、まだ目覚めていない。",
-  "gui.skyabyss.growth.desc.vitality": "2 につき最大体力が 0.5（ハート半分）増える。",
+  "gui.skyabyss.growth.desc.vitality": "2 につき最大体力が 0.25❤ 増える。",
   "gui.skyabyss.growth.cap": "一つのステータスの上限は %s。シフトを押しながらだと 5 ずつ振れる。",
   "gui.skyabyss.growth.lifetime": "これまでの経験値 %s / %s",
   "gui.skyabyss.growth.level_up_head": "力が満ちた",

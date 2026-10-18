@@ -578,7 +578,7 @@ public final class RecordBuilder {
             case AGILITY -> Component.translatable("gui.skyabyss.growth.effect.agility",
                     pct(GrowthRules.moveMultiplier(value)), pct(GrowthRules.projectileMultiplier(value)));
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit", (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
-            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality", String.format(java.util.Locale.ROOT, "%.1f", GrowthRules.bonusHealth(value)));
+            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality", jp.revati.skyabyss.Hearts.of(GrowthRules.bonusHealth(value)));
         };
     }
 
