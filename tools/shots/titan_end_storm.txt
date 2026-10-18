@@ -1,0 +1,41 @@
+# 雷翼の巨神が眠る場面 titan_end_thunder_wing の見せ場を撮る (docs/design/20_cinematics.md の 3.4、12 の 2.9)。平らな世界 (峰の代わりに地面)。
+# ./gradlew runShots -Pscript=tools/shots/titan_end_storm.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/<名前>/ → docs/review/previews/titan_end_storm_*.png へ
+# 雷翼を人の南 160 ブロックに止まらせ、眠らせる (稲妻がやみ、翼を畳んでうずくまる)。場面は 16 秒 = 320 tick
+world titan_end_storm flat
+size 1280 720
+timeout 900
+render 12
+clouds on
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p stone_whale
+cmd skyabyss progress grant @p tide_shell
+hud off
+camera minecraft:overworld 0 -60 0 0 0
+waitchunks
+wait 40
+cmd skyabyss titan summon storm
+wait 60
+cmd skyabyss titan rest storm here
+wait 100
+shot storm_00_awake
+cmd skyabyss titan end thunder_wing sleep
+cmd skyabyss cinematic play titan_end_thunder_wing
+wait 20
+shot storm_01_lightning_stops
+wait 100
+shot storm_02_folding
+wait 90
+shot storm_03_crouching
+wait 80
+shot storm_04_pullback
+wait 40
+shot storm_05_dormant
+wait 120
+shot storm_06_control
+cmd skyabyss titan end thunder_wing wake
+cmd kill @e[type=skyabyss:thunder_wing,distance=..800]
+wait 10
+quit

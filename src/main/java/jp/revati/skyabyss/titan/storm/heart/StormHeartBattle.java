@@ -317,6 +317,7 @@ public final class StormHeartBattle {
         Vec3 c = StormHeartArena.center();
         level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.9f);
         SkyAbyss.LOGGER.info("The heart of the thunder wing was defeated by {} participant(s)", ids.size());
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.THUNDER_WING, ids);
     }
 
     // 試練で湧いた心臓は保存しないが、古いものが残っていれば読み込みのときに消す

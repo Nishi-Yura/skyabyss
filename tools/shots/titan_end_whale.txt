@@ -1,0 +1,37 @@
+# 岩鯨が眠る場面 titan_end_stone_whale の見せ場を撮る (docs/design/20_cinematics.md の 3.4、02 の 2.11)。平らな世界。
+# ./gradlew runShots -Pscript=tools/shots/titan_end_whale.txt -PshotsName=<新しい名前>   絵は run/shots/<名前>/shots/<名前>/ → docs/review/previews/titan_end_whale_*.png へ
+# 岩鯨を人の南 150 ブロック・高さ 80 に、横向き (頭は西) で起こし、眠らせて場面を流す。場面は 16 秒 = 320 tick
+world titan_end_whale flat
+size 1280 720
+timeout 900
+render 12
+clouds on
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+hud off
+camera minecraft:overworld 0 -60 0 0 0
+waitchunks
+wait 40
+cmd summon skyabyss:stone_whale 50 20 150 {Rotation:[90f,0f],Mode:2,RestTicks:999999}
+wait 60
+shot whale_00_awake
+cmd skyabyss titan end stone_whale sleep
+cmd skyabyss cinematic play titan_end_stone_whale
+wait 20
+shot whale_01_song_stops
+wait 100
+shot whale_02_glow_fades
+wait 90
+shot whale_03_sinking
+wait 80
+shot whale_04_pullback
+wait 40
+shot whale_05_dormant
+wait 120
+shot whale_06_control
+cmd skyabyss titan end stone_whale wake
+cmd kill @e[type=skyabyss:stone_whale,distance=..600]
+wait 10
+quit

@@ -366,6 +366,7 @@ public final class StormBackTrials {
     // 試練を最初に戻す (12 の 7.1節)。試練の番号が進み (古い休み場の記録は無効)、心臓も眠り直す (TitanBackData)
     public static void reset(ServerLevel level, boolean announce, @Nullable StormBackState.Trial forceSleep, boolean noSleep) {
         TitanBackData data = TitanBackData.get(level);
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.THUNDER_WING);
         data.resetProgress();
         StormBackState state = StormBackState.get(level);
         state.reset(level.random, forceSleep, noSleep);

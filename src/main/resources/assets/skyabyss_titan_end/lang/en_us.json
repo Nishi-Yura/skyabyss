@@ -1,0 +1,17 @@
+{
+  "message.skyabyss.titan_end.silence": "The heartbeat has stopped. The whole back falls still.",
+  "message.skyabyss.titan_end.tremble.stone_whale": "The stone whale's back trembles faintly. The great chest draws a slow breath.",
+  "message.skyabyss.titan_end.tremble.tide_shell": "The shell creaks, and a tide pulls away somewhere far off. It breathes out, slowly.",
+  "message.skyabyss.titan_end.tremble.thunder_wing": "The wing-bones creak. The wind stills, and one last thunder drifts away.",
+  "message.skyabyss.titan_end.tremble.ember": "The heat in the deep of the body ebbs away. The floor begins to cool.",
+  "message.skyabyss.titan_end.again.stone_whale": "The stone whale falls silent and sinks into the sea of clouds.",
+  "message.skyabyss.titan_end.again.tide_shell": "The tide shell sinks into the sea. Only its coral terraces remain above the waves.",
+  "message.skyabyss.titan_end.again.thunder_wing": "The thunder wing folds its wings and sleeps on the peak like a crag.",
+  "message.skyabyss.titan_end.again.ember": "The ember titan buries itself and becomes a cooled hill.",
+  "message.skyabyss.titan_end.wake.stone_whale": "Far off in the sky, the song begins again.",
+  "message.skyabyss.titan_end.wake.tide_shell": "Far out at sea, something enormous stirs again.",
+  "message.skyabyss.titan_end.wake.thunder_wing": "Beyond the peaks, thunder begins to rumble again.",
+  "message.skyabyss.titan_end.wake.ember": "The ground beneath you grows faintly warm.",
+  "message.skyabyss.titan_end.sleeping": "%s sleeps deeply. You cannot board until its heartbeat returns.",
+  "message.skyabyss.titan_end.sleeping_call": "%s sleeps deeply and does not answer the call."
+}

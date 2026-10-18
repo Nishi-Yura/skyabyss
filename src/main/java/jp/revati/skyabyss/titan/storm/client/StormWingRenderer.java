@@ -23,7 +23,7 @@ public class StormWingRenderer extends GeoEntityRenderer<StormWingEntity> {
     public StormWingRenderer(EntityRendererProvider.Context context) {
         super(context, new LodModel());
         withScale(SCALE);
-        addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        addRenderLayer(new jp.revati.skyabyss.client.titan.DormantGlowLayer<>(this));
         this.shadowRadius = 0f;
     }
 

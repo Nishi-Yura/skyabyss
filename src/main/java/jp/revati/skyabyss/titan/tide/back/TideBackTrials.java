@@ -449,6 +449,7 @@ public final class TideBackTrials {
 
     public static void reset(ServerLevel level, boolean announce, @Nullable TideBackState.Trial forceSleep, boolean noSleep) {
         TitanBackData data = TitanBackData.get(level);
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL);
         TideHeartBattle.reawaken(level, data);
         TideBackState state = TideBackState.get(level);
         state.reset(level.random, forceSleep, noSleep);

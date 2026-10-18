@@ -66,7 +66,7 @@ public class EmberTitanRenderer extends GeoEntityRenderer<EmberTitanEntity> {
             if (glow == null) {
                 return;
             }
-            int v = Mth.clamp(Math.round(glowStrength(animatable) * 255f), 0, 255);
+            int v = Mth.clamp(Math.round(glowStrength(animatable) * animatable.glowFactor(partialTick) * 255f), 0, 255);
             int colour = 0xFF000000 | (v << 16) | (v << 8) | v;
             getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, glow, bufferSource.getBuffer(glow), partialTick,
                     LightTexture.FULL_BRIGHT, packedOverlay, colour);

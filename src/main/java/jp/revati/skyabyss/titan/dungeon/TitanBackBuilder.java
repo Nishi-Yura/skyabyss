@@ -110,6 +110,9 @@ public final class TitanBackBuilder {
         // 錨石 (左のわき腹の鉄の留め具) から、雲の海へ垂れる鎖。乗り込むときに上ってくる鎖
         anchorChain(kit);
         buildPlatform(kit);
+        // 到着の台 (錨石の外) と、そこから背の広場へ体の中を登る階段
+        buildFlankPlatform(kit);
+        buildClimb(kit);
     }
 
     // モデルの錨石 (左のわき腹の鉄の留め具) から、外へ張り出して雲の海の少し上まで垂れる鎖
@@ -202,8 +205,79 @@ public final class TitanBackBuilder {
                 .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
-        // 尾の台には案内の看板を置かない。錨石と炉の使い方は、着いた最初の一度だけ囁きで伝える (BackWhispers)
+        // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない (BackWhispers)
+    }
+
+    // 左のわき腹の台 (到着): 錨石 (モデルの鉄の留め具) の外へ張り出した石の台。床は空だった所だけに置く (留め具と体はそのまま)。
+    // 北・南・西の縁に低い柵 (鎖の垂れる所は開ける)、四隅に灯り。錨石 (石の磁石) を留め具の外の面に、共鳴の炉を北に置く。
+    // 台の北の端 (z STAIR_Z0〜STAIR_Z1) から、東の体の面へ登りの階段が始まる (buildClimb)
+    private static void buildFlankPlatform(BuildKit kit) {
+        int fy = FLANK_FLOOR_Y;
+        RandomSource random = kit.random;
+        for (int x = FLANK_X0; x <= FLANK_X1; x++) {
+            for (int z = FLANK_Z0; z <= FLANK_Z1; z++) {
+                if (!kit.get(x, fy, z).isAir()) {
+                    continue;
+                }
+                boolean edge = x == FLANK_X0 || z == FLANK_Z0 || z == FLANK_Z1;
+                kit.set(x, fy, z, edge ? BuildKit.BRICKS : (x + z) % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES);
+                // 台の下: 縁は二段、中は一段の石組み (宙に薄い板が浮かないように)
+                if (kit.get(x, fy - 1, z).isAir()) {
+                    kit.set(x, fy - 1, z, edge ? BuildKit.CRACKED : Blocks.DEEPSLATE.defaultBlockState());
+                }
+                if (edge && kit.get(x, fy - 2, z).isAir() && random.nextFloat() < 0.7f) {
+                    kit.set(x, fy - 2, z, Blocks.COBBLED_DEEPSLATE.defaultBlockState());
+                }
+            }
+        }
+        // 縁の柵 (西・北・南)。鎖の垂れる西の縁 (z 108〜112) は、鎖が見えるよう低い柵にしない
+        for (int x = FLANK_X0; x <= FLANK_X1; x++) {
+            for (int z = FLANK_Z0; z <= FLANK_Z1; z++) {
+                boolean edge = x == FLANK_X0 || z == FLANK_Z0 || z == FLANK_Z1;
+                boolean chainGap = x == FLANK_X0 && z >= ANCHOR_CHAIN_Z - 2 && z <= ANCHOR_CHAIN_Z + 2;
+                if (edge && !chainGap && kit.get(x, fy, z).is(BuildKit.BRICKS.getBlock())) {
+                    kit.set(x, fy + 1, z, Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState());
+                }
+            }
+        }
+        // 隅の灯りの柱
+        for (int x : new int[]{FLANK_X0, FLANK_X0 + 6}) {
+            for (int z : new int[]{FLANK_Z0, FLANK_Z1}) {
+                if (kit.get(x, fy, z).isAir()) {
+                    continue;
+                }
+                kit.set(x, fy + 1, z, BuildKit.POLISHED);
+                kit.set(x, fy + 2, z, BuildKit.POLISHED);
+                kit.set(x, fy + 3, z, Blocks.SOUL_LANTERN.defaultBlockState());
+            }
+        }
+        // 錨石 (石の磁石) を留め具の外の面に。鎖の根元の下
+        kit.set(anchor(), Blocks.LODESTONE.defaultBlockState());
         kit.set(forge(), ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.EAST));
+    }
+
+    // 台から背の広場への登りの階段: 体の中を東へ、1 ブロックごとに 1 上がる (幅 3・高さ 4)。広場の石畳 (南西) へ出る。
+    // 体の面に近い所は、背の殻を割って階段が背へ出る。灯りを段ごとに交互に吊るす
+    private static void buildClimb(BuildKit kit) {
+        int steps = stairSteps();
+        BlockState up = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST);
+        BlockState lantern = Blocks.SOUL_LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true);
+        for (int i = 0; i < steps; i++) {
+            int x = STAIR_X0 + i;
+            int feet = FLANK_FLOOR_Y + 1 + i;
+            for (int z = STAIR_Z0; z <= STAIR_Z1; z++) {
+                kit.fill(x, feet, z, x, feet + 3, z, BuildKit.AIR);
+                if (i > 0) {
+                    kit.set(x, feet - 1, z, up);
+                } else if (kit.get(x, feet - 1, z).isAir()) {
+                    kit.set(x, feet - 1, z, BuildKit.POLISHED);
+                }
+            }
+            // 灯り: 6 段ごとに、天井の中央から
+            if (i > 0 && i % 6 == 3 && !kit.get(x, feet + 4, STAIR_Z0 + 1).isAir()) {
+                kit.set(x, feet + 3, STAIR_Z0 + 1, lantern);
+            }
+        }
     }
 
     // 円形の石畳の模様。縁はレンガ、一つ内側に彫刻の線、その内側は市松、中央は扇形の模様
@@ -249,7 +323,7 @@ public final class TitanBackBuilder {
                 kit.set(x, py, z, BuildKit.CHISELED);
             }
         }
-        kit.set(anchor(), Blocks.LODESTONE.defaultBlockState());
+        kit.set(0, py, PLATFORM_Z + 3, BuildKit.CHISELED);
         for (int side = -1; side <= 1; side += 2) {
             for (int y = py + 1; y <= py + 3; y++) {
                 kit.set(2 * side, y, PLATFORM_Z + 4, BuildKit.POLISHED);

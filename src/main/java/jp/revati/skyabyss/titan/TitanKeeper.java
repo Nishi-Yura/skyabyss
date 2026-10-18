@@ -150,7 +150,7 @@ public abstract class TitanKeeper<T extends Entity> {
             } else {
                 frozenSince = -1;
             }
-            if (unreachableSince >= 0 && !someoneAboard && now - unreachableSince > RELOCATE_AFTER) {
+            if (unreachableSince >= 0 && !someoneAboard && !resting(level) && now - unreachableSince > RELOCATE_AFTER) {
                 ServerPlayer target = randomEligible(level);
                 if (target != null) {
                     relocate(level, slot, titan, target, now);
@@ -185,12 +185,17 @@ public abstract class TitanKeeper<T extends Entity> {
         missingSince = -1;
         if (unreachableSince < 0) {
             unreachableSince = now;
-        } else if (!someoneAboard && now - unreachableSince > RELOCATE_AFTER) {
+        } else if (!someoneAboard && !resting(level) && now - unreachableSince > RELOCATE_AFTER) {
             ServerPlayer target = randomEligible(level);
             if (target != null) {
                 relocate(level, slot, null, target, now);
             }
         }
+    }
+
+    // 眠っている巨神は、誰からも遠くなっても呼び直さない (眠ったその場所で、目覚めるまで動かない。TitanDormancy)
+    private boolean resting(ServerLevel level) {
+        return jp.revati.skyabyss.titan.end.TitanDormancy.isResting(level.getServer(), slotId);
     }
 
     // 古い個体 (読み込まれていれば) を消し、プレイヤーの遠くへ新しい個体を出して、前の状態を引き継がせる。

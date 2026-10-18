@@ -135,6 +135,11 @@ public final class Progression {
     // 入口で確かめる。乗れなければ理由を見せて false
     public static boolean checkBoard(ServerPlayer player, String titan) {
         if (canBoard(player, titan)) {
+            // 心臓を止めた直後の巨神は深い眠りにある (jp.revati.skyabyss.titan.end.TitanDormancy)。鼓動が戻るまで乗れない
+            if (jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.server, titan)) {
+                Notice.bar(player, ModText.deny("message.skyabyss.titan_end.sleeping", titanName(titan)));
+                return false;
+            }
             return true;
         }
         String prev = ProgressRules.previousTitan(titan);

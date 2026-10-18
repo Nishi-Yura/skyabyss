@@ -182,7 +182,7 @@ public final class TitanTravel {
             TitanBackBuilder.build(back, data);
         }
         BlockPos arrival = TitanBackLayout.arrival();
-        player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, 180f, 0f);
+        player.teleportTo(back, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5, TitanBackLayout.ARRIVAL_YAW, 0f);
         back.playSound(null, arrival, ModSounds.TITAN_CHAIN.get(), SoundSource.PLAYERS, 1.5f, 0.9f);
         showTitle(player, "title.skyabyss.titan_back", "title.skyabyss.titan_back.sub");
         Notice.narrate(player, "message.skyabyss.arrived_back");

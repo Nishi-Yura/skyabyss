@@ -134,12 +134,17 @@ public final class SelfTestRunner {
         steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
+        steps.add(Step.once("titan end (reset after tide_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         steps.add(Step.once("storm_heart (load)", jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::load));
         steps.add(Step.once("storm_heart", 30, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::runSelfTest));
+        steps.add(Step.once("titan end (reset after storm_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         steps.add(Step.once("storm_heart (light)", 40, jp.revati.skyabyss.titan.storm.heart.StormHeartSelfTest::checkLight));
         // 心臓の登場と倒れる演出・高さの固定 (四つの心臓の共通部分 HeartBoss)
         steps.add(Step.once("heart_cinematic (load)", jp.revati.skyabyss.entity.HeartCinematicSelfTest::load));
         steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
+        // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
+        steps.add(Step.once("titan end (load)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::load));
+        steps.add(Step.once("titan end", 60, jp.revati.skyabyss.titan.end.TitanEndSelfTest::runSelfTest));
         steps.add(Step.once("tide (load)", TideSelfTest::load));
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
@@ -176,6 +181,7 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.mob.EmberMobSelfTest.steps());
         // 余燼の心臓 (熾の底・区画・冷え・10 の技・凍え・報酬・天の鍵の四つ目・撃破)。13 の 5.3節
         steps.addAll(jp.revati.skyabyss.titan.ember.heart.EmberHeartSelfTest.steps());
+        steps.add(Step.once("titan end (reset after ember heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         // 余燼の三つの試練 (灰の道・鍛えの間・火守り)。13 の 4 章。建てたあと 100 tick 待ってから検査する
         steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く

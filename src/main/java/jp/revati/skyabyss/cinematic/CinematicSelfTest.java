@@ -87,7 +87,7 @@ public final class CinematicSelfTest {
                 check(f, end.distanceTo(new Vec3(0, CameraMath.EYE, 0)) < 1.0e-6, s.id() + ": seamless scene does not end at the eye");
             }
         }
-        check(f, count == 6, "expected 6 scenes (opening, whale, 4 hearts), got " + count);
+        check(f, count == 10, "expected 10 scenes (opening, whale, 4 hearts, 4 dormancies), got " + count);
         Scene opening = Scenes.get(Scenes.OPENING);
         check(f, opening != null && opening.duration() <= 40f && opening.duration() >= 25f, "opening should be 25-40 s");
         check(f, opening != null && opening.intro() && opening.handBack() && opening.seamless(), "opening flags");
@@ -95,6 +95,18 @@ public final class CinematicSelfTest {
         check(f, whale != null && whale.duration() <= 25f, "whale first sight too long");
         for (String titan : new String[] {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER}) {
             check(f, Scenes.get(Scenes.heartId(titan)) != null, "no heart scene for " + titan);
+            // 眠りの場面 (約 16 秒。カメラは巨神を狙い、台詞は 3 行)
+            Scene end = Scenes.get(Scenes.endId(titan));
+            check(f, end != null && end.duration() >= 14f && end.duration() <= 20f && end.lines().size() == 3 && !end.seamless(),
+                    "the dormancy scene for " + titan + " is missing or has odd length / lines");
+            if (end != null) {
+                for (Shot shot : end.shots()) {
+                    check(f, shot.lookFrom().kind() == Look.Kind.TARGET, "the dormancy scene for " + titan + " does not follow the titan");
+                }
+            }
+            // 心臓の台詞は巨神ごと (共通の台詞ではない)
+            Scene heart = Scenes.get(Scenes.heartId(titan));
+            check(f, heart != null && heart.lines().size() == 2 && heart.lines().get(0).text().contains(titan), "the heart lines for " + titan + " are not per titan");
         }
     }
 

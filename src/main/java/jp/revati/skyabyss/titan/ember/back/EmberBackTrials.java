@@ -497,6 +497,7 @@ public final class EmberBackTrials {
     public static void reset(ServerLevel level, boolean announce, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
         TitanBackData data = TitanBackData.get(level);
         EmberBackState state = EmberBackState.get(level);
+        jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.EMBER);
         if (data.isHeartDefeated()) {
             state.markEverDefeated();
         }

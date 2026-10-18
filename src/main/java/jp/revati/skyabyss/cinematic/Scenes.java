@@ -10,11 +10,13 @@ import jp.revati.skyabyss.progress.Titans;
 // 場面の定義 (Java の台本。docs/design/20_cinematics.md)。場面の座標は (右, 上, 前) で、前は場面ごとに決める向き
 //   opening           : 世界の始まり。前 = 最初の目的 (煙) の向き。約 36 秒
 //   whale_first_sight : 岩鯨を初めて見る。前 = 岩鯨の向き。狙う物 = 岩鯨 (動いても追う)。約 20 秒
-//   heart_<titan>     : 巨神の心臓が現れる (心臓の登場の演出が始まると TitanCinematics が見せる)。前 = 心臓の向き。狙う物 = 心臓。約 4 秒
+//   heart_<titan>     : 巨神の心臓が現れる (心臓の登場の演出が始まると TitanCinematics が見せる)。前 = 心臓の向き。狙う物 = 心臓。約 4 秒。台詞は巨神ごと
+//   titan_end_<titan> : 心臓を止めた人が地上へ降ろされたあと、巨神が眠りへ沈むのを地上から見る (初回だけ。TitanEnd)。前 = 巨神の向き。狙う物 = 巨神。約 16 秒
 public final class Scenes {
     public static final String OPENING = "opening";
     public static final String WHALE_FIRST_SIGHT = "whale_first_sight";
     public static final String HEART_PREFIX = "heart_";
+    public static final String END_PREFIX = "titan_end_";
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
 
@@ -25,6 +27,7 @@ public final class Scenes {
         add(whaleFirstSight());
         for (String titan : new String[] {Titans.STONE_WHALE, Titans.TIDE_SHELL, Titans.THUNDER_WING, Titans.EMBER}) {
             add(heartAppears(titan));
+            add(titanEnd(titan));
         }
     }
 
@@ -42,6 +45,10 @@ public final class Scenes {
 
     public static String heartId(String titan) {
         return HEART_PREFIX + titan;
+    }
+
+    public static String endId(String titan) {
+        return END_PREFIX + titan;
     }
 
     private static void add(Scene scene) {
@@ -85,15 +92,67 @@ public final class Scenes {
                 .build();
     }
 
-    // 巨神の心臓が現れる (4 秒。心臓の登場の演出 HeartBoss.INTRO_TICKS と同じ長さ)。心臓を見上げ、横へ回り込んで全体を収める。台詞は巨神ごとに差し替えてよい (今は共通)
+    // 巨神の心臓が現れる (4 秒。心臓の登場の演出 HeartBoss.INTRO_TICKS と同じ長さ)。心臓を見上げ、横へ回り込んで全体を収める。台詞は巨神ごと (cinematic.skyabyss.heart.<巨神>.heaven / .hero)
     private static Scene heartAppears(String titan) {
         return Scene.of(heartId(titan)).handBack()
                 .shot(Shot.of(1.8f).pos(0, 1.9, 0.5).posTo(0, 3.0, 1.5)
                         .look(Look.target(0, 3, 0)).lookTo(Look.target(0, 4, 0)).fov(70f, 64f).sway(0.2f).build())
                 .shot(Shot.of(2.2f).pos(0, 3.0, 1.5).posTo(7.0, 7.0, 4.0)
                         .look(Look.target(0, 4, 0)).lookTo(Look.target(0, 4, 0)).fov(64f, 58f).sway(0.2f).build())
-                .line(0.2f, 1.8f, Speaker.HEAVEN, "cinematic.skyabyss.heart.heaven")
-                .line(2.1f, 1.9f, Speaker.HERO, "cinematic.skyabyss.heart.hero")
+                .line(0.2f, 1.8f, Speaker.HEAVEN, "cinematic.skyabyss.heart." + titan + ".heaven")
+                .line(2.1f, 1.9f, Speaker.HERO, "cinematic.skyabyss.heart." + titan + ".hero")
                 .build();
+    }
+
+    // 巨神が眠りへ沈むのを地上から見る (16 秒。docs/design/20 の 3.4)。人は巨神に降ろされたばかりで、前 = 巨神の方。
+    // 三つの撮影: ①眠りの始まり (歌・光が消える) ②沈む・畳まれる・埋まる ③引いて全体。見る点の高さ dy は、巨神の姿の見せ所に合わせて巨神ごとに決める
+    private static Scene titanEnd(String titan) {
+        // 見る点の高さ (巨神の位置から): ① 始め → 終わり、② → 終わり、③ → 終わり。視野 (度): ①、②、③
+        double[] dy;
+        float[][] fov;
+        double[][] cam;
+        Speaker[] who;
+        switch (titan) {
+            case Titans.TIDE_SHELL -> {
+                // 海へ沈み、珊瑚の段だけが水の上に残る。甲羅の頂 (高さ 34) から水面まで
+                dy = new double[] {26, 24, 16, 8, 4};
+                fov = new float[][] {{54f, 50f}, {50f, 46f}, {46f, 58f}};
+                cam = new double[][] {{0, 1.9, 0.5, 0, 2.4, 1.0}, {0, 2.4, 1.0, 5, 5, 3}, {5, 5, 3, -5, 8, 2}};
+                who = new Speaker[] {Speaker.HERO, Speaker.HEAVEN, Speaker.HERO};
+            }
+            case Titans.THUNDER_WING -> {
+                // 翼を畳み、峰に伏せて岩の峰になる。翼の幅 ±112、体の高さ 30
+                dy = new double[] {30, 28, 22, 16, 10};
+                fov = new float[][] {{58f, 54f}, {54f, 54f}, {54f, 66f}};
+                cam = new double[][] {{0, 1.9, 0.5, 0, 2.6, 1.0}, {0, 2.6, 1.0, 4, 5, 2}, {4, 5, 2, -6, 10, 3}};
+                who = new Speaker[] {Speaker.HEAVEN, Speaker.HERO, Speaker.HEAVEN};
+            }
+            case Titans.EMBER -> {
+                // 土へ埋まり、尾根だけが冷えた丘になる。火山の縁は底から 68
+                dy = new double[] {58, 52, 42, 30, 24};
+                fov = new float[][] {{54f, 50f}, {50f, 48f}, {48f, 62f}};
+                cam = new double[][] {{0, 1.9, 0.5, 0, 2.4, 1.0}, {0, 2.4, 1.0, 5, 5, 3}, {5, 5, 3, -6, 8, 2}};
+                who = new Speaker[] {Speaker.HERO, Speaker.HEAVEN, Speaker.HERO};
+            }
+            default -> {
+                // 岩鯨: 歌がやみ、光が消え、雲の海へゆっくり沈む。体の中ほど (高さ 20) から
+                dy = new double[] {24, 22, 16, 8, 2};
+                fov = new float[][] {{54f, 50f}, {50f, 46f}, {46f, 60f}};
+                cam = new double[][] {{0, 1.9, 0.5, 0, 2.4, 1.0}, {0, 2.4, 1.0, 4, 5, 2}, {4, 5, 2, -6, 9, 3}};
+                who = new Speaker[] {Speaker.HEAVEN, Speaker.HERO, Speaker.HEAVEN};
+            }
+        }
+        float[] secs = {4.5f, 6.0f, 5.5f};
+        Scene.Builder b = Scene.of(endId(titan)).handBack();
+        for (int i = 0; i < 3; i++) {
+            Shot.Builder shot = Shot.of(secs[i]).pos(cam[i][0], cam[i][1], cam[i][2]).posTo(cam[i][3], cam[i][4], cam[i][5])
+                    .look(Look.target(0, dy[i], 0)).lookTo(Look.target(0, dy[i + 1], 0)).fov(fov[i][0], fov[i][1])
+                    .ease(i == 0 ? Ease.SMOOTH : Ease.SMOOTHER).sway(0.25f);
+            b.shot(shot.build());
+        }
+        b.line(0.8f, 3.6f, who[0], "cinematic.skyabyss.end." + titan + ".1");
+        b.line(6.0f, 4.6f, who[1], "cinematic.skyabyss.end." + titan + ".2");
+        b.line(11.4f, 4.2f, who[2], "cinematic.skyabyss.end." + titan + ".3");
+        return b.build();
     }
 }

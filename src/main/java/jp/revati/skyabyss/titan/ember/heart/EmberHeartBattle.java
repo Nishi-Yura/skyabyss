@@ -378,6 +378,7 @@ public final class EmberHeartBattle {
         Vec3 c = EmberHeartArena.heartHome();
         level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
         SkyAbyss.LOGGER.info("The heart of the embers was stilled by {} participant(s)", ids.size());
+        jp.revati.skyabyss.titan.end.TitanEnd.onHeartStopped(level, jp.revati.skyabyss.progress.Titans.EMBER, ids);
     }
 
     // 試練で湧いた心臓・礫は保存しないが、古いものが残っていれば読み込みのときに消す

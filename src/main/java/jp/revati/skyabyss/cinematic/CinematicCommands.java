@@ -55,11 +55,22 @@ public final class CinematicCommands {
     private static boolean play(ServerPlayer p, String id) throws CommandSyntaxException {
         Entity target = null;
         Vec3 face = p.position().add(p.getLookAngle().multiply(120, 0, 120));
-        if (id.equals(Scenes.WHALE_FIRST_SIGHT) || id.startsWith(Scenes.HEART_PREFIX)) {
+        if (id.equals(Scenes.WHALE_FIRST_SIGHT)) {
             StoneWhaleEntity whale = WhaleKeeper.current(p.server.overworld());
             if (whale != null) {
                 target = whale;
                 face = whale.position();
+            }
+        } else if (id.startsWith(Scenes.HEART_PREFIX) || id.startsWith(Scenes.END_PREFIX)) {
+            // 心臓・眠りの場面: その巨神の本体を狙う (いなければ岩鯨、それもなければ前方)
+            String titan = id.substring(id.startsWith(Scenes.HEART_PREFIX) ? Scenes.HEART_PREFIX.length() : Scenes.END_PREFIX.length());
+            Entity e = jp.revati.skyabyss.titan.end.TitanEnd.entity(p.server, titan);
+            if (e == null) {
+                e = WhaleKeeper.current(p.server.overworld());
+            }
+            if (e != null) {
+                target = e;
+                face = e.position();
             }
         }
         return Cinematics.start(p, id, target, face);
