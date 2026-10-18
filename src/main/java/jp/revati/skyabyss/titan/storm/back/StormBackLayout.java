@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 // ほかの担当へ (11.1 の約束): 雷獣の巣・竜骨の間・休み場はここから読む。数字を写さないこと (建て直しで動くことがある)。
 public final class StormBackLayout {
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 2;   // 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 3;   // 3: 外の鳥の色を低ポリ案 A (嵐の大鷲) に合わせた。2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
