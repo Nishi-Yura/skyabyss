@@ -399,6 +399,16 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
                 return true;
             }
+            case "weaponmesh" -> {
+                // weaponmesh on|off : プレイヤーの武器を低ポリ (on) / 元のボクセル (off) で描く
+                jp.revati.skyabyss.client.lowpoly.LowPoly.weaponMeshes = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "weapontier" -> {
+                // weapontier common|rare|legend|off : 武器のメッシュの階級を固定する (品の階級を使うのは off)
+                jp.revati.skyabyss.client.weapon.WeaponItemRenderer.setTier(line.arg(0));
+                return true;
+            }
             case "watcher" -> {
                 // watcher x y z yaw : 見る者 (クライアントだけの人影) を足元 (x, y, z)・体の向き yaw に置く。消えずに立つ (確かめ用)
                 if (first) {
