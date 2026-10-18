@@ -85,7 +85,7 @@ python tools/weapon_display.py [--check]                            # 持ち方 
 
 持ち方と動きの決まりは `docs/design/15_high_poly.md` の 4.6.1。
 
-### 装飾品の低ポリメッシュ (手・地面・額縁と、体に付けた姿。15 の 4.6.3)
+### 装飾品の低ポリメッシュ (手・地面・額縁と、体に付けた姿。15 の 4.6.4)
 
 ```
 cd tools/rough/lowpoly/accessories && python build_final.py   # 採用した A 案 16 品 x 階級 3 -> docs/review/lowpoly_roughs/accessories_final/<id>/ (面数は summary.json)
