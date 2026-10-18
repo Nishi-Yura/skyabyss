@@ -7,6 +7,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
+import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.ember.smith.AshSmith;
 import jp.revati.skyabyss.titan.ember.smith.EmberSmithSetup;
 import net.minecraft.client.Minecraft;
@@ -26,8 +28,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.model.DefaultedEntityGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 // 灰の鍛え手のクライアント側: 描画の登録と、10 段のボスバー (段階なし、橙の帯。13 の 5.2節)。
@@ -51,6 +51,9 @@ public final class AshSmithClient {
     private static final ResourceLocation NOTCH_TEX = tex("ash_smith_notches");
     private static final ResourceLocation GLOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/ash_smith_glowmask.png");
     private static final ResourceLocation GLOW_WHITE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/ash_smith_glowmask_white.png");
+    // 低ポリ: アトラスの光る画素の色だけを載せた絵 (tools/install_lowpoly_ember_npc.py が焼く)
+    private static final ResourceLocation GLOW_LOW = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/ash_smith_glow.png");
+    private static final ResourceLocation GLOW_LOW_WHITE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/ash_smith_glow_white.png");
 
     private AshSmithClient() {
     }
@@ -110,13 +113,22 @@ public final class AshSmithClient {
     // 鍛え手の描画。部屋の明るさで色が沈まないよう (08 の 19.8節): 基のテクスチャを明るくしてあり、光る所は glowmask を目の光で足す
     // (GlowLayer。AutoGlowingGeoLayer は光る画素を基から抜いて面の陰を受けるため、暗い部屋で沈む)。
     // 鞴が白く光る間 (吐いたあと) は白の発光、怒ったあとは橙がかった白。怒ったら前掛けを隠す。大鎚は socket_main、火箸は socket_off
-    static final class SmithRenderer extends GeoEntityRenderer<AshSmith> {
+    static final class SmithRenderer extends LowPolyGeoRenderer<AshSmith> {
         SmithRenderer(EntityRendererProvider.Context context) {
-            super(context, new DefaultedEntityGeoModel<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "ash_smith"), true));
+            // 低ポリ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo / GearLayer に戻る
+            super(context, "ash_smith", 1.0f);
             addRenderLayer(new GlowLayer(this));
-            addRenderLayer(new GearLayer<>(this, "socket_main", "smith_hammer", s -> "idle"));
-            addRenderLayer(new GearLayer<>(this, "socket_off", "smith_tongs", s -> "idle"));
+            addRenderLayer(new GearLayer<>(this, "socket_main", "smith_hammer", s -> "idle").activeWhen(() -> !LowPoly.enabled));
+            addRenderLayer(new GearLayer<>(this, "socket_off", "smith_tongs", s -> "idle").activeWhen(() -> !LowPoly.enabled));
+            addRenderLayer(GearLayer.lowPoly(this, "socket_main", "smith_hammer"));
+            addRenderLayer(GearLayer.lowPoly(this, "socket_off", "smith_tongs"));
             this.shadowRadius = 1.4f;
+        }
+
+        // 発光は下の GlowLayer (目の光で足す)。AutoGlowingGeoLayer は面の陰をかけ、暗い部屋で沈む
+        @Override
+        protected boolean autoGlow() {
+            return false;
         }
 
         @Override
@@ -151,7 +163,7 @@ public final class AshSmithClient {
                 return;
             }
             boolean white = smith.isWeak() || smith.isEnraged();
-            RenderType glow = RenderType.eyes(white ? GLOW_WHITE : GLOW);
+            RenderType glow = RenderType.eyes(LowPoly.enabled ? (white ? GLOW_LOW_WHITE : GLOW_LOW) : (white ? GLOW_WHITE : GLOW));
             int color = -1;
             if (smith.isEnraged() && !smith.isWeak()) {
                 color = FastColor.ARGB32.color(255, 255, 214, 170);

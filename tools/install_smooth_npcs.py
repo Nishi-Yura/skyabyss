@@ -1,4 +1,8 @@
-"""語り部 (storyteller) と イサナ (whale_chaser) の滑らか版ラフを、ゲームの assets へ入れる。
+"""【役目を終えた】語り部とイサナは低ポリ版 (`tools/install_lowpoly_ember_npc.py`、15 の 9.6) に替わった。ここが入れた滑らかなボクセルの geo・png
+(`geo/entity/{storyteller,whale_chaser}.geo.json`、`textures/entity/`) は、`LowPoly.enabled = false` のときの箱の描画として assets に残してある。
+入力の `docs/review/smooth_npc_roughs/<名前>/<案>/` は消したので、このスクリプトはもう回らない (経緯のために残す)。
+
+語り部 (storyteller) と イサナ (whale_chaser) の滑らか版ラフを、ゲームの assets へ入れる。
 
 選んだ案: 語り部 = B 頭巾の語り部、イサナ = A つば広帽の旅人。
 元: docs/review/smooth_npc_roughs/<名前>/<案>/ (tools/rough/smooth_npc.py が作る)。ラフは面の名前が「west = x の小さい側」の

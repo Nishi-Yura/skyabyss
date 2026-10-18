@@ -48,7 +48,7 @@ public final class WatcherClient {
     // 気づいたとみなすまでに、続けて見えている tick 数
     private static final int NOTICE_TICKS = 6;
     // 見た目の確かめ用 (起動時に -Dskyabyss.watcherHold=true): 見つめても近づいても消えない
-    private static final boolean HOLD = Boolean.getBoolean("skyabyss.watcherHold");
+    private static volatile boolean HOLD = Boolean.getBoolean("skyabyss.watcherHold");
     // 目を離してから消えるまでの tick 数
     private static final int LOOK_AWAY_TICKS = 8;
     // 見つめているとみなす、視線の中心からの角度
@@ -94,6 +94,12 @@ public final class WatcherClient {
     private static WatcherPresenceSound presenceSound;
 
     private WatcherClient() {
+    }
+
+    // 台本 (ShotRunner の `watcher x y z yaw`) 用: 消えずに立つ人影を、指定の位置に置く
+    public static void placeForShot(double x, double y, double z, float yaw) {
+        HOLD = true;
+        receive(new WatcherPayload(0x7F00, x, y, z, yaw, 0));
     }
 
     public static void receive(WatcherPayload payload) {
