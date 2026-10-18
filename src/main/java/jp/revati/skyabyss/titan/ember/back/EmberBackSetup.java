@@ -37,5 +37,7 @@ public final class EmberBackSetup {
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
         SOUNDS.register(modEventBus);
+        // グループごとの見かけ (鳴った石・門の火) と、グループが変わった人の後始末
+        EmberBackTrials.registerGroupHooks();
     }
 }

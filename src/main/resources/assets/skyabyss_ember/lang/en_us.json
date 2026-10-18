@@ -67,6 +67,7 @@
   "message.skyabyss.ember.back.gate_open": "The forge fire died. The cooled hearth floor opens downward.",
   "message.skyabyss.ember.back.shortcut": "The ember floor carried you back to the hall.",
   "message.skyabyss.ember.back.trials_renewed": "The fires inside the body have rekindled.",
+  "message.skyabyss.ember.back.group_changed": "Your companions changed, and so did the fires. You were led back to the hall's campfire.",
   "message.skyabyss.ember.back.sleeping_west": "Tonight the western ash road lies cold and asleep.",
   "message.skyabyss.ember.back.sleeping_east": "Tonight the eastern forge already burns.",
   "message.skyabyss.ember.back.sleeping_south": "Tonight the southern hearth already glows.",

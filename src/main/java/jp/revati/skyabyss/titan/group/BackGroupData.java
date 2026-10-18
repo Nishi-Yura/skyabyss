@@ -70,6 +70,14 @@ public final class BackGroupData extends SavedData {
             dirty();
         }
 
+        // 心臓をもう一度挑めるようにする (テスト用のコマンド・自己テスト。進みのほかの所と番号はそのまま)
+        public void clearHeartDefeated() {
+            if (heartDefeated) {
+                heartDefeated = false;
+                dirty();
+            }
+        }
+
         public boolean isGateOpened() {
             return gateOpened;
         }

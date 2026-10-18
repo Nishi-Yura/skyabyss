@@ -1,6 +1,6 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
-import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -58,12 +58,12 @@ public final class ForgeRoom {
                 k.set(x, box.maxY(), z, Blocks.SHROOMLIGHT.defaultBlockState());
             }
         }
-        buildInner(level, Forge.patternFor(jp.revati.skyabyss.titan.ember.back.EmberBackState.get(level).firstForgeUsed(),
-                jp.revati.skyabyss.titan.ember.back.EmberBackState.get(level).seed()));
+        buildInner(level, Forge.ownerPattern(level));
     }
 
-    // リセットで直す所: 金床の刻みの色 (打つ順)、大炉の口、扉
+    // リセットで直す所: 金床の刻みの色 (打つ順。部屋の持ち主の記録から)、大炉の口、扉のブロック (開け閉めはグループごと)
     static void buildInner(ServerLevel level, int[] pattern) {
+        Forge.patternBuilt(pattern);
         for (int i = 0; i < Forge.MARKS.length; i++) {
             BlockPos m = Forge.MARKS[i];
             level.setBlock(m, i < pattern.length ? Forge.woolOf(pattern[i]) : Blocks.BLACKSTONE.defaultBlockState(), Block.UPDATE_CLIENTS);
@@ -74,15 +74,7 @@ public final class ForgeRoom {
         for (BlockPos p : new BlockPos[] {Forge.BELLOWS_A, Forge.BELLOWS_B}) {
             level.setBlock(p, EmberTrialSetup.FORGE_BELLOWS.get().defaultBlockState(), Block.UPDATE_CLIENTS);
         }
-        // 鍛え手の扉 (3 x 4 x 3 の封印)
-        BlockState gate = ModBlocks.SEALED_GATE.get().defaultBlockState();
-        EmberBackLayout.Box d = EmberBackLayout.SMITH_DOOR;
-        for (int x = d.minX(); x <= d.maxX(); x++) {
-            for (int y = d.minY(); y <= d.maxY(); y++) {
-                for (int z = d.minZ(); z <= d.maxZ(); z++) {
-                    level.setBlock(new BlockPos(x, y, z), gate, Block.UPDATE_CLIENTS);
-                }
-            }
-        }
+        // 鍛え手の扉 (3 x 4 x 3 の封印。既定は閉じている。火の鍵で開けたグループにだけ開く)
+        GroupGates.place(level, jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(EmberBackLayout.SMITH_DOOR), false);
     }
 }

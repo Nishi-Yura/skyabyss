@@ -60,7 +60,6 @@ public final class EmberBodyBuilder {
         if (data.needsBuild(version)) {
             if (data.isBuilt()) {
                 SkyAbyss.LOGGER.info("Rebuilding the ember back (build {} -> {})", data.layoutVersion(), version);
-                data.resetProgress();
             }
             build(back, data);
         }
@@ -88,7 +87,6 @@ public final class EmberBodyBuilder {
         }
         if (data.isBuilt()) {
             SkyAbyss.LOGGER.info("Rebuilding the ember back (build {} -> {})", data.layoutVersion(), version);
-            data.resetProgress();
         }
         BackBuildJobs.Job job = BODY.job(back, EmberKit.FLAGS, y -> EmberKit.AIR);
         BackBuildJobs.schedule("ember back body", back, job, () -> buildRest(back, data, System.currentTimeMillis(), job.placed(), 0));
@@ -285,7 +283,7 @@ public final class EmberBodyBuilder {
             }
         }
         track(cx - 15, fy - 1, cz - 15, cx + 15, WELL_BOTTOM, cz + 15);
-        // 大きな炉 (5 × 5 の石の囲い、2 段。中の 3 × 3 が熾の底の門。門と火は EmberBackTrials.applyGate が置く)
+        // 大きな炉 (5 × 5 の石の囲い、2 段。中の 3 × 3 が熾の底の門。門 (扉のブロック) は EmberBackTrials.placeFixtures が置き、火と南の口はグループごとの見かけ)
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
                 if (Math.max(Math.abs(dx), Math.abs(dz)) != 2) {

@@ -26,6 +26,7 @@ import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackRooms;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.gear.EmberGear;
 import net.minecraft.core.BlockPos;
@@ -72,12 +73,12 @@ public final class EmberHeartSelfTest {
         List<String> failures = new ArrayList<>();
         List<String> notes = new ArrayList<>();
         ServerLevel back = server.getLevel(EmberIds.BACK);
-        boolean everBefore = false;
         try {
             if (back == null) {
                 failures.add("ember_back is missing");
             } else {
-                everBefore = EmberBackState.get(back).everDefeated();
+                // テストの人は一つのパーティにまとめ、心臓はそのパーティ (グループ) のものとして戦う
+                testParty = jp.revati.skyabyss.party.PartyData.get(server).create(PARTY_LEAD, "eh_lead");
                 run(server, back, failures, notes);
             }
         } catch (RuntimeException e) {
@@ -87,7 +88,7 @@ public final class EmberHeartSelfTest {
             if (back != null) {
                 EmberHeartBattle.abandon(back);
                 EmberHeartArena.cleanup(back);
-                setEverDefeated(back, everBefore);
+                forgetGroups(back);
                 force(back, false);
             }
         }
@@ -98,16 +99,31 @@ public final class EmberHeartSelfTest {
         }
     }
 
-    // 撃破の自己テストが立てた「ワールドで一度は倒された」を元に戻す (B の試練の眠る周の自己テストに影響しないように)
-    private static void setEverDefeated(ServerLevel back, boolean value) {
-        try {
-            java.lang.reflect.Field f = EmberBackState.class.getDeclaredField("everDefeated");
-            f.setAccessible(true);
-            f.setBoolean(EmberBackState.get(back), value);
-            EmberBackState.get(back).setDirty();
-        } catch (ReflectiveOperationException e) {
-            SkyAbyss.LOGGER.warn("could not restore everDefeated", e);
+    // 心臓と戦わない、もう一つのグループ (撃破で記録が変わらないことを見る)
+    static final UUID OTHER_GROUP = UUID.nameUUIDFromBytes("skyabyss ember heart other group".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+    static final UUID PARTY_LEAD = UUID.nameUUIDFromBytes("skyabyss ember heart party lead".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    @org.jetbrains.annotations.Nullable
+    private static jp.revati.skyabyss.party.PartyData.Party testParty;
+
+    // 自己テストが使ったグループの記録を消す (心臓の撃破・一度は倒した、がほかの自己テストに残らないように)
+    private static void forgetGroups(ServerLevel back) {
+        var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+        if (testParty != null) {
+            var parties = jp.revati.skyabyss.party.PartyData.get(back.getServer());
+            for (UUID m : List.copyOf(testParty.members)) {
+                parties.remove(m);
+                data.remove(m);
+            }
+            data.remove(testParty.id);
+            testParty = null;
         }
+        data.remove(EmberHeartBattle.TEST_GROUP);
+        if (EmberHeartBattle.lastGroup() != null) {
+            data.remove(EmberHeartBattle.lastGroup());
+        }
+        data.remove(OTHER_GROUP);
+        jp.revati.skyabyss.titan.group.RoomLocks.release(jp.revati.skyabyss.titan.ember.back.EmberRooms.HEART.lock());
     }
 
     private static void check(boolean ok, String message, List<String> failures) {
@@ -278,7 +294,8 @@ public final class EmberHeartSelfTest {
             }
         }
         for (BlockPos g : EmberHeartArena.gate()) {
-            check(back.getBlockState(g).isAir(), "entrance is closed at " + g, f);
+            check(back.getBlockState(g).is(ModBlocks.SEALED_GATE.get()) && back.getBlockState(g).getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN),
+                    "entrance is not an open gate at " + g, f);
         }
         check(EmberHeartArena.gate().size() == 3 * 4, "the gate is not 3 x 4", f);
         // 部屋の位置
@@ -352,6 +369,9 @@ public final class EmberHeartSelfTest {
         p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
         p.setHealth(1000);
         p.moveTo(x, EmberHeartArena.SURFACE, z, 0, 0);
+        if (testParty != null && !testParty.members.contains(p.getUUID())) {
+            jp.revati.skyabyss.party.PartyData.get(level.getServer()).add(testParty, p.getUUID(), "eh_" + tag);
+        }
         level.addFreshEntity(p);
         return p;
     }
@@ -488,7 +508,7 @@ public final class EmberHeartSelfTest {
     private static EmberHeart startHeart(ServerLevel back, List<String> f) {
         EmberHeartBattle.abandon(back);
         EmberHeartBattle.reawaken(back);
-        check(EmberHeartBattle.startNow(back), "battle did not start", f);
+        check(testParty != null ? EmberHeartBattle.startNow(back, testParty.id) : EmberHeartBattle.startNow(back), "battle did not start", f);
         EmberHeart heart = EmberHeartBattle.current(back);
         if (heart == null) {
             f.add("no heart after starting (difficulty " + back.getDifficulty() + ")");
@@ -525,6 +545,13 @@ public final class EmberHeartSelfTest {
         check(EmberHeartArena.sealed(back), "entrance not sealed when the fight starts", f);
         check(heart.getTags().contains(EmberHeartBattle.TAG) && heart.isBound(), "heart not tagged / bound", f);
         check(!heart.shouldBeSaved(), "heart would be saved to disk", f);
+        // 心臓は戦うグループのもの: ほかのグループの人には見えず、狙わない
+        FakePlayer other = new FakePlayer(back, new GameProfile(OTHER_GROUP, "[eh_other]"));
+        check(heart.groupId() != null && heart.groupId().equals(EmberHeartBattle.lastGroup()), "the heart has no group", f);
+        check(!jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(heart, other) && !heart.canAttack(other),
+                "another group can see or is targeted by the heart", f);
+        check(EmberRooms.owner(EmberRooms.HEART) != null && EmberRooms.owner(EmberRooms.HEART).equals(EmberHeartBattle.lastGroup()),
+                "the heart chamber is not held by the fighting group", f);
         check(!new EmberAshPellet(EmberHeartSetup.ASH_PELLET.get(), back).shouldBeSaved(), "pellet would be saved", f);
         check(Math.abs(heart.getMaxHealth() - EmberHeart.MAX_HEALTH) < 0.01, "max health is " + heart.getMaxHealth(), f);
         check(heart.getAttributeValue(Attributes.ARMOR) == 9 && heart.getAttributeValue(Attributes.ARMOR_TOUGHNESS) == 7
@@ -939,6 +966,7 @@ public final class EmberHeartSelfTest {
     // ---------------------------------------------------------------- 撃破 (進み・報酬・入口・光の柱・もう一度挑める)
     private static void checkDefeat(MinecraftServer server, ServerLevel back, List<String> f, List<String> notes) {
         boolean worldBefore = ProgressData.get(server).worldStopped(EmberLoot.TITAN);
+        int otherEpoch = EmberBackState.of(back, OTHER_GROUP).epoch();
         EmberHeart heart = startHeart(back, f);
         if (heart == null) {
             return;
@@ -953,9 +981,13 @@ public final class EmberHeartSelfTest {
         check(heart.isRemoved(), "heart was not removed after the death animation", f);
         check(EmberHeartBattle.isDefeated(back), "defeat was not recorded on the back", f);
         check(!EmberHeartBattle.room().active() && !EmberHeartArena.sealed(back), "entrance did not reopen after the defeat", f);
-        check(EmberBackState.get(back).everDefeated(), "the world did not record that the heart was stilled once (trials would not sleep)", f);
+        UUID group = EmberHeartBattle.lastGroup();
+        check(group != null && heart.groupId() != null && heart.groupId().equals(group), "the heart did not belong to the fighting group", f);
+        check(group != null && EmberBackState.of(back, group).everDefeated(), "the group did not record that it stilled the heart once (trials would not sleep)", f);
+        check(!EmberBackState.of(back, OTHER_GROUP).heartDefeated() && EmberBackState.of(back, OTHER_GROUP).epoch() == otherEpoch,
+                "another group's record changed when this group stilled the heart", f);
         check(!EmberHeartArena.isCold() && EmberHeartArena.sinkingCount() == 0, "the room was not restored after the defeat", f);
-        EmberHeartBattle.reawaken(back);
+        EmberHeartBattle.reawakenForTest(back);
         check(!EmberHeartBattle.isDefeated(back), "reawaken did not reset the heart", f);
         check(EmberHeartArena.isBuilt(back) && !EmberHeartArena.sealed(back), "reawaken left the chamber broken", f);
         if (!worldBefore) {

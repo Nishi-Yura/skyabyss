@@ -3,13 +3,21 @@ package jp.revati.skyabyss.titan.ember.back.trial;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOverlays;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.party.Parties;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.EmberMoth;
@@ -38,6 +46,9 @@ import net.minecraft.world.phys.Vec3;
 //   打ち終えると火の鍵 (焼き入れ前) が持ち物に入る (熱 +20)。10 秒以内に槽へ入れて焼き入れる。その鍵で鍛え手の扉を開ける
 //   灰被りが大炉に触れると、灰で熱が −30。打つ順は 4 通り (ワールドで初めてだけいちばんやさしい 赤→橙→黄)
 // 部屋の座標は ForgeRoom。熱はメモリだけに持つ (保存しない。リセットで 0)
+// 鍛えの間と鍛え手の間は一度に一つのグループ (EmberRooms の east)。ここの static は部屋の持ち主のために動く。
+// 打つ順は持ち主のグループの記録 (EmberBackState.forgePattern) から決まり、部屋を作り直すときに金床の刻みの毛糸と current に写す。
+// 鍛え手の扉 (SMITH_DOOR) はいつも置いてある扉。火の鍵で開けたグループにだけ開く (GroupGates)。開いていく灯りは、そのグループへの見かけ
 public final class Forge {
     // 部屋の道具の位置 (EAST の箱の中。床 y 80)
     public static final BlockPos FORGE = new BlockPos(26, 82, 22);
@@ -92,6 +103,13 @@ public final class Forge {
     private static int doorState;
     private static int doorStep;
     private static int doorTimer;
+    // 扉を開けているグループと、いま灯っている壁の z (なければ Integer.MIN_VALUE)
+    @Nullable
+    private static UUID doorGroup;
+    private static int glowZ = Integer.MIN_VALUE;
+    // いまの打つ順 (部屋を作り直したときに、持ち主の記録から決めて写す)
+    @Nullable
+    private static int[] current;
     private static final List<Consumer<ServerLevel>> DOOR_LISTENERS = new ArrayList<>();
 
     private Forge() {
@@ -109,6 +127,26 @@ public final class Forge {
         doorState = 0;
         doorStep = 0;
         doorTimer = 0;
+        doorGroup = null;
+        glowZ = Integer.MIN_VALUE;
+    }
+
+    // 扉の開いていく灯り (グループの見かけ)。EmberTrialSetup から一度だけ登録する
+    static void registerOverlay() {
+        GroupOverlays.register((level, group, out) -> {
+            if (level.dimension() != EmberIds.BACK || glowZ == Integer.MIN_VALUE || !group.equals(doorGroup)) {
+                return;
+            }
+            for (BlockPos p : layer(glowZ)) {
+                out.accept(p, Blocks.SHROOMLIGHT.defaultBlockState());
+            }
+        });
+    }
+
+    // 扉を開けているグループ (テスト用)
+    @Nullable
+    public static UUID doorGroup() {
+        return doorGroup;
     }
 
     // E (鍛え手) が、扉が開いて 5 秒の予告が終わったときに戦いを始めるための受け口
@@ -148,18 +186,22 @@ public final class Forge {
         return PATTERNS[firstUsed ? Math.floorMod(seed, PATTERNS.length) : 0];
     }
 
-    // 金床の刻みの色の並び (部屋のブロックから読む。サーバーを再起動しても同じになる)
+    // 打つ順 (部屋の持ち主のグループの記録から。部屋を作り直したときに current に写したもの)
     public static int[] pattern(ServerLevel level) {
-        int[] out = new int[MARKS.length];
-        int n = 0;
-        for (BlockPos p : MARKS) {
-            int c = colorOf(level.getBlockState(p));
-            if (c < 0) {
-                break;
-            }
-            out[n++] = c;
+        if (current == null) {
+            current = ownerPattern(level);
         }
-        return java.util.Arrays.copyOf(out, n);
+        return current;
+    }
+
+    // 部屋の持ち主の打つ順 (この周で初めて聞かれたときに記録へ決める。持ち主がいなければいちばんやさしい順)
+    public static int[] ownerPattern(ServerLevel level) {
+        return PATTERNS[EmberBackState.forRoom(level, EmberIds.EAST).forgePattern(PATTERNS.length)];
+    }
+
+    // 刻みを置いた (ForgeRoom.buildInner から)
+    static void patternBuilt(int[] pattern) {
+        current = pattern.clone();
     }
 
     static int colorOf(BlockState s) {
@@ -275,7 +317,6 @@ public final class Forge {
             EmberTrials.hint(player, EmberIds.LANG_EAST + "no_bloom");
             return StrikeResult.NO_BLOOM;
         }
-        EmberBackState state = EmberBackState.get(level);
         int[] pat = pattern(level);
         if (pat.length == 0) {
             return StrikeResult.NO_BLOOM;
@@ -351,7 +392,7 @@ public final class Forge {
         showMarks(level);
         // 鍵を持つ人に火の粉蛾が寄ってくる (D の誘い)
         int cap = EmberMoth.roomCap(Math.max(1, EmberTrials.playersIn(level, EmberBackLayout.EAST).size()));
-        for (int i = 0; i < 2 && EmberMoth.countIn(level, EmberBackLayout.EAST.aabb()) < cap; i++) {
+        for (int i = 0; i < 2 && EmberMoth.countIn(level, EmberBackLayout.EAST.aabb(), EmberRooms.owner(EmberIds.EAST)) < cap; i++) {
             EmberTrials.spawn(level, EmberMobSetup.EMBER_MOTH.get(), ANTE_SPAWN.getX() + i, ANTE_SPAWN.getY() + 2, ANTE_SPAWN.getZ());
         }
     }
@@ -369,25 +410,27 @@ public final class Forge {
         return true;
     }
 
-    // 焼き入れた鍵を扉に差す。開け始めたか
+    // 焼き入れた鍵を扉に差す。開け始めたか。扉はその人のグループにだけ開く
     public static boolean openDoor(ServerLevel level, ServerPlayer player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
-        if (doorState != 0 || !held.is(EmberTrialSetup.FIRE_KEY.get())) {
+        UUID group = Groups.keyOf(player);
+        if (doorState != 0 || !held.is(EmberTrialSetup.FIRE_KEY.get()) || GroupGates.isOpen(level, group, EmberBackLayout.SMITH_DOOR.min())) {
             return false;
         }
         held.shrink(1);
-        startDoor(level);
+        startDoor(level, group);
         Notice.narrate(player, EmberIds.LANG_EAST + "door_kindled");
         return true;
     }
 
-    static void startDoor(ServerLevel level) {
+    static void startDoor(ServerLevel level, @Nullable UUID group) {
         doorState = 1;
         doorStep = 0;
         doorTimer = 0;
+        doorGroup = group;
     }
 
-    // 扉の 3 枚の壁を、奥へ向かって一枚ずつ灯して開ける。そのあと 5 秒の予告
+    // 扉の 3 枚の壁を、奥へ向かって一枚ずつ灯して開ける (灯りも開くのも、鍵を差したグループにだけ)。そのあと 5 秒の予告
     static void tickDoor(ServerLevel level) {
         EmberBackLayout.Box d = EmberBackLayout.SMITH_DOOR;
         if (doorState == 1) {
@@ -395,13 +438,18 @@ public final class Forge {
                 return;
             }
             int step = doorStep++;
-            if (step > 0) {
-                fillLayer(level, d.minZ() + step - 1, Blocks.AIR.defaultBlockState());
+            if (step > 0 && doorGroup != null) {
+                GroupGates.open(level, doorGroup, layer(d.minZ() + step - 1));
+            }
+            glowZ = step < 3 ? d.minZ() + step : Integer.MIN_VALUE;
+            if (doorGroup != null) {
+                GroupOverlays.refresh(level, doorGroup);
             }
             if (step < 3) {
-                fillLayer(level, d.minZ() + step, Blocks.SHROOMLIGHT.defaultBlockState());
-                level.playSound(null, d.minX() + 1, d.minY() + 1, d.minZ() + step, EmberTrialSetup.DOOR_KINDLE.get(), SoundSource.BLOCKS, 1.5f,
-                        0.8f + 0.15f * step);
+                if (doorGroup != null) {
+                    EmberBackTrials.soundTo(level, doorGroup, new Vec3(d.minX() + 1.5, d.minY() + 1.5, d.minZ() + step + 0.5),
+                            EmberTrialSetup.DOOR_KINDLE.get(), 1.5f, 0.8f + 0.15f * step);
+                }
             } else {
                 doorState = 2;
                 doorTimer = DOOR_WARNING_TICKS;
@@ -428,13 +476,16 @@ public final class Forge {
         return DOOR_LISTENERS.size();
     }
 
-    static void fillLayer(ServerLevel level, int z, BlockState state) {
+    // 扉の一枚の壁 (z) のブロック
+    static List<BlockPos> layer(int z) {
         EmberBackLayout.Box d = EmberBackLayout.SMITH_DOOR;
+        List<BlockPos> out = new ArrayList<>();
         for (int x = d.minX(); x <= d.maxX(); x++) {
             for (int y = d.minY(); y <= d.maxY(); y++) {
-                level.setBlock(new BlockPos(x, y, z), state, Block.UPDATE_CLIENTS);
+                out.add(new BlockPos(x, y, z));
             }
         }
+        return out;
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -531,7 +582,7 @@ public final class Forge {
 
     // 灰被りの湧き: 最初に人が入ったとき 2 体 (+1 体/人)。いなくなって 40 秒たったら 1 体足す
     static void keepThralls(ServerLevel level, List<ServerPlayer> in, long now) {
-        int n = Math.max(1, Math.min(4, in.size()));
+        int n = Math.max(1, Math.min(Parties.MAX_MEMBERS, in.size()));
         if (!spawned) {
             spawned = true;
             lastThrall = now;
@@ -553,12 +604,16 @@ public final class Forge {
     }
 
     // ---------------------------------------------------------------- リセット (EmberBackRooms.onReset("east", ...))
+    // 部屋の持ち主が替わるたび。熱と扉の灯りを戻し、刻みを持ち主の打つ順で置き直す (扉の開け閉めはグループの記録にあるので触らない)
     public static void reset(ServerLevel level, boolean sleeping) {
         EmberTrials.clearMobs(level, EmberBackLayout.EAST);
-        EmberTrials.stripAll(level, EmberTrialSetup.FIRE_KEY_HOT.get(), EmberTrialSetup.FIRE_KEY.get());
+        UUID was = doorGroup;
         clearMemory();
-        EmberBackState state = EmberBackState.get(level);
-        ForgeRoom.buildInner(level, patternFor(state.firstForgeUsed(), state.seed()));
+        if (was != null) {
+            GroupOverlays.refresh(level, was);
+        }
+        current = null;
+        ForgeRoom.buildInner(level, ownerPattern(level));
         doorState = 0;
     }
 }

@@ -103,6 +103,11 @@ public final class RoomLocks {
         LOCKS.clear();
     }
 
+    // その場で持ち主を決める (戦いを今すぐ始めるコマンド・自己テスト用。リスナーは呼ばない)
+    public static void claim(String room, UUID group, long now) {
+        LOCKS.put(room, new Lock(group, now));
+    }
+
     // グループが持っている部屋の名前
     public static List<String> heldBy(UUID group) {
         return LOCKS.entrySet().stream().filter(e -> e.getValue().owner.equals(group)).map(Map.Entry::getKey).toList();
