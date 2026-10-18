@@ -77,8 +77,8 @@ public final class GearCurveSelfTest {
             check(f, j.startsWith("「") && j.endsWith("」") && !j.contains("\n"), "gear story line should be one quoted line: " + key);
             check(f, seen.add(j), "gear story line repeated: " + key);
         }
-        check(f, gear == 40, "expected 40 mod gear items with a story line, found " + gear);
-        check(f, ja.size() == 40 && en.size() == 40, "story line tables should hold 40 lines each: " + ja.size() + "/" + en.size());
+        check(f, gear == 44, "expected 44 mod gear items with a story line, found " + gear);
+        check(f, ja.size() == 44 && en.size() == 44, "story line tables should hold 44 lines each: " + ja.size() + "/" + en.size());
     }
 
     private static java.util.Map<String, String> lang(String path, List<String> f) {
