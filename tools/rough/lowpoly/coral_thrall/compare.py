@@ -127,7 +127,7 @@ def main():
             bgp = bg_panel(HW, PH3)
             if i == 0:
                 sq = voxel.render(of_w if j == 0 else of_t, yaw=yaw, pitch=10, size=(PH3, PH3), margin=0.02).resize((HW, HW), Image.LANCZOS)
-                bgp.paste(sq, (0, (PH3 - HW) // 2), sq)
+                bgp.paste(sq.convert("RGB"), (0, (PH3 - HW) // 2))
             else:
                 r = results[i - 1]
                 big, gl, yoff = combined_atlas(r)
