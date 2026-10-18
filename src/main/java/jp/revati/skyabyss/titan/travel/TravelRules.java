@@ -50,8 +50,8 @@ public final class TravelRules {
     // 雲の帳。白くなりきってから、行き先の読み込みを待って移す
     public static final int VEIL_FADE = 20;
     public static final int VEIL_WAIT_LIMIT = 200;
-    // 着いてから、その場で背中の鎖を垂らして休む
-    public static final int REST_AFTER = 1200;
+    // 着いてから、その場で背中の鎖を垂らして休む (20 分。TitanStay)
+    public static final int REST_AFTER = jp.revati.skyabyss.titan.TitanStay.TICKS;
     // 呼んだ人のクールダウン (着いたあと)。呼んだが乗らなかった・取りやめたときは短い方
     public static final int COOLDOWN = 3600;
     public static final int COOLDOWN_CANCELLED = 600;
