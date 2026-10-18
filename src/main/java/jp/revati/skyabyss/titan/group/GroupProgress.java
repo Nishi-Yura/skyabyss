@@ -68,6 +68,27 @@ public final class GroupProgress {
         return idle;
     }
 
+    // いま背中の中で続けているグループの数 (巨神の目覚めを待たせる)。数えるのは
+    //  - 動いている人 (観戦者と、長く動いていない人を除く) が背中にいるグループ
+    //  - 試練が進んでいて、心臓をまだ止めていないグループ (全員が背中を離れていても、放置のリセット (3 分) までは続けている扱い。ログアウト・再起動をまたぐ)
+    // 心臓を止めたグループ (運び出されたあと) と、進みのないグループは数えない
+    public static int activeInside(ServerLevel back) {
+        java.util.Set<UUID> groups = new java.util.HashSet<>();
+        for (ServerPlayer player : back.players()) {
+            if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
+                groups.add(Groups.keyOf(player));
+            }
+        }
+        BackGroupData data = BackGroupData.get(back);
+        for (UUID id : data.ids()) {
+            BackGroupData.Record r = data.peek(id);
+            if (r != null && r.hasProgress() && !r.isHeartDefeated()) {
+                groups.add(id);
+            }
+        }
+        return groups.size();
+    }
+
     // 背中にいる人のグループの「最後にいた時刻」を更新する (10 秒ごとに GroupEvents が呼ぶ)
     static void touch(ServerLevel level) {
         long now = level.getGameTime();

@@ -12,6 +12,6 @@
   "message.skyabyss.titan_end.wake.tide_shell": "Far out at sea, something enormous stirs again.",
   "message.skyabyss.titan_end.wake.thunder_wing": "Beyond the peaks, thunder begins to rumble again.",
   "message.skyabyss.titan_end.wake.ember": "The ground beneath you grows faintly warm.",
-  "message.skyabyss.titan_end.sleeping": "%s sleeps deeply. You cannot board until its heartbeat returns.",
+  "message.skyabyss.titan_end.sleeping": "%s has left the world below and sleeps deeply. No one can board until it wakes.",
   "message.skyabyss.titan_end.sleeping_call": "%s sleeps deeply and does not answer the call."
 }

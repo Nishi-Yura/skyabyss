@@ -80,12 +80,14 @@ public final class TitanEndSelfTest {
         ServerLevel level = server.overworld();
         List<String> f = new ArrayList<>();
         try {
+            purgeGroups(server);
             state(server, f);
             bodies(server, level, f);
             carried(server, level, f);
             landing(server, level, f);
             cinematicOnce(server, level, f);
             flow(server, level, f);
+            groupsInside(server, level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST titan end crashed", e);
             f.add("crashed: " + e);
@@ -94,10 +96,11 @@ public final class TitanEndSelfTest {
                 TitanDormancy.clear(server, t);
             }
             TitanEnd.clearHolding();
+            purgeGroups(server);
             unload(level);
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST titan end PASSED (sleep state and wake, each titan's sleep, carry-out picks, safe landing, first-clear scene once, flow)");
+            SkyAbyss.LOGGER.info("SELFTEST titan end PASSED (sleep state and wake, each titan's sleep, carry-out picks, safe landing, first-clear scene once, flow, groups still inside)");
         } else {
             f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST titan end FAILED: {}", m));
         }
@@ -391,5 +394,95 @@ public final class TitanEndSelfTest {
         check(f, r != null && r.since - server.overworld().getGameTime() >= TitanEnd.CARRY_AT - 2, "the sleep does not begin at the carry-out");
         TitanDormancy.clear(server, titan);
         Tasks.flush();
+    }
+
+    // ---------------------------------------------------------------- 一つのグループが心臓を止めたとき、まだ背中にいるグループ
+    // 背中の記録 (グループごとの進み) を空にする (前の自己テストの残りが、目覚めの待ちに数えられないように)
+    private static void purgeGroups(MinecraftServer server) {
+        for (String t : Titans.all()) {
+            var dim = Titans.backOf(t);
+            ServerLevel back = dim == null ? null : server.getLevel(dim);
+            if (back != null) {
+                var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+                for (UUID id : new ArrayList<>(data.ids())) {
+                    data.remove(id);
+                }
+            }
+        }
+    }
+
+    // A が心臓を止める間、B は試練の途中にいる: 巨神は去って新しく乗れないが、B は続けて心臓まで行け、運び出され、
+    // 巨神は B が終わって最短の眠りを過ぎてから目覚める。眠りと目覚めの時刻は保存される
+    private static void groupsInside(MinecraftServer server, ServerLevel level, List<String> f) {
+        ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
+        if (back == null) {
+            f.add("the whale back dimension is missing");
+            return;
+        }
+        String titan = Titans.STONE_WHALE;
+        TitanDormancy.clear(server, titan);
+        var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+        FakePlayer a = fake(back, "0041", "[titan_end_ga]");
+        FakePlayer b = fake(back, "0042", "[titan_end_gb]");
+        FakePlayer c = fake(level, "0043", "[titan_end_gc]");
+        UUID ga = jp.revati.skyabyss.titan.group.Groups.keyOf(a);
+        UUID gb = jp.revati.skyabyss.titan.group.Groups.keyOf(b);
+        check(f, !ga.equals(gb), "two lone players share a group");
+        try {
+            var recA = data.of(ga);
+            var recB = data.of(gb);
+            recA.markHallCleared("t1");
+            recB.markHallCleared("t1");
+            check(f, jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) == 2, "two groups mid-trial did not both count as inside");
+            // A が心臓を止める
+            recA.markHeartDefeated();
+            TitanDormancy.Rest r = TitanDormancy.begin(server, titan, 0);
+            check(f, jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) == 1, "the group that stopped its heart still counted as inside");
+            check(f, TitanDormancy.isResting(server, titan), "the titan did not leave when a group stopped its heart");
+            check(f, !Progression.checkBoard(c, titan), "a new player could board a titan that had left");
+            check(f, !BoardGlow.visibleTo(c, titan), "the boarding glow showed for a titan that had left");
+            // A の試練が戻っても (requestWake)、B がいるあいだは、最短を過ぎても目覚めない
+            TitanDormancy.requestWake(server, titan);
+            r.since -= TitanDormancy.MIN_TICKS + 10;
+            r.wakeAt = server.overworld().getGameTime();
+            check(f, TitanDormancy.tickWake(server) == 0 && TitanDormancy.isResting(server, titan), "the titan woke while a group was still inside");
+            check(f, TitanDormancy.activeGroups(server, titan) == 1, "activeGroups did not count the group still inside");
+            // 保存: 眠りと目覚めの時刻は、書いて読み戻しても同じ
+            var regs = server.registryAccess();
+            TitanDormancy loaded = TitanDormancy.load(TitanDormancy.get(server).save(new net.minecraft.nbt.CompoundTag(), regs), regs);
+            TitanDormancy.Rest lr = loaded.rests().get(titan);
+            check(f, lr != null && lr.since == r.since && lr.wakeAt == r.wakeAt, "the sleep did not survive a save and load");
+            // B は続けて心臓まで行ける (眠りが試練や心臓を止めない)。B が心臓を止めると、B も同じように運び出される
+            recB.markHeartDefeated();
+            check(f, jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) == 0, "no group should be inside after both stopped their hearts");
+            TitanDormancy.Rest same = TitanDormancy.begin(server, titan, TitanEnd.CARRY_AT);
+            check(f, same == r, "a second heart stopping started a new sleep");
+            List<ServerPlayer> pickedB = TitanEnd.pick(server, back, List.of(b), List.of(b.getUUID()));
+            check(f, pickedB.size() == 1 && pickedB.get(0) == b, "the group that stopped its heart later was not picked for the carry-out");
+            check(f, TitanEnd.landing(server, titan).pos() != null, "no landing for the group that stopped its heart later");
+            // B が終わっても、最短の眠りの前ならまだ眠る。過ぎていれば目覚める
+            long saved = r.since;
+            r.since = server.overworld().getGameTime() - 100;
+            r.wakeAt = r.since + TitanDormancy.MIN_TICKS;
+            check(f, TitanDormancy.tickWake(server) == 0 && TitanDormancy.isResting(server, titan), "the titan woke before the minimum sleep even though everyone had finished");
+            r.since = saved;
+            r.wakeAt = server.overworld().getGameTime();
+            check(f, TitanDormancy.tickWake(server) == 1 && !TitanDormancy.isResting(server, titan), "the titan did not wake once everyone had finished and the minimum sleep had passed");
+            check(f, Progression.checkBoard(c, titan), "new players could not board after the titan woke");
+            // 進みが残るあいだは、最短を過ぎても目覚めない。最後のグループが戻ると目覚める
+            TitanDormancy.Rest r2 = TitanDormancy.begin(server, titan, 0);
+            data.of(gb).clearHeartDefeated();
+            r2.since -= TitanDormancy.MIN_TICKS + 5;
+            TitanDormancy.requestWake(server, titan);
+            check(f, TitanDormancy.tickWake(server) == 0, "the titan woke while a group had progress");
+            data.of(gb).resetProgress();
+            data.of(ga).resetProgress();
+            check(f, TitanDormancy.tickWake(server) == 1, "the titan did not wake after the last group was reset");
+        } finally {
+            data.remove(ga);
+            data.remove(gb);
+            TitanDormancy.clear(server, titan);
+            TitanEnd.clearHolding();
+        }
     }
 }
