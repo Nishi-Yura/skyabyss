@@ -4,7 +4,7 @@ from pix import *
 import icons, icons2  # noqa: F401  (icons2 registers the new icons)
 
 
-def version_plaque(a, x, y, label="v0.2.0"):
+def version_plaque(a, x, y, label="v0.2.1"):
     w = text_width(label, 12) + 8
     h = 13
     frame(a, x, y, x + w - 1, y + h - 1, face=ABYSS2, hi=ABYSS3, lo=ABYSS1)

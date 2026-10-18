@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS  v0.2.0">
+  <img src="docs/readme/banner.png" alt="天と淵のあいだ  BETWEEN THE SKY AND THE ABYSS  v0.2.1">
 </p>
 
 <p align="center">
   <img alt="Minecraft 1.21.1" src="https://img.shields.io/badge/Minecraft-1.21.1-5aa9e6?style=for-the-badge&labelColor=17264a">
   <img alt="NeoForge" src="https://img.shields.io/badge/NeoForge-1.21.1-e8742a?style=for-the-badge&labelColor=17264a">
   <img alt="GeckoLib" src="https://img.shields.io/badge/GeckoLib-required-3aa6a0?style=for-the-badge&labelColor=17264a">
-  <img alt="Beta v0.2.0" src="https://img.shields.io/badge/BETA-v0.2.0-e8b83a?style=for-the-badge&labelColor=17264a">
+  <img alt="Beta v0.2.1" src="https://img.shields.io/badge/BETA-v0.2.1-e8b83a?style=for-the-badge&labelColor=17264a">
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@
 
 建築も、採掘も、いつものマイクラのまま。そこに、怖さと冒険と、少しずつ解けていく謎が重なります。
 
-> **ベータ版（v0.2.0）** です。序章と、巨神 1 体ごとの四つの章を越えて「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
+> **ベータ版（v0.2.1）** です。序章と、巨神 1 体ごとの四つの章を越えて「天の鍵」がそろうところまで遊べます。物語はその先へ続きますが、ベータ版はここまでです。
 
 <h2 align="center"><a name="titans"></a><img src="docs/readme/plate_titans.png" alt="巨神と章"></h2>
 
@@ -165,7 +165,7 @@
 <table>
   <tr>
     <td width="56" align="center"><img src="docs/readme/icon_jar.png" width="48" alt=""></td>
-    <td><code>skyabyss-0.2.0.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダに入れて起動します（サーバーなら、サーバーの <code>mods</code> にも同じものを）。ソースから作るときは <code>./gradlew build</code>（<code>build/libs/</code> にできます）。</td>
+    <td><code>skyabyss-0.2.1.jar</code> と GeckoLib の jar を、どちらも <code>mods</code> フォルダに入れて起動します（サーバーなら、サーバーの <code>mods</code> にも同じものを）。ソースから作るときは <code>./gradlew build</code>（<code>build/libs/</code> にできます）。</td>
   </tr>
 </table>
 
@@ -270,6 +270,8 @@
 <p align="center"><img src="docs/readme/divider.png" alt=""></p>
 
 <h2 align="center"><a name="changes"></a><img src="docs/readme/plate_changes.png" alt="0.2.0 の変更点"></h2>
+
+**0.2.1**: マルチで後から入った人に、開幕の場面や目的の帯などが出なかった不具合を直した。遊ぶ人はみんな同じ版の jar を入れる（版が違うと接続のときに断られる）。すでに遊んだ扱いになってしまったセーブは、OP が `/skyabyss opening reset <名前>` と `/skyabyss cinematic reset <名前>` で戻せる。
 
 **0.1.0 から 0.2.0 へ**
 

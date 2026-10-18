@@ -394,7 +394,7 @@ def banner():
             a[88 - d:89 + d, ox + 2] = TEAL if d else TEAL_L
             a[88, ox + 2 - d:ox + 3 + d] = TEAL if d else TEAL_L
     import extras
-    extras.version_plaque(a, W - 5 - (text_width("v0.2.0", 12) + 8) + 1, 83)
+    extras.version_plaque(a, W - 5 - (text_width("v0.2.1", 12) + 8) + 1, 83)
     return a
 
 
