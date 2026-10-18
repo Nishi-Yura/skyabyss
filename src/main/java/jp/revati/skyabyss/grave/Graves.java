@@ -12,6 +12,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.dungeon.CampBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
@@ -32,8 +33,11 @@ import net.minecraft.world.phys.Vec3;
 // 中身の出入りは必ず GraveData から消してから渡す。入りきらない分は墓に残す (開けるとき) か、報酬の預かりへ入れる (救うとき)
 public final class Graves {
     // 墓を置く場所を探す範囲 (死んだ場所の周り)
-    static final int SEARCH_RADIUS = 6;
+    static final int SEARCH_RADIUS = 8;
     static final int SEARCH_VERTICAL = 6;
+
+    // 自己テスト用: true の間は置ける所がないものとして扱う
+    static volatile boolean testNoSpot;
 
     private Graves() {
     }
@@ -58,7 +62,8 @@ public final class Graves {
 
     private static final List<BlockPos> NEAR = offsets(SEARCH_RADIUS, SEARCH_VERTICAL);
 
-    // 墓を置いてよい所: 置き換えられるブロックで、液体・火・溶岩のそばでなく、足もとが固い
+    // 墓を置いてよい所: 本物の空気 (何も壊さず、置き換えもしない) で、液体・火・溶岩のそばでなく、足もとが固く、
+    // 戦いの部屋・仕掛けの足場や仕掛けのそばでない
     public static boolean isSafeSpot(ServerLevel level, BlockPos pos) {
         if (!level.isInWorldBounds(pos) || !level.getWorldBorder().isWithinBounds(pos) || !level.hasChunkAt(pos)) {
             return false;
@@ -67,17 +72,21 @@ public final class Graves {
             return false;
         }
         BlockState here = level.getBlockState(pos);
-        if (!here.canBeReplaced() || !here.getFluidState().isEmpty() || here.is(BlockTags.FIRE) || level.getBlockEntity(pos) != null) {
+        if (!here.isAir() || !here.getFluidState().isEmpty() || level.getBlockEntity(pos) != null) {
+            return false;
+        }
+        if (CampBlocks.inArena(level.dimension(), pos)) {
             return false;
         }
         BlockPos below = pos.below();
         BlockState floor = level.getBlockState(below);
         if (!floor.isFaceSturdy(level, below, Direction.UP) || !floor.getFluidState().isEmpty()
-                || floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.CAMPFIRE) || floor.is(Blocks.SOUL_CAMPFIRE) || floor.is(Blocks.CACTUS)) {
+                || CampBlocks.isMechanism(floor) || floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.CAMPFIRE) || floor.is(Blocks.SOUL_CAMPFIRE) || floor.is(Blocks.CACTUS)) {
             return false;
         }
         for (Direction d : Direction.values()) {
-            if (level.getFluidState(pos.relative(d)).is(FluidTags.LAVA)) {
+            BlockPos n = pos.relative(d);
+            if (level.getFluidState(n).is(FluidTags.LAVA) || level.getBlockState(n).is(BlockTags.FIRE)) {
                 return false;
             }
         }
@@ -97,9 +106,14 @@ public final class Graves {
     }
 
     // 死んだ場所 → 周りの安全な所 → 最後に安全だった場所 → その柱の地表 → 世界の初めの場所 の順に探す。
-    // 奈落・溶岩・壁の中で倒れても、取りに行ける所へ置く。見つからなければ初めの場所へ無理に置く (中身を失わないため)
+    // 奈落・溶岩・壁の中で倒れても、取りに行ける所へ置く。ブロックは決して壊さない・置き換えない。
+    // どこにも置けなければ null (呼んだ側が報酬の預かりへ回す)
+    @Nullable
     public static Spot chooseSpot(ServerLevel level, BlockPos origin, @Nullable BlockPos lastSafe) {
         MinecraftServer server = level.getServer();
+        if (testNoSpot) {
+            return null;
+        }
         if (origin.getY() > level.getMinBuildHeight() && origin.getY() < level.getMaxBuildHeight()) {
             BlockPos p = search(level, origin, SEARCH_RADIUS, SEARCH_VERTICAL);
             if (p != null) {
@@ -126,12 +140,7 @@ public final class Graves {
         if (p != null) {
             return new Spot(overworld, p);
         }
-        // 最後の手段: 地表の真上に無理に置く (ブロックエンティティのある所は避ける)
-        BlockPos force = top;
-        for (int i = 0; i < 16 && (overworld.getBlockEntity(force) != null || overworld.getBlockState(force).getDestroySpeed(overworld, force) < 0); i++) {
-            force = force.above();
-        }
-        return new Spot(overworld, force);
+        return null;
     }
 
     // ---------------------------------------------------------------- 作る
@@ -140,8 +149,22 @@ public final class Graves {
     }
 
     // 墓を作って置く。items は呼んだ側がもう持ち物から外した品 (コピーして持つ)
+    // 置ける所がなければ墓は作らず、品と経験値を報酬の預かりへ入れて null を返す (控え帳で受け取れる)
+    @Nullable
     public static GraveData.Grave create(ServerPlayer owner, ServerLevel deathLevel, BlockPos origin, @Nullable BlockPos lastSafe, List<ItemStack> items, int xp) {
         Spot spot = chooseSpot(deathLevel, origin, lastSafe);
+        if (spot == null) {
+            TitanMemoryData.Pending pending = TitanMemoryData.get(owner.server).pending(owner.getUUID());
+            for (ItemStack s : items) {
+                if (!s.isEmpty()) {
+                    pending.items.add(s.copy());
+                }
+            }
+            pending.xp += xp;
+            SkyAbyss.LOGGER.info("[grave] no free spot near {} for {}: {} stacks and {} xp went to the pending reward box", origin.toShortString(), owner.getGameProfile().getName(),
+                    items.size(), xp);
+            return null;
+        }
         List<ItemStack> copies = new ArrayList<>();
         for (ItemStack s : items) {
             if (!s.isEmpty()) {
