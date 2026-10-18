@@ -525,15 +525,15 @@ public final class StormBirdBuilder {
         vent(kit, RAIJU_VENT);
     }
 
-    // 避雷の柱 (根元 base、高さ 6)。根元の銅、段の電球 3 つ、銅、先の避雷針
+    // 避雷の柱 (根元 base、高さ 6)。専用のブロック: 根元の台、段の電球 3 つ、軸、先の針 (12 の 120)
     static void rod(StormKit kit, BlockPos base, int charge) {
-        kit.put(base.getX(), base.getY(), base.getZ(), StormKit.COPPER_BLOCK);
+        kit.put(base.getX(), base.getY(), base.getZ(), StormBackSetup.ROD_BASE.get().defaultBlockState());
         for (int i = 0; i < 3; i++) {
-            kit.put(base.getX(), base.getY() + 1 + i, base.getZ(), Blocks.WAXED_COPPER_BULB.defaultBlockState()
-                    .setValue(net.minecraft.world.level.block.CopperBulbBlock.LIT, charge > i));
+            kit.put(base.getX(), base.getY() + 1 + i, base.getZ(), StormBackSetup.ROD_BULB.get().defaultBlockState()
+                    .setValue(StormBlocks.RodBulb.LIT, charge > i));
         }
-        kit.put(base.getX(), base.getY() + 4, base.getZ(), StormKit.COPPER);
-        kit.put(base.getX(), base.getY() + 5, base.getZ(), Blocks.LIGHTNING_ROD.defaultBlockState());
+        kit.put(base.getX(), base.getY() + 4, base.getZ(), StormBackSetup.ROD_SHAFT.get().defaultBlockState());
+        kit.put(base.getX(), base.getY() + 5, base.getZ(), StormBackSetup.ROD_TIP.get().defaultBlockState());
     }
 
     // ---------------------------------------------------------------- 前の試練 首と眼の間
@@ -586,8 +586,8 @@ public final class StormBirdBuilder {
         }
         // 戻しの鏡の台 (前室)
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY() - 1, MIRROR_RESET.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
-        kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), Blocks.LEVER.defaultBlockState()
-                .setValue(LeverBlock.FACE, AttachFace.FLOOR).setValue(LeverBlock.FACING, Direction.EAST));
+        kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
+                .setValue(StormBlocks.ReturnMirror.FACING, Direction.EAST));
     }
 
     // ---------------------------------------------------------------- 竜骨の門の下: 低い道・螺旋・床 121 の道・前室・竜骨の間

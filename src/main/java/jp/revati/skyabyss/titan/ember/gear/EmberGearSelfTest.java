@@ -51,7 +51,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 //  - 強さの曲線: GearCurve.STAGES の余燼の段 (03 の 9.8節) に +0 / +10 が入るか、潮殻・雷翼の目安との比べ、余燼の目安のボスとの手ごたえ、守り
 //  - 効果: 一式 (強靭・火に触れて筋力・熱のたまり方)、戦斧のくすぶり (火に強い相手にも) と +10%、大鎚の亀裂、火掻きの灰、外套、護符、灯、角杯
 //  - 報酬: 道中 1%・鍛え手 5%、図鑑に記す、天井、模擬の撃破数 (13 の 6.4節)
-//  - 炉: 余燼の欠片で強化・分解、交換 (巨神ごと)
+//  - 炉: 余燼の燠石で強化・分解、交換 (巨神ごと)
 public final class EmberGearSelfTest {
     private EmberGearSelfTest() {
     }
@@ -112,7 +112,7 @@ public final class EmberGearSelfTest {
         for (String id : List.of(EmberGear.CORE, EmberGear.SHARD)) {
             check(f, TitanGearSet.registered(id) && GearLevel.required(item(id)) == 0, id + " missing or has a level requirement");
         }
-        check(f, EmberGear.SET.shardItem().orElse(null) == EmberGearSetup.SHARD.get(), "ember shard is not the set's shard");
+        check(f, EmberGear.SET.shardItem().orElse(null) == EmberGearSetup.SHARD.get(), "ember cinder is not the set's shard");
         check(f, near(EmberGear.SET.chance(EmberGear.HELMET), 0.25) && near(EmberGear.SET.chance(EmberGear.WAR_AXE), 0.20)
                 && near(EmberGear.SET.chance(EmberGear.HAMMER), 0.04) && near(EmberGear.SET.chance(EmberGear.LANTERN), 0.02),
                 "heart chances do not match 13 6.3");
@@ -470,14 +470,14 @@ public final class EmberGearSelfTest {
     private static void forge(MinecraftServer server, List<String> f) {
         ServerLevel level = server.overworld();
         ItemStack axe = new ItemStack(item(EmberGear.WAR_AXE));
-        check(f, ForgeRules.shardItem(axe) == EmberGearSetup.SHARD.get(), "war axe should be enhanced with ember shards");
+        check(f, ForgeRules.shardItem(axe) == EmberGearSetup.SHARD.get(), "war axe should be enhanced with ember cinders");
         FakePlayer p = player(level, "ember_gear_forge", 30);
         p.getInventory().add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 64));
         p.getInventory().add(new ItemStack(ModItems.RESONANCE_CRYSTAL.get(), 8));
-        check(f, !ForgeRules.enhance(p, axe), "war axe was enhanced with stone whale shards");
+        check(f, !ForgeRules.enhance(p, axe), "war axe was enhanced with stone whale scales");
         p.getInventory().add(new ItemStack(EmberGearSetup.SHARD.get(), 10));
-        check(f, ForgeRules.enhance(p, axe) && ModGear.enhance(axe) == 1, "war axe was not enhanced with ember shards");
-        check(f, ForgeRules.count(p.getInventory(), EmberGearSetup.SHARD.get()) == 6, "enhance should take 4 ember shards");
+        check(f, ForgeRules.enhance(p, axe) && ModGear.enhance(axe) == 1, "war axe was not enhanced with ember cinders");
+        check(f, ForgeRules.count(p.getInventory(), EmberGearSetup.SHARD.get()) == 6, "enhance should take 4 ember cinders");
         check(f, !ForgeRules.canEnhance(new ItemStack(item(EmberGear.CHARM))) && !ForgeRules.canEnhance(new ItemStack(item(EmberGear.LANTERN))),
                 "charm and lantern must not be enhanced");
         int[] y = ForgeRules.dismantleYield(new ItemStack(item(EmberGear.HAMMER)));
@@ -486,7 +486,7 @@ public final class EmberGearSelfTest {
         check(f, GearExchange.state(EmberGear.SET, r) == ForgeRules.ExchangeState.NO_CLEAR, "exchange before an ember heart clear");
         r.clears = 1;
         check(f, GearExchange.state(EmberGear.SET, r) == ForgeRules.ExchangeState.READY, "exchange should be ready after a clear");
-        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD.get(), 30));
+        p.getInventory().add(new ItemStack(ModItems.RESONANCE_SHARD_EMBER.get(), 30));
         check(f, !GearExchange.exchange(p, EmberGear.SET, EmberGear.WAR_AXE), "a non-exclusive was traded");
         check(f, GearExchange.exchange(p, EmberGear.SET, EmberGear.LANTERN), "lantern exchange failed");
         check(f, r.owned.contains(EmberGear.LANTERN) && GearExchange.state(EmberGear.SET, r) == ForgeRules.ExchangeState.USED, "exchange state after trading");

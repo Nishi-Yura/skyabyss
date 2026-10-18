@@ -46,7 +46,7 @@ public final class EmberGearSetup {
             () -> new EmberHornItem(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON).fireResistant()));
 
     // 余燼の鎧の素材: 防御 4/8/6/4 = 22、強靭 3.25 (4 部位 13。2 部位の一式で +3 して 03 の 9.8節の 16)、ノックバック耐性 0.05。
-    // 余燼の欠片で直せる。重ねて着たときのバニラの絵 (立体を描けないとき) は textures/models/armor/ember_layer_{1,2}.png
+    // 余燼の燠石で直せる。重ねて着たときのバニラの絵 (立体を描けないとき) は textures/models/armor/ember_layer_{1,2}.png
     public static final Holder<ArmorMaterial> MATERIAL = MATERIALS.register("ember", () -> new ArmorMaterial(
             new EnumMap<>(Map.of(
                     ArmorItem.Type.HELMET, EmberGear.ARMOR_DEFENSE[0],

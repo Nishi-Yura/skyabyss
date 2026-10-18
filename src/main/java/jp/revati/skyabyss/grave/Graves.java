@@ -306,14 +306,19 @@ public final class Graves {
     // 持ち物に入りきらない分は報酬の預かりへ (控え帳で受け取れる)。救うものがなければ null
     @Nullable
     public static Rescued rescue(ServerPlayer player) {
+        List<GraveData.Grave> owned = GraveData.get(player.server).owned(player.getUUID());
+        return owned.isEmpty() ? null : rescue(player, owned.get(0));
+    }
+
+    // 選んだ墓を一つ救う (自分の墓だけ。割合が 0、または自分の墓でなければ null)
+    @Nullable
+    public static Rescued rescue(ServerPlayer player, GraveData.Grave grave) {
         MinecraftServer server = player.server;
         int percent = DeathRules.rescuePercent(server);
         GraveData data = GraveData.get(server);
-        List<GraveData.Grave> owned = data.owned(player.getUUID());
-        if (percent <= 0 || owned.isEmpty()) {
+        if (percent <= 0 || !grave.owner.equals(player.getUUID()) || data.get(grave.id) != grave) {
             return null;
         }
-        GraveData.Grave grave = owned.get(0);
         data.remove(grave.id);
         List<ItemStack> back = share(grave.items, percent);
         int given = 0;

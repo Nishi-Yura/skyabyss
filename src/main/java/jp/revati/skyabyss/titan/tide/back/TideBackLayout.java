@@ -29,19 +29,22 @@ import net.minecraft.world.phys.Vec3;
 // 干潮なら水盤の底へ下り、南東の回り道 (底から東の回廊まで上る坂) を通る。北の干潟の門は床の高さで、干潮のあいだだけ開く。
 public final class TideBackLayout {
     // 配置の版。2: 本番の島 (2026-10-17) / 3: 甲羅の地表・庭の壁・浜のすり鉢を直した (試遊 1 周目) /
-    // 4: 巨神の形の亀にし、試練を甲羅の中に埋めた (08 の 21 章)
-    public static final int LAYOUT_VERSION = 4;
+    // 4: 巨神の形の亀にし、試練を甲羅の中に埋めた (08 の 21 章) /
+    // 5: 亀を低ポリ案 B「段になった珊瑚礁の島」(四段の台地、頂に高い塔) の形に建て直し、上の三つの台地に封じた予約の間を足した (08 の 3.8節)
+    public static final int LAYOUT_VERSION = 5;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
 
     // ---------------------------------------------------------------- 甲羅 (モデルの超楕円。tide_shell_titan.py の plan と同じ形)
-    // モデルの甲羅は中心 z -4、半長 100、半幅 84、n 2.4 (単位)。1 単位 = 0.85 ブロック
+    // 案 B の甲羅は中心 z -3、半長 101、半幅 84、n 2.6 (単位)。1 単位 = 0.85 ブロック
     public static final int SHELL_CZ = -3;
     public static final int SHELL_RX = 71;
     public static final int SHELL_RZ = 85;
-    public static final double SHELL_N = 2.4;
-    public static final int TOP_Y = 114;
+    public static final double SHELL_N = 2.6;
+    // 甲羅の上 (外) の歩ける地面 = いちばん下の台地 (T1) の高さ。上の三つの台地は 114・126・137 (3.8節)
+    public static final int TOP_Y = 101;
+    public static final int[] TERRACE_Y = {101, 114, 126, 137};
 
     // 甲羅の地表の高さ (甲羅のいちばん上のブロックの y。上の遺跡・珊瑚は含まない)。甲羅の無い柱は Integer.MIN_VALUE
     public static int shellTop(int x, int z) {
@@ -51,7 +54,7 @@ public final class TideBackLayout {
     // 甲羅の平面の位置の 2 乗 (縁が 1。鋸歯の先は 1.2 くらい)。島から海に落ちたかを見るのに使う
     public static double shellS2(double x, double z) {
         double nx = Math.abs(x / 71.4);
-        double nz = Math.abs((z + 3.4) / 85.0);
+        double nz = Math.abs((z + 2.6) / 85.9);
         double r = Math.pow(Math.pow(nx, SHELL_N) + Math.pow(nz, SHELL_N), 1.0 / SHELL_N);
         return r * r;
     }
@@ -91,7 +94,7 @@ public final class TideBackLayout {
     public static final Area LANDING = new Area(-67, -56, 49, 59, GATE_FLOOR, 8);
     // 着く所: 左後ろのひれの上 (ひれの面は y 67)。北東を向くと、甲羅の脇腹に開いた潮門の大きな枠と、丸い甲羅が見える。
     // ひれの付け根から到着の段へ下り (3 段)、潮門の光る面の下をくぐって中へ
-    public static final BlockPos ARRIVAL = new BlockPos(-80, 68, 70);
+    public static final BlockPos ARRIVAL = new BlockPos(-80, 66, 70);
     public static final float ARRIVAL_YAW = -140f;
     // 見送りの段: 到着の段の西から海へ下りる段。いちばん下の段 (x -71〜-69、z 52〜56) に入ると地上へ戻る
     public static final int GATE_X = -70;
@@ -101,9 +104,26 @@ public final class TideBackLayout {
     // 甲羅の上へ上る段 (浜の西の壁の外、x -46〜-42、z 42〜46 の四角い螺旋。浜の西の壁の口 (-33, 44) から通路で入る)。上は甲羅の地表の口
     public static final int TOP_STAIR_X1 = -46;
     public static final int TOP_STAIR_Z1 = 42;
-    // 頂の塔 (モデルの塔。中心 (0, -3)、甲羅の地表 114、土台 115〜126、胴 127〜133、柱の段 134〜142、屋根 143〜146)
+    // 頂の塔 (案 B の塔。中心 (0, -3)、幅 14、頂の台地 137 の上に 138〜181。塔の中は詰まっていて、月の窓の縦穴だけが通る)
     public static final int TOWER_CZ = -3;
-    public static final int TOWER_DECK = 133;
+    // 月の窓の縦穴の上端のガラス (塔の窓の高さ。ここから屋根の頂まで、半径 2.5 の柱がガラス)
+    public static final int TOWER_DECK = 173;
+
+    // 封じた予約の間 (08 の 3.8節)。上の三つの台地の中の、空の歩ける部屋と、そのあいだの階段。今は何もない (将来の巨神の内容用)
+    public static final Area UPPER_1 = new Area(-32, 30, -38, 34, 101, 9);
+    public static final Area UPPER_2 = new Area(-22, 22, -28, 22, 114, 9);
+    public static final Area UPPER_3 = new Area(-10, 10, -16, 12, 126, 8);
+    public static final List<Area> UPPER_ROOMS = List.of(UPPER_1, UPPER_2, UPPER_3);
+    // 入口: 西の面 (T2 の崖、x -49) の封印の戸 (x -49、z -1〜1、y 102〜104)。外は T1 の地面 (101)。戸の奥は廊下 (x -48〜-33) で UPPER_1 へ
+    public static final int UPPER_GATE_X = -49;
+    public static final int UPPER_GATE_Z = 0;
+    public static final int UPPER_HALL_X2 = -33;
+    // 階段 (登る向き +z、幅 3、1 段ずつ。UPPER_1 の床 101 → UPPER_2 の床 114。x -20〜-18、z 8 から 13 段)
+    public static final int UPPER_STAIR12_X = -20;
+    public static final int UPPER_STAIR12_Z0 = 8;
+    // 階段 (登る向き +x、幅 3。UPPER_2 の床 114 → UPPER_3 の床 126。z 8〜10、x -20 から 12 段)
+    public static final int UPPER_STAIR23_Z = 8;
+    public static final int UPPER_STAIR23_X0 = -20;
 
     // 縁のくぐり道: 浜の北 (z=41) から広間の南の段 (y 74) へ上る屋根のある坂 (x -12〜-10)
     public static final int CAVE_X1 = -12;

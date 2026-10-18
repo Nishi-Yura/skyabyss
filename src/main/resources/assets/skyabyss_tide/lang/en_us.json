@@ -6,7 +6,7 @@
   "item.skyabyss.coral_thrall_spawn_egg": "Coral Thrall Spawn Egg",
   "item.skyabyss.reef_scuttler_spawn_egg": "Reef Scuttler Spawn Egg",
   "item.skyabyss.bubble_puffer_spawn_egg": "Bubble Puffer Spawn Egg",
-  "item.skyabyss.tide_shell_shard": "Tide Shell Shard",
+  "item.skyabyss.tide_shell_shard": "Tide Shell Flake",
   "item.skyabyss.tide_dried_shell": "Sun-Dried Tide Shell",
   "item.skyabyss.bubble_sac": "Bubble Sac",
   "subtitles.skyabyss.coral_thrall_ambient": "Coral creaks",
@@ -236,7 +236,6 @@
   "message.skyabyss.whisper.tide_beach": "The shell gauge at the top right shows the tide. Ring the three stones (west, east, front) to open the tide floor of the hall. The stairs in the west wall climb onto the shell",
   "message.skyabyss.whisper.tide_hub": "Rising, go up; ebbing, go forth. At flood, swim the basin to the east gallery; at ebb, the north gate opens",
   "message.skyabyss.whisper.tide_top": "You are out on the shell. Walk down to its front rim to see the titan's neck and head rising from the sea",
-  "message.skyabyss.whisper.tide_tower": "Under the tower floor, the moon window's shaft. Far below, the hall's basin glimmers",
   "message.skyabyss.whisper.tide_garden": "Carry the giant clam's pearl to the north altar. Climb a platform before the tide comes in; if the tide covers your head, the pearl returns to the clam",
   "message.skyabyss.whisper.tide_watch": "Water flows from the basin of the plug stand's color to the basin of the rug's color in front of it. The weight plate reverses the plug with the same mark beside it",
   "message.skyabyss.whisper.tide_flats": "The nests open only at low tide. When the tide comes in, climb onto the rock islands"

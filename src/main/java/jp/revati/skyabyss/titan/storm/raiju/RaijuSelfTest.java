@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
+import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +31,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.phys.Vec3;
 
@@ -184,9 +185,9 @@ public final class RaijuSelfTest {
             BlockPos rod = site.rod(i);
             BlockPos top = site.rodTop(i);
             check(rod.equals(layoutRods.get(i)), "rod " + i + " is not StormBackLayout.raijuRods() " + i, failures);
-            check(level.getBlockState(top).is(Blocks.LIGHTNING_ROD), "rod " + i + " has no lightning rod on top", failures);
+            check(level.getBlockState(top).is(StormBackSetup.ROD_TIP.get()), "rod " + i + " has no lightning rod on top", failures);
             for (int k = 1; k <= 3; k++) {
-                check(level.getBlockState(rod.above(k)).is(Blocks.WAXED_COPPER_BULB) && level.getBlockState(rod.above(k)).getValue(CopperBulbBlock.LIT),
+                check(level.getBlockState(rod.above(k)).is(StormBackSetup.ROD_BULB.get()) && level.getBlockState(rod.above(k)).getValue(StormBlocks.RodBulb.LIT),
                         "rod " + i + " bulb " + k + " is not a lit bulb", failures);
             }
             check(level.getBlockState(site.plug(i)).is(Blocks.LEVER) && !level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED),
@@ -249,7 +250,7 @@ public final class RaijuSelfTest {
         check(StormRods.isGrounded(rod), "pulled rod is not grounded", failures);
         check(!RaijuNest.pull(site, i, null), "a grounded rod could be pulled again", failures);
         for (int k = 1; k <= 3; k++) {
-            check(!level.getBlockState(rod.above(k)).getValue(CopperBulbBlock.LIT), "grounded rod's bulb " + k + " still lit", failures);
+            check(!level.getBlockState(rod.above(k)).getValue(StormBlocks.RodBulb.LIT), "grounded rod's bulb " + k + " still lit", failures);
         }
         check(level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED), "grounded rod's plug not down", failures);
         check(RaijuNest.rodIndexOfPlug(site, site.plug(i)) == i, "the plug of rod " + i + " is not found by its position", failures);

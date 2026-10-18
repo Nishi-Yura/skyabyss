@@ -72,7 +72,7 @@ public final class TitanGearSets {
         return item instanceof ModGear gear ? get(gear.dungeon()) : null;
     }
 
-    // 強化と分解で使う欠片 (由来の巨神の欠片。わからなければ岩鯨の欠片)
+    // 強化と分解で使う素材 (由来の巨神の素材。わからなければ岩鯨の鱗片)
     public static Item shardFor(ItemStack stack) {
         TitanGearSet set = of(stack.getItem());
         Optional<Item> shard = set == null ? Optional.empty() : set.shardItem();

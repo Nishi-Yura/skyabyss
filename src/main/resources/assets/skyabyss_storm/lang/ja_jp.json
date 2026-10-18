@@ -77,7 +77,7 @@
   "item.skyabyss.thunder_wing_core": "雷翼の心核",
   "item.skyabyss.thunder_wing_helmet": "雷翼の羽衣・兜",
   "item.skyabyss.thunder_wing_leggings": "雷翼の羽衣・脚衣",
-  "item.skyabyss.thunder_wing_shard": "雷翼の欠片",
+  "item.skyabyss.thunder_wing_shard": "雷翼の羽軸",
   "item.skyabyss.warden_hook_spear": "羽守の鉤槍",
   "item.skyabyss.weathercock": "風見鶏",
   "item.skyabyss.weathercock.desc": "鶏は、風ではなく嵐のほうを向く",
@@ -286,5 +286,8 @@
   "title.skyabyss.storm_back.sub": "嵐の上を飛ぶ、鳥の背",
   "trial.skyabyss.storm_east": "東 (雷の骨)",
   "trial.skyabyss.storm_front": "前 (眼の間)",
-  "trial.skyabyss.storm_west": "西 (風切りの骨)"
+  "trial.skyabyss.storm_west": "西 (風切りの骨)",
+  "block.skyabyss.storm_rod_bulb": "避雷の柱の電球",
+  "block.skyabyss.storm_rod_shaft": "避雷の柱の軸",
+  "block.skyabyss.storm_rod_tip": "避雷の柱の針"
 }

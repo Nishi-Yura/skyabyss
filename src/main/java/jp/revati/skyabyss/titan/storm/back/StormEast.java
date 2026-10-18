@@ -21,7 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -113,8 +112,8 @@ final class StormEast {
                 BlockPos p = r.base.above(1 + i);
                 BlockState s = level.getBlockState(p);
                 boolean lit = r.charge() > i && !StormRods.isGrounded(r.base);
-                if (s.is(Blocks.WAXED_COPPER_BULB) && s.getValue(CopperBulbBlock.LIT) != lit) {
-                    level.setBlock(p, s.setValue(CopperBulbBlock.LIT, lit), 3);
+                if (s.is(StormBackSetup.ROD_BULB.get()) && s.getValue(StormBlocks.RodBulb.LIT) != lit) {
+                    level.setBlock(p, s.setValue(StormBlocks.RodBulb.LIT, lit), 3);
                 }
             }
         }

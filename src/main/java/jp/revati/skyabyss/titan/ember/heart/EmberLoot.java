@@ -63,7 +63,7 @@ public final class EmberLoot {
 
     // 品の ID
     public static final String SKY_KEY_FRAGMENT = id("sky_key_fragment");
-    public static final String RESONANCE_SHARD = id("resonance_shard");
+    public static final String RESONANCE_SHARD = id("resonance_shard_ember");
     public static final String RESONANCE_CRYSTAL = id("resonance_crystal");
     public static final String SHARD = EmberGear.SHARD;
     public static final String CORE = EmberGear.CORE;

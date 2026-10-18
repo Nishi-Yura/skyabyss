@@ -6,7 +6,7 @@
   "item.skyabyss.coral_thrall_spawn_egg": "珊瑚憑きのスポーンエッグ",
   "item.skyabyss.reef_scuttler_spawn_egg": "磯走りのスポーンエッグ",
   "item.skyabyss.bubble_puffer_spawn_egg": "泡吹きのスポーンエッグ",
-  "item.skyabyss.tide_shell_shard": "潮殻の欠片",
+  "item.skyabyss.tide_shell_shard": "潮殻の殻片",
   "item.skyabyss.tide_dried_shell": "潮干しの貝",
   "item.skyabyss.bubble_sac": "泡袋",
   "subtitles.skyabyss.coral_thrall_ambient": "珊瑚がきしむ",
@@ -236,7 +236,6 @@
   "message.skyabyss.whisper.tide_beach": "右上の貝の目盛りが潮の満ち引き。西・東・前の三つの石を鳴らせば、広間の潮の底が開く。西の壁の段は甲羅の上へ",
   "message.skyabyss.whisper.tide_hub": "満ちれば上へ、引けば前へ。満潮なら水盤を泳いで東の回廊へ、干潮なら北の門が開く",
   "message.skyabyss.whisper.tide_top": "甲羅の上に出た。前の縁まで下りると、海から立ち上がる巨神の首と頭が見える",
-  "message.skyabyss.whisper.tide_tower": "塔の床の下に、月の窓の縦穴。ずっと下で、広間の水盤が光っている",
   "message.skyabyss.whisper.tide_garden": "大貝の真珠を、北の祭壇へ運ぶ。満ちる前に台へ上がれ。頭まで潮に沈むと、真珠は大貝へ戻る",
   "message.skyabyss.whisper.tide_watch": "栓の台の色の溜めから、台の前の敷物の色の溜めへ水が移る。重石の床は、隣の印と同じ栓を逆に流す",
   "message.skyabyss.whisper.tide_flats": "巣は干潮のあいだだけ口を開く。満ちてきたら岩の島へ上がれ"

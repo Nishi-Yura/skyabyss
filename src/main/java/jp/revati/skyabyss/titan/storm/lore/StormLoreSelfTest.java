@@ -271,14 +271,14 @@ public final class StormLoreSelfTest {
         Quests.poll(b, true);
         check(stage(b, "main_thunder").equals("report"), "a player who stilled the heart first should skip to the report: " + stage(b, "main_thunder"), f);
 
-        // 雷翼の背の周回: 段階 3 の人。倒した数で終わり、報酬が出る (雷翼の欠片は品ができてから)
+        // 雷翼の背の周回: 段階 3 の人。倒した数で終わり、報酬が出る (雷翼の羽軸は品ができてから)
         Quests.start(p, "daily_storm_rounds");
         for (int i = 0; i < 8; i++) {
             Quests.onKill(p, StormLore.BACK_MOBS.get(i % 3), true, 2);
         }
         Quests.poll(p, true);
         check(stage(p, "daily_storm_rounds").equals("done"), "eight back kills did not finish the rounds", f);
-        check(p.getInventory().countItem(item("skyabyss:resonance_shard")) >= 1, "the rounds paid no resonance shard", f);
+        check(p.getInventory().countItem(item("skyabyss:resonance_shard_thunder_wing")) >= 1, "the rounds paid no resonance shard", f);
         Quests.start(p, "weekly_storm_heart");
         Quests.onKill(p, "skyabyss:tide_heart", true, 2);
         Quests.poll(p, true);
@@ -290,7 +290,7 @@ public final class StormLoreSelfTest {
         boolean shard = BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(StormLore.SHARD));
         boolean cock = BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(StormLore.WEATHERCOCK));
         if (shard) {
-            check(p.getInventory().countItem(item(StormLore.SHARD)) >= 5, "the board quests paid no thunder wing shards", f);
+            check(p.getInventory().countItem(item(StormLore.SHARD)) >= 5, "the board quests paid no thunder wing quills", f);
         }
         // 古い地図の報酬に風見鶏 (品ができていれば渡る)
         QuestDef map = QuestManager.quest("sub_old_map");

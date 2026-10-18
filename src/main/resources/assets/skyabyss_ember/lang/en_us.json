@@ -416,7 +416,7 @@
   "item.skyabyss.ember_lantern.desc": "While worn as a trinket, it once holds you up against a fatal blow and burns what is near (sleeps 600 seconds after)",
   "item.skyabyss.ember_horn": "Ember Horn",
   "item.skyabyss.ember_horn.desc": "A warm drink with embers melted into it. On the ember titan's back it slows your heat; elsewhere it wards off fire for a while",
-  "item.skyabyss.ember_shard": "Ember Shard",
+  "item.skyabyss.ember_shard": "Ember Cinder",
   "item.skyabyss.ember_shard.desc": "A still-warm flake of the ember titan's shell. Used to temper ember gear",
   "item.skyabyss.ember_core": "Ember Core",
   "item.skyabyss.ember_core.desc": "An ember from the ember heart that will not go out. One day it will become part of a relic",
@@ -433,5 +433,6 @@
   "lore.skyabyss.chapter1.ember_hearth.title": "A Hearth of the Ash People",
   "lore.skyabyss.chapter1.ember_hearth.body": "A small hearth of fired stone is set into the ground. The ash had been raked together in the shape of a hand.\n\nIts mouth always faces the hill. They kept it lit not so the fire would live, but so the hill would not wake.",
   "lore.skyabyss.chapter1.ember_prev_page.title": "A Page from the Hearth",
-  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own."
+  "lore.skyabyss.chapter1.ember_prev_page.body": "A torn page. A short note remains in a hand that looks familiar.\n\n\"On days when the ground is warm, I do not look at the hill. I feel it would meet my eyes.\"\n\n... This handwriting resembles your own.",
+  "block.skyabyss.cinder_lamp": "Cinder Lamp"
 }
