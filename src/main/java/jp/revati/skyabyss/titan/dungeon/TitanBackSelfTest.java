@@ -77,6 +77,12 @@ public final class TitanBackSelfTest {
                     checkSigns(back, PENDING);
                     forceMazeChunks(back, true);
                 })),
+                // 詰み監査 (背中の到達・戻れるか・はしご・床の穴)。調べる部品は titan/audit/BackReach
+                SelfTestRunner.Step.once("titan back (reach)", server -> withBack(server, back -> {
+                    jp.revati.skyabyss.titan.audit.BackReach.Report r = TitanBackAudit.run(back);
+                    r.notes.forEach(n -> SkyAbyss.LOGGER.info("SELFTEST {}", n));
+                    PENDING.addAll(r.failures);
+                })),
                 SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
