@@ -95,7 +95,7 @@ public final class Pouch {
     // 入る分だけ袋へ入れ、stack を入れた数だけ減らす。入れた数を返す (上限・入れられない品は 0)
     public static int add(ServerPlayer player, ItemStack stack) {
         Entry e = PouchEntries.entry(stack);
-        if (e == null || !storable(player, stack, e)) {
+        if (!PouchConfig.enabled(player.server) || e == null || !storable(player, stack, e)) {
             return 0;
         }
         PouchData d = data(player);

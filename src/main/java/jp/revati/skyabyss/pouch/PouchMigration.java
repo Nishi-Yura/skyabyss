@@ -42,7 +42,7 @@ public final class PouchMigration {
     // まだなら流す。移した数を返す (済みなら -1)
     public static int runOnce(ServerPlayer player) {
         PouchData data = Pouch.data(player);
-        if (data.migrated >= PouchData.MIGRATION_VERSION) {
+        if (!PouchConfig.enabled(player.server) || data.migrated >= PouchData.MIGRATION_VERSION) {
             return -1;
         }
         return run(player);
@@ -50,6 +50,9 @@ public final class PouchMigration {
 
     // 流して「済み」の印を付ける。移した品の数を返す
     public static int run(ServerPlayer player) {
+        if (!PouchConfig.enabled(player.server)) {
+            return 0;
+        }
         int moved = 0;
         Inventory inv = player.getInventory();
         for (List<ItemStack> part : List.of(inv.items, inv.offhand)) {

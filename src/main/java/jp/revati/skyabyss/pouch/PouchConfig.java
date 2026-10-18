@@ -55,6 +55,21 @@ public final class PouchConfig {
     // 「袋がいっぱい」を同じ人に繰り返さない間隔 (tick)
     public static final int FULL_NOTICE_COOLDOWN = 600;
 
+    // 袋の親スイッチ (ゲームルール skyabyssPouch。既定は切)。切の間は、拾う・掃除・移し替え・渡しの袋行きをしない (昔の渡し方のまま)。
+    // 袋の中身は読む側が数え続け、`/skyabyss pouch take` で取り出せる (切にしても中身は失われない)。画面と使う入力ができたら既定を入にする
+    public static final boolean ENABLED_DEFAULT = false;
+
+    public static GameRules.Key<GameRules.BooleanValue> MASTER_RULE;
+
+    public static boolean enabled() {
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        return server == null ? ENABLED_DEFAULT : enabled(server);
+    }
+
+    public static boolean enabled(MinecraftServer server) {
+        return MASTER_RULE == null ? ENABLED_DEFAULT : server.getGameRules().getBoolean(MASTER_RULE);
+    }
+
     public static GameRules.Key<GameRules.IntegerValue> WITHDRAW_RULE;
 
     public static boolean withdrawEnabled(MinecraftServer server) {

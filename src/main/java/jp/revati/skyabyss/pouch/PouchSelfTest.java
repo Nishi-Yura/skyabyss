@@ -75,14 +75,17 @@ public final class PouchSelfTest {
     }
 
     // テストで変えるゲームルールを元へ戻す
-    private record PouchSetupState(int withdraw, int deathMode, boolean keepInventory) {
+    private record PouchSetupState(boolean master, int withdraw, int deathMode, boolean keepInventory) {
         static PouchSetupState capture(MinecraftServer server) {
             GameRules rules = server.getGameRules();
-            return new PouchSetupState(rules.getInt(PouchConfig.WITHDRAW_RULE), rules.getInt(DeathRules.MODE), rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
+            boolean on = rules.getBoolean(PouchConfig.MASTER_RULE);
+            rules.getRule(PouchConfig.MASTER_RULE).set(true, server);
+            return new PouchSetupState(on, rules.getInt(PouchConfig.WITHDRAW_RULE), rules.getInt(DeathRules.MODE), rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
         }
 
         void restore(MinecraftServer server) {
             GameRules rules = server.getGameRules();
+            rules.getRule(PouchConfig.MASTER_RULE).set(master, server);
             rules.getRule(PouchConfig.WITHDRAW_RULE).set(withdraw, server);
             rules.getRule(DeathRules.MODE).set(deathMode, server);
             rules.getRule(GameRules.RULE_KEEPINVENTORY).set(keepInventory, server);
@@ -103,6 +106,10 @@ public final class PouchSelfTest {
 
     private static int inv(Player p, Item item) {
         return Pouch.countInventory(p.getInventory(), item);
+    }
+
+    private static int ForgeRulesCount(Player p, Item item) {
+        return jp.revati.skyabyss.forge.ForgeRules.count(p, item);
     }
 
     static void run(MinecraftServer server, List<String> f) {
@@ -398,6 +405,22 @@ public final class PouchSelfTest {
         check(f, Pouch.data(m).migrated == PouchData.MIGRATION_VERSION && PouchMigration.runOnce(m) == -1, "the migration did not run exactly once");
         GraveData.get(server).remove(grave.id);
         TitanMemoryData.get(server).takePending(m.getUUID());
+
+        // ---- 親スイッチ skyabyssPouch (切): 袋行きをしない・中身は失われない・取り出せる
+        FakePlayer o = player(level, "[pouch_off]");
+        Pouch.add(o, new ItemStack(shard, 5));
+        server.getGameRules().getRule(PouchConfig.MASTER_RULE).set(false, server);
+        ItemStack off = new ItemStack(shard, 4);
+        PouchRouting.give(o, off);
+        check(f, !PouchConfig.enabled() && off.isEmpty() && inv(o, shard) == 4 && Pouch.count(o, shard) == 5, "give with the switch off did not use the old path");
+        check(f, Pouch.sweep(o) == 0 && PouchMigration.runOnce(o) == -1 && Pouch.data(o).migrated == 0, "sweep or migration ran with the switch off");
+        ItemEntity offDrop = new ItemEntity(level, o.getX(), o.getY(), o.getZ(), new ItemStack(shard, 2));
+        offDrop.setNoPickUpDelay();
+        NeoForge.EVENT_BUS.post(new ItemEntityPickupEvent.Pre(o, offDrop));
+        check(f, offDrop.getItem().getCount() == 2 && Pouch.count(o, shard) == 5, "pickup routing ran with the switch off");
+        check(f, ForgeRulesCount(o, shard) == 9, "readers stopped counting the pouch with the switch off");
+        check(f, Pouch.withdraw(o, shard, 5, true) == 5 && Pouch.count(o, shard) == 0, "the pouch contents could not be taken with the switch off");
+        server.getGameRules().getRule(PouchConfig.MASTER_RULE).set(true, server);
 
         // ---- 同期の呼び出しは作り物のプレイヤーでも落ちない
         Pouch.sync(m);

@@ -50,6 +50,8 @@ public final class PouchSetup {
     @SubscribeEvent
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            PouchConfig.MASTER_RULE = GameRules.register("skyabyssPouch", GameRules.Category.PLAYER,
+                    GameRules.BooleanValue.create(PouchConfig.ENABLED_DEFAULT));
             // ゲームルール skyabyssPouchWithdraw: 1 = 素材・共鳴を取り出せる (鍵・心核・笛・書は常に不可)、0 = 何も取り出せない
             PouchConfig.WITHDRAW_RULE = GameRules.register("skyabyssPouchWithdraw", GameRules.Category.PLAYER,
                     GameRules.IntegerValue.create(PouchConfig.WITHDRAW_DEFAULT));
