@@ -108,6 +108,9 @@ public class SkyAbyss {
         // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
         jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
 
+        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)。docs/design/21 の 1.4・1.5、P3
+        jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

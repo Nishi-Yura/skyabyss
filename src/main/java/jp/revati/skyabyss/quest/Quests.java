@@ -63,6 +63,7 @@ public final class Quests {
             Notice.hint(player, "message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log"));
         }
         notice(player, QuestNetwork.Notice.STARTED, questId);
+        jp.revati.skyabyss.guide.PrepQuests.onStarted(player, def);
         advance(player, def, entry, true);
         sync(player);
         return true;
@@ -352,6 +353,7 @@ public final class Quests {
         StoryContext ctx = StoryContext.of(player);
         reward.actions().forEach(a -> a.run(ctx));
         notice(player, QuestNetwork.Notice.FINISHED, def.id());
+        jp.revati.skyabyss.guide.PrepQuests.onFinished(player, def);
         QuestLog log = QuestLog.of(player);
         if (log.tracked.equals(def.id())) {
             log.tracked = nextToTrack(log);
