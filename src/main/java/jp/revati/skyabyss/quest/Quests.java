@@ -222,6 +222,8 @@ public final class Quests {
                 case "herd" -> slow ? herded(player, entry, ob) : entry.progress(i);
                 case "visit" -> ob.targets().contains(player.level().dimension().location().toString()) ? ob.count() : entry.progress(i);
                 case "condition" -> ob.condition().test(StoryContext.of(player)) ? ob.count() : 0;
+                // 試練のあとの石の合図は、パーティの誰かが鳴らせば全員のもの (グループの記録から数える。増えるだけ)
+                case "signal" -> Math.max(entry.progress(i), jp.revati.skyabyss.titan.group.TrialSteles.cleared(player, ob.targets()));
                 case "near" -> slow ? (near(player, ob) ? ob.count() : entry.progress(i)) : entry.progress(i);
                 default -> entry.progress(i);
             };

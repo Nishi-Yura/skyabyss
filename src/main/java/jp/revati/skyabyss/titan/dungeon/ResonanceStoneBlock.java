@@ -88,6 +88,9 @@ public class ResonanceStoneBlock extends Block {
         };
         GroupGates.open(server, group, shortcut);
         Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
+        // 背中の外にいる仲間にも (クエストはグループの記録から数える)
+        jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),
+                Component.translatable("block.skyabyss.resonance_stone"));
         int active = countActive(record);
         int total = TitanBackLayout.RESONANCE_STONES.size();
         notifyGroup(server, group, ModText.progress("message.skyabyss.resonance", active, total));
