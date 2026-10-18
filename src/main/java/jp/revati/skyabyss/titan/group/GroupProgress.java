@@ -56,6 +56,11 @@ public final class GroupProgress {
         BackGroupData data = BackGroupData.get(level);
         for (UUID id : data.ids()) {
             BackGroupData.Record r = data.peek(id);
+            if (r != null && r.lastSeen() == 0) {
+                // まだ一度も背中で見ていない記録 (できたばかり・コマンドや自己テストで進めた): ここから数える。0 のままだと、すぐ放置と見なされる
+                r.touch(now);
+                continue;
+            }
             if (r != null && r.hasProgress() && now - r.lastSeen() >= IDLE_TICKS && !present(level, id)) {
                 idle.add(id);
             }
