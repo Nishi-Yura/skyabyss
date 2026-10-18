@@ -20,8 +20,8 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 // 潮殻の心臓の描画。段階ごとの geo とテクスチャ (巻貝の殻 → 破れた殻と光る部屋 → 内側の螺旋と三日月と水滴の輪) を切り替え、
 // 核・部屋・月・水滴を光らせる (GlowLayer)。模型は tools/install_tide_heart.py が書く
 public class TideHeartRenderer extends jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<TideHeart> {
-    // 模型は 約 36 単位 (2.25 ブロック) の大きさ。判定箱 (3 x 4.2) に合わせて 2 倍
-    private static final float SCALE = 2.0f;
+    // 模型は 約 36 単位 (2.25 ブロック) の大きさ。判定箱 (4.5 x 6.3) に合わせて 3 倍 (迫力のため、前の 2 倍の 1.5 倍)
+    private static final float SCALE = 3.0f;
 
     public TideHeartRenderer(EntityRendererProvider.Context context) {
         // 低ポリ (client/lowpoly): 段階ごとに別のメッシュ。LowPoly.enabled = false で元のキューブの geo と自前の発光層に戻る

@@ -68,6 +68,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.titan.storm.mob.StormMobSetup.register(modEventBus);
         // 装飾の枠 (護符 1・装飾 2。記録・画面・パケット)。登録は item.accessory パッケージにまとめてある
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
+        // 留め袋 (この Mod の集める品・鍵を入れる専用の持ち物。記録・取り出し済みの印・ゲームルール)。docs/design/22
+        jp.revati.skyabyss.pouch.PouchSetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
         // 雷翼の心臓 (第三の巨神の最終ボス・音)。登録は titan.storm.heart パッケージにまとめてある
@@ -105,6 +107,9 @@ public class SkyAbyss {
         jp.revati.skyabyss.opening.OpeningSetup.register(modEventBus);
         // 章の演出の共通部品 (題字・余韻の札、予兆の枠)。docs/design/18 の 3 章、01 の 4.1
         jp.revati.skyabyss.story.arc.ArcSetup.register(modEventBus);
+
+        // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)。docs/design/21 の 1.4・1.5、P3
+        jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

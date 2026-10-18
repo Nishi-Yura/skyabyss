@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.storm.raiju;
 
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.GuardMob;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
@@ -33,6 +36,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -75,7 +80,22 @@ public class Raiju extends GuardMob {
     public static final int POUNCE_WINDUP_ANGRY = 12;
     public static final int POUNCE_FLIGHT = 10;
     public static final int DESCEND_FLIGHT = 14;
-    public static final int CLAW_TICKS = 32;
+    public static final int CLAW_TICKS = 42;
+    // 爪の連打 (扇の印 0.9 秒、そのあと 0.5 秒ごとに 3 回)
+    public static final int CLAW_WARN = 18;
+    public static final double CLAW_RANGE = 3.6;
+    public static final double CLAW_HALF_ANGLE = 70;
+    public static final float CLAW_SHOCK_DAMAGE = 4;
+    public static final double CLAW_SHOCK_LENGTH = 9;
+    // 雷渡りの枝分かれ (人数で増える。着いた柱から別の柱へ)
+    public static final float RAIL_FORK_DAMAGE = 9;
+    public static final double RAIL_FORK_HALF_WIDTH = 1.0;
+    // 飛びかかりの着地の円と、人数で増える雷の円・怒りの雷の輪
+    public static final double POUNCE_RADIUS = 2.4;
+    public static final double ECHO_RADIUS = 1.6;
+    public static final float ECHO_DAMAGE = 8;
+    public static final float POUNCE_RING_DAMAGE = 5;
+    public static final double POUNCE_RING_REACH = 8.0;
     public static final int ROAR_TICKS = 30;
     public static final int ROAR_RINGS = 6;
     public static final int RING_WARN = 24;
@@ -112,6 +132,13 @@ public class Raiju extends GuardMob {
     private int clawCooldown;
     private boolean roared;
     private float multiplier = 1f;
+    // 試験・開発用: 次の技を始めない / 巣にいる人数を実際より多いことにする (0 なら実際の人数) / 次の雷渡りの行き先
+    private boolean holdAttacks;
+    private int partyOverride;
+    private int forcedDest = -1;
+    // 飛びかかりの着地点 (技の始めに決まる)
+    @Nullable
+    private Vec3 pounceLand;
     @Nullable
     private ServerPlayer target;
     private Vec3 aim = Vec3.ZERO;
@@ -232,12 +259,15 @@ public class Raiju extends GuardMob {
         if (m == MODE_PERCH || m == MODE_RAIL || m == MODE_AIR) {
             setDeltaMovement(Vec3.ZERO);
         }
-        if (!roared && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE && (m == MODE_GROUND || m == MODE_PERCH)) {
+        if (!roared && !holdAttacks && getHealth() < getMaxHealth() * 0.5f && action == Action.NONE && (m == MODE_GROUND || m == MODE_PERCH)) {
             begin(server, Action.ROAR);
         }
         if (action != Action.NONE) {
             getNavigation().stop();
             tickAction(server);
+            return;
+        }
+        if (holdAttacks) {
             return;
         }
         switch (m) {
@@ -318,14 +348,71 @@ public class Raiju extends GuardMob {
     public List<ServerPlayer> fighters(ServerLevel server) {
         List<ServerPlayer> out = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (!p.isAlive() || p.isSpectator() || p.isCreative() || !jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
-                continue;
-            }
-            if (site != null ? site.inside(p.position()) : p.distanceToSqr(this) < 24 * 24) {
+            if (canFight(p)) {
                 out.add(p);
             }
         }
         return out;
+    }
+
+    private boolean canFight(ServerPlayer p) {
+        if (!p.isAlive() || p.isSpectator() || p.isCreative() || !jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
+            return false;
+        }
+        return site != null ? site.inside(p.position()) : p.distanceToSqr(this) < 24 * 24;
+    }
+
+    // ---- 試験・開発用 ----
+    public void holdAttacks() {
+        holdAttacks = true;
+    }
+
+    public void setPartyOverride(int count) {
+        partyOverride = count;
+    }
+
+    // 試験用: 怒った状態にする (咆哮は出さない)
+    public void makeAngryForTest() {
+        roared = true;
+        entityData.set(ANGRY, true);
+    }
+
+    public int actionTickCount() {
+        return actionTick;
+    }
+
+    private int present(ServerLevel server) {
+        return Math.max(partyOverride, fighters(server).size());
+    }
+
+    // ---- 人数 n で増えるもの (12 の 5.2節) ----
+    // 雷渡りの枝分かれの線
+    public static int railForks(int n) {
+        return n >= 6 ? 3 : n >= 4 ? 2 : n >= 2 ? 1 : 0;
+    }
+
+    // 飛びかかりのとき、ほかの人の足もとにも落ちる雷の円
+    public static int pounceEchoes(int n) {
+        return Math.min(Math.max(0, n - 1), 3);
+    }
+
+    // 爪の連打に添える雷の線 (ほかの人の方へ)
+    public static int clawShocks(int n) {
+        return Math.min(Math.max(0, n - 1), 3);
+    }
+
+    // 咆哮の招雷の輪の数
+    public static int roarRings(int n) {
+        return Math.min(12, Math.max(ROAR_RINGS, 2 * n));
+    }
+
+    // 技の床の高さと、予告の組み立て (持ち主は雷獣、当たるのは巣で戦っている人)
+    private double floorY() {
+        return site != null ? site.floor() : getY();
+    }
+
+    private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int color) {
+        return Telegraph.in(server, shape).floor(floorY()).warn(warn).color(color).owner(this).victims(this::canFight).reach(3.5);
     }
 
     // ---------------------------------------------------------------- 技
@@ -357,8 +444,8 @@ public class Raiju extends GuardMob {
             perchOn(destRod == 0 ? 1 : 0);
         }
         action = Action.NONE;
+        forcedDest = destRod;
         begin(server, Action.RAIL);
-        dest = destRod;
     }
 
     private void begin(ServerLevel server, Action a) {
@@ -368,7 +455,8 @@ public class Raiju extends GuardMob {
         getNavigation().stop();
         switch (a) {
             case RAIL -> {
-                dest = chooseDest();
+                dest = forcedDest >= 0 ? forcedDest : chooseDest();
+                forcedDest = -1;
                 if (dest < 0) {
                     action = Action.NONE;
                     perchTimer = 40;
@@ -377,18 +465,24 @@ public class Raiju extends GuardMob {
                 face(Vec3.atCenterOf(site.rodTop(dest)));
                 playAction("rail_charge");
                 sound(server, RaijuSetup.RAIL_CHARGE.get(), 2.5f, 1f);
+                if (rod >= 0) {
+                    railMarkers(server, perchSpot(rod), perchSpot(dest));
+                }
             }
             case DESCEND, POUNCE -> {
                 aim = target != null ? target.position() : position().add(getLookAngle().scale(5));
                 face(aim);
                 playAction("pounce_crouch");
                 sound(server, RaijuSetup.POUNCE.get(), 2f, a == Action.DESCEND ? 0.85f : 1f);
+                int windup = a == Action.DESCEND ? POUNCE_WINDUP : (isAngry() ? POUNCE_WINDUP_ANGRY : POUNCE_WINDUP);
+                pounceMarkers(server, windup + (a == Action.DESCEND ? DESCEND_FLIGHT : POUNCE_FLIGHT));
             }
             case CLAW -> {
                 playAction("claw");
                 if (target != null) {
                     face(target.position());
                 }
+                clawMarkers(server);
             }
             case ROAR -> {
                 roared = true;
@@ -464,7 +558,6 @@ public class Raiju extends GuardMob {
             flightTick = 0;
             arc = 0;
             sound(server, RaijuSetup.RAIL.get(), 3f, 1f);
-            railHit(server, a, b);
         }
         Vec3 before = position();
         boolean done = flightStep();
@@ -489,25 +582,14 @@ public class Raiju extends GuardMob {
         }
     }
 
-    // 予告線: 柱の先から柱の先へ (高い所) と、その下の床の帯 (当たる所)
+    // 予告線 (見た目): 柱の先から柱の先へ、高い所の青い線。当たる所の印は Telegraph (railMarkers)
     private void railLine(ServerLevel server, Vec3 a, Vec3 b, float size) {
         DustParticleOptions blue = new DustParticleOptions(new Vector3f(0.65f, 0.85f, 1.0f), size);
-        DustParticleOptions white = new DustParticleOptions(new Vector3f(1.0f, 1.0f, 0.92f), size);
         double len = a.distanceTo(b);
         int n = Math.max(6, (int) (len * 2.5));
-        double floor = site != null ? site.floor() + 0.1 : getY();
         for (int i = 0; i <= n; i++) {
             Vec3 p = a.lerp(b, i / (double) n);
             warn(server, blue, p.x, p.y + 0.8, p.z, 1, 0.05, 0.05, 0.05, 0);
-            double t = i / (double) n;
-            if (t > trim(len) && t < 1 - trim(len)) {
-                Vec3 side = new Vec3(-(b.z - a.z), 0, b.x - a.x).normalize().scale(RAIL_HALF_WIDTH);
-                warn(server, white, p.x + side.x, floor, p.z + side.z, 1, 0.02, 0, 0.02, 0);
-                warn(server, white, p.x - side.x, floor, p.z - side.z, 1, 0.02, 0, 0.02, 0);
-                if (i % 2 == 0) {
-                    warn(server, blue, p.x, floor, p.z, 1, 0.1, 0, 0.1, 0);
-                }
-            }
         }
     }
 
@@ -515,32 +597,51 @@ public class Raiju extends GuardMob {
         return Math.min(0.3, 1.8 / Math.max(len, 1));
     }
 
-    // 線の下 (床の上の帯、両端の柱のそば 1.8 ブロックは除く) の人に 12
-    private void railHit(ServerLevel server, Vec3 a, Vec3 b) {
-        double len = a.distanceTo(b);
-        for (ServerPlayer p : fighters(server)) {
-            double t = segmentT(p.position(), a, b);
-            if (t <= trim(len) || t >= 1 - trim(len)) {
-                continue;
+    // 雷渡りの当たる所: 線の下の床の帯 (幅 2.6。両端の柱のそば 1.8 ブロックは除く)。印が満ちて、雷になって渡りはじめる瞬間に帯の中の人に 12。
+    // 人数で、着いた柱から別の柱 (ほかの人にいちばん近い柱) へ枝分かれの帯が増える (最大 3 本。9)
+    private void railMarkers(ServerLevel server, Vec3 a, Vec3 b) {
+        railBand(server, a, b, RAIL_HALF_WIDTH, RAIL_DAMAGE, 0xFF9A3A);
+        int forks = railForks(present(server));
+        if (forks == 0 || site == null) {
+            return;
+        }
+        List<Integer> picks = new ArrayList<>();
+        List<ServerPlayer> others = new ArrayList<>(fighters(server));
+        others.sort(Comparator.comparingDouble(pl -> pl.distanceToSqr(b.x, b.y, b.z)));
+        for (ServerPlayer pl : others) {
+            int r = nearestRod(pl.position(), false);
+            if (r >= 0 && r != rod && r != dest && !picks.contains(r)) {
+                picks.add(r);
             }
-            Vec3 q = a.lerp(b, t);
-            double dx = p.getX() - q.x;
-            double dz = p.getZ() - q.z;
-            if (dx * dx + dz * dz <= RAIL_HALF_WIDTH * RAIL_HALF_WIDTH) {
-                p.hurt(attackSource(), RAIL_DAMAGE);
-                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX(), p.getY() + 1, p.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
+            if (picks.size() >= forks) {
+                break;
             }
+        }
+        for (int i = 0; i < RaijuNest.RODS && picks.size() < forks && picks.size() < partyOverride; i++) {
+            if (i != rod && i != dest && !picks.contains(i)) {
+                picks.add(i);
+            }
+        }
+        for (int r : picks) {
+            railBand(server, b, perchSpot(r), RAIL_FORK_HALF_WIDTH, RAIL_FORK_DAMAGE, 0xFFB060);
         }
     }
 
-    private static double segmentT(Vec3 p, Vec3 a, Vec3 b) {
-        double vx = b.x - a.x;
-        double vz = b.z - a.z;
-        double l2 = vx * vx + vz * vz;
-        if (l2 < 1e-6) {
-            return 0;
+    private void railBand(ServerLevel server, Vec3 a, Vec3 b, double halfWidth, float damage, int color) {
+        double len = Math.hypot(b.x - a.x, b.z - a.z);
+        if (len < 2) {
+            return;
         }
-        return Mth.clamp(((p.x - a.x) * vx + (p.z - a.z) * vz) / l2, 0, 1);
+        double t = trim(len);
+        double angle = Telegraph.angleOf(b.x - a.x, b.z - a.z);
+        tg(server, TelegraphShape.line(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, angle, len * (1 - 2 * t), halfWidth), RAIL_WARN + 1, color)
+                .onHit((s, player) -> {
+                    if (hit.add(player.getUUID())) {
+                        player.hurt(attackSource(), damage);
+                        s.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1, player.getZ(), 20, 0.3, 0.6, 0.3, 0.2);
+                    }
+                })
+                .start();
     }
 
     // 柱に着いた。接地していれば痺れて落ちる、そうでなければ柱の上にうずくまる
@@ -571,18 +672,65 @@ public class Raiju extends GuardMob {
         SkyAbyss.LOGGER.debug("Raiju fell off grounded rod {}", i);
     }
 
-    // 跳びかかり (床から・柱から)。溜めの間は着く所に黄色い輪、跳んでいる間と着いたときに当たる
+    // 跳びかかりの印: 着く所 (技の始めの狙いで決まる。追わない) に半径 2.4 の円が満ちて、着いた瞬間にその中の人に 11。跳んでいる途中は当たらない。
+    // 人数で、ほかの人の足もとにも雷の円 (半径 1.6、8。最大 3 つ)。怒ると、着地から雷の輪が広がる (跳べば当たらない。安全な筋が 2 本。3 人から二重)
+    private void pounceMarkers(ServerLevel server, int total) {
+        Vec3 land = clampToNest(aim);
+        pounceLand = land;
+        tg(server, TelegraphShape.circle(land.x, land.z, POUNCE_RADIUS), total, 0xFFDB59)
+                .onImpact(s -> StormStrike.bolt(s, new Vec3(land.x, floorY() + 14, land.z), new Vec3(land.x, floorY(), land.z)))
+                .onHit((s, player) -> {
+                    if (hit.add(player.getUUID())) {
+                        player.hurt(attackSource(), POUNCE_DAMAGE);
+                    }
+                })
+                .start();
+        int n = present(server);
+        List<Vec3> spots = new ArrayList<>();
+        List<ServerPlayer> others = new ArrayList<>(fighters(server));
+        others.remove(target);
+        java.util.Collections.shuffle(others, new java.util.Random(random.nextLong()));
+        for (ServerPlayer pl : others) {
+            spots.add(pl.position());
+        }
+        while (spots.size() < pounceEchoes(n)) {
+            double ang = random.nextDouble() * Math.PI * 2;
+            double r = 3 + random.nextDouble() * 6;
+            spots.add(clampToNest(land.add(Math.cos(ang) * r, 0, Math.sin(ang) * r)));
+        }
+        for (int i = 0; i < pounceEchoes(n); i++) {
+            Vec3 at = spots.get(i);
+            tg(server, TelegraphShape.circle(at.x, at.z, ECHO_RADIUS), total, 0xFFF2A0)
+                    .onImpact(s -> StormStrike.bolt(s, new Vec3(at.x, floorY() + 14, at.z), new Vec3(at.x, floorY(), at.z)))
+                    .onHit((s, player) -> {
+                        if (hit.add(player.getUUID())) {
+                            player.hurt(attackSource(), ECHO_DAMAGE);
+                        }
+                    })
+                    .start();
+        }
+        if (isAngry()) {
+            double gapBase = random.nextDouble() * Math.PI * 2;
+            double[] gaps = {gapBase, gapBase + Math.PI};
+            double gapHalf = Math.toRadians(26);
+            int active = (int) Math.ceil((POUNCE_RING_REACH - POUNCE_RADIUS) / 0.45);
+            for (int i = 0; i < (n >= 3 ? 2 : 1); i++) {
+                tg(server, TelegraphShape.wave(land.x, land.z, POUNCE_RADIUS, POUNCE_RING_REACH, 0.9, gaps, gapHalf), total + i * 10, 0xFFA040)
+                        .active(active).jumpClear(0.9)
+                        .onHit((s, player) -> player.hurt(attackSource(), POUNCE_RING_DAMAGE))
+                        .start();
+            }
+        }
+    }
+
+    // 跳びかかり (床から・柱から)。溜めの間、印の円が満ちる。着く所は技の始めに決まっている (pounceMarkers)
     private void tickPounce(ServerLevel server, int windup, int flightTicks, double height, boolean fromRod) {
         if (actionTick < windup) {
             if (fromRod) {
                 holdOnRod();
             }
-            if (target != null && actionTick < windup - 6) {
-                aim = target.position();
-            }
             face(aim);
             if (actionTick % 3 == 0) {
-                ring(server, aim, 2.0f, new Vector3f(1.0f, 0.86f, 0.35f));
                 warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.8, getZ(), 4, 0.8, 0.3, 0.8, 0.05);
             }
             return;
@@ -590,26 +738,13 @@ public class Raiju extends GuardMob {
         if (actionTick == windup) {
             playAction("pounce_leap");
             sound(server, RaijuSetup.CLAW.get(), 2f, 0.7f);
-            Vec3 land = clampToNest(aim);
             rod = -1;
-            startFlight(land, flightTicks, height);
+            startFlight(pounceLand != null ? pounceLand : clampToNest(aim), flightTicks, height);
         }
         boolean done = flightStep();
-        for (ServerPlayer p : fighters(server)) {
-            if (!hit.contains(p.getUUID()) && p.getBoundingBox().intersects(getBoundingBox().inflate(0.4))) {
-                hit.add(p.getUUID());
-                p.hurt(attackSource(), POUNCE_DAMAGE);
-            }
-        }
         if (done) {
             land(position());
             playAction("pounce_land");
-            for (ServerPlayer p : fighters(server)) {
-                if (!hit.contains(p.getUUID()) && p.distanceToSqr(this) < 2.2 * 2.2 && Math.abs(p.getY() - getY()) < 2) {
-                    hit.add(p.getUUID());
-                    p.hurt(attackSource(), POUNCE_DAMAGE);
-                }
-            }
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 0.2, getZ(), 30, 1.2, 0.1, 1.2, 0.2);
             if (fromRod) {
                 groundTimer = GROUND_TICKS;
@@ -619,27 +754,43 @@ public class Raiju extends GuardMob {
         }
     }
 
+    // 爪の連打の印: 前の扇 (射程 3.6・半角 70 度。向きは始めに決まる) が満ち、そのあと 0.5 秒ごとに 3 回、扇の中の人に 5。
+    // 人数で、ほかの人の方へ爪から雷の線 (長さ 9、4) が走る (最大 3 本)
+    private void clawMarkers(ServerLevel server) {
+        double angle = target != null ? Telegraph.angleOf(target.getX() - getX(), target.getZ() - getZ())
+                : Telegraph.angleOf(Vec3.directionFromRotation(0, getYRot()));
+        tg(server, TelegraphShape.cone(getX(), getZ(), angle, CLAW_RANGE, Math.toRadians(CLAW_HALF_ANGLE)), CLAW_WARN, 0xFFE9A0)
+                .active(20).repeatEvery(10)
+                .onHit((s, player) -> {
+                    player.hurt(attackSource(), CLAW_DAMAGE);
+                    player.invulnerableTime = 0;
+                })
+                .start();
+        int shocks = clawShocks(present(server));
+        if (shocks == 0) {
+            return;
+        }
+        List<ServerPlayer> others = new ArrayList<>(fighters(server));
+        others.remove(target);
+        java.util.Collections.shuffle(others, new java.util.Random(random.nextLong()));
+        for (int i = 0; i < shocks; i++) {
+            double a = i < others.size() ? Telegraph.angleOf(others.get(i).getX() - getX(), others.get(i).getZ() - getZ())
+                    : angle + Math.PI * 2 * (i + 1) / (shocks + 1);
+            tg(server, TelegraphShape.line(getX(), getZ(), a, CLAW_SHOCK_LENGTH, 1.0), CLAW_WARN, 0xFFF2A0)
+                    .onHit((s, player) -> player.hurt(attackSource(), CLAW_SHOCK_DAMAGE))
+                    .start();
+        }
+    }
+
     private void tickClaw(ServerLevel server) {
-        if (target != null) {
-            face(target.position());
+        if (actionTick == 15 || actionTick == 25 || actionTick == 35) {
+            sound(server, RaijuSetup.CLAW.get(), 1.6f, 1f + (actionTick - 15) * 0.01f);
         }
-        if (actionTick == 6 || actionTick == 16 || actionTick == 26) {
-            sound(server, RaijuSetup.CLAW.get(), 1.6f, 1f + (actionTick - 6) * 0.01f);
-        }
-        if (actionTick == 10 || actionTick == 20 || actionTick == 30) {
+        if (actionTick == 17 || actionTick == 27 || actionTick == 37) {
             Vec3 look = Vec3.directionFromRotation(0, getYRot());
             Vec3 tip = position().add(look.scale(1.8));
             warn(server, ParticleTypes.SWEEP_ATTACK, tip.x, getY() + 1.0, tip.z, 1, 0, 0, 0, 0);
             warn(server, ParticleTypes.ELECTRIC_SPARK, tip.x, getY() + 1.0, tip.z, 10, 0.6, 0.4, 0.6, 0.1);
-            for (ServerPlayer p : fighters(server)) {
-                Vec3 rel = p.position().subtract(position());
-                double d = Math.sqrt(rel.x * rel.x + rel.z * rel.z);
-                double cos = d < 1e-3 ? 1 : (rel.x * look.x + rel.z * look.z) / d;
-                if (d < 3.6 && cos > 0.34 && Math.abs(rel.y) < 2.5) {
-                    p.hurt(attackSource(), CLAW_DAMAGE);
-                    p.invulnerableTime = 0;
-                }
-            }
         }
         if (actionTick >= CLAW_TICKS) {
             clawCooldown = 30;
@@ -647,6 +798,8 @@ public class Raiju extends GuardMob {
         }
     }
 
+    // 咆哮 (1.5 秒): そのあと人の足もとに招雷の輪 (半径 1.5。1.2 秒で満ちる)。輪が巣の避雷の柱から 3 ブロック以内なら雷は柱へ (傷なし)。
+    // 人数で輪が増える (6 → 12 個)
     private void tickRoar(ServerLevel server) {
         if (mode() == MODE_PERCH) {
             holdOnRod();
@@ -658,7 +811,8 @@ public class Raiju extends GuardMob {
             return;
         }
         List<ServerPlayer> fs = fighters(server);
-        for (int i = 0; i < ROAR_RINGS && !fs.isEmpty(); i++) {
+        int rings = roarRings(present(server));
+        for (int i = 0; i < rings && !fs.isEmpty(); i++) {
             ServerPlayer p = fs.get(i % fs.size());
             Vec3 at = p.position();
             if (i >= fs.size()) {
@@ -666,11 +820,35 @@ public class Raiju extends GuardMob {
                 double r = 2.2 + random.nextDouble() * 3.0;
                 at = clampToNest(at.add(Math.cos(ang) * r, 0, Math.sin(ang) * r));
             }
-            double y = site != null ? site.floor() : at.y;
-            StormStrike.call(server, new Vec3(at.x, y, at.z), RING_WARN, ROAR_STRIKE_DAMAGE, this);
+            roarStrike(server, at);
         }
         spawnMoths(server, 2);
         finish();
+    }
+
+    private void roarStrike(ServerLevel server, Vec3 at) {
+        double y = floorY();
+        BlockPos rodPos = site != null ? StormRods.find(server, new Vec3(at.x, y, at.z), StormStrike.ROD_REACH) : null;
+        if (rodPos != null && StormRods.get(server, rodPos) == null) {
+            rodPos = null;
+        }
+        final BlockPos toRod = rodPos;
+        Telegraph.Builder b = tg(server, TelegraphShape.circle(at.x, at.z, StormStrike.RADIUS), RING_WARN, toRod != null ? 0xFFE278 : 0xFFFFFF)
+                .onImpact(s -> {
+                    if (toRod != null) {
+                        Vec3 tip = new Vec3(toRod.getX() + 0.5, toRod.getY() + StormRods.HEIGHT, toRod.getZ() + 0.5);
+                        StormStrike.bolt(s, tip.add(0, 18, 0), tip);
+                    } else {
+                        StormStrike.bolt(s, new Vec3(at.x, y + 18, at.z), new Vec3(at.x, y, at.z));
+                    }
+                });
+        if (toRod == null) {
+            b.onHit((s, player) -> {
+                player.hurt(attackSource(), ROAR_STRIKE_DAMAGE);
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 2, false, false, true));
+            });
+        }
+        b.start();
     }
 
     // 敵の担当の雷蛾 (static_moth) があれば湧かせる。まだ無ければ何もしない

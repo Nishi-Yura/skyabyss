@@ -63,6 +63,7 @@ public final class Quests {
             Notice.hint(player, "message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log"));
         }
         notice(player, QuestNetwork.Notice.STARTED, questId);
+        jp.revati.skyabyss.guide.PrepQuests.onStarted(player, def);
         advance(player, def, entry, true);
         sync(player);
         return true;
@@ -352,6 +353,7 @@ public final class Quests {
         StoryContext ctx = StoryContext.of(player);
         reward.actions().forEach(a -> a.run(ctx));
         notice(player, QuestNetwork.Notice.FINISHED, def.id());
+        jp.revati.skyabyss.guide.PrepQuests.onFinished(player, def);
         QuestLog log = QuestLog.of(player);
         if (log.tracked.equals(def.id())) {
             log.tracked = nextToTrack(log);
@@ -462,7 +464,9 @@ public final class Quests {
     }
 
     public static void give(ServerPlayer player, ItemStack stack) {
-        if (!player.getInventory().add(stack) && !stack.isEmpty()) {
+        // 留め袋に入る品は袋へ (docs/design/22 の 4.1)
+        jp.revati.skyabyss.pouch.PouchRouting.give(player, stack);
+        if (!stack.isEmpty()) {
             ItemEntity drop = player.drop(stack, false);
             if (drop != null) {
                 drop.setNoPickUpDelay();
@@ -472,6 +476,8 @@ public final class Quests {
     }
 
     public static void take(ServerPlayer player, Item item, int count) {
+        // 留め袋の中から先に払う (22 の 8.3)
+        count -= jp.revati.skyabyss.pouch.Pouch.take(player, item, count);
         var inv = player.getInventory();
         int left = count;
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {

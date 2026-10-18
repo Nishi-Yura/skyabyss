@@ -117,6 +117,40 @@ public final class KeepsakeBonds {
         });
     }
 
+    // ---------------------------------------------------------------- 留め袋 (22 の 5 章)
+    // 袋は持ち主の印を持たない数だけの入れ物。入れてよいのは、まだ結ばれていない品と、その人の今の代の品だけ
+    // (ほかの人の品・前の代の品は持ち物に残し、見回り (sweep) が帰す・砂にする)
+    public static boolean acceptable(ServerPlayer player, ItemStack stack) {
+        if (Kind.of(stack) == null) {
+            return true;
+        }
+        UUID owner = owner(stack);
+        return owner == null || (owner.equals(player.getUUID()) && !stale(player.server, stack));
+    }
+
+    // 袋に入れる前に持ち主の印を外す
+    public static void stripBond(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        if (data == null || !data.contains(TAG)) {
+            return;
+        }
+        CompoundTag tag = data.copyTag();
+        tag.remove(TAG);
+        if (tag.isEmpty()) {
+            stack.remove(DataComponents.CUSTOM_DATA);
+        } else {
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
+    }
+
+    // 袋から出す品に、その人の今の代の印を付ける
+    public static void bindFor(ServerPlayer player, ItemStack stack) {
+        Kind kind = Kind.of(stack);
+        if (kind != null) {
+            bind(stack, player.getUUID(), BondData.get(player.server).gen(player.getUUID(), kind.id));
+        }
+    }
+
     // 前の代の品か (持ち主が呼び戻した・心臓で取り戻した)
     public static boolean stale(MinecraftServer server, ItemStack stack) {
         Kind kind = Kind.of(stack);
@@ -449,6 +483,8 @@ public final class KeepsakeBonds {
             }
         }
         data.clearStash(me, itemId);
+        // 留め袋の中の品は印を持たない数だけなので、書き直さず、手もとにある数に足す (22 の 5 章)
+        kept += jp.revati.skyabyss.pouch.Pouch.count(player, kind.item());
         int give = Math.max(0, expected(player, kind) - kept);
         for (int i = 0; i < give; i++) {
             ItemStack stack = new ItemStack(kind.item());

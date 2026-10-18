@@ -114,7 +114,8 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     // 試練の戦いの状態はメモリにしかないので、試練の個体はディスクに書かない (保存して終了したあとに二重に湧かないように)
     @Override
     public boolean shouldBeSaved() {
-        return !isTrialMob() && super.shouldBeSaved();
+        // 地上の場所の湧き台・章のひとり歩き (guide.SiteSpawner / ChapterMobSpawner) の個体も保存しない
+        return !isTrialMob() && !getTags().contains(jp.revati.skyabyss.guide.SiteSpawner.TAG) && super.shouldBeSaved();
     }
 
     // 人へ与える傷の出どころ (番兵長と心臓の技が使う)。

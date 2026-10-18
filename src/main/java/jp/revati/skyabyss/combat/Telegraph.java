@@ -65,6 +65,7 @@ public final class Telegraph {
     private final double jumpClear;
     private final int warn;
     private final int active;
+    private final int repeat;
     private final int rgb;
     @Nullable
     private final Entity owner;
@@ -86,6 +87,7 @@ public final class Telegraph {
         this.jumpClear = b.jumpClear;
         this.warn = Math.max(MIN_WARN_TICKS, b.warn);
         this.active = Math.max(0, b.active);
+        this.repeat = Math.max(0, b.repeat);
         this.rgb = b.rgb;
         this.owner = b.owner;
         this.victims = b.victims;
@@ -130,6 +132,7 @@ public final class Telegraph {
         private double jumpClear = 0;
         private int warn = 24;
         private int active = 0;
+        private int repeat = 0;
         private int rgb = 0xFF5A5A;
         @Nullable
         private Entity owner;
@@ -173,6 +176,12 @@ public final class Telegraph {
         // 当たりが続く tick 数 (振り回す技)。0 なら予告のあと一度だけ
         public Builder active(int ticks) {
             this.active = ticks;
+            return this;
+        }
+
+        // active の間、同じ人に ticks ごとにもう一度当てる (床の帯電・爪の連打。印は消えずに残る)。0 なら一度だけ
+        public Builder repeatEvery(int ticks) {
+            this.repeat = ticks;
             return this;
         }
 
@@ -353,6 +362,9 @@ public final class Telegraph {
         // 振り回し: 進み具合に合わせた帯の中の人に一度ずつ
         double progress = Math.min(1.0, (double) (age - warn) / active);
         TelegraphShape now = shape.at(progress);
+        if (repeat > 0 && (age - warn) % repeat == 0) {
+            hit.clear();
+        }
         strike(now);
         if (age % 2 == 0) {
             draw(now::outline, 1.6, 1.0, 0.0, 1.5f);

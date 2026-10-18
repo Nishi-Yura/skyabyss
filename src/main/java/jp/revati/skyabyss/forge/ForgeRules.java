@@ -74,7 +74,7 @@ public final class ForgeRules {
             return false;
         }
         if (!player.isCreative()) {
-            remove(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get(), trialCost().crystals());
+            remove(player, ModItems.RESONANCE_CRYSTAL.get(), trialCost().crystals());
         }
         AffixRules.addTrial(stack, player.getRandom());
         return true;
@@ -95,16 +95,16 @@ public final class ForgeRules {
 
     // 巨神 titan (stone_whale / tide_shell / thunder_wing / ember) の専用伝説を交換する分の共鳴の欠片があるか
     public static boolean exchangeAffordable(Player player, String titan) {
-        return player.isCreative() || resonanceHeld(player.getInventory(), titan) >= EXCHANGE_SHARDS;
+        return player.isCreative() || resonanceHeld(player, titan) >= EXCHANGE_SHARDS;
     }
 
     // 払う: その巨神の共鳴の欠片から先に、足りない分を古い共通の欠片から (炉が古い欠片を換えて払う)
     public static void payExchange(Player player, String titan) {
         if (!player.isCreative()) {
             Item own = ModItems.resonanceShard(titan);
-            int fromOwn = Math.min(EXCHANGE_SHARDS, count(player.getInventory(), own));
-            remove(player.getInventory(), own, fromOwn);
-            remove(player.getInventory(), ModItems.RESONANCE_SHARD.get(), EXCHANGE_SHARDS - fromOwn);
+            int fromOwn = Math.min(EXCHANGE_SHARDS, count(player, own));
+            remove(player, own, fromOwn);
+            remove(player, ModItems.RESONANCE_SHARD.get(), EXCHANGE_SHARDS - fromOwn);
         }
     }
 
@@ -114,6 +114,23 @@ public final class ForgeRules {
         return ModItems.resonanceShard(set == null ? "stone_whale" : set.titan);
     }
 
+    // 持ち物 + 留め袋の数 (費用の足りるかの数え方。docs/design/22 の 8.3)
+    public static int count(Player player, Item item) {
+        return jp.revati.skyabyss.pouch.Pouch.countAll(player, item);
+    }
+
+    // 費用を払う: 留め袋から先に、足りない分を持ち物から
+    private static void remove(Player player, Item item, int amount) {
+        if (amount > 0) {
+            jp.revati.skyabyss.pouch.Pouch.takeAny(player, item, amount);
+        }
+    }
+
+    public static int resonanceHeld(Player player, String titan) {
+        return count(player, ModItems.resonanceShard(titan)) + count(player, ModItems.RESONANCE_SHARD.get());
+    }
+
+    // 持ち物だけの数 (留め袋は含まない)
     public static int count(Inventory inventory, Item item) {
         int n = 0;
         for (int i = 0; i < inventory.getContainerSize(); i++) {
@@ -147,8 +164,8 @@ public final class ForgeRules {
     }
 
     public static boolean affordable(Player player, Cost cost, Item shard) {
-        return player.isCreative() || (count(player.getInventory(), shard) >= cost.shards()
-                && count(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get()) >= cost.crystals());
+        return player.isCreative() || (count(player, shard) >= cost.shards()
+                && count(player, ModItems.RESONANCE_CRYSTAL.get()) >= cost.crystals());
     }
 
     // 強化する。できたら true
@@ -163,8 +180,8 @@ public final class ForgeRules {
             return false;
         }
         if (!player.isCreative()) {
-            remove(player.getInventory(), shard, cost.shards());
-            remove(player.getInventory(), ModItems.RESONANCE_CRYSTAL.get(), cost.crystals());
+            remove(player, shard, cost.shards());
+            remove(player, ModItems.RESONANCE_CRYSTAL.get(), cost.crystals());
         }
         stack.set(ModDataComponents.ENHANCE.get(), level + 1);
         return true;

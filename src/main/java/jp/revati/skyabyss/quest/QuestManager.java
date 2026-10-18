@@ -69,8 +69,26 @@ public final class QuestManager extends SimpleJsonResourceReloadListener {
                 errors.add(location + ": " + e.getMessage());
             }
         });
+        jp.revati.skyabyss.guide.PrepQuests.validate(loaded, errors);
+        jp.revati.skyabyss.guide.ChapterXpBudget.validate(loaded.values(), errors);
         set(loaded, errors);
         SkyAbyss.LOGGER.info("[quest] loaded {} quests", loaded.size());
+    }
+
+    // 自己テスト用: 定義を一時的に足す (同じ ID は置き換える)。戻すときは返した Runnable を呼ぶ
+    public static Runnable addTemporary(List<QuestDef> extra) {
+        Map<String, QuestDef> before = quests;
+        List<String> errorsBefore = loadErrors;
+        Map<String, QuestDef> merged = new LinkedHashMap<>(before);
+        extra.forEach(d -> merged.put(d.id(), d));
+        set(merged, List.of());
+        return () -> {
+            quests = before;
+            List<QuestDef> list = new ArrayList<>(before.values());
+            list.sort(Comparator.comparing((QuestDef q) -> !q.main()).thenComparingInt(QuestDef::order).thenComparing(QuestDef::id));
+            ordered = List.copyOf(list);
+            loadErrors = errorsBefore;
+        };
     }
 
     static void set(Map<String, QuestDef> loaded, List<String> errors) {

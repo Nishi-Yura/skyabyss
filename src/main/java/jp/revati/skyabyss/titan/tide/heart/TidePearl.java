@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.combat.Telegraph;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -20,16 +21,22 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-// 真珠の脈 (潮殻の心臓の段階2 の技) の真珠。狙った人をゆっくり追い (人の歩きより遅い)、触れると傷 8。
-// 叩けば消える。8 秒で消える。壁と島はすり抜ける (部屋の中だけで使う)。保存しない
+// 真珠の脈 (潮殻の心臓の段階2 の技) の真珠。狙った人をゆっくり追う (人の歩きより遅い)。触れても傷にならない。
+// 触れたとき・追いつづけて 5 秒たったときに止まり、足もとに予告の円 (半径 2.2、1 秒。Telegraph) が出て、その円の中の人に傷 9 で弾ける。
+// 叩けば消える (予告も取り消す)。壁と島はすり抜ける (部屋の中だけで使う)。保存しない
 public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabyss.titan.group.GroupOwned {
     public static final double SPEED = 0.18;
-    public static final int LIFE = 160;
+    // 追う長さ (止まって予告の円を出すまで)
+    public static final int LIFE = TideHeart.PEARL_CHASE;
 
     @Nullable
     private UUID targetId;
     @Nullable
     private UUID heartId;
+    // 止まって予告の円を出した tick (-1 = まだ追っている) と、その予告
+    private int lockedAt = -1;
+    @Nullable
+    private Telegraph burst;
 
     public TidePearl(EntityType<? extends TidePearl> type, Level level) {
         super(type, level);
@@ -83,9 +90,23 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
             }
             return;
         }
-        ServerPlayer target = targetId == null ? null : server.getServer().getPlayerList().getPlayer(targetId);
-        if (tickCount > LIFE || target == null || !target.isAlive() || target.level() != level()) {
+        if (lockedAt >= 0) {
+            // 止まっている: 予告の円が満ちたら弾ける (傷は予告の円が出す)
+            setDeltaMovement(Vec3.ZERO);
+            if (tickCount - lockedAt >= TideHeart.PEARL_WARN + 1) {
+                pop(server);
+            } else if (tickCount % 3 == 0) {
+                server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.3, getZ(), 2, 0.25, 0.25, 0.25, 0.01);
+            }
+            return;
+        }
+        ServerPlayer target = targetId == null ? null : (server.getPlayerByUUID(targetId) instanceof ServerPlayer sp ? sp : null);
+        if (target == null || !target.isAlive() || target.level() != level()) {
             pop(server);
+            return;
+        }
+        if (tickCount > LIFE) {
+            lock(server);
             return;
         }
         Vec3 to = target.position().add(0, 1.0, 0).subtract(position());
@@ -93,12 +114,26 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
         Vec3 step = d < 1e-3 ? Vec3.ZERO : to.scale(Math.min(SPEED, d) / d);
         setPos(getX() + step.x, getY() + step.y, getZ() + step.z);
         setDeltaMovement(step);
+        // 触れても傷にならない。止まって、足もとに円の予告が出る
         if (getBoundingBox().inflate(0.3).intersects(target.getBoundingBox())) {
-            Entity heart = heartId == null ? null : server.getEntity(heartId);
-            DamageSource source = heart instanceof TideHeart h ? h.attackSource() : damageSources().magic();
-            target.hurt(source, TideHeart.PEARL_DAMAGE);
-            pop(server);
+            lock(server);
         }
+    }
+
+    // 止まる。心臓が足もとに予告の円を出す (心臓がもういなければ消える)
+    private void lock(ServerLevel server) {
+        Entity heart = heartId == null ? null : server.getEntity(heartId);
+        if (!(heart instanceof TideHeart h) || !h.isAlive()) {
+            pop(server);
+            return;
+        }
+        lockedAt = tickCount;
+        burst = h.pearlBurst(server, getX(), getZ());
+        server.playSound(null, getX(), getY(), getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 1.4f, 1.3f);
+    }
+
+    public boolean isLocked() {
+        return lockedAt >= 0;
     }
 
     private void pop(ServerLevel server) {
@@ -111,6 +146,9 @@ public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabys
     public boolean hurt(DamageSource source, float amount) {
         if (isInvulnerableTo(source) || !(level() instanceof ServerLevel server)) {
             return false;
+        }
+        if (burst != null) {
+            burst.cancel();
         }
         pop(server);
         return true;
