@@ -96,9 +96,8 @@ def main(save=True):
     canvas = Image.new("RGB", (W, 3600), (16, 14, 18))
     d = ImageDraw.Draw(canvas)
     d.text((28, 14), "余燼の心臓 (ember_heart) — 低ポリ非立方体 + ドット絵テクスチャ 3 案", font=F(26), fill=WH)
-    d.text((28, 50), "骨の名前・pivot は今の geo (段階 1/2/3 で別。親なし・pivot (0,16,0)・休めの回転なし) と同じ。三角形 ≤ 2,000 / 段階。
-"
-                     "テクスチャは 1 ブロック = 32 テクセル・最近傍・限られた色。今の箱のモデルは同じ縮尺・同じ角度で並べる。", font=F(15), fill=GR)
+    d.text((28, 50), "骨の名前・pivot は今の geo (段階 1/2/3 で別。親なし・pivot (0,16,0)・休めの回転なし) と同じ。三角形 ≤ 2,000 / 段階。", font=F(15), fill=GR)
+    d.text((28, 72), "テクスチャは 1 ブロック = 32 テクセル・最近傍・限られた色。今の箱のモデルは同じ縮尺・同じ角度で並べる。", font=F(15), fill=GR)
 
     def frame(x, y, w, h):
         d.rectangle([x - 1, y - 1, x + w, y + h], outline=(66, 56, 60))
@@ -106,7 +105,7 @@ def main(save=True):
     cols, PW, gap, x0 = 4, 380, 14, 20
     colx = lambda i: x0 + i * (PW + gap)
     names = ["今 (箱のモデル)"] + [DESC[o["id"]][0] for o in OPTS]
-    y = 90
+    y = 106
     for title, yaw, ph, cen_, sc_, PH_, pitch in (
             ("前 3/4 (段階 1)", YAW_F, 1, (0, 15.5, 0), 13.0, 400, 12),
             ("後ろ 3/4 (段階 1)", YAW_B, 1, (0, 15.5, 0), 13.0, 400, 12),
