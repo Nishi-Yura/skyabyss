@@ -199,11 +199,22 @@ public final class StormHeartBattle {
         public boolean asleep(ServerLevel level) {
             return level.getDifficulty() == Difficulty.PEACEFUL;
         }
+
+        @Override
+        public boolean defeated(ServerLevel level, UUID group) {
+            var record = jp.revati.skyabyss.titan.group.BackGroupData.get(level).peek(group);
+            return record != null && record.isHeartDefeated();
+        }
     };
 
     // home() が心臓を探す level (tick の間だけ)
     @Nullable
     private static ServerLevel currentLevel;
+
+    // 心臓の間の部屋の仕組み (自己テストが、倒したあとに湧き直さないことを確かめる)
+    public static GroupBossRoom.Host host() {
+        return HOST;
+    }
 
     static List<ServerPlayer> playersIn(ServerLevel level, AABB box) {
         return level.getEntitiesOfClass(ServerPlayer.class, box, p -> p.isAlive() && !p.isSpectator());

@@ -75,6 +75,12 @@ public final class GroupBossRoom {
 
         // いま戦いを始められないか (ピースフルなど)
         boolean asleep(ServerLevel level);
+
+        // このグループはもうこの部屋のボスを倒したか。倒していれば、人が部屋に残っていても (運び出しの前や、光の柱を待つあいだ)
+        // 新しく集合・湧かせ直しをしない (倒したあとに心臓がまた出て、ボスゲージだけ残る不具合の元だった)。試練が戻って記録が消えれば、また始められる
+        default boolean defeated(ServerLevel level, UUID group) {
+            return false;
+        }
     }
 
     // 戦っている部屋 (プレイヤーの死を知らせるため)
@@ -147,7 +153,7 @@ public final class GroupBossRoom {
                 cooldown -= STEP;
                 return;
             }
-            if (host.asleep(level)) {
+            if (host.asleep(level) || host.defeated(level, group)) {
                 gather = -1;
                 return;
             }

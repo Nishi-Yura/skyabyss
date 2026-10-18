@@ -1,10 +1,12 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 // 四つの心臓 (岩鯨・潮殻・雷翼・余燼) の共通部分: 登場と倒れる演出、高さの固定。
 //
@@ -24,6 +27,7 @@ import net.neoforged.neoforge.common.NeoForge;
 //   - HeartCinematicEvent (NeoForge.EVENT_BUS。サーバー側で 登場の始まり/終わり、倒れる始まり/終わり を知らせる)
 //   - cinematicStage() / cinematicTicks() / cinematicProgress() / focusPoint() (両側で読める。登場の最中は同期データで届く)
 // アニメーションは tools/install_heart_cinematics.py が書く (長さは INTRO_TICKS・DEATH_TICKS と合わせる)。
+@net.neoforged.fml.common.EventBusSubscriber(modid = SkyAbyss.MODID)
 public abstract class HeartBoss extends GuardMob {
     public static final int INTRO_TICKS = 80;
     public static final int DEATH_TICKS = 100;
@@ -39,6 +43,72 @@ public abstract class HeartBoss extends GuardMob {
     private boolean deathStarted;
     // 高さの固定 (自分で高さを変える心臓 = 雷翼の段階 2 以外)。最初のサーバー tick の高さを覚える
     private double homeY = Double.NaN;
+
+    // いま世界にいる心臓 (サーバー側)。人が別のディメンションへ運ばれたとき・切断したときに、ボスゲージを確実に外すための一覧。
+    // 心臓の部屋が空 (人が運び出された) になると、心臓は tick されず、自分では外せない
+    private static final java.util.Set<HeartBoss> LIVE = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
+    // 各心臓のボスゲージ
+    protected abstract net.minecraft.server.level.ServerBossEvent heartBar();
+
+    // この人をボスゲージの見ている人から外す
+    protected final void dropViewer(ServerPlayer player) {
+        heartBar().removePlayer(player);
+    }
+
+    // ボスゲージを見ている人 (自己テスト用)
+    public final java.util.Collection<ServerPlayer> barViewers() {
+        return heartBar().getPlayers();
+    }
+
+    // ボスゲージを見せる (自己テスト用)
+    public final void showBarTo(ServerPlayer player) {
+        heartBar().addPlayer(player);
+    }
+
+    // 人が別のディメンションへ移った・切断した・復活した: どの心臓のボスゲージからも外す
+    private static void dropFromAll(ServerPlayer player) {
+        for (HeartBoss heart : java.util.List.copyOf(LIVE)) {
+            heart.dropViewer(player);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            dropFromAll(player);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            dropFromAll(player);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            dropFromAll(player);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        LIVE.clear();
+    }
+
+    // 自己テスト用: いま登録されている心臓の数
+    public static int liveCount() {
+        return LIVE.size();
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        LIVE.remove(this);
+        super.remove(reason);
+    }
 
     protected HeartBoss(EntityType<? extends Monster> type, Level level, String animPrefix, String... actions) {
         super(type, level, animPrefix, withCinematic(actions));
@@ -140,6 +210,9 @@ public abstract class HeartBoss extends GuardMob {
             introTicks++;
         }
         if (level() instanceof ServerLevel server) {
+            if (!isRemoved()) {
+                LIVE.add(this);
+            }
             if (!isNoGravity()) {
                 // /summon の NBT 読み込みは無重力の印を消すので、毎 tick 付け直す (浮いたまま落ちない)
                 setNoGravity(true);
