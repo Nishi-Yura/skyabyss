@@ -41,6 +41,22 @@ public final class PartyData extends SavedData {
         }
     }
 
+    // 組む・入る・抜ける・解散を知らせる (巨神の背中の、グループごとの進みを引き継ぐ。titan.group.GroupEvents)
+    public interface Listener {
+        void created(UUID partyId, UUID leader);
+
+        void joined(UUID partyId, UUID player);
+
+        // player が抜けた (解散なら null)。dissolved は、残りが一人になって解散した/解散で一人に戻った人たち
+        void left(UUID partyId, @Nullable UUID player, List<UUID> dissolved);
+    }
+
+    private static Listener listener;
+
+    public static void setListener(Listener l) {
+        listener = l;
+    }
+
     private final Map<UUID, Party> parties = new LinkedHashMap<>();
     private final Map<UUID, Party> byMember = new HashMap<>();
 
@@ -61,6 +77,9 @@ public final class PartyData extends SavedData {
         Party p = new Party(UUID.randomUUID());
         parties.put(p.id, p);
         add(p, leader, name);
+        if (listener != null) {
+            listener.created(p.id, leader);
+        }
         return p;
     }
 
@@ -69,6 +88,9 @@ public final class PartyData extends SavedData {
         p.names.put(player, name);
         byMember.put(player, p);
         setDirty();
+        if (listener != null && p.members.size() > 1) {
+            listener.joined(p.id, player);
+        }
     }
 
     // 抜ける。残りが一人になったら解散する。抜けたのがリーダーなら次の人がリーダー
@@ -79,21 +101,30 @@ public final class PartyData extends SavedData {
         }
         p.members.remove(player);
         p.names.remove(player);
+        List<UUID> dissolved = new ArrayList<>();
         if (p.members.size() <= 1) {
             for (UUID m : p.members) {
                 byMember.remove(m);
+                dissolved.add(m);
             }
             parties.remove(p.id);
         }
         setDirty();
+        if (listener != null) {
+            listener.left(p.id, player, dissolved);
+        }
     }
 
     public void disband(Party p) {
+        List<UUID> members = new ArrayList<>(p.members);
         for (UUID m : p.members) {
             byMember.remove(m);
         }
         parties.remove(p.id);
         setDirty();
+        if (listener != null) {
+            listener.left(p.id, null, members);
+        }
     }
 
     public void promote(Party p, UUID player) {

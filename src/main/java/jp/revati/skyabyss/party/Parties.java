@@ -14,6 +14,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.titan.TitanBacks;
+import jp.revati.skyabyss.titan.group.Activity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,7 +28,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 // パーティの操作 (コマンドと画面の両方から) と、経験値を分ける相手の選び方 (10 の 6 章)。
-// - 最大 4 人。リーダーが招待し、招待は 60 秒で切れる
+// - 最大 6 人。リーダーが招待し、招待は 60 秒で切れる
 // - 居合わせなかった仲間への分け前: 居合わせた人の取り分の skyabyssPartyShare % (既定 70、50〜80 に収める)
 //   ・同じディメンションで、居合わせた仲間の誰かから 64 ブロック以内
 //   ・巨神の背中 (ダンジョン) の中では、同じ背中にいれば距離を問わない
@@ -35,8 +36,10 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 //   ・倒れている人・観戦者には分けない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class Parties {
-    public static final int MAX_MEMBERS = 4;
+    public static final int MAX_MEMBERS = 6;
     public static final double SHARE_RANGE = 64;
+    // 背中の中で、放置していても分け前を受け取れる、居合わせた仲間からの距離
+    public static final double BACK_SHARE_RANGE = 128;
     public static final int LEVEL_GAP = 10;
     public static final int SHARE_MIN = 50;
     public static final int SHARE_MAX = 80;
@@ -122,7 +125,11 @@ public final class Parties {
                 if (top - Growth.get(m).level > LEVEL_GAP) {
                     continue;
                 }
-                if (TitanBacks.isBack(level.dimension()) || near(m, here)) {
+                // 背中 (ダンジョン) の中では距離を問わないが、放置の仲間には渡さない (10 の 6.2):
+                // 直近 60 秒に動いた・戦った人か、居合わせた仲間から 128 ブロック以内の人だけ
+                boolean sameBack = TitanBacks.isBack(level.dimension())
+                        && (Activity.active(m, Activity.SHARE_TICKS) || near(m, here, BACK_SHARE_RANGE));
+                if (sameBack || near(m, here, SHARE_RANGE)) {
                     out.add(m);
                 }
             }
@@ -130,9 +137,9 @@ public final class Parties {
         return out;
     }
 
-    private static boolean near(ServerPlayer m, List<ServerPlayer> here) {
+    private static boolean near(ServerPlayer m, List<ServerPlayer> here, double range) {
         for (ServerPlayer q : here) {
-            if (q.level() == m.level() && q.distanceToSqr(m) <= SHARE_RANGE * SHARE_RANGE) {
+            if (q.level() == m.level() && q.distanceToSqr(m) <= range * range) {
                 return true;
             }
         }

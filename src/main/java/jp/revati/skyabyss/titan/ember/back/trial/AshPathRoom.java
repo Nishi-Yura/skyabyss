@@ -37,6 +37,7 @@ public final class AshPathRoom {
 
     // 湖を建て直す (建てるときとリセットのとき)。溶岩・島・灰溜まりを置き、湖の上の空気を空ける
     public static void buildLake(ServerLevel level, int pattern) {
+        AshPath.lakeBuilt(pattern);
         RoomKit k = new RoomKit(level, "west");
         int floor = EmberBackLayout.FLOOR_WEST;
         int x1 = AshPath.LAKE_X1;

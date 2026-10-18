@@ -4,6 +4,7 @@ import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -12,7 +13,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormTravel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -25,6 +27,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 雷翼の背のテスト用コマンド (OP)。12 の 12章:
+// グループ: reset・sleep は打った人のグループ (コンソールなら記録のあるすべてのグループ)、ring・raiju・mirrors・status は打った人のグループ
 // /skyabyss titan reset storm                        : 試練だけ戻す
 // /skyabyss titan storm <calm|storm|cycle>           : 拍を凪・嵐に止める / 拍に戻す
 // /skyabyss titan sleep storm <west|east|front|none> : 眠る試練を決めて、試練を戻す
@@ -118,13 +121,24 @@ public final class StormBackCommands {
         return 1;
     }
 
+    // コマンドを打った人のグループ (コンソールなら null = 記録のあるすべてのグループ)
+    @org.jetbrains.annotations.Nullable
+    private static UUID group(CommandContext<CommandSourceStack> ctx) {
+        return ctx.getSource().getEntity() instanceof ServerPlayer p ? Groups.keyOf(p) : null;
+    }
+
     private static int reset(CommandContext<CommandSourceStack> ctx) {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        StormBackTrials.reset(back, true);
-        ctx.getSource().sendSuccess(() -> Component.literal("storm back trials reset"), true);
+        UUID g = group(ctx);
+        if (g == null) {
+            StormBackTrials.resetAll(back, true, null, false);
+        } else {
+            StormBackTrials.resetGroup(back, g, true, null, false, true);
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(g == null ? "storm back trials reset (all groups)" : "storm back trials reset (your group)"), true);
         return 1;
     }
 
@@ -134,7 +148,12 @@ public final class StormBackCommands {
             return 0;
         }
         StormBackState.Trial trial = StormBackState.Trial.byId(t);
-        StormBackTrials.reset(back, true, trial, trial == null);
+        UUID g = group(ctx);
+        if (g == null) {
+            StormBackTrials.resetAll(back, true, trial, trial == null);
+        } else {
+            StormBackTrials.resetGroup(back, g, true, trial, trial == null, true);
+        }
         ctx.getSource().sendSuccess(() -> Component.literal("storm back sleeping: " + t), true);
         return 1;
     }
@@ -151,52 +170,59 @@ public final class StormBackCommands {
         return 1;
     }
 
-    private static int ring(CommandContext<CommandSourceStack> ctx, StormBackState.Trial t) {
+    private static int ring(CommandContext<CommandSourceStack> ctx, StormBackState.Trial t) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        StormBackTrials.ring(back, StormBackState.get(back), t, null);
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        StormBackTrials.ring(back, StormProgress.of(back, p), t, null);
         return 1;
     }
 
-    private static int raiju(CommandContext<CommandSourceStack> ctx) {
+    private static int raiju(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        StormBackTrials.onRaijuDefeated(back);
-        ctx.getSource().sendSuccess(() -> Component.literal("raiju marked defeated"), true);
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        StormBackTrials.onRaijuDefeated(back, Groups.keyOf(p));
+        ctx.getSource().sendSuccess(() -> Component.literal("raiju marked defeated (your group)"), true);
         return 1;
     }
 
-    private static int mirrors(CommandContext<CommandSourceStack> ctx) {
+    private static int mirrors(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
         int c = IntegerArgumentType.getInteger(ctx, "config");
-        StormBackState state = StormBackState.get(back);
-        state.setRoutes(state.westRoute(), c);
-        EyeMirrors.apply(back, state, false);
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        StormProgress progress = StormProgress.of(back, p);
+        progress.setMirrorConfig(c);
+        progress.setReceivers(0);
+        if (progress.group.equals(RoomLocks.owner(StormBackTrials.EYE_ROOM))) {
+            EyeMirrors.apply(back, progress);
+        }
+        StormBackTrials.syncGates(back, progress.group);
         ctx.getSource().sendSuccess(() -> Component.literal("mirror config " + c + " (min " + EyeMirrors.solve(EyeMirrors.CONFIGS.get(c)) + " moves)"), true);
         return 1;
     }
 
-    private static int status(CommandContext<CommandSourceStack> ctx) {
+    private static int status(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerLevel back = back(ctx);
         if (back == null) {
             return 0;
         }
-        StormBackState s = StormBackState.get(back);
-        TitanBackData d = TitanBackData.get(back);
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        StormProgress s = StormProgress.of(back, p);
         String msg = String.format("beat %s (%d left, strength %.2f) | stones %d/3 west %s east %s front %s | sleeping %s | west route %d | mirrors %d receivers %s"
-                + " | doors %s%s%s | raiju %s | keel %s | heart %s | epoch %d",
+                + " | doors %s%s%s | raiju %s | keel %s | heart %s | epoch %d | eye room %s | east room %s",
                 StormBackClock.phase(back).id(), StormBackClock.ticksLeft(back), StormBackClock.strength(back), s.rungCount(),
                 s.rung(StormBackState.Trial.WEST), s.rung(StormBackState.Trial.EAST), s.rung(StormBackState.Trial.FRONT),
-                s.sleeping() == null ? "none" : s.sleeping().id(), s.westRoute(), s.mirrorConfig(), Integer.toBinaryString(s.receivers()),
+                s.sleeping() == null ? "none" : s.sleeping().id(), StormBackState.get(back).westRoute(), s.mirrorConfig(), Integer.toBinaryString(s.receivers()),
                 s.eastDoorOpen(0) ? "1" : "0", s.eastDoorOpen(1) ? "1" : "0", s.eastDoorOpen(2) ? "1" : "0", s.raijuDefeated(), s.keelOpen(),
-                d.isHeartDefeated(), d.epoch());
+                s.heartDefeated(), s.epoch(), RoomLocks.owner(StormBackTrials.EYE_ROOM), RoomLocks.owner(StormBackTrials.EAST_ROOM));
         ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
         return 1;
     }

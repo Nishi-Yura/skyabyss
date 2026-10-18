@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
+import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.EnumSet;
@@ -264,7 +265,7 @@ public class CinderRoller extends EmberMob {
         Vec3 v = rollDir.scale(ROLL_SPEED);
         setDeltaMovement(v.x, getDeltaMovement().y, v.z);
         // 押し出し: 進む先の人に当たる
-        for (Player p : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(0.3), EmberMoth::targetable)) {
+        for (Player p : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(0.3), q -> EmberMoth.targetable(q) && GroupOwned.mayTarget(this, q))) {
             if (!hitSomeone) {
                 hitSomeone = true;
                 if (p.hurt(damageSources().mobAttack(this), (float) getAttributeValue(Attributes.ATTACK_DAMAGE))) {
@@ -312,7 +313,7 @@ public class CinderRoller extends EmberMob {
             }
         }
         for (Player p : server.players()) {
-            if (!EmberMoth.targetable(p) || trailHit.containsKey(p.getUUID()) || p.distanceToSqr(this) > 40 * 40) {
+            if (!EmberMoth.targetable(p) || !GroupOwned.mayTarget(this, p) || trailHit.containsKey(p.getUUID()) || p.distanceToSqr(this) > 40 * 40) {
                 continue;
             }
             if (onTrail(p.position())) {

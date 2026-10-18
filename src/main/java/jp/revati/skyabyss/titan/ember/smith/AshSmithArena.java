@@ -3,7 +3,10 @@ package jp.revati.skyabyss.titan.ember.smith;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.revati.skyabyss.registry.ModBlocks;
+import java.util.UUID;
+
+import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout.Box;
 import net.minecraft.core.BlockPos;
@@ -15,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 鍛え手の間 (13 の 5.2節、11.2節の担当 E)。部屋の箱は EmberBackLayout.SMITH (27 x 27、床 80、天井まで 14)。箱の中だけに置く。
 // 中身: 床の模様、四隅の壁 (円形の部屋にする)、焼き入れの槽 2 つ (水。縁の石 5 x 5)、灰溜まり 4 つ (灰色の羊毛 3 x 3)、柱 4 本、
-// 奥の炉の扉 (怒りで開く。灰被りが 2 体出る)。入口 (鍛えの間からの扉 SMITH_DOOR) は戦いのあいだ封じる (BossRoom)。
+// 奥の炉の扉 (怒りで開く。灰被りが 2 体出る)。入口 (鍛えの間からの扉 SMITH_DOOR) は戦いのあいだ、戦うグループにだけ封じる (GroupBossRoom・GroupGates)。
 // 取っておく場所 (EmberBackLayout.reserved("smith")) には置かない。何度呼ばれても同じ物になる (build は箱の中を全部置き直す)
 public final class AshSmithArena {
     public static final Box BOX = EmberBackLayout.SMITH;
@@ -218,22 +221,25 @@ public final class AshSmithArena {
     }
 
     // ---------------------------------------------------------------- 入口 (鍛えの間からの扉)
-    public static void seal(ServerLevel level) {
-        BlockState gate = ModBlocks.SEALED_GATE.get().defaultBlockState();
-        for (BlockPos p : BlockPos.betweenClosed(DOOR.min(), DOOR.max())) {
-            level.setBlock(p, gate, 3);
-        }
+    // 入口はいつも置いてある扉 (閉じた既定。火の鍵で開けたグループにだけ開いている)。戦いのあいだは戦うグループにも閉じ、終われば開け直す
+    public static void seal(ServerLevel level, UUID group) {
+        List<BlockPos> door = EmberBackTrials.boxBlocks(DOOR);
+        GroupGates.place(level, door, false);
+        GroupGates.seal(level, group, door);
     }
 
-    public static void open(ServerLevel level) {
-        for (BlockPos p : BlockPos.betweenClosed(DOOR.min(), DOOR.max())) {
-            if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-            }
-        }
+    public static void open(ServerLevel level, UUID group) {
+        GroupGates.open(level, group, EmberBackTrials.boxBlocks(DOOR));
     }
 
+    // そのグループにとって入口が閉じているか
+    public static boolean sealed(ServerLevel level, UUID group) {
+        return !GroupGates.isOpen(level, group, new BlockPos((DOOR.minX() + DOOR.maxX()) / 2, DOOR.minY() + 1, DOOR.minZ()));
+    }
+
+    // 最後に戦ったグループにとって (コマンドと自己テスト)
     public static boolean sealed(ServerLevel level) {
-        return level.getBlockState(new BlockPos((DOOR.minX() + DOOR.maxX()) / 2, DOOR.minY() + 1, DOOR.minZ())).is(ModBlocks.SEALED_GATE.get());
+        UUID g = AshSmithBattle.lastGroup();
+        return g != null && sealed(level, g);
     }
 }

@@ -422,8 +422,9 @@ public class TideBeckoner extends TideMob {
         return position().add(look.x * 1.6, 1.4, look.z * 1.6);
     }
 
+    // 技の音は、潮招きのグループの人にだけ (GuardMob.playSound → GroupOwned.playToGroup)
     private void sound(ServerLevel server, SoundEvent sound, float volume, float pitch) {
-        server.playSound(null, getX(), getY(), getZ(), sound, SoundSource.HOSTILE, volume, pitch);
+        playSound(sound, volume, pitch);
     }
 
     // ---------------------------------------------------------------- 傷
@@ -468,10 +469,11 @@ public class TideBeckoner extends TideMob {
         super.remove(reason);
     }
 
+    // ボスバーは、近くにいる潮招きのグループの人にだけ
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (p.distanceToSqr(this) < 48 * 48 && isAlive()) {
+            if (p.distanceToSqr(this) < 48 * 48 && isAlive() && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }
         }

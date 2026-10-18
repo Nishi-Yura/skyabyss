@@ -43,7 +43,10 @@ public final class AshSmithCommands {
         event.getDispatcher().register(op(SkyAbyss.MODID).then(op("smith")
                 .then(op("go").executes(AshSmithCommands::go))
                 .then(op("start").executes(ctx -> {
-                    boolean ok = AshSmithBattle.startNow(ctx.getSource().getServer());
+                    ServerLevel back = AshSmithBattle.level(ctx.getSource().getServer());
+                    boolean ok = back != null && ctx.getSource().getPlayer() != null
+                            ? AshSmithBattle.startNow(back, jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.getSource().getPlayer()))
+                            : AshSmithBattle.startNow(ctx.getSource().getServer());
                     ctx.getSource().sendSuccess(() -> Component.literal(ok ? "smith: started" : "smith: already active or failed"), true);
                     return ok ? 1 : 0;
                 }))

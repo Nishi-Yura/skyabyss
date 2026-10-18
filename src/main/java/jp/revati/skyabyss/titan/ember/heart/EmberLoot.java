@@ -259,7 +259,7 @@ public final class EmberLoot {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
                 Notice.alert(player, fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", TitanLoot.itemLink(shown));
                 for (ServerPlayer other : level.players()) {
-                    if (other != player) {
+                    if (other != player && !jp.revati.skyabyss.titan.group.Groups.differ(other, player)) {
                         Notice.unlock(other, "message.skyabyss.legendary_other", player.getDisplayName(), TitanLoot.itemLink(shown));
                     }
                 }

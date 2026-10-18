@@ -16,6 +16,15 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
 import jp.revati.skyabyss.titan.storm.back.StormStrike;
+import jp.revati.skyabyss.titan.storm.back.StormTestPlayer;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.GroupOwned;
+import jp.revati.skyabyss.titan.group.Groups;
+import jp.revati.skyabyss.titan.group.RoomLocks;
+import jp.revati.skyabyss.registry.ModBlocks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -164,7 +173,8 @@ public final class RaijuSelfTest {
     }
 
     private static void checkNest(RaijuNest.Site site, List<String> failures) {
-        RaijuBattle.abandon(site.level().getServer());
+        RaijuBattle.abandonAll(site.level().getServer());
+        RoomLocks.release(RaijuBattle.ROOM);
         ServerLevel level = site.level();
         check(level.dimension() == RaijuNest.STORM_BACK, "the nest is not in the storm back (" + level.dimension().location() + ")", failures);
         check(site.center().equals(StormBackLayout.RAIJU_NEST), "the nest is not at StormBackLayout.RAIJU_NEST", failures);
@@ -201,13 +211,14 @@ public final class RaijuSelfTest {
         check(!level.getBlockState(new BlockPos(c.getX(), site.ceiling() + 1, c.getZ())).isAir(), "nest has no ceiling", failures);
         check(!level.getBlockState(c.offset(2, 0, 2)).isAir(), "nest has no floor", failures);
         check(site.ceiling() - c.getY() == 15, "nest height should be 15 (" + (site.ceiling() - c.getY()) + ")", failures);
-        // 入口: 開いているときは空気、封じる面のまわりは壁 (封じると回廊がふさがる)
+        // 入口: 開いた封印の扉のブロック (どのグループにも開いている)、封じる面のまわりは壁 (封じると回廊がふさがる)
         int minY = Integer.MAX_VALUE;
         int maxY = Integer.MIN_VALUE;
         int minZ = Integer.MAX_VALUE;
         int maxZ = Integer.MIN_VALUE;
         for (BlockPos g : site.gate()) {
-            check(level.getBlockState(g).isAir(), "entrance closed at " + g, failures);
+            check(level.getBlockState(g).is(ModBlocks.SEALED_GATE.get()) && GroupGates.isOpen(level, GROUP_A, g)
+                    && level.getBlockState(g).getCollisionShape(level, g).isEmpty(), "entrance is not an open gate at " + g, failures);
             minY = Math.min(minY, g.getY());
             maxY = Math.max(maxY, g.getY());
             minZ = Math.min(minZ, g.getZ());
@@ -245,14 +256,18 @@ public final class RaijuSelfTest {
         check(RaijuNest.rodIndexOfPlug(site, site.plug(i)) == i, "the plug of rod " + i + " is not found by its position", failures);
     }
 
+    // 自己テストのグループ (合成の鍵。一人のグループ = 人の UUID)
+    static final UUID GROUP_A = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005ba001");
+    static final UUID GROUP_B = UUID.fromString("5c1e0a2b-0000-4000-8000-0000005bb002");
+
     private static Raiju startRaiju(MinecraftServer server, List<String> failures) {
-        RaijuBattle.reawaken(server);
-        check(RaijuBattle.startNow(server), "battle did not start", failures);
-        Raiju r = RaijuBattle.current(server);
+        RaijuBattle.reawaken(server, GROUP_A);
+        check(RaijuBattle.startNow(server, GROUP_A), "battle did not start", failures);
+        Raiju r = RaijuBattle.current(server, GROUP_A);
         if (r == null) {
             RaijuNest.Site site = RaijuNest.site(server);
             failures.add("no raiju after starting (difficulty " + site.level().getDifficulty() + ", raiju nearby "
-                    + site.level().getEntitiesOfClass(Raiju.class, site.arena().inflate(8)).size() + ", boss id " + RaijuBattle.room().bossId()
+                    + site.level().getEntitiesOfClass(Raiju.class, site.arena().inflate(8)).size() + ", boss id " + RaijuBattle.room(GROUP_A).bossId()
                     + ", entity ticking " + site.level().isPositionEntityTicking(site.rodTop(0)) + ")");
         }
         return r;
@@ -269,11 +284,13 @@ public final class RaijuSelfTest {
         if (r == null) {
             return;
         }
-        check(RaijuNest.sealed(site), "entrance not sealed when the fight starts", failures);
+        check(RaijuNest.sealed(site, GROUP_A), "entrance not sealed when the fight starts", failures);
+        check(!RaijuNest.sealed(site, GROUP_B), "entrance sealed for another group", failures);
         check(r.getTags().contains(TitanBackTrials.HEART_TAG) && r.getTags().contains(Raiju.TRIAL_TAG), "raiju not tagged", failures);
         check(!r.shouldBeSaved(), "raiju would be saved to disk", failures);
         check(Math.abs(r.getMaxHealth() - Raiju.HEALTH) < 0.01, "max health is " + r.getMaxHealth(), failures);
         check(Math.abs(Raiju.scaleFor(1) - 1f) < 1e-4 && Math.abs(Raiju.scaleFor(3) - 2.2f) < 1e-4, "challenger scale is wrong", failures);
+        check(Math.abs(Raiju.scaleFor(6) - 4f) < 1e-4, "party of 6 scale should be 4.0", failures);
         check(Math.abs(Raiju.takenFor(10, 2f, true) - 7.5f) < 1e-4 && Math.abs(Raiju.takenFor(10, 1f, false) - 10f) < 1e-4, "damage taken is wrong", failures);
         check(r.mode() == Raiju.MODE_PERCH && r.rod() == 0, "raiju did not start on rod 1 (mode " + r.mode() + ", rod " + r.rod() + ")", failures);
         check(r.isNoGravity(), "perched raiju falls", failures);
@@ -312,25 +329,68 @@ public final class RaijuSelfTest {
         }
         check(failed.isEmpty(), "moves did not finish: " + failed, failures);
         check(r.roared() && r.isAngry(), "roar did not make the raiju angry", failures);
+        checkGroups(site, r, failures, notes);
         notes.add(ran + "/" + (Raiju.Action.values().length - 1) + " moves ran to the end");
         // 巣の外へ出た雷獣は戻る。誰もいなければ 3 秒で放棄
         RaijuBattle.Host host = RaijuBattle.host(server);
         r.forceAction(Raiju.Action.CLAW);
         tick(r, Raiju.CLAW_TICKS + 2);
         r.moveTo(site.home().x + 30, site.floor(), site.home().z);
-        RaijuBattle.room().tick(site.level(), host);
+        RaijuBattle.room(GROUP_A).tick(site.level(), host);
         check(r.distanceToSqr(site.home()) < 1, "raiju outside the nest was not brought back", failures);
         for (int i = 0; i < 6; i++) {
-            RaijuBattle.room().tick(site.level(), host);
+            RaijuBattle.room(GROUP_A).tick(site.level(), host);
         }
-        check(!RaijuBattle.room().active() && !r.isAlive() && !RaijuNest.sealed(site), "empty nest was not abandoned", failures);
+        check(!RaijuBattle.room(GROUP_A).active() && !r.isAlive() && !RaijuNest.sealed(site, GROUP_A), "empty nest was not abandoned", failures);
         // 体力 50% を切ると咆哮 (自動)
         Raiju r2 = startRaiju(server, failures);
         if (r2 != null) {
             r2.setHealth(r2.getMaxHealth() * 0.45f);
             tick(r2, 2);
             check(r2.currentAction() == Raiju.Action.ROAR, "no roar below 50% (" + r2.currentAction() + ")", failures);
-            RaijuBattle.abandon(server);
+            RaijuBattle.abandon(server, GROUP_A);
+        }
+    }
+
+    // グループ: A の雷獣と雷蛾は A のもの。B には見えず、B を狙わず、B の傷は届かない。巣の中の B は戦う人に数えない
+    private static void checkGroups(RaijuNest.Site site, Raiju r, List<String> failures, List<String> notes) {
+        ServerLevel level = site.level();
+        StormTestPlayer pa = StormTestPlayer.make(level, GROUP_A, "[raiju_a]");
+        StormTestPlayer pb = StormTestPlayer.make(level, GROUP_B, "[raiju_b]");
+        check(GROUP_A.equals(r.groupId()), "the raiju does not belong to the group that woke it (" + r.groupId() + ")", failures);
+        check(GroupOwned.visibleTo(r, pa) && !GroupOwned.visibleTo(r, pb), "the raiju is shown to another group", failures);
+        check(r.canAttack(pa) && !r.canAttack(pb), "the raiju may target another group", failures);
+        var aHit = new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(r,
+                new net.neoforged.neoforge.common.damagesource.DamageContainer(r.damageSources().playerAttack(pa), 4f));
+        var bHit = new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(r,
+                new net.neoforged.neoforge.common.damagesource.DamageContainer(r.damageSources().playerAttack(pb), 4f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(aHit);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(bHit);
+        check(!aHit.isCanceled() && bHit.isCanceled(), "damage from another group should not reach the raiju", failures);
+        // 咆哮で湧いた雷蛾も A のもの
+        List<Entity> moths = level.getEntities((Entity) null, site.arena().inflate(6),
+                e -> e.getTags().contains(Raiju.TRIAL_TAG) && !(e instanceof Raiju));
+        int mine = 0;
+        for (Entity m : moths) {
+            if (m instanceof GroupOwned owned) {
+                check(GROUP_A.equals(owned.groupId()), "a moth from the raiju's roar does not belong to group A", failures);
+                check(!GroupOwned.visibleTo(m, pb), "a moth from the raiju's roar is shown to group B", failures);
+                mine++;
+            }
+        }
+        notes.add(mine + " roar moths owned by the group");
+        // 巣の中の人: A は戦う人、B は数えない
+        Vec3 in = site.home().add(3, 0, 0);
+        StormTestPlayer ja = StormTestPlayer.join(level, UUID.fromString("5c1e0a2b-0000-4000-8000-0000005ba101"), "[raiju_ja]", in);
+        StormTestPlayer jb = StormTestPlayer.join(level, UUID.fromString("5c1e0a2b-0000-4000-8000-0000005bb102"), "[raiju_jb]", in);
+        try {
+            r.setGroupId(Groups.keyOf(ja));
+            List<ServerPlayer> fighters = r.fighters(level);
+            check(fighters.contains(ja) && !fighters.contains(jb), "the raiju counts another group's player as a fighter", failures);
+        } finally {
+            r.setGroupId(GROUP_A);
+            ja.leave();
+            jb.leave();
         }
     }
 
@@ -384,9 +444,12 @@ public final class RaijuSelfTest {
         r.invulnerableTime = 0;
         r.hurt(r.damageSources().genericKill(), 1000f);
         check(!r.isAlive(), "raiju did not die", failures);
-        check(RaijuBattle.defeated(server), "defeat was not recorded", failures);
-        check(!RaijuBattle.room().active() && !RaijuNest.sealed(site), "entrance did not reopen after the defeat", failures);
-        RaijuBattle.reawaken(server);
-        check(!RaijuBattle.defeated(server), "reawaken did not reset the raiju", failures);
+        check(RaijuBattle.defeated(site.level(), GROUP_A), "defeat was not recorded", failures);
+        check(!RaijuBattle.defeated(site.level(), GROUP_B), "group A's defeat was recorded for group B", failures);
+        check(!RaijuBattle.room(GROUP_A).active() && !RaijuNest.sealed(site, GROUP_A), "entrance did not reopen after the defeat", failures);
+        RaijuBattle.reawaken(server, GROUP_A);
+        check(!RaijuBattle.defeated(site.level(), GROUP_A), "reawaken did not reset the raiju", failures);
+        BackGroupData.get(site.level()).remove(GROUP_A);
+        BackGroupData.get(site.level()).remove(GROUP_B);
     }
 }

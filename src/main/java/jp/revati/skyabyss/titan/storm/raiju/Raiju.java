@@ -165,6 +165,7 @@ public class Raiju extends GuardMob {
         railsLeft = RAILS_PER_PERCH;
     }
 
+    // 挑む人数の倍率 (上限なし。パーティの 6 人で 4.0)
     public static float scaleFor(int challengers) {
         return 1f + 0.6f * (Math.max(1, challengers) - 1);
     }
@@ -313,11 +314,11 @@ public class Raiju extends GuardMob {
         return best;
     }
 
-    // 戦っている人: 巣の中の人 (部屋に結びついていなければ 24 ブロック以内)
+    // 戦っている人: 巣の中の、この雷獣のグループの人 (部屋に結びついていなければ 24 ブロック以内。グループのない雷獣なら誰でも)
     public List<ServerPlayer> fighters(ServerLevel server) {
         List<ServerPlayer> out = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (!p.isAlive() || p.isSpectator() || p.isCreative()) {
+            if (!p.isAlive() || p.isSpectator() || p.isCreative() || !jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
                 continue;
             }
             if (site != null ? site.inside(p.position()) : p.distanceToSqr(this) < 24 * 24) {
@@ -688,6 +689,10 @@ public class Raiju extends GuardMob {
             moth.moveTo(at.x, (site != null ? site.floor() : getY()) + 3, at.z, random.nextFloat() * 360, 0);
             moth.addTag(TitanBackTrials.HEART_TAG);
             moth.addTag(TRIAL_TAG);
+            // 雷蛾も雷獣のグループのもの (ほかのグループには見えず、狙わない)
+            if (moth instanceof jp.revati.skyabyss.titan.group.GroupOwned owned) {
+                owned.setGroupId(groupId());
+            }
             server.addFreshEntity(moth);
         }
     }
@@ -900,7 +905,7 @@ public class Raiju extends GuardMob {
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
         for (ServerPlayer p : server.players()) {
-            if (isAlive() && p.distanceToSqr(this) < 48 * 48) {
+            if (isAlive() && p.distanceToSqr(this) < 48 * 48 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }
         }

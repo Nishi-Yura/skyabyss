@@ -230,6 +230,7 @@
   "commands.skyabyss.tideback.go": "Moved to %s",
   "commands.skyabyss.tideback.status": "Tide: %s (%s ticks left), stones %s/3, sleeping %s, garden route %s, tidewatch config %s, nests %s, beckoner %s, bottom %s",
   "commands.skyabyss.tideback.watch": "Tidewatch levels: lower %s / middle %s / upper %s (config %s)",
+  "commands.skyabyss.tideback.rooms": "Room owners: garden %s / tidewatch %s / flats %s / shell bottom %s (your group %s)",
   "commands.skyabyss.tideback.not_built": "The tide back is not built yet (/skyabyss titan board tide)",
   "growth.skyabyss.reason.tide_trial": "A chime stone rang",
   "message.skyabyss.whisper.tide_landing": "You stand on the titan's flipper. The great gate in the shell's flank leads inside",

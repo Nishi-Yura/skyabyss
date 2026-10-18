@@ -19,7 +19,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 // 岩鯨の背に棲む者たちの共通部分。
 // 動き (待機・歩き) は自動で切り替え、攻撃などの動作はサーバーから playAction で流す (全員の画面に同期される)
-public abstract class GuardMob extends Monster implements GeoEntity {
+public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.skyabyss.titan.group.GroupOwned {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final RawAnimation idle;
     private final RawAnimation walk;
@@ -35,6 +35,41 @@ public abstract class GuardMob extends Monster implements GeoEntity {
     }
 
     private final String animPrefix;
+
+    // どのグループ (パーティ・一人) の試練の敵か。null なら誰にでも見えて誰でも狙える。湧かせる側が addFreshEntity の前に入れる
+    @javax.annotation.Nullable
+    private java.util.UUID groupId;
+
+    @Override
+    @javax.annotation.Nullable
+    public java.util.UUID groupId() {
+        return groupId;
+    }
+
+    @Override
+    public void setGroupId(@javax.annotation.Nullable java.util.UUID group) {
+        this.groupId = group;
+    }
+
+    // 別のグループの人にはパケットを送らない (見えない・当たらない・音も届かない)
+    @Override
+    public boolean broadcastToPlayer(ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, player);
+    }
+
+    // 別のグループの人を狙わない
+    @Override
+    public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
+        return super.canAttack(target) && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, target);
+    }
+
+    // 鳴き声・足音は自分のグループにだけ
+    @Override
+    public void playSound(SoundEvent sound, float volume, float pitch) {
+        if (!jp.revati.skyabyss.titan.group.GroupOwned.playToGroup(this, sound, volume, pitch)) {
+            super.playSound(sound, volume, pitch);
+        }
+    }
 
     // 攻撃などの動作アニメーションを流す (サーバー側で呼ぶ)
     public void playAction(String name) {

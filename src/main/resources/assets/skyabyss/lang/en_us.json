@@ -38,6 +38,7 @@
   "message.skyabyss.descending": "At your touch, the chain slowly lowers you to the ground",
   "message.skyabyss.resonance": "A resonance stone begins to sing (%s / %s)",
   "message.skyabyss.gate_opened": "Three songs align, and the seal exhales",
+  "message.skyabyss.room_busy": "Another party is taking this trial right now. Wait until they leave",
   "message.skyabyss.sealed_gate": "The seal holds fast. It seems to wait for stones to sing",
   "title.skyabyss.titan_back": "The Stone Whale's Back",
   "title.skyabyss.titan_back.sub": "An old guardian crossing a sea of clouds",

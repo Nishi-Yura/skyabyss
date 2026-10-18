@@ -21,8 +21,8 @@ public final class StormBackBuilder {
         TitanBackData data = TitanBackData.get(back);
         if (data.needsBuild(LAYOUT_VERSION)) {
             if (data.isBuilt()) {
+                // グループの進みは建て終えたとき (StormBackTrials.afterBuild) に全部戻す
                 SkyAbyss.LOGGER.info("Rebuilding the storm back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
-                data.resetProgress();
             }
             build(back, data);
         }
@@ -44,7 +44,6 @@ public final class StormBackBuilder {
         }
         if (data.isBuilt()) {
             SkyAbyss.LOGGER.info("Rebuilding the storm back (layout {} -> {})", data.layoutVersion(), LAYOUT_VERSION);
-            data.resetProgress();
         }
         StormKit kit = new StormKit(back);
         jp.revati.skyabyss.titan.BackBuildJobs.schedule("storm back bird", back, StormBirdBuilder.job(kit), () -> {

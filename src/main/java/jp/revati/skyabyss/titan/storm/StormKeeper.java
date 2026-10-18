@@ -66,7 +66,7 @@ public final class StormKeeper {
         @Override
         protected boolean someoneAboard(ServerLevel overworld) {
             ServerLevel back = overworld.getServer().getLevel(StormTravel.STORM_BACK);
-            return back != null && !back.players().isEmpty();
+            return back != null && jp.revati.skyabyss.titan.group.Activity.anyoneAboard(back);
         }
 
         @Override

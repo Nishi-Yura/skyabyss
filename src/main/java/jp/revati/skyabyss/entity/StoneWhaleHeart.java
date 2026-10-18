@@ -185,7 +185,8 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 技と狙いの対象になれるか。心臓の間に縛られているときは、その内側にいる人だけ
     private boolean canReach(@Nullable LivingEntity entity) {
-        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()))
+                && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p);
     }
 
     // 体力の割合から、いまあるべき段階
@@ -798,7 +799,7 @@ public class StoneWhaleHeart extends HeartBoss {
             }
         }
         if (level() instanceof ServerLevel server) {
-            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40)) {
+            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p))) {
                 bossBar.addPlayer(player);
             }
         }

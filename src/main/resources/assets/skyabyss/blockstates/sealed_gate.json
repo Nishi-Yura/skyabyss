@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "open=false": {
       "model": "skyabyss:block/sealed_gate"
+    },
+    "open=true": {
+      "model": "skyabyss:block/sealed_gate_open"
     }
   }
 }

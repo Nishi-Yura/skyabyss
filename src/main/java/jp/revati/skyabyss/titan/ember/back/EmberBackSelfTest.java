@@ -61,7 +61,9 @@ public final class EmberBackSelfTest {
                 NOTES.add("startup build " + EmberBodyBuilder.lastBuildMs + " ms");
             }
             EmberBodyBuilder.ensureBuilt(back);
-            EmberBackTrials.reset(back, false, null, true);
+            EmberBackTrials.placeFixtures(back);
+            EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+            EmberBackTrials.resetGroup(back, GROUP_B, false, null, true);
         })));
         steps.add(SelfTestRunner.Step.once("ember back (structure)", 40, server -> guarded(server, back -> {
             checkBody(back);
@@ -74,13 +76,18 @@ public final class EmberBackSelfTest {
         steps.add(SelfTestRunner.Step.once("ember back (flow)", 100, server -> guarded(server, back -> checkFluids(back, "100 ticks after building"))));
         steps.add(SelfTestRunner.Step.once("ember back (ring)", server -> guarded(server, back -> checkRing(back))));
         steps.add(SelfTestRunner.Step.once("ember back (gate)", EmberBackTrials.GATE_OPEN_TICKS + 20, server -> guarded(server, back -> {
-            EmberBackState state = EmberBackState.get(back);
+            EmberBackState state = EmberBackState.of(back, GROUP_A);
             expect(state.gateOpen(), "the gate did not open " + EmberBackTrials.GATE_OPEN_TICKS + " ticks after the third stone");
-            expect(back.getBlockState(HEART_GATE.min()).isAir() && back.getBlockState(HUB_CENTER.above()).isAir(), "the opened gate still has its grate or fire");
+            checkGateForTwoGroups(back);
             checkWalk(back, true);
             checkReset(back);
+            checkGroups(back);
             checkHeat(back);
             checkFluids(back, "after the trials");
+            EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+            EmberBackTrials.resetGroup(back, GROUP_B, false, null, true);
+            jp.revati.skyabyss.titan.group.BackGroupData.get(back).remove(GROUP_A);
+            jp.revati.skyabyss.titan.group.BackGroupData.get(back).remove(GROUP_B);
         })));
         steps.add(SelfTestRunner.Step.once("ember back", server -> guarded(server, back -> {
             forceChunks(back, false);
@@ -281,12 +288,19 @@ public final class EmberBackSelfTest {
                 && EmberBackLayout.WEST.contains(p);
     }
 
+    // 歩く人のグループ (扉の開け閉めをこのグループで見る。null なら扉の既定)
+    private static UUID walkGroup;
+
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
-        if (mechanisms && s.is(ModBlocks.SEALED_GATE.get()) && SMITH_DOOR.contains(p)) {
-            return true;
+        if (s.is(ModBlocks.SEALED_GATE.get())) {
+            if (mechanisms && SMITH_DOOR.contains(p)) {
+                return true;
+            }
+            return walkGroup == null ? s.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN)
+                    : jp.revati.skyabyss.titan.group.GroupGates.isOpen(l, walkGroup, p);
         }
-        return s.getCollisionShape(l, p).isEmpty() && !s.is(ModBlocks.SEALED_GATE.get()) && !l.getFluidState(p).is(FluidTags.LAVA)
+        return s.getCollisionShape(l, p).isEmpty() && !l.getFluidState(p).is(FluidTags.LAVA)
                 && !s.is(Blocks.FIRE) && !s.is(Blocks.SOUL_FIRE);
     }
 
@@ -295,7 +309,10 @@ public final class EmberBackSelfTest {
             return false;
         }
         BlockPos b = p.below();
-        return !l.getBlockState(b).getCollisionShape(l, b).isEmpty() || l.getBlockState(p).is(Blocks.WATER) || mechanisms && lakeLava(l, b);
+        BlockState under = l.getBlockState(b);
+        // 扉の上には、閉じている (歩く人のグループで) ときだけ立てる
+        boolean solid = under.is(ModBlocks.SEALED_GATE.get()) ? !passable(l, b) : !under.getCollisionShape(l, b).isEmpty();
+        return solid || l.getBlockState(p).is(Blocks.WATER) || mechanisms && lakeLava(l, b);
     }
 
     static Map<Long, Integer> walk(ServerLevel l, BlockPos start) {
@@ -358,14 +375,17 @@ public final class EmberBackSelfTest {
     // 試練の向こう側にある所。仕掛け (冷え殻・火の鍵) を通らないと歩いて行けないのが仕様 (13 の 24.1節)
     private static final Set<String> TRIAL_GATED = Set.of("rest w1", "west stone", "east stone");
 
+    // gateOpen: 門を開けたグループ A として歩く。閉じているときは、何も進んでいないグループ B として歩く
     private static void checkWalk(ServerLevel back, boolean gateOpen) {
+        walkGroup = gateOpen ? GROUP_A : GROUP_B;
         mechanisms = false;
-        checkWalk(back, gateOpen, false);
-        mechanisms = true;
         try {
+            checkWalk(back, gateOpen, false);
+            mechanisms = true;
             checkWalk(back, gateOpen, true);
         } finally {
             mechanisms = false;
+            walkGroup = null;
         }
     }
 
@@ -419,51 +439,226 @@ public final class EmberBackSelfTest {
         }
     }
 
-    // ---------------------------------------------------------------- 熾り石と門
+    // ---------------------------------------------------------------- 熾り石と門 (グループごと)
+    // 二つのグループ (偽のプレイヤー。パーティに入っていないので一人のグループ = その人の UUID)
+    static final UUID GROUP_A = UUID.nameUUIDFromBytes("skyabyss ember back test A".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    static final UUID GROUP_B = UUID.nameUUIDFromBytes("skyabyss ember back test B".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+    // 位置を移せる偽のプレイヤー (接続のない偽のプレイヤーは teleportTo で動かないので、位置を直接置く)
+    static FakePlayer fake(ServerLevel back, UUID id, String name) {
+        return new FakePlayer(back, new GameProfile(id, name)) {
+            @Override
+            public void teleportTo(ServerLevel level, double x, double y, double z, float yaw, float pitch) {
+                moveTo(x, y, z, yaw, pitch);
+            }
+        };
+    }
+
+    private static boolean overlayHas(ServerLevel back, UUID group, BlockPos pos, java.util.function.Predicate<BlockState> test) {
+        BlockState s = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, group).get(pos);
+        return s != null && test.test(s);
+    }
+
     private static void checkRing(ServerLevel back) {
-        EmberBackTrials.reset(back, false, null, true);
-        EmberBackState state = EmberBackState.get(back);
-        expect(back.getBlockState(HEART_GATE.min()).is(ModBlocks.SEALED_GATE.get()) && back.getBlockState(HUB_CENTER.above()).is(Blocks.CAMPFIRE),
-                "the closed gate has no grate or fire");
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        EmberBackTrials.resetGroup(back, GROUP_B, false, null, true);
+        EmberBackState state = EmberBackState.of(back, GROUP_A);
+        BlockState plug = back.getBlockState(HEART_GATE.min());
+        expect(plug.is(ModBlocks.SEALED_GATE.get()) && !plug.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN),
+                "the hub gate is not a closed gate block in the world");
+        expect(overlayHas(back, GROUP_A, HUB_CENTER.above(), s -> s.is(Blocks.CAMPFIRE)), "a group with the gate closed does not see the forge fire");
         expect(state.rungCount() == 0 && !state.gateOpen(), "a fresh round starts with rung stones");
-        FakePlayer p = new FakePlayer(back, new GameProfile(UUID.randomUUID(), "ember_test_ring"));
+        FakePlayer p = fake(back, GROUP_A, "ember_test_ring");
         // 東は鍛え手を倒すまで黙る
         EmberBackTrials.useStone(back, STONE_EAST, p);
         expect(!state.rung(EmberBackState.Trial.EAST), "the east stone rang before the smith fell");
         EmberBackTrials.useStone(back, STONE_WEST, p);
         expect(state.rung(EmberBackState.Trial.WEST), "the west stone did not ring");
-        expect(back.getBlockState(STONE_WEST).getValue(KindleStoneBlock.ACTIVE), "the rung west stone is not lit");
-        expect(back.getBlockState(PAD_WEST).is(EmberKit.EMBERLIGHT.getBlock()), "the west shortcut floor is not lit");
-        expect(!back.getBlockState(PAD_EAST).is(EmberKit.EMBERLIGHT.getBlock()), "the east shortcut floor is lit before its stone");
-        EmberBackTrials.markReady(back, EmberBackState.Trial.EAST);
+        // 光る石と床はグループの見かけ。ワールドのブロックは鳴っていない姿のまま、ほかのグループには見えない
+        expect(overlayHas(back, GROUP_A, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)), "the rung west stone is not lit for its group");
+        expect(overlayHas(back, GROUP_A, PAD_WEST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the west shortcut floor is not lit for its group");
+        expect(!overlayHas(back, GROUP_A, PAD_EAST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the east shortcut floor is lit before its stone");
+        expect(!back.getBlockState(STONE_WEST).getValue(KindleStoneBlock.ACTIVE), "ringing changed the world block of the stone");
+        expect(!overlayHas(back, GROUP_B, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)) && EmberBackState.of(back, GROUP_B).rungCount() == 0,
+                "group B sees or has group A's rung stone");
+        EmberBackTrials.markReady(back, GROUP_A, EmberBackState.Trial.EAST);
         EmberBackTrials.useStone(back, STONE_EAST, p);
-        EmberBackTrials.markReady(back, EmberBackState.Trial.SOUTH);
+        EmberBackTrials.markReady(back, GROUP_A, EmberBackState.Trial.SOUTH);
         EmberBackTrials.useStone(back, STONE_SOUTH, p);
         expect(state.rungCount() == 3, "three stones did not ring: " + state.rungCount());
-        expect(EmberBackTrials.gateOpening(), "the forge does not start dimming after three stones");
+        expect(EmberBackTrials.gateOpening(GROUP_A), "the forge does not start dimming after three stones");
+        expect(!EmberBackTrials.gateOpening(GROUP_B), "group B's forge dims with group A's stones");
         expect(!state.gateOpen(), "the gate opened at once (no dimming)");
     }
 
+    // 門を開けたグループ A は通れ、B は閉じたまま (当たり判定も)
+    private static void checkGateForTwoGroups(ServerLevel back) {
+        BlockPos plug = HEART_GATE.min();
+        expect(back.getBlockState(plug).is(ModBlocks.SEALED_GATE.get()), "opening the gate removed the gate block from the world");
+        expect(jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_A, plug, false), "the gate is not open for group A");
+        expect(!jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_B, plug, false), "the gate is open for group B");
+        FakePlayer a = fake(back, GROUP_A, "ember_test_gate_a");
+        FakePlayer b = fake(back, GROUP_B, "ember_test_gate_b");
+        BlockState s = back.getBlockState(plug);
+        expect(s.getCollisionShape(back, plug, net.minecraft.world.phys.shapes.CollisionContext.of(a)).isEmpty(), "group A collides with its open gate");
+        expect(!s.getCollisionShape(back, plug, net.minecraft.world.phys.shapes.CollisionContext.of(b)).isEmpty(), "group B walks through a gate it has not opened");
+        for (BlockPos w : EmberBackTrials.HUB_WALL) {
+            expect(!back.getBlockState(w).getCollisionShape(back, w, net.minecraft.world.phys.shapes.CollisionContext.of(b)).isEmpty(),
+                    "the furnace mouth is open for group B at " + w.toShortString());
+        }
+        expect(!overlayHas(back, GROUP_A, HUB_CENTER.above(), s2 -> s2.is(Blocks.CAMPFIRE)), "group A still sees the forge fire after the gate opened");
+        expect(overlayHas(back, GROUP_B, HUB_CENTER.above(), s2 -> s2.is(Blocks.CAMPFIRE)), "group B lost its forge fire when group A opened the gate");
+    }
+
     private static void checkReset(ServerLevel back) {
-        int epoch = TitanBackData.get(back).epoch();
-        EmberBackState state = EmberBackState.get(back);
+        EmberBackState state = EmberBackState.of(back, GROUP_A);
+        int epoch = state.epoch();
+        int epochB = EmberBackState.of(back, GROUP_B).epoch();
         int resets = state.resets();
-        EmberBackTrials.reset(back, false, null, true);
-        expect(TitanBackData.get(back).epoch() > epoch, "a reset does not advance the trial number");
+        int seed = state.seed();
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        expect(state.epoch() > epoch, "a reset does not advance the trial number");
+        expect(state.seed() != seed, "a reset does not change the seed");
+        expect(EmberBackState.of(back, GROUP_B).epoch() == epochB, "resetting group A advanced group B's trial number");
         expect(state.resets() == resets + 1 && state.rungCount() == 0 && !state.gateOpen(), "a reset does not clear the stones and gate");
-        expect(back.getBlockState(HEART_GATE.min()).is(ModBlocks.SEALED_GATE.get()), "a reset does not close the gate");
-        expect(!back.getBlockState(STONE_WEST).getValue(KindleStoneBlock.ACTIVE), "a reset does not dim the stones");
-        // 眠る試練: 東が眠ると smith も眠り、東の石は最初から鳴っている
-        EmberBackTrials.setSleeping(back, EmberBackState.Trial.EAST);
+        expect(!EmberBackTrials.gateOpenFor(back, GROUP_A), "a reset does not close the gate for the group");
+        expect(!overlayHas(back, GROUP_A, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)), "a reset does not dim the stones");
+        // 眠る試練: 東が眠ると smith も眠り、東の石は最初から鳴っている (部屋の持ち主のグループにとって)
+        EmberRooms.claimForTest(back, EmberRooms.EAST, GROUP_A);
+        EmberRooms.claimForTest(back, EmberRooms.WEST, GROUP_A);
+        EmberBackTrials.setSleeping(back, GROUP_A, EmberBackState.Trial.EAST);
         expect(state.rung(EmberBackState.Trial.EAST) && EmberBackTrials.sleeping(back, "smith") && EmberBackTrials.sleeping(back, "east")
                 && !EmberBackTrials.sleeping(back, "west"), "a sleeping east does not ring its stone or put the smith to sleep");
+        expect(!EmberBackState.of(back, GROUP_B).sleeping(EmberBackState.Trial.EAST), "group A's sleeping trial leaked into group B");
         // 心臓を倒したことがあれば、次のリセットで一つ眠る (同じ試練は二回続けて眠らない)
         state.markEverDefeated();
-        EmberBackTrials.reset(back, false);
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, false);
+        expect(EmberRooms.owner(EmberRooms.EAST) == null, "a group reset kept the group's room");
         expect(state.sleeping() != null && state.sleeping() != EmberBackState.Trial.EAST, "after the heart fell, a reset does not put another trial to sleep: "
                 + state.sleeping());
-        EmberBackTrials.reset(back, false, null, true);
+        expect(state.everDefeated(), "a reset forgot that the group stilled the heart once");
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
         expect(state.sleeping() == null, "noSleep still put a trial to sleep");
+        state.setEverDefeated(false);
+    }
+
+    // 二つのグループ: 部屋の占有・グループの敵・心臓の撃破のあとのリセット・放置のリセット・グループが変わった人
+    private static void checkGroups(ServerLevel back) {
+        FakePlayer a = fake(back, GROUP_A, "ember_test_group_a");
+        FakePlayer b = fake(back, GROUP_B, "ember_test_group_b");
+        // 部屋の占有: A が灰の道を持っているあいだ、入ってきた B は広間へ戻され、持ち主は A のまま
+        EmberRooms.claimForTest(back, EmberRooms.WEST, GROUP_A);
+        BlockPos in = rest("w0").floor().above();
+        a.moveTo(in.getX() + 0.5, in.getY(), in.getZ() + 0.5);
+        b.moveTo(in.getX() + 1.5, in.getY(), in.getZ() + 0.5);
+        back.addFreshEntity(a);
+        back.addFreshEntity(b);
+        try {
+            jp.revati.skyabyss.titan.group.RoomLocks.update(back, EmberRooms.WEST.lock(), EmberRooms.WEST.box().aabb(), EmberRooms.WEST.eject(),
+                    EmberRooms.WEST.grace(), null);
+            expect(GROUP_A.equals(EmberRooms.owner(EmberRooms.WEST)), "the west room changed hands while group A was inside");
+            expect(!EmberRooms.WEST.contains(b.position()), "group B was not sent out of the west room held by group A (at " + b.blockPosition() + ")");
+            expect(EmberRooms.WEST.contains(a.position()), "the owner was sent out of its own room");
+            // 部屋の数え方は持ち主だけ
+            b.moveTo(in.getX() + 1.5, in.getY(), in.getZ() + 0.5);
+            List<net.minecraft.server.level.ServerPlayer> counted = jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.playersIn(back, WEST);
+            expect(counted.contains(a) && !counted.contains(b), "the west trial counts players of another group");
+            // 試練の敵は持ち主のグループのもの: B には見えず、B を狙わず、B の傷を受けない
+            net.minecraft.world.entity.Mob moth = jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.spawn(back,
+                    jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.EMBER_MOTH.get(), in.getX() + 0.5, in.getY() + 2, in.getZ() + 3.5);
+            if (moth == null) {
+                FAILURES.add("could not spawn a moth for the group checks");
+            } else {
+                expect(moth instanceof jp.revati.skyabyss.titan.group.GroupOwned o && GROUP_A.equals(o.groupId()), "a trial mob in group A's room is not group A's");
+                expect(jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(moth, a) && !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(moth, b),
+                        "group A's moth is visible to group B (or hidden from A)");
+                expect(moth.canAttack(a) && !moth.canAttack(b), "group A's moth may attack group B (or not A)");
+                float hp = moth.getHealth();
+                moth.hurt(back.damageSources().playerAttack(b), 2f);
+                expect(moth.getHealth() == hp, "group B hurt group A's moth");
+                moth.discard();
+            }
+        } finally {
+            a.discard();
+            b.discard();
+            EmberRooms.releaseForTest(back, EmberRooms.WEST);
+        }
+        // 心臓を倒したグループだけ、記録が変わる。門の奥に誰もいなければ 30 秒でそのグループだけ次の周
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        int epochB = EmberBackState.of(back, GROUP_B).epoch();
+        EmberBackState.of(back, GROUP_A).markHeartDefeated();
+        expect(!EmberBackState.of(back, GROUP_B).heartDefeated(), "group A's heart kill was written to group B");
+        int epochA = EmberBackState.of(back, GROUP_A).epoch();
+        // いま背中にいたことにする (放置のリセットではなく、心臓のあとのリセットで戻ることを見る)
+        EmberBackState.of(back, GROUP_A).record().touch(back.getGameTime());
+        EmberBackState.of(back, GROUP_B).record().touch(back.getGameTime());
+        for (int t = 0; t <= EmberBackTrials.RESET_AFTER_HEART; t += 10) {
+            invokeTickReset(back);
+        }
+        expect(EmberBackState.of(back, GROUP_A).epoch() > epochA && !EmberBackState.of(back, GROUP_A).heartDefeated(),
+                "group A's trials were not renewed 30 s after its heart kill");
+        expect(EmberBackState.of(back, GROUP_A).everDefeated(), "the renewal forgot that group A stilled the heart");
+        expect(EmberBackState.of(back, GROUP_B).epoch() == epochB, "group A's renewal touched group B");
+        EmberBackState.of(back, GROUP_A).setEverDefeated(false);
+        EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
+        // グループが変わった人 (パーティに入った): 試練の中なら広間へ。休み場の記録は番号が違えば消える
+        FakePlayer c = fake(back, GROUP_A, "ember_test_group_change");
+        BlockPos w1 = rest("w1").floor().above();
+        c.moveTo(w1.getX() + 0.5, w1.getY(), w1.getZ() + 0.5);
+        EmberBackTrials.persisted(c).putString("skyabyss_ember_checkpoint", "w1");
+        EmberBackTrials.persisted(c).putInt("skyabyss_ember_checkpoint_epoch", -5);
+        EmberBackTrials.onGroupChanged(c);
+        expect(HUB.contains(c.blockPosition()), "a player whose group changed inside a trial was not moved to the hub (at " + c.blockPosition() + ")");
+        expect(EmberBackTrials.validCheckpoint(EmberBackTrials.persisted(c), EmberBackState.of(back, GROUP_A).epoch()).isEmpty()
+                && !EmberBackTrials.persisted(c).contains("skyabyss_ember_checkpoint"), "a stale checkpoint survived the group change");
+        checkParty(back);
+        NOTES.add("two groups: own gates, stones, rooms, mobs, renewals");
+    }
+
+    private static void invokeTickReset(ServerLevel back) {
+        try {
+            java.lang.reflect.Method m = EmberBackTrials.class.getDeclaredMethod("tickReset", ServerLevel.class);
+            m.setAccessible(true);
+            m.invoke(null, back);
+        } catch (ReflectiveOperationException e) {
+            FAILURES.add("could not run the reset tick: " + e);
+        }
+    }
+
+    // パーティ (6 人まで) を組む・入る・抜ける: 記録の引き継ぎ (GroupEvents)
+    private static void checkParty(ServerLevel back) {
+        var parties = jp.revati.skyabyss.party.PartyData.get(back.getServer());
+        var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
+        List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < jp.revati.skyabyss.party.Parties.MAX_MEMBERS; i++) {
+            ids.add(UUID.nameUUIDFromBytes(("skyabyss ember party test " + i).getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        }
+        jp.revati.skyabyss.party.PartyData.Party party = null;
+        try {
+            // リーダーは西の石を鳴らしている。入る人は何も鳴らしていない
+            EmberBackState.of(back, ids.get(0)).ring(EmberBackState.Trial.WEST);
+            party = parties.create(ids.get(0), "lead");
+            for (int i = 1; i < ids.size(); i++) {
+                parties.add(party, ids.get(i), "m" + i);
+            }
+            UUID key = jp.revati.skyabyss.titan.group.Groups.keyOf(back.getServer(), ids.get(5));
+            expect(key.equals(party.id) && party.members.size() == 6, "a party of six does not share one group key");
+            expect(EmberBackState.of(back, party.id).rung(EmberBackState.Trial.WEST), "a new party does not start from its leader's record");
+            // パーティの記録で進む。抜けた人は、そのときのパーティの記録の写しを持って一人に戻る
+            EmberBackState.of(back, party.id).ring(EmberBackState.Trial.SOUTH);
+            parties.remove(ids.get(5));
+            EmberBackState left = EmberBackState.of(back, ids.get(5));
+            expect(left.rung(EmberBackState.Trial.WEST) && left.rung(EmberBackState.Trial.SOUTH), "a player leaving the party lost the party's progress");
+            expect(jp.revati.skyabyss.titan.group.Groups.keyOf(back.getServer(), ids.get(5)).equals(ids.get(5)), "a player who left is still in the party group");
+        } finally {
+            for (UUID id : ids) {
+                parties.remove(id);
+                data.remove(id);
+            }
+            if (party != null) {
+                data.remove(party.id);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 熱

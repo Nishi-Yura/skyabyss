@@ -916,11 +916,17 @@ public final class EmberTrialSelfTest {
         }
         expect(calls >= 30 && calls <= 40, "the door should take about 1.5 s to open: " + calls + " ticks");
         expect(Forge.doorState() == 2, "door should be open and waiting 5 s: " + Forge.doorState());
+        // 扉は鍵を差したグループにだけ開く。扉のブロックはワールドに残り、ほかのグループには閉じたまま
+        UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(fp);
+        UUID other = UUID.nameUUIDFromBytes("ember_trial_door_other".getBytes());
+        expect(group.equals(Forge.doorGroup()), "the door does not remember the group that used the key");
         for (int x = d.minX(); x <= d.maxX(); x++) {
             for (int y = d.minY(); y <= d.maxY(); y++) {
                 for (int z = d.minZ(); z <= d.maxZ(); z++) {
-                    if (!level.getBlockState(new BlockPos(x, y, z)).isAir()) {
-                        F.add("door not open at " + x + "," + y + "," + z + " " + level.getBlockState(new BlockPos(x, y, z)));
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (!jp.revati.skyabyss.titan.group.GroupGates.isOpen(level, group, p) || jp.revati.skyabyss.titan.group.GroupGates.isOpen(level, other, p)
+                            || !level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
+                        F.add("door not open only for the key's group at " + x + "," + y + "," + z + " " + level.getBlockState(p));
                         x = d.maxX();
                         y = d.maxY();
                         z = d.maxZ();
@@ -941,14 +947,20 @@ public final class EmberTrialSelfTest {
         // リセットで閉じる
         Forge.reset(level, false);
         expect(Forge.doorState() == 0 && level.getBlockState(new BlockPos(d.minX(), d.minY(), d.minZ())).is(ModBlocks.SEALED_GATE.get()), "reset should seal the door");
+        jp.revati.skyabyss.titan.group.BackGroupData.get(level).remove(group);
+        jp.revati.skyabyss.titan.group.BackGroupData.get(level).remove(other);
     }
 
     // ---------------------------------------------------------------- 火守り
     private static void southNumbers(ServerLevel level) {
-        expect(Math.abs(Hearth.decayPerSecond(1) - 0.5f) < 1e-4 && Math.abs(Hearth.decayPerSecond(4) - 1.1f) < 1e-4 && Hearth.decayPerSecond(9) == Hearth.decayPerSecond(4),
-                "hearth decay should be 0.5/s (+0.2 per extra player, 4 counted)");
+        expect(Math.abs(Hearth.decayPerSecond(1) - 0.5f) < 1e-4 && Math.abs(Hearth.decayPerSecond(4) - 1.1f) < 1e-4 && Math.abs(Hearth.decayPerSecond(6) - 1.5f) < 1e-4 && Hearth.decayPerSecond(9) == Hearth.decayPerSecond(6),
+                "hearth decay should be 0.5/s (+0.2 per extra player, 6 counted)");
         expect(Hearth.START == 20f && Hearth.FEED == 8f && Hearth.DOUSE == 15f, "hearth numbers");
         expect(Hearth.carrierInterval(4) < Hearth.carrierInterval(1), "more players, more carriers");
+        // パーティは 6 人まで: 6 人まで数え、それより多くは数えない
+        expect(Hearth.carrierInterval(6) < Hearth.carrierInterval(4) && Hearth.carrierCap(6) == 8 && Hearth.carrierCap(9) == 8,
+                "the hearth does not scale up to a party of six");
+        expect(AshPath.mothTarget(6) == 16 && AshPath.mothTarget(9) == 16 && AshPath.mothTarget(4) == 12, "the ash path moths do not scale up to six");
         FakePlayer fp = fake(level, "ember_trial_hearth");
         Hearth.clearMemory();
         EmberTrials.READY_CALLS.clear();
@@ -1058,9 +1070,9 @@ public final class EmberTrialSelfTest {
         HearthVents.clearMemory();
     }
 
-    // 一人でも四人でも 100 まで燃やせる (模擬。腕のある人が 6 秒で灰運び一体を止めて熾を一つくべる。蛾は半分が火に触れる)
+    // 一人でも六人 (パーティの上限) でも 100 まで燃やせる (模擬。腕のある人が 6 秒で灰運び一体を止めて熾を一つくべる。蛾は半分が火に触れる)
     private static void southSimulate(ServerLevel level) {
-        for (int n : new int[] {1, 2, 4}) {
+        for (int n : new int[] {1, 2, 4, 6}) {
             Hearth.clearMemory();
             EmberTrials.READY_CALLS.clear();
             List<ServerPlayer> players = new ArrayList<>();
@@ -1220,7 +1232,7 @@ public final class EmberTrialSelfTest {
         if (F.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST ember trial PASSED (registry, rooms stay in their boxes, lake lava contained, reserved cells empty, "
                     + "ash path crosses in 3 layouts, crust clock and moths and standing wait, engulfed, urn, forge solves 4 patterns for one player, "
-                    + "cracks and white and key and door, hearth numbers and 1/2/4 player simulation, vent cycle and hits, thralls walk to forge and hearth)");
+                    + "cracks and white and key and door, hearth numbers and 1/2/4/6 player simulation, vent cycle and hits, thralls walk to forge and hearth)");
         } else {
             F.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST ember trial FAILED: {}", x));
         }

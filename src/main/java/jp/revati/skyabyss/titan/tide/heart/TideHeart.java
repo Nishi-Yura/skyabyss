@@ -205,8 +205,10 @@ public class TideHeart extends HeartBoss {
         return arena != null;
     }
 
+    // 狙える人: 部屋の中の、心臓のグループの人 (GroupOwned。ほかのグループの人は狙わない)
     private boolean canReach(@Nullable LivingEntity entity) {
-        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()));
+        return entity instanceof Player p && p.isAlive() && !p.isSpectator() && (arena == null || arena.contains(p.position()))
+                && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p);
     }
 
     // 体力の割合からの段階
@@ -906,12 +908,15 @@ public class TideHeart extends HeartBoss {
 
     private void updateBossBarViewers() {
         for (ServerPlayer player : List.copyOf(bossBar.getPlayers())) {
-            if (!player.isAlive() || player.distanceToSqr(this) > 48 * 48 || player.level() != level()) {
+            if (!player.isAlive() || player.distanceToSqr(this) > 48 * 48 || player.level() != level()
+                    || !jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, player)) {
                 bossBar.removePlayer(player);
             }
         }
         if (level() instanceof ServerLevel server) {
-            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40)) {
+            // ボスバーは、心臓のグループの人にだけ
+            for (ServerPlayer player : server.getPlayers(p -> p.distanceToSqr(this) < 40 * 40
+                    && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p))) {
                 bossBar.addPlayer(player);
             }
         }

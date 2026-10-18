@@ -5,13 +5,17 @@ import jp.revati.skyabyss.titan.storm.back.StormBlocks;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.UUID;
+
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.storm.back.StormBackBuilder;
 import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 //    壁は肋と飛ぶための筋の束: 灰白の石 (磨いた閃緑岩) に、方解石の縦の肋と、白い羽毛の層の帯。赤みは使わない
 //  - 避雷の柱 4 本 (北東・北西・南東・南西、中心から (±6, ±6))。銅の柱、高さ 6。中の 3 段は銅の電球で、満ちた段だけ灯る。先は光る
 //  - 風穴 4 つ (北・南・東・西、中心から 5)。床の銅の格子、下に光。段階 2 で昇り風が立つ (高さは心臓の下の端まで)
-//  - 北の壁に入口 (幅 3、高さ 3。戦いの間は封印)。その外に前室 (休み場 heart。担当 1 の螺旋の階段から西の道で着く)
+//  - 北の壁に入口 (幅 3、高さ 3。封印の扉のブロックがいつも置いてあり、戦っているグループにだけ閉じる)。その外に前室 (休み場 heart。担当 1 の螺旋の階段から西の道で着く)
 // 明るさ (13.2節の「暗い部屋で予告の粒が見えない」の直し): 柱の先・風穴・壁の灯に加え、見えない光のブロックを頭の高さに散らし、
 // 床が明るさ 11 以上になるようにする。心臓は自分の光で描く (StormHeartRenderer)
 // 背中の鳥は担当 1 が建てる。鳥が建て直されると部屋は石で埋まるので、5 秒ごとに確かめて建て直す (潮殻と同じ)
@@ -53,7 +57,7 @@ public final class StormHeartArena {
     // 入口 (北の壁。前室 KEEL_ANTE の北の口 = 背中の HEART_DOOR) と、その内側の壁の厚み (z GATE_Z + 1)
     static final int GATE_Z = StormBackLayout.KEEL_ANTE.z2() + 1;
 
-    // 柱の満ちた段 (部屋は一つなので static)
+    // 柱の満ちた段 (部屋は一つ。竜骨の間は一度に一つのグループだけが入れる部屋なので、その持ち主の戦いの段)
     private static final int[] CHARGE = new int[4];
 
     private StormHeartArena() {
@@ -208,6 +212,8 @@ public final class StormHeartArena {
     public static void ensureBuilt(ServerLevel back) {
         if (!isBuilt(back)) {
             build(back);
+        } else {
+            placeGate(back);
         }
     }
 
@@ -334,27 +340,34 @@ public final class StormHeartArena {
         for (int i = 0; i < 4; i++) {
             showCharge(back, i);
         }
+        placeGate(back);
         SkyAbyss.LOGGER.info("Built the keel chamber (thunder wing heart)");
     }
 
-    // ---------------------------------------------------------------- 入口
-    static void seal(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-        }
+    // ---------------------------------------------------------------- 入口 (グループごとの扉。既定は開いている)
+    // 扉のブロックを置く (建てたあと・確かめるたび。何度呼んでも同じ)
+    public static void placeGate(ServerLevel level) {
+        GroupGates.place(level, gate(), true);
     }
 
-    static void open(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+    // 戦っているグループにだけ閉じる
+    static void seal(ServerLevel level, UUID group) {
+        GroupGates.seal(level, group, gate());
+    }
+
+    static void open(ServerLevel level, UUID group) {
+        if (GroupGates.release(level, group, gate())) {
+            for (ServerPlayer player : Groups.online(level, group)) {
+                for (BlockPos p : gate()) {
+                    level.sendParticles(player, ParticleTypes.ELECTRIC_SPARK, false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.05);
+                }
             }
         }
     }
 
-    static boolean sealed(ServerLevel level) {
-        return level.getBlockState(gate().get(0)).is(ModBlocks.SEALED_GATE.get());
+    // そのグループにとって入口が閉じているか
+    public static boolean sealed(ServerLevel level, UUID group) {
+        return !GroupGates.isOpen(level, group, gate().get(0));
     }
 
     static void resetState() {

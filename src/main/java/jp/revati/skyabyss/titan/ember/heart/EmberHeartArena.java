@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackRooms;
@@ -350,10 +350,8 @@ public final class EmberHeartArena {
         for (BlockPos l : lampCells) {
             level.setBlock(l, lamp, flags);
         }
-        // 入口の壁の 1 枚 (前室とのあいだ) を空ける
-        for (BlockPos g : gate()) {
-            level.setBlock(g, AIR, flags);
-        }
+        // 入口の壁の 1 枚 (前室とのあいだ) は、開いた既定の扉 (戦うグループにだけ閉じる)
+        GroupGates.place(level, gate(), true);
         java.util.Arrays.fill(state, 0);
         java.util.Arrays.fill(timer, 0);
         cold = false;
@@ -627,23 +625,30 @@ public final class EmberHeartArena {
     }
 
     // ---------------------------------------------------------------- 入口
-    static void seal(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            level.setBlock(p, ModBlocks.SEALED_GATE.get().defaultBlockState(), 3);
-        }
+    // 入口はいつも置いてある扉 (開いた既定)。戦っているグループにだけ閉じる (GroupGates。ほかのグループは部屋の占有で入れない)
+    static void seal(ServerLevel level, UUID group) {
+        GroupGates.place(level, gate(), true);
+        GroupGates.seal(level, group, gate());
     }
 
-    static void open(ServerLevel level) {
-        for (BlockPos p : gate()) {
-            if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
-                level.setBlock(p, AIR, 3);
-                level.sendParticles(ParticleTypes.SMALL_FLAME, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.01);
+    static void open(ServerLevel level, UUID group) {
+        if (GroupGates.open(level, group, gate())) {
+            for (BlockPos p : gate()) {
+                jp.revati.skyabyss.titan.ember.back.EmberBackTrials.particlesTo(level, group, ParticleTypes.SMALL_FLAME, p.getX() + 0.5, p.getY() + 0.5,
+                        p.getZ() + 0.5, 4, 0.3, 0.3, 0.3, 0.01);
             }
         }
     }
 
-    static boolean sealed(ServerLevel level) {
-        return level.getBlockState(gate().get(0)).is(ModBlocks.SEALED_GATE.get());
+    // そのグループにとって入口が閉じているか
+    public static boolean sealed(ServerLevel level, UUID group) {
+        return !GroupGates.isOpen(level, group, gate().get(0));
+    }
+
+    // いま戦っている (最後に戦った) グループにとって入口が閉じているか (自己テスト・コマンド)
+    public static boolean sealed(ServerLevel level) {
+        UUID group = EmberHeartBattle.lastGroup();
+        return group != null && sealed(level, group);
     }
 
     // 戦いを終える・放棄するときの片づけ (区画・血管・灯・残り火の光)

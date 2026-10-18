@@ -8,8 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Nullable;
+
 import jp.revati.skyabyss.ModText;
-import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.group.GroupGates;
+import jp.revati.skyabyss.titan.group.Groups;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -28,6 +32,9 @@ import org.joml.Vector3f;
 // - 柱は 3 回受けると満ち、対になる骨の戸が開く (リセットまで開いたまま)。柱の段は根元の 3 つの電球で見える
 // - 予告線 (放電): 嵐のあいだ 3 秒ごとに、回廊の人のそばに壁から壁へ 1.2 秒光る線。低い線 (床から 1 段。跳び越す) と
 //   高い線 (頭の高さ。しゃがんで潜る) の二種類。線の上の人に 12
+// グループ (docs/design/10 の 9 章): 回廊 (肩の門の先から雷獣の巣の口まで) は部屋の占有 (RoomLocks。StormBackTrials.EAST_ROOM)。
+// 柱の段 (StormRods)・招雷・予告線は回廊の持ち主のグループのもので、持ち主が変わると柱をその記録から置き直す
+// (開けた戸の柱は満ちている)。骨の戸はグループごとの扉 (doorBlocks): 柱を満たしたグループにだけ開く
 final class StormEast {
     static final int STRIKE_EVERY = 80;
     static final int STRIKE_WARN = 24;
@@ -41,6 +48,7 @@ final class StormEast {
     record Line(double x, boolean high, int[] left) {
     }
 
+    // 回廊の持ち主の予告線と、直前に狙った人 (持ち主が変わると消す)
     private static final List<Line> LINES = new ArrayList<>();
     private static UUID lastTarget;
     private static int lineCount;
@@ -52,36 +60,49 @@ final class StormEast {
         return p.x > EAST_X1 - 0.5 && p.x < EAST_X2 + 1 && p.z > BONE_Z1 - 0.5 && p.z < BONE_Z2 + 1.5 && p.y > BONE_FLOOR && p.y < BONE_FLOOR + EAST_HEIGHT + 1;
     }
 
-    // 柱を登録し直す (建てたあと・リセット)。開いている戸の柱は満ちたまま
-    static void registerRods(ServerLevel level, StormBackState state) {
+    // 部屋の占有の箱 (回廊と肘の洞。雷獣の巣の口の手前まで)
+    static AABB room() {
+        return new AABB(EAST_X1, BONE_FLOOR, BONE_Z1, RAIJU_NEST_MOUTH.minX, BONE_FLOOR + EAST_HEIGHT + 1, BONE_Z2 + 1);
+    }
+
+    // 骨の戸 i のブロック (グループごとの扉)
+    static List<BlockPos> doorBlocks(int i) {
+        List<BlockPos> out = new ArrayList<>();
+        int x = EAST_DOORS[i];
+        for (int z = -18; z <= -16; z++) {
+            for (int y = BONE_FLOOR + 1; y <= BONE_FLOOR + 4; y++) {
+                out.add(new BlockPos(x, y, z));
+            }
+        }
+        return out;
+    }
+
+    // 柱を登録し直す。progress があれば、開けた戸の柱 (と東が鳴った・眠っている周の柱) は満ちたまま。null なら全部空
+    static void registerRods(ServerLevel level, @Nullable StormProgress progress) {
         for (int i = 0; i < EAST_RODS.size(); i++) {
             StormRods.Rod r = StormRods.register(level, EAST_RODS.get(i));
-            if (state.eastDoorOpen(i) || state.rung(StormBackState.Trial.EAST)) {
+            if (progress != null && (progress.eastDoorPassable(i) || progress.rung(StormBackState.Trial.EAST))) {
                 StormRods.charge(level, r.base, StormRods.FULL);
             }
         }
     }
 
-    static void apply(ServerLevel level, StormBackState state) {
-        registerRods(level, state);
-        for (int i = 0; i < EAST_DOORS.length; i++) {
-            setDoor(level, i, state.eastDoorOpen(i) || state.sleeping() == StormBackState.Trial.EAST);
-        }
-        showRods(level);
+    // 回廊を持ち主のグループの記録のとおりに置き直す (持ち主が変わったとき)
+    static void apply(ServerLevel level, StormProgress progress) {
+        registerRods(level, progress);
         LINES.clear();
+        lastTarget = null;
+        StormStrike.cancelIn(level, room());
+        showRods(level);
     }
 
-    static void setDoor(ServerLevel level, int i, boolean open) {
-        int x = EAST_DOORS[i];
-        for (int z = -18; z <= -16; z++) {
-            for (int y = BONE_FLOOR + 1; y <= BONE_FLOOR + 4; y++) {
-                BlockPos p = new BlockPos(x, y, z);
-                BlockState want = open ? Blocks.AIR.defaultBlockState() : ModBlocks.SEALED_GATE.get().defaultBlockState();
-                if (!level.getBlockState(p).equals(want)) {
-                    level.setBlock(p, want, 3);
-                }
-            }
-        }
+    // だれも持っていない回廊 (柱は空)
+    static void applyNeutral(ServerLevel level) {
+        registerRods(level, null);
+        LINES.clear();
+        lastTarget = null;
+        StormStrike.cancelIn(level, room());
+        showRods(level);
     }
 
     // 柱の段の電球 (根元の上の 3 つ)
@@ -98,55 +119,46 @@ final class StormEast {
         }
     }
 
-    static void tick(ServerLevel level, StormBackState state, boolean peaceful) {
+    // owner: 回廊の持ち主 (いなければ null。そのときは柱の電球だけ見る)
+    static void tick(ServerLevel level, @Nullable UUID owner, boolean peaceful) {
         long gt = level.getGameTime();
         if (gt % 5 == 0) {
             showRods(level);
-            openFullDoors(level, state);
+            if (owner != null) {
+                openFullDoors(level, StormProgress.of(level, owner));
+            }
         }
-        if (peaceful || StormBackClock.phase(level) != StormBackClock.Phase.STORM) {
+        if (owner == null || peaceful || StormBackClock.phase(level) != StormBackClock.Phase.STORM) {
             LINES.clear();
             return;
         }
-        tickStorm(level, gt);
+        StormFx.to(owner, () -> tickStorm(level, owner, gt));
     }
 
-    static int openDoors(StormBackState state) {
-        int n = 0;
+    // 満ちた柱の戸を、回廊の持ち主のグループにだけ開ける
+    static void openFullDoors(ServerLevel level, StormProgress progress) {
         for (int i = 0; i < EAST_RODS.size(); i++) {
-            if (state.eastDoorOpen(i)) {
-                n++;
-            }
-        }
-        return n;
-    }
-
-    // 満ちた柱の戸を開ける
-    static void openFullDoors(ServerLevel level, StormBackState state) {
-        {
-            for (int i = 0; i < EAST_RODS.size(); i++) {
-                if (!state.eastDoorOpen(i) && StormRods.isFull(level, EAST_RODS.get(i))) {
-                    state.openEastDoor(i);
-                    setDoor(level, i, true);
-                    BlockPos d = new BlockPos(EAST_DOORS[i], BONE_FLOOR + 2, -17);
-                    level.playSound(null, d, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.6f);
-                    level.playSound(null, d, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.6f, 1.8f);
-                    for (ServerPlayer p : level.players()) {
-                        if (inCorridor(p.position())) {
-                            Notice.bar(p, ModText.progress("message.skyabyss.storm.door_opened", openDoors(state)));
-                        }
+            if (!progress.eastDoorOpen(i) && StormRods.isFull(level, EAST_RODS.get(i))) {
+                progress.openEastDoor(i);
+                GroupGates.open(level, progress.group, doorBlocks(i));
+                BlockPos d = new BlockPos(EAST_DOORS[i], BONE_FLOOR + 2, -17);
+                level.playSound(null, d, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.6f);
+                level.playSound(null, d, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.6f, 1.8f);
+                for (ServerPlayer p : Groups.online(level, progress.group)) {
+                    if (inCorridor(p.position())) {
+                        Notice.bar(p, ModText.progress("message.skyabyss.storm.door_opened", progress.openDoorCount()));
                     }
                 }
             }
         }
     }
 
-    private static void tickStorm(ServerLevel level, long gt) {
-        // 招雷
+    private static void tickStorm(ServerLevel level, UUID owner, long gt) {
+        // 招雷 (持ち主のグループの人だけを狙う)
         if (gt % STRIKE_EVERY == 0) {
             List<ServerPlayer> cands = new ArrayList<>();
-            for (ServerPlayer p : level.players()) {
-                if (p.isSpectator() || p.isCreative() || !p.isAlive() || !inCorridor(p.position())) {
+            for (ServerPlayer p : Groups.alive(level, owner)) {
+                if (p.isCreative() || !inCorridor(p.position())) {
                     continue;
                 }
                 for (BlockPos r : EAST_RODS) {
@@ -162,13 +174,13 @@ final class StormEast {
             if (!cands.isEmpty()) {
                 ServerPlayer t = cands.get(level.random.nextInt(cands.size()));
                 lastTarget = t.getUUID();
-                StormStrike.call(level, t, STRIKE_WARN, STRIKE_DAMAGE, null);
+                StormStrike.call(level, t.position(), STRIKE_WARN, STRIKE_DAMAGE, null, owner);
             }
         }
         // 予告線
         if (gt % LINE_EVERY == 30) {
-            for (ServerPlayer p : level.players()) {
-                if (p.isSpectator() || !inCorridor(p.position())) {
+            for (ServerPlayer p : Groups.alive(level, owner)) {
+                if (!inCorridor(p.position())) {
                     continue;
                 }
                 double x = Math.floor(p.getX() + (level.random.nextInt(5) - 2)) + 0.5;
@@ -195,8 +207,8 @@ final class StormEast {
             StormFx.line(level, ParticleTypes.ELECTRIC_SPARK, a, b, 0.3);
             StormFx.line(level, ParticleTypes.END_ROD, a, b, 1.0);
             level.playSound(null, l.x(), y, -17, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1f, 1.6f);
-            for (ServerPlayer p : level.players()) {
-                if (p.isSpectator() || p.isCreative() || !p.isAlive() || Math.abs(p.getX() - l.x()) > 0.8 || !inCorridor(p.position())) {
+            for (ServerPlayer p : Groups.alive(level, owner)) {
+                if (p.isCreative() || Math.abs(p.getX() - l.x()) > 0.8 || !inCorridor(p.position())) {
                     continue;
                 }
                 if (hits(p.getY(), p.getBbHeight(), l.high())) {

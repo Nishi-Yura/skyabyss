@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 真珠の脈 (潮殻の心臓の段階2 の技) の真珠。狙った人をゆっくり追い (人の歩きより遅い)、触れると傷 8。
 // 叩けば消える。8 秒で消える。壁と島はすり抜ける (部屋の中だけで使う)。保存しない
-public class TidePearl extends Entity implements ItemSupplier {
+public class TidePearl extends Entity implements ItemSupplier, jp.revati.skyabyss.titan.group.GroupOwned {
     public static final double SPEED = 0.18;
     public static final int LIFE = 160;
 
@@ -37,9 +37,30 @@ public class TidePearl extends Entity implements ItemSupplier {
         this.setNoGravity(true);
     }
 
+    // 心臓のグループ (ほかのグループの人には送らない)
+    @Nullable
+    private UUID groupId;
+
+    @Override
+    @Nullable
+    public UUID groupId() {
+        return groupId;
+    }
+
+    @Override
+    public void setGroupId(@Nullable UUID group) {
+        this.groupId = group;
+    }
+
+    @Override
+    public boolean broadcastToPlayer(ServerPlayer player) {
+        return super.broadcastToPlayer(player) && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, player);
+    }
+
     public TidePearl(ServerLevel level, TideHeart heart, ServerPlayer target, Vec3 at) {
         this(TideHeartSetup.TIDE_PEARL.get(), level);
         this.heartId = heart.getUUID();
+        this.groupId = heart.groupId();
         this.targetId = target.getUUID();
         moveTo(at.x, at.y, at.z, 0f, 0f);
     }

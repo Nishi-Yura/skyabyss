@@ -147,6 +147,10 @@
     "en": "The storm's breath changes. The trials on the back have returned.",
     "ja": "嵐の息が変わった。背中の試練が元に戻った。"
   },
+  "message.skyabyss.storm.party_changed": {
+    "en": "Your party changed, and the trials with it. The wind carries you back to the wind hall.",
+    "ja": "仲間が変わり、試練の進みも変わった。風があなたを風の広間へ運んだ。"
+  },
   "message.skyabyss.storm.sleeping_west": {
     "en": "The Windbone sleeps this time. Its stone already sings.",
     "ja": "今回は風切りの骨が眠っている。石はもう鳴っている。"

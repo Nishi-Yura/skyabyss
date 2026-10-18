@@ -179,7 +179,7 @@ public final class TitanEvents {
             return 0;
         }
         TitanBackData data = TitanBackData.get(back);
-        data.resetProgress();
+        TitanBackTrials.resetAllGroups(back);
         TitanBackBuilder.build(back, data);
         ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.titan.rebuilt"), true);
         return 1;
