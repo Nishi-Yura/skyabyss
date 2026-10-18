@@ -350,6 +350,12 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 | 泡吹き bubble_puffer | A まんまる提灯 | 488 | 6 | `lp_bubble_puffer/a/`（ふくらみは体の骨の拡大と棘の骨のアニメ。ふくらんだ姿も棘・体とも合っている） |
 | 潮招き tide_beckoner | A 瓦の大蟹 | 1,489 | 12 | `lp_tide_beckoner/a/`（アトラス 512） |
 | 潮殻の心臓 tide_heart | B 珊瑚の殻 | 1,561 / 1,155 / 1,301（段階 1 / 2 / 3） | 14 / 14 / 14 | `lp_tide_heart/b/p1..p3`（`tide_heart_pN`。`TideHeartRenderer` は `LowPolyGeoRenderer` の派生で、キューブのときだけ自前の発光層、低ポリのときは `autoGlow()` の発光層） |
+| 珊瑚憑き coral_thrall | A 岩礁の溺れ人（第 2 弾） | 722 + 銛 118 | 11 | `coral_thrall2/a/`（銛 `coral_spear` は `socket_main`。像は同じメッシュ + 骨 `statue_coral`、白い石のアトラス `coral_thrall_statue.png`、像の銛は `coral_spear_statue`） |
+| 羽守 feather_warden | A 鷲兜の番人 | 610 + 鉤槍 109 | 12 | `lp_feather_warden/a/`（鉤槍 `hooked_glaive` は `socket_main`） |
+| 雷蛾 static_moth | A 綿毛の雷蛾 | 622 | 5 | `lp_static_moth/a/`（両面の薄い翅。帯電の光は `static_moth_charge.png`） |
+| 雷乞い thunder_supplicant | A 風見の籠 | 600 + 杖 76 | 9 | `lp_thunder_supplicant/a/`（杖 `supplicant_staff` は `socket_main`） |
+| 雷獣 raiju | A 嵐の狼 | 1,305（アトラス 512） | 17 | `lp_raiju/a/` |
+| 雷翼の心臓 thunder_wing_heart | A 風切りの殻 | 1,127 / 1,519 / 1,857（段階 1 / 2 / 3） | 13 | `lp_storm_heart/a/p1..p3`（`storm_heart_pN`） |
 
 入れ方で直した共通部分（`tools/install_lowpoly.py` と `client/lowpoly/`）:
 
@@ -362,7 +368,15 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 
 確かめ（台本 `tools/shots/lp_<名>.txt`、`tools/gen_lowpoly_five_shots.py` が書く。絵は `docs/review/previews/lp_*.png`）: 待機の前・斜め・横・後ろ、顔、番兵長の薙ぎ払い・叩きつけ・咆哮、射手の構えと弦、苔這いの飛びかかり・被弾・死、水路の顎の噛みつき、心臓の段階 1〜3 と登場・倒れる。動きは同じ姿勢の箱版（`cubes_*`）と並べて見た。負荷（1280x720、垂直同期なし、苔這い 20 + 射手 10 の 30 体、`tools/shots/lp_perf.txt`）: 低ポリ 6.5〜7.4 ms/frame、箱 22.1〜24.5 ms/frame（約 3.3 倍速い）。
 
-潮殻の背の 4 体は `python tools/install_lowpoly_tide.py` で一度に入る（珊瑚憑きは作り直し中なので含めない）。磯走り・泡吹きは `TideMobRenderers.lowPoly()`、潮招きは `TideBackClient.BeckonerRenderer`、心臓は `TideHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。確かめの台本は `python tools/gen_lowpoly_tide_shots.py` が `tools/shots/lp_tide_{scuttler,puffer,beckoner,heart}.txt` に書く（心臓の段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が自分で吠えて進むのを待って撮る）。絵は `docs/review/previews/lp_tide_*`（箱版は `cubes_tide_*`、モブごとの比較シートは `lp_tide_<名>_sheet.png`、心臓の登場・倒れるは `lp_tide_heart_cinematic_sheet.png`。`python tools/lowpoly_tide_sheets.py`）。負荷（`tools/shots/lp_tide_perf.txt`、磯走り 15 + 泡吹き 10 + 潮招き 2 = 27 体、1280x720、垂直同期なし）: 低ポリ 5.1〜5.6 ms/frame、箱 15.5〜16.8 ms/frame（約 3 倍速い）。
+潮殻の背の 4 体は `python tools/install_lowpoly_tide.py` で一度に入る（珊瑚憑きは下の雷翼の背のスクリプトで入る）。磯走り・泡吹きは `TideMobRenderers.lowPoly()`、潮招きは `TideBackClient.BeckonerRenderer`、心臓は `TideHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。確かめの台本は `python tools/gen_lowpoly_tide_shots.py` が `tools/shots/lp_tide_{scuttler,puffer,beckoner,heart}.txt` に書く（心臓の段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が自分で吠えて進むのを待って撮る）。絵は `docs/review/previews/lp_tide_*`（箱版は `cubes_tide_*`、モブごとの比較シートは `lp_tide_<名>_sheet.png`、心臓の登場・倒れるは `lp_tide_heart_cinematic_sheet.png`。`python tools/lowpoly_tide_sheets.py`）。負荷（`tools/shots/lp_tide_perf.txt`、磯走り 15 + 泡吹き 10 + 潮招き 2 = 27 体、1280x720、垂直同期なし）: 低ポリ 5.1〜5.6 ms/frame、箱 15.5〜16.8 ms/frame（約 3 倍速い）。
+
+雷翼の背の 5 体と珊瑚憑きは `python tools/install_lowpoly_storm.py` で一度に入る（珊瑚憑き・羽守・雷蛾・雷乞い・雷獣・心臓の段階 1〜3）。描画は羽守・雷蛾・雷乞いが `StormMobRenderers.MobRenderer`（`LowPolyGeoRenderer` の派生。鉤槍・杖は `GearLayer.lowPoly`、元の `GearLayer` は `activeWhen(!LowPoly.enabled)`）、珊瑚憑きが `TideMobRenderers.ThrallRenderer`（像のときは `LowPolyGeoRenderer.Model` を継いだ `ThrallModel` が白い石のアトラスを返し、骨 `statue_coral` を見せ、像の銛 `coral_spear_statue` に替える）、雷獣が `RaijuRenderer`（頭を向けない `Model("raiju", false)`）、心臓が `StormHeartRenderer`。どれも `LowPoly.enabled = false` で元の箱に戻る。
+
+- **雷蛾の帯電の光**: 箱の `static_moth_charge.png` は UV が違うので、低ポリでは翅の面のアトラスを明るくした `textures/lowpoly/static_moth_charge.png` を `ChargeLayer` が足す（スクリプトが焼く）。
+- **雷獣**: 低ポリでは `LowPolyGeoRenderer` の発光層（`autoGlow()` = `LowPoly.enabled`）、箱のときは自前の `GlowLayer`。
+- **雷翼の心臓の発光**: `AutoGlowingGeoLayer` は光る画素に面の陰をかけるため、核・稲妻が灰青に沈んだ（実測で本来の色の 0.6 倍）。心臓は低ポリでも箱と同じく目の光で足す（`StormHeartRenderer.GlowLayer`、`autoGlow()` = false）。足す絵は、アトラスの光る画素の色（0.8 倍）だけを載せた `textures/lowpoly/storm_heart_pN_glow.png`。ラフの段階 2・3 は、白飛びした光と、石の殻（`heart`・`vessel`）にばらまかれた 1 画素の光（ゲームではブロックの点に見えた）があったので、インストール先のコピーだけで、殻の骨の光る画素を消し、白・ほぼ白の光る色を氷色（186,220,250 など）に和らげた。ラフの入力は触らない。ゲームでは段階 3 の核は淡い氷色の六角、稲妻は青い線で読める。
+- **確かめ**: 台本は `python tools/gen_lowpoly_storm_shots.py` が `tools/shots/lp_storm_{warden,moth,moth_charged,supplicant,raiju,heart_p1,heart_p2,heart_p3,perf}.txt` と `lp_coral_thrall.txt` に書く（心臓は段階ごとに別の台本。段階 2・3 は NoAI だと段階 1 のままなので、体力を下げた AI ありの心臓が吠えて進むのを待ち、そのあと NoAI にして原点へ戻して撮る。珊瑚憑きの像は `tidemob tide high` で潮を満ちに止めてから）。比較シートは `python tools/lowpoly_storm_sheets.py` が `docs/review/previews/lp_storm_<名>_sheet.png`・`lp_coral_thrall_sheet.png` に書く（上が低ポリ、下が箱）。負荷（`tools/shots/lp_storm_perf.txt`、羽守 8 + 雷蛾 8 + 雷乞い 8 + 雷獣 2 = 26 体、1280x720、垂直同期なし、他の作業と並行）: 低ポリ 6.4〜7.3 ms/frame、箱 19.8〜22.8 ms/frame（約 3 倍速い）。
+- 雷蛾の帯電の明るさは、台本（`lp_storm_moth_charged`）では動く蛾が画面からはずれ、明るい翅を確かに撮れていない（箱版との並べも未確認）。
 
 ## 旧節番号の対応
 
