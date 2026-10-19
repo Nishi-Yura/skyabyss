@@ -5,7 +5,7 @@
 
 - heartbeat.ogg : B0 目覚め。ゆっくり落ち着いていく鼓動 (7 秒)
 - bell.ogg      : B0 の遠い鐘 / B2 の鐘の宿りの鐘。風のない朝の小さな音 (6 秒)
-- step.ogg      : B6 夜の足音。遠くの巨大な足音 + 地鳴り (3.2 秒。立ち上がりはなめらかで、急な大音は出さない)
+- step.ogg      : B6 夜の足音。遠くの巨大な足音 + 地鳴り (3.6 秒。重い低音を厚く。立ち上がりはなめらかで、急な大音は出さない)
 - rumble.ogg    : B6 足音の下で続く地鳴り (6 秒)
 - wind.ogg      : B0 目覚めの低い風 (9 秒。ゆっくり寄せて引く。音量は小さく、立ち上がりはなめらか)
 - song.ogg      : B9 夜の歌。低く長い歌 (40 秒。音量は小さく、5 秒かけて入って 7 秒かけて消える)
@@ -140,18 +140,21 @@ def bell():
 
 
 def step():
-    dur = 3.2
+    dur = 3.6
     n = int(SR * dur)
     t = t_axis(dur)
-    x = thump(t, 0.05, 48, 26, 0.55, 1.0)
-    x += 0.5 * thump(t, 0.07, 90, 40, 0.25, 1.0)
+    # 重い『どん』: 超低音の芯 (34〜46 Hz) を厚くし、少し遅れて腹に響く第二の低音を重ねる
+    x = thump(t, 0.05, 46, 24, 0.75, 1.0)
+    x += 0.8 * thump(t, 0.05, 36, 22, 0.9, 1.0)
+    x += 0.6 * thump(t, 0.07, 90, 40, 0.3, 1.0)
+    x += 0.55 * thump(t, 0.34, 40, 24, 0.7, 1.0)
     rumble_noise = lowpass(band_noise(n, 18, 140), 140)
-    x += rumble_noise * np.clip(t / 0.18, 0, 1) ** 2 * np.exp(-np.clip(t - 0.1, 0, None) / 0.95) * 0.9
-    # 土が軋む音 (控えめ)
+    x += rumble_noise * np.clip(t / 0.18, 0, 1) ** 2 * np.exp(-np.clip(t - 0.1, 0, None) / 1.2) * 1.1
+    # 土が軋む音 (不気味さのため、前より少し強く)
     crack = lowpass(band_noise(n, 150, 700), 700)
-    x += crack * np.clip((t - 0.05) / 0.06, 0, 1) ** 2 * np.exp(-np.clip(t - 0.08, 0, None) / 0.16) * 0.12
-    x = reverb(x, 2.0, 0.25)[:n]
-    x *= smooth_env(n, 0.02, 0.9)
+    x += crack * np.clip((t - 0.05) / 0.06, 0, 1) ** 2 * np.exp(-np.clip(t - 0.08, 0, None) / 0.2) * 0.2
+    x = reverb(x, 2.2, 0.25)[:n]
+    x *= smooth_env(n, 0.02, 1.0)
     return x
 
 
@@ -213,14 +216,14 @@ if __name__ == "__main__":
     only = set(_sys.argv[1:])
     if only:
         # 名前を渡したものだけ書く (採用済みの音を上書きしない)。例: SKYABYSS_ALLOW_REGEN=1 python tools/gen_opening_sounds.py wind
-        for name, fn, peak in (("heartbeat", heartbeat, 0.75), ("bell", bell, 0.7), ("step", step, 0.85), ("rumble", rumble, 0.6),
+        for name, fn, peak in (("heartbeat", heartbeat, 0.75), ("bell", bell, 0.7), ("step", step, 0.97), ("rumble", rumble, 0.6),
                                ("wind", wind, 0.5), ("song", song, 0.6)):
             if name in only:
                 write(name + ".ogg", fn(), peak)
         _sys.exit(0)
     write("heartbeat.ogg", heartbeat(), 0.75)
     write("bell.ogg", bell(), 0.7)
-    write("step.ogg", step(), 0.85)
+    write("step.ogg", step(), 0.97)
     write("rumble.ogg", rumble(), 0.6)
     write("wind.ogg", wind(), 0.5)
     write("song.ogg", song(), 0.6)

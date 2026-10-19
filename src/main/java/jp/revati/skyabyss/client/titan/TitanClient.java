@@ -168,7 +168,11 @@ public final class TitanClient {
     }
 
     // 背中の上でだけ鳴り続ける風
+    static final float BACK_WIND_VOLUME = 0.4f;
+
     private static final class WindSound extends AbstractTickableSoundInstance {
+        private float indoor;
+
         WindSound() {
             super(ModSounds.TITAN_WIND.get(), SoundSource.AMBIENT, RandomSource.create());
             this.looping = true;
@@ -184,7 +188,14 @@ public final class TitanClient {
 
         @Override
         public void tick() {
-            float target = onBack() ? 0.7f : 0f;
+            // 前は 0.7 で一定だった。ogg 側で突風と静けさを作り、全体も下げた (約 -10 dB)。屋内 (空が見えない所) はさらに小さく
+            Minecraft mc = Minecraft.getInstance();
+            float target = 0f;
+            if (onBack() && mc.player != null) {
+                boolean open = mc.level.canSeeSky(mc.player.blockPosition().above());
+                indoor += ((open ? 0f : 1f) - indoor) * 0.03f;
+                target = BACK_WIND_VOLUME * (1f - 0.7f * indoor);
+            }
             this.volume += (target - this.volume) * 0.05f;
             if (!onBack() && this.volume < 0.01f) {
                 stop();
