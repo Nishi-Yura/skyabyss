@@ -7,7 +7,7 @@
     },
     {
       "when": {
-        "count": "1|2|3|4|5"
+        "count": "1|2|3"
       },
       "apply": {
         "model": "skyabyss:block/anemone_tally_dot0"
@@ -15,7 +15,7 @@
     },
     {
       "when": {
-        "count": "2|3|4|5"
+        "count": "2|3"
       },
       "apply": {
         "model": "skyabyss:block/anemone_tally_dot1"
@@ -23,26 +23,10 @@
     },
     {
       "when": {
-        "count": "3|4|5"
+        "count": "3"
       },
       "apply": {
         "model": "skyabyss:block/anemone_tally_dot2"
-      }
-    },
-    {
-      "when": {
-        "count": "4|5"
-      },
-      "apply": {
-        "model": "skyabyss:block/anemone_tally_dot3"
-      }
-    },
-    {
-      "when": {
-        "count": "5"
-      },
-      "apply": {
-        "model": "skyabyss:block/anemone_tally_dot4"
       }
     }
   ]

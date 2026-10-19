@@ -62,7 +62,7 @@ public final class TitanBackAudit {
         if (mz != null) {
             s.goals.put("rest mz (maze mid ledge)", mz);
         }
-        // 灯の台 (23): 5 つぜんぶ、水の中を泳いで台の上まで行けること (戸は開いているものとして通る)
+        // 灯の台 (23): 3 つぜんぶ、水の中を泳いで台の上まで行けること (戸は開いているものとして通る)
         java.util.List<BlockPos> stands = AnemoneLights.stands(TitanBackData.get(level).mazeSeed());
         for (int i = 0; i < stands.size(); i++) {
             s.goals.put("lamp stand " + (i + 1), stands.get(i).above());

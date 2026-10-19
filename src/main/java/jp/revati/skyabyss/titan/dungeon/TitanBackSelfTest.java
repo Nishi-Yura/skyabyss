@@ -820,12 +820,14 @@ public final class TitanBackSelfTest {
     }
 
     private static void checkPockets(ServerLevel level, List<String> failures) {
-        List<BlockPos> pockets = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
-        if (pockets.size() < 2) {
-            failures.add("maze has too few breathing pockets on the path (" + pockets.size() + ")");
+        // 枝道のくぼみも含めた、すべてのくぼみ (正しい道は 3 マスごと、どのマスも 2 マス以内: MazePlan)
+        List<BlockPos> pockets = MazeBuilder.allPockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
+        if (pockets.size() < 6) {
+            failures.add("maze has too few breathing pockets (" + pockets.size() + ")");
         }
         int flooded = 0;
-        BlockPos mid = pockets.isEmpty() ? null : MazeBuilder.midPocket(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
+        BlockPos mid = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed())).isEmpty() ? null
+                : MazeBuilder.midPocket(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
         for (BlockPos p : pockets) {
             String bad = null;
             for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
@@ -853,7 +855,7 @@ public final class TitanBackSelfTest {
                 failures.add("breathing pocket at " + p.toShortString() + " is flooded or blocked after " + MAZE_SETTLE_TICKS + " ticks: " + bad);
             }
         }
-        SkyAbyss.LOGGER.info("SELFTEST maze pockets: {} on the path, {} flooded", pockets.size(), flooded);
+        SkyAbyss.LOGGER.info("SELFTEST maze pockets: {} in all, {} flooded", pockets.size(), flooded);
     }
 
     // 宝物庫: 台座は飾りとして残る。宝箱はもうない (欠片と装備は心臓を倒したときに渡す)

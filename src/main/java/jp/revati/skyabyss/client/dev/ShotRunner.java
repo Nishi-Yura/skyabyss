@@ -188,8 +188,13 @@ public final class ShotRunner {
         if (mc.level != null || mc.getSingleplayerServer() != null) {
             return;
         }
-        // タイトル画面か、初回の案内の画面が出たら入る
+        // タイトル画面か、初回の案内の画面が出たら入る。ただし読み込みの幕 (LoadingOverlay) がまだ上がっている間は入らない
+        // (幕の終わりの呼び出しの中で世界を作ると、世界の読み込みが幕の消えるのを待って止まる。onClientTick が幕が消えてから入る)
         if (screen instanceof TitleScreen || screen.getClass().getSimpleName().contains("Onboarding")) {
+            if (mc.getOverlay() != null) {
+                say("title screen while the loading overlay is still up; entering the world once it is gone");
+                return;
+            }
             worldRequested = true;
             mc.execute(ShotRunner::enterWorld);
         } else {
@@ -246,6 +251,12 @@ public final class ShotRunner {
         Minecraft mc = Minecraft.getInstance();
         if (Util.getMillis() > deadline) {
             fail("timed out after " + script.timeoutSeconds + " s at step " + (index + 1));
+            return;
+        }
+        if (!worldRequested && mc.level == null && mc.getSingleplayerServer() == null && mc.getOverlay() == null
+                && (mc.screen instanceof TitleScreen || (mc.screen != null && mc.screen.getClass().getSimpleName().contains("Onboarding")))) {
+            worldRequested = true;
+            mc.execute(ShotRunner::enterWorld);
             return;
         }
         if (mc.level == null || mc.player == null) {
