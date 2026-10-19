@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 
+import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.cinematic.DialogueLine;
+import jp.revati.skyabyss.cinematic.VoiceTiming;
 import jp.revati.skyabyss.client.opening.OpeningOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -116,9 +118,12 @@ final class CinematicScreen extends Screen {
     // 台詞: 話し手ごとに色と見せ方が違う。画面の下、黒帯のすぐ上に、薄い暗がりを敷いて
     private void renderLine(GuiGraphics g, Font font, CinematicClient.Run r, float sec, int w, int h, int barFull) {
         DialogueLine line = null;
-        for (DialogueLine l : r.scene.lines()) {
+        int lineIndex = -1;
+        for (int i = 0; i < r.scene.lines().size(); i++) {
+            DialogueLine l = r.scene.lines().get(i);
             if (sec >= l.at() && sec <= l.end()) {
                 line = l;
+                lineIndex = i;
                 break;
             }
         }
@@ -170,10 +175,45 @@ final class CinematicScreen extends Screen {
         g.fill(cx - 36, top - 6, cx + 36, top - 5, ((int) (a * 0xB0) << 24) | accent);
         g.drawCenteredString(font, label, cx, top, alpha | labelColor);
         int y = top + 13;
+        // 声に合わせて文字が出る (docs/design/20 の 5 章)。幅は全文で決めて、出るたびに文がずれないようにする。
+        // 声のない台詞・設定が INSTANT・スキップを押している間・終わりの暗転は全文
+        int total = 0;
         for (FormattedCharSequence row : rows) {
-            g.drawString(font, row, cx - font.width(row) / 2, y, alpha | 0xFFFFFF, true);
+            total += charCount(row);
+        }
+        int shown = total;
+        if (Config.SUBTITLE_REVEAL.get() == Config.SubtitleReveal.SYNCED && r.phase == CinematicClient.Phase.PLAY && r.skipHeld == 0) {
+            shown = VoiceTiming.revealCount(VoiceTiming.of(r.scene.id(), lineIndex), sec - line.at(), total);
+        }
+        int left = shown;
+        for (FormattedCharSequence row : rows) {
+            int n = charCount(row);
+            int x = cx - font.width(row) / 2;
+            if (left >= n) {
+                g.drawString(font, row, x, y, alpha | 0xFFFFFF, true);
+            } else if (left > 0) {
+                g.drawString(font, prefix(row, left), x, y, alpha | 0xFFFFFF, true);
+            }
+            left = Math.max(0, left - n);
             y += 12;
         }
+    }
+
+    private static int charCount(FormattedCharSequence row) {
+        int[] n = {0};
+        row.accept((pos, style, cp) -> {
+            n[0]++;
+            return true;
+        });
+        return n[0];
+    }
+
+    // 先頭から limit 文字だけの列 (書式は元のまま)
+    private static FormattedCharSequence prefix(FormattedCharSequence row, int limit) {
+        return sink -> {
+            int[] n = {0};
+            return row.accept((pos, style, cp) -> n[0]++ < limit ? sink.accept(pos, style, cp) : false);
+        };
     }
 
     // スキップの案内: 右下。始めは濃く、あとは控えめに。押している間は進みの線が伸びる

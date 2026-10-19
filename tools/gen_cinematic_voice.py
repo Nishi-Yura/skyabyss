@@ -5,6 +5,7 @@
 
 使い方 (リポジトリ直下で):
   python tools/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の声を assets に書く (既定 a)
+  (--install は voice_timing.json も書く: 字幕が声に合わせて出る時刻。各文字が出る秒と全体の長さ)
   python tools/gen_cinematic_voice.py --check                      # 全台詞にクリップと音の登録があり、長さが台詞の表示時間に収まるか
   python tools/gen_cinematic_voice.py --review2                    # 自然さを磨いた A2/A3/A4 と A の見本を docs/review/voice2/ に書く
   python tools/gen_cinematic_voice.py --review                     # 3 案の見本を docs/review/voice/ に書く (選定ページ)
@@ -98,42 +99,46 @@ def tokenize(text):
     toks = []
     i = 0
     ell = 0
+    ell_i = 0
     while i < len(text):
         ch = text[i]
+        ci = i  # この文字の位置 (字幕の出る時刻の対応に使う)
         i += 1
         if ch in "…・" or ch in "―—":
+            if not ell:
+                ell_i = ci
             ell += 1
             continue
         if ell:
-            toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55)})
+            toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55), "i": ell_i})
             ell = 0
         if ch in KANA:
             c, v = KANA[ch]
-            toks.append({"t": "m", "c": c, "v": v, "len": 1.0})
+            toks.append({"t": "m", "c": c, "v": v, "len": 1.0, "i": ci})
         elif ch in SMALL_Y and toks and toks[-1]["t"] == "m":
             toks[-1]["v"] = SMALL_Y[ch]
             toks[-1]["len"] = 1.0
         elif ch in SMALL_V and toks and toks[-1]["t"] == "m":
             toks[-1]["v"] = SMALL_V[ch]
         elif ch in "んン":
-            toks.append({"t": "m", "c": "", "v": "n", "len": 1.0})
+            toks.append({"t": "m", "c": "", "v": "n", "len": 1.0, "i": ci})
         elif ch in "っッ":
-            toks.append({"t": "p", "s": 0.06})
+            toks.append({"t": "p", "s": 0.06, "i": ci})
         elif ch == "ー" and toks and toks[-1]["t"] == "m":
-            toks.append({"t": "m", "c": "", "v": toks[-1]["v"], "len": 1.0})
+            toks.append({"t": "m", "c": "", "v": toks[-1]["v"], "len": 1.0, "i": ci})
         elif is_kanji(ch):
             n = 1 if ch in ONE_MORA_KANJI else 2
             for k in range(n):
                 h = ord(ch) * 31 + k * 17
                 toks.append({"t": "m", "c": KANJI_CONS[h % len(KANJI_CONS)] if k == 0 else KANJI_CONS[(h // 7) % len(KANJI_CONS)],
-                             "v": "aiueo"[(h // 3) % 5], "len": 1.0})
+                             "v": "aiueo"[(h // 3) % 5], "len": 1.0, "i": ci})
         elif ch in PAUSE_SHORT:
-            toks.append({"t": "p", "s": 0.17})
+            toks.append({"t": "p", "s": 0.17, "i": ci})
         elif ch in PAUSE_LONG:
-            toks.append({"t": "p", "s": 0.32})
+            toks.append({"t": "p", "s": 0.32, "i": ci})
         # ほかの文字 (「」・英数字・空白) は無視
     if ell:
-        toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55)})
+        toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55), "i": ell_i})
     # 間の連続をまとめ、最後の間は落とす
     out = []
     for t in toks:
@@ -159,11 +164,11 @@ def plan(text, spk, avail, rng):
     t = 0.0
     for tok in toks:
         if tok["t"] == "p":
-            ev.append({"t": "p", "at": t, "d": tok["s"]})
+            ev.append({"t": "p", "at": t, "d": tok["s"], "i": tok["i"]})
             t += tok["s"]
         else:
             d = base * tok["len"] * (1 + rng.uniform(-spk["jitter"], spk["jitter"]))
-            ev.append({"t": "m", "at": t, "d": d, "c": tok["c"], "v": tok["v"]})
+            ev.append({"t": "m", "at": t, "d": d, "c": tok["c"], "v": tok["v"], "i": tok["i"]})
             t += d
     t_nat = max(t, 0.2)
     tail_keep = 0.5 * spk["rev"][0] * (spk["rev"][1] > 0.15)
@@ -177,12 +182,35 @@ def plan(text, spk, avail, rng):
     for e in ev:
         e["at"] *= s
         e["d"] *= s
+    starts = char_starts(text, ev, target)
     ev = [e for e in ev if e["at"] + e["d"] * 0.8 <= target]
     while ev and ev[-1]["t"] == "p":
         ev.pop()
     if not ev:
-        ev = [{"t": "m", "at": 0.0, "d": min(base, target), "c": "", "v": "n"}]
-    return ev, target
+        ev = [{"t": "m", "at": 0.0, "d": min(base, target), "c": "", "v": "n", "i": 0}]
+    return ev, target, starts
+
+
+def char_starts(text, ev, target):
+    """字幕用: 本文の各文字が出る時刻 (秒)。拍の文字はその拍の頭、句読点は間の頭、小さい ゃゅょ や括弧などは直前の拍の頭、
+    入りきらず落ちた尻は声の終わり (target)。漢字は 2 拍でも最初の拍の頭"""
+    first = {}
+    for e in ev:
+        first.setdefault(e["i"], e["at"])
+    out = []
+    cur = 0.0
+    for j in range(len(text)):
+        if j in first:
+            cur = first[j]
+        out.append(min(cur, target))
+    # 落ちた尻 (target に届かない拍の文字) は声の終わりに出す
+    kept_end = max([e["at"] for e in ev if e["at"] + e["d"] * 0.8 <= target] + [0.0])
+    for j, c in enumerate(out):
+        if j in first and first[j] > kept_end:
+            out[j] = target
+    for j in range(1, len(out)):
+        out[j] = max(out[j], out[j - 1])
+    return out
 
 
 # ----------------------------------------------------------------------------- 音の部品
@@ -452,6 +480,8 @@ def style_soft(events, length, spk, rng, mode):
         phrases.append(cur)
     xs, ss = [], []
     base_shift = {"a2": -2.0, "a3": -3.0, "a4": -1.0}[mode]
+    if mode == "a4":
+        base_shift += rng.uniform(-1.3, 1.3)  # 台詞ごとに少し高さを変える (同じ声の繰り返しに聞こえないように)
     for pi, ph in enumerate(phrases):
         last = pi == len(phrases) - 1
         for i, e in enumerate(ph):
@@ -479,10 +509,14 @@ def style_soft(events, length, spk, rng, mode):
             e["v"] = "n"
         ev2.append(e)
     ms = ev2
-    att, rel = {"a2": (0.05, 0.10), "a3": (0.07, 0.12), "a4": (0.11, 0.16)}[mode]
+    att, rel = {"a2": (0.05, 0.10), "a3": (0.07, 0.12), "a4": (0.13, 0.19)}[mode]
+    # a4: 拍ごとの強弱は交互の規則 (繰り返しに聞こえる) をやめ、ゆっくり動く乱数のなだらかな波にする
+    walk = np.clip(0.88 + np.cumsum(rng.uniform(-0.07, 0.07, len(ms) + 1)), 0.7, 1.0) if mode == "a4" else None
     for i, e in enumerate(ms):
         # 句の頭は強め、あとへ向かって弱く。語の中は強弱をつけすぎない
         loud = rng.uniform(0.78, 1.0) * (0.86 if i % 2 else 1.0)
+        if walk is not None:
+            loud = float(walk[i])
         amp += env_bump(n, e["at"] - 0.01, e["at"] + e["d"] * 1.12, att, rel, 0.9) * loud
         cons += consonant(n, e, rng, {"a2": 0.4, "a3": 0.18, "a4": 0.15}[mode])
     amp = np.minimum(amp, 1.0)
@@ -490,7 +524,7 @@ def style_soft(events, length, spk, rng, mode):
     for a, b in zip(events, events[1:]):
         if a["t"] == "p" and a["d"] >= 0.15:
             breath += env_bump(n, a["at"] + 0.02, a["at"] + min(a["d"], 0.3) - 0.01, 0.05, 0.08, 1.0) * band_noise(n, rng, 600, 4500) * {"a2": 0.16, "a3": 0.1, "a4": 0.2}[mode]
-    forms = vowel_track(ms, n, spk, 60)
+    forms = vowel_track(ms, n, spk, 95 if mode == "a4" else 60)
     out = dict(f0=f0, amp=amp, forms=forms, cons=cons, breath=breath, whisper=False)
     if mode == "a2":
         out.update(vmix=np.ones(n), nmix=np.full(n, spk["breath"] * 0.3))
@@ -518,14 +552,19 @@ LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200}
 
 
 def render_voice(style, text, speaker, avail, seed_key):
+    return render_voice_timed(style, text, speaker, avail, seed_key)[0]
+
+
+def render_voice_timed(style, text, speaker, avail, seed_key):
+    """(波形, 字幕の時刻 {"n": 文字数, "dur": 秒, "t": [各文字の出る時刻]})"""
     spk = dict(SPEAKERS[speaker])
     if style in ("a2", "a3", "a4"):
         spk["mora"] *= 1.2  # ゆっくり
     CUR_TEXT[0] = text
     rng = np.random.default_rng(zlib.crc32((seed_key + style + speaker).encode("utf-8")))
-    events, length = plan(text, spk, avail, rng)
+    events, length, starts = plan(text, spk, avail, rng)
     if not any(e["t"] == "m" for e in events):
-        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n"}]
+        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
         length = spk["mora"]
     c = STYLE_FN[style](events, length, spk, rng)
     n = len(c["amp"])
@@ -562,7 +601,10 @@ def render_voice(style, text, speaker, avail, seed_key):
     elif style == "a4":
         rv, mix = rv * 1.8 + 0.7, min(0.75, mix * 1.6 + 0.3)
     y = reverb(y, rv, mix, rng)
-    return finish(y, avail - 0.05, LEVEL[style], 0.08 if style in LOWPASS else 0.02)
+    y = finish(y, avail - 0.05, LEVEL[style], 0.08 if style in LOWPASS else 0.02)
+    dur = len(y) / SR
+    meta = {"n": len(text), "dur": round(dur, 3), "t": [round(min(x, dur), 3) for x in starts]}
+    return y, meta
 
 
 def finish(y, max_len=None, level=0.10, fade_in=0.02):
@@ -631,10 +673,12 @@ def install(style):
     lang = load_lang()
     lines = load_manifest()
     sounds = {}
+    timing = {}
     total = 0
     for ln in lines:
         text = lang[ln["text"]]
-        y = render_voice(style, text, speaker_name(ln), ln["duration"], ln["scene"] + str(ln["idx"]))
+        y, meta = render_voice_timed(style, text, speaker_name(ln), ln["duration"], ln["scene"] + str(ln["idx"]))
+        timing[event_name(ln["scene"], ln["idx"])] = meta
         p = clip_path(ln["scene"], ln["idx"])
         write_ogg(p, y)
         total += p.stat().st_size
@@ -643,6 +687,7 @@ def install(style):
             "sounds": [{"name": f"skyabyss_cinematic:voice/{ln['scene']}/l{ln['idx']}", "stream": False}],
         }
     (CINE / "sounds.json").write_text(json.dumps(sounds, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (CINE / "voice_timing.json").write_text(json.dumps(timing, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     (CINE / "voice_style.txt").write_text(style + "\n", encoding="utf-8")
     print(f"style {style}: {len(lines)} clips, {total / 1024:.0f} KiB")
 
@@ -651,6 +696,7 @@ def check():
     lines = load_manifest()
     lang = load_lang()
     sj = json.loads((CINE / "sounds.json").read_text(encoding="utf-8"))
+    timing = json.loads((CINE / "voice_timing.json").read_text(encoding="utf-8"))
     bad = []
     tot = 0
     for ln in lines:
@@ -670,6 +716,17 @@ def check():
             bad.append(f"{p.name}: not mono {SR}")
         if not (0.4 * ln["duration"] <= d <= ln["duration"] + 0.05):
             bad.append(f"{name}: clip {d:.2f}s vs line {ln['duration']:.2f}s")
+        tm = timing.get(name)
+        if tm is None:
+            bad.append(f"no timing {name}")
+        else:
+            ts = tm["t"]
+            if tm["n"] != len(lang[ln["text"]]) or len(ts) != tm["n"]:
+                bad.append(f"{name}: timing n={tm['n']} vs ja text {len(lang[ln['text']])}")
+            if abs(tm["dur"] - d) > 0.01:
+                bad.append(f"{name}: timing dur {tm['dur']:.3f} vs clip {d:.3f}")
+            if any(b < a for a, b in zip(ts, ts[1:])) or (ts and (ts[0] < 0 or ts[-1] > tm["dur"] + 1e-6)):
+                bad.append(f"{name}: timing not monotonic / out of range")
     print(f"{len(lines)} lines, {tot / 1024:.0f} KiB")
     if tot > 8 * 1024 * 1024:
         bad.append("clips over 8 MiB")

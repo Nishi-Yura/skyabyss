@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 // 東の試練 雷の骨 (12 の 4.2節)。
-// - 招雷: 嵐のあいだ 4 秒ごとに、回廊の中で、まだ満ちていない柱から 6 ブロック以内にいる誰か一人 (直前と別の人) の足もとに輪。
+// - 招雷: 嵐のあいだ 4 秒ごと (凪は 8 秒ごと)に、回廊の中で、まだ満ちていない柱から 6 ブロック以内にいる誰か一人 (直前と別の人) の足もとに輪。
 //   輪が柱から 3 ブロック以内なら雷は柱へ (人には当たらない)。柱から離れた所にいる人は狙われない
 // - 柱は 3 回受けると満ち、対になる骨の戸が開く (リセットまで開いたまま)。柱の段は根元の 3 つの電球で見える
 // - 予告線 (放電): 嵐のあいだ 3 秒ごとに、回廊の人のそばに壁から壁へ 1.2 秒光る線。低い線 (床から 1 段。跳び越す) と
@@ -37,6 +37,8 @@ import org.joml.Vector3f;
 // (開けた戸の柱は満ちている)。骨の戸はグループごとの扉 (doorBlocks): 柱を満たしたグループにだけ開く
 final class StormEast {
     static final int STRIKE_EVERY = 80;
+    // 凪の招雷の間 (嵐の倍)
+    static final int CALM_STRIKE_EVERY = 160;
     static final int STRIKE_WARN = 24;
     static final float STRIKE_DAMAGE = 11f;
     static final int LINE_EVERY = 60;
@@ -128,11 +130,16 @@ final class StormEast {
                 openFullDoors(level, StormProgress.of(level, owner));
             }
         }
-        if (owner == null || peaceful || StormBackClock.phase(level) != StormBackClock.Phase.STORM) {
+        if (owner == null || peaceful) {
             LINES.clear();
             return;
         }
-        StormFx.to(owner, () -> tickStorm(level, owner, gt));
+        // どの拍でも雷は落ちて柱は満ちる (25 の 2章)。拍が変えるのは遊び方: 凪は間が長く (16 秒)、放電の線もない。嵐は 8 秒おきで、線が走る
+        boolean storm = StormBackClock.phase(level) == StormBackClock.Phase.STORM;
+        if (!storm) {
+            LINES.clear();
+        }
+        StormFx.to(owner, () -> tickStorm(level, owner, gt, storm));
     }
 
     // 満ちた柱の戸を、回廊の持ち主のグループにだけ開ける
@@ -153,9 +160,9 @@ final class StormEast {
         }
     }
 
-    private static void tickStorm(ServerLevel level, UUID owner, long gt) {
+    private static void tickStorm(ServerLevel level, UUID owner, long gt, boolean storm) {
         // 招雷 (持ち主のグループの人だけを狙う)
-        if (gt % STRIKE_EVERY == 0) {
+        if (gt % (storm ? STRIKE_EVERY : CALM_STRIKE_EVERY) == 0) {
             List<ServerPlayer> cands = new ArrayList<>();
             for (ServerPlayer p : Groups.alive(level, owner)) {
                 if (p.isCreative() || !inCorridor(p.position())) {
@@ -177,8 +184,8 @@ final class StormEast {
                 StormStrike.call(level, t.position(), STRIKE_WARN, STRIKE_DAMAGE, null, owner);
             }
         }
-        // 予告線
-        if (gt % LINE_EVERY == 30) {
+        // 予告線 (嵐だけ)
+        if (storm && gt % LINE_EVERY == 30) {
             for (ServerPlayer p : Groups.alive(level, owner)) {
                 if (!inCorridor(p.position())) {
                     continue;

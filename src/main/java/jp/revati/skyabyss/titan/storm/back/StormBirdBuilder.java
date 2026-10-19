@@ -591,6 +591,10 @@ public final class StormBirdBuilder {
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY() - 1, MIRROR_RESET.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
                 .setValue(StormBlocks.ReturnMirror.FACING, Direction.EAST));
+        // 眼の間の入口の東の隅にもう一つ (鏡の台と同じ高さ)
+        kit.put(MIRROR_RESET_HALL.getX(), MIRROR_RESET_HALL.getY() - 1, MIRROR_RESET_HALL.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
+        kit.put(MIRROR_RESET_HALL.getX(), MIRROR_RESET_HALL.getY(), MIRROR_RESET_HALL.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
+                .setValue(StormBlocks.ReturnMirror.FACING, Direction.WEST));
     }
 
     // ---------------------------------------------------------------- 竜骨の門の下: 低い道・螺旋・床 121 の道・前室・竜骨の間

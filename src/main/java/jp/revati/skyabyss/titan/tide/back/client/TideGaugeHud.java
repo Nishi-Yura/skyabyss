@@ -162,7 +162,7 @@ public final class TideGaugeHud {
         int w = goalWidth(g.guiWidth());
         int h = goalHeight(mc, w);
         int x = BackGaugeHud.left(g, w);
-        boolean done = gauge.goal().endsWith(".done") || gauge.goal().endsWith(".sleep");
+        boolean done = gauge.goal().endsWith(".done");
         BackGaugeHud.frame(g, x, y, w, h, 0xB0101C22, done ? 0xFFF0E8B0 : 0xFF5FB8B0);
         String trial = gauge.goal().substring(0, gauge.goal().indexOf('.'));
         Component title = Component.translatable("gui.skyabyss.tide_goal.title." + trial);

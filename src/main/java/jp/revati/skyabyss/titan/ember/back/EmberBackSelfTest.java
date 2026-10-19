@@ -528,22 +528,24 @@ public final class EmberBackSelfTest {
         expect(state.resets() == resets + 1 && state.rungCount() == 0 && !state.gateOpen(), "a reset does not clear the stones and gate");
         expect(!EmberBackTrials.gateOpenFor(back, GROUP_A), "a reset does not close the gate for the group");
         expect(!overlayHas(back, GROUP_A, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)), "a reset does not dim the stones");
-        // 眠る試練: 東が眠ると smith も眠り、東の石は最初から鳴っている (部屋の持ち主のグループにとって)
+        // 静かな試練: 東が静かだと smith の部屋も静かな周になるが、石は鳴っておらず (最後までできる)、やさしい打つ順になる (部屋の持ち主のグループにとって)
         EmberRooms.claimForTest(back, EmberRooms.EAST, GROUP_A);
         EmberRooms.claimForTest(back, EmberRooms.WEST, GROUP_A);
-        EmberBackTrials.setSleeping(back, GROUP_A, EmberBackState.Trial.EAST);
-        expect(state.rung(EmberBackState.Trial.EAST) && EmberBackTrials.sleeping(back, "smith") && EmberBackTrials.sleeping(back, "east")
-                && !EmberBackTrials.sleeping(back, "west"), "a sleeping east does not ring its stone or put the smith to sleep");
-        expect(!EmberBackState.of(back, GROUP_B).sleeping(EmberBackState.Trial.EAST), "group A's sleeping trial leaked into group B");
-        // 心臓を倒したことがあれば、次のリセットで一つ眠る (同じ試練は二回続けて眠らない)
+        EmberBackTrials.setQuiet(back, GROUP_A, EmberBackState.Trial.EAST);
+        expect(!state.rung(EmberBackState.Trial.EAST) && state.rungCount() == 0 && EmberBackTrials.quiet(back, "smith") && EmberBackTrials.quiet(back, "east")
+                && !EmberBackTrials.quiet(back, "west"), "a quiet east rang its stone for free or did not quiet the smith room");
+        expect(state.forgePattern(4) == 0, "a quiet east does not use the gentlest forging order");
+        expect(!state.hasProgress(), "a quiet trial counted as progress");
+        expect(!EmberBackState.of(back, GROUP_B).quiet(EmberBackState.Trial.EAST), "group A's quiet trial leaked into group B");
+        // 心臓を倒したことがあれば、次のリセットで一つ静かな試練になる (同じ試練は二回続けて静かにならない)
         state.markEverDefeated();
         EmberBackTrials.resetGroup(back, GROUP_A, false, null, false);
         expect(EmberRooms.owner(EmberRooms.EAST) == null, "a group reset kept the group's room");
-        expect(state.sleeping() != null && state.sleeping() != EmberBackState.Trial.EAST, "after the heart fell, a reset does not put another trial to sleep: "
-                + state.sleeping());
+        expect(state.quiet() != null && state.quiet() != EmberBackState.Trial.EAST, "after the heart fell, a reset does not quiet another trial: "
+                + state.quiet());
         expect(state.everDefeated(), "a reset forgot that the group stilled the heart once");
         EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
-        expect(state.sleeping() == null, "noSleep still put a trial to sleep");
+        expect(state.quiet() == null, "noSleep still quieted a trial");
         state.setEverDefeated(false);
     }
 
