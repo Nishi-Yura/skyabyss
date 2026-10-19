@@ -115,6 +115,13 @@ public class SkillScreen extends Screen {
         refresh();
     }
 
+    // 撮影用: 技を選んだ状態で開く
+    public SkillScreen select(Skill skill) {
+        selected = skill;
+        tree = skill.tree;
+        return this;
+    }
+
     private SkillData data() {
         return SkillManager.get(minecraft.player);
     }

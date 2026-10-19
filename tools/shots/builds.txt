@@ -1,0 +1,63 @@
+# ビルド (天職・刻印・木の印・伝説の書き換え) の確認。./gradlew runShots -Pscript=tools/shots/builds.txt
+# 絵は python tools/builds_sheet.py で docs/review/previews/builds_sheet.png にまとめる (音はランナーが消す)
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 12
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 20
+cmd skyabyss skill learn @p titan_cleave 2
+cmd skyabyss skill learn @p lunge 1
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+# 1. 天職の前: 木の 1 行目だけ
+open skills
+wait 20
+shot builds_1_before
+close
+wait 10
+
+# 2. 天職を選ぶ画面
+open calling
+wait 20
+shot builds_2_calling
+close
+wait 10
+
+# 3. 天職のあと: 岩守り。巨神斬りを極めて刻印の行、岩呼びを極めて伝説の書き換えの行 (羽守の鉤槍を持つ)
+cmd skyabyss level set @p 30
+cmd skyabyss skill points @p 40
+cmd skyabyss skill calling @p rock
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p rock_call 2
+cmd skyabyss skill rune @p titan_cleave 2
+cmd give @p skyabyss:warden_glaive
+wait 20
+open skills_cleave
+wait 20
+shot builds_3_rune
+close
+wait 10
+open skills_rockcall
+wait 20
+shot builds_4_legend
+close
+wait 10
+
+# 4. 二つ目の天職の画面
+open calling2
+wait 20
+shot builds_5_calling2
+close
+wait 10
