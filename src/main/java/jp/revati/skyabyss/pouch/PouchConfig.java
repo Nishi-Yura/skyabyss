@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 
 // 留め袋の決まりを一か所にまとめた定数 (docs/design/22_mod_pouch.md の 14 章の未決の答えが出たら、ここだけを直す)。
-//   名前          : 画面・知らせの文は lang の skyabyss_pouch.name だけ (仮は「留め袋」)。コードに名前は書かない
+//   名前          : 画面・知らせの文は lang の skyabyss_pouch.name だけ (旅嚢)。コードに名前は書かない
 //   範囲 (204)    : ENABLED_CATEGORIES。小さな素材を外すなら SMALL を、書を外すなら BOOK を取る
 //   取り出し (203): WITHDRAW_CATEGORIES (取り出して渡せる区分) と、ゲームルール skyabyssPouchWithdraw (0 で全部不可)
 //   使う道具      : USE_TOOLS_IN_POUCH。笛・貝・風見鶏・書は「手に持って右クリック」で使うので、
@@ -44,10 +44,10 @@ public final class PouchConfig {
     public static final Set<Category> WITHDRAW_CATEGORIES = EnumSet.of(Category.RESONANCE, Category.MATERIAL, Category.SMALL);
 
     // 手に持たないと使えない道具 (笛・貝・風見鶏・書・頁) を袋へ入れるか。使う入力 (P6) ができたら true にする
-    public static final boolean USE_TOOLS_IN_POUCH = false;
+    public static final boolean USE_TOOLS_IN_POUCH = true;
 
     // ゲームルール skyabyssPouchWithdraw の既定 (1 = 取り出せる、0 = 取り出せない)
-    public static final int WITHDRAW_DEFAULT = 1;
+    public static final int WITHDRAW_DEFAULT = 0;
 
     // 取りこぼしの掃除 (持ち物にある袋の品を袋へ移す) の間隔 (tick)
     public static final int SWEEP_INTERVAL = 20;
@@ -55,9 +55,9 @@ public final class PouchConfig {
     // 「袋がいっぱい」を同じ人に繰り返さない間隔 (tick)
     public static final int FULL_NOTICE_COOLDOWN = 600;
 
-    // 袋の親スイッチ (ゲームルール skyabyssPouch。既定は切)。切の間は、拾う・掃除・移し替え・渡しの袋行きをしない (昔の渡し方のまま)。
-    // 袋の中身は読む側が数え続け、`/skyabyss pouch take` で取り出せる (切にしても中身は失われない)。画面と使う入力ができたら既定を入にする
-    public static final boolean ENABLED_DEFAULT = false;
+    // 袋の親スイッチ (ゲームルール skyabyssPouch。既定は入。切にすると)。切の間は、拾う・掃除・移し替え・渡しの袋行きをしない (昔の渡し方のまま)。
+    // 袋の中身は読む側が数え続け、`/skyabyss pouch take` で取り出せる (切にしても中身は失われない)。画面 (PouchScreen) と使う入力 (PouchUsable) ができたので、既定は入
+    public static final boolean ENABLED_DEFAULT = true;
 
     public static GameRules.Key<GameRules.BooleanValue> MASTER_RULE;
 

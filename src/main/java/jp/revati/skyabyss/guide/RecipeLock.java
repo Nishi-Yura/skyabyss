@@ -21,7 +21,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 //   - 対象 = WayfarerNotes に登録された章のレシピの ID (旅装・砥石・糧・薬。登録した時点で自動で鍵がかかる)
 //   - 解く = 旅の覚書を開く / 職人に教わる (どちらも WayfarerNotes.unlockRecipes = レシピブックに入る)。人ごと
 //   - 作業台と持ち物の 2x2 の完成品の枠に、鍵のかかったレシピの品が出たら、毎 tick その枠を空にし、一行 (5 秒に一度) 知らせる。
-//     取り出す手前の競り合い (同じ tick の続けざまの操作) は、作られた直後の品を消して取りこぼしを防ぐ (材料は戻らない。通常の操作では起きない)
+//     取り出す手前の競り合い (同じ tick の続けざまの操作) は、作られた直後の品を消し、使われた材料を返す (材料は失われない)
 //   - 創造モードは問わない。バニラのレシピ・ほかの Mod のレシピには触れない
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RecipeLock {
@@ -88,7 +88,14 @@ public final class RecipeLock {
         }
         RecipeHolder<?> holder = recipeUsed(player.containerMenu);
         if (holder != null && !mayCraft(player, holder)) {
+            // 品は渡さず、使われた材料を返す (材料を失わせない)。持ち物に入りきらなければ足もとへ
             event.getCrafting().setCount(0);
+            for (net.minecraft.world.item.crafting.Ingredient ing : holder.value() instanceof net.minecraft.world.item.crafting.CraftingRecipe r ? r.getIngredients() : java.util.List.<net.minecraft.world.item.crafting.Ingredient>of()) {
+                if (!ing.isEmpty() && ing.getItems().length > 0) {
+                    player.getInventory().placeItemBackInInventory(ing.getItems()[0].copyWithCount(1));
+                }
+            }
+            Notice.hint(player, "message.skyabyss.recipe.locked");
         }
     }
 

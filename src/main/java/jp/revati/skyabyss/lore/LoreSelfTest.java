@@ -272,7 +272,7 @@ public final class LoreSelfTest {
         if (n != 1 || !Lore.state(a).has("chapter1/inscription_heart")) {
             failures.add("reading the heart inscription did not write chapter1/inscription_heart (" + n + ")");
         }
-        if (!Lore.state(a).bookGiven() || !Lore.contains(a.getInventory().items, LoreSetup.LORE_BOOK.get()) || !Lore.state(a).has(Lore.BOOK_ENTRY)) {
+        if (!Lore.state(a).bookGiven() || !Lore.hasBook(a) || !Lore.state(a).has(Lore.BOOK_ENTRY)) {
             failures.add("the first entry did not hand over the lore book");
         }
         if (Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_heart")) != 0) {
@@ -296,14 +296,14 @@ public final class LoreSelfTest {
         // 書をなくしたら、次に何かが記されたとき戻ってくる
         a.getInventory().clearContent();
         Lore.fire(a, "sign", t -> t.target().equals("sign.skyabyss.lore_west"));
-        if (!Lore.contains(a.getInventory().items, LoreSetup.LORE_BOOK.get())) {
+        if (!Lore.hasBook(a)) {
             failures.add("a lost book did not return with the next entry");
         }
         // 空の影を見た人は、書が落ちてくるのを待つ (その前に荷物の中へは入らない)
         LoreState sb = Lore.state(b);
         sb.bookDropAt = overworld.getGameTime() + 100000;
         Lore.fire(b, "sky_shadow", t -> true);
-        if (!sb.has("prologue/shadow") || sb.bookGiven() || Lore.contains(b.getInventory().items, LoreSetup.LORE_BOOK.get())) {
+        if (!sb.has("prologue/shadow") || sb.bookGiven() || Lore.hasBook(b)) {
             failures.add("the sky shadow did not wait for the falling book: " + sb);
         }
         // 天の鍵の欠片を持つと、欠片と心臓の項目が記される

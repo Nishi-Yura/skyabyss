@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 // 破れた頁。右クリックで読むと、出どころ (村 / 岩鯨の背) の伝承のうち、まだ記されていないものが一つ書に移る。
 // どの項目になるかは読んだ人ごとに選ぶので、同じ宝箱の頁でも、読む人が違えば違う話になる。
 // もう知っていることしか書かれていなければ、頁は手元に残る
-public class LorePageItem extends Item {
+public class LorePageItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     public LorePageItem(Properties properties) {
         super(properties);
     }
@@ -61,17 +61,27 @@ public class LorePageItem extends Item {
         if (!(player instanceof ServerPlayer server)) {
             return InteractionResultHolder.success(stack);
         }
-        List<LoreEntry> choices = candidates(server, source(stack));
+        return read(server, source(stack), () -> stack.consume(1, player)) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+    }
+
+    // 読む (右クリックと、旅嚢の輪・短押しの共通の中身)。この出どころで新しく記せる項目がなければ false (頁は残る)
+    @Override
+    public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
+        return read(player, "", consumeOne);
+    }
+
+    private static boolean read(ServerPlayer server, String source, Runnable consumeOne) {
+        List<LoreEntry> choices = candidates(server, source);
         if (choices.isEmpty()) {
             Notice.hint(server, "message.skyabyss.lore.page_known");
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
-        LoreEntry picked = choices.get(level.random.nextInt(choices.size()));
+        LoreEntry picked = choices.get(server.getRandom().nextInt(choices.size()));
         Lore.unlock(server, picked.id(), true);
         Notice.narrate(server, "message.skyabyss.lore.page_read");
-        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.9f);
-        stack.consume(1, player);
-        return InteractionResultHolder.consume(stack);
+        server.level().playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.9f);
+        consumeOne.run();
+        return true;
     }
 
     @Override

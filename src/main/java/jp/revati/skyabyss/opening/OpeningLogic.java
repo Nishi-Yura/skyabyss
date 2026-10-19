@@ -175,7 +175,9 @@ public final class OpeningLogic {
         };
         if (stage.equals("see_whale")) {
             // 歌を聞くまでは歌を待つ。歌のあとは、イサナに会っていなければ会いに行き、済んでいれば夕方の空を見て岩鯨を待つ (帯が歌のあとも変わらないままにならない)
-            id = !st.done(OpeningBeat.SONG) ? "see_whale" : !st.done(OpeningBeat.ISANA) ? "find_isana" : "wait_whale";
+            // 夜 1 に来るのは足音だけで、歌は次の夜 (first_hour_log の B-1)。足音を済ませるまでは明かりのそばで耳をすます文、済んだあとで歌の文
+            id = !st.done(OpeningBeat.SONG) ? (st.done(OpeningBeat.FOOTSTEPS) ? "see_whale" : "wait_steps")
+                    : !st.done(OpeningBeat.ISANA) ? "find_isana" : "wait_whale";
         }
         if (!id.isEmpty() && boneOffer(st, env) && (stage.equals("find_chaser") || stage.equals("see_whale"))) {
             return "bone_hill";

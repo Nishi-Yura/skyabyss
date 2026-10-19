@@ -21,6 +21,9 @@ public final class ModText {
     // 戦いの知らせ: 金色
     private static final TextColor BATTLE = TextColor.fromRgb(0xF2C14E);
 
+    // 目的の文: 目的の帯の文字色 (ObjectiveStrip)
+    private static final TextColor OBJECTIVE = TextColor.fromRgb(0xE9E3D4);
+
     private ModText() {
     }
 
@@ -45,6 +48,13 @@ public final class ModText {
     public static MutableComponent battle(String key, Object... args) {
         return Notice.tag(Notice.Kind.ALERT, Component.literal("⚔ ").withStyle(s -> s.withColor(BATTLE)),
                 Component.translatable(key, args).withStyle(s -> s.withColor(BATTLE).withBold(true)));
+    }
+
+    // 目的の知らせ: 目的の帯と同じ型 (金の「◆」と、明るい文。太字にしない)。字幕の列に流れる (手がかりの扱い)
+    public static MutableComponent objective(String key, Object... args) {
+        // 画面には本文 (Notice.body = 最後の部品) だけが出るので、「◆」も同じ部品の中に入れる
+        return Notice.tag(Notice.Kind.HINT, Component.literal("◆ ").withStyle(s -> s.withColor(BATTLE))
+                .append(Component.translatable(key, args).withStyle(s -> s.withColor(OBJECTIVE))));
     }
 
     public static MutableComponent title(String key) {

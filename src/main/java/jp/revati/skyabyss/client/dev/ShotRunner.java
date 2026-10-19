@@ -139,6 +139,8 @@ public final class ShotRunner {
         mc.options.onboardAccessibility = false;
         // 台本の撮影は音を鳴らさない (主音量 0。台本の options.txt に残っても、撮影のフォルダだけのこと)
         mc.options.getSoundSourceOptionInstance(net.minecraft.sounds.SoundSource.MASTER).set(0.0);
+        // 撮影は日本語で (TestMute.japanese。SKYABYSS_LANG で変えられる)
+        TestMute.japanese(mc);
         if (script.width > 0 && script.height > 0) {
             GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), script.width, script.height);
         }

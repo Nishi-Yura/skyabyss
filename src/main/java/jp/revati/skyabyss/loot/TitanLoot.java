@@ -18,7 +18,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.entity.BoneGull;
+import jp.revati.skyabyss.entity.BoneMortar;
 import jp.revati.skyabyss.entity.BoneSentinel;
+import jp.revati.skyabyss.entity.ElderSentinel;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.entity.RibArcher;
 import jp.revati.skyabyss.entity.WaterwayMaw;
@@ -259,6 +262,9 @@ public final class TitanLoot {
             }
             return items;
         }
+        if (mob instanceof BoneMortar || mob instanceof BoneGull || mob instanceof ElderSentinel) {
+            return rollNewGuard(mob, r, random);
+        }
         if (!(mob instanceof BoneSentinel || mob instanceof RibArcher || mob instanceof MossCrawler)) {
             return items;
         }
@@ -283,6 +289,46 @@ public final class TitanLoot {
             if (r != null && r.owned.add(id(piece))) {
                 r.memory = 0;
             }
+        }
+        return items;
+    }
+
+    // 背の新しい敵 (21 の 3.3): 骨の砲手・骨鳥は欠片と骨片、老番兵 (名づき) は欠片・岩殻片・骨片が必ずいくらか、防具の欠片が低い確率で
+    public static List<ItemStack> rollNewGuard(LivingEntity mob, @Nullable TitanMemoryData.Record r, RandomSource random) {
+        List<ItemStack> items = new ArrayList<>();
+        if (mob instanceof ElderSentinel) {
+            items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 2, 3)));
+            items.add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), between(random, 2, 4)));
+            if (random.nextFloat() < 0.60f) {
+                items.add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_SCRAP.get(), between(random, 1, 2)));
+            }
+            if (random.nextFloat() < 0.15f) {
+                items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get()));
+            }
+            if (random.nextFloat() < 0.10f) {
+                items.add(new ItemStack(ModItems.CLOUD_JERKY.get()));
+            }
+            if (random.nextFloat() < 0.08f) {
+                Item piece = armorSet().get(random.nextInt(4));
+                items.add(AffixRules.withAffixes(new ItemStack(piece), random));
+                if (r != null && r.owned.add(id(piece))) {
+                    r.memory = 0;
+                }
+            }
+            return items;
+        }
+        boolean mortar = mob instanceof BoneMortar;
+        if (random.nextFloat() < (mortar ? 0.25f : 0.08f)) {
+            items.add(new ItemStack(ModItems.STONE_WHALE_SHARD.get(), between(random, 1, mortar ? 2 : 1)));
+        }
+        if (random.nextFloat() < (mortar ? 0.40f : 0.30f)) {
+            items.add(new ItemStack(jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), between(random, 1, mortar ? 2 : 1)));
+        }
+        if (random.nextFloat() < (mortar ? 0.04f : 0.02f)) {
+            items.add(new ItemStack(ModItems.RESONANCE_SHARD_STONE_WHALE.get()));
+        }
+        if (random.nextFloat() < 0.03f) {
+            items.add(new ItemStack(ModItems.CLOUD_JERKY.get()));
         }
         return items;
     }

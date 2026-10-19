@@ -300,6 +300,10 @@ public final class TravelSelfTest {
                 check(f, RecipeLock.locked(r), r + " is registered but not locked");
             }
         }
+        // 袋 (旅嚢) の品ではない = 袋が入でも、素材は持ち物のまま作業台に並べて作れる
+        for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get(), Items.IRON_INGOT, Items.LEATHER, TravelGear.ROCK_WHETSTONE.get())) {
+            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " is a pouch item; the crafting table recipes would not find it");
+        }
         check(f, existing == 7, "the chapter-1 notes unlock " + existing + " recipes (want 7)");
     }
 
@@ -328,6 +332,15 @@ public final class TravelSelfTest {
         check(f, menu.getSlot(0).hasItem() && menu.getSlot(0).getItem().is(TravelGear.HELMET.get()), "the crafting grid did not show the helmet");
         check(f, !RecipeLock.mayCraft(a, helmet.get()), "a locked recipe was craftable");
         check(f, RecipeLock.sweep(a) && !menu.getSlot(0).hasItem(), "the locked result was not cleared");
+        // 取りこぼし (同じ tick に取り出された): 品は消え、材料 (岩殻片 3・鉄 2) は返る
+        a.getInventory().clearContent();
+        ItemStack taken = new ItemStack(TravelGear.HELMET.get());
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent(a, taken, new net.minecraft.world.SimpleContainer(9)));
+        check(f, taken.isEmpty(), "a locked result taken in the same tick was kept");
+        check(f, a.getInventory().countItem(GuideSetup.ROCK_SHELL_SCRAP.get()) == 3 && a.getInventory().countItem(Items.IRON_INGOT) == 2, "the materials of a blocked craft were not refunded");
+        a.getInventory().clearContent();
+        check(f, !ForgeRules.accepts(new ItemStack(TravelGear.HELMET.get())) && ForgeRules.accepts(new ItemStack(jp.revati.skyabyss.registry.ModItems.STONE_WHALE_HELMET.get())),
+                "the forge must refuse the road gear (no farming whale fragments) and still take titan gear");
         // 教わる (覚書を開く) と作れる
         WayfarerNotes.onOpen(a, 1);
         check(f, a.getRecipeBook().contains(helmet.get()) && RecipeLock.mayCraft(a, helmet.get()), "opening the notes did not unlock the recipe");

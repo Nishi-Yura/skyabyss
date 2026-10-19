@@ -222,7 +222,7 @@ public final class EmberBackState {
         }
     }
 
-    void markGateOpen() {
+    public void markGateOpen() {
         if (record != null) {
             record.setFlag(GATE_OPEN, true);
         }

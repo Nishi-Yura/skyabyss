@@ -87,6 +87,76 @@ public final class SiteSelfTest {
         }
     }
 
+    // 足跡の場所探しは、どんな地形でも必ず 1 つは決める (first_hour_log B-6)。合成の地形: 平ら・起伏が激しい・斑の池・ほぼ海の小島。
+    // 宿りがないとき (仮の宿りの向き) も
+    private static void footprintFallback(List<String> f) {
+        String[] names = {"flat", "rugged", "ponds", "islets"};
+        for (int kind = 0; kind < names.length; kind++) {
+            final int k = kind;
+            SiteFinder.Ground g = new SiteFinder.Ground() {
+                int h(int x, int z) {
+                    int cx = Math.floorDiv(x, 8);
+                    int cz = Math.floorDiv(z, 8);
+                    int hash = (cx * 73856093) ^ (cz * 19349663);
+                    hash = (hash ^ (hash >>> 13)) * 1274126177;
+                    int r = Math.floorMod(hash ^ (hash >>> 16), 100);
+                    return switch (k) {
+                        case 0 -> 70;
+                        case 1 -> 64 + r * 3;
+                        case 2 -> (Math.floorMod(cx / 6 + cz / 6, 3) == 0) ? 55 : 70 + r / 20;
+                        default -> (Math.floorMod(cx / 5 + cz / 5, 4) == 0) ? 66 + r / 10 : 40;
+                    };
+                }
+
+                @Override
+                public int top(int x, int z) {
+                    return h(x, z);
+                }
+
+                @Override
+                public int topCoarse(int x, int z) {
+                    return top(Math.floorDiv(x + 4, 8) * 8, Math.floorDiv(z + 4, 8) * 8);
+                }
+
+                @Override
+                public boolean wet(int x, int z) {
+                    return top(x, z) < 62;
+                }
+
+                @Override
+                public boolean wetCoarse(int x, int z) {
+                    return topCoarse(x, z) < 62;
+                }
+
+                @Override
+                public boolean biomeOk(int x, int z) {
+                    return Math.floorMod(Math.floorDiv(x, 64) + Math.floorDiv(z, 64), 5) != 0;
+                }
+
+                @Override
+                public int sea() {
+                    return 62;
+                }
+            };
+            int plans = 0;
+            for (int i = 0; i < 12; i++) {
+                BlockPos camp = new BlockPos(i * 301 - 1500, 80, i * -177 + 400);
+                // 宿りが建った世界と、宿りが見つからなかった世界 (仮の宿り)
+                for (BlockPos shelter : new BlockPos[] {camp.offset(170, 0, 40), camp.offset(180, 0, 0)}) {
+                    List<SiteFinder.Planned> out = new ArrayList<>();
+                    SiteFinder.planFootprints(g, out, camp, shelter);
+                    long n = out.stream().filter(p -> p.kind().equals(OpeningSites.Kind.FOOTPRINT.id)).count();
+                    if (n < 1) {
+                        // 起伏・水が全面でも、中心が乾いた所が一つもない地形ではないはず (どの合成にも乾いた所はある)
+                        f.add("footprint fallback: " + names[k] + " camp " + camp + " shelter " + shelter + ": no footprint planned");
+                    }
+                    plans++;
+                }
+            }
+            check(f, plans == 24, "footprint fallback: " + names[k] + ": " + plans + " plans");
+        }
+    }
+
     private static boolean solidBelow(ServerLevel level, BlockPos stand) {
         BlockState below = level.getBlockState(stand.below());
         return !below.getCollisionShape(level, stand.below()).isEmpty() && below.getFluidState().isEmpty();
@@ -140,6 +210,7 @@ public final class SiteSelfTest {
 
     private static void runChecks(MinecraftServer server, List<String> f) {
         footprintShape(f);
+        footprintFallback(f);
         ServerLevel level = server.overworld();
         check(f, OpeningSites.planned(server), "sites are not planned");
         check(f, OpeningSites.allBuilt(server), "not every site is built: " + OpeningSites.all(server));

@@ -17,9 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.entity.ElderSentinel;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
 import jp.revati.skyabyss.entity.WhaleboneCaptain;
 import jp.revati.skyabyss.loot.TitanLoot;
+import jp.revati.skyabyss.registry.Ch1BackEntities;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.titan.TitanTravel;
@@ -168,12 +170,14 @@ public final class TitanBackTrials {
     private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves) {
     }
 
-    // 第一の広間は、近接の波 (番兵が前に立ち、苔這いが回り込む) → 射手の波 (番兵の盾の後ろから射手 3 体が撃つ)。
+    // 第一の広間は、近接の波 (番兵が前に立ち、苔這いが回り込む) → 射手の波 (番兵の盾の後ろから射手 3 体が撃つ。奥の壁ぎわで骨の砲手が
+    // 足もとへ骨の塊を落とす) → 老番兵の波 (名づきの小さな中ボス。号令の骨笛で射手を呼ぶ)。
     // 番兵長の広間の第一波で両方が混ざる。(配置の版 2 で第二の広間を除き、その射手の波を第一の広間へ移した)
     private static final List<Hall> HALLS = List.of(
             new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, E1_EXIT, List.of(
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel"))),
+                    List.of("archer", "archer", "archer", "sentinel", "mortar"),
+                    List.of("elder", "sentinel", "sentinel"))),
             new Hall("e3", E3, E3_ANTE, E3_ENTRANCE, List.of(), List.of(
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
                     List.of("captain"))));
@@ -649,25 +653,44 @@ public final class TitanBackTrials {
     private static void spawnWave(ServerLevel level, Hall hall, HallState state) {
         List<BlockPos> spawns = EastWingBuilder.spawnPoints(hall.box());
         List<String> wave = new ArrayList<>(hall.waves().get(state.wave - 1));
-        // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)
+        // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)。
+        // 老番兵の波は骨の番兵が増える (老番兵は体力が増える)。骨の砲手は 4 人から 2 体
+        boolean elderWave = wave.get(0).equals("elder");
         for (int extra = 1; extra < Math.min(state.players, MAX_SCALE_PLAYERS); extra++) {
             if (wave.get(0).equals("captain")) {
                 wave.add("sentinel");
                 wave.add("archer");
+            } else if (elderWave) {
+                wave.add("sentinel");
+                wave.add("sentinel");
             } else {
                 wave.add(wave.get(0));
                 wave.add(wave.get(1));
             }
         }
+        if (wave.contains("mortar") && state.players >= 4) {
+            wave.add("mortar");
+        }
+        int mortars = 0;
         for (int i = 0; i < wave.size(); i++) {
-            BlockPos at = wave.get(i).equals("captain") ? hall.box().center() : spawns.get(i % spawns.size());
-            Mob mob = spawnGuard(level, wave.get(i), at, state.group);
-            if (mob instanceof WhaleboneCaptain captain) {
-                // 番兵長は心臓と同じ式で、人数に応じて体力が増える (280 × (1 + 0.6 × (人数 − 1)))
-                var health = captain.getAttribute(Attributes.MAX_HEALTH);
+            String kind = wave.get(i);
+            BlockPos at;
+            if (kind.equals("captain") || kind.equals("elder")) {
+                at = hall.box().center();
+            } else if (kind.equals("mortar")) {
+                // 骨の砲手は奥の壁ぎわ (広間の出口側の二つの角) から撃つ
+                int m = mortars++ % 2;
+                at = spawns.get(m).offset(m == 0 ? 2 : -2, 0, 0);
+            } else {
+                at = spawns.get(i % spawns.size());
+            }
+            Mob mob = spawnGuard(level, kind, at, state.group);
+            if (mob instanceof WhaleboneCaptain || mob instanceof ElderSentinel) {
+                // 番兵長・老番兵は心臓と同じ式で、人数に応じて体力が増える (280・220 × (1 + 0.6 × (人数 − 1)))
+                var health = mob.getAttribute(Attributes.MAX_HEALTH);
                 if (health != null) {
                     health.setBaseValue(Math.min(1024, health.getBaseValue() * StoneWhaleHeart.scaleFor(state.players)));
-                    captain.setHealth(captain.getMaxHealth());
+                    mob.setHealth(mob.getMaxHealth());
                 }
             }
         }
@@ -686,6 +709,9 @@ public final class TitanBackTrials {
             case "archer" -> ModEntities.RIB_ARCHER.get();
             case "crawler" -> ModEntities.MOSS_CRAWLER.get();
             case "captain" -> ModEntities.WHALEBONE_CAPTAIN.get();
+            case "mortar" -> Ch1BackEntities.BONE_MORTAR.get();
+            case "gull" -> Ch1BackEntities.BONE_GULL.get();
+            case "elder" -> Ch1BackEntities.ELDER_SENTINEL.get();
             default -> ModEntities.BONE_SENTINEL.get();
         };
         Mob mob = type.create(level);

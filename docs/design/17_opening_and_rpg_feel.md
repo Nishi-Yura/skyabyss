@@ -119,7 +119,7 @@
 | 岩鯨の降下の条件 | 鎖が降りる（岩鯨が人の近くへ降りる）のは「日 4 の朝以降 + 備えの頼みを 2 本終えたとき」か「日 6 以降」。それまで岩鯨は雲の下を巡る（日 3 夕方の初見 B10 は変えない。2.8）。日は `Repeats.day`（0 始まり: 日 4 の朝 = 3、日 6 = 5）。人ごとに見る（その人が一章にいるときだけ。心臓を止めた人は条件なし）が、グループ（パーティ、または一人）のオンラインの誰かが満たせば降り（`PrepQuests.groupAtLeast`）、降りた鎖には満たさない人も乗れる（備えの灯が赤になるだけ）。備えの頼みが 3 本そろっていない世界は条件なし。降りる先の人は、条件を満たす最も近い人 | `Ch1Descent`、`StoneWhaleEntity.tickCruise` |
 
 - 経験値（一章の新しい分の枠 400 に収まる）: 備えの頼み 300（80 + 160 + 60）+ 洞のクリア 40 = 340。伝承の頁（石標の祠 10・歌の間 10）は「既存の小要素」側の小さな分で、合計 750（`ChapterXpBudget`）の内。`ch1/follow_hauler`（50）と日替わり `daily_shell_cull` は P7 の敵と一緒に足す。
-- 新しい敵の差し込み口は `Ch1Prep` の冒頭の TODO の一覧（P4 職人・P5 旅装と砥石は一章の分が済み、のこりは P7 地上の敵・P8 岩鯨の背）。ひとり歩きの湧き（`ChapterMobSpawner`）は P7 まで何も登録しない（序盤に背中の敵を地上へ放たない）。
+- 新しい敵の差し込み口は `Ch1Prep` の冒頭の TODO の一覧（P4 職人・P5 旅装と砥石は一章の分が済み、P7 地上の敵も入った。のこりは P8 岩鯨の背）。ひとり歩きの湧き（`ChapterMobSpawner`）には P7 で岩殻虫・棘うさぎが入った（薄く間引く。背中の敵は地上へ放たない）。
 - 自己テスト `SELFTEST ch1 p6`（`Ch1SitesSelfTest`。`SKYABYSS_SELFTEST_ONLY=ch1`）: 新しい場所が全部建つ・拠点から 150 以内・石標が外へ向かう・祠・骨の山・荷車の傍らの金床と職人の印・洞の鳴り石と格子の印とろうそくの数・敵の湧き台が床の上の空気（向きが合う）・歌の間（人のブロックの上に置かない・五本の壁画・戸が梯子になる・二度は開かない）、洞の湧き（二つのグループが同時・グループの印・立ち位置・鳴り石の順と進みのグループ分け・格子が開く・クリアの記録と経験値と護り糸と合図）、備えの頼み 3 本（覚書・集めて話す・洞の合図・護り糸から鼓動守・`ch1_ready`）、降下の式と人ごとの判定（章と日を差し替える）、一章の経験値の枠。撮影: `tools/shots/ch1_sites.txt`（`tools/ch1_sites_sheet.py` → `docs/review/previews/ch1_sites_sheet.png`）。
 
 **まだ作っていない**: 一章の「背の外」の碑と頁 3 つ（岩鯨の背のディメンション側）、夜に岩鯨の方を向く見る者（N2）と縁の音（N4）、一章の空の段（`ChapterSky.setStage(WHALE, …)`。自己テスト `arc` が「既定では段が登録されていない」を確かめるので、全章がそろってから足す）、二章の予兆 1 拍目（引き。二章の担当）、E5（地下の貯蔵庫）。章の導出（`Chapters`）と題字・余韻の札（`ChapterCards`。18 の 9 章）、予兆の枠（`Foreshadow`）、小要素を置く共通基盤（3.8）の部品はできている。
@@ -277,7 +277,7 @@
 - いちばん先の足跡は前半が深い火口（底は焦げた玄武岩）になり、その先に土のうねり（地中を進んだ跡）が続く。余燼が地へ潜った場所。
 - まわり: 縁に盛り上がった土（高さ 3〜5）、割れた地面（放射状の割れ目）、はね飛ばされた岩、押しつぶされた木。底に雨水が 1 ブロックのたまりとして点々（池に見えない）。
 - 建て方: 固定のブロックの置き換えではなく、地面の高さに沿って掘る・盛る（`Blueprint.relief`、`SiteJob.applyRelief`。部品は `footprint.json` の 1853 列と `footprint_end.json` の 2419 列）。隣の列との深さの差は 1 以内で、落ちても段で登って出られる。木・草の片付けは掘る列の 1 まわりだけ。
-- 場所探し: 高さの差の上限 10 → 18 → 30 → 46 → 70（4 歩）→ 3 歩 → 2 歩 → 1 歩、乾いている範囲 100% → 40% → 15%。道・積み石・宿り・野営地に重ならない（道から 38 以上、宿り・野営地から 62 以上、一歩 66〜135）。`OpeningSites.footprints` の順は歩いた順（遠くなる順）。
+- 場所探し: 高さの差の上限 10 → 18 → 30 → 46 → 70（4 歩）→ 3 歩 → 2 歩 → 1 歩、乾いている範囲 100% → 40% → 15% → 最後の手段（高さの差も群系も問わず、中心が乾いていれば 1 歩。`FOOT_STAGES` の末尾）。宿りが見つからなかった世界でも、野営地から東 180 ブロックの仮の宿りの向きで足跡を探す（`planRest`）。建てる直前に実際のブロックで人の建物・水に当たって 12 の輪を動かし尽くしても、足跡は消さず、元の場所に強行して建てる（`SiteJob.force`。水の列は避ける。足跡の頁の目印なので必ず 1 つ以上建つ）。道・積み石・宿り・野営地に重ならない（道から 38 以上、宿り・野営地から 62 以上、一歩 66〜135）。`OpeningSites.footprints` の順は歩いた順（遠くなる順）。
 - 伝承: 「巨大な足跡」（短い一文「一歩で、家が一軒、沈む」）。
 
 ### 3.5 巨神の骨（B8）
@@ -364,7 +364,7 @@
 
 - 画面左上の小さな帯（`client/quest/ObjectiveStrip`、幅 230、`SkillHud`・`GrowthHud` と同じ層の仕組み）。目的 1 行（折り返さず全文。帯が空・名前だけになる段はない）、右に距離（約 100 ブロック単位）と方角（八方位）。変わるとき一度だけ光る。
 - 設定 `objectiveStrip` で消せる。U のクエストログに全文。戦闘中・会話中・画面を開いている間・ホラー演出（足音・歌・影）の最中は薄くする。B0 の最中は出さない。メインが `see_whale` を過ぎたら、クエストの目的を出す。
-- 方角と距離は、目的ごとの場所をサーバーが人ごとに送る（`OpeningDirector.target`。目印が変わったら送り直す）。場所は野営地の帳面・宿りの煙・語り部（宿りの鐘）・**鯨追いの焚き火**（宿りの鐘から 18〜34 ブロック離れた別の場所。立ったときの焚き火を `NpcWorldData.chaserFires` に残す）・骨の丘。構造物の場所そのものは世界に一組で、同じ世界の全員が同じ場所を指す（人ごとに違うのは目的と、その目印の選び方）。
+- 距離の札は 5 ブロック未満では出さない（10 ブロック単位に丸めると「0m 南」になる。`ObjectiveRules.distanceLabel`）。方角と距離は、目的ごとの場所をサーバーが人ごとに送る（`OpeningDirector.target`。目印が変わったら送り直す）。場所は野営地の帳面・宿りの煙・語り部（宿りの鐘）・**鯨追いの焚き火**（宿りの鐘から 18〜34 ブロック離れた別の場所。立ったときの焚き火を `NpcWorldData.chaserFires` に残す）・骨の丘。構造物の場所そのものは世界に一組で、同じ世界の全員が同じ場所を指す（人ごとに違うのは目的と、その目印の選び方）。
 
 ### 4.4 開幕の演出（B0）
 
@@ -433,7 +433,8 @@
 | `objective.skyabyss.read_page` | 破れた頁を拾って、読んでみよう | Take the torn page, and read it | 影が去ってから、落ちてきた破れた頁を読むまで（段は `watch_sky` のまま。`OpeningLogic.objective` が頁を落とす予定 `pageAt`・自動で読む予定 `pageReadAt` を見る）。帯が「空を見上げよう」のままで頁の存在を言わなかった穴を埋める |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the lodge storyteller | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.see_whale` | 探索しながら、夜空の歌に耳をすまそう | Explore, and listen for the song at night | 段 `see_whale` で、歌 (B9) をまだ聞いていない間 |
+| `objective.skyabyss.wait_steps` | 探索しつつ、夜は明かりのそばで耳をすまそう | At night, stay by a light and listen | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
+| `objective.skyabyss.see_whale` | 探索しながら、次の夜の空の歌を待とう | Explore; await the sky song next night | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
 | `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「探索で力をつけておこう」の一文つきの文（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Check the hazy white hill | 日 2 の昼の任意の寄り道 |
 
@@ -518,7 +519,7 @@
 
 - メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒しし、目的を「煙を追う」にした。段を 2 つ足した（`follow_smoke`、`watch_sky`。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす `skip_if`）。以後は影、語り部（`ask_storyteller`）、鯨追い（`find_chaser`）、岩鯨（`see_whale`）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。新しい `signal` は作っていない（序の二段は既存の `talk`・`lore` で進む）。
 - 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索しつつ、昼は空を見上げよう」など具体的な行動を書く。
-- 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = 歌 (B9) の前は `see_whale`、歌のあとは `wait_whale`（イサナに会っていなければ `find_isana`）、B8 の寄り道 = `bone_hill`。
+- 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = 足音 (B6) の前は `wait_steps`、足音のあと歌 (B9) の前は `see_whale`、歌のあとは `wait_whale`（イサナに会っていなければ `find_isana`）、B8 の寄り道 = `bone_hill`。
 - 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件）。
 - 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題は 1 つだけ足し、見聞の 5 つは別の節に分けた。
 - `tools/gen_npc_content.py` は出荷済みのデータに合わせてある（イサナの名乗り、伝承 `chapter1/whale_chaser`）。`gen_free_quests.py` と `gen_story_quests.py` は書き出し後の手直しと食い違うので再実行しない（6.6 の閉じ方は `gen_opening_text.py` がデータを直接直す）。

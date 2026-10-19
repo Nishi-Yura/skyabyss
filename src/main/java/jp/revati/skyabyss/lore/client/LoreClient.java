@@ -48,9 +48,12 @@ public final class LoreClient {
         Minecraft mc = Minecraft.getInstance();
         LoreEntry entry = catalog.entry(id);
         Component title = entry != null ? Component.translatable(entry.titleKey()) : Component.literal("？？？");
-        mc.getToasts().addToast(new LoreToast(title));
-        mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 0.8f, 0.6f));
         refreshScreen();
+        // 会話・場面の最中は溜め、閉じたあとに一枚ずつ (first_hour_log B-2)
+        jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
+            mc.getToasts().addToast(new LoreToast(title));
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 0.8f, 0.6f));
+        });
     }
 
     public static boolean has(String id) {

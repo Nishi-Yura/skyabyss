@@ -407,7 +407,8 @@ data/<名前空間>/quest/<名前>.json
 | 順番 | ふさがない。どれから受けても終えてもよい（ログの並びは `order`） |
 | 合図 | 3 本が終わったとき（どの順でも）、その人へ `ch<n>_ready` の合図（`Quests.signal`）を一度だけ送る（人ごと。`Growth.discover` の鍵 `prep_ready:<n>`）。3 本の定義がそろっていない章は合図が出ない（中身のない章） |
 | 読み方 | 条件 `{"type":"prep","chapter":n,"min":k}`（k 本以上。`min` を省くと 3 本）。コードは `PrepQuests.done / ready / atLeast / groupAtLeast`（`groupAtLeast` はオンラインの仲間まで見る。一章の岩鯨の降下は「2 本終えたとき」で、グループの誰かが満たせば降りる） |
-| 覚書 | `prep_gear` を受けたとき、その章の旅の覚書を人ごとに一度渡す |
+| 覚書 | `prep_gear` を受けたとき、その章の旅の覚書を人ごとに一度渡す。知らせの文は「備えの頼みが増えた。手引きの旅の覚書（一章）が荷物に届いた」（`message.skyabyss.notes.given`）で、頼みの札のあとに出る（単独で出さない。first_hour_log B-7） |
+| 鎖の待ちの帯 | メイン「雲の下の歌」の段 `board`（鎖をのぼる）で鎖が降りるまでの帯は、備えの頼み（一章）を 2 本終えるまでは「備えの頼み 0/2 と三灯を整えよう」（`…board.ride.wait.prep`）、終えたあとは「三灯をそろえて、鎖を待とう」（`…board.ride.wait.lamps`）。クライアントが自分のクエストログで決める（`QuestHud.objectiveText`、`ObjectiveRules.waitVariant`）。備えの頼みの記録が無ければ従来の「鎖が降りるまで、備えを整えよう」（`…wait`） |
 | 結果 | 会話の結果 `give_notes {chapter}`: 覚書を渡す。受け取り済みでも、持っていなければ渡し直す（職人の補充用） |
 
 **旅の覚書**（`wayfarer_notes`。`WayfarerNotes`）: 章ごとに 1 冊の薄い手帳。1 つのアイテムで、章（0 = 序章、1〜4）は品の欄 `skyabyss:notes_chapter` に持つ。名前は「旅の覚書（一章）」。右クリックで開く（サーバー: その章のレシピを解く。クライアント: 手帳の画面 `WayfarerNotesScreen`）。

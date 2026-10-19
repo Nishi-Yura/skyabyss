@@ -129,6 +129,51 @@ public final class NoticeSelfTest {
         d.offer("x", Notice.Kind.NARRATE, "same", 4);
         check(f, d.waiting() == 0 && d.current() != null, "duplicates should be merged");
 
+        // 関所 (会話・場面の最中は溜め、閉じたあとに優先の順で間隔をあけて出す。first_hour_log B-2・B-9)
+        NoticeGate gate = new NoticeGate();
+        List<String> order = new ArrayList<>();
+        gate.offer(NoticeGate.P_HINT, 400, () -> order.add("hint"));
+        gate.offer(NoticeGate.P_CENTER, 1500, () -> order.add("center"));
+        gate.offer(NoticeGate.P_CARD, 700, () -> order.add("card1"));
+        gate.offer(NoticeGate.P_GROWTH, 0, () -> order.add("xp"));
+        gate.offer(NoticeGate.P_CARD, 700, () -> order.add("card2"));
+        check(f, gate.drain(0, true) == 0 && gate.drain(100000, true) == 0 && order.isEmpty(), "the gate released something while a dialogue was open");
+        long gt = 10_000;
+        int released = gate.drain(gt, false);
+        check(f, released == 1 && order.equals(List.of("card1")), "the first release should be the first card: " + order);
+        check(f, gate.drain(gt + 300, false) == 0, "the gate released two cards at once (no gap)");
+        gt += 700;
+        gate.drain(gt, false);
+        gt += 700;
+        gate.drain(gt, false);
+        gt += 1;
+        gate.drain(gt, false);
+        gt += 5000;
+        for (int i = 0; i < 4; i++) {
+            gate.drain(gt, false);
+            gt += 2000;
+        }
+        check(f, order.equals(List.of("card1", "card2", "xp", "center", "hint")), "the gate order should be cards, growth, center, hints: " + order);
+        check(f, gate.pending() == 0, "the gate kept items");
+        // 画面が開いていなければ、すぐ出る (ふだんの遊びを遅らせない)
+        NoticeGate quick = new NoticeGate();
+        List<String> now = new ArrayList<>();
+        quick.offer(NoticeGate.P_CARD, 700, () -> now.add("a"));
+        quick.drain(1_000_000, false);
+        check(f, now.equals(List.of("a")), "an idle gate should release at once");
+        // あふれたら手がかりから捨てる
+        NoticeGate full = new NoticeGate();
+        full.offer(NoticeGate.P_HINT, 0, () -> {
+        });
+        for (int i = 0; i < NoticeGate.MAX_PENDING + 3; i++) {
+            full.offer(NoticeGate.P_CARD, 0, () -> {
+            });
+        }
+        check(f, full.pending() == NoticeGate.MAX_PENDING, "the gate should cap its backlog: " + full.pending());
+        // 開幕の目的の知らせは戦いの型 (⚔・太字) ではなく、目的の型
+        check(f, Notice.kindOf(ModText.objective("a.b")) == Notice.Kind.HINT && Notice.body(ModText.objective("a.b")).getString().equals("◆ a.b"), "the objective notice should be a diamond-led hint, not a battle notice");
+        check(f, !Notice.plain(ModText.objective("a.b")).getString().contains("⚔"), "the objective notice carries the battle ornament");
+
         // 濃さ: 出て、保って、消える
         NoticeQueue<String> a = new NoticeQueue<>();
         a.offer("a", Notice.Kind.PLACE, "a", 4);

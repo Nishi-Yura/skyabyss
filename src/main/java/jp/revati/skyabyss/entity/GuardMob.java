@@ -20,6 +20,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 岩鯨の背に棲む者たちの共通部分。
 // 動き (待機・歩き) は自動で切り替え、攻撃などの動作はサーバーから playAction で流す (全員の画面に同期される)
 public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.skyabyss.titan.group.GroupOwned {
+    // 一時の個体 (老いた歩哨の骨笛の射手・骨負い): 保存しない
+    public static final String TEMP_TAG = "skyabyss_temp_mob";
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final RawAnimation idle;
     private final RawAnimation walk;
@@ -116,7 +118,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     @Override
     public boolean shouldBeSaved() {
         // 地上の場所の湧き台・章のひとり歩き (guide.SiteSpawner / ChapterMobSpawner) の個体も保存しない
-        return !isTrialMob() && !getTags().contains(jp.revati.skyabyss.guide.SiteSpawner.TAG) && super.shouldBeSaved();
+        return !isTrialMob() && !getTags().contains(jp.revati.skyabyss.guide.SiteSpawner.TAG) && !getTags().contains(TEMP_TAG) && super.shouldBeSaved();
     }
 
     // 人へ与える傷の出どころ (番兵長と心臓の技が使う)。
@@ -133,5 +135,27 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
                 server.sendParticles(player, particle, true, x, y, z, count, dx, dy, dz, speed);
             }
         }
+    }
+
+    // from から離れる向きの、歩いて行ける点 (向きを少しずつ振って探す。なければ null)。逃げる・距離をとる動きに使う
+    @javax.annotation.Nullable
+    public static net.minecraft.world.phys.Vec3 awayPoint(net.minecraft.world.entity.PathfinderMob mob, net.minecraft.world.phys.Vec3 from, double dist) {
+        net.minecraft.world.phys.Vec3 away = mob.position().subtract(from).multiply(1, 0, 1);
+        double base = away.lengthSqr() < 1.0E-4 ? mob.getRandom().nextDouble() * Math.PI * 2 : Math.atan2(away.z, away.x);
+        for (int i = 0; i < 8; i++) {
+            double a = base + (mob.getRandom().nextDouble() - 0.5) * Math.PI * 0.8 + (i > 4 ? Math.PI * 0.5 * (mob.getRandom().nextBoolean() ? 1 : -1) : 0);
+            double x = mob.getX() + Math.cos(a) * dist;
+            double z = mob.getZ() + Math.sin(a) * dist;
+            net.minecraft.core.BlockPos column = net.minecraft.core.BlockPos.containing(x, mob.getY(), z);
+            if (!mob.level().hasChunkAt(column)) {
+                continue;
+            }
+            int y = mob.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
+            net.minecraft.world.level.pathfinder.Path path = mob.getNavigation().createPath(x, y, z, 0);
+            if (path != null && path.canReach()) {
+                return new net.minecraft.world.phys.Vec3(x, y, z);
+            }
+        }
+        return null;
     }
 }

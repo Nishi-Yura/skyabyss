@@ -140,8 +140,8 @@ public final class TideTravelSelfTest {
             check(!Voyages.isUnlocked(d, TitanKind.TIDE_SHELL) && Voyages.giveCalls(d) == 0, "a conch was given without the heart", failures);
             r.clears = 1;
             int given = Voyages.giveCalls(d);
-            check(given >= 1 && d.getInventory().countItem(TravelSetup.TIDE_SHELL_CALL.get()) == 1, "stilling the tide heart did not give the conch", failures);
-            check(Voyages.giveCalls(d) == 0 && d.getInventory().countItem(TravelSetup.TIDE_SHELL_CALL.get()) == 1, "the conch was given twice", failures);
+            check(given >= 1 && jp.revati.skyabyss.pouch.Pouch.countAll(d, TravelSetup.TIDE_SHELL_CALL.get()) == 1, "stilling the tide heart did not give the conch", failures);
+            check(Voyages.giveCalls(d) == 0 && jp.revati.skyabyss.pouch.Pouch.countAll(d, TravelSetup.TIDE_SHELL_CALL.get()) == 1, "the conch was given twice", failures);
         } finally {
             r.clears = clears;
             state.unlocked.clear();

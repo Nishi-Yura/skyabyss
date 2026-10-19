@@ -24,6 +24,19 @@ public final class TestMute {
         done = true;
         if (System.getenv("SKYABYSS_MUTE") != null) {
             Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).set(0.0);
+            japanese(Minecraft.getInstance());
         }
+    }
+
+    // 確かめ用の起動と台本の撮影は日本語で見る (SKYABYSS_LANG=en_us などで変えられる)。すでにその言語なら何もしない
+    public static void japanese(Minecraft mc) {
+        String code = System.getenv().getOrDefault("SKYABYSS_LANG", "ja_jp");
+        if (code.equals(mc.options.languageCode)) {
+            return;
+        }
+        mc.options.languageCode = code;
+        mc.getLanguageManager().setSelected(code);
+        mc.options.save();
+        mc.reloadResourcePacks();
     }
 }

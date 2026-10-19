@@ -42,6 +42,11 @@ public final class GrowthClient {
 
     // サーバーからの「経験値を得た」(RpgNetwork から呼ばれる)
     public static void onGain(GrowthGainPayload payload) {
+        // 会話・場面の最中は溜め、閉じたあとに札のあとで (first_hour_log B-2・B-9)。レベルアップの文字は長く出るので、次との間隔を広げる
+        jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_GROWTH, payload.levels() > 0 ? 2600 : 0, () -> showGain(payload));
+    }
+
+    private static void showGain(GrowthGainPayload payload) {
         // 理由のない同じ種類 (敵の撃破) が続いたら、一つにまとめる
         if (!POPUPS.isEmpty()) {
             Popup last = POPUPS.get(POPUPS.size() - 1);

@@ -119,7 +119,7 @@ public final class Cinematics {
     static void applyEffects(ServerPlayer player, Scene scene, boolean skipped) {
         switch (scene.id()) {
             // 開幕: 最初の目的を、操作が戻った瞬間に大きく一行で伝える (帯と同じ「煙の立つ方」)
-            case Scenes.OPENING -> Notice.alert(player, "cinematic.skyabyss.opening.goal");
+            case Scenes.OPENING -> Notice.objective(player, "cinematic.skyabyss.opening.goal");
             default -> {
             }
         }

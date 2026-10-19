@@ -194,7 +194,7 @@ band
 shot p9_wait_90s
 
 echo === P10 the chain. By the design (21 section 3.2 / Ch1Descent) it falls only on day 4 morning or later with 2 of the 3 preparation requests done (day 6 without them): never inside the first hour.
-echo --- emulate it: finish two preparation requests (quest next) and sleep to the morning of day 4 (time set: Repeats.day counts the day time too), then lower the whale (titan rest)
+echo --- emulate it: finish two preparation requests (quest next) and sleep to the morning of day 4 (time set: Repeats.day counts the day time too), then wait for the whale to come down by itself (no titan rest: B-5 measures how long it takes)
 cmd skyabyss quest next @s "ch1/prep_gear"
 cmd skyabyss quest next @s "ch1/prep_gear"
 cmd skyabyss quest next @s "ch1/prep_gear"
@@ -203,13 +203,12 @@ cmd skyabyss quest next @s "ch1/prep_blade"
 cmd skyabyss quest next @s "ch1/prep_blade"
 cmd time set 73000
 band
-cmd skyabyss titan rest
 wait 100
 band
 shot p10_whale_comes
 echo --- the first descent holds the chain until a sky shadow passes (WhaleHush, about 100 s, 3 notices): wait for the band to turn to the chain text
 cmd tick rate 100
-waitband 6000 Climb the chain
+waitband 9000 Climb the chain
 cmd tick rate 20
 band
 shot p10_chain_down

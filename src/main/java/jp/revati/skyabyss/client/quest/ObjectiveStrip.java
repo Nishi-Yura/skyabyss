@@ -131,7 +131,7 @@ public final class ObjectiveStrip {
         String far = "";
         if (target != null) {
             double d = Math.sqrt(mc.player.position().distanceToSqr(target.getX() + 0.5, mc.player.getY(), target.getZ() + 0.5));
-            far = (Math.round(d / 10.0) * 10) + "m " + direction(mc.player.position(), target);
+            far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, direction(mc.player.position(), target));
         }
         int w = WIDTH;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;

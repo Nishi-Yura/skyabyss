@@ -103,6 +103,11 @@ public final class Notice {
         send(p, Kind.HINT, ModText.hint(key, args));
     }
 
+    // 目的を伝える一行 (開幕の「目的: …」など)。戦いの知らせ (alert) ではなく、目的の帯と同じ型で字幕の列に出す
+    public static void objective(Player p, String key, Object... args) {
+        send(p, Kind.HINT, ModText.objective(key, args));
+    }
+
     public static void levelUp(Player p, String key, Object... args) {
         send(p, Kind.LEVEL_UP, ModText.progress(key, args));
     }

@@ -25,7 +25,8 @@ public final class ForgeRules {
     }
 
     public static boolean accepts(ItemStack stack) {
-        return stack.getItem() instanceof ModGear && stack.getMaxStackSize() == 1;
+        // 旅装 (鯨道の旅装) は炉に入れない: 鍛えず、分解して巨神の欠片を稼げないように (21 の 1.2)
+        return stack.getItem() instanceof ModGear && stack.getMaxStackSize() == 1 && !(stack.getItem() instanceof jp.revati.skyabyss.guide.WhaleRoadArmorItem);
     }
 
     public static boolean canEnhance(ItemStack stack) {

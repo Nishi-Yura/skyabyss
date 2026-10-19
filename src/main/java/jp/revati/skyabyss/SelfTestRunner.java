@@ -124,6 +124,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
         // 留め袋 (登録の表・保存と同期・入れる/出す・拾う・掃除・倒れても残る・読む側・移し替え)。docs/design/22 の 13 章
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
+        steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
@@ -149,6 +150,8 @@ public final class SelfTestRunner {
         steps.addAll(ChapterSkySelfTest.steps());
         // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
+        // 一章の地上の敵 (岩殻虫・棘うさぎ・骨負い・老いた歩哨。P7。21 の 3.1)。SKYABYSS_SELFTEST_ONLY="ch1 mobs"
+        steps.addAll(jp.revati.skyabyss.story.ch1.Ch1MobsSelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
@@ -171,6 +174,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
         // 予告 (Telegraph): 当たる範囲と印が同じ形・予告 0.8 秒以上・番兵長と岩鯨の心臓の技・人数で増える。docs/design/02 の 5.4
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
+        // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3
+        steps.addAll(jp.revati.skyabyss.entity.Ch1BackMobsSelfTest.steps());
         // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
         steps.add(Step.once("titan end (load)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::load));
         steps.add(Step.once("titan end", 60, jp.revati.skyabyss.titan.end.TitanEndSelfTest::runSelfTest));

@@ -204,5 +204,16 @@
   "wayfarer_notes.ch1.line.4": "When a line or ring is marked on the floor, jump, run or take cover. Do not stand still.",
   "wayfarer_notes.ch1.line.5": "Strike the song stones from the lowest cairn up. In the cave, strike the ringing stones from the fewest candles up.",
   "wayfarer_notes.ch1.line.6": "Before the heart, check your body, blade and provisions. You can board without them. It will only be heavier.",
-  "wayfarer_notes.ch1.line.7": "Shell scraps and bone chips make road gear, rock whetstones and road hardtack. Open these notes and the recipes appear at the workbench."
+  "wayfarer_notes.ch1.line.7": "Shell scraps and bone chips make road gear, rock whetstones and road hardtack. Open these notes and the recipes appear at the workbench.",
+  "entity.skyabyss.rock_shell_beetle": "Rock Shell Beetle",
+  "entity.skyabyss.spine_hare": "Spine Hare",
+  "entity.skyabyss.bone_hauler": "Bone Hauler",
+  "entity.skyabyss.elder_sentry": "Elder Sentry",
+  "item.skyabyss.rock_shell_beetle_spawn_egg": "Rock Shell Beetle Spawn Egg",
+  "item.skyabyss.spine_hare_spawn_egg": "Spine Hare Spawn Egg",
+  "item.skyabyss.bone_hauler_spawn_egg": "Bone Hauler Spawn Egg",
+  "item.skyabyss.elder_sentry_spawn_egg": "Elder Sentry Spawn Egg",
+  "item.skyabyss.sentry_tally": "Sentry's Tally",
+  "item.skyabyss.sentry_tally.desc": "A notched bone tally. The old sentry carried it for someone who never came to claim it.",
+  "message.skyabyss.ch1.sentry.tally": "In the old sentry's grip was a notched bone tally."
 }

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 装飾の画面。真ん中に人形、左に護符の枠 (金の輪)、右に装飾の枠 2 つ、下に持ち物。
-// 画面の上に「持ち物」「装飾」のつまみ (持ち物の画面にも同じ位置に出す)。
+// 画面の上に「持ち物」「装飾」「旅嚢」のつまみ (持ち物の画面にも同じ位置に出す)。
 // 背景は 2 倍密度のテクスチャ (textures/gui/accessory/accessory.png、tools/gen_accessory_assets.py の案 B)
 public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/accessory/accessory.png");
@@ -24,6 +24,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
     static final int H = 166;
     static final int TAB_W = 48;
     static final int TAB_H = 16;
+    static final int TABS = 3;
     private static final int DOLL_X0 = 58;
     private static final int DOLL_Y0 = 14;
     private static final int DOLL_X1 = 118;
@@ -42,13 +43,15 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
     @Override
     protected void init() {
         super.init();
-        addTabs(this::addRenderableWidget, this, false);
+        addTabs(this::addRenderableWidget, this, 1);
     }
 
-    // 持ち物の画面・装飾の画面の上に、二つのつまみを足す。位置は画面の左端に合わせて毎回決める (レシピ本で左右に動くため)
-    static void addTabs(java.util.function.Consumer<AbstractButton> add, AbstractContainerScreen<?> screen, boolean inventory) {
-        add.accept(new Tab(screen, 0, inventory));
-        add.accept(new Tab(screen, 1, !inventory));
+    // 持ち物の画面・装飾の画面・旅嚢の画面の上に、三つのつまみ (0 持ち物・1 装飾・2 旅嚢) を足す。selected = いまの画面のつまみ。
+    // 位置は画面の左端に合わせて毎回決める (レシピ本で左右に動くため)。画面の幅は三つとも 176
+    public static void addTabs(java.util.function.Consumer<AbstractButton> add, AbstractContainerScreen<?> screen, int selected) {
+        for (int i = 0; i < TABS; i++) {
+            add.accept(new Tab(screen, i, i == selected));
+        }
     }
 
     @Override
@@ -100,14 +103,15 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
         private final boolean selected;
 
         Tab(AbstractContainerScreen<?> screen, int which, boolean selected) {
-            super(0, 0, TAB_W, TAB_H, Component.translatable(which == 0 ? "skyabyss_gear.screen.tab_inventory" : "skyabyss_gear.screen.tab_accessories"));
+            super(0, 0, TAB_W, TAB_H, Component.translatable(which == 0 ? "skyabyss_gear.screen.tab_inventory"
+                    : which == 1 ? "skyabyss_gear.screen.tab_accessories" : "skyabyss_pouch.tab"));
             this.screen = screen;
             this.which = which;
             this.selected = selected;
         }
 
         private void place() {
-            setX(screen.getGuiLeft() + W - (2 - which) * (TAB_W + 2) - 2);
+            setX(screen.getGuiLeft() + W - (TABS - which) * (TAB_W + 2) - 2);
             setY(screen.getGuiTop() - TAB_H + 2);
         }
 
@@ -119,6 +123,8 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
             Minecraft mc = Minecraft.getInstance();
             if (which == 1) {
                 PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
+            } else if (which == 2) {
+                PacketDistributor.sendToServer(new jp.revati.skyabyss.pouch.PouchNet.Open());
             } else if (mc.player != null) {
                 mc.player.closeContainer();
                 mc.setScreen(new InventoryScreen(mc.player));

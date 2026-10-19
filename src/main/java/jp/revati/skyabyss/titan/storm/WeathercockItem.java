@@ -28,7 +28,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 // 掲げる (右クリック): 空が見え、まわり 16 ブロックでいちばん高い所 (または y 100 以上) で掲げると、風見鶏に雷が落ち (演出だけ)、
 // 雷翼がその人の近くの峰へ降りて 3 分止まる。ワールドで 10 分に一度まで。ほかの人には「○○が嵐を呼んだ」。
 // 鶏の向きが雷翼を指す手の中のモデル (回る) は、品の絵 (ラフ 3 案) と一緒に入れる。今は避雷針の形を借りている (00 に書いた)
-public class WeathercockItem extends Item {
+public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     static final int CALL_COOLDOWN = 12000;   // 10 分
     static final int CALL_REST = 3600;        // 3 分止まる
     static final int HIGH_Y = 100;
@@ -52,29 +52,37 @@ public class WeathercockItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!(level instanceof ServerLevel sl) || !(player instanceof ServerPlayer sp)) {
+        if (!(level instanceof ServerLevel) || !(player instanceof ServerPlayer sp)) {
             return InteractionResultHolder.success(stack);
         }
-        player.getCooldowns().addCooldown(this, 40);
+        return usePouch(sp, () -> {
+        }) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+    }
+
+    // 掲げる (右クリックと、旅嚢の輪・短押しの共通の中身)。条件を満たさなければ false
+    @Override
+    public boolean usePouch(ServerPlayer sp, Runnable consumeOne) {
+        ServerLevel sl = sp.serverLevel();
+        sp.getCooldowns().addCooldown(this, 40);
         BlockPos pos = sp.blockPosition();
-        if (level.dimension() != Level.OVERWORLD || !level.canSeeSky(pos.above())) {
+        if (sl.dimension() != Level.OVERWORLD || !sl.canSeeSky(pos.above())) {
             Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.no_sky"));
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
         if (!high(sl, pos)) {
             Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.too_low"));
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
         long now = sl.getGameTime();
         if (now - lastCall < CALL_COOLDOWN) {
             long minutes = (CALL_COOLDOWN - (now - lastCall) + 1199) / 1200;
             Notice.bar(sp, ModText.deny("message.skyabyss.weathercock.wait", minutes));
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
         StormWingEntity titan = StormKeeper.KEEPER.current(sl);
         if (titan == null || !titan.comeRest(sp, CALL_REST)) {
             Notice.bar(sp, ModText.hint("message.skyabyss.weathercock.absent"));
-            return InteractionResultHolder.fail(stack);
+            return false;
         }
         lastCall = now;
         LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(sl);
@@ -89,7 +97,7 @@ public class WeathercockItem extends Item {
                 Notice.bar(other, ModText.hint("message.skyabyss.weathercock.called_by", sp.getDisplayName()));
             }
         }
-        return InteractionResultHolder.consume(stack);
+        return true;
     }
 
     // y 100 以上か、まわり 16 ブロックの地表がどこも足もとより高くない
