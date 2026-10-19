@@ -118,6 +118,16 @@ public final class Config {
             .comment("目的の場所へ向かう、地面の道しるべ。ON = いつも, NEAR = 目的が 64 ブロック以内のときだけ, OFF = 出さない (キーでも切り替えられる)")
             .defineEnum("questTrail", TrailMode.ON);
 
+    // 場面の字幕の出し方 (client/cinematic/CinematicScreen, cinematic/VoiceTiming)
+    public enum SubtitleReveal {
+        SYNCED,
+        INSTANT
+    }
+
+    public static final ModConfigSpec.EnumValue<SubtitleReveal> SUBTITLE_REVEAL = CLIENT_BUILDER
+            .comment("場面の台詞の字幕の出し方。SYNCED = 声の速さに合わせて文字が出る (声を消していても同じ速さ), INSTANT = 最初から全文")
+            .defineEnum("subtitleReveal", SubtitleReveal.SYNCED);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);
