@@ -37,6 +37,7 @@ public final class CinematicSelfTest {
         List<String> f = new ArrayList<>();
         try {
             scenes(f);
+            voice(f);
             lang(f);
             math(f);
             codec(f);
@@ -117,6 +118,76 @@ public final class CinematicSelfTest {
             // 心臓の台詞は巨神ごと (共通の台詞ではない)
             Scene heart = Scenes.get(Scenes.heartId(titan));
             check(f, heart != null && heart.lines().size() == 2 && heart.lines().get(0).text().contains(titan), "the heart lines for " + titan + " are not per titan");
+        }
+    }
+
+    // ---------------------------------------------------------------- 台詞の声 (docs/design/20 の 6 章)
+    // 台本の全台詞 (場面, 番号) に、声の一覧 (voice_manifest.json。tools/gen_cinematic_voice.py の入力) の行・sounds.json の音・jar の中の .ogg があること。
+    // 一覧が台本とずれていたら落ちる。SKYABYSS_DUMP_VOICE=<パス> を付けると、台本から一覧を書き出す (台本を変えたあとに一度流して、tools の README の手順で作り直す)
+    private static void voice(List<String> f) {
+        StringBuilder out = new StringBuilder("{\"lines\":[\n");
+        List<String[]> want = new ArrayList<>();
+        for (Scene s : Scenes.all()) {
+            for (int i = 0; i < s.lines().size(); i++) {
+                DialogueLine l = s.lines().get(i);
+                want.add(new String[] {s.id(), Integer.toString(i), Float.toString(l.at()), Float.toString(l.duration()), l.speaker().name(), l.label(), l.text()});
+                if (out.length() > 12) {
+                    out.append(",\n");
+                }
+                out.append("{\"scene\":\"").append(s.id()).append("\",\"idx\":").append(i).append(",\"at\":").append(l.at())
+                        .append(",\"duration\":").append(l.duration()).append(",\"speaker\":\"").append(l.speaker().name())
+                        .append("\",\"label\":\"").append(l.label()).append("\",\"text\":\"").append(l.text()).append("\"}");
+            }
+        }
+        out.append("\n]}\n");
+        String dump = System.getenv("SKYABYSS_DUMP_VOICE");
+        if (dump != null && !dump.isBlank()) {
+            try {
+                java.nio.file.Files.writeString(java.nio.file.Path.of(dump), out.toString(), StandardCharsets.UTF_8);
+                SkyAbyss.LOGGER.info("cinematic voice manifest written: {} ({} lines)", dump, want.size());
+            } catch (Exception e) {
+                f.add("voice manifest dump: " + e);
+            }
+        }
+        JsonObject manifest = loadJson("/assets/skyabyss_cinematic/voice_manifest.json", f);
+        JsonObject sounds = loadJson("/assets/skyabyss_cinematic/sounds.json", f);
+        if (manifest == null || sounds == null) {
+            return;
+        }
+        com.google.gson.JsonArray lines = manifest.getAsJsonArray("lines");
+        check(f, lines.size() == want.size(), "voice manifest has " + lines.size() + " lines, the scripts have " + want.size() + " (regenerate: tools/README.md)");
+        for (int i = 0; i < Math.min(lines.size(), want.size()); i++) {
+            JsonObject m = lines.get(i).getAsJsonObject();
+            String[] w = want.get(i);
+            boolean same = m.get("scene").getAsString().equals(w[0]) && m.get("idx").getAsInt() == Integer.parseInt(w[1])
+                    && Math.abs(m.get("at").getAsFloat() - Float.parseFloat(w[2])) < 1.0e-4f
+                    && Math.abs(m.get("duration").getAsFloat() - Float.parseFloat(w[3])) < 1.0e-4f
+                    && m.get("speaker").getAsString().equals(w[4]) && m.get("label").getAsString().equals(w[5])
+                    && m.get("text").getAsString().equals(w[6]);
+            check(f, same, "voice manifest line " + i + " differs from the script (" + w[0] + " #" + w[1] + ")");
+        }
+        for (String[] w : want) {
+            int idx = Integer.parseInt(w[1]);
+            String name = VoiceClips.eventName(w[0], idx);
+            check(f, sounds.has(name), "no voice sound event " + name);
+            try (InputStream in = CinematicSelfTest.class.getResourceAsStream(VoiceClips.clipResource(w[0], idx))) {
+                check(f, in != null, "no voice clip " + VoiceClips.clipResource(w[0], idx));
+            } catch (Exception e) {
+                f.add("voice clip read " + name + ": " + e);
+            }
+        }
+    }
+
+    private static JsonObject loadJson(String path, List<String> f) {
+        try (InputStream in = CinematicSelfTest.class.getResourceAsStream(path)) {
+            if (in == null) {
+                f.add("missing resource " + path);
+                return null;
+            }
+            return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+        } catch (Exception e) {
+            f.add("read " + path + ": " + e);
+            return null;
         }
     }
 

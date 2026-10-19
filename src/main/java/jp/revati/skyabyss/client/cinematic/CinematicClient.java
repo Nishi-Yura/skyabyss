@@ -61,6 +61,8 @@ public final class CinematicClient {
         boolean skipped;
         boolean sentEnd;
         boolean restored;
+        // 次に声を鳴らす台詞の番号 (CinematicVoice)
+        int voiceNext;
         // 今の視野の倍率の元 (度。0 = そのまま)
         float fov;
         float fovOld;
@@ -191,6 +193,7 @@ public final class CinematicClient {
         Run r = run;
         run = null;
         pending = null;
+        CinematicVoice.stop();
         if (r != null && mc.screen == r.screen) {
             mc.setScreen(null);
         }
@@ -202,6 +205,7 @@ public final class CinematicClient {
             return;
         }
         r.skipped = skipped;
+        CinematicVoice.stop();
         if (!skipped && r.scene.seamless()) {
             // 最後のカメラが本人の目と同じなので、そのまま操作へ
             send(r);
@@ -312,6 +316,7 @@ public final class CinematicClient {
                 tickSkip(r, mc);
                 if (r.phase == Phase.PLAY) {
                     r.ticks++;
+                    CinematicVoice.tick(r);
                     applyCamera(r);
                     if (r.ticks >= r.scene.ticks()) {
                         finish(r, false);
@@ -352,6 +357,7 @@ public final class CinematicClient {
 
     // 状態を捨てて元に戻す (ワールドを抜けた・サーバーと切れた)
     private static void abort() {
+        CinematicVoice.stop();
         Run r = run;
         pending = null;
         if (r != null) {
@@ -367,6 +373,7 @@ public final class CinematicClient {
         Run r = run;
         pending = null;
         run = null;
+        CinematicVoice.stop();
         if (r != null) {
             mc.options.hideGui = r.hudBefore;
             r.restored = true;

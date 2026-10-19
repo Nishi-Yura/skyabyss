@@ -42,5 +42,10 @@
   "cinematic.skyabyss.end.thunder_wing.3": "嵐は眠っても、空を覚えている。",
   "cinematic.skyabyss.end.ember.1": "地面が、冷えていく。",
   "cinematic.skyabyss.end.ember.2": "熾火は土に埋もれ、丘になる。",
-  "cinematic.skyabyss.end.ember.3": "……足もとの拍は、消えていない。"
+  "cinematic.skyabyss.end.ember.3": "……足もとの拍は、消えていない。",
+  "subtitles.skyabyss_cinematic.voice.hero": "心の声のような音",
+  "subtitles.skyabyss_cinematic.voice.heaven": "天の声のような音",
+  "subtitles.skyabyss_cinematic.voice.isana": "イサナの声のような音",
+  "subtitles.skyabyss_cinematic.voice.storyteller": "語り部の声のような音",
+  "subtitles.skyabyss_cinematic.voice.watcher": "見る者の声のような音"
 }
