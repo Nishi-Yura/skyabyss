@@ -159,7 +159,6 @@ public final class StormBackSelfTest {
         check(!p.columnHas(0, -130) && !p.columnHas(230, 0), "the bird is larger than planned", f);
         // 部屋は体の中: 広間の真ん中の上は鳥 (天窓のガラスを除く)
         check(p.columnHas(10, -10) && StormBirdBuilder.top(10, -10) > HUB.floor() + HUB.height(), "the wind hall is not inside the body", f);
-        check(StormBirdBuilder.top(-128, -17) > KNOB_CEILING, "the left wrist knob pokes out of the wing", f);
         check(StormBirdBuilder.top(128, -17) > RAIJU_NEST_CEILING, "the right wrist knob pokes out of the wing", f);
         check(StormBirdBuilder.top(0, -78) > EYE_HALL.floor() + EYE_HALL.height(), "the eye hall pokes out of the head", f);
     }
@@ -645,7 +644,10 @@ public final class StormBackSelfTest {
             yes.put("rest " + id, rest(id));
         }
         yes.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, -17));
-        yes.put("left knob floor", WEST_KNOB.offset(4, 1, 0));
+        yes.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17));
+        for (String id : List.of("w2", "w3", "w4")) {
+            yes.put("rest " + id, rest(id));
+        }
         yes.put("tail hall", TAIL_CENTER);
         yes.put("eye hall", EYE_HALL_CENTER.offset(1, 0, 6));
         for (Map.Entry<String, BlockPos> e : yes.entrySet()) {
@@ -749,8 +751,7 @@ public final class StormBackSelfTest {
         try {
             check(StormGuide.goalFor(l, pa).id().equals("hub.stones"), "hub goal should be hub.stones, was " + StormGuide.goalFor(l, pa).id(), f);
             Object[][] spots = {
-                    {-35, BONE_FLOOR + 1, -17, "west.gap", 0}, {-60, BONE_FLOOR + 1, -17, "west.gap", 2}, {-110, BONE_FLOOR + 1, -17, "west.knob", 4},
-                    {WEST_STONE.getX(), WEST_STONE.getY(), WEST_STONE.getZ(), "west.stone", 4}, {40, BONE_FLOOR + 1, -17, "east.rods", 0},
+                    {-35, BONE_FLOOR + 1, -17, "west.gap", 0}, {-50, BONE_FLOOR + 1, -17, "west.gap", 1}, {-100, BONE_FLOOR + 1, -17, "west.rib", 2}, {40, BONE_FLOOR + 1, -17, "east.circuit", 0},
                     {0, EYE_HALL.floor() + 1, -78, "front.mirror", 0}};
             for (Object[] sp : spots) {
                 pa.moveTo((int) sp[0] + 0.5, (int) sp[1], (int) sp[2] + 0.5, 0f, 0f);
@@ -761,6 +762,9 @@ public final class StormBackSelfTest {
                     check(g.a() == (int) sp[4], "gaps passed at x " + sp[0] + " should be " + sp[4] + ", was " + g.a(), f);
                 }
             }
+            a.setRibLayer(RIB_LAYERS);
+            pa.moveTo(WEST_STONE.getX() + 0.5, WEST_STONE.getY(), WEST_STONE.getZ() + 0.5, 0f, 0f);
+            check(StormGuide.goalFor(l, pa).id().equals("west.stone"), "west goal at the top should be west.stone, was " + StormGuide.goalFor(l, pa).id(), f);
             // 進みの点: 石が鳴ると満点、受け羽・戸で増える
             a.setRung(StormBackState.Trial.FRONT, true);
             pa.moveTo(0.5, EYE_HALL.floor() + 1, -77.5, 0f, 0f);
@@ -774,7 +778,7 @@ public final class StormBackSelfTest {
             a.openEastDoor(1);
             pa.moveTo(40.5, BONE_FLOOR + 1, -16.5, 0f, 0f);
             g = StormGuide.goalFor(l, pa);
-            check(g.id().equals("east.rods") && g.done() == 2 && g.a() == 2, "east goal with two doors: " + g, f);
+            check(g.id().equals("east.circuit") && g.done() == 2 && g.a() == 2, "east goal with two doors: " + g, f);
             a.openEastDoor(2);
             check(StormGuide.goalFor(l, pa).id().equals("east.raiju"), "east goal with three doors should be east.raiju", f);
             a.setRaijuDefeated(true);
@@ -787,17 +791,9 @@ public final class StormBackSelfTest {
 
     // ---------------------------------------------------------------- どの拍でも試練に行ける・終えられる (25 の 2章)
     private static void checkNoStateGates(ServerLevel l, List<String> f) {
-        // 凪でも、東の柱は雷で満ちる (招雷の間は凪が嵐の倍)。西の瘤の岩棚の穴は拍によらず岩棚まで届く
-        check(StormEast.CALM_STRIKE_EVERY > 0 && StormEast.CALM_STRIKE_EVERY <= StormEast.STRIKE_EVERY * 3, "calm strikes should come at most 3x slower than storm ones", f);
-        for (StormBackClock.Phase ph : new StormBackClock.Phase[] {StormBackClock.Phase.CALM, StormBackClock.Phase.STORM}) {
-            StormBackClock.force(ph);
-            for (StormWest.Vent v : StormWest.vents()) {
-                if (v.floor().equals(WEST_KNOB_VENT)) {
-                    double h = StormWest.liftFor(l, v);
-                    check(WEST_KNOB_VENT.getY() + 1 + h >= WEST_STONE.getY(), "the knob vent does not reach the ledge in " + ph + " (" + h + ")", f);
-                }
-            }
-        }
+        // どの拍でも、西は肋の間を一段ずつ登れる (凪の昇り風 4 = 梁の段差)・東は回路を組める (StormReworkSelfTest が回路を両方の拍で通す)
+        check(StormBackClock.CALM_LIFT >= RIB_HOP, "the calm vent must lift at least one rib hop", f);
+        StormReworkSelfTest.run(l, f);
         StormBackClock.force(null);
         // 試練は自分では眠らない: 心臓を一度倒した記録でも、リセットのあと眠る試練がない (checkReset でも見る)
         StormProgress a = fresh(l, GROUP_A);
