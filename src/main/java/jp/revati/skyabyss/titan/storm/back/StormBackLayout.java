@@ -165,6 +165,12 @@ public final class StormBackLayout {
         return new Area(Math.max(RIB_X1, c.getX() - 2), Math.min(RIB_X2, c.getX() + 2), Math.max(BONE_Z1, c.getZ() - 2), Math.min(BONE_Z2, c.getZ() + 2), c.getY(), 4);
     }
 
+    // 層 layer の岩棚の「着いたら灯る」灯りの場所 (板の西の縁の上)。まだ着いていないグループには消えた石
+    public static BlockPos ribLayerLight(int layer) {
+        Area s = ribSlab(layer);
+        return new BlockPos(s.x1(), s.floor() + 3, s.z1());
+    }
+
     // 風切りの羽根の滑空の輪 (嵐の高い昇り風から次の層の岩棚へ。層 k → k+1 の中ほど、嵐の昇り風の上の端の高さ)
     public static Vec3 ribRing(int layer) {
         BlockPos a = ribLanding(layer);

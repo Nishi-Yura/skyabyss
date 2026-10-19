@@ -209,7 +209,7 @@ public final class StormBirdBuilder {
                     kit.put(x, y, z, StormKit.FEATHER);
                 }
                 boolean border = x == a.x1() || x == a.x2() || z == a.z1() || z == a.z2();
-                BlockState s = border ? StormKit.COPPER : ((x + z) & 1) == 0 ? StormKit.FEATHER_WHITE : StormKit.FEATHER;
+                BlockState s = border ? StormKit.COPPER : StormKit.floor(Style.FEATHER, x, z);
                 // 羽の模様 (真ん中に銅の菱形)
                 if (Math.abs(x) + Math.abs(z - PLAZA_CENTER.getZ()) <= 3) {
                     s = StormKit.COPPER;
@@ -294,8 +294,6 @@ public final class StormBirdBuilder {
                 }
             }
         }
-        // 口の上の灯り (光る面の奥)
-        kit.put(0, GATE_FLOOR + 10, GATE_Z1, StormKit.LAMP);
         // 腰の回廊: 門の内から北へ 1 段ずつ下りて尾の間の床へ (幅 7・高さ 5)
         for (int z = GATE_Z1 - 1; z > TAIL_HALL.z2(); z--) {
             int floor = Math.min(GATE_FLOOR, TAIL_HALL.floor() + Math.max(1, z - TAIL_HALL.z2()));
@@ -325,9 +323,9 @@ public final class StormBirdBuilder {
                 kit.solid(x, a.floor() + a.height() + 3, z, StormKit.wall(Style.FEATHER, x, 0, z));
             }
         }
-        kit.solid(0, a.floor() + a.height() + 3, 38, StormKit.LAMP);
-        kit.solid(-7, a.floor() + a.height() + 3, 38, StormKit.LAMP);
-        kit.solid(7, a.floor() + a.height() + 3, 38, StormKit.LAMP);
+        for (int[] l : new int[][] {{0, 38}, {-7, 38}, {7, 38}, {-4, 34}, {4, 34}, {-4, 42}, {4, 42}}) {
+            kit.solid(l[0], a.floor() + a.height() + 3, l[1], StormKit.LAMP);
+        }
         // 炉 (共鳴の炉) と飾りの焚き火、腰掛け
         kit.put(10, a.floor() + 1, 43, ModBlocks.RESONANCE_FORGE.get().defaultBlockState());
         kit.put(-10, a.floor() + 1, 43, Blocks.CAMPFIRE.defaultBlockState());
@@ -407,6 +405,9 @@ public final class StormBirdBuilder {
         kit.put(g.x1(), g.floor() - 2, g.z2(), StormKit.LAMP);
         kit.put(g.x2(), g.floor() - 2, g.z2(), StormKit.LAMP);
         kit.put(0, g.floor() - 2, g.z2(), StormKit.LAMP);
+        kit.put(-5, g.floor() - 2, g.z2(), StormKit.LAMP);
+        kit.put(5, g.floor() - 2, g.z2(), StormKit.LAMP);
+        kit.put(8, g.floor() - 2, g.z2(), StormKit.LAMP);
         calmTower(kit);
         // 竜骨の門 (床の羽根の輪。閉じているときは封印のブロック)
         int kz = HUB_CENTER.getZ();
@@ -425,9 +426,9 @@ public final class StormBirdBuilder {
         }
         // 行き先の線 (広間の真ん中から、西 = 水色、東 = 金、前 = 白。出口の戸の前まで)
         int wz = WZ;
-        StormDeco.strip(kit, a.floor(), StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, new int[] {-4, kz}, new int[] {-14, kz}, new int[] {-14, wz}, new int[] {-21, wz});
-        StormDeco.strip(kit, a.floor(), StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, new int[] {4, kz}, new int[] {14, kz}, new int[] {14, wz}, new int[] {21, wz});
-        StormDeco.strip(kit, a.floor(), StormDeco.FRONT_LINE, StormDeco.FRONT_PIP, 4, new int[] {0, kz - 4}, new int[] {0, HUB_UPDRAFT.getZ() + 3});
+        StormDeco.strip(kit, a.floor(), StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 1, new int[] {-4, kz}, new int[] {-14, kz}, new int[] {-14, wz}, new int[] {-21, wz});
+        StormDeco.strip(kit, a.floor(), StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 1, new int[] {4, kz}, new int[] {14, kz}, new int[] {14, wz}, new int[] {21, wz});
+        StormDeco.strip(kit, a.floor(), StormDeco.FRONT_LINE, StormDeco.FRONT_PIP, 4, 1, new int[] {0, kz - 4}, new int[] {0, HUB_UPDRAFT.getZ() + 3});
         // 出口の上の色の飾り (戸口の上に光る玉)
         kit.put(a.x1() - 1, a.floor() + 7, wz, Blocks.SEA_LANTERN.defaultBlockState());
         kit.put(a.x2() + 1, a.floor() + 7, wz, Blocks.OCHRE_FROGLIGHT.defaultBlockState());

@@ -137,7 +137,8 @@ public final class StormKit {
             case THUNDER -> h < 6 ? SLATE : TILE;
             case EYE -> h < 7 ? QUARTZ : CALCITE;
             case KEEL -> h < 6 ? ANDESITE : SMOOTH;
-            case FEATHER -> h < 4 ? FEATHER : h < 8 ? FEATHER_WHITE : CALCITE;
+            // 羽の筋: 北を向く矢じり (^) の縞が、幅 4 の白と灰で続く (行き先は北 = 羽根の門・首の側)
+            case FEATHER -> Math.floorMod(Math.abs(x) - z, 8) < 4 ? FEATHER_WHITE : FEATHER;
             case CROWN -> h < 5 ? QUARTZ : h < 9 ? CALCITE : DIORITE;
         };
     }

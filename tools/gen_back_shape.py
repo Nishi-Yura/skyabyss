@@ -98,11 +98,11 @@ def _bird_grid(IW):
     return LV.recolor(IW.build_grid(), LV.cached_grid())
 
 
-# 鳥の拡大 (docs/design/26。--hscale / --vscale。既定は 1.0 = 版 12 まで。雷翼の版 13 は 1.6 / 1.3)
-BIRD_H = 1.0
-BIRD_V = 1.0
+# 鳥の拡大 (docs/design/26。--hscale / --vscale / --wing。既定は雷翼の版 20 = 水平 1.6・垂直 1.3・翼の芯 1.9。版 12 までは 1.0 / 1.0 / 1.4)
+BIRD_H = 1.6
+BIRD_V = 1.3
 BIRD_OUT = None
-BIRD_WING = None
+BIRD_WING = 1.9
 
 
 def bird_cfg():
@@ -463,6 +463,24 @@ def walkable_plates(B, G, org):
     print("plate steps added", added)
 
 
+def drop_floaters(B, min_size=50):
+    """体につながっていない小さな塊 (面でつながらない 50 ブロック未満) を消す。拡大で細い塔の先が離れて宙に浮くのを防ぐ。消した数を返す"""
+    from scipy import ndimage
+    occ = B != 0
+    lab, k = ndimage.label(occ, structure=ndimage.generate_binary_structure(3, 1))
+    if k <= 1:
+        return 0
+    sizes = ndimage.sum(occ, lab, range(1, k + 1))
+    big = int(np.argmax(sizes)) + 1
+    drop = [i + 1 for i, s in enumerate(sizes) if s < min_size and i + 1 != big]
+    if not drop:
+        return 0
+    mask = np.isin(lab, drop)
+    n = int(mask.sum())
+    B[mask] = 0
+    return n
+
+
 def run(kind, preview_on=False):
     c = CONFIGS[kind]()
     K = c["build"]()
@@ -477,6 +495,8 @@ def run(kind, preview_on=False):
     if c["belly"]:
         G, org = add_belly(G, org, c)
     B, names = to_blocks(G, org, c)
+    if kind == "bird":
+        print("floating bits removed", drop_floaters(B))
     if c["plates"]:
         walkable_plates(B, G, org)
     if c.get("pad"):

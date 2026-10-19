@@ -43,8 +43,8 @@ final class StormDeco {
         }
     }
 
-    // 床の線 (折れ線 pts を軸方向の線分でつなぐ。床のブロック y の置き換え)。pipEvery おきに光る玉
-    static void strip(StormKit kit, int floorY, BlockState line, BlockState pip, int pipEvery, int[]... pts) {
+    // 床の線 (折れ線 pts を軸方向の線分でつなぐ。床のブロック y の置き換え)。pipEvery おきに光る玉。half は線の半幅 (1 なら 3 幅。玉は真ん中だけ)
+    static void strip(StormKit kit, int floorY, BlockState line, BlockState pip, int pipEvery, int half, int[]... pts) {
         int n = 0;
         for (int i = 0; i + 1 < pts.length; i++) {
             int x = pts[i][0];
@@ -52,7 +52,11 @@ final class StormDeco {
             int dx = Integer.signum(pts[i + 1][0] - x);
             int dz = Integer.signum(pts[i + 1][1] - z);
             while (x != pts[i + 1][0] || z != pts[i + 1][1]) {
-                kit.put(x, floorY, z, n % pipEvery == pipEvery - 1 ? pip : line);
+                for (int w = -half; w <= half; w++) {
+                    int px = dx != 0 ? x : x + w;
+                    int pz = dx != 0 ? z + w : z;
+                    kit.put(px, floorY, pz, w == 0 && n % pipEvery == pipEvery - 1 ? pip : line);
+                }
                 x += dx;
                 z += dz;
                 n++;

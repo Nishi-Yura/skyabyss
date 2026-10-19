@@ -163,7 +163,7 @@ public final class RouteLightDev {
                     for (Direction d : Direction.values()) {
                         BlockPos q = a.relative(d);
                         BlockState qs = level.getBlockState(q);
-                        if (!RouteLamps.replaceable(qs)) {
+                        if (!RouteLamps.replaceable(qs) || RouteLamps.reserved(name, q)) {
                             continue;
                         }
                         double score = q.distSqr(c.above());

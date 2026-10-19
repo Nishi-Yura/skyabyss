@@ -223,10 +223,10 @@ final class StormWingBuilder {
                 for (int z = WZ - 1; z <= WZ; z++) {
                     kit.put(x, HIGH_BEAM_Y, z, StormKit.BONE);
                 }
-                // 陰の柱 (梁の北の縁、5 ブロックおき)。横風をよける
+                // 陰の柱 (梁の北の側の列の上、5 ブロックおき。梁に立つ)。柱のすぐ東 (肩の側) の同じ列に立つと、横風をよけられる
                 if (Math.floorMod(x, 5) == 0) {
-                    kit.put(x, HIGH_BEAM_Y + 1, WZ - 2, StormKit.CALCITE);
-                    kit.put(x, HIGH_BEAM_Y + 2, WZ - 2, StormKit.CALCITE);
+                    kit.put(x, HIGH_BEAM_Y + 1, WZ - 1, StormKit.CALCITE);
+                    kit.put(x, HIGH_BEAM_Y + 2, WZ - 1, StormKit.CALCITE);
                 }
                 // 梁の下に 6 ブロックおきに灯り (嵐の高い道を明るく)
                 if (Math.floorMod(x, 6) == 0) {

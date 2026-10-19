@@ -35,6 +35,18 @@ public final class RouteLamps {
         };
     }
 
+    // 灯りに置き換えてはいけない場所 (仕掛けの見かけを持つ石。雷翼の肋の間の層の灯りは、着いたグループにだけ灯る)
+    public static boolean reserved(String titan, BlockPos p) {
+        if ("storm".equals(titan)) {
+            for (int layer = 1; layer <= jp.revati.skyabyss.titan.storm.back.StormBackLayout.RIB_LAYERS; layer++) {
+                if (jp.revati.skyabyss.titan.storm.back.StormBackLayout.ribLayerLight(layer).equals(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean replaceable(BlockState s) {
         boolean stone = s.is(Blocks.STONE) || s.is(Blocks.STONE_BRICKS) || s.is(Blocks.MOSSY_STONE_BRICKS) || s.is(Blocks.CRACKED_STONE_BRICKS)
                 || s.is(Blocks.DEEPSLATE) || s.is(Blocks.COBBLED_DEEPSLATE) || s.is(Blocks.DEEPSLATE_BRICKS) || s.is(Blocks.DEEPSLATE_TILES)
@@ -71,7 +83,7 @@ public final class RouteLamps {
         int n = 0;
         for (BlockPos p : load(titan)) {
             BlockState cur = level.getBlockState(p);
-            if (cur != lamp && replaceable(cur)) {
+            if (cur != lamp && replaceable(cur) && !reserved(titan, p)) {
                 level.setBlock(p, lamp, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                 n++;
             }

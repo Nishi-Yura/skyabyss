@@ -170,6 +170,12 @@ public final class BuildAuditSelfTest {
         steps.add(Step.once("build audit (ember)", server -> back(server, EmberIds.BACK, "ember", EMBER_BOX,
                 level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level))));
         steps.add(Step.once("build audit", BuildAuditSelfTest::finish));
+        // 開発用: 環境変数 SKYABYSS_AUDIT_ONLY=<whale|tide|storm|ember> なら、その背の段だけ (開始・その背を建てる・調べる・まとめ)
+        String only = System.getenv("SKYABYSS_AUDIT_ONLY");
+        if (only != null && !only.isBlank()) {
+            steps.removeIf(st -> !(st.name().equals("build audit (start)") || st.name().equals("build audit (" + only + " build)") || st.name().equals("build audit (" + only + ")")
+                    || st.name().equals("build audit")));
+        }
         return steps;
     }
 
