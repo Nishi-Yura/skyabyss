@@ -7,6 +7,8 @@ import jp.revati.skyabyss.rpg.client.skill.SkillClient;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillData;
+import jp.revati.skyabyss.rpg.skill.SkillKeystone;
+import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import net.minecraft.network.chat.Component;
@@ -83,6 +85,42 @@ public final class SkillNetwork {
                                 SkillManager.sync(player);
                                 Notice.bar(player, ModText.deny("message.skyabyss.skill.loadout_failed." + r.name().toLowerCase()));
                             }
+                        }
+                    }
+                })
+                .playToServer(SkillStancePayload.TYPE, SkillStancePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillManager.StanceResult r = SkillManager.setStance(player, SkillStance.of(payload.stance()));
+                        if (r == SkillManager.StanceResult.COOLDOWN) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.stance_cooldown"));
+                        }
+                    }
+                })
+                .playToServer(SkillChainPayload.TYPE, SkillChainPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillManager.ChainResult r = SkillManager.toggleChain(player, payload.slot());
+                        if (r != SkillManager.ChainResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.chain_failed." + r.name().toLowerCase()));
+                        }
+                    }
+                })
+                .playToServer(SkillKeystonePayload.TYPE, SkillKeystonePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillManager.KeystoneResult r = SkillManager.toggleKeystone(player, SkillKeystone.byId(payload.id()));
+                        if (r != SkillManager.KeystoneResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.keystone_failed." + r.name().toLowerCase()));
+                        }
+                    }
+                })
+                .playToServer(SkillTryonPayload.TYPE, SkillTryonPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        int n = SkillManager.learnAll(player, payload.skills());
+                        if (n < payload.skills().size()) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.tryon_partial", n, payload.skills().size()));
                         }
                     }
                 })

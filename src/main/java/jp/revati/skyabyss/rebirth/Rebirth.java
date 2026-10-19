@@ -286,7 +286,7 @@ public final class Rebirth {
     // レベル・経験値・ステータスの点・技・刻印・天職だけ戻す (回数・魂盤・恩恵・装備・物語・型の保存は残る)。回数は足さない
     public static void reset(ServerPlayer player) {
         Growth.resetForRebirth(player);
-        SkillManager.resetForRebirth(player);
+        jp.revati.skyabyss.rpg.skill.SkillReset.forRebirth(player);
         if (!(player instanceof FakePlayer)) {
             // 天職をもう一度選べるように (選べる段なら画面を開く)
             SkillCalling.offerSoon(player, 100, true);

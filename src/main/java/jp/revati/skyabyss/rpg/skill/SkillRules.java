@@ -22,6 +22,83 @@ public final class SkillRules {
     public static final double TRAIT_BONE_KEEP = 0.25;
     // 1 秒 = 20 tick
     public static final int SECOND = 20;
+    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案)
+    // 天職の割引: 天職の木の段 3 つぶんを 1 点ずつ安くする (A01)
+    public static final int CALLING_DISCOUNT_MAX = 3;
+    // 木のセット (A04): 同じ木に点を 2・4・6 使うたびの小さな追加
+    public static final int[] SET_AT = {2, 4, 6};
+    // タグ (A03): 数えるのは 10 まで。1 つにつき、そのタグの技の力 +1%。4 と 7 で小さな足し (SkillBuild.tagThreshold)
+    public static final int TAG_COUNT_CAP = 10;
+    public static final double TAG_POWER_PER = 0.01;
+    public static final int TAG_STEP1 = 4;
+    public static final int TAG_STEP2 = 7;
+    // 条件の特性 (A15): そのタグが 3 つ以上あるとき。5 以上で大きいほう
+    public static final int COND_MIN_TAGS = 3;
+    public static final int COND_BIG_TAGS = 5;
+    public static final int COND_DODGE_TICKS = 3 * SECOND;
+    public static final int COND_PERFECT_TICKS = 4 * SECOND;
+    // 無傷のあとにこの間 (5 秒) 傷を受けていなければ、予告をよけたのは「完璧」
+    public static final int PERFECT_CLEAN_TICKS = 5 * SECOND;
+    // 「低 HP」は 3❤ (6 点) 以下。回復や無敵は付けない
+    public static final float COND_LOW_HP = 6f;
+    public static final double COND_FULL_MANA = 0.98;
+    // 構え (A11): 切り替えの待ち 3 秒
+    public static final int STANCE_SWAP_TICKS = 3 * SECOND;
+    public static final double STANCE_GUARD_ARMOR = 3;
+    public static final double STANCE_GUARD_KNOCKBACK = 0.15;
+    public static final double STANCE_GUARD_DAMAGE = -0.10;
+    public static final double STANCE_SWIFT_MOVE = 0.08;
+    public static final double STANCE_SWIFT_COOLDOWN = -0.08;
+    public static final double STANCE_SWIFT_ARMOR = -2;
+    public static final double STANCE_SONG_REGEN = 0.35;
+    public static final double STANCE_SONG_SUPPORT = 0.15;
+    public static final double STANCE_SONG_DAMAGE = -0.10;
+    // 連鎖 (A10): 直前の枠の技から 2 秒以内に続けると、あとの技の力 +15%。立てられるのは 3 つ
+    public static final int CHAIN_MAX = 3;
+    public static final int CHAIN_WINDOW = 2 * SECOND;
+    public static final double CHAIN_POWER = 0.15;
+    // 熟練 (A13): 使う +1、当てる +1、予告をよけた直後 (4 秒) に当てる +3。1〜5 の境
+    public static final int[] MASTERY_AT = {15, 45, 100, 180, 300};
+    public static final int MASTERY_RUNE_LEVEL = 3;
+    public static final int MASTERY_VISUAL_LEVEL = 5;
+    public static final int MASTERY_DODGE_HIT = 3;
+    // 熟練の刻印 (刻印の 4 つ目): 力 +10%、待ち −8%
+    public static final double MASTERY_RUNE_POWER = 0.10;
+    public static final double MASTERY_RUNE_COOLDOWN = -0.08;
+    // キーストーン (A20): 2 つまで。その木に点 4 つ以上
+    public static final int KEYSTONE_MAX = 2;
+    public static final int KEYSTONE_TREE_POINTS = 4;
+    // キーストーンの数字 (得 / 代価)。2 つ組み合わせても「与える傷」は +26% まで (SkillBuild)
+    public static final double KEY_BULWARK_ARMOR = 5;
+    public static final double KEY_BULWARK_KNOCKBACK = 0.35;
+    public static final double KEY_BULWARK_MOVE = -0.10;
+    public static final double KEY_GLASS_DAMAGE = 0.14;
+    public static final double KEY_GLASS_ARMOR = -4;
+    public static final double KEY_TIDE_MANA = 0.40;
+    public static final double KEY_TIDE_REGEN = -0.30;
+    public static final double KEY_ASH_DAMAGE = 0.12;
+    public static final double KEY_ASH_MANA_COST = 0.30;
+    public static final double KEY_STRING_PROJECTILE = 0.22;
+    public static final double KEY_STRING_COOLDOWN = 0.15;
+    public static final double KEY_DANCE_MOVE = 0.12;
+    public static final double KEY_DANCE_COOLDOWN = -0.10;
+    public static final double KEY_DANCE_DAMAGE = -0.08;
+    // 外から足せる上限 (SkillModifier を含む合計)
+    public static final double POWER_CAP = 1.0;
+    public static final double COOLDOWN_MIN = -0.40;
+    public static final double COOLDOWN_MAX = 0.50;
+    public static final double MANA_COST_CAP = 0.50;
+
+    public static int masteryLevel(int xp) {
+        int lv = 0;
+        for (int at : MASTERY_AT) {
+            if (xp >= at) {
+                lv++;
+            }
+        }
+        return lv;
+    }
+
     // どの技を使ったあとも、次の技まで 0.5 秒あける (連打で重ねがけしない・手触りを重くする)
     public static final int GLOBAL_COOLDOWN = 10;
 
@@ -45,7 +122,9 @@ public final class SkillRules {
     }
 
     // ---------------------------------------------------------------- 振り直し・刻印の付け替え・型の保存
-    // 初回は無料。そのあと共鳴の結晶 1, 2, 3, 4, 5 (5 で頭打ち)
+    // 全振り直しは共鳴の炉のそばで、いつでも結晶 1 (A05)。目利きがあれば無料。Lv 15 になるまでは炉も結晶も要らない
+    public static final int RESPEC_COST = 1;
+    // ステータスの振り直し (GrowthRules) の費用の頭打ち
     public static final int RESPEC_MAX_COST = 5;
     // 共鳴の炉からこの距離 (ブロック) 以内で振り直せる
     public static final int RESPEC_FORGE_RANGE = 6;
@@ -53,22 +132,22 @@ public final class SkillRules {
     public static final int FREE_RESPEC_LEVEL = 15;
     // 刻印の付け替え (別の刻印に変える) の費用。初回は無料
     public static final int RUNE_SWAP_COST = 1;
-    // 型の保存の数
-    public static final int LOADOUTS = 2;
+    // 型の保存の数 (A05 で 2 から 4)
+    public static final int LOADOUTS = 4;
     // 刻印の付け替え・型の切り替えは、この間 (30 秒) 傷を受けも与えもしていないときだけ
     public static final int QUIET_TICKS = 30 * SECOND;
 
+    // ステータスの振り直しの費用 (回数が増えると上がる。初回は無料。GrowthRules が使う)。技の振り直しは下の 3 つの引数の版
     public static int respecCost(int respecsSoFar) {
         return Math.min(Math.max(0, respecsSoFar), RESPEC_MAX_COST);
     }
 
-    // レベルと「目利き」を見た全振り直しの費用 (結晶の数)。Lv 15 になるまでは 0。目利きは 2 以上のとき 1 減る
+    // レベルと「目利き」を見た全振り直しの費用 (結晶の数)。Lv 15 になるまでと、目利きがあるときは 0
     public static int respecCost(int respecsSoFar, int level, boolean appraiser) {
-        if (level < FREE_RESPEC_LEVEL) {
+        if (level < FREE_RESPEC_LEVEL || appraiser) {
             return 0;
         }
-        int cost = respecCost(respecsSoFar);
-        return appraiser && cost > 1 ? cost - 1 : cost;
+        return RESPEC_COST;
     }
 
     // ---------------------------------------------------------------- 消費マナとクールダウン

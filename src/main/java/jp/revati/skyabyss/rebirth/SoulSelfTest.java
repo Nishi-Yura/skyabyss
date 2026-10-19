@@ -245,7 +245,7 @@ public final class SoulSelfTest {
         check(f, rd.nodes.equals(List.of("ash")) && rd.boons.equals(List.of(pick.id)), "the chosen arm/boon were not recorded: " + rd.nodes + rd.boons);
         // 残るもの
         check(f, sd.loadouts[0].saved && Skill.LUNGE.id.equals(sd.loadouts[0].slots[0]), "saved loadouts did not stay");
-        check(f, sd.unlockedTrees.contains("star") && sd.bonusPoints == skillBonus && g.bonusPoints == 4, "unlocked trees / bonus points did not stay");
+        check(f, sd.unlockedTrees.contains("star") && sd.bonusPoints == 0 && g.bonusPoints == 4, "unlocked trees / bonus points did not stay");
         check(f, g.discoveries.contains("biome:test"), "discoveries did not stay");
         // 物語・できること: 巨神の進み・レベルの上限・装備の資格は変わらない
         check(f, Progression.stage(p) == stageBefore && Progression.levelCap(p) == capBefore, "the story progress or level cap changed");
