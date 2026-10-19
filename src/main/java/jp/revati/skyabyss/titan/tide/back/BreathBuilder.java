@@ -70,10 +70,10 @@ public final class BreathBuilder {
         for (int x = cx - 4; x <= cx + 4; x++) {
             for (int z = cz - 4; z <= cz + 4; z++) {
                 double dc = Math.hypot(x - cx, z - cz);
-                if (dc > RING_R) {
+                if (!d.floorContains(x, z)) {
                     continue;
                 }
-                boolean basin = dc <= BASIN_R;
+                boolean basin = d.basinContains(x, z);
                 if (basin) {
                     kit.set(x, fy - 1, z, TideKit.BRICK);
                     kit.set(x, fy, z, WATER);
@@ -89,7 +89,7 @@ public final class BreathBuilder {
                 }
                 // 皿の上の空気 (気室を掘ったあとなので、すでに空気。皿 0 と縁の上の水が残らないように)
                 for (int y = fy + 1; y <= fy + 4; y++) {
-                    if (!kit.get(x, y, z).isAir() && dc <= RING_R) {
+                    if (!kit.get(x, y, z).isAir()) {
                         kit.set(x, y, z, TideKit.AIR);
                     }
                 }

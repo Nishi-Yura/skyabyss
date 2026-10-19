@@ -192,6 +192,30 @@ public final class BreathSelfTest {
 
     // ---------------------------------------------------------------- B. 建物
     private static void structure(ServerLevel back) {
+        // 水は水たまりと皿の盆だけ (漏れて滝にならない): 縁の上から気室の天井の下まで、盆の外に水が無い
+        int stray = 0;
+        BlockPos firstStray = null;
+        for (int x = CX - 11; x <= CX + 11; x++) {
+            for (int z = CZ - 11; z <= CZ + 11; z++) {
+                for (int y = LIP + 1; y <= A_TOP; y++) {
+                    BlockPos q = new BlockPos(x, y, z);
+                    if (back.getFluidState(q).isEmpty()) {
+                        continue;
+                    }
+                    boolean basin = false;
+                    for (Dish dd : dishes()) {
+                        basin |= y == dd.floorY() && dd.basinContains(x, z);
+                    }
+                    if (!basin) {
+                        stray++;
+                        if (firstStray == null) {
+                            firstStray = q;
+                        }
+                    }
+                }
+            }
+        }
+        check(stray == 0, stray + " stray water cells in the chamber (first " + firstStray + ")");
         // 水たまり (縁と同じ高さの水面、深さ 4)・底はガラス (光が広間まで)
         BlockState water = Blocks.WATER.defaultBlockState();
         check(back.getBlockState(new BlockPos(CX, LIP, CZ)).getFluidState().isSource(), "pool surface is not water");

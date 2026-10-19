@@ -107,8 +107,17 @@ public final class BreathLayout {
             return floorY;
         }
 
+        // 縁の輪 (人が立つ。盆の水を囲うので、盆に 4 方向で接するマスは必ず輪)
         public boolean ringContains(int x, int z) {
-            return Math.hypot(x - cx, z - cz) <= RING_R;
+            if (basinContains(x, z)) {
+                return false;
+            }
+            return Math.hypot(x - cx, z - cz) <= RING_R || basinContains(x + 1, z) || basinContains(x - 1, z) || basinContains(x, z + 1) || basinContains(x, z - 1);
+        }
+
+        // 皿の床 (盆 + 輪)
+        public boolean floorContains(int x, int z) {
+            return basinContains(x, z) || ringContains(x, z);
         }
 
         public boolean basinContains(int x, int z) {
