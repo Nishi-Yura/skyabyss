@@ -1,7 +1,7 @@
 package jp.revati.skyabyss.titan.storm.back.client;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.titan.client.BackGaugeHud;
+import jp.revati.skyabyss.client.titan.BackGaugeHud;
 import jp.revati.skyabyss.titan.storm.StormTravel;
 import jp.revati.skyabyss.titan.storm.back.StormBackNetwork;
 import net.minecraft.client.Minecraft;
@@ -15,14 +15,53 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 // 風見の目盛り (12 の 3.4節): 背中にいる間、画面の右上に小さな風見の板。矢の向きと揺れで今の拍、次に変わるまでの秒、鳴った石の数。
-// パーティクルの設定に左右されない。嵐のあいだは縁が明るい青白に光る (予告の印)
+// その下に目的の板 (25 の 3章。潮殻の TideGaugeHud と同じ型): 今いる試練の「いま何をするか」と進みの点。
+// パーティクルの設定に左右されない。嵐のあいだは縁が明るい青白に光る (予告の印)。板の置き方・枠・文の切り方は共通の BackGaugeHud
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class StormGaugeHud {
     private static StormBackNetwork.Gauge gauge;
     private static int ticksLeft;
     private static int age = 1000;
 
+    private static final BackGaugeHud.Gauge GAUGE = StormGaugeHud::shown;
+
+    private static final int GOAL_WIDTH = 150;
+    private static final BackGaugeHud.Gauge GOAL = new BackGaugeHud.Gauge() {
+        @Override
+        public boolean shown(Minecraft mc) {
+            return StormGaugeHud.shown(mc) && !gauge.goal().isEmpty();
+        }
+
+        @Override
+        public int height() {
+            Minecraft mc = Minecraft.getInstance();
+            return BackGaugeHud.HEIGHT + 2 + goalHeight(mc, goalWidth(mc.getWindow().getGuiScaledWidth()));
+        }
+    };
+
+    static {
+        BackGaugeHud.register(GAUGE);
+        BackGaugeHud.register(GOAL);
+    }
+
     private StormGaugeHud() {
+    }
+
+    private static int goalWidth(int guiWidth) {
+        return Mth.clamp(GOAL_WIDTH, 112, Math.max(112, guiWidth / 2 - 91 - 4 - 6));
+    }
+
+    private static Component goalBody() {
+        return Component.translatable("gui.skyabyss.storm_goal." + gauge.goal(), gauge.done(), gauge.total(), gauge.a(), gauge.b(), gauge.c());
+    }
+
+    // 板の高さ: 見出しの行 + 本文 (幅に合わせて折り返し。最大 5 行)
+    static int goalHeight(Minecraft mc, int w) {
+        if (gauge == null || gauge.goal().isEmpty()) {
+            return 0;
+        }
+        int lines = Math.min(5, mc.font.split(goalBody(), w - 10).size());
+        return 6 + 11 + lines * 10;
     }
 
     public static void receive(StormBackNetwork.Gauge g) {
@@ -43,10 +82,9 @@ public final class StormGaugeHud {
         return gauge != null && mc.level != null && mc.level.dimension() == StormTravel.STORM_BACK && !mc.options.hideGui && age <= 100;
     }
 
-    // 板の下端 (仲間の表示がこれより下に来るように)
+    // 板の下端 (仲間の表示がこれより下に来るように)。ほかの背中の板もまとめて BackGaugeHud.bottom が見る
     public static int bottom() {
-        Minecraft mc = Minecraft.getInstance();
-        return shown(mc) ? BackGaugeHud.top(mc) + BackGaugeHud.HEIGHT : 0;
+        return BackGaugeHud.bottom();
     }
 
     @SubscribeEvent
@@ -70,8 +108,45 @@ public final class StormGaugeHud {
         boolean storm = gauge.phase() == 2 || gauge.phase() == 1;
         float pulse = storm ? 0.5f + 0.5f * Mth.sin(t * 0.35f) : 0;
         int border = storm ? (0xFF << 24) | ((int) (150 + 100 * pulse) << 16) | ((int) (190 + 60 * pulse) << 8) | 0xFF : 0xFF8A98B0;
-        BackGaugeHud.draw(g, mc, name, time, gauge.stones(), border, 0xB0161A26, storm ? 0xFFE8F0FF : 0xFFDCE2EC, 0xFFA8B4C8, 0xFFF2D9A0,
-                (gg, x, y) -> vane(gg, x, y, s, t));
+        int text = Math.max(mc.font.width(name), mc.font.width(time));
+        int w = BackGaugeHud.width(g, 34 + text + 10, 112);
+        int h = BackGaugeHud.HEIGHT;
+        int x = BackGaugeHud.left(g, w);
+        int y = BackGaugeHud.top(mc);
+        BackGaugeHud.frame(g, x, y, w, h, 0xB0161A26, border);
+        vane(g, x + 4, y + 5, s, t);
+        int room = w - 34 - 10;
+        BackGaugeHud.text(g, mc.font, name, x + 34, y + 5, room, storm ? 0xFFE8F0FF : 0xFFDCE2EC);
+        BackGaugeHud.text(g, mc.font, time, x + 34, y + 16, room, 0xFFA8B4C8);
+        for (int i = 0; i < 3; i++) {
+            g.fill(x + w - 8, y + 6 + i * 7, x + w - 4, y + 10 + i * 7, i < gauge.stones() ? 0xFFF2D9A0 : 0xFF404848);
+        }
+        if (!gauge.goal().isEmpty()) {
+            drawGoal(g, mc, y + h + 2);
+        }
+    }
+
+    // 目的の板: 見出し (試練の名前) と進みの点、本文 (いま何をするか)
+    private static void drawGoal(GuiGraphics g, Minecraft mc, int y) {
+        int w = goalWidth(g.guiWidth());
+        int h = goalHeight(mc, w);
+        int x = BackGaugeHud.left(g, w);
+        boolean done = gauge.goal().endsWith(".done") || gauge.goal().endsWith(".sleep");
+        BackGaugeHud.frame(g, x, y, w, h, 0xB0161A26, done ? 0xFFF2D9A0 : 0xFF8A98B0);
+        String trial = gauge.goal().substring(0, gauge.goal().indexOf('.'));
+        Component title = Component.translatable("gui.skyabyss.storm_goal.title." + trial);
+        int dots = gauge.total();
+        int dotsW = dots > 0 ? dots * 7 : 0;
+        BackGaugeHud.text(g, mc.font, title, x + 5, y + 4, w - 10 - dotsW, 0xFFF2D9A0);
+        for (int i = 0; i < dots; i++) {
+            int dx = x + w - 5 - (dots - i) * 7 + 2;
+            g.fill(dx, y + 5, dx + 5, y + 10, i < gauge.done() ? 0xFFF2D060 : 0xFF404848);
+        }
+        int ty = y + 4 + 11;
+        var lines = mc.font.split(goalBody(), w - 10);
+        for (int i = 0; i < Math.min(5, lines.size()); i++) {
+            g.drawString(mc.font, lines.get(i), x + 5, ty + i * 10, 0xFFE8F0FF, true);
+        }
     }
 
     // 風見 (柱と、向きが変わる矢)。凪は矢がゆっくり南を指して静か、嵐は北へ振れて大きく揺れる

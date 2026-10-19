@@ -1,7 +1,5 @@
 package jp.revati.skyabyss.titan.storm.back;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
@@ -214,26 +212,18 @@ public final class StormProgress {
     }
 
     // 試練を最初に戻す (12 の 7.1節)。番号が進み (古い休み場の記録は無効)、心臓も眠り直す。
-    // 眼の間は新しい配置を引く (このグループが初めて挑むときだけ、いちばんやさしい 0)。心臓を一度でも倒したグループは試練が一つ眠る
-    // (同じ試練は二回続けて眠らない)。forceSleep で決める・noSleep で眠らせない
+    // 眼の間は新しい配置を引く (このグループが初めて挑むときだけ、いちばんやさしい 0)。
+    // 試練はどれも、いつでも入れて終えられる (25 の 2章): 周回で試練が眠って飛ばされることはない。
+    // forceSleep は開発用のコマンドだけ (試練を眠らせた状態の確かめ)。noSleep は残してあるが、自動で眠らせないので効果はない
     public void reset(RandomSource random, @Nullable Trial forceSleep, boolean noSleep) {
         boolean ever = everDefeated();
-        Trial last = lastSleeping();
         record.resetProgress();
         if (ever) {
             markEverDefeated();
         }
         record.putInt(MIRROR_CONFIG, 1 + random.nextInt(EyeMirrors.CONFIGS.size() - 1));
-        Trial next = null;
         if (forceSleep != null) {
-            next = forceSleep;
-        } else if (ever && !noSleep) {
-            List<Trial> pool = new ArrayList<>(List.of(Trial.values()));
-            pool.remove(last);
-            next = pool.get(random.nextInt(pool.size()));
-        }
-        if (next != null) {
-            setSleeping(next);
+            setSleeping(forceSleep);
         }
     }
 }

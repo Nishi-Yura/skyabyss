@@ -10,7 +10,7 @@ import jp.revati.skyabyss.titan.audit.BackReach.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
-// 雷翼の背の「詰み監査」の指定 (docs/design/12 の詰み監査)。戸は開いているものとして、嵐の昇り風 (13 段) も使えるものとして調べる。
+// 雷翼の背の「詰み監査」の指定 (docs/design/12 の詰み監査)。戸は開いているものとして、昇り風は凪の高さ (4 段) だけで調べる (25 の 2章: どの拍でも全部の試練に行ける。固定の穴だけが 13 段)。
 // 西の骨の中は風切りの羽根で滑空できるので、何段落ちてもよい。雲の下 (CLOUD_Y より下) へ落ちると嵐に投げ返される = 出口
 public final class StormBackAudit {
     private StormBackAudit() {
@@ -43,7 +43,7 @@ public final class StormBackAudit {
                 if (p.getY() != c.getY() + 1 || Math.abs(p.getX() - c.getX()) > 1 || Math.abs(p.getZ() - c.getZ()) > 1) {
                     continue;
                 }
-                double h = v.fixedHeight() >= 0 ? v.fixedHeight() : StormBackClock.STORM_LIFT;
+                double h = v.fixedHeight() >= 0 ? v.fixedHeight() : StormBackClock.CALM_LIFT;
                 int top = c.getY() + 1 + (int) Math.floor(h);
                 for (int y = c.getY() + 1; y <= top; y++) {
                     if (!probe.passable(new BlockPos(p.getX(), y + 1, p.getZ()))) {
