@@ -27,6 +27,10 @@ public final class ModNetwork {
                 .playToClient(jp.revati.skyabyss.combat.TelegraphStartPayload.TYPE, jp.revati.skyabyss.combat.TelegraphStartPayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.start(payload))
                 .playToClient(jp.revati.skyabyss.combat.TelegraphCancelPayload.TYPE, jp.revati.skyabyss.combat.TelegraphCancelPayload.STREAM_CODEC,
-                        (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.cancel(payload.id()));
+                        (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.cancel(payload.id()))
+                .playToClient(jp.revati.skyabyss.combat.BossCue.Payload.TYPE, jp.revati.skyabyss.combat.BossCue.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.titan.BossCueClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload));
     }
 }

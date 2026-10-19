@@ -91,6 +91,8 @@ public final class PouchMigration {
                 Graves.settle(player.server, grave);
             }
         }
+        // 移し替えた品は前から持っていた品なので "NEW" にしない
+        Pouch.data(player).clearFresh();
         Pouch.data(player).migrated = PouchData.MIGRATION_VERSION;
         Pouch.sync(player);
         player.containerMenu.broadcastChanges();

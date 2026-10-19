@@ -23,7 +23,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   OpenBook (サーバー → 持ち主): 旅嚢から伝承の書を使ったとき、書の画面を開かせる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class PouchNet {
-    private static final String PROTOCOL_VERSION = "pouch-2";
+    private static final String PROTOCOL_VERSION = "pouch-3";
 
     // 最後に使った道具 (サーバーが覚える。短押しはこれを使う)
     private static final Map<UUID, ResourceLocation> LAST = new ConcurrentHashMap<>();
@@ -50,6 +50,11 @@ public final class PouchNet {
                         PouchSetup.openMenu(player);
                     }
                 })
+                .playToServer(Viewed.TYPE, Viewed.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        viewed(player, payload.item());
+                    }
+                })
                 .playToClient(OpenBook.TYPE, OpenBook.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.lore.client.LoreClient.openBook());
     }
 
@@ -74,6 +79,15 @@ public final class PouchNet {
         return result;
     }
 
+    // 画面で見た品の "NEW" の印を外す (自分の袋だけ。印のない品は何も起きない)。外したら true
+    public static boolean viewed(ServerPlayer player, ResourceLocation id) {
+        if (!Pouch.data(player).clearFresh(id)) {
+            return false;
+        }
+        Pouch.sync(player);
+        return true;
+    }
+
     // 覚えた前回の道具 (自己テスト・確かめ用)
     public static ResourceLocation last(ServerPlayer player) {
         return LAST.get(player.getUUID());
@@ -95,6 +109,18 @@ public final class PouchNet {
         public static final Type<Grid> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pouch_grid"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Grid> STREAM_CODEC = StreamCodec.composite(
                 ResourceLocation.STREAM_CODEC, Grid::item, ByteBufCodecs.BOOL, Grid::right, Grid::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // 画面で見た品 ("NEW" の印を外す。持ち主のものだけ。ない印は何も起きない)
+    public record Viewed(ResourceLocation item) implements CustomPacketPayload {
+        public static final Type<Viewed> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "pouch_viewed"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Viewed> STREAM_CODEC = StreamCodec.composite(
+                ResourceLocation.STREAM_CODEC, Viewed::item, Viewed::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

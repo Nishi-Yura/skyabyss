@@ -29,18 +29,22 @@ public final class NpcBonds {
                 Codec.STRING.listOf().optionalFieldOf("flags", List.of()).forGetter(b -> List.copyOf(b.flags)),
                 Codec.STRING.listOf().optionalFieldOf("echoes", List.of()).forGetter(b -> List.copyOf(b.echoes)),
                 Codec.INT.optionalFieldOf("talks", 0).forGetter(b -> b.talks),
-                Codec.LONG.optionalFieldOf("last_day", -1L).forGetter(b -> b.lastDay)).apply(i, Bond::new));
+                Codec.LONG.optionalFieldOf("last_day", -1L).forGetter(b -> b.lastDay),
+                Codec.STRING.listOf().optionalFieldOf("seen", List.of()).forGetter(b -> List.copyOf(b.seen))).apply(i, Bond::new));
 
         int affinity;
         final Set<String> flags = new LinkedHashSet<>();
         final Set<String> echoes = new LinkedHashSet<>();
+        // 入口で開いたことのある節 (頭の上の「新しい雑談」の点が、聞いた話にはもう出ないように。NpcMarkers)
+        final Set<String> seen = new LinkedHashSet<>();
         int talks;
         long lastDay = -1;
 
         Bond() {
         }
 
-        private Bond(int affinity, List<String> flags, List<String> echoes, int talks, long lastDay) {
+        private Bond(int affinity, List<String> flags, List<String> echoes, int talks, long lastDay, List<String> seen) {
+            this.seen.addAll(seen);
             this.affinity = affinity;
             this.flags.addAll(flags);
             this.echoes.addAll(echoes);
@@ -67,7 +71,7 @@ public final class NpcBonds {
         @Override
         public boolean equals(Object o) {
             return o instanceof Bond b && b.affinity == affinity && b.flags.equals(flags) && b.echoes.equals(echoes) && b.talks == talks
-                    && b.lastDay == lastDay;
+                    && b.lastDay == lastDay && b.seen.equals(seen);
         }
 
         @Override
@@ -112,6 +116,12 @@ public final class NpcBonds {
         return bonds.computeIfAbsent(role, r -> new Bond());
     }
 
+    // その役の入口の節をもう開いたことがあるか (読むだけ)
+    public boolean seen(String role, String node) {
+        Bond b = bonds.get(role);
+        return b != null && b.seen.contains(node);
+    }
+
     // 読むだけ (作らない)。条件の判定・表示用。bond() で読むと、読んだだけで記録ができ、「すでに遊んでいた人」と取り違えられる
     public boolean hasFlag(String role, String flag) {
         Bond b = bonds.get(role);
@@ -153,6 +163,7 @@ public final class NpcBonds {
         for (Bond b : bonds.values()) {
             b.echoes.addAll(b.flags);
             b.flags.clear();
+            b.seen.clear();
             b.affinity = 0;
             b.talks = 0;
             b.lastDay = -1;

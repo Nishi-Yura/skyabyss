@@ -48,10 +48,10 @@ public final class StormBackSetup {
     // 拍の舵 (25 の 5章 C): 凪の舵・嵐の舵。入口の台。見た目はバニラのテクスチャ (凪は水色の濃淡、嵐は灰と黄)
     public static final DeferredBlock<StormBlocks.Helm> HELM_CALM = BLOCKS.register("storm_helm_calm",
             () -> new StormBlocks.Helm(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(-1.0f, 3600000.0f)
-                    .noLootTable().sound(SoundType.COPPER).lightLevel(s -> s.getValue(StormBlocks.Helm.ACTIVE) ? 14 : 5)));
+                    .noLootTable().noOcclusion().sound(SoundType.COPPER).lightLevel(s -> s.getValue(StormBlocks.Helm.ACTIVE) ? 14 : 5)));
     public static final DeferredBlock<StormBlocks.Helm> HELM_STORM = BLOCKS.register("storm_helm_storm",
             () -> new StormBlocks.Helm(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(-1.0f, 3600000.0f)
-                    .noLootTable().sound(SoundType.COPPER).lightLevel(s -> s.getValue(StormBlocks.Helm.ACTIVE) ? 14 : 5)));
+                    .noLootTable().noOcclusion().sound(SoundType.COPPER).lightLevel(s -> s.getValue(StormBlocks.Helm.ACTIVE) ? 14 : 5)));
 
     // 風切りの羽根 (西の試練の品。試練の外へ出ると消える)
     public static final DeferredItem<Item> GALE_FEATHER = ITEMS.register("gale_feather",

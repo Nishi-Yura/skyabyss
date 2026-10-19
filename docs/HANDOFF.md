@@ -28,6 +28,7 @@
 - **武器の振り**: 攻撃速度に合わせた長さ（`client/weapon/SwingClock`）。
 - **内容の拡張の基盤**（設計書 21、ユーザーが 8 問に回答済み）: P1 復帰・P2 三灯・P3 導き（`guide/`: 備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・経験値の枠）・P6 一章の地上（石標・骨の集め場・歌の間・割れ殻の洞・備えの頼み 3 本・岩鯨の降下の門 `Ch1Descent`）・P9 初回/周回（`FirstRun`）は済み。
 - **旅嚢（mod 専用の持ち物。設計書 22、`pouch/` と `client/pouch/`）**: 土台に加えて、画面（持ち物 / 装飾 / 旅嚢のつまみ、キー I）・長押しの輪（キー Y。短押しで前回の道具）・作り直し（袋の素材で作業台のレシピを作る。修理つき）まで入った。笛・貝・風見鶏・書は旅嚢に入る。ゲームルール `skyabyssPouch` は既定で入、`skyabyssPouchWithdraw` は既定で 0（取り出し不可）。前の版のワールドは最初の起動で一度だけ既定に書き換わる。ゲームの窓での確かめ（画面の見え方・輪の操作・つまみの位置）は未。
+- **心臓の遺物の選択画面**（設計書 30、`loot/reward/` と `client/reward/`）: 心臓を初めて止めたあと一度だけ選べる専用伝説を、眠りの場面（`titan_end_<巨神>`）が終わったときに専用画面で選ぶ。大きなカード（絵・名前・階級・効果・必要 Lv・今の装備との数値の比べ）→ 確かめ → 完了の光。Esc は「あとで？」で、選ぶまで旅嚢の「遺物」ボタン・控え帳の行・`/titanmemory reward` から開き直せる。四体共通、受け取りは `HeartReward.claim` の一箇所（二重受け取りなし・人ごと・入り直しに強い）。チャットの選択肢はやめた（古い `/titanmemory <巨神> choose` は同じ決まりを通る）。自己テスト `heart reward`、台本 `tools/shots/heart_reward.txt`、絵 `docs/review/previews/heart_reward_ui.png`。実機のマウス・キーの操作感は未確認。
 - **作業台が旅嚢の材料を使う**（設計書 22 の 17 章。`pouch/PouchCraft`・`client/pouch/CraftStrip`・Mixin 二つ `mixin/`）: 作業台と持ち物の画面の右の「旅嚢から」の帯（左クリック一束・右クリック一つをカーソルへ）、レシピブックの「置く」は旅嚢から材料を出して残りを戻す。岩殻片・護り糸・骨片・棘針を旅嚢に追加。画面の見た目・マウス操作は実機の確認がまだ（サーバー側は自己テスト `pouch` で確認済み）。
 - 雷翼の装備名の重複 lang を一本化（羽衣系）。自己テスト `lang` が重複・日英の対応・%s を見る。
 - **最初の 1 時間の通し（A10）と、lang・帯の自己テスト**: 台本 `tools/shots/first_hour.txt`（新しい世界で 序章 → 帳面 → 影 → イサナ → 足音 → 歌 → 岩鯨の初見 → 鎖。約 25 分、`watch` の記録に帯・画面・知らせが時刻つきで出る）と、記録の読み解き `docs/review/first_hour_log.md`（時刻表・直した穴 9 件・直していない穴 B-1〜B-9）。自己テスト `lang`（コード・データ中のキーが ja・en にある・`{0}` 形式が無い）と `lang objective band`（帯の文が幅 230 px に収まる。目印つきは距離の札の分を引く）。ゲームなしの確認は `python tools/check_lang_keys.py`・`python tools/check_band_width.py`。直した本物の不具合: 影が屋内の人に来ない（`SkyEvents` の初回の再試行）、鎖が降りても帯が「待ち」のまま（`QuestHud`・`StoneWhaleEntity.isChainReaching`）、英語の画面の日本語の方角・`{0}`。
@@ -67,7 +68,7 @@
 - **テストで Minecraft を開くときは音量 0**（`runClientTest` と台本は自動）。
 - **java を全部落とさない**。止めるのは自分が立てたプロセスだけ（ユーザーの CurseForge の Minecraft は絶対に止めない）。使っていない java（終わったエージェントのサーバー、古い Gradle デーモン）はこまめに止める。
 - **ゲームの窓を OS のキー操作で動かさない**。ボスの通しのプレイはユーザーがする。
-- **取り込みでよくぶつかる所**: `SelfTestRunner` の段の一覧、lang、`SkyAbyss.java` のコンストラクタの登録、`Config.java`、各背の `LAYOUT_VERSION`（岩鯨 15・潮殻 12・雷翼 10・余燼 9・雷獣の巣 3）、`combat/Telegraph`。両方を残す形で直す。
+- **取り込みでよくぶつかる所**: `SelfTestRunner` の段の一覧、lang、`SkyAbyss.java` のコンストラクタの登録、`Config.java`、各背の `LAYOUT_VERSION`（岩鯨 17・潮殻 12・雷翼 11・余燼 9・雷獣の巣 3）、`combat/Telegraph`。両方を残す形で直す。
 - **Windows の Python**: 日本語の長い行を含む .py を heredoc で渡すと文字コードで失敗することがある。ファイルに書いて `python <file>`。
 - **古いワールド**: `LAYOUT_VERSION` を上げると次の起動で背が建て直され、試練の進みと休み場の記録が戻る。
 - **版**: ネットワークの版 = mod の版。マルチは全員同じ jar が要る。

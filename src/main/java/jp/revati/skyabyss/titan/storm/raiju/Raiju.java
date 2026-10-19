@@ -466,6 +466,9 @@ public class Raiju extends GuardMob {
     private void begin(ServerLevel server, Action a) {
         action = a;
         actionTick = 0;
+        if (a.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "raiju", a.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         hit.clear();
         getNavigation().stop();
         switch (a) {

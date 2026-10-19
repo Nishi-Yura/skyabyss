@@ -1,0 +1,83 @@
+# 心臓の遺物の選択画面 (docs/design/30_heart_reward_ui.md)。./gradlew runShots -Pscript=tools/shots/heart_reward.txt
+# 出力: run/shots/heart_reward/shots/heart_reward/*.png。日本語・音量 0 (台本は自動)。
+# 岩鯨 (弱い鉄の剣と鉄の胸当てを付けた Lv 1 の人。比べの欄と必要 Lv の赤が出る) → 幕の途中 → 選ぶ → 確かめ → あとで → 完了、ほかの三体
+world shots flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd item replace entity @s weapon.mainhand with minecraft:iron_sword
+cmd item replace entity @s armor.chest with minecraft:iron_chestplate
+hud on
+waitchunks
+chat clear
+wait 20
+
+cmd skyabyss dev heartreward stone_whale
+waitscreen 100 HeartRewardScreen
+wait 40
+shot heart_reward_reveal
+wait 60
+heartreward focus 0
+wait 4
+shot heart_reward_ui
+heartreward focus 1
+wait 4
+shot heart_reward_focus2
+heartreward focus 2
+wait 4
+shot heart_reward_focus3
+heartreward confirm 1
+wait 12
+shot heart_reward_confirm
+heartreward later
+wait 12
+shot heart_reward_later
+heartreward done 1
+wait 6
+shot heart_reward_done
+close
+cmd skyabyss dev heartreward reset
+
+cmd skyabyss dev heartreward tide_shell
+waitscreen 100 HeartRewardScreen
+wait 120
+heartreward focus 0
+wait 4
+shot heart_reward_tide
+close
+cmd skyabyss dev heartreward reset
+
+cmd skyabyss dev heartreward thunder_wing
+waitscreen 100 HeartRewardScreen
+wait 120
+heartreward focus 0
+wait 4
+shot heart_reward_storm
+close
+cmd skyabyss dev heartreward reset
+
+cmd skyabyss dev heartreward ember
+waitscreen 100 HeartRewardScreen
+wait 120
+heartreward focus 0
+wait 4
+shot heart_reward_ember
+close
+cmd skyabyss dev heartreward reset
+# 「あとで」にした人の入口: 旅嚢の画面の「遺物」ボタン (選ぶまで出る)
+cmd skyabyss dev heartreward stone_whale
+waitscreen 100 HeartRewardScreen
+close
+wait 10
+key skyabyss_pouch.key.open
+waitscreen 100 PouchScreen
+wait 10
+shot heart_reward_pouch
+close
+cmd skyabyss dev heartreward reset
+echo done

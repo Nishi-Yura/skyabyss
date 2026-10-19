@@ -270,6 +270,18 @@
 - 積み石（小さな石の塔）: 野営地から宿りへの道に 40 ブロックおき。道が池・海をまたぐ世界では 1 つでもよい。
 - 名前は「鐘の宿り」（英語 Bell Lodge）。会話では場所の名前を出さず（本物の村の語り部にも使えるように）、目的の文とクエストの書き付けにだけ出す。
 
+#### 3.3.1 煙の柱（どの地形でも「煙の立つ方」が見える）
+
+バニラのキャンプファイアの煙だけでは、木立・丘・谷や、描画距離・シミュレーション距離の外で見えなかった。そこで、宿りの煙の焚き火の真上に、**クライアントだけで描く煙の柱**を足す（`client/opening/SmokeColumnRenderer`）。バニラの煙はそのまま残す。
+
+- 位置: サーバーが `SiteNetwork` の場所の一覧に `smoke`（煙の焚き火。無ければ宿り）を載せて送る。柱は偽物（パーティクルでも ブロックでもない）なので、宿りのチャンクが読まれていなくても描ける。オーバーワールドだけ。
+- 形: 高さ 100 ブロック（木のてっぺんや丘より十分に上）。56 個の柔らかい煙のかたまり（実行時に作るふわふわの丸のテクスチャ。カメラに向く板）が 70 秒かけて根もとから頂まで昇る。根もとは細く濃く（透明度 約 0.6）、昇るほど太く薄くなり、頂で消える。風（宿りの座標で決まる、世界ごとに一定の向き）に流されて、昇るほど横へ（頂で約 40 ブロック）たなびき、ゆるく蛇行する。
+- 見え方: 深度は見る（手前の山・地面・葉には隠れる）が書き込まない。根もとが葉や尾根に隠れても、高い所の煙は木の上・稜線の上に出る。山に完全に隠れる位置でも、頂が稜線から出ていれば見える（細い手がかり。目的の帯の矢印が方角を指す）。遠いほど、かたまりを距離に応じて大きくし（細い線にならない）、色を霧の色へ寄せ、薄くするが、200 ブロック先でも読める濃さを残す（750 ブロック先で 6 割弱）。1500 ブロックより遠くは描かない。
+- 色: 昼は灰茶、日暮れ・夜は暗く霧に寄る。下 14 ブロックは火の色の明かりをほんのり足して、夜でも根もとが読める。
+- 近く: 根もとから 20 ブロック以内は柱の下部を消す（バニラの煙に任せる）。目の前 10 ブロックの煙は薄く（視界を塞がない）。
+- 設定: 目的の道しるべなので、画面の効果の強さ・ホラーの強さには従わない。開発用に環境変数 `SKYABYSS_NO_SMOKE_COLUMN` で描かなくできる（比べ撮り用）。
+- 撮影: `tools/shots/smoke_sheet.txt`（尾根・雪の谷・水ごし・丘の斜面・森の中。昼と日暮れ。柱あり・なし。`tools/gen_smoke_sheet_shots.py` で生成、`SKYABYSS_NO_SMOKE_COLUMN=1` で「なし」を撮り、`tools/smoke_sheet.py` で並べる）→ `docs/review/previews/smoke_column_sheet.png`。尾根・谷・水ごし（170〜230 ブロック）では柱が地形の上に出て見える。限界: 深い森の中で頭上を葉が覆う所、丘の斜面で視線が土に向く所では見えない（空を見上げれば出る。目的の帯の矢印は方角を指す）。
+
 ### 3.4 巨大な足跡（B3）
 
 - 場所: 道から 28〜62 ブロックの帯（最終的に 30〜155）に、道とほぼ平行。**北へ歩いた 4 歩（96 おき、左右の足が交互）**。土地が合わなければ 3・2・1 歩に減らす。ラフ選択: A 足の形。
@@ -430,13 +442,13 @@
 | `opening.skyabyss.bone_near` | 風が止んだ。丘は、丘のかたちをしていない。 | The wind has stopped. The hill is not shaped like a hill. | 前触れ 4（70 ブロック） |
 | `objective.skyabyss.examine_camp` | 野営地の跡を調べてみよう | Search the abandoned camp | 目覚めてから帳面を拾うまで（メインはまだ始まっていない） |
 | `objective.skyabyss.follow_smoke` | 煙の立つ方へ向かってみよう | Head toward the rising smoke | 帳面を拾ってから語り部と話すまで（メインの段 `follow_smoke`） |
-| `objective.skyabyss.watch_sky` | 周りを探索しつつ、昼は空を見上げよう | Explore, and watch the sky at midday | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
+| `objective.skyabyss.watch_sky` | 晴れた昼を待って、空を見上げよう | Wait for a clear midday; look up | 語り部と話してから最初の影を見るまで（段 `watch_sky`） |
 | `objective.skyabyss.read_page` | 破れた頁を拾って、読んでみよう | Take the torn page, and read it | 影が去ってから、落ちてきた破れた頁を読むまで（段は `watch_sky` のまま。`OpeningLogic.objective` が頁を落とす予定 `pageAt`・自動で読む予定 `pageReadAt` を見る）。帯が「空を見上げよう」のままで頁の存在を言わなかった穴を埋める |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the lodge storyteller | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.wait_steps` | 探索しつつ、夜は灯のそばで耳をすまそう | At night, stay by a light and listen | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
-| `objective.skyabyss.see_whale` | 探索しながら、次の夜の空の歌を待とう | Explore; await the sky song next night | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
-| `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「探索で力をつけておこう」の一文つきの文（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
+| `objective.skyabyss.wait_steps` | 夜を待とう（明かりのそばで） | Wait for night (by a light) | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
+| `objective.skyabyss.see_whale` | 次の夜、空の歌を待とう（明かりのそばで） | Wait for the sky song, next night | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
+| `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「夕方まで待って、岩鯨を探そう」（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Check the hazy white hill | 日 2 の昼の任意の寄り道 |
 
 - 文は「〜してみよう」「〜に話しかけよう」「〜を探そう」と次の行動を言う（日本語は 20 字まで、英語は 52 字まで。自己テストが数え、文末・キー名・名前だけの文を弾く）。方角と距離は帯が右に足す（距離は 10 ブロック単位、方角は短い形 `gui.skyabyss.objective.dir.<0..7>`: 日本語は 北・北東…、英語は N・NE…。言語に合わせる）。幅は 230 px で、目印が付く目的は距離の札（約 52 px）の分を引いた幅に収める（自己テスト `lang objective band`、`tools/check_band_width.py`）。メインの各段の「やること」の文（クエストログ用）は別に `quest.skyabyss.main_song.<段>.<目的>` にある。
@@ -519,7 +531,7 @@
 ### 6.7 メインクエスト・会話データの変更点
 
 - メイン「雲の下の歌」: 始まりを帳面（`prologue/the_book`）に前倒しし、目的を「煙を追う」にした。段を 2 つ足した（`follow_smoke`、`watch_sky`。影や岩鯨を先に見た人、空のことを先に尋ねた人は飛ばす `skip_if`）。以後は影、語り部（`ask_storyteller`）、鯨追い（`find_chaser`）、岩鯨（`see_whale`）。既存の段の書き付けと目的の文から「村の」を外した（宿りは村ではないため）。新しい `signal` は作っていない（序の二段は既存の `talk`・`lore` で進む）。
-- 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「周りを探索しつつ、昼は空を見上げよう」など具体的な行動を書く。
+- 文言（`assets/skyabyss_opening/lang/`。生成元 `tools/gen_opening_text.py`）の方針: 「〜してみよう／〜に話しかけよう／〜を探そう」と次にやることを言う。探索で待つ段（`watch_sky`、`see_whale`）も「晴れた昼を待って、空を見上げよう」など具体的な行動を書く。
 - 目的の ID の引き方: 初参加〜帳面 = `examine_camp`、段 `follow_smoke`／`watch_sky`／`ask_storyteller` = 同名、段 `find_chaser` = `find_isana`、段 `see_whale` = 足音 (B6) の前は `wait_steps`、足音のあと歌 (B9) の前は `see_whale`、歌のあとは `wait_whale`（イサナに会っていなければ `find_isana`）、B8 の寄り道 = `bone_hill`。
 - 語り部の入口に `shadow0`・`shadow_first`・`shadow_wait`、話題「道すがら、気になるものを見た」と 13 の節。イサナにも同じ話題と 7 つの節。空のことを尋ねる節（`shadow1`）で印 `sky_asked` を立てる（序盤の二段を飛ばす条件）。
 - 会話の枠の高さは `NpcQuestSelfTest` が測る（上限 210）。語り部の話題は 1 つだけ足し、見聞の 5 つは別の節に分けた。

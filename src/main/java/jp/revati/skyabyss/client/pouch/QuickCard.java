@@ -202,16 +202,42 @@ public final class QuickCard {
     // ---------------------------------------------------------------- 描く
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
-        if (!Config.POUCH_QUICK_CARD.get() || !PartyMarkers.hudAllowed(mc) || mc.player.isSpectator() || shown == null) {
+        if (mc.player == null || !PartyMarkers.hudAllowed(mc) || mc.player.isSpectator()) {
             return;
+        }
+        if (!renderCard(g, mc) && PouchNew.any()) {
+            renderOpenHint(g, mc);
+        }
+    }
+
+    // 札が出ていないとき (設定で消した・使える道具がまだない) も、新しい品があることだけ小さく知らせる: [I] 旅嚢 NEW
+    private static void renderOpenHint(GuiGraphics g, Minecraft mc) {
+        Component label = Component.literal("[").append(PouchClient.OPEN_KEY.getTranslatedKeyMessage()).append("] ").append(Component.translatable("skyabyss_pouch.name"));
+        float scale = 0.75f;
+        int tw = mc.font.width(label);
+        boolean leftSide = mc.options.mainHand().get() == HumanoidArm.RIGHT;
+        int cx = g.guiWidth() / 2;
+        int y = g.guiHeight() - 20;
+        int x = leftSide ? cx - 91 - 6 - Math.round(tw * scale) - 14 : cx + 91 + 6;
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(scale, scale, 1f);
+        g.drawString(mc.font, label, 0, 0, 0xCCD8DCE6, true);
+        g.pose().popPose();
+        PouchNew.badge(g, mc.font, x + Math.round(tw * scale) - 3, y - 1);
+    }
+
+    private static boolean renderCard(GuiGraphics g, Minecraft mc) {
+        if (!Config.POUCH_QUICK_CARD.get() || shown == null) {
+            return false;
         }
         PouchEntries.Entry e = PouchEntries.byId(shown);
         if (e == null) {
-            return;
+            return false;
         }
         int count = Pouch.count(mc.player, e.item());
         if (count <= 0) {
-            return;
+            return false;
         }
         int w = g.guiWidth();
         int h = g.guiHeight();
@@ -244,6 +270,10 @@ public final class QuickCard {
         ItemStack stack = new ItemStack(e.item(), count);
         g.renderItem(stack, itemX, h - 19);
         g.renderItemDecorations(mc.font, stack, itemX, h - 19);
+        // 袋に新しく入ってまだ見ていない品があれば "NEW" (札を出しただけでは見たことにしない。旅嚢の画面で外れる)
+        if (PouchNew.any()) {
+            PouchNew.badge(g, mc.font, itemX, h - 19);
+        }
         // 置いた札の印 (角の小さな金の点)
         if (isPinned(shown)) {
             int px = itemX - 1;
@@ -266,5 +296,6 @@ public final class QuickCard {
         g.pose().scale(scale, scale, 1f);
         g.drawString(mc.font, label, 0, 0, color, true);
         g.pose().popPose();
+        return true;
     }
 }

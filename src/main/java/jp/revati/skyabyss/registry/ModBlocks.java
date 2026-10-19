@@ -34,7 +34,7 @@ public final class ModBlocks {
     // 闇の水路の灯 (docs/design/23): 灯の台 (ともした姿はグループごとの上書き)・灯の苗床・入口の数え石
     public static final DeferredBlock<AnemonePedestalBlock> ANEMONE_PEDESTAL = BLOCKS.register("anemone_pedestal",
             () -> new AnemonePedestalBlock(unbreakable(MapColor.COLOR_CYAN).noOcclusion()
-                    .lightLevel(state -> state.getValue(AnemonePedestalBlock.LIT) ? 15 : 0)));
+                    .lightLevel(state -> state.getValue(AnemonePedestalBlock.LIT) ? 15 : 5)));
     public static final DeferredBlock<AnemoneBedBlock> ANEMONE_BED = BLOCKS.register("anemone_bed",
             () -> new AnemoneBedBlock(unbreakable(MapColor.SAND).noOcclusion().sound(net.minecraft.world.level.block.SoundType.SAND).lightLevel(state -> 7)));
     public static final DeferredBlock<AnemoneTallyBlock> ANEMONE_TALLY = BLOCKS.register("anemone_tally",

@@ -27,7 +27,7 @@ import net.minecraft.world.phys.AABB;
 //                        第一の広間の南の戸 → 第二の広間 (射手の波) → 番兵の詰所 (老番兵。奥の戸の鍵は老番兵が持つ「割符」)
 //                        広間の扉は戦いの間だけ閉じる。制圧すると出口と入口が開く
 // 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
-// 闇の水路: 5×5 の水の通路でできた迷路 (15×21 マス)。毎回形が変わり、途中に息継ぎのくぼみだけがある
+// 闇の水路 (光海): 5×5 の水の通路でできた迷路 (15×21 マス)。毎回形が変わり、息継ぎのくぼみがどのマスからも 3 マス以内に、灯の台が 3 つある
 public final class TitanBackLayout {
     // 雲の海の高さの基準 (雲は BASE_Y - 55 = 45、BASE_Y - 50 より下に落ちたら地上へ)。鯨の腹の下端は y 58
     public static final int BASE_Y = 100;
@@ -53,7 +53,9 @@ public final class TitanBackLayout {
     // 15: 水平 x1.6・垂直 x1.3 に作り直した (設計書 26)。部屋 x2.6、広間 x3.6、心臓の間 x1.3。通路は幅 5〜7・高さ 6。第二の広間・番兵の詰所・
     //     数え歌の鐘楼・骨の書庫・歌の祠・胸びれの道・尾の展望・闇の水路 15×21 (入口 2 つ)・グループごとの幕を足した。体の bin は深い内側を 1 種類にした。
     //     ボス部屋の大門は、広げた入口 (心臓の間・番兵長の広間) に合わせて建てる (BossGates)
-    public static final int LAYOUT_VERSION = 15;
+    // 16: 光海の作り直し (23 の 11 章。灯の台 3 つ・息継ぎのくぼみを 3 マス以内・近道・水域の色・広い入口の小部屋)
+    // 17: 15 と 16 の両方 (背の拡大の迷路 15×21 マス・1 マス 5×5 の上に、光海の導きをのせた。入口の小部屋は 21×14)
+    public static final int LAYOUT_VERSION = 17;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -202,8 +204,9 @@ public final class TitanBackLayout {
     public static final int MAZE_START2_J = 15;
     public static final int MAZE_EXIT_I = 11;
     public static final int MAZE_EXIT_J = 19;
-    // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、中は 5×5×4。はしごが北の辺を通る)
-    public static final Box MAZE_ENTRY_ROOM = new Box(mazeCellX(MAZE_START_I), mazeCellX(MAZE_START_I) + 4, mazeCellZ(MAZE_START_J), mazeCellZ(MAZE_START_J) + 4, MAZE_FLOOR + 4, 4);
+    // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、はしごが北の辺を通る)
+    // 1 つめは 21×14×4 の広い休み場 (6 人が焚き火を囲み、苗床・数え石・掲示板の前に立てる。はしごの穴は北の辺の x 6)。2 つめは 5×5×4
+    public static final Box MAZE_ENTRY_ROOM = new Box(-4, 16, -49, -36, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I), mazeCellX(MAZE_START2_I) + 4, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 4, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -7, -3, MAZE_FLOOR + 4, 5);
     // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)。入口の通路の東の壁 (x 4)

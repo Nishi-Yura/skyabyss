@@ -1,0 +1,61 @@
+# 岩鯨の影 (上から落ちる影) の見え方: 家と木の上に岩鯨を浮かべ、外から・屋根の縁・屋内・戸口を撮る。
+# ./gradlew runShots -Pscript=tools/shots/overhead_shadow_whale.txt -PshotsName=<名前>   絵は run/shots/<名前>/shots/overhead_shadow_whale/*.png
+world overhead_shadow_pass flat
+overheadshadow on
+# 台本の頭の overheadshadow が on なら画素ごとの影 (今)、off なら昔の地面の板 (before)
+overheadshadow on
+size 960 540
+timeout 900
+render 12
+clouds on
+
+cmd gamemode spectator
+cmd time set noon
+cmd weather clear
+hud off
+waitchunks
+
+cmd fill -4 -61 -4 4 -56 4 stone_bricks hollow
+cmd fill 4 -60 -1 4 -58 1 air
+cmd setblock 0 -57 0 glowstone
+cmd fill -20 -60 0 -20 -54 0 oak_log
+cmd fill -24 -55 -4 -16 -52 4 oak_leaves[persistent=true]
+cmd fill 12 -61 -6 22 -61 6 grass_block
+cmd fill 12 -60 -6 12 -57 -6 oak_log
+cmd fill 12 -60 6 12 -57 6 oak_log
+cmd fill 8 -56 -7 22 -56 7 oak_planks
+
+camera minecraft:overworld 0.5 -60 0.5 270 0
+wait 40
+# /summon は記録にある岩鯨と別だと取り消されるので、titan summon で呼んでから置き直す
+cmd skyabyss titan summon
+wait 30
+cmd data merge entity @e[type=skyabyss:stone_whale,limit=1] {Mode:2,RestTicks:999999}
+cmd tp @e[type=skyabyss:stone_whale,limit=1] 0 -35 0 90 0
+wait 80
+camera 0.5 -60 0.5 270 0
+cmd skyabyss cinematic stop
+chat clear
+wait 20
+
+camera 60.5 -60 0.5 90 -4
+wait 40
+shot whale_out_wide
+camera 30.5 -52 -26 50 8
+wait 40
+shot whale_roof_edge
+camera 0.5 -60 0.5 270 0
+wait 40
+shot whale_inside
+camera 6.5 -60 0.5 90 8
+wait 40
+shot whale_doorway_out
+look 270 8
+wait 10
+shot whale_doorway_in
+camera -19.5 -60 3.5 270 -20
+wait 40
+shot whale_tree
+cmd kill @e[type=skyabyss:stone_whale]
+wait 10
+quit

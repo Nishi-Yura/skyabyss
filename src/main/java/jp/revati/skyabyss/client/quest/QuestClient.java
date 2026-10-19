@@ -9,7 +9,9 @@ import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
+import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.quest.QuestUx;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestNetwork;
 import net.minecraft.client.KeyMapping;
@@ -17,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -56,6 +57,7 @@ public final class QuestClient {
         static void onLayers(RegisterGuiLayersEvent event) {
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "quest_tracker"), QuestHud::render);
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "objective_strip"), ObjectiveStrip::render);
+            event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "chapter_label"), ChapterLabel::render);
         }
     }
 
@@ -78,10 +80,18 @@ public final class QuestClient {
         // 会話・場面の最中は溜め、閉じたあとに一枚ずつ (first_hour_log B-2)
         jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
             mc.getToasts().addToast(new QuestToast(Component.translatable(head), title, def != null && def.main()));
-            float pitch = kind == QuestNetwork.Notice.FINISHED ? 0.9f : kind == QuestNetwork.Notice.STARTED ? 0.7f : 1.2f;
-            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, pitch, 0.7f));
+            playSound(mc, kind, def != null && def.main());
             QuestHud.flash();
         });
+    }
+
+    // 更新の音 (設定 questSound。メインは小さな鐘が二つ、サブはもっと柔らかいひとつ。終わったときは少し低く)
+    static void playSound(Minecraft mc, byte kind, boolean main) {
+        if (!Config.QUEST_SOUND.get()) {
+            return;
+        }
+        float pitch = kind == QuestNetwork.Notice.FINISHED ? 0.85f : 1.0f;
+        mc.getSoundManager().play(SimpleSoundInstance.forUI(main ? QuestUx.MAIN_SOUND.get() : QuestUx.SIDE_SOUND.get(), pitch, 1.0f));
     }
 
     @Nullable

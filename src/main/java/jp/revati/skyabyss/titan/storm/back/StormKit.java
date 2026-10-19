@@ -274,4 +274,38 @@ public final class StormKit {
         }
         return n;
     }
+
+    // 角の隙間をふさぐ: 掘った所 c の隣 (d1 と d2 の方向) がどちらも丸ごとの壁なのに、その斜め (c + d1 + d2) だけ空気、という角。
+    // seal は掘った所の面した所しか見ないので、屋根の縁・壁の縁の斜めが抜けて、屋根が浮いて見えたり光が漏れたりする。ふさいだ数を返す
+    public int sealCorners(java.util.function.Predicate<BlockPos> open, java.util.function.Function<BlockPos, Style> styleAt) {
+        int n = 0;
+        BlockPos.MutableBlockPos a = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos b = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos x = new BlockPos.MutableBlockPos();
+        Direction[] all = Direction.values();
+        for (long l : carved.toLongArray()) {
+            int cx = BlockPos.getX(l);
+            int cy = BlockPos.getY(l);
+            int cz = BlockPos.getZ(l);
+            for (Direction d1 : all) {
+                for (Direction d2 : all) {
+                    if (d1.getAxis() == d2.getAxis() || d1.ordinal() > d2.ordinal()) {
+                        continue;
+                    }
+                    a.set(cx + d1.getStepX(), cy + d1.getStepY(), cz + d1.getStepZ());
+                    b.set(cx + d2.getStepX(), cy + d2.getStepY(), cz + d2.getStepZ());
+                    x.set(cx + d1.getStepX() + d2.getStepX(), cy + d1.getStepY() + d2.getStepY(), cz + d1.getStepZ() + d2.getStepZ());
+                    if (carved.contains(a.asLong()) || carved.contains(b.asLong()) || carved.contains(x.asLong()) || open.test(x) || !level.getBlockState(x).isAir()) {
+                        continue;
+                    }
+                    if (!level.getBlockState(a).isCollisionShapeFullBlock(level, a) || !level.getBlockState(b).isCollisionShapeFullBlock(level, b)) {
+                        continue;
+                    }
+                    level.setBlock(x, wall(styleAt.apply(x), x.getX(), x.getY(), x.getZ()), FLAGS);
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
 }

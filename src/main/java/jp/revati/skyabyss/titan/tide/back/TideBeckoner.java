@@ -355,6 +355,9 @@ public class TideBeckoner extends TideMob {
     private void start(ServerLevel server, Action a) {
         action = a;
         actionTick = 0;
+        if (a.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "tide_beckoner", a.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         switch (a) {
             case SLAM -> {
                 Vec3 to = target != null ? target.position().subtract(position()) : getLookAngle();

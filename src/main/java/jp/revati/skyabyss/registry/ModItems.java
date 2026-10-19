@@ -131,7 +131,7 @@ public final class ModItems {
 
     // 闇の水路の灯 (docs/design/23): 持ち運ぶ光る海のイソギンチャクと、灯の台・苗床・数え石
     public static final DeferredItem<Item> GLOW_ANEMONE = ITEMS.register("glow_anemone",
-            () -> new jp.revati.skyabyss.titan.dungeon.GlowAnemoneItem(new Item.Properties().stacksTo(4).rarity(Rarity.UNCOMMON)));
+            () -> new jp.revati.skyabyss.titan.dungeon.GlowAnemoneItem(new Item.Properties().stacksTo(3).rarity(Rarity.UNCOMMON)));
     public static final DeferredItem<BlockItem> ANEMONE_PEDESTAL = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_PEDESTAL);
     public static final DeferredItem<BlockItem> ANEMONE_BED = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_BED);
     public static final DeferredItem<BlockItem> ANEMONE_TALLY = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_TALLY);
