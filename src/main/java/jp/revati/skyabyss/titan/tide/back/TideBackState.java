@@ -12,9 +12,9 @@ import net.minecraft.world.level.saveddata.SavedData;
 // 潮殻の背の試練の状態 (tide_back のディメンションに保存)。
 //  - 島で一つのもの (ここに保存): 潮の時計の位置。潮は景色なので、全員が同じ潮を見る
 //  - グループ (パーティ、または一人) ごとのもの: Group (BackGroupData の記録の data 欄に "tide." で書く)。
-//    鳴った石・眠る試練・種 (庭の道の形・潮見の間の配置・巣の場所)・壊した巣・潮招き・潮の底の門。
+//    鳴った石・静かな試練・種 (庭の道の形・潮見の間の配置・巣の場所)・壊した巣・潮招き・潮の底の門。
 //    試練の番号 (休み場の記録を無効にする番号) と心臓の撃破も、そのグループの記録 (BackGroupData.Record) が持つ。
-//    "keep." で始まる欄 (前に眠った試練・心臓を一度でも倒したか・やさしい配置を使ったか・リセットの数) はリセットでも残る
+//    "keep." で始まる欄 (前に静かだった試練・心臓を一度でも倒したか・やさしい配置を使ったか・リセットの数) はリセットでも残る
 public class TideBackState extends SavedData {
     private static final String NAME = "skyabyss_tide_back";
     private static final Factory<TideBackState> FACTORY = new Factory<>(TideBackState::new, TideBackState::load);
@@ -140,7 +140,7 @@ public class TideBackState extends SavedData {
             return Integer.bitCount(record.getInt(RUNG) & 0b111);
         }
 
-        public Trial sleeping() {
+        public Trial quiet() {
             return Trial.byId(record.getString(SLEEPING));
         }
 
@@ -206,13 +206,13 @@ public class TideBackState extends SavedData {
             return record.getInt(RESETS);
         }
 
-        // 戻す値打ちのある進みがあるか (眠っている試練の石は数えない。種だけでは戻さない)
+        // 戻す値打ちのある進みがあるか (種だけでは戻さない)
         public boolean hasTrialProgress() {
-            return rungCount() > (sleeping() != null ? 1 : 0) || heartDefeated() || nestsBrokenAny() || beckonerDefeated() || bottomOpen();
+            return rungCount() > 0 || heartDefeated() || nestsBrokenAny() || beckonerDefeated() || bottomOpen();
         }
 
         // 試練を最初に戻す (08 の 7.1節)。試練の番号を進め (記録の進みと扉の上書きも消える)、新しい種を引く。
-        // 心臓を一度でも倒したグループは、試練を一つ眠らせる (同じ試練は二回続けて眠らない)
+        // 心臓を一度でも倒したグループは、試練を一つ「静かな試練」にする (石は鳴らさない。敵が少なく、やさしい配置。同じ試練は二回続けて静かにならない)
         public void reset(RandomSource random, Trial forceSleep, boolean noSleep) {
             if (heartDefeated()) {
                 markEverDefeated();
@@ -231,23 +231,21 @@ public class TideBackState extends SavedData {
             if (next != null) {
                 record.putString(SLEEPING, next.id());
                 record.putString(LAST_SLEEPING, next.id());
-                ring(next);
+                if (next == Trial.EAST) {
+                    // 静かな東は、いちばんやさしい配置 (潮見の間の 4.2節)
+                    record.putInt(EAST, 0);
+                }
             }
             record.putInt(RESETS, resets() + 1);
         }
 
-        // 眠る試練をコマンドで決める (今の周に効かせる)
-        public void setSleeping(Trial t) {
-            Trial was = sleeping();
-            if (was != null && was != t) {
-                record.putInt(RUNG, record.getInt(RUNG) & ~(1 << was.ordinal()));
-            }
+        // 静かな試練をコマンドで決める (今の周に効かせる。石の鳴りには触れない)
+        public void setQuiet(Trial t) {
             if (t == null) {
                 record.remove(SLEEPING);
             } else {
                 record.putString(SLEEPING, t.id());
                 record.putString(LAST_SLEEPING, t.id());
-                ring(t);
             }
         }
     }

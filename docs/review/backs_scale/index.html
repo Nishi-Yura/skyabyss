@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>巨神の背 大きさと濃さ 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 8px}
+h2.dh{margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+.intro{color:var(--muted);max-width:72ch;margin:0 0 6px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.fact{background:var(--panel);border:1px solid var(--line);padding:10px 12px;min-width:0}
+.fact b{display:block;font-size:20px}
+.fact span{font-size:12px;color:var(--muted)}
+figure{margin:12px 0;background:#f4f5f7;border:1px solid var(--line);padding:8px}
+figure img{display:block;width:100%;height:auto;max-width:100%}
+figcaption{font-size:12px;color:#5b6672;margin-top:6px}
+.pick{font-size:13px;color:var(--ok);margin:8px 0 0}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:2px}
+.rec{color:var(--ok);font-size:12px;font-weight:600}
+.letter{font-size:20px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:16px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:500}
+@media (max-width:760px){
+  .facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+  table{display:block;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>巨神の背を大きく・濃くする</h1>
+  <p class="intro">試遊の声: 「巨神の試練は、マルチプレイを想定した大きさではない。それぞれ小さすぎる。もっと巨神の体自体を大きくして、もっともっと内容濃く、広くしてもよい。」 測り方・巨神ごとの案・作り方・作業の順は <code>docs/design/26_backs_scale_up.md</code>。この画面は大きさの見取り図と、決めてもらう 6 つです。まだ作りません。</p>
+
+  <h2>測ってわかったこと</h2>
+  <div class="facts">
+    <div class="fact"><b>幅 3・高さ 4</b><span>通路と戸口の標準。6 人は一列にしか通れない</span></div>
+    <div class="fact"><b>9 × 31</b><span>岩鯨の番兵長の広間。6 人のボス戦には幅がない</span></div>
+    <div class="fact"><b>11%</b><span>岩鯨の体の足あとのうち、部屋が使っている割合。残りは詰まった石</span></div>
+    <div class="fact"><b>4〜5.5 倍</b><span>拡大案での、歩ける部屋の面積の増え方（四体とも）</span></div>
+  </div>
+  <table>
+    <thead><tr><th></th><th>岩鯨</th><th>潮殻</th><th>雷翼</th><th>余燼</th></tr></thead>
+    <tbody>
+      <tr><th>体（水平 x × z）</th><td>275×437 → 440×699</td><td>290×273 → 464×437</td><td>472×285 → 755×456</td><td>244×412 → 390×659</td></tr>
+      <tr><th>部屋の床の合計 (m²)</th><td>3,900 → 約 21,700</td><td>8,600 → 約 37,200</td><td>6,000 → 約 29,200</td><td>7,000 → 約 35,300</td></tr>
+      <tr><th>いちばん広い戦いの部屋</th><td>390 → 1,029</td><td>庭 3,652 → 9,514</td><td>骨の回廊 1,275 → 3,425</td><td>灰の道 1,625 → 4,305</td></tr>
+      <tr><th>心臓の間 (m²)</th><td>1,134 → 1,963</td><td>804 → 1,385</td><td>707 → 1,257</td><td>804 → 1,385</td></tr>
+      <tr><th>通路の幅 × 高さ</th><td colspan="4">3×4 → 5〜6 × 6 以上（本道は 7）</td></tr>
+    </tbody>
+  </table>
+  <p class="intro">拡大案は水平 ×1.6（足あとの面積 ×2.6）。今の部屋を位置ごと拡大して面積 ×2.6、広間は ×3.6、心臓の間だけ ×1.3 にとどめる（戦いの手ごたえを保つため）。そこに 21 の初回の拡張と任意の翼を新しい空きへ置く。図は上が北（頭）。配置は概念図。</p>
+
+  <h2>四体の大きさ比べ</h2>
+  <figure><img src="overview_all.png" alt="四体の体の大きさ比べ" width="1076" height="1120"><figcaption>灰色がいま、橙が拡大案（×1.6）。四つとも同じ縮尺で、中心を合わせて重ねた。</figcaption></figure>
+
+  <h2>6 人が入ったときの部屋</h2>
+  <figure><img src="party_rooms.png" alt="6 人が入った部屋の比べ" width="1240" height="872"><figcaption>青い点が 6 人、赤い円が足踏みの予告（半径 3.5）3 つ。いまの広間・番兵長の広間は、6 人と予告で埋まる。</figcaption></figure>
+
+  <h2>岩鯨</h2>
+  <figure><img src="compare_whale.png" alt="岩鯨 いまと拡大案" width="1072" height="1117"><figcaption>いまの部屋は体の中ほどに固まっている。拡大案は、空いた南半分に鐘楼・第二の広間・詰所・書庫、胸びれに外の道、尾に展望を置く。紫は下の層（闇の水路）。黄は必須の長い道、橙は任意の翼。</figcaption></figure>
+  <h2>潮殻</h2>
+  <figure><img src="compare_tide.png" alt="潮殻 いまと拡大案" width="1544" height="977"><figcaption>灰色の枠は封じた予約の間（いまは空）で、拡大案では最初から開けた任意の翼にする。中央の黄の円は息の間（縦に 70 ブロックの大空洞）。</figcaption></figure>
+  <h2>雷翼</h2>
+  <figure><img src="compare_storm.png" alt="雷翼 いまと拡大案" width="1156" height="1273"><figcaption>骨の回廊の幅を 15 → 25 にして、三層の道が並ぶ。背の上の二つの塔、尾羽の外廊、翼の外の道が任意の翼。</figcaption></figure>
+  <h2>余燼</h2>
+  <figure><img src="compare_ember.png" alt="余燼 いまと拡大案" width="987" height="1092"><figcaption>灰の道に二つ目の湖、火守りの谷の奥に火床 II、喉の坂の脇に左右の肺、尾に炉。</figcaption></figure>
+
+  <h2 class="dh">決めてもらうこと（6 つ）</h2>
+  <p class="intro">選ぶと自動で保存されます（db の <code>choices</code>、id は <code>scale_1</code>〜<code>scale_6</code>）。メモは任意です。</p>
+  <div id="decisions"></div>
+  <div class="save" id="save">読み込み中…</div>
+</div>
+<script>
+const DECISIONS = [
+  { id: 'scale_1', title: '1. 体の倍率', q: '水平方向を何倍にしますか。(垂直は次元の高さ 256 の上限で約 ×1.3)',
+    opts: [
+      ['a', '×1.4', '足あと ×2.0。軽い。広間で ×2.6、試練の部屋で ×2.0', false],
+      ['b', '×1.6', '足あと ×2.6。部屋 ×2.6〜3.6 で 6 人の目標を満たす。建設は作り方の見直しで 2 倍以内の見込み', true],
+      ['c', '×2.0', '足あと ×4.0。次元の高さを上げる新しい次元名が要る。建設時間と保存の増え方が大きい', false]],
+    note: '倍率は版ごとの定数。×1.6 で作って遊んだあと ×2.0 へ上げることもできる (その場合は新しい次元名)。' },
+  { id: 'scale_2', title: '2. 初回の長さ', q: '大きくしたぶん、一つの背の初回クリアはどれくらいにしますか。',
+    opts: [
+      ['a', '21 のまま', '初回 75〜120 分。任意の翼 25〜35 分。周回 20〜30 分', false],
+      ['b', '任意の翼を約 2 倍', '初回 105〜140 分。必須の道は 21 のまま。周回は 20〜30 分のまま', true],
+      ['c', '必須も 1.3 倍', '初回 120〜160 分。周回も 26〜38 分に伸びる', false]],
+    note: '広さと濃さは任意の翼と見せ場に使い、必須の道と周回を膨らませない案が推薦。' },
+  { id: 'scale_3', title: '3. 一人と 6 人の合わせ方', q: '部屋が 6 人基準に広くなったとき、一人や二人のときをどうしますか。',
+    opts: [
+      ['a', '敵の数だけ人数で', '部屋はそのまま。敵と体力が人数で増減 (今の式)。一人だと広間ががらんとする', false],
+      ['b', '奥を幕で狭める', '一人〜二人のとき、そのグループだけに閉じる封印の扉で奥半分を区切る。敵の数も人数で', true],
+      ['c', '別ルート', '一人用と複数人用の道を別に作る。作る量が約 1.5 倍', false]],
+    note: '幕は今の GroupGates (グループごとの扉) の仕組みで足りる。' },
+  { id: 'scale_4', title: '4. 体の外の巨神', q: '空を泳ぐ・地上に降りる巨神のモデルも大きくしますか。',
+    opts: [
+      ['a', '今のまま', '背に立つと「見た目より中が大きい」。今も背は外の 1.7〜2.9 倍で作ってある', true],
+      ['b', '外も同じ倍率', '岩鯨は約 4.6 倍。モデル・当たり判定・描画距離・停泊・鎖・乗り込み口を全部直す。大工事', false],
+      ['c', '停泊中の近景だけ少し大きく', 'LOD の差し替え。外の大きさの印象だけ上げる。中くらいの工事', false]],
+    note: '外を変えると旅の仕組み全体に響く。' },
+  { id: 'scale_5', title: '5. 出す順', q: 'どの巨神から作り直しますか。',
+    opts: [
+      ['a', '岩鯨だけ先', '岩鯨を最後まで作って遊び、感触を見てから残り三体を並列に。直しが 4 倍にならない', true],
+      ['b', '四体同時', '一番早いが、感触が違ったときのやり直しが 4 体ぶん', false],
+      ['c', '章の順に 1 体ずつ', '岩鯨 → 潮殻 → 雷翼 → 余燼。一番ゆっくり', false]],
+    note: '基盤 (B0) は先に三本並列で出す。' },
+  { id: 'scale_6', title: '6. 試練の待ち行列', q: '物理が変わる部屋 (水・溶岩・鏡) は 1 グループずつです。どう減らしますか。',
+    opts: [
+      ['a', '並列のレーンを作る', '潮殻の庭・潮見の間、雷翼の眼の間、余燼の三試練を 2 レーンに。同じ石に着く。待ちの間の景色つき', true],
+      ['b', '待ちを短く', '占有の待ちを 20 秒から 10 秒に。部屋はそのまま', false],
+      ['c', '今のまま', '部屋が大きくなれば待ちが減ると期待する', false]],
+    note: '試練の数・扉の条件は変わらない。' }
+];
+const root = document.getElementById('decisions');
+for (const d of DECISIONS) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2 class="dh">' + d.title + '</h2><p class="intro">' + d.q + '</p>' +
+    '<fieldset class="opts" id="opts_' + d.id + '">' +
+    d.opts.map(o => '<label class="opt"><input type="radio" name="' + d.id + '" value="' + o[0] + '"><span class="letter">' + o[0].toUpperCase() + '</span><span><b>' + o[1] + '</b>' + (o[3] ? ' <span class="rec">推薦</span>' : '') + '<small>' + o[2] + '</small></span></label>').join('') +
+    '</fieldset><p class="pick">' + d.note + '</p>' +
+    '<label class="note-l" for="n_' + d.id + '">メモ (任意)</label><textarea id="n_' + d.id + '" class="note" rows="2" placeholder="別案・条件・気になる点"></textarea>';
+  root.appendChild(sec);
+}
+(() => {
+  const saveEl = document.getElementById('save');
+  let db = null; const timers = {};
+  const chosen = id => { const r = document.querySelector('input[name=' + id + ']:checked'); return r ? r.value : ''; };
+  async function save(id) {
+    if (!db) return;
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen(id), note: document.getElementById('n_' + id).value, at: Date.now() });
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  for (const d of DECISIONS) {
+    document.querySelectorAll('input[name=' + d.id + ']').forEach(r => r.addEventListener('change', () => save(d.id)));
+    document.getElementById('n_' + d.id).addEventListener('input', () => { clearTimeout(timers[d.id]); timers[d.id] = setTimeout(() => save(d.id), 800); });
+  }
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const doc of docs) {
+        if (!/^scale_/.test(doc.id)) continue;
+        const data = typeof doc.data === 'function' ? doc.data() : doc.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector('input[name=' + doc.id + '][value="' + data.option + '"]'); if (r) r.checked = true; }
+        if (data.note) { const n = document.getElementById('n_' + doc.id); if (n) n.value = data.note; }
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+  })();
+})();
+</script>
+</body>
+</html>

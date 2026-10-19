@@ -49,9 +49,9 @@ import net.minecraft.world.phys.Vec3;
 
 // 前の試練 群れの干潟 (08 の 4.3節) と中ボス潮招き (5.2節)。
 // 巣: 6 か所の候補からリセットの種で 3 つ。干潮で口を開けて 5 秒ごとに磯走りを 2 体 (一つの巣から生きているのは 3 体、人が一人増えるごとに +1)。
-//     満潮では殻を閉じて傷が通らない。体力は 60 × (1 + 0.6 × (干潟にいる人 - 1))。
+//     満ちているあいだは殻を閉じ、磯走りは出ないが、傷は半分だけ通る (いつでも壊せる)。体力は 60 × (1 + 0.6 × (干潟にいる人 - 1))。
 // 満潮のあいだは、泡吹きが水面の上に 2 体。
-// 潮招き: 最後の巣が壊れると 5 秒の集合 → 干潟の口が閉じる (干潟とトンネルと前室の人が参加者) → 干潮なら現れる (満潮なら引くまで待つ)。
+// 潮招き: 最後の巣が壊れると 5 秒の集合 → 干潟の口が閉じる (干潟とトンネルと前室の人が参加者) → 潮に関わらず現れる (満潮は水に沈んだ砂から)。
 //   参加者が干潟にいなくなって 3 秒たつと砂に潜って消え、口が開く (壊した巣はそのまま。次は潮招きからやり直す)
 // 干潟は占有する部屋 (TideRooms.FLATS)。巣・招き潮の水・潮招き・群れは、いまの持ち主のグループ (パーティ、または一人) のもの。
 // 人数・参加者・狙う相手・報酬は持ち主のグループの人だけで数える。干潟の口と干潟の門は、戦っているグループにだけ閉じる
@@ -111,6 +111,11 @@ public final class TideFlats {
 
     public static boolean fightSealed() {
         return fight == Fight.WAITING || fight == Fight.ACTIVE || fight == Fight.GATHER && fightTimer <= 0;
+    }
+
+    // 戦っているために、干潟の門と口をそのグループにだけ閉じているか
+    static boolean flatsSealedFor(UUID group) {
+        return sealedFor != null && sealedFor.equals(group);
     }
 
     public static boolean fightActive() {
@@ -206,7 +211,8 @@ public final class TideFlats {
             }
         }
         // 満潮で泡吹き、干潮で沈む
-        if (phase == TideClock.Phase.HIGH && !inFlats(level).isEmpty() && !state.rung(TideBackState.Trial.FRONT)) {
+        if (phase == TideClock.Phase.HIGH && !inFlats(level).isEmpty() && !state.rung(TideBackState.Trial.FRONT)
+                && state.quiet() != TideBackState.Trial.FRONT) {
             for (int i = 0; i < 2; i++) {
                 int x = -16 + level.random.nextInt(33);
                 int z = -100 + FLATS_DZ + level.random.nextInt(26);
@@ -323,8 +329,10 @@ public final class TideFlats {
             }
             NEST_TIMER[site] = NEST_INTERVAL;
             // 一つの巣から生きているのは 3 体 (人が一人増えるごとに +1)。干潟全体でも 8 体 (+2) まで (試遊で 3 つの巣から 20 体になり、一人では巣に届かなかった)
-            int cap = 3 + (people - 1);
-            int all = 8 + 2 * (people - 1);
+            // 静かな干潟 (08 の 7.2節): 磯走りは少なめ (一つの巣から 1 体 (+1/2 人)、全体で 3 体 (+1/人))
+            boolean quiet = state.quiet() == TideBackState.Trial.FRONT;
+            int cap = quiet ? 1 + (people - 1) / 2 : 3 + (people - 1);
+            int all = quiet ? 3 + (people - 1) : 8 + 2 * (people - 1);
             String tag = NEST_TAG + site;
             int alive = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(tag) && owned(e, state.id)).size();
             int total = level.getEntitiesOfClass(ReefScuttler.class, flatsBox().inflate(10), e -> e.getTags().contains(FLATS_TAG) && owned(e, state.id)).size();
@@ -459,17 +467,13 @@ public final class TideFlats {
                 }
                 fight = Fight.WAITING;
                 empty = 0;
-                if (!nestsOpen(level)) {
-                    broadcast(level, owner, ModText.lore("message.skyabyss.tide.beckoner_waits"));
-                }
             }
             case WAITING -> {
                 if (wiped(level)) {
                     return;
                 }
-                if (TideClock.phase(level) == TideClock.Phase.LOW) {
-                    spawnBoss(level, owner);
-                }
+                // 潮の段階を待たない。満潮なら、水に沈んだ干潟の砂から現れる (08 の 4.3節)
+                spawnBoss(level, owner);
             }
             case ACTIVE -> {
                 TideBeckoner boss = boss(level);
@@ -527,6 +531,22 @@ public final class TideFlats {
         }
     }
 
+    // 自己テスト用: 集合が済んだあとの待ち (WAITING) を、いまの潮のまま一度動かして、潮招きが現れるか (潮を待たない)
+    static boolean waitingSpawnsForTest(ServerLevel level, UUID participant) {
+        UUID owner = owner();
+        if (owner == null) {
+            return false;
+        }
+        fight = Fight.WAITING;
+        participants.clear();
+        participants.add(participant);
+        empty = 0;
+        tickFight(level, TideBackState.of(level, owner));
+        boolean rose = fight == Fight.ACTIVE && boss(level) != null;
+        resetFight(level, false);
+        return rose;
+    }
+
     private static void spawnBoss(ServerLevel level, UUID owner) {
         TideBeckoner boss = TideBackSetup.TIDE_BECKONER.get().create(level);
         if (boss == null) {
@@ -568,7 +588,7 @@ public final class TideFlats {
         }
     }
 
-    // 干潟の口と、広間の干潟の門を、そのグループにだけ閉じる / やめる (門は潮の既定に戻る)
+    // 干潟の口と、広間の干潟の門を、そのグループにだけ閉じる / やめる (門はそのグループにまた開く。潮には左右されない)
     static void sealMouth(ServerLevel level, @Nullable UUID group, boolean seal) {
         UUID who;
         if (seal && group != null) {
@@ -579,7 +599,7 @@ public final class TideFlats {
         } else if (!seal && sealedFor != null) {
             who = sealedFor;
             GroupGates.release(level, who, TideGates.mouth());
-            GroupGates.release(level, who, TideGates.flats());
+            GroupGates.open(level, who, TideGates.flats());
             sealedFor = null;
         } else {
             return;
