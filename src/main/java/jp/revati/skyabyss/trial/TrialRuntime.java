@@ -157,6 +157,15 @@ public final class TrialRuntime {
 
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onLevelTick0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("server.trialRuntime", prof);
+        }
+    }
+
+    static void onLevelTick0(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK) {
             return;
         }

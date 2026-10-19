@@ -139,6 +139,15 @@ public final class TrialHub {
 
     @SubscribeEvent
     static void onLevelTick(LevelTickEvent.Post event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onLevelTick0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("server.trialHub", prof);
+        }
+    }
+
+    static void onLevelTick0(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }

@@ -104,6 +104,15 @@ public final class NpcMarkerClient {
 
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onClientTick0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.npcMarkerTick", prof);
+        }
+    }
+
+    static void onClientTick0(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null || MARKERS.isEmpty()) {
@@ -141,6 +150,15 @@ public final class NpcMarkerClient {
 
     @SubscribeEvent
     static void onRenderLevel(RenderLevelStageEvent event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onRenderLevel0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.npcMarkerRender", prof);
+        }
+    }
+
+    static void onRenderLevel0(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS || MARKERS.isEmpty()) {
             return;
         }

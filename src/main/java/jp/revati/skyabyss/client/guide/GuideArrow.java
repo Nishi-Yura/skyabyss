@@ -45,16 +45,35 @@ public final class GuideArrow {
         g.pose().popPose();
     }
 
-    private static void paint(GuiGraphics g, int ox, int oy, int dx, int dy, int argb) {
+    // SHAPE の '#' の横の連なり {行, 始まり, 終わり (含まない)}。一度だけ求め、1 回の paint は連なりごとの fill にする (一回の中では重ならないので出る絵は同じ)
+    private static final int[] RUNS = runs();
+
+    private static int[] runs() {
+        java.util.List<Integer> out = new java.util.ArrayList<>();
         for (int row = 0; row < SHAPE.length; row++) {
             String line = SHAPE[row];
-            for (int col = 0; col < line.length(); col++) {
+            int col = 0;
+            while (col < line.length()) {
                 if (line.charAt(col) == '#') {
-                    int x = ox + col + dx;
-                    int y = oy + row + dy;
-                    g.fill(x, y, x + 1, y + 1, argb);
+                    int start = col;
+                    while (col < line.length() && line.charAt(col) == '#') {
+                        col++;
+                    }
+                    out.add(row);
+                    out.add(start);
+                    out.add(col);
+                } else {
+                    col++;
                 }
             }
+        }
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static void paint(GuiGraphics g, int ox, int oy, int dx, int dy, int argb) {
+        for (int i = 0; i < RUNS.length; i += 3) {
+            int y = oy + RUNS[i] + dy;
+            g.fill(ox + RUNS[i + 1] + dx, y, ox + RUNS[i + 2] + dx, y + 1, argb);
         }
     }
 

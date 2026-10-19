@@ -106,24 +106,34 @@ public final class TitanClient {
         for (int layer = 0; layer < 2; layer++) {
             float y = (float) (CLOUD_SEA_Y - layer * 10 - cam.y);
             double layerDrift = drift * (layer == 0 ? 1.0 : 0.6);
+            // 隣り合う区画は角を共有するので、角の値は (cells+1)^2 個を一度だけ求める (値は区画ごとに求めたものと同じ)
+            int n1 = cells + 1;
+            float[] grid = cornerGrid(n1);
+            for (int i = 0; i < n1; i++) {
+                double gx = minX + i * CLOUD_STEP;
+                for (int k = 0; k < n1; k++) {
+                    grid[i * n1 + k] = cloud(gx, minZ + k * CLOUD_STEP, layerDrift, layer, cam);
+                }
+            }
+            float c = brightness * (layer == 0 ? 1f : 0.82f);
+            float cb = c * 1.04f;
             for (int i = 0; i < cells; i++) {
+                double x = minX + i * CLOUD_STEP;
+                float x0 = (float) (x - cam.x);
                 for (int k = 0; k < cells; k++) {
-                    double x = minX + i * CLOUD_STEP;
-                    double z = minZ + k * CLOUD_STEP;
-                    float a00 = cloud(x, z, layerDrift, layer, cam);
-                    float a10 = cloud(x + CLOUD_STEP, z, layerDrift, layer, cam);
-                    float a11 = cloud(x + CLOUD_STEP, z + CLOUD_STEP, layerDrift, layer, cam);
-                    float a01 = cloud(x, z + CLOUD_STEP, layerDrift, layer, cam);
+                    float a00 = grid[i * n1 + k];
+                    float a10 = grid[(i + 1) * n1 + k];
+                    float a11 = grid[(i + 1) * n1 + k + 1];
+                    float a01 = grid[i * n1 + k + 1];
                     if (a00 + a10 + a11 + a01 < 0.01f) {
                         continue;
                     }
-                    float c = brightness * (layer == 0 ? 1f : 0.82f);
-                    float x0 = (float) (x - cam.x);
+                    double z = minZ + k * CLOUD_STEP;
                     float z0 = (float) (z - cam.z);
-                    buffer.addVertex(pose, x0, y, z0).setColor(c, c, c * 1.04f, a00);
-                    buffer.addVertex(pose, x0, y, z0 + CLOUD_STEP).setColor(c, c, c * 1.04f, a01);
-                    buffer.addVertex(pose, x0 + CLOUD_STEP, y, z0 + CLOUD_STEP).setColor(c, c, c * 1.04f, a11);
-                    buffer.addVertex(pose, x0 + CLOUD_STEP, y, z0).setColor(c, c, c * 1.04f, a10);
+                    buffer.addVertex(pose, x0, y, z0).setColor(c, c, cb, a00);
+                    buffer.addVertex(pose, x0, y, z0 + CLOUD_STEP).setColor(c, c, cb, a01);
+                    buffer.addVertex(pose, x0 + CLOUD_STEP, y, z0 + CLOUD_STEP).setColor(c, c, cb, a11);
+                    buffer.addVertex(pose, x0 + CLOUD_STEP, y, z0).setColor(c, c, cb, a10);
                 }
             }
         }
@@ -142,7 +152,22 @@ public final class TitanClient {
         RenderSystem.disableBlend();
     }
 
+    private static float[] cloudGrid = new float[0];
+
+    private static float[] cornerGrid(int n1) {
+        if (cloudGrid.length < n1 * n1) {
+            cloudGrid = new float[n1 * n1];
+        }
+        return cloudGrid;
+    }
+
     private static float cloud(double x, double z, double drift, int layer, Vec3 cam) {
+        // 半径の外 (濃さが 0 になる) は、重い計算の前に返す。境目から離れたものだけを切るので、値は変わらない
+        double dx = x - cam.x;
+        double dz = z - cam.z;
+        if (dx * dx + dz * dz > CLOUD_RADIUS * (double) CLOUD_RADIUS * 1.001) {
+            return 0f;
+        }
         double zz = z - drift;
         double n = noise(x / 70.0 + layer * 13.1, zz / 70.0) * 0.6 + noise(x / 24.0 - layer * 5.7, zz / 24.0) * 0.4;
         double cover = Mth.clamp((n - (layer == 0 ? 0.35 : 0.25)) / 0.25, 0.0, 1.0);

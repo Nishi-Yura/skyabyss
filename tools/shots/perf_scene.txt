@@ -1,0 +1,100 @@
+# Fixed muted perf scene (about 3 minutes, one client): heart hall fight -> trial room crowd -> HUD-heavy -> overworld whale.
+# SKYABYSS_PROF=1 ./gradlew runShots --no-daemon -Pscript=tools/shots/perf_scene.txt -PshotsName=perf_scene   (Prof sampler + sections, [prof] <scene> lines in logs/latest.log)
+# 1st run builds the whale back (warm up); read the 2nd run. Numbers per scene: tools/perf_report.py
+world perf_scene flat
+size 1280 720
+timeout 1500
+render 12
+clouds off
+guiscale 2
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd effect give @s minecraft:night_vision infinite 0 true
+cmd kill @e[type=!minecraft:player,distance=..120]
+hud on
+cmd skyabyss cinematic stop
+
+# ---- B: whale back, heart hall, heart fighting with telegraphs
+cmd skyabyss dev arrive titan_back
+waitchunks 1200
+wait 100
+cmd skyabyss cinematic stop
+chat clear
+camera skyabyss:titan_back 0.5 104 -122.5 180 8
+waitchunks 900
+cmd summon skyabyss:stone_whale_heart 0.5 104 -135.5 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 120
+prof discard
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 80
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+wait 220
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 120
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] THRUST
+wait 120
+prof B_heart_hall
+cmd kill @e[type=skyabyss:stone_whale_heart]
+
+# ---- C: busy trial room with mobs
+cmd skyabyss dev trial force W10
+cmd skyabyss dev trial tp W10
+waitchunks 900
+wait 60
+cmd execute at @s run summon skyabyss:bone_sentinel ~4 ~ ~4 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~-4 ~ ~4 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~4 ~ ~-4 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~-4 ~ ~-4 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~6 ~ ~0 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~-6 ~ ~0 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~0 ~ ~6 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~0 ~ ~-6 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~8 ~ ~3 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~-8 ~ ~3 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~3 ~ ~8 {PersistenceRequired:1b}
+cmd execute at @s run summon skyabyss:bone_sentinel ~-3 ~ ~-8 {PersistenceRequired:1b}
+wait 100
+prof discard
+wait 600
+prof C_trial_room
+cmd kill @e[type=skyabyss:bone_sentinel]
+
+# ---- D: HUD-heavy (boss bars, party list, goal panel, vow, notices)
+cmd bossbar add hud:b1 "heart"
+cmd bossbar set hud:b1 players @a
+cmd bossbar set hud:b1 value 70
+cmd bossbar add hud:b2 "sentinel"
+cmd bossbar set hud:b2 players @a
+cmd bossbar set hud:b2 value 40
+huddemo boss
+wait 100
+prof discard
+wait 250
+huddemo back
+wait 250
+prof D_hud_heavy
+huddemo off
+cmd bossbar remove hud:b1
+cmd bossbar remove hud:b2
+
+# ---- A: overworld, near the stone whale
+camera minecraft:overworld 0.5 -60 0.5 0 0
+waitchunks 600
+cmd skyabyss titan summon
+wait 100
+cmd skyabyss cinematic stop
+chat clear
+cmd tp @e[type=skyabyss:stone_whale,limit=1] 40 -20 30 90 0
+wait 100
+prof discard
+camera minecraft:overworld 0.5 -60 0.5 60 10
+skypass 0 0 1 0
+wait 100
+prof discard
+wait 600
+prof A_overworld_whale
+skypass off
+quit

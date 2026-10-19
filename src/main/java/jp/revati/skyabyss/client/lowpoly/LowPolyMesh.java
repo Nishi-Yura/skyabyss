@@ -44,6 +44,12 @@ public final class LowPolyMesh {
         public final int quadCount;
         // 塞いだ穴の面 (巨神) が始まる quad の番号 (無ければ quadCount)。LowPoly.titanWeight が false のときはここまでしか描かない
         public final int capStart;
+        // 巨神の焼き込みの陰をかけた頂点色。色 (colour) が前と同じなら作り直さない (描画スレッドだけが読み書きする)
+        int[] shadedColours;
+        int shadedFor;
+        // 発光の重ね描きで、発光マスクに光る画素が掛かる quad か (LowPolyGlow が作る)。maskFor はどのマスクで作ったか
+        boolean[] glowQuads;
+        ResourceLocation glowQuadsFor;
 
         Bone(String name, String parent, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
             this.name = name;

@@ -78,8 +78,14 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
             return;
         }
         // 巨神の焼き込みの陰 (下ほど暗い) は、光る層の重ね描きでは掛けない
-        LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, 0f, !glowPass);
+        boolean[] only = GLOW_SKIP && glowPass && glowMask != null && !LowPoly.debug ? LowPolyGlow.quads(meshBone, glowMask) : null;
+        LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, 0f, !glowPass, only);
     }
+
+    // 重ね描き中の発光マスクの画像 (その骨の quad のうち光る画素に掛かる所だけを流す。LowPolyGlow)
+    private ResourceLocation glowMask;
+    // 開発用: 環境変数 SKYABYSS_NOGLOWSKIP=1 で quad の飛ばしを切る (出る絵が同じかを比べる用)
+    private static final boolean GLOW_SKIP = !"1".equals(System.getenv("SKYABYSS_NOGLOWSKIP"));
 
     // 光る層 (GlowLayer) の重ね描きの最中か
     private boolean glowPass;
@@ -132,6 +138,7 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     // 発光マスク (<テクスチャ>_glowmask.png) があるテクスチャのときだけ AutoGlowingGeoLayer の描画をする
     private static final class GlowLayer<T extends Entity & GeoAnimatable> extends AutoGlowingGeoLayer<T> {
         private static final Map<ResourceLocation, Boolean> HAS_MASK = new HashMap<>();
+        private static final Map<ResourceLocation, ResourceLocation> MASK_OF = new HashMap<>();
 
         private final java.util.function.BooleanSupplier enabled;
 
@@ -147,12 +154,13 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
                 return;
             }
             ResourceLocation tex = getTextureResource(animatable);
-            boolean has = HAS_MASK.computeIfAbsent(tex, t -> Minecraft.getInstance().getResourceManager().getResource(
-                    t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p)).isPresent());
+            ResourceLocation maskLoc = MASK_OF.computeIfAbsent(tex, t -> t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p));
+            boolean has = HAS_MASK.computeIfAbsent(tex, t -> Minecraft.getInstance().getResourceManager().getResource(maskLoc).isPresent());
             if (has) {
                 LowPolyGeoRenderer<?> owner = getRenderer() instanceof LowPolyGeoRenderer<?> r ? r : null;
                 if (owner != null) {
                     owner.glowPass = true;
+                    owner.glowMask = maskLoc;
                 }
                 try {
                     // 眠る巨神 (DormantTitan) は、光が揺らぎながら消える
@@ -170,6 +178,7 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
                 } finally {
                     if (owner != null) {
                         owner.glowPass = false;
+                        owner.glowMask = null;
                     }
                 }
             }

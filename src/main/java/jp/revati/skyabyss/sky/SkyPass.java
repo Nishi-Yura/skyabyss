@@ -88,9 +88,6 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
 
     // 輪郭までの距離。内側は負、外側は正
     private static double distance(double along, double side, double fold) {
-        double span = 135.0 - 50.0 * fold;
-        double sweep = 10.0 * fold;
-
         // 部位はなめらかに溶け合わせ、継ぎ目の段差を出さない
         double d = capsule(along, side, -45, 0, 55, 0, 19, 17);
         d = smoothMin(d, capsule(along, side, 50, 0, 88, 0, 13, 7), 10);
@@ -99,7 +96,24 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
         if (d < -5.0) {
             return d;
         }
-        double[] wing = {
+        double[] wing = wingFor(fold);
+        return smoothMin(d, polygon(along, side, wing), 6);
+    }
+
+    // 翼の多角形は fold だけで決まる。fold が前と同じなら作り直さず (毎点の確保をやめて) 使い回す。書き込まれない配列なのでスレッドをまたいでよい
+    private record Wing(double fold, double[] v) {
+    }
+
+    private static volatile Wing wingCache;
+
+    private static double[] wingFor(double fold) {
+        Wing w = wingCache;
+        if (w != null && w.fold == fold) {
+            return w.v;
+        }
+        double span = 135.0 - 50.0 * fold;
+        double sweep = 10.0 * fold;
+        double[] v = {
                 30, 8,
                 10 + sweep, span * 0.45,
                 -25 + sweep * 2, span,
@@ -111,7 +125,8 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
                 -48, span * 0.21,
                 -40, 8,
         };
-        return smoothMin(d, polygon(along, side, wing), 6);
+        wingCache = new Wing(fold, v);
+        return v;
     }
 
     // 2つの形をなめらかにつなぐ (k が大きいほど継ぎ目が丸くなる)
@@ -122,7 +137,9 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
 
     // 楕円までのおおよその距離
     private static double ellipse(double px, double py, double cx, double cy, double ra, double rb) {
-        return (Math.hypot((px - cx) / ra, (py - cy) / rb) - 1.0) * Math.min(ra, rb);
+        double ex = (px - cx) / ra;
+        double ey = (py - cy) / rb;
+        return (Math.sqrt(ex * ex + ey * ey) - 1.0) * Math.min(ra, rb);
     }
 
     // a から b へ、半径 ra から rb へ細くなる棒までの距離
@@ -132,7 +149,10 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
         double ex = bx - ax;
         double ey = by - ay;
         double h = Math.max(0.0, Math.min(1.0, (wx * ex + wy * ey) / (ex * ex + ey * ey)));
-        return Math.hypot(wx - ex * h, wy - ey * h) - (ra + (rb - ra) * h);
+        double qx = wx - ex * h;
+        double qy = wy - ey * h;
+        // 距離の計算。Math.hypot は遅く、画素ごとの影の地図が毎フレーム何万点も引くので sqrt にする (差は最後の桁の丸めだけ)
+        return Math.sqrt(qx * qx + qy * qy) - (ra + (rb - ra) * h);
     }
 
     // 多角形までの符号付き距離 (頂点は x, y の順に並べた配列)

@@ -55,5 +55,6 @@ public final class LowPolyMeshes implements ResourceManagerReloadListener {
         }
         meshes = loaded;
         LowPolyArmor.clearCache();
+        LowPolyGlow.clear();
     }
 }

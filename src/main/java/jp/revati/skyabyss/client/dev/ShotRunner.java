@@ -358,6 +358,13 @@ public final class ShotRunner {
             case "echo" -> {
                 return true;
             }
+            case "prof" -> {
+                // prof <場面> : 計測器 (dev/Prof、SKYABYSS_PROF=1) の溜めた数字を [prof] <場面> で書き出して 0 に戻す。垂直同期は切る
+                mc.options.enableVsync().set(false);
+                mc.options.framerateLimit().set(260);
+                jp.revati.skyabyss.dev.Prof.flush(line.arg(0));
+                return true;
+            }
             case "watch" -> {
                 watching = line.arg(0).equals("on");
                 if (watching) {

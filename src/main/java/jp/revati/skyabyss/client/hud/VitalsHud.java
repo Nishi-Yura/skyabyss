@@ -40,6 +40,15 @@ public final class VitalsHud {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void onLayer(RenderGuiLayerEvent.Pre event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onLayer0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.vitals", prof);
+        }
+    }
+
+    static void onLayer0(RenderGuiLayerEvent.Pre event) {
         var name = event.getName();
         boolean health = VanillaGuiLayers.PLAYER_HEALTH.equals(name);
         boolean armor = VanillaGuiLayers.ARMOR_LEVEL.equals(name);
@@ -175,14 +184,36 @@ public final class VitalsHud {
         return 0xFF000000 | rr << 16 | gg << 8 | bb;
     }
 
+    // 絵の '#' の横の連なりを一つの fill にまとめる (同じ色の塗りなので出る絵は同じ)。連なりは形ごとに一度だけ求める
+    private static final java.util.Map<String[], int[]> ICON_RUNS = new java.util.IdentityHashMap<>();
+
     private static void drawIcon(GuiGraphics g, String[] shape, int x, int y, int color) {
+        int[] runs = ICON_RUNS.computeIfAbsent(shape, VitalsHud::runsOf);
+        for (int i = 0; i < runs.length; i += 3) {
+            g.fill(x + runs[i + 1], y + runs[i], x + runs[i + 2], y + runs[i] + 1, color);
+        }
+    }
+
+    // {行, 始まり, 終わり (含まない)} の並び
+    private static int[] runsOf(String[] shape) {
+        java.util.List<Integer> out = new java.util.ArrayList<>();
         for (int row = 0; row < shape.length; row++) {
-            for (int col = 0; col < shape[row].length(); col++) {
+            int col = 0;
+            while (col < shape[row].length()) {
                 if (shape[row].charAt(col) == '#') {
-                    g.fill(x + col, y + row, x + col + 1, y + row + 1, color);
+                    int start = col;
+                    while (col < shape[row].length() && shape[row].charAt(col) == '#') {
+                        col++;
+                    }
+                    out.add(row);
+                    out.add(start);
+                    out.add(col);
+                } else {
+                    col++;
                 }
             }
         }
+        return out.stream().mapToInt(Integer::intValue).toArray();
     }
 
     private static final String[] HEART = {".##.##.", "#######", "#######", ".#####.", "..###..", "...#..."};

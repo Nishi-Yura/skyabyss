@@ -142,6 +142,15 @@ public final class SpawnSafety {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onJoin(EntityJoinLevelEvent event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onJoin0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("server.spawnSafety", prof);
+        }
+    }
+
+    static void onJoin0(EntityJoinLevelEvent event) {
         if (event.loadedFromDisk() || !(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof Mob mob) || !applies(mob)) {
             return;
         }

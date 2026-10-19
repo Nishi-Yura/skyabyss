@@ -658,6 +658,15 @@ public final class SkillManager {
     // ログイン・復活・ディメンション移動・習得・振り直しのたび、そして 0.5 秒ごとに今の値で付け直す (保存される修飾子。値が同じなら何もしない)。
     // 岩の構え・軽業・孤風・備えの報い・耐久 15・筋力 15 の刻み目
     public static void applyModifiers(Player player) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            applyModifiers0(player);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("server.skillApplyModifiers", prof);
+        }
+    }
+
+    public static void applyModifiers0(Player player) {
         SkillData d = get(player);
         int stance = d.rank(Skill.STONE_STANCE);
         double guard = stance > 0 && WeaponType.has(player, WeaponType.GUARD) ? 1 : 0;

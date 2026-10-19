@@ -28,6 +28,9 @@ public final class LowPoly {
     // 開発用: 装飾品のメッシュの階級を common|rare|legend に固定する (null = 品の階級)。台本の `acctier <階級|off>`
     public static volatile String accessoryTier = null;
 
+    // 描画スレッドだけが使う作業用 (drawBone のたびに作らない)
+    private static final Vector3f SCRATCH = new Vector3f();
+
     private LowPoly() {
     }
 
@@ -43,6 +46,13 @@ public final class LowPoly {
 
     // shade: 巨神の焼き込みの明るさ (Bone.vshade) をかけるか。光る層 (発光マスクの重ね描き) では false にして、光を暗くしない
     public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten, boolean shade) {
+        drawBone(poseStack, buffer, bone, packedLight, packedOverlay, colour, flatten, shade, null);
+    }
+
+    // only: quad ごとに流すか (null = 全部)。発光の重ね描きで、光る画素が掛からない quad を飛ばすのに使う
+    public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten, boolean shade,
+                                boolean[] only) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
         boolean weight = titanWeight;
         float[] vshade = shade && weight ? bone.vshade : null;
         int ca = colour >>> 24;
@@ -52,12 +62,28 @@ public final class LowPoly {
         PoseStack.Pose pose = poseStack.last();
         Matrix4f m = pose.pose();
         Matrix3f nm = pose.normal();
-        Vector3f t = new Vector3f();
+        Vector3f t = SCRATCH;
+        int[] shaded = null;
+        if (vshade != null) {
+            shaded = bone.shadedColours;
+            if (shaded == null || bone.shadedFor != colour) {
+                shaded = new int[vshade.length];
+                for (int i = 0; i < shaded.length; i++) {
+                    float sh = vshade[i];
+                    shaded[i] = (ca << 24) | ((int) (cr * sh) << 16) | ((int) (cg * sh) << 8) | (int) (cb * sh);
+                }
+                bone.shadedColours = shaded;
+                bone.shadedFor = colour;
+            }
+        }
         float[] pos = bone.pos;
         float[] uv = bone.uv;
         float[] nrm = bone.nrm;
         int quadLimit = weight ? bone.quadCount : bone.capStart;
         for (int q = 0; q < quadLimit; q++) {
+            if (only != null && !only[q]) {
+                continue;
+            }
             nm.transform(nrm[q * 3], nrm[q * 3 + 1], nrm[q * 3 + 2], t).normalize();
             float nx = t.x, ny = t.y, nz = t.z;
             if (flatten > 0f) {
@@ -72,14 +98,11 @@ public final class LowPoly {
             for (int k = 0; k < 4; k++) {
                 int pi = q * 12 + k * 3;
                 m.transformPosition(pos[pi], pos[pi + 1], pos[pi + 2], t);
-                int c = colour;
-                if (vshade != null) {
-                    float sh = vshade[q * 4 + k];
-                    c = (ca << 24) | ((int) (cr * sh) << 16) | ((int) (cg * sh) << 8) | (int) (cb * sh);
-                }
+                int c = shaded != null ? shaded[q * 4 + k] : colour;
                 buffer.addVertex(t.x, t.y, t.z, c, uv[q * 8 + k * 2], uv[q * 8 + k * 2 + 1], packedOverlay, packedLight, nx, ny, nz);
             }
         }
+        jp.revati.skyabyss.dev.Prof.acc("client.lowpoly.drawBone", prof);
     }
 
     public static void drawAll(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh mesh, int packedLight, int packedOverlay, int colour) {
