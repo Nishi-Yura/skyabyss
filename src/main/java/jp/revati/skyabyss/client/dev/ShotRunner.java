@@ -315,6 +315,13 @@ public final class ShotRunner {
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
             }
+            case "heartreward" -> {
+                // heartreward <focus N|confirm|later|done> : 心臓の遺物の選択画面を、その見せ場まで進める (確かめ用。選ぶ決まりはサーバー)
+                if (mc.screen instanceof jp.revati.skyabyss.client.reward.HeartRewardScreen screen) {
+                    screen.devPhase(line.arg(0), line.rest().contains(" ") ? Integer.parseInt(line.arg(1)) : 0);
+                }
+                return true;
+            }
             case "echo" -> {
                 return true;
             }

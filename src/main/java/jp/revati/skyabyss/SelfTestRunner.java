@@ -117,6 +117,8 @@ public final class SelfTestRunner {
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
+        // 心臓の遺物の選択 (四体・一度だけ・入り直し・二人・あとで・場面の終わり)。docs/design/30_heart_reward_ui.md。SKYABYSS_SELFTEST_ONLY="heart reward"
+        steps.addAll(jp.revati.skyabyss.loot.reward.HeartRewardSelfTest.steps());
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
         steps.add(Step.once("storm gear", jp.revati.skyabyss.item.storm.StormGearSelfTest::runSelfTest));

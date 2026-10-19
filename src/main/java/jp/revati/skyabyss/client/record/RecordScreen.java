@@ -675,9 +675,8 @@ public class RecordScreen extends Screen {
         } else if (row.action() == RecordSnapshot.ACTION_RECALL_FRAGMENT || row.action() == RecordSnapshot.ACTION_RECALL_KEY) {
             PacketDistributor.sendToServer(new RecordNetwork.Recall(row.action() == RecordSnapshot.ACTION_RECALL_KEY));
         } else if (row.action() == RecordSnapshot.ACTION_CHOOSE && minecraft.player != null) {
-            // 選ぶ品の名前はチャットに出る (押すと選べる)。チャットが見えるよう画面を閉じる
-            minecraft.player.connection.sendCommand("titanmemory");
-            onClose();
+            // 遺物の選択画面 (サーバーが開かせる。docs/design/30)
+            jp.revati.skyabyss.client.reward.HeartRewardClient.request();
         }
     }
 
