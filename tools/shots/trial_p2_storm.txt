@@ -1,0 +1,129 @@
+# 雷翼の試練の甲板 (docs/design/29 の P2、版 22) の確かめ。./gradlew runShots --no-daemon -Pscript=tools/shots/trial_p2_storm.txt -PshotsName=trial_p2_storm
+# 出力: run/shots/trial_p2_storm/shots/trial_p2_storm/*.png → python tools/trial_p2_storm_sheet.py で docs/review/previews/trial_p2_storm_sheet.png
+world trial_p2_storm flat
+size 1280 720
+timeout 3600
+render 12
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive storm_back
+waitchunks 1500
+wait 80
+cmd skyabyss titan storm calm
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+hud off
+fov 100
+camera skyabyss:storm_back 19.5 167.0 38.5 0 12
+waitchunks 600
+wait 30
+close
+wait 4
+shot bridge
+fov 105
+camera skyabyss:storm_back 0.5 172.0 65.5 0 20
+waitchunks 600
+wait 30
+close
+wait 4
+shot yard
+fov 100
+camera skyabyss:storm_back -8.5 167.0 73.5 90 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot yard_gates
+fov 100
+camera skyabyss:storm_back -34.5 167.0 73.5 90 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s02_start
+fov 110
+camera skyabyss:storm_back -44.5 173.0 73.5 90 14
+waitchunks 600
+wait 30
+close
+wait 4
+shot s02_chain
+fov 100
+camera skyabyss:storm_back -83.5 168.0 70.5 90 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s02_mid
+fov 100
+camera skyabyss:storm_back 33.5 167.0 73.5 270 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s03_start
+fov 110
+camera skyabyss:storm_back 44.5 171.0 73.5 270 12
+waitchunks 600
+wait 30
+close
+wait 4
+shot s03_chain
+fov 100
+camera skyabyss:storm_back 66.5 170.0 73.5 270 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s03_mid
+fov 90
+camera skyabyss:storm_back 75.5 205.0 73.5 270 72
+waitchunks 600
+wait 30
+close
+wait 4
+shot s03_top
+fov 100
+camera skyabyss:storm_back -11.5 167.0 96.5 90 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s10_start
+fov 110
+camera skyabyss:storm_back -10.5 172.0 96.5 90 16
+waitchunks 600
+wait 30
+close
+wait 4
+shot s10_chain
+fov 100
+camera skyabyss:storm_back 14.5 167.0 95.5 270 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot s09_foyer
+fov 105
+camera skyabyss:storm_back 25.5 171.0 104.5 270 22
+waitchunks 600
+wait 30
+close
+wait 4
+shot s09_arena
+render 16
+fov 100
+camera skyabyss:storm_back 0.0 262.0 100.0 0 86
+waitchunks 600
+wait 30
+close
+wait 4
+shot overview
+quit
