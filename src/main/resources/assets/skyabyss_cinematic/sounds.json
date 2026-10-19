@@ -1,0 +1,371 @@
+{
+  "voice.opening.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/opening/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.opening.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/opening/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.opening.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/opening/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.opening.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/opening/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.opening.l4": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/opening/l4",
+        "stream": false
+      }
+    ]
+  },
+  "voice.whale_first_sight.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/whale_first_sight/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.whale_first_sight.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/whale_first_sight/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.whale_first_sight.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/whale_first_sight/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.whale_first_sight.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/whale_first_sight/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_tide_shell.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_tide_shell/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_tide_shell.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_tide_shell/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_tide_shell.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_tide_shell/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_tide_shell.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_tide_shell/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_thunder_wing.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_thunder_wing/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_thunder_wing.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_thunder_wing/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_thunder_wing.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_thunder_wing/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_thunder_wing.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_thunder_wing/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_ember.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_ember/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_ember.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_ember/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_ember.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_ember/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_first_ember.l3": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_first_ember/l3",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_stone_whale.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_stone_whale/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_stone_whale.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_stone_whale/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_stone_whale.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_stone_whale/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_stone_whale.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_stone_whale/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_stone_whale.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_stone_whale/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_tide_shell.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_tide_shell/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_tide_shell.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_tide_shell/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_tide_shell.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_tide_shell/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_tide_shell.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_tide_shell/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_tide_shell.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_tide_shell/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_thunder_wing.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_thunder_wing/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_thunder_wing.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_thunder_wing/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_thunder_wing.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_thunder_wing/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_thunder_wing.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_thunder_wing/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_thunder_wing.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_thunder_wing/l2",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_ember.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_ember/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.heart_ember.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/heart_ember/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_ember.l0": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_ember/l0",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_ember.l1": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.heaven",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_ember/l1",
+        "stream": false
+      }
+    ]
+  },
+  "voice.titan_end_ember.l2": {
+    "subtitle": "subtitles.skyabyss_cinematic.voice.hero",
+    "sounds": [
+      {
+        "name": "skyabyss_cinematic:voice/titan_end_ember/l2",
+        "stream": false
+      }
+    ]
+  }
+}
