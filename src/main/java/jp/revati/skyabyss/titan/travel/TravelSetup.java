@@ -31,11 +31,19 @@ public final class TravelSetup {
 
     // 岩鯨の呼び笛。心臓を倒した人が吹くと、岩鯨が迎えに来る
     public static final DeferredItem<Item> STONE_WHALE_CALL = ITEMS.register("stone_whale_call",
-            () -> new TitanCallItem(() -> TitanKind.STONE_WHALE, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+            () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.STONE_WHALE, () -> TitanKind.STONE_WHALE, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
     // 潮殻の呼び貝。潮殻の心臓を倒した人が海辺で吹くと、潮殻が浅瀬へ寄り、海を渡って運んでくれる
     public static final DeferredItem<Item> TIDE_SHELL_CALL = ITEMS.register("tide_shell_call",
-            () -> new TitanCallItem(() -> TitanKind.TIDE_SHELL, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+            () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.TIDE_SHELL, () -> TitanKind.TIDE_SHELL, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+
+    // 雷翼の呼び羽。出会った人が掲げると、雷翼が近くの峰へ降りて止まる (旅はない。背へ乗るための呼び)。TODO: 絵は仮 (岩鯨の笛の色替え)。ラフ 3 案を作って選んでもらう
+    public static final DeferredItem<Item> THUNDER_WING_CALL = ITEMS.register("thunder_wing_call",
+            () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.THUNDER_WING, null, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+
+    // 余燼の呼び鈴。出会った人が鳴らすと、余燼が近くの陸に浮かんで口を開ける (旅はない)。TODO: 絵は仮 (岩鯨の笛の色替え)。ラフ 3 案を作って選んでもらう
+    public static final DeferredItem<Item> EMBER_CALL = ITEMS.register("ember_call",
+            () -> new TitanCallItem(jp.revati.skyabyss.progress.Titans.EMBER, null, new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
     // 巨神の碑。触れると、巨神での移動の行き先に加わる
     public static final DeferredBlock<TitanWaymarkBlock> TITAN_WAYMARK = BLOCKS.register("titan_waymark",
@@ -75,6 +83,8 @@ public final class TravelSetup {
         if (event.getTabKey().equals(ModItems.TAB.getKey())) {
             event.accept(STONE_WHALE_CALL.get());
             event.accept(TIDE_SHELL_CALL.get());
+            event.accept(THUNDER_WING_CALL.get());
+            event.accept(EMBER_CALL.get());
             event.accept(TITAN_WAYMARK_ITEM.get());
         }
     }

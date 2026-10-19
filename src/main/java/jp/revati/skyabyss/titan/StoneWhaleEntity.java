@@ -289,7 +289,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private void tickApproach(ServerLevel level) {
         // 遠いあいだは、条件を満たす人の動きを追って目標を直す (1 秒おき。人が 24 ブロック以上動いたときだけ)
         if (tickCount % 20 == 0 && horizontalDistanceTo(targetX, targetZ) > 60) {
-            ServerPlayer player = jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), DESCENT_RANGE);
+            ServerPlayer player = called ? null : jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), DESCENT_RANGE);
             if (player != null) {
                 double nx = player.getX() + Math.cos(approachAngle) * 14;
                 double nz = player.getZ() + Math.sin(approachAngle) * 14;
@@ -309,6 +309,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             } else {
                 mode = Mode.CRUISE;
                 hasTarget = false;
+                called = false;
                 restCooldown = DESCENT_RECHECK;
                 return;
             }
@@ -316,8 +317,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         if (arrived) {
             mode = Mode.REST;
             restTicks = REST_DURATION;
-            // 一章の中盤の出来事 (story.ch1.WhaleHush。docs/design/02 の 2.3): 初めて降りるときだけ、空の影が通り過ぎるまで歌わず、鎖を垂らさない
-            int held = jp.revati.skyabyss.story.ch1.WhaleHush.onArrive(this, level);
+            // 一章の中盤の出来事 (story.ch1.WhaleHush。docs/design/02 の 2.3): 初めて降りるときだけ、空の影が通り過ぎるまで歌わず、鎖を垂らさない。
+            // 呼び笛で呼ばれたときは出来事を起こさない (初めての降下の場面は、笛より前の出会いのためにとっておく)
+            int held = called ? 0 : jp.revati.skyabyss.story.ch1.WhaleHush.onArrive(this, level);
+            called = false;
             if (held > 0) {
                 hold = held;
                 restTicks += held;
@@ -743,6 +746,29 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 .filter(p -> !p.isSpectator() && horizontalDistanceTo(p.getX(), p.getZ()) < range)
                 .toList();
         return near.isEmpty() ? null : near.get(random.nextInt(near.size()));
+    }
+
+    // 呼ばれて降りてくる途中か (その人のそばへ向かう。ほかの人へ目標を替えず、初めての降下の場面も起こさない)
+    private boolean called;
+
+    // 呼び笛 (titan.travel.TitanCalls): その人のすぐそばへ降りて、20 分 (TitanStay) 背の鎖を垂らす。昼夜・天気・一章の降下の条件に関わらず
+    public void callNear(ServerPlayer player) {
+        double angle = random.nextDouble() * Math.PI * 2;
+        approachAngle = angle;
+        targetX = player.getX() + Math.cos(angle) * 14;
+        targetZ = player.getZ() + Math.sin(angle) * 14;
+        hasTarget = true;
+        if (mode == Mode.REST) {
+            dropChainHandle();
+        }
+        hold = 0;
+        called = true;
+        mode = Mode.APPROACH;
+        approachTicks = 0;
+    }
+
+    public boolean isCalled() {
+        return called;
     }
 
     // テスト用: すぐにこのプレイヤーのそばへ降りてくる

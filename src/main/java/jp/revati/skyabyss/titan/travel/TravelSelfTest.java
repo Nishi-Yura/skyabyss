@@ -98,11 +98,12 @@ public final class TravelSelfTest {
         check(s.forgetWaymark(new BlockPos(1, 64, 1)) && s.waymarks.size() == TravelState.MAX_WAYMARKS - 1, "forget failed", failures);
         s.unlocked.add("stone_whale");
         s.callGiven.add("stone_whale");
+        s.met.add("ember");
         s.readyAt = 123456L;
         s.voyages = 3;
         DataResult<Tag> encoded = TravelState.CODEC.encodeStart(NbtOps.INSTANCE, s);
         TravelState back = encoded.flatMap(t -> TravelState.CODEC.parse(NbtOps.INSTANCE, t)).result().orElse(null);
-        check(back != null && back.waymarks.equals(s.waymarks) && back.unlocked.equals(s.unlocked) && back.callGiven.equals(s.callGiven)
+        check(back != null && back.waymarks.equals(s.waymarks) && back.unlocked.equals(s.unlocked) && back.callGiven.equals(s.callGiven) && back.met.equals(s.met)
                 && back.readyAt == s.readyAt && back.voyages == 3, "travel state did not survive the codec", failures);
         TravelState empty = TravelState.CODEC.parse(NbtOps.INSTANCE, new CompoundTag()).result().orElse(null);
         check(empty != null && empty.waymarks.isEmpty() && empty.readyAt == 0, "an empty record did not load", failures);

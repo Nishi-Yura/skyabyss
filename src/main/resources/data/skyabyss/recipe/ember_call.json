@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N",
+    "S",
+    "A"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "S": {
+      "item": "skyabyss:ember_shard"
+    },
+    "A": {
+      "item": "minecraft:charcoal"
+    }
+  },
+  "result": {
+    "id": "skyabyss:ember_call",
+    "count": 1
+  }
+}
