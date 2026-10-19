@@ -18,8 +18,9 @@ def box(frm, to, tex="#t"):
 
 
 def plane(frm, to, angle, tex):
+    # uv は絵の全体 (0〜16)。既定の uv は from/to の位置から決まるので、ブロックの上へはみ出す板 (y 13〜29) では絵の外を読んで真っ黒になる
     return {"from": frm, "to": to, "rotation": {"angle": angle, "axis": "y", "origin": [8, 8, 8]}, "shade": False,
-            "faces": {f: {"texture": tex} for f in ("north", "south")}}
+            "faces": {f: {"texture": tex, "uv": [0, 0, 16, 16]} for f in ("north", "south")}}
 
 
 ped = [box([3, 0, 3], [13, 2, 13]), box([5, 2, 5], [11, 10, 11]), box([3, 10, 3], [13, 13, 13])]
@@ -27,7 +28,7 @@ w("models/block/anemone_pedestal.json", {"parent": "minecraft:block/block",
    "textures": {"t": "skyabyss:block/anemone_pedestal", "particle": "skyabyss:block/anemone_pedestal"}, "elements": ped})
 w("models/block/anemone_pedestal_lit.json", {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
    "textures": {"t": "skyabyss:block/anemone_pedestal", "b": "skyabyss:block/anemone_bloom", "particle": "skyabyss:block/anemone_bloom"},
-   "elements": ped + [plane([2, 13, 8], [14, 29, 8], 45, "#b"), plane([2, 13, 8], [14, 29, 8], -45, "#b")]})
+   "elements": ped + [plane([0, 13, 8], [16, 29, 8], 45, "#b"), plane([0, 13, 8], [16, 29, 8], -45, "#b")]})
 w("blockstates/anemone_pedestal.json", {"variants": {
     "lit=false,waterlogged=false": {"model": "skyabyss:block/anemone_pedestal"},
     "lit=false,waterlogged=true": {"model": "skyabyss:block/anemone_pedestal"},
@@ -37,7 +38,7 @@ w("models/item/anemone_pedestal.json", {"parent": "skyabyss:block/anemone_pedest
 
 w("models/block/anemone_bed.json", {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
    "textures": {"t": "skyabyss:block/anemone_bed", "b": "skyabyss:block/anemone_bloom", "particle": "skyabyss:block/anemone_bed"},
-   "elements": [box([1, 0, 1], [15, 5, 15]), plane([3, 5, 8], [13, 15, 8], 45, "#b"), plane([3, 5, 8], [13, 15, 8], -45, "#b")]})
+   "elements": [box([1, 0, 1], [15, 5, 15]), plane([2, 5, 8], [14, 17, 8], 45, "#b"), plane([2, 5, 8], [14, 17, 8], -45, "#b")]})
 w("blockstates/anemone_bed.json", {"variants": {"waterlogged=false": {"model": "skyabyss:block/anemone_bed"},
                                                "waterlogged=true": {"model": "skyabyss:block/anemone_bed"}}})
 w("models/item/anemone_bed.json", {"parent": "skyabyss:block/anemone_bed"})

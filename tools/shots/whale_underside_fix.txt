@@ -67,21 +67,15 @@ wait 30
 shot pocket_close_b
 
 # ---- 灯の台: まだ / 近く / 遠くから
-cmd skyabyss dev lamp tp 2 0
+cmd skyabyss dev lamp vista 2
 waitchunks
 wait 30
 shot stand_unlit_close
-cmd skyabyss dev lamp vista 2
-wait 30
-shot stand_unlit_far
 cmd skyabyss dev lamp light 2
 wait 60
-cmd skyabyss dev lamp tp 2 0
-wait 30
-shot stand_lit_close
 cmd skyabyss dev lamp vista 2
 wait 30
-shot stand_lit_far
+shot stand_lit_close
 cmd skyabyss dev lamp path 2
 wait 20
 shot trail_one_lamp

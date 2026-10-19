@@ -176,7 +176,7 @@ public final class AnemoneDev {
         MazePlan plan = AnemoneLights.plan(level);
         List<int[]> pockets = plan.pockets;
         BlockPos c = MazeBuilder.allPockets(plan.maze).get(Math.min(n, pockets.size()) - 1);
-        face(p, level, c.getX() + 0.4, c.getY() + 0.8, c.getZ() + 0.4, c.getX() + 1.5, c.getY() + 1.4, c.getZ() + 1.5);
+        face(p, level, c.getX() + 0.3, c.getY() + 1.0, c.getZ() + 0.3, c.getX() + 1.5, c.getY() + 1.2, c.getZ() + 1.5);
         src.sendSuccess(() -> Component.literal("pocket " + n + " at " + c.toShortString()), false);
         return 1;
     }
