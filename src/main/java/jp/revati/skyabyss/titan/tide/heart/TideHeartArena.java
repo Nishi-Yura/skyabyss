@@ -254,6 +254,8 @@ public final class TideHeartArena {
         }
         fillTicks = holdTicks = drainTicks = 0;
         GroupGates.place(back, gate(), true);
+        // 入口の大門 (前室を広い前庭にし、心臓のレリーフの枠を立てる。扉のブロックは変えない)
+        jp.revati.skyabyss.titan.tide.back.TideBossGates.heart(back, FLOOR, CZ + GATE_Z);
         SkyAbyss.LOGGER.info("Built the tide heart chamber (shell bottom)");
     }
 

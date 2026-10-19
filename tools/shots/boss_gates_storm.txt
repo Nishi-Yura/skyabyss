@@ -1,0 +1,26 @@
+# 雷翼の背のボス部屋の大門 (雷獣の巣・竜骨の間) を撮る。./gradlew runShots -Pscript=tools/shots/boss_gates_storm.txt
+# 出力: run/shots/boss_gates_storm/shots/boss_gates_storm/*.png → python tools/boss_gates_sheet.py で docs/review/previews/boss_gates_sheet.png
+# 四つの背を建て終えた専用サーバーへ入る (標準の平らな世界だと 4 つの背を一度に建てて、読み込みが間に合わない)。
+# サーバー: run/server.properties の server-port=25726、先に OP を渡す: python tools/rcon.py --port 25826 "op Shooter"。起動: -PshotsUser=Shooter
+server localhost:25726
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set midnight
+cmd weather clear
+cmd gamemode spectator
+hud off
+fov 85
+# 雷獣の巣: 雷の骨の回廊の中ほどから、突き当たりの大門を見る (東向き。yaw 270)
+camera skyabyss:storm_back 98.5 145.0 -16.5 270 -6
+waitchunks 900
+wait 60
+shot gate_storm_nest
+# 竜骨の間: 前室の南端から、大門を見る (南向き。yaw 0)
+camera skyabyss:storm_back 0.5 123.4 -35.5 0 -28
+waitchunks 900
+wait 30
+shot gate_storm_heart
+quit

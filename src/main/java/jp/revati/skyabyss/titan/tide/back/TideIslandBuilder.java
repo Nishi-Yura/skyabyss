@@ -46,6 +46,7 @@ public final class TideIslandBuilder {
         garden(kit);
         eastRoom(kit);
         flats(kit);
+        TideBossGates.flats(kit.level());
         spiral(kit);
         TideHeartArena.build(kit.level());
         skin(kit);

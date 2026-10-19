@@ -55,6 +55,8 @@ public final class TitanBackBuilder {
         kit.wallLamps(ENTRY, 3, FLOOR + 3);
         WestWingBuilder.build(kit);
         EastWingBuilder.build(kit);
+        // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
+        BossGates.build(kit);
         MazeBuilder.buildFixtures(kit);
         MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
         // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)

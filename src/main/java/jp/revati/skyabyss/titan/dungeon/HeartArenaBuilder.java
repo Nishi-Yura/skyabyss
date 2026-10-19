@@ -40,8 +40,7 @@ final class HeartArenaBuilder {
                 }
             }
         }
-        // 最後の試練の入口の一言 (入ると扉が閉じることだけは、入る前に知らせる)
-        kit.wallSign(HEART_GATE_SIGN.pos(), HEART_GATE_SIGN.facing(), HEART_GATE_SIGN.key());
+        // 最後の試練の入口の一言 (大門の柱の面に掛ける) は BossGates が置く
     }
 
     // 回廊: 奥の扉 (z=-45) から心臓の間の入口 (z=-64) まで。幅3、高さ4
