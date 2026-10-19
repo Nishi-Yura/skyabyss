@@ -110,7 +110,7 @@ public final class HudManager {
         // 札の高さをなめらかに (出るときは速く、消えるときはゆっくり)
         float target = toastNow;
         toastNow = 0;
-        toastEased += (target - toastEased) * (target > toastEased ? 0.5f : 0.15f);
+        toastEased += (target - toastEased) * (target > toastEased ? 1f : 0.15f);
         if (Math.abs(toastEased - target) < 0.5f) {
             toastEased = target;
         }

@@ -299,7 +299,7 @@ public final class NoticeClient {
     private static CapPlan captionPlan(Font font, Component text, int guiW, int maxW, int maxH) {
         int wrap = Math.min(Math.min(guiW - 40, Math.max(160, (int) (guiW * 0.6f))), maxW - 24);
         int maxLines = Mth.clamp((maxH - 9) / 11, 0, 4);
-        if (wrap < 40 || maxLines < 1) {
+        if (wrap < 100 || maxLines < 1) {
             return null;
         }
         List<FormattedCharSequence> lines = font.split(text, wrap);
