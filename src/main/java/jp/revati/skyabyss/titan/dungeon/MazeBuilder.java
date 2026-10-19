@@ -122,7 +122,8 @@ public final class MazeBuilder {
                     }
                     kit.set(p.getX() + 2, p.getY() + 2, p.getZ() + 2, Blocks.AMETHYST_CLUSTER.defaultBlockState());
                 }
-            } else if (k % POCKET_EVERY == 2 && k % 3 == 2) {
+            } else if (k % POCKET_EVERY == 2 && k % 3 == 2 && k + 2 < path.size()) {
+                // (出口の手前の通路は、灯で開く戸 (AnemoneLights.exitGate) の場所なので流れは置かない)
                 // 下へ引きずり込む流れ: このマスから次のマスへの通路いっぱいに
                 current(kit, c, path.get(k + 1));
             }
@@ -171,6 +172,8 @@ public final class MazeBuilder {
                 }
             }
         }
+        // 灯の台 5 つ・出口の手前の戸・中ほどの苗床 (docs/design/23)
+        AnemoneLights.build(kit, maze);
     }
 
     // 迷路のまわりの決まった設備: 出口の小部屋と、入口の通路へ戻る抜け道。島を建てるときに一度だけ
@@ -180,6 +183,8 @@ public final class MazeBuilder {
         kit.fill(er.x1() - 1, er.floorY() + 1, er.z1() - 1, er.x2() + 1, er.ceilingY(), er.z2() + 1, BuildKit.TILES);
         kit.fill(er.x1(), er.floorY() + 1, er.z1(), er.x2(), er.ceilingY() - 1, er.z2(), BuildKit.AIR);
         kit.restPoint(er);
+        // 灯の数え石と苗床 (docs/design/23)
+        AnemoneLights.buildEntry(kit);
         kit.room(MAZE_EXIT_ROOM, BuildKit.POLISHED, BuildKit.TILES);
         kit.lantern(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z2());
         kit.set(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z1(), Blocks.AMETHYST_CLUSTER.defaultBlockState());

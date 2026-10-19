@@ -1233,6 +1233,8 @@ public final class TitanBackTrials {
         TitanBackData data = TitanBackData.get(level);
         BuildKit kit = new BuildKit(level, RandomSource.create(level.getRandom().nextLong()));
         WestWingBuilder.clearCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
+        // 灯の台と戸の場所は迷路の種で決まる: 古い種のうちに、全グループの灯の記録と戸の上書きを消す (23)
+        AnemoneLights.clearGroups(level, data.mazeSeed());
         data.reseed(level.getRandom());
         WestWingBuilder.placeCourses(kit, ParkourCourses.forSeed(data.courseSeed()));
         MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());

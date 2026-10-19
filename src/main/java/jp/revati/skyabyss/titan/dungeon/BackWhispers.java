@@ -58,7 +58,9 @@ public final class BackWhispers {
             new Whisper("w2", false, W2::contains),
             new Whisper("e0", false, E0::contains),
             new Whisper("ce1", false, CE1::contains),
-            new Whisper("heart", false, HEART_REST::contains));
+            new Whisper("heart", false, HEART_REST::contains),
+            // 闇の水路の入口の小部屋: 目的 (灯をともして出口の戸を開ける) を、最初の一度だけ伝える (23)
+            new Whisper("maze_entry", false, MAZE_ENTRY_ROOM::contains));
     private static final List<String> REST_POINTS = List.of("w0", "w1", "w2", "e0", "ce1", "heart");
 
     private BackWhispers() {
