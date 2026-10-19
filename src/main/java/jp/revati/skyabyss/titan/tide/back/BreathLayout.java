@@ -29,40 +29,34 @@ public final class BreathLayout {
     public static final double WX = CX + 0.5;
     public static final double WZ = CZ + 0.5;
     // 下の気室 A の半径 (ブロックの座標で hypot(x - CX, z - CZ) <= R_A が空気)
-    public static final double R_A = 9.5;
+    public static final double R_A = 15.0;
     // 水たまりの底 (石)・水の段・縁の高さ。縁 = 予約の間 1 の床 (人が立つのは 102)
-    public static final int POOL_FLOOR = 97;
+    public static final int POOL_FLOOR = 108;
     public static final int LIP = UPPER_1.floor();
-    public static final double POOL_R = 4.8;
+    public static final double POOL_R = 7.5;
     // 気室 A の天井の下 (空気の最上段) と、舞台の床
-    public static final int A_TOP = 137;
-    public static final int ARENA_FLOOR = 138;
+    public static final int A_TOP = 157;
+    public static final int ARENA_FLOOR = 160;
     public static final double ARENA_R = 6.0;
     // 気室 B (塔の中) の空気の最上段。その上の y 173 が展望の間の床
-    public static final int B_TOP = 172;
+    public static final int B_TOP = 205;
     public static final int DECK_FLOOR = TOWER_DECK;
     // 展望の間: 柱廊の中の床 (x -9〜8、z -12〜6)、空気は 174〜176、屋根は 177
     public static final int OBS_X1 = -9;
     public static final int OBS_X2 = 8;
-    public static final int OBS_Z1 = -12;
-    public static final int OBS_Z2 = 6;
-    public static final int OBS_ROOF = 177;
+    public static final int OBS_Z1 = -14;
+    public static final int OBS_Z2 = 4;
+    public static final int OBS_ROOF = 210;
 
     // 気室 B の半径 (y ごと。外の壁が 1.5 ブロック以上残る値。tools/tide_turtle_radius.py が塔の形から測った下限)
     public static double radiusB(int y) {
-        if (y <= 146) {
-            return 6.0;
+        if (y <= 190) {
+            return 8.0;
         }
-        if (y <= 149) {
-            return 5.5;
+        if (y <= 200) {
+            return 7.5;
         }
-        if (y <= 164) {
-            return 5.0;
-        }
-        if (y <= 169) {
-            return 4.0;
-        }
-        return 3.0;
+        return 5.5;
     }
 
     // ブロック (x, z) が気室の中心から何ブロックか
@@ -73,13 +67,13 @@ public final class BreathLayout {
     // ---------------------------------------------------------------- 皿
     public static final int DISHES = 8;
     // 皿の盆の底の高さ (盆の上に水が 1 段。縁の上面は +1)。2 番目の 114 は予約の間 2、5 番目の 126 は予約の間 3 の床と同じ
-    public static final int[] DISH_FLOOR = {106, 110, 114, 118, 122, 126, 129, 132};
+    public static final int[] DISH_FLOOR = {119, 124, 130, 135, 141, 146, 149, 152};
     // 皿の中心の気室の中心からの距離。最後の皿は舞台の下の風の柱になるので中へ寄る
-    public static final double DISH_R = 6.0;
+    public static final double DISH_R = 9.6;
     public static final double VENT_R = 3.8;
     // 皿の床 (縁の輪を含む) の半径、盆の半径
-    public static final double RING_R = 3.0;
-    public static final double BASIN_R = 2.4;
+    public static final double RING_R = 4.8;
+    public static final double BASIN_R = 3.8;
     // 皿が螺旋に並ぶ角度 (度。+z が 90 度、反時計回りに 1 つごと -72)
     public static final double ANGLE0 = 90;
     public static final double ANGLE_STEP = -72;
@@ -162,8 +156,8 @@ public final class BreathLayout {
 
     static {
         double a = Math.toRadians(ANGLE0 - ANGLE_STEP);
-        ENTRY_X = CX + (int) Math.round(7.2 * Math.cos(a));
-        ENTRY_Z = CZ + (int) Math.round(7.2 * Math.sin(a));
+        ENTRY_X = CX + (int) Math.round(11.5 * Math.cos(a));
+        ENTRY_Z = CZ + (int) Math.round(11.5 * Math.sin(a));
     }
 
     // 舞台と展望の間の乗り場の位置
@@ -352,10 +346,10 @@ public final class BreathLayout {
     }
 
     // ---------------------------------------------------------------- 運びの動き (サーバーが毎 tick 速度を決める式。自己テストが同じ式で何度も確かめる)
-    public static final double SPEED_UP = 0.62;
-    public static final double SPEED_FLAT = 0.42;
-    public static final double SPEED_DOWN = 0.34;
-    public static final double SPEED_TOWER = 0.78;
+    public static final double SPEED_UP = 0.74;
+    public static final double SPEED_FLAT = 0.50;
+    public static final double SPEED_DOWN = 0.40;
+    public static final double SPEED_TOWER = 0.92;
     // 折れ線のどこにいるか (道のりの割合)。位置から最も近い辺の上の点を取る
     public static double progress(List<Vec3> path, Vec3 p) {
         double best = Double.MAX_VALUE;
@@ -422,7 +416,7 @@ public final class BreathLayout {
 
     // 1 tick の速度: 道のり s に進む目標の点へ、いまの位置から向かう。道から外れたぶんは引き戻す (遅れ・入力のずれに強い)。
     // 返す速度の長さは MAX_STEP まで。着地の近く (終わりの辺の残りが短い) は目標の点が着地に止まる
-    public static final double MAX_STEP = 0.85;
+    public static final double MAX_STEP = 1.0;
 
     public record Step(Vec3 velocity, double s, boolean done) {
     }
@@ -516,9 +510,9 @@ public final class BreathLayout {
     }
 
     // 進みの輪の高さ (下・中・上。壁の帯。足もとの高さがこの値に着くと灯る)
-    public static final int[] RING_Y = {114, 126, ARENA_FLOOR + 1};
+    public static final int[] RING_Y = {130, 146, ARENA_FLOOR + 1};
     // 輪の帯の y (壁の帯の 1 段)
-    public static final int[] RING_BAND = {112, 124, 136};
+    public static final int[] RING_BAND = {128, 144, 158};
 
     // 足もとの高さから「息の目盛り」(縁の高さを 0 とした高さ)
     public static int heightOf(double feetY) {

@@ -211,6 +211,8 @@ public final class TideBackSelfTest {
         java.util.Set<BlockPos> expected = new java.util.HashSet<>();
         LORE_SIGNS.forEach(i -> expected.add(i.pos()));
         TideIslandBuilder.ENTRANCE_SIGNS.forEach(i -> expected.add(i.pos()));
+        TideCaches.CACHES.forEach(c -> expected.add(c.tablet()));
+        TideCaches.TABLETS.forEach(t -> expected.add(t.pos()));
         java.util.Set<String> keys = new java.util.TreeSet<>();
         int count = 0;
         for (int cx = TideTurtle.minX() >> 4; cx <= TideTurtle.maxX() >> 4; cx++) {
@@ -234,6 +236,11 @@ public final class TideBackSelfTest {
             }
         }
         check(count == expected.size(), "found " + count + " tablets on the tide back, expected " + expected.size(), failures);
+        for (BlockPos e : expected) {
+            if (!(back.getBlockEntity(e) instanceof TabletBlockEntity)) {
+                failures.add("missing tablet at " + e);
+            }
+        }
         failures.addAll(jp.revati.skyabyss.SignFit.check(keys));
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
         var en = jp.revati.skyabyss.SignFit.lang("en_us");
@@ -246,7 +253,7 @@ public final class TideBackSelfTest {
     // ---------------------------------------------------------------- 亀の形: 甲羅・頭・ひれ・尾がモデルの通りに置かれ、掘った部屋が甲羅を突き抜けていない
     private static void checkTurtle(ServerLevel back, List<String> failures) {
         check(shellTop(0, 20) >= 110, "the shell is not domed (top at (0,20) " + shellTop(0, 20) + ")", failures);
-        int[][] parts = {{0, -125}, {-90, -25}, {90, -25}, {-75, 67}, {75, 67}, {0, 90}};
+        int[][] parts = {{0, -200}, {-150, -20}, {150, -20}, {-125, 110}, {125, 110}, {0, 150}};
         String[] names = {"head", "left front flipper", "right front flipper", "left rear flipper", "right rear flipper", "tail"};
         for (int i = 0; i < parts.length; i++) {
             int t = TideTurtle.top(parts[i][0], parts[i][1]);
@@ -255,10 +262,10 @@ public final class TideBackSelfTest {
         }
         // 甲羅の地表に、掘った穴が開いていない (光の井戸・上る段の口・塔のまわりだけ)
         int holes = 0;
-        for (int x = -60; x <= 60; x += 2) {
-            for (int z = -75; z <= 70; z += 2) {
+        for (int x = -95; x <= 95; x += 3) {
+            for (int z = -120; z <= 100; z += 3) {
                 int top = shellTop(x, z);
-                if (top == Integer.MIN_VALUE || top < 100) {
+                if (top == Integer.MIN_VALUE || top < 108) {
                     continue;
                 }
                 if (back.getBlockState(new BlockPos(x, top, z)).isAir() && back.getBlockState(new BlockPos(x, top - 1, z)).isAir()
@@ -358,7 +365,7 @@ public final class TideBackSelfTest {
         int[] box = {x0, x1, z0, z1, y0, y1};
         flood(start, open, enclosed, box, failures, notes, "rooms", true);
         // 息の間 (予約の間 1〜3・気室・舞台・展望の間): 中から調べて、外へ抜ける口が戸口 (崖の穴) のほかに 0 であること
-        BlockPos up = new BlockPos(20, UPPER_1.floor() + 1, 20);
+        BlockPos up = new BlockPos(0, UPPER_1.floor() + 1, 18);
         check(open.test(up) && enclosed.test(up), "reserved room 1 is not an enclosed room at " + up.toShortString(), failures);
         flood(up, open, enclosed, box, failures, notes, "breath chamber rooms", true);
     }
@@ -408,10 +415,13 @@ public final class TideBackSelfTest {
 
     // わざと開けた口: 潮門と到着の段・ひれ・見送りの段 (左後ろの縁)、甲羅の上へ出る段の口
     private static boolean intendedOpening(BlockPos p) {
-        if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 6 && p.getY() <= GATE_FLOOR + 32) {
+        if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 12 && p.getY() <= GATE_FLOOR + 62) {
             return true;
         }
         if (p.getX() <= UPPER_GATE_X + 1 && Math.abs(p.getZ() - UPPER_GATE_Z) <= 3 && p.getY() >= UPPER_1.floor() && p.getY() <= UPPER_1.floor() + 6) {
+            return true;
+        }
+        if (Math.abs(p.getX()) >= 104 && p.getZ() >= -48 && p.getZ() <= -2 && p.getY() >= 60) {
             return true;
         }
         return p.getY() >= 95 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
@@ -423,13 +433,13 @@ public final class TideBackSelfTest {
         if (Math.abs(x - sx) <= 3 && Math.abs(z - sz) <= 3) {
             return true;
         }
-        if (Math.abs(x) <= 11 && Math.abs(z - TOWER_CZ) <= 14) {
+        if (Math.abs(x) <= 16 && Math.abs(z - TOWER_CZ) <= 20) {
             return true;
         }
         if (Math.abs(x - UPPER_GATE_X) <= 3 && Math.abs(z - UPPER_GATE_Z) <= 3) {
             return true;
         }
-        for (int[][] wells : new int[][][] {TideIslandBuilder.GARDEN_WELLS, TideIslandBuilder.FLATS_WELLS}) {
+        for (int[][] wells : new int[][][] {TideIslandBuilder.GARDEN_WELLS, TideIslandBuilder.FLATS_WELLS, TideIslandBuilder.WATCH_WELLS, TideIslandBuilder.BEACH_WELLS}) {
             for (int[] w : wells) {
                 if (Math.abs(x - w[0] - 0.5) <= 2 && Math.abs(z - w[1] - 0.5) <= 2) {
                     return true;
@@ -475,8 +485,8 @@ public final class TideBackSelfTest {
     private static void checkWatchSettled(ServerLevel back, List<String> failures, String when) {
         int leaks = 0;
         BlockPos first = null;
-        for (int x = 24; x <= 57; x++) {
-            for (int z = -36; z <= -5; z++) {
+        for (int x = 40; x <= 99; x++) {
+            for (int z = -64; z <= -6; z++) {
                 for (int y = TIER_FLOOR[0]; y <= LEDGE_FLOOR + 2; y++) {
                     BlockPos c = new BlockPos(x, y, z);
                     if (back.getFluidState(c).isEmpty()) {
@@ -633,10 +643,10 @@ public final class TideBackSelfTest {
     }
 
     // 歩いて調べる範囲 (甲羅と、まわりの海の水面を少し)
-    static final int WALK_X0 = -80;
-    static final int WALK_X1 = 80;
-    static final int WALK_Z0 = -100;
-    static final int WALK_Z1 = 85;
+    static final int WALK_X0 = -195;
+    static final int WALK_X1 = 195;
+    static final int WALK_Z0 = -145;
+    static final int WALK_Z1 = 135;
 
     static Map<Long, Integer> walk(ServerLevel l, BlockPos start) {
         PARENT.clear();
@@ -644,7 +654,7 @@ public final class TideBackSelfTest {
         ArrayDeque<BlockPos> q = new ArrayDeque<>();
         dist.put(start.asLong(), 0);
         q.add(start);
-        while (!q.isEmpty() && dist.size() < 400000) {
+        while (!q.isEmpty() && dist.size() < 3000000) {
             BlockPos p = q.poll();
             int d = dist.get(p.asLong());
             List<BlockPos> next = new ArrayList<>();
@@ -676,7 +686,7 @@ public final class TideBackSelfTest {
                 next.add(p.above());
             }
             for (BlockPos m : next) {
-                if (m.getX() < WALK_X0 || m.getX() > WALK_X1 || m.getZ() < WALK_Z0 || m.getZ() > WALK_Z1 || m.getY() < 45 || m.getY() > 150) {
+                if (m.getX() < WALK_X0 || m.getX() > WALK_X1 || m.getZ() < WALK_Z0 || m.getZ() > WALK_Z1 || m.getY() < 45 || m.getY() > 230) {
                     continue;
                 }
                 if (!dist.containsKey(m.asLong())) {
@@ -709,20 +719,20 @@ public final class TideBackSelfTest {
                 should.put("rest " + r.id(), r.spawn());
             }
         }
-        should.put("breath chamber (room 1 floor)", new BlockPos(20, UPPER_1.floor() + 1, 20));
+        should.put("breath chamber (room 1 floor)", new BlockPos(0, UPPER_1.floor() + 1, 18));
         should.put("breath entry bubble", TideBackAudit.landingBlock(BreathLayout.entry()));
         should.put("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2));
         should.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
-        should.put("east gallery", new BlockPos(10, HUB_LEDGE + 1, -2));
-        should.put("hub floor", new BlockPos(5, HUB_FLOOR + 1, 5));
-        should.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -85 + FLATS_DZ));
+        should.put("east gallery", new BlockPos(22, HUB_LEDGE + 1, -4));
+        should.put("hub floor", new BlockPos(8, HUB_FLOOR + 1, 8));
+        should.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -100));
         should.put("front stone", STONE_FRONT.offset(0, 0, 1));
         // 甲羅の上 (外) と頂の塔の柱の段へは、浜の西の壁の段と塔の螺旋で行ける (21 章)
-        should.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
+        should.put("beach", new BlockPos(-30, BEACH.floor() + 1, 80));
         should.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
-        should.put("shell top (far)", new BlockPos(50, shellTop(50, -40) + 1, -40));
-        should.put("shell top (north)", new BlockPos(0, TideTurtle.top(0, -66) + 1, -66));
-        should.put("shell top (before the reserved gate)", new BlockPos(UPPER_GATE_X - 3, TOP_Y + 1, UPPER_GATE_Z));
+        should.put("shell top (far)", new BlockPos(90, shellTop(90, -5) + 1, -5));
+        should.put("shell top (north)", new BlockPos(0, shellTop(0, -102) + 1, -102));
+        should.put("shell top (before the reserved gate)", new BlockPos(UPPER_GATE_X - 4, shellTop(UPPER_GATE_X - 4, UPPER_GATE_Z) + 1, UPPER_GATE_Z));
         for (Map.Entry<String, BlockPos> e : should.entrySet()) {
             BlockPos g = e.getValue();
             if (!dist.containsKey(g.asLong())) {
@@ -743,11 +753,11 @@ public final class TideBackSelfTest {
         Integer toHub = dist.get(RESTS.get(0).spawn().asLong());
         notes.add("arrival to hall " + toHub + " steps (" + dist.size() + " standing spots)");
         // 到着 (ひれの上) → 潮門 → 廊下 → 浜 → くぐり道 → 広間。歩いて 40 秒ほど (3.2節の「1 分以内」)
-        check(toHub != null && toHub <= 160, "the hall is too far from the arrival (" + toHub + " steps)", failures);
+        check(toHub != null && toHub <= 280, "the hall is too far from the arrival (" + toHub + " steps)", failures);
         Map<String, BlockPos> shouldNot = new java.util.LinkedHashMap<>();
-        shouldNot.put("middle tier", new BlockPos(41, TIER_FLOOR[1] + 1, -10));
-        shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
-        shouldNot.put("east ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32));
+        shouldNot.put("middle tier", new BlockPos(71, TIER_FLOOR[1] + 1, -14));
+        shouldNot.put("upper tier", new BlockPos(83, TIER_FLOOR[2] + 1, -15));
+        shouldNot.put("east ledge", new BlockPos(83, LEDGE_FLOOR + 1, -37));
         shouldNot.put("heart rest", RESTS.get(5).spawn());
         // 息の間: 光る泡に乗らないと昇れない (皿・足場・舞台・展望の間へは歩いて行けない)
         shouldNot.put("breath dish 0", TideBackAudit.landingBlock(BreathLayout.dishNode(0)));
@@ -755,9 +765,8 @@ public final class TideBackSelfTest {
         shouldNot.put("breath ledge u2", RESTS.get(8).spawn());
         shouldNot.put("breath summit", TideBackAudit.landingBlock(BreathLayout.arena()));
         shouldNot.put("breath deck", RESTS.get(9).spawn());
-        shouldNot.put("terrace 2", new BlockPos(0, TERRACE_Y[1] + 1, 46));
         shouldNot.put("garden from above", new BlockPos(PLAT_C[0], PLATFORM_TOP + 1, PLAT_C[1]).above(30));
-        shouldNot.put("garden wall top", new BlockPos(-30, GARDEN_WALL_TOP + 1, 20));
+        shouldNot.put("garden wall top", new BlockPos(-50, GARDEN_WALL_TOP + 1, 20));
         for (Map.Entry<String, BlockPos> e : shouldNot.entrySet()) {
             if (dist.containsKey(e.getValue().asLong())) {
                 failures.add("can walk to " + e.getKey() + " without solving (" + e.getValue() + "): " + pathTo(e.getValue()));
@@ -845,7 +854,7 @@ public final class TideBackSelfTest {
             }
         }
         check(water == 25, "lower basin at level 1 has " + water + " water", failures);
-        check(!back.getBlockState(new BlockPos(36, TIER_FLOOR[0] + 1, -10)).isAir(), "lower float is not at level 1", failures);
+        check(!back.getBlockState(new BlockPos(66, TIER_FLOOR[0] + 1, -14)).isAir(), "lower float is not at level 1", failures);
         // 溜めの戸は扉のブロックのまま、既定 (OPEN) で開け閉めする
         check(TideGates.defaultOpen(back, BASIN_DOOR[0]), "lower door closed at level 1", failures);
         check(back.getBlockState(BASIN_DOOR[1]).is(ModBlocks.SEALED_GATE.get()) && !TideGates.defaultOpen(back, BASIN_DOOR[1]), "middle door open at level 5", failures);
@@ -890,14 +899,14 @@ public final class TideBackSelfTest {
             expectGoal(back, p, "west.take", 0, 3, failures);
             // 東: 水位と、いちばん上まで来た段
             TideRooms.claim(back, TideRooms.WATCH, TEST);
-            p.moveTo(26, HUB_LEDGE + 1, -10);
+            p.moveTo(45, HUB_LEDGE + 1, -13);
             TidePuzzle.Config c = TideWatch.cfg();
             TideGuide.Goal g = TideGuide.goalFor(back, p);
             check(g.id().equals("east.go") && g.a() == c.init()[0] && g.b() == c.init()[1] && g.c() == c.init()[2] && g.done() == 0,
                     "east goal at the start is " + g, failures);
-            p.moveTo(41, TIER_FLOOR[1] + 1, -10);
+            p.moveTo(71, TIER_FLOOR[1] + 1, -14);
             TideGuide.tick(back);
-            p.moveTo(53, TIER_FLOOR[2] + 1, -12);
+            p.moveTo(83, TIER_FLOOR[2] + 1, -15);
             TideGuide.tick(back);
             check(TideGuide.eastStage() == 2, "east stage after reaching the top tier is " + TideGuide.eastStage(), failures);
             // 栓を引く・重石を踏む・水位が変わる (知らせの経路が落ちない。戸が開く)
@@ -913,12 +922,12 @@ public final class TideBackSelfTest {
             check(TideGuide.eastStage() == 0, "east stage stayed after the watch room reset", failures);
             // 前: 巣・潮招き・石
             TideRooms.claim(back, TideRooms.FLATS, TEST);
-            p.moveTo(0, FLATS_FLOOR + 1, -60);
+            p.moveTo(0, FLATS_FLOOR + 1, -100);
             int nests = Integer.bitCount(st.nestSites());
             TideGuide.Goal f = TideGuide.goalFor(back, p);
             check(f.id().equals("front.nests") && f.done() == 0 && f.total() == nests + 1 && f.a() == nests, "front goal at the start is " + f, failures);
             int broken = 0;
-            for (int s = 0; s < 6; s++) {
+            for (int s = 0; s < NEST_SITES.length; s++) {
                 if ((st.nestSites() & (1 << s)) != 0) {
                     st.breakNest(s);
                     broken++;
@@ -931,7 +940,7 @@ public final class TideBackSelfTest {
             st.markBeckonerDefeated();
             expectGoal(back, p, "front.stone", nests + 1, nests + 1, failures);
             // 広間: 石の数
-            p.moveTo(-6, HUB_LEDGE + 1, 10);
+            p.moveTo(-5, HUB_LEDGE + 1, 21);
             expectGoal(back, p, "hub.stones", 0, 3, failures);
             st.ring(TideBackState.Trial.WEST);
             st.ring(TideBackState.Trial.EAST);
@@ -998,8 +1007,8 @@ public final class TideBackSelfTest {
     private static void checkFlats(ServerLevel back, List<String> failures) {
         TideBackState.Group state = TideBackState.of(back, TEST);
         TideRooms.claim(back, TideRooms.FLATS, TEST);
-        check(Integer.bitCount(state.nestSites()) == 3, "nest sites should be 3 of 6", failures);
-        for (int s = 0; s < 6; s++) {
+        check(Integer.bitCount(state.nestSites()) == NEST_COUNT, "nest sites should be " + NEST_COUNT + " of " + NEST_SITES.length, failures);
+        for (int s = 0; s < NEST_SITES.length; s++) {
             if ((state.nestSites() & (1 << s)) != 0) {
                 check(!back.getBlockState(TideFlats.nestPos(s)).isAir(), "nest mound missing at site " + s, failures);
             }
@@ -1040,7 +1049,7 @@ public final class TideBackSelfTest {
         check(hub != null && hub.level() == hub.depth(), "the hub basin is not full for the flood check", failures);
         int leaks = 0;
         BlockPos first = null;
-        for (int x = -1; x <= 1; x++) {
+        for (int x = -2; x <= 2; x++) {
             for (int z = FLATS_GATE_Z - 1; z >= FLATS_GATE_Z - 30; z--) {
                 for (int y = TUNNEL_FLOOR; y <= HUB_FLOOR + 6; y++) {
                     BlockPos c = new BlockPos(x, y, z);
@@ -1090,7 +1099,7 @@ public final class TideBackSelfTest {
         // 潮招き: 満潮でも、集合のあとすぐ現れる
         TideBackTrials.resetGroup(back, TEST, false, null, true);
         TideRooms.claim(back, TideRooms.FLATS, TEST);
-        BlockPos flats = new BlockPos(0, FLATS_FLOOR + 1, -85 + FLATS_DZ);
+        BlockPos flats = new BlockPos(0, FLATS_FLOOR + 1, -100);
         TestPlayer fighter = join(back, TEST, "[TideTest]", flats);
         try {
             TideClock.force(TideClock.Phase.HIGH);

@@ -46,9 +46,9 @@ public final class TideBackCommands {
             Map.entry("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2)),
             Map.entry("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1)),
             Map.entry("watch", RESTS.get(3).spawn()),
-            Map.entry("ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32)),
+            Map.entry("ledge", new BlockPos(83, LEDGE_FLOOR + 1, -36)),
             Map.entry("f0", RESTS.get(4).spawn()),
-            Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -76 + FLATS_DZ)),
+            Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -100)),
             Map.entry("heart", RESTS.get(5).spawn()),
             Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)),
             // 息の間: 縁 (入口の泡の近く)・皿 7 (舞台の真下)・舞台・展望の間
@@ -196,7 +196,7 @@ public final class TideBackCommands {
         }
         TideBackState.Group s = groupState(ctx, back);
         int nests = 0;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < TideBackLayout.NEST_SITES.length; i++) {
             if ((s.nestSites() & (1 << i)) != 0 && !s.nestBroken(i)) {
                 nests++;
             }

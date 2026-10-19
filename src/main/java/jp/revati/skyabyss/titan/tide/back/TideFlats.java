@@ -67,8 +67,8 @@ public final class TideFlats {
         NONE, GATHER, WAITING, ACTIVE
     }
 
-    private static final UUID[] NESTS = new UUID[6];
-    private static final int[] NEST_TIMER = new int[6];
+    private static final UUID[] NESTS = new UUID[NEST_SITES.length];
+    private static final int[] NEST_TIMER = new int[NEST_SITES.length];
     private static Fight fight = Fight.NONE;
     private static int fightTimer;
     private static int empty;
@@ -205,7 +205,7 @@ public final class TideFlats {
     private static void onPhase(ServerLevel level, TideBackState.Group state, TideClock.Phase phase) {
         // 巣の口 (干潮で開き、満ちはじめると閉じる)
         boolean open = phase == TideClock.Phase.LOW;
-        for (int site = 0; site < 6; site++) {
+        for (int site = 0; site < NEST_SITES.length; site++) {
             if ((state.nestSites() & (1 << site)) != 0 && !state.nestBroken(site) && level.isLoaded(nestPos(site))) {
                 setNestMouth(level, site, open);
             }
@@ -214,8 +214,8 @@ public final class TideFlats {
         if (phase == TideClock.Phase.HIGH && !inFlats(level).isEmpty() && !state.rung(TideBackState.Trial.FRONT)
                 && state.quiet() != TideBackState.Trial.FRONT) {
             for (int i = 0; i < 2; i++) {
-                int x = -16 + level.random.nextInt(33);
-                int z = -100 + FLATS_DZ + level.random.nextInt(26);
+                int x = -30 + level.random.nextInt(61);
+                int z = -125 + level.random.nextInt(36);
                 Mob puffer = spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), new BlockPos(x, FLATS_FLOOR + 4, z), state.id);
                 if (puffer != null) {
                     puffer.addTag(FLATS_TAG);
@@ -285,7 +285,7 @@ public final class TideFlats {
     private static void tickNests(ServerLevel level, TideBackState.Group state) {
         boolean open = nestsOpen(level);
         int people = headcount(level);
-        for (int site = 0; site < 6; site++) {
+        for (int site = 0; site < NEST_SITES.length; site++) {
             if ((state.nestSites() & (1 << site)) == 0 || state.nestBroken(site)) {
                 continue;
             }
@@ -398,12 +398,12 @@ public final class TideFlats {
             TitanLoot.handOver(level.getServer(), p.getUUID(), p, items, 0);
         }
         int left = 0;
-        for (int s = 0; s < 6; s++) {
+        for (int s = 0; s < NEST_SITES.length; s++) {
             if ((state.nestSites() & (1 << s)) != 0 && !state.nestBroken(s)) {
                 left++;
             }
         }
-        broadcast(level, group, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", 3 - left, 3)
+        broadcast(level, group, left > 0 ? ModText.progress("message.skyabyss.tide.nest_broken", NEST_COUNT - left, NEST_COUNT)
                 : ModText.lore("message.skyabyss.tide.nests_all_broken"));
         if (left == 0 && group.equals(owner())) {
             beginGather(level);
@@ -500,7 +500,7 @@ public final class TideFlats {
 
     // トンネル (干潟の口の手前) と前室
     static AABB approach() {
-        return new AABB(-5, TUNNEL_FLOOR - 1, MOUTH_Z, 6, TUNNEL_FLOOR + 6, F0.z2() + 1);
+        return new AABB(-9, TUNNEL_FLOOR - 1, MOUTH_Z, 10, TUNNEL_FLOOR + 8, F0.z2() + 1);
     }
 
     private static void pullIn(ServerPlayer p) {
@@ -524,7 +524,7 @@ public final class TideFlats {
 
     // 戦いの途中で倒れて前室から戻った参加者は、口に触れると干潟へ戻れる
     private static void letBack(ServerLevel level) {
-        AABB door = new AABB(-1, TUNNEL_FLOOR + 1, MOUTH_Z + 1, 2, TUNNEL_FLOOR + 4, MOUTH_Z + 3);
+        AABB door = new AABB(-MOUTH_HALF, TUNNEL_FLOOR + 1, MOUTH_Z + 1, MOUTH_HALF + 1, TUNNEL_FLOOR + 4, MOUTH_Z + 3);
         for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, door, p -> p.isAlive() && participants.contains(p.getUUID()))) {
             pullIn(p);
             Notice.bar(p, ModText.battle("message.skyabyss.gate_rejoin"));
@@ -631,7 +631,7 @@ public final class TideFlats {
         }
         TideBackState.Group state = TideBackState.of(level, group);
         List<Integer> sites = new ArrayList<>();
-        for (int s = 0; s < 6; s++) {
+        for (int s = 0; s < NEST_SITES.length; s++) {
             if ((state.nestSites() & (1 << s)) != 0) {
                 sites.add(s);
             }
@@ -728,9 +728,9 @@ public final class TideFlats {
     // ---------------------------------------------------------------- 部屋を作り直す (新しい持ち主のグループの種と進みから。null は最初の形)
     static void reset(ServerLevel level, @Nullable TideBackState.Group state) {
         resetFight(level, false);
-        int sites = state == null ? 0b000111 : state.nestSites();
+        int sites = state == null ? (1 << NEST_COUNT) - 1 : state.nestSites();
         boolean frontDone = state != null && state.rung(TideBackState.Trial.FRONT);
-        for (int site = 0; site < 6; site++) {
+        for (int site = 0; site < NEST_SITES.length; site++) {
             if (NESTS[site] != null && level.getEntity(NESTS[site]) instanceof ReefNest n) {
                 n.discard();
             }
@@ -761,7 +761,7 @@ public final class TideFlats {
     // 部屋を手放した: 戦いを戻し、巣と群れを消す (次の持ち主が入ったときに、その種で作り直す)
     static void release(ServerLevel level, UUID formerOwner) {
         resetFight(level, false);
-        for (int site = 0; site < 6; site++) {
+        for (int site = 0; site < NEST_SITES.length; site++) {
             if (NESTS[site] != null && level.getEntity(NESTS[site]) instanceof ReefNest n) {
                 n.discard();
             }

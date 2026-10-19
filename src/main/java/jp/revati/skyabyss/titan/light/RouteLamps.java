@@ -43,7 +43,9 @@ public final class RouteLamps {
                 || s.is(Blocks.POLISHED_TUFF) || s.is(Blocks.CALCITE) || s.is(Blocks.DRIPSTONE_BLOCK) || s.is(Blocks.TERRACOTTA) || s.is(Blocks.SANDSTONE)
                 || s.is(Blocks.SMOOTH_SANDSTONE) || s.is(Blocks.PRISMARINE) || s.is(Blocks.PRISMARINE_BRICKS) || s.is(Blocks.DARK_PRISMARINE)
                 || s.is(Blocks.PACKED_MUD) || s.is(Blocks.MUD_BRICKS) || s.is(Blocks.BRICKS) || s.is(Blocks.NETHER_BRICKS) || s.is(Blocks.ANDESITE)
-                || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.POLISHED_DIORITE);
+                || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.POLISHED_DIORITE)
+                || s.is(Blocks.WAXED_OXIDIZED_CUT_COPPER) || s.is(Blocks.WAXED_WEATHERED_CUT_COPPER) || s.is(Blocks.WAXED_OXIDIZED_COPPER) || s.is(Blocks.WAXED_CUT_COPPER)
+                || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.WHITE_TERRACOTTA) || s.is(Blocks.CUT_SANDSTONE) || s.is(Blocks.SMOOTH_QUARTZ) || s.is(Blocks.QUARTZ_PILLAR);
         return stone && s.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
     }
 

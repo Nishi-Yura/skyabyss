@@ -36,13 +36,21 @@ public final class TideWatch {
     public static final int RESET_COOLDOWN = 30 * 20;
     public static final String WATCH_TAG = "skyabyss_watch_mob";
 
-    // 取っ手を置く所 (段ごとに 3 つ)。台の石の上に取っ手、看板は石の段の内側の面
+    // 取っ手を置く所 (段ごとに 3 つ)。台の石の上に取っ手、看板は石の段の内側の面。版 12 までの形を (WATCH_DX, WATCH_DZ) 動かした
+    private static BlockPos w(int x, int y, int z) {
+        return new BlockPos(x + WATCH_DX, y, z + WATCH_DZ);
+    }
+
     static final BlockPos[][] SLOTS = {
-            {new BlockPos(31, 75, -13), new BlockPos(31, 75, -7), new BlockPos(29, 75, -7)},
-            {new BlockPos(42, 81, -13), new BlockPos(42, 81, -7), new BlockPos(40, 81, -7)},
-            {new BlockPos(55, 87, -9), new BlockPos(55, 87, -12), new BlockPos(51, 87, -9)}};
-    static final BlockPos[] PLATES = {new BlockPos(29, 75, -13), new BlockPos(40, 81, -13), new BlockPos(51, 87, -14)};
-    static final BlockPos RESET_LEVER = new BlockPos(24, 75, -8);
+            {w(31, 75, -13), w(31, 75, -7), w(29, 75, -7)},
+            {w(42, 81, -13), w(42, 81, -7), w(40, 81, -7)},
+            {w(55, 87, -9), w(55, 87, -12), w(51, 87, -9)}};
+    static final BlockPos[] PLATES = {w(29, 75, -13), w(40, 81, -13), w(51, 87, -14)};
+    // 戻しの栓は前室 (s0) の南の壁ぎわ。床の取っ手 (看板は北向きに壁へ)
+    static final BlockPos RESET_LEVER = new BlockPos(46, 75, -7);
+    // 浮き石のある 3 マスの列 (溜めの奥行きの真ん中)
+    static final int FLOAT_Z1 = -11 + WATCH_DZ;
+    static final int FLOAT_Z2 = -9 + WATCH_DZ;
 
     private static int config;
     private static final int[] levels = new int[3];
@@ -184,8 +192,10 @@ public final class TideWatch {
     // 台の石と取っ手。台は水の元の溜めの色、台の前 (段の内側) の敷物は行き先の溜めの色。from < 0 は戻しの栓 (台は彫った凝灰岩)
     private static void placeLever(ServerLevel level, BlockPos slot, int from, int to) {
         level.setBlock(slot, from < 0 ? Blocks.CHISELED_TUFF.defaultBlockState() : BASIN_STONE[from], 3);
-        Direction face = slot.getZ() <= -12 && slot.getX() < 50 ? Direction.SOUTH : slot.getZ() >= -8 && slot.getX() < 50 ? Direction.NORTH
-                : slot.getX() >= 54 ? Direction.WEST : slot.getX() <= 25 ? Direction.EAST : Direction.EAST;
+        // 取っ手の向き (台のどちら側の面に敷物を敷くか): 北寄りの段は南へ、南寄りは北へ、戻しの栓は北
+        Direction face = from < 0 ? Direction.NORTH : slot.getZ() <= -12 + WATCH_DZ && slot.getX() < 50 + WATCH_DX ? Direction.SOUTH
+                : slot.getZ() >= -8 + WATCH_DZ && slot.getX() < 50 + WATCH_DX ? Direction.NORTH
+                : slot.getX() >= 54 + WATCH_DX ? Direction.WEST : slot.getX() <= 25 + WATCH_DX ? Direction.EAST : Direction.EAST;
         level.setBlock(slot.above(), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR)
                 .setValue(LeverBlock.FACING, face).setValue(LeverBlock.POWERED, false), 3);
         BlockPos front = slot.relative(face);
@@ -325,7 +335,7 @@ public final class TideWatch {
     }
 
     static AABB area() {
-        return new AABB(22, HUB_LEDGE, -37, 59, LEDGE_FLOOR + 8, -3);
+        return new AABB(WATCH_HALL.x1() - 1, HUB_LEDGE, WATCH_HALL.z1() - 1, WATCH_HALL.x2() + 2, TideWatchBuilder.HALL_ROOF, WATCH_HALL.z2() + 2);
     }
 
     private static void pipe(ServerLevel level, int from, int to) {
@@ -356,7 +366,7 @@ public final class TideWatch {
             // 浮き石に乗っている人を、上がる分だけ持ち上げる
             if (hasFloat && before != null && before[k] < L) {
                 int oldY = f + before[k];
-                AABB on = new AABB(b[0], oldY + 0.5, -11, b[1] + 1, oldY + 2.6, -8);
+                AABB on = new AABB(b[0], oldY + 0.5, FLOAT_Z1, b[1] + 1, oldY + 2.6, FLOAT_Z2 + 1);
                 for (Entity e : level.getEntitiesOfClass(Entity.class, on, e -> !e.isSpectator())) {
                     e.teleportTo(e.getX(), floatY + 1.0, e.getZ());
                     e.fallDistance = 0;
@@ -364,7 +374,7 @@ public final class TideWatch {
             }
             for (int x = b[0]; x <= b[1]; x++) {
                 for (int z = b[2]; z <= b[3]; z++) {
-                    boolean floatCell = hasFloat && z >= -11 && z <= -9;
+                    boolean floatCell = hasFloat && z >= FLOAT_Z1 && z <= FLOAT_Z2;
                     for (int y = f; y <= top; y++) {
                         BlockState s;
                         if (y < f + L) {
@@ -402,7 +412,7 @@ public final class TideWatch {
 
     // 前室の手前と、中の溜めの縁に泡吹き (謎解きを急かすほど多くはしない)
     private static void spawnGuards(ServerLevel level, java.util.UUID owner) {
-        BlockPos[] spots = {new BlockPos(20, 78, -3), new BlockPos(42, 84, -10), new BlockPos(30, 79, -10)};
+        BlockPos[] spots = {w(20, 78, -3), w(42, 84, -10), w(30, 79, -10)};
         for (BlockPos s : spots) {
             Mob m = TideFlats.spawn(level, TideMobSetup.BUBBLE_PUFFER.get(), s, owner);
             if (m != null) {

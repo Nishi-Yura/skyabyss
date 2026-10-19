@@ -31,6 +31,8 @@ public final class TideKit {
 
     private final ServerLevel level;
     final RandomSource random;
+    // いまの場所の材質 (TideZone。場所ごとに壁・床・柱・灯りが替わる)
+    private TideZone zone = TideZone.SHELL;
 
     public TideKit(ServerLevel level, RandomSource random) {
         this.level = level;
@@ -39,6 +41,16 @@ public final class TideKit {
 
     public ServerLevel level() {
         return level;
+    }
+
+    // 以降の部品 (壁・床・柱・灯り) の材質を場所のものにする
+    public TideKit zone(TideZone z) {
+        this.zone = z;
+        return this;
+    }
+
+    public TideZone zone() {
+        return zone;
     }
 
     public void set(int x, int y, int z, BlockState s) {
@@ -63,16 +75,71 @@ public final class TideKit {
         }
     }
 
-    // 壁の石: ところどころ暗い石と真珠層の筋
+    // 壁の石: 場所の材質 (主の石に、ところどころ副・筋・暗い帯)
     public BlockState wall(int x, int y, int z) {
-        int h = Math.floorMod(x * 7 + y * 13 + z * 5, 23);
-        if (h == 0) {
-            return NACRE;
+        return zone.wall(x, y, z);
+    }
+
+    // 床の石 (場所の材質)
+    public BlockState floorAt(int x, int z) {
+        return zone.floorAt(x, z);
+    }
+
+    // 灯りのブロック (場所の材質。潮殻は海のランタン)
+    public BlockState lamp() {
+        return zone.lamp;
+    }
+
+    // 灯りを壁・天井に埋める (そこが固い石のときだけ。空気や仕掛けには置かない)
+    public void lampIn(int x, int y, int z) {
+        BlockState cur = get(x, y, z);
+        if (!cur.isAir() && cur.isCollisionShapeFullBlock(level, new BlockPos(x, y, z)) && !cur.is(Blocks.WATER)) {
+            set(x, y, z, zone.lamp);
         }
-        if (h < 4) {
-            return ROUGH;
+    }
+
+    // 柱 (床 y1 から y2。柱頭は cap)。足もとと頭が固い所に立てる
+    public void pillar(int x, int z, int y1, int y2) {
+        for (int y = y1; y <= y2; y++) {
+            set(x, y, z, y == y2 ? zone.cap : y == y1 ? zone.floorAlt : zone.pillar);
         }
-        return (y % 5 == 0) ? DARK : BRICK;
+    }
+
+    // 折れ線 (x, z, x, z, ...) をたどる床のマスの並び (始点から終点まで、1 マスずつ)
+    public static java.util.List<int[]> line(int... xz) {
+        java.util.List<int[]> cells = new java.util.ArrayList<>();
+        for (int i = 0; i + 3 < xz.length; i += 2) {
+            int x = xz[i];
+            int z = xz[i + 1];
+            int tx = xz[i + 2];
+            int tz = xz[i + 3];
+            while (x != tx || z != tz) {
+                if (cells.isEmpty() || cells.get(cells.size() - 1)[0] != x || cells.get(cells.size() - 1)[1] != z) {
+                    cells.add(new int[] {x, z});
+                }
+                if (x != tx) {
+                    x += Integer.signum(tx - x);
+                } else {
+                    z += Integer.signum(tz - z);
+                }
+            }
+        }
+        int[] last = {xz[xz.length - 2], xz[xz.length - 1]};
+        if (cells.isEmpty() || cells.get(cells.size() - 1)[0] != last[0] || cells.get(cells.size() - 1)[1] != last[1]) {
+            cells.add(last);
+        }
+        return cells;
+    }
+
+    // 床に埋め込んだ灯りの道: 1 つおきに glow (床と同じ高さに平らに)、あいだは base。固い床の上だけ
+    public void routeStrip(int floorY, java.util.List<int[]> cells, BlockState glow, BlockState base) {
+        for (int i = 0; i < cells.size(); i++) {
+            int[] c = cells.get(i);
+            if (get(c[0], floorY, c[1]).isAir()) {
+                continue;
+            }
+            set(c[0], floorY, c[1], i % 2 == 0 ? glow : base);
+        }
     }
 
     // 箱の部屋: 内側を空け、外周 1 マスを壁・床・天井にする (すでに空いている所の外周はふさがない)

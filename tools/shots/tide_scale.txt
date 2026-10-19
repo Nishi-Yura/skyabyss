@@ -1,0 +1,184 @@
+# 潮殻の背の拡大 (docs/design/26 の 9 章) の確かめ。./gradlew runShots -Pscript=tools/shots/tide_scale.txt
+# 出力: run/shots/tide_scale/shots/tide_scale/*.png → python tools/tide_scale_sheet.py で docs/review/previews/tide_scale_sheet.png
+world tide_scale flat
+size 1280 720
+timeout 3600
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive tide_back
+waitchunks 1800
+wait 80
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+close
+hud off
+
+fov 90
+camera skyabyss:tide_back -124.5 69 114.5 -140 4
+waitchunks 900
+wait 40
+close
+wait 10
+shot arrival
+fov 90
+camera skyabyss:tide_back -104 68 99 180 2
+waitchunks 900
+wait 40
+close
+wait 10
+shot landing
+fov 90
+camera skyabyss:tide_back -80 67 86.5 270 0
+waitchunks 900
+wait 40
+close
+wait 10
+shot corridor
+fov 95
+camera skyabyss:tide_back -14 71 92 90 6
+waitchunks 900
+wait 40
+close
+wait 10
+shot beach
+fov 90
+camera skyabyss:tide_back -16.5 72 62 180 0
+waitchunks 900
+wait 40
+close
+wait 10
+shot cave
+fov 100
+camera skyabyss:tide_back -6 77 23 180 8
+waitchunks 900
+wait 40
+close
+wait 10
+shot hub
+fov 100
+camera skyabyss:tide_back 0 72 8 180 -55
+waitchunks 900
+wait 40
+close
+wait 10
+shot hub_dome
+fov 100
+camera skyabyss:tide_back -35 72 0 90 8
+waitchunks 900
+wait 40
+close
+wait 10
+shot garden_a
+fov 100
+camera skyabyss:tide_back -77 72 -6 180 5
+waitchunks 900
+wait 40
+close
+wait 10
+shot garden_c
+fov 100
+camera skyabyss:tide_back -83 69 48 0 6
+waitchunks 900
+wait 40
+close
+wait 10
+shot garden_clam
+fov 100
+camera skyabyss:tide_back 44 78 -13 270 5
+waitchunks 900
+wait 40
+close
+wait 10
+shot watch_foyer
+fov 100
+camera skyabyss:tide_back 56 80 -6 270 8
+waitchunks 900
+wait 40
+close
+wait 10
+shot watch_core
+fov 100
+camera skyabyss:tide_back 86 96 -45 180 6
+waitchunks 900
+wait 40
+close
+wait 10
+shot terrace
+fov 90
+camera skyabyss:tide_back 0 69 -34 180 0
+waitchunks 900
+wait 40
+close
+wait 10
+shot neck
+fov 100
+camera skyabyss:tide_back 0 69 -50 180 0
+waitchunks 900
+wait 40
+close
+wait 10
+shot f0
+fov 100
+camera skyabyss:tide_back 0 68 -83 180 2
+waitchunks 900
+wait 40
+close
+wait 10
+shot flats
+fov 90
+camera skyabyss:tide_back -92 70 -13 90 0
+waitchunks 900
+wait 40
+close
+wait 10
+shot fin_tunnel
+fov 100
+camera skyabyss:tide_back -122 74 -20 90 3
+waitchunks 900
+wait 40
+close
+wait 10
+shot fin_room
+fov 100
+camera skyabyss:tide_back -168 70 -20 90 5
+waitchunks 900
+wait 40
+close
+wait 10
+shot fin_tip
+fov 100
+camera skyabyss:tide_back -12 116 -7 270 6
+waitchunks 900
+wait 40
+close
+wait 10
+shot breath
+fov 100
+camera skyabyss:tide_back 28 116 -5 180 3
+waitchunks 900
+wait 40
+close
+wait 10
+shot crown_ring
+fov 95
+camera skyabyss:tide_back 0 128 66 180 -6
+waitchunks 900
+wait 40
+close
+wait 10
+shot tower
+fov 80
+camera skyabyss:tide_back 0 215 260 180 24
+waitchunks 900
+wait 40
+close
+wait 10
+shot overview

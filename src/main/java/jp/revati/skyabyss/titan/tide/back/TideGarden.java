@@ -454,9 +454,9 @@ public final class TideGarden {
     static void altarFixtures(TideKit kit, boolean rung) {
         int ax = ALTAR[0];
         int az = ALTAR[1];
-        for (int x = ax - 2; x <= ax + 2; x++) {
+        for (int x = ax - 4; x <= ax + 4; x++) {
             for (int y = ALTAR_TOP; y <= ALTAR_TOP + 3; y++) {
-                kit.set(x, y, az - 3, y == ALTAR_TOP + 3 ? TideKit.DARK : (x == ax ? TideKit.LAMP : TideKit.BRICK));
+                kit.set(x, y, az - 5, y == ALTAR_TOP + 3 ? TideKit.DARK : (x == ax || Math.abs(x - ax) == 3 ? TideKit.LAMP : TideKit.BRICK));
             }
         }
         kit.set(STONE_WEST.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState());
