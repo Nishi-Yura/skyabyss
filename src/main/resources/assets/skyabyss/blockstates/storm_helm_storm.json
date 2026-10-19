@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "skyabyss:block/storm_helm_storm_off"
+    },
+    "active=true": {
+      "model": "skyabyss:block/storm_helm_storm_on"
+    }
+  }
+}
