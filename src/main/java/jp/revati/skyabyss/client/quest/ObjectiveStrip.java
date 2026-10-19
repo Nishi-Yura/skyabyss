@@ -75,9 +75,15 @@ public final class ObjectiveStrip {
         return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
-    // 帯の分だけ、下の小さな表示をずらす
-    static int rows() {
-        return active() ? ROW : 0;
+    // HUD の要求: 左上の帯 (成長の表示の下)。描画 (render) と同じ条件で出す
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get() || OpeningClient.awakeActive()) {
+            return;
+        }
+        if (demo || OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
+                    WIDTH + 6, ROW - 2));
+        }
     }
 
     public static String direction(Vec3 from, BlockPos to) {
@@ -215,8 +221,12 @@ public final class ObjectiveStrip {
         // 戦闘で傷を受けた直後・画面を開いている間・ホラー演出 (足音・歌) の最中は薄くする (雰囲気を壊さない)
         boolean quiet = mc.screen != null || mc.player.hurtTime > 0 || OpeningClient.horrorCueActive();
         float a = quiet ? 0.45f : 1f;
-        int x = QuestHud.X;
-        int y = QuestHud.y();
+        jp.revati.skyabyss.hud.HudLayout.Rect rect = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE);
+        if (rect == null) {
+            return;
+        }
+        int x = rect.x() + 3;
+        int y = rect.y() + 2;
         String far = "";
         BlockPos target = resolved.pos();
         boolean arrow = Config.QUEST_ARROW.get();

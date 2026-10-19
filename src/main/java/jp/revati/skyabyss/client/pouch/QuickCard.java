@@ -200,6 +200,20 @@ public final class QuickCard {
     }
 
     // ---------------------------------------------------------------- 描く
+    // HUD の要求: ホットバーの左 (右利き) か右 (左利き)。オフハンドの枠があればその先、技の枠・成長の表示はさらに外へ
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (!Config.POUCH_QUICK_CARD.get() || !PartyMarkers.hudAllowed(mc) || mc.player.isSpectator() || shown == null) {
+            return;
+        }
+        PouchEntries.Entry e = PouchEntries.byId(shown);
+        if (e == null || (!jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) && Pouch.count(mc.player, e.item()) <= 0)) {
+            return;
+        }
+        boolean left = mc.options.mainHand().get() == HumanoidArm.RIGHT;
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.side(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD,
+                left ? jp.revati.skyabyss.hud.HudLayout.Side.LEFT : jp.revati.skyabyss.hud.HudLayout.Side.RIGHT, SPRITE_W, 31, 0));
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (!Config.POUCH_QUICK_CARD.get() || !PartyMarkers.hudAllowed(mc) || mc.player.isSpectator() || shown == null) {
@@ -213,22 +227,14 @@ public final class QuickCard {
         if (count <= 0) {
             return;
         }
-        int w = g.guiWidth();
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD);
+        if (r == null) {
+            return;
+        }
         int h = g.guiHeight();
         boolean leftSide = mc.options.mainHand().get() == HumanoidArm.RIGHT;
-        boolean offhand = !mc.player.getOffhandItem().isEmpty();
-        int cx = w / 2;
-        int spriteX;
-        int itemX;
-        if (leftSide) {
-            int base = cx - 91 - (offhand ? SPRITE_W + GAP : 0);
-            spriteX = base - SPRITE_W - GAP;
-            itemX = spriteX + 3;
-        } else {
-            int base = cx + 91 + (offhand ? SPRITE_W + GAP : 0);
-            spriteX = base + GAP;
-            itemX = spriteX + 10;
-        }
+        int spriteX = r.x();
+        int itemX = leftSide ? spriteX + 3 : spriteX + 10;
         int spriteY = h - 23;
         long age = Util.getMillis() - changedAt;
         float glow = age < HIGHLIGHT_MS ? 1f - age / (float) HIGHLIGHT_MS : 0f;
