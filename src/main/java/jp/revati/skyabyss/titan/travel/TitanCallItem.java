@@ -11,20 +11,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.player.Player;
 
-// 巨神の呼び笛。出会った巨神 (TitanCalls) は、いつでもこれで呼べる: 巨神が吹いた人の近くへ来て、20 分 (TitanStay) 背へ乗れる姿で待つ
-// (昼夜・潮・嵐の刻に関わらない。眠っている巨神は応えない)。
-// 旅のできる巨神 (岩鯨・潮殻) は、心臓を倒したあとの笛が旅の呼び (迎えに来て、行き先まで運ぶ)。しゃがんで吹くと、旅でなく背へ乗るための呼びになる。
-// 乗り場の上で吹くと、海図を開き直す。吹く仕草はヤギの角笛と同じ。音は tools/gen_titan_travel_assets.py で合成した独自の音
+// 巨神の呼び笛 (docs/design/28)。出会った巨神の笛は、その巨神の「子」を足もとへ呼ぶ: 子が現れ、乗ると行き先を決める海図が開く。
+// パーティ全員 (最大 6 人) が乗れる。成体の巨神は動かない。眠っている巨神の笛は応えない。
+// 笛を持った人のそばに仲間の子がいれば、吹くとその子に乗る。乗っている間に吹くと、海図を開き直す。
+// 巨神の背 (ダンジョン) の中で吹くと、地上へ下りる (ReturnBeacons)。吹く仕草はヤギの角笛と同じ。音は tools/gen_titan_travel_assets.py で合成した独自の音
 public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     private final String titanId;
-    // 旅のできる巨神 (岩鯨・潮殻) だけ。雷翼・余燼は null (旅はない。背へ乗る呼びだけ)
+    // 旅のできる巨神 (岩鯨・潮殻) の型 (記録・旅嚢の表示用)。雷翼・余燼は null
     @Nullable
     private final Supplier<TitanKind> kind;
 
@@ -39,7 +39,6 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
         return titanId;
     }
 
-    // 旅のできる巨神なら、その型。なければ null
     @Nullable
     public TitanKind kind() {
         return kind == null ? null : kind.get();
@@ -63,30 +62,12 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
         if (jp.revati.skyabyss.titan.end.ReturnBeacons.whistleInBack(player, titanId)) {
             return true;
         }
-        TitanKind travel = kind();
-        // 旅の呼び: 心臓を倒して認められた人が、しゃがまずに吹いたとき (旅の最中の人は、乗り場の上の吹き直しも旅の呼び)
-        if (travel != null && (Voyages.involving(player.getUUID()) != null
-                || (!player.isShiftKeyDown() && Voyages.isUnlocked(player, travel)))) {
-            Voyages.CallResult result = Voyages.call(player, travel, false);
-            if (result == Voyages.CallResult.REFUSED) {
-                return false;
-            }
-            if (result == Voyages.CallResult.CALLED) {
-                player.getCooldowns().addCooldown(this, 60);
-            }
+        boolean ok = jp.revati.skyabyss.titan.young.YoungCarriers.whistle(player, titanId);
+        if (ok) {
+            player.getCooldowns().addCooldown(this, 40);
             jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.WHISTLE);
-            return true;
         }
-        // 背へ乗るための呼び: いつでも、出会った巨神を近くへ呼ぶ
-        TitanCalls.Result result = TitanCalls.call(player, titanId, false);
-        if (result == TitanCalls.Result.REFUSED) {
-            return false;
-        }
-        if (result == TitanCalls.Result.CALLED) {
-            player.getCooldowns().addCooldown(this, 100);
-        }
-        jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.WHISTLE);
-        return true;
+        return ok;
     }
 
     @Override

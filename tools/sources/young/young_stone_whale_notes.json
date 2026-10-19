@@ -1,0 +1,69 @@
+{
+ "model": "young_stone_whale",
+ "seat_y": 3.625,
+ "seat_y_units": 58.0,
+ "seats_blocks": [
+  [
+   -1.0,
+   -2.0
+  ],
+  [
+   1.0,
+   -2.0
+  ],
+  [
+   -1.0,
+   0.0
+  ],
+  [
+   1.0,
+   0.0
+  ],
+  [
+   -1.0,
+   2.0
+  ],
+  [
+   1.0,
+   2.0
+  ]
+ ],
+ "hitbox": [
+  4.6,
+  3.4
+ ],
+ "front": "-Z (final geo space; root carries the pipeline's [0,180,0] with x/z-flipped vertices)",
+ "bones": [
+  "root",
+  "body",
+  "saddle",
+  "mote",
+  "fin_r",
+  "fin_l",
+  "tail",
+  "fluke",
+  "cloud"
+ ],
+ "anims": {
+  "idle": 3.0,
+  "move": 1.2,
+  "appear": 1.6,
+  "dissolve": 1.4
+ },
+ "loops": {
+  "idle": true,
+  "move": true,
+  "appear": false,
+  "dissolve": "hold_on_last_frame"
+ },
+ "saddle_max_motion_blocks": {
+  "idle": 0.071,
+  "move": 0.086
+ },
+ "visual_extent_blocks": {
+  "length_z": 11.9,
+  "width_x_body": 4.4,
+  "width_x_fins": 7.0,
+  "height": 4.6
+ }
+}

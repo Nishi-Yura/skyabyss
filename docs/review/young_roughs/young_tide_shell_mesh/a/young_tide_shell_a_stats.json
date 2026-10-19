@@ -1,0 +1,32 @@
+{
+ "tris": 2844,
+ "atlas": 1024,
+ "per_bone": {
+  "body": 1428,
+  "saddle": 828,
+  "head": 342,
+  "song": 48,
+  "fin_fr": 44,
+  "fin_br": 44,
+  "fin_fl": 44,
+  "fin_bl": 44,
+  "tail": 22
+ },
+ "lo": [
+  -5.3,
+  -0.04,
+  -6.48
+ ],
+ "hi": [
+  5.3,
+  2.64,
+  4.99
+ ],
+ "open_edges": 0,
+ "open_per_bone": {},
+ "seat_top": [
+  1.5,
+  1.5
+ ],
+ "above_seat": 0
+}

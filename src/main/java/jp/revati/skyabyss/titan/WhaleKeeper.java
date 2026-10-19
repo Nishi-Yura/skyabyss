@@ -90,7 +90,7 @@ public final class WhaleKeeper {
 
         @Override
         protected boolean busy() {
-            return jp.revati.skyabyss.titan.travel.Voyages.isBusy(jp.revati.skyabyss.titan.travel.TitanKind.STONE_WHALE);
+            return false;
         }
     };
 

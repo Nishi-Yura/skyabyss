@@ -1,0 +1,76 @@
+{
+  "model": "young_thunder_wing",
+  "seat_y": 2.25,
+  "seat_y_units": 36.0,
+  "seats_blocks_front_minus_z": [
+    [
+      -1.0,
+      -2.0
+    ],
+    [
+      1.0,
+      -2.0
+    ],
+    [
+      -1.0,
+      -0.0
+    ],
+    [
+      1.0,
+      -0.0
+    ],
+    [
+      -1.0,
+      2.0
+    ],
+    [
+      1.0,
+      2.0
+    ]
+  ],
+  "saddle_flat_region_blocks": {
+    "x": [
+      -1.6,
+      1.6
+    ],
+    "z": [
+      -3.2,
+      3.2
+    ]
+  },
+  "hitbox": [
+    4.6,
+    3.4
+  ],
+  "bones": [
+    "root",
+    "body",
+    "saddle",
+    "neck",
+    "head",
+    "mote",
+    "wing_l",
+    "wing_l_tip",
+    "wing_r",
+    "wing_r_tip",
+    "tail",
+    "leg_l",
+    "leg_r",
+    "halo"
+  ],
+  "anims": {
+    "idle": 3.0,
+    "move": 1.2,
+    "appear": 1.6,
+    "dissolve": 1.4
+  },
+  "loops": {
+    "idle": true,
+    "move": true,
+    "appear": false,
+    "dissolve": "hold_on_last_frame"
+  },
+  "front": "-Z in final geo space (drawn front -Z, flipped x/z, root rest rotation [0,180,0] cancels it)",
+  "glow": "textures/entity/young_thunder_wing_glowmask.png (cube) / textures/lowpoly/young_thunder_wing_glowmask.png (low poly)",
+  "note": "halo bone is empty in options A/B (C's lightning ring). root scale is animated in appear/dissolve."
+}
