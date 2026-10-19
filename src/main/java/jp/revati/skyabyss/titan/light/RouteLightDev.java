@@ -75,6 +75,11 @@ public final class RouteLightDev {
                         case "storm" -> BuildAuditSelfTest.STORM_BOX;
                         default -> BuildAuditSelfTest.EMBER_BOX;
                     };
+                    for (int cx = box.x1() >> 4; cx <= box.x2() >> 4; cx++) {
+                        for (int cz = box.z1() >> 4; cz <= box.z2() >> 4; cz++) {
+                            lv.setChunkForced(cx, cz, true);
+                        }
+                    }
                     LAMPS.clear();
                     LAMPS.addAll(RouteLamps.load(n));
                     round = 0;
@@ -189,6 +194,11 @@ public final class RouteLightDev {
             SkyAbyss.LOGGER.warn("could not write the lamp list: {}", e.toString());
         }
         SkyAbyss.LOGGER.info("ROUTELIGHT {} done: {} lamps, {} dark cells left", name, LAMPS.size(), darkLeft);
+        for (int cx = box.x1() >> 4; cx <= box.x2() >> 4; cx++) {
+            for (int cz = box.z1() >> 4; cz <= box.z2() >> 4; cz++) {
+                level.setChunkForced(cx, cz, false);
+            }
+        }
         level = null;
     }
 }

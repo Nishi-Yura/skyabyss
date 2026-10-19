@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 歩く道の灯り (建築の監査 LIGHT_DARK への答え)。道のどの立ち位置も光度 4 以上になるように、壁・天井の石を、巨神ごとの灯りのブロックに置き換える。
 // 灯りの場所は、建てた背を RouteLightDev (/skyabyss dev routelight <tide|storm|ember>) が測って選び、
 // data/skyabyss/<tide_back|storm_back|ember_back>/route_lamps.json に [x,y,z] の並びで書く。背を建てたあと (部屋・試練の中身より後) に place が置く。
-//  潮殻: 真珠の光 (pearlescent_froglight)、雷翼: 銅の電球 (copper_bulb、点灯)、余燼: 茂み光 (shroomlight)
+//  潮殻: 海のランタン (sea_lantern)、雷翼: 銅の電球 (copper_bulb、点灯)、余燼: 茂み光 (shroomlight)
 // 置き換えるのは、石・レンガ・玄武岩・凝灰岩などの丸ごとのブロックだけ (羊毛・ガラス・仕掛け・しるしのブロックは触らない)
 public final class RouteLamps {
     private RouteLamps() {
@@ -29,7 +29,7 @@ public final class RouteLamps {
 
     public static BlockState lampOf(String titan) {
         return switch (titan) {
-            case "tide" -> Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
+            case "tide" -> Blocks.SEA_LANTERN.defaultBlockState();
             case "storm" -> Blocks.COPPER_BULB.defaultBlockState().setValue(net.minecraft.world.level.block.CopperBulbBlock.LIT, true);
             default -> Blocks.SHROOMLIGHT.defaultBlockState();
         };
