@@ -168,13 +168,89 @@ public final class WhaleShape {
         return job.placed();
     }
 
-    // 同じ置き方を、1 列ずつ何 tick かに分けて進められる形で返す (BackBuildJobs)
+    // 同じ置き方を、1 列ずつ何 tick かに分けて進められる形で返す (BackBuildJobs)。
+    // 深い内側 (長い同じブロックの区間。外から 5 ブロックより奥) は、LevelChunk.setBlockState (高さ地図・明るさ・更新) を通さずに
+    // 区画 (16×16×16) へ直接書く。区画の全部が同じ石なら、区画ごと入れ替える (26 の 4.2 の「詰まった区画の一括」)。
+    // 殻と、空気に面するブロックは今までどおり (明るさの更新が要るため)
     static jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob job(BuildKit kit) {
         Data d = data();
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState[] column = new BlockState[d.ny];
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        boolean[] inner = new boolean[d.palette.length];
+        for (int i = 0; i < inner.length; i++) {
+            inner[i] = d.palette[i].is(Blocks.TUFF) || d.palette[i].is(Blocks.DEEPSLATE);
+        }
         return new jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob(kit.level(), d.x0, d.x0 + d.nx - 1, d.z0, d.z0 + d.nz - 1) {
+            // このチャンクで直接書いた区画 (番号の集合)
+            private long touched;
+
+            @Override
+            protected void beginChunk(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk) {
+                touched = 0;
+                // 前の島のブロックの持ち物 (看板・スポナー・焚き火) は、体を置き直すので捨てる (あとで部屋を建てるときに作り直す)
+                for (BlockPos p : java.util.List.copyOf(chunk.getBlockEntitiesPos())) {
+                    chunk.removeBlockEntity(p);
+                }
+                int cx = chunk.getPos().x << 4;
+                int cz = chunk.getPos().z << 4;
+                for (int si = 0; si < chunk.getSectionsCount(); si++) {
+                    int wy0 = chunk.getSectionYFromSectionIndex(si) << 4;
+                    int j0 = wy0 - d.y0;
+                    if (j0 < 0 || j0 + 16 > d.ny) {
+                        continue;
+                    }
+                    int pal = -2;
+                    boolean ok = true;
+                    for (int lx = 0; lx < 16 && ok; lx++) {
+                        for (int lz = 0; lz < 16 && ok; lz++) {
+                            int i = index(cx + lx, cz + lz);
+                            if (i < 0) {
+                                ok = false;
+                                break;
+                            }
+                            short[] r = d.runs[i];
+                            int found = -1;
+                            for (int k = 0; k < r.length; k += 3) {
+                                if (r[k] <= j0 && r[k] + r[k + 1] >= j0 + 16) {
+                                    found = r[k + 2];
+                                    break;
+                                }
+                            }
+                            if (found < 0 || !inner[found] || (pal != -2 && pal != found)) {
+                                ok = false;
+                            } else {
+                                pal = found;
+                            }
+                        }
+                    }
+                    if (ok && pal >= 0) {
+                        net.minecraft.world.level.chunk.LevelChunkSection old = chunk.getSection(si);
+                        var states = new net.minecraft.world.level.chunk.PalettedContainer<BlockState>(
+                                net.minecraft.world.level.block.Block.BLOCK_STATE_REGISTRY, d.palette[pal],
+                                net.minecraft.world.level.chunk.PalettedContainer.Strategy.SECTION_STATES);
+                        chunk.getSections()[si] = new net.minecraft.world.level.chunk.LevelChunkSection(states, old.getBiomes());
+                        touched |= 1L << si;
+                        addPlaced(4096);
+                    }
+                }
+            }
+
+            @Override
+            protected void endChunk(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk) {
+                if (touched == 0) {
+                    return;
+                }
+                for (int si = 0; si < chunk.getSectionsCount(); si++) {
+                    if ((touched & (1L << si)) != 0) {
+                        lv.getChunkSource().getLightEngine().updateSectionStatus(
+                                net.minecraft.core.SectionPos.of(chunk.getPos().x, chunk.getSectionYFromSectionIndex(si), chunk.getPos().z), false);
+                    }
+                }
+                chunk.setUnsaved(true);
+                touched = 0;
+            }
+
             @Override
             protected int column(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk, int x, int z) {
                 int i = index(x, z);
@@ -183,13 +259,24 @@ public final class WhaleShape {
                 }
                 java.util.Arrays.fill(column, air);
                 short[] r = d.runs[i];
+                int placed = 0;
                 for (int k = 0; k < r.length; k += 3) {
                     BlockState s = d.palette[r[k + 2]];
+                    boolean direct = inner[r[k + 2]] && r[k + 1] >= 8;
                     for (int j = r[k]; j < r[k] + r[k + 1]; j++) {
                         column[j] = s;
+                        if (direct) {
+                            int wy = d.y0 + j;
+                            int si = chunk.getSectionIndex(wy);
+                            net.minecraft.world.level.chunk.LevelChunkSection sec = chunk.getSection(si);
+                            if (sec.getBlockState(x & 15, wy & 15, z & 15) != s) {
+                                sec.setBlockState(x & 15, wy & 15, z & 15, s, false);
+                                touched |= 1L << si;
+                                placed++;
+                            }
+                        }
                     }
                 }
-                int placed = 0;
                 for (int j = 0; j < d.ny; j++) {
                     m.set(x, d.y0 + j, z);
                     if (chunk.getBlockState(m) != column[j]) {

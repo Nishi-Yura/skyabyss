@@ -113,6 +113,10 @@ public final class BoardGlow {
                 // 光の柱と枠 (遠くからでも見える。乗れる人にだけ、巨神が眠る・去るとすぐ消える)
                 PacketDistributor.sendToPlayer(player, beam(titan, shape));
             }
+            // 岩鯨は、鎖の下の地面の陣と鎖そのものが目印なので、鎖に沿った青い粒は出さない (ユーザーの声)
+            if (Titans.STONE_WHALE.equals(titan)) {
+                continue;
+            }
             // 遠いほど、かたまりを大きく (見えるように)。近づくと細かい粒だけになる
             boolean far = best > 40 * 40;
             double spread = far ? 1.1 : 0.5;

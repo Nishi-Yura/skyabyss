@@ -289,9 +289,9 @@ public final class TitanBackSelfTest {
             failures.add("anchor lodestone missing at " + anchor());
         }
         // 祠から体内へ、階段が途切れずにつながっていること
-        for (int z = SHRINE_Z - 1; z >= 4; z--) {
+        for (int z = SHRINE_Z - 1; z >= ENTRY.z2(); z--) {
             boolean walkable = false;
-            for (int y = FLOOR; y <= shrineY(); y++) {
+            for (int y = FLOOR; y <= shrineY() + SHRINE_STAIR_HEIGHT; y++) {
                 BlockPos p = new BlockPos(0, y, z);
                 if (!level.getBlockState(p).isAir() && level.getBlockState(p.above()).isAir() && level.getBlockState(p.above(2)).isAir()) {
                     walkable = true;
@@ -311,9 +311,9 @@ public final class TitanBackSelfTest {
     private static void checkWhale(ServerLevel level, List<String> failures) {
         record Part(String name, int x, int z, int y1, int y2) {
         }
-        for (Part part : List.of(new Part("head", -3, -150, 70, 125), new Part("left pectoral fin", -75, -30, 60, 95),
-                new Part("right pectoral fin", 69, -30, 60, 95), new Part("left fluke", -60, 238, 85, 100),
-                new Part("right fluke", 54, 238, 85, 100), new Part("ruined pillar on the back", -4, -21, 125, 142),
+        for (Part part : List.of(new Part("head", -3, -230, 70, 140), new Part("left pectoral fin", -100, -60, 70, 90),
+                new Part("right pectoral fin", 94, -60, 70, 90), new Part("left fluke", -30, 365, 95, 112),
+                new Part("right fluke", 30, 365, 95, 112),
                 new Part("anchor chain", ANCHOR_CHAIN_X, ANCHOR_CHAIN_Z, BASE_Y - 40, ANCHOR_CHAIN_Y))) {
             boolean found = false;
             for (int y = part.y1(); y <= part.y2() && !found; y++) {
@@ -329,8 +329,10 @@ public final class TitanBackSelfTest {
         for (int x = WhaleShape.minX(); x <= WhaleShape.maxX(); x++) {
             for (int z = WhaleShape.minZ(); z <= WhaleShape.maxZ(); z++) {
                 int t = WhaleShape.bodyTop(x, z);
-                if (t == Integer.MIN_VALUE || (Math.abs(x) <= 6 && z >= SHRINE_Z - 11 && z <= SHRINE_Z + 11)
-                        || (Math.abs(x) <= 9 && Math.abs(z - PLATFORM_Z) <= 11)) {
+                if (t == Integer.MIN_VALUE || (Math.abs(x) <= 9 && z >= SHRINE_Z - 17 && z <= SHRINE_Z + 17)
+                        || (Math.abs(x) <= 13 && Math.abs(z - PLATFORM_Z) <= 16)
+                        || (Math.abs(x) <= 8 && Math.abs(z - WingsBuilder.CAMP_Z) <= 8)
+                        || (Math.abs(x) <= 14 && Math.abs(z - WingsBuilder.TAIL_CZ) <= 14)) {
                     continue;
                 }
                 if (level.getBlockState(new BlockPos(x, t, z)).isAir() && level.getBlockState(new BlockPos(x, t - 1, z)).isAir()) {
@@ -365,7 +367,11 @@ public final class TitanBackSelfTest {
                 }
                 seen.add(q);
                 // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
+                // (胸びれの道のトンネルだけは、わざと体の外へ抜ける)
                 if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
+                    if (inFinTunnel(q)) {
+                        continue;
+                    }
                     leak = q;
                     break;
                 }
@@ -400,10 +406,17 @@ public final class TitanBackSelfTest {
         }
         if (toHub < 0) {
             failures.add("cannot walk from the arrival to the heartbeat hall");
-        } else if (toHub > 220) {
+        } else if (toHub > 400) {
             failures.add("the walk from the arrival to the hub is too long (" + toHub + " steps)");
         }
         SkyAbyss.LOGGER.info("Titan back walk: arrival -> shrine {} steps, -> hub {} steps", toShrine, toHub);
+    }
+
+    // 胸びれの道のトンネル (体の外へ抜ける。WingsBuilder.finPath)
+    private static boolean inFinTunnel(BlockPos q) {
+        return q.getZ() >= -65 && q.getZ() <= -59
+                && ((q.getX() <= W1.x1() - 1 && q.getY() >= W1.floorY() && q.getY() <= W1.floorY() + 8)
+                || (q.getX() >= CE1.x2() + 1 && q.getY() >= FLOOR && q.getY() <= FLOOR + 8));
     }
 
     // 歩いて何歩で着くか (着かなければ -1)。足元が固く、足と頭が空いている所を、上り 1・下り 3 まで。目標から r 以内で着いたとみなす
@@ -447,8 +460,11 @@ public final class TitanBackSelfTest {
 
     // どの部屋も、天井と床 (谷は溶岩の底) がそろっていて、空や奈落に穴が開いていないこと
     private static void checkRooms(ServerLevel level, List<String> failures) {
-        List<Box> rooms = List.of(HUB, ENTRY, TREASURY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3, MAZE_EXIT_ROOM);
-        for (Box room : rooms) {
+        for (Box room : TitanBackAudit.ROOMS) {
+            // 通路の天井は、大門 (BossGates) の高い空間で開く。迷路の入口の小部屋の天井ははしごの縦穴
+            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL || room == SONG_PASS) {
+                continue;
+            }
             int holes = 0;
             for (int x = room.x1(); x <= room.x2(); x++) {
                 for (int z = room.z1(); z <= room.z2(); z++) {
@@ -468,7 +484,7 @@ public final class TitanBackSelfTest {
         for (Box pit : PITS) {
             for (int x = pit.x1(); x <= pit.x2(); x++) {
                 for (int z = pit.z1(); z <= pit.z2(); z++) {
-                    if (!level.getBlockState(new BlockPos(x, 86, z)).is(Blocks.LAVA)) {
+                    if (!level.getBlockState(new BlockPos(x, PIT_LAVA_Y, z)).is(Blocks.LAVA)) {
                         failures.add("pit has no lava at " + x + "," + z);
                         return;
                     }
@@ -480,18 +496,19 @@ public final class TitanBackSelfTest {
     private static void checkDoors(ServerLevel level, List<String> failures) {
         // 通れるはずの戸口 (足元の高さと頭の高さ)
         int[][] open = {
-                {0, FLOOR + 1, -11}, {0, FLOOR + 1, -12}, {-12, FLOOR + 1, -22}, {12, FLOOR + 1, -22},
-                {-23, FLOOR + 1, -22}, {-30, 98, -35}, {-29, 98, -43}, {-23, 101, -57}, {-17, 101, -55},
-                {23, FLOOR + 1, -22}, {25, FLOOR + 1, -39}, {22, FLOOR + 1, -39}, {20, FLOOR + 1, -39},
-                {6, 94, -7},
+                {0, FLOOR + 1, -13}, {0, FLOOR + 1, 10}, {-22, FLOOR + 1, -36}, {22, FLOOR + 1, -36},
+                {WA.x2() + 1, FLOOR + 1, -36}, {-50, W1.floorY() + 1, WA.z1() - 1}, {-47, W1.floorY() + 1, WB.z2() + 1},
+                {-44, W2.floorY() + 1, WB.z1() - 1}, {-42, W2.floorY() + 1, BELL.z2() + 3}, {-33, W2.floorY() + 1, -97},
+                {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -63}, {E3.x2() + 1, FLOOR + 1, -63}, {38, FLOOR + 1, -2}, {38, FLOOR + 1, 4},
+                {38, FLOOR + 1, 51}, {38, FLOOR + 1, 55}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
                 // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
-                {0, 94, -46}, {0, 94, -63}, {0, 94, -64}, {0, 94, -65}};
+                {0, FLOOR + 1, -76}, {0, FLOOR + 1, HEART_GATE_Z + 1}, {0, FLOOR + 1, HEART_GATE_Z}, {0, FLOOR + 1, HEART_GATE_Z - 1}};
         for (int[] d : open) {
             BlockPos p = new BlockPos(d[0], d[1], d[2]);
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT)) {
+        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E1_SOUTH, E2_EXIT, E3_LOCK, BELL_GATE)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -505,19 +522,16 @@ public final class TitanBackSelfTest {
             air(level, p.above(), "above resonance stone", failures);
         }
         // 抜け道の内側 (鼓動の間の側) が柱などでふさがれていないこと
-        air(level, new BlockPos(9, 94, -31), "east return (hub side)", failures);
-        air(level, new BlockPos(11, 94, -31), "east return (hall side)", failures);
-        // 頂は 97 (戸 -10, 98〜99 の足もとの石の高さ)。98 だと支えが戸になる (詰み監査)
-        if (!level.getBlockState(new BlockPos(-9, 97, -31)).is(Blocks.LADDER) || level.getBlockState(new BlockPos(-9, 98, -31)).is(Blocks.LADDER)) {
-            failures.add("west return ladder missing or too high (top must be y 97)");
+        air(level, new BlockPos(HUB.x2(), FLOOR + 1, -53), "east return (hub side)", failures);
+        air(level, new BlockPos(E3.x1(), FLOOR + 1, -53), "east return (hall side)", failures);
+        // 頂は WEST_LEDGE_Y (戸の足もとの石の高さ)。その上だと支えが戸になる (詰み監査)
+        if (!level.getBlockState(new BlockPos(HUB.x1(), WEST_LEDGE_Y, WEST_RETURN_Z)).is(Blocks.LADDER)
+                || level.getBlockState(new BlockPos(HUB.x1(), WEST_LEDGE_Y + 1, WEST_RETURN_Z)).is(Blocks.LADDER)) {
+            failures.add("west return ladder missing or too high (top must be y " + WEST_LEDGE_Y + ")");
         }
-        if (!level.getBlockState(new BlockPos(4, FLOOR, -25)).is(Blocks.LADDER)) {
-            failures.add("maze entrance ladder missing at the hub floor");
-        }
-        // 配置の版 2 で除いた第二の広間・旧番兵長の控えの間・その間の通路は、埋まっていること (古いワールドを建て直したとき)
-        for (BlockPos p : List.of(new BlockPos(26, 94, -50), new BlockPos(28, 94, -43), new BlockPos(20, 94, -66), new BlockPos(17, 94, -66))) {
-            if (level.getBlockState(p).isAir()) {
-                failures.add("removed east hall space is still open at " + p);
+        for (BlockPos start : List.of(mazeCell(MAZE_START_I, MAZE_START_J), mazeCell(MAZE_START2_I, MAZE_START2_J))) {
+            if (!level.getBlockState(new BlockPos(start.getX() + MAZE_CELL / 2, FLOOR, start.getZ())).is(Blocks.LADDER)) {
+                failures.add("maze entrance ladder missing at the hub floor " + start);
             }
         }
         // 祠の階段の封印の場所は、ピースフルでないときは通れること
@@ -541,6 +555,10 @@ public final class TitanBackSelfTest {
 
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
+    // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
+    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.song_shrine", "sign.skyabyss.fin_left",
+            "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page");
+
     private static void checkSigns(ServerLevel level, List<String> failures) {
         Set<BlockPos> expected = new HashSet<>();
         allSigns().forEach(i -> expected.add(i.pos()));
@@ -552,9 +570,10 @@ public final class TitanBackSelfTest {
                     if (!(be instanceof jp.revati.skyabyss.tablet.TabletBlockEntity tablet)) {
                         continue;
                     }
-                    count++;
-                    if (!expected.contains(be.getBlockPos())) {
-                        failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions and trial entrances keep tablets)");
+                    if (expected.contains(be.getBlockPos())) {
+                        count++;
+                    } else if (!(tablet.key().startsWith("sign.skyabyss.library_") || NEW_TABLETS.contains(tablet.key()))) {
+                        failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions, trial entrances and the new wings keep tablets)");
                     }
                     keys.add(tablet.key());
                 }
@@ -587,7 +606,10 @@ public final class TitanBackSelfTest {
                     failures.add("course step missing at " + p);
                 }
                 for (int h = 1; h <= 3; h++) {
-                    air(level, p.above(h), "room above course step", failures);
+                    // 隣のレーンの足場が頭上にあるのは許す (別の道)
+                    if (!level.getBlockState(p.above(h)).is(ModBlocks.CRUMBLING_BONE.get())) {
+                        air(level, p.above(h), "room above course step", failures);
+                    }
                 }
             }
             validateCourse(spec, courses.get(c), "course " + c, failures);
@@ -603,7 +625,7 @@ public final class TitanBackSelfTest {
             for (int x = pit.x1(); x <= pit.x2(); x++) {
                 for (int z = pit.z1(); z <= pit.z2(); z++) {
                     BlockState floor = level.getBlockState(new BlockPos(x, FLOOR, z));
-                    boolean ledge = (x == -24 && z >= -23 && z <= -21) || isStep(courses, x, FLOOR, z);
+                    boolean ledge = (x == WA.x2() && z >= -38 && z <= -34) || isStep(courses, x, FLOOR, z);
                     if (!floor.isAir() && !ledge) {
                         failures.add("pit floor remains at " + x + "," + z + " (" + floor + ")");
                         return;
@@ -670,7 +692,7 @@ public final class TitanBackSelfTest {
 
 
     private static void checkHalls(ServerLevel level, List<String> failures) {
-        for (Box hall : List.of(E1, E3)) {
+        for (Box hall : List.of(E1, E2, E3, CK)) {
             for (BlockPos p : EastWingBuilder.spawnPoints(hall)) {
                 air(level, p, "hall spawn point", failures);
                 air(level, p.above(), "hall spawn point head", failures);
@@ -680,8 +702,8 @@ public final class TitanBackSelfTest {
 
     // 闇の水路: 入口のはしごの下から、水の中を通って出口の泡の柱までたどり着けること。休みの泡がいくつかあること
     private static void checkMaze(ServerLevel level, List<String> failures) {
-        BlockPos start = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 2, 0);
-        BlockPos goal = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(1, 1, 1);
+        BlockPos start = mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 2, 0);
+        BlockPos goal = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(MAZE_CELL / 2, 1, MAZE_CELL / 2);
         Set<BlockPos> seen = new HashSet<>();
         ArrayDeque<BlockPos> queue = new ArrayDeque<>();
         queue.add(start);
@@ -690,7 +712,8 @@ public final class TitanBackSelfTest {
             BlockPos cur = queue.poll();
             for (Direction d : Direction.values()) {
                 BlockPos n = cur.relative(d);
-                if (n.getX() < MAZE_X0 || n.getX() > 22 || n.getZ() < MAZE_Z0 || n.getZ() > -2 || n.getY() < 78 || n.getY() > 83 || seen.contains(n)) {
+                if (n.getX() < MAZE_X0 || n.getX() > MAZE_X0 + MAZE_W * (MAZE_CELL + 1) || n.getZ() < MAZE_Z0 || n.getZ() > MAZE_Z0 + MAZE_H * (MAZE_CELL + 1)
+                        || n.getY() <= MAZE_FLOOR || n.getY() > MAZE_FLOOR + 6 || seen.contains(n)) {
                     continue;
                 }
                 BlockState state = level.getBlockState(n);
@@ -709,9 +732,10 @@ public final class TitanBackSelfTest {
         checkEntryRest(level, failures);
         checkMaw(level, failures);
         // 水路の顎のスポナーは、同時に生かす数が MAW_MAX_NEARBY (2) に絞ってあること
-        var deadEnds = MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).deadEnds();
+        var deadEnds = new ArrayList<>(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).deadEnds());
+        deadEnds.removeIf(d -> d[0] == MAZE_START2_I && d[1] == MAZE_START2_J);
         for (int n = 1; n < deadEnds.size(); n += 3) {
-            BlockPos sp = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(1, 0, 1);
+            BlockPos sp = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
             if (!(level.getBlockEntity(sp) instanceof net.minecraft.world.level.block.entity.SpawnerBlockEntity be)) {
                 failures.add("waterway maw spawner missing at " + sp);
                 continue;
@@ -721,11 +745,11 @@ public final class TitanBackSelfTest {
                 failures.add("waterway maw spawner cap is " + cap + " (want " + MazeBuilder.MAW_MAX_NEARBY + ") at " + sp);
             }
         }
-        BlockPos exit = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(1, 0, 1);
+        BlockPos exit = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
         if (!level.getBlockState(new BlockPos(exit.getX(), MAZE_EXIT_ROOM.floorY(), exit.getZ())).is(Blocks.BUBBLE_COLUMN)) {
             failures.add("maze exit has no rising bubble column");
         }
-        if (!level.getBlockState(new BlockPos(MAZE_EXIT_ROOM.x1(), FLOOR, -7)).is(Blocks.LADDER)) {
+        if (!level.getBlockState(new BlockPos(MAZE_EXIT_ROOM.x1(), FLOOR, EXIT_LADDER_Z)).is(Blocks.LADDER)) {
             failures.add("maze return ladder missing");
         }
     }
@@ -766,7 +790,7 @@ public final class TitanBackSelfTest {
             failures.add("the waterway entrance rest point is outside its room at " + sp);
         }
         // 入口のはしごが部屋の中を通り、水面へ続いていること
-        BlockPos ladder = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 0, 0);
+        BlockPos ladder = mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0);
         for (int y = MAZE_FLOOR + 4; y <= FLOOR; y++) {
             if (!level.getBlockState(new BlockPos(ladder.getX(), y, ladder.getZ())).is(Blocks.LADDER)) {
                 failures.add("the entrance ladder is broken at y " + y + " (entry room)");
@@ -831,7 +855,7 @@ public final class TitanBackSelfTest {
             for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
                 for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
                     // 中ほどの休み場の四隅は乾いた足場 (水の二段目が石、その上は紫水晶があってもよい)
-                    boolean ledge = p.equals(mid) && dx != 1 && dz != 1;
+                    boolean ledge = p.equals(mid) && (dx == 0 || dx == MAZE_CELL - 1) && (dz == 0 || dz == MAZE_CELL - 1);
                     if (ledge) {
                         if (!level.getBlockState(p.offset(dx, 1, dz)).is(Blocks.POLISHED_DEEPSLATE)) {
                             bad = "the rest ledge corner is missing at " + p.offset(dx, 1, dz).toShortString();
@@ -861,8 +885,8 @@ public final class TitanBackSelfTest {
         if (!level.getBlockState(PEDESTAL).is(Blocks.LODESTONE)) {
             failures.add("pedestal missing");
         }
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -43; z <= -36; z++) {
+        for (int x = TREASURY.x1(); x <= TREASURY.x2(); x++) {
+            for (int z = TREASURY.z1(); z <= TREASURY.z2(); z++) {
                 if (level.getBlockEntity(new BlockPos(x, FLOOR + 1, z)) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity) {
                     failures.add("treasure chest should be gone at " + x + "," + z);
                 }
@@ -896,7 +920,7 @@ public final class TitanBackSelfTest {
                     if (!level.getBlockState(ceil).isSolid()) {
                         holes++;
                     }
-                } else if (!level.getBlockState(new BlockPos(cx + dx, 100, cz + dz)).isSolid()) {
+                } else if (!level.getBlockState(new BlockPos(cx + dx, FLOOR + 7, cz + dz)).isSolid()) {
                     // 壁の輪は、どこも空いていないこと
                     holes++;
                 }
@@ -905,7 +929,7 @@ public final class TitanBackSelfTest {
         if (holes > 0) {
             failures.add("heart arena shell has " + holes + " holes");
         }
-        if (!level.getBlockState(new BlockPos(0, 94, -54)).is(Blocks.SOUL_CAMPFIRE)) {
+        if (!level.getBlockState(HEART_REST.center()).is(Blocks.SOUL_CAMPFIRE)) {
             failures.add("heart rest campfire missing");
         }
     }
@@ -924,8 +948,8 @@ public final class TitanBackSelfTest {
     // 倒れて目覚める場所は、戦いの部屋の中ではなく、戦いの扉から離れていること (目の前が戦場にならない)。
     // 休み場がいまの戦いの前室なら、鼓動の間で目覚めること。闇の水路の中ほどの休み場は水路の中の乾いた足場であること
     private static void checkRespawnSafety(ServerLevel level, List<String> failures) {
-        List<TitanBackLayout.Box> fights = List.of(E1, E3, HEART);
-        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, CE1_WEST_DOOR, E3_ENTRANCE, HEART_GATE);
+        List<TitanBackLayout.Box> fights = List.of(E1, E2, CK, E3, HEART);
+        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, CK_ENTRANCE, CE1_WEST_DOOR, E3_ENTRANCE, HEART_GATE);
         for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
             BlockPos spawn = e.getValue();
             for (TitanBackLayout.Box room : fights) {
@@ -962,7 +986,7 @@ public final class TitanBackSelfTest {
         // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
         UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
         UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
-        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e3"}}) {
+        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e3"}, {"e2r", "e2"}, {"ckr", "ck"}}) {
             if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
                 failures.add("rest point " + pair[0] + " moved without a fight");
             }
@@ -1242,8 +1266,8 @@ public final class TitanBackSelfTest {
     private static void writeMaps(ServerLevel level, java.nio.file.Path dir) {
         try {
             java.nio.file.Files.createDirectories(dir);
-            int[][] slices = {{-1}, {FLOOR + 1}, {98}, {79}};
-            String[] names = {"surface", "floor94", "level98", "maze79"};
+            int[][] slices = {{-1}, {FLOOR + 1}, {WEST_LEDGE_Y + 1}, {MAZE_FLOOR + 2}};
+            String[] names = {"surface", "floor", "west_ledge", "maze"};
             for (int k = 0; k < slices.length; k++) {
                 int w = RX * 2 + 9;
                 int h = RZ * 2 + 9;

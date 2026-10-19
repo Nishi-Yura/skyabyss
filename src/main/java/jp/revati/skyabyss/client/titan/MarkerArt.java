@@ -246,6 +246,10 @@ public final class MarkerArt {
 
     private static void boardB(G g, TitanEndNetwork.Beam b, double time) {
         Entry e = entry(g, b);
+        if (e.vertical() && Titans.STONE_WHALE.equals(b.key())) {
+            boardGround(g, b, e, time);
+            return;
+        }
         shaft(g, b, e, 0.5, 0.12f, 0.42f);
         double ro = Math.max(b.hx(), b.hz()) + 1.5;
         double k = Math.min(3.5, 1.0 + e.dist() * 0.02);
@@ -289,6 +293,67 @@ public final class MarkerArt {
         // 入口の足もとの小さな紋様 (欠片の輪の下)
         String titan = b.key();
         g.floorLine(b.cx(), e.floor() + 0.05, b.cz(), motif(titan), ro * 0.9, time * 0.01, 0.1 * e.boost(), 0.45f, 0.4f, closed(titan));
+    }
+
+    // 岩鯨の乗り込み口 (B): 鎖の下端ではなく、鎖の下の地面のブロックの上に、平たい陣 (波の輪の紋様) を描く。
+    // 陣は地面の高さにそって張り付く (起伏があっても浮かない・埋まらない)。陣の中に立つと乗る (StoneWhaleEntity.tickStandBoard)。
+    // 鎖はそのまま目印。細い光の筋だけを陣の真ん中から上へ
+    public static final double SIGIL_R = 2.4;
+
+    private static void boardGround(G g, TitanEndNetwork.Beam b, Entry e, double time) {
+        Minecraft mc = Minecraft.getInstance();
+        double ref = b.beamFrom();
+        g.base = e.floor();
+        g.surface = (x, z) -> mc.level == null ? ref : groundTop(mc, x, z, ref);
+        shaft(g, b, e, 0.3, 0.08f, 0.30f);
+        double boost = 1.0 + Math.min(2.0, e.dist() * 0.01);
+        double r = SIGIL_R;
+        float pulse = 0.75f + 0.25f * Mth.sin((float) (time / 50.0 * Mth.TWO_PI));
+        double y = e.floor() + 0.08;
+        double cx = b.cx();
+        double cz = b.cz();
+        g.pass(false);
+        // 陣の地: ごく淡い円盤と、二重の輪
+        g.floorRing(cx, y, cz, 0.0, r, 0.16f * pulse, 0.10f * pulse, 0.15f, 32);
+        g.floorRing(cx, y + 0.02, cz, r - 0.2 * boost, r, 0.70f * pulse, 0.70f * pulse, 0.30f, 56);
+        g.floorRing(cx, y + 0.02, cz, r * 0.64 - 0.1 * boost, r * 0.64, 0.45f * pulse, 0.45f * pulse, 0.20f, 44);
+        // 紋様 (岩鯨の波の輪) をゆっくり回す
+        g.floorLine(cx, y + 0.04, cz, motif(Titans.STONE_WHALE), r * 0.86, time * 0.01, 0.11 * boost, 0.85f * pulse, 0.45f, true);
+        // 八つの目盛り
+        for (int i = 0; i < 8; i++) {
+            g.floorQuad(cx, y + 0.04, cz, Math.PI / 4 * i + time * 0.002, r * 0.66, r * 0.82, 0.07 * boost, 0.6f * pulse, 0.3f);
+        }
+        // 陣の真ん中へ流れる山形 (地面の上で、中心へ向かう > の形)
+        for (int k = 0; k < 6; k++) {
+            double ang = Math.PI / 3 * k + 0.3;
+            double ph = (time / 70.0 + k / 6.0) % 1.0;
+            double rho = r * (1.35 - 1.1 * ph);
+            float a = (float) Math.sin(Math.PI * ph) * 0.75f;
+            double d = 0.5;
+            double c = Math.cos(ang);
+            double s = Math.sin(ang);
+            double[][] chevron = {
+                    {c * (rho + d) - s * d, s * (rho + d) + c * d}, {c * rho, s * rho}, {c * (rho + d) + s * d, s * (rho + d) - c * d}};
+            g.floorLine(cx, y + 0.06, cz, chevron, 1.0, 0.0, 0.1 * boost, a, 0.4f, false);
+        }
+        // 真ん中の小さな光
+        g.billDisc(cx, e.floor() + 0.3, cz, 0.55 * boost, 0.5f * pulse, 0f, 0.5f, 0f, 12);
+    }
+
+    // 地面の上面の高さ (x, z)。基準 ref の少し上から下へ探して、最初に当たりのあるブロックの上面。なければ ref
+    static double groundTop(Minecraft mc, double x, double z, double ref) {
+        int bx = Mth.floor(x);
+        int bz = Mth.floor(z);
+        net.minecraft.core.BlockPos.MutableBlockPos m = new net.minecraft.core.BlockPos.MutableBlockPos(bx, Mth.floor(ref) + 3, bz);
+        for (int i = 0; i < 14; i++) {
+            var st = mc.level.getBlockState(m);
+            var shape = st.getCollisionShape(mc.level, m);
+            if (!shape.isEmpty()) {
+                return m.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
+            }
+            m.move(0, -1, 0);
+        }
+        return ref;
     }
 
     // ---------------------------------------------------------------- 乗り込み口 C: 巨神の体が応える (灯の点の連なり・提灯・光の綱) + ごく淡い標
@@ -557,6 +622,10 @@ public final class MarkerArt {
         }
         double d2 = sq(b.cx() - mc.player.getX()) + sq(b.cz() - mc.player.getZ());
         boolean ret = isReturn(b);
+        if (!ret && Titans.STONE_WHALE.equals(b.key())) {
+            // 岩鯨の乗り込み口は、足もとの陣と鎖が目印。登る道の青い粒は出さない
+            return;
+        }
         if (d2 > (ret ? 40 * 40 : 90 * 90)) {
             return;
         }
@@ -647,6 +716,15 @@ public final class MarkerArt {
             this.useAlpha = alpha;
         }
 
+        // 地面にそって描く (null = 水平のまま)。surface(x, z) = その場所の地面の上面の y、base = 水平で描くときの基準の y
+        java.util.function.DoubleBinaryOperator surface;
+        double base;
+
+        // 床の面の頂点: surface があれば、地面の高さにそわせる (基準からの高さ y - base は保つ)
+        void vf(double x, double y, double z, float a, float w) {
+            v(x, surface == null ? y : surface.applyAsDouble(x, z) + (y - base), z, a, w);
+        }
+
         // 頂点。w = 白への寄せ (0〜1)
         void v(double x, double y, double z, float a, float w) {
             int rr = (int) (r + (255 - r) * w);
@@ -719,10 +797,10 @@ public final class MarkerArt {
                 double s0 = Math.sin(t0);
                 double c1 = Math.cos(t1);
                 double s1 = Math.sin(t1);
-                v(cx + c0 * r0, y, cz + s0 * r0, a0, w);
-                v(cx + c0 * r1, y, cz + s0 * r1, a1, w);
-                v(cx + c1 * r1, y, cz + s1 * r1, a1, w);
-                v(cx + c1 * r0, y, cz + s1 * r0, a0, w);
+                vf(cx + c0 * r0, y, cz + s0 * r0, a0, w);
+                vf(cx + c0 * r1, y, cz + s0 * r1, a1, w);
+                vf(cx + c1 * r1, y, cz + s1 * r1, a1, w);
+                vf(cx + c1 * r0, y, cz + s1 * r0, a0, w);
             }
         }
 
@@ -732,10 +810,10 @@ public final class MarkerArt {
             double s = Math.sin(ang);
             double px = -s * width;
             double pz = c * width;
-            v(cx + c * r0 - px, y, cz + s * r0 - pz, a, w);
-            v(cx + c * r0 + px, y, cz + s * r0 + pz, a, w);
-            v(cx + c * r1 + px, y, cz + s * r1 + pz, a, w);
-            v(cx + c * r1 - px, y, cz + s * r1 - pz, a, w);
+            vf(cx + c * r0 - px, y, cz + s * r0 - pz, a, w);
+            vf(cx + c * r0 + px, y, cz + s * r0 + pz, a, w);
+            vf(cx + c * r1 + px, y, cz + s * r1 + pz, a, w);
+            vf(cx + c * r1 - px, y, cz + s * r1 - pz, a, w);
         }
 
         // 水平な折れ線 (単位半径の点列を scale 倍・rot 回転)
@@ -759,10 +837,10 @@ public final class MarkerArt {
                 }
                 double px = -dz / l * width * 0.5;
                 double pz = dx / l * width * 0.5;
-                v(x0 - px, y, z0 - pz, a, w);
-                v(x0 + px, y, z0 + pz, a, w);
-                v(x1 + px, y, z1 + pz, a, w);
-                v(x1 - px, y, z1 - pz, a, w);
+                vf(x0 - px, y, z0 - pz, a, w);
+                vf(x0 + px, y, z0 + pz, a, w);
+                vf(x1 + px, y, z1 + pz, a, w);
+                vf(x1 - px, y, z1 - pz, a, w);
             }
         }
 

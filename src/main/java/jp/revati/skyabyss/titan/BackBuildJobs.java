@@ -56,19 +56,41 @@ public final class BackBuildJobs {
         // 1 列 (x, z) の柱を置く。置いた数を返す
         protected abstract int column(ServerLevel level, LevelChunk chunk, int x, int z);
 
+        // 区画の一括置きで置いた数を足す
+        protected void addPlaced(int n) {
+            placed += n;
+        }
+
+        // チャンクの最初・最後に呼ぶ (区画の一括置きの準備と後始末。26 の 4.2)。既定は何もしない
+        protected void beginChunk(ServerLevel level, LevelChunk chunk) {
+        }
+
+        protected void endChunk(ServerLevel level, LevelChunk chunk) {
+        }
+
         @Override
         public boolean step(long deadlineNanos) {
             while (index < total) {
                 long ci = index >> 8;
                 int col = (int) (index & 255);
                 if (ci != chunkIndex) {
+                    if (chunk != null) {
+                        endChunk(level, chunk);
+                    }
                     chunkIndex = ci;
                     chunk = level.getChunk(cx0 + (int) (ci / ncz), cz0 + (int) (ci % ncz));
+                    beginChunk(level, chunk);
                 }
                 int x = ((cx0 + (int) (ci / ncz)) << 4) + (col >> 4);
                 int z = ((cz0 + (int) (ci % ncz)) << 4) + (col & 15);
                 placed += column(level, chunk, x, z);
                 index++;
+                if ((index & 255) == 0 && chunk != null) {
+                    // チャンクを置き終えた (次の列が次のチャンク)
+                    endChunk(level, chunk);
+                    chunk = null;
+                    chunkIndex = -1;
+                }
                 if (System.nanoTime() >= deadlineNanos) {
                     break;
                 }

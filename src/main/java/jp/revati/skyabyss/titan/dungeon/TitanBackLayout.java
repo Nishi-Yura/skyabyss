@@ -168,14 +168,20 @@ public final class TitanBackLayout {
     // 第二の広間 (E2。射手の波) と番兵の詰所 (CK。老番兵)。E1 の南の戸 → E2 → CK。初回だけ働く
     public static final Box E2 = new Box(24, 46, 5, 47, FLOOR, 12);
     public static final Box CK = new Box(24, 46, 56, 76, FLOOR, 8);
-    public static final Box E2_PASS = new Box(36, 40, -7, 4, FLOOR, 6);
-    public static final Box CK_PASS = new Box(36, 40, 48, 55, FLOOR, 6);
+    public static final Box E2_PASS = new Box(33, 43, -6, 3, FLOOR, 6);
+    public static final Box CK_PASS = new Box(33, 43, 49, 54, FLOOR, 6);
     public static final List<BlockPos> E1_SOUTH = wall(36, 40, FLOOR + 1, FLOOR + 6, -7, true);
     public static final List<BlockPos> E2_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 4, true);
     public static final List<BlockPos> E2_EXIT = wall(36, 40, FLOOR + 1, FLOOR + 6, 48, true);
     public static final List<BlockPos> CK_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 55, true);
     // 番兵長の広間への戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。控えの間の西の戸口 (x 40)
     public static final List<BlockPos> E3_LOCK = CE1_WEST_DOOR;
+    // 幕 (26 の 4.4・判断 3): 一人〜二人のグループには、大きな広間の遠い側に、そのグループだけに閉じた封印の壁 (GroupGates) を張って、
+    // 戦いの範囲を狭める。三人以上なら開く。戸口・出口・共鳴石はいつも近い側にある。広間 E1 は東の端 (x 48〜54)、E2 は西の端 (x 24〜32)、
+    // 番兵長の広間 E3 は北の端 (z -106〜-85)
+    public static final List<BlockPos> VEIL_E1 = wall(E1.z1(), E1.z2(), FLOOR + 1, FLOOR + 11, 47, false);
+    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 33, false);
+    public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -84, true);
     // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
     public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
 
@@ -186,6 +192,8 @@ public final class TitanBackLayout {
     public static final int MAZE_W = 15;
     public static final int MAZE_H = 21;
     public static final int MAZE_CELL = 5;
+    // 出口の小部屋の上のはしごの z (入口の通路から出口の小部屋へ上がる通路 EXIT_PASS の中ほど)
+    public static final int EXIT_LADDER_Z = -5;
     public static final int MAZE_FLOOR = FLOOR - 19;
     // 入口は 2 つ (出口は 1 つ): 6 人が分かれて探せる。1 つめは鼓動の間の北東、2 つめは南西
     public static final int MAZE_START_I = 8;

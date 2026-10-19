@@ -31,7 +31,9 @@ public final class CourseGenerator {
     // 隣のレーンへ跳び移って足場を飛ばせないようにする (26 の 3.1)。作れなければ例外
     public static List<int[]> generate(Spec spec, long seed, List<int[]> avoid) {
         Random random = new Random(seed);
-        for (int attempt = 0; attempt < 2000; attempt++) {
+        // 隣のレーンを避けるときは、作れなければ早く諦める (呼ぶ側が別の種で試し直す)
+        int tries = avoid.isEmpty() ? 2000 : 300;
+        for (int attempt = 0; attempt < tries; attempt++) {
             List<int[]> steps = attempt(spec, random, avoid);
             if (steps != null) {
                 // すべての足場を崩れる骨にする (入口と出口の岩棚は石のまま、ここには含まれない)
@@ -45,7 +47,7 @@ public final class CourseGenerator {
     }
 
     // 隣のレーンとの水平の距離の下限
-    public static final double LANE_GAP = 5.0;
+    public static final double LANE_GAP = 4.5;
 
     private static List<int[]> attempt(Spec spec, Random random, List<int[]> avoid) {
         // 寄り道の目印: 部屋の中のランダムな地点

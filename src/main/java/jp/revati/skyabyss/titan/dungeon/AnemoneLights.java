@@ -64,8 +64,10 @@ public final class AnemoneLights {
     public static final String FLAG = "lamp.";
     public static final String FIRST_ROOM = "whale_maze";
     // 入口の小部屋の中の、数え石と苗床 (迷路の天井の上。床 y 81 の上)
-    public static final BlockPos TALLY_POS = new BlockPos(5, MAZE_FLOOR + 5, -24);
-    public static final BlockPos ENTRY_BED_POS = new BlockPos(5, MAZE_FLOOR + 5, -23);
+    public static final BlockPos TALLY_POS = new BlockPos(MAZE_ENTRY_ROOM.x2(), MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2() - 1);
+    public static final BlockPos ENTRY_BED_POS = new BlockPos(MAZE_ENTRY_ROOM.x2(), MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2());
+    // 2 つめの入口の小部屋の苗床
+    public static final BlockPos ENTRY_BED_POS2 = new BlockPos(MAZE_ENTRY_ROOM2.x2(), MAZE_FLOOR + 5, MAZE_ENTRY_ROOM2.z2());
     // 持ち歩きの光の強さ
     private static final int CARRY_LIGHT = 11;
 
@@ -117,7 +119,7 @@ public final class AnemoneLights {
             if (k <= prev) {
                 k = prev + 1;
             }
-            if (k % 4 == 0) {
+            if (k % MazeBuilder.POCKET_EVERY == 0) {
                 k++;
             }
             result.add(standPos(path.get(k)));
@@ -127,7 +129,7 @@ public final class AnemoneLights {
     }
 
     private static BlockPos standPos(int[] c) {
-        return mazeCell(c[0], c[1]).offset(1, 0, 1);
+        return mazeCell(c[0], c[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
     }
 
     // 出口の手前の戸: 最後から二つ目のマスと出口のマスをつなぐ通路 (3×3。息継ぎのくぼみなら、壁にした一番上の段は除く)
@@ -139,7 +141,7 @@ public final class AnemoneLights {
         BlockPos ca = mazeCell(a[0], a[1]);
         int dx = b[0] - a[0];
         int dz = b[1] - a[1];
-        boolean pocket = (n - 2) % 4 == 0;
+        boolean pocket = (n - 2) % MazeBuilder.POCKET_EVERY == 0;
         List<BlockPos> list = new ArrayList<>();
         for (int t = 0; t < MAZE_CELL; t++) {
             int x = dx != 0 ? ca.getX() + (dx > 0 ? MAZE_CELL : -1) : ca.getX() + t;
@@ -163,7 +165,7 @@ public final class AnemoneLights {
         }
         BlockPos mid = MazeBuilder.midPocket(maze);
         // 中ほどの休み場: 隅の足場の上 (空気の層の一段目)。復活位置 (北西の隅) と紫水晶 (南東の隅) の間の隅
-        kit.set(mid.offset(2, 2, 0), ModBlocks.ANEMONE_BED.get().defaultBlockState());
+        kit.set(mid.offset(MAZE_CELL - 1, 2, 0), ModBlocks.ANEMONE_BED.get().defaultBlockState());
         registerRoom(maze);
     }
 
@@ -171,6 +173,7 @@ public final class AnemoneLights {
     static void buildEntry(BuildKit kit) {
         kit.set(TALLY_POS, ModBlocks.ANEMONE_TALLY.get().defaultBlockState());
         kit.set(ENTRY_BED_POS, ModBlocks.ANEMONE_BED.get().defaultBlockState());
+        kit.set(ENTRY_BED_POS2, ModBlocks.ANEMONE_BED.get().defaultBlockState());
     }
 
     // 初回を終えたグループには、出口の戸が最初から開く (既知の道。FirstRun が 1 秒ごとに開け直す)

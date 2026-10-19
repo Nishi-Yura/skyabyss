@@ -120,7 +120,7 @@ public class ResonanceStoneBlock extends Block {
         record.markGateOpened();
         GroupGates.open(level, group, TitanBackLayout.GATE);
         GroupGates.open(level, group, TitanBackLayout.INNER_GATE);
-        BlockPos center = TitanBackLayout.GATE.get(4);
+        BlockPos center = TitanBackLayout.GATE.get(TitanBackLayout.GATE.size() / 2);
         Groups.sound(level, group, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
         Groups.sound(level, group, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 4f, 1.1f);
         notifyGroup(level, group, ModText.lore("message.skyabyss.gate_opened"));
@@ -128,7 +128,7 @@ public class ResonanceStoneBlock extends Block {
 
     // 近くにいる、そのグループの人へ
     private static void notifyGroup(ServerLevel level, UUID group, Component message) {
-        AABB area = new AABB(-60, 60, -80, 60, 130, 20);
+        AABB area = new AABB(-90, 40, -200, 90, 210, 30);
         for (ServerPlayer player : Groups.online(level, group)) {
             if (area.contains(player.position())) {
                 Notice.send(player, message);

@@ -511,7 +511,7 @@ public final class Ch1BackMobsSelfTest {
             Method waves = hallClass.getDeclaredMethod("waves");
             waves.setAccessible(true);
             int waveCount = ((List<?>) waves.invoke(hall)).size();
-            check(waveCount == 3, "the first hall has " + waveCount + " waves (expected 3: melee, archers + mortar, elder)", f);
+            check(waveCount == 2, "the first hall has " + waveCount + " waves (expected 2: melee, archers + mortar; the elder moved to the guard post)", f);
             Class<?> stateClass = Class.forName(trials.getName() + "$HallState");
             Constructor<?> ctor = stateClass.getDeclaredConstructors()[0];
             ctor.setAccessible(true);
@@ -522,13 +522,18 @@ public final class Ch1BackMobsSelfTest {
             Method spawnWave = trials.getDeclaredMethod("spawnWave", ServerLevel.class, hallClass, stateClass);
             spawnWave.setAccessible(true);
             AABB box = TitanBackLayout.E1.aabb().inflate(2);
+            Object ckHall = ((List<?>) hallsField.get(null)).get(2);
             for (int players : new int[] {1, 3, 4}) {
                 for (int wave = 2; wave <= 3; wave++) {
-                    Object state = ctor.newInstance(UUID.randomUUID(), hall);
-                    waveField.setInt(state, wave);
+                    // 波 3 = 番兵の詰所 (ck) の老番兵の波。第一の広間は 2 波まで
+                    Object hall2 = wave == 3 ? ckHall : hall;
+                    int waveNo = wave == 3 ? 2 : wave;
+                    Object state = ctor.newInstance(UUID.randomUUID(), hall2);
+                    waveField.setInt(state, waveNo);
                     playersField.setInt(state, players);
-                    spawnWave.invoke(null, level, hall, state);
-                    List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box, m -> m.getTags().contains(TitanBackTrials.MOB_TAG));
+                    spawnWave.invoke(null, level, hall2, state);
+                    AABB box2 = wave == 3 ? TitanBackLayout.CK.aabb().inflate(2) : box;
+                    List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box2, m -> m.getTags().contains(TitanBackTrials.MOB_TAG));
                     List<BoneMortar> mortars = mobs.stream().filter(m -> m instanceof BoneMortar).map(m -> (BoneMortar) m).toList();
                     List<ElderSentinel> elders = mobs.stream().filter(m -> m instanceof ElderSentinel).map(m -> (ElderSentinel) m).toList();
                     long archers = mobs.stream().filter(m -> m instanceof RibArcher).count();
@@ -544,7 +549,7 @@ public final class Ch1BackMobsSelfTest {
                         }
                     } else {
                         check(elders.size() == 1 && archers == 0, label + ": " + elders.size() + " elders, " + archers + " archers", f);
-                        check(sentinels == 2 + 2L * (players - 1), label + ": " + sentinels + " sentinels (expected " + (2 + 2 * (players - 1)) + ")", f);
+                        check(sentinels == 2L * (players - 1), label + ": " + sentinels + " sentinels (expected " + (2 * (players - 1)) + ")", f);
                         if (elders.size() == 1) {
                             double want = 220 * StoneWhaleHeart.scaleFor(players);
                             check(Math.abs(elders.get(0).getMaxHealth() - want) < 1.0 && elders.get(0).getHealth() == elders.get(0).getMaxHealth(),
@@ -555,7 +560,7 @@ public final class Ch1BackMobsSelfTest {
                     mobs.forEach(Entity::discard);
                 }
             }
-            notes.add("first hall: 3 waves");
+            notes.add("first hall: 2 waves; guard post: shield wall + elder");
         } catch (ReflectiveOperationException e) {
             f.add("could not drive TitanBackTrials.spawnWave: " + e);
         }
