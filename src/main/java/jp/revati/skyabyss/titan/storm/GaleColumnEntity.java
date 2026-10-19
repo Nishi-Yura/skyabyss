@@ -124,7 +124,7 @@ public class GaleColumnEntity extends Entity {
                 continue;
             }
             lifting.add(p.getUUID());
-            if (Updraft.lift(p, top)) {
+            if (ride(p)) {
                 lifting.remove(p.getUUID());
                 arrive(level, p);
             }
@@ -149,9 +149,33 @@ public class GaleColumnEntity extends Entity {
         }
     }
 
+    // 柱の乗り心地: 浮遊の効果で一定の速さで滑らかに上げる (サーバーが速さを上書きしないので、ぶれず・押し戻されず、空中で横へ少し動ける)。
+    // 頂の手前 6 ブロックから段階的に遅くして、頂で背中へ渡す。しゃがむと上昇をやめてゆっくり下りる。頂に着いたら true
+    private boolean ride(ServerPlayer p) {
+        double left = top - p.getY();
+        if (left <= 0.4) {
+            p.removeEffect(MobEffects.LEVITATION);
+            return true;
+        }
+        p.fallDistance = 0;
+        if (p.isShiftKeyDown()) {
+            p.removeEffect(MobEffects.LEVITATION);
+            p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 10, 0, false, false, false));
+            return false;
+        }
+        p.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 6, levitationFor(left), false, false, false));
+        return false;
+    }
+
+    // 頂までの残りに応じた浮遊の強さ (0.05 × (強さ+1) ブロック/tick)。7 = 毎秒 8 ブロック
+    public static int levitationFor(double left) {
+        return left > 6 ? 7 : left > 3 ? 4 : 2;
+    }
+
     // 頂に着いた: 雷鳴を鳴らし、背中へ渡す (白い閃光は StormTravel.board が画面へ送る)
     private void arrive(ServerLevel level, ServerPlayer p) {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), StormSetup.THUNDER_FAR.get(), SoundSource.PLAYERS, 2f, 1.0f);
+        p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200, 0, false, false, true));
         StormTravel.board(p);
     }
 
