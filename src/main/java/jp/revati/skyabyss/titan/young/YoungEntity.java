@@ -190,6 +190,11 @@ public class YoungEntity extends Entity implements GeoEntity {
         return new Vec3(fx * s[2] + fz * s[0], s[1], fz * s[2] - fx * s[0]);
     }
 
+    // 自己テスト用: FakePlayer は startRiding を受けないので、乗せる側から呼ぶ
+    void seatForTest(Entity passenger) {
+        addPassenger(passenger);
+    }
+
     @Override
     protected boolean canAddPassenger(Entity passenger) {
         int p = phase();

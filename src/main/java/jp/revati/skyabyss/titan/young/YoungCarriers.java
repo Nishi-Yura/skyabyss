@@ -50,6 +50,33 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class YoungCarriers {
     // 持ち主 → 今の子 (一人に一体)
     private static final Map<UUID, YoungEntity> BY_OWNER = new HashMap<>();
+    // 自己テスト用の偽の人 (PlayerList にいない)。本番では空
+    private static final Map<UUID, ServerPlayer> TEST_PLAYERS = new HashMap<>();
+
+    public static void testPlayer(ServerPlayer p, boolean add) {
+        if (add) {
+            TEST_PLAYERS.put(p.getUUID(), p);
+        } else {
+            TEST_PLAYERS.remove(p.getUUID());
+        }
+    }
+
+    // 今いる人 (本物 + 自己テストの偽の人)
+    static List<ServerPlayer> online(net.minecraft.server.MinecraftServer server) {
+        List<ServerPlayer> list = new java.util.ArrayList<>(server.getPlayerList().getPlayers());
+        for (ServerPlayer p : TEST_PLAYERS.values()) {
+            if (!list.contains(p)) {
+                list.add(p);
+            }
+        }
+        return list;
+    }
+
+    @Nullable
+    static ServerPlayer playerOf(net.minecraft.server.MinecraftServer server, UUID id) {
+        ServerPlayer p = server.getPlayerList().getPlayer(id);
+        return p != null ? p : TEST_PLAYERS.get(id);
+    }
     // いま降ろしてよい人 (降りる操作を止めない)
     private static final Set<UUID> RELEASING = new HashSet<>();
     // 呼べる距離: 子に乗りに行ける距離 (持ち主のパーティの人が、笛で持ち主の子へ乗るとき)
@@ -308,7 +335,7 @@ public final class YoungCarriers {
             Notice.bar(player, ModText.deny("message.skyabyss.young.full"));
             return;
         }
-        if (!young.assignSeat(player) || !player.startRiding(young)) {
+        if (!young.assignSeat(player) || !player.startRiding(young, true)) {
             young.sweepSeats();
             return;
         }

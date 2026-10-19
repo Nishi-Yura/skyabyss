@@ -27,7 +27,6 @@ public final class YoungSetup {
                 .clientTrackingRange(24)
                 .updateInterval(2)
                 .fireImmune()
-                .noSave()
                 .noSummon()
                 .build(SkyAbyss.MODID + ":" + kind.model));
     }

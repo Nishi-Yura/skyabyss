@@ -27,7 +27,7 @@ final class YoungOffers {
     private static List<ServerPlayer> party(YoungTrip trip, ServerLevel level) {
         List<ServerPlayer> list = new ArrayList<>();
         Vec3 c = trip.ringCentre();
-        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer p : YoungCarriers.online(level.getServer())) {
             if (p.level() == level && p.isAlive() && !p.isSpectator() && trip.mayRide(p) && p.distanceToSqr(c.x, p.getY(), c.z) <= SEE * SEE) {
                 list.add(p);
             }

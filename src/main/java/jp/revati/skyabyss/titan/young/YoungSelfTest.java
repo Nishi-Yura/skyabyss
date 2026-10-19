@@ -40,6 +40,9 @@ public final class YoungSelfTest {
     private static final List<String> F = new ArrayList<>();
     private static int stage;
     private static int wait;
+    // 前に流れが呼ばれてから進んだゲーム時間 (重い tick のあとは runner が tick を飛ばして呼ぶので、数えるのは呼んだ回数でなくゲーム時間)
+    private static int elapsed = 1;
+    private static long lastGameTime;
     private static FakePlayer[] p;
     private static PartyData.Party party;
     private static YoungEntity young;
@@ -72,11 +75,12 @@ public final class YoungSelfTest {
     }
 
     private static FakePlayer fake(ServerLevel level, int i) {
-        FakePlayer f = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("5c1e0a2b-0000-4000-8000-0000000d00" + (10 + i)), "[young_" + i + "]"));
+        FakePlayer f = new YoungTestPlayer(level, new GameProfile(UUID.fromString("5c1e0a2b-0000-4000-8000-0000000d00" + (10 + i)), "[young_" + i + "]"));
         f.setPos(platform.getX() + 0.5 + i, platform.getY() + 1, platform.getZ() + 0.5);
         f.setHealth(f.getMaxHealth());
         f.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         Voyages.state(f).readyAt = 0;
+        YoungCarriers.testPlayer(f, true);
         return f;
     }
 
@@ -84,9 +88,11 @@ public final class YoungSelfTest {
         ServerLevel level = server.overworld();
         BlockPos spawn = level.getSharedSpawnPos();
         platform = new BlockPos(spawn.getX() + 40, 130, spawn.getZ() + 40);
-        for (int dx = -16; dx <= 16; dx += 16) {
-            for (int dz = -16; dz <= 16; dz += 16) {
-                level.getChunk((platform.getX() + dx) >> 4, (platform.getZ() + dz) >> 4);
+        // 子は実体なので、チャンクが tick されていないと動かない (偽の人は読み込みを持たない)。足場の周りを強制読み込みにする
+        // (東へ 170 ブロックの行き先まで、幅 3 チャンクの廊下も読み込んでおく)
+        for (int dx = -3; dx <= 15; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                level.setChunkForced((platform.getX() >> 4) + dx, (platform.getZ() >> 4) + dz, true);
             }
         }
         for (int dx = -14; dx <= 14; dx++) {
@@ -101,7 +107,7 @@ public final class YoungSelfTest {
         for (int i = 0; i < 7; i++) {
             p[i] = fake(level, i);
         }
-        stage = 0;
+        stage = -1;
         wait = 0;
     }
 
@@ -131,7 +137,19 @@ public final class YoungSelfTest {
     }
 
     private static boolean flow(MinecraftServer server, ServerLevel level) {
+        long now = level.getGameTime();
+        elapsed = (int) Math.max(1, Math.min(now - lastGameTime, 400));
+        lastGameTime = now;
         switch (stage) {
+            case -1 -> {
+                // 廊下の読み込みで遅れた tick が落ち着くまで待つ (runner は遅れている間 tick を飛ばして呼ぶので、飛行の途中が見えなくなる)
+                wait = elapsed == 1 ? wait + 1 : 0;
+                if (wait >= 60) {
+                    wait = 0;
+                    stage = 0;
+                }
+                return false;
+            }
             case 0 -> {
                 // 眠っている巨神の笛は応えない・出会っていない人は呼べない
                 for (int i = 0; i < 6; i++) {
@@ -160,7 +178,7 @@ public final class YoungSelfTest {
                 stage = 1;
             }
             case 1 -> {
-                if (++wait < YoungEntity.APPEAR_TICKS + 3) {
+                if ((wait += elapsed) < YoungEntity.APPEAR_TICKS + 3) {
                     return false;
                 }
                 check(young.phase() == YoungEntity.WAIT, "the young one did not reach WAIT (" + young.phase() + ")");
@@ -212,7 +230,7 @@ public final class YoungSelfTest {
             }
             case 2 -> {
                 if (young.trip().phase() == YoungTrip.Phase.COUNTDOWN) {
-                    if (++wait > 400) {
+                    if ((wait += elapsed) > 400) {
                         F.add("the countdown never ended");
                         cleanup(server);
                         report("young");
@@ -225,7 +243,7 @@ public final class YoungSelfTest {
                 stage = 3;
             }
             case 3 -> {
-                if (++wait < 50) {
+                if ((wait += elapsed) < 50) {
                     return false;
                 }
                 double moved = Math.hypot(young.getX() - start.x, young.getZ() - start.z);
@@ -246,7 +264,7 @@ public final class YoungSelfTest {
             }
             case 4 -> {
                 if (young.trip().phase() != YoungTrip.Phase.OFFER) {
-                    if (++wait > 1200) {
+                    if ((wait += elapsed) > 1200) {
                         F.add("never arrived (" + young.trip().phase() + " at " + young.blockPosition() + ")");
                         cleanup(server);
                         report("young");
@@ -271,7 +289,7 @@ public final class YoungSelfTest {
             }
             case 5 -> {
                 if (!young.isRemoved()) {
-                    if (++wait > 400) {
+                    if ((wait += elapsed) > 400) {
                         F.add("the young one never dissolved");
                         cleanup(server);
                         report("young");
@@ -292,7 +310,7 @@ public final class YoungSelfTest {
                 stage = 6;
             }
             case 6 -> {
-                if (++wait < YoungEntity.APPEAR_TICKS + 3) {
+                if ((wait += elapsed) < YoungEntity.APPEAR_TICKS + 3) {
                     return false;
                 }
                 YoungCarriers.tryBoard(young, p[0]);
@@ -306,14 +324,14 @@ public final class YoungSelfTest {
                 stage = 7;
             }
             case 7 -> {
-                if (young.trip().phase() != YoungTrip.Phase.CARRY || ++wait < 60) {
+                if (young.trip().phase() != YoungTrip.Phase.CARRY || (wait += elapsed) < 60) {
                     if (wait > 500) {
                         F.add("second flight never started");
                         cleanup(server);
                         report("young");
                         return true;
                     }
-                    wait++;
+                    wait += elapsed;
                     return false;
                 }
                 // ログアウト
@@ -337,7 +355,7 @@ public final class YoungSelfTest {
                 stage = 8;
             }
             case 8 -> {
-                if (!young.isRemoved() && ++wait < 100) {
+                if (!young.isRemoved() && (wait += elapsed) < 100) {
                     return false;
                 }
                 check(young.isRemoved(), "the dissolving young one stayed");
@@ -354,6 +372,11 @@ public final class YoungSelfTest {
 
     private static void cleanup(MinecraftServer server) {
         YoungCarriers.endAll();
+        for (FakePlayer f : p) {
+            if (f != null) {
+                YoungCarriers.testPlayer(f, false);
+            }
+        }
         for (YoungEntity e : YoungCarriers.all()) {
             e.discard();
         }

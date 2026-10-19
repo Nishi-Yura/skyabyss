@@ -126,7 +126,7 @@ public final class YoungTrip {
 
     @Nullable
     ServerPlayer player(UUID id) {
-        return level().getServer().getPlayerList().getPlayer(id);
+        return YoungCarriers.playerOf(level().getServer(), id);
     }
 
     List<ServerPlayer> riders() {
@@ -218,7 +218,7 @@ public final class YoungTrip {
     // 同じパーティで、子の近くにいて、まだ乗っていない人
     List<ServerPlayer> mateNotAboard(ServerLevel level) {
         List<ServerPlayer> list = new ArrayList<>();
-        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer p : YoungCarriers.online(level.getServer())) {
             if (p.getUUID().equals(owner) || p.level() != level || !p.isAlive() || p.isSpectator() || p.getVehicle() == e || !mayRide(p)) {
                 continue;
             }
