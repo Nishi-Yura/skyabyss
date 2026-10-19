@@ -286,6 +286,51 @@ public final class TrialDraw {
         return new Mods(layout, numbers, enemy, hz, goal, extreme, false, rarity);
     }
 
+    // 深淵の段 (docs/design/31 の B04): 引いた修飾を、極のさらに上へ上げる。配置・敵の組は変えない (板で読めるまま)。
+    //  - 数字: すべて一番きびしい (2)。さらに底上げは Abyss の式 (Mods.abyss()) で使う側が掛ける
+    //  - 障害: 二つ (禁止の組を外して)。引けなければ「限界の数字」だけ
+    //  - 任意の目標: 必ず一つ (あれば)
+    // 純粋な計算で、同じ入力なら同じ結果 (種で決まる)
+    public static Mods abyssify(Def def, Mods base, Random rng) {
+        Space sp = def.space();
+        int[] numbers = new int[base.numbers().length];
+        java.util.Arrays.fill(numbers, 2);
+        List<Integer> hazards = new ArrayList<>();
+        for (int h : base.hazards()) {
+            hazards.add(h);
+        }
+        if (!sp.isEmpty()) {
+            List<Integer> ok = allowedHazards(sp, base.layout());
+            ok.removeAll(hazards);
+            java.util.Collections.shuffle(ok, rng);
+            while (hazards.size() < 2 && !ok.isEmpty()) {
+                hazards.add(ok.remove(0));
+            }
+        }
+        int goal = base.goal();
+        if (goal < 0 && !sp.goals().isEmpty()) {
+            goal = rng.nextInt(sp.goals().size());
+        }
+        Extreme extreme = hazards.size() >= 2 ? Extreme.DOUBLE_HAZARD : numbers.length > 0 ? Extreme.GAUNTLET : Extreme.NONE;
+        int[] hz = hazards.stream().mapToInt(Integer::intValue).toArray();
+        return new Mods(base.layout(), numbers, base.enemy(), hz, goal, extreme, base.quiet(), Rarity.ABYSS);
+    }
+
+    // 引き全体を深淵にする (種はグループ・巨神・周回から)
+    public static Draw abyssify(Draw draw, String titan, long worldSeed, UUID group) {
+        long seed = mix(seed(worldSeed, group, titan, draw.cycle()) ^ 0xABE55L);
+        List<Pick> picks = new ArrayList<>();
+        for (Pick p : draw.picks()) {
+            Def d = p.def();
+            if (d == null || p.mods().abyss()) {
+                picks.add(p);
+                continue;
+            }
+            picks.add(new Pick(p.cellId(), abyssify(d, p.mods(), new Random(mix(seed ^ d.id().hashCode())))));
+        }
+        return new Draw(draw.cycle(), List.copyOf(picks));
+    }
+
     private static List<Integer> allowedHazards(Space sp, int layout) {
         List<Integer> ok = new ArrayList<>();
         for (int h = 0; h < sp.hazards().size(); h++) {
@@ -304,6 +349,7 @@ public final class TrialDraw {
             case COMMON -> 0;
             case RARE -> 1;
             case EXTREME -> 2;
+            case ABYSS -> jp.revati.skyabyss.abyss.Abyss.MATERIAL_BONUS;
         };
         if (goalDone) {
             n += 1;

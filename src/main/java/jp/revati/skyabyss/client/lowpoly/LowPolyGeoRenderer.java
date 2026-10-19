@@ -84,6 +84,15 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
     // 光る層 (GlowLayer) の重ね描きの最中か
     private boolean glowPass;
 
+    // 深淵の心臓は暗い紫に染める (docs/design/31 の B04。心臓四体はどれもこの描画を通る)
+    @Override
+    public software.bernie.geckolib.util.Color getRenderColor(T animatable, float partialTick, int packedLight) {
+        if (animatable instanceof jp.revati.skyabyss.entity.HeartBoss heart && heart.isAbyss()) {
+            return software.bernie.geckolib.util.Color.ofRGB(112, 88, 148);
+        }
+        return super.getRenderColor(animatable, partialTick, packedLight);
+    }
+
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         if (LowPoly.enabled && LowPoly.debug && !animatable.isInvisible()) {

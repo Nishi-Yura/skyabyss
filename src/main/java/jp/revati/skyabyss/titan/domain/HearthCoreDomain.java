@@ -65,7 +65,7 @@ public final class HearthCoreDomain extends HeartDomain {
 
     @Override
     protected void rule(ServerLevel level, int t) {
-        if (t < FIRST || (t - FIRST) % STEP != 0) {
+        if (t < FIRST || (t - FIRST) % fast(STEP) != 0) {
             return;
         }
         int kind = steps++ % 4;

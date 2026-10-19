@@ -35,6 +35,8 @@ public abstract class HeartBoss extends GuardMob {
     public enum Stage { NONE, INTRO, DEATH }
 
     private static final EntityDataAccessor<Boolean> DATA_INTRO = SynchedEntityData.defineId(HeartBoss.class, EntityDataSerializers.BOOLEAN);
+    // 深淵の心臓か (docs/design/31 の B04。見た目 = 暗い染め・粒は両側で読む)
+    private static final EntityDataAccessor<Boolean> DATA_ABYSS = SynchedEntityData.defineId(HeartBoss.class, EntityDataSerializers.BOOLEAN);
 
     // 0 = まだ始めていない、1 = 流れている、2 = 終わった (保存する。読み込みで二度流さない)
     private int introState;
@@ -125,6 +127,160 @@ public abstract class HeartBoss extends GuardMob {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_INTRO, false);
+        builder.define(DATA_ABYSS, false);
+    }
+
+    // ---------------------------------------------------------------- 深淵の心臓 (docs/design/31 の B04・各心臓の設計書の「深淵」)
+    // 湧いた最初の tick に、グループが深淵を選んでいれば深淵になる (Abyss.groupOn)。変わること:
+    //   体力 ×1.2・傷 ×1.12・技の間 ×0.85 (各心臓の finish)・領域の周期と仕掛けの猶予 (HeartDomain.fast)・
+    //   心臓ごとの「深淵の技」が一つ増える (AbyssAttacks。どれも床の予告つき。一人でも避けられる)・暗い染めと深淵の粒・題字「深淵の心臓」
+    // 変えないこと: 技の予告の長さ・領域の仕掛けの手順・報酬のしくみ (心臓の戦いの内容は 29 の 2.8 のまま)
+    private boolean abyssChecked;
+    private int abyssClock = 200;
+    private int abyssTick;
+    private int abyssFired;
+    private final java.util.List<AbyssLater> abyssLater = new java.util.ArrayList<>();
+
+    private record AbyssLater(int at, Runnable run) {
+    }
+
+    // 深淵の技が使う文脈 (心臓ごとの部屋の中心・床・半径・当たる人の条件)
+    public record AbyssCtx(double cx, double cz, double floorY, double radius, java.util.function.Predicate<ServerPlayer> victims, boolean fury) {
+    }
+
+    public boolean isAbyss() {
+        return entityData.get(DATA_ABYSS);
+    }
+
+    public int abyssFired() {
+        return abyssFired;
+    }
+
+    public float abyssDamage() {
+        return isAbyss() ? jp.revati.skyabyss.abyss.Abyss.HEART_DAMAGE : 1f;
+    }
+
+    // 技を出さない間 (咆哮・領域の最中)
+    protected boolean abyssBusy() {
+        return false;
+    }
+
+    protected boolean abyssFury() {
+        return false;
+    }
+
+    protected boolean abyssReach(ServerPlayer player) {
+        return player.isAlive() && !player.isSpectator();
+    }
+
+    protected double abyssCx() {
+        return getX();
+    }
+
+    protected double abyssCz() {
+        return getZ();
+    }
+
+    protected double abyssFloor() {
+        return getY();
+    }
+
+    protected double abyssRadius() {
+        return 12;
+    }
+
+    // "whale" / "tide" / "storm" / "ember"
+    protected String abyssTheme() {
+        return "whale";
+    }
+
+    public final String abyssThemeId() {
+        return abyssTheme();
+    }
+
+    public final AbyssCtx abyssCtx() {
+        return new AbyssCtx(abyssCx(), abyssCz(), abyssFloor(), abyssRadius(), this::abyssReach, abyssFury());
+    }
+
+    // 深淵にする (または戻す)。体力は割合を保つ
+    public void setAbyss(boolean on) {
+        abyssChecked = true;
+        if (on == isAbyss()) {
+            return;
+        }
+        entityData.set(DATA_ABYSS, on);
+        net.minecraft.world.entity.ai.attributes.AttributeInstance hp = getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "abyss_heart_hp");
+        if (hp != null) {
+            float ratio = getMaxHealth() <= 0 ? 1f : getHealth() / getMaxHealth();
+            hp.removeModifier(id);
+            if (on) {
+                hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(id, jp.revati.skyabyss.abyss.Abyss.HEART_HP - 1.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            }
+            setHealth(getMaxHealth() * ratio);
+        }
+        if (!level().isClientSide) {
+            net.minecraft.network.chat.Component bar = on
+                    ? net.minecraft.network.chat.Component.translatable("abyss.skyabyss.heart_bar", getDisplayName()).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE)
+                    : getDisplayName();
+            heartBar().setName(bar);
+            if (on && level() instanceof ServerLevel server) {
+                announceAbyss(server);
+            }
+        }
+    }
+
+    // 題字「深淵の心臓」(登場のとき、近くの人に)
+    private void announceAbyss(ServerLevel server) {
+        for (ServerPlayer p : server.getPlayers(q -> q.distanceToSqr(this) < 64 * 64 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, q))) {
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 70, 20));
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                    net.minecraft.network.chat.Component.translatable("abyss.skyabyss.subtitle." + abyssTheme()).withStyle(net.minecraft.ChatFormatting.GRAY)));
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+                    net.minecraft.network.chat.Component.translatable("abyss.skyabyss.title").withStyle(net.minecraft.ChatFormatting.DARK_PURPLE, net.minecraft.ChatFormatting.BOLD)));
+        }
+    }
+
+    // 予約: ticks 後に run (深淵の技の連なり。心臓が消えたら捨てる)
+    public void abyssLater(int ticks, Runnable run) {
+        abyssLater.add(new AbyssLater(abyssTick + Math.max(0, ticks), run));
+    }
+
+    private void tickAbyss(ServerLevel server) {
+        abyssTick++;
+        if (!abyssLater.isEmpty()) {
+            for (AbyssLater l : java.util.List.copyOf(abyssLater)) {
+                if (abyssTick >= l.at()) {
+                    abyssLater.remove(l);
+                    if (isAlive()) {
+                        l.run().run();
+                    }
+                }
+            }
+        }
+        if (isDeadOrDying()) {
+            abyssLater.clear();
+            return;
+        }
+        if (tickCount % 3 == 0) {
+            jp.revati.skyabyss.abyss.AbyssFx.aura(server, this, abyssTheme());
+        }
+        if (isIntroPlaying() || abyssBusy()) {
+            abyssClock = Math.max(abyssClock, 60);
+            return;
+        }
+        java.util.List<ServerPlayer> near = server.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(40, 14, 40), this::abyssReach);
+        if (near.isEmpty()) {
+            return;
+        }
+        if (abyssClock > 0) {
+            abyssClock--;
+            return;
+        }
+        jp.revati.skyabyss.abyss.AbyssAttacks.launch(this, server, near);
+        abyssFired++;
+        abyssClock = (abyssFury() ? jp.revati.skyabyss.abyss.Abyss.ATTACK_EVERY_FURY : jp.revati.skyabyss.abyss.Abyss.ATTACK_EVERY) + random.nextInt(40);
     }
 
     // ---------------------------------------------------------------- 演出の状態 (両側で読める)
@@ -217,8 +373,17 @@ public abstract class HeartBoss extends GuardMob {
                 // /summon の NBT 読み込みは無重力の印を消すので、毎 tick 付け直す (浮いたまま落ちない)
                 setNoGravity(true);
             }
+            if (!abyssChecked && !isDeadOrDying()) {
+                abyssChecked = true;
+                if (groupId() != null && jp.revati.skyabyss.abyss.Abyss.groupOn(server, groupId())) {
+                    setAbyss(true);
+                }
+            }
             tickCinematicServer(server);
             holdHeight();
+            if (isAbyss()) {
+                tickAbyss(server);
+            }
         }
     }
 
@@ -313,6 +478,9 @@ public abstract class HeartBoss extends GuardMob {
             if (deathTime >= DEATH_TICKS) {
                 super.dropAllDeathLoot(server, deathSource != null ? deathSource : damageSources().generic());
                 onDeathFinished(server);
+                if (isAbyss()) {
+                    jp.revati.skyabyss.abyss.AbyssLoot.onDefeat(server, this);
+                }
                 NeoForge.EVENT_BUS.post(new HeartCinematicEvent(this, HeartCinematicEvent.Kind.DEATH_END, DEATH_TICKS));
                 server.broadcastEntityEvent(this, (byte) 60);
                 remove(RemovalReason.KILLED);
@@ -324,6 +492,7 @@ public abstract class HeartBoss extends GuardMob {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("IntroDone", introState == 2);
+        tag.putBoolean("Abyss", isAbyss());
     }
 
     @Override
@@ -331,6 +500,10 @@ public abstract class HeartBoss extends GuardMob {
         super.readAdditionalSaveData(tag);
         if (tag.getBoolean("IntroDone")) {
             introState = 2;
+        }
+        if (tag.contains("Abyss")) {
+            abyssChecked = true;
+            entityData.set(DATA_ABYSS, tag.getBoolean("Abyss"));
         }
     }
 }

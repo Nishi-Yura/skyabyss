@@ -64,7 +64,7 @@ public final class ThunderCageDomain extends HeartDomain {
 
     @Override
     protected void rule(ServerLevel level, int t) {
-        if (t < FIRST || (t - FIRST) % PULSE != 0) {
+        if (t < FIRST || (t - FIRST) % fast(PULSE) != 0) {
             return;
         }
         int kind = pulses++ % 3;
@@ -187,12 +187,12 @@ public final class ThunderCageDomain extends HeartDomain {
         int k = t - chargeStart;
         if (k % 8 == 0) {
             burst(level, n, ParticleTypes.ELECTRIC_SPARK, 6 + k / 12, 0.4, 0.3);
-            ring(level, n.pos, ROD_RADIUS, k > CHARGE - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
+            ring(level, n.pos, ROD_RADIUS, k > fast(CHARGE) - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
         }
         if (k % 20 == 0) {
             tone(level, n.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f + k / 200f, 1.8f);
         }
-        if (k == CHARGE - TELE_WARN) {
+        if (k == fast(CHARGE) - TELE_WARN) {
             double x = n.pos.x;
             double z = n.pos.z;
             pending = tg(level, TelegraphShape.circle(x, z, ROD_RADIUS), TELE_WARN)
@@ -200,11 +200,11 @@ public final class ThunderCageDomain extends HeartDomain {
                     .onHit((s, p) -> striker.accept(p, ROD_DAMAGE))
                     .start();
         }
-        if (k >= CHARGE) {
+        if (k >= fast(CHARGE)) {
             // 溜まりきって落ちた (傷は予告が出した)。柱はしばらくして、また溜まる
             pending = null;
             chargeStart = -1;
-            readyAt = t + RESET;
+            readyAt = t + fast(RESET);
             burst(level, n, ParticleTypes.FLASH, 1, 0.1, 0);
             tell(level, "message.skyabyss.domain.thunder_cage.spent");
         }
@@ -223,7 +223,7 @@ public final class ThunderCageDomain extends HeartDomain {
             }
             chargeStart = -1;
             stage++;
-            readyAt = ticks() + GAP;
+            readyAt = ticks() + fast(GAP);
             tone(level, node.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.6f, 1.4f);
             burst(level, node, ParticleTypes.ELECTRIC_SPARK, 40, 0.6, 0.5);
             tell(level, "message.skyabyss.domain.thunder_cage.grounded", stage, NODES);

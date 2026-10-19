@@ -55,7 +55,12 @@ public enum Rune {
     THUNDER_RING("claw_ring", Skill.BACKSTEP, 4, "raiju_claw"),
     HOOK_PULL("halberd_hook", Skill.ROCK_CALL, 4, "warden_glaive"),
     FIRE_BED("hammer_forge", Skill.EMBER_HAMMER, 4, "smith_hammer"),
-    FIRE_PASS("poker_share", Skill.TEMPER, 4, "thrall_poker");
+    FIRE_PASS("poker_share", Skill.TEMPER, 4, "thrall_poker"),
+    // ---- 深淵の専用伝説 (深淵の心臓から。docs/design/31 の B04)。まだ書き換えのない 4 つの技へ
+    ABYSS_CLEAVE("abyss_cleave", Skill.TITAN_CLEAVE, 4, "abyss_greatsword"),
+    SUNK_SONG("sunk_song", Skill.WARD_SONG, 4, "abyss_bell_staff"),
+    SKY_FALL("sky_fall", Skill.CLOUD_PIERCE, 4, "abyss_storm_bow"),
+    CREEPING_ASH("creeping_ash", Skill.ASH_SCATTER, 4, "abyss_ash_scythe");
 
     // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は伝説の書き換え)。docs/design/31 の A13
     public static final int MASTERY = 5;

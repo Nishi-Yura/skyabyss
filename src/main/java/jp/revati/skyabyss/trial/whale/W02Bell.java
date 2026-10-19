@@ -123,10 +123,13 @@ public final class W02Bell implements TrialCell {
             return true;
         }
         Mods m = run.mods;
-        int period = PERIOD[m.number(0)];
-        double window = WINDOW[m.number(1)];
+        int period = jp.revati.skyabyss.abyss.Abyss.shorter(m, PERIOD[m.number(0)]);
+        double window = jp.revati.skyabyss.abyss.Abyss.narrower(m, WINDOW[m.number(1)]);
         if (m.hasHazard(1)) {
             window *= 0.75;
+        }
+        if (m.abyss()) {
+            window = Math.max(0.35, window);
         }
         long t = Math.max(0, now - run.startTick);
         long phase = (t + (long) i * period / BEAMS) % period;

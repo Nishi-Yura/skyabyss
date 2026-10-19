@@ -389,7 +389,7 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         action = Action.NONE;
         actionTicks = 0;
-        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]);
+        cooldown = jp.revati.skyabyss.abyss.Abyss.gap(isAbyss(), enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]));
     }
 
     // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どの技も自分の tick を数え直して動く)
@@ -455,7 +455,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 人へ傷を与える。殻が閉じた直後 (弱まっている間) は、この心臓の攻撃は半分になる
     private void strike(ServerPlayer player, float amount) {
-        player.hurt(attackSource(), weakTicks > 0 ? amount * 0.5f : amount);
+        player.hurt(attackSource(), (weakTicks > 0 ? amount * 0.5f : amount) * abyssDamage());
     }
 
     private double floorY() {
@@ -1073,6 +1073,37 @@ public class StoneWhaleHeart extends HeartBoss {
                 bossBar.addPlayer(player);
             }
         }
+    }
+
+    // ---- 深淵の心臓 (HeartBoss の abyss* の答え。docs/design/31 の B04) ----
+    @Override
+    protected boolean abyssBusy() {
+        return isRoaring() || domain != null && domain.running();
+    }
+
+    @Override
+    protected boolean abyssFury() {
+        return isEnraged();
+    }
+
+    @Override
+    protected boolean abyssReach(ServerPlayer player) {
+        return canReach(player);
+    }
+
+    @Override
+    protected double abyssFloor() {
+        return floorY();
+    }
+
+    @Override
+    protected double abyssRadius() {
+        return arena == null ? 12 : Math.min(arena.getXsize(), arena.getZsize()) / 2 - 1;
+    }
+
+    @Override
+    protected String abyssTheme() {
+        return "whale";
     }
 
     @Override

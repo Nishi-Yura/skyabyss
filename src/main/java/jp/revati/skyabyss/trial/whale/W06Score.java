@@ -45,6 +45,10 @@ public final class W06Score implements TrialCell {
     public static final int[][] RIB_COLOR = {{0, 1, 2, 3, 4, 5}, {5, 4, 3, 2, 1, 0}, {2, 0, 4, 1, 5, 3}};
     static final int[] LENGTH = {3, 4, 6};
     static final int FLASH_TICKS = 120;
+
+    static int length(Run run) {
+        return jp.revati.skyabyss.abyss.Abyss.plusOne(run.mods, LENGTH[run.mods.number(0)]);
+    }
     static final float[] PITCH = {0.7f, 0.8f, 0.9f, 1.1f, 1.25f, 1.45f};
 
     private static final BlockState[] CONCRETE = {Blocks.RED_CONCRETE.defaultBlockState(), Blocks.ORANGE_CONCRETE.defaultBlockState(),
@@ -91,7 +95,7 @@ public final class W06Score implements TrialCell {
 
     private static int[] sequence(Run run) {
         return run.get("seq", () -> {
-            int n = LENGTH[run.mods.number(0)];
+            int n = length(run);
             Random rng = new Random(run.seed);
             int[] seq = new int[n];
             for (int k = 0; k < n; k++) {
@@ -120,7 +124,7 @@ public final class W06Score implements TrialCell {
         run.put("shownUntil", back.getGameTime() + FLASH_TICKS);
         run.put("visible", true);
         if (run.cleared) {
-            run.put("progress", LENGTH[run.mods.number(0)]);
+            run.put("progress", length(run));
             GroupGates.open(back, run.group, WhaleDeck.W06_EXIT);
         }
     }

@@ -60,6 +60,8 @@ public final class SkillActions {
     // 雲穿ちの矢 (寿命を数え、尾を引かせる)
     public static final String PIERCE_TAG = "skyabyss_cloud_pierce";
     public static final String LIGHTNING_TAG = "skyabyss_cloud_pierce_lightning";
+    // 伝説の書き換え「天落とし」(雷淵の弓): 矢の止まった所に 0.8 秒後、雷の柱
+    public static final String SKY_FALL_TAG = "skyabyss_cloud_pierce_sky_fall";
     private static final List<TrackedArrow> ARROWS = new ArrayList<>();
     // 天の驟雨の、これから降る分
     private static final List<Rain> RAINS = new ArrayList<>();
@@ -322,8 +324,44 @@ public final class SkillActions {
                 level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.0);
             }
         }
+        if (rune == 4) {
+            abyssCleaveEcho(player, level, origin, dir, base);
+        }
         sound(player, Skills.SOUND_CLEAVE.get(), 1.0f, bigHit ? 0.85f : 1.0f);
         return null;
+    }
+
+    // 伝説の書き換え「奈落断ち」(底なしの大剣。docs/design/31 の B04): 振った扇が 1.2 秒後に裂けて、同じ扇にもう一度 ×0.6 の遅れた刃
+    private static void abyssCleaveEcho(ServerPlayer player, ServerLevel level, Vec3 origin, Vec3 dir, float base) {
+        SkillEffects.later(level, jp.revati.skyabyss.abyss.Abyss.ECHO_DELAY, () -> {
+            if (!player.isAlive() || player.level() != level) {
+                return;
+            }
+            double cos = Math.cos(Math.toRadians(SkillRules.CLEAVE_HALF_ANGLE));
+            AABB box = new AABB(origin, origin).inflate(SkillRules.CLEAVE_RANGE + 2, 1.5, SkillRules.CLEAVE_RANGE + 2).expandTowards(0, 2.0, 0);
+            int n = 0;
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, f -> isFoe(player, f))) {
+                Vec3 to = new Vec3(e.getX() - origin.x, 0, e.getZ() - origin.z);
+                double dist = to.length() - e.getBbWidth() / 2;
+                if (dist > SkillRules.CLEAVE_RANGE || to.length() >= 1.0 && to.normalize().dot(dir) < cos) {
+                    continue;
+                }
+                if (n++ >= SkillRules.CLEAVE_MAX_TARGETS) {
+                    break;
+                }
+                float amount = base * (float) jp.revati.skyabyss.abyss.Abyss.ECHO_SCALE * (isLarge(e) ? (float) SkillRules.CLEAVE_LARGE_BONUS : 1f);
+                if (hit(player, e, amount, Skill.TITAN_CLEAVE)) {
+                    particle(level, jp.revati.skyabyss.abyss.AbyssFx.DUST, e.position().add(0, e.getBbHeight() * 0.6, 0), 10, 0.3, 0.02);
+                    particle(level, ParticleTypes.REVERSE_PORTAL, e.position().add(0, e.getBbHeight() * 0.6, 0), 8, 0.3, 0.1);
+                }
+            }
+            // 裂け目の筋 (扇の中心線)
+            for (int i = 0; i <= 12; i++) {
+                Vec3 p = origin.add(dir.scale(0.8 + i * 0.35)).add(0, 0.3, 0);
+                level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y, p.z, 2, 0.05, 0.1, 0.05, 0.04);
+            }
+            level.playSound(null, origin.x, origin.y, origin.z, net.minecraft.sounds.SoundEvents.WARDEN_SONIC_BOOM, net.minecraft.sounds.SoundSource.PLAYERS, 0.5f, 1.4f);
+        });
     }
 
     // 岩呼び: 周りの敵の狙いを、数秒のあいだ自分へ引く。引いた敵の攻撃を受けても押されにくい (SkillEvents)
@@ -705,9 +743,42 @@ public final class SkillActions {
             player.serverLevel().sendParticles(ParticleTypes.NOTE, t.getX(), t.getY() + 2.1, t.getZ(), 3, 0.3, 0.15, 0.3, 1.0);
             player.serverLevel().sendParticles(Skills.SKY_MOTE.get(), t.getX(), t.getY() + 1.0, t.getZ(), 8, 0.4, 0.6, 0.4, 0.02);
         }
+        if (rune == 4) {
+            abyssSunkSong(player, targets, ticks);
+        }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_MARK.get(), 0.9f, 0.8f);
         return null;
+    }
+
+    // 伝説の書き換え「沈む唄」(沈み鐘の杖): 割られずに残った守りは、唄の終わりに体力へ沈み、いちばん傷ついた仲間にも合計の半分が届く
+    private static void abyssSunkSong(ServerPlayer player, List<ServerPlayer> targets, int ticks) {
+        ServerLevel level = player.serverLevel();
+        SkillEffects.later(level, Math.max(1, ticks - 2), () -> {
+            float pool = 0f;
+            for (ServerPlayer t : targets) {
+                if (t.isAlive() && t.level() == level) {
+                    float left = Math.min(t.getAbsorptionAmount(), SkillRules.ABSORB_CAP);
+                    if (left > 0f) {
+                        pool += left;
+                        t.heal(left);
+                        level.sendParticles(ParticleTypes.HEART, t.getX(), t.getY() + 1.9, t.getZ(), 2, 0.3, 0.2, 0.3, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, t.getX(), t.getY() + 1.0, t.getZ(), 6, 0.4, 0.5, 0.4, 0.0);
+                    }
+                }
+            }
+            if (pool > 0f) {
+                ServerPlayer worst = null;
+                for (ServerPlayer t : targets) {
+                    if (t.isAlive() && t.level() == level && (worst == null || t.getHealth() / t.getMaxHealth() < worst.getHealth() / worst.getMaxHealth())) {
+                        worst = t;
+                    }
+                }
+                if (worst != null) {
+                    worst.heal(pool * (float) jp.revati.skyabyss.abyss.Abyss.SUNK_SONG_SHARE);
+                }
+            }
+        });
     }
 
     // 引き潮: 前方の敵を足もとへ引き寄せ、鈍足を付ける。大きな相手は引かず鈍足だけ。
@@ -955,9 +1026,37 @@ public final class SkillActions {
             level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 14, 0.35, 0.4, 0.35, 0.02);
         }
         ring(level, ParticleTypes.ASH, player.position(), SkillRules.ASH_SCATTER_RADIUS, 36, 0.8);
+        if (rune(player, Skill.ASH_SCATTER) == 4) {
+            abyssCreepingAsh(player, level, rank);
+        }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_SWEEP.get(), 0.8f, 0.5f);
         return null;
+    }
+
+    // 伝説の書き換え「這う灰」(灰喰いの鎌): 灰かぶりの敵のまわりの敵へ、2 秒おきに灰が移る (最大 3 度)。灰かぶりは重ならないので、数が増えるだけ
+    private static void abyssCreepingAsh(ServerPlayer player, ServerLevel level, int rank) {
+        for (int step = 1; step <= jp.revati.skyabyss.abyss.Abyss.ASH_STEPS; step++) {
+            SkillEffects.later(level, step * jp.revati.skyabyss.abyss.Abyss.ASH_EVERY, () -> {
+                if (!player.isAlive() || player.level() != level) {
+                    return;
+                }
+                List<LivingEntity> ashed = new ArrayList<>();
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(24, 8, 24), f -> isFoe(player, f))) {
+                    if (SkillEffects.ashed(e)) {
+                        ashed.add(e);
+                    }
+                }
+                for (LivingEntity from : ashed) {
+                    for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, from.getBoundingBox().inflate(jp.revati.skyabyss.abyss.Abyss.ASH_RADIUS, 2, jp.revati.skyabyss.abyss.Abyss.ASH_RADIUS),
+                            f -> isFoe(player, f) && !SkillEffects.ashed(f))) {
+                        SkillEffects.ashFall(e, SkillRules.ashScatterTicks(rank));
+                        level.sendParticles(ParticleTypes.ASH, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 14, 0.35, 0.4, 0.35, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, e.getX(), e.getY() + 0.5, e.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
+                    }
+                }
+            });
+        }
     }
 
     // ---------------------------------------------------------------- 骨の射手
@@ -1008,6 +1107,9 @@ public final class SkillActions {
         arrow.addTag(PIERCE_TAG);
         if (rune == 3) {
             arrow.addTag(LIGHTNING_TAG);
+        }
+        if (rune == 4) {
+            arrow.addTag(SKY_FALL_TAG);
         }
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0f, speed, 0f);
         level.addFreshEntity(arrow);
@@ -1127,6 +1229,7 @@ public final class SkillActions {
             AbstractArrow a = t.arrow();
             int age = ++t.age()[0];
             if (a.isRemoved()) {
+                abyssSkyFall(a);
                 it.remove();
                 continue;
             }
@@ -1136,6 +1239,7 @@ public final class SkillActions {
                 if (a.level() instanceof ServerLevel l) {
                     l.sendParticles(Skills.SKY_MOTE.get(), a.getX(), a.getY(), a.getZ(), 6, 0.15, 0.15, 0.15, 0.02);
                 }
+                abyssSkyFall(a);
                 a.discard();
                 it.remove();
                 continue;
@@ -1181,6 +1285,32 @@ public final class SkillActions {
                 it.remove();
             }
         }
+    }
+
+    // 天落とし: 矢が止まった所 (刺さる・寿命・貫き終え) に、0.8 秒後に雷の柱 (半径 2.5。攻撃力の ×0.9)
+    private static void abyssSkyFall(AbstractArrow arrow) {
+        if (!arrow.getTags().contains(SKY_FALL_TAG) || !(arrow.level() instanceof ServerLevel level) || !(arrow.getOwner() instanceof ServerPlayer owner)) {
+            return;
+        }
+        Vec3 at = arrow.position();
+        arrow.removeTag(SKY_FALL_TAG);
+        ring(level, jp.revati.skyabyss.abyss.AbyssFx.DUST, at, jp.revati.skyabyss.abyss.Abyss.SKY_FALL_RADIUS, 20, 0.1);
+        SkillEffects.later(level, jp.revati.skyabyss.abyss.Abyss.SKY_FALL_DELAY, () -> {
+            if (!owner.isAlive() || owner.level() != level) {
+                return;
+            }
+            AABB box = new AABB(at, at).inflate(jp.revati.skyabyss.abyss.Abyss.SKY_FALL_RADIUS + 1, 2, jp.revati.skyabyss.abyss.Abyss.SKY_FALL_RADIUS + 1).expandTowards(0, 3, 0);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, f -> isFoe(owner, f))) {
+                if (Math.hypot(e.getX() - at.x, e.getZ() - at.z) - e.getBbWidth() / 2 <= jp.revati.skyabyss.abyss.Abyss.SKY_FALL_RADIUS) {
+                    hit(owner, e, attackDamage(owner) * (float) jp.revati.skyabyss.abyss.Abyss.SKY_FALL_SCALE, Skill.CLOUD_PIERCE);
+                }
+            }
+            for (int k = 0; k < 16; k++) {
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + k * 0.4, at.z, 3, 0.15, 0.05, 0.15, 0.02);
+            }
+            level.sendParticles(jp.revati.skyabyss.abyss.AbyssFx.DUST, at.x, at.y + 0.3, at.z, 14, 0.8, 0.3, 0.8, 0.0);
+            level.playSound(null, at.x, at.y, at.z, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 1.5f);
+        });
     }
 
     public static void clear() {

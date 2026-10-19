@@ -235,7 +235,11 @@ public final class TrialRuntime {
         }
         // 今週の試練 (引いていない): 全グループに同じ修飾 (種 = 世界の種 + 週 + 巨神)
         long h = TrialDraw.seed(TrialData.worldSeed(back), new UUID(TrialData.week(), 0x7EEC), titan, 1);
-        return TrialDraw.rollMods(def, new Random(h ^ def.id().hashCode()));
+        Mods weekly = TrialDraw.rollMods(def, new Random(h ^ def.id().hashCode()));
+        if (jp.revati.skyabyss.abyss.Abyss.groupOn(back, group)) {
+            weekly = TrialDraw.abyssify(def, weekly, new Random(h ^ def.id().hashCode() ^ 0xABE55L));
+        }
+        return weekly;
     }
 
     public static TrialCell.Run armed(ServerLevel back, UUID group, TrialCell cell, TrialDraw.Draw draw, long now) {
@@ -480,7 +484,8 @@ public final class TrialRuntime {
                 codex.setWeeklyDone(id, def.titan(), week);
                 Notice.hint(p, "message.skyabyss.trial.weekly_done");
             }
-            if (mods.rarity() == Rarity.EXTREME && back.random.nextFloat() < 0.08f) {
+            if ((mods.rarity() == Rarity.EXTREME && back.random.nextFloat() < 0.08f)
+                    || (mods.rarity() == Rarity.ABYSS && back.random.nextFloat() < jp.revati.skyabyss.abyss.Abyss.SHARD_CHANCE)) {
                 shards++;
             }
             if (shards > 0) {
@@ -551,8 +556,11 @@ public final class TrialRuntime {
         if (codex.totalGoals(id) >= 10) {
             earned.add("goals10");
         }
-        if (mods.rarity() == Rarity.EXTREME) {
+        if (mods.rarity() == Rarity.EXTREME || mods.rarity() == Rarity.ABYSS) {
             earned.add("extreme");
+        }
+        if (mods.rarity() == Rarity.ABYSS) {
+            earned.add("abyss");
         }
         for (String t : earned) {
             if (codex.addTitle(id, t)) {

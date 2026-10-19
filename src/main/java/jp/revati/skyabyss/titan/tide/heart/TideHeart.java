@@ -466,7 +466,7 @@ public class TideHeart extends HeartBoss {
         action = Action.NONE;
         actionTicks = 0;
         int phase = getPhase();
-        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[phase] + random.nextInt(GAP_SPAN[phase]);
+        cooldown = jp.revati.skyabyss.abyss.Abyss.gap(isAbyss(), enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[phase] + random.nextInt(GAP_SPAN[phase]));
     }
 
     // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どちらも自分の tick を数え直して動く)。両方が終わったら終わり
@@ -540,7 +540,7 @@ public class TideHeart extends HeartBoss {
     }
 
     void strike(ServerPlayer player, float amount) {
-        player.hurt(attackSource(), amount);
+        player.hurt(attackSource(), amount * abyssDamage());
     }
 
     // 心臓の中心の高さ (模型の核)
@@ -1438,6 +1438,37 @@ public class TideHeart extends HeartBoss {
                 bossBar.addPlayer(player);
             }
         }
+    }
+
+    // ---- 深淵の心臓 (HeartBoss の abyss* の答え。docs/design/31 の B04) ----
+    @Override
+    protected boolean abyssBusy() {
+        return isRoaring() || domain != null && domain.running();
+    }
+
+    @Override
+    protected boolean abyssFury() {
+        return isEnraged();
+    }
+
+    @Override
+    protected boolean abyssReach(ServerPlayer player) {
+        return canReach(player);
+    }
+
+    @Override
+    protected double abyssFloor() {
+        return floorY();
+    }
+
+    @Override
+    protected double abyssRadius() {
+        return isBound() ? TideHeartArena.RADIUS - 0.5 : 12;
+    }
+
+    @Override
+    protected String abyssTheme() {
+        return "tide";
     }
 
     @Override
