@@ -114,10 +114,10 @@ public class TideBackState extends SavedData {
             } else {
                 record.putInt(EAST, 1 + random.nextInt(3));
             }
-            // 6 か所から 3 つ
+            // 10 か所から 5 つ
             int sites = 0;
-            while (Integer.bitCount(sites) < 3) {
-                sites |= 1 << random.nextInt(6);
+            while (Integer.bitCount(sites) < TideBackLayout.NEST_COUNT) {
+                sites |= 1 << random.nextInt(TideBackLayout.NEST_SITES.length);
             }
             record.putInt(NEST_SITES, sites);
             record.setFlag(SEEDED, true);
@@ -169,7 +169,7 @@ public class TideBackState extends SavedData {
 
         public int nestSites() {
             int s = record.getInt(NEST_SITES);
-            return s == 0 ? 0b000111 : s;
+            return s == 0 ? (1 << TideBackLayout.NEST_COUNT) - 1 : s;
         }
 
         public boolean nestBroken(int site) {

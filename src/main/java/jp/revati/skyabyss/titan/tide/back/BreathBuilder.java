@@ -34,7 +34,7 @@ public final class BreathBuilder {
                 for (int y = POOL_FLOOR; y <= A_TOP; y++) {
                     BlockState s;
                     if (y == POOL_FLOOR) {
-                        s = d <= 3.4 ? GLASS : TideKit.BRICK;
+                        s = d <= MOON_R + 0.4 ? GLASS : TideKit.BRICK;
                     } else if (y < LIP) {
                         s = d <= POOL_R ? WATER : TideKit.BRICK;
                     } else if (y == LIP) {
@@ -67,8 +67,8 @@ public final class BreathBuilder {
         int cx = d.cx();
         int cz = d.cz();
         int fy = d.floorY();
-        for (int x = cx - 4; x <= cx + 4; x++) {
-            for (int z = cz - 4; z <= cz + 4; z++) {
+        for (int x = cx - 6; x <= cx + 6; x++) {
+            for (int z = cz - 6; z <= cz + 6; z++) {
                 double dc = Math.hypot(x - cx, z - cz);
                 if (!d.floorContains(x, z)) {
                     continue;
@@ -81,14 +81,17 @@ public final class BreathBuilder {
                     kit.set(x, fy, z, TideKit.FLOOR);
                     kit.set(x, fy - 1, z, TideKit.BRICK);
                 }
-                if (dc <= 2.6) {
+                if (dc <= 3.0) {
                     kit.set(x, fy - 2, z, TideKit.NACRE);
                 }
-                if (dc <= 1.8) {
+                if (dc <= 2.2) {
                     kit.set(x, fy - 3, z, TideKit.DARK);
                 }
+                if (dc <= 1.4) {
+                    kit.set(x, fy - 4, z, TideKit.DARK);
+                }
                 // 皿の上の空気 (気室を掘ったあとなので、すでに空気。皿 0 と縁の上の水が残らないように)
-                for (int y = fy + 1; y <= fy + 4; y++) {
+                for (int y = fy + 1; y <= Math.min(fy + 4, A_TOP); y++) {
                     if (!kit.get(x, y, z).isAir()) {
                         kit.set(x, y, z, TideKit.AIR);
                     }
@@ -217,6 +220,15 @@ public final class BreathBuilder {
                 kit.set(x, ARENA_FLOOR, z, s);
             }
         }
+        // 舞台の外の輪 (半径 ARENA_R から塔の気室の壁まで): 暗い石の床に、灯りの縁
+        for (int x = CX - 9; x <= CX + 9; x++) {
+            for (int z = CZ - 9; z <= CZ + 9; z++) {
+                double d = dist(x, z);
+                if (d > ARENA_R && d <= radiusB(ARENA_FLOOR + 1)) {
+                    kit.set(x, ARENA_FLOOR, z, d < ARENA_R + 1.2 ? TideKit.NACRE : (x + z) % 3 == 0 ? TideKit.DARK : TideKit.BRICK);
+                }
+            }
+        }
         // 風の柱 (皿 7 の真上): 床の穴と、まわりの低い壁 (床から 2 段)
         Dish v = vent();
         for (int x = v.cx() - 3; x <= v.cx() + 3; x++) {
@@ -325,7 +337,7 @@ public final class BreathBuilder {
 
     private static boolean window(int x, int z) {
         boolean ns = z == OBS_Z1 - 1 || z == OBS_Z2 + 1;
-        return ns ? x >= -6 && x <= 4 : z >= -9 && z <= 3;
+        return ns ? x >= -6 && x <= 4 : z >= CZ - 6 && z <= CZ + 6;
     }
 
     private static BlockState deckFloor(int x, int z) {

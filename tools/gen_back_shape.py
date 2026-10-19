@@ -35,6 +35,8 @@ PREVIEW = ROOT / "docs/review/tide_shell_roughs/install"
 BIRD_PREVIEW = ROOT / "docs/review/thunder_wing_roughs/install"
 BLOCK_COLORS = ROOT / "tools/rough/block_colors.json"
 INNER_DEPTH = 5        # これより深い体の中は凝灰岩
+TURTLE_H = float(__import__("os").environ.get("TURTLE_H", "1.6"))   # 亀の水平の倍率 (1 単位 = 0.85 * H ブロック)
+TURTLE_V = float(__import__("os").environ.get("TURTLE_V", "1.3"))   # 亀の垂直の倍率
 WING_SCALE = 1.4       # 鳥の翼の芯の厚み (この倍率。翼の骨の回廊が入るように)
 
 # 名前 (表示用の色の予備。block_colors.json に無いブロックだけ使う)
@@ -78,9 +80,9 @@ def turtle_cfg():
         name="turtle", out=ROOT / "src/main/resources/data/skyabyss/tide_back/turtle.bin",
         preview_prefix="tide_back_turtle", preview_dir=PREVIEW,
         build=build, mat_of=None,
-        cell=LV.CELL, origin=(-LV.OX / LV.CELL, -LV.OY / LV.CELL, -LV.OZ / LV.CELL), S=0.85,
-        # 水面 (geo の y=7) を海面 (y=63) に合わせる
-        ymap=lambda u: 63 + (u - 7.0) * 0.85, S_y=0.85, sea=63, wl=7.0,
+        cell=LV.CELL, origin=(-LV.OX / LV.CELL, -LV.OY / LV.CELL, -LV.OZ / LV.CELL), S=0.85 * TURTLE_H,
+        # 水面 (geo の y=7) を海面 (y=63) に合わせる。版 20 (docs/design/26 の 9 章): 水平 x1.6・垂直 x1.3 (海面は動かさない)
+        ymap=lambda u: 63 + (u - 7.0) * 0.85 * TURTLE_V, S_y=0.85 * TURTLE_V, sea=63, wl=7.0,
         blocks=blocks, wet=set(), wet_blocks=[],
         glow=glow, thin={2, 3, 4, 5, 7, 8}, max_part=8,
         deep_parts=None,            # 体 (骨 1) だけ

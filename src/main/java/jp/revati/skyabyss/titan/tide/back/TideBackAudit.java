@@ -17,7 +17,7 @@ public final class TideBackAudit {
     }
 
     public static BackReach.Spec spec() {
-        BackReach.Spec s = new BackReach.Spec("turtle", new Box(-115, 38, -135, 115, 190, 125));
+        BackReach.Spec s = new BackReach.Spec("turtle", new Box(-190, 38, -245, 190, 230, 170));
         s.longFallIsExit = true;
         s.entrances.add(ARRIVAL);
         s.exits.add(ARRIVAL);
@@ -28,12 +28,12 @@ public final class TideBackAudit {
         }
         s.goals.put("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2));
         s.goals.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
-        s.goals.put("east gallery", new BlockPos(10, HUB_LEDGE + 1, -2));
-        s.goals.put("hub floor", new BlockPos(5, HUB_FLOOR + 1, 5));
-        s.goals.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -85 + FLATS_DZ));
+        s.goals.put("east gallery", new BlockPos(22, HUB_LEDGE + 1, -4));
+        s.goals.put("hub floor", new BlockPos(8, HUB_FLOOR + 1, 8));
+        s.goals.put("flats", new BlockPos(0, FLATS_FLOOR + 1, -100));
         s.goals.put("front stone", STONE_FRONT.offset(0, 0, 1));
         s.goals.put("west stone", STONE_WEST.offset(1, 0, 0));
-        s.goals.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
+        s.goals.put("beach", new BlockPos(-30, BEACH.floor() + 1, 80));
         s.goals.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
         // 息の間: 縁の入口の泡・各皿の着地・舞台・展望の間。昇りは光る近い泡だけ (遠い泡は潮が満ちたときの近道なので、なくても昇れること)
         for (BreathLayout.Node n : BreathLayout.nodes()) {

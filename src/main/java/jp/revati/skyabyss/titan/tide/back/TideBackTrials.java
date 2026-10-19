@@ -77,6 +77,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 //  - ピースフル: 縁のくぐり道を封じ、試練の中の人は浜へ。試練の敵は消える (潮の時計は景色として動く)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideBackTrials {
+    // 島じゅう (試練の敵を片付ける範囲)
+    static final AABB ISLAND_BOX = new AABB(-135, 40, -145, 135, 230, 130);
     public static final TideField FIELD = new TideField();
     public static final int RESET_AFTER_IDLE = GroupProgress.IDLE_TICKS;
     public static final int RESET_AFTER_HEART = 20 * 30;
@@ -197,7 +199,7 @@ public final class TideBackTrials {
     // 島を建てた直後 (TideBackBuilder から)。扉を既定の形で置き、部屋を最初の形にし、試練の敵を片付ける
     public static void afterBuild(ServerLevel level) {
         TideRooms.releaseAll(level);
-        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG)
+        for (Entity e : level.getEntitiesOfClass(Entity.class, ISLAND_BOX, e -> e.getTags().contains(TideMob.TRIAL_TAG)
                 && !(e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart))) {
             e.discard();
         }
@@ -209,6 +211,7 @@ public final class TideBackTrials {
             GroupGates.place(level, TideGates.door(k), false);
         }
         GroupGates.place(level, TideGates.cave(), true);
+        TideFins.placeGates(level, true);
         level.setBlock(new BlockPos(0, HUB_FLOOR, 0), TideKit.LAMP, 3);
         TideGarden.reset(level, null);
         TideWatch.reset(level, null);
@@ -232,12 +235,12 @@ public final class TideBackTrials {
     public static void initPools(ServerLevel level) {
         FIELD.clear();
         // 広間の水盤 (床 70 の上の 3 段)。干潟の門は閉じているものとして囲う (扉はいつもブロックなので、水はそこで止まる)
-        List<BlockPos> hubSeeds = List.of(new BlockPos(0, 0, 6), new BlockPos(6, 0, -6), new BlockPos(-6, 0, -6), new BlockPos(14, 0, 8));
-        FIELD.put("hub", HUB_FLOOR + 1, TideField.flood(level, -HUB_R - 1, 26, -HUB_R - 1, 20, hubSeeds, HUB_FLOOR + 1, 3,
+        List<BlockPos> hubSeeds = List.of(new BlockPos(0, 0, 12), new BlockPos(12, 0, -12), new BlockPos(-12, 0, -12), new BlockPos(20, 0, 14));
+        FIELD.put("hub", HUB_FLOOR + 1, TideField.flood(level, -HUB_R - 1, 44, -HUB_R - 1, 30, hubSeeds, HUB_FLOOR + 1, 3,
                 p -> p.getZ() <= FLATS_GATE_Z || (Math.abs(p.getX()) <= BOTTOM_GATE_R && Math.abs(p.getZ()) <= BOTTOM_GATE_R && p.getY() <= HUB_FLOOR)));
         initGardenPool(level);
         // 干潟 (床 63 の上の 2 段)。干潟の口の階段の外へは出ない
-        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -85 + FLATS_DZ), new BlockPos(-20, 0, -100 + FLATS_DZ), new BlockPos(20, 0, -76 + FLATS_DZ));
+        List<BlockPos> flatSeeds = List.of(new BlockPos(0, 0, -100), new BlockPos(-30, 0, -110), new BlockPos(30, 0, -95), new BlockPos(0, 0, -125));
         FIELD.put("flats", FLATS_FLOOR + 1, TideField.flood(level, FLATS.x1(), FLATS.x2(), FLATS.z1(), FLATS.z2(), flatSeeds, FLATS_FLOOR + 1, FLATS_DEPTH,
                 p -> false));
         ready = true;
@@ -293,6 +296,7 @@ public final class TideBackTrials {
         if (level.getGameTime() % 10 == 0) {
             TideRooms.tick(level);
         }
+        TideFins.tick(level);
         TideGarden.tick(level, peaceful);
         if (!peaceful) {
             TideWatch.tick(level, false);
@@ -593,7 +597,7 @@ public final class TideBackTrials {
     static void cleanupWorld(ServerLevel level) {
         TideRooms.releaseAll(level);
         TideHeartBattle.releaseAll(level);
-        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG))) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, ISLAND_BOX, e -> e.getTags().contains(TideMob.TRIAL_TAG))) {
             e.discard();
         }
         lastPhase = null;
@@ -611,7 +615,7 @@ public final class TideBackTrials {
         GroupOverlays.refresh(level, group);
         AFTER_HEART.remove(group);
         // そのグループの試練の敵 (印のある個体) を片付ける
-        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90),
+        for (Entity e : level.getEntitiesOfClass(Entity.class, ISLAND_BOX,
                 e -> e.getTags().contains(TideMob.TRIAL_TAG) && e instanceof GroupOwned o && group.equals(o.groupId()))) {
             e.discard();
         }
@@ -665,6 +669,7 @@ public final class TideBackTrials {
                         || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
                         || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
                         || UPPER_ROOMS.stream().anyMatch(a -> a.aabb().inflate(2, 2, 2).contains(p.position()))
+                        || new AABB(UPPER_GATE_X - 3, UPPER_1.floor(), UPPER_GATE_Z - 4, UPPER_HALL_X2 + 2, UPPER_1.floor() + 9, UPPER_GATE_Z + 5).contains(p.position())
                         || Breath.activeBox().inflate(2).contains(p.position()) || BreathGuide.nearDoor(p.position())
                         || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition());
                 if (!beachSide) {
@@ -676,7 +681,7 @@ public final class TideBackTrials {
                 }
             }
             if (!wasPeaceful) {
-                for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(-80, 40, -150, 80, 130, 90), e -> e.getTags().contains(TideMob.TRIAL_TAG))) {
+                for (Entity e : level.getEntitiesOfClass(Entity.class, ISLAND_BOX, e -> e.getTags().contains(TideMob.TRIAL_TAG))) {
                     e.discard();
                 }
                 TideFlats.resetFight(level, false);

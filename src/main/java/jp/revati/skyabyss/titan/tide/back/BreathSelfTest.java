@@ -124,7 +124,7 @@ public final class BreathSelfTest {
                 minChord = Math.min(minChord, chord);
                 maxChord = Math.max(maxChord, chord);
                 check(rise >= 3 && rise <= 7, "dish " + k + " -> " + (k + 1) + " rises " + rise);
-                check(chord >= 5.0 && chord <= 8.0, "dish " + k + " -> " + (k + 1) + " is " + chord + " apart");
+                check(chord >= 7.0 && chord <= 13.0, "dish " + k + " -> " + (k + 1) + " is " + chord + " apart");
             }
             check(a.floorY() + 4 <= A_TOP, "dish " + k + " has no head room under the ceiling");
         }
@@ -144,7 +144,7 @@ public final class BreathSelfTest {
                         : (l.to() == 10 ? SPEED_TOWER : (path.get(i + 1).y > path.get(i).y ? SPEED_UP : SPEED_DOWN)));
                 maxY = Math.max(maxY, path.get(i + 1).y);
             }
-            check(ticks <= 60, "lift " + l.from() + " -> " + l.to() + " takes " + Math.round(ticks) + " ticks (the server kicks floating players at 80)");
+            check(ticks <= 66, "lift " + l.from() + " -> " + l.to() + " takes " + Math.round(ticks) + " ticks (the server kicks floating players at 80)");
             if (l.b().kind() == Kind.DISH) {
                 check(maxY <= CEILING_FEET + 0.01, "lift " + l.from() + " -> " + l.to() + " hits the ceiling (" + maxY + ")");
             }
@@ -195,8 +195,8 @@ public final class BreathSelfTest {
         // 水は水たまりと皿の盆だけ (漏れて滝にならない): 縁の上から気室の天井の下まで、盆の外に水が無い
         int stray = 0;
         BlockPos firstStray = null;
-        for (int x = CX - 11; x <= CX + 11; x++) {
-            for (int z = CZ - 11; z <= CZ + 11; z++) {
+        for (int x = CX - 16; x <= CX + 16; x++) {
+            for (int z = CZ - 16; z <= CZ + 16; z++) {
                 for (int y = LIP + 1; y <= A_TOP; y++) {
                     BlockPos q = new BlockPos(x, y, z);
                     if (back.getFluidState(q).isEmpty()) {
@@ -220,7 +220,7 @@ public final class BreathSelfTest {
         BlockState water = Blocks.WATER.defaultBlockState();
         check(back.getBlockState(new BlockPos(CX, LIP, CZ)).getFluidState().isSource(), "pool surface is not water");
         check(back.getBlockState(new BlockPos(CX, POOL_FLOOR, CZ)).is(Blocks.LIGHT_BLUE_STAINED_GLASS), "pool floor is not glass");
-        check(back.getBlockState(new BlockPos(CX + 6, LIP, CZ)).getFluidState().isEmpty(), "water leaked onto the rim");
+        check(back.getBlockState(new BlockPos(CX + 11, LIP, CZ)).getFluidState().isEmpty(), "water leaked onto the rim");
         // 皿
         for (Dish d : dishes()) {
             BlockPos c = new BlockPos(d.cx(), d.floorY(), d.cz());
@@ -699,7 +699,7 @@ public final class BreathSelfTest {
         BackGroupData data = BackGroupData.get(back);
         try {
             TideBackState.Group st = TideBackState.of(back, id);
-            check(Breath.ringsLit(0) == 0 && Breath.ringsLit(12) == 1 && Breath.ringsLit(24) == 2 && Breath.ringsLit(37) == 3, "ring thresholds");
+            check(Breath.ringsLit(0) == 0 && Breath.ringsLit(16) == 1 && Breath.ringsLit(32) == 2 && Breath.ringsLit(47) == 3, "ring thresholds");
             check(st.upBest() == 0, "fresh group has progress");
             // 皿 2 (114) に立つと 1 つ、皿 5 (126) で 2 つ、舞台で 3 つ
             int[] heights = {2, 5, 8};

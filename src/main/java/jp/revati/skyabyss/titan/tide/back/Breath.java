@@ -79,7 +79,8 @@ public final class Breath {
     static int boardings;
 
     public static AABB activeBox() {
-        return new AABB(CX - 12, POOL_FLOOR, CZ - 12, CX + 13, OBS_ROOF + 1, CZ + 13);
+        int e = (int) Math.ceil(R_A) + 3;
+        return new AABB(CX - e, POOL_FLOOR, CZ - e, CX + e + 1, OBS_ROOF + 1, CZ + e + 1);
     }
 
     public static boolean active(Vec3 p) {

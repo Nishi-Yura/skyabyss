@@ -40,7 +40,7 @@ final class TideGuide {
     // 目的の板の文の id (lang の gui.skyabyss.tide_goal.<id>)。自己テストが ja・en の両方にあることを見る
     static final java.util.List<String> GOAL_IDS = java.util.List.of("west.take", "west.carry", "west.place", "west.help", "west.done",
             "east.go", "east.exit", "east.done", "front.nests", "front.boss", "front.stone", "front.done", "hub.stones",
-            "hub.bottom", "up.start", "up.climb", "up.arena", "up.keeper", "up.lift", "up.done");
+            "hub.bottom", "up.start", "up.climb", "up.arena", "up.keeper", "up.lift", "up.done", "fin.hall", "fin.tip", "crown.ring");
 
     // 点の色 (灯った点は金、まだの点は暗い青灰)
     private static final DustParticleOptions LIT = new DustParticleOptions(new Vector3f(1f, 0.88f, 0.45f), 1.1f);
@@ -50,8 +50,8 @@ final class TideGuide {
             new DustParticleOptions(new Vector3f(0.5f, 0.9f, 0.15f), 1.2f), new DustParticleOptions(new Vector3f(0.85f, 0.2f, 0.85f), 1.2f)};
 
     // 入口の看板の上に出す点の中心 (庭・潮見の間・干潟の順 = Trial の順 WEST・EAST・FRONT)
-    private static final Vec3[] ENTRANCE_PIPS = {new Vec3(-18.5, PLATFORM_TOP + 3.6, -2.5), new Vec3(24.5, HUB_LEDGE + 3.6, -13.5),
-            new Vec3(3.5, TUNNEL_FLOOR + 3.6, -29.5)};
+    private static final Vec3[] ENTRANCE_PIPS = {new Vec3(-31.5, PLATFORM_TOP + 3.6, -5.5), new Vec3(40.5, HUB_LEDGE + 3.6, -13.5),
+            new Vec3(3.5, TUNNEL_FLOOR + 3.6, -63.5)};
 
     // 西の「半ばを越えた」(真珠が PLAT_C の線を北へ越えた)、東の「いちばん上まで来た段」
     private static boolean westPast;
@@ -110,7 +110,7 @@ final class TideGuide {
                     return new int[] {nests + 1, nests + 1};
                 }
                 int broken = 0;
-                for (int s = 0; s < 6; s++) {
+                for (int s = 0; s < NEST_SITES.length; s++) {
                     if ((state.nestSites() & (1 << s)) != 0 && state.nestBroken(s)) {
                         broken++;
                     }
@@ -161,6 +161,10 @@ final class TideGuide {
         if (up != null) {
             return up;
         }
+        Goal fin = finGoal(level, p);
+        if (fin != null) {
+            return fin;
+        }
         if (HUB.aabb().inflate(2, 8, 2).contains(v) || LEDGE_S.aabb().inflate(1, 2, 1).contains(v) || GALLERY_E.aabb().inflate(1, 2, 1).contains(v)) {
             int n = st.rungCount();
             if (n >= 3) {
@@ -197,12 +201,35 @@ final class TideGuide {
         return new Goal("up.climb", rings, 3, h, total, st.upBest());
     }
 
+    // ひれの道 (貝の間と先端) と、冠の回廊 (予約の間の輪)
+    @javax.annotation.Nullable
+    static Goal finGoal(ServerLevel level, ServerPlayer p) {
+        Vec3 v = p.position();
+        if (Math.abs(v.x) >= 105 && v.z >= -33 && v.z <= -7 && v.y >= 60 && v.y <= 90) {
+            int side = v.x < 0 ? -1 : 1;
+            UUID g = Groups.keyOf(p);
+            int solved = 0;
+            for (TideFins.Room r : TideFins.ROOMS) {
+                if (r.side() == side && jp.revati.skyabyss.titan.group.GroupGates.isOpen(level, g, r.gate())) {
+                    solved++;
+                }
+            }
+            return new Goal(solved >= 2 ? "fin.tip" : "fin.hall", solved, 2, 0, 0, 0);
+        }
+        for (Area a : UPPER_ROOMS) {
+            if (a.aabb().inflate(1, 1, 1).contains(v) && !Breath.active(v)) {
+                return new Goal("crown.ring", 0, 0, 0, 0, 0);
+            }
+        }
+        return null;
+    }
+
     private static AABB watchZone() {
-        return new AABB(13, HUB_LEDGE - 2, -37, 60, LEDGE_FLOOR + 8, -3);
+        return new AABB(WATCH_HALL.x1() - 2, HUB_LEDGE - 2, WATCH_HALL.z1() - 2, WATCH_HALL.x2() + 2, TideWatchBuilder.HALL_ROOF, WATCH_HALL.z2() + 2);
     }
 
     private static AABB frontZone() {
-        return new AABB(-26, 56, -84, 26, 80, -17);
+        return new AABB(FLATS.x1() - 2, 56, FLATS.z1() - 2, FLATS.x2() + 2, FLATS_CEILING + 2, FLATS.z2() + 2);
     }
 
     // ---------------------------------------------------------------- 毎 5 tick (TideBackTrials から。人がいるときだけ)

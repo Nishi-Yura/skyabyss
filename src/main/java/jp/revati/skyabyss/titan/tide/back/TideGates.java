@@ -28,7 +28,7 @@ public final class TideGates {
 
     public static List<BlockPos> flats() {
         List<BlockPos> list = new ArrayList<>();
-        for (int x = -1; x <= 1; x++) {
+        for (int x = -FLATS_GATE_HALF; x <= FLATS_GATE_HALF; x++) {
             for (int y = HUB_FLOOR + 1; y <= HUB_FLOOR + 3; y++) {
                 list.add(new BlockPos(x, y, FLATS_GATE_Z));
             }
@@ -60,7 +60,7 @@ public final class TideGates {
 
     public static List<BlockPos> mouth() {
         List<BlockPos> list = new ArrayList<>();
-        for (int x = -1; x <= 1; x++) {
+        for (int x = -MOUTH_HALF; x <= MOUTH_HALF; x++) {
             for (int y = TUNNEL_FLOOR + 1; y <= TUNNEL_FLOOR + 3; y++) {
                 list.add(new BlockPos(x, y, MOUTH_Z));
             }
@@ -82,7 +82,7 @@ public final class TideGates {
         List<BlockPos> list = new ArrayList<>();
         int f = TideIslandBuilder.caveFloor(CAVE_SEAL_Z);
         for (int x = CAVE_X1; x <= CAVE_X2; x++) {
-            for (int y = f + 1; y <= f + 4; y++) {
+            for (int y = f + 1; y <= f + 6; y++) {
                 list.add(new BlockPos(x, y, CAVE_SEAL_Z));
             }
         }
@@ -112,6 +112,7 @@ public final class TideGates {
             ensure(level, door(k), false);
         }
         ensure(level, cave(), true);
+        TideFins.placeGates(level, false);
         ensure(level, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.gate(), true);
     }
 
