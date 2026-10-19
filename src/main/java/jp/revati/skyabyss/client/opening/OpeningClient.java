@@ -180,10 +180,11 @@ public final class OpeningClient {
     // 星の欠けの帯: 西から東へ。0 = 始め、1 = 終わり。まだ・もう動いていなければ -1
     static float bandProgress() {
         int t = songTicks();
-        if (t < BAND_START || t > BAND_START + BAND_LENGTH) {
+        int length = StarEffect.bandLength();
+        if (t < BAND_START || t > BAND_START + length) {
             return -1f;
         }
-        return (t - BAND_START) / (float) BAND_LENGTH;
+        return (t - BAND_START) / (float) length;
     }
 
     // 歌のあいだ、この mod 自身の星を描く強さ (0〜1)。バニラの星は雨・雲・光源 mod やシェーダーで見えないことがあるので、欠けが読めるよう自前の星を重ねる。
@@ -193,7 +194,7 @@ public final class OpeningClient {
         if (t < 0) {
             return 0f;
         }
-        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + BAND_LENGTH)) / 80f));
+        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + StarEffect.bandLength())) / 80f));
     }
 
     // 画面の揺れ・効果の強さを掛けたもの (設定で 0 なら 0)
