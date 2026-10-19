@@ -211,7 +211,7 @@ public final class AnemoneSelfTest {
             for (int x = MAZE_ENTRY_ROOM.x1(); x <= MAZE_ENTRY_ROOM.x2(); x++) {
                 for (int z = MAZE_ENTRY_ROOM.z1(); z <= MAZE_ENTRY_ROOM.z2(); z++) {
                     BlockPos floor = new BlockPos(x, MAZE_ENTRY_ROOM.floorY(), z);
-                    boolean hatch = x == mazeCell(MAZE_START_I, MAZE_START_J).getX() + 1 && z == mazeCell(MAZE_START_I, MAZE_START_J).getZ();
+                    boolean hatch = x == mazeCell(MAZE_START_I, MAZE_START_J).getX() + MAZE_CELL / 2 && z == mazeCell(MAZE_START_I, MAZE_START_J).getZ();
                     check(f, hatch || back.getBlockState(floor).isSolid(), "the entry room floor has a hole at " + floor);
                     check(f, back.getFluidState(floor.above()).isEmpty(), "water in the entry room at " + floor.above());
                 }

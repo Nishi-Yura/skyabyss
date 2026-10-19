@@ -783,7 +783,7 @@ public final class AnemoneLights {
     }
 
     private static void band(ServerLevel level, ServerPlayer player, UUID group) {
-        Notice.bar(player, bandText(level, player, group));
+        LampBand.send(player, bandText(level, player, group));
     }
 
     // 灯の台の粒 (その人にだけ。近いものだけ): ともした台は白い光が昇り、まだの台は青い火がゆらぐ (遠くからも台の場所が分かる)

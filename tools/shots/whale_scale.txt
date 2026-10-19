@@ -87,7 +87,7 @@ waitchunks 600
 wait 30
 shot maze_hatch
 fov 95
-camera skyabyss:titan_back 6 89.6 -46.5 180 5
+camera skyabyss:titan_back -2.5 90.2 -37.5 225 4
 waitchunks 600
 wait 30
 shot maze_entry
