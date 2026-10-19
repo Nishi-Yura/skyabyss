@@ -55,8 +55,8 @@ public final class EmberHeartArena {
     public static final int SINK_TICKS = 160;
     // 同時に沈む区画の上限
     public static final int MAX_SINKING = 2;
-    // 呑まれた: 傷 12、熱 +40
-    public static final float ENGULF_DAMAGE = 12f;
+    // 呑まれた: 傷 18 (1 秒に一度だけ、台の上へ戻る)、熱 +40
+    public static final float ENGULF_DAMAGE = 18f;
     public static final float ENGULF_HEAT = 40f;
     // 見えない光 (段階 3 の暗さのなかで、色の粒の予告が沈まないように)
     private static final int AMBIENT_LIGHT = 6;
