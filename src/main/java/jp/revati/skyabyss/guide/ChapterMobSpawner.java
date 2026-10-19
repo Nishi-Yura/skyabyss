@@ -46,7 +46,12 @@ public final class ChapterMobSpawner {
         ANY, DAY, NIGHT
     }
 
-    public record Wanderer(String id, Chapters chapter, String entity, int weight, Time time) {
+    // biome: 湧く地形の条件 (null ならどこでも)
+    public record Wanderer(String id, Chapters chapter, String entity, int weight, Time time,
+                           @Nullable java.util.function.Predicate<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> biome) {
+        public Wanderer(String id, Chapters chapter, String entity, int weight, Time time) {
+            this(id, chapter, entity, weight, time, null);
+        }
     }
 
     public static final double ANCHOR_RANGE = 300;
@@ -76,6 +81,11 @@ public final class ChapterMobSpawner {
 
     public static void unregister(String id) {
         WANDERERS.removeIf(x -> x.id().equals(id));
+    }
+
+    // 登録済みのひとり歩き (自己テスト用)
+    public static List<Wanderer> registered() {
+        return List.copyOf(WANDERERS);
     }
 
     public static boolean isLive(UUID entity) {
@@ -203,6 +213,9 @@ public final class ChapterMobSpawner {
         BlockPos at = new BlockPos(x, y, z);
         if (!level.getBlockState(at.below()).isSolid() || !level.getBlockState(at).isAir() || !level.getBlockState(at.above()).isAir()
                 || !level.getFluidState(at.below()).isEmpty()) {
+            return false;
+        }
+        if (w.biome() != null && !w.biome().test(level.getBiome(at))) {
             return false;
         }
         EntityType<?> type = SiteSpawner.type(w.entity());

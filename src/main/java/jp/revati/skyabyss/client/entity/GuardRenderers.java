@@ -61,6 +61,11 @@ public final class GuardRenderers {
             r.addRenderLayer(GearLayer.lowPoly(r, "socket_main", "captain_pike"));
             return r;
         });
+        // 一章の地上の敵 (低ポリのメッシュ。倒れる動きは death アニメーションで、横倒しにはしない)
+        event.registerEntityRenderer(ModEntities.ROCK_SHELL_BEETLE.get(), ctx -> noTilt(ctx, "rock_shell_beetle"));
+        event.registerEntityRenderer(ModEntities.SPINE_HARE.get(), ctx -> noTilt(ctx, "spine_hare"));
+        event.registerEntityRenderer(ModEntities.BONE_HAULER.get(), ctx -> noTilt(ctx, "bone_hauler"));
+        event.registerEntityRenderer(ModEntities.ELDER_SENTRY.get(), ctx -> noTilt(ctx, "elder_sentry"));
         event.registerEntityRenderer(ModEntities.STONE_WHALE_HEART.get(), StoneWhaleHeartRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SPIKE.get(), ctx -> new ArrowRenderer<BoneSpike>(ctx) {
             @Override
@@ -68,6 +73,15 @@ public final class GuardRenderers {
                 return SPIKE;
             }
         });
+    }
+
+    private static <T extends net.minecraft.world.entity.Entity & GeoAnimatable> GeoEntityRenderer<T> noTilt(EntityRendererProvider.Context ctx, String name) {
+        return new LowPolyGeoRenderer<T>(ctx, name, 1.0f) {
+            @Override
+            protected float getDeathMaxRotation(T animatable) {
+                return 0f;
+            }
+        };
     }
 
     // 苔芋虫: 倒れるときは横倒しにならず、death アニメーション (丸まる) で終える

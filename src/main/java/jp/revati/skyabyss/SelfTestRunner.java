@@ -146,6 +146,8 @@ public final class SelfTestRunner {
         steps.addAll(ChapterSkySelfTest.steps());
         // 序章・一章の中身 (初日のお使い・旅の跡・歌石・見張りの丘・小さな異変・歩哨・岩鯨の影の出来事・予兆 3 拍)。docs/design/17 の 1.5。岩鯨を出す段より前に置く
         steps.addAll(jp.revati.skyabyss.story.ch1.Ch1SelfTest.steps());
+        // 一章の地上の敵 (岩殻虫・棘うさぎ・骨負い・老いた歩哨。P7。21 の 3.1)。SKYABYSS_SELFTEST_ONLY="ch1 mobs"
+        steps.addAll(jp.revati.skyabyss.story.ch1.Ch1MobsSelfTest.steps());
         // チャンクを読み込んでから、エンティティが入るのを待って試すもの
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));

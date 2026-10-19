@@ -26,11 +26,11 @@ import net.minecraft.resources.ResourceLocation;
 //              旅装を作ったときに Quests.signal(player, SIGNAL_GEAR_MADE) を送ると prep_gear が済む。砥石を使って洞の主を倒す条件は、
 //              prep_blade の "report" 段に足す (今は洞を抜けるだけ)。洞・集め場の宝の「道の固焼き」は minecraft:bread で代用 (road_hardtack に替える)。
 //              素材 4 つ (岩殻片・骨片・棘針・護り糸) は guide/GuideSetup に置いてある
-//   [P7 地上の敵] CleftCave.pads() が、各部屋の敵を `Ch1Mobs.pick(P7 の ID, 今の代用)` で選ぶ。P7 の敵が登録されれば自動でそちらを使う:
-//              岩殻虫 (rock_shell_beetle) = 入口の間 3、棘うさぎ (spine_hare) = 棘の間 3、老いた歩哨 (elder_sentry) = 奥の間 1 (代用は苔這い・骨の射手・骨の番兵)。
-//              骨負い (bone_hauler) は BoneCache の骨の山を歩かせ、ch1/follow_hauler (語り部の頼み。50) を足す。ひとり歩きの湧き (Ch1Mobs.registerWanderers) に
-//              岩殻虫 (丘・山・荒れ地、昼夜)・棘うさぎ (草原の夜) を足す。岩殻片・骨片・棘針の落とし物は P7 の loot
-//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER) は数え歌の鐘楼 (西の翼 WD) が同じ並びを読む。歩哨の割符 (SENTRY_TALLY) は老いた歩哨の落とし物。
+//   [P7 地上の敵] 入った (21 の 3.1。Ch1Mobs・entity/RockShellBeetle・SpineHare・BoneHauler・ElderSentry)。CleftCave.pads() は新しい敵を使う
+//              (入口の間 岩殻虫 3、棘の間 棘うさぎ 3、奥の間 老いた歩哨 1)。ひとり歩きは Ch1Mobs.registerWanderers、骨負いは Ch1Mobs の骨の集め場の巡回。
+//              残り: ch1/follow_hauler (語り部の頼み。50)
+//   [P8 岩鯨の背] 歌の間の壁画の順 (BELL_ORDER) は数え歌の鐘楼 (西の翼 WD) が同じ並びを読む。歩哨の割符 (SENTRY_TALLY = GuideSetup.SENTRY_TALLY) は
+//              老いた歩哨の落とし物 (そこにいる人ごとに一つ。持っていれば出ない)。
 //              詰所の戸の鍵として P8 が読む (持つ人がいればそのグループは老番兵を倒さずに戸を開けられる)
 public final class Ch1Prep {
     public static final String Q_GEAR = PrepQuests.id(1, "gear");
@@ -51,7 +51,7 @@ public final class Ch1Prep {
 
     // 歌の間の壁画の順 (鐘楼 P8 が読む。柱の高さ 1〜5 を低い順。歌石と同じ)
     public static final int[] BELL_ORDER = {1, 2, 3, 4, 5};
-    // 歩哨の割符 (P8 の詰所の戸の鍵。人ごとの記念品。P7 が老いた歩哨の落とし物にする。Items は未登録)
+    // 歩哨の割符 (P8 の詰所の戸の鍵。人ごとの記念品。GuideSetup に登録済み)
     public static final String SENTRY_TALLY = "skyabyss:sentry_tally";
 
     // 伝承 (manual。コードが記す。lore/entry/ch1/)

@@ -2066,5 +2066,280 @@
         "attenuation_distance": 40
       }
     ]
+  },
+  "rock_shell_beetle_ambient": {
+    "subtitle": "subtitles.skyabyss.rock_shell_beetle_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_ambient",
+        "pitch": 0.55,
+        "volume": 0.7
+      }
+    ]
+  },
+  "rock_shell_beetle_hurt": {
+    "subtitle": "subtitles.skyabyss.rock_shell_beetle_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_guard",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "rock_shell_beetle_death": {
+    "subtitle": "subtitles.skyabyss.rock_shell_beetle_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_death",
+        "pitch": 0.6,
+        "volume": 1.0
+      },
+      {
+        "name": "minecraft:block/stone/break1",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "rock_shell_beetle_step": {
+    "subtitle": "subtitles.skyabyss.rock_shell_beetle_step",
+    "sounds": [
+      {
+        "name": "minecraft:block/stone/step1",
+        "pitch": 1.4,
+        "volume": 0.35
+      },
+      {
+        "name": "minecraft:block/stone/step2",
+        "pitch": 1.5,
+        "volume": 0.35
+      }
+    ]
+  },
+  "rock_shell_beetle_charge": {
+    "subtitle": "subtitles.skyabyss.rock_shell_beetle_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/captain_erupt_charge",
+        "pitch": 1.6,
+        "volume": 0.8
+      }
+    ]
+  },
+  "spine_hare_ambient": {
+    "subtitle": "subtitles.skyabyss.spine_hare_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_ambient",
+        "pitch": 1.7,
+        "volume": 0.4
+      }
+    ]
+  },
+  "spine_hare_hurt": {
+    "subtitle": "subtitles.skyabyss.spine_hare_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_hurt_1",
+        "pitch": 1.8,
+        "volume": 0.7
+      },
+      {
+        "name": "skyabyss:mobs/rib_archer_hurt_2",
+        "pitch": 1.8,
+        "volume": 0.7
+      }
+    ]
+  },
+  "spine_hare_death": {
+    "subtitle": "subtitles.skyabyss.spine_hare_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_death",
+        "pitch": 1.8,
+        "volume": 0.7
+      }
+    ]
+  },
+  "spine_hare_step": {
+    "subtitle": "subtitles.skyabyss.spine_hare_step",
+    "sounds": [
+      {
+        "name": "minecraft:block/grass/step1",
+        "pitch": 1.6,
+        "volume": 0.4
+      },
+      {
+        "name": "minecraft:block/grass/step2",
+        "pitch": 1.6,
+        "volume": 0.4
+      }
+    ]
+  },
+  "spine_hare_shoot": {
+    "subtitle": "subtitles.skyabyss.spine_hare_shoot",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/rib_archer_shoot",
+        "pitch": 1.5,
+        "volume": 0.9
+      }
+    ]
+  },
+  "spine_hare_raise": {
+    "subtitle": "subtitles.skyabyss.spine_hare_raise",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_heart_spike_charge",
+        "pitch": 1.9,
+        "volume": 0.5
+      }
+    ]
+  },
+  "bone_hauler_ambient": {
+    "subtitle": "subtitles.skyabyss.bone_hauler_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_ambient",
+        "pitch": 0.7,
+        "volume": 0.6
+      }
+    ]
+  },
+  "bone_hauler_hurt": {
+    "subtitle": "subtitles.skyabyss.bone_hauler_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_hurt",
+        "pitch": 0.75,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bone_hauler_death": {
+    "subtitle": "subtitles.skyabyss.bone_hauler_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/moss_crawler_death",
+        "pitch": 0.7,
+        "volume": 0.9
+      }
+    ]
+  },
+  "bone_hauler_step": {
+    "subtitle": "subtitles.skyabyss.bone_hauler_step",
+    "sounds": [
+      {
+        "name": "minecraft:block/gravel/step1",
+        "pitch": 1.0,
+        "volume": 0.4
+      },
+      {
+        "name": "minecraft:block/gravel/step2",
+        "pitch": 1.0,
+        "volume": 0.4
+      }
+    ]
+  },
+  "elder_sentry_ambient": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_ambient",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "elder_sentry_hurt": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_1",
+        "pitch": 0.75,
+        "volume": 1.0
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_hurt_2",
+        "pitch": 0.75,
+        "volume": 1.0
+      }
+    ]
+  },
+  "elder_sentry_death": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_death",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "elder_sentry_step": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_1",
+        "pitch": 0.7,
+        "volume": 0.6
+      },
+      {
+        "name": "skyabyss:mobs/bone_sentinel_step_2",
+        "pitch": 0.7,
+        "volume": 0.6
+      }
+    ]
+  },
+  "elder_sentry_guard": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_guard",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/bone_sentinel_guard",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "elder_sentry_swing": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_swing",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/captain_leap_roar",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "elder_sentry_charge": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/captain_erupt_charge",
+        "pitch": 1.0,
+        "volume": 1.4
+      }
+    ]
+  },
+  "elder_sentry_horn": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_horn",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/captain_roar",
+        "pitch": 1.7,
+        "volume": 0.9
+      }
+    ]
+  },
+  "elder_sentry_stomp": {
+    "subtitle": "subtitles.skyabyss.elder_sentry_stomp",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/stone_heart_slam",
+        "pitch": 1.2,
+        "volume": 1.2
+      }
+    ]
   }
 }

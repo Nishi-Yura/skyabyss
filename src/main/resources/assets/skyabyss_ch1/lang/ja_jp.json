@@ -168,5 +168,16 @@
   "wayfarer_notes.ch1.line.3": "苔這いは低く、足もとへ寄ってくる。囲まれる前に、背を壁につけない。",
   "wayfarer_notes.ch1.line.4": "予告の線や輪が出たら、跳ぶか、走るか、物の陰に入れば避けられる。立ち止まらない。",
   "wayfarer_notes.ch1.line.5": "歌石は、積み石の低い順に叩く。洞の鳴り石も、ろうそくの数の少ない順に。",
-  "wayfarer_notes.ch1.line.6": "心臓の前には、身と刃と糧がそろっているか確かめる。足りなくても乗れる。ただ、重くなる。"
+  "wayfarer_notes.ch1.line.6": "心臓の前には、身と刃と糧がそろっているか確かめる。足りなくても乗れる。ただ、重くなる。",
+  "entity.skyabyss.rock_shell_beetle": "岩殻虫",
+  "entity.skyabyss.spine_hare": "棘うさぎ",
+  "entity.skyabyss.bone_hauler": "骨負い",
+  "entity.skyabyss.elder_sentry": "老いた歩哨",
+  "item.skyabyss.rock_shell_beetle_spawn_egg": "岩殻虫のスポーンエッグ",
+  "item.skyabyss.spine_hare_spawn_egg": "棘うさぎのスポーンエッグ",
+  "item.skyabyss.bone_hauler_spawn_egg": "骨負いのスポーンエッグ",
+  "item.skyabyss.elder_sentry_spawn_egg": "老いた歩哨のスポーンエッグ",
+  "item.skyabyss.sentry_tally": "歩哨の割符",
+  "item.skyabyss.sentry_tally.desc": "刻み目のある骨の割符。老いた歩哨が、取りに来なかった誰かのために持っていた。",
+  "message.skyabyss.ch1.sentry.tally": "老いた歩哨の手に、刻み目のある骨の割符が握られていた。"
 }
