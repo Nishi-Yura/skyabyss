@@ -38,9 +38,9 @@ final class TideGuide {
     }
 
     // 目的の板の文の id (lang の gui.skyabyss.tide_goal.<id>)。自己テストが ja・en の両方にあることを見る
-    static final java.util.List<String> GOAL_IDS = java.util.List.of("west.take", "west.carry", "west.place", "west.help", "west.done", "west.sleep",
-            "east.go", "east.exit", "east.done", "east.sleep", "front.nests", "front.boss", "front.stone", "front.done", "front.sleep", "hub.stones",
-            "hub.wait", "hub.bottom");
+    static final java.util.List<String> GOAL_IDS = java.util.List.of("west.take", "west.carry", "west.place", "west.help", "west.done",
+            "east.go", "east.exit", "east.done", "front.nests", "front.boss", "front.stone", "front.done", "hub.stones",
+            "hub.bottom");
 
     // 点の色 (灯った点は金、まだの点は暗い青灰)
     private static final DustParticleOptions LIT = new DustParticleOptions(new Vector3f(1f, 0.88f, 0.45f), 1.1f);
@@ -127,7 +127,7 @@ final class TideGuide {
         if (TideRooms.gardenBox().contains(v)) {
             int[] pr = progress(level, st, TideBackState.Trial.WEST, TideRooms.owns(TideRooms.GARDEN, p));
             if (st.rung(TideBackState.Trial.WEST)) {
-                return new Goal(st.sleeping() == TideBackState.Trial.WEST ? "west.sleep" : "west.done", pr[0], pr[1], 0, 0, 0);
+                return new Goal("west.done", pr[0], pr[1], 0, 0, 0);
             }
             boolean mine = TideRooms.owns(TideRooms.GARDEN, p);
             String id = "west.take";
@@ -143,7 +143,7 @@ final class TideGuide {
         if (watchZone().contains(v)) {
             int[] pr = progress(level, st, TideBackState.Trial.EAST, TideRooms.owns(TideRooms.WATCH, p));
             if (st.rung(TideBackState.Trial.EAST)) {
-                return new Goal(st.sleeping() == TideBackState.Trial.EAST ? "east.sleep" : "east.done", pr[0], pr[1], 0, 0, 0);
+                return new Goal("east.done", pr[0], pr[1], 0, 0, 0);
             }
             int[] lv = TideWatch.levels();
             return new Goal(lv[2] == 0 ? "east.exit" : "east.go", pr[0], pr[1], lv[0], lv[1], lv[2]);
@@ -152,7 +152,7 @@ final class TideGuide {
             int[] pr = progress(level, st, TideBackState.Trial.FRONT, TideRooms.owns(TideRooms.FLATS, p));
             int nests = Integer.bitCount(st.nestSites());
             if (st.rung(TideBackState.Trial.FRONT)) {
-                return new Goal(st.sleeping() == TideBackState.Trial.FRONT ? "front.sleep" : "front.done", pr[0], pr[1], 0, 0, 0);
+                return new Goal("front.done", pr[0], pr[1], 0, 0, 0);
             }
             String id = !st.allNestsBroken() ? "front.nests" : !st.beckonerDefeated() ? "front.boss" : "front.stone";
             return new Goal(id, pr[0], pr[1], nests, 0, 0);
@@ -160,7 +160,7 @@ final class TideGuide {
         if (HUB.aabb().inflate(2, 8, 2).contains(v) || LEDGE_S.aabb().inflate(1, 2, 1).contains(v) || GALLERY_E.aabb().inflate(1, 2, 1).contains(v)) {
             int n = st.rungCount();
             if (n >= 3) {
-                return new Goal(st.bottomOpen() ? "hub.bottom" : "hub.wait", 3, 3, 0, 0, 0);
+                return new Goal("hub.bottom", 3, 3, 0, 0, 0);
             }
             return new Goal("hub.stones", n, 3, 0, 0, 0);
         }

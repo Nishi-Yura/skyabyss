@@ -57,6 +57,9 @@ public final class Hearth {
     public static final int MOTH_TOUCH_GAP = 30;
     public static final float COAL_HEAT = 1f;
 
+    // 静かな周 (13 の 10.2節): 火の弱まりは半分、灰運びは 2 倍ゆっくり一体ずつ、蛾と燠虫は出ない
+    public static final float QUIET_DECAY = 0.5f;
+    public static final int QUIET_CARRIER_SLOWER = 2;
     private static float strength = START;
     private static boolean done;
     private static boolean spawned;
@@ -108,8 +111,8 @@ public final class Hearth {
     // ---------------------------------------------------------------- 火の出入り
     // 熾を火床へ。+8。100 に届いたら済む
     public static boolean feed(ServerLevel level, ServerPlayer player, ItemStack coal) {
-        if (done || EmberBackTrials.sleeping(level, EmberIds.SOUTH)) {
-            EmberTrials.hint(player, EmberIds.LANG_SOUTH + (done ? "burning" : "sleeping"));
+        if (done) {
+            EmberTrials.hint(player, EmberIds.LANG_SOUTH + "burning");
             return false;
         }
         coal.shrink(1);
@@ -183,11 +186,10 @@ public final class Hearth {
     static void tick(ServerLevel level) {
         long now = level.getGameTime();
         List<ServerPlayer> in = EmberTrials.playersIn(level, EmberBackLayout.SOUTH);
-        boolean sleeping = EmberBackTrials.sleeping(level, EmberIds.SOUTH);
         if (!in.isEmpty() || now % 20 == 0) {
-            HearthVents.tick(level, now, !done && !sleeping && !in.isEmpty());
+            HearthVents.tick(level, now, !done && !in.isEmpty());
         }
-        if (in.isEmpty() || sleeping) {
+        if (in.isEmpty()) {
             return;
         }
         if (now % 20 == 0) {
@@ -209,7 +211,7 @@ public final class Hearth {
     // 1 秒ごと: 火が弱まる。近くの人へ火の強さを出す
     static void second(ServerLevel level, List<ServerPlayer> in) {
         if (!done) {
-            add(level, -decayPerSecond(in.size()));
+            add(level, -decayPerSecond(in.size()) * (EmberBackTrials.quiet(level, EmberIds.SOUTH) ? QUIET_DECAY : 1f));
         }
         for (ServerPlayer p : in) {
             if (p.distanceToSqr(Vec3.atCenterOf(HEARTH)) < 14 * 14) {
@@ -268,19 +270,25 @@ public final class Hearth {
 
     static void spawnWaves(ServerLevel level, List<ServerPlayer> in, long now) {
         int n = Math.max(1, Math.min(Parties.MAX_MEMBERS, in.size()));
+        boolean quiet = EmberBackTrials.quiet(level, EmberIds.SOUTH);
         if (!spawned) {
             spawned = true;
             lastCarrier = now;
             lastMoths = now;
-            EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -4.5, EmberBackLayout.FLOOR_SOUTH + 1, 28.5);
-            EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 4.5, EmberBackLayout.FLOOR_SOUTH + 1, 32.5);
+            if (!quiet) {
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -4.5, EmberBackLayout.FLOOR_SOUTH + 1, 28.5);
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 4.5, EmberBackLayout.FLOOR_SOUTH + 1, 32.5);
+            }
         }
-        if (now - lastCarrier >= carrierInterval(n) && carriersAlive(level).size() < carrierCap(n)) {
+        // 静かな周: 灰運びは一体ずつ・ゆっくり (熾の元なので 0 にはしない)。蛾と燠虫は出ない
+        int interval = quiet ? carrierInterval(n) * QUIET_CARRIER_SLOWER : carrierInterval(n);
+        int carrierMax = quiet ? 1 : carrierCap(n);
+        if (now - lastCarrier >= interval && carriersAlive(level).size() < carrierMax) {
             lastCarrier = now;
             EmberTrials.spawn(level, EmberMobSetup.ASH_THRALL.get(), CARRIER_SPAWN.getX() - 3 + level.random.nextInt(7) + 0.5,
                     CARRIER_SPAWN.getY(), CARRIER_SPAWN.getZ() + 0.5, CARRIER_TAG);
         }
-        if (strength > MOTH_FROM && now - lastMoths >= MOTH_INTERVAL) {
+        if (!quiet && strength > MOTH_FROM && now - lastMoths >= MOTH_INTERVAL) {
             lastMoths = now;
             int cap = EmberMoth.roomCap(n);
             int want = 2 + 2 * n;
@@ -303,7 +311,7 @@ public final class Hearth {
     }
 
     // ---------------------------------------------------------------- リセット (EmberBackRooms.onReset("south", ...))
-    public static void reset(ServerLevel level, boolean sleeping) {
+    public static void reset(ServerLevel level, boolean quiet) {
         EmberTrials.clearMobs(level, EmberBackLayout.SOUTH);
         EmberTrials.clearItems(level, EmberBackLayout.SOUTH, EmberTrialSetup.LIVE_COAL.get());
         clearMemory();

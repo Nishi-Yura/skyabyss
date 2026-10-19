@@ -18,11 +18,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 // 群れの巣 (reef_nest、08 の 4.3節・5.1節)。干潟の砂の上の珊瑚の塚 (見た目は島のブロック)。このエンティティは当たり判定と体力だけを持つ。
-// 干潮で口を開け、磯走りを出す。満潮では殻を閉じて傷が通らない。湧き方・壊れたあとは TideFlats が決める。保存しない (TideFlats が置き直す)。
+// 干潮で口を開け、磯走りを出す (傷は全部通る)。満ちているあいだは殻を閉じ、磯走りは出ないが、傷は半分だけ通る (いつでも壊せる)。湧き方・壊れたあとは TideFlats が決める。保存しない (TideFlats が置き直す)。
 // 巣は干潟を持っているグループのもの (GroupOwned): ほかのグループの人には見えず (当たり判定も届かない)、傷も受けない
 public class ReefNest extends Mob implements GroupOwned {
     public static final float BASE_HEALTH = 60;
     public static final float ARMOR = 6;
+    // 殻を閉じているあいだ (満ちているとき) に通る傷の割合
+    public static final float CLOSED_DAMAGE = 0.5f;
 
     int site = -1;
     private long lastClosedNotice;
@@ -94,12 +96,14 @@ public class ReefNest extends Mob implements GroupOwned {
             return false;
         }
         if (!open() && !source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) {
+            // 殻を閉じている (満ちているあいだ): 傷は通るが半分だけ。口が開いているときのほうが早く壊せる。
+            // 干潮 = 磯走りが出てくる代わりに傷が全部通る / 満潮 = 磯走りは出ない代わりに、水の中で硬い殻を割る
             if (source.getEntity() instanceof ServerPlayer player && level().getGameTime() - lastClosedNotice > 20) {
                 lastClosedNotice = level().getGameTime();
-                Notice.bar(player, ModText.deny("message.skyabyss.tide.nest_closed"));
+                Notice.bar(player, ModText.hint("message.skyabyss.tide.nest_closed"));
             }
             level().playSound(null, getX(), getY() + 1, getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1f, 0.6f);
-            return false;
+            amount *= CLOSED_DAMAGE;
         }
         boolean hit = super.hurt(source, amount);
         if (hit && level() instanceof ServerLevel server) {
