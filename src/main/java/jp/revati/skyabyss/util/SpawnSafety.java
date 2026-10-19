@@ -41,6 +41,16 @@ public final class SpawnSafety {
     private SpawnSafety() {
     }
 
+    // 試験用: 敵を床のない所 (背中の空洞) に置く試験のために、足もと (y - 1) に石の床を敷く (rx・rz は中心からの半径)
+    public static void testFloor(ServerLevel level, BlockPos feet, int rx, int rz) {
+        level.getChunk(feet);
+        for (int dx = -rx; dx <= rx; dx++) {
+            for (int dz = -rz; dz <= rz; dz++) {
+                level.setBlock(feet.offset(dx, -1, dz), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 2);
+            }
+        }
+    }
+
     // この敵に決まりを当てるか
     public static boolean applies(Mob mob) {
         EntityType<?> type = mob.getType();

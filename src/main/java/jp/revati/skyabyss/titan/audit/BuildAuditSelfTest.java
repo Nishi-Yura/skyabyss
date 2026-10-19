@@ -52,6 +52,8 @@ public final class BuildAuditSelfTest {
         // 潮殻の体 (turtle.bin) の黄色い羊毛の盛り上がり: 模型の薄い壁の中が埋められて 1 マスだけ低く見える (体の飾りの色の塊。歩く所ではない)
         ALLOW.add(new Allow("tide", "FLOOR_DIMPLE", new BackReach.Box(40, 125, -41, 40, 125, -41), "a single wool voxel in the turtle body's coral-coloured mound (filled thin wall of the baked model); not a walking surface"));
         // 骨のあばら (anchor の部品) は地形に沿って建つので、起伏のある所で肋骨の先の 1 個が地面から離れて見えることがある (自然の起伏との関係。調べて直すなら RibBuilder / ribs.json)
+        // 建てた避難所の監査の枠は部品の外へ 3 マス広い。近くに村 (自然生成) があると、その家のかまどの向きを拾う (この Mod の部品の向きは bp:shelter の監査が見る)
+        ALLOW.add(new Allow("built:shelter", "ATTACH_FACING", null, "a furnace of a neighbouring vanilla village house inside the 3-block margin of the audit box; the blueprint itself has no furnace (bp:shelter is audited separately)"));
         ALLOW.add(new Allow("built:ribs", "FLOAT_BLOCK", null, "terrain-following anchor site: a rib tip can end up one step above a dip in the ground; reported in docs/review/build_audit_report.md"));
         // 火口の縁の段の最後: 縁の高さで終わる見晴らしの段 (その先にしかけは無い。13 の火口の縁を切って外を見られる所)
         ALLOW.add(new Allow("ember", "STAIR_REVERSED", new BackReach.Box(2, 183, -43, 2, 183, -43), "the top step of the crater ledge ends at the rim as a lookout; nothing is gated behind it"));
@@ -72,8 +74,8 @@ public final class BuildAuditSelfTest {
     static {
         // 暗さ: 内部の広間 (潮殻の上段の広間・岩鯨の腹の通路・雷翼の内側・余燼の洞) は、灯りが少なく光度 0〜2 の歩ける所が残る。
         // 数は光の計算の時間で数件ゆらぐので少し余裕を見る。灯りを足す (または暗さを演出として許す) 設計の判断待ち (docs/review/build_audit_report.md の「暗さ」)
-        BUDGETS.add(new Budget("whale", "LIGHT_DARK", 300, "the dark waterway (about 126 cells by design: the lamp-stand game) plus a few pockets of shadow in halls and stairs (version 18 lit the routes to 4+; the audit limit rose from 2 to 3, so the count moved from 175 to about 260-290)"));
-        BUDGETS.add(new Budget("tide", "LIGHT_DARK", 45, "pockets of shadow left on purpose (lower waterways and a few corners of UPPER_1..3); version 14 lit the routes to 4+ with sea lanterns in the walls"));
+        BUDGETS.add(new Budget("whale", "LIGHT_DARK", 8, "version 20 lit the routes to 4+ with sea lanterns in the walls (RouteLamps, whale_back/route_lamps.json from dev routelight whale); a few shadowed corners of stairs remain (real count 3 to 6 depending on the light engine; the 6 cells the lamp search found no wall for). The flooded underside maze is dark by design (the lamp-stand game) and is not counted (BuildAuditExtra.mazeDark)"));
+        BUDGETS.add(new Budget("tide", "LIGHT_DARK", 14, "pockets of shadow left on purpose (lower waterways and a few corners of UPPER_1..3); version 14 lit the routes to 4+ with sea lanterns in the walls"));
         // 岩鯨の谷の飛び石は、宙に浮かぶ一つの石 (跳ぶ道の部品)。浮きの検査から外す
         for (BackReach.Box pit : new BackReach.Box[]{new BackReach.Box(-58, 100, -55, -36, 118, -18), new BackReach.Box(-56, 100, -91, -37, 118, -68),
                 new BackReach.Box(-36, 100, -86, -19, 118, -48)}) {

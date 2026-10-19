@@ -88,6 +88,8 @@ public final class TitanBackBuilder {
         for (Inscription guide : GUIDE_SIGNS) {
             kit.wallSign(guide.pos(), guide.facing(), guide.key());
         }
+        // 歩く道の灯り (建築の監査 LIGHT_DARK。下の迷路は光の台の遊びなので暗いまま。場所は dev routelight whale が測った route_lamps.json)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "whale");
         // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
         for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
             if (kit.get(spawn.getX(), spawn.getY(), spawn.getZ()).is(Blocks.MOSS_CARPET)) {

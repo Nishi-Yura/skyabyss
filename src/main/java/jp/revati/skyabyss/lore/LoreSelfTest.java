@@ -90,7 +90,7 @@ public final class LoreSelfTest {
         Set<String> signKeys = new HashSet<>();
         TitanBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
         // 潮殻の背の碑文 (08 の 9.2節)
-        jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.forEach(s -> signKeys.add(s.key()));
+        jp.revati.skyabyss.titan.tide.back.TideBackLayout.LORE_SIGNS.stream().filter(s -> !jp.revati.skyabyss.titan.tide.back.TideBackLayout.SIGNPOSTS.contains(s.key())).forEach(s -> signKeys.add(s.key()));
         // 雷翼の背の碑文 (12 の 9.2節。キーは伝承の担当が決め、背中の担当がこのキーで看板を立てる)
         signKeys.addAll(jp.revati.skyabyss.titan.storm.lore.StormLore.INSCRIPTIONS.values());
         // 余燼の背の碑文 (13 の 9.2節。文は担当 G、看板は B が置く)

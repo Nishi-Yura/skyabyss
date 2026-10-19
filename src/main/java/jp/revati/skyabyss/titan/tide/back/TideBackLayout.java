@@ -285,6 +285,9 @@ public final class TideBackLayout {
     public record Inscription(String key, BlockPos pos, Direction facing) {
     }
 
+    // LORE_SIGNS のうち、伝承ではなく使い方の立て札 (伝承の項目を持たない)
+    public static final java.util.Set<String> SIGNPOSTS = java.util.Set.of("sign.skyabyss.tide_breath_pad", "sign.skyabyss.tide_breath_rematch");
+
     public static final List<Inscription> LORE_SIGNS = List.of(
             new Inscription("sign.skyabyss.lore_tide_beach", new BlockPos(-17, 68, 43), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_hub", new BlockPos(-4, HUB_LEDGE + 2, 12), Direction.NORTH),

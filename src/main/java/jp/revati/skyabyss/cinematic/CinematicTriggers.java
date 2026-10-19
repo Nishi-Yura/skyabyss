@@ -194,7 +194,8 @@ public final class CinematicTriggers {
             return true;
         }
         BlockPos bp = BlockPos.containing(at);
-        if (!level.isLoaded(bp) || !player.getChunkTrackingView().contains(bp.getX() >> 4, bp.getZ() >> 4)) {
+        // 試験用の人形 (FakePlayer) にはチャンクの送信がない (追跡の範囲がいつも空) ので、送られているかは見ない。視線は同じに見る
+        if (!level.isLoaded(bp) || (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer) && !player.getChunkTrackingView().contains(bp.getX() >> 4, bp.getZ() >> 4))) {
             return false;
         }
         net.minecraft.world.phys.Vec3 eye = player.getEyePosition();

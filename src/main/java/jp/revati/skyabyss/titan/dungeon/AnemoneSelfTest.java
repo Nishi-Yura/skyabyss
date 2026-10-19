@@ -345,7 +345,14 @@ public final class AnemoneSelfTest {
                     full++;
                 }
             }
-            check(f, full == AnemoneLights.trail(back).size() && full >= plan.path.size(), "the light path does not run the whole way to the exit once the gate is open (" + full + " / " + AnemoneLights.trail(back).size() + ")");
+            // 光の道は息継ぎのくぼみのマスと流れの通路を飛ばす (AnemoneLights.computeTrail) ので、道のマスの数ではなく、くぼみでないマスの数以上を見る
+            int floorCells = 0;
+            for (int[] cell : plan.path) {
+                if (!plan.isPocket(cell)) {
+                    floorCells++;
+                }
+            }
+            check(f, full == AnemoneLights.trail(back).size() && full >= floorCells, "the light path does not run the whole way to the exit once the gate is open (" + full + " / " + AnemoneLights.trail(back).size() + ")");
             BlockPos ringAt = MazeBuilder.exitBubble().offset(1, -1, 1);
             check(f, open3.get(ringAt) != null && open3.get(ringAt).is(Blocks.SEA_LANTERN), "the exit cell is not ringed with light once the gate is open");
             check(f, !GroupOverlays.compute(back, gb).containsKey(AnemoneLights.trail(back).get(0)), "the light path leaked into another group's overlay");

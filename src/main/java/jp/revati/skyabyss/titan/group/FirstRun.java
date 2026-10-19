@@ -125,6 +125,18 @@ public final class FirstRun {
         return room;
     }
 
+    // 既知の道の戸の位置か (BackGroupData の「進み」に数えない。心臓を止めたグループは戸が開いているだけで、試練が進んでいるのではない)
+    public static boolean isDoorKey(long key) {
+        for (Room room : ROOMS.values()) {
+            for (BlockPos p : room.doors) {
+                if (p.asLong() == key) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void unregister(String id) {
         ROOMS.remove(id);
     }

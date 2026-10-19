@@ -117,5 +117,7 @@ public final class EmberBackRooms {
                 }
             }
         }
+        // 部屋を作り直すと壁の灯り (歩く道の灯り) も石に戻るので、置き直す (置いてある灯りは飛ばす)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
     }
 }

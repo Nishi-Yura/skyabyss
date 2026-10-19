@@ -104,21 +104,27 @@ public final class BackGroupData extends SavedData {
             dirty();
         }
 
+        // 試験の診断用: 進みと数えている理由
+        public String progressWhy() {
+            return "gateOpened=" + gateOpened + " heartDefeated=" + heartDefeated + " halls=" + clearedHalls + " data=" + data.getAllKeys()
+                    + " open=" + openOverride.size() + " closed=" + closedOverride.size() + " realOverride=" + hasRealOverride();
+        }
+
         // 何かしら試練が進んでいるか (進んでいなければ、元に戻す必要もない)
         public boolean hasProgress() {
             return gateOpened || heartDefeated || !clearedHalls.isEmpty() || hasProgressData()
                     || hasRealOverride();
         }
 
-        // 試練の入口の戸 (引いた三つだけ開ける戸。人が背にいるだけで書かれる) 以外の上書きがあるか
+        // 試練の入口の戸 (引いた三つだけ開ける戸。人が背にいるだけで書かれる) と、既知の道の戸 (FirstRun。周回のグループに開く) 以外の上書きがあるか
         private boolean hasRealOverride() {
             for (long k : openOverride) {
-                if (!IGNORED_OVERRIDE.test(k)) {
+                if (!IGNORED_OVERRIDE.test(k) && !FirstRun.isDoorKey(k)) {
                     return true;
                 }
             }
             for (long k : closedOverride) {
-                if (!IGNORED_OVERRIDE.test(k)) {
+                if (!IGNORED_OVERRIDE.test(k) && !FirstRun.isDoorKey(k)) {
                     return true;
                 }
             }

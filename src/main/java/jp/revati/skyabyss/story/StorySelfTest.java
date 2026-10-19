@@ -104,7 +104,7 @@ public final class StorySelfTest {
     private static void isanaTopics(MinecraftServer server, ServerLevel level, List<net.minecraft.world.entity.Entity> spawned, List<String> f,
                                     List<String> notes) {
         BlockPos spawn = level.getSharedSpawnPos();
-        BlockPos at = new BlockPos(spawn.getX() + 60, 300, spawn.getZ() + 60);
+        BlockPos at = new BlockPos(spawn.getX() + 40, 300, spawn.getZ() + 40);
         NpcEntity wc = NpcSetup.WHALE_CHASER.get().create(level);
         if (wc == null) {
             f.add("isana topics: npc could not be created");
@@ -131,7 +131,8 @@ public final class StorySelfTest {
         talk(p, wc, "ms_c_tide", f);
         check(stage(p, "main_tide").equals("rumor"), "isana topics: the rumor finished before the topic page", f);
         DialogueService.choose(p, "ms_c_tide", DialogueService.CONTINUE);
-        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide"), f);
+        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide")
+                + " (node " + node(p) + ", heard " + QuestLog.of(p).heard("main_tide", WC, "ms_c_tide2") + ", npc alive " + wc.isAlive() + ")", f);
         DialogueService.close(p);
 
         // 余燼: 同じ。保存して読み直しても (ログイン) 聞いた記録は残る
