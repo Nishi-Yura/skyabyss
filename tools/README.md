@@ -73,6 +73,11 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 | `mainhand left\|right` | 利き手の設定 (左利きの確認用。終わったら `right` に戻す) |
 | `bodyyaw <度>` | 体の向きを視線から何度ずらすか (人は 50 度までしかずれないので、それ以上は効かない。斜めの絵用) |
 | `echo <文>` | 記録に書くだけ |
+| `watch on\|off` | 開発用の監視。on のあいだ、目的の帯の文・開いた画面・流れた知らせが変わるたびに、ゲーム内の時刻 (`game=` 総 tick・`day=`・`tod=`) つきで記録 (`[watch]`) に書く (`first_hour.txt`) |
+| `band` | いまの目的の帯の文 (と距離・方角の札) を一行 `[band]` に書く |
+| `waitgame <総 tick>` | 総 tick (`time set` に左右されない通算) がその値になるまで待つ。`cmd tick rate 100` でサーバーを 5 倍にした台本の待ちはこれで書く (`wait` はクライアントの tick) |
+| `waitband <最大 tick> <語>` / `waitnotice <最大 tick> <語>` | 帯の文 / 知らせにその語が出るまで待つ。来なければ `[gap]` を記録して先へ進む (失敗にはしない)。`waitnotice` は `watch on` が要る |
+| `waitscreen <最大 tick> <none\|画面のクラス名>` | その画面が開く / 全部閉じるまで待つ。来なければ `[gap]` |
 | `quit` | ゲームを閉じる (書かなくても、最後まで来たら閉じる) |
 
 例: `tools/shots/example_titan_arrival.txt` (岩鯨の背の到着)、`tools/shots/example_tide_back.txt` (潮殻の背の全景)。
@@ -118,6 +123,24 @@ python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_
 
 ### マルチの確かめ (専用サーバー + 二人)
 `run/server.properties` に `online-mode=false`・`server-port=25666`・`enable-rcon=true`・`rcon.port=25766`・`rcon.password=test`・新しい `level-name`・`level-seed=4242`、`run/eula.txt` に `eula=true`。`./gradlew runServer` で起動し、台本の頭の `server localhost:25666` で専用サーバーへ入るクライアントを `./gradlew runShots -Pscript=tools/shots/mp_alice.txt -PshotsUser=Alice`、`mp_bob.txt -PshotsUser=Bob` で動かす (Alice が入ってから Bob を起動)。台本の `waitfile <ファイル>` は外 (`signal` か手) がファイルを置くまで待つ。サーバーへの命令は `python tools/rcon.py "<命令>"` (OP の権限。`skyabyss cinematic play <場面> Bob` など)。
+
+### 最初の 1 時間の通し (`tools/shots/first_hour.txt`、rpg_brushup A10)
+
+```
+rm -rf run/shots/first_hour/saves/opening_first_hour      # 毎回、新しい世界で (新しいプレイヤーの目覚めから)
+./gradlew runShots -Pscript=tools/shots/first_hour.txt   # 約 15 分。音は自動で 0
+```
+
+新しいプレイヤーが、序章 → 帳面 → 煙 → 語り部 → 最初の影 → 破れた頁 → イサナ → 足音の夜 → 歌の夜 → 岩鯨の初見 → 鎖、を進む間の「帯の文・画面・知らせ」を、ゲーム内の時刻つきで `run/shots/first_hour/shots/first_hour/shots.log` の `[watch]` に残す (開発用。本番の計測ではない)。拍子の強制 (`opening <拍子>`) は使わず、影・足音・歌・岩鯨は本物の判断に任せて総 tick を 60 分ぶん流す (`cmd tick rate 100` でサーバーだけ 5 倍)。歩きは `dev opening view|goto` で運び、会話は `dev talk "<役>"` / `dev talk say <continue|leave|番号>` で本物の会話 (DialogueService) を進める (節と選択肢が `[dialogue]` に出る)。結果の読み方と見つけた穴は `docs/review/first_hour_log.md`。
+
+## ソースの検査 (ゲームを立てずに)
+
+```
+python tools/check_lang_keys.py     # コード・データの文字列リテラルの翻訳キーが ja_jp / en_us にあるか (LangSelfTest (4) と同じ規則。偽陽性の許可リストは両方に同じ内容)
+python tools/check_band_width.py    # 目的の帯の文が幅 230 px に入るか (ObjectiveBandSelfTest と同じ字幅表。目印の付く目的は距離の札の分を引く)
+```
+
+自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=lang ./gradlew runServer` (`lang` と `lang objective band` の二段)。
 
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 

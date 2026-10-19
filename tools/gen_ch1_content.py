@@ -303,8 +303,8 @@ put(M + 'oddity.bell', '鐘が鳴った。宿りとは、逆の方角から。',
 put(M + 'oddity.step', '足跡が、一歩ぶん、多い。', 'There is one footprint too many.')
 put(M + 'oddity.cold', '息が白い。日の高い昼なのに、ほんの一呼吸だけ。', 'My breath shows white. At midday, for the space of a single breath.')
 # 見張りの丘
-put(M + 'lookout.edge', '筒を覗く。夕暮れの雲の合間に、雲より暗い縁が見えた。\n縁は{0}の方角で、ゆっくりと動いている。',
-    'I look through the tube. Between the dusk clouds, an edge darker than the clouds.\nIt moves slowly, toward the {0}.')
+put(M + 'lookout.edge', '筒を覗く。夕暮れの雲の合間に、雲より暗い縁が見えた。\n縁は%sの方角で、ゆっくりと動いている。',
+    'I look through the tube. Between the dusk clouds, an edge darker than the clouds.\nIt moves slowly, toward the %s.')
 put(M + 'lookout.size', '比べるものが、ひとつもない。それなのに、あまりに大きい。', 'There is nothing to compare it to. And still, it is far too large.')
 put(M + 'lookout.wait', '雲が流れていくだけだ。夕方に、もう一度覗いてみよう。', 'Only clouds drift by. I should look again at dusk.')
 put(M + 'lookout.seen', '縁はもう見えない。雲の向こうへ行ってしまった。', 'The edge is gone, beyond the clouds.')

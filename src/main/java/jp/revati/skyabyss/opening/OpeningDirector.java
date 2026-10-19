@@ -32,6 +32,7 @@ import jp.revati.skyabyss.sky.SkyEvents;
 import jp.revati.skyabyss.sky.SkyPass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -333,7 +334,6 @@ public final class OpeningDirector {
 
     // ---------------------------------------------------------------- 骨の丘の前触れ (17 の 3.5節)
     // 丘が急に目の前に現れないように、イサナのあとで骨の丘へ近づくにつれて字幕を一度ずつ: 風のにおい (方角) → 遠い稜線の白 → 足もとの欠片 (低い地鳴り) → 風が止む
-    private static final String[] COMPASS = {"南", "南西", "西", "北西", "北", "北東", "東", "南東"};
     static final double BONE_FAR = 220;
     static final double BONE_MID = 130;
     static final double BONE_NEAR = 70;
@@ -359,7 +359,8 @@ public final class OpeningDirector {
         switch (want) {
             case 1 -> {
                 float yaw = OpeningSites.yawTo(player.blockPosition(), ribs.get());
-                Notice.narrate(player, "opening.skyabyss.bone_rumor", COMPASS[Math.floorMod(Math.round(yaw / 45f), 8)]);
+                // yaw 0 = 南 (message.skyabyss.guide.dir は北 = 0 の 8 方位。日本語に決め打ちしない: 英語の画面に「to the 北西」と出ていた)
+                Notice.narrate(player, "opening.skyabyss.bone_rumor", Component.translatable("message.skyabyss.guide.dir." + Math.floorMod(4 + Math.round(yaw / 45f), 8)));
             }
             case 2 -> Notice.narrate(player, "opening.skyabyss.bone_far");
             case 3 -> {
@@ -464,6 +465,8 @@ public final class OpeningDirector {
         public void giveNotebook() {
             // 帳面を拾う = 伝承の書を手に入れる (最初の頁「忘れないうちに書け」が記される)
             Lore.unlock(player, Lore.BOOK_ENTRY, true);
+            // 書の開き方 (持って右クリック) は、道具の説明文にしか無かった (first_hour の通しで見つけた穴)。その場で一度だけ手がかりを出す
+            Notice.hint(player, "opening.skyabyss.notebook_hint");
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.7f);
             level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
         }

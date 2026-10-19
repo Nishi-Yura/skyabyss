@@ -275,6 +275,9 @@ public final class SiteBuilds {
                                 .then(Commands.argument("dist", FloatArgumentType.floatArg(0, 400)).then(Commands.argument("up", FloatArgumentType.floatArg(-20, 80))
                                         .then(Commands.argument("yaw", FloatArgumentType.floatArg(-360, 720)).then(Commands.argument("pitch", FloatArgumentType.floatArg(-90, 90))
                                                 .executes(SiteBuilds::view))))))))
+                        // goto <notebook|bell|smoke|slab|chaser> <離れる距離>: 帳面・鐘・煙の焚き火・鯨追いの焚き火の、南へ距離だけ離れた所へ体ごと置く (北向き。first_hour.txt 用)
+                        .then(Commands.literal("goto").then(Commands.argument("what", StringArgumentType.word()).then(Commands.argument("dist", FloatArgumentType.floatArg(0, 400))
+                                .executes(SiteBuilds::gotoSite))))
                         // dump <種類> <番号>: 場所のまわりを書き出す (tools/structure/check.py で調べる)
                         .then(Commands.literal("dump").then(Commands.argument("kind", kinds).then(Commands.argument("index", IntegerArgumentType.integer(0, 9))
                                 .executes(SiteBuilds::dump)))))));
@@ -352,6 +355,29 @@ public final class SiteBuilds {
         level.getChunk(((int) Math.floor(x)) >> 4, ((int) Math.floor(z)) >> 4);
         player.teleportTo(level, x, e.pos.getY() + up, z, yaw, pitch);
         ctx.getSource().sendSuccess(() -> Component.literal("view " + e.kind + " " + e.index + " at " + e.pos.toShortString()), false);
+        return 1;
+    }
+
+    private static int gotoSite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        MinecraftServer server = ctx.getSource().getServer();
+        ServerLevel level = server.overworld();
+        BlockPos at = switch (StringArgumentType.getString(ctx, "what")) {
+            case "notebook" -> jp.revati.skyabyss.opening.OpeningSites.notebook(server).orElse(null);
+            case "bell" -> jp.revati.skyabyss.opening.OpeningSites.bell(server).orElse(null);
+            case "smoke" -> jp.revati.skyabyss.opening.OpeningSites.smoke(server).orElse(null);
+            case "slab" -> jp.revati.skyabyss.opening.OpeningSites.slab(server).orElse(null);
+            case "chaser" -> jp.revati.skyabyss.opening.OpeningSites.bell(server)
+                    .map(b -> jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(level, b)).orElse(null);
+            default -> null;
+        };
+        if (at == null) {
+            ctx.getSource().sendFailure(Component.literal("no such place (notebook|bell|smoke|slab|chaser), or not built yet"));
+            return 0;
+        }
+        float dist = FloatArgumentType.getFloat(ctx, "dist");
+        level.getChunk(at.getX() >> 4, (at.getZ() + (int) dist) >> 4);
+        ctx.getSource().getPlayerOrException().teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5 + dist, 180f, 0f);
+        ctx.getSource().sendSuccess(() -> Component.literal("goto " + StringArgumentType.getString(ctx, "what") + " " + at.toShortString()), false);
         return 1;
     }
 

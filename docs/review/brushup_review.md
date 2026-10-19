@@ -131,18 +131,22 @@
 | 11 | 鎖で乗る | 「鎖を右クリックすると…」（`chain_hint`）。光る乗り込み口（`BoardGlow`）。乗り込み口の「備え」の一言（赤のとき二度押し） | 備えの助言が存在しない品を言う（P1-2）。赤のとき、何をすれば緑になるかの道が無い（旅装・砥石・糧と薬が未実装） |
 | 12 | 背中 → 試練 → 心臓 | 床の予告（デカール）、再入場の帯（あと ○ 秒）、戻る 3 秒の光 | 予告の読み方・再入場の決まりをゲーム内で初めて説明する場所が無い（初回に一行の字幕が欲しい。A: 初めて倒れたとき `gate_wait` に「（床の印の外は安全）」を添える） |
 
+**【実測 2026-10-19】** この表の流れを台本 `tools/shots/first_hour.txt` で本当に通し、帯・画面・知らせを時刻つきで記録した。結果と、見つけて直した穴（頁の帯・屋内で影が来ない・鎖が降りても帯が待ちのまま・英語の画面の日本語の方角と `{0}`・初見のあとの帯の遅れ・書の開き方の手がかり）、直していない穴（夜 1 の歌の帯・会話に通知が重なる・鎖の待ちの帯と降下の遅さ・足跡が建たない世界）は `docs/review/first_hour_log.md`。
+
 ---
 
 ## テストの穴と、不安定だったもの
 
 ### 足りないテスト
-- **【修正済み 2026-10-19】** T-1 `lang` (重複・ja/en・`%s` 数。(4) のコード中キーの存在は未対応) / T-2 `TitanEndSelfTest.stayWarnings` (20 分は既存の `stay`、知らせは今回) / T-3 `brushup` / T-4 `TitanEndSelfTest.voyageHeartStop` / T-5 `brushup` / T-8 `brushup` の `titanTargets` (サーバー側: 巨神の位置が送られる)。T-6 は助言を今ある品に絞る別の直しのため不要、T-7 (帯の幅) は未対応。
+- **【修正済み 2026-10-19】** T-1 `lang` (重複・ja/en・`%s` 数。**(4) コード中キーの存在 = 2026-10-19 済み**: 下の T-1 の【修正済み】) / T-2 `TitanEndSelfTest.stayWarnings` (20 分は既存の `stay`、知らせは今回) / T-3 `brushup` / T-4 `TitanEndSelfTest.voyageHeartStop` / T-5 `brushup` / T-8 `brushup` の `titanTargets` (サーバー側: 巨神の位置が送られる)。T-6 は助言を今ある品に絞る別の直しのため不要、T-7 (帯の幅) = 2026-10-19 済み (下の T-7)。
+- **【T-1 (4) 修正済み 2026-10-19】** `LangSelfTest` が、ソース (`src/main/java`・`src/main/resources/data`。開発環境で見えるときだけ) の文字列リテラルにある「<種類>.skyabyss[_名前空間].<名前>」の形のキーが ja・en の両方にあるかを見る (約 1040 個)。`"…n" + 番号` の形は頭だけを見て、看板は `.1` の有無を見る。偽陽性の許可リスト (理由つき): `sign.skyabyss.ch3_wind_` (`StormChapterSelfTest` の startsWith の頭)・`opening.skyabyss.hint_move` (`OpeningStorySelfTest` が「もう無い」ことを確かめる否定の検査)。クエストの題・要約・完了・各段の日誌・各目的のキー全部 (`QuestManager`) も見る。同じ規則の `python tools/check_lang_keys.py` を足した (ゲームを立てずに確かめる)。**実際に足りないキーは 0 件**だった。代わりに `LangSelfTest` に「`{0}` 形式の引数が残っていない」検査を足したら、通しの確認 (first_hour) で見つかった 2 件 (`opening.skyabyss.bone_rumor`・`message.skyabyss.ch1.lookout.edge`。画面に「{0}」とそのまま出ていた) を直した。
 - T-1（A）lang 全体の自己テスト: (1) 全 `lang/*.json` で同じキーが重複しない（P0-1 を見つける）、(2) ja と en のキーが一致、(3) `%s` の数の一致、(4) コード中の `translatable("…")` のキーが存在する（接頭辞は除く）。今は系統ごとの自己テスト（`SignFit`・`GuideSelfTest`・`OpeningStorySelfTest` ほか）が部分的に見ているだけ。
 - T-2（A）`TitanStay`: 四体とも停泊が 24000 tick（`StoneWhaleEntity` の `REST_DURATION`・`TideShellEntity`・`StormWingEntity`・`EmberTitanEntity` の `forcedTicks`）、残り 2 分・30 秒の知らせが一度ずつ出る、保存して読み直しても残りが続く。今は `TitanEndSelfTest`/`HeartAftermathSelfTest` が `stay` に触れる程度で、20 分そのものと知らせは見ていない。
 - T-3（A）`ReentryRules.GUARD`: 退出・停止で消える（P1-4）。
 - T-4（A）停泊中・旅の最中に心臓が止まる（P2-3 の最後）。旅の最中は眠りに入らず、降りたあと眠りが勝つ。
 - T-5（B 小）戦いの最中の復活先（P1-1）。三体が入るなら、`TitanBackSelfTest` の岩鯨の `respawnCheckpoint` の検査（`TitanBackSelfTest.java:889-900`）と同じ検査を三体に。
 - T-6（A）備えの助言の語が実在の品か（P1-2）: 助言の語（旅装・砥石）が lang に品として存在しなければ失敗、など。品が入るまで助言から外す今の直しなら不要。
+- **【T-7 修正済み 2026-10-19】** 自己テスト `lang objective band` (`ObjectiveBandSelfTest`): メインのクエストの全段の全目的 (+ `.wait` 版) と序盤の目的 `objective.skyabyss.*` の日英全部 (88 文) が、帯の幅 230 px に「◆ 」と個数の札「（9/9）」を足して収まるか。サーバー側のテストなので、控えめな字幅表 (ASCII は vanilla の字体の送り幅、日本語・記号は 9 px。実機の画面で測ると表の方が 2〜3 px 大きい) で数える。**目印 (距離と方角) が付く目的** (序盤の 5 つと、章の「巨神を探す・乗る」段) は、距離の札 (約 52 px) の分を引いた幅に収める。あふれていた 28 文 (英語 23・日本語 5。序盤の 6 つと各章の 22 つ) を、意味を保って縮めた (`tools/check_band_width.py` で同じ表をゲームなしで確かめられる)。あわせて、距離の方角が日本語の字 (南西…) 決め打ちで英語の画面にも出ていたのを、言語に合う短い形 (N・NE…、`gui.skyabyss.objective.dir.<0..7>`) にした。
 - T-7（A）目的の帯: 目的の文の長さが画面の幅（日本語 18 字・英語 34 字）以下（P2-1）。
 - T-8（A）`SiteTargets`: `bind`/`bindPos` が使われていない（P1-8）。使うなら、`board` の帯が岩鯨の方向を出す自己テスト。
 

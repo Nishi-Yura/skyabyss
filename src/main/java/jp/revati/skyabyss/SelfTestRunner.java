@@ -95,6 +95,7 @@ public final class SelfTestRunner {
         // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
+        steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));

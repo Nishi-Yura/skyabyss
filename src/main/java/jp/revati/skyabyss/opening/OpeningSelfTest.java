@@ -748,7 +748,7 @@ public final class OpeningSelfTest {
         check(OpeningLogic.nightId(12999) == -1 && OpeningLogic.nightId(13000) == 0 && OpeningLogic.nightId(24000 + 20000) == 1 && OpeningLogic.nightId(24000 + 22000) == -1,
                 "night ids", failures);
         // 帯に出る文の鍵が、すべて語りの担当の表にある (日英の長さは OpeningStorySelfTest が数える)
-        for (String id : new String[]{"examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana", "see_whale", "wait_whale", "bone_hill"}) {
+        for (String id : new String[]{"examine_camp", "follow_smoke", "watch_sky", "read_page", "ask_storyteller", "find_isana", "see_whale", "wait_whale", "bone_hill"}) {
             check(OpeningSelfTest.class.getResourceAsStream("/assets/skyabyss_opening/lang/ja_jp.json") != null, "objective lang file", failures);
             try (var in = OpeningSelfTest.class.getResourceAsStream("/assets/skyabyss_opening/lang/en_us.json")) {
                 String text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);

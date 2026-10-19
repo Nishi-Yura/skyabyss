@@ -22,7 +22,6 @@ import net.minecraft.world.phys.Vec3;
 // 戦いで傷を受けた直後と、画面を開いているあいだは薄くする。設定 objectiveStrip で消せる (全文は U のクエストログ)。
 // 追跡中のクエストがメインのときは、この帯が代わりに出す (QuestHud は出さない)
 public final class ObjectiveStrip {
-    private static final String[] COMPASS = {"南", "南西", "西", "北西", "北", "北東", "東", "南東"};
     static final int WIDTH = 230;
     private static final int ROW = 14;
 
@@ -31,6 +30,9 @@ public final class ObjectiveStrip {
     public static volatile Function<String, BlockPos> targets;
 
     private static String lastText = "";
+    // 開発用 (台本のログ): 最後に帯へ描いた文と、その時刻
+    private static String lastShown = "";
+    private static long lastShownMs;
     private static long flashUntil;
 
     private ObjectiveStrip() {
@@ -49,6 +51,11 @@ public final class ObjectiveStrip {
             }
         }
         return best;
+    }
+
+    // 開発用: いま画面に出ている帯の文 (出ていなければ空)。台本の開発用ログ (client/dev/ShotRunner の watch) が読む
+    public static String shownNow() {
+        return net.minecraft.Util.getMillis() - lastShownMs < 600 ? lastShown : "";
     }
 
     // 帯を出すか (設定が入っていて、出す目的があるか)
@@ -71,7 +78,9 @@ public final class ObjectiveStrip {
         // yaw 0 = 南 (+Z)、90 = 西 (-X): 角度を 45 度ごとに八つへ
         double deg = Math.toDegrees(Math.atan2(-dx, dz));
         int i = Math.floorMod((int) Math.round(deg / 45.0), 8);
-        return COMPASS[i];
+        // 南 = 0 から時計回り (南 南西 西 …) の i を、北 = 0 の短い方位の文 (gui.skyabyss.objective.dir.<0..7>。英語は N NE …) へ。
+        // 長い方位の文 (north-west など) は距離の札の幅を食うので短い形を使う。語を日本語に決め打ちしない (英語の画面にも出る)
+        return Component.translatable("gui.skyabyss.objective.dir." + (i + 4) % 8).getString();
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {
@@ -137,6 +146,8 @@ public final class ObjectiveStrip {
             shown = shown.substring(0, shown.length() - 2) + "…";
         }
         g.drawString(font, Component.literal(shown), x + 1, y + 1, textColor, true);
+        lastShown = shown + (far.isEmpty() ? "" : "   [" + far + "]");
+        lastShownMs = now;
         if (!far.isEmpty()) {
             g.drawString(font, far, x + w - font.width(far), y + 1, ((int) (255 * a)) << 24 | 0x7FD6D0, true);
         }

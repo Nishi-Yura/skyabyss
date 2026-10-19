@@ -21,7 +21,15 @@ public final class NoticeLog {
     private NoticeLog() {
     }
 
+    // 流れた知らせの通し数 (200 件で切られても増え続ける。台本の開発用ログ ShotRunner が新しい知らせを数えるのに使う)
+    private static int total;
+
+    public static int total() {
+        return total;
+    }
+
     public static void add(Notice.Kind kind, Component text) {
+        total++;
         ENTRIES.add(0, new Entry(LocalTime.now().format(CLOCK), kind, text));
         while (ENTRIES.size() > MAX) {
             ENTRIES.remove(ENTRIES.size() - 1);

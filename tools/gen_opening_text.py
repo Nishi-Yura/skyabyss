@@ -110,21 +110,24 @@ OPENING = {
     # 判断 5: 日 3 の朝になっても宿りに着かない人へ、帳面の余白に増える一行 (伝承 prologue/the_book_margin を記す)
     "opening.skyabyss.margin_line": ("鐘の方へ。", "Toward the bell."),
     # 骨の丘の前触れ (日 2 の昼、イサナのあと。方角のにおい・遠い白・足もとの欠片・風の止む順。字幕で一度ずつ。{0} は方角)
-    "opening.skyabyss.bone_rumor": ("乾いた石のにおいが、風に混じっている。{0}の丘のほうだ。", "A smell of dry stone rides the wind. It comes from the hills to the {0}."),
+    "opening.skyabyss.bone_rumor": ("乾いた石のにおいが、風に混じっている。%sの丘のほうだ。", "A smell of dry stone rides the wind. It comes from the hills to the %s."),
+    # 帳面を渡した直後の手がかり (書の開き方は道具の説明にしか無かった。first_hour.txt の通しで発見)
+    "opening.skyabyss.notebook_hint": ("帳面を手に持って右クリックすると読める", "Hold the notebook and right-click to read it"),
     "opening.skyabyss.bone_far": ("遠く、丘の稜線が妙に白い。雲の影ではない。", "Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow."),
     "opening.skyabyss.bone_mid": ("足もとに、白い欠片が転がっている。……大きすぎる。", "White fragments lie at your feet. ...Too large."),
     "opening.skyabyss.bone_near": ("風が止んだ。丘は、丘のかたちをしていない。", "The wind has stopped. The hill is not shaped like a hill."),
 }
 OBJECTIVES = [
     # (ID, 日本語, 英語, いつ出すか)
-    ("examine_camp", "野営地の跡を調べてみよう", "Look around the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
+    ("examine_camp", "野営地の跡を調べてみよう", "Search the abandoned camp", "B0 目覚めてから、帳面を拾うまで"),
     ("follow_smoke", "煙の立つ方へ向かってみよう", "Head toward the rising smoke", "B1 帳面を拾ってから、鐘の宿りの語り部と話すまで (メインの段 follow_smoke)"),
-    ("watch_sky", "周りを探索して強くなろう", "Explore and grow stronger", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
-    ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the storyteller at the lodge", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
-    ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire beyond the lodge", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
-    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Keep exploring, and listen for the song at night", "B7〜B10 イサナと話してから、歌を聞くまで (メインの段 see_whale)"),
-    ("wait_whale", "夕方、空を見上げて岩鯨を待とう", "At dusk, look up and wait for the stone whale", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
-    ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Go and see the hill that looks white in the haze", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
+    ("watch_sky", "周りを探索しつつ、昼は空を見上げよう", "Explore, and watch the sky at midday", "B2〜B4 語り部と話してから、最初の影を見るまで (メインの段 watch_sky)"),
+    ("read_page", "破れた頁を拾って、読んでみよう", "Take the torn page, and read it", "B4 影が去ってから、落ちてきた破れた頁を読むまで (メインの段 watch_sky のまま。OpeningLogic.objective)"),
+    ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
+    ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
+    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Explore, and listen for the song at night", "B7〜B10 イサナと話してから、歌を聞くまで (メインの段 see_whale)"),
+    ("wait_whale", "夕方、空を見上げて岩鯨を待とう", "At dusk, look up for the stone whale", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
+    ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Check the hazy white hill", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]
 for oid, ja, en, _ in OBJECTIVES:
     OPENING[f"objective.skyabyss.{oid}"] = (ja, en)

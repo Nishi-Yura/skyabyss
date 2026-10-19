@@ -28,13 +28,14 @@
 - **内容の拡張の基盤**（設計書 21、ユーザーが 8 問に回答済み）: P1 復帰・P2 三灯・P3 導き（`guide/`: 備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・経験値の枠）・P6 一章の地上（石標・骨の集め場・歌の間・割れ殻の洞・備えの頼み 3 本・岩鯨の降下の門 `Ch1Descent`）・P9 初回/周回（`FirstRun`）は済み。
 - **留め袋（mod 専用の持ち物）の土台**（設計書 22、`pouch/`）: ゲームルール `skyabyssPouch` が既定で切。画面と使う入力ができるまで切のまま。
 - 雷翼の装備名の重複 lang を一本化（羽衣系）。自己テスト `lang` が重複・日英の対応・%s を見る。
+- **最初の 1 時間の通し（A10）と、lang・帯の自己テスト**: 台本 `tools/shots/first_hour.txt`（新しい世界で 序章 → 帳面 → 影 → イサナ → 足音 → 歌 → 岩鯨の初見 → 鎖。約 25 分、`watch` の記録に帯・画面・知らせが時刻つきで出る）と、記録の読み解き `docs/review/first_hour_log.md`（時刻表・直した穴 9 件・直していない穴 B-1〜B-9）。自己テスト `lang`（コード・データ中のキーが ja・en にある・`{0}` 形式が無い）と `lang objective band`（帯の文が幅 230 px に収まる。目印つきは距離の札の分を引く）。ゲームなしの確認は `python tools/check_lang_keys.py`・`python tools/check_band_width.py`。直した本物の不具合: 影が屋内の人に来ない（`SkyEvents` の初回の再試行）、鎖が降りても帯が「待ち」のまま（`QuestHud`・`StoneWhaleEntity.isChainReaching`）、英語の画面の日本語の方角・`{0}`。
 
 ## 2. 次にやること
 
 1. **選定ページの答えを入れる**（https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM 、db `choices`）: 一章の新しい敵 7 体（P7・P10）、旅の職人（P4）と 4 色、鯨道の旅装（P5）、旅の覚書・鼓動守のアイコン（今は仮の絵 `wayfarer_notes.png`・`heartbeat_ward.png`）、留め袋の画面と使う入力。
 2. 21 の残り: P4 職人 → P5 旅装・砥石・糧 → P7 一章の地上の敵 → P8 岩鯨の背の拡張（P10 の敵と並行）→ 二〜四章（P11〜P22）→ P23・P24。洞と備えの頼みの差し込み口は `story/ch1/Ch1Prep.java` の冒頭。
 3. 留め袋の P4（画面）・P5（絵）・P6（使う入力）・P9・P10。できたら `skyabyssPouch` を既定で入にし、205（心核を使うレシピ）を袋の画面の「作り直し」で解く。
-4. `docs/research/rpg_brushup.md` の残り（A5 の部屋の検査は済み、A10 の最初の 60 分の通しの確認）と `docs/review/brushup_review.md` の残り（T-1 (4) コード中のキーが lang にあるか、T-7 帯の文字数）。
+4. `docs/research/rpg_brushup.md` の残り（A5・A10 は済み。人が付ける試遊の表 = `beta_how_to_play.md` の 11 章の隣は未作成）。`docs/review/first_hour_log.md` の 4 章（B-1 夜 1 に歌を待たせる帯、B-2 最初の会話に通知が重なる、B-4・B-5 鎖の待ちの帯と降下の遅さ、B-6 足跡が建たない世界、ほか）。
 
 ## 3. ユーザーの判断待ち（起きたら一括で聞く）
 
@@ -43,6 +44,8 @@
 - RPG の調べもの（rpg_brushup の B）: 復帰の上限に仲間の蘇生を足すか、周回の変化、石の記録を本人が鳴らしたときだけにするか、停泊 20 分（無人なら早く去る案）、倒れた回数の札、「ここ」の目印。
 - 見直し（brushup_review の B）: 「留まる者」を序盤の見出しに出すか、英語の帯の幅、案の書類（21・22）の置き場、余燼のつなぎ目の扱い。
 - 武器の振りの長さの好み（`SwingClock.TICKS_AT_SPEED_1` = 12）。
+
+- 最初の 1 時間の通しで出た問い（`docs/review/first_hour_log.md` の 4 章）: 夜 1（足音だけの夜）の帯の文をどうするか（B-1）、会話・場面の最中は知らせを溜めて閉じたあとに流すか（B-2）、鎖の待ちの帯に備えの頼みの目的を出すか・条件が整った人には岩鯨が早く降りるようにするか（B-4・B-5）。
 
 ## 4. ユーザーにしか確かめられないもの
 
@@ -56,6 +59,7 @@
 - **見た目の決め方**: モブ・武器・防具・画面は、3 案のラフを選定ページで選んでもらってから作る。非立方体の低ポリ＋1 ブロック 32 画素のドット絵、軽さ重視。巨神ごとに形と色の言葉を分ける。公開は `Artifact` の publish に `files` で画像を渡す（公開するファイル名は `_` で始められない）。
 - **設計書**: `docs/design/` は今の仕様だけ（決定ログは作らない）。00 はサブエージェントに触らせない。新しい未決は 200 番から。
 - **自己テスト**: 毎回新しい level-name と `level-seed=4242`、`max-tick-time=-1`。並列のときは `server-port` と `rcon.port` をエージェントごとに分ける。重いと読み込みが間に合わずに落ちる段がある（岩鯨・墓・余燼の心臓・雷翼の網）。単独で流し直して通れば負荷のせい。`SKYABYSS_SELFTEST_ONLY=freequest` だけは落ちる（全体なら通る）。
+- **通しの台本**: `tools/shots/first_hour.txt` は毎回新しい世界で（`run/shots/first_hour/saves/opening_first_hour` を消す）。`cmd tick rate 100` でサーバーを 5 倍にし、待ちは `waitgame <総 tick>`（`wait` はクライアントの tick）。会話・歩きの開発コマンドは `dev talk`・`dev opening goto`。同じ世界を `-PshotsName=first_hour` で開いて続きだけ確かめられる。足跡が建たない世界があるので、屋外で待つ所は `goto notebook`（野営地）にしてある。
 - **撮影**: `./gradlew runShots -Pscript=tools/shots/<台本>.txt`。新しいワールドの 1 回目はカメラが間に合わないことがある（待ちを延ばした）。音は自動で 0。
 - **テストで Minecraft を開くときは音量 0**（`runClientTest` と台本は自動）。
 - **java を全部落とさない**。止めるのは自分が立てたプロセスだけ（ユーザーの CurseForge の Minecraft は絶対に止めない）。使っていない java（終わったエージェントのサーバー、古い Gradle デーモン）はこまめに止める。

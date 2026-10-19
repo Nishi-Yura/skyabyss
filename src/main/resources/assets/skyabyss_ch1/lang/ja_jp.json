@@ -97,7 +97,7 @@
   "message.skyabyss.ch1.hush.end": "影が去った。鎖の鳴る音がして、岩鯨が、また動きだした。",
   "message.skyabyss.ch1.hush.mid": "雲の上を、何かが通っている。岩鯨が、それを知っている。",
   "message.skyabyss.ch1.hush.start": "歌が、ぴたりとやんだ。風も、鳥も、息を止めている。",
-  "message.skyabyss.ch1.lookout.edge": "筒を覗く。夕暮れの雲の合間に、雲より暗い縁が見えた。\n縁は{0}の方角で、ゆっくりと動いている。",
+  "message.skyabyss.ch1.lookout.edge": "筒を覗く。夕暮れの雲の合間に、雲より暗い縁が見えた。\n縁は%sの方角で、ゆっくりと動いている。",
   "message.skyabyss.ch1.lookout.seen": "縁はもう見えない。雲の向こうへ行ってしまった。",
   "message.skyabyss.ch1.lookout.size": "比べるものが、ひとつもない。それなのに、あまりに大きい。",
   "message.skyabyss.ch1.lookout.wait": "雲が流れていくだけだ。夕方に、もう一度覗いてみよう。",

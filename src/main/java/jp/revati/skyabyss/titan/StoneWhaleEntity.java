@@ -191,6 +191,21 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         return (mode == Mode.REST || voyage) && chainLength() > 4f && chainBottom().y <= groundY + CHAIN_END_HEIGHT + 0.5;
     }
 
+    // 鎖が地上へ届いているか、クライアントでも使える形。isChainDown は mode と groundY (どちらもサーバーだけの値) を見るので、
+    // クライアントでは mode が既定の CRUISE のままで、いつも偽になる (目的の帯が、鎖が降りても「鎖が降りるまで」のままだった。first_hour.txt の通しで発見)。
+    // クライアントでは、同期されている鎖の長さと、鎖の下端の下の地面の高さ (読み込み済みの地形) で見る
+    public boolean isChainReaching() {
+        if (!level().isClientSide) {
+            return isChainDown();
+        }
+        if (chainLength() <= 4f) {
+            return false;
+        }
+        Vec3 bottom = chainBottom();
+        double ground = level().getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(bottom.x), Mth.floor(bottom.z));
+        return bottom.y <= ground + CHAIN_END_HEIGHT + 0.5;
+    }
+
     @Override
     public void tick() {
         super.tick();

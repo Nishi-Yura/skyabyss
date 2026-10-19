@@ -84,6 +84,15 @@ public final class ShotRunner {
     private static int shots;
     private static int failures;
     private static Screen confirmed;
+    // 開発用の監視 (台本の watch on): 目的の帯の文・画面・知らせが変わるたびに、ゲーム内の時刻つきで記録に書く (first_hour.txt)
+    private static boolean watching;
+    private static String watchBand = null;
+    private static String watchScreen = "";
+    private static boolean watchAwake;
+    private static boolean watchHorror;
+    private static int watchNotices;
+    private static final java.util.List<String> seenNotices = new java.util.ArrayList<>();
+    private static int noticeMark;
 
     private ShotRunner() {
     }
@@ -252,6 +261,9 @@ public final class ShotRunner {
         if (mc.screen instanceof PauseScreen) {
             mc.setScreen(null);
         }
+        if (watching) {
+            watchTick(mc);
+        }
         if (index >= script.steps.size()) {
             finish("SHOTS OK " + shots + " shots");
             return;
@@ -289,6 +301,70 @@ public final class ShotRunner {
                 return stepTicks + 1 >= line.intArg(0);
             }
             case "echo" -> {
+                return true;
+            }
+            case "watch" -> {
+                watching = line.arg(0).equals("on");
+                if (watching) {
+                    watchBand = null;
+                    watchScreen = "";
+                    watchAwake = false;
+                    watchNotices = jp.revati.skyabyss.client.notice.NoticeLog.total();
+                }
+                return true;
+            }
+            case "waitgame" -> {
+                // 総 tick (ゲーム内の通算。time set に左右されない) がその値になるまで待つ
+                return mc.level.getGameTime() >= Long.parseLong(line.arg(0));
+            }
+            case "waitband" -> {
+                // waitband <最大の待ち tick> <帯の文に含まれる語>: 帯がその語を出すまで待つ。来なければ記録に [gap] を残して先へ
+                String want = line.rest().substring(line.rest().indexOf(' ') + 1);
+                if (jp.revati.skyabyss.client.quest.ObjectiveStrip.shownNow().contains(want)) {
+                    say("  [waited] band shows \"" + want + "\" after " + stepTicks + " client ticks, " + watchStamp(mc));
+                    return true;
+                }
+                if (stepTicks >= line.intArg(0)) {
+                    say("  [gap] band never showed \"" + want + "\" within " + stepTicks + " client ticks, " + watchStamp(mc)
+                            + " (band: \"" + jp.revati.skyabyss.client.quest.ObjectiveStrip.shownNow() + "\")");
+                    return true;
+                }
+                return false;
+            }
+            case "waitnotice" -> {
+                if (first) {
+                    noticeMark = seenNotices.size();
+                }
+                String want = line.rest().substring(line.rest().indexOf(' ') + 1);
+                for (int i = noticeMark; i < seenNotices.size(); i++) {
+                    if (seenNotices.get(i).contains(want)) {
+                        say("  [waited] notice \"" + want + "\" after " + stepTicks + " client ticks, " + watchStamp(mc));
+                        return true;
+                    }
+                }
+                if (stepTicks >= line.intArg(0)) {
+                    say("  [gap] notice \"" + want + "\" never came within " + stepTicks + " client ticks, " + watchStamp(mc));
+                    return true;
+                }
+                return false;
+            }
+            case "waitscreen" -> {
+                // waitscreen <最大の待ち tick> <none|画面のクラス名>
+                String want = line.arg(1);
+                boolean ok = want.equals("none") ? mc.screen == null : mc.screen != null && mc.screen.getClass().getSimpleName().equals(want);
+                if (ok) {
+                    say("  [waited] screen " + want + " after " + stepTicks + " client ticks, " + watchStamp(mc));
+                    return true;
+                }
+                if (stepTicks >= line.intArg(0)) {
+                    say("  [gap] screen " + want + " never came within " + stepTicks + " client ticks, " + watchStamp(mc));
+                    return true;
+                }
+                return false;
+            }
+            case "band" -> {
+                // いまの帯の文を一行記録する (変わっていなくても)
+                say("  [band] " + watchStamp(mc) + " \"" + jp.revati.skyabyss.client.quest.ObjectiveStrip.shownNow() + "\"");
                 return true;
             }
             case "waitfile" -> {
@@ -601,6 +677,46 @@ public final class ShotRunner {
                 return false;
             }
             default -> throw new IllegalArgumentException("unknown step " + line.op());
+        }
+    }
+
+    // ゲーム内の時刻 (総 tick・日・一日の時刻)。時刻を飛ばした (time set) 台本でも、どの日のいつかが分かる
+    private static String watchStamp(Minecraft mc) {
+        long game = mc.level.getGameTime();
+        long dayTime = mc.level.getDayTime();
+        return "game=" + game + " (" + (game / 1200) + "m" + String.format("%02d", (game / 20) % 60) + "s) day=" + (dayTime / 24000L) + " tod=" + (dayTime % 24000L);
+    }
+
+    private static void watchTick(Minecraft mc) {
+        String band = jp.revati.skyabyss.client.quest.ObjectiveStrip.shownNow();
+        if (!band.equals(watchBand)) {
+            say("[watch] " + watchStamp(mc) + " band " + (band.isEmpty() ? "(none)" : "\"" + band + "\""));
+            watchBand = band;
+        }
+        boolean awake = jp.revati.skyabyss.client.opening.OpeningClient.awakeActive();
+        if (awake != watchAwake) {
+            say("[watch] " + watchStamp(mc) + " awake-scene " + (awake ? "start" : "end"));
+            watchAwake = awake;
+        }
+        boolean horror = jp.revati.skyabyss.client.opening.OpeningClient.horrorCueActive();
+        if (horror != watchHorror) {
+            say("[watch] " + watchStamp(mc) + " horror-cue (footsteps / song) " + (horror ? "start" : "end"));
+            watchHorror = horror;
+        }
+        String screen = mc.screen == null ? "" : mc.screen.getClass().getSimpleName();
+        if (!screen.equals(watchScreen)) {
+            say("[watch] " + watchStamp(mc) + " screen " + (screen.isEmpty() ? "closed" : screen));
+            watchScreen = screen;
+        }
+        int total = jp.revati.skyabyss.client.notice.NoticeLog.total();
+        if (total > watchNotices) {
+            var entries = jp.revati.skyabyss.client.notice.NoticeLog.entries();
+            for (int i = Math.min(total - watchNotices, entries.size()) - 1; i >= 0; i--) {
+                var e = entries.get(i);
+                seenNotices.add(e.text().getString());
+                say("[watch] " + watchStamp(mc) + " notice " + e.kind() + " \"" + e.text().getString().replace('\n', '/') + "\"");
+            }
+            watchNotices = total;
         }
     }
 

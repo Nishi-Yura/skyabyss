@@ -97,7 +97,7 @@
   "message.skyabyss.ch1.hush.end": "The shadow has gone. A chain clinks, and the whale begins to move again.",
   "message.skyabyss.ch1.hush.mid": "Something is passing above the clouds. The whale knows it.",
   "message.skyabyss.ch1.hush.start": "The song stopped dead. The wind and the birds hold their breath.",
-  "message.skyabyss.ch1.lookout.edge": "I look through the tube. Between the dusk clouds, an edge darker than the clouds.\nIt moves slowly, toward the {0}.",
+  "message.skyabyss.ch1.lookout.edge": "I look through the tube. Between the dusk clouds, an edge darker than the clouds.\nIt moves slowly, toward the %s.",
   "message.skyabyss.ch1.lookout.seen": "The edge is gone, beyond the clouds.",
   "message.skyabyss.ch1.lookout.size": "There is nothing to compare it to. And still, it is far too large.",
   "message.skyabyss.ch1.lookout.wait": "Only clouds drift by. I should look again at dusk.",

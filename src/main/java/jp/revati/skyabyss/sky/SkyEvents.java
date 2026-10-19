@@ -48,7 +48,6 @@ public final class SkyEvents {
     // 条件が合わなければ 10 秒おきに調べ直し、遅れた分だけ条件をゆるめる
     private static final long FIRST_PASS_AT = 6000L;
     private static final long FIRST_PASS_MIN_WAIT = 2400L;
-    private static final long FIRST_RETRY_DELAY = 200L;
     // 最初の一回は雨でも起こす (17 の 3.3節)。丸一日遅れたら、空の見えない所にいる人の上にも起こす
     private static final long FIRST_LOOSEN_SKY = DAY;
     private static final float SPEED = 0.35f;
@@ -135,7 +134,11 @@ public final class SkyEvents {
         long overdue = now - data.nextPassTick();
         ServerPlayer witness = pickWitness(level, first ? overdue : -1);
         if (witness == null) {
-            data.schedule(now + (first ? FIRST_RETRY_DELAY : RETRY_DELAY));
+            // 最初の通過は予定の時刻を動かさない (毎秒見直す)。動かすと「予定から何 tick 遅れたか」(overdue) がいつまでも 0 付近のままで、
+            // 一日たったら空の見える条件をゆるめる (FIRST_LOOSEN_SKY) 備えが働かず、屋内・洞窟にいる人にはいつまでも影が来なかった (first_hour.txt の通しで発見)
+            if (!first) {
+                data.schedule(now + RETRY_DELAY);
+            }
             return;
         }
         start(level, witness);

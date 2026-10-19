@@ -36,6 +36,13 @@ public final class OpeningSetup {
     }
 
     public static void register(IEventBus modEventBus) {
+        // 岩鯨の初見の場面が終わったら、すぐ「岩鯨を見た」の頁を記す (スキップでも)。頁の自然の解放は岩鯨が 160 ブロック以内に来たときで、
+        // 場面は遠い所 (WHALE_NEAR より遠く) から始まるので、場面のあと 10 秒以上も帯が「夕方、岩鯨を待とう」のままだった (first_hour.txt の通しで発見)
+        jp.revati.skyabyss.cinematic.Cinematics.onEnd(jp.revati.skyabyss.cinematic.Scenes.WHALE_FIRST_SIGHT, (player, skipped) -> {
+            if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+                jp.revati.skyabyss.lore.Lore.unlock(player, "chapter1/stone_whale", true);
+            }
+        });
         ATTACHMENTS.register(modEventBus);
         SOUNDS.register(modEventBus);
     }

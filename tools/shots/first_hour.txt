@@ -1,0 +1,227 @@
+# 最初の 1 時間の通し (rpg_brushup A10): 新しいプレイヤーが 序章 -> 岩鯨の初見 -> 鎖 を進む間の、目的の帯の文・画面・知らせを時刻つきで記録する。
+#   ./gradlew runShots -Pscript=tools/shots/first_hour.txt        (約 20 分。音は自動で 0。毎回、新しい世界で流す: run/shots/first_hour/saves/opening_first_hour を消す)
+#   記録: run/shots/first_hour/shots/first_hour/shots.log の "[watch]" (watch on のあいだ、帯・画面・知らせが変わるたびに) と "[band]" "[gap]" "[waited]" "[dialogue]" の行。
+#         game= は総 tick (20 tick = 1 秒。ここが「何分目」)、day= / tod= はゲーム内の日と一日の時刻
+#   読み方と結果: docs/review/first_hour_log.md
+# 方針:
+#   - 昼夜も影も足音も歌も岩鯨も本物の判断 (OpeningDirector / SkyEvents / TitanEvents) に任せ、拍子の強制 (opening <拍子>) は使わない。総 tick は本物の 60 分ぶん流す。
+#   - 遅い所は cmd tick rate 100 でサーバーだけ 5 倍にする (台本の wait はクライアントの tick なので 1 wait tick = 5 総 tick。待ちは waitgame <総 tick> で書く)。
+#   - 歩きは dev opening view / goto で体を運ぶ。会話は dev talk で本物の会話 (DialogueService) を開いて進める。破れた頁は拾って読む動きまで真似る。
+#   - 台本が真似られない所 (自然に起きるまで時間のかかる所) は、そこで使った開発コマンドを docs/review/first_hour_log.md に書く。
+world opening_first_hour normal
+size 1280 720
+timeout 5400
+render 8
+clouds off
+
+hud on
+watch on
+cmd gamemode survival
+cmd gamerule doDaylightCycle true
+cmd gamerule doWeatherCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+chat clear
+waitchunks
+echo === P0 awake scene (26 s)
+wait 30
+shot p0_awake_black
+waitscreen 900 none
+wait 60
+shot p0_band_examine_camp
+band
+cmd skyabyss opening status
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd effect give @s minecraft:regeneration infinite 1 true
+cmd effect give @s minecraft:slow_falling 600 0 true
+cmd tick rate 100
+
+echo === P1 camp: walk to the notebook (20 m), pick it up
+waitgame 1000
+cmd skyabyss dev opening goto notebook 6
+wait 10
+cmd skyabyss dev opening goto notebook 0
+wait 30
+shot p1_notebook
+band
+waitgame 1700
+band
+shot p1_after_notebook
+
+echo === P2 follow the smoke: leave the camp, the bell rings, arrive at the lodge
+cmd skyabyss dev opening view shelter 0 190 3 0 0
+wait 10
+band
+shot p2_on_the_road
+waitgame 2500
+cmd skyabyss dev opening goto bell 6
+wait 20
+band
+shot p2_lodge
+
+echo === P3 talk to the storyteller
+waitgame 2800
+cmd skyabyss dev talk "skyabyss:storyteller"
+wait 20
+shot p3_dialogue_open
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+shot p3_dialogue_options
+cmd skyabyss dev talk say 0
+wait 20
+cmd skyabyss dev talk say 12
+wait 20
+shot p3_dialogue_end
+band
+
+echo === P4 explore outside (open ground at the camp: the shadow needs a visible sky); the first sky shadow comes at the first noon (game 6000)
+waitgame 3600
+cmd skyabyss dev opening goto notebook 4
+wait 20
+band
+shot p4_footprint
+waitnotice 3000 torn page
+wait 20
+shot p4_page_falls
+band
+echo --- pick up the page (it falls 2 blocks ahead) and read it from the hotbar
+cmd tp @e[type=item,nbt={Item:{id:"skyabyss:lore_page"}},limit=1] @s
+wait 40
+key key.hotbar.2
+wait 5
+use
+wait 10
+stopuse
+wait 20
+waitband 200 Talk to the lodge storyteller
+shot p4_page_read
+
+echo === P5 ask the storyteller about the shadow, then go to the traveler at the fire (Isana)
+cmd skyabyss dev opening goto bell 6
+wait 40
+band
+cmd skyabyss dev talk "skyabyss:storyteller"
+wait 20
+shot p5_storyteller_menu
+cmd skyabyss dev talk say 0
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+shot p5_storyteller_shadow3
+cmd skyabyss dev talk say 0
+wait 40
+band
+shot p5_after_storyteller
+cmd skyabyss dev opening goto chaser 4
+wait 60
+band
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 20
+shot p5_isana_first
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say 0
+wait 20
+shot p5_isana_whale_q
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+cmd skyabyss dev talk say continue
+wait 20
+band
+wait 60
+band
+shot p5_after_isana
+
+echo === P6 night 1 (game 13000-21000): footsteps (B6). Wait outside on open ground (the camp): the song needs a visible sky
+waitgame 12600
+cmd skyabyss dev opening goto notebook 4
+wait 10
+band
+shot p6_dusk
+waitgame 18000
+band
+shot p6_night_late
+cmd skyabyss opening status
+
+echo === P7 day 2 (game 24000-35000): after Isana the bone hill is offered (optional side trip). Walk there, come back to the open ground
+waitgame 28000
+band
+shot p7_day2_band
+cmd skyabyss dev opening goto slab 4
+wait 80
+band
+shot p7_bone_slab
+waitgame 30500
+cmd skyabyss dev opening goto notebook 4
+wait 10
+band
+cmd skyabyss opening status
+
+echo === P8 night 2 (game 37000-45000): the song (B9). Wait on open ground
+waitgame 38000
+band
+shot p8_night2
+waitgame 46000
+band
+shot p8_after_song
+cmd skyabyss opening status
+
+echo === P9 day 3 (game 48000+): the whale shows at dusk (natural: tod 11000-12500 of day 2 = game 59000-60500). Real speed from game 58000
+waitgame 58000
+cmd tick rate 20
+cmd skyabyss opening status
+band
+shot p9_before_whale
+waitscreen 3600 CinematicScreen
+band
+shot p9_first_sight
+waitscreen 1500 none
+wait 40
+band
+shot p9_after_first_sight
+echo --- right after the first sight: what does the band say while waiting for the chain? (the chain falls only on day 4+ with 2 preparation requests, or day 6+: not in the first hour)
+wait 600
+band
+shot p9_wait_30s
+cmd skyabyss opening status
+wait 1200
+band
+shot p9_wait_90s
+
+echo === P10 the chain. By the design (21 section 3.2 / Ch1Descent) it falls only on day 4 morning or later with 2 of the 3 preparation requests done (day 6 without them): never inside the first hour.
+echo --- emulate it: finish two preparation requests (quest next) and sleep to the morning of day 4 (time set: Repeats.day counts the day time too), then lower the whale (titan rest)
+cmd skyabyss quest next @s "ch1/prep_gear"
+cmd skyabyss quest next @s "ch1/prep_gear"
+cmd skyabyss quest next @s "ch1/prep_gear"
+cmd skyabyss quest next @s "ch1/prep_blade"
+cmd skyabyss quest next @s "ch1/prep_blade"
+cmd skyabyss quest next @s "ch1/prep_blade"
+cmd time set 73000
+band
+cmd skyabyss titan rest
+wait 100
+band
+shot p10_whale_comes
+echo --- the first descent holds the chain until a sky shadow passes (WhaleHush, about 100 s, 3 notices): wait for the band to turn to the chain text
+cmd tick rate 100
+waitband 6000 Climb the chain
+cmd tick rate 20
+band
+shot p10_chain_down
+look 0 -40
+wait 20
+shot p10_chain_look_up
+wait 100
+cmd skyabyss titan board
+wait 200
+band
+shot p10_on_the_back
+wait 400
+band
+shot p10_back_400
+echo === end

@@ -164,7 +164,10 @@ public final class OpeningLogic {
         String stage = f.mainStage();
         String id = switch (stage) {
             case "", "follow_smoke" -> "follow_smoke";
-            case "watch_sky" -> "watch_sky";
+            // 影が去ったあと、破れた頁が落ちて (または荷物に入って) まだ読まれていない間は、頁を拾って読む目的 (first_hour.txt の通しで、
+            // 帯が「空を見上げよう」のままで頁の存在を言わない穴が見つかった)
+            // 頁を読んだ直後 (伝承 prologue/shadow は記されたが、クエストの段が進むまでの 1 秒ほど) は、次の目的を先に出す (帯が一瞬「空を見上げよう」へ戻っていた)
+            case "watch_sky" -> st.pageAt >= 0 || st.pageReadAt >= 0 ? "read_page" : f.shadowLore() ? "ask_storyteller" : "watch_sky";
             case "ask_storyteller" -> "ask_storyteller";
             case "find_chaser" -> "find_isana";
             case "see_whale" -> "see_whale";
