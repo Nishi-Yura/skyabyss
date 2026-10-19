@@ -166,7 +166,7 @@ public final class TrialRuntime {
     }
 
     static void onLevelTick0(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK) {
+        if (!(event.getLevel() instanceof ServerLevel level) || TrialBacks.of(Titans.titanOfBack(level.dimension())) == null) {
             return;
         }
         long now = level.getGameTime();
@@ -262,19 +262,11 @@ public final class TrialRuntime {
         BackGroupData.Record r = GroupProgress.of(back, group);
         long seed = TrialDraw.seed(TrialData.worldSeed(back), group, titan, TrialData.cycle(r)) ^ cell.def().id().hashCode() ^ now;
         run = new TrialCell.Run(group, cell, mods, seed, now);
-        run.cleared = TrialData.isCleared(r, cell.def().id()) && flagRung(r, cell, draw);
+        run.cleared = TrialData.isCleared(r, cell.def().id()) && TrialBacks.of(titan).isRung(back, group, cell.def(), draw.has(cell.def().id()));
         RUNS.put(k, run);
         cell.arm(back, run);
         GroupOverlays.refresh(back, group);
         return run;
-    }
-
-    private static boolean flagRung(BackGroupData.Record r, TrialCell cell, TrialDraw.Draw draw) {
-        return r.flag(stoneFlag(cell, draw));
-    }
-
-    private static String stoneFlag(TrialCell cell, TrialDraw.Draw draw) {
-        return draw.has(cell.def().id()) ? TitanBackTrials.STONE_FLAG + cell.def().slot().stone : "wstone." + cell.def().id();
     }
 
     private static void stop(ServerLevel back, TrialCell.Run run) {
@@ -309,7 +301,7 @@ public final class TrialRuntime {
             if (p.blockPosition().getX() == pad.getX() && p.blockPosition().getZ() == pad.getZ() && p.blockPosition().getY() == pad.getY() + 1) {
                 String rest = run.cell.ports().returnRest();
                 if (!rest.isEmpty()) {
-                    TitanBackTrials.returnToCheckpoint(p, rest);
+                    TrialBacks.of(run.cell.def().titan()).returnTo(p, rest);
                     back.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
                 }
             }
@@ -318,14 +310,15 @@ public final class TrialRuntime {
 
     // ---------------------------------------------------------------- 見かけ (グループごとの上書き)
     private static void overlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, BlockState> out) {
-        if (level.dimension() != TitanTravel.TITAN_BACK) {
+        String titan = Titans.titanOfBack(level.dimension());
+        TrialBacks.Back backKind = TrialBacks.of(titan);
+        if (backKind == null) {
             return;
         }
         BackGroupData.Record r = BackGroupData.get(level).peek(group);
         if (r == null) {
             return;
         }
-        String titan = Titans.titanOfBack(level.dimension());
         TrialDraw.Draw draw = r.has(TrialData.DRAW) ? TrialDraw.Draw.decode(r.getString(TrialData.DRAW)) : null;
         // 石: 鳴らしたグループにだけ光る
         for (TrialCell cell : TrialCells.of(titan)) {
@@ -333,8 +326,8 @@ public final class TrialRuntime {
             if (!cell.runtime() || stone == null || draw == null) {
                 continue;
             }
-            if (r.flag(stoneFlag(cell, draw))) {
-                out.accept(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
+            if (backKind.isRung(level, group, cell.def(), draw.has(cell.def().id()))) {
+                out.accept(stone, backKind.lit());
             }
         }
         for (TrialCell.Run run : runsOf(group)) {
@@ -349,18 +342,19 @@ public final class TrialRuntime {
     // ---------------------------------------------------------------- 右クリック (仕掛け)
     @SubscribeEvent
     static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || back.dimension() != TitanTravel.TITAN_BACK
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || TrialBacks.of(Titans.titanOfBack(back.dimension())) == null
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
         BlockPos pos = event.getPos();
-        for (TrialCell cell : TrialCells.of(Titans.STONE_WHALE)) {
+        String backTitan = Titans.titanOfBack(back.dimension());
+        for (TrialCell cell : TrialCells.of(backTitan)) {
             if (!cell.runtime() || !cell.interactive().contains(pos)) {
                 continue;
             }
             UUID group = Groups.keyOf(sp);
             TrialDraw.Draw draw = TrialData.current(back, group);
-            if (!liveCells(back, Titans.STONE_WHALE, draw).contains(cell)) {
+            if (!liveCells(back, backTitan, draw).contains(cell)) {
                 return;
             }
             long now = back.getGameTime();
@@ -377,7 +371,7 @@ public final class TrialRuntime {
     // 任意の目標「無傷で」: セルの中で倒れかけた人を数える (セルが読む)
     @SubscribeEvent
     static void onHurt(LivingDamageEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || back.dimension() != TitanTravel.TITAN_BACK
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || TrialBacks.of(Titans.titanOfBack(back.dimension())) == null
                 || event.getNewDamage() <= 0) {
             return;
         }
@@ -403,8 +397,11 @@ public final class TrialRuntime {
             return null;
         }
         String titan = cell.def().titan();
+        TrialBacks.Back kind = TrialBacks.of(titan);
+        if (kind == null || !titan.equals(Titans.titanOfBack(back.dimension()))) {
+            return null;
+        }
         UUID group = Groups.keyOf(sp);
-        BackGroupData.Record r = GroupProgress.of(back, group);
         TrialDraw.Draw draw = TrialData.current(back, group);
         boolean drawn = draw.has(cell.def().id());
         Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
@@ -418,35 +415,28 @@ public final class TrialRuntime {
             Notice.bar(sp, ModText.deny("message.skyabyss.stone_silent"));
             return InteractionResult.SUCCESS;
         }
-        String flag = stoneFlag(cell, draw);
-        if (r.flag(flag)) {
+        if (kind.isRung(back, group, cell.def(), drawn)) {
             if (drawn) {
-                TrialSteles.tellWho(sp, TrialSteles.WHALE, String.valueOf(cell.def().slot().stone));
+                kind.tellWho(sp, cell.def());
             }
             return InteractionResult.SUCCESS;
         }
-        r.setFlag(flag, true);
         Mods mods = run.mods;
-        GroupOverlays.refresh(back, group);
-        Groups.sound(back, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, ModSounds.RESONANCE.get(), SoundSource.BLOCKS, 2.5f, 0.7f);
-        for (ServerPlayer member : Groups.online(back, group)) {
-            if (member.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64) {
-                back.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
-            }
-        }
+        kind.ring(back, group, cell.def(), drawn, sp, pos);
         boolean goalDone = mods.goal() >= 0 && run.goalOk;
         onCellCleared(back, group, cell.def(), mods, goalDone, sp);
-        if (drawn) {
-            // 岩鯨の石の三つ目なら、宝物庫の封印が開く (原型の石と同じ数え方)。クエストの石の合図もスロットの番号で数える
-            suppressLegacy = true;
-            try {
-                TrialSteles.onRung(back, group, TrialSteles.WHALE, String.valueOf(cell.def().slot().stone), Component.translatable(cell.def().nameKey()), sp);
-            } finally {
-                suppressLegacy = false;
-            }
-            ResonanceStoneBlock.finishRung(back, sp, group, r);
-        }
+        kind.afterCleared(back, group, cell.def(), drawn, sp);
         return InteractionResult.SUCCESS;
+    }
+
+    // 石の知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)
+    public static void withLegacySuppressed(Runnable action) {
+        suppressLegacy = true;
+        try {
+            action.run();
+        } finally {
+            suppressLegacy = false;
+        }
     }
 
     // ---------------------------------------------------------------- 原型の石 (TrialSteles.onRung から)

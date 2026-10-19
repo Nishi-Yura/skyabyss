@@ -97,7 +97,7 @@ public final class TrialHub {
     }
 
     private static List<AABB> regions(ServerLevel back, String titan, String key, UUID group) {
-        if (Titans.STONE_WHALE.equals(titan)) {
+        if (Titans.STONE_WHALE.equals(titan) || Titans.TIDE_SHELL.equals(titan)) {
             return TrialRegions.of(back, titan, key, group);
         }
         return STATIC.computeIfAbsent(titan + "|" + key, k -> TrialRegions.of(back, titan, key, null));

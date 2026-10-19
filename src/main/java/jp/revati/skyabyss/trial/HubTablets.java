@@ -35,7 +35,7 @@ public final class HubTablets {
     private static final Map<String, List<Spot>> SPOTS = new HashMap<>();
 
     public static boolean enabled(String titan) {
-        return !Titans.STONE_WHALE.equals(titan) || WhaleDeck.placed();
+        return (!Titans.STONE_WHALE.equals(titan) || WhaleDeck.placed()) && (!Titans.TIDE_SHELL.equals(titan) || jp.revati.skyabyss.titan.tide.back.TideDeck.placed());
     }
 
     public static void clearCache() {

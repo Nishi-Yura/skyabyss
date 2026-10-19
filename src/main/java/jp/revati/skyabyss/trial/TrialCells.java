@@ -11,7 +11,15 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.WhaleDeck;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.TrialCell.Ports;
+import jp.revati.skyabyss.trial.tide.T02Crossing;
+import jp.revati.skyabyss.trial.tide.T06Choir;
+import jp.revati.skyabyss.trial.tide.T07Seas;
+import jp.revati.skyabyss.trial.tide.T10Ring;
 import jp.revati.skyabyss.trial.whale.W02Bell;
+import jp.revati.skyabyss.trial.whale.W03Moss;
+import jp.revati.skyabyss.trial.whale.W04Vents;
+import jp.revati.skyabyss.trial.whale.W11Coffin;
+import jp.revati.skyabyss.trial.whale.W12Arena;
 import jp.revati.skyabyss.trial.whale.W06Score;
 import jp.revati.skyabyss.trial.whale.W07Gates;
 import jp.revati.skyabyss.trial.whale.W10Fort;
@@ -47,9 +55,17 @@ public final class TrialCells {
             register(new LegacyCell(d, legacyPorts(d)));
         }
         register(new W02Bell());
+        register(new W03Moss());
+        register(new W04Vents());
         register(new W06Score());
         register(new W07Gates());
         register(new W10Fort());
+        register(new W11Coffin());
+        register(new W12Arena());
+        register(new T02Crossing());
+        register(new T06Choir());
+        register(new T07Seas());
+        register(new T10Ring());
         for (Def d : TrialCatalog.all()) {
             if (!CELLS.containsKey(d.id())) {
                 throw new IllegalStateException("trial " + d.id() + " has no cell");
