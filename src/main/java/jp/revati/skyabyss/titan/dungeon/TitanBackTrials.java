@@ -151,9 +151,13 @@ public final class TitanBackTrials {
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
             new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
-    // 試練の階 (WhaleDeck。docs/design/29) の休み場も同じ決まりで数える
-    private static final List<Checkpoint> CHECKPOINTS = concatCheckpoints(BASE_CHECKPOINTS,
+    // 試練の階 (WhaleDeck。docs/design/29) の休み場も、階を置いたあと (WhaleDeck.placed) は同じ決まりで数える
+    private static final List<Checkpoint> WITH_DECK_CHECKPOINTS = concatCheckpoints(BASE_CHECKPOINTS,
             WhaleDeck.rests().stream().map(r -> new Checkpoint(r.id(), r.area(), r.spawn())).toList());
+
+    private static List<Checkpoint> checkpoints() {
+        return WhaleDeck.placed() ? WITH_DECK_CHECKPOINTS : BASE_CHECKPOINTS;
+    }
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
 
     private static List<Checkpoint> concatCheckpoints(List<Checkpoint> a, List<Checkpoint> b) {
@@ -181,9 +185,9 @@ public final class TitanBackTrials {
 
     private static List<Checkpoint> checkpointsOf(ServerLevel level) {
         if (!TitanBackData.get(level).isBuilt()) {
-            return CHECKPOINTS;
+            return checkpoints();
         }
-        List<Checkpoint> all = new ArrayList<>(CHECKPOINTS);
+        List<Checkpoint> all = new ArrayList<>(checkpoints());
         all.add(mazeRest(level));
         return all;
     }
@@ -1426,7 +1430,7 @@ public final class TitanBackTrials {
         if (MAZE_REST.equals(id)) {
             return id;
         }
-        for (Checkpoint cp : CHECKPOINTS) {
+        for (Checkpoint cp : checkpoints()) {
             if (cp.id().equals(id)) {
                 return id;
             }
@@ -1449,7 +1453,7 @@ public final class TitanBackTrials {
     // 決まった場所の休み場の復活位置 (闇の水路の中ほどは含まない)
     public static Map<String, BlockPos> checkpointSpawns() {
         Map<String, BlockPos> map = new HashMap<>();
-        for (Checkpoint cp : CHECKPOINTS) {
+        for (Checkpoint cp : checkpoints()) {
             map.put(cp.id(), cp.spawn());
         }
         return map;
@@ -1475,7 +1479,7 @@ public final class TitanBackTrials {
     }
 
     private static BlockPos checkpointSpawnRaw(String id) {
-        for (Checkpoint cp : CHECKPOINTS) {
+        for (Checkpoint cp : checkpoints()) {
             if (cp.id().equals(id)) {
                 return cp.spawn();
             }

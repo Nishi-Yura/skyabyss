@@ -72,7 +72,9 @@ public final class TrialHubSelfTest {
                         }
                     }
                 }
-                boolean ready = hub != null && back.hasChunkAt(hub) && !back.getBlockState(hub.below()).isAir()
+                // 単独の実行 (ONLY) では、岩鯨のほかの背は建てていない (建てるのは各巨神の背の自己テスト) ので、世界の検査は全体の実行だけ
+                boolean only = System.getenv("SKYABYSS_SELFTEST_ONLY") != null;
+                boolean ready = hub != null && back.hasChunkAt(hub) && (!only || Titans.STONE_WHALE.equals(titan)) && !back.getBlockState(hub.below()).isAir()
                         && (!Titans.STONE_WHALE.equals(titan) || placedBefore);
                 if (ready) {
                     world(f, back, titan, hub);
@@ -202,6 +204,13 @@ public final class TrialHubSelfTest {
         check(f, bounced == 1, titan + ": expected exactly the clearing group's player to be bounced, got " + bounced);
         check(f, a.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, titan + ": the sealed trial did not send its player back to the hub");
         check(f, b.position().distanceTo(inA) < 0.5, titan + ": a player of another party was bounced out of a trial it has not cleared");
+        // 「光の中でしゃがむ」手順はない: 試練を越えた合図を送っても、個人の光は出ない
+        try {
+            jp.revati.skyabyss.quest.Quests.signal(a, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
+        } catch (RuntimeException e) {
+            // 合図の先の記録 (進捗・クエスト) は偽の人では動かないことがある。光が出ないことだけ見る
+        }
+        check(f, !ReturnBeacons.hasOffer(a.getUUID()), titan + ": a return light was offered after the clear");
         // 後始末
         a.setPos(0, 0, 0);
         b.setPos(0, 0, 0);

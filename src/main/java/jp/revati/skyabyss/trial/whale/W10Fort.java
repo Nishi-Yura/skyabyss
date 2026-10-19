@@ -64,7 +64,7 @@ public final class W10Fort implements TrialCell {
         return run.get("mobs", ArrayList::new);
     }
 
-    static int gunners(Run run, int players) {
+    public static int gunners(Run run, int players) {
         int g = GUNNERS[run.mods.number(0)] + (players >= 3 ? 1 : 0) + (players >= 5 ? 1 : 0);
         return run.mods.quiet() ? Math.max(1, g - 1) : g;
     }

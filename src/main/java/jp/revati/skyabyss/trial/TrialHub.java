@@ -111,6 +111,10 @@ public final class TrialHub {
         }
         player.stopRiding();
         player.teleportTo(back, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), player.getXRot());
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+            // 試験の偽の人は通信がないので、位置だけ直接動かす
+            player.setPos(hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5);
+        }
         player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 0;
         back.playSound(null, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.6f);

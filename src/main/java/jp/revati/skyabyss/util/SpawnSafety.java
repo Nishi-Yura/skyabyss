@@ -47,7 +47,7 @@ public final class SpawnSafety {
         if (mob.getBbWidth() > MAX_WIDTH) {
             return false;
         }
-        if (type.getCategory() != MobCategory.MONSTER) {
+        if (type.getCategory() != MobCategory.MONSTER && !(mob instanceof net.minecraft.world.entity.monster.Enemy)) {
             return false;
         }
         boolean ours = BuiltInRegistries.ENTITY_TYPE.getKey(type).getNamespace().startsWith(SkyAbyss.MODID);

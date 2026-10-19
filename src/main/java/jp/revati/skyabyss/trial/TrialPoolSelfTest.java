@@ -185,6 +185,12 @@ public final class TrialPoolSelfTest {
                 check(extremeShare < 0.10, d.id() + " extreme share " + extremeShare);
             }
         }
+        // 戦いの強さは入った人の数で決まる (パーティの人数ではない): 同じ人数なら、パーティの大きさによらず同じ
+        TrialCell.Run lone = new TrialCell.Run(g, TrialCells.get("W10"), new Mods(0, new int[] {1, 1}, 0, new int[0], -1, Extreme.NONE, false, Rarity.COMMON), 1L, 0);
+        check(jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 1) < jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 3)
+                && jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 3) < jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 5)
+                && jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 1) == jp.revati.skyabyss.trial.whale.W10Fort.gunners(lone, 2),
+                "the fort's gunners do not scale with the number inside");
         // 素材の数: 稀さで増える・任意の目標で増える・週替わりで倍
         Def w10 = TrialCatalog.get("W10");
         Mods plain = new Mods(0, new int[] {1, 1}, 0, new int[0], -1, Extreme.NONE, false, Rarity.COMMON);
