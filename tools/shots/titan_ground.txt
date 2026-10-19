@@ -1,0 +1,102 @@
+# 巨神が地形にめり込まない・潮殻の乗り場の輪: 直す前後の絵 (tools/gen_titan_ground_shots.py が書く)
+# SKYABYSS_SHOTS_SEED=4242 ./gradlew runShots -Pscript=tools/shots/titan_ground.txt
+world titan_ground normal
+size 1280 720
+timeout 2700
+render 12
+clouds on
+hud off
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd time set 5000
+cmd weather clear
+cmd skyabyss cinematic stop
+cmd gamemode creative
+cmd skyabyss progress grant @p stone_whale
+cmd attribute @p minecraft:generic.gravity base set 0
+wait 20
+camera 649.5 71.0 -335.5 1.2 -27.0
+waitchunks 1200
+wait 40
+cmd skyabyss dev titanground false
+cmd skyabyss dev titanground place tide 649 -312 -90
+wait 80
+camera 649.0 101.0 -348.0 -0.0 32.6
+hud off
+chat clear
+wait 20
+shot s1_before_view
+camera 529.0 118.0 -312.0 -90.0 21.4
+chat clear
+wait 20
+shot s1_before_aerial
+cmd skyabyss dev titanground true
+cmd skyabyss dev titanground place tide 682 -213 -105
+wait 80
+camera 645.9 101.0 -347.6 -15.0 9.4
+hud off
+chat clear
+wait 20
+shot s1_after_view
+camera 566.1 118.0 -181.9 -105.0 21.4
+chat clear
+wait 20
+shot s1_after_aerial
+camera 547.5 71.0 633.5 145.5 -21.2
+waitchunks 1200
+wait 40
+cmd skyabyss dev titanground false
+cmd skyabyss dev titanground place tide 530 608 56
+wait 80
+camera 553.7 101.0 642.9 145.8 28.6
+hud off
+chat clear
+wait 20
+shot s2_before_view
+camera 629.2 118.0 540.5 55.8 21.4
+chat clear
+wait 20
+shot s2_before_aerial
+cmd kill @e[type=skyabyss:tide_shell,distance=..2000]
+wait 20
+camera 553.7 101.0 642.9 145.8 28.6
+hud off
+chat clear
+wait 20
+shot s2_after_view
+camera 629.2 118.0 540.5 55.8 21.4
+chat clear
+wait 20
+shot s2_after_aerial
+camera 649.5 71.0 -335.5 -14.9 -5.4
+waitchunks 1200
+cmd skyabyss dev titanground false
+cmd skyabyss dev titanground place tide 682 -213 -105
+wait 80
+camera 640.0 68.0 -246.3 -15.0 -16.7
+hud off
+chat clear
+wait 20
+shot s3_before_door10
+camera 634.8 81.0 -265.6 -15.0 18.4
+hud off
+chat clear
+wait 20
+shot s3_before_door30
+cmd skyabyss dev titanground true
+cmd skyabyss dev titanground place tide 682 -213 -105
+wait 80
+camera 635.3 68.0 -263.6 -15.0 -16.7
+hud off
+chat clear
+wait 20
+shot s3_after_door10
+camera 630.1 81.0 -283.0 -15.0 18.4
+hud off
+chat clear
+wait 20
+shot s3_after_door30
+cmd skyabyss dev titanground true
+cmd kill @e[type=skyabyss:tide_shell,distance=..2000]
+wait 10
+quit

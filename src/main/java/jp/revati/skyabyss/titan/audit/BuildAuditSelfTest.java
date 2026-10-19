@@ -47,8 +47,8 @@ public final class BuildAuditSelfTest {
         // 歌の部屋のはしご: 頂の上 (door の印) は、閉じているあいだ石で、開けるとはしごが 1 つ足される (ch1 の SongChamber)。頂の出口は開けたあとの話
         ALLOW.add(new Allow("bp:ch1_song_chamber", "LADDER_TOP", null, "the hatch above the ladder is stone until the song chamber is opened (SongChamber.open adds the last ladder)"));
         ALLOW.add(new Allow("site:ch1_song_chamber", "LADDER_TOP", null, "same: the hatch is closed until the chamber is opened"));
-        // 鼓動の間のはしご: 頂の隣 (-10, 98〜99) が封印の戸 = 出口。戸は開けたグループにとって開いている (BackReach が通れるか調べる)
-        ALLOW.add(new Allow("whale", "LADDER_TOP", new BackReach.Box(-9, 97, -31, -9, 97, -31), "the exit is the sealed gate beside the top (BackReach checks that it opens)"));
+        // 鼓動の間のはしご: 頂の隣 (x -19, y 109〜111) が封印の戸 = 出口。戸は開けたグループにとって開いている (BackReach が通れるか調べる)
+        ALLOW.add(new Allow("whale", "LADDER_TOP", new BackReach.Box(-18, 108, -52, -18, 108, -52), "the exit is the sealed gate beside the top (BackReach checks that it opens)"));
         // 潮殻の体 (turtle.bin) の黄色い羊毛の盛り上がり: 模型の薄い壁の中が埋められて 1 マスだけ低く見える (体の飾りの色の塊。歩く所ではない)
         ALLOW.add(new Allow("tide", "FLOOR_DIMPLE", new BackReach.Box(40, 125, -41, 40, 125, -41), "a single wool voxel in the turtle body's coral-coloured mound (filled thin wall of the baked model); not a walking surface"));
         // 火口の縁の段の最後: 縁の高さで終わる見晴らしの段 (その先にしかけは無い。13 の火口の縁を切って外を見られる所)

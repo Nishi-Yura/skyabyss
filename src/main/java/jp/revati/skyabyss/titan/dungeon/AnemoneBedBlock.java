@@ -25,7 +25,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 // 灯の苗床 (docs/design/23)。光る海のイソギンチャクの生える砂の台。右クリックで灯を一つ摘める (摘んでも尽きない。
-// そのグループの「ともした灯 + 持っている灯」が上限 (4) に満たないときだけ生える。なくした灯は、ここでまた手に入る)。
+// そのグループの「ともした灯 + 持っている灯」が上限 (3。台の数と同じ) に満たないときだけ生える。なくした灯は、ここでまた手に入る)。
 // 入口の小部屋と、水路の中ほどの休み場にある
 public class AnemoneBedBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;

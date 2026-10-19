@@ -294,11 +294,45 @@ public final class DomainClient {
         };
     }
 
+    private static Component hudHead(Run r) {
+        Component name = Component.translatable("gui.skyabyss.domain." + r.id + ".name");
+        if (r.ended == 2) {
+            return Component.translatable("gui.skyabyss.domain.broken");
+        } else if (r.ended == 1) {
+            return Component.translatable("gui.skyabyss.domain.faded");
+        }
+        float left = Math.max(0, r.remaining) / 20f;
+        return Component.translatable("gui.skyabyss.domain.hud", name, (int) Math.ceil(left));
+    }
+
+    // HUD の要求: 上中央 (ボスの技の名前の下)。残りの時間と、砕く進みの二段 (高さ 32)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        Run r = run;
+        if (r == null || mc.level == null) {
+            return;
+        }
+        float t = now(0);
+        if (!(t - r.start >= r.declare - 8 || r.ended != 0)) {
+            return;
+        }
+        int w = Math.max(100, mc.font.width(hudHead(r)) + 8);
+        if (r.ended == 0) {
+            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain.break", r.percent)) + 4);
+        }
+        int h = r.ended == 0 ? 32 : 14;
+        int fw = w;
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN, jp.revati.skyabyss.hud.HudLayout.Region.TOP_CENTER,
+                (maxW, maxH) -> h <= maxH && maxW >= 60 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(fw, maxW), h) : null));
+    }
+
     // 残りの時間と、砕く進み (ボスの技の名前の下)
     private static void drawHud(GuiGraphics g, Minecraft mc, Run r, float t, int w) {
-        int cx = w / 2;
-        int top = NoticeClient.lastBossBottom();
-        int y = (top > 0 ? top : 4) + 40;
+        jp.revati.skyabyss.hud.HudLayout.Rect rect = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN);
+        if (rect == null) {
+            return;
+        }
+        int cx = rect.x() + rect.w() / 2;
+        int y = rect.y() + 2;
         float fadeIn = Mth.clamp((t - r.start - r.declare + 8f) / 10f, 0f, 1f);
         float fadeOut = r.ended != 0 ? Mth.clamp(1f - (t - r.endedAt) / 40f, 0f, 1f) : 1f;
         float a = fadeIn * fadeOut;
@@ -307,16 +341,7 @@ public final class DomainClient {
         }
         int ia = Mth.clamp((int) (a * 255f), 4, 255) << 24;
         int rgb = r.theme.accent & 0xFFFFFF;
-        Component name = Component.translatable("gui.skyabyss.domain." + r.id + ".name");
-        Component head;
-        if (r.ended == 2) {
-            head = Component.translatable("gui.skyabyss.domain.broken");
-        } else if (r.ended == 1) {
-            head = Component.translatable("gui.skyabyss.domain.faded");
-        } else {
-            float left = Math.max(0, r.remaining) / 20f;
-            head = Component.translatable("gui.skyabyss.domain.hud", name, (int) Math.ceil(left));
-        }
+        Component head = hudHead(r);
         int tw = mc.font.width(head);
         g.fill(cx - tw / 2 - 4, y - 2, cx + tw / 2 + 4, y + 10, ((int) (a * 120) << 24) | 0x0A0E18);
         g.drawString(mc.font, head, cx - tw / 2, y, ia | 0xFFFFFF, false);

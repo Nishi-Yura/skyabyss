@@ -71,7 +71,7 @@ public final class TideGaugeHud {
     }
 
     private static boolean shown(Minecraft mc) {
-        return gauge != null && mc.level != null && mc.level.dimension() == TideTravel.TIDE_BACK && !mc.options.hideGui && age <= 100;
+        return gauge != null && mc.level != null && (jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.GAUGE) || mc.level.dimension() == TideTravel.TIDE_BACK) && !mc.options.hideGui && age <= 100;
     }
 
     public static void receive(TideBackNetwork.Gauge g) {

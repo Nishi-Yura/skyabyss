@@ -34,6 +34,7 @@ public class QuestToast implements Toast {
 
     @Override
     public Visibility render(GuiGraphics g, ToastComponent toasts, long timeSinceLastVisible) {
+        jp.revati.skyabyss.client.hud.HudManager.noteToast(g, height());
         Font font = toasts.getMinecraft().font;
         int w = width();
         int h = height();

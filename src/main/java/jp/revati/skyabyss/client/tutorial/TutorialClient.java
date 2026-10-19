@@ -77,7 +77,7 @@ public final class TutorialClient {
     // 出してよいか (会話・場面・開いた画面・F1・デバッグ画面の間は出さない)
     static boolean allowed(Minecraft mc) {
         return mc.player != null && mc.level != null && !mc.options.hideGui && mc.screen == null && !mc.getDebugOverlay().showDebugScreen()
-                && !CinematicClient.active() && !NoticeClient.busy();
+                && !CinematicClient.active() && !NoticeClient.busy() && !jp.revati.skyabyss.client.hud.HudManager.inCombat();
     }
 
     // ---------------------------------------------------------------- 文
@@ -136,18 +136,8 @@ public final class TutorialClient {
     }
 
     // ---------------------------------------------------------------- 描く
-    // ホットバーの上 (字幕の帯 (下から 84) のすぐ下、アクションバーの上)
-    static void render(GuiGraphics g, DeltaTracker delta) {
-        Minecraft mc = Minecraft.getInstance();
-        long now = Util.getMillis();
-        long dt = lastFrame < 0 ? 0 : Math.min(now - lastFrame, 250);
-        lastFrame = now;
-        // 出せない間 (会話・画面) は「できた」の時計を止める (閉じたあとに見せる)
-        boolean ok = allowed(mc);
-        DONE.tick(dt, ok);
-        if (!ok) {
-            return;
-        }
+    // 今出す行 (できた → 手引きの順。MAX_LINES まで)。要求と描画で同じ判断をする
+    private static List<Line> lines(Minecraft mc) {
         List<Line> lines = new ArrayList<>();
         for (String id : DONE.ids()) {
             lines.add(new Line(Component.translatable("tutorial.skyabyss.done"), DONE.alpha(id), true));
@@ -161,23 +151,65 @@ public final class TutorialClient {
                 lines.add(new Line(t, 1f, false));
             }
         }
+        return lines;
+    }
+
+    // HUD の要求: 下中央の手がかりの列 (字幕の下、アクションバーの上)。一行 13 の板を MAX_LINES 行まで
+    public static void requests(Minecraft mc, List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (!allowed(mc)) {
+            return;
+        }
+        List<Line> lines = lines(mc);
         if (lines.isEmpty()) {
+            return;
+        }
+        int widest = 0;
+        for (Line l : lines) {
+            widest = Math.max(widest, mc.font.width(l.text));
+        }
+        int w = widest;
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.HINTS, jp.revati.skyabyss.hud.HudLayout.Region.BOTTOM_CENTER,
+                // 高さが足りなければ手前の行だけ (できた → 手引きの順)
+                (maxW, maxH) -> Math.min(lines.size(), maxH / 13) >= 1 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(w + 28, maxW), Math.min(lines.size(), maxH / 13) * 13) : null));
+    }
+
+    static void render(GuiGraphics g, DeltaTracker delta) {
+        Minecraft mc = Minecraft.getInstance();
+        long now = Util.getMillis();
+        long dt = lastFrame < 0 ? 0 : Math.min(now - lastFrame, 250);
+        lastFrame = now;
+        // 出せない間 (会話・画面) は「できた」の時計を止める (閉じたあとに見せる)
+        boolean ok = allowed(mc);
+        DONE.tick(dt, ok);
+        if (!ok) {
+            return;
+        }
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.HINTS);
+        List<Line> lines = lines(mc);
+        if (lines.isEmpty() || r == null) {
             return;
         }
         // 点滅しない、ゆっくりした呼吸 (目を引くが邪魔にならない)
         float pulse = 0.85f + 0.15f * Mth.sin(now / 450f);
-        int cx = g.guiWidth() / 2;
-        int y = g.guiHeight() - 82 - (lines.size() - 1) * 13;
-        for (Line l : lines) {
-            int w = mc.font.width(l.text);
-            int x0 = cx - w / 2 - 14;
-            int x1 = cx + w / 2 + 14;
+        int cx = r.x() + r.w() / 2;
+        int y = r.y() + 2;
+        int shownLines = Math.max(1, r.h() / 13);
+        for (Line l : lines.subList(0, Math.min(lines.size(), shownLines))) {
+            Component shown = l.text;
+            int tw = mc.font.width(shown);
+            int room = r.w() - 28;
+            if (tw > room) {
+                shown = Component.literal(mc.font.plainSubstrByWidth(l.text.getString(), Math.max(8, room - 6)) + "…");
+                tw = mc.font.width(shown);
+            }
+            int x0 = cx - tw / 2 - 14;
+            int x1 = cx + tw / 2 + 14;
             float a = l.alpha * (l.done ? 1f : pulse);
             g.fill(x0, y - 2, x1, y + 11, ((int) (a * 0x99) << 24) | 0x0A0E12);
             g.fill(x0, y - 2, x0 + 1, y + 11, ((int) (a * 0xC0) << 24) | (l.done ? 0x7FD6D0 : 0xE0B84C));
             String mark = l.done ? "✔" : "◆";
             g.drawString(mc.font, mark, x0 + 5, y, ((int) (a * 255) << 24) | (l.done ? 0x7FD6D0 : 0xE0B84C), true);
-            g.drawString(mc.font, l.text, cx - w / 2 + 2, y, ((int) (Mth.clamp(a, 0.05f, 1f) * 255) << 24) | 0xFFFFFF, true);
+            g.drawString(mc.font, shown, cx - tw / 2 + 2, y, ((int) (Mth.clamp(a, 0.05f, 1f) * 255) << 24) | 0xFFFFFF, true);
             y += 13;
         }
     }

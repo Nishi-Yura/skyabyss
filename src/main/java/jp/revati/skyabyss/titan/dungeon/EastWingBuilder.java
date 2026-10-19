@@ -2,16 +2,17 @@ package jp.revati.skyabyss.titan.dungeon;
 
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 
-// 東の翼「番兵の回廊」: 二つの広間を順に制圧していく戦いの回廊。
+// 東の翼「番兵の回廊」(版 13 で x1.6): 広間を順に制圧していく戦いの回廊。
 //   東の前室 (休み場) → 第一の広間 → 番兵長の控えの間 (休み場) → 短い通路 → 番兵長の広間 (共鳴石)
-// (配置の版 2 で第二の広間を除いた。TitanBackLayout.LAYOUT_VERSION)
+//   第一の広間の南の戸 → 休み場 e2r → 第二の広間 (射手の波) → 休み場 ckr → 番兵の詰所 (老番兵。奥の戸の鍵 = 割符を持つ)
+// 番兵長の広間の戸 (E3_LOCK) は、初回は詰所の老番兵を倒すまで閉じている (周回は開いている。FirstRun の既知の道)。
 // 広間に入ると入口が閉じ、番兵の波が押し寄せる。倒しきると出口が開く (TitanBackTrials)。
 // 広間には身を隠せる柱が並ぶ。出口は最初から封じておき、制圧で開く
 final class EastWingBuilder {
@@ -24,34 +25,43 @@ final class EastWingBuilder {
         kit.room(CE1);
         kit.room(E3);
         kit.room(E3_CORRIDOR);   // 控えの間 → 番兵長の広間
-        for (List<BlockPos> door : List.of(E1_ENTRANCE, E1_EXIT, CE1_WEST_DOOR, E3_ENTRANCE)) {
+        kit.room(E2);
+        kit.room(CK);
+        kit.room(E2_PASS);       // 第一の広間 → 第二の広間の間の休み場
+        kit.room(CK_PASS);       // 第二の広間 → 詰所の間の休み場
+        for (List<BlockPos> door : List.of(E1_ENTRANCE, E1_EXIT, CE1_WEST_DOOR, E3_ENTRANCE, E1_SOUTH, E2_ENTRANCE, E2_EXIT, CK_ENTRANCE, E3_LOCK)) {
             for (BlockPos p : door) {
                 kit.set(p, BuildKit.AIR);
             }
         }
         // 出口は制圧するまで閉じている (入口は戦いが始まると閉じる)
-        for (List<BlockPos> exit : List.of(E1_EXIT)) {
+        for (List<BlockPos> exit : List.of(E1_EXIT, E1_SOUTH, E2_EXIT, E3_LOCK)) {
             for (BlockPos p : exit) {
                 kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
             }
         }
 
+        for (Box hall : List.of(E1, E2, E3, CK)) {
+            hallInterior(kit, hall);
+        }
+        throneDais(kit);
         // 番兵長の広間から鼓動の間へ戻る扉 (石が歌うまで封じられている)。広間を掘ったあとに置く
         for (BlockPos p : EAST_RETURN) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        for (Box hall : List.of(E1, E3)) {
-            hallInterior(kit, hall);
-        }
-        throneDais(kit);
         kit.restPoint(E0);
         kit.restPoint(CE1);
-        kit.wallLamps(E3_CORRIDOR, 3, FLOOR + 3);
+        kit.restPoint(E2_PASS);
+        kit.restPoint(CK_PASS);
+        kit.wallLamps(E3_CORRIDOR, 3, FLOOR + 4);
         kit.pilasters(E0, 3);
-        for (Box rest : List.of(E0, CE1)) {
-            kit.wallLamps(rest, 3, FLOOR + 3);
+        for (Box rest : List.of(E0, CE1, E2_PASS, CK_PASS)) {
+            kit.wallLamps(rest, 3, FLOOR + 4);
         }
         kit.moss(E0, 0.05f);
+        // 詰所: 奥の壁に番兵の旗 (割符の戸の印)
+        kit.lantern(CK.x2() - 1, FLOOR + 1, CK.z2());
+        kit.lantern(CK.x1() + 1, FLOOR + 1, CK.z2());
     }
 
     // 広間: 床の模様、身を隠す柱、壁の柱、天井の骨の梁、吊るした灯り
@@ -64,9 +74,10 @@ final class EastWingBuilder {
                 }
             }
         }
+        // 身を隠す柱 (間隔 8 マス。戸口の前と湧き場所は避ける)
         for (int x = hall.x1(); x <= hall.x2(); x++) {
             for (int z = hall.z1(); z <= hall.z2(); z++) {
-                if ((x - hall.x1()) % 5 == 3 && (z - hall.z1()) % 5 == 3 && !isSpawnPoint(hall, x, z)
+                if ((x - hall.x1()) % 8 == 4 && (z - hall.z1()) % 8 == 4 && !isSpawnPoint(hall, x, z)
                         && x > hall.x1() && x < hall.x2() && z > hall.z1() && z < hall.z2()) {
                     for (int y = hall.floorY() + 1; y < hall.ceilingY(); y++) {
                         kit.set(x, y, z, y == hall.floorY() + 1 || y == hall.ceilingY() - 1 ? BuildKit.CHISELED : BuildKit.POLISHED);
@@ -74,15 +85,15 @@ final class EastWingBuilder {
                 }
             }
         }
-        kit.pilasters(hall, 4);
-        kit.wallLamps(hall, 4, hall.floorY() + 4);
-        kit.ribs(hall, 5, hall.z2() - hall.z1() >= hall.x2() - hall.x1());
-        BlockPos c = hall.center();
-        kit.hangingLantern(c.getX(), c.getZ(), hall.ceilingY(), 2);
-        kit.hangingLantern(hall.x1() + 2, hall.z1() + 2, hall.ceilingY(), 1);
-        kit.hangingLantern(hall.x2() - 2, hall.z2() - 2, hall.ceilingY(), 1);
-        kit.hangingLantern(hall.x1() + 2, hall.z2() - 2, hall.ceilingY(), 1);
-        kit.hangingLantern(hall.x2() - 2, hall.z1() + 2, hall.ceilingY(), 1);
+        kit.pilasters(hall, 5);
+        kit.wallLamps(hall, 5, hall.floorY() + 6);
+        kit.ribs(hall, 6, hall.z2() - hall.z1() >= hall.x2() - hall.x1());
+        int step = Math.max(8, Math.min(hall.x2() - hall.x1(), hall.z2() - hall.z1()) / 2);
+        for (int x = hall.x1() + 3; x <= hall.x2() - 3; x += step) {
+            for (int z = hall.z1() + 3; z <= hall.z2() - 3; z += step) {
+                kit.hangingLantern(x, z, hall.ceilingY(), 3);
+            }
+        }
         kit.moss(hall, 0.03f);
         // 番兵の湧く場所には苔を残さない
         for (BlockPos p : spawnPoints(hall)) {
@@ -104,14 +115,25 @@ final class EastWingBuilder {
         kit.lantern(stone.getX() + 3, FLOOR + 1, stone.getZ());
     }
 
-    // 戦いの湧き場所 (TitanBackTrials が使う)。広間の四隅の内側と中央
+    // 戦いの湧き場所 (TitanBackTrials が使う)。広間の四隅の内側・辺の中ほど・中央 (9 か所)
     static List<BlockPos> spawnPoints(Box hall) {
         BlockPos c = hall.center();
         int y = hall.floorY() + 1;
-        return List.of(
-                new BlockPos(hall.x1() + 2, y, hall.z1() + 2), new BlockPos(hall.x2() - 2, y, hall.z1() + 2),
-                new BlockPos(hall.x1() + 2, y, hall.z2() - 2), new BlockPos(hall.x2() - 2, y, hall.z2() - 2),
-                new BlockPos(c.getX(), y, c.getZ()));
+        int x1 = hall.x1() + 2;
+        int x2 = hall.x2() - 2;
+        int z1 = hall.z1() + 2;
+        int z2 = hall.z2() - 2;
+        List<BlockPos> list = new ArrayList<>();
+        list.add(new BlockPos(x1, y, z1));
+        list.add(new BlockPos(x2, y, z1));
+        list.add(new BlockPos(x1, y, z2));
+        list.add(new BlockPos(x2, y, z2));
+        list.add(new BlockPos(c.getX(), y, c.getZ()));
+        list.add(new BlockPos(c.getX(), y, z1));
+        list.add(new BlockPos(c.getX(), y, z2));
+        list.add(new BlockPos(x1, y, c.getZ()));
+        list.add(new BlockPos(x2, y, c.getZ()));
+        return List.copyOf(list);
     }
 
     private static boolean isSpawnPoint(Box hall, int x, int z) {

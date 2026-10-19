@@ -156,6 +156,7 @@
   "message.skyabyss.titan_call.met.ember": "The heat underfoot has set into the shape of a small bell. With it, you can call the ember",
   "message.skyabyss.titan_call.called.stone_whale": "The bone whistle sounds. Far away, a low song answers",
   "message.skyabyss.titan_call.called.tide_shell": "The conch's note melts into the tide. Beyond the shallows, something stirs",
+  "message.skyabyss.titan_call.far.tide_shell": "The shore is too rough; the tide shell waits in open water, about %2$s blocks %1$s of here. Swim or sail to the ring of light",
   "message.skyabyss.titan_call.called.thunder_wing": "The feather cuts the wind. Far-off thunder turns toward you",
   "message.skyabyss.titan_call.called.ember": "The bell rings in the ash. The deep ground begins to lift, slowly",
   "message.skyabyss.titan_call.no_place.stone_whale": "There is nowhere to descend. Try a more open spot",

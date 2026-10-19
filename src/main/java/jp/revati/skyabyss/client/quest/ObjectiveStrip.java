@@ -32,6 +32,8 @@ public final class ObjectiveStrip {
     @Nullable
     public static volatile Function<String, BlockPos> targets;
 
+    // 開発用 (/skyabyss_hud demo): 目的の帯と追跡の札を、データなしで出す
+    public static volatile boolean demo;
     private static String lastText = "";
     // 開発用 (台本のログ): 最後に帯へ描いた文と、その時刻
     private static String lastShown = "";
@@ -67,12 +69,21 @@ public final class ObjectiveStrip {
         if (!Config.OBJECTIVE_STRIP.get() || mc.player == null) {
             return false;
         }
+        if (demo) {
+            return true;
+        }
         return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
-    // 帯の分だけ、下の小さな表示をずらす
-    static int rows() {
-        return active() ? ROW : 0;
+    // HUD の要求: 左上の帯 (成長の表示の下)。描画 (render) と同じ条件で出す
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get() || OpeningClient.awakeActive()) {
+            return;
+        }
+        if (demo || OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
+                    WIDTH + 6, ROW - 2));
+        }
     }
 
     public static String direction(Vec3 from, BlockPos to) {
@@ -170,6 +181,11 @@ public final class ObjectiveStrip {
                 || OpeningClient.awakeActive()) {
             return;
         }
+        if (demo) {
+            BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
+            draw(g, mc, "岩鯨の背へ上る鎖を探す", new Resolved(at, false));
+            return;
+        }
         // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる。操作のキーは書かない
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
@@ -205,8 +221,12 @@ public final class ObjectiveStrip {
         // 戦闘で傷を受けた直後・画面を開いている間・ホラー演出 (足音・歌) の最中は薄くする (雰囲気を壊さない)
         boolean quiet = mc.screen != null || mc.player.hurtTime > 0 || OpeningClient.horrorCueActive();
         float a = quiet ? 0.45f : 1f;
-        int x = QuestHud.X;
-        int y = QuestHud.y();
+        jp.revati.skyabyss.hud.HudLayout.Rect rect = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE);
+        if (rect == null) {
+            return;
+        }
+        int x = rect.x() + 3;
+        int y = rect.y() + 2;
         String far = "";
         BlockPos target = resolved.pos();
         boolean arrow = Config.QUEST_ARROW.get();

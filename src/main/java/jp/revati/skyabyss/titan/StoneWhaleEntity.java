@@ -351,7 +351,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         entityData.set(CHAIN, chain + step);
         if (isChainDown()) {
             keepChainHandle(level);
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow());
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow(), chainShape(level));
+            tickStandBoard(level);
             if (tickCount % 40 == 0) {
                 hintNearbyPlayers(level);
             }
@@ -472,6 +473,64 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         }
         points.add(new Vec3(top.x, top.y, top.z));
         return points;
+    }
+
+    // 鎖の下の地面のブロックの上面の高さ (鎖の下端から下へ探す)。鎖は地面から少し浮いて終わるので、乗り口の陣はその真下の地面に描く
+    private static double groundTopBelow(ServerLevel level, Vec3 from) {
+        net.minecraft.core.BlockPos.MutableBlockPos m = new net.minecraft.core.BlockPos.MutableBlockPos(Mth.floor(from.x), Mth.floor(from.y), Mth.floor(from.z));
+        for (int i = 0; i < 24; i++) {
+            var shape = level.getBlockState(m).getCollisionShape(level, m);
+            if (!shape.isEmpty()) {
+                return m.getY() + shape.max(net.minecraft.core.Direction.Axis.Y);
+            }
+            m.move(0, -1, 0);
+        }
+        return level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(from.x), Mth.floor(from.z));
+    }
+
+    // 乗り口の光の形: 枠の中心を鎖の下端ではなく、その真下の地面の上面に置く (クライアントが平たい陣として地面にそわせて描く)
+    private jp.revati.skyabyss.titan.end.BoardGlow.Shape chainShape(ServerLevel level) {
+        Vec3 top = chainTop();
+        Vec3 bottom = chainBottom();
+        double ground = groundTopBelow(level, bottom);
+        return new jp.revati.skyabyss.titan.end.BoardGlow.Shape(new Vec3(bottom.x, ground, bottom.z), 1.6f, 2.6f, 1.6f, 0f,
+                ground, Math.max(top.y, ground + jp.revati.skyabyss.titan.end.BoardGlow.MIN_BEAM), 0.9f);
+    }
+
+    // 陣の半径 (StoneWhaleEntity の乗り口。クライアントの MarkerArt.SIGIL_R の内側)
+    public static final double STAND_RADIUS = 2.0;
+    private final java.util.Map<java.util.UUID, Integer> standCooldown = new java.util.HashMap<>();
+
+    // 鎖の下の陣の中に立つと乗る (右クリックでも乗れる)。乗れない・満席などの知らせは 3 秒に一度まで
+    private void tickStandBoard(ServerLevel level) {
+        if (tickCount % 4 != 0) {
+            return;
+        }
+        Vec3 bottom = chainBottom();
+        double ground = groundTopBelow(level, bottom);
+        for (ServerPlayer player : Players.snapshot(level.players())) {
+            double dx = player.getX() - bottom.x;
+            double dz = player.getZ() - bottom.z;
+            if (dx * dx + dz * dz > STAND_RADIUS * STAND_RADIUS || player.getY() < ground - 0.6 || player.getY() > ground + 1.2) {
+                // 陣から出た: 次に入ったときは、すぐ (待たずに) 数える
+                standCooldown.remove(player.getUUID());
+                continue;
+            }
+            if (player.isSpectator() || !player.isAlive() || player.isPassenger() || !player.onGround()
+                    || jp.revati.skyabyss.titan.TitanTravel.isLifting(player.getUUID())) {
+                continue;
+            }
+            int last = standCooldown.getOrDefault(player.getUUID(), -1000);
+            if (tickCount - last < 60) {
+                continue;
+            }
+            standCooldown.put(player.getUUID(), tickCount);
+            if (voyage) {
+                jp.revati.skyabyss.titan.travel.Voyages.grabChain(player, this);
+            } else {
+                jp.revati.skyabyss.titan.TitanTravel.startLift(player, this, jp.revati.skyabyss.readiness.BoardReadiness.Mode.WALK_IN);
+            }
+        }
     }
 
     // 鎖の根元に、右クリックを受け取る見えない当たり判定を置き続ける
@@ -620,7 +679,8 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         entityData.set(CHAIN, chain + step);
         if (isChainDown()) {
             keepChainHandle(level);
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow());
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, chainGlow(), chainShape(level));
+            tickStandBoard(level);
             if (tickCount % 40 == 0) {
                 hintNearbyPlayers(level);
             }
@@ -718,6 +778,12 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                     max = Math.max(max, level.getHeight(Heightmap.Types.MOTION_BLOCKING, sx, sz));
                 }
             }
+        }
+        // 体の下の丘・木・峰に体のどこもめり込まない高さ (体積の柱ごと。休む高さ = surroundingMax + REST_CLEARANCE を下回らない)
+        double need = TitanGround.requiredY(level, TitanGround.Surface.TOP, jp.revati.skyabyss.titan.solid.TitanVolume.get("stone_whale"), getX(), getZ(), getYRot(),
+                TitanGround.MARGIN, 2);
+        if (Double.isFinite(need)) {
+            max = Math.max(max, need - REST_CLEARANCE);
         }
         surroundingMax = max;
     }

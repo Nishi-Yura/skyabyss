@@ -129,36 +129,66 @@ public final class TideOcean {
         return null;
     }
 
-    // 休む場所: (px, pz) の人から 64 ブロック以内の海で、深さ 6〜14、岸から 40 ブロック以内 (08 の 2.3節)。
+    // 休む場所: (px, pz) の人から 96 ブロック以内の海で、深さ 6〜14、岸から 96 ブロック以内 (08 の 2.3節)。
     // 巨神の左 (潮門の側) をその人へ向けたとき、潮門の前が水であること。見つからなければ null。
     // 戻り値は (x, 向き, z)。近すぎると甲羅が人に重なるので、中心は人から 40〜64 ブロック、だめなら 24〜36 ブロックを試す
     @Nullable
     public static Vec3 findRestSpot(ServerLevel level, double px, double pz) {
-        int[] rings = {44, 52, 60, 64, 40, 36, 30, 24};
-        for (int r : rings) {
-            for (int a = 0; a < 16; a++) {
-                double angle = Math.PI * 2 * (a + (r % 8) / 8.0) / 16;
+        return findRestSpot(level, px, pz, MAX_RAISE);
+    }
+
+    // maxRaise: 休む高さからの持ち上げの上限
+    @Nullable
+    public static Vec3 findRestSpot(ServerLevel level, double px, double pz, double maxRaise) {
+        // 人に近い輪から順に、体が大きいので海の開けた所 (体の下のどこも、休む高さのまま海底・岸・丘・木に触れない) を探す。
+        // 読み込まれているチャンクだけを見る (読み込まれていない沖は選べない)
+        for (int r : REST_RINGS) {
+            for (int a = 0; a < 24; a++) {
+                double angle = Math.PI * 2 * (a + (r % 8) / 8.0) / 24;
                 double x = px + Math.cos(angle) * r;
                 double z = pz + Math.sin(angle) * r;
-                if (!waterAtSurface(level, x, z)) {
-                    continue;
-                }
-                int d = depth(level, x, z);
-                if (d < 6 || d > 14 || !nearShore(level, x, z, 40)) {
+                if (!waterAtSurface(level, x, z) || depth(level, x, z) < REST_MIN_DEPTH) {
                     continue;
                 }
                 // 巨神の左を人へ向ける: 左の向き (cos yaw, sin yaw) = 人への向き
                 float yaw = (float) (Mth.atan2(pz - z, px - x) * Mth.RAD_TO_DEG);
                 Vec3 gate = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.GATE_SIDE, 0, -TideShellEntity.GATE_BACK));
                 Vec3 front = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.EXIT_SIDE, 0, -TideShellEntity.GATE_BACK));
-                if (!waterAtSurface(level, gate.x, gate.z) || !waterAtSurface(level, front.x, front.z) || depth(level, front.x, front.z) < 2) {
+                Vec3 dock = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.DOCK_SIDE, 0, -TideShellEntity.GATE_BACK));
+                if (!waterAtSurface(level, gate.x, gate.z) || !waterAtSurface(level, front.x, front.z) || depth(level, front.x, front.z) < 2
+                        || !waterAtSurface(level, dock.x, dock.z) || depth(level, dock.x, dock.z) < 2) {
                     continue;
                 }
-                return new Vec3(x, yaw, z);
+                if (restRaise(level, x, z, yaw) <= maxRaise) {
+                    return new Vec3(x, yaw, z);
+                }
             }
         }
         return null;
     }
+
+    // 休む場所の中心が人から離れてよい輪 (近い順)。体の下が開けた海を、沖まで探す
+    static final int[] REST_RINGS = {24, 30, 36, 40, 44, 52, 60, 64, 72, 80, 96, 112, 128, 144, 160, 180, 200};
+    // 休む場所の水深の下限 (上限はない。深い沖でも休む高さは海面の 3.5 下)
+    static final int REST_MIN_DEPTH = 6;
+
+    // 休む高さ (底が海面の REST_DRAFT 下) から、体のどこも海底・岸・木・丘にめり込まないために持ち上げる量 (ブロック。0 以下 = 持ち上げ不要)。
+    // 持ち上げても乗り場の輪は海面にあるので、乗れる (門の敷居が水面から離れるだけ)。読み込まれていない柱は調べない。測りが切ってあれば 0
+    public static double restRaise(ServerLevel level, double x, double z, float yaw) {
+        // 体の輪郭 (横 ±67・前 87・後ろ 59) の縁が読み込まれていない沖は、地形が分からないので選ばない
+        for (double[] p : new double[][] {{-67, -59}, {67, -59}, {-67, 87}, {67, 87}, {0, -59}, {0, 87}, {-67, 14}, {67, 14}}) {
+            Vec3 w = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, p[0], 0, p[1]));
+            if (!loaded(level, w.x, w.z)) {
+                return Double.POSITIVE_INFINITY;
+            }
+        }
+        double need = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get("tide_shell"), x, z, yaw);
+        return Double.isFinite(need) ? need - (level.getSeaLevel() - TideShellEntity.REST_DRAFT) : 0.0;
+    }
+
+    // 休む場所を選ぶときの持ち上げの上限 (ブロック)。安全の余白だけ。これより持ち上げないと浅瀬・岸にめり込む場所は選ばない (浮いて見えない)
+    public static final double MAX_RAISE = 1.5;
 
     // 呼び貝で呼ぶときの休む場所: まず (px, pz) の人の近く (findRestSpot)。人が海から遠いときは、読み込まれている範囲で
     // いちばん近い海辺を、輪を広げながら探す (人から 96〜256 ブロックを 32 ブロックずつ、16 方向)。見つからなければ null。

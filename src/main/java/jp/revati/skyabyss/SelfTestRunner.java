@@ -80,6 +80,8 @@ public final class SelfTestRunner {
         List<Step> steps = new ArrayList<>();
         // 岩鯨の背: 建てる・調べる (番兵を動かす段は最後。サーバーを止めるので)
         steps.addAll(TitanBackSelfTest.buildSteps());
+        // 岩鯨の背の拡大 (BackScale・部屋の大きさ・幕・鐘・初回だけの部屋・建て直しで keep.* が残る)。docs/design/26。SKYABYSS_SELFTEST_ONLY="whale scale"
+        steps.add(Step.once("whale scale", jp.revati.skyabyss.titan.dungeon.WhaleScaleSelfTest::runSelfTest));
         // グループ (パーティ・一人) の共通部分: 部屋の占有・戦いの参加者・個人の影・乗っている人の数え方・放置の分け前。docs/design/10 の 10 章
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         // 倒れた参加者の再入場 (20 秒の待ち・回数・全滅でやり直し・ゲームルール)。docs/design/02 の 4.2、10 の 10.4
@@ -110,9 +112,13 @@ public final class SelfTestRunner {
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
         steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
+        // HUD の置き場の計算 (倍率 1〜4 × 代表的な窓で重ならない)。docs/design/18 の 14 章
+        steps.add(Step.once("hud layout", jp.revati.skyabyss.hud.HudLayoutSelfTest::runSelfTest));
         steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
+        steps.add(Step.once("storm scan", jp.revati.skyabyss.titan.storm.back.StormBuildScan::runSelfTest));
+        steps.add(jp.revati.skyabyss.cinematic.SightLiveSelfTest.step(jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
@@ -206,6 +212,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("titan end (reset after hearts)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
         steps.add(Step.once("tide (load)", TideSelfTest::load));
         steps.add(Step.once("tide", 50, TideSelfTest::runSelfTest));
+        // 巨神が地形にめり込まない (潮殻の休む場所・巡航、雷翼の止まり木、潮殻の乗り場が体の外)。SKYABYSS_SELFTEST_ONLY="titan ground"
+        steps.add(Step.once("titan ground", 10, jp.revati.skyabyss.titan.tide.TitanGroundSelfTest::runSelfTest));
         steps.add(Step.once("tide mobs (load)", TideMobSelfTest::load));
         steps.add(Step.once("tide mobs", 45, TideMobSelfTest::runSelfTest));
         // 潮殻の心臓と中ボス潮招きの予告 (Telegraph): 印と当たりが同じ・予告 0.8 秒以上・安全な床 15% 以上・人数で増える・部屋に収まる。docs/design/08 の 5.5

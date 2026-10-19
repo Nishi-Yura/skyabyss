@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 
 // 今の章の札 (「一章　空を泳ぐもの」)。左上の目的の帯のすぐ上に、小さく出しっぱなしにする (docs/design/18 の 3.5 節)。
 // 章はサーバーが人ごとに導いて送る (quest/QuestUx)。場面・F1・F3・序盤の目覚めの間は出さない。設定 chapterLabel で消せる。
-// 札の高さの分 (ROWS) だけ、下の帯と追跡の表示は下へずれる (QuestHud.y)
+// 置き場は HudManager (Id.CHAPTER。目的の帯のすぐ上)
 public final class ChapterLabel {
     static final int ROWS = 11;
     private static final int WIDTH = ObjectiveStrip.WIDTH;
@@ -52,9 +52,12 @@ public final class ChapterLabel {
                 && !OpeningClient.awakeActive() && !CinematicClient.active();
     }
 
-    // 札の分だけ、下の帯をずらす
-    static int rows() {
-        return active() ? ROWS : 0;
+    // HUD の要求: 左上の帯の、目的の帯のすぐ上 (成長の表示の下)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (active()) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
+                    WIDTH + 6, ROWS - 3));
+        }
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {
@@ -65,8 +68,12 @@ public final class ChapterLabel {
         Chapters c = current();
         Font font = mc.font;
         float a = mc.screen != null ? 0.45f : 0.85f;
-        int x = QuestHud.X;
-        int y = QuestHud.y() - ROWS;
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER);
+        if (r == null) {
+            return;
+        }
+        int x = r.x() + 3;
+        int y = r.y();
         Component text = text(c);
         String shown = text.getString();
         // 細い金の線 (帯の金の縁と揃える) と、小さめの字
