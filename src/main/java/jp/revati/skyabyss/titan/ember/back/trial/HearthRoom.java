@@ -38,10 +38,18 @@ public final class HearthRoom {
             k.set(box.minX() + 1, floor + 7, z + 3, RoomKit.SHROOM);
             k.set(box.maxX() - 1, floor + 7, z + 3, RoomKit.SHROOM);
         }
-        // 壁ぎわの灯りの柱
+        // 洞の建築: 丸天井と肋 (亀裂の下は開ける)、壁の肋、熔脈
+        k.relief(box.minZ() + 1, box.maxZ() - 1, 12, null);
+        k.vault(box.minX() + 1, box.maxX() - 1, box.minZ() + 1, box.maxZ() - 1, 16, 25,
+                (x, z) -> x >= crack.minX() - 1 && x <= crack.maxX() + 1 && z >= crack.minZ() - 1 && z <= crack.maxZ() + 1);
+        k.veins(box.minZ() + 3, box.maxZ() - 3, 9);
+        k.veinsEnds(box.minX() + 3, box.maxX() - 3, 6);
+        // 奥の岸の石の門 (熾り石の岸を囲む)
+        k.stoneGate(-7, 7, 56, 11);
+        // 中央の通り道の灯りの柱 (谷の入口側と奥側)
         for (int z : new int[] {5, 17, 29, 41, 53, 62}) {
-            k.post(-15, z, 4);
-            k.post(15, z, 4);
+            k.post(-13, z, 4);
+            k.post(13, z, 4);
         }
         // 灰降りの庭: 灰の木
         for (int[] t : TREES) {
@@ -90,16 +98,16 @@ public final class HearthRoom {
         for (BlockPos p : PUDDLES) {
             k.ashPool(p.getX(), p.getZ(), 3, 2);
         }
-        // 天井の鍾乳 (亀裂の下は除く)
-        int top = box.maxY() - 1;
-        for (int x = box.minX() + 2; x <= box.maxX() - 2; x += 2) {
-            for (int z = box.minZ() + 2; z <= box.maxZ() - 2; z += 2) {
-                int hs = RoomKit.hash(x, 12, z);
-                boolean underCrack = x >= crack.minX() - 1 && x <= crack.maxX() + 1 && z >= crack.minZ() - 1 && z <= crack.maxZ() + 1;
-                if (hs < 45 && !underCrack) {
-                    int len = 2 + hs % 4;
-                    for (int y = top; y > top - len; y--) {
-                        k.set(x, y, z, RoomKit.BASALT);
+        // 亀裂の下の灰の吹きだまり (背の上から降った灰の小山。谷の両脇)
+        for (int[] m : new int[][] {{-6, 26}, {6, 33}, {-6, 47}, {6, 50}, {-7, 38}}) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int hgt = dx == 0 && dz == 0 ? 2 : 1;
+                    if (Math.abs(dx) + Math.abs(dz) == 2 && RoomKit.hash(m[0] + dx, 3, m[1] + dz) < 500) {
+                        continue;
+                    }
+                    for (int y = 1; y <= hgt; y++) {
+                        k.set(m[0] + dx, floor + y, m[1] + dz, RoomKit.ASH_DRIFT);
                     }
                 }
             }

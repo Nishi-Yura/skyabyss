@@ -44,9 +44,19 @@ public final class AshPathRoom {
         for (int[] b : banks(box)) {
             k.drifts(box.minX() + 1, b[0], box.maxX() - 1, b[1], 20);
         }
-        // 壁ぎわの灯りの柱 (岸ごと)
-        for (int x : new int[] {-60, -26}) {
-            for (int z : new int[] {-9, 3, 12, 24, 30, 65, 75, 107}) {
+        // 洞の建築: 丸天井と肋、壁の肋、熔脈 (マグマの筋)
+        k.relief(box.minZ() + 1, box.maxZ() - 1, 12, AshPathRoom::lavaRow);
+        k.vault(box.minX() + 1, box.maxX() - 1, box.minZ() + 1, box.maxZ() - 1, 14, 22, null);
+        k.veins(box.minZ() + 3, box.maxZ() - 3, 9);
+        k.veinsEnds(box.minX() + 3, box.maxX() - 3, 6);
+        // 奥の岸の石の門 (熾り石の岸を囲む)
+        k.stoneGate(-50, -36, AshPath.LAKE2_Z2 + 2, 11);
+        // 岸の灯りの柱 (床の灯り。道ぞいに 3 列)
+        for (int x : new int[] {-56, -43, -30}) {
+            for (int z : new int[] {-9, 3, 12, 25, 30, 65, 75, 108}) {
+                if (x == -43 && (z == -9 || z == 108)) {
+                    continue;
+                }
                 k.post(x, z, 4);
             }
         }
@@ -61,7 +71,15 @@ public final class AshPathRoom {
             k.ashPool(p[0], p[1], 3, 2);
         }
         tomb(k);
-        ceiling(k, box);
+    }
+
+    static boolean lavaRow(int z) {
+        for (int[] r : AshPath.LAVA_RANGES) {
+            if (z >= r[0] && z <= r[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 墓所: 低い壁で囲った灰の民の墓 (北・南・東。東の壁に 3 幅の口)。棺 2 つと蝋燭、奥の壁に宝箱
@@ -96,29 +114,6 @@ public final class AshPathRoom {
         k.set(-61, floor + 4, 2, RoomKit.SHROOM);
     }
 
-    // 天井: 玄武岩の鍾乳 (ところどころ)、湖の上の灯り (吊り鎖に提灯。島の上を照らす)
-    private static void ceiling(RoomKit k, EmberBackLayout.Box box) {
-        int top = box.maxY() - 1;
-        for (int x = box.minX() + 2; x <= box.maxX() - 2; x += 2) {
-            for (int z = box.minZ() + 2; z <= box.maxZ() - 2; z += 2) {
-                int h = RoomKit.hash(x, 11, z);
-                if (h < 40) {
-                    int len = 2 + h % 3;
-                    for (int y = top; y > top - len; y--) {
-                        k.set(x, y, z, RoomKit.BASALT);
-                    }
-                }
-            }
-        }
-        for (int x : new int[] {-52, -43, -34}) {
-            for (int z : new int[] {38, 52, 85, 96}) {
-                k.set(x, top, z, Blocks.CHAIN.defaultBlockState());
-                k.set(x, top - 1, z, Blocks.CHAIN.defaultBlockState());
-                k.set(x, top - 2, z, RoomKit.LANTERN.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true));
-            }
-        }
-    }
-
     // 湖を建て直す (建てるときとリセットのとき)。溶岩・島・灰溜まりを置き、湖の上の空気を空ける
     public static void buildLake(ServerLevel level, int pattern) {
         AshPath.lakeBuilt(pattern);
@@ -129,8 +124,26 @@ public final class AshPathRoom {
         for (int[] r : AshPath.LAVA_RANGES) {
             k.fill(x1, floor - 3, r[0], x2, floor - 3, r[1], RoomKit.BASALT);
             k.fill(x1, floor - 2, r[0], x2, floor, r[1], Blocks.LAVA.defaultBlockState());
-            k.air(x1, floor + 1, r[0], x2, EmberBackLayout.WEST.maxY() - 1, r[1]);
+            k.air(x1, floor + 1, r[0], x2, floor + 13, r[1]);
         }
+        // 溶岩の中の岩の柱 (景色。島とその 4 ブロック・中央の通り道・湖の端の 3 ブロックは避ける)
+        java.util.List<AshPath.Island> islands = AshPath.PATTERNS.get(pattern);
+        k.stacks(x1 + 1, x2 - 1, AshPath.CHANNEL_Z1 + 1, AshPath.LAKE2_Z2 - 1, 5, 6, (x, z) -> {
+            if (!lavaRow(z) || Math.abs(x + 43) <= 6) {
+                return true;
+            }
+            for (int[] r : AshPath.LAVA_RANGES) {
+                if (z >= r[0] && z <= r[1] && (z <= r[0] + 2 || z >= r[1] - 2)) {
+                    return true;
+                }
+            }
+            for (AshPath.Island i : islands) {
+                if (Math.abs(x - i.cx()) <= i.half() + 4 && Math.abs(z - i.cz()) <= i.half() + 4) {
+                    return true;
+                }
+            }
+            return false;
+        });
         for (AshPath.Island island : AshPath.PATTERNS.get(pattern)) {
             for (int x = island.cx() - island.half(); x <= island.cx() + island.half(); x++) {
                 for (int z = island.cz() - island.half(); z <= island.cz() + island.half(); z++) {

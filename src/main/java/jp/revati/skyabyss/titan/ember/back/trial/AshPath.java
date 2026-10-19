@@ -51,9 +51,9 @@ public final class AshPath {
     public static final int REACH = 4;
     // 溶岩の面 (ブロックの y)。島・岸の床と同じ
     public static final int LAVA_Y = EmberBackLayout.FLOOR_WEST;
-    // 湖の x の範囲 (部屋の内側いっぱい)
-    public static final int LAKE_X1 = -61;
-    public static final int LAKE_X2 = -25;
+    // 湖の x の範囲 (部屋の内側から壁の肋の 2 マスを引いた幅)
+    public static final int LAKE_X1 = -59;
+    public static final int LAKE_X2 = -27;
     // 試しの流れ (幅いっぱいの溶岩の溝。灰の壺の使い方を教える)・第一の湖・第二の湖の z の範囲。その間は岸 (試しの岸・中ノ岸)
     public static final int CHANNEL_Z1 = 15;
     public static final int CHANNEL_Z2 = 21;

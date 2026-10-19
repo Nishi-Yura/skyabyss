@@ -164,4 +164,125 @@ final class RoomKit {
         set(x, floorY + 2, z + backDz, Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
         set(x, floorY + 3, z + backDz, LANTERN);
     }
+
+    // ---------------------------------------------------------------- 洞の建築 (版 20): 丸天井・壁の肋・熔脈・溶岩の中の岩の柱
+    // 丸天井: x の範囲の真ん中が高く、端が低い (hEdge → hCenter。床の上の高さ)。z の範囲で、天井の下を壁の石で埋める。
+    // holes に当たる所 (背の亀裂の下) は埋めない。8 ブロックおきに肋 (黒石レンガ) が天井の下に 1 段張り出し、肋の真ん中と 1/4 に光る茂み
+    void vault(int xMin, int xMax, int zMin, int zMax, int hEdge, int hCenter, java.util.function.BiPredicate<Integer, Integer> hole) {
+        double cx = (xMin + xMax) / 2.0;
+        double half = (xMax - xMin) / 2.0;
+        for (int x = xMin; x <= xMax; x++) {
+            double u = (x - cx) / half;
+            int limit = floorY + hEdge + (int) Math.round((hCenter - hEdge) * (1 - u * u));
+            for (int z = zMin; z <= zMax; z++) {
+                if (hole != null && hole.test(x, z)) {
+                    continue;
+                }
+                for (int y = limit + 1; y < box.maxY(); y++) {
+                    set(x, y, z, wall(x, y, z));
+                }
+                if (Math.floorMod(z - zMin, 8) == 0) {
+                    boolean key = Math.abs(x - cx) < 1 || Math.abs(Math.abs(x - cx) - half / 2) < 1;
+                    set(x, limit, z, key ? SHROOM : BRICKS);
+                }
+            }
+        }
+    }
+
+    // 壁の肋: 両側の壁 (box の x の端の内側 2 マス) に、8 ブロックおきに幅 2 の黒い岩の肋を高さ h まで立てる。肋の正面に光る茂みを埋める。
+    // lavaRow の z (溶岩の湖の行) は、溶岩が壁に触れないよう、内側 2 マスを床の下 3 から床の上 3 まで必ず壁にする (肋でない所も)
+    void relief(int zMin, int zMax, int h, java.util.function.IntPredicate lavaRow) {
+        for (int z = zMin; z <= zMax; z++) {
+            int k = Math.floorMod(z - zMin, 8);
+            boolean lava = lavaRow != null && lavaRow.test(z);
+            for (int side = 0; side < 2; side++) {
+                int x1 = side == 0 ? box.minX() + 1 : box.maxX() - 1;
+                int dir = side == 0 ? 1 : -1;
+                for (int d = 0; d < 2; d++) {
+                    int x = x1 + dir * d;
+                    int top = k <= 1 ? floorY + h - 3 * d : lava ? floorY + 3 : floorY;
+                    int bottom = lava ? floorY - 3 : floorY + 1;
+                    for (int y = bottom; y <= top; y++) {
+                        set(x, y, z, hash(x, y, z) < 500 ? POLISHED : BLACKSTONE);
+                    }
+                    if (d == 1 && k == 0 && Math.floorMod(z - zMin, 16) == 0) {
+                        set(x, floorY + 6, z, SHROOM);
+                    }
+                }
+            }
+        }
+    }
+
+    // 熔脈: 両側の壁の面 (box の端の石) に、縦に走るマグマの筋 (3〜8 ブロック。ゆるく曲がる)。ところどころ光る茂みが混じる
+    void veins(int zMin, int zMax, int spacing) {
+        for (int z = zMin; z <= zMax; z += spacing) {
+            for (int side = 0; side < 2; side++) {
+                int x = side == 0 ? box.minX() : box.maxX();
+                int zz = z + hash(x, 5, z) % 4;
+                int len = 3 + hash(x, 6, z) % 6;
+                int y0 = floorY + 2 + hash(x, 7, z) % 8;
+                for (int i = 0; i < len; i++) {
+                    int jitter = (hash(x, y0 + i, zz) % 5 == 0) ? 1 : 0;
+                    set(x, y0 + i, zz + jitter, hash(x, y0 + i, z) < 120 ? SHROOM : MAGMA);
+                }
+            }
+        }
+    }
+
+    // 奥の壁と手前の壁 (box の z の端) にも熔脈を走らせる
+    void veinsEnds(int xMin, int xMax, int spacing) {
+        for (int x = xMin; x <= xMax; x += spacing) {
+            for (int side = 0; side < 2; side++) {
+                int z = side == 0 ? box.minZ() : box.maxZ();
+                int xx = x + hash(x, 8, z) % 4;
+                int len = 3 + hash(x, 9, z) % 7;
+                int y0 = floorY + 2 + hash(x, 10, z) % 9;
+                for (int i = 0; i < len; i++) {
+                    set(xx + (hash(xx, y0 + i, z) % 5 == 0 ? 1 : 0), y0 + i, z, hash(xx, y0 + i, z) < 120 ? SHROOM : MAGMA);
+                }
+            }
+        }
+    }
+
+    // 石の門: 熾り石を囲む二本の柱と梁 (取っておく場所の外。柱 x1・x2、梁は柱のあいだ)
+    void stoneGate(int x1, int x2, int z, int h) {
+        for (int x : new int[] {x1, x2}) {
+            for (int y = floorY + 1; y <= floorY + h; y++) {
+                set(x, y, z, y % 4 == 0 ? POLISHED : BRICKS);
+            }
+            set(x, floorY + h + 1, z, SHROOM);
+        }
+        for (int x = x1; x <= x2; x++) {
+            set(x, floorY + h, z, BRICKS);
+            if ((x - x1) % 3 == 1) {
+                set(x, floorY + h - 1, z, RoomKit.BONE);
+            }
+        }
+    }
+
+    // 溶岩の中の岩の柱 (景色。1 × 1 か 2 × 2、水面より 3〜9 高い)。避けたい範囲 (島とその 4 ブロック) を skip で渡す
+    void stacks(int xMin, int xMax, int zMin, int zMax, int stepX, int stepZ, java.util.function.BiPredicate<Integer, Integer> skip) {
+        for (int x = xMin; x <= xMax; x += stepX) {
+            for (int z = zMin; z <= zMax; z += stepZ) {
+                int h = hash(x, 21, z);
+                if (h > 450) {
+                    continue;
+                }
+                int px = x + h % 3;
+                int pz = z + (h / 3) % 3;
+                int w = h % 7 == 0 ? 2 : 1;
+                if (skip != null && skip.test(px, pz)) {
+                    continue;
+                }
+                int top = floorY + 3 + h % 7;
+                for (int dx = 0; dx < w; dx++) {
+                    for (int dz = 0; dz < w; dz++) {
+                        for (int y = floorY - 3; y <= top - dx - dz; y++) {
+                            set(px + dx, y, pz + dz, hash(px + dx, y, pz + dz) < 600 ? BASALT : BLACKSTONE);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

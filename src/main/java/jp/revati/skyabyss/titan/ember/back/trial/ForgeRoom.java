@@ -32,6 +32,11 @@ public final class ForgeRoom {
         gallery(k, box);
         core(k, box);
         workshop(k);
+        // 洞の建築: 丸天井と肋、熔脈 (壁のマグマの筋)、回廊の溶岩の溝 (熔脈の回廊)
+        k.vault(box.minX() + 1, box.maxX() - 1, box.minZ() + 1, box.maxZ() - 1, 14, 19, null);
+        k.veins(box.minZ() + 3, box.maxZ() - 3, 8);
+        k.veinsEnds(box.minX() + 3, box.maxX() - 3, 6);
+        veinChannels(k);
         buildInner(level, Forge.ownerPattern(level));
     }
 
@@ -96,6 +101,26 @@ public final class ForgeRoom {
         for (int i = 0; i < colors.length; i++) {
             k.fill(49 + i, floor + 1, -8, 49 + i, floor + 2, -8, colors[i]);
             k.set(49 + i, floor + 3, -8, RoomKit.POLISHED);
+        }
+    }
+
+    // 熔脈の回廊の溶岩の溝: 道 (x 41〜47) の両側 4 ブロック先 (x 37 と 51) に、床の高さで細い溶岩の溝が南北に走る (z -11〜18)。
+    // 溝の両側は 2 段の黒石レンガの縁。溝の端は床で閉じている (溶岩は流れ出さない)。道の端から溝まで 4 ブロックあるので熱は届かない
+    private static void veinChannels(RoomKit k) {
+        int floor = EmberBackLayout.FLOOR_EAST;
+        for (int x : new int[] {37, 51}) {
+            for (int z = -11; z <= 18; z++) {
+                k.set(x, floor, z, Blocks.LAVA.defaultBlockState());
+                k.set(x - 1, floor + 1, z, RoomKit.BRICKS);
+                k.set(x - 1, floor + 2, z, Blocks.POLISHED_BLACKSTONE_BRICK_WALL.defaultBlockState());
+                k.set(x + 1, floor + 1, z, RoomKit.BRICKS);
+                k.set(x + 1, floor + 2, z, Blocks.POLISHED_BLACKSTONE_BRICK_WALL.defaultBlockState());
+            }
+            // 溝の端のしるし: 柱と灯り
+            for (int z : new int[] {-12, 19}) {
+                k.fill(x, floor + 1, z, x, floor + 4, z, RoomKit.BRICKS);
+                k.set(x, floor + 5, z, RoomKit.SHROOM);
+            }
         }
     }
 

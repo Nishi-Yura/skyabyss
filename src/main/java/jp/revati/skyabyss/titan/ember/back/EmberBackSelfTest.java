@@ -280,7 +280,7 @@ public final class EmberBackSelfTest {
     // ---------------------------------------------------------------- 液体
     private static void checkFluids(ServerLevel back, String when) {
         List<Box> regions = List.of(MOUTH, THROAT, BAY_WEST, BAY_EAST, HUB,
-                new Box(-48, 78, -58, 50, 96, -10), new Box(-4, 82, -27, 4, 96, -9), HEART_ANTE, GATE_SHAFT, BACK_TUBE,
+                new Box(-48, 78, -58, 50, 96, -16), new Box(-4, 82, -27, 4, 96, -9), HEART_ANTE, GATE_SHAFT, BACK_TUBE,
                 new Box(-7, WELL_BOTTOM, HUB_CENTER.getZ() - 7, 7, EmberBodyBuilder.crater(), HUB_CENTER.getZ() + 7));
         int fluids = 0;
         String first = "";
