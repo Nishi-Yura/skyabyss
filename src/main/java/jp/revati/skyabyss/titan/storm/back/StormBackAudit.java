@@ -17,7 +17,7 @@ public final class StormBackAudit {
     }
 
     public static BackReach.Spec spec(ServerLevel level) {
-        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 215, 200));
+        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 235, 200));
         s.voidY = CLOUD_Y + 5;
         s.longFallIsExit = true;
         s.entrances.add(ARRIVAL);
@@ -31,6 +31,9 @@ public final class StormBackAudit {
         s.scan.add(new Box(RIB_X1 - 2, 168, BONE_Z1 - 2, RIB_X2 + 2, RIB_TOP_Y + 8, BONE_Z2 + 2));
         s.scan.add(new Box(-20, 144, -152, 20, 172, HUB.z1() - 1));
         s.scan.add(new Box(-36, 112, -54, 24, HUB.floor(), 8));
+        // 任意の翼 (26 の 9.5): 背の広場・二つの塔・尾羽の庭
+        s.scan.add(new Box(-48, StormExtra.DECK_Y, 9, 48, StormExtra.TOP_Y + 9, 37));
+        s.scan.add(new Box(-36, StormExtra.GARDEN_Y, StormExtra.GARDEN_Z1, 36, StormExtra.GARDEN_Y + 16, StormExtra.GARDEN_Z2));
         // 西の骨の割れた床 (WEST_GAPS): わざとの穴。落ちると雲の下へ出て嵐に投げ返される
         for (int[] g : WEST_GAPS) {
             s.allowHole.add(new Box(g[0] - 1, 130, BONE_Z1, g[1] + 1, 175, BONE_Z2 + 1));
@@ -87,6 +90,9 @@ public final class StormBackAudit {
         s.goals.put("east perch", EAST_STONE.offset(-1, 0, 0));
         s.goals.put("beak room", FRONT_STONE.offset(1, 0, 0));
         s.goals.put("heart room", HEART_ROOM.offset(0, 2, 8));
+        for (var e : StormExtra.goals().entrySet()) {
+            s.goals.put(e.getKey(), e.getValue());
+        }
         return s;
     }
 

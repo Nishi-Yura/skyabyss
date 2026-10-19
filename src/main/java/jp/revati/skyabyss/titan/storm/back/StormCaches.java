@@ -30,8 +30,11 @@ public final class StormCaches {
     private StormCaches() {
     }
 
-    // side -1 = 広場の西、+1 = 広場の東、-2 = 骨の書庫、+2 = 雷の炉
+    // side -1 = 広場の西、+1 = 広場の東、-2 = 骨の書庫、+2 = 雷の炉。3〜7 = 任意の翼 (StormExtra.caches)
     static BlockPos cachePos(int side) {
+        if (side >= 3) {
+            return StormExtra.caches().get(side);
+        }
         return switch (side) {
             case -2 -> VAULT_CACHE_W;
             case -1 -> CACHE_WEST;
@@ -49,7 +52,7 @@ public final class StormCaches {
         if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
             return;
         }
-        for (int side : new int[] {-2, -1, 1, 2}) {
+        for (int side : new int[] {-2, -1, 1, 2, 3, 4, 5, 6, 7}) {
             if (cachePos(side).equals(event.getPos())) {
                 event.setCanceled(true);
                 open(player, side);
@@ -73,18 +76,27 @@ public final class StormCaches {
             case -2 -> 5;
             case -1 -> 4;
             case 1 -> 6;
+            case 3, 4 -> 10;
+            case 5, 6 -> 8;
+            case 7 -> 6;
             default -> 7;
         };
         int arrows = switch (side) {
             case -2 -> 20;
             case -1 -> 16;
             case 1 -> 24;
+            case 3, 4 -> 40;
+            case 5, 6 -> 32;
+            case 7 -> 24;
             default -> 28;
         };
         int xp = switch (side) {
             case -2 -> 50;
             case -1 -> 30;
             case 1 -> 40;
+            case 3, 4 -> 90;
+            case 5, 6 -> 70;
+            case 7 -> 50;
             default -> 60;
         };
         give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), jerky));
@@ -95,6 +107,10 @@ public final class StormCaches {
             case -2 -> "message.skyabyss.storm_cache_vault_w";
             case -1 -> "message.skyabyss.storm_cache_west";
             case 1 -> "message.skyabyss.storm_cache_east";
+            case 3 -> "message.skyabyss.storm_cache_vane";
+            case 4 -> "message.skyabyss.storm_cache_rod";
+            case 5, 6 -> "message.skyabyss.storm_cache_tip";
+            case 7 -> "message.skyabyss.storm_cache_lookout";
             default -> "message.skyabyss.storm_cache_vault_e";
         }));
     }
