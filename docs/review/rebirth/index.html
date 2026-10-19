@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>転生と自由度 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --fig:#f4f5f7; --warn:#a9692a;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --fig:#14181e; --warn:#e0a566; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --fig:#14181e; --warn:#e0a566; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 8px}
+h2.dh{margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+.intro{color:var(--muted);max-width:72ch;margin:0 0 6px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.fact{background:var(--panel);border:1px solid var(--line);padding:10px 12px;min-width:0}
+.fact b{display:block;font-size:20px}
+.fact span{font-size:12px;color:var(--muted)}
+figure{margin:12px 0;background:var(--fig);border:1px solid var(--line);padding:8px}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:12px;color:var(--muted);margin-top:6px}
+svg text{font-family:var(--body);fill:var(--ink)}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+svg .acc{fill:none;stroke:var(--accent);stroke-width:2}
+svg .accf{fill:var(--accent)}
+svg .accf-t{fill:var(--accent-ink)}
+svg .ln{stroke:var(--muted);stroke-width:1.5;fill:none}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tab{font:inherit;font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:5px 12px;cursor:pointer}
+.tab.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--tc);padding:10px 12px;min-width:0}
+.card[hidden]{display:none}
+.card header{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:12px}
+.cid{font-weight:700;color:var(--muted)}
+.slot{padding:0 6px;border:1px solid var(--line)}
+.s-歩{border-color:#3f8f63}.s-智{border-color:#4d78b8}.s-闘{border-color:#b85a4d}
+.cat{color:var(--muted)}
+.tier{color:var(--warn);letter-spacing:1px}
+.orig{margin-left:auto;font-size:11px;color:var(--accent-ink);background:var(--accent);padding:0 6px}
+.new{margin-left:auto;font-size:11px;color:var(--muted);border:1px solid var(--line);padding:0 6px}
+.card h3{margin:4px 0;font-size:16px}
+.card p{margin:0 0 6px;font-size:13px;color:var(--muted);line-height:1.6}
+.card details{font-size:12px}
+.card summary{cursor:pointer;color:var(--accent)}
+.card dl{margin:6px 0 0}
+.card dt{font-weight:700;margin-top:4px}
+.card dd{margin:0;color:var(--muted);line-height:1.5}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:2px}
+.rec{color:var(--ok);font-size:12px;font-weight:600}
+.letter{font-size:20px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.pick{font-size:13px;color:var(--ok);margin:8px 0 0}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:16px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:500}
+@media (max-width:760px){
+  .facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+  table{display:block;overflow-x:auto}
+}
+
+.card h3{margin:6px 0 4px}
+.ck{display:flex;align-items:center;gap:6px;cursor:pointer}
+.ck input{width:18px;height:18px;accent-color:var(--accent)}
+.card:has(input:checked){outline:2px solid var(--accent);outline-offset:-2px}
+.card header{align-items:center}
+.eff{margin-left:auto;font-weight:700;border:1px solid var(--line);padding:0 8px}
+.e-S{color:var(--ok)}.e-M{color:var(--warn)}.e-L{color:#b85a4d}
+.card dl{margin:6px 0 0;font-size:12px}
+.card dt{font-weight:700;margin-top:4px}
+.card dd{margin:0;color:var(--muted);line-height:1.5}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar b{color:var(--accent)}
+.tab[disabled]{opacity:.5}
+.pk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pkc{background:var(--panel);border:1px solid var(--line);padding:12px;min-width:0}
+.pkc h3{margin:0 0 4px;font-size:16px}.pkc p{font-size:13px;color:var(--muted);margin:0 0 8px}
+.pkc .n{font-size:12px;color:var(--muted)}
+.opts.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* badge ramp */
+.ramp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.pl{background:linear-gradient(#27415a,#6b8fb0 55%,#5f7a52 55%);border:1px solid var(--line);padding:16px 6px 0;display:flex;flex-direction:column;align-items:center;min-width:0;height:210px;justify-content:flex-start}
+.tag{font:700 13px/1.3 var(--body);padding:2px 8px;background:rgba(10,14,18,.72);border:1.5px solid #e9edf0;color:#fff;white-space:nowrap;text-align:center}
+.tag small{display:block;font-size:10px;font-weight:500;opacity:.8}
+.tag .sym{margin-right:4px}
+.t0{border-color:#e9edf0}
+.t1{border-color:#4fd0c4;color:#9ff3ea}.t1 .sym{color:#4fd0c4}
+.t5{border-color:#e6b84a;color:#ffe08a;box-shadow:0 0 6px #e6b84a88}.t5 .sym{color:#ffd45a}
+.t10{border-color:#e6b84a;color:#ffe08a;box-shadow:0 0 8px #e6b84a,inset 0 0 6px #e6b84a66}.t10 .sym{color:#ffd45a}
+.t20{border:2px solid transparent;background:linear-gradient(rgba(10,14,18,.8),rgba(10,14,18,.8)) padding-box,linear-gradient(90deg,#ff7aa8,#ffd45a,#6df2b5,#6cb7ff,#c18cff,#ff7aa8) border-box;background-size:100% 100%,300% 100%;animation:prism 4s linear infinite;color:#fff}
+.t20 .sym{background:linear-gradient(90deg,#ff7aa8,#ffd45a,#6df2b5,#6cb7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes prism{to{background-position:0 0,300% 0}}
+@media (prefers-reduced-motion:reduce){.t20{animation:none}}
+.body{width:26px;height:64px;background:#2b2f36;margin-top:8px;position:relative}
+.body:before{content:"";position:absolute;left:3px;top:-18px;width:20px;height:20px;background:#d8b48f}
+.body:after{content:"";position:absolute;left:-8px;top:4px;width:8px;height:34px;background:#2b2f36;box-shadow:34px 0 0 #2b2f36}
+.aura{width:60px;height:14px;border-radius:50%;margin-top:-6px;border:2px solid transparent}
+.rl{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+/* K panel */
+.kp{background:#14181e;color:#e3e8ee;border:1px solid #2a313b;max-width:900px;margin:0 auto;font-size:13px}
+.kp .tb{display:flex;gap:2px;border-bottom:1px solid #2a313b;background:#0e1115}
+.kp .tb span{padding:8px 16px;color:#93a0ad}.kp .tb .on{background:#14181e;color:#5fdcef;border-bottom:2px solid #5fdcef}
+.kp .cols{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px;padding:12px}
+.kp .bx{border:1px solid #2a313b;padding:10px;background:#171b22;min-width:0}
+.kp h4{margin:0 0 6px;font-size:13px;color:#5fdcef}
+.kp ul{margin:0;padding-left:16px}.kp li{margin:2px 0}
+.kp .kept li{color:#6fd18c}.kp .lost li{color:#e0a566}
+.kp .btn{display:block;margin-top:10px;text-align:center;padding:8px;background:#5fdcef;color:#0b1216;font-weight:700}
+.kp .btn.dis{background:#2a313b;color:#93a0ad}
+.kp .boon{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.kp .boon div{border:1px solid #2a313b;padding:6px;font-size:12px}
+.kp .boon .on{border-color:#e6b84a;background:#2a2312}
+.kp .echo{display:flex;gap:6px;margin-top:6px}
+.kp .echo span{flex:1;border:1px dashed #5b6672;padding:8px 4px;text-align:center;font-size:12px}
+.kp .echo .f{border-style:solid;border-color:#5fdcef;color:#9ff3ea}
+.kp .xp{height:8px;background:#2a313b;margin:6px 0}.kp .xp i{display:block;height:100%;width:100%;background:#5fdcef}
+.kp .ft{padding:8px 12px;border-top:1px solid #2a313b;color:#93a0ad;font-size:12px}
+@media (max-width:760px){.pk,.opts.four{grid-template-columns:minmax(0,1fr)}.ramp{grid-template-columns:repeat(3,minmax(0,1fr))}.kp .cols{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>スキルの自由度と転生（Lv 50+）</h1>
+  <p class="intro">試遊の声: 「スキルを Diablo みたいに、もっと自由に。Lv 50 で転生できて、使える装備はそのまま、天性やポイントはリセット。ビルドし直せる以外にも、何回も転生するメリットが欲しい。レベルの色や記号など、他の人から見て自慢できる要素も」。案は 65 本。気に入ったものにチェックして、下の 8 つを選んでください。設計は <code>docs/design/31_freedom_and_rebirth.md</code>。</p>
+  <div class="facts">
+    <div class="fact"><b>20 / 22 / 23</b><span>A スキルの自由度 / B 転生の報酬 / C 自慢の見せ方</span></div>
+    <div class="fact"><b>Lv 50+n</b><span>転生は Lv 50 で。レベルは 1 から、装備と巨神の進みは残る</span></div>
+    <div class="fact"><b>力は小さく</b><span>転生 10 回で装備 1 部位ぶん。約 10 回で伸びが半分に</span></div>
+    <div class="fact"><b>3 つの組み合わせ</b><span>軽い 36 / 釣り合い 115 / 深い 245 A日</span></div>
+  </div>
+
+  <h2>転生の骨組み</h2>
+  <figure>
+  <svg viewBox="0 0 960 230" role="img" aria-label="転生の流れ">
+    <rect class="box" x="10" y="30" width="170" height="150"/><text x="95" y="56" text-anchor="middle" font-size="14" font-weight="700">Lv 1 → 50</text>
+    <g font-size="12" class="mut"><text x="22" y="84">点を振って育つ</text><text x="22" y="104">天職・刻印・型</text><text x="22" y="124">巨神と試練を進める</text></g>
+    <path class="ln" d="M196 105 H256"/><path class="accf" d="M256 99 L268 105 L256 111Z"/>
+    <rect class="box" x="272" y="30" width="190" height="150" style="stroke:var(--accent)"/><text x="367" y="56" text-anchor="middle" font-size="14" font-weight="700">転生（鼓動の間）</text>
+    <g font-size="12" class="mut"><text x="284" y="84">結晶 5・戦いの外</text><text x="284" y="104">恩恵 3 択から 1 つ</text><text x="284" y="124">魂盤のノードを開く</text><text x="284" y="144">残響を 1 つ持ち越す</text></g>
+    <path class="ln" d="M478 105 H538"/><path class="accf" d="M538 99 L550 105 L538 111Z"/>
+    <rect class="box" x="554" y="30" width="190" height="150"/><text x="649" y="56" text-anchor="middle" font-size="14" font-weight="700">Lv 1 → 50+n</text>
+    <g font-size="12" class="mut"><text x="566" y="84">必要経験値 −6%/回</text><text x="566" y="104">技の点 0・天職を選び直し</text><text x="566" y="124">色と ✦ が上がる</text></g>
+    <path class="ln" d="M760 105 H800"/><path class="accf" d="M800 99 L812 105 L800 111Z"/>
+    <rect class="box" x="816" y="30" width="136" height="150"/><text x="884" y="56" text-anchor="middle" font-size="14" font-weight="700">先がある</text>
+    <g font-size="12" class="mut"><text x="826" y="84">深淵の難度</text><text x="826" y="104">転生者の段</text><text x="826" y="124">専用の伝説</text></g>
+  </svg>
+  <figcaption>装備と巨神の進みは残る。戻るのは「レベル・技の点・ステータスの点・天職」。</figcaption>
+  </figure>
+
+  <h2>名札の色の段（6 人を並べて）</h2>
+  <p class="intro">プレイヤーの頭の上の名札。左の記号が転生の回数、枠の色が段。プリズムは枠の色が回ります（動きを減らす設定では止まります）。</p>
+  <figure><div class="ramp"><div><div class="pl"><div class="tag t0"><span class="sym"></span>Yura<small>Lv 50</small></div><div class="body"></div></div><div class="rl"><b>転生 0</b><br>白・記号なし</div></div><div><div class="pl"><div class="tag t1"><span class="sym">✦</span>Yura<small>Lv 50+1</small></div><div class="body"></div></div><div class="rl"><b>転生 1</b><br>青緑</div></div><div><div class="pl"><div class="tag t1"><span class="sym">✦✦✦</span>Yura<small>Lv 50+3</small></div><div class="body"></div></div><div class="rl"><b>転生 3</b><br>青緑・3 つ</div></div><div><div class="pl"><div class="tag t5"><span class="sym">✧</span>Yura<small>Lv 50+5</small></div><div class="body"></div></div><div class="rl"><b>転生 5</b><br>金・✧ 1 つ</div></div><div><div class="pl"><div class="tag t10"><span class="sym">✧✧</span>Yura<small>Lv 50+10</small></div><div class="body"></div></div><div class="rl"><b>転生 10</b><br>金・光る縁</div></div><div><div class="pl"><div class="tag t20"><span class="sym">✺</span>Yura<small>Lv 50+20</small></div><div class="body"></div></div><div class="rl"><b>転生 20</b><br>プリズム・縁が回る</div></div></div>
+  <figcaption>白（0）→ 青緑（1〜4）→ 金（5〜14）→ プリズム（15 以上）。記号は ✦ → ✧ → ✺ に束ねる。色覚の違いには記号と縁の形で対応。</figcaption></figure>
+
+  <h2>魂盤の図（B01 の案）</h2>
+  <figure><svg viewBox="0 0 960 540" role="img" aria-label="魂盤の図。6 つの腕に転生ごとのノード"><circle cx="480" cy="270" r="236" class="box" style="fill:none;stroke-dasharray:3 6"/><circle cx="480" cy="270" r="160" class="box" style="fill:none;stroke-dasharray:3 6"/><path d="M480 270 L480 216 L480 183 L480 150 L480 117 L480 84 L480 51" class="ln" style="stroke:#9a8d73;opacity:.55"/><path d="M480 270 L527 243 L555 226 L584 210 L613 194 L641 177 L670 160" class="ln" style="stroke:#3fae8c;opacity:.55"/><path d="M480 270 L527 297 L555 314 L584 330 L613 346 L641 363 L670 380" class="ln" style="stroke:#3d86c6;opacity:.55"/><path d="M480 270 L480 324 L480 357 L480 390 L480 423 L480 456 L480 489" class="ln" style="stroke:#c4522a;opacity:.55"/><path d="M480 270 L433 297 L405 314 L376 330 L347 346 L319 363 L290 380" class="ln" style="stroke:#c9bfa5;opacity:.55"/><path d="M480 270 L433 243 L405 226 L376 210 L347 194 L319 177 L290 160" class="ln" style="stroke:#a98bd0;opacity:.55"/><path d="M480 150 L584 210" class="ln" style="opacity:.25"/><path d="M480 84 L641 177" class="ln" style="opacity:.25"/><path d="M584 210 L584 330" class="ln" style="opacity:.25"/><path d="M641 177 L641 363" class="ln" style="opacity:.25"/><path d="M584 330 L480 390" class="ln" style="opacity:.25"/><path d="M641 363 L480 456" class="ln" style="opacity:.25"/><path d="M480 390 L376 330" class="ln" style="opacity:.25"/><path d="M480 456 L319 363" class="ln" style="opacity:.25"/><path d="M376 330 L376 210" class="ln" style="opacity:.25"/><path d="M319 363 L319 177" class="ln" style="opacity:.25"/><path d="M376 210 L480 150" class="ln" style="opacity:.25"/><path d="M319 177 L480 84" class="ln" style="opacity:.25"/><circle cx="480" cy="216" r="6" style="fill:#9a8d73;stroke:#9a8d73;stroke-width:2"/><circle cx="480" cy="183" r="6" style="fill:#9a8d73;stroke:#9a8d73;stroke-width:2"/><circle cx="480" cy="150" r="6" style="fill:#9a8d73;stroke:#9a8d73;stroke-width:2"/><circle cx="480" cy="117" r="6" class="box" style="stroke:#9a8d73;stroke-width:1.5"/><circle cx="480" cy="84" r="6" class="box" style="stroke:#9a8d73;stroke-width:1.5"/><circle cx="480" cy="51" r="11" class="box" style="stroke:#9a8d73;stroke-width:1.5"/><text x="480" y="8" text-anchor="middle" font-size="14" font-weight="700" style="fill:#9a8d73">岩の腕</text><text x="480" y="24" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="527" cy="243" r="6" style="fill:#3fae8c;stroke:#3fae8c;stroke-width:2"/><circle cx="555" cy="226" r="6" style="fill:#3fae8c;stroke:#3fae8c;stroke-width:2"/><circle cx="584" cy="210" r="6" style="fill:#3fae8c;stroke:#3fae8c;stroke-width:2"/><circle cx="613" cy="194" r="6" class="box" style="stroke:#3fae8c;stroke-width:1.5"/><circle cx="641" cy="177" r="6" class="box" style="stroke:#3fae8c;stroke-width:1.5"/><circle cx="670" cy="160" r="11" class="box" style="stroke:#3fae8c;stroke-width:1.5"/><text x="714" y="139" text-anchor="middle" font-size="14" font-weight="700" style="fill:#3fae8c">風の腕</text><text x="714" y="155" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="527" cy="297" r="6" style="fill:#3d86c6;stroke:#3d86c6;stroke-width:2"/><circle cx="555" cy="314" r="6" style="fill:#3d86c6;stroke:#3d86c6;stroke-width:2"/><circle cx="584" cy="330" r="6" class="box" style="stroke:#3d86c6;stroke-width:1.5"/><circle cx="613" cy="346" r="6" class="box" style="stroke:#3d86c6;stroke-width:1.5"/><circle cx="641" cy="363" r="6" class="box" style="stroke:#3d86c6;stroke-width:1.5"/><circle cx="670" cy="380" r="11" class="box" style="stroke:#3d86c6;stroke-width:1.5"/><text x="714" y="401" text-anchor="middle" font-size="14" font-weight="700" style="fill:#3d86c6">潮の腕</text><text x="714" y="417" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="480" cy="324" r="6" style="fill:#c4522a;stroke:#c4522a;stroke-width:2"/><circle cx="480" cy="357" r="6" style="fill:#c4522a;stroke:#c4522a;stroke-width:2"/><circle cx="480" cy="390" r="6" class="box" style="stroke:#c4522a;stroke-width:1.5"/><circle cx="480" cy="423" r="6" class="box" style="stroke:#c4522a;stroke-width:1.5"/><circle cx="480" cy="456" r="6" class="box" style="stroke:#c4522a;stroke-width:1.5"/><circle cx="480" cy="489" r="11" class="box" style="stroke:#c4522a;stroke-width:1.5"/><text x="480" y="532" text-anchor="middle" font-size="14" font-weight="700" style="fill:#c4522a">灰の腕</text><text x="480" y="548" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="433" cy="297" r="6" style="fill:#c9bfa5;stroke:#c9bfa5;stroke-width:2"/><circle cx="405" cy="314" r="6" style="fill:#c9bfa5;stroke:#c9bfa5;stroke-width:2"/><circle cx="376" cy="330" r="6" class="box" style="stroke:#c9bfa5;stroke-width:1.5"/><circle cx="347" cy="346" r="6" class="box" style="stroke:#c9bfa5;stroke-width:1.5"/><circle cx="319" cy="363" r="6" class="box" style="stroke:#c9bfa5;stroke-width:1.5"/><circle cx="290" cy="380" r="11" class="box" style="stroke:#c9bfa5;stroke-width:1.5"/><text x="246" y="401" text-anchor="middle" font-size="14" font-weight="700" style="fill:#c9bfa5">骨の腕</text><text x="246" y="417" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="433" cy="243" r="6" style="fill:#a98bd0;stroke:#a98bd0;stroke-width:2"/><circle cx="405" cy="226" r="6" style="fill:#a98bd0;stroke:#a98bd0;stroke-width:2"/><circle cx="376" cy="210" r="6" class="box" style="stroke:#a98bd0;stroke-width:1.5"/><circle cx="347" cy="194" r="6" class="box" style="stroke:#a98bd0;stroke-width:1.5"/><circle cx="319" cy="177" r="6" class="box" style="stroke:#a98bd0;stroke-width:1.5"/><circle cx="290" cy="160" r="11" class="box" style="stroke:#a98bd0;stroke-width:1.5"/><text x="246" y="139" text-anchor="middle" font-size="14" font-weight="700" style="fill:#a98bd0">旅の腕</text><text x="246" y="155" text-anchor="middle" font-size="11" class="mut">拾う・結晶</text><circle cx="480" cy="270" r="30" class="accf"/><text x="480" y="276" text-anchor="middle" font-size="16" font-weight="700" class="accf-t">魂</text><g font-size="12"><circle cx="24" cy="28" r="6" class="accf"/><text x="38" y="32">開いたノード（例: 転生 14 回）</text><circle cx="24" cy="52" r="6" class="box" style="stroke:var(--muted)"/><text x="38" y="56">まだ</text><circle cx="24" cy="76" r="11" class="box" style="stroke:var(--accent);stroke-width:2.5"/><text x="42" y="80">要の節（各腕の端。10・20・30… 回で）</text></g></svg><figcaption>転生 1 回で 1 ノード。6 つの腕のどこへ進むかを毎回選ぶ。端の大きい丸が要の節（10・20・30 回…）。例は転生 14 回で、均等に進めた場合。</figcaption></figure>
+
+  <h2>K 画面の「転生」パネル（見取り図）</h2>
+  <figure><div class="kp"><div class="tb"><span>技</span><span>ステータス</span><span>型</span><span class="on">転生</span><span>記録</span></div>
+<div class="cols">
+<div class="bx"><h4>転生の準備</h4><div>現在 <b>Lv 50</b>（転生 2 回）</div><div class="xp"><i></i></div>
+<div>転生すると <b>Lv 50+3</b>、名札が <span style="color:#9ff3ea">✦✦✦</span> になります。</div>
+<div class="boon"><div>拾う数 +3%</div><div class="on">結晶の出 +5%<br><small>選択中</small></div><div>最初の章の道案内</div></div>
+<div style="margin-top:8px;color:#93a0ad;font-size:12px">今回の「試し」（任意）: 死なずに到達 <b style="color:#e6b84a">達成</b></div>
+<div class="btn">転生する（結晶 5）</div></div>
+<div class="bx"><h4>残るもの</h4><ul class="kept"><li>装備・ポーチ・結晶・素材</li><li>巨神の進み（共有の背）</li><li>魂盤 14 → 15 ノード</li><li>残響 2 枠（次で 3 つ目）</li><li>熟練・称号・記録</li></ul>
+<h4 style="margin-top:10px">戻るもの</h4><ul class="lost"><li>レベル（1 から。必要経験値 −18%）</li><li>技の点 45 → 0</li><li>ステータスの点</li><li>天職（選び直し）</li></ul></div>
+<div class="bx"><h4>残響スロット</h4><div style="color:#93a0ad;font-size:12px">前の人生の特性を 1 つ持ち越す</div>
+<div class="echo"><span class="f">凪の心得<br><small>潮</small></span><span class="f">岩の構え<br><small>岩</small></span><span>空き<br><small>転生 15 回</small></span></div>
+<h4 style="margin-top:10px">魂盤</h4><div style="color:#93a0ad;font-size:12px">次のノードを選ぶ</div>
+<div class="boon"><div>岩の腕<br>吸収 +1%</div><div class="on">潮の腕<br>マナ +2</div><div>灰の腕<br>傷 +0.5%</div></div></div>
+</div><div class="ft">戦いの外・鼓動の間の台座でのみ。倒れたときの罰・装備の損失はありません。</div></div><figcaption>K 画面に「転生」を足す。Lv 50 でない間は灰色の説明だけ。ここで恩恵 3 択・残響・魂盤の次のノードを決める。</figcaption></figure>
+
+  <h2>3 つの組み合わせ</h2>
+  <div class="pk"><div class="pkc"><h3>A 軽い（まず自由と見せ方）</h3><p>魂盤と色の段・記号で「転生する理由」を最小で作る。木の開放と気軽な振り直しで自由度の入口まで。</p><div class="n">19 本 / 約 36 A日</div><button class="tab" data-pk="lean">この組み合わせを全部チェック</button></div><div class="pkc"><h3>B 釣り合い（推薦）</h3><p>軽い案に、アスペクト・残響・深淵・3 択の恩恵・試し・順位表を足す。転生を何度も回す理由が 3 本（力・自由・自慢）そろう。</p><div class="n">40 本 / 約 115 A日</div><button class="tab" data-pk="bal">この組み合わせを全部チェック</button></div><div class="pkc"><h3>C 深い（Diablo に寄せる）</h3><p>ソケット・変異・合成技・淵の木・前世の技・季節・紋盤まで。長く遊ぶ人向け。整備は大きい。</p><div class="n">65 本 / 約 245 A日</div><button class="tab" data-pk="deep">この組み合わせを全部チェック</button></div></div>
+
+  <h2 class="dh">案を選ぶ（65 本）</h2>
+  <p class="intro">気に入ったものにチェック。保存は自動です（<code>choices/rebirth_ideas</code>）。量 S は約 1.5・M は約 4・L は約 9 A日。</p>
+  <div class="bar"><span>選択 <b id="cnt">0</b> 本 / 約 <b id="sum">0</b> A日</span>
+    <span class="tabs" id="tg"><button class="tab on" data-g="all">全部</button><button class="tab" data-g="A">A 自由度</button><button class="tab" data-g="B">B 転生の報酬</button><button class="tab" data-g="C">C 自慢</button></span>
+    <span class="tabs" id="te"><button class="tab on" data-e="all">量 全部</button><button class="tab" data-e="S">S</button><button class="tab" data-e="M">M</button><button class="tab" data-e="L">L</button></span>
+    <button class="tab" id="onlyck">チェックだけ</button><button class="tab" id="clr">全部外す</button></div>
+  <div class="grid"><article class="card" data-g="A" data-e="M" data-id="A01" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A01"><span class="cid">A01</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>全部の木を最初から開く（天職は専門）</h3><p>天職で木が開く仕組みをやめ、5 本すべての木を最初から全段取れる。天職は「鍵」ではなく専門で、要の技・固有の特性・その木の点の割引（1 段 −1 点を 3 回まで）をくれる。</p>
+<dl><dt>価値</dt><dd>自由度の土台。27 の「ほかの木は 2 段まで」が消え、Diablo のように混ぜられる。</dd><dt>リスク</dt><dd>点の総数（Lv50 で 45）は変えないので全部盛りは起きない。割引が強すぎると結局 1 本に偏る。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A02" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A02"><span class="cid">A02</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>アスペクト（伝説の効果を別の装備へ）</h3><p>伝説の書き換え（27 の 4.2）を炉で「抽出」して、レアの武器や防具に付け替えられる。抽出すると元の伝説は壊れる（または印だけ残る）。</p>
+<dl><dt>価値</dt><dd>Diablo IV の看板。伝説を拾うたびにビルドが動く。</dd><dt>リスク</dt><dd>壊れる設計だと集める手間が重い。多重に付くと書き換えが重なる（1 装備 1 つ、1 技 1 つ）。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A03" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A03"><span class="cid">A03</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>属性タグ（岩・風・潮・灰・骨）</h3><p>全技・全パッシブ・アクセサリに属性タグを付け、「岩の技の力 +x%」「風の技を 4 つ以上で…」のようにタグで数える。木の印（27 の 4.1）をこれに広げる。</p>
+<dl><dt>価値</dt><dd>混ぜるほど数えが効く。木をまたぐ組み合わせに理由ができる。</dd><dt>リスク</dt><dd>タグを増やしすぎると読めない。5 つに固定し、表示は色の点だけ。</dd></dl></article><article class="card" data-g="A" data-e="S" data-id="A04" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A04"><span class="cid">A04</span></label><span class="slot">スキルの自由度</span><span class="eff e-S">S</span></header>
+<h3>木のセット（2 / 4 / 6 点）</h3><p>同じ木の技を 2・4・6 点ぶん取るたびに小さな追加（例: 岩 4 点で岩の構え中の吸収 +1❤）。装備ではなく技のセット。</p>
+<dl><dt>価値</dt><dd>1 本に絞る・薄く混ぜるの両方に意味が出る。</dd><dt>リスク</dt><dd>一本足が最強になりやすい。6 点の追加は小さく、2 本目の 4 点が勝つ程度に。</dd></dl></article><article class="card" data-g="A" data-e="S" data-id="A05" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A05"><span class="cid">A05</span></label><span class="slot">スキルの自由度</span><span class="eff e-S">S</span></header>
+<h3>炉での気軽な振り直し</h3><p>点の全振り直しを結晶 1（またはコスト 0）で、炉の近くでいつでも。型の保存を 2 → 4 に増やす。</p>
+<dl><dt>価値</dt><dd>試行錯誤の摩擦を消す。転生の「ビルドし直し」と相性。</dd><dt>リスク</dt><dd>安すぎると結晶の用途が減る（用途は転生・深淵に回す）。</dd></dl></article><article class="card" data-g="A" data-e="L" data-id="A06" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A06"><span class="cid">A06</span></label><span class="slot">スキルの自由度</span><span class="eff e-L">L</span></header>
+<h3>技の修飾ルーン（戦利品）</h3><p>試練・巨神の戦利品で「技の修飾」が落ちる。1 つの技に 1 枚差す（例: 風裂き＋「二連目が爆ぜる」）。刻印の外側の変化。</p>
+<dl><dt>価値</dt><dd>装備集めの理由が技の側に出る。拾うたびに組み替え。</dd><dt>リスク</dt><dd>種類の整備が重い。数字の暴走を防ぐ上限（倍率の合計 ×2.0）が要る。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A07" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A07"><span class="cid">A07</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>宝石・欠片のソケット</h3><p>武器・防具に穴（0〜2）。巨神素材から作る欠片（岩の欠片・潮の欠片…）を差すと、その属性のタグが付く／小さな数字が上がる。</p>
+<dl><dt>価値</dt><dd>素材の使い道が増え、03 の素材集めに二次の用途ができる。</dd><dt>リスク</dt><dd>穴の抽選が運に寄る。穴は「打ち直し」で必ず付けられる形にする。</dd></dl></article><article class="card" data-g="A" data-e="L" data-id="A08" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A08"><span class="cid">A08</span></label><span class="slot">スキルの自由度</span><span class="eff e-L">L</span></header>
+<h3>技の変異（ミューテーション）</h3><p>1 つの技を巨神の素材で「変異」させ、形を変える（例: 風裂き → 飛ぶ刃になる）。刻印とは別の 1 回きりの選択。</p>
+<dl><dt>価値</dt><dd>Last Epoch 風の深さ。見た目と手触りが変わる。</dd><dt>リスク</dt><dd>アニメ・エフェクトが技ごとに要る。まず 8 技から。</dd></dl></article><article class="card" data-g="A" data-e="L" data-id="A09" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A09"><span class="cid">A09</span></label><span class="slot">スキルの自由度</span><span class="eff e-L">L</span></header>
+<h3>木またぎの合成技</h3><p>2 つの木の技（例: 岩守り 3 段＋風読み 3 段）を取ると開く合成技。盤の隣り合う木の橋として置く。</p>
+<dl><dt>価値</dt><dd>混ぜた人だけの技。27 の「木の輪」の完成形。</dd><dt>リスク</dt><dd>合成技が強すぎて必須になる。単体の木の頂点と同格に。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A10" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A10"><span class="cid">A10</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>連鎖（技の直後の技が変わる）</h3><p>技 A の直後 2 秒以内に技 B を使うと B が強化される。連鎖は 3 本まで（技の木の行に印を付ける）。</p>
+<dl><dt>価値</dt><dd>操作の巧さが出る。ソロでも仲間とでも気持ちいい。</dd><dt>リスク</dt><dd>待ち時間の仕組みと衝突する。連鎖は「待ちを縮める」ではなく「効果を足す」形に。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A11" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A11"><span class="cid">A11</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>構え（スタンス）の切り替え</h3><p>守・疾・歌の 3 構え。構えで使う技の性質が少し変わる（盾を構えながら歌える等）。切り替えは短い待ち。</p>
+<dl><dt>価値</dt><dd>同じ技でも戦い方が変わる。武器の型（27 の 3.9）と並ぶ軸。</dd><dt>リスク</dt><dd>構えは技の数を倍に見せるが中身は割り算。実装は少ないが調整が多い。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A12" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A12"><span class="cid">A12</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>武器持ち替えの枠セット</h3><p>武器を替えると技の枠も 2 組を切り替える（近接と弓の持ち替えで枠 4〜5 が入れ替わる）。</p>
+<dl><dt>価値</dt><dd>持ち替え遊びが成立する。弓と盾の「型」が使い分けになる。</dd><dt>リスク</dt><dd>持ち越しを悪用した「ゼロ待ち」連打。待ちは武器を替えても共有。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A13" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A13"><span class="cid">A13</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>熟練（使うほど育つ技）</h3><p>技ごとに使った回数・当てた数で熟練 1〜5。熟練 3 で刻印の 4 つ目の選択肢、熟練 5 で見た目の変化が開く。転生でも熟練は残る。</p>
+<dl><dt>価値</dt><dd>「使い込む」楽しみ。転生で別ビルドを遊んでも積んだものが残る。</dd><dt>リスク</dt><dd>単調な稼ぎにならないよう、数だけでなく「予告を避けて当てた」回数も数える。</dd></dl></article><article class="card" data-g="A" data-e="L" data-id="A14" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A14"><span class="cid">A14</span></label><span class="slot">スキルの自由度</span><span class="eff e-L">L</span></header>
+<h3>紋（グリフ）の盤</h3><p>点とは別に、技の周りの紋の穴に「紋」を差す（Diablo IV の紋章盤のように隣の技の数が上がる）。紋は試練で出る。</p>
+<dl><dt>価値</dt><dd>点の振りの外に、遊ぶたびに増える調整がある。</dd><dt>リスク</dt><dd>盤が複雑。K 画面で読めるのは 1 画面 6 穴まで。</dd></dl></article><article class="card" data-g="A" data-e="S" data-id="A15" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A15"><span class="cid">A15</span></label><span class="slot">スキルの自由度</span><span class="eff e-S">S</span></header>
+<h3>条件付きの特性（避けたとき・予告・低 HP）</h3><p>回避の直後・予告を完璧に避けた直後・HP 3❤ 以下・マナ満タンなどで発動する小さな特性。刻印に混ぜるか、旅人の木に足す。</p>
+<dl><dt>価値</dt><dd>「避ける戦い」を技の強化に結びつける（この Mod の核）。</dd><dt>リスク</dt><dd>低 HP 強化は死に近づく遊びを誘う。回復・無敵は作らない小ささに。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A16" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A16"><span class="cid">A16</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>パーティ共鳴（役目ごとのオーラ）</h3><p>壁・支え・攻め・崩しの技を持つ仲間が近くにいると、小さな共鳴が全員に付く（例: 壁がいると攻めの傷 +3%）。重ならない。</p>
+<dl><dt>価値</dt><dd>役目の分担がマルチの理由になる（27 の 6 節の延長）。</dd><dt>リスク</dt><dd>ソロが不利に見える。構えで一人でも半分は取れるようにする。</dd></dl></article><article class="card" data-g="A" data-e="S" data-id="A17" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A17"><span class="cid">A17</span></label><span class="slot">スキルの自由度</span><span class="eff e-S">S</span></header>
+<h3>ビルドの共有コード</h3><p>点・刻印・枠を短い文字列に。コピーして貼ると「試着」ができ、足りない点は赤で見える。サイトでも読める形に。</p>
+<dl><dt>価値</dt><dd>友達に見せる・攻略の共有。</dd><dt>リスク</dt><dd>更新で互換が崩れる。バージョン番号を持たせる。</dd></dl></article><article class="card" data-g="A" data-e="S" data-id="A18" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A18"><span class="cid">A18</span></label><span class="slot">スキルの自由度</span><span class="eff e-S">S</span></header>
+<h3>試着（仮振り）モード</h3><p>点を仮に振って、技の効果・マナ・待ちの数字を確かめてから確定する。キャンセルすれば元のまま。</p>
+<dl><dt>価値</dt><dd>間違いの怖さを消す。Diablo の「何度も組み替える」の入口。</dd><dt>リスク</dt><dd>小。K 画面の作り直しが前提。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A19" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A19"><span class="cid">A19</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>反応技（カウンター）の枠</h3><p>予告を完璧に避けた直後にだけ使える 1 回きりの反応技を 1 つ持てる枠（6 つ目の枠）。</p>
+<dl><dt>価値</dt><dd>避ける→殴り返すがそのままビルドの顔になる。</dd><dt>リスク</dt><dd>入力が増える。完璧回避の窓は誰でも練習で取れる幅に。</dd></dl></article><article class="card" data-g="A" data-e="M" data-id="A20" style="--tc:#0a8fa6">
+<header><label class="ck"><input type="checkbox" name="idea" value="A20"><span class="cid">A20</span></label><span class="slot">スキルの自由度</span><span class="eff e-M">M</span></header>
+<h3>キーストーン（ルールが変わる 1 点）</h3><p>盤の端に、1 点で取れる強い代わりに何かを失う技（例: 吸収ハートが 2 倍になるが、マナ回復が半分）。1 人 2 つまで。</p>
+<dl><dt>価値</dt><dd>PoE 風。ビルドの個性が極端に出せる。</dd><dt>リスク</dt><dd>極端な組み合わせで詰まない形に。回復・無敵は作らない。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B01" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B01"><span class="cid">B01</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>魂盤（転生ごとに 1 ノード）</h3><p>転生するたびに魂盤のノードを 1 つ開く。小さな数字（筋力・マナ・拾う範囲・結晶の出・待ち −1% など）と、10 回ごとの要所の節。永久に残る。</p>
+<dl><dt>価値</dt><dd>転生の第一の報酬。長く遊ぶほど見えて伸びる。</dd><dt>リスク</dt><dd>足し算が積み重なる。1 ノード 1% 以下、合計でも装備 1 部位程度に。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B02" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B02"><span class="cid">B02</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>残響スロット（前世の特性を持ち越す）</h3><p>転生のとき、前の人生で取っていた特性（常に効く技）を 1 つ「残響」として残せる。枠は転生 1・5・15 回で 1→3 つ。</p>
+<dl><dt>価値</dt><dd>「ビルドし直し」＋「前の積み重ねが生きる」。混ぜの自由度が上がる。</dd><dt>リスク</dt><dd>強い特性が最初からあると序盤が楽すぎる。残響は各木の入口 2 段までの特性に限る。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B03" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B03"><span class="cid">B03</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>再レベリングの加速</h3><p>転生後の必要経験値を転生ごとに −6%、下限 −40%。章の進みは巨神の鼓動で決まるので、レベルだけが先行しない。</p>
+<dl><dt>価値</dt><dd>「最初から」の苦痛を減らす。何度も転生する人のため。</dd><dt>リスク</dt><dd>レベル上げの価値が薄まる。序盤の敵の強さは Lv ではなく巨神の段で決める。</dd></dl></article><article class="card" data-g="B" data-e="L" data-id="B04" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B04"><span class="cid">B04</span></label><span class="slot">転生の報酬</span><span class="eff e-L">L</span></header>
+<h3>深淵の難度（極の上）</h3><p>29 の「極」の上に「深淵」の修飾段を足す。転生 3 回以上で開く。素材は +3、深淵の心臓から専用の伝説が狙える。</p>
+<dl><dt>価値</dt><dd>転生者が遊ぶ理由（終わりのない上）。装備集めの終点が増える。</dd><dt>リスク</dt><dd>難しさの暴走。一人で解ける原則を守り、深淵は数字の標準だけを上げる（26 の原則）。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B05" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B05"><span class="cid">B05</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>導き手のボーナス</h3><p>未転生の仲間と同じ試練を遊ぶと、転生者に導きの欠片（魂盤の欠片）が入る。未転生の人も少し経験が増える。</p>
+<dl><dt>価値</dt><dd>手伝いが報われる。マルチの空気を良くする。</dd><dt>リスク</dt><dd>欠片稼ぎの連れ回し。1 日 3 回まで、同じ人は 1 日 1 回に。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B06" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B06"><span class="cid">B06</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>収穫逓減（約 10 回以降）</h3><p>魂盤の数字は 10 回目まで線形、そのあとは 1 ノードの値を半分、20 回目以降は 1/4。見た目と称号の価値は落とさない。</p>
+<dl><dt>価値</dt><dd>積み上げ型の暴走を止める。長期プレイで価値が「力」から「飾り」へ移る。</dd><dt>リスク</dt><dd>やる気を削ぐ。飾り・称号・記録は伸び続けるので折れない。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B07" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B07"><span class="cid">B07</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>転生ごとの 3 択の恩恵</h3><p>転生のたびに 3 枚の恩恵（毎回違う候補。拾う数 +、結晶 +、最初の章の道案内、足の速さ など）から 1 つ選ぶ。選択は永久。</p>
+<dl><dt>価値</dt><dd>自分で選ぶ満足。転生の数が個性になる。</dd><dt>リスク</dt><dd>選ばなかったものの未練。数回後に同じ候補が再び出る。</dd></dl></article><article class="card" data-g="B" data-e="L" data-id="B08" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B08"><span class="cid">B08</span></label><span class="slot">転生の報酬</span><span class="eff e-L">L</span></header>
+<h3>前世の技（転生専用の技）</h3><p>転生 N 回で開く 5〜8 本の特別な技（例: 前の人生の最後の瞬間を再現する「遺響の一撃」）。点は魂盤とは別枠で振る。</p>
+<dl><dt>価値</dt><dd>新しい技が見える。転生ごとに触れなかった遊びが増える。</dd><dt>リスク</dt><dd>整備が重い。数は 8 本まで。強さは同じ段の通常技と同格。</dd></dl></article><article class="card" data-g="B" data-e="L" data-id="B09" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B09"><span class="cid">B09</span></label><span class="slot">転生の報酬</span><span class="eff e-L">L</span></header>
+<h3>転生専用の木「淵」</h3><p>6 本目の木。転生 1 回で入口、5 回で全段。他の 5 本に混ぜる前提の「橋渡し」の技が中心。</p>
+<dl><dt>価値</dt><dd>混ぜの自由度の最終形。深い遊び。</dd><dt>リスク</dt><dd>木 1 本 6 技 ≒ 10 A日。転生が前提で、未転生者に見えない形に。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B10" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B10"><span class="cid">B10</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>祖の力（累計で育つ小さな力）</h3><p>累計の転生数に応じて全体の小さな力が付く（転生 5 ごとに全ダメージ +1%、上限 +4%）。キャラに付く。</p>
+<dl><dt>価値</dt><dd>積み上げの手触り。回数に意味が出る。</dd><dt>リスク</dt><dd>力が見た目の自慢と混ざらないよう、小さく固定する。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B11" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B11"><span class="cid">B11</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>転生の試し（条件付き転生）</h3><p>転生のとき「試し」を 1 つ付けて挑める（死ななかった・ソロだった・この武器だけ・刻印なし など）。達成すると転生の印（飾り）と魂の欠片。</p>
+<dl><dt>価値</dt><dd>やり込みの軸。同じ Lv 50 でも差が出る。</dd><dt>リスク</dt><dd>達成不可能な条件にしない。失敗しても通常の転生と同じ（欠片だけ減る）。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B12" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B12"><span class="cid">B12</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>やわらかい代価</h3><p>転生は結晶 5（または欠片）を使う。倒れたときの罰はない。レベルは 1 から、装備は全部残る。</p>
+<dl><dt>価値</dt><dd>軽い儀式。何度転生しても資源が枯渇しない。</dd><dt>リスク</dt><dd>安すぎて乱発。結晶は周回の副産物で、足りなくなるほどにはしない。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B13" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B13"><span class="cid">B13</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>ポーチ・持ち物の拡張</h3><p>転生 2・6・12 回で 22 のポーチの枠が 1 つずつ増える（最大 +3）。魂盤とは別枠。</p>
+<dl><dt>価値</dt><dd>生活のしやすさ（力ではない）。転生のうれしさが数字以外に出る。</dd><dt>リスク</dt><dd>小。22 のポーチの仕様に合わせる。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B14" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B14"><span class="cid">B14</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>運び手との絆</h3><p>28 の若い運び手が転生者の足音を覚えて駆け寄る。転生 3・8・15 回で補助が増える（運ぶ速さ・呼ぶ範囲）。</p>
+<dl><dt>価値</dt><dd>世界の側から転生を認めてくれる。物語に寄り添う。</dd><dt>リスク</dt><dd>小。力ではなく「便利」に寄せる。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B15" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B15"><span class="cid">B15</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>装備の世代刻み</h3><p>装備に「第 N 世代」の刻みが付く。転生しても持ち越した装備は世代が上がり、世代 3 ごとに小さな特性の枠が開く。</p>
+<dl><dt>価値</dt><dd>形見の装備が愛着の対象になる。使い捨てず育てる理由。</dd><dt>リスク</dt><dd>世代の差が大きいと新しい人が追いつけない。差は 1 枠の特性だけ。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B16" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B16"><span class="cid">B16</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>潮の季節（週替わり・月替わり）</h3><p>29 の週替わりと連動して、季節ごとの修飾と称号が出る。転生者は季節の記録を持つ。</p>
+<dl><dt>価値</dt><dd>ラダー・シーズンの Mod 版。同じ内容でも飽きない。</dd><dt>リスク</dt><dd>日付の扱い。ローカルは世界の日数で数える。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B17" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B17"><span class="cid">B17</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>記録（最速・最少死・最少傷）</h3><p>転生のたびに、その人生の記録（時間・死の回数・巨神ごとの最速）を自動で残す。転生画面で比べられる。</p>
+<dl><dt>価値</dt><dd>自分の上達が見える。順位表の元データ。</dd><dt>リスク</dt><dd>小。11 の記録画面の一部に載せる。</dd></dl></article><article class="card" data-g="B" data-e="L" data-id="B18" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B18"><span class="cid">B18</span></label><span class="slot">転生の報酬</span><span class="eff e-L">L</span></header>
+<h3>転生者向けの段（段 5 以降）</h3><p>試練の段（29 の 2.3）に段 5・6 を足し、転生した人にだけ開く。数字の標準が上がり、修飾が増える。</p>
+<dl><dt>価値</dt><dd>深淵とは別に、周回の上が続く。</dd><dt>リスク</dt><dd>検査（≒ 1,700 通り）が増える。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B19" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B19"><span class="cid">B19</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>経験値の持ち越し</h3><p>転生時に、Lv 50 を超えた余剰経験値の 20% を次の人生の最初に貯める。</p>
+<dl><dt>価値</dt><dd>遊んだ分が無駄にならない。</dd><dt>リスク</dt><dd>小。Lv 50 以降の経験値は意味が薄く、余剰は自然に出る。</dd></dl></article><article class="card" data-g="B" data-e="S" data-id="B20" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B20"><span class="cid">B20</span></label><span class="slot">転生の報酬</span><span class="eff e-S">S</span></header>
+<h3>木の面影</h3><p>転生のたびに、前の人生で一番点を振った木の 1 行目を最初から 1 点ぶん開いた状態で始められる。</p>
+<dl><dt>価値</dt><dd>その木が好きな人への小さな贈り物。</dd><dt>リスク</dt><dd>小さな力。残響と併せて重なりを検討。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B21" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B21"><span class="cid">B21</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>共闘のレベル合わせ</h3><p>転生者が低レベルの仲間と遊ぶとき、傷の倍率が仲間の段に合わせて自動で下がり、報酬は転生者にも等しく入る。</p>
+<dl><dt>価値</dt><dd>手伝っても退屈にならない。未転生者が置いていかれない。</dd><dt>リスク</dt><dd>同期のずれ。傷と HP の読みやすさを守るため、下がるのは傷の倍率だけ。</dd></dl></article><article class="card" data-g="B" data-e="M" data-id="B22" style="--tc:#a9692a">
+<header><label class="ck"><input type="checkbox" name="idea" value="B22"><span class="cid">B22</span></label><span class="slot">転生の報酬</span><span class="eff e-M">M</span></header>
+<h3>形見の武器（1 本だけ育つ）</h3><p>武器 1 本を「形見」にして、転生のたびに特性の枠を 1 つ足す。交換・譲渡不可。</p>
+<dl><dt>価値</dt><dd>1 本を連れて歩ける物語。伝説の収集と別軸の愛着。</dd><dt>リスク</dt><dd>形見が最強になりやすい。形見は伝説より弱く、書き換えには使えない。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C01" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C01"><span class="cid">C01</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>レベルの色の段</h3><p>名札のレベルの色が、白（転生 0）→ 青緑（1〜4）→ 金（5〜14）→ プリズム（15 以上）。見ただけで段が分かる。</p>
+<dl><dt>価値</dt><dd>最も安く、最も目立つ。</dd><dt>リスク</dt><dd>色覚の違い。色に加えて記号・縁の形でも分ける。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C02" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C02"><span class="cid">C02</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>記号（✦ の数）</h3><p>転生 1 回につき ✦ を 1 つ。5 つで ✧、10 で ✺ に束ねる（長くなりすぎない）。名札の左に出る。</p>
+<dl><dt>価値</dt><dd>数が自慢になる。色が分からなくても読める。</dd><dt>リスク</dt><dd>小。表示の幅を決める。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C03" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C03"><span class="cid">C03</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>名札の効果</h3><p>名札の縁の流れ・光の粒・ゆらぎ。金で縁取り、プリズムで色が回る。控えめで、設定で止められる。</p>
+<dl><dt>価値</dt><dd>頭上の見え方に個性。</dd><dt>リスク</dt><dd>画面が騒がしい。名札は 5 マス離れたら効果を消す。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C04" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C04"><span class="cid">C04</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>称号</h3><p>「転生 1 回」「無傷の転生」「全巨神を 3 周」などで称号が付く。名前の下に小さく出し、選べる。</p>
+<dl><dt>価値</dt><dd>実績の見せ方。人によって違う称号になる。</dd><dt>リスク</dt><dd>数が増えすぎる。最初は 24 個まで。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C05" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C05"><span class="cid">C05</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>足元のオーラ</h3><p>立っているとき足元に薄い環。転生 3・10・20 で形が変わる。戦闘中は消える。</p>
+<dl><dt>価値</dt><dd>格好よさ。他人にも見える。</dd><dt>リスク</dt><dd>描画の負荷（粒は 8 個まで）。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C06" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C06"><span class="cid">C06</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>足跡</h3><p>歩くと小さな光が数歩ぶん残る。色は段の色、地形でかたちが変わる。</p>
+<dl><dt>価値</dt><dd>歩くだけで楽しい。</dd><dt>リスク</dt><dd>描画の負荷。バイオーム別は後回し。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C07" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C07"><span class="cid">C07</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>武器の輝き</h3><p>武器の刃・柄に薄い光の層。段の色で。モデルは変えず、描画の重ね。</p>
+<dl><dt>価値</dt><dd>他人から見て分かる。装備の見た目を壊さない。</dd><dt>リスク</dt><dd>装備が多いと実装が重い。まず近接の主要 3 種から。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C08" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C08"><span class="cid">C08</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>背中の飾り（マント・紋）</h3><p>転生 5・10・20 で背中に飾りが付く（小さな紋章・短い布・光の羽）。着ける・外すは自由。</p>
+<dl><dt>価値</dt><dd>見た目の集め。防具の見た目と干渉しない。</dd><dt>リスク</dt><dd>防具との重なり。背中の薄い層に限る。</dd></dl></article><article class="card" data-g="C" data-e="L" data-id="C09" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C09"><span class="cid">C09</span></label><span class="slot">自慢の見せ方</span><span class="eff e-L">L</span></header>
+<h3>ハブの彫像</h3><p>ハブ（鼓動の間）に転生者の像が立つ。転生のたびに像が少し変わり、自分で見られる。</p>
+<dl><dt>価値</dt><dd>世界に残る感じ。物語への寄与が大きい。</dd><dt>リスク</dt><dd>配置とモデル。1 人 1 台座で、マルチは台座を増やす。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C10" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C10"><span class="cid">C10</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>碑（名を刻む壁）</h3><p>世界に 1 つの碑に、転生した人の名・回数・日付が刻まれる。マルチで皆の名が並ぶ。</p>
+<dl><dt>価値</dt><dd>世界の歴史になる。</dd><dt>リスク</dt><dd>データの保存。世界ごとに保存し消さない。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C11" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C11"><span class="cid">C11</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>順位表（ローカル／サーバー）</h3><p>碑の横に、転生数・最速・最少死などの順位表。ローカルは自分の世界の仲間、サーバーはその鯖内。</p>
+<dl><dt>価値</dt><dd>競う楽しみ。やり込みの目標。</dd><dt>リスク</dt><dd>競争が嫌な人もいる。表示は任意、大きく出すのは上位 3 人だけ。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C12" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C12"><span class="cid">C12</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>墓の飾り</h3><p>墓（倒れたとき残るもの）に ✦ の数・色・花が付く。回収に行くと、他の人にも転生の数が見える。</p>
+<dl><dt>価値</dt><dd>死にさえ誇りが出る。死の柔らかさと合う。</dd><dt>リスク</dt><dd>墓の描画。基本は石の上の飾りだけ。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C13" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C13"><span class="cid">C13</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>倒れと回収の演出</h3><p>倒れたとき、光が段の色で散る。墓から立ち上がるときも色が少し残る。</p>
+<dl><dt>価値</dt><dd>大げさにならず印象に残る。</dd><dt>リスク</dt><dd>小。長さは 1 秒まで。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C14" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C14"><span class="cid">C14</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>チャットの接頭辞</h3><p>チャットの名前の前に「✦3」。色は段の色。サーバーのチャット形式は変えない。</p>
+<dl><dt>価値</dt><dd>全員に見える。</dd><dt>リスク</dt><dd>小。他 Mod の接頭辞と衝突しないようにする。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C15" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C15"><span class="cid">C15</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>パーティ一覧・記録画面の枠</h3><p>パーティ画面（10）と記録画面（11）で、名前の横に段の枠と記号。記録画面の「転生の欄」に前の人生の要約が出る。</p>
+<dl><dt>価値</dt><dd>マルチで目に入る。見せるだけで力は無い。</dd><dt>リスク</dt><dd>小。画面ごとに幅を確保。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C16" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C16"><span class="cid">C16</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>転生の儀式（演出）</h3><p>転生の瞬間、鼓動の間で鐘が鳴り全員に聞こえる。巨神が一度だけ目を向ける。チャットに「○○ が転生した」。</p>
+<dl><dt>価値</dt><dd>重みが出る。物語との相性。</dd><dt>リスク</dt><dd>演出（20）の追加。1 回 20 秒、飛ばせる。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C17" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C17"><span class="cid">C17</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>巨神の灯（名札の下の四つの点）</h3><p>四体の巨神ごとの周回数に応じて、名札の下の四つの点が灯る。点は巨神の色。</p>
+<dl><dt>価値</dt><dd>「どの巨神を何周したか」が一目で分かる。</dd><dt>リスク</dt><dd>情報過多。近距離でだけ出す。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C18" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C18"><span class="cid">C18</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>エモート・しぐさ</h3><p>転生 N 回で特別なポーズが開く（膝をつく・手を掲げる・巨神に礼）。メニューから出せる。</p>
+<dl><dt>価値</dt><dd>遊びの余白。写真を撮りたくなる。</dd><dt>リスク</dt><dd>アニメの整備。まず 3 つ。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C19" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C19"><span class="cid">C19</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>タブ一覧の色</h3><p>Tab の一覧で、名前の色と記号が段の色になる。標準機能の範囲で。</p>
+<dl><dt>価値</dt><dd>他の人から見て分かる。実装がほぼ要らない。</dd><dt>リスク</dt><dd>小。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C20" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C20"><span class="cid">C20</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>実績（アドバンスメント）</h3><p>「転生 1 / 5 / 10 / 20」「無傷の転生」などを 19 の実績の枝に足す。</p>
+<dl><dt>価値</dt><dd>MC 標準の見せ方。</dd><dt>リスク</dt><dd>小。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C21" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C21"><span class="cid">C21</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>飾り板（ハブの記録板）</h3><p>ハブの壁に、巨神ごとの最速の人の名前と記録が飾られる。更新されると光る。</p>
+<dl><dt>価値</dt><dd>目標が目に見える。マルチで盛り上がる。</dd><dt>リスク</dt><dd>更新の同期。</dd></dl></article><article class="card" data-g="C" data-e="M" data-id="C22" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C22"><span class="cid">C22</span></label><span class="slot">自慢の見せ方</span><span class="eff e-M">M</span></header>
+<h3>付き従う小さな灯</h3><p>転生 10・20 で、肩のあたりに小さな光が浮かぶ。巨神の色。移動に追従する。</p>
+<dl><dt>価値</dt><dd>自分だけの印。</dd><dt>リスク</dt><dd>描画の負荷。1 個まで。</dd></dl></article><article class="card" data-g="C" data-e="S" data-id="C23" style="--tc:#8a5fc4">
+<header><label class="ck"><input type="checkbox" name="idea" value="C23"><span class="cid">C23</span></label><span class="slot">自慢の見せ方</span><span class="eff e-S">S</span></header>
+<h3>飾りの表示を切り替える</h3><p>自分に見える・他人から見える飾り（オーラ・足跡・灯）をそれぞれ ON/OFF。色の段と記号だけは固定。</p>
+<dl><dt>価値</dt><dd>低スペック・好みへの配慮。見せびらかしが嫌な人も安心。</dd><dt>リスク</dt><dd>小。クライアント設定を足す。</dd></dl></article></div>
+  <label class="note-l" for="n_ideas">案へのメモ (任意)</label><textarea id="n_ideas" class="note" rows="3" placeholder="案の組み替え・条件・気になる点"></textarea>
+
+  <h2 class="dh">決めてもらうこと（8 つ）</h2>
+  <p class="intro">選ぶと自動で保存されます（db の <code>choices</code>、id は <code>rebirth_1</code>〜<code>rebirth_8</code>）。メモは任意です。</p>
+  <div id="decisions"></div>
+  <div class="save" id="save">読み込み中…</div>
+</div>
+<script>
+const DECISIONS = [{"id": "rebirth_1", "title": "1. 組み合わせ", "q": "どの規模で作りますか。（案の個別選択は下のカードのチェックでも変えられます）", "opts": [["a", "軽い", "魂盤・色と記号・木の開放・気軽な振り直し。約 36 A日。", false], ["b", "釣り合い", "軽い案＋アスペクト・残響・深淵・3 択の恩恵・試し・順位表。約 115 A日。", true], ["c", "深い", "さらにソケット・変異・合成技・淵の木・前世の技・季節。約 245 A日。", false]], "note": "チェックを一括で入れるボタンが上にあります。"}, {"id": "rebirth_2", "title": "2. 天職の扱い", "q": "天職は今も「鍵」（その木が全部開く）です。", "opts": [["a", "鍵のまま", "今の仕様を保つ。混ぜる自由度は小さい。", false], ["b", "専門にする", "全部の木が最初から開く。天職は要・特性・点の割引をくれる。転生のたびに選び直す。", true], ["c", "専門にして、転生で 2 つ目を最初から", "第三章を待たず、転生 3 回目から天職が 2 つ。自由は大きいが、1 つ目の価値が薄まる。", false]], "note": "A01 の話。土台なので他の案に影響します。"}, {"id": "rebirth_3", "title": "3. 転生で戻る範囲", "q": "技の点・ステータスの点・天職は戻る前提で、ほかを決めます。", "opts": [["a", "型は残す", "保存した型（枠と刻印の組）は残り、点が溜まるたびに使える。", true], ["b", "型も全部戻す", "完全に 0 から。新鮮だが、前のビルドへ戻りにくい。", false], ["c", "技の点だけ戻す", "ステータスの点と天職は残す。軽いが「0 から」の感じが薄い。", false]], "note": "「0 から」の気持ちとの兼ね合い。"}, {"id": "rebirth_4", "title": "4. 力の伸び方（逓減）", "q": "魂盤・祖の力などの合計の伸び方。", "opts": [["a", "10 回まで線形、以降は半分（20 回以降 1/4）", "自然に落ち着く。分かりやすい。", true], ["b", "5・10・20 回で段階的に", "区切りに意味が出る。区切りの間は伸びない。", false], ["c", "10 回で打ち止め", "力はそこで終わり。飾りと記録だけ続く。", false], ["d", "逓減なし", "ずっと伸びる。長期は強くなりすぎる恐れ。", false]], "note": "見た目と称号は、どれを選んでも伸び続けます。"}, {"id": "rebirth_5", "title": "5. 色の段", "q": "名札のレベルの色。", "opts": [["a", "白→青緑→金→プリズム", "この Mod の鯨・潮の色と合う。プリズムは 15 回以上。", true], ["b", "白→青→紫→金", "一般的な希少度の色。分かりやすい。", false], ["c", "銅→銀→金→プリズム", "金属の段。記号と合わせて読める。", false]], "note": "色覚への配慮として、記号と縁の形でも分けます。"}, {"id": "rebirth_6", "title": "6. 回数の上限", "q": "転生できる回数。", "opts": [["a", "上限なし", "数字が自慢になる。力は逓減で止まる。", true], ["b", "20 回まで", "終わりがある。記号は 20 で完成。", false], ["c", "50 回まで", "長い目標。魂盤が埋まる回数と揃える。", false]], "note": "記号は ✦ → ✧ → ✺ に束ねるので、長くなっても名札は崩れません。"}, {"id": "rebirth_7", "title": "7. 転生の代価", "q": "転生するときに何を使うか。", "opts": [["a", "無料（Lv 50 に着いていれば）", "気軽。結晶の用途は他に回す。", false], ["b", "結晶 5", "結晶に用途が増える。軽い儀式。", true], ["c", "試しの条件つきで、達成すると上乗せ", "条件は任意。やり込みの軸になる。", false]], "note": "倒れたときの罰やレベルを失う罰はありません（どれでも）。"}, {"id": "rebirth_8", "title": "8. 力の大きさ", "q": "転生で付く力の大きさ。", "opts": [["a", "見た目と便利が中心", "力は数 % まで。ポーチ・足の速さ・拾う範囲など。", false], ["b", "小さな力まで", "10 回で全ダメージ約 +8%。装備 1 部位ぶん。", true], ["c", "大きな力も", "10 回で +20% 程度。深淵・転生者の段で使う前提。", false]], "note": "試練は一人で解ける原則は、どれでも守ります。"}];
+const PACKS = {"lean": ["A01", "A05", "A03", "A15", "A18", "B01", "B03", "B05", "B06", "B12", "B17", "C01", "C02", "C04", "C12", "C14", "C19", "C20", "C23"], "bal": ["A01", "A05", "A03", "A15", "A18", "B01", "B03", "B05", "B06", "B12", "B17", "C01", "C02", "C04", "C12", "C14", "C19", "C20", "C23", "A02", "A04", "A13", "A17", "A19", "B02", "B04", "B07", "B10", "B11", "B13", "B14", "B21", "C03", "C05", "C09", "C11", "C13", "C15", "C16", "C21"], "deep": ["A01", "A05", "A03", "A15", "A18", "B01", "B03", "B05", "B06", "B12", "B17", "C01", "C02", "C04", "C12", "C14", "C19", "C20", "C23", "A02", "A04", "A13", "A17", "A19", "B02", "B04", "B07", "B10", "B11", "B13", "B14", "B21", "C03", "C05", "C09", "C11", "C13", "C15", "C16", "C21", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A14", "A16", "A20", "B08", "B09", "B15", "B16", "B18", "B19", "B20", "B22", "C06", "C07", "C08", "C10", "C17", "C18", "C22"]};
+const COST = {"A01": 4, "A02": 4, "A03": 4, "A04": 1.5, "A05": 1.5, "A06": 9, "A07": 4, "A08": 9, "A09": 9, "A10": 4, "A11": 4, "A12": 4, "A13": 4, "A14": 9, "A15": 1.5, "A16": 4, "A17": 1.5, "A18": 1.5, "A19": 4, "A20": 4, "B01": 4, "B02": 4, "B03": 1.5, "B04": 9, "B05": 1.5, "B06": 1.5, "B07": 4, "B08": 9, "B09": 9, "B10": 1.5, "B11": 4, "B12": 1.5, "B13": 1.5, "B14": 4, "B15": 4, "B16": 4, "B17": 1.5, "B18": 9, "B19": 1.5, "B20": 1.5, "B21": 4, "B22": 4, "C01": 1.5, "C02": 1.5, "C03": 4, "C04": 1.5, "C05": 4, "C06": 4, "C07": 4, "C08": 4, "C09": 9, "C10": 4, "C11": 4, "C12": 1.5, "C13": 1.5, "C14": 1.5, "C15": 1.5, "C16": 4, "C17": 4, "C18": 4, "C19": 1.5, "C20": 1.5, "C21": 4, "C22": 4, "C23": 1.5};
+const saveEl = document.getElementById('save');
+let db = null;
+const root = document.getElementById('decisions');
+for (const d of DECISIONS) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2 class="dh">' + d.title + '</h2><p class="intro">' + d.q + '</p>' +
+    '<fieldset class="opts' + (d.opts.length === 4 ? ' four' : '') + '" id="opts_' + d.id + '">' +
+    d.opts.map(o => '<label class="opt"><input type="radio" name="' + d.id + '" value="' + o[0] + '"><span class="letter">' + o[0].toUpperCase() + '</span><span><b>' + o[1] + '</b>' + (o[3] ? ' <span class="rec">推薦</span>' : '') + '<small>' + o[2] + '</small></span></label>').join('') +
+    '</fieldset><p class="pick">' + d.note + '</p>' +
+    '<label class="note-l" for="n_' + d.id + '">メモ (任意)</label><textarea id="n_' + d.id + '" class="note" rows="2" placeholder="別案・条件・気になる点"></textarea>';
+  root.appendChild(sec);
+}
+// カードの絞り込みと集計
+const cards = [...document.querySelectorAll('.card')];
+const boxes = [...document.querySelectorAll('input[name=idea]')];
+let fg = 'all', fe = 'all', only = false;
+function apply() {
+  cards.forEach(c => { const ck = c.querySelector('input').checked;
+    c.hidden = !((fg === 'all' || c.dataset.g === fg) && (fe === 'all' || c.dataset.e === fe) && (!only || ck)); });
+  const on = boxes.filter(b => b.checked);
+  document.getElementById('cnt').textContent = on.length;
+  document.getElementById('sum').textContent = on.reduce((s, b) => s + COST[b.value], 0).toFixed(0);
+}
+document.querySelectorAll('#tg .tab').forEach(b => b.addEventListener('click', () => { fg = b.dataset.g; document.querySelectorAll('#tg .tab').forEach(x => x.classList.toggle('on', x === b)); apply(); }));
+document.querySelectorAll('#te .tab').forEach(b => b.addEventListener('click', () => { fe = b.dataset.e; document.querySelectorAll('#te .tab').forEach(x => x.classList.toggle('on', x === b)); apply(); }));
+document.getElementById('onlyck').addEventListener('click', e => { only = !only; e.target.classList.toggle('on', only); apply(); });
+document.getElementById('clr').addEventListener('click', () => { boxes.forEach(b => b.checked = false); apply(); saveIdeas(); });
+document.querySelectorAll('[data-pk]').forEach(b => b.addEventListener('click', () => { const s = new Set(PACKS[b.dataset.pk]); boxes.forEach(x => x.checked = s.has(x.value)); apply(); saveIdeas(); }));
+// 保存
+let tIdeas = null;
+async function saveIdeas() {
+  apply();
+  if (!db) return;
+  saveEl.textContent = '保存中…';
+  try {
+    await db.doc('choices/rebirth_ideas').set({ ids: boxes.filter(b => b.checked).map(b => b.value), note: document.getElementById('n_ideas').value, at: Date.now() });
+    saveEl.textContent = '保存しました';
+  } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+}
+boxes.forEach(b => b.addEventListener('change', saveIdeas));
+document.getElementById('n_ideas').addEventListener('input', () => { clearTimeout(tIdeas); tIdeas = setTimeout(saveIdeas, 800); });
+const timers = {};
+const chosen = id => { const r = document.querySelector('input[name=' + id + ']:checked'); return r ? r.value : ''; };
+async function save(id) {
+  if (!db) return;
+  saveEl.textContent = '保存中…';
+  try {
+    await db.doc('choices/' + id).set({ option: chosen(id), note: document.getElementById('n_' + id).value, at: Date.now() });
+    saveEl.textContent = '保存しました';
+  } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+}
+for (const d of DECISIONS) {
+  document.querySelectorAll('input[name=' + d.id + ']').forEach(r => r.addEventListener('change', () => save(d.id)));
+  document.getElementById('n_' + d.id).addEventListener('input', () => { clearTimeout(timers[d.id]); timers[d.id] = setTimeout(() => save(d.id), 800); });
+}
+(async () => {
+  apply();
+  const c = window.claude && window.claude.use ? window.claude : null;
+  db = c ? await c.use('db') : null;
+  if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+  try {
+    const snap = await db.collection('choices').get();
+    const docs = snap.docs || snap;
+    for (const doc of docs) {
+      if (!/^rebirth_/.test(doc.id)) continue;
+      const data = typeof doc.data === 'function' ? doc.data() : doc.data;
+      if (!data) continue;
+      if (doc.id === 'rebirth_ideas') {
+        const s = new Set(data.ids || []); boxes.forEach(b => b.checked = s.has(b.value));
+        if (data.note) document.getElementById('n_ideas').value = data.note;
+        continue;
+      }
+      if (data.option) { const r = document.querySelector('input[name=' + doc.id + '][value="' + data.option + '"]'); if (r) r.checked = true; }
+      if (data.note) { const n = document.getElementById('n_' + doc.id); if (n) n.value = data.note; }
+    }
+    apply();
+    saveEl.textContent = '選ぶと自動で保存されます';
+  } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+})();
+</script>
+</body>
+</html>
