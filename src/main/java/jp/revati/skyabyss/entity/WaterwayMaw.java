@@ -12,7 +12,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import java.util.EnumSet;
 import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -41,12 +46,27 @@ public class WaterwayMaw extends Monster implements GeoEntity {
     private static final RawAnimation SWIM = RawAnimation.begin().thenLoop("animation.waterway_maw.swim");
     private static final RawAnimation BITE = RawAnimation.begin().thenPlay("animation.waterway_maw.bite");
     // 来てから襲うまでの猶予（5 秒）と、来た人を数える範囲（16 ブロック。外へ 24 ブロック離れると忘れる）
-    private static final int ARRIVAL_GRACE = 100;
+    // 来てから襲うまでの猶予は 10 秒 (岩棚を渡る間は襲われない)
+    public static final int ARRIVAL_GRACE = 200;
+    // 噛みつきの強さ (ハート 1 つぶん) と、噛む前の予兆・噛んだあとの間
+    public static final float BITE_DAMAGE = 2.0f;
+    public static final int WINDUP_TICKS = 16;
+    private static final int RETREAT_TICKS = 40;
+    private static final int BITE_COOLDOWN = 80;
+    // 水から上がった (岩棚・はしご) 相手は、これだけ見えなかったら諦める。諦めたあとは CALM_TICKS の間は誰も狙わない
+    public static final int GIVE_UP_TICKS = 20;
+    private static final int CALM_TICKS = 120;
+    // 近くに同時にいる数の上限
+    public static final int MAX_NEAR = 2;
+    private static final double NEAR_RADIUS = 24;
     private static final double ARRIVAL_RANGE_SQR = 16 * 16;
     private static final double FORGET_RANGE_SQR = 24 * 24;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     // 近くに来た人 → 来た時刻 (tickCount)
     private final Map<UUID, Integer> arrivals = new HashMap<>();
+    private int calmUntil;
+    private int biteReadyAt;
+    private boolean windingUp;
 
     public WaterwayMaw(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -59,18 +79,18 @@ public class WaterwayMaw extends Monster implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 18)
-                .add(Attributes.ATTACK_DAMAGE, 3.5)
+                .add(Attributes.ATTACK_DAMAGE, BITE_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 0.77)
                 .add(Attributes.FOLLOW_RANGE, 16);
     }
 
     @Override
     protected void registerGoals() {
-        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.3, true));
+        goalSelector.addGoal(2, new BiteGoal());
         goalSelector.addGoal(4, new RandomSwimmingGoal(this, 1.0, 10));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8f));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && graced(p.getUUID())));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && tickCount >= calmUntil && graced(p.getUUID())));
     }
 
     @Override
@@ -121,6 +141,19 @@ public class WaterwayMaw extends Monster implements GeoEntity {
                 arrivals.putIfAbsent(p.getUUID(), tickCount);
             }
         }
+        // 近くに 3 匹目がいたら、あとから来た方は消える (囲まれないように)
+        if (getTarget() == null) {
+            int rank = 0;
+            for (WaterwayMaw other : level().getEntitiesOfClass(WaterwayMaw.class, getBoundingBox().inflate(NEAR_RADIUS), m -> m != this && m.isAlive())) {
+                if (other.getId() < getId()) {
+                    rank++;
+                }
+            }
+            if (rank >= MAX_NEAR) {
+                discard();
+                return;
+            }
+        }
         arrivals.keySet().removeIf(id -> {
             Player p = level().getPlayerByUUID(id);
             return p == null || p.distanceToSqr(this) > FORGET_RANGE_SQR;
@@ -132,10 +165,121 @@ public class WaterwayMaw extends Monster implements GeoEntity {
         return since != null && tickCount - since >= ARRIVAL_GRACE;
     }
 
+    // 噛みつき: 小さな傷と、はっきりした弾き飛ばし。続けては噛まない (BiteGoal の間)
     @Override
     public boolean doHurtTarget(Entity target) {
         triggerAnim("action", "bite");
-        return super.doHurtTarget(target);
+        boolean hit = target.hurt(damageSources().mobAttack(this), BITE_DAMAGE);
+        if (hit && target instanceof LivingEntity living) {
+            living.knockback(1.1, getX() - living.getX(), getZ() - living.getZ());
+            living.hurtMarked = true;
+        }
+        return hit;
+    }
+
+    // 噛む前の合図: 頭のまわりに泡が集まり、低く鳴る
+    private void biteTell() {
+        if (level() instanceof ServerLevel sl) {
+            Vec3 look = getLookAngle();
+            sl.sendParticles(ParticleTypes.BUBBLE, getX() + look.x, getY() + 0.4, getZ() + look.z, 8, 0.35, 0.25, 0.35, 0.02);
+            sl.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, getX(), getY() + 0.3, getZ(), 4, 0.2, 0.1, 0.2, 0.05);
+        }
+    }
+
+    private class BiteGoal extends Goal {
+        private int state; // 0 追う, 1 溜め, 2 退く
+        private int timer;
+        private int dryTicks;
+
+        BiteGoal() {
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            LivingEntity t = getTarget();
+            return t != null && t.isAlive() && t.isInWater();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            LivingEntity t = getTarget();
+            return t != null && t.isAlive() && dryTicks < GIVE_UP_TICKS;
+        }
+
+        @Override
+        public void start() {
+            state = 0;
+            timer = 0;
+            dryTicks = 0;
+        }
+
+        @Override
+        public void stop() {
+            windingUp = false;
+            getNavigation().stop();
+            LivingEntity t = getTarget();
+            if (dryTicks >= GIVE_UP_TICKS || t == null || !t.isAlive()) {
+                setTarget(null);
+                calmUntil = tickCount + CALM_TICKS;
+            }
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity t = getTarget();
+            if (t == null) {
+                return;
+            }
+            dryTicks = t.isInWater() ? 0 : dryTicks + 1;
+            getLookControl().setLookAt(t, 30f, 30f);
+            double dist = distanceTo(t);
+            if (state == 2) {
+                // 噛んだあとは離れて間を取る
+                if (--timer <= 0) {
+                    state = 0;
+                } else {
+                    Vec3 away = position().subtract(t.position()).normalize().scale(6);
+                    getNavigation().moveTo(getX() + away.x, getY(), getZ() + away.z, 1.0);
+                }
+                return;
+            }
+            if (state == 1) {
+                // 溜め: 止まって泡を出す。この間に離れれば外れる
+                getNavigation().stop();
+                windingUp = true;
+                if (timer % 4 == 0) {
+                    biteTell();
+                }
+                if (--timer <= 0) {
+                    windingUp = false;
+                    if (dist <= 3.0) {
+                        doHurtTarget(t);
+                    }
+                    state = 2;
+                    timer = RETREAT_TICKS;
+                    biteReadyAt = tickCount + BITE_COOLDOWN;
+                }
+                return;
+            }
+            getNavigation().moveTo(t, 1.2);
+            if (dist <= 2.4 && tickCount >= biteReadyAt) {
+                state = 1;
+                timer = WINDUP_TICKS;
+                level().playSound(null, getX(), getY(), getZ(), SoundEvents.GUARDIAN_ATTACK, SoundSource.HOSTILE, 0.6f, 1.7f);
+                biteTell();
+            }
+        }
+    }
+
+    // 自己テスト用: 噛みつきの合図の最中か
+    public boolean isWindingUp() {
+        return windingUp;
     }
 
     @Override
