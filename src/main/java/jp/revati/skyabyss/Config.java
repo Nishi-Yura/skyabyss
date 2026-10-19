@@ -165,6 +165,22 @@ public final class Config {
             .comment("夜の歌で星が欠ける見せ方。C (淡い光の輪郭 + 低い音のうねり) が採用。CURRENT = 前の帯, A = 暗い影の帯, B = 星空のゆがみ")
             .defineEnum("starEffect", StarEffectVariant.C);
 
+    // 乗り込み口の目印・戻る場所の光の見せ方 (開発用の選定。ユーザーが選ぶまで既定は CURRENT。client/titan/MarkerArt)
+    public enum MarkerStyle {
+        CURRENT,
+        A,
+        B,
+        C
+    }
+
+    public static final ModConfigSpec.EnumValue<MarkerStyle> BOARD_MARKER = CLIENT_BUILDER
+            .comment("乗り込み口の目印の見せ方。CURRENT = 今の光の柱と枠, A = 柔らかい光の筋と床の紋様, B = 浮かぶ欠片の輪と矢印の流れ, C = 巨神の体の灯りと光の綱")
+            .defineEnum("boardMarker", MarkerStyle.CURRENT);
+
+    public static final ModConfigSpec.EnumValue<MarkerStyle> RETURN_MARKER = CLIENT_BUILDER
+            .comment("真ん中へ戻る光の見せ方。CURRENT = 今の光の柱と枠, A = 浮かぶ灯の精, B = 床の紋様と立ちのぼる粒, C = 光の拱門")
+            .defineEnum("returnMarker", MarkerStyle.CURRENT);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {

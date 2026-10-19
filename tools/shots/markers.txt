@@ -1,0 +1,319 @@
+# 乗り込み口の目印・戻る光の選定用の絵 (tools/gen_marker_shots.py が書く)
+# ./gradlew runShots -Pscript=tools/shots/markers.txt  絵は run/shots/markers/shots/markers/
+world markers flat
+size 1280 720
+timeout 6000
+render 16
+clouds off
+cmd skyabyss cinematic stop
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd time set 6000
+cmd gamemode spectator
+camera 0.5 -50 60 180 0
+waitchunks
+cmd fill -16 -60 -16 16 -42 6 minecraft:deepslate_tiles
+cmd fill -12 -60 -16 12 -50 6 minecraft:stone_bricks
+cmd fill -4 -60 -9 4 -53 7 minecraft:air
+cmd fill -6 -60 5 6 -57 6 minecraft:air
+cmd skyabyss opening whale
+hud off
+wait 200
+marker clear
+marker fake board ember 0.5 -60 0.5 0
+wait 20
+cmd time set 6000
+wait 4
+marker board current
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_current_far_day
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_current_near_day
+marker board a
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_a_far_day
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_a_near_day
+marker board b
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_b_far_day
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_b_near_day
+marker board c
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_c_far_day
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_c_near_day
+cmd time set 18000
+wait 4
+marker board current
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_current_far_night
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_current_near_night
+marker board a
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_a_far_night
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_a_near_night
+marker board b
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_b_far_night
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_b_near_night
+marker board c
+wait 8
+camera 0.5 -52 112 180 -6
+wait 6
+shot board_ember_c_far_night
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_c_near_night
+cmd time set 18000
+wait 4
+marker clear
+marker fake board tide_shell 0.5 -60 0.5 0
+wait 20
+marker board a
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_tide_shell_a_near_night
+marker board b
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_tide_shell_b_near_night
+marker board c
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_tide_shell_c_near_night
+marker clear
+marker fake board ember 0.5 -60 0.5 0
+wait 20
+marker board a
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_a_near_night
+marker board b
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_b_near_night
+marker board c
+wait 8
+camera 0.5 -58.4 22 180 -8
+wait 6
+shot board_ember_c_near_night
+camera 200 -50 40 180 0
+waitchunks
+marker clear
+marker fake board stone_whale 200.5 -60 0.5 0
+wait 20
+marker board a
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_stone_whale_a_near_night
+marker board b
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_stone_whale_b_near_night
+marker board c
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_stone_whale_c_near_night
+cmd time set 6000
+wait 4
+marker board current
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_stone_whale_current_far_day
+marker board a
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_stone_whale_a_far_day
+marker board b
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_stone_whale_b_far_day
+marker board c
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_stone_whale_c_far_day
+cmd time set 18000
+wait 4
+marker clear
+marker fake board thunder_wing 200.5 -60 0.5 0
+wait 20
+marker board a
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_thunder_wing_a_near_night
+marker board b
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_thunder_wing_b_near_night
+marker board c
+wait 8
+camera 200.5 -58.4 18 180 -10
+wait 6
+shot board_thunder_wing_c_near_night
+cmd time set 6000
+wait 4
+marker board current
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_thunder_wing_current_far_day
+marker board a
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_thunder_wing_a_far_day
+marker board b
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_thunder_wing_b_far_day
+marker board c
+wait 8
+camera 200.5 -52 110 180 -6
+wait 6
+shot board_thunder_wing_c_far_day
+cmd time set 18000
+wait 4
+camera 400 -50 40 180 0
+waitchunks
+marker clear
+marker titan stone_whale
+marker fake return 400.5 -60 0.5
+wait 20
+cmd time set 6000
+wait 4
+marker return current
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_current_far_day
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_current_near_day
+marker return a
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_a_far_day
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_a_near_day
+marker return b
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_b_far_day
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_b_near_day
+marker return c
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_c_far_day
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_c_near_day
+cmd time set 18000
+wait 4
+marker return current
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_current_far_night
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_current_near_night
+marker return a
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_a_far_night
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_a_near_night
+marker return b
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_b_far_night
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_b_near_night
+marker return c
+wait 8
+camera 400.5 -57 62 180 2
+wait 6
+shot return_c_far_night
+camera 400.5 -58.4 5.5 180 8
+wait 6
+shot return_c_near_night
+cmd time set 18000
+wait 4
+marker titan stone_whale
+marker return b
+wait 8
+camera 400.5 -58.4 5.5 180 12
+wait 6
+shot return_b_stone_whale_night
+marker titan tide_shell
+marker return b
+wait 8
+camera 400.5 -58.4 5.5 180 12
+wait 6
+shot return_b_tide_shell_night
+marker titan thunder_wing
+marker return b
+wait 8
+camera 400.5 -58.4 5.5 180 12
+wait 6
+shot return_b_thunder_wing_night
+marker titan ember
+marker return b
+wait 8
+camera 400.5 -58.4 5.5 180 12
+wait 6
+shot return_b_ember_night
+marker clear
+quit
