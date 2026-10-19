@@ -331,31 +331,12 @@ public final class StormBirdBuilder {
         // 肩の道 (広間の床 137 → 肩の門の 142)
         shoulderPass(kit, WEST_PASS, -1, Style.HALL);
         kit.room(W0, Style.BONE, 5);
-        // 上腕と前腕の骨 (空洞の骨の中の回廊)
+        // 上腕の骨 (空洞の骨の中の回廊。割れた床が二つ)・肘の洞
         bone(kit, WEST_UPPER_X1, WEST_UPPER_X2);
         kit.cave(WEST_ELBOW, ELBOW_R, BONE_FLOOR, BONE_FLOOR + 10, Style.BONE, 5);
-        bone(kit, WEST_FORE_X1, WEST_FORE_X2);
-        // 左手首の瘤 (丸い洞)。高い岩棚と、その下の昇り風の穴
-        kit.cave(WEST_KNOB, KNOB_R, WEST_KNOB.getY(), KNOB_CEILING, Style.BONE, 7);
-        StormBackLayout.Area l = WEST_LEDGE;
-        for (int x = l.x1(); x <= l.x2(); x++) {
-            for (int z = l.z1(); z <= l.z2(); z++) {
-                for (int y = WEST_KNOB.getY() + 1; y <= l.floor(); y++) {
-                    kit.put(x, y, z, StormKit.wall(Style.BONE, x, y, z));
-                }
-                kit.put(x, l.floor(), z, StormKit.floor(Style.BONE, x, z));
-                // 岩棚の上は 3 段空ける (丸天井の端で低くならないように)
-                for (int y = l.floor() + 1; y <= l.floor() + 3; y++) {
-                    kit.air(x, y, z);
-                }
-                kit.solid(x, l.floor() + 4, z, StormKit.wall(Style.BONE, x, l.floor() + 4, z));
-            }
-        }
-        vent(kit, WEST_KNOB_VENT);
-        // 骨の梁 (瘤の中を斜めに渡る白い梁。景色と陰)
-        for (int i = -8; i <= 8; i++) {
-            kit.put(WEST_KNOB.getX() + i, WEST_KNOB.getY() + 9 + Math.abs(i) / 3, WEST_KNOB.getZ() - 6, StormKit.BONE);
-        }
+        // 前腕: 縦の肋の間 (25 の 5章 A。縦の空洞の登り) と、肘からの廊下
+        StormRib.build(kit);
+        bone(kit, RIB_X2 + 1, WEST_FORE_X2);
     }
 
     // 肩の道: 広間の壁から 5 段上って肩の門 (dir -1 = 西、+1 = 東)
@@ -459,7 +440,7 @@ public final class StormBirdBuilder {
             }
         }
         // 昇り風の穴と、嵐の高い道 (二つの割れた床の上をまとめて渡る梁。幅 2、z -17〜-16)
-        for (int arm = 0; arm < 2; arm++) {
+        for (int arm = 0; arm < WEST_VENT_X.length; arm++) {
             int vx = WEST_VENT_X[arm];
             vent(kit, new BlockPos(vx, BONE_FLOOR, -20));
             int[] far = WEST_GAPS[arm * 2 + 1];
@@ -498,9 +479,8 @@ public final class StormBirdBuilder {
                 }
             }
         }
-        for (BlockPos r : EAST_RODS) {
-            rod(kit, r, 0);
-        }
+        // 雷の回路 (25 の 5章 B): 柱・導線・レバー・誘いの床。戸の柱 (EAST_RODS) もここで建てる
+        StormCircuit.build(kit);
         // 右手首の瘤 (雷獣の巣)
         kit.cave(RAIJU_NEST, RAIJU_NEST_RADIUS, RAIJU_NEST.getY(), RAIJU_NEST_CEILING, Style.THUNDER, 8);
         for (BlockPos r : raijuRods()) {
@@ -717,6 +697,14 @@ public final class StormBirdBuilder {
         }
         for (BlockPos p : new BlockPos[] {LAMP_WEST, LAMP_EAST, LAMP_FRONT}) {
             kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);
+        }
+        // 拍の舵 (入口の台。凪の舵と嵐の舵。上に避雷針の風見)
+        for (StormHelm.Helm h : StormHelm.HELMS) {
+            kit.put(h.calm().getX(), h.calm().getY(), h.calm().getZ(), StormBackSetup.HELM_CALM.get().defaultBlockState());
+            kit.put(h.storm().getX(), h.storm().getY(), h.storm().getZ(), StormBackSetup.HELM_STORM.get().defaultBlockState());
+            for (BlockPos p : new BlockPos[] {h.calm(), h.storm()}) {
+                kit.put(p.getX(), p.getY() + 1, p.getZ(), Blocks.LIGHTNING_ROD.defaultBlockState());
+            }
         }
         // 風鳴り石 (台の上)
         for (BlockPos s : new BlockPos[] {WEST_STONE, EAST_STONE, FRONT_STONE}) {

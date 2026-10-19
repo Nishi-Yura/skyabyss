@@ -102,7 +102,8 @@ public final class StormGaugeHud {
         };
         Component name = Component.translatable("gui.skyabyss.storm_gauge." + phase);
         Component time = ticksLeft < 0 ? Component.translatable("gui.skyabyss.storm_gauge.held")
-                : Component.translatable("gui.skyabyss.storm_gauge.left", (ticksLeft + 19) / 20);
+                : gauge.locked() ? Component.translatable("gui.skyabyss.storm_gauge.locked", (ticksLeft + 19) / 20)
+                        : Component.translatable("gui.skyabyss.storm_gauge.left", (ticksLeft + 19) / 20);
         float s = gauge.strength();
         float t = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(true);
         boolean storm = gauge.phase() == 2 || gauge.phase() == 1;

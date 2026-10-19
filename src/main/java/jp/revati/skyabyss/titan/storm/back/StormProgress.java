@@ -27,6 +27,8 @@ public final class StormProgress {
     static final String MIRROR_CONFIG = "storm.mirror_config";
     static final String MIRROR_ROTS = "storm.mirror_rots";
     static final String RECEIVERS = "storm.receivers";
+    static final String RIB = "storm.rib";
+    static final String RIB_RINGS = "storm.rib_rings";
     static final String EVER_DEFEATED = "keep.storm.ever_defeated";
     static final String LAST_SLEEPING = "keep.storm.last_sleeping";
 
@@ -112,6 +114,29 @@ public final class StormProgress {
 
     public boolean heartDefeated() {
         return record.isHeartDefeated();
+    }
+
+    // ---------------------------------------------------------------- 西の肋の間 (25 の 5章 A)
+    // 着いた層の岩棚の最高 (0 = 床だけ。RIB_LAYERS = 頂)
+    public int ribLayer() {
+        return record.getInt(RIB);
+    }
+
+    public void setRibLayer(int layer) {
+        record.putInt(RIB, Math.max(ribLayer(), layer));
+    }
+
+    // くぐった滑空の輪 (ビット)
+    public boolean ribRingLit(int k) {
+        return (record.getInt(RIB_RINGS) & (1 << k)) != 0;
+    }
+
+    public void setRibRingLit(int k) {
+        record.putInt(RIB_RINGS, record.getInt(RIB_RINGS) | (1 << k));
+    }
+
+    public int ribRingCount() {
+        return Integer.bitCount(record.getInt(RIB_RINGS));
     }
 
     // ---------------------------------------------------------------- 東の試練・雷獣・竜骨の門
@@ -208,7 +233,7 @@ public final class StormProgress {
     public boolean needsReset() {
         Trial s = sleeping();
         return rungCount() > (s != null ? 1 : 0) || record.isHeartDefeated() || receivers() != 0 || raijuDefeated() || record.getInt(DOORS) != 0
-                || keelOpen() || record.has(MIRROR_ROTS);
+                || keelOpen() || record.has(MIRROR_ROTS) || ribLayer() > 0 || record.getInt(RIB_RINGS) != 0;
     }
 
     // 試練を最初に戻す (12 の 7.1節)。番号が進み (古い休み場の記録は無効)、心臓も眠り直す。

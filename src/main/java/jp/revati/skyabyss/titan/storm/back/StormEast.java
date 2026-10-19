@@ -26,20 +26,17 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-// 東の試練 雷の骨 (12 の 4.2節)。
-// - 招雷: 嵐のあいだ 4 秒ごと (凪は 8 秒ごと)に、回廊の中で、まだ満ちていない柱から 6 ブロック以内にいる誰か一人 (直前と別の人) の足もとに輪。
-//   輪が柱から 3 ブロック以内なら雷は柱へ (人には当たらない)。柱から離れた所にいる人は狙われない
-// - 柱は 3 回受けると満ち、対になる骨の戸が開く (リセットまで開いたまま)。柱の段は根元の 3 つの電球で見える
+// 東の試練 雷の骨 (12 の 4.2節・25 の 5章 B)。
+// - 雷の回路 (StormCircuit): 受け柱 → (中継の柱) → 戸の柱を銅の導線でつなぎ、レバーで雷の通り道を切り替える。金の床に立つと雷が受け柱へ落ち、
+//   柱から柱へ跳んで、戸の柱に届くと対の骨の戸が開く (リセットまで開いたまま)。導線に雷が通った所は光り続ける
 // - 予告線 (放電): 嵐のあいだ 3 秒ごとに、回廊の人のそばに壁から壁へ 1.2 秒光る線。低い線 (床から 1 段。跳び越す) と
-//   高い線 (頭の高さ。しゃがんで潜る) の二種類。線の上の人に 12
-// グループ (docs/design/10 の 9 章): 回廊 (肩の門の先から雷獣の巣の口まで) は部屋の占有 (RoomLocks。StormBackTrials.EAST_ROOM)。
-// 柱の段 (StormRods)・招雷・予告線は回廊の持ち主のグループのもので、持ち主が変わると柱をその記録から置き直す
-// (開けた戸の柱は満ちている)。骨の戸はグループごとの扉 (doorBlocks): 柱を満たしたグループにだけ開く
+//   高い線 (頭の高さ。しゃがんで潜る) の二種類。線の上の人に 12。凪には線がない
+// - 拍はその回廊の持ち主のグループの舵 (StormHelm) の固定があればそれ、なければ背中の拍。凪は輪が遅く、雷が柱から柱へ跳ぶのも遅い。嵐は速い
+// グループ (docs/design/10 の 9 章): 回廊 (肩の門の先から雷獣の巣の口まで) は部屋の占有 (RoomLocks.EAST_ROOM)。
+// 柱・回路・予告線は回廊の持ち主のグループのもので、持ち主が変わると回路をその記録から置き直す
+// (開けた戸の回路は柱が満ち、導線が光る)。骨の戸はグループごとの扉 (doorBlocks): 回路をつないだグループにだけ開く
 final class StormEast {
-    static final int STRIKE_EVERY = 80;
-    // 凪の招雷の間 (嵐の倍)
-    static final int CALM_STRIKE_EVERY = 160;
-    static final int STRIKE_WARN = 24;
+    // 招雷の傷 (輪の中に人が立っていて、柱へ落ちなかったとき。回路の輪は必ず受け柱へ落ちるので当たらない)
     static final float STRIKE_DAMAGE = 11f;
     static final int LINE_EVERY = 60;
     static final int LINE_WARN = 24;
@@ -52,7 +49,6 @@ final class StormEast {
 
     // 回廊の持ち主の予告線と、直前に狙った人 (持ち主が変わると消す)
     private static final List<Line> LINES = new ArrayList<>();
-    private static UUID lastTarget;
     private static int lineCount;
 
     private StormEast() {
@@ -79,21 +75,15 @@ final class StormEast {
         return out;
     }
 
-    // 柱を登録し直す。progress があれば、開けた戸の柱 (と東が鳴った・眠っている周の柱) は満ちたまま。null なら全部空
+    // 回路を置き直す (柱の登録・戸が開いた回路の光・レバー・導線)。progress が null なら誰も持っていない回廊 (全部空)
     static void registerRods(ServerLevel level, @Nullable StormProgress progress) {
-        for (int i = 0; i < EAST_RODS.size(); i++) {
-            StormRods.Rod r = StormRods.register(level, EAST_RODS.get(i));
-            if (progress != null && (progress.eastDoorPassable(i) || progress.rung(StormBackState.Trial.EAST))) {
-                StormRods.charge(level, r.base, StormRods.FULL);
-            }
-        }
+        StormCircuit.apply(level, progress);
     }
 
     // 回廊を持ち主のグループの記録のとおりに置き直す (持ち主が変わったとき)
     static void apply(ServerLevel level, StormProgress progress) {
         registerRods(level, progress);
         LINES.clear();
-        lastTarget = null;
         StormStrike.cancelIn(level, room());
         showRods(level);
     }
@@ -102,7 +92,6 @@ final class StormEast {
     static void applyNeutral(ServerLevel level) {
         registerRods(level, null);
         LINES.clear();
-        lastTarget = null;
         StormStrike.cancelIn(level, room());
         showRods(level);
     }
@@ -124,18 +113,24 @@ final class StormEast {
     // owner: 回廊の持ち主 (いなければ null。そのときは柱の電球だけ見る)
     static void tick(ServerLevel level, @Nullable UUID owner, boolean peaceful) {
         long gt = level.getGameTime();
+        StormCircuit.tickFlash(level);
         if (gt % 5 == 0) {
             showRods(level);
             if (owner != null) {
                 openFullDoors(level, StormProgress.of(level, owner));
             }
         }
-        if (owner == null || peaceful) {
+        if (owner == null) {
             LINES.clear();
             return;
         }
-        // どの拍でも雷は落ちて柱は満ちる (25 の 2章)。拍が変えるのは遊び方: 凪は間が長く (16 秒)、放電の線もない。嵐は 8 秒おきで、線が走る
-        boolean storm = StormBackClock.phase(level) == StormBackClock.Phase.STORM;
+        // どの拍でも雷は落ちて回路は組める (25 の 2章)。拍が変えるのは遊び方: 凪は輪と雷が遅く、放電の線もない。嵐は速く、線が走る
+        boolean storm = StormHelm.phase(level, StormBackState.Trial.EAST, owner) == StormBackClock.Phase.STORM;
+        StormFx.to(owner, () -> StormCircuit.tick(level, owner, StormProgress.of(level, owner), storm, peaceful));
+        if (peaceful) {
+            LINES.clear();
+            return;
+        }
         if (!storm) {
             LINES.clear();
         }
@@ -161,29 +156,6 @@ final class StormEast {
     }
 
     private static void tickStorm(ServerLevel level, UUID owner, long gt, boolean storm) {
-        // 招雷 (持ち主のグループの人だけを狙う)
-        if (gt % (storm ? STRIKE_EVERY : CALM_STRIKE_EVERY) == 0) {
-            List<ServerPlayer> cands = new ArrayList<>();
-            for (ServerPlayer p : Groups.alive(level, owner)) {
-                if (p.isCreative() || !inCorridor(p.position())) {
-                    continue;
-                }
-                for (BlockPos r : EAST_RODS) {
-                    if (!StormRods.isFull(level, r) && StormRods.find(level, p.position(), 6.0) != null) {
-                        cands.add(p);
-                        break;
-                    }
-                }
-            }
-            if (cands.size() > 1) {
-                cands.removeIf(p -> p.getUUID().equals(lastTarget));
-            }
-            if (!cands.isEmpty()) {
-                ServerPlayer t = cands.get(level.random.nextInt(cands.size()));
-                lastTarget = t.getUUID();
-                StormStrike.call(level, t.position(), STRIKE_WARN, STRIKE_DAMAGE, null, owner);
-            }
-        }
         // 予告線 (嵐だけ)
         if (storm && gt % LINE_EVERY == 30) {
             for (ServerPlayer p : Groups.alive(level, owner)) {
@@ -236,6 +208,5 @@ final class StormEast {
 
     static void clear() {
         LINES.clear();
-        lastTarget = null;
     }
 }

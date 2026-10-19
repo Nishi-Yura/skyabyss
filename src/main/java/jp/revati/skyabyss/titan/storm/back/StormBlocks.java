@@ -177,4 +177,36 @@ public final class StormBlocks {
             return SHAPE;
         }
     }
+
+    // ---- 拍の舵 (25 の 5章 C。入口の台。右クリックでその試練の拍を 60 秒、凪か嵐に固定する。StormHelm) ----
+    public static class Helm extends Block {
+        public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+
+        public Helm(Properties p) {
+            super(p);
+            registerDefaultState(stateDefinition.any().setValue(ACTIVE, false));
+        }
+
+        @Override
+        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
+            b.add(ACTIVE);
+        }
+
+        @Override
+        protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
+                StormHelm.use(server, pos, sp);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        @Override
+        protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
+                BlockHitResult hit) {
+            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
+                StormHelm.use(server, pos, sp);
+            }
+            return ItemInteractionResult.SUCCESS;
+        }
+    }
 }
