@@ -90,5 +90,6 @@ public final class ModEntities {
 
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
+        Ch1BackEntities.register(modEventBus);
     }
 }

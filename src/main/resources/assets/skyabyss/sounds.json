@@ -2066,5 +2066,178 @@
         "attenuation_distance": 40
       }
     ]
+  },
+  "bone_mortar_ambient": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_ambient"
+      }
+    ]
+  },
+  "bone_mortar_hurt": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_hurt_1"
+      },
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_hurt_2"
+      }
+    ]
+  },
+  "bone_mortar_death": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_death"
+      }
+    ]
+  },
+  "bone_mortar_step": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_step_2"
+      }
+    ]
+  },
+  "bone_mortar_charge": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_charge",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_charge",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "bone_mortar_fire": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_fire",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_fire",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "bone_mortar_land": {
+    "subtitle": "subtitles.skyabyss.bone_mortar_land",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_mortar_land",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "bone_gull_ambient": {
+    "subtitle": "subtitles.skyabyss.bone_gull_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_gull_ambient"
+      }
+    ]
+  },
+  "bone_gull_hurt": {
+    "subtitle": "subtitles.skyabyss.bone_gull_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_gull_hurt"
+      }
+    ]
+  },
+  "bone_gull_death": {
+    "subtitle": "subtitles.skyabyss.bone_gull_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_gull_death"
+      }
+    ]
+  },
+  "bone_gull_cry": {
+    "subtitle": "subtitles.skyabyss.bone_gull_cry",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_gull_cry",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "bone_gull_dive": {
+    "subtitle": "subtitles.skyabyss.bone_gull_dive",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_gull_dive",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "elder_sentinel_ambient": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_ambient",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_ambient"
+      }
+    ]
+  },
+  "elder_sentinel_hurt": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_hurt",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_hurt_1"
+      },
+      {
+        "name": "skyabyss:mobs/ch1back_elder_hurt_2"
+      }
+    ]
+  },
+  "elder_sentinel_death": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_death",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_death",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "elder_sentinel_step": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_step",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_step_1"
+      },
+      {
+        "name": "skyabyss:mobs/ch1back_elder_step_2"
+      }
+    ]
+  },
+  "elder_sentinel_rush": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_rush",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_rush",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "elder_sentinel_stomp": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_stomp",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_stomp",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "elder_sentinel_flute": {
+    "subtitle": "subtitles.skyabyss.elder_sentinel_flute",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/ch1back_elder_flute",
+        "attenuation_distance": 40
+      }
+    ]
   }
 }
