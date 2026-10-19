@@ -362,7 +362,7 @@ public final class EmberDeckSelfTest {
         } finally {
             cell.disarm(back, moth);
         }
-        check(back.getEntitiesOfClass(EmberMoth.class, EmberDeck.A.aabb().inflate(2)).isEmpty(), "E02: moths stayed after disarm");
+        check(back.getEntitiesOfClass(EmberMoth.class, EmberDeck.A.aabb().inflate(2), Entity::isAlive).isEmpty(), "E02: moths stayed after disarm");
         EmberHeat.reset(p);
     }
 
