@@ -212,6 +212,8 @@ public final class TideBackTrials {
         }
         GroupGates.place(level, TideGates.cave(), true);
         TideFins.placeGates(level, true);
+        // 試練の階の戸 (引いた三つだけ、そのグループに開く。docs/design/29)
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
         level.setBlock(new BlockPos(0, HUB_FLOOR, 0), TideKit.LAMP, 3);
         TideGarden.reset(level, null);
         TideWatch.reset(level, null);
@@ -448,6 +450,10 @@ public final class TideBackTrials {
         if (level.dimension() != TideTravel.TIDE_BACK) {
             return;
         }
+        // 試練のプールの新作の石 (試練の階。docs/design/29): プールが扱う
+        if (jp.revati.skyabyss.trial.TrialRuntime.useStone(level, player, pos) != null) {
+            return;
+        }
         TideBackState.Group state = state(level, player);
         TideBackState.Trial trial = pos.equals(STONE_WEST) ? TideBackState.Trial.WEST
                 : pos.equals(STONE_EAST) ? TideBackState.Trial.EAST : pos.equals(STONE_FRONT) ? TideBackState.Trial.FRONT : null;
@@ -479,8 +485,18 @@ public final class TideBackTrials {
         ring(level, state, trial, player);
     }
 
+    // 試練のプールの新作の石 (引いていない今週の試練): そのグループの人にだけ鳴らして光らせる
+    public static void notifyGroup(ServerLevel level, UUID group, BlockPos pos) {
+        for (ServerPlayer p : Groups.online(level, group)) {
+            if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 48 * 48) {
+                notify(p, TideBackSetup.CHIME.get(), 3f, 1f);
+                level.sendParticles(p, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
+            }
+        }
+    }
+
     // 石を鳴らす (そのグループの記録に書き、そのグループの人にだけ光って見せる)
-    static void ring(ServerLevel level, TideBackState.Group state, TideBackState.Trial trial, @Nullable ServerPlayer by) {
+    public static void ring(ServerLevel level, TideBackState.Group state, TideBackState.Trial trial, @Nullable ServerPlayer by) {
         state.ring(trial);
         GroupOverlays.refresh(level, state.id);
         BlockPos pos = stonePos(trial);
@@ -612,6 +628,8 @@ public final class TideBackTrials {
         TideRooms.releaseGroup(level, group);
         TideBackState.Group state = TideBackState.of(level, group);
         state.reset(level.random, forceSleep, noSleep);
+        // 試練のプールのセル (引きは残る。動かしていたセルと戸の上書きを戻す)
+        jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         GroupOverlays.refresh(level, group);
         AFTER_HEART.remove(group);
         // そのグループの試練の敵 (印のある個体) を片付ける

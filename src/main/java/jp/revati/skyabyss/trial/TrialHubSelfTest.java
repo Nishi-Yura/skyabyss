@@ -74,7 +74,7 @@ public final class TrialHubSelfTest {
                 }
                 // 単独の実行 (ONLY) では、岩鯨のほかの背は建てていない (建てるのは各巨神の背の自己テスト) ので、世界の検査は全体の実行だけ
                 boolean only = System.getenv("SKYABYSS_SELFTEST_ONLY") != null;
-                boolean ready = hub != null && back.hasChunkAt(hub) && (!only || Titans.STONE_WHALE.equals(titan)) && !back.getBlockState(hub.below()).isAir()
+                boolean ready = hub != null && back.hasChunkAt(hub) && (!only || Titans.STONE_WHALE.equals(titan) || Titans.TIDE_SHELL.equals(titan) && TrialPoolSelfTest.tideBuilt()) && !back.getBlockState(hub.below()).isAir()
                         && (!Titans.STONE_WHALE.equals(titan) || placedBefore);
                 if (ready) {
                     world(f, back, titan, hub);
@@ -143,6 +143,8 @@ public final class TrialHubSelfTest {
 
     // ---------------------------------------------------------------- 碑と流れ
     private static void world(List<String> f, ServerLevel back, String titan, BlockPos hub) {
+        // 巨神ごとに、封の見張りの冷めを忘れる (前の巨神で戻した人の記録が、同じ偽の人の次の戻しを止めないように)
+        TrialHub.clearAll();
         HubTablets.clearCache();
         List<HubTablets.Spot> spots = HubTablets.spots(back, titan);
         check(f, spots.size() == 3, titan + ": found " + spots.size() + " tablet spots");
@@ -205,7 +207,8 @@ public final class TrialHubSelfTest {
         a.setPos(inA);
         b.setPos(inA);
         int bounced = TrialHub.tickSeal(back, titan, List.of(a, b), back.getGameTime() + 1000);
-        check(f, bounced == 1, titan + ": expected exactly the clearing group's player to be bounced, got " + bounced);
+        check(f, bounced == 1, titan + ": expected exactly the clearing group's player to be bounced, got " + bounced + " (inside " + TrialHub.inside(back, keyA, titan, keys.get(0), a)
+                + ", cleared " + HubTablets.cleared(back, keyA, titan, keys.get(0)) + ", pending " + TrialHub.pending(keyA, titan, keys.get(0)) + ", at " + a.position() + ")");
         check(f, a.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, titan + ": the sealed trial did not send its player back to the hub");
         check(f, b.position().distanceTo(inA) < 0.5, titan + ": a player of another party was bounced out of a trial it has not cleared");
         // 「光の中でしゃがむ」手順はない: 試練を越えた合図を送っても、個人の光は出ない

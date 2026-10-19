@@ -26,7 +26,7 @@ public final class StormBackLayout {
     }
 
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 20;   // 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 21;   // 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -279,7 +279,7 @@ public final class StormBackLayout {
     public static final BlockPos LAMP_FRONT = new BlockPos(0, 134, 9);
 
     // ---------------------------------------------------------------- 休み場 (焚き火)
-    public static final List<Rest> RESTS = List.of(
+    public static final List<Rest> RESTS = concat(List.of(
             new Rest("tail", new BlockPos(0, 147, 115), new BlockPos(2, 147, 114), TAIL_PLAZA),
             new Rest("hub", new BlockPos(-17, 135, 7), new BlockPos(-15, 135, 7), HUB),
             new Rest("w0", new BlockPos(-56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(-58, BONE_FLOOR + 1, BONE_Z2 - 1), W0),
@@ -290,7 +290,7 @@ public final class StormBackLayout {
             new Rest("e0", new BlockPos(56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(58, BONE_FLOOR + 1, BONE_Z2 - 1), E0),
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
-            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE));
+            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)), StormExtra.RESTS);
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
 
@@ -306,7 +306,7 @@ public final class StormBackLayout {
     }
 
     // ---------------------------------------------------------------- 看板 (碑文 6 枚と入口の一言 3 枚と、見晴らしの碑 2 枚)
-    public static final List<Inscription> LORE_SIGNS = List.of(
+    public static final List<Inscription> LORE_SIGNS = concat(List.of(
             new Inscription("sign.skyabyss.lore_storm_tail", new BlockPos(-5, 147, 30), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_hub", new BlockPos(-6, 136, 10), Direction.NORTH),
             new Inscription("sign.skyabyss.lore_storm_west", new BlockPos(-60, BONE_FLOOR + 2, BONE_Z2), Direction.NORTH),
@@ -319,13 +319,19 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_vault_w1", new BlockPos(-98, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH));
+            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)), StormExtra.SIGNS);
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
             new Inscription("sign.skyabyss.storm_front", new BlockPos(-6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH));
 
     private StormBackLayout() {
+    }
+
+    private static <T> List<T> concat(List<T> a, List<T> b) {
+        List<T> out = new ArrayList<>(a);
+        out.addAll(b);
+        return List.copyOf(out);
     }
 
     // 肋の間の層 layer の岩棚の休み場 (板の隅に焚き火。昇り風の穴から 1.7 以上離す)
@@ -392,6 +398,9 @@ public final class StormBackLayout {
             return true;
         }
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 5 && z <= FEATHER_GATE.maxZ + 4) {
+            return true;
+        }
+        if (StormExtra.open(x, y, z)) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);

@@ -28,6 +28,13 @@ public final class TideBackBuilder {
         return TideBackLayout.ARRIVAL;
     }
 
+    // 開発・自己テスト: 試練の階を、いまの背へ後から置く (本番の建設では TideDeck.placed() が false のあいだ置かない)
+    public static void placeDeck(ServerLevel back) {
+        jp.revati.skyabyss.titan.tide.back.TideDeck.setPlaced(true);
+        jp.revati.skyabyss.titan.tide.back.TideDeckBuilder.buildDeck(new TideKit(back, RandomSource.create(20261017L)));
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(back);
+    }
+
     // 地上へ戻る潮門の口に入っているか
     static boolean inReturnGate(double x, double y, double z) {
         return TideIslandBuilder.inReturnGate(x, y, z);

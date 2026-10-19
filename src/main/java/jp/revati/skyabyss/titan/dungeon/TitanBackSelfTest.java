@@ -356,6 +356,7 @@ public final class TitanBackSelfTest {
         queue.add(start);
         seen.add(start);
         BlockPos leak = null;
+        java.util.Map<BlockPos, BlockPos> parent = new java.util.HashMap<>();
         while (!queue.isEmpty() && leak == null && seen.size() < 600_000) {
             BlockPos p = queue.poll();
             for (Direction d : Direction.values()) {
@@ -368,6 +369,7 @@ public final class TitanBackSelfTest {
                     continue;
                 }
                 seen.add(q);
+                parent.put(q, p);
                 // 部屋はどれも鯨の体の中を掘ったもの。鯨のブロックが無かった所へ出たら、外とつながっている
                 // (胸びれの道のトンネルだけは、わざと体の外へ抜ける)
                 if (WhaleShape.at(q.getX(), q.getY(), q.getZ()) == null) {
@@ -381,7 +383,16 @@ public final class TitanBackSelfTest {
             }
         }
         if (leak != null) {
-            failures.add("the inside of the whale opens to the outside at " + leak + " (not through the shrine stairs)");
+            // 抜け道の足あと (空気の道を、外へ出る所からさかのぼる。見つけやすいよう 12 マスおきに 8 か所)
+            StringBuilder trail = new StringBuilder();
+            BlockPos cur = leak;
+            for (int i = 0; i < 400 && cur != null; i++) {
+                if (i % 12 == 0 && trail.length() < 400) {
+                    trail.append(cur.toShortString()).append(" < ");
+                }
+                cur = parent.get(cur);
+            }
+            failures.add("the inside of the whale opens to the outside at " + leak + " (not through the shrine stairs) via " + trail);
         }
         SkyAbyss.LOGGER.info("Titan back whale: {} air cells inside the body, back holes {}", seen.size(), holes);
         // 歩ける道: 到着から祠、祠の階段で鼓動の間

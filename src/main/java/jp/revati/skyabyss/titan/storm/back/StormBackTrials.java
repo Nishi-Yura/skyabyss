@@ -189,6 +189,7 @@ public final class StormBackTrials {
     // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
     static void applyWorld(ServerLevel level) {
         registerFirstRun();
+        StormExtraRules.registerRods(level);
         StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
         StormBirdBuilder.carveKeel(level);
         placeGates(level);
@@ -300,6 +301,7 @@ public final class StormBackTrials {
         }
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
         StormWest.tick(level, peaceful);
+        StormExtraRules.tick(level, peaceful);
         StormRib.tick(level);
         StormEast.tick(level, RoomLocks.owner(EAST_ROOM), peaceful);
         if (gt % 4 == 0) {

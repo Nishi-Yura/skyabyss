@@ -11,9 +11,13 @@ import jp.revati.skyabyss.SelfTestRunner.Step;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.titan.TitanTravel;
+import jp.revati.skyabyss.titan.tide.TideBackBuilder;
+import jp.revati.skyabyss.titan.tide.TideTravel;
 import jp.revati.skyabyss.titan.dungeon.TitanBackBuilder;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
+import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.WhaleDeck;
+import jp.revati.skyabyss.titan.tide.back.TideDeck;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.trial.Trial.Def;
@@ -37,6 +41,12 @@ public final class TrialPoolSelfTest {
     }
 
     private static final List<String> FAIL = new ArrayList<>();
+    // 潮殻の背を、この実行で建てたか (単独の実行 (ONLY) で、世界の検査ができるかの目印)
+    private static boolean tideBuilt;
+
+    public static boolean tideBuilt() {
+        return tideBuilt;
+    }
 
     private static void check(boolean ok, String what) {
         if (!ok) {
@@ -58,6 +68,17 @@ public final class TrialPoolSelfTest {
                     TitanBackBuilder.build(back, data);
                     TitanBackBuilder.placeDeck(back);
                 }),
+                Step.once("trial pool (build tide)", server -> {
+                    tideBuilt = false;
+                    ServerLevel tide = server.getLevel(TideTravel.TIDE_BACK);
+                    if (tide == null) {
+                        FAIL.add("tide_back dimension is missing");
+                        return;
+                    }
+                    TideDeck.setPlaced(true);
+                    TideBackBuilder.build(tide, TitanBackData.get(tide));
+                    tideBuilt = true;
+                }),
                 Step.once("trial pool", 20, TrialPoolSelfTest::run));
     }
 
@@ -66,12 +87,14 @@ public final class TrialPoolSelfTest {
         try {
             pure();
             variants(server);
+            TrialCellLogic.run(server, FAIL);
             world(server);
         } catch (RuntimeException e) {
             FAIL.add("exception " + e);
             SkyAbyss.LOGGER.error("SELFTEST trial pool exception", e);
         } finally {
             WhaleDeck.setPlaced(true);
+            TideDeck.setPlaced(true);
         }
         if (FAIL.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST trial pool PASSED ({} ms)", System.currentTimeMillis() - t0);
@@ -81,21 +104,38 @@ public final class TrialPoolSelfTest {
     }
 
     // ---------------------------------------------------------------- 引き方・修飾 (ゲームなし)
+    private static void setPlaced(String titan, boolean on) {
+        if (Titans.STONE_WHALE.equals(titan)) {
+            WhaleDeck.setPlaced(on);
+        } else if (Titans.TIDE_SHELL.equals(titan)) {
+            TideDeck.setPlaced(on);
+        }
+    }
+
     private static void pure() {
-        String whale = Titans.STONE_WHALE;
-        WhaleDeck.setPlaced(true);
-        check(TrialCatalog.originals(whale).stream().map(Def::id).toList().equals(List.of("W01", "W05", "W09")), "whale originals are not W01 W05 W09");
-        check(TrialCatalog.poolActive(whale), "the whale pool is not active with the deck placed");
-        check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
-        for (Def d : TrialCatalog.all()) {
+        pureDraw(Titans.STONE_WHALE, List.of("W01", "W05", "W09"));
+        pureDraw(Titans.TIDE_SHELL, List.of("T01", "T05", "T09"));
+        pureCommon();
+    }
+
+    // 引き方 (巨神ごと。試練の階を置いた巨神)
+    private static void pureDraw(String whale, List<String> originals) {
+        setPlaced(whale, true);
+        check(TrialCatalog.originals(whale).stream().map(Def::id).toList().equals(originals), whale + " originals are not " + originals);
+        check(TrialCatalog.poolActive(whale), "the " + whale + " pool is not active with the deck placed");
+        for (Def d : TrialCatalog.of(whale)) {
             check(TrialCells.get(d.id()) != null, d.id() + " has no cell");
+        }
+        // 枠ごとに、作ってある試練は四つ (歩・智・闘。P2 まで)
+        for (Slot sl : Slot.values()) {
+            check(TrialCatalog.inSlot(whale, sl).size() >= 2, whale + " slot " + sl + " has fewer than two trials");
         }
         // ---- 周回 1 は原型の三つ・修飾なし
         UUID g = new UUID(1, 2);
         TrialDraw.Memory mem = new TrialDraw.Memory();
         TrialDraw.Draw d1 = TrialDraw.draw(whale, 1, 4242L, g, mem);
-        check(d1.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("W01", "W05", "W09")), "cycle 1 is not the originals");
-        check(d1.picks().stream().allMatch(p -> p.mods().equals(Mods.PLAIN) || p.mods().encode().equals(Mods.PLAIN.encode())), "cycle 1 has modifiers");
+        check(d1.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(originals), whale + " cycle 1 is not the originals");
+        check(d1.picks().stream().allMatch(p -> p.mods().equals(Mods.PLAIN) || p.mods().encode().equals(Mods.PLAIN.encode())), whale + " cycle 1 has modifiers");
         // ---- 周回 2 以降: 枠ごとに一つ、履歴、直前を引かない、種の再現
         for (int trial = 0; trial < 40; trial++) {
             UUID grp = new UUID(trial, 77);
@@ -107,17 +147,35 @@ public final class TrialPoolSelfTest {
             }
             for (int cycle = 2; cycle <= 9; cycle++) {
                 TrialDraw.Draw dr = TrialDraw.draw(whale, cycle, 4242L, grp, m);
-                check(dr.picks().size() == 3, "cycle " + cycle + " did not draw three");
+                check(dr.picks().size() == 3, whale + " cycle " + cycle + " did not draw three");
                 for (Slot s : Slot.values()) {
                     TrialDraw.Pick p = dr.inSlot(s);
-                    check(p != null && p.def().slot() == s, "cycle " + cycle + " slot " + s + " is missing or in the wrong slot");
+                    check(p != null && p.def().slot() == s, whale + " cycle " + cycle + " slot " + s + " is missing or in the wrong slot");
                     if (p != null) {
-                        check(!p.cellId().equals(prev.get(s)), "slot " + s + " repeated " + p.cellId() + " at cycle " + cycle);
+                        check(!p.cellId().equals(prev.get(s)), whale + " slot " + s + " repeated " + p.cellId() + " at cycle " + cycle);
                         prev.put(s, p.cellId());
                         check(p.def().tier() <= cycle || TrialCatalog.inSlot(whale, s).stream().noneMatch(x -> x.tier() <= dr.cycle()), "tier above the cycle was drawn");
                         check(p.mods().layout() >= 0 && p.mods().layout() < Math.max(1, p.def().space().layouts()), "layout out of range");
                     }
                 }
+            }
+        }
+        // 四周で、各枠の候補を (段の許すかぎり) 見る: 巨神ごとに、周回 2〜5 のうちに歩・智・闘のどれも、作ってある全部の試練に当たる
+        for (Slot sl : Slot.values()) {
+            Set<String> met = new HashSet<>();
+            for (int trial = 0; trial < 30; trial++) {
+                TrialDraw.Memory m = new TrialDraw.Memory();
+                UUID grp = new UUID(trial, 99);
+                TrialDraw.draw(whale, 1, 4242L, grp, m);
+                for (int cycle = 2; cycle <= 12; cycle++) {
+                    TrialDraw.Pick p = TrialDraw.draw(whale, cycle, 4242L, grp, m).inSlot(sl);
+                    if (p != null) {
+                        met.add(p.cellId());
+                    }
+                }
+            }
+            for (Def d : TrialCatalog.inSlot(whale, sl)) {
+                check(d.original() || met.contains(d.id()), whale + " " + d.id() + " is never drawn");
             }
         }
         // 種の再現 (履歴を最初から積み直して同じ結果)
@@ -129,21 +187,25 @@ public final class TrialPoolSelfTest {
         }
         check(TrialDraw.seed(4242L, new UUID(1, 1), whale, 2) != TrialDraw.seed(4242L, new UUID(1, 2), whale, 2), "two groups share a seed");
         check(TrialDraw.seed(4242L, new UUID(1, 1), whale, 2) != TrialDraw.seed(4242L, new UUID(1, 1), whale, 3), "two cycles share a seed");
-        // 四周で各枠の候補を全部見る (歩 2・智 3・闘 2 なので、周回 2〜4 で智が全部。歩・闘は周回 3 で戻る)
-        List<String> seq = sequence(whale, new UUID(9, 9), 4);
-        check(new HashSet<>(seq.subList(0, 3)).size() == 3 || seq.size() == 12, "sequence malformed: " + seq);
-        // 巨神ごとに原型へ固定 (新作が無い巨神)
-        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
-        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
-        // 置かないあいだは岩鯨も原型のまま (本番の安全)
-        WhaleDeck.setPlaced(false);
+        // 置かないあいだは原型のまま (本番の安全)
+        setPlaced(whale, false);
         TrialDraw.Draw off = TrialDraw.draw(whale, 5, 4242L, g, new TrialDraw.Memory());
-        check(off.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("W01", "W05", "W09")), "the whale pool drew with the deck not placed");
-        WhaleDeck.setPlaced(true);
+        check(off.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(originals), "the " + whale + " pool drew with the deck not placed");
+        setPlaced(whale, true);
         // 符号の往復
         TrialDraw.Draw rt = TrialDraw.draw(whale, 3, 4242L, g, copyMem(whale, g, 2));
         TrialDraw.Draw back = TrialDraw.Draw.decode(rt.encode());
         check(back != null && back.encode().equals(rt.encode()), "draw encode/decode does not round-trip");
+    }
+
+    private static void pureCommon() {
+        String whale = Titans.STONE_WHALE;
+        WhaleDeck.setPlaced(true);
+        TideDeck.setPlaced(true);
+        UUID g = new UUID(1, 2);
+        check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
+        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
+        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
         // ---- 修飾
         Random rng = new Random(12345);
         for (Def d : TrialCatalog.all()) {
@@ -313,12 +375,120 @@ public final class TrialPoolSelfTest {
         }
     }
 
+    // 試練の階の部屋どうしが重ならない (内側どうし) ・新しい部屋が体の中に収まる (天井の上に殻が一枚以上残る) ・潮殻の固定の部屋と重ならない
+    private static void deckRooms() {
+        var whaleRooms = WhaleDeck.ROOMS;
+        for (int i = 0; i < whaleRooms.size(); i++) {
+            for (int j = i + 1; j < whaleRooms.size(); j++) {
+                var a = whaleRooms.get(i);
+                var b = whaleRooms.get(j);
+                boolean x = a.x1() <= b.x2() && b.x1() <= a.x2();
+                boolean z = a.z1() <= b.z2() && b.z1() <= a.z2();
+                boolean y = a.floorY() + 1 <= b.floorY() + b.height() && b.floorY() + 1 <= a.floorY() + a.height();
+                if (x && z && y) {
+                    FAIL.add("whale deck rooms " + a + " and " + b + " overlap inside");
+                }
+            }
+        }
+        for (var b : whaleRooms) {
+            // 円い闘技場 W12 は外接の箱の四隅を掘らない (下で、円と控えを別に調べる)
+            if (b.z2() < 81 || b == WhaleDeck.W12) {
+                continue;
+            }
+            int low = Integer.MAX_VALUE;
+            for (int x = b.x1() - 1; x <= b.x2() + 1; x++) {
+                for (int z = b.z1() - 1; z <= b.z2() + 1; z++) {
+                    int top = jp.revati.skyabyss.titan.dungeon.WhaleShape.bodyTop(x, z);
+                    low = Math.min(low, top == Integer.MIN_VALUE ? -999 : top);
+                }
+            }
+            check(low >= b.ceilingY() + 1, "whale deck room " + b + " is not inside the body (lowest top " + low + ", ceiling " + b.ceilingY() + ")");
+        }
+        {
+            int low = Integer.MAX_VALUE;
+            for (int dx = -13; dx <= 13; dx++) {
+                for (int dz = -13; dz <= 13; dz++) {
+                    if (Math.hypot(dx, dz) <= RingArenaCell.R_HALL + 1.2) {
+                        low = Math.min(low, jp.revati.skyabyss.titan.dungeon.WhaleShape.bodyTop(WhaleDeck.W12_CX + dx, WhaleDeck.W12_CZ + dz));
+                    }
+                }
+            }
+            check(low >= WhaleDeck.Y + 10 + 1, "whale arena hall is not inside the body (lowest top " + low + ")");
+            for (var f : new TitanBackLayout.Box[] {WhaleDeck.W12_FOYER_N, WhaleDeck.W12_FOYER_S}) {
+                int lowF = Integer.MAX_VALUE;
+                for (int x = f.x1() - 1; x <= f.x2() + 1; x++) {
+                    for (int z = f.z1() - 1; z <= f.z2() + 1; z++) {
+                        lowF = Math.min(lowF, jp.revati.skyabyss.titan.dungeon.WhaleShape.bodyTop(x, z));
+                    }
+                }
+                check(lowF >= f.ceilingY() + 1, "whale arena foyer " + f + " is not inside the body (lowest top " + lowF + ")");
+            }
+            // 潮殻の円環の広間 (中心 (40, 68) の半径 12.8 までと、控え)
+            int lowT = Integer.MAX_VALUE;
+            for (int dx = -13; dx <= 13; dx++) {
+                for (int dz = -13; dz <= 13; dz++) {
+                    if (Math.hypot(dx, dz) <= RingArenaCell.R_HALL + 1.2) {
+                        lowT = Math.min(lowT, jp.revati.skyabyss.titan.tide.back.TideBackLayout.shellTop(TideDeck.T10_CX + dx, TideDeck.T10_CZ + dz));
+                    }
+                }
+            }
+            check(lowT >= TideDeck.F + 10 + 2, "tide ring hall is not inside the shell (lowest top " + lowT + ")");
+        }
+        var tideRooms = TideDeck.ROOMS;
+        for (int i = 0; i < tideRooms.size(); i++) {
+            for (int j = i + 1; j < tideRooms.size(); j++) {
+                var a = tideRooms.get(i);
+                var b = tideRooms.get(j);
+                boolean x = a.x1() <= b.x2() && b.x1() <= a.x2();
+                boolean z = a.z1() <= b.z2() && b.z1() <= a.z2();
+                boolean y = a.floor() + 1 <= b.floor() + b.height() && b.floor() + 1 <= a.floor() + a.height();
+                if (x && z && y) {
+                    FAIL.add("tide deck rooms " + a + " and " + b + " overlap inside");
+                }
+            }
+        }
+        for (java.lang.reflect.Field fld : jp.revati.skyabyss.titan.tide.back.TideBackLayout.class.getDeclaredFields()) {
+            if (fld.getType() != jp.revati.skyabyss.titan.tide.back.TideBackLayout.Area.class || !java.lang.reflect.Modifier.isStatic(fld.getModifiers())) {
+                continue;
+            }
+            try {
+                fld.setAccessible(true);
+                var other = (jp.revati.skyabyss.titan.tide.back.TideBackLayout.Area) fld.get(null);
+                for (var room : tideRooms) {
+                    boolean x = room.x1() - 1 <= other.x2() && other.x1() <= room.x2() + 1;
+                    boolean z = room.z1() - 1 <= other.z2() && other.z1() <= room.z2() + 1;
+                    boolean y = room.floor() <= other.floor() + other.height() + 1 && other.floor() <= room.floor() + room.height() + 1;
+                    // 南の段の壁 (z 27) を抜く通路 TC は、戸口として南の段に接する (隣合うだけ)
+                    if (x && z && y && !(room == TideDeck.TC && fld.getName().equals("LEDGE_S"))) {
+                        FAIL.add("tide deck room " + room + " overlaps layout area " + fld.getName() + " " + other);
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                FAIL.add("cannot read " + fld.getName());
+            }
+        }
+        for (var a : tideRooms) {
+            int low = Integer.MAX_VALUE;
+            for (int x = a.x1() - 1; x <= a.x2() + 1; x++) {
+                for (int z = a.z1() - 1; z <= a.z2() + 1; z++) {
+                    low = Math.min(low, jp.revati.skyabyss.titan.tide.back.TideBackLayout.shellTop(x, z));
+                }
+            }
+            check(low >= a.floor() + a.height() + 2, "tide deck room " + a + " is not inside the shell (lowest top " + low + ")");
+        }
+    }
+
     private static void variants(MinecraftServer server) {
         deckOverlaps();
-        ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
+        deckRooms();
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {
             if (!cell.runtime() || !cell.def().titan().equals(Titans.STONE_WHALE)) {
+                continue;
+            }
+            ServerLevel back = server.getLevel(Titans.backOf(cell.def().titan()));
+            if (back == null) {
+                FAIL.add(cell.def().id() + ": its back dimension is missing");
                 continue;
             }
             check(cell.audit(back).isEmpty(), cell.def().id() + " audit: " + cell.audit(back));
@@ -357,8 +527,17 @@ public final class TrialPoolSelfTest {
 
     // ---------------------------------------------------------------- 世界: 戸・複数グループ・記録
     private static void world(MinecraftServer server) {
-        ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
-        String whale = Titans.STONE_WHALE;
+        for (String titan : List.of(Titans.STONE_WHALE, Titans.TIDE_SHELL)) {
+            ServerLevel back = server.getLevel(Titans.backOf(titan));
+            if (back == null) {
+                FAIL.add(titan + ": back dimension missing");
+                continue;
+            }
+            worldOf(back, titan);
+        }
+    }
+
+    private static void worldOf(ServerLevel back, String whale) {
         TrialRuntime.installGates(back);
         UUID a = new UUID(0xA, 1);
         UUID b = new UUID(0xB, 2);
@@ -384,8 +563,9 @@ public final class TrialPoolSelfTest {
             check(GroupGates.isOpen(back, b, c.ports().entrance()) == wb, c.def().id() + " gate for group B: expected " + wb);
         }
         // 進みは別 (A が済ませても B は済んでいない)
-        TrialData.markCleared(ra, "W02");
-        check(TrialData.isCleared(ra, "W02") && !TrialData.isCleared(rb, "W02"), "progress leaked between groups");
+        String fresh = TrialCatalog.of(whale).stream().filter(d -> !d.original()).findFirst().get().id();
+        TrialData.markCleared(ra, fresh);
+        check(TrialData.isCleared(ra, fresh) && !TrialData.isCleared(rb, fresh), "progress leaked between groups");
         GroupGates.reset(back, a);
         GroupGates.reset(back, b);
         ra.remove(TrialData.DONE);

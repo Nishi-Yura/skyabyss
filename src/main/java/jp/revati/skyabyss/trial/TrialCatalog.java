@@ -13,8 +13,8 @@ import jp.revati.skyabyss.trial.Trial.Kind;
 import jp.revati.skyabyss.trial.Trial.Slot;
 import jp.revati.skyabyss.trial.Trial.Space;
 
-// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 4 (W02・W06・W07・W10)・余燼の新作 4 (E02・E06・E07・E10)。
-// 引き方 (プール) を動かすのは「枠の中に作ってある試練が二つ以上ある巨神」だけ (いまは岩鯨)。ほかの三体は、引く数が足りるまで
+// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 8 (W02・W03・W04・W06・W07・W10・W11・W12)・潮殻の新作 4 (T02・T06・T07・T10)・余燼の新作 4 (E02・E06・E07・E10)。
+// 引き方 (プール) を動かすのは「枠の中に作ってある試練が二つ以上ある巨神」だけ (いまは岩鯨・潮殻・余燼)。ほかの二体は、引く数が足りるまで
 // 原型の三つのまま (poolActive)。
 public final class TrialCatalog {
     private TrialCatalog() {
@@ -35,6 +35,32 @@ public final class TrialCatalog {
     public static final List<String> W10_NUMBERS = List.of("gunners", "waves");
     public static final List<String> W10_HAZARDS = List.of("rockfall");
     public static final List<String> W10_GOALS = List.of("no_hit");
+    // P2: 岩鯨の新作 4 (W03・W04・W11・W12)
+    public static final List<String> W03_NUMBERS = List.of("flow", "turn");
+    public static final List<String> W03_HAZARDS = List.of("surge");
+    public static final List<String> W03_GOALS = List.of("no_fall");
+    public static final List<String> W04_NUMBERS = List.of("vent_period", "vent_burst");
+    public static final List<String> W04_HAZARDS = List.of("rockfall");
+    public static final List<String> W04_GOALS = List.of("no_fall");
+    public static final List<String> W11_NUMBERS = List.of("raids", "coffin_speed");
+    public static final List<String> W11_HAZARDS = List.of("rockfall");
+    public static final List<String> W11_GOALS = List.of("no_scratch");
+    public static final List<String> W12_NUMBERS = List.of("foes", "warning");
+    public static final List<String> W12_HAZARDS = List.of("rockfall");
+    public static final List<String> W12_GOALS = List.of("no_fall");
+    // P2: 潮殻の新作 4 (T02・T06・T07・T10)
+    public static final List<String> T02_NUMBERS = List.of("overlap", "tide_speed");
+    public static final List<String> T02_HAZARDS = List.of("eddy");
+    public static final List<String> T02_GOALS = List.of("no_swim");
+    public static final List<String> T06_NUMBERS = List.of("chorus", "mural");
+    public static final List<String> T06_HAZARDS = List.of("swell");
+    public static final List<String> T06_GOALS = List.of("no_murk");
+    public static final List<String> T07_NUMBERS = List.of("pulls", "hold");
+    public static final List<String> T07_HAZARDS = List.of("puffers");
+    public static final List<String> T07_GOALS = List.of("no_reset");
+    public static final List<String> T10_NUMBERS = List.of("foes", "warning");
+    public static final List<String> T10_HAZARDS = List.of("crash");
+    public static final List<String> T10_GOALS = List.of("no_wet");
 
     // 余燼の新作の修飾の口の名前
     public static final List<String> E02_NUMBERS = List.of("vent_period", "vent_warn");
@@ -59,6 +85,10 @@ public final class TrialCatalog {
         add(new Def("W01", whale, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("W02", whale, Slot.WALK, Kind.BEAT, 2, false, false,
                 new Space(3, W02_NUMBERS, 0, W02_HAZARDS, W02_GOALS, List.of())));
+        add(new Def("W03", whale, Slot.WALK, Kind.CROSS, 2, true, false,
+                new Space(3, W03_NUMBERS, 0, W03_HAZARDS, W03_GOALS, List.of())));
+        add(new Def("W04", whale, Slot.WALK, Kind.BEAT, 3, true, false,
+                new Space(3, W04_NUMBERS, 0, W04_HAZARDS, W04_GOALS, List.of())));
         add(new Def("W05", whale, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
         add(new Def("W06", whale, Slot.WIT, Kind.SOLVE, 1, false, false,
                 new Space(3, W06_NUMBERS, 0, List.of(), W06_GOALS, List.of())));
@@ -67,10 +97,22 @@ public final class TrialCatalog {
         add(new Def("W09", whale, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("W10", whale, Slot.FIGHT, Kind.FIGHT, 2, false, false,
                 new Space(3, W10_NUMBERS, 2, W10_HAZARDS, W10_GOALS, List.of())));
+        add(new Def("W11", whale, Slot.FIGHT, Kind.ESCORT, 2, true, false,
+                new Space(3, W11_NUMBERS, 2, W11_HAZARDS, W11_GOALS, List.of())));
+        add(new Def("W12", whale, Slot.FIGHT, Kind.FIGHT, 3, true, false,
+                new Space(3, W12_NUMBERS, 2, W12_HAZARDS, W12_GOALS, List.of())));
         // ---- 潮殻 (西 T01 歩 / 東 T05 智 / 前 T09 闘)
         add(new Def("T01", tide, Slot.WALK, Kind.CARRY, 1, true, true, Space.EMPTY));
+        add(new Def("T02", tide, Slot.WALK, Kind.BEAT, 2, true, false,
+                new Space(3, T02_NUMBERS, 0, T02_HAZARDS, T02_GOALS, List.of())));
         add(new Def("T05", tide, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
+        add(new Def("T06", tide, Slot.WIT, Kind.SOLVE, 1, false, false,
+                new Space(1, T06_NUMBERS, 0, T06_HAZARDS, T06_GOALS, List.of())));
+        add(new Def("T07", tide, Slot.WIT, Kind.TOGETHER, 2, false, false,
+                new Space(3, T07_NUMBERS, 0, T07_HAZARDS, T07_GOALS, List.of())));
         add(new Def("T09", tide, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
+        add(new Def("T10", tide, Slot.FIGHT, Kind.FIGHT, 2, true, false,
+                new Space(3, T10_NUMBERS, 2, T10_HAZARDS, T10_GOALS, List.of())));
         // ---- 雷翼 (西 S01 歩 / 東 S05 智 / 前 S06 智。闘の枠は初回は無い)
         add(new Def("S01", storm, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("S05", storm, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
@@ -151,6 +193,7 @@ public final class TrialCatalog {
     // 新作のセルを背に置いてあるか (岩鯨の試練の階。体の作り直しが済むまで置かない。WhaleDeck.placed)。ほかの巨神は新作がまだ無いので false
     public static boolean deckPlaced(String titan) {
         return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed()
+                || Titans.TIDE_SHELL.equals(titan) && jp.revati.skyabyss.titan.tide.back.TideDeck.placed()
                 || Titans.EMBER.equals(titan) && jp.revati.skyabyss.titan.ember.back.EmberDeck.placed();
     }
 

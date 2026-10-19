@@ -733,7 +733,7 @@ public final class EmberDeckSelfTest {
             TrialCell.Run run = TrialRuntime.armed(back, pg, cell, dp, back.getGameTime());
             run.cleared = true;
             var state = jp.revati.skyabyss.titan.ember.back.EmberBackState.of(back, pg);
-            String key = TrialRuntime.emberTrial(cell.def().slot());
+            String key = jp.revati.skyabyss.trial.TrialBacks.emberTrial(cell.def().slot()).id();
             var trial = jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial.byId(key);
             check(!state.rung(trial), "the new cell's stone was already rung");
             p.setPos(cell.ports().stone().getX() + 0.5, cell.ports().stone().getY(), cell.ports().stone().getZ() + 1.5);
