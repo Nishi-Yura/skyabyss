@@ -59,6 +59,10 @@ public final class ModBlocks {
             () -> new jp.revati.skyabyss.grave.GraveBlock(unbreakable(MapColor.COLOR_GREEN).sound(SoundType.MOSS).lightLevel(state -> 5)
                     .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
+    // 試練の板: 引いた三つの試練と修飾の一覧・図鑑・称号の画面を開く。鼓動の間と試練の階の広間に立つ (docs/design/29 の 2.7)
+    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialBoardBlock> TRIAL_BOARD = BLOCKS.register("trial_board",
+            () -> new jp.revati.skyabyss.trial.TrialBoardBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> 6)));
+
     private ModBlocks() {
     }
 

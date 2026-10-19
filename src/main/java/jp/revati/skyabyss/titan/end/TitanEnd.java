@@ -102,6 +102,8 @@ public final class TitanEnd {
         TitanDormancy.begin(server, titan, CARRY_AT);
         // このグループは初回を終えた (周回の道になる。docs/design/21 の 1.7)
         jp.revati.skyabyss.titan.group.FirstRun.onFirstCleared(back, fought);
+        // 試練のプール: 周を一つ進める (次の乗り込みで新しく三つを引く。docs/design/29 の 2.2)
+        jp.revati.skyabyss.trial.TrialRuntime.onHeartStopped(back, fought);
         // 周回の誓いの報酬 (素材の上乗せ・共鳴の欠片・称号・最高の段の記録)。誓いはここで降ろす (docs/design/21 の 1.8)
         jp.revati.skyabyss.titan.vow.Vows.onHeartStopped(back, titan, fought);
         if (Titans.THUNDER_WING.equals(titan)) {

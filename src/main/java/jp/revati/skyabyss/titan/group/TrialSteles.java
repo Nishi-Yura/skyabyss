@@ -105,6 +105,8 @@ public final class TrialSteles {
 
     // by: 鳴らした人 (わかれば。「誰が鳴らしたか」の表示のために控える。踏破の数え方には使わない)
     public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name, @Nullable ServerPlayer by) {
+        // 試練のプール (docs/design/29): 原型の石は図鑑・報いに数える (新作の石は TrialRuntime が自分で数える)
+        jp.revati.skyabyss.trial.TrialRuntime.onStoneRung(back, group, titan, trial, by);
         if (by != null) {
             jp.revati.skyabyss.tutorial.TutorialHints.start(by, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
             SteleRingers.get(back.getServer()).put(group, signal(titan, trial), by.getUUID(), by.getGameProfile().getName());

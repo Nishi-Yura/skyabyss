@@ -135,6 +135,7 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ANEMONE_PEDESTAL = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_PEDESTAL);
     public static final DeferredItem<BlockItem> ANEMONE_BED = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_BED);
     public static final DeferredItem<BlockItem> ANEMONE_TALLY = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_TALLY);
+    public static final DeferredItem<BlockItem> TRIAL_BOARD = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_BOARD);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.skyabyss"))

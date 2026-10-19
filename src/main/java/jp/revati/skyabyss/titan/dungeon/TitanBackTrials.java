@@ -129,7 +129,7 @@ public final class TitanBackTrials {
     }
 
     public static final String MAZE_ENTRY = "mz0";
-    private static final List<Checkpoint> CHECKPOINTS = List.of(
+    private static final List<Checkpoint> BASE_CHECKPOINTS = List.of(
             // 鼓動の間の中央は眠る心臓の台座 (強化深層岩) なので、南へずらす
             new Checkpoint("hub", HUB, HUB.center().offset(0, 0, 6)),
             // 休み場の焚き火のまわり (中心から 2 マスの東西南北) には腰掛けがあるので、斜めに置く
@@ -151,7 +151,16 @@ public final class TitanBackTrials {
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
             new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
+    // 試練の階 (WhaleDeck。docs/design/29) の休み場も同じ決まりで数える
+    private static final List<Checkpoint> CHECKPOINTS = concatCheckpoints(BASE_CHECKPOINTS,
+            WhaleDeck.rests().stream().map(r -> new Checkpoint(r.id(), r.area(), r.spawn())).toList());
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
+
+    private static List<Checkpoint> concatCheckpoints(List<Checkpoint> a, List<Checkpoint> b) {
+        List<Checkpoint> out = new ArrayList<>(a);
+        out.addAll(b);
+        return List.copyOf(out);
+    }
 
     // 闇の水路の中ほどの休み場 (息継ぎのくぼみの一つに、乾いた足場を作ってある)。迷路は種で形が変わるので、場所は種から出す
     public static final String MAZE_REST = "mz";
@@ -294,6 +303,8 @@ public final class TitanBackTrials {
         }
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
         GroupGates.place(level, shrineSeal(), !peaceful);
+        // 試練の階の入口・出口の戸と、原型の三つの入口の戸 (docs/design/29)
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
     }
 
     // 世界の共有の見かけ以外の、グループごとの見かけ (鳴らした共鳴石)
@@ -552,7 +563,8 @@ public final class TitanBackTrials {
 
     // 心臓の回廊 (宝物庫の奥の扉から心臓の間の入口まで)
     // リセットで作り直したり封じたりしない場所 (鼓動の間とその周り)。リセットのとき、ここにいる人は動かさない
-    private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0, WEST_HALL, EAST_HALL,
+    private static final List<Box> SAFE_ON_RESET = List.of(HUB, ENTRY, W0, E0, WEST_HALL, EAST_HALL, WhaleDeck.STAIR, WhaleDeck.D0, WhaleDeck.C1, WhaleDeck.S0,
+            WhaleDeck.W02, WhaleDeck.W06, WhaleDeck.W07, WhaleDeck.W10,
             // 台から背の広場へ登る階段 (到着の道。リセットで動かさない)
             new Box(STAIR_X0, STAIR_X0 + 64, STAIR_Z0, STAIR_Z1, FLANK_FLOOR_Y, 64));
 
@@ -1285,6 +1297,8 @@ public final class TitanBackTrials {
         // 進み具合を消し、試練の番号を進める (古い休み場の記録は、これで無効になる)
         GroupProgress.reset(level, group);
         AFTER_HEART_IDLE.remove(group);
+        // 試練の階のセルを止め、引いた試練の戸を開け直す (戸の上書きはいま消えた。引きは keep.* なので残る)
+        jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         int epoch = record(level, group).epoch();
         BlockPos hub = safeSpot(level, checkpointSpawnRaw("hub"));
         for (ServerPlayer player : Groups.online(level, group)) {
@@ -1326,6 +1340,7 @@ public final class TitanBackTrials {
         HEART_ROOMS.clear();
         HALL_STATES.clear();
         gatesInstalled = false;
+        jp.revati.skyabyss.trial.TrialRuntime.clearAll();
     }
 
     // すべてのグループを戻して共有の形も作り直す (コマンド・自己テスト・昇降の戻し)
@@ -1508,6 +1523,15 @@ public final class TitanBackTrials {
             }
         }
         return want;
+    }
+
+    // 人がいま記録している休み場 (なければ "")。試練の階のセルが、落ちた人を戻すのに使う
+    public static String checkpointOf(ServerPlayer player) {
+        return validCheckpoint(persisted(player), epochOf(player.serverLevel(), player));
+    }
+
+    public static void returnToCheckpoint(ServerPlayer player, String id) {
+        returnTo(player, id);
     }
 
     private static void returnTo(ServerPlayer player, String id) {

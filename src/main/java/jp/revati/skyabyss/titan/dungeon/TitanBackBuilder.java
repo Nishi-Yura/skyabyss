@@ -56,6 +56,8 @@ public final class TitanBackBuilder {
         WestWingBuilder.build(kit);
         EastWingBuilder.build(kit);
         WingsBuilder.build(kit);
+        // 試練の階 (階段・広間・四つの新しいセル。docs/design/29)。入口の通路・東の翼の天井の上の、体の中の空き
+        WhaleDeckBuilder.build(kit);
         // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
         BossGates.build(kit);
         MazeBuilder.buildFixtures(kit);
