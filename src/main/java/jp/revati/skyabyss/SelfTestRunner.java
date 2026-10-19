@@ -80,6 +80,8 @@ public final class SelfTestRunner {
         List<Step> steps = new ArrayList<>();
         // 岩鯨の背: 建てる・調べる (番兵を動かす段は最後。サーバーを止めるので)
         steps.addAll(TitanBackSelfTest.buildSteps());
+        // 岩鯨の背の拡大 (BackScale・部屋の大きさ・幕・鐘・初回だけの部屋・建て直しで keep.* が残る)。docs/design/26。SKYABYSS_SELFTEST_ONLY="whale scale"
+        steps.add(Step.once("whale scale", jp.revati.skyabyss.titan.dungeon.WhaleScaleSelfTest::runSelfTest));
         // グループ (パーティ・一人) の共通部分: 部屋の占有・戦いの参加者・個人の影・乗っている人の数え方・放置の分け前。docs/design/10 の 10 章
         steps.add(Step.once("group", jp.revati.skyabyss.titan.group.GroupSelfTest::runSelfTest));
         // 倒れた参加者の再入場 (20 秒の待ち・回数・全滅でやり直し・ゲームルール)。docs/design/02 の 4.2、10 の 10.4

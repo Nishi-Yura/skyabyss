@@ -81,7 +81,7 @@ public final class HudLayout {
         // ---- ホットバーの左右 (外側へ)
         QUICK_CARD, GROWTH_BAR, SKILL_SLOTS,
         // ---- 左上の帯 (上から下へ)
-        STATUS_TL, SLOTS_TL, CHAPTER, OBJECTIVE, QUEST, POPUPS_TL,
+        STATUS_TL, SLOTS_TL, CHAPTER, OBJECTIVE, LAMP, QUEST, POPUPS_TL,
         // ---- 右上の板 (上から下へ)
         VOW, BACK_GAUGE, PARTY_LIST,
         // ---- 下中央 (下から上へ)

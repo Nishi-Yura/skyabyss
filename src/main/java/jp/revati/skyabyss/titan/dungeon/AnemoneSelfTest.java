@@ -81,7 +81,7 @@ public final class AnemoneSelfTest {
                     check(f, false, "seed " + seed + ": pocket at cell " + c[0] + "," + c[1] + " is at the start / near the exit / in a dead end");
                 }
                 BlockPos p = mazeCell(c[0], c[1]);
-                for (TitanBackLayout.Box room : List.of(MAZE_ENTRY_ROOM, MAZE_EXIT_ROOM)) {
+                for (TitanBackLayout.Box room : List.of(MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, MAZE_EXIT_ROOM)) {
                     boolean x = p.getX() + MAZE_CELL + 1 >= room.x1() - 1 && p.getX() - 1 <= room.x2() + 1;
                     boolean z = p.getZ() + MAZE_CELL + 1 >= room.z1() - 1 && p.getZ() - 1 <= room.z2() + 1;
                     check(f, !(x && z), "seed " + seed + ": pocket at " + p.toShortString() + " is under a room (its floor would be dug out)");
@@ -176,21 +176,21 @@ public final class AnemoneSelfTest {
                         "stand " + i + " is not an unlit waterlogged pedestal at " + s + " (" + st + ")");
                 boolean onPath = false;
                 for (int k = 1; k < path.size() - 2; k++) {
-                    if (!plan.isPocket(path.get(k)) && mazeCell(path.get(k)[0], path.get(k)[1]).offset(1, 0, 1).equals(s)) {
+                    if (!plan.isPocket(path.get(k)) && mazeCell(path.get(k)[0], path.get(k)[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2).equals(s)) {
                         onPath = true;
                     }
                 }
                 check(f, onPath, "stand " + i + " is not on the correct path (or sits in a breathing pocket) at " + s);
                 check(f, back.getBlockState(s.above()).getFluidState().isSource() && back.getBlockState(s.below()).isSolid(), "stand " + i + " floats or is walled in at " + s);
             }
-            check(f, gate.size() == MAZE_CELL * MAZE_CELL, "the exit gate is not a 3x3 passage (" + gate.size() + ")");
+            check(f, gate.size() == MAZE_CELL * 3, "the exit gate is not a full passage (" + gate.size() + ")");
             for (BlockPos g : gate) {
                 BlockState st = back.getBlockState(g);
                 check(f, st.is(ModBlocks.SEALED_GATE.get()) && !st.getValue(SealedGateBlock.OPEN), "exit gate block at " + g + " is not a closed sealed gate (" + st + ")");
             }
             BlockPos exitCell = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J);
             BlockPos beforeCell = mazeCell(path.get(path.size() - 2)[0], path.get(path.size() - 2)[1]);
-            check(f, gate.stream().allMatch(g -> g.distSqr(exitCell) <= 30 && g.distSqr(beforeCell) <= 30), "the exit gate is not in the passage before the exit");
+            check(f, gate.stream().allMatch(g -> g.distSqr(exitCell) <= 60 && g.distSqr(beforeCell) <= 60), "the exit gate is not in the passage before the exit");
             check(f, back.getBlockState(AnemoneLights.TALLY_POS).is(ModBlocks.ANEMONE_TALLY.get()), "tally stone missing in the entry room");
             check(f, AnemoneLights.ENTRY_BEDS.size() == 3, "the entry room should have 3 anemone beds");
             for (BlockPos bed : AnemoneLights.ENTRY_BEDS) {
@@ -211,12 +211,12 @@ public final class AnemoneSelfTest {
             for (int x = MAZE_ENTRY_ROOM.x1(); x <= MAZE_ENTRY_ROOM.x2(); x++) {
                 for (int z = MAZE_ENTRY_ROOM.z1(); z <= MAZE_ENTRY_ROOM.z2(); z++) {
                     BlockPos floor = new BlockPos(x, MAZE_ENTRY_ROOM.floorY(), z);
-                    boolean hatch = x == mazeCell(MAZE_START_I, MAZE_START_J).getX() + 1 && z == mazeCell(MAZE_START_I, MAZE_START_J).getZ();
+                    boolean hatch = x == mazeCell(MAZE_START_I, MAZE_START_J).getX() + MAZE_CELL / 2 && z == mazeCell(MAZE_START_I, MAZE_START_J).getZ();
                     check(f, hatch || back.getBlockState(floor).isSolid(), "the entry room floor has a hole at " + floor);
                     check(f, back.getFluidState(floor.above()).isEmpty(), "water in the entry room at " + floor.above());
                 }
             }
-            BlockPos midBed = MazeBuilder.midPocket(maze).offset(2, 2, 0);
+            BlockPos midBed = MazeBuilder.midPocket(maze).offset(MAZE_CELL - 1, 2, 0);
             check(f, back.getBlockState(midBed).is(ModBlocks.ANEMONE_BED.get()), "anemone bed missing at the mid rest ledge " + midBed);
             check(f, back.getBlockState(MazeBuilder.restSpot(MazeBuilder.midPocket(maze))).isAir(), "the mid rest spot is blocked");
             check(f, FirstRun.room(AnemoneLights.FIRST_ROOM) != null, "the first-run room for the waterway is not registered");
@@ -224,8 +224,8 @@ public final class AnemoneSelfTest {
             // ---- 息継ぎのくぼみ: 床の真ん中は魂の砂と泡の柱、床の四隅と天井は水域の色の光
             for (int[] cell : plan.pockets) {
                 BlockPos p = mazeCell(cell[0], cell[1]);
-                check(f, back.getBlockState(p.offset(1, -1, 1)).is(Blocks.SOUL_SAND) && back.getBlockState(p.offset(1, 0, 1)).is(Blocks.BUBBLE_COLUMN)
-                        && !back.getBlockState(p.offset(1, 0, 1)).getValue(net.minecraft.world.level.block.BubbleColumnBlock.DRAG_DOWN),
+                check(f, back.getBlockState(p.offset(MAZE_CELL / 2, -1, MAZE_CELL / 2)).is(Blocks.SOUL_SAND) && back.getBlockState(p.offset(MAZE_CELL / 2, 0, MAZE_CELL / 2)).is(Blocks.BUBBLE_COLUMN)
+                        && !back.getBlockState(p.offset(MAZE_CELL / 2, 0, MAZE_CELL / 2)).getValue(net.minecraft.world.level.block.BubbleColumnBlock.DRAG_DOWN),
                         "pocket at " + p.toShortString() + " has no rising bubble column");
                 BlockState light = MazeBuilder.ZONE_LIGHT[plan.zoneOf(cell[0], cell[1])];
                 check(f, back.getBlockState(p.offset(0, -1, 0)).is(light.getBlock()), "pocket at " + p.toShortString() + " has no zone light on its floor");

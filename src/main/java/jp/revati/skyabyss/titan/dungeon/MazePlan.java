@@ -83,7 +83,7 @@ public final class MazePlan {
     // 部屋の下のマスにはくぼみを掘れない (部屋の床が迷路の天井の石と同じ高さ)
     static boolean underRoom(int i, int j) {
         BlockPos c = mazeCell(i, j);
-        for (TitanBackLayout.Box room : List.of(MAZE_ENTRY_ROOM, MAZE_EXIT_ROOM)) {
+        for (TitanBackLayout.Box room : List.of(MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, MAZE_EXIT_ROOM)) {
             boolean x = c.getX() + MAZE_CELL + 1 >= room.x1() - 1 && c.getX() - 1 <= room.x2() + 1;
             boolean z = c.getZ() + MAZE_CELL + 1 >= room.z1() - 1 && c.getZ() - 1 <= room.z2() + 1;
             if (x && z) {
@@ -322,7 +322,7 @@ public final class MazePlan {
 
     // マスの真ん中、水の一段目
     public static BlockPos center(int[] c) {
-        return mazeCell(c[0], c[1]).offset(1, 0, 1);
+        return mazeCell(c[0], c[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
     }
 
     // a から b (隣のマス) へ向かう通路 (壁の切れ目) の 3×3 の戸の場所。y は水の三段
@@ -346,8 +346,8 @@ public final class MazePlan {
         BlockPos ca = mazeCell(a[0], a[1]);
         int dx = b[0] - a[0];
         int dz = b[1] - a[1];
-        int x = dx != 0 ? ca.getX() + (dx > 0 ? MAZE_CELL : -1) : ca.getX() + 1;
-        int z = dz != 0 ? ca.getZ() + (dz > 0 ? MAZE_CELL : -1) : ca.getZ() + 1;
+        int x = dx != 0 ? ca.getX() + (dx > 0 ? MAZE_CELL : -1) : ca.getX() + MAZE_CELL / 2;
+        int z = dz != 0 ? ca.getZ() + (dz > 0 ? MAZE_CELL : -1) : ca.getZ() + MAZE_CELL / 2;
         return new BlockPos(x, MAZE_FLOOR, z);
     }
 

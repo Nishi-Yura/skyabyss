@@ -70,13 +70,15 @@ public final class AnemoneLights {
     public static final String FLAG = "lamp.";
     public static final String FIRST_ROOM = "whale_maze";
     // 入口の小部屋の中の、数え石・苗床・灯の掲示板 (迷路の天井の上。床 y 81 の上)
-    public static final BlockPos TALLY_POS = new BlockPos(8, MAZE_FLOOR + 5, -25);
-    public static final List<BlockPos> ENTRY_BEDS = List.of(new BlockPos(7, MAZE_FLOOR + 5, -17), new BlockPos(8, MAZE_FLOOR + 5, -17),
-            new BlockPos(9, MAZE_FLOOR + 5, -17));
+    public static final BlockPos TALLY_POS = new BlockPos(MAZE_ENTRY_ROOM.x2() - 2, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z1());
+    public static final List<BlockPos> ENTRY_BEDS = List.of(new BlockPos(MAZE_ENTRY_ROOM.x2() - 3, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2()),
+            new BlockPos(MAZE_ENTRY_ROOM.x2() - 2, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2()), new BlockPos(MAZE_ENTRY_ROOM.x2() - 1, MAZE_FLOOR + 5, MAZE_ENTRY_ROOM.z2()));
     public static final BlockPos ENTRY_BED_POS = ENTRY_BEDS.get(0);
+    // 2 つめの入口の小部屋の苗床
+    public static final BlockPos ENTRY_BED_POS2 = new BlockPos(MAZE_ENTRY_ROOM2.x2(), MAZE_FLOOR + 5, MAZE_ENTRY_ROOM2.z2());
     // 東の壁に埋めた、灯の数の掲示板 (赤石灯 3 つ。左から順にともる)
-    public static final List<BlockPos> BOARD = List.of(new BlockPos(11, MAZE_FLOOR + 6, -23), new BlockPos(11, MAZE_FLOOR + 6, -21),
-            new BlockPos(11, MAZE_FLOOR + 6, -19));
+    public static final List<BlockPos> BOARD = List.of(new BlockPos(MAZE_ENTRY_ROOM.x2() + 1, MAZE_FLOOR + 6, MAZE_ENTRY_ROOM.z1() + 3),
+            new BlockPos(MAZE_ENTRY_ROOM.x2() + 1, MAZE_FLOOR + 6, MAZE_ENTRY_ROOM.z1() + 6), new BlockPos(MAZE_ENTRY_ROOM.x2() + 1, MAZE_FLOOR + 6, MAZE_ENTRY_ROOM.z1() + 9));
     // 持ち歩きの光の強さ
     private static final int CARRY_LIGHT = 11;
     // 灯をともした台から、光の道が先へ伸びる長さ (正しい道のマスの数)
@@ -246,7 +248,7 @@ public final class AnemoneLights {
         }
         BlockPos mid = MazeBuilder.midPocket(maze);
         // 中ほどの休み場: 隅の足場の上 (空気の層の一段目)。復活位置 (北西の隅) と紫水晶 (南東の隅) の間の隅
-        kit.set(mid.offset(2, 2, 0), ModBlocks.ANEMONE_BED.get().defaultBlockState());
+        kit.set(mid.offset(MAZE_CELL - 1, 2, 0), ModBlocks.ANEMONE_BED.get().defaultBlockState());
         registerRoom(maze);
     }
 
@@ -256,6 +258,7 @@ public final class AnemoneLights {
         for (BlockPos bed : ENTRY_BEDS) {
             kit.set(bed, ModBlocks.ANEMONE_BED.get().defaultBlockState());
         }
+        kit.set(ENTRY_BED_POS2, ModBlocks.ANEMONE_BED.get().defaultBlockState());
         // 掲示板: 赤石灯 (消えている) を壁に埋め、上下を彫刻石で縁取る。ともした数だけ、そのグループの画面で灯る
         for (BlockPos p : BOARD) {
             kit.set(p, Blocks.REDSTONE_LAMP.defaultBlockState());
@@ -746,7 +749,7 @@ public final class AnemoneLights {
         int dist;
         if (inRoom || dEntry <= dMid || dMid < 0) {
             target = ENTRY_BED_POS.getCenter();
-            dist = inRoom ? (int) Math.ceil(Math.sqrt(player.distanceToSqr(target)) / 4.0) : dEntry;
+            dist = inRoom ? (int) Math.ceil(Math.sqrt(player.distanceToSqr(target)) / (MAZE_CELL + 1.0)) : dEntry;
             if (!inRoom) {
                 target = new Vec3(MazePlan.center(start).getX() + 0.5, MAZE_FLOOR + 1, MazePlan.center(start).getZ() + 0.5);
                 int[] next = plan.nextStep(here, start);
@@ -771,7 +774,7 @@ public final class AnemoneLights {
     // from のマスから to のマスへ向かう次の中継点 (マスの真ん中)。入口の小部屋にいるときは、水への入口 (はしごの穴)
     private static Vec3 waypoint(MazePlan plan, int[] from, int[] to, boolean inRoom) {
         if (inRoom) {
-            BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 0, 0);
+            BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0);
             return new Vec3(hatch.getX() + 0.5, hatch.getY(), hatch.getZ() + 0.5);
         }
         int[] next = plan.nextStep(from, to);
@@ -780,7 +783,7 @@ public final class AnemoneLights {
     }
 
     private static void band(ServerLevel level, ServerPlayer player, UUID group) {
-        Notice.bar(player, bandText(level, player, group));
+        LampBand.send(player, bandText(level, player, group));
     }
 
     // 灯の台の粒 (その人にだけ。近いものだけ): ともした台は白い光が昇り、まだの台は青い火がゆらぐ (遠くからも台の場所が分かる)

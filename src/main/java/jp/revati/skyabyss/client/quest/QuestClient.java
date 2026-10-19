@@ -57,6 +57,7 @@ public final class QuestClient {
         static void onLayers(RegisterGuiLayersEvent event) {
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "quest_tracker"), QuestHud::render);
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "objective_strip"), ObjectiveStrip::render);
+            event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "lamp_band"), jp.revati.skyabyss.client.titan.LampBandClient::render);
             event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "chapter_label"), ChapterLabel::render);
         }
     }

@@ -30,6 +30,7 @@ final class HudRequests {
         SkillHud.requests(mc, out);
         ChapterLabel.requests(mc, out);
         ObjectiveStrip.requests(mc, out);
+        jp.revati.skyabyss.client.titan.LampBandClient.requests(mc, out);
         QuestHud.requests(mc, out);
         // ホットバーの左右
         QuickCard.requests(mc, out);

@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 // 入口 (HEART_GATE) は、戦いが始まると TitanBackTrials が封じる。ここでは開けたまま作る
 final class HeartArenaBuilder {
     // 円の内側と、壁の外側の二乗距離 (19^2 と 21^2 を整数で)。自己テストも使う
-    static final int INNER_R2 = 361;
-    static final int OUTER_R2 = 441;
-    static final int EXTENT = 22;
+    static final int INNER_R2 = 625;
+    static final int OUTER_R2 = 729;
+    static final int EXTENT = 28;
     private static final int ARENA_TOP = HEART.ceilingY();
 
     private HeartArenaBuilder() {
@@ -33,9 +33,9 @@ final class HeartArenaBuilder {
         ribs(kit);
         pillars(kit);
         // 入口の通路 (壁の厚さの分をくり抜く)。封印は TitanBackTrials が戦いのたびに出し入れする
-        for (int x = -1; x <= 1; x++) {
-            for (int y = 94; y <= 97; y++) {
-                for (int z = -65; z <= -63; z++) {
+        for (int x = -3; x <= 3; x++) {
+            for (int y = FLOOR + 1; y <= FLOOR + 6; y++) {
+                for (int z = HEART_GATE_Z - 1; z <= HEART_GATE_Z + 1; z++) {
                     kit.set(x, y, z, BuildKit.AIR);
                 }
             }
@@ -46,37 +46,37 @@ final class HeartArenaBuilder {
     // 回廊: 奥の扉 (z=-45) から心臓の間の入口 (z=-64) まで。幅3、高さ4
     private static void corridor(BuildKit kit) {
         RandomSource r = kit.random;
-        for (int z = -63; z <= -46; z++) {
-            for (int x = -2; x <= 2; x++) {
-                for (int y = FLOOR; y <= 98; y++) {
-                    boolean inside = Math.abs(x) <= 1 && y >= 94 && y <= 97;
+        for (int z = HEART_GATE_Z + 1; z <= HEART_CORRIDOR.z2(); z++) {
+            for (int x = -4; x <= 4; x++) {
+                for (int y = FLOOR; y <= FLOOR + 7; y++) {
+                    boolean inside = Math.abs(x) <= 3 && y >= FLOOR + 1 && y <= FLOOR + 6;
                     kit.set(x, y, z, inside ? BuildKit.AIR : flesh(r));
                 }
             }
             // 天井の骨の梁
             if ((z & 3) == 0) {
-                for (int x = -2; x <= 2; x++) {
-                    kit.set(x, 98, z, Blocks.BONE_BLOCK.defaultBlockState());
+                for (int x = -4; x <= 4; x++) {
+                    kit.set(x, FLOOR + 7, z, Blocks.BONE_BLOCK.defaultBlockState());
                 }
             }
         }
         // 側壁の脈の光
-        for (int z = -50; z >= -62; z -= 6) {
-            kit.set(-2, 95, z, Blocks.SEA_LANTERN.defaultBlockState());
-            kit.set(2, 95, z, Blocks.SEA_LANTERN.defaultBlockState());
+        for (int z = HEART_CORRIDOR.z2() - 3; z > HEART_GATE_Z + 3; z -= 6) {
+            kit.set(-4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
+            kit.set(4, FLOOR + 3, z, Blocks.SEA_LANTERN.defaultBlockState());
         }
     }
 
     // 休み場 heart: 回廊の途中を横に広げた部屋。焚き火と腰掛け、碑文
     private static void heartRest(BuildKit kit) {
         RandomSource r = kit.random;
-        for (int x = -4; x <= 4; x++) {
+        for (int x = HEART_REST.x1() - 1; x <= HEART_REST.x2() + 1; x++) {
             for (int z = HEART_REST.z1(); z <= HEART_REST.z2(); z++) {
-                for (int y = FLOOR; y <= 98; y++) {
-                    boolean inside = Math.abs(x) <= 3 && y >= 94 && y <= 97;
+                for (int y = FLOOR; y <= HEART_REST.ceilingY(); y++) {
+                    boolean inside = Math.abs(x) <= HEART_REST.x2() && y > FLOOR && y < HEART_REST.ceilingY();
                     if (inside) {
                         kit.set(x, y, z, BuildKit.AIR);
-                    } else if (Math.abs(x) == 4 || y == FLOOR || y == 98) {
+                    } else if (Math.abs(x) == HEART_REST.x2() + 1 || y == FLOOR || y == HEART_REST.ceilingY()) {
                         kit.set(x, y, z, flesh(r));
                     }
                 }
@@ -113,7 +113,7 @@ final class HeartArenaBuilder {
 
     // 床: 肉の床に、マグマの溝 (斜めに点々と) と、わずかな脈の光
     private static BlockState floorBlock(RandomSource r, int dx, int dz) {
-        if (Math.abs(dx) == Math.abs(dz) && (Math.abs(dx) == 5 || Math.abs(dx) == 10 || Math.abs(dx) == 15)) {
+        if (Math.abs(dx) == Math.abs(dz) && (Math.abs(dx) == 7 || Math.abs(dx) == 14 || Math.abs(dx) == 21)) {
             return Blocks.MAGMA_BLOCK.defaultBlockState();
         }
         if (((HEART_CX + dx) * 7 + (HEART_CZ + dz) * 3) % 23 == 0 && r.nextFloat() < 0.5f) {
@@ -136,7 +136,7 @@ final class HeartArenaBuilder {
 
     // 壁: 肉の質感。中ほどの高さに紫水晶 (脈の結晶) と海のランタンを散らす
     private static BlockState wallBlock(RandomSource r, int x, int y, int z) {
-        if (y >= 99 && y <= 102) {
+        if (y >= FLOOR + 6 && y <= FLOOR + 11) {
             if ((x + z) % 9 == 0) {
                 return Blocks.AMETHYST_BLOCK.defaultBlockState();
             }
@@ -158,13 +158,13 @@ final class HeartArenaBuilder {
 
     // 骨の肋骨: 壁ぎわから天井の中ほどへ反り上がる弧 (x 方向の平面に立つ)。弧の下は通れる
     private static void ribs(BuildKit kit) {
-        for (int offset : new int[]{-16, -12, -8, -4, 4, 8, 12, 16}) {
+        for (int offset : new int[]{-23, -19, -15, -11, -7, 7, 11, 15, 19, 23}) {
             int x = HEART_CX + offset;
             int reach = (int) Math.floor(Math.sqrt(INNER_R2 - offset * offset));
             int prevY = Integer.MIN_VALUE;
             for (int dz = -reach; dz <= reach; dz++) {
                 double t = dz / (reach + 0.5);
-                int y = FLOOR + 1 + (int) Math.round(10 * Math.sqrt(Math.max(0, 1 - t * t)));
+                int y = FLOOR + 1 + (int) Math.round(13 * Math.sqrt(Math.max(0, 1 - t * t)));
                 int from = prevY == Integer.MIN_VALUE ? y : Math.min(prevY, y);
                 int to = prevY == Integer.MIN_VALUE ? y : Math.max(prevY, y);
                 for (int yy = from; yy <= to; yy++) {
@@ -177,14 +177,14 @@ final class HeartArenaBuilder {
 
     // 身を隠せる柱。中心 (半径3ほど) は空けておく
     private static void pillars(BuildKit kit) {
-        int[][] at = {{-6, -6}, {6, 6}, {-10, 3}, {10, -3}, {-14, -10}, {14, 10}, {-3, 15}, {3, -15}};
+        int[][] at = {{-9, -9}, {9, 9}, {-14, 4}, {14, -4}, {-19, -14}, {19, 14}, {-4, 20}, {4, -20}, {-16, 15}, {16, -15}};
         for (int[] p : at) {
             int x = HEART_CX + p[0];
             int z = HEART_CZ + p[1];
-            for (int y = FLOOR + 1; y <= 97; y++) {
+            for (int y = FLOOR + 1; y <= FLOOR + 9; y++) {
                 kit.set(x, y, z, Blocks.MUD_BRICKS.defaultBlockState());
             }
-            kit.set(x, 98, z, Blocks.BONE_BLOCK.defaultBlockState());
+            kit.set(x, FLOOR + 10, z, Blocks.BONE_BLOCK.defaultBlockState());
         }
     }
 }

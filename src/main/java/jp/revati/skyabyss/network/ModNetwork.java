@@ -30,6 +30,8 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.combat.TelegraphClient.cancel(payload.id()))
                 .playToClient(jp.revati.skyabyss.combat.BossCue.Payload.TYPE, jp.revati.skyabyss.combat.BossCue.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.BossCueClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.titan.dungeon.LampBand.Payload.TYPE, jp.revati.skyabyss.titan.dungeon.LampBand.Payload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.titan.LampBandClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload));
     }

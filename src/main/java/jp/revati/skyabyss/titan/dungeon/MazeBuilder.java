@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 闇の水路 (光海): 鼓動の間の床の穴から下りる、水没した迷路。通路は 3×3 の水で、明かりはほとんどない。
+// 闇の水路 (光海): 鼓動の間の床の穴 (2 つ) から下りる、水没した迷路。通路は 5×5 の水で、明かりはほとんどない。
 // 試練が元に戻るたびに、新しい種で迷路を掘り直す。入口のマスから、すぐに道が分かれる。
 // 息継ぎのくぼみ (天井がくぼみ、泡の柱が空気へ押し上げる光る場所) は、どのマスからも 3 マス以内にある (MazePlan)。
 // 水域は正しい道が灯の台を越えるたびに色が変わる (床・壁の石・くぼみの光)。
@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 出口は湧き上がる泡の柱で、上の小部屋へ押し上げられる。小部屋の石が歌うと、入口の通路へ戻る抜け道が開く
 public final class MazeBuilder {
     // 入口から出口までの道が、少なくともこれだけのマスを通ること
-    private static final int MIN_PATH_CELLS = 26;
+    private static final int MIN_PATH_CELLS = 44;
     // 水路の顎のスポナーが同時に生かしておく数（近くの人には最大 2 匹まで）
     public static final int MAW_MAX_NEARBY = 2;
 
@@ -127,16 +127,18 @@ public final class MazeBuilder {
             BlockPos p = mazeCell(c[0], c[1]);
             BlockState light = ZONE_LIGHT[plan.zoneOf(c[0], c[1])];
             sealPocketMouths(kit, maze, c, wall);
-            kit.fill(p.getX(), p.getY() + 2, p.getZ(), p.getX() + 2, p.getY() + 3, p.getZ() + 2, BuildKit.AIR);
+            int hi = MAZE_CELL - 1;
+            int mid = MAZE_CELL / 2;
+            kit.fill(p.getX(), p.getY() + 2, p.getZ(), p.getX() + hi, p.getY() + 3, p.getZ() + hi, BuildKit.AIR);
             // 暗い水の中から見つけられるよう、床の四隅と天井に水域の色の光をともし、四隅にシーピクルスを置く
-            kit.set(p.getX() + 1, p.getY() - 1, p.getZ() + 1, Blocks.SOUL_SAND.defaultBlockState());
+            kit.set(p.getX() + mid, p.getY() - 1, p.getZ() + mid, Blocks.SOUL_SAND.defaultBlockState());
             for (int y = p.getY(); y <= p.getY() + 1; y++) {
-                kit.set(p.getX() + 1, y, p.getZ() + 1, Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(BubbleColumnBlock.DRAG_DOWN, false));
+                kit.set(p.getX() + mid, y, p.getZ() + mid, Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(BubbleColumnBlock.DRAG_DOWN, false));
             }
-            if (!kit.get(p.getX() + 1, p.getY() + 4, p.getZ() + 1).isAir()) {
-                kit.set(p.getX() + 1, p.getY() + 4, p.getZ() + 1, light);
+            if (!kit.get(p.getX() + mid, p.getY() + 4, p.getZ() + mid).isAir()) {
+                kit.set(p.getX() + mid, p.getY() + 4, p.getZ() + mid, light);
             }
-            for (int[] corner : new int[][]{{0, 0}, {2, 0}, {0, 2}, {2, 2}}) {
+            for (int[] corner : new int[][]{{0, 0}, {hi, 0}, {0, hi}, {hi, hi}}) {
                 kit.set(p.getX() + corner[0], p.getY() - 1, p.getZ() + corner[1], light);
                 kit.set(p.getX() + corner[0], p.getY(), p.getZ() + corner[1], Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, 3));
             }
@@ -144,10 +146,10 @@ public final class MazeBuilder {
                 // 中ほどの休み場: 四隅に乾いた足場 (水の二段目の高さ) を置く。真ん中は水のままで、そこから浮かび上がって上がれる。
                 // 空気の層 (足元と頭の二段) は通路の口が壁でふさがれているので、魚は入れない。紫水晶が目印。
                 // 隅の足場は水の一段目 (y = p.y) のシーピクルスの上に重ねる
-                for (int[] corner : new int[][]{{0, 0}, {2, 0}, {0, 2}, {2, 2}}) {
+                for (int[] corner : new int[][]{{0, 0}, {hi, 0}, {0, hi}, {hi, hi}}) {
                     kit.set(p.getX() + corner[0], p.getY() + 1, p.getZ() + corner[1], BuildKit.POLISHED);
                 }
-                kit.set(p.getX() + 2, p.getY() + 2, p.getZ() + 2, Blocks.AMETHYST_CLUSTER.defaultBlockState());
+                kit.set(p.getX() + hi, p.getY() + 2, p.getZ() + hi, Blocks.AMETHYST_CLUSTER.defaultBlockState());
             }
         }
         // 下へ引きずり込む流れ (くぼみにつながる通路と、出口の手前の戸の通路には置かない: MazePlan が避ける)
@@ -156,9 +158,10 @@ public final class MazeBuilder {
         }
 
         // 行き止まり: 水路の顎の巣と、かすかなシーピクルスの明かりと、揺れるケルプ
-        List<int[]> deadEnds = maze.deadEnds();
+        List<int[]> deadEnds = new java.util.ArrayList<>(maze.deadEnds());
+        deadEnds.removeIf(d -> d[0] == MAZE_START2_I && d[1] == MAZE_START2_J);
         for (int n = 0; n < deadEnds.size(); n++) {
-            BlockPos p = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(1, 0, 1);
+            BlockPos p = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
             if (n % 3 == 1) {
                 kit.set(p, Blocks.SPAWNER.defaultBlockState());
                 if (kit.level().getBlockEntity(p) instanceof SpawnerBlockEntity be) {
@@ -178,14 +181,15 @@ public final class MazeBuilder {
             }
         }
 
-        // 入口: 鼓動の間の床から、水面のすぐ上まで下りるはしご
-        BlockPos start = mazeCell(MAZE_START_I, MAZE_START_J);
+        // 入口 (2 つ): 鼓動の間の床から、水面のすぐ上まで下りるはしご
         BlockState ladder = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.SOUTH);
-        for (int y = MAZE_FLOOR + 4; y <= FLOOR; y++) {
-            kit.set(start.getX() + 1, y, start.getZ(), ladder);
+        for (BlockPos start : List.of(mazeCell(MAZE_START_I, MAZE_START_J), mazeCell(MAZE_START2_I, MAZE_START2_J))) {
+            for (int y = MAZE_FLOOR + 4; y <= FLOOR; y++) {
+                kit.set(start.getX() + MAZE_CELL / 2, y, start.getZ(), ladder);
+            }
         }
         // 出口: 泡の柱が、上の小部屋へ押し上げる
-        BlockPos exit = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(1, 0, 1);
+        BlockPos exit = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
         kit.set(exit.below(), Blocks.SOUL_SAND.defaultBlockState());
         for (int y = exit.getY(); y <= MAZE_EXIT_ROOM.floorY(); y++) {
             kit.set(exit.getX(), y, exit.getZ(), Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(BubbleColumnBlock.DRAG_DOWN, false));
@@ -210,14 +214,14 @@ public final class MazeBuilder {
         TitanBackLayout.Box er = MAZE_ENTRY_ROOM;
         BlockPos c = er.center();
         kit.set(c.getX(), er.floorY(), c.getZ(), BuildKit.CHISELED);
-        BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 0, 0);
+        BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0);
         kit.set(hatch.getX() - 1, er.floorY(), hatch.getZ(), Blocks.SEA_LANTERN.defaultBlockState());
         kit.set(hatch.getX() + 1, er.floorY(), hatch.getZ(), Blocks.SEA_LANTERN.defaultBlockState());
-        for (int dx = -1; dx <= 1; dx++) {
+        for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 int x = c.getX() + dx * 2;
                 int z = c.getZ() + dz * 2;
-                if ((dx != 0 || dz != 0) && Math.abs(dx) + Math.abs(dz) <= 2) {
+                if ((dx != 0 || dz != 0) && Math.abs(dx) + Math.abs(dz) <= 3) {
                     kit.set(x, er.floorY(), z, BuildKit.POLISHED);
                 }
             }
@@ -226,43 +230,47 @@ public final class MazeBuilder {
 
     // 出口の泡の柱の根もと (出口のマスの真ん中、水の一段目)
     public static BlockPos exitBubble() {
-        return mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(1, 0, 1);
+        return mazeCell(MAZE_EXIT_I, MAZE_EXIT_J).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
     }
 
     // 迷路のまわりの決まった設備: 出口の小部屋と、入口の通路へ戻る抜け道。島を建てるときに一度だけ
     static void buildFixtures(BuildKit kit) {
         // 入口の小部屋: はしごを下りた先の、水の外の休み場。周りは壁で、水は入らない (床は迷路の天井)。はしごは buildMaze が通す
-        TitanBackLayout.Box er = MAZE_ENTRY_ROOM;
-        kit.fill(er.x1() - 1, er.floorY() + 1, er.z1() - 1, er.x2() + 1, er.ceilingY(), er.z2() + 1, BuildKit.TILES);
-        kit.fill(er.x1(), er.floorY() + 1, er.z1(), er.x2(), er.ceilingY() - 1, er.z2(), BuildKit.AIR);
-        kit.restPoint(er);
-        // 広い部屋 (13×9): 壁の灯りを天井近くに。灯の数え石・苗床・灯の数の掲示板 (docs/design/23)
-        kit.wallLamps(er, 4, er.ceilingY() - 1);
+        for (TitanBackLayout.Box er : List.of(MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2)) {
+            kit.fill(er.x1() - 1, er.floorY() + 1, er.z1() - 1, er.x2() + 1, er.ceilingY(), er.z2() + 1, BuildKit.TILES);
+            kit.fill(er.x1(), er.floorY() + 1, er.z1(), er.x2(), er.ceilingY() - 1, er.z2(), BuildKit.AIR);
+        }
+        // 休み場の設え (焚き火は煙の出ない魂の焚き火。BuildKit.restPoint)。広い部屋 (21×14) は壁の灯りを天井近くに。
+        // 灯の数え石・苗床・灯の数の掲示板 (docs/design/23)
+        kit.restPoint(MAZE_ENTRY_ROOM, true);
+        kit.restPoint(MAZE_ENTRY_ROOM2, true);
+        kit.wallLamps(MAZE_ENTRY_ROOM, 4, MAZE_ENTRY_ROOM.ceilingY() - 1);
         AnemoneLights.buildEntry(kit);
         kit.room(MAZE_EXIT_ROOM, BuildKit.POLISHED, BuildKit.TILES);
         kit.lantern(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z2());
         kit.set(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z1(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
-        kit.room(new TitanBackLayout.Box(3, 10, -7, -7, FLOOR, 3));
+        kit.room(EXIT_PASS);
         BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
         for (int y = MAZE_EXIT_ROOM.floorY() + 1; y <= FLOOR; y++) {
-            kit.set(MAZE_EXIT_ROOM.x1(), y, -7, ladderEast);
+            kit.set(MAZE_EXIT_ROOM.x1(), y, EXIT_LADDER_Z, ladderEast);
         }
         for (BlockPos p : LOWER_RETURN) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        // 鼓動の間の床の入口を、黒い石の縁取りと灯りで目立たせる
-        BlockPos hatch = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 0, 0);
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                if (dx != 0 || dz != 0) {
-                    kit.set(hatch.getX() + dx, FLOOR, hatch.getZ() + dz, Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
-                    kit.set(hatch.getX() + dx, FLOOR + 1, hatch.getZ() + dz, BuildKit.AIR);
+        // 鼓動の間の床の入口 (2 つ) を、黒い石の縁取りと灯りで目立たせる
+        for (BlockPos hatch : List.of(mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0), mazeCell(MAZE_START2_I, MAZE_START2_J).offset(MAZE_CELL / 2, 0, 0))) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    if (dx != 0 || dz != 0) {
+                        kit.set(hatch.getX() + dx, FLOOR, hatch.getZ() + dz, Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
+                        kit.set(hatch.getX() + dx, FLOOR + 1, hatch.getZ() + dz, BuildKit.AIR);
+                    }
                 }
             }
+            kit.set(hatch.getX(), FLOOR + 1, hatch.getZ(), BuildKit.AIR);
+            kit.lantern(hatch.getX() - 2, FLOOR + 1, hatch.getZ());
+            kit.lantern(hatch.getX() + 2, FLOOR + 1, hatch.getZ());
         }
-        kit.set(hatch.getX(), FLOOR + 1, hatch.getZ(), BuildKit.AIR);
-        kit.lantern(hatch.getX() - 2, FLOOR + 1, hatch.getZ());
-        kit.lantern(hatch.getX() + 2, FLOOR + 1, hatch.getZ());
     }
 
     // 息継ぎのマス c へつながるすべての通路 (正しい道も枝道も) の、一番上の段を壁にする

@@ -171,7 +171,7 @@ public final class CampSelfTest {
         back.setBlock(stacked, Blocks.AIR.defaultBlockState(), 3);
 
         // 3. 仕掛け (封印の扉) のそばには置けない。手持ちは減らない
-        BlockPos nearGate = new BlockPos(0, FLOOR + 1, -31);
+        BlockPos nearGate = new BlockPos(0, FLOOR + 1, TitanBackLayout.GATE.get(0).getZ() + 1);
         if (!back.getBlockState(nearGate).isAir()) {
             f.add("test spot near the treasury gate is not free: " + back.getBlockState(nearGate));
         } else {

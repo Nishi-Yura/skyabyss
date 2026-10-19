@@ -11,7 +11,7 @@
       --fit で、体の中の部屋が殻の何ブロック内側にあるかを表にする (東の広間 e1 が 1 以上、肋骨の谷 wa が 3 ほど)
       建て直したあとの図と案 C のメッシュとの並べ描きは tools/whale_back_c_views.py
 
-縮尺: 1 単位 = 1.43 ブロック。体の軸 x = -2。環境変数 WS / WY / WX / WZ で縮尺と置き場所を試せる。
+縮尺: 1 単位 = 1.43 ブロック (版 12)。版 13 は水平 x1.6・垂直 x1.3 (環境変数 WH / WV。体の軸 x = -2 x WH)。環境変数 WS / WY / WX / WZ で縮尺と置き場所も試せる。
 高さ: 体の中心 (geo の y=40) を y 95 に置く。geo の z 0 を z 24 に置く。
 ブロックの決め方: ブロックに入る格子のセルの多数決。占める割合が 0.45 (細い部品は 0.3) 以上なら置く。
       光る材料 (目) は少しでもあれば残す。同じ材料の中の色の揺れは、ブロックの位置のハッシュで選ぶ (乱数なし)。
@@ -36,10 +36,17 @@ class V:  # 格子の決まり (lowpoly_whale_voxel と同じ)
 OUT = ROOT / "src/main/resources/data/skyabyss/titan_back/whale.bin"
 PREVIEW = ROOT / "docs/review/whale_back_roughs"
 
-S = float(__import__("os").environ.get("WS", "1.43"))             # 1 単位あたりのブロック (ゲームの岩鯨の 1.4 倍)
-CX = float(__import__("os").environ.get("WX", "-2"))            # Blockbench の x=0 (体の軸) を置く世界の x
-YW = float(__import__("os").environ.get("WY", "95"))           # geo の y=YC (体の中心) を置く世界の y
-ZOFF = float(__import__("os").environ.get("WZ", "24"))         # geo の z=0 を置く世界の z
+_E = __import__("os").environ
+# 倍率 (設計書 26)。既定は 1.6 (水平) / 1.3 (垂直) = TitanBackLayout の版 13。WH=1 WV=1 で版 12 の形 (BackScale と同じ値)
+WH = float(_E.get("WH", "1.6"))                                  # 水平 (x・z) の倍率
+WV = float(_E.get("WV", "1.3"))                                  # 垂直 (y) の倍率
+S = float(_E.get("WS", "1.43"))                                  # 1 単位あたりのブロック (版 12 の縮尺。ゲームの岩鯨の 1.4 倍)
+SH = S * WH                                                      # 水平の 1 単位あたりのブロック
+SV = S * WV                                                      # 垂直の 1 単位あたりのブロック
+CX = float(_E.get("WX", str(-2 * WH)))                           # Blockbench の x=0 (体の軸) を置く世界の x
+# geo の y=YC (体の中心) を置く世界の y。腹の下端 (版 12 は y 58) を動かさないよう、垂直の倍率の分だけ中心を上げる
+YW = float(_E.get("WY", str(95 + round(37.0 * (WV - 1.0)))))
+ZOFF = float(_E.get("WZ", str(24 * WH)))                         # geo の z=0 を置く世界の z
 INNER_DEPTH = 5     # これより深い体の中は、凝灰岩と深層岩 (部屋を掘ると壁は深層岩のレンガになる)
 
 P = I.PARTS
@@ -68,7 +75,9 @@ BLOCKS = {
     M["crust"]: [("brown_terracotta", 3), ("gray_terracotta", 2), ("mud_bricks", 1), ("blackstone", 1), ("dripstone_block", 1)],
 }
 MOSS_BLOCKS = [("moss_block", 4), ("green_terracotta", 1)]
-INNER_BLOCKS = [("tuff", 3), ("deepslate", 1)]
+# 深い内側 (外から INNER_DEPTH より奥) は、詰まった区画を一括で置けるよう、高さだけで 1 種類に決める (BackBuildJobs の区画の一括。
+# 部屋を掘ると壁は深層岩のレンガになるので、中の石の見た目は見えない)。16 ブロックの区画の境 (y 96) で切り替える
+INNER_SPLIT_Y = 96
 
 
 def hash3(x, y, z, salt=0):
@@ -79,8 +88,9 @@ def hash3(x, y, z, salt=0):
     return (h & 0xFFFF) / 65536.0
 
 
-def axis_map(n, origin, f):
-    u = (np.arange(n) - origin + 0.5) / V.CELL
+def axis_map(n, origin, f, rep=1):
+    # rep: 格子を軸ごとに何倍に細かくしたか。水平の倍率が 1 を超えると、セルより大きなブロックが抜けるので 2 倍に刻む
+    u = ((np.arange(n) + 0.5) / rep - origin) / V.CELL
     return np.floor(f(u)).astype(int)
 
 
@@ -102,11 +112,14 @@ def model_grid():
 
 def block_grid():
     K = model_grid()
+    REP = 2 if SH * 0.5 > 0.8 else 1
+    if REP > 1:
+        K = np.repeat(np.repeat(K, REP, 0), REP, 2)
     nx, ny, nz = K.shape
     # X は反転 (Blockbench の +X = ゲームの左 = 頭を北に向けたときの西)
-    bx = axis_map(nx, V.OX, lambda u: CX - u * S)
-    by = axis_map(ny, V.OY, lambda u: YW + (u - V.YC) * S)
-    bz = axis_map(nz, V.OZ, lambda u: ZOFF + u * S)
+    bx = axis_map(nx, V.OX, lambda u: CX - u * SH, REP)
+    by = axis_map(ny, V.OY, lambda u: YW + (u - V.YC) * SV)
+    bz = axis_map(nz, V.OZ, lambda u: ZOFF + u * SH, REP)
     x0, y0, z0 = bx.min(), by.min(), bz.min()
     NBX, NBY, NBZ = bx.max() - x0 + 1, by.max() - y0 + 1, bz.max() - z0 + 1
     cx = np.bincount(bx - x0, minlength=NBX)
@@ -177,7 +190,7 @@ def to_blocks(G, org):
     above_air = np.zeros(G.shape, bool)
     above_air[:, :-1, :] = G[:, 1:, :] == 0
     above_air[:, -1, :] = True
-    yu = V.YC + (wy + 0.5 - YW) / S
+    yu = V.YC + (wy + 0.5 - YW) / SV
     mp = 0.0 * yu   # 案 C は苔をアトラスの色 (moss 材料) で持つ。塗り足さない
     stone = (mats == M["stone"]) & np.isin(keys // 16, list(BODY_PARTS)) & above_air[ii, jj, kk]
     hm = hash3(wx // 2, wy, wz // 2, 3)
@@ -188,7 +201,8 @@ def to_blocks(G, org):
     body = np.isin(G // 16, list(BODY_PARTS))
     deep = (depth > INNER_DEPTH) & body
     di = np.argwhere(deep)
-    B[deep] = pick(INNER_BLOCKS, hash3(di[:, 0] + x0, di[:, 1] + y0, di[:, 2] + z0, 9))
+    inner_tuff, inner_deep = idx("tuff"), idx("deepslate")
+    B[deep] = np.where(di[:, 1] + y0 >= INNER_SPLIT_Y, inner_tuff, inner_deep).astype(np.int16)
     return B, names, depth
 
 
