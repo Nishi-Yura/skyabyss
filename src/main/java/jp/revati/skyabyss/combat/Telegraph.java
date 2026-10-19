@@ -341,6 +341,42 @@ public final class Telegraph {
         return shape.contains(e.getX(), e.getZ());
     }
 
+    // 試験用 (読む人形): 点 (x, y, z) に、ticksAhead tick 後に傷が出る予告 (傷のある・まだ終わっていないもの) があるか。
+    // 当たる瞬間 (予告が満ちる tick) と、振り回す・続く予告の active の間を見る。印と当たりは同じ形・同じ高さ判定
+    public static boolean dangerAt(ServerLevel level, double x, double y, double z, int ticksAhead) {
+        for (Telegraph t : ACTIVE.getOrDefault(level, List.of())) {
+            if (t.done || t.onHit == null) {
+                continue;
+            }
+            int a = t.age + ticksAhead;
+            if (a < t.warn) {
+                continue;
+            }
+            TelegraphShape now;
+            if (t.active == 0) {
+                if (a > t.warn) {
+                    continue;
+                }
+                now = t.shape.at(1.0);
+            } else {
+                if (a > t.warn + t.active) {
+                    continue;
+                }
+                now = t.shape.at(Math.min(1.0, (double) (a - t.warn) / t.active));
+            }
+            if (y < t.floor - 1.5 || y > t.floor + t.reach) {
+                continue;
+            }
+            if (t.jumpClear > 0 && y >= t.floor + t.jumpClear) {
+                continue;
+            }
+            if (now.contains(x, z)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 向き (x, z のベクトル) の角度。Telegraph の角度の約束 (cos a, sin a) に合わせる
     public static double angleOf(double dx, double dz) {
         return Math.atan2(dz, dx);

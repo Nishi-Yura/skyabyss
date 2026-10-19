@@ -43,6 +43,11 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> TIDE_HEART_HURT = register("tide_heart_hurt");
     // 技の音 (tools/gen_boss_skill_sounds.py)。岩鯨の心臓と鯨骨の番兵長
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_ROAR = register("stone_heart_roar");
+    // 心臓の領域の宣言の合図 (tools/gen_heart_domain_stings.py)
+    public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_STONE_SEA = register("domain_stone_sea");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_RISING_TIDE = register("domain_rising_tide");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_THUNDER_CAGE = register("domain_thunder_cage");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_HEARTH_CORE = register("domain_hearth_core");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_SHOCKWAVE = register("stone_heart_shockwave");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_PHASE = register("stone_heart_phase");
     public static final DeferredHolder<SoundEvent, SoundEvent> STONE_HEART_GRIND = register("stone_heart_grind");
