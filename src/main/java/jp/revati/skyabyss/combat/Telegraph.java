@@ -50,6 +50,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class Telegraph {
     // 傷が出るまでの最短の予告 (0.8 秒)
     public static final int MIN_WARN_TICKS = 16;
+    // 「よけた」と数える、範囲の外のそばの幅 (ブロック)
+    static final double DODGE_MARGIN = 10;
+    private static final List<Consumer<ServerPlayer>> DODGE = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    // 予告が自分に当たらず終わった人への知らせの登録 (一度だけ。技の見切りなど)
+    public static void onDodge(Consumer<ServerPlayer> listener) {
+        DODGE.add(listener);
+    }
     // 1 tick に送る予告の粒の数 (粒 × 見る人) の上限
     static final int BUDGET = 700;
 
@@ -499,6 +507,7 @@ public final class Telegraph {
             if (active == 0) {
                 strike(shape.at(1.0));
                 done = true;
+                reportDodges();
             } else {
                 strike(shape.at(0.0));
             }
@@ -516,6 +525,24 @@ public final class Telegraph {
         }
         if (age - warn >= active) {
             done = true;
+            reportDodges();
+        }
+    }
+
+    // 予告をよけて (範囲の外で) 終わらせた人へ知らせる (技の見切り・敏捷の刻み目)。傷のある予告だけ。範囲のそばにいた人だけ
+    private void reportDodges() {
+        if (onHit == null || DODGE.isEmpty()) {
+            return;
+        }
+        double[] b = shape.at(1.0).bounds();
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(b[0] - DODGE_MARGIN, floor - 3, b[1] - DODGE_MARGIN, b[2] + DODGE_MARGIN, floor + reach + 4,
+                b[3] + DODGE_MARGIN);
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, box, victims)) {
+            if (p.isAlive() && !p.isSpectator() && !hit.contains(p.getUUID())) {
+                for (Consumer<ServerPlayer> l : DODGE) {
+                    l.accept(p);
+                }
+            }
         }
     }
 

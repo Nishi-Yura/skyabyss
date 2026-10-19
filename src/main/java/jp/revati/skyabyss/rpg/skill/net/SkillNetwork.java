@@ -52,9 +52,32 @@ public final class SkillNetwork {
                         }
                     }
                 })
+                .playToServer(SkillRunePayload.TYPE, SkillRunePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillManager.RuneResult r = SkillManager.chooseRune(player, Skill.byId(payload.skill()), payload.index());
+                        if (r != SkillManager.RuneResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.rune_failed." + r.name().toLowerCase()));
+                        }
+                    }
+                })
+                .playToServer(SkillLoadoutPayload.TYPE, SkillLoadoutPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        if (payload.save()) {
+                            SkillManager.saveLoadout(player, payload.index());
+                            Notice.bar(player, ModText.lore("message.skyabyss.skill.loadout_saved", payload.index() + 1));
+                        } else {
+                            SkillManager.LoadoutResult r = SkillManager.loadLoadout(player, payload.index());
+                            if (r != SkillManager.LoadoutResult.OK) {
+                                SkillManager.sync(player);
+                                Notice.bar(player, ModText.deny("message.skyabyss.skill.loadout_failed." + r.name().toLowerCase()));
+                            }
+                        }
+                    }
+                })
                 .playToServer(SkillRespecPayload.TYPE, SkillRespecPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        int cost = SkillRules.respecCost(SkillManager.get(player).respecs);
+                        int cost = SkillManager.respecCostFor(player);
                         if (payload.cost() != cost && !player.isCreative()) {
                             SkillManager.sync(player);
                             return;
