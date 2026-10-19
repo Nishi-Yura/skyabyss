@@ -54,6 +54,13 @@ public class ResonanceStoneBlock extends Block {
         }
         boolean onBack = server.dimension() == TitanTravel.TITAN_BACK;
         int index = TitanBackLayout.RESONANCE_STONES.indexOf(pos);
+        if (onBack && index < 0) {
+            // 試練の階の石 (新しいセル。docs/design/29): 引いた試練のスロットの石として数える
+            InteractionResult deck = jp.revati.skyabyss.trial.TrialRuntime.useStone(server, sp, pos);
+            if (deck != null) {
+                return deck;
+            }
+        }
         if (!onBack || index < 0) {
             // 岩鯨の背の外の石 (ふつうのブロックとして置いた石): 光るのはワールド全体
             server.setBlock(pos, state.setValue(ACTIVE, true), Block.UPDATE_ALL);
@@ -93,13 +100,18 @@ public class ResonanceStoneBlock extends Block {
         // 背中の外にいる仲間にも (クエストはグループの記録から数える)
         jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),
                 Component.translatable("block.skyabyss.resonance_stone"), sp);
+        finishRung(server, sp, group, record);
+        return InteractionResult.SUCCESS;
+    }
+
+    // 石が鳴ったあとの数え: 何個目かを知らせ、三つそろえば宝物庫の封印を解く (試練の階の石からも使う)
+    public static void finishRung(ServerLevel server, ServerPlayer sp, UUID group, BackGroupData.Record record) {
         int active = countActive(record);
         int total = TitanBackLayout.RESONANCE_STONES.size();
         notifyGroup(server, group, ModText.progress("message.skyabyss.resonance", active, total));
         if (active >= total) {
             openGate(server, group, record);
         }
-        return InteractionResult.SUCCESS;
     }
 
     private static int countActive(BackGroupData.Record record) {

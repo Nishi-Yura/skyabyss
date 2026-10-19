@@ -427,8 +427,24 @@ public final class HeartBotSelfTest {
         checkDomain(level, maker, f, notes);
     }
 
+    // ---------------------------------------------------------------- 領域 (仕掛けを解くまで続く)
+    private static final int ACTIVE_WINDOW = 700;
+
+    // 宣言が明けて領域が始まるまで回す
+    private static HeartDomain toActive(Rig rig, Bot bot, Driver driver, ServerLevel level) {
+        int guard = 0;
+        while ((rig.domain().get() == null || rig.domain().get().phase() != HeartDomain.Phase.ACTIVE) && guard++ < 600) {
+            step(rig, bot, driver, level, guard);
+        }
+        return rig.domain().get();
+    }
+
+    private static int legTicks(Vec3 a, Vec3 b) {
+        return (int) Math.ceil(a.distanceTo(b) / (SPRINT * 0.8)) + 10;
+    }
+
     private static void checkDomain(ServerLevel level, Supplier<Rig> maker, List<String> f, List<String> notes) {
-        // 読む人形で領域を通す: 宣言 (傷なし) → 領域 → 終わり
+        // A: 読む人形で領域を通す。宣言 (傷なし) → 領域。仕掛けを解かないと終わらない・心臓は傷を受けない・仕掛けが三つ立つ
         Rig rig = maker.get();
         String name = rig.name();
         Bot bot = spawnBot(level, "domain", 8);
@@ -436,55 +452,62 @@ public final class HeartBotSelfTest {
             Driver driver = reader(rig.heightAt(), rig.refuges());
             rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
             boolean sawDeclare = false;
-            boolean sawActive = false;
-            boolean sawDone = false;
             float healthInDeclare = -1;
             float healthAfterDeclare = -1;
-            double taken = 0;
             int cues = BossCue.sentCount();
-            for (int t = 0; t < 60 + HeartDomain.DECLARE_TICKS + HeartDomain.ACTIVE_TICKS + 200 && !sawDone; t++) {
+            int active = 0;
+            for (int t = 0; t < 60 + HeartDomain.DECLARE_TICKS + ACTIVE_WINDOW + 200 && active < ACTIVE_WINDOW; t++) {
                 step(rig, bot, driver, level, t);
                 HeartDomain d = rig.domain().get();
                 if (d != null) {
-                    if (d.phase() == HeartDomain.Phase.DECLARE) {
-                        if (!sawDeclare) {
-                            sawDeclare = true;
-                            // 宣言のあいだは傷を受けない
-                            rig.heart().invulnerableTime = 0;
-                            healthInDeclare = rig.heart().getHealth();
-                            rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
-                            healthAfterDeclare = rig.heart().getHealth();
-                        }
+                    if (d.phase() == HeartDomain.Phase.DECLARE && !sawDeclare) {
+                        sawDeclare = true;
+                        // 宣言のあいだは傷を受けない
+                        rig.heart().invulnerableTime = 0;
+                        healthInDeclare = rig.heart().getHealth();
+                        rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
+                        healthAfterDeclare = rig.heart().getHealth();
                     } else if (d.phase() == HeartDomain.Phase.ACTIVE) {
-                        sawActive = true;
-                    } else if (d.phase() == HeartDomain.Phase.DONE) {
-                        sawDone = true;
+                        active++;
                     }
                 }
             }
-            taken = bot.taken(rig.stage()) / HeartBalance.expectedHealth(rig.stage());
-            check(f, sawDeclare && sawActive && sawDone, name + ": the domain did not run declare -> active -> done (" + sawDeclare + sawActive + sawDone + ")");
+            HeartDomain d = rig.domain().get();
+            double taken = bot.taken(rig.stage()) / HeartBalance.expectedHealth(rig.stage());
+            check(f, sawDeclare && d != null, name + ": the domain never declared");
             check(f, healthInDeclare > 0 && healthInDeclare == healthAfterDeclare, name + ": the heart took damage while declaring its domain");
-            check(f, rig.domain().get() != null && !rig.domain().get().broken(), name + ": an undisturbed domain reports broken");
+            check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE && active >= ACTIVE_WINDOW, name + ": the unsolved domain did not last (phase " + (d == null ? "-" : d.phase()) + ")");
+            if (d != null) {
+                check(f, !d.solved() && !d.broken(), name + ": an unsolved domain reports solved");
+                check(f, d.nodes().size() == HeartDomain.NODES, name + ": the domain has " + d.nodes().size() + " nodes");
+                for (HeartDomain.Node n : d.nodes()) {
+                    check(f, n.entityId() != null && ((ServerLevel) rig.heart().level()).getEntity(n.entityId()) != null, name + ": node " + n.index + " has no hit box");
+                    check(f, Math.hypot(n.pos.x - CX, n.pos.z - CZ) < 15, name + ": node " + n.index + " is outside the room at " + n.pos);
+                    check(f, level.noCollision(new net.minecraft.world.phys.AABB(n.pos.x - 0.5, n.pos.y, n.pos.z - 0.5, n.pos.x + 0.5, n.pos.y + 2, n.pos.z + 0.5)),
+                            name + ": node " + n.index + " is inside a block at " + n.pos);
+                }
+                // 領域のあいだ、心臓は叩いても傷を受けない (領域は仕掛けで解く)
+                rig.heart().invulnerableTime = 0;
+                float h0 = rig.heart().getHealth();
+                for (int i = 0; i < 20; i++) {
+                    rig.heart().invulnerableTime = 0;
+                    rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
+                }
+                check(f, rig.heart().getHealth() == h0 && d.phase() == HeartDomain.Phase.ACTIVE, name + ": hitting the heart hurt it or broke the domain during the domain");
+            }
             check(f, BossCue.sentCount() > cues, name + ": no attack names were sent during the domain");
-            check(f, taken <= 0.45, name + ": a telegraph-reading bot took " + fmt(taken) + " of the expected health through the domain (needs <= 0.45): " + bot.where);
-            check(f, jp.revati.skyabyss.titan.domain.HeartDomain.lastPayload() != null
-                    && jp.revati.skyabyss.titan.domain.HeartDomain.lastPayload().state() == jp.revati.skyabyss.titan.domain.DomainPayload.END,
-                    name + ": no end packet after the domain");
-            notes.add(String.format(Locale.ROOT, "%s domain: reader %.2f", name, taken));
+            check(f, taken <= 0.45, name + ": a telegraph-reading bot took " + fmt(taken) + " of the expected health through the declaration and 35 s of the domain (needs <= 0.45): " + bot.where);
+            notes.add(String.format(Locale.ROOT, "%s domain: reader %.2f (no timeout, heart invulnerable)", name, taken));
         } finally {
             despawn(rig, bot);
         }
-        // 回る人形は領域のあいだ傷を受ける (領域の決まりは回り続けを許さない)
+        // B: 回る人形は領域のあいだ傷を受ける (領域の決まりは回り続けを許さない)
         rig = maker.get();
         bot = spawnBot(level, "domain_circle", 8);
         try {
             Driver driver = circler();
             rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
-            int guard = 0;
-            while ((rig.domain().get() == null || rig.domain().get().phase() != HeartDomain.Phase.ACTIVE) && guard++ < 400) {
-                step(rig, bot, driver, level, guard);
-            }
+            toActive(rig, bot, driver, level);
             double before = bot.taken(rig.stage());
             for (int t = 0; t < 400; t++) {
                 step(rig, bot, driver, level, t);
@@ -495,44 +518,236 @@ public final class HeartBotSelfTest {
         } finally {
             despawn(rig, bot);
         }
-        // 砕く: 領域のあいだに心臓へ与えた傷で砕け、予告は消え、1.5 倍・終わりの通信
+        // C: 一人の人形が仕掛けを解く (歩く時間つき)。解けたら砕けて、予告・箱が消え、1.5 倍・終わりの通信
         rig = maker.get();
-        bot = spawnBot(level, "domain_break", 8);
+        bot = spawnBot(level, "domain_solve", 8);
+        try {
+            Driver reader = reader(rig.heightAt(), rig.refuges());
+            rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
+            HeartDomain d = toActive(rig, bot, reader, level);
+            check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the domain never became active");
+            if (d != null) {
+                double before = bot.taken(rig.stage());
+                int solvedAt = solve(rig, bot, reader, level, d, f);
+                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved() && d.broken(), name + ": a lone bot did not solve the domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks)");
+                check(f, solvedAt > 0 && solvedAt < 20 * 70, name + ": solving took " + solvedAt + " ticks (needs under 70 s for one player)");
+                double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
+                check(f, taken <= 0.8, name + ": the solver bot took " + fmt(taken) + " of the expected health while solving (needs <= 0.8)");
+                check(f, d.takenMultiplier() > 1.4f, name + ": no 1.5x window after the domain was solved");
+                Telegraph.tickNow(level);
+                check(f, Telegraph.activeCount(level) == 0, name + ": telegraphs remain after the solve (" + Telegraph.activeCount(level) + ")");
+                for (HeartDomain.Node n : d.nodes()) {
+                    check(f, n.entityId() == null, name + ": a node hit box was left behind");
+                }
+                check(f, level.getEntitiesOfClass(net.minecraft.world.entity.Interaction.class, new net.minecraft.world.phys.AABB(CX - 40, FLOOR - 5, CZ - 40, CX + 40, FLOOR + 20, CZ + 40),
+                        e -> e.getTags().contains(HeartDomain.NODE_TAG)).isEmpty(), name + ": node boxes remain in the room");
+                jp.revati.skyabyss.titan.domain.DomainPayload p = HeartDomain.lastPayload();
+                check(f, p != null && p.state() == jp.revati.skyabyss.titan.domain.DomainPayload.END && p.a() == 1, name + ": no solved packet");
+                // 解けたあと、心臓は技へ戻り、その窓では傷が通る
+                float h0 = rig.heart().getHealth();
+                rig.heart().invulnerableTime = 0;
+                rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
+                check(f, rig.heart().getHealth() < h0, name + ": the heart is still invulnerable after the domain was solved");
+                for (int t = 0; t < 200; t++) {
+                    step(rig, bot, reader, level, t);
+                }
+                check(f, !d.running(), name + ": the domain is still running after it was solved");
+                notes.add(String.format(Locale.ROOT, "%s domain solved by one bot in %.1f s (took %.2f)", name, solvedAt / 20.0, taken));
+            }
+        } finally {
+            despawn(rig, bot);
+        }
+        // D: 仕掛けごとの決まり
+        checkPuzzleRules(level, maker, f, notes);
+    }
+
+    // 一人で解く。仕掛けごとの手順 (歩く時間を見込む)。解けるまでの tick (解けなければ上限) を返す
+    private static int solve(Rig rig, Bot bot, Driver reader, ServerLevel level, HeartDomain d, List<String> f) {
+        String name = rig.name();
+        boolean[] hold = {false};
+        boolean[] dodging = {false};
+        int[] holdNode = {-1};
+        Vec3[] holdAt = {Vec3.ZERO};
+        Driver driver = (b, lv, tk) -> {
+            if (hold[0] && !dodging[0]) {
+                b.moveTo(holdAt[0].x, holdAt[0].y, holdAt[0].z);
+            } else {
+                reader.move(b, lv, tk);
+            }
+        };
+        int[] lastAct = {0};
+        Vec3[] at = {bot.position()};
+        for (int t = 1; t < 20 * 90 && d.phase() == HeartDomain.Phase.ACTIVE; t++) {
+            step(rig, bot, driver, level, t);
+            if (d.phase() != HeartDomain.Phase.ACTIVE) {
+                return t;
+            }
+            if (d instanceof jp.revati.skyabyss.titan.domain.StoneSeaDomain s) {
+                int e = s.expected();
+                if (e >= 0) {
+                    Vec3 np = s.nodes().get(e).pos;
+                    if (t - lastAct[0] >= legTicks(at[0], np)) {
+                        bot.moveTo(np.x + 1, np.y, np.z);
+                        s.strikeNode(level, e, bot);
+                        lastAct[0] = t;
+                        at[0] = np;
+                    }
+                }
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.RisingTideDomain r) {
+                // 水門を順に叩く (開いたまま三つそろえる)
+                for (HeartDomain.Node n : r.nodes()) {
+                    if (!n.done && t - lastAct[0] >= legTicks(at[0], n.pos)) {
+                        bot.moveTo(n.pos.x + 1, n.pos.y, n.pos.z);
+                        r.strikeNode(level, n.index, bot);
+                        lastAct[0] = t;
+                        at[0] = n.pos;
+                        break;
+                    }
+                }
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.ThunderCageDomain c) {
+                int rod = c.charging();
+                if (rod >= 0) {
+                    Vec3 np = c.nodes().get(rod).pos;
+                    int walk = legTicks(at[0], np);
+                    check(f, walk <= jp.revati.skyabyss.titan.domain.ThunderCageDomain.CHARGE - 50, name + ": a rod is " + walk + " ticks of walking away (charge is " + jp.revati.skyabyss.titan.domain.ThunderCageDomain.CHARGE + ")");
+                    if (d.ticks() - c.chargeStart() >= walk) {
+                        // 溜まり始めからの時間で、歩いて着く
+                        bot.moveTo(np.x + 1, np.y, np.z);
+                        c.strikeNode(level, rod, bot);
+                        lastAct[0] = t;
+                        at[0] = np;
+                    }
+                }
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.HearthCoreDomain h) {
+                HeartDomain.Node next = null;
+                for (HeartDomain.Node n : h.nodes()) {
+                    if (!n.done) {
+                        next = n;
+                        break;
+                    }
+                }
+                if (next == null) {
+                    hold[0] = false;
+                    bot.setShiftKeyDown(false);
+                } else if (!hold[0] || holdNode[0] != next.index) {
+                    // 次の核へ歩く (着くまでの時間を見込む)
+                    hold[0] = false;
+                    bot.setShiftKeyDown(false);
+                    if (holdNode[0] != next.index && t - lastAct[0] >= legTicks(at[0], next.pos)) {
+                        hold[0] = true;
+                        holdNode[0] = next.index;
+                        holdAt[0] = new Vec3(next.pos.x + 1, next.pos.y, next.pos.z);
+                        lastAct[0] = t;
+                        at[0] = next.pos;
+                    } else if (holdNode[0] == next.index) {
+                        hold[0] = true;
+                    }
+                } else {
+                    // しゃがんで冷ます。熱い床の予告が足もとに来るなら、いったん避ける (読む人形の動き)
+                    boolean danger = Telegraph.dangerAt(level, holdAt[0].x, holdAt[0].y, holdAt[0].z, 12) || Telegraph.dangerAt(level, holdAt[0].x, holdAt[0].y, holdAt[0].z, 0);
+                    bot.setShiftKeyDown(!danger);
+                    dodging[0] = danger;
+                }
+            }
+        }
+        bot.setShiftKeyDown(false);
+        return d.phase() == HeartDomain.Phase.ACTIVE ? -1 : 20 * 90;
+    }
+
+    // 仕掛けごとの決まり: 間違い・保たない・逃す・離れる・叩きだけでは効かない
+    private static void checkPuzzleRules(ServerLevel level, Supplier<Rig> maker, List<String> f, List<String> notes) {
+        Rig rig = maker.get();
+        String name = rig.name();
+        Bot bot = spawnBot(level, "domain_rules", 8);
         try {
             Driver driver = reader(rig.heightAt(), rig.refuges());
             rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
-            int guard = 0;
-            while ((rig.domain().get() == null || rig.domain().get().phase() != HeartDomain.Phase.ACTIVE) && guard++ < 400) {
-                step(rig, bot, driver, level, guard);
+            HeartDomain d = toActive(rig, bot, driver, level);
+            if (d == null) {
+                f.add(name + ": no domain for the rule checks");
+                return;
             }
-            HeartDomain d = rig.domain().get();
-            check(f, d != null && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the domain never became active");
-            if (d != null) {
-                for (int t = 0; t < 40; t++) {
+            if (d instanceof jp.revati.skyabyss.titan.domain.StoneSeaDomain s) {
+                for (int t = 0; t < 10; t++) {
                     step(rig, bot, driver, level, t);
                 }
-                check(f, Telegraph.activeCount(level) > 0, name + ": the domain shows no telegraphs");
-                float start = rig.heart().getHealth();
-                int hits = 0;
-                while (d.phase() == HeartDomain.Phase.ACTIVE && hits++ < 80) {
-                    rig.heart().invulnerableTime = 0;
-                    rig.heart().hurt(rig.heart().damageSources().generic(), 40f);
-                }
-                check(f, d.phase() == HeartDomain.Phase.DONE && d.broken(), name + ": the domain did not break after " + hits + " hits (" + d.percent() + "%)");
-                float lost = start - rig.heart().getHealth();
-                check(f, lost >= d.breakNeeded() && lost < d.breakNeeded() + 60, name + ": lost " + fmt(lost) + " health, break needs " + fmt(d.breakNeeded()));
-                check(f, d.takenMultiplier() > 1.4f, name + ": no 1.5x window after the shatter");
-                Telegraph.tickNow(level);
-                check(f, Telegraph.activeCount(level) == 0, name + ": telegraphs remain after the shatter (" + Telegraph.activeCount(level) + ")");
-                jp.revati.skyabyss.titan.domain.DomainPayload p = HeartDomain.lastPayload();
-                check(f, p != null && p.state() == jp.revati.skyabyss.titan.domain.DomainPayload.END && p.a() == 1, name + ": no shatter packet");
-                // 砕けたあと、心臓は技へ戻る
-                for (int t = 0; t < 200; t++) {
+                int[] order = s.order();
+                int wrong = order[0] == 0 ? 1 : 0;
+                s.strikeNode(level, wrong, bot);
+                check(f, s.solvedCount() == 0, name + ": a wrong first bone counted");
+                s.strikeNode(level, order[0], bot);
+                check(f, s.solvedCount() == 1 && s.expected() == order[1], name + ": the right first bone did not count");
+                s.strikeNode(level, order[2], bot);
+                check(f, s.solvedCount() == 0 && s.expected() == order[0], name + ": a wrong second bone did not reset the pattern");
+                check(f, s.nodes().stream().noneMatch(n -> n.done), name + ": bones stayed lit after a reset");
+                for (int t = 0; t < 400; t++) {
                     step(rig, bot, driver, level, t);
                 }
-                check(f, !d.running(), name + ": the domain is still running after it broke");
-                notes.add(name + " domain break ok (" + fmt(lost) + " health)");
+                check(f, d.phase() == HeartDomain.Phase.ACTIVE, name + ": a wrong pattern ended the domain");
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.RisingTideDomain r) {
+                r.strikeNode(level, 0, bot);
+                check(f, r.solvedCount() == 1, name + ": a struck valve did not open");
+                for (int t = 0; t < jp.revati.skyabyss.titan.domain.RisingTideDomain.OPEN_TICKS - 5; t++) {
+                    step(rig, bot, driver, level, t);
+                }
+                check(f, r.solvedCount() == 1, name + ": the valve closed before its open time ran out");
+                for (int t = 0; t < 12; t++) {
+                    step(rig, bot, driver, level, t);
+                }
+                check(f, r.solvedCount() == 0 && d.phase() == HeartDomain.Phase.ACTIVE, name + ": the valve stayed open after its time (" + r.solvedCount() + ")");
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.ThunderCageDomain c) {
+                int guard = 0;
+                while (c.charging() < 0 && guard++ < 300) {
+                    step(rig, bot, driver, level, guard);
+                }
+                check(f, c.charging() >= 0, name + ": no rod started to charge");
+                int other = (c.charging() + 1) % 3;
+                c.strikeNode(level, other, bot);
+                check(f, c.solvedCount() == 0, name + ": striking a rod that was not charging counted");
+                int start = c.chargeStart();
+                int spent = 0;
+                for (int t = 0; t < jp.revati.skyabyss.titan.domain.ThunderCageDomain.CHARGE + 20; t++) {
+                    step(rig, bot, driver, level, t);
+                    if (c.charging() < 0) {
+                        spent++;
+                    }
+                }
+                check(f, spent > 0 && c.solvedCount() == 0, name + ": a missed rod did not discharge and reset (solved " + c.solvedCount() + ")");
+                guard = 0;
+                while (c.charging() < 0 && guard++ < 400) {
+                    step(rig, bot, driver, level, guard);
+                }
+                check(f, c.charging() >= 0 && c.chargeStart() != start, name + ": the rod did not charge again after discharging");
+            } else if (d instanceof jp.revati.skyabyss.titan.domain.HearthCoreDomain h) {
+                HeartDomain.Node n = h.nodes().get(0);
+                h.strikeNode(level, 0, bot);
+                check(f, h.solvedCount() == 0, name + ": hitting a core cooled it");
+                // しゃがまずにそばに立つ・しゃがんで遠くに立つ: 冷めない
+                Driver stay = (b, lv, tk) -> b.moveTo(n.pos.x + 1, n.pos.y, n.pos.z);
+                bot.setShiftKeyDown(false);
+                for (int t = 0; t < 120; t++) {
+                    step(rig, bot, stay, level, t);
+                }
+                check(f, n.state == 0 && h.solvedCount() == 0, name + ": standing by a core without sneaking cooled it");
+                Driver far = (b, lv, tk) -> b.moveTo(n.pos.x + 7, n.pos.y, n.pos.z);
+                bot.setShiftKeyDown(true);
+                for (int t = 0; t < 120; t++) {
+                    step(rig, bot, far, level, t);
+                }
+                check(f, n.state == 0 && h.solvedCount() == 0, name + ": sneaking far from a core cooled it");
+                // 近くでしゃがむと進み、離れると戻る
+                for (int t = 0; t < 30; t++) {
+                    step(rig, bot, stay, level, t);
+                }
+                int mid = n.state;
+                check(f, mid >= 25 && mid < jp.revati.skyabyss.titan.domain.HearthCoreDomain.QUENCH, name + ": sneaking by a core made " + mid + " progress in 30 ticks");
+                for (int t = 0; t < 20; t++) {
+                    step(rig, bot, far, level, t);
+                }
+                check(f, n.state < mid, name + ": a core did not warm up again after the bot left");
+                bot.setShiftKeyDown(false);
             }
+            notes.add(name + " domain rules ok");
         } finally {
             despawn(rig, bot);
         }

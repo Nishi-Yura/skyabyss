@@ -95,6 +95,11 @@ final class WhaleDump {
         if ((p.getX() >= -14 && p.getX() <= 14 && p.getZ() >= -122 && p.getZ() <= -99) || (p.getX() >= 33 && p.getX() <= 40 && p.getZ() >= -109 && p.getZ() <= -97)) {
             return true;
         }
+        // 入口の通路の東の壁から試練の階へ上る階段の戸口 (WhaleDeck。docs/design/29)
+        if (WhaleDeck.placed() && p.getX() >= WhaleDeck.STAIR_DOOR_X && p.getX() <= WhaleDeck.LAND_X && p.getZ() >= WhaleDeck.STAIR_Z0 - 1
+                && p.getZ() <= WhaleDeck.STAIR_Z1 + 1) {
+            return true;
+        }
         // 祠から下りる階段
         if (p.getX() >= -4 && p.getX() <= 4 && p.getZ() >= 15 && p.getZ() <= TitanBackLayout.SHRINE_Z) {
             return true;

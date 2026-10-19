@@ -88,7 +88,7 @@ public final class CinematicSelfTest {
                 check(f, end.distanceTo(new Vec3(0, CameraMath.EYE, 0)) < 1.0e-6, s.id() + ": seamless scene does not end at the eye");
             }
         }
-        check(f, count == 13, "expected 13 scenes (opening, whale, 3 first sights, 4 hearts, 4 dormancies), got " + count);
+        check(f, count == 14, "expected 14 scenes (opening, whale, 3 first sights, 4 hearts, 4 dormancies, trial tablet reveal), got " + count);
         Scene opening = Scenes.get(Scenes.OPENING);
         check(f, opening != null && opening.duration() <= 40f && opening.duration() >= 25f, "opening should be 25-40 s");
         check(f, opening != null && opening.intro() && opening.handBack() && opening.seamless(), "opening flags");

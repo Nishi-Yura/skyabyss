@@ -6,9 +6,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -125,5 +127,131 @@ public final class ThunderCageDomain extends HeartDomain {
         if (shattered) {
             level.sendParticles(ParticleTypes.END_ROD, cx, floorY + 3, cz, 100, 3, 1.5, 3, 0.4);
         }
+    }
+
+    // ---------------------------------------------------------------- 仕掛け: 避雷の柱 (三本)
+    // 柱は順に (一本ずつ) 雷を溜める。溜まっている柱は強く光り、音が鳴る。CHARGE tick のあいだに叩けば、雷は地へ逃げて柱は済む。
+    // 叩かないまま溜まりきると、最後の TELE_WARN tick に柱のまわりに予告 (床の円) が出て、雷が柱の足もとへ落ちる (予告は叩けば消える)。
+    // 散ったあとは RESET tick おいて、同じ柱がまた溜まる。人が多ければ、近くの人が叩ける
+    public static final int CHARGE = 160;
+    public static final int TELE_WARN = 28;
+    public static final int GAP = 30;
+    public static final int RESET = 70;
+    public static final double ROD_RADIUS = 3.4;
+    public static final float ROD_DAMAGE = 14f;
+
+    private int[] order = {0, 1, 2};
+    private int stage;
+    private int chargeStart = -1;
+    private int readyAt;
+    private Telegraph pending;
+
+    public int[] order() {
+        return order.clone();
+    }
+
+    // 試験用: いま溜まっている柱 (なければ -1) と、溜まり始めの tick
+    public int charging() {
+        return chargeStart >= 0 && stage < NODES ? order[stage] : -1;
+    }
+
+    public int chargeStart() {
+        return chargeStart;
+    }
+
+    @Override
+    protected void puzzleBegin(ServerLevel level) {
+        java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
+        java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
+        order = new int[] {list.get(0), list.get(1), list.get(2)};
+        stage = 0;
+        chargeStart = -1;
+        readyAt = 50;
+        pending = null;
+    }
+
+    @Override
+    protected void puzzleTick(ServerLevel level, int t) {
+        if (stage >= NODES) {
+            return;
+        }
+        Node n = nodes.get(order[stage]);
+        if (chargeStart < 0) {
+            if (t >= readyAt) {
+                chargeStart = t;
+                tone(level, n.pos, SoundEvents.BEACON_POWER_SELECT, 3.0f, 1.8f);
+                tell(level, "message.skyabyss.domain.thunder_cage.charging");
+            }
+            return;
+        }
+        int k = t - chargeStart;
+        if (k % 8 == 0) {
+            burst(level, n, ParticleTypes.ELECTRIC_SPARK, 6 + k / 12, 0.4, 0.3);
+            ring(level, n.pos, ROD_RADIUS, k > CHARGE - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
+        }
+        if (k % 20 == 0) {
+            tone(level, n.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f + k / 200f, 1.8f);
+        }
+        if (k == CHARGE - TELE_WARN) {
+            double x = n.pos.x;
+            double z = n.pos.z;
+            pending = tg(level, TelegraphShape.circle(x, z, ROD_RADIUS), TELE_WARN)
+                    .onImpact(s -> s.playSound(null, x, floorY + 1, z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 2.5f, 1.2f))
+                    .onHit((s, p) -> striker.accept(p, ROD_DAMAGE))
+                    .start();
+        }
+        if (k >= CHARGE) {
+            // 溜まりきって落ちた (傷は予告が出した)。柱はしばらくして、また溜まる
+            pending = null;
+            chargeStart = -1;
+            readyAt = t + RESET;
+            burst(level, n, ParticleTypes.FLASH, 1, 0.1, 0);
+            tell(level, "message.skyabyss.domain.thunder_cage.spent");
+        }
+    }
+
+    @Override
+    protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
+        if (stage >= NODES) {
+            return true;
+        }
+        if (chargeStart >= 0 && node.index == order[stage]) {
+            node.done = true;
+            if (pending != null) {
+                pending.cancel();
+                pending = null;
+            }
+            chargeStart = -1;
+            stage++;
+            readyAt = ticks() + GAP;
+            tone(level, node.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 1.6f, 1.4f);
+            burst(level, node, ParticleTypes.ELECTRIC_SPARK, 40, 0.6, 0.5);
+            tell(level, "message.skyabyss.domain.thunder_cage.grounded", stage, NODES);
+        } else {
+            tone(level, node.pos, SoundEvents.NOTE_BLOCK_HAT.value(), 1.0f, 0.8f);
+            tell(level, "message.skyabyss.domain.thunder_cage.idle");
+        }
+        return true;
+    }
+
+    @Override
+    public int solvedCount() {
+        return stage;
+    }
+
+    @Override
+    protected boolean complete() {
+        return stage >= NODES;
+    }
+
+    @Override
+    protected int markColor(Node n, int t) {
+        if (n.done) {
+            return 0x66E08A;
+        }
+        if (charging() == n.index) {
+            return (t / 4) % 2 == 0 ? 0xFFF6A0 : 0xFFD23C;
+        }
+        return 0x7C93B8;
     }
 }

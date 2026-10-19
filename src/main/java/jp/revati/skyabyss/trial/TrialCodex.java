@@ -1,0 +1,220 @@
+package jp.revati.skyabyss.trial;
+
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.saveddata.SavedData;
+
+// 試練の図鑑・称号・今週の試練の記録 (人ごと。docs/design/29 の 4.2・4.4。共有しない)。オーバーワールドに保存する。
+// 札は初めて「引かれた」とき seen、「済ませた」とき cleared が増える。出会った修飾は "種類:内容" の文字で集める
+public final class TrialCodex extends SavedData {
+    private static final String NAME = "skyabyss_trial_codex";
+
+    public static final class Entry {
+        public boolean seen;
+        public int cleared;
+        public int goals;
+        public final Set<String> mods = new LinkedHashSet<>();
+    }
+
+    private final Map<UUID, Map<String, Entry>> entries = new HashMap<>();
+    private final Map<UUID, Set<String>> titles = new HashMap<>();
+    // 今週の試練を済ませた週 (巨神ごと)
+    private final Map<UUID, Map<String, Long>> weekly = new HashMap<>();
+
+    public static TrialCodex get(MinecraftServer server) {
+        return server.overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TrialCodex::new, TrialCodex::load), NAME);
+    }
+
+    public Entry of(UUID player, String cell) {
+        return entries.computeIfAbsent(player, k -> new HashMap<>()).computeIfAbsent(cell, k -> new Entry());
+    }
+
+    // 読むだけ (なければ空の札。作らない)
+    public Entry peek(UUID player, String cell) {
+        Map<String, Entry> m = entries.get(player);
+        Entry e = m == null ? null : m.get(cell);
+        return e == null ? new Entry() : e;
+    }
+
+    // 引かれた。初めてなら true
+    public boolean markSeen(UUID player, String cell) {
+        Entry e = of(player, cell);
+        if (e.seen) {
+            return false;
+        }
+        e.seen = true;
+        setDirty();
+        return true;
+    }
+
+    // 済ませた。modKeys = 出会った修飾の印。その人にとって初めて済ませたなら true
+    public boolean markCleared(UUID player, String cell, Set<String> modKeys, boolean goalDone) {
+        Entry e = of(player, cell);
+        boolean first = e.cleared == 0;
+        e.seen = true;
+        e.cleared++;
+        if (goalDone) {
+            e.goals++;
+        }
+        e.mods.addAll(modKeys);
+        setDirty();
+        return first;
+    }
+
+    public int totalCleared(UUID player) {
+        int n = 0;
+        Map<String, Entry> m = entries.get(player);
+        if (m != null) {
+            for (Entry e : m.values()) {
+                if (e.cleared > 0) {
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
+    public int totalGoals(UUID player) {
+        int n = 0;
+        Map<String, Entry> m = entries.get(player);
+        if (m != null) {
+            for (Entry e : m.values()) {
+                n += e.goals;
+            }
+        }
+        return n;
+    }
+
+    public Set<String> titles(UUID player) {
+        return titles.getOrDefault(player, Set.of());
+    }
+
+    public boolean addTitle(UUID player, String title) {
+        if (titles.computeIfAbsent(player, k -> new LinkedHashSet<>()).add(title)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public long weeklyDone(UUID player, String titan) {
+        Map<String, Long> m = weekly.get(player);
+        Long w = m == null ? null : m.get(titan);
+        return w == null ? Long.MIN_VALUE : w;
+    }
+
+    public void setWeeklyDone(UUID player, String titan, long week) {
+        weekly.computeIfAbsent(player, k -> new HashMap<>()).put(titan, week);
+        setDirty();
+    }
+
+    public void forget(UUID player) {
+        boolean any = entries.remove(player) != null;
+        any |= titles.remove(player) != null;
+        any |= weekly.remove(player) != null;
+        if (any) {
+            setDirty();
+        }
+    }
+
+    private static TrialCodex load(CompoundTag tag, HolderLookup.Provider registries) {
+        TrialCodex data = new TrialCodex();
+        CompoundTag all = tag.getCompound("entries");
+        for (String pid : all.getAllKeys()) {
+            UUID uuid = parse(pid);
+            if (uuid == null) {
+                continue;
+            }
+            CompoundTag p = all.getCompound(pid);
+            for (String cell : p.getAllKeys()) {
+                CompoundTag c = p.getCompound(cell);
+                Entry e = data.of(uuid, cell);
+                e.seen = c.getBoolean("seen");
+                e.cleared = c.getInt("cleared");
+                e.goals = c.getInt("goals");
+                for (Tag t : c.getList("mods", Tag.TAG_STRING)) {
+                    e.mods.add(t.getAsString());
+                }
+            }
+        }
+        CompoundTag tl = tag.getCompound("titles");
+        for (String pid : tl.getAllKeys()) {
+            UUID uuid = parse(pid);
+            if (uuid == null) {
+                continue;
+            }
+            Set<String> set = new LinkedHashSet<>();
+            for (Tag t : tl.getList(pid, Tag.TAG_STRING)) {
+                set.add(t.getAsString());
+            }
+            data.titles.put(uuid, set);
+        }
+        CompoundTag wk = tag.getCompound("weekly");
+        for (String pid : wk.getAllKeys()) {
+            UUID uuid = parse(pid);
+            if (uuid == null) {
+                continue;
+            }
+            CompoundTag w = wk.getCompound(pid);
+            Map<String, Long> m = new HashMap<>();
+            for (String titan : w.getAllKeys()) {
+                m.put(titan, w.getLong(titan));
+            }
+            data.weekly.put(uuid, m);
+        }
+        return data;
+    }
+
+    private static UUID parse(String s) {
+        try {
+            return UUID.fromString(s);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        CompoundTag all = new CompoundTag();
+        entries.forEach((uuid, m) -> {
+            CompoundTag p = new CompoundTag();
+            m.forEach((cell, e) -> {
+                CompoundTag c = new CompoundTag();
+                c.putBoolean("seen", e.seen);
+                c.putInt("cleared", e.cleared);
+                c.putInt("goals", e.goals);
+                ListTag mods = new ListTag();
+                e.mods.forEach(s -> mods.add(StringTag.valueOf(s)));
+                c.put("mods", mods);
+                p.put(cell, c);
+            });
+            all.put(uuid.toString(), p);
+        });
+        tag.put("entries", all);
+        CompoundTag tl = new CompoundTag();
+        titles.forEach((uuid, set) -> {
+            ListTag l = new ListTag();
+            set.forEach(s -> l.add(StringTag.valueOf(s)));
+            tl.put(uuid.toString(), l);
+        });
+        tag.put("titles", tl);
+        CompoundTag wk = new CompoundTag();
+        weekly.forEach((uuid, m) -> {
+            CompoundTag w = new CompoundTag();
+            m.forEach(w::putLong);
+            wk.put(uuid.toString(), w);
+        });
+        tag.put("weekly", wk);
+        return tag;
+    }
+}
