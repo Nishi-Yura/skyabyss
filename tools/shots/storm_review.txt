@@ -1,0 +1,47 @@
+# 雷翼の背の試練の見直し (docs/design/25) の確かめ。./gradlew runShots -Pscript=tools/shots/storm_review.txt
+# 出力: run/shots/storm_review/shots/storm_review/*.png
+world storm_review flat
+size 1280 720
+timeout 900
+render 12
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+cmd skyabyss titan storm calm
+cmd skyabyss stormback mirrors 0
+cmd skyabyss stormback go eye
+wait 60
+hud off
+camera skyabyss:storm_back 0 147 -70.5 180 12
+wait 40
+waitchunks
+shot eye_from_door
+camera skyabyss:storm_back 0 156 -72 180 55
+wait 20
+shot eye_above
+camera skyabyss:storm_back -7.5 147 -78 270 5
+wait 20
+shot eye_west_wall
+camera skyabyss:storm_back 7 147 -86 90 5
+wait 20
+shot eye_north_east
+camera skyabyss:storm_back 0 147 -85 0 8
+wait 20
+shot eye_north_wall
+cmd skyabyss stormback go knob
+camera skyabyss:storm_back -128 145 -17 270 15
+wait 20
+waitchunks
+shot knob
+cmd skyabyss stormback go w1
+camera skyabyss:storm_back -31 147 -17 90 5
+wait 20
+waitchunks
+shot west_bone
+cmd skyabyss stormback go e0
+camera skyabyss:storm_back 32 147 -17 270 3
+wait 20
+waitchunks
+shot east_bone

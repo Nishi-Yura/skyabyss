@@ -685,20 +685,13 @@ public final class StormBackSelfTest {
                 "the keel gate should be closed after reset", f);
         check(other.epoch() == epochB && other.rung(StormBackState.Trial.EAST), "resetting group A touched group B's record", f);
         check(state.mirrorConfig() >= 1, "the next round should draw a harder mirror config (" + state.mirrorConfig() + ")", f);
-        // 眠る試練: 心臓を倒したグループは 2 周目から一つ眠り、同じものは続けない。24 回で三つとも眠る
+        // 試練は眠らない (25 の 2章): 心臓を倒したグループでも、リセットのあと三つとも鳴っていない・眠っていない
         state.markEverDefeated();
-        StormBackState.Trial prev = null;
-        Set<StormBackState.Trial> seen = new HashSet<>();
-        for (int i = 0; i < 24; i++) {
+        for (int i = 0; i < 12; i++) {
             state.reset(l.random, null, false);
-            StormBackState.Trial s = state.sleeping();
-            check(s != null && s != prev, "sleeping trial repeated or missing at reset " + i, f);
-            check(s == null || state.rung(s), "the sleeping trial's stone should be ringing", f);
+            check(state.sleeping() == null && state.rungCount() == 0, "a trial slept or rang by itself at reset " + i, f);
             check(state.everDefeated(), "the heart record of the group was lost by a reset", f);
-            seen.add(s);
-            prev = s;
         }
-        check(seen.size() == 3, "all three trials should sleep sometimes", f);
         // 東が眠ると、そのグループにだけ骨の戸が開いている
         StormBackTrials.resetGroup(l, GROUP_A, false, StormBackState.Trial.EAST, false, false);
         BlockPos door = new BlockPos(EAST_DOORS[1], BONE_FLOOR + 2, -17);
