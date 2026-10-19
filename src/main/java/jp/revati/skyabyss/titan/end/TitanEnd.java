@@ -105,9 +105,30 @@ public final class TitanEnd {
         if (Titans.THUNDER_WING.equals(titan)) {
             chooseStormPeak(server.overworld());
         }
+        scheduleCarry(back, titan, fought);
+    }
+
+    // 報酬を出さずに、眠りと運び出しだけ (同じ試練の周で心臓をもう一度倒したとき。報酬・誓いは二重に出さない。
+    // これを呼ばないと、二度目の撃破では巨神が眠らず、地上から去らない)
+    public static void onHeartStoppedAgain(ServerLevel back, String titan, Collection<UUID> ids) {
+        MinecraftServer server = back.getServer();
+        Set<UUID> fought = new LinkedHashSet<>(ids);
+        TitanDormancy.begin(server, titan, CARRY_AT);
+        if (Titans.THUNDER_WING.equals(titan)) {
+            chooseStormPeak(server.overworld());
+        }
+        scheduleCarry(back, titan, fought);
+    }
+
+    private static void scheduleCarry(ServerLevel back, String titan, Set<UUID> fought) {
+        MinecraftServer server = back.getServer();
         long until = server.overworld().getGameTime() + CARRY_AT + 60;
         for (UUID id : targetIds(server, back, fought)) {
             HOLDING.put(id, until);
+        }
+        // 心臓を止めた人のそばに、すぐ帰れる帰り石 (運び出しを待たずに戻れる)
+        for (ServerPlayer p : targets(server, back, fought)) {
+            ReturnBeacons.offer(p);
         }
         Tasks.later(SILENCE_AT, () -> narrateBack(back, "message.skyabyss.titan_end.silence"));
         Tasks.later(TREMBLE_AT, () -> tremble(back, titan));

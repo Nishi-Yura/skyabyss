@@ -44,7 +44,7 @@
   "message.skyabyss.tide.gate_hint": "潮門をくぐると、背中へ渡る",
   "message.skyabyss.tide.arrived": "水をくぐると、巨きなひれの上にいた。目の前で、山のような甲羅がゆっくりと息をしている。",
   "message.skyabyss.tide.leaving": "潮門の向こうから、地上の海の音がする。",
-  "message.skyabyss.tide.return_hint": "見送りの段を下りて海に入ると、地上へ戻る",
+  "message.skyabyss.tide.return_hint": "光る帰り石の上でしゃがむか、見送りの段を下りて海に入ると、地上へ戻る",
   "message.skyabyss.tide.swept_back": "潮に押し戻された",
   "title.skyabyss.tide_back": "潮殻の背",
   "title.skyabyss.tide_back.sub": "海を歩く巨神の、甲羅の上",
@@ -239,5 +239,6 @@
   "message.skyabyss.whisper.tide_top": "甲羅の上に出た。前の縁まで下りると、海から立ち上がる巨神の首と頭が見える",
   "message.skyabyss.whisper.tide_garden": "大貝の真珠を、北の祭壇へ運ぶ。満ちる前に台へ上がれ。頭まで潮に沈むと、真珠は大貝へ戻る",
   "message.skyabyss.whisper.tide_watch": "栓の台の色の溜めから、台の前の敷物の色の溜めへ水が移る。重石の床は、隣の印と同じ栓を逆に流す",
-  "message.skyabyss.whisper.tide_flats": "巣は干潮のあいだだけ口を開く。満ちてきたら岩の島へ上がれ"
+  "message.skyabyss.whisper.tide_flats": "巣は干潮のあいだだけ口を開く。満ちてきたら岩の島へ上がれ",
+  "message.skyabyss.tide.boat_given": "岸が遠いので、舟を一艘用意した"
 }

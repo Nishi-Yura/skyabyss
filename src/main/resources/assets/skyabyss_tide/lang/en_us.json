@@ -44,7 +44,7 @@
   "message.skyabyss.tide.gate_hint": "Pass through the tide gate to cross onto its back",
   "message.skyabyss.tide.arrived": "Through the water, you stand on a great flipper. Before you, a vast shell slowly breathes.",
   "message.skyabyss.tide.leaving": "Beyond the tide gate, you hear the sea of the world below.",
-  "message.skyabyss.tide.return_hint": "Walk down the farewell steps into the sea to return to the surface",
+  "message.skyabyss.tide.return_hint": "Crouch on a glowing return stone, or wade down the farewell steps, to return to the surface",
   "message.skyabyss.tide.swept_back": "The tide pushed you back",
   "title.skyabyss.tide_back": "The Tide Shell's Back",
   "title.skyabyss.tide_back.sub": "Atop the shell of the titan that walks the sea",
@@ -239,5 +239,6 @@
   "message.skyabyss.whisper.tide_top": "You are out on the shell. Walk down to its front rim to see the titan's neck and head rising from the sea",
   "message.skyabyss.whisper.tide_garden": "Carry the giant clam's pearl to the north altar. Climb a platform before the tide comes in; if the tide covers your head, the pearl returns to the clam",
   "message.skyabyss.whisper.tide_watch": "Water flows from the basin of the plug stand's color to the basin of the rug's color in front of it. The weight plate reverses the plug with the same mark beside it",
-  "message.skyabyss.whisper.tide_flats": "The nests open only at low tide. When the tide comes in, climb onto the rock islands"
+  "message.skyabyss.whisper.tide_flats": "The nests open only at low tide. When the tide comes in, climb onto the rock islands",
+  "message.skyabyss.tide.boat_given": "The shore is far, so a boat was set out for you"
 }
