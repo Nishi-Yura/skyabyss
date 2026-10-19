@@ -1,0 +1,130 @@
+# 星が欠ける 4 案 (current / A / B / C) を、同じ時刻・同じ場所・同じ進み (帯が空を渡る割合) で撮る。選定ページ docs/review/stars 用。
+# ./gradlew runShots -Pscript=tools/shots/star_effect.txt -PshotsName=star_effect
+world shots flat
+size 1280 720
+timeout 1500
+render 12
+clouds off
+
+cmd gamemode creative
+cmd gamerule doDaylightCycle false
+cmd weather clear
+hud off
+waitchunks
+cmd skyabyss opening reset
+chat clear
+wait 5
+
+# ---- current ----
+stareffect current
+cmd time set 14500
+cmd skyabyss opening back song
+wait 20
+fov 100
+camera 0 80 0 0 -55
+wait 20
+shot star_current_0
+cmd skyabyss opening song
+wait 85
+shot star_current_1
+wait 105
+shot star_current_2
+wait 90
+shot star_current_3
+wait 90
+shot star_current_4
+wait 90
+shot star_current_5
+wait 90
+shot star_current_6
+wait 90
+shot star_current_7
+wait 160
+shot star_current_8
+wait 20
+
+# ---- a ----
+stareffect a
+cmd time set 14500
+cmd skyabyss opening back song
+wait 20
+fov 100
+camera 0 80 0 0 -55
+wait 20
+shot star_a_0
+cmd skyabyss opening song
+wait 85
+shot star_a_1
+wait 42
+shot star_a_2
+wait 27
+shot star_a_3
+wait 27
+shot star_a_4
+wait 27
+shot star_a_5
+wait 27
+shot star_a_6
+wait 27
+shot star_a_7
+wait 118
+shot star_a_8
+wait 440
+
+# ---- b ----
+stareffect b
+cmd time set 14500
+cmd skyabyss opening back song
+wait 20
+fov 100
+camera 0 80 0 0 -55
+wait 20
+shot star_b_0
+cmd skyabyss opening song
+wait 85
+shot star_b_1
+wait 42
+shot star_b_2
+wait 27
+shot star_b_3
+wait 27
+shot star_b_4
+wait 27
+shot star_b_5
+wait 27
+shot star_b_6
+wait 27
+shot star_b_7
+wait 118
+shot star_b_8
+wait 440
+
+# ---- c ----
+stareffect c
+cmd time set 14500
+cmd skyabyss opening back song
+wait 20
+fov 100
+camera 0 80 0 0 -55
+wait 20
+shot star_c_0
+cmd skyabyss opening song
+wait 85
+shot star_c_1
+wait 42
+shot star_c_2
+wait 27
+shot star_c_3
+wait 27
+shot star_c_4
+wait 27
+shot star_c_5
+wait 27
+shot star_c_6
+wait 27
+shot star_c_7
+wait 118
+shot star_c_8
+wait 440
+
+quit

@@ -134,6 +134,18 @@ public final class Config {
             .comment("技の予告の高コントラスト (面を濃く、縁を太く、縁の下に黒い縁取りを敷く)")
             .define("telegraphHighContrast", false);
 
+    // 夜の歌の「星が欠ける」見せ方 (開発用の選定。ユーザーが選ぶまで既定は CURRENT)
+    public enum StarEffectVariant {
+        CURRENT,
+        A,
+        B,
+        C
+    }
+
+    public static final ModConfigSpec.EnumValue<StarEffectVariant> STAR_EFFECT = CLIENT_BUILDER
+            .comment("夜の歌で星が欠ける見せ方 (開発用の選定)。CURRENT = 今の帯, A = 暗い影の帯 (縁で星が瞬いて消える), B = 星空のゆがみ (レンズ), C = 淡い光の輪郭 + 低い音のうねり")
+            .defineEnum("starEffect", StarEffectVariant.CURRENT);
+
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private Config() {
