@@ -178,7 +178,7 @@ def cleft_shell_cave():
     # 階段の段 (空気を上書きして段を置く) と、口の両脇の壁・柱
     for i in range(0, 15):
         for x in (-1, 0, 1):
-            bp.set(x, -1 - i, i, stair('south'))
+            bp.set(x, -1 - i, i, stair('north'))  # facing = 登る向き (背の高い側)。口 (z 0) へ登るので北
         # 両脇の壁。口 (z 0..3) は低い壁にして、空へ開く
         top = 1 if i <= 3 else -i + 3
         for x in (-2, 2):

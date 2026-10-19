@@ -42,7 +42,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック
 // 巨神での移動 (09 の 16 章): TravelTitan を実装する。旅の間は自分の動き (巡航・干潮) を止め、動きは旅の操縦 (titan.travel.SeaVoyage) が決める。
 // 乗り場は潮門の前の水 (泡の柱)、座席は甲羅の頂
-public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan {
+public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(TideShellEntity.class, EntityDataSerializers.BOOLEAN);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って沈みはじめてからは tick (600 で止まる)
@@ -797,6 +797,22 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる。
     // モデルは横 ±68、前 87.5〜後ろ 61.5 ブロック、底 (位置の y) から塔の上 73 ブロックまで (低ポリの寸法。塔が高くなったので余裕を持って 80)
+    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    @Override
+    public String volumeName() {
+        return "tide_shell";
+    }
+
+    @Override
+    public java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> corridors() {
+        return CORRIDORS;
+    }
+
+    private static final java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> CORRIDORS = java.util.List.of(
+            // 潮門の口 (横 29〜39、後ろ 27.5〜36.5) とその前の水の上 (乗り場の舟寄せ)
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(27.0, 46.0, -5.0, 17.0, -39.0, -25.0),
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(38.0, 62.0, -10.0, 20.0, -44.0, -20.0));
+
     @Override
     public AABB getBoundingBoxForCulling() {
         return getBoundingBox().inflate(92.0, 0.0, 92.0).expandTowards(0, 80.0, 0);

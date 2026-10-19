@@ -98,8 +98,8 @@ def stele():
         "minecraft:mossy_stone_bricks",                 # 2
         "minecraft:stone_brick_slab[type=bottom]",      # 3
         "minecraft:cracked_stone_bricks",               # 4
-        "minecraft:stone_brick_stairs[facing=north,half=bottom]",  # 5
-        "minecraft:stone_brick_stairs[facing=south,half=bottom]",  # 6
+        "minecraft:stone_brick_stairs[facing=south,half=bottom]",  # 5 (北の段: 中央の台へ登る = 南向き)
+        "minecraft:stone_brick_stairs[facing=north,half=bottom]",  # 6 (南の段: 北向き)
     ]
     blocks = [
         [-1, 0, -1, 1], [0, 0, -1, 5], [1, 0, -1, 1],

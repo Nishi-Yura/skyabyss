@@ -77,8 +77,12 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
             super.renderCubesOfBone(poseStack, bone, currentSource.getBuffer(RenderType.entityTranslucent(DEBUG_TEXTURE)), packedLight, packedOverlay, colour);
             return;
         }
-        LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour);
+        // 巨神の焼き込みの陰 (下ほど暗い) は、光る層の重ね描きでは掛けない
+        LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, 0f, !glowPass);
     }
+
+    // 光る層 (GlowLayer) の重ね描きの最中か
+    private boolean glowPass;
 
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
@@ -137,16 +141,26 @@ public class LowPolyGeoRenderer<T extends Entity & GeoAnimatable> extends GeoEnt
             boolean has = HAS_MASK.computeIfAbsent(tex, t -> Minecraft.getInstance().getResourceManager().getResource(
                     t.withPath(p -> p.endsWith(".png") ? p.substring(0, p.length() - 4) + "_glowmask.png" : p)).isPresent());
             if (has) {
-                // 眠る巨神 (DormantTitan) は、光が揺らぎながら消える
-                float factor = animatable instanceof jp.revati.skyabyss.titan.end.DormantTitan d ? d.glowFactor(partialTick) : 1f;
-                if (factor >= 0.999f) {
-                    super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
-                } else if (factor > 0.003f) {
-                    RenderType glow = getRenderType(animatable, bufferSource);
-                    if (glow != null) {
-                        int v = net.minecraft.util.Mth.clamp(Math.round(factor * 255f), 0, 255);
-                        getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, glow, bufferSource.getBuffer(glow), partialTick,
-                                net.minecraft.client.renderer.LightTexture.FULL_BRIGHT, packedOverlay, 0xFF000000 | (v << 16) | (v << 8) | v);
+                LowPolyGeoRenderer<?> owner = getRenderer() instanceof LowPolyGeoRenderer<?> r ? r : null;
+                if (owner != null) {
+                    owner.glowPass = true;
+                }
+                try {
+                    // 眠る巨神 (DormantTitan) は、光が揺らぎながら消える
+                    float factor = animatable instanceof jp.revati.skyabyss.titan.end.DormantTitan d ? d.glowFactor(partialTick) : 1f;
+                    if (factor >= 0.999f) {
+                        super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+                    } else if (factor > 0.003f) {
+                        RenderType glow = getRenderType(animatable, bufferSource);
+                        if (glow != null) {
+                            int v = net.minecraft.util.Mth.clamp(Math.round(factor * 255f), 0, 255);
+                            getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, glow, bufferSource.getBuffer(glow), partialTick,
+                                    net.minecraft.client.renderer.LightTexture.FULL_BRIGHT, packedOverlay, 0xFF000000 | (v << 16) | (v << 8) | v);
+                        }
+                    }
+                } finally {
+                    if (owner != null) {
+                        owner.glowPass = false;
                     }
                 }
             }

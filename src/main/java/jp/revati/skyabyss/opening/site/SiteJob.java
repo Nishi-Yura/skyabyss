@@ -550,6 +550,19 @@ public final class SiteJob {
                     placedCount++;
                 }
             }
+            // ならさない小さな部品 (積み石・柱) は、置く高さが 3x3 の中央値なので、低い列は下が空く。最下段の下の空きを土 (いちばん下は上面の土) で埋める
+            // (建築の監査 SITE_FLOAT)。地下の部品 (部屋) と、足もとを延ばす骨・掘る足跡は対象外
+            if (!bp.level && !bp.anchor && bp.relief.isEmpty() && bp.minY >= -2 && c.y() <= 0 && !state.isAir()) {
+                for (int dy = 1; dy <= 8; dy++) {
+                    p.set(at.getX(), at.getY() - dy, at.getZ());
+                    BlockState below = level.getBlockState(p);
+                    if (below.isAir() || below.canBeReplaced() || naturalAbove(below)) {
+                        set(p, dy == 1 ? topState : fillState);
+                    } else {
+                        break;
+                    }
+                }
+            }
             // 柱の根もとは地面まで延ばす (骨の脚)
             if (bp.anchor && c.y() == 0 && !state.isAir()) {
                 for (int dy = 1; dy <= 14; dy++) {

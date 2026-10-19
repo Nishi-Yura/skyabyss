@@ -50,6 +50,13 @@ public class EmberTitanRenderer extends LowPolyGeoRenderer<EmberTitanEntity> {
         super.applyRotations(titan, poseStack, ageInTicks, yaw, partialTick, nativeScale);
     }
 
+    // 地面に落ちる影 (重さ。client/titan/TitanWeight)
+    @Override
+    public void render(EmberTitanEntity titan, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        jp.revati.skyabyss.client.titan.TitanWeight.renderShadow(titan, partialTick, poseStack, buffer);
+        super.render(titan, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
     // 光る画素の強さ (0〜1)。glowmask の色にかける (光る描き方は足し合わせなので、色を下げると暗くなる)
     static float glowStrength(EmberTitanEntity titan) {
         return switch (titan.syncedMode()) {

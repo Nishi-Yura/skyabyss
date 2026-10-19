@@ -41,7 +41,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 空の影が 640 ブロック以内を通るあいだは、近くの峰へ急いで降りてうずくまる (演出だけ)
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (潮殻と同じ)。位置の y はモデルの底 (geo の y=0)
 // 地上の人には、この中心の周りを回る巨神として見える。地形は変えない (エンティティと粒だけ)
-public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan {
+public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> LOOK = SynchedEntityData.defineId(StormWingEntity.class, EntityDataSerializers.BOOLEAN);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って峰へ向かいはじめてからは tick (600 で止まる)
@@ -753,9 +753,24 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる (翼の幅 ±112、体の長さ ±60、塔の高さ 30)
+    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    @Override
+    public String volumeName() {
+        return "thunder_wing";
+    }
+
+    @Override
+    public java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> corridors() {
+        return CORRIDORS;
+    }
+
+    private static final java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> CORRIDORS = java.util.List.of(
+            // 昇り風の柱 (左へ 14、前へ -4) の根もとから腰の門の上まで
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(8.0, 20.0, -400.0, 30.0, -10.0, 2.0));
+
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(WING_SPAN, 0.0, WING_SPAN).expandTowards(0, GATE_UP + 40, 0);
+        return getBoundingBox().inflate(WING_SPAN, 0.0, WING_SPAN).expandTowards(0, GATE_UP + 40, 0).expandTowards(0, -110.0, 0);
     }
 
     // 光を測る所: 体の中ほど (地上の影にならないよう、少し上)

@@ -69,6 +69,11 @@ public final class TitanTravel {
     }
 
     // 背中の鎖を上っている人がいるか (巨神での移動は、その間は岩鯨を呼べない)
+    // この人は鎖を巻き上げられている最中か
+    public static boolean isLifting(java.util.UUID player) {
+        return LIFTS.containsKey(player);
+    }
+
     public static boolean isLifting() {
         return !LIFTS.isEmpty();
     }

@@ -35,6 +35,14 @@ public class TideShellRenderer extends LowPolyGeoRenderer<TideShellEntity> {
         super.applyRotations(titan, poseStack, ageInTicks, yaw, partialTick, nativeScale);
     }
 
+    // 海面に落ちる影 (重さ。client/titan/TitanWeight)
+    @Override
+    public void render(TideShellEntity titan, float entityYaw, float partialTick, com.mojang.blaze3d.vertex.PoseStack poseStack,
+                       net.minecraft.client.renderer.MultiBufferSource buffer, int packedLight) {
+        jp.revati.skyabyss.client.titan.TitanWeight.renderShadow(titan, partialTick, poseStack, buffer);
+        super.render(titan, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
     // 3 段の LOD (骨の名前とテクスチャは同じ)。カメラから体の軸 (頭の先から尾の先までの線分) までの距離で選ぶ
     private static final class LodModel extends LowPolyLodModel<TideShellEntity> {
         // 横に広い (ひれの先まで ±75) ので、岩鯨 (64) より少し遠くまで近景にする

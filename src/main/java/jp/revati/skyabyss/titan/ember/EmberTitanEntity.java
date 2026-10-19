@@ -49,7 +49,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // - 息 (18 秒): 吸う 8 秒・止める 2 秒・吐く 6 秒・間 2 秒。吸うと止めるのあいだだけ、熱の口 (EmberMouthEntity) から背中へ渡れる
 // 当たり判定は小さく、見た目は描画側で 8 倍にする (岩鯨・潮殻と同じ。巨大なモデルには当たり判定を付けない)。
 // 位置の y はモデルの底 (geo の y=0)。geo の 1 単位は 0.5 ブロック。頭は前 (geo の -Z)
-public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan {
+public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
     private static final EntityDataAccessor<Byte> MODE = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> BREATH = SynchedEntityData.defineId(EmberTitanEntity.class, EntityDataSerializers.BYTE);
     // 眠りの姿 (TitanDormancy)。起きていれば -1、眠って土に埋まりはじめてからは tick (600 で止まる)
@@ -1017,6 +1017,21 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     }
 
     // 見た目は当たり判定よりずっと大きい。モデルは横 ±54、前 103〜後ろ 124 ブロック、底から煙の上まで 92 ブロック (低ポリは頭の後ろの角まで 96 ブロック。余裕を持って 100)
+    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    @Override
+    public String volumeName() {
+        return "ember_titan";
+    }
+
+    @Override
+    public java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> corridors() {
+        return CORRIDORS;
+    }
+
+    private static final java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> CORRIDORS = java.util.List.of(
+            // 熱の口 (前へ 83、舌の高さ 3) の中と、その前の外
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(-6.5, 6.5, 0.0, 15.0, 76.0, 114.0));
+
     @Override
     public AABB getBoundingBoxForCulling() {
         return getBoundingBox().inflate(128.0, 0.0, 128.0).expandTowards(0, 100.0, 0);

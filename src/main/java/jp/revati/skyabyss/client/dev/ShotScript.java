@@ -72,7 +72,7 @@ public final class ShotScript {
                     script.height = line.intArg(1);
                 }
                 case "stareffect", "marker", "waitfile", "signal", "wait", "cmd", "camera", "waitchunks", "hud", "fov", "guiscale", "open", "key", "close", "shot",
-                        "echo", "watch", "band", "waitgame", "waitband", "waitnotice", "waitscreen", "quit", "waitdump", "chat", "look", "render", "clouds", "perf", "perspective", "swingpose", "swingclock", "swing", "use", "stopuse", "mainhand", "bodyyaw", "lowpoly", "weaponmesh", "weapontier", "acctier", "accmesh", "accworn", "accequip", "watcher", "armortier", "armorlevel", "sneak", "walk" -> script.steps.add(line);
+                        "echo", "watch", "band", "waitgame", "waitband", "waitnotice", "waitscreen", "quit", "waitdump", "chat", "look", "render", "clouds", "perf", "perspective", "swingpose", "swingclock", "swing", "use", "stopuse", "mainhand", "bodyyaw", "lowpoly", "titanweight", "weaponmesh", "weapontier", "acctier", "accmesh", "accworn", "accequip", "watcher", "armortier", "armorlevel", "sneak", "walk" -> script.steps.add(line);
                 default -> throw new IllegalArgumentException("line " + (i + 1) + ": unknown step '" + op + "' (" + Arrays.toString(args) + ")");
             }
         }
