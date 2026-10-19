@@ -30,9 +30,14 @@ public final class StormCaches {
     private StormCaches() {
     }
 
-    // side -1 = 西、+1 = 東
+    // side -1 = 広場の西、+1 = 広場の東、-2 = 骨の書庫、+2 = 雷の炉
     static BlockPos cachePos(int side) {
-        return side < 0 ? CACHE_WEST : CACHE_EAST;
+        return switch (side) {
+            case -2 -> VAULT_CACHE_W;
+            case -1 -> CACHE_WEST;
+            case 1 -> CACHE_EAST;
+            default -> VAULT_CACHE_E;
+        };
     }
 
     @SubscribeEvent
@@ -44,7 +49,7 @@ public final class StormCaches {
         if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
             return;
         }
-        for (int side : new int[] {-1, 1}) {
+        for (int side : new int[] {-2, -1, 1, 2}) {
             if (cachePos(side).equals(event.getPos())) {
                 event.setCanceled(true);
                 open(player, side);
@@ -64,17 +69,34 @@ public final class StormCaches {
             return;
         }
         tag.putBoolean(TAG + side, true);
-        if (side < 0) {
-            give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), 4));
-            give(player, new ItemStack(Items.ARROW, 16));
-            player.level().addFreshEntity(new ExperienceOrb(player.level(), player.getX(), player.getY(), player.getZ(), 30));
-        } else {
-            give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), 6));
-            give(player, new ItemStack(Items.ARROW, 24));
-            player.level().addFreshEntity(new ExperienceOrb(player.level(), player.getX(), player.getY(), player.getZ(), 40));
-        }
+        int jerky = switch (side) {
+            case -2 -> 5;
+            case -1 -> 4;
+            case 1 -> 6;
+            default -> 7;
+        };
+        int arrows = switch (side) {
+            case -2 -> 20;
+            case -1 -> 16;
+            case 1 -> 24;
+            default -> 28;
+        };
+        int xp = switch (side) {
+            case -2 -> 50;
+            case -1 -> 30;
+            case 1 -> 40;
+            default -> 60;
+        };
+        give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), jerky));
+        give(player, new ItemStack(Items.ARROW, arrows));
+        player.level().addFreshEntity(new ExperienceOrb(player.level(), player.getX(), player.getY(), player.getZ(), xp));
         player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.4f, 1.2f);
-        Notice.send(player, ModText.progress(side < 0 ? "message.skyabyss.storm_cache_west" : "message.skyabyss.storm_cache_east"));
+        Notice.send(player, ModText.progress(switch (side) {
+            case -2 -> "message.skyabyss.storm_cache_vault_w";
+            case -1 -> "message.skyabyss.storm_cache_west";
+            case 1 -> "message.skyabyss.storm_cache_east";
+            default -> "message.skyabyss.storm_cache_vault_e";
+        }));
     }
 
     private static void give(ServerPlayer player, ItemStack stack) {

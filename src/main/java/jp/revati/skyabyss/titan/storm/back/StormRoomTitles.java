@@ -38,6 +38,7 @@ final class StormRoomTitles {
         r.add(new Room("valley2", wingBox(WEST_UPPER_X1, WEST_GAPS[1][1] + 2)));
         r.add(new Room("elbow", new AABB(WEST_ELBOW.getX() - ELBOW_R, BONE_FLOOR, WZ - ELBOW_R, WEST_ELBOW.getX() + ELBOW_R + 1, BONE_FLOOR + 12, WZ + ELBOW_R + 1)));
         r.add(new Room("rib", RIB_HALL.aabb()));
+        r.add(new Room("vault_w", WEST_VAULT.aabb()));
         r.add(new Room("e0", E0.aabb()));
         int from = EAST_X1;
         for (int i = 0; i < EAST_DOORS.length; i++) {
@@ -45,6 +46,7 @@ final class StormRoomTitles {
             from = EAST_DOORS[i] + 1;
         }
         r.add(new Room("east_ante", new AABB(from, BONE_FLOOR, BONE_Z1, EAST_X2 + 1, BONE_FLOOR + EAST_HEIGHT + 1, BONE_Z2 + 1)));
+        r.add(new Room("vault_e", EAST_VAULT.aabb()));
         r.add(new Room("crown", F0.aabb()));
         r.add(new Room("eye", EYE_HALL.aabb()));
         r.add(new Room("beak", BEAK_ROOM.aabb()));

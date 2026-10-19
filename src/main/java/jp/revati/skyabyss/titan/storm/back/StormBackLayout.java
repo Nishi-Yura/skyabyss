@@ -120,6 +120,10 @@ public final class StormBackLayout {
     public static final int[][] WEST_GAPS = {{-86, -79}, {-110, -103}};
     // 島 (二つの割れた床のあいだ)
     public static final Area WEST_ISLAND = new Area(-102, -87, BONE_Z1, BONE_Z2, BONE_FLOOR, BONE_HEIGHT);
+    // 骨の書庫 (島の北の壁から入る横の部屋。碑二つと宝箱。必須ではない。26 の 3.3)
+    public static final Area WEST_VAULT = new Area(-100, -89, -47, -38, BONE_FLOOR, 8);
+    public static final int[] WEST_VAULT_DOOR = {-94, -92};
+    public static final BlockPos VAULT_CACHE_W = new BlockPos(-93, BONE_FLOOR + 1, -46);
     // 昇り風の穴 (上腕の最初の割れた床の手前。凪 4・嵐 13 上がる)
     public static final int[] WEST_VENT_X = {-74};
     // 嵐の高い道 (昇り風で上がった梁。床 = BONE_FLOOR + 12)
@@ -201,6 +205,10 @@ public final class StormBackLayout {
     // 戸の柱 (回路の出口。雷がここへ届くと対の戸が開く)。回路の全体は StormCircuit
     public static final List<BlockPos> EAST_RODS = List.of(new BlockPos(91, BONE_FLOOR + 1, WZ - 7), new BlockPos(120, BONE_FLOOR + 1, WZ + 8),
             new BlockPos(148, BONE_FLOOR + 1, WZ + 9), new BlockPos(174, BONE_FLOOR + 1, WZ));
+    // 雷の炉 (前室の北の壁から入る横の部屋。碑二つと宝箱。必須ではない)
+    public static final Area EAST_VAULT = new Area(180, 189, -47, -38, BONE_FLOOR, 8);
+    public static final int[] EAST_VAULT_DOOR = {182, 184};
+    public static final BlockPos VAULT_CACHE_E = new BlockPos(183, BONE_FLOOR + 1, -46);
     // 右手首の瘤 (雷獣の巣)。直径 26。避雷の柱は中心から半径 9、60 度おきに 6 本
     public static final BlockPos RAIJU_NEST = new BlockPos(204, BONE_FLOOR + 1, WZ);
     public static final int RAIJU_NEST_RADIUS = 13;
@@ -307,7 +315,11 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_heart", new BlockPos(-3, KEEL_ANTE.floor() + 2, -48), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vane_w", new BlockPos(-19, 148, 104), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vane_e", new BlockPos(19, 148, 104), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_crown", new BlockPos(6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH));
+            new Inscription("sign.skyabyss.lore_storm_crown", new BlockPos(6, UPPER_GALLERY_Y + 2, -98), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_storm_vault_w1", new BlockPos(-98, BONE_FLOOR + 2, -47), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH));
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
@@ -349,11 +361,11 @@ public final class StormBackLayout {
 
     // 試練の中 (リセットのときに広間へ移す所)
     public static boolean inWest(Vec3 p) {
-        return p.x < -22.5 && p.x > RIB_X1 - 14 && p.z > BONE_Z1 - 4 && p.z < BONE_Z2 + 4 && p.y > 138 && p.y < RIB_TOP_Y + 12;
+        return p.x < -22.5 && p.x > RIB_X1 - 14 && p.z > BONE_Z1 - 14 && p.z < BONE_Z2 + 4 && p.y > 138 && p.y < RIB_TOP_Y + 12;
     }
 
     public static boolean inEast(Vec3 p) {
-        return p.x > 22.5 && p.x < RAIJU_NEST.getX() + 20 && p.z > BONE_Z1 - 4 && p.z < BONE_Z2 + 4 && p.y > 138 && p.y < BONE_FLOOR + 26;
+        return p.x > 22.5 && p.x < RAIJU_NEST.getX() + 20 && p.z > BONE_Z1 - 14 && p.z < BONE_Z2 + 4 && p.y > 138 && p.y < BONE_FLOOR + 26;
     }
 
     public static boolean inFront(Vec3 p) {

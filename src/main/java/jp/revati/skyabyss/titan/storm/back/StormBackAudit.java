@@ -76,6 +76,8 @@ public final class StormBackAudit {
         s.goals.put("east door 3", new BlockPos(EAST_DOORS[EAST_DOORS.length - 1] + 3, BONE_FLOOR + 1, WZ));
         s.goals.put("west island", new BlockPos(WEST_ISLAND.x1() + 3, BONE_FLOOR + 1, WZ));
         s.goals.put("elbow", WEST_ELBOW.offset(0, 1, 4));
+        s.goals.put("west vault", VAULT_CACHE_W.offset(0, 0, 3));
+        s.goals.put("east vault", VAULT_CACHE_E.offset(0, 0, 3));
         s.goals.put("cache west", CACHE_WEST.offset(0, 0, 2));
         s.goals.put("cache east", CACHE_EAST.offset(0, 0, 2));
         s.goals.put("west stone ledge", WEST_STONE.offset(1, 0, 0));

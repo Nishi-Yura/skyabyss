@@ -37,6 +37,7 @@ final class StormWingBuilder {
         // 前腕: 縦の肋の間 (25 の 5章 A。縦の空洞の登り) と、肘からの廊下
         StormRib.build(kit);
         bone(kit, RIB_X2 + 1, WEST_FORE_X2);
+        vault(kit, WEST_VAULT, WEST_VAULT_DOOR, Style.BONE, VAULT_CACHE_W, true);
         // 休み場の腰掛け
         for (Rest r : RESTS) {
             if (r.id().equals("wm") || r.id().equals("w0")) {
@@ -162,6 +163,58 @@ final class StormWingBuilder {
         }
     }
 
+    // 横の部屋 (骨の書庫・雷の炉): 回廊の北の壁から幅 3 の戸口で入る。奥の壁に碑二つと宝箱 (StormCaches)。書庫は本棚、炉は銅のコイルの柱。必須ではない
+    private static void vault(StormKit kit, Area a, int[] door, Style style, BlockPos chest, boolean shelves) {
+        kit.room(a, style, 4);
+        // 戸口 (回廊の北の壁と、部屋の南の壁)。高さ 5
+        for (int x = door[0]; x <= door[1]; x++) {
+            for (int z = a.z2() + 1; z <= BONE_Z1 - 1; z++) {
+                for (int y = a.floor() + 1; y <= a.floor() + 5; y++) {
+                    kit.air(x, y, z);
+                }
+                kit.put(x, a.floor(), z, StormKit.floor(style, x, z));
+            }
+        }
+        // 戸口の枠 (銅) と上の灯り
+        for (int z = a.z2() + 1; z <= BONE_Z1 - 1; z++) {
+            for (int y = a.floor() + 1; y <= a.floor() + 5; y++) {
+                kit.put(door[0] - 1, y, z, y == a.floor() + 3 ? StormKit.LAMP : StormKit.COPPER_BLOCK);
+                kit.put(door[1] + 1, y, z, y == a.floor() + 3 ? StormKit.LAMP : StormKit.COPPER_BLOCK);
+            }
+        }
+        for (int x = door[0] - 1; x <= door[1] + 1; x++) {
+            kit.put(x, a.floor() + 6, BONE_Z1 - 1, Blocks.WAXED_CHISELED_COPPER.defaultBlockState());
+        }
+        // 床の道しるべ (戸口から宝箱まで、銅の線)
+        int mid = (door[0] + door[1]) / 2;
+        for (int z = BONE_Z1 - 1; z >= chest.getZ() + 1; z--) {
+            kit.put(mid, a.floor(), z, StormKit.COPPER);
+        }
+        // 奥の壁ぎわの宝箱 (見た目だけ。右クリックで一度だけ小さな贈り物)
+        kit.put(chest.getX(), chest.getY(), chest.getZ(), Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.SOUTH));
+        kit.put(chest.getX() - 1, chest.getY(), chest.getZ(), StormKit.LAMP);
+        kit.put(chest.getX() + 1, chest.getY(), chest.getZ(), StormKit.LAMP);
+        // 側の壁: 書庫は本棚 (3 段)、炉は銅のコイルの柱
+        for (int sx : new int[] {a.x1(), a.x2()}) {
+            for (int z = a.z1() + 2; z <= a.z2() - 1; z++) {
+                for (int y = a.floor() + 1; y <= a.floor() + 3; y++) {
+                    if (shelves) {
+                        kit.put(sx, y, z, (z + y) % 5 == 0 ? Blocks.CHISELED_BOOKSHELF.defaultBlockState() : Blocks.BOOKSHELF.defaultBlockState());
+                    } else if ((z - a.z1()) % 3 == 1) {
+                        kit.put(sx, y, z, y == a.floor() + 3 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : StormKit.COPPER_BLOCK);
+                    }
+                }
+            }
+        }
+        // 真ん中の机 (低い台。書庫は羽の台、炉は銅の台)
+        int cx = (a.x1() + a.x2()) / 2;
+        int cz = (a.z1() + a.z2()) / 2 + 1;
+        for (int dx = 0; dx <= 1; dx++) {
+            kit.put(cx + dx, a.floor() + 1, cz, shelves ? StormKit.CALCITE : StormKit.COPPER_BLOCK);
+        }
+        kit.put(cx, a.floor() + 2, cz, shelves ? StormKit.LAMP : Blocks.LIGHTNING_ROD.defaultBlockState());
+    }
+
     // 道の形 (リセットの種): 割れた床の低い梁の位置と、昇り風の穴と高い梁。建て直さずに試練の側が置き直す
     static void carveWestRoute(StormKit kit, int route) {
         int half = LOW_BEAM_WIDTH / 2;
@@ -279,6 +332,7 @@ final class StormWingBuilder {
                 StormDeco.bench(kit, rx - 1, rx + 1, BONE_Z2, BONE_Z2, BONE_FLOOR + 1, Direction.NORTH);
             }
         }
+        vault(kit, EAST_VAULT, EAST_VAULT_DOOR, Style.THUNDER, VAULT_CACHE_E, false);
         // 前室 (最後の戸と雷獣の巣の口のあいだ): 銅の柱の並び
         for (int x = EAST_DOORS[EAST_DOORS.length - 1] + 4; x <= EAST_X2 - 4; x += 4) {
             for (int sz : new int[] {BONE_Z1 + 1, BONE_Z2 - 1}) {

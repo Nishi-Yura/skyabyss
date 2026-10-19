@@ -323,8 +323,14 @@ public final class StormBirdBuilder {
                 kit.solid(x, a.floor() + a.height() + 3, z, StormKit.wall(Style.FEATHER, x, 0, z));
             }
         }
-        for (int[] l : new int[][] {{0, 38}, {-7, 38}, {7, 38}, {-4, 34}, {4, 34}, {-4, 42}, {4, 42}}) {
-            kit.solid(l[0], a.floor() + a.height() + 3, l[1], StormKit.LAMP);
+        for (int lx = -8; lx <= 8; lx += 4) {
+            for (int lz : new int[] {34, 38, 42}) {
+                kit.solid(lx, a.floor() + a.height() + 3, lz, StormKit.LAMP);
+            }
+        }
+        // 床の灯り (真ん中の床に光る石。ここを渡る人の足もとを照らす)
+        for (int lx : new int[] {-2, 2}) {
+            kit.put(lx, a.floor(), 36, StormKit.LAMP);
         }
         // 炉 (共鳴の炉) と飾りの焚き火、腰掛け
         kit.put(10, a.floor() + 1, 43, ModBlocks.RESONANCE_FORGE.get().defaultBlockState());
@@ -433,9 +439,12 @@ public final class StormBirdBuilder {
         kit.put(a.x1() - 1, a.floor() + 7, wz, Blocks.SEA_LANTERN.defaultBlockState());
         kit.put(a.x2() + 1, a.floor() + 7, wz, Blocks.OCHRE_FROGLIGHT.defaultBlockState());
         kit.put(0, NECK.floor() + NECK.height() + 1, NECK.z2(), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
-        // 広間の南の壁の灯りの柱 (尾の間からの入口の左右)
+        // 広間の南の壁の灯りの柱 (尾の間からの入口の左右) と、北の壁ぎわの灯りの柱 (上の回廊と昇り風の下)
         for (int sx : new int[] {-5, 5}) {
             StormDeco.lampPost(kit, sx, a.floor(), a.z2());
+        }
+        for (int sx : new int[] {-15, -8, 8, 15}) {
+            StormDeco.lampPost(kit, sx, a.floor(), a.z1() + 2);
         }
     }
 

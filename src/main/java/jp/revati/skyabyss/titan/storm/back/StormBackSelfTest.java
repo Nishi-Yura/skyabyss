@@ -749,6 +749,7 @@ public final class StormBackSelfTest {
         }
         yes.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, GALLERY.z1() + 3));
         yes.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, WZ));
+        yes.put("west vault cache spot", VAULT_CACHE_W.offset(0, 0, 3));
         yes.put("west cache spot", CACHE_WEST.offset(0, 0, 2));
         yes.put("east cache spot", CACHE_EAST.offset(0, 0, 2));
         yes.put("crown hall", new BlockPos(0, F0.floor() + 1, (F0.z1() + F0.z2()) / 2 + 3));
@@ -898,10 +899,98 @@ public final class StormBackSelfTest {
             check(StormGuide.goalFor(l, pa).id().equals("east.raiju"), "east goal with all doors should be east.raiju", f);
             a.setRaijuDefeated(true);
             check(StormGuide.goalFor(l, pa).id().equals("east.stone"), "east goal after the raiju should be east.stone", f);
+            checkObjective(l, a, pa, f);
+            checkCaches(pa, f);
         } finally {
             pa.leave();
             fresh(l, GROUP_A);
         }
+    }
+
+    // ---------------------------------------------------------------- 目的の光の柱 (StormObjective): いる場所と進みから、次にすること一つ
+    private static void expectGoal(ServerLevel l, StormTestPlayer pa, double x, double y, double z, String id, List<String> f) {
+        pa.moveTo(x, y, z, 0f, 0f);
+        StormObjective.Goal g = StormObjective.next(l, pa);
+        check(g != null && g.id().equals(id), "objective at " + x + "," + y + "," + z + " should be " + id + ", was " + (g == null ? "none" : g.id()), f);
+    }
+
+    private static void checkObjective(ServerLevel l, StormProgress a, StormTestPlayer pa, List<String> f) {
+        StormObjective.IDS.forEach(id -> check(!id.isEmpty(), "empty objective id", f));
+        a = fresh(l, GROUP_A);
+        StormBackClock.force(StormBackClock.Phase.STORM);
+        // 道の流れ: 尾羽の上 → 門 → 尾の間 → 広間
+        expectGoal(l, pa, ARRIVAL.getX() + 0.5, ARRIVAL.getY(), ARRIVAL.getZ() + 0.5, "storm_gate", f);
+        expectGoal(l, pa, PLAZA_CENTER.getX() + 0.5, PLAZA_CENTER.getY(), PLAZA_CENTER.getZ() + 0.5, "storm_gate", f);
+        expectGoal(l, pa, TAIL_CENTER.getX() + 0.5, TAIL_CENTER.getY(), TAIL_CENTER.getZ() + 0.5, "storm_hall", f);
+        // 広間: いちばん近い、まだの試練の入口 (休み場の西側からは西)。嵐なら前は昇り風、凪なら塔
+        expectGoal(l, pa, rest("hub").getX() + 0.5, rest("hub").getY(), rest("hub").getZ() + 0.5, "storm_west", f);
+        a.setRung(StormBackState.Trial.WEST, true);
+        pa.moveTo(rest("hub").getX() + 0.5, rest("hub").getY(), rest("hub").getZ() + 0.5, 0f, 0f);
+        StormObjective.Goal g = StormObjective.next(l, pa);
+        check(g != null && (g.id().equals("storm_front_vent") || g.id().equals("storm_east")), "objective in the hall with the west rung should point to east or front, was " + (g == null ? "none" : g.id()), f);
+        StormBackClock.force(StormBackClock.Phase.CALM);
+        a.setRung(StormBackState.Trial.EAST, true);
+        expectGoal(l, pa, rest("hub").getX() + 0.5, rest("hub").getY(), rest("hub").getZ() + 0.5, "storm_front_tower", f);
+        pa.moveTo(0.5, UPPER_GALLERY_Y + 1, GALLERY.z1() + 2.5, 0f, 0f);
+        g = StormObjective.next(l, pa);
+        check(g != null && g.id().equals("storm_front_neck"), "objective on the gallery should be the neck, was " + (g == null ? "none" : g.id()), f);
+        a.setRung(StormBackState.Trial.FRONT, true);
+        expectGoal(l, pa, rest("hub").getX() + 0.5, rest("hub").getY(), rest("hub").getZ() + 0.5, "storm_keel", f);
+        a = fresh(l, GROUP_A);
+        // 西: 割れた床 → 肋の間 → 石 → 戻る
+        expectGoal(l, pa, W0.x1() + 3.5, BONE_FLOOR + 1, WZ + 0.5, "storm_west_gap", f);
+        expectGoal(l, pa, WEST_GAPS[0][0] - 8.5, BONE_FLOOR + 1, WZ + 0.5, "storm_west_gap", f);
+        expectGoal(l, pa, WEST_GAPS[1][0] - 12.5, BONE_FLOOR + 1, WZ + 0.5, "storm_west_rib", f);
+        a.setRibLayer(RIB_LAYERS);
+        expectGoal(l, pa, WEST_GAPS[1][0] - 12.5, BONE_FLOOR + 1, WZ + 0.5, "storm_west_stone", f);
+        a.setRung(StormBackState.Trial.WEST, true);
+        expectGoal(l, pa, WEST_GAPS[1][0] - 12.5, BONE_FLOOR + 1, WZ + 0.5, "storm_back_w", f);
+        a = fresh(l, GROUP_A);
+        // 東: レバー → 金の床 → 次の回路 → 雷獣 → 石 → 戻る
+        expectGoal(l, pa, 80.5, BONE_FLOOR + 1, WZ + 0.5, "storm_east_lever", f);
+        for (BlockPos lever : StormCircuit.solution(StormCircuit.CIRCUITS.get(0))) {
+            StormCircuit.setLever(l, lever, true);
+        }
+        expectGoal(l, pa, 80.5, BONE_FLOOR + 1, WZ + 0.5, "storm_east_pad", f);
+        for (BlockPos lever : StormCircuit.solution(StormCircuit.CIRCUITS.get(0))) {
+            StormCircuit.setLever(l, lever, false);
+        }
+        for (int i = 0; i < EAST_DOORS.length; i++) {
+            a.openEastDoor(i);
+        }
+        expectGoal(l, pa, 80.5, BONE_FLOOR + 1, WZ + 0.5, "storm_east_raiju", f);
+        a.setRaijuDefeated(true);
+        expectGoal(l, pa, 80.5, BONE_FLOOR + 1, WZ + 0.5, "storm_east_stone", f);
+        a.setRung(StormBackState.Trial.EAST, true);
+        expectGoal(l, pa, 80.5, BONE_FLOOR + 1, WZ + 0.5, "storm_back_e", f);
+        a = fresh(l, GROUP_A);
+        // 前: 光を導く → 戸が開けば嘴の石 → 戻る。竜骨の前室は心臓へ
+        expectGoal(l, pa, 0.5, EYE_HALL.floor() + 1, EYE_HALL_CENTER.getZ() + 0.5, "storm_front_mirror", f);
+        a.setReceivers(7);
+        expectGoal(l, pa, 0.5, EYE_HALL.floor() + 1, EYE_HALL_CENTER.getZ() + 0.5, "storm_front_stone", f);
+        a.setRung(StormBackState.Trial.FRONT, true);
+        expectGoal(l, pa, 0.5, EYE_HALL.floor() + 1, EYE_HALL_CENTER.getZ() + 0.5, "storm_back_f", f);
+        expectGoal(l, pa, rest("heart").getX() + 0.5, rest("heart").getY(), rest("heart").getZ() + 0.5, "storm_heart", f);
+        StormBackClock.force(null);
+        fresh(l, GROUP_A);
+    }
+
+    // 羽の広場の宝箱: 一人に一度だけ、小さな贈り物 (食べ物・矢・経験値)
+    private static void checkCaches(StormTestPlayer pa, List<String> f) {
+        pa.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        int before = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
+        StormCaches.open(pa, -1);
+        int once = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
+        StormCaches.open(pa, -1);
+        int twice = pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get());
+        check(once - before == 4 && twice == once, "the west lookout chest should give once (" + before + " -> " + once + " -> " + twice + ")", f);
+        check(StormCaches.taken(pa, -1) && !StormCaches.taken(pa, 1), "the cache record is wrong", f);
+        StormCaches.open(pa, 1);
+        check(StormCaches.taken(pa, 1) && pa.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get()) - twice == 6, "the east lookout chest should give 6 jerky", f);
+        StormCaches.open(pa, -2);
+        StormCaches.open(pa, 2);
+        check(StormCaches.taken(pa, -2) && StormCaches.taken(pa, 2), "the vault chests should give once each", f);
+        pa.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
     }
 
     // ---------------------------------------------------------------- どの拍でも試練に行ける・終えられる (25 の 2章)
