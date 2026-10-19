@@ -50,6 +50,8 @@ REPORT = os.path.join(ROOT, "docs", "review", "mesh_audit_report.md")
 WELD = 0.01          # 頂点の溶接距離 (1/16 ブロック単位)
 DEGEN_AREA = 1e-4
 GEO_LIMIT = 0.002    # キューブ geo の光線 2000 本のうち裏面が先に当たる割合 (0.2% = 4 本) を超えたら失敗。乱数の光線の取りこぼしを許す
+# 付け根の曲げ検査を蝶番のまわりだけで見る骨 (メッシュ名, 骨)。口を開く顎
+HINGE_ONLY = {("waterway_maw", "jaw")}
 SEE_LIMIT = 0.002    # 裏面透けの画素が全体の 0.2% を超えたらゲートの失敗 (重なった面の z 競合の数画素は許す)
 
 
@@ -497,21 +499,30 @@ def joint_check(bones, mesh_name):
         psamp = np.vstack([surface_samples(m) for m in refs])
         pivot_in = bool(inside(b.pivot[None, :])[0])
         cs = surface_samples(b)
+        cs_full = cs
         if len(cs) > 200:
             # 付け根の近く (親・兄弟の表面にいちばん近い 200 点) だけを見る。体の遠い所の点が割合を薄めないように
             dd = cKDTree(psamp).query(cs)[0]
             cs = cs[np.argsort(dd)[:200]]
         # 浅さの基準は部品の大きさの 2.5%。ただし巨神 (200 超) では大きさの上限を 40 にして、基準を 1 単位 (1/16 ブロック) までにする
         ext = min(40.0, float((b.V.max(0) - b.V.min(0)).max()))
+        if (mesh_name, n) in HINGE_ONLY:
+            # 口を開く顎は、歯・あごの先の接する面は離れて当然。蝶番 (回転軸から部品の大きさの 40% 以内で親にいちばん近い 200 点) だけで埋まりと曲げを見る
+            hinge = cs_full[np.linalg.norm(cs_full - b.pivot, axis=1) < 0.4 * ext]
+            if len(hinge) > 200:
+                hinge = hinge[np.argsort(cKDTree(psamp).query(hinge)[0])[:200]]
+            if len(hinge) >= 20:
+                cs = hinge
         buried = inside(cs)
         frac0 = float(buried.mean())
         depth0 = float(depth_in(cs[buried], None, None, psamp).max()) if buried.any() else 0.0
         rng = rng_all.get(n)
         worst = None
         if rng:
+            cs_w = cs
             for rot in rotation_corners(rng):
                 R = euler_matrix(*rot)
-                cs2 = (cs - b.pivot) @ R.T + b.pivot
+                cs2 = (cs_w - b.pivot) @ R.T + b.pivot
                 f1 = float(inside(cs2).mean())
                 if worst is None or f1 < worst[0]:
                     worst = (f1, rot)

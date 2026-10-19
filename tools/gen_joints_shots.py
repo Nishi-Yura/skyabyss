@@ -8,11 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]
 # (id, 高さ (ブロック), 足元の y, 動作, 動作を流してから撮るまでの tick, 浮かせるか)
 MODELS = [
     ("bone_sentinel", 2.2, -60, "pounce", 8, False),
-    ("whalebone_captain", 2.3, -60, "slam", 12, False),
-    ("rib_archer", 2.1, -60, "shoot", 10, False),
-    ("moss_crawler", 0.9, -60, "pounce", 8, False),
-    ("waterway_maw", 1.8, -59, "bite", 8, True),
-    ("ember_moth", 0.7, -59.3, "attack", 8, True),
+    ("whalebone_captain", 3.2, -60, "slam", 12, False),
+    ("static_moth", 1.0, -59.3, "attack", 8, True),
+    ("moss_crawler", 1.5, -60, "pounce", 8, False),
+    ("waterway_maw", 2.0, -58.4, "bite", 8, True),
+    ("elder_sentry", 2.3, -60, "attack", 8, False),
     ("thunder_supplicant", 2.3, -60, "attack", 8, False),
     ("elder_sentinel", 2.9, -60, "pounce", 8, False),
 ]
@@ -30,7 +30,7 @@ def main():
         nog = "NoGravity:1b," if fly else ""
         L += [f"# --- {mid}", "cmd kill @e[type=!minecraft:player,distance=..80]",
               f"cmd summon skyabyss:{mid} 0 {y} 0 {{NoAI:1b,{nog}Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:[\"m\"]}}",
-              f"camera minecraft:overworld {cx} {cy} {cz} 135 0", "waitchunks", "wait 50",
+              f"camera minecraft:overworld {cx} {cy} {cz} 135 0", "waitchunks", "wait 120",
               f"shot j_{mid}_rest", f"cmd skyabyss dev anim @e[tag=m] {anim}"]
         L += [f"wait {tick}", f"shot j_{mid}_pose_a", "wait 4", f"shot j_{mid}_pose_b"]
         L += ["wait 40"]

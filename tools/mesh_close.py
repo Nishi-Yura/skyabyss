@@ -631,12 +631,49 @@ def _joint_score(j):
     return (rank, min(worst, j["buried"]), j["buried"])
 
 
+# 手で決めた付け根の沈め (sink_root で直らない薄い翼・小さな飾り用)。(メッシュ名, 骨) -> (向き, 量, 帯の幅)
+# 帯の幅は付け根の外向き (|x|) の距離で、その内側ほど強く動かす。None なら骨ごと平行移動 (形は変えない)。
+JOINT_TOUCHUPS = {
+    ("static_moth", "wing_l"): ((0, -1, 0), 1.5, 4.0),
+    ("static_moth", "wing_r"): ((0, -1, 0), 1.5, 4.0),
+    ("moss_crawler", "lure_l"): ((0, -1, 0), 0.7, None),
+    ("moss_crawler", "lure_r"): ((0, -1, 0), 0.7, None),
+    # 顎の後ろの上の縁を頭蓋の底へ立ち上げる (あごの枝。蝶番が頭蓋の中に入る)。(lift, 後ろ z0, 前 z1, 下の y)
+    ("waterway_maw", "jaw"): ("ramus", 6.0, -14.0, -26.0, 2.0),
+}
+
+
+def touchup_joint(data, mesh_name, n):
+    spec = JOINT_TOUCHUPS.get((mesh_name, n))
+    b = data["bones"].get(n)
+    if not spec or not b or not b.get("vertices"):
+        return False
+    V = np.array(b["vertices"], float)
+    if spec[0] == "ramus":
+        _, lift, z0, z1, yr = spec
+        w = np.clip((V[:, 2] - z1) / (z0 - z1), 0.0, 1.0)
+        w = w * w * (3 - 2 * w)
+        wy = np.clip((V[:, 1] - yr) / (6.8 - yr), 0.0, 1.0)
+        V[:, 1] += lift * w * wy
+        b["vertices"] = [[round(float(x), 4) for x in p] for p in V]
+        return True
+    u, push, reach = spec
+    if reach is None:
+        w = np.ones(len(V))
+    else:
+        w = np.clip(1.0 - np.abs(V[:, 0]) / reach, 0.0, 1.0)
+        w = w * w * (3 - 2 * w)
+    V = V + np.array(u, float)[None, :] * push * w[:, None]
+    b["vertices"] = [[round(float(x), 4) for x in p] for p in V]
+    return True
+
+
 def fix_joints(data, mesh_name):
     """付け根の検査 (mesh_audit.joint_check) で detach / shallow の骨を、sink_root で沈めて直す。
-    骨ごとに、元の頂点から沈める量を (部品の大きさの 3% から 20% まで) 少しずつ増やして試し、最初に ok になった量を採る。
+    骨ごとに、元の頂点から沈める量を (部品の大きさの 3% から 60% まで) 少しずつ増やして試し、最初に ok になった量を採る。
     どれでも ok にならなければ最も判定の良かった量を採る (悪くなるなら沈めない)。裏返る量は採らない。
     離れすぎた部品 (隙間が大きさの 40% 超) は触らない。親から先に直す。戻り値は直せなかった骨の名前の一覧。"""
-    steps = (0.03, 0.06, 0.1, 0.15, 0.2)
+    steps = (0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6)
     bad, bones = joint_bad(data, mesh_name)
     for n in sorted(bad, key=lambda x: _depth(data, x)):
         b = data["bones"][n]
@@ -669,6 +706,9 @@ def fix_joints(data, mesh_name):
             if j["status"] == "ok":
                 break
         b["vertices"] = best[1]
+    bad, _ = joint_bad(data, mesh_name)
+    for n in sorted(bad):
+        touchup_joint(data, mesh_name, n)
     bad, _ = joint_bad(data, mesh_name)
     return sorted(bad)
 
@@ -703,6 +743,85 @@ def drop_degenerate(V, T):
     return T[~bad]
 
 
+def drop_duplicates(V, T):
+    """同じ三点・同じ向きで重なった三角形の二枚目以降を捨てる (二重に書かれた面は、開いた縁を「二枚の面がある辺」に見せて蓋を止めてしまう)。"""
+    if len(T) == 0:
+        return T
+    c = ma.weld_ids(V)
+    seen = set()
+    keep = []
+    for i, (a, b, d) in enumerate(c[T]):
+        k = min(((a, b, d), (b, d, a), (d, a, b)))
+        if k in seen:
+            continue
+        seen.add(k)
+        keep.append(i)
+    return T[keep] if len(keep) < len(T) else T
+
+
+def drop_back_to_back(V, T):
+    """同じ三点で向きが逆の二枚 (両面に書いた面) のうち、部品の重心から見て内向きのほうを捨てる。
+    薄い板ではなく殻の壁を二重に書いたもの用 (開いた縁を覆って蓋が付かなくなる)。呼ぶのは手で選んだメッシュだけ。"""
+    if len(T) == 0:
+        return T
+    c = ma.weld_ids(V)
+    lab = components(V, T)
+    cen = {L: V[np.unique(T[lab == L])].mean(0) for L in np.unique(lab)}
+    byset = collections.defaultdict(list)
+    for i, t in enumerate(c[T]):
+        byset[tuple(sorted(t))].append(i)
+    drop = set()
+    for ids in byset.values():
+        if len(ids) < 2:
+            continue
+        ori = {}
+        for i in ids:
+            a, b, d = c[T[i]]
+            ori.setdefault(min(((a, b, d), (b, d, a), (d, a, b))), []).append(i)
+        if len(ori) < 2:
+            continue
+        for i in ids:
+            P = V[T[i]]
+            n = np.cross(P[1] - P[0], P[2] - P[0])
+            if float(np.dot(n, P.mean(0) - cen[lab[i]])) < 0:
+                drop.add(i)
+    return T[[i for i in range(len(T)) if i not in drop]]
+
+
+def repair_file(path, pairs=False):
+    """閉じ済みのメッシュの二重の面を捨て、そのせいで塞がれなかった縁をもう一度蓋で塞ぐ。直したら True。何度流しても同じ。"""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    changed = False
+    for n, b in data.get("bones", {}).items():
+        if not b.get("triangles"):
+            continue
+        V = np.array(b["vertices"], float)
+        UV = np.array(b["uvs"], float)
+        T = np.array(b["triangles"], int)
+        T2 = drop_duplicates(V, T)
+        if pairs:
+            T2 = drop_back_to_back(V, T2)
+        if len(T2) == len(T):
+            continue
+        T2, _ = fix_orientation(V, T2)
+        nv0 = len(V)
+        V2, UV2, T2, caps = close_bone(V, UV, T2, V.mean(0))
+        T2, _ = fix_orientation(V2, T2)
+        b["vertices"] = [[round(float(x), 4) for x in p] for p in V2]
+        b["uvs"] = [[round(float(x), 5) for x in p] for p in UV2]
+        b["triangles"] = [[int(i) for i in t] for t in T2]
+        b["triangle_count"] = len(T2)
+        if caps and b.get("cap_vertex_start") is None:
+            b["cap_vertex_start"] = nv0
+        changed = True
+    if changed:
+        data["triangle_count"] = sum(len(b.get("triangles", [])) for b in data["bones"].values())
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, separators=(",", ":"))
+    return changed
+
+
 def close_mesh(data, with_collar=True):
     """メッシュ JSON (dict) を水密にして返す。戻り値 (dict, 統計)。"""
     bones = {n: [np.array(b.get("vertices", []), float).reshape(-1, 3), np.array(b.get("uvs", []), float).reshape(-1, 2),
@@ -713,7 +832,7 @@ def close_mesh(data, with_collar=True):
     names = [n for n in data["bones"]]
     for n in names:
         V, UV, T = bones[n]
-        bones[n] = [V, UV, drop_degenerate(V, T)]
+        bones[n] = [V, UV, drop_duplicates(V, drop_degenerate(V, T))]
     # 段 A: 親の体積の判定に使う、塞いだ写し (collar は親が閉じていないと内外を判定できない)
     closed = {}
     for n in names:
@@ -794,9 +913,26 @@ def main(argv):
         print(__doc__)
         return 1
     force = "--force" in argv
+    if "--repair" in argv:
+        for p in ma.mesh_files():
+            if flt and not any(f in ma.rel(p) for f in flt):
+                continue
+            if repair_file(p, pairs="--pairs" in argv):
+                print("repaired", ma.rel(p))
+        return 0
+    jonly = "--joints-only" in argv  # 閉じ済みのメッシュの付け根だけをもう一度直す (fix_joints)
     for p in ma.mesh_files():
         r = ma.rel(p)
         if flt and not any(f in r for f in flt):
+            continue
+        if jonly:
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+            if "bones" in d and len(d["bones"]) > 1:
+                un = fix_joints(d, os.path.splitext(os.path.basename(p))[0])
+                with open(p, "w", encoding="utf-8") as f:
+                    json.dump(d, f, separators=(",", ":"))
+                print("%-50s unfixed=%s" % (r, ",".join(un) or "-"))
             continue
         st = close_mesh_file(p, with_collar="--no-collar" not in argv, force=force)
         if st:
