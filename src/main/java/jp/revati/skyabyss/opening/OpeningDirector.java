@@ -495,7 +495,14 @@ public final class OpeningDirector {
 
         @Override
         public void startFootsteps(long now) {
-            PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_FOOTSTEPS, now, level.random.nextFloat() * 360f));
+            float yaw = level.random.nextFloat() * 360f;
+            PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_FOOTSTEPS, now, yaw));
+            // 近くの人 (仲間を含む) にも、同じ時刻・向きで音と揺れだけ聞かせる。その人の拍子は進めない
+            for (net.minecraft.server.level.ServerPlayer other : level.players()) {
+                if (other != player && !other.isSpectator() && other.distanceToSqr(player) <= OpeningNetwork.FOOTSTEPS_NEAR_RANGE * OpeningNetwork.FOOTSTEPS_NEAR_RANGE) {
+                    PacketDistributor.sendToPlayer(other, new CuePayload(OpeningNetwork.CUE_FOOTSTEPS_NEAR, now, yaw));
+                }
+            }
             FREEZE.put(player.getUUID(), now + OpeningLogic.STEPS_TOTAL);
         }
 

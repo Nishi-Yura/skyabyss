@@ -27,6 +27,9 @@ public final class OpeningNetwork {
     public static final int CUE_SONG = 2;
     // 進行中の演出を止める (コマンドで拍子を戻したとき)
     public static final int CUE_STOP = 3;
+    // 近くの人の足音を聞かせる (音と揺れだけ。暗さ・環境音の消去・拍子の進みはなし)
+    public static final int CUE_FOOTSTEPS_NEAR = 4;
+    public static final double FOOTSTEPS_NEAR_RANGE = 64.0;
 
     public record ObjectivePayload(String id, boolean hasTarget, long target) implements CustomPacketPayload {
         public static final Type<ObjectivePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "opening_objective"));
