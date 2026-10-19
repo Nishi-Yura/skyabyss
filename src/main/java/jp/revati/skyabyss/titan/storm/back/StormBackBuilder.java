@@ -54,6 +54,8 @@ public final class StormBackBuilder {
     }
 
     private static void finish(ServerLevel back, TitanBackData data, long start) {
+        // ボス部屋の大門 (竜骨の間の入口・雷獣の巣の口)。部屋と回廊を掘ったあと
+        StormBossGates.build(back);
         data.markBuilt(LAYOUT_VERSION);
         StormBackTrials.afterBuild(back);
         // 試練の仕掛け (昇り風の柱・戸・避雷の柱) を置いたあとで、鳥の背・翼の上の、落ちたら出られない小さな穴 (詰み監査) を埋める。

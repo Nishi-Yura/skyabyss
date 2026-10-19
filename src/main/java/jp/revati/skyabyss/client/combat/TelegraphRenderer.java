@@ -14,6 +14,7 @@ import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphGeometry;
+import jp.revati.skyabyss.combat.TelegraphGround;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -245,33 +246,47 @@ public final class TelegraphRenderer {
         void emit(TelegraphGeometry.Seg out);
     }
 
-    // 頂点に床の高さを引いて、面・線・幕をバッファへ出す
+    // 面・線・幕を、歩ける床の面にだけ出す。列ごとの床 (TelegraphGround) で三角形・線を切り、段差・半ブロックはその高さで描く。
+    // 床の無い所 (壁の上・穴・空中・天井の上) は出さない。範囲の全部が平らな床なら (広間など) 切らずにそのまま出す。
     private static final class Painter {
+        private static final double GRID = 0.5;
         private final BufferBuilder buf;
         private final Matrix4f pose;
         private final Vec3 cam;
-        private final ClientLevel level;
         private final boolean hc;
-        private TelegraphClient.Decal decal;
+        private TelegraphGround ground;
+        private double flat = Double.NaN;
         private float lift;
+        private float[] unloaded;
         Pattern pattern = Pattern.SOLID;
         double centerX;
         double centerZ;
+        private final double[] poly = new double[40];
+        private final double[] clipOut = new double[40];
+        private final double[] clipTmp = new double[40];
+        private final double[] cuts = new double[64];
 
         Painter(BufferBuilder buf, Matrix4f pose, Vec3 cam, ClientLevel level, boolean hc) {
             this.buf = buf;
             this.pose = pose;
             this.cam = cam;
-            this.level = level;
             this.hc = hc;
         }
 
         void begin(TelegraphClient.Decal d) {
-            this.decal = d;
+            this.ground = d.ground;
+            this.flat = ground.flatHeight(d.shape.bounds());
+            float f = (float) d.floor;
+            this.unloaded = new float[] {f, f, f, f};
             double[] b = d.shape.bounds();
             double dist = Math.hypot((b[0] + b[2]) / 2 - cam.x, (b[1] + b[3]) / 2 - cam.z) + Math.abs(cam.y - d.floor);
             // 遠いほど深度の刻みが粗いので、浮かせる量を増やす
             this.lift = (float) (0.025 + 0.0016 * dist);
+        }
+
+        private float[] col(int bx, int bz) {
+            float[] c = ground.column(bx, bz);
+            return c != null ? c : unloaded;
         }
 
         void faces(FaceSource source, int rgb, float alpha) {
@@ -282,12 +297,81 @@ public final class TelegraphRenderer {
             float g = ((rgb >> 8) & 0xFF) / 255f;
             float b = (rgb & 0xFF) / 255f;
             float a = Math.min(1f, alpha);
-            source.emit((x0, z0, x1, z1, x2, z2) -> {
-                vertex(x0, z0, lift, r, g, b, a);
-                vertex(x1, z1, lift, r, g, b, a);
-                vertex(x2, z2, lift, r, g, b, a);
-                vertex(x2, z2, lift, r, g, b, a);
-            });
+            source.emit((x0, z0, x1, z1, x2, z2) -> tri(x0, z0, x1, z1, x2, z2, r, g, b, a));
+        }
+
+        private void tri(double x0, double z0, double x1, double z1, double x2, double z2, float r, float g, float b, float a) {
+            if (!Double.isNaN(flat)) {
+                emitTri(x0, z0, x1, z1, x2, z2, (float) flat + lift, r, g, b, a);
+                return;
+            }
+            int cx0 = (int) Math.floor(Math.min(x0, Math.min(x1, x2)) + 1e-9);
+            int cx1 = (int) Math.floor(Math.max(x0, Math.max(x1, x2)) - 1e-9);
+            int cz0 = (int) Math.floor(Math.min(z0, Math.min(z1, z2)) + 1e-9);
+            int cz1 = (int) Math.floor(Math.max(z0, Math.max(z1, z2)) - 1e-9);
+            cx1 = Math.max(cx0, cx1);
+            cz1 = Math.max(cz0, cz1);
+            // 全部の列が同じ高さの平らな床なら切らずに出す。全部が床なしなら出さない
+            boolean fast = true;
+            float h = Float.NaN;
+            boolean first = true;
+            for (int x = cx0; x <= cx1 && fast; x++) {
+                for (int z = cz0; z <= cz1; z++) {
+                    float[] c = col(x, z);
+                    if (!TelegraphGround.uniform(c) || (!first && !TelegraphGround.same(h, c[0]))) {
+                        fast = false;
+                        break;
+                    }
+                    h = c[0];
+                    first = false;
+                }
+            }
+            if (fast) {
+                if (!Float.isNaN(h)) {
+                    emitTri(x0, z0, x1, z1, x2, z2, h + lift, r, g, b, a);
+                }
+                return;
+            }
+            for (int x = cx0; x <= cx1; x++) {
+                for (int z = cz0; z <= cz1; z++) {
+                    float[] c = col(x, z);
+                    if (TelegraphGround.uniform(c)) {
+                        if (!Float.isNaN(c[0])) {
+                            clipEmit(x0, z0, x1, z1, x2, z2, x, z, x + 1, z + 1, c[0] + lift, r, g, b, a);
+                        }
+                        continue;
+                    }
+                    for (int s = 0; s < 4; s++) {
+                        if (Float.isNaN(c[s])) {
+                            continue;
+                        }
+                        double sx = x + (s & 1) * GRID;
+                        double sz = z + (s >> 1) * GRID;
+                        clipEmit(x0, z0, x1, z1, x2, z2, sx, sz, sx + GRID, sz + GRID, c[s] + lift, r, g, b, a);
+                    }
+                }
+            }
+        }
+
+        private void clipEmit(double x0, double z0, double x1, double z1, double x2, double z2, double minX, double minZ, double maxX, double maxZ,
+                float y, float r, float g, float b, float a) {
+            poly[0] = x0;
+            poly[1] = z0;
+            poly[2] = x1;
+            poly[3] = z1;
+            poly[4] = x2;
+            poly[5] = z2;
+            int n = TelegraphGround.clipRect(poly, 3, minX, minZ, maxX, maxZ, clipOut, clipTmp);
+            for (int i = 1; i + 1 < n; i++) {
+                emitTri(clipOut[0], clipOut[1], clipOut[2 * i], clipOut[2 * i + 1], clipOut[2 * i + 2], clipOut[2 * i + 3], y, r, g, b, a);
+            }
+        }
+
+        private void emitTri(double x0, double z0, double x1, double z1, double x2, double z2, float y, float r, float g, float b, float a) {
+            vertex(x0, z0, y, r, g, b, a);
+            vertex(x1, z1, y, r, g, b, a);
+            vertex(x2, z2, y, r, g, b, a);
+            vertex(x2, z2, y, r, g, b, a);
         }
 
         void lines(LineSource source, int rgb, float alpha, float width, float curtainHeight) {
@@ -328,7 +412,8 @@ public final class TelegraphRenderer {
             });
         }
 
-        // 線の 1 片: 平らな帯と、立つ幕。extend = 両端を少し伸ばして折れ目のすき間を埋める
+        // 線の 1 片: 平らな帯と、立つ幕。extend = 両端を少し伸ばして折れ目のすき間を埋める。
+        // 床の列 (半マス) の境でさらに切り、それぞれの床の高さで描く。床の無い所は描かない
         private void piece(double x0, double z0, double x1, double z1, float r, float g, float b, float a, float width, float curtainHeight, boolean extend) {
             double dx = x1 - x0;
             double dz = z1 - z0;
@@ -336,40 +421,88 @@ public final class TelegraphRenderer {
             if (len < 1e-6) {
                 return;
             }
-            float up = lift + 0.012f;
-            double ex = extend ? dx / len * width * 0.5 : 0;
-            double ez = extend ? dz / len * width * 0.5 : 0;
-            double ax = x0 - ex;
-            double az = z0 - ez;
-            double bx = x1 + ex;
-            double bz = z1 + ez;
+            double ext = extend ? width * 0.5 : 0;
+            double ax = x0 - dx / len * ext;
+            double az = z0 - dz / len * ext;
+            double bx = x1 + dx / len * ext;
+            double bz = z1 + dz / len * ext;
             double nx = -dz / len * width * 0.5;
             double nz = dx / len * width * 0.5;
-            if (hc) {
-                // 高コントラスト: 縁の下に黒い縁取り
-                double wx = nx * 1.9;
-                double wz = nz * 1.9;
-                vertex(ax + wx, az + wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                vertex(bx + wx, bz + wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                vertex(bx - wx, bz - wz, lift + 0.004f, 0, 0, 0, 0.7f);
-                vertex(ax - wx, az - wz, lift + 0.004f, 0, 0, 0, 0.7f);
+            // 切る位置 (a→b の線の上の割合)
+            int nc = 0;
+            cuts[nc++] = 0;
+            if (Double.isNaN(flat)) {
+                nc = cutsAlong(ax, bx, nc);
+                nc = cutsAlong(az, bz, nc);
+                java.util.Arrays.sort(cuts, 1, nc);
             }
-            vertex(ax + nx, az + nz, up, r, g, b, a);
-            vertex(bx + nx, bz + nz, up, r, g, b, a);
-            vertex(bx - nx, bz - nz, up, r, g, b, a);
-            vertex(ax - nx, az - nz, up, r, g, b, a);
-            if (curtainHeight > 0.02f) {
-                // 縁に立つ低い幕: 下は縁の色、上へ消える。低い目線では床の面が薄く見えるので、これで範囲が読める
-                float ca = a * (hc ? 0.75f : 0.55f);
-                vertex(x0, z0, up, r, g, b, ca);
-                vertex(x1, z1, up, r, g, b, ca);
-                vertex(x1, z1, up + curtainHeight, r, g, b, 0f);
-                vertex(x0, z0, up + curtainHeight, r, g, b, 0f);
+            cuts[nc++] = 1;
+            double total = len + 2 * ext;
+            double t0Cur = ext / total;
+            double t1Cur = 1 - ext / total;
+            for (int i = 0; i + 1 < nc; i++) {
+                double ta = cuts[i];
+                double tb = cuts[i + 1];
+                if (tb - ta < 1e-7) {
+                    continue;
+                }
+                double h = Double.isNaN(flat) ? ground.heightAt(ax + (bx - ax) * (ta + tb) * 0.5, az + (bz - az) * (ta + tb) * 0.5) : flat;
+                if (Double.isNaN(h)) {
+                    continue;
+                }
+                float base = (float) h + lift;
+                float up = base + 0.012f;
+                double sx0 = ax + (bx - ax) * ta;
+                double sz0 = az + (bz - az) * ta;
+                double sx1 = ax + (bx - ax) * tb;
+                double sz1 = az + (bz - az) * tb;
+                if (hc) {
+                    // 高コントラスト: 縁の下に黒い縁取り
+                    double wx = nx * 1.9;
+                    double wz = nz * 1.9;
+                    vertex(sx0 + wx, sz0 + wz, base + 0.004f, 0, 0, 0, 0.7f);
+                    vertex(sx1 + wx, sz1 + wz, base + 0.004f, 0, 0, 0, 0.7f);
+                    vertex(sx1 - wx, sz1 - wz, base + 0.004f, 0, 0, 0, 0.7f);
+                    vertex(sx0 - wx, sz0 - wz, base + 0.004f, 0, 0, 0, 0.7f);
+                }
+                vertex(sx0 + nx, sz0 + nz, up, r, g, b, a);
+                vertex(sx1 + nx, sz1 + nz, up, r, g, b, a);
+                vertex(sx1 - nx, sz1 - nz, up, r, g, b, a);
+                vertex(sx0 - nx, sz0 - nz, up, r, g, b, a);
+                double ca0 = Math.max(ta, t0Cur);
+                double cb0 = Math.min(tb, t1Cur);
+                if (curtainHeight > 0.02f && cb0 > ca0 + 1e-7) {
+                    // 縁に立つ低い幕: 下は縁の色、上へ消える。低い目線では床の面が薄く見えるので、これで範囲が読める
+                    float ca = a * (hc ? 0.75f : 0.55f);
+                    double cx0 = ax + (bx - ax) * ca0;
+                    double cz0 = az + (bz - az) * ca0;
+                    double cx1 = ax + (bx - ax) * cb0;
+                    double cz1 = az + (bz - az) * cb0;
+                    vertex(cx0, cz0, up, r, g, b, ca);
+                    vertex(cx1, cz1, up, r, g, b, ca);
+                    vertex(cx1, cz1, up + curtainHeight, r, g, b, 0f);
+                    vertex(cx0, cz0, up + curtainHeight, r, g, b, 0f);
+                }
             }
         }
 
-        private void vertex(double x, double z, float height, float r, float g, float b, float a) {
-            double y = decal.ground(level, x, z) + height;
+        // 座標 from→to が、半マスごとの格子線を横切る割合を cuts に足す
+        private int cutsAlong(double from, double to, int nc) {
+            double lo = Math.min(from, to);
+            double hi = Math.max(from, to);
+            if (hi - lo < 1e-9) {
+                return nc;
+            }
+            for (double k = Math.floor(lo / GRID + 1e-9) + 1; k * GRID < hi - 1e-9 && nc < cuts.length - 2; k++) {
+                double t = (k * GRID - from) / (to - from);
+                if (t > 1e-7 && t < 1 - 1e-7) {
+                    cuts[nc++] = t;
+                }
+            }
+            return nc;
+        }
+
+        private void vertex(double x, double z, float y, float r, float g, float b, float a) {
             buf.addVertex(pose, (float) (x - cam.x), (float) (y - cam.y), (float) (z - cam.z)).setColor(r, g, b, a);
         }
     }

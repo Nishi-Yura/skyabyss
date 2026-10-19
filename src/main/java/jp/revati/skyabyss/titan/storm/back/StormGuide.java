@@ -36,10 +36,10 @@ final class StormGuide {
     }
 
     // 目的の板の文の id (lang の gui.skyabyss.storm_goal.<id>)。自己テストが ja・en の両方にあることを見る
-    static final List<String> GOAL_IDS = List.of("west.gap", "west.knob", "west.stone", "west.done", "west.sleep", "east.rods", "east.raiju", "east.stone",
+    static final List<String> GOAL_IDS = List.of("west.gap", "west.rib", "west.stone", "west.done", "west.sleep", "east.circuit", "east.raiju", "east.stone",
             "east.done", "east.sleep", "front.mirror", "front.stone", "front.done", "front.sleep", "hub.stones", "hub.keel");
 
-    static final int WEST_TOTAL = WEST_GAPS.length + 1;
+    static final int WEST_TOTAL = WEST_GAPS.length + RIB_LAYERS + 1;
     static final int EAST_TOTAL = 5;
     static final int FRONT_TOTAL = 4;
 
@@ -47,8 +47,6 @@ final class StormGuide {
     private static final DustParticleOptions LIT = new DustParticleOptions(new Vector3f(1f, 0.88f, 0.45f), 1.1f);
     private static final DustParticleOptions DIM = new DustParticleOptions(new Vector3f(0.28f, 0.36f, 0.4f), 1.0f);
 
-    private static final int[] NO_RODS = new int[0];
-    private static int[] prevCharge = NO_RODS;
     private static int counter;
     private static final Map<UUID, Goal> LAST = new HashMap<>();
     private static final Map<UUID, Integer> WEST_BEST = new HashMap<>();
@@ -59,7 +57,6 @@ final class StormGuide {
 
     static void clear() {
         counter = 0;
-        prevCharge = NO_RODS;
         LAST.clear();
         WEST_BEST.clear();
         DOOR_HINT.clear();
@@ -84,7 +81,7 @@ final class StormGuide {
                 if (p.rung(trial)) {
                     return new int[] {WEST_TOTAL, WEST_TOTAL};
                 }
-                return new int[] {StormBackLayout.inWest(viewer) ? gapsPassed(viewer) : 0, WEST_TOTAL};
+                return new int[] {(StormBackLayout.inWest(viewer) ? gapsPassed(viewer) : 0) + Math.min(RIB_LAYERS, p.ribLayer()), WEST_TOTAL};
             }
             case EAST -> {
                 if (p.rung(trial)) {
@@ -111,8 +108,13 @@ final class StormGuide {
                 return new Goal(p.sleeping() == Trial.WEST ? "west.sleep" : "west.done", pr[0], pr[1], 0, 0, 0);
             }
             int passed = gapsPassed(v);
-            String id = passed < WEST_GAPS.length ? "west.gap" : v.y >= WEST_LEDGE.floor() ? "west.stone" : "west.knob";
-            return new Goal(id, pr[0], pr[1], passed, WEST_GAPS.length, 0);
+            if (passed < WEST_GAPS.length) {
+                return new Goal("west.gap", pr[0], pr[1], passed, WEST_GAPS.length, 0);
+            }
+            if (p.ribLayer() < RIB_LAYERS) {
+                return new Goal("west.rib", pr[0], pr[1], p.ribLayer(), RIB_LAYERS, 0);
+            }
+            return new Goal("west.stone", pr[0], pr[1], 0, 0, 0);
         }
         if (StormBackLayout.inEast(v)) {
             int[] pr = progress(p, Trial.EAST, v);
@@ -126,7 +128,7 @@ final class StormGuide {
             if (doors >= EAST_DOORS.length) {
                 return new Goal("east.raiju", pr[0], pr[1], 0, 0, 0);
             }
-            return new Goal("east.rods", pr[0], pr[1], doors, EAST_DOORS.length, 0);
+            return new Goal("east.circuit", pr[0], pr[1], doors, EAST_DOORS.length, 0);
         }
         if (StormBackLayout.inFront(v)) {
             int[] pr = progress(p, Trial.FRONT, v);
@@ -157,8 +159,12 @@ final class StormGuide {
         counter++;
         refreshGoals(level);
         tickWest(level);
-        tickEast(level);
         tickDoorHints(level);
+        for (ServerPlayer p : level.players()) {
+            if (!p.isSpectator() && p.isAlive()) {
+                StormRib.hint(level, p);
+            }
+        }
         if (counter % 2 == 0) {
             tickPips(level);
         }
@@ -203,35 +209,6 @@ final class StormGuide {
         }
     }
 
-    // ---------------------------------------------------------------- 東: 柱が一段満ちた
-    private static void tickEast(ServerLevel level) {
-        UUID owner = jp.revati.skyabyss.titan.group.RoomLocks.owner(StormBackTrials.EAST_ROOM);
-        if (owner == null) {
-            prevCharge = NO_RODS;
-            return;
-        }
-        int n = EAST_RODS.size();
-        if (prevCharge.length != n) {
-            prevCharge = new int[n];
-            for (int i = 0; i < n; i++) {
-                prevCharge[i] = StormRods.chargeOf(level, EAST_RODS.get(i));
-            }
-            return;
-        }
-        for (int i = 0; i < n; i++) {
-            int c = StormRods.chargeOf(level, EAST_RODS.get(i));
-            if (c > prevCharge[i] && c < StormRods.FULL) {
-                for (ServerPlayer p : Groups.online(level, owner)) {
-                    if (StormEast.inCorridor(p.position())) {
-                        Notice.bar(p, ModText.progress("message.skyabyss.storm.rod_charged", c, StormRods.FULL));
-                        success(level, p, 0.9f + 0.15f * c);
-                    }
-                }
-            }
-            prevCharge[i] = c;
-        }
-    }
-
     // ---------------------------------------------------------------- 閉じた戸の前: 閉じている理由と今の進み (3 秒に一度)
     private static void tickDoorHints(ServerLevel level) {
         long now = level.getGameTime();
@@ -245,7 +222,7 @@ final class StormGuide {
             for (int i = 0; i < EAST_DOORS.length; i++) {
                 if (!pr.eastDoorPassable(i) && Math.abs(v.x - EAST_DOORS[i]) < 2.4 && v.z > -20 && v.z < -14 && v.y > BONE_FLOOR && v.y < BONE_FLOOR + 5) {
                     DOOR_HINT.put(p.getUUID(), now);
-                    Notice.bar(p, ModText.hint("message.skyabyss.storm.door_shut", StormRods.chargeOf(level, EAST_RODS.get(i)), StormRods.FULL));
+                    Notice.bar(p, ModText.hint("message.skyabyss.storm.door_shut"));
                     break;
                 }
             }
@@ -300,6 +277,10 @@ final class StormGuide {
     }
 
     // ---------------------------------------------------------------- 成功の手応え (その人にだけ)
+    static void successTo(ServerLevel level, ServerPlayer p, float pitch) {
+        success(level, p, pitch);
+    }
+
     private static void success(ServerLevel level, ServerPlayer p, float pitch) {
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
                 net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.AMETHYST_BLOCK_CHIME), SoundSource.PLAYERS, p.getX(),

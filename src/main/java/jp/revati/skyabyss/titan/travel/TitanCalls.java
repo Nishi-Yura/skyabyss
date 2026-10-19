@@ -50,6 +50,8 @@ public final class TitanCalls {
     public static final double MEET_RANGE = 200;
     // すぐそこにいるとみなす距離 (呼ばずに「ここにいる」と答える)
     public static final double HERE_RANGE = 128;
+    // 別の巨神がこの距離 (水平) 以内にいるあいだは、呼びを断る (巨神の近くで別の巨神を呼ばない。TitanStay.LEAVE_RANGE と同じ)
+    public static final double NEAR_TITAN_RANGE = 160;
     // 遠くから呼び寄せるときの現れる距離
     private static final double ENTRY = 260;
     // 巨神ごとの、呼び寄せに頼る距離 (これより遠ければ、現れ直す)
@@ -220,6 +222,12 @@ public final class TitanCalls {
             }
         }
         ServerLevel level = player.server.overworld();
+        String near = nearTitan(level, player, id);
+        if (near != null) {
+            Notice.bar(player, ModText.hint(LANG + "near_titan", Progression.titanName(near)));
+            player.playNotifySound(net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.5f, 0.7f);
+            return Result.REFUSED;
+        }
         TitanWorldData data = TitanWorldData.get(level);
         TitanWorldData.Slot slot = data.slot(id);
         if (!slot.spawned) {
@@ -254,6 +262,26 @@ public final class TitanCalls {
         Notice.narrate(player, LANG + "called." + id);
         SkyAbyss.LOGGER.info("{} called the {} near {}", player.getGameProfile().getName(), id, player.blockPosition());
         return Result.CALLED;
+    }
+
+    // 呼ぶ巨神 except 以外で、player から NEAR_TITAN_RANGE (水平) 以内にいる巨神の id (いなければ null)。止まっていても飛んでいても数える
+    @Nullable
+    public static String nearTitan(ServerLevel level, ServerPlayer player, String except) {
+        for (String other : Titans.all()) {
+            if (!known(other) || other.equals(except)) {
+                continue;
+            }
+            net.minecraft.world.entity.Entity e = switch (other) {
+                case Titans.STONE_WHALE -> WhaleKeeper.current(level);
+                case Titans.TIDE_SHELL -> TideKeeper.KEEPER.current(level);
+                case Titans.THUNDER_WING -> StormKeeper.KEEPER.current(level);
+                default -> EmberKeeper.KEEPER.current(level);
+            };
+            if (e != null && e.isAlive() && Math.hypot(e.getX() - player.getX(), e.getZ() - player.getZ()) <= NEAR_TITAN_RANGE) {
+                return other;
+            }
+        }
+        return null;
     }
 
     private static boolean skyTitan(String id) {

@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // 雷翼の背のパケット (風見の目盛り)。ほかの担当とぶつからないよう、別の版で登録する
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class StormBackNetwork {
-    private static final String PROTOCOL_VERSION = "storm-back-2";
+    private static final String PROTOCOL_VERSION = "storm-back-3";
 
     private StormBackNetwork() {
     }
@@ -26,7 +26,8 @@ public final class StormBackNetwork {
 
     // サーバー → 背中にいる人: 拍の段階・次に変わるまでの tick (止めているときは -1)・嵐の強さ (0〜1)・鳴った石の数
     // + 目的の板 (StormGuide.Goal): 文の id (空なら出さない)・進みの点 (done / total)・文に入れる数 a b c
-    public record Gauge(int phase, int ticksLeft, float strength, int stones, String goal, int done, int total, int a, int b, int c)
+    // + locked: 拍の舵 (StormHelm) で固定中か。固定中は phase・strength はその固定の拍、ticksLeft は固定の残り
+    public record Gauge(int phase, int ticksLeft, float strength, int stones, String goal, int done, int total, int a, int b, int c, boolean locked)
             implements CustomPacketPayload {
         public static final Type<Gauge> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_gauge"));
         // composite は 6 つまでなので、書き読みを並べる
@@ -41,8 +42,9 @@ public final class StormBackNetwork {
             buf.writeVarInt(g.a);
             buf.writeVarInt(g.b);
             buf.writeVarInt(g.c);
+            buf.writeBoolean(g.locked);
         }, buf -> new Gauge(buf.readVarInt(), buf.readInt(), buf.readFloat(), buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(),
-                buf.readVarInt(), buf.readVarInt(), buf.readVarInt()));
+                buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
