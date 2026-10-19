@@ -113,10 +113,10 @@ public final class PartyNetwork {
                 ServerPlayer m = server.getPlayerList().getPlayer(id);
                 String name = party.names.getOrDefault(id, "?");
                 if (m == null) {
-                    members.add(new Member(id.toString(), name, 0, 0, 0, false, false, party.isLeader(id)));
+                    members.add(new Member(id.toString(), name, 0, 0, 0, false, false, party.isLeader(id), jp.revati.skyabyss.rebirth.Rebirths.offlineCount(server, id)));
                 } else {
                     members.add(new Member(id.toString(), name, Growth.get(m).level, m.getHealth(), m.getMaxHealth(), true,
-                            m.level() == player.level(), party.isLeader(id)));
+                            m.level() == player.level(), party.isLeader(id), jp.revati.skyabyss.rebirth.RebirthView.count(m)));
                 }
             }
         }
@@ -163,7 +163,12 @@ public final class PartyNetwork {
         syncSoon(player);
     }
 
-    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader) {
+    // rebirths: 転生の回数 (名前の枠の色と記号に使う。docs/design/31 の C15)
+    public record Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader, int rebirths) {
+        public Member(String id, String name, int level, float health, float maxHealth, boolean online, boolean sameDim, boolean leader) {
+            this(id, name, level, health, maxHealth, online, sameDim, leader, 0);
+        }
+
         static void write(FriendlyByteBuf buf, Member m) {
             buf.writeUtf(m.id, 64);
             buf.writeUtf(m.name, 32);
@@ -173,11 +178,12 @@ public final class PartyNetwork {
             buf.writeBoolean(m.online);
             buf.writeBoolean(m.sameDim);
             buf.writeBoolean(m.leader);
+            buf.writeVarInt(m.rebirths);
         }
 
         static Member read(FriendlyByteBuf buf) {
             return new Member(buf.readUtf(64), buf.readUtf(32), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readBoolean(),
-                    buf.readBoolean(), buf.readBoolean());
+                    buf.readBoolean(), buf.readBoolean(), buf.readVarInt());
         }
     }
 

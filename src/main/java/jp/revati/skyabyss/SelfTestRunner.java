@@ -116,6 +116,9 @@ public final class SelfTestRunner {
         // HUD の置き場の計算 (倍率 1〜4 × 代表的な窓で重ならない)。docs/design/18 の 14 章
         steps.add(Step.once("hud layout", jp.revati.skyabyss.hud.HudLayoutSelfTest::runSelfTest));
         steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
+        // 転生の見せ方 (色の段・記号・称号・順位表・同期・記録・墓の飾り)。docs/design/31
+        steps.add(Step.once("rebirth load", jp.revati.skyabyss.rebirth.RebirthSelfTest::load));
+        steps.add(Step.once("rebirth", 40, jp.revati.skyabyss.rebirth.RebirthSelfTest::runSelfTest));
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
         steps.add(Step.once("storm scan", jp.revati.skyabyss.titan.storm.back.StormBuildScan::runSelfTest));
