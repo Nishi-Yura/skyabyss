@@ -2,6 +2,7 @@ package jp.revati.skyabyss.client.combat;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,14 +12,16 @@ import org.joml.Vector3f;
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphGround;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.combat.TelegraphStartPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -45,7 +48,7 @@ public final class TelegraphClient {
         final Telegraph.Style style;
         @Nullable
         final UUID target;
-        final Map<Long, Float> heights = new HashMap<>();
+        final TelegraphGround ground;
 
         Decal(int id, TelegraphShape shape, double floor, long localStart, int warn, int active, int rgb,
                 Telegraph.Style style, @Nullable UUID target) {
@@ -58,40 +61,55 @@ public final class TelegraphClient {
             this.rgb = rgb;
             this.style = style;
             this.target = target;
+            this.ground = new TelegraphGround(new LevelBlocks(Minecraft.getInstance().level), floor);
         }
 
         int lifetime() {
             return warn + Math.max(0, active) + FLASH_TICKS;
         }
 
-        // その場所の床の高さ (印の floor の近くにある、いちばん上の固い面)。段差は 1.6 まで、それより高い壁・柱は無視する
-        float ground(ClientLevel level, double x, double z) {
-            int bx = Mth.floor(x);
-            int bz = Mth.floor(z);
-            long key = BlockPos.asLong(bx, 0, bz);
-            Float cached = heights.get(key);
-            if (cached != null) {
-                return cached;
+        // 点の床の高さ (歩ける床が無ければ NaN)。粒用。面と線は TelegraphGround の列を使って描く
+        double ground(double x, double z) {
+            return ground.heightAt(x, z);
+        }
+    }
+
+    // 本物の世界を TelegraphGround に見せる。当たり判定の箱 (半ブロック・階段もそのまま)。箱が無くて流体があれば、流体の面を箱にする
+    private static final class LevelBlocks implements TelegraphGround.Blocks {
+        private final ClientLevel level;
+        private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+        LevelBlocks(ClientLevel level) {
+            this.level = level;
+        }
+
+        @Override
+        public double[][] boxes(int x, int y, int z) {
+            if (level == null || y < level.getMinBuildHeight() || y >= level.getMaxBuildHeight()) {
+                return TelegraphGround.none();
             }
-            float h = (float) floor;
-            if (level.hasChunk(bx >> 4, bz >> 4)) {
-                int top = Mth.floor(floor + 0.01) + 1;
-                BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(bx, top, bz);
-                for (int y = top; y >= top - 5; y--) {
-                    pos.setY(y);
-                    BlockState state = level.getBlockState(pos);
-                    VoxelShape shapeHere = state.getCollisionShape(level, pos);
-                    if (!shapeHere.isEmpty()) {
-                        double surface = y + shapeHere.max(net.minecraft.core.Direction.Axis.Y);
-                        if (surface <= floor + 1.6) {
-                            h = (float) surface;
-                            break;
-                        }
-                    }
+            pos.set(x, y, z);
+            BlockState state = level.getBlockState(pos);
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            if (shape.isEmpty()) {
+                FluidState fluid = state.getFluidState();
+                if (fluid.isEmpty()) {
+                    return TelegraphGround.none();
                 }
+                return new double[][] {{0, 0, 0, 1, fluid.getHeight(level, pos), 1}};
             }
-            heights.put(key, h);
-            return h;
+            List<AABB> list = shape.toAabbs();
+            double[][] out = new double[list.size()][];
+            for (int i = 0; i < out.length; i++) {
+                AABB b = list.get(i);
+                out[i] = new double[] {b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ};
+            }
+            return out;
+        }
+
+        @Override
+        public boolean loaded(int x, int z) {
+            return level != null && level.hasChunk(x >> 4, z >> 4);
         }
     }
 
@@ -173,7 +191,12 @@ public final class TelegraphClient {
         DustParticleOptions dust = new DustParticleOptions(new Vector3f(r / 255f, g / 255f, b / 255f), (float) (1.0 + 0.5 * progress));
         double[] bounds = current.bounds();
         double spacing = Math.max(0.9, Math.max(bounds[2] - bounds[0], bounds[3] - bounds[1]) / 24.0);
-        TelegraphShape.PointSink sink = (x, z) -> level.addParticle(dust, x, d.ground(level, x, z) + 0.1, z, 0, 0, 0);
+        TelegraphShape.PointSink sink = (x, z) -> {
+            double y = d.ground(x, z);
+            if (!Double.isNaN(y)) {
+                level.addParticle(dust, x, y + 0.1, z, 0, 0, 0);
+            }
+        };
         current.outline(sink, spacing);
         if (t < d.warn) {
             current.edge(progress, sink, spacing);

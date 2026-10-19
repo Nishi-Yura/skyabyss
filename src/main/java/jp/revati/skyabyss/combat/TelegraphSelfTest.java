@@ -66,6 +66,7 @@ public final class TelegraphSelfTest {
             platform(level);
             shapes(level, f, notes);
             TelegraphDecalTest.run(server, f, notes);
+            TelegraphGroundTest.run(f, notes);
             basics(level, f, notes);
             roomSizes(f, notes);
             captain(level, f, notes);
