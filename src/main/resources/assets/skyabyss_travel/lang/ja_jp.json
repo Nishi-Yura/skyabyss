@@ -146,6 +146,7 @@
   "message.skyabyss.titan_call.no_sky": "空が見えない。ここでは%sがあなたを見つけられない",
   "message.skyabyss.titan_call.absent": "%sは、まだこの世界に姿を見せていない",
   "message.skyabyss.titan_call.here": "%sはすぐそこにいる。背へ乗れる",
+  "message.skyabyss.titan_call.near_titan": "%sがすぐ近くにいる。離れてから、ほかの巨神を呼ぼう",
   "message.skyabyss.titan_call.busy": "%sは、ほかの人の用で手が離せない",
   "message.skyabyss.titan_call.sleeping": "%sは眠っている。目覚めまで、およそ %s 分",
   "message.skyabyss.titan_call.met_hint": "呼び笛は、旅嚢から吹ける。出会った巨神は、いつでも呼べば近くへ来て、20 分のあいだ背を貸してくれる",
