@@ -254,5 +254,12 @@
   "skyabyss_record.r.check_notes": "旅の覚書",
   "skyabyss_record.v.check_notes_yes": "受け取り済み",
   "skyabyss_record.v.check_notes_no": "まだ",
-  "skyabyss_record.d.check_notes": "備えの頼み「身ごしらえ」を受けると、職人から渡される。"
+  "skyabyss_record.d.check_notes": "備えの頼み「身ごしらえ」を受けると、職人から渡される。",
+  "skyabyss_record.d.fight_badge": "勝った戦いでパーティが倒れた回数の最良。0 回で「無傷の誓い」、%s 回までで「堅き歩み」。見た目だけで、報酬は変わらない。",
+  "skyabyss_record.r.fight_badge.heart": "倒れた回数の札: 心臓",
+  "skyabyss_record.r.fight_badge.mid": "倒れた回数の札: 中ボス",
+  "skyabyss_record.v.fight_none": "まだ勝っていない",
+  "skyabyss_record.v.fight_oath": "無傷の誓い",
+  "skyabyss_record.v.fight_steady": "堅き歩み（%s 回）",
+  "skyabyss_record.v.fight_falls": "札なし（%s 回）"
 }

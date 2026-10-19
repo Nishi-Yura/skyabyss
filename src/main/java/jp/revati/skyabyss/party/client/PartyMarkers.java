@@ -91,7 +91,9 @@ public final class PartyMarkers {
 
     // 状態の記号 (色のほかに形でも分かるように。A11): 無事 = 塗りつぶし、傷 = 枠と下半分、瀕死 = 感嘆符、墓 = 十字
     public enum Symbol {
-        HEALTHY, HURT, LOW, GRAVE
+        HEALTHY, HURT, LOW, GRAVE,
+        // 倒れた仲間 (×)、「ここ」の印 (菱形)、敵の印 (三角): 色に頼らない形 (A11)
+        DOWNED, PING, ENEMY
     }
 
     public static Symbol symbolOf(int hp) {
@@ -210,6 +212,28 @@ public final class PartyMarkers {
             case GRAVE -> {
                 g.fill(x + 2, y - 1, x + 3, y + 6, c);
                 g.fill(x, y + 1, x + 5, y + 2, c);
+            }
+            case DOWNED -> {
+                // ×
+                for (int i = 0; i < 5; i++) {
+                    g.fill(x + i, y + i, x + i + 1, y + i + 1, c);
+                    g.fill(x + 4 - i, y + i, x + 5 - i, y + i + 1, c);
+                }
+            }
+            case PING -> {
+                // 菱形
+                g.fill(x + 2, y, x + 3, y + 1, c);
+                g.fill(x + 1, y + 1, x + 4, y + 2, c);
+                g.fill(x, y + 2, x + 5, y + 3, c);
+                g.fill(x + 1, y + 3, x + 4, y + 4, c);
+                g.fill(x + 2, y + 4, x + 3, y + 5, c);
+            }
+            case ENEMY -> {
+                // 下向きの三角
+                g.fill(x, y, x + 5, y + 1, c);
+                g.fill(x + 1, y + 1, x + 4, y + 2, c);
+                g.fill(x + 1, y + 2, x + 4, y + 3, c);
+                g.fill(x + 2, y + 3, x + 3, y + 5, c);
             }
         }
     }

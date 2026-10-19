@@ -257,8 +257,12 @@ public final class GroupEvents {
     // 戦いの部屋の中で倒れた参加者を覚える (撃破の参加者に数える。docs/design/10 の 10 章)
     @SubscribeEvent
     static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player && TitanBacks.isBack(player.level().dimension())) {
-            GroupBossRoom.noteDeath(player.getUUID());
+        if (event.getEntity() instanceof ServerPlayer player) {
+            // 倒れた状態から死んだ人は、倒れたときに数えている (二重に数えない)
+            boolean wasDown = jp.revati.skyabyss.party.Downed.onDeath(player);
+            if (TitanBacks.isBack(player.level().dimension())) {
+                GroupBossRoom.noteDeath(player.getUUID(), !wasDown);
+            }
         }
     }
 
