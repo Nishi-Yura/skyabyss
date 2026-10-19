@@ -55,7 +55,6 @@ public final class StormBackCommands {
         PLACES.put("beak", FRONT_STONE.offset(1, 0, 0));
         PLACES.put("heart", rest("heart"));
         PLACES.put("keel", HEART_ROOM.offset(0, 2, 8));
-        PLACES.put("top", TOP_STAIR.above(14));
     }
 
     private StormBackCommands() {

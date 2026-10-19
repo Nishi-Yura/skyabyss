@@ -300,6 +300,49 @@ public final class TitanEndSelfTest {
     // ---------------------------------------------------------------- 地上での滞在 (TitanStay: 乗れるようになってから 20 分)
     // 本体を直接 24000 tick 進める (時間を飛ばす)。乗れる姿のまま 24000 tick 残り、そのあと去ること。途中で心臓が止まれば眠りが勝つこと。
     private static void stay(MinecraftServer server, ServerLevel level, List<String> f) {
+        jp.revati.skyabyss.titan.TitanStay.vacancyEnabled = false;
+        try {
+            stay20(server, level, f);
+        } finally {
+            jp.revati.skyabyss.titan.TitanStay.vacancyEnabled = true;
+        }
+        vacancy(server, level, f);
+    }
+
+    // 無人 3 分で去る (Vacancy) は有効なまま、誰かが近くにいれば数え直し、眠っていれば数えない
+    private static void vacancy(MinecraftServer server, ServerLevel level, List<String> f) {
+        var v = new jp.revati.skyabyss.titan.TitanStay.Vacancy();
+        boolean fired = false;
+        for (int i = 0; i < jp.revati.skyabyss.titan.TitanStay.LEAVE_AFTER - 1; i++) {
+            fired |= v.tick(false);
+        }
+        check(f, !fired && v.tick(false), "vacancy did not fire after exactly 3 minutes with nobody near");
+        v = new jp.revati.skyabyss.titan.TitanStay.Vacancy();
+        for (int i = 0; i < jp.revati.skyabyss.titan.TitanStay.LEAVE_AFTER - 1; i++) {
+            v.tick(false);
+        }
+        v.tick(true);
+        check(f, !v.tick(false) && v.vacantTicks() == 1, "someone returning did not reset the vacancy");
+        var w = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        var at = new Vec3(PAD_X, PAD_Y, PAD_Z);
+        String titan = Titans.STONE_WHALE;
+        TitanDormancy.clear(server, titan);
+        boolean awake = false;
+        for (int i = 0; i < jp.revati.skyabyss.titan.TitanStay.LEAVE_AFTER + 5; i++) {
+            awake |= w.vacantTooLong(level, at, titan);
+        }
+        check(f, awake, "an empty awake titan did not leave after 3 minutes");
+        TitanDormancy.begin(server, titan, 0);
+        w = new jp.revati.skyabyss.titan.TitanStay.Warner();
+        boolean asleep = false;
+        for (int i = 0; i < jp.revati.skyabyss.titan.TitanStay.LEAVE_AFTER + 5; i++) {
+            asleep |= w.vacantTooLong(level, at, titan);
+        }
+        check(f, !asleep, "vacancy counted while the titan was sleeping");
+        TitanDormancy.clear(server, titan);
+    }
+
+    private static void stay20(MinecraftServer server, ServerLevel level, List<String> f) {
         int full = jp.revati.skyabyss.titan.TitanStay.TICKS;
         check(f, full == 24000, "the stay is not 20 minutes (" + full + ")");
         double cx = PAD_X + PAD / 2.0;

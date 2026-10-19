@@ -5,7 +5,9 @@
 
 使い方 (リポジトリ直下で):
   python tools/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の声を assets に書く (既定 a)
+  (--install は voice_timing.json も書く: 字幕が声に合わせて出る時刻。各文字が出る秒と全体の長さ)
   python tools/gen_cinematic_voice.py --check                      # 全台詞にクリップと音の登録があり、長さが台詞の表示時間に収まるか
+  python tools/gen_cinematic_voice.py --review2                    # 自然さを磨いた A2/A3/A4 と A の見本を docs/review/voice2/ に書く
   python tools/gen_cinematic_voice.py --review                     # 3 案の見本を docs/review/voice/ に書く (選定ページ)
 
 様式 (--style): a = 音節のブリップ (形のある母音を拍ごとの高さで)、b = 息のささやきのつぶやき (息 + 母音の滑らかな移り)、
@@ -25,7 +27,7 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from scipy.signal import fftconvolve, lfilter
+from scipy.signal import butter, fftconvolve, lfilter, sosfilt
 
 SR = 22050
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,7 +36,11 @@ CINE = ASSETS / "skyabyss_cinematic"
 MANIFEST = CINE / "voice_manifest.json"
 VOICE_DIR = CINE / "sounds" / "voice"
 REVIEW = ROOT / "docs/review/voice"
-STYLES = ("a", "b", "c")
+REVIEW2 = ROOT / "docs/review/voice2"
+STYLES = ("a", "b", "c", "a2", "a3", "a4")
+CUR_TEXT = [""]  # 今描いている台詞の本文 (抑揚: 。で下がる・？で上がる)
+# 仕上げの音量 (有音部の RMS)。A は耳にきついという声があり 0.10 → 0.07 に下げた
+LEVEL = {"a": 0.07, "b": 0.10, "c": 0.10, "a2": 0.055, "a3": 0.04, "a4": 0.035}
 
 # ----------------------------------------------------------------------------- 話し手
 # f0: 基本の高さ (Hz)、form: 口の大きさ (formant の倍率)、mora: 一拍の秒、breath: 息の量、voiced: ささやきに混ぜる声 (B)、
@@ -93,42 +99,46 @@ def tokenize(text):
     toks = []
     i = 0
     ell = 0
+    ell_i = 0
     while i < len(text):
         ch = text[i]
+        ci = i  # この文字の位置 (字幕の出る時刻の対応に使う)
         i += 1
         if ch in "…・" or ch in "―—":
+            if not ell:
+                ell_i = ci
             ell += 1
             continue
         if ell:
-            toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55)})
+            toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55), "i": ell_i})
             ell = 0
         if ch in KANA:
             c, v = KANA[ch]
-            toks.append({"t": "m", "c": c, "v": v, "len": 1.0})
+            toks.append({"t": "m", "c": c, "v": v, "len": 1.0, "i": ci})
         elif ch in SMALL_Y and toks and toks[-1]["t"] == "m":
             toks[-1]["v"] = SMALL_Y[ch]
             toks[-1]["len"] = 1.0
         elif ch in SMALL_V and toks and toks[-1]["t"] == "m":
             toks[-1]["v"] = SMALL_V[ch]
         elif ch in "んン":
-            toks.append({"t": "m", "c": "", "v": "n", "len": 1.0})
+            toks.append({"t": "m", "c": "", "v": "n", "len": 1.0, "i": ci})
         elif ch in "っッ":
-            toks.append({"t": "p", "s": 0.06})
+            toks.append({"t": "p", "s": 0.06, "i": ci})
         elif ch == "ー" and toks and toks[-1]["t"] == "m":
-            toks.append({"t": "m", "c": "", "v": toks[-1]["v"], "len": 1.0})
+            toks.append({"t": "m", "c": "", "v": toks[-1]["v"], "len": 1.0, "i": ci})
         elif is_kanji(ch):
             n = 1 if ch in ONE_MORA_KANJI else 2
             for k in range(n):
                 h = ord(ch) * 31 + k * 17
                 toks.append({"t": "m", "c": KANJI_CONS[h % len(KANJI_CONS)] if k == 0 else KANJI_CONS[(h // 7) % len(KANJI_CONS)],
-                             "v": "aiueo"[(h // 3) % 5], "len": 1.0})
+                             "v": "aiueo"[(h // 3) % 5], "len": 1.0, "i": ci})
         elif ch in PAUSE_SHORT:
-            toks.append({"t": "p", "s": 0.17})
+            toks.append({"t": "p", "s": 0.17, "i": ci})
         elif ch in PAUSE_LONG:
-            toks.append({"t": "p", "s": 0.32})
+            toks.append({"t": "p", "s": 0.32, "i": ci})
         # ほかの文字 (「」・英数字・空白) は無視
     if ell:
-        toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55)})
+        toks.append({"t": "p", "s": min(0.14 * ell + 0.1, 0.55), "i": ell_i})
     # 間の連続をまとめ、最後の間は落とす
     out = []
     for t in toks:
@@ -154,11 +164,11 @@ def plan(text, spk, avail, rng):
     t = 0.0
     for tok in toks:
         if tok["t"] == "p":
-            ev.append({"t": "p", "at": t, "d": tok["s"]})
+            ev.append({"t": "p", "at": t, "d": tok["s"], "i": tok["i"]})
             t += tok["s"]
         else:
             d = base * tok["len"] * (1 + rng.uniform(-spk["jitter"], spk["jitter"]))
-            ev.append({"t": "m", "at": t, "d": d, "c": tok["c"], "v": tok["v"]})
+            ev.append({"t": "m", "at": t, "d": d, "c": tok["c"], "v": tok["v"], "i": tok["i"]})
             t += d
     t_nat = max(t, 0.2)
     tail_keep = 0.5 * spk["rev"][0] * (spk["rev"][1] > 0.15)
@@ -172,12 +182,35 @@ def plan(text, spk, avail, rng):
     for e in ev:
         e["at"] *= s
         e["d"] *= s
+    starts = char_starts(text, ev, target)
     ev = [e for e in ev if e["at"] + e["d"] * 0.8 <= target]
     while ev and ev[-1]["t"] == "p":
         ev.pop()
     if not ev:
-        ev = [{"t": "m", "at": 0.0, "d": min(base, target), "c": "", "v": "n"}]
-    return ev, target
+        ev = [{"t": "m", "at": 0.0, "d": min(base, target), "c": "", "v": "n", "i": 0}]
+    return ev, target, starts
+
+
+def char_starts(text, ev, target):
+    """字幕用: 本文の各文字が出る時刻 (秒)。拍の文字はその拍の頭、句読点は間の頭、小さい ゃゅょ や括弧などは直前の拍の頭、
+    入りきらず落ちた尻は声の終わり (target)。漢字は 2 拍でも最初の拍の頭"""
+    first = {}
+    for e in ev:
+        first.setdefault(e["i"], e["at"])
+    out = []
+    cur = 0.0
+    for j in range(len(text)):
+        if j in first:
+            cur = first[j]
+        out.append(min(cur, target))
+    # 落ちた尻 (target に届かない拍の文字) は声の終わりに出す
+    kept_end = max([e["at"] for e in ev if e["at"] + e["d"] * 0.8 <= target] + [0.0])
+    for j, c in enumerate(out):
+        if j in first and first[j] > kept_end:
+            out[j] = target
+    for j in range(1, len(out)):
+        out[j] = max(out[j], out[j - 1])
+    return out
 
 
 # ----------------------------------------------------------------------------- 音の部品
@@ -427,15 +460,111 @@ def style_c(events, length, spk, rng):
     return dict(f0=f0, amp=amp, forms=forms, vmix=np.ones(n), nmix=np.full(n, spk["breath"] * 0.3), cons=cons, whisper=False, hum=True)
 
 
-STYLE_FN = {"a": style_a, "b": style_b, "c": style_c}
+def style_soft(events, length, spk, rng, mode):
+    """A2/A3/A4: 音節をなめらかにつなぎ、文の抑揚 (。で下がる・？で上がる) に高さが沿う、息つぎのある穏やかなつぶやき。
+    a2 = やわらかく低く遅い / a3 = 口を閉じたハミング寄り (mm/nn に時々開いた母音) / a4 = 遠くの声 (こもって息が多く、言葉より気配)"""
+    n = int(SR * length) + 2
+    t = np.arange(n) / SR
+    ms = [e for e in events if e["t"] == "m"]
+    text = CUR_TEXT[0]
+    question = text.rstrip("」』 ").endswith(("？", "?"))
+    # 句 (間で区切る) ごとに: 頭は少し高く、だんだん下がる。文末の句は終わりの 2 拍で下がる (？なら上がる)
+    phrases, cur = [], []
+    for e in events:
+        if e["t"] == "m":
+            cur.append(e)
+        elif cur:
+            phrases.append(cur)
+            cur = []
+    if cur:
+        phrases.append(cur)
+    xs, ss = [], []
+    base_shift = {"a2": -2.0, "a3": -3.0, "a4": -1.0}[mode]
+    if mode == "a4":
+        base_shift += rng.uniform(-1.3, 1.3)  # 台詞ごとに少し高さを変える (同じ声の繰り返しに聞こえないように)
+    for pi, ph in enumerate(phrases):
+        last = pi == len(phrases) - 1
+        for i, e in enumerate(ph):
+            pos = i / max(1, len(ph) - 1)
+            st = base_shift + 1.2 - 2.2 * pos + rng.uniform(-0.35, 0.35)
+            if i == 0:
+                st += 0.6
+            if last and i >= len(ph) - 2:
+                st += (2.5 if question else -2.2) * (0.5 if i == len(ph) - 2 else 1.0)
+            xs.append(e["at"] + e["d"] * 0.5)
+            ss.append(st)
+    if not xs:
+        xs, ss = [0.0], [0.0]
+    semis = smooth(np.interp(t, xs, ss), 55)
+    drift = 0.18 * np.sin(2 * math.pi * 4.6 * t + rng.uniform(0, 6)) * np.clip(t - 0.2, 0, 0.4) / 0.4  # ごく弱い揺れ
+    f0 = spk["f0"] * 0.9 * 2 ** ((semis + drift) / 12)
+    amp = np.zeros(n)
+    cons = np.zeros(n)
+    breath = np.zeros(n)
+    hum_vowels = {"a2": 0.0, "a3": 0.7, "a4": 0.25}[mode]
+    ev2 = []
+    for i, e in enumerate(ms):
+        e = dict(e)
+        if rng.uniform() < hum_vowels:
+            e["v"] = "n"
+        ev2.append(e)
+    ms = ev2
+    att, rel = {"a2": (0.05, 0.10), "a3": (0.07, 0.12), "a4": (0.13, 0.19)}[mode]
+    # a4: 拍ごとの強弱は交互の規則 (繰り返しに聞こえる) をやめ、ゆっくり動く乱数のなだらかな波にする
+    walk = np.clip(0.88 + np.cumsum(rng.uniform(-0.07, 0.07, len(ms) + 1)), 0.7, 1.0) if mode == "a4" else None
+    for i, e in enumerate(ms):
+        # 句の頭は強め、あとへ向かって弱く。語の中は強弱をつけすぎない
+        loud = rng.uniform(0.78, 1.0) * (0.86 if i % 2 else 1.0)
+        if walk is not None:
+            loud = float(walk[i])
+        amp += env_bump(n, e["at"] - 0.01, e["at"] + e["d"] * 1.12, att, rel, 0.9) * loud
+        cons += consonant(n, e, rng, {"a2": 0.4, "a3": 0.18, "a4": 0.15}[mode])
+    amp = np.minimum(amp, 1.0)
+    # 息つぎ: 句の切れ目に短い吸う息
+    for a, b in zip(events, events[1:]):
+        if a["t"] == "p" and a["d"] >= 0.15:
+            breath += env_bump(n, a["at"] + 0.02, a["at"] + min(a["d"], 0.3) - 0.01, 0.05, 0.08, 1.0) * band_noise(n, rng, 600, 4500) * {"a2": 0.16, "a3": 0.1, "a4": 0.2}[mode]
+    forms = vowel_track(ms, n, spk, 95 if mode == "a4" else 60)
+    out = dict(f0=f0, amp=amp, forms=forms, cons=cons, breath=breath, whisper=False)
+    if mode == "a2":
+        out.update(vmix=np.ones(n), nmix=np.full(n, spk["breath"] * 0.3))
+    elif mode == "a3":
+        out.update(vmix=np.ones(n), nmix=np.full(n, spk["breath"] * 0.12), gains=(1.0, 0.22, 0.08, 0.02))
+    else:
+        out.update(vmix=np.full(n, 0.4), nmix=np.full(n, 0.9), gains=(1.0, 0.5, 0.25, 0.1), whisper=True)
+    return out
+
+
+def style_a2(events, length, spk, rng):
+    return style_soft(events, length, spk, rng, "a2")
+
+
+def style_a3(events, length, spk, rng):
+    return style_soft(events, length, spk, rng, "a3")
+
+
+def style_a4(events, length, spk, rng):
+    return style_soft(events, length, spk, rng, "a4")
+
+
+STYLE_FN = {"a": style_a, "b": style_b, "c": style_c, "a2": style_a2, "a3": style_a3, "a4": style_a4}
+LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200}
 
 
 def render_voice(style, text, speaker, avail, seed_key):
-    spk = SPEAKERS[speaker]
+    return render_voice_timed(style, text, speaker, avail, seed_key)[0]
+
+
+def render_voice_timed(style, text, speaker, avail, seed_key):
+    """(波形, 字幕の時刻 {"n": 文字数, "dur": 秒, "t": [各文字の出る時刻]})"""
+    spk = dict(SPEAKERS[speaker])
+    if style in ("a2", "a3", "a4"):
+        spk["mora"] *= 1.2  # ゆっくり
+    CUR_TEXT[0] = text
     rng = np.random.default_rng(zlib.crc32((seed_key + style + speaker).encode("utf-8")))
-    events, length = plan(text, spk, avail, rng)
+    events, length, starts = plan(text, spk, avail, rng)
     if not any(e["t"] == "m" for e in events):
-        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n"}]
+        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
         length = spk["mora"]
     c = STYLE_FN[style](events, length, spk, rng)
     n = len(c["amp"])
@@ -445,13 +574,17 @@ def render_voice(style, text, speaker, avail, seed_key):
         f = c["f0"] * 2 ** ((st + cents / 100.0) / 12.0)
         if style == "c":
             f = f * (1 + 0.0015 * np.sin(2 * math.pi * (4.7 + 0.3 * rng.uniform()) * np.arange(n) / SR + rng.uniform(0, 6)))
-        voiced += g * lfilter([1.0], [1, -0.55], saw(f))
+        voiced += g * lfilter([1.0], [1, -0.55 if style not in ("a2", "a3", "a4") else -0.85], saw(f))
     voiced /= max(1.0, sum(g for _, g, _ in spk["layers"]) ** 0.7)
     noise = lfilter([1.0], [1, -0.4], rng.standard_normal(n)) * 0.6
     src = voiced * c["vmix"] + noise * c["nmix"]
     bws = FORM_BW_WHISPER if c["whisper"] else FORM_BW
-    y = formant_filter(src, c["forms"], bws, FORM_GAIN)
+    y = formant_filter(src, c["forms"], bws, c.get("gains", FORM_GAIN))
     y = y * c["amp"] + c["cons"] * 0.5
+    if "breath" in c:
+        y = y + c["breath"]
+    if style in LOWPASS:
+        y = sosfilt(butter(2, LOWPASS[style] / (SR / 2), output="sos"), y)
     if c["whisper"]:
         y = y * 1.0
     y = comb_hollow(y, spk["f0"], spk["hollow"])
@@ -461,17 +594,26 @@ def render_voice(style, text, speaker, avail, seed_key):
         rv, mix = rv * 1.6 + 0.4, min(0.7, mix * 1.5 + 0.12)
     elif style == "b":
         rv, mix = rv * 0.8, mix * 0.8
+    elif style == "a2":
+        rv, mix = rv + 0.3, mix + 0.1
+    elif style == "a3":
+        rv, mix = rv + 0.5, mix + 0.18
+    elif style == "a4":
+        rv, mix = rv * 1.8 + 0.7, min(0.75, mix * 1.6 + 0.3)
     y = reverb(y, rv, mix, rng)
-    return finish(y, avail - 0.05)
+    y = finish(y, avail - 0.05, LEVEL[style], 0.08 if style in LOWPASS else 0.02)
+    dur = len(y) / SR
+    meta = {"n": len(text), "dur": round(dur, 3), "t": [round(min(x, dur), 3) for x in starts]}
+    return y, meta
 
 
-def finish(y, max_len=None):
+def finish(y, max_len=None, level=0.10, fade_in=0.02):
     """音量をそろえ (ジャンプスケア禁止: なだらかな立ち上がり)、無音の尻を切る"""
     # 高域の耳に刺さる成分を抑える (22 kHz mono なので 9 kHz より上は元々出ない)
     peak = np.max(np.abs(y)) + 1e-9
     act = y[np.abs(y) > 0.05 * peak]
     rms = float(np.sqrt(np.mean(act ** 2))) if len(act) else peak
-    y = y * (0.10 / (rms + 1e-9))
+    y = y * (level / (rms + 1e-9))
     y = np.tanh(y * 1.4) / 1.4
     y *= min(1.0, 0.6 / (np.max(np.abs(y)) + 1e-9))
     env = np.abs(y)
@@ -480,7 +622,7 @@ def finish(y, max_len=None):
         y = y[: min(len(y), keep[-1] + int(0.05 * SR))]
     if max_len is not None and len(y) > int(max_len * SR):
         y = y[: int(max_len * SR)]
-    fi = int(0.02 * SR)
+    fi = int(fade_in * SR)
     fo = min(len(y), int(0.25 * SR) if max_len is not None and len(y) >= int(max_len * SR) - 2 else int(0.12 * SR))
     y[:fi] *= np.linspace(0, 1, fi)
     y[-fo:] *= np.linspace(1, 0, fo)
@@ -531,10 +673,12 @@ def install(style):
     lang = load_lang()
     lines = load_manifest()
     sounds = {}
+    timing = {}
     total = 0
     for ln in lines:
         text = lang[ln["text"]]
-        y = render_voice(style, text, speaker_name(ln), ln["duration"], ln["scene"] + str(ln["idx"]))
+        y, meta = render_voice_timed(style, text, speaker_name(ln), ln["duration"], ln["scene"] + str(ln["idx"]))
+        timing[event_name(ln["scene"], ln["idx"])] = meta
         p = clip_path(ln["scene"], ln["idx"])
         write_ogg(p, y)
         total += p.stat().st_size
@@ -543,6 +687,7 @@ def install(style):
             "sounds": [{"name": f"skyabyss_cinematic:voice/{ln['scene']}/l{ln['idx']}", "stream": False}],
         }
     (CINE / "sounds.json").write_text(json.dumps(sounds, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (CINE / "voice_timing.json").write_text(json.dumps(timing, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     (CINE / "voice_style.txt").write_text(style + "\n", encoding="utf-8")
     print(f"style {style}: {len(lines)} clips, {total / 1024:.0f} KiB")
 
@@ -551,6 +696,7 @@ def check():
     lines = load_manifest()
     lang = load_lang()
     sj = json.loads((CINE / "sounds.json").read_text(encoding="utf-8"))
+    timing = json.loads((CINE / "voice_timing.json").read_text(encoding="utf-8"))
     bad = []
     tot = 0
     for ln in lines:
@@ -570,6 +716,17 @@ def check():
             bad.append(f"{p.name}: not mono {SR}")
         if not (0.4 * ln["duration"] <= d <= ln["duration"] + 0.05):
             bad.append(f"{name}: clip {d:.2f}s vs line {ln['duration']:.2f}s")
+        tm = timing.get(name)
+        if tm is None:
+            bad.append(f"no timing {name}")
+        else:
+            ts = tm["t"]
+            if tm["n"] != len(lang[ln["text"]]) or len(ts) != tm["n"]:
+                bad.append(f"{name}: timing n={tm['n']} vs ja text {len(lang[ln['text']])}")
+            if abs(tm["dur"] - d) > 0.01:
+                bad.append(f"{name}: timing dur {tm['dur']:.3f} vs clip {d:.3f}")
+            if any(b < a for a, b in zip(ts, ts[1:])) or (ts and (ts[0] < 0 or ts[-1] > tm["dur"] + 1e-6)):
+                bad.append(f"{name}: timing not monotonic / out of range")
     print(f"{len(lines)} lines, {tot / 1024:.0f} KiB")
     if tot > 8 * 1024 * 1024:
         bad.append("clips over 8 MiB")
@@ -595,44 +752,56 @@ STYLE_INFO = {
 }
 
 
-def review():
+def review(styles=("a", "b", "c"), outdir=None, template=None, info=None):
+    outdir = outdir or REVIEW
+    template = template or REVIEW_TEMPLATE
+    info = info or STYLE_INFO
     lang = load_lang()
     lines = {(l["scene"], l["idx"]): l for l in load_manifest()}
-    REVIEW.mkdir(parents=True, exist_ok=True)
-    for old in REVIEW.glob("*.ogg"):
+    outdir.mkdir(parents=True, exist_ok=True)
+    for old in outdir.glob("*.ogg"):
         old.unlink()
     rows = []
     for tag, scene, idx, label in REVIEW_LINES:
         ln = lines[(scene, idx)]
         text = lang[ln["text"]]
         row = {"tag": tag, "label": label, "text": text, "files": {}}
-        for st in STYLES:
+        for st in styles:
             y = render_voice(st, text, speaker_name(ln), ln["duration"], scene + str(idx))
             fn = f"{st}_{tag}.ogg"
-            write_ogg(REVIEW / fn, y)
+            write_ogg(outdir / fn, y)
             row["files"][st] = fn
         rows.append(row)
     sampler = []
     for sp in SPEAKERS:
         row = {"name": SAMPLER_NAMES[sp], "files": {}}
-        for st in STYLES:
+        for st in styles:
             y = render_voice(st, SAMPLER_TEXT, sp, 3.0, "sampler")
             fn = f"{st}_who_{sp}.ogg"
-            write_ogg(REVIEW / fn, y)
+            write_ogg(outdir / fn, y)
             row["files"][st] = fn
         sampler.append(row)
-    html = REVIEW_TEMPLATE
+    html = template
     html = html.replace("/*ROWS*/", json.dumps(rows, ensure_ascii=False))
     html = html.replace("/*SAMPLER*/", json.dumps(sampler, ensure_ascii=False))
-    html = html.replace("/*STYLES*/", json.dumps({k: {"title": v[0], "desc": v[1]} for k, v in STYLE_INFO.items()}, ensure_ascii=False))
+    html = html.replace("/*STYLES*/", json.dumps({k: {"title": v[0], "desc": v[1]} for k, v in info.items()}, ensure_ascii=False))
     html = html.replace("{{SAMPLER_TEXT}}", SAMPLER_TEXT)
-    (REVIEW / "index.html").write_text(html, encoding="utf-8")
-    size = sum(p.stat().st_size for p in REVIEW.iterdir())
-    print(f"review: {len(rows) * 3 + len(sampler) * 3} clips, folder {size / 1024:.0f} KiB -> {REVIEW}")
+    (outdir / "index.html").write_text(html, encoding="utf-8")
+    size = sum(p.stat().st_size for p in outdir.iterdir())
+    print(f"review: {(len(rows) + len(sampler)) * len(styles)} clips, folder {size / 1024:.0f} KiB -> {outdir}")
 
 
 REVIEW_TEMPLATE = (Path(__file__).resolve().parent / "voice_review_template.html").read_text(encoding="utf-8") \
     if (Path(__file__).resolve().parent / "voice_review_template.html").exists() else ""
+
+
+STYLE_INFO2 = {
+    "a": ("A いまの声 (音量は少し下げた)", "比較用。拍ごとに高さの違う短い弾む母音。"),
+    "a2": ("A2 やわらかい語り", "低く・ゆっくり・つながる音節。高さが文の抑揚に沿い (。で下がる・？で上がる)、頭と尾がなめらか、句の切れ目で息をつく。小さめ。"),
+    "a3": ("A3 ハミング混じり", "口を閉じた mm / nn の響きに、ときどき開いた母音が混じる。こもって暖かく、ほとんど気配だけ。さらに小さめ。"),
+    "a4": ("A4 遠い声", "高域を削り、息が多く、残響が深い。言葉というより遠くから届く気配。いちばん小さい。"),
+}
+REVIEW2_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review2_template.html"
 
 
 def main():
@@ -641,14 +810,17 @@ def main():
     ap.add_argument("--install", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--review", action="store_true")
+    ap.add_argument("--review2", action="store_true")
     a = ap.parse_args()
     if a.install:
         install(a.style)
     if a.review:
         review()
+    if a.review2:
+        review(("a", "a2", "a3", "a4"), REVIEW2, REVIEW2_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO2)
     if a.check:
         check()
-    if not (a.install or a.review or a.check):
+    if not (a.install or a.review or a.review2 or a.check):
         ap.print_help()
 
 

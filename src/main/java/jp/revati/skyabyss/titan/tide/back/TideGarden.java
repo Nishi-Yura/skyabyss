@@ -117,8 +117,7 @@ public final class TideGarden {
         UUID group = Groups.keyOf(player);
         TideBackState.Group state = TideBackState.of(level, group);
         if (state.rung(TideBackState.Trial.WEST)) {
-            Notice.bar(player, ModText.hint(state.sleeping() == TideBackState.Trial.WEST
-                    ? "message.skyabyss.tide.trial_sleeping" : "message.skyabyss.tide.clam_empty"));
+            Notice.bar(player, ModText.hint("message.skyabyss.tide.clam_empty"));
             return true;
         }
         if (TideRooms.owner(TideRooms.GARDEN) == null) {
@@ -273,7 +272,8 @@ public final class TideGarden {
 
     private static void onPhase(ServerLevel level, UUID owner, TideClock.Phase phase) {
         boolean people = !Groups.inBox(level, owner, TideRooms.gardenBox()).isEmpty();
-        if (phase == TideClock.Phase.HIGH && people) {
+        // 静かな庭 (08 の 7.2節) は、満潮の泡吹きも出ない
+        if (phase == TideClock.Phase.HIGH && people && TideBackState.of(level, owner).quiet() != TideBackState.Trial.WEST) {
             // 満潮: 台のまわりに泡吹き 2 体
             int[][] plats = {PLAT_A, PLAT_C, PLAT_B1, PLAT_B2, PLAT_D1, PLAT_D2};
             RandomSource r = level.random;
@@ -309,6 +309,11 @@ public final class TideGarden {
             BlockPos mid = cells.get(cells.size() / 2);
             spots.add(new BlockPos(mid.getX(), GARDEN_FLOOR + 1, mid.getZ()));
         }
+        // 静かな庭: 珊瑚憑きは 2 体 (+1/人) で、水路の磯走りは出ない
+        if (state.quiet() == TideBackState.Trial.WEST) {
+            placeThralls(level, spots, 2 + (people - 1), owner);
+            return;
+        }
         placeThralls(level, spots, 5 + 2 * (people - 1), owner);
         placePack(level, 3 + people - 1, owner);
     }
@@ -321,6 +326,10 @@ public final class TideGarden {
             BlockPos mid = cells.get(cells.size() / 2);
             spots.add(new BlockPos(mid.getX(), GARDEN_FLOOR + 1, mid.getZ()));
             spots.add(new BlockPos(c.from[0], GARDEN_FLOOR + 1, c.to[1]));
+        }
+        if (state.quiet() == TideBackState.Trial.WEST) {
+            placeThralls(level, spots, added, owner);
+            return;
         }
         placeThralls(level, spots, 2 * added, owner);
         placePack(level, added, owner);

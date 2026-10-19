@@ -54,7 +54,6 @@ public final class TideBackAudit {
                 TideRooms.claim(level, TideRooms.GARDEN, group);
                 TideRooms.claim(level, TideRooms.WATCH, group);
                 TideRooms.claim(level, TideRooms.FLATS, group);
-                jp.revati.skyabyss.titan.group.GroupGates.setDefault(level, TideGates.flats(), true);
                 BackReach.Report r = BackReach.run(level, spec());
                 String tag = "[route " + route + ", east " + east + "] ";
                 for (String f : r.failures) {

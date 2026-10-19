@@ -77,7 +77,7 @@ public final class Quests {
             String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
             if (titan != null) {
                 jp.revati.skyabyss.advancement.Beats.fire(player, "trial:" + titan);
-                // 試練を越えたら、すぐ帰れるように、そばに帰り石を出す (四つの背中で共通)
+                // 試練を越えたら、背中の真ん中へすぐ戻れる光をそばに出す (四つの背中で共通)
                 jp.revati.skyabyss.titan.end.ReturnBeacons.offer(player);
             }
         }
@@ -87,6 +87,22 @@ public final class Quests {
     // 会話でその節 (node) に入った。topic のない talk は、その NPC と話せば何でもよい
     public static void onTalk(ServerPlayer player, String role, String node) {
         jp.revati.skyabyss.advancement.Beats.fire(player, "talk:" + role);
+        // 聞いた話題を覚える。今の段階でなくても (先に聞いても、途中で閉じても)、その段に着いたとき・ログイン時の measure が済ませる
+        // (始めたあとの、そのクエストのどこかの段の話題だけ。始める前に聞いた話では済まない)
+        QuestLog hlog = QuestLog.of(player);
+        for (Map.Entry<String, QuestLog.Entry> e : hlog.quests.entrySet()) {
+            QuestDef hd = QuestManager.quest(e.getKey());
+            if (hd == null || e.getValue().done || hd.repeats()) {
+                continue;
+            }
+            for (QuestDef.Stage hs : hd.stages()) {
+                for (QuestDef.Objective ho : hs.objectives()) {
+                    if (ho.type().equals("talk") && node.equals(ho.topic()) && ho.targets().contains(role)) {
+                        hlog.heard.add(e.getKey() + "|" + role + "/" + node);
+                    }
+                }
+            }
+        }
         bump(player, (def, stage, ob) -> ob.type().equals("talk") && ob.targets().contains(role)
                 && (ob.topic() == null || ob.topic().equals(node)));
     }
@@ -225,6 +241,9 @@ public final class Quests {
                 case "herd" -> slow ? herded(player, entry, ob) : entry.progress(i);
                 case "visit" -> ob.targets().contains(player.level().dimension().location().toString()) ? ob.count() : entry.progress(i);
                 case "condition" -> ob.condition().test(StoryContext.of(player)) ? ob.count() : 0;
+                // 聞いた話題の目的は、聞いた記録があれば済む (一度きりのクエストだけ。繰り返すものは毎回聞き直す)
+                case "talk" -> !def.repeats() && ob.topic() != null && ob.targets().stream().anyMatch(t -> QuestLog.of(player).heard(def.id(), t, ob.topic()))
+                        ? ob.count() : entry.progress(i);
                 // 試練のあとの石の合図は、パーティの誰かが鳴らせば全員のもの (グループの記録から数える。増えるだけ)
                 case "signal" -> Math.max(entry.progress(i), jp.revati.skyabyss.titan.group.TrialSteles.cleared(player, ob.targets()));
                 case "near" -> slow ? (near(player, ob) ? ob.count() : entry.progress(i)) : entry.progress(i);
@@ -419,6 +438,7 @@ public final class Quests {
     public static boolean forget(ServerPlayer player, String questId) {
         QuestLog log = QuestLog.of(player);
         boolean removed = log.quests.remove(questId) != null;
+        log.heard.removeIf(h -> h.startsWith(questId + "|"));
         if (log.tracked.equals(questId)) {
             log.tracked = nextToTrack(log);
         }
@@ -429,6 +449,7 @@ public final class Quests {
     public static void forgetAll(ServerPlayer player) {
         QuestLog log = QuestLog.of(player);
         log.quests.clear();
+        log.heard.clear();
         log.tracked = "";
         sync(player);
     }

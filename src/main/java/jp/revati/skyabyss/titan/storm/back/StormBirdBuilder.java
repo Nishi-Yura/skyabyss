@@ -56,7 +56,6 @@ public final class StormBirdBuilder {
         east(kit);
         front(kit);
         keel(kit);
-        topStair(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
         int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
         fixtures(kit);
@@ -592,6 +591,10 @@ public final class StormBirdBuilder {
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY() - 1, MIRROR_RESET.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
         kit.put(MIRROR_RESET.getX(), MIRROR_RESET.getY(), MIRROR_RESET.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
                 .setValue(StormBlocks.ReturnMirror.FACING, Direction.EAST));
+        // 眼の間の入口の東の隅にもう一つ (鏡の台と同じ高さ)
+        kit.put(MIRROR_RESET_HALL.getX(), MIRROR_RESET_HALL.getY() - 1, MIRROR_RESET_HALL.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
+        kit.put(MIRROR_RESET_HALL.getX(), MIRROR_RESET_HALL.getY(), MIRROR_RESET_HALL.getZ(), StormBackSetup.RETURN_MIRROR.get().defaultBlockState()
+                .setValue(StormBlocks.ReturnMirror.FACING, Direction.WEST));
     }
 
     // ---------------------------------------------------------------- 竜骨の門の下: 低い道・螺旋・床 121 の道・前室・竜骨の間
@@ -691,63 +694,6 @@ public final class StormBirdBuilder {
             kit.solid(HEART_ROOM.getX() + (int) Math.round(Math.cos(a) * (r + 1)), HEART_ROOM.getY() + 4,
                     HEART_ROOM.getZ() + (int) Math.round(Math.sin(a) * (r + 1)), StormKit.LAMP);
         }
-    }
-
-    // ---------------------------------------------------------------- 背の上へ上る段 (尾の間の西の壁から 5x5 の螺旋)
-    private static void topStair(StormKit kit) {
-        int cx = TOP_STAIR.getX();
-        int cz = TOP_STAIR.getZ();
-        int floor = TAIL_HALL.floor();
-        // 尾の間の西の壁の口 (x -11、z 26)
-        kit.room(-12, -11, cz, cz, floor, 3, Style.HALL, 0);
-        int surface = Math.max(floor + 6, top(cx, cz));
-        List<int[]> ring = ring5(cx, cz);
-        int start = 0;
-        for (int i = 0; i < ring.size(); i++) {
-            if (ring.get(i)[0] == cx + 2 && ring.get(i)[1] == cz) {
-                start = i;
-            }
-        }
-        kit.room(cx - 2, cx + 2, cz - 2, cz + 2, floor, surface - floor + 1, Style.HALL, 0);
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                kit.fill(cx + dx, floor + 1, cz + dz, cx + dx, surface + 1, cz + dz, StormKit.wall(Style.HALL, cx + dx, 0, cz + dz));
-            }
-        }
-        int k = 0;
-        int y = floor;
-        while (y < surface) {
-            int[] c = ring.get(Math.floorMod(start + 1 + k, 16));
-            y = floor + 1 + k;
-            for (int yy = floor + 1; yy < y; yy++) {
-                if (!kit.isCarved(c[0], yy, c[1]) || yy < y - 3) {
-                    kit.put(c[0], yy, c[1], StormKit.wall(Style.HALL, c[0], yy, c[1]));
-                }
-            }
-            kit.put(c[0], y, c[1], StormKit.floor(Style.HALL, c[0], c[1]));
-            k++;
-        }
-        // 上の口 (最後の段の上を空へ開け、まわりに低い縁)
-        int[] last = ring.get(Math.floorMod(start + k, 16));
-        for (int yy = y + 1; yy <= Math.max(y + 3, top(last[0], last[1]) + 3); yy++) {
-            kit.air(last[0], yy, last[1]);
-        }
-        // 口の次の外周のマスは、最後の段より 1 段だけ高い段にして、空へ開けておく。最後の段 → この段 → 屋根の上 (屋根は最後の段の 2 上) と、
-        // 1 段ずつ上がって背の上へ出られる (前は最後の段の真上だけが屋根の穴で、2 段の縦穴になり、上の口から出られなかった。詰み監査)
-        int[] exit = ring.get(Math.floorMod(start + k + 1, 16));
-        for (int yy = y; yy <= y + 1; yy++) {
-            kit.put(exit[0], yy, exit[1], StormKit.FEATHER);
-        }
-        for (int yy = y + 2; yy <= y + 4; yy++) {
-            kit.air(exit[0], yy, exit[1]);
-        }
-        // 螺旋の屋根 (縦穴を空から見てふさぐ。口とその次の段だけ空ける)
-        for (int[] c : ring) {
-            if (c != last && c != exit) {
-                kit.solid(c[0], surface + 2, c[1], StormKit.FEATHER);
-            }
-        }
-        kit.solid(cx, surface + 2, cz, StormKit.LAMP);
     }
 
     // ---------------------------------------------------------------- 休み場・碑文・石・抜け道の床・広間の灯り

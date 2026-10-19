@@ -52,6 +52,8 @@ public final class NoticeClient {
     // ---- 画面の中央まわりの置き場 (重ならないための共通の寸法)。上の帯 → レベルアップの文字 → 中央の演出 → 字幕、の順に積む
     // ボスバーの下端 (その枠の描画中に BossBarLayout が記す)、上の帯の下端 (前の枠の値)、レベルアップの文字の下端 (GrowthHud が記す)、中央の演出の下端 (前の枠の値)
     private static int bossBottom;
+    // 前の枠で描いたボスバーの下端 (技の名前の一行が、ボスバーの直下に置くために使う)
+    private static int lastBossBottom;
     private static int bannerBottom;
     private static int levelUpBottom;
     private static int centerBottomPrev;
@@ -62,6 +64,10 @@ public final class NoticeClient {
     // ボスバーを描いた分の下端を記す (複数なら一番下)
     public static void noteBossBottom(int y) {
         bossBottom = Math.max(bossBottom, y);
+    }
+
+    public static int lastBossBottom() {
+        return lastBossBottom;
     }
 
     // レベルアップの文字の上端: 画面の中ほどより少し上。上の帯やボスバーが下まで来ていれば、その下へずらす
@@ -250,6 +256,7 @@ public final class NoticeClient {
         renderCenter(g, font, cx);
         renderCaption(g, font, cx);
         centerBottomPrev = Math.max(centerBottom, levelUpBottom);
+        lastBossBottom = bossBottom;
         bossBottom = 0;
         levelUpBottom = 0;
     }

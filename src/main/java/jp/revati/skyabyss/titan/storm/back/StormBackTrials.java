@@ -300,6 +300,7 @@ public final class StormBackTrials {
             tickPads(level);
             tickPeaceful(level, peaceful);
             tickGateFace(level);
+            StormGuide.tick(level);
         }
         StormBackClock.Phase phase = StormBackClock.phase(level);
         if (phase != lastPhase || gt % 20 == 0) {
@@ -865,7 +866,7 @@ public final class StormBackTrials {
         }
         ServerLevel level = player.serverLevel();
         BlockPos pos = event.getPos();
-        if (pos.equals(MIRROR_RESET)) {
+        if (pos.equals(MIRROR_RESET) || pos.equals(MIRROR_RESET_HALL)) {
             event.setCanceled(true);
             EyeMirrors.resetMirrors(level, player);
             return;
@@ -896,6 +897,7 @@ public final class StormBackTrials {
         RoomLocks.release(EAST_ROOM);
         StormEast.clear();
         EyeMirrors.clear();
+        StormGuide.clear();
         StormBackClock.force(null);
     }
 
@@ -911,8 +913,10 @@ public final class StormBackTrials {
     }
 
     static StormBackNetwork.Gauge gauge(ServerLevel level, ServerPlayer player) {
+        StormGuide.Goal goal = StormGuide.goalFor(level, player);
         return new StormBackNetwork.Gauge(StormBackClock.phase(level).ordinal(), StormBackClock.ticksLeft(level),
-                (float) StormBackClock.strength(level), StormProgress.of(level, player).rungCount());
+                (float) StormBackClock.strength(level), StormProgress.of(level, player).rungCount(), goal.id(), goal.done(), goal.total(), goal.a(), goal.b(),
+                goal.c());
     }
 
     public static Vec3 hubSpawn() {

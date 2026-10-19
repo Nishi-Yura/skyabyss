@@ -1,8 +1,6 @@
 package jp.revati.skyabyss.titan.end;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,15 +35,13 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3f;
 
-// 帰り石 (docs/design/01 の 4.3「全巨神に共通の決まり」、02 の 2.11・08 の 2.5・12・13)。四つの背中のどこからでも、地上へ戻る道をわかりやすくする共通の目印。
-//   場所: 着いた所のそば (到着点から 3〜7 ブロック、見送りの段・錨石・羽根の門・見送りの石のある方へ寄せた立てる床) と、各休み場の復活の位置。
-//   見た目: 淡い緑白の光の柱と枠 (BoardBeamClient)。近づくと粒の輪。その背中にいる人にだけ送る (96 ブロック以内)
-//   使い方: 光の中でしゃがんで 1.5 秒。粒の輪が閉じると、その巨神の戻り道 (Titans.sendDown) で地上へ戻る。立っているだけでは戻らない
-//           (復活の位置・到着の位置に立っているだけで戻らないように)。戻る先は各巨神の決まり (潮殻は近くの岸、ほかは足もと)
-// 昔からの戻り方 (岩鯨の錨石・潮殻の見送りの段・雷翼の羽根の門・余燼の見送りの石・/skyabyss titan leave) はそのまま残る。
+// 真ん中へ戻る光 (docs/design/01 の 4.3「全巨神に共通の決まり」、02 の 2.11・08 の 2.5・12・13)。
+//   試練を越えた人のそばに、5 分だけ個人の光の柱を立てる (その人にだけ見える)。光の中でしゃがんで 1.5 秒で、その背中の真ん中 (鼓動の間・休み場 "hub") へ戻る。
+//   途中から地上へ戻る道は、光ではなく、その巨神の呼び笛 (旅嚢) を背中の中で使う: 「地上へ下りる？」と聞かれ、5 秒以内にもう一度使うと地上へ戻る (Titans.sendDown)。
+//   心臓を止めたあとの運び出しは別 (TitanEnd)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ReturnBeacons {
-    // しゃがんで立つ長さ (tick) と、石の半径 (水平)・高さの幅
+    // しゃがんで立つ長さ (tick) と、光の半径 (水平)・高さの幅
     public static final int DWELL = 30;
     public static final double RADIUS = 1.5;
     public static final double HEIGHT = 2.2;
@@ -54,21 +50,22 @@ public final class ReturnBeacons {
     public static final int SEND_EVERY = 20;
     // 光の色 (淡い緑白。乗り込み口の光 (巨神ごとの色) と見分ける)
     public static final int RGB = 0xC8FFE0;
-    // 到着点から探す距離
-    private static final int FIND_MIN = 3;
-    private static final int FIND_MAX = 7;
+    // 試練の終わりのそばから探す距離
+    private static final int FIND_MIN = 2;
+    private static final int FIND_MAX = 6;
+    // 笛で地上へ下りるとき、聞き返してからもう一度使うまでの猶予 (tick)
+    public static final int CONFIRM_TICKS = 20 * 5;
 
     public record Beacon(String id, Vec3 foot) {
     }
 
-    // ディメンション → 帰り石の一覧 (最初の人が来たとき作る。保存しない)
-    private static final Map<ResourceKey<Level>, List<Beacon>> CACHE = new HashMap<>();
     // しゃがんで立っている人 → tick
     private static final Map<UUID, Integer> DWELLING = new HashMap<>();
-
-    // 試練を越えた・心臓を止めた人のそばに、すぐ帰れる帰り石を一つ置く (人ごと・保存しない)。人 → 石と、消える時刻 (背中のゲーム時間)
+    // 試練を越えた人のそばに、真ん中へ戻れる光を一つ置く (人ごと・保存しない)。人 → 光と、消える時刻 (背中のゲーム時間)
     private static final Map<UUID, Offer> OFFERS = new HashMap<>();
     public static final int OFFER_TICKS = 20 * 60 * 5;
+    // 笛で「地上へ下りる？」と聞かれた人 → 答えられる最後の時刻 (背中のゲーム時間)
+    private static final Map<UUID, Long> ASKED = new HashMap<>();
 
     private record Offer(Beacon beacon, ResourceKey<Level> dim, long until) {
     }
@@ -76,10 +73,10 @@ public final class ReturnBeacons {
     private ReturnBeacons() {
     }
 
-    // この人のそばに、帰り石を出す (試練の終わり・心臓の撃破。背中の中でだけ)。置ける床がなければ何もしない。置いたか
+    // この人のそばに、真ん中へ戻る光を出す (試練の終わり。背中の中でだけ)。置ける床がなければ何もしない。置いたか
     public static boolean offer(ServerPlayer player) {
         String titan = Titans.titanOfBack(player.level().dimension());
-        if (titan == null || !(player.level() instanceof ServerLevel back)) {
+        if (titan == null || !(player.level() instanceof ServerLevel back) || hubOf(titan) == null) {
             return false;
         }
         BlockPos at = player.blockPosition();
@@ -93,18 +90,17 @@ public final class ReturnBeacons {
         return true;
     }
 
-    private static List<Beacon> withOffer(ServerPlayer player, ServerLevel back, List<Beacon> list) {
+    @Nullable
+    private static Offer liveOffer(ServerPlayer player, ServerLevel back) {
         Offer o = OFFERS.get(player.getUUID());
         if (o == null) {
-            return list;
+            return null;
         }
         if (o.dim() != back.dimension() || back.getGameTime() > o.until()) {
             OFFERS.remove(player.getUUID());
-            return list;
+            return null;
         }
-        List<Beacon> all = new ArrayList<>(list);
-        all.add(o.beacon());
-        return all;
+        return o;
     }
 
     // ---------------------------------------------------------------- 場所
@@ -121,7 +117,13 @@ public final class ReturnBeacons {
         return map;
     }
 
-    // 到着点の位置と、戻り道のある方 (到着点の帰り石をそちらへ寄せる)
+    // その背中の真ん中 (鼓動の間・休み場 "hub") の、戻ってきたとき立つ所
+    @Nullable
+    public static BlockPos hubOf(String titan) {
+        return restSpots(titan).get("hub");
+    }
+
+    // 到着点の位置 (自己テスト・開発用)
     public static BlockPos arrivalOf(String titan) {
         return switch (titan) {
             case Titans.TIDE_SHELL -> TideBackLayout.ARRIVAL;
@@ -131,43 +133,7 @@ public final class ReturnBeacons {
         };
     }
 
-    public static Vec3 exitOf(String titan) {
-        return switch (titan) {
-            case Titans.TIDE_SHELL -> new Vec3(TideBackLayout.GATE_X + 0.5, TideBackLayout.GATE_Y1, TideBackLayout.GATE_Z + 1.0);
-            case Titans.THUNDER_WING -> StormBackLayout.GATE_MOUTH.getCenter();
-            case Titans.EMBER -> Vec3.atBottomCenterOf(EmberBackLayout.RETURN_STONE.center());
-            default -> Vec3.atBottomCenterOf(TitanBackLayout.anchor());
-        };
-    }
-
-    // 帰り石の一覧 (到着点のそば + 休み場)。背中が読み込まれていて到着点のそばに立てる床があれば、到着点の石も入る
-    public static List<Beacon> beacons(ServerLevel back, String titan) {
-        List<Beacon> cached = CACHE.get(back.dimension());
-        if (cached != null) {
-            return cached;
-        }
-        List<Beacon> list = new ArrayList<>();
-        BlockPos arrival = arrivalOf(titan);
-        if (!back.hasChunkAt(arrival)) {
-            // まだ床が読み込まれていない (人が着いた直後)。休み場だけ先に出し、到着点の分は次の機会に足す (キャッシュしない)
-            return restBeacons(titan);
-        }
-        Vec3 near = findNear(back, arrival, exitOf(titan));
-        if (near != null) {
-            list.add(new Beacon("arrival", near));
-        }
-        list.addAll(restBeacons(titan));
-        CACHE.put(back.dimension(), list);
-        return list;
-    }
-
-    private static List<Beacon> restBeacons(String titan) {
-        List<Beacon> list = new ArrayList<>();
-        restSpots(titan).forEach((id, pos) -> list.add(new Beacon("rest_" + id, Vec3.atBottomCenterOf(pos))));
-        return list;
-    }
-
-    // 到着点から FIND_MIN〜FIND_MAX 以内の立てる床のうち、戻り道 (toward) にいちばん近いもの。なければ null
+    // arrival から FIND_MIN〜FIND_MAX 以内の立てる床のうち、toward にいちばん近いもの。なければ null
     @Nullable
     public static Vec3 findNear(ServerLevel level, BlockPos arrival, Vec3 toward) {
         Vec3 best = null;
@@ -208,21 +174,11 @@ public final class ReturnBeacons {
                 && body.getCollisionShape(level, feet).isEmpty() && head.getCollisionShape(level, feet.above()).isEmpty();
     }
 
-    // p が帰り石の中 (足もとから HEIGHT 以内、水平 RADIUS 以内) か
+    // p が光の中 (足もとから HEIGHT 以内、水平 RADIUS 以内) か
     public static boolean inside(Beacon b, Vec3 p) {
         double dx = p.x - b.foot().x;
         double dz = p.z - b.foot().z;
         return dx * dx + dz * dz <= RADIUS * RADIUS && p.y >= b.foot().y - 1.0 && p.y <= b.foot().y + HEIGHT;
-    }
-
-    @Nullable
-    public static Beacon insideAny(List<Beacon> list, Vec3 p) {
-        for (Beacon b : list) {
-            if (inside(b, p)) {
-                return b;
-            }
-        }
-        return null;
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -237,12 +193,15 @@ public final class ReturnBeacons {
             DWELLING.remove(player.getUUID());
             return;
         }
-        List<Beacon> list = withOffer(player, back, beacons(back, titan));
-        if (player.tickCount % SEND_EVERY == 0) {
-            sendBeams(player, list);
+        Offer offer = liveOffer(player, back);
+        if (offer == null) {
+            DWELLING.remove(player.getUUID());
+            return;
         }
-        Beacon in = insideAny(list, player.position());
-        if (in == null || player.isPassenger()) {
+        if (player.tickCount % SEND_EVERY == 0) {
+            sendBeam(player, offer.beacon());
+        }
+        if (!inside(offer.beacon(), player.position()) || player.isPassenger()) {
             DWELLING.remove(player.getUUID());
             return;
         }
@@ -254,31 +213,65 @@ public final class ReturnBeacons {
             return;
         }
         int t = DWELLING.merge(player.getUUID(), 2, Integer::sum);
-        ring(back, in.foot(), t / (float) DWELL);
+        ring(back, offer.beacon().foot(), t / (float) DWELL);
         if (t >= DWELL) {
             DWELLING.remove(player.getUUID());
-            leave(player, titan, in);
+            OFFERS.remove(player.getUUID());
+            toHub(player, back, titan);
         }
     }
 
-    // 戻す (自己テストからも)
-    public static void leave(ServerPlayer player, String titan, @Nullable Beacon at) {
-        SkyAbyss.LOGGER.info("{} used the return stone {} of the {} back", player.getGameProfile().getName(), at == null ? "-" : at.id(), titan);
+    // 背中の真ん中へ戻す (自己テストからも)。戻せたか
+    public static boolean toHub(ServerPlayer player, ServerLevel back, String titan) {
+        BlockPos hub = hubOf(titan);
+        if (hub == null) {
+            return false;
+        }
+        SkyAbyss.LOGGER.info("{} returned to the hub of the {} back", player.getGameProfile().getName(), titan);
         Notice.narrate(player, "message.skyabyss.return_beacon.leaving");
-        player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0f, 1.4f);
-        Titans.sendDown(player, titan);
+        back.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0f, 1.4f);
+        player.stopRiding();
+        player.teleportTo(back, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0;
+        back.playSound(null, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0f, 1.6f);
+        return true;
     }
 
-    private static void sendBeams(ServerPlayer player, List<Beacon> list) {
-        for (Beacon b : list) {
-            double dx = player.getX() - b.foot().x;
-            double dz = player.getZ() - b.foot().z;
-            if (dx * dx + dz * dz > SHOW_RANGE * SHOW_RANGE || Math.abs(player.getY() - b.foot().y) > 60) {
-                continue;
-            }
-            PacketDistributor.sendToPlayer(player, new TitanEndNetwork.Beam("return_" + b.id(), RGB, b.foot().x, b.foot().y + 1.0, b.foot().z,
-                    (float) RADIUS - 0.3f, 1.0f, (float) RADIUS - 0.3f, 0f, b.foot().y, b.foot().y + 16, 0.55f, BoardGlow.BEAM_TTL));
+    // ---------------------------------------------------------------- 笛で地上へ
+
+    // 背中の中で、その巨神の呼び笛を使った。その背中の中なら true (呼びには進まない)。一度目は聞き返し、5 秒以内の二度目で地上へ戻す
+    public static boolean whistleInBack(ServerPlayer player, String kindId) {
+        String titan = Titans.titanOfBack(player.level().dimension());
+        if (titan == null || !titan.equals(kindId)) {
+            return false;
         }
+        long now = player.level().getGameTime();
+        Long until = ASKED.get(player.getUUID());
+        if (until != null && now <= until) {
+            ASKED.remove(player.getUUID());
+            SkyAbyss.LOGGER.info("{} went down from the {} back with the call whistle", player.getGameProfile().getName(), titan);
+            Notice.narrate(player, "message.skyabyss.return_beacon.descending");
+            Titans.sendDown(player, titan);
+            return true;
+        }
+        ASKED.put(player.getUUID(), now + CONFIRM_TICKS);
+        Notice.bar(player, ModText.hint("message.skyabyss.return_beacon.confirm"));
+        return true;
+    }
+
+    public static boolean isAsking(UUID player) {
+        return ASKED.containsKey(player);
+    }
+
+    private static void sendBeam(ServerPlayer player, Beacon b) {
+        double dx = player.getX() - b.foot().x;
+        double dz = player.getZ() - b.foot().z;
+        if (dx * dx + dz * dz > SHOW_RANGE * SHOW_RANGE || Math.abs(player.getY() - b.foot().y) > 60) {
+            return;
+        }
+        PacketDistributor.sendToPlayer(player, new TitanEndNetwork.Beam("return_" + b.id(), RGB, b.foot().x, b.foot().y + 1.0, b.foot().z,
+                (float) RADIUS - 0.3f, 1.0f, (float) RADIUS - 0.3f, 0f, b.foot().y, b.foot().y + 16, 0.55f, BoardGlow.BEAM_TTL));
     }
 
     // 閉じていく粒の輪 (progress 0〜1)
@@ -295,22 +288,22 @@ public final class ReturnBeacons {
 
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        DWELLING.remove(event.getEntity().getUUID());
-        OFFERS.remove(event.getEntity().getUUID());
+        UUID id = event.getEntity().getUUID();
+        DWELLING.remove(id);
+        OFFERS.remove(id);
+        ASKED.remove(id);
     }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
-        CACHE.clear();
-        DWELLING.clear();
-        OFFERS.clear();
+        clearCache();
     }
 
-    // 自己テスト用: キャッシュを捨てる
+    // 自己テスト用: 記録を捨てる
     public static void clearCache() {
-        CACHE.clear();
         DWELLING.clear();
         OFFERS.clear();
+        ASKED.clear();
     }
 
     public static boolean hasOffer(UUID player) {

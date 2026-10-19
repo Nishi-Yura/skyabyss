@@ -18,7 +18,9 @@
   "message.skyabyss.titan_end.departed.tide_shell": "潮殻は海の底へ去った。",
   "message.skyabyss.titan_end.departed.thunder_wing": "雷翼は空の向こうへ去った。",
   "message.skyabyss.titan_end.departed.ember": "余燼の巨神は土の底へ去った。",
-  "message.skyabyss.return_beacon.hint": "光る帰り石の上でしゃがむと、地上へ戻る",
-  "message.skyabyss.return_beacon.offer": "すぐ帰るなら、近くの光る帰り石の上でしゃがむ",
-  "message.skyabyss.return_beacon.leaving": "光に包まれ、足もとが遠のいていく。"
+  "message.skyabyss.return_beacon.hint": "光の中でしゃがむと、この背中の真ん中へ戻る",
+  "message.skyabyss.return_beacon.offer": "試練は終わった。近くの光の中でしゃがむと、真ん中へ戻れる",
+  "message.skyabyss.return_beacon.leaving": "光に包まれ、真ん中へ運ばれていく。",
+  "message.skyabyss.return_beacon.confirm": "地上へ下りる？ 5 秒以内にもう一度笛を使うと下りる",
+  "message.skyabyss.return_beacon.descending": "笛の音とともに、足もとが遠のいていく。"
 }

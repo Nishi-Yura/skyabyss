@@ -33,6 +33,8 @@ import net.minecraft.world.phys.Vec3;
 // 巨神が止まっているあいだだけ在る (飛び立てば消える)。保存しない (StormSetup で noSave)。
 public class GaleColumnEntity extends Entity {
     public static final double RADIUS = 2.5;
+    // 入れる広さ (見える柱・光の枠より少し広く。踏み込めば確実に持ち上がる)
+    public static final double ENTRY_RADIUS = RADIUS + 1.5;
     // 資格のない人が断られたあと、もう一度断るまで (tick)
     private static final int REFUSE_QUIET = 60;
     private static final int SLOW_FALL_AFTER_LEAVING = 120;
@@ -94,7 +96,8 @@ public class GaleColumnEntity extends Entity {
                 glow.add(new Vec3(baseX, y, baseZ));
             }
             glow.add(new Vec3(baseX, top, baseZ));
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, Titans.THUNDER_WING, glow);
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, Titans.THUNDER_WING, glow,
+                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(new Vec3(baseX, baseY + 1.5, baseZ), (float) ENTRY_RADIUS, 2.5f, (float) ENTRY_RADIUS, 0f, baseY, top, 1.4f));
         }
         if (tickCount % 10 == 0) {
             StormFx.ring(level, ParticleTypes.CLOUD, new Vec3(baseX, baseY + 0.5, baseZ), RADIUS, 8);
@@ -121,7 +124,7 @@ public class GaleColumnEntity extends Entity {
                 continue;
             }
             lifting.add(p.getUUID());
-            if (Updraft.lift(p, top)) {
+            if (ride(p)) {
                 lifting.remove(p.getUUID());
                 arrive(level, p);
             }
@@ -146,9 +149,33 @@ public class GaleColumnEntity extends Entity {
         }
     }
 
+    // 柱の乗り心地: 浮遊の効果で一定の速さで滑らかに上げる (サーバーが速さを上書きしないので、ぶれず・押し戻されず、空中で横へ少し動ける)。
+    // 頂の手前 6 ブロックから段階的に遅くして、頂で背中へ渡す。しゃがむと上昇をやめてゆっくり下りる。頂に着いたら true
+    private boolean ride(ServerPlayer p) {
+        double left = top - p.getY();
+        if (left <= 0.4) {
+            p.removeEffect(MobEffects.LEVITATION);
+            return true;
+        }
+        p.fallDistance = 0;
+        if (p.isShiftKeyDown()) {
+            p.removeEffect(MobEffects.LEVITATION);
+            p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 10, 0, false, false, false));
+            return false;
+        }
+        p.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 6, levitationFor(left), false, false, false));
+        return false;
+    }
+
+    // 頂までの残りに応じた浮遊の強さ (0.05 × (強さ+1) ブロック/tick)。7 = 毎秒 8 ブロック
+    public static int levitationFor(double left) {
+        return left > 6 ? 7 : left > 3 ? 4 : 2;
+    }
+
     // 頂に着いた: 雷鳴を鳴らし、背中へ渡す (白い閃光は StormTravel.board が画面へ送る)
     private void arrive(ServerLevel level, ServerPlayer p) {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), StormSetup.THUNDER_FAR.get(), SoundSource.PLAYERS, 2f, 1.0f);
+        p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 200, 0, false, false, true));
         StormTravel.board(p);
     }
 
@@ -156,7 +183,7 @@ public class GaleColumnEntity extends Entity {
     public boolean inColumn(double x, double y, double z) {
         double dx = x - baseX;
         double dz = z - baseZ;
-        return dx * dx + dz * dz <= RADIUS * RADIUS && y >= baseY - 1 && y <= top + 1;
+        return dx * dx + dz * dz <= ENTRY_RADIUS * ENTRY_RADIUS && y >= baseY - 2.5 && y <= top + 2;
     }
 
     public double topY() {

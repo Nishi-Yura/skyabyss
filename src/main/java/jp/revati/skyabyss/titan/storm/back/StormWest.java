@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 
 // 西の試練 風切りの骨 (12 の 4.1節) と、背中の昇り風の穴 (広間・骨・瘤・雷獣の巣の頂)。
 // - 風切りの羽根: 肩の門 (w0) で手に入る。西の試練の外へ出ると消える
-// - 昇り風の穴: 凪は 4、嵐は 13 上がる (広間・骨・西の瘤)。雷獣の巣の頂の穴は、雷獣を倒したあといつも 12
+// - 昇り風の穴: 凪は 4、嵐は 13 上がる (広間・骨の中の二つ)。西の瘤の岩棚へ上がる穴はどの拍でも 13 (25 の 2章: 石へ行ける行けないを拍で決めない)。雷獣の巣の頂の穴は、雷獣を倒したあといつも 12
 // - 横風: 嵐のあいだ 6 秒ごと。1.5 秒前に雨の筋と笛の音、吹く 2 秒は梁の陰 (風上 3 ブロック以内に壁や柱) にいないと肩の側へ押し戻す
 // - 跳躍と低速落下の効き目は、西の試練の中では消す
 // グループ: 拍・横風・道の形 (StormBackState.westRoute) は全員に同じ (梁はブロックなので見る人ごとに変えられない)。
@@ -38,7 +38,7 @@ final class StormWest {
 
     static List<Vent> vents() {
         return List.of(new Vent(HUB_UPDRAFT, -1), new Vent(new BlockPos(WEST_VENT_X[0], BONE_FLOOR, -20), -1),
-                new Vent(new BlockPos(WEST_VENT_X[1], BONE_FLOOR, -20), -1), new Vent(WEST_KNOB_VENT, -1));
+                new Vent(new BlockPos(WEST_VENT_X[1], BONE_FLOOR, -20), -1), new Vent(WEST_KNOB_VENT, StormBackClock.STORM_LIFT));
     }
 
     private StormWest() {

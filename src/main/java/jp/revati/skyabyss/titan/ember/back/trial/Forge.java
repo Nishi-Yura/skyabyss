@@ -86,7 +86,7 @@ public final class Forge {
     public static final int[][] PATTERNS = {{RED, ORANGE, YELLOW}, {RED, YELLOW, ORANGE}, {ORANGE, RED, YELLOW}, {RED, ORANGE, YELLOW, RED}};
 
     public enum StrikeResult {
-        NO_BLOOM, SLEEPING, FULL, HIT, DONE, CRACK, BROKEN
+        NO_BLOOM, FULL, HIT, DONE, CRACK, BROKEN
     }
 
     // ---------------------------------------------------------------- メモリ
@@ -309,10 +309,6 @@ public final class Forge {
     }
 
     public static StrikeResult strike(ServerLevel level, ServerPlayer player) {
-        if (EmberBackTrials.sleeping(level, EmberIds.EAST)) {
-            EmberTrials.hint(player, EmberIds.LANG_EAST + "sleeping");
-            return StrikeResult.SLEEPING;
-        }
         if (brokenUntil != 0) {
             EmberTrials.hint(player, EmberIds.LANG_EAST + "no_bloom");
             return StrikeResult.NO_BLOOM;
@@ -498,20 +494,18 @@ public final class Forge {
         if (in.isEmpty() && heat <= 0 && brokenUntil == 0) {
             return;
         }
-        if (!EmberBackTrials.sleeping(level, EmberIds.EAST)) {
-            stepHeat(level, now);
-            pollBellows(level, now);
-        }
+        stepHeat(level, now);
+        pollBellows(level, now);
         if (in.isEmpty()) {
             return;
         }
         if (now % 10 == 0) {
             keys(level, in, now);
         }
-        if (now % 10 == 5 && !EmberBackTrials.sleeping(level, EmberIds.EAST)) {
+        if (now % 10 == 5 && !EmberBackTrials.quiet(level, EmberIds.EAST)) {
             dousers(level);
         }
-        if (now % 20 == 0 && !EmberBackTrials.sleeping(level, EmberIds.EAST) && doorState == 0) {
+        if (now % 20 == 0 && !EmberBackTrials.quiet(level, EmberIds.EAST) && doorState == 0) {
             keepThralls(level, in, now);
         }
     }
@@ -605,7 +599,7 @@ public final class Forge {
 
     // ---------------------------------------------------------------- リセット (EmberBackRooms.onReset("east", ...))
     // 部屋の持ち主が替わるたび。熱と扉の灯りを戻し、刻みを持ち主の打つ順で置き直す (扉の開け閉めはグループの記録にあるので触らない)
-    public static void reset(ServerLevel level, boolean sleeping) {
+    public static void reset(ServerLevel level, boolean quiet) {
         EmberTrials.clearMobs(level, EmberBackLayout.EAST);
         UUID was = doorGroup;
         clearMemory();

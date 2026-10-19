@@ -30,6 +30,10 @@
           {
             "type": "lore",
             "entry": "chapter1/storm_wing"
+          },
+          {
+            "type": "stilled",
+            "titan": "thunder_wing"
           }
         ]
       }
