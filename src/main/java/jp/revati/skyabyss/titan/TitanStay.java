@@ -23,6 +23,9 @@ public final class TitanStay {
     public static final double LEAVE_RANGE = 160;
     public static final int LEAVE_AFTER = 3 * 60 * 20;
 
+    // 自己テスト用: false なら無人でも早く去らない (滞在 20 分そのものを測るとき)
+    public static boolean vacancyEnabled = true;
+
     private TitanStay() {
     }
 
@@ -108,6 +111,11 @@ public final class TitanStay {
 
         // 毎 tick (滞在中だけ)。誰もいないのが 3 分続いたら true = 今すぐ去ってよい
         public boolean vacantTooLong(ServerLevel level, Vec3 at, String titan) {
+            // 眠っている (去っていく) 巨神は数えない。眠りが勝つ
+            if (!vacancyEnabled || jp.revati.skyabyss.titan.end.TitanDormancy.isResting(level.getServer(), titan)) {
+                vacancy.reset();
+                return false;
+            }
             return vacancy.tick(attended(level, at, titan));
         }
 
