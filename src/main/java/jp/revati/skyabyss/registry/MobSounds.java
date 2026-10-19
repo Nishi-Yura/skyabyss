@@ -73,6 +73,31 @@ public final class MobSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> CORAL_THRALL_STEP = register("coral_thrall_step");
     public static final DeferredHolder<SoundEvent, SoundEvent> FEATHER_WARDEN_STEP = register("feather_warden_step");
     public static final DeferredHolder<SoundEvent, SoundEvent> THUNDER_SUPPLICANT_STEP = register("thunder_supplicant_step");
+    // 一章の地上の敵 (tools/gen_ch1_ground_mobs.py。既存の音源に高さを付けた別名)
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_AMBIENT = register("rock_shell_beetle_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_HURT = register("rock_shell_beetle_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_DEATH = register("rock_shell_beetle_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_STEP = register("rock_shell_beetle_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROCK_SHELL_BEETLE_CHARGE = register("rock_shell_beetle_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_AMBIENT = register("spine_hare_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_HURT = register("spine_hare_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_DEATH = register("spine_hare_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_STEP = register("spine_hare_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_SHOOT = register("spine_hare_shoot");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPINE_HARE_RAISE = register("spine_hare_raise");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_HAULER_AMBIENT = register("bone_hauler_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_HAULER_HURT = register("bone_hauler_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_HAULER_DEATH = register("bone_hauler_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BONE_HAULER_STEP = register("bone_hauler_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_AMBIENT = register("elder_sentry_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_HURT = register("elder_sentry_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_DEATH = register("elder_sentry_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_STEP = register("elder_sentry_step");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_GUARD = register("elder_sentry_guard");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_SWING = register("elder_sentry_swing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_CHARGE = register("elder_sentry_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_HORN = register("elder_sentry_horn");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDER_SENTRY_STOMP = register("elder_sentry_stomp");
 
     private MobSounds() {
     }

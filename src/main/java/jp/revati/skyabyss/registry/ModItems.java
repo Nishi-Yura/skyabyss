@@ -109,6 +109,14 @@ public final class ModItems {
             () -> new DeferredSpawnEggItem(ModEntities.RIB_ARCHER, 0xD8CDB2, 0x5C7C3E, new Item.Properties()));
     public static final DeferredItem<Item> MOSS_CRAWLER_EGG = ITEMS.register("moss_crawler_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.MOSS_CRAWLER, 0x46565C, 0x5C7C3E, new Item.Properties()));
+    public static final DeferredItem<Item> ROCK_SHELL_BEETLE_EGG = ITEMS.register("rock_shell_beetle_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ROCK_SHELL_BEETLE, 0x7C8794, 0x8A5C34, new Item.Properties()));
+    public static final DeferredItem<Item> SPINE_HARE_EGG = ITEMS.register("spine_hare_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.SPINE_HARE, 0x6B6050, 0xD8CDB2, new Item.Properties()));
+    public static final DeferredItem<Item> BONE_HAULER_EGG = ITEMS.register("bone_hauler_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.BONE_HAULER, 0x5C7C3E, 0xD8CDB2, new Item.Properties()));
+    public static final DeferredItem<Item> ELDER_SENTRY_EGG = ITEMS.register("elder_sentry_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ELDER_SENTRY, 0xD8CDB2, 0x5C7C3E, new Item.Properties()));
     public static final DeferredItem<Item> WATERWAY_MAW_EGG = ITEMS.register("waterway_maw_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.WATERWAY_MAW, 0x46565C, 0x7FD6D0, new Item.Properties()));
     public static final DeferredItem<Item> WHALEBONE_CAPTAIN_EGG = ITEMS.register("whalebone_captain_spawn_egg",
@@ -153,6 +161,10 @@ public final class ModItems {
                 output.accept(Ch1BackEntities.BONE_GULL_EGG.get());
                 output.accept(Ch1BackEntities.ELDER_SENTINEL_EGG.get());
                 output.accept(MOSS_CRAWLER_EGG.get());
+                output.accept(ROCK_SHELL_BEETLE_EGG.get());
+                output.accept(SPINE_HARE_EGG.get());
+                output.accept(BONE_HAULER_EGG.get());
+                output.accept(ELDER_SENTRY_EGG.get());
                 output.accept(WATERWAY_MAW_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());

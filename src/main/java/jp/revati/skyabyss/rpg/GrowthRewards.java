@@ -67,6 +67,11 @@ public final class GrowthRewards {
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_mortar", new Source(14, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_gull", new Source(4, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentinel", new Source(60, STONE_WHALE_LEVEL));
+        // 一章の地上の敵 (21 の 3.1。章の経験値の枠には数えない小さな分): 岩殻虫 7、棘うさぎ 5、骨負い 2、老いた歩哨 40
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":rock_shell_beetle", new Source(7, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":spine_hare", new Source(5, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":bone_hauler", new Source(2, STONE_WHALE_LEVEL));
+        MOD_ENEMIES.put(SkyAbyss.MODID + ":elder_sentry", new Source(40, STONE_WHALE_LEVEL));
         MOD_ENEMIES.put(SkyAbyss.MODID + ":waterway_maw", new Source(4, STONE_WHALE_LEVEL));
         // 試練の外で呼ばれた番兵長・心臓 (コマンドなど) は、ふつうの敵として分ける
         MOD_ENEMIES.put(SkyAbyss.MODID + ":whalebone_captain", new Source(100, STONE_WHALE_LEVEL));

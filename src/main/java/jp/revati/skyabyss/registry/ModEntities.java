@@ -1,7 +1,11 @@
 package jp.revati.skyabyss.registry;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.entity.BoneHauler;
 import jp.revati.skyabyss.entity.BoneSentinel;
+import jp.revati.skyabyss.entity.ElderSentry;
+import jp.revati.skyabyss.entity.RockShellBeetle;
+import jp.revati.skyabyss.entity.SpineHare;
 import jp.revati.skyabyss.entity.BoneSpike;
 import jp.revati.skyabyss.entity.MossCrawler;
 import jp.revati.skyabyss.entity.RibArcher;
@@ -69,6 +73,20 @@ public final class ModEntities {
                     .sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20)
                     .build(SkyAbyss.MODID + ":bone_spike"));
 
+    // 一章の地上の敵 (docs/design/21 の 3.1。tools/gen_ch1_ground_mobs.py)
+    public static final DeferredHolder<EntityType<?>, EntityType<RockShellBeetle>> ROCK_SHELL_BEETLE = ENTITIES.register("rock_shell_beetle",
+            () -> EntityType.Builder.of(RockShellBeetle::new, MobCategory.MONSTER)
+                    .sized(1.3f, 1.0f).eyeHeight(0.6f).clientTrackingRange(8).build(SkyAbyss.MODID + ":rock_shell_beetle"));
+    public static final DeferredHolder<EntityType<?>, EntityType<SpineHare>> SPINE_HARE = ENTITIES.register("spine_hare",
+            () -> EntityType.Builder.of(SpineHare::new, MobCategory.MONSTER)
+                    .sized(0.6f, 0.75f).eyeHeight(0.6f).clientTrackingRange(8).build(SkyAbyss.MODID + ":spine_hare"));
+    public static final DeferredHolder<EntityType<?>, EntityType<BoneHauler>> BONE_HAULER = ENTITIES.register("bone_hauler",
+            () -> EntityType.Builder.of(BoneHauler::new, MobCategory.MONSTER)
+                    .sized(0.9f, 1.1f).eyeHeight(0.7f).clientTrackingRange(8).build(SkyAbyss.MODID + ":bone_hauler"));
+    public static final DeferredHolder<EntityType<?>, EntityType<ElderSentry>> ELDER_SENTRY = ENTITIES.register("elder_sentry",
+            () -> EntityType.Builder.of(ElderSentry::new, MobCategory.MONSTER)
+                    .sized(0.9f, 2.45f).clientTrackingRange(10).build(SkyAbyss.MODID + ":elder_sentry"));
+
     private static <T extends net.minecraft.world.entity.Mob> DeferredHolder<EntityType<?>, EntityType<T>> monster(
             String name, EntityType.EntityFactory<T> factory, float width, float height) {
         return ENTITIES.register(name, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
@@ -83,6 +101,10 @@ public final class ModEntities {
         event.put(WATERWAY_MAW.get(), WaterwayMaw.createAttributes().build());
         event.put(WHALEBONE_CAPTAIN.get(), WhaleboneCaptain.createAttributes().build());
         event.put(STONE_WHALE_HEART.get(), StoneWhaleHeart.createAttributes().build());
+        event.put(ROCK_SHELL_BEETLE.get(), RockShellBeetle.createAttributes().build());
+        event.put(SPINE_HARE.get(), SpineHare.createAttributes().build());
+        event.put(BONE_HAULER.get(), BoneHauler.createAttributes().build());
+        event.put(ELDER_SENTRY.get(), ElderSentry.createAttributes().build());
     }
 
     private ModEntities() {

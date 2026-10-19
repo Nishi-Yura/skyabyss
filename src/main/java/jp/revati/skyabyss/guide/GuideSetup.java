@@ -41,6 +41,10 @@ public final class GuideSetup {
     // 岩殻の護り糸 (鼓動守 岩鯨の材料)
     public static final DeferredItem<Item> ROCK_SHELL_THREAD = ITEMS.register("rock_shell_thread", () -> new Item(new Item.Properties()));
 
+    // 歩哨の割符 (老いた歩哨の落とし物。人ごとの記念品。一章の背中の詰所の戸の鍵 = Ch1Prep.SENTRY_TALLY。P8 が読む)
+    public static final DeferredItem<Item> SENTRY_TALLY = ITEMS.register("sentry_tally",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
     private GuideSetup() {
     }
 
@@ -63,6 +67,7 @@ public final class GuideSetup {
             event.accept(BONE_CHIP.get());
             event.accept(HARE_QUILL.get());
             event.accept(ROCK_SHELL_THREAD.get());
+            event.accept(SENTRY_TALLY.get());
             event.accept(HEARTBEAT_WARD_STONE_WHALE.get());
             event.accept(HEARTBEAT_WARD_TIDE_SHELL.get());
             event.accept(HEARTBEAT_WARD_THUNDER_WING.get());
