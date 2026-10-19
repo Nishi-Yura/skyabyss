@@ -151,7 +151,8 @@ final class CinematicScreen extends Screen {
                 style = Style.EMPTY.withItalic(true).withColor(0xDCE6E4);
                 accent = 0x7FD6D0;
                 labelColor = 0x8FA3A6;
-                label = Component.translatable("cinematic.skyabyss.speaker.hero");
+                // 心の声の名札は見ている本人の名前 (多人数でもそれぞれ自分の名前)
+                label = Component.literal(net.minecraft.client.Minecraft.getInstance().getUser().getName());
             }
         }
         MutableComponent text = Component.translatable(line.text()).withStyle(style);
