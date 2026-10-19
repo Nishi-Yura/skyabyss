@@ -138,12 +138,18 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.item.storm.StormGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SHARD.get(), Category.MATERIAL, 999, false, false);
+        // 序盤の背中の素材 (岩殻片・護り糸)。作業台も旅嚢の中から使える (22 の 17 章)。登録の末尾に足して既存の枠の位置を動かさない
+        add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_SCRAP.get(), Category.MATERIAL, 999, false, false);
+        add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_THREAD.get(), Category.MATERIAL, 999, false, false);
         // 小さな素材
         add(list, jp.revati.skyabyss.item.storm.StormGearSetup.DUST.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_SAC.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SPARK_DUST.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.CINDER_HUSK.get(), Category.SMALL, 999, false, false);
+        // 序盤の小さな素材 (骨片・棘針)
+        add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
+        add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
         return list;
     }
 

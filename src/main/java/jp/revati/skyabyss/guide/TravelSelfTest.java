@@ -300,9 +300,13 @@ public final class TravelSelfTest {
                 check(f, RecipeLock.locked(r), r + " is registered but not locked");
             }
         }
-        // 袋 (旅嚢) の品ではない = 袋が入でも、素材は持ち物のまま作業台に並べて作れる
-        for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get(), Items.IRON_INGOT, Items.LEATHER, TravelGear.ROCK_WHETSTONE.get())) {
-            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " is a pouch item; the crafting table recipes would not find it");
+        // 序盤の素材 (岩殻片・骨片) は旅嚢の品。作業台はレシピブックの「置く」と「旅嚢から」の帯で旅嚢の中の分を使う (PouchCraft。22 の 17 章。自己テスト pouch で通しで確かめる)。
+        // 鉄・革・砥石は袋の品ではなく、今までどおり持ち物
+        for (Item mat : List.of(GuideSetup.ROCK_SHELL_SCRAP.get(), GuideSetup.BONE_CHIP.get())) {
+            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) != null, mat + " is not a pouch item");
+        }
+        for (Item mat : List.of(Items.IRON_INGOT, Items.LEATHER, TravelGear.ROCK_WHETSTONE.get())) {
+            check(f, jp.revati.skyabyss.pouch.PouchEntries.entry(mat) == null, mat + " is a pouch item");
         }
         check(f, existing == 7, "the chapter-1 notes unlock " + existing + " recipes (want 7)");
     }
