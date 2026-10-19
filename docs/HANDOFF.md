@@ -30,6 +30,8 @@
 - 雷翼の装備名の重複 lang を一本化（羽衣系）。自己テスト `lang` が重複・日英の対応・%s を見る。
 - **最初の 1 時間の通し（A10）と、lang・帯の自己テスト**: 台本 `tools/shots/first_hour.txt`（新しい世界で 序章 → 帳面 → 影 → イサナ → 足音 → 歌 → 岩鯨の初見 → 鎖。約 25 分、`watch` の記録に帯・画面・知らせが時刻つきで出る）と、記録の読み解き `docs/review/first_hour_log.md`（時刻表・直した穴 9 件・直していない穴 B-1〜B-9）。自己テスト `lang`（コード・データ中のキーが ja・en にある・`{0}` 形式が無い）と `lang objective band`（帯の文が幅 230 px に収まる。目印つきは距離の札の分を引く）。ゲームなしの確認は `python tools/check_lang_keys.py`・`python tools/check_band_width.py`。直した本物の不具合: 影が屋内の人に来ない（`SkyEvents` の初回の再試行）、鎖が降りても帯が「待ち」のまま（`QuestHud`・`StoneWhaleEntity.isChainReaching`）、英語の画面の日本語の方角・`{0}`。
 
+- **最初の 1 時間の穴 B-1〜B-9 を直した**（`docs/review/first_hour_log.md` の 4 章）。**未了**: 台本 `first_hour.txt` の再実行（試遊中のため見送り。鎖の段は `titan rest` をやめ、自然に降りるまでの時間を測る形に変えてある）と、新しい時刻表の追記。自己テストは全体を 1 回通し、`ch1 p6` の所要時間の式だけ直して `ch1` を再実行（通過）。
+
 ## 2. 次にやること
 
 1. **選定ページの答えを入れる**（https://claude.ai/artifact/EqFcC7E183D8uyyAo8yKMM 、db `choices`）: 一章の新しい敵 7 体（P7・P10）、旅の職人（P4）と 4 色、鯨道の旅装（P5）、旅の覚書・鼓動守のアイコン（今は仮の絵 `wayfarer_notes.png`・`heartbeat_ward.png`）、留め袋の画面と使う入力。
