@@ -169,6 +169,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("heart_cinematic", 20, jp.revati.skyabyss.entity.HeartCinematicSelfTest::runSelfTest));
         // 予告 (Telegraph): 当たる範囲と印が同じ形・予告 0.8 秒以上・番兵長と岩鯨の心臓の技・人数で増える。docs/design/02 の 5.4
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
+        // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3
+        steps.addAll(jp.revati.skyabyss.entity.Ch1BackMobsSelfTest.steps());
         // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4
         steps.add(Step.once("titan end (load)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::load));
         steps.add(Step.once("titan end", 60, jp.revati.skyabyss.titan.end.TitanEndSelfTest::runSelfTest));

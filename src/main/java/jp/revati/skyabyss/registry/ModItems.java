@@ -149,6 +149,9 @@ public final class ModItems {
                 output.accept(RESONANCE_FORGE.get());
                 output.accept(BONE_SENTINEL_EGG.get());
                 output.accept(RIB_ARCHER_EGG.get());
+                output.accept(Ch1BackEntities.BONE_MORTAR_EGG.get());
+                output.accept(Ch1BackEntities.BONE_GULL_EGG.get());
+                output.accept(Ch1BackEntities.ELDER_SENTINEL_EGG.get());
                 output.accept(MOSS_CRAWLER_EGG.get());
                 output.accept(WATERWAY_MAW_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
