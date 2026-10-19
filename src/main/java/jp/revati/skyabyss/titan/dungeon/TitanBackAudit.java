@@ -54,6 +54,10 @@ public final class TitanBackAudit {
 
     public static BackReach.Report run(ServerLevel level) {
         BackReach.Spec s = spec();
+        BlockPos mz0 = TitanBackTrials.checkpointSpawns(level).get(TitanBackTrials.MAZE_ENTRY);
+        if (mz0 != null) {
+            s.goals.put("rest mz0 (maze entrance room)", mz0);
+        }
         BlockPos mz = TitanBackTrials.checkpointSpawns(level).get(TitanBackTrials.MAZE_REST);
         if (mz != null) {
             s.goals.put("rest mz (maze mid ledge)", mz);

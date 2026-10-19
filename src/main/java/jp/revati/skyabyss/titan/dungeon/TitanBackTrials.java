@@ -125,6 +125,7 @@ public final class TitanBackTrials {
     private record Checkpoint(String id, Box area, BlockPos spawn) {
     }
 
+    public static final String MAZE_ENTRY = "mz0";
     private static final List<Checkpoint> CHECKPOINTS = List.of(
             // 鼓動の間の中央は眠る心臓の台座 (強化深層岩) なので、南へずらす
             new Checkpoint("hub", HUB, HUB.center().offset(0, 0, 6)),
@@ -136,7 +137,9 @@ public final class TitanBackTrials {
             // 倒れて目覚めた所の目の前が戦場、にならないように
             new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
             new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, -2)),
-            new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)));
+            new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)),
+            // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
+            new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
     private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
 
     // 闇の水路の中ほどの休み場 (息継ぎのくぼみの一つに、乾いた足場を作ってある)。迷路は種で形が変わるので、場所は種から出す
