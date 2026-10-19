@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.pouch.PouchConfig.Category;
 import jp.revati.skyabyss.record.Keepsakes;
-import jp.revati.skyabyss.record.TitanPages;
 import jp.revati.skyabyss.registry.ModItems;
 import jp.revati.skyabyss.story.StorySetup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -153,17 +152,9 @@ public final class PouchEntries {
         return list;
     }
 
+    // 心核か (図鑑の頁がない巨神も装備の表の心核で数える。Keepsakes.coreItems)
     private static boolean isCore(Item item) {
-        if (item == ModItems.STONE_WHALE_CORE.get()) {
-            return true;
-        }
-        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
-            TitanPages.Page page = TitanPages.page(titan);
-            if (page != null && page.coreItem() == item) {
-                return true;
-            }
-        }
-        return false;
+        return item == ModItems.STONE_WHALE_CORE.get() || Keepsakes.coreItems().contains(item);
     }
 
     private static void add(List<Entry> list, Item item, Category category, int limit, boolean needsHand, boolean bonded) {
