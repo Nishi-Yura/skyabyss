@@ -1,0 +1,30 @@
+# 岩鯨の乗り込み口 (鎖の下の地面の陣) を撮る。./gradlew runShots -Pscript=tools/shots/whale_board.txt
+# 出力: run/shots/whale_board/shots/whale_board/*.png → python tools/whale_scale_sheet.py (音は自動で 0)
+# 陣は観戦者には見えない (乗れる人にだけ送るため) ので、クリエイティブで鎖の外から見る。陣の中に立つと乗ってしまうので、陣から 5 ブロック以上離れる
+world whale_board flat
+size 1280 720
+timeout 900
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd summon skyabyss:stone_whale 0 -30 0 {Rotation:[0f,0f],Mode:2,RestTicks:999999}
+wait 500
+hud off
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^40 ^-29 ^8 facing ^10.5 ^-45 ^-30.5
+wait 60
+shot board_far
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^18 ^-28 ^-24 facing ^10.5 ^-45 ^-30.5
+wait 60
+shot board_close
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^12 ^-18 ^-12 facing ^10.5 ^-50 ^-30.5
+wait 60
+shot board_above
+cmd kill @e[type=skyabyss:stone_whale,distance=..600]
+wait 10
+quit

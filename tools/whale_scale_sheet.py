@@ -13,9 +13,11 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs/review/previews/whale_scale_sheet.png"
 SRC = ROOT / "run/shots/whale_scale/shots/whale_scale"
+BOARD = ROOT / "run/shots/whale_board/shots/whale_board"
 CELLS = [
-    ("board_far", "Boarding sigil under the chain (far)"),
-    ("board_close", "Boarding sigil (close, flat on the ground)"),
+    ("@board_far", "Boarding sigil under the chain (far)"),
+    ("@board_close", "Boarding sigil (close, flat on the ground)"),
+    ("@board_above", "Boarding sigil (from above)"),
     ("arrival", "Arrival flank platform (east: anchor, forge, stair)"),
     ("climb", "Climb stair breaking out onto the back"),
     ("plaza", "Plaza on the tail root (north: ridge gate, shrine)"),
@@ -46,7 +48,7 @@ d = ImageDraw.Draw(img)
 for i, (name, label) in enumerate(CELLS):
     x = (i % COLS) * W
     y = (i // COLS) * (H + 22)
-    f = SRC / f"{name}.png"
+    f = (BOARD if name.startswith("@") else SRC) / f"{name.lstrip('@')}.png"
     if f.exists():
         img.paste(Image.open(f).convert("RGB").resize((W, H), Image.LANCZOS), (x, y + 22))
     d.text((x + 6, y + 5), label, fill=(230, 230, 230))

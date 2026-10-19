@@ -9,31 +9,16 @@ clouds off
 cmd time set noon
 cmd weather clear
 cmd gamemode creative
-cmd skyabyss progress grant @p thunder_wing
 camera 0.5 -60 0.5 0 0
 waitchunks
 wait 40
-# 乗り込み口 (鎖の下の陣): 眠った岩鯨を地面の上に置き、鎖が降りるのを待つ
-cmd summon skyabyss:stone_whale 0 -30 0 {Rotation:[0f,0f],Mode:2,RestTicks:999999}
-wait 400
-hud off
-cmd gamemode spectator
-cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^60 ^-22 ^40 facing ^10.5 ^-30 ^-30.5
-wait 40
-shot board_far
-cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^22 ^-52 ^-14 facing ^10.5 ^-30 ^-30.5
-wait 40
-shot board_close
-cmd kill @e[type=skyabyss:stone_whale,distance=..600]
-wait 10
-cmd gamemode creative
-hud on
 # 背へ (建っていなければ建てる)
 cmd skyabyss dev arrive titan_back
 waitchunks 1200
 wait 60
 chat clear
 cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
 hud off
 fov 90
 fov 85
@@ -42,7 +27,7 @@ waitchunks 600
 wait 30
 shot arrival
 fov 95
-camera skyabyss:titan_back -58 101 164 270 -4
+camera skyabyss:titan_back -40 113.6 164.5 270 6
 waitchunks 600
 wait 30
 shot climb
@@ -62,12 +47,12 @@ waitchunks 600
 wait 30
 shot hub
 fov 100
-camera skyabyss:titan_back -39 107 -25 270 -18
+camera skyabyss:titan_back -38.5 107 -26 90 -20
 waitchunks 600
 wait 30
 shot west_a
 fov 100
-camera skyabyss:titan_back -43 112 -70 90 -16
+camera skyabyss:titan_back -44 114 -71 180 -22
 waitchunks 600
 wait 30
 shot west_b
