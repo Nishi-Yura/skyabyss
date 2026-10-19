@@ -77,7 +77,7 @@ public final class Quests {
             String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
             if (titan != null) {
                 jp.revati.skyabyss.advancement.Beats.fire(player, "trial:" + titan);
-                // 試練を越えたら、すぐ帰れるように、そばに帰り石を出す (四つの背中で共通)
+                // 試練を越えたら、背中の真ん中へすぐ戻れる光をそばに出す (四つの背中で共通)
                 jp.revati.skyabyss.titan.end.ReturnBeacons.offer(player);
             }
         }

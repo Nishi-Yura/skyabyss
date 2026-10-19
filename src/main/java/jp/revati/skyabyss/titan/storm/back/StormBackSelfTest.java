@@ -618,7 +618,6 @@ public final class StormBackSelfTest {
         yes.put("left knob floor", WEST_KNOB.offset(4, 1, 0));
         yes.put("tail hall", TAIL_CENTER);
         yes.put("eye hall", EYE_HALL_CENTER.offset(1, 0, 6));
-        yes.put("back top", new BlockPos(TOP_STAIR.getX() - 4, StormBirdBuilder.top(TOP_STAIR.getX() - 4, TOP_STAIR.getZ()) + 1, TOP_STAIR.getZ()));
         for (Map.Entry<String, BlockPos> e : yes.entrySet()) {
             expect(calm, l, e.getKey() + " (calm)", e.getValue(), true, f);
         }

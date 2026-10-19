@@ -249,8 +249,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     // 熱の口の判定の中か (横 ±2.5、前 81〜85、舌の上から 4)
     public boolean inMouth(double x, double y, double z) {
         Vec3 l = local(x, y, z);
-        return Math.abs(l.x) <= MOUTH_WIDTH / 2 && l.z >= MOUTH_FORWARD - MOUTH_DEPTH / 2 && l.z <= MOUTH_FORWARD + MOUTH_DEPTH / 2
-                && l.y >= TONGUE_UP - 0.5 && l.y <= TONGUE_UP + MOUTH_HEIGHT;
+        return Math.abs(l.x) <= MOUTH_WIDTH / 2 + 1.0 && l.z >= MOUTH_FORWARD - MOUTH_DEPTH / 2 - 1.0 && l.z <= MOUTH_FORWARD + MOUTH_DEPTH / 2 + 1.0
+                && l.y >= TONGUE_UP - 1.5 && l.y <= TONGUE_UP + MOUTH_HEIGHT + 1.0;
     }
 
     // 息の扇の中か (口の前 16 ブロック、幅 60 度。口の中の奥から)
