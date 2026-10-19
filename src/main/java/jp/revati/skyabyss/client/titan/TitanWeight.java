@@ -53,6 +53,16 @@ public final class TitanWeight {
         double ey = Mth.lerp(partialTick, titan.yOld, titan.getY());
         double ez = Mth.lerp(partialTick, titan.zOld, titan.getZ());
         // 体のいちばん下の高さの目安 (局所の 0。眠って沈んでも、そこから測る)
+        if (jp.revati.skyabyss.client.sky.OverheadShadow.ready()) {
+            // 画素ごとの影 (client/sky/OverheadShadow): 巨神の下の地面・屋根・屋内・人をまとめて暗くする。高いほど薄く (空を行く巨神の影は淡く広がる)
+            int gx = Mth.floor(ex);
+            int gz = Mth.floor(ez);
+            float g = ground(level, gx, gz);
+            float height = Float.isNaN(g) ? 0f : (float) (ey - g);
+            float fade = 1f - Mth.clamp((height - 6f) / 160f, 0f, 0.65f);
+            jp.revati.skyabyss.client.sky.OverheadShadow.addTitan(ex, ey, ez, yaw, sh, fade);
+            return;
+        }
         VertexConsumer buffer = buffers.getBuffer(RenderType.entityShadow(SHADOW));
         Matrix4f m = poseStack.last().pose();
         int cols = sh.nj() + 1;
