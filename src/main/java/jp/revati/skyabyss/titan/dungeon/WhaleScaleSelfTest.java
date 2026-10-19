@@ -45,6 +45,7 @@ public final class WhaleScaleSelfTest {
         check(f, LAYOUT_VERSION >= 15, "layout version was not bumped");
         // ---- 大きさ
         BackMetrics.checkWhale().forEach(p -> f.add("metrics: " + p));
+        BackMetrics.table("whale").forEach((k, v) -> SkyAbyss.LOGGER.info("SELFTEST whale metrics {}: {}", k, v));
         // ---- 幕
         for (var pair : List.of(java.util.Map.entry(VEIL_E1, E1), java.util.Map.entry(VEIL_E2, E2), java.util.Map.entry(VEIL_E3, E3))) {
             for (BlockPos p : pair.getKey()) {

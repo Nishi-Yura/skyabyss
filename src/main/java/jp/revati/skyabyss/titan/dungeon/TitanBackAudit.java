@@ -65,6 +65,12 @@ public final class TitanBackAudit {
         s.goals.put("song shrine", SONG_SHRINE.center());
         s.goals.put("heart arena", HEART.center());
         s.goals.put("library", LIBRARY.center());
+        // 任意の翼 (背の外): 胸びれの道の先端・尾の展望・背の野営地
+        s.goals.put("bell tower floor", BELL.center());
+        s.goals.put("fin left tip", WingsBuilder.finTip(-1));
+        s.goals.put("fin right tip", WingsBuilder.finTip(1));
+        s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 4));
+        s.goals.put("back camp", new BlockPos(0, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z - 3));
         return s;
     }
 

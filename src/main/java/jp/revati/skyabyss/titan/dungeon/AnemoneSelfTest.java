@@ -75,7 +75,7 @@ public final class AnemoneSelfTest {
                         "stand " + i + " is not an unlit waterlogged pedestal at " + s + " (" + st + ")");
                 boolean onPath = false;
                 for (int k = 1; k < path.size() - 2; k++) {
-                    if (k % 4 != 0 && mazeCell(path.get(k)[0], path.get(k)[1]).offset(1, 0, 1).equals(s)) {
+                    if (k % MazeBuilder.POCKET_EVERY != 0 && mazeCell(path.get(k)[0], path.get(k)[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2).equals(s)) {
                         onPath = true;
                     }
                 }
@@ -88,11 +88,11 @@ public final class AnemoneSelfTest {
             }
             BlockPos exitCell = mazeCell(MAZE_EXIT_I, MAZE_EXIT_J);
             BlockPos beforeCell = mazeCell(path.get(path.size() - 2)[0], path.get(path.size() - 2)[1]);
-            check(f, gate.stream().allMatch(g -> g.distSqr(exitCell) <= 30 && g.distSqr(beforeCell) <= 30), "the exit gate is not in the passage before the exit");
+            check(f, gate.stream().allMatch(g -> g.distSqr(exitCell) <= 60 && g.distSqr(beforeCell) <= 60), "the exit gate is not in the passage before the exit");
             check(f, back.getBlockState(AnemoneLights.TALLY_POS).is(ModBlocks.ANEMONE_TALLY.get()), "tally stone missing in the entry room");
             check(f, back.getBlockState(AnemoneLights.ENTRY_BED_POS).is(ModBlocks.ANEMONE_BED.get()), "anemone bed missing in the entry room");
             check(f, MAZE_ENTRY_ROOM.contains(AnemoneLights.TALLY_POS) && MAZE_ENTRY_ROOM.contains(AnemoneLights.ENTRY_BED_POS), "tally / bed are outside the entry room");
-            BlockPos midBed = MazeBuilder.midPocket(maze).offset(2, 2, 0);
+            BlockPos midBed = MazeBuilder.midPocket(maze).offset(MAZE_CELL - 1, 2, 0);
             check(f, back.getBlockState(midBed).is(ModBlocks.ANEMONE_BED.get()), "anemone bed missing at the mid rest ledge " + midBed);
             check(f, back.getBlockState(MazeBuilder.restSpot(MazeBuilder.midPocket(maze))).isAir(), "the mid rest spot is blocked");
             check(f, FirstRun.room(AnemoneLights.FIRST_ROOM) != null, "the first-run room for the waterway is not registered");

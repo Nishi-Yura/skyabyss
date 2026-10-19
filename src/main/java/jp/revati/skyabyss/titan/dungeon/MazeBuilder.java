@@ -37,10 +37,21 @@ public final class MazeBuilder {
     public static FloodedMaze maze(long seed) {
         for (long s = seed; ; s++) {
             FloodedMaze maze = FloodedMaze.generate(MAZE_W, MAZE_H, MAZE_START_I, MAZE_START_J, MAZE_EXIT_I, MAZE_EXIT_J, s);
-            if (maze.solution().size() >= MIN_PATH_CELLS && maze.links(MAZE_START_I, MAZE_START_J) >= 2) {
+            if (maze.solution().size() >= MIN_PATH_CELLS && maze.links(MAZE_START_I, MAZE_START_J) >= 2 && !pocketOnSecondEntrance(maze)) {
                 return maze;
             }
         }
+    }
+
+    // 2 つめの入口のマスが息継ぎのくぼみになる種は避ける (はしごの下の端が、くぼみの空気の層に重なるため)
+    private static boolean pocketOnSecondEntrance(FloodedMaze maze) {
+        List<int[]> path = maze.solution();
+        for (int k = 1; k < path.size() - 1; k++) {
+            if (k % POCKET_EVERY == 0 && path.get(k)[0] == MAZE_START2_I && path.get(k)[1] == MAZE_START2_J) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 正しい道の上の、息継ぎのくぼみを置くマス (マスの北西の隅の水の一段目)

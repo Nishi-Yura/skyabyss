@@ -1,0 +1,149 @@
+# 岩鯨の背の拡大 (docs/design/26 の W0〜W4) の確かめ。./gradlew runShots -Pscript=tools/shots/whale_scale.txt
+# 出力: run/shots/whale_scale/shots/whale_scale/*.png → python tools/whale_scale_sheet.py で docs/review/previews/whale_scale_sheet.png (音は自動で 0)
+world whale_scale flat
+size 1280 720
+timeout 3000
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss progress grant @p thunder_wing
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+# 乗り込み口 (鎖の下の陣): 眠った岩鯨を地面の上に置き、鎖が降りるのを待つ
+cmd summon skyabyss:stone_whale 0 -30 0 {Rotation:[0f,0f],Mode:2,RestTicks:999999}
+wait 400
+hud off
+cmd gamemode spectator
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^60 ^-22 ^40 facing ^10.5 ^-30 ^-30.5
+wait 40
+shot board_far
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^22 ^-52 ^-14 facing ^10.5 ^-30 ^-30.5
+wait 40
+shot board_close
+cmd kill @e[type=skyabyss:stone_whale,distance=..600]
+wait 10
+cmd gamemode creative
+hud on
+# 背へ (建っていなければ建てる)
+cmd skyabyss dev arrive titan_back
+waitchunks 1200
+wait 60
+chat clear
+cmd gamemode spectator
+hud off
+fov 90
+fov 85
+camera skyabyss:titan_back -71.5 100.6 173.5 270 3
+waitchunks 600
+wait 30
+shot arrival
+fov 95
+camera skyabyss:titan_back -58 101 164 270 -4
+waitchunks 600
+wait 30
+shot climb
+fov 90
+camera skyabyss:titan_back 0 152 176 180 12
+waitchunks 600
+wait 30
+shot plaza
+fov 90
+camera skyabyss:titan_back 0 156 84 180 18
+waitchunks 600
+wait 30
+shot shrine
+fov 95
+camera skyabyss:titan_back 0 108 -18 180 -4
+waitchunks 600
+wait 30
+shot hub
+fov 100
+camera skyabyss:titan_back -39 107 -25 270 -18
+waitchunks 600
+wait 30
+shot west_a
+fov 100
+camera skyabyss:titan_back -43 112 -70 90 -16
+waitchunks 600
+wait 30
+shot west_b
+fov 100
+camera skyabyss:titan_back -43 114 -107 180 -14
+waitchunks 600
+wait 30
+shot bell
+fov 100
+camera skyabyss:titan_back 44 107 -10 180 -10
+waitchunks 600
+wait 30
+shot east_e1
+fov 100
+camera skyabyss:titan_back 35 108 6 0 -12
+waitchunks 600
+wait 30
+shot east_e2
+fov 100
+camera skyabyss:titan_back 35 106 57 0 -10
+waitchunks 600
+wait 30
+shot east_ck
+fov 100
+camera skyabyss:titan_back 26 107 -54 180 -8
+waitchunks 600
+wait 30
+shot east_e3
+fov 95
+camera skyabyss:titan_back 6 112 -38 180 40
+waitchunks 600
+wait 30
+shot maze_hatch
+fov 95
+camera skyabyss:titan_back 6 89.6 -46.5 180 5
+waitchunks 600
+wait 30
+shot maze_entry
+fov 95
+camera skyabyss:titan_back 0 106 -90 180 -6
+waitchunks 600
+wait 30
+shot heart_rest
+fov 95
+camera skyabyss:titan_back 0 106 -104 180 5
+waitchunks 600
+wait 30
+shot heart_gate
+fov 100
+camera skyabyss:titan_back 0 109 -112 180 -6
+waitchunks 600
+wait 30
+shot heart_arena
+fov 95
+camera skyabyss:titan_back -10 106 -93 90 -6
+waitchunks 600
+wait 30
+shot song
+fov 100
+camera skyabyss:titan_back -13 107 6 90 -8
+waitchunks 600
+wait 30
+shot library
+fov 90
+camera skyabyss:titan_back 0 153 104 0 10
+waitchunks 600
+wait 30
+shot camp
+fov 95
+camera skyabyss:titan_back 0 128 284 0 -5
+waitchunks 600
+wait 30
+shot tail_vista
+fov 85
+camera skyabyss:titan_back 0 230 370 180 28
+waitchunks 600
+wait 30
+shot overview
+quit

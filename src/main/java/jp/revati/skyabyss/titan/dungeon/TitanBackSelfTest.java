@@ -332,7 +332,9 @@ public final class TitanBackSelfTest {
                 if (t == Integer.MIN_VALUE || (Math.abs(x) <= 9 && z >= SHRINE_Z - 17 && z <= SHRINE_Z + 17)
                         || (Math.abs(x) <= 13 && Math.abs(z - PLATFORM_Z) <= 16)
                         || (Math.abs(x) <= 8 && Math.abs(z - WingsBuilder.CAMP_Z) <= 8)
-                        || (Math.abs(x) <= 14 && Math.abs(z - WingsBuilder.TAIL_CZ) <= 14)) {
+                        || (Math.abs(x) <= 14 && Math.abs(z - WingsBuilder.TAIL_CZ) <= 14)
+                        // 登り口の階段は、背に近づくと殻を割って背へ出る (開いた階段)
+                        || (x >= STAIR_X0 && x <= 0 && z >= STAIR_Z0 - 1 && z <= STAIR_Z1 + 1)) {
                     continue;
                 }
                 if (level.getBlockState(new BlockPos(x, t, z)).isAir() && level.getBlockState(new BlockPos(x, t - 1, z)).isAir()) {
@@ -466,6 +468,7 @@ public final class TitanBackSelfTest {
                 continue;
             }
             int holes = 0;
+            BlockPos firstCeilingHole = null;
             for (int x = room.x1(); x <= room.x2(); x++) {
                 for (int z = room.z1(); z <= room.z2(); z++) {
                     if (level.getBlockState(new BlockPos(x, room.ceilingY(), z)).isAir()) {
@@ -474,11 +477,14 @@ public final class TitanBackSelfTest {
                             continue;
                         }
                         holes++;
+                        if (firstCeilingHole == null) {
+                            firstCeilingHole = new BlockPos(x, room.ceilingY(), z);
+                        }
                     }
                 }
             }
             if (holes > 4) {
-                failures.add("room " + room + " has " + holes + " holes in its ceiling");
+                failures.add("room " + room + " has " + holes + " holes in its ceiling (first at " + firstCeilingHole + ")");
             }
         }
         for (Box pit : PITS) {
@@ -500,7 +506,7 @@ public final class TitanBackSelfTest {
                 {WA.x2() + 1, FLOOR + 1, -36}, {-50, W1.floorY() + 1, WA.z1() - 1}, {-47, W1.floorY() + 1, WB.z2() + 1},
                 {-44, W2.floorY() + 1, WB.z1() - 1}, {-42, W2.floorY() + 1, BELL.z2() + 3}, {-33, W2.floorY() + 1, -97},
                 {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -63}, {E3.x2() + 1, FLOOR + 1, -63}, {38, FLOOR + 1, -2}, {38, FLOOR + 1, 4},
-                {38, FLOOR + 1, 51}, {38, FLOOR + 1, 55}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
+                {38, FLOOR + 1, 50}, {38, FLOOR + 1, 55}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
                 // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
                 {0, FLOOR + 1, -76}, {0, FLOOR + 1, HEART_GATE_Z + 1}, {0, FLOOR + 1, HEART_GATE_Z}, {0, FLOOR + 1, HEART_GATE_Z - 1}};
         for (int[] d : open) {

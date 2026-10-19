@@ -64,20 +64,14 @@ public final class Ch1BackMobsSelfTest {
                 }
             }
         }
-        // 第一の広間 (x 24〜36, z -34〜-5) と西の竪穴・崩れ橋 (x -31〜-11, z -56〜-30)
-        for (int cx = 1; cx <= 2; cx++) {
-            for (int cz = -3; cz <= -1; cz++) {
-                level.setChunkForced(cx, cz, on);
-                if (on) {
-                    level.getChunk(cx, cz);
-                }
-            }
-        }
-        for (int cx = -2; cx <= -1; cx++) {
-            for (int cz = -4; cz <= -2; cz++) {
-                level.setChunkForced(cx, cz, on);
-                if (on) {
-                    level.getChunk(cx, cz);
+        // 第一の広間 E1・番兵の詰所 CK・西の竪穴 WB (背の座標のまま、オーバーワールドに足場を作る)
+        for (TitanBackLayout.Box box : List.of(TitanBackLayout.E1, TitanBackLayout.CK, TitanBackLayout.WB)) {
+            for (int cx = (box.x1() - 3) >> 4; cx <= (box.x2() + 3) >> 4; cx++) {
+                for (int cz = (box.z1() - 3) >> 4; cz <= (box.z2() + 3) >> 4; cz++) {
+                    level.setChunkForced(cx, cz, on);
+                    if (on) {
+                        level.getChunk(cx, cz);
+                    }
                 }
             }
         }
@@ -143,6 +137,8 @@ public final class Ch1BackMobsSelfTest {
         flat(level, 90, 90, 130, 130, FLOOR - 1, 12);
         TitanBackLayout.Box e1 = TitanBackLayout.E1;
         flat(level, e1.x1() - 2, e1.z1() - 2, e1.x2() + 2, e1.z2() + 2, e1.floorY(), 8);
+        TitanBackLayout.Box ck = TitanBackLayout.CK;
+        flat(level, ck.x1() - 2, ck.z1() - 2, ck.x2() + 2, ck.z2() + 2, ck.floorY(), 8);
         TitanBackLayout.Box wb = TitanBackLayout.WB;
         for (int x = wb.x1(); x <= wb.x2(); x++) {
             for (int z = wb.z1(); z <= wb.z2(); z++) {

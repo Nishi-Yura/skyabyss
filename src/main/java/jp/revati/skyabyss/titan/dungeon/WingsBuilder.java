@@ -110,7 +110,7 @@ final class WingsBuilder {
     // ---------------------------------------------------------------- 胸びれの道 (側 side = -1 左 / +1 右)
     // 左は第一の休み場 W1、右は控えの間 CE1 から、体の外へ抜けるトンネルを通り、段を下りて、ひれの上の道 (幅 5、低い欄干) を先端の台まで。
     // 道は斜め (ひれの付け根 → 先端) に走り、道の高さは隣と 1 ずつしか違わない。先端の台に焚き火の休み場と碑
-    static final int FIN_Z_A = -72;
+    static final int FIN_Z_A = -62;
     static final int FIN_Z_B = -34;
     static final int FIN_LEN = 72;
 
@@ -122,32 +122,21 @@ final class WingsBuilder {
         return side < 0 ? W1.x1() - 1 : CE1.x2() + 1;
     }
 
-    private static void finPath(BuildKit kit, int side) {
+    // 胸びれの道の計画 (建てる前に、体の形だけから決まる): 列 i の x・z の中心・床のブロックの y と、面のある最後の列
+    record Plan(int[] xs, int[] zs, int[] hs, int last) {
+    }
+
+    static int finExitX(int side) {
         int tf = finTunnelFloor(side);
         int wallX = finWallX(side);
-        // トンネル: 壁から、体の外に出るまで (幅 5 = z -64〜-60、高さ 6)
         int exitX = wallX;
         while (Math.abs(exitX - wallX) < 40 && WhaleShape.at(exitX, tf + 3, -62) != null) {
             exitX += side;
         }
-        int ix1 = Math.min(wallX, exitX);
-        int ix2 = Math.max(wallX, exitX);
-        for (int x = ix1; x <= ix2; x++) {
-            for (int z = -65; z <= -59; z++) {
-                boolean inner = z >= -64 && z <= -60;
-                for (int y = tf; y <= tf + 7; y++) {
-                    if (inner && y > tf && y <= tf + 6) {
-                        kit.set(x, y, z, BuildKit.AIR);
-                    } else if (!kit.get(x, y, z).isAir()) {
-                        kit.set(x, y, z, y == tf ? BuildKit.POLISHED : y == tf + 7 ? BuildKit.TILES : kit.wallStone());
-                    }
-                }
-            }
-            if (Math.abs(x - wallX) % 4 == 2 && x != exitX) {
-                kit.lantern(x, tf + 1, -64);
-                kit.lantern(x, tf + 1, -60);
-            }
-        }
+        return exitX;
+    }
+
+    static Plan plan(int side, int exitX, int tf) {
         // 外の道: 体の外へ出た所 (exitX) から、斜めにひれの先端まで
         int n = FIN_LEN;
         int[] hs = new int[n + 1];
@@ -187,9 +176,60 @@ final class WingsBuilder {
         for (int i = last - 1; i >= 0; i--) {
             hs[i] = Math.min(hs[i], hs[i + 1] + 1);
         }
+        return new Plan(xs, zs, hs, last);
+    }
+
+    // 先端の台の中心 (焚き火の位置の一歩手前。監査の行き先)
+    public static BlockPos finTip(int side) {
+        Plan plan = plan(side, finExitX(side), finTunnelFloor(side));
+        return new BlockPos(plan.xs()[plan.last()] + 3 * side, plan.hs()[plan.last()] + 1, plan.zs()[plan.last()] + 2);
+    }
+
+    private static void finPath(BuildKit kit, int side) {
+        int tf = finTunnelFloor(side);
+        int wallX = finWallX(side);
+        // トンネル: 壁から、体の外に出るまで (幅 5 = z -64〜-60、高さ 6)
+        int exitX = wallX;
+        while (Math.abs(exitX - wallX) < 40 && WhaleShape.at(exitX, tf + 3, -62) != null) {
+            exitX += side;
+        }
+        int ix1 = Math.min(wallX, exitX);
+        int ix2 = Math.max(wallX, exitX);
+        for (int x = ix1; x <= ix2; x++) {
+            for (int z = -65; z <= -59; z++) {
+                boolean inner = z >= -64 && z <= -60;
+                for (int y = tf; y <= tf + 7; y++) {
+                    if (inner && y > tf && y <= tf + 6) {
+                        kit.set(x, y, z, BuildKit.AIR);
+                    } else if (!kit.get(x, y, z).isAir()) {
+                        kit.set(x, y, z, y == tf ? BuildKit.POLISHED : y == tf + 7 ? BuildKit.TILES : kit.wallStone());
+                    }
+                }
+            }
+            if (Math.abs(x - wallX) % 4 == 2 && x != exitX) {
+                kit.lantern(x, tf + 1, -64);
+                kit.lantern(x, tf + 1, -60);
+            }
+        }
+        Plan plan = plan(side, exitX, tf);
+        int n = FIN_LEN;
+        int[] xs = plan.xs();
+        int[] zs = plan.zs();
+        int[] hs = plan.hs();
+        int last = plan.last();
         Direction up = side < 0 ? Direction.EAST : Direction.WEST;
         BlockState stair = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, up);
         BlockState rail = Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState();
+        // 階段の置き場 (柵は、階段の隣に置かない: 階段の低い側が柵だと床に埋まった階段に見える)
+        java.util.Set<BlockPos> stairAt = new java.util.HashSet<>();
+        for (int i = 0; i <= last; i++) {
+            boolean drops = i == 0 ? hs[i] < tf : hs[i] < hs[i - 1];
+            if (drops) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    stairAt.add(new BlockPos(xs[i], hs[i] + 1, zs[i] + dz));
+                }
+            }
+        }
         for (int i = 0; i <= last; i++) {
             int x = xs[i];
             int h = hs[i];
@@ -198,13 +238,20 @@ final class WingsBuilder {
                 int z = zs[i] + dz;
                 // 支えの石 (道の下を 3 つ)
                 kit.fill(x, h - 3, z, x, h - 1, z, BuildKit.BRICKS);
-                kit.set(x, h, z, drops ? stair : ((x + z) % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES));
-                kit.fill(x, h + 1, z, x, h + 6, z, BuildKit.AIR);
+                kit.set(x, h, z, (x + z) % 2 == 0 ? BuildKit.POLISHED : BuildKit.TILES);
+                if (drops) {
+                    // 1 段下がる所: 低い列の床 (h) の上に半段の階段を載せる。階段の背の高い側は、前の列の床 (同じ y の丸ごとのブロック)
+                    kit.set(x, h + 1, z, stair);
+                    kit.fill(x, h + 2, z, x, h + 7, z, BuildKit.AIR);
+                } else {
+                    kit.fill(x, h + 1, z, x, h + 6, z, BuildKit.AIR);
+                }
             }
             for (int dz : new int[]{-3, 3}) {
                 int z = zs[i] + dz;
                 kit.fill(x, h - 3, z, x, h, z, BuildKit.BRICKS);
-                kit.set(x, h + 1, z, rail);
+                boolean nearStair = stairAt.contains(new BlockPos(x - 1, h + 1, z)) || stairAt.contains(new BlockPos(x + 1, h + 1, z));
+                kit.set(x, h + 1, z, nearStair || drops ? BuildKit.AIR : rail);
                 kit.fill(x, h + 2, z, x, h + 6, z, BuildKit.AIR);
             }
             if (i % 8 == 4) {
@@ -295,8 +342,8 @@ final class WingsBuilder {
         kit.set(0, CAMP_Y + 1, CAMP_Z, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
         kit.set(0, CAMP_Y + 2, CAMP_Z, Blocks.CHAIN.defaultBlockState());
         kit.set(2, CAMP_Y + 1, CAMP_Z, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
-        kit.set(3, CAMP_Y + 1, CAMP_Z, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
-        kit.set(2, CAMP_Y + 1, CAMP_Z + 1, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
+        kit.set(3, CAMP_Y + 1, CAMP_Z, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
+        kit.set(2, CAMP_Y + 1, CAMP_Z + 1, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
         kit.standingSign(new BlockPos(-2, CAMP_Y + 1, CAMP_Z - 2), "sign.skyabyss.camp_page");
         kit.lantern(-3, CAMP_Y + 1, CAMP_Z + 3);
     }

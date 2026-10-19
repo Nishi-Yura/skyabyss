@@ -77,12 +77,12 @@ public final class TitanBackLayout {
     public static final float ARRIVAL_YAW = 270f;
     // 登り口の階段: x = STAIR_X0 から東へ、1 ブロックごとに 1 上がる。幅 5 (z STAIR_Z0〜STAIR_Z1)、高さ 6
     public static final int STAIR_X0 = -54;
-    public static final int STAIR_Z0 = 166;
-    public static final int STAIR_Z1 = 170;
+    public static final int STAIR_Z0 = 162;
+    public static final int STAIR_Z1 = 166;
     public static final int STAIR_HEIGHT = 6;
 
-    // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
-    public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
+    // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 6 段目。ここまで階段の頭が祠の床を割って空へ開くので、この面で閉じる)。これより北の体内は試練の場
+    public static final int SHRINE_SEAL_Z = SHRINE_Z - 6;
     // 祠の階段の幅の半分 (x -3〜3 = 幅 7。本道)・高さ
     public static final int SHRINE_STAIR_HALF = 3;
     public static final int SHRINE_STAIR_HEIGHT = 6;
@@ -205,7 +205,7 @@ public final class TitanBackLayout {
     // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、中は 5×5×4。はしごが北の辺を通る)
     public static final Box MAZE_ENTRY_ROOM = new Box(mazeCellX(MAZE_START_I), mazeCellX(MAZE_START_I) + 4, mazeCellZ(MAZE_START_J), mazeCellZ(MAZE_START_J) + 4, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I), mazeCellX(MAZE_START2_I) + 4, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 4, MAZE_FLOOR + 4, 4);
-    public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -9, -1, MAZE_FLOOR + 4, 5);
+    public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -7, -3, MAZE_FLOOR + 4, 5);
     // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)。入口の通路の東の壁 (x 4)
     public static final List<BlockPos> LOWER_RETURN = wall(-7, -3, FLOOR + 1, FLOOR + 4, 4, false);
     // 出口の小部屋から入口の通路へ上がる通路 (床 FLOOR。x 4〜21)
@@ -225,14 +225,14 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.lore_vault", new BlockPos(-10, FLOOR + 3, -62), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.lore_west", new BlockPos(-24, WEST_LEDGE_Y + 2, -49), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -1), net.minecraft.core.Direction.NORTH));
+            new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
 
     // ---------------------------------------------------------------- 試練の入口の一言 (看板)。背中に置く看板は、これと碑文だけ
     // 案内 (錨石・炉・休み場・封印の扉・台座・抜け道) は看板にせず、形・光・音と、最初の一度だけの囁き (BackWhispers) で伝える
     public static final List<Inscription> TRIAL_SIGNS = List.of(
             new Inscription("sign.skyabyss.chasm", new BlockPos(-18, FLOOR + 4, -41), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.arena", new BlockPos(18, FLOOR + 4, -41), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -54), net.minecraft.core.Direction.SOUTH));
+            new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -55), net.minecraft.core.Direction.SOUTH));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
             new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
@@ -293,13 +293,18 @@ public final class TitanBackLayout {
 
     public static int platformY() {
         if (platformY == Integer.MIN_VALUE) {
-            int y = BASE_Y;
-            for (int x = -12; x <= 12; x++) {
-                for (int z = PLATFORM_Z - 16; z <= PLATFORM_Z + 16; z++) {
-                    y = Math.max(y, top(x, z));
+            // 広場の円 (rx 11・rz 14) の中の背の高さの 65 番目の百分位。小さな背びれの出っ張りに引きずられて、広場が高い台にならない
+            // (出っ張りは広場の空きで削る)
+            java.util.List<Integer> tops = new java.util.ArrayList<>();
+            for (int x = -11; x <= 11; x++) {
+                for (int z = PLATFORM_Z - 14; z <= PLATFORM_Z + 14; z++) {
+                    if (Math.hypot(x / 11.0, (z - PLATFORM_Z) / 14.0) <= 1.0) {
+                        tops.add(top(x, z));
+                    }
                 }
             }
-            platformY = y;
+            java.util.Collections.sort(tops);
+            platformY = Math.max(BASE_Y, tops.get((int) (tops.size() * 0.65)));
         }
         return platformY;
     }
