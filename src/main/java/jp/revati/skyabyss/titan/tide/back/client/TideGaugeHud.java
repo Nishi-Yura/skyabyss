@@ -25,8 +25,46 @@ public final class TideGaugeHud {
 
     private static final BackGaugeHud.Gauge GAUGE = TideGaugeHud::shown;
 
+    // 目的の板 (潮見の目盛りの下。試練の中と広間で、いま何をするかの一行と進みの点)
+    private static final int GOAL_WIDTH = 150;
+    private static final int[] BASIN_COLORS = {0xFFE8C81E, 0xFF84D41E, 0xFFD733D7};
+    private static final BackGaugeHud.Gauge GOAL = new BackGaugeHud.Gauge() {
+        @Override
+        public boolean shown(Minecraft mc) {
+            return TideGaugeHud.shown(mc) && !gauge.goal().isEmpty();
+        }
+
+        @Override
+        public int height() {
+            Minecraft mc = Minecraft.getInstance();
+            return BackGaugeHud.HEIGHT + 2 + goalHeight(mc, goalWidth(mc.getWindow().getGuiScaledWidth()));
+        }
+    };
+
     static {
         BackGaugeHud.register(GAUGE);
+        BackGaugeHud.register(GOAL);
+    }
+
+    private static int goalWidth(int guiWidth) {
+        return Mth.clamp(GOAL_WIDTH, 112, Math.max(112, guiWidth / 2 - 91 - 4 - 6));
+    }
+
+    private static Component goalBody() {
+        return Component.translatable("gui.skyabyss.tide_goal." + gauge.goal(), gauge.done(), gauge.total(), gauge.a(), gauge.b(), gauge.c());
+    }
+
+    private static boolean showsLevels() {
+        return gauge.goal().equals("east.go") || gauge.goal().equals("east.exit");
+    }
+
+    // 板の高さ: 見出しの行 + 本文 (幅に合わせて折り返し。最大 4 行) + (東は水位の行)
+    static int goalHeight(Minecraft mc, int w) {
+        if (gauge == null || gauge.goal().isEmpty()) {
+            return 0;
+        }
+        int lines = Math.min(4, mc.font.split(goalBody(), w - 10).size());
+        return 6 + 11 + lines * 10 + (showsLevels() ? 11 : 0);
     }
 
     private TideGaugeHud() {
@@ -113,6 +151,43 @@ public final class TideGaugeHud {
         for (int i = 0; i < 3; i++) {
             int c = i < gauge.stones() ? 0xFFF0E8B0 : 0xFF404848;
             g.fill(x + w - 8, y + 6 + i * 7, x + w - 4, y + 10 + i * 7, c);
+        }
+        if (!gauge.goal().isEmpty()) {
+            drawGoal(g, mc, y + h + 2);
+        }
+    }
+
+    // 目的の板: 見出し (試練の名前) と進みの点、本文 (いま何をするか)、東は三つの溜めの水位
+    private static void drawGoal(GuiGraphics g, Minecraft mc, int y) {
+        int w = goalWidth(g.guiWidth());
+        int h = goalHeight(mc, w);
+        int x = BackGaugeHud.left(g, w);
+        boolean done = gauge.goal().endsWith(".done") || gauge.goal().endsWith(".sleep");
+        BackGaugeHud.frame(g, x, y, w, h, 0xB0101C22, done ? 0xFFF0E8B0 : 0xFF5FB8B0);
+        String trial = gauge.goal().substring(0, gauge.goal().indexOf('.'));
+        Component title = Component.translatable("gui.skyabyss.tide_goal.title." + trial);
+        int dots = gauge.total();
+        int dotsW = dots > 0 ? dots * 7 : 0;
+        BackGaugeHud.text(g, mc.font, title, x + 5, y + 4, w - 10 - dotsW, 0xFFF0E8B0);
+        for (int i = 0; i < dots; i++) {
+            int dx = x + w - 5 - (dots - i) * 7 + 2;
+            g.fill(dx, y + 5, dx + 5, y + 10, i < gauge.done() ? 0xFFF0D060 : 0xFF404848);
+        }
+        int ty = y + 4 + 11;
+        var lines = mc.font.split(goalBody(), w - 10);
+        for (int i = 0; i < Math.min(4, lines.size()); i++) {
+            g.drawString(mc.font, lines.get(i), x + 5, ty + i * 10, 0xFFE6F2EE, true);
+        }
+        if (showsLevels()) {
+            int ly = ty + Math.min(4, lines.size()) * 10 + 1;
+            int[] values = {gauge.a(), gauge.b(), gauge.c()};
+            int lx = x + 5;
+            for (int k = 0; k < 3; k++) {
+                g.fill(lx, ly + 1, lx + 6, ly + 7, BASIN_COLORS[k]);
+                Component label = Component.translatable("gui.skyabyss.tide_level." + k, values[k]);
+                BackGaugeHud.text(g, mc.font, label, lx + 8, ly, 36, 0xFFE6F2EE);
+                lx += (w - 10) / 3;
+            }
         }
     }
 }

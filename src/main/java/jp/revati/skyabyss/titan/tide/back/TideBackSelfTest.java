@@ -90,6 +90,7 @@ public final class TideBackSelfTest {
             reach.notes.forEach(n -> jp.revati.skyabyss.SkyAbyss.LOGGER.info("SELFTEST {}", n));
             reach.failures.forEach(f -> jp.revati.skyabyss.SkyAbyss.LOGGER.warn("REACH {}", f));
             FAILURES.addAll(reach.failures);
+            checkGuide(back, FAILURES, NOTES);
             checkPuzzle(back, FAILURES, NOTES);
             checkGarden(back, FAILURES);
             checkFlats(back, FAILURES);
@@ -217,6 +218,12 @@ public final class TideBackSelfTest {
                         continue;
                     }
                     count++;
+                    // 看板の裏に壁がある (空中に浮いた看板を作らない)
+                    BlockState tb = back.getBlockState(be.getBlockPos());
+                    if (tb.hasProperty(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING) && !tb.getValue(jp.revati.skyabyss.tablet.TabletBlock.STANDING)) {
+                        BlockPos behind = be.getBlockPos().relative(tb.getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING).getOpposite());
+                        check(back.getBlockState(behind).isSolidRender(back, behind), "tablet at " + be.getBlockPos() + " has no wall behind it", failures);
+                    }
                     if (!expected.contains(be.getBlockPos())) {
                         failures.add("unexpected tablet at " + be.getBlockPos() + " (only inscriptions and trial entrances keep tablets)");
                     }
@@ -849,6 +856,111 @@ public final class TideBackSelfTest {
         TideWatch.setLevels(back, 0, 0, 3);
         check(!TideGates.defaultOpen(back, BASIN_DOOR[2]), "upper door open with water", failures);
         TideWatch.reset(back, TideBackState.of(back, TEST));
+    }
+
+    // ---------------------------------------------------------------- 試練のわかりやすさ (目的の板・進みの点・栓の知らせ・看板の裏)
+    private static void checkGuide(ServerLevel back, List<String> failures, List<String> notes) {
+        var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        var en = jp.revati.skyabyss.SignFit.lang("en_us");
+        for (String id : TideGuide.GOAL_IDS) {
+            check(ja.containsKey("gui.skyabyss.tide_goal." + id) && en.containsKey("gui.skyabyss.tide_goal." + id), "goal text missing: " + id, failures);
+        }
+        for (String t : new String[] {"west", "east", "front", "hub"}) {
+            check(ja.containsKey("gui.skyabyss.tide_goal.title." + t) && en.containsKey("gui.skyabyss.tide_goal.title." + t), "goal title missing: " + t, failures);
+        }
+        TestPlayer p = join(back, TEST, "[TideGuide]", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1]));
+        try {
+            TideBackState.Group st = TideBackState.of(back, TEST);
+            // 西: 取る → 運ぶ → 祭壇の近く (据える) → 半ばを越える → 戻る
+            TideRooms.claim(back, TideRooms.GARDEN, TEST);
+            expectGoal(back, p, "west.take", 0, 3, failures);
+            p.getInventory().clearContent();
+            TideGarden.useClam(back, TideGarden.pearlBlock(), p);
+            expectGoal(back, p, "west.carry", 1, 3, failures);
+            p.moveTo(ALTAR[0] + 3, ALTAR_TOP + 1, ALTAR[1] + 4);
+            expectGoal(back, p, "west.place", 1, 3, failures);
+            p.moveTo(CLAM[0] + 2, GARDEN_FLOOR + 1, PLAT_C[1] - 6);
+            TideGuide.tick(back);
+            check(TideGuide.westPast(), "the pearl crossing the midpoint was not noticed", failures);
+            expectGoal(back, p, "west.carry", 2, 3, failures);
+            TideGarden.returnPearl(back, "message.skyabyss.tide.pearl_dropped");
+            TideGuide.tick(back);
+            check(!TideGuide.westPast(), "the midpoint stayed after the pearl returned", failures);
+            expectGoal(back, p, "west.take", 0, 3, failures);
+            // 東: 水位と、いちばん上まで来た段
+            TideRooms.claim(back, TideRooms.WATCH, TEST);
+            p.moveTo(26, HUB_LEDGE + 1, -10);
+            TidePuzzle.Config c = TideWatch.cfg();
+            TideGuide.Goal g = TideGuide.goalFor(back, p);
+            check(g.id().equals("east.go") && g.a() == c.init()[0] && g.b() == c.init()[1] && g.c() == c.init()[2] && g.done() == 0,
+                    "east goal at the start is " + g, failures);
+            p.moveTo(41, TIER_FLOOR[1] + 1, -10);
+            TideGuide.tick(back);
+            p.moveTo(53, TIER_FLOOR[2] + 1, -12);
+            TideGuide.tick(back);
+            check(TideGuide.eastStage() == 2, "east stage after reaching the top tier is " + TideGuide.eastStage(), failures);
+            // 栓を引く・重石を踏む・水位が変わる (知らせの経路が落ちない。戸が開く)
+            for (int i = 0; i < c.plugs().length; i++) {
+                TideWatch.setLever(back, TideWatch.leverSlot(i), true);
+            }
+            TideGuide.tick(back);
+            TideWatch.setLevels(back, 5, 5, 0);
+            TideGuide.tick(back);
+            expectGoal(back, p, "east.exit", 3, 3, failures);
+            check(TideGuide.goalFor(back, p).c() == 0, "east goal does not carry the water levels", failures);
+            TideWatch.reset(back, st);
+            check(TideGuide.eastStage() == 0, "east stage stayed after the watch room reset", failures);
+            // 前: 巣・潮招き・石
+            TideRooms.claim(back, TideRooms.FLATS, TEST);
+            p.moveTo(0, FLATS_FLOOR + 1, -60);
+            int nests = Integer.bitCount(st.nestSites());
+            TideGuide.Goal f = TideGuide.goalFor(back, p);
+            check(f.id().equals("front.nests") && f.done() == 0 && f.total() == nests + 1 && f.a() == nests, "front goal at the start is " + f, failures);
+            int broken = 0;
+            for (int s = 0; s < 6; s++) {
+                if ((st.nestSites() & (1 << s)) != 0) {
+                    st.breakNest(s);
+                    broken++;
+                    if (broken < nests) {
+                        expectGoal(back, p, "front.nests", broken, nests + 1, failures);
+                    }
+                }
+            }
+            expectGoal(back, p, "front.boss", nests, nests + 1, failures);
+            st.markBeckonerDefeated();
+            expectGoal(back, p, "front.stone", nests + 1, nests + 1, failures);
+            // 広間: 石の数
+            p.moveTo(-6, HUB_LEDGE + 1, 10);
+            expectGoal(back, p, "hub.stones", 0, 3, failures);
+            st.ring(TideBackState.Trial.WEST);
+            st.ring(TideBackState.Trial.EAST);
+            st.ring(TideBackState.Trial.FRONT);
+            expectGoal(back, p, "hub.wait", 3, 3, failures);
+            // 進みの点と光の経路 (落ちない)
+            TideGuide.pips(back, p, net.minecraft.world.phys.Vec3.atCenterOf(STONE_WEST).add(0, 1.4, 0), 1, 3);
+            // 外にいれば出ない
+            p.moveTo(-20, TOP_Y + 1, 44);
+            check(TideGuide.goalFor(back, p).id().isEmpty(), "a goal is shown on the shell top", failures);
+            // 目的の板の本文は 4 行に収まる (板の本文の幅 140 px、折り返しの余裕を見て 130 で数える)
+            int longest = 0;
+            for (var lang : java.util.List.of(ja, en)) {
+                for (String id : TideGuide.GOAL_IDS) {
+                    int w = jp.revati.skyabyss.SignFit.approxWidth(lang.get("gui.skyabyss.tide_goal." + id));
+                    longest = Math.max(longest, w);
+                    check(w <= 130 * 4, "goal text " + id + " needs more than four lines (" + w + " px)", failures);
+                }
+            }
+            notes.add("goal texts up to " + longest + " px");
+        } finally {
+            leave(back, p);
+            TideBackTrials.resetGroup(back, TEST, false, null, true);
+            TideRooms.releaseAll(back);
+        }
+    }
+
+    private static void expectGoal(ServerLevel back, TestPlayer p, String id, int done, int total, List<String> failures) {
+        TideGuide.Goal g = TideGuide.goalFor(back, p);
+        check(g.id().equals(id) && g.done() == done && g.total() == total, "goal is " + g + ", expected " + id + " " + done + "/" + total, failures);
     }
 
     // ---------------------------------------------------------------- 珊瑚の庭 (真珠)
