@@ -95,7 +95,7 @@ public final class LangSelfTest {
     }
 
     // 全名前空間をまとめた ja_jp / en_us の表 (他の自己テストが文を引くのに使う)
-    static Map<String, String> table(String locale) throws IOException {
+    public static Map<String, String> table(String locale) throws IOException {
         Map<String, Map<String, Map<String, String>>> all = load(new ArrayList<>(), new TreeMap<>());
         Map<String, String> out = new TreeMap<>();
         all.values().forEach(m -> {

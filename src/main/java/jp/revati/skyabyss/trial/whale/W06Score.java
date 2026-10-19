@@ -46,7 +46,7 @@ public final class W06Score implements TrialCell {
     static final int[] LENGTH = {3, 4, 6};
     static final int FLASH_TICKS = 120;
 
-    static int length(Run run) {
+    public static int length(Run run) {
         return jp.revati.skyabyss.abyss.Abyss.plusOne(run.mods, LENGTH[run.mods.number(0)]);
     }
     static final float[] PITCH = {0.7f, 0.8f, 0.9f, 1.1f, 1.25f, 1.45f};

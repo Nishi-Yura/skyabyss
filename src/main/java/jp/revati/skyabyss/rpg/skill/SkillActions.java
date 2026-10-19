@@ -1288,7 +1288,7 @@ public final class SkillActions {
     }
 
     // 天落とし: 矢が止まった所 (刺さる・寿命・貫き終え) に、0.8 秒後に雷の柱 (半径 2.5。攻撃力の ×0.9)
-    private static void abyssSkyFall(AbstractArrow arrow) {
+    public static void abyssSkyFall(AbstractArrow arrow) {
         if (!arrow.getTags().contains(SKY_FALL_TAG) || !(arrow.level() instanceof ServerLevel level) || !(arrow.getOwner() instanceof ServerPlayer owner)) {
             return;
         }

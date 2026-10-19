@@ -202,24 +202,19 @@ public abstract class HeartBoss extends GuardMob {
         return new AbyssCtx(abyssCx(), abyssCz(), abyssFloor(), abyssRadius(), this::abyssReach, abyssFury());
     }
 
-    // 深淵にする (または戻す)。体力は割合を保つ
+    // 体力 ×1.2 は、受ける傷を 1/1.2 にして出す (最大体力は属性の上限 1024 に近いので増やせない。各心臓の「硬さ」の掛け算と同じ形。HeartBalance の effectiveHp)
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        return super.hurt(source, isAbyss() ? amount / jp.revati.skyabyss.abyss.Abyss.HEART_HP : amount);
+    }
+
+    // 深淵にする (または戻す)
     public void setAbyss(boolean on) {
         abyssChecked = true;
         if (on == isAbyss()) {
             return;
         }
         entityData.set(DATA_ABYSS, on);
-        net.minecraft.world.entity.ai.attributes.AttributeInstance hp = getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "abyss_heart_hp");
-        if (hp != null) {
-            float ratio = getMaxHealth() <= 0 ? 1f : getHealth() / getMaxHealth();
-            hp.removeModifier(id);
-            if (on) {
-                hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(id, jp.revati.skyabyss.abyss.Abyss.HEART_HP - 1.0,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-            }
-            setHealth(getMaxHealth() * ratio);
-        }
         if (!level().isClientSide) {
             net.minecraft.network.chat.Component bar = on
                     ? net.minecraft.network.chat.Component.translatable("abyss.skyabyss.heart_bar", getDisplayName()).withStyle(net.minecraft.ChatFormatting.DARK_PURPLE)

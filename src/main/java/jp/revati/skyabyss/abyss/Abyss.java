@@ -76,7 +76,7 @@ public final class Abyss {
     }
 
     // ---------------------------------------------------------------- 深淵の心臓の数字 (心臓ごとの手ごたえは HeartBalance の帯の中に収める)
-    // 体力・傷・技の間・領域の速さ。どれも帯 (戦いの長さ 3〜5 分・一撃 28% 前後) を壊さない範囲
+    // 体力 (実質。受ける傷を 1/HEART_HP にする)・傷・技の間・領域の速さ。どれも帯 (戦いの長さ 3〜5 分・一撃 28% 前後) を壊さない範囲
     public static final float HEART_HP = 1.20f;
     public static final float HEART_DAMAGE = 1.12f;
     public static final double HEART_GAP = 0.85;

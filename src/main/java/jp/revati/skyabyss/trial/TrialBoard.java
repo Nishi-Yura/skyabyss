@@ -10,6 +10,7 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.abyss.Abyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.rebirth.RebirthView;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
@@ -81,6 +82,20 @@ public final class TrialBoard {
                 List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r));
     }
 
+    public enum Toggle { CHANGED, SAME, LOCKED }
+
+    // つまみの決まり (純粋な部分): 入るには転生 3 回以上、切るのは誰でも。記録 r を書き換える
+    public static Toggle applyToggle(BackGroupData.Record r, boolean on, int rebirths) {
+        if (Abyss.on(r) == on) {
+            return Toggle.SAME;
+        }
+        if (on && !Abyss.open(rebirths)) {
+            return Toggle.LOCKED;
+        }
+        Abyss.set(r, on);
+        return Toggle.CHANGED;
+    }
+
     // 深淵のつまみ (グループごと)。転生 3 回以上の人だけが入れる。切るのは誰でも。変えたら動いている試練を止めて (次に入るとき引き直した修飾で組み直す)、板を開き直す
     public static void toggleAbyss(ServerPlayer sp, String titan, boolean on) {
         if (!Titans.hasBack(titan)) {
@@ -92,15 +107,15 @@ public final class TrialBoard {
         }
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record r = GroupProgress.of(back, group);
-        if (Abyss.on(r) == on) {
+        Toggle result = applyToggle(r, on, RebirthView.count(sp));
+        if (result == Toggle.SAME) {
             open(sp, titan);
             return;
         }
-        if (on && !Abyss.open(sp)) {
+        if (result == Toggle.LOCKED) {
             Notice.bar(sp, ModText.deny("message.skyabyss.abyss.locked", Abyss.OPEN_AT));
             return;
         }
-        Abyss.set(r, on);
         r.changed();
         TrialRuntime.stopGroup(back, group);
         TrialRuntime.syncGates(back, group, titan, TrialData.current(back, group));

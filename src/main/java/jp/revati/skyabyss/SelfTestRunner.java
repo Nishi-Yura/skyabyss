@@ -123,6 +123,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
         steps.add(Step.once("storm scan", jp.revati.skyabyss.titan.storm.back.StormBuildScan::runSelfTest));
         steps.add(jp.revati.skyabyss.cinematic.SightLiveSelfTest.step(jp.revati.skyabyss.progress.Titans.THUNDER_WING));
+        // 深淵 (B04): 転生での開閉・修飾の段・心臓の湧き・落とし表・書き換えの効き。SKYABYSS_SELFTEST_ONLY="abyss"
+        steps.addAll(jp.revati.skyabyss.abyss.AbyssSelfTest.steps());
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));

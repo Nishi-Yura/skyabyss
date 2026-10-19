@@ -40,7 +40,7 @@ public final class W07Gates implements TrialCell {
     static final int[] GRACE = {280, 220, 160};
     static final int[] HOLD = {20, 40, 60};
 
-    static int graceOf(Run run) {
+    public static int graceOf(Run run) {
         return jp.revati.skyabyss.abyss.Abyss.shorter(run.mods, GRACE[run.mods.number(0)]);
     }
     static final int WEIGHTS = 2;
