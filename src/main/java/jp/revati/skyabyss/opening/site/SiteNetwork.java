@@ -56,6 +56,26 @@ public final class SiteNetwork {
         for (BlockPos p : OpeningSites.cairns(server)) {
             m.put("cairn" + i++, p);
         }
+        // 話す相手の居場所 (道しるべの目印): 語り部は宿りの鐘のそば、鯨追いは外れの焚き火
+        OpeningSites.bell(server).or(() -> OpeningSites.shelter(server)).ifPresent(bell -> {
+            m.put(SiteTargets.NPC_PREFIX + "storyteller", bell);
+            if (server.overworld() != null) {
+                BlockPos chaser = jp.revati.skyabyss.npc.NpcSpawner.chaserSpot(server.overworld(), bell);
+                if (chaser != null) {
+                    m.put(SiteTargets.NPC_PREFIX + "whale_chaser", chaser);
+                }
+            }
+        });
+        // 旅の職人: 章の立つ所 (ArtisanSpawner.Spot) の印の最初の場所 (拠点が複数あれば先頭。話す目的の道しるべ)
+        if (server.overworld() != null) {
+            for (var spot : jp.revati.skyabyss.npc.ArtisanSpawner.spots()) {
+                var marks = jp.revati.skyabyss.npc.ArtisanSpawner.marks(server.overworld(), spot);
+                if (!marks.isEmpty()) {
+                    m.put(SiteTargets.NPC_PREFIX + "artisan", marks.get(0));
+                    break;
+                }
+            }
+        }
         // 巨神の最後の位置 (章のクエストの帯の方角と距離。動くので、下の onTick が変わるたびに送り直す)
         net.minecraft.server.level.ServerLevel overworld = server.overworld();
         if (overworld != null) {

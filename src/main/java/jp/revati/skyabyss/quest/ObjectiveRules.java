@@ -12,7 +12,7 @@ public final class ObjectiveRules {
 
     // 距離の札 (「230m NE」)。近すぎれば空 (札を出さない)
     public static String distanceLabel(double distance, String dir) {
-        return distance < HIDE_UNDER ? "" : (Math.round(distance / 10.0) * 10) + "m " + dir;
+        return distance < HIDE_UNDER ? "" : ((Math.round(distance / 10.0) * 10) + "m " + dir).trim();
     }
 
     // 鎖の待ちの帯の版: 備えの頼みが 2 本に届くまでは本数つき (.wait.prep)、届いたあとは三灯 (.wait.lamps)
