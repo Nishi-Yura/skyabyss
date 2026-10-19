@@ -50,19 +50,23 @@ import net.minecraft.world.phys.Vec3;
 // 打つ順は持ち主のグループの記録 (EmberBackState.forgePattern) から決まり、部屋を作り直すときに金床の刻みの毛糸と current に写す。
 // 鍛え手の扉 (SMITH_DOOR) はいつも置いてある扉。火の鍵で開けたグループにだけ開く (GroupGates)。開いていく灯りは、そのグループへの見かけ
 public final class Forge {
-    // 部屋の道具の位置 (EAST の箱の中。床 y 80)
-    public static final BlockPos FORGE = new BlockPos(26, 82, 22);
-    public static final BlockPos BELLOWS_A = new BlockPos(22, 81, 20);
-    public static final BlockPos BELLOWS_B = new BlockPos(30, 81, 20);
-    public static final BlockPos ANVIL = new BlockPos(26, 81, 12);
-    public static final BlockPos TROUGH_A = new BlockPos(32, 81, 13);
-    public static final BlockPos TROUGH_B = new BlockPos(33, 81, 13);
+    // 部屋の道具の位置 (EAST の箱の中。床 y 86)。版 12 までの部屋の配置を、x +18・y +6・z +28 に移した (鞴 → 金床の間の 9 ブロックは時間の遊びなので動かさない)
+    public static final int DX = 18;
+    public static final int DY = 6;
+    public static final int DZ = 28;
+    public static final BlockPos FORGE = new BlockPos(26 + DX, 82 + DY, 22 + DZ);
+    public static final BlockPos BELLOWS_A = new BlockPos(22 + DX, 81 + DY, 20 + DZ);
+    public static final BlockPos BELLOWS_B = new BlockPos(30 + DX, 81 + DY, 20 + DZ);
+    public static final BlockPos ANVIL = new BlockPos(26 + DX, 81 + DY, 12 + DZ);
+    public static final BlockPos TROUGH_A = new BlockPos(32 + DX, 81 + DY, 13 + DZ);
+    public static final BlockPos TROUGH_B = new BlockPos(33 + DX, 81 + DY, 13 + DZ);
     // 金床の刻み (4 つ。打つ回数が 3 のときは 4 つ目は黒石)。上の蝋燭が「次に打つ色」を指す
-    public static final BlockPos[] MARKS = {new BlockPos(24, 82, 11), new BlockPos(25, 82, 11), new BlockPos(26, 82, 11), new BlockPos(27, 82, 11)};
+    public static final BlockPos[] MARKS = {new BlockPos(24 + DX, 82 + DY, 11 + DZ), new BlockPos(25 + DX, 82 + DY, 11 + DZ),
+            new BlockPos(26 + DX, 82 + DY, 11 + DZ), new BlockPos(27 + DX, 82 + DY, 11 + DZ)};
     // 灰被りが歩いてくる炉の前
-    public static final BlockPos FORGE_FRONT = new BlockPos(26, 81, 19);
+    public static final BlockPos FORGE_FRONT = new BlockPos(26 + DX, 81 + DY, 19 + DZ);
     // 灰被りが湧く前室の奥
-    public static final BlockPos ANTE_SPAWN = new BlockPos(26, 81, 3);
+    public static final BlockPos ANTE_SPAWN = new BlockPos(26 + DX, 81 + DY, 3 + DZ);
     public static final String DOUSER_TAG = "skyabyss_forge_douser";
 
     // 数 (4.2節)

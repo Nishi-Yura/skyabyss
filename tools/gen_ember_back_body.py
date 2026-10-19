@@ -28,15 +28,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 import lowpoly_ember_voxel as I  # noqa: E402
 
-OUT = ROOT / "src/main/resources/data/skyabyss/ember_back/body.bin"
+import os as _os
+OUT = Path(_os.environ["EMBER_OUT"]) if "EMBER_OUT" in _os.environ else ROOT / "src/main/resources/data/skyabyss/ember_back/body.bin"
 PREVIEW = ROOT / "docs/review/previews/ember_back"
 
-S = 0.85            # 1 単位あたりのブロック (ゲームの巨神の 1.7 倍)
+_E = _os.environ
+S = 0.85            # 1 単位あたりのブロック (ゲームの巨神の 1.7 倍。版 12 まで)
+# 倍率 (設計書 26)。既定は水平 x1.6・垂直 x1.3 = EmberBackLayout の版 13。WH=1 WV=1 で版 12 の形
+WH = float(_E.get("WH", "1.6"))
+WV = float(_E.get("WV", "1.3"))
+SH = S * WH         # 水平 (x・z) の 1 単位あたりのブロック
+SV = S * WV         # 垂直 (y) の 1 単位あたりのブロック
 GROUND = 64         # モデルの y=0 を置く高さ (灰の原のいちばん上 y 63 の上)
 BELLY_Y = 67        # 腹の下端 (この段の足あとを下へ埋める)
 INNER_DEPTH = 5     # これより深い体の中は凝灰岩
 GLOW_MIN = 3        # 光る材料はブロックに 3 セル以上あれば優先 (割れ目を太らせすぎない)
-ZSHIFT = 7          # 火口の鉢の中心 (モデルでは 体の中心の 48 単位前) を炉心の広間の真上 z -34 に合わせる
+ZSHIFT = int(_E.get("ZSHIFT", str(round(7 * WH))))          # 火口の鉢の中心 (モデルでは 体の中心の 48 単位前) を炉心の広間の真上 z -34 に合わせる
 
 M = I.MAT
 P = I.PARTS
@@ -99,9 +106,9 @@ def block_grid():
     K = model_grid()
     nx, ny, nz = K.shape
     # 向きは今までと同じ (頭は -Z、反転なし。尾は -X へ曲がる)
-    bx = axis_map(nx, I.OX, lambda u: u * S)
-    by = axis_map(ny, I.OY, lambda u: GROUND + u * S)
-    bz = axis_map(nz, I.OZ, lambda u: u * S + ZSHIFT)
+    bx = axis_map(nx, I.OX, lambda u: u * SH)
+    by = axis_map(ny, I.OY, lambda u: GROUND + u * SV)
+    bz = axis_map(nz, I.OZ, lambda u: u * SH + ZSHIFT)
     keep = by >= GROUND             # 地面より下 (脚の先) は作らない
     x0, y0, z0 = bx.min(), GROUND, bz.min()
     NBX, NBY, NBZ = bx.max() - x0 + 1, by.max() - y0 + 1, bz.max() - z0 + 1

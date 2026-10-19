@@ -61,6 +61,7 @@ public final class EmberBackSelfTest {
                 NOTES.add("startup build " + EmberBodyBuilder.lastBuildMs + " ms");
             }
             EmberBodyBuilder.ensureBuilt(back);
+            EmberDump.run(back);
             EmberBackTrials.placeFixtures(back);
             EmberBackTrials.resetGroup(back, GROUP_A, false, null, true);
             EmberBackTrials.resetGroup(back, GROUP_B, false, null, true);
@@ -147,9 +148,10 @@ public final class EmberBackSelfTest {
         int crater = EmberBodyBuilder.crater();
         expect(crater > 150, "the crater floor is at " + crater + ", expected the volcano");
         NOTES.add("crater floor " + crater);
+        expect(crater == CRATER_Y, "EmberBackLayout.CRATER_Y is " + CRATER_Y + " but the body's crater floor is " + crater);
         expect(!back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, 40)).isAir(), "the belly does not rest on the ash plain");
         // 体の外 (灰の原) は平らなまま
-        expect(back.getBlockState(new BlockPos(0, PLAIN_TOP, -200)).is(Blocks.SMOOTH_BASALT) && back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, -200)).isAir(),
+        expect(back.getBlockState(new BlockPos(0, PLAIN_TOP, -295)).is(Blocks.SMOOTH_BASALT) && back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, -295)).isAir(),
                 "the ash plain in front of the body is not flat");
     }
 
@@ -169,7 +171,7 @@ public final class EmberBackSelfTest {
                 expect(in, "rest " + r.name() + " is outside every room box");
             }
         }
-        expect(GATE_SHAFT.contains(HUB_CENTER.getX(), 84, HUB_CENTER.getZ()) && HEART_GATE.contains(HUB_CENTER), "the gate is not over its shaft");
+        expect(GATE_SHAFT.contains(HUB_CENTER.getX(), FLOOR_HUB - 8, HUB_CENTER.getZ()) && HEART_GATE.contains(HUB_CENTER), "the gate is not over its shaft");
     }
 
     // ---------------------------------------------------------------- 看板
@@ -195,21 +197,37 @@ public final class EmberBackSelfTest {
         FAILURES.addAll(bad);
         expect(SignFit.allSignKeys().containsAll(keys), "SignFit does not see the ember signs (skyabyss_ember lang)");
         expect(all.size() == 9, "there should be 9 tablets (6 inscriptions, 3 entrances), not " + all.size());
+        // 掲示 (部屋の中の碑)・宝箱の碑
+        List<String> more = new ArrayList<>();
+        for (Inscription in : BOARDS) {
+            more.add("sign.skyabyss.ember_board_" + in.id());
+            BlockState bs = back.getBlockState(in.pos());
+            expect(bs.getBlock() instanceof TabletBlock && bs.getValue(HorizontalDirectionalBlock.FACING) == in.facing(), "board " + in.id() + " is missing at " + in.pos().toShortString());
+            expect(back.getBlockState(in.pos().relative(in.facing().getOpposite())).isSolid(), "board " + in.id() + " has nothing behind it");
+        }
+        for (Cache c : CACHES) {
+            more.add("sign.skyabyss.ember_cache_" + c.id());
+            expect(back.getBlockState(c.pos()).is(Blocks.CHEST), "cache " + c.id() + " has no chest at " + c.pos().toShortString());
+            BlockState cs = back.getBlockState(c.pos().above());
+            expect(cs.getBlock() instanceof TabletBlock, "cache " + c.id() + " has no tablet above the chest");
+        }
+        FAILURES.addAll(SignFit.check(more));
+        expect(SignFit.allSignKeys().containsAll(more), "SignFit does not see the ember boards (skyabyss_ember lang)");
     }
 
     // ---------------------------------------------------------------- 穴 (体の中の空気が、決めた口のほかで空へ抜けない)
     static boolean allowedOpening(int x, int y, int z) {
-        if (z <= -128) {
+        if (z <= EmberBodyBuilder.NECK_Z1) {
             return true;
         }
         if (Math.abs(x) <= 4 && z >= CRACK.minZ() - 2 && z <= CRACK.maxZ() + 2 && y >= SOUTH.minY()) {
             return true;
         }
-        if (EmberBodyBuilder.wellDist(x, z) <= 15 && y >= EmberBodyBuilder.crater() - 2
+        if (EmberBodyBuilder.wellDist(x, z) <= 18 && y >= EmberBodyBuilder.crater() - 2
                 || EmberBodyBuilder.wellDist(x, z) <= WELL_RADIUS + 0.5 && y >= WELL_BOTTOM - 1) {
             return true;
         }
-        return Math.abs(x) <= 3 && z >= -30 && z <= 6 && y >= BACK_EXIT_FLOOR;
+        return Math.abs(x) <= 5 && z >= HUB_CENTER.getZ() + 4 && z <= EmberBodyBuilder.backTubeEnd() + 2 && y >= BACK_EXIT_FLOOR;
     }
 
     private static boolean open(ServerLevel l, BlockPos p) {
@@ -262,8 +280,8 @@ public final class EmberBackSelfTest {
 
     // ---------------------------------------------------------------- 液体
     private static void checkFluids(ServerLevel back, String when) {
-        List<Box> regions = List.of(new Box(-7, MOUTH_FLOOR, -166, 7, 80, -134), new Box(-3, MOUTH_FLOOR, -135, 3, 91, -49), HUB,
-                new Box(-27, 75, -36, 23, 90, -9), new Box(-1, 77, -20, 1, 90, -7), HEART_ANTE, GATE_SHAFT,
+        List<Box> regions = List.of(MOUTH, THROAT, BAY_WEST, BAY_EAST, HUB,
+                new Box(-48, 78, -58, 50, 96, -16), new Box(-4, 82, -27, 4, 96, -9), HEART_ANTE, GATE_SHAFT, BACK_TUBE,
                 new Box(-7, WELL_BOTTOM, HUB_CENTER.getZ() - 7, 7, EmberBodyBuilder.crater(), HUB_CENTER.getZ() + 7));
         int fluids = 0;
         String first = "";
@@ -410,9 +428,12 @@ public final class EmberBackSelfTest {
         goals.put("west stone", STONE_WEST.north());
         goals.put("east stone", STONE_EAST.north());
         goals.put("south stone", STONE_SOUTH.north());
-        goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 8, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
-        goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, 4));
-        goals.put("crack rail", new BlockPos(5, EmberBodyBuilder.BODY.top(5, 30) + 1, 30));
+        goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 11, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
+        goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, EmberBodyBuilder.backTubeEnd()));
+        goals.put("crack rail", new BlockPos(6, EmberBodyBuilder.BODY.top(6, 37) + 1, 37));
+        for (Cache c : CACHES) {
+            goals.put("cache " + c.id(), c.pos().relative(c.facing()));
+        }
         if (gateOpen) {
             goals.put("heart door", HEART_DOOR.min());
         }
@@ -672,7 +693,7 @@ public final class EmberBackSelfTest {
     private static void checkHeat(ServerLevel back) {
         FakePlayer p = new FakePlayer(back, new GameProfile(UUID.randomUUID(), "ember_test_heat_b"));
         // 灰溜まり (広間の壁ぎわ)
-        BlockPos ash = HUB_CENTER.offset(-9, 1, -8);
+        BlockPos ash = HUB_CENTER.offset(EmberZones.HUB_ASH[0][0] + 1, 1, EmberZones.HUB_ASH[0][1]);
         p.moveTo(ash.getX() + 0.5, ash.getY(), ash.getZ() + 0.5);
         expect(EmberHeat.spot(p) == EmberHeat.Spot.ASH, "the hub ash pool is not an ash spot: " + EmberHeat.spot(p));
         EmberHeat.set(p, 50);

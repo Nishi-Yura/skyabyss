@@ -51,10 +51,23 @@ public final class AshPath {
     public static final int REACH = 4;
     // 溶岩の面 (ブロックの y)。島・岸の床と同じ
     public static final int LAVA_Y = EmberBackLayout.FLOOR_WEST;
-    public static final int LAKE_X1 = -36;
-    public static final int LAKE_X2 = -14;
-    public static final int LAKE_Z1 = 0;
-    public static final int LAKE_Z2 = 48;
+    // 湖の x の範囲 (部屋の内側から壁の肋の 2 マスを引いた幅)
+    public static final int LAKE_X1 = -59;
+    public static final int LAKE_X2 = -27;
+    // 試しの流れ (幅いっぱいの溶岩の溝。灰の壺の使い方を教える)・第一の湖・第二の湖の z の範囲。その間は岸 (試しの岸・中ノ岸)
+    public static final int CHANNEL_Z1 = 15;
+    public static final int CHANNEL_Z2 = 21;
+    public static final int LAKE1_Z1 = 32;
+    public static final int LAKE1_Z2 = 62;
+    public static final int LAKE2_Z1 = 77;
+    public static final int LAKE2_Z2 = 104;
+    // 溶岩の溜め (z1, z2)。溶岩は y LAVA_Y - 2 〜 LAVA_Y、底は y LAVA_Y - 3
+    public static final int[][] LAVA_RANGES = {{CHANNEL_Z1, CHANNEL_Z2}, {LAKE1_Z1, LAKE1_Z2}, {LAKE2_Z1, LAKE2_Z2}};
+    // 中ノ岸 (休み場 w1。第一の湖の向こう) と試しの岸 (流れの向こう)
+    public static final int MID_Z1 = 63;
+    public static final int MID_Z2 = 76;
+    public static final int TEACH_Z1 = 22;
+    public static final int TEACH_Z2 = 31;
 
     // 冷え殻の時計 (tick)
     public static final int LIFE = 240;
@@ -70,40 +83,42 @@ public final class AshPath {
     public static final float ENGULF_HEAT = 30f;
 
     // 奥の岸 (着いたら石を鳴らせる)
-    public static final EmberBackLayout.Box FAR_SHORE = new EmberBackLayout.Box(-29, LAVA_Y + 1, 49, -21, LAVA_Y + 5, 56);
+    public static final EmberBackLayout.Box FAR_SHORE = new EmberBackLayout.Box(-48, LAVA_Y + 1, 105, -38, LAVA_Y + 5, 111);
 
-    // ---------------------------------------------------------------- 島の並び (3 通り。7 つ。w1 の島 (-25, 24) はどれにも入る)
+    // ---------------------------------------------------------------- 島の並び (3 通り。第一の湖に 4 つ、第二の湖に 4 つ。どの並びも島と島のあいだは 8 ブロックまで)
+    // half 1 = 3 x 3、half 2 = 5 x 5 (四隅を丸める)。第二の湖の大きな島には燠虫が 1 体ずつ。中ノ岸 (休み場 w1) は島ではなく湖のあいだの岸
     public record Island(int cx, int cz, int half) {
         public boolean contains(int x, int z) {
             return Math.abs(x - cx) <= half && Math.abs(z - cz) <= half && !corner(x, z);
         }
 
-        // 5 x 5 の島は四隅を丸める (w1 の休み場の台は 5 x 5 のまま)
+        // 5 x 5 の島は四隅を丸める
         boolean corner(int x, int z) {
-            return half == 2 && !w1() && Math.abs(x - cx) == 2 && Math.abs(z - cz) == 2;
-        }
-
-        public boolean w1() {
-            return cx == -25 && cz == 24;
+            return half == 2 && Math.abs(x - cx) == 2 && Math.abs(z - cz) == 2;
         }
 
         public boolean big() {
-            return half == 2 && !w1();
+            return half == 2;
         }
 
-        // 灰溜まり (灰色の羊毛) の位置。w1 は休み場の台の東に一つはみ出して置く
+        // 第二の湖の島か (燠虫が乗る・蛾が飛ぶ)
+        public boolean second() {
+            return cz >= LAKE2_Z1;
+        }
+
+        // 灰溜まり (灰色の羊毛) の位置 (島の真ん中)
         public BlockPos puddle() {
-            return w1() ? new BlockPos(cx + 3, LAVA_Y, cz) : new BlockPos(cx, LAVA_Y, cz);
+            return new BlockPos(cx, LAVA_Y, cz);
         }
     }
 
     public static final List<List<Island>> PATTERNS = List.of(
-            List.of(new Island(-30, 7, 1), new Island(-20, 13, 2), new Island(-25, 24, 2), new Island(-31, 31, 1), new Island(-19, 36, 2),
-                    new Island(-28, 42, 1), new Island(-20, 45, 1)),
-            List.of(new Island(-20, 8, 2), new Island(-30, 14, 1), new Island(-25, 24, 2), new Island(-20, 31, 1), new Island(-30, 36, 2),
-                    new Island(-22, 42, 1), new Island(-32, 44, 1)),
-            List.of(new Island(-25, 6, 1), new Island(-31, 13, 1), new Island(-19, 13, 2), new Island(-25, 24, 2), new Island(-25, 33, 1),
-                    new Island(-31, 40, 2), new Island(-19, 41, 1)));
+            List.of(new Island(-50, 38, 1), new Island(-41, 44, 2), new Island(-47, 53, 1), new Island(-36, 57, 2),
+                    new Island(-50, 83, 2), new Island(-40, 90, 1), new Island(-48, 97, 2), new Island(-39, 101, 1)),
+            List.of(new Island(-36, 38, 1), new Island(-45, 44, 2), new Island(-39, 53, 1), new Island(-50, 57, 2),
+                    new Island(-36, 83, 2), new Island(-46, 90, 1), new Island(-38, 97, 2), new Island(-48, 101, 1)),
+            List.of(new Island(-43, 38, 2), new Island(-50, 46, 1), new Island(-36, 46, 1), new Island(-43, 55, 2),
+                    new Island(-43, 82, 2), new Island(-51, 90, 1), new Island(-36, 91, 1), new Island(-43, 98, 2)));
 
     // 島の並び: 部屋の持ち主のグループの種から (持ち主がいなければ種 0 の並び)
     public static int patternOf(ServerLevel level) {
@@ -356,7 +371,7 @@ public final class AshPath {
         if (feet.getY() != LAVA_Y + 1) {
             return;
         }
-        boolean onIsland = false;
+        boolean onIsland = feet.getZ() >= TEACH_Z1 && feet.getZ() <= TEACH_Z2 || feet.getZ() >= MID_Z1 && feet.getZ() <= MID_Z2;
         for (Island i : PATTERNS.get(patternOf(level))) {
             if (i.contains(feet.getX(), feet.getZ())) {
                 onIsland = true;
@@ -462,7 +477,7 @@ public final class AshPath {
         if (!spawned) {
             spawned = true;
             for (Island i : islands) {
-                if (i.big()) {
+                if (i.big() && i.second()) {
                     EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), i.cx() + 0.5, LAVA_Y + 1, i.cz() + 0.5);
                 }
             }
@@ -482,7 +497,7 @@ public final class AshPath {
 
     private static void spawnMoth(ServerLevel level, int salt) {
         double x = LAKE_X1 + 3 + level.random.nextInt(LAKE_X2 - LAKE_X1 - 5);
-        double z = LAKE_Z1 + 4 + level.random.nextInt(LAKE_Z2 - LAKE_Z1 - 7);
+        double z = LAKE2_Z1 + 3 + level.random.nextInt(LAKE2_Z2 - LAKE2_Z1 - 5);
         EmberTrials.spawn(level, EmberMobSetup.EMBER_MOTH.get(), x + 0.5, LAVA_Y + 3 + (salt % 3), z + 0.5);
     }
 

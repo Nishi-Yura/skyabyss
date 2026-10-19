@@ -134,7 +134,9 @@ public final class RouteLightDev {
             }
             BlockPos q = pick(c);
             if (q == null) {
-                stuck++;
+                if (stuck++ < 12) {
+                    SkyAbyss.LOGGER.info("ROUTELIGHT {} no spot near {}", name, c.toShortString());
+                }
                 continue;
             }
             level.setBlock(q, lamp, 2 | 16);

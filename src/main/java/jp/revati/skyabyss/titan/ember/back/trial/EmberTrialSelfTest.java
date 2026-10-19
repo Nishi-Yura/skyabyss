@@ -179,6 +179,15 @@ public final class EmberTrialSelfTest {
         HearthRoom.build(level, EmberBackLayout.SOUTH);
     }
 
+    private static boolean inLavaRange(int z) {
+        for (int[] r : AshPath.LAVA_RANGES) {
+            if (z >= r[0] && z <= r[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------------------------------------------------------- 静的な検査 (溶岩を 100 tick 流したあと)
     static void staticChecks(MinecraftServer server) {
         ServerLevel level = server.getLevel(EmberIds.BACK);
@@ -207,9 +216,10 @@ public final class EmberTrialSelfTest {
                     for (int z = b.minZ(); z <= b.maxZ(); z++) {
                         BlockPos pos = new BlockPos(x, y, z);
                         if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.LAVA)) {
-                            boolean inLake = b == EmberBackLayout.WEST && x >= AshPath.LAKE_X1 && x <= AshPath.LAKE_X2 && z >= AshPath.LAKE_Z1
-                                    && z <= AshPath.LAKE_Z2 && y >= 74 && y <= AshPath.LAVA_Y;
-                            if (inLake) {
+                            boolean inLake = b == EmberBackLayout.WEST && x >= AshPath.LAKE_X1 && x <= AshPath.LAKE_X2 && inLavaRange(z)
+                                    && y >= AshPath.LAVA_Y - 2 && y <= AshPath.LAVA_Y;
+                            boolean veinChannel = b == EmberBackLayout.EAST && y == EmberBackLayout.FLOOR_EAST && (x == 37 || x == 51) && z >= -11 && z <= 18;
+                            if (inLake || veinChannel) {
                                 lavaInLake++;
                             } else {
                                 F.add("lava leaked to " + pos + " (box " + b + ")");
@@ -259,7 +269,7 @@ public final class EmberTrialSelfTest {
         expect(level.getBlockState(Forge.BELLOWS_B).is(EmberTrialSetup.FORGE_BELLOWS.get()), "bellows B");
         expect(level.getBlockState(Forge.TROUGH_A).is(EmberTrialSetup.QUENCH_TROUGH.get()), "trough");
         expect(level.getBlockState(Hearth.HEARTH).is(EmberTrialSetup.EMBER_HEARTH.get()), "hearth block");
-        expect(level.getBlockState(new BlockPos(-19, 77, -4)).is(EmberTrialSetup.ASH_URN_STAND.get()), "urn stand");
+        expect(level.getBlockState(new BlockPos(-37, 81, -6)).is(EmberTrialSetup.ASH_URN_STAND.get()), "urn stand");
         for (BlockPos v : HearthVents.VENTS) {
             expect(level.getBlockState(v).is(EmberTrialSetup.HEAT_VENT.get()), "vent block at " + v);
             expect(EmberBackLayout.SOUTH.contains(v), "vent outside its box " + v);
@@ -267,7 +277,7 @@ public final class EmberTrialSelfTest {
         for (BlockPos p : HearthRoom.PUDDLES) {
             expect(level.getBlockState(p).is(Blocks.GRAY_WOOL), "valley ash pool at " + p);
         }
-        expect(HearthVents.VENTS.size() == 10, "10 vents");
+        expect(HearthVents.VENTS.size() == 16, "16 vents");
         // 扉は閉じている
         EmberBackLayout.Box d = EmberBackLayout.SMITH_DOOR;
         expect(level.getBlockState(new BlockPos(d.minX(), d.minY(), d.minZ())).is(ModBlocks.SEALED_GATE.get()), "smith door is not sealed");
@@ -351,9 +361,6 @@ public final class EmberTrialSelfTest {
                     cells.add(key(x, z));
                 }
             }
-        }
-        if (i.w1()) {
-            cells.add(key(i.puddle().getX(), i.puddle().getZ()));
         }
         return new Node("island " + i.cx() + "," + i.cz(), cells, i.cx(), i.cz());
     }
@@ -473,14 +480,18 @@ public final class EmberTrialSelfTest {
             AshPathRoom.buildLake(level, pattern);
             AshPath.clearMemory();
             List<Node> nodes = new ArrayList<>();
-            nodes.add(bandNode("entrance shore", -2, -1));
+            // 岸は水際の 2 列 (庭の南端・試しの岸の北端と南端・中ノ岸の北端と南端・奥の岸の北端)。同じ岸の北端と南端は歩いてつながる (壺 0 回)
+            nodes.add(bandNode("garden shore", AshPath.CHANNEL_Z1 - 2, AshPath.CHANNEL_Z1 - 1));
+            nodes.add(bandNode("teach north", AshPath.TEACH_Z1, AshPath.TEACH_Z1 + 1));
+            nodes.add(bandNode("teach south", AshPath.TEACH_Z2 - 1, AshPath.TEACH_Z2));
+            nodes.add(bandNode("mid north", AshPath.MID_Z1, AshPath.MID_Z1 + 1));
+            nodes.add(bandNode("mid south", AshPath.MID_Z2 - 1, AshPath.MID_Z2));
             for (AshPath.Island i : AshPath.PATTERNS.get(pattern)) {
                 nodes.add(islandNode(i));
             }
-            nodes.add(bandNode("far shore", 49, 50));
+            nodes.add(bandNode("far shore", AshPath.LAKE2_Z2 + 1, AshPath.LAKE2_Z2 + 2));
             int n = nodes.size();
-            expect(AshPath.PATTERNS.get(pattern).size() == 7, "pattern " + pattern + " has " + AshPath.PATTERNS.get(pattern).size() + " islands");
-            expect(AshPath.PATTERNS.get(pattern).stream().anyMatch(AshPath.Island::w1), "pattern " + pattern + " lacks the w1 island");
+            expect(AshPath.PATTERNS.get(pattern).size() == 8, "pattern " + pattern + " has " + AshPath.PATTERNS.get(pattern).size() + " islands");
             int[][] throwsOf = new int[n][n];
             for (int[] row : throwsOf) {
                 java.util.Arrays.fill(row, -1);
@@ -497,6 +508,8 @@ public final class EmberTrialSelfTest {
                     throwsOf[i][j] = cross(level, fp, nodes.get(i), nodes.get(j));
                 }
             }
+            throwsOf[1][2] = 0;
+            throwsOf[3][4] = 0;
             // 最短の道 (使う壺の回数が少ない)、島の数が最も少ない道
             int[] cost = new int[n];
             java.util.Arrays.fill(cost, Integer.MAX_VALUE);
@@ -525,13 +538,7 @@ public final class EmberTrialSelfTest {
             }
             expect(worst[n - 1] <= 4, "ash path pattern " + pattern + " has no route with every hop within 4 scatters (best " + worst[n - 1] + ")");
             expect(cost[n - 1] != Integer.MAX_VALUE, "ash path pattern " + pattern + " cannot be crossed with 5 scatters per hop");
-            int w1 = -1;
-            for (int i = 0; i < n; i++) {
-                if (nodes.get(i).name().equals("island -25,24")) {
-                    w1 = i;
-                }
-            }
-            expect(w1 >= 0 && cost[w1] != Integer.MAX_VALUE, "the w1 island is unreachable in pattern " + pattern);
+            expect(cost[4] != Integer.MAX_VALUE, "the middle shore is unreachable in pattern " + pattern);
             int maxHop = 0;
             int edges = 0;
             for (int[] row : throwsOf) {
@@ -542,7 +549,7 @@ public final class EmberTrialSelfTest {
                     }
                 }
             }
-            expect(edges >= 8, "pattern " + pattern + " has too few hops: " + edges);
+            expect(edges >= 14, "pattern " + pattern + " has too few hops: " + edges);
             SkyAbyss.LOGGER.info("ember trial: ash path pattern {} crosses with {} scatters in total, easiest route needs at most {} per hop ({} hops, longest {})", pattern,
                     cost[n - 1], worst[n - 1], edges, maxHop);
         }
@@ -553,7 +560,7 @@ public final class EmberTrialSelfTest {
     // ---------------------------------------------------------------- 冷え殻の時計・呑まれた
     private static void westCrust(ServerLevel level) {
         AshPath.clearMemory();
-        BlockPos spot = new BlockPos(-33, AshPath.LAVA_Y, 20);
+        BlockPos spot = new BlockPos(-33, AshPath.LAVA_Y, 18);
         int placed = AshPath.placeCrust(level, spot.getX(), spot.getZ());
         expect(placed == 9, "3 x 3 crust expected, got " + placed);
         BlockPos mid = spot;
@@ -654,7 +661,7 @@ public final class EmberTrialSelfTest {
         expect(AshUrnItem.charges(urn) == 5, "a new urn holds 5 scatters");
         expect(urn.getMaxStackSize() == 1, "urn stacks to 1");
         // 5 回まいて、6 回目は空。灰溜まりで満ちる
-        int[][] targets = {{-33, 20}, {-33, 24}, {-33, 28}, {-33, 32}, {-33, 36}};
+        int[][] targets = {{-33, 18}, {-39, 18}, {-45, 18}, {-51, 18}, {-57, 18}};
         for (int[] t : targets) {
             int got = throwAt(level, fp, t[0] + 2, t[1], t[0], t[1], urn);
             if (got == 0) {
@@ -667,7 +674,7 @@ public final class EmberTrialSelfTest {
         }
         expect(AshUrnItem.charges(urn) == 0, "urn should be empty after 5 scatters: " + AshUrnItem.charges(urn));
         int before = AshPath.crustCount();
-        expect(throwAt(level, fp, -31, 40, -33, 40, urn) == 0 && AshPath.crustCount() == before, "an empty urn must not scatter");
+        expect(throwAt(level, fp, -31, 18, -33, 18, urn) == 0 && AshPath.crustCount() == before, "an empty urn must not scatter");
         // 溶岩でない所 (島の床) に向けては何も起きない
         AshUrnItem.setCharges(urn, 5);
         BlockPos pud = AshPath.PATTERNS.get(AshPath.patternOf(level)).get(0).puddle();
@@ -682,11 +689,11 @@ public final class EmberTrialSelfTest {
         }
         // 島の上で壺を失った人 (休み場 w1 で目覚めた、落とした) には壺が戻る。入口の岸では戻らない
         fp.getInventory().clearContent();
-        fp.setPos(-24.5, AshPath.LAVA_Y + 1, 24.5);
+        fp.setPos(-43.5, AshPath.LAVA_Y + 1, 66.5);
         AshPath.rescueUrn(level, fp);
-        expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 1, "a player stranded on the w1 island without an urn got none");
+        expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 1, "a player stranded on the middle shore without an urn got none");
         fp.getInventory().clearContent();
-        fp.setPos(-24.5, AshPath.LAVA_Y + 1, -3.5);
+        fp.setPos(-43.5, AshPath.LAVA_Y + 1, -3.5);
         AshPath.rescueUrn(level, fp);
         expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 0, "the entry shore must hand out the urn only from the stand");
         AshPath.giveUrn(fp);
@@ -1043,7 +1050,7 @@ public final class EmberTrialSelfTest {
         for (int i = 0; i < HearthVents.VENTS.size(); i++) {
             sizes[HearthVents.groupOf(i)]++;
         }
-        expect(java.util.Arrays.equals(sizes, new int[] {3, 3, 2, 2}), "vent groups should be 3, 3, 2, 2: " + java.util.Arrays.toString(sizes));
+        expect(java.util.Arrays.equals(sizes, new int[] {4, 4, 4, 4}), "vent groups should be 4, 4, 4, 4: " + java.util.Arrays.toString(sizes));
         int maxAtOnce = 0;
         int minAtOnce = 99;
         for (int t = 0; t < HearthVents.CYCLE; t++) {
@@ -1058,7 +1065,7 @@ public final class EmberTrialSelfTest {
                 minAtOnce = Math.min(minAtOnce, bursting);
             }
         }
-        expect(maxAtOnce == 3 && minAtOnce == 2, "2 to 3 vents should burst at once: " + minAtOnce + ".." + maxAtOnce);
+        expect(maxAtOnce == 4 && minAtOnce == 4, "4 vents should burst at once: " + minAtOnce + ".." + maxAtOnce);
         for (int i = 0; i < HearthVents.VENTS.size(); i++) {
             int burst = 0;
             int warn = 0;

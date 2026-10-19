@@ -36,10 +36,10 @@ import net.minecraft.world.phys.Vec3;
 //   100 になると南の熾り石を鳴らせる (EmberBackTrials.markReady)。灰運びと蛾は消える
 // 火の強さはメモリだけに持つ (保存しない。リセットで 20)
 public final class Hearth {
-    // 火床の位置 (谷の奥、取っておく場所 (z 56〜62) の手前)。床 78 の上
-    public static final BlockPos HEARTH = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 28);
-    public static final BlockPos CARRIER_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 4);
-    public static final BlockPos MOTH_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 22, 18);
+    // 火床の位置 (谷の奥、取っておく場所 (z 56〜65) の手前)。床 83 の上
+    public static final BlockPos HEARTH = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 46);
+    public static final BlockPos CARRIER_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 8);
+    public static final BlockPos MOTH_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 22, 34);
     public static final String CARRIER_TAG = "skyabyss_hearth_carrier";
 
     public static final float START = 20f;
@@ -298,8 +298,8 @@ public final class Hearth {
             lastCarrier = now - 100000;
             lastMoths = now;
             if (!quiet) {
-                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -6.5, EmberBackLayout.FLOOR_SOUTH + 1, 14.5);
-                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 6.5, EmberBackLayout.FLOOR_SOUTH + 1, 20.5);
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -10.5, EmberBackLayout.FLOOR_SOUTH + 1, 20.5);
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 10.5, EmberBackLayout.FLOOR_SOUTH + 1, 32.5);
             }
         }
         // 静かな周: 灰運びは一体ずつ・ゆっくり (熾の元なので 0 にはしない)。蛾と燠虫は出ない

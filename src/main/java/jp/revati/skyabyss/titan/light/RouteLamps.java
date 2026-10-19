@@ -57,7 +57,10 @@ public final class RouteLamps {
                 || s.is(Blocks.PACKED_MUD) || s.is(Blocks.MUD_BRICKS) || s.is(Blocks.BRICKS) || s.is(Blocks.NETHER_BRICKS) || s.is(Blocks.ANDESITE)
                 || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.POLISHED_DIORITE)
                 || s.is(Blocks.WAXED_OXIDIZED_CUT_COPPER) || s.is(Blocks.WAXED_WEATHERED_CUT_COPPER) || s.is(Blocks.WAXED_OXIDIZED_COPPER) || s.is(Blocks.WAXED_CUT_COPPER)
-                || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.WHITE_TERRACOTTA) || s.is(Blocks.CUT_SANDSTONE) || s.is(Blocks.SMOOTH_QUARTZ) || s.is(Blocks.QUARTZ_PILLAR);
+                || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.WHITE_TERRACOTTA) || s.is(Blocks.CUT_SANDSTONE) || s.is(Blocks.SMOOTH_QUARTZ) || s.is(Blocks.QUARTZ_PILLAR)
+                || s.is(Blocks.RED_NETHER_BRICKS) || s.is(Blocks.NETHER_WART_BLOCK) || s.is(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS)
+                || s.is(Blocks.CHISELED_POLISHED_BLACKSTONE) || s.is(Blocks.RED_TERRACOTTA) || s.is(Blocks.LIGHT_GRAY_TERRACOTTA)
+                || s.is(Blocks.ORANGE_TERRACOTTA) || s.is(Blocks.BROWN_TERRACOTTA);
         return stone && s.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
     }
 
