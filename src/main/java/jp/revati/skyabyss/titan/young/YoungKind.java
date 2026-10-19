@@ -71,7 +71,7 @@ public enum YoungKind {
         return new double[] {s[0], seatY, s[1]};
     }
 
-    public Component name() {
+    public Component displayName() {
         return Component.translatable("entity.skyabyss." + model);
     }
 

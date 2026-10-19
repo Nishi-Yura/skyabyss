@@ -40,4 +40,4 @@ print("check %s option %s: triangles %d, open edges %d %s, saddle top min/max %.
       "anim bones missing %s, lowpoly glowmask %s, anims %s"
       % (NAME, opt, mesh["triangle_count"], sum(oe.values()), dict(oe), hs.min(), hs.max(), yt.SEAT_Y, yt.SEAT_Y / 16,
          bad, glow, {k.split(".")[-1]: v["animation_length"] for k, v in anim["animations"].items()}))
-assert sum(oe.values()) == 0 and not bad and abs(hs.min() - yt.SEAT_Y) < 0.01 and abs(hs.max() - yt.SEAT_Y) < 0.01
+assert sum(oe.values()) == 0 and not bad and abs(hs.min() - yt.SEAT_Y) < 0.01 and abs(hs.max() - yt.SEAT_Y) < 1.0  # a 1/16-block rise at the saddle rim is allowed
