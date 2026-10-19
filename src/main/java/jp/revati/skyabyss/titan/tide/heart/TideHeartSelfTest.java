@@ -195,8 +195,9 @@ public final class TideHeartSelfTest {
         check(TideHeartArena.sealed(back), "entrance not sealed when the fight starts", failures);
         check(heart.getTags().contains(TitanBackTrials.HEART_TAG) && heart.isBound(), "heart not tagged / bound", failures);
         check(GROUP_A.equals(heart.groupId()) && GROUP_A.equals(TideHeartBattle.owner()), "the heart is not group A's / the shell bottom is not held by A", failures);
-        // 人数の倍率: パーティは 6 人まで (1 + 0.6 × 5)
-        check(Math.abs(TideHeart.scaleFor(jp.revati.skyabyss.party.Parties.MAX_MEMBERS) - 4.0f) < 1e-4, "heart scale for 6 is wrong", failures);
+        // 人数の倍率: パーティは 6 人まで (基本の硬さ 1.58 × (1 + 0.85 × 5))。一人で挑むと硬さ 1.58
+        check(Math.abs(TideHeart.scaleFor(jp.revati.skyabyss.party.Parties.MAX_MEMBERS) - 1.58f * 5.25f) < 1e-3
+                && Math.abs(TideHeart.scaleFor(1) - TideHeart.BASE_RESIST) < 1e-4, "heart scale for 6 is wrong", failures);
         // A の心臓は B には見えず、B を狙わない
         net.neoforged.neoforge.common.util.FakePlayer b = net.neoforged.neoforge.common.util.FakePlayerFactory.get(back,
                 new com.mojang.authlib.GameProfile(GROUP_B, "[TideHeartB]"));
@@ -212,7 +213,7 @@ public final class TideHeartSelfTest {
         check(TideHeart.phaseFor(1f) == 0 && TideHeart.phaseFor(0.67f) == 0 && TideHeart.phaseFor(0.65f) == 1
                 && TideHeart.phaseFor(0.34f) == 1 && TideHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(TideHeart.takenFor(1, 10, 1) - 12f) < 1e-4 && Math.abs(TideHeart.takenFor(0, 10, 1) - 10f) < 1e-4
-                && Math.abs(TideHeart.takenFor(2, 16, TideHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", failures);
+                && Math.abs(TideHeart.takenFor(2, 1.58f * 1.85f * 10f, TideHeart.scaleFor(2)) - 10f) < 1e-3, "damage taken multipliers are wrong", failures);
         // 咆哮: 体力を 60% にすると、咆哮 (無敵) のあと段階 2
         heart.setHealth(heart.getMaxHealth() * 0.6f);
         tickHeart(heart, 3);
@@ -227,7 +228,8 @@ public final class TideHeartSelfTest {
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        check(Math.abs((h0 - heart.getHealth()) - 12f) < 0.6f, "open shell should take 1.2x (took " + (h0 - heart.getHealth()) + ")", failures);
+        float open = 12f / heart.toughness();
+        check(Math.abs((h0 - heart.getHealth()) - open) < 0.6f, "open shell should take 1.2x (took " + (h0 - heart.getHealth()) + ", want " + open + ")", failures);
         // 9 つの技が最後まで回る (人がいないので当たらない)
         int ran = 0;
         for (int phase = 0; phase < 3; phase++) {
@@ -244,6 +246,31 @@ public final class TideHeartSelfTest {
         }
         TideHeartArena.drainNow(back);
         notes.add(ran + "/9 moves ran to the end");
+        // 技の組が最後まで回る (段階 2・3 と最終段階の組)
+        int combos = 0;
+        List<TideHeart.Pair> pairs = new ArrayList<>(List.of(TideHeart.PAIRS_TWO));
+        pairs.addAll(List.of(TideHeart.PAIRS_THREE));
+        pairs.addAll(List.of(TideHeart.PAIRS_FURY));
+        heart.forcePhase(2);
+        for (TideHeart.Pair p : pairs) {
+            heart.forceCombo(p);
+            tickHeart(heart, 220);
+            if (heart.currentAction() == TideHeart.Action.NONE) {
+                combos++;
+            } else {
+                failures.add("combo " + p + " did not finish");
+            }
+        }
+        notes.add(combos + "/" + pairs.size() + " combos ran to the end");
+        // 最終段階: 3 秒の咆哮 (無敵) のあと、模型は段階 3 のまま憤怒に。大潮が最後まで回る
+        heart.forceEnrage();
+        tickHeart(heart, 3);
+        check(heart.isRoaring(), "no roar when entering the final phase", failures);
+        tickHeart(heart, TideHeart.ROAR_TICKS + 2);
+        check(heart.isEnraged() && heart.getPhase() == 2 && !heart.isRoaring(), "final phase did not start after the roar", failures);
+        heart.forceAction(TideHeart.Action.SPRING_TIDE);
+        tickHeart(heart, 200);
+        check(heart.currentAction() == TideHeart.Action.NONE, "spring tide did not finish", failures);
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
         heart.moveTo(0.5, TideHeartArena.FLOOR + 1, -12.5);
         TideHeartBattle.room(GROUP_A).tick(back, TideHeartBattle.HOST);
