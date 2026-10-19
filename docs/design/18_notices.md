@@ -97,8 +97,24 @@
 
 ### 6.1 ボスの技の名前（`BossAttackCue`）
 
-- 心臓・中ボス共通の部品（`client/titan/BossAttackCue`）。サーバーが技の始まりに送る名前と印（`show(印, 名前, 予告の長さ)`）を、設定 `bossAttackNames` に従って出す。今、技の名前を送っているのは雷翼の心臓（`StormHeartNetwork.Warn`）だけ。ほかの心臓・中ボスで名前を出すときも、この口に渡す。
+- 心臓・中ボス共通の部品（`client/titan/BossAttackCue`）。サーバーが技の始まりに送る名前と印（`show(印, 名前, 予告の長さ)`）を、設定 `bossAttackNames` に従って出す。技の名前を送るのは、**四つの心臓すべてと中ボス・番兵**。雷翼の心臓の主な技は従来どおり印つきの `StormHeartNetwork.Warn`（`gui.skyabyss.storm_heart.warn.<技>`）。それ以外は `combat/BossCue.send(ボス, ボスの鍵, 技の鍵, 予告の長さ)` が、ボスの近く（64 ブロック以内）の、そのボスが見える人（`GroupOwned.visibleTo`）へ送り、クライアントが `gui.skyabyss.attack.<ボスの鍵>.<技の鍵>`（印なし）を出す（`client/titan/BossCueClient`。`BossAttackCue.render` もここが毎フレーム呼ぶ）。名前の文は `assets/skyabyss_heartdomain/lang/`（ja_jp / en_us）。回り続けへの追い技（`lead` / `cutoff` / `chase`）と領域の決まり（`sea_wave` など）も同じ口。
 - SMALL（既定）: ボスバーの直下（`NoticeClient.lastBossBottom`）に中央揃えで一行。小さな印（8px）+ 名前、薄い暗い帯の上。予告の長さ（14〜40 tick）+ 10 tick で消え、出入りは淡く。続けて技が来たら下へ最大 3 行まで積み（古いほうから消える）、同じ名前は一行にまとめて延ばす。画面の中央・足もとには届かないので、床の予告をふさがない。
+| ボスの鍵 | 技の鍵 → 名前（ja） |
+|---|---|
+| `whale`（岩鯨の心臓） | thrust 殻の突き / sweep 石棘の掃射 / leap 跳躍の叩きつけ / crack 亀裂の爆発 / reclose 殻の再閉 / volley 骨の棘の投射 / beam 赤熱の光線 / chain 鎖の振り回し / shell_drop 殻の落下 / lead 石の先回り / cutoff 行く手の石壁 / chase 追い石の薙ぎ / sea_wave 石の波 / sea_spike 石棘の輪 |
+| `tide`（潮殻の心臓） | breath 潮の吐息 / shell_strike 殻打ち / whirl 渦潮 / flood 満ち潮と珊瑚の槍 / bubble 泡の牢 / pearl 真珠の脈 / ebb 引き潮 / moon_wave 月潮の大波 / pearl_rain 真珠の雨 / spring_tide 大潮 / lead 潮の先回り / cutoff 行く手の潮目 / chase 追い潮の薙ぎ / flood_rise 潮、満ちる / flood_ebb 潮、引く |
+| `storm`（雷翼の心臓） | 主な技は `storm_heart.warn.*`（招雷・風の刃・雷の鎖・羽ばたき・帯電の床・羽根の雨・閃光・雷の網・招雷の連打・雷翼の十字）。追加: lead 雷の先回り / cutoff 行く手の雷壁 / chase 追い雷の薙ぎ / cage_bars 雷の檻 ― 格子 / cage_cross 雷の檻 ― 斜めの格子 |
+| `ember`（余燼の心臓） | breath 火の息 / pulse 熱の脈 / orb 熔け玉 / floor 崩れる床 / gale 鞴の嵐 / pellet 灰の礫 / embers 残り火 / fading 消えかけの鼓動 / veil 灰の帳 / forge 炉打ち / lead 熾の先回り / cutoff 行く手の熱壁 / chase 追い熾の薙ぎ / core_rings 炉心の輪 / core_fans 炉心の扇 |
+| `captain`（鯨骨の番兵長） | sweep 骨の薙ぎ払い / leap 鎧の跳躍 / erupt 骨の噴出 / roar 番兵長の咆哮 |
+| `elder_sentinel`（老番兵） | rush 老番兵の突進 / stomp 老番兵の踏みしめ / flute 骨笛の呼び |
+| `elder_sentry`（老いた歩哨） | swing 歩哨の振りかぶり / rush 歩哨の突進 / horn 骨笛の合図 / stomp 歩哨の踏みしめ |
+| `pearl_keeper`（真珠守り） | updraft 昇り潮 / downdraft 押し潮 / charge 真珠守の突進 / volley 真珠の斉射 / shell 殻ごもり |
+| `tide_beckoner`（潮招き） | slam 打ち下ろし / beckon 潮の招き / breath 潮の吐息 / burrow 潜り / roar 潮招きの咆哮 |
+| `raiju`（雷獣） | rail 雷の走り / descend 雷獣の降下 / pounce 雷獣の飛びかかり / claw 雷の爪 / roar 雷獣の咆哮 / return 雷獣の跳び戻り |
+| `ash_smith`（灰の鍛え手） | slam 鎚の打ち下ろし / breath 炉の吐息 / quench 焼き入れ / sparks 火花の散らし / rage 鍛え手の怒り |
+
+組（二つの技が重なる）は、一つ目の名前を始めに、二つ目の名前を二つ目の予告が出る tick に出す。咆哮（段階の変わり目）・冷えなど常時の技は出さない。英語の名前は同じ lang の en_us。自己テスト `heart bots` が、技を出すたびに `BossCue` が送られること（領域の最中も）を数える。
+
 - FULL: 従来の大きな表示（上から 62px、印 24px、残りの帯）を一つだけ。
 - OFF: 出さない。F1 で隠れる。
 

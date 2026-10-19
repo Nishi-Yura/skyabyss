@@ -147,6 +147,7 @@
 
   キーは `cinematic.skyabyss.end.<巨神>.1`〜`.3`。
 - 場面のあと: 章の余韻の札（`ChapterCards.aftermath`。場面の間は預かる）と、次の章の引き（[18](18_notices.md) の 9 章）。四章は、そのあとに天の鍵が一つになる場面（`SkyKey`。巨神の背中にいる間・場面の最中は待つ）、`EmberAftermath` が続く。
+- 遺物の選択画面: 場面が終わる（最後まで・スキップ・打ち切り）と、`HeartReward` の聞き手が 50 tick あとに、心臓を初めて止めた人へ専用の画面を開かせる（[30](30_heart_reward_ui.md)）。場面のない降ろしは 110 tick あと。
 - コマンド: `/skyabyss cinematic play titan_end_<巨神>`（巨神の本体を狙う）。眠りの動きは `/skyabyss titan end <巨神> sleep` を一緒に流すと見られる。
 
 ## 4. 開発・確認

@@ -638,17 +638,9 @@ public final class TitanLoot {
         return line;
     }
 
-    // 初回クリアの選択報酬: 押すと /titanmemory choose が走る
+    // 初回クリアの選択報酬: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
     private static void offerChoice(ServerPlayer player) {
-        Notice.alert(player, "message.skyabyss.first_clear");
-        MutableComponent row = Component.literal("   ");
-        for (Item item : exclusives()) {
-            ItemStack stack = new ItemStack(item);
-            row.append(itemLink(stack).withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/titanmemory choose " + id(item)))))
-                    .append("  ");
-        }
-        player.sendSystemMessage(row);
-        player.sendSystemMessage(ModText.hint("message.skyabyss.first_clear_hint"));
+        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, STONE_WHALE);
     }
 
     // ---------------------------------------------------------------- コマンド
@@ -727,21 +719,12 @@ public final class TitanLoot {
 
     private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        TitanMemoryData.Record r = record(player);
         ResourceLocation choice = ResourceLocationArgument.getId(ctx, "item");
-        Item item = exclusives().stream().filter(i -> id(i).equals(choice.toString())).findFirst().orElse(null);
-        if (!r.choicePending || item == null) {
+        // 決まりは画面と同じ一箇所 (HeartReward.claim)
+        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, STONE_WHALE, choice.toString()) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
             Notice.warn(player, "message.skyabyss.first_clear_none");
             return 0;
         }
-        r.choicePending = false;
-        // 初回の贈り物は記憶のカウンタを戻さない (天井の進みはそのまま)
-        r.owned.add(id(item));
-        ItemStack gift = AffixRules.withAffixes(new ItemStack(item), player.getRandom());
-        int held = handOver(player.server, player.getUUID(), player, List.of(gift), 0);
-        player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        Notice.alert(player, "message.skyabyss.legendary_new", itemLink(gift));
-        tellHeld(player, held);
         return 1;
     }
 

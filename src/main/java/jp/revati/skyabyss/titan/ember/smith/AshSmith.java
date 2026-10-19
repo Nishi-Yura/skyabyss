@@ -435,6 +435,9 @@ public class AshSmith extends EmberMob {
     private void begin(ServerLevel server, Action a) {
         action = a;
         actionTick = 0;
+        if (a.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "ash_smith", a.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         stuck = 0;
         getNavigation().stop();
         switch (a) {

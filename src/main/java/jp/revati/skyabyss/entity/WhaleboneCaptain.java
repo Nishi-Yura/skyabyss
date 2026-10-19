@@ -173,6 +173,9 @@ public class WhaleboneCaptain extends GuardMob {
     private void begin(Action next, String animation) {
         action = next;
         actionTicks = 0;
+        if (next.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "captain", next.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         getNavigation().stop();
         playAction(animation);
     }

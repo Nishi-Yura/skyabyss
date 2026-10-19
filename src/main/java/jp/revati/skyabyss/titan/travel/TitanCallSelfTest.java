@@ -401,6 +401,22 @@ public final class TitanCallSelfTest {
         rest.wakeAt = Long.MAX_VALUE;
         check(TitanCalls.call(a, Titans.THUNDER_WING, false) == TitanCalls.Result.REFUSED, "a sleeping thunder wing (no wake time) answered", failures);
         TitanDormancy.clear(level.getServer(), Titans.THUNDER_WING);
+        // 別の巨神が近く (NEAR_TITAN_RANGE 以内) にいるあいだは呼べない。離れれば呼べる
+        discardAll(level, Titans.STONE_WHALE);
+        discardAll(level, Titans.EMBER);
+        TitanWorldData.Slot wslot = TitanWorldData.get(level).slot(Titans.STONE_WHALE);
+        wslot.spawned = true;
+        wslot.id = null;
+        Voyages.state(a).met.add(Titans.STONE_WHALE);
+        Voyages.state(a).met.add(Titans.EMBER);
+        StoneWhaleEntity whale = (StoneWhaleEntity) jp.revati.skyabyss.titan.travel.TitanKind.STONE_WHALE.respawn().spawn(level, spot.x + 60, spot.y + 40, spot.z);
+        TitanWorldData.Slot eslot = TitanWorldData.get(level).slot(Titans.EMBER);
+        eslot.spawned = true;
+        check(TitanCalls.nearTitan(level, a, Titans.EMBER) != null, "a whale 60 blocks away was not counted as near", failures);
+        check(TitanCalls.call(a, Titans.EMBER, false) == TitanCalls.Result.REFUSED, "an ember call near the whale was not refused", failures);
+        whale.setPos(spot.x + TitanCalls.NEAR_TITAN_RANGE + 40, spot.y + 40, spot.z);
+        check(TitanCalls.nearTitan(level, a, Titans.EMBER) == null, "a whale beyond the near range was counted as near", failures);
+        whale.discard();
     }
 
     private static void meetings(ServerLevel level, Vec3 spot, Vec3 tideSpot, List<String> failures) {

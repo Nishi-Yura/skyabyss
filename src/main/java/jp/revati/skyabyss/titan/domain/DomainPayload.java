@@ -1,0 +1,50 @@
+package jp.revati.skyabyss.titan.domain;
+
+import jp.revati.skyabyss.SkyAbyss;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+
+// サーバー -> クライアント: 領域の始まり・進み・終わり (HeartDomain)。画面の側は client/titan/domain/DomainClient。
+//  START   : a = 宣言の長さ tick、b = 領域の長さ tick。部屋の中心・床の高さ・半径つき
+//  PROGRESS: a = 砕く進み (0〜100 %)、b = 残りの tick
+//  END     : a = 1 なら砕かれた、0 なら時間切れ・心臓が倒れた
+public record DomainPayload(String id, int state, int a, int b, double cx, double cz, double floor, double radius) implements CustomPacketPayload {
+    public static final int START = 0;
+    public static final int PROGRESS = 1;
+    public static final int END = 2;
+
+    public static final Type<DomainPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "heart_domain"));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, DomainPayload> STREAM_CODEC = StreamCodec.of(
+            (buf, p) -> {
+                buf.writeUtf(p.id);
+                buf.writeVarInt(p.state);
+                buf.writeVarInt(p.a);
+                buf.writeVarInt(p.b);
+                buf.writeDouble(p.cx);
+                buf.writeDouble(p.cz);
+                buf.writeDouble(p.floor);
+                buf.writeDouble(p.radius);
+            },
+            buf -> new DomainPayload(buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(),
+                    buf.readDouble(), buf.readDouble()));
+
+    public static DomainPayload start(String id, int declare, int active, double cx, double cz, double floor, double radius) {
+        return new DomainPayload(id, START, declare, active, cx, cz, floor, radius);
+    }
+
+    public static DomainPayload progress(String id, int percent, int remaining) {
+        return new DomainPayload(id, PROGRESS, percent, remaining, 0, 0, 0, 0);
+    }
+
+    public static DomainPayload end(String id, boolean broken) {
+        return new DomainPayload(id, END, broken ? 1 : 0, 0, 0, 0, 0, 0);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}
