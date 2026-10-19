@@ -184,8 +184,9 @@ public final class ObjectiveStrip {
         QuestLog.Entry entry = log.entry(def.id());
         String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
         Resolved target = resolveQuest(def, entry);
-        // 巨神の背中の中で、今の目的が地上にあるとき (心臓を止めたあと・次の巨神を探すとき): 帯は戻り方を言う (帰り石。titan.end.ReturnBeacons)
-        if ((target.inside() || jp.revati.skyabyss.client.titan.BoardBeamClient.has("return_offer")) && mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
+        // 巨神の背中の中で、試練を越えて個人の「真ん中へ戻る光」が出ているあいだだけ、帯はその戻り方を言う (titan.end.ReturnBeacons)。
+        // 入ったばかりでは言わない (光が出ていないので)
+        if (jp.revati.skyabyss.client.titan.BoardBeamClient.has("return_offer") && mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
             text = Component.translatable("objective.skyabyss.back_return").getString();
             target = Resolved.NONE;
         }

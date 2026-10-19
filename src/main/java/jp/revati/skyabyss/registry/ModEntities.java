@@ -41,7 +41,7 @@ public final class ModEntities {
     // 地上へ垂れた鎖の、右クリックでつかめる部分
     public static final DeferredHolder<EntityType<?>, EntityType<WhaleChainEntity>> WHALE_CHAIN = ENTITIES.register("whale_chain",
             () -> EntityType.Builder.<WhaleChainEntity>of(WhaleChainEntity::new, MobCategory.MISC)
-                    .sized(1.6f, 10.0f)
+                    .sized(2.6f, 12.0f)
                     .clientTrackingRange(10)
                     .noSave()
                     .noSummon()
