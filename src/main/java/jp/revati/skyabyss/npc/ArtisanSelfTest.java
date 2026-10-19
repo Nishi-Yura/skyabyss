@@ -167,7 +167,7 @@ public final class ArtisanSelfTest {
         }
         check(f, java.util.Arrays.equals(pngSize(a + "textures/lowpoly/artisan.png", f), size), "the default artisan texture is not 256x256");
         for (String face : List.of("neutral", "smile", "grave")) {
-            check(f, java.util.Arrays.equals(pngSize(a + "textures/gui/npc/face/artisan_" + face + ".png", f), new int[] {80, 80}), "the artisan face " + face + " is not 80x80");
+            check(f, java.util.Arrays.equals(pngSize(a + "textures/gui/npc/face/artisan_" + face + ".png", f), new int[] {128, 128}), "the artisan face " + face + " is not 128x128");
         }
         // 防具 (鯨道の旅装 案 A): 4 部位のメッシュ・絵・光る画素・アイコン・モデル。骨は共通の geo の 8 本のうち
         Set<String> armorBones = Set.of("armorHead", "armorBody", "armorRightArm", "armorLeftArm", "armorRightLeg", "armorLeftLeg", "armorRightBoot", "armorLeftBoot");

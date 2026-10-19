@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """NPC の頭の上の印の絵 (16x24 のドット絵 5 つと、やわらかい光 1 つ) を書く。
 使い方: python tools/gen_npc_marker_icons.py
-出力: src/main/resources/assets/skyabyss/textures/gui/npc_marker/{bang_gold,bang_teal,question_gold,question_teal,chat,glow}.png
-形: 「!」新しい話・頼み、「?」報告、吹き出し = 新しい雑談。金 = メイン、青緑 = サブ。暗い縁取りと、左上の明るい縁・右下の影つき
+出力: src/main/resources/assets/skyabyss/textures/gui/npc_marker/{bang_gold,question_gold,scroll_teal,scroll_check_teal,chat,glow}.png
+形: メイン (金) は「!」新しい話、「?」報告。サブ (青緑) は「!」を使わず、巻物 = 新しい頼み、チェックの巻物 = 報告。吹き出し = 新しい雑談。暗い縁取りと、左上の明るい縁・右下の影つき
 """
 from pathlib import Path
 
@@ -20,6 +20,13 @@ QUESTION = [
     "..######..", ".########.", "###....###", "###....###", ".......###", "......###.", ".....###..", "....###...",
     "...###....", "...###....", "..........", "...###....", "...###....", "...###....",
 ]
+SCROLL = [
+    "..##########..", ".############.", ".############.", "..##########..", "...########...", "...########...", "...########...",
+    "...########...", "...########...", "...########...", "..##########..", ".############.", ".############.", "..##########..",
+]
+# 巻物の紙の上の文字の線 (列, 行) と、報告のチェック
+SCROLL_LINES = [(x, y) for y in (5, 7) for x in range(4, 10)]
+SCROLL_CHECK = [(4, 7), (5, 8), (6, 9), (7, 8), (8, 7), (9, 6)]
 CHAT = [
     "..##########..", ".############.", "##############", "##############", "##############", "##############", "##############",
     ".############.", "..####..#####.", "....###.......", "....##........", "....#.........",
@@ -74,9 +81,9 @@ def glow():
 
 OUT.mkdir(parents=True, exist_ok=True)
 icon(BANG, GOLD).save(OUT / "bang_gold.png")
-icon(BANG, TEAL).save(OUT / "bang_teal.png")
+icon(SCROLL, TEAL, SCROLL_LINES).save(OUT / "scroll_teal.png")
 icon(QUESTION, GOLD).save(OUT / "question_gold.png")
-icon(QUESTION, TEAL).save(OUT / "question_teal.png")
+icon(SCROLL, TEAL, SCROLL_CHECK).save(OUT / "scroll_check_teal.png")
 icon(CHAT, PALE, CHAT_DOTS).save(OUT / "chat.png")
 glow().save(OUT / "glow.png")
 print(OUT)

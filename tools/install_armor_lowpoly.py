@@ -14,6 +14,9 @@ import os
 import shutil
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import mesh_close  # noqa: E402  (書き出す前に水密にする)
+
 import numpy as np
 from PIL import Image
 
@@ -54,6 +57,7 @@ def main():
                 for b in d['bones'].values():
                     b.pop('triangle_count', None)
                 tris[(s, p, t)] = sum(len(b['triangles']) for b in d['bones'].values())
+                d, _ = mesh_close.close_mesh(d)
                 with open(os.path.join(mesh_dir, s, f'{p}{t}.json'), 'w', encoding='utf-8') as f:
                     json.dump(d, f, separators=(',', ':'))
                 n_mesh += 1

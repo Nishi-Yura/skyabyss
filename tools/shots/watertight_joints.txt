@@ -1,0 +1,138 @@
+# 関節をアニメの途中で止めて撮る (tools/mesh_close.py の前後の比べ用。docs/review/previews/watertight_sheet.png)。
+# ./gradlew runShots -Pscript=tools/shots/watertight_joints.txt -PshotsName=wt_after   (run/shots/<名前>/options.txt に soundCategory_master:0.0 を置くと無音)
+world shots flat
+size 960 720
+timeout 900
+render 8
+clouds off
+
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+
+# --- archer: shoot
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:rib_archer 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 2.6 -59.4 -2.2 330 10
+waitchunks
+wait 50
+camera minecraft:overworld 2.6 -59.4 -2.2 330 10
+wait 6
+cmd skyabyss dev anim @e[tag=m] shoot
+wait 8
+shot wt_archer_0_8
+wait 6
+shot wt_archer_0_14
+wait 60
+camera minecraft:overworld 2.4 -59.4 2.4 210 10
+wait 6
+cmd skyabyss dev anim @e[tag=m] shoot
+wait 8
+shot wt_archer_1_8
+wait 6
+shot wt_archer_1_14
+wait 60
+# --- smith: slam
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:ash_smith 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 4.2 -59.0 -3.4 320 8
+waitchunks
+wait 50
+camera minecraft:overworld 4.2 -59.0 -3.4 320 8
+wait 6
+cmd skyabyss dev anim @e[tag=m] slam
+wait 12
+shot wt_smith_0_12
+wait 8
+shot wt_smith_0_20
+wait 8
+shot wt_smith_0_28
+wait 60
+camera minecraft:overworld -4.2 -59.0 -3.4 40 8
+wait 6
+cmd skyabyss dev anim @e[tag=m] slam
+wait 12
+shot wt_smith_1_12
+wait 8
+shot wt_smith_1_20
+wait 8
+shot wt_smith_1_28
+wait 60
+# --- captain: slam
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:whalebone_captain 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 5.0 -59.0 -3.5 325 8
+waitchunks
+wait 50
+camera minecraft:overworld 5.0 -59.0 -3.5 325 8
+wait 6
+cmd skyabyss dev anim @e[tag=m] slam
+wait 6
+shot wt_captain_0_6
+wait 4
+shot wt_captain_0_10
+wait 4
+shot wt_captain_0_14
+wait 60
+# --- warden: attack
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:feather_warden 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 3.2 -59.2 -2.6 325 8
+waitchunks
+wait 50
+camera minecraft:overworld 3.2 -59.2 -2.6 325 8
+wait 6
+cmd skyabyss dev anim @e[tag=m] attack
+wait 5
+shot wt_warden_0_5
+wait 4
+shot wt_warden_0_9
+wait 4
+shot wt_warden_0_13
+wait 60
+camera minecraft:overworld -3.2 -59.2 -2.6 35 8
+wait 6
+cmd skyabyss dev anim @e[tag=m] attack
+wait 5
+shot wt_warden_1_5
+wait 4
+shot wt_warden_1_9
+wait 4
+shot wt_warden_1_13
+wait 60
+# --- raiju: claw
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:raiju 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 4.6 -59.2 -3.6 325 10
+waitchunks
+wait 50
+camera minecraft:overworld 4.6 -59.2 -3.6 325 10
+wait 6
+cmd skyabyss dev anim @e[tag=m] claw
+wait 8
+shot wt_raiju_0_8
+wait 6
+shot wt_raiju_0_14
+wait 6
+shot wt_raiju_0_20
+wait 60
+# --- beckoner: slam_raise
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd summon skyabyss:tide_beckoner 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["m"]}
+camera minecraft:overworld 4.0 -59.2 -3.2 325 10
+waitchunks
+wait 50
+camera minecraft:overworld 4.0 -59.2 -3.2 325 10
+wait 6
+cmd skyabyss dev anim @e[tag=m] slam_raise
+wait 8
+shot wt_beckoner_0_8
+wait 6
+shot wt_beckoner_0_14
+wait 6
+shot wt_beckoner_0_20
+wait 60
+quit

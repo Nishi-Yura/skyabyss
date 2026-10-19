@@ -26,6 +26,9 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 
 ## モデルの透けの検査と修理・心臓の演出
 
+- **水密性の検査 (`python tools/mesh_audit.py`)**: 低ポリのメッシュ (`assets/skyabyss/lowpoly/**`) を骨ごとに、開いた辺・向きの食い違い・逆法線・つぶれた三角形・裏面透け (外からの光線の最初の当たりが裏面)・親子の付け根 (埋まりが足りない・離れる。アニメの最大回転で曲げて見る) を数え、`docs/review/mesh_audit_report.md` に悪い順で書く。キューブの geo の透けとブロックモデルの欠けた面・宙に浮く部品も見る。**ゲートは `python tools/mesh_audit.py --check`** (数秒。開いた辺・向き違い・逆法線・ブロックの欠けが 1 つでもあれば終了コード 1。`--full` で裏面透け (全体の 0.2% 超で失敗)、`--joints` で付け根も失敗にする)。`--selftest` は検査器自身の自己テストと、入っている全メッシュの `--check`。
+- **水密にする (`python tools/mesh_close.py --all`)**: 生成スクリプトは見える面だけを書くので、書き出したメッシュは縁が開いている。`mesh_close.py` が、開いた縁の輪を蓋で塞ぎ (蓋は内側へ少し引っ込めた扇。貼りつく面と同じ平面で z が競らない)、向きの食い違い・逆法線を直し、子の骨の回転軸 (pivot) に玉 (`joint_ball`。回しても形が変わらず親子の継ぎ目を覆う。付けられない大きさなら `collar` で根元を親の中へ延ばす) を足す。`install_lowpoly*.py` ・`install_armor_lowpoly.py` ・`install_whale_road_assets.py` は書き出すときに自動で通す (書き出し直しても水密のまま)。巨神は蓋の頂点の始まり (`cap_vertex_start`) を JSON に残し、読み込み側 (`LowPolyMesh`) が蓋の面を暗く出す。ブロックモデルの外へ向いた欠け面は `python tools/fix_block_faces.py` が足す。
+- 直す前 / 直した後の接写の比べ表: `python tools/watertight_sheet.py` → `docs/review/previews/watertight_sheet.png` (関節をアニメの最大回転まで曲げ、裏面が見える所を紫で塗る)
 - `python tools/fix_geo_face_sides.py --check` : 全 geo の「透けて中が見える穴」を数える。`--apply --fill` で直す (面の左右の名前を GeckoLib に合わせ、元から抜けた面を塞ぐ。二度は直さない)。経緯は `docs/design/15_high_poly.md` の 5 章。書き出し直したら、そのあとにもう一度流す。見た目の比べは `tools/shots/geo_sides.txt`
 - `python tools/install_heart_cinematics.py` : 四つの心臓の登場 (intro) と倒れる (death) のアニメーションを各 `animation.json` に足す。`install_*_heart.py` で書き出し直したら、そのあとにもう一度流す。長さは `HeartBoss` の `INTRO_TICKS` `DEATH_TICKS` と合わせる
 

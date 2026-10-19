@@ -467,8 +467,6 @@ public final class OpeningDirector {
         public void giveNotebook() {
             // 帳面を拾う = 伝承の書を手に入れる (最初の頁「忘れないうちに書け」が記される)
             Lore.unlock(player, Lore.BOOK_ENTRY, true);
-            // 書の開き方 (持って右クリック) は、道具の説明文にしか無かった (first_hour の通しで見つけた穴)。その場で一度だけ手がかりを出す
-            Notice.hint(player, "opening.skyabyss.notebook_hint");
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.9f, 0.7f);
             level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.3, 0.3, 0.01);
         }

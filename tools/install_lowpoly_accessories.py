@@ -19,6 +19,10 @@ import shutil
 from pathlib import Path
 
 from PIL import Image
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mesh_close  # noqa: E402  (書き出す前に水密にする: tools/mesh_close.py)
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "docs/review/lowpoly_roughs/accessories_final"
@@ -66,6 +70,7 @@ def install_meshes():
             mesh = json.loads((src / f"{tier}_mesh.json").read_text(encoding="utf-8"))
             mesh["texture"] = f"items/{item}/{tier}_atlas"
             mesh.pop("glowmask", None)
+            mesh, _ = mesh_close.close_mesh(mesh)
             (mesh_dir / f"{tier}.json").write_text(json.dumps(mesh, separators=(",", ":")), encoding="utf-8")
             name = f"{tier}_atlas"
             shutil.copyfile(src / f"{tier}_atlas.png", tex_dir / (name + ".png"))

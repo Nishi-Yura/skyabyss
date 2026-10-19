@@ -13,8 +13,6 @@ import net.minecraft.network.chat.Component;
 // 光海の「灯 n / 3 …」の帯 (LampBand の受け口と描画)。左上の帯の、目的の帯の下に一行 (HudLayout の Id.LAMP)。
 // 届いてから 50 tick (約 2.5 秒) で消える (サーバーは 1 秒ごとに送り直す)
 public final class LampBandClient {
-    public static final int WIDTH = 230;
-    private static final int ROW = 14;
     private static final int LIFE = 50;
     private static Component text = Component.empty();
     private static long receivedAt = Long.MIN_VALUE;
@@ -22,8 +20,16 @@ public final class LampBandClient {
     private LampBandClient() {
     }
 
+    private static net.minecraft.world.phys.Vec3 way;
+
+    // 次に向かう中継点 (届いて 2.5 秒のあいだ。なければ null)。目的の標 (ObjectiveMarker) が使う
+    public static net.minecraft.world.phys.Vec3 waypoint() {
+        return visible(Minecraft.getInstance()) ? way : null;
+    }
+
     public static void receive(LampBand.Payload p) {
         text = p.text();
+        way = p.hasWay() ? new net.minecraft.world.phys.Vec3(p.x(), p.y(), p.z()) : null;
         Minecraft mc = Minecraft.getInstance();
         receivedAt = mc.level == null ? Long.MIN_VALUE : mc.level.getGameTime();
     }
@@ -34,14 +40,29 @@ public final class LampBandClient {
     }
 
     private static boolean visible(Minecraft mc) {
+        // 一度も届いていない (receivedAt が初期値) ときと、文が空のときは出さない (空の青緑の枠が出ていた)
         return mc.player != null && mc.level != null && !mc.options.hideGui && !mc.getDebugOverlay().showDebugScreen()
+                && receivedAt != Long.MIN_VALUE && !text.getString().isEmpty()
                 && mc.level.getGameTime() - receivedAt <= LIFE && mc.level.getGameTime() >= receivedAt;
     }
 
+    // 帯の幅は目的の帯と同じ (GUI 倍率が高い画面で伸びすぎない)。長い文は折り返して 3 行まで
     public static void requests(Minecraft mc, List<HudLayout.Request> out) {
-        if (visible(mc)) {
-            out.add(HudLayout.Request.of(HudLayout.Id.LAMP, HudLayout.Region.TOP_LEFT, WIDTH + 6, ROW - 2));
+        if (!visible(mc)) {
+            return;
         }
+        Font font = mc.font;
+        String full = text.getString();
+        int want = jp.revati.skyabyss.client.quest.ObjectiveStrip.bandWidth(mc);
+        out.add(HudLayout.Request.of(HudLayout.Id.LAMP, HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+            int w = Math.min(want, maxW - 6);
+            int n = Math.min(3, (maxH - 2) / 10);
+            if (n < 1 || w < 60) {
+                return null;
+            }
+            int lines = Math.min(n, jp.revati.skyabyss.lore.LoreWrap.wrap(full, w - 6, font::width).size());
+            return new HudLayout.Size(w + 6, lines * 10 + 2);
+        }));
     }
 
     public static void render(GuiGraphics g, DeltaTracker delta) {
@@ -53,10 +74,22 @@ public final class LampBandClient {
         Font font = mc.font;
         int x = rect.x() + 3;
         int y = rect.y() + 2;
+        int w = rect.w() - 6;
         boolean quiet = mc.screen != null || mc.player.hurtTime > 0;
         float a = quiet ? 0.45f : 1f;
-        g.fill(x - 3, y - 2, x + WIDTH + 3, y + ROW - 4, ((int) (0x50 * a)) << 24 | 0x0A0C10);
-        g.fill(x - 3, y - 2, x - 2, y + ROW - 4, ((int) (255 * a)) << 24 | 0x7FD6D0);
-        g.drawString(font, font.substrByWidth(text, WIDTH - 2).getString(), x + 1, y + 1, ((int) (255 * a)) << 24 | 0xE9E3D4, true);
+        List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap(text.getString(), w - 6, font::width));
+        int max = Math.max(1, (rect.h() - 2) / 10);
+        if (lines.size() > max) {
+            lines = new java.util.ArrayList<>(lines.subList(0, max));
+            lines.set(max - 1, font.plainSubstrByWidth(lines.get(max - 1), w - 6 - font.width("…")) + "…");
+        }
+        int bottom = y + lines.size() * 10 - 2;
+        g.fill(x - 3, y - 2, x + w + 3, bottom, ((int) (0x50 * a)) << 24 | 0x0A0C10);
+        g.fill(x - 3, y - 2, x - 2, bottom, ((int) (255 * a)) << 24 | 0x7FD6D0);
+        int ty = y + 1;
+        for (String line : lines) {
+            g.drawString(font, line, x + 1, ty, ((int) (255 * a)) << 24 | 0xE9E3D4, true);
+            ty += 10;
+        }
     }
 }
