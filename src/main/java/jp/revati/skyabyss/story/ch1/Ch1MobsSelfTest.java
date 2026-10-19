@@ -71,6 +71,7 @@ public final class Ch1MobsSelfTest {
         for (int cx = (SX >> 4) - 3; cx <= (SX >> 4) + 3; cx++) {
             for (int cz = (SZ >> 4) - 3; cz <= (SZ >> 4) + 3; cz++) {
                 level.setChunkForced(cx, cz, true);
+                level.getChunk(cx, cz); // 読み込みを待つ (負荷が高いと経路が引けない)
             }
         }
     }
@@ -415,7 +416,7 @@ public final class Ch1MobsSelfTest {
             double d0 = h.distanceTo(in);
             Outcome o = watch(level, h, 36, in);
             check(o.firstHurt() >= Telegraph.MIN_WARN_TICKS, "hare spine hurt after only " + o.firstHurt() + " ticks", f);
-            check(o.firstHurt() >= 0, "hare never shot", f);
+            check(o.firstHurt() >= 0, "hare never shot (target=" + h.getTarget() + " canAttack=" + h.canAttack(in) + " los=" + h.hasLineOfSight(in) + " ground=" + h.onGround() + " downed=" + jp.revati.skyabyss.party.Downed.isDowned(in) + " guarded=" + jp.revati.skyabyss.titan.group.ReentryRules.guarded(in) + ")", f);
             check(lost(in) >= 2.5f && lost(in) <= 3.5f, "hare spine damage " + lost(in), f);
             check(in.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "hare spine should slow", f);
             check(lost(off) == 0 && lost(behind) == 0 && lost(far) == 0, "hare spine hurt a player outside the line", f);
