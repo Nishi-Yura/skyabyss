@@ -79,6 +79,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     // 旧い説明: 潮門の敷居 geo y=9 が水面の 1 ブロック上。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
     public static final double REST_DRAFT = 11.0;
     public static final double REST_LEG_SKIP = -1.0;
+    // 休むとき、腹 (底の 7 ブロック) は海底へ沈めてよい。浅い所で腹が地形に押し上げられると甲羅が海面に浮いて見える。海底に腹をうずめて休む亀にする。
+    // 沈めてよいのは足・ひれを除いた腹だけで、上の体 (甲羅の縁・首・頭) は海底・岸・丘に触れない
+    public static final double REST_BURY = 7.0;
     public static final double CRUISE_DRAFT_MAX = 29.0;
     // 眠るときの沈み: 甲羅の頂が海から 2 ブロックだけ出る (珊瑚の段だけが水の上に残る)
     public static final double SLEEP_DRAFT = 32.0;
@@ -631,7 +634,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private void sampleAhead(ServerLevel level) {
         jp.revati.skyabyss.titan.solid.TitanVolume volume = jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName());
         groundAhead = Double.NEGATIVE_INFINITY;
-        if (mode != Mode.REST && getDeltaMovement().horizontalDistanceSqr() > 1.0e-4) {
+        // 休む場所の手前 60 ブロックからは、足・ひれと腹を海底へ沈めてよい (REST_BURY)。先読みは、その分を数えられないので、今の位置の下限 (sampleNow) に任せる
+        boolean settling = mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60;
+        if (mode != Mode.REST && !settling && getDeltaMovement().horizontalDistanceSqr() > 1.0e-4) {
             double cap = mode == Mode.APPROACH ? horizontalDistanceTo(restX, restZ) : Double.MAX_VALUE;
             double[] distances = java.util.Arrays.stream(GROUND_LOOK).filter(d -> d < cap).toArray();
             if (distances.length > 0) {
@@ -648,6 +653,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         groundNow = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
                 jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0,
                 settling ? REST_LEG_SKIP : Double.NEGATIVE_INFINITY);
+        if (settling && Double.isFinite(groundNow)) {
+            groundNow -= REST_BURY;
+        }
     }
 
     // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)

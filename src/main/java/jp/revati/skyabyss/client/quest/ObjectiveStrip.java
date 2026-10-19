@@ -252,8 +252,9 @@ public final class ObjectiveStrip {
         int textColor = ((int) (255 * a)) << 24 | 0xE9E3D4;
         String shown = "◆ " + text;
         int room = w - (far.isEmpty() ? 0 : font.width(far) + arrowRoom + 6);
-        while (font.width(shown) > room && shown.length() > 3) {
-            shown = shown.substring(0, shown.length() - 2) + "…";
+        if (font.width(shown) > room) {
+            // 幅で切る (1 文字ずつ削って、途中で欠けた「…」が重ならないように。字幅を測って収まる所まで)
+            shown = font.plainSubstrByWidth(shown, Math.max(10, room - font.width("…"))) + "…";
         }
         g.drawString(font, Component.literal(shown), x + 1, y + 1, textColor, true);
         lastShown = shown + (far.isEmpty() ? "" : "   [" + far + "]");

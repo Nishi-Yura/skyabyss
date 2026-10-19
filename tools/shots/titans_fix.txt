@@ -1,0 +1,65 @@
+# 亀・余燼・雷翼の試遊後の直しの確かめ。./gradlew runShots -Pscript=tools/shots/titans_fix.txt
+# 出力: run/shots/titans_fix/shots/titans_fix/*.png。python -I tools/titans_fix_sheet.py で一枚に組む
+world titans_fix flat
+size 1280 720
+timeout 1800
+render 12
+clouds off
+cmd skyabyss cinematic stop
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+camera minecraft:overworld 0 70 0 0 0
+waitchunks
+cmd fill -90 48 -100 90 48 111 minecraft:sand
+cmd fill -90 49 -100 90 62 -87 minecraft:water
+cmd fill -90 49 -86 90 62 -73 minecraft:water
+cmd fill -90 49 -72 90 62 -59 minecraft:water
+cmd fill -90 49 -58 90 62 -45 minecraft:water
+cmd fill -90 49 -44 90 62 -31 minecraft:water
+cmd fill -90 49 -30 90 62 -17 minecraft:water
+cmd fill -90 49 -16 90 62 -3 minecraft:water
+cmd fill -90 49 -2 90 62 11 minecraft:water
+cmd fill -90 49 12 90 62 25 minecraft:water
+cmd fill -90 49 26 90 62 39 minecraft:water
+cmd fill -90 49 40 90 62 53 minecraft:water
+cmd fill -90 49 54 90 62 67 minecraft:water
+cmd fill -90 49 68 90 62 81 minecraft:water
+cmd fill -90 49 82 90 62 95 minecraft:water
+cmd fill -90 49 96 90 62 109 minecraft:water
+cmd fill -90 49 110 90 62 111 minecraft:water
+wait 40
+cmd summon skyabyss:tide_shell 0 52 0 {Rotation:[0f,0f],Mode:2,ForcedTicks:999999}
+wait 120
+hud off
+camera minecraft:overworld 110 66 -10 90 6
+wait 40
+shot tide_low_in_water
+marker fake board tide_shell 51 62.9 -32 0
+wait 30
+camera minecraft:overworld 74 66.5 -32 90 10
+wait 30
+shot tide_doorway_front
+camera minecraft:overworld 60 80 -60 60 35
+wait 30
+shot tide_doorway_above
+marker clear
+cmd skyabyss embertrial build
+cmd skyabyss embertrial hearth 40
+hud on
+camera skyabyss:ember_back 0 82 -3 0 14
+waitchunks 900
+wait 80
+shot ember_valley_entrance
+camera skyabyss:ember_back 12 90 4 0 38
+wait 20
+cmd execute in skyabyss:ember_back run setblock 0 78 12 skyabyss:heat_vent[phase=2]
+cmd execute in skyabyss:ember_back run setblock 1 78 16 skyabyss:heat_vent[phase=1]
+wait 10
+shot ember_lane_vents
+hud off
+camera skyabyss:ember_back 0 84 33 180 22
+wait 20
+shot ember_hearth_end
+quit

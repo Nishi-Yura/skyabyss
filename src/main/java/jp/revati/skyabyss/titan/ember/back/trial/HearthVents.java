@@ -22,13 +22,15 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 噴気の割れ目 (13 の 4.3節): 谷の床の割れ目 10 本。20 秒で一周する決まった巡りで、2〜3 本ずつ噴く (4 組。5 秒おき)。
+// 噴気の割れ目 (13 の 4.3節): 谷の床の割れ目 10 本。16 秒で一周する決まった巡りで、2〜3 本ずつ噴く (4 組。4 秒おき)。
+// 噴気は「灰運びの道」を作る: 谷の入口から火床まで、低い壁に挟まれた幅 5 の道 (灰運びの道) が通り、その中に 5 本、両脇の人の通り道に 5 本ある。
+// 灰運びは道を歩いて火床へ行くので、噴いた噴気の上を通ると焼かれる (灰が燃え、火床の薪になる。Hearth.jetBurned)。道の脇の壁には 2 か所の隙があり、人が灰運びを誘い込める
 // 噴く 1.5 秒前に割れ目が白く光り、しゅうと鳴る (段階 1)。噴く 1.5 秒のあいだ (段階 2)、真上 5 ブロックが噴気になる。
 //   人: 熱 +25 (VENT)、6 の傷 (heat_burst)、少し上へ跳ねる。敵: 30 の傷 (灰被りの灰の殻は一度で割れる)。
 //   噴気一回につき一人 (一体) に一度だけ当たる
 public final class HearthVents {
-    public static final int CYCLE = 400;
-    public static final int GROUP_SPACING = 100;
+    public static final int CYCLE = 320;
+    public static final int GROUP_SPACING = 80;
     public static final int WARN_TICKS = 30;
     public static final int BURST_TICKS = 30;
     public static final float PLAYER_HEAT = 25f;
@@ -37,13 +39,19 @@ public final class HearthVents {
     public static final int HEIGHT = 5;
     public static final int GROUPS = 4;
 
-    // 割れ目の位置 (谷の床 y 78。真ん中の通り道と、両脇に)。組は番号 % 4
+    // 割れ目の位置 (谷の床 y 78)。組は番号 % 4。0〜4 番は灰運びの道 (x -1〜1) の中、5〜9 番は両脇の人の通り道
     public static final List<BlockPos> VENTS = List.of(
-            new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 16), new BlockPos(-5, EmberBackLayout.FLOOR_SOUTH, 20),
-            new BlockPos(5, EmberBackLayout.FLOOR_SOUTH, 24), new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 30),
-            new BlockPos(-6, EmberBackLayout.FLOOR_SOUTH, 34), new BlockPos(4, EmberBackLayout.FLOOR_SOUTH, 38),
-            new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 42), new BlockPos(-4, EmberBackLayout.FLOOR_SOUTH, 46),
-            new BlockPos(6, EmberBackLayout.FLOOR_SOUTH, 47), new BlockPos(5, EmberBackLayout.FLOOR_SOUTH, 49));
+            new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 8), new BlockPos(-1, EmberBackLayout.FLOOR_SOUTH, 12),
+            new BlockPos(1, EmberBackLayout.FLOOR_SOUTH, 16), new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 20),
+            new BlockPos(-1, EmberBackLayout.FLOOR_SOUTH, 24), new BlockPos(-6, EmberBackLayout.FLOOR_SOUTH, 10),
+            new BlockPos(6, EmberBackLayout.FLOOR_SOUTH, 14), new BlockPos(-6, EmberBackLayout.FLOOR_SOUTH, 18),
+            new BlockPos(6, EmberBackLayout.FLOOR_SOUTH, 22), new BlockPos(-5, EmberBackLayout.FLOOR_SOUTH, 26));
+    // 灰運びの道の壁 (x = ±3、z 6〜24、高さ 2)。隙は z 14〜15 の 2 か所 (両側)。HearthRoom が建てる
+    public static final int LANE_WALL_X = 3;
+    public static final int LANE_Z0 = 6;
+    public static final int LANE_Z1 = 24;
+    public static final int LANE_GAP_Z0 = 14;
+    public static final int LANE_GAP_Z1 = 15;
 
     public static class VentBlock extends Block {
         // 0 しずか、1 白く光る (噴く前)、2 噴いている
@@ -156,6 +164,11 @@ public final class HearthVents {
         } else {
             e.invulnerableTime = 0;
             e.hurt(EmberTrials.damage(level, EmberIds.HEAT_BURST, null), ENEMY_DAMAGE);
+            // 灰を運ぶ敵が焼かれたら、運んでいた灰が燃えて火床の薪になる (灰はもうかけられない)
+            if (e.getTags().contains(Hearth.CARRIER_TAG)) {
+                e.removeTag(Hearth.CARRIER_TAG);
+                Hearth.jetBurned(level, e);
+            }
         }
     }
 }
