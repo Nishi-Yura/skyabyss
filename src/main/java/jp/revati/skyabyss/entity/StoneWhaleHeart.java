@@ -486,8 +486,18 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 試験・コマンド用: 技を一つ出す (段階に関係なく)。咆哮は段階が進む
     public void forceAttack(String name) {
+        // "PAIR_n": 技の組 (0 亀裂 + 投射、1 光線 + 落下、2 鎖 + 投射、3 跳躍 + 落下)
+        if (name.toUpperCase().startsWith("PAIR_")) {
+            pair = ALL_PAIRS[Integer.parseInt(name.substring(5))];
+            begin(Action.COMBO, null);
+            return;
+        }
         begin(Action.valueOf(name.toUpperCase()), null);
     }
+
+    // 試験用: 組の一覧 (技の名前の組と、遅れ・長さの確認に使う)
+    public static final int PAIR_KINDS = 4;
+    private static final Pair[] ALL_PAIRS = {PAIRS_TWO[0], PAIRS_THREE[0], PAIRS_THREE[1], PAIRS_FURY[2]};
 
     // 試験用: 次の技を始めない (forceAttack で出した技だけを見たいとき)
     public void holdAttacks() {
