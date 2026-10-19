@@ -161,6 +161,7 @@ public final class VowSelfTest {
                 Mob other = TideMobSetup.CORAL_THRALL.get().create(back);
                 check(f, thrall instanceof jp.revati.skyabyss.titan.group.GroupOwned && other != null, "could not make group-owned test mobs");
                 if (thrall instanceof jp.revati.skyabyss.titan.group.GroupOwned go1 && other instanceof jp.revati.skyabyss.titan.group.GroupOwned go2) {
+                    jp.revati.skyabyss.util.SpawnSafety.testFloor(back, at, 3, 1); // 床のない所には敵が湧かない決まり (SpawnSafety)
                     made.add(thrall);
                     made.add(other);
                     thrall.moveTo(at.getX() + 2, at.getY(), at.getZ(), 0, 0);

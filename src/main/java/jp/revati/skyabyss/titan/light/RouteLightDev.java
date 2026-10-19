@@ -29,7 +29,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-// 開発用: 歩く道の灯りの場所を選ぶ。/skyabyss dev routelight <tide|storm|ember>
+// 開発用: 歩く道の灯りの場所を選ぶ。/skyabyss dev routelight <whale|tide|storm|ember>
 // 建てた背の道 (BackReach の到達点) の光度を測り、光度 4 未満の所の近くの石を灯りのブロック (RouteLamps.lampOf) に置き換える。
 // 光の計算を待って (80 tick) 測り直し、暗い所が無くなるまで (最大 10 回) 繰り返す。灯りどうしは 5 マス以上あける (所々に影を残す)。
 // 終わると全部の灯りの場所を、サーバーのフォルダの route_lamps_<名前>.json に書く (data/skyabyss/<名前>_back/route_lamps.json へ写す)
@@ -56,6 +56,7 @@ public final class RouteLightDev {
                 .then(Commands.literal("dev").then(Commands.literal("routelight").then(Commands.argument("titan", StringArgumentType.word()).executes(ctx -> {
                     String n = StringArgumentType.getString(ctx, "titan");
                     ResourceKey<Level> key = switch (n) {
+                        case "whale" -> jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK;
                         case "tide" -> TideTravel.TIDE_BACK;
                         case "storm" -> StormTravel.STORM_BACK;
                         case "ember" -> EmberIds.BACK;
@@ -71,6 +72,7 @@ public final class RouteLightDev {
                     name = n;
                     level = lv;
                     box = switch (n) {
+                        case "whale" -> BuildAuditSelfTest.WHALE_BOX;
                         case "tide" -> BuildAuditSelfTest.TIDE_BOX;
                         case "storm" -> BuildAuditSelfTest.STORM_BOX;
                         default -> BuildAuditSelfTest.EMBER_BOX;
@@ -101,7 +103,7 @@ public final class RouteLightDev {
             LongIterator it = reach.reached.iterator();
             while (it.hasNext()) {
                 BlockPos p = BlockPos.of(it.nextLong());
-                if (!box.contains(p)) {
+                if (!box.contains(p) || jp.revati.skyabyss.titan.audit.BuildAuditExtra.mazeDark(name, p)) {
                     continue;
                 }
                 cells++;

@@ -55,7 +55,7 @@ import net.minecraft.world.level.material.FluidState;
 //  FLUID_LEAK       水・溶岩の源の横・下が空気で、流れ出す (水槽・溶岩の池が漏れる)
 //  SIGN_OVERFLOW    看板の行が 90 px を超える、または 4 行を超える
 //  LIGHT_DARK       歩ける所 (route) で明るさ 0〜2 のかたまり (monsters が湧く暗さ)
-final class BuildAuditExtra {
+public final class BuildAuditExtra {
     private BuildAuditExtra() {
     }
 
@@ -411,13 +411,27 @@ final class BuildAuditExtra {
 
     // ---------------------------------------------------------------- 歩ける所 (route) の暗さ
     // route: BackReach.Report.reached (立つ位置の long)。4x4x4 のかたまりごとに 1 件
+    // 岩鯨の下の迷路 (光の台の遊びのため、暗いのが設計) の中の立ち位置か。暗さの数えから外す (数は灯りの台の点き具合で動くので)
+    public static boolean mazeDark(String st, BlockPos p) {
+        if (!st.equals("whale")) {
+            return false;
+        }
+        int x0 = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_X0;
+        int z0 = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_Z0;
+        int y0 = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_FLOOR;
+        int span = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_CELL + 1;
+        return p.getX() >= x0 && p.getX() <= x0 + jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_W * span
+                && p.getZ() >= z0 && p.getZ() <= z0 + jp.revati.skyabyss.titan.dungeon.TitanBackLayout.MAZE_H * span
+                && p.getY() >= y0 && p.getY() <= y0 + 3;
+    }
+
     static void light(Grid g, LongOpenHashSet route, BackReach.Box box, String st, Report out) {
         java.util.Map<Long, int[]> cells = new java.util.LinkedHashMap<>();
         List<BlockPos> first = new ArrayList<>();
         LongIterator it = route.iterator();
         while (it.hasNext()) {
             BlockPos p = BlockPos.of(it.nextLong());
-            if (!box.contains(p)) {
+            if (!box.contains(p) || mazeDark(st, p)) {
                 continue;
             }
             int l = g.light(p);

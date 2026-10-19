@@ -118,7 +118,8 @@ public final class TideHeartArena {
         return back.getBlockState(new BlockPos(CX, FLOOR - 1, CZ)).is(Blocks.CHISELED_TUFF_BRICKS)
                 && back.getBlockState(new BlockPos(CX, CEILING - 2, CZ)).isAir()
                 && back.getBlockState(new BlockPos(CX, FLOOR, CZ + EXIT_Z + 1)).isAir()
-                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + ISLAND_OFFSET)).is(Blocks.SEA_LANTERN);
+                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + ISLAND_OFFSET)).is(Blocks.SEA_LANTERN)
+                && back.getBlockState(new BlockPos(CX + ISLAND_OFFSET - 2, FLOOR, CZ + ISLAND_OFFSET)).is(Blocks.MOSSY_COBBLESTONE_STAIRS);
     }
 
     public static void ensureBuilt(ServerLevel back) {
@@ -204,6 +205,17 @@ public final class TideHeartArena {
         for (int sx = -1; sx <= 1; sx += 2) {
             for (int sz = -1; sz <= 1; sz += 2) {
                 back.setBlock(new BlockPos(CX + sx * ISLAND_OFFSET, FLOOR + ISLAND_HEIGHT - 1, CZ + sz * ISLAND_OFFSET), lamp, flags);
+            }
+        }
+        // 島の段: 島は床から 2 段高く、跳んでは上がれないので、島の中心の側 (部屋の中心へ向く二辺) に苔の石の階段を 1 段置く (仕掛けの水門まで歩いて届く)
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                BlockState stairX = Blocks.MOSSY_COBBLESTONE_STAIRS.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.StairBlock.FACING, sx > 0 ? net.minecraft.core.Direction.EAST : net.minecraft.core.Direction.WEST);
+                BlockState stairZ = Blocks.MOSSY_COBBLESTONE_STAIRS.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.StairBlock.FACING, sz > 0 ? net.minecraft.core.Direction.SOUTH : net.minecraft.core.Direction.NORTH);
+                back.setBlock(new BlockPos(CX + sx * (ISLAND_OFFSET - 2), FLOOR, CZ + sz * ISLAND_OFFSET), stairX, flags);
+                back.setBlock(new BlockPos(CX + sx * ISLAND_OFFSET, FLOOR, CZ + sz * (ISLAND_OFFSET - 2)), stairZ, flags);
             }
         }
         // 溝の下は砂岩 (水の底が抜けないように)

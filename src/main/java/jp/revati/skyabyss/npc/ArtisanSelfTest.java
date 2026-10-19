@@ -127,7 +127,7 @@ public final class ArtisanSelfTest {
             tris += e.getValue().getAsJsonObject().getAsJsonArray("triangles").size();
         }
         check(f, meshBones.equals(Set.of("root", "body", "head", "armL", "armR", "legL", "legR")), "the artisan mesh bones are " + meshBones);
-        check(f, tris == 740 && tris <= 800, "the artisan mesh has " + tris + " triangles (want 740, at most 800)");
+        check(f, tris == 1058 && tris <= 1200, "the artisan mesh has " + tris + " triangles (want 1058 after closing the mesh, at most 1200)"); // 740 → 1058: watertight pass (docs/design/15)
         Set<String> geoBones = new HashSet<>();
         JsonArray bones = geo.has("minecraft:geometry") ? geo.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones") : new JsonArray();
         for (JsonElement e : bones) {
@@ -186,7 +186,7 @@ public final class ArtisanSelfTest {
             check(f, java.util.Arrays.equals(pngSize(a + "textures/item/whale_road_" + piece + ".png", f), new int[] {32, 32}), "the " + piece + " icon is not 32x32");
             check(f, json(a + "models/item/whale_road_" + piece + ".json", f).has("textures"), "the " + piece + " item model is missing");
         }
-        check(f, armorTris == 418, "the whale road armor has " + armorTris + " triangles (want 418)");
+        check(f, armorTris == 600, "the whale road armor has " + armorTris + " triangles (want 600 after closing the meshes)"); // 418 → 600: watertight pass (docs/design/15)
         // 旅の覚書・鼓動守の絵 (案 A に差し替え済み。仮の絵ではない)
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/wayfarer_notes.png", f), new int[] {32, 32}), "the notes icon is not 32x32");
         check(f, java.util.Arrays.equals(pngSize(a + "textures/item/heartbeat_ward.png", f), new int[] {32, 32}), "the heartbeat ward icon is not 32x32");

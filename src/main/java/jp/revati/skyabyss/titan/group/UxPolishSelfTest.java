@@ -79,6 +79,9 @@ public final class UxPolishSelfTest {
         FakePlayer p = player(back, "ux_respawn");
         p.setPos(40.5, 100, 40.5);
         back.getChunk(new BlockPos(40, 100, 40));
+        // 床のない所には敵が湧かない決まり (SpawnSafety) なので、敵を置く所に床を敷く
+        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(40, 100, 40), 5, 1);
+        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(60, 100, 40), 1, 1);
         Zombie chaser = EntityType.ZOMBIE.create(back);
         Zombie near = null;
         Zombie far = null;

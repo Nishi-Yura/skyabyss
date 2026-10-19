@@ -401,15 +401,16 @@ public abstract class HeartDomain {
         }
     }
 
-    // 位置を、箱が壁に入らない近くの床へ寄せる (水平 ±2 の中で、体の箱が空いていて足もとが立てるいちばん近い所)
+    // 位置を、箱が壁に入らない近くの床へ寄せる (水平 ±3・上 +2 の中で、叩ける当たりの箱 (幅 1.4・高さ 2.2。spawnBox と同じ) が空いていて足もとが立てるいちばん近い所)。
+    // 柱・肋骨のそばに置かれた箱が壁に食い込まないように、箱は叩ける当たりと同じ大きさで調べる
     protected Vec3 snap(ServerLevel level, Vec3 want) {
         double bestD = Double.MAX_VALUE;
         Vec3 best = want;
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
                 for (int dy = 0; dy <= 2; dy++) {
                     Vec3 p = new Vec3(want.x + dx, want.y + dy, want.z + dz);
-                    AABB box = new AABB(p.x - 0.5, p.y, p.z - 0.5, p.x + 0.5, p.y + 2.0, p.z + 0.5);
+                    AABB box = new AABB(p.x - 0.7, p.y, p.z - 0.7, p.x + 0.7, p.y + 2.2, p.z + 0.7);
                     if (!level.noCollision(box)) {
                         continue;
                     }

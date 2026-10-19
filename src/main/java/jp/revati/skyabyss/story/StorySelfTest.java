@@ -131,7 +131,8 @@ public final class StorySelfTest {
         talk(p, wc, "ms_c_tide", f);
         check(stage(p, "main_tide").equals("rumor"), "isana topics: the rumor finished before the topic page", f);
         DialogueService.choose(p, "ms_c_tide", DialogueService.CONTINUE);
-        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide"), f);
+        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide")
+                + " (node " + node(p) + ", heard " + QuestLog.of(p).heard("main_tide", WC, "ms_c_tide2") + ", npc alive " + wc.isAlive() + ")", f);
         DialogueService.close(p);
 
         // 余燼: 同じ。保存して読み直しても (ログイン) 聞いた記録は残る
