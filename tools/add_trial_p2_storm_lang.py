@@ -86,14 +86,14 @@ STORM_ENTRIES = {
     "message.skyabyss.storm.room.d_s10": ("羽守の見張り台: 守りを倒すと風の穴が目覚める。穴で浮いて、滑空で次の台へ", "Warden Watch: beating the guards wakes the wind vent. Rise on it and glide to the next post"),
     "message.skyabyss.storm.room.d_s09": ("雷乞いの巣: 柱の近くの雷の輪は柱が受ける。三度受けた柱は放電する", "Caller's Nest: rods catch nearby rings. A rod that caught three will discharge"),
     # ---- 目的の帯
-    "objective.skyabyss.trial_storm_deck_hall": ("広間の南の出口から、試練の渡り場へ向かおう", "Take the south exit of the hall toward the Trial Landing"),
-    "objective.skyabyss.trial_storm_deck_turret": ("尾の間の北西の螺旋を上って、背の広場へ出よう", "Climb the northwest spiral of the tail hall to the back plaza"),
-    "objective.skyabyss.trial_storm_deck_bridge": ("背の広場の南の橋を渡って、試練の渡り場へ行こう", "Cross the south bridge of the back plaza to the Trial Landing"),
-    "objective.skyabyss.trial_storm_deck_gate": ("渡り場の、開いている戸から試練へ入ろう", "Enter the trial through the open door of the Landing"),
-    "objective.skyabyss.trial_storm_deck_s02": ("光る気嚢に立って浮き、滑空で次の島へ渡ろう", "Rise on a lit sac and glide to the next island"),
-    "objective.skyabyss.trial_storm_deck_s03": ("橙の床を避けて、次の柱へ渡ろう", "Avoid the orange tiles and cross to the next pillar"),
+    "objective.skyabyss.trial_storm_deck_hall": ("広間の南の出口から、試練の渡り場へ向かおう", "Leave the hall by its south exit"),
+    "objective.skyabyss.trial_storm_deck_turret": ("尾の間の北西の螺旋を上って、背の広場へ出よう", "Climb the tail hall spiral to the plaza"),
+    "objective.skyabyss.trial_storm_deck_bridge": ("背の広場の南の橋を渡って、試練の渡り場へ行こう", "Cross the south bridge of the plaza"),
+    "objective.skyabyss.trial_storm_deck_gate": ("渡り場の、開いている戸から試練へ入ろう", "Enter through an open door"),
+    "objective.skyabyss.trial_storm_deck_s02": ("光る気嚢に立って浮き、滑空で次の島へ渡ろう", "Rise on a lit sac, glide on"),
+    "objective.skyabyss.trial_storm_deck_s03": ("橙の床を避けて、次の柱へ渡ろう", "Dodge the orange, cross the pillars"),
     "objective.skyabyss.trial_storm_deck_s09": ("巣の真ん中へ進もう", "Advance to the middle of the nest"),
-    "objective.skyabyss.trial_storm_deck_s10_vent": ("目覚めた風の穴で浮いて、次の台へ滑空しよう", "Rise on the awakened vent and glide to the next post"),
+    "objective.skyabyss.trial_storm_deck_s10_vent": ("目覚めた風の穴で浮いて、次の台へ滑空しよう", "Ride the vent to the next post"),
     "objective.skyabyss.trial_storm_deck_s10_guard": ("台の守りを全部倒そう", "Defeat all the guards of this post"),
     "objective.skyabyss.trial_storm_deck_stone": ("石を鳴らそう", "Ring the stone"),
 }
@@ -116,7 +116,7 @@ SIGNS.update(sign("storm_d_s03_start", ["雷は柱を", "前へ走る", "落ち�
 SIGNS.update(sign("storm_d_s03_mid", ["ここから雷は", "向こうから来る", "橙の形も広がる", "金の床へ"], ["From here it", "runs at you.", "Shapes widen:", "stand on gold."]))
 SIGNS.update(sign("storm_d_s10", ["羽守の見張り台", "台ごとに守り", "倒すと風の穴", "が目覚める"], ["Warden Watch", "Posts have", "guards. Clear", "to wake vents."]))
 SIGNS.update(sign("storm_d_s10_start", ["灰色の穴は", "眠っている", "守りを倒すと", "光って運ぶ"], ["A gray vent", "sleeps. Beat", "the guards to", "wake and ride."]))
-SIGNS.update(sign("storm_d_s10_mid", ["後ろの台ほど", "守りは厚い", "雷蛾と雷乞い", "も加わる"], ["Later posts", "have more guards", "moths and", "callers."]))
+SIGNS.update(sign("storm_d_s10_mid", ["後ろの台ほど", "守りは厚い", "雷蛾と雷乞い", "も加わる"], ["Later posts", "hold more", "guards, plus", "moths, callers"]))
 SIGNS.update(sign("storm_d_s09", ["雷乞いの巣", "柱が雷を受ける", "三度で放電", "敵も巻き込め"], ["Caller's Nest", "Rods catch rings.", "Three hits and", "they discharge."]))
 SIGNS.update(sign("storm_d_s09_start", ["柱のそばでは", "雷の輪は柱へ", "電球が三つで", "放電する"], ["Stand by a rod:", "rings go to it.", "Three bulbs and", "it blasts."]))
 SIGNS.update(sign("storm_d_s09_arena", ["放電は敵にも", "大きく当たる", "満ちた柱へ", "敵を誘え"], ["The blast hurts", "foes far more.", "Lure them to", "a full rod."]))

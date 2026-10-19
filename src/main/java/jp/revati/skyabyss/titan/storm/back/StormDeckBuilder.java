@@ -134,6 +134,13 @@ final class StormDeckBuilder {
         }
     }
 
+    // 下へ下げる灯り: 銅の柱が from から to まで、下の 3 マスは海のランタン
+    private static void underLamp(StormKit kit, int x, int z, int from, int to) {
+        for (int y = from; y >= to; y--) {
+            kit.put(x, y, z, y <= to + 2 ? StormKit.LAMP : StormKit.COPPER);
+        }
+    }
+
     // 碑の台の代わり: 立てた碑 (床の 1 上)
     private static void signs(StormKit kit) {
         for (Inscription i : SIGNS) {
@@ -274,9 +281,10 @@ final class StormDeckBuilder {
         gateFrame(kit, S10_GATE, false);
         gateFrame(kit, S09_GATE, false);
         // 下: 逆さの羽の錐 (島の下)
-        for (int d = 1; d <= 8; d++) {
-            int hx = 24 - d * 2;
-            int hz = 9 - d;
+        // 羽軸の道 (床 147〜155、頭上 5) の上を通すので、深さは 3 まで (y 159 より上)
+        for (int d = 1; d <= 3; d++) {
+            int hx = 24 - d * 3;
+            int hz = 9 - d * 2;
             if (hx < 0 || hz < 0) {
                 break;
             }
@@ -285,6 +293,15 @@ final class StormDeckBuilder {
                     kit.put(x, Y - d, z, featherUnder(new int[] {d, x, z}));
                 }
             }
+        }
+        // 下の灯り: 渡り場の下は羽軸の道と尾羽の背 (歩ける所)。空が見えないので、銅の柱に海のランタンを下げる (建築の監査の暗さ)
+        for (int x : new int[] {-16, -9, 9, 16}) {
+            for (int z : new int[] {67, 79}) {
+                underLamp(kit, x, z, Y - 4, Math.max(StormBirdBuilder.top(x, z) + 3, Y - 15));
+            }
+        }
+        for (int x : new int[] {-19, 19}) {
+            underLamp(kit, x, 73, Y - 4, Math.max(StormBirdBuilder.top(x, 73) + 3, Y - 15));
         }
         // 灯りの柱: 四隅と、橋の口・戸のそば
         for (int x : new int[] {-24, 24}) {
@@ -451,6 +468,12 @@ final class StormDeckBuilder {
             }
         }
         hang(kit, a.cx(), a.cz(), Y, a.size(), 13, 0, StormDeckBuilder::slateUnder);
+        // 錐の先に灯り (下の尾羽の背が暗くならないように)
+        for (int[] d : new int[][] {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+            kit.put(a.cx() + d[0], Y - 12, a.cz() + d[1], StormKit.LAMP);
+        }
+        kit.put(a.cx(), Y - 13, a.cz(), StormKit.LAMP);
+        kit.put(a.cx(), Y - 14, a.cz(), StormKit.LAMP);
         // 避雷の柱 6 本 (根元 = 床の 1 上)
         for (BlockPos base : s09Rods()) {
             StormBirdBuilder.rod(kit, base, 0);
@@ -497,6 +520,10 @@ final class StormDeckBuilder {
             // 北と南の手すり (東と西は開けて、風の穴から飛べる)
             for (int x = is.x1(); x <= is.x2(); x++) {
                 for (int z : new int[] {is.z1(), is.z2()}) {
+                    // 始めの台の北の縁は、戸の道の幅だけ手すりをあける
+                    if (i == 0 && z == is.z1() && x >= -18 && x <= -12) {
+                        continue;
+                    }
                     kit.put(x, Y + 1, z, RAIL);
                 }
             }

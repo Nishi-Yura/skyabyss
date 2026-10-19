@@ -178,7 +178,9 @@ public final class StormBuildScan {
                         && minY >= StormBackLayout.BONE_FLOOR && maxY <= StormBackLayout.RIB_TOP_Y + 4;
                 m.set(xOf(first), yOf(first), zOf(first));
                 String name = level.getBlockState(m).getBlock().getDescriptionId().replace("block.minecraft.", "");
-                if (inRibHall) {
+                // 試練の甲板の空に浮かぶ島 (StormDeck。設計どおり浮かべた気嚢・柱・台・巣。橋と渡り場は背の広場につながる)
+                boolean skyIsland = StormDeck.placed() && minY >= StormDeck.Y - 16 && maxY <= StormDeck.Y + 8 && minZ >= 60 && maxZ <= 135 && minX >= -160 && maxX <= 160;
+                if (inRibHall || skyIsland) {
                     designFloating += size;
                     continue;
                 }
@@ -245,6 +247,6 @@ public final class StormBuildScan {
         for (String s : out) {
             SkyAbyss.LOGGER.warn("STORM SCAN {}", s);
         }
-        SkyAbyss.LOGGER.info("SELFTEST storm scan: floating {} (rib hall design pieces {} excluded) buried {} in {} ms", floating, designFloating, buried, System.currentTimeMillis() - t0);
+        SkyAbyss.LOGGER.info("SELFTEST storm scan: floating {} (rib hall and deck sky-island design pieces {} excluded) buried {} in {} ms", floating, designFloating, buried, System.currentTimeMillis() - t0);
     }
 }
