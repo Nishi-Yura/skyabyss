@@ -91,10 +91,109 @@ public final class TitanBodyBlocks {
                     runs[i] = r;
                 }
             }
-            return new Data(x0, y0, z0, nx, ny, nz, palette, shell, runs);
+            Data data = new Data(x0, y0, z0, nx, ny, nz, palette, shell, runs);
+            int[] fixed = tidy(data);
+            if (fixed[0] + fixed[1] > 0) {
+                SkyAbyss.LOGGER.info("titan body {}: removed {} stray voxels, filled {} one-block pits (建築の監査 FLOAT_BLOCK / FLOOR_DIMPLE)", resource, fixed[0], fixed[1]);
+            }
+            return data;
         } catch (IOException e) {
             throw new IllegalStateException("could not read " + resource, e);
         }
+    }
+
+    // 体の中の palette 番号 (無ければ -1)
+    private static int cell(Data d, int a, int c, int j) {
+        if (a < 0 || c < 0 || a >= d.nx || c >= d.nz || j < 0 || j >= d.ny) {
+            return -1;
+        }
+        short[] r = d.runs[a * d.nz + c];
+        for (int k = 0; k < r.length; k += 3) {
+            if (j >= r[k] && j < r[k] + r[k + 1]) {
+                return r[k + 2];
+            }
+        }
+        return -1;
+    }
+
+    // モデルの格子から焼いた表の、1 ブロックの傷を直す (建築の監査 BuildAudit):
+    //  (1) まわり 26 マスに何も無い、宙に浮いた 1 ブロックを消す
+    //  (2) 上が空いた床の 1 マスだけが、四方より 1 低いくぼみ (1 つ低く埋まったブロック) を、同じブロックを 1 つ重ねて平らにする
+    // 戻り値は {消した数, 埋めた数}
+    private static int[] tidy(Data d) {
+        int stray = 0;
+        for (int a = 0; a < d.nx; a++) {
+            for (int c = 0; c < d.nz; c++) {
+                short[] r = d.runs[a * d.nz + c];
+                for (int k = 0; k < r.length; k += 3) {
+                    if (r[k + 1] != 1 || d.palette[r[k + 2]].isAir()) {
+                        continue;
+                    }
+                    int j = r[k];
+                    boolean alone = true;
+                    for (int da = -1; da <= 1 && alone; da++) {
+                        for (int dc = -1; dc <= 1 && alone; dc++) {
+                            for (int dj = -1; dj <= 1; dj++) {
+                                if ((da | dc | dj) != 0 && cell(d, a + da, c + dc, j + dj) >= 0) {
+                                    alone = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (alone) {
+                        short[] n = new short[r.length - 3];
+                        System.arraycopy(r, 0, n, 0, k);
+                        System.arraycopy(r, k + 3, n, k, r.length - k - 3);
+                        d.runs[a * d.nz + c] = n;
+                        stray++;
+                        break;
+                    }
+                }
+            }
+        }
+        java.util.List<int[]> pits = new java.util.ArrayList<>();
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int a = 0; a < d.nx; a++) {
+            for (int c = 0; c < d.nz; c++) {
+                short[] r = d.runs[a * d.nz + c];
+                if (r.length == 0) {
+                    continue;
+                }
+                int j = r[r.length - 3] + r[r.length - 2] - 1;
+                if (j + 5 >= d.ny || d.palette[r[r.length - 1]].isAir() || d.palette[r[r.length - 1]].getFluidState().isEmpty() == false) {
+                    continue;
+                }
+                boolean pit = true;
+                for (int[] dd : dirs) {
+                    if (cell(d, a + dd[0], c + dd[1], j + 1) < 0 || d.palette[cell(d, a + dd[0], c + dd[1], j + 1)].isAir()) {
+                        pit = false;
+                        break;
+                    }
+                    for (int up = 2; up <= 4; up++) {
+                        if (cell(d, a + dd[0], c + dd[1], j + up) >= 0) {
+                            pit = false;
+                            break;
+                        }
+                    }
+                    if (!pit) {
+                        break;
+                    }
+                }
+                if (pit) {
+                    pits.add(new int[] {a, c, j, r[r.length - 1]});
+                }
+            }
+        }
+        for (int[] p : pits) {
+            short[] r = d.runs[p[0] * d.nz + p[1]];
+            short[] n = java.util.Arrays.copyOf(r, r.length + 3);
+            n[r.length] = (short) (p[2] + 1);
+            n[r.length + 1] = 1;
+            n[r.length + 2] = (short) p[3];
+            d.runs[p[0] * d.nz + p[1]] = n;
+        }
+        return new int[] {stray, pits.size()};
     }
 
     public int minX() {

@@ -447,6 +447,39 @@ public final class SiteJob {
         cellIndex = 0;
     }
 
+    // 足跡の雨水を張った所 (finish で、横にこぼれる水を取り除く)
+    private final it.unimi.dsi.fastutil.longs.LongOpenHashSet puddles = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+
+    // 張った雨水のうち、横・下が空気 (隣の水が条件を満たさず張られなかった所) で流れ出すものを、止まるまで消す (水の条件は隣へ伝わらないため)
+    private void trimLeakingPuddles() {
+        if (puddles.isEmpty()) {
+            return;
+        }
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        boolean changed = true;
+        int removed = 0;
+        for (int guard = 0; changed && guard < 64; guard++) {
+            changed = false;
+            for (long l : puddles.toLongArray()) {
+                BlockPos at = BlockPos.of(l);
+                if (!level.getBlockState(at).is(Blocks.WATER)) {
+                    continue;
+                }
+                for (net.minecraft.core.Direction d : new net.minecraft.core.Direction[] {net.minecraft.core.Direction.DOWN, net.minecraft.core.Direction.NORTH,
+                        net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.SOUTH, net.minecraft.core.Direction.WEST}) {
+                    BlockState n = level.getBlockState(q.set(at).move(d));
+                    if (n.isAir() || (n.getFluidState().isEmpty() && n.canBeReplaced())) {
+                        level.setBlock(at, AIR, FLAGS);
+                        changed = true;
+                        removed++;
+                        break;
+                    }
+                }
+            }
+        }
+        SkyAbyss.LOGGER.info("Opening site {}: puddle cells {}, trimmed {} that would leak sideways", label, puddles.size(), removed);
+    }
+
     // ---------------------------------------------------------------- 地面に沿って掘る・盛る (大きな足跡)。g はその列の地面の高さ (上面)
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
 
@@ -463,6 +496,7 @@ public final class SiteJob {
                 placedCount++;
                 if (r[5] == 1 && waterOk(x, z, g, a)) {
                     set(p.set(x, g - a + 1, z), Blocks.WATER.defaultBlockState());
+                    puddles.add(BlockPos.asLong(x, g - a + 1, z));
                 }
             }
             case 1 -> {
@@ -582,6 +616,111 @@ public final class SiteJob {
         phase = Phase.FINISH;
     }
 
+    // 掘った所の隣にあった自然の水 (浜・池の縁) が、掘った穴へ流れ出さないように、水の源の横・下の空気を足もとの石 (無ければ土) で埋める
+    private void sealShoreWater() {
+        if (rect == null) {
+            return;
+        }
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        int sealed = 0;
+        for (int pass = 0; pass < 3; pass++) {
+            int before = sealed;
+            for (int x = rect[0] - 1; x <= rect[2] + 1; x++) {
+                for (int z = rect[1] - 1; z <= rect[3] + 1; z++) {
+                    for (int y = origin.getY() + 2; y >= origin.getY() - 10; y--) {
+                        p.set(x, y, z);
+                        BlockState s = level.getBlockState(p);
+                        if (!s.getFluidState().isSource() || !s.is(Blocks.WATER)) {
+                            continue;
+                        }
+                        for (net.minecraft.core.Direction d : new net.minecraft.core.Direction[] {net.minecraft.core.Direction.DOWN, net.minecraft.core.Direction.NORTH,
+                                net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.SOUTH, net.minecraft.core.Direction.WEST}) {
+                            q.set(p).move(d);
+                            BlockState n = level.getBlockState(q);
+                            if (n.isAir() || (n.getFluidState().isEmpty() && n.canBeReplaced())) {
+                                BlockState under = level.getBlockState(q.below());
+                                level.setBlock(q, under.isSolidRender(level, q.below()) && !under.getBlock().hasDynamicShape() ? under : Blocks.DIRT.defaultBlockState(), FLAGS);
+                                sealed++;
+                            }
+                        }
+                    }
+                }
+            }
+            if (sealed == before) {
+                break;
+            }
+        }
+        if (sealed > 0) {
+            SkyAbyss.LOGGER.info("Opening site {}: sealed {} air cells beside natural water", label, sealed);
+        }
+    }
+
+    // 建てたブロックのうち、まわり 26 マスに固いブロックが何も無い (地形の凹凸で取り残された) 宙に浮いた 1 個を消す。載っていた薄い飾り (カーペットなど) も一緒に消す
+    private void pruneStrayBlocks() {
+        BlockPos.MutableBlockPos q = new BlockPos.MutableBlockPos();
+        int removed = 0;
+        int before;
+        int pass = 0;
+        do {
+            before = removed;
+            removed += pruneStrayPass(q);
+        } while (removed > before && ++pass < 4);
+        if (removed > 0) {
+            SkyAbyss.LOGGER.info("Opening site {}: removed {} stray floating blocks", label, removed);
+        }
+    }
+
+    private int pruneStrayPass(BlockPos.MutableBlockPos q) {
+        int removed = 0;
+        for (BlockPos at : placed) {
+            BlockState s = level.getBlockState(at);
+            if (s.getCollisionShape(level, at).isEmpty() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS)) {
+                continue;
+            }
+            boolean alone = true;
+            for (int dx = -1; dx <= 1 && alone; dx++) {
+                for (int dy = -1; dy <= 1 && alone; dy++) {
+                    for (int dz = -1; dz <= 1; dz++) {
+                        if ((dx | dy | dz) != 0 && !level.getBlockState(q.set(at.getX() + dx, at.getY() + dy, at.getZ() + dz)).getCollisionShape(level, q).isEmpty()) {
+                            alone = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (alone) {
+                level.setBlock(at, AIR, FLAGS);
+                BlockState up = level.getBlockState(at.above());
+                if (up.getCollisionShape(level, at.above()).isEmpty() && !up.isAir() && up.getFluidState().isEmpty() && up.is(Blocks.MOSS_CARPET)) {
+                    level.setBlock(at.above(), AIR, FLAGS);
+                }
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    // ならした範囲の、支えを失ったつる (木や葉を片づけたあとに宙にぶら下がる) を消す。上から順に調べるので、ぶら下がった列は全部消える
+    private void pruneOrphanVines() {
+        if (rect == null) {
+            return;
+        }
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        int top = Math.min(level.getMaxBuildHeight() - 1, origin.getY() + Math.max(bp.maxY, 3) + 26);
+        for (int x = rect[0] - 1; x <= rect[2] + 1; x++) {
+            for (int z = rect[1] - 1; z <= rect[3] + 1; z++) {
+                for (int y = top; y >= origin.getY() - 2; y--) {
+                    p.set(x, y, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.is(Blocks.VINE) && !s.canSurvive(level, p)) {
+                        level.setBlock(p, Blocks.AIR.defaultBlockState(), FLAGS);
+                    }
+                }
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- FINISH
     private void finish() {
         // つながる物 (柵・板ガラス・石垣・階段) の形を、まわりに合わせる
@@ -595,6 +734,10 @@ public final class SiteJob {
                 }
             }
         }
+        trimLeakingPuddles();
+        sealShoreWater();
+        pruneOrphanVines();
+        pruneStrayBlocks();
         post.finish(this);
         // 場所の高さを実際の地面に合わせる (立つ場所 = 上面 + 1)
         entry.pos = new BlockPos(origin.getX(), origin.getY() + 1, origin.getZ());
