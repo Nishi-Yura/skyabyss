@@ -42,6 +42,8 @@ public final class TideIslandBuilder {
         cave(kit);
         upper(kit);
         hub(kit);
+        BreathBuilder.chamber(kit);
+        BreathBuilder.arena(kit);
         ramp(kit);
         garden(kit);
         eastRoom(kit);
@@ -51,6 +53,7 @@ public final class TideIslandBuilder {
         skin(kit);
         topStair(kit);
         tower(kit);
+        BreathBuilder.observatory(kit);
         lightWells(kit);
         fixtures(kit);
         fillWells(kit);
@@ -322,16 +325,16 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        // 月の窓: 天井の穴 (中心 (0, MOON_CZ)) から、甲羅と頂の塔の中を抜けて、塔の柱の段の床 (TOWER_DECK) まで縦穴。
-        // 柱の段の床はガラス (上から広間が見え、落ちない)。日と月の光は塔の屋根のガラスから、まっすぐ広間の水盤まで落ちる
+        // 月の窓: 天井の穴 (中心 (0, MOON_CZ)) から、甲羅の中を息の間の底 (気室 A のガラスの床 y 97) の下まで縦穴。
+        // その上は息の間 (BreathBuilder.chamber) が掘る。ガラスの床と水たまりを通して、日と月の光が広間の水盤まで落ちる
         for (int x = -MOON_R - 1; x <= MOON_R + 1; x++) {
             for (int z = MOON_CZ - MOON_R - 1; z <= MOON_CZ + MOON_R + 1; z++) {
                 double r = Math.hypot(x, z - MOON_CZ);
-                for (int y = HUB_CEILING; y <= TOWER_DECK; y++) {
+                for (int y = HUB_CEILING; y < BreathLayout.POOL_FLOOR; y++) {
                     if (r <= MOON_R + 0.5) {
-                        kit.set(x, y, z, y == TOWER_DECK ? Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState() : TideKit.AIR);
+                        kit.set(x, y, z, TideKit.AIR);
                     } else if (r <= MOON_R + 1.5) {
-                        kit.set(x, y, z, y % 6 == 0 && y < TOWER_DECK ? TideKit.LAMP : TideKit.DARK);
+                        kit.set(x, y, z, y % 6 == 0 ? TideKit.LAMP : TideKit.DARK);
                     }
                 }
             }
@@ -1197,9 +1200,9 @@ public final class TideIslandBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 封じた予約の間 (上の三つの台地の中。08 の 3.8節)
-    // 中は空の部屋だけ。入口は西の崖の封印の戸 (開かない) で、将来の巨神の内容を足すための空き。
-    // 部屋の床は台地の地面の高さ (101・114・126)。階段は 1 段ずつ、どの段の上も 3 マス空いている
+    // ---------------------------------------------------------------- 予約の間 1〜3 (上の三つの台地の中。08 の 3.8節)
+    // 部屋と入口の廊下だけをここで掘る。真ん中は息の間 (BreathBuilder.chamber) が円く掘り抜いて一つの気室にする。
+    // 入口は西の崖 (x -49) の戸口。戸はない (いつも開いている)。階段もない (昇りは気室の皿と風の運び)
     private static void upper(TideKit kit) {
         for (Area a : UPPER_ROOMS) {
             kit.room(a, TideKit.FLOOR);
@@ -1210,48 +1213,20 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        // 入口の廊下 (x -48〜-33、z -1〜1、高さ 4) と、崖の前の窪み (x -51〜-50)。戸は廊下の西の端
+        // 入口の廊下 (x -48〜-33、z -1〜1、高さ 4) と、崖の前の窪み (x -51〜-50)。戸口は廊下の西の端 (x -49)
         int gx = UPPER_GATE_X;
         kit.room(gx + 1, UPPER_HALL_X2, UPPER_GATE_Z - 1, UPPER_GATE_Z + 1, UPPER_1.floor(), 4, TideKit.FLOOR);
-        for (int x = gx - 2; x <= gx - 1; x++) {
+        for (int x = gx - 2; x <= gx; x++) {
             for (int z = UPPER_GATE_Z - 1; z <= UPPER_GATE_Z + 1; z++) {
                 for (int y = UPPER_1.floor() + 1; y <= UPPER_1.floor() + 4; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
             }
         }
-        for (int z = UPPER_GATE_Z - 1; z <= UPPER_GATE_Z + 1; z++) {
-            for (int y = UPPER_1.floor() + 1; y <= UPPER_1.floor() + 3; y++) {
-                kit.set(gx, y, z, ModBlocks.SEALED_GATE.get().defaultBlockState());
-            }
-            kit.set(gx, UPPER_1.floor() + 4, z, TideKit.DARK);
-        }
-        // 階段 1: UPPER_1 の床 → UPPER_2 の床 (登る向き +z)
-        for (int k = 1; k <= 12; k++) {
-            int z = UPPER_STAIR12_Z0 + k - 1;
-            int y = UPPER_1.floor() + k;
-            for (int x = UPPER_STAIR12_X; x <= UPPER_STAIR12_X + 2; x++) {
-                for (int yy = UPPER_1.floor() + 1; yy < y; yy++) {
-                    kit.set(x, yy, z, TideKit.BRICK);
-                }
-                kit.stair(x, y, z, Direction.SOUTH, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
-                for (int yy = y + 1; yy <= y + 3; yy++) {
-                    kit.set(x, yy, z, TideKit.AIR);
-                }
-            }
-        }
-        // 階段 2: UPPER_2 の床 → UPPER_3 の床 (登る向き +x)
-        for (int k = 1; k <= 11; k++) {
-            int x = UPPER_STAIR23_X0 + k;
-            int y = UPPER_2.floor() + k;
-            for (int z = UPPER_STAIR23_Z; z <= UPPER_STAIR23_Z + 2; z++) {
-                for (int yy = UPPER_2.floor() + 1; yy < y; yy++) {
-                    kit.set(x, yy, z, TideKit.BRICK);
-                }
-                kit.stair(x, y, z, Direction.EAST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
-                for (int yy = y + 1; yy <= y + 3; yy++) {
-                    kit.set(x, yy, z, TideKit.AIR);
-                }
+        // 戸口の枠 (光る石の柱)
+        for (int z : new int[] {UPPER_GATE_Z - 2, UPPER_GATE_Z + 2}) {
+            for (int y = UPPER_1.floor() + 1; y <= UPPER_1.floor() + 4; y++) {
+                kit.set(gx, y, z, y == UPPER_1.floor() + 2 ? TideKit.LAMP : TideKit.NACRE);
             }
         }
     }
@@ -1329,7 +1304,9 @@ public final class TideIslandBuilder {
             // 潮見の間: 栓の色の読み方 (入口の隣)・戻しの栓の上。広間: 三つの試練の一言ずつ (どこへ行って何をするか)
             new Inscription("sign.skyabyss.tide_watch_color", new BlockPos(26, HUB_LEDGE + 2, -14), Direction.SOUTH),
             new Inscription("sign.skyabyss.tide_watch_reset", new BlockPos(24, HUB_LEDGE + 3, -8), Direction.EAST),
-            new Inscription("sign.skyabyss.tide_hub_guide", new BlockPos(-6, HUB_LEDGE + 2, 12), Direction.NORTH));
+            new Inscription("sign.skyabyss.tide_hub_guide", new BlockPos(-6, HUB_LEDGE + 2, 12), Direction.NORTH),
+            // 息の間の入口の廊下 (どの試練も、条件なしで入れる。昇り方の一言)
+            new Inscription("sign.skyabyss.tide_breath", new BlockPos(-40, UPPER_1.floor() + 2, -1), Direction.SOUTH));
 
     private static void fixtures(TideKit kit) {
         for (Rest r : RESTS) {

@@ -46,6 +46,11 @@ public final class TideBackSetup {
             () -> EntityType.Builder.of(TideBeckoner::new, MobCategory.MONSTER).sized(4.0f, 3.0f).eyeHeight(2.4f)
                     .clientTrackingRange(10).fireImmune().build(SkyAbyss.MODID + ":tide_beckoner"));
 
+    // 中ボス 真珠守り (大きな真珠を抱いて渦巻きの殻に籠もる、大きな宿借り。息の間の頂)
+    public static final DeferredHolder<EntityType<?>, EntityType<PearlKeeper>> PEARL_KEEPER = ENTITIES.register("pearl_keeper",
+            () -> EntityType.Builder.of(PearlKeeper::new, MobCategory.MONSTER).sized(3.0f, 3.4f).eyeHeight(2.6f)
+                    .clientTrackingRange(10).fireImmune().build(SkyAbyss.MODID + ":pearl_keeper"));
+
     // ---------------------------------------------------------------- 音 (tools/gen_tide_back_assets.py、独自合成)
     public static final DeferredHolder<SoundEvent, SoundEvent> HORN_LOW = sound("tide_horn_low");
     public static final DeferredHolder<SoundEvent, SoundEvent> HORN_HIGH = sound("tide_horn_high");
@@ -87,6 +92,7 @@ public final class TideBackSetup {
     private static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(REEF_NEST.get(), ReefNest.createAttributes().build());
         event.put(TIDE_BECKONER.get(), TideBeckoner.createAttributes().build());
+        event.put(PEARL_KEEPER.get(), PearlKeeper.createAttributes().build());
     }
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {

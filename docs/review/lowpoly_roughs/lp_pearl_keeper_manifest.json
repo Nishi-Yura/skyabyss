@@ -1,0 +1,24 @@
+{
+  "id": "lp_pearl_keeper",
+  "short": "真珠守り 低ポリ",
+  "kind": "低ポリ 3案",
+  "title": "真珠守り (pearl_keeper) — 低ポリ非立方体 + ドット絵 3 案 (潮殻の背・息の間の頂の名づき)",
+  "sheets": [
+    "lowpoly_roughs/lp_pearl_keeper.png"
+  ],
+  "extra": "24 の 5 章 (案 C「息の間」) の山頂の番。大きな宿借りが貝殻に籠もり、息を吐く技 (吹き上げ・吹き下ろし) を使う。骨 14 本は 3 案で共通で、アニメ 12 本 (idle・walk・hurt・death・emerge・updraft・downdraft・charge・volley・shell_in・shelled・shell_out) がどの案でも動く。三角形 (全身): A 1347 / B 1483 / C 1279 (上限 約 1,500)。アトラス 512×512。光る画素は真珠 (弱点) が主。メッシュは lowpoly_roughs/lp_pearl_keeper/{a,b,c}/pearl_keeper_{a,b,c}_mesh.json (+ atlas・glowmask)。生成: tools/rough/lowpoly/pearl_keeper/sheet.py。取り込み: python tools/install_lowpoly_pearl_keeper.py [a|b|c]。",
+  "options": {
+    "a": {
+      "name": "A 螺旋の宿",
+      "desc": "真珠層の白い巻貝 (青緑の螺旋の帯、鮑のような息の穴の列) を背負う珊瑚色の宿借り。殻の肩の花びらの台に大きな真珠。右の大きいはさみ。いちばん「宿借り」らしい。"
+    },
+    "b": {
+      "name": "B 畝の塔",
+      "desc": "細く高い塔の巻貝 (青緑に白い畝と棘) を立てて背負う、脚の長い深い青の宿借り。真珠は殻の正面の白い肋の籠に埋まる。縦に高く、遠くから塔で見分けがつく。"
+    },
+    "c": {
+      "name": "C 珊瑚の兜",
+      "desc": "低く広い円い殻 (青緑の石灰に真珠層の螺旋の筋) に珊瑚の林が生え、頂の開いた二枚貝に真珠。下から白い宿借りが覗き、平たい盾のはさみで顔を守る。横に広く重い。"
+    }
+  }
+}
