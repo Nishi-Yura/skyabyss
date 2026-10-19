@@ -42,5 +42,9 @@
   "item.skyabyss.heartbeat_ward_stone_whale.story": "\"I kept one beat back, for you.\"",
   "item.skyabyss.heartbeat_ward_tide_shell.story": "\"Even the ebb turns back, once.\"",
   "item.skyabyss.heartbeat_ward_thunder_wing.story": "\"Lightning will hesitate, now and then, before it falls.\"",
-  "item.skyabyss.heartbeat_ward_ember.story": "\"Under the ash, one breath of fire always stays.\""
+  "item.skyabyss.heartbeat_ward_ember.story": "\"Under the ash, one breath of fire always stays.\"",
+  "item.skyabyss.whale_road_helmet.story": "\"A cap learns the rain before it learns the sky.\"",
+  "item.skyabyss.whale_road_chestplate.story": "\"The shell on the shoulder has taken someone else's rain.\"",
+  "item.skyabyss.whale_road_leggings.story": "\"The hem wears thin by the count of roads walked.\"",
+  "item.skyabyss.whale_road_boots.story": "\"A sole remembers the stones of the road.\""
 }

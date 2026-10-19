@@ -5,7 +5,7 @@
 
 書くもの:
   data/skyabyss/quest/ch1/prep_gear|prep_blade|prep_pulse.json   備えの頼み 3 本 (07 の 6.8 の型)
-  data/skyabyss/dialogue/ch1/storyteller_prep.json               語り部の入口 3 つ (職人 P4 が入るまでの代用。TODO は story/ch1/Ch1Prep)
+  data/skyabyss/dialogue/ch1/storyteller_prep.json               語り部の一言 1 つ (荷車の職人を指す。頼みの会話は職人 = tools/gen_artisan_dialogue.py)
   data/skyabyss/dialogue/ch1/whale_chaser_prep.json              イサナの備えの一言 3 つ
   data/skyabyss/lore/entry/ch1/road_cairns|song_chamber|cleft_cave.json
   assets/skyabyss_ch1/lang/{ja_jp,en_us}.json  文 (既存のキーに混ぜる。キー順)
@@ -20,13 +20,19 @@ import zlib
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, 'src', 'main', 'resources')
 
-# 職人 (P4) が入ったら、ここを 'skyabyss:artisan' にして、会話を dialogue/ch1/artisan.json へ移す
-GIVER = 'skyabyss:storyteller'
+# 依頼主は旅の職人 (P4。会話は tools/gen_artisan_dialogue.py が dialogue/artisan.json・dialogue/ch1/artisan.json に書く)
+GIVER = 'skyabyss:artisan'
+IRON_COUNT = 7
+ITEM_LEATHER = 'minecraft:leather'
+ITEM_BONE_CHIP = 'skyabyss:bone_chip'
 ITEM_ROCK_SHELL = 'skyabyss:rock_shell_scrap'
 ITEM_THREAD = 'skyabyss:rock_shell_thread'
 
 ja = {}
 en = {}
+
+# 職人 (P4) に移して、使わなくなった文
+DROPPED = ['dialogue.skyabyss.storyteller.ch1p_gear_weave', 'dialogue.skyabyss.storyteller.ch1p_blade_report', 'dialogue.skyabyss.storyteller.ch1p_pulse_weave']
 
 
 def put(key, j, e):
@@ -56,12 +62,14 @@ def quests():
     write_json(os.path.join(RES, 'data/skyabyss/quest/ch1/prep_gear.json'), {
         'category': 'sub', 'order': 42, 'giver': GIVER, 'chapter': 'titan_whale', 'start_when': START,
         'stages': [
+            # 素材は鯨道の旅装 4 部位の合計 (岩殻片 12・鉄 7・革 3・骨片 2。recipe/whale_road_*.json)
             {'id': 'gather', 'mode': 'all', 'objectives': [
-                {'id': 'iron', 'type': 'collect', 'target': 'minecraft:iron_ingot', 'count': 8, 'party': False},
-                {'id': 'scrap', 'type': 'collect', 'target': ITEM_ROCK_SHELL, 'count': 12, 'party': False}]},
-            # TODO(P5): 旅装を作ったら合図 ch1_travel_gear_made が立つ (どちらか。会話だけでも済む)
-            {'id': 'weave', 'mode': 'any', 'objectives': [
-                {'id': 'talk', 'type': 'talk', 'target': GIVER, 'topic': 'ch1p_gear_weave'},
+                {'id': 'iron', 'type': 'collect', 'target': 'minecraft:iron_ingot', 'count': IRON_COUNT, 'party': False},
+                {'id': 'scrap', 'type': 'collect', 'target': ITEM_ROCK_SHELL, 'count': 12, 'party': False},
+                {'id': 'leather', 'type': 'collect', 'target': ITEM_LEATHER, 'count': 3, 'party': False},
+                {'id': 'chip', 'type': 'collect', 'target': ITEM_BONE_CHIP, 'count': 2, 'party': False}]},
+            # 旅装を一式作ると合図 ch1_travel_gear_made が立つ (guide/TravelGear)。作り方は職人か覚書 (guide/RecipeLock)
+            {'id': 'weave', 'objectives': [
                 {'id': 'made', 'type': 'signal', 'target': 'ch1_travel_gear_made', 'party': False}]},
         ],
         'reward': {'xp': 80, 'items': []},
@@ -69,9 +77,10 @@ def quests():
     write_json(os.path.join(RES, 'data/skyabyss/quest/ch1/prep_blade.json'), {
         'category': 'sub', 'order': 43, 'giver': GIVER, 'chapter': 'titan_whale', 'start_when': START,
         'stages': [
-            # TODO(P5・P7): 砥石を使って洞の主 (老いた歩哨) を倒す条件をここへ足す。今は洞を抜ける (敵を倒しきる) だけ
-            {'id': 'cave', 'xp': 60, 'objectives': [
-                {'id': 'clear', 'type': 'signal', 'target': 'site_clear:ch1_cleft_shell_cave', 'party': False}]},
+            # 洞を抜ける (敵を倒しきる) と、岩の砥石を使う (どちらが先でもよい)。TODO(P7): 老いた歩哨ができたら「研いだ刃で洞の主を倒す」に締める
+            {'id': 'cave', 'xp': 60, 'mode': 'all', 'objectives': [
+                {'id': 'clear', 'type': 'signal', 'target': 'site_clear:ch1_cleft_shell_cave', 'party': False},
+                {'id': 'whet', 'type': 'signal', 'target': 'ch1_whetstone_used', 'party': False}]},
             {'id': 'report', 'objectives': [
                 {'id': 'talk', 'type': 'talk', 'target': GIVER, 'topic': 'ch1p_blade_report'}]},
         ],
@@ -90,25 +99,28 @@ def quests():
 
     # ---- 文
     put('quest.skyabyss.ch1.prep_gear.title', '身ごしらえ', 'Packing for the Road')
-    put('quest.skyabyss.ch1.prep_gear.summary', '鉄と岩殻片をそろえて、旅の支度を編んでもらう。', 'Gather iron and rock-shell scraps, and have the road gear stitched.')
+    put('quest.skyabyss.ch1.prep_gear.summary', '素材をそろえて、鯨道の旅装を作る。', 'Gather the materials and make the Whale Road gear.')
     put('quest.skyabyss.ch1.prep_gear.gather.journal',
-        '道の脇の荷車のそばに、誰かの荷が置いてあった。「道具は覚えている。持ち主は、そうでもない」\n鉄と、灰青の殻の欠片があれば、この先の道に耐える支度が編めるらしい。',
-        'Someone had left a pack by the cart beside the road. "The tools remember. The owner, less so."\nWith iron and shards of grey-blue shell, a set fit for the road ahead can be stitched.')
+        '荷車の傍らの道に、旅の職人が荷を広げている。「道具は覚えている。持ち主は、そうでもない」\n鉄と、灰青の殻の欠片と、革と骨片があれば、この先の道に耐える旅装が作れるらしい。作り方は職人に聞けば教えてくれる。旅の覚書にも書いてある。',
+        "A traveling artisan has spread a pack by the cart track. \"The tools remember. The owner, less so.\"\nWith iron, shards of grey-blue shell, leather and bone chips, a set fit for the road ahead can be made. The artisan will teach you how; it is also in your wayfarer's notes.")
     put('quest.skyabyss.ch1.prep_gear.gather.iron', '鉄を集める', 'Gather iron ingots')
     put('quest.skyabyss.ch1.prep_gear.gather.scrap', '岩殻片を集める', 'Gather rock-shell scraps')
-    put('quest.skyabyss.ch1.prep_gear.weave.journal', '材料はそろった。語り部に見せに行こう。', 'The materials are ready. Show them to the storyteller.')
-    put('quest.skyabyss.ch1.prep_gear.weave.talk', '語り部に支度を頼む', 'Ask the storyteller to stitch the gear')
-    put('quest.skyabyss.ch1.prep_gear.weave.made', '旅装を作る', 'Make the road gear')
+    put('quest.skyabyss.ch1.prep_gear.gather.leather', '革を集める', 'Gather leather')
+    put('quest.skyabyss.ch1.prep_gear.gather.chip', '骨片を集める', 'Gather bone chips')
+    put('quest.skyabyss.ch1.prep_gear.weave.journal', '材料はそろった。作業台で、旅装を一式作ろう。作り方は旅の覚書か、旅の職人に。',
+        "You have the materials. Make a full set at a workbench. The recipes are in your wayfarer's notes, or ask the artisan.")
+    put('quest.skyabyss.ch1.prep_gear.weave.made', '旅装を一式作る', 'Make the full Whale Road set')
     put('quest.skyabyss.ch1.prep_gear.done', '「縫い目は、荷を持ったぶんだけ締まる。……歩いておいで」', '"A seam only tightens under a load. ...Go and walk in it."')
 
     put('quest.skyabyss.ch1.prep_blade.title', '刃を研ぐ', 'Edge to the Stone')
-    put('quest.skyabyss.ch1.prep_blade.summary', '割れ殻の洞を抜けて、刃の使い方を確かめる。', 'Go through the Cleft Shell cave and test how you wield a blade.')
+    put('quest.skyabyss.ch1.prep_blade.summary', '割れ殻の洞を抜け、岩の砥石で刃を研ぐ。', 'Go through the Cleft Shell cave, and hone your blade on a rock whetstone.')
     put('quest.skyabyss.ch1.prep_blade.cave.journal',
-        '丘の斜面に、岩の割れ目がある。湿った風が出ているそうだ。\n中の敵を一人で倒せないなら、この先で刃は役に立たない。盾の前は避け、背を取る。',
-        'There is a crack in a hillside, and a damp wind comes out of it.\nIf the things inside are too much for you, a blade will not help you further on. Avoid the front of a shield; get behind.')
+        '丘の斜面に、岩の割れ目がある。湿った風が出ているそうだ。\n中の敵を一人で倒せないなら、この先で刃は役に立たない。盾の前は避け、背を取る。刃は、砥石で研いでから振るといい。',
+        'There is a crack in a hillside, and a damp wind comes out of it.\nIf the things inside are too much for you, a blade will not help you further on. Avoid the front of a shield; get behind. Hone your blade on a whetstone before you swing it.')
     put('quest.skyabyss.ch1.prep_blade.cave.clear', '割れ殻の洞を抜ける', 'Clear the Cleft Shell cave')
-    put('quest.skyabyss.ch1.prep_blade.report.journal', '洞を抜けた。語り部に話そう。', 'You came through the cave. Tell the storyteller.')
-    put('quest.skyabyss.ch1.prep_blade.report.talk', '語り部に話す', 'Talk to the storyteller')
+    put('quest.skyabyss.ch1.prep_blade.cave.whet', '岩の砥石を使う', 'Use a rock whetstone')
+    put('quest.skyabyss.ch1.prep_blade.report.journal', '洞を抜けた。旅の職人に話そう。', 'You came through the cave. Tell the traveling artisan.')
+    put('quest.skyabyss.ch1.prep_blade.report.talk', '旅の職人に話す', 'Talk to the traveling artisan')
     put('quest.skyabyss.ch1.prep_blade.done', '「刃は、研いだぶんだけ軽くなる。……腕のほうも」', '"A blade lightens as you hone it. So does the arm."')
 
     put('quest.skyabyss.ch1.prep_pulse.title', '鼓動を聞く', 'Listening for the Beat')
@@ -117,40 +129,28 @@ def quests():
         '割れ殻の洞の奥に、殻の護り糸が眠っているという。糸は、鼓動に合わせてゆるむ。\n洞を抜けた人の手に、一本だけ渡るそうだ。',
         'Deep in the Cleft Shell cave lies a thread of shell ward. It loosens in time with a beat.\nOne length passes to whoever comes through.')
     put('quest.skyabyss.ch1.prep_pulse.thread.thread', '殻の護り糸を持ち帰る', 'Bring back a thread of shell ward')
-    put('quest.skyabyss.ch1.prep_pulse.weave.journal', '糸を手に入れた。語り部に、護りを編んでもらおう。', 'You have the thread. Ask the storyteller to weave it into a charm.')
+    put('quest.skyabyss.ch1.prep_pulse.weave.journal', '糸を手に入れた。旅の職人に、護りを編んでもらおう。', 'You have the thread. Ask the traveling artisan to weave it into a charm.')
     put('quest.skyabyss.ch1.prep_pulse.weave.talk', '護りを編んでもらう', 'Have the charm woven')
     put('quest.skyabyss.ch1.prep_pulse.done', '「鼓動に合わせて編んである。ほどけたら、また持っておいで」', '"It is woven to a beat. When it unravels, bring it back."')
 
 
 # ---------------------------------------------------------------- 会話
 def dialogue():
+    # 語り部: 職人の頼みの入口は職人へ移した (tools/gen_artisan_dialogue.py)。ここは「荷車の傍らの道に職人がいる」の一言だけ
     write_json(os.path.join(RES, 'data/skyabyss/dialogue/ch1/storyteller_prep.json'), {
         'npc': 'skyabyss:storyteller', 'extends': True,
         'entries': [
-            {'node': 'ch1p_gear_weave', 'if': [
-                {'type': 'quest', 'quest': 'ch1/prep_gear', 'is': 'active', 'stage': 'weave'},
-                {'type': 'item', 'item': 'minecraft:iron_ingot', 'count': 8},
-                {'type': 'item', 'item': ITEM_ROCK_SHELL, 'count': 12}]},
-            {'node': 'ch1p_blade_report', 'if': {'type': 'quest', 'quest': 'ch1/prep_blade', 'is': 'active', 'stage': 'report'}},
-            {'node': 'ch1p_pulse_weave', 'if': [
-                {'type': 'quest', 'quest': 'ch1/prep_pulse', 'is': 'active', 'stage': 'weave'},
-                {'type': 'item', 'item': ITEM_THREAD, 'count': 1}]},
+            {'node': 'ch1p_artisan_pointer', 'if': [
+                {'type': 'quest', 'quest': 'ch1/prep_gear', 'is': 'active'},
+                {'type': 'not', 'of': {'type': 'flag', 'flag': 'ch1p_pointer_told'}}]},
         ],
         'nodes': {
-            'ch1p_gear_weave': {'face': 'smile', 'do': [{'type': 'affinity', 'amount': 2}], 'next': 'menu'},
-            'ch1p_blade_report': {'face': 'neutral', 'do': [{'type': 'affinity', 'amount': 2}], 'next': 'menu'},
-            'ch1p_pulse_weave': {'face': 'smile', 'do': [{'type': 'take', 'item': ITEM_THREAD, 'count': 1}, {'type': 'affinity', 'amount': 2}], 'next': 'menu'},
+            'ch1p_artisan_pointer': {'face': 'smile', 'do': [{'type': 'flag', 'flag': 'ch1p_pointer_told'}], 'next': 'menu'},
         },
     })
-    put('dialogue.skyabyss.storyteller.ch1p_gear_weave',
-        '岩殻と鉄か。……道の脇に置いてあった荷の手は、覚えている。針の入れ方も。\n旅装は、材料を持って作業台に向かえば、手が思い出す。持ち主のほうは、まだ思い出せないがね。',
-        'Shell and iron. ...My hands remember whose pack that was by the road. The way the needle goes in, too.\nTake the materials to a workbench and your hands will recall the rest. The owner, I still cannot recall.')
-    put('dialogue.skyabyss.storyteller.ch1p_blade_report',
-        '割れ殻の洞を抜けたのかい。……盾は、前から押すものじゃない。背へ回るものだ。\n手ぶらで通れたなら、もう少しは行ける。もう少しだけ、だが。',
-        'You went through the Cleft Shell. ...A shield is not pushed from the front. You go round to its back.\nIf you passed with empty hands, you can go a little further. Only a little.')
-    put('dialogue.skyabyss.storyteller.ch1p_pulse_weave',
-        '殻の護り糸か。……いい糸だ。鼓動に合わせて、ゆるむようにできている。\n編んでおこう。倒れかけた一度だけ、これが肩で受けてくれる。使えば、ほどけて消える。',
-        'Shell-ward thread. ...A good one. It is made to slacken in time with a beat.\nI will weave it. Once, when you would fall, it will take the blow on your shoulder. Used, it unravels and is gone.')
+    put('dialogue.skyabyss.storyteller.ch1p_artisan_pointer',
+        '道の脇の荷車のそばで、荷を広げている人を見たかい。旅の職人だよ。……あの荷の手は、私も覚えている。針の入れ方も。\n旅装を編むのも、刃を研ぐのも、あの人に聞くといい。持ち主のほうは、まだ思い出せないがね。',
+        'Have you seen the one with a pack spread out by the cart track? A traveling artisan. ...My hands remember whose pack that was. The way the needle goes in, too.\nFor stitching road gear or honing a blade, ask them. The owner, I still cannot recall.')
 
     # イサナ (whale_chaser): 乗る前の備えの一言。数字は言わず、言い回しだけ
     write_json(os.path.join(RES, 'data/skyabyss/dialogue/ch1/whale_chaser_prep.json'), {
@@ -224,7 +224,7 @@ def texts():
         put('message.skyabyss.ch1.arrive.ch1_road_cairn_%d' % n, j, e)
     put('message.skyabyss.ch1.arrive.ch1_bone_cache', '骨の山。誰かが集めて、運ぼうとしていた。', 'A heap of bones, gathered by something that meant to carry them off.')
     put('message.skyabyss.ch1.cache.found', '骨の山の下から、使える物を拾った。', 'You pick something usable from under the bones.')
-    put('message.skyabyss.ch1.arrive.ch1_cart_track', '轍の先に、荷が置いてある。持ち主は、いない。', 'Where the ruts end, a pack has been left. No owner in sight.')
+    put('message.skyabyss.ch1.arrive.ch1_cart_track', '轍の先に、荷が広げてある。', 'Where the ruts end, a pack has been spread out.')
     put('message.skyabyss.ch1.arrive.ch1_cleft_shell_cave', '岩の割れ目から、湿った風が出ている。', 'A damp wind comes out of the crack in the rock.')
     put('message.skyabyss.ch1.arrive.song_chamber', '鐘が、一節ぶん低く鳴った。', 'The bell rang one verse lower.')
     put('message.skyabyss.ch1.stone.chamber', '鐘の足もとの石が、音もなく沈んだ。', 'A stone at the foot of the bell sank without a sound.')
@@ -253,6 +253,7 @@ def texts():
     put('wayfarer_notes.ch1.line.4', '予告の線や輪が出たら、跳ぶか、走るか、物の陰に入れば避けられる。立ち止まらない。', 'When a line or ring is marked on the floor, jump, run or take cover. Do not stand still.')
     put('wayfarer_notes.ch1.line.5', '歌石は、積み石の低い順に叩く。洞の鳴り石も、ろうそくの数の少ない順に。', 'Strike the song stones from the lowest cairn up. In the cave, strike the ringing stones from the fewest candles up.')
     put('wayfarer_notes.ch1.line.6', '心臓の前には、身と刃と糧がそろっているか確かめる。足りなくても乗れる。ただ、重くなる。', 'Before the heart, check your body, blade and provisions. You can board without them. It will only be heavier.')
+    put('wayfarer_notes.ch1.line.7', '岩殻片と骨片は、旅装にも、岩の砥石にも、道の固焼きにもなる。この覚書を開くと、作り方が作業台に出る。', 'Shell scraps and bone chips make road gear, rock whetstones and road hardtack. Open these notes and the recipes appear at the workbench.')
 
 
 # ---------------------------------------------------------------- 仮の絵 (素材 4 つ)
@@ -361,6 +362,8 @@ def main():
         with open(path, encoding='utf-8') as f:
             merged = json.load(f)
         merged.update({k: v for k, v in table.items() if v != ''})
+        for k in DROPPED:
+            merged.pop(k, None)
         write_json(path, dict(sorted(merged.items())))
     print('wrote ch1 prep data: %d texts' % len(ja))
 

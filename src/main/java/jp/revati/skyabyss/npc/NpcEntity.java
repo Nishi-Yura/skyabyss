@@ -52,6 +52,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 //  - 空の影が近くを通ると、足を止めて空を見上げる
 public class NpcEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<Boolean> TALKING = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.BOOLEAN);
+    // 見た目の変種 (旅の職人は章 1〜4 の装い。ほかの役は 0。保存する)
+    private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(NpcEntity.class, EntityDataSerializers.INT);
     // 話し相手が何 tick 応答しなければ、話していないとみなすか (画面が閉じたのに知らせが届かなかったとき)
     private static final int TALK_TIMEOUT = 20 * 60;
 
@@ -92,6 +94,15 @@ public class NpcEntity extends PathfinderMob implements GeoEntity {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(TALKING, false);
+        builder.define(VARIANT, 0);
+    }
+
+    public int variant() {
+        return entityData.get(VARIANT);
+    }
+
+    public void setVariant(int variant) {
+        entityData.set(VARIANT, variant);
     }
 
     public boolean isTalking() {
@@ -310,12 +321,14 @@ public class NpcEntity extends PathfinderMob implements GeoEntity {
         if (home != null) {
             tag.put("Home", NbtUtils.writeBlockPos(home));
         }
+        tag.putInt("Variant", variant());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         NbtUtils.readBlockPos(tag, "Home").ifPresent(this::setHome);
+        setVariant(tag.getInt("Variant"));
     }
 
     // ---------------------------------------------------------------- 動き (GeckoLib)

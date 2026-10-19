@@ -110,6 +110,8 @@ public class SkyAbyss {
 
         // 章の導き (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・ひとり歩きの湧き・経験値の枠)。docs/design/21 の 1.4・1.5、P3
         jp.revati.skyabyss.guide.GuideSetup.register(modEventBus);
+        // 旅装・砥石・糧と薬 (一章の分。21 の 1.2、P5)
+        jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

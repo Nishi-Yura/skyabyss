@@ -198,5 +198,16 @@
   "gui.skyabyss.quest.toast.finished": "Quest complete",
   "message.skyabyss.quest.started": "Quest started: %s",
   "message.skyabyss.quest.finished": "Quest complete: %s",
-  "message.skyabyss.quest.open_hint": "Press %s to open the quest log"
+  "message.skyabyss.quest.open_hint": "Press %s to open the quest log",
+  "entity.skyabyss.artisan": "Traveling Artisan",
+  "message.skyabyss.artisan.struck": "\"...Do not make me stop. The needle slips.\"",
+  "message.skyabyss.heartbeat_ward.remade": "You had your heartbeat ward woven again.",
+  "dialogue.skyabyss.artisan.a_menu": "Something you need? My hands will keep moving.",
+  "dialogue.skyabyss.artisan.a_menu.hammer": "May I ask about that hammer?",
+  "dialogue.skyabyss.artisan.a_menu.whet": "What about the whetstone at your hip?",
+  "dialogue.skyabyss.artisan.a_menu.hands": "What do your hands remember?",
+  "dialogue.skyabyss.artisan.a_menu.bye": "I will be back.",
+  "dialogue.skyabyss.artisan.a_hammer": "This hammer? The haft has been changed three times. The head, never. ...Or once? I have no memory of that part.\nA hammer does not remember how often it fell. The hand does.",
+  "dialogue.skyabyss.artisan.a_whet": "A whetstone wears down before the blade does. Every time you hone, it rounds off. That is fine. That is what it is for.\n...Some people name the things that wear away. I do not. Name it, and the hand starts to spare it.",
+  "dialogue.skyabyss.artisan.a_hands": "The hands remember. How the needle goes in, how the hammer falls, which way a knot lies. ...Who taught me, the hands will not say.\nStill, when I hold a tool, I feel I am standing on the owner's side. Odd. Forget I said it."
 }

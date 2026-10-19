@@ -72,8 +72,7 @@ public final class CleftCave {
         SiteTreasure.register(TREASURE, SiteTreasure.Table.of(
                 List.of(new SiteTreasure.Entry("skyabyss:rock_shell_thread", 1), new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 4),
                         new SiteTreasure.Entry("skyabyss:bone_chip", 3),
-                        // TODO(P5): 道の固焼き (road_hardtack) に替える
-                        new SiteTreasure.Entry("minecraft:bread", 3)),
+                        new SiteTreasure.Entry("skyabyss:road_hardtack", 3)),
                 1, 2, List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 2, 4, 3), new SiteTreasure.Entry("skyabyss:bone_chip", 2, 3, 3),
                         new SiteTreasure.Entry("skyabyss:hare_quill", 2, 4, 2), new SiteTreasure.Entry("minecraft:iron_ingot", 1, 2, 2))));
         SiteTreasure.register(REPEAT_TREASURE, SiteTreasure.Table.of(List.of(), 1, 2, List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 2, 4, 3),

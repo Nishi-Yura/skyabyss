@@ -33,10 +33,12 @@ import net.minecraft.world.item.ItemStack;
 //   grave_choose                   : 墓の一覧の画面を開く。選んだ墓を語り部の救いで戻す (墓は消え、割合の分だけ手もとへ。grave パッケージ)
 //   grave_rescue                   : いちばん古い墓を語り部の救いで戻す (画面なし)
 //   give_notes  {chapter}          : 旅の覚書 (その章の手帳) を渡す。人ごとに一度、なくしたときは持っていなければ渡し直す (guide.WayfarerNotes)
+//   unlock_recipes {chapter}       : その章の旅の覚書のレシピを解く (旅装・砥石・糧と薬。guide.WayfarerNotes。職人が教える)。新しく解けた数を一行で知らせる
+//   remake_ward {titan}            : その巨神の鼓動守を編み直して渡す (持っていない人だけ、1 日 1 つまで。条件 ward_ok と組。素材は別に take)
 //   open_board                     : 言伝ての板の画面を開く (板のない所で、NPC が代わりに頼みごとを見せる)
 public final class Action {
     public static final Set<String> TYPES = Set.of("quest_start", "signal", "affinity", "flag", "unflag", "lore", "give", "take", "xp",
-            "open_board", "grave_rescue", "grave_choose", "give_notes");
+            "open_board", "grave_rescue", "grave_choose", "give_notes", "unlock_recipes", "remake_ward");
 
     private final String type;
     private final JsonObject json;
@@ -107,7 +109,8 @@ public final class Action {
             case "lore" -> "entry";
             case "give", "take" -> "item";
             case "xp" -> "once";
-            case "give_notes" -> "chapter";
+            case "give_notes", "unlock_recipes" -> "chapter";
+            case "remake_ward" -> "titan";
             default -> null;
         };
         if (need != null && !o.has(need)) {
@@ -161,6 +164,12 @@ public final class Action {
                 }
             }
             case "give_notes" -> jp.revati.skyabyss.guide.WayfarerNotes.give(player, integer("chapter", 1), true);
+            case "unlock_recipes" -> jp.revati.skyabyss.guide.WayfarerNotes.onOpen(player, integer("chapter", 1));
+            case "remake_ward" -> {
+                if (jp.revati.skyabyss.guide.HeartbeatWard.remake(player, str("titan"))) {
+                    Notice.hint(player, "message.skyabyss.heartbeat_ward.remade");
+                }
+            }
             case "open_board" -> jp.revati.skyabyss.quest.free.Board.open(player, ctx.npc() != null ? ctx.npc().blockPosition() : player.blockPosition(), true);
             case "grave_rescue" -> jp.revati.skyabyss.grave.GraveRescue.run(player);
             case "grave_choose" -> jp.revati.skyabyss.grave.GraveChooser.open(player);

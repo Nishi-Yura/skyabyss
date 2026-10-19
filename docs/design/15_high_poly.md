@@ -402,6 +402,8 @@ gear の作り（`tools/rough/hp_gear.py`、取り込み `tools/install_hp_gear.
 
 ### 9.6 採用した低ポリ（番兵のあとの 5 体。`python tools/install_lowpoly_five.py` で一度に入れ直せる）
 
+> 旅の職人（21 の P4）と鯨道の旅装（P5）も同じ低ポリの流れで入れた: 職人は案 B「槌と砥石の荷人」（740 三角形）の 1 つのメッシュに章ごとの 4 色の絵（`tools/install_artisan.py`。NPC の geo の root は yaw 180 度、アニメは `tools/gen_artisan_anim.py`）、旅装は防具の様式 C の 4 部位（418 三角形。`tools/install_whale_road_assets.py`）。仕様は 07 の 3.6・03 の 5.8。
+
 | モブ | 採用 | 三角形 | 骨 | 入力（`docs/review/lowpoly_roughs/`） |
 | --- | --- | --- | --- | --- |
 | 骨の番兵 bone_sentinel | 先の試作 | 584 + 盾 60 | 9 | `bone_sentinel_*` |

@@ -25,7 +25,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // NPC のテスト用コマンド (OP)。
-//   /skyabyss npc spawn <storyteller|whale_chaser>   : 足もとに立たせる (家はその場所)
+//   /skyabyss npc spawn <storyteller|whale_chaser|artisan> [章]  : 足もとに立たせる (家はその場所)。職人は章 (1〜4) で装いが変わる (省くと 1)
 //   /skyabyss npc village                             : 近くの村 (鐘) に、いなければ語り部を、要るなら鯨追いを立たせる
 //   /skyabyss npc affinity <人> <役> [値]             : 好感度を見る・決める
 //   /skyabyss npc bonds <人>                          : 好感度と会話の印 (このループ / 前のループ) の一覧
@@ -34,7 +34,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class NpcCommands {
     private static final SuggestionProvider<CommandSourceStack> ROLES = (ctx, b) -> SharedSuggestionProvider.suggest(
-            new String[] {"storyteller", "whale_chaser"}, b);
+            new String[] {"storyteller", "whale_chaser", "artisan"}, b);
 
     private NpcCommands() {
     }
@@ -48,7 +48,8 @@ public final class NpcCommands {
         d.register(Commands.literal(SkyAbyss.MODID).requires(s -> s.hasPermission(2))
                 .then(Commands.literal("npc")
                         .then(Commands.literal("spawn").then(Commands.argument("role", StringArgumentType.word()).suggests(ROLES)
-                                .executes(NpcCommands::spawn)))
+                                .executes(NpcCommands::spawn)
+                                .then(Commands.argument("chapter", IntegerArgumentType.integer(1, 4)).executes(NpcCommands::spawn))))
                         .then(Commands.literal("village").executes(NpcCommands::village))
                         .then(Commands.literal("affinity").then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("role", StringArgumentType.word()).suggests(ROLES)
@@ -76,7 +77,8 @@ public final class NpcCommands {
     private static int spawn(CommandContext<CommandSourceStack> ctx) {
         String role = roleId(StringArgumentType.getString(ctx, "role"));
         EntityType<NpcEntity> type = role.equals(NpcSetup.STORYTELLER_ID) ? NpcSetup.STORYTELLER.get()
-                : role.equals(NpcSetup.WHALE_CHASER_ID) ? NpcSetup.WHALE_CHASER.get() : null;
+                : role.equals(NpcSetup.WHALE_CHASER_ID) ? NpcSetup.WHALE_CHASER.get()
+                : role.equals(NpcSetup.ARTISAN_ID) ? NpcSetup.ARTISAN.get() : null;
         if (type == null) {
             ctx.getSource().sendFailure(Component.literal("unknown role " + role));
             return 0;
@@ -90,6 +92,15 @@ public final class NpcCommands {
         npc.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, ctx.getSource().getRotation().y + 180f, 0f);
         npc.setHome(at);
         npc.nameByRole();
+        if (role.equals(NpcSetup.ARTISAN_ID)) {
+            int chapter = 1;
+            try {
+                chapter = IntegerArgumentType.getInteger(ctx, "chapter");
+            } catch (IllegalArgumentException ignored) {
+                // 章を省いた
+            }
+            npc.setVariant(chapter);
+        }
         level.addFreshEntity(npc);
         ctx.getSource().sendSuccess(() -> Component.literal("spawned " + role + " at " + at.toShortString()), true);
         return 1;

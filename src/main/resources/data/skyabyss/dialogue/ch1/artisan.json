@@ -1,0 +1,337 @@
+{
+  "npc": "skyabyss:artisan",
+  "extends": true,
+  "entries": [
+    {
+      "node": "ch1p_gear_teach",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch1/prep_gear",
+          "is": "active",
+          "stage": "weave"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1p_taught"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1p_blade_report",
+      "if": {
+        "type": "quest",
+        "quest": "ch1/prep_blade",
+        "is": "active",
+        "stage": "report"
+      }
+    },
+    {
+      "node": "ch1p_pulse_weave",
+      "if": [
+        {
+          "type": "quest",
+          "quest": "ch1/prep_pulse",
+          "is": "active",
+          "stage": "weave"
+        },
+        {
+          "type": "item",
+          "item": "skyabyss:rock_shell_thread",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "node": "ch1a_ready",
+      "if": [
+        {
+          "type": "prep",
+          "chapter": 1,
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1a_ready_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1a_some",
+      "if": [
+        {
+          "type": "prep",
+          "chapter": 1,
+          "min": 1
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "prep",
+            "chapter": 1,
+            "min": 3
+          }
+        },
+        {
+          "type": "day",
+          "min": 3
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1a_some_told"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1a_deja",
+      "if": [
+        {
+          "type": "loop",
+          "min": 1
+        },
+        {
+          "type": "remembers",
+          "flag": "met"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "met"
+          }
+        }
+      ]
+    },
+    {
+      "node": "ch1a_first",
+      "if": {
+        "type": "not",
+        "of": {
+          "type": "flag",
+          "flag": "met"
+        }
+      }
+    }
+  ],
+  "nodes": {
+    "ch1a_first": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give_notes",
+          "chapter": 1
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_deja": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "give_notes",
+          "chapter": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1p_gear_teach": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "unlock_recipes",
+          "chapter": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch1p_taught"
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1p_blade_report": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1p_pulse_weave": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:rock_shell_thread",
+          "count": 1
+        },
+        {
+          "type": "affinity",
+          "amount": 2
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_ready": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1a_ready_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_some": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "ch1a_some_told"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1p_teach": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "unlock_recipes",
+          "chapter": 1
+        },
+        {
+          "type": "flag",
+          "flag": "ch1p_taught"
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_notes": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "give_notes",
+          "chapter": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_ward": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "take",
+          "item": "skyabyss:rock_shell_scrap",
+          "count": 8
+        },
+        {
+          "type": "remake_ward",
+          "titan": "stone_whale"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "ch1a_ward_ask": {
+      "face": "neutral",
+      "next": "a_menu"
+    }
+  },
+  "add_options": {
+    "a_menu": {
+      "before": "bye",
+      "options": [
+        {
+          "id": "teach",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch1/prep_gear",
+            "is": "started"
+          },
+          "goto": "ch1p_teach"
+        },
+        {
+          "id": "notes",
+          "kind": "quest",
+          "if": {
+            "type": "quest",
+            "quest": "ch1/prep_gear",
+            "is": "started"
+          },
+          "goto": "ch1a_notes"
+        },
+        {
+          "id": "ward",
+          "kind": "give",
+          "if": [
+            {
+              "type": "quest",
+              "quest": "ch1/prep_pulse",
+              "is": "done"
+            },
+            {
+              "type": "ward_ok",
+              "titan": "stone_whale"
+            },
+            {
+              "type": "item",
+              "item": "skyabyss:rock_shell_scrap",
+              "count": 8
+            }
+          ],
+          "goto": "ch1a_ward"
+        },
+        {
+          "id": "ward_ask",
+          "kind": "quest",
+          "if": [
+            {
+              "type": "quest",
+              "quest": "ch1/prep_pulse",
+              "is": "done"
+            },
+            {
+              "type": "ward_ok",
+              "titan": "stone_whale"
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "item",
+                "item": "skyabyss:rock_shell_scrap",
+                "count": 8
+              }
+            }
+          ],
+          "goto": "ch1a_ward_ask"
+        }
+      ]
+    }
+  }
+}

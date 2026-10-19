@@ -50,6 +50,37 @@ public final class HeartbeatWard {
         return -1;
     }
 
+    // ---------------------------------------------------------------- 補充 (旅の職人。21 の 1.4・P4)
+    // 使い切った人 (その巨神の鼓動守を持っていない) に、職人が編み直す。1 日に 1 つまで (素材の岩殻片などは会話の側で受け取る)。
+    // 最初の一つは備えの頼み「鼓動を聞く」の報酬 (ここを通らない)
+    public static boolean remakeable(ServerPlayer player, String titan) {
+        net.minecraft.world.item.Item ward = GuideSetup.wardOf(titan);
+        if (ward == null || player.getInventory().countItem(ward) > 0) {
+            return false;
+        }
+        AccessoryData data = Accessories.get(player);
+        for (int i = 0; i < AccessoryData.SIZE; i++) {
+            if (data.items.get(i).is(ward)) {
+                return false;
+            }
+        }
+        return !jp.revati.skyabyss.rpg.Growth.discovered(player, remakeKey(player, titan));
+    }
+
+    // 編み直して渡す。渡したら true
+    public static boolean remake(ServerPlayer player, String titan) {
+        if (!remakeable(player, titan)) {
+            return false;
+        }
+        jp.revati.skyabyss.rpg.Growth.discover(player, remakeKey(player, titan));
+        jp.revati.skyabyss.quest.Quests.give(player, new ItemStack(GuideSetup.wardOf(titan)));
+        return true;
+    }
+
+    private static String remakeKey(ServerPlayer player, String titan) {
+        return "ward_remake:" + titan + ":" + player.server.overworld().getGameTime() / 24000L;
+    }
+
     // 致命の傷を耐えられる量に直す。働いたら true (damage は耐えたあとの傷を返す)
     // health + absorption 以上の傷が致命。体力が 1 のままになるよう、傷を (health - 1 + absorption) に抑える
     public static float survivable(float damage, float health, float absorption) {

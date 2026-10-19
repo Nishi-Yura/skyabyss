@@ -3,84 +3,30 @@
   "extends": true,
   "entries": [
     {
-      "node": "ch1p_gear_weave",
+      "node": "ch1p_artisan_pointer",
       "if": [
         {
           "type": "quest",
           "quest": "ch1/prep_gear",
-          "is": "active",
-          "stage": "weave"
+          "is": "active"
         },
         {
-          "type": "item",
-          "item": "minecraft:iron_ingot",
-          "count": 8
-        },
-        {
-          "type": "item",
-          "item": "skyabyss:rock_shell_scrap",
-          "count": 12
-        }
-      ]
-    },
-    {
-      "node": "ch1p_blade_report",
-      "if": {
-        "type": "quest",
-        "quest": "ch1/prep_blade",
-        "is": "active",
-        "stage": "report"
-      }
-    },
-    {
-      "node": "ch1p_pulse_weave",
-      "if": [
-        {
-          "type": "quest",
-          "quest": "ch1/prep_pulse",
-          "is": "active",
-          "stage": "weave"
-        },
-        {
-          "type": "item",
-          "item": "skyabyss:rock_shell_thread",
-          "count": 1
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "ch1p_pointer_told"
+          }
         }
       ]
     }
   ],
   "nodes": {
-    "ch1p_gear_weave": {
+    "ch1p_artisan_pointer": {
       "face": "smile",
       "do": [
         {
-          "type": "affinity",
-          "amount": 2
-        }
-      ],
-      "next": "menu"
-    },
-    "ch1p_blade_report": {
-      "face": "neutral",
-      "do": [
-        {
-          "type": "affinity",
-          "amount": 2
-        }
-      ],
-      "next": "menu"
-    },
-    "ch1p_pulse_weave": {
-      "face": "smile",
-      "do": [
-        {
-          "type": "take",
-          "item": "skyabyss:rock_shell_thread",
-          "count": 1
-        },
-        {
-          "type": "affinity",
-          "amount": 2
+          "type": "flag",
+          "flag": "ch1p_pointer_told"
         }
       ],
       "next": "menu"

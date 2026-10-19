@@ -1,7 +1,7 @@
 {
   "category": "sub",
   "order": 44,
-  "giver": "skyabyss:storyteller",
+  "giver": "skyabyss:artisan",
   "chapter": "titan_whale",
   "start_when": {
     "type": "all",
@@ -39,7 +39,7 @@
         {
           "id": "talk",
           "type": "talk",
-          "target": "skyabyss:storyteller",
+          "target": "skyabyss:artisan",
           "topic": "ch1p_pulse_weave"
         }
       ]

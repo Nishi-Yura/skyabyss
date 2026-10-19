@@ -1,10 +1,13 @@
 package jp.revati.skyabyss.client.npc;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
+import jp.revati.skyabyss.npc.ArtisanLook;
 import jp.revati.skyabyss.npc.NpcEntity;
 import jp.revati.skyabyss.npc.NpcSetup;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,6 +33,34 @@ public final class NpcRenderer {
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(NpcSetup.STORYTELLER.get(), ctx -> create(ctx, "storyteller", 0.38f));
         event.registerEntityRenderer(NpcSetup.WHALE_CHASER.get(), ctx -> create(ctx, "whale_chaser", 0.42f));
+        // 旅の職人: 形は一つ、章 (variant 1〜4) ごとに絵 (textures/lowpoly/artisan_ch<n>.png) が替わる
+        event.registerEntityRenderer(NpcSetup.ARTISAN.get(), ctx -> new LowPolyGeoRenderer<>(ctx, new ArtisanModel(), e -> "artisan", 1.0f) {
+            {
+                this.shadowRadius = 0.42f;
+            }
+        });
+    }
+
+    // 職人の装いの絵 (章 1〜4。範囲外は一章)
+    public static ResourceLocation artisanTexture(int variant) {
+        return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/" + ArtisanLook.texture(variant) + ".png");
+    }
+
+    static final class ArtisanModel extends Model {
+        ArtisanModel() {
+            super("artisan");
+        }
+
+        // 職人には元の滑らかな版 (cube の geo) が無いので、LowPoly.enabled = false でも低ポリの骨と絵のまま (メッシュは描かれず、消えるだけで落ちない)
+        @Override
+        public ResourceLocation getModelResource(NpcEntity entity) {
+            return ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "geo/entity/artisan_lowpoly.geo.json");
+        }
+
+        @Override
+        public ResourceLocation getTextureResource(NpcEntity entity) {
+            return artisanTexture(entity.variant());
+        }
     }
 
     // 低ポリ (client/lowpoly): LowPoly.enabled = false で元の滑らかなボクセルの geo (geo/entity/<name>.geo.json) に戻る
@@ -41,7 +72,7 @@ public final class NpcRenderer {
         };
     }
 
-    static final class Model extends LowPolyGeoRenderer.Model<NpcEntity> {
+    static class Model extends LowPolyGeoRenderer.Model<NpcEntity> {
         Model(String name) {
             super(name, false);
         }

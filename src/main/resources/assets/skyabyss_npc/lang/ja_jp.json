@@ -198,5 +198,16 @@
   "gui.skyabyss.quest.toast.finished": "クエスト達成",
   "message.skyabyss.quest.started": "クエスト「%s」が始まった",
   "message.skyabyss.quest.finished": "クエスト「%s」を終えた",
-  "message.skyabyss.quest.open_hint": "%s キーで、クエストログを開ける"
+  "message.skyabyss.quest.open_hint": "%s キーで、クエストログを開ける",
+  "entity.skyabyss.artisan": "旅の職人",
+  "message.skyabyss.artisan.struck": "「……手を止めさせるな。針が滑る」",
+  "message.skyabyss.heartbeat_ward.remade": "鼓動守を編み直してもらった。",
+  "dialogue.skyabyss.artisan.a_menu": "用か。手は止めないがね。",
+  "dialogue.skyabyss.artisan.a_menu.hammer": "その槌のこと、聞いてもいい？",
+  "dialogue.skyabyss.artisan.a_menu.whet": "腰の砥石のことは？",
+  "dialogue.skyabyss.artisan.a_menu.hands": "手は、何を覚えている？",
+  "dialogue.skyabyss.artisan.a_menu.bye": "また来る。",
+  "dialogue.skyabyss.artisan.a_hammer": "この槌か。柄は三度替えた。頭は、一度も。……いや、一度だったか。どうも、そこだけ覚えがない。\n槌は、振った数を覚えていない。覚えているのは、手のほうだ。",
+  "dialogue.skyabyss.artisan.a_whet": "砥石は、削られるほうが先に減る。刃を研ぐたびに、石は丸くなる。それでいい。石は、そのためにある。\n……減っていくものに、名前を付ける奴がいる。俺は付けない。付けると、手が惜しむ。",
+  "dialogue.skyabyss.artisan.a_hands": "手は、覚えている。針の入れ方、槌の落とし方、結び目の向き。……誰に教わったのかは、手に聞いても答えない。\nそれでも、道具を持つと、持ち主の側へ立っている気がする。変な話だ。聞き流してくれ。"
 }

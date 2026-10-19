@@ -147,13 +147,13 @@ public final class NpcSpawner {
         return NpcWorldData.get(level.getServer().overworld()).chaserFire(bell);
     }
 
-    private static boolean canRespawn(NpcWorldData data, BlockPos bell, String role, long now) {
+    static boolean canRespawn(NpcWorldData data, BlockPos bell, String role, long now) {
         long at = data.spawnedAt(bell.asLong(), role);
         return at < 0 || now - at > RESPAWN_AFTER || now < at;
     }
 
     // 鐘のまわり 3×3 チャンクの生き物が読み込まれているか (読み込み前に「いない」と見て二人目を立たせないため)
-    private static boolean entitiesLoaded(ServerLevel level, BlockPos bell) {
+    static boolean entitiesLoaded(ServerLevel level, BlockPos bell) {
         ChunkPos c = new ChunkPos(bell);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
@@ -166,7 +166,7 @@ public final class NpcSpawner {
     }
 
     @Nullable
-    private static NpcEntity find(ServerLevel level, BlockPos bell, EntityType<NpcEntity> type) {
+    static NpcEntity find(ServerLevel level, BlockPos bell, EntityType<NpcEntity> type) {
         List<NpcEntity> found = level.getEntities(type, new AABB(bell).inflate(SEARCH), NpcEntity::isAlive);
         return found.isEmpty() ? null : found.get(0);
     }
@@ -276,7 +276,7 @@ public final class NpcSpawner {
     }
 
     @Nullable
-    private static NpcEntity place(ServerLevel level, EntityType<NpcEntity> type, BlockPos at, BlockPos home) {
+    static NpcEntity place(ServerLevel level, EntityType<NpcEntity> type, BlockPos at, BlockPos home) {
         NpcEntity npc = type.create(level);
         if (npc == null) {
             return null;

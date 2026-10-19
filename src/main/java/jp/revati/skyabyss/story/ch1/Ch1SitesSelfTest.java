@@ -139,6 +139,16 @@ public final class Ch1SitesSelfTest {
             SiteData.Entry e = entry(server, Sites.LOST_CART, cart.get(0).pos());
             BlockPos artisan = e == null ? null : e.extra("artisan");
             check(artisan != null && near(level, artisan, 4, Blocks.ANVIL), "the cart track has no anvil beside the lost cart (artisan mark " + artisan + ")");
+            // 職人 (P4): 印のそばに章 1 の装いで立てる (読み込み前なら立てない = 確かめない)
+            if (artisan != null) {
+                jp.revati.skyabyss.npc.NpcEntity npc = jp.revati.skyabyss.npc.ArtisanSpawner.ensure(level, artisan, 1);
+                if (npc != null) {
+                    check(npc.variant() == 1 && npc.blockPosition().distSqr(artisan) <= 36, "the artisan did not stand at the cart track mark " + artisan + " (stood at " + npc.blockPosition() + ")");
+                    npc.discard();
+                } else {
+                    SkyAbyss.LOGGER.warn("[selftest] the artisan was not stood at {} (entities not loaded there, or already standing)", artisan);
+                }
+            }
         }
         // 割れ殻の洞
         var caves = CleftCave.entries(server);
@@ -278,6 +288,8 @@ public final class Ch1SitesSelfTest {
             long now = level.getGameTime();
             int total = def.pads().stream().mapToInt(p -> p.spawns().stream().mapToInt(SiteSpawner.Spawn::count).sum()).sum();
             Quests.start(a, Ch1Prep.Q_BLADE);
+            // 洞の段は「洞を抜ける」と「砥石を使う」(どちらが先でもよい)。先に砥石を使っておく
+            Quests.signal(a, Ch1Prep.SIGNAL_WHETSTONE_USED);
             SiteSpawner.tick(level, List.of(a, b), now);
             // a と b は別々のグループ (パーティなし)
             UUID ga = Groups.keyOf(a);
@@ -338,7 +350,7 @@ public final class Ch1SitesSelfTest {
             check(a.getInventory().countItem(GuideSetup.ROCK_SHELL_SCRAP.get()) >= 4, "the first clear should hand over shell scraps");
             check(Growth.get(a).discoveries.contains("site:" + CleftCave.SITE) && Growth.get(a).xp >= xpBefore, "the clear xp was not granted");
             QuestLog.Entry e = QuestLog.of(a).entry(Ch1Prep.Q_BLADE);
-            check(e != null && e.stage >= 1, "the clear signal did not finish the cave stage of prep_blade");
+            check(e != null && e.stage >= 1, "the clear signal (with the whetstone used) did not finish the cave stage of prep_blade");
             check(SiteSpawner.liveCount(CleftCave.SITE, origin, gb) + SiteSpawner.pendingCount(CleftCave.SITE, origin, gb) > 0, "clearing group A changed group B's cave");
         } finally {
             SiteSpawner.clearAll(level);
@@ -376,24 +388,35 @@ public final class Ch1SitesSelfTest {
             // 身ごしらえ: 材料を集める → 語り部に頼む
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 0, "prep_gear moved on without the materials");
-            p.getInventory().add(new ItemStack(Items.IRON_INGOT, 8));
+            p.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
             p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
             Quests.poll(p, true);
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 1, "prep_gear did not reach the weave stage with 8 iron and 12 shell scraps");
-            Quests.onTalk(p, "skyabyss:storyteller", "ch1p_gear_weave");
-            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).done, "talking did not finish prep_gear");
-            // もう一つの出口: 旅装を作った合図 (P5)
+            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 0, "prep_gear moved on without the leather and the bone chips");
+            p.getInventory().add(new ItemStack(Items.LEATHER, 3));
+            p.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
+            Quests.poll(p, true);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).stage == 1, "prep_gear did not reach the make stage with 7 iron, 12 shell scraps, 3 leather and 2 bone chips");
+            // 話しただけでは済まない (旅装を作るまで)。作ると合図 (P5。TravelSelfTest が作業台とアイテムの側を確かめる)
+            Quests.onTalk(p, "skyabyss:artisan", "ch1p_gear_teach");
+            check(!QuestLog.of(p).entry(Ch1Prep.Q_GEAR).done, "talking finished prep_gear without the gear being made");
+            Quests.signal(p, Ch1Prep.SIGNAL_GEAR_MADE);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_GEAR).done, "the gear-made signal did not finish prep_gear");
+            // 別の人も同じ道
             Quests.start(q, Ch1Prep.Q_GEAR);
-            q.getInventory().add(new ItemStack(Items.IRON_INGOT, 8));
+            q.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
             q.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
+            q.getInventory().add(new ItemStack(Items.LEATHER, 3));
+            q.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
             Quests.poll(q, true);
             Quests.signal(q, Ch1Prep.SIGNAL_GEAR_MADE);
-            check(QuestLog.of(q).entry(Ch1Prep.Q_GEAR).done, "the gear-made signal did not finish prep_gear");
+            check(QuestLog.of(q).entry(Ch1Prep.Q_GEAR).done, "the gear-made signal did not finish prep_gear for the second player");
 
             // 刃を研ぐ: 洞の合図 → 話す
             Quests.signal(p, SiteSpawner.signal(Ch1Prep.CLEFT_CAVE));
-            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "the cave signal did not finish the cave stage");
-            Quests.onTalk(p, "skyabyss:storyteller", "ch1p_blade_report");
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 0, "the cave stage finished without a whetstone being used");
+            Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
+            check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).stage == 1, "the cave signal and the whetstone did not finish the cave stage");
+            Quests.onTalk(p, "skyabyss:artisan", "ch1p_blade_report");
             check(QuestLog.of(p).entry(Ch1Prep.Q_BLADE).done, "reporting did not finish prep_blade");
             check(Lore.state(p).has(Ch1Prep.CLEFT_CAVE_LORE), "prep_blade did not record the cave lore");
             check(PrepQuests.done(p, 1) == 2 && !PrepQuests.ready(p, 1), "two prep quests are done, three are not");
@@ -402,7 +425,7 @@ public final class Ch1SitesSelfTest {
             p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_THREAD.get(), 1));
             Quests.poll(p, true);
             check(QuestLog.of(p).entry(Ch1Prep.Q_PULSE).stage == 1, "prep_pulse did not reach the weave stage with a ward thread");
-            Quests.onTalk(p, "skyabyss:storyteller", "ch1p_pulse_weave");
+            Quests.onTalk(p, "skyabyss:artisan", "ch1p_pulse_weave");
             check(QuestLog.of(p).entry(Ch1Prep.Q_PULSE).done, "weaving did not finish prep_pulse");
             check(p.getInventory().countItem(GuideSetup.HEARTBEAT_WARD_STONE_WHALE.get()) == 1, "prep_pulse did not give the Stone Whale heartbeat ward");
             check(PrepQuests.done(p, 1) == 3 && PrepQuests.ready(p, 1), "three prep quests should raise ch1_ready");
@@ -488,14 +511,17 @@ public final class Ch1SitesSelfTest {
     // p に備えの頼みを n 本終えさせる (gear、blade の順)
     private static void finish(FakePlayer p, int n) {
         Quests.start(p, Ch1Prep.Q_GEAR);
-        p.getInventory().add(new ItemStack(Items.IRON_INGOT, 8));
+        p.getInventory().add(new ItemStack(Items.IRON_INGOT, 7));
         p.getInventory().add(new ItemStack(GuideSetup.ROCK_SHELL_SCRAP.get(), 12));
+        p.getInventory().add(new ItemStack(Items.LEATHER, 3));
+        p.getInventory().add(new ItemStack(GuideSetup.BONE_CHIP.get(), 2));
         Quests.poll(p, true);
-        Quests.onTalk(p, "skyabyss:storyteller", "ch1p_gear_weave");
+        Quests.signal(p, Ch1Prep.SIGNAL_GEAR_MADE);
         if (n >= 2) {
             Quests.start(p, Ch1Prep.Q_BLADE);
             Quests.signal(p, SiteSpawner.signal(Ch1Prep.CLEFT_CAVE));
-            Quests.onTalk(p, "skyabyss:storyteller", "ch1p_blade_report");
+            Quests.signal(p, Ch1Prep.SIGNAL_WHETSTONE_USED);
+            Quests.onTalk(p, "skyabyss:artisan", "ch1p_blade_report");
         }
     }
 }

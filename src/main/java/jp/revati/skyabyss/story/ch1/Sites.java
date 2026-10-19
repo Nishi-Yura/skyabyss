@@ -85,7 +85,7 @@ public final class Sites {
                 .onArrive((p, s) -> {
                     arrive(p, s);
                     Quests.start(p, Ch1.Q_TRAVELLER);
-                    // 荷車の傍らの道 (轍の先の旅の職人の荷。職人 P4 が立つまでは荷だけ)
+                    // 荷車の傍らの道 (轍の先の旅の職人の荷。職人は npc/ArtisanSpawner が、イサナと会ったあとの人の近くに立たせる)
                     Tasks.later(80, () -> Notice.narrate(p, "message.skyabyss.ch1.arrive.ch1_cart_track"));
                 }).register();
         ChapterSites.element(DIARY_SPOT, Chapters.WHALE, DIARY_SPOT).dist(100, 150).arriveRadius(8)
@@ -115,8 +115,7 @@ public final class Sites {
         // 骨の集め場: 骨の山。人ごとの一度きりの抽選 (旅装の素材 + 道の固焼き 3)。TODO(P7): 骨負いがここへ導く (ch1/follow_hauler)
         SiteTreasure.register(Ch1Prep.BONE_CACHE, SiteTreasure.Table.of(List.of(new SiteTreasure.Entry("skyabyss:rock_shell_scrap", 3),
                 new SiteTreasure.Entry("skyabyss:bone_chip", 3),
-                // TODO(P5): 道の固焼き (road_hardtack) に替える
-                new SiteTreasure.Entry("minecraft:bread", 3))));
+                new SiteTreasure.Entry("skyabyss:road_hardtack", 3))));
         ChapterSites.element(Ch1Prep.BONE_CACHE, Chapters.WHALE, Ch1Prep.BONE_CACHE).dist(60, 140).arriveRadius(8).onArrive((p, s) -> {
             arrive(p, s);
             if (!SiteTreasure.claim(p, Ch1Prep.BONE_CACHE).isEmpty()) {

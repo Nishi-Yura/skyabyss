@@ -1,7 +1,7 @@
 {
   "category": "sub",
   "order": 42,
-  "giver": "skyabyss:storyteller",
+  "giver": "skyabyss:artisan",
   "chapter": "titan_whale",
   "start_when": {
     "type": "all",
@@ -29,7 +29,7 @@
           "id": "iron",
           "type": "collect",
           "target": "minecraft:iron_ingot",
-          "count": 8,
+          "count": 7,
           "party": false
         },
         {
@@ -38,19 +38,26 @@
           "target": "skyabyss:rock_shell_scrap",
           "count": 12,
           "party": false
+        },
+        {
+          "id": "leather",
+          "type": "collect",
+          "target": "minecraft:leather",
+          "count": 3,
+          "party": false
+        },
+        {
+          "id": "chip",
+          "type": "collect",
+          "target": "skyabyss:bone_chip",
+          "count": 2,
+          "party": false
         }
       ]
     },
     {
       "id": "weave",
-      "mode": "any",
       "objectives": [
-        {
-          "id": "talk",
-          "type": "talk",
-          "target": "skyabyss:storyteller",
-          "topic": "ch1p_gear_weave"
-        },
         {
           "id": "made",
           "type": "signal",

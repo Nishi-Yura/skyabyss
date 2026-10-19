@@ -128,6 +128,36 @@
 | クエスト | 会ってからの目的と日誌は「イサナに」と書く。会う前の「村の外れの鯨追いに、話を聞く」は役名のまま |
 | 今後 | 次の巨神へ導く役（08 の潮見の貝のサブなど）もイサナにする。ほかに何度も出会う人物を作るときも、同じく名前を付ける |
 
+### 3.6 旅の職人（`skyabyss:artisan`。21 の 1.4、P4。一章の分は実装済み）
+
+| | 旅の職人 |
+| --- | --- |
+| 人物 | 荷車の傍らの道に荷を広げている旅の職人。役名だけで固有の名前は付けない（名前は重要人物だけ。3.5）。同じ顔・同じ口調で**前のことを覚えていない**（イサナの「どこかで会ったか？」と同じ方向）。「道具は覚えている。持ち主は、そうでもない」 |
+| 役目 | 備えの頼み 3 本の依頼主（一章 `ch1/prep_gear`・`prep_blade`・`prep_pulse`。会話の置き場）、旅の覚書の渡し直し、旅装・砥石・糧のレシピを教える（会話の結果 `unlock_recipes`）、鼓動守の編み直し、好感度で開く「手の話」（道具の来歴。巨神の話ではなく手の話）。**売り買いと修理はしない**（21 の 1.4 に書いた「縫い直し」の修理は未実装） |
+| 口調 | 短く、淡々と。「〜だ」「〜しろ」、道具のたとえ。数字は言わない。心臓・深淵・巨神の眠りの理由は語らない |
+| 見た目 | 低ポリ 740 三角形（案 B 槌と砥石の荷人。肩の広い荷人、前掛けと道具の巻き、腰の砥石と槌、額へ押し上げた眼鏡）。**章ごとの装い**は 1 つのモデルに 4 つの絵: 一章 岩殻の石の縁・二章 塩の白・三章 銅の針金の襟・四章 煤の黒と火の糸（`textures/lowpoly/artisan_ch<n>.png`）。骨は root / body / head / armL / armR / legL / legR。ラフのメッシュは root の回転が無いので、入れるとき root に yaw 180 度を足して語り部・イサナと同じ向きにそろえた（`tools/install_artisan.py`）。動き `idle`（息・右手が柄を直す）・`walk`・`talk`（右手の身ぶり）、頭は `NpcRenderer` が相手へ向ける。顔アイコンは頭のメッシュを正面から描き起こした 80×80（ふつう・笑み・沈む。`tools/gen_artisan_faces.py`） |
+| 当たり判定 | 0.6 × 1.95 |
+| 出し方 | `npc/ArtisanSpawner`。**章ごとの「立つ所」の表**（`Spot(章, 場所の ID, 印, 条件)`）で決める。一章 = 失せ物の荷車（`ch1_lost_cart`）の傍らの道の印 `artisan`、条件はイサナと会ったあと（伝承 `chapter1/whale_chaser`。「日 2 の朝、イサナの話のあとに職人の荷が見つかる」）。その場所の 48 ブロック以内に条件を満たす人が来て、5 秒おきの見回りで、まだいなければ立たせる（家 = その印、まわり 3 ブロックを歩く）。いなくなったら 1 日で立て直す。マルチでは場所は拠点ごと、近くの人が同じ職人に会う。二〜四章の担当（P11・P15・P19）は、地上の部品に印を付けて場所の記録の `extra` に残し、`ArtisanSpawner.register(new Spot(…))` を足すだけ（装い = `NpcEntity.variant` = 章） |
+| 保存 | `NpcEntity` の `Variant`（章の装い）。好感度・印は人ごと（`NpcBonds`、役 `skyabyss:artisan`） |
+
+**会話**（`dialogue/artisan.json` = 全章の共通 + `dialogue/ch1/artisan.json` = 一章の足し書き。生成は `tools/gen_artisan_dialogue.py`。二〜四章は `ch<n>/artisan.json` を同じ形で足す。足し書きの入口は共通の最後の入口 `a_menu` の手前に入る）:
+
+| 入口（上から） | 条件 | 中身 |
+| --- | --- | --- |
+| `ch1p_gear_teach` | `prep_gear` が仕上げの段・まだ教わっていない | 作り方を教える（結果 `unlock_recipes` 一章 + 印 `ch1p_taught`）。好感度 +2 |
+| `ch1p_blade_report` | `prep_blade` が報告の段 | 洞の話（盾は背へ回る）。好感度 +2 |
+| `ch1p_pulse_weave` | `prep_pulse` が編む段・護り糸を持っている | 護り糸を受け取り、鼓動守の話（報酬は頼みの側）。好感度 +2 |
+| `ch1a_ready` | 備えの頼みを 3 本終えた・まだ言っていない | 乗る前の一言（数字なし） |
+| `ch1a_some` | 1〜2 本終え・日 3 以降 | 乗る前の一言（急がなくていい） |
+| `ch1a_deja` | 次のループ・前に会った記憶がある・今回は初めて | 「前にも会った気がするだけだ」。覚書を渡す |
+| `ch1a_first` | 初対面 | 名乗らない（「旅の職人、とでも呼んでくれ」）。覚書を渡す（`give_notes`）。好感度 +1 |
+| `a_menu`（共通の最後） | なし | 用か。手は止めない |
+
+- 話題の選択肢（`a_menu`）: **手の話**（好感度 10 で `hammer`・30 で `whet`・60 で `hands`。各一度、好感度 +1。槌と砥石と手が覚えていること）。一章の足し: `teach`（作り方をもう一度。`prep_gear` を受けたあと）、`notes`（覚書をなくした。`give_notes` で渡し直す）、`ward`（鼓動守を編み直す。`prep_pulse` を終え、条件 `ward_ok`、岩殻片 8 つを受け取って `remake_ward`）、`ward_ask`（素材が足りないとき理由を言う）、`bye`。
+- **鼓動守の補充**（21 の 1.4）: 岩殻片 8 つ・1 日 1 つ・その巨神の鼓動守を持っていない（持ち物にも装飾の枠にも）人だけ。最初の一つは頼み 3 の報酬（ここを通らない）。条件 `ward_ok {titan}`・結果 `remake_ward {titan}`（`HeartbeatWard.remakeable / remake`）。
+- 語り部（`dialogue/ch1/storyteller_prep.json`）には、頼みを受けていれば一度だけ「荷車のそばの旅の職人」を指す一言（`ch1p_artisan_pointer`）を残した。頼みの入口 `ch1p_*` は職人へ移した。
+- 自己テスト `artisan`（`ArtisanSelfTest`）: メッシュ・骨だけの geo・アニメ・絵・顔・防具の絵がそろい名前とピボットが合う（root の yaw 180 度）、立つ所の表と立たせ方（二人目を立てない・章ごとに別の人・装いの保存）、会話の入口の順と選択肢の条件と結果、日英の文。
+
 ---
 
 ## 4. 会話
@@ -218,6 +248,7 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `weather` | `thunder`, `rain` | 今いる所が雷雨・雨で、真上に空が見える（天気の記録で見る） |
 | `height` | `min` | 高さ |
 | `grave` | なし | 救える墓がある（自分の墓があり、救いの割合が 0 でない。11 の 6.4 節） |
+| `ward_ok` | `titan` | その巨神の鼓動守を編み直してもらえる（今は持っていない・枠にも付けていない・今日はまだ編み直していない。職人。3.6） |
 | `no_keepsake` | `item` | その品が、自分のどこにもない（持ち物・箱・エンダーチェスト・預かり・地面・しまった箱。`Keepsakes.locate` の合計が 0。語り部の「潮見の貝をなくした」に使う） |
 
 | 結果 `type` | 欄 | 意味 |
@@ -229,6 +260,9 @@ assets/skyabyss_npc/lang/{ja_jp,en_us}.json   会話・クエスト・画面の�
 | `lore` | `entry` | 伝承の書に記す（知らせつき） |
 | `give` / `take` | `item`, `count` | 渡す（入らなければ足もとへ、本人だけが拾える）/ 受け取る（足りなければ何もしない） |
 | `xp` | `amount`, `once` | 成長の経験値。`once` の鍵で一人一回だけ（会話のくり返しで稼げない） |
+| `give_notes` | `chapter` | その章の旅の覚書を渡す。人ごとに一度、なくしたときは持っていなければ渡し直す（6.8 節） |
+| `unlock_recipes` | `chapter` | その章の覚書のレシピを解く（旅装・砥石・糧と薬。新しく解けた数を一行で知らせる。職人が教える） |
+| `remake_ward` | `titan` | その巨神の鼓動守を編み直して渡す（持っていない人だけ、1 日 1 つまで。条件 `ward_ok` と組。素材は別に `take`） |
 
 - 結果 `open_board`: 板の画面を開く（NPC が受け口になる）。結果 `grave_choose`: 墓の一覧の画面を開く（11 の 6.4 節）。結果 `grave_rescue`: 画面なしで一番古い墓を救う。結果 `give` の `name` / `lore` と、品の `token`、`optional` の欄は 6.1 節。
 
@@ -378,11 +412,11 @@ data/<名前空間>/quest/<名前>.json
 
 **旅の覚書**（`wayfarer_notes`。`WayfarerNotes`）: 章ごとに 1 冊の薄い手帳。1 つのアイテムで、章（0 = 序章、1〜4）は品の欄 `skyabyss:notes_chapter` に持つ。名前は「旅の覚書（一章）」。右クリックで開く（サーバー: その章のレシピを解く。クライアント: 手帳の画面 `WayfarerNotesScreen`）。
 
-- レシピの解放: `WayfarerNotes.registerRecipes(章, レシピの ID…)` で足した分を、開いたときにレシピブックへ解く（`awardRecipesByKey`。新しい画面は作らない）。存在しない ID は無視する。**作れるようになるのを解いてからにする**のは旅装・砥石の担当（P5）の仕事で、ゲームルール `doLimitedCrafting` か自前の検査で決める（ここは解く口だけ）。
+- レシピの解放: `WayfarerNotes.registerRecipes(章, レシピの ID…)` で足した分を、開いたときにレシピブックへ解く（`awardRecipesByKey`。新しい画面は作らない）。存在しない ID は無視する。**解くまで作れない**: 登録した ID は自動で `guide/RecipeLock` の鍵がかかり、作業台（と持ち物の 2x2）の完成品の枠が、教わっていない人には空になる（ゲームルール `doLimitedCrafting` は世界ぜんぶを縛るので使わない。創造モードは問わない）。解く口は、覚書を開く・職人に教わる（結果 `unlock_recipes`）。一章の分（旅装 4・砥石・固焼き・軟膏）は 21 の 1.2。
 - 手帳の中身: 文のキー `wayfarer_notes.ch<n>.line.<i>`（`i` = 1, 2, …。途切れるまで）が画面に 1 行ずつ並ぶ。中身がなければ「まだ、何も書かれていない。」。敵の見分け方・備えの一行は、章の担当が日英の lang に足す。
 - 渡す: `WayfarerNotes.give(player, 章)`（人ごとに一度。`Growth.discover` の鍵 `notes:ch<n>`）。
 
-**一章の備えの頼み（P6。実装済み）**: `quest/ch1/prep_gear`（80）・`prep_blade`（160）・`prep_pulse`（60）、依頼主は職人（P4）が入るまで語り部。開始条件は「一章（段階 0）・イサナと会った（伝承 `chapter1/whale_chaser`）・日 2 以降」。身ごしらえは「鉄 8・岩殻片 12 を持ち物に（`collect`）→ 語り部の入口 `ch1p_gear_weave`（材料を見る。受け取らない）」か、P5 の旅装の合図 `ch1_travel_gear_made`（段の目的は `any`）。刃を研ぐは割れ殻の洞のクリアの合図 `site_clear:ch1_cleft_shell_cave`（段の経験値 60）→ 入口 `ch1p_blade_report`、報酬で伝承 `ch1/cleft_cave`。鼓動を聞くは護り糸（`skyabyss:rock_shell_thread`、洞の宝）→ 入口 `ch1p_pulse_weave`（護り糸を受け取る）、報酬が岩鯨の鼓動守。会話は `dialogue/ch1/storyteller_prep.json`、イサナの備えの一言は `whale_chaser_prep.json`（17 の 1.5）。一章の降下の条件の読み方は 02 の 2.3。
+**一章の備えの頼み（P6。実装済み）**: `quest/ch1/prep_gear`（80）・`prep_blade`（160）・`prep_pulse`（60）、依頼主は旅の職人（P4。3.6 節）。開始条件は「一章（段階 0）・イサナと会った（伝承 `chapter1/whale_chaser`）・日 2 以降」。身ごしらえは「鉄 7・岩殻片 12・革 3・骨片 2（旅装 4 部位の素材の合計）を持ち物に（`collect`）→ 旅装を一式作る（合図 `ch1_travel_gear_made`。作り方は職人の入口 `ch1p_gear_teach` か旅の覚書。P5）」。刃を研ぐは割れ殻の洞のクリアの合図 `site_clear:ch1_cleft_shell_cave` と、岩の砥石を使った合図 `ch1_whetstone_used`（段は `all`、段の経験値 60）→ 職人の入口 `ch1p_blade_report`、報酬で伝承 `ch1/cleft_cave`（老いた歩哨ができたら「研いだ刃で倒す」に締める）。鼓動を聞くは護り糸（`skyabyss:rock_shell_thread`、洞の宝）→ 職人の入口 `ch1p_pulse_weave`（護り糸を受け取る）、報酬が岩鯨の鼓動守。会話は `dialogue/ch1/artisan.json`、語り部は `storyteller_prep.json` に一言だけ（`ch1p_artisan_pointer`）、イサナの備えの一言は `whale_chaser_prep.json`（17 の 1.5）。一章の降下の条件の読み方は 02 の 2.3。
 
 **経験値の枠**（`ChapterXpBudget`）: 21 の 1.5 の表（章ごとの 1 レベル分・既存・新しい分の上限・合計の上限）を持ち、`quest/ch<n>/` の新しいクエスト（既存の小要素に数え済みの `LEGACY` と繰り返す頼みを除く、段階と報酬の経験値の合計）と、場所の湧き台のクリアの経験値を足す。読み込みのとき（`QuestManager`）と自己テスト `xp budget` が、新しい分の上限と合計の上限を超えていないか検める。超えた章の場所の経験値は、湧き台が 0 に切る（品は渡す）。
 
@@ -854,7 +888,7 @@ data/<名前空間>/quest/<名前>.json
 
 | コマンド | 内容 |
 | --- | --- |
-| `/skyabyss npc spawn <storyteller\|whale_chaser>` | 足もとに立たせる（家はその場所） |
+| `/skyabyss npc spawn <storyteller\|whale_chaser\|artisan> [章]` | 足もとに立たせる（家はその場所）。職人は章 1〜4 で装いが変わる（省くと 1） |
 | `/skyabyss npc village` | 近くの村（鐘）で、いなければ語り部を、要るなら鯨追いを立たせる（立て直しの待ち時間を無視） |
 | `/skyabyss npc affinity <人> <役> [値]` | 好感度を見る・決める |
 | `/skyabyss npc bonds <人>` | 好感度・印・記憶の一覧 |
@@ -925,6 +959,7 @@ WorldLoop.advance(server);                          // M4: 月が落ちたとき
 | `FreeQuestSelfTest`（`SELFTEST freequest`、`quest/free/`） | 自由なモードのクエストが 8〜12 本、日替わりと週替わり、板に出すものはちょうど繰り返すもの、段階は 1 まで、次の巨神の背中の敵を目的にしない。足し書きが元の会話に混ざる。一度きりを最初から最後まで。板（段階 0 で段階 1 の日替わりは伏せる、羊 2/3、薪は 15 本では受け取らず樫と白樺を合わせて 16 本で受け取る、日替わり 3 つで報酬・4 つ目は受けられない、記録を消して受け直しても報酬は二度出ない、週替わり 2 つ）。パーティ（50 ブロック先の仲間は数え、他人は数えない）。保存 |
 | `OpeningStorySelfTest`（`SELFTEST opening story`） | 序盤の伝承 6 つ、開幕の一行と目的の帯、メインの通し（帳面 → `shadow0` → 影 → 語り部 → イサナ → `see_whale`）、影・岩鯨・空の質問を先にした人が序盤の二段を飛ばすこと、見聞が話すと消えること、イサナと会うまで板の頼みと語り部の頼みごとが閉じていること |
 | `SELFTEST story` | 1 章の続き（[14](14_beta.md) の 7.2 節） |
+| `TravelSelfTest`（`SELFTEST travel gear`）・`ArtisanSelfTest`（`SELFTEST artisan`） | 21 の P5・P4。旅装の値と `GearCurve.TRAVEL` の照合・砥石・固焼き・軟膏・レシピと鍵・合図、職人の絵と骨・立つ所・会話・文（3.6 節） |
 | `GuideSelfTest`（`SELFTEST prep chain`・`wayfarer notes`・`heartbeat ward`・`site cave`・`xp budget`） | 備えの頼みの規則（置き場・種類・`start_when`・章・繰り返し・板を検査で弾く）と流れ（自動で出る、どの順でも 3 本で `ch<n>_ready` が一度、`prep` 条件の本数、覚書は人ごとに一度で渡し直しは持っていないときだけ）。覚書のレシピの解放。鼓動守（式・心臓の戦いの参加者だけ・1 回の戦いに一度・心臓以外と虚空は耐えない・糧の灯 +0.2）。場所の湧き台（17 の 3.9）と経験値の枠 |
 
 ### 13.2 ゲーム画面（runClientTest）

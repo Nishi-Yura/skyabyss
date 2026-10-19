@@ -116,6 +116,9 @@ public final class SelfTestRunner {
         steps.add(Step.once("readiness", jp.revati.skyabyss.readiness.ReadinessSelfTest::runSelfTest));
         // 章の導きの基盤 (備えの頼み・旅の覚書・鼓動守・場所の湧き台と宝・章のひとり歩き・経験値の枠)。docs/design/21 の P3
         steps.addAll(jp.revati.skyabyss.guide.GuideSelfTest.steps());
+        // 旅装・砥石・糧と薬 (P5) と旅の職人 (P4)。docs/design/21 の 1.2・1.4
+        steps.addAll(jp.revati.skyabyss.guide.TravelSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.npc.ArtisanSelfTest.steps());
         // 倒れたときの決まりと墓 (docs/design/11 の 6 章)
         steps.add(Step.once("grave (load)", jp.revati.skyabyss.grave.GraveSelfTest::load));
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
@@ -229,10 +232,12 @@ public final class SelfTestRunner {
         }
         QUEUE.clear();
         QUEUE.addAll(steps());
-        // SKYABYSS_SELFTEST_ONLY=<名前の頭> なら、その段だけ (例: "storm back")。終わるとサーバーを止める
+        // SKYABYSS_SELFTEST_ONLY=<名前の頭>[,<名前の頭>…] なら、その段だけ (例: "storm back"、"travel gear,artisan")。終わるとサーバーを止める
         String only = System.getenv("SKYABYSS_SELFTEST_ONLY");
         if (only != null && !only.isBlank()) {
-            QUEUE.removeIf(s -> !s.name().startsWith(only));
+            // カンマ区切りで複数 ("travel gear,artisan")。どれかの頭に合う段を残す
+            String[] prefixes = java.util.Arrays.stream(only.split(",")).map(String::trim).filter(x -> !x.isEmpty()).toArray(String[]::new);
+            QUEUE.removeIf(s -> java.util.Arrays.stream(prefixes).noneMatch(s.name()::startsWith));
             haltWhenDone = true;
         }
         if (QUEUE.isEmpty()) {

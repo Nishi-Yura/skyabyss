@@ -1,6 +1,6 @@
 """装備のツールチップの「物語の一行」(灰色の斜体。巨神の声で、短く) の文を書く。docs/design/03 の 11章 (旧 17-8、00 の 181)。
 
-  src/main/resources/assets/skyabyss_gear_story/lang/{ja_jp,en_us}.json   : item.skyabyss.<id>.story (装備 40 点。防具は部位ごと)
+  src/main/resources/assets/skyabyss_gear_story/lang/{ja_jp,en_us}.json   : item.skyabyss.<id>.story (装備 48 点。防具は部位ごと)
 
 ツールチップの組み立ては item/ModGear.tooltip (説明の次の行に、このキーがあれば出す)。キーがない品には何も出さない。
 自己テスト (SELFTEST gear curve) が、登録された装備のすべてにこの行が日英であること、長さの上限を確かめる。
@@ -59,6 +59,16 @@ LINES = [
     ("smith_hammer", "「鍛え手は、最後に自分を打った。」", "\"The smith struck himself last.\""),
     ("thrall_poker", "「灰被りは、火掻きだけを手放さなかった。」", "\"The ash thralls let go of everything but the poker.\""),
     ("ember_lantern", "「灯は、倒れる前に一度だけ吠える。」", "\"A lantern roars once, before it falls.\""),
+    # ---- 鼓動守 (21 の 1.4。guide/HeartbeatWard)
+    ("heartbeat_ward_stone_whale", "「鼓動はひとつ、おまえのために打ち残してある。」", "\"I kept one beat back, for you.\""),
+    ("heartbeat_ward_tide_shell", "「引いた波も、一度だけは引き返す。」", "\"Even the ebb turns back, once.\""),
+    ("heartbeat_ward_thunder_wing", "「雷は、落ちる前にためらうことがある。」", "\"Lightning will hesitate, now and then, before it falls.\""),
+    ("heartbeat_ward_ember", "「灰の下には、息ひとつぶんの火がいつも残る。」", "\"Under the ash, one breath of fire always stays.\""),
+    # ---- 旅装 (一章の橋渡し。21 の 1.2・P5。巨神の声ではなく、道を歩いた人の声)
+    ("whale_road_helmet", "「帽子は、空より先に雨を覚える。」", "\"A cap learns the rain before it learns the sky.\""),
+    ("whale_road_chestplate", "「肩の殻は、誰かの雨を受けてきた。」", "\"The shell on the shoulder has taken someone else's rain.\""),
+    ("whale_road_leggings", "「歩いた道の数だけ、裾が薄くなる。」", "\"The hem wears thin by the count of roads walked.\""),
+    ("whale_road_boots", "「靴底は、道の石を覚えている。」", "\"A sole remembers the stones of the road.\""),
 ]
 
 

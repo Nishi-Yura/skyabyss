@@ -4,6 +4,8 @@
   src/main/resources/assets/skyabyss/textures/item/heartbeat_ward.png    鼓動守 (32x32。四つの巨神で共通。巨神ごとに分けるなら
                                                                           models/item/heartbeat_ward_<titan>.json の textures を替える)
 使い方: python tools/gen_guide_placeholders.py
+済み (21 の P4・P5): ユーザーの選定 (旅の覚書 A・鼓動守 A) の絵に置き換え済み (tools/install_whale_road_assets.py)。この仮の絵はもう書かない
+(流すと選んだ絵を仮の絵で上書きするので、引数 --force を付けたときだけ書く)。
 """
 import os
 import zlib
@@ -70,6 +72,8 @@ def ward():
 
 if __name__ == "__main__":
     os.makedirs(ROOT, exist_ok=True)
+    if "--force" not in __import__("sys").argv:
+        raise SystemExit("placeholders are already replaced by the chosen icons (tools/install_whale_road_assets.py); pass --force to overwrite them")
     png(os.path.join(ROOT, "wayfarer_notes.png"), notes())
     png(os.path.join(ROOT, "heartbeat_ward.png"), ward())
     print("wrote placeholders in", os.path.abspath(ROOT))

@@ -19,6 +19,7 @@ public final class NpcSetup {
 
     public static final String STORYTELLER_ID = SkyAbyss.MODID + ":storyteller";
     public static final String WHALE_CHASER_ID = SkyAbyss.MODID + ":whale_chaser";
+    public static final String ARTISAN_ID = SkyAbyss.MODID + ":artisan";
 
     // 語り部: 村の鐘のそばにいる年寄り。空の影と村の言い伝えを語る (家のまわり 8 ブロックを歩く)
     public static final DeferredHolder<EntityType<?>, EntityType<NpcEntity>> STORYTELLER = ENTITIES.register("storyteller",
@@ -34,6 +35,14 @@ public final class NpcSetup {
                     .clientTrackingRange(10)
                     .fireImmune()
                     .build(WHALE_CHASER_ID));
+
+    // 旅の職人 (docs/design/21 の 1.4、P4): 荷車の傍らの道に荷を広げている。章ごとに装いが変わる (NpcEntity.variant = 章)。荷のまわり 3 ブロック
+    public static final DeferredHolder<EntityType<?>, EntityType<NpcEntity>> ARTISAN = ENTITIES.register("artisan",
+            () -> EntityType.Builder.<NpcEntity>of((type, level) -> new NpcEntity(type, level, 3), MobCategory.MISC)
+                    .sized(0.6f, 1.95f)
+                    .clientTrackingRange(10)
+                    .fireImmune()
+                    .build(ARTISAN_ID));
 
     // プレイヤーと NPC の記録 (好感度・会話の印)。死んでも引き継ぎ、持ち主にだけ同期する
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<NpcBonds>> BONDS = ATTACHMENTS.register("npc_bonds",
@@ -55,5 +64,6 @@ public final class NpcSetup {
     private static void onAttributes(EntityAttributeCreationEvent event) {
         event.put(STORYTELLER.get(), NpcEntity.attributes(0.2).build());
         event.put(WHALE_CHASER.get(), NpcEntity.attributes(0.25).build());
+        event.put(ARTISAN.get(), NpcEntity.attributes(0.22).build());
     }
 }

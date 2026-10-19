@@ -1,0 +1,113 @@
+{
+  "npc": "skyabyss:artisan",
+  "entries": [
+    {
+      "node": "a_menu"
+    }
+  ],
+  "nodes": {
+    "a_menu": {
+      "face": "neutral",
+      "options": [
+        {
+          "id": "hammer",
+          "if": [
+            {
+              "type": "affinity",
+              "min": 10
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "a_hammer_told"
+              }
+            }
+          ],
+          "goto": "a_hammer"
+        },
+        {
+          "id": "whet",
+          "if": [
+            {
+              "type": "affinity",
+              "min": 30
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "a_whet_told"
+              }
+            }
+          ],
+          "goto": "a_whet"
+        },
+        {
+          "id": "hands",
+          "if": [
+            {
+              "type": "affinity",
+              "min": 60
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "a_hands_told"
+              }
+            }
+          ],
+          "goto": "a_hands"
+        },
+        {
+          "id": "bye",
+          "kind": "leave",
+          "goto": "end"
+        }
+      ]
+    },
+    "a_hammer": {
+      "face": "neutral",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "a_hammer_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "a_whet": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "a_whet_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    },
+    "a_hands": {
+      "face": "grave",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "a_hands_told"
+        },
+        {
+          "type": "affinity",
+          "amount": 1
+        }
+      ],
+      "next": "a_menu"
+    }
+  }
+}

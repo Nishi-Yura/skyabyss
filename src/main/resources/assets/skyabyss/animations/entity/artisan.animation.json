@@ -1,0 +1,115 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.artisan.idle": {
+   "loop": true,
+   "animation_length": 5.0,
+   "bones": {
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.anim_time * 72) * 0.2",
+      "0"
+     ],
+     "rotation": [
+      "math.sin(query.anim_time * 72) * 0.6",
+      "0",
+      "0"
+     ]
+    },
+    "armL": {
+     "rotation": [
+      "math.sin(query.anim_time * 72 + 30) * 1.5",
+      "0",
+      "math.sin(query.anim_time * 72) * 0.8"
+     ]
+    },
+    "armR": {
+     "rotation": [
+      "math.sin(query.anim_time * 72 + 90) * 1.5 + math.max(0, math.sin(query.anim_time * 144)) * 3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.artisan.walk": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "legL": {
+     "rotation": [
+      "math.sin(query.anim_time * 360) * 18",
+      "0",
+      "0"
+     ]
+    },
+    "legR": {
+     "rotation": [
+      "-math.sin(query.anim_time * 360) * 18",
+      "0",
+      "0"
+     ]
+    },
+    "armL": {
+     "rotation": [
+      "-math.sin(query.anim_time * 360) * 12",
+      "0",
+      "0"
+     ]
+    },
+    "armR": {
+     "rotation": [
+      "math.sin(query.anim_time * 360) * 12",
+      "0",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.abs(math.sin(query.anim_time * 360)) * 0.4",
+      "0"
+     ],
+     "rotation": [
+      "0",
+      "math.sin(query.anim_time * 360) * 1.5",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.artisan.talk": {
+   "loop": true,
+   "animation_length": 3.0,
+   "bones": {
+    "armR": {
+     "rotation": [
+      "32 + math.sin(query.anim_time * 120) * 7",
+      "0",
+      "math.sin(query.anim_time * 120 + 40) * 3"
+     ]
+    },
+    "armL": {
+     "rotation": [
+      "8 + math.sin(query.anim_time * 120 + 90) * 3",
+      "0",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.anim_time * 120) * 0.15",
+      "0"
+     ],
+     "rotation": [
+      "math.sin(query.anim_time * 120) * 1.2",
+      "0",
+      "0"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -7,7 +7,7 @@
 1. `git fetch origin` → `git checkout m1-sky-pass` → `git pull`
 2. ブランチは `main` と `m1-sky-pass`。途中の作業（wip ブランチ）は無い。エージェントの worktree（`.claude/worktrees/`）の中身は全部 m1-sky-pass に取り込み済み。
 3. ビルド: `./gradlew compileJava --offline`（初回は `--offline` を外す）。jar は `./gradlew build --offline -x test` → `build/libs/skyabyss-0.2.2.jar`。
-4. 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer`（一部だけは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>`。合う段が無いとエラーで止まる）。**新しい level-name と `level-seed=4242`、`max-tick-time=-1`** で回す。結果は「5. 自己テスト」。
+4. 自己テスト: `SKYABYSS_SELFTEST=1 ./gradlew runServer`（一部だけは `SKYABYSS_SELFTEST_ONLY=<段の名前の頭>[,<頭>…]`。カンマで複数。合う段が無いとエラーで止まる）。**新しい level-name と `level-seed=4242`、`max-tick-time=-1`** で回す。結果は「5. 自己テスト」。
 5. 設計書は `docs/design/README.md` から。未決 `docs/design/00_decisions_needed.md` は空。ユーザーに聞くことは下の「3. ユーザーの判断待ち」。
 
 ## 1. 2026-10-19〜20 に入ったもの（0.2.2）

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "minecraft:wheat"
+    },
+    {
+      "item": "skyabyss:bone_chip"
+    }
+  ],
+  "result": {
+    "id": "skyabyss:road_hardtack",
+    "count": 3
+  }
+}
