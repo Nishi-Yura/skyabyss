@@ -60,7 +60,7 @@ for i, (name, title, note) in enumerate(CELLS):
         img.paste(Image.open(f).convert("RGB").resize((W, H), Image.LANCZOS), (x, y))
     d.text((x + 2, y + H + 6), title, fill=ACC, font=font(18))
     d.text((x + 2, y + H + 30), note, fill=SUB, font=font(13))
-d.text((PAD + 4, img.height - 30), "配置の版 20 / 体 4,610,293 ブロック / 建設 約 7 秒 + 体 42 秒 / 休み場 10 / 碑と宝 10 / 貝の間 4", fill=SUB, font=font(13))
+d.text((PAD + 4, img.height - 30), "配置の版 20 / 体 4,610,293 ブロック / 建設 約 7 秒 + 体 42 秒 / 休み場 10 / 碑と宝 15 / 貝の間 4", fill=SUB, font=font(13))
 OUT.parent.mkdir(parents=True, exist_ok=True)
 img.save(OUT)
 print(OUT, img.size)
