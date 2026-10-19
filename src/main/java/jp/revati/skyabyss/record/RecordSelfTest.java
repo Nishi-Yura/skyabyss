@@ -235,6 +235,8 @@ public final class RecordSelfTest {
         RecordSnapshot.Tab overview = snap.tab(RecordSnapshot.TITANS);
         for (String titan : titans) {
             check(f, overview != null && overview.row("titan." + titan) != null, "overview misses " + titan);
+            TitanPages.Page page = TitanPages.page(titan);
+            check(f, page != null && page.coreItem() != null && !page.collection().get().isEmpty(), "the record page of " + titan + " has no core or collection");
         }
         // 段階 0 の人には、潮殻より先は伏せ字 (名前の翻訳キーが出ない)
         if (jp.revati.skyabyss.progress.Progression.stage(a) == 0) {
