@@ -24,11 +24,12 @@ public final class QuestHud {
 
     public static int y() {
         // 成長の表示を経験値バーの左に置いたときは、左上の一番上から (左上に寄せた技の枠があればその下)
+        // 章の札 (ChapterLabel) を帯の上に出すあいだは、その分 (ROWS) だけ下へ。札は y() - ROWS に描く
         Minecraft mc = Minecraft.getInstance();
         if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, mc.getWindow().getGuiScaledWidth())) {
-            return 6 + jp.revati.skyabyss.rpg.client.skill.SkillHud.topLeftRowsWhenGrowthAtBottom();
+            return 6 + jp.revati.skyabyss.rpg.client.skill.SkillHud.topLeftRowsWhenGrowthAtBottom() + ChapterLabel.rows();
         }
-        return POPUP_TOP + jp.revati.skyabyss.rpg.client.skill.SkillHud.rowsBelowXpBar() + POPUP_ROWS * 10 + 6;
+        return POPUP_TOP + jp.revati.skyabyss.rpg.client.skill.SkillHud.rowsBelowXpBar() + POPUP_ROWS * 10 + 6 + ChapterLabel.rows();
     }
     static final int WIDTH = 150;
     static final int TITLE = 0xFF7FD6D0;
@@ -156,7 +157,7 @@ public final class QuestHud {
         jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
         // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
         boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
-        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める・探索する。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
+        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
         // 歌の頁を持つ人は上の式がいつも真になり、鎖が降りても「待ち」のままだった (first_hour.txt の通しで発見)。この段だけは鎖で決める
         if (def.id().equals("main_song") && stage.id().equals("board")) {
             waiting = !chainDown();

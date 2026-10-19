@@ -87,6 +87,9 @@
 | `noticeSpeed` | 1.0 | 字幕・中央・帯の出ている長さの倍率（0.5〜2） |
 | `bossAttackNames` | `SMALL` | ボスの技の名前。`SMALL` = ボスバーのすぐ下に小さな一行（印 8px。1 秒あまりで消える）、`FULL` = 従来の大きな印と名前と残りの帯、`OFF` = 出さない（床の予告だけ） |
 | `objectiveStrip` | true | 左上のメインの目的の帯 |
+| `chapterLabel` | true | 左上の目的の帯の上の、今の章の札（8.4） |
+| `questSound` | true | クエストが始まった・進んだ・終わったときの小さな音（メインとサブで音が違う。8.4） |
+| `npcMarkers` | true | NPC の頭の上の印（話すことがあるとき。その人にだけ見える。07 の 8.5） |
 | `partyMarkers` | true | 仲間の札・矢印 |
 | `graveMarker` | true | 自分の墓の標（札・矢印と距離） |
 | `questArrow` | true | 目的の帯の方角を、向きに合わせて回る矢印にする（false = 北東などの文字）。8.3 |
@@ -146,6 +149,12 @@
   - 描かない場面: 場面（シネマティック）・開幕の目覚め・画面を開いている間・F1・オーバーワールド以外・目印が 3.5 ブロック以内（近づくと薄れる）・設定 OFF。
 - 自己テスト `SELFTEST guide nav`（`guide/nav/GuideNavSelfTest`）: 矢印の角度（八方・yaw の巻き戻り・範囲）、探索（平ら・段差 1・壁 2・穴・落差 3/4・全面の壁・池を避ける/湖を渡る・溶岩・読み込み外・遠い目印・空の目印・出発点が空中・上限）、予算（1 tick の上限・何 tick かに分散・持ち主にだけ届く・動かなければ送り直さない・8 ブロックで再計算・目印の変更・止めたら送らない・途絶えで捨てる）、パケットの往復と大きさ。
 
+
+### 8.4 章の札・更新の音・NPC の頭の印（`quest/QuestUx`、`client/quest/ChapterLabel`）
+
+- **章の札**: 目的の帯のすぐ上に、今の章（「一章　空を泳ぐもの」。`Chapters` の `tab` + 全角空白 + `title`。序章は「序章　空の影」）を小さく出しっぱなしにする。章はサーバーが人ごとに `Chapters.of` で導き、変わったとき・入ったときだけその人に送る（パケット版 `questux-1`）。場面・F1・F3・目覚めの暗転では出さない。画面を開いている間は薄くする。設定 `chapterLabel`。札の高さ（11px）の分だけ、下の帯と追跡の表示が下へずれる（`QuestHud.y()`）。HUD の置き場を一括で持つ部品（`HudLayout`）ができたら、札はそこの「帯の上」の段に載せる。
+- **更新の音**: クエストの札（`QuestToast`）と同時に、メインの段の更新・始まり・終わりは小さな鐘が二つ（五度上がる、1.3 秒、最大音量 0.5。終わりは少し低く）、サブは柔らかいひとつ（0.7 秒、0.32）。合成は `tools/gen_quest_ux_sounds.py`（序盤の鐘と同じ部分音の組み方）、出力は `sounds/ui/quest_main.ogg`・`quest_side.ogg`、登録は `QuestUx`、鳴らすのは `QuestClient.playSound`。会話・場面の最中は札と同じく溜めて、閉じたあとに鳴る。設定 `questSound` で止める（以前の水晶の音は廃止）。
+- **NPC の頭の上の印**: 07 の 8.5 節。見本の絵は `docs/review/previews/quest_ux_sheet.png`（`tools/shots/quest_ux.txt` → `tools/quest_ux_sheet.py`）。
 
 ## 9. 章の題字と余韻（`story/arc/ChapterCards`）
 

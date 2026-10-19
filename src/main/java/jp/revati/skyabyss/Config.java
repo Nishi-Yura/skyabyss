@@ -103,6 +103,18 @@ public final class Config {
             .comment("メインの目的を左上の細い帯に常に出すか (false = 出さない。全文は U のクエストログ)")
             .define("objectiveStrip", true);
 
+    public static final ModConfigSpec.BooleanValue CHAPTER_LABEL = CLIENT_BUILDER
+            .comment("今の章 (「一章　空を泳ぐもの」) を左上の目的の帯の上に小さく出すか (false = 出さない)")
+            .define("chapterLabel", true);
+
+    public static final ModConfigSpec.BooleanValue QUEST_SOUND = CLIENT_BUILDER
+            .comment("クエストが始まった・進んだ・終わったときの小さな音を鳴らすか (メインとサブで音が違う。false = 鳴らさない)")
+            .define("questSound", true);
+
+    public static final ModConfigSpec.BooleanValue NPC_MARKERS = CLIENT_BUILDER
+            .comment("話すことがある NPC の頭の上に、その人にだけ見える印 (! 新しい話・頼み、? 報告、・ 新しい雑談) を出すか (false = 出さない)")
+            .define("npcMarkers", true);
+
     // 目的の道しるべ (client/guide): 左上の帯の矢印と、地面の道の出し方
     public enum TrailMode {
         ON,

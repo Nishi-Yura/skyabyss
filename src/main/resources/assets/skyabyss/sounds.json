@@ -2514,5 +2514,19 @@
         "volume": 1.2
       }
     ]
+  },
+  "quest_main": {
+    "sounds": [
+      {
+        "name": "skyabyss:ui/quest_main"
+      }
+    ]
+  },
+  "quest_side": {
+    "sounds": [
+      {
+        "name": "skyabyss:ui/quest_side"
+      }
+    ]
   }
 }
