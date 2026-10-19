@@ -20,7 +20,7 @@ public final class EmberDeck {
     private EmberDeck() {
     }
 
-    // 試練の階を建てるか。版 22 から本番でも置く (既定 true)。自己テストが「置かない姿」(原型の三つだけ) を確かめるときだけ false にする
+    // 試練の階を建てるか。版 23 から本番でも置く (既定 true)。自己テストが「置かない姿」(原型の三つだけ) を確かめるときだけ false にする
     // (開発用: 環境変数 SKYABYSS_TRIAL_DECK=0 で置かない姿にして比べられる)
     private static boolean placed = !"0".equals(System.getenv("SKYABYSS_TRIAL_DECK"));
 
