@@ -90,7 +90,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("party steles", jp.revati.skyabyss.titan.group.TrialStelesSelfTest::runSelfTest));
         // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)。docs/design/21 の 1.7、10 の 10.11
         steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
-        // 周回の誓い (Vow)・周回の言い回し、居座りの早じまい (無人 3 分)。docs/design/21 の 1.8、10 の 10.12、rpg_brushup B4 / B5
+        // 周回の誓い (Vow)・周回の言い回し、居座りの早じまい (無人 3 分)。docs/design/21 の 1.8、10 の 10.15、rpg_brushup B4 / B5
         steps.add(Step.once("vow (load)", jp.revati.skyabyss.titan.vow.VowSelfTest::load));
         steps.add(Step.once("vow", 40, jp.revati.skyabyss.titan.vow.VowSelfTest::runSelfTest));
         steps.add(Step.once("stay leave", jp.revati.skyabyss.titan.vow.VowSelfTest::runStaySelfTest));
