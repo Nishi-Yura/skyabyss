@@ -290,7 +290,31 @@ public final class TrialPoolSelfTest {
         return out;
     }
 
+    // 試練の階の部屋が、背のほかの部屋 (TitanBackLayout の Box) と体の中で重ならない (壁を共有するだけは良い)
+    private static void deckOverlaps() {
+        for (java.lang.reflect.Field fld : jp.revati.skyabyss.titan.dungeon.TitanBackLayout.class.getDeclaredFields()) {
+            if (fld.getType() != jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box.class || !java.lang.reflect.Modifier.isStatic(fld.getModifiers())) {
+                continue;
+            }
+            try {
+                fld.setAccessible(true);
+                var other = (jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box) fld.get(null);
+                for (var room : WhaleDeck.ROOMS) {
+                    boolean x = room.x1() - 1 <= other.x2() && other.x1() <= room.x2() + 1;
+                    boolean z = room.z1() - 1 <= other.z2() && other.z1() <= room.z2() + 1;
+                    boolean y = room.floorY() <= other.floorY() + other.height() + 1 && other.floorY() <= room.floorY() + room.height() + 1;
+                    if (x && z && y) {
+                        FAIL.add("deck room " + room + " overlaps layout box " + fld.getName() + " " + other);
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                FAIL.add("cannot read " + fld.getName());
+            }
+        }
+    }
+
     private static void variants(MinecraftServer server) {
+        deckOverlaps();
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {

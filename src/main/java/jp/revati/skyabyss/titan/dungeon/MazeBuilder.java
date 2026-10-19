@@ -163,14 +163,7 @@ public final class MazeBuilder {
         for (int n = 0; n < deadEnds.size(); n++) {
             BlockPos p = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(MAZE_CELL / 2, 0, MAZE_CELL / 2);
             if (n % 3 == 1) {
-                kit.set(p, Blocks.SPAWNER.defaultBlockState());
-                if (kit.level().getBlockEntity(p) instanceof SpawnerBlockEntity be) {
-                    be.setEntityId(ModEntities.WATERWAY_MAW.get(), kit.random);
-                    // 同時にいる数は 2 まで。入った瞬間に囲まれないように
-                    CompoundTag tag = be.saveWithoutMetadata(kit.level().registryAccess());
-                    tag.putShort("MaxNearbyEntities", (short) MAW_MAX_NEARBY);
-                    be.getSpawner().load(kit.level(), p, tag);
-                }
+                placeMawSpawner(kit, p);
             } else if (n % 2 == 0) {
                 kit.set(p.below(), Blocks.SAND.defaultBlockState());
                 kit.set(p, Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, 1 + n % 3));
@@ -178,6 +171,23 @@ public final class MazeBuilder {
                 kit.set(p.below(), Blocks.SAND.defaultBlockState());
                 kit.set(p, Blocks.KELP_PLANT.defaultBlockState());
                 kit.set(p.above(), Blocks.KELP.defaultBlockState());
+            }
+        }
+
+        // 水路の顎 (版 18。魚に出会う機会を増やす): 正しい道に沿って、天井の石に埋めた湧きの装置 (見えない)。道の途中にいるあいだ、10 〜 20 秒ごとに
+        // 近くへ一匹が来る (近くに同時に 2 匹まで)。入口・出口・息継ぎのくぼみの近くには置かない。来てから襲うまでの猶予と、灯のそばは襲わない決まりはそのまま (WaterwayMaw)
+        java.util.Set<Long> pocketCells = new java.util.HashSet<>();
+        for (int[] c : plan.pockets) {
+            pocketCells.add(((long) c[0] << 20) ^ c[1]);
+        }
+        for (int k = 8; k < path.size() - 6; k += 7) {
+            int[] c = path.get(k);
+            if (pocketCells.contains(((long) c[0] << 20) ^ c[1])) {
+                continue;
+            }
+            BlockPos ceiling = mazeCell(c[0], c[1]).offset(MAZE_CELL / 2, 3, MAZE_CELL / 2);
+            if (!kit.get(ceiling.getX(), ceiling.getY(), ceiling.getZ()).isAir()) {
+                placeMawSpawner(kit, ceiling);
             }
         }
 
@@ -206,6 +216,22 @@ public final class MazeBuilder {
         buildEntryFloor(kit);
         // 灯の台・出口の手前の戸・近道の戸・中ほどの苗床 (docs/design/23)
         AnemoneLights.build(kit, maze);
+    }
+
+    // 水路の顎の湧きの装置: 同時に 2 匹まで、6〜16 秒ごと、20 ブロック以内に人がいるとき (既定は 16 ブロック・10〜40 秒)
+    private static void placeMawSpawner(BuildKit kit, BlockPos p) {
+        kit.set(p, Blocks.SPAWNER.defaultBlockState());
+        if (kit.level().getBlockEntity(p) instanceof SpawnerBlockEntity be) {
+            be.setEntityId(ModEntities.WATERWAY_MAW.get(), kit.random);
+            CompoundTag tag = be.saveWithoutMetadata(kit.level().registryAccess());
+            tag.putShort("MaxNearbyEntities", (short) MAW_MAX_NEARBY);
+            tag.putShort("MinSpawnDelay", (short) 120);
+            tag.putShort("MaxSpawnDelay", (short) 320);
+            tag.putShort("SpawnCount", (short) 1);
+            tag.putShort("RequiredPlayerRange", (short) 20);
+            tag.putShort("SpawnRange", (short) 5);
+            be.getSpawner().load(kit.level(), p, tag);
+        }
     }
 
     // 入口の小部屋の床の飾り: 焚き火の下の彫刻石と、水への入口 (床の穴) の両脇の灯り。
@@ -250,6 +276,9 @@ public final class MazeBuilder {
         kit.lantern(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z2());
         kit.set(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z1(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
         kit.room(EXIT_PASS);
+        kit.wallLamps(EXIT_PASS, 4, FLOOR + 4);
+        kit.lantern(EXIT_PASS.x1() + 3, FLOOR + 1, EXIT_PASS.z1());
+        kit.lantern(EXIT_PASS.x1() + 9, FLOOR + 1, EXIT_PASS.z2());
         BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
         for (int y = MAZE_EXIT_ROOM.floorY() + 1; y <= FLOOR; y++) {
             kit.set(MAZE_EXIT_ROOM.x1(), y, EXIT_LADDER_Z, ladderEast);

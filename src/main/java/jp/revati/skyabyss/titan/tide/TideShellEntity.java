@@ -81,7 +81,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     public static final double REST_LEG_SKIP = -1.0;
     // 休むとき、腹 (底の 7 ブロック) は海底へ沈めてよい。浅い所で腹が地形に押し上げられると甲羅が海面に浮いて見える。海底に腹をうずめて休む亀にする。
     // 沈めてよいのは足・ひれを除いた腹だけで、上の体 (甲羅の縁・首・頭) は海底・岸・丘に触れない
-    public static final double REST_BURY = 7.0;
+    public static final double REST_BURY = 10.0;
+    // 休むとき、頂が 16 ブロックに届かない低い体 (甲羅の裾・ひれ) は、砂・岸へ埋めてよい (裾を砂に沈めて休む)。ドームと首・頭は触れない
+    public static final double REST_SKIRT_HI = 16.0;
     public static final double CRUISE_DRAFT_MAX = 29.0;
     // 眠るときの沈み: 甲羅の頂が海から 2 ブロックだけ出る (珊瑚の段だけが水の上に残る)
     public static final double SLEEP_DRAFT = 32.0;
@@ -652,7 +654,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         boolean settling = mode == Mode.REST || (mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60);
         groundNow = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
                 jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0,
-                settling ? REST_LEG_SKIP : Double.NEGATIVE_INFINITY);
+                settling ? REST_LEG_SKIP : Double.NEGATIVE_INFINITY, settling ? REST_SKIRT_HI : Double.NEGATIVE_INFINITY);
         if (settling && Double.isFinite(groundNow)) {
             groundNow -= REST_BURY;
         }

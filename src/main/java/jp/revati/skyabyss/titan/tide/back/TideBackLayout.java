@@ -39,7 +39,7 @@ public final class TideBackLayout {
     // 10: 息の間 (亀の肺。予約の間 1〜3 と月の窓の縦穴を一つの大空洞にし、水を湛えた皿と風の柱、頂の真珠守りと展望の間を足した。封印の戸と階段はなくなった。
     //    docs/design/24 の案 C、08 の 3.8節)
     // 12: ボス部屋の大門と建築の監査の両方
-    public static final int LAYOUT_VERSION = 13; // 12: 建築の監査 (体の 1 ブロックの浮き・くぼみを直す)。11: 建築の監査 (階段の向き・庭の入口の段・甲羅の出口の段)
+    public static final int LAYOUT_VERSION = 14; // 12: 建築の監査 (体の 1 ブロックの浮き・くぼみを直す)。11: 建築の監査 (階段の向き・庭の入口の段・甲羅の出口の段)
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

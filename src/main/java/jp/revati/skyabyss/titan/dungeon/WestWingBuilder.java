@@ -5,27 +5,30 @@ import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 import java.util.List;
 
 import jp.revati.skyabyss.registry.ModBlocks;
+import jp.revati.skyabyss.titan.dungeon.ParkourCourses.Island;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 西の翼「裂け目の回廊」: 足場を跳び継いで進む、長いアスレチック (版 13 で x1.6。谷ごとに並列のレーン 2〜3 本)。
+// 西の翼「裂け目の回廊」(版 18 で作り直し): 谷を渡る長いアスレチック。
 //   西の前室 (休み場) → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 (→ 数え歌の鐘楼) → 崩れ橋 → 共鳴石の岩棚
-// 谷はどれも床が抜け落ち、はるか下に溶岩が光る。落ちると直前の休み場へ戻される (TitanBackTrials)。
-// 一部の足場は乗ると崩れる。最後の岩棚から、鼓動の間へ下りる抜け道が開く。
-// 第二の休み場から崩れ橋へ行く通路は、初回は鐘楼の鐘が鳴りやむまで閉じている (BELL_GATE。鐘楼は BellTower)
+// 谷はどれも床が抜け落ち、はるか下に溶岩が光る。足場は筋の通った一本の道 (ParkourCourses): 飛び石 → 島 (休み場を兼ねる) → 骨の橋。
+// 落ちると直前の休み場 (島を含む) へ戻される (TitanBackTrials)。最後の岩棚から、鼓動の間へ下りる抜け道が開く。
+// 第二の休み場から崩れ橋へ行く通路は、初回は鐘楼の鐘が鳴りやむまで閉じている (BELL_GATE。鐘楼は BellTower)。
+// 材質は「肋骨」(ZonePalette.RIB): 熱で黒ずんだ磨き黒石・骨・玄武岩。谷の天井には肋骨の梁が渡る
 final class WestWingBuilder {
     private WestWingBuilder() {
     }
 
     static void build(BuildKit kit) {
+        kit.palette(ZonePalette.RIB);
         kit.room(W0);
-        kit.room(WA);
+        kit.roomSolid(WA);
         kit.room(W1);
-        kit.room(WB);
+        kit.roomSolid(WB);
         kit.room(W2);
-        kit.room(WC);
+        kit.roomSolid(WC);
         // 部屋どうしをつなぐ戸口 (壁の厚さ 1。幅 5、高さ 6)
         kit.doorway(WA.x2() + 1, WA.x2() + 1, -38, -34, FLOOR, 6);                    // 西の前室 → 肋骨の谷
         kit.doorway(-52, -48, WA.z1() - 1, WA.z1() - 1, W1.floorY(), 6);               // 肋骨の谷 → 第一の休み場
@@ -33,22 +36,32 @@ final class WestWingBuilder {
         kit.doorway(-46, -42, WB.z1() - 1, WB.z1() - 1, W2.floorY(), 6);               // 竪穴 → 第二の休み場
         kit.room(W2_CONN1);                                                              // 第二の休み場 → 崩れ橋
         kit.room(W2_CONN2);
+        for (Box conn : List.of(W2_CONN1, W2_CONN2)) {
+            kit.wallLamps(conn, 3, conn.floorY() + 4);
+            kit.lantern(conn.x1() + 1, conn.floorY() + 1, conn.z1());
+        }
 
         // 谷: 床を抜き、はるか下を溶岩にする
         for (Box pit : PITS) {
             pit(kit, pit);
         }
-        // 谷の入口と出口の岩棚 (レーンの両端)
-        for (CourseGenerator.Spec spec : List.of(ParkourCourses.A, ParkourCourses.B, ParkourCourses.C)) {
+        // 谷の入口と出口の岩棚 (道の両端)
+        for (CourseGenerator.Spec spec : ParkourCourses.ALL) {
             ledge(kit, spec.start());
             ledge(kit, spec.end());
         }
         // 戸の足もとの石までつなぐ (共鳴石の岩棚。谷の東の縁の列)
-        kit.fill(WC.x2() - 5, WEST_LEDGE_Y, -54, WC.x2(), WEST_LEDGE_Y, -50, BuildKit.POLISHED);
+        kit.fill(WC.x2() - 5, WEST_LEDGE_Y, -54, WC.x2(), WEST_LEDGE_Y, -50, kit.pal().floor());
 
         decorate(kit);
         ribWindows(kit);
-        placeCourses(kit, ParkourCourses.forSeed(TitanBackData.get(kit.level()).courseSeed()));
+        for (int i = 0; i < ParkourCourses.ISLANDS.size(); i++) {
+            for (Island isl : ParkourCourses.ISLANDS.get(i)) {
+                island(kit, isl);
+            }
+        }
+        placeCourses(kit, ParkourCourses.forSeed(0));
+        pathLights(kit);
 
         // 最後の岩棚から鼓動の間へ下りる抜け道 (石が歌うまで封じられている)
         for (BlockPos p : WEST_RETURN) {
@@ -56,9 +69,11 @@ final class WestWingBuilder {
         }
         // 数え歌の鐘楼 (第二の休み場の北) と、そこへ行く通路。鐘が鳴りやむまで崩れ橋への通路が閉じる
         BellTower.build(kit);
+        kit.palette(ZonePalette.RIB);
         for (BlockPos p : BELL_GATE) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
+        kit.palette(ZonePalette.DEEP);
     }
 
     private static void pit(BuildKit kit, Box pit) {
@@ -128,23 +143,57 @@ final class WestWingBuilder {
 
     private static void ledge(BuildKit kit, List<int[]> cells) {
         for (int[] c : cells) {
-            kit.set(c[0], c[1], c[2], BuildKit.POLISHED);
+            kit.set(c[0], c[1], c[2], kit.pal().floor());
         }
     }
 
-    // 足場を置く。足場はすべて崩れる骨。新しい足場の頭上に飾り (鎖・鍾乳石) が垂れていたら取り除く
+    // 島: 3×3 の石の台 (休み場)。下は先の細い岩の塊になって谷へ垂れ、四隅に骨の柱と灯りが立つ
+    private static void island(BuildKit kit, Island i) {
+        BlockState brick = kit.pal().wall();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                boolean center = dx == 0 && dz == 0;
+                kit.set(i.cx() + dx, i.y(), i.cz() + dz, center ? kit.pal().trim() : brick);
+                kit.set(i.cx() + dx, i.y() - 1, i.cz() + dz, brick);
+                // 四隅の上は空ける (頭上の飾りを消す)
+                for (int y = i.y() + 1; y <= i.y() + 6; y++) {
+                    kit.set(i.cx() + dx, y, i.cz() + dz, BuildKit.AIR);
+                }
+            }
+        }
+        for (int d = 0; d < 4; d++) {
+            kit.set(i.cx() + Direction.from2DDataValue(d).getStepX(), i.y() - 2, i.cz() + Direction.from2DDataValue(d).getStepZ(), brick);
+        }
+        for (int y = i.y() - 2; y >= i.y() - 5; y--) {
+            kit.set(i.cx(), y, i.cz(), y >= i.y() - 3 ? brick : Blocks.BLACKSTONE.defaultBlockState());
+        }
+        // 四隅の柱 (骨 2 つ) と灯り
+        for (int dx = -1; dx <= 1; dx += 2) {
+            for (int dz = -1; dz <= 1; dz += 2) {
+                int x = i.cx() + dx;
+                int z = i.cz() + dz;
+                kit.set(x, i.y() + 1, z, kit.pal().pillarAlong(Direction.Axis.Y));
+                kit.set(x, i.y() + 2, z, kit.pal().pillarAlong(Direction.Axis.Y));
+                kit.set(x, i.y() + 3, z, kit.pal().lantern());
+            }
+        }
+    }
+
+    // 足場を置く。足場の頭上は、天井まで空ける (飾りの鎖・鍾乳石・ランタンが途中で切れて宙に残らない)
     static void placeCourses(BuildKit kit, List<List<int[]>> courses) {
-        // 先に頭上を空け、そのあとで全レーンの足場を置く (別のレーンの足場が頭上にあっても消さない)
         for (List<int[]> course : courses) {
             for (int[] s : course) {
-                for (int y = s[1] + 1; y <= s[1] + 6; y++) {
-                    kit.set(s[0], y, s[2], BuildKit.AIR);
+                for (int y = s[1] + 1; y <= FLOOR + 15; y++) {
+                    BlockState b = kit.get(s[0], y, s[2]);
+                    if (y <= s[1] + 5 || b.is(Blocks.CHAIN) || b.is(Blocks.POINTED_DRIPSTONE) || b.getBlock() instanceof net.minecraft.world.level.block.LanternBlock) {
+                        kit.set(s[0], y, s[2], BuildKit.AIR);
+                    }
                 }
             }
         }
         for (List<int[]> course : courses) {
             for (int[] s : course) {
-                kit.set(s[0], s[1], s[2], ModBlocks.CRUMBLING_BONE.get().defaultBlockState());
+                kit.set(s[0], s[1], s[2], s[3] == 1 ? ZonePalette.RIB.glow() : ModBlocks.CRUMBLING_BONE.get().defaultBlockState());
             }
         }
     }
@@ -158,6 +207,41 @@ final class WestWingBuilder {
         }
     }
 
+    // 道の灯り: 骨の橋の脇に、天井から鎖で吊るした灯りを 4 つの足場ごとに (橋の真上は頭上を空けてあるので、2 マス脇に)
+    private static void pathLights(BuildKit kit) {
+        List<List<int[]>> courses = ParkourCourses.forSeed(0);
+        int ceiling = FLOOR + 16;
+        int[][] offsets = {{2, 0}, {-2, 0}, {0, 2}, {0, -2}};
+        for (int pit = 0; pit < courses.size(); pit++) {
+            int n = 0;
+            for (int[] s : courses.get(pit)) {
+                if (s[3] != 0 || n++ % 4 != 2) {
+                    continue;
+                }
+                for (int[] o : offsets) {
+                    int x = s[0] + o[0];
+                    int z = s[2] + o[1];
+                    if (freeColumn(x, z) && !kit.get(x, ceiling, z).isAir() && kit.get(x, ceiling - 1, z).isAir()) {
+                        kit.hangingLantern(x, z, ceiling, Math.max(1, ceiling - s[1] - 5));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // その柱 (x, z) の上下に、足場も島もない (隣の柱にも足場がない) か
+    private static boolean freeColumn(int x, int z) {
+        for (int pit = 0; pit < ParkourCourses.ALL.size(); pit++) {
+            for (int[] b : ParkourCourses.allBlocks(pit)) {
+                if (Math.abs(b[0] - x) <= 1 && Math.abs(b[2] - z) <= 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private static void decorate(BuildKit kit) {
         // 休み場
         kit.restPoint(W0);
@@ -168,19 +252,23 @@ final class WestWingBuilder {
         }
         kit.pilasters(W0, 3);
         kit.moss(W0, 0.06f);
-        // 肋骨の谷: 天井に骨の梁 (足場の高さより十分上なので頭はぶつからない)
-        kit.ribs(WA, 6, true);
-        kit.pilasters(WA, 5);
-        // 谷の天井から垂れる鍾乳石と鎖。足場の位置は毎回変わるので、壁ぎわ1マスだけに飾る
+        // 谷の天井に、肋骨の梁 (谷ごとに。足場の高さより十分上なので頭はぶつからない)
+        for (Box pit : PITS) {
+            kit.ribs(pit, 6, true);
+            kit.pilasters(pit, 5);
+        }
+        // 谷の天井から垂れる鍾乳石と鎖。壁ぎわ 1 マスだけに飾る (足場の上の柱は、足場を置くときに天井まで消える)
+        java.util.Set<Long> used = new java.util.HashSet<>();
         for (Box pit : PITS) {
             for (int i = 0; i < 30; i++) {
                 boolean alongX = kit.random.nextBoolean();
                 int x = alongX ? pit.x1() + kit.random.nextInt(pit.x2() - pit.x1() + 1) : (kit.random.nextBoolean() ? pit.x1() : pit.x2());
                 int z = alongX ? (kit.random.nextBoolean() ? pit.z1() : pit.z2()) : pit.z1() + kit.random.nextInt(pit.z2() - pit.z1() + 1);
+                if (!used.add(((long) x << 32) ^ (z & 0xffffffffL))) {
+                    continue;
+                }
                 if (i % 3 == 0) {
-                    for (int y = pit.ceilingY() - 1; y > pit.ceilingY() - 5; y--) {
-                        kit.set(x, y, z, Blocks.CHAIN.defaultBlockState());
-                    }
+                    kit.hangingLantern(x, z, pit.ceilingY(), 3);
                 } else {
                     kit.stalactite(x, pit.ceilingY(), z, 1 + kit.random.nextInt(3));
                 }

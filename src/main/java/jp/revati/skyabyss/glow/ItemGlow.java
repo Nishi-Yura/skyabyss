@@ -3,6 +3,7 @@ package jp.revati.skyabyss.glow;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +85,7 @@ public final class ItemGlow {
             }
             if (list.isEmpty()) {
                 ACTIVE.remove(player.getUUID());
+                LAST.remove(player.getUUID());
             } else {
                 ACTIVE.add(player.getUUID());
             }
@@ -93,8 +95,28 @@ public final class ItemGlow {
                 ids[i] = list.get(i)[0];
                 kinds[i] = (byte) list.get(i)[1];
             }
-            PacketDistributor.sendToPlayer(player, new Sync(ids, kinds));
+            // 前に送った一覧と同じなら送り直さない (空になった一度きりの送りは ACTIVE で保たれる)
+            Sync prev = LAST.get(player.getUUID());
+            if (prev != null && Arrays.equals(prev.ids(), ids) && Arrays.equals(prev.kinds(), kinds)) {
+                continue;
+            }
+            Sync now = new Sync(ids, kinds);
+            LAST.put(player.getUUID(), now);
+            PacketDistributor.sendToPlayer(player, now);
         }
+    }
+
+    private static final java.util.Map<UUID, Sync> LAST = new java.util.HashMap<>();
+
+    // 入り直した人の画面は空なので、次の送りで必ず一覧を送る
+    @SubscribeEvent
+    static void onLoginForget(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+        LAST.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    static void onChangeDimForget(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent event) {
+        LAST.remove(event.getEntity().getUUID());
     }
 
     // サーバー → 持ち主: 自分に光らせる実体の一覧 (空なら全部消す)

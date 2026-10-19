@@ -87,6 +87,12 @@ public final class OverheadShadow {
 
     // 影を画面にかける。一つ目の呼び出しだけが描く。レベル描画の AFTER_PARTICLES (体・ブロック・水・粒子が描き終わったあと) から呼ぶ
     static void render(Matrix4f pose, Matrix4f projection, Vec3 cam, SkyPass sky, double skyAge) {
+        long t = jp.revati.skyabyss.dev.Prof.begin();
+        render0(pose, projection, cam, sky, skyAge);
+        jp.revati.skyabyss.dev.Prof.end("client.overheadShadow", t);
+    }
+
+    private static void render0(Matrix4f pose, Matrix4f projection, Vec3 cam, SkyPass sky, double skyAge) {
         if (!ready()) {
             TITANS.clear();
             return;
@@ -97,6 +103,16 @@ public final class OverheadShadow {
         double ox = Math.floor((cam.x - N * CELL / 2.0) / CELL) * CELL;
         double oz = Math.floor((cam.z - N * CELL / 2.0) / CELL) * CELL;
         double base = Math.floor(cam.y) - 256.0;
+        // 入力 (升目の原点・空の影の時刻・巨神の影) が前のフレームと同じなら、焼き直しと転送を省いて前の地図をそのまま使う
+        Object testCircle = SkyPassRenderer.testCircle;
+        boolean same = fieldValid && lastOx == ox && lastOz == oz && lastBase == base && lastSky == sky
+                && (sky == null || lastSkyAge == skyAge) && lastTestCircle == testCircle && TITANS.equals(lastTitans);
+        if (same) {
+            TITANS.clear();
+            if (!lastAny) {
+                return;
+            }
+        } else {
         java.util.Arrays.fill(DARK, 0f);
         // 影のない升目は「高い所まで落ちる」(1) にしておく。補間で縁の升目の高さが下がり、影が欠けるのを防ぐ
         java.util.Arrays.fill(TOP, 1f);
@@ -108,11 +124,20 @@ public final class OverheadShadow {
         for (Titan t : TITANS) {
             any |= bakeTitan(t, ox, oz, base);
         }
+        lastTitans = new ArrayList<>(TITANS);
         TITANS.clear();
+        lastOx = ox;
+        lastOz = oz;
+        lastBase = base;
+        lastSky = sky;
+        lastSkyAge = skyAge;
+        lastTestCircle = testCircle;
+        lastAny = any;
+        fieldValid = !any || upload();
         if (!any) {
             return;
         }
-        upload();
+        }
 
         Minecraft mc = Minecraft.getInstance();
         RenderTarget main = mc.getMainRenderTarget();
@@ -238,7 +263,17 @@ public final class OverheadShadow {
         return Mth.lerp(u, a, b);
     }
 
-    private static void upload() {
+    private static boolean fieldValid;
+    private static boolean lastAny;
+    private static double lastOx;
+    private static double lastOz;
+    private static double lastBase;
+    private static double lastSkyAge;
+    private static SkyPass lastSky;
+    private static Object lastTestCircle;
+    private static List<Titan> lastTitans = List.of();
+
+    private static boolean upload() {
         if (field == null) {
             field = new DynamicTexture(N, N, false);
             field.setFilter(true, false);
@@ -256,5 +291,6 @@ public final class OverheadShadow {
         field.upload();
         // upload は昔の最近傍の指定に戻してしまうので、そのあとで双一次に直す (升目の段が見えてしまう)
         field.setFilter(true, false);
+        return true;
     }
 }

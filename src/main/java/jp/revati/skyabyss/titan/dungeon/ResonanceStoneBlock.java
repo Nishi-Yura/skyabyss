@@ -131,7 +131,6 @@ public class ResonanceStoneBlock extends Block {
         }
         record.markGateOpened();
         GroupGates.open(level, group, TitanBackLayout.GATE);
-        GroupGates.open(level, group, TitanBackLayout.INNER_GATE);
         BlockPos center = TitanBackLayout.GATE.get(TitanBackLayout.GATE.size() / 2);
         Groups.sound(level, group, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 3f, 0.6f);
         Groups.sound(level, group, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 4f, 1.1f);

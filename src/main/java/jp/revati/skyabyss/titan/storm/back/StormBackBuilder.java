@@ -58,6 +58,7 @@ public final class StormBackBuilder {
         StormBossGates.build(back);
         data.markBuilt(LAYOUT_VERSION);
         StormBackTrials.afterBuild(back);
+        jp.revati.skyabyss.titan.light.RouteLamps.place(back, "storm");
         // 試練の仕掛け (昇り風の柱・戸・避雷の柱) を置いたあとで、鳥の背・翼の上の、落ちたら出られない小さな穴 (詰み監査) を埋める。
         // 部屋より上 (y 159 以上) だけ。部屋・通路の中は直さずに報告に残す
         int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(back, () -> StormBackAudit.spec(back),

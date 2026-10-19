@@ -19,11 +19,15 @@ final class WingsBuilder {
     }
 
     static void build(BuildKit kit) {
+        kit.palette(ZonePalette.LIBRARY);
         library(kit);
+        kit.palette(ZonePalette.SONG);
         songShrine(kit);
+        kit.palette(ZonePalette.FIN);
         finPath(kit, -1);
         finPath(kit, 1);
         tailVista(kit);
+        kit.palette(ZonePalette.DEEP);
         camp(kit);
         trailLamps(kit);
     }
@@ -45,12 +49,29 @@ final class WingsBuilder {
     }
 
     private static void library(BuildKit kit) {
-        kit.room(LIBRARY);
+        kit.roomSolid(LIBRARY);
         kit.room(LIBRARY_PASS);
+        kit.wallLamps(LIBRARY_PASS, 3, FLOOR + 4);
+        kit.lantern(LIBRARY_PASS.x1() + 1, FLOOR + 1, LIBRARY_PASS.z1());
+        kit.lantern(LIBRARY_PASS.x2() - 1, FLOOR + 1, LIBRARY_PASS.z2());
         kit.ribs(LIBRARY, 5, true);
         kit.floorBorder(LIBRARY);
         kit.pilasters(LIBRARY, 4);
         kit.wallLamps(LIBRARY, 5, FLOOR + 6);
+        // 書棚の壁: 壁龕のあいだに、書棚を二段に積む (壁の内側の面。壁龕・柱の前は避ける)
+        for (int x = LIBRARY.x1(); x <= LIBRARY.x2(); x++) {
+            int m = Math.floorMod(x - LIBRARY.x1() - 2, 4);
+            if (m != 2) {
+                continue;
+            }
+            for (int z : new int[]{LIBRARY.z1(), LIBRARY.z2()}) {
+                for (int y = FLOOR + 1; y <= FLOOR + 2; y++) {
+                    if (kit.get(x, y, z).isAir() && !kit.get(x, y, z + (z == LIBRARY.z1() ? -1 : 1)).isAir()) {
+                        kit.set(x, y, z, Blocks.BOOKSHELF.defaultBlockState());
+                    }
+                }
+            }
+        }
         BlockState bone = Blocks.BONE_BLOCK.defaultBlockState();
         for (int n = 1; n <= NICHES; n++) {
             BlockPos p = nichePos(n);
@@ -82,20 +103,21 @@ final class WingsBuilder {
             kit.set(x, FLOOR + 2, z, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
         }
         kit.moss(LIBRARY, 0.04f);
-        kit.hangingLantern(LIBRARY.x1() + 4, LIBRARY.z1() + 6, LIBRARY.ceilingY(), 2);
-        kit.hangingLantern(LIBRARY.x2() - 4, LIBRARY.z1() + 6, LIBRARY.ceilingY(), 2);
-        kit.hangingLantern(LIBRARY.x1() + 4, LIBRARY.z2() - 6, LIBRARY.ceilingY(), 2);
-        kit.hangingLantern(LIBRARY.x2() - 4, LIBRARY.z2() - 6, LIBRARY.ceilingY(), 2);
+        for (int x : new int[]{LIBRARY.x1() + 4, (LIBRARY.x1() + LIBRARY.x2()) / 2, LIBRARY.x2() - 4}) {
+            for (int z : new int[]{LIBRARY.z1() + 6, LIBRARY.z2() - 6}) {
+                kit.hangingLantern(x, z, LIBRARY.ceilingY(), 2);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 歌の祠 (心臓の前の静かな部屋)
     private static void songShrine(BuildKit kit) {
-        kit.room(SONG_SHRINE);
+        kit.roomSolid(SONG_SHRINE);
         kit.room(SONG_PASS);
         kit.ribs(SONG_SHRINE, 4, true);
         kit.floorBorder(SONG_SHRINE);
         BlockPos c = SONG_SHRINE.center();
-        kit.set(c.getX(), FLOOR, c.getZ(), BuildKit.CHISELED);
+        kit.set(c.getX(), FLOOR, c.getZ(), kit.pal().trim());
         for (Direction d : Direction.Plane.HORIZONTAL) {
             kit.set(c.getX() + d.getStepX() * 2, FLOOR + 1, c.getZ() + d.getStepZ() * 2,
                     Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 4).setValue(CandleBlock.LIT, true));
@@ -201,8 +223,18 @@ final class WingsBuilder {
                 for (int y = tf; y <= tf + 7; y++) {
                     if (inner && y > tf && y <= tf + 6) {
                         kit.set(x, y, z, BuildKit.AIR);
+                    } else if (inner && y == tf) {
+                        // 床は必ず張る (トンネルの出口の 1 マスが、体の殻が薄くて空いたままだと、階段との間に 1 マスの穴になる)
+                        kit.set(x, y, z, kit.pal().floor());
                     } else if (!kit.get(x, y, z).isAir()) {
-                        kit.set(x, y, z, y == tf ? BuildKit.POLISHED : y == tf + 7 ? BuildKit.TILES : kit.wallStone());
+                        kit.set(x, y, z, y == tf ? kit.pal().floor() : y == tf + 7 ? kit.pal().ceiling() : kit.wallStone());
+                    }
+                }
+                if (inner && Math.abs(x - exitX) <= 2) {
+                    for (int y = tf - 3; y < tf; y++) {
+                        if (kit.get(x, y, z).isAir()) {
+                            kit.set(x, y, z, kit.pal().wall());
+                        }
                     }
                 }
             }
@@ -279,6 +311,64 @@ final class WingsBuilder {
         kit.set(px + 3 * side, ph + 1, pz, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         kit.standingSign(new BlockPos(px + 5 * side, ph + 1, pz + 1), side < 0 ? "sign.skyabyss.fin_left" : "sign.skyabyss.fin_right");
         kit.lantern(px + 5 * side, ph + 1, pz - 2);
+        // 先端の見どころ (版 18): 左は碑 (昔の巡礼者の言葉) と小さな宝、右は見晴らしと、風の下の隠し棚の宝
+        kit.standingSign(new BlockPos(px + 5 * side, ph + 1, pz - 1), side < 0 ? "sign.skyabyss.fin_left_lore" : "sign.skyabyss.fin_right_lore");
+        if (side < 0) {
+            BlockPos chest = cachePos(side);
+            kit.set(chest, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.NORTH));
+            kit.set(chest.relative(Direction.WEST), Blocks.BONE_BLOCK.defaultBlockState());
+            kit.set(chest.relative(Direction.EAST), Blocks.AMETHYST_CLUSTER.defaultBlockState());
+        } else {
+            hiddenLedge(kit, side, px, pz, ph);
+        }
+    }
+
+    // 先端の宝 (左は台の上、右は隠し棚)。右クリックは FinCaches が受ける
+    static BlockPos cachePos(int side) {
+        Plan plan = plan(side, finExitX(side), finTunnelFloor(side));
+        int px = plan.xs()[plan.last()];
+        int pz = plan.zs()[plan.last()];
+        int ph = plan.hs()[plan.last()];
+        return side < 0 ? new BlockPos(px + 4 * side, ph + 1, pz + 2) : new BlockPos(px + 3 * side, ph - 2, pz + 7);
+    }
+
+    // 右のひれの先: 台の南の縁の柵に切れ目 (3 マス) があり、そこから外側へ 3 段下りると、棚がある。棚の奥に宝箱と灯り。
+    // 柵の切れ目と、棚の灯りが下に見えるのが目印 (碑の言葉も「風の下」と言う)
+    private static void hiddenLedge(BuildKit kit, int side, int px, int pz, int ph) {
+        BlockState brick = kit.pal().wall();
+        for (int dx = 2; dx <= 4; dx++) {
+            int x = px + dx * side;
+            kit.set(x, ph + 1, pz + 3, BuildKit.AIR);
+            for (int k = 1; k <= 3; k++) {
+                int z = pz + 3 + k;
+                int y = ph - k;
+                kit.fill(x, y - 3, z, x, y - 1, z, brick);
+                kit.set(x, y, z, kit.pal().floor());
+                kit.fill(x, y + 1, z, x, y + 6, z, BuildKit.AIR);
+            }
+        }
+        int ly = ph - 3;
+        for (int dx = 1; dx <= 5; dx++) {
+            for (int k = 4; k <= 7; k++) {
+                int x = px + dx * side;
+                int z = pz + 3 + k;
+                if (dx >= 2 && dx <= 4 && k <= 6 && z <= pz + 6) {
+                    continue;
+                }
+                boolean edge = dx == 1 || dx == 5 || k == 7;
+                kit.fill(x, ly - 3, z, x, ly - 1, z, brick);
+                kit.set(x, ly, z, edge ? brick : kit.pal().floor());
+                kit.fill(x, ly + 1, z, x, ly + 6, z, BuildKit.AIR);
+                if (edge) {
+                    kit.set(x, ly + 1, z, Blocks.TUFF_BRICK_WALL.defaultBlockState());
+                }
+            }
+        }
+        BlockPos chest = cachePos(side);
+        kit.set(chest.below(), kit.pal().trim());
+        kit.set(chest, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.NORTH));
+        kit.lantern(px + 2 * side, ph - 2, pz + 7);
+        kit.lantern(px + 4 * side, ph - 2, pz + 7);
     }
 
     // ---------------------------------------------------------------- 尾の展望 (背の南の端。背全体と雲の海が見える)
@@ -340,7 +430,7 @@ final class WingsBuilder {
         }
         // 鎖の祭壇の跡と焚き火
         kit.set(0, CAMP_Y + 1, CAMP_Z, Blocks.CHISELED_DEEPSLATE.defaultBlockState());
-        kit.set(0, CAMP_Y + 2, CAMP_Z, Blocks.CHAIN.defaultBlockState());
+        kit.lantern(0, CAMP_Y + 2, CAMP_Z);
         kit.set(2, CAMP_Y + 1, CAMP_Z, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         kit.set(3, CAMP_Y + 1, CAMP_Z, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
         kit.set(2, CAMP_Y + 1, CAMP_Z + 1, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
