@@ -49,10 +49,11 @@ public final class TitanBackLayout {
     //     中心を 5 北へ (z -85)。テレグラフの円 (スタンプ 半径 5 など) が床の 4 割以下に収まり、避ける広さが残る (02 の 4.2、5.2)
     // 10: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
     // 11: 闇の水路の入口 (はしごを下りた先) に、乾いた小部屋の休み場 (mz0) を足した
-    // 12: 詰み監査の穴埋め (背の外の凹み) / 13: 建築の監査 (ベンチの向き)
-    // 14: 水平 x1.6・垂直 x1.3 に作り直した (設計書 26)。部屋 x2.6、広間 x3.6、心臓の間 x1.3。通路は幅 5〜7・高さ 6。第二の広間・番兵の詰所・
-    //     数え歌の鐘楼・骨の書庫・歌の祠・胸びれの道・尾の展望・闇の水路 15×21 (入口 2 つ)・グループごとの幕を足した。体の bin は深い内側を 1 種類にした
-    public static final int LAYOUT_VERSION = 14;
+    // 12: 詰み監査の穴埋め (背の外の凹み) / 13: 建築の監査 (ベンチの向き) / 13': ボス部屋の大門 (BossGates) / 14: 大門と建築の監査の両方
+    // 15: 水平 x1.6・垂直 x1.3 に作り直した (設計書 26)。部屋 x2.6、広間 x3.6、心臓の間 x1.3。通路は幅 5〜7・高さ 6。第二の広間・番兵の詰所・
+    //     数え歌の鐘楼・骨の書庫・歌の祠・胸びれの道・尾の展望・闇の水路 15×21 (入口 2 つ)・グループごとの幕を足した。体の bin は深い内側を 1 種類にした。
+    //     ボス部屋の大門は、広げた入口 (心臓の間・番兵長の広間) に合わせて建てる (BossGates)
+    public static final int LAYOUT_VERSION = 15;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -173,8 +174,8 @@ public final class TitanBackLayout {
     public static final List<BlockPos> E2_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 4, true);
     public static final List<BlockPos> E2_EXIT = wall(36, 40, FLOOR + 1, FLOOR + 6, 48, true);
     public static final List<BlockPos> CK_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 55, true);
-    // 番兵長の広間の戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。控えの間の西の戸口 (x 40) の通路側 (x 39)
-    public static final List<BlockPos> E3_LOCK = wall(-65, -61, FLOOR + 1, FLOOR + 6, 38, false);
+    // 番兵長の広間への戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。控えの間の西の戸口 (x 40)
+    public static final List<BlockPos> E3_LOCK = CE1_WEST_DOOR;
     // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
     public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
 
@@ -226,7 +227,7 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -54), net.minecraft.core.Direction.SOUTH));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
-            new Inscription("sign.skyabyss.heart_gate", new BlockPos(3, FLOOR + 4, -107), net.minecraft.core.Direction.WEST);
+            new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
 
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {
