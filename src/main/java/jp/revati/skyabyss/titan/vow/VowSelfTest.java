@@ -120,7 +120,7 @@ public final class VowSelfTest {
                 FirstRun.onFirstCleared(back, List.of(ga));
                 check(f, Vows.canChange(server, ga, WHALE) == Vows.Result.OK && Vows.canChange(server, gb, WHALE) == Vows.Result.NOT_REPEAT,
                         "vows are not open to exactly the cleared group (ga " + Vows.canChange(server, ga, WHALE) + ", gb " + Vows.canChange(server, gb, WHALE) + ", first run ga " + FirstRun.isFirstRun(back, ga)
-                                + ", key " + jp.revati.skyabyss.titan.group.Groups.keyOf(server, ga).equals(ga) + ")");
+                                + ", key " + jp.revati.skyabyss.titan.group.Groups.keyOf(server, ga).equals(ga) + ", " + jp.revati.skyabyss.titan.group.BackGroupData.get(back).of(ga).progressWhy() + ")");
                 check(f, Vows.add(server, ga, WHALE, "nope") == Vows.Result.UNKNOWN, "an unknown vow was accepted");
                 check(f, Vows.add(server, ga, WHALE, "hardy") == Vows.Result.OK && Vows.add(server, ga, WHALE, "hardy") == Vows.Result.ALREADY, "add / already");
                 check(f, Vows.add(server, ga, WHALE, "sharp") == Vows.Result.OK && Vows.add(server, ga, WHALE, "thin") == Vows.Result.OK, "adding the 2nd and 3rd vow");

@@ -540,7 +540,8 @@ public final class Ch1BackMobsSelfTest {
                     List<ElderSentinel> elders = mobs.stream().filter(m -> m instanceof ElderSentinel).map(m -> (ElderSentinel) m).toList();
                     long archers = mobs.stream().filter(m -> m instanceof RibArcher).count();
                     long sentinels = mobs.stream().filter(m -> m instanceof BoneSentinel).count();
-                    String label = "wave " + wave + " / " + players + " player(s)";
+                    String label = "wave " + wave + " / " + players + " player(s)" + " [refused " + jp.revati.skyabyss.util.SpawnSafety.refused + ", moved " + jp.revati.skyabyss.util.SpawnSafety.moved
+                            + ", mobs " + mobs.stream().map(m -> m.getType().toShortString() + "@" + m.blockPosition().toShortString()).toList() + "]";
                     if (wave == 2) {
                         int expectedMortars = players >= 4 ? 2 : 1;
                         check(mortars.size() == expectedMortars, label + ": " + mortars.size() + " mortars (expected " + expectedMortars + ")", f);
