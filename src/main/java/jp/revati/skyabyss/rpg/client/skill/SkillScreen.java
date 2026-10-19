@@ -136,7 +136,7 @@ public class SkillScreen extends Screen {
         for (int i = 0; i < SkillRules.LOADOUTS; i++) {
             loadLoadout[i].active = d.loadouts[i].saved;
         }
-        calling.visible = false;
+        calling.visible = pendingCalling() > 0;
     }
 
     @Override
@@ -161,6 +161,20 @@ public class SkillScreen extends Screen {
     }
 
     private void openCalling() {
+        int which = pendingCalling();
+        if (which > 0) {
+            minecraft.setScreen(new CallingScreen(which));
+        }
+    }
+
+    // 選べる天職 (0 = なし)。進みはサーバーだけが知るので、サーバーが知らせた段 (SkillClient.callingReady) を見る
+    private int pendingCalling() {
+        SkillData d = data();
+        if (!SkillRules.CALLINGS) {
+            return 0;
+        }
+        int ready = SkillClient.callingReady;
+        return !d.hasCalling() ? (ready >= 1 ? 1 : 0) : d.calling2.isEmpty() ? (ready >= 2 ? 2 : 0) : 0;
     }
 
     private void sendLoadout(int index, boolean save) {

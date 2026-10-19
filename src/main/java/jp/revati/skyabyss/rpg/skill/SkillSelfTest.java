@@ -36,11 +36,15 @@ public final class SkillSelfTest {
     // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
+        // 技の規則の検めは、五つの木が全部開いた状態で流す。天職の層は BuildsSelfTest.callings が自分で入れる
+        SkillRules.CALLINGS = false;
         try {
             run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("skill selftest crashed", e);
             failures.add("crashed: " + e);
+        } finally {
+            SkillRules.CALLINGS = true;
         }
         if (failures.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST skills PASSED (points, learn rules, sanitize, nbt, sync codec, death copy, player save/load, cooldowns, mana, casting, passives)");

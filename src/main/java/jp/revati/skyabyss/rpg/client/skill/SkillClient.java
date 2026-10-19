@@ -36,6 +36,17 @@ public final class SkillClient {
         }
     }
 
+    // 天職を選べる (サーバーが知らせた) 段。0 = まだ。K の画面のボタンを出す
+    public static int callingReady;
+
+    public static void onCallingOpen(jp.revati.skyabyss.rpg.skill.net.CallingOpenPayload payload) {
+        callingReady = payload.which();
+        Minecraft mc = Minecraft.getInstance();
+        if (payload.open() && mc.player != null && !(mc.screen instanceof CallingScreen)) {
+            mc.setScreen(new CallingScreen(payload.which()));
+        }
+    }
+
     public static void onCastResult(SkillCastResultPayload payload) {
         int i = payload.slot();
         if (i < 0 || i >= slotFlash.length) {

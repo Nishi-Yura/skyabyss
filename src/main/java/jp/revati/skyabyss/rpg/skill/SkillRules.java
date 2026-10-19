@@ -9,7 +9,17 @@ public final class SkillRules {
     public static final int BASE_SLOTS = 4;
     public static final int SLOTS = 5;
     // 天職の層 (docs/design/27 の C 案)。false なら、5 つの木が最初から全部開いている (A 案)
-    public static final boolean CALLINGS = false;
+    public static boolean CALLINGS = true;
+    // 天性 (一つ目の天職だけ。docs/design/27 の 9.1)
+    public static final double TRAIT_ROCK_TOUGHNESS = 0.5;
+    public static final double TRAIT_ROCK_KNOCKBACK = 0.10;
+    public static final double TRAIT_WIND_MOVE = 0.03;
+    public static final double TRAIT_TIDE_MANA = 10;
+    public static final double TRAIT_TIDE_RANGE = 1;
+    public static final double TRAIT_ASH_ENHANCE = 0.10;
+    public static final double TRAIT_ASH_FIRE = 0.10;
+    public static final double TRAIT_BONE_DAMAGE = 0.05;
+    public static final double TRAIT_BONE_KEEP = 0.25;
     // 1 秒 = 20 tick
     public static final int SECOND = 20;
     // どの技を使ったあとも、次の技まで 0.5 秒あける (連打で重ねがけしない・手触りを重くする)

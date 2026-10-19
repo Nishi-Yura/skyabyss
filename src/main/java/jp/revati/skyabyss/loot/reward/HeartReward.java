@@ -134,6 +134,8 @@ public final class HeartReward {
         Notice.alert(player, "message.skyabyss.legendary_new", TitanLoot.itemLink(gift));
         TitanLoot.tellHeld(player, held);
         sendState(player);
+        // 天職を選べるようになったら (一章の心臓のあと・雷翼のあと)、報酬の画面のあとに天職の画面を開く
+        jp.revati.skyabyss.rpg.skill.SkillCalling.offerSoon(player, jp.revati.skyabyss.rpg.skill.SkillCalling.OFFER_DELAY, false);
         return Result.OK;
     }
 

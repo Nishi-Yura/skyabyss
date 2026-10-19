@@ -45,6 +45,10 @@ public final class SkillEffects {
         if (!(player.level() instanceof ServerLevel level)) {
             return out;
         }
+        // 歌い手 (潮歌いの天性): 仲間に向ける技の範囲 +1 ブロック
+        if (SkillManager.get(player).callingTree() == SkillTree.TIDE) {
+            radius += SkillRules.TRAIT_TIDE_RANGE;
+        }
         for (ServerPlayer p : level.players()) {
             if (p != player && p.isAlive() && !p.isSpectator() && p.distanceToSqr(player) <= radius * radius) {
                 out.add(p);

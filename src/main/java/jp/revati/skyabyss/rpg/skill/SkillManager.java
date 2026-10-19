@@ -38,6 +38,10 @@ public final class SkillManager {
     public static final ResourceLocation MOD_READY_MANA = id("skill/readiness_mana");
     public static final ResourceLocation MOD_READY_ATTACK = id("skill/readiness_attack");
     public static final ResourceLocation MOD_BP_KNOCKBACK = id("skill/bp_vitality_knockback");
+    public static final ResourceLocation MOD_TRAIT_TOUGH = id("skill/trait_rock_toughness");
+    public static final ResourceLocation MOD_TRAIT_KNOCKBACK = id("skill/trait_rock_knockback");
+    public static final ResourceLocation MOD_TRAIT_MOVE = id("skill/trait_wind_move");
+    public static final ResourceLocation MOD_TRAIT_MANA = id("skill/trait_tide_mana");
     public static final ResourceLocation MOD_BP_SWING = id("skill/bp_strength_swing");
 
     private SkillManager() {
@@ -483,6 +487,12 @@ public final class SkillManager {
         int ready = d.readyBlue ? d.rank(Skill.READINESS_REWARD) : 0;
         add(player, Rpg.MAX_MANA, MOD_READY_MANA, SkillRules.readinessMana(ready));
         set(player, Attributes.ATTACK_DAMAGE, MOD_READY_ATTACK, SkillRules.readinessAttack(ready), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        // 天性 (一つ目の天職だけ)
+        SkillTree calling = d.callingTree();
+        add(player, Attributes.ARMOR_TOUGHNESS, MOD_TRAIT_TOUGH, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_TOUGHNESS : 0);
+        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_TRAIT_KNOCKBACK, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_KNOCKBACK : 0);
+        set(player, Attributes.MOVEMENT_SPEED, MOD_TRAIT_MOVE, calling == SkillTree.WIND ? SkillRules.TRAIT_WIND_MOVE : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        add(player, Rpg.MAX_MANA, MOD_TRAIT_MANA, calling == SkillTree.TIDE ? SkillRules.TRAIT_TIDE_MANA : 0);
         boolean heavy = WeaponType.isHeld(player.getMainHandItem(), WeaponType.HEAVY)
                 && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH, Breakpoints.FIRST);
         set(player, Attributes.ATTACK_SPEED, MOD_BP_SWING, heavy ? Breakpoints.STRENGTH_15_SWING : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);

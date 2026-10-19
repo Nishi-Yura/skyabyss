@@ -37,6 +37,58 @@ final class BuildsSelfTest {
         weaponTypes(f);
         balance(f);
         player(server, f);
+        callings(server, f);
+    }
+
+    // ---------------------------------------------------------------- 天職の層 (docs/design/27 の 10 節)
+    private static void callings(MinecraftServer server, List<String> f) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "builds_test_c"));
+        p.moveTo(spawn.getX() + 0.5, 300, spawn.getZ() + 0.5, 0f, 0f);
+        Growth.get(p).level = 30;
+        SkillData d = SkillManager.get(p);
+        d.bonusPoints = 60;
+        boolean before = SkillRules.CALLINGS;
+        SkillRules.CALLINGS = true;
+        try {
+            // 天職の前: 1 行目だけ・刻印なし
+            check(f, d.canLearn(Skill.TITAN_CLEAVE, 30) == SkillData.LearnResult.OK, "a first-row skill was refused before the calling");
+            SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
+            check(f, d.canLearn(Skill.ROCK_CALL, 30) == SkillData.LearnResult.CALLING, "a second-row skill opened before the calling");
+            check(f, SkillCalling.which(p) == 0, "a calling was offered before the whale heart");
+            check(f, SkillCalling.choose(p, "rock") == SkillCalling.Result.NOT_READY, "a calling was chosen before the whale heart");
+            check(f, SkillCalling.choose(p, "traveler", true) == SkillCalling.Result.BAD_TREE, "the traveler tree was chosen as a calling");
+            check(f, !d.runeAvailable(Skill.TITAN_CLEAVE), "a rune opened before the calling");
+            // 一つ目: 岩守り
+            check(f, SkillCalling.choose(p, "rock", true) == SkillCalling.Result.OK && d.calling.equals("rock") && d.calling2.isEmpty(), "the first calling was not set");
+            check(f, d.canLearn(Skill.ROCK_CALL, 30) == SkillData.LearnResult.OK, "the calling tree did not open");
+            check(f, d.canLearn(Skill.BACKSTEP, 30) == SkillData.LearnResult.CALLING || d.canLearn(Skill.BACKSTEP, 30) == SkillData.LearnResult.REQUIRES,
+                    "another tree's second row opened");
+            check(f, d.rankLimit(Skill.NIMBLE) == 2 && d.rankLimit(Skill.STONE_STANCE) == 3, "rank limits of other trees are wrong");
+            check(f, d.runeAvailable(Skill.TITAN_CLEAVE), "a rune of the calling tree did not open");
+            SkillManager.applyModifiers(p);
+            var tough = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS).getModifier(SkillManager.MOD_TRAIT_TOUGH);
+            check(f, tough != null && Math.abs(tough.amount() - SkillRules.TRAIT_ROCK_TOUGHNESS) < 1e-9, "the rock trait was not applied");
+            check(f, d.slotCount() == SkillRules.BASE_SLOTS, "slot count before the second calling");
+            // 二つ目: 同じ木は選べない。風読みなら 3 行目まで・要なし・天性なし・枠 +1
+            check(f, SkillCalling.which(p) == 0 && SkillCalling.choose(p, "wind") == SkillCalling.Result.NOT_READY, "the second calling opened early");
+            check(f, SkillCalling.choose(p, "rock", true) == SkillCalling.Result.TAKEN, "the same tree was chosen twice");
+            check(f, SkillCalling.choose(p, "wind", true) == SkillCalling.Result.OK && d.calling2.equals("wind"), "the second calling was not set");
+            check(f, d.slotCount() == SkillRules.SLOTS, "the fifth slot did not open");
+            check(f, d.callingAllows(Skill.BACKSTEP) && d.callingAllows(Skill.WIND_REND) && !d.callingAllows(Skill.LONE_WIND), "second calling rows are wrong");
+            check(f, d.rankLimit(Skill.NIMBLE) == 3, "second calling tree has a rank limit");
+            check(f, SkillCalling.choose(p, "tide", true) == SkillCalling.Result.TAKEN, "a third calling was set");
+            var move = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).getModifier(SkillManager.MOD_TRAIT_MOVE);
+            check(f, move == null, "the second calling gave a trait");
+            // 記録を保存して読み直しても残る
+            SkillData copy = new SkillData();
+            copy.deserializeNBT(server.registryAccess(), d.serializeNBT(server.registryAccess()));
+            check(f, copy.calling.equals("rock") && copy.calling2.equals("wind"), "callings were lost in save/load");
+        } finally {
+            SkillRules.CALLINGS = before;
+            SkillManager.forgetAll(p);
+        }
     }
 
     // ---------------------------------------------------------------- 前の版の記録の移行
