@@ -111,7 +111,12 @@ public final class LowPolyMesh {
                 }
             }
             int origVerts = v.length;
-            if (titan && n > 0) {
+            // tools/mesh_close.py が書いた蓋: 元の頂点は cap_vertex_start までで、あとは塞ぎの面 (巨神では暗く出す)。読み込み時に塞ぐ必要は無い
+            boolean preClosed = b.has("cap_vertex_start");
+            if (preClosed) {
+                origVerts = b.get("cap_vertex_start").getAsInt();
+            }
+            if (titan && n > 0 && !preClosed) {
                 // 骨の開いた縁 (関節・接ぎ目) に、内側へ引っ込めた暗い蓋をする。ひれ・顎・首が動いて継ぎ目が開いても、中が透けない
                 Capped c = capHoles(v, uv, t);
                 v = c.v();
@@ -124,7 +129,7 @@ public final class LowPolyMesh {
             float[] vshade = titan ? new float[q * 4] : null;
             int capStart = q;
             for (int i = 0; i < q; i++) {
-                if (quadList.get(i)[0] >= origVerts) {
+                if ((titan || !preClosed) && quadList.get(i)[0] >= origVerts) {
                     capStart = i;
                     break;
                 }
