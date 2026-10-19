@@ -257,6 +257,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.smith.AshSmithSelfTest.steps());
         // 建築の監査 (階段の向き・段差・埋まり・戸・はしご・地形との関係。docs/design/08)。SKYABYSS_SELFTEST_ONLY="build audit" でこれだけ流せる
         steps.addAll(jp.revati.skyabyss.titan.audit.BuildAuditSelfTest.steps());
+        // 領域の仕掛けが本物の心臓の間で壁の中でなく、歩いて届く所にあるか (docs/design/02 の 5.9)。SKYABYSS_SELFTEST_ONLY="domain room"
+        steps.addAll(jp.revati.skyabyss.titan.domain.DomainRoomSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         // 試練のプール (引き方・修飾・全変種・今週の試練・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
         steps.addAll(jp.revati.skyabyss.trial.TrialPoolSelfTest.steps());

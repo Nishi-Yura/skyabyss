@@ -329,6 +329,23 @@ public abstract class HeartDomain {
         return strike(level, nodes.get(index), player);
     }
 
+    // 試験用: 仕掛けの置き場を (箱を立てずに) 今の決まりで引く。壁の中でない所へ寄せたあとの位置
+    public List<Vec3> previewNodes(ServerLevel level) {
+        List<Vec3> out = new ArrayList<>();
+        for (Vec3 s : nodeSpots()) {
+            out.add(snap(level, s));
+        }
+        return out;
+    }
+
+    public double centerX() {
+        return cx;
+    }
+
+    public double centerZ() {
+        return cz;
+    }
+
     private void spawnNodes(ServerLevel level) {
         removeNodes(level);
         nodes.clear();
