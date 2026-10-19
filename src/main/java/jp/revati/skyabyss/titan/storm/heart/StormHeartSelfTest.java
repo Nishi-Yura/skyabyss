@@ -110,7 +110,7 @@ public final class StormHeartSelfTest {
             paths.add("/assets/skyabyss/textures/gui/boss/storm_heart_icon_p" + n + ".png");
         }
         for (StormHeart.Action a : StormHeart.Action.values()) {
-            if (a != StormHeart.Action.NONE) {
+            if (a != StormHeart.Action.NONE && a != StormHeart.Action.COMBO) {
                 paths.add("/assets/skyabyss/textures/gui/storm_heart/warn_" + a.key() + ".png");
             }
         }
@@ -136,13 +136,21 @@ public final class StormHeartSelfTest {
         java.util.Map<StormHeart.Action, Integer> warn = java.util.Map.of(
                 StormHeart.Action.SUMMON, 24, StormHeart.Action.BLADE, 24, StormHeart.Action.CHAIN, 20,
                 StormHeart.Action.WINGBEAT, 30, StormHeart.Action.CHARGE, 30, StormHeart.Action.FEATHER, 24,
-                StormHeart.Action.FLASH, 40, StormHeart.Action.WEB, 30, StormHeart.Action.BARRAGE, 20);
+                StormHeart.Action.FLASH, 40, StormHeart.Action.WEB, 30, StormHeart.Action.BARRAGE, 20, StormHeart.Action.CROSS, 24);
         warn.forEach((a, t) -> check(a.warnTicks == t, a + " warning should be " + t + " ticks (" + a.warnTicks + ")", failures));
         check(StormHeart.ROAR_TICKS == 60 && StormHeart.SPLIT_TICKS == 120 && StormHeart.WEB_TICKS == 80, "roar / split / web timings differ from 5.3", failures);
         check(StormHeart.FLASH_CONE_DEG == 60, "flash cone should be 60 degrees", failures);
+        // 技の組: 二つ目の予告も 0.8 秒以上、二つ目は一つ目の始めから 1 秒以上あと、組の長さに収まる
+        for (StormHeart.Pair[] pairs : new StormHeart.Pair[][] {StormHeart.PAIRS_TWO, StormHeart.PAIRS_THREE, StormHeart.PAIRS_FURY}) {
+            for (StormHeart.Pair p : pairs) {
+                check(p.first() != p.second() && p.second().warnTicks >= 16 && p.offset() >= 20 && p.offset() < p.length(),
+                        "pair " + p + " is not fair", failures);
+            }
+        }
         float[] dmg = {StormHeart.SUMMON_DAMAGE, StormHeart.BLADE_DAMAGE, StormHeart.CHAIN_DAMAGE, StormHeart.WINGBEAT_DAMAGE,
-                StormHeart.CHARGE_DAMAGE, StormHeart.FEATHER_DAMAGE, StormHeart.FLASH_DAMAGE, StormHeart.WEB_DAMAGE, StormHeart.BARRAGE_DAMAGE};
-        float[] want = {13f, 14f, 15.5f, 6f, 3f, 10f, 12f, 14f, 10f};
+                StormHeart.CHARGE_DAMAGE, StormHeart.FEATHER_DAMAGE, StormHeart.FLASH_DAMAGE, StormHeart.WEB_DAMAGE, StormHeart.BARRAGE_DAMAGE,
+                StormHeart.CROSS_DAMAGE};
+        float[] want = {26f, 28f, 31f, 16f, 6f, 24f, 24f, 28f, 20f, 26f};
         check(java.util.Arrays.equals(dmg, want), "move damage differs from 5.3: " + java.util.Arrays.toString(dmg), failures);
         // 9 つの技と咆哮のアニメが模型のアニメにある
         try (InputStream in = StormHeartSelfTest.class.getResourceAsStream("/assets/skyabyss/animations/entity/storm_heart.animation.json")) {
@@ -181,7 +189,7 @@ public final class StormHeartSelfTest {
             return;
         }
         for (StormHeart.Action a : StormHeart.Action.values()) {
-            if (a != StormHeart.Action.NONE) {
+            if (a != StormHeart.Action.NONE && a != StormHeart.Action.COMBO) {
                 keys.add("gui.skyabyss.storm_heart.warn." + a.key());
             }
         }
@@ -340,7 +348,7 @@ public final class StormHeartSelfTest {
         check(heart.canAttack(pa) && !heart.canAttack(pb), "the heart may target another group", failures);
         check(!damageCancelled(heart, heart.damageSources().playerAttack(pa)) && damageCancelled(heart, heart.damageSources().playerAttack(pb)),
                 "damage from another group should not reach the heart", failures);
-        check(Math.abs(StormHeart.scaleFor(6) - 4.0f) < 1e-4 && StormHeart.scaleFor(7) > StormHeart.scaleFor(6), "party of 6 scale should be 4.0 (uncapped)", failures);
+        check(Math.abs(StormHeart.scaleFor(6) - 5.25f) < 1e-4 && Math.abs(StormHeart.scaleFor(2) - 1.85f) < 1e-4, "party of 6 scale should be 5.25 (HeartBalance.partyScale)", failures);
     }
 
     static boolean damageCancelled(net.minecraft.world.entity.LivingEntity victim, net.minecraft.world.damagesource.DamageSource source) {
@@ -377,7 +385,8 @@ public final class StormHeartSelfTest {
                 && StormHeart.phaseFor(0.34f) == 1 && StormHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", failures);
         check(Math.abs(StormHeart.takenFor(1, false, 10, 1) - 12f) < 1e-4 && Math.abs(StormHeart.takenFor(0, false, 10, 1) - 10f) < 1e-4
                 && Math.abs(StormHeart.takenFor(0, true, 10, 1) - 15f) < 1e-4
-                && Math.abs(StormHeart.takenFor(2, false, 16, StormHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", failures);
+                && Math.abs(StormHeart.takenFor(2, false, 18.5f, StormHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", failures);
+        check(Math.abs(heart.toughness() - StormHeart.BASE_RESIST) < 1e-4, "solo heart resist is " + heart.toughness() + " (want " + StormHeart.BASE_RESIST + ")", failures);
         // 段階の高さ: 段階 2 は 4 上がり、下の端が昇り風の上の端。段階 3 は床の 2 上
         check(Math.abs(StormHeart.heightFor(1, false) - StormHeart.heightFor(0, false) - 4.0) < 0.01
                 && Math.abs(StormHeartArena.FLOOR + StormHeart.heightFor(1, false) - StormHeartArena.UPDRAFT_TOP) < 0.01
@@ -388,7 +397,8 @@ public final class StormHeartSelfTest {
         heart.invulnerableTime = 0;
         float s0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        check(Math.abs((s0 - heart.getHealth()) - 15f) < 0.6f, "split heart should take 1.5x (took " + (s0 - heart.getHealth()) + ")", failures);
+        float splitWant = 15f / heart.toughness();
+        check(Math.abs((s0 - heart.getHealth()) - splitWant) < 0.6f, "split heart should take 1.5x (took " + (s0 - heart.getHealth()) + ", want " + splitWant + ")", failures);
         tickHeart(heart, StormHeart.SPLIT_TICKS + 2);
         check(!heart.isSplit(), "split did not end", failures);
         // 咆哮: 体力を 60% にすると、咆哮 (無敵) のあと段階 2
@@ -409,7 +419,8 @@ public final class StormHeartSelfTest {
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        check(Math.abs((h0 - heart.getHealth()) - 12f) < 0.6f, "open wings should take 1.2x (took " + (h0 - heart.getHealth()) + ")", failures);
+        float openWant = 12f / heart.toughness();
+        check(Math.abs((h0 - heart.getHealth()) - openWant) < 0.6f, "open wings should take 1.2x (took " + (h0 - heart.getHealth()) + ", want " + openWant + ")", failures);
         // 9 つの技が最後まで回る (人がいないので当たらない)
         int ran = 0;
         for (int phase = 0; phase < 3; phase++) {
@@ -425,6 +436,35 @@ public final class StormHeartSelfTest {
             }
         }
         notes.add(ran + "/9 moves ran to the end");
+        // 技の組と、憤怒の雷翼の十字も最後まで回る
+        heart.forcePhase(2);
+        heart.forceAction(StormHeart.Action.CROSS);
+        tickHeart(heart, StormHeart.lengthOf(StormHeart.Action.CROSS) + 4);
+        check(heart.currentAction() == StormHeart.Action.NONE, "thunder cross did not finish", failures);
+        int pairs = 0;
+        for (StormHeart.Pair p : new StormHeart.Pair[] {StormHeart.PAIRS_TWO[0], StormHeart.PAIRS_THREE[2], StormHeart.PAIRS_FURY[1]}) {
+            heart.forcePhase(p == StormHeart.PAIRS_TWO[0] ? 1 : 2);
+            heart.forcePair(p);
+            tickHeart(heart, p.length() - 2);
+            check(heart.currentAction() == StormHeart.Action.COMBO, "pair " + p + " ended early", failures);
+            tickHeart(heart, 4);
+            if (heart.currentAction() == StormHeart.Action.NONE) {
+                pairs++;
+            } else {
+                failures.add("pair " + p + " did not finish (" + heart.currentAction() + ")");
+            }
+        }
+        notes.add(pairs + "/3 pairs ran to the end");
+        // 憤怒: 段階 3 で体力 15% 未満になると咆哮 (無敵) のあと憤怒、ボスバーが赤い
+        heart.forcePhase(2);
+        heart.setHealth(heart.getMaxHealth() * 0.1f);
+        tickHeart(heart, 3);
+        check(heart.isRoaring() && !heart.isEnraged(), "no enrage roar below 15%", failures);
+        tickHeart(heart, StormHeart.ROAR_TICKS + 2);
+        check(heart.isEnraged() && heart.getPhase() == 2 && heart.heartBarColorForTest() == net.minecraft.world.BossEvent.BossBarColor.RED,
+                "heart did not enrage after the roar (phase " + heart.getPhase() + ")", failures);
+        heart.forcePhase(2);
+        heart.setHealth(heart.getMaxHealth() * 0.3f);
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
         heart.moveTo(StormHeartArena.CX + 0.5, StormHeartArena.FLOOR + 3, StormHeartArena.CZ + 20.5);
         StormHeartBattle.tick(back);
@@ -535,8 +575,8 @@ public final class StormHeartSelfTest {
         double taken1 = (taken(st, StormHeart.SUMMON_DAMAGE) + taken(st, StormHeart.BLADE_DAMAGE) + taken(st, StormHeart.CHAIN_DAMAGE)) / 3;
         double taken3 = (taken(st, StormHeart.FLASH_DAMAGE) + 2 * taken(st, StormHeart.WEB_DAMAGE) + 3 * taken(st, StormHeart.BARRAGE_DAMAGE)) / 3;
         // 技の間隔 = 間 (平均) + 技の長さ (平均)
-        double cycle1 = (58 + (40 + 55 + 32) / 3.0) / 20.0;
-        double cycle3 = (38 + (50 + 156 + 66) / 3.0) / 20.0;
+        double cycle1 = (StormHeart.GAP[0] + StormHeart.GAP_SPAN[0] / 2.0 + (40 + 62 + 32) / 3.0) / 20.0;
+        double cycle3 = (StormHeart.GAP[2] + StormHeart.GAP_SPAN[2] / 2.0 + (50 + 116 + 66) / 3.0) / 20.0;
         double hp1 = StormHeart.MAX_HEALTH * (1 - StormHeart.PHASE_TWO_AT);
         double hp3 = StormHeart.MAX_HEALTH * StormHeart.PHASE_THREE_AT;
         double damage = hp1 / dps / cycle1 * taken1 + hp3 / dps / cycle3 * taken3;
@@ -544,7 +584,7 @@ public final class StormHeartSelfTest {
         notes.add(String.format("standing still: phase 2 out of reach, phases 1+3 deal %.1f of %.0f health (load %.2f), %.1f hits to fall",
                 damage, health, load, health / taken1));
         check(load > 0.8, "standing still takes too little damage in phases 1 and 3 (load " + load + ")", failures);
-        check(health / taken1 > 5 && health / taken1 < 10, "hits to fall should be about 7 (" + health / taken1 + ")", failures);
+        check(health / taken1 > 2.5 && health / taken1 < 5, "hits to fall should be about 3 (" + health / taken1 + ")", failures);
     }
 
     // 明るさ (光の計算は別の糸で進むので、部屋を建ててから 2 秒待って測る。SelfTestRunner の storm_heart (light) の段)。
