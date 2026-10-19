@@ -61,6 +61,7 @@ public final class TideIslandBuilder {
         BreathBuilder.observatory(kit);
         lightWells(kit);
         crown(kit);
+        cairns(kit);
         fixtures(kit);
         fillWells(kit);
     }
@@ -239,6 +240,16 @@ public final class TideIslandBuilder {
         for (int[] c : new int[][] {{-48, 96}, {-40, 70}, {-24, 97}, {-49, 74}, {-28, 88}, {-30, 70}}) {
             kit.set(c[0], 67, c[1], deadFan(c[0] + c[1]));
         }
+        // 南の壁の大きな帆立貝 (扇の彫刻。桃色と白の筋、要に灯り) と、天井から吊るした灯り
+        scallop(kit, -22, 100);
+        for (int[] h : new int[][] {{-40, 74}, {-28, 80}, {-20, 90}, {-34, 84}}) {
+            int edge = Math.min(Math.min(h[0] - b.x1(), b.x2() - h[0]), Math.min(h[1] - b.z1(), b.z2() - h[1]));
+            int ceilY = Math.min(BEACH_CEILING, b.floor() + 9 + edge);
+            for (int y = ceilY; y >= ceilY - 3; y--) {
+                kit.set(h[0], y, h[1], Blocks.CHAIN.defaultBlockState());
+            }
+            kit.set(h[0], ceilY - 4, h[1], TideKit.LAMP);
+        }
         // 灯りの道: 西の廊下の口から、北東の回廊の口へ (床に埋めた灯り)
         kit.routeStrip(b.floor(), TideKit.line(b.x1(), 86, -16, 86, -16, b.z1()), TideKit.LAMP, TideKit.NACRE);
         // 肋の根もとの柱 (骨の柱。肋の梁を支える)
@@ -254,6 +265,32 @@ public final class TideIslandBuilder {
                 }
             }
         }
+    }
+
+    // 壁に立てた帆立貝の扇 (厚さ 2。要の灯りから放射の筋、縁は白)
+    private static void scallop(TideKit kit, int cx, int z) {
+        BlockState pink = Blocks.PINK_TERRACOTTA.defaultBlockState();
+        BlockState white = Blocks.WHITE_TERRACOTTA.defaultBlockState();
+        BlockState rib = Blocks.CALCITE.defaultBlockState();
+        int y0 = BEACH.floor() + 1;
+        for (int dx = -10; dx <= 10; dx++) {
+            for (int dy = 0; dy <= 10; dy++) {
+                double r = Math.hypot(dx, dy);
+                double a = Math.atan2(dx, dy);
+                if (r < 2.4 || r > 10.3 || Math.abs(a) > Math.toRadians(78)) {
+                    continue;
+                }
+                int ray = (int) Math.round(a / Math.toRadians(13));
+                BlockState s = r > 9.2 ? white : Math.floorMod(ray, 2) == 0 ? rib : pink;
+                for (int dz = 0; dz <= 1; dz++) {
+                    kit.set(cx + dx, y0 + dy, z - dz, s);
+                }
+            }
+        }
+        kit.set(cx, y0, z, TideZone.BEACH.dark);
+        kit.set(cx, y0 + 1, z, TideKit.LAMP);
+        kit.set(cx - 1, y0, z, TideZone.BEACH.dark);
+        kit.set(cx + 1, y0, z, TideZone.BEACH.dark);
     }
 
     private static BlockState beachFloor(int x, int z) {
@@ -1017,6 +1054,27 @@ public final class TideIslandBuilder {
                         kit.set(dx, yy, cz + dz, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
                     }
                 }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 甲羅の上 (T1) の標石: {x, z, 番号}。3x3 の台、石柱と灯り、碑と小さな宝
+    public static final int[][] CAIRNS = {{-70, -85, 0}, {70, -85, 1}, {80, 55, 2}, {-80, 55, 3}, {0, -105, 4}};
+
+    private static void cairns(TideKit kit) {
+        kit.zone(TideZone.FIN);
+        for (int[] c : CAIRNS) {
+            int top = shellTop(c[0], c[1]);
+            if (top != TOP_Y) {
+                continue;
+            }
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    kit.set(c[0] + dx, top + 1, c[1] + dz, Math.abs(dx) + Math.abs(dz) == 2 ? Blocks.POLISHED_TUFF.defaultBlockState() : Blocks.TUFF_BRICKS.defaultBlockState());
+                }
+            }
+            for (int y = top + 2; y <= top + 5; y++) {
+                kit.set(c[0], y, c[1], y == top + 5 ? TideKit.LAMP : y == top + 4 ? Blocks.CHISELED_TUFF_BRICKS.defaultBlockState() : Blocks.TUFF_BRICKS.defaultBlockState());
             }
         }
     }

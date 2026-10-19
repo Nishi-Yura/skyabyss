@@ -62,6 +62,10 @@ public final class TideCaches {
         add("crown_1", 29, 114, -8, Direction.WEST, 31, 116, -5, Direction.WEST, 40, 1, 1, 2);
         add("crown_2", 25, 131, -8, Direction.WEST, 27, 133, -5, Direction.WEST, 45, 2, 1, 0);
         add("crown_3", 21, 147, -8, Direction.WEST, 23, 149, -5, Direction.WEST, 60, 2, 2, 0);
+        // 甲羅の上 (T1) の標石 5 つ (遠くを見る碑と、小さな宝)
+        for (int[] c : TideIslandBuilder.CAIRNS) {
+            add("cairn_" + c[2], c[0] + 1, 115, c[1] + 1, Direction.SOUTH, c[0] + 1, 116, c[1], Direction.EAST, 25, 1, 0, 1);
+        }
         // ひれの先端 (西・東)
         add("fin_w_tip", -177, 66, -22, Direction.EAST, -179, 68, -20, Direction.EAST, 70, 3, 2, 3);
         add("fin_e_tip", 177, 66, -22, Direction.WEST, 179, 68, -20, Direction.WEST, 70, 3, 2, 3);
