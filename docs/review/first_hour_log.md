@@ -2,7 +2,7 @@
 
 台本 `tools/shots/first_hour.txt` で、新しいプレイヤーが序章から岩鯨の初見、鎖までを進む間の「目的の帯の文・開いた画面・流れた知らせ」を、ゲーム内の時刻つきで記録した。ここは 2026-10-19 の実行（クライアントは英語。日本語の文は lang から引いた）の読み解きと、見つけた穴。
 
-- 記録の元: `run/shots/first_hour/shots/first_hour/shots.log`（`[watch]` が変わるたびの記録、`[band]` が台本の指定点の帯、`[dialogue]` が会話の節と選択肢、`[gap]` が待ちきれなかった所）。実行のたびに上書きされる。絵は `docs/review/previews/first_hour/`。
+- 記録の元: `run/shots/first_hour/shots/first_hour/shots.log`（`[watch]` が変わるたびの記録、`[band]` が台本の指定点の帯、`[dialogue]` が会話の節と選択肢、`[gap]` が待ちきれなかった所）。実行のたびに上書きされる。絵は `docs/review/previews/first_hour/`（git 管理外）。
 - 動かし方: `tools/README.md` の「最初の 1 時間の通し」。毎回新しい世界（`run/shots/first_hour/saves/opening_first_hour` を消す）。約 25 分。音は自動で 0。
 - 時刻は総 tick（20 tick = 1 秒）と、それを時間にした「分:秒」。一日 = 24000 tick = 20 分。実行ごとに 数十〜数百 tick ずれる（影の長さ・乱数の幅）。
 
@@ -99,4 +99,4 @@
 
 ## 6. 絵
 
-`docs/review/previews/first_hour/` に台本の撮影の抜粋（毎回撮り直せる）。`p0_band_examine_camp`（最初の帯）、`p3_dialogue_open`（B-2）、`p4_page_falls`（頁の帯）、`p6_dusk`・`p8_night2`（待ちの帯）、`p9_after_first_sight`（初見のあと）、`p10_back_400`（背）。
+`docs/review/previews/first_hour/` に台本の撮影の抜粋（`previews/` は git の管理外なので、この worktree のローカルだけ。台本を流せば毎回撮り直せる）。`p0_band_examine_camp`（最初の帯）、`p3_dialogue_open`（B-2）、`p4_page_falls`（頁の帯）、`p6_dusk`・`p8_night2`（待ちの帯）、`p9_after_first_sight`（初見のあと）、`p10_back_400`（背）。
