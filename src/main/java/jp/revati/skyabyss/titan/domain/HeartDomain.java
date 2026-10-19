@@ -85,6 +85,8 @@ public abstract class HeartDomain {
         }
     }
 
+    // 深淵の心臓の領域 (docs/design/31 の B04): 仕掛けの手順・予告の長さは同じで、規則の周期と仕掛けの猶予だけが速くなる (fast)
+    protected final boolean abyss;
     protected final Mob heart;
     protected final String id;
     protected final double cx;
@@ -107,6 +109,7 @@ public abstract class HeartDomain {
     protected HeartDomain(Mob heart, String id, double cx, double cz, double floorY, double radius, Predicate<ServerPlayer> victims,
             BiConsumer<ServerPlayer, Float> striker, Supplier<Collection<ServerPlayer>> players, SoundEvent sting) {
         this.heart = heart;
+        this.abyss = heart instanceof jp.revati.skyabyss.entity.HeartBoss boss && boss.isAbyss();
         this.id = id;
         this.cx = cx;
         this.cz = cz;
@@ -120,6 +123,15 @@ public abstract class HeartDomain {
 
     public String id() {
         return id;
+    }
+
+    // 周期・猶予の速さ (深淵なら 1 / 1.3)。予告 (warn) の長さには使わない: 避ける目安は変えない
+    protected final int fast(int base) {
+        return jp.revati.skyabyss.abyss.Abyss.domainTicks(abyss, base);
+    }
+
+    public boolean isAbyss() {
+        return abyss;
     }
 
     public Phase phase() {

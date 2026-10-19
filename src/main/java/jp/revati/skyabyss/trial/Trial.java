@@ -52,9 +52,9 @@ public final class Trial {
         }
     }
 
-    // 常 70% / 稀 25% / 極 5%
+    // 常 70% / 稀 25% / 極 5%。深淵は引くものではなく、転生 3 回以上の人が板で選ぶ段 (極の上。docs/design/31 の B04・29 の 2.5)
     public enum Rarity {
-        COMMON, RARE, EXTREME;
+        COMMON, RARE, EXTREME, ABYSS;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);
@@ -126,6 +126,11 @@ public final class Trial {
 
         public int number(int i) {
             return i < numbers.length ? numbers[i] : 1;
+        }
+
+        // 深淵の段か (数字の標準が極のさらに上。使う側は jp.revati.skyabyss.abyss.Abyss の数字の式を通す)
+        public boolean abyss() {
+            return rarity == Rarity.ABYSS;
         }
 
         public boolean hasHazard(int h) {

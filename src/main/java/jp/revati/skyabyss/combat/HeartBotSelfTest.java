@@ -425,6 +425,54 @@ public final class HeartBotSelfTest {
         check(f, read <= 0.55, name + ": a telegraph-reading bot took " + fmt(read) + " of the expected health in 60 s (needs <= 0.55): " + readHits);
         notes.add(String.format(Locale.ROOT, "%s: circler %.2f (was %.2f without the fix, %d pursuit moves), reader %.2f", name, circle, base, fired, read));
         checkDomain(level, maker, f, notes);
+        checkAbyss(level, maker, f, notes);
+    }
+
+    // ---------------------------------------------------------------- 深淵の心臓 (docs/design/31 の B04)
+    // 体力 ×1.2・深淵の技が割り込む・予告を読む人形は、それでも 60 秒を生き残る (<= 0.65)。深淵の領域 (速い周期) も一人で解ける
+    private static void checkAbyss(ServerLevel level, Supplier<Rig> maker, List<String> f, List<String> notes) {
+        Rig rig = maker.get();
+        String name = rig.name() + " (abyss)";
+        jp.revati.skyabyss.entity.HeartBoss boss = (jp.revati.skyabyss.entity.HeartBoss) rig.heart();
+        boss.setAbyss(true);
+        check(f, boss.isAbyss(), name + ": setAbyss did not make an abyss heart");
+        Bot bot = spawnBot(level, "abyss", 8);
+        double read;
+        int fired;
+        String hits;
+        try {
+            Telegraph.resetStats();
+            read = fight(rig, bot, reader(rig.heightAt(), rig.refuges()), level, FIGHT_TICKS);
+            fired = boss.abyssFired();
+            hits = bot.where.toString();
+            check(f, Telegraph.damagingCreated() > fired, name + ": the abyss attacks made no damaging telegraphs (" + Telegraph.damagingCreated() + " for " + fired + " attacks)");
+        } finally {
+            despawn(rig, bot);
+        }
+        check(f, fired >= 3, name + ": only " + fired + " abyss attacks in 60 s");
+        check(f, jp.revati.skyabyss.abyss.AbyssAttacks.lastKind().equals(boss.abyssThemeId()), name + ": the abyss attack was not this heart's own (" + jp.revati.skyabyss.abyss.AbyssAttacks.lastKind() + ")");
+        check(f, read <= 0.65, name + ": a telegraph-reading bot took " + fmt(read) + " of the expected health in 60 s of the abyss heart (needs <= 0.65): " + hits);
+        // 領域: 深淵の周期で、一人の人形が解ける
+        rig = maker.get();
+        boss = (jp.revati.skyabyss.entity.HeartBoss) rig.heart();
+        boss.setAbyss(true);
+        bot = spawnBot(level, "abyss_domain", 8);
+        try {
+            Driver reader = reader(rig.heightAt(), rig.refuges());
+            rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
+            HeartDomain d = toActive(rig, bot, reader, level);
+            check(f, d != null && d.isAbyss(), name + ": the domain is not an abyss domain");
+            if (d != null) {
+                double before = bot.taken(rig.stage());
+                int solvedAt = solve(rig, bot, reader, level, d, f);
+                check(f, d.phase() == HeartDomain.Phase.DONE && d.solved(), name + ": a lone bot did not solve the abyss domain (" + d.solvedCount() + "/3 after " + solvedAt + " ticks)");
+                double taken = (bot.taken(rig.stage()) - before) / HeartBalance.expectedHealth(rig.stage());
+                check(f, taken <= 0.9, name + ": the solver bot took " + fmt(taken) + " in the abyss domain (needs <= 0.9)");
+                notes.add(String.format(Locale.ROOT, "%s: reader %.2f, %d abyss attacks, domain solved in %.1f s (took %.2f)", name, read, fired, solvedAt / 20.0, taken));
+            }
+        } finally {
+            despawn(rig, bot);
+        }
     }
 
     // ---------------------------------------------------------------- 領域 (仕掛けを解くまで続く)

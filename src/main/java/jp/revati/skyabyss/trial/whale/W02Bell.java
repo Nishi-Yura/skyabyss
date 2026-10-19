@@ -117,17 +117,30 @@ public final class W02Bell implements TrialCell {
         return Set.of(BELL_A, BELL_M);
     }
 
+    // 梁の周期 (tick)・止まっている割合。深淵は周期が短く窓が狭い (下限あり。Abyss)
+    public static int period(Mods m) {
+        return jp.revati.skyabyss.abyss.Abyss.shorter(m, PERIOD[m.number(0)]);
+    }
+
+    public static double window(Mods m) {
+        double window = jp.revati.skyabyss.abyss.Abyss.narrower(m, WINDOW[m.number(1)]);
+        if (m.hasHazard(1)) {
+            window *= 0.75;
+        }
+        if (m.abyss()) {
+            window = Math.max(0.35, window);
+        }
+        return window;
+    }
+
     // 梁 i が、いま止まっているか (乗れるか)
     static boolean solid(Run run, int i, long now) {
         if (now < run.getLong("bellUntil")) {
             return true;
         }
         Mods m = run.mods;
-        int period = PERIOD[m.number(0)];
-        double window = WINDOW[m.number(1)];
-        if (m.hasHazard(1)) {
-            window *= 0.75;
-        }
+        int period = period(m);
+        double window = window(m);
         long t = Math.max(0, now - run.startTick);
         long phase = (t + (long) i * period / BEAMS) % period;
         return phase < window * period;

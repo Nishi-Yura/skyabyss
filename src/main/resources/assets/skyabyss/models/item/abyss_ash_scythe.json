@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "skyabyss:item/abyss_ash_scythe"
+  }
+}

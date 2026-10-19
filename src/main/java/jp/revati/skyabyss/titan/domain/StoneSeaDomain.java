@@ -74,7 +74,7 @@ public final class StoneSeaDomain extends HeartDomain {
 
     @Override
     protected void rule(ServerLevel level, int t) {
-        if (t < 30 || (t - 30) % WAVE_EVERY != 0) {
+        if (t < 30 || (t - 30) % fast(WAVE_EVERY) != 0) {
             return;
         }
         int n = waves++;
@@ -192,10 +192,10 @@ public final class StoneSeaDomain extends HeartDomain {
         }
         if (showStart >= 0) {
             int k = t - showStart;
-            if (k % SHOW_GAP == 0 && k / SHOW_GAP < NODES) {
-                note(level, nodes.get(order[k / SHOW_GAP]), true);
+            if (k % fast(SHOW_GAP) == 0 && k / fast(SHOW_GAP) < NODES) {
+                note(level, nodes.get(order[k / fast(SHOW_GAP)]), true);
             }
-            if (k >= SHOW_GAP * NODES + 20) {
+            if (k >= fast(SHOW_GAP) * NODES + 20) {
                 showStart = -1;
                 nextShow = t + SHOW_EVERY;
             }

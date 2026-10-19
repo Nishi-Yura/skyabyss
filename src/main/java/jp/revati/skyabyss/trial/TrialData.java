@@ -94,6 +94,12 @@ public final class TrialData {
     }
 
     public static TrialDraw.Draw current(String titan, BackGroupData.Record r, UUID group, long worldSeed) {
+        return jp.revati.skyabyss.abyss.Abyss.on(r) ? TrialDraw.abyssify(currentBase(titan, r, group, worldSeed), titan, worldSeed, group)
+                : currentBase(titan, r, group, worldSeed);
+    }
+
+    // 深淵を重ねる前の、保存されている引き (深淵は表示と実行のたびに重ねる。保存はしない: つまみを戻せば元の引きに戻る)
+    private static TrialDraw.Draw currentBase(String titan, BackGroupData.Record r, UUID group, long worldSeed) {
         int cycle = cycle(r);
         TrialDraw.Draw stored = r.has(DRAW) ? TrialDraw.Draw.decode(r.getString(DRAW)) : null;
         if (stored != null && stored.cycle() == cycle && matches(stored, titan)) {

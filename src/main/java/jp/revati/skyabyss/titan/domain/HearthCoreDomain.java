@@ -168,8 +168,8 @@ public final class HearthCoreDomain extends HeartDomain {
                     tone(level, n.pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, 2.5f, 0.8f);
                     tell(level, "message.skyabyss.domain.hearth_core.step", solvedCount(), NODES);
                 }
-            } else if (n.state > 0 && t % 3 == 0) {
-                // 離れると、ゆっくり戻る (予告を避けて少し離れても、進みは大きく失わない)
+            } else if (n.state > 0 && t % fast(3) == 0) {
+                // 離れると、ゆっくり戻る (予告を避けて少し離れても、進みは大きく失わない)。深淵は戻りが速い (3 tick に 1 → 2 tick に 1。熱い床の周期は変えない: 一人で冷ませる余地を守る)
                 n.state--;
             }
         }

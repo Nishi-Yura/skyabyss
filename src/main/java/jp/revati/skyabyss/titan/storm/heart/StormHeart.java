@@ -692,7 +692,7 @@ public class StormHeart extends HeartBoss {
         updraftStopped = false;
         updraftStrong = false;
         // 次の技までの間 (段階 1 は 1.6〜2.05 秒、段階 2 は 1.1〜1.45 秒、段階 3 は 0.65〜0.8 秒、憤怒は 0.35〜0.5 秒)。予告の長さは変わらない
-        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]);
+        cooldown = jp.revati.skyabyss.abyss.Abyss.gap(isAbyss(), enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]));
     }
 
     // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どちらの技も自分の tick を数え直して動く)
@@ -777,7 +777,7 @@ public class StormHeart extends HeartBoss {
     }
 
     void strike(ServerPlayer player, float amount) {
-        player.hurt(attackSource(), amount);
+        player.hurt(attackSource(), amount * abyssDamage());
     }
 
     // 心臓の核の高さ (模型の核。描画 3 倍で足もとから 3.3)
@@ -1675,6 +1675,47 @@ public class StormHeart extends HeartBoss {
                 bossBar.addPlayer(player);
             }
         }
+    }
+
+    // ---- 深淵の心臓 (HeartBoss の abyss* の答え。docs/design/31 の B04) ----
+    @Override
+    protected boolean abyssBusy() {
+        return isRoaring() || domain != null && domain.running();
+    }
+
+    @Override
+    protected boolean abyssFury() {
+        return isEnraged();
+    }
+
+    @Override
+    protected boolean abyssReach(ServerPlayer player) {
+        return canReach(player);
+    }
+
+    @Override
+    protected double abyssFloor() {
+        return floorY();
+    }
+
+    @Override
+    protected double abyssRadius() {
+        return roomRadius();
+    }
+
+    @Override
+    protected double abyssCx() {
+        return centerX();
+    }
+
+    @Override
+    protected double abyssCz() {
+        return centerZ();
+    }
+
+    @Override
+    protected String abyssTheme() {
+        return "storm";
     }
 
     @Override

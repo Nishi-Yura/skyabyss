@@ -636,7 +636,7 @@ public class EmberHeart extends HeartBoss {
         actionTicks = 0;
         pair = null;
         int phase = getPhase();
-        cooldown = isEnraged() ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP_MIN[phase] + random.nextInt(GAP_SPAN[phase]);
+        cooldown = jp.revati.skyabyss.abyss.Abyss.gap(isAbyss(), isEnraged() ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP_MIN[phase] + random.nextInt(GAP_SPAN[phase]));
     }
 
     // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どの技も自分の tick を数え直して動く)
@@ -708,12 +708,12 @@ public class EmberHeart extends HeartBoss {
     }
 
     void strike(ServerPlayer player, float amount) {
-        player.hurt(attackSource(), amount);
+        player.hurt(attackSource(), amount * abyssDamage());
     }
 
     // 地形から噴く・燃える・燃え立つ傷 (防具で減る。熱の噴き)
     void burn(ServerLevel server, ServerPlayer player, float amount) {
-        player.hurt(EmberHeartArena.source(server, EmberIds.HEAT_BURST, this), amount);
+        player.hurt(EmberHeartArena.source(server, EmberIds.HEAT_BURST, this), amount * abyssDamage());
     }
 
     // 心臓の中心の高さ (模型の核)
@@ -1741,6 +1741,47 @@ public class EmberHeart extends HeartBoss {
                 bossBar.addPlayer(player);
             }
         }
+    }
+
+    // ---- 深淵の心臓 (HeartBoss の abyss* の答え。docs/design/31 の B04) ----
+    @Override
+    protected boolean abyssBusy() {
+        return isRoaring() || domain != null && domain.running();
+    }
+
+    @Override
+    protected boolean abyssFury() {
+        return isEnraged();
+    }
+
+    @Override
+    protected boolean abyssReach(ServerPlayer player) {
+        return canReach(player);
+    }
+
+    @Override
+    protected double abyssFloor() {
+        return floorY();
+    }
+
+    @Override
+    protected double abyssRadius() {
+        return isBound() ? 13.0 : 12.0;
+    }
+
+    @Override
+    protected double abyssCx() {
+        return isBound() ? EmberHeartArena.CX + 0.5 : getX();
+    }
+
+    @Override
+    protected double abyssCz() {
+        return isBound() ? EmberHeartArena.CZ + 0.5 : getZ();
+    }
+
+    @Override
+    protected String abyssTheme() {
+        return "ember";
     }
 
     @Override

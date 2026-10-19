@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow_pulling_2",
+  "textures": {
+    "layer0": "skyabyss:item/abyss_storm_bow_pulling_2"
+  }
+}

@@ -65,12 +65,12 @@ public final class W10Fort implements TrialCell {
     }
 
     public static int gunners(Run run, int players) {
-        int g = GUNNERS[run.mods.number(0)] + (players >= 3 ? 1 : 0) + (players >= 5 ? 1 : 0);
+        int g = jp.revati.skyabyss.abyss.Abyss.plusOne(run.mods, GUNNERS[run.mods.number(0)] + (players >= 3 ? 1 : 0) + (players >= 5 ? 1 : 0));
         return run.mods.quiet() ? Math.max(1, g - 1) : g;
     }
 
     static int waves(Run run) {
-        return run.mods.quiet() ? 1 : WAVES[run.mods.number(1)];
+        return run.mods.quiet() ? 1 : jp.revati.skyabyss.abyss.Abyss.plusOne(run.mods, WAVES[run.mods.number(1)]);
     }
 
     @Override

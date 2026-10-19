@@ -36,9 +36,12 @@ public class TrialBoardScreen extends Screen {
     private static final int RARE = 0xF2C14E;
     private static final int EXTREME = 0xC25BD6;
     private static final int COMMON = 0x4A6A72;
+    private static final int ABYSS = 0xD8343C;
 
     private static final int W = 360;
     private static final int H = 244;
+
+    private static final int ABYSS_W = 118;
 
     private TrialBoardNet.Open data;
     private int tab;
@@ -97,6 +100,14 @@ public class TrialBoardScreen extends Screen {
                     return true;
                 }
             }
+            // 深淵のつまみ (転生 3 回以上の人だけ押せる。グループごと。サーバーが確かめる)
+            int ax = px + W - 12 - ABYSS_W;
+            if (mx >= ax && mx < ax + ABYSS_W) {
+                if (data.abyssOpen()) {
+                    net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.AbyssToggle(data.titan(), !data.abyssOn()));
+                }
+                return true;
+            }
         }
         return super.mouseClicked(mx, my, button);
     }
@@ -136,7 +147,7 @@ public class TrialBoardScreen extends Screen {
     }
 
     private static int rarityColor(int r) {
-        return r >= 2 ? EXTREME : r == 1 ? RARE : COMMON;
+        return r >= 3 ? ABYSS : r == 2 ? EXTREME : r == 1 ? RARE : COMMON;
     }
 
     static String stars(int tier) {
@@ -161,6 +172,7 @@ public class TrialBoardScreen extends Screen {
             case "hazard" -> Component.translatable("trial.skyabyss.hazard." + c.code());
             case "goal" -> Component.translatable("trial.skyabyss.goal." + c.code());
             case "extreme" -> Component.translatable("trial.skyabyss.extreme." + c.code());
+            case "abyss" -> Component.translatable("trial.skyabyss.abyss");
             case "quiet" -> Component.translatable("trial.skyabyss.quiet");
             default -> Component.literal(c.code());
         };
@@ -176,7 +188,7 @@ public class TrialBoardScreen extends Screen {
             case "enemy" -> I_ENEMY;
             case "hazard" -> I_HAZARD;
             case "goal" -> I_GOAL;
-            case "extreme" -> I_EXTREME;
+            case "extreme", "abyss" -> I_EXTREME;
             case "quiet" -> I_QUIET;
             default -> I_UNKNOWN;
         };
@@ -203,6 +215,7 @@ public class TrialBoardScreen extends Screen {
             Component label = Component.translatable(tabs[t]);
             g.drawString(font, label, tx + 52 - font.width(label) / 2, py + 38, argb(1f, on ? GOLD : DIM), false);
         }
+        renderAbyssToggle(g, font, px + W - 12 - ABYSS_W, py + 34, mouseX, mouseY);
         if (tab == 0) {
             renderNow(g, font, px, py);
         } else {
@@ -210,6 +223,22 @@ public class TrialBoardScreen extends Screen {
         }
         // 足: 今週の試練・称号
         renderFoot(g, font, px, py);
+    }
+
+    // 深淵のつまみ: 閉じている (転生 3 回未満) は灰、選んでいないは暗い縁、選んでいるは赤い縁で脈打つ
+    private void renderAbyssToggle(GuiGraphics g, Font font, int x, int y, int mx, int my) {
+        boolean open = data.abyssOpen();
+        boolean on = data.abyssOn();
+        boolean hover = open && mx >= x && mx < x + ABYSS_W && my >= y && my < y + 16;
+        float pulse = on ? 0.75f + 0.25f * (float) Math.sin(age * 0.2) : 1f;
+        int line = on ? ABYSS : open ? (hover ? 0x8C4A50 : 0x4A2C32) : 0x2C3846;
+        frame(g, x, y, ABYSS_W, 16, line, on ? 0x2A1216 : open ? 0x181014 : CARD);
+        String key = !open ? "gui.skyabyss.trial.abyss.locked" : on ? "gui.skyabyss.trial.abyss.on" : "gui.skyabyss.trial.abyss.off";
+        Component label = Component.translatable(key, jp.revati.skyabyss.abyss.Abyss.OPEN_AT);
+        g.drawString(font, label, x + ABYSS_W / 2 - font.width(label) / 2, y + 4, argb(pulse, on ? 0xFF8A90 : open ? 0xC8A0A6 : DIM), false);
+        if (hover) {
+            g.renderTooltip(font, Component.translatable("gui.skyabyss.trial.abyss.tip"), mx, my);
+        }
     }
 
     private void renderNow(GuiGraphics g, Font font, int px, int py) {

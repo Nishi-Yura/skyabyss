@@ -58,7 +58,7 @@ final class BuildsSelfTest {
         SkillData d = SkillManager.get(p);
         d.bonusPoints = 60;
         d.calling = "";
-        // 書き換えは 8 つ。武器の品は実在し、書き換える技は使う技
+        // 書き換えは 12 つ (従来 8 + 深淵の専用伝説 4。abyss/AbyssSelfTest)。武器の品は実在し、書き換える技は使う技
         int count = 0;
         for (Rune r : Rune.values()) {
             if (!r.legendary()) {
@@ -68,7 +68,7 @@ final class BuildsSelfTest {
             check(f, r.index == 4 && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
             check(f, Rune.of(r.skill).stream().noneMatch(Rune::legendary), "ordinary rune list holds a legendary rune for " + r.skill.id);
         }
-        check(f, count == 8, "legendary rune count is " + count);
+        check(f, count == 12, "legendary rune count is " + count);
         // 持っていなければ選べない・持てば選べる・外せば効かない (記録には残る)
         SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
         SkillManager.forceRank(p, Skill.LUNGE, 2);

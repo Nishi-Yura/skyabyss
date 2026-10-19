@@ -7,8 +7,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.ModText;
+import jp.revati.skyabyss.abyss.Abyss;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.rebirth.RebirthView;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupProgress;
 import jp.revati.skyabyss.titan.group.Groups;
@@ -57,7 +59,7 @@ public final class TrialBoard {
             Def d = p.def();
             Mods m = p.mods();
             boolean hide = false;
-            if (m.extreme() != Extreme.NONE && !hiddenGiven) {
+            if (m.extreme() != Extreme.NONE && !m.abyss() && !hiddenGiven) {
                 hide = true;
                 hiddenGiven = true;
             }
@@ -77,7 +79,50 @@ public final class TrialBoard {
         }
         boolean weeklyDone = codex.weeklyDone(id, titan) == TrialData.week();
         return new TrialBoardNet.Open(titan, draw.cycle(), cards, weekly == null ? "" : weekly.id(), weeklyDone, weekly != null && draw.has(weekly.id()), rows,
-                List.copyOf(codex.titles(id)));
+                List.copyOf(codex.titles(id)), Abyss.open(sp), Abyss.on(r));
+    }
+
+    public enum Toggle { CHANGED, SAME, LOCKED }
+
+    // つまみの決まり (純粋な部分): 入るには転生 3 回以上、切るのは誰でも。記録 r を書き換える
+    public static Toggle applyToggle(BackGroupData.Record r, boolean on, int rebirths) {
+        if (Abyss.on(r) == on) {
+            return Toggle.SAME;
+        }
+        if (on && !Abyss.open(rebirths)) {
+            return Toggle.LOCKED;
+        }
+        Abyss.set(r, on);
+        return Toggle.CHANGED;
+    }
+
+    // 深淵のつまみ (グループごと)。転生 3 回以上の人だけが入れる。切るのは誰でも。変えたら動いている試練を止めて (次に入るとき引き直した修飾で組み直す)、板を開き直す
+    public static void toggleAbyss(ServerPlayer sp, String titan, boolean on) {
+        if (!Titans.hasBack(titan)) {
+            return;
+        }
+        ServerLevel back = sp.server.getLevel(Titans.backOf(titan));
+        if (back == null) {
+            return;
+        }
+        UUID group = Groups.keyOf(sp);
+        BackGroupData.Record r = GroupProgress.of(back, group);
+        Toggle result = applyToggle(r, on, RebirthView.count(sp));
+        if (result == Toggle.SAME) {
+            open(sp, titan);
+            return;
+        }
+        if (result == Toggle.LOCKED) {
+            Notice.bar(sp, ModText.deny("message.skyabyss.abyss.locked", Abyss.OPEN_AT));
+            return;
+        }
+        r.changed();
+        TrialRuntime.stopGroup(back, group);
+        TrialRuntime.syncGates(back, group, titan, TrialData.current(back, group));
+        for (ServerPlayer m : Groups.online(back, group)) {
+            Notice.hint(m, on ? "message.skyabyss.abyss.on" : "message.skyabyss.abyss.off");
+        }
+        open(sp, titan);
     }
 
     // 修飾の札 (type:code)。数字は標準も見せる (どの値かが分かるように)
@@ -89,19 +134,22 @@ public final class TrialBoard {
         }
         for (int i = 0; i < sp.numbers().size(); i++) {
             int lv = m.number(i);
-            out.add(new Chip("number", sp.numbers().get(i) + ":" + lv, hideExtreme && m.extreme() == Extreme.GAUNTLET, lv == 1 ? 0 : m.extreme() == Extreme.GAUNTLET ? 2 : 1));
+            out.add(new Chip("number", sp.numbers().get(i) + ":" + lv, hideExtreme && m.extreme() == Extreme.GAUNTLET, lv == 1 && !m.abyss() ? 0 : m.abyss() ? 3 : m.extreme() == Extreme.GAUNTLET ? 2 : 1));
         }
         if (sp.enemySets() > 1 && m.enemy() >= 0) {
             out.add(new Chip("enemy", d.id() + ":" + m.enemy(), false, 0));
         }
         for (int h : m.hazards()) {
-            out.add(new Chip("hazard", sp.hazards().get(h), hideExtreme && m.extreme() == Extreme.DOUBLE_HAZARD, m.extreme() == Extreme.DOUBLE_HAZARD ? 2 : 1));
+            out.add(new Chip("hazard", sp.hazards().get(h), hideExtreme && m.extreme() == Extreme.DOUBLE_HAZARD, m.abyss() ? 3 : m.extreme() == Extreme.DOUBLE_HAZARD ? 2 : 1));
         }
         if (m.goal() >= 0) {
-            out.add(new Chip("goal", sp.goals().get(m.goal()), false, 1));
+            out.add(new Chip("goal", sp.goals().get(m.goal()), false, m.abyss() ? 3 : 1));
         }
         if (m.extreme() != Extreme.NONE) {
             out.add(new Chip("extreme", m.extreme().id(), hideExtreme, Rarity.EXTREME.ordinal()));
+        }
+        if (m.abyss()) {
+            out.add(new Chip("abyss", "", false, Rarity.ABYSS.ordinal()));
         }
         if (m.quiet()) {
             out.add(new Chip("quiet", "", false, 0));

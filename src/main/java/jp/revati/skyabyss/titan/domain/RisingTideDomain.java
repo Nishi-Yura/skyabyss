@@ -77,10 +77,12 @@ public final class RisingTideDomain extends HeartDomain {
         if (t < FIRST) {
             return;
         }
-        int local = (t - FIRST) % CYCLE;
+        int step = fast(RING_STEP);
+        int ebbStart = step * 3 + 48;
+        int local = (t - FIRST) % (ebbStart + step * 3 + 40);
         // 満ち: 外から内へ
         for (int i = 0; i < RINGS; i++) {
-            if (local == i * RING_STEP) {
+            if (local == i * step) {
                 if (i == 0) {
                     BossCue.send(heart, "tide", "flood_rise", RING_WARN);
                 }
@@ -89,7 +91,7 @@ public final class RisingTideDomain extends HeartDomain {
         }
         // 引き: 内から外へ
         for (int i = 0; i < RINGS; i++) {
-            if (local == EBB_START + i * RING_STEP) {
+            if (local == ebbStart + i * step) {
                 if (i == 0) {
                     BossCue.send(heart, "tide", "flood_ebb", RING_WARN);
                 }
@@ -169,7 +171,7 @@ public final class RisingTideDomain extends HeartDomain {
     @Override
     protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
         boolean wasOpen = node.state > 0;
-        node.state = OPEN_TICKS;
+        node.state = fast(OPEN_TICKS);
         node.done = true;
         tone(level, node.pos, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, 2.5f, 1.0f);
         tone(level, node.pos, SoundEvents.BARREL_OPEN, 1.5f, 0.6f);

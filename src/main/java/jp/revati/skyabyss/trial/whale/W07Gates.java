@@ -39,6 +39,10 @@ public final class W07Gates implements TrialCell {
     // 猶予 (tick)・保つ時間 (tick) (やさしい / 標準 / きびしい)
     static final int[] GRACE = {280, 220, 160};
     static final int[] HOLD = {20, 40, 60};
+
+    public static int graceOf(Run run) {
+        return jp.revati.skyabyss.abyss.Abyss.shorter(run.mods, GRACE[run.mods.number(0)]);
+    }
     static final int WEIGHTS = 2;
     static final int FLOOD_EVERY = 240;
     static final int FLOOD_LEN = 80;
@@ -136,8 +140,8 @@ public final class W07Gates implements TrialCell {
         }
         long[] openUntil = run.get("openUntil", () -> new long[4]);
         boolean[] prev = run.get("prev", () -> new boolean[4]);
-        int grace = GRACE[run.mods.number(0)];
-        int hold = HOLD[run.mods.number(1)];
+        int grace = graceOf(run);
+        int hold = jp.revati.skyabyss.abyss.Abyss.longer(run.mods, HOLD[run.mods.number(1)]);
         // 水位 (障害): 生きている取っ手の一つが、4 秒のあいだ水没して効かない。予告の粒が 1 秒前から
         if (run.mods.hasHazard(0) && !run.cleared) {
             long next = run.getLong("nextFlood");
@@ -247,10 +251,10 @@ public final class W07Gates implements TrialCell {
             }
             return true;
         }
-        openUntil[k] = now + GRACE[run.mods.number(0)];
+        openUntil[k] = now + graceOf(run);
         TrialFx.sound(back, run.group, pos, SoundEvents.IRON_DOOR_OPEN, 1f, 0.7f);
         TrialFx.particles(back, run.group, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 12, 0.5, 0.2, 0.5, 0.1);
-        Notice.bar(player, ModText.progress("message.skyabyss.trial.w07.pulled", GRACE[run.mods.number(0)] / 20));
+        Notice.bar(player, ModText.progress("message.skyabyss.trial.w07.pulled", graceOf(run) / 20));
         return true;
     }
 
