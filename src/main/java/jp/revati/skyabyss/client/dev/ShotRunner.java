@@ -906,6 +906,14 @@ public final class ShotRunner {
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
+            // 橋の輪・淵・前世の技・変異と紋のページ (docs/design/31)
+            case "skills_bridge" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.HYBRID)
+                    .select(jp.revati.skyabyss.rpg.skill.Skill.DUST_CHARGE);
+            case "skills_deep" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.DEEP)
+                    .select(jp.revati.skyabyss.rpg.skill.Skill.DEEP_MIRROR);
+            case "skills_past" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.PAST)
+                    .select(jp.revati.skyabyss.rpg.skill.Skill.ECHO_STRIKE);
+            case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;

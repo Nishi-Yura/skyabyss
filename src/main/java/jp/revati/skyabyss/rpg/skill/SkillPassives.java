@@ -40,6 +40,7 @@ final class SkillPassives {
                 d.readyBlue = d.rank(Skill.READINESS_REWARD) > 0 && allBlue(player);
             }
             SkillManager.syncBar(player);
+            SkillExtOps.refreshRebirth(player);
             SkillManager.applyModifiers(player);
             d.regenScale = regenScale(player, d);
         }

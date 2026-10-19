@@ -13,6 +13,11 @@ import net.minecraft.world.item.ItemStack;
 public final class SkillBuild {
     private static final List<SkillModifier> MODIFIERS = new CopyOnWriteArrayList<>();
 
+    static {
+        // 橋・淵・前世の技・紋の盤の数字 (docs/design/31 の A09・A14・B08・B09)
+        MODIFIERS.add(SkillExt.INSTANCE);
+    }
+
     private SkillBuild() {
     }
 
@@ -26,7 +31,7 @@ public final class SkillBuild {
         SkillData d = SkillManager.get(player);
         int n = 0;
         for (Skill s : Skill.values()) {
-            if (d.knows(s) && SkillTag.of(s) == tag) {
+            if (d.knows(s) && (SkillTag.of(s) == tag || SkillTag.second(s) == tag)) {
                 n++;
             }
         }
@@ -301,7 +306,7 @@ public final class SkillBuild {
         if (has(d, SkillKeystone.FULL_TIDE)) {
             v += SkillRules.KEY_TIDE_REGEN;
         }
-        return v;
+        return v + SkillExt.regenAdd(player);
     }
 
     // ---------------------------------------------------------------- 属性の修飾 (SkillManager.applyModifiers が付ける)
@@ -338,6 +343,10 @@ public final class SkillBuild {
         if (has(d, SkillKeystone.FULL_TIDE)) {
             manaMult += SkillRules.KEY_TIDE_MANA;
         }
+        SkillExt.Attrs ext = SkillExt.attrs(player);
+        armor += ext.armor();
+        move += ext.move();
+        mana += ext.mana();
         return new Attrs(armor, kb, move, aspeed, mana, manaMult);
     }
 }

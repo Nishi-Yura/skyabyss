@@ -15,7 +15,11 @@ public enum SkillTree {
     // 3 章 (月) で目覚める
     STAR("star", Stat.SPIRIT, true, "star"),
     // 2 章 (深淵) で目覚める
-    ABYSS("abyss", Stat.SPIRIT, true, "abyss");
+    ABYSS("abyss", Stat.SPIRIT, true, "abyss"),
+    // 橋 (A09)・淵 (B09。転生者だけ)・前世の技 (B08。転生者だけ。点は別枠)。封じではなく、画面の出し分けは転生の回数で
+    HYBRID("hybrid", null, false, "hybrid"),
+    DEEP("deep", Stat.SPIRIT, false, "deep"),
+    PAST("past", null, false, "past");
 
     public final String id;
     // 効果の元になるステータス (画面に出すだけ。数値は技ごとに SkillRules で決める)。共通の木は null
@@ -50,7 +54,12 @@ public enum SkillTree {
 
     // 画面の木のつまみに出す絵 (icons.png の升目)
     public int iconIndex() {
-        return 36 + ordinal();
+        return ordinal() < 8 ? 36 + ordinal() : 100 + 17 + (ordinal() - 8);
+    }
+
+    // 転生した人にだけ見える木 (淵・前世の技)
+    public boolean rebornOnly() {
+        return this == DEEP || this == PAST;
     }
 
     public static SkillTree byId(String id) {

@@ -9,6 +9,7 @@ import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillKeystone;
 import jp.revati.skyabyss.rpg.skill.SkillStance;
+import jp.revati.skyabyss.rpg.skill.SkillExtOps;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import net.minecraft.network.chat.Component;
@@ -112,6 +113,20 @@ public final class SkillNetwork {
                         if (r != SkillManager.KeystoneResult.OK) {
                             SkillManager.sync(player);
                             Notice.bar(player, ModText.deny("message.skyabyss.skill.keystone_failed." + r.name().toLowerCase()));
+                        }
+                    }
+                })
+                .playToServer(SkillExtPayload.TYPE, SkillExtPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        String result = switch (payload.action()) {
+                            case SkillExtPayload.MUTATE -> SkillExtOps.mutate(player, Skill.byId(payload.skill())).name();
+                            case SkillExtPayload.PLACE -> SkillExtOps.place(player, payload.a(), payload.b(), Skill.byId(payload.skill())).name();
+                            case SkillExtPayload.REMOVE -> SkillExtOps.remove(player, payload.a()).name();
+                            default -> "BAD";
+                        };
+                        if (!result.equals("OK")) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.ext_failed." + result.toLowerCase()));
                         }
                     }
                 })

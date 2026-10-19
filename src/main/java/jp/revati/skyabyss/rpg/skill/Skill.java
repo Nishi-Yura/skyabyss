@@ -52,7 +52,27 @@ public enum Skill {
     CAMP_HAND("camp_hand", SkillTree.TRAVELER, Kind.PASSIVE, 2, 1, 0, "signal", "readiness_reward"),
     APPRAISER("appraiser", SkillTree.TRAVELER, Kind.PASSIVE, 1, 1, 1, "signal", "readiness_reward"),
     FLEET_FOOT("fleet_foot", SkillTree.TRAVELER, Kind.PASSIVE, 3, 2, 2, "camp_hand", "appraiser"),
-    JOURNAL("journal", SkillTree.TRAVELER, Kind.KEYSTONE, 1, 3, 2, "fleet_foot");
+    JOURNAL("journal", SkillTree.TRAVELER, Kind.KEYSTONE, 1, 3, 2, "fleet_foot"),
+    // ---------------------------------------------------------------- 橋 (A09。隣り合う 2 本の木で技を 3 つずつ覚えると開く。列 0〜4 は画面の輪の位置)
+    DUST_CHARGE("dust_charge", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 0),
+    SEA_BREEZE("sea_breeze", SkillTree.HYBRID, Kind.PASSIVE, 2, 2, 1),
+    STEAM_BELL("steam_bell", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 2),
+    CINDER_VOLLEY("cinder_volley", SkillTree.HYBRID, Kind.ACTIVE, 2, 2, 3),
+    STONE_AIM("stone_aim", SkillTree.HYBRID, Kind.PASSIVE, 2, 2, 4),
+    // ---------------------------------------------------------------- 淵 (B09。転生 1 回で入口、5 回で全段。混ぜる前提の木)
+    DEEP_PULL("deep_pull", SkillTree.DEEP, Kind.ACTIVE, 2, 0, 0),
+    DEEP_MIRROR("deep_mirror", SkillTree.DEEP, Kind.PASSIVE, 3, 0, 1),
+    DEEP_ECHO("deep_echo", SkillTree.DEEP, Kind.ACTIVE, 2, 1, 0, "deep_pull"),
+    DEEP_TITHE("deep_tithe", SkillTree.DEEP, Kind.PASSIVE, 3, 1, 1, "deep_mirror"),
+    DEEP_MAW("deep_maw", SkillTree.DEEP, Kind.ACTIVE, 2, 2, 2, "deep_echo", "deep_tithe"),
+    DEEP_OATH("deep_oath", SkillTree.DEEP, Kind.KEYSTONE, 1, 3, 2, "deep_maw"),
+    // ---------------------------------------------------------------- 前世の技 (B08。転生の回数で開く。点は別枠。前提なし)
+    ECHO_STRIKE("echo_strike", SkillTree.PAST, Kind.ACTIVE, 2, 0, 0),
+    OLD_VIGIL("old_vigil", SkillTree.PAST, Kind.PASSIVE, 2, 0, 1),
+    GRAVE_BELL("grave_bell", SkillTree.PAST, Kind.ACTIVE, 2, 1, 0),
+    MEMORY_EDGE("memory_edge", SkillTree.PAST, Kind.PASSIVE, 2, 1, 1),
+    FINAL_LIGHT("final_light", SkillTree.PAST, Kind.ACTIVE, 2, 2, 2),
+    SOUL_THREAD("soul_thread", SkillTree.PAST, Kind.KEYSTONE, 1, 3, 2);
 
     public enum Kind {
         ACTIVE, PASSIVE, KEYSTONE
@@ -81,7 +101,7 @@ public enum Skill {
         this.maxRank = maxRank;
         this.tier = tier;
         this.column = column;
-        this.minLevel = tier == 0 ? 1 : tier == 1 ? 5 : tier == 2 ? 12 : 20;
+        this.minLevel = tree == SkillTree.PAST ? 1 : tier == 0 ? 1 : tier == 1 ? 5 : tier == 2 ? 12 : 20;
         this.requiresAny = requiresAny;
     }
 
@@ -119,9 +139,36 @@ public enum Skill {
         return "skill.skyabyss." + id + ".type";
     }
 
-    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)
+    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)。新しい 17 本は icons2.png (番号 100 から)
     public int iconIndex() {
-        return ordinal();
+        return ordinal() < 36 ? ordinal() : 100 + (ordinal() - 36);
+    }
+
+    // 転生の回数がこれ以上で取れる (淵・前世の技。ほかは 0)
+    public int rebirthAt() {
+        return switch (tree) {
+            case DEEP -> new int[] {1, 3, 4, 5}[tier];
+            case PAST -> switch (this) {
+                case ECHO_STRIKE, OLD_VIGIL -> 1;
+                case GRAVE_BELL -> 2;
+                case MEMORY_EDGE -> 3;
+                case FINAL_LIGHT -> 4;
+                default -> 5;
+            };
+            default -> 0;
+        };
+    }
+
+    // 橋の技の親の 2 本の木 (橋でなければ空)。岩-風、風-潮、潮-灰、灰-骨、骨-岩の輪
+    public SkillTree[] bridgeTrees() {
+        return switch (this) {
+            case DUST_CHARGE -> new SkillTree[] {SkillTree.ROCK, SkillTree.WIND};
+            case SEA_BREEZE -> new SkillTree[] {SkillTree.WIND, SkillTree.TIDE};
+            case STEAM_BELL -> new SkillTree[] {SkillTree.TIDE, SkillTree.ASH};
+            case CINDER_VOLLEY -> new SkillTree[] {SkillTree.ASH, SkillTree.BONE};
+            case STONE_AIM -> new SkillTree[] {SkillTree.BONE, SkillTree.ROCK};
+            default -> new SkillTree[0];
+        };
     }
 
     // この技の刻印 (第一段階。ない技は空)

@@ -41,6 +41,7 @@ final class BuildsSelfTest {
         freedom(server, f);
         legendary(server, f);
         marks(server, f);
+        DeepSkillsSelfTest.run(server, f);
     }
 
     private static ItemStack legendStack(String path) {

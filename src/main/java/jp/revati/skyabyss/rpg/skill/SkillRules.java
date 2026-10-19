@@ -168,6 +168,15 @@ public final class SkillRules {
             case CLOUD_PIERCE -> 10;
             case BONE_TRAP -> 8;
             case SKY_RAIN -> 18;
+            case DUST_CHARGE -> 12;
+            case STEAM_BELL -> 14;
+            case CINDER_VOLLEY -> 12;
+            case DEEP_PULL -> 12;
+            case DEEP_ECHO -> 14;
+            case DEEP_MAW -> 18;
+            case ECHO_STRIKE -> 10;
+            case GRAVE_BELL -> 12;
+            case FINAL_LIGHT -> 18;
             default -> 0;
         };
     }
@@ -192,6 +201,15 @@ public final class SkillRules {
             case BONE_TRAP -> 12 * SECOND;
             case SKY_RAIN -> (r >= 2 ? 14 : 18) * SECOND;
             case SIGNAL -> 6 * SECOND;
+            case DUST_CHARGE -> 10 * SECOND;
+            case STEAM_BELL -> 12 * SECOND;
+            case CINDER_VOLLEY -> 11 * SECOND;
+            case DEEP_PULL -> 14 * SECOND;
+            case DEEP_ECHO -> 20 * SECOND;
+            case DEEP_MAW -> (r >= 2 ? 14 : 17) * SECOND;
+            case ECHO_STRIKE -> 12 * SECOND;
+            case GRAVE_BELL -> 14 * SECOND;
+            case FINAL_LIGHT -> (r >= 2 ? 18 : 22) * SECOND;
             default -> 0;
         };
     }
@@ -649,6 +667,23 @@ public final class SkillRules {
             case APPRAISER -> new Object[] {1};
             case FLEET_FOOT -> new Object[] {3, fmt(fleetBonus(r) * 100), FLEET_TICKS / SECOND, FLEET_COOLDOWN / SECOND};
             case JOURNAL -> new Object[] {1};
+            case DUST_CHARGE -> new Object[] {fmt(DUST_LENGTH), pct(dustMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case SEA_BREEZE -> new Object[] {fmt(seaMove(r) * 100), fmt(seaRegen(r) * 100)};
+            case STEAM_BELL -> new Object[] {fmt(STEAM_RADIUS), pct(steamMultiplier(r)), fmt(STEAM_SLOW * 100), STEAM_TICKS / SECOND};
+            case CINDER_VOLLEY -> new Object[] {VOLLEY_BOLTS, pct(volleyMultiplier(r)), fmt(VOLLEY_RANGE), VOLLEY_BURN / SECOND};
+            case STONE_AIM -> new Object[] {fmt(aimPower(r) * 100), AIM_TICKS / SECOND, fmt(aimArmor(r))};
+            case DEEP_PULL -> new Object[] {fmt(PULL_RADIUS), pct(pullMultiplier(r)), fmt(PULL_SLOW * 100), PULL_SLOW_TICKS / SECOND};
+            case DEEP_MIRROR -> new Object[] {fmt(mirrorPower(r) * 100), MIRROR_TAGS};
+            case DEEP_ECHO -> new Object[] {fmt(echoPower(r) * 100), ECHO_TICKS / SECOND, fmtSeconds(cooldownTicks(skill, r))};
+            case DEEP_TITHE -> new Object[] {r};
+            case DEEP_MAW -> new Object[] {fmt(MAW_RADIUS), pct(mawMultiplier(r)), fmt(MAW_REACH), fmtSeconds(cooldownTicks(skill, r))};
+            case DEEP_OATH -> new Object[] {fmt(OATH_DEEP_POWER * 100), fmt(OATH_DEEP_REGEN * 100)};
+            case ECHO_STRIKE -> new Object[] {pct(echoStrikeMultiplier(r)), fmt(ECHO_STRIKE_RANGE)};
+            case OLD_VIGIL -> new Object[] {fmt(vigilArmor(r)), fmt(vigilMana(r))};
+            case GRAVE_BELL -> new Object[] {fmt(BELL_RADIUS), pct(bellMultiplier(r)), fmt(BELL_SLOW * 100), BELL_TICKS / SECOND};
+            case MEMORY_EDGE -> new Object[] {fmt(memoryPower(r, 6) * 100), fmt(MEMORY_PER_REBIRTH * 100), MEMORY_REBIRTH_MAX};
+            case FINAL_LIGHT -> new Object[] {fmt(LIGHT_RADIUS), pct(lightMultiplier(r)), fmtSeconds(cooldownTicks(skill, r))};
+            case SOUL_THREAD -> new Object[] {fmt(-THREAD_COOLDOWN * 100)};
         };
     }
 
@@ -665,6 +700,128 @@ public final class SkillRules {
         // 0.3 * 100 = 30.000000000000004 のような誤差を「30.0」と出さないよう、先に小数 1 桁に丸める
         v = Math.round(v * 10) / 10.0;
         return v == Math.floor(v) ? String.valueOf((long) v) : String.format(java.util.Locale.ROOT, "%.1f", v);
+    }
+
+    // ---------------------------------------------------------------- 橋・淵・前世の技・紋・変異 (docs/design/31 の A08・A09・A14・B08・B09)
+    // 同格の基準: 段 2 の使う技 = 鯨尾薙ぎ (×0.9 / ×1.2、全員)。単体は巨神斬り段 1 (×1.2) 前後
+    public static final double DUST_LENGTH = 6;
+    public static final double DUST_WIDTH = 1.6;
+
+    public static double dustMultiplier(int rank) {
+        return rank >= 2 ? 1.2 : 0.9;
+    }
+
+    public static double seaMove(int rank) {
+        return rank >= 2 ? 0.05 : 0.03;
+    }
+
+    public static double seaRegen(int rank) {
+        return rank >= 2 ? 0.12 : 0.08;
+    }
+
+    public static final double STEAM_RADIUS = 4;
+    public static final double STEAM_SLOW = 0.30;
+    public static final int STEAM_TICKS = 3 * SECOND;
+
+    public static double steamMultiplier(int rank) {
+        return rank >= 2 ? 0.95 : 0.7;
+    }
+
+    public static final int VOLLEY_BOLTS = 5;
+    public static final double VOLLEY_RANGE = 14;
+    public static final int VOLLEY_BURN = 3 * SECOND;
+
+    public static double volleyMultiplier(int rank) {
+        return rank >= 2 ? 0.42 : 0.30;
+    }
+
+    public static final int AIM_TICKS = SECOND;
+
+    public static double aimPower(int rank) {
+        return rank >= 2 ? 0.09 : 0.06;
+    }
+
+    public static double aimArmor(int rank) {
+        return rank;
+    }
+
+    public static final double PULL_RADIUS = 7;
+    public static final double PULL_SLOW = 0.35;
+    public static final int PULL_SLOW_TICKS = 5 * SECOND / 2;
+
+    public static double pullMultiplier(int rank) {
+        return rank >= 2 ? 0.7 : 0.5;
+    }
+
+    public static final int MIRROR_TAGS = 3;
+
+    public static double mirrorPower(int rank) {
+        return 0.01 + 0.02 * rank;
+    }
+
+    public static final int ECHO_TICKS = 5 * SECOND;
+
+    public static double echoPower(int rank) {
+        return rank >= 2 ? 0.18 : 0.12;
+    }
+
+    public static final double MAW_RADIUS = 4;
+    public static final double MAW_REACH = 10;
+
+    public static double mawMultiplier(int rank) {
+        return rank >= 2 ? 1.7 : 1.3;
+    }
+
+    public static final double OATH_DEEP_POWER = 0.08;
+    public static final double OATH_DEEP_REGEN = 0.05;
+    public static final double ECHO_STRIKE_RANGE = 7;
+
+    public static double echoStrikeMultiplier(int rank) {
+        return rank >= 2 ? 1.6 : 1.3;
+    }
+
+    public static double vigilArmor(int rank) {
+        return rank;
+    }
+
+    public static double vigilMana(int rank) {
+        return 4 * rank;
+    }
+
+    public static final double BELL_RADIUS = 5;
+    public static final double BELL_SLOW = 0.40;
+    public static final int BELL_TICKS = 3 * SECOND;
+
+    public static double bellMultiplier(int rank) {
+        return rank >= 2 ? 0.8 : 0.6;
+    }
+
+    public static final double MEMORY_PER_REBIRTH = 0.005;
+    public static final int MEMORY_REBIRTH_MAX = 6;
+
+    public static double memoryPower(int rank, int rebirth) {
+        return MEMORY_PER_REBIRTH * Math.min(MEMORY_REBIRTH_MAX, Math.max(0, rebirth)) * rank;
+    }
+
+    public static final double LIGHT_RADIUS = 5.5;
+
+    public static double lightMultiplier(int rank) {
+        return rank >= 2 ? 2.0 : 1.5;
+    }
+
+    public static final double THREAD_COOLDOWN = -0.10;
+
+    // 紋の盤 (A14): 穴は最初 3、転生 1 回ごとに 1 つ開いて最大 6。持てる紋は 24。
+    // 紋の効きは盤の合計で、力 +20%・マナ −10%・待ち −20% が上限 (全部足した上限でも心臓 15 秒・番兵長 5 秒の下限を割らない)
+    public static final int GLYPH_SOCKETS = 6;
+    public static final int GLYPH_SOCKETS_BASE = 3;
+    public static final int GLYPH_BAG_MAX = 24;
+    public static final double GLYPH_POWER_CAP = 0.20;
+    public static final double GLYPH_MANA_CAP = 0.10;
+    public static final double GLYPH_COOLDOWN_CAP = 0.20;
+
+    public static int glyphSockets(int rebirth) {
+        return Math.min(GLYPH_SOCKETS, GLYPH_SOCKETS_BASE + Math.max(0, rebirth));
     }
 
     private SkillRules() {

@@ -193,7 +193,24 @@ public final class SkillHud {
     }
 
     // 32px の絵を 16 で描く
+    static final ResourceLocation ICONS2 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/skill/icons2.png");
+
+    // 100 以上は icons2.png (橋・淵・前世の技・木の印・紋。256x128)
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
-        g.blit(ICONS, x, y, 16, 16, (index % 8) * 32, (index / 8) * 32, 32, 32, 256, 192);
+        drawIcon(g, index, x, y, 16);
+    }
+
+    static void drawIcon(GuiGraphics g, int index, int x, int y, int size) {
+        if (index >= 100) {
+            int n = index - 100;
+            g.blit(ICONS2, x, y, size, size, (n % 8) * 32, (n / 8) * 32, 32, 32, 256, 128);
+        } else {
+            g.blit(ICONS, x, y, size, size, (index % 8) * 32, (index / 8) * 32, 32, 32, 256, 192);
+        }
+    }
+
+    // 紋の絵 (icons2.png の 20〜24 番)
+    static void drawGlyph(GuiGraphics g, jp.revati.skyabyss.rpg.skill.Glyph glyph, int x, int y, int size) {
+        drawIcon(g, 120 + glyph.ordinal(), x, y, size);
     }
 }
