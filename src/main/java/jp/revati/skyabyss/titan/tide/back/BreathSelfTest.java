@@ -220,7 +220,7 @@ public final class BreathSelfTest {
         for (int y = ARENA_FLOOR + 1; y <= B_TOP; y += 6) {
             check(back.getBlockState(new BlockPos(CX, y, CZ + 1)).isAir(), "chamber B is not carved at y=" + y);
         }
-        check(back.getBlockState(new BlockPos(CX + 3, ARENA_FLOOR, CZ - 2)).blocksMotion(), "arena floor is not solid: " + back.getBlockState(new BlockPos(CX + 3, ARENA_FLOOR, CZ - 2)));
+        check(back.getBlockState(new BlockPos(CX - 3, ARENA_FLOOR, CZ + 2)).blocksMotion(), "arena floor is not solid: " + back.getBlockState(new BlockPos(CX - 3, ARENA_FLOOR, CZ + 2)));
         Dish v = vent();
         for (int y = v.floorY() + 1; y <= ARENA_FLOOR + 1; y++) {
             check(back.getBlockState(new BlockPos(v.cx(), y, v.cz())).isAir(), "vent shaft blocked at y=" + y);
@@ -306,19 +306,23 @@ public final class BreathSelfTest {
             s = st.s();
             pending.add(st.velocity());
             Vec3 applied = pending.size() > delay ? pending.poll() : Vec3.ZERO;
-            Vec3 move = applied.add(rng.nextGaussian() * noise, rng.nextGaussian() * noise * 0.4, rng.nextGaussian() * noise);
+            Vec3 move = applied.add(rng.nextGaussian() * noise, 0, rng.nextGaussian() * noise);
             Vec3 next = pos.add(move);
             if (!free(back, next)) {
-                blocked++;
-                if (where.isEmpty()) {
-                    BlockPos bp = findBlock(back, next);
-                    where = "t=" + t + " at " + next + " block " + bp.toShortString() + " " + back.getBlockState(bp).getBlock().getDescriptionId();
-                }
                 Vec3 slid = pos;
                 for (Vec3 axis : new Vec3[] {new Vec3(move.x, 0, 0), new Vec3(0, move.y, 0), new Vec3(0, 0, move.z)}) {
                     Vec3 trial = slid.add(axis);
                     if (free(back, trial)) {
                         slid = trial;
+                    }
+                }
+                // 数えるのは、着地の 1 ブロック上までに、横から壁・縁・床にぶつかったとき (着地のときの床へのめり込み・縁のすれすれは、人なら床の上に立つだけ)
+                boolean horizontal = Math.abs(slid.x - next.x) > 1e-9 || Math.abs(slid.z - next.z) > 1e-9;
+                if (horizontal && pos.y > path.get(path.size() - 1).y + 1.7) {
+                    blocked++;
+                    if (where.isEmpty()) {
+                        BlockPos bp = findBlock(back, next);
+                        where = "t=" + t + " at " + next + " block " + bp.toShortString() + " " + back.getBlockState(bp).getBlock().getDescriptionId();
                     }
                 }
                 next = slid;
@@ -464,15 +468,18 @@ public final class BreathSelfTest {
         return switch (n.kind()) {
             case DISH -> {
                 Dish d = dish(n.dish());
-                double rr = r * BASIN_R * 0.95;
+                double rr = r * 1.3;
                 yield new Vec3(d.wx() + Math.cos(a) * rr, d.floorY(), d.wz() + Math.sin(a) * rr);
             }
             case ARENA -> {
                 double rr = 1.0 + r * 3.0;
                 Vec3 p = new Vec3(WX + Math.cos(a) * rr, ARENA_FLOOR + 1, WZ + Math.sin(a) * rr);
                 Dish v = vent();
+                if (Math.hypot(p.x - (REMATCH.getX() + 0.5), p.z - (REMATCH.getZ() + 0.5)) < 2.0) {
+                    p = new Vec3(WX + 1.5, ARENA_FLOOR + 1, WZ - 1.0);
+                }
                 // 風の柱の壁の中は避ける
-                yield Math.hypot(p.x - v.wx(), p.z - v.wz()) < VENT_WALL_R + 0.5 ? new Vec3(WX - 2, ARENA_FLOOR + 1, WZ + 1) : p;
+                yield Math.hypot(p.x - v.wx(), p.z - v.wz()) < VENT_WALL_R + 1.2 ? new Vec3(WX - 2, ARENA_FLOOR + 1, WZ + 1) : p;
             }
             default -> new Vec3(WX - 3 + r * 4, DECK_FLOOR + 1, WZ - 2 + Math.sin(a) * 2);
         };

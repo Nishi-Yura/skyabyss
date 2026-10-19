@@ -79,18 +79,18 @@ public final class BreathLayout {
     public static final double VENT_R = 3.8;
     // 皿の床 (縁の輪を含む) の半径、盆の半径
     public static final double RING_R = 3.0;
-    public static final double BASIN_R = 2.1;
+    public static final double BASIN_R = 2.4;
     // 皿が螺旋に並ぶ角度 (度。+z が 90 度、反時計回りに 1 つごと -72)
     public static final double ANGLE0 = 90;
     public static final double ANGLE_STEP = -72;
     // 光る泡 (近い皿への運び) に立つ半径と、遠い皿への運びの泡の位置・半径
-    public static final double PAD_R = 0.8;
-    public static final double FAR_OFFSET = 1.5;
-    public static final double FAR_PAD_R = 0.6;
+    public static final double PAD_R = 0.7;
+    public static final double FAR_OFFSET = 1.3;
+    public static final double FAR_PAD_R = 0.5;
     // 着地の位置 (皿の中心から前の皿の向きへ)
-    public static final double LAND_OFFSET = 1.45;
+    public static final double LAND_OFFSET = 1.4;
     // 足もとの高さの上限 (気室 A の天井 138 の下で頭が当たらない)
-    public static final double CEILING_FEET = A_TOP - 1.5;
+    public static final double CEILING_FEET = A_TOP - 2.0;
 
     public record Dish(int index, int cx, int cz, int floorY, double angle) {
         // 世界の座標の中心
@@ -199,7 +199,7 @@ public final class BreathLayout {
         list.add(new Node(9, Kind.ARENA, -1, WX, WZ, ARENA_FLOOR + 1, WX - in[1] * 2.6, WZ + in[0] * 2.6, ARENA_FLOOR + 1,
                 DECK_FLOOR + 2.0));
         // 10: 展望の間
-        list.add(new Node(10, Kind.DECK, -1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, OBS_ROOF - 1.9));
+        list.add(new Node(10, Kind.DECK, -1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, OBS_ROOF - 2.3));
         return List.copyOf(list);
     }
 
@@ -360,8 +360,8 @@ public final class BreathLayout {
             double t = len < 1e-9 ? 0 : Math.max(0, Math.min(1, p.subtract(a).dot(ab) / (len * len)));
             Vec3 q = a.add(ab.scale(t));
             double d = q.distanceToSqr(p);
-            if (d < best - 1e-9) {
-                best = d;
+            if (d <= best + 1e-9) {
+                best = Math.min(best, d);
                 bestS = along + t * len;
             }
             along += len;
@@ -418,18 +418,68 @@ public final class BreathLayout {
     public record Step(Vec3 velocity, double s, boolean done) {
     }
 
+    // 道のりの s にいる辺の向き (単位ベクトル)
+    public static Vec3 tangentAt(List<Vec3> path, double s) {
+        double along = 0;
+        for (int i = 0; i + 1 < path.size(); i++) {
+            Vec3 a = path.get(i);
+            Vec3 b = path.get(i + 1);
+            double len = a.distanceTo(b);
+            if (s <= along + len || i + 2 == path.size()) {
+                return len < 1e-9 ? Vec3.ZERO : b.subtract(a).scale(1.0 / len);
+            }
+            along += len;
+        }
+        return Vec3.ZERO;
+    }
+
+    // いまの辺の終わりまでの距離が短く、次の辺が大きく曲がるとき、速さを 0.35〜1 に
+    static double cornerFactor(List<Vec3> path, double s) {
+        double along = 0;
+        for (int i = 0; i + 1 < path.size(); i++) {
+            Vec3 a = path.get(i);
+            Vec3 b = path.get(i + 1);
+            double len = a.distanceTo(b);
+            if (s < along + len || i + 2 == path.size()) {
+                if (i + 2 >= path.size()) {
+                    return 1;
+                }
+                Vec3 t1 = b.subtract(a).normalize();
+                Vec3 t2 = path.get(i + 2).subtract(b).normalize();
+                if (t1.dot(t2) > 0.8) {
+                    return 1;
+                }
+                double rem = along + len - s;
+                return Math.max(0.35, Math.min(1.0, 0.35 + rem / 1.6));
+            }
+            along += len;
+        }
+        return 1;
+    }
+
+    // 位置の最も近い道の点へ向かう引き戻し (遅れ・ふらつきでも振動しないよう弱く: 1 tick に 0.3)
+    public static final double PULL = 0.3;
+
     public static Step step(List<Vec3> path, Vec3 pos, double s, boolean tower) {
         double total = length(path);
-        // 位置の側の進み (後ろへ流されたときは前の目標を保つ。目標は位置の進みより 2.5 ブロックまでしか先へ行かない)
         double near = progress(path, pos);
         double cur = Math.max(s, near);
-        double speed = edgeSpeed(path, cur, tower);
-        double target = Math.min(total, cur + speed * 1.6);
-        Vec3 goal = pointAt(path, target);
-        Vec3 delta = goal.subtract(pos);
-        double l = delta.length();
-        Vec3 v = l < 1e-9 ? Vec3.ZERO : delta.scale(Math.min(MAX_STEP, Math.max(speed, Math.min(l * 0.5, MAX_STEP))) / l);
-        boolean done = total - near < 0.35 && pos.distanceTo(path.get(path.size() - 1)) < 0.9;
+        double speed = edgeSpeed(path, near + 0.2, tower);
+        // 曲がり角 (上り → 横、横 → 下り) の手前は速さを落とす (遅れて行きすぎ、天井・縁にぶつからないように)
+        speed *= cornerFactor(path, near);
+        Vec3 q = pointAt(path, near);
+        Vec3 v = tangentAt(path, near + 0.2).scale(speed).add(q.subtract(pos).scale(PULL));
+        double l = v.length();
+        if (l > MAX_STEP) {
+            v = v.scale(MAX_STEP / l);
+        }
+        // 終わりの近く: 着地へ向かって速さを落とす
+        double left = total - near;
+        if (left < 1.0) {
+            Vec3 end = path.get(path.size() - 1);
+            v = end.subtract(pos).scale(Math.min(1.0, 0.5 + left)).scale(0.5);
+        }
+        boolean done = left < 0.35 && pos.distanceTo(path.get(path.size() - 1)) < 0.9;
         return new Step(v, Math.min(near + 2.5, cur + speed), done);
     }
 
