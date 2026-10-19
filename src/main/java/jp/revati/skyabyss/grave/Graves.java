@@ -177,6 +177,7 @@ public final class Graves {
         GraveData.get(server).add(grave);
         jp.revati.skyabyss.tutorial.TutorialHints.start(owner, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
         spot.level().setBlock(spot.pos(), ModBlocks.GRAVE.get().defaultBlockState(), Block.UPDATE_ALL);
+        jp.revati.skyabyss.rebirth.RebirthFx.graveCreated(owner, spot.level(), spot.pos());
         SkyAbyss.LOGGER.info("[grave] {} made a grave at {} {} ({} stacks, {} xp)", grave.ownerName, grave.dimension.location(), spot.pos().toShortString(),
                 copies.size(), xp);
         return grave;

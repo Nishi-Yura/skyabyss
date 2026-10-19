@@ -83,6 +83,26 @@ public final class Rebirth {
 
     public static void register(IEventBus modEventBus) {
         ATTACHMENTS.register(modEventBus);
+        // 見せ方 (名札・順位表など) の読む回数を、この本体の値に切り替える
+        RebirthView.useSource(Rebirth::displayCount);
+    }
+
+    // 見せ方が読む回数。サーバーは本体 (GrowthData.rebirths)、クライアントは全員へ同期する写し (RebirthSetup.DATA の count)。
+    // 写しは mirror で本体に合わせる (名札はほかのプレイヤーの回数も見るため)
+    public static int displayCount(Player player) {
+        if (player.level().isClientSide) {
+            return player.getData(RebirthSetup.DATA.get()).count();
+        }
+        return Growth.get(player).rebirths;
+    }
+
+    // 本体の回数を、全員へ同期する写しへ書く
+    public static void mirror(ServerPlayer player) {
+        int n = Growth.get(player).rebirths;
+        RebirthData d = player.getData(RebirthSetup.DATA.get());
+        if (d.count() != n) {
+            player.setData(RebirthSetup.DATA.get(), d.withCount(n));
+        }
     }
 
     // ---------------------------------------------------------------- 読む
@@ -256,6 +276,9 @@ public final class Rebirth {
         sync(player);
         Growth.sync(player);
         Growth.applyModifiers(player);
+        mirror(player);
+        // 見せ方 (記録・称号・名札・実績) へ。回数は本体が書いたので、記録と飾りだけが動く
+        Rebirths.onRebirth(player);
         celebrate(player, g.rebirths, arm, boon);
         return Result.OK;
     }

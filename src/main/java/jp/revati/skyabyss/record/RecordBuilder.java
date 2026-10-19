@@ -602,6 +602,7 @@ public final class RecordBuilder {
         int unspent = d.unspentPoints();
         rows.add(value("points", t("r.points"), t("v.of", unspent, d.totalPoints()), unspent > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE,
                 List.of(t("d.points", GrowthRules.POINTS_PER_LEVEL, GrowthRules.STAT_CAP))));
+        rows.addAll(jp.revati.skyabyss.rebirth.RebirthRecord.rows(p));
         rows.add(header("stats"));
         for (Stat stat : Stat.values()) {
             int v = d.stat(stat);

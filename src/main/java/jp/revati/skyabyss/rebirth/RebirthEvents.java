@@ -111,6 +111,7 @@ public final class RebirthEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             SoulData d = Rebirth.data(player);
             d.sanitize(Rebirth.count(player));
+            Rebirth.mirror(player);
             Rebirth.sync(player);
             Rebirth.applyModifiers(player);
         }

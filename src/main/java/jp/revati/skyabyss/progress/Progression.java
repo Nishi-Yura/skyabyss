@@ -184,6 +184,8 @@ public final class Progression {
         if (worldFirst != null) {
             announceWorld(server, worldFirst, titan);
         }
+        // 巨神ごとの最速の記録・称号 (docs/design/31 の C21・C04)
+        jp.revati.skyabyss.rebirth.Rebirths.onTitanStopped(server, participants, titan);
     }
 
     private static String nameOf(MinecraftServer server, UUID id) {

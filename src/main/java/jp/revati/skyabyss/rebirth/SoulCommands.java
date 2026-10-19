@@ -89,5 +89,6 @@ public final class SoulCommands {
         Rebirth.sync(p);
         Growth.sync(p);
         Growth.applyModifiers(p);
+        Rebirth.mirror(p);
     }
 }
