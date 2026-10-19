@@ -81,13 +81,13 @@ public final class HudLayout {
         // ---- ホットバーの左右 (外側へ)
         QUICK_CARD, GROWTH_BAR, SKILL_SLOTS,
         // ---- 左上の帯 (上から下へ)
-        STATUS_TL, SLOTS_TL, POPUPS_TL, OBJECTIVE, QUEST,
+        STATUS_TL, SLOTS_TL, POPUPS_TL, CHAPTER, OBJECTIVE, QUEST,
         // ---- 右上の板 (上から下へ)
         VOW, BACK_GAUGE, PARTY_LIST,
         // ---- 下中央 (下から上へ)
         DOWNED_SELF, HINTS,
         // ---- 上中央 (ボスバーの下へ)
-        BOSS_CUE, BANNER, LEVEL_UP, CENTER_LINE,
+        BOSS_CUE, BOSS_DOMAIN, BANNER, LEVEL_UP, CENTER_LINE,
         // ---- 字幕 (上中央と手がかりのあいだ)
         CAPTION;
 

@@ -1,0 +1,145 @@
+package jp.revati.skyabyss.titan.domain;
+
+import java.util.Collection;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import jp.revati.skyabyss.combat.BossCue;
+import jp.revati.skyabyss.combat.Telegraph;
+import jp.revati.skyabyss.combat.TelegraphShape;
+import jp.revati.skyabyss.registry.MobSounds;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Blocks;
+
+// 岩鯨の心臓の領域「石の海」(docs/design/02 の 5.9)。床が石の海になり、心臓から波が打ち寄せる。
+//  石の波 (STONE_WAVE): 44 tick ごとに、心臓から外へ広がる輪 (跳べば越える)。輪には安全な筋 (緑の扇) が二つ (三本目の波は三つ) で、
+//     筋の場所は波ごとに ±55° ずつ向きを替えて動く (一方向に回り続けても、次の筋はこちらへは来ない)。三波に一度、二つ目の輪が 14 tick 遅れて続く
+//  石棘の輪 (STONE_RING): 二波に一度、波と同時に、心臓から半径 6.5 / 10.5 の円周に石の棘が 6 本 (半径 1.5 の円。予告 1.2 秒)。棘の間は安全
+// 技の名前: whale.sea_wave / whale.sea_spike。傷: 波 16、棘 18 (心臓の通常の技と同じ重さ)。
+public final class StoneSeaDomain extends HeartDomain {
+    public static final String ID = "stone_sea";
+    public static final int WAVE_EVERY = 44;
+    public static final int WAVE_WARN = 28;
+    public static final double WAVE_SPEED = 0.45;
+    public static final double WAVE_START = 2.0;
+    public static final double WAVE_HALF_THICKNESS = 1.0;
+    public static final double GAP_HALF = Math.toRadians(24);
+    public static final float WAVE_DAMAGE = 16f;
+    public static final int SPIKE_WARN = 24;
+    public static final double SPIKE_RADIUS = 1.5;
+    public static final float SPIKE_DAMAGE = 18f;
+
+    private double gapBase;
+    private int waves;
+    // 試験用: 最後に出した波の安全な筋の向き
+    private double[] lastGaps = new double[0];
+
+    public StoneSeaDomain(Mob heart, double cx, double cz, double floorY, double radius, Predicate<ServerPlayer> victims,
+            BiConsumer<ServerPlayer, Float> striker, Supplier<Collection<ServerPlayer>> players) {
+        super(heart, ID, cx, cz, floorY, radius, victims, striker, players, MobSounds.DOMAIN_STONE_SEA.get());
+        this.gapBase = heart.getRandom().nextDouble() * Math.PI * 2;
+    }
+
+    public double[] lastGaps() {
+        return lastGaps;
+    }
+
+    @Override
+    protected void onDeclare(ServerLevel level) {
+        level.playSound(null, cx, floorY + 3, cz, MobSounds.STONE_HEART_ROAR.get(), SoundSource.HOSTILE, 3f, 0.8f);
+    }
+
+    @Override
+    protected void declareEffects(ServerLevel level, int t) {
+        if (t % 6 == 0) {
+            double r = (t / (double) DECLARE_TICKS) * radius;
+            for (int i = 0; i < 28; i++) {
+                double a = Math.PI * 2 * i / 28;
+                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                        cx + Math.cos(a) * r, floorY + 0.3, cz + Math.sin(a) * r, 2, 0.2, 0.2, 0.2, 0.05);
+            }
+        }
+        if (t == DECLARE_TICKS - 1) {
+            level.playSound(null, cx, floorY + 1, cz, MobSounds.STONE_HEART_SHOCKWAVE.get(), SoundSource.HOSTILE, 3f, 0.7f);
+        }
+    }
+
+    @Override
+    protected void rule(ServerLevel level, int t) {
+        if (t < 30 || (t - 30) % WAVE_EVERY != 0) {
+            return;
+        }
+        int n = waves++;
+        // 筋の向きは波ごとに ±55°、向きも替える
+        gapBase += (n % 2 == 0 ? 1 : -1) * Math.toRadians(55) + Math.toRadians(17);
+        int gapCount = n % 3 == 2 ? 3 : 2;
+        double[] gaps = new double[gapCount];
+        for (int i = 0; i < gapCount; i++) {
+            gaps[i] = gapBase + Math.PI * 2 * i / gapCount;
+        }
+        lastGaps = gaps;
+        BossCue.send(heart, "whale", "sea_wave", WAVE_WARN);
+        wave(level, gaps, 0);
+        for (double gap : gaps) {
+            tg(level, TelegraphShape.cone(cx, cz, gap, radius + 1, GAP_HALF), WAVE_WARN).safe().start();
+        }
+        if (n % 3 == 1) {
+            wave(level, gaps, 14);
+        }
+        if (n % 2 == 1) {
+            BossCue.send(heart, "whale", "sea_spike", SPIKE_WARN);
+            double ring = n % 4 == 1 ? 6.5 : 10.5;
+            double off = gapBase * 0.5;
+            for (int i = 0; i < 6; i++) {
+                double a = off + Math.PI * 2 * i / 6;
+                spike(level, cx + Math.cos(a) * ring, cz + Math.sin(a) * ring);
+            }
+        }
+    }
+
+    private void wave(ServerLevel level, double[] gaps, int extraWarn) {
+        double reach = radius + 0.5;
+        int active = (int) Math.ceil((reach - WAVE_START) / WAVE_SPEED);
+        tg(level, TelegraphShape.wave(cx, cz, WAVE_START, reach, WAVE_HALF_THICKNESS, gaps, GAP_HALF), WAVE_WARN + extraWarn)
+                .active(active).jumpClear(0.9)
+                .onImpact(s -> {
+                    s.playSound(null, cx, floorY + 1, cz, MobSounds.STONE_HEART_SHOCKWAVE.get(), SoundSource.HOSTILE, 2.2f, 0.9f);
+                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), cx, floorY + 0.5, cz, 50, 2.0, 0.4, 2.0, 0.2);
+                })
+                .onHit((s, p) -> striker.accept(p, WAVE_DAMAGE))
+                .start();
+    }
+
+    private void spike(ServerLevel level, double x, double z) {
+        tg(level, TelegraphShape.circle(x, z, SPIKE_RADIUS), SPIKE_WARN)
+                .onImpact(s -> {
+                    s.playSound(null, x, floorY, z, MobSounds.STONE_HEART_SPIKE_BURST.get(), SoundSource.HOSTILE, 1.3f, 1.0f);
+                    s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), x, floorY + 0.5, z, 20, 0.5, 0.5, 0.5, 0.2);
+                })
+                .onHit((s, p) -> striker.accept(p, SPIKE_DAMAGE))
+                .start();
+    }
+
+    @Override
+    protected void ambient(ServerLevel level, int t) {
+        double a = heart.getRandom().nextDouble() * Math.PI * 2;
+        double r = heart.getRandom().nextDouble() * radius;
+        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.MOSSY_STONE_BRICKS.defaultBlockState()),
+                cx + Math.cos(a) * r, floorY + 0.4, cz + Math.sin(a) * r, 3, 0.4, 0.3, 0.4, 0.02);
+    }
+
+    @Override
+    protected void onEnd(ServerLevel level, boolean shattered) {
+        level.playSound(null, cx, floorY + 2, cz, shattered ? MobSounds.STONE_HEART_PLATE_LOCK.get() : MobSounds.STONE_HEART_PHASE.get(),
+                SoundSource.HOSTILE, 3f, shattered ? 0.7f : 1f);
+        if (shattered) {
+            level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), cx, floorY + 3, cz, 80, 2.5, 1.5, 2.5, 0.3);
+        }
+    }
+}

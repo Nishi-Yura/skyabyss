@@ -1,0 +1,70 @@
+# クエストの見え方 (docs/design/18 の 3.5 節): NPC の頭の上の印 (その人にだけ) と、左上の章の札。
+# ./gradlew runShots -Pscript=tools/shots/quest_ux.txt   (音はランナーが消す) → python tools/quest_ux_sheet.py
+# 印は本番と同じ経路 (サーバーが人ごとに計算 → 1 秒ごとに送る) なので、クエストの段を /skyabyss quest stage で決めて待つ
+world shots flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon skyabyss:storyteller -2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd summon skyabyss:whale_chaser 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
+cmd skyabyss quest forget @s all
+hud on
+camera minecraft:overworld 0 -58.5 9 180 0
+waitchunks
+wait 100
+cmd skyabyss cinematic stop
+wait 60
+
+# 何も進めていないとき: 新しい雑談があれば小さな点
+shot near_chat
+
+# 語り部に尋ねる段: 語り部の頭に金の「!」、鯨追いには何も出ない
+cmd skyabyss quest stage @s main_song ask_storyteller
+wait 80
+shot near_new
+
+# 報告の段: 二人とも金の「?」
+cmd skyabyss quest stage @s main_song return
+wait 80
+shot near_ready
+
+# 遠くから (約 40 ブロック)
+camera minecraft:overworld 0 -60 40 180 -2
+waitchunks
+wait 80
+shot far_40
+
+# 壁越し: 手前に壁。8 ブロックは見える、30 ブロックでは隠れる
+cmd fill -8 -60 2 8 -55 2 minecraft:stone
+camera minecraft:overworld 0 -60 10 180 -8
+wait 60
+shot wall_near
+camera minecraft:overworld 0 -60 32 180 -4
+wait 60
+shot wall_far
+
+# 旅嚢の "NEW": 新しく入った品を持ち物に出し、掃除で袋に入るのを待つ。ホットバーの左に [I] 旅嚢 NEW、画面の枠に NEW の札
+cmd skyabyss pouch hold false
+cmd fill -8 -60 2 8 -55 2 minecraft:air
+cmd give @s skyabyss:resonance_crystal 3
+cmd give @s skyabyss:stone_whale_shard 5
+cmd give @s skyabyss:lore_page 1
+cmd give @s skyabyss:sky_key_fragment 1
+camera minecraft:overworld 0 -58.5 9 180 0
+wait 120
+shot pouch_hint
+key skyabyss_pouch.key.open
+wait 40
+shot pouch_new
+

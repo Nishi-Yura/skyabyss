@@ -171,6 +171,9 @@ public class ElderSentinel extends GuardMob {
     private void begin(Action next) {
         action = next;
         actionTicks = 0;
+        if (next.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "elder_sentinel", next.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         getNavigation().stop();
         fluteSpots.clear();
         playAction(switch (next) {

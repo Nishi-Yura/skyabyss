@@ -77,7 +77,7 @@ public final class TutorialClient {
     // 出してよいか (会話・場面・開いた画面・F1・デバッグ画面の間は出さない)
     static boolean allowed(Minecraft mc) {
         return mc.player != null && mc.level != null && !mc.options.hideGui && mc.screen == null && !mc.getDebugOverlay().showDebugScreen()
-                && !CinematicClient.active() && !NoticeClient.busy();
+                && !CinematicClient.active() && !NoticeClient.busy() && !jp.revati.skyabyss.client.hud.HudManager.inCombat();
     }
 
     // ---------------------------------------------------------------- 文

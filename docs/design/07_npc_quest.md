@@ -31,7 +31,7 @@
 | --- | --- | --- | --- |
 | 始まり | 野営地に帳面が残されていた。遠くに煙が立つ | — | 帳面を拾う（伝承 `prologue/the_book`）と自動で始まる。空の影を先に見る（`prologue/shadow`）か、先に岩鯨を見つける（`chapter1/stone_whale`）でも始まる。語り部に「空のことを」と尋ねても始まる |
 | 序 1 `follow_smoke` | 煙の下の「鐘の宿り」に語り部がいる | 煙の下の鐘の宿りへ向かおう | 語り部の節 `shadow0` に入る。影や岩鯨を先に見た人、空のことを先に尋ねた人（印 `sky_asked`）は飛ばす（`skip_if`） |
-| 序 2 `watch_sky` | 今日あたり、空を見ていなさい | 探索して強くなろう。晴れた昼は空を見上げよう | 伝承 `prologue/shadow`。見たら次へ |
+| 序 2 `watch_sky` | 今日あたり、空を見ていなさい | 晴れた昼を待って、空を見上げよう | 伝承 `prologue/shadow`。見たら次へ |
 | 1 `ask_storyteller` | 影の年には遠い空から“歌”が聞こえる。歌を追う旅人がいる | 語り部に尋ねる | 語り部の節 `shadow3` に入る |
 | 2 `find_chaser` | 歌の主は空を泳ぐ岩の鯨。降りてきて鎖を垂らす | 外れの鯨追いに話を聞く | イサナの節 `c_whale2` に入る（イサナは、この段のときに村の外れへ火を焚いて現れる） |
 | 3 `see_whale` | 歌が聞こえたら空を見ろ | 岩鯨をその目で見る | 伝承 `chapter1/stone_whale`（160 ブロック以内に岩鯨） |
@@ -506,6 +506,22 @@ data/<名前空間>/quest/<名前>.json
 | 潮殻の背の見回り `daily_tide_rounds` | 言伝ての板（日替わり） | 2 | 潮殻の背の敵を 8 体（仲間も） | — |
 | 潮の鼓動をもう一度 `weekly_tide_heart` | 言伝ての板（週替わり） | 2 | 潮殻の心臓をもう一度（仲間も）。「潮は七日で満ちる」 | 七日 |
 
+### 8.5 NPC の頭の上の印（`npc/NpcMarkers`、`client/npc/NpcMarkerClient`）
+
+話しかけると何かが起きる NPC の頭の上に、**その人にだけ見える**印を出す（RPG の「！」「？」）。計算はサーバーが人ごとに、会話のハブの印（`DialogueService.visibleOptions`。8.2 節）と同じ規則で行い、1 秒ごとに、64 ブロック以内の NPC のうち印のあるものだけを、変わったときにその人にだけ送る（パケット版 `npcmark-1`）。話しても何も起きない（入口が定型のあいさつだけ）なら印は出ない。
+
+| 印 | 見た目 | 出る条件（上ほど優先） |
+| --- | --- | --- |
+| `READY_MAIN` / `READY_SIDE` | 「?」 金 / 青緑 | 進行中のクエストの**最後の段**が、この人に話すこと（報告）。または、この人が依頼主で、納める品（`turn_in`）が手持ちでそろっている |
+| `NEW_MAIN` / `NEW_SIDE` | 「!」 金 / 青緑 | 進行中のクエストの**次の段**が、この人に話すこと（まだ聞いていない話題）。または、会話の入口の節にこの人からの新しい頼み・渡す品がある（ハブの金の印と同じ判定。メインの依頼主なら金、そうでなければ青緑） |
+| `CHAT` | 小さな点（淡い色） | 入口が定型のあいさつでなく、その人がまだその節を開いたことがない（`NpcBonds` の `seen`。開くと消える。月のループで戻る） |
+
+- メインは金、サブは青緑（クエストの札と同じ色）。「?」はゆっくり脈打つ。印のない NPC には何も出さない。
+- 見え方: 遠いほど大きく描き、64 ブロックで消える。16 ブロックまでは壁越しでも見える。それより遠くは、頭が見通せるときだけ（クライアントが 5 tick ごとに視線を調べる）。場面・画面（会話を含む）・F1・目覚めの暗転では描かない。設定 `npcMarkers`（既定 ON）で消せる。
+- 実装: 印の計算 `NpcMarkers.of(player, npc)`、会話の入口を開いたら `Bond.seen` に節を足す（`DialogueService.open`）。描画は世界の描画の段（`AFTER_TRANSLUCENT_BLOCKS`）に、画素の絵（5×8 の「!」「?」、3×3 の点。縁は暗い色）をカメラの向きの板で描く。
+- 自己テスト `npc`（`NpcMarkerSelfTest`）: 人ごとに違う（一人の進みがもう一人の印を変えない）、報告の「?」、ハブの印との一致、定型だけなら印なし、点は開くと消える（別の人には残る）、頼みのあるハブは「!」で頼みの出ないハブは印なし、パケットの詰め替え、日英の lang に「探索しつつ」などが残っていない。
+- 18 の 8.4 節に、章の札と更新の音。
+
 ---
 
 ## 9. 全セリフとクエストの表
@@ -629,10 +645,10 @@ data/<名前空間>/quest/<名前>.json
 | 段階 | 書き付け | 目的 | 済ませ方 | 経験値 |
 | --- | --- | --- | --- | --- |
 | `follow_smoke` | 野営地に残されていたのは、一冊の帳面だけだった。<br>遠くの空に、細い煙が立っている。ときおり、鐘の音も風に乗ってくる。 | 煙の下の鐘の宿りへ向かおう | talk storyteller の節 `shadow0`<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
-| `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 探索して強くなろう。晴れた昼は空を見上げよう | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
+| `watch_sky` | 鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。<br>鐘は朝から、風もないのに小さく鳴っているという。 | 晴れた昼を待って、空を見上げよう | lore prologue/shadow<br>skip_if: (伝承 prologue/shadow または 伝承 chapter1/stone_whale または 印 sky_asked) | 20 |
 | `ask_storyteller` | 晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。<br>語り部なら、何か知っているかもしれない。 | 語り部に、空のことを尋ねよう | talk storyteller の節 `shadow3`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
 | `find_chaser` | 影が通った年には、決まって遠い空から“歌”が聞こえるという。<br>その歌を追う旅人が、少し離れた所で火を焚いている。煙が目印だ。 | 火を焚く鯨追いに、話を聞きに行こう | talk whale_chaser の節 `c_whale2`<br>skip_if: 伝承 chapter1/stone_whale | 30 |
-| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう（歌のあとは「夕方に岩鯨を待とう。それまでは探索で強くなろう」。`see_whale.see.wait`） | lore chapter1/stone_whale | 60 |
+| `see_whale` | 歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。<br>歌が聞こえたら、空を見ろ。 | 歌に耳をすまし、空を泳ぐ岩鯨を探そう（歌のあとは「夕方まで待って、岩鯨を探そう」。`see_whale.see.wait`） | lore chapter1/stone_whale | 60 |
 | `board` | 岩鯨が、すぐそこにいる。降りてきたら、地面に届いた鎖をつかめば、背中へ引き上げられるはずだ。 | 鎖をのぼって、岩鯨の背中へ渡ろう | lore chapter1/sky_ruins | 60 |
 | `inscriptions` | 背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。<br>どの道の先にも、背中の民が碑文を残しているはずだ。 | 背中の碑文を三つ読んでみよう（3） | lore chapter1/inscription_west, chapter1/inscription_east, chapter1/inscription_below | 90 |
 | `heart` | 封印が解けた。奥の扉の向こうで、何かが脈を打っている。<br>鍵は、鼓動のそばに納められているという。 | 体の奥で脈打つものを、止めに行こう<br>天の鍵の欠片を手に取ろう | lore chapter1/heart_stilled<br>lore chapter1/sky_key | 0 |
@@ -920,6 +936,7 @@ data/<名前空間>/quest/<名前>.json
 | `quest/QuestDef`、`QuestManager`、`QuestLog`、`Quests`、`QuestEvents` | クエストの定義、読み込み、記録、進行、出来事の拾い方 |
 | `quest/QuestSetup`、`QuestNetwork`、`QuestCommands`、`NpcQuestSelfTest` | Attachment `quest_log`、パケット（版 `quest-1`）、コマンド、自己テスト |
 | `guide/PrepQuests`、`WayfarerNotes`（`Item`・画面は `client/`）、`HeartbeatWard`、`ChapterXpBudget` | 備えの頼みの規則と合図、旅の覚書、鼓動守、章の経験値の枠（6.8 節）。場所の湧き台・宝・章のひとり歩きは 17 の 3.9 |
+| `npc/NpcMarkers`、`client/npc/NpcMarkerClient` | 頭の上の印（8.5 節。版 `npcmark-1`） |
 | `client/npc/DialogueScreen`、`NpcClient`、`NpcRenderer` | 会話の画面、受け口、描画 |
 | `client/quest/QuestLogScreen`、`QuestHud`、`QuestToast`、`QuestClient` | ログ、追跡表示、札、キー（U） |
 | `tools/gen_npc_content.py` | 会話・クエスト・文・この書類の表 |

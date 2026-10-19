@@ -110,6 +110,9 @@ public final class Pouch {
         d.set(e.id(), have + n);
         stack.shrink(n);
         boolean first = d.markSeen(e.id());
+        if (first) {
+            d.markFresh(e.id());
+        }
         sync(player);
         if (first && !(player instanceof FakePlayer)) {
             Notice.gain(player, "skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription());

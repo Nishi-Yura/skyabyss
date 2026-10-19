@@ -181,7 +181,7 @@ public final class QuestHud {
         jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
         // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
         boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
-        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める・探索する。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
+        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
         // 歌の頁を持つ人は上の式がいつも真になり、鎖が降りても「待ち」のままだった (first_hour.txt の通しで発見)。この段だけは鎖で決める
         if (def.id().equals("main_song") && stage.id().equals("board")) {
             waiting = !chainDown();

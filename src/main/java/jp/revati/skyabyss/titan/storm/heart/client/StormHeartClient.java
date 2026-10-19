@@ -86,7 +86,6 @@ public final class StormHeartClient {
         GuiGraphics g = event.getGuiGraphics();
         float t = now() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
         drawFlash(g, mc, t);
-        BossAttackCue.render(g, mc, t);
     }
 
     // 閃光の暗転 (画面の効果の強さの設定が低い人にも出す。弱めるだけ) と、閃光の瞬き

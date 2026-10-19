@@ -720,6 +720,10 @@ public final class EmberBackTrials {
 
     private static void tickPeaceful(ServerLevel level, boolean peaceful) {
         int f = EmberBodyBuilder.throatFloor(PEACEFUL_SEAL_Z);
+        // 封じる所の塊がまだ読み込まれていないあいだは何もしない (読むと、サーバーの tick が塊の読み込みを待ち続けて、世界の準備が終わらないことがあった)
+        if (!level.hasChunkAt(new BlockPos(-3, f, PEACEFUL_SEAL_Z)) || !level.hasChunkAt(new BlockPos(3, f, PEACEFUL_SEAL_Z))) {
+            return;
+        }
         List<BlockPos> seal = new ArrayList<>();
         for (int x = -3; x <= 3; x++) {
             for (int y = f + 1; y <= f + 5; y++) {

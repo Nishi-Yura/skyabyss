@@ -78,6 +78,19 @@ public final class HudManager {
         toastNow = Math.max(toastNow, Math.max(0, top) + Math.max(32, (height + 31) / 32 * 32));
     }
 
+    // 戦いの最中か: ボスバーが出ている・直近 10 秒に敵から傷を受けた。操作の手がかり (手引き・キーの案内) は、戦いの最中は出さない (見せ場の邪魔をしない)
+    public static boolean inCombat() {
+        if (HudDemo.on()) {
+            return false;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        Player p = mc.player;
+        if (p == null) {
+            return false;
+        }
+        return bossBottom > 0 || p.hurtTime > 0 || (p.getLastHurtByMobTimestamp() > 0 && p.tickCount - p.getLastHurtByMobTimestamp() < 200);
+    }
+
     public static int lastBossBottom() {
         return bossBottom;
     }

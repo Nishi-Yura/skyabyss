@@ -4,6 +4,7 @@ import java.util.List;
 
 import jp.revati.skyabyss.client.notice.NoticeClient;
 import jp.revati.skyabyss.client.pouch.QuickCard;
+import jp.revati.skyabyss.client.quest.ChapterLabel;
 import jp.revati.skyabyss.client.quest.ObjectiveStrip;
 import jp.revati.skyabyss.client.quest.QuestHud;
 import jp.revati.skyabyss.client.titan.BackGaugeHud;
@@ -27,6 +28,7 @@ final class HudRequests {
         // 左上の帯 (上から): 成長 → 目的 → 追跡中の依頼
         GrowthHud.requests(mc, w, h, out);
         SkillHud.requests(mc, out);
+        ChapterLabel.requests(mc, out);
         ObjectiveStrip.requests(mc, out);
         QuestHud.requests(mc, out);
         // ホットバーの左右
@@ -40,6 +42,7 @@ final class HudRequests {
         TutorialClient.requests(mc, out);
         // 上中央 (ボスバーの下): 技の名前 → 上の帯 → レベルアップ → 中央の一行。字幕は上中央と手がかりのあいだ
         BossAttackCue.requests(mc, out);
+        jp.revati.skyabyss.client.titan.domain.DomainClient.requests(mc, out);
         NoticeClient.requests(mc, w, h, out);
     }
 }

@@ -315,6 +315,13 @@ public final class ShotRunner {
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
             }
+            case "heartreward" -> {
+                // heartreward <focus N|confirm|later|done> : 心臓の遺物の選択画面を、その見せ場まで進める (確かめ用。選ぶ決まりはサーバー)
+                if (mc.screen instanceof jp.revati.skyabyss.client.reward.HeartRewardScreen screen) {
+                    screen.devPhase(line.arg(0), line.rest().contains(" ") ? Integer.parseInt(line.arg(1)) : 0);
+                }
+                return true;
+            }
             case "echo" -> {
                 return true;
             }
@@ -507,6 +514,27 @@ public final class ShotRunner {
                     case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
                     default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
                 }
+                return true;
+            }
+            case "skycircle" -> {
+                // skycircle <x> <z> <半径> | off : 空の影の形を、決まった円 (縁は 10 ブロックでぼやける) にする。skypass で影を置いたあとに使う
+                jp.revati.skyabyss.client.sky.SkyPassRenderer.testCircle = line.arg(0).equalsIgnoreCase("off") ? null
+                        : new double[] {line.doubleArg(0), line.doubleArg(1), line.doubleArg(2)};
+                return true;
+            }
+            case "skypass" -> {
+                // skypass <x> <z> <dirX> <dirZ> | off : 動かない空の影 (サーバーなし。速さ 0) をこのクライアントにだけ置く。影の縁を決まった場所に置いて撮る用
+                if (line.arg(0).equalsIgnoreCase("off")) {
+                    jp.revati.skyabyss.client.sky.SkyPassClient.clear();
+                } else {
+                    jp.revati.skyabyss.client.sky.SkyPassClient.receive(new jp.revati.skyabyss.sky.SkyPass(mc.level.getGameTime(),
+                            line.doubleArg(0), line.doubleArg(1), (float) line.doubleArg(2), (float) line.doubleArg(3), 0f, 1000000));
+                }
+                return true;
+            }
+            case "overheadshadow" -> {
+                // overheadshadow on|off : 上から落ちる影 (空の影・巨神の影) を画素ごとの影 (OverheadShadow) にする / 昔の地面の板と屋内の弱めに戻す (前後の比べ用)
+                jp.revati.skyabyss.client.sky.OverheadShadow.enabled = !line.arg(0).equalsIgnoreCase("off");
                 return true;
             }
             case "titanweight" -> {

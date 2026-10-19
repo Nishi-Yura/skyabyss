@@ -63,6 +63,7 @@ public final class DialogueService {
         }
         bond.talks++;
         bond.flags.add("met");
+        bond.seen.add(node.id());
         NpcBonds.sync(player);
         // ほかの NPC と話している途中なら、そちらは終える (その NPC が話し相手を待ち続けないように)
         Session old = SESSIONS.get(player.getUUID());

@@ -232,6 +232,19 @@ public class EmberHeart extends HeartBoss {
     private boolean holdAttacks;
     // 開発用: 熾の底にいる人数を多いことにする (0 なら実際の人数)
     private int partyOverride;
+    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「炉心」(titan/domain/HearthCoreDomain)
+    private final jp.revati.skyabyss.combat.HeartPursuit pursuit;
+    @Nullable
+    private jp.revati.skyabyss.titan.domain.HearthCoreDomain domain;
+    public static final float DOMAIN_AT = 0.5f;
+    // 試験・開発用: 領域を展開しない (憤怒までの技だけを見たいとき)
+    private boolean domainEnabled = true;
+
+    public void setDomainEnabled(boolean enabled) {
+        this.domainEnabled = enabled;
+    }
+    // 回っている人への狙いの先読み (予告の長さに近い tick)
+    private static final int AIM_TICKS = 24;
 
     public EmberHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "ember_heart", "roar_1", "roar_2", "breath", "pulse", "orb", "floor", "gale", "pellet",
@@ -239,6 +252,33 @@ public class EmberHeart extends HeartBoss {
         this.xpReward = 400;
         this.setNoGravity(true);
         this.setPersistenceRequired();
+        this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("ember", PULSE_DAMAGE, ParticleTypes.FLAME, SoundEvents.BLAZE_SHOOT, 1.2f),
+                this::canReach, this::strike,
+                () -> level() instanceof ServerLevel s ? reachable(s, 40) : List.<ServerPlayer>of(),
+                () -> isBound() ? new Vec3(EmberHeartArena.CX + 0.5, getY(), EmberHeartArena.CZ + 0.5) : position(),
+                this::floorY, () -> isBound() ? 13.0 : 12.0);
+    }
+
+    public jp.revati.skyabyss.combat.HeartPursuit pursuit() {
+        return pursuit;
+    }
+
+    @Nullable
+    public jp.revati.skyabyss.titan.domain.HearthCoreDomain domain() {
+        return domain;
+    }
+
+    // 領域「炉心」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
+    public void startDomain(ServerLevel server) {
+        if (domain != null) {
+            return;
+        }
+        double cx = isBound() ? EmberHeartArena.CX + 0.5 : getX();
+        double cz = isBound() ? EmberHeartArena.CZ + 0.5 : getZ();
+        domain = new jp.revati.skyabyss.titan.domain.HearthCoreDomain(this, cx, cz, floorY(), isBound() ? 13.0 : 12.0, this::canReach, this::strike,
+                () -> reachable(server, 40));
+        domain.begin(server);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -424,8 +464,21 @@ public class EmberHeart extends HeartBoss {
             tickChill(server);
             tickBeat(server);
         }
-        if (getPhase() == 1 && !isRoaring() && isBound()) {
+        boolean domainRunning = domain != null && domain.running();
+        if (getPhase() == 1 && !isRoaring() && isBound() && !domainRunning) {
             tickFloorTimer(server);
+        }
+        pursuit.tick(server, action != Action.ROAR && !domainRunning);
+        if (domainRunning) {
+            LivingEntity watched = getTarget();
+            if (watched != null && canReach(watched)) {
+                faceTarget(watched);
+            }
+            domain.tick(server);
+            if (!domain.running()) {
+                cooldown = 40;
+            }
+            return;
         }
 
         if (action == Action.NONE) {
@@ -439,6 +492,10 @@ public class EmberHeart extends HeartBoss {
                 return;
             }
             if (holdAttacks) {
+                return;
+            }
+            if (domain == null && domainEnabled && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !reachable(server, 40).isEmpty()) {
+                startDomain(server);
                 return;
             }
             LivingEntity target = getTarget();
@@ -548,6 +605,27 @@ public class EmberHeart extends HeartBoss {
         }
         attackYaw = getYRot();
         playAction(animation != null ? animation : next == Action.COMBO && pair != null ? pair.first().anim : next.anim);
+        cue(next == Action.COMBO && pair != null ? pair.first() : next);
+    }
+
+    // 技の名前 (ボスバーの下の小さな一行。BossCue)。咆哮・冷え・組は出さない (組は一つ目・二つ目それぞれ)
+    private void cue(Action a) {
+        int warn = switch (a) {
+            case BREATH -> BREATH_WARN;
+            case PULSE -> PULSE_WARN;
+            case ORB -> ORB_WARN;
+            case FLOOR -> 40;
+            case GALE -> 60;
+            case PELLET -> PELLET_WARN;
+            case EMBERS -> EMBER_BURST_FIRST;
+            case FADING -> FADING_WARN;
+            case VEIL -> 40;
+            case FORGE -> FORGE_WARN;
+            default -> 0;
+        };
+        if (warn > 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "ember", a.name().toLowerCase(java.util.Locale.ROOT), Math.min(warn, 60));
+        }
     }
 
     private void finish() {
@@ -570,6 +648,9 @@ public class EmberHeart extends HeartBoss {
         }
         runPart(server, p.first(), actionTicks);
         if (actionTicks > p.offset()) {
+            if (actionTicks == p.offset() + 1) {
+                cue(p.second());
+            }
             runPart(server, p.second(), actionTicks - p.offset());
         }
         if (actionTicks >= p.length()) {
@@ -808,12 +889,16 @@ public class EmberHeart extends HeartBoss {
 
     // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
     private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
+        ServerPlayer best = null;
+        double bestD = 7.0 * 7.0;
         for (ServerPlayer p : Players.snapshot(server.players())) {
-            if (p.position().equals(spot)) {
-                return p;
+            double d = p.position().distanceToSqr(spot);
+            if (d < bestD) {
+                bestD = d;
+                best = p;
             }
         }
-        return null;
+        return best;
     }
 
     private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
@@ -856,8 +941,10 @@ public class EmberHeart extends HeartBoss {
                 z = getZ() + Math.sin(a) * r;
             } else {
                 ServerPlayer p = all.get(i % all.size());
-                x = p.getX();
-                z = p.getZ();
+                // 回り続けている人には、予告が満ちる頃にいる所を狙う (combat/AntiStrafe)
+                Vec3 aimed = pursuit.strafe().aim(p, AIM_TICKS);
+                x = aimed.x;
+                z = aimed.z;
                 if (i >= all.size()) {
                     double a = random.nextDouble() * Math.PI * 2;
                     double r = fillMin + random.nextDouble() * (fillMax - fillMin);
@@ -1583,7 +1670,19 @@ public class EmberHeart extends HeartBoss {
             }
             return false;
         }
-        return super.hurt(source, takenFor(getPhase(), amount, toughness));
+        if (domain != null && domain.invulnerable()) {
+            if (level() instanceof ServerLevel server) {
+                server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.6f);
+                server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 6, 0.8, 0.8, 0.8, 0);
+            }
+            return false;
+        }
+        float before = getHealth();
+        boolean result = super.hurt(source, takenFor(getPhase(), amount, toughness) * (domain != null ? domain.takenMultiplier() : 1f));
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.damaged(server, before - getHealth());
+        }
+        return result;
     }
 
     // 受ける傷 (段階と人数で)。自己テストからも使う
@@ -1652,6 +1751,9 @@ public class EmberHeart extends HeartBoss {
     @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         if (level() instanceof ServerLevel server) {
             clearHazards(server);
             clearChill(server);
@@ -1668,6 +1770,9 @@ public class EmberHeart extends HeartBoss {
         defeated = true;
         super.die(source);
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), EmberHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
             server.sendParticles(ParticleTypes.ASH, getX(), coreY(), getZ(), 160, 1.5, 1.6, 1.5, 0.1);

@@ -254,7 +254,8 @@ public final class NoticeClient {
     public static void requests(Minecraft mc, int guiW, int guiH, List<Request> out) {
         Font font = mc.font;
         NoticeQueue.Entry<Line> cap = CAPTIONS.current();
-        if (cap != null && CAPTIONS.alpha() > 0.01f) {
+        // 操作の手がかり (HINT) は戦いの最中は出さない (順番待ちの時計は進むので、終わったあとに残らない)
+        if (cap != null && CAPTIONS.alpha() > 0.01f && !(cap.kind == Notice.Kind.HINT && HudManager.inCombat())) {
             Component text = cap.value.text();
             out.add(Request.of(Id.CAPTION, Region.CAPTION, (maxW, maxH) -> {
                 CapPlan p = captionPlan(font, text, guiW, maxW, maxH);

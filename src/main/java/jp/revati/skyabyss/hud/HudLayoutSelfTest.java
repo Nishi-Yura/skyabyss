@@ -97,7 +97,7 @@ public final class HudLayoutSelfTest {
     // ふつうに遊んでいる場面: 左上の帯・右上の板・字幕と手がかり・ホットバーの横。上の帯・レベルアップ・中央の一行は短く出るだけなので入れない
     static List<Request> typical(Scene s, boolean rightHandedCard) {
         List<Request> q = busy(s, rightHandedCard);
-        q.removeIf(r -> r.id() == Id.BANNER || r.id() == Id.LEVEL_UP || r.id() == Id.CENTER_LINE || r.id() == Id.BOSS_CUE || r.id() == Id.AIM_RING);
+        q.removeIf(r -> r.id() == Id.BANNER || r.id() == Id.LEVEL_UP || r.id() == Id.CENTER_LINE || r.id() == Id.BOSS_CUE || r.id() == Id.BOSS_DOMAIN || r.id() == Id.AIM_RING);
         return q;
     }
 
@@ -112,6 +112,7 @@ public final class HudLayoutSelfTest {
         q.add(Request.side(Id.GROWTH_BAR, Side.LEFT, 64, 22 + 40, 18, status, popups));
         q.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, 5 * 22 - 2, 20, 1, slotsTl));
         q.add(Request.side(Id.QUICK_CARD, rightHandedCard ? Side.LEFT : Side.RIGHT, 29, 31, 0));
+        q.add(Request.of(Id.CHAPTER, Region.TOP_LEFT, 156, 8));
         q.add(Request.of(Id.OBJECTIVE, Region.TOP_LEFT, 236, 14));
         q.add(Request.of(Id.QUEST, Region.TOP_LEFT, 156, 62));
         // 右上
@@ -123,6 +124,7 @@ public final class HudLayoutSelfTest {
         q.add(Request.of(Id.HINTS, Region.BOTTOM_CENTER, wrapped(300, 3, 13, 0, 3)));
         // 上中央
         q.add(Request.of(Id.BOSS_CUE, Region.TOP_CENTER, wrapped(220, 3, 11, 4, 3)));
+        q.add(Request.of(Id.BOSS_DOMAIN, Region.TOP_CENTER, clipped(180, 32)));
         q.add(Request.of(Id.BANNER, Region.TOP_CENTER, wrapped(Math.max(120, w / 2), 4, 14, 8, 4)).minTop((int) (h * 0.16f)));
         q.add(Request.of(Id.LEVEL_UP, Region.TOP_CENTER, 120, 32).minTop((int) (h * 0.27f)));
         q.add(Request.of(Id.CENTER_LINE, Region.TOP_CENTER, wrapped(Math.max(180, w / 2), 2, 11, 10, 2)).minTop((int) (h * 0.36f)));

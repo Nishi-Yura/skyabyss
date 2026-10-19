@@ -170,6 +170,9 @@ public final class HudDemo {
         if (mc.player == null || mc.level == null) {
             return;
         }
+        if (slow && has(Part.OBJECTIVE)) {
+            jp.revati.skyabyss.client.quest.ChapterLabel.setForTest(0);
+        }
         // ---- 手引き (初回の案内。ホットバーの上) と、キーの手がかり
         if (slow && has(Part.TUTORIAL)) {
             TutorialClient.receive(new TutorialHints.Sync(List.of(TutorialHints.POUCH, TutorialHints.RECORD, TutorialHints.PING),

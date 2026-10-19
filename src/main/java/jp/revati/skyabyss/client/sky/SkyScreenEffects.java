@@ -47,7 +47,8 @@ public final class SkyScreenEffects {
         GuiGraphics graphics = event.getGuiGraphics();
         int w = graphics.guiWidth();
         int h = graphics.guiHeight();
-        int dark = (int) (Mth.clamp(under * 0.45f + near * 0.08f, 0f, 0.8f) * 255f);
+        // 景色の暗さは OverheadShadow が画素ごとにかける。ここは手や画面全体に薄く足す分だけ (手は景色より後に描かれて影がかからない)
+        int dark = (int) (Mth.clamp(under * (OverheadShadow.ready() ? 0.2f : 0.45f) + near * 0.08f, 0f, 0.8f) * 255f);
         graphics.fill(0, 0, w, h, dark << 24 | 0x04040C);
 
         RenderSystem.enableBlend();
