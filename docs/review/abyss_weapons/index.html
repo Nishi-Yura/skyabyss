@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>深淵の専用伝説 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#6a4bc4; --accent-ink:#ffffff; --ok:#2f8a4b; --shot:#16121f;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#b79cff; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#b79cff; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:34px 0 10px}
+.intro{color:var(--muted);max-width:70ch;margin:0 0 6px}
+figure{margin:0}
+img{display:block;width:100%;height:auto;background:var(--shot);border:1px solid var(--line);image-rendering:pixelated}
+.option{background:var(--panel);border:1px solid var(--line);padding:14px;margin:16px 0}
+.option h3{margin:0 0 4px;font-size:18px}
+.option p{margin:0 0 10px;color:var(--muted)}
+.option figure + figure{margin-top:8px}
+figcaption{font-size:12px;color:var(--muted);margin-top:2px}
+.scroll{overflow-x:auto}
+.scroll img{min-width:720px}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-size:22px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){ .opts{grid-template-columns:minmax(0,1fr)} }
+</style>
+<style>
+.sec{border-top:2px solid var(--line);margin-top:40px;padding-top:6px}
+.sec h2{font-size:22px;margin:18px 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>深淵の専用伝説 4 点の形</h1>
+  <p class="intro">深淵の心臓（その巨神の心臓をグループが「深淵」で倒したとき）からだけ出る専用の伝説武器です。今は平らな絵だけなので、ほかの伝説と同じ低ポリ＋1 ブロック 32 画素のドット絵の立体にします。共通の方針は「深淵の紫黒の土台、うっすら内側で光る筋、風化した巨神の素材（岩鯨の骨、潮殻の真珠、雷翼の銅、余燼の玄武岩）の差し色」。派手にしすぎず、輪郭で見分けがつくことを優先しました。階級は伝説だけなので強化は +0 / +5 / +10 の光り方だけ変わります。各武器の A 案を仮にゲームに入れてあります。</p>
+  <div id="root"></div>
+</div>
+<script>
+(() => {
+  const WEAPONS = {"greatsword": {"jp": "底なしの大剣", "intro": "岩鯨の深淵の心臓から出る。攻撃 18・速さ 0.9。技「巨神斬り」を「奈落断ち」(扇が 1.2 秒後にもう一度裂ける) に書き換える。差し色は骨の白紫。", "opts": {"a": {"title": "A 裂け刃", "desc": "裂け刃。刃が縦に割れ、割れ目の底に虚の光。鍔は下へ垂れる鯨の肋、背に風化した骨の歯。技「奈落断ち」(もう一度裂ける) をそのまま形にした案。"}, "b": {"title": "B 断崖", "desc": "断崖。幅広い一枚刃の右縁が地層のように段になって落ち、段ごとに光る筋。背に風化した肋が三本。重く、遠くから段の輪郭で見分けがつく。"}, "c": {"title": "C 牙", "desc": "牙。反った一本の巨大な牙。根は風化した鯨骨の白紫、先へ向かって虚の紫黒に溶ける。鍔は二股のあご骨。いちばん細身で静か。"}}}, "bell_staff": {"jp": "沈み鐘の杖", "intro": "潮殻の深淵の心臓から出る。攻撃 12・速さ 1.6。技「守りの唄」を「沈む唄」(残った守りが体力へ沈む) に書き換える。差し色は青緑の真珠。", "opts": {"a": {"title": "A 吊り鐘", "desc": "吊り鐘。杖の先が鉤に曲がり、風化した鐘が一つ吊るされる。鐘の下に真珠の舌。ひとつの輪郭で「鐘の杖」と読める。"}, "b": {"title": "B 真珠の杯", "desc": "真珠の杯。大きく開いた鐘が口を上にして先に載り、真珠を抱く。外側に風化した貝の鰭。左右対称で祭具らしい。"}, "c": {"title": "C 二つ鐘", "desc": "二つ鐘。杖の先が横木になり、左右に小さな鐘が垂れる。真ん中に真珠の尖り。風鈴のような軽さ。"}}}, "storm_bow": {"jp": "雷淵の弓", "intro": "雷翼の深淵の心臓から出る。矢 ×1.8。技「雲穿ち」を「天落とし」(止まった所へ雷の柱) に書き換える。差し色は嵐の銅と黄白の稲光。引き絵 3 段つき。", "opts": {"a": {"title": "A 稲妻の腕", "desc": "稲妻の腕。弓の腕が稲妻のように折れ、折れ目に風化した銅の継ぎ手。先に銅の爪。いちばん「雷」が輪郭に出る。"}, "b": {"title": "B 雷環", "desc": "雷環。なめらかに反った虚の腕、握りの前に銅の環が二つ並び、矢が環をくぐる。静かで、引くと環が際立つ。"}, "c": {"title": "C 避雷針", "desc": "避雷針。上の腕の先が長い銅の針になって突き出し (返し付き)、下は短く光る石。上下非対称で、空へ向ける弓。"}}}, "ash_scythe": {"jp": "灰喰いの鎌", "intro": "余燼の深淵の心臓から出る。攻撃 14・速さ 1.2。技「灰散らし」を「這う灰」(灰が敵から敵へ移る) に書き換える。差し色は熾の橙。", "opts": {"a": {"title": "A 大鎌", "desc": "大鎌。長い柄の先から大きく弧を描く虚の刃。内側の縁だけが熾で薄く光る。玄武岩の襟と背の棘。いちばん古典的で大きい。"}, "b": {"title": "B 草刈り鎌", "desc": "草刈り鎌。短い柄、幅広の鉤刃。内側に細かい歯が並び、灰の布が垂れる。小ぶりで素早そう (速さ 1.2 に合う)。"}, "c": {"title": "C 顎の鎌", "desc": "顎の鎌。大小二枚の三日月刃が口のように向かい合い、喉で熾の核が光る。「灰を喰う」を形にした案。"}}}};
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const root = document.getElementById('root');
+  const dbp = (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    return c ? await c.use('db') : null;
+  })();
+  for (const id of Object.keys(WEAPONS)) {
+    const W = WEAPONS[id];
+    const docId = 'abyss_weapon_' + id;
+    const sec = mk('section', 'sec');
+    sec.appendChild(mk('h2', '', W.jp));
+    sec.appendChild(mk('p', 'intro', W.intro));
+    sec.appendChild(mk('figure', 'scroll', `<img src="${id}/compare.png" alt="${W.jp} 3 案の並び" loading="lazy"><figcaption>3 案の並び（各案: 前・前 3/4）</figcaption>`));
+    const fs = mk('fieldset', 'opts');
+    for (const k of Object.keys(W.opts)) {
+      const o = mk('section', 'option');
+      o.appendChild(mk('h3', '', W.opts[k].title));
+      o.appendChild(mk('p', '', W.opts[k].desc));
+      o.appendChild(mk('figure', 'scroll', `<img src="${id}/opt_${k}_views.png" alt="${W.opts[k].title} 前・横・後ろ・前 3/4" loading="lazy"><figcaption>前・横・後ろ・前 3/4（回転 4 方向）</figcaption>`));
+      o.appendChild(mk('figure', 'scroll', `<img src="${id}/opt_${k}_actions.png" alt="${W.opts[k].title} 手と地面" loading="lazy"><figcaption>手に持つ（三人称・一人称。持ち方は目安）・地面に落ちた姿・強化の光り方${id === 'storm_bow' ? '・弓の引き 3 段' : ''}</figcaption>`));
+      sec.appendChild(o);
+      fs.appendChild(mk('label', 'opt', `<input type="radio" name="style_${id}" value="${k}"><span class="letter">${k.toUpperCase()}</span><span>${W.opts[k].title}</span>`));
+    }
+    sec.appendChild(mk('h2', '', `${W.jp}: 採用する案`));
+    sec.appendChild(fs);
+    sec.appendChild(mk('label', 'note-l', '直してほしい点（任意。色・形・光の量・大きさ、など）'));
+    const note = mk('textarea', 'note'); note.rows = 3; note.id = 'note_' + id;
+    sec.appendChild(note);
+    const saveEl = mk('div', 'save', '読み込み中…');
+    sec.appendChild(saveEl);
+    root.appendChild(sec);
+
+    let db = null, timer = null;
+    const chosen = () => { const r = sec.querySelector('input[type=radio]:checked'); return r ? r.value : ''; };
+    const save = async () => {
+      if (!db) return;
+      saveEl.textContent = '保存中…';
+      try {
+        await db.doc('choices/' + docId).set({ option: chosen(), note: note.value, at: Date.now() });
+        saveEl.textContent = '保存しました';
+      } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+    };
+    sec.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', save));
+    note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(save, 800); });
+    (async () => {
+      db = await dbp;
+      if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+      try {
+        const snap = await db.collection('choices').get();
+        const docs = snap.docs || snap;
+        for (const d of docs) {
+          if (d.id !== docId) continue;
+          const data = typeof d.data === 'function' ? d.data() : d.data;
+          if (!data) continue;
+          if (data.option) { const r = sec.querySelector(`input[type=radio][value="${data.option}"]`); if (r) r.checked = true; }
+          if (data.note) note.value = data.note;
+        }
+        saveEl.textContent = '選ぶと自動で保存されます';
+      } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+    })();
+  }
+})();
+</script>
+</body>
+</html>

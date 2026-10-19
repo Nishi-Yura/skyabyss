@@ -54,9 +54,14 @@ HELD = {
     "coral_harpoon": (t((0, 90, -45), (0, 0, -3), 1.3), t((20, 90, -45), (0, 0, -5), 0.9)),
     "warden_glaive": (t((0, 90, -45), (0, 0, -3), 1.25), t((20, 90, -45), (0, 0, -5), 0.9)),
     "thrall_poker": (t((0, 90, -45), (0, 0, -3), 1.1), t((20, 90, -45), (0, 0, -5), 0.8)),
+    # 深淵の専用伝説: 大剣は鯨骨の大剣、鎌は戦斧、杖は火かき棒 (前へ伸びる) と同じ持ち方
+    "abyss_greatsword": (t((0, -90, 55), (0, 4.5, 0.5), 1.2), t((0, -90, 25), (0.5, 4.6, 1.13), 0.7)),
+    "abyss_ash_scythe": (t((0, -90, 55), (0, 4.0, 0.5), 1.0), t((0, -90, 25), (0.5, 4.6, 1.13), 0.66)),
+    "abyss_bell_staff": (t((0, 90, -45), (0, 0, -3), 1.1), t((20, 90, -45), (0, 0, -5), 0.8)),
 }
 # 雷翼の弓 (引き絵 3 枚も同じ持ち方)。三人称は今のまま (None)、一人称だけ小さく左へ寄せて、弓全体が見えるようにする
-for _bow in ("thunder_wing_bow", "thunder_wing_bow_pulling_0", "thunder_wing_bow_pulling_1", "thunder_wing_bow_pulling_2"):
+for _bow in ("thunder_wing_bow", "thunder_wing_bow_pulling_0", "thunder_wing_bow_pulling_1", "thunder_wing_bow_pulling_2",
+             "abyss_storm_bow", "abyss_storm_bow_pulling_0", "abyss_storm_bow_pulling_1", "abyss_storm_bow_pulling_2"):
     HELD[_bow] = (None, t((0, -90, 25), (-1.0, 3.5, 1.13), 0.55))
 
 

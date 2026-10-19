@@ -11,7 +11,6 @@ import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
 import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
-import jp.revati.skyabyss.item.storm.ThunderWingBowItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -23,6 +22,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -67,7 +67,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         int stage = pullStage(stack, context);
-        if (LowPoly.weaponMeshes) {
+        if (LowPoly.weaponMeshes || id.startsWith("abyss_")) {
             LowPolyMesh mesh = LowPolyMeshes.get("items/" + id + "/" + tierName(stack) + (stage >= 0 ? "_pull" + stage : ""));
             if (mesh != null) {
                 renderMesh(mesh, id, level(stack), stack.hasFoil(), pose, buffers, light, overlay);
@@ -131,7 +131,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     // 弓の引き絵の段 (-1 = 引いていない)。バニラの pulling / pull の述語と同じ: 引いている間は 0、pull 0.65 から 1、0.9 から 2
     private static int pullStage(ItemStack stack, ItemDisplayContext context) {
-        if (!(stack.getItem() instanceof ThunderWingBowItem)) {
+        if (!(stack.getItem() instanceof BowItem)) {
             return -1;
         }
         LivingEntity e = context.firstPerson() ? Minecraft.getInstance().player : holder;

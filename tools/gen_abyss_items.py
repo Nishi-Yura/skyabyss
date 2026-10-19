@@ -11,6 +11,7 @@ review 用の拡大 (tools/_scratch/abyss_items_preview.png)。
 """
 import json
 import os
+import sys
 
 from PIL import Image, ImageDraw
 
@@ -173,6 +174,9 @@ def write_model(name, kind):
 
 
 def main():
+    if "--flat" not in sys.argv:
+        print("低ポリ化済み (tools/install_lowpoly_abyss_weapons.py)。平らな絵と item/handheld のモデルへ戻すときだけ --flat を付ける")
+        return
     os.makedirs(TEX, exist_ok=True)
     os.makedirs(MOD, exist_ok=True)
     save(greatsword(), "abyss_greatsword")

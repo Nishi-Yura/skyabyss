@@ -145,7 +145,11 @@ public enum WeaponKind {
             Map.entry("tidecaller_claw", CLAW),
             Map.entry("ember_war_axe", AXE),
             Map.entry("smith_hammer", HAMMER),
-            Map.entry("thrall_poker", POKER));
+            Map.entry("thrall_poker", POKER),
+            // 深淵の専用伝説 (剣型の 3 点。弓は WeaponClient が BowExtension で登録する)
+            Map.entry("abyss_greatsword", GREATSWORD),
+            Map.entry("abyss_bell_staff", POKER),
+            Map.entry("abyss_ash_scythe", AXE));
 
     public static Iterable<Map.Entry<String, WeaponKind>> items() {
         return BY_ITEM.entrySet();

@@ -125,6 +125,7 @@ python tools/accessory_lp_sheet.py [巨神]                       # docs/review/
 
 ```
 python tools/install_lowpoly_weapons.py        # weapons_final/ のメッシュ・アトラス・光る画像を入れ、models/item/<id>.json の base を builtin/entity にする (何度でも)
+python tools/install_lowpoly_abyss_weapons.py  # 深淵の専用伝説 4 点 (docs/review/lowpoly_roughs/abyss_weapons/<id>/<案> から。--option abyss_greatsword=b で案を替える。3 案は rough/lowpoly/weapons/abyss/build_abyss.py)
 python tools/gen_weapon_lp_shots.py [id ...]   # 台本 tools/shots/weapon_lp_<id>.txt (階級 3 x 強化 3 x 一人称/三人称、ボクセル版、弓の引き、盾の構え、地面・額縁) と weapon_lp_perf.txt
 ./gradlew runShots -Pscript=tools/shots/weapon_lp_<id>.txt
 python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_<id>.png (コンタクトシート) ほか

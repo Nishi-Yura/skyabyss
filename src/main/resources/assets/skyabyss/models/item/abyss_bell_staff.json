@@ -1,6 +1,1 @@
-{
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "skyabyss:item/abyss_bell_staff"
-  }
-}
+{"loader":"neoforge:separate_transforms","base":{"parent":"builtin/entity","gui_light":"front","display":{"thirdperson_righthand":{"rotation":[0,90,-45],"translation":[0,0,-3],"scale":[1.1,1.1,1.1]},"thirdperson_lefthand":{"rotation":[0,90,-135],"translation":[0,0,-3],"scale":[1.1,1.1,1.1]},"firstperson_righthand":{"rotation":[20,90,-45],"translation":[0,0,-5],"scale":[0.8,0.8,0.8]},"firstperson_lefthand":{"rotation":[20,90,-135],"translation":[0,0,-5],"scale":[0.8,0.8,0.8]},"ground":{"rotation":[0,0,0],"translation":[0,2,0],"scale":[0.5,0.5,0.5]},"head":{"rotation":[0,180,0],"translation":[0,13,7],"scale":[1,1,1]},"fixed":{"rotation":[0,180,0],"translation":[0,0,0],"scale":[1,1,1]}},"textures":{"particle":"skyabyss:item/abyss_bell_staff"}},"perspectives":{"gui":{"parent":"minecraft:item/generated","textures":{"layer0":"skyabyss:item/abyss_bell_staff"}}}}

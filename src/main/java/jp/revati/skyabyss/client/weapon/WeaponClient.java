@@ -54,6 +54,7 @@ public final class WeaponClient {
             }
         }
         event.registerItem(new BowExtension(), jp.revati.skyabyss.item.storm.StormGearSetup.BOW.get());
+        event.registerItem(new BowExtension(), jp.revati.skyabyss.abyss.AbyssSetup.STORM_BOW_ITEM.get());
         // 珊瑚の盾: バニラの構え。見た目 (低ポリのメッシュ) だけ差し替える
         event.registerItem(new MeshOnlyExtension(), BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "coral_shield")));
     }
