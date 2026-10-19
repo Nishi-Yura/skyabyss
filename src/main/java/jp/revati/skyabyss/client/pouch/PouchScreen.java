@@ -42,6 +42,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private static final int BTN_H = 12;
     private static final int TOGGLE_X = PouchLayout.W - 8 - BTN_W;
     private static final int TOGGLE_Y = 2;
+    // 心臓の遺物のボタン (受け取れる遺物があるときだけ。切り替えのすぐ左)
+    private static final int RELIC_X = TOGGLE_X - 4 - BTN_W;
     private static final int REPAIR_X = 12;
     private static final int REPAIR_Y = PouchLayout.SEPARATOR_Y + 22;
     // 作り直しの一覧
@@ -207,6 +209,13 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         boolean toggleHover = hit(mx, my, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H);
         drawButton(g, TOGGLE_X, TOGGLE_Y, BTN_W, BTN_H, toggleHover ? 1 : 0,
                 Component.translatable(menu.rebuildView ? "skyabyss_pouch.screen.back_btn" : "skyabyss_pouch.screen.rebuild_btn"));
+        if (!menu.rebuildView && jp.revati.skyabyss.client.reward.HeartRewardClient.pending()) {
+            // 心臓の遺物: 金の縁のボタン (ゆっくり点る)
+            boolean relicHover = hit(mx, my, RELIC_X, TOGGLE_Y, BTN_W, BTN_H);
+            drawButton(g, RELIC_X, TOGGLE_Y, BTN_W, BTN_H, relicHover ? 1 : 0, Component.translatable("skyabyss_reward.pouch.button"));
+            int glow = 0x40 + (int) (0x50 * (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 300.0)));
+            g.renderOutline(RELIC_X - 1, TOGGLE_Y - 1, BTN_W + 2, BTN_H + 2, (glow << 24) | 0xF2C14E);
+        }
         if (minecraft == null || minecraft.player == null) {
             return;
         }
@@ -285,6 +294,10 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         }
         int mx = mouseX - leftPos;
         int my = mouseY - topPos;
+        if (!menu.rebuildView && jp.revati.skyabyss.client.reward.HeartRewardClient.pending() && hit(mx, my, RELIC_X, TOGGLE_Y, BTN_W, BTN_H)) {
+            g.renderTooltip(font, Component.translatable("skyabyss_reward.pouch.tip"), mouseX, mouseY);
+            return;
+        }
         if (menu.rebuildView) {
             if (hit(mx, my, REPAIR_X, REPAIR_Y, BTN_W, BTN_H)) {
                 g.renderTooltip(font, Component.translatable("skyabyss_pouch.screen.repair_hint"), mouseX, mouseY);
@@ -343,6 +356,12 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             menu.rebuildView = !menu.rebuildView;
             scroll = 0;
             refreshRows();
+            return true;
+        }
+        if (button == 0 && !menu.rebuildView && jp.revati.skyabyss.client.reward.HeartRewardClient.pending() && hit(mx, my, RELIC_X, TOGGLE_Y, BTN_W, BTN_H)) {
+            // 遺物の画面はサーバーが開かせる (選べるかを決めるのはサーバー)
+            minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.6f, 1.2f);
+            jp.revati.skyabyss.client.reward.HeartRewardClient.request();
             return true;
         }
         if (button == 1 && !menu.rebuildView && hoveredSlot != null && hoveredSlot.index >= 0 && hoveredSlot.index < menu.pouchSlotCount()) {

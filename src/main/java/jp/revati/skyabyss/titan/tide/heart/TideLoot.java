@@ -305,22 +305,9 @@ public final class TideLoot {
         }
     }
 
-    // 初回の選択: 押すと /titanmemory tide choose が走る。専用伝説がまだ作られていなければ、選べるようになるまで待つ
+    // 初回の選択: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
     private static void offerChoice(ServerPlayer player, TitanMemoryData.Record r) {
-        List<String> ready = EXCLUSIVES.stream().filter(TideLoot::registered).toList();
-        if (ready.isEmpty()) {
-            Notice.hint(player, "message.skyabyss.tide_heart.choice_later");
-            return;
-        }
-        Notice.alert(player, "message.skyabyss.first_clear");
-        MutableComponent row = Component.literal("   ");
-        for (String id : ready) {
-            ItemStack stack = new ItemStack(item(id).orElseThrow());
-            row.append(TitanLoot.itemLink(stack).withStyle(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/titanmemory tide choose " + id))))
-                    .append("  ");
-        }
-        player.sendSystemMessage(row);
-        player.sendSystemMessage(ModText.hint("message.skyabyss.first_clear_hint"));
+        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, TITAN);
     }
 
     // ---------------------------------------------------------------- コマンド
@@ -366,19 +353,12 @@ public final class TideLoot {
 
     private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        TitanMemoryData.Record r = record(player);
         String choice = StringArgumentType.getString(ctx, "item").trim();
-        if (!r.choicePending || !EXCLUSIVES.contains(choice) || !registered(choice)) {
+        // 決まりは画面と同じ一箇所 (HeartReward.claim)
+        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, TITAN, choice) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
             Notice.warn(player, "message.skyabyss.first_clear_none");
             return 0;
         }
-        r.choicePending = false;
-        r.owned.add(choice);
-        ItemStack gift = AffixRules.withAffixes(new ItemStack(item(choice).orElseThrow()), player.getRandom());
-        int held = TitanLoot.handOver(player.server, player.getUUID(), player, List.of(gift), 0);
-        player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
-        Notice.alert(player, "message.skyabyss.legendary_new", TitanLoot.itemLink(gift));
-        TitanLoot.tellHeld(player, held);
         return 1;
     }
 
