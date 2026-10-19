@@ -37,7 +37,7 @@ public final class TideBackLayout {
     // 9: 干潟の門を潮に関わらず開けておき、眠る試練を「静かな試練」(石は自分で鳴らす) にした (08 の 3.5・7.2節)
     // 10: 息の間 (亀の肺。予約の間 1〜3 と月の窓の縦穴を一つの大空洞にし、水を湛えた皿と風の柱、頂の真珠守りと展望の間を足した。封印の戸と階段はなくなった。
     //    docs/design/24 の案 C、08 の 3.8節)
-    public static final int LAYOUT_VERSION = 10;
+    public static final int LAYOUT_VERSION = 11; // 11: 建築の監査 (階段の向き・庭の入口の段・甲羅の出口の段)
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

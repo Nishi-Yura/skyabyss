@@ -204,13 +204,14 @@ public final class TitanBackBuilder {
             }
         }
         // 休みのベンチ (入口の両脇)
-        kit.set(-4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
-        kit.set(4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        // 階段の facing は背の高い側 (背もたれ)。ベンチは背もたれを道の外へ向ける
+        kit.set(-4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        kit.set(4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         // 魂の焚き火の休み場 (祠の脇): 焚き火と、そのまわりのベンチ
         kit.set(-4, py + 1, PLATFORM_Z + 3, Blocks.SOUL_CAMPFIRE.defaultBlockState()
                 .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
-        kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
-        kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
+        kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
         // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない (BackWhispers)
     }
 

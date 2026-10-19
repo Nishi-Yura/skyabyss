@@ -3,40 +3,40 @@
  "animations": {
   "animation.thunder_wing.fly": {
    "loop": true,
-   "animation_length": 3.0,
+   "animation_length": 4.5,
    "bones": {
     "wing_l": {
      "rotation": [
       "0",
       "0",
-      "-28 * math.sin(120 * query.anim_time + 0)"
+      "-20 * (math.sin(80 * query.anim_time) + 0.22 * math.sin(160 * query.anim_time - 40))"
      ]
     },
     "wing_r": {
      "rotation": [
       "0",
       "0",
-      "28 * math.sin(120 * query.anim_time + 0)"
+      "20 * (math.sin(80 * query.anim_time) + 0.22 * math.sin(160 * query.anim_time - 40))"
      ]
     },
     "hand_l": {
      "rotation": [
       "0",
       "0",
-      "-12 * math.sin(120 * query.anim_time + -60)"
+      "-10 * (math.sin(80 * query.anim_time - 80) + 0.22 * math.sin(160 * query.anim_time - 120))"
      ]
     },
     "hand_r": {
      "rotation": [
       "0",
       "0",
-      "12 * math.sin(120 * query.anim_time + -60)"
+      "10 * (math.sin(80 * query.anim_time - 80) + 0.22 * math.sin(160 * query.anim_time - 120))"
      ]
     },
     "tail": {
      "rotation": [
       "0",
-      "3 * math.sin(120 * query.anim_time + 0)",
+      "3 * math.sin(80 * query.anim_time - 60)",
       "0"
      ]
     }

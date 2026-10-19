@@ -41,6 +41,7 @@ public class StormWingRenderer extends LowPolyGeoRenderer<StormWingEntity> {
         if (!StormClient.exists(getGeoModel().getModelResource(titan)) || !StormClient.exists(getGeoModel().getTextureResource(titan))) {
             return;
         }
+        jp.revati.skyabyss.client.titan.TitanWeight.renderShadow(titan, partialTick, poseStack, buffer);
         super.render(titan, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 

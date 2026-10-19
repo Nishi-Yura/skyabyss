@@ -93,8 +93,9 @@ def cart(bp, ox, oz, chest_state=BARREL_SIDE, broken=True):
     for dx in (-1, 0, 1):
         bp.set(ox + dx, 0, oz, PLANKS)
         bp.set(ox + dx, 1, oz, PLANKS if dx != 0 or not broken else 'minecraft:spruce_slab[type=top]')
-    bp.set(ox - 1, 0, oz + 1, stairs('south'))
-    bp.set(ox + 1, 0, oz + 1, stairs('south'))
+    # 階段の facing は背の高い側 (登る向き)。荷台の板 (北) を背にした腰かけなので北向き
+    bp.set(ox - 1, 0, oz + 1, stairs('north'))
+    bp.set(ox + 1, 0, oz + 1, stairs('north'))
     bp.set(ox, 0, oz + 1, chest_state)
     bp.mark('chest', ox, 0, oz + 1)
     wheel(ox + 3, oz + 1, bp)
@@ -197,8 +198,9 @@ def lookout():
     bp.set(0, 0, 0, 'minecraft:polished_andesite')
     bp.set(0, 1, 0, 'minecraft:lightning_rod[facing=north,powered=false,waterlogged=false]')
     bp.mark('scope', 0, 1, 0)
-    bp.set(-2, 0, 1, 'minecraft:stone_brick_stairs[facing=east,half=bottom,shape=straight]')
-    bp.set(2, 0, 1, 'minecraft:stone_brick_stairs[facing=west,half=bottom,shape=straight]')
+    # 壁 (x ±3) を背にした腰かけ: 背の高い側が壁
+    bp.set(-2, 0, 1, 'minecraft:stone_brick_stairs[facing=west,half=bottom,shape=straight]')
+    bp.set(2, 0, 1, 'minecraft:stone_brick_stairs[facing=east,half=bottom,shape=straight]')
     bp.mark('stand', 0, 0, 2)
     return bp
 

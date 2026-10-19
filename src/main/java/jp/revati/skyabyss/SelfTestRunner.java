@@ -168,6 +168,9 @@ public final class SelfTestRunner {
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
         steps.add(Step.once("opening beats", 60, jp.revati.skyabyss.opening.OpeningBeatsSelfTest::runSelfTest));
+        // 巨神の体に入れない仕組み (体積・通り道・押し出し・矢)。docs/design/02 の「体に入れない」
+        steps.add(Step.once("titan solid (load)", jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::load));
+        steps.add(Step.once("titan solid", 40, jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));
@@ -243,6 +246,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く
         steps.addAll(jp.revati.skyabyss.titan.ember.smith.AshSmithSelfTest.steps());
+        // 建築の監査 (階段の向き・段差・埋まり・戸・はしご・地形との関係。docs/design/08)。SKYABYSS_SELFTEST_ONLY="build audit" でこれだけ流せる
+        steps.addAll(jp.revati.skyabyss.titan.audit.BuildAuditSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }

@@ -50,6 +50,7 @@ public class StoneWhaleRenderer extends LowPolyGeoRenderer<StoneWhaleEntity> {
 
     @Override
     public void render(StoneWhaleEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
+        TitanWeight.renderShadow(entity, partialTick, poseStack, buffers);
         super.render(entity, entityYaw, partialTick, poseStack, buffers, packedLight);
         float length = entity.chainLength();
         if (length > 0.1f) {

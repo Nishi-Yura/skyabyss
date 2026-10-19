@@ -270,6 +270,8 @@ def shelter_a(g: Grid, rng):
     # 戸 (南の壁の中央) と窓 (窓は壁を抜いた開口に鎧戸)
     g.set(0, 1, z1, "spruce_door[facing=south,half=lower,hinge=left,open=false,powered=false]")
     g.set(0, 2, z1, "spruce_door[facing=south,half=upper,hinge=left,open=false,powered=false]")
+    # 戸の外の一段 (床は庭の地面より 1 高いので、階段で上がる。背の高い側 = 登る向き = 北、が敷居にそろう)
+    g.set(0, 0, z1 + 1, "spruce_stairs[facing=north,half=bottom,shape=straight]")
     for x in (-2, 2):
         g.set(x, 2, z1, "glass_pane")
     for z in (-5, -4):

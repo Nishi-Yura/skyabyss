@@ -345,7 +345,8 @@ public final class StormBirdBuilder {
         int xOut = dir < 0 ? p.x1() : p.x2();
         for (int i = 0; ; i++) {
             int x = xIn + dir * i;
-            int floor = HUB.floor() + Math.min(5, Math.max(0, i - 1));
+            // 一段ごとに 1 上がる (階段は上がった先の床のブロックの代わりに置く)。i - 1 だと最初の段が広間の床と同じ高さになり、床に埋まる
+            int floor = HUB.floor() + Math.min(5, i);
             kit.room(x, x, p.z1(), p.z2(), floor, 4, style, 0);
             if (i >= 1 && i <= 5) {
                 for (int z = p.z1(); z <= p.z2(); z++) {
