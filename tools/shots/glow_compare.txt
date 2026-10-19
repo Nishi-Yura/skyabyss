@@ -1,0 +1,39 @@
+# Glow-pass output check (perf): same shots with and without the glow quad skip (SKYABYSS_NOGLOWSKIP=1); compare the PNGs by eye (idle animation uses real time, so not byte-identical).
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/glow_compare.txt -PshotsName=glow_a   and again with SKYABYSS_NOGLOWSKIP=1 -PshotsName=glow_b
+world glow_cmp flat
+size 960 540
+timeout 600
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set midnight
+cmd weather clear
+cmd gamemode spectator
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud off
+cmd summon skyabyss:bone_sentinel -8 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:moss_crawler -4 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:rib_archer 0 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:stone_whale_heart 8 -57 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:tide_heart 18 -57 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b}
+camera minecraft:overworld -2 -58 8 180 5
+waitchunks
+wait 80
+shot a_front
+camera minecraft:overworld 10 -56 10 160 5
+wait 20
+shot b_hearts
+camera minecraft:overworld 3 -59 -8 20 5
+wait 20
+shot c_back
+camera minecraft:overworld -9 -58 4 100 3
+wait 20
+shot d_side
+camera minecraft:overworld 8 -48 0.5 180 80
+wait 20
+shot e_top
+camera minecraft:overworld 14 -56 8 150 5
+wait 20
+shot f_far
+quit

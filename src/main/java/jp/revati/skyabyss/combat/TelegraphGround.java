@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.combat;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
 // 予告の床の印を「歩ける床の面にだけ」置くための、列ごとの床の選び方。画面にも Minecraft にも触れない計算だけなので、
 // サーバーの自己テストが作り物の地形で確かめられる (TelegraphGroundTest)。
@@ -32,7 +31,10 @@ public final class TelegraphGround {
 
     private final Blocks blocks;
     private final double floor;
-    private final Map<Long, float[]> columns = new HashMap<>();
+    private final Long2ObjectOpenHashMap<float[]> columns = new Long2ObjectOpenHashMap<>();
+    // 直前に引いた列 (三角形ごとに同じ列を続けて引くので、表を引かずに返す)
+    private long lastKey;
+    private float[] lastColumn;
     private double flat = Double.NaN;
     private boolean flatKnown;
 
@@ -48,8 +50,13 @@ public final class TelegraphGround {
     // 列の 4 つの小区画の床 (添字 = sx + 2 * sz。sx・sz は 0 か 1)。読み込み前は null (まだ決めない)
     public float[] column(int bx, int bz) {
         long key = ((long) bx << 32) ^ (bz & 0xFFFFFFFFL);
+        if (lastColumn != null && key == lastKey) {
+            return lastColumn;
+        }
         float[] c = columns.get(key);
         if (c != null) {
+            lastKey = key;
+            lastColumn = c;
             return c;
         }
         if (!blocks.loaded(bx, bz)) {
@@ -57,6 +64,8 @@ public final class TelegraphGround {
         }
         c = compute(blocks, bx, bz, floor);
         columns.put(key, c);
+        lastKey = key;
+        lastColumn = c;
         return c;
     }
 

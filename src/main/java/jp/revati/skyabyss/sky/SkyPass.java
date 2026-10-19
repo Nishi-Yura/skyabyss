@@ -88,9 +88,6 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
 
     // 輪郭までの距離。内側は負、外側は正
     private static double distance(double along, double side, double fold) {
-        double span = 135.0 - 50.0 * fold;
-        double sweep = 10.0 * fold;
-
         // 部位はなめらかに溶け合わせ、継ぎ目の段差を出さない
         double d = capsule(along, side, -45, 0, 55, 0, 19, 17);
         d = smoothMin(d, capsule(along, side, 50, 0, 88, 0, 13, 7), 10);
@@ -99,7 +96,24 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
         if (d < -5.0) {
             return d;
         }
-        double[] wing = {
+        double[] wing = wingFor(fold);
+        return smoothMin(d, polygon(along, side, wing), 6);
+    }
+
+    // 翼の多角形は fold だけで決まる。fold が前と同じなら作り直さず (毎点の確保をやめて) 使い回す。書き込まれない配列なのでスレッドをまたいでよい
+    private record Wing(double fold, double[] v) {
+    }
+
+    private static volatile Wing wingCache;
+
+    private static double[] wingFor(double fold) {
+        Wing w = wingCache;
+        if (w != null && w.fold == fold) {
+            return w.v;
+        }
+        double span = 135.0 - 50.0 * fold;
+        double sweep = 10.0 * fold;
+        double[] v = {
                 30, 8,
                 10 + sweep, span * 0.45,
                 -25 + sweep * 2, span,
@@ -111,7 +125,8 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
                 -48, span * 0.21,
                 -40, 8,
         };
-        return smoothMin(d, polygon(along, side, wing), 6);
+        wingCache = new Wing(fold, v);
+        return v;
     }
 
     // 2つの形をなめらかにつなぐ (k が大きいほど継ぎ目が丸くなる)

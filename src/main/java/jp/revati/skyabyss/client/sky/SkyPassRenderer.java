@@ -220,8 +220,14 @@ public final class SkyPassRenderer {
                 // 姿の座標 (前後 u、横 v)
                 double u = rx * dx + rz * dz;
                 double v = -rx * dz + rz * dx;
-                double d = pass.outlineDistance(x, z, age);
                 int idx = (i * n + k) * 3;
+                // 描画距離の外 (濃さが 0 になる) は、重い計算の前に 0 を入れる (掛けて 0 になるだけなので値は同じ)
+                float fade = visible * distanceFade(x - cam.x, z - cam.z, viewRange);
+                if (fade <= 0f) {
+                    field[idx] = field[idx + 1] = field[idx + 2] = 0f;
+                    continue;
+                }
+                double d = pass.outlineDistance(x, z, age);
                 if (d > 90.0) {
                     field[idx] = field[idx + 1] = field[idx + 2] = 0f;
                     continue;
@@ -235,7 +241,6 @@ public final class SkyPassRenderer {
                 float halo = (float) smooth(0.5 - (d - 6.0) / 60.0) * 0.34f;
                 float body = (float) smooth(0.5 - d / 20.0) * 0.82f * (float) mottle;
                 float core = (float) smooth(0.5 - (d + 15.0) / 22.0) * 0.88f;
-                float fade = visible * distanceFade(x - cam.x, z - cam.z, viewRange);
                 field[idx] = halo * fade;
                 field[idx + 1] = body * fade;
                 field[idx + 2] = core * fade;
@@ -303,14 +308,24 @@ public final class SkyPassRenderer {
 
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         boolean any = false;
+        // 隣り合う区画は角を共有するので、角の値は (cells+1)^2 個を一度だけ求める (区画ごとに求めた値と同じ)
+        int n1 = cells + 1;
+        if (deckGrid.length < n1 * n1) {
+            deckGrid = new float[n1 * n1];
+        }
+        for (int i = 0; i < n1; i++) {
+            for (int k = 0; k < n1; k++) {
+                deckGrid[i * n1 + k] = deckAlpha(minX + i * DECK_STEP, minZ + k * DECK_STEP, cx, cz, cam, driftX, driftZ, storm, range);
+            }
+        }
         for (int i = 0; i < cells; i++) {
             for (int k = 0; k < cells; k++) {
                 double x = minX + i * DECK_STEP;
                 double z = minZ + k * DECK_STEP;
-                float a00 = deckAlpha(x, z, cx, cz, cam, driftX, driftZ, storm, range);
-                float a10 = deckAlpha(x + DECK_STEP, z, cx, cz, cam, driftX, driftZ, storm, range);
-                float a11 = deckAlpha(x + DECK_STEP, z + DECK_STEP, cx, cz, cam, driftX, driftZ, storm, range);
-                float a01 = deckAlpha(x, z + DECK_STEP, cx, cz, cam, driftX, driftZ, storm, range);
+                float a00 = deckGrid[i * n1 + k];
+                float a10 = deckGrid[(i + 1) * n1 + k];
+                float a11 = deckGrid[(i + 1) * n1 + k + 1];
+                float a01 = deckGrid[i * n1 + k + 1];
                 if (a00 + a10 + a11 + a01 <= 0.01f) {
                     continue;
                 }
@@ -333,7 +348,14 @@ public final class SkyPassRenderer {
         draw(buffer, any);
     }
 
+    private static float[] deckGrid = new float[0];
+
     private static float deckAlpha(double x, double z, double cx, double cz, Vec3 cam, double driftX, double driftZ, float storm, float range) {
+        // 描画距離の外は濃さ 0 (最後に距離の薄れを掛けるので 0 になる)。先に見て、重いノイズを避ける
+        float dfade = distanceFade(x - cam.x, z - cam.z, range);
+        if (dfade <= 0f) {
+            return 0f;
+        }
         // 姿の近くでは、雲が姿から押しのけられるように外へ流れる (雲の模様を中心から遠ざける向きにずらす)
         double ox = x - cx;
         double oz = z - cz;
@@ -345,7 +367,7 @@ public final class SkyPassRenderer {
         // 嵐が強いほど雲が厚くなり、切れ間が減る
         double threshold = 0.62 - storm * 0.3;
         double cover = Mth.clamp((n - threshold) / 0.18, 0.0, 1.0);
-        return (float) (cover * 0.85 * storm) * distanceFade(x - cam.x, z - cam.z, range);
+        return (float) (cover * 0.85 * storm) * dfade;
     }
 
     // 描画距離の端に向かって薄くし、空との境目を目立たなくする
