@@ -1,0 +1,41 @@
+# 対話画面の肖像 (128x128) を、語り部・イサナ・旅の職人の順に撮る。表情は節の face で変わる (最初の節 / dev talk say で進める)
+world shots flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..80]
+hud on
+waitchunks
+wait 330
+cmd summon skyabyss:storyteller 0 -60 6 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:whale_chaser 6 -60 6 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd summon skyabyss:artisan -6 -60 6 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+wait 40
+cmd skyabyss dev talk "skyabyss:storyteller"
+wait 140
+shot portrait_storyteller_a
+cmd skyabyss dev talk say continue
+wait 140
+shot portrait_storyteller_b
+close
+wait 20
+cmd skyabyss dev talk "skyabyss:whale_chaser"
+wait 140
+shot portrait_whale_chaser_a
+cmd skyabyss dev talk say continue
+wait 140
+shot portrait_whale_chaser_b
+close
+wait 20
+cmd skyabyss dev talk "skyabyss:artisan"
+wait 140
+shot portrait_artisan_a
+cmd skyabyss dev talk say continue
+wait 140
+shot portrait_artisan_b

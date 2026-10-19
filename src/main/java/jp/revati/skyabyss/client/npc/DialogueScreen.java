@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-// 会話の画面。下に横長の枠: 左に顔 (32px 密度の肖像)、名前、親しさ。右に本文 (一字ずつ現れる) と選択肢。
+// 会話の画面。下に横長の枠: 左に顔 (128x128 のドット絵の肖像、整数倍で出す)、名前、親しさ。右に本文 (一字ずつ現れる) と選択肢。
 // 本文は日本語の禁則を守って折り返す (伝承の書と同じ LoreWrap)。ゲームは止めない (マルチでも同じ)。
 // 操作: クリック / 数字キー / ↑↓ と Enter・Space。本文の途中でクリックすると全文を出す。Esc で立ち去る
 public class DialogueScreen extends Screen {
@@ -36,7 +36,10 @@ public class DialogueScreen extends Screen {
     private static final int HOVER = 0x402E8F88;
     private static final int LINE_H = 11;
     private static final int OPTION_H = 13;
-    private static final int FACE = 40;
+    // 肖像は 128x128 のドット絵。画面の画素に対して整数倍で、ぼかさず (最近傍) 出す。GUI の倍率が 2 なら等倍、3 なら等倍で小さめ、4 以上は 2 倍
+    private static final int PORTRAIT_PX = 128;
+    private int face = 64;
+    private int facePx = 1;
     // 選択肢の印 (「1◆」) の幅
     private static final int MARK_W = 18;
     // 1 tick に出す字の数 (2 = 毎秒 40 字)
@@ -89,8 +92,11 @@ public class DialogueScreen extends Screen {
 
     private void layout() {
         Font font = Minecraft.getInstance().font;
-        panelW = Math.min(400, width - 16);
-        textX = 16 + FACE + 14;
+        double scale = Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
+        facePx = Math.max(1, (int) Math.floor(64 * scale / PORTRAIT_PX + 0.35));
+        face = (int) Math.ceil(PORTRAIT_PX * facePx / scale);
+        panelW = Math.min(420, width - 16);
+        textX = 16 + face + 14;
         textW = panelW - textX - 12;
         lines.clear();
         lines.addAll(wrapBalanced(Component.translatable(show.textKey()).getString(), textW, font));
@@ -104,7 +110,7 @@ public class DialogueScreen extends Screen {
             optionsH += Math.max(OPTION_H, ol.size() * LINE_H + 2);
         }
         int textH = lines.size() * LINE_H;
-        panelH = Math.max(FACE + 54, 10 + textH + 8 + optionsH + 10);
+        panelH = Math.max(face + 52, 10 + textH + 8 + optionsH + 10);
         panelX = (width - panelW) / 2;
         panelY = height - panelH - 10;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
@@ -175,18 +181,25 @@ public class DialogueScreen extends Screen {
         g.renderOutline(x, y, panelW, panelH, EDGE);
         g.renderOutline(x + 2, y + 2, panelW - 4, panelH - 4, EDGE_IN);
         // 顔
-        int fx = x + 12;
+        int fx = x + 13;
         int fy = y + 10;
-        g.fill(fx - 2, fy - 2, fx + FACE + 2, fy + FACE + 2, 0xFF0A0C10);
-        g.renderOutline(fx - 2, fy - 2, FACE + 4, FACE + 4, EDGE);
-        g.blit(faceTexture(), fx, fy, FACE, FACE, 0, 0, 80, 80, 80, 80);
+        g.fill(fx - 3, fy - 3, fx + face + 3, fy + face + 3, 0xFF0A0C10);
+        g.renderOutline(fx - 3, fy - 3, face + 6, face + 6, EDGE);
+        g.renderOutline(fx - 1, fy - 1, face + 2, face + 2, EDGE_IN);
+        // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
+        float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
+        g.pose().pushPose();
+        g.pose().translate(fx, fy, 0);
+        g.pose().scale(k, k, 1);
+        g.blit(faceTexture(), 0, 0, 0, 0, PORTRAIT_PX, PORTRAIT_PX, PORTRAIT_PX, PORTRAIT_PX);
+        g.pose().popPose();
         // 名前と親しさ
         Component name = Component.translatable("entity." + show.role().replace(':', '.'));
-        g.drawCenteredString(font, name, fx + FACE / 2, fy + FACE + 6, NAME);
+        g.drawCenteredString(font, name, fx + face / 2, fy + face + 7, NAME);
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + FACE / 2, fy + FACE + 17, SOFT);
-        drawMarks(g, fx + FACE / 2, fy + FACE + 28, tier);
+        g.drawCenteredString(font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2, fy + face + 18, SOFT);
+        drawMarks(g, fx + face / 2, fy + face + 29, tier);
         // 本文 (一字ずつ)
         int tx = x + textX;
         int ty = y + 10;
