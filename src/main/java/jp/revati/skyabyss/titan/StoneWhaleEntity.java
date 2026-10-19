@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
@@ -322,7 +324,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             } else {
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
-                for (ServerPlayer player : level.players()) {
+                for (ServerPlayer player : Players.snapshot(level.players())) {
                     if (player.distanceToSqr(this) < 200 * 200) {
                         Notice.narrate(player, "message.skyabyss.titan_descends");
                     }
@@ -406,18 +408,20 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             // 昇って去る (秒速 5 ブロック。80 ブロックなら 16 秒。体のまわりに雲がまとわりつく)
             setPos(getX(), Math.min(sleepY, getY() + 0.25), getZ());
             if (tickCount % 3 == 0) {
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, -4, 0);
                         level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
                     }
                 }
             }
-        } else if (!departing && !Double.isNaN(sleepY) && getY() > sleepY) {
-            setPos(getX(), Math.max(sleepY, getY() - 0.07), getZ());
+        } else if (!departing && !Double.isNaN(sleepY) && getY() > sinkTarget(age)) {
+            // 去りはじめたら (眠って 10 秒)、さらに深く・速く沈む
+            double rate = jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? 0.07 + 0.2 * jp.revati.skyabyss.titan.end.TitanDormancy.departProgress(age) : 0.07;
+            setPos(getX(), Math.max(sinkTarget(age), getY() - rate), getZ());
             if (tickCount % 3 == 0) {
                 // 雲の海へ沈むように、体のまわりに雲がまとわりつく
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, 14, 0);
                         level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
@@ -428,7 +432,16 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         if (tickCount % 5 == 0) {
             entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
         }
+        // 眠って 40 秒: 雲の海の向こうへ去る (地上から取り除く。見守りは眠りのあいだ呼び直さない)
+        if (age >= jp.revati.skyabyss.titan.end.TitanDormancy.DEPART_TICKS) {
+            jp.revati.skyabyss.titan.end.TitanDeparture.finish(this, jp.revati.skyabyss.progress.Titans.STONE_WHALE);
+        }
         return true;
+    }
+
+    // 沈む先 (去りはじめたら、地形より 8 ブロック上まで 30 ブロック深く)
+    private double sinkTarget(int age) {
+        return jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? Math.max(surroundingMax + 8, sleepY - 30) : sleepY;
     }
 
     // 章の出来事 (story.ch1.WhaleHush) が終わった: 鎖を降ろし、歌をまた許す
@@ -486,7 +499,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     private void hintNearbyPlayers(ServerLevel level) {
         Vec3 bottom = chainBottom();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(bottom) < 12 * 12 && !player.isPassenger()) {
                 Notice.bar(player, ModText.hint(voyage ? "message.skyabyss.travel.chain_hint" : "message.skyabyss.chain_hint"));
             }
@@ -714,7 +727,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private ServerPlayer nearestPlayer(ServerLevel level, double range) {
         ServerPlayer best = null;
         double bestDistance = range;
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             double d = horizontalDistanceTo(player.getX(), player.getZ());
             if (!player.isSpectator() && d < bestDistance) {
                 best = player;

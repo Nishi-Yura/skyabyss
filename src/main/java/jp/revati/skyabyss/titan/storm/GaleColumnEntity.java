@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,7 +101,7 @@ public class GaleColumnEntity extends Entity {
             level.playSound(null, baseX, baseY, baseZ, StormSetup.GALE.get(), SoundSource.AMBIENT, 1.2f, 0.9f + random.nextFloat() * 0.2f);
         }
         Set<UUID> inside = new HashSet<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) { // arrive() で別の次元へ移すので写しを回す
             if (!TitanKeeper.eligible(p) || !inColumn(p.getX(), p.getY(), p.getZ())) {
                 continue;
             }
@@ -136,7 +138,7 @@ public class GaleColumnEntity extends Entity {
             }
         }
         if (tickCount % HINT_EVERY == 0) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - baseX, p.getZ() - baseZ) < HINT_RANGE) {
                     Notice.bar(p, ModText.hint("message.skyabyss.storm.column_hint"));
                 }

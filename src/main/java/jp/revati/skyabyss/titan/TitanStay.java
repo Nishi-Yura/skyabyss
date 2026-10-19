@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.server.level.ServerLevel;
@@ -46,7 +48,7 @@ public final class TitanStay {
     }
 
     private static void send(ServerLevel level, Vec3 at, String key) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && p.distanceToSqr(at.x, p.getY(), at.z) < RANGE * RANGE) {
                 Notice.bar(p, ModText.lore(key));
             }
@@ -55,7 +57,7 @@ public final class TitanStay {
 
     // 誰かがいるか: 巨神 at から LEAVE_RANGE (水平) 以内に生きている人 (観戦者を除く) がいる、または巨神 titan の背中の中に人がいる
     public static boolean attended(ServerLevel level, Vec3 at, String titan) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && p.distanceToSqr(at.x, p.getY(), at.z) < LEAVE_RANGE * LEAVE_RANGE) {
                 return true;
             }
@@ -63,7 +65,7 @@ public final class TitanStay {
         var back = jp.revati.skyabyss.progress.Titans.backOf(titan);
         ServerLevel inside = back == null ? null : level.getServer().getLevel(back);
         if (inside != null) {
-            for (ServerPlayer p : inside.players()) {
+            for (ServerPlayer p : Players.snapshot(inside.players())) {
                 if (TitanKeeper.eligible(p)) {
                     return true;
                 }

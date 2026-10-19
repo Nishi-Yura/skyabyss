@@ -88,6 +88,7 @@ public final class TitanEndSelfTest {
             landing(server, level, f);
             cinematicOnce(server, level, f);
             flow(server, level, f);
+            TitanDepartureSelfTest.run(server, level, f, PAD_X + PAD / 2.0, PAD_Z + PAD / 2.0, PAD_Y);
             groupsInside(server, level, f);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST titan end crashed", e);

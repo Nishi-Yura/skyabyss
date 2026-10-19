@@ -464,7 +464,7 @@ public final class TelegraphSelfTest {
 
     // ---------------------------------------------------------------- D. 岩鯨の心臓
 
-    private static final String[] ATTACKS = {"THRUST", "SWEEP", "LEAP", "CRACK", "RECLOSE", "VOLLEY", "BEAM", "CHAIN", "SHELL_DROP"};
+    private static final String[] ATTACKS = {"THRUST", "SWEEP", "LEAP", "CRACK", "RECLOSE", "VOLLEY", "BEAM", "CHAIN", "SHELL_DROP", "PAIR_0", "PAIR_1", "PAIR_2", "PAIR_3"};
 
     private static void heart(ServerLevel level, List<String> f, List<String> notes) {
         Map<String, int[]> counts = new HashMap<>();
@@ -510,7 +510,7 @@ public final class TelegraphSelfTest {
                     boolean[] hits = Telegraph.probeHits();
                     int safe = safeCount(hits);
                     int percent = Math.round(100f * safe / hits.length);
-                    check(attack.equals("RECLOSE") || percent >= (attack.equals("LEAP") ? 15 : 25), attack + " (n=" + n + ") leaves only " + percent + "% of the floor safe", f);
+                    check(attack.equals("RECLOSE") || percent >= (attack.equals("LEAP") ? 15 : attack.equals("PAIR_3") ? 12 : attack.startsWith("PAIR_") ? 15 : 25), attack + " (n=" + n + ") leaves only " + percent + "% of the floor safe", f);
                     counts.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = Telegraph.damagingCreated();
                     safePercent.computeIfAbsent(attack, k -> new int[2])[n == 1 ? 0 : 1] = percent;
                 } finally {
@@ -528,7 +528,7 @@ public final class TelegraphSelfTest {
             int[] c = counts.get(attack);
             int[] s = safePercent.get(attack);
             sb.append(' ').append(attack.toLowerCase()).append(' ').append(c[0]).append("->").append(c[1]).append('/').append(s[0]).append("%->").append(s[1]).append('%');
-            if (!attack.equals("RECLOSE") && !attack.equals("LEAP")) {
+            if (!attack.equals("RECLOSE") && !attack.equals("LEAP") && !attack.equals("PAIR_3")) {
                 check(c[1] > c[0], attack + ": 6 players made " + c[1] + " areas, 1 player made " + c[0] + " (must grow with the party)", f);
             }
         }
@@ -536,5 +536,50 @@ public final class TelegraphSelfTest {
         int[] leap = counts.get("LEAP");
         check(leap[1] > leap[0], "LEAP: 6 players made " + leap[1] + " areas, 1 player made " + leap[0], f);
         notes.add(sb.toString());
+        heartFury(level, f, notes);
+    }
+
+    // 憤怒: 体力 10% で湧かせると、咆哮を三度 (段階 2・3・憤怒) 経て憤怒に入り、そのあとは技の組だけが出て、予告はどれも 16 tick 以上
+    private static void heartFury(ServerLevel level, List<String> f, List<String> notes) {
+        StoneWhaleHeart heart = ModEntities.STONE_WHALE_HEART.get().create(level);
+        heart.moveTo(SX, FLOOR + 2, SZ, 0f, 0f);
+        heart.setPersistenceRequired();
+        heart.skipIntro();
+        level.addFreshEntity(heart);
+        List<FakePlayer> ps = new ArrayList<>();
+        try {
+            FakePlayer p = fake(level, "fury", SX + 9, FLOOR, SZ);
+            ps.add(p);
+            heart.setTarget(p);
+            heart.setHealth(heart.getMaxHealth() * 0.10f);
+            int minWarn = Integer.MAX_VALUE;
+            int attacks = 0;
+            boolean wasIdle = true;
+            for (int i = 0; i < 900; i++) {
+                p.setHealth(p.getMaxHealth());
+                heart.tickCount++;
+                heart.tick();
+                Telegraph.tickNow(level);
+                for (int w : Telegraph.activeWarns(level)) {
+                    minWarn = Math.min(minWarn, w);
+                }
+                boolean idle = heart.actionTickCount() == 0;
+                if (wasIdle && !idle && heart.isEnraged()) {
+                    attacks++;
+                }
+                wasIdle = idle;
+            }
+            check(heart.isEnraged(), "the heart did not enter the fury phase at 10% health", f);
+            check(heart.getPhase() == StoneWhaleHeart.PHASE_COUNT - 1, "the fury phase should keep the phase 3 model (phase " + heart.getPhase() + ")", f);
+            check(minWarn >= Telegraph.MIN_WARN_TICKS, "a fury telegraph is under 16 ticks (" + minWarn + ")", f);
+            check(attacks >= 2, "the fury heart attacked only " + attacks + " times in 900 ticks", f);
+            notes.add("heart fury: entered, " + attacks + " attacks, shortest warn " + minWarn);
+        } finally {
+            drop(ps);
+            heart.discard();
+            for (int i = 0; i < 3; i++) {
+                Telegraph.tickNow(level);
+            }
+        }
     }
 }

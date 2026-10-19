@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.quest;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +100,7 @@ public final class QuestEvents {
 
     // その生き物を倒す目的が、だれかの進行中の段階にあるか (毎回の死亡で全員を回さないため)
     private static boolean anyKillObjective(ServerLevel level, String id) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             for (Map.Entry<String, QuestLog.Entry> e : QuestLog.of(p).quests().entrySet()) {
                 QuestDef def = QuestManager.quest(e.getKey());
                 QuestLog.Entry entry = e.getValue();

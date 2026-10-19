@@ -1321,11 +1321,15 @@ public final class TideIslandBuilder {
     }
 
     // ---------------------------------------------------------------- 休み場・碑文・潮鳴り石・抜け道の床
-    // 看板は、試練の入口の一言 (3 枚) と碑文 (6 枚) だけ。使い方は最初の一度だけの囁き (TideWhispers)、形・光・音で伝える
+    // 看板は、試練の入口の一言 (3 枚)・その補い (栓の色の読み方・戻しの栓・広間の案内。3 枚) と碑文 (6 枚)。使い方は最初の一度だけの囁き (TideWhispers)、形・光・音で伝える
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.tide_garden", new BlockPos(-19, PLATFORM_TOP + 2, -3), Direction.SOUTH),
             new Inscription("sign.skyabyss.tide_watch", new BlockPos(24, HUB_LEDGE + 2, -14), Direction.SOUTH),
-            new Inscription("sign.skyabyss.tide_flats", new BlockPos(3, TUNNEL_FLOOR + 2, -30), Direction.SOUTH));
+            new Inscription("sign.skyabyss.tide_flats", new BlockPos(3, TUNNEL_FLOOR + 2, -30), Direction.SOUTH),
+            // 潮見の間: 栓の色の読み方 (入口の隣)・戻しの栓の上。広間: 三つの試練の一言ずつ (どこへ行って何をするか)
+            new Inscription("sign.skyabyss.tide_watch_color", new BlockPos(26, HUB_LEDGE + 2, -14), Direction.SOUTH),
+            new Inscription("sign.skyabyss.tide_watch_reset", new BlockPos(24, HUB_LEDGE + 3, -8), Direction.EAST),
+            new Inscription("sign.skyabyss.tide_hub_guide", new BlockPos(-6, HUB_LEDGE + 2, 12), Direction.NORTH));
 
     private static void fixtures(TideKit kit) {
         for (Rest r : RESTS) {

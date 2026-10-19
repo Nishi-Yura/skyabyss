@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.record;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +111,7 @@ public final class RecordCommands {
             }
             MinecraftServer server = source.getServer();
             Map<UUID, RecordSnapshot> before = new HashMap<>();
-            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
                 before.put(p.getUUID(), RecordBuilder.build(p, true));
             }
             if (!before.isEmpty()) {
@@ -129,7 +131,7 @@ public final class RecordCommands {
         List<Watch> watches = new ArrayList<>(WATCHES);
         WATCHES.clear();
         for (Watch w : watches) {
-            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
                 RecordSnapshot before = w.before().get(p.getUUID());
                 if (before == null) {
                     continue;

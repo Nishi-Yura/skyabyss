@@ -59,17 +59,26 @@ public final class Ch1BackMobsSelfTest {
         for (int cx = 5; cx <= 9; cx++) {
             for (int cz = 5; cz <= 9; cz++) {
                 level.setChunkForced(cx, cz, on);
+                if (on) {
+                    level.getChunk(cx, cz);
+                }
             }
         }
         // 第一の広間 (x 24〜36, z -34〜-5) と西の竪穴・崩れ橋 (x -31〜-11, z -56〜-30)
         for (int cx = 1; cx <= 2; cx++) {
             for (int cz = -3; cz <= -1; cz++) {
                 level.setChunkForced(cx, cz, on);
+                if (on) {
+                    level.getChunk(cx, cz);
+                }
             }
         }
         for (int cx = -2; cx <= -1; cx++) {
             for (int cz = -4; cz <= -2; cz++) {
                 level.setChunkForced(cx, cz, on);
+                if (on) {
+                    level.getChunk(cx, cz);
+                }
             }
         }
     }

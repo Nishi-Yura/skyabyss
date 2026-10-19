@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.util.Players;
+
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -138,7 +140,7 @@ public final class StormKeeper {
 
     // 出現のとき、屋外の人に遠い雷を一度だけ (320 ブロック以内)
     static void thunderFar(ServerLevel level, StormWingEntity titan) {
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < 320 * 320
                     && level.canSeeSky(player.blockPosition().above())) {
                 player.playNotifySound(StormSetup.THUNDER_FAR.get(), SoundSource.AMBIENT, 0.7f, 0.9f);
@@ -152,7 +154,7 @@ public final class StormKeeper {
         if (titan == null) {
             return;
         }
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < LORE_RANGE * LORE_RANGE) {
                 Lore.unlock(player, LORE_ENTRY, true);
             }

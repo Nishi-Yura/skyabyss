@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +76,7 @@ public final class GroupProgress {
     // 心臓を止めたグループ (運び出されたあと) と、進みのないグループは数えない
     public static int activeInside(ServerLevel back) {
         java.util.Set<UUID> groups = new java.util.HashSet<>();
-        for (ServerPlayer player : back.players()) {
+        for (ServerPlayer player : Players.snapshot(back.players())) {
             if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
                 groups.add(Groups.keyOf(player));
             }
@@ -93,7 +95,7 @@ public final class GroupProgress {
     static void touch(ServerLevel level) {
         long now = level.getGameTime();
         BackGroupData data = BackGroupData.get(level);
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
                 data.of(Groups.keyOf(player)).touch(now);
             }

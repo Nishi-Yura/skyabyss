@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch1;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,7 +103,7 @@ public final class WhaleHush {
 
     static List<ServerPlayer> witnesses(ServerLevel level, StoneWhaleEntity whale) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && (includeFakes || !(p instanceof FakePlayer)) && Math.hypot(p.getX() - whale.getX(), p.getZ() - whale.getZ()) <= RANGE) {
                 out.add(p);
             }
@@ -123,7 +125,7 @@ public final class WhaleHush {
                     return;
                 }
                 StoneWhaleEntity w = WhaleKeeper.current(level.getServer().overworld());
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (!p.isSpectator() && !(p instanceof FakePlayer) && w != null && Math.hypot(p.getX() - w.getX(), p.getZ() - w.getZ()) <= RANGE + 60) {
                         silence(p, false);
                     }
@@ -176,7 +178,7 @@ public final class WhaleHush {
         if (whale != null) {
             whale.releaseHold();
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || p instanceof FakePlayer) {
                 continue;
             }

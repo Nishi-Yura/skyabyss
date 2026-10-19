@@ -210,29 +210,51 @@ public final class EmberHeartSelfTest {
         check(EmberBackRooms.hasBuilder("heart"), "the heart room has no builder registered with EmberBackRooms", f);
     }
 
-    // ---------------------------------------------------------------- 数 (13 の 5.3節の表)
+    // ---------------------------------------------------------------- 数 (13 の 8.2・8.3節の表)
     private static void checkNumbers(List<String> f, List<String> notes) {
-        check(EmberHeart.MAX_HEALTH == 790f, "max health " + EmberHeart.MAX_HEALTH, f);
-        check(EmberHeart.BREATH_DAMAGE == 18f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 13f && EmberHeart.PULSE_HEAT == 10f
-                && EmberHeart.ORB_DAMAGE == 15f && EmberHeart.ORB_FLOOR_DAMAGE == 3f && EmberHeart.ORB_FLOOR_HEAT == 5f
-                && EmberHeart.GALE_DAMAGE == 16f && EmberHeart.PELLET_DAMAGE == 10f && EmberHeart.FADING_DAMAGE == 22f
-                && EmberHeart.EMBER_BURN_DAMAGE == 5f && EmberHeart.EMBER_HEAT_PER_SECOND == 12f && EmberHeart.CHILL_PER_SECOND == 8f
-                && EmberHeartArena.ENGULF_DAMAGE == 12f && EmberHeartArena.ENGULF_HEAT == 40f, "damage or heat numbers differ from 13 の 5.3節", f);
+        check(EmberHeart.MAX_HEALTH == jp.revati.skyabyss.combat.HeartBalance.MAX_HP && EmberHeart.BASE_RESIST == 2.29f,
+                "max health " + EmberHeart.MAX_HEALTH + " / resist " + EmberHeart.BASE_RESIST + " (want 1000 x 2.29)", f);
+        check(EmberHeart.BREATH_DAMAGE == 32f && EmberHeart.BREATH_HEAT == 15f && EmberHeart.PULSE_DAMAGE == 24f && EmberHeart.PULSE_HEAT == 10f
+                && EmberHeart.ORB_DAMAGE == 28f && EmberHeart.ORB_FLOOR_DAMAGE == 5f && EmberHeart.ORB_FLOOR_HEAT == 5f
+                && EmberHeart.GALE_DAMAGE == 30f && EmberHeart.PELLET_DAMAGE == 18f && EmberHeart.FADING_DAMAGE == 37f
+                && EmberHeart.FORGE_DAMAGE == 34f && EmberHeart.FORGE_CORE_DAMAGE == 30f
+                && EmberHeart.EMBER_BURN_DAMAGE == 8f && EmberHeart.EMBER_HEAT_PER_SECOND == 12f && EmberHeart.CHILL_PER_SECOND == 8f
+                && EmberHeartArena.ENGULF_DAMAGE == 18f && EmberHeartArena.ENGULF_HEAT == 40f, "damage or heat numbers differ from 13 の 8.3節", f);
         check(EmberHeart.GALE_PULL == 0.12 && EmberAshPellet.SPEED == 0.18 && EmberHeart.EMBER_RADIUS == 2.5 && EmberHeart.EMBER_TICKS == 160
                 && EmberHeart.EMBER_COUNT == 4 && EmberHeartArena.CRACK_TICKS == 40 && EmberHeartArena.SINK_TICKS == 160 && EmberHeartArena.MAX_SINKING == 2,
                 "timing numbers differ from 13 の 5.3節", f);
         // 技は 10 (冷えは段階 3 に入る瞬間から効く常時の技)。三段階に三つずつ
         check(EmberHeart.bagFor(0).length == 3 && EmberHeart.bagFor(1).length == 3 && EmberHeart.bagFor(2).length == 3, "each phase should have 3 moves", f);
         check(EmberHeart.bagFor(0).length + EmberHeart.bagFor(1).length + EmberHeart.bagFor(2).length + 1 == 10, "should be 10 moves in all", f);
-        // 技の間: 段階 1 は 2.5〜3.3 秒、段階 2 は 2.0〜2.8 秒、段階 3 は 1.8〜2.4 秒
-        check(EmberHeart.GAP_MIN[0] == 50 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 66
-                && EmberHeart.GAP_MIN[1] == 40 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 56
-                && EmberHeart.GAP_MIN[2] == 36 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 48, "move gaps differ from 13", f);
+        // 技の間: 段階 1 は 1.4〜1.9 秒、段階 2 は 1.1〜1.5 秒、段階 3 は 1.0〜1.4 秒、憤怒は 0.4〜0.7 秒。段階が進むほど短い
+        check(EmberHeart.GAP_MIN[0] == 28 && EmberHeart.GAP_MIN[0] + EmberHeart.GAP_SPAN[0] - 1 <= 37
+                && EmberHeart.GAP_MIN[1] == 22 && EmberHeart.GAP_MIN[1] + EmberHeart.GAP_SPAN[1] - 1 <= 29
+                && EmberHeart.GAP_MIN[2] == 20 && EmberHeart.GAP_MIN[2] + EmberHeart.GAP_SPAN[2] - 1 <= 27
+                && EmberHeart.GAP_FURY + EmberHeart.GAP_FURY_SPAN - 1 < EmberHeart.GAP_MIN[2], "move gaps differ from 13", f);
+        // 技の組: 二つ目は 16 tick 以上遅れ、組の長さは二つの技が終わるまで。段階 3 と憤怒の組に灰の帳・鞴の嵐・崩れる床は入らない。炉打ちは憤怒の組だけ
+        for (EmberHeart.Pair[] set : List.of(EmberHeart.PAIRS_TWO, EmberHeart.PAIRS_THREE, EmberHeart.PAIRS_FURY)) {
+            for (EmberHeart.Pair pr : set) {
+                check(pr.offset() >= 16 && pr.first() != pr.second(), "pair " + pr + " starts its second move too early", f);
+                if (set != EmberHeart.PAIRS_TWO) {
+                    for (EmberHeart.Action a : List.of(pr.first(), pr.second())) {
+                        check(a != EmberHeart.Action.VEIL && a != EmberHeart.Action.GALE && a != EmberHeart.Action.FLOOR,
+                                "pair " + pr + " uses " + a + " in the cold phase", f);
+                    }
+                }
+            }
+        }
+        check(java.util.Arrays.stream(EmberHeart.PAIRS_FURY).anyMatch(pr -> pr.first() == EmberHeart.Action.FORGE)
+                && java.util.Arrays.stream(EmberHeart.PAIRS_THREE).noneMatch(pr -> pr.first() == EmberHeart.Action.FORGE),
+                "the forge should only come in the fury pairs", f);
+        check(EmberHeart.FORGE_WARN >= Telegraph.MIN_WARN_TICKS && EmberHeart.FORGE_CORE_WARN > EmberHeart.FORGE_WARN + 2 * EmberHeart.FORGE_STEP,
+                "forge telegraph timings", f);
         // 段階の境目と受ける傷
         check(EmberHeart.phaseFor(1f) == 0 && EmberHeart.phaseFor(0.67f) == 0 && EmberHeart.phaseFor(0.65f) == 1
                 && EmberHeart.phaseFor(0.34f) == 1 && EmberHeart.phaseFor(0.32f) == 2, "phase thresholds are wrong", f);
         check(Math.abs(EmberHeart.takenFor(1, 10, 1) - 12f) < 1e-4 && Math.abs(EmberHeart.takenFor(0, 10, 1) - 10f) < 1e-4
-                && Math.abs(EmberHeart.takenFor(2, 16, EmberHeart.scaleFor(2)) - 10f) < 1e-4, "damage taken multipliers are wrong", f);
+                && Math.abs(EmberHeart.takenFor(2, 18.5f, EmberHeart.scaleFor(2)) - 10f) < 1e-4
+                && Math.abs(EmberHeart.toughnessFor(1) - EmberHeart.BASE_RESIST) < 1e-4
+                && Math.abs(EmberHeart.toughnessFor(3) - EmberHeart.BASE_RESIST * 2.7f) < 1e-4, "damage taken multipliers are wrong", f);
         // 段階 3 の鼓動: 33% で 2.4 秒、0% で 4 秒へ。だんだん遅く、弱く
         check(EmberHeart.beatInterval(0.33f) == 48 && EmberHeart.beatInterval(0f) == 80 && EmberHeart.beatInterval(0.16f) > 48
                 && EmberHeart.beatInterval(0.16f) < 80 && EmberHeart.beatVolume(0f) < EmberHeart.beatVolume(0.33f), "beat interval / volume wrong", f);
@@ -246,19 +268,16 @@ public final class EmberHeartSelfTest {
         double farthest = 2 * 13.5;   // 部屋の端から反対の端 (残り火は半径 13.5 以内に置く) の最悪
         double secondsToEmber = (farthest - EmberHeart.EMBER_RADIUS) / walk;
         check(secondsToEmber + thawSeconds <= EmberHeart.EMBER_TICKS / 20.0 * 1.6, "a frozen player cannot reach and use an ember in time", f);
-        // 凍えの攻撃の速さ −20% は、倒すのにかかる時間を 25% 延ばす。段階 3 (体力の 33%、790 × 0.33) を +0 の武器 (1 秒 17.5) で
-        double heartLeft = EmberHeart.MAX_HEALTH * EmberHeart.PHASE_THREE_AT;
-        double killNormal = heartLeft / 17.5;
-        double killFrozen = heartLeft / (17.5 * (1 + EmberHeart.CHILL_ATTACK_SPEED));
-        // 凍えたまま避けきれない傷 (残り火の燃え立ち 5 を 2 秒ごと + 消えかけの鼓動 22 を平均 9 秒ごと)。防具 22 / 強靭 16 (余燼の鎧) で減らす
-        double perSecond = EmberHeart.EMBER_BURN_DAMAGE / 2.0 + EmberHeart.FADING_DAMAGE / 9.0;
-        // 防具 22 / 強靭 16 で 5 の傷が通る割合 (バニラの式)
-        float armored = (float) (5.0 * (1 - Math.min(20.0, Math.max(22.0 / 5.0, 22.0 - 5.0 / (2.0 + 16.0 / 4.0))) / 25.0));
-        double perSecondArmored = perSecond * armored / 5.0;
-        double taken = perSecondArmored * killFrozen;
+        // 凍えの攻撃の速さ −20% は、倒すのにかかる時間を 25% 延ばす。段階 3 (実質の体力 1000 × 2.29 × 0.33) を、想定の装備の一人の 1 秒の傷 (HeartBalance.playerDps) で
+        double heartLeft = EmberHeart.MAX_HEALTH * EmberHeart.BASE_RESIST * EmberHeart.PHASE_THREE_AT;
+        double dps = jp.revati.skyabyss.combat.HeartBalance.playerDps("ember", 1.0);
+        double killNormal = heartLeft / dps;
+        double killFrozen = heartLeft / (dps * (1 + EmberHeart.CHILL_ATTACK_SPEED));
+        // 温まる代わりの傷: 凍えを解くあいだ (2.5 秒) に残り火の燃え立ちを二度受けても (どちらも 1 秒前に円の予告が出る)、想定の防具で想定の体力 38 の 1 割未満
+        double thawCost = 2 * jp.revati.skyabyss.combat.HeartBalance.taken("ember", EmberHeart.EMBER_BURN_DAMAGE);
         check(killFrozen / killNormal > 1.2 && killFrozen / killNormal < 1.3, "frozen kill time ratio " + killFrozen / killNormal, f);
-        check(taken < 20, "a frozen, armored player standing in embers all phase would take " + taken + " (more than 20)", f);
-        notes.add(String.format("frozen: thaw %.1f s in an ember, kill phase 3 in %.0f s (normal %.0f s), unavoidable %.1f dmg", thawSeconds, killFrozen, killNormal, taken));
+        check(thawCost < 0.1 * jp.revati.skyabyss.combat.HeartBalance.expectedHealth("ember"), "thawing in an ember costs " + thawCost + " (10% of the health or more)", f);
+        notes.add(String.format("frozen: thaw %.1f s in an ember (two bursts %.1f dmg), hit phase 3 for %.0f s (normal %.0f s)", thawSeconds, thawCost, killFrozen, killNormal));
         // 6.6節の経験値: MOD_ENEMIES に一行 (Lv 30)
         GrowthRewards.Source src = GrowthRewards.MOD_ENEMIES.get(EmberIds.id(EmberIds.EMBER_HEART).toString());
         check(src != null && src.xp() == 650 && src.contentLevel() == 30, "GrowthRewards.MOD_ENEMIES has no ember heart (650, Lv 30)", f);
@@ -434,7 +453,7 @@ public final class EmberHeartSelfTest {
             p.discard();
             EmberHeartArena.restoreAll(back);
         }
-        notes.add("sections: warn 2.0 s, sink 8 s, at most 2 at once, engulfed -12 / +40 heat");
+        notes.add("sections: warn 2.0 s, sink 8 s, at most 2 at once, engulfed -" + EmberHeartArena.ENGULF_DAMAGE + " / +40 heat");
     }
 
     private record Vec3Helper(double x, double y, double z) {
@@ -579,7 +598,8 @@ public final class EmberHeartSelfTest {
         heart.invulnerableTime = 0;
         float h0 = heart.getHealth();
         heart.hurt(heart.damageSources().magic(), 10f);
-        check(Math.abs((h0 - heart.getHealth()) - 12f) < 0.6f, "exposed shell should take 1.2x (took " + (h0 - heart.getHealth()) + ")", f);
+        float exposed = 12f / heart.toughness();
+        check(Math.abs((h0 - heart.getHealth()) - exposed) < 0.3f, "exposed shell should take 1.2x (took " + (h0 - heart.getHealth()) + ", want " + exposed + ")", f);
         // 段階 3 に入る咆哮で部屋が冷える。段階 2 の崩れ床の残りは元に戻る
         check(!EmberHeartArena.isCold(), "room is cold before phase 3", f);
         heart.setHealth(heart.getMaxHealth() * 0.3f);
@@ -588,6 +608,19 @@ public final class EmberHeartSelfTest {
         tickHeart(heart, EmberHeart.ROAR_TICKS + 2);
         check(heart.getPhase() == 2 && EmberHeartArena.isCold(), "phase 3 did not cool the room", f);
         check(EmberHeartArena.sinkingCount() == 0, "sections still sinking in phase 3", f);
+        // 憤怒: 体力 15% 未満で、段階 3 のまま 3 秒の咆哮 (傷を受けない) のあと憤怒。模型は段階 3 のまま
+        check(!heart.isEnraged(), "enraged before 15%", f);
+        heart.setHealth(heart.getMaxHealth() * 0.12f);
+        heart.holdAttacks(true);
+        tickHeart(heart, 3);
+        check(heart.isRoaring() && heart.currentAction() == EmberHeart.Action.ROAR, "no roar after dropping under 15%", f);
+        float fury0 = heart.getHealth();
+        heart.invulnerableTime = 0;
+        heart.hurt(heart.damageSources().generic(), 50f);
+        check(heart.getHealth() == fury0, "heart took damage during the fury roar", f);
+        tickHeart(heart, EmberHeart.ROAR_TICKS + 2);
+        check(heart.isEnraged() && heart.getPhase() == 2 && !heart.isRoaring() && EmberHeartArena.isCold(), "the fury roar did not enrage the heart (phase " + heart.getPhase() + ")", f);
+        heart.holdAttacks(false);
         // 部屋の外へ出た心臓は戻る。誰もいなければ 3 秒で放棄
         heart.moveTo(0.5, EmberHeartArena.SURFACE + 3, EmberHeartArena.CZ + 30.5);
         EmberHeartBattle.room().tick(back, EmberHeartBattle.HOST);
@@ -603,11 +636,13 @@ public final class EmberHeartSelfTest {
             two.bindArena(EmberHeartArena.arena(), 3);
             two.invulnerableTime = 0;
             float t0 = two.getHealth();
-            two.hurt(two.damageSources().magic(), 22f);
-            check(Math.abs((t0 - two.getHealth()) - 10f) < 0.6f && two.getMaxHealth() == EmberHeart.MAX_HEALTH, "3 challengers should divide the damage by 2.2", f);
+            two.hurt(two.damageSources().magic(), 27f);
+            float want = 27f / (EmberHeart.BASE_RESIST * 2.7f);
+            check(Math.abs(two.toughness() - EmberHeart.toughnessFor(3)) < 1e-4 && Math.abs((t0 - two.getHealth()) - want) < 0.3f
+                    && two.getMaxHealth() == EmberHeart.MAX_HEALTH, "3 challengers should divide the damage by 2.29 x 2.7 (took " + (t0 - two.getHealth()) + ")", f);
             EmberHeartBattle.abandon(back);
         }
-        notes.add("phases 66/33, roar 3 s invulnerable, exposed x1.2, abandon after 3 s");
+        notes.add("phases 66/33 + fury 15%, roar 3 s invulnerable, exposed x1.2, abandon after 3 s");
     }
 
     // ---------------------------------------------------------------- 10 の技の予告と傷
@@ -645,6 +680,35 @@ public final class EmberHeartSelfTest {
             }
         }
         notes.add(ran + "/10 moves ran to the end");
+        // 技の組 (段階 2・3・憤怒): どれも組の長さで終わり、予告はどれも 16 tick 以上 (人がいないので傷は見ない)
+        int pairsRan = 0;
+        int pairWarn = Integer.MAX_VALUE;
+        for (int set = 0; set < 3; set++) {
+            EmberHeart.Pair[] pairs = set == 0 ? EmberHeart.PAIRS_TWO : set == 1 ? EmberHeart.PAIRS_THREE : EmberHeart.PAIRS_FURY;
+            heart.forcePhase(set == 0 ? 1 : 2);
+            heart.forceEnraged(set == 2);
+            for (EmberHeart.Pair pr : pairs) {
+                heart.forcePair(pr);
+                int t = 0;
+                for (; t < 200 && heart.currentAction() != EmberHeart.Action.NONE; t++) {
+                    step(heart);
+                    EmberHeartArena.tick(back, heart);
+                    for (int w : Telegraph.activeWarns(back)) {
+                        pairWarn = Math.min(pairWarn, w);
+                    }
+                }
+                if (heart.currentAction() == EmberHeart.Action.NONE && t >= pr.length() - 1) {
+                    pairsRan++;
+                } else {
+                    f.add("pair " + pr.first() + "+" + pr.second() + " ended after " + t + " ticks (length " + pr.length() + ")");
+                }
+                Telegraph.cancelAll(heart);
+                EmberHeartArena.restoreAll(back);
+            }
+        }
+        heart.forceEnraged(false);
+        check(pairWarn >= Telegraph.MIN_WARN_TICKS, "a paired move has a telegraph under 16 ticks (" + pairWarn + ")", f);
+        notes.add(pairsRan + " pairs ran to the end, shortest warn " + pairWarn);
         // 傷のある技: 予告の長さと傷を、立っている人で確かめる
         List<Move> moves = List.of(
                 new Move(EmberHeart.Action.BREATH, 22, EmberHeart.BREATH_DAMAGE, 60),
@@ -727,7 +791,7 @@ public final class EmberHeartSelfTest {
             List<EmberAshPellet> pellets = back.getEntitiesOfClass(EmberAshPellet.class, EmberHeartArena.arena());
             check(early == 0, "pellets appeared before the 1.0 s charge (" + early + ")", f);
             check(pellets.size() == EmberHeart.pelletCount(1), "pellet count " + pellets.size() + " (want " + EmberHeart.pelletCount(1) + ")", f);
-            check(EmberHeart.PELLET_DAMAGE == 10f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
+            check(EmberHeart.PELLET_DAMAGE == 18f && EmberAshPellet.LIFE == 160 && EmberHeart.PELLET_WARN >= Telegraph.MIN_WARN_TICKS, "pellet numbers", f);
             check(1000 - target.getHealth() == 0, "a pellet hurt before landing", f);
             tickHeart(heart, EmberHeart.PELLET_WARN + 3);
             float lost = 1000 - target.getHealth();
@@ -883,7 +947,8 @@ public final class EmberHeartSelfTest {
 
     private static final List<Case> CASES = List.of(new Case(EmberHeart.Action.BREATH, 0), new Case(EmberHeart.Action.PULSE, 0),
             new Case(EmberHeart.Action.ORB, 0), new Case(EmberHeart.Action.FLOOR, 1), new Case(EmberHeart.Action.GALE, 1),
-            new Case(EmberHeart.Action.PELLET, 1), new Case(EmberHeart.Action.EMBERS, 2), new Case(EmberHeart.Action.FADING, 2));
+            new Case(EmberHeart.Action.PELLET, 1), new Case(EmberHeart.Action.EMBERS, 2), new Case(EmberHeart.Action.FADING, 2),
+            new Case(EmberHeart.Action.FORGE, 2));
 
     static void runTelegraph(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
@@ -1056,7 +1121,8 @@ public final class EmberHeartSelfTest {
             int[] a = e.getValue();
             int[] sf = safes.get(e.getKey());
             sb.append(' ').append(e.getKey().toLowerCase()).append(' ').append(a[0]).append("->").append(a[1]).append('/').append(sf[0]).append("%->").append(sf[1]).append('%');
-            if (!e.getKey().equals("EMBERS")) {
+            // 残り火と炉打ち (部屋を回る三打と中央。人数で増えない) は除く
+            if (!e.getKey().equals("EMBERS") && !e.getKey().equals("FORGE")) {
                 check(a[1] > a[0], e.getKey() + ": 6 players made " + a[1] + " areas, 1 player made " + a[0] + " (must grow with the party)", f);
             }
         }

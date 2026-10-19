@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.party;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -281,7 +283,7 @@ public final class Downed {
             tick(server);
         }
         if (server.getTickCount() % 5 == 0 && (!DOWNED.isEmpty() || !LAST.isEmpty())) {
-            syncTick(server, server.getPlayerList().getPlayers(), (p, sync) -> {
+            syncTick(server, Players.snapshot(server.getPlayerList().getPlayers()), (p, sync) -> {
                 if (p.connection != null) {
                     PacketDistributor.sendToPlayer(p, sync);
                 }

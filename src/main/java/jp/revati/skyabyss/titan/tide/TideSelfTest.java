@@ -228,8 +228,10 @@ public final class TideSelfTest {
             failures.add("restHere did not rest");
         }
         TideTravel.Landing landing = TideTravel.landing(level);
-        if (landing.pos().distanceTo(first.gateExit()) > 1e-6 || Float.isNaN(landing.yaw())) {
-            failures.add("leaving a resting titan does not land at the gate exit: " + landing);
+        // 近くに岸があればそこ (沖に取り残さない)。なければ門の前の水の上 (舟つき)
+        if (landing.water() ? landing.pos().distanceTo(first.gateExit()) > 1e-6 || Float.isNaN(landing.yaw())
+                : level.getFluidState(net.minecraft.core.BlockPos.containing(landing.pos())).is(net.minecraft.tags.FluidTags.WATER)) {
+            failures.add("leaving a resting titan lands in the open sea without a boat: " + landing);
         }
         if (Math.abs(first.getY() - (level.getSeaLevel() - TideShellEntity.REST_DRAFT)) > 1e-6) {
             failures.add("restHere is not at the rest height: " + first.getY());

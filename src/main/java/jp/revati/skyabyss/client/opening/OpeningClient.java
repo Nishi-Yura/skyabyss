@@ -56,6 +56,8 @@ public final class OpeningClient {
     private static long awakeStart = Long.MIN_VALUE;
     private static long stepsStart = Long.MIN_VALUE;
     private static float stepsYaw;
+    private static long nearStart = Long.MIN_VALUE;
+    private static float nearYaw;
     private static long songStart = Long.MIN_VALUE;
     // 揺れの余韻 (足音のたびに足し、減らす)
     private static float shake;
@@ -82,6 +84,10 @@ public final class OpeningClient {
                 stepsStart = clock;
                 stepsYaw = payload.yaw();
             }
+            case OpeningNetwork.CUE_FOOTSTEPS_NEAR -> {
+                nearStart = clock;
+                nearYaw = payload.yaw();
+            }
             case OpeningNetwork.CUE_SONG -> {
                 songStart = clock;
                 play(OpeningSetup.SONG.get(), 0.55f, 1.0f, 0);
@@ -95,6 +101,7 @@ public final class OpeningClient {
     private static void stop() {
         awakeStart = Long.MIN_VALUE;
         stepsStart = Long.MIN_VALUE;
+        nearStart = Long.MIN_VALUE;
         songStart = Long.MIN_VALUE;
         shake = 0f;
         Minecraft.getInstance().getSoundManager().stop(OpeningSetup.SONG.getId(), null);
@@ -173,10 +180,11 @@ public final class OpeningClient {
     // 星の欠けの帯: 西から東へ。0 = 始め、1 = 終わり。まだ・もう動いていなければ -1
     static float bandProgress() {
         int t = songTicks();
-        if (t < BAND_START || t > BAND_START + BAND_LENGTH) {
+        int length = StarEffect.bandLength();
+        if (t < BAND_START || t > BAND_START + length) {
             return -1f;
         }
-        return (t - BAND_START) / (float) BAND_LENGTH;
+        return (t - BAND_START) / (float) length;
     }
 
     // 歌のあいだ、この mod 自身の星を描く強さ (0〜1)。バニラの星は雨・雲・光源 mod やシェーダーで見えないことがあるので、欠けが読めるよう自前の星を重ねる。
@@ -186,7 +194,7 @@ public final class OpeningClient {
         if (t < 0) {
             return 0f;
         }
-        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + BAND_LENGTH)) / 80f));
+        return smooth((t - 20) / 80f) * (1f - smooth((t - (BAND_START + StarEffect.bandLength())) / 80f));
     }
 
     // 画面の揺れ・効果の強さを掛けたもの (設定で 0 なら 0)
@@ -211,12 +219,16 @@ public final class OpeningClient {
     private static final java.util.List<Pending> PENDING = new java.util.ArrayList<>();
 
     private static void playStep(int index) {
+        playStep(index, stepsYaw);
+    }
+
+    private static void playStep(int index, float yawDeg) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
         }
         // 向きは足音ごとに近づく。方角はプレイヤーの yaw と同じ決め方 (0 = 南)
-        double rad = Math.toRadians(stepsYaw);
+        double rad = Math.toRadians(yawDeg);
         double d = STEP_DISTANCE[index];
         double x = mc.player.getX() - Math.sin(rad) * d;
         double z = mc.player.getZ() + Math.cos(rad) * d;
@@ -269,6 +281,18 @@ public final class OpeningClient {
                         PENDING.add(new Pending(clock + 15, OpeningSetup.RUMBLE.get(), 0.55f, 1.0f));
                     }
                 }
+            }
+        }
+        // 近くの人の足音: 音と揺れだけ (自分の拍子は進めない)
+        if (nearStart != Long.MIN_VALUE) {
+            long nt = clock - nearStart;
+            for (int i = 0; i < STEP_AT.length; i++) {
+                if (nt == STEP_AT[i]) {
+                    playStep(i, nearYaw);
+                }
+            }
+            if (nt > OpeningLogic.STEPS_TOTAL) {
+                nearStart = Long.MIN_VALUE;
             }
         }
         shake *= 0.94f;

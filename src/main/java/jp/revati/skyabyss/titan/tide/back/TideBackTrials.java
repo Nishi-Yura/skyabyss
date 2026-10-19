@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.tide.back.TideBackLayout.*;
 
@@ -299,6 +301,7 @@ public final class TideBackTrials {
             tickPads(level);
             tickPeaceful(level, peaceful);
             tickFrost(level);
+            TideGuide.tick(level);
         }
         TideClock.Phase phase = TideClock.phase(level);
         if (phase != lastPhase || level.getGameTime() % 20 == 0) {
@@ -318,7 +321,7 @@ public final class TideBackTrials {
         if (!low && !high) {
             return;
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             level.playSound(null, p.getX(), p.getY() + 8, p.getZ(), low ? TideBackSetup.HORN_LOW.get() : TideBackSetup.HORN_HIGH.get(),
                     SoundSource.AMBIENT, 1.4f, 1f);
             Notice.bar(p, ModText.lore(low ? "message.skyabyss.tide.rising_soon" : "message.skyabyss.tide.falling_soon"));
@@ -370,7 +373,7 @@ public final class TideBackTrials {
     // 背中にいる人 (観戦者を除く) のグループ
     static List<UUID> presentGroups(ServerLevel level) {
         List<UUID> list = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator()) {
                 continue;
             }
@@ -425,7 +428,7 @@ public final class TideBackTrials {
 
     // 氷渡りの氷は背中では溶かす (満潮の水の上を歩けないように。8 章)
     private static void tickFrost(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             BlockPos c = p.blockPosition();
             for (int dx = -4; dx <= 4; dx++) {
                 for (int dz = -4; dz <= 4; dz++) {
@@ -907,13 +910,14 @@ public final class TideBackTrials {
         TideRooms.forget();
         TideGarden.clear();
         TideWatch.clear();
+        TideGuide.clear();
         TideFlats.clear();
         TideClock.force(null);
     }
 
     // ---------------------------------------------------------------- 潮見の目盛り (画面右上。鳴った石の数と招き潮は、その人のグループのもの)
     static void sendGauge(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             PacketDistributor.sendToPlayer(p, gauge(level, p));
         }
     }
@@ -927,7 +931,9 @@ public final class TideBackTrials {
         int left = TideClock.ticksLeft(level);
         TideBackState.Group state = state(level, player);
         boolean alert = TideFlats.beckonAlert() && TideRooms.owns(TideRooms.FLATS, player);
-        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), alert, state.rungCount());
+        TideGuide.Goal goal = TideGuide.goalFor(level, player);
+        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), alert, state.rungCount(), goal.id(), goal.done(),
+                goal.total(), goal.a(), goal.b(), goal.c());
     }
 
     public static Vec3 hubSpawn() {

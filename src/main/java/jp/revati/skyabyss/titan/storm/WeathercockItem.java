@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
@@ -92,7 +94,7 @@ public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.Po
             sl.addFreshEntity(bolt);
         }
         Notice.narrate(sp, "message.skyabyss.weathercock.called");
-        for (ServerPlayer other : sl.players()) {
+        for (ServerPlayer other : Players.snapshot(sl.players())) {
             if (other != sp && holds(other)) {
                 Notice.bar(other, ModText.hint("message.skyabyss.weathercock.called_by", sp.getDisplayName()));
             }

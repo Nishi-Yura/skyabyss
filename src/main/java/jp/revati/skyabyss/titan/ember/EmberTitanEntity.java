@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -322,6 +324,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private boolean wasDormant;
     // 眠ったとき、さらに土へ埋まる深さ (ブロック)。尾根だけが冷えた丘のように残る
     private static final double BURY_EXTRA = 4.0;
+    // 去りはじめてからの潜り (さらに 60 ブロック、秒速 2 ブロック)
+    private static final double DEPART_EXTRA_DEPTH = 60.0;
+    private static final double DEPART_SINK = 0.1;
 
     // 眠り (docs/design/13): 心臓が止まると熱が引き、浮いていれば土の中へ沈んで、動かず埋まる。尾根だけが冷えた丘になる。目覚めると潜行に戻る。
     // 戻り = 眠っている (通常の動きを飛ばす)
@@ -355,7 +360,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
                 if (mode == Mode.APPROACH) {
                     setMode(Mode.SWIM);
                 }
-                rise(burrowHeight(level) - BURY_EXTRA, 0.02);
+                rise(burrowHeight(level) - BURY_EXTRA - (jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? DEPART_EXTRA_DEPTH : 0),
+                        jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? DEPART_SINK : 0.02);
                 if (mouthId != null) {
                     removeMouth(level);
                 }
@@ -363,6 +369,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         }
         if (tickCount % 5 == 0) {
             entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        // 眠って 40 秒: 土の底へ去る (冷えた丘ごと地上から取り除く)
+        if (age >= jp.revati.skyabyss.titan.end.TitanDormancy.DEPART_TICKS) {
+            jp.revati.skyabyss.titan.end.TitanDeparture.finish(this, jp.revati.skyabyss.progress.Titans.EMBER);
         }
         return true;
     }
@@ -408,7 +418,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             return;
         }
         List<ServerPlayer> players = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && horizontalDistanceTo(p.getX(), p.getZ()) < TitanKeeper.NEAR) {
                 players.add(p);
             }
@@ -518,7 +528,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         lastSleepX = getX();
         lastSleepZ = getZ();
         lastSleepYaw = getYRot();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(getX(), player.getY(), getZ()) < 200 * 200) {
                 Notice.narrate(player, EmberIds.LANG_SURFACE + "asleep");
             }
@@ -573,7 +583,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             for (double f : new double[] {0, 2, 5}) {
                 glow.add(position().add(offset(getYRot(), 0, TONGUE_UP + 2.0, MOUTH_FORWARD + f)));
             }
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.EMBER, glow);
+            Vec3 frame = position().add(offset(getYRot(), 0, TONGUE_UP + 2.0, MOUTH_FORWARD));
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.EMBER, glow,
+                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(frame, (float) MOUTH_WIDTH / 2f + 0.3f, (float) MOUTH_HEIGHT / 2f + 0.2f,
+                            (float) MOUTH_DEPTH / 2f + 0.3f, getYRot(), frame.y - 2, frame.y + 44, 1.3f));
         }
     }
 
@@ -613,7 +626,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         Vec3 mouth = mouthCenter();
         Vec3 snout = position().add(offset(getYRot(), 0, TONGUE_UP + 2, SNOUT_FORWARD + 14));
         Vec3 crater = ridgePoint();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             double d = Math.hypot(p.getX() - getX(), p.getZ() - getZ());
             int tier = EmberGround.ashTier(d);
             if (tier == 0) {
@@ -658,7 +671,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void mouthHint(ServerLevel level) {
         long night = EmberGround.nightId(level.getDayTime());
         Vec3 mouth = mouthCenter();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || p.distanceToSqr(mouth) > 24 * 24 && !inBreathFan(p.getX(), p.getY(), p.getZ())) {
                 continue;
             }
@@ -723,7 +736,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     // 洞窟の中にいる人には、壁の向こうを大きなものが通る音 (岩をこする音と遠い鼓動)。2 章の「壁の向こうの足音」の先触れ
     private void caveSounds(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || axisDistance(p.position()) > 48) {
                 continue;
             }
@@ -743,7 +756,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     // 地鳴り: range ブロック以内 (尾根から) の人に低い音と画面の微振動
     private void rumble(ServerLevel level, double range, float volume, float shake) {
         Vec3 ridge = ridgePoint();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) > range) {
                 continue;
             }
@@ -756,7 +769,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void recordFinders(ServerLevel level) {
         Vec3 ridge = ridgePoint();
         double range = isSurfaced() ? 96 : 48;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) < range) {
                 Lore.unlock(p, EmberIds.LORE_FOUND, true);
             }
@@ -765,7 +778,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private List<ServerPlayer> playersWithin(ServerLevel level, double range) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (Math.hypot(p.getX() - getX(), p.getZ() - getZ()) < range) {
                 out.add(p);
             }

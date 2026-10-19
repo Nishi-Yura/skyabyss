@@ -99,6 +99,8 @@ public final class TitanBackSelfTest {
                     });
                 })),
                 SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),
+                // 闇の水路の灯 (docs/design/23): 置き場・摘む・ともす・なだめる・戸・グループごと・リセット・詰まない・持ち歩きの光・既知の道
+                SelfTestRunner.Step.once("titan back (lights)", server -> withBack(server, back -> PENDING.addAll(AnemoneSelfTest.run(back)))),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
                 SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
@@ -692,7 +694,7 @@ public final class TitanBackSelfTest {
                     continue;
                 }
                 BlockState state = level.getBlockState(n);
-                if (state.getFluidState().isSource() || state.isAir()) {
+                if (state.getFluidState().isSource() || state.isAir() || state.is(ModBlocks.SEALED_GATE.get())) {
                     seen.add(n);
                     queue.add(n);
                 }
@@ -704,7 +706,9 @@ public final class TitanBackSelfTest {
         if (MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).links(MAZE_START_I, MAZE_START_J) < 2) {
             failures.add("maze entrance is not a junction");
         }
-        // 水路の顎のスポナーは、同時に生かす数が半分（MAW_MAX_NEARBY）に絞ってあること
+        checkEntryRest(level, failures);
+        checkMaw(level, failures);
+        // 水路の顎のスポナーは、同時に生かす数が MAW_MAX_NEARBY (2) に絞ってあること
         var deadEnds = MazeBuilder.maze(TitanBackData.get(level).mazeSeed()).deadEnds();
         for (int n = 1; n < deadEnds.size(); n += 3) {
             BlockPos sp = mazeCell(deadEnds.get(n)[0], deadEnds.get(n)[1]).offset(1, 0, 1);
@@ -742,6 +746,79 @@ public final class TitanBackSelfTest {
 
     // 水を流したあとでも、正しい道の息継ぎのくぼみごとに 3×3×2 の空気が残っていること (流れる水で埋まっていないこと)。
     // くぼみの下の段は水源のままで、泳いで入れること
+    // 入口の休み場 (mz0): 水の外・乾いた小部屋・天井あり・戦いの外。はしごの下りた先から歩いて着く
+    private static void checkEntryRest(ServerLevel level, List<String> failures) {
+        BlockPos sp = TitanBackTrials.checkpointSpawns(level).get(TitanBackTrials.MAZE_ENTRY);
+        if (sp == null) {
+            failures.add("the waterway entrance has no rest point (mz0)");
+            return;
+        }
+        if (!level.getFluidState(sp).isEmpty() || !level.getFluidState(sp.above()).isEmpty() || !level.getFluidState(sp.below()).isEmpty()) {
+            failures.add("the waterway entrance rest point touches water at " + sp);
+        }
+        if (!level.getBlockState(sp).getCollisionShape(level, sp).isEmpty() || !level.getBlockState(sp.above()).getCollisionShape(level, sp.above()).isEmpty()) {
+            failures.add("the waterway entrance rest point is blocked at " + sp);
+        }
+        if (level.getBlockState(sp.below()).getCollisionShape(level, sp.below()).isEmpty()) {
+            failures.add("the waterway entrance rest point has no floor at " + sp);
+        }
+        if (!MAZE_ENTRY_ROOM.contains(sp) || sp.getY() <= MAZE_ENTRY_ROOM.floorY()) {
+            failures.add("the waterway entrance rest point is outside its room at " + sp);
+        }
+        // 入口のはしごが部屋の中を通り、水面へ続いていること
+        BlockPos ladder = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 0, 0);
+        for (int y = MAZE_FLOOR + 4; y <= FLOOR; y++) {
+            if (!level.getBlockState(new BlockPos(ladder.getX(), y, ladder.getZ())).is(Blocks.LADDER)) {
+                failures.add("the entrance ladder is broken at y " + y + " (entry room)");
+                break;
+            }
+        }
+        // 記録された休み場として復活の行き先にできること
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        TitanBackTrials.writeCheckpoint(tag, TitanBackTrials.MAZE_ENTRY, 7);
+        if (!TitanBackTrials.MAZE_ENTRY.equals(TitanBackTrials.validCheckpoint(tag, 7))) {
+            failures.add("mz0 is not accepted as a recorded rest point");
+        }
+        if (!TitanBackTrials.MAZE_ENTRY.equals(TitanBackTrials.respawnCheckpoint(level, UUID.randomUUID(), TitanBackTrials.MAZE_ENTRY))) {
+            failures.add("mz0 respawn was moved");
+        }
+    }
+
+    // 水路の顎: 弱い噛みつき・弾き・予兆・諦めの定数と、実際に噛んだときの傷と弾き
+    private static void checkMaw(ServerLevel level, List<String> failures) {
+        if (jp.revati.skyabyss.entity.WaterwayMaw.BITE_DAMAGE > 2.0f || jp.revati.skyabyss.entity.WaterwayMaw.ARRIVAL_GRACE < 200
+                || jp.revati.skyabyss.entity.WaterwayMaw.WINDUP_TICKS < 12 || jp.revati.skyabyss.entity.WaterwayMaw.GIVE_UP_TICKS > 30
+                || jp.revati.skyabyss.entity.WaterwayMaw.MAX_NEAR > 2 || MazeBuilder.MAW_MAX_NEARBY > 2) {
+            failures.add("waterway maw is tuned too harshly (damage/grace/windup/give-up/cap)");
+        }
+        var maw = jp.revati.skyabyss.registry.ModEntities.WATERWAY_MAW.get().create(level);
+        if (maw == null) {
+            failures.add("could not create a waterway maw");
+            return;
+        }
+        BlockPos at = mazeCell(MAZE_START_I, MAZE_START_J).offset(1, 1, 1);
+        level.setChunkForced(at.getX() >> 4, at.getZ() >> 4, true);
+        // 本物のプレイヤーは作れない (FakePlayer は無敵) ので、羊で傷と弾きを見る
+        var victim = net.minecraft.world.entity.EntityType.SHEEP.create(level);
+        victim.moveTo(at.getX() + 0.5 - 1.5, at.getY(), at.getZ() + 0.5, 0f, 0f);
+        maw.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        level.addFreshEntity(victim);
+        level.addFreshEntity(maw);
+        victim.setHealth(8f);
+        victim.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        maw.doHurtTarget(victim);
+        float lost = 8f - victim.getHealth();
+        if (lost < 1.5f || lost > 2.01f) {
+            failures.add("waterway maw bite did " + lost + " damage (want about 2)");
+        }
+        if (victim.getDeltaMovement().horizontalDistanceSqr() < 0.04) {
+            failures.add("waterway maw bite did not knock the player back");
+        }
+        maw.discard();
+        victim.discard();
+        level.setChunkForced(at.getX() >> 4, at.getZ() >> 4, false);
+    }
+
     private static void checkPockets(ServerLevel level, List<String> failures) {
         List<BlockPos> pockets = MazeBuilder.pockets(MazeBuilder.maze(TitanBackData.get(level).mazeSeed()));
         if (pockets.size() < 2) {

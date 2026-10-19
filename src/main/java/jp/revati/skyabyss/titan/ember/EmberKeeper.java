@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.util.Players;
+
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -124,7 +126,7 @@ public final class EmberKeeper {
 
     // 出現のとき、出現点から 160 ブロック以内の人に地の底のうなりを一度だけ鳴らす (本人にだけ聞こえる)
     static void murmur(ServerLevel level, EmberTitanEntity titan) {
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < 160 * 160) {
                 player.playNotifySound(EmberTitanSetup.RUMBLE.get(), SoundSource.AMBIENT, 0.7f, 0.6f);
             }

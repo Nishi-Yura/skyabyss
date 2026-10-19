@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.heart;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.registry.MobSounds;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,8 +49,10 @@ import org.joml.Vector3f;
 //  段階1 閉じた殻 : 潮の吐息 (水の帯) / 殻打ち (床を走る輪) / 渦潮 (引いて弾ける)
 //  段階2 開いた殻 : 満ち潮と珊瑚の槍 (床が満ち、島へ上がる) / 泡の牢 (浮かせる泡) / 真珠の脈 (追う真珠)。受ける傷 1.2 倍
 //  段階3 月の潮   : 引き潮 (強く引いて弾ける。島の上は半分) / 月潮の大波 (島へ逃げる) / 真珠の雨 (島の上にも来る)
+// 段階 2・3 では、技の組 (COMBO) が割り込む (二つ目は 20 tick 以上遅れて始まり、どの予告も 0.8 秒以上)。
+// 体力 15% 未満で最終段階 (大潮): 3 秒の咆哮のあと、技の組 (PAIRS_FURY。新しい技「大潮」を含む) だけを短い間で出す。ボスバーは赤。
 // 戦いの主題は「床と島の行き来」。段階は同期データで全員の画面に届き、模型 (段階ごとの geo) とボスバーの見た目を決める。
-// 強さは 03 の 9.8節の目安 (推奨 Lv18: 体力 540、ふつうの技の一撃 13.5 前後)
+// 強さは HeartBalance (08 の 5.3節「手ごたえ」): 体力 1000 × 硬さ 1.58、最も重い一撃 26
 public class TideHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     // 見た目と判定箱の大きさ (前の 1.5 倍。TideHeartSetup の sized と TideHeartRenderer の SCALE を合わせる)
@@ -56,20 +60,23 @@ public class TideHeart extends HeartBoss {
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
     public static final int ROAR_TICKS = 60;
-    public static final float MAX_HEALTH = 540f;
+    public static final float MAX_HEALTH = jp.revati.skyabyss.combat.HeartBalance.MAX_HP;
+    // 基本の硬さ (最大体力に掛けた値が実質の体力 1580。人数でさらに HeartBalance.partyScale 倍)
+    public static final float BASE_RESIST = 1.58f;
     // 段階2 (開いた殻) で受ける傷の倍率
     public static final float OPEN_SHELL_TAKEN = 1.2f;
 
-    // 技の傷 (防具で減る前)。08 の表の値を、03 の 9.8節の目安 (ふつうの技の一撃 13.5) に合わせて 1〜2 割上げた (ゲームで、動かずに立つ人が推奨 Lv・ダイヤ一式でほぼ勝ててしまったため)
-    public static final float BREATH_DAMAGE = 13.5f;
-    public static final float SHELL_RING_DAMAGE = 10f;
-    public static final float WHIRL_DAMAGE = 12.5f;
-    public static final float SPEAR_DAMAGE = 11.5f;
-    public static final float BUBBLE_DAMAGE_PER_SECOND = 2f;
-    public static final float PEARL_DAMAGE = 9f;
-    public static final float EBB_DAMAGE = 15f;
-    public static final float WAVE_DAMAGE = 16.5f;
-    public static final float RAIN_DAMAGE = 12.5f;
+    // 技の傷 (防具で減る前)。最も重い月潮の大波 26 が、想定の防具 (二章 +0) で想定の体力の約 28% (3〜4 回で危ない。HeartBalance.HEAVY_SHARE)。
+    // ほかの技は大波との比を保つ。泡の牢は 1 秒ごと (最長 4 回) なので、一回は軽い
+    public static final float BREATH_DAMAGE = 22f;
+    public static final float SHELL_RING_DAMAGE = 17f;
+    public static final float WHIRL_DAMAGE = 21f;
+    public static final float SPEAR_DAMAGE = 19f;
+    public static final float BUBBLE_DAMAGE_PER_SECOND = 3f;
+    public static final float PEARL_DAMAGE = 16f;
+    public static final float EBB_DAMAGE = 24f;
+    public static final float WAVE_DAMAGE = 26f;
+    public static final float RAIN_DAMAGE = 21f;
     // 引く速さ (ブロック/tick)。渦潮は歩けば逆らえる、引き潮は島の上では半分
     public static final double WHIRL_PULL = 0.08;
     public static final double EBB_PULL = 0.15;
@@ -81,7 +88,9 @@ public class TideHeart extends HeartBoss {
         NONE(null), ROAR(null),
         BREATH("breath"), SHELL_STRIKE("shell_strike"), WHIRL("whirl"),
         FLOOD("flood"), BUBBLE("bubble"), PEARL("pearl"),
-        EBB("ebb"), MOON_WAVE("moon_wave"), PEARL_RAIN("pearl_rain");
+        EBB("ebb"), MOON_WAVE("moon_wave"), PEARL_RAIN("pearl_rain"),
+        // 最終段階の新しい技 (引き潮の動きを使う) と、技の組
+        SPRING_TIDE("ebb"), COMBO(null);
 
         final String anim;
 
@@ -94,11 +103,23 @@ public class TideHeart extends HeartBoss {
     public static final Action[] PHASE_TWO = {Action.FLOOD, Action.BUBBLE, Action.PEARL};
     public static final Action[] PHASE_THREE = {Action.EBB, Action.MOON_WAVE, Action.PEARL_RAIN};
 
+    // 技の組 (二つの技を、二つ目を offset tick 遅らせて重ねる。どちらも自分の tick 処理で動き、両方が終わったら組も終わる)。
+    // 組むのは、避け方が違う (跳ぶ・横へ出る・島へ上がる・真珠を叩く) か、場所が分かれる技だけ。泡の牢 (浮いて動けない) は組まない
+    public record Pair(Action first, Action second, int offset) {
+    }
+
+    public static final Pair[] PAIRS_TWO = {new Pair(Action.SHELL_STRIKE, Action.PEARL, 20), new Pair(Action.PEARL, Action.BREATH, 24)};
+    public static final Pair[] PAIRS_THREE = {new Pair(Action.MOON_WAVE, Action.PEARL_RAIN, 20), new Pair(Action.PEARL_RAIN, Action.BREATH, 20)};
+    public static final Pair[] PAIRS_FURY = {new Pair(Action.SPRING_TIDE, Action.PEARL_RAIN, 50), new Pair(Action.SPRING_TIDE, Action.BREATH, 26),
+            new Pair(Action.MOON_WAVE, Action.PEARL_RAIN, 20), new Pair(Action.PEARL_RAIN, Action.BREATH, 20)};
+    // 組が割り込む割合 (段階 1 / 2 / 3)。最終段階は組だけ
+    public static final double[] COMBO_CHANCE = {0, 0.3, 0.5};
+
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;
-    private int cooldown = 40;
+    private int cooldown = 30;
     private float attackYaw;
     private boolean defeated;
     // 技の始めに決めて覚える数・向き (人数で変わる本数、返し波の安全な筋、大波の本数と角)
@@ -112,7 +133,20 @@ public class TideHeart extends HeartBoss {
     private int partyOverride;
     @Nullable
     private AABB arena;
-    private float toughness = 1f;
+    private float toughness = BASE_RESIST;
+    // 最終段階 (体力 HeartBalance.ENRAGE_AT 未満)。咆哮のあとに立つ。模型は段階 3 のまま
+    private boolean enraged;
+    private boolean enrageRoar;
+    // 技の組の進行 (どちらの技が終わったか)。組の中の技の finish は、組を終わらせない
+    @Nullable
+    private Pair pair;
+    private boolean suppressFinish;
+    private boolean partFinished;
+    private boolean firstDone;
+    private boolean secondDone;
+    // 大潮の安全な筋
+    @Nullable
+    private double[] springGaps;
 
     public TideHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "tide_heart", "roar_1", "roar_2", "breath", "shell_strike", "whirl", "flood", "bubble", "pearl",
@@ -177,9 +211,13 @@ public class TideHeart extends HeartBoss {
         this.toughness = scaleFor(challengers);
     }
 
-    // 人数による強さの倍率: 1 + 0.6 × (人数 − 1)。最大体力は変えず、受ける傷を割る (岩鯨と同じ)
+    // 受ける傷を割る値: 基本の硬さ × 人数の倍率 (HeartBalance.partyScale: 1 + 0.85 × (人数 − 1))。最大体力は変えない (岩鯨と同じ)
     public static float scaleFor(int challengers) {
-        return 1f + 0.6f * (Math.max(1, challengers) - 1);
+        return BASE_RESIST * (float) jp.revati.skyabyss.combat.HeartBalance.partyScale(challengers);
+    }
+
+    public boolean isEnraged() {
+        return enraged;
     }
 
     public float toughness() {
@@ -233,6 +271,11 @@ public class TideHeart extends HeartBoss {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
                 return;
             }
+            if (!enraged && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < jp.revati.skyabyss.combat.HeartBalance.ENRAGE_AT) {
+                enrageRoar = true;
+                begin(Action.ROAR, "roar_2");
+                return;
+            }
             LivingEntity target = getTarget();
             if (target != null && !canReach(target)) {
                 setTarget(null);
@@ -259,6 +302,8 @@ public class TideHeart extends HeartBoss {
             case EBB -> tickEbb(server);
             case MOON_WAVE -> tickMoonWave(server);
             case PEARL_RAIN -> tickPearlRain(server);
+            case SPRING_TIDE -> tickSpringTide(server);
+            case COMBO -> tickCombo(server);
             default -> {
             }
         }
@@ -266,6 +311,17 @@ public class TideHeart extends HeartBoss {
 
     // 段階の技から、直前と同じでないものを選ぶ。満ち潮の最中は満ち潮を選ばない
     private Action pickAttack() {
+        Pair[] pairs = enraged ? PAIRS_FURY : getPhase() == 1 ? PAIRS_TWO : getPhase() == 2 ? PAIRS_THREE : null;
+        if (pairs != null && (enraged || random.nextDouble() < COMBO_CHANCE[getPhase()])) {
+            Pair p;
+            int guard = 0;
+            do {
+                p = pairs[random.nextInt(pairs.length)];
+                guard++;
+            } while (p == pair && guard < 10);
+            pair = p;
+            return Action.COMBO;
+        }
         Action[] bag = bagFor(getPhase());
         Action pick;
         int guard = 0;
@@ -289,6 +345,19 @@ public class TideHeart extends HeartBoss {
         begin(next, next == Action.ROAR ? "roar_" + (getPhase() + 1) : null);
     }
 
+    // テスト用: 技の組を直接始める
+    public void forceCombo(Pair p) {
+        pair = p;
+        begin(Action.COMBO, null);
+    }
+
+    // テスト用: 最終段階の咆哮を始める (体力に関係なく)
+    public void forceEnrage() {
+        entityData.set(DATA_PHASE, PHASE_COUNT - 1);
+        enrageRoar = true;
+        begin(Action.ROAR, "roar_2");
+    }
+
     private void begin(Action next, @Nullable String animation) {
         action = next;
         last = next;
@@ -298,19 +367,73 @@ public class TideHeart extends HeartBoss {
             faceTarget(target);
         }
         attackYaw = getYRot();
-        playAction(animation != null ? animation : next.anim);
+        if (next == Action.COMBO) {
+            firstDone = false;
+            secondDone = false;
+        }
+        playAction(animation != null ? animation : next == Action.COMBO && pair != null ? pair.first().anim : next.anim);
     }
 
+    // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、最終段階。段階が進むほど短い (予告の長さはそのまま)
+    public static final int[] GAP = {25, 20, 15};
+    public static final int[] GAP_SPAN = {10, 8, 6};
+    public static final int GAP_FURY = 8;
+    public static final int GAP_FURY_SPAN = 6;
+
     private void finish() {
+        if (suppressFinish) {
+            partFinished = true;
+            return;
+        }
         action = Action.NONE;
         actionTicks = 0;
-        // 次の技までの間 (段階1 は 2.5〜3.3 秒、段階3 は 1.6〜2.2 秒)
-        int base = switch (getPhase()) {
-            case 0 -> 50;
-            case 1 -> 40;
-            default -> 32;
-        };
-        cooldown = base + random.nextInt(getPhase() == 2 ? 13 : 17);
+        int phase = getPhase();
+        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[phase] + random.nextInt(GAP_SPAN[phase]);
+    }
+
+    // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どちらも自分の tick を数え直して動く)。両方が終わったら終わり
+    private void tickCombo(ServerLevel server) {
+        if (pair == null) {
+            finish();
+            return;
+        }
+        if (!firstDone) {
+            firstDone = runPart(server, pair.first(), actionTicks);
+        }
+        if (!secondDone && actionTicks > pair.offset()) {
+            secondDone = runPart(server, pair.second(), actionTicks - pair.offset());
+        }
+        if ((firstDone && secondDone) || actionTicks > 400) {
+            finish();
+        }
+    }
+
+    // 組の中の技を一 tick 動かす。その技が終わったら真
+    private boolean runPart(ServerLevel server, Action part, int ticks) {
+        int savedTicks = actionTicks;
+        Action saved = action;
+        actionTicks = ticks;
+        action = part;
+        suppressFinish = true;
+        partFinished = false;
+        try {
+            switch (part) {
+                case BREATH -> tickBreath(server);
+                case SHELL_STRIKE -> tickShellStrike(server);
+                case WHIRL -> tickWhirl(server);
+                case PEARL -> tickPearl(server);
+                case EBB -> tickEbb(server);
+                case MOON_WAVE -> tickMoonWave(server);
+                case PEARL_RAIN -> tickPearlRain(server);
+                case SPRING_TIDE -> tickSpringTide(server);
+                default -> partFinished = true;
+            }
+        } finally {
+            suppressFinish = false;
+            actionTicks = savedTicks;
+            action = saved;
+        }
+        return partFinished;
     }
 
     private void faceTarget(LivingEntity target) {
@@ -444,11 +567,11 @@ public class TideHeart extends HeartBoss {
     public static final double SHELL_CORE = 3.6;
     public static final double SHELL_REACH = 15.5;
     public static final double SHELL_SPEED = 0.6;
-    public static final float SHELL_CORE_DAMAGE = 8f;
+    public static final float SHELL_CORE_DAMAGE = 14f;
     public static final int WHIRL_WARN = 70;
     public static final double WHIRL_BLAST = 5.0;
     public static final double WHIRL_POOL = 3.0;
-    public static final float WHIRL_POOL_DAMAGE = 9f;
+    public static final float WHIRL_POOL_DAMAGE = 15f;
     public static final int SPEAR_WARN = 20;
     public static final double SPEAR_RADIUS = 1.3;
     public static final int BUBBLE_WARN = 30;
@@ -458,7 +581,7 @@ public class TideHeart extends HeartBoss {
     public static final double PEARL_RADIUS = 2.2;
     public static final int EBB_WARN = 100;
     public static final double EBB_BLAST = 5.5;
-    public static final float EBB_RIPPLE_DAMAGE = 9f;
+    public static final float EBB_RIPPLE_DAMAGE = 15f;
     public static final int MOON_WARN = 40;
     public static final int MOON_ACTIVE = 40;
     public static final double MOON_LENGTH = 15;
@@ -554,7 +677,7 @@ public class TideHeart extends HeartBoss {
 
     // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
     private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (p.position().equals(spot)) {
                 return p;
             }
@@ -647,11 +770,21 @@ public class TideHeart extends HeartBoss {
                     .start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
+            if (enrageRoar) {
+                warn(server, dust(0xFF4A5A, 1.5f), getX(), coreY(), getZ(), 8, 1.3 * BODY_SCALE, 1.3 * BODY_SCALE, 1.3 * BODY_SCALE, 0.05);
+            }
             warn(server, dust(getPhase() == 0 ? 0xF0E4EC : 0xC8DCFA, 1.3f), getX(), coreY(), getZ(), 6, 1.2 * BODY_SCALE, 1.2 * BODY_SCALE, 1.2 * BODY_SCALE, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             entityData.set(DATA_ROARING, false);
-            entityData.set(DATA_PHASE, Math.min(PHASE_COUNT - 1, getPhase() + 1));
+            if (enrageRoar) {
+                // 最終段階へ (模型は段階 3 のまま、ボスバーが赤くなる)
+                enrageRoar = false;
+                enraged = true;
+                bossBar.setColor(BossEvent.BossBarColor.RED);
+            } else {
+                entityData.set(DATA_PHASE, Math.min(PHASE_COUNT - 1, getPhase() + 1));
+            }
             sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, 1.4f);
             server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), coreY(), getZ(), 60, 1.8 * BODY_SCALE, 1.6 * BODY_SCALE, 1.8 * BODY_SCALE, 0.1);
             finish();
@@ -1103,6 +1236,72 @@ public class TideHeart extends HeartBoss {
         if (actionTicks >= 44) {
             finish();
         }
+    }
+
+    // ---- 最終段階 ----
+
+    // 大潮 (2 秒の溜め): 引き潮より速い満ち引き。中心へ引き (歩けば逆らえる。島の上は半分)、2 秒で半径 5.5 の円が弾け、
+    // そこから床を走る輪が 0.6 秒おきに三重に広がる (跳べば当たらない。安全な筋は緑で、三重とも同じ筋)。最終段階の組でだけ出る
+    public static final int SPRING_WARN = 40;
+    public static final int SPRING_RINGS = 3;
+    public static final int SPRING_RING_STEP = 12;
+
+    private void tickSpringTide(ServerLevel server) {
+        double fy = floorY();
+        if (actionTicks == 1) {
+            sound(server, TideHeartSetup.EBB.get(), 2.5f, 1.3f);
+            int n = present(server);
+            springGaps = lanes(random.nextDouble() * Math.PI * 2, shellLanes(n));
+            tg(server, TelegraphShape.circle(getX(), getZ(), EBB_BLAST), SPRING_WARN, D)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.GENERIC_SPLASH, 2.5f, 0.5f);
+                        s.sendParticles(ParticleTypes.SPLASH, getX(), floorY() + 0.5, getZ(), 160, 4.0, 0.6, 4.0, 0.5);
+                    })
+                    .onHit((s, player) -> {
+                        strike(player, EBB_DAMAGE);
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        player.knockback(1.0, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+            laneMarks(server, springGaps, SPRING_WARN + (SPRING_RINGS - 1) * SPRING_RING_STEP);
+            for (int i = 0; i < SPRING_RINGS; i++) {
+                ripple(server, EBB_BLAST + 1.0, SPRING_WARN + i * SPRING_RING_STEP, springGaps, EBB_RIPPLE_DAMAGE, true, i == 0);
+            }
+        }
+        if (actionTicks < SPRING_WARN && actionTicks % 3 == 0) {
+            // 中心へ流れる赤みの水の筋 (見た目だけ)
+            for (int k = 0; k < 12; k++) {
+                double a = Math.toRadians(k * 30 + 15);
+                double r = 14 - ((actionTicks * 0.5 + k * 1.7) % 12);
+                warn(server, dust(0xC07A8A, 1.3f), getX() + Math.cos(a) * r, fy + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            }
+        }
+        if (actionTicks >= 10 && actionTicks < SPRING_WARN && actionTicks % 2 == 0) {
+            for (ServerPlayer player : reachable(server, 22)) {
+                pull(player, onIsland(player) ? WHIRL_PULL * 0.5 : WHIRL_PULL);
+            }
+        }
+        int active = (int) Math.ceil((SHELL_REACH - EBB_BLAST - 1.0) / SHELL_SPEED);
+        if (actionTicks >= SPRING_WARN + (SPRING_RINGS - 1) * SPRING_RING_STEP + active + 8) {
+            finish();
+        }
+    }
+
+    // 手ごたえの数 (HeartBalance / 自己テスト用)。段階 1 / 2 / 3 / 最終段階。
+    // action = 技の長さの平均 tick (組が割り込む分を入れた。段階 1: 吐息 40・殻打ち 47・渦潮 82。段階 2: 満ち潮 140・泡 42・真珠 32、組 52/64。
+    // 段階 3: 引き潮 112・大波 86・雨 44、組 86/60。最終段階: 組 94/87/86/60)。泡の牢は 4 回ぶんを一撃とみる
+    public static jp.revati.skyabyss.combat.HeartBalance.Profile balanceProfile() {
+        return new jp.revati.skyabyss.combat.HeartBalance.Profile("tide_shell", MAX_HEALTH, BASE_RESIST,
+                new int[] {GAP[0] + GAP_SPAN[0] / 2, GAP[1] + GAP_SPAN[1] / 2, GAP[2] + GAP_SPAN[2] / 2, GAP_FURY + GAP_FURY_SPAN / 2},
+                new int[] {56, 67, 77, 82},
+                new double[] {COMBO_CHANCE[0], COMBO_CHANCE[1], COMBO_CHANCE[2], 1.0},
+                new float[][] {
+                        {BREATH_DAMAGE, SHELL_RING_DAMAGE, WHIRL_DAMAGE},
+                        {SPEAR_DAMAGE, 4 * BUBBLE_DAMAGE_PER_SECOND, PEARL_DAMAGE, PEARL_DAMAGE, BREATH_DAMAGE},
+                        {EBB_DAMAGE, WAVE_DAMAGE, RAIN_DAMAGE, RAIN_DAMAGE, BREATH_DAMAGE},
+                        {EBB_DAMAGE, RAIN_DAMAGE, EBB_DAMAGE, BREATH_DAMAGE, WAVE_DAMAGE, RAIN_DAMAGE, RAIN_DAMAGE, BREATH_DAMAGE}},
+                3 * ROAR_TICKS);
     }
 
     // 立てる高さ (部屋では、島なら島の上、ほかは床)

@@ -8,7 +8,7 @@
   "opening.skyabyss.notebook_hint": "帳面を手に持って右クリックすると読める",
   "objective.skyabyss.read_page": "破れた頁を拾って、読んでみよう",
   "objective.skyabyss.watch_sky": "周りを探索しつつ、昼は空を見上げよう",
-  "objective.skyabyss.wait_steps": "探索しつつ、夜は明かりのそばで耳をすまそう",
+  "objective.skyabyss.wait_steps": "探索しつつ、夜は灯のそばで耳をすまそう",
   "objective.skyabyss.ask_storyteller": "宿りの語り部に話しかけよう",
   "objective.skyabyss.find_isana": "外れの焚き火の旅人に話しかけよう",
   "objective.skyabyss.see_whale": "探索しながら、次の夜の空の歌を待とう",
@@ -21,5 +21,6 @@
   "opening.skyabyss.bone_rumor": "乾いた石のにおいが、風に混じっている。%sの丘のほうだ。",
   "opening.skyabyss.bone_far": "遠く、丘の稜線が妙に白い。雲の影ではない。",
   "opening.skyabyss.bone_mid": "足もとに、白い欠片が転がっている。……大きすぎる。",
-  "opening.skyabyss.bone_near": "風が止んだ。丘は、丘のかたちをしていない。"
+  "opening.skyabyss.bone_near": "風が止んだ。丘は、丘のかたちをしていない。",
+  "objective.skyabyss.back_return": "戻る: 光る帰り石でしゃがむ"
 }

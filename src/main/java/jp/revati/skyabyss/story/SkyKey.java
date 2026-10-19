@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
@@ -100,7 +102,7 @@ public final class SkyKey {
         jp.revati.skyabyss.titan.ember.EmberAftermath.afterKey(player);
         if (first) {
             // 画面の語りで、心臓を一つ以上止めた人にだけ (まだ序盤の人に鍵の話を明かさない。チャットには流さない)
-            for (ServerPlayer p : player.server.getPlayerList().getPlayers()) {
+            for (ServerPlayer p : Players.snapshot(player.server.getPlayerList().getPlayers())) {
                 if (p != player && Progression.stage(p) >= 1) {
                     Notice.narrate(p, "message.skyabyss.story.key_formed_world", player.getDisplayName());
                 }

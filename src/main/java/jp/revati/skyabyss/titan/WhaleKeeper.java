@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +76,7 @@ public final class WhaleKeeper {
             double x = whale.getX();
             double z = whale.getZ();
             level.playSound(null, x, 200, z, ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 24f, 0.8f);
-            for (ServerPlayer player : level.players()) {
+            for (ServerPlayer player : Players.snapshot(level.players())) {
                 if (player.distanceToSqr(x, 200, z) < NEAR * NEAR) {
                     Notice.narrate(player, "message.skyabyss.titan_appears");
                 }
@@ -93,6 +95,11 @@ public final class WhaleKeeper {
     };
 
     private WhaleKeeper() {
+    }
+
+    // 見守り (自己テスト用)
+    public static TitanKeeper<StoneWhaleEntity> keeper() {
+        return KEEPER;
     }
 
     // 本物の岩鯨 (読み込まれているときだけ)

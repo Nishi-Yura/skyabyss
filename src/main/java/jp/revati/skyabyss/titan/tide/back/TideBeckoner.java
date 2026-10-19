@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -748,7 +750,7 @@ public class TideBeckoner extends TideMob {
     // ボスバーは、近くにいる潮招きのグループの人にだけ
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (p.distanceToSqr(this) < 48 * 48 && isAlive() && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }

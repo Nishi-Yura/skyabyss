@@ -224,7 +224,7 @@ public final class HeartAftermathSelfTest {
             // 倒れる: リーダーでない人の間接の傷 (魔法・矢のたぐい)
             heart.setHealth(1f);
             heart.invulnerableTime = 0;
-            heart.hurt(back.damageSources().indirectMagic(mate, mate), 1000f);
+            heart.hurt(back.damageSources().indirectMagic(mate, mate), Float.MAX_VALUE);
             check(f, !heart.isAlive(), "the heart survived an indirect hit from a party member");
             check(f, heart.barViewers().isEmpty(), "the boss bar stayed on while the heart was dying");
             // 倒れる演出のあいだ、部屋は閉じたまま待つ。演出が終われば、撃破の報告

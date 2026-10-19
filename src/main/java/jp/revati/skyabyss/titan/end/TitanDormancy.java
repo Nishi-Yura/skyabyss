@@ -38,6 +38,11 @@ public final class TitanDormancy extends SavedData {
     public static final long HARD_MAX_TICKS = 20L * 60 * 60;
     // entity の REST の同期は、これを超えたら止める (光が消えきったあとは動かない)
     public static final int SYNC_CAP = 600;
+    // 去る (docs/design/02 の 7.2節): 眠る姿が始まって DEPART_START tick (10 秒。眠りの場面の前半) までは、各巨神ごとの眠り方で落ち着く。
+    // そこから去りはじめ (岩鯨は昇る・潮殻は沈みきる・雷翼は飛び去る・余燼は土へ潜る)、DEPART_TICKS tick (40 秒) で本体を地上から取り除く。
+    // 眠っているあいだは見守りも呼び直さない (TitanKeeper)。目覚めたとき、見守りが遠くから呼び直す
+    public static final int DEPART_START = 200;
+    public static final int DEPART_TICKS = 800;
 
     private static final Factory<TitanDormancy> FACTORY = new Factory<>(TitanDormancy::new, TitanDormancy::load);
 
@@ -85,6 +90,16 @@ public final class TitanDormancy extends SavedData {
         return r != null && now(server) >= r.since;
     }
 
+    // 去りはじめているか (眠る姿が始まって DEPART_START tick 以降)
+    public static boolean isDeparting(int age) {
+        return age >= DEPART_START;
+    }
+
+    // 去る動きの進み (0〜1。DEPART_START → DEPART_TICKS)
+    public static float departProgress(int age) {
+        return net.minecraft.util.Mth.clamp((age - DEPART_START) / (float) (DEPART_TICKS - DEPART_START), 0f, 1f);
+    }
+
     // 眠る姿が始まってからの tick。眠っていない・まだ始まっていなければ -1
     public static int age(MinecraftServer server, String titan) {
         Rest r = get(server).rests.get(titan);
@@ -115,6 +130,19 @@ public final class TitanDormancy extends SavedData {
         data.setDirty();
         SkyAbyss.LOGGER.info("The {} fell into its sleep (visible from tick {})", titan, r.since);
         return r;
+    }
+
+    // 自己テスト用: 眠りが ticks だけ前から始まっていたことにする (時間を飛ばす。ゲーム時間は進めない)
+    public static void backdate(MinecraftServer server, String titan, long ticks) {
+        TitanDormancy data = get(server);
+        Rest r = data.rests.get(titan);
+        if (r != null) {
+            r.since -= ticks;
+            if (r.wakeAt != Long.MAX_VALUE) {
+                r.wakeAt -= ticks;
+            }
+            data.setDirty();
+        }
     }
 
     // 眠りの場所を決める

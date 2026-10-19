@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -312,7 +314,7 @@ public class CinderRoller extends EmberMob {
                 server.sendParticles(ParticleTypes.SMALL_FLAME, t.pos().x, t.pos().y + 0.05, t.pos().z, 1, 0.2, 0.0, 0.2, 0.005);
             }
         }
-        for (Player p : server.players()) {
+        for (Player p : Players.snapshot(server.players())) {
             if (!EmberMoth.targetable(p) || !GroupOwned.mayTarget(this, p) || trailHit.containsKey(p.getUUID()) || p.distanceToSqr(this) > 40 * 40) {
                 continue;
             }

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.opening;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.SkyAbyss;
@@ -79,7 +81,7 @@ public final class OpeningBeats {
 
     // オーバーワールドにいる誰かが語り部と話したことがあるか (岩鯨の出現の条件)
     public static boolean anyoneMetStoryteller(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && metStoryteller(p)) {
                 return true;
             }

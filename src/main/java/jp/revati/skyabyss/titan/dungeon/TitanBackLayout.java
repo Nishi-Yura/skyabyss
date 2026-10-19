@@ -43,7 +43,8 @@ public final class TitanBackLayout {
     //  9: 東の第一の広間 (E1) を 13×23 → 13×30、番兵長の広間 (E3) を 9×23 → 9×31 に延ばした。心臓の間を内側の半径 14.5 → 19 に広げ、
     //     中心を 5 北へ (z -85)。テレグラフの円 (スタンプ 半径 5 など) が床の 4 割以下に収まり、避ける広さが残る (02 の 4.2、5.2)
     // 10: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
-    public static final int LAYOUT_VERSION = 10;
+    // 11: 闇の水路の入口 (はしごを下りた先) に、乾いた小部屋の休み場 (mz0) を足した
+    public static final int LAYOUT_VERSION = 12;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
@@ -140,6 +141,8 @@ public final class TitanBackLayout {
     public static final int MAZE_START_J = 9;
     public static final int MAZE_EXIT_I = 8;
     public static final int MAZE_EXIT_J = 13;
+    // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、中は 3×3×3。はしごが北の隅を通る)
+    public static final Box MAZE_ENTRY_ROOM = new Box(3, 5, -25, -23, MAZE_FLOOR + 4, 3);
     public static final Box MAZE_EXIT_ROOM = new Box(10, 14, -10, -6, 81, 4);
     // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)
     public static final List<BlockPos> LOWER_RETURN = List.of(new BlockPos(2, 94, -7), new BlockPos(2, 95, -7));

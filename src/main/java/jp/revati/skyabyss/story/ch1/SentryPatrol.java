@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch1;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +63,7 @@ public final class SentryPatrol {
             return;
         }
         boolean near = false;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && !(p instanceof FakePlayer) && Math.hypot(p.getX() - ribs.get().getX(), p.getZ() - ribs.get().getZ()) <= WATCH) {
                 near = true;
                 break;
@@ -137,7 +139,7 @@ public final class SentryPatrol {
         if (!(event.getEntity() instanceof BoneSentinel sentry) || !sentry.getTags().contains(TAG) || !(sentry.level() instanceof ServerLevel level)) {
             return;
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && !(p instanceof FakePlayer) && p.distanceToSqr(sentry) <= 24 * 24) {
                 reward(p);
             }

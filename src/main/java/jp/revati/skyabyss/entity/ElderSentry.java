@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -389,7 +391,7 @@ public class ElderSentry extends GroundFoe {
         if (!(level() instanceof ServerLevel server)) {
             return;
         }
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             boolean near = p.distanceToSqr(this) < 32 * 32 && GroupOwned.visibleTo(this, p);
             if (near) {
                 bossBar.addPlayer(p);
@@ -435,7 +437,7 @@ public class ElderSentry extends GroundFoe {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         ResourceLocation tallyId = ResourceLocation.tryParse(Ch1Prep.SENTRY_TALLY);
         var tally = tallyId == null ? null : BuiltInRegistries.ITEM.get(tallyId);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || p.distanceToSqr(this) > 40 * 40
                     || (groupId() != null && !groupId().equals(Groups.keyOf(p)))) {
                 continue;

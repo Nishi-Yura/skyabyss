@@ -28,6 +28,12 @@ public final class EmberHeartClient {
             new int[] {0xFFC060, 0xFFF0B0, 0xD86A58},
             new int[] {0xFFA050, 0xFFE080, 0xE8E0D6},
             "gui.skyabyss.boss.ember_heart.phase.", "gui.skyabyss.boss.ember_heart.roaring", 0xFFB070);
+    // 憤怒 (体力 15% 未満。模型は段階 3 のまま): 段階 3 の枠に、燃え上がる赤の帯
+    public static final PhasedBossBar.Style BAR_FURY = new PhasedBossBar.Style("ember_heart",
+            new int[] {0xF67E28, 0xFFD660, 0xE0281A},
+            new int[] {0xFFC060, 0xFFF0B0, 0xFF7050},
+            new int[] {0xFFA050, 0xFFE080, 0xFF5A40},
+            "gui.skyabyss.boss.ember_heart.phase.", "gui.skyabyss.boss.ember_heart.roaring", 0xFF5A40);
 
     // 灰の帳の残り tick と、凍えているか (サーバーからのパケット)
     private static int veilLeft;
@@ -123,7 +129,7 @@ public final class EmberHeartClient {
             return;
         }
         event.setCanceled(true);
-        PhasedBossBar.draw(event.getGuiGraphics(), mc, BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY());
+        PhasedBossBar.draw(event.getGuiGraphics(), mc, heart.isEnraged() ? BAR_FURY : BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY());
         event.setIncrement(event.getIncrement() + PhasedBossBar.EXTRA_HEIGHT);
     }
 }

@@ -33,7 +33,8 @@ public final class TideBackLayout {
     // 5: 亀を低ポリ案 B「段になった珊瑚礁の島」(四段の台地、頂に高い塔) の形に建て直し、上の三つの台地に封じた予約の間を足した (08 の 3.8節)
     // 6: 殻の底 (心臓の間) の天井を 1 段上げて、空気が 12 段にした (予告の高さ・心臓の大きさ 1.5 倍のため。08 の 5.5節)
     // 7: 詰み監査の修正 (甲羅の地表の 1 マス角の縦穴を埋めた。08 の「詰み監査」)
-    public static final int LAYOUT_VERSION = 7;
+    // 8: 試練のわかりやすさ (入口の看板を 4 行にし、潮見の間の栓の色・戻しの栓・広間の案内の看板を足した。08 の 4.4節)
+    public static final int LAYOUT_VERSION = 8;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

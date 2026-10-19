@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.smith;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -411,7 +413,7 @@ public class AshSmith extends EmberMob {
             return forced;
         }
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (p.isAlive() && !p.isSpectator() && !p.isCreative() && AshSmithArena.inside(p.position())
                     && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, p)) {
                 out.add(p);
@@ -981,7 +983,7 @@ public class AshSmith extends EmberMob {
 
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (isAlive() && p.distanceToSqr(this) < 48 * 48 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +63,7 @@ public final class Groups {
     // そのディメンションにいる、グループの生きている人 (観戦者を除く)
     public static List<ServerPlayer> alive(ServerLevel level, UUID group) {
         List<ServerPlayer> list = new ArrayList<>();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.isAlive() && !player.isSpectator() && isMember(player, group)) {
                 list.add(player);
             }
@@ -72,7 +74,7 @@ public final class Groups {
     // そのディメンションにいる、グループの人 (倒れている人・観戦者も含む)
     public static List<ServerPlayer> online(ServerLevel level, UUID group) {
         List<ServerPlayer> list = new ArrayList<>();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (isMember(player, group)) {
                 list.add(player);
             }

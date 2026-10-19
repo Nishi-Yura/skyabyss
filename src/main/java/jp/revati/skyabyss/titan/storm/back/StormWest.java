@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
@@ -91,7 +93,7 @@ final class StormWest {
         int gust = gust(level);
         if (gust == 1 && gt % 6 == 0) {
             // 雨の筋 (手首の側から肩の側へ流れる)
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (inBone(p.position())) {
                     for (int i = 0; i < 6; i++) {
                         StormFx.forced(level, ParticleTypes.FALLING_WATER, p.getX() - 6 + level.random.nextDouble() * 4,
@@ -103,7 +105,7 @@ final class StormWest {
             }
         }
         int t = gustT(level);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator()) {
                 continue;
             }
@@ -129,7 +131,7 @@ final class StormWest {
         Vec3 base = new Vec3(floor.getX() + 0.5, floor.getY() + 1, floor.getZ() + 0.5);
         double maxY = base.y + height;
         boolean any = false;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || p.getAbilities().flying || p.distanceToSqr(base) > 48 * 48 || !who.test(p)) {
                 continue;
             }
@@ -147,7 +149,7 @@ final class StormWest {
 
     // 風切りの羽根: w0 に入ると一枚。西の試練の外へ出ると消える。跳躍・低速落下は試練の中で消す
     static void tickFeathers(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             boolean inWest = inWest(p.position());
             if (inWest) {
                 if (W0.contains(p.blockPosition()) && !GaleFeather.holds(p) && p.isAlive()) {

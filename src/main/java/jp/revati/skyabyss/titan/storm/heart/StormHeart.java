@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
@@ -61,14 +63,18 @@ import org.joml.Vector3f;
 //                                  羽ばたき (風穴の下降風と、跳べる突風の輪) / 帯電の床 (床の円。空中なら当たらない) / 羽根の雨 (人の上の円)
 //  段階 3 骨だけの翼 (前 = 光): 心臓は床の 2 ブロック上へ。閃光 (人へ向く扇の中で、心臓を見ている人だけ。背を向けるか柱の陰) /
 //                                  雷の網 (回る雷の腕。跳べば越える) / 招雷の連打 (円が三度。柱のそばなら柱へ)
+// 段階 2・3 では、技の組 (COMBO) が割り込む (二つ目の予告は 20〜30 tick 遅れて始まり、どの予告も 0.8 秒以上)。
+// 体力 15% 未満で最終段階 (憤怒): 3 秒の咆哮のあと、技の組 (PAIRS_FURY) だけを短い間で出す。憤怒だけの技「雷翼の十字」(CROSS) が加わる。
 // 予告は色の粒 (overrideLimiter。GuardMob.warn) に加え、技ごとに別の音と、画面の予告の印 (StormHeartNetwork.Warn) の三つで出す。
-// 強さは 03 の 9.8節の目安 (推奨 Lv24: 体力 650、ふつうの技の一撃 15.5 前後)
+// 強さは HeartBalance (12 の 5.3節の「手ごたえ」): 最大体力 1000 × 基本の硬さ 1.86、最も重い一撃 31
 public class StormHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
     public static final int ROAR_TICKS = 60;
-    public static final float MAX_HEALTH = 650f;
+    public static final float MAX_HEALTH = jp.revati.skyabyss.combat.HeartBalance.MAX_HP;
+    // 基本の硬さ (受ける傷をこの値 × 人数の倍率で割る。最大体力に掛けた値が実質の体力 1860)
+    public static final float BASE_RESIST = 1.86f;
     // 段階 2 (開いた翼) と、翼が裂けているあいだに受ける傷の倍率
     public static final float OPEN_WINGS_TAKEN = 1.2f;
     public static final float SPLIT_TAKEN = 1.5f;
@@ -78,16 +84,22 @@ public class StormHeart extends HeartBoss {
     public static final int HIGH_TICKS = 160;
     public static final int PERCH_TICKS = 160;
 
-    // 技の傷 (防具で減る前。12 の 5.3節の表のまま)
-    public static final float SUMMON_DAMAGE = 13f;
-    public static final float BLADE_DAMAGE = 14f;
-    public static final float CHAIN_DAMAGE = 15.5f;
-    public static final float WINGBEAT_DAMAGE = 6f;
-    public static final float CHARGE_DAMAGE = 3f;
-    public static final float FEATHER_DAMAGE = 10f;
-    public static final float FLASH_DAMAGE = 12f;
-    public static final float WEB_DAMAGE = 14f;
-    public static final float BARRAGE_DAMAGE = 10f;
+    // 技の傷 (防具で減る前。12 の 5.3節の表のまま)。最も重い雷の鎖 31 は、想定の防具 (21 / 14・一式 ×0.8) で想定の体力 34 の 28%
+    public static final float SUMMON_DAMAGE = 26f;
+    public static final float BLADE_DAMAGE = 28f;
+    public static final float CHAIN_DAMAGE = 31f;
+    public static final float WINGBEAT_DAMAGE = 16f;
+    // 帯電の床は 0.5 秒ごとの傷 (円に立ち続けると 5 回)
+    public static final float CHARGE_DAMAGE = 6f;
+    public static final float FEATHER_DAMAGE = 24f;
+    public static final float FLASH_DAMAGE = 24f;
+    public static final float WEB_DAMAGE = 28f;
+    public static final float BARRAGE_DAMAGE = 20f;
+    // 雷翼の十字 (憤怒だけ): 四方への雷の線が二度 (二度目は向き直す)、そのあと足もとの招雷
+    public static final float CROSS_DAMAGE = 26f;
+    public static final int CROSS_WARN = 24;
+    public static final int CROSS_STEP = 20;
+    public static final double CROSS_HALF_WIDTH = 1.2;
     // 判定の寸法
     public static final double SUMMON_RADIUS = 1.5;
     public static final double ROD_REACH = 3.0;
@@ -130,7 +142,9 @@ public class StormHeart extends HeartBoss {
         NONE(null, 0), ROAR(null, ROAR_TICKS),
         SUMMON("summon", 24), BLADE("blade", 24), CHAIN("chain", 20),
         WINGBEAT("wingbeat", 30), CHARGE("charge", 30), FEATHER("feather", 24),
-        FLASH("flash", 40), WEB("web", 30), BARRAGE("barrage", 20);
+        FLASH("flash", 40), WEB("web", 30), BARRAGE("barrage", 20),
+        // 憤怒だけの技 (模型のアニメは招雷の連打を使う) と、技の組 (二つの技を重ねる。印は組の中の技のもの)
+        CROSS("barrage", CROSS_WARN), COMBO(null, 0);
 
         final String anim;
         // 予告の長さ (tick)。画面の予告の印の長さにも使う
@@ -150,12 +164,86 @@ public class StormHeart extends HeartBoss {
     public static final Action[] PHASE_TWO = {Action.WINGBEAT, Action.CHARGE, Action.FEATHER};
     public static final Action[] PHASE_THREE = {Action.FLASH, Action.WEB, Action.BARRAGE};
 
+    // 技の組 (二つの技を、二つ目を offset tick 遅らせて重ねる)。段階 2・3 で割り込み、憤怒では組だけを出す。
+    // 組むのは、避け方の違う技どうし (動く / 跳ぶ / 目を背ける) で、心臓の高さを変えないもの。二つ目の予告も 0.8 秒以上
+    public record Pair(Action first, Action second, int offset) {
+        public int length() {
+            return Math.max(lengthOf(first), offset + lengthOf(second));
+        }
+    }
+
+    public static final Pair[] PAIRS_TWO = {new Pair(Action.CHARGE, Action.FEATHER, 20), new Pair(Action.WINGBEAT, Action.FEATHER, 24)};
+    public static final Pair[] PAIRS_THREE = {new Pair(Action.FLASH, Action.BARRAGE, 20), new Pair(Action.BARRAGE, Action.FLASH, 26),
+            new Pair(Action.WEB, Action.FLASH, 30)};
+    public static final Pair[] PAIRS_FURY = {new Pair(Action.FLASH, Action.BARRAGE, 20), new Pair(Action.CROSS, Action.FLASH, 34),
+            new Pair(Action.CROSS, Action.FEATHER, 30)};
+    // 組が割り込む割合 (段階 1 / 2 / 3)。憤怒は組だけ
+    public static final double[] COMBO_CHANCE = {0, 0.35, 0.7};
+    // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、憤怒。段階が進むほど短い
+    public static final int[] GAP = {32, 22, 13};
+    public static final int[] GAP_SPAN = {10, 8, 4};
+    public static final int GAP_FURY = 7;
+    public static final int GAP_FURY_SPAN = 4;
+
+    // 技の長さ (始めから finish まで の tick。羽ばたきは輪が二重のときの長さ)。各 tick の関数の終わりと同じ値
+    public static int lengthOf(Action a) {
+        return switch (a) {
+            case SUMMON -> 40;
+            case BLADE -> BLADE_WARN + BLADE_ACTIVE + 8;
+            case CHAIN -> 32;
+            case WINGBEAT -> 76 + 14;
+            case CHARGE -> 30 + CHARGE_ACTIVE + 10;
+            case FEATHER -> 34;
+            case FLASH -> 50;
+            case WEB -> 30 + WEB_TICKS + 6;
+            case BARRAGE -> 66;
+            case CROSS -> 2 * CROSS_STEP + CROSS_WARN + 8;
+            case ROAR -> ROAR_TICKS;
+            default -> 0;
+        };
+    }
+
+    // 手ごたえの数 (HeartBalance / 自己テスト用)。段階 1 / 2 / 3 / 憤怒。
+    // action = 技の長さの平均 (組が割り込む分を入れる)。帯電の床の一撃は、円に 1.5 秒立ってしまった分 (3 回) とみる
+    public static jp.revati.skyabyss.combat.HeartBalance.Profile balanceProfile() {
+        return new jp.revati.skyabyss.combat.HeartBalance.Profile("thunder_wing", MAX_HEALTH, BASE_RESIST,
+                new int[] {GAP[0] + GAP_SPAN[0] / 2, GAP[1] + GAP_SPAN[1] / 2, GAP[2] + GAP_SPAN[2] / 2, GAP_FURY + GAP_FURY_SPAN / 2},
+                new int[] {meanLength(PHASE_ONE, null, 0), meanLength(PHASE_TWO, PAIRS_TWO, COMBO_CHANCE[1]),
+                        meanLength(PHASE_THREE, PAIRS_THREE, COMBO_CHANCE[2]), meanLength(null, PAIRS_FURY, 1.0)},
+                new double[] {0, COMBO_CHANCE[1], COMBO_CHANCE[2], 1.0},
+                new float[][] {
+                        {SUMMON_DAMAGE, BLADE_DAMAGE, CHAIN_DAMAGE},
+                        {WINGBEAT_DAMAGE, 3 * CHARGE_DAMAGE, FEATHER_DAMAGE},
+                        {FLASH_DAMAGE, WEB_DAMAGE, BARRAGE_DAMAGE},
+                        {FLASH_DAMAGE, BARRAGE_DAMAGE, CROSS_DAMAGE, FLASH_DAMAGE, CROSS_DAMAGE, FEATHER_DAMAGE}},
+                3 * ROAR_TICKS);
+    }
+
+    // 技の長さの平均 (一つの技と組を、組の割合 chance で混ぜる)
+    private static int meanLength(@Nullable Action[] singles, @Nullable Pair[] pairs, double chance) {
+        double one = 0;
+        if (singles != null) {
+            for (Action a : singles) {
+                one += lengthOf(a);
+            }
+            one /= singles.length;
+        }
+        double two = 0;
+        if (pairs != null) {
+            for (Pair p : pairs) {
+                two += p.length();
+            }
+            two /= pairs.length;
+        }
+        return (int) Math.round((1 - chance) * one + chance * two);
+    }
+
 
     private final ServerBossEvent bossBar = new ServerBossEvent(getDisplayName(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10);
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;
-    private int cooldown = 40;
+    private int cooldown = 30;
     private int splitTicks;
     private int safeFallTicks;
     // 段階 2 の高低の拍の時計 (咆哮が終わった所から数える)
@@ -178,7 +266,15 @@ public class StormHeart extends HeartBoss {
     private double anchorY = Double.NaN;
     @Nullable
     private AABB arena;
-    private float toughness = 1f;
+    // 受ける傷を割る値 (基本の硬さ × 人数の倍率)
+    private float toughness = BASE_RESIST;
+    // 憤怒に入ったか (体力 HeartBalance.ENRAGE_AT 未満)。咆哮のあとに立つ。段階 (模型) は 3 のまま
+    private boolean enraged;
+    private boolean enrageRoar;
+    // 技の組の進行
+    @Nullable
+    private Pair pair;
+    private boolean suppressFinish;
 
     public StormHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "storm_heart", "roar_1", "roar_2", "summon", "blade", "chain", "split", "wingbeat", "charge", "feather",
@@ -192,7 +288,7 @@ public class StormHeart extends HeartBoss {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, MAX_HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, 15.5)
+                .add(Attributes.ATTACK_DAMAGE, CHAIN_DAMAGE)
                 .add(Attributes.ARMOR, 9)
                 .add(Attributes.ARMOR_TOUGHNESS, 6)
                 .add(Attributes.MOVEMENT_SPEED, 0.0)
@@ -230,6 +326,10 @@ public class StormHeart extends HeartBoss {
         endSplit();
         Telegraph.cancelAll(this);
         action = Action.NONE;
+        pair = null;
+        enraged = false;
+        enrageRoar = false;
+        bossBar.setColor(BossEvent.BossBarColor.WHITE);
         updraftStopped = false;
         updraftStrong = false;
         cooldown = 20;
@@ -244,6 +344,11 @@ public class StormHeart extends HeartBoss {
         return bossBar.getProgress();
     }
 
+    // 試験用: ボスバーの色 (憤怒で赤)
+    public BossEvent.BossBarColor heartBarColorForTest() {
+        return bossBar.getColor();
+    }
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 24f));
@@ -253,12 +358,16 @@ public class StormHeart extends HeartBoss {
     public void bindArena(AABB arena, int challengers) {
         this.arena = arena;
         this.anchorY = StormHeartArena.FLOOR;
-        this.toughness = scaleFor(challengers);
+        this.toughness = BASE_RESIST * scaleFor(challengers);
     }
 
-    // 挑む人数の倍率 (上限なし。パーティの 6 人で 4.0)
+    // 挑む人数の倍率 (HeartBalance.partyScale: 1 + 0.85 × (人数 − 1)。パーティの 6 人で 5.25)
     public static float scaleFor(int challengers) {
-        return 1f + 0.6f * (Math.max(1, challengers) - 1);
+        return (float) jp.revati.skyabyss.combat.HeartBalance.partyScale(challengers);
+    }
+
+    public boolean isEnraged() {
+        return enraged;
     }
 
     public float toughness() {
@@ -403,6 +512,12 @@ public class StormHeart extends HeartBoss {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
                 return;
             }
+            if (!enraged && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < jp.revati.skyabyss.combat.HeartBalance.ENRAGE_AT) {
+                // 憤怒の咆哮 (模型は段階 3 のまま。段階 2 → 3 の咆哮のアニメを使う)
+                enrageRoar = true;
+                begin(Action.ROAR, "roar_2");
+                return;
+            }
             LivingEntity target = getTarget();
             if (target != null && !canReach(target)) {
                 setTarget(null);
@@ -429,12 +544,30 @@ public class StormHeart extends HeartBoss {
             case FLASH -> tickFlash(server);
             case WEB -> tickWeb(server);
             case BARRAGE -> tickBarrage(server);
+            case CROSS -> tickCross(server);
+            case COMBO -> tickCombo(server);
             default -> {
             }
         }
     }
 
+    // 組の候補 (段階 1 は null)。憤怒は PAIRS_FURY
+    @Nullable
+    private Pair[] pairsNow() {
+        return enraged ? PAIRS_FURY : getPhase() == 0 ? null : getPhase() == 1 ? PAIRS_TWO : PAIRS_THREE;
+    }
+
     private Action pickAttack() {
+        Pair[] pairs = pairsNow();
+        if (pairs != null && (enraged || random.nextDouble() < COMBO_CHANCE[getPhase()])) {
+            Pair next;
+            int guard = 0;
+            do {
+                next = pairs[random.nextInt(pairs.length)];
+            } while (next == pair && last == Action.COMBO && pairs.length > 1 && ++guard < 20);
+            pair = next;
+            return Action.COMBO;
+        }
         Action[] bag = bagFor(getPhase());
         Action pick;
         int guard = 0;
@@ -458,7 +591,27 @@ public class StormHeart extends HeartBoss {
             return;
         }
         endSplit();
+        if (next == Action.COMBO) {
+            // 組: いまの段階の組から一つ (段階 1 なら段階 2 の組)
+            Pair[] pairs = pairsNow();
+            pairs = pairs != null ? pairs : PAIRS_TWO;
+            pair = pairs[random.nextInt(pairs.length)];
+        }
         begin(next, next == Action.ROAR ? "roar_" + (getPhase() + 1) : null);
+    }
+
+    // 試験・開発用: 決めた組を出す
+    public void forcePair(Pair p) {
+        endSplit();
+        pair = p;
+        begin(Action.COMBO, null);
+    }
+
+    // 試験・開発用: 憤怒に入れる (咆哮なし)
+    public void forceEnrage() {
+        entityData.set(DATA_PHASE, PHASE_COUNT - 1);
+        enraged = true;
+        bossBar.setColor(BossEvent.BossBarColor.RED);
     }
 
     private void begin(Action next, @Nullable String animation) {
@@ -469,24 +622,87 @@ public class StormHeart extends HeartBoss {
         if (target != null) {
             faceTarget(target);
         }
-        playAction(animation != null ? animation : next.anim);
-        if (level() instanceof ServerLevel server && next.warnTicks > 0) {
-            StormHeartNetwork.warn(reachable(server, 32), next, next.warnTicks);
+        Action shown = next == Action.COMBO && pair != null ? pair.first() : next;
+        playAction(animation != null ? animation : shown.anim);
+        if (level() instanceof ServerLevel server && shown.warnTicks > 0) {
+            StormHeartNetwork.warn(reachable(server, 32), shown, shown.warnTicks);
         }
     }
 
     private void finish() {
+        if (suppressFinish) {
+            return;
+        }
         action = Action.NONE;
         actionTicks = 0;
         updraftStopped = false;
         updraftStrong = false;
-        // 次の技までの間 (段階 1 は 2.5〜3.3 秒、段階 2 は 2.0〜2.8 秒、段階 3 は 1.6〜2.2 秒)
-        int base = switch (getPhase()) {
-            case 0 -> 50;
-            case 1 -> 40;
-            default -> 32;
-        };
-        cooldown = base + random.nextInt(getPhase() == 2 ? 13 : 17);
+        // 次の技までの間 (段階 1 は 1.6〜2.05 秒、段階 2 は 1.1〜1.45 秒、段階 3 は 0.65〜0.8 秒、憤怒は 0.35〜0.5 秒)。予告の長さは変わらない
+        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]);
+    }
+
+    // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どちらの技も自分の tick を数え直して動く)
+    private void tickCombo(ServerLevel server) {
+        if (pair == null) {
+            finish();
+            return;
+        }
+        Pair p = pair;
+        runPart(server, p.first(), actionTicks);
+        if (actionTicks > p.offset()) {
+            if (actionTicks == p.offset() + 1 && p.second().warnTicks > 0) {
+                // 画面の予告の印は二つ目の技へ (模型のアニメは一つ目のまま)
+                StormHeartNetwork.warn(reachable(server, 32), p.second(), p.second().warnTicks);
+            }
+            runPart(server, p.second(), actionTicks - p.offset());
+        }
+        if (actionTicks >= p.length()) {
+            finish();
+        }
+    }
+
+    private void runPart(ServerLevel server, Action part, int ticks) {
+        int savedTicks = actionTicks;
+        Action saved = action;
+        actionTicks = ticks;
+        action = part;
+        suppressFinish = true;
+        try {
+            switch (part) {
+                case SUMMON -> tickSummon(server);
+                case BLADE -> tickBlade(server);
+                case CHAIN -> tickChain(server);
+                case WINGBEAT -> tickWingbeat(server);
+                case CHARGE -> tickCharge(server);
+                case FEATHER -> tickFeather(server);
+                case FLASH -> tickFlash(server);
+                case WEB -> tickWeb(server);
+                case BARRAGE -> tickBarrage(server);
+                case CROSS -> tickCross(server);
+                default -> {
+                }
+            }
+        } finally {
+            suppressFinish = false;
+            actionTicks = savedTicks;
+            action = saved;
+        }
+    }
+
+    // いま (組の中も含めて) 出ている技か、その技の始めからの tick (出ていなければ −1)
+    private int partTicks(Action a) {
+        if (action == a) {
+            return actionTicks;
+        }
+        if (action == Action.COMBO && pair != null) {
+            if (pair.first() == a) {
+                return actionTicks;
+            }
+            if (pair.second() == a && actionTicks > pair.offset()) {
+                return actionTicks - pair.offset();
+            }
+        }
+        return -1;
     }
 
     private void faceTarget(LivingEntity target) {
@@ -655,7 +871,7 @@ public class StormHeart extends HeartBoss {
 
     // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
     private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (p.position().equals(spot)) {
                 return p;
             }
@@ -757,19 +973,29 @@ public class StormHeart extends HeartBoss {
             tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, Math.max(8, roomRadius()), 0.9, new double[0], 0), 22, H).active(24).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
+            if (enrageRoar) {
+                warn(server, dust(0xFF4A3A, 1.5f), getX(), core().y, getZ(), 8, 1.4, 1.4, 1.4, 0.05);
+            }
             warn(server, dust(getPhase() == 0 ? 0xA8D8FF : 0xF6F0C8, 1.3f), getX(), core().y, getZ(), 6, 1.2, 1.2, 1.2, 0.05);
             warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), core().y, getZ(), 6, 1.6, 1.6, 1.6, 0.2);
         }
         if (actionTicks >= ROAR_TICKS) {
             entityData.set(DATA_ROARING, false);
-            entityData.set(DATA_PHASE, Math.min(PHASE_COUNT - 1, getPhase() + 1));
+            if (enrageRoar) {
+                // 憤怒: 段階 (模型) は 3 のまま、ボスバーが赤くなり、組だけを短い間で出す
+                enrageRoar = false;
+                enraged = true;
+                bossBar.setColor(BossEvent.BossBarColor.RED);
+            } else {
+                entityData.set(DATA_PHASE, Math.min(PHASE_COUNT - 1, getPhase() + 1));
+            }
             if (isBound()) {
                 StormHeartArena.resetRods(server);
             }
             sound(server, SoundEvents.BEACON_ACTIVATE, 2.5f, 1.4f);
             server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 60, 1.8, 1.6, 1.8, 0.1);
             finish();
-            cooldown = 40;
+            cooldown = enraged ? 20 : 30;
         }
     }
 
@@ -978,7 +1204,8 @@ public class StormHeart extends HeartBoss {
             return;
         }
         boolean active = getPhase() == 1 && !isRoaring() && !updraftStopped;
-        boolean warnDown = action == Action.WINGBEAT && actionTicks < 30;
+        int beat = partTicks(Action.WINGBEAT);
+        boolean warnDown = beat >= 0 && beat < 30;
         if (tickCount % 2 == 0 && (getPhase() == 1 || (isRoaring() && getPhase() == 0 && actionTicks > 30))) {
             for (int k = 0; k < 4; k++) {
                 Vec3 h = StormHeartArena.hole(k);
@@ -1013,8 +1240,8 @@ public class StormHeart extends HeartBoss {
     }
 
     // 羽ばたき (1.5 秒): 翼を高く上げ、風穴の粒が下を向く。次の二つが印になる:
-    //  - 風穴の下降風: 4 つの風穴の円 (半径 2.1)。円の中の空中の人に 6 と下向きの力 (昇り風に乗っている人への技)
-    //  - 突風の輪: 心臓から広がる輪 (3 人から二重)。跳べば当たらない。輪には安全な筋が 2 本あり、そこは何もない。当たると 6 と外への押し
+    //  - 風穴の下降風: 4 つの風穴の円 (半径 2.1)。円の中の空中の人に WINGBEAT_DAMAGE と下向きの力 (昇り風に乗っている人への技)
+    //  - 突風の輪: 心臓から広がる輪 (3 人から二重)。跳べば当たらない。輪には安全な筋が 2 本あり、そこは何もない。当たると WINGBEAT_DAMAGE と外への押し
     // 2 秒、昇り風が止まる
     private void tickWingbeat(ServerLevel server) {
         if (actionTicks == 1) {
@@ -1075,7 +1302,7 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    // 帯電の床 (1.5 秒): 床の円 (半径 3) の中を青い火花が這い、3 秒のあいだ 0.5 秒ごとに、円に立つ人へ 3 と鈍足 I。
+    // 帯電の床 (1.5 秒): 床の円 (半径 3) の中を青い火花が這い、3 秒のあいだ 0.5 秒ごとに、円に立つ人へ CHARGE_DAMAGE と鈍足 I。
     // **昇り風の中 (空中) なら当たらない**。円の数は 3 → 7 (人数 + 2)。人の足もとのほか、残りは部屋のあちこち。昇り風は強まる
     private void tickCharge(ServerLevel server) {
         if (actionTicks == 1) {
@@ -1112,7 +1339,7 @@ public class StormHeart extends HeartBoss {
         }
     }
 
-    // 羽根の雨 (1.2 秒): 人の位置に白い輪 (半径 2。空中の人にはその高さに) が満ちて、羽根が降る。10 と下への力。
+    // 羽根の雨 (1.2 秒): 人の位置に白い輪 (半径 2。空中の人にはその高さに) が満ちて、羽根が降る。FEATHER_DAMAGE と下への力。
     // 輪の高さから 1.5 ずれれば当たらない。3 人から、人のいない所にも 2〜3 か所
     private void tickFeather(ServerLevel server) {
         if (actionTicks == 1) {
@@ -1149,7 +1376,7 @@ public class StormHeart extends HeartBoss {
 
     // ---------------------------------------------------------------- 段階 3
     // 閃光 (2.0 秒): 心臓が光を吸い込み (画面が暗くなる)、高まる音、画面の眼の印。人のいる方へ光の扇 (半角 22 度・射程 13) が満ちる。
-    // 扇の中で、心臓の方を向いている (視線から 60 度以内) 人は盲目 3 秒と 12。扇から出る・背を向ける・柱の陰 (心臓との間にブロックがある) のどれかでよい。
+    // 扇の中で、心臓の方を向いている (視線から 60 度以内) 人は盲目 3 秒と FLASH_DAMAGE。扇から出る・背を向ける・柱の陰 (心臓との間にブロックがある) のどれかでよい。
     // 扇は人数で 1 → 4 本 (別の人へ)
     private void tickFlash(ServerLevel server) {
         if (actionTicks == 1) {
@@ -1209,7 +1436,7 @@ public class StormHeart extends HeartBoss {
     }
 
     // 雷の網 (1.5 秒): 4 本の柱の先が光り、柱と柱の間に線。心臓を中心に、雷の腕 (幅 2・長さ 13) が回る。振れる扇を床に描いて満ち、
-    // そのあと腕が 4 秒かけてその扇を一度通る。**跳べば越えられる**。触れると 14。腕は 2 本 → 3 本 → 4 本 (人数。扇の合計は 180 度のまま)
+    // そのあと腕が 4 秒かけてその扇を一度通る。**跳べば越えられる**。触れると WEB_DAMAGE。腕は 2 本 → 3 本 → 4 本 (人数。扇の合計は 180 度のまま)
     private void tickWeb(ServerLevel server) {
         if (actionTicks == 1) {
             sound(server, StormHeartSetup.WEB.get(), 2.6f, 1f);
@@ -1286,6 +1513,57 @@ public class StormHeart extends HeartBoss {
         }
     }
 
+
+    // ---------------------------------------------------------------- 憤怒
+    // 雷翼の十字 (3.6 秒): 心臓から四方へ雷の線 (幅 2.4・部屋の端まで) が満ちて落ちる。一度目は狙う人へ向いた十字、
+    // 1.0 秒後に、そのときの人へ向き直した二度目の十字、さらに 1.0 秒後に人の足もとへ招雷の円 (柱のそばなら柱へ)。
+    // どの印も 1.2 秒前から出る。線は横へ一歩ずれれば外れる (線と線のあいだは広い)
+    private void tickCross(ServerLevel server) {
+        if (actionTicks == 1 || actionTicks == 1 + CROSS_STEP) {
+            sound(server, StormHeartSetup.CHAIN.get(), 2.4f, actionTicks == 1 ? 0.85f : 1.05f);
+            LivingEntity target = getTarget();
+            double base = target != null ? Telegraph.angleOf(target.getX() - getX(), target.getZ() - getZ()) : random.nextDouble() * Math.PI * 2;
+            double reach = Math.max(8, roomRadius() - 0.5);
+            for (int i = 0; i < 4; i++) {
+                double angle = base + i * Math.PI / 2;
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                boolean first = i == 0;
+                tg(server, TelegraphShape.line(getX(), getZ(), angle, reach, CROSS_HALF_WIDTH), CROSS_WARN, D).target(first ? target : null)
+                        .onImpact(s -> {
+                            if (first) {
+                                s.playSound(null, getX(), floorY(), getZ(), StormHeartSetup.STRIKE.get(), SoundSource.HOSTILE, 2.4f, 1.1f);
+                            }
+                            for (double d = 1.0; d <= reach; d += 0.9) {
+                                warn(s, ParticleTypes.ELECTRIC_SPARK, getX() + dx * d, floorY() + 1.0, getZ() + dz * d, 2, 0.3, 0.4, 0.3, 0.1);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, CROSS_DAMAGE);
+                            // 線の横へ押す (線の上に残らない)
+                            push(player, -dz * 0.5, 0.2, dx * 0.5);
+                        })
+                        .start();
+            }
+            if (actionTicks > 1 && action == Action.CROSS) {
+                StormHeartNetwork.warn(reachable(server, 32), Action.CROSS, CROSS_WARN);
+            }
+        }
+        if (actionTicks == 1 + 2 * CROSS_STEP) {
+            sound(server, StormHeartSetup.BARRAGE.get(), 2.2f, 1.3f);
+            for (Vec3 spot : pickSpots(server, 6)) {
+                lightningCircle(server, spot.x, floorY(), spot.z, SUMMON_RADIUS, CROSS_WARN, BARRAGE_DAMAGE, false);
+            }
+        }
+        if (actionTicks < 2 * CROSS_STEP && actionTicks % 3 == 0) {
+            // 翼の先の火花 (骨の翼に雷が溜まる)
+            warn(server, ParticleTypes.ELECTRIC_SPARK, getX(), core().y + 1.0, getZ(), 8, 2.8, 0.8, 2.8, 0.1);
+            warn(server, dust(0xFF6A4A, 1.2f), getX(), core().y, getZ(), 4, 1.0, 1.0, 1.0, 0.02);
+        }
+        if (actionTicks >= lengthOf(Action.CROSS)) {
+            finish();
+        }
+    }
 
     // ---------------------------------------------------------------- 受ける傷
     // 咆哮の間は傷を受けない。段階 2 は 1.2 倍、翼が裂けている間は 1.5 倍。人数の分だけ割る

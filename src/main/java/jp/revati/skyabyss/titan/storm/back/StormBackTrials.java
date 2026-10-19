@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.storm.back.StormBackLayout.*;
 
@@ -320,7 +322,7 @@ public final class StormBackTrials {
     // 荒れる 10 秒前に低い風の唸り、静まる 10 秒前に遠い高い鳴き声 (島じゅう)
     private static void horn(ServerLevel level, StormBackClock.Phase next) {
         boolean rise = next == StormBackClock.Phase.RISING;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             level.playSound(null, p.getX(), p.getY() + 6, p.getZ(), rise ? StormSetup.RISE_WARN.get() : StormSetup.FALL_WARN.get(),
                     SoundSource.AMBIENT, 1.4f, 1f);
             Notice.bar(p, ModText.lore(rise ? "message.skyabyss.storm.storm_soon" : "message.skyabyss.storm.calm_soon"));
@@ -340,7 +342,7 @@ public final class StormBackTrials {
     // 背中にいるグループ (重複なし)
     static List<UUID> presentGroups(ServerLevel level) {
         List<UUID> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             UUID k = Groups.keyOf(p);
             if (!out.contains(k)) {
                 out.add(k);
@@ -374,7 +376,7 @@ public final class StormBackTrials {
 
     // ---------------------------------------------------------------- 抜け道の床 (石が鳴ると光り、踏むと広間の近くへ。その人のグループの石で)
     private static void tickPads(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator()) {
                 continue;
             }
@@ -503,7 +505,7 @@ public final class StormBackTrials {
         ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, SoundSource.BLOCKS, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                 volume, pitch, level.random.nextLong());
         double range = Math.max(16, volume * 16);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if ((p.isSpectator() || Groups.isMember(p, group)) && p.distanceToSqr(Vec3.atCenterOf(pos)) < range * range && p.connection != null) {
                 p.connection.send(packet);
             }
@@ -899,7 +901,7 @@ public final class StormBackTrials {
 
     // ---------------------------------------------------------------- 風見の目盛り (画面右上。石の数はその人のグループの)
     static void sendGauge(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             PacketDistributor.sendToPlayer(p, gauge(level, p));
         }
     }

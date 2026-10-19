@@ -105,18 +105,40 @@ public final class TideTravel {
         player.fallDistance = 0;
         player.teleportTo(overworld, drop.x, drop.y, drop.z, yaw, 0f);
         player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 20 * 10, 0, false, false, true));
+        if (landing.water()) {
+            // 岸が見つからず海の上へ出るときは、舟を一艘添える (沖で泳いで戻る羽目にしない)
+            giveBoat(overworld, player, drop);
+        }
         overworld.playSound(null, drop.x, drop.y, drop.z, TideSetup.GATE.get(), SoundSource.PLAYERS, 1.2f, 1.1f);
     }
 
+    private static void giveBoat(ServerLevel overworld, ServerPlayer player, Vec3 at) {
+        net.minecraft.world.entity.vehicle.Boat boat = new net.minecraft.world.entity.vehicle.Boat(overworld, at.x, overworld.getSeaLevel(), at.z);
+        boat.setVariant(net.minecraft.world.entity.vehicle.Boat.Type.OAK);
+        boat.setYRot(player.getYRot());
+        overworld.addFreshEntity(boat);
+        player.startRiding(boat);
+        Notice.bar(player, ModText.hint("message.skyabyss.tide.boat_given"));
+    }
+
     // 戻る先と向き (向きが NaN なら今の向きのまま)
-    record Landing(Vec3 pos, float yaw) {
+    // water = 海の上へ出る (岸が見つからなかった)。そのときは舟を添える
+    record Landing(Vec3 pos, float yaw, boolean water) {
+        Landing(Vec3 pos, float yaw) {
+            this(pos, yaw, false);
+        }
     }
 
     // 巨神が休んでいれば門の前の水の上 (巨神に背を向ける)、休んでいなければ最後に休んだ場所の岸、記録もなければ共有スポーン地点
     static Landing landing(ServerLevel overworld) {
         TideShellEntity titan = TideKeeper.KEEPER.current(overworld);
         if (titan != null && titan.isResting()) {
-            return new Landing(titan.gateExit(), titan.getYRot() - 90f);
+            // 休んでいる間も、海の上ではなく近くの岸へ降ろす (背中から出て沖に取り残されない)。舟は岸が見つからないときだけ
+            Vec3 shore = shoreNear(overworld, titan.getX(), titan.getZ());
+            if (shore != null) {
+                return new Landing(shore, Float.NaN);
+            }
+            return new Landing(titan.gateExit(), titan.getYRot() - 90f, true);
         }
         Vec3 rest = titan != null ? titan.lastRestSpot() : lastRestFromRecord(overworld);
         if (rest != null) {
@@ -128,6 +150,22 @@ public final class TideTravel {
         BlockPos spawn = overworld.getSharedSpawnPos();
         int y = overworld.getHeight(Heightmap.Types.MOTION_BLOCKING, spawn.getX(), spawn.getZ());
         return new Landing(new Vec3(spawn.getX() + 0.5, y + 1, spawn.getZ() + 0.5), Float.NaN);
+    }
+
+    // 戻る先が、水の中でない (岸・陸) か、海の上なら舟が付く (自己テスト用)
+    public static boolean landingSafe(ServerLevel overworld) {
+        Landing l = landing(overworld);
+        return l.water() || !overworld.getFluidState(BlockPos.containing(l.pos())).is(net.minecraft.tags.FluidTags.WATER);
+    }
+
+    // 巨神 (x, z) の近くの岸: 水際の立てる地面 (巨神の休む所は岸から 40 以内。48 ブロックの輪、なければ 140 ブロックまで)
+    @javax.annotation.Nullable
+    static Vec3 shoreNear(ServerLevel overworld, double x, double z) {
+        Vec3 shore = TideOcean.standableShore(overworld, x, z);
+        if (shore == null) {
+            shore = jp.revati.skyabyss.titan.end.SafeSpot.find(overworld, x, z, 0, 140, jp.revati.skyabyss.titan.end.SafeSpot.Kind.SHORE, 24);
+        }
+        return shore;
     }
 
     // 巨神が読み込まれていないときは、見守りの記録から最後に休んだ場所を読む

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public final class EmberRising {
         if (!EmberChapterData.get(level.getServer()).markRisen(day)) {
             return false;
         }
-        perform(level, titan, level.players());
+        perform(level, titan, Players.snapshot(level.players()));
         return true;
     }
 

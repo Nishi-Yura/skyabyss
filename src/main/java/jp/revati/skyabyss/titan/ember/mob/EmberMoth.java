@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -412,7 +414,7 @@ public class EmberMoth extends EmberMob {
     // 試練の担当が湧かせるときのための、近くの人の数 (部屋の上限を出す)
     public static int playersNear(ServerLevel level, AABB room) {
         int n = 0;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (targetable(p) && room.contains(p.position())) {
                 n++;
             }

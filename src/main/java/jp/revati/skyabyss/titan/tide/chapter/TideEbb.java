@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.chapter;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -435,7 +437,7 @@ public final class TideEbb {
 
     // 計画を実行して始める。始まれば true。途中の道と近すぎる (重なる) 計画は始めない
     static boolean begin(ServerLevel level, EbbData data, Plan plan) {
-        return begin(level, data, plan, level.players());
+        return begin(level, data, plan, Players.snapshot(level.players()));
     }
 
     static boolean begin(ServerLevel level, EbbData data, Plan plan, java.util.Collection<? extends ServerPlayer> players) {
@@ -465,7 +467,7 @@ public final class TideEbb {
 
     // 水を戻して終える (途中のものすべて)。中にいる人は岸へ戻す
     static void end(ServerLevel level, EbbData data) {
-        end(level, data, level.players());
+        end(level, data, Players.snapshot(level.players()));
     }
 
     static void end(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
@@ -508,7 +510,7 @@ public final class TideEbb {
 
     // 途中の見回り: 敵を除く、頁、予告、終わり (途中のものすべて)
     static void tickActive(ServerLevel level, EbbData data) {
-        tickActive(level, data, level.players());
+        tickActive(level, data, Players.snapshot(level.players()));
     }
 
     static void tickActive(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {
@@ -568,7 +570,7 @@ public final class TideEbb {
     // まだ自分の大干潮を迎えていない二章の人に、大干潮を迎えさせる (見回りごと)。
     // 近くで途中のものがあればそれを共有し、なければ新しく道を通す (途中の道と重ならない所だけ)
     static void tryTrigger(ServerLevel level, EbbData data) {
-        tryTrigger(level, data, level.players());
+        tryTrigger(level, data, Players.snapshot(level.players()));
     }
 
     static void tryTrigger(ServerLevel level, EbbData data, java.util.Collection<? extends ServerPlayer> players) {

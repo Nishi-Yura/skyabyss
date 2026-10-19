@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.end;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -105,9 +107,30 @@ public final class TitanEnd {
         if (Titans.THUNDER_WING.equals(titan)) {
             chooseStormPeak(server.overworld());
         }
+        scheduleCarry(back, titan, fought);
+    }
+
+    // 報酬を出さずに、眠りと運び出しだけ (同じ試練の周で心臓をもう一度倒したとき。報酬・誓いは二重に出さない。
+    // これを呼ばないと、二度目の撃破では巨神が眠らず、地上から去らない)
+    public static void onHeartStoppedAgain(ServerLevel back, String titan, Collection<UUID> ids) {
+        MinecraftServer server = back.getServer();
+        Set<UUID> fought = new LinkedHashSet<>(ids);
+        TitanDormancy.begin(server, titan, CARRY_AT);
+        if (Titans.THUNDER_WING.equals(titan)) {
+            chooseStormPeak(server.overworld());
+        }
+        scheduleCarry(back, titan, fought);
+    }
+
+    private static void scheduleCarry(ServerLevel back, String titan, Set<UUID> fought) {
+        MinecraftServer server = back.getServer();
         long until = server.overworld().getGameTime() + CARRY_AT + 60;
         for (UUID id : targetIds(server, back, fought)) {
             HOLDING.put(id, until);
+        }
+        // 心臓を止めた人のそばに、すぐ帰れる帰り石 (運び出しを待たずに戻れる)
+        for (ServerPlayer p : targets(server, back, fought)) {
+            ReturnBeacons.offer(p);
         }
         Tasks.later(SILENCE_AT, () -> narrateBack(back, "message.skyabyss.titan_end.silence"));
         Tasks.later(TREMBLE_AT, () -> tremble(back, titan));
@@ -117,7 +140,7 @@ public final class TitanEnd {
     }
 
     private static void narrateBack(ServerLevel back, String key) {
-        for (ServerPlayer p : back.players()) {
+        for (ServerPlayer p : Players.snapshot(back.players())) {
             if (!p.isSpectator()) {
                 Notice.narrate(p, key);
             }
@@ -126,7 +149,7 @@ public final class TitanEnd {
 
     // 背中が震える: 足もとのうなり、粒、その巨神の言い回しの語り
     private static void tremble(ServerLevel back, String titan) {
-        for (ServerPlayer p : back.players()) {
+        for (ServerPlayer p : Players.snapshot(back.players())) {
             if (p.isSpectator()) {
                 continue;
             }
@@ -149,7 +172,7 @@ public final class TitanEnd {
 
     // 背中にいる (生きている・観戦でない) 人で、戦った人か、戦った人のパーティの人
     public static List<ServerPlayer> targets(MinecraftServer server, ServerLevel back, Collection<UUID> fought) {
-        return pick(server, back, back.players(), fought);
+        return pick(server, back, Players.snapshot(back.players()), fought);
     }
 
     // targets の選び方そのもの (自己テストが、いる人の一覧を渡して確かめる)。candidates のうち、背中 back にいる (生きている・観戦でない) 人で、
@@ -385,7 +408,7 @@ public final class TitanEnd {
     static void onWake(MinecraftServer server, String titan) {
         Vec3 c = titanPosition(server, titan);
         ServerLevel o = server.overworld();
-        for (ServerPlayer p : o.players()) {
+        for (ServerPlayer p : Players.snapshot(o.players())) {
             if (!p.isSpectator() && p.level().dimension() == Level.OVERWORLD && Math.hypot(p.getX() - c.x, p.getZ() - c.z) < 640) {
                 Notice.narrate(p, "message.skyabyss.titan_end.wake." + titan);
             }

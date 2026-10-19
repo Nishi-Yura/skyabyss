@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.party;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +61,7 @@ public final class PartyNetwork {
             return;
         }
         PartyData data = PartyData.get(server);
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer player : Players.snapshot(server.getPlayerList().getPlayers())) {
             boolean inParty = data.of(player.getUUID()) != null;
             if (SOON.remove(player.getUUID()) || inParty || tick % 100 == 0) {
                 send(player);

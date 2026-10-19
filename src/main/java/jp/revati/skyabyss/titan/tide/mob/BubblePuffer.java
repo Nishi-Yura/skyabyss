@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.mob;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,7 +128,7 @@ public class BubblePuffer extends TideMob {
         }
         Player near = null;
         double best = Double.MAX_VALUE;
-        for (Player p : level().players()) {
+        for (Player p : Players.snapshot(level().players())) {
             if (p.isSpectator() || p.isCreative() || !p.isAlive()) {
                 continue;
             }

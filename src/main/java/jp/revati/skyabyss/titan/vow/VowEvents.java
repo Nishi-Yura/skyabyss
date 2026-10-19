@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.vow;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +51,7 @@ public final class VowEvents {
         long t = level.getGameTime();
         if (t % 20 == 11) {
             Set<UUID> groups = new HashSet<>();
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (!p.isSpectator() && groups.add(Groups.keyOf(p))) {
                     Vows.startTimerIfNeeded(level, Groups.keyOf(p), level.getServer().overworld().getGameTime());
                 }
@@ -57,7 +59,7 @@ public final class VowEvents {
             applyFoeHealth(level);
         }
         if (t % 100 == 13) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 VowNetwork.resend(p);
             }
         }

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.guide;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -188,7 +190,7 @@ public final class SiteSpawner {
         MinecraftServer server = event.getServer();
         if (!DEFS.isEmpty() && server.getTickCount() % EVERY == 3) {
             ServerLevel overworld = server.overworld();
-            tick(overworld, overworld.players(), overworld.getGameTime());
+            tick(overworld, Players.snapshot(overworld.players()), overworld.getGameTime());
         }
     }
 
@@ -356,7 +358,7 @@ public final class SiteSpawner {
     }
 
     private static void discardMobs(ServerLevel level, Instance inst) {
-        for (UUID id : inst.live.keySet()) {
+        for (UUID id : new ArrayList<>(inst.live.keySet())) {
             Entity e = level.getEntity(id);
             if (e != null) {
                 e.discard();

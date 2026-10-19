@@ -117,7 +117,7 @@ public final class HeartCinematicSelfTest {
 
             // 倒れる
             heart.invulnerableTime = 0;
-            heart.hurt(heart.damageSources().genericKill(), 1000f);
+            heart.hurt(heart.damageSources().genericKill(), Float.MAX_VALUE);
             check(heart.isDeadOrDying() && heart.cinematicStage() == HeartBoss.Stage.DEATH, name + ": death did not start", failures);
             check(EVENTS.getOrDefault(HeartCinematicEvent.Kind.DEATH_START, 0) == 1, name + ": no DEATH_START event", failures);
             for (int i = 0; i < HeartBoss.DEATH_TICKS / 2; i++) {

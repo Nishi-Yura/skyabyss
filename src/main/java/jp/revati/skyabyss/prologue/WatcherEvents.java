@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.prologue;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -119,7 +121,7 @@ public final class WatcherEvents {
         }
         PrologueData data = PrologueData.get(level);
         float moon = moonNearness(level);
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             PrologueData.Entry entry = data.entry(player.getUUID());
             if (entry.nextWatcher < 0) {
                 entry.nextWatcher = now + (long) (randomBetween(level, FIRST_DELAY_MIN, FIRST_DELAY_MAX) / frequency);
@@ -153,7 +155,7 @@ public final class WatcherEvents {
         if (player.isUnderWater() || !level.canSeeSky(player.blockPosition().above())) {
             return "not outdoors";
         }
-        for (ServerPlayer other : level.players()) {
+        for (ServerPlayer other : Players.snapshot(level.players())) {
             if (other != player && !other.isSpectator() && other.distanceToSqr(player) < ALONE_RADIUS * ALONE_RADIUS) {
                 return "not alone";
             }

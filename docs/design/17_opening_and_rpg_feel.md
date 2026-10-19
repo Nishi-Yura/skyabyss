@@ -394,7 +394,7 @@
 | 殺さない | ダメージ・拘束・モブの湧きの変更なし。戦闘中（200 tick 以内に傷を受けた・与えた）・体力が半分以下・敵が 8 ブロック以内・水中・睡眠中・影の最中は後ろへずらす（最大 2 分）。足音と歌は他の演出と重ならない |
 | 慣らさない | 足音と歌は一度だけ。見る者は最初の二夜を外す。同じ演出は数日空ける |
 | 弱められる | `horrorEventFrequency` 0 で足音・歌・影の頁は起こさず（拍子は済みとして先へ進み、誘導は残る）。画面の揺れ（`screenShake`）と効果の強さ（`screenEffectStrength`）で足音の揺れ・暗がりが弱まる／消える |
-| 自分だけ | 合図は本人にだけ送る。星の欠け・足音はその人のクライアントだけ |
+| 拍子は人ごと・足音の音は近くに共有 | 拍子の進みと合図（暗さ・環境音の消去）は本人にだけ。足音の音と揺れだけは、同じ次元で 64 ブロック以内にいる人（仲間を含む）にも同じ時刻・向きで聞かせる（`CUE_FOOTSTEPS_NEAR`。その人の拍子は進めない）。星の欠けはその人のクライアントだけ |
 
 ---
 
@@ -434,7 +434,7 @@
 | `objective.skyabyss.read_page` | 破れた頁を拾って、読んでみよう | Take the torn page, and read it | 影が去ってから、落ちてきた破れた頁を読むまで（段は `watch_sky` のまま。`OpeningLogic.objective` が頁を落とす予定 `pageAt`・自動で読む予定 `pageReadAt` を見る）。帯が「空を見上げよう」のままで頁の存在を言わなかった穴を埋める |
 | `objective.skyabyss.ask_storyteller` | 宿りの語り部に話しかけよう | Talk to the lodge storyteller | 影を見てから語り部に尋ねるまで（段 `ask_storyteller`） |
 | `objective.skyabyss.find_isana` | 外れの焚き火の旅人に話しかけよう | Talk to the traveler at the fire | 語り部のあとイサナと話すまで（段 `find_chaser`） |
-| `objective.skyabyss.wait_steps` | 探索しつつ、夜は明かりのそばで耳をすまそう | At night, stay by a light and listen | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
+| `objective.skyabyss.wait_steps` | 探索しつつ、夜は灯のそばで耳をすまそう | At night, stay by a light and listen | 段 `see_whale` で、足音 (B6) をまだ聞いていない間。夜 1 に来るのは足音だけなので、歌とは言わない（`OpeningLogic.objective`） |
 | `objective.skyabyss.see_whale` | 探索しながら、次の夜の空の歌を待とう | Explore; await the sky song next night | 段 `see_whale` で、足音を済ませたあと、歌 (B9) をまだ聞いていない間（歌は足音の次の夜以降） |
 | `objective.skyabyss.wait_whale` | 夕方、空を見上げて岩鯨を待とう | At dusk, look up for the stone whale | 段 `see_whale` で、歌を聞いたあと（イサナに会っていなければ `find_isana`）。岩鯨を見るまで。クエストログの同じ段は「探索で力をつけておこう」の一文つきの文（`…see_whale.see.wait`、`QuestHud.objectiveText`）になる |
 | `objective.skyabyss.bone_hill` | 白く霞む丘を確かめに行ってみよう | Check the hazy white hill | 日 2 の昼の任意の寄り道 |

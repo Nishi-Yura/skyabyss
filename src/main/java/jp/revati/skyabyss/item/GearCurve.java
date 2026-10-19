@@ -41,6 +41,8 @@ public final class GearCurve {
     // dps0 / dps10: 一体への 1 秒あたりの傷 (筋力・相手の防具の前、固有効果の上乗せ込み、出血は除く)。段ごとに約 1.15 倍、
     // 次の巨神の +0 は前の巨神の +5 ほど。armor / toughness: 4 部位の合計 (+0)。setMultiplier: 一式の効果で受ける傷に掛かる値
     // bossHit / bossHp: 推奨レベル・その段の防具 +0 で、心臓の一撃に 7 回ほど耐え、+0 の武器で 75 秒ほどかかる値
+    // (装備の段を比べる物差しの値。実際の心臓の体力・一撃・技の速さは combat/HeartBalance と各心臓の balanceProfile が持つ: 2026-10-20 に心臓を
+    // 一人 4 分・一撃が体力の 28% に作り直した。ここの値を動かすと防具の段の比較 (防具の式は一撃が大きいほど強靭が効く) が崩れるので、物差しのまま残す)
     public record Stage(String id, int level, double dps0, double dps10, double armor, double toughness, double setMultiplier,
             double bossHit, int bossHp) {
     }
