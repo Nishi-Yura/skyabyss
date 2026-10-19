@@ -36,7 +36,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // 第一の巨神「岩鯨」。背中に古代の遺跡を乗せ、雲の高さをゆっくり泳ぐ。
 // ときどきプレイヤーの近くまで降りてきて、背中の尾の側にある錨石から脇腹ごしに鎖を地上へ垂らす。
 // 鎖を右クリックすると、巻き上げられて背中へ引き上げられる。
-public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan {
+public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, jp.revati.skyabyss.titan.end.DormantTitan, jp.revati.skyabyss.titan.solid.SolidTitan {
     private static final EntityDataAccessor<Float> CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.FLOAT);
     // 鎖が頭の乗り場から垂れているか (巨神での移動。titan.travel)。false なら背中の錨石から垂れる
     private static final EntityDataAccessor<Boolean> HEAD_CHAIN = SynchedEntityData.defineId(StoneWhaleEntity.class, EntityDataSerializers.BOOLEAN);
@@ -806,10 +806,27 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     }
 
     // 見た目は当たり判定よりずっと大きいので、画面外判定を広げる
+    // 体に入れない (titan/solid)。体積は tools/gen_titan_volumes.py が近景のメッシュから焼く。入ってよいのは乗り場の通り道だけ
+    @Override
+    public String volumeName() {
+        return "stone_whale";
+    }
+
+    @Override
+    public java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> corridors() {
+        return CORRIDORS;
+    }
+
+    private static final java.util.List<jp.revati.skyabyss.titan.solid.SolidTitan.Corridor> CORRIDORS = java.util.List.of(
+            // 背中の鎖 (後ろへ 30.5、左へ 10.5) の下から巻き上げの終わりまで
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(5.0, 16.0, -400.0, 18.0, -35.5, -25.5),
+            // 乗り場の鎖 (頭の左の頬、前へ 44) の下から頭の上の座席まで
+            new jp.revati.skyabyss.titan.solid.SolidTitan.Corridor(8.0, 20.0, -400.0, 34.0, 39.0, 49.0));
+
     @Override
     public AABB getBoundingBoxForCulling() {
         // モデルは体の底が付け根の上 6.75 ブロック、背の上端が 46.5 ブロック (前後は -66〜81 ブロック)。上はそこまで届くようにする
-        return getBoundingBox().inflate(100.0, 50.0, 100.0).expandTowards(0, -Math.max(0, chainLength() - CHAIN_UP), 0);
+        return getBoundingBox().inflate(100.0, 50.0, 100.0).expandTowards(0, -Math.max(110.0, chainLength() - CHAIN_UP), 0);
     }
 
     // 位置の補間。サーバーは2tickごとに位置を送るので、それに合わせた steps で滑らかにつなぐ

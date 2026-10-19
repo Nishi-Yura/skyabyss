@@ -502,6 +502,11 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "titanweight" -> {
+                // titanweight on|off : 巨神の重さの見せ方 (下ほど暗い陰・穴の蓋・地面や海面の影・雲や水しぶき) を入れる / 外す (前後の比べ用)
+                jp.revati.skyabyss.client.lowpoly.LowPoly.titanWeight = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
             case "armortier" -> {
                 // armortier common|rare|legend|auto : 低ポリ防具の階級を決め打つ (品は全部レア。auto = 品の階級)
                 String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);

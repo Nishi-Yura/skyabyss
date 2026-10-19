@@ -85,6 +85,11 @@ public final class Voyages {
         return null;
     }
 
+    // この人は巨神での移動に加わっている最中か (乗り場へ歩く・座る・降りる)
+    public static boolean involvesPlayer(UUID player) {
+        return involving(player) != null;
+    }
+
     public static boolean isBusy(TitanKind kind) {
         return ACTIVE.containsKey(kind.id());
     }

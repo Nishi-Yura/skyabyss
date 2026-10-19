@@ -13,6 +13,8 @@ public final class LowPoly {
     public static volatile boolean enabled = true;
     // true: 骨のぴったりの箱 (geo/entity/<name>_lowpoly_debug.geo.json) を半透明の赤で重ねる。メッシュと GeckoLib の座標が合っているかの確認用
     public static volatile boolean debug = false;
+    // 巨神の重さの見せ方 (下ほど暗い陰・関節の穴の蓋・地面や海面の影・雲や水しぶきと土ぼこり) を使うか。台本の `titanweight on|off` (前後の比べ用)
+    public static volatile boolean titanWeight = true;
     // プレイヤーの武器 13 種 (手・地面・額縁) を低ポリメッシュで描くか。false にすると元のボクセルのモデル (models/item_voxel/) で描く (client/weapon/WeaponItemRenderer)。
     // 台本の `weaponmesh on|off`
     public static volatile boolean weaponMeshes = true;
@@ -36,6 +38,17 @@ public final class LowPoly {
 
     // flatten: 0..1。法線を真上へこの割合だけ寄せる (防具用: 絵に面の向きの陰影が焼いてあるので、腕を上げて面が下を向いても二重に暗くならないように)
     public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten) {
+        drawBone(poseStack, buffer, bone, packedLight, packedOverlay, colour, flatten, true);
+    }
+
+    // shade: 巨神の焼き込みの明るさ (Bone.vshade) をかけるか。光る層 (発光マスクの重ね描き) では false にして、光を暗くしない
+    public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten, boolean shade) {
+        boolean weight = titanWeight;
+        float[] vshade = shade && weight ? bone.vshade : null;
+        int ca = colour >>> 24;
+        int cr = (colour >> 16) & 255;
+        int cg = (colour >> 8) & 255;
+        int cb = colour & 255;
         PoseStack.Pose pose = poseStack.last();
         Matrix4f m = pose.pose();
         Matrix3f nm = pose.normal();
@@ -43,7 +56,8 @@ public final class LowPoly {
         float[] pos = bone.pos;
         float[] uv = bone.uv;
         float[] nrm = bone.nrm;
-        for (int q = 0; q < bone.quadCount; q++) {
+        int quadLimit = weight ? bone.quadCount : bone.capStart;
+        for (int q = 0; q < quadLimit; q++) {
             nm.transform(nrm[q * 3], nrm[q * 3 + 1], nrm[q * 3 + 2], t).normalize();
             float nx = t.x, ny = t.y, nz = t.z;
             if (flatten > 0f) {
@@ -58,7 +72,12 @@ public final class LowPoly {
             for (int k = 0; k < 4; k++) {
                 int pi = q * 12 + k * 3;
                 m.transformPosition(pos[pi], pos[pi + 1], pos[pi + 2], t);
-                buffer.addVertex(t.x, t.y, t.z, colour, uv[q * 8 + k * 2], uv[q * 8 + k * 2 + 1], packedOverlay, packedLight, nx, ny, nz);
+                int c = colour;
+                if (vshade != null) {
+                    float sh = vshade[q * 4 + k];
+                    c = (ca << 24) | ((int) (cr * sh) << 16) | ((int) (cg * sh) << 8) | (int) (cb * sh);
+                }
+                buffer.addVertex(t.x, t.y, t.z, c, uv[q * 8 + k * 2], uv[q * 8 + k * 2 + 1], packedOverlay, packedLight, nx, ny, nz);
             }
         }
     }
