@@ -87,6 +87,8 @@ public final class Rebirths {
             e.order = stats.takeOrder();
         }
         e.rebirths = now;
+        // 持ち越した装備の世代を一つ上げる (B15。item/extra/GearFreedom)
+        jp.revati.skyabyss.item.extra.GearFreedom.onRebirth(p, now);
         stats.touch();
         refreshNames(p);
         updateTitles(p);

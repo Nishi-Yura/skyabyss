@@ -487,6 +487,11 @@ public final class TrialRuntime {
                 jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(Vows.resonanceShardOf(def.titan()), shards));
                 Notice.gain(p, ModText.progress("message.skyabyss.trial.shard", shards));
             }
+            // 技の修飾ルーン・属性の欠片 (item/extra/GearFreedomLoot)
+            for (ItemStack extra : jp.revati.skyabyss.item.extra.GearFreedomLoot.trialDrops(def.titan(), first, mods.rarity() == Rarity.EXTREME, back.random)) {
+                jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, extra);
+                Notice.gain(p, ModText.progress("message.skyabyss.trial.extra", extra.getHoverName()));
+            }
             if (goalDone) {
                 Notice.hint(p, "message.skyabyss.trial.goal_done");
             }

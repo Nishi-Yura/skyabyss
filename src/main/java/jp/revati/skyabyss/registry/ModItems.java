@@ -102,6 +102,32 @@ public final class ModItems {
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant(), 0x7FD6D0,
                     "item.skyabyss.stone_whale_core.desc", true));
 
+    // 装備の自由度 (docs/design/31 の A02・A06・A07): 属性の欠片 5 種、アスペクトの芯、技の修飾ルーン。使うのは共鳴の炉の「刻み」
+    public static final DeferredItem<Item> SOCKET_SHARD_STONE = ITEMS.register("socket_shard_stone",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard(jp.revati.skyabyss.item.extra.Element.STONE));
+    public static final DeferredItem<Item> SOCKET_SHARD_WIND = ITEMS.register("socket_shard_wind",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard(jp.revati.skyabyss.item.extra.Element.WIND));
+    public static final DeferredItem<Item> SOCKET_SHARD_TIDE = ITEMS.register("socket_shard_tide",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard(jp.revati.skyabyss.item.extra.Element.TIDE));
+    public static final DeferredItem<Item> SOCKET_SHARD_ASH = ITEMS.register("socket_shard_ash",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard(jp.revati.skyabyss.item.extra.Element.ASH));
+    public static final DeferredItem<Item> SOCKET_SHARD_BONE = ITEMS.register("socket_shard_bone",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard(jp.revati.skyabyss.item.extra.Element.BONE));
+    public static final DeferredItem<Item> ASPECT_CORE = ITEMS.register("aspect_core",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.AspectCore());
+    public static final DeferredItem<Item> SKILL_RUNE = ITEMS.register("skill_rune",
+            () -> new jp.revati.skyabyss.item.extra.GearFreedomItems.SkillRune());
+
+    public static DeferredItem<Item> socketShard(jp.revati.skyabyss.item.extra.Element e) {
+        return switch (e) {
+            case STONE -> SOCKET_SHARD_STONE;
+            case WIND -> SOCKET_SHARD_WIND;
+            case TIDE -> SOCKET_SHARD_TIDE;
+            case ASH -> SOCKET_SHARD_ASH;
+            case BONE -> SOCKET_SHARD_BONE;
+        };
+    }
+
     // 番兵たちのスポーンエッグ (クリエイティブでの確認用)
     public static final DeferredItem<Item> BONE_SENTINEL_EGG = ITEMS.register("bone_sentinel_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.BONE_SENTINEL, 0xD8CDB2, 0x5A6070, new Item.Properties()));
@@ -161,6 +187,17 @@ public final class ModItems {
                 output.accept(RESONANCE_SHARD_TIDE_SHELL.get());
                 output.accept(RESONANCE_SHARD_THUNDER_WING.get());
                 output.accept(RESONANCE_SHARD_EMBER.get());
+                for (jp.revati.skyabyss.item.extra.Element e : jp.revati.skyabyss.item.extra.Element.values()) {
+                    output.accept(socketShard(e).get());
+                }
+                for (jp.revati.skyabyss.rpg.skill.Rune r : jp.revati.skyabyss.rpg.skill.Rune.values()) {
+                    if (r.legendary()) {
+                        output.accept(jp.revati.skyabyss.item.extra.GearFreedom.core(r));
+                    }
+                }
+                for (jp.revati.skyabyss.rpg.skill.Skill s : jp.revati.skyabyss.item.extra.RuneData.skills()) {
+                    output.accept(jp.revati.skyabyss.item.extra.GearFreedomItems.rune(new jp.revati.skyabyss.item.extra.RuneData(s.id, false, 1200)));
+                }
                 output.accept(RESONANCE_SHARD.get());
                 output.accept(STONE_WHALE_CORE.get());
                 output.accept(RESONANCE_FORGE.get());

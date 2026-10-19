@@ -80,7 +80,7 @@ public final class SkillEffects {
         if (skill == Skill.TITAN_CLEAVE && WeaponType.has(player, WeaponType.HEAVY)) {
             v += SkillRules.CLEAVE_HEAVY_BONUS;
         }
-        return v;
+        return v * jp.revati.skyabyss.rpg.skill.api.SkillModifiers.power(player, skill);
     }
 
     // 支えの量 (吸収・マナの回復) に掛ける倍率: 共鳴の声・木の印・精神 30 の刻み目 (仲間に向ける技 +10%)
@@ -89,7 +89,7 @@ public final class SkillEffects {
         if (Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.SPIRIT, 30)) {
             v += Breakpoints.SPIRIT_30_ALLY;
         }
-        return v;
+        return v * jp.revati.skyabyss.rpg.skill.api.SkillModifiers.power(player, skill);
     }
 
     // ================================================================ 期限つきの修飾子

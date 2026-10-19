@@ -81,6 +81,125 @@ public final class ForgeRules {
         return true;
     }
 
+    // ---------------------------------------------------------------- 刻み (アスペクト・ソケット・ルーン。docs/design/31 の A02・A06・A07)
+    // 結晶だけの費用 (創造は払わない)
+    public static boolean crystalsAvailable(Player player, int crystals) {
+        return player.isCreative() || count(player, ModItems.RESONANCE_CRYSTAL.get()) >= crystals;
+    }
+
+    private static void payCrystals(Player player, int crystals) {
+        if (!player.isCreative()) {
+            remove(player, ModItems.RESONANCE_CRYSTAL.get(), crystals);
+        }
+    }
+
+    // 材料の枠に置かれたものが穴へ差せるものなら、その中身 (欠片・ルーン)。差せないものは null
+    public static jp.revati.skyabyss.item.extra.Gem gemOf(ItemStack material) {
+        if (material.getItem() instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard shard) {
+            return new jp.revati.skyabyss.item.extra.Gem(jp.revati.skyabyss.item.extra.Gem.SHARD, shard.element.id, 0);
+        }
+        jp.revati.skyabyss.item.extra.RuneData d = jp.revati.skyabyss.item.extra.GearFreedomItems.runeOf(material);
+        if (material.is(ModItems.SKILL_RUNE.get()) && d != null && d.valid()) {
+            return d.toGem();
+        }
+        return null;
+    }
+
+    // 外した中身を品に戻す
+    public static ItemStack gemItem(jp.revati.skyabyss.item.extra.Gem gem) {
+        if (gem.isShard()) {
+            jp.revati.skyabyss.item.extra.Element e = jp.revati.skyabyss.item.extra.Element.byId(gem.arg());
+            return e == null ? ItemStack.EMPTY : new ItemStack(ModItems.socketShard(e).get());
+        }
+        return jp.revati.skyabyss.item.extra.GearFreedomItems.rune(jp.revati.skyabyss.item.extra.RuneData.fromGem(gem));
+    }
+
+    public static boolean canInsert(ItemStack gear, ItemStack material) {
+        jp.revati.skyabyss.item.extra.Gem gem = gemOf(material);
+        return gem != null && jp.revati.skyabyss.item.extra.GearFreedom.canInsert(gear, gem);
+    }
+
+    // 差す (材料を一つ使う。費用なし)
+    public static boolean insertGem(ItemStack gear, ItemStack material) {
+        jp.revati.skyabyss.item.extra.Gem gem = gemOf(material);
+        if (gem == null || !jp.revati.skyabyss.item.extra.GearFreedom.insert(gear, gem)) {
+            return false;
+        }
+        material.shrink(1);
+        return true;
+    }
+
+    public static boolean canRemoveGem(Player player, ItemStack gear, int index) {
+        return index >= 0 && index < jp.revati.skyabyss.item.extra.GearFreedom.extras(gear).gems().size()
+                && crystalsAvailable(player, jp.revati.skyabyss.item.extra.GearFreedom.UNSOCKET_CRYSTALS);
+    }
+
+    // 外す (結晶 1)。外したものを品にして返す (できなければ空)
+    public static ItemStack removeGem(Player player, ItemStack gear, int index) {
+        if (!canRemoveGem(player, gear, index)) {
+            return ItemStack.EMPTY;
+        }
+        payCrystals(player, jp.revati.skyabyss.item.extra.GearFreedom.UNSOCKET_CRYSTALS);
+        return gemItem(jp.revati.skyabyss.item.extra.GearFreedom.remove(gear, index));
+    }
+
+    // 穴を足す (打ち直し。結晶 2 と、由来の巨神の素材。一つ目 8、二つ目 16)。運に頼らず必ず付けられる
+    public static int addSocketMaterial(ItemStack gear) {
+        int n = jp.revati.skyabyss.item.extra.GearFreedom.sockets(gear);
+        return jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_MATERIAL[Math.min(n, jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_MATERIAL.length - 1)];
+    }
+
+    public static boolean canAddSocket(Player player, ItemStack gear) {
+        return jp.revati.skyabyss.item.extra.GearFreedom.canAddSocket(gear)
+                && affordable(player, new Cost(addSocketMaterial(gear), jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS), shardItem(gear));
+    }
+
+    public static boolean addSocket(Player player, ItemStack gear) {
+        if (!canAddSocket(player, gear)) {
+            return false;
+        }
+        Item shard = shardItem(gear);
+        int material = addSocketMaterial(gear);
+        if (!player.isCreative()) {
+            remove(player, shard, material);
+            remove(player, ModItems.RESONANCE_CRYSTAL.get(), jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS);
+        }
+        return jp.revati.skyabyss.item.extra.GearFreedom.addSocket(gear);
+    }
+
+    public static int extractCost(boolean destroy) {
+        return destroy ? jp.revati.skyabyss.item.extra.GearFreedom.EXTRACT_DESTROY_CRYSTALS : jp.revati.skyabyss.item.extra.GearFreedom.EXTRACT_KEEP_CRYSTALS;
+    }
+
+    public static boolean canExtract(Player player, ItemStack gear, boolean destroy) {
+        return jp.revati.skyabyss.item.extra.GearFreedom.canExtract(gear) && crystalsAvailable(player, extractCost(destroy));
+    }
+
+    // 伝説の書き換えを抽出して芯にする。壊すなら装備は呼び出し側が捨てる。芯を返す (できなければ空)
+    public static ItemStack extract(Player player, ItemStack gear, boolean destroy) {
+        if (!canExtract(player, gear, destroy)) {
+            return ItemStack.EMPTY;
+        }
+        payCrystals(player, extractCost(destroy));
+        return jp.revati.skyabyss.item.extra.GearFreedom.extract(gear, destroy);
+    }
+
+    public static boolean canImprint(Player player, ItemStack gear, ItemStack core) {
+        return jp.revati.skyabyss.item.extra.GearFreedom.canImprint(gear, core)
+                && crystalsAvailable(player, jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS);
+    }
+
+    // 芯を刻む (結晶 1。芯は使い切る)
+    public static boolean imprint(Player player, ItemStack gear, ItemStack core) {
+        if (!canImprint(player, gear, core)) {
+            return false;
+        }
+        payCrystals(player, jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS);
+        jp.revati.skyabyss.item.extra.GearFreedom.imprint(gear, core);
+        core.shrink(1);
+        return true;
+    }
+
     // ---------------------------------------------------------------- 交換 (共鳴の欠片 30 で、まだ持っていない専用伝説を一つ)
     public static final int EXCHANGE_SHARDS = 30;
 

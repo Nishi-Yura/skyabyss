@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "skyabyss:bone_chip"
+    },
+    {
+      "item": "skyabyss:bone_chip"
+    },
+    {
+      "item": "skyabyss:bone_chip"
+    },
+    {
+      "item": "skyabyss:bone_chip"
+    },
+    {
+      "item": "skyabyss:resonance_crystal"
+    }
+  ],
+  "result": {
+    "id": "skyabyss:socket_shard_bone",
+    "count": 1
+  }
+}

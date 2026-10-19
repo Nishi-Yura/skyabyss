@@ -363,6 +363,7 @@ public final class SkillManager {
                 && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.SECOND)) {
             ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
         }
+        ticks = (int) Math.round(ticks * jp.revati.skyabyss.rpg.skill.api.SkillModifiers.cooldown(player, skill));
         return jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks);
     }
 
