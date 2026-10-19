@@ -65,7 +65,17 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private static final int REST_DURATION = TitanStay.TICKS;
     private final TitanStay.Warner stayWarner = new TitanStay.Warner();
     // 降下の途中で目的地に着けないまま、これより長くたったらあきらめる
-    private static final int APPROACH_GIVE_UP = 1800;
+    private static final int APPROACH_GIVE_UP = 2400;
+    // 降下の条件を満たす人 (Ch1Descent) を探す範囲。見守り (TitanKeeper.NEAR = 640) が岩鯨を人の 640 ブロック以内に保つので、その外までは要らない。
+    // 以前は 320 で、岩鯨が 320〜640 ブロック先を巡っている間は、条件が整っても降りなかった (first_hour_log B-5)
+    public static final double DESCENT_RANGE = 700;
+    // 条件を満たす人がいないあいだ、降下を調べ直す間隔 (tick)。以前は 600〜1200 (30〜60 秒) だった
+    public static final int DESCENT_RECHECK = 100;
+    // 遠い人のもとへ向かうときの速さ: 距離に比例して速く (遠くからは巡航の 2 倍強)、近づくと APPROACH_SPEED まで落とす
+    static final float HOMING_MAX_SPEED = 0.45f;
+    // 停泊のあと、次に降りてよくなるまでの待ち (tick)。以前は 6000〜9000 (5〜7.5 分)
+    static final int STAY_COOLDOWN_MIN = 3600;
+    static final int STAY_COOLDOWN_SPREAD = 1200;
 
     private enum Mode { CRUISE, APPROACH, REST }
 
@@ -87,6 +97,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private int restCooldown = 2400;
     private int restTicks;
     private int approachTicks;
+    private double approachAngle;
     private int songCooldown = 200;
     // 章の出来事の間、鎖を垂らさず歌わない残り tick (保存しない。読み込み直したら普通に降ろす)
     private int hold;
@@ -253,23 +264,40 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
         if (--restCooldown <= 0) {
             // 一章の降下の条件 (story.ch1.Ch1Descent。docs/design/21 の 3.2): 条件を満たす人 (グループの誰か) がいないあいだは、雲の下を巡って降りない
-            ServerPlayer player = jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), 320);
+            ServerPlayer player = jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), DESCENT_RANGE);
             if (player == null) {
-                restCooldown = nearestPlayer(level, 320) == null ? 1200 : 600;
+                restCooldown = DESCENT_RECHECK;
                 return;
             }
             // プレイヤーの少し横に降り、鎖がすぐ近くに届くようにする
-            double angle = random.nextDouble() * Math.PI * 2;
-            targetX = player.getX() + Math.cos(angle) * 14;
-            targetZ = player.getZ() + Math.sin(angle) * 14;
+            approachAngle = random.nextDouble() * Math.PI * 2;
+            targetX = player.getX() + Math.cos(approachAngle) * 14;
+            targetZ = player.getZ() + Math.sin(approachAngle) * 14;
             hasTarget = true;
             mode = Mode.APPROACH;
             approachTicks = 0;
         }
     }
 
+    // 降下の途中の速さ (遠いほど速く、近づくと APPROACH_SPEED)。純粋な式 (自己テストが見る)
+    public static float approachSpeed(double distance) {
+        return (float) Math.min(HOMING_MAX_SPEED, Math.max(APPROACH_SPEED, distance * 0.004));
+    }
+
     private void tickApproach(ServerLevel level) {
-        steer(targetX, targetZ, surroundingMax + REST_CLEARANCE, APPROACH_SPEED);
+        // 遠いあいだは、条件を満たす人の動きを追って目標を直す (1 秒おき。人が 24 ブロック以上動いたときだけ)
+        if (tickCount % 20 == 0 && horizontalDistanceTo(targetX, targetZ) > 60) {
+            ServerPlayer player = jp.revati.skyabyss.story.ch1.Ch1Descent.pick(level, getX(), getZ(), DESCENT_RANGE);
+            if (player != null) {
+                double nx = player.getX() + Math.cos(approachAngle) * 14;
+                double nz = player.getZ() + Math.sin(approachAngle) * 14;
+                if ((nx - targetX) * (nx - targetX) + (nz - targetZ) * (nz - targetZ) > 24 * 24) {
+                    targetX = nx;
+                    targetZ = nz;
+                }
+            }
+        }
+        steer(targetX, targetZ, surroundingMax + REST_CLEARANCE, approachSpeed(horizontalDistanceTo(targetX, targetZ)));
         retractChain();
         boolean arrived = horizontalDistanceTo(targetX, targetZ) < 6 && Math.abs(getY() - (surroundingMax + REST_CLEARANCE)) < 2;
         if (!arrived && ++approachTicks > APPROACH_GIVE_UP) {
@@ -279,7 +307,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             } else {
                 mode = Mode.CRUISE;
                 hasTarget = false;
-                restCooldown = 1200;
+                restCooldown = DESCENT_RECHECK;
                 return;
             }
         }
@@ -327,7 +355,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
         if (--restTicks <= 0) {
             mode = Mode.CRUISE;
             hasTarget = false;
-            restCooldown = 6000 + random.nextInt(3000);
+            restCooldown = STAY_COOLDOWN_MIN + random.nextInt(STAY_COOLDOWN_SPREAD);
             dropChainHandle();
             level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.7f);
         }

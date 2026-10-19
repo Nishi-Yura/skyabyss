@@ -6,6 +6,7 @@ import java.util.List;
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
+import jp.revati.skyabyss.notice.NoticeGate;
 import jp.revati.skyabyss.notice.NoticePayload;
 import jp.revati.skyabyss.notice.NoticeQueue;
 import net.minecraft.Util;
@@ -73,6 +74,21 @@ public final class NoticeClient {
         levelUpBottom = Math.max(levelUpBottom, y);
     }
 
+    // 会話・場面の間は札・経験値・中央の演出・手がかりを溜め、閉じたあとに優先の順で間隔をあけて出す (first_hour_log B-2・B-9)
+    private static final NoticeGate GATE = new NoticeGate();
+
+    // 画面に重ねて出さない画面: NPC との会話、場面 (カメラの演出・開幕の目覚め)
+    public static boolean busy() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.screen instanceof jp.revati.skyabyss.client.npc.DialogueScreen || jp.revati.skyabyss.client.opening.OpeningClient.awakeActive();
+    }
+
+    // 札・経験値・演出・手がかりを出す仕事を関所に預ける (すぐ出せるときはすぐ出る)。優先は NoticeGate.P_*、gapAfter は次を出すまでの間隔
+    public static void gate(int priority, long gapAfter, Runnable run) {
+        GATE.offer(priority, gapAfter, run);
+        GATE.drain(Util.getMillis(), busy());
+    }
+
     private NoticeClient() {
     }
 
@@ -110,6 +126,11 @@ public final class NoticeClient {
         @SubscribeEvent
         static void onTick(ClientTickEvent.Post event) {
             Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null || mc.level == null) {
+                GATE.clear();
+            } else if (!mc.isPaused()) {
+                GATE.drain(Util.getMillis(), busy());
+            }
             while (LOG_KEY.consumeClick()) {
                 if (mc.player != null && mc.screen == null) {
                     mc.setScreen(new NoticeLogScreen());
@@ -117,6 +138,9 @@ public final class NoticeClient {
             }
         }
     }
+
+    // 札 (右上) を続けて出すときの間隔 (ミリ秒)。同じ瞬間に重ならず、一枚ずつ読める
+    public static final long CARD_GAP = 700;
 
     // 同じ手がかりは、この遊びの間に三度まで (初めの数回だけ出す)
     private static final java.util.Map<String, Integer> HINT_COUNT = new java.util.HashMap<>();
@@ -143,14 +167,22 @@ public final class NoticeClient {
         double speed = Config.NOTICE_SPEED.get();
         switch (kind.channel()) {
             case CAPTION -> {
-                CAPTIONS.setSpeed(speed);
-                CAPTIONS.offer(new Line(body, Component.empty()), kind, key, key.length());
+                Runnable show = () -> {
+                    CAPTIONS.setSpeed(speed);
+                    CAPTIONS.offer(new Line(body, Component.empty()), kind, key, key.length());
+                };
+                if (kind == Notice.Kind.HINT) {
+                    // 操作の手がかり (J・K・目的の一行など) は、会話・場面のあとに、札と経験値のあとで
+                    gate(NoticeGate.P_HINT, 400, show);
+                } else {
+                    show.run();
+                }
             }
-            case CENTER -> {
+            case CENTER -> gate(NoticeGate.P_CENTER, 1500, () -> {
                 CENTER.setSpeed(speed);
                 CENTER.offer(new Line(body, Component.empty()), kind, key, key.length());
                 chime(mc, 1.5f, 0.5f);
-            }
+            });
             case BANNER -> {
                 BANNER.setSpeed(speed);
                 BANNER.offer(new Line(body, payload.extra()), kind, key, key.length());
@@ -158,12 +190,12 @@ public final class NoticeClient {
                     chime(mc, 0.7f, 0.5f);
                 }
             }
-            case TOAST -> {
+            case TOAST -> gate(NoticeGate.P_CARD, CARD_GAP, () -> {
                 boolean gain = kind == Notice.Kind.GAIN;
                 Component head = Component.translatable(gain ? "gui.skyabyss.notice.head.gain" : "gui.skyabyss.notice.head.unlock");
                 mc.getToasts().addToast(new NoticeToast(mc.font, head, body, gain ? 0xF2C14E : 0x7FD6D0));
                 chime(mc, gain ? 1.0f : 0.8f, 0.6f);
-            }
+            });
             case ACTIONBAR -> mc.gui.setOverlayMessage(body, false);
         }
     }
@@ -189,6 +221,7 @@ public final class NoticeClient {
 
     // 自己テストや台本の前に、残っている知らせを消す
     public static void clear() {
+        GATE.clear();
         CAPTIONS.clear();
         CENTER.clear();
         BANNER.clear();

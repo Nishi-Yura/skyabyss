@@ -67,7 +67,7 @@
 
 | 場面 | 効果 |
 | --- | --- |
-| `opening` | 画面の上に大きく一行「目的: 煙の立つ方へ向かう」（`cinematic.skyabyss.opening.goal`）。目的の帯は場面のあと（HUD が戻ると）出る |
+| `opening` | 字幕の列に目的の型で一行「◆ 目的: 野営地の跡を調べる」（`cinematic.skyabyss.opening.goal`。`Notice.objective`。戦いの知らせの型ではない）。目的の帯は場面のあと（HUD が戻ると）出る |
 | ほか | なし。`Cinematics.onEnd(場面の名前, (player, skipped) -> …)` で足せる |
 
 ## 3. 場面

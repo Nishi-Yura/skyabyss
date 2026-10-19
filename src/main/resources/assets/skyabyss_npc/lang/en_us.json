@@ -144,6 +144,8 @@
   "quest.skyabyss.main_song.board.journal": "The stone whale is right there. When it comes down, grab the chain that reaches the ground and it should haul you up onto its back.",
   "quest.skyabyss.main_song.board.ride": "Climb the chain to its back",
   "quest.skyabyss.main_song.board.ride.wait": "Prepare and await the chain",
+  "quest.skyabyss.main_song.board.ride.wait.prep": "Prep quests %s/2; ready lamps",
+  "quest.skyabyss.main_song.board.ride.wait.lamps": "Ready the lamps; await the chain",
   "quest.skyabyss.main_song.inscriptions.journal": "On its back lay a ruined town. Below the shrine stairs, three paths lead deeper in.\nAt the end of each, the people of the back must have left an inscription.",
   "quest.skyabyss.main_song.inscriptions.read": "Read the back's three inscriptions",
   "quest.skyabyss.main_song.heart.journal": "The seal is broken. Beyond the inner door, something is beating.\nThe key, they say, was laid to rest beside the heartbeat.",

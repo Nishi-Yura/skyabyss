@@ -431,6 +431,29 @@ public final class Ch1SitesSelfTest {
         check(Ch1Descent.allows(3, 2), "day 4 morning with two prep quests should lower the chain");
         check(!Ch1Descent.allows(4, 0), "day 5 with no prep should not lower the chain");
         check(Ch1Descent.allows(5, 0) && Ch1Descent.allows(9, 0), "day 6 on should lower the chain with no prep");
+        // 降りる速さ (first_hour_log B-5): 遠いほど速く (上限 0.45)、近づくと 0.12。単調で、巡航 (0.2) の 2 倍強まで
+        check(jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(700) == 0.45f && jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(20) == 0.12f, "approach speed bounds");
+        float prevSpeed = 0f;
+        for (int d = 0; d <= 700; d += 10) {
+            float v = jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(d);
+            check(v >= prevSpeed && v >= 0.12f && v <= 0.45f, "approach speed is not monotonic at " + d);
+            prevSpeed = v;
+        }
+        // 640 ブロックの旅 (見守りが岩鯨を人から保つ限界) が、2 分より十分短い (速度は目標の速さへ 1 tick 5% ずつなじむので、平均は速さの 85% として)
+        double ticks = 0;
+        for (double dist = 700; dist > 6; ) {
+            double v = Math.min(jp.revati.skyabyss.titan.StoneWhaleEntity.approachSpeed(dist), dist * 0.02);
+            dist -= Math.max(0.02, v * 0.85);
+            ticks++;
+        }
+        check(ticks < 2400, "a 700 block approach would take " + (int) ticks + " ticks (over 2 minutes)");
+        check(jp.revati.skyabyss.titan.StoneWhaleEntity.DESCENT_RANGE >= 640 && jp.revati.skyabyss.titan.StoneWhaleEntity.DESCENT_RECHECK <= 200, "the descent search range or recheck interval is too slow");
+        check(jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(0).equals(".wait.prep") && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(1).equals(".wait.prep")
+                && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(2).equals(".wait.lamps") && jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(3).equals(".wait.lamps"),
+                "the chain-wait band variant should switch at two prep quests");
+        check(jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(0.4, "S").isEmpty() && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(4.9, "S").isEmpty()
+                && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(5, "S").equals("10m S") && jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(227, "NE").equals("230m NE"),
+                "the distance label should hide under 5 m and round to 10 m");
         // 人ごと (差し替えた章と日で)
         ServerLevel level = server.overworld();
         FakePlayer a = fake(server, "descent_a");

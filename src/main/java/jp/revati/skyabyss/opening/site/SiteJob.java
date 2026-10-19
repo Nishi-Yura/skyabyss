@@ -243,7 +243,7 @@ public final class SiteJob {
             anaX = x0;
             anaInit = true;
         }
-        boolean skipCheck = entry.started;
+        boolean skipCheck = entry.started || force;
         // 人の建物があるかは、地面の少し上まで見れば足りる (高い所は自然の木)
         int height = Math.min(Math.max(bp.maxY, 3) + 3, 16);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
@@ -596,6 +596,8 @@ public final class SiteJob {
     // 輪ごとに 12 方向 (輪の幅 = 部品の半分の大きさの半分、最小 14) を調べ、12 の輪まで。ほかの構造物と重ならず、骨は野営地から 205〜375、足跡は道から 30〜155 に収める
     private java.util.concurrent.CompletableFuture<BlockPos> relocSearch;
     private BlockPos home;
+    // 動かし尽くしたので、元の場所に強行して建てる (足跡だけ)。conflict の確認を飛ばす
+    private boolean force;
 
     static int radiusOf(SiteData.Entry e) {
         return e.radius > 0 ? e.radius : otherRadius(e.kind);
@@ -628,6 +630,26 @@ public final class SiteJob {
         }
         // 大きな構造物 (足跡・骨) は 12 の輪まで。小さな物 (野営地・宿り・積み石) は 14 回まで (輪は 3 回ごとに外へ)
         int maxRings = bp.wetOk ? 12 : 14;
+        if (force) {
+            // 強行しても建てられなかった (水ばかり): ここで本当に諦める
+            SkyAbyss.LOGGER.warn("Opening site {} at {}: no ground to build on even when forced", label, home);
+            data.remove(entry);
+            phase = Phase.DONE;
+            return;
+        }
+        if (relocations > maxRings && entry.kind.equals("footprint") && home != null) {
+            // 足跡は「ここに巨神が通った」という物語の目印で、足跡の頁 (prologue/footprints) の条件でもある。動かし尽くして消すより、
+            // 元の場所で、人の建物や木があっても (水の列は避けて) 建てる。first_hour_log B-6 (同じ種でも足跡が 0〜1 個の世界があった)
+            force = true;
+            relocations = 0;
+            SkyAbyss.LOGGER.warn("Opening site {} at {}: no free land after {} moves; building it in place anyway", label, home, maxRings);
+            entry.pos = home;
+            origin = home;
+            entry.started = false;
+            data.setDirty();
+            phase = Phase.LOAD;
+            return;
+        }
         if (relocations > maxRings) {
             SkyAbyss.LOGGER.warn("Opening site {} at {}: gave up after {} moves (the land is built on or wet)", label, home, relocations - 1);
             data.remove(entry);

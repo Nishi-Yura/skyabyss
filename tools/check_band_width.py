@@ -63,8 +63,9 @@ if __name__ == "__main__":
     ja, en = lang("ja_jp"), lang("en_us")
     keys = main_objectives()
     for k in list(keys):
-        if k + ".wait" in ja or k + ".wait" in en:
-            keys[k + ".wait"] = keys[k]
+        for suffix in (".wait", ".wait.prep", ".wait.lamps"):
+            if k + suffix in ja or k + suffix in en:
+                keys[k + suffix] = keys[k]
     for k in ja:
         if k.startswith("objective.skyabyss."):
             keys[k] = False

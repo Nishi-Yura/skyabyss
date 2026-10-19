@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +27,11 @@ public class LoreToast implements Toast {
         LoreBookScreen.blitWidget(g, 0, 0, LoreBookScreen.W_TOAST);
         g.renderFakeItem(new ItemStack(LoreSetup.LORE_BOOK.get()), 8, 8);
         g.drawString(font, Component.translatable("gui.skyabyss.lore.toast"), 30, 7, LoreBookScreen.TEAL, false);
-        List<FormattedCharSequence> lines = font.split(title, width() - 36);
-        if (!lines.isEmpty()) {
-            g.drawString(font, lines.get(0), 30, 18, LoreBookScreen.INK, false);
-        }
+        // 札の絵は一行分の高さ。長い題は「…」で切る (折り返して途中で切れるより、省略だと分かる)
+        int room = width() - 36;
+        net.minecraft.network.chat.FormattedText shown = font.width(title) <= room ? title
+                : net.minecraft.network.chat.FormattedText.composite(font.substrByWidth(title, room - font.width("…")), net.minecraft.network.chat.FormattedText.of("…"));
+        g.drawString(font, Language.getInstance().getVisualOrder(shown), 30, 18, LoreBookScreen.INK, false);
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;
     }
 }

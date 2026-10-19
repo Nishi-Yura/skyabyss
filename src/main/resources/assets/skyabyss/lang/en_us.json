@@ -613,7 +613,7 @@
   "item.skyabyss.heartbeat_ward_thunder_wing": "Thunder Wing Heartbeat Ward",
   "item.skyabyss.heartbeat_ward_ember": "Ember Heartbeat Ward",
   "item.skyabyss.heartbeat_ward.desc": "Worn in an accessory slot, it lets you survive one lethal blow at 1 HP, once per heart fight. It shatters when used",
-  "message.skyabyss.notes.given": "Received Wayfarer's Notes (%s)",
+  "message.skyabyss.notes.given": "New prep requests. Wayfarer's Notes (%s) came with your pack as a guide",
   "message.skyabyss.notes.recipes": "The notes remind you of %s recipes",
   "message.skyabyss.prep.ready": "You are ready for %s",
   "message.skyabyss.heartbeat_ward.used": "The heartbeat ward shattered and held you back",

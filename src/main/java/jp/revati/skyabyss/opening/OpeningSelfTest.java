@@ -702,13 +702,14 @@ public final class OpeningSelfTest {
         check(OpeningLogic.objective(st, base, day).equals("examine_camp"), "objective: before the notebook", failures);
         st.markDone(OpeningBeat.CAMP);
         String[][] table = {{"", "follow_smoke"}, {"follow_smoke", "follow_smoke"}, {"watch_sky", "watch_sky"}, {"ask_storyteller", "ask_storyteller"},
-                {"find_chaser", "find_isana"}, {"see_whale", "see_whale"}, {"board", ""}, {"done", ""}};
+                {"find_chaser", "find_isana"}, {"see_whale", "wait_steps"}, {"board", ""}, {"done", ""}};
         for (String[] row : table) {
             Facts f = new Facts(false, true, true, 5, 5, 100, false, false, false, false, false, false, false, false, false, false, false, 0, -1, row[0]);
             check(OpeningLogic.objective(st, f, day).equals(row[1]), "objective: stage '" + row[0] + "' gave '" + OpeningLogic.objective(st, f, day) + "'", failures);
         }
-        // 骨の丘: 日 2 の昼、イサナと話したあと、メインが find_chaser / see_whale のとき
+        // 骨の丘: 日 2 の昼、イサナと話したあと、メインが find_chaser / see_whale のとき (足音は済んだ人)
         st.markDone(OpeningBeat.ISANA);
+        st.markDone(OpeningBeat.FOOTSTEPS);
         Env day2noon = new Env(30000, 24000 + 6000, true, true, true, false, false, false, true, false);
         Facts seeWhale = new Facts(false, true, true, 5, 5, 100, false, false, true, true, false, false, true, false, false, false, false, 1, 100, "see_whale");
         check(OpeningLogic.objective(st, seeWhale, day2noon).equals("bone_hill"), "objective: the bone hill was not offered on day 2 noon", failures);
@@ -730,7 +731,13 @@ public final class OpeningSelfTest {
         notYet.awakeDay = 0;
         notYet.markDone(OpeningBeat.CAMP);
         notYet.markDone(OpeningBeat.ISANA);
-        check(OpeningLogic.objective(heard, atWhale, noon1).equals("see_whale"), "objective: before the song the band should wait for the song", failures);
+        // 夜 1 に来るのは足音だけ: 足音を済ませるまでは歌と言わず (B-1)、足音のあとで次の夜の歌 (see_whale)。人ごと
+        check(OpeningLogic.objective(heard, atWhale, noon1).equals("wait_steps"), "objective: before the footsteps the band should not promise the song: "
+                + OpeningLogic.objective(heard, atWhale, noon1), failures);
+        heard.markDone(OpeningBeat.FOOTSTEPS);
+        check(OpeningLogic.objective(heard, atWhale, noon1).equals("see_whale"), "objective: after the footsteps the band should wait for the song", failures);
+        check(OpeningLogic.objective(notYet, atWhale, noon1).equals("wait_steps"), "objective: one player's footsteps moved another player's band", failures);
+        notYet.markDone(OpeningBeat.FOOTSTEPS);
         heard.markDone(OpeningBeat.SONG);
         check(OpeningLogic.objective(heard, atWhale, noon1).equals("wait_whale"), "objective: the band did not advance after the song: " + OpeningLogic.objective(heard, atWhale, noon1), failures);
         check(OpeningLogic.objective(notYet, atWhale, noon1).equals("see_whale"), "objective: one player's song moved another player's band", failures);
