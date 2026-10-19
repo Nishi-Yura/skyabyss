@@ -189,6 +189,10 @@ public final class TrialHubSelfTest {
         check(f, b.position().distanceTo(inB) < 0.5, titan + ": a player in another trial was moved");
         check(f, c.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 0.5, titan + ": the player at the hub was moved");
         check(f, TrialHub.pendingCount() == 0, titan + ": the return stayed queued");
+        // 越えた人 (試練の中にいた A) にだけ紋が出る。別の試練にいた B・鼓動の間の C には出ない (docs/design/31 の A14)
+        check(f, jp.revati.skyabyss.rpg.skill.SkillManager.get(a).glyphClaims.contains(titan + "|" + keys.get(0)), titan + ": the player who cleared the trial got no glyph");
+        check(f, jp.revati.skyabyss.rpg.skill.SkillManager.get(b).glyphClaims.isEmpty() && jp.revati.skyabyss.rpg.skill.SkillManager.get(c).glyphClaims.isEmpty(),
+                titan + ": a player who did not clear the trial got a glyph");
         // 光る碑: A のグループの画面だけ 0 番目が光る
         Map<BlockPos, BlockState> litA = GroupOverlays.compute(back, keyA);
         Map<BlockPos, BlockState> litB = GroupOverlays.compute(back, keyB);

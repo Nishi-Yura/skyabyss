@@ -445,8 +445,10 @@ final class ExtActions {
             SkillEffects.later(level, i, () -> {
                 for (int s = -1; s <= 1; s++) {
                     Vec3 p = at.add(side.scale(s * 0.9));
-                    level.sendParticles(dust(Blocks.STONE), p.x, p.y + 0.3, p.z, 8, 0.25, 0.4, 0.25, 0.08);
-                    level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 0.9, p.z, 2, 0.1, 0.5, 0.1, 0.1);
+                    level.sendParticles(dust(Blocks.STONE), p.x, p.y + 0.4, p.z, 14, 0.3, 0.6, 0.3, 0.1);
+                    level.sendParticles(dust(Blocks.DEEPSLATE), p.x, p.y + 1.4, p.z, 6, 0.25, 0.5, 0.25, 0.08);
+                    level.sendParticles(ParticleTypes.POOF, p.x, p.y + 0.2, p.z, 3, 0.3, 0.1, 0.3, 0.02);
+                    level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.2, p.z, 4, 0.15, 0.7, 0.15, 0.15);
                 }
             });
         }
@@ -525,7 +527,8 @@ final class ExtActions {
         Vec3 side = new Vec3(-unit.z, 0, unit.x).normalize();
         for (double t = 0; t <= len; t += 0.6) {
             Vec3 at = from.add(unit.scale(t));
-            level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+            level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 0, 1.2, 0, 0, 1.0);
+            level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 1, 0.1, 0.1, 0.1, 0.01);
             level.sendParticles(Skills.SKY_MOTE.get(), at.x + side.x * 0.4, at.y, at.z + side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
             level.sendParticles(Skills.SKY_MOTE.get(), at.x - side.x * 0.4, at.y, at.z - side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
         }
@@ -619,8 +622,9 @@ final class ExtActions {
         for (int i = 0; i < 10; i++) {
             int h = i;
             SkillEffects.later(level, h, () -> {
-                level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 10 - h, center.z, 5, 0.25, 0.3, 0.25, 0.02);
-                level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 10 - h, center.z, 2, 0.2, 0.2, 0.2, 0.01);
+                level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 10 - h, center.z, 14, 0.4, 0.5, 0.4, 0.03);
+                level.sendParticles(ParticleTypes.LAVA, center.x, center.y + 10 - h, center.z, 2, 0.3, 0.3, 0.3, 0.0);
+                level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 10 - h, center.z, 4, 0.3, 0.3, 0.3, 0.02);
             });
         }
         SkillEffects.later(level, 10, () -> {
@@ -633,7 +637,8 @@ final class ExtActions {
                 }
             }
             SkillEffects.zone(SkillEffects.ZoneKind.EMBER, player, center, radius, SkillRules.EMBER_TICKS, rank);
-            level.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.5, center.z, 2, 0.5, 0.2, 0.5, 0.0);
+            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 0.6, center.z, 1, 0, 0, 0, 0);
+            level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.5, center.z, 40, radius * 0.4, 0.3, radius * 0.4, 0.12);
             level.sendParticles(dust(Blocks.MAGMA_BLOCK), center.x, center.y + 0.3, center.z, 30, radius * 0.5, 0.3, radius * 0.5, 0.1);
             level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.8f);
         });

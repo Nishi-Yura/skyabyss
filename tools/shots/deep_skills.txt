@@ -48,7 +48,8 @@ close
 wait 10
 
 # 2. 淵 (転生 3 回: 入口と 2 行目まで) と前世の技 (6 点)
-cmd skyabyss dev rebirth @p 3
+cmd skyabyss dev rebirth 3
+wait 140
 cmd skyabyss skill learn @p deep_pull 2
 cmd skyabyss skill learn @p deep_mirror 3
 cmd skyabyss skill learn @p deep_echo 1
@@ -90,7 +91,8 @@ wait 10
 
 # 4. 変異の見た目 (第一人称。敵を前に並べて撃つ)
 cmd gamemode creative
-cmd skyabyss dev rebirth @p 0
+cmd skyabyss dev rebirth 0
+wait 20
 cmd skyabyss skill forget @p
 cmd skyabyss skill points @p 40
 cmd skyabyss skill learn @p titan_cleave 3
@@ -103,23 +105,25 @@ cmd skyabyss skill slot @p 1 titan_cleave
 cmd skyabyss skill slot @p 2 ember_hammer
 cmd skyabyss skill slot @p 3 wind_rend
 cmd skyabyss skill mana @p full
-cmd summon zombie 0 -60 4 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
-cmd summon zombie 1.5 -60 1 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
-cmd summon zombie -1.5 -60 -2 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
-cmd summon zombie 0 -60 -5 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
-camera 0 -60 8 180 14
+cmd summon husk 0 -60 4 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon husk 1.5 -60 1 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon husk -1.5 -60 -2 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon husk 0 -60 -5 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+camera 0 -60 8 180 8
 wait 20
 cmd skyabyss skill cast @p 1
 wait 5
 shot deep_5_cliff
 wait 40
 cmd skyabyss skill cooldowns @p
+cmd skyabyss skill mana @p full
 cmd skyabyss skill cast @p 3
 wait 3
 shot deep_6_blade
 wait 40
 cmd skyabyss skill cooldowns @p
+cmd skyabyss skill mana @p full
 cmd skyabyss skill cast @p 2
-wait 7
+wait 12
 shot deep_7_meteor
 wait 40

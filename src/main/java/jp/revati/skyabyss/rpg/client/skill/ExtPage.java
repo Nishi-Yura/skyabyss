@@ -51,7 +51,11 @@ final class ExtPage {
     void preselect(int socketIndex, Skill skill) {
         socket = socketIndex;
         pick = skill;
+        quiet = true;
     }
+
+    // 撮影のとき、カーソルの下の説明を出さない
+    private boolean quiet;
 
     private static List<Skill> known(SkillData d) {
         List<Skill> list = new ArrayList<>();
@@ -188,7 +192,7 @@ final class ExtPage {
         if (hoverItem == null && d.glyphBag.isEmpty()) {
             g.drawString(font, Component.translatable("gui.skyabyss.ext.bag_empty"), rx + 2, by + 3, DIM, false);
         }
-        if (tip != null) {
+        if (tip != null && !quiet) {
             g.renderComponentTooltip(font, tip, mx, my);
         }
     }
