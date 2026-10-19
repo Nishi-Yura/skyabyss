@@ -1,0 +1,76 @@
+# 空の影 (上から落ちる影) の見え方: 開けた所・木の下・屋根の下・戸口・屋根の縁を外から。
+# 影は動かない空の影をこのクライアントにだけ置き (skypass。サーバーなし。本体は遠くへ置く)、形は決まった円にする (skycircle)。overheadshadow on = 画素ごとの影 (今)、off = 昔の地面の板 (before)。
+# ./gradlew runShots -Pscript=tools/shots/overhead_shadow_pass.txt -PshotsName=<名前>   絵は run/shots/<名前>/shots/overhead_shadow_pass/*.png
+# 台本 overhead_shadow_pass_off.txt は off の版 (同じ世界を使い回す。世界は初回に作るので、2 回目から速い)。組み立て: python tools/overhead_shadow_sheet.py
+world overhead_shadow_pass flat
+overheadshadow off
+size 960 540
+timeout 900
+render 12
+clouds on
+
+cmd gamemode spectator
+cmd time set noon
+cmd weather clear
+hud off
+waitchunks
+
+# 家 (石れんが。中は x -3..3, y -60..-57。東の戸口)、庇つきの小屋 (x 8..22)、木 (x -20)
+cmd fill -4 -61 -4 4 -56 4 stone_bricks hollow
+cmd fill 4 -60 -1 4 -58 1 air
+cmd setblock 0 -57 0 glowstone
+cmd fill -20 -60 0 -20 -54 0 oak_log
+cmd fill -24 -55 -4 -16 -52 4 oak_leaves[persistent=true]
+cmd fill 12 -60 -6 12 -57 -6 oak_log
+cmd fill 12 -60 6 12 -57 6 oak_log
+cmd fill 8 -56 -7 22 -56 7 oak_planks
+cmd skyabyss cinematic stop
+camera 0.5 -60 0.5 270 0
+wait 10
+chat clear
+
+# A. 影が全体にかかっている (半径 120 の円): 外・屋根の下・木の下・戸口
+skypass 100000 0 1 0
+skycircle 0 0 120
+camera 40.5 -60 0.5 90 4
+wait 60
+shot a_open_out
+camera 0.5 -60 0.5 270 -45
+wait 40
+shot a_roof_up
+look 270 0
+wait 10
+shot a_roof_out
+camera -19.5 -60 3.5 270 -40
+wait 40
+shot a_tree_up
+look 270 0
+wait 10
+shot a_tree_out
+camera 6.5 -60 0.5 90 8
+wait 40
+shot a_doorway_out
+look 270 8
+wait 10
+shot a_doorway_in
+
+# B. 影の縁 (ほぼまっすぐ。z = 0) が家・小屋・木の真ん中を通る (北 = -z が影): 外から屋根の縁と屋内を見る
+skycircle 0 -200 200
+camera 46.5 -50 0.5 90 18
+wait 70
+shot b_edge_side_wide
+camera 24.5 -52 -2 90 20
+wait 30
+shot b_edge_side_house
+camera 5.5 -40 30 180 38
+wait 30
+shot b_edge_front_high
+camera 10.5 -59 0.5 90 4
+wait 30
+shot b_edge_door
+camera 0.5 -58 2.5 0 -10
+wait 30
+shot b_edge_inside
+skycircle off
+skypass off
+quit

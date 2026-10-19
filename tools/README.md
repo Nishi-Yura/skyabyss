@@ -308,3 +308,7 @@ python tools/gen_cinematic_voice.py --review                     # 3 様式の�
 - `python tools/gen_gear_story.py` : 装備 40 点のツールチップの「物語の一行」(`assets/skyabyss_gear_story/lang/`)。03 の 3.4節
 - `python tools/gen_resonance_shards.py` : 巨神ごとの共鳴の欠片の絵 4 枚 (`textures/item/resonance_shard_<巨神>.png`。共通の欠片の色味を替える)。03 の 2.2節
 - `python tools/gen_grave_assets.py` : 墓の絵・モデル・語り部の墓の会話と文 (墓の一覧の画面の文も含む)。11 の 6.4節
+
+### 上から落ちる影 (空の影・巨神の影。`client/sky/OverheadShadow`、設計書 06 の 2.4)
+
+画素ごとに世界の位置で掛ける影の確かめ。台本 `tools/shots/overhead_shadow_pass.txt` (動かない空の影を `skypass` で置き、形を `skycircle` の円にして、影の下・屋根の下・木の下・戸口・影の縁を撮る) と `overhead_shadow_whale.txt` (家と木の上に岩鯨を浮かべる)。`_off` の台本は `overheadshadow off` = 昔の地面の板 (before)。台本の手順: `overheadshadow on|off`、`skypass <x> <z> <dirX> <dirZ>|off`、`skycircle <x> <z> <半径>|off`。同じ世界 (`overhead_shadow_pass`) を使い回す (`-PshotsName=osp`)。世界の新規作成は重くて固まることがあるので、固まったら java を PID で止めて、同じ台本をもう一度流す (2 回目は開くだけ)。比べの絵: `python tools/overhead_shadow_sheet.py <before の空の影> <after の空の影> <before の鯨> <after の鯨>` → `docs/review/previews/overhead_shadow_sheet.png`。岩鯨は `/summon` だと記録の個体と違って取り消されるので `skyabyss titan summon` で呼ぶ。
