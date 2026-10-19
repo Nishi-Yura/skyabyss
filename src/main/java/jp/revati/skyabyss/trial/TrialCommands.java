@@ -63,8 +63,18 @@ public final class TrialCommands {
                                 .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
     }
 
+    // 実行した人がいる背 (背の外なら岩鯨の背)
     private static ServerLevel back(CommandSourceStack src) {
+        ServerPlayer sp = src.getPlayer();
+        if (sp != null && Titans.titanOfBack(sp.level().dimension()) != null) {
+            return sp.serverLevel();
+        }
         return src.getServer().getLevel(jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK);
+    }
+
+    private static String titanOf(ServerLevel back) {
+        String t = Titans.titanOfBack(back.dimension());
+        return t == null ? Titans.STONE_WHALE : t;
     }
 
     private static int board(CommandSourceStack src, String titan) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
@@ -78,12 +88,12 @@ public final class TrialCommands {
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record r = GroupProgress.of(back, group);
         TrialDraw.Draw draw = TrialData.current(back, group);
-        src.sendSuccess(() -> Component.literal("cycle " + draw.cycle() + " seed " + TrialDraw.seed(TrialData.worldSeed(back), group, Titans.STONE_WHALE, draw.cycle())
+        src.sendSuccess(() -> Component.literal("cycle " + draw.cycle() + " seed " + TrialDraw.seed(TrialData.worldSeed(back), group, titanOf(back), draw.cycle())
                 + " cleared " + TrialData.clearedIds(r)), false);
         for (TrialDraw.Pick p : draw.picks()) {
             src.sendSuccess(() -> Component.literal("  " + p.cellId() + " " + p.mods().encode() + " " + p.mods().rarity() + (p.mods().quiet() ? " quiet" : "")), false);
         }
-        Def w = TrialData.weekly(Titans.STONE_WHALE, TrialData.worldSeed(back), TrialData.week());
+        Def w = TrialData.weekly(titanOf(back), TrialData.worldSeed(back), TrialData.week());
         src.sendSuccess(() -> Component.literal("weekly " + (w == null ? "-" : w.id()) + " (week " + TrialData.week() + ")"), false);
         return 1;
     }
@@ -100,7 +110,7 @@ public final class TrialCommands {
             r.remove(TrialData.LAST + s.id);
         }
         TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, Titans.STONE_WHALE, TrialData.current(back, group));
+        TrialRuntime.syncGates(back, group, titanOf(back), TrialData.current(back, group));
         return list(src);
     }
 
@@ -119,7 +129,7 @@ public final class TrialCommands {
         }
         r.putString(TrialData.DRAW, new TrialDraw.Draw(TrialData.cycle(r), picks).encode());
         TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, Titans.STONE_WHALE, TrialData.current(back, group));
+        TrialRuntime.syncGates(back, group, titanOf(back), TrialData.current(back, group));
         return list(src);
     }
 
@@ -149,11 +159,32 @@ public final class TrialCommands {
         return list(src);
     }
 
+    // 余燼の背: hub = 炉心の広間の休み場、deck = 試練の階の広間、セルの id = そのセルの入口の内側
+    private static int tpEmber(ServerPlayer sp, ServerLevel back, String where) {
+        BlockPos at = switch (where.toLowerCase()) {
+            case "hub" -> jp.revati.skyabyss.titan.ember.back.EmberBackLayout.rest("hub").floor().above();
+            case "deck" -> jp.revati.skyabyss.titan.ember.back.EmberDeck.RESTS.get(0).floor().above();
+            case "e02" -> new BlockPos(16, jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1, 25);
+            case "e10" -> new BlockPos(16, jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1, 75);
+            case "e06" -> new BlockPos(-16, jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1, 25);
+            case "e07" -> new BlockPos(-16, jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1, 67);
+            default -> null;
+        };
+        if (at == null) {
+            return 0;
+        }
+        sp.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, where.equalsIgnoreCase("e06") || where.equalsIgnoreCase("e07") ? 90f : -90f, 0f);
+        return 1;
+    }
+
     private static int tp(CommandSourceStack src, String where) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer sp = src.getPlayerOrException();
         ServerLevel back = back(src);
         BlockPos at;
         float yaw = 0;
+        if (Titans.EMBER.equals(titanOf(back))) {
+            return tpEmber(sp, back, where);
+        }
         switch (where) {
             case "hub" -> at = jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HUB.center().offset(0, 0, 4);
             case "deck" -> {

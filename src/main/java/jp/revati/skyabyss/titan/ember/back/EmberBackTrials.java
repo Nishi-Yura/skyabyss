@@ -271,6 +271,8 @@ public final class EmberBackTrials {
     // 石と光る床は鳴っていない姿、炉の火の所は空気 (火はグループの見かけ)
     public static void placeFixtures(ServerLevel level) {
         GroupGates.place(level, gateBlocks(), false);
+        // 試練のプールの戸 (原型の入口は開いた既定、試練の階の入口は閉じた既定)
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
         for (BlockPos p : HUB_FIRE) {
             if (!level.getBlockState(p).isAir()) {
                 level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
@@ -349,6 +351,11 @@ public final class EmberBackTrials {
                 return true;
             }
         }
+        for (Box b : EmberDeck.CELLS) {
+            if (b.aabb().inflate(0, 2, 0).contains(pos)) {
+                return true;
+            }
+        }
         return pastGate(pos);
     }
 
@@ -370,6 +377,8 @@ public final class EmberBackTrials {
             }
         }
         if (trial == null) {
+            // 試練の階の石 (新しいセル。docs/design/29): 引いた試練の枠の熾り石として数える
+            jp.revati.skyabyss.trial.TrialRuntime.useStone(level, player, pos);
             return;
         }
         UUID group = Groups.keyOf(player);
@@ -665,6 +674,8 @@ public final class EmberBackTrials {
         // 部屋 (戦いの部屋も) を先に戻す。戦いの放棄は扉をそのグループに開け直すので、そのあとで扉の上書きを記録ごと消す
         EmberRooms.releaseHeldBy(level, group);
         resetRecord(level, group, forceSleep, noSleep);
+        // 試練の階のセルも止める (敵・仕掛けを片付け、引いた試練の戸を開け直す)
+        jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         for (ServerPlayer p : Groups.online(level, group)) {
             jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.strip(p, jp.revati.skyabyss.titan.ember.back.trial.EmberTrials.allTrialItems());
         }

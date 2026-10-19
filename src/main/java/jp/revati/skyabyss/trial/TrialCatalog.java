@@ -13,7 +13,7 @@ import jp.revati.skyabyss.trial.Trial.Kind;
 import jp.revati.skyabyss.trial.Trial.Slot;
 import jp.revati.skyabyss.trial.Trial.Space;
 
-// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 4 (W02・W06・W07・W10)。
+// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 4 (W02・W06・W07・W10)・余燼の新作 4 (E02・E06・E07・E10)。
 // 引き方 (プール) を動かすのは「枠の中に作ってある試練が二つ以上ある巨神」だけ (いまは岩鯨)。ほかの三体は、引く数が足りるまで
 // 原型の三つのまま (poolActive)。
 public final class TrialCatalog {
@@ -35,6 +35,20 @@ public final class TrialCatalog {
     public static final List<String> W10_NUMBERS = List.of("gunners", "waves");
     public static final List<String> W10_HAZARDS = List.of("rockfall");
     public static final List<String> W10_GOALS = List.of("no_hit");
+
+    // 余燼の新作の修飾の口の名前
+    public static final List<String> E02_NUMBERS = List.of("vent_period", "vent_warn");
+    public static final List<String> E02_HAZARDS = List.of("gust", "moths");
+    public static final List<String> E02_GOALS = List.of("no_burn");
+    public static final List<String> E06_NUMBERS = List.of("flues", "rounds");
+    public static final List<String> E06_HAZARDS = List.of("gust");
+    public static final List<String> E06_GOALS = List.of("no_mistake");
+    public static final List<String> E07_NUMBERS = List.of("grace", "hold");
+    public static final List<String> E07_HAZARDS = List.of("ash");
+    public static final List<String> E07_GOALS = List.of("no_lapse");
+    public static final List<String> E10_NUMBERS = List.of("bearers", "waves");
+    public static final List<String> E10_HAZARDS = List.of("vents");
+    public static final List<String> E10_GOALS = List.of("no_scorch");
 
     static {
         String whale = Titans.STONE_WHALE;
@@ -63,8 +77,16 @@ public final class TrialCatalog {
         add(new Def("S06", storm, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
         // ---- 余燼 (西 E01 歩 / 東 E05 智 / 南 E09 闘)
         add(new Def("E01", ember, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
+        add(new Def("E02", ember, Slot.WALK, Kind.BEAT, 2, false, false,
+                new Space(3, E02_NUMBERS, 0, E02_HAZARDS, E02_GOALS, List.of())));
         add(new Def("E05", ember, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
+        add(new Def("E06", ember, Slot.WIT, Kind.SOLVE, 1, false, false,
+                new Space(3, E06_NUMBERS, 0, E06_HAZARDS, E06_GOALS, List.of())));
+        add(new Def("E07", ember, Slot.WIT, Kind.TOGETHER, 2, false, false,
+                new Space(3, E07_NUMBERS, 0, E07_HAZARDS, E07_GOALS, List.of())));
         add(new Def("E09", ember, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
+        add(new Def("E10", ember, Slot.FIGHT, Kind.FIGHT, 2, false, false,
+                new Space(3, E10_NUMBERS, 2, E10_HAZARDS, E10_GOALS, List.of())));
     }
 
     private static void add(Def def) {
@@ -128,7 +150,8 @@ public final class TrialCatalog {
 
     // 新作のセルを背に置いてあるか (岩鯨の試練の階。体の作り直しが済むまで置かない。WhaleDeck.placed)。ほかの巨神は新作がまだ無いので false
     public static boolean deckPlaced(String titan) {
-        return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed();
+        return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed()
+                || Titans.EMBER.equals(titan) && jp.revati.skyabyss.titan.ember.back.EmberDeck.placed();
     }
 
     // 石の合図 (TrialSteles の titan と trial の文字) から、その石の原型の試練。なければ null

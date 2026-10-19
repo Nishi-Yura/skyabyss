@@ -17,7 +17,6 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModSounds;
-import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
@@ -166,7 +165,7 @@ public final class TrialRuntime {
     }
 
     static void onLevelTick0(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != TitanTravel.TITAN_BACK) {
+        if (!(event.getLevel() instanceof ServerLevel level) || Titans.titanOfBack(level.dimension()) == null) {
             return;
         }
         long now = level.getGameTime();
@@ -274,7 +273,32 @@ public final class TrialRuntime {
     }
 
     private static String stoneFlag(TrialCell cell, TrialDraw.Draw draw) {
-        return draw.has(cell.def().id()) ? TitanBackTrials.STONE_FLAG + cell.def().slot().stone : "wstone." + cell.def().id();
+        if (!draw.has(cell.def().id())) {
+            return "wstone." + cell.def().id();
+        }
+        // 余燼の石の記録は、熾り石 (EmberBackState の ember.rung.<西・東・南>) と同じ。枠の歩・智・闘が 西・東・南
+        return Titans.EMBER.equals(cell.def().titan()) ? "ember.rung." + emberTrial(cell.def().slot()) : TitanBackTrials.STONE_FLAG + cell.def().slot().stone;
+    }
+
+    // 余燼の枠 → 熾り石の名前 (歩 = 西、智 = 東、闘 = 南)
+    public static String emberTrial(Trial.Slot slot) {
+        return switch (slot) {
+            case WALK -> "west";
+            case WIT -> "east";
+            case FIGHT -> "south";
+        };
+    }
+
+    // 戻りの光る床: そのセルの背の休み場へ戻す
+    private static void returnToRest(ServerLevel back, ServerPlayer p, String rest) {
+        if (Titans.EMBER.equals(Titans.titanOfBack(back.dimension()))) {
+            BlockPos at = jp.revati.skyabyss.titan.ember.back.EmberBackTrials.restSpawn(back, rest);
+            p.fallDistance = 0;
+            p.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
+            jp.revati.skyabyss.titan.ember.back.EmberHeat.reset(p);
+        } else {
+            TitanBackTrials.returnToCheckpoint(p, rest);
+        }
     }
 
     private static void stop(ServerLevel back, TrialCell.Run run) {
@@ -309,7 +333,7 @@ public final class TrialRuntime {
             if (p.blockPosition().getX() == pad.getX() && p.blockPosition().getZ() == pad.getZ() && p.blockPosition().getY() == pad.getY() + 1) {
                 String rest = run.cell.ports().returnRest();
                 if (!rest.isEmpty()) {
-                    TitanBackTrials.returnToCheckpoint(p, rest);
+                    returnToRest(back, p, rest);
                     back.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
                 }
             }
@@ -318,14 +342,14 @@ public final class TrialRuntime {
 
     // ---------------------------------------------------------------- 見かけ (グループごとの上書き)
     private static void overlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, BlockState> out) {
-        if (level.dimension() != TitanTravel.TITAN_BACK) {
+        String titan = Titans.titanOfBack(level.dimension());
+        if (titan == null) {
             return;
         }
         BackGroupData.Record r = BackGroupData.get(level).peek(group);
         if (r == null) {
             return;
         }
-        String titan = Titans.titanOfBack(level.dimension());
         TrialDraw.Draw draw = r.has(TrialData.DRAW) ? TrialDraw.Draw.decode(r.getString(TrialData.DRAW)) : null;
         // 石: 鳴らしたグループにだけ光る
         for (TrialCell cell : TrialCells.of(titan)) {
@@ -334,7 +358,10 @@ public final class TrialRuntime {
                 continue;
             }
             if (r.flag(stoneFlag(cell, draw))) {
-                out.accept(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
+                out.accept(stone, Titans.EMBER.equals(titan)
+                        ? jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get().defaultBlockState()
+                                .setValue(jp.revati.skyabyss.titan.ember.back.KindleStoneBlock.ACTIVE, true)
+                        : ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
             }
         }
         for (TrialCell.Run run : runsOf(group)) {
@@ -349,18 +376,19 @@ public final class TrialRuntime {
     // ---------------------------------------------------------------- 右クリック (仕掛け)
     @SubscribeEvent
     static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || back.dimension() != TitanTravel.TITAN_BACK
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || Titans.titanOfBack(back.dimension()) == null
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
         BlockPos pos = event.getPos();
-        for (TrialCell cell : TrialCells.of(Titans.STONE_WHALE)) {
+        String titan = Titans.titanOfBack(back.dimension());
+        for (TrialCell cell : TrialCells.of(titan)) {
             if (!cell.runtime() || !cell.interactive().contains(pos)) {
                 continue;
             }
             UUID group = Groups.keyOf(sp);
             TrialDraw.Draw draw = TrialData.current(back, group);
-            if (!liveCells(back, Titans.STONE_WHALE, draw).contains(cell)) {
+            if (!liveCells(back, titan, draw).contains(cell)) {
                 return;
             }
             long now = back.getGameTime();
@@ -377,7 +405,7 @@ public final class TrialRuntime {
     // 任意の目標「無傷で」: セルの中で倒れかけた人を数える (セルが読む)
     @SubscribeEvent
     static void onHurt(LivingDamageEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || back.dimension() != TitanTravel.TITAN_BACK
+        if (!(event.getEntity() instanceof ServerPlayer sp) || !(sp.level() instanceof ServerLevel back) || Titans.titanOfBack(back.dimension()) == null
                 || event.getNewDamage() <= 0) {
             return;
         }
@@ -419,24 +447,42 @@ public final class TrialRuntime {
             return InteractionResult.SUCCESS;
         }
         String flag = stoneFlag(cell, draw);
+        boolean ember = Titans.EMBER.equals(titan);
         if (r.flag(flag)) {
             if (drawn) {
-                TrialSteles.tellWho(sp, TrialSteles.WHALE, String.valueOf(cell.def().slot().stone));
+                if (ember) {
+                    TrialSteles.tellWho(sp, TrialSteles.EMBER, emberTrial(cell.def().slot()));
+                } else {
+                    TrialSteles.tellWho(sp, TrialSteles.WHALE, String.valueOf(cell.def().slot().stone));
+                }
             }
             return InteractionResult.SUCCESS;
         }
-        r.setFlag(flag, true);
+        if (!(drawn && ember)) {
+            // 余燼の引いた試練は、EmberBackTrials.ring が鳴らした印 (同じ旗) を立てる (先に立てると ring が「もう鳴っている」と戻る)
+            r.setFlag(flag, true);
+        }
         Mods mods = run.mods;
         GroupOverlays.refresh(back, group);
-        Groups.sound(back, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, ModSounds.RESONANCE.get(), SoundSource.BLOCKS, 2.5f, 0.7f);
-        for (ServerPlayer member : Groups.online(back, group)) {
-            if (member.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64) {
-                back.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
+        if (!ember) {
+            Groups.sound(back, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, ModSounds.RESONANCE.get(), SoundSource.BLOCKS, 2.5f, 0.7f);
+            for (ServerPlayer member : Groups.online(back, group)) {
+                if (member.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64) {
+                    back.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
+                }
             }
         }
         boolean goalDone = mods.goal() >= 0 && run.goalOk;
         onCellCleared(back, group, cell.def(), mods, goalDone, sp);
-        if (drawn) {
+        if (drawn && ember) {
+            // 余燼の熾り石として数える (鳴らした印・抜け道・踏破の経験値・クエスト・戻りは EmberBackTrials.ring)。原型の石の二重数えはしない
+            suppressLegacy = true;
+            try {
+                jp.revati.skyabyss.titan.ember.back.EmberBackTrials.ring(back, group, jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial.byId(emberTrial(cell.def().slot())), sp);
+            } finally {
+                suppressLegacy = false;
+            }
+        } else if (drawn) {
             // 岩鯨の石の三つ目なら、宝物庫の封印が開く (原型の石と同じ数え方)。クエストの石の合図もスロットの番号で数える
             suppressLegacy = true;
             try {

@@ -86,7 +86,7 @@ public final class TrialPoolSelfTest {
         WhaleDeck.setPlaced(true);
         check(TrialCatalog.originals(whale).stream().map(Def::id).toList().equals(List.of("W01", "W05", "W09")), "whale originals are not W01 W05 W09");
         check(TrialCatalog.poolActive(whale), "the whale pool is not active with the deck placed");
-        check(!TrialCatalog.poolActive(Titans.EMBER), "the ember pool must stay off (no new cells)");
+        check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
         for (Def d : TrialCatalog.all()) {
             check(TrialCells.get(d.id()) != null, d.id() + " has no cell");
         }
@@ -133,8 +133,8 @@ public final class TrialPoolSelfTest {
         List<String> seq = sequence(whale, new UUID(9, 9), 4);
         check(new HashSet<>(seq.subList(0, 3)).size() == 3 || seq.size() == 12, "sequence malformed: " + seq);
         // 巨神ごとに原型へ固定 (新作が無い巨神)
-        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 4, 4242L, g, new TrialDraw.Memory());
-        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember draw is not the originals");
+        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
+        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
         // 置かないあいだは岩鯨も原型のまま (本番の安全)
         WhaleDeck.setPlaced(false);
         TrialDraw.Draw off = TrialDraw.draw(whale, 5, 4242L, g, new TrialDraw.Memory());
@@ -238,7 +238,7 @@ public final class TrialPoolSelfTest {
     }
 
     // ---------------------------------------------------------------- 全変種
-    private static List<Mods> variantsOf(Def d) {
+    public static List<Mods> variantsOf(Def d) {
         Space sp = d.space();
         List<Mods> out = new ArrayList<>();
         int nn = sp.numbers().size();
@@ -318,7 +318,7 @@ public final class TrialPoolSelfTest {
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {
-            if (!cell.runtime()) {
+            if (!cell.runtime() || !cell.def().titan().equals(Titans.STONE_WHALE)) {
                 continue;
             }
             check(cell.audit(back).isEmpty(), cell.def().id() + " audit: " + cell.audit(back));

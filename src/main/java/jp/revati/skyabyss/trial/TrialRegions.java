@@ -82,14 +82,23 @@ public final class TrialRegions {
                 }
             }
             case Titans.EMBER -> {
-                switch (key) {
-                    case "west" -> out.add(ember(EmberBackLayout.WEST));
-                    case "east" -> {
-                        out.add(ember(EmberBackLayout.EAST));
-                        out.add(ember(EmberBackLayout.SMITH));
+                TrialCell cell = group == null ? null : drawnEmberCell(back, group, key);
+                if (cell != null) {
+                    // 試練の階の新作: 引いたセルの床の範囲と休み場
+                    out.add(cell.ports().area().inflate(1, 2, 1));
+                    for (TrialCell.Rest r : cell.ports().rests()) {
+                        out.add(new AABB(r.area().x1(), r.area().floorY(), r.area().z1(), r.area().x2() + 1, r.area().floorY() + 8, r.area().z2() + 1));
                     }
-                    case "south" -> out.add(ember(EmberBackLayout.SOUTH));
-                    default -> {
+                } else {
+                    switch (key) {
+                        case "west" -> out.add(ember(EmberBackLayout.WEST));
+                        case "east" -> {
+                            out.add(ember(EmberBackLayout.EAST));
+                            out.add(ember(EmberBackLayout.SMITH));
+                        }
+                        case "south" -> out.add(ember(EmberBackLayout.SOUTH));
+                        default -> {
+                        }
                     }
                 }
             }
@@ -142,6 +151,29 @@ public final class TrialRegions {
             return null;
         }
         TrialDraw.Pick pick = TrialData.current(back, group).inSlot(Slot.ofStone(stone));
+        if (pick == null) {
+            return null;
+        }
+        TrialCell cell = TrialCells.get(pick.cellId());
+        return cell != null && cell.runtime() ? cell : null;
+    }
+
+    // 余燼で、その石 (西 歩 / 東 智 / 南 闘) の枠に引いてある新作のセル。なければ null (原型)
+    @Nullable
+    private static TrialCell drawnEmberCell(ServerLevel back, UUID group, String key) {
+        if (!jp.revati.skyabyss.titan.ember.back.EmberDeck.placed()) {
+            return null;
+        }
+        Slot slot = switch (key) {
+            case "west" -> Slot.WALK;
+            case "east" -> Slot.WIT;
+            case "south" -> Slot.FIGHT;
+            default -> null;
+        };
+        if (slot == null) {
+            return null;
+        }
+        TrialDraw.Pick pick = TrialData.current(back, group).inSlot(slot);
         if (pick == null) {
             return null;
         }
