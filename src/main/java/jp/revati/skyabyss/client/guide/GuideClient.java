@@ -24,10 +24,10 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-// 目的の道しるべのクライアント側 (docs/design/18 の 8.2 節)。
+// 目的の道しるべのクライアント側 (docs/design/18 の 8.3 節)。
 //  - 10 tick ごとに「いまの目的の場所」を決め、変わったとき (と 5 秒ごと) サーバーへ知らせる。サーバーが歩ける道を探して、その人にだけ返す
 //  - 返ってきた道 (Trail) を覚える。目印と合わない・古い・道なしのときは、地面の破線 (まっすぐ 16 ブロック) に落とす
-//  - 設定 questTrail (ON / NEAR / OFF) と、すばやく切り替えるキー (M)
+//  - 設定 questTrail (ON / NEAR / OFF) と、すばやく切り替えるキー (;)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class GuideClient {
     // NEAR のとき道を出す、目的までの水平距離
@@ -38,7 +38,7 @@ public final class GuideClient {
     private static final long STALE_MS = 25_000L;
 
     public static final KeyMapping TOGGLE_KEY = new KeyMapping("key.skyabyss.guide_trail", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_SEMICOLON, "key.categories.skyabyss");
 
     // サーバーから届いた道。nodes は出発点から目印の方へ (空 = 道なし or 着いた)
     public record Trail(BlockPos target, boolean found, BlockPos[] nodes, long at) {

@@ -90,19 +90,26 @@ public final class SelfTestRunner {
         steps.add(Step.once("party steles", jp.revati.skyabyss.titan.group.TrialStelesSelfTest::runSelfTest));
         // 初回と周回の共通部品 (first_cleared・既知の道・場面と追憶の宝の人ごとの記録)。docs/design/21 の 1.7、10 の 10.11
         steps.add(Step.once("back first", jp.revati.skyabyss.titan.group.FirstRunSelfTest::runSelfTest));
+        // 周回の誓い (Vow)・周回の言い回し、居座りの早じまい (無人 3 分)。docs/design/21 の 1.8、10 の 10.15、rpg_brushup B4 / B5
+        steps.add(Step.once("vow (load)", jp.revati.skyabyss.titan.vow.VowSelfTest::load));
+        steps.add(Step.once("vow", 40, jp.revati.skyabyss.titan.vow.VowSelfTest::runSelfTest));
+        steps.add(Step.once("stay leave", jp.revati.skyabyss.titan.vow.VowSelfTest::runStaySelfTest));
         // 使い心地の磨き: 背中の復活の守り・石の「誰が鳴らしたか」・墓の標 (rpg_brushup A3 / A4 / A8)
         steps.add(Step.once("ux polish", jp.revati.skyabyss.titan.group.UxPolishSelfTest::runSelfTest));
         // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
-        // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.2 節
+        // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.3 節
         steps.add(Step.once("guide nav", jp.revati.skyabyss.guide.nav.GuideNavSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
+        // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
+        steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
         steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
+        steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));

@@ -81,6 +81,7 @@ public class LorePageItem extends Item implements jp.revati.skyabyss.pouch.Pouch
         Notice.narrate(server, "message.skyabyss.lore.page_read");
         server.level().playSound(null, server.getX(), server.getY(), server.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.9f);
         consumeOne.run();
+        jp.revati.skyabyss.tutorial.TutorialHints.done(server, jp.revati.skyabyss.tutorial.TutorialHints.LORE_PAGE);
         return true;
     }
 

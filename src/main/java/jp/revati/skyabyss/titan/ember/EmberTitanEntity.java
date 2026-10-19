@@ -530,6 +530,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void tickSleep(ServerLevel level) {
         setDeltaMovement(Vec3.ZERO);
         stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.ember");
+        // 居座りの早じまい (20 分の滞在のあいだだけ): 誰もいないのが 3 分続いたら去る
+        if (forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.EMBER)) {
+            forcedTicks = 1;
+        }
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !EmberGround.isSleepTime(level.getDayTime());
         if (done) {
             // 夜明け。地の中へ沈み、潜行に戻る (背中に人がいても沈む。背中から出る人は、眠った場所の口の前へ戻る)

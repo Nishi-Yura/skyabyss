@@ -66,6 +66,16 @@ public final class SiteNetwork {
                 }
             }
         });
+        // 旅の職人: 章の立つ所 (ArtisanSpawner.Spot) の印の最初の場所 (拠点が複数あれば先頭。話す目的の道しるべ)
+        if (server.overworld() != null) {
+            for (var spot : jp.revati.skyabyss.npc.ArtisanSpawner.spots()) {
+                var marks = jp.revati.skyabyss.npc.ArtisanSpawner.marks(server.overworld(), spot);
+                if (!marks.isEmpty()) {
+                    m.put(SiteTargets.NPC_PREFIX + "artisan", marks.get(0));
+                    break;
+                }
+            }
+        }
         // 巨神の最後の位置 (章のクエストの帯の方角と距離。動くので、下の onTick が変わるたびに送り直す)
         net.minecraft.server.level.ServerLevel overworld = server.overworld();
         if (overworld != null) {

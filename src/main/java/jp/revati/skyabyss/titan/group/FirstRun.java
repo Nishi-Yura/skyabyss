@@ -155,6 +155,21 @@ public final class FirstRun {
         return player.level() instanceof ServerLevel level && isFirstRun(level, Groups.keyOf(player));
     }
 
+    // そのグループが、巨神 titan (null ならどれでも) の心臓を一度でも止めたか。地上の語り部などが周回の言い回しを選ぶのに使う
+    public static boolean hasCleared(MinecraftServer server, UUID group, @Nullable String titan) {
+        for (String t : jp.revati.skyabyss.progress.Titans.all()) {
+            if (titan != null && !titan.equals(t)) {
+                continue;
+            }
+            var dim = jp.revati.skyabyss.progress.Titans.backOf(t);
+            ServerLevel back = dim == null ? null : server.getLevel(dim);
+            if (back != null && !isFirstRun(back, group)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 部屋 room が、このグループにとって既知の道 (静かな通路) か。任意の翼は常に false
     public static boolean isKnownPath(ServerLevel back, UUID group, Room room) {
         return room.firstRunOnly && room.dimension == back.dimension() && !isFirstRun(back, group);

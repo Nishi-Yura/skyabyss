@@ -254,5 +254,12 @@
   "skyabyss_record.r.check_notes": "Wayfarer's notes",
   "skyabyss_record.v.check_notes_yes": "Received",
   "skyabyss_record.v.check_notes_no": "Not yet",
-  "skyabyss_record.d.check_notes": "Taking the \"Fit out\" request has the artisan hand them to you."
+  "skyabyss_record.d.check_notes": "Taking the \"Fit out\" request has the artisan hand them to you.",
+  "skyabyss_record.d.fight_badge": "Your best result: how many times the party fell in a fight you won. 0 falls earns \"Unscarred Oath\", up to %s earns \"Steady Stride\". Cosmetic only; rewards do not change.",
+  "skyabyss_record.r.fight_badge.heart": "Fall badge: heart",
+  "skyabyss_record.r.fight_badge.mid": "Fall badge: mid-boss",
+  "skyabyss_record.v.fight_none": "Not won yet",
+  "skyabyss_record.v.fight_oath": "Unscarred Oath",
+  "skyabyss_record.v.fight_steady": "Steady Stride (%s falls)",
+  "skyabyss_record.v.fight_falls": "No badge (%s falls)"
 }

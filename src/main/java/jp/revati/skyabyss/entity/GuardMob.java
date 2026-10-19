@@ -62,7 +62,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     // 別のグループの人を狙わない
     @Override
     public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
-        return super.canAttack(target) && !(target instanceof net.minecraft.server.level.ServerPlayer sp && jp.revati.skyabyss.titan.group.ReentryRules.guarded(sp))
+        return super.canAttack(target) && !(target instanceof net.minecraft.server.level.ServerPlayer sp && (jp.revati.skyabyss.titan.group.ReentryRules.guarded(sp) || jp.revati.skyabyss.party.Downed.isDowned(sp)))
                 && jp.revati.skyabyss.titan.group.GroupOwned.mayTarget(this, target);
     }
 

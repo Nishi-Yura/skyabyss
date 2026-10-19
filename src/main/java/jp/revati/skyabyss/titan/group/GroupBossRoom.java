@@ -89,10 +89,27 @@ public final class GroupBossRoom {
 
     // 部屋の中にいた参加者が倒れた (LivingDeathEvent から)。戦っている部屋のうち、その人を最後に中で見た部屋に数える
     public static void noteDeath(UUID player) {
+        noteDeath(player, true);
+    }
+
+    // countFall: 倒れた回数に数えるか (倒れた状態から死んだ人は、倒れたときに数えたので false)
+    public static void noteDeath(UUID player, boolean countFall) {
         for (GroupBossRoom room : ACTIVE) {
             if (room.lastInside.contains(player)) {
                 room.died.add(player);
                 room.reentry.fell(player);
+                if (countFall) {
+                    room.falls++;
+                }
+            }
+        }
+    }
+
+    // 部屋の中の参加者が「倒れた状態」になった (party.Downed から)。死んではいないので、再入場の記録は付けず、倒れた回数だけ数える
+    public static void noteDown(UUID player) {
+        for (GroupBossRoom room : ACTIVE) {
+            if (room.lastInside.contains(player)) {
+                room.falls++;
             }
         }
     }
@@ -135,6 +152,8 @@ public final class GroupBossRoom {
     private final Reentry reentry = new Reentry();
     // この戦いで鼓動守 (guide.HeartbeatWard) が働いた人 (戦いが終わる・やり直しで消える。21 の 1.4: 戦いに一度)
     private final Set<UUID> wardUsed = new LinkedHashSet<>();
+    // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。勝ったときの札 (FightBadges) に使う
+    private int falls;
     private int noticeTicks;
     private int empty;
     private int gather = -1;
@@ -174,6 +193,10 @@ public final class GroupBossRoom {
 
     public Reentry reentry() {
         return reentry;
+    }
+
+    public int falls() {
+        return falls;
     }
 
     public int challengers() {
@@ -343,6 +366,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        falls = 0;
         reentry.clear();
         wardUsed.clear();
         lastInside.clear();
@@ -370,6 +394,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        falls = 0;
         reentry.clear();
         wardUsed.clear();
         lastInside.clear();
@@ -401,12 +426,15 @@ public final class GroupBossRoom {
                 ids.add(id);
             }
         }
+        // 倒れた回数の札 (見た目だけ。報酬は変えない)
+        FightBadges.onVictory(level, level.getEntity(boss), ids, falls);
         active = false;
         ACTIVE.remove(this);
         bossId = null;
         participants.clear();
         joining.clear();
         died.clear();
+        falls = 0;
         reentry.clear();
         wardUsed.clear();
         lastInside.clear();
@@ -425,6 +453,7 @@ public final class GroupBossRoom {
         participants.clear();
         joining.clear();
         died.clear();
+        falls = 0;
         reentry.clear();
         wardUsed.clear();
         lastInside.clear();

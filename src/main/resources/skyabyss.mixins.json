@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "jp.revati.skyabyss.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "InventoryMixin",
+    "ServerPlaceRecipeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

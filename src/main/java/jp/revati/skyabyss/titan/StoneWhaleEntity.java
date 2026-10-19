@@ -352,6 +352,10 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             }
         }
         stayWarner.tick(level, position(), restTicks, "message.skyabyss.stay_ending.whale");
+        // 居座りの早じまい (rpg_brushup B5): 近くにも背中にも誰もいないのが 3 分続いたら去る (戻れば数え直し)
+        if (stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.STONE_WHALE)) {
+            restTicks = 0;
+        }
         if (--restTicks <= 0) {
             mode = Mode.CRUISE;
             hasTarget = false;

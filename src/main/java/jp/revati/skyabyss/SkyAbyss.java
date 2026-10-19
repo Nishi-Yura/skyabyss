@@ -70,6 +70,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.item.accessory.AccessorySetup.register(modEventBus);
         // 留め袋 (この Mod の集める品・鍵を入れる専用の持ち物。記録・取り出し済みの印・ゲームルール)。docs/design/22
         jp.revati.skyabyss.pouch.PouchSetup.register(modEventBus);
+        // 初回の手引き (品・出来事で始まり、した操作で済む。人ごとの記録)。docs/design/18 の 12 章
+        jp.revati.skyabyss.tutorial.TutorialSetup.register(modEventBus);
         // 潮殻の心臓 (最終ボス・泡・真珠・音)。登録は titan.tide.heart パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.heart.TideHeartSetup.register(modEventBus);
         // 雷翼の心臓 (第三の巨神の最終ボス・音)。登録は titan.storm.heart パッケージにまとめてある

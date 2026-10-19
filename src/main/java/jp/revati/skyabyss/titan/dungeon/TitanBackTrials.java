@@ -200,6 +200,8 @@ public final class TitanBackTrials {
         final Set<UUID> participants = new LinkedHashSet<>();
         // 戦いの最中に倒れた参加者の再入場 (20 秒の待ち・回数。戦いが終わる・やり直しで消える。報酬の参加者には残る)
         final Reentry reentry = new Reentry();
+        // この戦いでパーティが倒れた回数 (倒れた状態 + 倒れずに死んだ回数)。番兵長に勝ったときの札に使う
+        int falls;
 
         HallState(UUID group, Hall hall) {
             this.group = group;
@@ -775,10 +777,12 @@ public final class TitanBackTrials {
         }
         UUID group = captain.groupId();
         Set<UUID> ids = new LinkedHashSet<>();
+        int falls = 0;
         if (group != null) {
             HallState state = HALL_STATES.get(hallKey(group, "e3"));
             if (state != null) {
                 ids.addAll(state.participants);
+                falls = state.falls;
             }
             for (ServerPlayer player : Groups.inBox(level, group, E3.aabb().inflate(0, 1, 0))) {
                 ids.add(player.getUUID());
@@ -789,6 +793,8 @@ public final class TitanBackTrials {
             }
         }
         TitanLoot.onCaptainDefeat(level, onlinePlayers(level, ids), ids);
+        // 倒れた回数の札 (中ボス。見た目だけ)
+        jp.revati.skyabyss.titan.group.FightBadges.onVictory(level, captain, ids, falls);
     }
 
     // UUID の一覧から、いまサーバーにいる人を集める (倒れて復活を待っている人も含む)
@@ -933,11 +939,25 @@ public final class TitanBackTrials {
         }
     }
 
+    // 参加者が倒れた状態になった (party.Downed から)。死んではいないので再入場の記録は付けず、回数だけ数える
+    public static void noteDown(UUID player) {
+        for (HallState state : HALL_STATES.values()) {
+            if (state.wave > 0 && state.participants.contains(player)) {
+                state.falls++;
+            }
+        }
+    }
+
     // 戦いの最中に倒れた参加者を覚える (20 秒の待ちの起点)。LivingDeathEvent から
     static void noteFallen(ServerPlayer player) {
+        // 倒れた状態から死んだ人は、倒れたときに数えている
+        boolean wasDown = jp.revati.skyabyss.party.Downed.takeDownDeath(player.getUUID());
         for (HallState state : HALL_STATES.values()) {
             if (state.wave > 0 && state.participants.contains(player.getUUID())) {
                 state.reentry.fell(player.getUUID());
+                if (!wasDown) {
+                    state.falls++;
+                }
             }
         }
     }

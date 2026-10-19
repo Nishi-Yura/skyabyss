@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 目的の道しるべ (docs/design/18 の 8.2 節)。クライアントが「いまの目的の場所」を送り (GuideTarget)、
+// 目的の道しるべ (docs/design/18 の 8.3 節)。クライアントが「いまの目的の場所」を送り (GuideTarget)、
 // サーバーが歩ける道を探して、その人にだけ道の点を返す (GuideTrail)。探索は GuideScheduler が 1 tick の予算内で進める。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class GuideNetwork {

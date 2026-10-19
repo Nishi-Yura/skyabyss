@@ -42,5 +42,10 @@
   "cinematic.skyabyss.end.thunder_wing.3": "Even asleep, the storm remembers the sky.",
   "cinematic.skyabyss.end.ember.1": "The ground is cooling.",
   "cinematic.skyabyss.end.ember.2": "The embers bury themselves and become a hill.",
-  "cinematic.skyabyss.end.ember.3": "...The beat beneath me hasn't faded."
+  "cinematic.skyabyss.end.ember.3": "...The beat beneath me hasn't faded.",
+  "subtitles.skyabyss_cinematic.voice.hero": "Inner murmur",
+  "subtitles.skyabyss_cinematic.voice.heaven": "Murmur from the sky",
+  "subtitles.skyabyss_cinematic.voice.isana": "Isana murmurs",
+  "subtitles.skyabyss_cinematic.voice.storyteller": "Storyteller murmurs",
+  "subtitles.skyabyss_cinematic.voice.watcher": "Watcher whispers"
 }

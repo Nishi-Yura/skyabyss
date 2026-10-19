@@ -483,7 +483,13 @@ public final class RecordBuilder {
                 t(r.memory >= TitanLoot.HARD_PITY - 1 ? "d.memory_next_guaranteed" : r.memory >= TitanLoot.SOFT_PITY - 1 ? "d.memory_next_soft"
                         : "d.memory_next_plain"))));
         rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
+        rows.addAll(fightBadgeRows(p, titan));
         rows.add(stelesRow(p, titan));
+        // 誓い (周回の縛り) の最高の段。称号は飾りだけ (docs/design/21 の 1.8)
+        int vowBest = jp.revati.skyabyss.titan.group.FirstRunData.get(p.server).vowBest(p.getUUID(), titan);
+        int vowTier = jp.revati.skyabyss.titan.vow.Vows.titleTier(vowBest);
+        rows.add(value("vow_best", t("r.vow_best"), vowBest > 0 ? t("v.vow_best", vowBest, Component.translatable(jp.revati.skyabyss.titan.vow.Vows.titleKey(vowTier))) : t("v.vow_none"),
+                vowBest > 0 ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.vow_best"))));
         List<Item> collection = page.collection().get();
         int owned = 0;
         for (Item item : collection) {
@@ -523,6 +529,20 @@ public final class RecordBuilder {
     }
 
     // 備えの三灯 (21 の 1.2、11 の 9 章): 身・刃・糧の色と、足りない灯の一言。サーバーの式 (Readiness) を target の持ち物から
+    // 倒れた回数の札 (docs/design/10 の 10.14): 心臓・中ボスそれぞれの、倒れた回数の最良と札の名前。文の中に文を入れない (パケットで壊れないように)
+    static List<Row> fightBadgeRows(ServerPlayer p, String titan) {
+        FightBadgeData d = FightBadgeData.get(p.server);
+        return List.of(fightBadgeRow(FightBadgeData.HEART, d.best(p.getUUID(), titan, FightBadgeData.HEART)),
+                fightBadgeRow(FightBadgeData.MID, d.best(p.getUUID(), titan, FightBadgeData.MID)));
+    }
+
+    private static Row fightBadgeRow(String kind, int falls) {
+        String badge = falls < 0 ? null : jp.revati.skyabyss.titan.group.FightBadges.badgeOf(falls);
+        Component value = falls < 0 ? t("v.fight_none") : badge == null ? t("v.fight_falls", falls) : t("v.fight_" + badge, falls);
+        return value("fight_badge." + kind, t("r.fight_badge." + kind), value, badge != null ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
+                List.of(t("d.fight_badge", jp.revati.skyabyss.titan.group.FightBadges.STEADY_MAX)));
+    }
+
     static Row readinessRow(ServerPlayer p, String titan) {
         Readiness.Result r = Readiness.of(p, titan);
         Readiness.Colour worst = r.worst();

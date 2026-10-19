@@ -534,6 +534,10 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         }
         if (forcedTicks > 0) {
             stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.storm");
+            // 居座りの早じまい: 誰もいないのが 3 分続いたら飛び立つ
+            if (stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.THUNDER_WING)) {
+                forcedTicks = 1;
+            }
             if (--forcedTicks <= 0) {
                 // 20 分たった: 夕立の刻の内でも飛び立つ
                 beginTakeOff(level);

@@ -61,6 +61,7 @@ public final class PouchSetup {
         if (!PouchConfig.enabled(player.server)) {
             return;
         }
+        jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.POUCH);
         player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new PouchMenu(id, inventory), Component.translatable("skyabyss_pouch.name")));
     }
 

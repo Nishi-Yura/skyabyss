@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 
-// 目的の道しるべの自己テスト (docs/design/18 の 8.2 節): 矢印の角度・歩ける道の探索 (段差・穴・壁・水・溶岩・読み込み外)・
+// 目的の道しるべの自己テスト (docs/design/18 の 8.3 節): 矢印の角度・歩ける道の探索 (段差・穴・壁・水・溶岩・読み込み外)・
 // 予算 (1 tick のノード数・1 回の探索の上限)・結果は持ち主にだけ・やり直しの条件・パケットの詰め方
 public final class GuideNavSelfTest {
     private GuideNavSelfTest() {

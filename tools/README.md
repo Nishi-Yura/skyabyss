@@ -174,6 +174,18 @@ python tools/structure/check.py run/shots/dump_backs/dumps/titan_back.sbd --out 
 歩く決まり (上り 1・下り 3・頭 2 マス・水の中は 1 つ上へ) は背の自己テスト (`TideBackSelfTest.walk`) と同じ。水は実際より多めに出る (バニラは近くの落ち口の方へだけ流れるため)。
 部品は `sbd.py` (読む)、`analyze.py` (囲まれた空間と口・歩く・水・看板)、`render.py` (図)。新しく背中の検査を書くときは、自己テストに同じ探索を書き足す前にこれで見る。例は `docs/review/structure_*`。
 
+## 場面の台詞の声 (`gen_cinematic_voice.py`)
+
+台詞の「声のようなもの」(言葉にならないつぶやき。自前の合成) を作る。仕様は `docs/design/20_cinematics.md` の 5 章。
+
+```
+python tools/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の .ogg と sounds.json を src に書く (既定 a。選んだ様式への切り替えはこの一語)
+python tools/gen_cinematic_voice.py --check                      # 全台詞にクリップ・音の登録があるか、長さが表示時間に収まるか
+python tools/gen_cinematic_voice.py --review                     # 3 様式の見本を docs/review/voice/ に (選定ページ。テンプレートは tools/voice_review_template.html)
+```
+
+入力は `src/main/resources/assets/skyabyss_cinematic/voice_manifest.json` (台本の台詞の一覧)。台本を変えたら、環境変数 `SKYABYSS_DUMP_VOICE=<そのパス>` を付けて `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=cinematic ./gradlew runServer` を一度流して書き直し、`--install` する (自己テスト `SELFTEST cinematic` が、一覧・sounds.json・.ogg が台本と合っているかを見る)。書く先は `skyabyss_cinematic/sounds/voice/` と `sounds.json` と `voice_style.txt` だけ。
+
 ## 採用版の生成元 (実行してよい)
 
 | 素材 (`src/main/resources/assets/skyabyss/` 以下) | 生成元 | 備考 |
