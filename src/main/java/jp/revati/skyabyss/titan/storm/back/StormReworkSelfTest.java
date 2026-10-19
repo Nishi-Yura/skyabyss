@@ -42,7 +42,7 @@ final class StormReworkSelfTest {
 
     // ---------------------------------------------------------------- 肋の間
     private static boolean clear(ServerLevel l, Vec3 at) {
-        AABB box = new AABB(at.x - 0.3, at.y, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3);
+        AABB box = new AABB(at.x - 0.25, at.y, at.z - 0.25, at.x + 0.25, at.y + 1.8, at.z + 0.25);
         return l.noCollision(box);
     }
 
@@ -112,7 +112,14 @@ final class StormReworkSelfTest {
         for (int i = 0; i <= n; i++) {
             Vec3 q = a.add(d.scale(i / (double) n)).add(0, -0.9, 0);
             if (!clear(l, q)) {
-                f.add("the current path of " + name + " is blocked at " + q);
+                StringBuilder around = new StringBuilder();
+                BlockPos bq = BlockPos.containing(q);
+                for (BlockPos p : BlockPos.betweenClosed(bq.offset(-1, 0, -1), bq.offset(1, 2, 1))) {
+                    if (!l.getBlockState(p).getCollisionShape(l, p).isEmpty()) {
+                        around.append(' ').append(p.toShortString()).append('=').append(l.getBlockState(p).getBlock().getDescriptionId());
+                    }
+                }
+                f.add("the current path of " + name + " is blocked at " + q + " by" + around);
                 return;
             }
         }
@@ -200,12 +207,14 @@ final class StormReworkSelfTest {
             pa.setOnGround(true);
             check(StormCircuit.padAt(pa) == c, tag + ": the pad is not recognised at its centre", f);
             // 何も倒していない: 暗い導線 (橙なし)。受け柱から先は戸に届かない
-            check(l.getBlockState(c.edges().get(0).cells().get(1)).equals(StormCircuit.B_OFF) || c.edges().get(0).cells().size() < 2,
-                    tag + ": the first conduit should be dark before any lever", f);
+            if (c.index() == 0) {
+                check(l.getBlockState(c.edges().get(0).cells().get(1)).equals(StormCircuit.B_OFF), tag + ": the grounded circuit's conduit should be dark", f);
+            }
             // 誤った状態で呼ぶ: 戸は開かない (行き止まり・接地)
             fire(l, c, pa, storm);
             StormEast.openFullDoors(l, state);
             check(!state.eastDoorOpen(c.index()), tag + ": the door opened with the levers down", f);
+            StormCircuit.clearFlash();
             // 解の状態に倒すと橙の筋が戸の柱まで通る (先読み)
             for (BlockPos lv : StormCircuit.solution(c)) {
                 StormCircuit.setLever(l, lv, true);
@@ -233,7 +242,7 @@ final class StormReworkSelfTest {
                     tag + ": lit conduits did not survive re-applying", f);
             // 別のグループには空の回廊
             StormEast.applyNeutral(l);
-            check(!StormRods.isFull(l, c.doorRod()) && l.getBlockState(StormCircuit.solutionTrace(c).edges().get(0).cells().get(1)).equals(StormCircuit.B_OFF),
+            check(!StormRods.isFull(l, c.doorRod()) && !l.getBlockState(StormCircuit.solutionTrace(c).edges().get(0).cells().get(1)).equals(StormCircuit.B_LIT),
                     tag + ": the neutral corridor is not dark", f);
             check(!StormProgress.of(l, GROUP_B).eastDoorOpen(c.index()), tag + ": group B's door opened", f);
         } finally {

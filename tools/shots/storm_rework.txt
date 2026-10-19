@@ -1,0 +1,74 @@
+# 雷翼の背の作り直し (docs/design/25 の 5章 A・B・C) の確かめ。./gradlew runShots -Pscript=tools/shots/storm_rework.txt
+# 出力: run/shots/storm_rework/shots/storm_rework/*.png  → tools/storm_rework_sheet.py で docs/review/previews/storm_rework_sheet.png に並べる
+world storm_rework flat
+size 1280 720
+timeout 1800
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive storm_back
+cmd skyabyss titan storm storm
+cmd skyabyss stormback go rib
+wait 80
+waitchunks
+camera skyabyss:storm_back -93.5 143.6 -17 90 -38
+hud on
+wait 40
+chat clear
+shot rib_entrance_hud
+hud off
+camera skyabyss:storm_back -97 146 -12 100 -20
+wait 20
+shot rib_spiral_low
+cmd skyabyss stormback go rib1
+camera skyabyss:storm_back -97 157 -19 80 -5
+wait 30
+shot rib_layer1
+cmd skyabyss stormback go rib2
+camera skyabyss:storm_back -96 168 -16 75 -10
+wait 30
+shot rib_layer2
+cmd skyabyss stormback go ledge
+camera skyabyss:storm_back -95.5 180.5 -17.5 85 8
+wait 30
+shot rib_top_stone
+camera skyabyss:storm_back -97 182 -19 265 50
+wait 20
+shot rib_down_rings
+camera skyabyss:storm_back -99 196 -50 0 32
+wait 20
+shot rib_outside_tower
+cmd skyabyss stormback go pad2
+wait 40
+camera skyabyss:storm_back 49.5 145.5 -10.5 240 38
+hud on
+wait 30
+chat clear
+shot circuit2_dark_hud
+hud off
+cmd setblock 57 143 -17 minecraft:lever[face=floor,facing=north,powered=true]
+wait 30
+shot circuit2_armed
+cmd skyabyss stormback circuits
+wait 40
+shot circuit2_solved
+camera skyabyss:storm_back 79 146 -9 245 40
+wait 20
+shot circuit3_solved
+cmd skyabyss stormback go helm_w
+wait 30
+camera skyabyss:storm_back -27 144.6 -7 180 14
+wait 20
+shot helm_west_idle
+cmd skyabyss stormback helm west storm
+wait 20
+hud on
+shot helm_west_storm_locked_hud
+hud off
+cmd skyabyss stormback go helm_f
+camera skyabyss:storm_back 0 152.6 -50 180 14
+wait 30
+shot helm_front

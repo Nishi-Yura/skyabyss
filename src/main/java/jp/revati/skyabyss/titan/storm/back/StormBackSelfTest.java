@@ -751,7 +751,7 @@ public final class StormBackSelfTest {
         try {
             check(StormGuide.goalFor(l, pa).id().equals("hub.stones"), "hub goal should be hub.stones, was " + StormGuide.goalFor(l, pa).id(), f);
             Object[][] spots = {
-                    {-35, BONE_FLOOR + 1, -17, "west.gap", 0}, {-60, BONE_FLOOR + 1, -17, "west.gap", 2}, {-100, BONE_FLOOR + 1, -17, "west.rib", 2}, {40, BONE_FLOOR + 1, -17, "east.circuit", 0},
+                    {-35, BONE_FLOOR + 1, -17, "west.gap", 0}, {-50, BONE_FLOOR + 1, -17, "west.gap", 1}, {-100, BONE_FLOOR + 1, -17, "west.rib", 2}, {40, BONE_FLOOR + 1, -17, "east.circuit", 0},
                     {0, EYE_HALL.floor() + 1, -78, "front.mirror", 0}};
             for (Object[] sp : spots) {
                 pa.moveTo((int) sp[0] + 0.5, (int) sp[1], (int) sp[2] + 0.5, 0f, 0f);

@@ -158,7 +158,7 @@ public final class StormBackLayout {
     // 降りの輪 (頂の岩棚の東の縁 → 床の東側。輪の流れで降りる近道)
     public static final Vec3[] RIB_DOWN_RINGS = {new Vec3(RIB_TOP.getX() + 3.4, RIB_TOP_Y + 0.9, RIB_TOP.getZ() + 0.5),
             new Vec3(RIB_TOP.getX() + 4.2, RIB_TOP_Y - 11, RIB_TOP.getZ() + 1.5), new Vec3(RIB_TOP.getX() + 4.6, RIB_TOP_Y - 24, RIB_TOP.getZ() + 2.5)};
-    public static final Vec3 RIB_DOWN_LANDING = new Vec3(RIB_TOP.getX() + 4.6, BONE_FLOOR + 1.0, RIB_TOP.getZ() + 3.5);
+    public static final Vec3 RIB_DOWN_LANDING = new Vec3(RIB_TOP.getX() + 4.6, BONE_FLOOR + 2.9, RIB_TOP.getZ() + 3.5);
     public static final BlockPos RIB_TOP_REST = RIB_TOP.offset(1, 1, 1);
 
     // ---------------------------------------------------------------- 東の試練 雷の骨

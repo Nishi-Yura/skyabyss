@@ -691,6 +691,13 @@ final class StormCircuit {
         }
     }
 
+    // 自己テスト用: 行き止まりの光を今すぐ消す
+    static void clearFlash() {
+        FLASH_UNTIL.clear();
+        FLASH_EDGES.clear();
+        FLASH_DECOY.clear();
+    }
+
     // 自己テスト用: 雷が走っている最中か
     static boolean running() {
         return !ANIMS.isEmpty();
