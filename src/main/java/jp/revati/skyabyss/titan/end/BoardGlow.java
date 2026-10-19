@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.end;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.List;
 
 import jp.revati.skyabyss.progress.Progression;
@@ -56,7 +58,7 @@ public final class BoardGlow {
         int rgb = colour(titan);
         DustParticleOptions dust = new DustParticleOptions(new Vector3f((rgb >> 16 & 255) / 255f, (rgb >> 8 & 255) / 255f, (rgb & 255) / 255f), 2.2f + 2.0f * pulse);
         int served = 0;
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (!visibleTo(player, titan)) {
                 continue;
             }

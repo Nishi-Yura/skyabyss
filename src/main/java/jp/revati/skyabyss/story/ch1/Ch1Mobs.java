@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch1;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -99,7 +101,7 @@ public final class Ch1Mobs {
         }
         ServerLevel level = server.overworld();
         for (BlockPos cache : SiteSpawner.originsOf(Ch1Prep.BONE_CACHE).apply(server)) {
-            syncHauler(level, cache, level.players());
+            syncHauler(level, cache, Players.snapshot(level.players()));
         }
     }
 

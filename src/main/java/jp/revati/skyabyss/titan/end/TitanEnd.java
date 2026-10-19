@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.end;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -117,7 +119,7 @@ public final class TitanEnd {
     }
 
     private static void narrateBack(ServerLevel back, String key) {
-        for (ServerPlayer p : back.players()) {
+        for (ServerPlayer p : Players.snapshot(back.players())) {
             if (!p.isSpectator()) {
                 Notice.narrate(p, key);
             }
@@ -126,7 +128,7 @@ public final class TitanEnd {
 
     // 背中が震える: 足もとのうなり、粒、その巨神の言い回しの語り
     private static void tremble(ServerLevel back, String titan) {
-        for (ServerPlayer p : back.players()) {
+        for (ServerPlayer p : Players.snapshot(back.players())) {
             if (p.isSpectator()) {
                 continue;
             }
@@ -149,7 +151,7 @@ public final class TitanEnd {
 
     // 背中にいる (生きている・観戦でない) 人で、戦った人か、戦った人のパーティの人
     public static List<ServerPlayer> targets(MinecraftServer server, ServerLevel back, Collection<UUID> fought) {
-        return pick(server, back, back.players(), fought);
+        return pick(server, back, Players.snapshot(back.players()), fought);
     }
 
     // targets の選び方そのもの (自己テストが、いる人の一覧を渡して確かめる)。candidates のうち、背中 back にいる (生きている・観戦でない) 人で、
@@ -385,7 +387,7 @@ public final class TitanEnd {
     static void onWake(MinecraftServer server, String titan) {
         Vec3 c = titanPosition(server, titan);
         ServerLevel o = server.overworld();
-        for (ServerPlayer p : o.players()) {
+        for (ServerPlayer p : Players.snapshot(o.players())) {
             if (!p.isSpectator() && p.level().dimension() == Level.OVERWORLD && Math.hypot(p.getX() - c.x, p.getZ() - c.z) < 640) {
                 Notice.narrate(p, "message.skyabyss.titan_end.wake." + titan);
             }

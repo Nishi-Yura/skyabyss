@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide;
 
+import jp.revati.skyabyss.util.Players;
+
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.Config;
@@ -118,7 +120,7 @@ public final class TideKeeper {
 
     // 出現のとき、320 ブロック以内の人に遠い潮騒を一度だけ鳴らす (本人にだけ聞こえる)
     static void murmur(ServerLevel level, TideShellEntity titan) {
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(player) && player.distanceToSqr(titan.getX(), player.getY(), titan.getZ()) < 320 * 320) {
                 player.playNotifySound(TideSetup.SURF.get(), SoundSource.AMBIENT, 0.6f, 0.85f);
             }

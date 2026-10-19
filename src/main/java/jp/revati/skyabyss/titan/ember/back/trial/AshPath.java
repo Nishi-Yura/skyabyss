@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -325,7 +327,7 @@ public final class AshPath {
     static void tick(ServerLevel level) {
         long now = level.getGameTime();
         if (!CRUSTS.isEmpty()) {
-            tickCrusts(level, now, level.players());
+            tickCrusts(level, now, Players.snapshot(level.players()));
             if (now % 5 == 0) {
                 mothTouch(level, now);
             }

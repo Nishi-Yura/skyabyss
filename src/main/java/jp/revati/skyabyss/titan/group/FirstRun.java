@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -241,7 +243,7 @@ public final class FirstRun {
                 return;
             }
             Set<UUID> seen = new HashSet<>();
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 UUID group = Groups.keyOf(p);
                 if (!p.isSpectator() && seen.add(group)) {
                     syncDoors(level, group);

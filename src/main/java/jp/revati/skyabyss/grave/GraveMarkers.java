@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.grave;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +52,7 @@ public final class GraveMarkers {
         if (server.getTickCount() % 10 != 0) {
             return;
         }
-        tick(server, server.getPlayerList().getPlayers(), (p, pos) -> {
+        tick(server, Players.snapshot(server.getPlayerList().getPlayers()), (p, pos) -> {
             if (p.connection != null) {
                 PacketDistributor.sendToPlayer(p, pos);
             }

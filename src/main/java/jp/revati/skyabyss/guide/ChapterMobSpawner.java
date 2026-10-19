@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.guide;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -128,7 +130,7 @@ public final class ChapterMobSpawner {
         MinecraftServer server = event.getServer();
         if (!WANDERERS.isEmpty() && server.getTickCount() % EVERY == 11) {
             ServerLevel overworld = server.overworld();
-            tick(overworld, overworld.players(), overworld.getGameTime());
+            tick(overworld, Players.snapshot(overworld.players()), overworld.getGameTime());
         }
     }
 

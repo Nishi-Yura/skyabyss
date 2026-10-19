@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -136,7 +138,7 @@ public class WaterwayMaw extends Monster implements GeoEntity {
 
     // 近くに来た人を覚える。来てから ARRIVAL_GRACE の間は、この人を新しく狙わない
     private void updateArrivals() {
-        for (Player p : level().players()) {
+        for (Player p : Players.snapshot(level().players())) {
             if (p.distanceToSqr(this) <= ARRIVAL_RANGE_SQR) {
                 arrivals.putIfAbsent(p.getUUID(), tickCount);
             }

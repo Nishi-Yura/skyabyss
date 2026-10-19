@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -316,7 +318,7 @@ public abstract class TitanKeeper<T extends Entity> {
     public static ServerPlayer nearestEligible(ServerLevel level, double x, double z, double range) {
         ServerPlayer best = null;
         double bestDistance = range * range;
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             double dx = player.getX() - x;
             double dz = player.getZ() - z;
             double d = dx * dx + dz * dz;

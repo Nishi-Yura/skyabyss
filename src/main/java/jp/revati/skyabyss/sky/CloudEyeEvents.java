@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.sky;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -134,7 +136,7 @@ public final class CloudEyeEvents {
             return;
         }
         ChapterSkyData data = ChapterSkyData.get(level);
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             ChapterSkyData.Entry entry = data.entry(player.getUUID());
             if (entry.nextEye < 0 && ChapterSky.inChapterOne(player)) {
                 // 初めて条件がそろった夜から開きうる

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.back;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +36,7 @@ public final class StormFx {
     }
 
     public static void forced(ServerLevel level, ParticleOptions p, double x, double y, double z, int count, double dx, double dy, double dz, double speed) {
-        for (ServerPlayer pl : level.players()) {
+        for (ServerPlayer pl : Players.snapshot(level.players())) {
             if (audience != null && !pl.isSpectator() && !Groups.isMember(pl, audience)) {
                 continue;
             }

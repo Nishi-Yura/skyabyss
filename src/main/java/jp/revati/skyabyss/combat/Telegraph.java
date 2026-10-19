@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.combat;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -376,7 +378,7 @@ public final class Telegraph {
             done = true;
             if (!notified.isEmpty()) {
                 TelegraphCancelPayload payload = new TelegraphCancelPayload(id);
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (notified.contains(p.getUUID())) {
                         PacketDistributor.sendToPlayer(p, payload);
                     }
@@ -511,7 +513,7 @@ public final class Telegraph {
         double[] b = shape.bounds();
         double reachSq = Math.pow(96 + Math.hypot(b[2] - b[0], b[3] - b[1]) / 2, 2);
         TelegraphStartPayload payload = null;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p instanceof FakePlayer || notified.contains(p.getUUID())) {
                 continue;
             }
@@ -567,7 +569,7 @@ public final class Telegraph {
         double cz = shape.centerZ();
         double[] b = shape.bounds();
         double reachSq = Math.pow(64 + Math.hypot(b[2] - b[0], b[3] - b[1]) / 2, 2);
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(cx, floor, cz) < reachSq && GroupOwned.visibleTo(owner != null ? owner : p, p)) {
                 viewers.add(p);
             }

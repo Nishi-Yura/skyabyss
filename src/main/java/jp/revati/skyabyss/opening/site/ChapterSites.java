@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.opening.site;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -741,7 +743,7 @@ public final class ChapterSites {
     // 章が開いたことを見つける唯一の場所 (pollOpen)。着いたことの検出 (pollArrive) は 1 秒おき
     static void poll(MinecraftServer server, boolean open) {
         SiteData data = SiteData.get(server.overworld());
-        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
             if (p.level().dimension() != Level.OVERWORLD || !p.isAlive()) {
                 continue;
             }

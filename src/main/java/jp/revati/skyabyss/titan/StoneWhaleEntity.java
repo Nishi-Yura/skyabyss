@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
@@ -322,7 +324,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             } else {
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_CHAIN.get(), SoundSource.AMBIENT, 6f, 0.8f);
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.TITAN_SONG.get(), SoundSource.AMBIENT, 16f, 0.85f);
-                for (ServerPlayer player : level.players()) {
+                for (ServerPlayer player : Players.snapshot(level.players())) {
                     if (player.distanceToSqr(this) < 200 * 200) {
                         Notice.narrate(player, "message.skyabyss.titan_descends");
                     }
@@ -406,7 +408,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             // 昇って去る (秒速 5 ブロック。80 ブロックなら 16 秒。体のまわりに雲がまとわりつく)
             setPos(getX(), Math.min(sleepY, getY() + 0.25), getZ());
             if (tickCount % 3 == 0) {
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, -4, 0);
                         level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
@@ -417,7 +419,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
             setPos(getX(), Math.max(sleepY, getY() - 0.07), getZ());
             if (tickCount % 3 == 0) {
                 // 雲の海へ沈むように、体のまわりに雲がまとわりつく
-                for (ServerPlayer p : level.players()) {
+                for (ServerPlayer p : Players.snapshot(level.players())) {
                     if (p.distanceToSqr(this) < 300 * 300) {
                         Vec3 c = position().add(0, 14, 0);
                         level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, c.x, c.y, c.z, 12, 36, 5, 36, 0.01);
@@ -486,7 +488,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
 
     private void hintNearbyPlayers(ServerLevel level) {
         Vec3 bottom = chainBottom();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(bottom) < 12 * 12 && !player.isPassenger()) {
                 Notice.bar(player, ModText.hint(voyage ? "message.skyabyss.travel.chain_hint" : "message.skyabyss.chain_hint"));
             }
@@ -714,7 +716,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
     private ServerPlayer nearestPlayer(ServerLevel level, double range) {
         ServerPlayer best = null;
         double bestDistance = range;
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             double d = horizontalDistanceTo(player.getX(), player.getZ());
             if (!player.isSpectator() && d < bestDistance) {
                 best = player;

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -107,7 +109,7 @@ public final class TrialSteles {
             jp.revati.skyabyss.tutorial.TutorialHints.start(by, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
             SteleRingers.get(back.getServer()).put(group, signal(titan, trial), by.getUUID(), by.getGameProfile().getName());
         }
-        for (ServerPlayer p : back.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer p : Players.snapshot(back.getServer().getPlayerList().getPlayers())) {
             if (!Groups.isMember(p, group)) {
                 continue;
             }

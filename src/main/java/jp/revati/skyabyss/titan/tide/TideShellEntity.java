@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
@@ -284,7 +286,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         rise(level.getSeaLevel() - SLEEP_DRAFT, SLEEP_SINK);
         if (tickCount % 8 == 0 && getY() > level.getSeaLevel() - SLEEP_DRAFT + 0.5) {
             // 沈むあいだ、甲羅のまわりの海面に泡と波紋
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (p.distanceToSqr(this) < 300 * 300) {
                     double y = level.getSeaLevel() + 0.5;
                     level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.BUBBLE_POP, true, getX(), y, getZ(), 30, 28, 0.3, 28, 0.02);
@@ -332,7 +334,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             return;
         }
         List<ServerPlayer> players = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && horizontalDistanceTo(p.getX(), p.getZ()) < TitanKeeper.NEAR) {
                 players.add(p);
             }
@@ -356,7 +358,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         forcedTicks = forced;
         approachTicks = 0;
         setMode(Mode.APPROACH);
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(restX, player.getY(), restZ) < 200 * 200) {
                 Notice.narrate(player, "message.skyabyss.tide.ebb");
                 player.playNotifySound(TideSetup.SURF.get(), SoundSource.AMBIENT, 0.8f, 1.0f);
@@ -437,7 +439,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
         if (tickCount % 40 == 0) {
             Vec3 gate = gateCenter();
-            for (ServerPlayer player : level.players()) {
+            for (ServerPlayer player : Players.snapshot(level.players())) {
                 if (player.distanceToSqr(gate) < 16 * 16) {
                     Notice.bar(player, ModText.hint("message.skyabyss.tide.gate_hint"));
                 }
@@ -447,7 +449,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             // 近くに人がいると、首を上げてそちらを見る
             Vec3 head = position().add(offset(getYRot(), 0, HEAD_UP, HEAD_FORWARD));
             boolean look = false;
-            for (ServerPlayer player : level.players()) {
+            for (ServerPlayer player : Players.snapshot(level.players())) {
                 if (!player.isSpectator() && player.distanceToSqr(head) < 56 * 56) {
                     look = true;
                     break;

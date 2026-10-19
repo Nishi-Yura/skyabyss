@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 
@@ -65,7 +67,7 @@ public class WarmStoneItem extends Item {
             case OK -> {
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5f, 0.6f);
                 Notice.narrate(sp, EmberIds.LANG_SURFACE + "stone.asked");
-                for (ServerPlayer other : server.players()) {
+                for (ServerPlayer other : Players.snapshot(server.players())) {
                     if (other != sp && holds(other)) {
                         Notice.hint(other, EmberIds.LANG_SURFACE + "stone.asked_other", sp.getDisplayName());
                     }

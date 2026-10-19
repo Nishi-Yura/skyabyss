@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.vow;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -112,7 +114,7 @@ public final class VowCommands {
         Vows.Result r = add ? Vows.add(p.server, group, titan, id) : Vows.remove(p.server, group, titan, id);
         if (r == Vows.Result.OK) {
             Vow v = Vows.get(id);
-            for (ServerPlayer m : p.server.getPlayerList().getPlayers()) {
+            for (ServerPlayer m : Players.snapshot(p.server.getPlayerList().getPlayers())) {
                 if (Groups.isMember(m, group)) {
                     Notice.hint(m, add ? "message.skyabyss.vow.added" : "message.skyabyss.vow.removed", p.getDisplayName(),
                             Component.translatable(v.nameKey()), Vows.level(Vows.active(Vows.backLevel(p.server, titan), group)));

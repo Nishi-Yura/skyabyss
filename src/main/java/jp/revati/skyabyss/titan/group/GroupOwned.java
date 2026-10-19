@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -53,7 +55,7 @@ public interface GroupOwned {
         Holder<SoundEvent> holder = BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
         ClientboundSoundPacket packet = new ClientboundSoundPacket(holder, self.getSoundSource(), self.getX(), self.getY(), self.getZ(),
                 volume, pitch, level.random.nextLong());
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(self) < 64 * 64 && (player.isSpectator() || owned.groupId().equals(Groups.keyOf(player)))) {
                 player.connection.send(packet);
             }

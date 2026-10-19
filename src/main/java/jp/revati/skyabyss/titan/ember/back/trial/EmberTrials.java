@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.back.trial;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +94,7 @@ public final class EmberTrials {
     // 箱の中にいる、生きている (観戦者でない) 人。箱が占有の部屋 (EmberRooms) の中なら、持ち主のグループの人だけ
     // (ほかのグループの人は 10 tick のうちに外へ出されるので、そのあいだも数えない)
     public static List<ServerPlayer> playersIn(ServerLevel level, EmberBackLayout.Box box) {
-        return playersIn(level.players(), box, EmberRooms.ownerAt(Vec3.atCenterOf(box.center())));
+        return playersIn(Players.snapshot(level.players()), box, EmberRooms.ownerAt(Vec3.atCenterOf(box.center())));
     }
 
     public static List<ServerPlayer> playersIn(List<ServerPlayer> all, EmberBackLayout.Box box) {
@@ -209,7 +211,7 @@ public final class EmberTrials {
 
     // そのグループの人の持ち物から消す (ほかのグループの人には触らない)
     public static void stripGroup(ServerLevel level, UUID group, Item... items) {
-        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer p : Players.snapshot(level.getServer().getPlayerList().getPlayers())) {
             if (Groups.isMember(p, group)) {
                 strip(p, items);
             }
@@ -264,7 +266,7 @@ public final class EmberTrials {
         Hearth.tick(level);
         if (level.getGameTime() % 20 == 0) {
             if (!level.players().isEmpty()) {
-                patrol(level, level.players());
+                patrol(level, Players.snapshot(level.players()));
             }
         }
     }

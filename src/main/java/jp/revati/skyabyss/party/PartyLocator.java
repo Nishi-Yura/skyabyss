@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.party;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +50,7 @@ public final class PartyLocator {
         if (server.getTickCount() % 10 != 0) {
             return;
         }
-        tick(server, server.getPlayerList().getPlayers(), id -> server.getPlayerList().getPlayer(id), (p, pos) -> {
+        tick(server, Players.snapshot(server.getPlayerList().getPlayers()), id -> server.getPlayerList().getPlayer(id), (p, pos) -> {
             if (p.connection != null) {
                 PacketDistributor.sendToPlayer(p, pos);
             }

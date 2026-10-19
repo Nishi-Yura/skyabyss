@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.cinematic;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.SkyAbyss;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +31,7 @@ public final class TitanCinematics {
     }
 
     public static int heartAppears(ServerLevel level, String titanId, Entity heart, double range) {
-        return heartAppears(level.players(), titanId, heart, range);
+        return heartAppears(Players.snapshot(level.players()), titanId, heart, range);
     }
 
     // 見せる人の一覧を渡す形 (自己テストが、いる人の一覧を作って確かめる)

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.npc;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.quest.Quests;
 import net.minecraft.server.MinecraftServer;
@@ -25,7 +27,7 @@ public final class WorldLoop {
         NpcWorldData data = NpcWorldData.get(server.overworld());
         data.loop++;
         data.setDirty();
-        server.getPlayerList().getPlayers().forEach(WorldLoop::catchUp);
+        Players.snapshot(server.getPlayerList().getPlayers()).forEach(WorldLoop::catchUp);
     }
 
     // 回数を直接決める (コマンド用)。記録の巻き戻しはしない (条件 loop を試すため)

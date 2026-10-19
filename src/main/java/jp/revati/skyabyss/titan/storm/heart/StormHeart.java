@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.heart;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.registry.MobSounds;
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
@@ -655,7 +657,7 @@ public class StormHeart extends HeartBoss {
 
     // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
     private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (p.position().equals(spot)) {
                 return p;
             }
