@@ -26,7 +26,7 @@ public final class StormBackLayout {
     }
 
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 21;   // 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 22;   // 22: 試練の甲板 (29 の P2。尾の上の渡り場と四つの試練 S02・S03・S09・S10。背の広場から橋)・広間の三つの出口の戸。 21: 任意の翼 (26 の 9.5。背の広場・風見の塔・避雷の塔・翼の外の廊・翼の先・尾羽の庭)・広間の屋根の肋と羽の壁・銅の筋・二つ目の鏡の間。 20: 26 の拡大 (水平 x1.6)。部屋ごとに作り直し、東の戸は 4 枚、嵐の冠・尾羽の広場・灯の道・目的の光の柱 (StormGuide)。 12: 歩く道の灯り (route_lamps)。 11: 肋の間の外を翼から生えた肋の尖塔に。 10: 西を縦の肋の登りに・東を雷の回路に・入口に拍の舵 (25 の 5章)。 9: ボス部屋の大門。 8: 建築の監査。 5: 詰み監査の修正。 4: 避雷の柱と戻しの鏡を専用のブロックに。 2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -290,7 +290,8 @@ public final class StormBackLayout {
             new Rest("e0", new BlockPos(56, BONE_FLOOR + 1, BONE_Z2 - 1), new BlockPos(58, BONE_FLOOR + 1, BONE_Z2 - 1), E0),
             eastRest("e1", 0), eastRest("e2", 1), eastRest("e3", 2),
             new Rest("f0", new BlockPos(7, UPPER_GALLERY_Y + 1, -84), new BlockPos(5, UPPER_GALLERY_Y + 1, -84), F0),
-            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)), StormExtra.RESTS);
+            new Rest("heart", new BlockPos(2, KEEL_ANTE.floor() + 1, -44), new BlockPos(0, KEEL_ANTE.floor() + 1, -43), KEEL_ANTE)),
+            concat(StormExtra.RESTS, StormDeck.RESTS));
     public static final Map<String, BlockPos> REST;
     public static final List<String> REST_ORDER;
 
@@ -319,7 +320,8 @@ public final class StormBackLayout {
             new Inscription("sign.skyabyss.lore_storm_vault_w1", new BlockPos(-98, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_w2", new BlockPos(-90, BONE_FLOOR + 2, -47), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_storm_vault_e1", new BlockPos(182, BONE_FLOOR + 2, -47), Direction.SOUTH),
-            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)), StormExtra.SIGNS);
+            new Inscription("sign.skyabyss.lore_storm_vault_e2", new BlockPos(187, BONE_FLOOR + 2, -47), Direction.SOUTH)),
+            concat(StormExtra.SIGNS, StormDeck.SIGNS));
     public static final List<Inscription> ENTRANCE_SIGNS = List.of(
             new Inscription("sign.skyabyss.storm_west", new BlockPos(-23, 137, WZ - 5), Direction.EAST),
             new Inscription("sign.skyabyss.storm_east", new BlockPos(23, 137, WZ - 5), Direction.WEST),
@@ -384,7 +386,7 @@ public final class StormBackLayout {
     }
 
     public static boolean inTrial(Vec3 p) {
-        return inWest(p) || inEast(p) || inFront(p) || pastKeel(p);
+        return inWest(p) || inEast(p) || inFront(p) || pastKeel(p) || StormDeck.inCell(p);
     }
 
     // 体の中 (尾の間より奥。ピースフルのあいだは入れない)。腰の回廊の封印より北で、体の中の高さ
@@ -400,7 +402,7 @@ public final class StormBackLayout {
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 5 && z <= FEATHER_GATE.maxZ + 4) {
             return true;
         }
-        if (StormExtra.open(x, y, z)) {
+        if (StormExtra.open(x, y, z) || StormDeck.open(x, y, z)) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 12) * (z + 12) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);

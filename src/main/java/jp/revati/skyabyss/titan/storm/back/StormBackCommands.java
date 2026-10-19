@@ -68,6 +68,20 @@ public final class StormBackCommands {
         PLACES.put("beak", FRONT_STONE.offset(1, 0, 0));
         PLACES.put("heart", rest("heart"));
         PLACES.put("keel", HEART_ROOM.offset(0, 2, 8));
+        // 試練の甲板 (29 の P2)
+        PLACES.put("yard", rest("yard"));
+        PLACES.put("s02", rest("s02a"));
+        PLACES.put("s02m", rest("s02m"));
+        PLACES.put("s02stone", StormDeck.S02_STONE.east(2));
+        PLACES.put("s03", rest("s03a"));
+        PLACES.put("s03m", rest("s03m"));
+        PLACES.put("s03stone", StormDeck.S03_STONE.west(2));
+        PLACES.put("s09", rest("s09a"));
+        PLACES.put("s09arena", new BlockPos(StormDeck.S09_ARENA.cx() - 5, StormDeck.Y + 1, StormDeck.S09_ARENA.cz()));
+        PLACES.put("s09stone", StormDeck.S09_STONE.west(2));
+        PLACES.put("s10", rest("s10a"));
+        PLACES.put("s10m", rest("s10m"));
+        PLACES.put("s10stone", StormDeck.S10_STONE.east(2));
     }
 
     private StormBackCommands() {

@@ -55,6 +55,12 @@ final class StormRoomTitles {
         for (StormExtra.Zone z : StormExtra.titledZones()) {
             r.add(new Room(z.id(), z.area().aabb()));
         }
+        // 試練の甲板 (StormDeck)
+        if (StormDeck.placed()) {
+            for (StormDeck.Zone z : StormDeck.zones()) {
+                r.add(new Room(z.id(), z.box()));
+            }
+        }
         return List.copyOf(r);
     }
 

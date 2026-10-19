@@ -273,8 +273,10 @@ public final class TrialRuntime {
         return r.flag(stoneFlag(cell, draw));
     }
 
-    private static String stoneFlag(TrialCell cell, TrialDraw.Draw draw) {
-        return draw.has(cell.def().id()) ? TitanBackTrials.STONE_FLAG + cell.def().slot().stone : "wstone." + cell.def().id();
+    // 鳴った印の欄。岩鯨は石の番号の欄 (原型と同じ)、雷翼と今週の試練 (引いていない) は試練の名前の欄
+    public static String stoneFlag(TrialCell cell, TrialDraw.Draw draw) {
+        boolean slotFlag = draw.has(cell.def().id()) && !Titans.THUNDER_WING.equals(cell.def().titan());
+        return slotFlag ? TitanBackTrials.STONE_FLAG + cell.def().slot().stone : "wstone." + cell.def().id();
     }
 
     private static void stop(ServerLevel back, TrialCell.Run run) {
@@ -334,7 +336,10 @@ public final class TrialRuntime {
                 continue;
             }
             if (r.flag(stoneFlag(cell, draw))) {
-                out.accept(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
+                out.accept(stone, Titans.THUNDER_WING.equals(titan)
+                        ? jp.revati.skyabyss.titan.storm.back.StormBackSetup.CHIME_STONE.get().defaultBlockState()
+                                .setValue(jp.revati.skyabyss.titan.storm.back.StormBlocks.ChimeStone.ACTIVE, true)
+                        : ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
             }
         }
         for (TrialCell.Run run : runsOf(group)) {
@@ -418,6 +423,9 @@ public final class TrialRuntime {
             Notice.bar(sp, ModText.deny("message.skyabyss.stone_silent"));
             return InteractionResult.SUCCESS;
         }
+        if (Titans.THUNDER_WING.equals(titan)) {
+            return jp.revati.skyabyss.trial.storm.StormStones.use(back, sp, cell, draw, drawn, run);
+        }
         String flag = stoneFlag(cell, draw);
         if (r.flag(flag)) {
             if (drawn) {
@@ -447,6 +455,16 @@ public final class TrialRuntime {
             ResonanceStoneBlock.finishRung(back, sp, group, r);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    // 新作の石が TrialSteles.onRung を通すあいだ、原型の数えを止める (雷翼の石)
+    public static void withoutLegacy(Runnable body) {
+        suppressLegacy = true;
+        try {
+            body.run();
+        } finally {
+            suppressLegacy = false;
+        }
     }
 
     // ---------------------------------------------------------------- 原型の石 (TrialSteles.onRung から)

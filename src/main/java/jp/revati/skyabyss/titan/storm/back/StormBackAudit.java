@@ -42,8 +42,20 @@ public final class StormBackAudit {
         // 昇り風: 穴の上 (中心から 1 マス以内) に立つと、穴の上の柱の空いている所から、横 3 マス以内の立てる所へ
         List<StormWest.Vent> vents = new ArrayList<>(StormWest.vents());
         vents.add(new StormWest.Vent(RAIJU_VENT, EAST_PERCH.floor() + 2 - RAIJU_VENT.getY() - 1));
+        List<StormDeck.Hop> hops = StormDeck.placed() ? StormDeck.hops() : List.of();
         s.extra = (probe, out) -> {
             BlockPos p = probe.pos();
+            // 試練の甲板: 昇り風の穴の上に立てば、次の島へ滑空して着ける (凪の昇り風 4 で余裕がある。StormDeck.glideMargin)
+            for (StormDeck.Hop h : hops) {
+                if (p.getY() == h.from().getY() + 1 && Math.abs(p.getX() - h.from().getX()) <= 1 && Math.abs(p.getZ() - h.from().getZ()) <= 1) {
+                    for (BlockPos f : h.to().floor()) {
+                        BlockPos m = f.above();
+                        if (probe.valid(m)) {
+                            out.add(m);
+                        }
+                    }
+                }
+            }
             for (StormWest.Vent v : vents) {
                 BlockPos c = v.floor();
                 if (p.getY() != c.getY() + 1 || Math.abs(p.getX() - c.getX()) > 1 || Math.abs(p.getZ() - c.getZ()) > 1) {
@@ -92,6 +104,9 @@ public final class StormBackAudit {
         s.goals.put("heart room", HEART_ROOM.offset(0, 2, 8));
         for (var e : StormExtra.goals().entrySet()) {
             s.goals.put(e.getKey(), e.getValue());
+        }
+        if (StormDeck.placed()) {
+            s.goals.putAll(StormDeck.goals());
         }
         return s;
     }

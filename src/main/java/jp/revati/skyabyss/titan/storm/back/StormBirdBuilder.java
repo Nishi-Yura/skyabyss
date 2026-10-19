@@ -57,6 +57,7 @@ public final class StormBirdBuilder {
         StormHeadBuilder.front(kit);
         keel(kit);
         StormExtraBuilder.build(kit);
+        StormDeckBuilder.build(kit);
         StormSilhouette.build(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
         int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);

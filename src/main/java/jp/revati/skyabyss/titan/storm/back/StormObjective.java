@@ -29,7 +29,9 @@ final class StormObjective {
     // 目的の id の一覧 (lang の objective.skyabyss.trial_<id> の確認用)
     static final List<String> IDS = List.of("storm_gate", "storm_hall", "storm_west", "storm_east", "storm_front_vent", "storm_front_tower", "storm_front_neck",
             "storm_keel", "storm_extra_chest", "storm_west_gap", "storm_west_rib", "storm_west_stone", "storm_east_lever", "storm_east_pad", "storm_east_raiju", "storm_east_stone",
-            "storm_front_mirror", "storm_front_stone", "storm_back_w", "storm_back_e", "storm_back_f", "storm_heart");
+            "storm_front_mirror", "storm_front_stone", "storm_back_w", "storm_back_e", "storm_back_f", "storm_heart",
+            "storm_deck_hall", "storm_deck_turret", "storm_deck_bridge", "storm_deck_gate", "storm_deck_s02", "storm_deck_s03", "storm_deck_s09", "storm_deck_s10_vent",
+            "storm_deck_s10_guard", "storm_deck_stone");
 
     private StormObjective() {
     }
@@ -61,6 +63,24 @@ final class StormObjective {
             // 螺旋と道を抜けて前室、前室から竜骨の間の戸
             return goal("storm_heart", new BlockPos(0, KEEL_ANTE.floor() + 1, (int) HEART_DOOR.minZ), 3f, 3f, 0.7f);
         }
+        // 試練の甲板 (29 の P2): 島の中・橋・渡り場・背の広場から橋へ
+        if (StormDeck.placed()) {
+            jp.revati.skyabyss.trial.storm.StormGuides.Target t = jp.revati.skyabyss.trial.storm.StormGuides.inCell(level, player);
+            if (t != null) {
+                return goal(t.id(), t.at(), t.hx(), t.hy(), t.hz());
+            }
+            boolean onDeck = StormDeck.YARD.aabb().inflate(1, 4, 1).contains(v)
+                    || v.x >= StormDeck.BRIDGE_X1 - 1 && v.x <= StormDeck.BRIDGE_X2 + 2 && v.z >= StormDeck.BRIDGE_Z1 && v.z <= StormDeck.BRIDGE_Z2 + 1 && v.y > StormDeck.Y - 2;
+            if (onDeck) {
+                var g = jp.revati.skyabyss.trial.storm.StormGuides.atYard(level, player);
+                if (g != null) {
+                    return goal(g.id(), g.at(), g.hx(), g.hy(), g.hz());
+                }
+            } else if (jp.revati.skyabyss.trial.storm.StormGuides.unrung(level, jp.revati.skyabyss.titan.group.Groups.keyOf(player)) != null
+                    && StormExtra.PLAZA.aabb().inflate(1, 6, 1).contains(v)) {
+                return goal("storm_deck_bridge", new BlockPos((StormDeck.BRIDGE_X1 + StormDeck.BRIDGE_X2) / 2, StormDeck.Y + 1, StormDeck.BRIDGE_Z1 + 1), 3.5f, 2f, 0.7f);
+            }
+        }
         if (StormBackLayout.inWest(v)) {
             return west(pr, v);
         }
@@ -83,6 +103,10 @@ final class StormObjective {
         }
         // 尾の間と腰の回廊 (広間の南)
         if (v.z < GATE_Z1 && v.z > HUB.z2() && v.y > 128) {
+            if (deckWanted(level, player, pr)) {
+                // 尾の間の北西の螺旋の塔 (背の広場へ上る)
+                return goal("storm_deck_turret", new BlockPos(StormExtra.TURRET_X, TAIL_HALL.floor() + 1, StormExtra.TURRET_Z), 2.5f, 2f, 2.5f);
+            }
             return goal("storm_hall", new BlockPos(0, HUB.floor() + 1, HUB.z2()), 3f, 2f, 0.7f);
         }
         // 尾羽の上 (到着の台・羽軸の道・羽の広場) と羽根の門
@@ -117,19 +141,27 @@ final class StormObjective {
         }
         Trial best = null;
         double bd = Double.MAX_VALUE;
+        boolean deck = false;
+        jp.revati.skyabyss.trial.TrialDraw.Draw draw = StormDeck.placed() ? jp.revati.skyabyss.trial.TrialData.current(level, jp.revati.skyabyss.titan.group.Groups.keyOf(player)) : null;
         for (Trial t : Trial.values()) {
             if (pr.rung(t)) {
                 continue;
             }
-            Vec3 e = entrance(t);
+            // 引いたのが新作 (試練の甲板) なら、入口は広間の南の出口 (尾の間から背の広場へ)
+            boolean newCell = draw != null && isDeckKey(draw, t);
+            Vec3 e = newCell ? new Vec3(0, HUB.floor() + 1, HUB.z2()) : entrance(t);
             double d = e.distanceToSqr(v);
             if (d < bd) {
                 bd = d;
                 best = t;
+                deck = newCell;
             }
         }
         if (best == null) {
             return null;
+        }
+        if (deck) {
+            return goal("storm_deck_hall", new BlockPos(0, HUB.floor() + 1, HUB.z2()), 3f, 2f, 0.7f);
         }
         switch (best) {
             case WEST:
@@ -144,6 +176,18 @@ final class StormObjective {
                 return StormBackClock.phase(level).stormy() ? goal("storm_front_vent", new BlockPos(HUB_UPDRAFT.getX(), HUB.floor() + 1, HUB_UPDRAFT.getZ()), 1.5f, 2f, 1.5f)
                         : goal("storm_front_tower", new BlockPos(CALM_TOWER_X - 3, HUB.floor() + 1, CALM_TOWER_Z + 3), 1.5f, 2f, 1.5f);
         }
+    }
+
+    // この枠 (西・東・前) に、このグループが引いたのは新作 (試練の甲板) か
+    private static boolean isDeckKey(jp.revati.skyabyss.trial.TrialDraw.Draw draw, Trial t) {
+        var d = jp.revati.skyabyss.trial.storm.StormStones.cellOfKey(draw, t.id());
+        var c = d == null ? null : jp.revati.skyabyss.trial.TrialCells.get(d.id());
+        return c != null && c.runtime();
+    }
+
+    // 石がまだの新作が一つでもあるか
+    private static boolean deckWanted(ServerLevel level, ServerPlayer player, StormProgress pr) {
+        return StormDeck.placed() && jp.revati.skyabyss.trial.storm.StormGuides.unrung(level, jp.revati.skyabyss.titan.group.Groups.keyOf(player)) != null;
     }
 
     private static Vec3 entrance(Trial t) {

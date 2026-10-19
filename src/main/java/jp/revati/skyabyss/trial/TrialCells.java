@@ -11,6 +11,10 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.WhaleDeck;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.TrialCell.Ports;
+import jp.revati.skyabyss.trial.storm.S02Sacs;
+import jp.revati.skyabyss.trial.storm.S03Pillars;
+import jp.revati.skyabyss.trial.storm.S09Nest;
+import jp.revati.skyabyss.trial.storm.S10Watch;
 import jp.revati.skyabyss.trial.whale.W02Bell;
 import jp.revati.skyabyss.trial.whale.W06Score;
 import jp.revati.skyabyss.trial.whale.W07Gates;
@@ -50,6 +54,10 @@ public final class TrialCells {
         register(new W06Score());
         register(new W07Gates());
         register(new W10Fort());
+        register(new S02Sacs());
+        register(new S03Pillars());
+        register(new S09Nest());
+        register(new S10Watch());
         for (Def d : TrialCatalog.all()) {
             if (!CELLS.containsKey(d.id())) {
                 throw new IllegalStateException("trial " + d.id() + " has no cell");
@@ -99,6 +107,10 @@ public final class TrialCells {
             case "W01" -> new Ports(WhaleDeck.WEST_GATE, true, List.of(), TitanBackLayout.RESONANCE_STONES.get(0), null, "", empty(), List.of());
             case "W09" -> new Ports(WhaleDeck.EAST_GATE, true, List.of(), TitanBackLayout.RESONANCE_STONES.get(1), null, "", empty(), List.of());
             case "W05" -> new Ports(WhaleDeck.mazeLids(), true, List.of(), TitanBackLayout.RESONANCE_STONES.get(2), null, "", empty(), List.of());
+            // 雷翼: 広間の三つの出口 (西の肩の階段・東・首) の戸。引かなかったグループに閉じる
+            case "S01" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.WEST_GATE, true, List.of(), null, null, "", empty(), List.of());
+            case "S05" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.EAST_GATE, true, List.of(), null, null, "", empty(), List.of());
+            case "S06" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.FRONT_GATE, true, List.of(), null, null, "", empty(), List.of());
             default -> Ports.NONE;
         };
     }

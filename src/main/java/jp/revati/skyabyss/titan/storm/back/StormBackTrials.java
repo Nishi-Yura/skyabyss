@@ -193,6 +193,8 @@ public final class StormBackTrials {
         StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
         StormBirdBuilder.carveKeel(level);
         placeGates(level);
+        // 試練のプール (docs/design/29): 広間の三つの出口の戸と、試練の甲板の四つの戸
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
         applyStones(level);
         UUID east = RoomLocks.owner(EAST_ROOM);
         if (east == null) {
@@ -418,6 +420,10 @@ public final class StormBackTrials {
         if (level.dimension() != StormTravel.STORM_BACK) {
             return;
         }
+        // 試練の甲板の新作の石 (docs/design/29)
+        if (jp.revati.skyabyss.trial.TrialRuntime.useStone(level, player, pos) != null) {
+            return;
+        }
         StormProgress p = StormProgress.of(level, player);
         StormBackState.Trial trial = pos.equals(WEST_STONE) ? StormBackState.Trial.WEST
                 : pos.equals(EAST_STONE) ? StormBackState.Trial.EAST : pos.equals(FRONT_STONE) ? StormBackState.Trial.FRONT : null;
@@ -627,6 +633,7 @@ public final class StormBackTrials {
         }
         StormHeartBattle.onGroupReset(level, group);
         RaijuBattle.onGroupReset(level, group);
+        jp.revati.skyabyss.trial.TrialRuntime.onGroupReset(level, group);
         syncGates(level, group);
         GroupOverlays.refresh(level, group);
         if (moveOut) {
@@ -783,6 +790,18 @@ public final class StormBackTrials {
             case "e1" -> jp.revati.skyabyss.titan.storm.raiju.RaijuBattle.fighting(group);
             default -> false;
         };
+    }
+
+    // 試練の甲板のセルから、その人を休み場へ戻す (落ちた・占有されている)。その休み場を最後の休み場にする
+    public static void returnToRest(ServerPlayer player, String id) {
+        ServerLevel back = (ServerLevel) player.level();
+        BlockPos at = restSpawn(back, id);
+        writeCheckpoint(player, id, epochOf(back, player));
+        player.stopRiding();
+        player.fallDistance = 0;
+        player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        player.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), 0f);
+        player.hurtMarked = true;
     }
 
     public static BlockPos restSpawn(ServerLevel level, String id) {

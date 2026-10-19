@@ -35,6 +35,19 @@ public final class TrialCatalog {
     public static final List<String> W10_NUMBERS = List.of("gunners", "waves");
     public static final List<String> W10_HAZARDS = List.of("rockfall");
     public static final List<String> W10_GOALS = List.of("no_hit");
+    // 雷翼の新作 (P2) の修飾の口の名前
+    public static final List<String> S02_NUMBERS = List.of("sac_period", "sac_window");
+    public static final List<String> S02_HAZARDS = List.of("crosswind", "spark_moth");
+    public static final List<String> S02_GOALS = List.of("no_fall");
+    public static final List<String> S03_NUMBERS = List.of("bolt_tempo", "bolt_shapes");
+    public static final List<String> S03_HAZARDS = List.of("ground_arc", "spark_moth");
+    public static final List<String> S03_GOALS = List.of("no_hit");
+    public static final List<String> S09_NUMBERS = List.of("callers", "nest_waves");
+    public static final List<String> S09_HAZARDS = List.of("overload", "sky_bolt");
+    public static final List<String> S09_GOALS = List.of("no_hit");
+    public static final List<String> S10_NUMBERS = List.of("wardens", "watch_posts");
+    public static final List<String> S10_HAZARDS = List.of("crosswind", "sky_bolt");
+    public static final List<String> S10_GOALS = List.of("no_hit");
 
     static {
         String whale = Titans.STONE_WHALE;
@@ -61,6 +74,11 @@ public final class TrialCatalog {
         add(new Def("S01", storm, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("S05", storm, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
         add(new Def("S06", storm, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
+        // ---- 雷翼の新作 4 (P2。尾の上の試練の甲板 = StormDeck): 歩 S02・S03、闘 S09・S10
+        add(new Def("S02", storm, Slot.WALK, Kind.BEAT, 2, false, false, new Space(3, S02_NUMBERS, 0, S02_HAZARDS, S02_GOALS, List.of())));
+        add(new Def("S03", storm, Slot.WALK, Kind.BEAT, 2, false, false, new Space(3, S03_NUMBERS, 0, S03_HAZARDS, S03_GOALS, List.of())));
+        add(new Def("S09", storm, Slot.FIGHT, Kind.FIGHT, 1, true, false, new Space(3, S09_NUMBERS, 2, S09_HAZARDS, S09_GOALS, List.of())));
+        add(new Def("S10", storm, Slot.FIGHT, Kind.FIGHT, 2, false, false, new Space(3, S10_NUMBERS, 2, S10_HAZARDS, S10_GOALS, List.of())));
         // ---- 余燼 (西 E01 歩 / 東 E05 智 / 南 E09 闘)
         add(new Def("E01", ember, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("E05", ember, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
@@ -128,6 +146,9 @@ public final class TrialCatalog {
 
     // 新作のセルを背に置いてあるか (岩鯨の試練の階。体の作り直しが済むまで置かない。WhaleDeck.placed)。ほかの巨神は新作がまだ無いので false
     public static boolean deckPlaced(String titan) {
+        if (Titans.THUNDER_WING.equals(titan)) {
+            return jp.revati.skyabyss.titan.storm.back.StormDeck.placed();
+        }
         return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed();
     }
 

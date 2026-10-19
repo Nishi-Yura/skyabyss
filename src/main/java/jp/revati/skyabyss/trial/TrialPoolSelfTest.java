@@ -45,7 +45,7 @@ public final class TrialPoolSelfTest {
     }
 
     public static List<Step> steps() {
-        return List.of(
+        List<Step> out = new ArrayList<>(List.of(
                 Step.once("trial pool (build)", server -> {
                     FAIL.clear();
                     ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
@@ -58,7 +58,10 @@ public final class TrialPoolSelfTest {
                     TitanBackBuilder.build(back, data);
                     TitanBackBuilder.placeDeck(back);
                 }),
-                Step.once("trial pool", 20, TrialPoolSelfTest::run));
+                Step.once("trial pool", 20, TrialPoolSelfTest::run)));
+        // 雷翼の試練の甲板 (P2。storm の背を建てて調べる)
+        out.addAll(jp.revati.skyabyss.trial.storm.StormTrialSelfTest.steps());
+        return out;
     }
 
     private static void run(MinecraftServer server) {
@@ -318,7 +321,8 @@ public final class TrialPoolSelfTest {
         ServerLevel back = server.getLevel(TitanTravel.TITAN_BACK);
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {
-            if (!cell.runtime()) {
+            // 雷翼の新作は雷翼の背で調べる (trial pool storm)
+            if (!cell.runtime() || !Titans.STONE_WHALE.equals(cell.def().titan())) {
                 continue;
             }
             check(cell.audit(back).isEmpty(), cell.def().id() + " audit: " + cell.audit(back));

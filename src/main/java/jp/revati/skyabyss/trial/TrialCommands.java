@@ -63,8 +63,18 @@ public final class TrialCommands {
                                 .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
     }
 
+    // 打った人がいる背 (背の外なら岩鯨の背)
     private static ServerLevel back(CommandSourceStack src) {
+        ServerLevel here = src.getLevel();
+        if (Titans.titanOfBack(here.dimension()) != null) {
+            return here;
+        }
         return src.getServer().getLevel(jp.revati.skyabyss.titan.TitanTravel.TITAN_BACK);
+    }
+
+    private static String titanOf(ServerLevel back) {
+        String t = Titans.titanOfBack(back.dimension());
+        return t == null ? Titans.STONE_WHALE : t;
     }
 
     private static int board(CommandSourceStack src, String titan) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
@@ -78,12 +88,12 @@ public final class TrialCommands {
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record r = GroupProgress.of(back, group);
         TrialDraw.Draw draw = TrialData.current(back, group);
-        src.sendSuccess(() -> Component.literal("cycle " + draw.cycle() + " seed " + TrialDraw.seed(TrialData.worldSeed(back), group, Titans.STONE_WHALE, draw.cycle())
+        src.sendSuccess(() -> Component.literal("cycle " + draw.cycle() + " seed " + TrialDraw.seed(TrialData.worldSeed(back), group, titanOf(back), draw.cycle())
                 + " cleared " + TrialData.clearedIds(r)), false);
         for (TrialDraw.Pick p : draw.picks()) {
             src.sendSuccess(() -> Component.literal("  " + p.cellId() + " " + p.mods().encode() + " " + p.mods().rarity() + (p.mods().quiet() ? " quiet" : "")), false);
         }
-        Def w = TrialData.weekly(Titans.STONE_WHALE, TrialData.worldSeed(back), TrialData.week());
+        Def w = TrialData.weekly(titanOf(back), TrialData.worldSeed(back), TrialData.week());
         src.sendSuccess(() -> Component.literal("weekly " + (w == null ? "-" : w.id()) + " (week " + TrialData.week() + ")"), false);
         return 1;
     }
@@ -100,7 +110,7 @@ public final class TrialCommands {
             r.remove(TrialData.LAST + s.id);
         }
         TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, Titans.STONE_WHALE, TrialData.current(back, group));
+        TrialRuntime.syncGates(back, group, titanOf(back), TrialData.current(back, group));
         return list(src);
     }
 
@@ -119,7 +129,7 @@ public final class TrialCommands {
         }
         r.putString(TrialData.DRAW, new TrialDraw.Draw(TrialData.cycle(r), picks).encode());
         TrialRuntime.stopGroup(back, group);
-        TrialRuntime.syncGates(back, group, Titans.STONE_WHALE, TrialData.current(back, group));
+        TrialRuntime.syncGates(back, group, titanOf(back), TrialData.current(back, group));
         return list(src);
     }
 

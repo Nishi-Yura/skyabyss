@@ -199,7 +199,7 @@ final class StormWest {
                     p.removeEffect(MobEffects.JUMP);
                     p.removeEffect(MobEffects.SLOW_FALLING);
                 }
-            } else if (GaleFeather.holds(p)) {
+            } else if (GaleFeather.holds(p) && !StormDeck.inGlideCell(p.position())) {
                 strip(p);
                 Notice.bar(p, ModText.hint("message.skyabyss.storm.gale_feather_gone"));
             }
