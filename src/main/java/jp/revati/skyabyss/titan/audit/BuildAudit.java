@@ -110,6 +110,23 @@ public final class BuildAudit {
         public final BlockState get(BlockPos p) {
             return get(p.getX(), p.getY(), p.getZ());
         }
+
+        // box の中の、空気でないブロックをすべて列挙する (BuildAuditExtra の飾り・浮き・流体の検査用)
+        public abstract void all(BackReach.Box box, BiConsumer<BlockPos, BlockState> out);
+
+        // ブロックエンティティ (看板の文)。部品の格子では無い
+        public net.minecraft.world.level.block.entity.BlockEntity blockEntity(BlockPos p) {
+            return null;
+        }
+
+        // 明るさ (空の光と灯りの大きいほう)。部品の格子では -1
+        public int light(BlockPos p) {
+            return -1;
+        }
+
+        public String lightInfo(BlockPos p) {
+            return "";
+        }
     }
 
     static boolean candidate(BlockState s) {
@@ -129,6 +146,57 @@ public final class BuildAudit {
         @Override
         public BlockState get(int x, int y, int z) {
             return level.getBlockState(m.set(x, y, z));
+        }
+
+        @Override
+        public net.minecraft.world.level.block.entity.BlockEntity blockEntity(BlockPos p) {
+            return level.getBlockEntity(p);
+        }
+
+        @Override
+        public int light(BlockPos p) {
+            return level.getRawBrightness(p, 0);
+        }
+
+        @Override
+        public String lightInfo(BlockPos p) {
+            return "sky " + level.getBrightness(net.minecraft.world.level.LightLayer.SKY, p) + " block " + level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, p)
+                    + " canSeeSky " + level.canSeeSky(p);
+        }
+
+        @Override
+        public void all(BackReach.Box box, BiConsumer<BlockPos, BlockState> out) {
+            int minY = Math.max(box.y1(), level.getMinBuildHeight());
+            int maxY = Math.min(box.y2(), level.getMaxBuildHeight() - 1);
+            for (int cx = box.x1() >> 4; cx <= box.x2() >> 4; cx++) {
+                for (int cz = box.z1() >> 4; cz <= box.z2() >> 4; cz++) {
+                    ChunkAccess chunk = level.getChunk(cx, cz);
+                    LevelChunkSection[] sections = chunk.getSections();
+                    for (int i = 0; i < sections.length; i++) {
+                        LevelChunkSection sec = sections[i];
+                        int sy = level.getSectionYFromSectionIndex(i) << 4;
+                        if (sec == null || sec.hasOnlyAir() || sy + 15 < minY || sy > maxY) {
+                            continue;
+                        }
+                        for (int lx = 0; lx < 16; lx++) {
+                            for (int ly = 0; ly < 16; ly++) {
+                                for (int lz = 0; lz < 16; lz++) {
+                                    BlockState s = sec.getBlockState(lx, ly, lz);
+                                    if (s.isAir()) {
+                                        continue;
+                                    }
+                                    int x = (cx << 4) + lx;
+                                    int y = sy + ly;
+                                    int z = (cz << 4) + lz;
+                                    if (box.contains(x, y, z)) {
+                                        out.accept(new BlockPos(x, y, z), s);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         @Override
@@ -184,6 +252,18 @@ public final class BuildAudit {
                 return s;
             }
             return y <= -1 ? ground : air;
+        }
+
+        @Override
+        public void all(BackReach.Box box, BiConsumer<BlockPos, BlockState> out) {
+            for (Map.Entry<Long, BlockState> e : cells.entrySet()) {
+                if (!e.getValue().isAir()) {
+                    BlockPos p = BlockPos.of(e.getKey());
+                    if (box.contains(p)) {
+                        out.accept(p, e.getValue());
+                    }
+                }
+            }
         }
 
         @Override
@@ -269,7 +349,13 @@ public final class BuildAudit {
                 ladder(g, p, s, structure, out);
             }
         });
+        if (extra) {
+            BuildAuditExtra.scan(g, box, structure, out);
+        }
     }
+
+    // 飾り・浮き・流体などの広い検査 (BuildAuditExtra) を一緒に流すか。既定は流す
+    public static boolean extra = true;
 
     private static void flag(Report out, String structure, String kind, BlockPos p, String msg) {
         out.add(new Finding(structure, kind, p.immutable(), msg));

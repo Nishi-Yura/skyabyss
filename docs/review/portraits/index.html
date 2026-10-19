@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>会話の肖像 選定</title>
+<style>
+:root{--bg:#eceef0;--panel:#f8f9fa;--ink:#1b2129;--muted:#5b6672;--line:#c9d0d6;--accent:#0a8fa6;--accent-ink:#fff;--body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#101318;--panel:#171b22;--ink:#e3e8ee;--muted:#93a0ad;--line:#2a313b;--accent:#5fdcef;--accent-ink:#0b1216;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101318;--panel:#171b22;--ink:#e3e8ee;--muted:#93a0ad;--line:#2a313b;--accent:#5fdcef;--accent-ink:#0b1216;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:36px 0 6px}
+.intro,.sub{color:var(--muted);max-width:72ch;margin:0 0 8px}
+.sub{font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);padding:8px}
+figure img{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.shots img{image-rendering:auto}
+.mock{display:flex;gap:14px;background:#101318;border:2px solid #2e5552;padding:12px;margin:12px 0;max-width:640px;color:#e9e3d4}
+.mock img{width:128px;height:128px;image-rendering:pixelated;border:2px solid #2e5552;flex:none}
+.mock .t{font-size:14px}.mock b{color:#7fd6d0;display:block;margin-bottom:4px}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-size:22px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){.shots{grid-template-columns:minmax(0,1fr)}.opts{grid-template-columns:minmax(0,1fr)}.grid{gap:6px}.mock{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>会話の肖像 選定</h1>
+<p class="intro">NPC の顔の絵を、32px 密度の低解像度から 128×128 のドット絵へ描き直しました。語り部・イサナ・旅の職人の 3 人 × 表情 3 つ (ふつう / 笑み / 沈む) × 3 案。いまのゲーム内の低ポリの姿 (語り部の頭巾と青白い目、イサナのつば広帽と赤い襟巻、職人の額の眼鏡と石の襟) に合わせています。光はどれも左上の手前、構図は胸から上でそろえてあります。ゲームには、とりあえず A を入れてあります。</p>
+<p class="sub">画像は原寸 128px を拡大して表示しています (ぼかさず、画素のまま)。見る者 (watcher) は話さないので肖像はありません。</p>
+
+<div id="styles"></div>
+
+<h2>どれにしますか</h2>
+<fieldset class="opts" id="opts"></fieldset>
+<label class="note-l" for="note">メモ (人ごとに変えたい、ここが気になる、など)</label>
+<textarea id="note" class="note" rows="4"></textarea>
+<div class="save" id="save" aria-live="polite"></div>
+</div>
+<script>
+(() => {
+  const STYLES = {
+    a: ['A 粒子のにじむ絵画調', '5 段の陰影とディザ、縁に冷たい逆光、暗い背景に光の暈。画面の暗い石板の枠になじむ。'],
+    b: ['B 太い輪郭の JRPG 調', '3 段のセル塗り、2 画素の黒い縁取り、放射の帯の背景。一番はっきり読める。'],
+    c: ['C くすんだ木版調', '4 段のくすんだ色、斜線とざらつきの影、紙と木目の背景。物語の古い絵のような手ざわり。']
+  };
+  const NPCS = [['storyteller', '語り部'], ['whale_chaser', 'イサナ'], ['artisan', '旅の職人']];
+  const FACES = [['neutral', 'ふつう'], ['smile', '笑み'], ['grave', '沈む']];
+  const host = document.getElementById('styles');
+  const opts = document.getElementById('opts');
+  for (const k of Object.keys(STYLES)) {
+    let h = `<h2>${STYLES[k][0]}</h2><p class="sub">${STYLES[k][1]}</p>`;
+    for (const [n, nn] of NPCS) {
+      h += '<div class="grid">' + FACES.map(([f, ff]) => `<figure><img src="${k}_${n}_${f}.png" width="128" height="128" alt="${nn} ${ff}"><figcaption>${nn} / ${ff}</figcaption></figure>`).join('') + '</div>';
+    }
+    h += `<div class="mock"><img src="${k}_whale_chaser_grave.png" alt=""><div class="t"><b>イサナ</b>どこかで会ったか？ ……いや、空ばかり見ていると、人の顔を忘れる。俺はイサナ。</div></div>`;
+    h += '<p class="sub">ゲーム内の会話画面 (日本語・音は 0 で撮影)</p><div class="shots">' + NPCS.flatMap(([n, nn]) => ['a', 'b'].map(x => `<figure><img src="ingame_${k}_${n}_${x}.png" alt="${nn} 会話画面"><figcaption>${nn}</figcaption></figure>`)).join('') + '</div>';
+    host.insertAdjacentHTML('beforeend', h);
+    opts.insertAdjacentHTML('beforeend', `<label class="opt"><input type="radio" name="style" value="${k}"><span class="letter">${k.toUpperCase()}</span><span>${STYLES[k][0].slice(2)}</span></label>`);
+  }
+  const saveEl = document.getElementById('save'), note = document.getElementById('note');
+  let db = null, timer = null;
+  const chosen = () => { const r = document.querySelector('input[name=style]:checked'); return r ? r.value : ''; };
+  async function save() {
+    if (!db) return;
+    saveEl.textContent = '保存中…';
+    try { await db.doc('choices/portrait_style').set({ option: chosen(), note: note.value, at: Date.now() }); saveEl.textContent = '保存しました'; }
+    catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  document.querySelectorAll('input[name=style]').forEach(r => r.addEventListener('change', save));
+  note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(save, 800); });
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      for (const d of (snap.docs || snap)) {
+        if (d.id !== 'portrait_style') continue;
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector(`input[name=style][value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) note.value = data.note;
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+  })();
+})();
+</script>
+</body>
+</html>
