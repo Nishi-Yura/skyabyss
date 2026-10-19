@@ -9,7 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 // ポーチの余白の枠 (B13): 転生 2・6・12 回で 1 つずつ (最大 3)。1 枠に 1 種類の品を 999 個まで預けられる。
-// 倒れても残る (RebirthData は死んでも引き継ぐ)。部品のない (そのままの) 品・積める品だけ。登録された袋の品 (専用の枠がある) は入れない。
+// 倒れても残る (SoulData は死んでも引き継ぐ)。部品のない (そのままの) 品・積める品だけ。登録された袋の品 (専用の枠がある) は入れない。
 // 預ける・出す操作は PouchMenu の clicked から呼ぶ (サーバーが決める)
 public final class RebirthSpare {
     private RebirthSpare() {
@@ -33,8 +33,8 @@ public final class RebirthSpare {
 
     // 枠 slot の見かけの品 (空なら EMPTY)
     public static ItemStack view(Player player, int slot) {
-        RebirthData d = Rebirth.data(player);
-        if (slot < 0 || slot >= RebirthData.SPARE_MAX || slot >= slots(player) || d.spareCount[slot] <= 0) {
+        SoulData d = Rebirth.data(player);
+        if (slot < 0 || slot >= SoulData.SPARE_MAX || slot >= slots(player) || d.spareCount[slot] <= 0) {
             return ItemStack.EMPTY;
         }
         Item item = item(d.spareItem[slot]);
@@ -51,18 +51,18 @@ public final class RebirthSpare {
         if (slot < 0 || slot >= slots(player) || n <= 0 || !accepts(carried)) {
             return 0;
         }
-        RebirthData d = Rebirth.data(player);
+        SoulData d = Rebirth.data(player);
         String id = BuiltInRegistries.ITEM.getKey(carried.getItem()).toString();
         if (d.spareCount[slot] > 0 && !d.spareItem[slot].equals(id)) {
             return 0;
         }
         // 同じ品が別の枠にあるときは、そちらへ (一つの品が 2 枠に割れない)
-        for (int i = 0; i < RebirthData.SPARE_MAX; i++) {
+        for (int i = 0; i < SoulData.SPARE_MAX; i++) {
             if (i != slot && d.spareCount[i] > 0 && d.spareItem[i].equals(id)) {
                 return 0;
             }
         }
-        int room = RebirthData.SPARE_LIMIT - d.spareCount[slot];
+        int room = SoulData.SPARE_LIMIT - d.spareCount[slot];
         int moved = Math.min(Math.min(n, carried.getCount()), room);
         if (moved <= 0) {
             return 0;
@@ -76,7 +76,7 @@ public final class RebirthSpare {
 
     // 取り出す (want 個まで、1 スタックを超えない)。取り出した品 (空なら EMPTY)
     public static ItemStack take(ServerPlayer player, int slot, int want) {
-        RebirthData d = Rebirth.data(player);
+        SoulData d = Rebirth.data(player);
         ItemStack shown = view(player, slot);
         if (shown.isEmpty() || want <= 0) {
             return ItemStack.EMPTY;

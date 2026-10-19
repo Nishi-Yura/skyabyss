@@ -52,10 +52,10 @@ public final class Rebirth {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SkyAbyss.MODID);
 
     // 転生で残るもの。持ち主のクライアントにだけ同期する
-    public static final DeferredHolder<AttachmentType<?>, AttachmentType<RebirthData>> DATA = ATTACHMENTS.register("rebirth",
-            () -> AttachmentType.serializable(RebirthData::new)
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<SoulData>> DATA = ATTACHMENTS.register("soul",
+            () -> AttachmentType.serializable(SoulData::new)
                     .copyOnDeath()
-                    .sync((holder, to) -> holder == to, RebirthData.STREAM_CODEC)
+                    .sync((holder, to) -> holder == to, SoulData.STREAM_CODEC)
                     .build());
 
     public static final ResourceLocation MOD_MOVE = id("rebirth/move");
@@ -86,7 +86,7 @@ public final class Rebirth {
     }
 
     // ---------------------------------------------------------------- 読む
-    public static RebirthData data(Player player) {
+    public static SoulData data(Player player) {
         return player.getData(DATA);
     }
 
@@ -136,7 +136,7 @@ public final class Rebirth {
     }
 
     public static RebirthRules.Effects effects(Player player) {
-        RebirthData d = data(player);
+        SoulData d = data(player);
         int n = count(player);
         if (n <= 0 && d.nodes.isEmpty()) {
             return RebirthRules.Effects.NONE;
@@ -245,7 +245,7 @@ public final class Rebirth {
         if (!player.isCreative()) {
             SkillManager.removeCrystals(player, RebirthRules.COST_CRYSTALS);
         }
-        RebirthData d = data(player);
+        SoulData d = data(player);
         GrowthData g = Growth.get(player);
         d.nodes.add(arm.id);
         d.boons.add(boon.id);
@@ -287,7 +287,7 @@ public final class Rebirth {
     // ---------------------------------------------------------------- 魂盤の欠片の節 (B05)
     // 導きの欠片 5 個で、好きな腕に節を 1 つ足す (一生で 6 つまで)
     public static boolean claimShardNode(ServerPlayer player, String armId) {
-        RebirthData d = data(player);
+        SoulData d = data(player);
         SoulArm arm = SoulArm.byId(armId);
         if (arm == null || !d.canClaimShardNode()) {
             return false;
@@ -336,7 +336,7 @@ public final class Rebirth {
 
     // 導きの欠片を 1 つ渡す (限りがあれば false)
     static boolean giveGuideShard(ServerPlayer guide, List<ServerPlayer> newcomers) {
-        RebirthData d = data(guide);
+        SoulData d = data(guide);
         long day = today.getAsLong();
         if (d.guideDay != day) {
             d.guideDay = day;

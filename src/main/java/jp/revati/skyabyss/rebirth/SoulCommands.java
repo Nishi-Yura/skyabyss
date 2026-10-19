@@ -18,14 +18,14 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 // 開発・確かめ用の転生コマンド (管理者)。
-// /skyabyss rebirth show <人>                 : 回数・魂盤・恩恵・欠片・余白を見る
-// /skyabyss rebirth set <人> <0-20>           : 回数を決める (魂盤の節と恩恵を、腕と候補の順に埋める。装備・物語は触らない)
-// /skyabyss rebirth do <人> <腕> <候補 0-2>   : 転生する (台座は問わない。結晶・Lv 50・戦いの外は問う)
-// /skyabyss rebirth shards <人> <数>          : 導きの欠片を決める
-// /skyabyss rebirth open <人>                 : 転生の画面を開かせる
+// /skyabyss soul show <人>                 : 回数・魂盤・恩恵・欠片・余白を見る
+// /skyabyss soul set <人> <0-20>           : 回数を決める (魂盤の節と恩恵を、腕と候補の順に埋める。装備・物語は触らない)
+// /skyabyss soul do <人> <腕> <候補 0-2>   : 転生する (台座は問わない。結晶・Lv 50・戦いの外は問う)
+// /skyabyss soul shards <人> <数>          : 導きの欠片を決める
+// /skyabyss soul open <人>                 : 転生の画面を開かせる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
-public final class RebirthCommands {
-    private RebirthCommands() {
+public final class SoulCommands {
+    private SoulCommands() {
     }
 
     @SubscribeEvent
@@ -33,10 +33,10 @@ public final class RebirthCommands {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         d.register(Commands.literal(SkyAbyss.MODID)
                 .requires(source -> source.hasPermission(2))
-                .then(Commands.literal("rebirth")
+                .then(Commands.literal("soul")
                         .then(Commands.literal("show").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
                             ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
-                            RebirthData rd = Rebirth.data(p);
+                            SoulData rd = Rebirth.data(p);
                             ctx.getSource().sendSuccess(() -> Component.literal(p.getGameProfile().getName() + ": " + Rebirth.levelLabel(p) + " rebirths "
                                     + Rebirth.count(p) + " nodes " + rd.nodes + " boons " + rd.boons + " shards " + rd.shards + "/" + rd.shardNodes
                                     + " spare " + java.util.Arrays.toString(rd.spareItem) + java.util.Arrays.toString(rd.spareCount)
@@ -75,7 +75,7 @@ public final class RebirthCommands {
     // 回数を決める: 魂盤の節は腕を順にめぐり、恩恵は毎回の候補の 1 枚目。力の記録は作り直す
     static void set(ServerPlayer p, int n) {
         GrowthData g = Growth.get(p);
-        RebirthData rd = Rebirth.data(p);
+        SoulData rd = Rebirth.data(p);
         rd.nodes.clear();
         rd.boons.clear();
         rd.shardNodes = 0;

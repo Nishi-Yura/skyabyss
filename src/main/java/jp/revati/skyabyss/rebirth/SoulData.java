@@ -19,7 +19,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 転生で残るもの (Data Attachment skyabyss:rebirth)。魂盤の節 (転生した順の腕の id)、選んだ恩恵 (順)、導きの欠片、ポーチの余白の中身。
 // 転生の回数そのものは GrowthData.rebirths (レベルと同じ所。表示と経験値のため)。
 // 転生しても消えない (レベル・技・天職だけが戻る)。死んでも引き継ぐ。持ち主のクライアントにだけ同期する
-public final class RebirthData implements INBTSerializable<CompoundTag> {
+public final class SoulData implements INBTSerializable<CompoundTag> {
     public static final int VERSION = 1;
     public static final int SPARE_MAX = 3;
     // 余白の枠 1 つに入る数
@@ -43,7 +43,7 @@ public final class RebirthData implements INBTSerializable<CompoundTag> {
     // 転生を重ねた総数の記録 (回数が減らないこと・最後に転生した時刻)
     public long lastRebirthMillis;
 
-    public RebirthData() {
+    public SoulData() {
         Arrays.fill(spareItem, "");
     }
 
@@ -102,8 +102,8 @@ public final class RebirthData implements INBTSerializable<CompoundTag> {
         return n;
     }
 
-    public RebirthData copy() {
-        RebirthData d = new RebirthData();
+    public SoulData copy() {
+        SoulData d = new SoulData();
         d.fromTag(toTag());
         return d;
     }
@@ -182,9 +182,9 @@ public final class RebirthData implements INBTSerializable<CompoundTag> {
     }
 
     // 持ち主のクライアントへ送る分 (全部。小さい)
-    public static final StreamCodec<RegistryFriendlyByteBuf, RebirthData> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(tag -> {
-        RebirthData d = new RebirthData();
+    public static final StreamCodec<RegistryFriendlyByteBuf, SoulData> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(tag -> {
+        SoulData d = new SoulData();
         d.fromTag(tag);
         return d;
-    }, RebirthData::toTag).cast();
+    }, SoulData::toTag).cast();
 }

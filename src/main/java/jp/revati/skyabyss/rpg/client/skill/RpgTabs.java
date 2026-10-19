@@ -60,7 +60,7 @@ public final class RpgTabs {
 
     static void open(Minecraft mc, int which) {
         if (which == REBIRTH) {
-            mc.setScreen(new jp.revati.skyabyss.client.rebirth.RebirthScreen());
+            mc.setScreen(new jp.revati.skyabyss.client.rebirth.SoulScreen());
         } else if (which == STATUS) {
             mc.setScreen(new GrowthScreen());
         } else if (which == SKILLS) {

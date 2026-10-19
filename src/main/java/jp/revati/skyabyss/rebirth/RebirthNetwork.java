@@ -9,7 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-// 転生のパケット。ほかの系統とは別に登録する。転生の記録そのものは Data Attachment の同期 (GrowthData・RebirthData) で届く
+// 転生のパケット。ほかの系統とは別に登録する。転生の記録そのものは Data Attachment の同期 (GrowthData・SoulData) で届く
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RebirthNetwork {
     private static final String PROTOCOL_VERSION = "1";
@@ -21,7 +21,7 @@ public final class RebirthNetwork {
     static void register(RegisterPayloadHandlersEvent event) {
         event.registrar(PROTOCOL_VERSION)
                 .playToClient(RebirthOpenPayload.TYPE, RebirthOpenPayload.STREAM_CODEC,
-                        (payload, context) -> jp.revati.skyabyss.client.rebirth.RebirthClient.open())
+                        (payload, context) -> jp.revati.skyabyss.client.rebirth.SoulClient.open())
                 .playToServer(RebirthActionPayload.TYPE, RebirthActionPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         handle(player, payload);

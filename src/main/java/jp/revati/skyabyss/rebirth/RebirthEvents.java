@@ -109,7 +109,7 @@ public final class RebirthEvents {
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            RebirthData d = Rebirth.data(player);
+            SoulData d = Rebirth.data(player);
             d.sanitize(Rebirth.count(player));
             Rebirth.sync(player);
             Rebirth.applyModifiers(player);

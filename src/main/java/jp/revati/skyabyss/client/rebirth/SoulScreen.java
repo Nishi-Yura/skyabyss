@@ -6,7 +6,7 @@ import java.util.List;
 import jp.revati.skyabyss.rebirth.Boon;
 import jp.revati.skyabyss.rebirth.Rebirth;
 import jp.revati.skyabyss.rebirth.RebirthActionPayload;
-import jp.revati.skyabyss.rebirth.RebirthData;
+import jp.revati.skyabyss.rebirth.SoulData;
 import jp.revati.skyabyss.rebirth.RebirthRules;
 import jp.revati.skyabyss.rebirth.SoulArm;
 import jp.revati.skyabyss.rpg.Growth;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // K 画面の「転生」パネル (docs/design/31、見取り図は docs/review/rebirth/index.html)。
 // 左: 転生の準備 (いまと転生後、代価、恩恵の 3 択、ボタン)。中: 残るもの・戻るもの・魂盤の力。右: 魂盤 (6 つの腕。次の節を足す腕を選ぶ)。
 // ボタンは二度押しで送る (押しまちがえない)。Lv 50 になるまで・20 回を超えたあとは、灰色の説明だけ
-public class RebirthScreen extends Screen {
+public class SoulScreen extends Screen {
     static final int W = 380;
     static final int H = 184;
 
@@ -62,7 +62,7 @@ public class RebirthScreen extends Screen {
     private List<Boon> offer = List.of();
     private int offerFor = -1;
 
-    public RebirthScreen() {
+    public SoulScreen() {
         super(Component.translatable("gui.skyabyss.rebirth.title"));
     }
 
@@ -72,7 +72,7 @@ public class RebirthScreen extends Screen {
         top = (height - H) / 2;
         arms.clear();
         boons.clear();
-        RebirthData d = Rebirth.data(minecraft.player);
+        SoulData d = Rebirth.data(minecraft.player);
         // 次の節の腕: いちばん節の少ない腕を、はじめの選びにする
         int best = Integer.MAX_VALUE;
         for (SoulArm a : SoulArm.values()) {
@@ -133,7 +133,7 @@ public class RebirthScreen extends Screen {
         go.active = ready && cost && place && !offer.isEmpty();
         go.setMessage(Component.translatable(armed > 0 ? "gui.skyabyss.rebirth.confirm" : !place && ready && cost ? "gui.skyabyss.rebirth.go_hub" : "gui.skyabyss.rebirth.button",
                 RebirthRules.COST_CRYSTALS));
-        RebirthData d = Rebirth.data(minecraft.player);
+        SoulData d = Rebirth.data(minecraft.player);
         shardButton.active = d.canClaimShardNode();
         for (BoonButton b : boons) {
             b.visible = ready && b.index < offer.size();
@@ -209,7 +209,7 @@ public class RebirthScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
         g.drawCenteredString(font, title, left + W / 2, top + 7, TITLE);
         GrowthData gd = growth();
-        RebirthData rd = Rebirth.data(minecraft.player);
+        SoulData rd = Rebirth.data(minecraft.player);
         int n = gd.rebirths;
         long ms = System.currentTimeMillis();
         drawLeft(g, gd, n, ms);
@@ -250,7 +250,7 @@ public class RebirthScreen extends Screen {
         g.drawString(font, Component.translatable("gui.skyabyss.rebirth.boon_title"), x, top + 82, SOFT, false);
     }
 
-    private void drawMiddle(GuiGraphics g, GrowthData gd, RebirthData rd, int n) {
+    private void drawMiddle(GuiGraphics g, GrowthData gd, SoulData rd, int n) {
         int x = left + C2;
         int y = top + 24;
         g.drawString(font, Component.translatable("gui.skyabyss.rebirth.kept_title"), x, y, OK, false);
@@ -308,7 +308,7 @@ public class RebirthScreen extends Screen {
     }
 
     // ---------------------------------------------------------------- 魂盤
-    private void drawBoard(GuiGraphics g, RebirthData rd, int n, long ms) {
+    private void drawBoard(GuiGraphics g, SoulData rd, int n, long ms) {
         int cx = left + BOARD_CX;
         int cy = top + BOARD_CY;
         g.drawString(font, Component.translatable("gui.skyabyss.rebirth.board_title"), left + C3, top + 24, GOLD, false);
@@ -368,7 +368,7 @@ public class RebirthScreen extends Screen {
         g.drawString(font, Component.translatable("gui.skyabyss.rebirth.shards", rd.shards, RebirthRules.SHARDS_PER_NODE), left + C3, top + 164, rd.shards > 0 ? TEXT : SOFT, false);
     }
 
-    private void drawTooltips(GuiGraphics g, RebirthData rd, int mouseX, int mouseY) {
+    private void drawTooltips(GuiGraphics g, SoulData rd, int mouseX, int mouseY) {
         for (ArmButton a : arms) {
             if (a.isHovered()) {
                 List<Component> tip = new ArrayList<>();

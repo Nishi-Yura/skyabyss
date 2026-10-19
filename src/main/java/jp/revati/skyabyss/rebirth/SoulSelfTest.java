@@ -44,14 +44,14 @@ import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-// 転生の自己テスト (SKYABYSS_SELFTEST_ONLY="rebirth")。docs/design/31
+// 転生の自己テスト (SKYABYSS_SELFTEST_ONLY="soul")。docs/design/31
 //  - 数の計算: 経験値 −6%・下限 −40%、逓減 (10 まで線形・半分・1/4)、祖の力、10 回で全ダメージ約 +8%、色と記号、余白・絆の段、共闘の倍率、恩恵の候補
 //  - 転生の流れ: 戻るもの (レベル・技・点・天職) と残るもの (型の保存・解いた木・追加の点・装備の使える資格・物語の進み)、代価の結晶 5、
 //    戦いの最中・Lv 50 未満の拒否、20 回の上限、恩恵の 3 択 (候補にないものは断る)
 //  - 保存: プレイヤーの保存と読み込み (ログアウト・ログイン)・死亡時の引き継ぎ・同期の符号化
 //  - ポーチの余白 (2・6・12 回で枠が増え、預ける・出す・倒れても残る)、導きの欠片 (1 日 3 回・同じ人は 1 日 1 回・節 6 まで)、共闘の合わせ (傷だけ)
-public final class RebirthSelfTest {
-    private RebirthSelfTest() {
+public final class SoulSelfTest {
+    private SoulSelfTest() {
     }
 
     public static void runSelfTest(MinecraftServer server) {
@@ -64,16 +64,16 @@ public final class RebirthSelfTest {
             guide(server, f);
             sync(server, f);
         } catch (RuntimeException e) {
-            SkyAbyss.LOGGER.error("SELFTEST rebirth crashed", e);
+            SkyAbyss.LOGGER.error("SELFTEST soul crashed", e);
             f.add("crashed: " + e);
         } finally {
             RebirthEvents.testLookup = null;
             Rebirth.today = () -> System.currentTimeMillis() / 86_400_000L;
         }
         if (f.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST rebirth PASSED (rules, reset/keep scope, story unlocked, cap 20, cost, boon choice, pouch spare, persistence, guide shards, party sync)");
+            SkyAbyss.LOGGER.info("SELFTEST soul PASSED (rules, reset/keep scope, story unlocked, cap 20, cost, boon choice, pouch spare, persistence, guide shards, party sync)");
         } else {
-            f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST rebirth FAILED: {}", m));
+            f.forEach(m -> SkyAbyss.LOGGER.error("SELFTEST soul FAILED: {}", m));
         }
     }
 
@@ -188,7 +188,7 @@ public final class RebirthSelfTest {
         FakePlayer p = player(level, "rebirth_a");
         GrowthData g = Growth.get(p);
         SkillData sd = SkillManager.get(p);
-        RebirthData rd = Rebirth.data(p);
+        SoulData rd = Rebirth.data(p);
 
         // 準備: Lv 50・技と点・天職・型の保存・解いた木・追加の点・発見の記録
         g.level = 50;
@@ -290,7 +290,7 @@ public final class RebirthSelfTest {
         check(f, p.getAttribute(Attributes.MAX_HEALTH).getModifier(Rebirth.MOD_HEALTH) != null || Rebirth.effects(p).maxHealth() == 0, "health modifier missing");
         check(f, Math.abs(Rebirth.scaleCooldown(p, 1000) / 1000.0 - (1 - Rebirth.effects(p).cooldown())) < 1e-3 || Rebirth.effects(p).cooldown() == 0, "cooldown scaling is wrong");
         // 学びの手: 経験値の補正
-        RebirthData xpData = Rebirth.data(p);
+        SoulData xpData = Rebirth.data(p);
         xpData.boons.clear();
         xpData.boons.add(Boon.SCHOLAR.id);
         check(f, Rebirth.scaleXp(p, 100) == 103, "scholar boon xp is " + Rebirth.scaleXp(p, 100));
@@ -385,7 +385,7 @@ public final class RebirthSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer p = player(level, "rebirth_save");
         GrowthData g = Growth.get(p);
-        RebirthData rd = Rebirth.data(p);
+        SoulData rd = Rebirth.data(p);
         g.rebirths = 6;
         g.level = 33;
         rd.nodes.addAll(List.of("ash", "rock", "tide", "wind", "bone", "journey", "ash"));
@@ -413,8 +413,8 @@ public final class RebirthSelfTest {
         check(f, Rebirth.data(reborn).spareCount[0] == 321, "the spare slot contents were lost on death");
         // 同期の符号化 (持ち主のクライアントへ)
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
-        RebirthData.STREAM_CODEC.encode(buf, rd);
-        RebirthData wire = RebirthData.STREAM_CODEC.decode(buf);
+        SoulData.STREAM_CODEC.encode(buf, rd);
+        SoulData wire = SoulData.STREAM_CODEC.decode(buf);
         check(f, sameData(rd, wire), "the sync codec lost rebirth data");
         RegistryFriendlyByteBuf gb = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
         GrowthData.STREAM_CODEC.encode(gb, g);
@@ -425,22 +425,22 @@ public final class RebirthSelfTest {
         oldTag.putInt("level", 50);
         old.deserializeNBT(server.registryAccess(), oldTag);
         check(f, old.rebirths == 0 && old.level == 50, "an old save was not migrated to 0 rebirths");
-        RebirthData broken = new RebirthData();
+        SoulData broken = new SoulData();
         broken.nodes.addAll(List.of("ash", "zzz", "rock", "ash"));
         broken.boons.addAll(List.of("stride", "zzz"));
         broken.spareItem[2] = "minecraft:stone";
         broken.spareCount[2] = 5000;
         broken.sanitize(2);
-        check(f, broken.nodes.equals(List.of("ash", "rock")) && broken.boons.equals(List.of("stride")) && broken.spareCount[2] == RebirthData.SPARE_LIMIT,
+        check(f, broken.nodes.equals(List.of("ash", "rock")) && broken.boons.equals(List.of("stride")) && broken.spareCount[2] == SoulData.SPARE_LIMIT,
                 "a broken record was not sanitized: " + broken.nodes + broken.boons + broken.spareCount[2]);
         // 回数がないのに節がある保存 (手で書き換え) は回数に合わせる
-        RebirthData extra = new RebirthData();
+        SoulData extra = new SoulData();
         extra.nodes.addAll(repeat("ash", 5));
         extra.sanitize(2);
         check(f, extra.nodes.size() == 2, "nodes beyond the rebirth count were kept");
     }
 
-    private static boolean sameData(RebirthData a, RebirthData b) {
+    private static boolean sameData(SoulData a, SoulData b) {
         return a.nodes.equals(b.nodes) && a.boons.equals(b.boons) && a.shards == b.shards && a.shardNodes == b.shardNodes
                 && java.util.Arrays.equals(a.spareItem, b.spareItem) && java.util.Arrays.equals(a.spareCount, b.spareCount);
     }
@@ -450,7 +450,7 @@ public final class RebirthSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer p = player(level, "rebirth_spare");
         GrowthData g = Growth.get(p);
-        RebirthData rd = Rebirth.data(p);
+        SoulData rd = Rebirth.data(p);
         g.rebirths = 1;
         check(f, RebirthSpare.slots(p) == 0 && RebirthSpare.deposit(p, 0, new ItemStack(Items.COBBLESTONE, 10), 10) == 0, "a spare slot opened before 2 rebirths");
         g.rebirths = 2;
@@ -504,7 +504,7 @@ public final class RebirthSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer guide = player(level, "rebirth_guide");
         Growth.get(guide).rebirths = 2;
-        RebirthData rd = Rebirth.data(guide);
+        SoulData rd = Rebirth.data(guide);
         FakePlayer n1 = player(level, "rebirth_n1");
         FakePlayer n2 = player(level, "rebirth_n2");
         FakePlayer n3 = player(level, "rebirth_n3");
