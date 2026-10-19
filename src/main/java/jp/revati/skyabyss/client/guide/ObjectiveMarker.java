@@ -194,7 +194,11 @@ public final class ObjectiveMarker {
         g.pose().popPose();
     }
 
-    private static void paint(GuiGraphics g, String[] shape, int ox, int oy, int argb) {
+    // 形ごとの '#' の横の連なり {行, 始まり, 終わり (含まない)}。一度だけ求める (ひし形は縁取りで 9 回描くので、毎回文字列をなめない)
+    private static final java.util.Map<String[], int[]> RUNS = new java.util.IdentityHashMap<>();
+
+    private static int[] runsOf(String[] shape) {
+        java.util.List<Integer> out = new java.util.ArrayList<>();
         for (int row = 0; row < shape.length; row++) {
             String line = shape[row];
             int col = 0;
@@ -204,11 +208,21 @@ public final class ObjectiveMarker {
                     while (col < line.length() && line.charAt(col) == '#') {
                         col++;
                     }
-                    g.fill(ox + start, oy + row, ox + col, oy + row + 1, argb);
+                    out.add(row);
+                    out.add(start);
+                    out.add(col);
                 } else {
                     col++;
                 }
             }
+        }
+        return out.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static void paint(GuiGraphics g, String[] shape, int ox, int oy, int argb) {
+        int[] runs = RUNS.computeIfAbsent(shape, ObjectiveMarker::runsOf);
+        for (int i = 0; i < runs.length; i += 3) {
+            g.fill(ox + runs[i + 1], oy + runs[i], ox + runs[i + 2], oy + runs[i] + 1, argb);
         }
     }
 
