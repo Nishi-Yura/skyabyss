@@ -151,8 +151,8 @@ public final class Config {
     }
 
     public static final ModConfigSpec.EnumValue<StarEffectVariant> STAR_EFFECT = CLIENT_BUILDER
-            .comment("夜の歌で星が欠ける見せ方 (開発用の選定)。CURRENT = 今の帯, A = 暗い影の帯 (縁で星が瞬いて消える), B = 星空のゆがみ (レンズ), C = 淡い光の輪郭 + 低い音のうねり")
-            .defineEnum("starEffect", StarEffectVariant.CURRENT);
+            .comment("夜の歌で星が欠ける見せ方。C (淡い光の輪郭 + 低い音のうねり) が採用。CURRENT = 前の帯, A = 暗い影の帯, B = 星空のゆがみ")
+            .defineEnum("starEffect", StarEffectVariant.C);
 
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
