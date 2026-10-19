@@ -64,8 +64,13 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     static final double GATE_BACK_MAX = 36.5;
     static final double GATE_UP_MIN = 1.5;
     static final double GATE_UP_MAX = 15.0;
-    // 背中から戻るときに出る所 (門の口の外の水の上)
-    public static final double EXIT_SIDE = 41.0;
+    // 乗り込みの「入り口」(乗り場の輪): 潮門の口は甲羅の縁の中にあって、光の標が体に隠れていた。そこで標と判定を、門の真外の水の上
+    // (横 51 = 甲羅の縁の裾から 2 ブロック以上外、後ろ 32、門と同じ並び) に立てる。光の柱と床の紋様はここから海面に立ち、水平の半径 3 の輪に入ると背中へ渡る。
+    // 門の口そのもの (横 29〜39) に入っても渡る (従来どおり)
+    public static final double DOCK_SIDE = 51.0;
+    public static final double DOCK_RADIUS = 3.0;
+    // 背中から戻るときに出る所 (乗り場の輪の外の水の上。輪の縁から 6 ブロック先で、戻ってすぐ輪に入って渡り直さない)
+    public static final double EXIT_SIDE = 60.0;
     // 頭の先は前へ 87 ブロック、首の付け根は前へ 50。首を上げる判定は頭の中ほど (前へ 66) から測る
     static final double HEAD_FORWARD = 66.0;
     static final double HEAD_UP = 12.0;
@@ -94,6 +99,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private static final double LOOK_FAR = 60.0;
     // 巡航の目的地と前方に要る水深 (浅い所を歩くと体が大きく出すぎる)
     private static final int CRUISE_DEPTH = 10;
+    // 巡航で、標準の高さからこれ以上の持ち上げが要る先 (岸の丘・浅瀬) へは進まず向きを変える (ブロック)
+    private static final double MAX_CRUISE_LIFT = 6.0;
     private static final int APPROACH_GIVE_UP = 4800;
     // コマンドで休ませたときの長さ
     static final int FORCED_REST = 3600;
@@ -212,12 +219,23 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return position().add(offset(getYRot(), GATE_SIDE, (GATE_UP_MIN + GATE_UP_MAX) / 2, -GATE_BACK));
     }
 
-    // 門の口に入っているか
+    // 乗り場の輪の真ん中の海面 (世界の座標)
+    public Vec3 dockCenter() {
+        Vec3 p = position().add(offset(getYRot(), DOCK_SIDE, 0, -GATE_BACK));
+        return new Vec3(p.x, level().getSeaLevel() - 0.1, p.z);
+    }
+
+    // 乗り込める所に入っているか: 乗り場の輪 (門の真外の水の上) か、門の口そのもの
     boolean inGateMouth(Entity e) {
         Vec3 l = local(e.getX(), e.getY(), e.getZ());
         // 見える枠より少し広く (横・奥行き 1.5、上下 1)
-        return l.x >= GATE_SIDE_MIN - 1.5 && l.x <= GATE_SIDE_MAX + 1.5 && -l.z >= GATE_BACK_MIN - 1.5 && -l.z <= GATE_BACK_MAX + 1.5
+        boolean mouth = l.x >= GATE_SIDE_MIN - 1.5 && l.x <= GATE_SIDE_MAX + 1.5 && -l.z >= GATE_BACK_MIN - 1.5 && -l.z <= GATE_BACK_MAX + 1.5
                 && l.y >= GATE_UP_MIN - 1 && l.y <= GATE_UP_MAX + 1;
+        // 輪: 水平の半径 DOCK_RADIUS (海面から下 2・上 12 ブロック。泳いでいる人も舟も、空を飛ぶ人も入る)
+        // 高さは海面から測る (底を持ち上げて休んでいても、輪は海面にある)
+        double above = e.getY() - (level().getSeaLevel() - 0.1);
+        boolean dock = Math.hypot(l.x - DOCK_SIDE, -l.z - GATE_BACK) <= DOCK_RADIUS && above >= -2.0 && above <= 12.0;
+        return mouth || dock;
     }
 
     // 背中から戻るときに出る所 (門の口の外の水面)
@@ -244,6 +262,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         ServerLevel level = (ServerLevel) level();
         if (tickCount % 20 == 0) {
             sampleFloor(level);
+        }
+        // 先の地形は 5 tick ごと (今の位置の分は、動かしたあとの rise が毎 tick 測る)
+        if (tickCount % 5 == 0) {
+            sampleAhead(level);
         }
         if (voyage) {
             tickVoyage(level);
@@ -290,7 +312,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         // 眠って 10 秒からは、珊瑚の段も水の下へ沈みきる (海の底へ去る)。40 秒で地上から取り除く
         boolean leaving = jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age);
         double sinkTo = level.getSeaLevel() - SLEEP_DRAFT - (leaving ? DEPART_EXTRA_DRAFT : 0);
-        rise(sinkTo, leaving ? DEPART_SINK : SLEEP_SINK);
+        riseRaw(sinkTo, leaving ? DEPART_SINK : SLEEP_SINK);
         if (tickCount % 8 == 0 && getY() > sinkTo + 0.5) {
             // 沈むあいだ、甲羅のまわりの海面に泡と波紋
             for (ServerPlayer p : Players.snapshot(level.players())) {
@@ -325,6 +347,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
                     turnAway(level);
                     break;
                 }
+            }
+            // 進む先の海底・岸・丘に体が触れないために、標準の巡航の高さから大きく持ち上げねばならない (岸の丘が体の幅に入る) なら、向きを変える
+            if (blockedCooldown <= 0 && Double.isFinite(groundAhead) && groundAhead > cruiseHeight(level) + MAX_CRUISE_LIFT) {
+                turnAway(level);
             }
         }
         steer(targetX, targetZ, cruiseHeight(level), CRUISE_SPEED, CRUISE_RISE);
@@ -434,15 +460,23 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             return;
         }
         {
-            // 潮門の光 (乗れる人にだけ見える。眠っているあいだは出ない)
+            // 乗り場の光 (乗れる人にだけ見える。眠っているあいだは出ない)。標は門の真外の水の上の輪 (体に隠れない)。粒は輪と、門の口にも少し
+            Vec3 d = dockCenter();
             Vec3 g = gateCenter();
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(g, g.add(0, 5, 0), g.add(0, -5, 0)),
-                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(g, (float) (GATE_SIDE_MAX - GATE_SIDE_MIN) / 2f, (float) (GATE_UP_MAX - GATE_UP_MIN) / 2f,
-                            (float) (GATE_BACK_MAX - GATE_BACK_MIN) / 2f, getYRot(), g.y - 6, g.y + 46, 1.6f));
+            double surface = d.y;
+            if (jp.revati.skyabyss.titan.TitanGround.enabled) {
+                jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(d.add(0, 1.5, 0), d.add(0, 7, 0), d.add(0, 13, 0), g),
+                        new jp.revati.skyabyss.titan.end.BoardGlow.Shape(d.add(0, 2.0, 0), (float) DOCK_RADIUS, 2.0f, (float) DOCK_RADIUS, getYRot(), surface, surface + 46, 1.6f));
+            } else {
+                // 開発用 (/skyabyss dev titanground false): 直す前の標 (門の口に枠と柱。体に隠れる) を出して、見比べる
+                jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(g, g.add(0, 5, 0), g.add(0, -5, 0)),
+                        new jp.revati.skyabyss.titan.end.BoardGlow.Shape(g, (float) (GATE_SIDE_MAX - GATE_SIDE_MIN) / 2f, (float) (GATE_UP_MAX - GATE_UP_MIN) / 2f,
+                                (float) (GATE_BACK_MAX - GATE_BACK_MIN) / 2f, getYRot(), g.y - 6, g.y + 46, 1.6f));
+            }
         }
         if (tickCount % 4 == 0) {
-            Vec3 gate = gateCenter();
-            AABB around = new AABB(gate, gate).inflate(10);
+            Vec3 d = dockCenter();
+            AABB around = new AABB(d, d).inflate(DOCK_RADIUS + 14);
             for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, around)) {
                 if (TitanKeeper.eligible(player) && inGateMouth(player)) {
                     TideTravel.boardFromGate(player, this);
@@ -450,9 +484,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             }
         }
         if (tickCount % 40 == 0) {
-            Vec3 gate = gateCenter();
+            Vec3 dock = dockCenter();
             for (ServerPlayer player : Players.snapshot(level.players())) {
-                if (player.distanceToSqr(gate) < 16 * 16) {
+                if (player.distanceToSqr(dock) < 20 * 20) {
                     Notice.bar(player, ModText.hint("message.skyabyss.tide.gate_hint"));
                 }
             }
@@ -554,11 +588,65 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         rise(ty, rise);
     }
 
+    // 高さを ty へ寄せる。ただし体が海底・岸・木・丘にめり込む高さには下げない (groundNow = 今の位置で要る最低の高さ、groundAhead = 進む先まで見た最低の高さ)。
+    // 先に地形が高くなるときは、ゆっくり持ち上がりながら先回りする。それでも間に合わない分は、めり込む前に押し上げる
     private void rise(double ty, double rate) {
+        if (level() instanceof ServerLevel serverLevel) {
+            sampleNow(serverLevel);
+        }
+        double want = Math.max(ty, Math.max(groundNow, groundAhead));
+        double r = rate;
+        if (want > getY()) {
+            // 持ち上げるべき差が大きいほど、少しだけ速く (最大で秒 10 ブロック)
+            r = Math.max(rate, Math.min(0.5, (want - getY()) * 0.08));
+        }
+        double dy = Mth.clamp(want - getY(), -rate, r);
+        double ny = getY() + dy;
+        if (ny < groundNow) {
+            ny = groundNow;
+        }
+        if (Math.abs(ny - getY()) > 1e-4) {
+            setPos(getX(), ny, getZ());
+        }
+    }
+
+    // 地形に関わらず高さを寄せる (眠って海へ沈み去る演出だけ)
+    private void riseRaw(double ty, double rate) {
         double dy = Mth.clamp(ty - getY(), -rate, rate);
         if (Math.abs(dy) > 1e-4) {
             setPos(getX(), getY() + dy, getZ());
         }
+    }
+
+    // 体の下の地形 (海底・岸・木・丘) を、体積の柱ごとに測る。5 tick ごと。今の位置の分と、進む先 6〜48 ブロックまで見た分
+    private static final double[] GROUND_LOOK = {6.0, 12.0, 18.0, 24.0, 32.0, 40.0, 48.0};
+    private double groundNow = Double.NEGATIVE_INFINITY;
+    private double groundAhead = Double.NEGATIVE_INFINITY;
+
+    // 進む先の地形 (巡航・接近で動いているあいだだけ。止まっているときは、前の地形に持ち上げられない。寄っていくときは、休む場所の先までは見ない)
+    private void sampleAhead(ServerLevel level) {
+        jp.revati.skyabyss.titan.solid.TitanVolume volume = jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName());
+        groundAhead = Double.NEGATIVE_INFINITY;
+        if (mode != Mode.REST && getDeltaMovement().horizontalDistanceSqr() > 1.0e-4) {
+            double cap = mode == Mode.APPROACH ? horizontalDistanceTo(restX, restZ) : Double.MAX_VALUE;
+            double[] distances = java.util.Arrays.stream(GROUND_LOOK).filter(d -> d < cap).toArray();
+            if (distances.length > 0) {
+                groundAhead = jp.revati.skyabyss.titan.TitanGround.requiredAhead(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR, volume,
+                        getX(), getZ(), getYRot(), distances, 1);
+            }
+        }
+    }
+
+    // 今の位置・向きの下限 (動かしたあとに毎 tick。前後左右 3 ブロック先の地形まで数えて、崖のへりで跳ばないよう先に持ち上がり始める)
+    private void sampleNow(ServerLevel level) {
+        groundNow = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0);
+    }
+
+    // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)
+    public double groundRequiredY() {
+        return jp.revati.skyabyss.titan.TitanGround.requiredY((ServerLevel) level(), jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot());
     }
 
     private double horizontalDistanceTo(double x, double z) {
@@ -620,6 +708,14 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         }
         beginApproach((ServerLevel) level(), spot, FORCED_REST);
         return true;
+    }
+
+    // 試験用: 巡航で (x, z) へ向かう
+    void testCruiseTo(double x, double z) {
+        setMode(Mode.CRUISE);
+        targetX = x;
+        targetZ = z;
+        hasTarget = true;
     }
 
     // テスト用: その場ですぐに休む
@@ -722,7 +818,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     // 乗り場: 潮門の前の水の上 (背中から戻るときに出る所と同じ)
     @Override
     public Vec3 boardingChainOffset(float yaw) {
-        return offset(yaw, EXIT_SIDE, 0, -GATE_BACK);
+        return offset(yaw, DOCK_SIDE, 0, -GATE_BACK);
     }
 
     // 潮門の前 → 門の敷居 → 甲羅の肩 → 塔の横 → 塔の前の座席の手前 (世界の座標)
@@ -731,7 +827,7 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         float yaw = getYRot();
         double sea = level().getSeaLevel();
         List<Vec3> points = new ArrayList<>();
-        Vec3 dock = position().add(offset(yaw, EXIT_SIDE, 0, -GATE_BACK));
+        Vec3 dock = position().add(offset(yaw, DOCK_SIDE, 0, -GATE_BACK));
         points.add(new Vec3(dock.x, sea + 0.6, dock.z));
         points.add(position().add(offset(yaw, GATE_SIDE, REST_DRAFT + 7.0, -GATE_BACK)));
         points.add(position().add(offset(yaw, 20.0, 27.0, -17.0)));

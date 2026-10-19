@@ -180,8 +180,10 @@ public final class PartyMarkers {
         float hw = Math.max(1, vx > 0 ? rect[2] - cx : cx - rect[0]);
         float hh = Math.max(1, vy > 0 ? rect[3] - cy : cy - rect[1]);
         float t = Math.min(Math.abs(vx) < 1e-4f ? Float.MAX_VALUE : hw / Math.abs(vx), Math.abs(vy) < 1e-4f ? Float.MAX_VALUE : hh / Math.abs(vy));
-        int ax = Math.round(cx + vx * t);
-        int ay = Math.round(cy + vy * t);
+        // 矢印の置き場は HudManager (板・バニラの部品の上は避けて、縁を伝って空いた所へ)
+        int[] edge = jp.revati.skyabyss.client.hud.HudManager.edgePoint(vx, vy);
+        int ax = edge[0];
+        int ay = edge[1];
         drawArrow(g, ax, ay, (float) Math.atan2(vy, vx) + (float) Math.PI / 2f, rgb);
         int lx = Mth.clamp(ax, lw / 2 + 4, w - PartyClient.W - 12 - lw / 2);
         int ly = ay + 8;

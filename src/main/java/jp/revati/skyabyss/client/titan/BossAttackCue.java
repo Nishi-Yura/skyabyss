@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.Config;
-import jp.revati.skyabyss.client.notice.NoticeClient;
+import jp.revati.skyabyss.client.hud.HudManager;
+import jp.revati.skyabyss.hud.HudLayout.Id;
+import jp.revati.skyabyss.hud.HudLayout.Rect;
+import jp.revati.skyabyss.hud.HudLayout.Region;
+import jp.revati.skyabyss.hud.HudLayout.Request;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -70,17 +74,37 @@ public final class BossAttackCue {
         }
     }
 
-    public static void render(GuiGraphics g, Minecraft mc, float t) {
+    // HUD の要求: 上中央の、ボスバーのすぐ下 (SMALL は一行 11 を行数ぶん、FULL は印と名前と帯の大きな一つ)
+    public static void requests(Minecraft mc, java.util.List<Request> out) {
         if (ENTRIES.isEmpty() || mc.options.hideGui) {
             return;
         }
         if (Config.BOSS_ATTACK_NAMES.get() == Config.BossAttackNames.FULL) {
-            renderFull(g, mc, t, ENTRIES.get(ENTRIES.size() - 1));
+            Entry e = ENTRIES.get(ENTRIES.size() - 1);
+            out.add(Request.of(Id.BOSS_CUE, Region.TOP_CENTER, Math.max(48, mc.font.width(e.label)) + 8, 42));
             return;
         }
-        int cx = g.guiWidth() / 2;
-        int top = NoticeClient.lastBossBottom();
-        int y = (top > 0 ? top : 4) + 3;
+        int w = 0;
+        for (Entry e : ENTRIES) {
+            w = Math.max(w, mc.font.width(e.label) + (e.icon == null ? 0 : 10) + 6);
+        }
+        out.add(Request.of(Id.BOSS_CUE, Region.TOP_CENTER, w, ENTRIES.size() * 11));
+    }
+
+    public static void render(GuiGraphics g, Minecraft mc, float t) {
+        if (ENTRIES.isEmpty() || mc.options.hideGui) {
+            return;
+        }
+        Rect r = HudManager.rect(Id.BOSS_CUE);
+        if (r == null) {
+            return;
+        }
+        if (Config.BOSS_ATTACK_NAMES.get() == Config.BossAttackNames.FULL) {
+            renderFull(g, mc, t, ENTRIES.get(ENTRIES.size() - 1), r);
+            return;
+        }
+        int cx = r.x() + r.w() / 2;
+        int y = r.y() + 1;
         for (int i = 0; i < ENTRIES.size(); i++) {
             Entry e = ENTRIES.get(i);
             float shown = Math.min(Math.max(e.ticks, 14), SMALL_MAX_TICKS);
@@ -113,7 +137,7 @@ public final class BossAttackCue {
     }
 
     // 従来の大きい表示 (設定 FULL)
-    private static void renderFull(GuiGraphics g, Minecraft mc, float t, Entry e) {
+    private static void renderFull(GuiGraphics g, Minecraft mc, float t, Entry e, Rect r) {
         float k = (t - e.start) / Math.max(1, e.ticks);
         if (k > 1.25f) {
             ENTRIES.clear();
@@ -122,8 +146,8 @@ public final class BossAttackCue {
         if (k < 0) {
             return;
         }
-        int cx = g.guiWidth() / 2;
-        int y = 62;
+        int cx = r.x() + r.w() / 2;
+        int y = r.y();
         float alpha = k <= 1f ? 1f : 1f - (k - 1f) / 0.25f;
         float pulse = 0.75f + 0.25f * (float) Math.sin(t * (0.6f + k * 1.4f));
         int a = (int) (alpha * 255);

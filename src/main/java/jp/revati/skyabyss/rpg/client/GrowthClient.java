@@ -74,6 +74,20 @@ public final class GrowthClient {
         }
     }
 
+    // 開発用 (/skyabyss_hud demo): 「+経験値」の列とレベルアップの文字を、今この場で出す
+    public static void demo() {
+        POPUPS.clear();
+        POPUPS.add(new Popup(12, ""));
+        POPUPS.add(new Popup(30, ""));
+        POPUPS.add(new Popup(8, ""));
+        barFlash = 12;
+        levelUpAge = 12;
+        levelUpLevel = 7;
+        for (Popup p : POPUPS) {
+            p.age = 0;
+        }
+    }
+
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
