@@ -155,6 +155,10 @@ public final class TrialHub {
             return;
         }
         // 碑を立てる・立て直す (人がいるあいだ 10 秒に一度)
+        if (now % 200 == 0 && !players.isEmpty()) {
+            // 順位の石と飾り板 (転生。docs/design/31 の C11・C21)
+            jp.revati.skyabyss.rebirth.RebirthBoards.install(level, titan);
+        }
         if (now % 200 == 0 && !players.isEmpty() && HubTablets.install(level, titan) > 0) {
             for (UUID g : groupsOf(players)) {
                 HubTablets.refresh(level, g);
