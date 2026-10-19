@@ -89,6 +89,10 @@ public final class AffixRules {
         for (int i = 0; i < count && !pool.isEmpty(); i++) {
             AffixType pick = weighted(pool, random);
             pool.remove(pick);
+            if (pick.isMark()) {
+                // 木の印は 1 装備に 1 つまで
+                pool.removeIf(AffixType::isMark);
+            }
             out.add(new Affix(pick, value(pick, legendary, random)));
         }
         return List.copyOf(out);
@@ -167,9 +171,13 @@ public final class AffixRules {
         }
         boolean legendary = tier == GearTier.LEGENDARY;
         List<AffixType> seen = new ArrayList<>();
+        int marks = 0;
         for (Affix a : list) {
             AffixType t = a.kind();
             if (t == null || t.slot != slot || seen.contains(t)) {
+                return false;
+            }
+            if (t.isMark() && ++marks > 1) {
                 return false;
             }
             if (a.value() < t.min(legendary) - 1e-9 || a.value() > t.max(legendary) + 1e-9) {

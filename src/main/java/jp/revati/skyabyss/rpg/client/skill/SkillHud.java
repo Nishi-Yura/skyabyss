@@ -48,12 +48,12 @@ public final class SkillHud {
         if (!anySlot(SkillManager.get(mc.player))) {
             return;
         }
-        int row = SkillRules.SLOTS * (SLOT + SLOT_GAP) - SLOT_GAP;
+        int row = SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP;
         out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
     static boolean anySlot(SkillData d) {
-        for (int i = 0; i < d.slots.length; i++) {
+        for (int i = 0; i < d.slotCount(); i++) {
             if (d.slot(i) != null) {
                 return true;
             }
@@ -123,7 +123,7 @@ public final class SkillHud {
             return;
         }
         Font font = mc.font;
-        for (int i = 0; i < d.slots.length; i++) {
+        for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
             g.blit(TEXTURE, x, y, SLOT, SLOT, 468, 384, 40, 40, TEX_W, TEX_H);
@@ -139,7 +139,7 @@ public final class SkillHud {
                 int left = d.cooldown(s);
                 // 冴え (手の武器の特性) で縮んだ待ちを全体の長さにする (サーバーが待ちを決めるときと同じ計算)。
                 // 待ちの途中で武器を持ち替えると全体が変わるが、覆いは 16 で止まるので崩れない
-                int total = jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(mc.player, SkillRules.cooldownTicks(s, rank));
+                int total = SkillManager.cooldownFor(mc.player, s);
                 if (left > 0) {
                     int h = Mth.clamp(Math.round(16f * left / total), 1, 16);
                     g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB0101418);
@@ -175,6 +175,6 @@ public final class SkillHud {
 
     // 32px の絵を 16 で描く
     static void drawIcon(GuiGraphics g, int index, int x, int y) {
-        g.blit(ICONS, x, y, 16, 16, (index % 8) * 32, (index / 8) * 32, 32, 32, 256, 64);
+        g.blit(ICONS, x, y, 16, 16, (index % 8) * 32, (index / 8) * 32, 32, 32, 256, 192);
     }
 }

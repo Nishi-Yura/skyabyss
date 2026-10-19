@@ -3,29 +3,69 @@ package jp.revati.skyabyss.rpg.skill;
 import java.util.ArrayList;
 import java.util.List;
 
-// 技の一覧。木ごとに 3 段 (tier 0..2)。1 段目は左右の 2 つ、2 段目は真上の技が要る、3 段目 (奥義) は 2 段目のどちらかが要る。
-// 数値は SkillRules、表と理由は docs/design/04_growth_and_skills.md の 10 章。
-// 保存には id (文字列) を使う。並びを変えても記録は壊れない
+// 技の一覧 (36 本)。木ごとに 4 行 (tier 0..3、Lv 1・5・12・20)。
+//   1 行目: 左 (使う技) と右 (常に効く技)。前提なし
+//   2 行目: 真上の技が要る
+//   3 行目: 奥義の使う技 (2 行目のどちらかが要る)。真ん中
+//   4 行目: 要 (かなめ。癖のある常に効く技。3 行目が要る。段は 1)
+// 数値は SkillRules、表と理由は docs/design/04_growth_and_skills.md と 27_builds_and_classes.md。
+// 保存には id (文字列) を使う。並びを変えても記録は壊れない (前の版の 10 の技は id をそのまま木だけ移した)
 public enum Skill {
-    // ---------------------------------------------------------------- 剣士 (筋力)
-    TITAN_CLEAVE("titan_cleave", SkillTree.SWORD, true, 3, 0, 0, 1),
-    RIPOSTE("riposte", SkillTree.SWORD, false, 3, 0, 1, 1),
-    LUNGE("lunge", SkillTree.SWORD, true, 2, 1, 0, 5, "titan_cleave"),
-    STONE_STANCE("stone_stance", SkillTree.SWORD, false, 3, 1, 1, 5, "riposte"),
-    WHALE_SWEEP("whale_sweep", SkillTree.SWORD, true, 2, 2, 2, 12, "lunge", "stone_stance"),
-    // ---------------------------------------------------------------- 弓使い (敏捷)
-    CLOUD_PIERCE("cloud_pierce", SkillTree.BOW, true, 3, 0, 0, 1),
-    FAR_SHOT("far_shot", SkillTree.BOW, false, 3, 0, 1, 1),
-    BACKSTEP("backstep", SkillTree.BOW, true, 2, 1, 0, 5, "cloud_pierce"),
-    HAWK_EYE("hawk_eye", SkillTree.BOW, false, 3, 1, 1, 5, "far_shot"),
-    SKY_RAIN("sky_rain", SkillTree.BOW, true, 2, 2, 2, 12, "backstep", "hawk_eye");
+    // ---------------------------------------------------------------- 岩守り (筋力・耐久 ／ 壁・近接)
+    TITAN_CLEAVE("titan_cleave", SkillTree.ROCK, Kind.ACTIVE, 3, 0, 0),
+    RIPOSTE("riposte", SkillTree.ROCK, Kind.PASSIVE, 3, 0, 1),
+    ROCK_CALL("rock_call", SkillTree.ROCK, Kind.ACTIVE, 2, 1, 0, "titan_cleave"),
+    STONE_STANCE("stone_stance", SkillTree.ROCK, Kind.PASSIVE, 3, 1, 1, "riposte"),
+    WHALE_SWEEP("whale_sweep", SkillTree.ROCK, Kind.ACTIVE, 2, 2, 2, "rock_call", "stone_stance"),
+    STONE_OATH("stone_oath", SkillTree.ROCK, Kind.KEYSTONE, 1, 3, 2, "whale_sweep"),
+    // ---------------------------------------------------------------- 風読み (敏捷 ／ 機動・短い間合いの攻め)
+    LUNGE("lunge", SkillTree.WIND, Kind.ACTIVE, 2, 0, 0),
+    NIMBLE("nimble", SkillTree.WIND, Kind.PASSIVE, 3, 0, 1),
+    BACKSTEP("backstep", SkillTree.WIND, Kind.ACTIVE, 2, 1, 0, "lunge"),
+    FORESIGHT("foresight", SkillTree.WIND, Kind.PASSIVE, 3, 1, 1, "nimble"),
+    WIND_REND("wind_rend", SkillTree.WIND, Kind.ACTIVE, 2, 2, 2, "backstep", "foresight"),
+    LONE_WIND("lone_wind", SkillTree.WIND, Kind.KEYSTONE, 1, 3, 2, "wind_rend"),
+    // ---------------------------------------------------------------- 潮歌い (精神 ／ 支え・崩し)
+    WARD_SONG("ward_song", SkillTree.TIDE, Kind.ACTIVE, 3, 0, 0),
+    CALM_HEART("calm_heart", SkillTree.TIDE, Kind.PASSIVE, 3, 0, 1),
+    EBB_TIDE("ebb_tide", SkillTree.TIDE, Kind.ACTIVE, 2, 1, 0, "ward_song"),
+    RIPPLE("ripple", SkillTree.TIDE, Kind.PASSIVE, 3, 1, 1, "calm_heart"),
+    CYCLE_SONG("cycle_song", SkillTree.TIDE, Kind.ACTIVE, 2, 2, 2, "ebb_tide", "ripple"),
+    CHORUS_VOICE("chorus_voice", SkillTree.TIDE, Kind.KEYSTONE, 1, 3, 2, "cycle_song"),
+    // ---------------------------------------------------------------- 灰の鍛え人 (筋力・精神 ／ 近接の攻め・火)
+    TEMPER("temper", SkillTree.ASH, Kind.ACTIVE, 3, 0, 0),
+    EMBER_HEART("ember_heart", SkillTree.ASH, Kind.PASSIVE, 3, 0, 1),
+    EMBER_HAMMER("ember_hammer", SkillTree.ASH, Kind.ACTIVE, 2, 1, 0, "temper"),
+    FORGE_MEMORY("forge_memory", SkillTree.ASH, Kind.PASSIVE, 3, 1, 1, "ember_heart"),
+    ASH_SCATTER("ash_scatter", SkillTree.ASH, Kind.ACTIVE, 2, 2, 2, "ember_hammer", "forge_memory"),
+    SMITH_EYE("smith_eye", SkillTree.ASH, Kind.KEYSTONE, 1, 3, 2, "ash_scatter"),
+    // ---------------------------------------------------------------- 骨の射手 (敏捷 ／ 遠い間合いの攻め・罠)
+    CLOUD_PIERCE("cloud_pierce", SkillTree.BONE, Kind.ACTIVE, 3, 0, 0),
+    FAR_SHOT("far_shot", SkillTree.BONE, Kind.PASSIVE, 3, 0, 1),
+    BONE_TRAP("bone_trap", SkillTree.BONE, Kind.ACTIVE, 2, 1, 0, "cloud_pierce"),
+    HAWK_EYE("hawk_eye", SkillTree.BONE, Kind.PASSIVE, 3, 1, 1, "far_shot"),
+    SKY_RAIN("sky_rain", SkillTree.BONE, Kind.ACTIVE, 2, 2, 2, "bone_trap", "hawk_eye"),
+    STILL_STRING("still_string", SkillTree.BONE, Kind.KEYSTONE, 1, 3, 2, "sky_rain"),
+    // ---------------------------------------------------------------- 旅人 (共通の木。使う技 1 ＋ 常 4 ＋ 要 1)
+    SIGNAL("signal", SkillTree.TRAVELER, Kind.ACTIVE, 2, 0, 0),
+    READINESS_REWARD("readiness_reward", SkillTree.TRAVELER, Kind.PASSIVE, 3, 0, 1),
+    CAMP_HAND("camp_hand", SkillTree.TRAVELER, Kind.PASSIVE, 2, 1, 0, "signal", "readiness_reward"),
+    APPRAISER("appraiser", SkillTree.TRAVELER, Kind.PASSIVE, 1, 1, 1, "signal", "readiness_reward"),
+    FLEET_FOOT("fleet_foot", SkillTree.TRAVELER, Kind.PASSIVE, 3, 2, 2, "camp_hand", "appraiser"),
+    JOURNAL("journal", SkillTree.TRAVELER, Kind.KEYSTONE, 1, 3, 2, "fleet_foot");
 
+    public enum Kind {
+        ACTIVE, PASSIVE, KEYSTONE
+    }
+
+    // 行ごとの要るレベルは 1・5・12・20 (minLevel)
     public final String id;
     public final SkillTree tree;
-    // true = スロットに置いて使う技 (能動)。false = 覚えるだけで効く技 (常時)
+    public final Kind kind;
+    // true = スロットに置いて使う技 (能動)。false = 覚えるだけで効く技 (常時・要)
     public final boolean active;
     public final int maxRank;
-    // 段 (0 = 1 段目) と、木の中の列 (0 = 左、1 = 右、2 = 真ん中)
+    // 行 (0 = 1 行目) と、木の中の列 (0 = 左、1 = 右、2 = 真ん中)
     public final int tier;
     public final int column;
     // 覚えるのに要るレベル
@@ -33,15 +73,20 @@ public enum Skill {
     // 前提: このうちどれか一つを覚えていること (空なら前提なし)
     private final String[] requiresAny;
 
-    Skill(String id, SkillTree tree, boolean active, int maxRank, int tier, int column, int minLevel, String... requiresAny) {
+    Skill(String id, SkillTree tree, Kind kind, int maxRank, int tier, int column, String... requiresAny) {
         this.id = id;
         this.tree = tree;
-        this.active = active;
+        this.kind = kind;
+        this.active = kind == Kind.ACTIVE;
         this.maxRank = maxRank;
         this.tier = tier;
         this.column = column;
-        this.minLevel = minLevel;
+        this.minLevel = tier == 0 ? 1 : tier == 1 ? 5 : tier == 2 ? 12 : 20;
         this.requiresAny = requiresAny;
+    }
+
+    public boolean keystone() {
+        return kind == Kind.KEYSTONE;
     }
 
     public List<Skill> requires() {
@@ -69,9 +114,19 @@ public enum Skill {
         return "skill.skyabyss." + id + ".flavor";
     }
 
-    // アイコンの位置 (gui/skill/icons.png の 32px の升目)
+    // 型 (武器の型) のおまけの一行 (なければ空の文字。lang の skill.skyabyss.<id>.type)
+    public String typeKey() {
+        return "skill.skyabyss." + id + ".type";
+    }
+
+    // アイコンの位置 (gui/skill/icons.png の 32px の升目。並びは宣言の順)
     public int iconIndex() {
         return ordinal();
+    }
+
+    // この技の刻印 (第一段階。ない技は空)
+    public List<Rune> runes() {
+        return Rune.of(this);
     }
 
     public static Skill byId(String id) {
