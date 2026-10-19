@@ -37,13 +37,16 @@ public final class BellTower {
     public static final int COUNT = 5;
     public static final String FIRST_ROOM = "whale_bell";
     public static final String FLAG = "bell";
-    // 鐘の台 (台の高さ = 番号)。塔の床 (y FLOOR) の四隅と奥
+    // 鐘の台 (台の高さ = 番号)。塔の北の壁ぎわに、西から東へ 1 → 5 と高くなって並ぶ (音階のように読める)
     public static final List<int[]> PILLARS = List.of(
-            new int[]{-50, -125}, new int[]{-50, -115}, new int[]{-36, -125}, new int[]{-36, -115}, new int[]{-43, -127});
+            new int[]{-50, -124}, new int[]{-47, -124}, new int[]{-43, -124}, new int[]{-39, -124}, new int[]{-36, -124});
     // 入口の岩棚 (W2 と同じ高さ) と、そこから北の塔の床へ下りる階段
     public static final int LANDING_Y = FLOOR + 9;
     private static final int STAIR_X1 = -44;
     private static final int STAIR_X2 = -40;
+    // 大きな吊り鐘の真下 (階段の上)。装飾
+    private static final int GREAT_X = -43;
+    private static final int GREAT_Z = -117;
 
     private static final Map<UUID, Integer> PROGRESS = new HashMap<>();
 
@@ -65,23 +68,53 @@ public final class BellTower {
         return 0;
     }
 
+    // 版 18 で作り直し (数え歌の鐘楼): 凝灰岩と緑青の銅の塔 (ZonePalette.BELL)。壁・床・天井は外周を必ず埋める (体の殻が薄くても穴が空かない)。
+    // 入口は W2 の北の戸口 (BELL_PASS) 一か所だけで、銅の枠をつける。岩棚 (W2 と同じ高さ) から階段で塔の床へ下りる。
+    // 塔の真ん中の天井から大きな吊り鐘 (飾り)、北の壁ぎわに 1〜5 の鐘が高さ順に並ぶ。四隅は銅の柱
     static void build(BuildKit kit) {
+        kit.palette(ZonePalette.BELL);
+        kit.roomSolid(BELL);
+        // 戸口 (壁の厚さの分をくり抜く)。塔を作ったあとに開ける
         kit.room(BELL_PASS);
-        kit.room(BELL);
-        kit.ribs(BELL, 6, true);
-        kit.pilasters(BELL, 6);
-        kit.wallLamps(BELL, 5, FLOOR + 6);
-        kit.wallLamps(BELL, 5, FLOOR + 16);
-        // 入口の岩棚 (W2 と同じ高さ): 塔の南の端
-        for (int x = -46; x <= -38; x++) {
-            for (int z = BELL.z2() - 5; z <= BELL.z2(); z++) {
-                kit.set(x, LANDING_Y, z, BuildKit.POLISHED);
-                // 岩棚の下は石で埋める (宙に浮かない)
-                kit.fill(x, FLOOR + 1, z, x, LANDING_Y - 1, z, BuildKit.BRICKS);
+        kit.doorFrame(wall(BELL_PASS.x1(), BELL_PASS.x2(), LANDING_Y + 1, LANDING_Y + 6, BELL.z2() + 1, true), LANDING_Y);
+        kit.doorFrame(wall(BELL_PASS.x1(), BELL_PASS.x2(), LANDING_Y + 1, LANDING_Y + 6, BELL_PASS.z2(), true), LANDING_Y);
+        // 四隅の銅の柱 (灯りを埋める)
+        for (int x : new int[]{BELL.x1(), BELL.x2()}) {
+            for (int z : new int[]{BELL.z1(), BELL.z2()}) {
+                for (int y = FLOOR + 1; y < BELL.ceilingY(); y++) {
+                    kit.set(x, y, z, y == BELL.ceilingY() - 1 ? kit.pal().cap() : y == FLOOR + 1 ? kit.pal().trim()
+                            : (y == FLOOR + 8 || y == FLOOR + 17) ? kit.pal().glow() : kit.pal().pillarAlong(Direction.Axis.Y));
+                }
             }
         }
+        kit.ribs(BELL, 6, true);
+        kit.wallLamps(BELL, 5, FLOOR + 6);
+        kit.wallLamps(BELL, 5, FLOOR + 16);
+        // 床の模様: 中央の輪 (吊り鐘の真下) と、北の壁ぎわの鐘の列の帯
+        for (int x = BELL.x1(); x <= BELL.x2(); x++) {
+            for (int z = BELL.z1(); z <= BELL.z2(); z++) {
+                double d = Math.hypot(x - GREAT_X, z - GREAT_Z);
+                if (d <= 5.5 && d >= 4.5 || d <= 1.5) {
+                    kit.set(x, FLOOR, z, kit.pal().trim());
+                } else if (z >= -126 && z <= -122) {
+                    kit.set(x, FLOOR, z, (x + z) % 2 == 0 ? kit.pal().floorAlt() : kit.pal().floor());
+                }
+            }
+        }
+        // 入口の岩棚 (W2 と同じ高さ): 塔の南の端。縁には低い手すり。岩棚の下は石で埋める (宙に浮かない)
+        BlockState rail = Blocks.TUFF_BRICK_WALL.defaultBlockState();
+        for (int x = BELL_PASS.x1() - 2; x <= BELL_PASS.x2() + 2; x++) {
+            for (int z = BELL.z2() - 5; z <= BELL.z2(); z++) {
+                kit.set(x, LANDING_Y, z, x == BELL_PASS.x1() - 2 || x == BELL_PASS.x2() + 2 ? kit.pal().trim() : kit.pal().floor());
+                kit.fill(x, FLOOR + 1, z, x, LANDING_Y - 1, z, kit.pal().wall());
+            }
+        }
+        for (int z = BELL.z2() - 4; z <= BELL.z2(); z++) {
+            kit.set(BELL_PASS.x1() - 2, LANDING_Y + 1, z, rail);
+            kit.set(BELL_PASS.x2() + 2, LANDING_Y + 1, z, rail);
+        }
         // 岩棚から北の塔の床へ下りる階段 (登る向き = 南 = 背の高い側)。両脇は石の土手と低い壁
-        BlockState step = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
+        BlockState step = Blocks.TUFF_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
         int zStart = BELL.z2() - 6;
         for (int i = 0; ; i++) {
             int y = LANDING_Y - 1 - i;
@@ -90,36 +123,72 @@ public final class BellTower {
                 break;
             }
             for (int x = STAIR_X1 - 1; x <= STAIR_X2 + 1; x++) {
-                kit.fill(x, FLOOR + 1, z, x, y - 1, z, BuildKit.BRICKS);
+                kit.fill(x, FLOOR + 1, z, x, y - 1, z, kit.pal().wall());
                 boolean side = x == STAIR_X1 - 1 || x == STAIR_X2 + 1;
                 if (side) {
-                    kit.set(x, y, z, BuildKit.BRICKS);
-                    kit.set(x, y + 1, z, Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState());
+                    kit.set(x, y, z, kit.pal().wall());
+                    kit.set(x, y + 1, z, rail);
+                    if (i == 0) {
+                        // 岩棚の縁の手すりと土手の手すりのつなぎ目: 1 マスの隙間 (落ちる穴) を作らない
+                        kit.set(x, y + 2, z, rail);
+                    }
                 } else {
                     kit.set(x, y, z, step);
                     kit.fill(x, y + 1, z, x, y + 6, z, BuildKit.AIR);
                 }
             }
+            // 階段の脇の灯り (1 段おきの手すりの上)
+            if (i % 3 == 1) {
+                kit.lantern(STAIR_X1 - 1, y + 2, z);
+                kit.lantern(STAIR_X2 + 1, y + 2, z);
+            }
         }
-        // 鐘と台
+        // 鐘と台 (台の高さ = 番号)
         for (int n = 1; n <= COUNT; n++) {
             int[] p = PILLARS.get(n - 1);
             for (int y = FLOOR + 1; y <= FLOOR + n; y++) {
-                kit.set(p[0], y, p[1], y == FLOOR + n ? BuildKit.CHISELED : BuildKit.POLISHED);
+                kit.set(p[0], y, p[1], y == FLOOR + n ? kit.pal().trim() : kit.pal().pillarAlong(Direction.Axis.Y));
             }
             kit.set(bellPos(n), Blocks.BELL.defaultBlockState());
             kit.lantern(p[0] + 1, FLOOR + 1, p[1]);
         }
+        greatBell(kit);
         // 欠けた節の立て札 (岩棚の上)
         kit.standingSign(new BlockPos(-45, LANDING_Y + 1, BELL.z2() - 1), "sign.skyabyss.bell_hint");
-        // 塔の天井から垂れる鎖と灯り
-        for (int x : new int[]{-48, -43, -38}) {
-            for (int z : new int[]{-123, -117}) {
-                kit.hangingLantern(x, z, BELL.ceilingY(), 6);
+        // 塔の天井から垂れる鎖と灯り (吊り鐘と岩棚の上は避ける)
+        for (int[] l : new int[][]{{-49, -123}, {-37, -123}, {-49, -113}, {-37, -113}, {-49, -118}, {-37, -118}}) {
+            kit.hangingLantern(l[0], l[1], BELL.ceilingY(), 6);
+        }
+        register();
+    }
+
+    // 天井から鎖で吊るした大きな鐘 (緑青の銅の塊。中に灯りの舌)。階段の上、頭の届かない高さ
+    private static void greatBell(BuildKit kit) {
+        BlockState copper = Blocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState();
+        BlockState dark = Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState();
+        int top = BELL.ceilingY() - 1;
+        // 鎖 (天井から 3 本)
+        for (int y = top; y >= top - 3; y--) {
+            kit.set(GREAT_X, y, GREAT_Z, Blocks.CHAIN.defaultBlockState());
+        }
+        int y0 = top - 4;
+        kit.set(GREAT_X, y0, GREAT_Z, kit.pal().trim());
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                kit.set(GREAT_X + dx, y0 - 1, GREAT_Z + dz, copper);
             }
         }
-        kit.moss(BELL, 0.03f);
-        register();
+        // 肩 (5×5 の層。中心は舌の鎖) と、口の縁 (広がる輪)
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                kit.set(GREAT_X + dx, y0 - 2, GREAT_Z + dz, copper);
+                if (Math.abs(dx) == 2 || Math.abs(dz) == 2) {
+                    kit.set(GREAT_X + dx, y0 - 3, GREAT_Z + dz, dark);
+                }
+            }
+        }
+        kit.set(GREAT_X, y0 - 2, GREAT_Z, Blocks.CHAIN.defaultBlockState());
+        kit.set(GREAT_X, y0 - 3, GREAT_Z, kit.pal().hangingLantern());
     }
 
     // 初回だけ働く部屋として登録する (周回のグループには戸が最初から開く)。建てたあと・起動のあとに呼ぶ

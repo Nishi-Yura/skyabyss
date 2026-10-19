@@ -13,6 +13,7 @@ import jp.revati.skyabyss.titan.BackScale;
 import jp.revati.skyabyss.titan.TitanTravel;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.FirstRun;
+import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -36,6 +37,91 @@ public final class WhaleScaleSelfTest {
         }
     }
 
+    // 部屋の壁の輪 (x1-1〜x2+1 など) に、戸口でも別の部屋の内側でもない空気 (= 意図しない穴) が無いこと
+    static List<String> wallHoles(ServerLevel back) {
+        List<String> out = new ArrayList<>();
+        List<Box> rooms = new ArrayList<>(TitanBackAudit.ROOMS);
+        List<BlockPos> doors = new ArrayList<>();
+        for (List<BlockPos> l : TitanBackTrials.allDoorLists()) {
+            doors.addAll(l);
+        }
+        java.util.Set<BlockPos> doorSet = new java.util.HashSet<>(doors);
+        for (Box b : rooms) {
+            int holes = 0;
+            String first = null;
+            for (int x = b.x1() - 1; x <= b.x2() + 1; x++) {
+                for (int z = b.z1() - 1; z <= b.z2() + 1; z++) {
+                    boolean ring = x < b.x1() || x > b.x2() || z < b.z1() || z > b.z2();
+                    if (!ring) {
+                        continue;
+                    }
+                    for (int y = b.floorY() + 1; y < b.ceilingY(); y++) {
+                        BlockPos p = new BlockPos(x, y, z);
+                        if (!back.getBlockState(p).isAir() || doorSet.contains(p) || WhaleDump.allowedOpening(p, b)) {
+                            continue;
+                        }
+                        holes++;
+                        if (first == null) {
+                            first = p.toShortString();
+                        }
+                    }
+                }
+            }
+            if (holes > 0) {
+                out.add("wall holes: room " + b + " has " + holes + " unintended open wall cells (first " + first + ")");
+            }
+        }
+        return out;
+    }
+
+    // 版 18: 一本道・ゾーンの材質・胸びれの宝・次の目的・宝物庫の廃止
+    private static void checkVersion18(ServerLevel back, List<String> f) {
+        // 材質: ゾーンごとの壁が、少なくとも 8 種類はちがう
+        java.util.Set<net.minecraft.world.level.block.Block> walls = new java.util.HashSet<>();
+        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, LIBRARY, SONG_SHRINE, HEART_REST)) {
+            walls.add(back.getBlockState(new BlockPos(b.x1() - 1, b.floorY() + 2, (b.z1() + b.z2()) / 2)).getBlock());
+        }
+        check(f, walls.size() >= 8, "the zones do not read differently: only " + walls.size() + " wall materials " + walls);
+        // 宝物庫の部屋はない: 封印のすぐ先が回廊
+        check(f, back.getBlockState(new BlockPos(0, FLOOR + 1, GATE.get(0).getZ() - 1)).isAir(), "the seal does not open onto the heart corridor");
+        // 胸びれの先の宝箱
+        for (int side : new int[]{-1, 1}) {
+            check(f, back.getBlockState(WingsBuilder.cachePos(side)).is(net.minecraft.world.level.block.Blocks.CHEST), "fin cache chest missing for side " + side);
+        }
+        // 東の翼は一本道: 戸は北へ順に E1_EXIT → E2_EXIT → 詰所の入口
+        check(f, E1_EXIT.get(0).getZ() > E2_EXIT.get(0).getZ() && E2_EXIT.get(0).getZ() > CK_ENTRANCE.get(0).getZ(), "the east wing doors are not in a forward order");
+        // 次の目的: 記録だけから決まる
+        BackGroupData.Record r = BackGroupData.get(back).of(UUID.randomUUID());
+        var g1 = TrialGuide.next(r, HUB.center());
+        check(f, g1 != null && g1.id().equals("wings"), "guide in the hub should say 'wings': " + g1);
+        g1 = TrialGuide.next(r, E1.center());
+        check(f, g1 != null && g1.id().equals("east_e1"), "guide in the first hall: " + g1);
+        r.markHallCleared("e1");
+        g1 = TrialGuide.next(r, CE1.center());
+        check(f, g1 != null && g1.id().equals("east_e2"), "guide after the first hall: " + g1);
+        r.markHallCleared("e2");
+        r.markHallCleared("ck");
+        g1 = TrialGuide.next(r, E3.center());
+        check(f, g1 != null && g1.id().equals("east_e3"), "guide at the captain: " + g1);
+        r.markHallCleared("e3");
+        g1 = TrialGuide.next(r, E3.center());
+        check(f, g1 != null && g1.id().equals("east_stone"), "guide after the captain: " + g1);
+        r.setFlag(TitanBackTrials.STONE_FLAG + 1, true);
+        g1 = TrialGuide.next(r, E3.center());
+        check(f, g1 != null && g1.id().equals("stone_back"), "guide after the east stone: " + g1);
+        g1 = TrialGuide.next(BackGroupData.get(back).of(UUID.randomUUID()), W2.center());
+        check(f, g1 != null && g1.id().equals("bell"), "guide at the second west rest: " + g1);
+        var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");
+        var en = jp.revati.skyabyss.SignFit.lang("en_us");
+        for (String id : TrialGuide.IDS) {
+            check(f, ja.containsKey("objective.skyabyss.trial_" + id) && en.containsKey("objective.skyabyss.trial_" + id), "objective text missing for " + id);
+        }
+    }
+
+    private static ServerLevel back0(MinecraftServer server) {
+        return server.getLevel(TitanTravel.TITAN_BACK);
+    }
+
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
         // ---- BackScale
@@ -47,7 +133,7 @@ public final class WhaleScaleSelfTest {
         BackMetrics.checkWhale().forEach(p -> f.add("metrics: " + p));
         BackMetrics.table("whale").forEach((k, v) -> SkyAbyss.LOGGER.info("SELFTEST whale metrics {}: {}", k, v));
         // ---- 幕
-        for (var pair : List.of(java.util.Map.entry(VEIL_E1, E1), java.util.Map.entry(VEIL_E2, E2), java.util.Map.entry(VEIL_E3, E3))) {
+        for (var pair : List.of(java.util.Map.entry(VEIL_E1, E1), java.util.Map.entry(VEIL_E1_SOLO, E1), java.util.Map.entry(VEIL_E2, E2), java.util.Map.entry(VEIL_E3, E3))) {
             for (BlockPos p : pair.getKey()) {
                 if (!pair.getValue().contains(p)) {
                     f.add("a veil block is outside its hall at " + p);
@@ -86,7 +172,7 @@ public final class WhaleScaleSelfTest {
             FirstRun.syncDoors(back, group);
             check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, BELL_GATE), "the bell gate did not open on the known path");
             check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E3_LOCK), "the guard-post door did not open on the known path");
-            check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E1_SOUTH), "the way to the second hall did not open on the known path");
+            check(f, jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, group, E1_EXIT), "the way to the second hall did not open on the known path");
             // 版を上げる建て直し: 試練の進みは戻るが、keep.* (初回を終えた印) は残る
             record.setFlag("keep.selftest_seen", true);
             record.markHallCleared("e1");
@@ -94,11 +180,16 @@ public final class WhaleScaleSelfTest {
             check(f, record.isFirstCleared() && record.flag("keep.selftest_seen"), "a rebuild reset erased the keep.* records");
             check(f, !record.isHallCleared("e1") && !record.flag(BellTower.FLAG), "a rebuild reset did not clear the trial progress");
             record.remove("keep.selftest_seen");
+            checkVersion18(back, f);
             // 休み場の復活位置
             for (var e : TitanBackTrials.checkpointSpawns(back).entrySet()) {
                 check(f, TitanBackTrials.isSafeStand(back, e.getValue()), "rest point " + e.getKey() + " is not a safe standing spot at " + e.getValue());
             }
         }
+        if (back0(server) != null && TitanBackData.get(back0(server)).isBuilt()) {
+            f.addAll(wallHoles(back0(server)));
+        }
+        WhaleDump.write(back0(server));
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST whale scale PASSED");
         } else {

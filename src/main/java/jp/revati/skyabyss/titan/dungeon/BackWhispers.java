@@ -52,7 +52,7 @@ public final class BackWhispers {
             new Whisper("ridge", true, p -> near(p, new BlockPos(-3, top(-3, RIDGE_Z) + 1, RIDGE_Z), 8, 5)),
             new Whisper("shrine", true, p -> near(p, new BlockPos(0, shrineY(), SHRINE_Z), 6, 4)),
             new Whisper("hub", true, HUB::contains),
-            new Whisper("treasury", true, TREASURY::contains),
+            new Whisper("seal", true, p -> HEART_CORRIDOR.contains(p) && p.getZ() > HEART_REST.z2()),
             new Whisper("w0", false, W0::contains),
             new Whisper("w1", false, W1::contains),
             new Whisper("w2", false, W2::contains),

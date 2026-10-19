@@ -436,7 +436,6 @@
 | `opening.skyabyss.line` | ……ここは、どこだ。 | ...Where am I? | B0 題字の下（一度だけ） |
 | `opening.skyabyss.margin_line` | 鐘の方へ。 | Toward the bell. | 余白の一行（頁 `prologue/the_book_margin` の碑文と同じ文） |
 | `opening.skyabyss.bone_rumor` | 乾いた石のにおいが、風に混じっている。%sの丘のほうだ。 | A smell of dry stone rides the wind. It comes from the hills to the %s. | 骨の丘の前触れ 1（%s は方角。`message.skyabyss.guide.dir.<0..7>` の語） |
-| `opening.skyabyss.notebook_hint` | 帳面を手に持って右クリックすると読める | Hold the notebook and right-click to read it | B1 帳面を渡した直後の手がかり（`Notice.hint`。書の開き方は道具の説明にしか無かった） |
 | `opening.skyabyss.bone_far` | 遠く、丘の稜線が妙に白い。雲の影ではない。 | Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow. | 前触れ 2（丘の中心から 220 ブロック） |
 | `opening.skyabyss.bone_mid` | 足もとに、白い欠片が転がっている。……大きすぎる。 | White fragments lie at your feet. ...Too large. | 前触れ 3（130 ブロック。小さな地鳴り） |
 | `opening.skyabyss.bone_near` | 風が止んだ。丘は、丘のかたちをしていない。 | The wind has stopped. The hill is not shaped like a hill. | 前触れ 4（70 ブロック） |

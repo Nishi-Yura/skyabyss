@@ -300,6 +300,7 @@ public final class EmberTrialSelfTest {
             eastDoor(level);
             southNumbers(level);
             southVents(level);
+            emberGuideAndJets(level);
             southSimulate(level);
             quietTrials(level);
             resets(level);
@@ -1005,6 +1006,35 @@ public final class EmberTrialSelfTest {
         fp.setPos(-25, 77, -4);
         EmberTrials.patrol(level, List.of(fp));
         expect(EmberTrials.count(fp, EmberTrialSetup.FIRE_KEY.get()) == 0, "a fire key left the forge with the player");
+    }
+
+    // 目的の板の文 (ja・en)・火床の道の壁・噴気に焼かれた灰運びが火床を育てる (試遊のあとの直し。13 の 5.4・5.4.1)
+    private static void emberGuideAndJets(ServerLevel level) {
+        for (String lang : jp.revati.skyabyss.SignFit.LANGUAGES) {
+            Map<String, String> m = jp.revati.skyabyss.SignFit.lang(lang);
+            for (String id : EmberGuide.GOAL_IDS) {
+                expect(m.containsKey("gui.skyabyss.ember_goal." + id), "ember goal text " + id + " is missing in " + lang);
+            }
+            for (String t : List.of("west", "east", "south", "hub")) {
+                expect(m.containsKey("gui.skyabyss.ember_goal.title." + t), "ember goal title " + t + " is missing in " + lang);
+            }
+            expect(m.containsKey("message.skyabyss.ember.trial.south.jet_burned"), "jet_burned text is missing in " + lang);
+        }
+        // 灰運びの道の壁: 隙以外は高さ 2、隙は床まで
+        int floor = EmberBackLayout.FLOOR_SOUTH;
+        expect(level.getBlockState(new BlockPos(HearthVents.LANE_WALL_X, floor + 2, HearthVents.LANE_Z0)).isSolid(), "lane wall is missing at its start");
+        expect(level.getBlockState(new BlockPos(HearthVents.LANE_WALL_X, floor + 1, HearthVents.LANE_GAP_Z0)).isAir(), "lane wall gap is not open");
+        expect(Hearth.HEARTH.getZ() > HearthVents.LANE_Z1 && EmberBackLayout.SOUTH.contains(Hearth.HEARTH), "hearth is not past the lane inside the resized valley");
+        // 噴気に焼かれた灰運びは、灰が燃えて火床に +6。灰はもうかけられない (印が外れる)
+        BlockPos vent = HearthVents.VENTS.get(0);
+        net.minecraft.world.entity.Mob carrier = EmberTrials.spawn(level, jp.revati.skyabyss.titan.ember.mob.EmberMobSetup.ASH_THRALL.get(), vent.getX() + 0.5, vent.getY() + 1, vent.getZ() + 0.5,
+                Hearth.CARRIER_TAG);
+        Hearth.setStrength(30f);
+        HearthVents.hit(level, carrier, vent);
+        expect(Math.abs(Hearth.strength() - (30f + Hearth.JET_FEED)) < 0.01f, "a burned carrier should feed the hearth +6: " + Hearth.strength());
+        expect(!carrier.getTags().contains(Hearth.CARRIER_TAG), "a burned carrier kept its ash");
+        carrier.discard();
+        Hearth.setStrength(Hearth.START);
     }
 
     private static void southVents(ServerLevel level) {

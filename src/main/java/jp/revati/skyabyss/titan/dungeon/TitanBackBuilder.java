@@ -47,7 +47,7 @@ public final class TitanBackBuilder {
         buildSurface(kit);
         buildHub(kit);
         buildTreasury(kit);
-        // 宝物庫の奥の扉の先: 心臓の回廊と、最終ボスの心臓の間
+        // 北の封印の先: 心臓の回廊と、最終ボスの心臓の間
         HeartArenaBuilder.build(kit);
         // 鼓動の間の柱は、戸口・はしご・封印・碑文をすべて置いたあとに立てる (それらの前を避けるため)
         kit.pilasters(HUB, 5);
@@ -56,6 +56,10 @@ public final class TitanBackBuilder {
         WestWingBuilder.build(kit);
         EastWingBuilder.build(kit);
         WingsBuilder.build(kit);
+        // 建築の監査 (版 18): 四方が 1 高い床の中で 1 マスだけ低いくぼみを埋める (背の殻の模型の窪みと、ひれの道の縁)
+        smoothDimples(kit, -27, -17, 138, 152, 93, 103);
+        smoothDimples(kit, 54, 120, 70, 100, -75, -25);
+        smoothDimples(kit, -120, -54, 70, 112, -75, -25);
         // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
         BossGates.build(kit);
         MazeBuilder.buildFixtures(kit);
@@ -68,6 +72,10 @@ public final class TitanBackBuilder {
         // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
         for (Inscription lore : LORE_SIGNS) {
             kit.wallSign(lore.pos(), lore.facing(), lore.key());
+        }
+        // 道しるべの碑 (版 18)
+        for (Inscription guide : GUIDE_SIGNS) {
+            kit.wallSign(guide.pos(), guide.facing(), guide.key());
         }
         // 休み場の復活位置に苔の敷物が落ちていたら除く (立てる所を空けておく)
         for (BlockPos spawn : TitanBackTrials.checkpointSpawns().values()) {
@@ -83,6 +91,37 @@ public final class TitanBackBuilder {
         }
         data.markBuilt();
         SkyAbyss.LOGGER.info("Built the stone whale's back in {} ms", System.currentTimeMillis() - start);
+    }
+
+    // 床 (上が 2 マス空いた固いブロック) で、四方の隣の 1 つ上の高さに固いブロックがあるものは、1 つ低く埋まったくぼみなので、1 つ上を同じブロックで埋める
+    private static void smoothDimples(BuildKit kit, int x1, int x2, int y1, int y2, int z1, int z2) {
+        int filled = 0;
+        for (int x = x1; x <= x2; x++) {
+            for (int z = z1; z <= z2; z++) {
+                for (int y = y1; y <= y2; y++) {
+                    BlockState here = kit.get(x, y, z);
+                    if (here.isAir() || !here.getFluidState().isEmpty() || !here.canOcclude() || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
+                        continue;
+                    }
+                    boolean pit = true;
+                    for (Direction d : Direction.Plane.HORIZONTAL) {
+                        int nx = x + d.getStepX();
+                        int nz = z + d.getStepZ();
+                        if (kit.get(nx, y + 1, nz).isAir() || !kit.get(nx, y + 2, nz).isAir() || !kit.get(nx, y + 3, nz).isAir() || !kit.get(nx, y + 4, nz).isAir()) {
+                            pit = false;
+                            break;
+                        }
+                    }
+                    if (pit && kit.get(x, y + 3, z).isAir()) {
+                        kit.set(x, y + 1, z, here);
+                        filled++;
+                    }
+                }
+            }
+        }
+        if (filled > 0) {
+            SkyAbyss.LOGGER.info("Whale back: filled {} floor dimples", filled);
+        }
     }
 
     // ---------------------------------------------------------------- 島: 岩鯨と同じ形のブロックの鯨 (WhaleShape)
@@ -127,13 +166,14 @@ public final class TitanBackBuilder {
     // モデルの錨石 (左のわき腹の鉄の留め具) から、外へ張り出して雲の海の少し上まで垂れる鎖
     // (地上で岩鯨が垂らす鎖と同じく、胴の外へ渡してから下ろす)
     private static void anchorChain(BuildKit kit) {
-        BlockState along = Blocks.CHAIN.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
+        // 錨石から外へ渡す腕は、骨の梁 (固い) にする。垂れる鎖は、その梁の先から途切れずに下りる (宙から鎖がぶら下がらない)
+        BlockState arm = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
         BlockState down = Blocks.CHAIN.defaultBlockState();
         int y = ANCHOR_CHAIN_Y;
         int z = ANCHOR_CHAIN_Z;
-        for (int x = ANCHOR_STONE_X; x > ANCHOR_CHAIN_X; x--) {
-            if (kit.get(x, y, z).isAir()) {
-                kit.set(x, y, z, along);
+        for (int x = ANCHOR_STONE_X; x >= ANCHOR_CHAIN_X; x--) {
+            if (kit.get(x, y + 1, z).isAir()) {
+                kit.set(x, y + 1, z, arm);
             }
         }
         for (int yy = y; yy >= BASE_Y - 42; yy--) {
@@ -382,6 +422,9 @@ public final class TitanBackBuilder {
                 }
             }
         }
+        // 灯りを吊るす所は、屋根の石を欠かさない (鎖が宙に残らない)
+        kit.set(0, sy + 9, SHRINE_Z + 10, BuildKit.TILES);
+        kit.set(0, sy + 9, SHRINE_Z - 10, BuildKit.TILES);
         kit.hangingLantern(0, SHRINE_Z + 10, sy + 9, 2);
         kit.hangingLantern(0, SHRINE_Z - 10, sy + 9, 2);
         // 南の口 (広場から来る踏み跡) の段: 背は南へ下がっていくので、祠の床まで一段ずつ上がる段を置く
@@ -422,8 +465,9 @@ public final class TitanBackBuilder {
                     }
                 }
             }
-            if (i % 6 == 3 && y + SHRINE_STAIR_HEIGHT + 1 < sy) {
+            if (i % 3 == 1 && y + SHRINE_STAIR_HEIGHT + 1 < sy) {
                 kit.lantern(SHRINE_STAIR_HALF + 1, y + 2, z);
+                kit.lantern(-SHRINE_STAIR_HALF - 1, y + 2, z);
             }
         }
     }
@@ -453,11 +497,15 @@ public final class TitanBackBuilder {
                 }
             }
         }
+        // 灯りは床の近くまで低く吊るす (天井が高いので、高く吊るすと床に光が届かない)。広間のどこでも光度 4 以上
         for (int x : new int[]{-12, -6, 6, 12}) {
-            for (int z : new int[]{-50, -35, -20}) {
-                kit.hangingLantern(x, z, HUB.ceilingY(), 4);
+            for (int z : new int[]{-50, -42, -30, -20}) {
+                kit.hangingLantern(x, z, HUB.ceilingY(), 9);
             }
         }
+        // 床に埋めた灯りの道 (入口の通路から台座の脇を通って北の封印まで)
+        kit.routeStrip(FLOOR, BuildKit.line(0, -16, 0, -29), Blocks.SEA_LANTERN.defaultBlockState(), BuildKit.POLISHED);
+        kit.routeStrip(FLOOR, BuildKit.line(0, -41, 0, -54), Blocks.SEA_LANTERN.defaultBlockState(), BuildKit.POLISHED);
         kit.lantern(-2, FLOOR + 1, -3);
         kit.lantern(2, FLOOR + 1, 2);
         kit.moss(HUB, 0.04f);
@@ -482,36 +530,19 @@ public final class TitanBackBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 宝物庫
+    // ---------------------------------------------------------------- 北の封印 (心臓の回廊の入口)
+    // 版 18: 宝物庫の部屋は無くした (天の鍵の欠片は心臓を倒すと受け取る)。三つの石が歌うと、鼓動の間の北の封印が開き、そのまま心臓の回廊へ入る。
+    // 封印の両脇に、泣く黒曜石の柱 (灯りを兼ねる) を立てる
     private static void buildTreasury(BuildKit kit) {
-        // 壁はほかの部屋と同じ深層岩。島ではブロックを壊せないので、特別な石で囲む必要はない
-        kit.room(TREASURY);
-        kit.ribs(TREASURY, 3, true);
-        kit.floorBorder(TREASURY);
-        for (int x = TREASURY.x1(); x <= TREASURY.x2(); x++) {
-            for (int z = TREASURY.z1(); z <= TREASURY.z2(); z++) {
-                if ((x + z) % 2 == 0) {
-                    kit.set(x, FLOOR, z, BuildKit.CHISELED);
-                }
-            }
-        }
-        // 宝物庫の封印 (鼓動の間との境の壁) と、奥の扉
         for (BlockPos p : GATE) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
         }
-        for (BlockPos p : INNER_GATE) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
-        }
-        // 眠る台座 (飾り): 磁石石を、紫水晶とろうそくが囲む。欠片は心臓を倒すと受け取れる
-        kit.set(PEDESTAL.below(), Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
-        kit.set(PEDESTAL, Blocks.LODESTONE.defaultBlockState());
-        for (Direction d : Direction.Plane.HORIZONTAL) {
-            BlockPos c = PEDESTAL.relative(d);
-            kit.set(c, d.getAxis() == Direction.Axis.X ? Blocks.AMETHYST_CLUSTER.defaultBlockState()
-                    : Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
-        }
-        for (int[] l : new int[][]{{-7, -60}, {7, -60}, {-7, -70}, {7, -70}}) {
-            kit.hangingLantern(l[0], l[1], TREASURY.ceilingY(), 2);
+        for (int side = -1; side <= 1; side += 2) {
+            int x = 4 * side;
+            for (int y = FLOOR + 1; y <= FLOOR + 6; y++) {
+                kit.set(x, y, HUB.z1(), y == FLOOR + 6 ? Blocks.CHISELED_DEEPSLATE.defaultBlockState()
+                        : y == FLOOR + 3 || y == FLOOR + 4 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : Blocks.POLISHED_DEEPSLATE.defaultBlockState());
+            }
         }
     }
 

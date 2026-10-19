@@ -101,12 +101,40 @@ public final class SkillCommands {
                                     ctx.getSource().sendSuccess(() -> Component.literal("cast: " + r.name()), false);
                                     return r == SkillManager.CastResult.OK ? 1 : 0;
                                 }))))
+                        .then(Commands.literal("calling").then(player().then(Commands.argument("tree", StringArgumentType.word())
+                                .executes(ctx -> callingCommand(ctx, "")))))
+                        .then(Commands.literal("rune").then(player().then(Commands.argument("skill", StringArgumentType.word())
+                                .then(Commands.argument("index", IntegerArgumentType.integer(0, 4)).executes(ctx -> {
+                                    // 開発用: 刻印を選んだことにする (極めている・天職の木のときだけ。点も武器も問わない)
+                                    ServerPlayer p = target(ctx);
+                                    Skill s = Skill.byId(StringArgumentType.getString(ctx, "skill"));
+                                    int index = IntegerArgumentType.getInteger(ctx, "index");
+                                    if (s == null || !SkillManager.get(p).runeAvailable(s) || index > 0 && Rune.of(s, index) == null) {
+                                        ctx.getSource().sendFailure(Component.literal("rune not available"));
+                                        return 0;
+                                    }
+                                    if (index == 0) {
+                                        SkillManager.get(p).runes.remove(s.id);
+                                    } else {
+                                        SkillManager.get(p).runes.put(s.id, index);
+                                    }
+                                    SkillManager.sync(p);
+                                    return done(ctx);
+                                })))))
                         .then(Commands.literal("respecs").then(player().then(Commands.argument("count", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).respecs = IntegerArgumentType.getInteger(ctx, "count");
                             SkillManager.sync(p);
                             return done(ctx);
                         }))))));
+    }
+
+    // 開発用: 進みに関わらず天職を決める (一つ目が空なら一つ目、そうでなければ二つ目)
+    private static int callingCommand(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx, String unused) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = target(ctx);
+        SkillCalling.Result r = SkillCalling.choose(p, StringArgumentType.getString(ctx, "tree"), true);
+        ctx.getSource().sendSuccess(() -> Component.literal("calling: " + r.name()), false);
+        return r == SkillCalling.Result.OK ? 1 : 0;
     }
 
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, ?> player() {

@@ -72,14 +72,16 @@ public final class BuildAuditSelfTest {
     static {
         // 暗さ: 内部の広間 (潮殻の上段の広間・岩鯨の腹の通路・雷翼の内側・余燼の洞) は、灯りが少なく光度 0〜2 の歩ける所が残る。
         // 数は光の計算の時間で数件ゆらぐので少し余裕を見る。灯りを足す (または暗さを演出として許す) 設計の判断待ち (docs/review/build_audit_report.md の「暗さ」)
-        BUDGETS.add(new Budget("whale", "LIGHT_DARK", 600, "interior dark spots: design decision pending (add lights or accept the dark mood)"));
+        BUDGETS.add(new Budget("whale", "LIGHT_DARK", 175, "the dark waterway (about 126 cells by design: the lamp-stand game) plus a few pockets of shadow in halls and stairs (version 18 lit the routes to 4+)"));
         BUDGETS.add(new Budget("tide", "LIGHT_DARK", 600, "interior dark spots: design decision pending (upper halls UPPER_1..3 have few lamps)"));
         BUDGETS.add(new Budget("storm", "LIGHT_DARK", 95, "interior dark spots: design decision pending"));
         BUDGETS.add(new Budget("ember", "LIGHT_DARK", 175, "interior dark spots: design decision pending"));
-        // 岩鯨 (別の担当が直す): 鎖が空中からぶら下がる / 鎖の下のランタン / 1 マスのくぼみ
-        BUDGETS.add(new Budget("whale", "ATTACH_SUPPORT", 70, "pending fix by the whale-back agent: chains hanging from air at -48,58..92,110 and 1,97,-53; lantern at 4,131,105"));
-        BUDGETS.add(new Budget("whale", "FLOAT_BLOCK", 3, "pending fix by the whale-back agent: the lantern at 4,131,105 floats"));
-        BUDGETS.add(new Budget("whale", "FLOOR_DIMPLE", 6, "pending fix by the whale-back agent: single floor blocks one lower at -9,125,-146 / -8,126,71 / -5,127,104"));
+        // 岩鯨の谷の飛び石は、宙に浮かぶ一つの石 (跳ぶ道の部品)。浮きの検査から外す
+        for (BackReach.Box pit : new BackReach.Box[]{new BackReach.Box(-58, 100, -55, -36, 118, -18), new BackReach.Box(-56, 100, -91, -37, 118, -68),
+                new BackReach.Box(-36, 100, -86, -19, 118, -48)}) {
+            ALLOW.add(new Allow("whale", "FLOAT_BLOCK", pit, "stepping stones in the west pits float by design (the readable jump line, 26 of 8.6)"));
+        }
+        // 岩鯨の鎖・くぼみ・浮いた灯りは版 18 で直した (0 件)
     }
 
     private BuildAuditSelfTest() {
