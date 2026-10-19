@@ -156,6 +156,20 @@ final class StormRib {
         return out;
     }
 
+    // 周回の既知の道: 梁の格子の穴 (昇り風の穴) の床。そのグループの画面でだけ光る
+    static List<BlockPos> guideCells() {
+        List<BlockPos> out = new java.util.ArrayList<>();
+        for (int i = 0; i < RIB_LAYERS * RIB_HOPS; i++) {
+            BlockPos c = ribLedge(i);
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    out.add(c.offset(dx, 0, dz));
+                }
+            }
+        }
+        return out;
+    }
+
     // 層の灯りの場所 (岩棚の西の縁の上)。まだ着いていないグループには消えた石、着いたグループには灯り
     static BlockPos layerLight(int layer) {
         Area s = ribSlab(layer);

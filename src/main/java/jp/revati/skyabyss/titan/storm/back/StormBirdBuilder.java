@@ -703,7 +703,7 @@ public final class StormBirdBuilder {
             kit.put(h.calm().getX(), h.calm().getY(), h.calm().getZ(), StormBackSetup.HELM_CALM.get().defaultBlockState());
             kit.put(h.storm().getX(), h.storm().getY(), h.storm().getZ(), StormBackSetup.HELM_STORM.get().defaultBlockState());
             for (BlockPos p : new BlockPos[] {h.calm(), h.storm()}) {
-                kit.put(p.getX(), p.getY() + 1, p.getZ(), Blocks.WAXED_LIGHTNING_ROD.defaultBlockState());
+                kit.put(p.getX(), p.getY() + 1, p.getZ(), Blocks.LIGHTNING_ROD.defaultBlockState());
             }
         }
         // 風鳴り石 (台の上)

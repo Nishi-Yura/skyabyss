@@ -26,6 +26,7 @@ public final class StormBackAudit {
         s.scan.add(new Box(-16, 128, 12, 16, 160, 45));
         s.scan.add(new Box(-16, 129, -20, 16, 162, 12));
         s.scan.add(new Box(-150, 138, -26, 150, 158, 2));
+        s.scan.add(new Box(RIB_X1 - 2, 158, BONE_Z1 - 2, RIB_X2 + 2, RIB_TOP_Y + 8, BONE_Z2 + 2));
         s.scan.add(new Box(-12, 144, -100, 12, 160, -18));
         s.scan.add(new Box(-28, 112, -40, 22, 137, 6));
         // 西の骨の割れた床 (WEST_GAPS): わざとの穴。落ちると雲の下へ出て嵐に投げ返される
@@ -67,7 +68,7 @@ public final class StormBackAudit {
             s.goals.put("rest " + r.id(), r.spawn());
         }
         s.goals.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, -17));
-        s.goals.put("west knob floor", WEST_KNOB.offset(4, 1, 0));
+        s.goals.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17));
         s.goals.put("west stone ledge", WEST_STONE.offset(1, 0, 0));
         s.goals.put("tail hall", TAIL_CENTER);
         s.goals.put("eye hall", EYE_HALL_CENTER.offset(1, 0, 6));
