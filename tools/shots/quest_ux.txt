@@ -20,6 +20,9 @@ camera minecraft:overworld 0 -60 5.5 180 -8
 waitchunks
 wait 100
 
+# 何も進めていないとき: 新しい雑談があれば小さな点
+shot near_chat
+
 # 語り部に尋ねる段: 語り部の頭に金の「!」、鯨追いには何も出ない
 cmd skyabyss quest stage @s main_song ask_storyteller
 wait 80
@@ -44,3 +47,17 @@ shot wall_near
 camera minecraft:overworld 0 -60 32 180 -4
 wait 60
 shot wall_far
+
+# 旅嚢の "NEW": 新しく入った品を持ち物に出し、掃除で袋に入るのを待つ。ホットバーの左に [I] 旅嚢 NEW、画面の枠に NEW の札
+cmd skyabyss pouch hold off
+cmd give @s skyabyss:resonance_crystal 3
+cmd give @s skyabyss:stone_whale_shard 5
+cmd give @s skyabyss:lore_page 1
+cmd give @s skyabyss:sky_key_fragment 1
+camera minecraft:overworld 0 -60 5.5 180 -8
+wait 120
+shot pouch_hint
+key skyabyss_pouch.key.open
+wait 40
+shot pouch_new
+

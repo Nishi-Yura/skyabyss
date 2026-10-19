@@ -155,6 +155,7 @@
 - **章の札**: 目的の帯のすぐ上に、今の章（「一章　空を泳ぐもの」。`Chapters` の `tab` + 全角空白 + `title`。序章は「序章　空の影」）を小さく出しっぱなしにする。章はサーバーが人ごとに `Chapters.of` で導き、変わったとき・入ったときだけその人に送る（パケット版 `questux-1`）。場面・F1・F3・目覚めの暗転では出さない。画面を開いている間は薄くする。設定 `chapterLabel`。札の高さ（11px）の分だけ、下の帯と追跡の表示が下へずれる（`QuestHud.y()`）。HUD の置き場を一括で持つ部品（`HudLayout`）ができたら、札はそこの「帯の上」の段に載せる。
 - **更新の音**: クエストの札（`QuestToast`）と同時に、メインの段の更新・始まり・終わりは小さな鐘が二つ（五度上がる、1.3 秒、最大音量 0.5。終わりは少し低く）、サブは柔らかいひとつ（0.7 秒、0.32）。合成は `tools/gen_quest_ux_sounds.py`（序盤の鐘と同じ部分音の組み方）、出力は `sounds/ui/quest_main.ogg`・`quest_side.ogg`、登録は `QuestUx`、鳴らすのは `QuestClient.playSound`。会話・場面の最中は札と同じく溜めて、閉じたあとに鳴る。設定 `questSound` で止める（以前の水晶の音は廃止）。
 - **NPC の頭の上の印**: 07 の 8.5 節。見本の絵は `docs/review/previews/quest_ux_sheet.png`（`tools/shots/quest_ux.txt` → `tools/quest_ux_sheet.py`）。
+- **旅嚢の "NEW"**: 新しく袋に入って、まだ画面で見ていない品の枠・輪の札・ホットバー脇の札に小さな赤い "NEW"（持ち主ごとに保存。カーソルを重ねると外れる）。22 の 9.4 節。
 
 ## 9. 章の題字と余韻（`story/arc/ChapterCards`）
 

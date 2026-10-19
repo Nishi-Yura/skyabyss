@@ -222,6 +222,27 @@ public final class PouchSelfTest {
         check(f, Pouch.data(p).isEmpty(), "a new player has a non-empty pouch");
         ItemStack s20 = new ItemStack(shard, 20);
         check(f, Pouch.add(p, s20) == 20 && s20.isEmpty() && Pouch.count(p, shard) == 20, "adding 20 scales failed");
+        // ---- "NEW" の印 (22 の 9.4): 初めて入った品に付く・見たら外れる・同じ品を足しても付き直さない・人ごと・保存と同期・倒れても残る
+        ResourceLocation shardId = PouchEntries.any(shard).id();
+        check(f, Pouch.data(p).isFresh(shardId) && Pouch.data(p).anyFresh(), "a first-time pouch item has no NEW flag");
+        Pouch.add(p, new ItemStack(shard, 1));
+        check(f, Pouch.data(p).isFresh(shardId), "adding more of an item cleared the NEW flag");
+        FakePlayer freshOther = player(level, "[pouch_new_other]");
+        check(f, !Pouch.data(freshOther).anyFresh(), "another player got the NEW flag");
+        PouchData flagged = Pouch.data(p);
+        Tag freshTag = PouchData.CODEC.encodeStart(NbtOps.INSTANCE, flagged).result().orElse(null);
+        PouchData freshBack = freshTag == null ? null : PouchData.CODEC.parse(NbtOps.INSTANCE, freshTag).result().orElse(null);
+        check(f, freshBack != null && freshBack.isFresh(shardId), "the NEW flag was lost on a save round trip");
+        RegistryFriendlyByteBuf freshBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
+        PouchData.STREAM_CODEC.encode(freshBuf, flagged);
+        check(f, PouchData.STREAM_CODEC.decode(freshBuf).isFresh(shardId), "the NEW flag was lost on a sync round trip");
+        check(f, flagged.copy().isFresh(shardId), "the NEW flag was lost on the death copy");
+        check(f, !PouchNet.viewed(freshOther, shardId) && Pouch.data(p).isFresh(shardId), "viewing from another player cleared the flag");
+        check(f, PouchNet.viewed(p, shardId) && !Pouch.data(p).isFresh(shardId) && !Pouch.data(p).anyFresh(), "viewing an item did not clear its NEW flag");
+        check(f, !PouchNet.viewed(p, shardId), "viewing an unflagged item reported a change");
+        Pouch.take(p, shard, 21);
+        Pouch.add(p, new ItemStack(shard, 20));
+        check(f, !Pouch.data(p).isFresh(shardId), "re-adding an item that was seen before flagged it NEW again");
         ItemStack big = new ItemStack(shard, 64);
         for (int i = 0; i < 15; i++) {
             Pouch.add(p, new ItemStack(shard, 64));

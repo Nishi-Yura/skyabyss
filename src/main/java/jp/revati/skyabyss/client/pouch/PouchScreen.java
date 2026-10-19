@@ -103,8 +103,28 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
+        renderNewBadges(g);
+        PouchEntries.Entry hovered = hoveredEntry();
+        if (hovered != null) {
+            // 重ねて見た品の "NEW" は外す
+            PouchNew.viewed(hovered.id());
+        }
         renderTooltip(g, mouseX, mouseY);
         renderExtraTooltips(g, mouseX, mouseY);
+    }
+
+    // 新しく入ってまだ見ていない品の枠に "NEW" の札 (枠の絵の上に重ねる)
+    private void renderNewBadges(GuiGraphics g) {
+        if (minecraft == null || minecraft.player == null || menu.rebuildView) {
+            return;
+        }
+        PouchData d = Pouch.data(minecraft.player);
+        for (int i = 0; i < menu.pouchSlotCount(); i++) {
+            PouchLayout.Spot spot = menu.layout().spots().get(i);
+            if (d.isFresh(spot.entry().id()) && d.count(spot.entry().id()) > 0) {
+                PouchNew.badge(g, font, leftPos + spot.x(), topPos + spot.y());
+            }
+        }
     }
 
     private boolean seen(PouchEntries.Entry e) {

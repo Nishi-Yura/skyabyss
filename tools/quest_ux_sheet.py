@@ -13,11 +13,14 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs/review/previews/quest_ux_sheet.png"
 CELLS = [
+    ("near_chat", "Small dot over the storyteller: a chat you have not heard (nothing else pending)"),
     ("near_new", "Gold ! over the storyteller (next main step); chapter label top-left"),
     ("near_ready", "Gold ? over both (report stage)"),
     ("far_40", "Seen from about 40 blocks, drawn larger"),
     ("wall_near", "Behind a wall at 10 blocks: still visible"),
     ("wall_far", "Behind a wall at 32 blocks: hidden"),
+    ("pouch_hint", "New pouch item: small NEW hint beside the hotbar"),
+    ("pouch_new", "Pouch screen: NEW badge on slots not yet looked at"),
 ]
 W, H = 640, 360
 COLS = 2

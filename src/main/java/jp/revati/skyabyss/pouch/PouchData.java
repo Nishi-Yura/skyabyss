@@ -31,7 +31,8 @@ public final class PouchData {
             Codec.INT.optionalFieldOf("migrated", 0).forGetter(d -> d.migrated),
             Codec.BOOL.optionalFieldOf("hold", false).forGetter(d -> d.hold),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("items", Map.of()).forGetter(d -> d.counts),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("seen", List.of()).forGetter(d -> new ArrayList<>(d.seen)))
+            ResourceLocation.CODEC.listOf().optionalFieldOf("seen", List.of()).forGetter(d -> new ArrayList<>(d.seen)),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("fresh", List.of()).forGetter(d -> new ArrayList<>(d.fresh)))
             .apply(i, PouchData::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PouchData> STREAM_CODEC = StreamCodec.composite(
@@ -41,6 +42,7 @@ public final class PouchData {
             ByteBufCodecs.<RegistryFriendlyByteBuf, ResourceLocation, Integer, Map<ResourceLocation, Integer>>map(LinkedHashMap::new,
                     ResourceLocation.STREAM_CODEC, ByteBufCodecs.VAR_INT), d -> d.counts,
             ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), d -> new ArrayList<>(d.seen),
+            ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), d -> new ArrayList<>(d.fresh),
             PouchData::new);
 
     // 保存の形の版 (読み込んだあとは今の版に読み替えて、次の保存から新しい版で書く)
@@ -52,15 +54,19 @@ public final class PouchData {
     private final Map<ResourceLocation, Integer> counts = new LinkedHashMap<>();
     // いちど袋に入れた品 (初めてのときだけ知らせる。22 の 4.3)
     private final Set<ResourceLocation> seen = new LinkedHashSet<>();
+    // 新しく入ったまま、まだ画面で見ていない品 ("NEW" の印。見たら外す。docs/design/22 の 9.4)
+    private final Set<ResourceLocation> fresh = new LinkedHashSet<>();
 
     public PouchData() {
     }
 
-    private PouchData(int version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen) {
-        this(Optional.of(version), migrated, hold, items, seen);
+    private PouchData(int version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen,
+            List<ResourceLocation> fresh) {
+        this(Optional.of(version), migrated, hold, items, seen, fresh);
     }
 
-    private PouchData(Optional<Integer> version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen) {
+    private PouchData(Optional<Integer> version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen,
+            List<ResourceLocation> fresh) {
         this.version = VERSION;
         this.migrated = migrated;
         this.hold = hold;
@@ -70,6 +76,7 @@ public final class PouchData {
             }
         });
         this.seen.addAll(seen);
+        this.fresh.addAll(fresh);
     }
 
     public int count(ResourceLocation id) {
@@ -90,6 +97,27 @@ public final class PouchData {
 
     public boolean hasSeen(ResourceLocation id) {
         return seen.contains(id);
+    }
+
+    // "NEW" の印: 初めて袋に入った品に付け、画面で見たら外す
+    public void markFresh(ResourceLocation id) {
+        fresh.add(id);
+    }
+
+    public boolean isFresh(ResourceLocation id) {
+        return fresh.contains(id);
+    }
+
+    public boolean clearFresh(ResourceLocation id) {
+        return fresh.remove(id);
+    }
+
+    public void clearFresh() {
+        fresh.clear();
+    }
+
+    public boolean anyFresh() {
+        return !fresh.isEmpty();
     }
 
     // 読むだけの写し (品の ID → 個数。登録にない品も含む)
@@ -115,6 +143,6 @@ public final class PouchData {
 
     // 死んだあと・同期の写し
     public PouchData copy() {
-        return new PouchData(Optional.of(version), migrated, hold, counts, new ArrayList<>(seen));
+        return new PouchData(Optional.of(version), migrated, hold, counts, new ArrayList<>(seen), new ArrayList<>(fresh));
     }
 }

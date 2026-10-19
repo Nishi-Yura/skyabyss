@@ -24,6 +24,7 @@
   "skyabyss_pouch.screen.unknown": "???",
   "skyabyss_pouch.screen.unknown_hint": "Not found yet",
   "skyabyss_pouch.screen.missing": "None in hand right now",
+  "skyabyss_pouch.badge.new": "NEW",
   "skyabyss_pouch.screen.kept": "Kept even if you fall. Cannot be dropped",
   "skyabyss_pouch.screen.count": "%1$s / %2$s",
   "skyabyss_pouch.screen.withdraw_off": "Cannot be taken out",
