@@ -62,6 +62,8 @@ public final class TideIslandBuilder {
         lightWells(kit);
         crown(kit);
         cairns(kit);
+        // 試練の階 (潮の広間の南の戸口から。docs/design/29)。休み場の焚き火は fixtures が RESTS から置く
+        TideDeckBuilder.build(kit);
         fixtures(kit);
         fillWells(kit);
     }

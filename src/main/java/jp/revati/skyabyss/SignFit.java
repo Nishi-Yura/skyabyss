@@ -90,7 +90,7 @@ public final class SignFit {
         return CACHE.computeIfAbsent(language, l -> {
             Map<String, String> map = new HashMap<>();
             // 潮殻の背の文は skyabyss_tide、雷翼の背の文は skyabyss_storm、余燼の背の文は skyabyss_ember の lang にある (同じ "sign.skyabyss." のキー)
-            for (String ns : List.of(SkyAbyss.MODID, SkyAbyss.MODID + "_tide", SkyAbyss.MODID + "_storm", SkyAbyss.MODID + "_ember", SkyAbyss.MODID + "_opening")) {
+            for (String ns : List.of(SkyAbyss.MODID, SkyAbyss.MODID + "_tide", SkyAbyss.MODID + "_storm", SkyAbyss.MODID + "_ember", SkyAbyss.MODID + "_opening", SkyAbyss.MODID + "_trial")) {
                 String path = "/assets/" + ns + "/lang/" + l + ".json";
                 try (InputStream in = SignFit.class.getResourceAsStream(path)) {
                     if (in == null) {

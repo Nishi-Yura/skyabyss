@@ -15,6 +15,10 @@ import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.trial.Trial.Extreme;
 import jp.revati.skyabyss.trial.Trial.Mods;
 import jp.revati.skyabyss.trial.Trial.Rarity;
+import jp.revati.skyabyss.titan.tide.back.TideClock;
+import jp.revati.skyabyss.trial.tide.T02Crossing;
+import jp.revati.skyabyss.trial.tide.T06Choir;
+import jp.revati.skyabyss.trial.tide.T07Seas;
 import jp.revati.skyabyss.trial.whale.W03Moss;
 import jp.revati.skyabyss.trial.whale.W04Vents;
 import jp.revati.skyabyss.trial.whale.W11Coffin;
@@ -57,10 +61,39 @@ final class TrialCellLogic {
         if (back == null) {
             return;
         }
-        w03(back, fail);
-        w04(back, fail);
-        w11(back, fail);
-        w12(back, fail);
+        if (server.getWorldData().getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
+            server.setDifficulty(net.minecraft.world.Difficulty.EASY, true);
+        }
+        // 敵を湧かせて探すので、試験の区域のチャンクは読み込んだままにする (偽の人は読み込みの票にならない)
+        keepLoaded(back, -48, 40, 118, 176, true);
+        try {
+            w03(back, fail);
+            w04(back, fail);
+            w11(back, fail);
+            w12(back, fail);
+        } finally {
+            keepLoaded(back, -48, 40, 118, 176, false);
+        }
+        ServerLevel tideLevel = server.getLevel(jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK);
+        if (tideLevel != null) {
+            keepLoaded(tideLevel, 0, 100, 27, 95, true);
+            try {
+                tide(tideLevel, fail);
+            } finally {
+                keepLoaded(tideLevel, 0, 100, 27, 95, false);
+            }
+        }
+    }
+
+    private static void keepLoaded(ServerLevel level, int x1, int x2, int z1, int z2, boolean on) {
+        for (int cx = x1 >> 4; cx <= x2 >> 4; cx++) {
+            for (int cz = z1 >> 4; cz <= z2 >> 4; cz++) {
+                if (on) {
+                    level.getChunk(cx, cz);
+                }
+                level.setChunkForced(cx, cz, on);
+            }
+        }
     }
 
     private static void check(List<String> fail, boolean ok, String what) {
@@ -257,27 +290,31 @@ final class TrialCellLogic {
         check(fail, cell.audit(back).isEmpty(), "W11 audit: " + cell.audit(back));
     }
 
-    // ---------------------------------------------------------------- W12 鯨骨の闘技場
+    // ---------------------------------------------------------------- W12 鯨骨の闘技場・T10 満ち潮の円環 (円い闘技場)
     private static void w12(ServerLevel back, List<String> fail) {
-        TrialCell cell = TrialCells.get("W12");
-        W12Arena arena = (W12Arena) cell;
+        ringTest(back, fail, "W12", WhaleDeck.W12_CX, WhaleDeck.W12_CZ, WhaleDeck.Y, jp.revati.skyabyss.trial.whale.W12Arena.BRIDGE_OUT, 10);
+    }
+
+    private static void ringTest(ServerLevel back, List<String> fail, String id, int cx, int cz, int floorY, List<BlockPos> bridgeOut, int base) {
+        TrialCell cell = TrialCells.get(id);
+        RingArenaCell arena = (RingArenaCell) cell;
         for (int pass = 0; pass < 2; pass++) {
             boolean small = pass == 0;
             int count = small ? 1 : 3;
             List<FakePlayer> ps = new ArrayList<>();
             for (int i = 0; i < count; i++) {
-                ps.add(player(back, 10 + i));
+                ps.add(player(back, base + i));
             }
             UUID group = Groups.keyOf(ps.get(0));
             int layout = pass == 0 ? 0 : 2;
             Mods m = mods(layout, new int[] {0, 0}, 0, new int[0], 0, false);
             TrialCell.Run run = new TrialCell.Run(group, cell, m, 13L, 0);
-            String tag = "W12 " + (small ? "solo" : "full") + ": ";
+            String tag = id + " " + (small ? "solo" : "full") + ": ";
             try {
                 cell.arm(back, run);
                 List<ServerPlayer> inside = new ArrayList<>(ps);
                 for (FakePlayer p : ps) {
-                    stand(p, WhaleDeck.W12_CX + 0.5, WhaleDeck.Y + 1, WhaleDeck.W12_CZ + 0.5);
+                    stand(p, cx + 0.5, floorY + 1, cz + 0.5);
                 }
                 long now = 10;
                 cell.tick(back, run, inside, now);
@@ -293,7 +330,7 @@ final class TrialCellLogic {
                 check(fail, run.getInt("wave") == 1 && wave1 >= 3, tag + "wave 1 did not spawn (" + wave1 + ")");
                 // 人数で敵が増える
                 if (!small) {
-                    check(fail, wave1 > 3 + 0, tag + "three players did not raise the foe count (" + wave1 + ")");
+                    check(fail, wave1 > 3, tag + "three players did not raise the foe count (" + wave1 + ")");
                 }
                 kill(back, run);
                 for (int k = 0; k < 40 && run.getInt("wave") < 3; k++) {
@@ -311,8 +348,9 @@ final class TrialCellLogic {
                 kill(back, run);
                 now += 5;
                 cell.tick(back, run, inside, now);
-                check(fail, run.cleared && !GroupGates.isOpen(back, group, W12Arena.BRIDGE_OUT.get(0)), tag + "the last wave did not clear the arena and raise the exit bridge");
+                check(fail, run.cleared && !GroupGates.isOpen(back, group, bridgeOut.get(0)), tag + "the last wave did not clear the arena and raise the exit bridge");
             } finally {
+                kill(back, run);
                 cell.disarm(back, run);
                 GroupGates.reset(back, group);
                 for (FakePlayer p : ps) {
@@ -320,7 +358,173 @@ final class TrialCellLogic {
                 }
             }
         }
-        check(fail, cell.audit(back).isEmpty(), "W12 audit: " + cell.audit(back));
+        check(fail, cell.audit(back).isEmpty(), id + " audit: " + cell.audit(back));
+    }
+
+    // ---------------------------------------------------------------- 潮殻の新作
+    private static void tide(ServerLevel tide, List<String> fail) {
+        t02(tide, fail);
+        t06(tide, fail);
+        t07(tide, fail);
+        ringTest(tide, fail, "T10", jp.revati.skyabyss.titan.tide.back.TideDeck.T10_CX, jp.revati.skyabyss.titan.tide.back.TideDeck.T10_CZ,
+                jp.revati.skyabyss.titan.tide.back.TideDeck.F, jp.revati.skyabyss.trial.tide.T10Ring.BRIDGE_OUT, 30);
+    }
+
+    private static void t02(ServerLevel tide, List<String> fail) {
+        TrialCell cell = TrialCells.get("T02");
+        FakePlayer p = player(tide, 21);
+        UUID group = Groups.keyOf(p);
+        int f = jp.revati.skyabyss.titan.tide.back.TideDeck.F;
+        try {
+            for (int layout = 0; layout < 3; layout++) {
+                Mods m = mods(layout, new int[] {1, 0}, -1, new int[0], 0, false);
+                TrialCell.Run run = new TrialCell.Run(group, cell, m, 5L, 0);
+                try {
+                    TideClock.force(TideClock.Phase.LOW);
+                    cell.arm(tide, run);
+                    List<BlockPos> bars = T02Crossing.bars(layout);
+                    List<BlockPos> stone0 = T02Crossing.stone(layout, 0);
+                    check(fail, !GroupGates.isOpen(tide, group, bars) && GroupGates.isOpen(tide, group, stone0),
+                            "T02 layout " + layout + ": at the ebb the sandbar should stand and the stones be gone");
+                    TideClock.force(TideClock.Phase.HIGH);
+                    cell.tick(tide, run, List.of(), 5);
+                    check(fail, GroupGates.isOpen(tide, group, bars) && !GroupGates.isOpen(tide, group, stone0),
+                            "T02 layout " + layout + ": at the flood the stones should stand and the sandbar be gone");
+                    // 浮き石は、乗りつづけると沈む
+                    int after = T02Crossing.sinkAfter(m, 1);
+                    long now = 10;
+                    for (int i = 0; i < after / 5 + 6; i++, now += 5) {
+                        stand(p, stone0.get(0).getX() + 1.0, f + 1, stone0.get(0).getZ() + 1.0);
+                        cell.tick(tide, run, List.of(p), now);
+                    }
+                    check(fail, GroupGates.isOpen(tide, group, stone0), "T02 layout " + layout + ": a stone did not sink under a player who kept standing on it");
+                    // 沈んだあとは戻る
+                    for (int i = 0; i < 30; i++, now += 5) {
+                        cell.tick(tide, run, List.of(), now);
+                    }
+                    check(fail, !GroupGates.isOpen(tide, group, stone0), "T02 layout " + layout + ": a sunk stone did not come back");
+                    // 向こうの岸に着けば済む
+                    stand(p, 12.5, f + 1, 88.5);
+                    cell.tick(tide, run, List.of(p), now);
+                    check(fail, run.cleared, "T02 layout " + layout + ": the far shore did not clear the trial");
+                } finally {
+                    cell.disarm(tide, run);
+                    GroupGates.reset(tide, group);
+                }
+            }
+            // 潮の時計: どの重なりでも、どちらかの道は立っている。消える前に予告が出る
+            for (int ov : new int[] {130, 90, 50}) {
+                for (int c = 0; c < TideClock.CYCLE; c++) {
+                    check(fail, T02Crossing.barSolid(c, ov) || T02Crossing.stoneSolid(c, ov), "T02: no route up at " + c);
+                    if (T02Crossing.barSolid(c, ov) && !T02Crossing.barSolid((c + 1) % TideClock.CYCLE, ov)) {
+                        check(fail, T02Crossing.barWarn(c, ov), "T02: the sandbar vanished without a warning at " + c);
+                    }
+                    if (T02Crossing.stoneSolid(c, ov) && !T02Crossing.stoneSolid((c + 1) % TideClock.CYCLE, ov)) {
+                        check(fail, T02Crossing.stoneWarn(c, ov), "T02: the stones vanished without a warning at " + c);
+                    }
+                }
+            }
+            check(fail, cell.audit(tide).isEmpty(), "T02 audit: " + cell.audit(tide));
+        } finally {
+            TideClock.force(null);
+            stand(p, 0, 0, 0);
+        }
+    }
+
+    private static void t06(ServerLevel tide, List<String> fail) {
+        TrialCell cell = TrialCells.get("T06");
+        FakePlayer p = player(tide, 22);
+        UUID group = Groups.keyOf(p);
+        Mods m = mods(0, new int[] {0, 0}, -1, new int[0], 0, false);
+        TrialCell.Run run = new TrialCell.Run(group, cell, m, 17L, 0);
+        try {
+            cell.arm(tide, run);
+            cell.tick(tide, run, List.of(p), 5);
+            long now = 10;
+            for (int round = 0; round < 3; round++) {
+                check(fail, run.getInt("round") == round, "T06: the chorus did not reach round " + round);
+                T06Choir.Chorus ch = (T06Choir.Chorus) run.data.get("chorus");
+                int[] colors = (int[]) run.data.get("colors");
+                // 読み方の決まり (一つ目: 上の段を左から右へ / 二つ目: 下の段を右から左へ / 三つ目: 上・下を左から交互に)
+                int[] order = ch.order();
+                for (int k = 0; k < order.length; k++) {
+                    int want = switch (round) {
+                        case 0 -> ch.rows()[0][k];
+                        case 1 -> ch.rows()[1][order.length - 1 - k];
+                        default -> ch.rows()[k % 2][k / 2];
+                    };
+                    check(fail, order[k] == want, "T06 round " + round + ": the expected order does not follow the reading rule at " + k);
+                }
+                // 違う貝: 最初から。数える
+                int wrong = (T06Choir.pedestalOf(colors, order[0]) + 1) % T06Choir.PEDS;
+                int mistakes = run.getInt("mistakes");
+                cell.onUse(tide, run, p, T06Choir.pedestal(wrong), false, now);
+                check(fail, run.getInt("progress") == 0 && run.getInt("mistakes") == mistakes + 1, "T06 round " + round + ": a wrong shell did not reset the chorus");
+                // 正しい順
+                for (int k = 0; k < order.length; k++) {
+                    now += 5;
+                    cell.onUse(tide, run, p, T06Choir.pedestal(T06Choir.pedestalOf(colors, order[k])), false, now);
+                }
+            }
+            check(fail, run.cleared && GroupGates.isOpen(tide, group, jp.revati.skyabyss.titan.tide.back.TideDeck.T06_EXIT),
+                    "T06: three choruses did not clear the trial and open the gate");
+            check(fail, !run.goalOk, "T06: the unclouded goal survived a mistake");
+        } finally {
+            cell.disarm(tide, run);
+            GroupGates.reset(tide, group);
+            stand(p, 0, 0, 0);
+        }
+        // 色の入れ替わり (障害): 入れ替わったあとも、いまの色で貝が決まる
+        check(fail, T06Choir.pedestalOf(new int[] {2, 0, 1}, 0) == 1, "T06: pedestalOf does not follow the current colours");
+        check(fail, cell.audit(tide).isEmpty(), "T06 audit: " + cell.audit(tide));
+    }
+
+    private static void t07(ServerLevel tide, List<String> fail) {
+        TrialCell cell = TrialCells.get("T07");
+        FakePlayer p = player(tide, 23);
+        UUID group = Groups.keyOf(p);
+        for (int layout = 0; layout < 3; layout++) {
+            Mods m = mods(layout, new int[] {0, 0}, -1, new int[0], 0, false);
+            TrialCell.Run run = new TrialCell.Run(group, cell, m, 19L, 0);
+            try {
+                cell.arm(tide, run);
+                cell.tick(tide, run, List.of(p), 5);
+                int[] t = (int[]) run.data.get("target");
+                List<Integer> path = t == null ? null : T07Seas.solution(layout, t);
+                check(fail, path != null && path.size() >= 3, "T07 layout " + layout + ": no solution of three or more pulls to the marks");
+                if (path == null) {
+                    continue;
+                }
+                long now = 10;
+                // 溢れる引きは働かない
+                run.put("a", T07Seas.MAX);
+                for (int k = 0; k < 3; k++) {
+                    if (T07Seas.OPS[layout][k][0] > 0) {
+                        cell.onUse(tide, run, p, T07Seas.PLUGS[k], false, now);
+                        check(fail, run.getInt("a") == T07Seas.MAX, "T07 layout " + layout + ": a pull that overflows a tank worked");
+                    }
+                }
+                // 戻しの栓: 最初へ。任意の目標が外れる
+                cell.onUse(tide, run, p, T07Seas.RESET, false, now);
+                check(fail, run.getInt("a") == T07Seas.START[layout][0] && run.getInt("b") == T07Seas.START[layout][1] && !run.goalOk,
+                        "T07 layout " + layout + ": the reset plug did not restore the start");
+                for (int k : path) {
+                    now += 5;
+                    cell.onUse(tide, run, p, T07Seas.PLUGS[k], false, now);
+                }
+                check(fail, run.getInt("a") == t[0] && run.getInt("b") == t[1], "T07 layout " + layout + ": the shortest pulls did not reach the marks");
+                cell.tick(tide, run, List.of(p), now + 5);
+                check(fail, !run.cleared, "T07 layout " + layout + ": cleared without holding the marks");
+                cell.tick(tide, run, List.of(p), now + 5 + 400);
+                check(fail, run.cleared && GroupGates.isOpen(tide, group, jp.revati.skyabyss.titan.tide.back.TideDeck.T07_EXIT),
+                        "T07 layout " + layout + ": holding the marks did not clear the trial and open the gate");
+            } finally {
+                cell.disarm(tide, run);
+                GroupGates.reset(tide, group);
+            }
+        }
+        stand(p, 0, 0, 0);
+        check(fail, cell.audit(tide).isEmpty(), "T07 audit: " + cell.audit(tide));
     }
 
     @SuppressWarnings("unchecked")

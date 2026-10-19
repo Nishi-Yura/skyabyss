@@ -41,6 +41,7 @@ final class WhaleDeckBuilder {
     private static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
 
     static void build(BuildKit kit) {
+        long t0 = System.currentTimeMillis();
         for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {D0, C1, S0, W06, W07, W10, W02}) {
             kit.room(b);
         }
@@ -79,6 +80,7 @@ final class WhaleDeckBuilder {
         // 試練の板 (鼓動の間の南の壁ぎわ・試練の階の広間の北の壁ぎわ)
         kit.set(BOARD_HUB, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
         kit.set(BOARD_D0, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
+        jp.revati.skyabyss.SkyAbyss.LOGGER.info("Built the whale trial deck in {} ms", System.currentTimeMillis() - t0);
     }
 
     // ---------------------------------------------------------------- 階段 (入口の通路の東の壁 → D0)

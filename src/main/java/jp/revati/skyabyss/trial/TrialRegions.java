@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 // 試練の「中」の範囲 (docs/design/29 の 4.6)。試練を越えたとき、その中にいる仲間だけを真ん中の鼓動の間へ戻し、
 // 越えた試練へは、そのグループは入り直せない (中へ入ると鼓動の間へ戻される) ために使う。
 // 試練の名前 (key) は石の合図 (TrialSteles) と同じ: 岩鯨は 0 西 / 1 東 / 2 下、潮殻・雷翼は west / east / front、余燼は west / east / south。
-// 岩鯨の新作のセル (試練の階) は、引いたセルの床の範囲 (TrialCell.Ports.area と休み場)。
+// 岩鯨・潮殻の新作のセル (試練の階) は、引いたセルの床の範囲 (TrialCell.Ports.area と休み場)。
 // 範囲は鼓動の間・入口・宝物庫・心臓へ続く道を含まない。背の作りを変えたら、自己テスト (trial pool の regions) が
 // 石と休み場が範囲に入っていること・鼓動の間が入っていないことを確かめる
 public final class TrialRegions {
@@ -42,7 +42,7 @@ public final class TrialRegions {
         switch (titan) {
             case Titans.STONE_WHALE, "whale" -> {
                 int f = TitanBackLayout.FLOOR;
-                TrialCell cell = group == null ? null : drawnCell(back, group, key);
+                TrialCell cell = group == null ? null : drawnCell(back, group, Titans.STONE_WHALE, key);
                 if (cell != null) {
                     out.add(cell.ports().area().inflate(1, 2, 1));
                     for (TrialCell.Rest r : cell.ports().rests()) {
@@ -59,6 +59,14 @@ public final class TrialRegions {
                 }
             }
             case Titans.TIDE_SHELL, "tide" -> {
+                TrialCell drawn = group == null ? null : drawnCell(back, group, titan, key);
+                if (drawn != null) {
+                    out.add(drawn.ports().area().inflate(1, 2, 1));
+                    for (TrialCell.Rest r : drawn.ports().rests()) {
+                        out.add(new AABB(r.area().x1(), r.area().floorY(), r.area().z1(), r.area().x2() + 1, r.area().floorY() + 8, r.area().z2() + 1));
+                    }
+                    break;
+                }
                 switch (key) {
                     case "west" -> out.add(tide(TideBackLayout.GARDEN));
                     case "east" -> out.add(new AABB(40, 70, -65, 100, 106, -4));
@@ -129,19 +137,34 @@ public final class TrialRegions {
         };
     }
 
-    // 岩鯨で、その枠の石 (0 歩 / 1 闘 / 2 智) に引いてある新作のセル。なければ null (原型)
+    // その枠 (岩鯨は 0 歩 / 1 闘 / 2 智の石の番号、潮殻は west 歩 / front 闘 / east 智) に引いてある新作のセル。なければ null (原型)
     @Nullable
-    private static TrialCell drawnCell(ServerLevel back, UUID group, String key) {
-        if (!WhaleDeck.placed()) {
-            return null;
+    private static TrialCell drawnCell(ServerLevel back, UUID group, String titan, String key) {
+        Slot slot;
+        if (Titans.STONE_WHALE.equals(titan)) {
+            if (!WhaleDeck.placed()) {
+                return null;
+            }
+            try {
+                slot = Slot.ofStone(Integer.parseInt(key));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        } else {
+            if (!jp.revati.skyabyss.titan.tide.back.TideDeck.placed()) {
+                return null;
+            }
+            slot = switch (key) {
+                case "west" -> Slot.WALK;
+                case "east" -> Slot.WIT;
+                case "front" -> Slot.FIGHT;
+                default -> null;
+            };
+            if (slot == null) {
+                return null;
+            }
         }
-        int stone;
-        try {
-            stone = Integer.parseInt(key);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-        TrialDraw.Pick pick = TrialData.current(back, group).inSlot(Slot.ofStone(stone));
+        TrialDraw.Pick pick = TrialData.current(back, group).inSlot(slot);
         if (pick == null) {
             return null;
         }

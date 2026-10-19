@@ -61,6 +61,21 @@ public abstract class RingArenaCell implements TrialCell {
 
     protected abstract BlockPos stone();
 
+    // この高さより下へ沈んだ人は控えへ戻す (穴の底が水で、泳げる闘技場は、深く潜ったときだけにする)
+    protected double fallY() {
+        return floorY() + 1 - 1.5;
+    }
+
+    // この高さより下へ落ちた敵は消える
+    protected double mobLine() {
+        return floorY() - 2;
+    }
+
+    // 橋の見かけ
+    protected BlockState bridgeLook() {
+        return Blocks.BONE_BLOCK.defaultBlockState();
+    }
+
     // ---------------------------------------------------------------- 形
     // 円の床のマス (中心 (cx, cz))。dx, dz は中心から。段: 2 = 芯 / 0・1 = 崩れる床 / -1 = 円の外
     public static int stage(int layout, int dx, int dz) {
@@ -187,8 +202,8 @@ public abstract class RingArenaCell implements TrialCell {
         List<UUID> list = mobs(run);
         for (int i = list.size() - 1; i >= 0; i--) {
             Entity e = back.getEntity(list.get(i));
-            if (e == null || !e.isAlive() || e.getY() < floorY() - 2) {
-                if (e != null && e.getY() < floorY() - 2) {
+            if (e == null || !e.isAlive() || e.getY() < mobLine()) {
+                if (e != null && e.getY() < mobLine()) {
                     e.discard();
                 }
                 list.remove(i);
@@ -237,7 +252,7 @@ public abstract class RingArenaCell implements TrialCell {
         }
         // 落ちた人は控えへ戻す
         for (ServerPlayer p : inside) {
-            if (p.getY() < floorY() + 1 - 1.5 && Math.hypot(p.getX() - (cx() + 0.5), p.getZ() - (cz() + 0.5)) < R_HALL + 1) {
+            if (p.getY() < fallY() && Math.hypot(p.getX() - (cx() + 0.5), p.getZ() - (cz() + 0.5)) < R_HALL + 1) {
                 sendBack(back, p);
                 p.setDeltaMovement(0, 0, 0);
                 p.hurtMarked = true;
@@ -365,8 +380,13 @@ public abstract class RingArenaCell implements TrialCell {
             }
         }
         if (m.hasHazard(0) && run.getInt("phase") == 1) {
-            TrialRock.tick(back, run, inside, now, ROCK_EVERY, 4f);
+            hazardTick(back, run, inside, now);
         }
+    }
+
+    // 障害 (落石など)。巨神ごとに見かけを替えられる
+    protected void hazardTick(ServerLevel back, Run run, List<ServerPlayer> inside, long now) {
+        TrialRock.tick(back, run, inside, now, ROCK_EVERY, 4f);
     }
 
     // ---------------------------------------------------------------- 見かけ
@@ -379,25 +399,47 @@ public abstract class RingArenaCell implements TrialCell {
         return Blocks.DEEPSLATE_TILES.defaultBlockState();
     }
 
+    // 沈んだ (崩れた) 床の見かけ。穴が空いて見えるなら null (底が見える)、水面なら水
+    protected BlockState goneLook() {
+        return null;
+    }
+
     @Override
     public void overlay(ServerLevel back, Run run, BiConsumer<BlockPos, BlockState> out) {
         int layout = run.mods.layout();
         int phase = run.getInt("phase");
         int stage = run.getInt("stage");
+        int collapsed = run.data.get("collapsed") instanceof Integer c ? c : -1;
         BlockState warn = Blocks.CALCITE.defaultBlockState();
+        BlockState gone = goneLook();
         for (int s = 0; s <= 1; s++) {
             boolean flicker = phase == 2 && stage == s;
             for (BlockPos p : cellsOfStage(layout, s)) {
+                if (s <= collapsed) {
+                    // もう崩れた床 (そのグループには扉が開いている)。見かけの上書きは載せない (水面などの見かけがあれば、それを)
+                    if (gone != null) {
+                        out.accept(p, gone);
+                    }
+                    continue;
+                }
                 out.accept(p, flicker ? warn : s == 0 ? crackedLook() : plainLook());
             }
         }
-        BlockState bridge = Blocks.BONE_BLOCK.defaultBlockState();
+        BlockState bridge = bridgeLook();
         for (BlockPos p : bridgeIn()) {
-            out.accept(p, bridge);
-        }
-        if (run.cleared) {
-            for (BlockPos p : bridgeOut()) {
+            if (collapsed >= 0) {
+                if (gone != null) {
+                    out.accept(p, gone);
+                }
+            } else {
                 out.accept(p, bridge);
+            }
+        }
+        for (BlockPos p : bridgeOut()) {
+            if (run.cleared) {
+                out.accept(p, bridge);
+            } else if (gone != null) {
+                out.accept(p, gone);
             }
         }
     }

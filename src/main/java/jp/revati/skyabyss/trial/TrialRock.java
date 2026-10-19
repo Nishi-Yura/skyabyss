@@ -19,18 +19,24 @@ public final class TrialRock {
 
     // 一回分を進める (5 tick ごとに呼ぶ)。every = 次の落石までの間 (tick)。人がいなければ何もしない
     public static void tick(ServerLevel back, TrialCell.Run run, List<ServerPlayer> inside, long now, int every, float damage) {
+        tick(back, run, inside, now, every, damage, ParticleTypes.POOF, ParticleTypes.EXPLOSION, SoundEvents.GENERIC_EXPLODE.value());
+    }
+
+    // 見かけの違う落下 (高波など): 予告の粒・当たりの粒・音を替える
+    public static void tick(ServerLevel back, TrialCell.Run run, List<ServerPlayer> inside, long now, int every, float damage,
+            net.minecraft.core.particles.ParticleOptions warn, net.minecraft.core.particles.ParticleOptions hit, net.minecraft.sounds.SoundEvent sound) {
         long rockAt = run.getLong("rockAt");
         if (rockAt > 0) {
             BlockPos at = (BlockPos) run.data.get("rockPos");
             if (now < rockAt) {
                 for (int k = 0; k < 8; k++) {
                     double a = k * Math.PI / 4;
-                    TrialFx.particles(back, run.group, ParticleTypes.POOF, at.getX() + 0.5 + Math.cos(a) * 1.5, at.getY() + 0.1, at.getZ() + 0.5 + Math.sin(a) * 1.5,
+                    TrialFx.particles(back, run.group, warn, at.getX() + 0.5 + Math.cos(a) * 1.5, at.getY() + 0.1, at.getZ() + 0.5 + Math.sin(a) * 1.5,
                             1, 0, 0, 0, 0);
                 }
             } else {
-                TrialFx.particles(back, run.group, ParticleTypes.EXPLOSION, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 1, 0, 0, 0, 0);
-                TrialFx.sound(back, run.group, at, SoundEvents.GENERIC_EXPLODE.value(), 1.0f, 1.2f);
+                TrialFx.particles(back, run.group, hit, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 1, 0, 0, 0, 0);
+                TrialFx.sound(back, run.group, at, sound, 1.0f, 1.2f);
                 for (ServerPlayer p : inside) {
                     if (Math.hypot(p.getX() - (at.getX() + 0.5), p.getZ() - (at.getZ() + 0.5)) < 1.7 && Math.abs(p.getY() - at.getY()) < 3) {
                         p.hurt(p.damageSources().generic(), damage);
