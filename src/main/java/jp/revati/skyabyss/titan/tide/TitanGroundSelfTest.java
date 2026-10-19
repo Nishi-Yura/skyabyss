@@ -30,7 +30,7 @@ public final class TitanGroundSelfTest {
     private static final int SCAN_STEP = 48;
     private static final int SITES = 4;
     private static final int PLAYERS_PER_SHORE = 3;
-    private static final int PRELOAD = 10;
+    private static final int PRELOAD = 14;
 
     private TitanGroundSelfTest() {
     }

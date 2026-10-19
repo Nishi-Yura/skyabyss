@@ -14,9 +14,9 @@ SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "run/shots/titan_ground
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs/review/previews/titan_ground_sheet.png"
 
 ROWS = [
-    ("s1_before_view", "s1_after_view", "丘の岸: 人の目から", "前: 旧い休み場所。甲羅が丘にめり込む", "後: 新しい休み場所。体が丘に触れない (6〜7 ブロック持ち上がる)"),
+    ("s1_before_view", "s1_after_view", "丘の岸: 人の目から", "前: 旧い休み場所。甲羅が丘にめり込む", "後: 沖の開けた水 (127 ブロック先) で休む。体が丘に触れず、浮かない"),
     ("s1_before_aerial", "s1_after_aerial", "丘の岸: 沖から見下ろす", "前", "後"),
-    ("s2_before_view", "s2_after_view", "荒い岸: 人の目から", "前: 同じ場所で測りなし。丘・木にめり込む", "後: 同じ場所で測りあり。丘の上へ持ち上がる"),
+    ("s2_before_view", "s2_after_view", "荒い岸: 人の目から", "前: 旧い休み場所。丘・木にめり込む", "後: 触れない開けた水がないので寄らない (浮かせない)"),
     ("s2_before_aerial", "s2_after_aerial", "荒い岸: 沖から見下ろす", "前", "後"),
     ("s3_before_door10", "s3_after_door10", "乗り込み口: 10 ブロックから", "前: 標が門の口 (甲羅の縁の中) にあり体に隠れる", "後: 門の真外の水の上に輪と光の柱"),
     ("s3_before_door30", "s3_after_door30", "乗り込み口: 30 ブロックから", "前", "後"),

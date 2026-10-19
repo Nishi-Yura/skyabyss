@@ -103,6 +103,18 @@ public final class TitanGroundDev {
                                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "cx"),
                                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "cz"),
                                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "radius")))))))
+                        .then(Commands.literal("callspot")
+                                .then(Commands.argument("px", DoubleArgumentType.doubleArg()).then(Commands.argument("pz", DoubleArgumentType.doubleArg())
+                                        .executes(ctx -> {
+                                            ServerLevel level = ctx.getSource().getServer().overworld();
+                                            double px = DoubleArgumentType.getDouble(ctx, "px");
+                                            double pz = DoubleArgumentType.getDouble(ctx, "pz");
+                                            net.minecraft.world.phys.Vec3 spot = jp.revati.skyabyss.titan.tide.TideOcean.findCallSpot(level, px, pz);
+                                            String text = spot == null ? "callspot: none" : String.format(java.util.Locale.ROOT, "callspot: %d %d %.0f dist %d", (int) spot.x, (int) spot.z,
+                                                    spot.y, (int) Math.hypot(spot.x - px, spot.z - pz));
+                                            ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(text), false);
+                                            return spot == null ? 0 : 1;
+                                        }))))
                         .then(Commands.literal("place").then(Commands.literal("tide")
                                 .then(Commands.argument("x", DoubleArgumentType.doubleArg()).then(Commands.argument("z", DoubleArgumentType.doubleArg())
                                         .then(Commands.argument("yaw", DoubleArgumentType.doubleArg()).executes(ctx -> {

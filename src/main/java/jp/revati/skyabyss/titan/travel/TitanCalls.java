@@ -24,6 +24,7 @@ import jp.revati.skyabyss.titan.storm.StormSetup;
 import jp.revati.skyabyss.titan.storm.StormWingEntity;
 import jp.revati.skyabyss.titan.tide.TideKeeper;
 import jp.revati.skyabyss.titan.tide.TideShellEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -350,7 +351,16 @@ public final class TitanCalls {
         if (shell == null) {
             shell = (TideShellEntity) TitanKind.TIDE_SHELL.respawn().spawn(level, spot.x + 100, level.getSeaLevel(), spot.z);
         }
-        return shell.callNear(player);
+        boolean ok = shell.callNear(player);
+        if (ok) {
+            // 体の下が開けた水が人から遠いとき (岸が荒れて近くに寄れない) は、待っている場所の向きと距離を添える
+            double far = Math.hypot(spot.x - player.getX(), spot.z - player.getZ());
+            if (far > 60) {
+                Notice.hint(player, LANG + "far.tide_shell", Component.translatable("message.skyabyss.travel.compass."
+                        + SeaVoyage.compass(player.blockPosition(), BlockPos.containing(spot.x, 0, spot.z))), (int) Math.round(far));
+            }
+        }
+        return ok;
     }
 
     private static boolean callWing(ServerLevel level, ServerPlayer player) {

@@ -16,13 +16,13 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "tools/shots/titan_ground.txt"
 SEA = 63
 
-# 場面 1: 丘の岸。人 P=(673,-323)。旧い決まりは 689,-282 (向き -113)、新しい決まりは 595,-302 (向き -15。6〜7 ブロック持ち上げて丘に触れない)
-S1_P = (673, -323)
-S1_OLD = (689, -282, -113)
-S1_NEW = (595, -302, -15)
-# 場面 2: 荒い岸。人 P=(547,633)。旧い決まりは 512,660 (向き -38)。同じ場所で測りを入れると、丘の上へ持ち上がる
+# 場面 1: 丘の岸。人 P=(649,-336)。旧い決まりは岸のすぐ沖 (649,-312)、新しい決まりは沖の開けた水 (682,-213。127 ブロック先。持ち上げなし)
+S1_P = (649, -336)
+S1_OLD = (649, -312, -90)
+S1_NEW = (682, -213, -105)
+# 場面 2: 荒い岸。人 P=(547,633)。旧い決まりは岸のすぐ沖 (530,608)。新しい決まりは、体が触れない開けた水が読み込み範囲になく、寄らない
 S2_P = (547, 633)
-S2_OLD = (512, 660, -38)
+S2_OLD = (530, 608, 56)
 
 lines = []
 add = lines.append
@@ -72,7 +72,7 @@ def views(prefix, p, shell):
     # 人の立つ岸の少し沖寄りの、木より高い所から (木の葉の中に入らない)
     dx0, dz0 = cx - p[0], cz - p[1]
     d0 = math.hypot(dx0, dz0) or 1.0
-    camera((p[0] + dx0 / d0 * 25, SEA + 38, p[1] + dz0 / d0 * 25), (cx, SEA + 15, cz))
+    camera((p[0] - dx0 / d0 * 12, SEA + 38, p[1] - dz0 / d0 * 12), (cx, SEA + 15, cz))
     add("hud off")
     add("chat clear")
     add("wait 20")
@@ -127,13 +127,14 @@ views("s1_before", S1_P, S1_OLD)
 place(S1_NEW, True)
 views("s1_after", S1_P, S1_NEW)
 
-# --- 場面 2: 荒い岸で、同じ場所に前 (めり込む) と後 (持ち上がる)
+# --- 場面 2: 荒い岸で、前 (旧い場所。めり込む) と後 (寄らない)
 camera((S2_P[0] + 0.5, SEA + 8, S2_P[1] + 0.5), (S2_OLD[0], SEA + 20, S2_OLD[1]))
 add("waitchunks 1200")
 add("wait 40")
 place(S2_OLD, False)
 views("s2_before", S2_P, S2_OLD)
-place(S2_OLD, True)
+add("cmd kill @e[type=skyabyss:tide_shell,distance=..2000]")
+add("wait 20")
 views("s2_after", S2_P, S2_OLD)
 
 # --- 場面 3: 乗り込み口。前は門の口に立つ標 (体に隠れる)、後は門の真外の水の上の輪。10 と 30 ブロックから

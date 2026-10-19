@@ -98,9 +98,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     private static final double LOOK_AHEAD = 30.0;
     private static final double LOOK_FAR = 60.0;
     // 巡航の目的地と前方に要る水深 (浅い所を歩くと体が大きく出すぎる)
-    private static final int CRUISE_DEPTH = 10;
+    private static final int CRUISE_DEPTH = 22;
     // 巡航で、標準の高さからこれ以上の持ち上げが要る先 (岸の丘・浅瀬) へは進まず向きを変える (ブロック)
-    private static final double MAX_CRUISE_LIFT = 6.0;
+    private static final double MAX_CRUISE_LIFT = 1.5;
     private static final int APPROACH_GIVE_UP = 4800;
     // コマンドで休ませたときの長さ
     static final int FORCED_REST = 3600;
@@ -348,8 +348,8 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
                     break;
                 }
             }
-            // 進む先の海底・岸・丘に体が触れないために、標準の巡航の高さから大きく持ち上げねばならない (岸の丘が体の幅に入る) なら、向きを変える
-            if (blockedCooldown <= 0 && Double.isFinite(groundAhead) && groundAhead > cruiseHeight(level) + MAX_CRUISE_LIFT) {
+            // 進む先の海底・岸・丘に体が触れないために、今の高さから少しでも持ち上がらねばならない (浅瀬・岸の丘が体の幅に入る) なら、持ち上がらずに向きを変える (浅瀬を避けて回る)
+            if (blockedCooldown <= 0 && Double.isFinite(groundAhead) && groundAhead > getY() + MAX_CRUISE_LIFT) {
                 turnAway(level);
             }
         }
