@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 //  - 埋まった半端ブロック: 階段・半ブロック・灯り・避雷針など、全方向を丸ごとのブロックにふさがれている
 // 結果はログの "STORM SCAN" 行
 public final class StormBuildScan {
-    private static final int X1 = -230, X2 = 230, Y1 = 100, Y2 = 215, Z1 = -150, Z2 = 150;
+    private static final int X1 = -335, X2 = 335, Y1 = 100, Y2 = 230, Z1 = -190, Z2 = 200;
     private static final int NX = X2 - X1 + 1, NY = Y2 - Y1 + 1, NZ = Z2 - Z1 + 1;
 
     private StormBuildScan() {

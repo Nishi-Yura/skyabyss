@@ -38,24 +38,29 @@ public final class StormBackCommands {
 
     static {
         PLACES.put("arrival", ARRIVAL);
+        PLACES.put("plaza", rest("tail"));
         PLACES.put("gate", new BlockPos(0, GATE_FLOOR + 1, GATE_Z2 + 2));
         PLACES.put("tail", TAIL_CENTER);
         PLACES.put("hub", rest("hub"));
-        PLACES.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, -17));
+        PLACES.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, GALLERY.z1() + 3));
         PLACES.put("w0", rest("w0"));
+        PLACES.put("wm", rest("wm"));
         PLACES.put("w1", rest("w1"));
-        PLACES.put("rib", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17));
+        PLACES.put("rib", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, WZ));
         PLACES.put("rib1", rest("w2"));
         PLACES.put("rib2", rest("w3"));
         PLACES.put("ledge", WEST_STONE.offset(1, 0, 1));
-        PLACES.put("pad1", new BlockPos(S(35), BONE_FLOOR + 1, -19));
-        PLACES.put("pad2", new BlockPos(S(51), BONE_FLOOR + 1, -20));
-        PLACES.put("pad3", new BlockPos(S(81), BONE_FLOOR + 1, -20));
-        PLACES.put("helm_w", new BlockPos(-27, 143, -10));
-        PLACES.put("helm_e", new BlockPos(27, 143, -10));
-        PLACES.put("helm_f", new BlockPos(0, 151, -52));
+        PLACES.put("pad1", new BlockPos(76, BONE_FLOOR + 1, WZ - 3));
+        PLACES.put("pad2", new BlockPos(103, BONE_FLOOR + 1, WZ - 4));
+        PLACES.put("pad3", new BlockPos(128, BONE_FLOOR + 1, WZ - 4));
+        PLACES.put("pad4", new BlockPos(155, BONE_FLOOR + 1, WZ - 4));
+        PLACES.put("helm_w", StormHelm.HELMS.get(0).calm().offset(2, 0, 2));
+        PLACES.put("helm_e", StormHelm.HELMS.get(1).calm().offset(2, 0, 2));
+        PLACES.put("helm_f", StormHelm.HELMS.get(2).calm().offset(0, 0, 2));
         PLACES.put("e0", rest("e0"));
         PLACES.put("e1", rest("e1"));
+        PLACES.put("e2", rest("e2"));
+        PLACES.put("e3", rest("e3"));
         PLACES.put("nest", RAIJU_NEST.offset(-8, 1, 0));
         PLACES.put("perch", EAST_STONE.offset(-1, 0, 1));
         PLACES.put("f0", rest("f0"));

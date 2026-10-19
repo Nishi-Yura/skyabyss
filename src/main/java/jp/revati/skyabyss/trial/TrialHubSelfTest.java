@@ -47,7 +47,7 @@ public final class TrialHubSelfTest {
     private static final Map<String, Map<String, String>> REST_KEYS = Map.of(
             Titans.STONE_WHALE, Map.of("w0", "0", "w1", "0", "w2", "0", "e0", "1", "ce1", "1", "e2r", "1", "ckr", "1", "mz0", "2", "mz1", "2"),
             Titans.TIDE_SHELL, Map.of("g0", "west", "g1", "west", "f0", "front"),
-            Titans.THUNDER_WING, Map.of("w0", "west", "w1", "west", "e0", "east", "e1", "east", "f0", "front"),
+            Titans.THUNDER_WING, Map.of("w0", "west", "wm", "west", "w1", "west", "w2", "west", "w4", "west", "e0", "east", "e1", "east", "e3", "east", "f0", "front"),
             Titans.EMBER, Map.of("w0", "west", "w1", "west", "e0", "east", "s0", "south"));
 
     private static void run(MinecraftServer server) {

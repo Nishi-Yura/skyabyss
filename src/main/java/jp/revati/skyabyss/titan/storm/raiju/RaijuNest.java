@@ -53,7 +53,7 @@ public final class RaijuNest {
     public static final ResourceKey<Level> STORM_BACK = ResourceKey.create(Registries.DIMENSION,
             ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "storm_back"));
     // 2: 背中の担当の本物の巣を使う (自前の洞を建てない)
-    public static final int LAYOUT_VERSION = 3;
+    public static final int LAYOUT_VERSION = 4;
     public static final int RODS = 6;
     public static final int ROD_RADIUS = StormBackLayout.RAIJU_ROD_RADIUS;
     // 柱: 根元 (床のブロックの高さ) の銅、電球 3 つ、銅、5 段上に避雷針。雷獣は避雷針の上に立つ

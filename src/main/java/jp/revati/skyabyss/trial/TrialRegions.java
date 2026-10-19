@@ -71,12 +71,12 @@ public final class TrialRegions {
                 }
             }
             case Titans.THUNDER_WING, "storm" -> {
-                // 嵐の背の試練の床は y 137 の広間より上 (竜骨の道と心臓の間は y 134 より下)
-                int y0 = 136;
+                // 嵐の背の試練の床は広間 (床 134) の肩の階段より上 (竜骨の道と心臓の間は広間の床より下)
+                int y0 = StormBackLayout.HUB.floor() + 2;
                 switch (key) {
-                    case "west" -> out.add(new AABB(-135, y0, -45, -23, 230, 40));
-                    case "east" -> out.add(new AABB(23, y0, -45, 140, 230, 40));
-                    case "front" -> out.add(new AABB(-24, y0, -105, 24, 230, -19));
+                    case "west" -> out.add(new AABB(StormBackLayout.RIB_X1 - 20, y0, StormBackLayout.BONE_Z1 - 12, -23, 240, StormBackLayout.BONE_Z2 + 12));
+                    case "east" -> out.add(new AABB(23, y0, StormBackLayout.BONE_Z1 - 12, StormBackLayout.RAIJU_NEST.getX() + 22, 240, StormBackLayout.BONE_Z2 + 12));
+                    case "front" -> out.add(new AABB(-24, y0, -154, 24, 240, StormBackLayout.HUB.z1() - 1));
                     default -> {
                     }
                 }

@@ -172,8 +172,7 @@ final class StormRib {
 
     // 層の灯りの場所 (岩棚の西の縁の上)。まだ着いていないグループには消えた石、着いたグループには灯り
     static BlockPos layerLight(int layer) {
-        Area s = ribSlab(layer);
-        return new BlockPos(s.x1(), s.floor() + 3, s.z1());
+        return ribLayerLight(layer);
     }
 
     // グループごとの見かけ: 着いた層の灯り

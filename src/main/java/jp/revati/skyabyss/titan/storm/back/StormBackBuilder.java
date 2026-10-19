@@ -62,7 +62,7 @@ public final class StormBackBuilder {
         // 試練の仕掛け (昇り風の柱・戸・避雷の柱) を置いたあとで、鳥の背・翼の上の、落ちたら出られない小さな穴 (詰み監査) を埋める。
         // 部屋より上 (y 159 以上) だけ。部屋・通路の中は直さずに報告に残す
         int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(back, () -> StormBackAudit.spec(back),
-                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-225, 159, -145, 225, 200, 145)), 8, 6,
+                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-330, 160, -190, 330, 215, 200)), 8, 6,
                 StormKit.FEATHER);
         if (repaired > 0) {
             SkyAbyss.LOGGER.info("Storm back: filled {} blocks of dead-end pockets on the bird's surface", repaired);

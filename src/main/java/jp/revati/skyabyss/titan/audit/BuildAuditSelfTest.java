@@ -62,7 +62,7 @@ public final class BuildAuditSelfTest {
     // 四つの背の調べる範囲 (開発コマンド /skyabyss dev buildaudit <名前> でも使う)
     public static final BackReach.Box WHALE_BOX = new BackReach.Box(-100, 40, -256, 100, 175, 256);
     public static final BackReach.Box TIDE_BOX = new BackReach.Box(-190, 38, -245, 190, 230, 170);
-    public static final BackReach.Box STORM_BOX = new BackReach.Box(-225, 105, -145, 225, 200, 145);
+    public static final BackReach.Box STORM_BOX = new BackReach.Box(-330, 105, -190, 330, 215, 200);
     public static final BackReach.Box EMBER_BOX = new BackReach.Box(-140, 44, -230, 140, 235, 260);
 
     // 「いまある数まで」許す指摘 (増えたら全部失敗)。直す担当が別にある、または設計の判断待ちのもの。直したら数を下げる (0 になったら消す)
@@ -172,6 +172,12 @@ public final class BuildAuditSelfTest {
         steps.add(Step.once("build audit (ember)", server -> back(server, EmberIds.BACK, "ember", EMBER_BOX,
                 level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level))));
         steps.add(Step.once("build audit", BuildAuditSelfTest::finish));
+        // 開発用: 環境変数 SKYABYSS_AUDIT_ONLY=<whale|tide|storm|ember> なら、その背の段だけ (開始・その背を建てる・調べる・まとめ)
+        String only = System.getenv("SKYABYSS_AUDIT_ONLY");
+        if (only != null && !only.isBlank()) {
+            steps.removeIf(st -> !(st.name().equals("build audit (start)") || st.name().equals("build audit (" + only + " build)") || st.name().equals("build audit (" + only + ")")
+                    || st.name().equals("build audit")));
+        }
         return steps;
     }
 

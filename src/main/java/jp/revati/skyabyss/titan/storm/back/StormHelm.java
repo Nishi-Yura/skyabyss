@@ -49,9 +49,9 @@ final class StormHelm {
     }
 
     static final List<Helm> HELMS = List.of(
-            new Helm(Trial.WEST, new BlockPos(-29, 143, -11), new BlockPos(-25, 143, -11)),
-            new Helm(Trial.EAST, new BlockPos(25, 143, -11), new BlockPos(29, 143, -11)),
-            new Helm(Trial.FRONT, new BlockPos(-1, 151, -53), new BlockPos(1, 151, -53)));
+            new Helm(Trial.WEST, new BlockPos(-62, BONE_FLOOR + 1, BONE_Z1 + 2), new BlockPos(-58, BONE_FLOOR + 1, BONE_Z1 + 2)),
+            new Helm(Trial.EAST, new BlockPos(58, BONE_FLOOR + 1, BONE_Z1 + 2), new BlockPos(62, BONE_FLOOR + 1, BONE_Z1 + 2)),
+            new Helm(Trial.FRONT, new BlockPos(6, UPPER_GALLERY_Y + 1, F0.z1() + 2), new BlockPos(9, UPPER_GALLERY_Y + 1, F0.z1() + 2)));
 
     // 固定。グループ + 試練 → (拍、始まり、終わり)
     record Lock(StormBackClock.Phase phase, long start, long end) {

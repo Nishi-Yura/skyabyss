@@ -67,8 +67,8 @@ final class StormEast {
     static List<BlockPos> doorBlocks(int i) {
         List<BlockPos> out = new ArrayList<>();
         int x = EAST_DOORS[i];
-        for (int z = -18; z <= -16; z++) {
-            for (int y = BONE_FLOOR + 1; y <= BONE_FLOOR + 4; y++) {
+        for (int z = WZ - DOOR_HALF; z <= WZ + DOOR_HALF; z++) {
+            for (int y = BONE_FLOOR + 1; y <= BONE_FLOOR + DOOR_HEIGHT; y++) {
                 out.add(new BlockPos(x, y, z));
             }
         }
@@ -143,7 +143,7 @@ final class StormEast {
             if (!progress.eastDoorOpen(i) && StormRods.isFull(level, EAST_RODS.get(i))) {
                 progress.openEastDoor(i);
                 GroupGates.open(level, progress.group, doorBlocks(i));
-                BlockPos d = new BlockPos(EAST_DOORS[i], BONE_FLOOR + 2, -17);
+                BlockPos d = new BlockPos(EAST_DOORS[i], BONE_FLOOR + 2, WZ);
                 level.playSound(null, d, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.6f);
                 level.playSound(null, d, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.BLOCKS, 0.6f, 1.8f);
                 for (ServerPlayer p : Groups.online(level, progress.group)) {
@@ -164,7 +164,7 @@ final class StormEast {
                 }
                 double x = Math.floor(p.getX() + (level.random.nextInt(5) - 2)) + 0.5;
                 LINES.add(new Line(x, (lineCount++ & 1) == 1, new int[] {LINE_WARN}));
-                level.playSound(null, x, BONE_FLOOR + 2, -17, SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 0.7f, 1.8f);
+                level.playSound(null, x, BONE_FLOOR + 2, WZ, SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 0.7f, 1.8f);
             }
         }
         for (Iterator<Line> it = LINES.iterator(); it.hasNext();) {
@@ -185,7 +185,7 @@ final class StormEast {
             it.remove();
             StormFx.line(level, ParticleTypes.ELECTRIC_SPARK, a, b, 0.3);
             StormFx.line(level, ParticleTypes.END_ROD, a, b, 1.0);
-            level.playSound(null, l.x(), y, -17, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1f, 1.6f);
+            level.playSound(null, l.x(), y, WZ, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1f, 1.6f);
             for (ServerPlayer p : Groups.alive(level, owner)) {
                 if (p.isCreative() || Math.abs(p.getX() - l.x()) > 0.8 || !inCorridor(p.position())) {
                     continue;

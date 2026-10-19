@@ -40,7 +40,7 @@ public final class StormKit {
 
     // 壁の石の種類 (場所ごと)
     public enum Style {
-        HALL, BONE, THUNDER, EYE, KEEL
+        HALL, BONE, THUNDER, EYE, KEEL, FEATHER, CROWN
     }
 
     private final ServerLevel level;
@@ -122,6 +122,10 @@ public final class StormKit {
             case THUNDER -> h < 6 ? COPPER : h < 55 ? TILE : h < 85 ? SLATE : ANDESITE;
             case EYE -> h < 50 ? CALCITE : h < 80 ? QUARTZ : DIORITE;
             case KEEL -> h < 40 ? CALCITE : h < 70 ? SMOOTH : h < 90 ? ANDESITE : BONE;
+            // 羽 (広間・尾): 白と灰の羽の縞。4 段ごとに銅の帯
+            case FEATHER -> y % 8 == 0 ? COPPER : y % 3 == 0 ? FEATHER : h < 45 ? FEATHER_WHITE : h < 75 ? CALCITE : DIORITE;
+            // 冠 (頭): 石英と銅の帯
+            case CROWN -> y % 5 == 0 ? COPPER : h < 45 ? QUARTZ : h < 75 ? CALCITE : DIORITE;
         };
     }
 
@@ -133,6 +137,9 @@ public final class StormKit {
             case THUNDER -> h < 6 ? SLATE : TILE;
             case EYE -> h < 7 ? QUARTZ : CALCITE;
             case KEEL -> h < 6 ? ANDESITE : SMOOTH;
+            // 羽の筋: 北を向く矢じり (^) の縞が、幅 4 の白と灰で続く (行き先は北 = 羽根の門・首の側)
+            case FEATHER -> Math.floorMod(Math.abs(x) - z, 8) < 4 ? FEATHER_WHITE : FEATHER;
+            case CROWN -> h < 5 ? QUARTZ : h < 9 ? CALCITE : DIORITE;
         };
     }
 

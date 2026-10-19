@@ -1,0 +1,249 @@
+# 雷翼の背の拡大 (docs/design/26 の 9 章、版 20) の確かめ。./gradlew runShots -Pscript=tools/shots/storm_scale.txt
+# 出力: run/shots/storm_scale/shots/storm_scale/*.png → python tools/storm_scale_sheet.py で docs/review/previews/storm_scale_sheet.png (音は自動で 0)
+# この台本は python tools/gen_storm_scale_shots.py が書く (場所の表はそちら)
+world storm_scale flat
+size 1280 720
+timeout 3600
+render 12
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive storm_back
+waitchunks 1500
+wait 80
+cmd skyabyss titan storm calm
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+hud off
+fov 90
+camera skyabyss:storm_back 0.5 150.2 172 180 5
+waitchunks 600
+wait 30
+close
+wait 4
+shot arrival
+fov 90
+camera skyabyss:storm_back 0.5 149.0 145 180 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot road
+fov 95
+camera skyabyss:storm_back 0.5 149.4 125 180 10
+waitchunks 600
+wait 30
+close
+wait 4
+shot plaza
+fov 95
+camera skyabyss:storm_back -9 149.5 111 90 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot plaza_bay
+fov 95
+camera skyabyss:storm_back 0.5 152.5 92 180 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot gate
+fov 95
+camera skyabyss:storm_back 0.5 147.6 44 180 5
+waitchunks 600
+wait 30
+close
+wait 4
+shot tail_hall
+fov 100
+camera skyabyss:storm_back 0.5 136.8 8.5 180 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot hub_south
+fov 100
+camera skyabyss:storm_back 0.5 136.6 5 180 30
+waitchunks 600
+wait 30
+close
+wait 4
+shot hub_up
+fov 100
+camera skyabyss:storm_back 0.5 150.0 -33 0 45
+waitchunks 600
+wait 30
+close
+wait 4
+shot hub_floor
+fov 100
+camera skyabyss:storm_back 4.5 136.6 6 270 22
+waitchunks 600
+wait 30
+close
+wait 4
+shot hub_tower
+fov 100
+camera skyabyss:storm_back -27.5 136.6 -24 90 12
+waitchunks 600
+wait 30
+close
+wait 4
+shot west_pass
+fov 100
+camera skyabyss:storm_back -53.5 153.0 -24 90 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot w0
+fov 100
+camera skyabyss:storm_back -72.5 153.0 -24 90 12
+waitchunks 600
+wait 30
+close
+wait 4
+shot valley1
+fov 100
+camera skyabyss:storm_back -91.5 153.0 -24 90 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot island
+fov 100
+camera skyabyss:storm_back -121 153.0 -24 90 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot elbow
+fov 100
+camera skyabyss:storm_back -94.5 153.2 -39.5 180 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot vault_w
+fov 100
+camera skyabyss:storm_back -162 153.0 -24 90 -35
+waitchunks 600
+wait 30
+close
+wait 4
+shot rib_low
+fov 80
+camera skyabyss:storm_back -168 205 -100 0 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot rib_shell
+fov 100
+camera skyabyss:storm_back 53.5 153.0 -24 270 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot e0
+fov 100
+camera skyabyss:storm_back 73.5 153.0 -24 270 18
+waitchunks 600
+wait 30
+close
+wait 4
+shot circuit1
+fov 100
+camera skyabyss:storm_back 105 153.0 -24 270 18
+waitchunks 600
+wait 30
+close
+wait 4
+shot circuit2
+fov 100
+camera skyabyss:storm_back 131 153.0 -24 270 18
+waitchunks 600
+wait 30
+close
+wait 4
+shot circuit3
+fov 100
+camera skyabyss:storm_back 158 153.0 -24 270 18
+waitchunks 600
+wait 30
+close
+wait 4
+shot circuit4
+fov 100
+camera skyabyss:storm_back 180 153.0 -24 270 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot east_ante
+fov 100
+camera skyabyss:storm_back 183.5 153.2 -39.5 180 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot vault_e
+fov 100
+camera skyabyss:storm_back 196 154.5 -24 270 6
+waitchunks 600
+wait 30
+close
+wait 4
+shot nest
+fov 95
+camera skyabyss:storm_back 0.5 149.2 -50 180 4
+waitchunks 600
+wait 30
+close
+wait 4
+shot neck
+fov 100
+camera skyabyss:storm_back 0.5 149.4 -80 180 8
+waitchunks 600
+wait 30
+close
+wait 4
+shot crown
+fov 100
+camera skyabyss:storm_back 0.5 151.0 -116 180 12
+waitchunks 600
+wait 30
+close
+wait 4
+shot eye
+fov 95
+camera skyabyss:storm_back 0.5 149.9 -141 180 5
+waitchunks 600
+wait 30
+close
+wait 4
+shot beak
+fov 95
+camera skyabyss:storm_back 0.5 120.0 -45 0 4
+waitchunks 600
+wait 30
+close
+wait 4
+shot keel
+render 16
+fov 85
+camera skyabyss:storm_back 0 215 238 180 24
+waitchunks 600
+wait 30
+close
+wait 4
+shot overview
+quit

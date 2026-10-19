@@ -17,23 +17,25 @@ public final class StormBackAudit {
     }
 
     public static BackReach.Spec spec(ServerLevel level) {
-        BackReach.Spec s = new BackReach.Spec("storm", new Box(-225, 105, -145, 225, 200, 145));
+        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 215, 200));
         s.voidY = CLOUD_Y + 5;
         s.longFallIsExit = true;
         s.entrances.add(ARRIVAL);
         s.exits.add(ARRIVAL);
         // 床の穴・はしごを調べるのは体の中 (外の羽毛のすきまは、落ちても嵐に投げ返されるだけ)
-        s.scan.add(new Box(-16, 128, 12, 16, 160, 45));
-        s.scan.add(new Box(-16, 129, -20, 16, 162, 12));
-        s.scan.add(new Box(-150, 138, -26, 150, 158, 2));
-        s.scan.add(new Box(RIB_X1 - 2, 158, BONE_Z1 - 2, RIB_X2 + 2, RIB_TOP_Y + 8, BONE_Z2 + 2));
-        s.scan.add(new Box(-12, 144, -100, 12, 160, -18));
-        s.scan.add(new Box(-28, 112, -40, 22, 137, 6));
+        s.scan.add(new Box(-16, 130, 8, 16, 165, 66));
+        s.scan.add(new Box(-24, 129, HUB.z1() - 3, 24, 162, HUB.z2() + 3));
+        // 翼の中 (部屋と通路の空気だけ。翼の背の凹みは調べずに、建てたあとの修復 BackReach.repair が埋める)
+        s.scan.add(new Box(RIB_X1 - 2, 138, BONE_Z1 - 1, -23, BONE_FLOOR + BONE_HEIGHT, BONE_Z2 + 1));
+        s.scan.add(new Box(23, 138, BONE_Z1 - 3, RAIJU_NEST.getX() + 14, RAIJU_NEST_CEILING, BONE_Z2 + 3));
+        s.scan.add(new Box(RIB_X1 - 2, 168, BONE_Z1 - 2, RIB_X2 + 2, RIB_TOP_Y + 8, BONE_Z2 + 2));
+        s.scan.add(new Box(-20, 144, -152, 20, 172, HUB.z1() - 1));
+        s.scan.add(new Box(-36, 112, -54, 24, HUB.floor(), 8));
         // 西の骨の割れた床 (WEST_GAPS): わざとの穴。落ちると雲の下へ出て嵐に投げ返される
         for (int[] g : WEST_GAPS) {
             s.allowHole.add(new Box(g[0] - 1, 130, BONE_Z1, g[1] + 1, 175, BONE_Z2 + 1));
         }
-        s.glide = p -> StormWest.inBone(p.getCenter()) || p.getX() < -110;
+        s.glide = p -> StormWest.inBone(p.getCenter());
         // 昇り風: 穴の上 (中心から 1 マス以内) に立つと、穴の上の柱の空いている所から、横 3 マス以内の立てる所へ
         List<StormWest.Vent> vents = new ArrayList<>(StormWest.vents());
         vents.add(new StormWest.Vent(RAIJU_VENT, EAST_PERCH.floor() + 2 - RAIJU_VENT.getY() - 1));
@@ -67,8 +69,17 @@ public final class StormBackAudit {
         for (Rest r : RESTS) {
             s.goals.put("rest " + r.id(), r.spawn());
         }
-        s.goals.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, -17));
-        s.goals.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17));
+        s.goals.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, GALLERY.z1() + 3));
+        s.goals.put("rib floor", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, WZ));
+        s.goals.put("plaza", PLAZA_CENTER);
+        s.goals.put("crown", new BlockPos(0, F0.floor() + 1, (F0.z1() + F0.z2()) / 2 + 3));
+        s.goals.put("east door 3", new BlockPos(EAST_DOORS[EAST_DOORS.length - 1] + 3, BONE_FLOOR + 1, WZ));
+        s.goals.put("west island", new BlockPos(WEST_ISLAND.x1() + 3, BONE_FLOOR + 1, WZ));
+        s.goals.put("elbow", WEST_ELBOW.offset(0, 1, 4));
+        s.goals.put("west vault", VAULT_CACHE_W.offset(0, 0, 3));
+        s.goals.put("east vault", VAULT_CACHE_E.offset(0, 0, 3));
+        s.goals.put("cache west", CACHE_WEST.offset(0, 0, 2));
+        s.goals.put("cache east", CACHE_EAST.offset(0, 0, 2));
         s.goals.put("west stone ledge", WEST_STONE.offset(1, 0, 0));
         s.goals.put("tail hall", TAIL_CENTER);
         s.goals.put("eye hall", EYE_HALL_CENTER.offset(1, 0, 6));
