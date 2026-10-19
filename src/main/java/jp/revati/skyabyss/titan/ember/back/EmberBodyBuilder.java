@@ -111,6 +111,8 @@ public final class EmberBodyBuilder {
         EmberBackRooms.buildAll(back);
         long tRooms = System.currentTimeMillis() - t0;
         b.fixtures();
+        // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
+        EmberBossGates.build(back);
         b.repairPockets(back);
         data.markBuilt(buildVersion());
         EmberBackTrials.afterBuild(back);

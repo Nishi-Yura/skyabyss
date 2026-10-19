@@ -44,7 +44,9 @@ public final class TitanBackLayout {
     //     中心を 5 北へ (z -85)。テレグラフの円 (スタンプ 半径 5 など) が床の 4 割以下に収まり、避ける広さが残る (02 の 4.2、5.2)
     // 10: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
     // 11: 闇の水路の入口 (はしごを下りた先) に、乾いた小部屋の休み場 (mz0) を足した
-    public static final int LAYOUT_VERSION = 13; // 13: 建築の監査 (ベンチの向き)
+    // 13: ボス部屋の大門 (心臓の間・番兵長の広間の入口。BossGates)。心臓の間の入口の看板を右の柱の面 (2, 96, -62) へ
+    // 14: ボス部屋の大門と建築の監査の両方
+    public static final int LAYOUT_VERSION = 14; // 13: 建築の監査 (ベンチの向き)
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
@@ -171,7 +173,7 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.maze", new BlockPos(5, FLOOR + 3, -32), net.minecraft.core.Direction.SOUTH));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
-            new Inscription("sign.skyabyss.heart_gate", new BlockPos(1, FLOOR + 3, -62), net.minecraft.core.Direction.WEST);
+            new Inscription("sign.skyabyss.heart_gate", new BlockPos(2, FLOOR + 3, -62), net.minecraft.core.Direction.WEST);
 
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {
