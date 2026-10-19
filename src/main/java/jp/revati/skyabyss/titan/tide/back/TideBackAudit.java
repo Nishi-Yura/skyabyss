@@ -39,6 +39,19 @@ public final class TideBackAudit {
         for (BreathLayout.Node n : BreathLayout.nodes()) {
             s.goals.put("breath " + n.label(), landingBlock(n));
         }
+        // 宝箱の前 (碑と宝を、歩いて取りに行ける)、ひれの先端 (戸は開けたグループにとって開いているとして)
+        for (TideCaches.Cache c : TideCaches.CACHES) {
+            // 灯台のテラスは岩棚の先 (水位の謎解きの水は、監査では引いたまま。岩棚は届かない)
+            if (!c.id().equals("terrace")) {
+                s.goals.put("cache " + c.id(), c.chest().relative(c.front()));
+            }
+        }
+        for (int side : new int[] {-1, 1}) {
+            s.goals.put("fin tip " + (side < 0 ? "west" : "east"), TideFins.tipCenter(side).above());
+        }
+        for (TideFins.Room r : TideFins.ROOMS) {
+            s.goals.put("fin room " + r.id(), r.center());
+        }
         s.extra = TideBackAudit::breathEdges;
         return s;
     }

@@ -61,7 +61,7 @@ public final class TrialRegions {
             case Titans.TIDE_SHELL, "tide" -> {
                 switch (key) {
                     case "west" -> out.add(tide(TideBackLayout.GARDEN));
-                    case "east" -> out.add(new AABB(23, 70, -38, 61, 100, -1));
+                    case "east" -> out.add(new AABB(40, 70, -65, 100, 106, -4));
                     case "front" -> {
                         out.add(tide(TideBackLayout.FLATS));
                         out.add(tide(TideBackLayout.F0));

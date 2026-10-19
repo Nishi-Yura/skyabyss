@@ -350,9 +350,9 @@ final class TideGardenBuilder {
 
     static final List<Grotto> GROTTOS = List.of(
             // 漁り人の窪み: 西の入口の水路 (g0〜C) の南の壁に口。碑と宝箱
-            new Grotto("garden_a", -60, -50, -1, 8, -56, -54, -3, -3, Direction.NORTH, new BlockPos(-55, 67, 8), new BlockPos(-52, 65, 6)),
+            new Grotto("garden_a", -60, -50, -1, 8, -56, -54, -3, -2, Direction.NORTH, new BlockPos(-55, 69, 8), new BlockPos(-52, 65, 6)),
             // 貝守の窪み: 大貝の水路の西の壁に口
-            new Grotto("garden_b", -97, -88, 46, 56, -86, -86, 50, 52, Direction.EAST, new BlockPos(-97, 67, 51), new BlockPos(-95, 65, 54)));
+            new Grotto("garden_b", -97, -88, 46, 56, -87, -86, 50, 52, Direction.EAST, new BlockPos(-97, 69, 51), new BlockPos(-95, 65, 54)));
 
     static void grottos(TideKit kit) {
         for (Grotto g : GROTTOS) {

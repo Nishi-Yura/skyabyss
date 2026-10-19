@@ -49,8 +49,8 @@ public final class TideCaches {
 
     static {
         // 庭の窪み
-        add("garden_a", -52, 65, 6, Direction.WEST, -55, 67, 8, Direction.NORTH, 30, 1, 0, 2);
-        add("garden_b", -95, 65, 54, Direction.NORTH, -97, 67, 51, Direction.EAST, 30, 0, 1, 2);
+        add("garden_a", -52, 65, 6, Direction.WEST, -55, 69, 8, Direction.NORTH, 30, 1, 0, 2);
+        add("garden_b", -95, 65, 54, Direction.NORTH, -97, 69, 51, Direction.EAST, 30, 0, 1, 2);
         // 首の廊下の窪み
         add("neck_a", -8, 67, -36, Direction.SOUTH, -10, 68, -38, Direction.EAST, 35, 2, 0, 0);
         add("neck_b", 8, 67, -42, Direction.SOUTH, 10, 68, -44, Direction.WEST, 35, 1, 1, 0);

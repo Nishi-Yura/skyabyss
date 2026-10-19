@@ -89,6 +89,11 @@ public final class TideIslandBuilder {
                     int a = Math.min(h[i - 1][j], h[i + 1][j]);
                     int b = Math.min(h[i][j - 1], h[i][j + 1]);
                     int to = Math.max(a >= t + 2 ? a - 1 : t, b >= t + 2 ? b - 1 : t);
+                    // 四方が 1 以上高いくぼみ (1 マスの凹み) も、いちばん低い隣の高さまで埋める
+                    int m4 = Math.min(a, b);
+                    if (m4 >= t + 1) {
+                        to = Math.max(to, m4);
+                    }
                     if (to <= t) {
                         continue;
                     }
