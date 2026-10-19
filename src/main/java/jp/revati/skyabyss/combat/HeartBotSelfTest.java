@@ -56,6 +56,8 @@ public final class HeartBotSelfTest {
     // 傷を数えるだけの人形
     private static final class Bot extends FakePlayer {
         final List<Float> hits = new ArrayList<>();
+        final List<String> where = new ArrayList<>();
+        String context = "";
 
         Bot(ServerLevel level, UUID id, String name) {
             super(level, new GameProfile(id, name));
@@ -64,6 +66,7 @@ public final class HeartBotSelfTest {
         @Override
         public boolean hurt(DamageSource source, float amount) {
             hits.add(amount);
+            where.add(context + " " + fmt(amount));
             return true;
         }
 
@@ -77,7 +80,7 @@ public final class HeartBotSelfTest {
     }
 
     private record Rig(String name, String stage, Mob heart, HeartPursuit pursuit, Supplier<HeartDomain> domain, Consumer<ServerLevel> startDomain,
-            DoubleBinaryOperator heightAt) {
+            DoubleBinaryOperator heightAt, List<double[]> refuges) {
     }
 
     // 潮殻の部屋の岩の島 (中心から ±6、半径 2.2、高さ 2。TideHeartArena)。島の上は床から 1.9 より高いので満ち潮の輪が届かない
@@ -168,25 +171,35 @@ public final class HeartBotSelfTest {
     private static Rig whale(ServerLevel level) {
         StoneWhaleHeart h = place(ModEntities.STONE_WHALE_HEART.get().create(level), level, 0);
         h.skipIntro();
-        return new Rig("whale", "stone_whale", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0);
+        return new Rig("whale", "stone_whale", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0, List.of());
     }
 
     private static Rig tide(ServerLevel level) {
         TideHeart h = place(TideHeartSetup.TIDE_HEART.get().create(level), level, 0.5);
         h.skipIntro();
-        return new Rig("tide", "tide_shell", h, h.pursuit(), h::domain, h::startDomain, HeartBotSelfTest::islandHeight);
+        return new Rig("tide", "tide_shell", h, h.pursuit(), h::domain, h::startDomain, HeartBotSelfTest::islandHeight, islandCenters());
     }
 
     private static Rig storm(ServerLevel level) {
         StormHeart h = place(StormHeartSetup.STORM_HEART.get().create(level), level, 0.5);
         h.skipIntro();
-        return new Rig("storm", "thunder_wing", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0);
+        return new Rig("storm", "thunder_wing", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0, List.of());
     }
 
     private static Rig ember(ServerLevel level) {
         EmberHeart h = place(EmberHeartSetup.EMBER_HEART.get().create(level), level, 0.5);
         h.skipIntro();
-        return new Rig("ember", "ember", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0);
+        return new Rig("ember", "ember", h, h.pursuit(), h::domain, h::startDomain, (x, z) -> 0, List.of());
+    }
+
+    private static List<double[]> islandCenters() {
+        List<double[]> out = new ArrayList<>();
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                out.add(new double[] {CX + sx * ISLAND_OFFSET, CZ + sz * ISLAND_OFFSET});
+            }
+        }
+        return out;
     }
 
     private static Bot spawnBot(ServerLevel level, String name, double radius) {
@@ -274,7 +287,7 @@ public final class HeartBotSelfTest {
     }
 
     // 読む人形: 回りたいが、予告 (30 tick 先まで) に当たるなら、16 方向・止まる・跳ぶから、当たらない動きを選ぶ
-    private static Driver reader(DoubleBinaryOperator heightAt) {
+    private static Driver reader(DoubleBinaryOperator heightAt, List<double[]> refuges) {
         double[] want = {0};
         int[] jump = {0};
         double[] dirs = new double[16];
@@ -292,20 +305,29 @@ public final class HeartBotSelfTest {
             double bestX = pos.x;
             double bestZ = pos.z;
             boolean bestJump = false;
-            // 候補: 16 方向 + 止まる、それぞれ跳ぶ / 跳ばない (すでに跳んでいる間は跳ぶ・跳ばないを選ばない)
+            // 候補 {1 tick の動き x, z, 最大の歩数}: 16 方向、止まる、回りたい向き、避難所 (岩の島) へ向かう道
+            List<double[]> cands = new ArrayList<>();
+            for (int i = 0; i < 16; i++) {
+                cands.add(new double[] {Math.cos(dirs[i]) * SPRINT, Math.sin(dirs[i]) * SPRINT, 999});
+            }
+            cands.add(new double[] {0, 0, 0});
+            cands.add(new double[] {desired.x - pos.x, desired.z - pos.z, 999});
+            for (double[] r : refuges) {
+                double d = Math.hypot(r[0] - pos.x, r[1] - pos.z);
+                if (d > 0.3) {
+                    cands.add(new double[] {(r[0] - pos.x) / d * SPRINT, (r[1] - pos.z) / d * SPRINT, d / SPRINT});
+                }
+            }
+            // それぞれ、跳ぶ / 跳ばない (すでに跳んでいる間は跳ぶ・跳ばないを選ばない)
             for (int jmp = 0; jmp < (jump[0] > 0 ? 1 : 2); jmp++) {
-                for (int d = 0; d <= 16; d++) {
-                    double ux = d == 16 ? 0 : Math.cos(dirs[d]) * SPRINT;
-                    double uz = d == 16 ? 0 : Math.sin(dirs[d]) * SPRINT;
-                    // 回りたい向きの候補も入れる
-                    if (d == 15 && jmp >= 0) {
-                        ux = (desired.x - pos.x);
-                        uz = (desired.z - pos.z);
-                    }
+                for (double[] c : cands) {
+                    double ux = c[0];
+                    double uz = c[1];
                     int hits = 0;
-                    for (int k = 1; k <= 30; k++) {
-                        double x = pos.x + ux * k;
-                        double z = pos.z + uz * k;
+                    for (int k = 1; k <= 36; k++) {
+                        double kk = Math.min(k, c[2]);
+                        double x = pos.x + ux * kk;
+                        double z = pos.z + uz * kk;
                         double rr = Math.hypot(x - CX, z - CZ);
                         if (rr > RADIUS - 1) {
                             x = CX + (x - CX) * (RADIUS - 1) / rr;
@@ -345,6 +367,8 @@ public final class HeartBotSelfTest {
 
     // ---------------------------------------------------------------- 戦い
     private static void step(Rig rig, Bot bot, Driver driver, ServerLevel level, int tick) {
+        HeartDomain dom = rig.domain().get();
+        bot.context = (dom == null ? "-" : dom.phase() + "@" + dom.ticks()) + " t" + tick;
         driver.move(bot, level, tick);
         rig.heart().setTarget(bot);
         rig.heart().tickCount++;
@@ -391,12 +415,14 @@ public final class HeartBotSelfTest {
         rig = maker.get();
         bot = spawnBot(level, "reader", 8);
         double read;
+        String readHits;
         try {
-            read = fight(rig, bot, reader(rig.heightAt()), level, FIGHT_TICKS);
+            read = fight(rig, bot, reader(rig.heightAt(), rig.refuges()), level, FIGHT_TICKS);
+            readHits = bot.where.toString();
         } finally {
             despawn(rig, bot);
         }
-        check(f, read <= 0.55, name + ": a telegraph-reading bot took " + fmt(read) + " of the expected health in 60 s (needs <= 0.55)");
+        check(f, read <= 0.55, name + ": a telegraph-reading bot took " + fmt(read) + " of the expected health in 60 s (needs <= 0.55): " + readHits);
         notes.add(String.format(Locale.ROOT, "%s: circler %.2f (was %.2f without the fix, %d pursuit moves), reader %.2f", name, circle, base, fired, read));
         checkDomain(level, maker, f, notes);
     }
@@ -407,7 +433,7 @@ public final class HeartBotSelfTest {
         String name = rig.name();
         Bot bot = spawnBot(level, "domain", 8);
         try {
-            Driver driver = reader(rig.heightAt());
+            Driver driver = reader(rig.heightAt(), rig.refuges());
             rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
             boolean sawDeclare = false;
             boolean sawActive = false;
@@ -441,7 +467,7 @@ public final class HeartBotSelfTest {
             check(f, healthInDeclare > 0 && healthInDeclare == healthAfterDeclare, name + ": the heart took damage while declaring its domain");
             check(f, rig.domain().get() != null && !rig.domain().get().broken(), name + ": an undisturbed domain reports broken");
             check(f, BossCue.sentCount() > cues, name + ": no attack names were sent during the domain");
-            check(f, taken <= 0.45, name + ": a telegraph-reading bot took " + fmt(taken) + " of the expected health through the domain (needs <= 0.45)");
+            check(f, taken <= 0.45, name + ": a telegraph-reading bot took " + fmt(taken) + " of the expected health through the domain (needs <= 0.45): " + bot.where);
             check(f, jp.revati.skyabyss.titan.domain.HeartDomain.lastPayload() != null
                     && jp.revati.skyabyss.titan.domain.HeartDomain.lastPayload().state() == jp.revati.skyabyss.titan.domain.DomainPayload.END,
                     name + ": no end packet after the domain");
@@ -473,7 +499,7 @@ public final class HeartBotSelfTest {
         rig = maker.get();
         bot = spawnBot(level, "domain_break", 8);
         try {
-            Driver driver = reader(rig.heightAt());
+            Driver driver = reader(rig.heightAt(), rig.refuges());
             rig.heart().setHealth(rig.heart().getMaxHealth() * 0.45f);
             int guard = 0;
             while ((rig.domain().get() == null || rig.domain().get().phase() != HeartDomain.Phase.ACTIVE) && guard++ < 400) {

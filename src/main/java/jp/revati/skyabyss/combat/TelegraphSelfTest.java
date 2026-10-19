@@ -545,6 +545,7 @@ public final class TelegraphSelfTest {
         heart.moveTo(SX, FLOOR + 2, SZ, 0f, 0f);
         heart.setPersistenceRequired();
         heart.skipIntro();
+        heart.setDomainEnabled(false);
         level.addFreshEntity(heart);
         List<FakePlayer> ps = new ArrayList<>();
         try {

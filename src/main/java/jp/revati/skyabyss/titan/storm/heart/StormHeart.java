@@ -280,6 +280,12 @@ public class StormHeart extends HeartBoss {
     @Nullable
     private jp.revati.skyabyss.titan.domain.ThunderCageDomain domain;
     public static final float DOMAIN_AT = 0.5f;
+    // 試験・開発用: 領域を展開しない (憤怒までの技だけを見たいとき)
+    private boolean domainEnabled = true;
+
+    public void setDomainEnabled(boolean enabled) {
+        this.domainEnabled = enabled;
+    }
     // 回っている人への狙いの先読み (予告の長さに近い tick)
     private static final int AIM_TICKS = 24;
 
@@ -562,7 +568,7 @@ public class StormHeart extends HeartBoss {
                 begin(Action.ROAR, "roar_2");
                 return;
             }
-            if (domain == null && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !reachable(server, 40).isEmpty()) {
+            if (domain == null && domainEnabled && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !reachable(server, 40).isEmpty()) {
                 startDomain(server);
                 return;
             }

@@ -35,6 +35,8 @@ python tools/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly_roughs/
 - 巨神の眠り (心臓を止めたあと。`docs/design/20_cinematics.md` の 3.4) の絵: `tools/shots/titan_end_whale.txt`・`titan_end_ember.txt`・`titan_end_storm.txt` (平らな世界。巨神を眠らせて場面を流し、見せ場を撮る)、`titan_end_tide.txt` (普通の世界の海。座標は `titan_end_scout.txt` が `locate` で探す)、乗り込み口の光 `titan_end_glow.txt`、到着の台と登りの階段 `titan_end_arrival.txt`。絵は `docs/review/previews/titan_end_*.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan end" ./gradlew runServer` (server.properties の `max-tick-time=-1` を付けると、重い読み込みでウォッチドッグに止められない)
 - 雷翼の背の見直し (`docs/design/25_storm_back_review.md`): `python tools/gen_storm_review.py` が見取り図を `docs/review/storm_review/` に、撮影は `tools/shots/storm_review.txt` (眼の間の入口・上から・壁、瘤、西・東の骨。凪に固定して撮る)。選定ページは `docs/review/storm_review/index.html` (db `choices` の `storm_rework`)。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="storm back" ./gradlew runServer`
 
+- 心臓の領域と技の名前 (`docs/design/02` の 5.6・5.7、`18` の 6.1): `python tools/gen_heart_domain_stings.py` が宣言の音 4 本 (`sounds/mobs/domain_*.ogg`)・`sounds.json`・字幕を書く。撮影は `tools/shots/heart_domains.txt` (四つの心臓を一体ずつ出し、技の名前・領域の題字と天の声・領域のあいだを撮る。`/skyabyss dev force <心臓> DOMAIN|LEAD|CUTOFF|CHASE`) → `python tools/heart_domains_sheet.py` で `docs/review/previews/heart_domains_sheet.png`。自己テストは `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="heart bots" ./gradlew runServer` (回る人形は負け、予告を読む人形は生き残る、領域の流れ・砕く)
+
 ## 台本で撮るスクショ (`client/dev/ShotRunner`)
 
 ```

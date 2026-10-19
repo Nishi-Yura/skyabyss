@@ -23,6 +23,10 @@ waitchunks
 wait 20
 cmd skyabyss cinematic stop
 chat clear
+wait 300
+cmd weather clear
+cmd time set noon
+wait 40
 
 # ---- whale
 cmd summon skyabyss:stone_whale_heart 0 -59 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
