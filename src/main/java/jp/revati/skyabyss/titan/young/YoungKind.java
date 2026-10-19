@@ -15,7 +15,7 @@ public enum YoungKind {
     WHALE(Titans.STONE_WHALE, "young_stone_whale", Gait.SKY, 1.25, 2400, 20.0, 3.625, 1.0f),
     TIDE(Titans.TIDE_SHELL, "young_tide_shell", Gait.SEA, 0.95, 3200, 0.0, 1.0, 1.0f),
     STORM(Titans.THUNDER_WING, "young_thunder_wing", Gait.RIDGE, 1.05, 2600, 9.0, 2.25, 1.0f),
-    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 0.8, 1800, 0.0, 1.5, 1.0f);
+    EMBER(Titans.EMBER, "young_ember", Gait.GROUND, 0.8, 1800, 0.0, 2.5, 1.0f);
 
     public enum Gait { SKY, SEA, RIDGE, GROUND }
 
