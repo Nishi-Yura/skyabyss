@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Builds docs/review/previews/smoke_sheet.png from tools/shots/smoke_sheet.txt runs (docs/design/17 3.2.1).
+"""Builds docs/review/previews/smoke_column_sheet.png from tools/shots/smoke_sheet.txt runs (docs/design/17 3.2.1).
 
 usage: python tools/smoke_sheet.py <before dir> <after dir> <spot:label> [<spot:label> ...]
   rows = terrains, columns = before noon / after noon / before dusk / after dusk
@@ -23,7 +23,7 @@ for r, (n, label) in enumerate(spots):
         x, y = c * W, r * (H + 20)
         sheet.paste(im, (x, y + 20))
         d.text((x + 6, y + 4), "%s - %s" % (label, title), fill=(230, 230, 230))
-out = ROOT / "docs/review/previews/smoke_sheet.png"
+out = ROOT / "docs/review/previews/smoke_column_sheet.png"
 out.parent.mkdir(parents=True, exist_ok=True)
 sheet.save(out)
 print("wrote", out)
