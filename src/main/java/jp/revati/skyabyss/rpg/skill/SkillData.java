@@ -20,8 +20,9 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 書き換えは SkillManager を通す (同期と修飾子の付け直しをそこでまとめて行う)
 public final class SkillData implements INBTSerializable<CompoundTag> {
     // 記録の版。1 = 剣士・弓使いの木の 10 の技だけ、2 = 5 つの木・刻印・型の保存 (docs/design/27)、
+    // 4 = 変異・紋の盤・橋・淵・前世の技 (docs/design/31 の A08・A09・A14・B08・B09。新しい欄は空で始まる)、
     // 3 = 全部の木を最初から開く・キーストーン・構え・連鎖・熟練・型 4 つ・武器ごとの枠 (docs/design/31 の A 案)
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
 
     // 型の保存 1 つぶん: 枠の置き方と、技ごとの刻印の選び
     public static final class Loadout {
@@ -69,6 +70,17 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public final String[][] bars = new String[2][SkillRules.SLOTS];
     public final boolean[] barUsed = new boolean[2];
     public int bar;
+    // 技の変異 (A08。技の id → 変異の id)。一度選んだら外せない。転生しても残る
+    public final Map<String, String> mutations = new LinkedHashMap<>();
+    // 紋 (A14)。持っている紋 (「id/段」の文字。25 まで) と、盤の穴 (最大 6。「id/段@技の id」か空)。転生しても残る
+    public final java.util.List<String> glyphBag = new java.util.ArrayList<>();
+    public final String[] glyphSockets = new String[SkillRules.GLYPH_SOCKETS];
+    // 紋をもらった試練 ("巨神|試練")。同じ試練で二度もらわない。転生で空に戻る
+    public final Set<String> glyphClaims = new LinkedHashSet<>();
+    // 転生の回数 (サーバーが毎回入れて同期する。保存しない。淵・前世の技の出し分けと、前世の点に使う)
+    public int rebirth;
+    // 淵の残響の期限 (サーバーだけ)
+    public long echoUntil;
     // 記録の版 (読んだ記録が古ければ sanitize で移す)
     public int version = VERSION;
     // レベル以外から得た技の点 (クエストや記憶の断片の報酬に使う予定。今は 0)
@@ -143,6 +155,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         }
         Arrays.fill(bars[0], "");
         Arrays.fill(bars[1], "");
+        Arrays.fill(glyphSockets, "");
     }
 
     public int rank(Skill skill) {
@@ -182,6 +195,78 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return sum;
     }
 
+    // ---------------------------------------------------------------- 橋・淵・前世の技 (31 の A09・B08・B09)
+    // 橋が開くか: 親の 2 本の木のそれぞれで、技を 3 つ以上覚えている (木の「段 3」)
+    public static final int BRIDGE_SKILLS_PER_TREE = 3;
+
+    public int knownIn(SkillTree tree) {
+        int n = 0;
+        for (Skill s : Skill.inTree(tree)) {
+            if (knows(s)) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    public boolean bridgeOpen(Skill skill) {
+        SkillTree[] parents = skill.bridgeTrees();
+        if (parents.length != 2) {
+            return true;
+        }
+        return knownIn(parents[0]) >= BRIDGE_SKILLS_PER_TREE && knownIn(parents[1]) >= BRIDGE_SKILLS_PER_TREE;
+    }
+
+    // 前世の点の持ち分: 転生 1 回につき 2 点 (6 回ぶんの 12 点まで)。通常の点とは別枠
+    public static final int PAST_POINTS_PER_REBIRTH = 2;
+    public static final int PAST_POINTS_MAX = 12;
+
+    public int pastPool() {
+        return Math.min(PAST_POINTS_MAX, Math.max(0, rebirth) * PAST_POINTS_PER_REBIRTH);
+    }
+
+    public int pastSpent() {
+        int sum = 0;
+        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+            Skill s = Skill.byId(e.getKey());
+            if (s != null && s.tree == SkillTree.PAST) {
+                sum += e.getValue();
+            }
+        }
+        return sum;
+    }
+
+    public int pastLeft() {
+        return pastPool() - pastSpent();
+    }
+
+    // 転生の回数が足りない淵・前世の技を戻す (回数が下がった・開発コマンド)。前世の点が持ち分を超えたら前世の技を全部戻す。戻したら true
+    public boolean enforceRebirth() {
+        boolean changed = false;
+        for (Skill s : Skill.values()) {
+            if (s.rebirthAt() > rebirth && ranks.containsKey(s.id)) {
+                ranks.remove(s.id);
+                runes.remove(s.id);
+                changed = true;
+            }
+        }
+        if (pastSpent() > pastPool()) {
+            ranks.keySet().removeIf(id -> Skill.byId(id) != null && Skill.byId(id).tree == SkillTree.PAST);
+            changed = true;
+        }
+        if (changed) {
+            // 淵の途中が消えて前提が崩れた技も戻す
+            pruneBroken();
+            for (int i = 0; i < slots.length; i++) {
+                Skill sk = Skill.byId(slots[i]);
+                if (sk != null && !knows(sk)) {
+                    slots[i] = "";
+                }
+            }
+        }
+        return changed;
+    }
+
     // 天職の割引: 天職の木の技の段を 3 つぶんまで 1 点ずつ安くする (戻る点)。要と刻印は数えない
     public int callingDiscount() {
         if (!SkillRules.CALLINGS || !hasCalling()) {
@@ -209,7 +294,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public int spentPoints() {
         int sum = 0;
         for (Map.Entry<String, Integer> e : ranks.entrySet()) {
-            if (Skill.byId(e.getKey()) != null) {
+            Skill sk = Skill.byId(e.getKey());
+            if (sk != null && sk.tree != SkillTree.PAST) {
                 sum += e.getValue();
             }
         }
@@ -276,7 +362,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // ---------------------------------------------------------------- 習得の条件
     public enum LearnResult {
-        OK, UNKNOWN, SEALED, MAX_RANK, NO_POINTS, LEVEL, REQUIRES, CALLING
+        OK, UNKNOWN, SEALED, MAX_RANK, NO_POINTS, LEVEL, REQUIRES, CALLING, REBIRTH
     }
 
     public LearnResult canLearn(Skill skill, int level) {
@@ -285,6 +371,12 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         }
         if (!treeOpen(skill.tree)) {
             return LearnResult.SEALED;
+        }
+        if (skill.rebirthAt() > rebirth) {
+            return LearnResult.REBIRTH;
+        }
+        if (!bridgeOpen(skill)) {
+            return LearnResult.REQUIRES;
         }
         if (rank(skill) >= rankLimit(skill)) {
             return rank(skill) >= skill.maxRank ? LearnResult.MAX_RANK : LearnResult.CALLING;
@@ -298,7 +390,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (!callingAllows(skill)) {
             return LearnResult.CALLING;
         }
-        if (unspentPoints(level) < 1) {
+        if (skill.tree == SkillTree.PAST ? pastLeft() < 1 : unspentPoints(level) < 1) {
             return LearnResult.NO_POINTS;
         }
         return LearnResult.OK;
@@ -358,6 +450,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         c.calling = calling;
         c.calling2 = calling2;
         c.bonusPoints = bonusPoints;
+        c.rebirth = rebirth;
         c.mana = mana;
         System.arraycopy(slots, 0, c.slots, 0, slots.length);
         return c;
@@ -473,10 +566,29 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 return s == null || e.getValue() == null || !Rune.valid(s, e.getValue());
             });
         }
+        sanitizeExt();
         cooldowns.entrySet().removeIf(e -> Skill.byId(e.getKey()) == null || e.getValue() == null || e.getValue() <= 0);
         globalCooldown = Math.max(0, globalCooldown);
         if (Float.isNaN(mana)) {
             mana = -1;
+        }
+    }
+
+    // 変異・紋の検め (知らない id・壊れた形を落とす。技を覚えているかは見ない: 転生で技が空になっても残る)
+    void sanitizeExt() {
+        mutations.entrySet().removeIf(e -> {
+            Mutation m = Mutation.byId(e.getValue());
+            return m == null || !m.skill.id.equals(e.getKey());
+        });
+        glyphBag.removeIf(g -> Glyph.parse(g) == null);
+        while (glyphBag.size() > SkillRules.GLYPH_BAG_MAX) {
+            glyphBag.remove(glyphBag.size() - 1);
+        }
+        for (int i = 0; i < glyphSockets.length; i++) {
+            String g = glyphSockets[i];
+            if (g == null || (!g.isEmpty() && Glyph.parsePlaced(g) == null)) {
+                glyphSockets[i] = "";
+            }
         }
     }
 
@@ -573,6 +685,24 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         }
         tag.put("unlockedTrees", u);
         tag.putInt("notifiedPoints", notifiedPoints);
+        CompoundTag mu = new CompoundTag();
+        mutations.forEach(mu::putString);
+        tag.put("mutations", mu);
+        ListTag gb = new ListTag();
+        for (String g : glyphBag) {
+            gb.add(StringTag.valueOf(g));
+        }
+        tag.put("glyphBag", gb);
+        ListTag gs = new ListTag();
+        for (String g : glyphSockets) {
+            gs.add(StringTag.valueOf(g));
+        }
+        tag.put("glyphSockets", gs);
+        ListTag gc = new ListTag();
+        for (String g : glyphClaims) {
+            gc.add(StringTag.valueOf(g));
+        }
+        tag.put("glyphClaims", gc);
         return tag;
     }
 
@@ -649,6 +779,24 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             unlockedTrees.add(t.getAsString());
         }
         notifiedPoints = tag.getInt("notifiedPoints");
+        mutations.clear();
+        CompoundTag mu = tag.getCompound("mutations");
+        for (String key : mu.getAllKeys()) {
+            mutations.put(key, mu.getString(key));
+        }
+        glyphBag.clear();
+        for (Tag t : tag.getList("glyphBag", Tag.TAG_STRING)) {
+            glyphBag.add(t.getAsString());
+        }
+        Arrays.fill(glyphSockets, "");
+        ListTag gs = tag.getList("glyphSockets", Tag.TAG_STRING);
+        for (int i = 0; i < Math.min(gs.size(), glyphSockets.length); i++) {
+            glyphSockets[i] = gs.getString(i);
+        }
+        glyphClaims.clear();
+        for (Tag t : tag.getList("glyphClaims", Tag.TAG_STRING)) {
+            glyphClaims.add(t.getAsString());
+        }
         // レベルを知らないので、点の検めはログインのとき (SkillManager.onLogin) に行う。ここでは形だけ整える
         sanitize(50);
     }
@@ -716,6 +864,19 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 for (String id : d.unlockedTrees) {
                     buf.writeUtf(id, 64);
                 }
+                buf.writeVarInt(d.rebirth);
+                buf.writeVarInt(d.mutations.size());
+                d.mutations.forEach((k, v) -> {
+                    buf.writeUtf(k, 64);
+                    buf.writeUtf(v, 64);
+                });
+                buf.writeVarInt(d.glyphBag.size());
+                for (String g : d.glyphBag) {
+                    buf.writeUtf(g, 64);
+                }
+                for (String g : d.glyphSockets) {
+                    buf.writeUtf(g, 96);
+                }
             },
             buf -> {
                 SkillData d = new SkillData();
@@ -773,6 +934,18 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 int u = buf.readVarInt();
                 for (int i = 0; i < u; i++) {
                     d.unlockedTrees.add(buf.readUtf(64));
+                }
+                d.rebirth = buf.readVarInt();
+                int mn2 = buf.readVarInt();
+                for (int i = 0; i < mn2; i++) {
+                    d.mutations.put(buf.readUtf(64), buf.readUtf(64));
+                }
+                int gn = buf.readVarInt();
+                for (int i = 0; i < gn; i++) {
+                    d.glyphBag.add(buf.readUtf(64));
+                }
+                for (int i = 0; i < d.glyphSockets.length; i++) {
+                    d.glyphSockets[i] = buf.readUtf(96);
                 }
                 return d;
             });

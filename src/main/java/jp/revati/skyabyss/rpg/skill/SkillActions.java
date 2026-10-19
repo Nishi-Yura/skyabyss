@@ -97,6 +97,11 @@ public final class SkillActions {
     }
 
     public static String perform(ServerPlayer player, Skill skill, int rank) {
+        // 変異 (A08): 極めた技に選んでいれば、形の違う中身で動く (力・待ち・マナはそのまま)
+        Mutation mutation = SkillExtOps.active(player, skill);
+        if (mutation != null) {
+            return ExtActions.mutated(player, mutation, rank);
+        }
         return switch (skill) {
             case TITAN_CLEAVE -> cleave(player, rank);
             case ROCK_CALL -> rockCall(player, rank);
@@ -114,7 +119,7 @@ public final class SkillActions {
             case BONE_TRAP -> boneTrap(player, rank);
             case SKY_RAIN -> rain(player, rank);
             case SIGNAL -> signal(player, rank);
-            default -> "message.skyabyss.skill.not_active";
+            default -> ExtActions.perform(player, skill, rank);
         };
     }
 
@@ -156,19 +161,19 @@ public final class SkillActions {
     }
 
     // 水平の向き (見ている向きから上下を除いたもの)
-    private static Vec3 flatLook(Player player) {
+    static Vec3 flatLook(Player player) {
         Vec3 look = player.getLookAngle();
         Vec3 flat = new Vec3(look.x, 0, look.z);
         return flat.lengthSqr() < 1e-6 ? Vec3.directionFromRotation(0, player.getYRot()) : flat.normalize();
     }
 
-    private static List<LivingEntity> foesAround(ServerPlayer player, double radius, double down, double up) {
+    static List<LivingEntity> foesAround(ServerPlayer player, double radius, double down, double up) {
         AABB box = player.getBoundingBox().inflate(radius, 0, radius).expandTowards(0, up, 0).expandTowards(0, -down, 0);
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class, box, e -> isFoe(player, e) && player.hasLineOfSight(e));
     }
 
     // 見通しを問わない、近くの敵
-    private static List<LivingEntity> foesAroundAny(ServerPlayer player, double radius) {
+    static List<LivingEntity> foesAroundAny(ServerPlayer player, double radius) {
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> isFoe(player, e));
     }
 
@@ -224,19 +229,19 @@ public final class SkillActions {
         }
     }
 
-    private static float attackDamage(Player player) {
+    static float attackDamage(Player player) {
         return (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
 
-    private static void sound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
+    static void sound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, volume, pitch);
     }
 
-    private static void particle(ServerLevel level, ParticleOptions p, Vec3 at, int count, double spread, double speed) {
+    static void particle(ServerLevel level, ParticleOptions p, Vec3 at, int count, double spread, double speed) {
         level.sendParticles(p, at.x, at.y, at.z, count, spread, spread, spread, speed);
     }
 
-    private static void ring(ServerLevel level, ParticleOptions p, Vec3 center, double radius, int n, double lift) {
+    static void ring(ServerLevel level, ParticleOptions p, Vec3 center, double radius, int n, double lift) {
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n;
             level.sendParticles(p, center.x + Math.cos(a) * radius, center.y + lift, center.z + Math.sin(a) * radius, 1, 0.03, 0.03, 0.03, 0.0);
@@ -244,7 +249,7 @@ public final class SkillActions {
     }
 
     // 範囲の技の押し出し: 筋力 30 の刻み目で 1.25 倍
-    private static double push(ServerPlayer player, double base) {
+    static double push(ServerPlayer player, double base) {
         return Breakpoints.reached(player, GrowthRules.Stat.STRENGTH, Breakpoints.SECOND) ? base * Breakpoints.STRENGTH_30_PUSH : base;
     }
 
@@ -487,7 +492,7 @@ public final class SkillActions {
     }
 
     // 足もと (0.2 下から 1.2 下まで) に、立てるブロックがあるか
-    private static boolean hasFooting(Level level, Vec3 p) {
+    static boolean hasFooting(Level level, Vec3 p) {
         for (double dy = 0.2; dy <= 1.2; dy += 0.5) {
             BlockPos below = BlockPos.containing(p.x, p.y - dy, p.z);
             if (!level.getBlockState(below).getCollisionShape(level, below).isEmpty()) {
@@ -961,7 +966,7 @@ public final class SkillActions {
     }
 
     // ---------------------------------------------------------------- 骨の射手
-    private static ItemStack heldBow(Player player) {
+    static ItemStack heldBow(Player player) {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack s = player.getItemInHand(hand);
             if (s.getItem() instanceof BowItem || s.getItem() instanceof CrossbowItem) {

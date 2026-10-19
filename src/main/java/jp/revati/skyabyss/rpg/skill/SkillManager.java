@@ -66,6 +66,7 @@ public final class SkillManager {
     }
 
     public static void sync(Player player) {
+        SkillExtOps.absorbRebirth(player);
         if (player instanceof ServerPlayer sp && !(player instanceof FakePlayer) && sp.connection != null) {
             player.syncData(Skills.DATA);
             get(player).sentMana = get(player).mana;
@@ -128,6 +129,7 @@ public final class SkillManager {
 
     // ---------------------------------------------------------------- 習得
     public static SkillData.LearnResult learn(ServerPlayer player, Skill skill) {
+        SkillExtOps.refreshRebirth(player);
         SkillData d = get(player);
         SkillData.LearnResult r = d.canLearn(skill, level(player));
         if (r != SkillData.LearnResult.OK) {

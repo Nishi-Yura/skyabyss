@@ -68,9 +68,20 @@ public final class SkillSelfTest {
             for (Skill r : s.requires()) {
                 check(f, r.tree == s.tree && r.tier < s.tier, s.id + " requires a skill that is not in the same tree or an earlier tier: " + r.id);
             }
-            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる
-            check(f, (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
+            // 前提が空の技は 1 段目だけ。前提のある技は、前提を覚えれば覚えられる (橋と前世の技は前提の線なし)
+            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            check(f, !linked || (s.tier == 0) == s.requires().isEmpty(), s.id + " tier and requirements disagree");
             SkillData d = new SkillData();
+            // 淵・前世の技は転生の回数、橋は両隣の木の技 3 つずつ
+            d.rebirth = SkillRules.GLYPH_SOCKETS * 3;
+            for (SkillTree parent : s.bridgeTrees()) {
+                int n = 0;
+                for (Skill q : Skill.inTree(parent)) {
+                    if (n++ < SkillData.BRIDGE_SKILLS_PER_TREE) {
+                        d.ranks.put(q.id, 1);
+                    }
+                }
+            }
             for (Skill r : s.requires()) {
                 // 前提の前提も覚えておく (そうでないと検めで全部戻る)
                 for (Skill q : Skill.inTree(s.tree)) {
@@ -94,14 +105,15 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
                 && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
                 && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        check(f, Skill.values().length == 36 && Rune.values().length == 38, "skill / rune counts are wrong");
+        check(f, Skill.values().length == 53 && Rune.values().length == 38, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
-            check(f, s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty(), s.id + " requirement shape is wrong");
+            boolean linked = s.tree != SkillTree.HYBRID && s.tree != SkillTree.PAST;
+            check(f, !linked || (s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty()), s.id + " requirement shape is wrong");
             check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0), s.id + " cooldown does not match its kind");
             check(f, s.keystone() == (s.tier == 3) && (!s.keystone() || s.maxRank == 1), s.id + " keystone shape is wrong");
-            check(f, s.iconIndex() < 36, s.id + " icon index");
+            check(f, s.ordinal() < 36 ? s.iconIndex() == s.ordinal() : s.iconIndex() >= 100 && s.iconIndex() < 132, s.id + " icon index");
             if (s.active && s != Skill.SIGNAL) {
                 check(f, SkillRules.manaCost(s, 1) > 0, s.id + " has no mana cost");
             }
@@ -110,7 +122,7 @@ public final class SkillSelfTest {
             }
         }
         for (SkillTree t : SkillTree.values()) {
-            check(f, t.sealed || perTree[t.ordinal()] == 6, t.id + " does not have 6 skills");
+            check(f, t.sealed || perTree[t.ordinal()] == (t == SkillTree.HYBRID ? 5 : 6), t.id + " does not have the right number of skills");
         }
         // 1 本の木の総点 (段 + 刻印 1 点ずつ)。Lv 50 の 45 点では 3 本は極められない
         int[] treePoints = new int[SkillTree.values().length];

@@ -438,6 +438,9 @@ public final class SkillEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             SkillData d = SkillManager.get(player);
             d.sanitize(SkillManager.level(player));
+            // 転生の回数を写し、足りなくなった淵・前世の技を戻す (版 3 以前の記録はそのまま通る)
+            d.rebirth = jp.revati.skyabyss.rebirth.RebirthView.count(player);
+            d.enforceRebirth();
             SkillManager.applyModifiers(player);
             // ここではまだ上限まで切り詰めない。装備の特性 (共鳴・静心) の最大マナは最初の tick で付くので、
             // 上限を超えていれば regenTick がそのとき収める

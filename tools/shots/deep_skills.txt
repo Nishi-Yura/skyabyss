@@ -1,0 +1,125 @@
+# 橋・変異・紋の盤・前世の技・淵 (docs/design/31 の A08・A09・A14・B08・B09) の K 画面と変異の見た目の確認。
+# ./gradlew runShots -Pscript=tools/shots/deep_skills.txt  → python tools/deep_skills_sheet.py で docs/review/previews/deep_skills_sheet.png
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 40
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+# 木を 3 つずつ (岩・風・潮・灰・骨) → 橋が開く
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p riposte 2
+cmd skyabyss skill learn @p rock_call 2
+cmd skyabyss skill learn @p lunge 2
+cmd skyabyss skill learn @p nimble 2
+cmd skyabyss skill learn @p backstep 2
+cmd skyabyss skill learn @p ward_song 2
+cmd skyabyss skill learn @p calm_heart 2
+cmd skyabyss skill learn @p ebb_tide 2
+cmd skyabyss skill learn @p temper 2
+cmd skyabyss skill learn @p ember_heart 2
+cmd skyabyss skill learn @p ember_hammer 3
+cmd skyabyss skill learn @p cloud_pierce 2
+cmd skyabyss skill learn @p far_shot 2
+cmd skyabyss skill learn @p bone_trap 2
+cmd skyabyss skill learn @p dust_charge 2
+cmd skyabyss skill learn @p steam_bell 1
+cmd skyabyss skill learn @p sea_breeze 1
+wait 20
+
+# 1. 橋の輪 (5 本の木の間に橋が 1 つずつ。開いた橋は金の枠)
+open skills_bridge
+wait 20
+shot deep_1_bridge
+close
+wait 10
+
+# 2. 淵 (転生 3 回: 入口と 2 行目まで) と前世の技 (6 点)
+cmd skyabyss dev rebirth @p 3
+cmd skyabyss skill learn @p deep_pull 2
+cmd skyabyss skill learn @p deep_mirror 3
+cmd skyabyss skill learn @p deep_echo 1
+cmd skyabyss skill learn @p echo_strike 2
+cmd skyabyss skill learn @p old_vigil 1
+cmd skyabyss skill learn @p grave_bell 1
+wait 20
+open skills_deep
+wait 20
+shot deep_2_deep
+close
+wait 10
+open skills_past
+wait 20
+shot deep_3_past
+close
+wait 10
+
+# 3. 変異と紋の盤 (穴は転生 3 回で 6 つ。差した紋の中心の技と段)
+cmd skyabyss skill mutate @p titan_cleave
+cmd skyabyss skill mutate @p ember_hammer
+cmd skyabyss skill glyph @p rock 3
+cmd skyabyss skill glyph @p ash 2
+cmd skyabyss skill glyph @p tide 1
+cmd skyabyss skill glyph @p wind 3
+cmd skyabyss skill glyph @p bone 2
+cmd skyabyss skill glyph @p rock 1
+cmd skyabyss skill glyph @p wind 2
+cmd skyabyss skill socket @p 0 titan_cleave
+cmd skyabyss skill socket @p 1 ember_hammer
+cmd skyabyss skill socket @p 2 ward_song
+cmd skyabyss skill socket @p 3 backstep
+wait 20
+open skills_ext
+wait 20
+shot deep_4_ext
+close
+wait 10
+
+# 4. 変異の見た目 (第一人称。敵を前に並べて撃つ)
+cmd gamemode creative
+cmd skyabyss dev rebirth @p 0
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 40
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p ember_hammer 3
+cmd skyabyss skill learn @p wind_rend 2
+cmd skyabyss skill mutate @p titan_cleave
+cmd skyabyss skill mutate @p ember_hammer
+cmd skyabyss skill mutate @p wind_rend
+cmd skyabyss skill slot @p 1 titan_cleave
+cmd skyabyss skill slot @p 2 ember_hammer
+cmd skyabyss skill slot @p 3 wind_rend
+cmd skyabyss skill mana @p full
+cmd summon zombie 0 -60 4 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon zombie 1.5 -60 1 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon zombie -1.5 -60 -2 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+cmd summon zombie 0 -60 -5 {NoAI:1b,Silent:1b,PersistenceRequired:1b}
+camera 0 -60 8 180 14
+wait 20
+cmd skyabyss skill cast @p 1
+wait 5
+shot deep_5_cliff
+wait 40
+cmd skyabyss skill cooldowns @p
+cmd skyabyss skill cast @p 3
+wait 3
+shot deep_6_blade
+wait 40
+cmd skyabyss skill cooldowns @p
+cmd skyabyss skill cast @p 2
+wait 7
+shot deep_7_meteor
+wait 40

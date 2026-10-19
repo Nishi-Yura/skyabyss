@@ -164,6 +164,37 @@ public final class SkillCommands {
                             SkillReset.forRebirth(target(ctx));
                             return done(ctx);
                         })))
+                        // 開発用 (A08・A14): 紋を 1 つ足す・変異を素材なしで入れる・紋を盤へ差す
+                        .then(Commands.literal("glyph").then(player().then(Commands.argument("id", StringArgumentType.word())
+                                .then(Commands.argument("level", IntegerArgumentType.integer(1, 3)).executes(ctx -> {
+                                    ServerPlayer p = target(ctx);
+                                    Glyph g = Glyph.byId(StringArgumentType.getString(ctx, "id"));
+                                    if (g == null || !SkillExtOps.give(p, g, IntegerArgumentType.getInteger(ctx, "level"))) {
+                                        return 0;
+                                    }
+                                    return done(ctx);
+                                })))))
+                        .then(Commands.literal("socket").then(player().then(Commands.argument("socket", IntegerArgumentType.integer(0, 5))
+                                .then(Commands.argument("skill", StringArgumentType.word()).executes(ctx -> {
+                                    ServerPlayer p = target(ctx);
+                                    SkillData sd = SkillManager.get(p);
+                                    sd.lastCombat = Long.MIN_VALUE / 2;
+                                    SkillExtOps.GlyphResult r = SkillExtOps.place(p, IntegerArgumentType.getInteger(ctx, "socket"), 0,
+                                            Skill.byId(StringArgumentType.getString(ctx, "skill")));
+                                    ctx.getSource().sendSuccess(() -> Component.literal("socket: " + r.name()), false);
+                                    return r == SkillExtOps.GlyphResult.OK ? 1 : 0;
+                                })))))
+                        .then(Commands.literal("mutate").then(player().then(Commands.argument("skill", StringArgumentType.word()).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            Skill s = Skill.byId(StringArgumentType.getString(ctx, "skill"));
+                            Mutation m = s == null ? null : Mutation.of(s);
+                            if (m == null) {
+                                return 0;
+                            }
+                            SkillManager.get(p).mutations.put(s.id, m.id);
+                            SkillManager.sync(p);
+                            return done(ctx);
+                        }))))
                         .then(Commands.literal("respecs").then(player().then(Commands.argument("count", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).respecs = IntegerArgumentType.getInteger(ctx, "count");
@@ -219,6 +250,9 @@ public final class SkillCommands {
         source.sendSystemMessage(ModText.progress("message.skyabyss.skill.points_line", d.unspentPoints(level), d.totalPoints(level),
                 Math.round(d.mana), Math.round(SkillManager.maxMana(p))));
         for (SkillTree tree : SkillTree.values()) {
+            if (tree.rebornOnly() && d.rebirth <= 0) {
+                continue;
+            }
             MutableComponent line = Component.translatable(tree.nameKey()).withStyle(ChatFormatting.GOLD).append(" ");
             if (!d.treeOpen(tree)) {
                 line.append(Component.translatable("message.skyabyss.skill.sealed").withStyle(ChatFormatting.DARK_GRAY));

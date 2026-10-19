@@ -184,6 +184,8 @@ public final class TrialHub {
             HubTablets.install(level, p.titan());
             HubTablets.refresh(level, p.group());
             for (ServerPlayer m : moved) {
+                // 試練を越えた人に紋が 1 つ (同じ試練では一度だけ。docs/design/31 の A14)
+                jp.revati.skyabyss.rpg.skill.SkillExtOps.award(m, p.titan(), p.key());
                 sendToHub(level, m, p.titan(), true, p.key());
             }
             SkyAbyss.LOGGER.info("Trial {} of the {} cleared by group {}: {} member(s) returned to the hub", p.key(), p.titan(), p.group(), moved.size());
