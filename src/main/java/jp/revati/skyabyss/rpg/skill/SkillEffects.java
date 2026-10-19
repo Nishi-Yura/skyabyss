@@ -231,6 +231,8 @@ public final class SkillEffects {
     // 吸収を付ける。重ねがけで増えない (いまの吸収が大きければそのまま)。黄ハートは 2❤ (4 点) まで
     public static void absorb(ServerPlayer target, float amount, int ticks, boolean cycling) {
         amount = Math.min(SkillRules.ABSORB_CAP, amount);
+        // 1.21 の吸収は max_absorption の属性で頭打ちになる (ふだんは 0)。期限のあいだだけ上限を上げる
+        timedMod(target, Attributes.MAX_ABSORPTION, "absorb_cap", SkillRules.ABSORB_CAP, AttributeModifier.Operation.ADD_VALUE, ticks + 2);
         if (target.getAbsorptionAmount() < amount) {
             target.setAbsorptionAmount(amount);
         }

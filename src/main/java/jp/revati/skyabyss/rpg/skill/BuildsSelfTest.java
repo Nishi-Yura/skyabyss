@@ -154,11 +154,12 @@ final class BuildsSelfTest {
         check(f, SkillManager.chooseRune(p, Skill.ROCK_CALL, 1) == SkillManager.RuneResult.NOT_AVAILABLE, "a rune of an unlearned skill was chosen");
         check(f, SkillManager.chooseRune(p, Skill.TITAN_CLEAVE, 2) == SkillManager.RuneResult.NO_PLACE, "a rune was swapped away from a forge or fire");
         SkillManager.forceRank(p, Skill.JOURNAL, 1);
+        spent = d.spentPoints();
         d.lastCombat = level.getGameTime();
         check(f, SkillManager.chooseRune(p, Skill.TITAN_CLEAVE, 2) == SkillManager.RuneResult.NOT_QUIET, "a rune was swapped in combat");
         d.lastCombat = level.getGameTime() - SkillRules.QUIET_TICKS - 1;
         check(f, SkillManager.chooseRune(p, Skill.TITAN_CLEAVE, 2) == SkillManager.RuneResult.OK && d.rune(Skill.TITAN_CLEAVE) == 2 && d.runeSwaps == 1
-                && d.spentPoints() == spent + 1, "the first swap was not free");
+                && d.spentPoints() == spent, "the first swap was not free");
         check(f, SkillManager.chooseRune(p, Skill.TITAN_CLEAVE, 3) == SkillManager.RuneResult.NO_CRYSTALS, "a second swap was free");
         check(f, SkillManager.runeOf(p, Skill.TITAN_CLEAVE) == 2, "runeOf is wrong");
         // 刻印の待ちへの効き目

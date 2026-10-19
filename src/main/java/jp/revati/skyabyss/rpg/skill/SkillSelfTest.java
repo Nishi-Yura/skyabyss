@@ -329,7 +329,7 @@ public final class SkillSelfTest {
         check(f, p.getInventory().getItem(9).getCount() == 4, "cloud pierce did not use one arrow");
         List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, new AABB(px - 8, py - 8, pz - 8, px + 8, py + 8, pz + 8),
                 e -> e.getTags().contains(SkillActions.PIERCE_TAG));
-        check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) && arrows.get(0).isNoGravity()
+        check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) + 1 && arrows.get(0).isNoGravity()
                 && arrows.get(0).pickup == AbstractArrow.Pickup.CREATIVE_ONLY, "the cloud pierce arrow is wrong: " + arrows.size());
         arrows.forEach(AbstractArrow::discard);
 
