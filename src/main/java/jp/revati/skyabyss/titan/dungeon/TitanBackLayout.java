@@ -13,7 +13,7 @@ import net.minecraft.world.phys.AABB;
 // 尾の付け根の背 (z 160) に到着の広場と錨石、背の中ほど (z 62) に祠。祠の階段で体の中の鼓動の間へ下りる。
 // 西の翼は左のわき腹の肋骨の間 (肋骨の窓から空が見える)、東の翼は背骨に沿った広間、闇の水路は腹の中の水、心臓の間は胸の奥
 //
-//              [宝物庫]  (北: 封印の扉の奥)           [歌の祠]
+//              [封印の回廊 → 心臓の間]  (北)         [歌の祠]
 //                 |
 //   [西の翼]--[鼓動の間]--[東の翼]   [図書室 (骨の書庫)]
 //                 |  \__ 床の穴の下に [闇の水路] (y 84〜89。入口 2 つ)
@@ -23,10 +23,9 @@ import net.minecraft.world.phys.AABB;
 //
 // 西の翼 (裂け目の回廊): 西の前室 → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 (→ 数え歌の鐘楼) → 崩れ橋 → 共鳴石
 //                        足場の並びは毎回変わる (谷ごとに 3 本の並列のレーン)
-// 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 番兵長の控えの間 → 短い通路 → 番兵長の広間 → 共鳴石
-//                        第一の広間の南の戸 → 第二の広間 (射手の波) → 番兵の詰所 (老番兵。奥の戸の鍵は老番兵が持つ「割符」)
-//                        広間の扉は戦いの間だけ閉じる。制圧すると出口と入口が開く
-// 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
+// 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 控えの間 → 第二の広間 (射手の波) → 前室 → 番兵の詰所 (老番兵が持つ「割符」) → 通路 → 番兵長の広間 → 共鳴石
+//                        一本道 (戻らない)。広間の扉は戦いの間だけ閉じる。制圧すると次の戸が開く
+// 心臓の回廊・心臓の間: 鼓動の間の北の封印から、そのまま北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
 // 闇の水路 (光海): 5×5 の水の通路でできた迷路 (15×21 マス)。毎回形が変わり、息継ぎのくぼみがどのマスからも 3 マス以内に、灯の台が 3 つある
 public final class TitanBackLayout {
     // 雲の海の高さの基準 (雲は BASE_Y - 55 = 45、BASE_Y - 50 より下に落ちたら地上へ)。鯨の腹の下端は y 58
@@ -55,7 +54,10 @@ public final class TitanBackLayout {
     //     ボス部屋の大門は、広げた入口 (心臓の間・番兵長の広間) に合わせて建てる (BossGates)
     // 16: 光海の作り直し (23 の 11 章。灯の台 3 つ・息継ぎのくぼみを 3 マス以内・近道・水域の色・広い入口の小部屋)
     // 17: 15 と 16 の両方 (背の拡大の迷路 15×21 マス・1 マス 5×5 の上に、光海の導きをのせた。入口の小部屋は 21×14)
-    public static final int LAYOUT_VERSION = 17;
+    // 18: 東の翼を一本道に (E1 → CE1 → E2 → 前室 → 詰所 → 割符の戸 → E3。戻らない)・少人数の仕切り (幕を段にした)・宝物庫を無くして封印の回廊に・
+    //     西の翼のアスレチックを筋の通った道に作り直し (中ほどの休み場)・鐘楼の作り直し・胸びれの先の碑と宝・ゾーンごとの材質 (ZonePalette)・
+    //     鎖・くぼみの修正・灯り (設計書 26 の 8.6)
+    public static final int LAYOUT_VERSION = 18;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -93,20 +95,15 @@ public final class TitanBackLayout {
     public static final Box HUB = new Box(-18, 18, -55, -15, FLOOR, 16);
     // 入口の通路: 祠の階段の足もと (z 15) から鼓動の間まで
     public static final Box ENTRY = new Box(-3, 3, -14, 15, FLOOR, 6);
-    public static final Box TREASURY = new Box(-10, 10, -73, -57, FLOOR, 9);
-    // 宝物庫の封印 (三つの石で開く)。鼓動の間の北の壁 (z -56)
+    // 封印 (三つの石で開く)。鼓動の間の北の壁 (z -56)。開くとそのまま心臓の回廊 (版 18: 天の鍵の欠片は心臓から受け取るので、宝物庫の部屋は無くした)
     public static final List<BlockPos> GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, -56, true);
-    // 宝物庫の奥の扉 (三つの石で封印が開くと、一緒に開く)。その先は心臓の回廊
-    public static final List<BlockPos> INNER_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, -74, true);
-    // 天の鍵の欠片の台座 (飾り。欠片は岩鯨の心臓を倒すと、そこで受け取る)
-    public static final BlockPos PEDESTAL = new BlockPos(0, FLOOR + 1, -66);
     // 鼓動の間の中央の台座 (眠る心臓)
     public static final int HUB_CX = 0;
     public static final int HUB_CZ = -35;
 
     // ---------------------------------------------------------------- 心臓の回廊と心臓の間 (最終ボス)
-    // 奥の扉から北へ伸びる回廊 (x -3〜3、z -75〜-108)。途中に休み場 heart がある
-    public static final Box HEART_CORRIDOR = new Box(-3, 3, -108, -75, FLOOR, 6);
+    // 封印から北へ伸びる回廊 (x -3〜3、z -57〜-108)。途中に休み場 heart がある
+    public static final Box HEART_CORRIDOR = new Box(-3, 3, -108, -57, FLOOR, 6);
     public static final Box HEART_REST = new Box(-6, 6, -100, -88, FLOOR, 7);
     // 心臓の間: 中心 (0, 104, -136)、床 y=103、天井 y=120 (体の表面の内側に収まる)。内側の半径 25、壁の外側 27 (入口の壁 z=-109 が円の南の端)
     public static final int HEART_CX = 0;
@@ -151,39 +148,39 @@ public final class TitanBackLayout {
     public static final Box LIBRARY = new Box(-34, -12, -8, 18, FLOOR, 10);
     public static final Box LIBRARY_PASS = new Box(-11, -4, 3, 9, FLOOR, 6);
 
-    // ---------------------------------------------------------------- 東の翼 (戦闘)
+    // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
+    // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 第二の広間 E2 → (北の戸) 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
+    //   → (西の戸 = 割符の戸) 通路 E3_CORRIDOR (休み場) → 番兵長の広間 E3 (共鳴石) → 鼓動の間へ戻る扉
+    // どの戸も、手前の広間を鎮めたあとにだけ開く (道の途中で二つの戸が同時に開くことはない)。戦いの広間の入口は、戦いの間だけ閉じる
     public static final Box E0 = new Box(26, 32, -42, -29, FLOOR, 8);
     public static final Box E1 = new Box(34, 54, -54, -8, FLOOR, 11);
-    // 番兵長の控えの間 (休み場 ce1)。E1 の出口の先。西の壁の戸口から短い通路で番兵長の広間へ
     public static final Box CE1 = new Box(41, 53, -68, -56, FLOOR, 7);
+    public static final Box E2 = new Box(41, 55, -92, -70, FLOOR, 12);
+    public static final Box CK_PASS = new Box(42, 54, -99, -94, FLOOR, 6);
+    public static final Box CK = new Box(41, 55, -118, -101, FLOOR, 8);
+    public static final Box E3_CORRIDOR = new Box(34, 39, -105, -101, FLOOR, 6);
     public static final Box E3 = new Box(20, 32, -106, -52, FLOOR, 11);
-    // 控えの間 → 番兵長の広間の通路 (x 34〜39)。両端の壁 x=40 (戸口) と x=33 (番兵長の広間の入口)
-    public static final Box E3_CORRIDOR = new Box(34, 39, -65, -61, FLOOR, 6);
     public static final List<BlockPos> E1_ENTRANCE = wall(-38, -34, FLOOR + 1, FLOOR + 6, 33, false);
     public static final List<BlockPos> E1_EXIT = wall(42, 46, FLOOR + 1, FLOOR + 6, -55, true);
-    public static final List<BlockPos> CE1_WEST_DOOR = wall(-65, -61, FLOOR + 1, FLOOR + 6, 40, false);
-    public static final List<BlockPos> E3_ENTRANCE = wall(-65, -61, FLOOR + 1, FLOOR + 6, 33, false);
-    // 番兵長の広間の前室 (扉が閉じるとき、ここにいる人も中へ入れる): 控えの間と通路
-    public static final AABB E3_ANTE = CE1.aabb().minmax(E3_CORRIDOR.aabb());
+    public static final List<BlockPos> E2_ENTRANCE = wall(45, 49, FLOOR + 1, FLOOR + 6, -69, true);
+    public static final List<BlockPos> E2_EXIT = wall(45, 49, FLOOR + 1, FLOOR + 6, -93, true);
+    public static final List<BlockPos> CK_ENTRANCE = wall(45, 49, FLOOR + 1, FLOOR + 6, -100, true);
+    // 番兵長の広間への戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。詰所の西の壁 (x 40)
+    public static final List<BlockPos> E3_LOCK = wall(-105, -101, FLOOR + 1, FLOOR + 6, 40, false);
+    public static final List<BlockPos> E3_ENTRANCE = wall(-105, -101, FLOOR + 1, FLOOR + 6, 33, false);
+    // 番兵長の広間の前室 (扉が閉じるとき、ここにいる人も中へ入れる): 割符の戸から先の通路
+    public static final AABB E3_ANTE = E3_CORRIDOR.aabb();
     // 東の石を鳴らすと開く、鼓動の間へ戻る扉 (鼓動の間の東の壁 x=19。広間 E3 と壁を共有する所)
     public static final List<BlockPos> EAST_RETURN = wall(-54, -52, FLOOR + 1, FLOOR + 3, 19, false);
-    // 第二の広間 (E2。射手の波) と番兵の詰所 (CK。老番兵)。E1 の南の戸 → E2 → CK。初回だけ働く
-    public static final Box E2 = new Box(24, 46, 5, 47, FLOOR, 12);
-    public static final Box CK = new Box(24, 46, 56, 76, FLOOR, 8);
-    public static final Box E2_PASS = new Box(33, 43, -6, 3, FLOOR, 6);
-    public static final Box CK_PASS = new Box(33, 43, 49, 54, FLOOR, 6);
-    public static final List<BlockPos> E1_SOUTH = wall(36, 40, FLOOR + 1, FLOOR + 6, -7, true);
-    public static final List<BlockPos> E2_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 4, true);
-    public static final List<BlockPos> E2_EXIT = wall(36, 40, FLOOR + 1, FLOOR + 6, 48, true);
-    public static final List<BlockPos> CK_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 55, true);
-    // 番兵長の広間への戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。控えの間の西の戸口 (x 40)
-    public static final List<BlockPos> E3_LOCK = CE1_WEST_DOOR;
-    // 幕 (26 の 4.4・判断 3): 一人〜二人のグループには、大きな広間の遠い側に、そのグループだけに閉じた封印の壁 (GroupGates) を張って、
-    // 戦いの範囲を狭める。三人以上なら開く。戸口・出口・共鳴石はいつも近い側にある。広間 E1 は東の端 (x 48〜54)、E2 は西の端 (x 24〜32)、
-    // 番兵長の広間 E3 は北の端 (z -106〜-85)
-    public static final List<BlockPos> VEIL_E1 = wall(E1.z1(), E1.z2(), FLOOR + 1, FLOOR + 11, 47, false);
-    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 33, false);
-    public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -84, true);
+    // 仕切りの候補 (版 18。**いまは建てず、使わない**。広さの扱いはユーザーの判断待ち: 設計書 26 の 8.7 の案 A〜C)。案 A を採るときは、
+    // 少人数のグループだけに、広間の中へ立てる封印の壁 (GroupGates。そのグループにだけ見える)。外側は封じられ、湧きも戸口・出口・共鳴石のある側だけ。戦いが終われば開く。
+    //   第一の広間 E1: 二人以下は南 (z -26〜-8) を、一人はさらに東 (x 48〜54) を封じる (21×47 → 21×27 → 13×27)
+    //   第二の広間 E2: 一人は東の端 (x 51〜55) を封じる (15×23 → 10×23)
+    //   番兵長の広間 E3: 二人以下は南 (z -75〜-52。共鳴石の側) を封じる。倒すと開き、共鳴石へ行ける (13×55 → 13×30)
+    public static final List<BlockPos> VEIL_E1 = wall(E1.x1(), E1.x2(), FLOOR + 1, FLOOR + 11, -27, true);
+    public static final List<BlockPos> VEIL_E1_SOLO = wall(E1.z1(), -28, FLOOR + 1, FLOOR + 11, 47, false);
+    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 50, false);
+    public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -76, true);
     // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
     public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
 
@@ -225,7 +222,7 @@ public final class TitanBackLayout {
 
     public static final List<Inscription> LORE_SIGNS = List.of(
             new Inscription("sign.skyabyss.lore_heart", new BlockPos(6, FLOOR + 3, -90), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-10, FLOOR + 3, -62), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-3, FLOOR + 3, -64), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.lore_west", new BlockPos(-24, WEST_LEDGE_Y + 2, -49), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
             new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
@@ -236,6 +233,16 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.chasm", new BlockPos(-18, FLOOR + 4, -41), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.arena", new BlockPos(18, FLOOR + 4, -41), net.minecraft.core.Direction.WEST),
             new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -55), net.minecraft.core.Direction.SOUTH));
+    // 道しるべの碑 (版 18。26 の 8.6): 東の翼の広間の入口・次の戸・詰所の割符の戸・鐘の戸のそばに、次に何があるか・なぜ閉じているかを書く
+    public static final List<Inscription> GUIDE_SIGNS = List.of(
+            new Inscription("sign.skyabyss.hall_e1", new BlockPos(34, FLOOR + 3, -40), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.door_next", new BlockPos(39, FLOOR + 3, -54), net.minecraft.core.Direction.SOUTH),
+            new Inscription("sign.skyabyss.hall_e2", new BlockPos(44, FLOOR + 3, -68), net.minecraft.core.Direction.SOUTH),
+            new Inscription("sign.skyabyss.door_next", new BlockPos(44, FLOOR + 3, -92), net.minecraft.core.Direction.SOUTH),
+            new Inscription("sign.skyabyss.hall_ck", new BlockPos(51, FLOOR + 3, -99), net.minecraft.core.Direction.SOUTH),
+            new Inscription("sign.skyabyss.door_tally", new BlockPos(41, FLOOR + 3, -107), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.hall_e3", new BlockPos(32, FLOOR + 3, -96), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.door_bell", new BlockPos(-33, FLOOR + 12, -92), net.minecraft.core.Direction.EAST));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
             new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
@@ -244,6 +251,7 @@ public final class TitanBackLayout {
     public static List<Inscription> allSigns() {
         List<Inscription> all = new java.util.ArrayList<>(LORE_SIGNS);
         all.addAll(TRIAL_SIGNS);
+        all.addAll(GUIDE_SIGNS);
         all.add(HEART_GATE_SIGN);
         return List.copyOf(all);
     }

@@ -129,6 +129,10 @@ public final class TitanBackTrials {
     }
 
     public static final String MAZE_ENTRY = "mz0";
+    private static Checkpoint islandCheckpoint(ParkourCourses.Island i) {
+        return new Checkpoint(i.id(), new Box(i.cx() - 1, i.cx() + 1, i.cz() - 1, i.cz() + 1, i.y(), 3), new BlockPos(i.cx(), i.y() + 1, i.cz()));
+    }
+
     private static final List<Checkpoint> CHECKPOINTS = List.of(
             // 鼓動の間の中央は眠る心臓の台座 (強化深層岩) なので、南へずらす
             new Checkpoint("hub", HUB, HUB.center().offset(0, 0, 6)),
@@ -136,14 +140,16 @@ public final class TitanBackTrials {
             new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
             new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
+            // 谷の中ほどの島 (アスレチックの休み場。落ちるとここへ戻る)
+            islandCheckpoint(ParkourCourses.ISLANDS_A.get(0)), islandCheckpoint(ParkourCourses.ISLANDS_A.get(1)),
+            islandCheckpoint(ParkourCourses.ISLANDS_B.get(0)), islandCheckpoint(ParkourCourses.ISLANDS_C.get(0)),
             // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
             // 倒れて目覚めた所の目の前が戦場、にならないように
             new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
             new Checkpoint("ce1", CE1, CE1.center().offset(2, 0, -2)),
             new Checkpoint("heart", HEART_REST, HEART_REST.center().offset(1, 0, 1)),
-            // 第一の広間と第二の広間のあいだ・第二の広間と詰所のあいだの休み場 (焚き火のまわりの腰掛けを避けて斜めに置く)
-            new Checkpoint("e2r", E2_PASS, E2_PASS.center().offset(2, 0, -2)),
-            new Checkpoint("ckr", CK_PASS, CK_PASS.center().offset(2, 0, -2)),
+            // 第二の広間と詰所のあいだの休み場 (焚き火のまわりの腰掛けを避けて斜めに置く)
+            new Checkpoint("ckr", CK_PASS, CK_PASS.center().offset(4, 0, 1)),
             // 背の外の道の宿 (広場から祠への踏み跡の途中)
             new Checkpoint("camp", new Box(-6, 6, WingsBuilder.CAMP_Z - 6, WingsBuilder.CAMP_Z + 6, WingsBuilder.CAMP_Y, 8),
                     new BlockPos(-3, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z + 2)),
@@ -151,7 +157,7 @@ public final class TitanBackTrials {
             new Checkpoint("mz1", MAZE_ENTRY_ROOM2, new BlockPos(MAZE_ENTRY_ROOM2.x1(), MAZE_ENTRY_ROOM2.floorY() + 1, MAZE_ENTRY_ROOM2.z2())),
             // 闇の水路の入口: はしごを下りた先の乾いた小部屋。水の外・戦いの外。足元は部屋の床の一段上
             new Checkpoint(MAZE_ENTRY, MAZE_ENTRY_ROOM, new BlockPos(MAZE_ENTRY_ROOM.x1(), MAZE_ENTRY_ROOM.floorY() + 1, MAZE_ENTRY_ROOM.z2())));
-    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
+    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2", "wa1", "wa2", "wb1", "wc1");
 
     // 闇の水路の中ほどの休み場 (息継ぎのくぼみの一つに、乾いた足場を作ってある)。迷路は種で形が変わるので、場所は種から出す
     public static final String MAZE_REST = "mz";
@@ -182,13 +188,41 @@ public final class TitanBackTrials {
     // ---------------------------------------------------------------- 番兵の広間
     // ante は入口の手前の前室 (扉が閉じるとき、ここにいる人も中へ入れる)
     // knownRoom: 初回だけ働く部屋の名前 (FirstRun)。既知の道のグループには、戦わずに制圧済みになる。
-    // veil / veilNear: 幕 (一人〜二人のグループだけに、広間の遠い側を封じる壁) と、近い側の判定
-    private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves,
-            @Nullable String knownRoom, List<BlockPos> veil, java.util.function.Predicate<BlockPos> veilNear) {
+    // cuts: 動かせる仕切り (版 18。少人数のグループだけに、広間の中に立つ封印の壁。人数が maxPlayers 以下のとき張り、封じた側 (sealed) には湧かない)
+    private record Cut(int maxPlayers, List<BlockPos> wall, java.util.function.Predicate<BlockPos> sealed) {
     }
 
-    // 幕を張る人数の上限 (これ以下のグループは遠い側が封じられる)
-    public static final int VEIL_MAX_PLAYERS = 2;
+    private record Hall(String id, Box box, AABB ante, List<BlockPos> entrance, List<BlockPos> exit, List<List<String>> waves,
+            @Nullable String knownRoom, List<Cut> cuts) {
+        // その人数のとき封じている仕切りの壁の全部
+        List<BlockPos> walls(int players) {
+            List<BlockPos> out = new ArrayList<>();
+            for (Cut c : cuts) {
+                if (players <= c.maxPlayers()) {
+                    out.addAll(c.wall());
+                }
+            }
+            return out;
+        }
+
+        // その人数のとき、湧いてよい場所か (封じた側ではない)
+        boolean open(int players, BlockPos p) {
+            for (Cut c : cuts) {
+                if (players <= c.maxPlayers() && c.sealed().test(p)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        List<BlockPos> allWalls() {
+            List<BlockPos> out = new ArrayList<>();
+            for (Cut c : cuts) {
+                out.addAll(c.wall());
+            }
+            return out;
+        }
+    }
 
     private static List<BlockPos> concat(List<BlockPos> a, List<BlockPos> b) {
         List<BlockPos> out = new ArrayList<>(a);
@@ -199,21 +233,29 @@ public final class TitanBackTrials {
     // 第一の広間は、近接の波 (番兵が前に立ち、苔這いが回り込む) → 射手の波 (番兵の盾の後ろから射手 3 体が撃つ。奥の壁ぎわで骨の砲手が
     // 足もとへ骨の塊を落とす) → 老番兵の波 (名づきの小さな中ボス。号令の骨笛で射手を呼ぶ)。
     // 番兵長の広間の第一波で両方が混ざる。(配置の版 2 で第二の広間を除き、その射手の波を第一の広間へ移した)
+    // 動かせる仕切りは、いまは使わない (ユーザーの判断待ち。設計書 26 の 8.7 の案 A〜C)。入れるなら、各広間の NO_CUTS を
+    // List.of(new Cut(最大人数, VEIL_E1, 封じる側の判定), ...) に替え、VEIL_* を OPEN_GATES に足す (仕組みは applyVeil・spawnWave・resetHall が持っている)
+    private static final List<Cut> NO_CUTS = List.of();
+
     private static final List<Hall> HALLS = List.of(
-            new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, concat(E1_EXIT, E1_SOUTH), List.of(
+            // 第一の広間 (練兵場): 二人以下は南を封じ (z -26 より南)、一人はさらに東 (x 48 より東) を封じる
+            new Hall("e1", E1, E0.aabb(), E1_ENTRANCE, E1_EXIT, List.of(
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
-                    List.of("archer", "archer", "archer", "sentinel", "mortar")), null, VEIL_E1, p -> p.getX() < 47),
-            // 第二の広間: 射手の波 (骨棘の射手 3 + 骨の砲手 1)。初回だけ
-            new Hall("e2", E2, E2_PASS.aabb(), E2_ENTRANCE, E2_EXIT, List.of(
+                    List.of("archer", "archer", "archer", "sentinel", "mortar")), null,
+                    NO_CUTS),
+            // 第二の広間 (射手の回廊): 射手の波 (骨棘の射手 3 + 骨の砲手 1)。初回だけ。一人は東の端を封じる
+            new Hall("e2", E2, CE1.aabb(), E2_ENTRANCE, E2_EXIT, List.of(
                     List.of("archer", "archer", "archer", "mortar"),
-                    List.of("crawler", "crawler", "archer", "sentinel")), "whale_e2", VEIL_E2, p -> p.getX() > 33),
-            // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間の戸 (割符) が開く。初回だけ
+                    List.of("crawler", "crawler", "archer", "sentinel")), "whale_e2",
+                    NO_CUTS),
+            // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
             new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
                     List.of("sentinel", "sentinel", "sentinel", "sentinel"),
-                    List.of("elder")), "whale_ck", List.of(), p -> true),
+                    List.of("elder")), "whale_ck", List.of()),
+            // 番兵長の広間: 二人以下は南 (共鳴石の側) を封じる。倒すと開く
             new Hall("e3", E3, E3_ANTE, E3_ENTRANCE, List.of(), List.of(
                     List.of("sentinel", "sentinel", "archer", "crawler", "crawler"),
-                    List.of("captain")), null, VEIL_E3, p -> p.getZ() > -84));
+                    List.of("captain")), null, NO_CUTS));
 
     // ---------------------------------------------------------------- 状態 (グループごと)
     // 試練の進み (制圧した広間・宝物庫の封印・心臓の撃破・鳴らした石・扉の開け閉め) は、グループ (パーティ、または一人) の記録
@@ -258,12 +300,18 @@ public final class TitanBackTrials {
     private static final GroupBossRooms HEART_ROOMS = new GroupBossRooms();
 
     // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
-    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT,
-            E1_SOUTH, E2_EXIT, E3_LOCK, BELL_GATE);
-    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, E2_ENTRANCE, CK_ENTRANCE,
-            VEIL_E1, VEIL_E2, VEIL_E3);
+    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT,
+            E2_EXIT, E3_LOCK, BELL_GATE);
+    private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, E2_ENTRANCE, CK_ENTRANCE);
 
     private TitanBackTrials() {
+    }
+
+    // 戸口の位置の一覧 (閉じている戸・開いている戸の全部。壁の穴の検査 (WhaleScaleSelfTest) が使う)
+    static List<List<BlockPos>> allDoorLists() {
+        List<List<BlockPos>> all = new ArrayList<>(CLOSED_GATES);
+        all.addAll(OPEN_GATES);
+        return all;
     }
 
     // 倒れても消えないよう、PlayerPersisted (死んでも引き継がれる領域) に書く
@@ -559,7 +607,7 @@ public final class TitanBackTrials {
     // 封印の先 (宝物庫・心臓の回廊・心臓の前室・心臓の間) にいるか
     static boolean isPastHeartSeal(Player player) {
         BlockPos p = player.blockPosition();
-        return TREASURY.contains(p) || HEART_CORRIDOR.contains(p) || HEART_REST.contains(p) || HEART.contains(p) || SONG_SHRINE.contains(p);
+        return HEART_CORRIDOR.contains(p) || HEART_REST.contains(p) || HEART.contains(p) || SONG_SHRINE.contains(p);
     }
 
     // 体内 (島の地表より下) にいるか
@@ -665,7 +713,7 @@ public final class TitanBackTrials {
             HALL_STATES.remove(key);
             GroupGates.open(level, group, hall.exit());
             GroupGates.release(level, group, hall.entrance());
-            GroupGates.release(level, group, hall.veil());
+            GroupGates.release(level, group, hall.allWalls());
             playToGroup(level, group, hall.box().center(), SoundEvents.BEACON_POWER_SELECT, 2f, 0.8f);
             broadcast(level, group, hall.box(), ModText.progress(hall.exit().isEmpty() ? "message.skyabyss.arena_cleared" : "message.skyabyss.hall_cleared"));
         } else {
@@ -682,7 +730,7 @@ public final class TitanBackTrials {
         }
         HALL_STATES.remove(hallKey(group, hall.id()));
         GroupGates.release(level, group, hall.entrance());
-        GroupGates.release(level, group, hall.veil());
+        GroupGates.release(level, group, hall.allWalls());
         if (!record(level, group).isHallCleared(hall.id())) {
             GroupGates.release(level, group, hall.exit());
         }
@@ -696,15 +744,14 @@ public final class TitanBackTrials {
         return Math.max(1, Groups.inBox(level, group, hall.box().aabb().inflate(40)).size());
     }
 
-    // 幕 (一人〜二人だけ遠い側を封じる)。人数が増えれば開く
+    // 仕切り (少人数だけ、広間の一部を封じる)。人数に合わせて立てる・外す (人数が増えれば外れる)
     private static void applyVeil(ServerLevel level, UUID group, Hall hall, int players) {
-        if (hall.veil().isEmpty()) {
-            return;
-        }
-        if (players <= VEIL_MAX_PLAYERS) {
-            GroupGates.seal(level, group, hall.veil());
-        } else {
-            GroupGates.release(level, group, hall.veil());
+        for (Cut cut : hall.cuts()) {
+            if (players <= cut.maxPlayers()) {
+                GroupGates.seal(level, group, cut.wall());
+            } else {
+                GroupGates.release(level, group, cut.wall());
+            }
         }
     }
 
@@ -718,9 +765,9 @@ public final class TitanBackTrials {
 
     private static void spawnWave(ServerLevel level, Hall hall, HallState state) {
         List<BlockPos> spawns = EastWingBuilder.spawnPoints(hall.box());
-        if (!hall.veil().isEmpty() && state.players <= VEIL_MAX_PLAYERS) {
-            // 幕が張られているあいだは、近い側にだけ湧かせる
-            List<BlockPos> near = spawns.stream().filter(hall.veilNear()).toList();
+        if (!hall.cuts().isEmpty()) {
+            // 仕切りが立っているあいだは、封じていない側にだけ湧かせる
+            List<BlockPos> near = spawns.stream().filter(p -> hall.open(state.players, p)).toList();
             if (!near.isEmpty()) {
                 spawns = near;
             }
@@ -1380,6 +1427,7 @@ public final class TitanBackTrials {
                 && Math.abs(player.getX()) < 3 && pos.getZ() > SHRINE_SEAL_Z && pos.getZ() <= SHRINE_SEAL_Z + 4 && pos.getY() < shrineY()) {
             Notice.bar(player, ModText.lore("message.skyabyss.trials_peaceful"));
         }
+        TrialGuide.tick(player);
         int epoch = epochOf(player.serverLevel(), player);
         CompoundTag tag = persisted(player);
         // いまの試練の番号を見た、という印 (ログインしたときの検査に使う)
@@ -1724,8 +1772,6 @@ public final class TitanBackTrials {
             case "e0":
                 return hallFighting(group, "e1");
             case "ce1":
-                return hallFighting(group, "e3");
-            case "e2r":
                 return hallFighting(group, "e2");
             case "ckr":
                 return hallFighting(group, "ck");
@@ -1749,16 +1795,6 @@ public final class TitanBackTrials {
             return;
         }
         BlockPos pos = event.getPos();
-        if (pos.equals(PEDESTAL)) {
-            // 飾りの台座。欠片は心臓を倒すと受け取れる
-            event.setCanceled(true);
-            if (event.getEntity() instanceof ServerPlayer player) {
-                // 天の鍵の欠片をもう受け取った人には、そう伝える
-                boolean claimed = TitanBackData.get(player.serverLevel()).hasClaimedFragment(player.getUUID());
-                Notice.bar(player, ModText.hint(claimed ? "message.skyabyss.fragment_already" : "message.skyabyss.pedestal_sleep"));
-            }
-            return;
-        }
         // 休み場の焚き火: しゃがんで触れると、試練をあきらめて尾の台へ戻る (休み場の記録も消える)
         net.minecraft.world.level.block.state.BlockState clicked = event.getLevel().getBlockState(pos);
         // (煙の出ない魂の火鉢 = 地面の魂のランタン。闇の水路の入口の小部屋 BuildKit.restPoint)

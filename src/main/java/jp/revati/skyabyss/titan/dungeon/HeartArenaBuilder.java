@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 // 心臓の回廊と心臓の間 (最終ボスの部屋)。
-// 宝物庫の奥の扉 (z=-45) から北へ回廊が伸び、途中の休み場 heart を過ぎると、円形の大広間に出る。
+// 鼓動の間の北の封印 (z=-56) から北へ回廊が伸び、途中の休み場 heart を過ぎると、円形の大広間に出る。
 //  - 広間の中心は (0, 94, -85)。内側の半径 19、壁の外側 21。床は y=93、天井は y=106
 //    (体の表面が y=106 あたりなので、天井の高さは 12 マスになる。体の外へ出ないための限界)
 //  - 壁・天井・床は、赤土器・ネザーイボ・泥煉瓦の肉の質感。紫水晶と海のランタンが脈の光になる
@@ -83,6 +83,12 @@ final class HeartArenaBuilder {
             }
         }
         kit.restPoint(HEART_REST);
+        // 休み場の四隅に灯り (どこに立っても暗がりにならない)
+        for (int x : new int[]{HEART_REST.x1() + 1, HEART_REST.x2() - 1}) {
+            for (int z : new int[]{HEART_REST.z1() + 1, HEART_REST.z2() - 1}) {
+                kit.lantern(x, FLOOR + 1, z);
+            }
+        }
     }
 
     // 心臓の間: 円の内側は空けて床・天井を張り、壁の外側の輪は肉の壁にする

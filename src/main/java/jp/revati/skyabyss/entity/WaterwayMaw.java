@@ -83,16 +83,17 @@ public class WaterwayMaw extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, 18)
                 .add(Attributes.ATTACK_DAMAGE, BITE_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 0.77)
-                .add(Attributes.FOLLOW_RANGE, 16);
+                .add(Attributes.FOLLOW_RANGE, 26);
     }
 
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(2, new BiteGoal());
+        goalSelector.addGoal(3, new DriftToSwimmerGoal());
         goalSelector.addGoal(4, new RandomSwimmingGoal(this, 1.0, 10));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8f));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && tickCount >= calmUntil && graced(p.getUUID()) && !calmedByLamp(p)));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, false, false, p -> p.isInWater() && tickCount >= calmUntil && graced(p.getUUID()) && !calmedByLamp(p)));
     }
 
     @Override
@@ -190,6 +191,54 @@ public class WaterwayMaw extends Monster implements GeoEntity {
             Vec3 look = getLookAngle();
             sl.sendParticles(ParticleTypes.BUBBLE, getX() + look.x, getY() + 0.4, getZ() + look.z, 8, 0.35, 0.25, 0.35, 0.02);
             sl.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, getX(), getY() + 0.3, getZ(), 4, 0.2, 0.1, 0.2, 0.05);
+        }
+    }
+
+    // 版 18: 水の中を泳ぐ人の方へ寄っていく (襲うのではなく、姿を見せる)。近づいて 8 ブロックまで来ると、あとは回る。
+    // 襲うかどうかは、来てから 10 秒の猶予・灯のそば・噛む前の予兆 (BiteGoal) が決める。水路で魚に出会う機会を増やすための動き
+    private class DriftToSwimmerGoal extends Goal {
+        private Player swimmer;
+        private int recompute;
+
+        DriftToSwimmerGoal() {
+            setFlags(java.util.EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (getTarget() != null || tickCount < calmUntil || !isInWater()) {
+                return false;
+            }
+            Player best = null;
+            double bestD = 30 * 30;
+            for (Player p : Players.snapshot(level().players())) {
+                double d = p.distanceToSqr(WaterwayMaw.this);
+                if (p.isInWater() && !p.isSpectator() && d < bestD && !calmedByLamp(p)) {
+                    best = p;
+                    bestD = d;
+                }
+            }
+            swimmer = best;
+            return best != null && bestD > 8 * 8;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return swimmer != null && swimmer.isAlive() && swimmer.isInWater() && getTarget() == null
+                    && distanceToSqr(swimmer) > 6 * 6 && !calmedByLamp(swimmer);
+        }
+
+        @Override
+        public void tick() {
+            if (--recompute <= 0) {
+                recompute = 15;
+                getNavigation().moveTo(swimmer, 1.0);
+            }
+        }
+
+        @Override
+        public void stop() {
+            swimmer = null;
         }
     }
 
