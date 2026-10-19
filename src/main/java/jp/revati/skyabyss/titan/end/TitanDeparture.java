@@ -36,7 +36,7 @@ public final class TitanDeparture {
         double x = titan.getX();
         double y = titan.getY() + titan.getBbHeight() * 0.5;
         double z = titan.getZ();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : jp.revati.skyabyss.util.Players.snapshot(level.players())) {
             if (p.distanceToSqr(x, p.getY(), z) < TELL_RANGE * TELL_RANGE) {
                 level.sendParticles(p, puff, true, x, y, z, 80, 14, 4, 14, 0.15);
                 if (!p.isSpectator()) {

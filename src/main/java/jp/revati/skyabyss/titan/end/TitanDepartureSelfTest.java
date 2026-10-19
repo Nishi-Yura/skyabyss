@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 //    40 秒で本体が地上から取り除かれる。取り除かれたあと、見守りは眠りのあいだ呼び直さない (restHolds)。目覚めたあとは控えが止まる
 //  - 試遊のコマンドの道: `playtest next`・`trials` のように心臓を止めずに進みだけ記しても眠らない (巨神は残る)。
 //    `titan end sleep` (TitanDormancy.begin(…, 0)) と本物の撃破 (TitanEnd.onHeartStopped) のどちらでも、同じように去る
-//  - 光の柱と枠 (TitanEndNetwork.Beam) の送受信、帰り石の形と置き場所
+//  - 光の柱と枠 (TitanEndNetwork.Beam) の送受信、真ん中へ戻る光の形と置き場所
 final class TitanDepartureSelfTest {
     private TitanDepartureSelfTest() {
     }
@@ -181,12 +181,12 @@ final class TitanDepartureSelfTest {
                 && BoardGlow.Shape.fromPoints(List.of(new Vec3(0, 80, 0))).beamTo() >= 80 + BoardGlow.MIN_BEAM, "the default beam shape is wrong");
     }
 
-    // 帰り石: 形の判定、到着点のそばの置き場所 (戻り道のある方へ寄る)、四体の休み場の一覧
+    // 真ん中へ戻る光: 形の判定、置き場所 (向いている方へ寄る)、四体の背中の真ん中 (hub) の位置
     private static void returnStones(MinecraftServer server, ServerLevel level, List<String> f, double cx, double cz, int padY) {
         ReturnBeacons.Beacon b = new ReturnBeacons.Beacon("t", new Vec3(5.5, 70, 5.5));
-        check(f, ReturnBeacons.inside(b, new Vec3(5.5, 70, 5.5)) && ReturnBeacons.inside(b, new Vec3(6.5, 71, 5.5)), "standing on a return stone did not count");
+        check(f, ReturnBeacons.inside(b, new Vec3(5.5, 70, 5.5)) && ReturnBeacons.inside(b, new Vec3(6.5, 71, 5.5)), "standing on a return light did not count");
         check(f, !ReturnBeacons.inside(b, new Vec3(8.5, 70, 5.5)) && !ReturnBeacons.inside(b, new Vec3(5.5, 74, 5.5)) && !ReturnBeacons.inside(b, new Vec3(5.5, 60, 5.5)),
-                "a return stone counted from too far");
+                "a return light counted from too far");
         // 床を敷いて、到着点から 3〜7 ブロックの床で、戻り道 (東) にいちばん近い所が選ばれる
         int bx = (int) cx;
         int bz = (int) cz;
@@ -200,32 +200,32 @@ final class TitanDepartureSelfTest {
         BlockPos arrival = new BlockPos(bx, padY, bz);
         Vec3 east = ReturnBeacons.findNear(level, arrival, new Vec3(bx + 40, padY, bz));
         Vec3 west = ReturnBeacons.findNear(level, arrival, new Vec3(bx - 40, padY, bz));
-        check(f, east != null && west != null, "no return stone spot near the arrival on open floor");
+        check(f, east != null && west != null, "no return light spot near the arrival on open floor");
         if (east != null && west != null) {
             double de = Math.hypot(east.x - (bx + 0.5), east.z - (bz + 0.5));
-            check(f, de >= ReturnBeacons.RADIUS && de <= 7.5 && east.x > bx + 0.5, "the east return stone is misplaced (" + east + ")");
-            check(f, west.x < bx + 0.5, "the west return stone is misplaced (" + west + ")");
+            check(f, de >= 2 && de <= 6.5 && east.x > bx + 0.5, "the east return light is misplaced (" + east + ")");
+            check(f, west.x < bx + 0.5, "the west return light is misplaced (" + west + ")");
         }
         // 水の上・穴は置かない
         level.setBlockAndUpdate(new BlockPos(bx + 5, padY, bz), Blocks.WATER.defaultBlockState());
-        check(f, !ReturnBeacons.standable(level, new BlockPos(bx + 5, padY, bz)), "water counted as a place for a return stone");
+        check(f, !ReturnBeacons.standable(level, new BlockPos(bx + 5, padY, bz)), "water counted as a place for a return light");
         level.setBlockAndUpdate(new BlockPos(bx + 5, padY, bz), Blocks.AIR.defaultBlockState());
         for (String titan : Titans.all()) {
-            check(f, !ReturnBeacons.restSpots(titan).isEmpty(), titan + ": no rest spot has a return stone");
-            check(f, ReturnBeacons.arrivalOf(titan) != null && ReturnBeacons.exitOf(titan) != null, titan + ": the arrival or exit of the back is unknown");
+            check(f, ReturnBeacons.hubOf(titan) != null, titan + ": the back has no hub to return to");
+            check(f, ReturnBeacons.arrivalOf(titan) != null, titan + ": the arrival of the back is unknown");
+            // 休み場・到着点の帰り道は無い (光は試練のあとの個人のものだけ)
+            check(f, !ReturnBeacons.hasOffer(UUID.fromString("7e5a0e0d-0000-4000-8000-0000000e0063")), "a return light exists without a trial clear");
         }
-        // 背中の層が建っているときは、休み場の復活の位置が帰り石に使える (立てる床)
+        // 背中の層が建っているときは、真ん中の復活の位置が立てる床
         for (String titan : Titans.all()) {
             var dim = Titans.backOf(titan);
             ServerLevel back = dim == null ? null : server.getLevel(dim);
             if (back == null || !jp.revati.skyabyss.titan.dungeon.TitanBackData.get(back).isBuilt()) {
                 continue;
             }
-            for (var e : ReturnBeacons.restSpots(titan).entrySet()) {
-                BlockPos p = e.getValue();
-                if (back.hasChunkAt(p) && ReturnBeacons.standable(back, p) == false && ReturnBeacons.standable(back, p.above()) == false) {
-                    f.add(titan + ": the rest spot " + e.getKey() + " at " + p + " cannot hold a return stone");
-                }
+            BlockPos hub = ReturnBeacons.hubOf(titan);
+            if (hub != null && back.hasChunkAt(hub) && !ReturnBeacons.standable(back, hub) && !ReturnBeacons.standable(back, hub.above())) {
+                f.add(titan + ": the hub spot at " + hub + " is not a place to stand");
             }
         }
         // 戻り先 (潮殻): 岸が見つからないときだけ海の上 (舟つき)。見つかれば陸

@@ -113,6 +113,30 @@ public final class TutorialSelfTest {
         check(f, !TutorialHints.start(a, TutorialHints.RECORD), "a finished event hint must not restart");
         check(f, !TutorialHints.start(a, "no_such_hint"), "an unknown id should be refused");
 
+        // 「済んだ」は一度しか送らない (した瞬間だけ。見回し・再送・再ログインでは空)
+        List<String> act = List.of(TutorialHints.LORE_PAGE);
+        var first = TutorialHints.plan(act, List.of(TutorialHints.LORE_BOOK, TutorialHints.LORE_PAGE), List.of(TutorialHints.LORE_BOOK));
+        check(f, first != null && first.done().equals(List.of(TutorialHints.LORE_BOOK)), "the finishing sync should carry the done id");
+        check(f, TutorialHints.plan(act, act, List.of()) == null, "an unchanged state must not be re-sent");
+        var relog = TutorialHints.plan(act, null, List.of());
+        check(f, relog != null && relog.done().isEmpty(), "a relog/respawn resend must never carry done ids");
+        check(f, !TutorialHints.done(a, TutorialHints.LORE_BOOK), "the done id must not be produced a second time");
+
+        // 「できた」の表示: 一度だけ出て、時間で消え、止まっている間は進まず、再送でも出し直さない
+        var bn = new DoneBanners();
+        check(f, bn.add("x") && !bn.isEmpty(), "a new done id should show");
+        bn.tick(100000, false);
+        check(f, !bn.isEmpty() && bn.alpha("x") == 1f, "the banner clock must not advance while hidden");
+        for (int i = 0; i < 40; i++) {
+            bn.tick(50, true);
+        }
+        check(f, bn.isEmpty(), "the banner must disappear after DONE_MS of visible time");
+        check(f, !bn.add("x") && bn.isEmpty(), "a repeated done id must not show again");
+        var bn2 = new DoneBanners();
+        bn2.add("y");
+        bn2.tick(DoneBanners.DONE_MS - DoneBanners.FADE_MS / 2, true);
+        check(f, bn2.alpha("y") > 0.4f && bn2.alpha("y") < 0.6f, "the banner should be half faded midway through the fade");
+
         // 文の鍵が日英にそろっている
         langKeys(f);
     }

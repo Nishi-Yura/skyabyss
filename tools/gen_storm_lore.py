@@ -81,8 +81,6 @@ WHISPERS = [
     ("storm_hub", "lore", "凪には下を、嵐には上を。凪なら壁ぞいの坂で上の回廊へ。嵐なら、中央の昇り風がひと息に運ぶ",
      "In calm, below; in storm, above. In a calm, take the ramp along the wall to the upper gallery. In a storm, the central updraft "
      "carries you up in one breath"),
-    ("storm_top", "lore", "鳥の背の上に出た。左右の翼が、雲の天井の上をどこまでも伸びている。ずっと下で、嵐が光っている",
-     "You are out on the bird's back. Its wings stretch away on either side over the cloud ceiling. Far below, the storm flickers"),
     ("storm_west", "hint", "風切りの羽根を持って、空中でしゃがむと滑空する。床の穴の昇り風は、凪には低く、嵐には高く上がる。横風は梁の陰でやり過ごせ",
      "With the gale feather, crouch in midair to glide. The updrafts from holes in the floor rise low in a calm and high in a storm. "
      "Wait out the crosswinds behind the beams"),

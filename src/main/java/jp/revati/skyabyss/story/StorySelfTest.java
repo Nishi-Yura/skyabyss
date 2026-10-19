@@ -27,6 +27,7 @@ import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.QuestManager;
+import jp.revati.skyabyss.quest.QuestSetup;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.record.Keepsakes;
 import jp.revati.skyabyss.registry.ModItems;
@@ -76,6 +77,7 @@ public final class StorySelfTest {
             rules.getRule(Progression.STORY_GATE).set(true, server);
             order(server, failures, notes);
             mainQuests(server, level, spawned, failures, notes);
+            isanaTopics(server, level, spawned, failures, notes);
             migration(server, level, failures, notes);
         } catch (RuntimeException e) {
             failures.add("exception: " + e);
@@ -93,6 +95,80 @@ public final class StorySelfTest {
         } else {
             failures.forEach(f -> SkyAbyss.LOGGER.error("SELFTEST story FAILED: {}", f));
         }
+    }
+
+
+    // ---------------------------------------------------------------- 「イサナに〜を尋ねよう」の連鎖 (聞いたのに目的が残る不具合)
+    // 聞いた時点で済む (最後の頁まで読まなくても)、先に聞いても済む、ログイン (保存して読み直し) をまたいでも済む、
+    // 古いセーブ (記録なし) でも、先の段の証拠があれば自己修復する
+    private static void isanaTopics(MinecraftServer server, ServerLevel level, List<net.minecraft.world.entity.Entity> spawned, List<String> f,
+                                    List<String> notes) {
+        BlockPos spawn = level.getSharedSpawnPos();
+        BlockPos at = new BlockPos(spawn.getX() + 60, 300, spawn.getZ() + 60);
+        NpcEntity wc = NpcSetup.WHALE_CHASER.get().create(level);
+        if (wc == null) {
+            f.add("isana topics: npc could not be created");
+            return;
+        }
+        wc.moveTo(at.getX() + 2.5, at.getY(), at.getZ() + 0.5);
+        wc.setNoGravity(true);
+        level.addFreshEntity(wc);
+        spawned.add(wc);
+        FakePlayer p = FakePlayerFactory.get(level, new GameProfile(UUID.fromString("7a1e0b3c-0000-4000-8000-00000000b002"), "[isana_topics]"));
+        Lore.reset(p);
+        p.getInventory().clearContent();
+        Quests.forgetAll(p);
+        p.setData(NpcSetup.BONDS, new NpcBonds());
+        NpcBonds.of(p).bond(WC).flags().add("met");
+        p.moveTo(at.getX() + 1.5, at.getY(), at.getZ() + 1.5);
+        StoryData.get(server).clear(p.getUUID());
+        ProgressRules.TITAN_ORDER.forEach(t -> ProgressData.get(server).clearPersonal(p.getUUID(), t));
+        jp.revati.skyabyss.quest.Quests.forget(p, "ch4/fragments");
+
+        // 潮殻: 話題の頁 (ms_c_tide2) に着いたとたんに済む
+        Quests.setStage(p, "main_tide", "rumor");
+        check(stage(p, "main_tide").equals("rumor"), "isana topics: main_tide did not start at rumor", f);
+        talk(p, wc, "ms_c_tide", f);
+        check(stage(p, "main_tide").equals("rumor"), "isana topics: the rumor finished before the topic page", f);
+        DialogueService.choose(p, "ms_c_tide", DialogueService.CONTINUE);
+        check(stage(p, "main_tide").equals("see"), "isana topics: hearing Isana's topic page did not finish main_tide's rumor: " + stage(p, "main_tide"), f);
+        DialogueService.close(p);
+
+        // 余燼: 同じ。保存して読み直しても (ログイン) 聞いた記録は残る
+        Quests.setStage(p, "main_ember", "rumor");
+        check(stage(p, "main_ember").equals("rumor"), "isana topics: main_ember did not start at rumor", f);
+        talk(p, wc, "ms_c_ember", f);
+        DialogueService.choose(p, "ms_c_ember", DialogueService.CONTINUE);
+        check(stage(p, "main_ember").equals("see"), "isana topics: hearing Isana's topic page did not finish main_ember's rumor: " + stage(p, "main_ember"), f);
+        DialogueService.close(p);
+        QuestLog before = QuestLog.of(p);
+        QuestLog after = QuestLog.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, QuestLog.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, before)
+                .getOrThrow()).getOrThrow();
+        check(after.heard("main_ember", WC, "ms_c_ember2") && after.heard("main_tide", WC, "ms_c_tide2"), "isana topics: heard topics were lost across save and load", f);
+        p.setData(QuestSetup.LOG, after);
+        check(stage(p, "main_ember").equals("see") && stage(p, "main_tide").equals("see"), "isana topics: stages changed across relog", f);
+
+        // 記録のあるのに段が残った状態 (古いセーブ・先に聞いていた) は、見回りが一度走れば済む
+        Quests.setStage(p, "main_ember", "rumor");
+        Quests.poll(p, true);
+        check(stage(p, "main_ember").equals("see"), "isana topics: a heard rumor stage did not self-heal on poll: " + stage(p, "main_ember"), f);
+        // 先の段の証拠 (心臓を止めた) があれば、聞いた記録がなくても飛ばす
+        p.setData(QuestSetup.LOG, new QuestLog());
+        Quests.setStage(p, "main_tide", "rumor");
+        ProgressData.get(server).markPersonal(p.getUUID(), Titans.TIDE_SHELL);
+        Quests.poll(p, true);
+        check(!stage(p, "main_tide").equals("rumor"), "isana topics: a rumor stage stayed after the tide heart was stilled: " + stage(p, "main_tide"), f);
+        ProgressData.get(server).clearPersonal(p.getUUID(), Titans.TIDE_SHELL);
+
+        // 四章: イサナの話を先に聞いたあとで語り部の段が済めば、イサナの段は着いたとたんに済む
+        p.setData(QuestSetup.LOG, new QuestLog());
+        Quests.setStage(p, "ch4/fragments", "teller");
+        Quests.onTalk(p, WC, "ch4_i_one");
+        Quests.onTalk(p, WC, "ch4_i_three");
+        check(stage(p, "ch4/fragments").equals("teller"), "isana topics: Isana's tale finished the storyteller's stage", f);
+        Quests.onTalk(p, ST, "ch4_s_three");
+        check(stage(p, "ch4/fragments").equals("done"), "isana topics: the fragments quest stayed open after both were heard: " + stage(p, "ch4/fragments"), f);
+        notes.add("Isana topics: heard on the topic page, remembered across relog, healed on poll, heard-first order");
     }
 
     // ---------------------------------------------------------------- 既存のワールドの移行 (docs/review/chapter_per_titan_plan.md 2.3)
