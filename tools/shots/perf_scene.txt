@@ -91,6 +91,10 @@ cmd tp @e[type=skyabyss:stone_whale,limit=1] 40 -20 30 90 0
 wait 100
 prof discard
 camera minecraft:overworld 0.5 -60 0.5 60 10
+skypass 0 0 1 0
+wait 100
+prof discard
 wait 600
 prof A_overworld_whale
+skypass off
 quit
