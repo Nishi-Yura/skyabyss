@@ -229,7 +229,7 @@ final class StormReworkSelfTest {
             fireWait(l, c, pa, storm);
             StormEast.openFullDoors(l, state);
             check(state.eastDoorOpen(c.index()), tag + ": the door did not open after the right levers", f);
-            check(GroupGates.isOpen(l, GROUP_A, new BlockPos(EAST_DOORS[c.index()], BONE_FLOOR + 1, -17)), tag + ": the door block is not open for the group", f);
+            check(GroupGates.isOpen(l, GROUP_A, new BlockPos(EAST_DOORS[c.index()], BONE_FLOOR + 1, WZ)), tag + ": the door block is not open for the group", f);
             StormCircuit.refreshVisuals(l, state);
             for (StormCircuit.Edge e : StormCircuit.solutionTrace(c).edges()) {
                 for (BlockPos p : e.cells()) {
@@ -286,7 +286,7 @@ final class StormReworkSelfTest {
                     "no helm blocks at the " + h.trial() + " entrance", f);
             check(StormHelm.helmAt(h.calm()) == h && StormHelm.helmAt(h.storm()) == h, "helmAt " + h.trial(), f);
         }
-        StormTestPlayer pa = StormTestPlayer.join(l, GROUP_A, "[storm_h]", Vec3.atBottomCenterOf(new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17)));
+        StormTestPlayer pa = StormTestPlayer.join(l, GROUP_A, "[storm_h]", Vec3.atBottomCenterOf(new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, WZ)));
         try {
             // 全体の拍は嵐。A が西の凪の舵を回す: A の西だけ凪 (昇り風 4・横風なし)、B は嵐のまま
             StormBackClock.force(StormBackClock.Phase.STORM);

@@ -98,6 +98,13 @@ def _bird_grid(IW):
     return LV.recolor(IW.build_grid(), LV.cached_grid())
 
 
+# 鳥の拡大 (docs/design/26。--hscale / --vscale。既定は 1.0 = 版 12 まで。雷翼の版 13 は 1.6 / 1.3)
+BIRD_H = 1.0
+BIRD_V = 1.0
+BIRD_OUT = None
+BIRD_WING = None
+
+
 def bird_cfg():
     """雷翼の鳥 (12 の 3.2節)。格子は install_thunder_wing.build_grid() (骨の番号、左 = +X で返る)"""
     import install_thunder_wing as IW
@@ -140,17 +147,17 @@ def bird_cfg():
     blocks = {M[k]: v for k, v in B.items()}
     glow = [M[k] for k in ("vein", "eye", "gate", "knob_w", "knob_t", "bolt", "glass")]
     return dict(
-        name="bird", out=ROOT / "src/main/resources/data/skyabyss/storm_back/bird.bin",
+        name="bird", out=BIRD_OUT or ROOT / "src/main/resources/data/skyabyss/storm_back/bird.bin",
         preview_prefix="storm_back_bird", preview_dir=BIRD_PREVIEW,
         build=lambda: np.ascontiguousarray(_bird_grid(IW)[::-1]),   # install の左 (+X) を本当の向き (左 = -X) に戻す
         mat_of=M,
-        cell=TW.CELL, origin=(TW.X0, TW.Y0, TW.Z0), S=0.85,
+        cell=TW.CELL, origin=(TW.X0, TW.Y0, TW.Z0), S=0.85 * BIRD_H,
         # 体の中心 (geo の y=40) を y=140 に置く
-        ymap=lambda u: 140.0 + (u - 40.0) * 0.85, S_y=0.85,
+        ymap=lambda u: 140.0 + (u - 40.0) * 0.85 * BIRD_V, S_y=0.85 * BIRD_V,
         blocks=blocks, wet=set(), wet_blocks=[],
         glow=glow, thin={3, 4, 6, 8, 10, 11, 12, 13}, max_part=13,
         deep_parts=set(range(1, 14)),
-        wing=({7, 9}, WING_SCALE), belly=False, plates=False, belly_mat=None, belly_y0=None, water=False,
+        wing=({7, 9}, BIRD_WING or WING_SCALE), belly=False, plates=False, belly_mat=None, belly_y0=None, water=False,
         water_rest=0.0, water_band=1.0,
     )
 
@@ -496,4 +503,14 @@ def run(kind, preview_on=False):
 
 if __name__ == "__main__":
     kind = sys.argv[1] if len(sys.argv) > 1 else "turtle"
-    run(kind, "--preview" in sys.argv)
+    args = sys.argv[2:]
+    for i, a in enumerate(args):
+        if a == "--hscale":
+            BIRD_H = float(args[i + 1])
+        elif a == "--vscale":
+            BIRD_V = float(args[i + 1])
+        elif a == "--wing":
+            BIRD_WING = float(args[i + 1])
+        elif a == "--out":
+            BIRD_OUT = Path(args[i + 1])
+    run(kind, "--preview" in args)

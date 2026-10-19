@@ -173,13 +173,13 @@ final class StormCircuit {
         StormStrike.listen(StormCircuit::onLanded);
     }
 
-    // ---------------------------------------------------------------- 回路の定義 (基準の寸法 → 縮尺)
+    // ---------------------------------------------------------------- 回路の定義 (26 の拡大の座標。回廊の中心は WZ、どの回路も戸の手前の 26 ブロックほどの区画)
     private static BlockPos rod(int x, int z) {
-        return new BlockPos(S(x), BONE_FLOOR + 1, z);
+        return new BlockPos(x, BONE_FLOOR + 1, z);
     }
 
     private static BlockPos lever(int x, int z) {
-        return new BlockPos(S(x), BONE_FLOOR + 1, z);
+        return new BlockPos(x, BONE_FLOOR + 1, z);
     }
 
     // a の根元の床から b の根元の床まで (xFirst なら x 方向を先に)。両端を含む
@@ -205,34 +205,56 @@ final class StormCircuit {
         return out;
     }
 
+    // 四つの回路 (一つの決まりを教えて、ひねる):
+    //  0 決まりを教える: 受け柱 → 戸の柱。接地のレバー 1 本 (戻していると雷は地へ逃げる。倒すとつながる)
+    //  1 分かれ道: 受け柱 → 中継 → (戸の柱 | 行き止まり)。分岐のレバー 1 本 (橙の筋が戸へ届いていれば当たり)
+    //  2 二段の分岐: 中継が二つ。レバー 2 本。順に橙の筋を読む
+    //  3 ひねり: 中継が三つ、レバー 3 本。レバーは自分の中継の隣になく、ずれた柱のそば (橙の筋の先読みで、どのレバーがどの分かれ道かを見分ける)
     private static List<Circuit> buildCircuits() {
         List<Circuit> out = new ArrayList<>();
-        // 回路 0 (第一の戸): 受け柱 → 戸の柱。接地のレバー (戻している = 地へ逃げる。倒すとつながる)
-        BlockPos i0 = rod(35, -22);
+        int z0 = WZ;
+        // 回路 0 (第一の戸): 受け柱 → 戸の柱。接地のレバー
+        BlockPos i0 = rod(76, z0 - 7);
         BlockPos d0 = EAST_RODS.get(0);
         out.add(new Circuit(0, List.of(new Node("i", i0, Kind.INTAKE), new Node("d", d0, Kind.DOOR)),
                 List.of(new Edge("a", "i", "d", path(i0, d0, true))),
-                List.of(new Sw("i", lever(39, -19), "a", null)), new BlockPos(S(35), BONE_FLOOR, -19), "i"));
+                List.of(new Sw("i", lever(84, z0 - 4), "a", null)), new BlockPos(76, BONE_FLOOR, z0 - 3), "i"));
         // 回路 1 (第二の戸): 受け柱 → 中継 → (戸の柱 | 行き止まり)。分岐のレバー (倒す = 戸へ、戻す = 行き止まり)
-        BlockPos i1 = rod(51, -17);
-        BlockPos j1 = rod(55, -17);
-        BlockPos x1 = rod(59, -22);
+        BlockPos i1 = rod(103, z0);
+        BlockPos j1 = rod(110, z0);
+        BlockPos x1 = rod(120, z0 - 8);
         BlockPos d1 = EAST_RODS.get(1);
         out.add(new Circuit(1, List.of(new Node("i", i1, Kind.INTAKE), new Node("j", j1, Kind.RELAY), new Node("x", x1, Kind.DECOY), new Node("d", d1, Kind.DOOR)),
                 List.of(new Edge("a", "i", "j", path(i1, j1, true)), new Edge("b", "j", "d", path(j1, d1, false)), new Edge("c", "j", "x", path(j1, x1, false))),
-                List.of(new Sw("j", lever(57, -17), "b", "c")), new BlockPos(S(51), BONE_FLOOR, -20), "i"));
+                List.of(new Sw("j", lever(113, z0), "b", "c")), new BlockPos(103, BONE_FLOOR, z0 - 4), "i"));
         // 回路 2 (第三の戸): 二段の分岐。受け柱 → 中継 A → (中継 B | 行き止まり A)、中継 B → (戸の柱 | 行き止まり B)
-        BlockPos i2 = rod(81, -17);
-        BlockPos ja = rod(85, -17);
-        BlockPos xa = rod(89, -22);
-        BlockPos jb = rod(89, -12);
-        BlockPos xb = rod(89, -16);
+        BlockPos i2 = rod(128, z0);
+        BlockPos ja = rod(135, z0);
+        BlockPos xa = rod(146, z0 - 9);
+        BlockPos jb = rod(146, z0 + 9);
+        BlockPos xb = rod(146, z0 + 5);
         BlockPos d2 = EAST_RODS.get(2);
         out.add(new Circuit(2, List.of(new Node("i", i2, Kind.INTAKE), new Node("ja", ja, Kind.RELAY), new Node("xa", xa, Kind.DECOY), new Node("jb", jb, Kind.RELAY),
                 new Node("xb", xb, Kind.DECOY), new Node("d", d2, Kind.DOOR)),
                 List.of(new Edge("a", "i", "ja", path(i2, ja, true)), new Edge("b", "ja", "xa", path(ja, xa, false)), new Edge("c", "ja", "jb", path(ja, jb, false)),
                         new Edge("d", "jb", "xb", path(jb, xb, false)), new Edge("e", "jb", "d", path(jb, d2, true))),
-                List.of(new Sw("ja", lever(87, -17), "c", "b"), new Sw("jb", lever(91, -14), "e", "d")), new BlockPos(S(81), BONE_FLOOR, -20), "i"));
+                List.of(new Sw("ja", lever(139, z0), "c", "b"), new Sw("jb", lever(143, z0 + 6), "e", "d")), new BlockPos(128, BONE_FLOOR, z0 - 4), "i"));
+        // 回路 3 (第四の戸): 三つの中継。レバー a は中継 c のそば、b は中継 a のそば、c は中継 b のそば (ずれている)
+        BlockPos i3 = rod(155, z0);
+        BlockPos ra = rod(160, z0);
+        BlockPos rb = rod(165, z0);
+        BlockPos rc = rod(170, z0);
+        BlockPos xa3 = rod(160, z0 - 7);
+        BlockPos xb3 = rod(165, z0 + 7);
+        BlockPos xc3 = rod(170, z0 - 7);
+        BlockPos d3 = EAST_RODS.get(3);
+        out.add(new Circuit(3, List.of(new Node("i", i3, Kind.INTAKE), new Node("ra", ra, Kind.RELAY), new Node("xa", xa3, Kind.DECOY), new Node("rb", rb, Kind.RELAY),
+                new Node("xb", xb3, Kind.DECOY), new Node("rc", rc, Kind.RELAY), new Node("xc", xc3, Kind.DECOY), new Node("d", d3, Kind.DOOR)),
+                List.of(new Edge("p", "i", "ra", path(i3, ra, true)), new Edge("q", "ra", "rb", path(ra, rb, true)), new Edge("r", "ra", "xa", path(ra, xa3, false)),
+                        new Edge("s", "rb", "rc", path(rb, rc, true)), new Edge("t", "rb", "xb", path(rb, xb3, false)), new Edge("u", "rc", "d", path(rc, d3, true)),
+                        new Edge("v", "rc", "xc", path(rc, xc3, false))),
+                List.of(new Sw("ra", lever(172, z0 - 4), "q", "r"), new Sw("rb", lever(161, z0 + 4), "s", "t"), new Sw("rc", lever(167, z0 - 4), "u", "v")),
+                new BlockPos(155, BONE_FLOOR, z0 - 4), "i"));
         return out;
     }
 

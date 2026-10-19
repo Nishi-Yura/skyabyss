@@ -100,7 +100,7 @@ public final class StormBackTrials {
     private static final String TAG_CHECKPOINT_EPOCH = "skyabyss_storm_checkpoint_epoch";
     private static final String TAG_SEEN_EPOCH = "skyabyss_storm_epoch";
     private static final String TAG_DIED = "skyabyss_died_on_storm";
-    private static final AABB BODY = new AABB(-150, 100, -120, 150, 170, 130);
+    private static final AABB BODY = new AABB(-330, 100, -190, 330, 200, 200);
 
     private static boolean ready;
     // 背中にだれもいない時間 (背中そのものの片付け)
@@ -221,8 +221,8 @@ public final class StormBackTrials {
     // ピースフルの封印 (腰の回廊。全員に同じ)
     static List<BlockPos> sealBlocks() {
         List<BlockPos> out = new ArrayList<>();
-        for (int x = -1; x <= 1; x++) {
-            for (int y = TAIL_HALL.floor() + 1; y <= TAIL_HALL.floor() + 4; y++) {
+        for (int x = -CORRIDOR_HALF; x <= CORRIDOR_HALF; x++) {
+            for (int y = TAIL_HALL.floor() + 1; y <= TAIL_HALL.floor() + 5; y++) {
                 out.add(new BlockPos(x, y, SEAL_Z));
             }
         }
@@ -375,7 +375,7 @@ public final class StormBackTrials {
             }
             if (p.keelOpen() && level.getGameTime() % 10 == 0) {
                 // 下から風が吹き上がる (開いたグループにだけ見える)
-                StormFx.to(group, () -> StormFx.forced(level, ParticleTypes.CLOUD, 0.5, HUB.floor() + 0.5, -3.5, 0, 0, 1, 0, 0.3));
+                StormFx.to(group, () -> StormFx.forced(level, ParticleTypes.CLOUD, 0.5, HUB.floor() + 0.5, HUB_CENTER.getZ() + 0.5, 0, 0, 1, 0, 0.3));
             }
         }
     }
@@ -628,7 +628,7 @@ public final class StormBackTrials {
         syncGates(level, group);
         GroupOverlays.refresh(level, group);
         if (moveOut) {
-            BlockPos hub = RESTS.get(0).spawn();
+            BlockPos hub = rest("hub");
             for (ServerPlayer pl : Groups.online(level, group)) {
                 if (!pl.isSpectator() && StormBackLayout.inTrial(pl.position())) {
                     pl.fallDistance = 0;
@@ -672,7 +672,7 @@ public final class StormBackTrials {
         }
         tag.putInt(TAG_SEEN_EPOCH, epoch);
         if (player.isAlive() && !player.isSpectator() && StormBackLayout.inTrial(player.position())) {
-            BlockPos hub = RESTS.get(0).spawn();
+            BlockPos hub = rest("hub");
             player.fallDistance = 0;
             player.teleportTo(level, hub.getX() + 0.5, hub.getY(), hub.getZ() + 0.5, player.getYRot(), 0f);
             Notice.narrate(player, "message.skyabyss.storm.party_changed");
@@ -944,7 +944,7 @@ public final class StormBackTrials {
     }
 
     public static Vec3 hubSpawn() {
-        return Vec3.atBottomCenterOf(RESTS.get(0).spawn());
+        return Vec3.atBottomCenterOf(rest("hub"));
     }
 
     // そのグループで、扉がその人にとって開いているか (自己テスト・コマンド)

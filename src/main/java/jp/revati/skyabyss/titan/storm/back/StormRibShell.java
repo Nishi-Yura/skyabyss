@@ -14,10 +14,12 @@ final class StormRibShell {
     static final double REACH = 8.5;
     static final double WEB_REACH = 6.0;
     // 翼の背のだいたいの高さ (裾の式の基準)
-    static final int SURF = 160;
+    static final int SURF = 165;
+    // 肋の間の中心 (東西・南北)
+    static final int CX = (RIB_X1 + RIB_X2) / 2;
     // 面の肋 (北・南の面は x、西・東の面は z)。真ん中の肋だけ頂まで行く
-    static final int[][] RIB_NS = {{-100, -99}, {-104, -103}, {-96, -95}};
-    static final int[][] RIB_EW = {{-18, -17, -16}, {-23, -22, -21}, {-13, -12, -11}};
+    static final int[][] RIB_NS = {{CX, CX + 1}, {CX - 5, CX - 4}, {CX + 5, CX + 6}};
+    static final int[][] RIB_EW = {{WZ - 1, WZ, WZ + 1}, {WZ - 7, WZ - 6, WZ - 5}, {WZ + 5, WZ + 6, WZ + 7}};
 
     private static final BlockState TUFF_POLISHED = Blocks.POLISHED_TUFF.defaultBlockState();
     private static final BlockState TUFF_BRICKS = Blocks.TUFF_BRICKS.defaultBlockState();
@@ -58,7 +60,7 @@ final class StormRibShell {
     // 膜: 根元は翼の暗い石 (深層岩・凝灰岩)、上へ行くほど羽の白に変わる。翼から生えて見えるように、高さで色を移す
     private static BlockState webBlock(int x, int y, int z) {
         int h = hash(x, y, z);
-        double t = Math.min(1, Math.max(0, (y - 156) / 26.0)) + (h - 48) / 400.0;
+        double t = Math.min(1, Math.max(0, (y - SURF + 4) / 26.0)) + (h - 48) / 400.0;
         if (t < 0.28) {
             return h < 28 ? Blocks.POLISHED_DEEPSLATE.defaultBlockState() : h < 50 ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : h < 70 ? Blocks.DEEPSLATE_TILES.defaultBlockState()
                     : h < 88 ? TUFF_RAW : StormKit.FEATHER;
@@ -138,14 +140,14 @@ final class StormRibShell {
         double halfNS = (z1 - z0) / 2.0;
         double halfEW = (x1 - x0) / 2.0;
         for (int[] set : RIB_NS) {
-            boolean center = set[0] == -100;
+            boolean center = set[0] == CX;
             for (int x : set) {
                 crown(kit, x, z0, 0, 1, center ? (int) halfNS : 4, center ? halfNS : 4, center ? 7 : 3);
                 crown(kit, x, z1, 0, -1, center ? (int) halfNS : 4, center ? halfNS : 4, center ? 7 : 3);
             }
         }
         for (int[] set : RIB_EW) {
-            boolean center = set[0] == -18;
+            boolean center = set[0] == WZ - 1;
             for (int z : set) {
                 crown(kit, x0, z, 1, 0, center ? (int) halfEW : 4, center ? halfEW : 4, center ? 7 : 3);
                 crown(kit, x1, z, -1, 0, center ? (int) halfEW : 4, center ? halfEW : 4, center ? 7 : 3);
@@ -173,10 +175,10 @@ final class StormRibShell {
         }
         // 4. 頂の尖り (束ねた所に骨の柱と避雷針) と、四隅の角 (短い骨の角と避雷針)
         for (int y = roof + 1; y <= roof + 10; y++) {
-            ext(kit, -100, y, -17, y == roof + 8 ? StormKit.COPPER : StormKit.BONE, false);
-            ext(kit, -99, y, -17, y > roof + 8 ? StormKit.AIR : (y > roof + 6 ? StormKit.CALCITE : ribBlock(-99, y, -17)), false);
+            ext(kit, CX, y, WZ, y == roof + 8 ? StormKit.COPPER : StormKit.BONE, false);
+            ext(kit, CX + 1, y, WZ, y > roof + 8 ? StormKit.AIR : (y > roof + 6 ? StormKit.CALCITE : ribBlock(CX + 1, y, WZ)), false);
         }
-        ext(kit, -100, roof + 11, -17, Blocks.LIGHTNING_ROD.defaultBlockState(), false);
+        ext(kit, CX, roof + 11, WZ, Blocks.LIGHTNING_ROD.defaultBlockState(), false);
         for (int ix = 0; ix < 2; ix++) {
             for (int iz = 0; iz < 2; iz++) {
                 int hx = ix == 0 ? x0 : x1;
@@ -198,11 +200,11 @@ final class StormRibShell {
                 ext(kit, x, roof - 4, z, StormKit.COPPER, true);
             }
         }
-        for (int x : new int[] {-102, -97, -94}) {
+        for (int x : new int[] {CX - 2, CX + 3, CX + 6}) {
             ext(kit, x, roof - 2, z0, StormKit.LAMP, true);
             ext(kit, x, roof - 2, z1, StormKit.LAMP, true);
         }
-        for (int z : new int[] {-20, -14}) {
+        for (int z : new int[] {WZ - 3, WZ + 3}) {
             ext(kit, x0, roof - 2, z, StormKit.LAMP, true);
             ext(kit, x1, roof - 2, z, StormKit.LAMP, true);
         }

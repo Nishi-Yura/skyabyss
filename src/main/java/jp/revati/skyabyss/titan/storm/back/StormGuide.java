@@ -40,7 +40,7 @@ final class StormGuide {
             "east.done", "east.sleep", "front.mirror", "front.stone", "front.done", "front.sleep", "hub.stones", "hub.keel");
 
     static final int WEST_TOTAL = WEST_GAPS.length + RIB_LAYERS + 1;
-    static final int EAST_TOTAL = 5;
+    static final int EAST_TOTAL = EAST_DOORS.length + 2;
     static final int FRONT_TOTAL = 4;
 
     // 点の色 (灯った点は金、まだの点は暗い青灰)
@@ -57,6 +57,7 @@ final class StormGuide {
 
     static void clear() {
         counter = 0;
+        StormRoomTitles.clear();
         LAST.clear();
         WEST_BEST.clear();
         DOOR_HINT.clear();
@@ -166,6 +167,16 @@ final class StormGuide {
     static void tick(ServerLevel level) {
         counter++;
         refreshGoals(level);
+        if (counter % 2 == 0) {
+            StormRoomTitles.tick(level);
+        }
+        if (counter % 8 == 3) {
+            for (ServerPlayer p : level.players()) {
+                if (!p.isSpectator() && p.isAlive()) {
+                    StormObjective.send(level, p);
+                }
+            }
+        }
         tickWest(level);
         tickDoorHints(level);
         for (ServerPlayer p : level.players()) {
@@ -228,7 +239,7 @@ final class StormGuide {
             Vec3 v = p.position();
             // 東の骨の戸
             for (int i = 0; i < EAST_DOORS.length; i++) {
-                if (!pr.eastDoorPassable(i) && Math.abs(v.x - EAST_DOORS[i]) < 2.4 && v.z > -20 && v.z < -14 && v.y > BONE_FLOOR && v.y < BONE_FLOOR + 5) {
+                if (!pr.eastDoorPassable(i) && Math.abs(v.x - EAST_DOORS[i]) < 2.4 && Math.abs(v.z - WZ) < 4 && v.y > BONE_FLOOR && v.y < BONE_FLOOR + 5) {
                     DOOR_HINT.put(p.getUUID(), now);
                     Notice.bar(p, ModText.hint("message.skyabyss.storm.door_shut"));
                     break;
@@ -240,7 +251,7 @@ final class StormGuide {
                 Notice.bar(p, ModText.hint("message.skyabyss.storm.beak_shut", Integer.bitCount(pr.receivers() & 7)));
             }
             // 竜骨の門 (広間の床の栓)
-            if (!pr.keelOpen() && Math.abs(v.x) < 3.2 && v.z > -7.2 && v.z < -0.8 && v.y > HUB.floor() && v.y < HUB.floor() + 3) {
+            if (!pr.keelOpen() && Math.abs(v.x) < 3.2 && Math.abs(v.z - HUB_CENTER.getZ()) < 3.2 && v.y > HUB.floor() && v.y < HUB.floor() + 3) {
                 DOOR_HINT.put(p.getUUID(), now);
                 Notice.bar(p, ModText.hint("message.skyabyss.storm.keel_shut", pr.rungCount()));
             }

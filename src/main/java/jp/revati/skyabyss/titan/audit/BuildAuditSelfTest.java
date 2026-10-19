@@ -60,7 +60,7 @@ public final class BuildAuditSelfTest {
     // 四つの背の調べる範囲 (開発コマンド /skyabyss dev buildaudit <名前> でも使う)
     public static final BackReach.Box WHALE_BOX = new BackReach.Box(-100, 40, -256, 100, 175, 256);
     public static final BackReach.Box TIDE_BOX = new BackReach.Box(-115, 38, -135, 115, 190, 125);
-    public static final BackReach.Box STORM_BOX = new BackReach.Box(-225, 105, -145, 225, 200, 145);
+    public static final BackReach.Box STORM_BOX = new BackReach.Box(-330, 105, -190, 330, 215, 200);
     public static final BackReach.Box EMBER_BOX = new BackReach.Box(-140, 44, -230, 140, 235, 260);
 
     // 「いまある数まで」許す指摘 (増えたら全部失敗)。直す担当が別にある、または設計の判断待ちのもの。直したら数を下げる (0 になったら消す)

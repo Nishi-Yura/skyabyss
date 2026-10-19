@@ -42,7 +42,7 @@ final class StormWest {
         List<Vent> out = new java.util.ArrayList<>();
         out.add(new Vent(HUB_UPDRAFT, -1));
         for (int x : WEST_VENT_X) {
-            out.add(new Vent(new BlockPos(x, BONE_FLOOR, -20), -1));
+            out.add(new Vent(new BlockPos(x, BONE_FLOOR, WZ - 1), -1));
         }
         // 肋の間の梁 (床の上の 0 段目から、頂の手前まで)
         for (int i = 0; i < RIB_LAYERS * RIB_HOPS; i++) {
