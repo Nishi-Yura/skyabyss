@@ -122,9 +122,9 @@ public final class TitanBackLayout {
     public static final Box W0 = new Box(-35, -26, -42, -29, FLOOR, 8);
     public static final Box WA = new Box(-57, -37, -54, -19, FLOOR, 15);
     public static final Box W1 = new Box(-54, -45, -67, -56, FLOOR + 5, 7);
-    public static final Box WB = new Box(-50, -38, -90, -69, FLOOR, 15);
+    public static final Box WB = new Box(-55, -38, -90, -69, FLOOR, 15);
     public static final Box W2 = new Box(-47, -36, -101, -92, FLOOR + 9, 6);
-    public static final Box WC = new Box(-32, -20, -85, -49, FLOOR, 15);
+    public static final Box WC = new Box(-35, -20, -85, -49, FLOOR, 15);
     // 鼓動の間 → 西の前室 / 西の前室 → 肋骨の谷 (つなぎの通路は壁の厚さの分を含む)
     public static final Box WEST_HALL = new Box(-25, -19, -38, -34, FLOOR, 6);
     // 数え歌の鐘楼 (W2 の北。縦の穴。床 y 103、入口の岩棚は y 112)。W2 の北の戸口 BELL_PASS から入る

@@ -50,11 +50,12 @@ public final class TitanBackBuilder {
         // 宝物庫の奥の扉の先: 心臓の回廊と、最終ボスの心臓の間
         HeartArenaBuilder.build(kit);
         // 鼓動の間の柱は、戸口・はしご・封印・碑文をすべて置いたあとに立てる (それらの前を避けるため)
-        kit.pilasters(HUB, 4);
-        kit.wallLamps(HUB, 4, FLOOR + 4);
-        kit.wallLamps(ENTRY, 3, FLOOR + 3);
+        kit.pilasters(HUB, 5);
+        kit.wallLamps(HUB, 5, FLOOR + 6);
+        kit.wallLamps(ENTRY, 4, FLOOR + 4);
         WestWingBuilder.build(kit);
         EastWingBuilder.build(kit);
+        WingsBuilder.build(kit);
         MazeBuilder.buildFixtures(kit);
         MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
         // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)
@@ -74,7 +75,7 @@ public final class TitanBackBuilder {
         }
         // 背・ひれの上の、落ちたら出られない凹み (詰み監査で見つけて埋める。部屋・通路の中は直さずに報告に残す)
         int repaired = jp.revati.skyabyss.titan.audit.BackReach.repair(level, TitanBackAudit::spec,
-                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, 99, -RZ, RX, 175, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
+                java.util.List.of(new jp.revati.skyabyss.titan.audit.BackReach.Box(-RX, FLOOR + 8, -RZ, RX, 205, RZ)), 200, 14, Blocks.DEEPSLATE_BRICKS.defaultBlockState());
         if (repaired > 0) {
             SkyAbyss.LOGGER.info("Whale back: filled {} blocks of dead-end pockets on the outside", repaired);
         }
@@ -94,8 +95,8 @@ public final class TitanBackBuilder {
     private static void buildSurface(BuildKit kit) {
         RandomSource random = kit.random;
         // 祠から広場までの踏み跡 (苔の上の石)。背骨 (x -3) の東に沿う
-        for (int z = SHRINE_Z + 11; z <= PLATFORM_Z - 9; z++) {
-            for (int x = -1; x <= 1; x++) {
+        for (int z = SHRINE_Z + 17; z <= PLATFORM_Z - 14; z++) {
+            for (int x = -2; x <= 2; x++) {
                 if (random.nextFloat() < 0.7f) {
                     BlockState path = switch (random.nextInt(3)) {
                         case 0 -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
@@ -107,11 +108,11 @@ public final class TitanBackBuilder {
             }
         }
         // 踏み跡の脇の灯りの柱 (石の門のアーチ z 48〜60 は避ける)
-        for (int z : new int[]{64, 84}) {
-            int base = top(3, z) + 1;
-            kit.set(3, base, z, BuildKit.POLISHED);
-            kit.set(3, base + 1, z, BuildKit.POLISHED);
-            kit.set(3, base + 2, z, Blocks.SOUL_LANTERN.defaultBlockState());
+        for (int z : new int[]{102, 134}) {
+            int base = top(5, z) + 1;
+            kit.set(5, base, z, BuildKit.POLISHED);
+            kit.set(5, base + 1, z, BuildKit.POLISHED);
+            kit.set(5, base + 2, z, Blocks.SOUL_LANTERN.defaultBlockState());
         }
         // 錨石 (左のわき腹の鉄の留め具) から、雲の海へ垂れる鎖。乗り込むときに上ってくる鎖
         anchorChain(kit);
@@ -141,8 +142,8 @@ public final class TitanBackBuilder {
     // 尾の付け根の広場: 到着地点。円形の石畳 (外はレンガ、中ほどは市松と線、中央は扇形の模様)、
     // 北の骨の門 (祠の方角)、錨石の祠、縁の柵、灯りの柱と旗、ベンチ、焚き火の休み場を置く。
     // 背の丸みは、石畳の下を埋め、上を空けて平らにする。到着は (0, 123, 98)、錨石は (0, 122, 103)
-    private static final double PLAZA_RX = 7.0;
-    private static final double PLAZA_RZ = 9.0;
+    private static final double PLAZA_RX = 11.0;
+    private static final double PLAZA_RZ = 14.0;
 
     private static double plazaDistance(int x, int z) {
         return Math.hypot(x / PLAZA_RX, (z - PLATFORM_Z) / PLAZA_RZ);
@@ -150,30 +151,30 @@ public final class TitanBackBuilder {
 
     // 北の門の前後 (柵を置かず、石畳の道をあける)
     private static boolean plazaGate(int x, int z) {
-        return Math.abs(x) <= 4 && z <= PLATFORM_Z - 6;
+        return Math.abs(x) <= 6 && z <= PLATFORM_Z - 9;
     }
 
     private static void buildPlatform(BuildKit kit) {
         int py = platformY();
         RandomSource random = kit.random;
         // 円形の石畳と、下の埋め
-        for (int x = -8; x <= 8; x++) {
-            for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
+        for (int x = -12; x <= 12; x++) {
+            for (int z = PLATFORM_Z - 15; z <= PLATFORM_Z + 15; z++) {
                 double d = plazaDistance(x, z);
                 if (d > 1.0) {
                     continue;
                 }
                 kit.fill(x, Math.min(py - 3, top(x, z)), z, x, py - 1, z, Blocks.DEEPSLATE.defaultBlockState());
                 kit.set(x, py, z, plazaFloor(x, z, d, random));
-                kit.fill(x, py + 1, z, x, py + 6, z, BuildKit.AIR);
+                kit.fill(x, py + 1, z, x, py + 8, z, BuildKit.AIR);
                 if (d < 0.84 && random.nextFloat() < 0.06f) {
                     kit.set(x, py + 1, z, Blocks.MOSS_CARPET.defaultBlockState());
                 }
             }
         }
         // 縁の柵: 石畳の外へ面した所に、低い石の柵を巡らす (北の門の前は除く)
-        for (int x = -8; x <= 8; x++) {
-            for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
+        for (int x = -12; x <= 12; x++) {
+            for (int z = PLATFORM_Z - 15; z <= PLATFORM_Z + 15; z++) {
                 if (plazaDistance(x, z) > 1.0 || plazaGate(x, z)) {
                     continue;
                 }
@@ -189,9 +190,9 @@ public final class TitanBackBuilder {
         // 縁の柱: 灯りを吊るす柱と、旗を立てる柱を交互に
         for (int k = 0; k < 8; k++) {
             double a = k * Math.PI / 4;
-            int x = (int) Math.round(6.0 * Math.cos(a));
-            int z = PLATFORM_Z + (int) Math.round(7.7 * Math.sin(a));
-            if (plazaGate(x, z) || (x == 0 && z == PLATFORM_Z - 8)) {
+            int x = (int) Math.round(9.5 * Math.cos(a));
+            int z = PLATFORM_Z + (int) Math.round(12.3 * Math.sin(a));
+            if (plazaGate(x, z) || (x == 0 && z == PLATFORM_Z - 12)) {
                 continue;
             }
             for (int y = py + 1; y <= py + 3; y++) {
@@ -205,13 +206,13 @@ public final class TitanBackBuilder {
         }
         // 休みのベンチ (入口の両脇)
         // 階段の facing は背の高い側 (背もたれ)。ベンチは背もたれを道の外へ向ける
-        kit.set(-4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
-        kit.set(4, py + 1, PLATFORM_Z - 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
+        kit.set(-7, py + 1, PLATFORM_Z - 5, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        kit.set(7, py + 1, PLATFORM_Z - 5, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         // 魂の焚き火の休み場 (祠の脇): 焚き火と、そのまわりのベンチ
-        kit.set(-4, py + 1, PLATFORM_Z + 3, Blocks.SOUL_CAMPFIRE.defaultBlockState()
+        kit.set(-7, py + 1, PLATFORM_Z + 6, Blocks.SOUL_CAMPFIRE.defaultBlockState()
                 .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
-        kit.set(-5, py + 1, PLATFORM_Z + 3, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
-        kit.set(-4, py + 1, PLATFORM_Z + 4, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
+        kit.set(-8, py + 1, PLATFORM_Z + 6, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
+        kit.set(-7, py + 1, PLATFORM_Z + 7, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH));
         // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない (BackWhispers)
     }
 
@@ -248,7 +249,7 @@ public final class TitanBackBuilder {
             }
         }
         // 隅の灯りの柱
-        for (int x : new int[]{FLANK_X0, FLANK_X0 + 6}) {
+        for (int x : new int[]{FLANK_X0, FLANK_X0 + 9}) {
             for (int z : new int[]{FLANK_Z0, FLANK_Z1}) {
                 if (kit.get(x, fy, z).isAir()) {
                     continue;
@@ -273,7 +274,7 @@ public final class TitanBackBuilder {
             int x = STAIR_X0 + i;
             int feet = FLANK_FLOOR_Y + 1 + i;
             for (int z = STAIR_Z0; z <= STAIR_Z1; z++) {
-                kit.fill(x, feet, z, x, feet + 3, z, BuildKit.AIR);
+                kit.fill(x, feet, z, x, feet + STAIR_HEIGHT - 1, z, BuildKit.AIR);
                 if (i > 0) {
                     kit.set(x, feet - 1, z, up);
                 } else if (kit.get(x, feet - 1, z).isAir()) {
@@ -281,8 +282,8 @@ public final class TitanBackBuilder {
                 }
             }
             // 灯り: 6 段ごとに、天井の中央から
-            if (i > 0 && i % 6 == 3 && !kit.get(x, feet + 4, STAIR_Z0 + 1).isAir()) {
-                kit.set(x, feet + 3, STAIR_Z0 + 1, lantern);
+            if (i > 0 && i % 6 == 3 && !kit.get(x, feet + STAIR_HEIGHT, (STAIR_Z0 + STAIR_Z1) / 2).isAir()) {
+                kit.set(x, feet + STAIR_HEIGHT - 1, (STAIR_Z0 + STAIR_Z1) / 2, lantern);
             }
         }
     }
@@ -308,86 +309,86 @@ public final class TitanBackBuilder {
 
     // 北の骨の門: 遺跡のほうへ抜ける、鯨の肋骨の門。中央に魂のランタンを吊るす
     private static void buildGate(BuildKit kit, int py) {
-        int gz = PLATFORM_Z - 7;
+        int gz = PLATFORM_Z - 11;
         BlockState bone = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
         BlockState beam = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
-        for (int x : new int[]{-3, 3}) {
-            for (int y = py + 1; y <= py + 3; y++) {
+        for (int x : new int[]{-5, 5}) {
+            for (int y = py + 1; y <= py + 5; y++) {
                 kit.set(x, y, gz, bone);
             }
-            kit.set(x, py + 4, gz, bone);
+            kit.set(x, py + 6, gz, bone);
         }
-        for (int x = -2; x <= 2; x++) {
-            kit.set(x, py + 5, gz, beam);
+        for (int x = -4; x <= 4; x++) {
+            kit.set(x, py + 7, gz, beam);
         }
-        kit.hangingLantern(0, gz, py + 5, 1);
+        kit.hangingLantern(0, gz, py + 7, 1);
     }
 
     // 錨石の祠: 錨石 (石の磁石) を、磨いた石の台と、後ろの壁と屋根で囲む。屋根から鎖と魂のランタンを下げる
     private static void buildShrine(BuildKit kit, int py) {
-        for (int x = -1; x <= 1; x++) {
-            for (int z = PLATFORM_Z + 2; z <= PLATFORM_Z + 4; z++) {
+        for (int x = -2; x <= 2; x++) {
+            for (int z = PLATFORM_Z + 3; z <= PLATFORM_Z + 7; z++) {
                 kit.set(x, py, z, BuildKit.CHISELED);
             }
         }
-        kit.set(0, py, PLATFORM_Z + 3, BuildKit.CHISELED);
         for (int side = -1; side <= 1; side += 2) {
-            for (int y = py + 1; y <= py + 3; y++) {
-                kit.set(2 * side, y, PLATFORM_Z + 4, BuildKit.POLISHED);
+            for (int y = py + 1; y <= py + 5; y++) {
+                kit.set(3 * side, y, PLATFORM_Z + 7, BuildKit.POLISHED);
             }
         }
-        for (int x = -2; x <= 2; x++) {
-            for (int z = PLATFORM_Z + 3; z <= PLATFORM_Z + 5; z++) {
-                kit.set(x, py + 4, z, BuildKit.POLISHED);
+        for (int x = -3; x <= 3; x++) {
+            for (int z = PLATFORM_Z + 4; z <= PLATFORM_Z + 8; z++) {
+                kit.set(x, py + 6, z, BuildKit.POLISHED);
             }
         }
         // 後ろの壁は置かない (広場から尾と尾びれが見えるように)。屋根を支える柱だけ
         // 鎖: 屋根の下から、錨石の上へ。中央には魂のランタン
-        kit.set(-2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
-        kit.set(2, py + 3, PLATFORM_Z + 3, Blocks.CHAIN.defaultBlockState());
-        kit.hangingLantern(0, PLATFORM_Z + 3, py + 4, 1);
+        kit.set(-2, py + 5, PLATFORM_Z + 5, Blocks.CHAIN.defaultBlockState());
+        kit.set(2, py + 5, PLATFORM_Z + 5, Blocks.CHAIN.defaultBlockState());
+        kit.hangingLantern(0, PLATFORM_Z + 5, py + 6, 1);
     }
 
 
     // ---------------------------------------------------------------- 祠と体内への階段
     private static void buildShrineAndStairs(BuildKit kit) {
         int sy = shrineY();
-        int z1 = SHRINE_Z - 10;
-        int z2 = SHRINE_Z + 10;
-        for (int x = -5; x <= 5; x++) {
+        int z1 = SHRINE_Z - 16;
+        int z2 = SHRINE_Z + 16;
+        for (int x = -8; x <= 8; x++) {
             for (int z = z1; z <= z2; z++) {
                 kit.fill(x, sy - 3, z, x, sy - 1, z, Blocks.TUFF.defaultBlockState());
-                boolean border = Math.abs(x) == 5 || z == z1 || z == z2;
+                boolean border = Math.abs(x) == 8 || z == z1 || z == z2;
                 kit.set(x, sy, z, border ? BuildKit.TILES : BuildKit.POLISHED);
-                kit.fill(x, sy + 1, z, x, sy + 8, z, BuildKit.AIR);
+                kit.fill(x, sy + 1, z, x, sy + 12, z, BuildKit.AIR);
             }
         }
         // 四隅と中ほどの柱、二段の屋根
-        for (int x : new int[]{-5, 5}) {
-            for (int z : new int[]{z1, SHRINE_Z, z2}) {
-                for (int y = sy + 1; y <= sy + 5; y++) {
-                    kit.set(x, y, z, y == sy + 5 ? BuildKit.CHISELED : BuildKit.POLISHED);
+        for (int x : new int[]{-8, 8}) {
+            for (int z : new int[]{z1, SHRINE_Z - 8, SHRINE_Z, SHRINE_Z + 8, z2}) {
+                for (int y = sy + 1; y <= sy + 8; y++) {
+                    kit.set(x, y, z, y == sy + 8 ? BuildKit.CHISELED : BuildKit.POLISHED);
                 }
             }
         }
-        for (int x = -6; x <= 6; x++) {
+        for (int x = -9; x <= 9; x++) {
             for (int z = z1 - 1; z <= z2 + 1; z++) {
                 if ((x * 7 + z * 13) % 6 != 0) {
-                    kit.set(x, sy + 6, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
+                    kit.set(x, sy + 9, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
                 }
-                if (Math.abs(x) <= 3 && z >= z1 + 3 && z <= z2 - 3) {
-                    kit.set(x, sy + 7, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
+                if (Math.abs(x) <= 5 && z >= z1 + 5 && z <= z2 - 5) {
+                    kit.set(x, sy + 10, z, Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
                 }
             }
         }
-        kit.hangingLantern(0, SHRINE_Z + 6, sy + 6, 1);
+        kit.hangingLantern(0, SHRINE_Z + 10, sy + 9, 2);
+        kit.hangingLantern(0, SHRINE_Z - 10, sy + 9, 2);
         // 南の口 (広場から来る踏み跡) の段: 背は南へ下がっていくので、祠の床まで一段ずつ上がる段を置く
         BlockState up = Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
-        for (int i = 1; i <= 8; i++) {
+        for (int i = 1; i <= 14; i++) {
             int z = z2 + i;
             int y = sy - i;
             boolean any = false;
-            for (int x = -2; x <= 2; x++) {
+            for (int x = -3; x <= 3; x++) {
                 int t = top(x, z);
                 if (t >= y) {
                     continue;
@@ -395,7 +396,7 @@ public final class TitanBackBuilder {
                 any = true;
                 kit.fill(x, t + 1, z, x, y - 1, z, BuildKit.BRICKS);
                 kit.set(x, y, z, up);
-                kit.fill(x, y + 1, z, x, y + 4, z, BuildKit.AIR);
+                kit.fill(x, y + 1, z, x, y + 6, z, BuildKit.AIR);
             }
             if (!any) {
                 break;
@@ -409,9 +410,9 @@ public final class TitanBackBuilder {
             if (y < FLOOR) {
                 break;
             }
-            for (int x = -2; x <= 2; x++) {
-                boolean inside = Math.abs(x) <= 1;
-                for (int yy = y; yy <= y + 4; yy++) {
+            for (int x = -SHRINE_STAIR_HALF - 1; x <= SHRINE_STAIR_HALF + 1; x++) {
+                boolean inside = Math.abs(x) <= SHRINE_STAIR_HALF;
+                for (int yy = y; yy <= y + SHRINE_STAIR_HEIGHT; yy++) {
                     if (inside) {
                         kit.set(x, yy, z, yy == y ? (y == FLOOR ? BuildKit.POLISHED : step) : BuildKit.AIR);
                     } else if (yy < sy && !kit.get(x, yy, z).isAir()) {
@@ -419,8 +420,8 @@ public final class TitanBackBuilder {
                     }
                 }
             }
-            if (i % 6 == 3 && y + 5 < sy) {
-                kit.lantern(2, y + 2, z);
+            if (i % 6 == 3 && y + SHRINE_STAIR_HEIGHT + 1 < sy) {
+                kit.lantern(SHRINE_STAIR_HALF + 1, y + 2, z);
             }
         }
     }
@@ -430,34 +431,36 @@ public final class TitanBackBuilder {
         kit.room(HUB);
         kit.room(ENTRY);
         // 西・東の翼へ向かう通路
-        kit.room(new Box(-15, -10, -23, -21, FLOOR, 4));
-        kit.room(new Box(10, 15, -23, -21, FLOOR, 4));
-        kit.ribs(HUB, 4, true);
-        kit.ribs(ENTRY, 3, true);
+        kit.room(WEST_HALL);
+        kit.room(EAST_HALL);
+        kit.ribs(HUB, 5, true);
+        kit.ribs(ENTRY, 4, true);
         kit.floorBorder(HUB);
         // 中央: 眠っている心臓の台座と、それを囲む模様
-        kit.set(0, FLOOR + 1, -22, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
-        kit.set(0, FLOOR + 2, -22, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
+        kit.set(HUB_CX, FLOOR + 1, HUB_CZ, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
+        kit.set(HUB_CX, FLOOR + 2, HUB_CZ, Blocks.REINFORCED_DEEPSLATE.defaultBlockState());
         for (Direction d : Direction.Plane.HORIZONTAL) {
-            kit.set(d.getStepX() * 2, FLOOR + 1, -22 + d.getStepZ() * 2,
+            kit.set(HUB_CX + d.getStepX() * 2, FLOOR + 1, HUB_CZ + d.getStepZ() * 2,
                     Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 4).setValue(CandleBlock.LIT, true));
         }
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -25; z <= -19; z++) {
-                int r = Math.max(Math.abs(x), Math.abs(z + 22));
-                if (r == 3 || (r == 1 && (x == 0 || z == -22))) {
+        for (int x = -6; x <= 6; x++) {
+            for (int z = HUB_CZ - 6; z <= HUB_CZ + 6; z++) {
+                int r = Math.max(Math.abs(x - HUB_CX), Math.abs(z - HUB_CZ));
+                if (r == 6 || r == 3 || (r == 1 && (x == HUB_CX || z == HUB_CZ))) {
                     kit.set(x, FLOOR, z, BuildKit.CHISELED);
                 }
             }
         }
-        for (int[] l : new int[][]{{-5, -16}, {5, -16}, {-5, -28}, {5, -28}, {0, -13}, {-5, -22}, {5, -22}, {0, -30}}) {
-            kit.hangingLantern(l[0], l[1], HUB.ceilingY(), 2);
+        for (int x : new int[]{-12, -6, 6, 12}) {
+            for (int z : new int[]{-50, -35, -20}) {
+                kit.hangingLantern(x, z, HUB.ceilingY(), 4);
+            }
         }
-        kit.lantern(-1, FLOOR + 1, -3);
-        kit.lantern(1, FLOOR + 1, 2);
+        kit.lantern(-2, FLOOR + 1, -3);
+        kit.lantern(2, FLOOR + 1, 2);
         kit.moss(HUB, 0.04f);
-        for (int[] s : new int[][]{{-7, -14}, {7, -30}, {-6, -30}, {7, -15}}) {
-            kit.stalactite(s[0], HUB.ceilingY(), s[1], 2);
+        for (int[] s : new int[][]{{-14, -20}, {14, -50}, {-12, -50}, {14, -20}, {0, -51}, {0, -19}}) {
+            kit.stalactite(s[0], HUB.ceilingY(), s[1], 3);
         }
         // 看板は試練の入口の一言だけ (西・東・下)。封印の扉のことは、鼓動の間に入った最初の一度だけ囁く (BackWhispers)
         for (Inscription s : TRIAL_SIGNS) {
@@ -469,8 +472,8 @@ public final class TitanBackBuilder {
         }
         BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
         // はしごの頂は 97 まで。98 (戸と同じ高さ) だと、支えの壁が戸になって、戸が開くと浮いてしまう。頂の隣 (-10, 98〜99) が戸 = 出口
-        for (int y = FLOOR + 1; y <= 97; y++) {
-            kit.set(-9, y, -31, ladderEast);
+        for (int y = FLOOR + 1; y <= WEST_LEDGE_Y; y++) {
+            kit.set(HUB.x1(), y, WEST_RETURN_Z, ladderEast);
         }
         for (BlockPos p : EAST_RETURN) {
             kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
@@ -505,8 +508,8 @@ public final class TitanBackBuilder {
             kit.set(c, d.getAxis() == Direction.Axis.X ? Blocks.AMETHYST_CLUSTER.defaultBlockState()
                     : Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
         }
-        for (int[] l : new int[][]{{-4, -36}, {4, -36}, {-4, -42}, {4, -42}}) {
-            kit.hangingLantern(l[0], l[1], TREASURY.ceilingY(), 1);
+        for (int[] l : new int[][]{{-7, -60}, {7, -60}, {-7, -70}, {7, -70}}) {
+            kit.hangingLantern(l[0], l[1], TREASURY.ceilingY(), 2);
         }
     }
 
