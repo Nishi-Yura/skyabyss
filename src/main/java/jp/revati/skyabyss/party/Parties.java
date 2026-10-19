@@ -209,6 +209,7 @@ public final class Parties {
         data.add(party, player.getUUID(), player.getGameProfile().getName());
         for (ServerPlayer m : onlineMembers(server, party)) {
             Notice.unlock(m, "message.skyabyss.party.joined", player.getDisplayName());
+            jp.revati.skyabyss.tutorial.TutorialHints.start(m, jp.revati.skyabyss.tutorial.TutorialHints.PING);
             PartyNetwork.syncSoon(m);
         }
         return true;

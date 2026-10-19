@@ -85,6 +85,7 @@ public final class Ping {
 
     // 実際の入口: 見ている先を調べて送る
     static void request(ServerPlayer sender) {
+        jp.revati.skyabyss.tutorial.TutorialHints.done(sender, jp.revati.skyabyss.tutorial.TutorialHints.PING);
         MinecraftServer server = sender.server;
         Target target = aim(sender);
         if (target == null) {

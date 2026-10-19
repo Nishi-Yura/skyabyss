@@ -39,6 +39,9 @@ public final class RecordService {
             return false;
         }
         send(viewer, target, true, tab == null ? "" : tab);
+        if (viewer == target) {
+            jp.revati.skyabyss.tutorial.TutorialHints.done(viewer, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
+        }
         return true;
     }
 
