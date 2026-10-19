@@ -169,8 +169,8 @@ public final class TideOcean {
 
     // 休む場所の中心が人から離れてよい輪 (近い順)。体の下が開けた海を、沖まで探す
     static final int[] REST_RINGS = {24, 30, 36, 40, 44, 52, 60, 64, 72, 80, 96, 112, 128, 144, 160, 180, 200};
-    // 休む場所の水深の下限 (上限はない。深い沖でも休む高さは海面の 3.5 下)
-    static final int REST_MIN_DEPTH = 6;
+    // 休む場所の水深の下限 (上限はない。深い沖でも休む高さは海面の 11 下)
+    static final int REST_MIN_DEPTH = 14;
 
     // 休む高さ (底が海面の REST_DRAFT 下) から、体のどこも海底・岸・木・丘にめり込まないために持ち上げる量 (ブロック。0 以下 = 持ち上げ不要)。
     // 持ち上げても乗り場の輪は海面にあるので、乗れる (門の敷居が水面から離れるだけ)。読み込まれていない柱は調べない。測りが切ってあれば 0
@@ -183,7 +183,8 @@ public final class TideOcean {
             }
         }
         double need = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
-                jp.revati.skyabyss.titan.solid.TitanVolume.get("tide_shell"), x, z, yaw);
+                jp.revati.skyabyss.titan.solid.TitanVolume.get("tide_shell"), x, z, yaw,
+                jp.revati.skyabyss.titan.TitanGround.MARGIN, 1, TideShellEntity.REST_LEG_SKIP);
         return Double.isFinite(need) ? need - (level.getSeaLevel() - TideShellEntity.REST_DRAFT) : 0.0;
     }
 

@@ -74,8 +74,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     // 頭の先は前へ 87 ブロック、首の付け根は前へ 50。首を上げる判定は頭の中ほど (前へ 66) から測る
     static final double HEAD_FORWARD = 66.0;
     static final double HEAD_UP = 12.0;
-    // 休むときの水面は底から 3.5 ブロック上 (潮門の敷居 geo y=9 が水面の 1 ブロック上)。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
-    public static final double REST_DRAFT = 3.5;
+    // 休むときの水面は底から 11 ブロック上 (本物の亀のように、腹は水の中に沈み、潮門の口 (高さ 4.5〜15.5) は下の 6.5 が水に浸かって、上の 4.5 が開く。
+    // 泳ぎでも舟でも入れる)。旧い値は 3.5 (甲羅が海に浮かぶ島に見えた)。足・ひれ (底が -1 より下の柱) は休むとき海底へ埋めてよい (REST_LEG_SKIP)。
+    // 旧い説明: 潮門の敷居 geo y=9 が水面の 1 ブロック上。巡航は底から 29 ブロック上まで沈む (甲羅の頂が海から約 5 ブロック出る)
+    public static final double REST_DRAFT = 11.0;
+    public static final double REST_LEG_SKIP = -1.0;
     public static final double CRUISE_DRAFT_MAX = 29.0;
     // 眠るときの沈み: 甲羅の頂が海から 2 ブロックだけ出る (珊瑚の段だけが水の上に残る)
     public static final double SLEEP_DRAFT = 32.0;
@@ -465,8 +468,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
             Vec3 g = gateCenter();
             double surface = d.y;
             if (jp.revati.skyabyss.titan.TitanGround.enabled) {
-                jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(d.add(0, 1.5, 0), d.add(0, 7, 0), d.add(0, 13, 0), g),
-                        new jp.revati.skyabyss.titan.end.BoardGlow.Shape(d.add(0, 2.0, 0), (float) DOCK_RADIUS, 2.0f, (float) DOCK_RADIUS, getYRot(), surface, surface + 46, 1.6f));
+                jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(d.add(0, 1.5, 0), d.add(0, 5, 0), d.add(offset(getYRot(), -9, 0, 0)).add(0, 1.5, 0), g),
+                        // 戸口の標 (昇る柱ではない。クライアントが光の門・水面の道・内向きの山形を描く。beamFrom〜To は 1 ブロックだけ)
+                        new jp.revati.skyabyss.titan.end.BoardGlow.Shape(d.add(0, 2.0, 0), (float) DOCK_RADIUS, 2.0f, (float) DOCK_RADIUS, getYRot(), surface, surface + 1, 1.6f));
             } else {
                 // 開発用 (/skyabyss dev titanground false): 直す前の標 (門の口に枠と柱。体に隠れる) を出して、見比べる
                 jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.TIDE_SHELL, List.of(g, g.add(0, 5, 0), g.add(0, -5, 0)),
@@ -639,8 +643,11 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
 
     // 今の位置・向きの下限 (動かしたあとに毎 tick。前後左右 3 ブロック先の地形まで数えて、崖のへりで跳ばないよう先に持ち上がり始める)
     private void sampleNow(ServerLevel level) {
+        // 休む・休む場所へ寄る最後の 60 ブロックは、足・ひれを海底に埋めてよい (腹だけが海底・岸・丘に触れない)
+        boolean settling = mode == Mode.REST || (mode == Mode.APPROACH && horizontalDistanceTo(restX, restZ) < 60);
         groundNow = jp.revati.skyabyss.titan.TitanGround.requiredYPadded(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
-                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0);
+                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 3.0,
+                settling ? REST_LEG_SKIP : Double.NEGATIVE_INFINITY);
     }
 
     // 試験用: 今の位置・向きで体が地形にめり込まない最低の高さ (間引かずに測る)

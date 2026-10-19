@@ -79,6 +79,11 @@ public final class TitanGround {
     // 柱の真下だけでなく、その前後左右 spread ブロック先の地形も数える版 (動くたびに向きや位置が少しずれるので、崖のへりで下限が一気に跳ばないように、
     // 先に持ち上がり始める。毎 tick の「今の位置」の下限に使う)
     public static double requiredYPadded(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, double spread) {
+        return requiredYPadded(level, surface, volume, x, z, yaw, margin, spread, Double.NEGATIVE_INFINITY);
+    }
+
+    // loFrom より下に底のある柱 (足・ひれ。休むときは海底へ埋めてよい) は数えない版
+    public static double requiredYPadded(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, double spread, double loFrom) {
         if (volume == null || !enabled) {
             return Double.NEGATIVE_INFINITY;
         }
@@ -86,6 +91,9 @@ public final class TitanGround {
         double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
         double need = Double.NEGATIVE_INFINITY;
         for (TitanVolume.Column c : volume.coreColumns()) {
+            if (c.lo() < loFrom) {
+                continue;
+            }
             double wx = x + fx * c.fwd() + fz * c.side();
             double wz = z + fz * c.fwd() - fx * c.side();
             double t = Math.max(terrainAt(level, surface, wx, wz), Math.max(terrainAt(level, surface, wx + spread, wz), terrainAt(level, surface, wx - spread, wz)));
