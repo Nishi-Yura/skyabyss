@@ -52,6 +52,7 @@ public final class Ch1BackMobsSelfTest {
     public static List<SelfTestRunner.Step> steps() {
         return List.of(
                 SelfTestRunner.Step.once("ch1 back mobs (load)", Ch1BackMobsSelfTest::load),
+                SelfTestRunner.Step.until("ch1 back mobs (wait)", Ch1BackMobsSelfTest::ready),
                 SelfTestRunner.Step.once("ch1 back mobs", 30, Ch1BackMobsSelfTest::run));
     }
 
@@ -75,6 +76,31 @@ public final class Ch1BackMobsSelfTest {
                 }
             }
         }
+    }
+
+    private static int waited;
+
+    // 足場の区画がすべてエンティティの動く状態になるまで待つ (最長 600 tick)。読み込んだ直後は、敵が入っても見えない・動かない区画がある
+    static boolean ready(MinecraftServer server) {
+        ServerLevel level = server.overworld();
+        boolean all = true;
+        for (int cx = 5; cx <= 9 && all; cx++) {
+            for (int cz = 5; cz <= 9 && all; cz++) {
+                all = level.isPositionEntityTicking(new BlockPos(cx * 16 + 8, FLOOR, cz * 16 + 8));
+            }
+        }
+        for (TitanBackLayout.Box box : List.of(TitanBackLayout.E1, TitanBackLayout.CK, TitanBackLayout.WB)) {
+            for (int cx = box.x1() >> 4; cx <= box.x2() >> 4 && all; cx++) {
+                for (int cz = box.z1() >> 4; cz <= box.z2() >> 4 && all; cz++) {
+                    all = level.isPositionEntityTicking(new BlockPos(cx * 16 + 8, box.floorY() + 1, cz * 16 + 8));
+                }
+            }
+        }
+        if (all || ++waited > 600) {
+            waited = 0;
+            return true;
+        }
+        return false;
     }
 
     static void load(MinecraftServer server) {
