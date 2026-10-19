@@ -1,9 +1,8 @@
 {
   "gui.skyabyss.domain.label": "Domain",
-  "gui.skyabyss.domain.hud": "Domain \"%s\"  %s s left",
-  "gui.skyabyss.domain.broken": "The domain shatters",
-  "gui.skyabyss.domain.faded": "The domain fades",
-  "gui.skyabyss.domain.break": "Wear the heart down to break it %s%%",
+  "gui.skyabyss.domain.hud": "Domain: %s",
+  "gui.skyabyss.domain.broken": "Domain solved",
+  "gui.skyabyss.domain.faded": "Domain faded",
   "gui.skyabyss.domain.stone_sea.name": "Sea of Stone",
   "gui.skyabyss.domain.stone_sea.line": "Stone becomes the tide, and covers the world.",
   "gui.skyabyss.domain.rising_tide.name": "Rising Tide",

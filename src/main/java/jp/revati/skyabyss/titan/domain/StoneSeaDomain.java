@@ -11,6 +11,8 @@ import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -141,5 +143,104 @@ public final class StoneSeaDomain extends HeartDomain {
         if (shattered) {
             level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()), cx, floorY + 3, cz, 80, 2.5, 1.5, 2.5, 0.3);
         }
+    }
+
+    // ---------------------------------------------------------------- 仕掛け: 共鳴する骨 (三本)
+    // 骨は三本、それぞれ音程が違う。鳴る順 (旋律。SHOW_GAP tick おきに三つ) を SHOW_EVERY tick ごとにくり返して見せる (光る柱と音)。
+    // 同じ順に叩き返せば解ける。順を間違えたら叩いた分は消えて、旋律をすぐ見せ直す (傷はない)。叩くのは左クリックでも右クリックでもよい
+    public static final int SHOW_GAP = 22;
+    public static final int SHOW_EVERY = 200;
+    private static final float[] PITCH = {0.8f, 1.0f, 1.26f};
+
+    private int[] order = {0, 1, 2};
+    private int step;
+    private int nextShow;
+    private int showStart = -1;
+
+    // 試験用: 鳴る順と、次に叩く骨 (終われば -1)
+    public int[] order() {
+        return order.clone();
+    }
+
+    public int expected() {
+        return step >= NODES ? -1 : order[step];
+    }
+
+    @Override
+    protected void puzzleBegin(ServerLevel level) {
+        java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
+        java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
+        order = new int[] {list.get(0), list.get(1), list.get(2)};
+        step = 0;
+        nextShow = 30;
+        showStart = -1;
+    }
+
+    private void note(ServerLevel level, Node n, boolean show) {
+        tone(level, n.pos, SoundEvents.NOTE_BLOCK_BELL.value(), 2.4f, PITCH[n.index]);
+        burst(level, n, show ? ParticleTypes.END_ROD : ParticleTypes.NOTE, show ? 14 : 6, 0.25, show ? 0.05 : 0.3);
+        column(level, n, show ? 0xFFD76A : 0x66E08A, 1.6f, 8);
+    }
+
+    @Override
+    protected void puzzleTick(ServerLevel level, int t) {
+        if (step >= NODES) {
+            return;
+        }
+        if (showStart < 0 && t >= nextShow) {
+            showStart = t;
+        }
+        if (showStart >= 0) {
+            int k = t - showStart;
+            if (k % SHOW_GAP == 0 && k / SHOW_GAP < NODES) {
+                note(level, nodes.get(order[k / SHOW_GAP]), true);
+            }
+            if (k >= SHOW_GAP * NODES + 20) {
+                showStart = -1;
+                nextShow = t + SHOW_EVERY;
+            }
+        }
+    }
+
+    @Override
+    protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
+        if (step >= NODES) {
+            return true;
+        }
+        if (node.index == order[step]) {
+            node.done = true;
+            step++;
+            note(level, node, false);
+            if (step < NODES) {
+                tell(level, "message.skyabyss.domain.stone_sea.step", step, NODES);
+            }
+        } else {
+            step = 0;
+            for (Node n : nodes) {
+                n.done = false;
+            }
+            tone(level, node.pos, SoundEvents.NOTE_BLOCK_BASS.value(), 2.0f, 0.5f);
+            burst(level, node, ParticleTypes.SMOKE, 10, 0.3, 0.02);
+            tell(level, "message.skyabyss.domain.stone_sea.wrong");
+            // 旋律をすぐ見せ直す
+            showStart = -1;
+            nextShow = ticks() + 30;
+        }
+        return true;
+    }
+
+    @Override
+    public int solvedCount() {
+        return step;
+    }
+
+    @Override
+    protected boolean complete() {
+        return step >= NODES;
+    }
+
+    @Override
+    protected int markColor(Node n, int t) {
+        return n.done ? 0x66E08A : 0xB9C4D2;
     }
 }

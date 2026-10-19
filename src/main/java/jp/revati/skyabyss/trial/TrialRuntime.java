@@ -67,6 +67,8 @@ public final class TrialRuntime {
 
     static {
         GroupOverlays.register(TrialRuntime::overlay);
+        // 鼓動の間の試練の碑 (越えた試練の碑がそのグループの画面で光る)
+        TrialHub.register();
     }
 
     private static String key(UUID group, String id) {

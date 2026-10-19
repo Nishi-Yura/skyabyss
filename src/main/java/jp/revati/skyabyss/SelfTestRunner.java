@@ -266,6 +266,8 @@ public final class SelfTestRunner {
         steps.addAll(TitanBackSelfTest.trialSteps());
         // 試練のプール (引き方・修飾・全変種・今週の試練・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
         steps.addAll(jp.revati.skyabyss.trial.TrialPoolSelfTest.steps());
+        // 試練を越えたあと (範囲・碑・鼓動の間への戻り・パーティごとの封)。docs/design/29 の 4.6。背が建ててある巨神だけ世界の検査をする
+        steps.addAll(jp.revati.skyabyss.trial.TrialHubSelfTest.steps());
         return steps;
     }
 

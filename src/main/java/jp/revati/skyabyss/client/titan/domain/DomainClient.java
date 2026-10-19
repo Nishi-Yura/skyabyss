@@ -301,11 +301,10 @@ public final class DomainClient {
         } else if (r.ended == 1) {
             return Component.translatable("gui.skyabyss.domain.faded");
         }
-        float left = Math.max(0, r.remaining) / 20f;
-        return Component.translatable("gui.skyabyss.domain.hud", name, (int) Math.ceil(left));
+        return Component.translatable("gui.skyabyss.domain.hud", name);
     }
 
-    // HUD の要求: 上中央 (ボスの技の名前の下)。残りの時間と、砕く進みの二段 (高さ 32)
+    // HUD の要求: 上中央 (ボスの技の名前の下)。名前・進み・手がかりの三段 (高さ 44)
     public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
         Run r = run;
         if (r == null || mc.level == null) {
@@ -317,15 +316,16 @@ public final class DomainClient {
         }
         int w = Math.max(100, mc.font.width(hudHead(r)) + 8);
         if (r.ended == 0) {
-            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain.break", r.percent)) + 4);
+            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain.solve", r.remaining, jp.revati.skyabyss.titan.domain.HeartDomain.NODES)) + 4);
+            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain." + r.id + ".goal")) + 4);
         }
-        int h = r.ended == 0 ? 32 : 14;
+        int h = r.ended == 0 ? 44 : 14;
         int fw = w;
         out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN, jp.revati.skyabyss.hud.HudLayout.Region.TOP_CENTER,
                 (maxW, maxH) -> h <= maxH && maxW >= 60 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(fw, maxW), h) : null));
     }
 
-    // 残りの時間と、砕く進み (ボスの技の名前の下)
+    // 領域の名前・解いた仕掛けの数・手がかりの一行 (ボスの技の名前の下)
     private static void drawHud(GuiGraphics g, Minecraft mc, Run r, float t, int w) {
         jp.revati.skyabyss.hud.HudLayout.Rect rect = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN);
         if (rect == null) {
@@ -351,8 +351,10 @@ public final class DomainClient {
             g.fill(cx - bw / 2, by, cx + bw / 2, by + 3, ((int) (a * 150) << 24) | 0x101828);
             int filled = Math.round(bw * Mth.clamp(r.percent / 100f, 0f, 1f));
             g.fill(cx - bw / 2, by, cx - bw / 2 + filled, by + 3, ia | rgb);
-            Component hint = Component.translatable("gui.skyabyss.domain.break", r.percent);
+            Component hint = Component.translatable("gui.skyabyss.domain.solve", r.remaining, jp.revati.skyabyss.titan.domain.HeartDomain.NODES);
             g.drawCenteredString(mc.font, hint, cx, by + 6, ((int) (a * 190) << 24) | 0xC8CCD8);
+            Component goal = Component.translatable("gui.skyabyss.domain." + r.id + ".goal");
+            g.drawCenteredString(mc.font, goal, cx, by + 17, ((int) (a * 150) << 24) | 0xE9E3D4);
         }
     }
 

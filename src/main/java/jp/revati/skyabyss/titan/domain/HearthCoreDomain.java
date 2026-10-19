@@ -10,6 +10,7 @@ import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -132,5 +133,80 @@ public final class HearthCoreDomain extends HeartDomain {
         if (shattered) {
             level.sendParticles(ParticleTypes.LAVA, cx, floorY + 2, cz, 50, 3, 1, 3, 0.2);
         }
+    }
+
+    // ---------------------------------------------------------------- 仕掛け: 熾の核 (三つ)
+    // 核は赤く燃える。核のそば (QUENCH_RANGE) でしゃがみ続けると冷める (しゃがんだ人 1 人あたり毎 tick 1、三人まで。QUENCH = 90 で冷めきる =
+    // 一人で 4.5 秒)。離れると 3 tick に 1 ずつ戻る (熱い床の予告を避けて離れても、進みはほとんど失わない)。冷めた核は灰色になって、そのまま。
+    // 叩いても冷めない (しゃがむ手がかりの一行が出る)
+    public static final int QUENCH = 90;
+    public static final double QUENCH_RANGE = 2.6;
+
+    @Override
+    protected void puzzleTick(ServerLevel level, int t) {
+        java.util.List<ServerPlayer> room = inRoom();
+        for (Node n : nodes) {
+            if (n.done) {
+                continue;
+            }
+            int near = 0;
+            for (ServerPlayer p : room) {
+                if (p.isAlive() && !p.isSpectator() && p.isShiftKeyDown() && Math.hypot(p.getX() - n.pos.x, p.getZ() - n.pos.z) <= QUENCH_RANGE
+                        && Math.abs(p.getY() - n.pos.y) < 2.5) {
+                    near++;
+                }
+            }
+            if (near > 0) {
+                n.state = Math.min(QUENCH, n.state + Math.min(near, 3));
+                if (t % 5 == 0) {
+                    burst(level, n, ParticleTypes.CLOUD, 6, 0.4, 0.05);
+                    tone(level, n.pos, SoundEvents.FIRE_EXTINGUISH, 0.6f, 1.2f);
+                }
+                if (n.state >= QUENCH) {
+                    n.done = true;
+                    burst(level, n, ParticleTypes.LARGE_SMOKE, 30, 0.6, 0.1);
+                    tone(level, n.pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, 2.5f, 0.8f);
+                    tell(level, "message.skyabyss.domain.hearth_core.step", solvedCount(), NODES);
+                }
+            } else if (n.state > 0 && t % 3 == 0) {
+                // 離れると、ゆっくり戻る (予告を避けて少し離れても、進みは大きく失わない)
+                n.state--;
+            }
+        }
+    }
+
+    @Override
+    protected boolean strike(ServerLevel level, Node node, ServerPlayer player) {
+        tell(level, "message.skyabyss.domain.hearth_core.hint");
+        tone(level, node.pos, SoundEvents.FIRE_AMBIENT, 1.0f, 0.8f);
+        return true;
+    }
+
+    @Override
+    public int solvedCount() {
+        int n = 0;
+        for (Node node : nodes) {
+            if (node.done) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    @Override
+    protected boolean complete() {
+        return nodes.size() == NODES && solvedCount() == NODES;
+    }
+
+    @Override
+    protected int markColor(Node n, int t) {
+        if (n.done) {
+            return 0x7A8088;
+        }
+        float f = n.state / (float) QUENCH;
+        int r = 255;
+        int g = (int) (80 + 120 * f);
+        int b = (int) (20 + 180 * f);
+        return (r << 16) | (g << 8) | b;
     }
 }

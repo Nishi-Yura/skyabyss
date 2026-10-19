@@ -19,6 +19,8 @@ public final class Scenes {
     public static final String FIRST_PREFIX = "titan_first_";
     public static final String HEART_PREFIX = "heart_";
     public static final String END_PREFIX = "titan_end_";
+    // 試練を越えて真ん中へ戻ったとき、光った碑を見せる (約 3.4 秒。docs/design/29 の 4.6)。前 = 碑の方。台詞なし
+    public static final String TABLET_REVEAL = "trial_tablet_reveal";
     // 設定の視野 (度)。撮影の fov はこの値との比で効かせる
     public static final float BASE_FOV = 70f;
 
@@ -30,6 +32,7 @@ public final class Scenes {
     static {
         add(opening());
         add(whaleFirstSight());
+        add(tabletReveal());
         for (String titan : FIRST_SIGHT_TITANS) {
             add(titanFirstSight(titan));
         }
@@ -149,6 +152,18 @@ public final class Scenes {
                 .line(6.0f, 3.8f, Speaker.HERO, "cinematic.skyabyss.first." + titan + ".hero2")
                 .line(11.2f, 5.0f, Speaker.HEAVEN, "cinematic.skyabyss.first." + titan + ".heaven")
                 .line(16.4f, 3.2f, Speaker.HERO, "cinematic.skyabyss.first." + titan + ".hero3")
+                .build();
+    }
+
+    // 試練を越えて真ん中へ戻る (3.4 秒)。①目の高さから碑の方へ向き直る ②少し寄って碑を見せる ③目の高さに戻って操作へ (切れ目なし)
+    private static Scene tabletReveal() {
+        return Scene.of(TABLET_REVEAL).handBack().seamless()
+                .shot(Shot.of(1.2f).pos(0, CameraMath.EYE, 0).posTo(0, 1.9, 0.6)
+                        .look(Look.frame(0, 1.5, 5)).lookTo(Look.frame(0, 1.5, 5)).fov(70f, 60f).sway(0.15f).build())
+                .shot(Shot.of(1.2f).pos(0, 1.9, 0.6).posTo(0, 1.8, 1.4)
+                        .look(Look.frame(0, 1.5, 5)).lookTo(Look.frame(0, 1.4, 5)).fov(60f, 54f).sway(0.1f).build())
+                .shot(Shot.of(1.0f).pos(0, 1.8, 1.4).posTo(0.0, CameraMath.EYE, 0.0)
+                        .look(Look.frame(0, 1.4, 5)).lookTo(Look.frame(0, 1.5, 6)).fov(54f, 70f).ease(Ease.SMOOTH).build())
                 .build();
     }
 

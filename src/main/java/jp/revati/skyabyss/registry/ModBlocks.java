@@ -63,6 +63,10 @@ public final class ModBlocks {
     public static final DeferredBlock<jp.revati.skyabyss.trial.TrialBoardBlock> TRIAL_BOARD = BLOCKS.register("trial_board",
             () -> new jp.revati.skyabyss.trial.TrialBoardBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> 6)));
 
+    // 試練の碑: 鼓動の間に一つの試練につき一つ立つ。グループが越えた試練の碑は、そのグループの画面でだけ光る (HubTablets の見かけの上書き)
+    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialTabletBlock> TRIAL_TABLET = BLOCKS.register("trial_tablet",
+            () -> new jp.revati.skyabyss.trial.TrialTabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> state.getValue(jp.revati.skyabyss.trial.TrialTabletBlock.LIT) ? 12 : 2)));
+
     private ModBlocks() {
     }
 
