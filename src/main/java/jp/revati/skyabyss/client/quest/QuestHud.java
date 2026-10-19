@@ -17,7 +17,10 @@ import net.minecraft.util.Mth;
 // 済んだ目的は出さない (「どれか一つ」の段階は、選べる目的を「または」でつなぐ)。F1・F3 の画面と、追跡していないときは出さない
 public final class QuestHud {
     public static final int X = 6;
-    static final int WIDTH = 150;
+    static int w() {
+        return Math.min(150, ObjectiveStrip.bandWidth(Minecraft.getInstance()));
+    }
+
     static final int TITLE = 0xFF7FD6D0;
     static final int MAIN_TITLE = 0xFFF2C14E;
     static final int TEXT = 0xFFE0DCD0;
@@ -44,8 +47,14 @@ public final class QuestHud {
             return null;
         }
         if (demo) {
-            return new Shown(null, null, Component.literal("見張り台の頼みごと"), false,
-                    List.of(new Line("・渡り鳥の羽を 3 枚集める（1/3）", 0, TEXT), new Line("・見張り台の鐘を鳴らす", 0, TEXT)));
+            List<Line> demoLines = new ArrayList<>();
+            for (String t : List.of("渡り鳥の羽を 3 枚集める", "見張り台の鐘を鳴らす")) {
+                List<String> wrapped = wrapWithCount(t, t.startsWith("渡り") ? "1/3" : "", w() - 12, mc.font);
+                for (int k = 0; k < wrapped.size(); k++) {
+                    demoLines.add(new Line((k == 0 ? "・" : "") + wrapped.get(k), k == 0 ? 0 : 9, TEXT));
+                }
+            }
+            return new Shown(null, null, Component.literal("見張り台の頼みごと"), false, demoLines);
         }
         QuestLog log = QuestLog.of(mc.player);
         if (log.tracked().isEmpty()) {
@@ -59,7 +68,12 @@ public final class QuestHud {
         if (def.main() && ObjectiveStrip.active()) {
             return null;
         }
-        return new Shown(def, entry, Component.translatable(def.titleKey()), def.main(), lines(mc.font, def, entry, WIDTH - 12));
+        List<Line> lines = lines(mc.font, def, entry, w() - 12);
+        // 目的の行が一つも無い (済んだ・今は出すものが無い) ときは、空の札を出さない
+        if (lines.isEmpty()) {
+            return null;
+        }
+        return new Shown(def, entry, Component.translatable(def.titleKey()), def.main(), lines);
     }
 
     private record Shown(QuestDef def, QuestLog.Entry entry, Component title, boolean main, List<Line> lines) {
@@ -70,7 +84,7 @@ public final class QuestHud {
         Shown s = shown(mc);
         if (s != null) {
             out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.QUEST, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
-                    WIDTH + 6, s.lines.size() * 10 + 16));
+                    w() + 6, s.lines.size() * 10 + 16 + (s.def != null && guideShown(mc, s) ? 10 : 0)));
         }
     }
 
@@ -82,21 +96,26 @@ public final class QuestHud {
             return;
         }
         int top = r.y() + 3;
-        drawBox(g, mc, top, s.title, s.main, s.lines, () -> {
+        drawBox(g, mc, top, s.title, s.main, s.lines, s.def != null && guideShown(mc, s), () -> {
             if (s.def != null) {
-                drawGuide(g, mc, s.def, s.entry, top);
+                drawGuide(g, mc, s.def, s.entry, top + 12 + s.lines.size() * 10);
             }
         });
     }
 
     // 札の箱 (題と、済んでいない目的の行)
-    private static void drawBox(GuiGraphics g, Minecraft mc, int top, Component title, boolean main, List<Line> lines, Runnable guide) {
+    private static void drawBox(GuiGraphics g, Minecraft mc, int top, Component title, boolean main, List<Line> lines, boolean withGuide, Runnable guide) {
         Font font = mc.font;
-        int h = 12 + lines.size() * 10 + 3;
+        int WIDTH = w();
+        int h = 12 + lines.size() * 10 + 3 + (withGuide ? 10 : 0);
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
         g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
-        g.drawString(font, title, X + 1, top, main ? MAIN_TITLE : TITLE, true);
+        String ts = title.getString();
+        if (font.width(ts) > WIDTH - 2) {
+            ts = font.plainSubstrByWidth(ts, WIDTH - 2 - font.width("…")) + "…";
+        }
+        g.drawString(font, ts, X + 1, top, main ? MAIN_TITLE : TITLE, true);
         guide.run();
         int y = top + 12;
         for (Line l : lines) {
@@ -108,14 +127,19 @@ public final class QuestHud {
     // 開発用 (/skyabyss_hud demo): データなしで追跡の札を出す
     public static volatile boolean demo;
 
-    // 追跡中のクエストの札の右上に、目的までの矢印と距離 (帯と同じ。設定 questArrow が OFF なら方位の文字)。背中の中なら「背中の中」
+    // 札に導きの行を出すか (行き先が分かるとき)
+    private static boolean guideShown(Minecraft mc, Shown s) {
+        ObjectiveStrip.Resolved r = ObjectiveStrip.resolveQuest(s.def, s.entry);
+        return r.inside() || r.pos() != null;
+    }
+
+    // 追跡中のクエストの札の最後の行に、目的までの矢印と距離 (帯と同じ。設定 questArrow が OFF なら方位の文字)。背中の中なら「背中の中」
     private static void drawGuide(GuiGraphics g, Minecraft mc, QuestDef def, QuestLog.Entry entry, int top) {
         ObjectiveStrip.Resolved r = ObjectiveStrip.resolveQuest(def, entry);
         Font font = mc.font;
-        int right = X + WIDTH;
         if (r.inside()) {
             String s = Component.translatable("gui.skyabyss.guide.inside").getString();
-            g.drawString(font, s, right - font.width(s), top, 0xFF9A9AAE, true);
+            g.drawString(font, s, X + 1, top, 0xFF9A9AAE, true);
             return;
         }
         if (r.pos() == null) {
@@ -128,17 +152,18 @@ public final class QuestHud {
         if (far.isEmpty()) {
             return;
         }
-        int fx = right - font.width(far);
-        g.drawString(font, far, fx, top, 0xFF7FD6D0, true);
+        int fx = X + 1;
         if (arrow) {
             float deg = jp.revati.skyabyss.guide.nav.NavMath.arrowDegrees(mc.player.getX(), mc.player.getZ(), t.getX() + 0.5, t.getZ() + 0.5, mc.player.getYRot());
-            int cx = fx - 3 - jp.revati.skyabyss.client.guide.GuideArrow.SIZE / 2;
-            jp.revati.skyabyss.client.guide.GuideArrow.draw(g, cx, top + 4, deg, 1f);
+            jp.revati.skyabyss.client.guide.GuideArrow.draw(g, fx + jp.revati.skyabyss.client.guide.GuideArrow.SIZE / 2, top + 4, deg, 1f);
+            fx += jp.revati.skyabyss.client.guide.GuideArrow.SIZE + 3;
             int v = jp.revati.skyabyss.guide.nav.NavMath.vertical(t.getY() + 0.5 - mc.player.getY());
             if (v != 0) {
-                jp.revati.skyabyss.client.guide.GuideArrow.drawVertical(g, cx - jp.revati.skyabyss.client.guide.GuideArrow.SIZE / 2 - 6, top + 4, v > 0, 1f);
+                jp.revati.skyabyss.client.guide.GuideArrow.drawVertical(g, fx + 2, top + 4, v > 0, 1f);
+                fx += 9;
             }
         }
+        g.drawString(font, far, fx, top, 0xFF7FD6D0, true);
     }
 
     record Line(String text, int indent, int color) {

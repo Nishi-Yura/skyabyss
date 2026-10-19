@@ -134,7 +134,8 @@ public final class TitanGroundSelfTest {
                         notes.add(String.format("  new rule spot: shell at %d %d yaw %.0f raise %.1f for the player at %d %d", (int) now.x, (int) now.z, now.y, raise, (int) px, (int) pz));
                     }
                     // 体がその高さにあるときの、体の中の固いブロック (ブロックを直接数える)
-                    int bad = solidColumns(level, shell, now.x, restY + raise, now.z, (float) now.y);
+                    // 休むときは足・ひれを除いた腹を REST_BURY だけ海底へ沈めてよい。その分だけ持ち上げた体が地形に触れないことを見る
+                    int bad = solidColumns(level, shell, now.x, restY + raise + TideShellEntity.REST_BURY, now.z, (float) now.y, TideShellEntity.REST_LEG_SKIP);
                     if (bad > 0) {
                         failures.add("the tide shell rest spot (" + (int) now.x + ", " + (int) now.z + ") has " + bad + " body columns inside blocks");
                     }
@@ -405,11 +406,19 @@ public final class TitanGroundSelfTest {
 
     // 位置 (x, y, z)・向き yaw の体で、固いブロックが体の中にある柱の数 (ブロックを直接数える。測りの計算は使わない)
     static int solidColumns(ServerLevel level, TitanVolume volume, double x, double y, double z, float yaw) {
+        return solidColumns(level, volume, x, y, z, yaw, Double.NEGATIVE_INFINITY);
+    }
+
+    // loFrom より下に底のある柱 (足・ひれ) は数えない版
+    static int solidColumns(ServerLevel level, TitanVolume volume, double x, double y, double z, float yaw, double loFrom) {
         double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);
         double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
         int bad = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (TitanVolume.Column c : volume.coreColumns()) {
+            if (c.lo() < loFrom) {
+                continue;
+            }
             int wx = Mth.floor(x + fx * c.fwd() + fz * c.side());
             int wz = Mth.floor(z + fz * c.fwd() - fx * c.side());
             int from = Mth.floor(y + c.lo());

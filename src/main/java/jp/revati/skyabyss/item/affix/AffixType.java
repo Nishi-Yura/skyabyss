@@ -13,6 +13,12 @@ public enum AffixType {
     THIRST("thirst", Slot.WEAPON, 15, 0.02, 0.04, 0.005, true),
     RESONANT("resonant", Slot.WEAPON, 20, 4, 10, 1, false),
     KEEN("keen", Slot.WEAPON, 15, 0.04, 0.10, 0.005, true),
+    // 木の印 (docs/design/27 の 4.1): その木の技の力 +5〜10%。5 種合わせて重み 10 (一つずつ 2)。1 装備に 1 つまで
+    MARK_STONE("mark_stone", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
+    MARK_WIND("mark_wind", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
+    MARK_TIDE("mark_tide", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
+    MARK_ASH("mark_ash", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
+    MARK_BONE("mark_bone", Slot.WEAPON, 2, 0.05, 0.10, 0.01, true),
     // ---- 防具 (着ている部位)
     BULWARK("bulwark", Slot.ARMOR, 30, 0.5, 1.0, 0.5, false),
     VIGOR("vigor", Slot.ARMOR, 25, 0.5, 1.0, 0.5, false),
@@ -44,6 +50,11 @@ public enum AffixType {
         this.max = max;
         this.step = step;
         this.percent = percent;
+    }
+
+    // 木の印か (1 装備に 1 つまで)
+    public boolean isMark() {
+        return id.startsWith("mark_");
     }
 
     public double min(boolean legendary) {

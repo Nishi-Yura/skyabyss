@@ -100,7 +100,9 @@ public final class StormGaugeHud {
             case 2 -> "storm";
             default -> "falling";
         };
-        Component name = Component.translatable("gui.skyabyss.storm_gauge." + phase);
+        // 舵で固定中は、見出しを「舵: 凪に固定 / 嵐に固定」にして、枠を金に (自然の拍との区別)
+        Component name = gauge.locked() ? Component.translatable("gui.skyabyss.storm_gauge.lock_name." + (gauge.phase() == 2 ? "storm" : "calm"))
+                : Component.translatable("gui.skyabyss.storm_gauge." + phase);
         Component time = ticksLeft < 0 ? Component.translatable("gui.skyabyss.storm_gauge.held")
                 : gauge.locked() ? Component.translatable("gui.skyabyss.storm_gauge.locked", (ticksLeft + 19) / 20)
                         : Component.translatable("gui.skyabyss.storm_gauge.left", (ticksLeft + 19) / 20);
@@ -108,7 +110,7 @@ public final class StormGaugeHud {
         float t = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(true);
         boolean storm = gauge.phase() == 2 || gauge.phase() == 1;
         float pulse = storm ? 0.5f + 0.5f * Mth.sin(t * 0.35f) : 0;
-        int border = storm ? (0xFF << 24) | ((int) (150 + 100 * pulse) << 16) | ((int) (190 + 60 * pulse) << 8) | 0xFF : 0xFF8A98B0;
+        int border = gauge.locked() ? 0xFFF2D060 : storm ? (0xFF << 24) | ((int) (150 + 100 * pulse) << 16) | ((int) (190 + 60 * pulse) << 8) | 0xFF : 0xFF8A98B0;
         int text = Math.max(mc.font.width(name), mc.font.width(time));
         int w = BackGaugeHud.width(g, 34 + text + 10, 112);
         int h = BackGaugeHud.HEIGHT;

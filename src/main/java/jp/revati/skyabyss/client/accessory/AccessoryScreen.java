@@ -48,7 +48,30 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
 
     // 持ち物の画面・装飾の画面・旅嚢の画面の上に、三つのつまみ (0 持ち物・1 装飾・2 旅嚢) を足す。selected = いまの画面のつまみ。
     // 位置は画面の左端に合わせて毎回決める (レシピ本で左右に動くため)。画面の幅は三つとも 176
+    // 見出しを切り替えると、画面の開き直しでマウスが画面の中央へ戻される (バニラの releaseMouse)。押した時の位置を覚え、次の画面の
+    // 見出しが並ぶとき (開き直しの後) に同じ位置へ戻す
+    private static double[] keptCursor;
+    private static long keptAt;
+
+    static void keepCursor() {
+        Minecraft mc = Minecraft.getInstance();
+        keptCursor = new double[] {mc.mouseHandler.xpos(), mc.mouseHandler.ypos()};
+        keptAt = net.minecraft.Util.getMillis();
+    }
+
+    private static void restoreCursor() {
+        double[] c = keptCursor;
+        keptCursor = null;
+        if (c != null && net.minecraft.Util.getMillis() - keptAt < 4000) {
+            Minecraft mc = Minecraft.getInstance();
+            if (!mc.mouseHandler.isMouseGrabbed()) {
+                org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), c[0], c[1]);
+            }
+        }
+    }
+
     public static void addTabs(java.util.function.Consumer<AbstractButton> add, AbstractContainerScreen<?> screen, int selected) {
+        restoreCursor();
         for (int i = 0; i < TABS; i++) {
             add.accept(new Tab(screen, i, i == selected));
         }
@@ -121,6 +144,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> {
                 return;
             }
             Minecraft mc = Minecraft.getInstance();
+            keepCursor();
             if (which == 1) {
                 PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
             } else if (which == 2) {

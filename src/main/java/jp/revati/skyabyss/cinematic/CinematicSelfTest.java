@@ -523,6 +523,12 @@ public final class CinematicSelfTest {
             check(f, !CinematicTriggers.firstSight(level, a, titan, stand) && !Cinematics.state(a).seen(scene), titan + ": started for a dead titan");
             stand.discard();
         }
+        // 余燼が地の下を泳いでいる (まだ浮かんでいない) あいだは、世界にいても見えない。場面は始まらない (ユーザーの声: 余燼がいないのに初見が始まった)
+        Cinematics.state(a).forgetAll();
+        var swimmer = jp.revati.skyabyss.titan.ember.EmberTitanSetup.EMBER_TITAN.get().create(level);
+        swimmer.setPos(a.getX() + 200, a.getY(), a.getZ());
+        check(f, !swimmer.isSurfaced() && !CinematicTriggers.firstSight(level, a, Titans.EMBER, swimmer) && !Cinematics.active(a)
+                && !Cinematics.state(a).seen(Scenes.firstId(Titans.EMBER)), "ember first sight started while the titan was still underground");
         // 船に乗っていても見られる (海で会いに行く足)。馬など、ほかの乗り物では見せない。
         // 乗せる操作は環境で失敗しうるので、乗り物の判定 (vehicleAllows) を実体を世界に置かずに確かめ、徒歩の人は canWatch で確かめる
         var boat = new net.minecraft.world.entity.vehicle.Boat(net.minecraft.world.entity.EntityType.BOAT, level);

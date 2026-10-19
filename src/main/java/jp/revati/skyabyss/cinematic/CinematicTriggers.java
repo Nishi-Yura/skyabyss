@@ -145,6 +145,11 @@ public final class CinematicTriggers {
             return false;
         }
         Vec3 at = anchor(entity);
+        // 巨神が実際にそこにいて、この人から見えること (地の下を泳いでいる余燼・眠っている巨神・読み込まれていない巨神・丘の向こうでは始めない)
+        if (!visibleTo(level, player, titan, entity, at)) {
+            DELAYED.remove(delayKey(player, scene));
+            return false;
+        }
         double dx = at.x - player.getX();
         double dz = at.z - player.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);
@@ -168,6 +173,39 @@ public final class CinematicTriggers {
         }
         DELAYED.remove(delayKey(player, scene));
         return Cinematics.startOnce(player, scene, entity, at);
+    }
+
+    // 巨神が「いる」「見える」か (初見の場面の前提)。
+    //  - 余燼は、浮かんで (上がる・眠る・沈む) 地上に背を出しているときだけ。地の下を泳いでいる間は、世界にはいても見えない
+    //  - 眠って去る途中の巨神 (TitanDormancy) は見せない
+    //  - 世界に出ている実体は、この人にチャンクが送られていて、目から巨神の体 (中心・上・さらに上) のどれかへ視線が通ること
+    //    (丘の陰・山の向こうでは始めない)。世界に出ていない置物 (自己テスト) は距離と生死の判定だけ
+    static boolean visibleTo(ServerLevel level, ServerPlayer player, String titan, Entity entity, Vec3 at) {
+        if (entity.isRemoved()) {
+            return false;
+        }
+        if (entity instanceof EmberTitanEntity ember && !ember.isSurfaced()) {
+            return false;
+        }
+        if (player.getServer() != null && jp.revati.skyabyss.titan.end.TitanDormancy.isResting(player.getServer(), titan)) {
+            return false;
+        }
+        if (level.getEntity(entity.getUUID()) != entity) {
+            return true;
+        }
+        BlockPos bp = BlockPos.containing(at);
+        if (!level.isLoaded(bp) || !player.getChunkTrackingView().contains(bp.getX() >> 4, bp.getZ() >> 4)) {
+            return false;
+        }
+        net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+        for (double up : new double[] {2, 14, 30}) {
+            net.minecraft.world.phys.Vec3 target = at.add(0, up, 0);
+            if (level.clip(new net.minecraft.world.level.ClipContext(eye, target, net.minecraft.world.level.ClipContext.Block.VISUAL,
+                    net.minecraft.world.level.ClipContext.Fluid.NONE, player)).getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 伝承の項目は近づくと記される (岩鯨 160、潮殻 200、雷翼 96)。場面はそれより先に出るので、伝承を根拠にするのは岩鯨 (旧ワールドからの人) だけ。

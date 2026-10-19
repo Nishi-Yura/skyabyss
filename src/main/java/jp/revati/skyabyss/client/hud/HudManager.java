@@ -153,7 +153,8 @@ public final class HudManager {
         boolean offhand = !p.getOffhandItem().isEmpty();
         boolean attack = mc.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR;
         float hearts = p.getMaxHealth() + p.getAbsorptionAmount();
-        int rows = Math.max(1, Math.min(4, (int) Math.ceil(hearts / 2f / 10f)));
+        // 体力の帯 (VitalsHud) は何ハートでも一本。バニラのハートに戻した人だけ、段が増えるぶん上へ避ける
+        int rows = VitalsHud.styled() ? 1 : Math.max(1, Math.min(4, (int) Math.ceil(hearts / 2f / 10f)));
         int good = 0;
         int bad = 0;
         for (MobEffectInstance e : p.getActiveEffects()) {

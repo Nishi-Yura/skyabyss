@@ -37,15 +37,17 @@ import net.minecraft.world.phys.Vec3;
 // 火の強さはメモリだけに持つ (保存しない。リセットで 20)
 public final class Hearth {
     // 火床の位置 (谷の奥、取っておく場所 (z 56〜62) の手前)。床 78 の上
-    public static final BlockPos HEARTH = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 52);
-    public static final BlockPos CARRIER_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 8);
-    public static final BlockPos MOTH_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 22, 30);
+    public static final BlockPos HEARTH = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 28);
+    public static final BlockPos CARRIER_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 1, 4);
+    public static final BlockPos MOTH_SPAWN = new BlockPos(0, EmberBackLayout.FLOOR_SOUTH + 22, 18);
     public static final String CARRIER_TAG = "skyabyss_hearth_carrier";
 
     public static final float START = 20f;
     public static final float MAX = 100f;
     public static final float FEED = 8f;
     public static final float DOUSE = 15f;
+    // 噴気に焼かれた灰運びが火床へ足す火 (灰が燃えて薪になる)
+    public static final float JET_FEED = 6f;
     public static final float MOTH_DOUSE = 2f;
     public static final float DECAY_PER_SECOND = 0.5f;
     public static final float DECAY_PER_PLAYER = 0.2f;
@@ -133,6 +135,25 @@ public final class Hearth {
         level.sendParticles(ParticleTypes.LARGE_SMOKE, HEARTH.getX() + 0.5, HEARTH.getY() + 0.9, HEARTH.getZ() + 0.5, 16, 0.3, 0.3, 0.3, 0.03);
         for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
             Notice.bar(p, ModText.deny(EmberIds.LANG_SOUTH + "doused"));
+        }
+    }
+
+    // 灰運びが噴気に焼かれた: 灰が燃えて、火床へ火が足される。目に見える手応え (火の粉が灰運びから火床へ飛ぶ)
+    public static void jetBurned(ServerLevel level, net.minecraft.world.entity.LivingEntity carrier) {
+        if (done) {
+            return;
+        }
+        add(level, JET_FEED);
+        level.playSound(null, HEARTH, EmberTrialSetup.HEARTH_FEED.get(), SoundSource.BLOCKS, 1f, 1.3f);
+        Vec3 from = carrier.position().add(0, 1.0, 0);
+        Vec3 to = Vec3.atCenterOf(HEARTH).add(0, 0.8, 0);
+        for (int i = 0; i <= 12; i++) {
+            Vec3 p = from.lerp(to, i / 12.0).add(0, Math.sin(Math.PI * i / 12.0) * 2.0, 0);
+            level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 2, 0.1, 0.1, 0.1, 0.01);
+        }
+        level.sendParticles(ParticleTypes.FLAME, HEARTH.getX() + 0.5, HEARTH.getY() + 0.9, HEARTH.getZ() + 0.5, 14, 0.25, 0.2, 0.25, 0.05);
+        for (ServerPlayer p : EmberTrials.playersIn(level, EmberBackLayout.SOUTH)) {
+            Notice.bar(p, ModText.hint(EmberIds.LANG_SOUTH + "jet_burned", Math.round(strength)));
         }
     }
 
@@ -273,11 +294,12 @@ public final class Hearth {
         boolean quiet = EmberBackTrials.quiet(level, EmberIds.SOUTH);
         if (!spawned) {
             spawned = true;
-            lastCarrier = now;
+            // 最初の灰運びは、人が谷に入ってすぐ来る (道を歩く灰運びと、噴気の上を通る様子を最初に見せる)
+            lastCarrier = now - 100000;
             lastMoths = now;
             if (!quiet) {
-                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -4.5, EmberBackLayout.FLOOR_SOUTH + 1, 28.5);
-                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 4.5, EmberBackLayout.FLOOR_SOUTH + 1, 32.5);
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), -6.5, EmberBackLayout.FLOOR_SOUTH + 1, 14.5);
+                EmberTrials.spawn(level, EmberMobSetup.CINDER_ROLLER.get(), 6.5, EmberBackLayout.FLOOR_SOUTH + 1, 20.5);
             }
         }
         // 静かな周: 灰運びは一体ずつ・ゆっくり (熾の元なので 0 にはしない)。蛾と燠虫は出ない
@@ -285,7 +307,7 @@ public final class Hearth {
         int carrierMax = quiet ? 1 : carrierCap(n);
         if (now - lastCarrier >= interval && carriersAlive(level).size() < carrierMax) {
             lastCarrier = now;
-            EmberTrials.spawn(level, EmberMobSetup.ASH_THRALL.get(), CARRIER_SPAWN.getX() - 3 + level.random.nextInt(7) + 0.5,
+            EmberTrials.spawn(level, EmberMobSetup.ASH_THRALL.get(), CARRIER_SPAWN.getX() - 2 + level.random.nextInt(5) + 0.5,
                     CARRIER_SPAWN.getY(), CARRIER_SPAWN.getZ() + 0.5, CARRIER_TAG);
         }
         if (!quiet && strength > MOTH_FROM && now - lastMoths >= MOTH_INTERVAL) {

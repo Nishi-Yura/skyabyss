@@ -126,6 +126,7 @@ public class HeartRewardScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        showCursor();
         if (cards.isEmpty()) {
             cards = buildCards();
             // 最初に選べるカードへ
@@ -371,6 +372,11 @@ public class HeartRewardScreen extends Screen {
         super.tick();
         age++;
         phaseAge++;
+        // 開いている間は守る (サーバーが 2 秒ぶん延ばす。傷つかず、敵は狙わない)
+        if (age % 10 == 1) {
+            PacketDistributor.sendToServer(new HeartRewardNet.Hold());
+        }
+        showCursor();
         if (phase == Phase.REVEAL) {
             for (int i = 0; i < stacks.size() && i < revealSounded.length; i++) {
                 if (!revealSounded[i] && age >= T_CARD0 + i * T_CARD_STEP) {
@@ -730,9 +736,30 @@ public class HeartRewardScreen extends Screen {
         }
     }
 
+    private double lastMx = -1;
+    private double lastMy = -1;
+
+    // 画面が開いている間は、いつもマウスの矢印を出す (ほかの画面や場面のあとで、マウスが捕まったまま・隠れたままになることがあった)
+    private void showCursor() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.mouseHandler.isMouseGrabbed()) {
+            mc.mouseHandler.releaseMouse();
+        }
+        long window = mc.getWindow().getWindow();
+        if (org.lwjgl.glfw.GLFW.glfwGetInputMode(window, org.lwjgl.glfw.GLFW.GLFW_CURSOR) != org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL) {
+            org.lwjgl.glfw.GLFW.glfwSetInputMode(window, org.lwjgl.glfw.GLFW.GLFW_CURSOR, org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL);
+        }
+    }
+
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         float t = age + partialTick;
+        // 矢印の下のカードを毎枠調べる (開いた時に矢印が動かないままだと mouseMoved が来ず、強調が付かなかった)
+        if (mouseX != lastMx || mouseY != lastMy) {
+            lastMx = mouseX;
+            lastMy = mouseY;
+            mouseMoved(mouseX, mouseY);
+        }
         float dim = ease(t / 10f);
         // 暗転 (全面)。ぼかさず、黒に少し差し色を混ぜる
         g.fill(0, 0, width, height, argb(0.94f * dim, BG));

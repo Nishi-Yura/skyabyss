@@ -19,12 +19,12 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 // 技の画面まわりの登録 (Mod のイベントバス)。
-// キー: 技の画面 K、技の枠 R・G・V・Z (バニラで使っていないキー。数字はホットバー、Q・E・F・C・X はバニラが使う)。キー設定で変えられる
+// キー: 技の画面 K、技の枠 R・G・V・Z (5 つ目は B。バニラで使っていないキー。数字はホットバー、Q・E・F・C・X はバニラが使う)。キー設定で変えられる
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class SkillClientSetup {
     public static final KeyMapping SKILLS_KEY = new KeyMapping("key.skyabyss.skills", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.skyabyss");
-    private static final int[] SLOT_DEFAULTS = {GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_Z};
+    private static final int[] SLOT_DEFAULTS = {GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_B};
     public static final KeyMapping[] SLOT_KEYS = new KeyMapping[SkillRules.SLOTS];
     static {
         for (int i = 0; i < SLOT_KEYS.length; i++) {
