@@ -299,6 +299,12 @@ public final class ShotRunner {
             say("line " + line.number() + ": " + line.op() + (line.rest().isEmpty() ? "" : " " + line.rest()));
         }
         switch (line.op()) {
+            case "stareffect" -> {
+                // stareffect <current|a|b|c>: 星が欠ける見せ方を、設定を書き換えずに切り替える (選定用)
+                jp.revati.skyabyss.client.opening.StarEffect.override =
+                        jp.revati.skyabyss.Config.StarEffectVariant.valueOf(line.arg(0).toUpperCase(java.util.Locale.ROOT));
+                return true;
+            }
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
             }

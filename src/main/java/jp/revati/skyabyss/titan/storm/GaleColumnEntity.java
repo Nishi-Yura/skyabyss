@@ -99,7 +99,7 @@ public class GaleColumnEntity extends Entity {
             level.playSound(null, baseX, baseY, baseZ, StormSetup.GALE.get(), SoundSource.AMBIENT, 1.2f, 0.9f + random.nextFloat() * 0.2f);
         }
         Set<UUID> inside = new HashSet<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : java.util.List.copyOf(level.players())) { // arrive() で別の次元へ移すので写しを回す
             if (!TitanKeeper.eligible(p) || !inColumn(p.getX(), p.getY(), p.getZ())) {
                 continue;
             }

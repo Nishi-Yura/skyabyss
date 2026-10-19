@@ -2,6 +2,7 @@ package jp.revati.skyabyss.titan.dungeon;
 
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
+
 import java.util.List;
 
 import jp.revati.skyabyss.registry.ModBlocks;
@@ -26,8 +27,8 @@ public final class MazeBuilder {
     private static final int POCKET_EVERY = 4;
     // 入口から出口までの道が、少なくともこれだけのマスを通ること
     private static final int MIN_PATH_CELLS = 26;
-    // 水路の顎のスポナーが同時に生かしておく数（既定の 6 の半分）
-    public static final int MAW_MAX_NEARBY = 3;
+    // 水路の顎のスポナーが同時に生かしておく数（近くの人には最大 2 匹まで）
+    public static final int MAW_MAX_NEARBY = 2;
 
     private MazeBuilder() {
     }
@@ -135,7 +136,7 @@ public final class MazeBuilder {
                 kit.set(p, Blocks.SPAWNER.defaultBlockState());
                 if (kit.level().getBlockEntity(p) instanceof SpawnerBlockEntity be) {
                     be.setEntityId(ModEntities.WATERWAY_MAW.get(), kit.random);
-                    // 同時にいる数は既定の 6 の半分（3）まで。入った瞬間に囲まれないように
+                    // 同時にいる数は 2 まで。入った瞬間に囲まれないように
                     CompoundTag tag = be.saveWithoutMetadata(kit.level().registryAccess());
                     tag.putShort("MaxNearbyEntities", (short) MAW_MAX_NEARBY);
                     be.getSpawner().load(kit.level(), p, tag);
@@ -174,6 +175,11 @@ public final class MazeBuilder {
 
     // 迷路のまわりの決まった設備: 出口の小部屋と、入口の通路へ戻る抜け道。島を建てるときに一度だけ
     static void buildFixtures(BuildKit kit) {
+        // 入口の小部屋: はしごを下りた先の、水の外の休み場。周りは壁で、水は入らない (床は迷路の天井)。はしごは buildMaze が通す
+        TitanBackLayout.Box er = MAZE_ENTRY_ROOM;
+        kit.fill(er.x1() - 1, er.floorY() + 1, er.z1() - 1, er.x2() + 1, er.ceilingY(), er.z2() + 1, BuildKit.TILES);
+        kit.fill(er.x1(), er.floorY() + 1, er.z1(), er.x2(), er.ceilingY() - 1, er.z2(), BuildKit.AIR);
+        kit.restPoint(er);
         kit.room(MAZE_EXIT_ROOM, BuildKit.POLISHED, BuildKit.TILES);
         kit.lantern(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z2());
         kit.set(MAZE_EXIT_ROOM.x2(), MAZE_EXIT_ROOM.floorY() + 1, MAZE_EXIT_ROOM.z1(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
