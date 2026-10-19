@@ -1,0 +1,30 @@
+# 雷翼の初見の再現 (本物の人で近づく)。./gradlew runShots -Pscript=tools/shots/sight_thunder.txt
+# 出力: run/shots/sight_thunder/shots/sight_thunder/*.png。ログの [sightdbg] で条件を見る
+world sight_thunder normal
+size 854 480
+timeout 1500
+render 8
+clouds on
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss cinematic stop
+wait 20
+cmd skyabyss cinematic reset
+cmd skyabyss progress grant @p stone_whale
+cmd skyabyss progress grant @p tide_shell
+wait 60
+cmd skyabyss titan summon storm
+cmd skyabyss titan status storm
+wait 100
+shot sight_a
+wait 100
+shot sight_b
+wait 100
+shot sight_c
+wait 200
+shot sight_d
+wait 300
+shot sight_e
+quit
