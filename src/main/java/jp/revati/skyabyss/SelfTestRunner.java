@@ -238,6 +238,8 @@ public final class SelfTestRunner {
         steps.addAll(jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSelfTest.steps());
         // 余燼の中ボス 灰の鍛え手 (技の時間と傷・怒り・報酬・一人で倒せる数値)。東の石の記録を残すので、余燼の背の試練の検査のあとに置く
         steps.addAll(jp.revati.skyabyss.titan.ember.smith.AshSmithSelfTest.steps());
+        // 建築の監査 (階段の向き・段差・埋まり・戸・はしご・地形との関係。docs/design/08)。SKYABYSS_SELFTEST_ONLY="build audit" でこれだけ流せる
+        steps.addAll(jp.revati.skyabyss.titan.audit.BuildAuditSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
         return steps;
     }

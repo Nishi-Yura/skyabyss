@@ -700,14 +700,16 @@ public final class TideIslandBuilder {
                 }
             }
         }
-        for (int i = 0; i < 3; i++) {
+        // 一段ごとに 1 下りる。階段 (登る向きは東) の背の高い側が、上の床の上面にそろう高さに置く: 1 段目は g0 の床と同じ高さ (PLATFORM_TOP)
+        // (1 つ低く置くと、g0 の縁から 1 ブロック落ちて階段の背に着き、階段が埋まって見える)。庭の床 (GARDEN_FLOOR + 1) までなので 4 段
+        for (int i = 0; i < 4; i++) {
             int x = G0.x1() - 1 - i;
             for (int z = -1; z <= 1; z++) {
-                for (int y = GARDEN_FLOOR; y < PLATFORM_TOP - 1 - i; y++) {
+                for (int y = GARDEN_FLOOR; y < PLATFORM_TOP - i; y++) {
                     kit.set(x, y, z, TideKit.SANDSTONE);
                 }
-                kit.stair(x, PLATFORM_TOP - 1 - i, z, Direction.EAST, Blocks.SANDSTONE_STAIRS.defaultBlockState());
-                for (int y = PLATFORM_TOP - i; y <= GARDEN_WALL_TOP + 2; y++) {
+                kit.stair(x, PLATFORM_TOP - i, z, Direction.EAST, Blocks.SANDSTONE_STAIRS.defaultBlockState());
+                for (int y = PLATFORM_TOP - i + 1; y <= GARDEN_WALL_TOP + 2; y++) {
                     kit.set(x, y, z, TideKit.AIR);
                 }
             }
@@ -845,7 +847,7 @@ public final class TideIslandBuilder {
                         kit.set(x, y, z, TideKit.SHELL);
                     } else if (y == f) {
                         if (i > 0 && f > TIER_FLOOR[2] + i - 1 && f < LEDGE_FLOOR + 1 && i <= LEDGE_FLOOR - TIER_FLOOR[2]) {
-                            kit.stair(x, y, z, Direction.SOUTH, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
+                            kit.stair(x, y, z, Direction.NORTH, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
                         } else {
                             kit.set(x, y, z, TideKit.FLOOR);
                         }
@@ -1151,7 +1153,8 @@ public final class TideIslandBuilder {
             for (int yy = y + 1; yy <= y + 3; yy++) {
                 kit.set(c[0], yy, c[1], TideKit.AIR);
             }
-            if (y + 1 >= top) {
+            // 段の背の高い側が地表の上面 (top + 1) にそろうのは、段が top にあるとき (top - 1 で止めると、外へ出るときに 1 ブロック登ることになる)
+            if (y >= top) {
                 // 地表に出た: 段の上を空まで開け、口のまわりに低い遺跡の枠 (半分埋まった石の段)
                 for (int yy = y + 1; yy <= top + 3; yy++) {
                     kit.set(c[0], yy, c[1], TideKit.AIR);

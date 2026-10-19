@@ -359,17 +359,20 @@ public final class EmberBodyBuilder {
             lo = Math.min(lo, f);
             boolean drop = f < floor.applyAsInt(z - 1);
             for (int x = x1; x <= x2; x++) {
+                // 下りる段は、前 (北) の床と同じ高さ (f + 1) に置く。背の高い側が前の床の上面にそろい、低い側が下りた床より半段高い
+                // (f に置くと、前の床より 1 段、下りた床の前で半段へこむ「埋まった階段」になる)
+                int top = drop ? f + 1 : f;
                 if (drop) {
-                    kit.stair(x, f, z, Direction.NORTH);
-                    kit.set(x, f - 1, z, EmberKit.RUIN);
+                    kit.set(x, f, z, EmberKit.RUIN);
+                    kit.stair(x, top, z, Direction.NORTH);
                 } else {
                     kit.set(x, f, z, EmberKit.ruinFloor(x, z));
                 }
-                for (int y = f + 1; y <= f + 4; y++) {
+                for (int y = top + 1; y <= top + 4; y++) {
                     kit.set(x, y, z, EmberKit.AIR);
                 }
                 // 下りた段の上の前の床の高さまで空ける (段の頭を打たないように)
-                for (int y = f + 5; y <= floor.applyAsInt(z1) + 4 && z > z1 && y <= floor.applyAsInt(z - 1) + 4; y++) {
+                for (int y = top + 5; y <= floor.applyAsInt(z1) + 4 && z > z1 && y <= floor.applyAsInt(z - 1) + 4; y++) {
                     kit.set(x, y, z, EmberKit.AIR);
                 }
             }
@@ -660,7 +663,8 @@ public final class EmberBodyBuilder {
     }
 
     private void ledgeStep(int x, int z, int y, int px, int pz) {
-        Direction up = px == Integer.MIN_VALUE ? Direction.NORTH : Direction.fromDelta(x - px, 0, z - pz);
+        // 最初の段の向きは、次の段 (弧は東回り) のほう。NORTH だと最初の段だけ背の高い側が逆を向く
+        Direction up = px == Integer.MIN_VALUE ? Direction.EAST : Direction.fromDelta(x - px, 0, z - pz);
         kit.set(x, y - 1, z, EmberKit.RUIN);
         kit.stair(x, y, z, up == null ? Direction.NORTH : up);
         for (int yy = y + 1; yy <= y + 3; yy++) {
