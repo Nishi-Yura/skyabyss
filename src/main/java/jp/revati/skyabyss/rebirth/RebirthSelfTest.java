@@ -60,6 +60,9 @@ public final class RebirthSelfTest {
         List<String> f = new ArrayList<>();
         // 見せ方の検査は、仮の元 (同期する写しの回数) で流す。終わったら本体の元へ戻す
         RebirthView.useSource(null);
+        RebirthStats stats = RebirthStats.get(server);
+        net.minecraft.nbt.CompoundTag savedStats = stats.save(new net.minecraft.nbt.CompoundTag(), server.registryAccess());
+        stats.clearForTest();
         try {
             tiers(f);
             titles(f);
@@ -72,6 +75,7 @@ public final class RebirthSelfTest {
             SkyAbyss.LOGGER.error("rebirth selftest crashed", e);
             f.add("crashed: " + e);
         }
+        stats.restore(savedStats, server.registryAccess());
         force(server, false);
         RebirthView.useSource(Rebirth::displayCount);
         if (f.isEmpty()) {

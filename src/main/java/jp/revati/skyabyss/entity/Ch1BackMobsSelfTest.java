@@ -541,6 +541,7 @@ public final class Ch1BackMobsSelfTest {
                     long archers = mobs.stream().filter(m -> m instanceof RibArcher).count();
                     long sentinels = mobs.stream().filter(m -> m instanceof BoneSentinel).count();
                     String label = "wave " + wave + " / " + players + " player(s)" + " [refused " + jp.revati.skyabyss.util.SpawnSafety.refused + ", moved " + jp.revati.skyabyss.util.SpawnSafety.moved
+                            + ", wide " + level.getEntitiesOfClass(Mob.class, box2.inflate(30), m -> m.getTags().contains(TitanBackTrials.MOB_TAG)).stream().map(m -> m.getType().toShortString() + "@" + m.blockPosition().toShortString()).toList()
                             + ", mobs " + mobs.stream().map(m -> m.getType().toShortString() + "@" + m.blockPosition().toShortString()).toList() + "]";
                     if (wave == 2) {
                         int expectedMortars = players >= 4 ? 2 : 1;

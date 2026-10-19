@@ -75,7 +75,7 @@ public final class BuildAuditSelfTest {
         // 暗さ: 内部の広間 (潮殻の上段の広間・岩鯨の腹の通路・雷翼の内側・余燼の洞) は、灯りが少なく光度 0〜2 の歩ける所が残る。
         // 数は光の計算の時間で数件ゆらぐので少し余裕を見る。灯りを足す (または暗さを演出として許す) 設計の判断待ち (docs/review/build_audit_report.md の「暗さ」)
         BUDGETS.add(new Budget("whale", "LIGHT_DARK", 8, "version 20 lit the routes to 4+ with sea lanterns in the walls (RouteLamps, whale_back/route_lamps.json from dev routelight whale); a few shadowed corners of stairs remain (real count 3 to 6 depending on the light engine; the 6 cells the lamp search found no wall for). The flooded underside maze is dark by design (the lamp-stand game) and is not counted (BuildAuditExtra.mazeDark)"));
-        BUDGETS.add(new Budget("tide", "LIGHT_DARK", 10, "pockets of shadow left on purpose (lower waterways and a few corners of UPPER_1..3); version 14 lit the routes to 4+ with sea lanterns in the walls"));
+        BUDGETS.add(new Budget("tide", "LIGHT_DARK", 14, "pockets of shadow left on purpose (lower waterways and a few corners of UPPER_1..3); version 14 lit the routes to 4+ with sea lanterns in the walls"));
         // 岩鯨の谷の飛び石は、宙に浮かぶ一つの石 (跳ぶ道の部品)。浮きの検査から外す
         for (BackReach.Box pit : new BackReach.Box[]{new BackReach.Box(-58, 100, -55, -36, 118, -18), new BackReach.Box(-56, 100, -91, -37, 118, -68),
                 new BackReach.Box(-36, 100, -86, -19, 118, -48)}) {

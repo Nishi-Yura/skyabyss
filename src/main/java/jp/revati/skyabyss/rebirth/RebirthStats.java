@@ -104,6 +104,23 @@ public final class RebirthStats extends SavedData {
         return rows;
     }
 
+    // 試験用: 中身を空にして、保存した写しから戻す (世界を使い回しても、前の記録が試験に混ざらない)
+    public void restore(CompoundTag tag, HolderLookup.Provider registries) {
+        RebirthStats s = load(tag, registries);
+        entries.clear();
+        entries.putAll(s.entries);
+        records.clear();
+        records.putAll(s.records);
+        nextOrder = s.nextOrder;
+        setDirty();
+    }
+
+    public void clearForTest() {
+        entries.clear();
+        records.clear();
+        setDirty();
+    }
+
     private static RebirthStats load(CompoundTag tag, HolderLookup.Provider registries) {
         RebirthStats s = new RebirthStats();
         s.nextOrder = tag.getLong("nextOrder");
