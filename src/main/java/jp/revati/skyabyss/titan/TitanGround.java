@@ -54,6 +54,12 @@ public final class TitanGround {
 
     // loFrom より上に底のある柱だけを調べる版 (地面に伏せて腹が土に埋まる余燼は、地面より上の体だけが丘・木に触れないことを見る)
     public static double requiredY(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, int stride, double loFrom) {
+        return requiredY(level, surface, volume, x, z, yaw, margin, stride, loFrom, Double.NEGATIVE_INFINITY);
+    }
+
+    // hiFrom より低い柱 (甲羅の裾・ひれなど、頂が hiFrom に届かない低い体) も数えない版 (休むとき、裾は砂・岸へ埋めてよい)
+    public static double requiredY(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, int stride, double loFrom,
+            double hiFrom) {
         if (volume == null || !enabled) {
             return Double.NEGATIVE_INFINITY;
         }
@@ -63,7 +69,7 @@ public final class TitanGround {
         List<TitanVolume.Column> cols = volume.coreColumns();
         for (int i = 0; i < cols.size(); i += Math.max(1, stride)) {
             TitanVolume.Column c = cols.get(i);
-            if (c.lo() < loFrom) {
+            if (c.lo() < loFrom || c.hi() < hiFrom) {
                 continue;
             }
             double wx = x + fx * c.fwd() + fz * c.side();
@@ -84,6 +90,11 @@ public final class TitanGround {
 
     // loFrom より下に底のある柱 (足・ひれ。休むときは海底へ埋めてよい) は数えない版
     public static double requiredYPadded(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, double spread, double loFrom) {
+        return requiredYPadded(level, surface, volume, x, z, yaw, margin, spread, loFrom, Double.NEGATIVE_INFINITY);
+    }
+
+    public static double requiredYPadded(ServerLevel level, Surface surface, TitanVolume volume, double x, double z, float yaw, double margin, double spread, double loFrom,
+            double hiFrom) {
         if (volume == null || !enabled) {
             return Double.NEGATIVE_INFINITY;
         }
@@ -91,7 +102,7 @@ public final class TitanGround {
         double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
         double need = Double.NEGATIVE_INFINITY;
         for (TitanVolume.Column c : volume.coreColumns()) {
-            if (c.lo() < loFrom) {
+            if (c.lo() < loFrom || c.hi() < hiFrom) {
                 continue;
             }
             double wx = x + fx * c.fwd() + fz * c.side();

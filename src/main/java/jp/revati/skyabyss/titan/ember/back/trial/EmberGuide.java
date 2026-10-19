@@ -23,6 +23,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 今いる部屋の「いま何をするか」の一行と進みの点を出す。サーバーが人ごとに決めて EmberNetwork.Goal で送る (変わったときと 5 秒ごと)。
 // 試練ごとの一行は 1 手ずつ: 西 = 壺 → 渡る → 石、東 = 鞴 → 色を見て打つ (次の色つき) → 槽 → 扉 → 鍛え手 → 石、南 = 熾 → くべる → 石。
 // 決まり: どの部屋も「その部屋の決まりを一つ教え、次にひねりを足す」 (西: 灰の殻は崩れる → 蛾が早く崩す、東: 色で打つ → 打つ順が変わる、南: 熾をくべる → 噴気で灰運びを焼く)
+@EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID)
 public final class EmberGuide {
     public record Goal(String id, int done, int total, int a, int b) {
         public static final Goal NONE = new Goal("", 0, 0, 0, 0);
