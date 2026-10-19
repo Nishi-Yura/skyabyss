@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3f;
 
 // 乗り込み口の光 (docs/design/01 の 4.3「全巨神に共通の決まり」)。岩鯨の鎖・潮殻の潮門・雷翼の昇り風・余燼の口が、
@@ -36,6 +37,12 @@ public final class BoardGlow {
     private BoardGlow() {
     }
 
+    // 光の柱と枠の知らせ (巨神ごとの色)
+    public static TitanEndNetwork.Beam beam(String titan, Shape s) {
+        return new TitanEndNetwork.Beam(titan, colour(titan), s.centre().x, s.centre().y, s.centre().z, s.hx(), s.hy(), s.hz(), s.yaw(),
+                s.beamFrom(), s.beamTo(), s.beamRadius(), BEAM_TTL);
+    }
+
     // 脈の強さ (0〜1)。tick から
     public static float pulse(long tick) {
         return 0.5f + 0.5f * Mth.sin((float) (tick % PULSE) / PULSE * Mth.TWO_PI);
@@ -46,8 +53,35 @@ public final class BoardGlow {
         return !player.isSpectator() && Progression.canBoard(player, titan) && !TitanDormancy.isResting(player.server, titan);
     }
 
-    // points に光を出す。EVERY tick ごとに呼んでよい (それ以外の tick は何もしない)。光を送った人の数を返す
+    // 光の柱と枠 (クライアントが描く。TitanEndNetwork.Beam)。centre = 枠の中心、hx・hy・hz = 枠の半分の大きさ (hx は yaw の向きの横、hz は奥行き)、
+    // beamFrom〜beamTo = 光の柱の高さ (y)、beamRadius = 柱の半径
+    public record Shape(Vec3 centre, float hx, float hy, float hz, float yaw, double beamFrom, double beamTo, float beamRadius) {
+        // 点の並び (縦の鎖・昇り風の柱) から: いちばん低い点に枠、そこから最も高い点 (最低 32 ブロック) まで柱
+        public static Shape fromPoints(List<Vec3> points) {
+            Vec3 lo = points.get(0);
+            double hi = lo.y;
+            for (Vec3 p : points) {
+                if (p.y < lo.y) {
+                    lo = p;
+                }
+                hi = Math.max(hi, p.y);
+            }
+            return new Shape(lo, 1.6f, 2.6f, 1.6f, 0f, lo.y, Math.max(hi, lo.y + MIN_BEAM), 0.9f);
+        }
+    }
+
+    // 光の柱の最低の高さ (ブロック。遠くから見えるように)
+    public static final double MIN_BEAM = 32.0;
+    // 光の柱・枠の知らせを送る間隔 (tick) と、クライアントが表示を続ける長さ (tick。次の知らせが来なければ消える)
+    public static final int BEAM_EVERY = 20;
+    public static final int BEAM_TTL = 34;
+
     public static int emit(ServerLevel level, String titan, List<Vec3> points) {
+        return points.isEmpty() ? 0 : emit(level, titan, points, Shape.fromPoints(points));
+    }
+
+    // points に光を出す。EVERY tick ごとに呼んでよい (それ以外の tick は何もしない)。光を送った人の数を返す
+    public static int emit(ServerLevel level, String titan, List<Vec3> points, Shape shape) {
         long t = level.getGameTime();
         if (points.isEmpty() || t % EVERY != 0 || TitanDormancy.isResting(level.getServer(), titan)) {
             return 0;
@@ -73,6 +107,10 @@ public final class BoardGlow {
                 continue;
             }
             served++;
+            if (t % BEAM_EVERY == 0 && player.distanceToSqr(shape.centre()) < (RANGE + 40) * (RANGE + 40)) {
+                // 光の柱と枠 (遠くからでも見える。乗れる人にだけ、巨神が眠る・去るとすぐ消える)
+                PacketDistributor.sendToPlayer(player, beam(titan, shape));
+            }
             // 遠いほど、かたまりを大きく (見えるように)。近づくと細かい粒だけになる
             boolean far = best > 40 * 40;
             double spread = far ? 1.1 : 0.5;

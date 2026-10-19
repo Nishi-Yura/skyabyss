@@ -1130,7 +1130,12 @@ public final class TitanBackTrials {
         UUID group = room.group;
         BackGroupData.Record record = record(level, group);
         Set<UUID> ids = room.finish(level, HEART_HOST, heart.getUUID());
-        if (ids == null || record.isHeartDefeated()) {
+        if (ids == null) {
+            return;
+        }
+        if (record.isHeartDefeated()) {
+            // 同じ周でもう一度倒した: 報酬は出さないが、岩鯨は眠り、戦った人は運び出される (さもないと岩鯨が去らない)
+            jp.revati.skyabyss.titan.end.TitanEnd.onHeartStoppedAgain(level, jp.revati.skyabyss.progress.Titans.STONE_WHALE, ids);
             return;
         }
         record.markHeartDefeated();

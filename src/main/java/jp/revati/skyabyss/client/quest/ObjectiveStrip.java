@@ -184,6 +184,11 @@ public final class ObjectiveStrip {
         QuestLog.Entry entry = log.entry(def.id());
         String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
         Resolved target = resolveQuest(def, entry);
+        // 巨神の背中の中で、今の目的が地上にあるとき (心臓を止めたあと・次の巨神を探すとき): 帯は戻り方を言う (帰り石。titan.end.ReturnBeacons)
+        if ((target.inside() || jp.revati.skyabyss.client.titan.BoardBeamClient.has("return_offer")) && mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
+            text = Component.translatable("objective.skyabyss.back_return").getString();
+            target = Resolved.NONE;
+        }
         draw(g, mc, text, target);
     }
 

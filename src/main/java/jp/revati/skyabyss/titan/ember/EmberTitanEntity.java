@@ -322,6 +322,9 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private boolean wasDormant;
     // 眠ったとき、さらに土へ埋まる深さ (ブロック)。尾根だけが冷えた丘のように残る
     private static final double BURY_EXTRA = 4.0;
+    // 去りはじめてからの潜り (さらに 60 ブロック、秒速 2 ブロック)
+    private static final double DEPART_EXTRA_DEPTH = 60.0;
+    private static final double DEPART_SINK = 0.1;
 
     // 眠り (docs/design/13): 心臓が止まると熱が引き、浮いていれば土の中へ沈んで、動かず埋まる。尾根だけが冷えた丘になる。目覚めると潜行に戻る。
     // 戻り = 眠っている (通常の動きを飛ばす)
@@ -355,7 +358,8 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
                 if (mode == Mode.APPROACH) {
                     setMode(Mode.SWIM);
                 }
-                rise(burrowHeight(level) - BURY_EXTRA, 0.02);
+                rise(burrowHeight(level) - BURY_EXTRA - (jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? DEPART_EXTRA_DEPTH : 0),
+                        jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age) ? DEPART_SINK : 0.02);
                 if (mouthId != null) {
                     removeMouth(level);
                 }
@@ -363,6 +367,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         }
         if (tickCount % 5 == 0) {
             entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
+        }
+        // 眠って 40 秒: 土の底へ去る (冷えた丘ごと地上から取り除く)
+        if (age >= jp.revati.skyabyss.titan.end.TitanDormancy.DEPART_TICKS) {
+            jp.revati.skyabyss.titan.end.TitanDeparture.finish(this, jp.revati.skyabyss.progress.Titans.EMBER);
         }
         return true;
     }
@@ -573,7 +581,10 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             for (double f : new double[] {0, 2, 5}) {
                 glow.add(position().add(offset(getYRot(), 0, TONGUE_UP + 2.0, MOUTH_FORWARD + f)));
             }
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.EMBER, glow);
+            Vec3 frame = position().add(offset(getYRot(), 0, TONGUE_UP + 2.0, MOUTH_FORWARD));
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, jp.revati.skyabyss.progress.Titans.EMBER, glow,
+                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(frame, (float) MOUTH_WIDTH / 2f + 0.3f, (float) MOUTH_HEIGHT / 2f + 0.2f,
+                            (float) MOUTH_DEPTH / 2f + 0.3f, getYRot(), frame.y - 2, frame.y + 44, 1.3f));
         }
     }
 

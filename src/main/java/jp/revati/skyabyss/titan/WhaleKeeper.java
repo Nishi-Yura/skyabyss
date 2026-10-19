@@ -95,6 +95,11 @@ public final class WhaleKeeper {
     private WhaleKeeper() {
     }
 
+    // 見守り (自己テスト用)
+    public static TitanKeeper<StoneWhaleEntity> keeper() {
+        return KEEPER;
+    }
+
     // 本物の岩鯨 (読み込まれているときだけ)
     @Nullable
     public static StoneWhaleEntity current(ServerLevel overworld) {

@@ -21,5 +21,6 @@
   "opening.skyabyss.bone_rumor": "A smell of dry stone rides the wind. It comes from the hills to the %s.",
   "opening.skyabyss.bone_far": "Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow.",
   "opening.skyabyss.bone_mid": "White fragments lie at your feet. ...Too large.",
-  "opening.skyabyss.bone_near": "The wind has stopped. The hill is not shaped like a hill."
+  "opening.skyabyss.bone_near": "The wind has stopped. The hill is not shaped like a hill.",
+  "objective.skyabyss.back_return": "Return: crouch on a return stone"
 }

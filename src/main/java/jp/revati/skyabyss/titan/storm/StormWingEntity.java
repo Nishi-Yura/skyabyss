@@ -318,6 +318,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         if (age < 0) {
             if (wasDormant) {
                 wasDormant = false;
+                departing = false;
                 entityData.set(REST, -1);
                 hasCover = false;
                 level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 12f, 0.8f);
@@ -332,21 +333,52 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
             chooseSleepSpot(level);
             setMode(Mode.COWER);
         }
-        double dx = sleepX - getX();
-        double dz = sleepZ - getZ();
-        double dist = Math.hypot(dx, dz);
-        if (dist > 1.0) {
-            setYRot(Mth.approachDegrees(getYRot(), (float) Math.toDegrees(Math.atan2(-dx, dz)), 3f));
-            double step = Math.min(COVER_SPEED, dist);
-            double ny = getY() + Mth.clamp(sleepY - getY(), -COVER_SPEED, COVER_SPEED);
-            setPos(getX() + dx / dist * step, ny, getZ() + dz / dist * step);
+        if (jp.revati.skyabyss.titan.end.TitanDormancy.isDeparting(age)) {
+            // 眠って 10 秒: 峰で羽ばたいて飛び立ち、そのまま空の向こうへ去る (40 秒で地上から取り除く)
+            tickDeparture(level, age);
         } else {
-            setPos(sleepX, sleepY, sleepZ);
+            double dx = sleepX - getX();
+            double dz = sleepZ - getZ();
+            double dist = Math.hypot(dx, dz);
+            if (dist > 1.0) {
+                setYRot(Mth.approachDegrees(getYRot(), (float) Math.toDegrees(Math.atan2(-dx, dz)), 3f));
+                double step = Math.min(COVER_SPEED, dist);
+                double ny = getY() + Mth.clamp(sleepY - getY(), -COVER_SPEED, COVER_SPEED);
+                setPos(getX() + dx / dist * step, ny, getZ() + dz / dist * step);
+            } else {
+                setPos(sleepX, sleepY, sleepZ);
+            }
         }
         if (tickCount % 5 == 0) {
             entityData.set(REST, Math.min(age, jp.revati.skyabyss.titan.end.TitanDormancy.SYNC_CAP));
         }
+        if (age >= jp.revati.skyabyss.titan.end.TitanDormancy.DEPART_TICKS) {
+            jp.revati.skyabyss.titan.end.TitanDeparture.finish(this, jp.revati.skyabyss.progress.Titans.THUNDER_WING);
+        }
         return true;
+    }
+
+    private boolean departing;
+
+    // 去る: 飛び立つ姿勢 (TAKE_OFF の動き) で、向きのまま前へ・上へ、だんだん速く。電光の粒を引く
+    private void tickDeparture(ServerLevel level, int age) {
+        if (!departing) {
+            departing = true;
+            setMode(Mode.TAKE_OFF);
+            level.playSound(null, getX(), getY(), getZ(), StormSetup.WING_CALL.get(), SoundSource.AMBIENT, 16f, 0.7f);
+        }
+        float ramp = jp.revati.skyabyss.titan.end.TitanDormancy.departProgress(age);
+        double yaw = Math.toRadians(getYRot());
+        double forward = 0.3 + 1.2 * ramp;
+        setPos(getX() - Math.sin(yaw) * forward, getY() + 0.15 + 0.35 * ramp, getZ() + Math.cos(yaw) * forward);
+        if (tickCount % 3 == 0) {
+            for (ServerPlayer p : level.players()) {
+                if (p.distanceToSqr(this) < 400 * 400) {
+                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, true, getX(), getY(), getZ(), 14, 18, 6, 18, 0.2);
+                    level.sendParticles(p, net.minecraft.core.particles.ParticleTypes.CLOUD, true, getX(), getY() - 4, getZ(), 10, 24, 4, 24, 0.02);
+                }
+            }
+        }
     }
 
     private void chooseSleepSpot(ServerLevel level) {

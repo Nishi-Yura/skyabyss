@@ -119,14 +119,35 @@ public abstract class TitanKeeper<T extends Entity> {
 
     // 毎 tick、オーバーワールドで呼ばれる
     public void tick(ServerLevel level) {
+        tick(level, level.getGameTime());
+    }
+
+    // 眠って地上から去ったあと、見守りが呼び直しを控えた回数 (自己テスト用)
+    private int restHolds;
+
+    public int restHolds() {
+        return restHolds;
+    }
+
+    // now = オーバーワールドのゲーム時間 (自己テストは時刻をずらして呼ぶ)
+    public void tick(ServerLevel level, long now) {
         TitanWorldData data = TitanWorldData.get(level);
         TitanWorldData.Slot slot = data.slot(slotId);
         if (!slot.spawned) {
             return;
         }
-        long now = level.getGameTime();
         boolean someoneAboard = someoneAboard(level);
         T titan = current(level);
+        if (titan == null && resting(level)) {
+            // 眠っている巨神は、眠りのあいだに地上から去る (TitanDeparture)。目覚めるまで、読み込み直しも呼び直しもしない
+            // (呼び直すと、去ったはずの巨神が眠ったまま人の上に出てくる)
+            restHolds++;
+            releaseTicket(level);
+            missingSince = -1;
+            unreachableSince = -1;
+            frozenSince = -1;
+            return;
+        }
         if (titan != null) {
             missingSince = -1;
             boolean near = nearestEligible(level, titan.getX(), titan.getZ(), NEAR) != null;
@@ -153,7 +174,7 @@ public abstract class TitanKeeper<T extends Entity> {
                 if (titan.tickCount != lastTickCount || frozenSince < 0) {
                     lastTickCount = titan.tickCount;
                     frozenSince = now;
-                } else if (now - frozenSince > STUCK_AFTER) {
+                } else if (now - frozenSince > STUCK_AFTER && !resting(level)) {
                     SkyAbyss.LOGGER.warn("The {} stopped ticking at {}; calling it again", logName, titan.blockPosition());
                     relocate(level, slot, titan, pickTarget(level), now);
                     return;
