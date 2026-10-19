@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""tools/shots/boss_gates_{whale,tide,storm,ember}.txt の絵を 1 枚の表にまとめる (ボス部屋の大門 8 か所)。
+"""tools/shots/boss_gates.txt の絵を 1 枚の表にまとめる (ボス部屋の大門 8 か所)。
 
 使い方: python tools/boss_gates_sheet.py [出力ファイル]
-入力: run/shots/boss_gates_<巨神>/shots/boss_gates_<巨神>/gate_<巨神>_<場所>.png
+入力: run/shots/boss_gates/shots/boss_gates/gate_<巨神>_<場所>.png
 出力: docs/review/previews/boss_gates_sheet.png (左が中ボスの広間の入口、右が心臓の間の入口。上から 岩鯨・潮殻・雷翼・余燼)
 """
 import sys
@@ -25,7 +25,7 @@ for r, (titan, cells) in enumerate(ROWS):
     for c, (place, label) in enumerate(cells):
         x = c * W
         y = r * (H + 22)
-        f = ROOT / f"run/shots/boss_gates_{titan}/shots/boss_gates_{titan}/gate_{titan}_{place}.png"
+        f = ROOT / f"run/shots/boss_gates/shots/boss_gates/gate_{titan}_{place}.png"
         if f.exists():
             im = Image.open(f).convert("RGB").resize((W, H), Image.LANCZOS)
             img.paste(im, (x, y + 22))

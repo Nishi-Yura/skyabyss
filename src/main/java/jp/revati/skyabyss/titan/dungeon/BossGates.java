@@ -29,7 +29,7 @@ final class BossGates {
 
     static void build(BuildKit kit) {
         // 心臓の間: 回廊の終わり (z -64) の大門。回廊の先を広い前庭にする
-        BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(0, FLOOR, HEART_GATE_Z), Direction.NORTH).court(5, 5, 14), PALETTE);
+        BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(0, FLOOR, HEART_GATE_Z), Direction.NORTH).court(5, 5, 14).vault(13, 3), PALETTE);
         // 番兵長の広間: 控えの間からの通路の終わり (x 20) の大門。通路を広い前室にする
         BossGate.build(kit.level(), new BossGate.Spec(new BlockPos(20, FLOOR, -39), Direction.WEST).court(4, 3, 14), PALETTE);
         // 心臓の間の入口の一言は、右の柱の内側の面に掛ける

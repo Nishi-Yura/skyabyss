@@ -40,6 +40,8 @@ public final class BossGate {
         boolean pylons = true;
         int limit = Integer.MAX_VALUE;
         int lowDepth = -1;
+        int vaultLen = 0;
+        int vaultHalf = 3;
 
         public Spec(BlockPos base, Direction approach) {
             this.base = base;
@@ -87,6 +89,14 @@ public final class BossGate {
         // 人の高さ (開口の高さまで) の柱の奥行き。既定は depth。柱の横を歩いて回る所 (大炉の後ろなど) は 1 にして道を残す
         public Spec lowDepth(int v) {
             lowDepth = v;
+            return this;
+        }
+
+        // 扉の手前の len ブロックの、開口より上 (床からの高さ h+1 以上。天井の高さから) だけを広い高い空間にする。低い通路・前室の天井を上げて、
+        // 離れた所からも枠の上の心臓のレリーフが見えるようにする (床・壁の下のほうは変えない)。幅は左右 half
+        public Spec vault(int len, int half) {
+            vaultLen = len;
+            vaultHalf = half;
             return this;
         }
 
@@ -175,6 +185,22 @@ public final class BossGate {
         int cornice = tympBottom + er;
         int top = cornice + 2;
 
+        // ---- 天井を上げる (開口より上だけ)
+        if (s.vaultLen > 0) {
+            int vt = top + 2;
+            for (int v = -s.vaultLen; v <= -1; v++) {
+                for (int u = -s.vaultHalf; u <= s.vaultHalf; u++) {
+                    for (int y = h + 1; y <= vt - 1; y++) {
+                        air(u, v, y);
+                    }
+                    shell(u, v, vt);
+                }
+                for (int y = h + 1; y <= vt; y++) {
+                    shell(-s.vaultHalf - 1, v, y);
+                    shell(s.vaultHalf + 1, v, y);
+                }
+            }
+        }
         // ---- 前庭 (掘る)
         if (s.courtLen > 0) {
             int ch = Math.max(s.courtHeight, top + 1);

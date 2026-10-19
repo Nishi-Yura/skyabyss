@@ -36,6 +36,6 @@ public final class TideBossGates {
 
     // 殻の底 (心臓の間) の入口: 前室の北の端 (z -15)。開口は x -1〜1、床 (床のブロックは floorY - 1) の上 3 段。前室から広い前庭へ
     public static void heart(ServerLevel level, int floorY, int gateZ) {
-        BossGate.build(level, new BossGate.Spec(new BlockPos(0, floorY - 1, gateZ), Direction.NORTH).height(3).court(4, 4, 15), PALETTE);
+        BossGate.build(level, new BossGate.Spec(new BlockPos(0, floorY - 1, gateZ), Direction.NORTH).height(3).court(4, 4, 15).vault(12, 4), PALETTE);
     }
 }
