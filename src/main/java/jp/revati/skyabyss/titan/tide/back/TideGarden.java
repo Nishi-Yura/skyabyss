@@ -70,6 +70,11 @@ public final class TideGarden {
         return pearl == Pearl.OUT;
     }
 
+    // 案内 (TideGuide) が読む真珠の状態
+    static Pearl pearlState() {
+        return pearl;
+    }
+
     // 庭の中 (真珠を持っていてよい所)。祭壇の台と入口の段も含む
     static boolean inGarden(Entity e) {
         BlockPos p = e.blockPosition();

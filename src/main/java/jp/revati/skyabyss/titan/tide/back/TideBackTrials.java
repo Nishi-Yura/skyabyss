@@ -299,6 +299,7 @@ public final class TideBackTrials {
             tickPads(level);
             tickPeaceful(level, peaceful);
             tickFrost(level);
+            TideGuide.tick(level);
         }
         TideClock.Phase phase = TideClock.phase(level);
         if (phase != lastPhase || level.getGameTime() % 20 == 0) {
@@ -907,6 +908,7 @@ public final class TideBackTrials {
         TideRooms.forget();
         TideGarden.clear();
         TideWatch.clear();
+        TideGuide.clear();
         TideFlats.clear();
         TideClock.force(null);
     }
@@ -927,7 +929,9 @@ public final class TideBackTrials {
         int left = TideClock.ticksLeft(level);
         TideBackState.Group state = state(level, player);
         boolean alert = TideFlats.beckonAlert() && TideRooms.owns(TideRooms.FLATS, player);
-        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), alert, state.rungCount());
+        TideGuide.Goal goal = TideGuide.goalFor(level, player);
+        return new TideBackNetwork.Gauge(phase.ordinal(), left, (float) TideClock.fullness(level), alert, state.rungCount(), goal.id(), goal.done(),
+                goal.total(), goal.a(), goal.b(), goal.c());
     }
 
     public static Vec3 hubSpawn() {
