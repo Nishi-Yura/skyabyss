@@ -51,6 +51,8 @@ import org.joml.Vector3f;
 //  段階1 (八枚の殻): 殻の突き / 石棘の掃射 / 跳躍の叩きつけ
 //  段階2 (割れた殻): 亀裂の爆発 / 殻の再閉 / 骨の棘の投射
 //  段階3 (吊られた殻): 赤熱の光線 / 鎖の振り回し / 殻の落下
+// 体力 15% 未満で最終段階 (憤怒): 3 秒の咆哮のあと、技が二つ重なる組 (PAIRS_FURY) だけを短い間で出す。
+// 段階 2・3 でも、技の組 (COMBO) が割り込む (二つ目の予告は 20 tick 前後遅れて始まり、どの予告も 0.8 秒以上)。
 // 段階が変わるときは 3 秒の咆哮を挟む。その間は傷を受けず、輪で人を押し返す。
 // 段階は同期データで全員の画面に届き、モデルとボスバーの見た目を決める。
 public class StoneWhaleHeart extends HeartBoss {
@@ -68,7 +70,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     private enum Action {
         NONE(null), ROAR(null), THRUST("thrust"), SWEEP("sweep"), LEAP("leap"), CRACK("crack"), RECLOSE("reclose"),
-        VOLLEY("volley"), BEAM("beam"), CHAIN("chain"), SHELL_DROP("shell_drop");
+        VOLLEY("volley"), BEAM("beam"), CHAIN("chain"), SHELL_DROP("shell_drop"), COMBO(null);
 
         final String anim;
 
@@ -81,6 +83,17 @@ public class StoneWhaleHeart extends HeartBoss {
     private static final Action[] PHASE_TWO = {Action.CRACK, Action.RECLOSE, Action.VOLLEY};
     private static final Action[] PHASE_THREE = {Action.BEAM, Action.CHAIN, Action.SHELL_DROP};
 
+    // 技の組 (二つの技を、二つ目を offset tick 遅らせて重ねる)。段階 2・3 で割り込み、憤怒では組だけを出す
+    private record Pair(Action first, Action second, int offset, int length) {
+    }
+
+    private static final Pair[] PAIRS_TWO = {new Pair(Action.CRACK, Action.VOLLEY, 24, 64)};
+    private static final Pair[] PAIRS_THREE = {new Pair(Action.BEAM, Action.SHELL_DROP, 20, 70), new Pair(Action.CHAIN, Action.VOLLEY, 20, 62)};
+    private static final Pair[] PAIRS_FURY = {new Pair(Action.BEAM, Action.SHELL_DROP, 20, 70), new Pair(Action.CHAIN, Action.VOLLEY, 20, 62),
+            new Pair(Action.LEAP, Action.SHELL_DROP, 30, 80)};
+    // 組が割り込む割合 (段階 1 / 2 / 3)。憤怒は組だけ
+    static final double[] COMBO_CHANCE = {0, 0.3, 0.45};
+
     private static final double BEAM_LENGTH = 24;
     private static final double CHAIN_LENGTH = 14;
 
@@ -88,7 +101,7 @@ public class StoneWhaleHeart extends HeartBoss {
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;
-    private int cooldown = 40;
+    private int cooldown = 30;
     private int weakTicks;
     private float attackYaw;
     private boolean defeated;
@@ -102,7 +115,15 @@ public class StoneWhaleHeart extends HeartBoss {
     private AABB arena;
     // 挑む人数による強さ。受ける傷をこの値で割る (1 人で 1.0、1 人増えるごとに +0.6)。
     // 体力の上限 (1024) を超えないよう、体力そのものではなく受ける傷で強くする (実質の体力は 450 × この値)
-    private float toughness = 1f;
+    // 基本の硬さ (最大体力 HeartBalance.MAX_HP に掛けた値が実質の体力。02 の 5.6)
+    public static final float BASE_RESIST = 1.28f;
+    private float toughness = BASE_RESIST;
+    // 憤怒に入ったか (体力 HeartBalance.ENRAGE_AT 未満)。咆哮のあとに立つ。段階 (模型) は 3 のまま
+    private boolean enraged;
+    private boolean enrageRoar;
+    // 技の組の進行
+    private Pair pair;
+    private boolean suppressFinish;
 
     public StoneWhaleHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "stone_whale_heart", "roar_1", "roar_2", "thrust", "sweep", "leap", "crack", "reclose", "volley", "beam", "chain", "shell_drop");
@@ -113,7 +134,7 @@ public class StoneWhaleHeart extends HeartBoss {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, 450)
+                .add(Attributes.MAX_HEALTH, jp.revati.skyabyss.combat.HeartBalance.MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 12)
                 .add(Attributes.ARMOR, 8)
                 .add(Attributes.ARMOR_TOUGHNESS, 6)
@@ -156,10 +177,14 @@ public class StoneWhaleHeart extends HeartBoss {
     // 試練の仕組みが、心臓の間の範囲と挑む人数を伝える
     public void bindArena(AABB arena, int challengers) {
         this.arena = arena;
-        this.toughness = scaleFor(challengers);
+        this.toughness = BASE_RESIST * (float) jp.revati.skyabyss.combat.HeartBalance.partyScale(challengers);
     }
 
-    // 人数による強さの倍率 (心臓と番兵長で共通): 1 + 0.6 × (人数 − 1)
+    public boolean isEnraged() {
+        return enraged;
+    }
+
+    // 人数による強さの倍率 (番兵長・老番兵の体力。心臓は HeartBalance.partyScale): 1 + 0.6 × (人数 − 1)
     public static float scaleFor(int challengers) {
         return 1f + 0.6f * (Math.max(1, challengers) - 1);
     }
@@ -211,6 +236,11 @@ public class StoneWhaleHeart extends HeartBoss {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
                 return;
             }
+            if (!enraged && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < jp.revati.skyabyss.combat.HeartBalance.ENRAGE_AT) {
+                enrageRoar = true;
+                begin(Action.ROAR, "roar_2");
+                return;
+            }
             LivingEntity target = getTarget();
             if (target != null && !canReach(target)) {
                 // 部屋の外へ出た人は狙わない
@@ -238,6 +268,7 @@ public class StoneWhaleHeart extends HeartBoss {
             case BEAM -> tickBeam(server);
             case CHAIN -> tickChain(server);
             case SHELL_DROP -> tickShellDrop(server);
+            case COMBO -> tickCombo(server);
             default -> {
             }
         }
@@ -245,6 +276,11 @@ public class StoneWhaleHeart extends HeartBoss {
 
     // 段階ごとの技から、直前と同じでないものを選ぶ
     private Action pickAttack() {
+        Pair[] pairs = enraged ? PAIRS_FURY : getPhase() == 0 ? null : getPhase() == 1 ? PAIRS_TWO : PAIRS_THREE;
+        if (pairs != null && (enraged || random.nextDouble() < COMBO_CHANCE[getPhase()])) {
+            pair = pairs[random.nextInt(pairs.length)];
+            return Action.COMBO;
+        }
         Action[] bag = switch (getPhase()) {
             case 0 -> PHASE_ONE;
             case 1 -> PHASE_TWO;
@@ -262,19 +298,59 @@ public class StoneWhaleHeart extends HeartBoss {
         last = next;
         actionTicks = 0;
         attackYaw = getYRot();
-        playAction(animation != null ? animation : next.anim);
+        playAction(animation != null ? animation : next == Action.COMBO ? pair.first().anim : next.anim);
     }
 
+    // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、憤怒。段階が進むほど短い。憤怒は息をつく間もほとんどない (予告は 0.8 秒以上のまま)
+    static final int[] GAP = {25, 20, 15};
+    static final int[] GAP_SPAN = {10, 8, 6};
+    static final int GAP_FURY = 8;
+    static final int GAP_FURY_SPAN = 6;
+
     private void finish() {
+        if (suppressFinish) {
+            return;
+        }
         action = Action.NONE;
         actionTicks = 0;
-        // 次の技までの間。段階が進むほど短い
-        int base = switch (getPhase()) {
-            case 0 -> 50;
-            case 1 -> 40;
-            default -> 30;
-        };
-        cooldown = base + random.nextInt(15);
+        cooldown = enraged ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP[getPhase()] + random.nextInt(GAP_SPAN[getPhase()]);
+    }
+
+    // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どの技も自分の tick を数え直して動く)
+    private void tickCombo(ServerLevel server) {
+        runPart(server, pair.first(), actionTicks);
+        if (actionTicks > pair.offset()) {
+            runPart(server, pair.second(), actionTicks - pair.offset());
+        }
+        if (actionTicks >= pair.length()) {
+            finish();
+        }
+    }
+
+    private void runPart(ServerLevel server, Action part, int ticks) {
+        int savedTicks = actionTicks;
+        Action saved = action;
+        actionTicks = ticks;
+        action = part;
+        suppressFinish = true;
+        try {
+            switch (part) {
+                case THRUST -> tickThrust(server);
+                case SWEEP -> tickSweep(server);
+                case LEAP -> tickLeap(server);
+                case CRACK -> tickCrack(server);
+                case VOLLEY -> tickVolley(server);
+                case BEAM -> tickBeam(server);
+                case CHAIN -> tickChain(server);
+                case SHELL_DROP -> tickShellDrop(server);
+                default -> {
+                }
+            }
+        } finally {
+            suppressFinish = false;
+            actionTicks = savedTicks;
+            action = saved;
+        }
     }
 
     private void faceTarget(LivingEntity target) {
@@ -367,32 +443,46 @@ public class StoneWhaleHeart extends HeartBoss {
     public static final int THRUST_WARN = 24;
     public static final double THRUST_LENGTH = 9;
     public static final double THRUST_HALF_WIDTH = 2.0;
-    public static final float THRUST_DAMAGE = 11f;
+    public static final float THRUST_DAMAGE = 22f;
     public static final int SPIKE_WARN = 22;
     public static final double SPIKE_RADIUS = 1.4;
-    public static final float SPIKE_DAMAGE = 9f;
+    public static final float SPIKE_DAMAGE = 18f;
     public static final int LEAP_WARN = 24;
     public static final double LEAP_CORE = 4.5;
-    public static final float LEAP_CORE_DAMAGE = 10f;
+    public static final float LEAP_CORE_DAMAGE = 20f;
     public static final double LEAP_WAVE_REACH = 16;
-    public static final float LEAP_WAVE_DAMAGE = 8f;
+    public static final float LEAP_WAVE_DAMAGE = 16f;
     public static final int CRACK_WARN = 30;
     public static final double CRACK_HALF_WIDTH = 1.2;
-    public static final float CRACK_DAMAGE = 8f;
+    public static final float CRACK_DAMAGE = 20f;
     public static final int VOLLEY_WARN = 30;
     public static final double VOLLEY_HALF_WIDTH = 1.0;
-    public static final float VOLLEY_DAMAGE = 7f;
+    public static final float VOLLEY_DAMAGE = 16f;
     public static final int BEAM_WARN = 40;
     public static final int BEAM_ACTIVE = 24;
-    public static final float BEAM_DAMAGE = 10f;
+    public static final float BEAM_DAMAGE = 20f;
     public static final int CHAIN_WARN = 24;
     public static final int CHAIN_ACTIVE = 36;
-    public static final float CHAIN_DAMAGE = 10f;
+    public static final float CHAIN_DAMAGE = 20f;
     public static final int DROP_WARN = 30;
     public static final double DROP_RADIUS = 2.5;
-    public static final float DROP_DAMAGE = 12f;
+    public static final float DROP_DAMAGE = 22f;
     public static final int ROAR_PUSH_WARN = 22;
     public static final double ROAR_PUSH_RADIUS = 8;
+
+    // 手ごたえの数 (HeartBalance / 自己テスト用)。段階 1 / 2 / 3 / 憤怒。action = 技の長さ (組が割り込む分を平均に入れた) の平均 tick
+    public static jp.revati.skyabyss.combat.HeartBalance.Profile balanceProfile() {
+        return new jp.revati.skyabyss.combat.HeartBalance.Profile("stone_whale", jp.revati.skyabyss.combat.HeartBalance.MAX_HP, BASE_RESIST,
+                new int[] {GAP[0] + GAP_SPAN[0] / 2, GAP[1] + GAP_SPAN[1] / 2, GAP[2] + GAP_SPAN[2] / 2, GAP_FURY + GAP_FURY_SPAN / 2},
+                new int[] {55, 54, 62, 71},
+                new double[] {0, COMBO_CHANCE[1], COMBO_CHANCE[2], 1.0},
+                new float[][] {
+                        {THRUST_DAMAGE, SPIKE_DAMAGE, LEAP_CORE_DAMAGE},
+                        {CRACK_DAMAGE, 0f, VOLLEY_DAMAGE},
+                        {BEAM_DAMAGE, CHAIN_DAMAGE, DROP_DAMAGE, DROP_DAMAGE, VOLLEY_DAMAGE},
+                        {BEAM_DAMAGE, DROP_DAMAGE, CHAIN_DAMAGE, VOLLEY_DAMAGE, LEAP_CORE_DAMAGE, DROP_DAMAGE}},
+                3 * ROAR_TICKS);
+    }
 
     // 試験・コマンド用: 技を一つ出す (段階に関係なく)。咆哮は段階が進む
     public void forceAttack(String name) {
@@ -493,11 +583,20 @@ public class StoneWhaleHeart extends HeartBoss {
             tg(server, TelegraphShape.wave(getX(), getZ(), 1.5, 20, 0.9, new double[0], 0), ROAR_PUSH_WARN, H).active(30).start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
+            if (enrageRoar) {
+                warn(server, dust(0xFF3A2A, 1.4f), getX(), coreHeight(), getZ(), 8, 1.2, 1.2, 1.2, 0.05);
+            }
             warn(server, dust(0x9CFBFF, 1.2f), getX(), coreHeight(), getZ(), 6, 1.0, 1.0, 1.0, 0.05);
         }
         if (actionTicks >= ROAR_TICKS) {
             setRoaring(false);
-            setPhase(getPhase() + 1);
+            if (enrageRoar) {
+                enrageRoar = false;
+                enraged = true;
+                bossBar.setColor(BossEvent.BossBarColor.RED);
+            } else {
+                setPhase(getPhase() + 1);
+            }
             sound(server, MobSounds.STONE_HEART_PHASE.get(), 3f, 1.0f);
             finish();
             cooldown = 40;
@@ -611,7 +710,7 @@ public class StoneWhaleHeart extends HeartBoss {
                 // 安全な筋 (見た目だけ)
                 tg(server, TelegraphShape.cone(getX(), getZ(), gap, 14, gapHalf), LEAP_WARN, S).start();
             }
-            int rings = leapRings(present(server));
+            int rings = enraged ? 3 : leapRings(present(server));
             for (int i = 0; i < rings; i++) {
                 int active = (int) Math.ceil((LEAP_WAVE_REACH - LEAP_CORE) / 0.55);
                 tg(server, TelegraphShape.wave(getX(), getZ(), LEAP_CORE, LEAP_WAVE_REACH, 0.9, gaps, gapHalf), LEAP_WARN + i * 14, D)

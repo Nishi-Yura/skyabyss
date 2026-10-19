@@ -113,6 +113,8 @@ public final class SelfTestRunner {
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
+        // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
+        steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));
         steps.add(Step.once("tide gear", jp.revati.skyabyss.titan.tide.gear.TideGearSelfTest::runSelfTest));
