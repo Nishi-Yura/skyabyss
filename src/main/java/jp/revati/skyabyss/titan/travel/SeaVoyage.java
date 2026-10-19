@@ -34,6 +34,8 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
+import jp.revati.skyabyss.titan.TitanGround;
+import jp.revati.skyabyss.titan.solid.TitanVolume;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -142,6 +144,9 @@ final class SeaVoyage extends Voyage {
                 if (TideOcean.walkable(level, x, z, 5)) {
                     // 巨神の左 (潮門の側) を spot へ向ける
                     float yaw = (float) (Mth.atan2(spot.z - z, spot.x - x) * Mth.RAD_TO_DEG);
+                    if (TideOcean.restRaise(level, x, z, yaw) > TideOcean.MAX_RAISE) {
+                        continue;
+                    }
                     return new Park(new Vec3(x, level.getSeaLevel() - TideShellEntity.REST_DRAFT, z), yaw);
                 }
             }
@@ -244,10 +249,30 @@ final class SeaVoyage extends Voyage {
         double sea = level.getSeaLevel();
         Vec3 ahead = shell.position().add(TideShellEntity.offset(shell.getYRot(), 0, 0, 30));
         double floor = TideOcean.floorY(level, ahead.x, ahead.z);
-        if (Double.isNaN(floor)) {
-            return sea - TRAVEL_DRAFT;
+        double y = Double.isNaN(floor) ? sea - TRAVEL_DRAFT : Mth.clamp(floor - 1, sea - TRAVEL_DRAFT, sea - SHALLOW_DRAFT);
+        // 体のどこも海底・岸・木・丘にめり込まない高さ (先の 16・32・48 ブロックまで見て、先回りして持ち上がる)
+        double need = TitanGround.requiredAhead(level, TitanGround.Surface.FLOOR, TitanVolume.get("tide_shell"), shell.getX(), shell.getZ(), shell.getYRot(),
+                GROUND_LOOK, 1);
+        return Double.isFinite(need) ? Math.max(y, need) : y;
+    }
+
+    private static final double[] GROUND_LOOK = {6.0, 12.0, 18.0, 24.0, 32.0, 40.0, 48.0};
+
+    // 動かしたあと、体が地形にめり込んでいたら (持ち上がりが間に合わなかったら) 押し上げる
+    static void keepAbove(Entity shell) {
+        if (shell.level() instanceof ServerLevel level) {
+            double need = TitanGround.requiredYPadded(level, TitanGround.Surface.FLOOR, TitanVolume.get("tide_shell"), shell.getX(), shell.getZ(), shell.getYRot(),
+                    TitanGround.MARGIN, 3.0);
+            if (Double.isFinite(need) && shell.getY() < need) {
+                shell.setPos(shell.getX(), need, shell.getZ());
+            }
         }
-        return Mth.clamp(floor - 1, sea - TRAVEL_DRAFT, sea - SHALLOW_DRAFT);
+    }
+
+    // Voyage.move の潮殻版: 動かしたあとに地形へのめり込みを直す
+    static void move(Entity shell, float yaw, double speed, double vy) {
+        Voyage.move(shell, yaw, speed, vy);
+        keepAbove(shell);
     }
 
     // 止まる所へ歩いていき、向きを合わせる。着いたら true
@@ -273,6 +298,7 @@ final class SeaVoyage extends Voyage {
             Vec3 motion = new Vec3(h.x, vy, h.z);
             shell.setDeltaMovement(motion);
             shell.move(MoverType.SELF, motion);
+            keepAbove(shell);
         }
         return dist < 1.0 && Math.abs(shell.getY() - ty) < 0.6 && Math.abs(Mth.degreesDifference(yaw, target.yaw())) < 2f;
     }
@@ -281,6 +307,7 @@ final class SeaVoyage extends Voyage {
         snaps++;
         shell.setYRot(target.yaw());
         shell.teleportTo(target.center().x, target.center().y, target.center().z);
+        keepAbove(shell);
     }
 
     // ---------------------------------------------------------------- 段階
@@ -486,6 +513,7 @@ final class SeaVoyage extends Voyage {
                 }
                 shell.teleportTo(exit.x, level.getSeaLevel() - TRAVEL_DRAFT, exit.z);
                 shell.setYRot(yawTowards(shell.position(), goal));
+                keepAbove(shell);
                 veilMovedAt = phaseTicks;
                 veilExit = null;
                 SkyAbyss.LOGGER.info("Tide voyage: moved {} through the deep current to {}, {}", kind.id(), (int) exit.x, (int) exit.z);

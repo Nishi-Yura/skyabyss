@@ -129,36 +129,68 @@ public final class TideOcean {
         return null;
     }
 
-    // 休む場所: (px, pz) の人から 64 ブロック以内の海で、深さ 6〜14、岸から 40 ブロック以内 (08 の 2.3節)。
+    // 休む場所: (px, pz) の人から 96 ブロック以内の海で、深さ 6〜14、岸から 96 ブロック以内 (08 の 2.3節)。
     // 巨神の左 (潮門の側) をその人へ向けたとき、潮門の前が水であること。見つからなければ null。
     // 戻り値は (x, 向き, z)。近すぎると甲羅が人に重なるので、中心は人から 40〜64 ブロック、だめなら 24〜36 ブロックを試す
     @Nullable
     public static Vec3 findRestSpot(ServerLevel level, double px, double pz) {
-        int[] rings = {44, 52, 60, 64, 40, 36, 30, 24};
+        return findRestSpot(level, px, pz, MAX_RAISE);
+    }
+
+    // maxRaise: 休む高さからの持ち上げの上限 (試験では大きくして、持ち上げの分布を見る)
+    @Nullable
+    public static Vec3 findRestSpot(ServerLevel level, double px, double pz, double maxRaise) {
+        int[] rings = {44, 52, 60, 64, 72, 80, 88, 96, 40, 36, 30, 24};
+        Vec3 best = null;
+        double bestRaise = Double.MAX_VALUE;
         for (int r : rings) {
-            for (int a = 0; a < 16; a++) {
-                double angle = Math.PI * 2 * (a + (r % 8) / 8.0) / 16;
+            for (int a = 0; a < 24; a++) {
+                double angle = Math.PI * 2 * (a + (r % 8) / 8.0) / 24;
                 double x = px + Math.cos(angle) * r;
                 double z = pz + Math.sin(angle) * r;
                 if (!waterAtSurface(level, x, z)) {
                     continue;
                 }
                 int d = depth(level, x, z);
-                if (d < 6 || d > 14 || !nearShore(level, x, z, 40)) {
+                if (d < 6 || d > 14 || !nearShore(level, x, z, REST_SHORE)) {
                     continue;
                 }
                 // 巨神の左を人へ向ける: 左の向き (cos yaw, sin yaw) = 人への向き
                 float yaw = (float) (Mth.atan2(pz - z, px - x) * Mth.RAD_TO_DEG);
                 Vec3 gate = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.GATE_SIDE, 0, -TideShellEntity.GATE_BACK));
                 Vec3 front = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.EXIT_SIDE, 0, -TideShellEntity.GATE_BACK));
-                if (!waterAtSurface(level, gate.x, gate.z) || !waterAtSurface(level, front.x, front.z) || depth(level, front.x, front.z) < 2) {
+                Vec3 dock = new Vec3(x, 0, z).add(TideShellEntity.offset(yaw, TideShellEntity.DOCK_SIDE, 0, -TideShellEntity.GATE_BACK));
+                if (!waterAtSurface(level, gate.x, gate.z) || !waterAtSurface(level, front.x, front.z) || depth(level, front.x, front.z) < 2
+                        || !waterAtSurface(level, dock.x, dock.z) || depth(level, dock.x, dock.z) < 2) {
                     continue;
                 }
-                return new Vec3(x, yaw, z);
+                // 体の下の海底・岸・木・丘にめり込まない: 休む高さのままで済む所を先に選ぶ。なければ、持ち上げが少なくて済む所 (MAX_RAISE まで)
+                double raise = restRaise(level, x, z, yaw);
+                if (raise <= 0.05) {
+                    return new Vec3(x, yaw, z);
+                }
+                if (raise <= maxRaise && raise < bestRaise) {
+                    bestRaise = raise;
+                    best = new Vec3(x, yaw, z);
+                }
             }
         }
-        return null;
+        return best;
     }
+
+    // 休む高さ (底が海面の REST_DRAFT 下) から、体のどこも海底・岸・木・丘にめり込まないために持ち上げる量 (ブロック。0 以下 = 持ち上げ不要)。
+    // 持ち上げても乗り場の輪は海面にあるので、乗れる (門の敷居が水面から離れるだけ)。読み込まれていない柱は調べない。測りが切ってあれば 0
+    public static double restRaise(ServerLevel level, double x, double z, float yaw) {
+        double need = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get("tide_shell"), x, z, yaw);
+        return Double.isFinite(need) ? need - (level.getSeaLevel() - TideShellEntity.REST_DRAFT) : 0.0;
+    }
+
+    // 休む場所の中心が、岸から何ブロック以内か (体が大きいので、岸の丘に重ならない沖も選べるように広げた)
+    public static final int REST_SHORE = 96;
+
+    // 休む場所を選ぶときの持ち上げの上限 (ブロック)。これより持ち上げないと浅瀬・岸にめり込む場所は選ばない
+    public static final double MAX_RAISE = 8.0;
 
     // 呼び貝で呼ぶときの休む場所: まず (px, pz) の人の近く (findRestSpot)。人が海から遠いときは、読み込まれている範囲で
     // いちばん近い海辺を、輪を広げながら探す (人から 96〜256 ブロックを 32 ブロックずつ、16 方向)。見つからなければ null。
