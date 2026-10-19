@@ -38,7 +38,7 @@ for i, (name, label) in enumerate(CELLS):
     d.text((x + 6, y + 5), label, fill=(230, 230, 230))
 # 絵の見本 (4 倍)。左から ! 金・! 青緑・? 金・? 青緑・吹き出し
 strip = Image.new("RGB", (W * COLS, 120), (120, 160, 220))
-icons = ["bang_gold", "bang_teal", "question_gold", "question_teal", "chat"]
+icons = ["bang_gold", "scroll_teal", "question_gold", "scroll_check_teal", "chat"]
 for i, n in enumerate(icons):
     ic = Image.open(ROOT / f"src/main/resources/assets/skyabyss/textures/gui/npc_marker/{n}.png").convert("RGBA")
     ic = ic.resize((ic.width * 4, ic.height * 4), Image.NEAREST)

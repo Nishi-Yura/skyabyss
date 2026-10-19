@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 // 置き場は HudManager (Id.CHAPTER。目的の帯のすぐ上)
 public final class ChapterLabel {
     static final int ROWS = 11;
-    private static final int WIDTH = ObjectiveStrip.WIDTH;
 
     // 受け取った章の番号 (-1 = まだ届いていない)
     private static volatile int chapter = -1;
@@ -55,8 +54,18 @@ public final class ChapterLabel {
     // HUD の要求: 左上の帯の、目的の帯のすぐ上 (成長の表示の下)
     public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
         if (active()) {
-            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
-                    WIDTH + 6, ROWS - 3));
+            Font font = mc.font;
+            String full = text(current()).getString();
+            int want = ObjectiveStrip.bandWidth(mc);
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.CHAPTER, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+                int w = Math.min(want, maxW - 6);
+                int n = Math.min(2, (maxH + 3) / ROWS);
+                if (n < 1 || w < 40) {
+                    return null;
+                }
+                int lines = Math.min(n, jp.revati.skyabyss.lore.LoreWrap.wrap(full, w - 2, font::width).size());
+                return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines * ROWS - 3);
+            }));
         }
     }
 
@@ -75,13 +84,18 @@ public final class ChapterLabel {
         int x = r.x() + 3;
         int y = r.y();
         Component text = text(c);
-        String shown = text.getString();
+        java.util.List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap(text.getString(), r.w() - 8, font::width));
+        int maxLines = Math.max(1, (r.h() + 3) / ROWS);
+        if (lines.size() > maxLines) {
+            lines = new java.util.ArrayList<>(lines.subList(0, maxLines));
+            lines.set(maxLines - 1, font.plainSubstrByWidth(lines.get(maxLines - 1), r.w() - 8 - font.width("…")) + "…");
+        }
         // 細い金の線 (帯の金の縁と揃える) と、小さめの字
         int alpha = ((int) (255 * a)) << 24;
-        g.fill(x - 3, y, x - 2, y + 8, alpha | 0xA88A3C);
-        if (font.width(shown) > WIDTH) {
-            shown = font.plainSubstrByWidth(shown, WIDTH - font.width("…")) + "…";
+        g.fill(x - 3, y, x - 2, y + lines.size() * ROWS - 3, alpha | 0xA88A3C);
+        for (String line : lines) {
+            g.drawString(font, line, x + 1, y, alpha | 0xD9C48A, true);
+            y += ROWS;
         }
-        g.drawString(font, shown, x + 1, y, alpha | 0xD9C48A, true);
     }
 }

@@ -112,7 +112,6 @@ OPENING = {
     # 骨の丘の前触れ (日 2 の昼、イサナのあと。方角のにおい・遠い白・足もとの欠片・風の止む順。字幕で一度ずつ。{0} は方角)
     "opening.skyabyss.bone_rumor": ("乾いた石のにおいが、風に混じっている。%sの丘のほうだ。", "A smell of dry stone rides the wind. It comes from the hills to the %s."),
     # 帳面を渡した直後の手がかり (書の開き方は道具の説明にしか無かった。first_hour.txt の通しで発見)
-    "opening.skyabyss.notebook_hint": ("帳面を手に持って右クリックすると読める", "Hold the notebook and right-click to read it"),
     "opening.skyabyss.bone_far": ("遠く、丘の稜線が妙に白い。雲の影ではない。", "Far off, the ridge of a hill looks strangely white. It is not a cloud's shadow."),
     "opening.skyabyss.bone_mid": ("足もとに、白い欠片が転がっている。……大きすぎる。", "White fragments lie at your feet. ...Too large."),
     "opening.skyabyss.bone_near": ("風が止んだ。丘は、丘のかたちをしていない。", "The wind has stopped. The hill is not shaped like a hill."),

@@ -147,6 +147,7 @@ public final class HeartReward {
         }
         LAST_OPEN.put(player.getUUID(), titan);
         if (!(player instanceof FakePlayer)) {
+            HeartRewardNet.holdOnOpen(player);
             PacketDistributor.sendToPlayer(player, new HeartRewardNet.Open(titan, options, ownedMask(r, options), auto));
         }
         return true;

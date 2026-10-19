@@ -182,7 +182,7 @@ public final class DialogueService {
                     }
                     available++;
                     if ((t.kind().equals("quest") || t.kind().equals("give")) && !t.target().equals(Dialogue.END)
-                            && !t.target().equals(Dialogue.ENTRY)) {
+                            && !t.target().equals(Dialogue.ENTRY) && offers(dialogue, t, ctx)) {
                         fresh++;
                     }
                 }
@@ -196,6 +196,47 @@ public final class DialogueService {
             shown.add(i);
             kinds.add(kind);
         }
+    }
+
+    // この選択肢の先 (続き・選択肢をたどって) に、実際にクエストを始める・品を渡す・品を納める結果があるか。
+    // 先がただの話 (頼みのように見えて何も起きない) なら、金の印の理由にしない (「頼み事はあるかい」がいつも金色になっていた)
+    static boolean offers(Dialogue dialogue, Dialogue.Option option, StoryContext ctx) {
+        if (hasOfferAction(option.actions())) {
+            return true;
+        }
+        return reaches(dialogue, option.target(), ctx, new java.util.HashSet<>(), 0);
+    }
+
+    private static boolean hasOfferAction(List<jp.revati.skyabyss.quest.Action> actions) {
+        for (jp.revati.skyabyss.quest.Action a : actions) {
+            String type = a.type();
+            if (type.equals("quest_start") || type.equals("give") || type.equals("take") || type.equals("open_board")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean reaches(Dialogue dialogue, String id, StoryContext ctx, java.util.Set<String> seen, int depth) {
+        Dialogue.Node node = dialogue.nodes().get(id);
+        if (node == null || depth > 6 || !seen.add(id)) {
+            return false;
+        }
+        if (hasOfferAction(node.actions())) {
+            return true;
+        }
+        if (node.next() != null && reaches(dialogue, node.next(), ctx, seen, depth + 1)) {
+            return true;
+        }
+        for (Dialogue.Option o : node.options()) {
+            if (!o.condition().test(ctx) || o.kind().equals("leave") || o.target().equals(Dialogue.ENTRY)) {
+                continue;
+            }
+            if (hasOfferAction(o.actions()) || reaches(dialogue, o.target(), ctx, seen, depth + 1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void close(ServerPlayer player) {

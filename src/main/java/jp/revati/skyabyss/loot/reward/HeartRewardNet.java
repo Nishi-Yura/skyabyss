@@ -20,9 +20,11 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   Claim   (持ち主 → サーバー): この品を選ぶ
 //   Request (持ち主 → サーバー): 受け取れる遺物の画面を開いて (旅嚢・控え帳・コマンドから)
 //   Later   (持ち主 → サーバー): 「あとで」にした (サーバーは何も変えない。案内の一行だけ)
+//   Hold    (持ち主 → サーバー): 画面が開いている間、10 tick ごと。サーバーは 2 秒ぶん「守り」を延ばす:
+//           その間は本人は傷つかず (出血・火・落下・敵のどれも。/kill と虚空は除く)、敵は本人を狙わない。画面を閉じて 2 秒で切れる (旗を持たないので、落ちても残らない)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class HeartRewardNet {
-    private static final String PROTOCOL_VERSION = "heart_reward-1";
+    private static final String PROTOCOL_VERSION = "heart_reward-2";
 
     private HeartRewardNet() {
     }
@@ -99,6 +101,79 @@ public final class HeartRewardNet {
         }
     }
 
+    public record Hold() implements CustomPacketPayload {
+        public static final Type<Hold> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "heart_reward_hold"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Hold> STREAM_CODEC = StreamCodec.unit(new Hold());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    // ---- 画面が開いている間の守り (人 → 守りが切れるゲーム時刻)
+    private static final int HOLD_TICKS = 40;
+    private static final java.util.Map<java.util.UUID, Long> HELD = new java.util.HashMap<>();
+
+    public static void hold(ServerPlayer player, int ticks) {
+        HELD.put(player.getUUID(), player.serverLevel().getGameTime() + ticks);
+    }
+
+    public static boolean isHeld(net.minecraft.world.entity.Entity e) {
+        if (!(e instanceof ServerPlayer p)) {
+            return false;
+        }
+        Long until = HELD.get(p.getUUID());
+        if (until == null) {
+            return false;
+        }
+        if (p.serverLevel().getGameTime() > until) {
+            HELD.remove(p.getUUID());
+            return false;
+        }
+        return true;
+    }
+
+    // Open を送るとき (画面が開くまでの間も守る)
+    static void holdOnOpen(ServerPlayer player) {
+        hold(player, HOLD_TICKS * 4);
+    }
+
+    @SubscribeEvent
+    static void onIncomingDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+        if (isHeld(event.getEntity()) && !event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    static void onChangeTarget(net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent event) {
+        if (isHeld(event.getNewAboutToBeSetTarget())) {
+            event.setCanceled(true);
+        }
+    }
+
+    // すでに狙っている敵の狙いも外す (1 秒に一度)
+    @SubscribeEvent
+    static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player && player.tickCount % 20 == 0 && isHeld(player)) {
+            for (net.minecraft.world.entity.Mob mob : player.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                    player.getBoundingBox().inflate(32), m -> m.getTarget() == player)) {
+                mob.setTarget(null);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        HELD.remove(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    static void onStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        HELD.clear();
+    }
+
     @SubscribeEvent
     static void register(RegisterPayloadHandlersEvent event) {
         // クライアント側の処理はラムダの中だけで呼ぶので、専用サーバーでも安全
@@ -114,6 +189,11 @@ public final class HeartRewardNet {
                 .playToServer(Request.TYPE, Request.STREAM_CODEC, (p, ctx) -> {
                     if (ctx.player() instanceof ServerPlayer player) {
                         HeartReward.onRequestPacket(player);
+                    }
+                })
+                .playToServer(Hold.TYPE, Hold.STREAM_CODEC, (p, ctx) -> {
+                    if (ctx.player() instanceof ServerPlayer player) {
+                        hold(player, HOLD_TICKS);
                     }
                 })
                 .playToServer(Later.TYPE, Later.STREAM_CODEC, (p, ctx) -> {

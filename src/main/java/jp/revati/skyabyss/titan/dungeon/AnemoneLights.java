@@ -707,6 +707,14 @@ public final class AnemoneLights {
         return ARROWS[idx];
     }
 
+    // bandText が最後に向かった中継点 (band が目的の標のために一緒に送る。サーバーは一つのスレッドなので static でよい)
+    private static Vec3 lastWay;
+
+    private static String arrowTo(ServerPlayer player, Vec3 pos) {
+        lastWay = pos;
+        return arrow(player, pos.x - player.getX(), pos.z - player.getZ());
+    }
+
     // いまの目的の帯の文 (自己テスト・撮影用に、送らずに作る)
     static Component bandText(ServerLevel level, ServerPlayer player, UUID group) {
         BackGroupData.Record r = BackGroupData.get(level).peek(group);
@@ -718,7 +726,7 @@ public final class AnemoneLights {
         int[] start = plan.path.get(0);
         if (GroupGates.isOpen(level, group, exitGate(level))) {
             Vec3 way = waypoint(plan, here, plan.path.get(plan.path.size() - 1), inRoom);
-            return ModText.objective("message.skyabyss.lamp_band_open", lit, STANDS, arrow(player, way.x - player.getX(), way.z - player.getZ()),
+            return ModText.objective("message.skyabyss.lamp_band_open", lit, STANDS, arrowTo(player, way),
                     meters(plan.distance(here, plan.path.get(plan.path.size() - 1))));
         }
         if (held > 0 || lit >= NEED) {
@@ -737,7 +745,7 @@ public final class AnemoneLights {
             if (best >= 0) {
                 Vec3 way = waypoint(plan, inRoom ? start : here, plan.path.get(plan.standK[best]), inRoom);
                 int d = inRoom ? plan.distance(start, plan.path.get(plan.standK[best])) : bestD;
-                return ModText.objective("message.skyabyss.lamp_band", lit, STANDS, arrow(player, way.x - player.getX(), way.z - player.getZ()), meters(d), held);
+                return ModText.objective("message.skyabyss.lamp_band", lit, STANDS, arrowTo(player, way), meters(d), held);
             }
         }
         // 灯が手元にない: 苗床へ (入口の小部屋の苗床か、中ほどの休み場の苗床。近いほう)
@@ -764,7 +772,7 @@ public final class AnemoneLights {
             target = new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5);
             dist = dMid;
         }
-        return ModText.objective("message.skyabyss.lamp_band_bed", lit, STANDS, arrow(player, target.x - player.getX(), target.z - player.getZ()), meters(dist));
+        return ModText.objective("message.skyabyss.lamp_band_bed", lit, STANDS, arrowTo(player, target), meters(dist));
     }
 
     private static int meters(int cells) {
@@ -783,7 +791,9 @@ public final class AnemoneLights {
     }
 
     private static void band(ServerLevel level, ServerPlayer player, UUID group) {
-        LampBand.send(player, bandText(level, player, group));
+        lastWay = null;
+        Component text = bandText(level, player, group);
+        LampBand.send(player, text, lastWay);
     }
 
     // 灯の台の粒 (その人にだけ。近いものだけ): ともした台は白い光が昇り、まだの台は青い火がゆらぐ (遠くからも台の場所が分かる)

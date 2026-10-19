@@ -103,7 +103,8 @@ public final class BossAttackCue {
             renderFull(g, mc, t, ENTRIES.get(ENTRIES.size() - 1), r);
             return;
         }
-        int cx = r.x() + r.w() / 2;
+        // ボスバーの真ん中の真下に置く (置き場の長方形が左右の帯に押されて右へずれても、画面の中心に合わせる)
+        int cx = g.guiWidth() / 2;
         int y = r.y() + 1;
         for (int i = 0; i < ENTRIES.size(); i++) {
             Entry e = ENTRIES.get(i);
@@ -146,7 +147,7 @@ public final class BossAttackCue {
         if (k < 0) {
             return;
         }
-        int cx = r.x() + r.w() / 2;
+        int cx = g.guiWidth() / 2;
         int y = r.y();
         float alpha = k <= 1f ? 1f : 1f - (k - 1f) / 0.25f;
         float pulse = 0.75f + 0.25f * (float) Math.sin(t * (0.6f + k * 1.4f));
