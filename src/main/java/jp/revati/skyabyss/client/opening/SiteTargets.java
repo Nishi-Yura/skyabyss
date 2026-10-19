@@ -58,13 +58,23 @@ public final class SiteTargets {
         bind("main_ember/see", TITAN_PREFIX + "ember");
     }
 
+    // 語り部・鯨追いなど、話す相手の居場所 (サーバーが SiteNetwork で送る。キー npc.<役の名前>)
+    public static final String NPC_PREFIX = "npc.";
+
+    // 位置はどれも地上のもの。背中・ほかの次元の中では出さない (距離が意味を持たない)
+    public static boolean inOverworld() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        return mc.level == null || mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD;
+    }
+
     @Nullable
     public static BlockPos lookup(String questId) {
-        // 位置はどれも地上のもの。背中・ほかの次元の中では出さない (距離が意味を持たない)
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        if (mc.level != null && mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
-            return null;
-        }
+        return inOverworld() ? lookupAny(questId) : null;
+    }
+
+    // 次元を問わず場所があるか (背中の中でも「この目的には場所がある」と言うため)
+    @Nullable
+    public static BlockPos lookupAny(String questId) {
         java.util.function.Supplier<BlockPos> d = DIRECT.get(questId);
         if (d != null) {
             BlockPos p = d.get();
@@ -74,6 +84,13 @@ public final class SiteTargets {
         }
         String key = BINDINGS.get(questId);
         return sites.get(key != null ? key : questId);
+    }
+
+    // 話す相手 (クエストの対象 "skyabyss:storyteller" → npc.storyteller) の居場所。次元を問わない
+    @Nullable
+    public static BlockPos npc(String entityId) {
+        int c = entityId.indexOf(':');
+        return sites.get(NPC_PREFIX + (c >= 0 ? entityId.substring(c + 1) : entityId));
     }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)

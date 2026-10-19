@@ -92,6 +92,21 @@ public final class Config {
             .comment("メインの目的を左上の細い帯に常に出すか (false = 出さない。全文は U のクエストログ)")
             .define("objectiveStrip", true);
 
+    // 目的の道しるべ (client/guide): 左上の帯の矢印と、地面の道の出し方
+    public enum TrailMode {
+        ON,
+        NEAR,
+        OFF
+    }
+
+    public static final ModConfigSpec.BooleanValue QUEST_ARROW = CLIENT_BUILDER
+            .comment("目的の帯の方角を、向いている向きに合わせて回る矢印にするか (false = 北東などの文字)")
+            .define("questArrow", true);
+
+    public static final ModConfigSpec.EnumValue<TrailMode> QUEST_TRAIL = CLIENT_BUILDER
+            .comment("目的の場所へ向かう、地面の道しるべ。ON = いつも, NEAR = 目的が 64 ブロック以内のときだけ, OFF = 出さない (キーでも切り替えられる)")
+            .defineEnum("questTrail", TrailMode.ON);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);

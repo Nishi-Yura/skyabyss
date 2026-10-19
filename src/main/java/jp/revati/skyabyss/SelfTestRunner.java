@@ -96,6 +96,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
+        // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.2 節
+        steps.add(Step.once("guide nav", jp.revati.skyabyss.guide.nav.GuideNavSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));

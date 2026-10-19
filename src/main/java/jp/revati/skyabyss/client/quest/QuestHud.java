@@ -75,10 +75,44 @@ public final class QuestHud {
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
         g.fill(X - 3, top - 3, X - 2, top + h - 2, def.main() ? MAIN_TITLE : TITLE);
         g.drawString(font, Component.translatable(def.titleKey()), X + 1, top, def.main() ? MAIN_TITLE : TITLE, true);
+        drawGuide(g, mc, def, entry, top);
         int y = top + 12;
         for (Line l : lines) {
             g.drawString(font, l.text, X + l.indent, y, l.color, true);
             y += 10;
+        }
+    }
+
+    // 追跡中のクエストの札の右上に、目的までの矢印と距離 (帯と同じ。設定 questArrow が OFF なら方位の文字)。背中の中なら「背中の中」
+    private static void drawGuide(GuiGraphics g, Minecraft mc, QuestDef def, QuestLog.Entry entry, int top) {
+        ObjectiveStrip.Resolved r = ObjectiveStrip.resolveQuest(def, entry);
+        Font font = mc.font;
+        int right = X + WIDTH;
+        if (r.inside()) {
+            String s = Component.translatable("gui.skyabyss.guide.inside").getString();
+            g.drawString(font, s, right - font.width(s), top, 0xFF9A9AAE, true);
+            return;
+        }
+        if (r.pos() == null) {
+            return;
+        }
+        net.minecraft.core.BlockPos t = r.pos();
+        double d = Math.sqrt(mc.player.position().distanceToSqr(t.getX() + 0.5, mc.player.getY(), t.getZ() + 0.5));
+        boolean arrow = jp.revati.skyabyss.Config.QUEST_ARROW.get();
+        String far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, arrow ? "" : ObjectiveStrip.direction(mc.player.position(), t));
+        if (far.isEmpty()) {
+            return;
+        }
+        int fx = right - font.width(far);
+        g.drawString(font, far, fx, top, 0xFF7FD6D0, true);
+        if (arrow) {
+            float deg = jp.revati.skyabyss.guide.nav.NavMath.arrowDegrees(mc.player.getX(), mc.player.getZ(), t.getX() + 0.5, t.getZ() + 0.5, mc.player.getYRot());
+            int cx = fx - 3 - jp.revati.skyabyss.client.guide.GuideArrow.SIZE / 2;
+            jp.revati.skyabyss.client.guide.GuideArrow.draw(g, cx, top + 4, deg, 1f);
+            int v = jp.revati.skyabyss.guide.nav.NavMath.vertical(t.getY() + 0.5 - mc.player.getY());
+            if (v != 0) {
+                jp.revati.skyabyss.client.guide.GuideArrow.drawVertical(g, cx - jp.revati.skyabyss.client.guide.GuideArrow.SIZE / 2 - 6, top + 4, v > 0, 1f);
+            }
         }
     }
 

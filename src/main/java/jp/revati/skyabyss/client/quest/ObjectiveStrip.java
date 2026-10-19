@@ -5,7 +5,10 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.Config;
+import jp.revati.skyabyss.client.guide.GuideArrow;
 import jp.revati.skyabyss.client.opening.OpeningClient;
+import jp.revati.skyabyss.client.opening.SiteTargets;
+import jp.revati.skyabyss.guide.nav.NavMath;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.QuestLog;
 import net.minecraft.client.DeltaTracker;
@@ -83,6 +86,84 @@ public final class ObjectiveStrip {
         return Component.translatable("gui.skyabyss.objective.dir." + (i + 4) % 8).getString();
     }
 
+    // 道しるべの行き先: pos = 地上の目印 (なければ null)、inside = 目印はあるが、いまは背中・ほかの次元の中 (矢印の代わりに文を出す)
+    public record Resolved(@Nullable BlockPos pos, boolean inside) {
+        static final Resolved NONE = new Resolved(null, false);
+    }
+
+    // いまの目的 (序盤の目的 → メインのクエスト) の行き先。道しるべの地面の道もこれを使う
+    public static Resolved resolve(Minecraft mc) {
+        if (mc.player == null) {
+            return Resolved.NONE;
+        }
+        OpeningClient.Objective opening = OpeningClient.objective();
+        if (opening != null) {
+            return new Resolved(opening.target(), false);
+        }
+        QuestLog log = QuestLog.of(mc.player);
+        QuestDef def = current(mc, log);
+        if (def == null) {
+            return Resolved.NONE;
+        }
+        return resolveQuest(def, log.entry(def.id()));
+    }
+
+    // 帯が出さない追跡中のクエスト (メインでないもの) の行き先
+    public static Resolved resolveTracked(Minecraft mc) {
+        if (mc.player == null) {
+            return Resolved.NONE;
+        }
+        QuestLog log = QuestLog.of(mc.player);
+        if (log.tracked().isEmpty()) {
+            return Resolved.NONE;
+        }
+        QuestDef def = QuestClient.quest(log.tracked());
+        QuestLog.Entry entry = log.entry(log.tracked());
+        if (def == null || entry == null || entry.done || entry.stage >= def.stages().size()) {
+            return Resolved.NONE;
+        }
+        return resolveQuest(def, entry);
+    }
+
+    // クエストの今の段の行き先: 「クエスト/段」→ クエストの id → 話す相手 (済んでいない最初の「話す」目的)
+    public static Resolved resolveQuest(QuestDef def, QuestLog.Entry entry) {
+        if (entry == null || entry.stage >= def.stages().size()) {
+            return Resolved.NONE;
+        }
+        QuestDef.Stage stage = def.stages().get(entry.stage);
+        Function<String, BlockPos> provider = targets;
+        BlockPos target = null;
+        if (provider != null) {
+            target = provider.apply(def.id() + "/" + stage.id());
+            if (target == null) {
+                target = provider.apply(def.id());
+            }
+        }
+        boolean overworld = SiteTargets.inOverworld();
+        if (target != null) {
+            return new Resolved(target, false);
+        }
+        BlockPos any = SiteTargets.lookupAny(def.id() + "/" + stage.id());
+        if (any == null) {
+            any = SiteTargets.lookupAny(def.id());
+        }
+        if (any == null) {
+            for (int i = 0; i < stage.objectives().size(); i++) {
+                QuestDef.Objective ob = stage.objectives().get(i);
+                if (ob.type().equals("talk") && !ob.targets().isEmpty() && entry.progress(i) < ob.count()) {
+                    any = SiteTargets.npc(ob.targets().get(0));
+                    if (any != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (any == null) {
+            return Resolved.NONE;
+        }
+        return overworld ? new Resolved(any, false) : new Resolved(null, true);
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get()
@@ -92,7 +173,7 @@ public final class ObjectiveStrip {
         // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる。操作のキーは書かない
         OpeningClient.Objective opening = OpeningClient.objective();
         if (opening != null) {
-            draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), opening.target());
+            draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), new Resolved(opening.target(), false));
             return;
         }
         QuestLog log = QuestLog.of(mc.player);
@@ -102,19 +183,11 @@ public final class ObjectiveStrip {
         }
         QuestLog.Entry entry = log.entry(def.id());
         String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
-        Function<String, BlockPos> provider = targets;
-        // 目印は「クエスト/段」で先に探し (SiteTargets.bind("main_song/board", ...))、なければクエストの id で探す
-        BlockPos target = null;
-        if (provider != null) {
-            target = provider.apply(def.id() + "/" + def.stages().get(entry.stage).id());
-            if (target == null) {
-                target = provider.apply(def.id());
-            }
-        }
+        Resolved target = resolveQuest(def, entry);
         draw(g, mc, text, target);
     }
 
-    private static void draw(GuiGraphics g, Minecraft mc, String text, @Nullable BlockPos target) {
+    private static void draw(GuiGraphics g, Minecraft mc, String text, Resolved resolved) {
         Font font = mc.font;
         long now = net.minecraft.Util.getMillis();
         if (!text.equals(lastText)) {
@@ -129,10 +202,21 @@ public final class ObjectiveStrip {
         int x = QuestHud.X;
         int y = QuestHud.y();
         String far = "";
+        BlockPos target = resolved.pos();
+        boolean arrow = Config.QUEST_ARROW.get();
+        float arrowDeg = 0f;
+        int vertical = 0;
         if (target != null) {
             double d = Math.sqrt(mc.player.position().distanceToSqr(target.getX() + 0.5, mc.player.getY(), target.getZ() + 0.5));
-            far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, direction(mc.player.position(), target));
+            far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, arrow ? "" : direction(mc.player.position(), target));
+            arrowDeg = NavMath.arrowDegrees(mc.player.getX(), mc.player.getZ(), target.getX() + 0.5, target.getZ() + 0.5, mc.player.getYRot());
+            vertical = NavMath.vertical(target.getY() + 0.5 - mc.player.getY());
+        } else if (resolved.inside()) {
+            far = Component.translatable("gui.skyabyss.guide.inside").getString();
+            arrow = false;
         }
+        boolean withArrow = arrow && target != null && !far.isEmpty();
+        int arrowRoom = withArrow ? GuideArrow.SIZE + 4 + (vertical != 0 ? 6 : 0) : 0;
         int w = WIDTH;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
         int bg = ((int) ((0x50 + glow * 0x50) * a)) << 24 | 0x0A0C10;
@@ -141,7 +225,7 @@ public final class ObjectiveStrip {
         g.fill(x - 3, y - 2, x - 2, y + ROW - 4, accent);
         int textColor = ((int) (255 * a)) << 24 | 0xE9E3D4;
         String shown = "◆ " + text;
-        int room = w - (far.isEmpty() ? 0 : font.width(far) + 6);
+        int room = w - (far.isEmpty() ? 0 : font.width(far) + arrowRoom + 6);
         while (font.width(shown) > room && shown.length() > 3) {
             shown = shown.substring(0, shown.length() - 2) + "…";
         }
@@ -149,7 +233,15 @@ public final class ObjectiveStrip {
         lastShown = shown + (far.isEmpty() ? "" : "   [" + far + "]");
         lastShownMs = now;
         if (!far.isEmpty()) {
-            g.drawString(font, far, x + w - font.width(far), y + 1, ((int) (255 * a)) << 24 | 0x7FD6D0, true);
+            int fx = x + w - font.width(far);
+            g.drawString(font, far, fx, y + 1, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
+            if (withArrow) {
+                int cx = fx - 3 - GuideArrow.SIZE / 2;
+                GuideArrow.draw(g, cx, y + 4, arrowDeg, a);
+                if (vertical != 0) {
+                    GuideArrow.drawVertical(g, cx - GuideArrow.SIZE / 2 - 6, y + 4, vertical > 0, a);
+                }
+            }
         }
     }
 }
