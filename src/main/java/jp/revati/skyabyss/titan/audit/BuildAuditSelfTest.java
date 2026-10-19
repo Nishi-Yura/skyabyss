@@ -177,6 +177,16 @@ public final class BuildAuditSelfTest {
         void build(ServerLevel level);
     }
 
+    // 背ごとの到達の調べ (歩ける所 reached を持つ)。RouteLightDev も使う
+    public static BackReach.Report routeOf(String name, ServerLevel level) {
+        return switch (name) {
+            case "whale" -> jp.revati.skyabyss.titan.dungeon.TitanBackAudit.run(level);
+            case "tide" -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec());
+            case "storm" -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level);
+            default -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level);
+        };
+    }
+
     private static void build(MinecraftServer server, ResourceKey<Level> key, Builder b) {
         ServerLevel level = server.getLevel(key);
         if (level == null) {
