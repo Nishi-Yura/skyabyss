@@ -72,6 +72,7 @@ public final class TideBackBuilder {
         TideIslandBuilder.buildRest(kit);
         data.markBuilt(LAYOUT_VERSION);
         TideBackTrials.afterBuild(back);
+        jp.revati.skyabyss.titan.light.RouteLamps.place(back, "tide");
         SkyAbyss.LOGGER.info("Built the tide back island (layout {}); the rooms took {} ms", LAYOUT_VERSION, System.currentTimeMillis() - start);
     }
 }
