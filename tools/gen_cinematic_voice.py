@@ -37,13 +37,15 @@ MANIFEST = CINE / "voice_manifest.json"
 VOICE_DIR = CINE / "sounds" / "voice"
 REVIEW = ROOT / "docs/review/voice"
 REVIEW2 = ROOT / "docs/review/voice2"
-STYLES = ("a", "b", "c", "a2", "a3", "a4", "m1", "m2", "m3")
+STYLES = ("a", "b", "c", "a2", "a3", "a4", "m1", "m2", "m3", "l1", "l2", "l3")
+# 架空の言語 (conlang_voice.py)。本文の母音には従わない
+CONLANG_STYLES = ("l1", "l2", "l3")
 # 文字に合わせて鳴らさない様式 (動機・環境音・息だけ)。字幕は一定の速さで出る (voice_timing の span)
-STEADY_STYLES = ("m1", "m2", "m3")
+STEADY_STYLES = ("m1", "m2", "m3", "l1", "l2", "l3")
 REVIEW3 = ROOT / "docs/review/voice3"
 CUR_TEXT = [""]  # 今描いている台詞の本文 (抑揚: 。で下がる・？で上がる)
 # 仕上げの音量 (有音部の RMS)。A は耳にきついという声があり 0.10 → 0.07 に下げた
-LEVEL = {"a": 0.07, "b": 0.10, "c": 0.10, "a2": 0.055, "a3": 0.04, "a4": 0.035, "m1": 0.04, "m2": 0.02, "m3": 0.03}
+LEVEL = {"a": 0.07, "b": 0.10, "c": 0.10, "a2": 0.055, "a3": 0.04, "a4": 0.035, "m1": 0.04, "m2": 0.02, "m3": 0.03, "l1": 0.035, "l2": 0.036, "l3": 0.03}
 
 # ----------------------------------------------------------------------------- 話し手
 # f0: 基本の高さ (Hz)、form: 口の大きさ (formant の倍率)、mora: 一拍の秒、breath: 息の量、voiced: ささやきに混ぜる声 (B)、
@@ -551,7 +553,7 @@ def style_a4(events, length, spk, rng):
 
 
 STYLE_FN = {"a": style_a, "b": style_b, "c": style_c, "a2": style_a2, "a3": style_a3, "a4": style_a4}
-LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200}
+LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200, "l1": 3600, "l2": 4300, "l3": 3200}
 
 
 def render_voice(style, text, speaker, avail, seed_key):
@@ -560,18 +562,23 @@ def render_voice(style, text, speaker, avail, seed_key):
 
 def render_voice_timed(style, text, speaker, avail, seed_key):
     """(波形, 字幕の時刻 {"n": 文字数, "dur": 秒, "t": [各文字の出る時刻]})"""
-    if style in STEADY_STYLES:
+    if style in STEADY_STYLES and style not in CONLANG_STYLES:
         return render_steady(style, text, speaker, avail, seed_key)
     spk = dict(SPEAKERS[speaker])
     if style in ("a2", "a3", "a4"):
         spk["mora"] *= 1.2  # ゆっくり
     CUR_TEXT[0] = text
     rng = np.random.default_rng(zlib.crc32((seed_key + style + speaker).encode("utf-8")))
-    events, length, starts = plan(text, spk, avail, rng)
-    if not any(e["t"] == "m" for e in events):
-        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
-        length = spk["mora"]
-    c = STYLE_FN[style](events, length, spk, rng)
+    if style in CONLANG_STYLES:
+        import conlang_voice
+        c, length = conlang_voice.build(sys.modules[__name__], style, text, speaker, avail, seed_key, spk, rng)
+        starts = []
+    else:
+        events, length, starts = plan(text, spk, avail, rng)
+        if not any(e["t"] == "m" for e in events):
+            events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
+            length = spk["mora"]
+        c = STYLE_FN[style](events, length, spk, rng)
     n = len(c["amp"])
     # 声の源 (重ね)
     voiced = np.zeros(n)
@@ -579,7 +586,7 @@ def render_voice_timed(style, text, speaker, avail, seed_key):
         f = c["f0"] * 2 ** ((st + cents / 100.0) / 12.0)
         if style == "c":
             f = f * (1 + 0.0015 * np.sin(2 * math.pi * (4.7 + 0.3 * rng.uniform()) * np.arange(n) / SR + rng.uniform(0, 6)))
-        voiced += g * lfilter([1.0], [1, -0.55 if style not in ("a2", "a3", "a4") else -0.85], saw(f))
+        voiced += g * lfilter([1.0], [1, -0.55 if style not in ("a2", "a3", "a4") + CONLANG_STYLES else -0.85], saw(f))
     voiced /= max(1.0, sum(g for _, g, _ in spk["layers"]) ** 0.7)
     noise = lfilter([1.0], [1, -0.4], rng.standard_normal(n)) * 0.6
     src = voiced * c["vmix"] + noise * c["nmix"]
@@ -605,10 +612,18 @@ def render_voice_timed(style, text, speaker, avail, seed_key):
         rv, mix = rv + 0.5, mix + 0.18
     elif style == "a4":
         rv, mix = rv * 1.8 + 0.7, min(0.75, mix * 1.6 + 0.3)
+    elif style == "l1":
+        rv, mix = rv * 1.6 + 0.6, min(0.72, mix * 1.5 + 0.26)
+    elif style == "l2":
+        rv, mix = rv * 1.3 + 0.7, min(0.62, mix * 1.3 + 0.22)  # 石の広間のような、子音の輪郭が残る残響
+    elif style == "l3":
+        rv, mix = rv * 1.9 + 0.8, min(0.78, mix * 1.6 + 0.34)
     y = reverb(y, rv, mix, rng)
     y = finish(y, avail - 0.05, LEVEL[style], 0.08 if style in LOWPASS else 0.02)
     dur = len(y) / SR
     meta = {"n": len(text), "dur": round(dur, 3), "t": [round(min(x, dur), 3) for x in starts]}
+    if style in STEADY_STYLES:
+        meta["span"] = round(float(avail), 3)  # 字幕は一定の速さ (声の長さに合わせない)
     return y, meta
 
 
@@ -962,6 +977,16 @@ STYLE_INFO3 = {
 REVIEW3_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review3_template.html"
 
 
+REVIEW4 = ROOT / "docs/review/voice4"
+STYLE_INFO4 = {
+    "a4": ("A4 いまの声 (比較用)", "日本語の文字の拍・母音に合わせて鳴る遠いつぶやき。字幕は声に合わせて出る。"),
+    "l1": ("L1 やわらかく流れる言葉", "母音・子音とも本文とは無関係の、架空の言語。開音節・鼻音・流音が多く、二重母音と長い母音がなめらかにつながる。語のまとまりと弱い強勢、文末で下がる抑揚。A4 と同じ遠い音色。字幕は一定の速さ。"),
+    "l2": ("L2 子音の多い古い言葉", "破裂・摩擦・喉の閉鎖・ごく小さなクリックと、子音の連なる閉音節。短い拍で語末に強勢。母音は中舌・奥舌が中心。古い儀式の言葉のような硬さ。字幕は一定の速さ。"),
+    "l3": ("L3 ささやきの詠唱", "息の声で、ほぼ一定の高さに乗せて唱える。長い母音、語の繰り返し、拍がそろう。文末で一段下がる。字幕は一定の速さ。"),
+}
+REVIEW4_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review4_template.html"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--style", choices=STYLES, default="a")
@@ -970,6 +995,7 @@ def main():
     ap.add_argument("--review", action="store_true")
     ap.add_argument("--review2", action="store_true")
     ap.add_argument("--review3", action="store_true")
+    ap.add_argument("--review4", action="store_true")
     a = ap.parse_args()
     if a.install:
         install(a.style)
@@ -979,9 +1005,11 @@ def main():
         review(("a", "a2", "a3", "a4"), REVIEW2, REVIEW2_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO2)
     if a.review3:
         review(("a4", "m1", "m2", "m3"), REVIEW3, REVIEW3_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO3)
+    if a.review4:
+        review(("a4", "l1", "l2", "l3"), REVIEW4, REVIEW4_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO4)
     if a.check:
         check()
-    if not (a.install or a.review or a.review2 or a.review3 or a.check):
+    if not (a.install or a.review or a.review2 or a.review3 or a.review4 or a.check):
         ap.print_help()
 
 
