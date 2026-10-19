@@ -280,7 +280,7 @@
 - 色: 昼は灰茶、日暮れ・夜は暗く霧に寄る。下 14 ブロックは火の色の明かりをほんのり足して、夜でも根もとが読める。
 - 近く: 根もとから 20 ブロック以内は柱の下部を消す（バニラの煙に任せる）。目の前 10 ブロックの煙は薄く（視界を塞がない）。
 - 設定: 目的の道しるべなので、画面の効果の強さ・ホラーの強さには従わない。開発用に環境変数 `SKYABYSS_NO_SMOKE_COLUMN` で描かなくできる（比べ撮り用）。
-- 撮影: `tools/shots/smoke_sheet.txt`（4 つの地形・昼と日暮れ。柱あり・なし）→ `docs/review/previews/smoke_column_sheet.png`。
+- 撮影: `tools/shots/smoke_sheet.txt`（尾根・雪の谷・水ごし・丘の斜面・森の中。昼と日暮れ。柱あり・なし。`tools/gen_smoke_sheet_shots.py` で生成、`SKYABYSS_NO_SMOKE_COLUMN=1` で「なし」を撮り、`tools/smoke_sheet.py` で並べる）→ `docs/review/previews/smoke_column_sheet.png`。尾根・谷・水ごし（170〜230 ブロック）では柱が地形の上に出て見える。限界: 深い森の中で頭上を葉が覆う所、丘の斜面で視線が土に向く所では見えない（空を見上げれば出る。目的の帯の矢印は方角を指す）。
 
 ### 3.4 巨大な足跡（B3）
 
