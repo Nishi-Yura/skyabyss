@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -416,7 +418,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
             return;
         }
         List<ServerPlayer> players = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && horizontalDistanceTo(p.getX(), p.getZ()) < TitanKeeper.NEAR) {
                 players.add(p);
             }
@@ -526,7 +528,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         lastSleepX = getX();
         lastSleepZ = getZ();
         lastSleepYaw = getYRot();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(getX(), player.getY(), getZ()) < 200 * 200) {
                 Notice.narrate(player, EmberIds.LANG_SURFACE + "asleep");
             }
@@ -624,7 +626,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
         Vec3 mouth = mouthCenter();
         Vec3 snout = position().add(offset(getYRot(), 0, TONGUE_UP + 2, SNOUT_FORWARD + 14));
         Vec3 crater = ridgePoint();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             double d = Math.hypot(p.getX() - getX(), p.getZ() - getZ());
             int tier = EmberGround.ashTier(d);
             if (tier == 0) {
@@ -669,7 +671,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void mouthHint(ServerLevel level) {
         long night = EmberGround.nightId(level.getDayTime());
         Vec3 mouth = mouthCenter();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || p.distanceToSqr(mouth) > 24 * 24 && !inBreathFan(p.getX(), p.getY(), p.getZ())) {
                 continue;
             }
@@ -734,7 +736,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     // 洞窟の中にいる人には、壁の向こうを大きなものが通る音 (岩をこする音と遠い鼓動)。2 章の「壁の向こうの足音」の先触れ
     private void caveSounds(ServerLevel level) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || axisDistance(p.position()) > 48) {
                 continue;
             }
@@ -754,7 +756,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     // 地鳴り: range ブロック以内 (尾根から) の人に低い音と画面の微振動
     private void rumble(ServerLevel level, double range, float volume, float shake) {
         Vec3 ridge = ridgePoint();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator() || Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) > range) {
                 continue;
             }
@@ -767,7 +769,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
     private void recordFinders(ServerLevel level) {
         Vec3 ridge = ridgePoint();
         double range = isSurfaced() ? 96 : 48;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && Math.hypot(p.getX() - ridge.x, p.getZ() - ridge.z) < range) {
                 Lore.unlock(p, EmberIds.LORE_FOUND, true);
             }
@@ -776,7 +778,7 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     private List<ServerPlayer> playersWithin(ServerLevel level, double range) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (Math.hypot(p.getX() - getX(), p.getZ() - getZ()) < range) {
                 out.add(p);
             }

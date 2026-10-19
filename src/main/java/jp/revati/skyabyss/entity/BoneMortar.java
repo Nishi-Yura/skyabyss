@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -226,7 +228,7 @@ public class BoneMortar extends GuardMob {
 
     // 飛行の粒は同じグループの人にだけ
     private void trail(ServerLevel server, ParticleOptions particle, Vec3 at, int count, double dx, double dy, double dz, double speed) {
-        for (ServerPlayer player : server.players()) {
+        for (ServerPlayer player : Players.snapshot(server.players())) {
             if (player.distanceToSqr(at) < 64 * 64 && GroupOwned.visibleTo(this, player)) {
                 server.sendParticles(player, particle, true, at.x, at.y, at.z, count, dx, dy, dz, speed);
             }

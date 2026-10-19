@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch1;
 
+import jp.revati.skyabyss.util.Players;
+
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.guide.PrepQuests;
@@ -48,7 +50,7 @@ public final class Ch1Descent {
     public static ServerPlayer pick(ServerLevel level, double x, double z, double range) {
         ServerPlayer best = null;
         double bd = range * range;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isSpectator()) {
                 continue;
             }

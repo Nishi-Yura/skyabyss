@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -476,7 +478,7 @@ public final class EmberHeartArena {
     // 予告の粒は「制限を無視する」印を付けて送る (パーティクル「最小」の設定でも描かれる)
     static void warn(ServerLevel level, net.minecraft.core.particles.ParticleOptions particle, double x, double y, double z, int count,
             double dx, double dy, double dz, double speed) {
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
                 level.sendParticles(player, particle, true, x, y, z, count, dx, dy, dz, speed);
             }

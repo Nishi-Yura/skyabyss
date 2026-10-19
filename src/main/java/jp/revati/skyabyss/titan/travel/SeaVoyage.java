@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.travel;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -363,7 +365,7 @@ final class SeaVoyage extends Voyage {
                 }
             }
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (involves(p.getUUID()) || p.isPassenger() || p.isSpectator() || !p.isAlive()) {
                 continue;
             }

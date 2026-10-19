@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,7 +187,7 @@ public final class GroupEvents {
                 GroupProgress.prune(level);
             }
         }
-        List<ServerPlayer> players = level.players();
+        List<ServerPlayer> players = Players.snapshot(level.players());
         for (ServerPlayer p : players) {
             Integer left = RESEND.get(p.getUUID());
             if (left != null) {

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.sky;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -132,7 +134,7 @@ public final class PeakScarEvents {
         double midZ = pass.centerZ(pass.duration() / 2.0);
         ServerPlayer witness = null;
         double best = Double.MAX_VALUE;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             double d = Math.hypot(p.getX() - midX, p.getZ() - midZ);
             if (!p.isSpectator() && d < best) {
                 best = d;

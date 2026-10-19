@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.glow;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +77,7 @@ public final class ItemGlow {
         if (event.getServer().getTickCount() % PERIOD != 0) {
             return;
         }
-        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer player : Players.snapshot(event.getServer().getPlayerList().getPlayers())) {
             List<int[]> list = collect(player.serverLevel(), player.getUUID(), player.getX(), player.getY(), player.getZ());
             if (list.isEmpty() && !ACTIVE.contains(player.getUUID())) {
                 continue;

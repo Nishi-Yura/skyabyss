@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.sky;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -310,7 +312,7 @@ public final class PeakScar {
         if (horizontal(spawn.getX(), spawn.getZ(), x, z) < SPAWN_CLEAR) {
             return "near world spawn";
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && horizontal(p.getX(), p.getZ(), x, z) < playerClear) {
                 return "player nearby";
             }

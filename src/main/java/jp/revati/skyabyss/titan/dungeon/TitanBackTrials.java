@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.dungeon;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import static jp.revati.skyabyss.titan.dungeon.TitanBackLayout.*;
 
@@ -362,7 +364,7 @@ public final class TitanBackTrials {
     // 背中に動いている人 (観戦者と、長く動いていない人を除く) がいるグループ
     private static List<UUID> activeGroups(ServerLevel level) {
         List<UUID> keys = new ArrayList<>();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : Players.snapshot(level.players())) {
             if (!player.isSpectator() && Activity.active(player, Activity.PRESENT_TICKS)) {
                 UUID key = Groups.keyOf(player);
                 if (!keys.contains(key)) {

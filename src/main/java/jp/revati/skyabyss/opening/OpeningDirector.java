@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.opening;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +106,7 @@ public final class OpeningDirector {
                 n++;
             }
         }
-        for (var e : server.overworld().getAllEntities()) {
+        for (var e : com.google.common.collect.Lists.newArrayList(server.overworld().getAllEntities())) { // discard で一覧から外れるので写しを回す
             if (e instanceof ItemEntity item && !item.isRemoved() && item.getPersistentData().hasUUID(PAGE_OWNER_TAG)
                     && item.getPersistentData().getUUID(PAGE_OWNER_TAG).equals(owner)) {
                 item.discard();
@@ -383,7 +385,7 @@ public final class OpeningDirector {
     @Nullable
     public static ServerPlayer readyPlayer(ServerLevel level) {
         ServerPlayer any = null;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.isAlive() && !p.isSpectator() && OpeningLogic.whaleReady(state(p))) {
                 // まだ岩鯨を見ていない人を先に (最初の一人の近くにだけ出て、遅れて来た人が見損ねないように)
                 if (!Lore.state(p).has("chapter1/stone_whale")) {
@@ -498,7 +500,7 @@ public final class OpeningDirector {
             float yaw = level.random.nextFloat() * 360f;
             PacketDistributor.sendToPlayer(player, new CuePayload(OpeningNetwork.CUE_FOOTSTEPS, now, yaw));
             // 近くの人 (仲間を含む) にも、同じ時刻・向きで音と揺れだけ聞かせる。その人の拍子は進めない
-            for (net.minecraft.server.level.ServerPlayer other : level.players()) {
+            for (net.minecraft.server.level.ServerPlayer other : Players.snapshot(level.players())) {
                 if (other != player && !other.isSpectator() && other.distanceToSqr(player) <= OpeningNetwork.FOOTSTEPS_NEAR_RANGE * OpeningNetwork.FOOTSTEPS_NEAR_RANGE) {
                     PacketDistributor.sendToPlayer(other, new CuePayload(OpeningNetwork.CUE_FOOTSTEPS_NEAR, now, yaw));
                 }

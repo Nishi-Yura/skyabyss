@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.ember.heart;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.List;
@@ -225,7 +227,7 @@ public final class EmberHeartBattle {
 
     // 凍えをすべて解く (部屋の人と、サーバーにいる全員。一時の修飾子なので、残っていれば消す)
     static void clearChill(ServerLevel level) {
-        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer p : Players.snapshot(level.getServer().getPlayerList().getPlayers())) {
             EmberHeart.applyChill(p, false);
         }
     }
@@ -266,7 +268,7 @@ public final class EmberHeartBattle {
     // 部屋の 48 ブロック以内に人がいるか (離れた人のために部屋を読み込ませない)
     private static boolean nearRoom(ServerLevel level) {
         Vec3 c = EmberHeartArena.heartHome();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(c) < 64 * 64) {
                 return true;
             }

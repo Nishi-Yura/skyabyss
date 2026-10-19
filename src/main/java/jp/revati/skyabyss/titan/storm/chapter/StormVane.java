@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.chapter;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -169,7 +171,7 @@ public final class StormVane {
     static void tick(MinecraftServer server) {
         ServerLevel level = server.overworld();
         java.util.List<ServerPlayer> storm = new java.util.ArrayList<>();
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.level().dimension() == Level.OVERWORLD && p.isAlive() && Chapters.of(p) == Chapters.STORM) {
                 storm.add(p);
             }

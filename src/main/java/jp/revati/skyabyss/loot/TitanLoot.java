@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.loot;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -598,7 +600,7 @@ public final class TitanLoot {
             if (isExclusive(piece)) {
                 player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1f, 1f);
                 Notice.alert(player, fresh ? "message.skyabyss.legendary_new" : "message.skyabyss.legendary_dupe", itemLink(shown));
-                for (ServerPlayer other : level.players()) {
+                for (ServerPlayer other : Players.snapshot(level.players())) {
                     if (other != player) {
                         Notice.unlock(other, "message.skyabyss.legendary_other", player.getDisplayName(), itemLink(shown));
                     }

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm.raiju;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -347,7 +349,7 @@ public class Raiju extends GuardMob {
     // 戦っている人: 巣の中の、この雷獣のグループの人 (部屋に結びついていなければ 24 ブロック以内。グループのない雷獣なら誰でも)
     public List<ServerPlayer> fighters(ServerLevel server) {
         List<ServerPlayer> out = new ArrayList<>();
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (canFight(p)) {
                 out.add(p);
             }
@@ -1099,7 +1101,7 @@ public class Raiju extends GuardMob {
 
     private void updateBossBar(ServerLevel server) {
         List<ServerPlayer> keep = new ArrayList<>();
-        for (ServerPlayer p : server.players()) {
+        for (ServerPlayer p : Players.snapshot(server.players())) {
             if (isAlive() && p.distanceToSqr(this) < 48 * 48 && jp.revati.skyabyss.titan.group.GroupOwned.visibleTo(this, p)) {
                 keep.add(p);
             }

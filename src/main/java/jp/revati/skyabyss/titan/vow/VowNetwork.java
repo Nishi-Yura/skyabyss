@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.vow;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +103,7 @@ public final class VowNetwork {
 
     // そのグループのオンラインの全員へ (誓いを変えたとき・降ろしたとき)
     public static void syncGroup(MinecraftServer server, UUID group) {
-        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer p : Players.snapshot(server.getPlayerList().getPlayers())) {
             if (Groups.isMember(p, group)) {
                 send(p, true);
             }

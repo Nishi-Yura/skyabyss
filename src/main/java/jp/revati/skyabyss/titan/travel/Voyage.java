@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.travel;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -334,7 +336,7 @@ class Voyage {
                 boardingBar.removePlayer(p);
             }
         }
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (p.distanceToSqr(at) <= r2 || riders.contains(p.getUUID())) {
                 boardingBar.addPlayer(p);
             }
@@ -1075,7 +1077,7 @@ class Voyage {
     void tellAboard(ServerLevel level, String key) {
         ServerLevel back = level.getServer().getLevel(TitanTravel.TITAN_BACK);
         if (back != null && kind == TitanKind.STONE_WHALE) {
-            for (ServerPlayer p : back.players()) {
+            for (ServerPlayer p : Players.snapshot(back.players())) {
                 Notice.narrate(p, key);
             }
         }

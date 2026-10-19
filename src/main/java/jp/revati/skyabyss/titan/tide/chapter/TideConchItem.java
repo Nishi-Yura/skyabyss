@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.tide.chapter;
 
+import jp.revati.skyabyss.util.Players;
+
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -147,7 +149,7 @@ public class TideConchItem extends Item implements jp.revati.skyabyss.pouch.Pouc
             case OK -> {
                 server.playSound(null, sp.getX(), sp.getY(), sp.getZ(), TideChapterSetup.CONCH_FAR.get(), SoundSource.PLAYERS, 1.6f, 1.0f);
                 Notice.narrate(sp, "message.skyabyss.ch2.conch.asked");
-                for (ServerPlayer other : server.players()) {
+                for (ServerPlayer other : Players.snapshot(server.players())) {
                     if (other != sp && holds(other)) {
                         Notice.hint(other, "message.skyabyss.ch2.conch.asked_other", sp.getDisplayName());
                     }

@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.entity;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
@@ -130,7 +132,7 @@ public abstract class GuardMob extends Monster implements GeoEntity, jp.revati.s
     // 技の予告の粒。近くの人ごとに「制限を無視する」印を付けて送る (パーティクル「最小」の設定でも描かれる)
     protected void warn(ServerLevel server, ParticleOptions particle, double x, double y, double z, int count,
             double dx, double dy, double dz, double speed) {
-        for (ServerPlayer player : server.players()) {
+        for (ServerPlayer player : Players.snapshot(server.players())) {
             if (player.distanceToSqr(x, y, z) < 64 * 64) {
                 server.sendParticles(player, particle, true, x, y, z, count, dx, dy, dz, speed);
             }

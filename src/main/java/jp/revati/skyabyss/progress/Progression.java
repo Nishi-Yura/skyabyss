@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.progress;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.Collection;
 import java.util.List;
@@ -200,7 +202,7 @@ public final class Progression {
         int i = ProgressRules.titanIndex(titan);
         String key = i + 1 < ProgressRules.TITAN_ORDER.size()
                 ? "message.skyabyss.progress.world_first" : "message.skyabyss.progress.world_first_last";
-        for (ServerPlayer p : worldFirstAudience(server.getPlayerList().getPlayers(), by, i)) {
+        for (ServerPlayer p : worldFirstAudience(Players.snapshot(server.getPlayerList().getPlayers()), by, i)) {
             Notice.narrate(p, key, by.getDisplayName(), titanName(titan));
         }
     }

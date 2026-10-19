@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.storm;
 
+import jp.revati.skyabyss.util.Players;
+
 import jp.revati.skyabyss.notice.Notice;
 import java.util.List;
 import java.util.UUID;
@@ -440,7 +442,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     // 中心の選び直し: どのプレイヤーからも LOST_RANGE より離れたら、一人の近くへ置き直す
     private void keepCentreNearPlayers(ServerLevel level) {
         double best = Double.MAX_VALUE;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p)) {
                 best = Math.min(best, Math.hypot(p.getX() - getX(), p.getZ() - getZ()));
             }
@@ -586,7 +588,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     private void updateLook(ServerLevel level) {
         Vec3 head = position().add(offset(getYRot(), 0, HEAD_UP, HEAD_FORWARD));
         boolean look = false;
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (!p.isSpectator() && p.distanceToSqr(head) < LOOK_RANGE * LOOK_RANGE) {
                 look = true;
                 break;
@@ -605,7 +607,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
 
     // 近くの人 (止まり木から TELL_RANGE 以内) に一行
     private void tell(ServerLevel level, String key) {
-        for (ServerPlayer p : level.players()) {
+        for (ServerPlayer p : Players.snapshot(level.players())) {
             if (TitanKeeper.eligible(p) && Math.hypot(p.getX() - perchX, p.getZ() - perchZ) < TELL_RANGE) {
                 Notice.bar(p, jp.revati.skyabyss.ModText.lore(key));
             }
@@ -655,7 +657,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
     private void tickCower(ServerLevel level) {
         // うずくまる雷翼を 160 ブロック以内で見た人に、伝承「うずくまる巨神」を記す (12 の 11.1 の約束)
         if (modeTicks % 20 == 0) {
-            for (ServerPlayer p : level.players()) {
+            for (ServerPlayer p : Players.snapshot(level.players())) {
                 if (TitanKeeper.eligible(p) && p.distanceToSqr(this) < COWER_LORE_RANGE * COWER_LORE_RANGE && p.hasLineOfSight(this)) {
                     jp.revati.skyabyss.lore.Lore.unlock(p, jp.revati.skyabyss.titan.storm.lore.StormLore.LORE_COWER, true);
                 }

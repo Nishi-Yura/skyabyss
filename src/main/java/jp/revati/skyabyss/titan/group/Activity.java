@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.titan.group;
 
+import jp.revati.skyabyss.util.Players;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -72,7 +74,7 @@ public final class Activity {
     // その背中に、乗っているとみなせる人 (観戦者・クリエイティブでなく、長く動かないままでもない人) がいるか。
     // 巨神の呼び直し (TitanKeeper) と試練のリセットが「だれかいる」と見るときに使う
     public static boolean anyoneAboard(net.minecraft.server.level.ServerLevel back) {
-        return anyoneAboard(back.players());
+        return anyoneAboard(Players.snapshot(back.players()));
     }
 
     public static boolean anyoneAboard(Iterable<ServerPlayer> players) {

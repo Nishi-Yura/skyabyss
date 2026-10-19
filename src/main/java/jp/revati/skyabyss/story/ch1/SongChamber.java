@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.story.ch1;
 
+import jp.revati.skyabyss.util.Players;
+
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
@@ -54,7 +56,7 @@ public final class SongChamber {
             if (frame != null) {
                 // 歌石を鳴らしきった人がいれば開く (置く前に鳴らしきった世界でも、あとから開く)
                 if (data.chamber == 1) {
-                    for (ServerPlayer p : level.players()) {
+                    for (ServerPlayer p : Players.snapshot(level.players())) {
                         if (data.players().containsKey(p.getUUID()) && data.player(p.getUUID()).songDone) {
                             open(level);
                             break;
@@ -62,7 +64,7 @@ public final class SongChamber {
                     }
                 }
                 if (data.chamber == 2) {
-                    for (ServerPlayer p : level.players()) {
+                    for (ServerPlayer p : Players.snapshot(level.players())) {
                         if (!p.isSpectator() && inside(frame, p)) {
                             visit(p);
                         }
