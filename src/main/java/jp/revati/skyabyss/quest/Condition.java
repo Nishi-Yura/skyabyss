@@ -46,7 +46,7 @@ import net.minecraft.world.item.Item;
 //   item は token を書くと、その印の品だけを数える (QuestItems)。optional を書くと、まだ登録されていない品でも読み込める (数は 0)
 public final class Condition {
     public static final Set<String> TYPES = Set.of("all", "any", "not", "quest", "lore", "affinity", "flag", "remembers", "loop",
-            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep");
+            "item", "watcher", "day", "level", "night", "true", "stage", "stilled", "world_stage", "weather", "height", "grave", "no_keepsake", "prep", "repeat_run");
     public static final Condition ALWAYS = new Condition("true", new JsonObject(), List.of());
 
     private final String type;
@@ -141,6 +141,11 @@ public final class Condition {
                     errors.add(where + ": unknown item " + GsonHelper.getAsString(json, "item", ""));
                 }
             }
+            case "repeat_run" -> {
+                if (json.has("titan") && !jp.revati.skyabyss.progress.ProgressRules.TITAN_ORDER.contains(GsonHelper.getAsString(json, "titan", ""))) {
+                    errors.add(where + ": unknown titan " + GsonHelper.getAsString(json, "titan", ""));
+                }
+            }
             case "stilled" -> {
                 need("titan", errors, where);
                 if (!jp.revati.skyabyss.progress.ProgressRules.TITAN_ORDER.contains(GsonHelper.getAsString(json, "titan", ""))) {
@@ -190,6 +195,9 @@ public final class Condition {
                 yield s >= GsonHelper.getAsInt(json, "min", 0) && s <= GsonHelper.getAsInt(json, "max", Integer.MAX_VALUE);
             }
             case "stilled" -> jp.revati.skyabyss.progress.Progression.stopped(ctx.player().server, ctx.player().getUUID(), str("titan"));
+            // 周回: そのグループが心臓を止めている (first_cleared)。titan を省けばどの巨神でもよい (docs/design/21 の 1.7・1.8)
+            case "repeat_run" -> jp.revati.skyabyss.titan.group.FirstRun.hasCleared(ctx.player().server, jp.revati.skyabyss.titan.group.Groups.keyOf(ctx.player()),
+                    optStr("titan"));
             case "world_stage" -> jp.revati.skyabyss.progress.Progression.worldStage(ctx.player().server) >= GsonHelper.getAsInt(json, "min", 0);
             case "weather" -> {
                 var level = ctx.player().level();

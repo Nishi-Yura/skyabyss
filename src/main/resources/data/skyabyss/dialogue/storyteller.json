@@ -115,6 +115,21 @@
       }
     },
     {
+      "node": "repeat_note",
+      "if": [
+        {
+          "type": "repeat_run"
+        },
+        {
+          "type": "not",
+          "of": {
+            "type": "flag",
+            "flag": "repeat_told"
+          }
+        }
+      ]
+    },
+    {
       "node": "menu"
     }
   ],
@@ -931,6 +946,16 @@
           "goto": "end"
         }
       ]
+    },
+    "repeat_note": {
+      "face": "smile",
+      "do": [
+        {
+          "type": "flag",
+          "flag": "repeat_told"
+        }
+      ],
+      "next": "menu"
     }
   }
 }

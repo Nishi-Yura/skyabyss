@@ -484,6 +484,11 @@ public final class RecordBuilder {
                         : "d.memory_next_plain"))));
         rows.add(value("clears", t("r.clears"), t("v.times", r.clears), RecordSnapshot.MARK_NONE, List.of(t("d.clears"))));
         rows.add(stelesRow(p, titan));
+        // 誓い (周回の縛り) の最高の段。称号は飾りだけ (docs/design/21 の 1.8)
+        int vowBest = jp.revati.skyabyss.titan.group.FirstRunData.get(p.server).vowBest(p.getUUID(), titan);
+        int vowTier = jp.revati.skyabyss.titan.vow.Vows.titleTier(vowBest);
+        rows.add(value("vow_best", t("r.vow_best"), vowBest > 0 ? t("v.vow_best", vowBest, Component.translatable(jp.revati.skyabyss.titan.vow.Vows.titleKey(vowTier))) : t("v.vow_none"),
+                vowBest > 0 ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_LOCKED, List.of(t("d.vow_best"))));
         List<Item> collection = page.collection().get();
         int owned = 0;
         for (Item item : collection) {

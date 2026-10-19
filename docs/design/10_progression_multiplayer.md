@@ -534,6 +534,18 @@
 - **追憶の宝**: `FirstRun.grantKeepsake(人, id, 品)`。人ごとに一度きり（`FirstRunData`＝オーバーワールドの記録。死んでも・パーティが変わっても残る）。備えの品・素材・小さな装飾だけで、巨神の装備（`ModGear`・武器・防具）が混ざると何も渡さず拒む（`keepsakeAllowed`）。グループの初回・周回には関わらず、初めての人が受け取る。
 - 自己テスト: `SELFTEST back first`（first_cleared の前後・グループごと・リセットで残る・戸と光る床と静かな通路・任意の翼・パーティの組む入る抜ける・場面が人ごとに一度・宝が人ごとに一度で装備は拒む・素材は繰り返す）。
 
+### 10.12 周回の言い回しと誓い（`titan/vow`）
+
+21 の 1.8 の実装。`FirstRun` の初回/周回（10.10）の上に載り、周回のグループにだけ働く。
+
+- **誓い**: `Vow`（数字の束）を `Vows` の登録表に持つ。選択は `Vows.add / remove / clear`（`canChange`: 背中がある・周回・`Record.hasProgress` が false。結果は `Vows.Result`）。置き場はグループの背中の記録の `keep.vows`（id のコンマ区切り）と `keep.vow_start`（時間制限の始まり）。`keep.` なので試練のリセットでは残り、パーティの組む・入る・抜けるでは記録ごと写る（10.7）ので、全員が同じ誓いを見る。
+- **効き**: 体力は `VowEvents.applyFoeHealth`（1 秒ごとに背中の `GroupOwned` の敵へ、そのグループの誓いの分の属性修飾を一度だけ）、傷は `LivingIncomingDamageEvent`、野営禁止は `BlockEvent.EntityPlaceEvent`（`CampBlocks.isCamp`）、時間制限は背中に最初に誰かが入った時刻から（`Vows.timerRemaining`・`effective`）、予告の短縮は `Telegraph` の組み立てが持ち主の `Vows.telegraphWarn` を通す（最短 16 tick）。
+- **報酬**: `TitanEnd.onHeartStopped` が `FirstRun.onFirstCleared` のあとに `Vows.onHeartStopped` を呼ぶ。戦ったグループごとに、背中にいるそのグループの人へ `Vows.reward`（素材の上乗せ・共鳴の欠片・最高の段の記録・称号の知らせ）、そのあと誓いを降ろす。最高の段は `FirstRunData.vowBest`（人 → 巨神 → 段。オーバーワールドの記録）。
+- **帯**: `VowNetwork.Sync`（巨神・誓いの id・段・時間制限の残り秒）をグループの全員へ送る（変えたとき・ログイン・次元の移動・時間制限中は 5 秒ごと）。画面は `client/vow/VowHud`（右上）。
+- **周回の言い回し**: `BackWhispers.hear` が周回で最初の囁きを聞いた人に `message.skyabyss.repeat.<id>` を一度出す（`r:<id>`）。石は `TrialSteles.onRung / tellWho`。語り部は会話の条件 `repeat_run`（`FirstRun.hasCleared(server, group, titan?)`）。
+- **lang**: 誓い・帯・囁き・石・語り部・控え帳の行はすべて名前空間 `skyabyss_vow`（ja/en）。
+- 自己テスト: `SELFTEST vow`（登録・段・倍率・称号・予告の短縮と最短・選べる条件・パーティで揃う・体力と傷と野営禁止・時間制限・報酬と最高の段と降ろす・周回の囁きが first_cleared で切り替わる・初めての人は最初の囁き・ja/en の文）。居座りの早じまいは `SELFTEST stay leave`（08 の休息、`TitanStay.Vacancy`）。
+
 ---
 
 ## 未決

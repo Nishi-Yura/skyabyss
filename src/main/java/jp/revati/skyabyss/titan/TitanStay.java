@@ -9,13 +9,17 @@ import net.minecraft.world.phys.Vec3;
 // 巨神が止まって乗れるようになってからの地上での滞在 (四体で共通)。20 分 = 24000 tick。
 // 乗れる窓の長さはこの一つで決まる (岩鯨は鎖が降りてから、潮殻は潮門が開いてから、雷翼は止まり木に着いてから、余燼は浮いて眠ってから)。
 // 途中で去るのは、心臓が止まって眠るとき (TitanDormancy)、遠くまで人がいなくなって呼び直されるとき (TitanKeeper)、
-// 巨神での移動 (titan.travel) が始まるときだけ。残りは各巨神の保存データ (RestTicks / ForcedTicks) に入り、再起動しても続く。
+// 巨神での移動 (titan.travel) が始まるとき、そして「誰もいない」のが 3 分続いたとき (Vacancy。下)。残りは各巨神の保存データ (RestTicks / ForcedTicks) に入り、再起動しても続く。
 public final class TitanStay {
     public static final int TICKS = 24000;
     // 去る前の知らせ: 残り 2 分と 30 秒
     public static final int WARN_TICKS = 2400;
     public static final int WARN_LAST = 600;
     private static final double RANGE = 200;
+    // 早く去る (rpg_brushup B5): 巨神から LEAVE_RANGE ブロック以内に誰もいない状態が LEAVE_AFTER tick (3 分) 続いたら去る。
+    // 戻ってくれば数え直し。そのグループが背中の中にいるあいだは数えない
+    public static final double LEAVE_RANGE = 160;
+    public static final int LEAVE_AFTER = 3 * 60 * 20;
 
     private TitanStay() {
     }
@@ -49,10 +53,61 @@ public final class TitanStay {
         }
     }
 
+    // 誰かがいるか: 巨神 at から LEAVE_RANGE (水平) 以内に生きている人 (観戦者を除く) がいる、または巨神 titan の背中の中に人がいる
+    public static boolean attended(ServerLevel level, Vec3 at, String titan) {
+        for (ServerPlayer p : level.players()) {
+            if (TitanKeeper.eligible(p) && p.distanceToSqr(at.x, p.getY(), at.z) < LEAVE_RANGE * LEAVE_RANGE) {
+                return true;
+            }
+        }
+        var back = jp.revati.skyabyss.progress.Titans.backOf(titan);
+        ServerLevel inside = back == null ? null : level.getServer().getLevel(back);
+        if (inside != null) {
+            for (ServerPlayer p : inside.players()) {
+                if (TitanKeeper.eligible(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // 無人の連続を数える (巨神ごと・保存しない。再読み込みで数え直し)。毎 tick tick(attended) を呼び、true が返ったら去る
+    public static final class Vacancy {
+        private int vacant;
+
+        // 戻りは「去ってよい (3 分続いた)」
+        public boolean tick(boolean attended) {
+            if (attended) {
+                vacant = 0;
+                return false;
+            }
+            if (++vacant >= LEAVE_AFTER) {
+                vacant = 0;
+                return true;
+            }
+            return false;
+        }
+
+        public int vacantTicks() {
+            return vacant;
+        }
+
+        public void reset() {
+            vacant = 0;
+        }
+    }
+
     // 巨神ごとの知らせ係。前回の残りを覚えて、残りが跳んで境をまたいだとき (旅の降り・WhaleHush の延長など) も一度だけ知らせる。
     // 保存はしない (再読み込みの直後は、境の幅の中にいるときだけ知らせる)
     public static final class Warner {
         private int last = -1;
+        private final Vacancy vacancy = new Vacancy();
+
+        // 毎 tick (滞在中だけ)。誰もいないのが 3 分続いたら true = 今すぐ去ってよい
+        public boolean vacantTooLong(ServerLevel level, Vec3 at, String titan) {
+            return vacancy.tick(attended(level, at, titan));
+        }
 
         // 毎 tick、残りを渡す。またいだ境のうち一番小さいものを一度だけ知らせる。知らせたら true
         public boolean tick(ServerLevel level, Vec3 at, int left, String key) {
@@ -68,6 +123,7 @@ public final class TitanStay {
         // 巨神が去る・やり直すとき。次の滞在で前回の値を持ち越さない
         public void reset() {
             last = -1;
+            vacancy.reset();
         }
     }
 
