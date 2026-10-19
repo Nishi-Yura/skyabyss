@@ -6,7 +6,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-// HUD の置き場の計算 (docs/design/18_notices.md の 9 章)。Minecraft の型を一つも使わない「長方形の計算だけ」の部品で、
+// HUD の置き場の計算 (docs/design/18_notices.md の 14 章)。Minecraft の型を一つも使わない「長方形の計算だけ」の部品で、
 // 自己テスト (HudLayoutSelfTest) が GUI の倍率 1〜4 と代表的な窓の大きさをすべて当てて、重ならないことを確かめる。
 //
 // 考え方
@@ -83,7 +83,7 @@ public final class HudLayout {
         // ---- 左上の帯 (上から下へ)
         STATUS_TL, SLOTS_TL, POPUPS_TL, OBJECTIVE, QUEST,
         // ---- 右上の板 (上から下へ)
-        VOW, BACK_GAUGE, BACK_GOAL, PARTY_LIST,
+        VOW, BACK_GAUGE, PARTY_LIST,
         // ---- 下中央 (下から上へ)
         DOWNED_SELF, HINTS,
         // ---- 上中央 (ボスバーの下へ)
@@ -368,7 +368,9 @@ public final class HudLayout {
     private static void stackColumn(Scene s, Result r, List<Request> items, boolean right) {
         int y = M;
         for (Request q : items) {
-            Size sz = q.fit.fit(Math.max(1, s.w - 2 * M), Math.max(1, s.h));
+            // 右上の板はボスバーの右に収まる幅まで (中央の幅 182 の右の端から 4 あけた所。最小 112)。文は Fit が切る
+            int maxW = right ? Math.max(112, s.w / 2 - 91 - GAP - M) : Math.max(1, s.w - 2 * M);
+            Size sz = q.fit.fit(maxW, Math.max(1, s.h));
             if (sz == null) {
                 r.dropped.add(q.id);
                 continue;

@@ -19,7 +19,7 @@ import jp.revati.skyabyss.hud.HudLayout.Side;
 import jp.revati.skyabyss.hud.HudLayout.Size;
 import net.minecraft.server.MinecraftServer;
 
-// HUD の置き場の自己テスト (docs/design/18 の 9 章)。長方形の計算だけで、ゲームを開かずに回せる (main でも動く)。
+// HUD の置き場の自己テスト (docs/design/18 の 14 章)。長方形の計算だけで、ゲームを開かずに回せる (main でも動く)。
 // GUI の倍率 1〜4 × 代表的な窓の大きさ × バニラの状態 (ボスバー・効き目・オフハンド・利き手・体力の段・札・チャット) × mod の部品の
 // ありなし (全部 + 乱数の組み合わせ) をすべて当てて、
 //   1. 置かれた長方形はどれも画面に収まる
@@ -81,6 +81,11 @@ public final class HudLayoutSelfTest {
         };
     }
 
+    // 幅を上限まで切って収める (右上の板の文)
+    static Fit clipped(int natW, int h) {
+        return (maxW, maxH) -> h <= maxH && maxW >= 60 ? new Size(Math.min(natW, maxW), h) : null;
+    }
+
     // 全部が同時に出る最悪の場面の要求
     // (自分が倒れている表示 DOWNED_SELF は、ほかの表示が要らない場面なので別に調べる)
     static List<Request> busy(Scene s, boolean rightHandedCard) {
@@ -110,9 +115,8 @@ public final class HudLayoutSelfTest {
         q.add(Request.of(Id.OBJECTIVE, Region.TOP_LEFT, 236, 14));
         q.add(Request.of(Id.QUEST, Region.TOP_LEFT, 156, 62));
         // 右上
-        q.add(Request.of(Id.VOW, Region.TOP_RIGHT, 150, 22));
-        q.add(Request.of(Id.BACK_GAUGE, Region.TOP_RIGHT, 150, 30));
-        q.add(Request.of(Id.BACK_GOAL, Region.TOP_RIGHT, 150, 62));
+        q.add(Request.of(Id.VOW, Region.TOP_RIGHT, clipped(250, 22)));
+        q.add(Request.of(Id.BACK_GAUGE, Region.TOP_RIGHT, clipped(150, 62)));
         q.add(Request.of(Id.PARTY_LIST, Region.TOP_RIGHT, 88, 3 * 19 + 10).minTop(h / 3));
         // 下中央
         q.add(Request.of(Id.DOWNED_SELF, Region.BOTTOM_CENTER, 120, 42));

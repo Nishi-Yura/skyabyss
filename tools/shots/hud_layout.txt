@@ -17,6 +17,8 @@ hud on
 waitchunks
 chat clear
 guiscale 2
+# 新しい世界の開幕の暗転と題字 (360 tick) と場面が終わるまで待つ
+wait 480
 cmd effect give @s minecraft:speed infinite 0 true
 cmd effect give @s minecraft:strength infinite 0 true
 cmd effect give @s minecraft:night_vision infinite 0 true

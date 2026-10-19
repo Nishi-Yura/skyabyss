@@ -81,7 +81,11 @@ public final class VowHud {
         for (Component line : lines) {
             w = Math.max(w, mc.font.width(line));
         }
-        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.VOW, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT, w, lines.size() * 11));
+        int natW = w;
+        int h = lines.size() * 11;
+        // 狭い画面では文を切って幅に収める (最小 60)
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.VOW, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
+                (maxW, maxH) -> maxW >= 60 && h <= maxH ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(natW, maxW), h) : null));
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {
@@ -95,7 +99,8 @@ public final class VowHud {
         int y = r.y();
         boolean first = true;
         for (Component line : lines(s, net.minecraft.Util.getMillis() - receivedAt)) {
-            g.drawString(font, line, r.right() - font.width(line), y, first ? 0xF2C14E : 0xE9E3D4, true);
+            net.minecraft.util.FormattedCharSequence shown = net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(line, r.w()));
+            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? 0xF2C14E : 0xE9E3D4, true);
             first = false;
             y += 11;
         }

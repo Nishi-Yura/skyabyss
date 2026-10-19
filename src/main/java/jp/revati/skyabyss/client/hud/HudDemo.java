@@ -46,7 +46,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 
-// 開発用: 画面の部品を全部いっぺんに出す (スクリーンショットと「かぶらないか」の目視用)。docs/design/18 の 9.5 節。
+// 開発用: 画面の部品を全部いっぺんに出す (スクリーンショットと「かぶらないか」の目視用)。docs/design/18 の 14.5 節。
 //   /skyabyss_hud demo [all|opening|back|boss|off]  : 見本のデータを各層へ入れる (サーバーのデータには触れない。表示だけ)。台本では `huddemo <all|opening|back|boss|off>`
 //   /skyabyss_hud layout         : いまの置き場の長方形と、出さなかった部品を、チャットへ出す
 // ボスバーと効き目の絵はバニラの部品なので、台本から `cmd bossbar …`・`cmd effect give …` で足す (tools/shots/hud_layout.txt)
@@ -162,8 +162,8 @@ public final class HudDemo {
     }
 
     private static String fresh(String text) {
-        // 同じ手がかりは 3 度までなので、見えない文字で別の文にする
-        return text + "​".repeat(++counter);
+        // 同じ手がかりは 3 度までなので、末尾の空白で別の文にする
+        return text + " ".repeat(++counter);
     }
 
     private static void refresh(Minecraft mc, boolean slow) {
@@ -180,7 +180,7 @@ public final class HudDemo {
             if (has(Part.HINTS) && (counter % 2 == 0 || !has(Part.NARRATE))) {
                 notice(Notice.Kind.HINT, fresh(Component.translatable("message.skyabyss.growth.open_hint", Component.keybind("key.skyabyss.status")).getString()), "");
             } else if (has(Part.NARRATE)) {
-                notice(Notice.Kind.NARRATE, "背骨に沿って、古い石の門と折れた柱が半ば埋もれている。頭はずっと北、胸びれの先は雲の上だ" + "​".repeat(counter), "");
+                notice(Notice.Kind.NARRATE, "背骨に沿って、古い石の門と折れた柱が半ば埋もれている。頭はずっと北、胸びれの先は雲の上だ" + " ".repeat(counter), "");
             }
             if (has(Part.HINTS) && NoticeClient.idle(Notice.Channel.CAPTION)) {
                 notice(Notice.Kind.HINT, fresh(Component.translatable("message.skyabyss.quest.open_hint", Component.keybind("key.skyabyss.quest_log")).getString()), "");
@@ -203,7 +203,7 @@ public final class HudDemo {
         }
         // ---- 右上: 誓いの帯、背の目盛りと目的の板、仲間
         if (slow && has(Part.VOW)) {
-            VowHud.receive(new VowNetwork.Sync("tide", List.of("hardy", "hasty"), 3, 1800 - tick / 20));
+            VowHud.receive(new VowNetwork.Sync("tide_shell", List.of("hardy", "hasty"), 3, 1800 - tick / 20));
         }
         if (slow && has(Part.GAUGE)) {
             TideGaugeHud.receive(new TideBackNetwork.Gauge(1, 1200, 0.6f, false, 2, "east.go", 1, 3, 1, 2, 3));
@@ -212,7 +212,7 @@ public final class HudDemo {
         String b = "00000000-0000-4000-8000-00000000000b";
         String c = "00000000-0000-4000-8000-00000000000c";
         if (slow && has(Part.PARTY)) {
-            PartyClient.receive(new PartyNetwork.Sync(1, 15, 1, "tide", 70, List.of(
+            PartyClient.receive(new PartyNetwork.Sync(1, 15, 1, "tide_shell", 70, List.of(
                     new PartyNetwork.Member(mc.player.getUUID().toString(), "あなた", 9, 20f, 20f, true, true, false),
                     new PartyNetwork.Member(a, "イサナ", 12, 18f, 20f, true, true, true),
                     new PartyNetwork.Member(b, "カイ", 8, 7f, 20f, true, true, false),

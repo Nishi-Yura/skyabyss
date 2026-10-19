@@ -23,6 +23,7 @@ public class LoreToast implements Toast {
 
     @Override
     public Visibility render(GuiGraphics g, ToastComponent toasts, long timeSinceLastVisible) {
+        jp.revati.skyabyss.client.hud.HudManager.noteToast(g, height());
         Font font = toasts.getMinecraft().font;
         LoreBookScreen.blitWidget(g, 0, 0, LoreBookScreen.W_TOAST);
         g.renderFakeItem(new ItemStack(LoreSetup.LORE_BOOK.get()), 8, 8);

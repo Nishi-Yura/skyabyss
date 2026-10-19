@@ -43,7 +43,7 @@ public final class GrowthHud {
         static final int HEIGHT = 32;
     }
 
-    // ---------------------------------------------------------------- 置き場 (HudManager が割り当てる。docs/design/18 の 9 章)
+    // ---------------------------------------------------------------- 置き場 (HudManager が割り当てる。docs/design/18 の 14 章)
     // 左上に置くときの箱 (Lv の行 + バー + マナの行) と、その下の「+12」の列 (4 行ぶんをいつも空けて、目的の帯が上下に動かない)
     static final int STATUS_W = 72;
     static final int STATUS_H = 23;
