@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ビルドと職 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 8px}
+h2.dh{margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+h3{font-size:16px;margin:22px 0 6px}
+.intro{color:var(--muted);max-width:74ch;margin:0 0 6px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.fact{background:var(--panel);border:1px solid var(--line);padding:10px 12px;min-width:0}
+.fact b{display:block;font-size:20px}
+.fact span{font-size:12px;color:var(--muted)}
+figure{margin:12px 0;background:#f4f5f7;border:1px solid var(--line);padding:8px}
+figure img{display:block;width:100%;height:auto;max-width:100%}
+figcaption{font-size:12px;color:#5b6672;margin-top:6px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pick{font-size:13px;color:var(--ok);margin:8px 0 0}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:2px}
+.rec{color:var(--ok);font-size:12px;font-weight:600}
+.letter{font-size:20px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:16px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:500}
+.mock{background:var(--panel);border:1px solid var(--line);padding:12px;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.5;overflow-x:auto;white-space:pre;margin:10px 0}
+@media (max-width:760px){
+  .facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .opts,.two{grid-template-columns:minmax(0,1fr)}
+  table{display:block;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ビルドと職 — Diablo のような作り込み</h1>
+  <p class="intro">試遊の声: 「もっとスキルを増やしてもいいかも。遊び方に種類が出る（初期職業の有無は悩む）。もし初期職業を選べるなら、Diablo くらいビルドを作り込めると面白い。」 詳しい設計は <code>docs/design/27_builds_and_classes.md</code>。</p>
+
+  <h2>今の限界</h2>
+  <div class="facts">
+    <div class="fact"><b>25 / 26</b><span>Lv 50 の技の点 / 全部の段。ほぼ全部が取れて、選びが消える</span></div>
+    <div class="fact"><b>10 技</b><span>剣士・弓使いの 2 本だけ。回復・無敵・耐性は作らない方針で役目も無い</span></div>
+    <div class="fact"><b>13 種</b><span>武器の種類。技と噛み合わない（どれでも同じ扇・同じ倍率）</span></div>
+    <div class="fact"><b>線形</b><span>ステータスは 1 あたり一定。分かれ目がなく、最適は「分ける」</span></div>
+  </div>
+
+  <h2>共通で足すもの（どの案でも同じ）</h2>
+  <div class="two">
+    <figure><img src="tree_anatomy.svg" alt="1 つの木の形" width="760" height="530"><figcaption>木 = 使う技 3 ＋ 常に効く技 2 ＋ 要 1。使う技は段 3 で刻印（3 択の形の変化）が開く。今の 10 技は ID のまま引っ越す。</figcaption></figure>
+    <figure><img src="points_curve.svg" alt="技の点の曲線" width="760" height="420"><figcaption>Lv 10 まで今と同じ。以後 1 レベル 1 点で Lv 50 に 45（約 2.5 本。3 本は極められない）。</figcaption></figure>
+  </div>
+  <table>
+    <thead><tr><th>木（6 本ずつ）</th><th>役目</th><th>技（要は太字）</th></tr></thead>
+    <tbody>
+      <tr><th>岩守り</th><td>壁</td><td>巨神斬り・鯨尾薙ぎ・岩呼び（狙いを引く）／返し刃・岩の構え／<b>守り石の約束</b>（仲間の傷の 10% を肩代わり）</td></tr>
+      <tr><th>風読み</th><td>近い攻め・機動</td><td>踏み込み・跳び退き・風裂き／軽業・見切り（予告をよけた直後に速くなる）／<b>孤風</b>（一人のとき強い）</td></tr>
+      <tr><th>潮歌い</th><td>支え・崩し</td><td>守りの唄（吸収ハート）・引き潮・巡りの唄（マナ）／凪の心得・波紋／<b>共鳴の声</b>（仲間の数で強い）</td></tr>
+      <tr><th>灰の鍛え人</th><td>近い攻め・火</td><td>焼き入れ・熾火の槌・灰散らし／熾の心得・炉の記憶／<b>鍛え人の目</b>（武器の強化段階が技に効く）</td></tr>
+      <tr><th>骨の射手</th><td>遠い攻め・罠</td><td>雲穿ち・天の驟雨・骨の罠／遠矢の心得・鷹の目／<b>静かな弦</b>（止まって引くと強い）</td></tr>
+      <tr><th>旅人（共通）</th><td>全員</td><td>合図（標を付ける）／備えの報い・野営の手・目利き・逃げ足／<b>旅の手帖</b>（どこでも刻印を切り替え）</td></tr>
+    </tbody>
+  </table>
+  <p class="intro">そのほか: 刻印 48（第一段階は 30）／武器の型（重・長・速・遠・守）／装備の「木の印」5 種と、伝説の武器が技の刻印を別物にする「書き換え」8 本／刻印の付け替えは結晶 1・型の保存 2 つ／ステータスの 15・30 に小さな分かれ目。回復と無敵は作らず、支えは吸収ハート（小）とマナまで。</p>
+
+  <h2>案 A 職なし（開いた木）</h2>
+  <figure><img src="option_a_ring.svg" alt="案 A の木の輪" width="760" height="545"><figcaption>最初から全部開く。隣り合う木の間に「橋」（両隣へ 3 点ずつで開く常時の技）。技 41。</figcaption></figure>
+  <p class="intro">K 画面: 輪の星図で木を選び、中央に木の 4 行、右に説明と刻印、下に枠と型。作業量の目安 14 セッション。強み: 序盤に触らない・作りが素直。弱み: 名乗りが弱く、最適解で似通う。</p>
+
+  <h2>案 B 始まりの職（形見を選ぶ）</h2>
+  <figure><img src="option_b_class.svg" alt="案 B の職" width="760" height="465"><figcaption>語り部のあと、台に五つの形見。専用の木＋天性＋共通の旅人、Lv 20 から他の職の木を 2 つまで（縁）。技 41。</figcaption></figure>
+  <p class="intro">K 画面: 職の印と大きな職の木、旅人・縁のつまみ。作業量 18。強み: 最初から名乗れて、パーティの役目が見える。弱み: 序盤（17）へ選びが入る。選ぶ時点では違いが分かりにくい。</p>
+
+  <h2>案 C 天職（一章のあと）</h2>
+  <figure><img src="option_c_calling.svg" alt="案 C の天職" width="760" height="560"><figcaption>序盤は入口だけ試す。心臓が止まり巨神が眠る場面のあと天職を選ぶ。三章で 2 つ目（3 行目まで）。技 41。</figcaption></figure>
+  <p class="intro">K 画面: 一章の前は簡単な形（5 つの木の入口）、天職のあとは B と同じ形。作業量 19（A の上に 5 を足す）。強み: 序盤に触らず、物語の拍で選ぶ。10 時間遊んだあとなので選びに根拠がある。弱み: 二つの状態と演出が要る。</p>
+  <pre class="mock">K 画面（案 C・天職のあと）
+┌ 刻まれた技 ──────────────── 天職: 岩守り ── 点 12 ┐
+│ [旅人][縁/2つ目]   岩守りの木（4 行）               │ 右: 名前・段・消費・待ち
+│  ●巨神斬り  ■返し刃        行 1                     │     刻印 [広刃][深刃][地走り]
+│  ●岩呼び    ■岩の構え      行 2                     │     型: 重で +10%
+│     ●鯨尾薙ぎ              行 3                     │     書き換え: （持っている伝説）
+│        ◆守り石の約束       行 4（Lv 20）            │
+│ 枠 R G V Z (X は三章)   型 1｜型 2   振り直す(二度)  │
+└────────────────────────────────────────────────────┘</pre>
+
+  <h2 class="dh">推薦</h2>
+  <p class="intro"><b>C</b>。序盤の拍子（試遊で指摘があった）に触らず、職を物語の拍（巨神が眠る）に載せられる。A の上に載せる作りなので、A まで作って止めても無駄がない（14 → 19）。</p>
+
+  <h2 class="dh">決めてもらうこと（6 つ）</h2>
+  <p class="intro">選ぶと自動で保存されます（db の <code>choices</code>、id は <code>build_1</code>〜<code>build_6</code>）。メモは任意です。</p>
+  <div id="decisions"></div>
+  <div class="save" id="save">読み込み中…</div>
+</div>
+<script>
+const DECISIONS = [
+  { id: 'build_1', title: '1. 構造', q: '職（クラス）をどう扱いますか。',
+    opts: [
+      ['a', 'A 職なし', '最初から全部の木が開く。木の輪と橋で混ぜる。作業 14。序盤に触らないが、名乗りが弱い', false],
+      ['b', 'B 始まりの職', '序盤に形見を選ぶ（5 職）。専用の木＋縁。作業 18。序盤に選びが入る', false],
+      ['c', 'C 天職', '一章のあと（心臓が止まり巨神が眠る場面）に選ぶ。三章で 2 つ目。作業 19。A の上に載る', true]],
+    note: 'C は序盤を変えず、A を土台にできる。B は A へ戻りにくい。' },
+  { id: 'build_2', title: '2. 技の点', q: '技の点の増え方はどうしますか。',
+    opts: [
+      ['a', '今のまま', 'Lv 50 で 25。技が 36 に増えるので選べる幅が足りず、章 4 で 17 点しかない', false],
+      ['b', 'Lv 10 まで同じ、以後 1 レベル 1 点', 'Lv 50 で 45（約 2.5 本）。章 4 の上限 Lv 33 で 28 点。序盤の強さは今と同じ', true],
+      ['c', '1 レベル 1 点', 'Lv 50 で 50。序盤から点が多く、心臓の数値を取り直す量が増える', false]],
+    note: '3 本は極められない形を保てる。' },
+  { id: 'build_3', title: '3. 支えの技の許し方', q: '回復・無敵・耐性の技を作らない方針（04 の 7.7）をどうしますか。',
+    opts: [
+      ['a', '緩めない', '壁・攻め・崩しだけ。支えの役目は作れない（合図とマナの共有だけ）', false],
+      ['b', '吸収ハート（小）・マナの支え・狙いの引き寄せまで', '吸収は 1 回 2❤まで、重ねがけは高いほうだけ。回復と無敵は作らない', true],
+      ['c', '小さな回復も許す', '支えが成り立つが、心臓の戦いの「避けるもの」という前提が崩れやすい', false]],
+    note: '「壁・支え・攻め・崩し」の四つの役目が成り立つ最小の緩め方。' },
+  { id: 'build_4', title: '4. 装備との結びつき', q: '装備が技を変える度合いはどこまでですか。',
+    opts: [
+      ['a', '刻印だけ', '装備は今のまま。技の変化は刻印だけ（作業は小さい）', false],
+      ['b', '木の印（特性 5 種）＋伝説の書き換え（8 本）', '伝説の武器が 1 つの技の刻印を別物にする。装備を拾う楽しみが技へつながる', true],
+      ['c', 'B に加えて神器にも書き換えの枠', '神器が 2 つの技を書き換える。神器は未実装なので先の話', false]],
+    note: '技の段 +1 にはしない（段の上限は 3）。技の力の % にする。' },
+  { id: 'build_5', title: '5. 振り直しの重さ', q: '組み替えをどれくらい軽くしますか。',
+    opts: [
+      ['a', '今のまま', '炉に行き、結晶 1〜5。刻印の付け替えも全振り直し', false],
+      ['b', '刻印の付け替えは結晶 1、型の保存 2 つ、Lv 15 までは全振り直しが無料', '遠い選択は重く、近い選択は軽く。戦いごとに少し組み替えられる', true],
+      ['c', '炉に行かなくても無料でいつでも', '気軽だが、点を振る重みがなくなる', false]],
+    note: '旅人の要「旅の手帖」で、どこでも刻印と型を切り替えられる。' },
+  { id: 'build_6', title: '6. ステータスの深さ', q: '4 つのステータスにどれだけ深みを足しますか。',
+    opts: [
+      ['a', '今のまま', '線形のみ。分かれ目がない', false],
+      ['b', '15 と 30 に刻み目（8 つの分かれ目）', '例: 筋力 15 で重い武器の後隙 −8%。章 4（力 96）で 3 つ分が 30 に届く', true],
+      ['c', '5 つ目のステータスを足す', '運などを足す。画面と数式が増え、読みやすさが下がる', false]],
+    note: '分かれ目は小さな数字にとどめる。' }
+];
+const root = document.getElementById('decisions');
+for (const d of DECISIONS) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2 class="dh">' + d.title + '</h2><p class="intro">' + d.q + '</p>' +
+    '<fieldset class="opts" id="opts_' + d.id + '">' +
+    d.opts.map(o => '<label class="opt"><input type="radio" name="' + d.id + '" value="' + o[0] + '"><span class="letter">' + o[0].toUpperCase() + '</span><span><b>' + o[1] + '</b>' + (o[3] ? ' <span class="rec">推薦</span>' : '') + '<small>' + o[2] + '</small></span></label>').join('') +
+    '</fieldset><p class="pick">' + d.note + '</p>' +
+    '<label class="note-l" for="n_' + d.id + '">メモ (任意)</label><textarea id="n_' + d.id + '" class="note" rows="2" placeholder="別案・条件・気になる点"></textarea>';
+  root.appendChild(sec);
+}
+(() => {
+  const saveEl = document.getElementById('save');
+  let db = null; const timers = {};
+  const chosen = id => { const r = document.querySelector('input[name=' + id + ']:checked'); return r ? r.value : ''; };
+  async function save(id) {
+    if (!db) return;
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen(id), note: document.getElementById('n_' + id).value, at: Date.now() });
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  for (const d of DECISIONS) {
+    document.querySelectorAll('input[name=' + d.id + ']').forEach(r => r.addEventListener('change', () => save(d.id)));
+    document.getElementById('n_' + d.id).addEventListener('input', () => { clearTimeout(timers[d.id]); timers[d.id] = setTimeout(() => save(d.id), 800); });
+  }
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const doc of docs) {
+        if (!/^build_/.test(doc.id)) continue;
+        const data = typeof doc.data === 'function' ? doc.data() : doc.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector('input[name=' + doc.id + '][value="' + data.option + '"]'); if (r) r.checked = true; }
+        if (data.note) { const n = document.getElementById('n_' + doc.id); if (n) n.value = data.note; }
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+  })();
+})();
+</script>
+</body>
+</html>
