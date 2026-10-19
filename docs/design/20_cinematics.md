@@ -190,6 +190,7 @@
 - `cinematic/VoiceTiming` が読み、`client/cinematic/CinematicScreen` が台詞の頭からの秒で字幕を文字ごとに出す（純関数 `revealCount`。声の終わりで全文）。英語など別の本文は文字位置の割合で写す。幅は全文で決めるので、出るたびに文がずれない。
 - 声の音量が 0 でも同じ速さで出る（音でなく時間で決める）。スキップを押している間・終わりの暗転は全文。声のない台詞（`VoiceTiming` に時刻がない）と NPC の会話画面（声がない）は今までどおり全文。
 - 設定 `subtitleReveal`（クライアント）: `SYNCED`（既定）/ `INSTANT`（最初から全文）。
+- 文字に合わせない様式（`--style m1|m2|m3`。選定は `docs/review/voice3/index.html`、採用は未定で既定は a4）: m1 = 行頭の短い合図（天=息の鈴・主人公=ため息・イサナ=軽いハミング・語り部=低いハム・見る者=うつろなささやき）、m2 = 話し手ごとの静かな持続音、m3 = 行頭の吸う息と終わりの吐く息だけ。`voice_timing.json` の項目に `span`（台詞の表示時間）が付き（`t` は空）、字幕は一定の速さで出る（`VoiceTiming.revealSteady`: 1 秒に `steadyRevealCps` 文字（クライアント設定、既定 8）、長い台詞は表示時間の 85% で全文が出る速さまで上がる。`span` に届けば全文）。`--install --style m1` で切り替わり、コードは変えない。
 - 自己テスト `cinematic`: 全台詞に時刻があり、`dur` が .ogg の長さと合い、台詞の表示時間に収まること、`revealCount` の振る舞い。
 
 ## 6. 今はないもの
