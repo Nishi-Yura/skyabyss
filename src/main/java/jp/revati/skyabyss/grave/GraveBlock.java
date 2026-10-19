@@ -66,6 +66,7 @@ public class GraveBlock extends Block {
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level instanceof ServerLevel sl) {
             Graves.spill(sl, pos);
+            jp.revati.skyabyss.rebirth.RebirthFx.graveRemoved(sl, pos);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

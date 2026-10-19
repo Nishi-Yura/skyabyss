@@ -71,8 +71,10 @@ public final class GearLevel {
         return required(stack.getItem());
     }
 
+    // 装備の要求レベルに使うレベル。転生した人は、レベルを 1 から上げ直している間も 50 として扱う
+    // (持ち越した装備が使えなくならない。docs/design/31)
     public static int level(Player player) {
-        return Growth.get(player).level;
+        return jp.revati.skyabyss.rebirth.Rebirth.gearLevel(player);
     }
 
     // この人がこの品の力を使えるか (要件のない品と、プレイヤーでない者はいつでも使える)

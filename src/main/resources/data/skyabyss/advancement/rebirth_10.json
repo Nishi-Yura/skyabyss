@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:rebirth_5",
+  "display": {
+    "icon": {
+      "id": "minecraft:amethyst_shard"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.rebirth_10.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.rebirth_10.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "rebirth:10"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -593,7 +593,7 @@ public final class RecordBuilder {
         SkillData s = SkillManager.get(p);
         rows.add(header("level"));
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
-        int toNext = GrowthRules.xpToNext(d.level);
+        int toNext = d.xpNeed();
         rows.add(new Row("level", Kind.VALUE, ItemStack.EMPTY, t("r.level"), t("v.level", d.level), RecordSnapshot.MARK_NONE,
                 max ? 1f : (float) d.xp / Math.max(1, toNext),
                 List.of(t("d.level", GrowthRules.MAX_LEVEL), t("d.lifetime", d.lifetimeXp(), GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL))),
@@ -602,6 +602,7 @@ public final class RecordBuilder {
         int unspent = d.unspentPoints();
         rows.add(value("points", t("r.points"), t("v.of", unspent, d.totalPoints()), unspent > 0 ? RecordSnapshot.MARK_ATTENTION : RecordSnapshot.MARK_NONE,
                 List.of(t("d.points", GrowthRules.POINTS_PER_LEVEL, GrowthRules.STAT_CAP))));
+        rows.addAll(jp.revati.skyabyss.rebirth.RebirthRecord.rows(p));
         rows.add(header("stats"));
         for (Stat stat : Stat.values()) {
             int v = d.stat(stat);

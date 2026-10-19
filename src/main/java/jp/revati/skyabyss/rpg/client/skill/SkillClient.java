@@ -6,6 +6,9 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
+import jp.revati.skyabyss.rpg.skill.SkillStance;
+import jp.revati.skyabyss.rpg.skill.net.SkillStancePayload;
+import net.minecraft.network.chat.Component;
 import jp.revati.skyabyss.rpg.skill.net.ManaPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillCastPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillCastResultPayload;
@@ -72,7 +75,7 @@ public final class SkillClient {
         if (!payload.ok() && mc.player != null) {
             SkillData d = SkillManager.get(mc.player);
             Skill s = d.slot(i);
-            if (s != null && d.mana + 1e-4 < SkillRules.manaCost(s, d.rank(s))) {
+            if (s != null && d.mana + 1e-4 < SkillManager.manaCostFor(mc.player, s)) {
                 manaFlash = 14;
             }
         }
@@ -105,6 +108,18 @@ public final class SkillClient {
         while (SkillClientSetup.SKILLS_KEY.consumeClick()) {
             if (mc.screen == null) {
                 mc.setScreen(new SkillScreen());
+            }
+        }
+        while (SkillClientSetup.STANCE_KEY.consumeClick()) {
+            if (mc.screen == null && mc.player.isAlive() && !mc.player.isSpectator()) {
+                SkillData sd = SkillManager.get(mc.player);
+                if (sd.stanceCd > 0 && !mc.player.isCreative()) {
+                    mc.player.displayClientMessage(ModText.deny("message.skyabyss.skill.stance_cooldown"), true);
+                } else {
+                    int next = (sd.stance + 1) % SkillStance.values().length;
+                    PacketDistributor.sendToServer(new SkillStancePayload(next));
+                    mc.player.displayClientMessage(ModText.hint("message.skyabyss.skill.stance_set", Component.translatable(SkillStance.of(next).nameKey())), true);
+                }
             }
         }
         for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {

@@ -39,6 +39,7 @@ final class SkillPassives {
             if (player.tickCount % 100 == 3 || d.rank(Skill.READINESS_REWARD) == 0) {
                 d.readyBlue = d.rank(Skill.READINESS_REWARD) > 0 && allBlue(player);
             }
+            SkillManager.syncBar(player);
             SkillManager.applyModifiers(player);
             d.regenScale = regenScale(player, d);
         }
@@ -86,7 +87,7 @@ final class SkillPassives {
         for (ServerPlayer ally : SkillEffects.allies(player, SkillRules.ALLY_RANGE)) {
             calm = Math.max(calm, SkillRules.calmHeartBonus(SkillManager.get(ally).rank(Skill.CALM_HEART)));
         }
-        add += calm;
+        add += calm + SkillBuild.regenAdd(player);
         int camp = d.rank(Skill.CAMP_HAND);
         return d.campNear && camp > 0 ? add * SkillRules.campRegen(camp) : add;
     }

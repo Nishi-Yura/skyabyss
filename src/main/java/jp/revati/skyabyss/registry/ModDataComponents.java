@@ -29,6 +29,18 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<List<Affix>>>> REFORGE_OFFERS = COMPONENTS.registerComponentType("reforge_offers",
             builder -> builder.persistent(Affix.OFFERS_CODEC).networkSynchronized(Affix.OFFERS_STREAM_CODEC).cacheEncoding());
 
+    // 特性の外側の刻み: 穴・差したもの・アスペクト・世代 (docs/design/31 の A02・A06・A07・B15)。付いていない装備は手にしたときに抽選する
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<jp.revati.skyabyss.item.extra.GearExtras>> GEAR_EXTRAS = COMPONENTS.registerComponentType("gear_extras",
+            builder -> builder.persistent(jp.revati.skyabyss.item.extra.GearExtras.CODEC).networkSynchronized(jp.revati.skyabyss.item.extra.GearExtras.STREAM_CODEC).cacheEncoding());
+
+    // アスペクトの芯 (品) が持つ、伝説の書き換え (Rune の id)
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> ASPECT = COMPONENTS.registerComponentType("aspect",
+            builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
+
+    // 技の修飾ルーン (品) の中身
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<jp.revati.skyabyss.item.extra.RuneData>> SKILL_RUNE = COMPONENTS.registerComponentType("skill_rune",
+            builder -> builder.persistent(jp.revati.skyabyss.item.extra.RuneData.CODEC).networkSynchronized(jp.revati.skyabyss.item.extra.RuneData.STREAM_CODEC));
+
     private ModDataComponents() {
     }
 

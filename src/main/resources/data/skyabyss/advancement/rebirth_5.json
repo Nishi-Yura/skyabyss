@@ -1,0 +1,31 @@
+{
+  "parent": "skyabyss:rebirth_1",
+  "display": {
+    "icon": {
+      "id": "minecraft:gold_ingot"
+    },
+    "title": {
+      "translate": "advancement.skyabyss.rebirth_5.title"
+    },
+    "description": {
+      "translate": "advancement.skyabyss.rebirth_5.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "skyabyss:beat",
+      "conditions": {
+        "event": "rebirth:5"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

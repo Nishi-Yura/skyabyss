@@ -1,0 +1,83 @@
+# スキルの自由度 (天職は専門・タグ・木のセット・構え・連鎖・鍵石・熟練・試着) の K 画面の確認。
+# ./gradlew runShots -Pscript=tools/shots/skill_freedom.txt  → python tools/skill_freedom_sheet.py で docs/review/previews/skill_freedom_sheet.png
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 12
+cmd skyabyss skill rebirth @p
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 6
+cmd skyabyss skill learn @p titan_cleave 2
+cmd skyabyss skill learn @p lunge 1
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+# 1. 天職の前でも全部の木が開いている (木のつまみに岩のセットの段)
+open skills
+wait 20
+shot freedom_1_open
+close
+wait 10
+
+# 2. 天職のあと (要を授かる・割引)。熟練 3 で刻印の 4 つ目が開く
+cmd skyabyss level set @p 50
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 0
+cmd skyabyss skill calling @p rock
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p rock_call 2
+cmd skyabyss skill learn @p stone_stance 3
+cmd skyabyss skill learn @p lunge 2
+cmd skyabyss skill learn @p nimble 2
+cmd skyabyss skill learn @p wind_rend 2
+cmd skyabyss skill mastery @p titan_cleave 120
+cmd skyabyss skill mastery @p rock_call 20
+cmd skyabyss skill rune @p titan_cleave 5
+wait 20
+open skills_cleave
+wait 20
+shot freedom_2_mastery
+close
+wait 10
+
+# 3. 木の説明 (セットの 3 段)
+open skills
+wait 20
+shot freedom_3_sets
+close
+wait 10
+
+# 4. ビルドのページ: 構え (守)・連鎖・タグ・鍵石 2 つ
+cmd skyabyss skill stance @p guard
+cmd skyabyss skill keystone @p bulwark
+cmd skyabyss skill keystone @p glass_blade
+cmd skyabyss skill chain @p 3
+wait 20
+open skills_build
+wait 20
+shot freedom_4_build
+close
+wait 10
+
+# 5. 試着 (仮に振って確かめる。確定するまで何も変わらない)
+cmd skyabyss level set @p 30
+cmd skyabyss skill rebirth @p
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 0
+cmd skyabyss skill learn @p titan_cleave 2
+wait 20
+open skills_tryon
+wait 20
+shot freedom_5_tryon
+close
+wait 10

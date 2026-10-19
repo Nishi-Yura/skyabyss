@@ -487,6 +487,11 @@ public final class TrialRuntime {
                 jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, new ItemStack(Vows.resonanceShardOf(def.titan()), shards));
                 Notice.gain(p, ModText.progress("message.skyabyss.trial.shard", shards));
             }
+            // 技の修飾ルーン・属性の欠片 (item/extra/GearFreedomLoot)
+            for (ItemStack extra : jp.revati.skyabyss.item.extra.GearFreedomLoot.trialDrops(def.titan(), first, mods.rarity() == Rarity.EXTREME, back.random)) {
+                jp.revati.skyabyss.pouch.PouchRouting.placeBack(p, extra);
+                Notice.gain(p, ModText.progress("message.skyabyss.trial.extra", extra.getHoverName()));
+            }
             if (goalDone) {
                 Notice.hint(p, "message.skyabyss.trial.goal_done");
             }
@@ -495,6 +500,8 @@ public final class TrialRuntime {
             }
             awardTitles(p, codex, def, mods);
         }
+        // 転生者の結晶の出・導きの欠片 (未転生の仲間と遊んだとき)・仲間の経験値 (docs/design/31 の B05)
+        jp.revati.skyabyss.rebirth.Rebirth.onTrialCleared(Groups.online(back, group));
     }
 
     // 出会った修飾の印 (図鑑の「出会った修飾」の数え)

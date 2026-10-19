@@ -81,6 +81,7 @@ public interface ModGear {
                     tooltip.add(AffixRules.line(affix));
                 }
             }
+            jp.revati.skyabyss.item.extra.GearFreedom.tooltip(stack, tooltip);
             int offers = AffixRules.offers(stack).size();
             if (offers > 0) {
                 tooltip.add(Component.translatable("gear.skyabyss.reforge_pending", offers, AffixRules.MAX_TRIALS)

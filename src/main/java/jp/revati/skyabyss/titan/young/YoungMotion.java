@@ -96,7 +96,9 @@ final class YoungMotion {
         }
         float yaw = Mth.approachDegrees(e.getYRot(), heading, groundGait ? TURN_LAND : TURN_AIR);
         // 速さ: 近づくほど落とす。見えない先がある間は半分
-        double wanted = Math.min(kind.speed, Math.max(0.1, dist * 0.04));
+        // 転生の絆 (docs/design/31 の B14): 持ち主が転生を重ねていると、運ぶ速さが上がる
+        double bond = jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(e.level().getServer(), e.owner());
+        double wanted = Math.min(kind.speed * bond, Math.max(0.1, dist * 0.04));
         boolean unknown = false;
         double yr = yaw * Mth.DEG_TO_RAD;
         double fx = -Math.sin(yr);

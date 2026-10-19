@@ -141,6 +141,7 @@ public final class AffixRules {
     // 新しく出た装備に付けて返す (報酬・交換)
     public static ItemStack withAffixes(ItemStack stack, RandomSource random) {
         ensureRolled(stack, random);
+        jp.revati.skyabyss.item.extra.GearFreedom.ensure(stack, random);
         return stack;
     }
 
@@ -148,10 +149,34 @@ public final class AffixRules {
         return stack.getOrDefault(ModDataComponents.AFFIXES.get(), List.of());
     }
 
-    // その装備の、ある種類の値 (付いていなければ 0)
+    // 効く特性: 抽選した特性に、差した欠片と形見の特性 (item/extra/GearFreedom.bonus) を種類ごとに足したもの
+    public static List<Affix> effective(ItemStack stack) {
+        List<Affix> base = affixes(stack);
+        List<Affix> extra = jp.revati.skyabyss.item.extra.GearFreedom.bonus(stack);
+        if (extra.isEmpty()) {
+            return base;
+        }
+        List<Affix> out = new ArrayList<>(base);
+        for (Affix e : extra) {
+            boolean merged = false;
+            for (int i = 0; i < out.size(); i++) {
+                if (out.get(i).type().equals(e.type())) {
+                    out.set(i, new Affix(e.type(), Math.round((out.get(i).value() + e.value()) * 10000) / 10000.0));
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) {
+                out.add(e);
+            }
+        }
+        return out;
+    }
+
+    // その装備の、ある種類の値 (付いていなければ 0)。欠片・形見の特性も入る
     public static double value(ItemStack stack, AffixType type) {
         double sum = 0;
-        for (Affix a : affixes(stack)) {
+        for (Affix a : effective(stack)) {
             if (a.kind() == type) {
                 sum += a.value();
             }

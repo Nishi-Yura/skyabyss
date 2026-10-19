@@ -102,12 +102,14 @@ public final class YoungReach {
     public static List<TravelNetwork.Dest> list(ServerPlayer player, YoungKind kind, Vec3 origin) {
         ServerLevel level = player.server.overworld();
         List<TravelNetwork.Dest> list = new ArrayList<>();
-        list.add(build(level, kind, origin, "spawn", "", "", level.getSharedSpawnPos(), 0, true));
+        // 転生の絆 (docs/design/31 の B14): 持ち主の運ぶ速さの倍率 (所要時間の見積りに入れる)
+        double bond = jp.revati.skyabyss.rebirth.Rebirth.youngSpeed(player.server, player.getUUID());
+        list.add(build(level, kind, origin, "spawn", "", "", level.getSharedSpawnPos(), 0, true, bond));
         TravelWorldData world = TravelWorldData.get(player.server);
         TravelState state = Voyages.state(player);
         for (BlockPos pos : state.waymarks) {
             TravelWorldData.Waymark mark = world.waymark(pos);
-            list.add(build(level, kind, origin, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null));
+            list.add(build(level, kind, origin, "w" + pos.asLong(), mark == null ? "" : mark.name(), mark == null ? "" : mark.biome(), pos, 1, mark != null, bond));
         }
         for (String titan : Titans.all()) {
             if (!TitanCalls.known(titan) || !TitanCalls.met(player, titan)) {
@@ -121,7 +123,7 @@ public final class YoungReach {
                 lock = "absent";
             }
             BlockPos pos = at == null ? level.getSharedSpawnPos() : BlockPos.containing(at);
-            TravelNetwork.Dest d = build(level, kind, origin, "t:" + titan, titan, "", pos, 2, lock.isEmpty());
+            TravelNetwork.Dest d = build(level, kind, origin, "t:" + titan, titan, "", pos, 2, lock.isEmpty(), bond);
             if (!lock.isEmpty()) {
                 d = new TravelNetwork.Dest(d.id(), d.name(), d.biome(), d.x(), d.y(), d.z(), d.kind(), false, d.seconds(), lock);
             }
@@ -131,20 +133,25 @@ public final class YoungReach {
     }
 
     private static TravelNetwork.Dest build(ServerLevel level, YoungKind kind, Vec3 origin, String id, String name, String biome, BlockPos pos, int dkind,
-                                            boolean valid) {
+                                            boolean valid, double bond) {
         double distance = Math.hypot(pos.getX() + 0.5 - origin.x, pos.getZ() + 0.5 - origin.z);
         String lock = valid && distance >= MIN_DISTANCE ? refuse(level, kind, origin, pos) : "";
         return new TravelNetwork.Dest(id, name, biome, pos.getX(), pos.getY(), pos.getZ(), dkind, valid && lock.isEmpty(),
-                estimateSeconds(kind, distance), lock);
+                estimateSeconds(kind, distance, bond), lock);
     }
 
     // 運ぶのにかかるおおよその秒数 (画面に出す)
     public static int estimateSeconds(YoungKind kind, double distance) {
+        return estimateSeconds(kind, distance, 1.0);
+    }
+
+    public static int estimateSeconds(YoungKind kind, double distance, double bond) {
+        double speed = kind.speed * bond;
         double ticks = 160 /* 出発の待ち */ + 40 /* 舞い上がる */ + 120 /* 降りる */;
         if (distance > YoungTrip.VEIL_DISTANCE) {
-            ticks += YoungTrip.CRUISE_BEFORE_VEIL + YoungTrip.VEIL_FADE * 2 + YoungTrip.VEIL_EXIT / kind.speed * 1.2;
+            ticks += YoungTrip.CRUISE_BEFORE_VEIL + YoungTrip.VEIL_FADE * 2 + YoungTrip.VEIL_EXIT / speed * 1.2;
         } else {
-            ticks += distance / kind.speed * 1.2;
+            ticks += distance / speed * 1.2;
         }
         return (int) Math.round(ticks / 20.0);
     }

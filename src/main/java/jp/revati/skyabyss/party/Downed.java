@@ -189,6 +189,7 @@ public final class Downed {
         release(player);
         GroupBossRoom.noteDown(player.getUUID());
         jp.revati.skyabyss.titan.dungeon.TitanBackTrials.noteDown(player.getUUID());
+        jp.revati.skyabyss.rebirth.RebirthFx.burst(player, false);
         if (player.level() instanceof ServerLevel level) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);
         }
@@ -240,6 +241,7 @@ public final class Downed {
         victim.setHealth(Math.max(1f, victim.getMaxHealth() * REVIVE_HEALTH));
         victim.fallDistance = 0;
         ReentryRules.guard(victim, false);
+        jp.revati.skyabyss.rebirth.RebirthFx.burst(victim, true);
         if (victim.level() instanceof ServerLevel level) {
             level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.2f, 1.4f);
             level.sendParticles(ParticleTypes.HEART, victim.getX(), victim.getY() + 1.0, victim.getZ(), 8, 0.4, 0.5, 0.4, 0.02);

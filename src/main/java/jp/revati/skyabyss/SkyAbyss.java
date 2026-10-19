@@ -40,10 +40,13 @@ public class SkyAbyss {
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModMenus.register(modEventBus);
+        // 装備の技の修飾 (ルーン・属性タグ) を SkillModifier へつなぐ
+        jp.revati.skyabyss.item.extra.GearSkillModifier.register();
         // 大事な場面のカメラ演出 (見た場面の記録)。docs/design/20_cinematics.md
         jp.revati.skyabyss.cinematic.CinematicSetup.register(modEventBus);
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
+        jp.revati.skyabyss.rebirth.Rebirth.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
         // 1章の空 (削られた山頂・雲の目) の音
         jp.revati.skyabyss.sky.ChapterSkyRegistry.register(modEventBus);
@@ -122,6 +125,9 @@ public class SkyAbyss {
 
         // 心臓の遺物の選択画面 (眠りの場面が終わったら開く)。docs/design/30_heart_reward_ui.md
         jp.revati.skyabyss.loot.reward.HeartReward.register();
+
+        // 転生の見せ方 (色の段・記号・名札・称号・背中の飾り・順位の石・飾り板)。docs/design/31
+        jp.revati.skyabyss.rebirth.RebirthSetup.register(modEventBus, modContainer);
 
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み

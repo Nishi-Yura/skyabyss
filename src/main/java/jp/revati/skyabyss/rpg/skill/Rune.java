@@ -57,6 +57,19 @@ public enum Rune {
     FIRE_BED("hammer_forge", Skill.EMBER_HAMMER, 4, "smith_hammer"),
     FIRE_PASS("poker_share", Skill.TEMPER, 4, "thrall_poker");
 
+    // 熟練 3 で開く 4 つ目の刻印 (熟練の刻印)。どの使う技にもあり、番号は 5 (4 は伝説の書き換え)。docs/design/31 の A13
+    public static final int MASTERY = 5;
+
+    public static boolean valid(Skill skill, int index) {
+        return of(skill, index) != null || index == MASTERY && skill.active;
+    }
+
+    // その刻印を今選べる手の状態か (熟練の刻印は常に。伝説は武器を持っているとき)
+    public static boolean heldOf(Skill skill, int index, net.minecraft.world.entity.player.Player player) {
+        Rune r = of(skill, index);
+        return r == null ? index == MASTERY : r.held(player);
+    }
+
     public final String id;
     public final Skill skill;
     // 1..3 (同じ技の中での番号。記録にはこの番号を入れる)。伝説の書き換えは 4
@@ -84,7 +97,13 @@ public enum Rune {
         if (!legendary()) {
             return true;
         }
-        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().equals(weapon);
+        net.minecraft.world.item.ItemStack hand = player.getMainHandItem();
+        // 自分の伝説を持っている (抽出して抜け殻になったものは除く)、または装備に刻んだアスペクト (item/extra/GearFreedom)
+        if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(hand.getItem()).getPath().equals(weapon)
+                && !jp.revati.skyabyss.item.extra.GearFreedom.isHollow(hand)) {
+            return true;
+        }
+        return jp.revati.skyabyss.item.extra.GearFreedom.carries(player, this);
     }
 
     public static Rune legendaryOf(Skill skill) {

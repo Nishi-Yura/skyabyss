@@ -53,6 +53,8 @@ public final class Growth {
             return 0;
         }
         GrowthData data = get(player);
+        // 転生の恩恵「学びの手」で経験値が少し増える (docs/design/31 の B07)
+        amount = jp.revati.skyabyss.rebirth.Rebirth.scaleXp(player, amount);
         // 物語の進みで決まるレベルの上限 (10 の 5 章)
         int cap = jp.revati.skyabyss.progress.Progression.levelCap(player);
         int gained = addXpRaw(data, amount, cap);
@@ -81,14 +83,14 @@ public final class Growth {
         int before = data.level;
         int limit = Math.min(cap, GrowthRules.MAX_LEVEL);
         long xp = data.xp + amount;
-        while (data.level < limit && xp >= GrowthRules.xpToNext(data.level)) {
-            xp -= GrowthRules.xpToNext(data.level);
+        while (data.level < limit && xp >= data.xpNeed()) {
+            xp -= data.xpNeed();
             data.level++;
         }
         if (data.level >= GrowthRules.MAX_LEVEL) {
             data.xp = 0;
         } else {
-            data.xp = (int) Math.min(xp, GrowthRules.xpToNext(data.level) - 1L);
+            data.xp = (int) Math.min(xp, data.xpNeed() - 1L);
         }
         return data.level - before;
     }
@@ -98,6 +100,19 @@ public final class Growth {
         GrowthData data = get(player);
         data.level = level;
         data.xp = 0;
+        data.sanitize();
+        sync(player);
+        applyModifiers(player);
+    }
+
+    // 転生 (docs/design/31): レベル・経験値・ステータスの点・振り直しの回数を戻す。追加の点 (bonusPoints)・記憶の断片・発見の記録は残す。
+    // 転生の回数を 1 足すのは呼ぶ側 (Rebirth)
+    public static void resetForRebirth(ServerPlayer player) {
+        GrowthData data = get(player);
+        data.level = 1;
+        data.xp = 0;
+        java.util.Arrays.fill(data.stats, 0);
+        data.statRespecs = 0;
         data.sanitize();
         sync(player);
         applyModifiers(player);
@@ -198,6 +213,8 @@ public final class Growth {
         set(player, Attributes.ATTACK_SPEED, MOD_AGILITY_ATTACK, GrowthRules.attackSpeedMultiplier(data.stat(Stat.AGILITY)), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         set(player, Rpg.MAX_MANA, MOD_SPIRIT, GrowthRules.bonusMana(data.stat(Stat.SPIRIT)), AttributeModifier.Operation.ADD_VALUE);
         set(player, Attributes.MAX_HEALTH, MOD_VITALITY, GrowthRules.bonusHealth(data.stat(Stat.VITALITY)), AttributeModifier.Operation.ADD_VALUE);
+        // 転生の魂盤・恩恵の修飾子 (docs/design/31)
+        jp.revati.skyabyss.rebirth.Rebirth.applyModifiers(player);
         // 最大体力が増えた分は、そのぶん満たしておく (振った直後にハートが空のままにならないように)
         float maxAfter = player.getMaxHealth();
         if (maxAfter > maxBefore && player.isAlive() && healthBefore >= maxBefore - 0.01f) {
