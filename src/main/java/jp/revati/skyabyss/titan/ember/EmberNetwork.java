@@ -23,7 +23,21 @@ public final class EmberNetwork {
     @SubscribeEvent
     static void register(RegisterPayloadHandlersEvent event) {
         event.registrar(PROTOCOL_VERSION)
-                .playToClient(Heat.TYPE, Heat.STREAM_CODEC, (payload, context) -> EmberHeatClient.receive(payload.heat()));
+                .playToClient(Heat.TYPE, Heat.STREAM_CODEC, (payload, context) -> EmberHeatClient.receive(payload.heat()))
+                .playToClient(Goal.TYPE, Goal.STREAM_CODEC, (payload, context) -> jp.revati.skyabyss.titan.ember.client.EmberGoalHud.receive(payload));
+    }
+
+    // サーバー → 余燼の背にいる人: 目的の板 (EmberGuide)。id は lang の gui.skyabyss.ember_goal.<id> (空なら出さない)、done / total は進みの点、a・b は文に入れる数
+    public record Goal(String id, int done, int total, int a, int b) implements CustomPacketPayload {
+        public static final Type<Goal> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "ember_goal"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Goal> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, Goal::id, ByteBufCodecs.VAR_INT, Goal::done, ByteBufCodecs.VAR_INT, Goal::total, ByteBufCodecs.VAR_INT, Goal::a,
+                ByteBufCodecs.VAR_INT, Goal::b, Goal::new);
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
     }
 
     // サーバー → 余燼の背にいる人: 自分の今の熱 (0〜100)。変わったときと 2 秒ごと。背中を出ると 0

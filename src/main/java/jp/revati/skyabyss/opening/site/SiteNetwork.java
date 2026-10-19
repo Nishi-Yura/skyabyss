@@ -84,21 +84,48 @@ public final class SiteNetwork {
             var data = jp.revati.skyabyss.titan.TitanWorldData.get(overworld);
             for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
                 var slot = data.slot(titan);
-                if (slot != null && slot.hasLast) {
-                    m.put(SiteTargets.TITAN_PREFIX + titan, BlockPos.containing(slot.lastX, slot.lastY, slot.lastZ));
+                BlockPos spot = titanSpot(overworld, titan, slot);
+                if (spot != null) {
+                    m.put(SiteTargets.TITAN_PREFIX + titan, spot);
                 }
             }
         }
         return new SiteTargetsPayload(m);
     }
 
+    // 道しるべの巨神の場所。生きている実体があればその「今」の位置 (記録の位置は 1 秒おきで、遅れる)。
+    // 余燼は、体の原点 (地の中) ではなく見える目印 (浮かんでいれば背の尾根、泳いでいる間は真上の地表の高さ) を指す。
+    // 余燼の目印が体の原点だと、距離も矢印も実際に見える山からずれ、上下の矢印も地の下を指していた
+    @org.jetbrains.annotations.Nullable
+    static BlockPos titanSpot(net.minecraft.server.level.ServerLevel level, String titan, jp.revati.skyabyss.titan.TitanWorldData.Slot slot) {
+        net.minecraft.world.entity.Entity live = switch (titan) {
+            case jp.revati.skyabyss.progress.Titans.STONE_WHALE -> jp.revati.skyabyss.titan.WhaleKeeper.current(level);
+            case jp.revati.skyabyss.progress.Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.TideKeeper.KEEPER.current(level);
+            case jp.revati.skyabyss.progress.Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.StormKeeper.KEEPER.current(level);
+            case jp.revati.skyabyss.progress.Titans.EMBER -> jp.revati.skyabyss.titan.ember.EmberKeeper.KEEPER.current(level);
+            default -> null;
+        };
+        if (live instanceof jp.revati.skyabyss.titan.ember.EmberTitanEntity ember) {
+            net.minecraft.world.phys.Vec3 ridge = ember.ridgePoint();
+            int y = (int) ridge.y;
+            if (!ember.isSurfaced() && level.hasChunk(BlockPos.containing(ridge).getX() >> 4, BlockPos.containing(ridge).getZ() >> 4)) {
+                y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(ridge.x), (int) Math.floor(ridge.z));
+            }
+            return new BlockPos((int) Math.floor(ridge.x), y, (int) Math.floor(ridge.z));
+        }
+        if (live != null && live.isAlive()) {
+            return live.blockPosition();
+        }
+        return slot != null && slot.hasLast ? BlockPos.containing(slot.lastX, slot.lastY, slot.lastZ) : null;
+    }
+
     private static Map<String, BlockPos> lastSent = Map.of();
 
-    // 200 tick (10 秒) ごとに、巨神の位置が 8 ブロック以上動いていたら全員へ送り直す
+    // 60 tick (3 秒) ごとに、巨神の位置が 8 ブロック以上動いていたら全員へ送り直す
     @SubscribeEvent
     static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
-        if (server.getTickCount() % 200 != 0 || server.getPlayerList().getPlayers().isEmpty()) {
+        if (server.getTickCount() % 60 != 0 || server.getPlayerList().getPlayers().isEmpty()) {
             return;
         }
         SiteTargetsPayload p = payload(server);

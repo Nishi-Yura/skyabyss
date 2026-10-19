@@ -165,6 +165,7 @@ final class StormCircuit {
         FLASH_DECOY.clear();
         LAST_LEVER.clear();
         HINT_AT.clear();
+        DEMO_SHOWN.clear();
         java.util.Arrays.fill(BUSY_UNTIL, 0);
     }
 
@@ -662,8 +663,26 @@ final class StormCircuit {
     }
 
     // 金の床・レバーに近づくと、役割の一行 (45 秒に一度)
+    // 初めての見本: グループが回路 0 (接地のレバー) の 14 ブロック以内に初めて来たら、正しい雷の通り道を一度だけ光らせる (回路 0 は決まりを教える部屋)
+    private static final java.util.Set<UUID> DEMO_SHOWN = new java.util.HashSet<>();
+    static final int DEMO_TICKS = 160;
+
     private static void tickHints(ServerLevel level, UUID owner, StormProgress progress) {
         long gt = level.getGameTime();
+        Circuit first = CIRCUITS.get(0);
+        if (!done(progress, first) && !DEMO_SHOWN.contains(owner)) {
+            Vec3 pad = new Vec3(first.pad().getX() + 0.5, BONE_FLOOR + 1, first.pad().getZ() + 0.5);
+            for (ServerPlayer p : Groups.alive(level, owner)) {
+                if (p.position().distanceToSqr(pad) < 14 * 14) {
+                    DEMO_SHOWN.add(owner);
+                    FLASH_EDGES.put(first.index(), solutionTrace(first).edges());
+                    FLASH_UNTIL.put(first.index(), gt + DEMO_TICKS);
+                    tellGroup(level, owner, "message.skyabyss.storm.circuit_demo");
+                    level.playSound(null, first.pad(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.6f, 1.2f);
+                    break;
+                }
+            }
+        }
         for (ServerPlayer p : Groups.alive(level, owner)) {
             if (p.isSpectator() || gt - HINT_AT.getOrDefault(p.getUUID(), -10000L) < 900) {
                 continue;
@@ -692,6 +711,10 @@ final class StormCircuit {
     }
 
     // 自己テスト用: 行き止まりの光を今すぐ消す
+    static void clearDemo() {
+        DEMO_SHOWN.clear();
+    }
+
     static void clearFlash() {
         FLASH_UNTIL.clear();
         FLASH_EDGES.clear();

@@ -717,7 +717,7 @@ public final class EmberBodyBuilder {
         // 奥の岸 (西)・鍛え手の間の奥 (東)・谷の奥 (南) の床
         farFloor(new Box(-29, FLOOR_WEST, 49, -21, FLOOR_WEST + 4, 56), WEST.minY());
         farFloor(new Box(22, FLOOR_EAST, 52, 30, FLOOR_EAST + 4, 58), SMITH.minY());
-        farFloor(new Box(-4, FLOOR_SOUTH, 56, 4, FLOOR_SOUTH + 4, 62), SOUTH.minY());
+        farFloor(new Box(-4, FLOOR_SOUTH, 32, 4, FLOOR_SOUTH + 4, 38), SOUTH.minY());
         // 入口の通り道 (扉から 2 マス内側まで、床と空気)
         lane(new Box(-26, FLOOR_WEST, -8, -24, FLOOR_WEST + 4, -7), WEST.minY());
         lane(new Box(20, FLOOR_EAST, -8, 22, FLOOR_EAST + 4, -7), EAST.minY());
