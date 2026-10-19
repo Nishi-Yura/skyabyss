@@ -384,6 +384,45 @@ final class BuildsSelfTest {
             check(f, SkillManager.chooseRune(p, Skill.TEMPER, Rune.MASTERY) == SkillManager.RuneResult.OK && SkillManager.runeOf(p, Skill.TEMPER) == Rune.MASTERY, "the mastery rune was not chosen");
             check(f, Math.abs(SkillBuild.skillPower(p, Skill.TEMPER) - SkillBuild.tagPower(p, SkillTag.ASH) - SkillRules.MASTERY_RUNE_POWER) < 1e-9
                     && Math.abs(SkillBuild.cooldownScale(p, Skill.TEMPER) - (1 + SkillRules.MASTERY_RUNE_COOLDOWN)) < 1e-9, "the mastery rune numbers are wrong");
+            // ---- 実際の傷: 傷のキーストーンが技の傷に乗り、熟練が数えられる (広い技が何体に当たっても 10 tick に 1 度)
+            SkillManager.forgetAll(p);
+            d.calling = "";
+            d.calling2 = "";
+            d.bonusPoints = 40;
+            d.mastery.clear();
+            d.masteryHitAt.clear();
+            SkillManager.forceRank(p, Skill.WIND_REND, 2);
+            Zombie zombie = new Zombie(EntityType.ZOMBIE, level);
+            zombie.moveTo(spawn.getX() + 0.5, 300, spawn.getZ() + 2.5, 180f, 0f);
+            zombie.setNoAi(true);
+            zombie.setNoGravity(true);
+            zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(500);
+            level.addFreshEntity(zombie);
+            double[] dealt = new double[3];
+            for (int run = 0; run < 3; run++) {
+                if (run == 1) {
+                    d.keystones.add("glass_blade");
+                }
+                if (run == 2) {
+                    d.dodgeUntil = level.getGameTime() + 60;
+                }
+                zombie.setHealth(500);
+                d.mana = 100;
+                d.cooldowns.clear();
+                d.globalCooldown = 0;
+                d.slots[0] = Skill.WIND_REND.id;
+                d.masteryHitAt.clear();
+                int xp = d.masteryXp(Skill.WIND_REND);
+                check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK, "wind rend could not be cast for the damage test");
+                dealt[run] = 500 - zombie.getHealth();
+                int gained = d.masteryXp(Skill.WIND_REND) - xp;
+                // 使う 1 + 当てる 1 (予告をよけた直後は当てる 3)
+                check(f, gained == (run == 2 ? 1 + SkillRules.MASTERY_DODGE_HIT : 2), "mastery gain is " + gained + " in run " + run);
+            }
+            check(f, dealt[0] > 0 && Math.abs(dealt[1] / dealt[0] - (1 + SkillRules.KEY_GLASS_DAMAGE)) < 0.02, "the glass blade keystone did not raise skill damage: " + dealt[0] + " -> " + dealt[1]);
+            d.keystones.clear();
+            d.dodgeUntil = 0;
+            zombie.discard();
             // ---- A18: 試着の確定 (途中で通らなければそこで止める)
             SkillManager.forgetAll(p);
             d.bonusPoints = 0;

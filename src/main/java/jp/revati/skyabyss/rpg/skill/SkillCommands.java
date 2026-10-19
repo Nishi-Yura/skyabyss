@@ -104,12 +104,12 @@ public final class SkillCommands {
                         .then(Commands.literal("calling").then(player().then(Commands.argument("tree", StringArgumentType.word())
                                 .executes(ctx -> callingCommand(ctx, "")))))
                         .then(Commands.literal("rune").then(player().then(Commands.argument("skill", StringArgumentType.word())
-                                .then(Commands.argument("index", IntegerArgumentType.integer(0, 4)).executes(ctx -> {
+                                .then(Commands.argument("index", IntegerArgumentType.integer(0, 5)).executes(ctx -> {
                                     // 開発用: 刻印を選んだことにする (極めている・天職の木のときだけ。点も武器も問わない)
                                     ServerPlayer p = target(ctx);
                                     Skill s = Skill.byId(StringArgumentType.getString(ctx, "skill"));
                                     int index = IntegerArgumentType.getInteger(ctx, "index");
-                                    if (s == null || !SkillManager.get(p).runeAvailable(s) || index > 0 && Rune.of(s, index) == null) {
+                                    if (s == null || !SkillManager.get(p).runeAvailable(s) || index > 0 && !Rune.valid(s, index)) {
                                         ctx.getSource().sendFailure(Component.literal("rune not available"));
                                         return 0;
                                     }
@@ -121,6 +121,49 @@ public final class SkillCommands {
                                     SkillManager.sync(p);
                                     return done(ctx);
                                 })))))
+                        // 開発用 (自由度。docs/design/31): 構え・鍵石・熟練・連鎖・転生の初期化を、条件を問わずに入れる
+                        .then(Commands.literal("stance").then(player().then(Commands.argument("name", StringArgumentType.word()).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            String name = StringArgumentType.getString(ctx, "name");
+                            SkillStance st = java.util.Arrays.stream(SkillStance.values()).filter(x -> x.id.equals(name)).findFirst().orElse(SkillStance.NONE);
+                            SkillManager.get(p).stanceCd = 0;
+                            SkillManager.setStance(p, st);
+                            return done(ctx);
+                        }))))
+                        .then(Commands.literal("keystone").then(player().then(Commands.argument("id", StringArgumentType.word()).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            SkillKeystone k = SkillKeystone.byId(StringArgumentType.getString(ctx, "id"));
+                            if (k == null) {
+                                SkillManager.get(p).keystones.clear();
+                            } else {
+                                SkillManager.get(p).keystones.add(k.id);
+                            }
+                            SkillManager.sync(p);
+                            SkillManager.applyModifiers(p);
+                            return done(ctx);
+                        }))))
+                        .then(Commands.literal("mastery").then(player().then(Commands.argument("skill", StringArgumentType.word())
+                                .then(Commands.argument("xp", IntegerArgumentType.integer(0, 1000)).executes(ctx -> {
+                                    ServerPlayer p = target(ctx);
+                                    Skill s = Skill.byId(StringArgumentType.getString(ctx, "skill"));
+                                    if (s == null) {
+                                        return 0;
+                                    }
+                                    SkillManager.get(p).mastery.put(s.id, IntegerArgumentType.getInteger(ctx, "xp"));
+                                    SkillManager.sync(p);
+                                    return done(ctx);
+                                })))))
+                        .then(Commands.literal("chain").then(player().then(Commands.argument("mask", IntegerArgumentType.integer(0, 15)).executes(ctx -> {
+                            ServerPlayer p = target(ctx);
+                            SkillManager.get(p).chainMask = IntegerArgumentType.getInteger(ctx, "mask");
+                            SkillManager.get(p).sanitize(SkillManager.level(p));
+                            SkillManager.sync(p);
+                            return done(ctx);
+                        }))))
+                        .then(Commands.literal("rebirth").then(player().executes(ctx -> {
+                            SkillReset.forRebirth(target(ctx));
+                            return done(ctx);
+                        })))
                         .then(Commands.literal("respecs").then(player().then(Commands.argument("count", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
                             ServerPlayer p = target(ctx);
                             SkillManager.get(p).respecs = IntegerArgumentType.getInteger(ctx, "count");

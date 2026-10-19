@@ -145,7 +145,29 @@ public class SkillScreen extends Screen {
         tryonCancel = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_cancel"), b -> tryonCancel())
                 .bounds(left + BTN_X + 104, top + BTN_ROW2, 54, 12).build());
         RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.SKILLS);
+        if (!demoTry.isEmpty() && tryon == null) {
+            tryon = real().copyOf();
+            for (Skill s : demoTry) {
+                tryon.ranks.merge(s.id, 1, Integer::sum);
+                tryonOrder.add(s.id);
+            }
+            demoTry = new ArrayList<>();
+        }
         refresh();
+    }
+
+    // 撮影用: ビルドのページで開く
+    public SkillScreen buildPage() {
+        page = 1;
+        return this;
+    }
+
+    // 撮影用: 試着中 (仮に振った技を順に) の状態で開く
+    private List<Skill> demoTry = new ArrayList<>();
+
+    public SkillScreen tryOn(Skill... skills) {
+        demoTry = new ArrayList<>(List.of(skills));
+        return this;
     }
 
     // 撮影用: 技を選んだ状態で開く
@@ -1228,24 +1250,19 @@ public class SkillScreen extends Screen {
             SkillKeystone k = SkillKeystone.values()[i];
             boolean mine = d.keystones.contains(k.id);
             boolean reach = d.keystoneReachable(k);
-            boolean hover = in(mx, my, x1, y, w1, 16);
-            g.fill(x1, y, x1 + w1, y + 16, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : reach ? 0xFF4A5A6A : 0xFF2A2E38);
-            g.fill(x1 + 1, y + 1, x1 + w1 - 1, y + 15, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
+            boolean hover = in(mx, my, x1, y, w1, 17);
+            g.fill(x1, y, x1 + w1, y + 17, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : reach ? 0xFF4A5A6A : 0xFF2A2E38);
+            g.fill(x1 + 1, y + 1, x1 + w1 - 1, y + 16, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
             g.fill(x1 + 3, y + 3, x1 + 7, y + 7, 0xFF000000 | k.tag.rgb);
-            g.drawString(font, Component.translatable(k.nameKey()), x1 + 10, y + 2, mine ? GOLD : reach ? TEXT : DIM, false);
+            g.drawString(font, Component.translatable(k.nameKey()), x1 + 10, y + 1, mine ? GOLD : reach ? TEXT : DIM, false);
             g.pose().pushPose();
-            g.pose().translate(x1 + 10, y + 10, 0);
+            g.pose().translate(x1 + 10, y + 10.5f, 0);
             g.pose().scale(0.7f, 0.7f, 1f);
             g.drawString(font, Component.translatable(k.effectKey()), 0, 0, mine ? PALE : reach ? SOFT : DIM, false);
             g.pose().popPose();
-            hits.add(new int[] {x1, y, w1, 16, 3, i});
-            y += 17;
+            hits.add(new int[] {x1, y, w1, 17, 3, i});
+            y += 18;
         }
-        g.pose().pushPose();
-        g.pose().translate(x1, y + 2, 0);
-        g.pose().scale(0.75f, 0.75f, 1f);
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.keystone_hint", SkillRules.KEYSTONE_TREE_POINTS), 0, 0, DIM, false);
-        g.pose().popPose();
         if (noticeTicks > 0 && noticeText != null) {
             int alpha = Math.min(255, noticeTicks * 12);
             List<FormattedCharSequence> lines = TextWrap.split(font, noticeText, 330);

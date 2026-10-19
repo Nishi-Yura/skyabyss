@@ -310,8 +310,13 @@ public final class SkillEvents {
         DamageSource source = event.getSource();
         long now = victim.level().getGameTime();
         // 熟練: 技が当たった (予告をよけた直後に当てると多く数える)
-        if (source.getEntity() instanceof ServerPlayer att && !(att instanceof FakePlayer) && att != victim && SkillActions.dealing() != null) {
-            SkillManager.addMastery(att, SkillActions.dealing(), SkillManager.get(att).dodgeUntil >= now ? SkillRules.MASTERY_DODGE_HIT : 1);
+        if (source.getEntity() instanceof ServerPlayer att && att != victim && SkillActions.dealing() != null) {
+            SkillData ad = SkillManager.get(att);
+            Long last = ad.masteryHitAt.get(SkillActions.dealing().id);
+            if (last == null || now - last >= 10) {
+                ad.masteryHitAt.put(SkillActions.dealing().id, now);
+                SkillManager.addMastery(att, SkillActions.dealing(), ad.dodgeUntil >= now ? SkillRules.MASTERY_DODGE_HIT : 1);
+            }
         }
         if (victim instanceof ServerPlayer player) {
             SkillData d = SkillManager.get(player);

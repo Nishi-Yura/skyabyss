@@ -104,6 +104,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public int lastCastSlot = -1;
     public long lastCastTick = Long.MIN_VALUE / 2;
     public String chainSkill = "";
+    // 熟練の「当てた」を数えた時刻 (技ごと。広い技が一度に何体に当たっても、10 tick に 1 度だけ数える)
+    public final Map<String, Long> masteryHitAt = new LinkedHashMap<>();
     public long chainUntil;
     // 最後に持ち主へ送ったマナ (送りすぎないため)
     public float sentMana = -999;
