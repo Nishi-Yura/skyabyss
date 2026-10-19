@@ -158,12 +158,20 @@ public final class TutorialHints {
         if (player.connection == null || player instanceof FakePlayer) {
             return;
         }
-        List<String> act = active(player);
-        if (newlyDone.isEmpty() && act.equals(SENT.get(player.getUUID()))) {
+        Sync s = plan(active(player), SENT.get(player.getUUID()), newlyDone);
+        if (s == null) {
             return;
         }
-        SENT.put(player.getUUID(), act);
-        PacketDistributor.sendToPlayer(player, new Sync(act, newlyDone));
+        SENT.put(player.getUUID(), s.active());
+        PacketDistributor.sendToPlayer(player, s);
+    }
+
+    // 送る中身を決める (純粋)。変わっていなければ null。「済んだ」は newlyDone のときだけ載せる (再送では空)
+    static Sync plan(List<String> act, List<String> sent, List<String> newlyDone) {
+        if (newlyDone.isEmpty() && act.equals(sent)) {
+            return null;
+        }
+        return new Sync(List.copyOf(act), List.copyOf(newlyDone));
     }
 
     @SubscribeEvent
