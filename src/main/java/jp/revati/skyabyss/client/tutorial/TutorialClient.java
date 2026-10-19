@@ -1,9 +1,7 @@
 package jp.revati.skyabyss.client.tutorial;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +14,7 @@ import jp.revati.skyabyss.client.record.RecordClient;
 import jp.revati.skyabyss.party.client.PingClient;
 import jp.revati.skyabyss.pouch.PouchEntries;
 import jp.revati.skyabyss.pouch.PouchUsable;
+import jp.revati.skyabyss.tutorial.DoneBanners;
 import jp.revati.skyabyss.tutorial.TutorialHints;
 import net.minecraft.Util;
 import net.minecraft.client.DeltaTracker;
@@ -39,14 +38,15 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class TutorialClient {
     // 「できた」を出している長さ (ミリ秒)
-    public static final long DONE_MS = 1800;
+    public static final long DONE_MS = DoneBanners.DONE_MS;
     // 画面に同時に出す行の数
     public static final int MAX_LINES = 2;
 
     // 今出ている手引き (サーバーの並び)
     private static List<String> active = List.of();
-    // 済んだ手引き → 済んだ時刻 (ミリ秒。画面が出せない間は進めない)
-    private static final Map<String, Long> DONE = new LinkedHashMap<>();
+    // 済んだ手引きの「できた」(出した一回だけ。時計は見せている間だけ進む)
+    private static final DoneBanners DONE = new DoneBanners();
+    private static long lastFrame = -1;
 
     private TutorialClient() {
     }
@@ -54,7 +54,7 @@ public final class TutorialClient {
     public static void receive(TutorialHints.Sync sync) {
         active = List.copyOf(sync.active());
         for (String id : sync.done()) {
-            DONE.put(id, Util.getMillis());
+            DONE.add(id);
         }
     }
 
@@ -66,6 +66,7 @@ public final class TutorialClient {
     static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         active = List.of();
         DONE.clear();
+        lastFrame = -1;
     }
 
     @SubscribeEvent
@@ -139,17 +140,17 @@ public final class TutorialClient {
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         long now = Util.getMillis();
-        DONE.values().removeIf(t -> now - t > DONE_MS);
-        if (!allowed(mc)) {
-            // 出せない間は「できた」の時計を止める (閉じたあとに見せる)
-            for (Map.Entry<String, Long> e : DONE.entrySet()) {
-                e.setValue(e.getValue() + 50);
-            }
+        long dt = lastFrame < 0 ? 0 : Math.min(now - lastFrame, 250);
+        lastFrame = now;
+        // 出せない間 (会話・画面) は「できた」の時計を止める (閉じたあとに見せる)
+        boolean ok = allowed(mc);
+        DONE.tick(dt, ok);
+        if (!ok) {
             return;
         }
         List<Line> lines = new ArrayList<>();
-        for (String id : DONE.keySet()) {
-            lines.add(new Line(Component.translatable("tutorial.skyabyss.done"), 1f - Mth.clamp((now - DONE.get(id) - (DONE_MS - 600)) / 600f, 0f, 1f), true));
+        for (String id : DONE.ids()) {
+            lines.add(new Line(Component.translatable("tutorial.skyabyss.done"), DONE.alpha(id), true));
         }
         for (String id : active) {
             if (lines.size() >= MAX_LINES) {
