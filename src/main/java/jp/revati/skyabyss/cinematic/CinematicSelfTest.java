@@ -170,12 +170,74 @@ public final class CinematicSelfTest {
             int idx = Integer.parseInt(w[1]);
             String name = VoiceClips.eventName(w[0], idx);
             check(f, sounds.has(name), "no voice sound event " + name);
+            double clipSec = -1;
             try (InputStream in = CinematicSelfTest.class.getResourceAsStream(VoiceClips.clipResource(w[0], idx))) {
                 check(f, in != null, "no voice clip " + VoiceClips.clipResource(w[0], idx));
+                if (in != null) {
+                    clipSec = oggSeconds(in.readAllBytes());
+                }
             } catch (Exception e) {
                 f.add("voice clip read " + name + ": " + e);
             }
+            // 字幕の時刻: 声の長さ = .ogg の長さ、各文字の時刻は単調で長さに収まり、声は台詞の表示時間に収まる
+            VoiceTiming t = VoiceTiming.of(w[0], idx);
+            check(f, t != null, "no voice timing " + name);
+            if (t != null) {
+                check(f, t.starts().length > 0, "voice timing " + name + " has no characters");
+                check(f, clipSec > 0 && Math.abs(t.dur() - clipSec) < 0.01, "voice timing " + name + " dur " + t.dur() + " vs clip " + clipSec);
+                check(f, t.dur() <= Float.parseFloat(w[3]) + 0.05f, "voice timing " + name + " is longer than the line");
+                boolean ok = true;
+                for (int k = 0; k < t.starts().length; k++) {
+                    ok &= t.starts()[k] >= 0f && t.starts()[k] <= t.dur() + 1.0e-4f && (k == 0 || t.starts()[k] >= t.starts()[k - 1]);
+                }
+                check(f, ok, "voice timing " + name + " starts are not monotonic / out of range");
+                check(f, VoiceTiming.revealCount(t, t.dur(), 20) == 20 && VoiceTiming.revealCount(t, -1f, 20) == 0, "voice timing " + name + " reveal ends");
+            }
         }
+        revealSchedule(f);
+    }
+
+    // 字幕の出る数の純関数 (VoiceTiming.revealCount)
+    private static void revealSchedule(List<String> f) {
+        float[] st = {0.0f, 0.5f, 1.0f, 2.0f}; // 4 文字 (2 文字目と 3 文字目、3 文字目と 4 文字目の間があく)
+        float dur = 2.5f;
+        check(f, VoiceTiming.revealCount(st, dur, -0.1f, 4) == 0, "reveal before the voice");
+        check(f, VoiceTiming.revealCount(st, dur, 0.0f, 4) == 1, "reveal first character");
+        check(f, VoiceTiming.revealCount(st, dur, 0.49f, 4) == 1, "reveal holds during a gap");
+        check(f, VoiceTiming.revealCount(st, dur, 0.5f, 4) == 2, "reveal second character");
+        check(f, VoiceTiming.revealCount(st, dur, 1.99f, 4) == 3, "reveal holds during a long pause");
+        check(f, VoiceTiming.revealCount(st, dur, 2.0f, 4) == 4, "reveal last character");
+        check(f, VoiceTiming.revealCount(st, dur, 2.5f, 7) == 7 && VoiceTiming.revealCount(st, dur, 9f, 7) == 7, "reveal finishes when the voice ends");
+        // 別の長さの本文 (英語など) へは割合で写す: 単調で、0 から全文まで
+        int prev = 0;
+        for (float x = -0.5f; x <= 3f; x += 0.05f) {
+            int c = VoiceTiming.revealCount(st, dur, x, 23);
+            check(f, c >= prev && c >= 0 && c <= 23, "reveal is monotonic for a longer text");
+            prev = c;
+        }
+        check(f, prev == 23 && VoiceTiming.revealCount(st, dur, 0.0f, 23) >= 1, "reveal maps to another length");
+        check(f, VoiceTiming.revealCount((VoiceTiming) null, 0f, 9) == 9 && VoiceTiming.revealCount(new float[0], 1f, 0.1f, 5) == 5, "no timing shows the full text");
+    }
+
+    // Ogg Vorbis の長さ (秒): 最後のページの granule position / 標本化周波数 (識別ヘッダーの 4 バイト目から)
+    private static double oggSeconds(byte[] b) {
+        int rate = 0;
+        for (int i = 0; i + 16 < b.length; i++) {
+            if (b[i] == 1 && b[i + 1] == 'v' && b[i + 2] == 'o' && b[i + 3] == 'r') {
+                rate = (b[i + 12] & 0xFF) | (b[i + 13] & 0xFF) << 8 | (b[i + 14] & 0xFF) << 16 | (b[i + 15] & 0xFF) << 24;
+                break;
+            }
+        }
+        for (int i = b.length - 14; i >= 0; i--) {
+            if (b[i] == 'O' && b[i + 1] == 'g' && b[i + 2] == 'g' && b[i + 3] == 'S') {
+                long g = 0;
+                for (int k = 7; k >= 0; k--) {
+                    g = g << 8 | (b[i + 6 + k] & 0xFF);
+                }
+                return rate > 0 ? (double) g / rate : -1;
+            }
+        }
+        return -1;
     }
 
     private static JsonObject loadJson(String path, List<String> f) {

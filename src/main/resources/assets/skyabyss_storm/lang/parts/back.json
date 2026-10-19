@@ -173,8 +173,8 @@
   },
   "sign.skyabyss.storm_west.1": "",
   "sign.skyabyss.storm_west.2": {
-    "en": "Windbone",
-    "ja": "風切りの骨"
+    "en": "Beams or vents",
+    "ja": "梁か風で越える"
   },
   "sign.skyabyss.storm_west.3": {
     "en": "Ride the wind",
@@ -183,8 +183,8 @@
   "sign.skyabyss.storm_west.4": "",
   "sign.skyabyss.storm_east.1": "",
   "sign.skyabyss.storm_east.2": {
-    "en": "Thunderbone",
-    "ja": "雷の骨"
+    "en": "Bolts to rods",
+    "ja": "柱へ雷を導く"
   },
   "sign.skyabyss.storm_east.3": {
     "en": "Bolts to rods",
@@ -193,8 +193,8 @@
   "sign.skyabyss.storm_east.4": "",
   "sign.skyabyss.storm_front.1": "",
   "sign.skyabyss.storm_front.2": {
-    "en": "Eye Hall",
-    "ja": "眼の間"
+    "en": "Mirror the light",
+    "ja": "鏡で光を三つへ"
   },
   "sign.skyabyss.storm_front.3": {
     "en": "Light to three",

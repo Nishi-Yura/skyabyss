@@ -9,6 +9,7 @@ import org.joml.Matrix4f;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -50,6 +51,11 @@ public final class BoardBeamClient {
         return BEAMS.containsKey(key);
     }
 
+    // 全部消す (選定・撮影用)
+    public static void clearAll() {
+        Minecraft.getInstance().execute(BEAMS::clear);
+    }
+
     // 表示中の知らせの数 (確認用)
     public static int active() {
         return BEAMS.size();
@@ -61,6 +67,14 @@ public final class BoardBeamClient {
             return;
         }
         clientTick++;
+        Minecraft mc = Minecraft.getInstance();
+        for (Entry e : BEAMS.values()) {
+            // A/B/C の粒 (CURRENT はサーバーの粒だけ)
+            jp.revati.skyabyss.Config.MarkerStyle st = MarkerArt.style(MarkerArt.isReturn(e.beam()));
+            if (st != jp.revati.skyabyss.Config.MarkerStyle.CURRENT) {
+                MarkerArt.particles(mc, e.beam(), st, clientTick, MarkerArt.returnTitan(mc));
+            }
+        }
         Iterator<Entry> it = BEAMS.values().iterator();
         while (it.hasNext()) {
             if (it.next().until() < clientTick) {
@@ -88,17 +102,27 @@ public final class BoardBeamClient {
         float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         double time = clientTick + partial;
         BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        // 通常合成の面 (A/B/C の筋の本体。昼空でも色が乗る)。Tesselator は 1 本しか使えないので別の置き場
+        ByteBufferBuilder alphaStore = new ByteBufferBuilder(1 << 17);
+        BufferBuilder alphaBuf = new BufferBuilder(alphaStore, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         for (Entry e : BEAMS.values()) {
             TitanEndNetwork.Beam b = e.beam();
             // 消えかけ (残り 10 tick) はなめらかに薄れる。現れるときも少し
             float life = Mth.clamp((e.until() - (float) time) / 10f, 0f, 1f);
             float pulse = 0.78f + 0.22f * Mth.sin((float) (time / 50.0 * Mth.TWO_PI));
+            jp.revati.skyabyss.Config.MarkerStyle style = MarkerArt.style(MarkerArt.isReturn(b));
+            if (style != jp.revati.skyabyss.Config.MarkerStyle.CURRENT) {
+                MarkerArt.draw(buf, alphaBuf, pose, cam, b, style, life, time, MarkerArt.returnTitan(mc));
+                continue;
+            }
             Painter p = new Painter(buf, pose, cam, b.rgb(), life * pulse);
             p.beam(b);
             p.frame(b);
         }
         MeshData mesh = buf.build();
-        if (mesh == null) {
+        MeshData alphaMesh = alphaBuf.build();
+        if (mesh == null && alphaMesh == null) {
+            alphaStore.close();
             return;
         }
         RenderSystem.enableBlend();
@@ -107,7 +131,15 @@ public final class BoardBeamClient {
         RenderSystem.disableCull();
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferUploader.drawWithShader(mesh);
+        RenderSystem.defaultBlendFunc();
+        if (alphaMesh != null) {
+            BufferUploader.drawWithShader(alphaMesh);
+        }
+        alphaStore.close();
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        if (mesh != null) {
+            BufferUploader.drawWithShader(mesh);
+        }
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
         RenderSystem.defaultBlendFunc();
