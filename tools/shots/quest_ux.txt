@@ -7,6 +7,10 @@ timeout 600
 render 6
 clouds off
 
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
 cmd time set noon
 cmd weather clear
 cmd gamemode creative
@@ -16,9 +20,11 @@ cmd summon skyabyss:storyteller -2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRe
 cmd summon skyabyss:whale_chaser 2 -60 0 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
 cmd skyabyss quest forget @s all
 hud on
-camera minecraft:overworld 0 -60 5.5 180 -8
+camera minecraft:overworld 0 -58.5 9 180 0
 waitchunks
 wait 100
+cmd skyabyss cinematic stop
+wait 60
 
 # 何も進めていないとき: 新しい雑談があれば小さな点
 shot near_chat
@@ -49,12 +55,13 @@ wait 60
 shot wall_far
 
 # 旅嚢の "NEW": 新しく入った品を持ち物に出し、掃除で袋に入るのを待つ。ホットバーの左に [I] 旅嚢 NEW、画面の枠に NEW の札
-cmd skyabyss pouch hold off
+cmd skyabyss pouch hold false
+cmd fill -8 -60 2 8 -55 2 minecraft:air
 cmd give @s skyabyss:resonance_crystal 3
 cmd give @s skyabyss:stone_whale_shard 5
 cmd give @s skyabyss:lore_page 1
 cmd give @s skyabyss:sky_key_fragment 1
-camera minecraft:overworld 0 -60 5.5 180 -8
+camera minecraft:overworld 0 -58.5 9 180 0
 wait 120
 shot pouch_hint
 key skyabyss_pouch.key.open

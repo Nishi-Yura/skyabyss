@@ -13,8 +13,8 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs/review/previews/quest_ux_sheet.png"
 CELLS = [
-    ("near_chat", "Small dot over the storyteller: a chat you have not heard (nothing else pending)"),
-    ("near_new", "Gold ! over the storyteller (next main step); chapter label top-left"),
+    ("near_chat", "Before the first sync (markers arrive once a second): nothing yet"),
+    ("near_new", "Gold ! over the storyteller (next main step), small dot over the chaser (new chat); chapter label top-left"),
     ("near_ready", "Gold ? over both (report stage)"),
     ("far_40", "Seen from about 40 blocks, drawn larger"),
     ("wall_near", "Behind a wall at 10 blocks: still visible"),
