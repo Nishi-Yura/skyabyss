@@ -36,7 +36,7 @@ public final class EmberBackLayout {
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。8: ボス部屋の大門 (熾の底の前室・鍛え手の扉。EmberBossGates)、1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く、4: 体を低ポリ案 C の火蜥蜴に、5: 体を口が開いた案 C から作り直し、6: 詰み監査の修正 (脚のあいだ・火口の縁の出られない凹みを埋めた)、7: 眠る試練を「静かな試練」(石は自分で鳴らす・いつでも入れて最後までできる) にした (13 の 10.2節)
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。1: 骨組みの仮の箱 (体はまだ建てない)、2: 体と部屋を建てる、3: 口の灯り・炉の煙を低く、4: 体を低ポリ案 C の火蜥蜴に、5: 体を口が開いた案 C から作り直し、6: 詰み監査の修正 (脚のあいだ・火口の縁の出られない凹みを埋めた)、7: 眠る試練を「静かな試練」(石は自分で鳴らす・いつでも入れて最後までできる) にした (13 の 10.2節)
     // 9: ボス部屋の大門と建築の監査の両方
-    public static final int LAYOUT_VERSION = 9; // 8: 建築の監査 (下りる段の高さ・火口の段の最初の向き)
+    public static final int LAYOUT_VERSION = 11; // 9: 建築の監査 (体の 1 ブロックの浮き・くぼみを直す)。8: 建築の監査 (下りる段の高さ・火口の段の最初の向き)
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。2.5節の 220 ブロック)
@@ -135,9 +135,9 @@ public final class EmberBackLayout {
     public static final BlockPos SMITH_CENTER = new BlockPos(26, 80, 45);
     public static final int SMITH_RADIUS = 13;
     public static final Box SMITH = new Box(13, 80, 32, 39, 94, 58);
-    // 火守り (幅 21・長さ 69・高さ 31 の谷。上は背の亀裂 CRACK で、背の上まで抜けて空が見える) → C3
+    // 火守り (幅 21・長さ 45・高さ 31 の谷。旧い版は長さ 69 で、火床まで歩くだけの広い部屋だった。上は背の亀裂 CRACK で、背の上まで抜けて空が見える) → C3
     public static final int FLOOR_SOUTH = 78;
-    public static final Box SOUTH = new Box(-10, 78, -6, 10, 108, 62);
+    public static final Box SOUTH = new Box(-10, 78, -6, 10, 108, 38);
     // 熾の底の前室 (9 × 7。螺旋の階段の下) → B (碑文 lore_ember_heart と休み場 heart)
     public static final int FLOOR_HEART = 50;
     public static final Box HEART_ANTE = new Box(-4, FLOOR_HEART, -29, 4, 56, -23);
@@ -174,17 +174,17 @@ public final class EmberBackLayout {
     // 背の上への出口の通路の床 (井戸の南から z -1 まで)
     public static final int BACK_EXIT_FLOOR = 118;
     // 背の亀裂 (火守りの谷の天井から背の上まで。上に格子の手すり)
-    public static final Box CRACK = new Box(-2, 109, 14, 2, 140, 56);
+    public static final Box CRACK = new Box(-2, 109, 10, 2, 140, 32);
 
     // ---------------------------------------------------------------- 熾り石・抜け道の光る床・碑文 (→ B が置く。担当の箱の中の reserved)
     // 熾り石 (ブロックの位置。床 +1)。西は奥の岸、東は鍛え手の間の奥、南は谷の奥 (火床の向こう)
     public static final BlockPos STONE_WEST = new BlockPos(-25, FLOOR_WEST + 1, 55);
     public static final BlockPos STONE_EAST = new BlockPos(26, FLOOR_EAST + 1, 57);
-    public static final BlockPos STONE_SOUTH = new BlockPos(0, FLOOR_SOUTH + 1, 61);
+    public static final BlockPos STONE_SOUTH = new BlockPos(0, FLOOR_SOUTH + 1, 37);
     // 抜け道の光る床 (3 × 3 の中心の床のブロック)。石が鳴ると光り、踏むと広間の扉の内側 (SHORTCUT_*_TO) へ運ぶ
     public static final BlockPos PAD_WEST = new BlockPos(-25, FLOOR_WEST, 51);
     public static final BlockPos PAD_EAST = new BlockPos(26, FLOOR_EAST, 53);
-    public static final BlockPos PAD_SOUTH = new BlockPos(0, FLOOR_SOUTH, 57);
+    public static final BlockPos PAD_SOUTH = new BlockPos(0, FLOOR_SOUTH, 33);
     public static final BlockPos SHORTCUT_WEST_TO = new BlockPos(-11, 86, -34);
     public static final BlockPos SHORTCUT_EAST_TO = new BlockPos(11, 86, -34);
     public static final BlockPos SHORTCUT_SOUTH_TO = new BlockPos(0, 86, -23);
@@ -198,7 +198,7 @@ public final class EmberBackLayout {
             new Inscription("lore_ember_hub", new BlockPos(0, 87, -37), Direction.NORTH),
             new Inscription("lore_ember_west", new BlockPos(-28, FLOOR_WEST + 1, 55), Direction.NORTH),
             new Inscription("lore_ember_east", new BlockPos(23, FLOOR_EAST + 1, 57), Direction.NORTH),
-            new Inscription("lore_ember_south", new BlockPos(3, FLOOR_SOUTH + 1, 61), Direction.NORTH),
+            new Inscription("lore_ember_south", new BlockPos(3, FLOOR_SOUTH + 1, 37), Direction.NORTH),
             new Inscription("lore_ember_heart", new BlockPos(3, FLOOR_HEART + 1, -28), Direction.SOUTH));
 
     // 試練の入口の一言の看板 (広間の扉の内側の脇。3 枚)
@@ -298,7 +298,7 @@ public final class EmberBackLayout {
                 out.add(new Box(-1, FLOOR_SOUTH, -6, 1, FLOOR_SOUTH + 4, -5));
                 out.add(rest("s0").area());
                 // 谷の奥 (南の熾り石・光る床・碑文。火床は C3 がこれより北に置く)
-                out.add(new Box(-4, FLOOR_SOUTH, 56, 4, FLOOR_SOUTH + 4, 62));
+                out.add(new Box(-4, FLOOR_SOUTH, 32, 4, FLOOR_SOUTH + 4, 38));
                 // 背の亀裂の下 (谷の天井に抜ける縦の溝。C3 はここを空けておく)
                 out.add(new Box(CRACK.minX(), 100, CRACK.minZ(), CRACK.maxX(), SOUTH.maxY(), CRACK.maxZ()));
             }

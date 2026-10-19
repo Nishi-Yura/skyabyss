@@ -36,7 +36,7 @@ final class StormGuide {
     }
 
     // 目的の板の文の id (lang の gui.skyabyss.storm_goal.<id>)。自己テストが ja・en の両方にあることを見る
-    static final List<String> GOAL_IDS = List.of("west.gap", "west.rib", "west.stone", "west.done", "west.sleep", "east.circuit", "east.raiju", "east.stone",
+    static final List<String> GOAL_IDS = List.of("west.gap", "west.rib", "west.stone", "west.done", "west.sleep", "east.circuit", "east.pad", "east.raiju", "east.stone",
             "east.done", "east.sleep", "front.mirror", "front.stone", "front.done", "front.sleep", "hub.stones", "hub.keel");
 
     static final int WEST_TOTAL = WEST_GAPS.length + RIB_LAYERS + 1;
@@ -128,7 +128,15 @@ final class StormGuide {
             if (doors >= EAST_DOORS.length) {
                 return new Goal("east.raiju", pr[0], pr[1], 0, 0, 0);
             }
-            return new Goal("east.circuit", pr[0], pr[1], doors, EAST_DOORS.length, 0);
+            // 今の回路 (まだ開いていない中で、いちばん近い金の床の回路): 橙の筋が戸の柱へ届いていれば「金の床へ」、まだなら「レバーを倒せ」
+            StormCircuit.Circuit cur = null;
+            for (StormCircuit.Circuit c : StormCircuit.CIRCUITS) {
+                if (!StormCircuit.done(p, c) && (cur == null || Math.abs(c.pad().getX() - v.x) < Math.abs(cur.pad().getX() - v.x))) {
+                    cur = c;
+                }
+            }
+            boolean armed = cur != null && StormCircuit.trace(cur, lp -> StormCircuit.leverOn(level, lp)).outcome() == StormCircuit.Outcome.DOOR;
+            return new Goal(armed ? "east.pad" : "east.circuit", pr[0], pr[1], doors, EAST_DOORS.length, 0);
         }
         if (StormBackLayout.inFront(v)) {
             int[] pr = progress(p, Trial.FRONT, v);

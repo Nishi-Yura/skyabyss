@@ -1,0 +1,67 @@
+# UI まとめ直し (docs/design/18 の 8・9・14 章、30)。./gradlew runShots -Pscript=tools/shots/ui_pass.txt [-PshotsName=ui_pass]
+# 目的の帯の折り返し (GUI 4/3/2)・体力の帯 (増えた体力 + 吸収 + 防具)・経験値の列の位置・目的の標・章の題字の札・中ボスのボスバーの印・遺物の選択画面。
+world ui_pass flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd attribute @s minecraft:generic.max_health base set 60
+cmd item replace entity @s armor.chest with minecraft:iron_chestplate
+cmd item replace entity @s armor.head with minecraft:iron_helmet
+hud on
+waitchunks
+chat clear
+guiscale 4
+# 新しい世界の開幕の暗転と題字と場面が終わるまで待つ
+wait 700
+cmd effect give @s minecraft:absorption 600 4 true
+wait 300
+wait 30
+
+echo === GUI 4: objective band wrapped, vitals bar, markers
+huddemo all
+wait 90
+shot ui_gui4
+guiscale 3
+wait 30
+shot ui_gui3
+guiscale 2
+wait 30
+shot ui_gui2
+huddemo off
+guiscale 3
+chat clear
+wait 20
+
+echo === chapter title card
+cmd skyabyss dev arc card titan_whale
+wait 95
+shot ui_chapter_a
+wait 90
+shot ui_chapter_b
+wait 260
+
+echo === mid bosses
+cmd execute at @s run summon skyabyss:whalebone_captain ~3 ~ ~8 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd execute at @s run summon skyabyss:elder_sentry ~-3 ~ ~8 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd execute at @s run summon skyabyss:pearl_keeper ~6 ~ ~8 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd execute at @s run summon skyabyss:tide_beckoner ~-6 ~ ~8 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+wait 60
+shot ui_boss
+cmd kill @e[type=!minecraft:player,distance=..40]
+wait 20
+
+echo === heart reward (invulnerable while open)
+cmd skyabyss dev heartreward stone_whale
+waitscreen 100 HeartRewardScreen
+wait 120
+heartreward focus 1
+wait 6
+shot ui_reward
+close
+cmd skyabyss dev heartreward reset
+echo done

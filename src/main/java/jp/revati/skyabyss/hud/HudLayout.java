@@ -219,7 +219,7 @@ public final class HudLayout {
         }
         left.sort((a, b) -> a.id.compareTo(b.id));
         // 3. 左上・右上の帯
-        stackColumn(s, r, left, false);
+        stackLeft(s, r, left);
         List<Request> right = new ArrayList<>();
         for (Request q : reqs) {
             if (q.region == Region.TOP_RIGHT) {
@@ -400,6 +400,51 @@ public final class HudLayout {
     }
 
     // ------------------------------------------------------------ 帯 (左上・右上)
+    // 左上の帯: 得た経験値の列 (POPUPS_TL) は、成長の表示 (STATUS_TL) のすぐ下に置く (目的の帯の下ではない)。ただし優先は最後のまま:
+    // まず列なしで積み、列を足しても一つも落ちないときだけ、列を成長の下に入れた積み直しを採る (入らなければ列を出さない)
+    private static void stackLeft(Scene s, Result r, List<Request> left) {
+        Request popups = null;
+        List<Request> rest = new ArrayList<>();
+        for (Request q : left) {
+            if (q.id == Id.POPUPS_TL) {
+                popups = q;
+            } else {
+                rest.add(q);
+            }
+        }
+        Map<Id, Rect> before = new EnumMap<>(Id.class);
+        before.putAll(r.placed);
+        EnumSet<Id> droppedBefore = EnumSet.copyOf(r.dropped.isEmpty() ? EnumSet.noneOf(Id.class) : r.dropped);
+        stackColumn(s, r, rest, false);
+        if (popups == null) {
+            return;
+        }
+        Map<Id, Rect> base = new EnumMap<>(Id.class);
+        base.putAll(r.placed);
+        EnumSet<Id> baseDropped = EnumSet.copyOf(r.dropped.isEmpty() ? EnumSet.noneOf(Id.class) : r.dropped);
+        r.placed.clear();
+        r.placed.putAll(before);
+        r.dropped.clear();
+        r.dropped.addAll(droppedBefore);
+        List<Request> withPopups = new ArrayList<>(rest);
+        int at = 0;
+        for (int i = 0; i < withPopups.size(); i++) {
+            if (withPopups.get(i).id == Id.STATUS_TL) {
+                at = i + 1;
+            }
+        }
+        withPopups.add(at, popups);
+        stackColumn(s, r, withPopups, false);
+        boolean keepsAll = r.placed.keySet().containsAll(base.keySet());
+        if (!keepsAll || !r.placed.containsKey(Id.POPUPS_TL)) {
+            r.placed.clear();
+            r.placed.putAll(base);
+            r.dropped.clear();
+            r.dropped.addAll(baseDropped);
+            r.dropped.add(Id.POPUPS_TL);
+        }
+    }
+
     private static void stackColumn(Scene s, Result r, List<Request> items, boolean right) {
         int y = M;
         for (Request q : items) {

@@ -99,6 +99,10 @@ public final class Config {
             .comment("ボス戦で技の名前をどう出すか。SMALL = ボスバーの下に小さな一行 (既定), FULL = 画面の上のほうに大きく (印つき), OFF = 出さない (床の予告だけ)")
             .defineEnum("bossAttackNames", BossAttackNames.SMALL);
 
+    public static final ModConfigSpec.BooleanValue STYLED_VITALS = CLIENT_BUILDER
+            .comment("体力・防具・満腹・空気を mod の帯 (数字つき。体力が増えても上へ伸びない) で出すか (false = バニラのハート)")
+            .define("styledVitals", true);
+
     public static final ModConfigSpec.BooleanValue OBJECTIVE_STRIP = CLIENT_BUILDER
             .comment("メインの目的を左上の細い帯に常に出すか (false = 出さない。全文は U のクエストログ)")
             .define("objectiveStrip", true);

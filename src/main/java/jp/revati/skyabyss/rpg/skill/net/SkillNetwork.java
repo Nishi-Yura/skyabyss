@@ -5,6 +5,7 @@ import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.client.skill.SkillClient;
 import jp.revati.skyabyss.rpg.skill.Skill;
+import jp.revati.skyabyss.rpg.skill.SkillCalling;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
@@ -30,6 +31,16 @@ public final class SkillNetwork {
                 // ラムダの中身はクライアントで受信したときにだけ実行されるので、専用サーバーでも安全
                 .playToClient(ManaPayload.TYPE, ManaPayload.STREAM_CODEC, (payload, context) -> SkillClient.onMana(payload))
                 .playToClient(SkillCastResultPayload.TYPE, SkillCastResultPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCastResult(payload))
+                .playToClient(CallingOpenPayload.TYPE, CallingOpenPayload.STREAM_CODEC, (payload, context) -> SkillClient.onCallingOpen(payload))
+                .playToServer(CallingChoosePayload.TYPE, CallingChoosePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillCalling.Result r = SkillCalling.choose(player, payload.tree());
+                        if (r != SkillCalling.Result.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.calling.failed"));
+                        }
+                    }
+                })
                 .playToServer(SkillCastPayload.TYPE, SkillCastPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
                         SkillManager.cast(player, payload.slot());
@@ -52,9 +63,32 @@ public final class SkillNetwork {
                         }
                     }
                 })
+                .playToServer(SkillRunePayload.TYPE, SkillRunePayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        SkillManager.RuneResult r = SkillManager.chooseRune(player, Skill.byId(payload.skill()), payload.index());
+                        if (r != SkillManager.RuneResult.OK) {
+                            SkillManager.sync(player);
+                            Notice.bar(player, ModText.deny("message.skyabyss.skill.rune_failed." + r.name().toLowerCase()));
+                        }
+                    }
+                })
+                .playToServer(SkillLoadoutPayload.TYPE, SkillLoadoutPayload.STREAM_CODEC, (payload, context) -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        if (payload.save()) {
+                            SkillManager.saveLoadout(player, payload.index());
+                            Notice.bar(player, ModText.lore("message.skyabyss.skill.loadout_saved", payload.index() + 1));
+                        } else {
+                            SkillManager.LoadoutResult r = SkillManager.loadLoadout(player, payload.index());
+                            if (r != SkillManager.LoadoutResult.OK) {
+                                SkillManager.sync(player);
+                                Notice.bar(player, ModText.deny("message.skyabyss.skill.loadout_failed." + r.name().toLowerCase()));
+                            }
+                        }
+                    }
+                })
                 .playToServer(SkillRespecPayload.TYPE, SkillRespecPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        int cost = SkillRules.respecCost(SkillManager.get(player).respecs);
+                        int cost = SkillManager.respecCostFor(player);
                         if (payload.cost() != cost && !player.isCreative()) {
                             SkillManager.sync(player);
                             return;

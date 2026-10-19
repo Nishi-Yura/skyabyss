@@ -892,6 +892,18 @@ public final class ShotRunner {
             case "quests", "questlog" -> jp.revati.skyabyss.client.quest.QuestLogScreen::new;
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
+            case "calling" -> () -> {
+                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(1);
+                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.ROCK);
+                return c;
+            };
+            case "calling2" -> () -> {
+                var c = new jp.revati.skyabyss.rpg.client.skill.CallingScreen(2);
+                c.pick(jp.revati.skyabyss.rpg.skill.SkillTree.WIND);
+                return c;
+            };
+            case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
+            case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
             case "grave" -> jp.revati.skyabyss.client.grave.GraveScreen.Sample::new;

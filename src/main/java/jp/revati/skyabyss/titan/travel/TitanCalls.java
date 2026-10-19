@@ -97,6 +97,12 @@ public final class TitanCalls {
         return Voyages.state(player).unlocked.contains(id);
     }
 
+    // 認められているか: その巨神の心臓を倒した (巨神の記憶の撃破の記録、またはコマンドの認め)。笛を渡す条件
+    public static boolean recognized(ServerPlayer player, String id) {
+        TitanMemoryData.Record r = TitanMemoryData.get(player.server).peek(player.getUUID(), id);
+        return (r != null && r.clears > 0) || Voyages.state(player).unlocked.contains(id);
+    }
+
     // 出会ったと記す (記録がなければ true)
     public static boolean markMet(ServerPlayer player, String id) {
         return Voyages.state(player).met.add(id);
@@ -147,7 +153,7 @@ public final class TitanCalls {
         meetAndGive(player);
     }
 
-    // 出会いを調べ、出会った巨神の笛を一度だけ渡す。渡した数を返す (旅のできる巨神の、心臓のあとの笛は Voyages.giveCalls が渡す)
+    // 出会いを調べ、心臓を倒して認められた巨神の笛を一度だけ渡す。渡した数を返す (旅のできる巨神の、心臓のあとの笛は Voyages.giveCalls が渡す)
     public static int meetAndGive(ServerPlayer player) {
         TravelState s = Voyages.state(player);
         int given = 0;
@@ -161,7 +167,8 @@ public final class TitanCalls {
                     s.met.add(id);
                 }
             }
-            if (!met(player, id) || s.callGiven.contains(id)) {
+            // 笛は「出会った」だけでは渡さない (近づいただけで笛が手に入る不具合)。渡すのは、その巨神の心臓を倒して認められた段 (物語の決めた一歩) だけ
+            if (!recognized(player, id) || s.callGiven.contains(id)) {
                 continue;
             }
             TitanKind kind = TitanKind.byId(id);

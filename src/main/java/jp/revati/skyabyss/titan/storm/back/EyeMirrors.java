@@ -178,12 +178,18 @@ public final class EyeMirrors {
     // 最短の解き方 (回す鏡の番号の並び。解けなければ null)。自己テストが世界の鏡で同じ手を打って確かめる
     @Nullable
     public static List<Integer> solvePath(Config cfg) {
+        return solveFrom(cfg, cfg.init(), 0);
+    }
+
+    // 今の鏡の向き rots・光った受け羽の組 mask から、最短の解き方 (ヒントの「次の一手」用。右回しだけ数える)
+    @Nullable
+    public static List<Integer> solveFrom(Config cfg, int[] rots0, int mask0) {
         int n = cfg.mirrors().size();
         int full = (1 << cfg.receivers().size()) - 1;
         ArrayDeque<Long> q = new ArrayDeque<>();
         Map<Long, long[]> parent = new HashMap<>();
-        int[] start = cfg.init().clone();
-        long s0 = encode(start, lit(cfg, start, 0));
+        int[] start = rots0.clone();
+        long s0 = encode(start, lit(cfg, start, mask0));
         q.add(s0);
         parent.put(s0, null);
         while (!q.isEmpty()) {
@@ -382,6 +388,49 @@ public final class EyeMirrors {
             return;
         }
         StormFx.to(progress.group, () -> traceAndDraw(level, progress));
+        tickHint(level, progress);
+    }
+
+    // 迷ったときの助け (25 の 3章): 60 秒、鏡を回さず受け羽も増えなければ、次に回す鏡が光の粒で光り、一行が出る。回すか受け羽が光ると、また 60 秒数える
+    static final int HINT_IDLE = 20 * 60;
+    private static final Map<UUID, Long> LAST_ACT = new HashMap<>();
+    private static final Map<UUID, Integer> LAST_MASK = new HashMap<>();
+    private static final Map<UUID, Long> HINT_SAID = new HashMap<>();
+
+    private static void tickHint(ServerLevel level, StormProgress progress) {
+        UUID g = progress.group;
+        long now = level.getGameTime();
+        int mask = progress.receivers() & 7;
+        Integer lastMask = LAST_MASK.put(g, mask);
+        if (lastMask == null || lastMask != mask) {
+            LAST_ACT.put(g, now);
+            return;
+        }
+        long idle = now - LAST_ACT.computeIfAbsent(g, k -> now);
+        if (idle < HINT_IDLE || mask == 7) {
+            return;
+        }
+        List<Integer> path = solveFrom(progress.config(), progress.mirrorRots(), mask);
+        if (path == null || path.isEmpty()) {
+            return;
+        }
+        int[] m = progress.config().mirrors().get(path.get(0));
+        BlockPos at = gridCell(m[0], m[1]);
+        StormFx.to(g, () -> {
+            for (int i = 0; i < 6; i++) {
+                double a = Math.PI * 2 * i / 6 + now * 0.08;
+                level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5 + Math.cos(a) * 0.7, at.getY() + 1.4, at.getZ() + 0.5 + Math.sin(a) * 0.7, 1, 0, 0.02, 0, 0.0);
+            }
+            level.sendParticles(ParticleTypes.GLOW, at.getX() + 0.5, at.getY() + 2.2, at.getZ() + 0.5, 1, 0.1, 0.1, 0.1, 0.0);
+        });
+        if (now - HINT_SAID.getOrDefault(g, -10000L) > 600) {
+            HINT_SAID.put(g, now);
+            for (ServerPlayer p : Groups.online(level, g)) {
+                if (StormBackLayout.inFront(p.position())) {
+                    Notice.bar(p, ModText.hint("message.skyabyss.storm.mirror_next"));
+                }
+            }
+        }
     }
 
     // 光の筋の見た目 (25 の 2.2): 粒ではなく、光る細い箱 (block_display) をつなぐ。光の筋が変わったときだけ置き直す
@@ -584,6 +633,7 @@ public final class EyeMirrors {
         }
         int rot = (progress.mirrorRots()[index] + step) % 4;
         progress.setMirrorRot(index, rot);
+        LAST_ACT.put(progress.group, level.getGameTime());
         BlockState s = level.getBlockState(pos);
         if (s.is(StormBackSetup.MIRROR.get())) {
             level.setBlock(pos, s.setValue(StormBlocks.Mirror.ROT, rot), 3);
@@ -614,10 +664,16 @@ public final class EyeMirrors {
 
     static void forget(UUID group) {
         LAST_RESET.remove(group);
+        LAST_ACT.remove(group);
+        LAST_MASK.remove(group);
+        HINT_SAID.remove(group);
     }
 
     static void clear() {
         LAST_RESET.clear();
+        LAST_ACT.clear();
+        LAST_MASK.clear();
+        HINT_SAID.clear();
         beam = List.of();
         beamSig = "";
     }

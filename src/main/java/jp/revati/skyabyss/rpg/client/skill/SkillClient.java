@@ -36,6 +36,31 @@ public final class SkillClient {
         }
     }
 
+    // 伝説の武器の説明に、書き換わる技を一行添える
+    @SubscribeEvent
+    static void onTooltip(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) {
+        String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(event.getItemStack().getItem()).getPath();
+        for (jp.revati.skyabyss.rpg.skill.Rune r : jp.revati.skyabyss.rpg.skill.Rune.values()) {
+            if (r.legendary() && r.weapon.equals(path)) {
+                event.getToolTip().add(net.minecraft.network.chat.Component.translatable("tooltip.skyabyss.legend_rewrite",
+                        net.minecraft.network.chat.Component.translatable(r.skillNameKey()), net.minecraft.network.chat.Component.translatable(r.nameKey()))
+                        .withColor(0xF2D78A));
+                return;
+            }
+        }
+    }
+
+    // 天職を選べる (サーバーが知らせた) 段。0 = まだ。K の画面のボタンを出す
+    public static int callingReady;
+
+    public static void onCallingOpen(jp.revati.skyabyss.rpg.skill.net.CallingOpenPayload payload) {
+        callingReady = payload.which();
+        Minecraft mc = Minecraft.getInstance();
+        if (payload.open() && mc.player != null && !(mc.screen instanceof CallingScreen)) {
+            mc.setScreen(new CallingScreen(payload.which()));
+        }
+    }
+
     public static void onCastResult(SkillCastResultPayload payload) {
         int i = payload.slot();
         if (i < 0 || i >= slotFlash.length) {

@@ -439,6 +439,12 @@ public final class TitanCallSelfTest {
                 "met the thunder wing while it was cruising", failures);
         wing.restHere(TitanStay.TICKS);
         check(wing.isPerched(), "restHere did not perch", failures);
+        // 出会っただけでは笛は渡らない (心臓を倒して認められてから)
+        int none = TitanCalls.meetAndGive(p);
+        check(none == 0 && s.met.contains(Titans.THUNDER_WING) && !s.callGiven.contains(Titans.THUNDER_WING)
+                && jp.revati.skyabyss.pouch.Pouch.countAll(p, TravelSetup.THUNDER_WING_CALL.get())
+                        + p.getInventory().countItem(TravelSetup.THUNDER_WING_CALL.get()) == 0, "meeting alone gave a call (" + none + ")", failures);
+        jp.revati.skyabyss.loot.TitanMemoryData.get(level.getServer()).record(TEST_A, Titans.THUNDER_WING).clears = 1;
         int given = TitanCalls.meetAndGive(p);
         check(given >= 1 && s.met.contains(Titans.THUNDER_WING) && s.callGiven.contains(Titans.THUNDER_WING)
                 && jp.revati.skyabyss.pouch.Pouch.countAll(p, TravelSetup.THUNDER_WING_CALL.get())

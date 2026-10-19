@@ -94,7 +94,7 @@ public final class MarkerArt {
     private static TitanEndNetwork.Beam fakeBoard(String titan, double x, double y, double z, float yaw) {
         int rgb = BoardGlow.colour(titan);
         return switch (titan) {
-            case Titans.TIDE_SHELL -> new TitanEndNetwork.Beam(titan, rgb, x, y + 2.3, z, 3.0f, 2.5f, 3.5f, yaw, y - 6, y + 46, 1.6f, 200000);
+            case Titans.TIDE_SHELL -> new TitanEndNetwork.Beam(titan, rgb, x, y + 2.0, z, 3.0f, 2.0f, 3.0f, yaw, y, y + 1, 1.6f, 200000);
             case Titans.EMBER -> new TitanEndNetwork.Beam(titan, rgb, x, y + 3.0, z, 4.0f, 3.2f, 5.0f, yaw, y - 2, y + 44, 1.3f, 200000);
             case Titans.THUNDER_WING -> new TitanEndNetwork.Beam(titan, rgb, x, y + 1.5, z, 3.5f, 2.5f, 3.5f, 0f, y, y + 60, 1.4f, 200000);
             default -> new TitanEndNetwork.Beam(titan, rgb, x, y, z, 1.6f, 2.6f, 1.6f, 0f, y, y + 32, 0.9f, 200000);
@@ -117,6 +117,9 @@ public final class MarkerArt {
                 case B -> returnB(g, b, time, titan);
                 default -> returnC(g, b, time);
             }
+        } else if (Titans.TIDE_SHELL.equals(b.key()) && Math.abs(b.hx() - b.hz()) < 0.01f) {
+            // 潮殻の乗り込み口: 昇る柱ではなく、入る戸口 (光の門・水面の光の道・内向きの山形)。どの様式でも同じ
+            boardDoorway(g, b, time);
         } else {
             switch (style) {
                 case A -> boardA(g, b, time);
@@ -199,6 +202,88 @@ public final class MarkerArt {
 
     private static boolean closed(String titan) {
         return !titan.equals(Titans.TIDE_SHELL);
+    }
+
+    // ---------------------------------------------------------------- 潮殻の戸口 (門の形の標)
+
+    public static final double DOORWAY_PATH = 17.0;
+    public static final double DOORWAY_OUT = 12.0;
+
+    // 潮殻の乗り込み口は「入る」所なので、上へ昇る柱や上向きの山形は出さない。海面に立つ光の門 (柱 2 本と半円の弧、奥にもう一つ小さい門)、
+    // 門から潮門へ延びる水面の光の道 (両側の縁と淡い帯)、道の上を内側 (甲羅の側) へ流れる山形を描く。標の中心 (b.cx, b.cz) は門の真外の水の上、
+    // 内側は巨神の横の向きの逆 (-sx, -sz)
+    private static void boardDoorway(G g, TitanEndNetwork.Beam b, double time) {
+        Entry e = entry(g, b);
+        double boost = 1.0 + Math.min(3.0, e.dist() * 0.012);
+        float pulse = 0.78f + 0.22f * Mth.sin((float) (time / 50.0 * Mth.TWO_PI));
+        double ix = -e.sx();
+        double iz = -e.sz();
+        double ax = e.fx();
+        double az = e.fz();
+        double y0 = e.floor() + 0.1;
+        g.pass(false);
+        // 光の門 2 つ (手前は大きく、奥は小さく。ゆっくり脈打つ)
+        double[] gateAt = {0.0, 5.5};
+        double[] gateR = {3.2, 2.5};
+        for (int k = 0; k < 2; k++) {
+            double r = gateR[k];
+            double cx = b.cx() + ix * gateAt[k];
+            double cz = b.cz() + iz * gateAt[k];
+            double post = r * 1.5;
+            double w = 0.16 * boost * (k == 0 ? 1.0 : 0.8);
+            float a = (k == 0 ? 0.85f : 0.6f) * pulse;
+            g.ribbon(cx - ax * r, y0, cz - az * r, cx - ax * r, y0 + post, cz - az * r, w, a, 0.5f);
+            g.ribbon(cx + ax * r, y0, cz + az * r, cx + ax * r, y0 + post, cz + az * r, w, a, 0.5f);
+            int seg = 18;
+            double px = cx + ax * r;
+            double py = y0 + post;
+            double pz = cz + az * r;
+            for (int i = 1; i <= seg; i++) {
+                double th = Math.PI * i / seg;
+                double qx = cx + ax * r * Math.cos(th);
+                double qy = y0 + post + r * Math.sin(th);
+                double qz = cz + az * r * Math.cos(th);
+                g.ribbon(px, py, pz, qx, qy, qz, w, a, 0.5f);
+                px = qx;
+                py = qy;
+                pz = qz;
+            }
+            // 戸口の幕: 淡い縦の筋 (門の内側へ視線を誘う)
+            if (k == 0) {
+                for (int i = -2; i <= 2; i++) {
+                    double u = i / 2.5;
+                    double top = post + r * Math.sqrt(Math.max(0, 1 - u * u));
+                    g.ribbon(cx + ax * r * u, y0, cz + az * r * u, cx + ax * r * u, y0 + top, cz + az * r * u, 0.07 * boost, 0.16f * pulse, 0.3f);
+                }
+            }
+        }
+        // 水面の光の道: 沖 12 ブロックから門を通り、潮門 17 ブロックまで。両側の縁と、中央の淡い帯
+        double out = DOORWAY_OUT;
+        double len = out + DOORWAY_PATH;
+        double ox = b.cx() - ix * out;
+        double oz = b.cz() - iz * out;
+        for (int side = -1; side <= 1; side += 2) {
+            g.ribbon(ox + ax * 1.7 * side, y0, oz + az * 1.7 * side, ox + ix * len + ax * 1.7 * side, y0, oz + iz * len + az * 1.7 * side,
+                    0.09 * boost, 0.5f * pulse, 0.4f);
+        }
+        g.ribbon(ox, y0, oz, ox + ix * len, y0, oz + iz * len, 1.5, 0.10f * pulse, 0.2f);
+        // 内向きの山形 (道の上を、沖から門を通って潮門へ流れる。先が潮門の側)
+        double spacing = 2.8;
+        int n = (int) (len / spacing) + 1;
+        for (int i = 0; i < n; i++) {
+            double d = (time * 0.08 + i * spacing) % len;
+            double edge = Math.sin(Math.PI * d / len);
+            float a = (float) (Math.pow(edge, 0.7) * 0.85);
+            double w = 1.15 * Math.min(1.6, 1 + (boost - 1) * 0.35);
+            double tx = ox + ix * (d + 0.9);
+            double tz = oz + iz * (d + 0.9);
+            double bx = ox + ix * d;
+            double bz = oz + iz * d;
+            g.ribbon(tx, y0 + 0.05, tz, bx + ax * w, y0 + 0.05, bz + az * w, 0.12 * boost, a, 0.5f);
+            g.ribbon(tx, y0 + 0.05, tz, bx - ax * w, y0 + 0.05, bz - az * w, 0.12 * boost, a, 0.5f);
+        }
+        // 門の足もとの輪 (乗り場の目印)
+        g.floorRing(b.cx(), y0, b.cz(), 3.0 - 0.18 * boost, 3.0, 0.5f * pulse, 0.5f * pulse, 0.3f, 40);
     }
 
     // ---------------------------------------------------------------- 乗り込み口 A: 柔らかい光の筋 + 床の紋様 + 入口へ縮む輪
@@ -658,6 +743,17 @@ public final class MarkerArt {
             return;
         }
         double floor = Math.abs(b.hx() - b.hz()) < 0.01f ? b.beamFrom() : b.cy() - b.hy();
+        if (Titans.TIDE_SHELL.equals(b.key()) && Math.abs(b.hx() - b.hz()) < 0.01f) {
+            // 戸口の粒: 水面の道に沿って、潮門の側へ流れる (昇る粒は出さない)
+            double yaw = Math.toRadians(b.yaw());
+            double sx = Math.cos(yaw);
+            double sz = Math.sin(yaw);
+            double dd = rnd.nextDouble() * (DOORWAY_PATH + DOORWAY_OUT) - DOORWAY_OUT;
+            double off = (rnd.nextDouble() - 0.5) * 3.0;
+            mc.level.addParticle(ParticleTypes.END_ROD, b.cx() - sx * dd - Math.sin(yaw) * off, floor + 0.3, b.cz() - sz * dd + Math.cos(yaw) * off,
+                    -sx * 0.05, 0.0, -sz * 0.05);
+            return;
+        }
         DustParticleOptions dust = dust(b.rgb(), 0.8f);
         double R = Math.max(b.hx(), b.hz()) + 1.0;
         switch (style) {

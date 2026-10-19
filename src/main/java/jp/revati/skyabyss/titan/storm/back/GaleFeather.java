@@ -18,12 +18,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 // 風切りの羽根 (12 の 4.1節)。西の試練の肩の門で手に入る試練の品。持っていると、空中でしゃがむ間だけ滑空する
-// (落ちる速さ 0.08、前へ 0.35)。持ち物にあればよい (手に持たなくてよい)。試練の外へ出る・倒れると消える (StormWest)。
+// (落ちる速さ 0.08、前へ 0.5。旧い値は 0.35 で、昇り風のあとの横移動が遅すぎた)。持ち物にあればよい (手に持たなくてよい)。試練の外へ出る・倒れると消える (StormWest)。
 // 動きはプレイヤーの側 (クライアント) で付ける (しゃがむ入力と同じ所で動かすので、遅れて揺れない)。サーバーは落下の距離を消すだけ
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public class GaleFeather extends Item {
     public static final double FALL = 0.08;
-    public static final double FORWARD = 0.35;
+    public static final double FORWARD = 0.5;
 
     public GaleFeather(Properties p) {
         super(p);
@@ -49,7 +49,7 @@ public class GaleFeather extends Item {
                 && !p.isInWater() && p.getDeltaMovement().y < 0 && holds(p);
     }
 
-    // 1 tick の滑空の動き (前へ 0.35 まで寄せ、落ちる速さは 0.08 まで)
+    // 1 tick の滑空の動き (前へ 0.5 まで寄せ、落ちる速さは 0.08 まで)
     public static Vec3 glide(Entity e, Vec3 v) {
         Vec3 look = e.getLookAngle();
         Vec3 flat = new Vec3(look.x, 0, look.z);
@@ -58,8 +58,8 @@ public class GaleFeather extends Item {
         } else {
             flat = flat.normalize().scale(FORWARD);
         }
-        double vx = v.x + (flat.x - v.x) * 0.25;
-        double vz = v.z + (flat.z - v.z) * 0.25;
+        double vx = v.x + (flat.x - v.x) * 0.3;
+        double vz = v.z + (flat.z - v.z) * 0.3;
         return new Vec3(vx, Math.max(v.y, -FALL), vz);
     }
 

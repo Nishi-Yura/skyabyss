@@ -262,7 +262,7 @@ final class StormHelm {
                 Vec3 mid = Vec3.atCenterOf(h.calm()).add(Vec3.atCenterOf(h.storm())).scale(0.5);
                 if (p.position().distanceToSqr(mid) < 4.5 * 4.5) {
                     HINT_AT.put(p.getUUID(), now);
-                    Notice.bar(p, ModText.hint("message.skyabyss.storm.helm_hint"));
+                    Notice.bar(p, ModText.hint("message.skyabyss.storm.helm_hint." + h.trial().id()));
                     break;
                 }
             }

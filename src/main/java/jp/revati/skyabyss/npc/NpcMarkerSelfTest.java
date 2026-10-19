@@ -111,7 +111,7 @@ public final class NpcMarkerSelfTest {
         Dialogue request = Dialogue.parse("test_marker", json("""
                 {"npc":"%s","entries":[{"node":"hub"}],
                  "nodes":{"hub":{"text":"x","options":[{"id":"ask","kind":"quest","goto":"offer"},{"id":"bye","kind":"leave","goto":"end"}]},
-                          "offer":{"text":"y","options":[{"id":"ok","kind":"quest","goto":"thanks"},{"id":"no","kind":"leave","goto":"end"}]},
+                          "offer":{"text":"y","options":[{"id":"ok","kind":"quest","goto":"thanks","do":[{"type":"open_board"}]},{"id":"no","kind":"leave","goto":"end"}]},
                           "thanks":{"text":"z","next":"end"}}}""".formatted(ROLE)),
                 errors);
         check(errors.isEmpty(), "sample hub errors " + errors, failures);
@@ -123,6 +123,13 @@ public final class NpcMarkerSelfTest {
                  "nodes":{"hub":{"text":"x","options":[{"id":"ask","kind":"quest","goto":"offer"},{"id":"bye","kind":"leave","goto":"end"}]},
                           "offer":{"text":"y","options":[{"id":"no","kind":"leave","goto":"end"}]}}}""".formatted(ROLE)), errors);
         check(NpcMarkers.of(empty, new StoryContext(a, ROLE, st)) == Marker.NONE, "a hub with nothing to offer must carry no marker", failures);
+        // 先が「頼み」に見えても実際には何も起きない (クエストを始めない・品を渡さない) なら「!」にならない
+        Dialogue talky = Dialogue.parse("test_marker", json("""
+                {"npc":"%s","entries":[{"node":"hub"}],
+                 "nodes":{"hub":{"text":"x","options":[{"id":"ask","kind":"quest","goto":"offer"},{"id":"bye","kind":"leave","goto":"end"}]},
+                          "offer":{"text":"y","options":[{"id":"ok","kind":"quest","goto":"thanks"},{"id":"no","kind":"leave","goto":"end"}]},
+                          "thanks":{"text":"z","next":"end"}}}""".formatted(ROLE)), errors);
+        check(NpcMarkers.of(talky, new StoryContext(a, ROLE, st)) == Marker.NONE, "a request that offers nothing must carry no marker: " + NpcMarkers.of(talky, new StoryContext(a, ROLE, st)), failures);
         // --- パケットの詰め替え
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), a.server.registryAccess());
         NpcMarkers.Update.STREAM_CODEC.encode(buf, new NpcMarkers.Update(new int[] {5, 900}, new int[] {1, 5}));

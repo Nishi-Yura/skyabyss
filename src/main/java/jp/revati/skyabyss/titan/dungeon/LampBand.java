@@ -16,9 +16,12 @@ public final class LampBand {
     private LampBand() {
     }
 
-    public record Payload(Component text) implements CustomPacketPayload {
+    // way = 次に向かう中継点 (灯の台・苗床・出口。迷路の道のりで次のマス)。クライアントは目的の標 (client/guide/ObjectiveMarker) をそこへ出す。hasWay が false なら標なし
+    public record Payload(Component text, boolean hasWay, double x, double y, double z) implements CustomPacketPayload {
         public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "lamp_band"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, Payload> STREAM_CODEC = StreamCodec.composite(ComponentSerialization.STREAM_CODEC, Payload::text, Payload::new);
+        public static final StreamCodec<RegistryFriendlyByteBuf, Payload> STREAM_CODEC = StreamCodec.composite(ComponentSerialization.STREAM_CODEC, Payload::text,
+                net.minecraft.network.codec.ByteBufCodecs.BOOL, Payload::hasWay, net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::x,
+                net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::y, net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::z, Payload::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
@@ -30,9 +33,13 @@ public final class LampBand {
     private static Component lastSent = Component.empty();
 
     public static void send(ServerPlayer player, Component text) {
+        send(player, text, null);
+    }
+
+    public static void send(ServerPlayer player, Component text, @javax.annotation.Nullable net.minecraft.world.phys.Vec3 way) {
         lastSent = text;
         if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
-            PacketDistributor.sendToPlayer(player, new Payload(text));
+            PacketDistributor.sendToPlayer(player, way == null ? new Payload(text, false, 0, 0, 0) : new Payload(text, true, way.x, way.y, way.z));
         }
     }
 

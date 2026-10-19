@@ -36,11 +36,15 @@ public final class SkillSelfTest {
     // 呼ぶのは SelfTestRunner (SKYABYSS_SELFTEST=1 のとき、1 tick に 1 系統ずつ)
     public static void runSelfTest(MinecraftServer server) {
         List<String> failures = new ArrayList<>();
+        // 技の規則の検めは、五つの木が全部開いた状態で流す。天職の層は BuildsSelfTest.callings が自分で入れる
+        SkillRules.CALLINGS = false;
         try {
             run(server, failures);
         } catch (Exception e) {
             SkyAbyss.LOGGER.error("skill selftest crashed", e);
             failures.add("crashed: " + e);
+        } finally {
+            SkillRules.CALLINGS = true;
         }
         if (failures.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST skills PASSED (points, learn rules, sanitize, nbt, sync codec, death copy, player save/load, cooldowns, mana, casting, passives)");
@@ -85,45 +89,58 @@ public final class SkillSelfTest {
             d.sanitize(50);
             check(f, java.util.Arrays.asList(d.slots).contains(s.id) == s.active, s.id + " slot changed by sanitize");
         }
-        // ---------------------------------------------------------------- 技の点
+        // ---------------------------------------------------------------- 技の点・木の形
         check(f, SkillRules.pointsForLevel(1) == 1 && SkillRules.pointsForLevel(2) == 1 && SkillRules.pointsForLevel(3) == 2
-                && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(12) == 6 && SkillRules.pointsForLevel(50) == 25,
-                "skill points per level are wrong");
-        int sword = 0;
-        int bow = 0;
+                && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
+                && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
+                && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
+        check(f, Skill.values().length == 36 && Rune.values().length == 38, "skill / rune counts are wrong");
+        int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
-            if (s.tree == SkillTree.SWORD) {
-                sword += s.maxRank;
-            } else if (s.tree == SkillTree.BOW) {
-                bow += s.maxRank;
-            }
+            perTree[s.tree.ordinal()]++;
             check(f, s.tier == 0 ? s.requires().isEmpty() : !s.requires().isEmpty(), s.id + " requirement shape is wrong");
-            check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0) && s.active == (SkillRules.manaCost(s, 1) > 0),
-                    s.id + " cost/cooldown does not match its kind");
+            check(f, s.active == (SkillRules.cooldownTicks(s, 1) > 0), s.id + " cooldown does not match its kind");
+            check(f, s.keystone() == (s.tier == 3) && (!s.keystone() || s.maxRank == 1), s.id + " keystone shape is wrong");
+            check(f, s.iconIndex() < 36, s.id + " icon index");
+            if (s.active && s != Skill.SIGNAL) {
+                check(f, SkillRules.manaCost(s, 1) > 0, s.id + " has no mana cost");
+            }
             for (int r = 1; r <= s.maxRank; r++) {
                 check(f, SkillRules.describeArgs(s, r).length > 0, s.id + " has no description args");
             }
         }
-        // 二つの木を両方とも極めることはできない (選ぶ理由を残す)
-        check(f, sword + bow > SkillRules.pointsForLevel(50), "both trees can be maxed at level 50 (" + (sword + bow) + " ranks)");
-        SkyAbyss.LOGGER.info("[selftest] skills: sword ranks {}, bow ranks {}, points at 50: {}", sword, bow, SkillRules.pointsForLevel(50));
+        for (SkillTree t : SkillTree.values()) {
+            check(f, t.sealed || perTree[t.ordinal()] == 6, t.id + " does not have 6 skills");
+        }
+        // 1 本の木の総点 (段 + 刻印 1 点ずつ)。Lv 50 の 45 点では 3 本は極められない
+        int[] treePoints = new int[SkillTree.values().length];
+        for (Skill s : Skill.values()) {
+            treePoints[s.tree.ordinal()] += s.maxRank + (s.runes().isEmpty() ? 0 : 1);
+        }
+        int rockPts = treePoints[SkillTree.ROCK.ordinal()];
+        check(f, rockPts >= 12 && rockPts <= 20 && rockPts * 3 > SkillRules.pointsForLevel(50), "tree points out of range: " + rockPts);
+        SkyAbyss.LOGGER.info("[selftest] skills: points per tree {}, points at 50: {}", java.util.Arrays.toString(treePoints), SkillRules.pointsForLevel(50));
 
         // ---------------------------------------------------------------- 習得の条件
         SkillData d = new SkillData();
         check(f, d.canLearn(Skill.TITAN_CLEAVE, 1) == SkillData.LearnResult.OK, "level 1 cannot learn titan cleave");
-        check(f, d.canLearn(Skill.LUNGE, 1) == SkillData.LearnResult.LEVEL, "lunge at level 1 was not blocked by level");
-        check(f, d.canLearn(Skill.LUNGE, 5) == SkillData.LearnResult.REQUIRES, "lunge without titan cleave was not blocked");
+        check(f, d.canLearn(Skill.LUNGE, 1) == SkillData.LearnResult.OK, "lunge (row 1 of wind) was refused at level 1");
+        check(f, d.canLearn(Skill.BACKSTEP, 1) == SkillData.LearnResult.LEVEL, "backstep at level 1 was not blocked by level");
+        check(f, d.canLearn(Skill.BACKSTEP, 5) == SkillData.LearnResult.REQUIRES, "backstep without lunge was not blocked");
         d.ranks.put(Skill.TITAN_CLEAVE.id, 1);
         check(f, d.canLearn(Skill.TITAN_CLEAVE, 1) == SkillData.LearnResult.NO_POINTS, "a second point at level 1 was allowed");
-        check(f, d.canLearn(Skill.LUNGE, 5) == SkillData.LearnResult.OK, "lunge at level 5 with titan cleave was refused");
+        check(f, d.canLearn(Skill.ROCK_CALL, 5) == SkillData.LearnResult.OK, "rock call at level 5 with titan cleave was refused");
         d.ranks.put(Skill.TITAN_CLEAVE.id, 3);
         check(f, d.canLearn(Skill.TITAN_CLEAVE, 50) == SkillData.LearnResult.MAX_RANK, "rank over the max was allowed");
-        // 奥義は 2 段目のどちらか一つで足りる
+        // 奥義は 2 行目のどちらか一つで足りる
         d.ranks.put(Skill.STONE_STANCE.id, 1);
         d.ranks.put(Skill.RIPOSTE.id, 1);
         check(f, d.canLearn(Skill.WHALE_SWEEP, 12) == SkillData.LearnResult.OK, "whale sweep with stone stance only was refused");
         check(f, d.canLearn(Skill.WHALE_SWEEP, 11) == SkillData.LearnResult.LEVEL, "whale sweep below level 12 was allowed");
-        check(f, !d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.SWORD), "sealed trees are open");
+        d.ranks.put(Skill.WHALE_SWEEP.id, 1);
+        check(f, d.canLearn(Skill.STONE_OATH, 19) == SkillData.LearnResult.LEVEL && d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.NO_POINTS
+                || d.canLearn(Skill.STONE_OATH, 20) == SkillData.LearnResult.OK, "the keystone level gate is wrong");
+        check(f, !d.treeOpen(SkillTree.STAR) && !d.treeOpen(SkillTree.ABYSS) && d.treeOpen(SkillTree.ROCK), "sealed trees are open");
         d.unlockedTrees.add(SkillTree.STAR.id);
         check(f, d.treeOpen(SkillTree.STAR), "an unlocked tree stayed sealed");
 
@@ -143,7 +160,7 @@ public final class SkillSelfTest {
         d.sanitize(3); // 2 点しかない → 全部戻る
         check(f, d.ranks.isEmpty() && d.slots[0].isEmpty(), "overspent skills were not refunded");
         d = new SkillData();
-        d.ranks.put(Skill.LUNGE.id, 1); // 前提なし
+        d.ranks.put(Skill.BACKSTEP.id, 1); // 前提なし
         d.sanitize(50);
         check(f, d.ranks.isEmpty(), "a skill without its requirement survived sanitize");
 
@@ -154,7 +171,7 @@ public final class SkillSelfTest {
         SkillManager.autoSlot(d, Skill.RIPOSTE); // 常時の技は置かない
         SkillManager.autoSlot(d, Skill.TITAN_CLEAVE);
         SkillManager.autoSlot(d, Skill.TITAN_CLEAVE); // 二度目は重ねない
-        SkillManager.autoSlot(d, Skill.LUNGE); // 覚えていない技は置かない
+        SkillManager.autoSlot(d, Skill.ROCK_CALL); // 覚えていない技は置かない
         check(f, d.slots[0].equals(Skill.TITAN_CLEAVE.id) && d.slots[1].isEmpty(), "auto slot is wrong: " + String.join(",", d.slots));
 
         // ---------------------------------------------------------------- クールダウン
@@ -316,7 +333,7 @@ public final class SkillSelfTest {
         check(f, p.getInventory().getItem(9).getCount() == 4, "cloud pierce did not use one arrow");
         List<AbstractArrow> arrows = level.getEntitiesOfClass(AbstractArrow.class, new AABB(px - 8, py - 8, pz - 8, px + 8, py + 8, pz + 8),
                 e -> e.getTags().contains(SkillActions.PIERCE_TAG));
-        check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) && arrows.get(0).isNoGravity()
+        check(f, arrows.size() == 1 && arrows.get(0).getPierceLevel() == SkillRules.piercePierce(2) + 1 && arrows.get(0).isNoGravity()
                 && arrows.get(0).pickup == AbstractArrow.Pickup.CREATIVE_ONLY, "the cloud pierce arrow is wrong: " + arrows.size());
         arrows.forEach(AbstractArrow::discard);
 
@@ -353,10 +370,12 @@ public final class SkillSelfTest {
                 "forgetting did not clear the modifiers and slots");
         // 振り直しは炉のそばでだけ (サバイバル)
         SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
+        Growth.get(p).level = 16;
         check(f, SkillManager.respec(p) == SkillManager.RespecResult.NO_FORGE, "respec worked away from a forge");
 
         zombie.discard();
         golem.discard();
+        BuildsSelfTest.run(server, f);
     }
 
     private static SkillData sample() {

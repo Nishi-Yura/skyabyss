@@ -31,6 +31,18 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class SkillManager {
     public static final ResourceLocation MOD_STANCE_ARMOR = id("skill/stone_stance_armor");
     public static final ResourceLocation MOD_STANCE_KNOCKBACK = id("skill/stone_stance_knockback");
+    public static final ResourceLocation MOD_NIMBLE_MOVE = id("skill/nimble_move");
+    public static final ResourceLocation MOD_NIMBLE_FALL = id("skill/nimble_fall");
+    public static final ResourceLocation MOD_LONE_ATTACK = id("skill/lone_wind_attack");
+    public static final ResourceLocation MOD_LONE_MOVE = id("skill/lone_wind_move");
+    public static final ResourceLocation MOD_READY_MANA = id("skill/readiness_mana");
+    public static final ResourceLocation MOD_READY_ATTACK = id("skill/readiness_attack");
+    public static final ResourceLocation MOD_BP_KNOCKBACK = id("skill/bp_vitality_knockback");
+    public static final ResourceLocation MOD_TRAIT_TOUGH = id("skill/trait_rock_toughness");
+    public static final ResourceLocation MOD_TRAIT_KNOCKBACK = id("skill/trait_rock_knockback");
+    public static final ResourceLocation MOD_TRAIT_MOVE = id("skill/trait_wind_move");
+    public static final ResourceLocation MOD_TRAIT_MANA = id("skill/trait_tide_mana");
+    public static final ResourceLocation MOD_BP_SWING = id("skill/bp_strength_swing");
 
     private SkillManager() {
     }
@@ -103,7 +115,8 @@ public final class SkillManager {
         }
         if (d.mana < max) {
             boolean calm = gameTime - d.lastCombat >= SkillRules.CALM_AFTER_TICKS;
-            d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) / SkillRules.SECOND);
+            double scale = d.regenScale + (gameTime < d.regenBoostUntil ? d.regenBoost : 0);
+            d.mana = (float) Math.min(max, d.mana + SkillRules.regenPerSecond(max, calm) * scale / SkillRules.SECOND);
         }
     }
 
@@ -121,7 +134,8 @@ public final class SkillManager {
             autoSlot(d, skill);
         }
         jp.revati.skyabyss.advancement.Beats.fire(player, "skill:learned");
-        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + skill.tree.name().toLowerCase(java.util.Locale.ROOT));
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + skill.tree.beat);
+        jp.revati.skyabyss.advancement.Beats.fire(player, "skill:tree:" + skill.tree.id);
         sync(player);
         applyModifiers(player);
         ServerLevel level = player.serverLevel();
@@ -141,7 +155,7 @@ public final class SkillManager {
                 return;
             }
         }
-        for (int i = 0; i < d.slots.length; i++) {
+        for (int i = 0; i < d.slotCount(); i++) {
             if (d.slots[i].isEmpty()) {
                 d.slots[i] = skill.id;
                 return;
@@ -153,7 +167,7 @@ public final class SkillManager {
     // 枠に技を置く (skill が null なら空ける)。同じ技が別の枠にあれば、そちらは空ける
     public static boolean setSlot(ServerPlayer player, int slot, Skill skill) {
         SkillData d = get(player);
-        if (slot < 0 || slot >= d.slots.length) {
+        if (slot < 0 || slot >= d.slotCount()) {
             return false;
         }
         if (skill == null) {
@@ -179,17 +193,30 @@ public final class SkillManager {
         OK, NOTHING, NO_FORGE, NO_CRYSTALS
     }
 
-    // 共鳴の炉のそばで、共鳴の結晶を払って振り直す (初回は無料)。クリエイティブは炉も結晶も要らない
+    // いまの振り直しの費用 (結晶の数)。Lv 15 になるまでは 0、目利きがあれば 2 以上のとき 1 減る
+    public static int respecCostFor(Player player) {
+        SkillData d = get(player);
+        return SkillRules.respecCost(d.respecs, level(player), d.knows(Skill.APPRAISER));
+    }
+
+    // Lv 15 になるまでは、どこでも無料 (炉も結晶も要らない。回数も数えない)
+    public static boolean freeRespec(Player player) {
+        return level(player) < SkillRules.FREE_RESPEC_LEVEL;
+    }
+
+    // 共鳴の炉のそばで、共鳴の結晶を払って振り直す (初回は無料)。クリエイティブは炉も結晶も要らない。
+    // Lv 15 になるまでは、どこでも無料
     public static RespecResult respec(ServerPlayer player) {
         SkillData d = get(player);
         if (d.ranks.isEmpty()) {
             return RespecResult.NOTHING;
         }
-        boolean free = player.isCreative();
+        boolean early = freeRespec(player);
+        boolean free = player.isCreative() || early;
         if (!free && !nearForge(player)) {
             return RespecResult.NO_FORGE;
         }
-        int cost = SkillRules.respecCost(d.respecs);
+        int cost = respecCostFor(player);
         if (!free && countCrystals(player) < cost) {
             return RespecResult.NO_CRYSTALS;
         }
@@ -197,12 +224,146 @@ public final class SkillManager {
             removeCrystals(player, cost);
         }
         d.clearSkills();
-        d.respecs++;
+        if (!early) {
+            d.respecs++;
+        }
         sync(player);
         applyModifiers(player);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 0.7f);
         Notice.send(player, ModText.lore("message.skyabyss.skill.respec_done"));
         return RespecResult.OK;
+    }
+
+    // ---------------------------------------------------------------- 刻印・型の保存
+    // 刻印の効き目の番号 (選んでいない・まだ開かない・極めていない技は 0)
+    public static int runeOf(Player player, Skill skill) {
+        SkillData d = get(player);
+        int r = d.rune(skill);
+        if (r <= 0 || !d.runeAvailable(skill)) {
+            return 0;
+        }
+        // 伝説の書き換えは、その武器を持つあいだだけ
+        Rune rune = Rune.of(skill, r);
+        return rune != null && rune.held(player) ? r : 0;
+    }
+
+    public enum RuneResult {
+        OK, NOT_AVAILABLE, SAME, NO_POINTS, NOT_QUIET, NO_PLACE, NO_CRYSTALS
+    }
+
+    // 戦いの外 (30 秒、傷を受けも与えもしていない) か。クリエイティブは問わない
+    public static boolean quiet(Player player) {
+        return player.isCreative() || player.level().getGameTime() - get(player).lastCombat >= SkillRules.QUIET_TICKS;
+    }
+
+    // 刻印・型を切り替えられる場所か (炉・焚き火の近く。旅の手帖があればどこでも)
+    public static boolean switchPlace(Player player) {
+        return player.isCreative() || get(player).knows(Skill.JOURNAL) || nearForge(player) || SkillPassives.campNear(player);
+    }
+
+    // 刻印を選ぶ。はじめて選ぶのは 1 点、別の刻印へ付け替えるのは炉などで結晶 1 (初回は無料)
+    public static RuneResult chooseRune(ServerPlayer player, Skill skill, int index) {
+        SkillData d = get(player);
+        if (skill == null || Rune.of(skill, index) == null || !d.runeAvailable(skill) || !Rune.of(skill, index).held(player)) {
+            return RuneResult.NOT_AVAILABLE;
+        }
+        int current = d.rune(skill);
+        if (current == index) {
+            return RuneResult.SAME;
+        }
+        if (current == 0) {
+            if (d.unspentPoints(level(player)) < 1) {
+                return RuneResult.NO_POINTS;
+            }
+            d.runes.put(skill.id, index);
+        } else {
+            if (!quiet(player)) {
+                return RuneResult.NOT_QUIET;
+            }
+            if (!switchPlace(player)) {
+                return RuneResult.NO_PLACE;
+            }
+            boolean free = player.isCreative() || d.runeSwaps == 0;
+            if (!free && countCrystals(player) < SkillRules.RUNE_SWAP_COST) {
+                return RuneResult.NO_CRYSTALS;
+            }
+            if (!free) {
+                removeCrystals(player, SkillRules.RUNE_SWAP_COST);
+            }
+            d.runeSwaps++;
+            d.runes.put(skill.id, index);
+        }
+        sync(player);
+        applyModifiers(player);
+        ServerLevel level = player.serverLevel();
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.7f, 1.4f);
+        level.sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
+        return RuneResult.OK;
+    }
+
+    // 型の保存: 今の枠と刻印を保存する (いつでも)
+    public static boolean saveLoadout(ServerPlayer player, int index) {
+        SkillData d = get(player);
+        if (index < 0 || index >= d.loadouts.length) {
+            return false;
+        }
+        SkillData.Loadout l = d.loadouts[index];
+        System.arraycopy(d.slots, 0, l.slots, 0, l.slots.length);
+        l.runes.clear();
+        for (var e : d.runes.entrySet()) {
+            l.runes.put(e.getKey(), e.getValue());
+        }
+        l.saved = true;
+        sync(player);
+        return true;
+    }
+
+    public enum LoadoutResult {
+        OK, EMPTY, NOT_QUIET, NO_PLACE
+    }
+
+    // 型を切り替える (点は変わらない)。枠は覚えている使う技だけを置き、刻印はすでに 1 つ選んである技だけ付け替える
+    public static LoadoutResult loadLoadout(ServerPlayer player, int index) {
+        SkillData d = get(player);
+        if (index < 0 || index >= d.loadouts.length || !d.loadouts[index].saved) {
+            return LoadoutResult.EMPTY;
+        }
+        if (!quiet(player)) {
+            return LoadoutResult.NOT_QUIET;
+        }
+        if (!switchPlace(player)) {
+            return LoadoutResult.NO_PLACE;
+        }
+        SkillData.Loadout l = d.loadouts[index];
+        java.util.Arrays.fill(d.slots, "");
+        for (int i = 0; i < Math.min(d.slotCount(), l.slots.length); i++) {
+            Skill s = Skill.byId(l.slots[i]);
+            if (s != null && s.active && d.knows(s) && !java.util.Arrays.asList(d.slots).contains(s.id)) {
+                d.slots[i] = s.id;
+            }
+        }
+        for (var e : l.runes.entrySet()) {
+            Skill s = Skill.byId(e.getKey());
+            if (s != null && d.rune(s) > 0 && d.runeAvailable(s) && Rune.of(s, e.getValue()) != null) {
+                d.runes.put(s.id, e.getValue());
+            }
+        }
+        sync(player);
+        applyModifiers(player);
+        player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.6f, 1.8f);
+        return LoadoutResult.OK;
+    }
+
+    // 技の待ち (tick): 刻印・敏捷 30 の刻み目・手の武器の冴えを入れた長さ。クライアントの枠の表示も同じ計算
+    public static int cooldownFor(Player player, Skill skill) {
+        SkillData d = get(player);
+        int rank = d.rank(skill);
+        int ticks = SkillRules.cooldownTicks(skill, rank, runeOf(player, skill));
+        if ((skill == Skill.LUNGE || skill == Skill.BACKSTEP || skill == Skill.WIND_REND)
+                && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.SECOND)) {
+            ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
+        }
+        return jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks);
     }
 
     public static boolean nearForge(Player player) {
@@ -280,6 +441,7 @@ public final class SkillManager {
             sendResult(player, slot, false);
             return CastResult.NO_MANA;
         }
+        SkillActions.cooldownScale = 1;
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -288,8 +450,14 @@ public final class SkillManager {
             return CastResult.FAILED;
         }
         d.mana = Math.max(0, d.mana - cost);
-        // 手の武器の特性「冴え」で待ちが縮む (03 の 8章)
-        d.cooldowns.put(skill.id, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, SkillRules.cooldownTicks(skill, rank)));
+        // 刻印・敏捷の刻み目・手の武器の特性「冴え」で待ちが変わる (03 の 8章)。連ねは当たると半分
+        d.cooldowns.put(skill.id, Math.max(1, (int) Math.round(cooldownFor(player, skill) * SkillActions.cooldownScale)));
+        SkillActions.cooldownScale = 1;
+        // 炉の記憶: 技を使うたびに熾が 1 つ溜まる (次の近接で使い切る)
+        int memory = d.rank(Skill.FORGE_MEMORY);
+        if (memory > 0) {
+            d.embers = Math.min(memory, d.embers + 1);
+        }
         d.globalCooldown = SkillRules.GLOBAL_COOLDOWN;
         d.lastCombat = player.level().getGameTime();
         sync(player);
@@ -303,15 +471,43 @@ public final class SkillManager {
         }
     }
 
-    // ---------------------------------------------------------------- 常時の技の修飾子 (岩の構え)
-    // ログイン・復活・ディメンション移動・習得・振り直しのたびに今の値で付け直す (保存される修飾子)
+    // ---------------------------------------------------------------- 常時の技・刻み目の修飾子
+    // ログイン・復活・ディメンション移動・習得・振り直しのたび、そして 0.5 秒ごとに今の値で付け直す (保存される修飾子。値が同じなら何もしない)。
+    // 岩の構え・軽業・孤風・備えの報い・耐久 15・筋力 15 の刻み目
     public static void applyModifiers(Player player) {
-        int stance = get(player).rank(Skill.STONE_STANCE);
-        set(player, Attributes.ARMOR, MOD_STANCE_ARMOR, SkillRules.stanceArmor(stance));
-        set(player, Attributes.KNOCKBACK_RESISTANCE, MOD_STANCE_KNOCKBACK, SkillRules.stanceKnockback(stance));
+        SkillData d = get(player);
+        int stance = d.rank(Skill.STONE_STANCE);
+        double guard = stance > 0 && WeaponType.has(player, WeaponType.GUARD) ? 1 : 0;
+        add(player, Attributes.ARMOR, MOD_STANCE_ARMOR, SkillRules.stanceArmor(stance) + guard);
+        double vit15 = Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.VITALITY, Breakpoints.FIRST) ? Breakpoints.VITALITY_15_KNOCKBACK : 0;
+        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_STANCE_KNOCKBACK, SkillRules.stanceKnockback(stance));
+        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_BP_KNOCKBACK, vit15);
+        int nimble = d.rank(Skill.NIMBLE);
+        double nimbleMove = SkillRules.nimbleMove(nimble) + (nimble > 0 && WeaponType.has(player, WeaponType.FAST) ? SkillRules.NIMBLE_FAST_BONUS : 0);
+        set(player, Attributes.MOVEMENT_SPEED, MOD_NIMBLE_MOVE, nimbleMove, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        add(player, Attributes.SAFE_FALL_DISTANCE, MOD_NIMBLE_FALL, SkillRules.nimbleFall(nimble));
+        boolean lone = d.knows(Skill.LONE_WIND) && player instanceof ServerPlayer sp && SkillEffects.allies(sp, SkillRules.LONE_RANGE).isEmpty();
+        set(player, Attributes.ATTACK_DAMAGE, MOD_LONE_ATTACK, lone ? SkillRules.LONE_ATTACK : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        set(player, Attributes.MOVEMENT_SPEED, MOD_LONE_MOVE, lone ? SkillRules.LONE_MOVE : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        int ready = d.readyBlue ? d.rank(Skill.READINESS_REWARD) : 0;
+        add(player, Rpg.MAX_MANA, MOD_READY_MANA, SkillRules.readinessMana(ready));
+        set(player, Attributes.ATTACK_DAMAGE, MOD_READY_ATTACK, SkillRules.readinessAttack(ready), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        // 天性 (一つ目の天職だけ)
+        SkillTree calling = d.callingTree();
+        add(player, Attributes.ARMOR_TOUGHNESS, MOD_TRAIT_TOUGH, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_TOUGHNESS : 0);
+        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_TRAIT_KNOCKBACK, calling == SkillTree.ROCK ? SkillRules.TRAIT_ROCK_KNOCKBACK : 0);
+        set(player, Attributes.MOVEMENT_SPEED, MOD_TRAIT_MOVE, calling == SkillTree.WIND ? SkillRules.TRAIT_WIND_MOVE : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        add(player, Rpg.MAX_MANA, MOD_TRAIT_MANA, calling == SkillTree.TIDE ? SkillRules.TRAIT_TIDE_MANA : 0);
+        boolean heavy = WeaponType.isHeld(player.getMainHandItem(), WeaponType.HEAVY)
+                && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH, Breakpoints.FIRST);
+        set(player, Attributes.ATTACK_SPEED, MOD_BP_SWING, heavy ? Breakpoints.STRENGTH_15_SWING : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     }
 
-    private static void set(Player player, Holder<Attribute> attribute, ResourceLocation id, double value) {
+    private static void add(Player player, Holder<Attribute> attribute, ResourceLocation id, double value) {
+        set(player, attribute, id, value, AttributeModifier.Operation.ADD_VALUE);
+    }
+
+    private static void set(Player player, Holder<Attribute> attribute, ResourceLocation id, double value, AttributeModifier.Operation op) {
         AttributeInstance instance = player.getAttribute(attribute);
         if (instance == null) {
             return;
@@ -321,10 +517,10 @@ public final class SkillManager {
             return;
         }
         AttributeModifier current = instance.getModifier(id);
-        if (current != null && current.amount() == value) {
+        if (current != null && current.amount() == value && current.operation() == op) {
             return;
         }
-        instance.addOrReplacePermanentModifier(new AttributeModifier(id, value, AttributeModifier.Operation.ADD_VALUE));
+        instance.addOrReplacePermanentModifier(new AttributeModifier(id, value, op));
     }
 
     // 前提をどれも覚えていなければ、最初の前提を段 1 で覚えさせる (その前提の前提も)

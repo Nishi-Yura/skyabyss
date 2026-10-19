@@ -2,25 +2,33 @@ package jp.revati.skyabyss.rpg.skill;
 
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
 
-// スキルツリー (クラス)。クラスは固定せず、どの木にも技の点を振れる (01 の「混合型」)。
-// 星術師と深淵術師は枠だけ置き、章が進むまで封じておく (技はまだない)
+// スキルツリー (系統)。5 つの系統と共通の木 (旅人)、封じた 2 本 (星術師・深淵術師。技はまだない)。
+// 木の形は 4 行 (Lv 1・5・12・20): 入口の 2 つ、2 行目の 2 つ、奥義の使う技 1、要 1 (docs/design/27_builds_and_classes.md の 2.2)
 public enum SkillTree {
-    SWORD("sword", Stat.STRENGTH, false),
-    BOW("bow", Stat.AGILITY, false),
+    ROCK("rock", Stat.STRENGTH, false, "sword"),
+    WIND("wind", Stat.AGILITY, false, "sword"),
+    TIDE("tide", Stat.SPIRIT, false, "tide"),
+    ASH("ash", Stat.STRENGTH, false, "sword"),
+    BONE("bone", Stat.AGILITY, false, "bow"),
+    // 共通の木。誰でも取れる。天職の対象にはならない
+    TRAVELER("traveler", null, false, "traveler"),
     // 3 章 (月) で目覚める
-    STAR("star", Stat.SPIRIT, true),
+    STAR("star", Stat.SPIRIT, true, "star"),
     // 2 章 (深淵) で目覚める
-    ABYSS("abyss", Stat.SPIRIT, true);
+    ABYSS("abyss", Stat.SPIRIT, true, "abyss");
 
     public final String id;
-    // 効果の元になるステータス (画面に出すだけ。数値は技ごとに SkillRules で決める)
+    // 効果の元になるステータス (画面に出すだけ。数値は技ごとに SkillRules で決める)。共通の木は null
     public final Stat mainStat;
     public final boolean sealed;
+    // 実績 (skill:tree:<名>) へ出す名前。前の版の「剣士の木」「弓使いの木」の実績をそのまま使うため、近接は sword、骨の射手は bow
+    public final String beat;
 
-    SkillTree(String id, Stat mainStat, boolean sealed) {
+    SkillTree(String id, Stat mainStat, boolean sealed, String beat) {
         this.id = id;
         this.mainStat = mainStat;
         this.sealed = sealed;
+        this.beat = beat;
     }
 
     public String nameKey() {
@@ -33,6 +41,16 @@ public enum SkillTree {
 
     public String sealedKey() {
         return "skilltree.skyabyss." + id + ".sealed";
+    }
+
+    // 天職にできる木 (5 つの系統)
+    public boolean callable() {
+        return this == ROCK || this == WIND || this == TIDE || this == ASH || this == BONE;
+    }
+
+    // 画面の木のつまみに出す絵 (icons.png の升目)
+    public int iconIndex() {
+        return 36 + ordinal();
     }
 
     public static SkillTree byId(String id) {

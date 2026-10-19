@@ -75,15 +75,87 @@ public final class ObjectiveStrip {
         return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
 
-    // HUD の要求: 左上の帯 (成長の表示の下)。描画 (render) と同じ条件で出す
+    // 帯の幅: 画面が小さい (GUI 倍率が高い) ほど狭く、折り返して行を足す。広い画面でも最大 WIDTH。
+    // 倍率 4 (1920 幅で GUI 幅 480) では約 115 になり、背景が画面の半ばまで伸びない
+    public static int bandWidth(Minecraft mc) {
+        return Mth.clamp((int) (mc.getWindow().getGuiScaledWidth() * 0.24f), 112, WIDTH);
+    }
+
+    private record Cur(String text, Resolved resolved) {
+    }
+
+    // いまの帯の中身 (出さないなら null)。要求と描画で同じ判断をする
+    @Nullable
+    private static Cur cur(Minecraft mc) {
+        if (demo) {
+            BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
+            return new Cur("岩鯨の背へ上る鎖を探す", new Resolved(at, false));
+        }
+        OpeningClient.Objective opening = OpeningClient.objective();
+        if (opening != null) {
+            return new Cur(Component.translatable("objective.skyabyss." + opening.id()).getString(), new Resolved(opening.target(), false));
+        }
+        QuestLog log = QuestLog.of(mc.player);
+        QuestDef def = current(mc, log);
+        if (def == null) {
+            return null;
+        }
+        QuestLog.Entry entry = log.entry(def.id());
+        String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
+        Resolved target = resolveQuest(def, entry);
+        // 巨神の背中の中で、試練を越えて個人の「真ん中へ戻る光」が出ているあいだだけ、帯はその戻り方を言う (titan.end.ReturnBeacons)。
+        // 入ったばかりでは言わない (光が出ていないので)
+        if (jp.revati.skyabyss.client.titan.BoardBeamClient.has("return_offer") && mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
+            text = Component.translatable("objective.skyabyss.back_return").getString();
+            target = Resolved.NONE;
+        }
+        return new Cur(text, target);
+    }
+
+    private static boolean hasFar(Cur c) {
+        return c.resolved.pos() != null || c.resolved.inside();
+    }
+
+    // 文を幅に折り返した行 (先頭に「◆ 」)。行数は maxLines まで (超えたら最後を「…」で切る)
+    static java.util.List<String> wrap(Font font, String text, int width, int maxLines) {
+        java.util.List<String> lines = new java.util.ArrayList<>(jp.revati.skyabyss.lore.LoreWrap.wrap("◆ " + text, width, font::width));
+        if (lines.size() > maxLines) {
+            lines = new java.util.ArrayList<>(lines.subList(0, maxLines));
+            String last = lines.get(maxLines - 1);
+            while (font.width(last + "…") > width && last.length() > 1) {
+                last = last.substring(0, last.length() - 1);
+            }
+            lines.set(maxLines - 1, last + "…");
+        }
+        return lines;
+    }
+
+    // HUD の要求: 左上の帯 (成長の表示の下)。描画 (render) と同じ条件で出す。
+    // 寸法は幅の上限に合わせて文を折り返した行数 (+ 距離の行) で決める
     public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get() || OpeningClient.awakeActive()) {
             return;
         }
-        if (demo || OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null) {
-            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
-                    WIDTH + 6, ROW - 2));
+        Cur c = cur(mc);
+        if (c == null) {
+            return;
         }
+        Font font = mc.font;
+        int want = bandWidth(mc);
+        boolean far = hasFar(c);
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
+            int w = Math.min(want, maxW - 6);
+            if (w < 60) {
+                return null;
+            }
+            int extra = far ? 11 : 0;
+            int maxLines = (maxH - 2 - extra) / 10;
+            if (maxLines < 1) {
+                return null;
+            }
+            java.util.List<String> lines = wrap(font, c.text, w - 6, Math.min(maxLines, 6));
+            return new jp.revati.skyabyss.hud.HudLayout.Size(w + 6, lines.size() * 10 + 2 + extra);
+        }));
     }
 
     public static String direction(Vec3 from, BlockPos to) {
@@ -181,32 +253,10 @@ public final class ObjectiveStrip {
                 || OpeningClient.awakeActive()) {
             return;
         }
-        if (demo) {
-            BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
-            draw(g, mc, "岩鯨の背へ上る鎖を探す", new Resolved(at, false));
-            return;
+        Cur c = cur(mc);
+        if (c != null) {
+            draw(g, mc, c.text, c.resolved);
         }
-        // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる。操作のキーは書かない
-        OpeningClient.Objective opening = OpeningClient.objective();
-        if (opening != null) {
-            draw(g, mc, Component.translatable("objective.skyabyss." + opening.id()).getString(), new Resolved(opening.target(), false));
-            return;
-        }
-        QuestLog log = QuestLog.of(mc.player);
-        QuestDef def = current(mc, log);
-        if (def == null) {
-            return;
-        }
-        QuestLog.Entry entry = log.entry(def.id());
-        String text = QuestHud.firstObjective(mc.font, def, entry, WIDTH - 12);
-        Resolved target = resolveQuest(def, entry);
-        // 巨神の背中の中で、試練を越えて個人の「真ん中へ戻る光」が出ているあいだだけ、帯はその戻り方を言う (titan.end.ReturnBeacons)。
-        // 入ったばかりでは言わない (光が出ていないので)
-        if (jp.revati.skyabyss.client.titan.BoardBeamClient.has("return_offer") && mc.level != null && jp.revati.skyabyss.progress.Titans.titanOfBack(mc.level.dimension()) != null) {
-            text = Component.translatable("objective.skyabyss.back_return").getString();
-            target = Resolved.NONE;
-        }
-        draw(g, mc, text, target);
     }
 
     private static void draw(GuiGraphics g, Minecraft mc, String text, Resolved resolved) {
@@ -242,32 +292,36 @@ public final class ObjectiveStrip {
             arrow = false;
         }
         boolean withArrow = arrow && target != null && !far.isEmpty();
-        int arrowRoom = withArrow ? GuideArrow.SIZE + 4 + (vertical != 0 ? 6 : 0) : 0;
-        int w = WIDTH;
+        int w = rect.w() - 6;
+        int extra = far.isEmpty() ? 0 : 11;
+        java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 2 - extra) / 10));
+        int bottom = y + lines.size() * 10 + extra - 2;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
         int bg = ((int) ((0x50 + glow * 0x50) * a)) << 24 | 0x0A0C10;
-        g.fill(x - 3, y - 2, x + w + 3, y + ROW - 4, bg);
+        g.fill(x - 3, y - 2, x + w + 3, bottom, bg);
         int accent = ((int) (255 * a)) << 24 | 0xF2C14E;
-        g.fill(x - 3, y - 2, x - 2, y + ROW - 4, accent);
+        g.fill(x - 3, y - 2, x - 2, bottom, accent);
         int textColor = ((int) (255 * a)) << 24 | 0xE9E3D4;
-        String shown = "◆ " + text;
-        int room = w - (far.isEmpty() ? 0 : font.width(far) + arrowRoom + 6);
-        while (font.width(shown) > room && shown.length() > 3) {
-            shown = shown.substring(0, shown.length() - 2) + "…";
+        int ty = y + 1;
+        for (String line : lines) {
+            g.drawString(font, Component.literal(line), x + 1, ty, textColor, true);
+            ty += 10;
         }
-        g.drawString(font, Component.literal(shown), x + 1, y + 1, textColor, true);
-        lastShown = shown + (far.isEmpty() ? "" : "   [" + far + "]");
+        lastShown = String.join(" ", lines) + (far.isEmpty() ? "" : "   [" + far + "]");
         lastShownMs = now;
         if (!far.isEmpty()) {
-            int fx = x + w - font.width(far);
-            g.drawString(font, far, fx, y + 1, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
+            // 距離は最後の行 (矢印と、その右に距離)
+            int fy = ty;
+            int fx = x + 1;
             if (withArrow) {
-                int cx = fx - 3 - GuideArrow.SIZE / 2;
-                GuideArrow.draw(g, cx, y + 4, arrowDeg, a);
+                GuideArrow.draw(g, fx + GuideArrow.SIZE / 2, fy + 4, arrowDeg, a);
+                fx += GuideArrow.SIZE + 3;
                 if (vertical != 0) {
-                    GuideArrow.drawVertical(g, cx - GuideArrow.SIZE / 2 - 6, y + 4, vertical > 0, a);
+                    GuideArrow.drawVertical(g, fx + 2, fy + 4, vertical > 0, a);
+                    fx += 9;
                 }
             }
+            g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
         }
     }
 }
