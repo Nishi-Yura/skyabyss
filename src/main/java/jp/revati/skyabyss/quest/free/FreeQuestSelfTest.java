@@ -230,10 +230,45 @@ public final class FreeQuestSelfTest {
         spawned.add(wc);
         // 日の始まりにそろえる (夜明けの直後)
         level.setDayTime(Math.floorDiv(level.getDayTime(), Repeats.DAY) * Repeats.DAY + 1000);
+        hubMarks(level, st, wc, at, failures, notes);
         onceQuests(server, level, st, wc, at, failures, notes);
         boardQuests(server, level, at, spawned, failures, notes);
         party(server, level, at, failures, notes);
         saving(server, level, at, failures, notes);
+    }
+
+    // 「ほかに頼みは」の印: 先で新しい頼みが選べるときだけ金色 (quest)。先が空なら隠す。話の途中で状態が変われば映し直す
+    private static String kindOf(ServerPlayer p, String role, String optionId) {
+        Dialogue d = DialogueManager.dialogue(role);
+        String nodeId = DialogueService.currentNode(p);
+        if (d == null || nodeId == null) {
+            return "(closed)";
+        }
+        Dialogue.Node n = d.nodes().get(nodeId);
+        List<Integer> shown = DialogueService.shownOptions(p);
+        for (int k = 0; k < shown.size(); k++) {
+            if (n.options().get(shown.get(k)).id().equals(optionId)) {
+                return DialogueService.shownKinds(p).get(k);
+            }
+        }
+        return "(hidden)";
+    }
+
+    private static void hubMarks(ServerLevel level, NpcEntity st, NpcEntity wc, BlockPos at, List<String> failures, List<String> notes) {
+        FakePlayer p = player(level, 9, at);
+        // 鯨追い: 何も開いていないなら「ほかに頼みは」は隠れる
+        talk(p, wc);
+        check(kindOf(p, WC, "errands").equals("(hidden)"), "empty whale chaser errands hub should be hidden: " + kindOf(p, WC, "errands"), failures);
+        DialogueService.close(p);
+        // 語り部: 板だけ (その場で終わる) なら金色にしない
+        talk(p, st);
+        check(kindOf(p, ST, "errands").equals("talk"), "storyteller errands with only the board should be plain: " + kindOf(p, ST, "errands"), failures);
+        // 話の途中で新しい頼みが開く (火のそばの話を聞いた) と、映し直されて金色になる
+        NpcBonds.of(p).bond(WC).flags().add("c_whale_heard");
+        check(DialogueService.refreshForTest(p), "refresh did not pick up the new errand", failures);
+        check(kindOf(p, ST, "errands").equals("quest"), "storyteller errands with a new request should be gold: " + kindOf(p, ST, "errands"), failures);
+        DialogueService.close(p);
+        notes.add("hub marks: empty hub hidden, board-only plain, new request gold, live refresh");
     }
 
     // ---------------------------------------------------------------- 読み込み
@@ -400,8 +435,7 @@ public final class FreeQuestSelfTest {
 
         // 雲間の道標・干潮を数える: 岩鯨の心臓を止めるまで出ない
         talk(a, wc);
-        pick(a, WC, "errands", failures);
-        check(!shown(a, WC, "way") && !shown(a, WC, "tide"), "chaser offered stage-1 quests at stage 0", failures);
+        check(!shown(a, WC, "errands"), "an empty errands hub should be hidden at stage 0", failures);
         DialogueService.close(a);
         stilled(server, a);
         talk(a, wc);
