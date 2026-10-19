@@ -309,7 +309,7 @@ public final class Rebirth {
         List<ServerPlayer> guides = new ArrayList<>();
         List<ServerPlayer> newcomers = new ArrayList<>();
         for (ServerPlayer p : players) {
-            if (p.isSpectator() || p instanceof FakePlayer) {
+            if (p.isSpectator()) {
                 continue;
             }
             (count(p) > 0 ? guides : newcomers).add(p);

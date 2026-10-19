@@ -25,6 +25,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // 転生の効き目をゲームへつなぐ出来事 (傷・拾う範囲・ログイン・台座)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class RebirthEvents {
+    // 自己テストが仲間の見つけ方を差し替える (偽のプレイヤーはプレイヤー一覧にいない)
+    static java.util.function.Function<java.util.UUID, ServerPlayer> testLookup;
+
     private RebirthEvents() {
     }
 
@@ -71,8 +74,9 @@ public final class RebirthEvents {
             return 0;
         }
         int low = 0;
-        for (ServerPlayer m : Parties.onlineMembers(player.server, party)) {
-            if (m == player || m.isSpectator() || !m.isAlive() || m.level() != player.level()
+        for (java.util.UUID id : party.members) {
+            ServerPlayer m = testLookup != null ? testLookup.apply(id) : player.server.getPlayerList().getPlayer(id);
+            if (m == null || m == player || m.isSpectator() || !m.isAlive() || m.level() != player.level()
                     || m.distanceToSqr(player) > Parties.SHARE_RANGE * Parties.SHARE_RANGE) {
                 continue;
             }

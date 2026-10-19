@@ -41,7 +41,7 @@ public class PouchMenu extends AbstractContainerMenu {
             addSlot(new PouchSlot(view, i, spot.x(), spot.y()));
         }
         for (int i = 0; i < spare; i++) {
-            addSlot(new PouchSlot(view, layout.spots().size() + i, PouchLayout.spareX(i), PouchLayout.SPARE_Y));
+            addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1]));
         }
         addDataSlot(withdrawFlag);
         refreshFlag();

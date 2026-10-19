@@ -176,7 +176,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     private void renderSpareBg(GuiGraphics g, int x, int y) {
         for (int i = 0; i < menu.spareCount(); i++) {
             boolean has = !menu.getSlot(menu.pouchSlotCount() + i).getItem().isEmpty();
-            g.blit(TEXTURE, x + PouchLayout.spareX(i) - 1, y + PouchLayout.SPARE_Y - 1, 18, 18, has ? 400f : 360f, 0f, 36, 36, TEX, TEX);
+            int[] at = menu.layout().spare().get(i);
+            g.blit(TEXTURE, x + at[0] - 1, y + at[1] - 1, 18, 18, has ? 400f : 360f, 0f, 36, 36, TEX, TEX);
         }
     }
 
@@ -258,7 +259,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x(), label.y(), DIM, false);
         }
         if (menu.spareCount() > 0) {
-            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), PouchLayout.X0, PouchLayout.SPARE_Y - 9, DIM, false);
+            int[] at = menu.layout().spareLabel();
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0], at[1], DIM, false);
         }
         renderInfo(g);
     }
