@@ -151,7 +151,7 @@ def triangulate_loop(P, centroid):
         nm = nm / ln
         dev = float(np.abs((P - ctr) @ nm).max())
         if dev <= 0.2 * max(ext, 1e-9):
-            apex = ctr - nm * max(0.2, 0.2 * ext)
+            apex = ctr - nm * min(max(0.12, 0.08 * ext), 0.4)
             return [tuple(apex)], [(k, (k + 1) % n, n) for k in range(n)]
     apex = ctr + (centroid - ctr) * 0.2
     return [tuple(apex)], [(k, (k + 1) % n, n) for k in range(n)]
@@ -624,43 +624,51 @@ def joint_bad(data, mesh_name):
     return {n: v for n, v in j.items() if v["status"] in ("detach", "shallow")}, bones
 
 
-def fix_joints(data, mesh_name, rounds=8):
-    """付け根の検査 (mesh_audit.joint_check) で detach / shallow の骨を、sink_root で沈めて直す。直るまで量を増やす (部品の大きさの 3% から 35%)。
-    離れすぎた部品 (隙間が大きさの 40% 超。煙の柱のように元から浮かせてあるもの) は触らない。戻り値は直せなかった骨の名前の一覧。"""
-    steps = (0.03, 0.06, 0.1, 0.16, 0.24, 0.35)
-    moved = {}
-    for rd in range(rounds):
-        bad, bones = joint_bad(data, mesh_name)
-        if not bad:
-            return []
-        todo = False
-        # 親から先に直す (親が動くと子の判定も変わる)
-        for n in sorted(bad, key=lambda x: _depth(data, x)):
-            b = data["bones"][n]
-            if not b.get("vertices"):
+def _joint_score(j):
+    """骨の付け根の判定の良さ (大きいほど良い)。ok > shallow > detach、同じなら埋まりの割合と最悪の回転での割合。"""
+    rank = {"ok": 2, "shallow": 1, "detach": 0}[j["status"]]
+    worst = j["worst"][0] if j.get("worst") else 1.0
+    return (rank, min(worst, j["buried"]), j["buried"])
+
+
+def fix_joints(data, mesh_name):
+    """付け根の検査 (mesh_audit.joint_check) で detach / shallow の骨を、sink_root で沈めて直す。
+    骨ごとに、元の頂点から沈める量を (部品の大きさの 3% から 20% まで) 少しずつ増やして試し、最初に ok になった量を採る。
+    どれでも ok にならなければ最も判定の良かった量を採る (悪くなるなら沈めない)。裏返る量は採らない。
+    離れすぎた部品 (隙間が大きさの 40% 超) は触らない。親から先に直す。戻り値は直せなかった骨の名前の一覧。"""
+    steps = (0.03, 0.06, 0.1, 0.15, 0.2)
+    bad, bones = joint_bad(data, mesh_name)
+    for n in sorted(bad, key=lambda x: _depth(data, x)):
+        b = data["bones"][n]
+        if not b.get("vertices"):
+            continue
+        bad_now, bones = joint_bad(data, mesh_name)
+        if n not in bad_now:
+            continue  # 親を直したら直った
+        pn = bad_now[n]["parent"]
+        refs = [bones[pn]] + [m for k, m in bones.items() if k not in (n, pn) and m.parent == bones[n].parent and len(m.T)]
+        ext = float((bones[n].V.max(0) - bones[n].V.min(0)).max())
+        psamp = np.vstack([ma.surface_samples(r) for r in refs])
+        if float(cKDTree(psamp).query(ma.surface_samples(bones[n]))[0].min()) > 0.4 * ext:
+            continue
+        orig = b["vertices"]
+        best = (_joint_score(bad_now[n]), orig)
+        for st in steps:
+            b["vertices"] = orig
+            if not sink_root(b, refs, st * ext, n):
+                break
+            if ma.analyze(np.array(b["vertices"], float), np.array(b["triangles"], int))["inv"]:
+                continue  # 裏返った (薄い部品が突き抜けた)
+            nb, bn = joint_bad(data, mesh_name)
+            j = ma.joint_check(bn, mesh_name).get(n) if bn else None
+            if j is None:
                 continue
-            pn = bad[n]["parent"]
-            refs = [bones[pn]] + [m for k, m in bones.items() if k not in (n, pn) and m.parent == bones[n].parent and len(m.T)]
-            ext = float((bones[n].V.max(0) - bones[n].V.min(0)).max())
-            psamp = np.vstack([ma.surface_samples(r) for r in refs])
-            gap = float(cKDTree(psamp).query(ma.surface_samples(bones[n]))[0].min())
-            if gap > 0.4 * ext:
-                continue
-            if any(_anc_in(data, n, bad)):
-                continue  # 祖先が悪いときは、祖先が直ってから (祖先が動くと判定が変わる)
-            i = moved.get(n, 0)
-            if i >= len(steps):
-                continue
-            # 同じ回で動かした親の影響は次の回の判定で見る
-            old = b["vertices"]
-            if sink_root(b, refs, steps[i] * ext, n):
-                moved[n] = i + 1
-                todo = True
-                if ma.analyze(np.array(b["vertices"], float), np.array(b["triangles"], int))["inv"]:
-                    b["vertices"] = old  # 裏返った (薄い部品が突き抜けた) ので戻す
-                    moved[n] = len(steps)
-        if not todo:
-            break
+            sc = _joint_score(j)
+            if sc > best[0]:
+                best = (sc, b["vertices"])
+            if j["status"] == "ok":
+                break
+        b["vertices"] = best[1]
     bad, _ = joint_bad(data, mesh_name)
     return sorted(bad)
 
