@@ -26,7 +26,7 @@ public interface GroupOwned {
     void setGroupId(@Nullable UUID group);
 
     // viewer にこの個体を送ってよいか (観戦者は全部見える)
-    static boolean visibleTo(Entity self, ServerPlayer viewer) {
+    public static boolean visibleTo(Entity self, ServerPlayer viewer) {
         if (!(self instanceof GroupOwned owned) || owned.groupId() == null || viewer.isSpectator()) {
             return true;
         }

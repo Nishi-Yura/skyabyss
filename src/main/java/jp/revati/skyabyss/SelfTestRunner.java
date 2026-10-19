@@ -97,6 +97,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
         steps.add(Step.once("party locator", jp.revati.skyabyss.party.PartyLocatorSelfTest::runSelfTest));
+        // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
+        steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
