@@ -1,0 +1,15 @@
+{
+  "tutorial.skyabyss.done": "Done",
+  "tutorial.skyabyss.lore_book.hand": "Right-click to read the Lore Book",
+  "tutorial.skyabyss.lore_book.short": "Tap [%s] to open the Lore Book",
+  "tutorial.skyabyss.lore_book.wheel": "Hold [%s] for the pouch wheel, pick the Lore Book, release",
+  "tutorial.skyabyss.lore_page.hand": "Right-click to read the torn page",
+  "tutorial.skyabyss.lore_page.short": "Tap [%s] to read the torn page",
+  "tutorial.skyabyss.lore_page.wheel": "Hold [%s] for the pouch wheel, pick the torn page, release to read it",
+  "tutorial.skyabyss.pouch": "Press [%s] to open the pouch",
+  "tutorial.skyabyss.whistle.hand": "Right-click to blow the whistle and call a titan",
+  "tutorial.skyabyss.whistle.short": "Tap [%s] to blow the whistle (call)",
+  "tutorial.skyabyss.whistle.wheel": "Hold [%s] for the pouch wheel, pick the whistle, release to call",
+  "tutorial.skyabyss.record": "Press [%s] to open the record book",
+  "tutorial.skyabyss.ping": "Press [%s] to point out what you are looking at to your party"
+}

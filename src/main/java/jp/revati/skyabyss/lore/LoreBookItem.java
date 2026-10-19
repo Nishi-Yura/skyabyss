@@ -28,6 +28,7 @@ public class LoreBookItem extends Item implements jp.revati.skyabyss.pouch.Pouch
         } else if (player instanceof ServerPlayer server) {
             // 開く前に最新の記録を送っておく (データパックを入れ替えた直後など)
             Lore.sync(server);
+            jp.revati.skyabyss.tutorial.TutorialHints.done(server, jp.revati.skyabyss.tutorial.TutorialHints.LORE_BOOK);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
@@ -36,6 +37,7 @@ public class LoreBookItem extends Item implements jp.revati.skyabyss.pouch.Pouch
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
         Lore.sync(player);
+        jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.LORE_BOOK);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new jp.revati.skyabyss.pouch.PouchNet.OpenBook());
         return true;
     }

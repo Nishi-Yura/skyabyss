@@ -51,6 +51,7 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
         if (result == Voyages.CallResult.CALLED) {
             player.getCooldowns().addCooldown(this, 60);
         }
+        jp.revati.skyabyss.tutorial.TutorialHints.done(player, jp.revati.skyabyss.tutorial.TutorialHints.WHISTLE);
         return true;
     }
 

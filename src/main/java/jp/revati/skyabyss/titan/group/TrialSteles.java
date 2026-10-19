@@ -104,6 +104,7 @@ public final class TrialSteles {
     // by: 鳴らした人 (わかれば。「誰が鳴らしたか」の表示のために控える。踏破の数え方には使わない)
     public static void onRung(ServerLevel back, UUID group, String titan, String trial, @Nullable Component name, @Nullable ServerPlayer by) {
         if (by != null) {
+            jp.revati.skyabyss.tutorial.TutorialHints.start(by, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
             SteleRingers.get(back.getServer()).put(group, signal(titan, trial), by.getUUID(), by.getGameProfile().getName());
         }
         for (ServerPlayer p : back.getServer().getPlayerList().getPlayers()) {
@@ -159,6 +160,7 @@ public final class TrialSteles {
 
     // すでに鳴っている石に触ったとき、画面の下に「あなたが鳴らした / 〇〇が鳴らした」を出す
     public static void tellWho(ServerPlayer player, String titan, String trial) {
+        jp.revati.skyabyss.tutorial.TutorialHints.start(player, jp.revati.skyabyss.tutorial.TutorialHints.RECORD);
         WhoRang w = who(player.server, Groups.keyOf(player), player.getUUID(), signal(titan, trial));
         Notice.bar(player, jp.revati.skyabyss.ModText.hint("message.skyabyss.steles.who", whoText(w)));
         if (w.who() != Who.NONE && !FirstRun.isFirstRun(player)) {
