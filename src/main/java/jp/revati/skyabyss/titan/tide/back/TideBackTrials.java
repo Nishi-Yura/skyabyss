@@ -124,7 +124,9 @@ public final class TideBackTrials {
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             GroupOverlays.register(TideBackTrials::overlay);
+            GroupOverlays.register(Breath::overlay);
             GroupEvents.addMembershipHook(TideBackTrials::membershipChanged);
+            BreathGuide.register();
         });
     }
 
@@ -296,6 +298,8 @@ public final class TideBackTrials {
             TideWatch.tick(level, false);
         }
         TideFlats.tick(level, peaceful);
+        Breath.tick(level, peaceful);
+        BreathSummit.tick(level, peaceful);
         if (level.getGameTime() % 5 == 0) {
             tickGates(level);
             tickPads(level);
@@ -673,6 +677,7 @@ public final class TideBackTrials {
                         || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
                         || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
                         || UPPER_ROOMS.stream().anyMatch(a -> a.aabb().inflate(2, 2, 2).contains(p.position()))
+                        || Breath.activeBox().inflate(2).contains(p.position()) || BreathGuide.nearDoor(p.position())
                         || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition());
                 if (!beachSide) {
                     toArrival(p);
@@ -876,6 +881,10 @@ public final class TideBackTrials {
             event.setCanceled(true);
             return;
         }
+        if (BreathSummit.useBlock(level, pos, player)) {
+            event.setCanceled(true);
+            return;
+        }
         if (level.getBlockState(pos).is(Blocks.SOUL_CAMPFIRE)) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
@@ -893,7 +902,7 @@ public final class TideBackTrials {
     @SubscribeEvent
     static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.loadedFromDisk() && event.getLevel().dimension() == TideTravel.TIDE_BACK
-                && (event.getEntity() instanceof ReefNest || event.getEntity() instanceof TideBeckoner)) {
+                && (event.getEntity() instanceof ReefNest || event.getEntity() instanceof TideBeckoner || event.getEntity() instanceof PearlKeeper)) {
             event.setCanceled(true);
         }
     }
@@ -912,6 +921,8 @@ public final class TideBackTrials {
         TideWatch.clear();
         TideGuide.clear();
         TideFlats.clear();
+        Breath.clear();
+        BreathSummit.clear();
         TideClock.force(null);
     }
 

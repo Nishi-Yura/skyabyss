@@ -30,7 +30,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // /skyabyss titan tide <low|high|cycle>            : 潮を干潮・満潮に止める / 時計に戻す (潮殻の背だけの潮)
 // /skyabyss titan sleep tide <west|east|front|none> : 打った人のグループの眠る試練を決めて、そのグループの試練を戻す
 // 確かめるための操作 (/skyabyss tideback ...):
-//   go <場所>           : 浜・広間・庭・大貝・祭壇・潮見・岩棚・干潟の前室・干潟・殻の底の前室へ移る
+//   go <場所>           : 浜・広間・庭・大貝・祭壇・潮見・岩棚・干潟の前室・干潟・殻の底の前室・息の間の縁 (breath)・舞台の下 (vent)・舞台 (summit)・展望の間 (deck) へ移る
 //   ring <west|east|front> : 打った人のグループの石を鳴らす (試練を飛ばす)
 //   status              : 潮と、打った人のグループの石・眠る試練・種・巣・潮招き、部屋の持ち主
 //   watch <下> <中> <上> : 潮見の間の水位を直接決める
@@ -50,7 +50,13 @@ public final class TideBackCommands {
             Map.entry("f0", RESTS.get(4).spawn()),
             Map.entry("flats", new BlockPos(0, FLATS_FLOOR + 1, -76 + FLATS_DZ)),
             Map.entry("heart", RESTS.get(5).spawn()),
-            Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)));
+            Map.entry("bottom", new BlockPos(0, HUB_FLOOR + 1, 3)),
+            // 息の間: 縁 (入口の泡の近く)・皿 7 (舞台の真下)・舞台・展望の間
+            Map.entry("breath", RESTS.get(6).spawn()),
+            Map.entry("vent", BlockPos.containing(BreathLayout.dishNode(BreathLayout.DISHES - 1).landX(), BreathLayout.dishNode(BreathLayout.DISHES - 1).landY(),
+                    BreathLayout.dishNode(BreathLayout.DISHES - 1).landZ())),
+            Map.entry("summit", BlockPos.containing(BreathLayout.arena().landX(), BreathLayout.arena().landY(), BreathLayout.arena().landZ())),
+            Map.entry("deck", RESTS.get(9).spawn()));
 
     private TideBackCommands() {
     }

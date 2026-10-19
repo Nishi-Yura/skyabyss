@@ -40,7 +40,7 @@ final class TideGuide {
     // 目的の板の文の id (lang の gui.skyabyss.tide_goal.<id>)。自己テストが ja・en の両方にあることを見る
     static final java.util.List<String> GOAL_IDS = java.util.List.of("west.take", "west.carry", "west.place", "west.help", "west.done", "west.sleep",
             "east.go", "east.exit", "east.done", "east.sleep", "front.nests", "front.boss", "front.stone", "front.done", "front.sleep", "hub.stones",
-            "hub.wait", "hub.bottom");
+            "hub.wait", "hub.bottom", "up.start", "up.climb", "up.arena", "up.keeper", "up.lift", "up.done");
 
     // 点の色 (灯った点は金、まだの点は暗い青灰)
     private static final DustParticleOptions LIT = new DustParticleOptions(new Vector3f(1f, 0.88f, 0.45f), 1.1f);
@@ -157,6 +157,10 @@ final class TideGuide {
             String id = !st.allNestsBroken() ? "front.nests" : !st.beckonerDefeated() ? "front.boss" : "front.stone";
             return new Goal(id, pr[0], pr[1], nests, 0, 0);
         }
+        Goal up = upGoal(level, p, st);
+        if (up != null) {
+            return up;
+        }
         if (HUB.aabb().inflate(2, 8, 2).contains(v) || LEDGE_S.aabb().inflate(1, 2, 1).contains(v) || GALLERY_E.aabb().inflate(1, 2, 1).contains(v)) {
             int n = st.rungCount();
             if (n >= 3) {
@@ -165,6 +169,32 @@ final class TideGuide {
             return new Goal("hub.stones", n, 3, 0, 0, 0);
         }
         return Goal.NONE;
+    }
+
+    // 息の間の「いま何をするか」: 縁 (入口の泡) → 昇る (高さ・輪の数) → 舞台 (戦い・風の柱) → 展望の間。輪 = 下・中・上の壁の輪 (3 つ)
+    @javax.annotation.Nullable
+    static Goal upGoal(ServerLevel level, ServerPlayer p, TideBackState.Group st) {
+        Vec3 v = p.position();
+        if (!Breath.active(v) || v.y < BreathLayout.LIP - 1) {
+            return null;
+        }
+        int rings = Breath.ringsLit(st.upBest());
+        int h = BreathLayout.heightOf(v.y);
+        int total = BreathLayout.TOTAL_HEIGHT;
+        if (v.y >= BreathLayout.DECK_FLOOR + 0.7) {
+            return new Goal("up.done", 3, 3, h, total, st.upBest());
+        }
+        if (BreathLayout.arenaBox().contains(v) && v.y >= BreathLayout.ARENA_FLOOR + 0.7) {
+            boolean open = Breath.deckOpen(level, p, level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL);
+            if (open) {
+                return new Goal("up.lift", 3, 3, h, total, st.upBest());
+            }
+            return new Goal(BreathSummit.fight() == BreathSummit.Fight.ACTIVE ? "up.keeper" : "up.arena", 3, 3, h, total, st.upBest());
+        }
+        if (v.y <= BreathLayout.LIP + 2.5 && st.upBest() == 0) {
+            return new Goal("up.start", 0, 3, h, total, 0);
+        }
+        return new Goal("up.climb", rings, 3, h, total, st.upBest());
     }
 
     private static AABB watchZone() {
@@ -187,6 +217,7 @@ final class TideGuide {
         if (counter % 2 == 0) {
             tickLeverGlow(level);
         }
+        BreathGuide.tick(level, counter);
     }
 
     // 目的が変わった人にだけ、目盛りの板を送り直す (毎秒の送りを待たない)
