@@ -53,7 +53,7 @@ public final class Telegraph {
     // 1 tick に送る予告の粒の数 (粒 × 見る人) の上限
     static final int BUDGET = 700;
 
-    // 印の意味 (色に頼らない合図の違いもある: 危険 = 縁に山形・満ちると橙から赤から白、安全 = 青白の破線、無害 = 灰色の点)。
+    // 印の意味 (色に頼らない合図の違いもある: 危険 = 縁は実線・満ちると橙から赤から白、安全 = 青白の破線、無害 = 灰色の点)。
     // CUSTOM は color() で選んだ色 (旧来の見え方)。新しい技は danger() / safe() / harmless() を使う
     public enum Style {
         CUSTOM(0xFF5A5A),
@@ -249,7 +249,7 @@ public final class Telegraph {
             return this;
         }
 
-        // 当たると傷が出る範囲: 橙から赤へ満ち、当たる瞬間に白く光る。縁は山形
+        // 当たると傷が出る範囲: 橙から赤へ満ち、当たる瞬間に白く光る。縁は実線
         public Builder danger() {
             this.style = Style.DANGER;
             this.rgb = Style.DANGER.rgb;

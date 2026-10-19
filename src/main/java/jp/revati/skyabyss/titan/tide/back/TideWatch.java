@@ -70,6 +70,7 @@ public final class TideWatch {
     // state は新しい持ち主のグループ (null なら最初の配置。建てたあと)。岩棚の石と抜け道の床は、ワールドではいつも「まだ鳴っていない」形
     static void reset(ServerLevel level, @javax.annotation.Nullable TideBackState.Group state) {
         config = state == null ? 0 : state.eastConfig();
+        TideGuide.resetEast();
         TidePuzzle.Config c = cfg();
         // 取っ手の台をすべて片付ける
         for (BlockPos[] tier : SLOTS) {
@@ -314,7 +315,7 @@ public final class TideWatch {
     }
 
     // 持ち主のグループの、部屋の近くの人 (知らせを出す相手)
-    private static List<ServerPlayer> near(ServerLevel level) {
+    static List<ServerPlayer> near(ServerLevel level) {
         java.util.UUID owner = TideRooms.owner(TideRooms.WATCH);
         return level.getEntitiesOfClass(ServerPlayer.class, area().inflate(6),
                 p -> !p.isSpectator() && (owner == null || jp.revati.skyabyss.titan.group.Groups.isMember(p, owner)));

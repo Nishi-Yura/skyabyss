@@ -54,7 +54,7 @@ public final class TutorialHints {
             new Hint(POUCH, null),
             new Hint(LORE_BOOK, i -> i instanceof jp.revati.skyabyss.lore.LoreBookItem),
             new Hint(LORE_PAGE, i -> i instanceof jp.revati.skyabyss.lore.LorePageItem),
-            new Hint(WHISTLE, i -> i instanceof jp.revati.skyabyss.titan.travel.TitanCallItem),
+            // 呼び笛の手引きは出さない (ユーザー判断: 左の札で十分。強制しない)
             new Hint(RECORD, null),
             new Hint(PING, null));
 

@@ -129,6 +129,13 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> CRUMBLING_BONE = ITEMS.registerSimpleBlockItem(ModBlocks.CRUMBLING_BONE);
     public static final DeferredItem<BlockItem> RESONANCE_FORGE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_FORGE);
 
+    // 闇の水路の灯 (docs/design/23): 持ち運ぶ光る海のイソギンチャクと、灯の台・苗床・数え石
+    public static final DeferredItem<Item> GLOW_ANEMONE = ITEMS.register("glow_anemone",
+            () -> new jp.revati.skyabyss.titan.dungeon.GlowAnemoneItem(new Item.Properties().stacksTo(4).rarity(Rarity.UNCOMMON)));
+    public static final DeferredItem<BlockItem> ANEMONE_PEDESTAL = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_PEDESTAL);
+    public static final DeferredItem<BlockItem> ANEMONE_BED = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_BED);
+    public static final DeferredItem<BlockItem> ANEMONE_TALLY = ITEMS.registerSimpleBlockItem(ModBlocks.ANEMONE_TALLY);
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.skyabyss"))
             .icon(() -> SKY_KEY_FRAGMENT.get().getDefaultInstance())
@@ -171,6 +178,10 @@ public final class ModItems {
                 output.accept(RESONANCE_STONE.get());
                 output.accept(SEALED_GATE.get());
                 output.accept(CRUMBLING_BONE.get());
+                output.accept(GLOW_ANEMONE.get());
+                output.accept(ANEMONE_PEDESTAL.get());
+                output.accept(ANEMONE_BED.get());
+                output.accept(ANEMONE_TALLY.get());
             })
             .build());
 

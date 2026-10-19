@@ -83,8 +83,8 @@ public final class TutorialSelfTest {
         a.getInventory().add(new ItemStack(LoreSetup.LORE_PAGE.get()));
         a.getInventory().add(new ItemStack(jp.revati.skyabyss.titan.travel.TravelSetup.STONE_WHALE_CALL.get()));
         TutorialHints.scan(a);
-        check(f, TutorialHints.active(a).equals(List.of(TutorialHints.LORE_BOOK, TutorialHints.LORE_PAGE, TutorialHints.WHISTLE)),
-                "book, page and whistle should be active in priority order: " + TutorialHints.active(a));
+        check(f, TutorialHints.active(a).equals(List.of(TutorialHints.LORE_BOOK, TutorialHints.LORE_PAGE)),
+                "book and page should be active (no whistle hint) in priority order: " + TutorialHints.active(a));
         Pouch.add(a, new ItemStack(ModItems.STONE_WHALE_SHARD.get(), 3));
         TutorialHints.scan(a);
         check(f, TutorialHints.active(a).get(0).equals(TutorialHints.POUCH), "the pouch hint should come first once the pouch holds something: " + TutorialHints.active(a));

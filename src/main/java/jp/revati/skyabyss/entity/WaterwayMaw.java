@@ -92,7 +92,7 @@ public class WaterwayMaw extends Monster implements GeoEntity {
         goalSelector.addGoal(4, new RandomSwimmingGoal(this, 1.0, 10));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8f));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && tickCount >= calmUntil && graced(p.getUUID())));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, p -> p.isInWater() && tickCount >= calmUntil && graced(p.getUUID()) && !calmedByLamp(p)));
     }
 
     @Override
@@ -160,6 +160,11 @@ public class WaterwayMaw extends Monster implements GeoEntity {
             Player p = level().getPlayerByUUID(id);
             return p == null || p.distanceToSqr(this) > FORGET_RANGE_SQR;
         });
+    }
+
+    // 灯 (docs/design/23。ともした光る海のイソギンチャク) のそばにいる人は襲わない。灯のまわり (6.5 ブロック) は、魚がおとなしい
+    private boolean calmedByLamp(Entity target) {
+        return jp.revati.skyabyss.titan.dungeon.AnemoneLights.calms(level(), target);
     }
 
     private boolean graced(UUID id) {
@@ -239,6 +244,13 @@ public class WaterwayMaw extends Monster implements GeoEntity {
                 return;
             }
             dryTicks = t.isInWater() ? 0 : dryTicks + 1;
+            // 灯のそばに入られたら、狙いを諦める (噛む前の溜めの最中でも外れる)
+            if (tickCount % 5 == 0 && calmedByLamp(t)) {
+                dryTicks = GIVE_UP_TICKS;
+                windingUp = false;
+                state = 0;
+                return;
+            }
             getLookControl().setLookAt(t, 30f, 30f);
             double dist = distanceTo(t);
             if (state == 2) {

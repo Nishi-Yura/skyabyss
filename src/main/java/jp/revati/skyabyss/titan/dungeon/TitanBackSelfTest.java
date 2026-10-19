@@ -99,6 +99,8 @@ public final class TitanBackSelfTest {
                     });
                 })),
                 SelfTestRunner.Step.once("titan back (groups)", server -> withBack(server, back -> checkGroups(server, back))),
+                // 闇の水路の灯 (docs/design/23): 置き場・摘む・ともす・なだめる・戸・グループごと・リセット・詰まない・持ち歩きの光・既知の道
+                SelfTestRunner.Step.once("titan back (lights)", server -> withBack(server, back -> PENDING.addAll(AnemoneSelfTest.run(back)))),
                 // 水が流れ広がるのを待ってから、息継ぎの空気が残っているかを数える (水は 5 tick ごとに一段広がる)
                 SelfTestRunner.Step.once("titan back (maze settled)", MAZE_SETTLE_TICKS, server -> withBack(server, back -> checkPockets(back, PENDING))),
                 SelfTestRunner.Step.once("titan back (reset)", server -> withBack(server, back -> {
@@ -692,7 +694,7 @@ public final class TitanBackSelfTest {
                     continue;
                 }
                 BlockState state = level.getBlockState(n);
-                if (state.getFluidState().isSource() || state.isAir()) {
+                if (state.getFluidState().isSource() || state.isAir() || state.is(ModBlocks.SEALED_GATE.get())) {
                     seen.add(n);
                     queue.add(n);
                 }

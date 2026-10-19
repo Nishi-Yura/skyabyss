@@ -103,9 +103,8 @@ public final class TelegraphRenderer {
         float fillA = hc ? 0.50f : 0.34f;
         float curtain = hc ? 1.0f : 0.6f;
         float wm = style == Telegraph.Style.DANGER ? 0.1f : 0.3f;
-        // 縁の模様 (色だけに頼らない): 危険 = 山形、安全 = 破線、無害 = 点、特別な色 = 実線
+        // 縁の模様 (色だけに頼らない): 危険 = 実線、安全 = 破線、無害 = 点、特別な色 = 実線
         Pattern pattern = switch (style) {
-            case DANGER -> Pattern.CHEVRON;
             case SAFE -> Pattern.DASH;
             case HARMLESS -> Pattern.DOT;
             default -> Pattern.SOLID;
@@ -225,7 +224,6 @@ public final class TelegraphRenderer {
 
     enum Pattern {
         SOLID,
-        CHEVRON,
         DASH,
         DOT
     }
@@ -323,27 +321,6 @@ public final class TelegraphRenderer {
                             } else {
                                 at += Math.max(period - phase, 0.02);
                             }
-                        }
-                        acc[0] += len;
-                    }
-                    case CHEVRON -> {
-                        // 細い実線 + 1.2 マスごとの山形 (頂点は範囲の中心の側)
-                        piece(x0, z0, x1, z1, r, g, b, a, width * 0.55f, curtainHeight, true);
-                        double period = 1.2;
-                        double at = acc[0] % period == 0 ? 0 : period - (acc[0] % period);
-                        for (; at < len; at += period) {
-                            double mx = x0 + ux * at;
-                            double mz = z0 + uz * at;
-                            double nx = -uz;
-                            double nz = ux;
-                            if ((centerX - mx) * nx + (centerZ - mz) * nz < 0) {
-                                nx = -nx;
-                                nz = -nz;
-                            }
-                            double ax = mx + nx * 0.34;
-                            double az = mz + nz * 0.34;
-                            piece(ax, az, mx - ux * 0.3, mz - uz * 0.3, r, g, b, a, width * 0.9f, 0f, false);
-                            piece(ax, az, mx + ux * 0.3, mz + uz * 0.3, r, g, b, a, width * 0.9f, 0f, false);
                         }
                         acc[0] += len;
                     }

@@ -44,7 +44,6 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 // 場面に合わせて自動で入れ替わる (QuickPick): 巨神の乗り場・巨神のそば = 呼び笛・呼び貝、海の上 = 潮見の貝、嵐 = 風見鶏、そのほか = 前回の道具。
 // 旅嚢の画面で右クリックして置いた道具 (pin) と、輪で選んだ道具は、はずすまで自動より優先する。
 // 場面の最中・画面を開いている間・F1・デバッグ画面では出さない。設定 pouchQuickCard で消せる (消すと短押しは前回の道具)
-@EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class QuickCard {
     private static final ResourceLocation SPRITE_LEFT = ResourceLocation.withDefaultNamespace("hud/hotbar_offhand_left");
     private static final ResourceLocation SPRITE_RIGHT = ResourceLocation.withDefaultNamespace("hud/hotbar_offhand_right");
