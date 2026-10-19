@@ -225,6 +225,16 @@ public final class NoticeClient {
         mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, pitch, volume));
     }
 
+    // 開発用 (/skyabyss_hud demo): その列が空いているか (空いたら見本をまた出す)
+    public static boolean idle(Notice.Channel channel) {
+        return switch (channel) {
+            case CAPTION -> CAPTIONS.idle();
+            case CENTER -> CENTER.idle();
+            case BANNER -> BANNER.idle();
+            default -> true;
+        };
+    }
+
     // 自己テストや台本の前に、残っている知らせを消す
     public static void clear() {
         GATE.clear();

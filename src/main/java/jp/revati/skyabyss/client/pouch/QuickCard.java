@@ -92,7 +92,7 @@ public final class QuickCard {
             scanIn = SCAN_INTERVAL;
             ctx = scan(mc);
         }
-        ResourceLocation now = pick(mc);
+        ResourceLocation now = jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) && !PouchEntries.all().isEmpty() ? PouchEntries.all().get(0).id() : pick(mc);
         if (!java.util.Objects.equals(now, shown)) {
             // 初めて出るとき (shown が null) は強調しない
             if (shown != null && now != null) {
@@ -209,7 +209,7 @@ public final class QuickCard {
         if (e == null) {
             return;
         }
-        int count = Pouch.count(mc.player, e.item());
+        int count = jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) ? 3 : Pouch.count(mc.player, e.item());
         if (count <= 0) {
             return;
         }

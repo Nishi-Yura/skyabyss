@@ -32,6 +32,8 @@ public final class ObjectiveStrip {
     @Nullable
     public static volatile Function<String, BlockPos> targets;
 
+    // 開発用 (/skyabyss_hud demo): 目的の帯と追跡の札を、データなしで出す
+    public static volatile boolean demo;
     private static String lastText = "";
     // 開発用 (台本のログ): 最後に帯へ描いた文と、その時刻
     private static String lastShown = "";
@@ -66,6 +68,9 @@ public final class ObjectiveStrip {
         Minecraft mc = Minecraft.getInstance();
         if (!Config.OBJECTIVE_STRIP.get() || mc.player == null) {
             return false;
+        }
+        if (demo) {
+            return true;
         }
         return OpeningClient.objective() != null || current(mc, QuestLog.of(mc.player)) != null;
     }
@@ -168,6 +173,11 @@ public final class ObjectiveStrip {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || !Config.OBJECTIVE_STRIP.get()
                 || OpeningClient.awakeActive()) {
+            return;
+        }
+        if (demo) {
+            BlockPos at = mc.player.blockPosition().offset(96, 0, -70);
+            draw(g, mc, "岩鯨の背へ上る鎖を探す", new Resolved(at, false));
             return;
         }
         // 序盤 (17 の 5.3節、11.2節): 野営地から最初の岩鯨までは、拍子の担当 (opening/) が目的と目印を送ってくる。操作のキーは書かない

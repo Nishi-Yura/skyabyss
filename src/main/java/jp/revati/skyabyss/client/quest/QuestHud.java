@@ -55,6 +55,10 @@ public final class QuestHud {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.screen instanceof QuestLogScreen) {
             return;
         }
+        if (demo) {
+            renderDemo(g, mc);
+            return;
+        }
         QuestLog log = QuestLog.of(mc.player);
         if (log.tracked().isEmpty()) {
             return;
@@ -69,18 +73,33 @@ public final class QuestHud {
         }
         Font font = mc.font;
         List<Line> lines = lines(font, def, entry, WIDTH - 12);
+        drawBox(g, mc, Component.translatable(def.titleKey()), def.main(), lines, () -> drawGuide(g, mc, def, entry, y() + ObjectiveStrip.rows()));
+    }
+
+    // 札の箱 (題と、済んでいない目的の行)。開発用の見本 (demo) も同じ描き方
+    private static void drawBox(GuiGraphics g, Minecraft mc, Component title, boolean main, List<Line> lines, Runnable guide) {
+        Font font = mc.font;
         int h = 12 + lines.size() * 10 + 3;
         int top = y() + ObjectiveStrip.rows();
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
-        g.fill(X - 3, top - 3, X - 2, top + h - 2, def.main() ? MAIN_TITLE : TITLE);
-        g.drawString(font, Component.translatable(def.titleKey()), X + 1, top, def.main() ? MAIN_TITLE : TITLE, true);
-        drawGuide(g, mc, def, entry, top);
+        g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
+        g.drawString(font, title, X + 1, top, main ? MAIN_TITLE : TITLE, true);
+        guide.run();
         int y = top + 12;
         for (Line l : lines) {
             g.drawString(font, l.text, X + l.indent, y, l.color, true);
             y += 10;
         }
+    }
+
+    // 開発用 (/skyabyss_hud demo): データなしで追跡の札を出す
+    public static volatile boolean demo;
+
+    private static void renderDemo(GuiGraphics g, Minecraft mc) {
+        List<Line> lines = List.of(new Line("・渡り鳥の羽を 3 枚集める（1/3）", 0, TEXT), new Line("・見張り台の鐘を鳴らす", 0, TEXT));
+        drawBox(g, mc, Component.literal("見張り台の頼みごと"), false, lines, () -> {
+        });
     }
 
     // 追跡中のクエストの札の右上に、目的までの矢印と距離 (帯と同じ。設定 questArrow が OFF なら方位の文字)。背中の中なら「背中の中」

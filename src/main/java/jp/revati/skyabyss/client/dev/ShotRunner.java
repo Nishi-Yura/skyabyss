@@ -586,6 +586,11 @@ public final class ShotRunner {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
                 return true;
             }
+            case "huddemo" -> {
+                // huddemo <all|opening|back|boss|off> : 画面の部品をいっぺんに出す (client/hud/HudDemo)
+                jp.revati.skyabyss.client.hud.HudDemo.set(line.arg(0));
+                return true;
+            }
             case "perspective" -> {
                 // perspective first|back|front : 視点 (一人称 / 三人称の背中側 / 三人称の正面)
                 mc.options.setCameraType(switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
