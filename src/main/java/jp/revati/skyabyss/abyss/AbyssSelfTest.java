@@ -17,8 +17,6 @@ import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
 import jp.revati.skyabyss.loot.TitanMemoryData;
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.rebirth.RebirthData;
-import jp.revati.skyabyss.rebirth.RebirthSetup;
 import jp.revati.skyabyss.registry.ModEntities;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.skill.Rune;
@@ -114,7 +112,7 @@ public final class AbyssSelfTest {
     private static FakePlayer fake(ServerLevel level, String name, int rebirths) {
         FakePlayer p = new FakePlayer(level, new GameProfile(UUID.nameUUIDFromBytes(("abyss_" + name).getBytes()), "[" + name + "]"));
         p.moveTo(CX, FLOOR + 1, CZ, 0f, 0f);
-        p.setData(RebirthSetup.DATA.get(), RebirthData.EMPTY.withCount(rebirths));
+        jp.revati.skyabyss.rebirth.Rebirths.setCount(p, rebirths);
         return p;
     }
 

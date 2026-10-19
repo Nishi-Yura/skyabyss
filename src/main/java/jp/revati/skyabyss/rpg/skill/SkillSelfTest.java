@@ -94,7 +94,7 @@ public final class SkillSelfTest {
                 && SkillRules.pointsForLevel(9) == 5 && SkillRules.pointsForLevel(10) == 5 && SkillRules.pointsForLevel(12) == 7
                 && SkillRules.pointsForLevel(15) == 10 && SkillRules.pointsForLevel(21) == 16 && SkillRules.pointsForLevel(33) == 28
                 && SkillRules.pointsForLevel(50) == 45, "skill points per level are wrong");
-        check(f, Skill.values().length == 36 && Rune.values().length == 38, "skill / rune counts are wrong");
+        check(f, Skill.values().length == 36 && Rune.values().length == 42, "skill / rune counts are wrong");
         int[] perTree = new int[SkillTree.values().length];
         for (Skill s : Skill.values()) {
             perTree[s.tree.ordinal()]++;
