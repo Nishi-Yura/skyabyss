@@ -60,7 +60,7 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-// 余燼の背の試練の進み (13 の 3.5節・7 章): 熾り石・抜け道の光る床・熾の底の門・リセット・眠る試練・休み場・ピースフル。
+// 余燼の背の試練の進み (13 の 3.5節・7 章): 熾り石・抜け道の光る床・熾の底の門・リセット・静かな試練・休み場・ピースフル。
 // 進みはグループ (パーティ、または一人) ごと (docs/design/10 の 9 章、EmberBackState)。背中は一つで、同じ背中に別のグループが同時にいてよい:
 //  - 熾り石の光・光る床・広間の炉の火と囲いの口は、グループごとの見かけ (GroupOverlays)。ワールドのブロックは「まだ何も鳴っていない」姿
 //  - 熾の底の門 (格子と囲いの南の口)・鍛え手の扉・熾の底の入口は、いつも置いてある扉 (SealedGateBlock)。開け閉めはグループごと (GroupGates)
@@ -68,7 +68,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // ほかの担当が呼ぶ API:
 //   markReady(level, group, trial)      石を鳴らせるようにする (東: E が鍛え手を倒したとき、南: C3 が火床を 100 にしたとき。西は奥の岸に着けばいつでも)
 //   ring(level, group, trial, player)   石を鳴らす (ふつうは人が石を右クリックしたとき useStone から。テスト用)
-//   sleeping(level, room)               部屋の持ち主にとって、この周その部屋が眠っているか (east が眠ると smith も)
+//   quiet(level, room)                  部屋の持ち主にとって、この周その部屋が静かな試練か (east が静かだと smith の部屋も。いつでも入れて最後までできる)
 //   EmberBackState.forRoom(level, room) 部屋の持ち主の状態 (リセットの種で島の並び・打つ順を決める)
 //   inTrial(pos)・toHub(player)         試練の箱の中か / 広間の休み場へ移す (熱は 0)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
@@ -252,7 +252,7 @@ public final class EmberBackTrials {
         }
     }
 
-    // 体を建てた直後 (EmberBodyBuilder から)。扉と石を置き、すべてのグループの試練を最初の形にする (眠らせない)
+    // 体を建てた直後 (EmberBodyBuilder から)。扉と石を置き、すべてのグループの試練を最初の形にする (静かにしない)
     static void afterBuild(ServerLevel level) {
         GATE_TIMERS.clear();
         AFTER_HEART.clear();
@@ -313,9 +313,9 @@ public final class EmberBackTrials {
         }
     }
 
-    // 部屋の持ち主にとって、この周その部屋が眠っているか (持ち主がいなければ false)
-    public static boolean sleeping(ServerLevel level, String room) {
-        return EmberBackState.forRoom(level, room).roomSleeping(room);
+    // 部屋の持ち主にとって、この周その部屋が静かな周か (持ち主がいなければ false)
+    public static boolean quiet(ServerLevel level, String room) {
+        return EmberBackState.forRoom(level, room).roomQuiet(room);
     }
 
     public static BlockPos stonePos(EmberBackState.Trial t) {
@@ -375,11 +375,7 @@ public final class EmberBackTrials {
         UUID group = Groups.keyOf(player);
         EmberBackState state = EmberBackState.of(level, group);
         if (state.rung(trial)) {
-            if (state.sleeping(trial)) {
-                Notice.bar(player, ModText.hint(EmberIds.LANG_BACK + "trial_sleeping"));
-            } else {
-                jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id());
-            }
+            jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.EMBER, trial.id());
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -655,7 +651,7 @@ public final class EmberBackTrials {
     }
 
     // そのグループの試練を最初に戻す (7.1節)。そのグループの試練の中の人は広間へ (熱は 0)、試練の番号が進む (古い休み場の記録は無効)。
-    // そのグループが持っている部屋は手放して最初に戻す。ほかのグループの進み・部屋・人には触らない。2 周目からは一つ眠る
+    // そのグループが持っている部屋は手放して最初に戻す。ほかのグループの進み・部屋・人には触らない。2 周目からは一つ静かにする
     public static void resetGroup(ServerLevel level, UUID group, boolean announce, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
         // そのグループの試練が元に戻る = 鼓動が戻る。眠っている巨神は、最短の長さを過ぎていれば目覚める (titan/end)
         jp.revati.skyabyss.titan.end.TitanDormancy.requestWake(level.getServer(), jp.revati.skyabyss.progress.Titans.EMBER);
@@ -676,11 +672,11 @@ public final class EmberBackTrials {
         if (announce) {
             for (ServerPlayer p : Groups.online(level, group)) {
                 Notice.narrate(p, EmberIds.LANG_BACK + "trials_renewed");
-                tellSleeping(p, state);
+                tellQuiet(p, state);
             }
         }
-        SkyAbyss.LOGGER.info("Ember back trials reset for group {} (sleeping: {}, seed {})", group,
-                state.sleeping() == null ? "none" : state.sleeping().id(), state.seed());
+        SkyAbyss.LOGGER.info("Ember back trials reset for group {} (quiet: {}, seed {})", group,
+                state.quiet() == null ? "none" : state.quiet().id(), state.seed());
     }
 
     private static void resetRecord(ServerLevel level, UUID group, @Nullable EmberBackState.Trial forceSleep, boolean noSleep) {
@@ -697,10 +693,10 @@ public final class EmberBackTrials {
         EmberRooms.releaseAll(level);
     }
 
-    // 眠る試練をコマンドで決める (そのグループの今の周に効かせる)。そのグループが持っている部屋は作り直す
-    public static void setSleeping(ServerLevel level, UUID group, @Nullable EmberBackState.Trial t) {
+    // 静かな試練をコマンドで決める (そのグループの今の周に効かせる)。そのグループが持っている部屋は作り直す
+    public static void setQuiet(ServerLevel level, UUID group, @Nullable EmberBackState.Trial t) {
         EmberBackState state = EmberBackState.of(level, group);
-        state.setSleeping(t);
+        state.setQuiet(t);
         for (EmberRooms.Room r : EmberRooms.ALL) {
             if (group.equals(EmberRooms.owner(r))) {
                 EmberBackRooms.resetRoom(level, r);
@@ -710,9 +706,9 @@ public final class EmberBackTrials {
         checkAllRung(level, group);
     }
 
-    static void tellSleeping(ServerPlayer p, EmberBackState state) {
-        if (state.sleeping() != null) {
-            Notice.narrate(p, EmberIds.LANG_BACK + "sleeping_" + state.sleeping().id());
+    static void tellQuiet(ServerPlayer p, EmberBackState state) {
+        if (state.quiet() != null) {
+            Notice.narrate(p, EmberIds.LANG_BACK + "quiet_" + state.quiet().id());
         }
     }
 
@@ -806,7 +802,7 @@ public final class EmberBackTrials {
             if (event.getTo() == EmberIds.BACK && back != null) {
                 EmberBackState state = EmberBackState.of(back, player);
                 persisted(player).putInt(TAG_SEEN_EPOCH, state.epoch());
-                tellSleeping(player, state);
+                tellQuiet(player, state);
             }
         }
     }

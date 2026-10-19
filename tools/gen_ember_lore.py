@@ -224,7 +224,7 @@ LINES = [
     ("back.stone_rang", "熾り石が鳴った。広間の炉の火が、ひとつ落ちた", "A kindle stone rang. One of the hall's fires sank"),
     ("back.all_stones", "三つの熾り石が鳴った。炉が冷えて、底の格子がひらく",
      "All three kindle stones rang. The forge cools, and the grate in its floor opens"),
-    ("back.trial_asleep", "%sの火は、いまは眠っている", "The fire of the %s sleeps for now"),
+    ("back.trial_quiet", "%sの火は、今宵は静かだ", "The fire of the %s is quiet tonight"),
     ("back.trial.west", "灰の道", "Ash Path"),
     ("back.trial.east", "鍛えの間", "Forge Hall"),
     ("back.trial.south", "火守り", "Firekeep"),
