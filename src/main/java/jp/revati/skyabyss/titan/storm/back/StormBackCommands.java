@@ -44,8 +44,16 @@ public final class StormBackCommands {
         PLACES.put("gallery", new BlockPos(0, UPPER_GALLERY_Y + 1, -17));
         PLACES.put("w0", rest("w0"));
         PLACES.put("w1", rest("w1"));
-        PLACES.put("knob", WEST_KNOB.above());
+        PLACES.put("rib", new BlockPos(RIB_X2 - 1, BONE_FLOOR + 1, -17));
+        PLACES.put("rib1", rest("w2"));
+        PLACES.put("rib2", rest("w3"));
         PLACES.put("ledge", WEST_STONE.offset(1, 0, 1));
+        PLACES.put("pad1", new BlockPos(S(35), BONE_FLOOR + 1, -19));
+        PLACES.put("pad2", new BlockPos(S(51), BONE_FLOOR + 1, -20));
+        PLACES.put("pad3", new BlockPos(S(81), BONE_FLOOR + 1, -20));
+        PLACES.put("helm_w", new BlockPos(-27, 143, -10));
+        PLACES.put("helm_e", new BlockPos(27, 143, -10));
+        PLACES.put("helm_f", new BlockPos(0, 151, -52));
         PLACES.put("e0", rest("e0"));
         PLACES.put("e1", rest("e1"));
         PLACES.put("nest", RAIJU_NEST.offset(-8, 1, 0));
@@ -94,8 +102,49 @@ public final class StormBackCommands {
         dispatcher.register(op(SkyAbyss.MODID).then(op("stormback").then(go).then(ring)
                 .then(op("status").executes(StormBackCommands::status))
                 .then(op("raiju").executes(StormBackCommands::raiju))
+                .then(op("circuits").executes(StormBackCommands::circuits))
+                .then(helm())
                 .then(op("mirrors").then(Commands.argument("config", IntegerArgumentType.integer(0, EyeMirrors.CONFIGS.size() - 1))
                         .executes(StormBackCommands::mirrors)))));
+    }
+
+    // /skyabyss stormback helm <west|east|front> <calm|storm>: 舵を回したのと同じ (60 秒の固定。もう一度で放す)
+    private static LiteralArgumentBuilder<CommandSourceStack> helm() {
+        LiteralArgumentBuilder<CommandSourceStack> top = op("helm");
+        for (StormBackState.Trial t : StormBackState.Trial.values()) {
+            LiteralArgumentBuilder<CommandSourceStack> n = op(t.id());
+            for (String ph : new String[] {"calm", "storm"}) {
+                n.then(op(ph).executes(ctx -> {
+                    ServerLevel back = back(ctx);
+                    UUID g = group(ctx);
+                    if (back == null || g == null) {
+                        return 0;
+                    }
+                    StormHelm.set(back, g, t, ph.equals("storm") ? StormBackClock.Phase.STORM : StormBackClock.Phase.CALM,
+                            ctx.getSource().getEntity() instanceof ServerPlayer sp ? sp : null);
+                    return 1;
+                }));
+            }
+            top.then(n);
+        }
+        return top;
+    }
+
+    // /skyabyss stormback circuits: 三つの回路をつないだ状態にする (打った人のグループ。開発用)
+    private static int circuits(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerLevel back = back(ctx);
+        if (back == null) {
+            return 0;
+        }
+        StormProgress p = StormProgress.of(back, ctx.getSource().getPlayerOrException());
+        for (int i = 0; i < EAST_DOORS.length; i++) {
+            p.openEastDoor(i);
+        }
+        StormBackTrials.syncGates(back, p.group);
+        if (p.group.equals(RoomLocks.owner(StormBackTrials.EAST_ROOM))) {
+            StormEast.apply(back, p);
+        }
+        return 1;
     }
 
     private static ServerLevel back(CommandContext<CommandSourceStack> ctx) {

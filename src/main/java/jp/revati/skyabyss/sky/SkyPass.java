@@ -65,6 +65,10 @@ public record SkyPass(long startTick, double originX, double originZ, float dirX
         }
         double along = rx * dirX + rz * dirZ;
         double side = Math.abs(-rx * dirZ + rz * dirX);
+        // 形の外 (翼の端・頭・尾の先から、ぼかしの幅を足した外) は計算しない。画面の影の地図が毎フレーム何万点も引くので
+        if (side > 150.0 || along > 135.0 || along < -175.0) {
+            return 0f;
+        }
         double d = distance(along, side, fold(age));
         // 高い所からの影なので、輪郭の前後5ブロックをぼかす
         return (float) smooth(0.5 - d / 10.0);

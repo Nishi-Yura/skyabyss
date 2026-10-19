@@ -42,6 +42,18 @@ public final class SkyPassRenderer {
     private static final float BODY_HALO_RISE = 5f;
     private static final float BODY_CORE_DROP = 7f;
 
+    // 開発用 (台本の skycircle): 空の影の代わりに、決まった円の影 {中心 x, z, 半径}。縁の位置を決めて撮る (null = 本物)
+    public static double[] testCircle;
+
+    // 地点の影の濃さ (0〜1)。画素ごとの影も、昔の地面の板も、ここから引く
+    static float shadowAt(SkyPass pass, double x, double z, double age) {
+        if (testCircle != null) {
+            double t = Mth.clamp(0.5 - (Math.hypot(x - testCircle[0], z - testCircle[1]) - testCircle[2]) / 10.0, 0.0, 1.0);
+            return (float) (t * t * (3.0 - 2.0 * t));
+        }
+        return pass.shadow(x, z, age);
+    }
+
     private static int[] heights = new int[0];
     private static float[] field = new float[0];
 
@@ -56,6 +68,13 @@ public final class SkyPassRenderer {
         SkyPass pass = SkyPassClient.current();
         ClientLevel level = Minecraft.getInstance().level;
         float storm = SkyPassClient.storm();
+        // 上から落ちる影 (空の影・巨神の影) は、画面の画素ごとに世界の位置で掛ける。姿や雲より先に (その下の景色に掛ける)
+        if (level != null) {
+            boolean skyShadow = pass != null && pass.isActive(level.getGameTime());
+            OverheadShadow.render(event.getPoseStack().last().pose(), RenderSystem.getProjectionMatrix(), event.getCamera().getPosition(),
+                    skyShadow ? pass : null,
+                    skyShadow ? pass.age(level.getGameTime(), event.getPartialTick().getGameTimeDeltaPartialTick(false)) : 0.0);
+        }
         if (pass == null || level == null || (!pass.isActive(level.getGameTime()) && storm < 0.01f)) {
             return;
         }
@@ -70,7 +89,10 @@ public final class SkyPassRenderer {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         RenderSystem.depthMask(false);
-        drawGroundShadow(level, pass, age, cam, pose);
+        if (!OverheadShadow.ready()) {
+            // 画素ごとの影が使えないときだけ、従来の地面の板
+            drawGroundShadow(level, pass, age, cam, pose);
+        }
 
         float cloudHeight = level.effects().getCloudHeight();
         if (!Float.isNaN(cloudHeight) && storm > 0.01f) {
@@ -125,7 +147,7 @@ public final class SkyPassRenderer {
                 if (h == Integer.MIN_VALUE) {
                     continue;
                 }
-                float s = pass.shadow(x + 0.5, z + 0.5, age);
+                float s = shadowAt(pass, x + 0.5, z + 0.5, age);
                 if (s <= 0.01f) {
                     continue;
                 }

@@ -266,6 +266,8 @@ public final class TitanEnd {
                 Notice.narrate(player, "message.skyabyss.titan_end.again." + titan);
             }
         });
+        // 場面のない降ろし (二回目から・始められなかった) では、少しあとに遺物の選択画面。場面があるときは、場面の終わりに開く (HeartReward.register)
+        jp.revati.skyabyss.loot.reward.HeartReward.scheduleOpen(player, titan, jp.revati.skyabyss.loot.reward.HeartReward.OPEN_AFTER_CARRY, true);
     }
 
     // 巨神が吐く息: 降ろされた所の粒と音 (巨神ごと)

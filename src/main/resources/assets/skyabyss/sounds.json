@@ -2514,5 +2514,41 @@
         "volume": 1.2
       }
     ]
+  },
+  "domain_stone_sea": {
+    "subtitle": "subtitles.skyabyss.domain_stone_sea",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/domain_stone_sea",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "domain_rising_tide": {
+    "subtitle": "subtitles.skyabyss.domain_rising_tide",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/domain_rising_tide",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "domain_thunder_cage": {
+    "subtitle": "subtitles.skyabyss.domain_thunder_cage",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/domain_thunder_cage",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "domain_hearth_core": {
+    "subtitle": "subtitles.skyabyss.domain_hearth_core",
+    "sounds": [
+      {
+        "name": "skyabyss:mobs/domain_hearth_core",
+        "attenuation_distance": 64
+      }
+    ]
   }
 }

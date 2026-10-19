@@ -124,12 +124,51 @@ public class StoneWhaleHeart extends HeartBoss {
     // 技の組の進行
     private Pair pair;
     private boolean suppressFinish;
+    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「石の海」(titan/domain/StoneSeaDomain)
+    private final jp.revati.skyabyss.combat.HeartPursuit pursuit;
+    @Nullable
+    private jp.revati.skyabyss.titan.domain.StoneSeaDomain domain;
+    public static final float DOMAIN_AT = 0.5f;
+    // 試験・開発用: 領域を展開しない (憤怒までの技だけを見たいとき)
+    private boolean domainEnabled = true;
+
+    public void setDomainEnabled(boolean enabled) {
+        this.domainEnabled = enabled;
+    }
+    // 回っている人への狙いの先読み (予告の長さに近い tick)
+    private static final int AIM_TICKS = 26;
 
     public StoneWhaleHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "stone_whale_heart", "roar_1", "roar_2", "thrust", "sweep", "leap", "crack", "reclose", "volley", "beam", "chain", "shell_drop");
         this.xpReward = 200;
         this.setNoGravity(true);
         this.setPersistenceRequired();
+        this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("whale", 20f, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState()),
+                        MobSounds.STONE_HEART_SLAM.get(), 1.6f),
+                this::canReach, this::strike,
+                () -> level() instanceof ServerLevel s ? nearbyPlayers(s, 40) : List.<ServerPlayer>of(),
+                this::position, this::floorY, () -> arena == null ? 12 : Math.min(arena.getXsize(), arena.getZsize()) / 2 - 1);
+    }
+
+    public jp.revati.skyabyss.combat.HeartPursuit pursuit() {
+        return pursuit;
+    }
+
+    @Nullable
+    public jp.revati.skyabyss.titan.domain.StoneSeaDomain domain() {
+        return domain;
+    }
+
+    // 領域「石の海」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
+    public void startDomain(ServerLevel server) {
+        if (domain != null) {
+            return;
+        }
+        double radius = arena == null ? 12 : Math.min(arena.getXsize(), arena.getZsize()) / 2 - 1;
+        domain = new jp.revati.skyabyss.titan.domain.StoneSeaDomain(this, getX(), getZ(), floorY(), radius, this::canReach, this::strike,
+                () -> nearbyPlayers(server, 40));
+        domain.begin(server);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -230,6 +269,19 @@ public class StoneWhaleHeart extends HeartBoss {
         if (weakTicks > 0) {
             weakTicks--;
         }
+        boolean domainRunning = domain != null && domain.running();
+        pursuit.tick(server, action != Action.ROAR && !domainRunning);
+        if (domainRunning) {
+            LivingEntity watched = getTarget();
+            if (watched != null && canReach(watched)) {
+                faceTarget(watched);
+            }
+            domain.tick(server);
+            if (!domain.running()) {
+                cooldown = 40;
+            }
+            return;
+        }
 
         if (action == Action.NONE) {
             if (getPhase() < phaseForHealth()) {
@@ -239,6 +291,10 @@ public class StoneWhaleHeart extends HeartBoss {
             if (!enraged && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < jp.revati.skyabyss.combat.HeartBalance.ENRAGE_AT) {
                 enrageRoar = true;
                 begin(Action.ROAR, "roar_2");
+                return;
+            }
+            if (domain == null && domainEnabled && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !nearbyPlayers(server, 40).isEmpty()) {
+                startDomain(server);
                 return;
             }
             LivingEntity target = getTarget();
@@ -299,6 +355,26 @@ public class StoneWhaleHeart extends HeartBoss {
         actionTicks = 0;
         attackYaw = getYRot();
         playAction(animation != null ? animation : next == Action.COMBO ? pair.first().anim : next.anim);
+        cue(next == Action.COMBO ? pair.first() : next);
+    }
+
+    // 技の名前 (ボスバーの下の小さな一行。BossCue)。咆哮・組は出さない (組は一つ目・二つ目それぞれ)
+    private void cue(Action a) {
+        int warn = switch (a) {
+            case THRUST -> THRUST_WARN;
+            case SWEEP -> 24;
+            case LEAP -> LEAP_WARN;
+            case CRACK -> CRACK_WARN;
+            case RECLOSE -> 30;
+            case VOLLEY -> VOLLEY_WARN;
+            case BEAM -> BEAM_WARN;
+            case CHAIN -> CHAIN_WARN;
+            case SHELL_DROP -> DROP_WARN;
+            default -> 0;
+        };
+        if (warn > 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "whale", a.name().toLowerCase(java.util.Locale.ROOT), warn);
+        }
     }
 
     // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、憤怒。段階が進むほど短い。憤怒は息をつく間もほとんどない (予告は 0.8 秒以上のまま)
@@ -320,6 +396,9 @@ public class StoneWhaleHeart extends HeartBoss {
     private void tickCombo(ServerLevel server) {
         runPart(server, pair.first(), actionTicks);
         if (actionTicks > pair.offset()) {
+            if (actionTicks == pair.offset() + 1) {
+                cue(pair.second());
+            }
             runPart(server, pair.second(), actionTicks - pair.offset());
         }
         if (actionTicks >= pair.length()) {
@@ -528,7 +607,8 @@ public class StoneWhaleHeart extends HeartBoss {
         }
         List<Vec3> spots = new ArrayList<>();
         for (ServerPlayer p : all) {
-            spots.add(p.position());
+            // 回り続けている人には、予告が満ちる頃にいる所を狙う (combat/AntiStrafe)
+            spots.add(pursuit.strafe().aim(p, AIM_TICKS));
         }
         while (spots.size() < Math.min(max, partyOverride)) {
             double a = random.nextDouble() * Math.PI * 2;
@@ -966,7 +1046,20 @@ public class StoneWhaleHeart extends HeartBoss {
             }
             return false;
         }
-        return super.hurt(source, (weakTicks > 0 ? amount * 1.5f : amount) / toughness);
+        if (domain != null && domain.invulnerable()) {
+            if (level() instanceof ServerLevel server) {
+                server.playSound(null, getX(), getY(), getZ(), MobSounds.STONE_HEART_GUARD.get(), SoundSource.HOSTILE, 1.8f, 1.0f);
+                server.sendParticles(ParticleTypes.CRIT, getX(), coreHeight(), getZ() - 1, 6, 0.8, 0.8, 0.4, 0.1);
+            }
+            return false;
+        }
+        float before = getHealth();
+        float domainTaken = domain != null ? domain.takenMultiplier() : 1f;
+        boolean result = super.hurt(source, (weakTicks > 0 ? amount * 1.5f : amount) * domainTaken / toughness);
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.damaged(server, before - getHealth());
+        }
+        return result;
     }
 
     private void updateBossBarViewers() {
@@ -990,6 +1083,9 @@ public class StoneWhaleHeart extends HeartBoss {
     @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         super.remove(reason);
     }
 
@@ -1002,6 +1098,9 @@ public class StoneWhaleHeart extends HeartBoss {
         defeated = true;
         super.die(source);
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         if (level() instanceof ServerLevel server) {
             server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()),
                     getX(), coreHeight(), getZ(), 120, 1.2, 1.5, 1.2, 0.2);

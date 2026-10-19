@@ -128,6 +128,10 @@ public final class Config {
             .comment("場面の台詞の字幕の出し方。SYNCED = 声の速さに合わせて文字が出る (声を消していても同じ速さ), INSTANT = 最初から全文")
             .defineEnum("subtitleReveal", SubtitleReveal.SYNCED);
 
+    public static final ModConfigSpec.DoubleValue STEADY_REVEAL_CPS = CLIENT_BUILDER
+            .comment("声が文字に合わせて鳴らない様式 (動機・環境音・息だけ) のときの、字幕が出る速さ (1 秒に出す文字数)。長い台詞は表示時間のうちに全文が出る速さまで上がる")
+            .defineInRange("steadyRevealCps", 8.0, 2.0, 40.0);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);

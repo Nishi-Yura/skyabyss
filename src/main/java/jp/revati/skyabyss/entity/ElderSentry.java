@@ -194,6 +194,9 @@ public class ElderSentry extends GroundFoe {
     private void begin(Kind next, LivingEntity target) {
         kind = next;
         act = 1;
+        if (next.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "elder_sentry", next.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         lockYawToward(target);
         holdYaw();
         switch (next) {

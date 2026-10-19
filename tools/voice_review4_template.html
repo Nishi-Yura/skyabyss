@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>声のようなもの 選定 (第 4 弾)</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:34px 0 10px}
+.intro{color:var(--muted);max-width:70ch;margin:0 0 6px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{background:var(--panel);border:1px solid var(--line);padding:12px 14px;min-width:0}
+.card b{display:block;font-size:16px}
+.card span{font-size:13px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line)}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:13px;color:var(--muted);font-weight:500}
+td.line{min-width:0}
+td.line small{display:block;color:var(--muted);font-size:12px}
+#demo{background:var(--panel);border:1px solid var(--line);padding:14px;min-height:3.6em;font-size:17px;letter-spacing:.04em}
+#demo i{font-style:normal;color:var(--muted)}
+audio{width:100%;min-width:150px;height:36px}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.letter{font-size:18px;font-weight:700;min-width:36px;padding-inline:4px;width:auto;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){
+  .cards,.opts{grid-template-columns:minmax(0,1fr)}
+  table,thead,tbody,tr,th,td{display:block}
+  thead{display:none}
+  td{border-bottom:0;padding:6px 12px}
+  tr{border-bottom:1px solid var(--line);padding:8px 0}
+  td[data-st]::before{content:attr(data-st);display:block;font-size:12px;color:var(--muted)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>場面の台詞の「声のようなもの」 第 4 弾</h1>
+  <p class="intro">A4 の音色のまま、「日本語の母音に合わせるから変に聞こえる。何かの言語を話している感じにしたい」という案です。L1〜L3 は、母音・子音・音節・強勢・抑揚が本文とは無関係の架空の言語で、台詞の id から決まる乱数で作ります (同じ台詞はいつも同じ音)。本文から使うのは句の長さと句読点の間だけです。話し手ごとに訛り (母音のずれ・子音の置き換え・速さ・抑揚の幅) があります。字幕は一定の速さで出ます。A4 (いまの声) は比較用です。開幕の台詞 4 つと 5 人の聞き比べです。</p>
+  <div class="cards" id="cards"></div>
+
+  <h2>開幕の台詞</h2>
+  <table>
+    <thead><tr><th>台詞</th><th>A4 (今)</th><th>L1 流れる</th><th>L2 古い・子音</th><th>L3 詠唱</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <h2>字幕の出る速さ</h2>
+  <p class="intro">上の表の L1〜L3 を再生すると、その台詞が一定の速さ (1 秒に 8 文字、長い台詞は表示時間に収まる速さまで上がる) で出ます。</p>
+  <div id="demo"><i>再生すると、ここに字幕が出ます</i></div>
+
+  <h2>話し手ごとの音色 (同じ一言「{{SAMPLER_TEXT}}」)</h2>
+  <p class="intro">天の声 / 主人公 / イサナ (明るい) / 語り部 (老いて低く息) / 見る者 (うつろ・ささやき)。</p>
+  <table>
+    <thead><tr><th>話し手</th><th>A4 (今)</th><th>L1 流れる</th><th>L2 古い・子音</th><th>L3 詠唱</th></tr></thead>
+    <tbody id="sampler"></tbody>
+  </table>
+
+  <h2>採用する様式</h2>
+  <fieldset class="opts" id="opts"></fieldset>
+  <label class="note-l" for="note">直してほしい点 (任意。字幕の速さ・音の長さ・語感・誰の訛りをどう変えたいか、など)</label>
+  <textarea id="note" class="note" rows="3" placeholder="例: L1 の語感で子音だけ L2 に寄せたい、イサナの訛りをもっと強く"></textarea>
+  <div class="save" id="save">読み込み中…</div>
+</div>
+<script>
+(() => {
+  const ROWS = /*ROWS*/;
+  const SAMPLER = /*SAMPLER*/;
+  const STYLES = /*STYLES*/;
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const player = f => `<audio controls preload="none" src="${f}"></audio>`;
+  const cards = document.getElementById('cards');
+  const opts = document.getElementById('opts');
+  for (const k of Object.keys(STYLES)) {
+    const c = mk('div', 'card', `<b>${STYLES[k].title}</b><span>${STYLES[k].desc}</span>`);
+    cards.appendChild(c);
+    const l = mk('label', 'opt', `<input type="radio" name="style" value="${k}"><span class="letter">${k.toUpperCase()}</span><span>${STYLES[k].title}</span>`);
+    opts.appendChild(l);
+  }
+  const rows = document.getElementById('rows');
+  for (const r of ROWS) {
+    const tr = mk('tr');
+    tr.appendChild(mk('td', 'line', `${r.label}<small>${r.text}</small>`));
+    for (const k of ['a4', 'l1', 'l2', 'l3']) { const td = mk('td', '', player(r.files[k])); td.dataset.st = k.toUpperCase(); tr.appendChild(td); }
+    rows.appendChild(tr);
+  }
+  const sam = document.getElementById('sampler');
+  for (const r of SAMPLER) {
+    const tr = mk('tr');
+    tr.appendChild(mk('td', 'line', r.name));
+    for (const k of ['a4', 'l1', 'l2', 'l3']) { const td = mk('td', '', player(r.files[k])); td.dataset.st = k.toUpperCase(); tr.appendChild(td); }
+    sam.appendChild(tr);
+  }
+  // 字幕の出方の見本: L1〜L3 は一定の速さ、A4 は声の長さに沿って
+  const demo = document.getElementById('demo');
+  let demoTimer = null;
+  document.addEventListener('play', e => {
+    const a = e.target; clearInterval(demoTimer);
+    const m = /(a4|l[123])_(\w+)\.ogg/.exec(a.getAttribute('src') || '');
+    const row = m && ROWS.find(r => r.tag === m[2]);
+    if (!row) return;
+    const t0 = performance.now(), span = Math.max(a.duration || 4, 2), total = row.text.length;
+    const cps = m[1] === 'a4' ? total / (0.8 * span) : Math.max(8, total / (0.85 * span));
+    demoTimer = setInterval(() => {
+      const n = Math.min(total, Math.floor((performance.now() - t0) / 1000 * cps) + 1);
+      demo.textContent = row.text.slice(0, n);
+      if (n >= total) clearInterval(demoTimer);
+    }, 40);
+  }, true);
+  // 再生中は他を止める
+  document.addEventListener('play', e => { document.querySelectorAll('audio').forEach(a => { if (a !== e.target) a.pause(); }); }, true);
+
+  const saveEl = document.getElementById('save');
+  const note = document.getElementById('note');
+  let db = null, timer = null;
+  const chosen = () => { const r = document.querySelector('input[name=style]:checked'); return r ? r.value : ''; };
+  async function save() {
+    if (!db) return;
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('choices/voice_style4').set({ option: chosen(), note: note.value, at: Date.now() });
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  document.querySelectorAll('input[name=style]').forEach(r => r.addEventListener('change', save));
+  note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(save, 800); });
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        if (d.id !== 'voice_style4') continue;
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector(`input[name=style][value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) note.value = data.note;
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+  })();
+})();
+</script>
+</body>
+</html>

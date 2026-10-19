@@ -173,8 +173,8 @@
   },
   "sign.skyabyss.storm_west.1": "",
   "sign.skyabyss.storm_west.2": {
-    "en": "Beams or vents",
-    "ja": "梁か風で越える"
+    "en": "Climb the ribs",
+    "ja": "縦に登る"
   },
   "sign.skyabyss.storm_west.3": {
     "en": "Ride the wind",
@@ -183,8 +183,8 @@
   "sign.skyabyss.storm_west.4": "",
   "sign.skyabyss.storm_east.1": "",
   "sign.skyabyss.storm_east.2": {
-    "en": "Bolts to rods",
-    "ja": "柱へ雷を導く"
+    "en": "Wire the bolt",
+    "ja": "回路で戸へ"
   },
   "sign.skyabyss.storm_east.3": {
     "en": "Bolts to rods",
@@ -236,5 +236,25 @@
   "block.skyabyss.reset_mirror": {
     "en": "Return Mirror",
     "ja": "戻しの鏡"
+  },
+  "checkpoint.skyabyss.storm_w2": {
+    "en": "Rib Hall, First Ledge",
+    "ja": "肋の間 第一層"
+  },
+  "checkpoint.skyabyss.storm_w3": {
+    "en": "Rib Hall, Second Ledge",
+    "ja": "肋の間 第二層"
+  },
+  "checkpoint.skyabyss.storm_w4": {
+    "en": "Rib Hall, Summit",
+    "ja": "肋の間 頂"
+  },
+  "block.skyabyss.storm_helm_calm": {
+    "en": "Calm Helm",
+    "ja": "凪の舵"
+  },
+  "block.skyabyss.storm_helm_storm": {
+    "en": "Storm Helm",
+    "ja": "嵐の舵"
   }
 }

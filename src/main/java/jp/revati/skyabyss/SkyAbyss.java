@@ -115,6 +115,9 @@ public class SkyAbyss {
         // 旅装・砥石・糧と薬 (一章の分。21 の 1.2、P5)
         jp.revati.skyabyss.guide.TravelGear.register(modEventBus);
 
+        // 心臓の遺物の選択画面 (眠りの場面が終わったら開く)。docs/design/30_heart_reward_ui.md
+        jp.revati.skyabyss.loot.reward.HeartReward.register();
+
         // サーバー設定はワールドごとに保存され、マルチプレイでは参加者に同期される。
         // クライアント設定は各プレイヤーのPCごとの好み
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

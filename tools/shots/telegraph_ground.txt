@@ -1,0 +1,229 @@
+# Floor decals drawn only on walkable floor (docs/design/02_stone_whale.md section 5.4, 'floor decal')
+# ./gradlew runShots -Pscript=tools/shots/telegraph_ground.txt   (mute: the shots runner sets the volume to 0)
+# Five scenes (flat, steps+stairs, wall+pillars, mobs, low ceilings) around P = (0.5, 12.5). The captain's stomp circle (radius 4) forms under the player,
+# then the player turns to spectator and the camera looks from an oblique height (obl_*) and from the floor (eye_*).
+world telegraph_ground flat
+size 1280 720
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamerule doWeatherCycle false
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+cmd fill -30 -61 -30 30 -61 30 minecraft:smooth_basalt destroy
+hud off
+camera minecraft:overworld 0.5 -60 12.5 180 0
+waitchunks
+wait 20
+cmd skyabyss cinematic stop
+chat clear
+
+# ---------------- scene: flat
+cmd time set noon
+cmd weather clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd fill -8 -60 5 10 -46 24 minecraft:air
+wait 10
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -52 22.5 180 38
+wait 3
+shot obl_flat
+wait 6
+shot obl_flat_b
+wait 30
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -59 21.5 180 6
+wait 3
+shot eye_flat
+wait 6
+shot eye_flat_b
+wait 30
+
+# ---------------- scene: steps
+cmd time set noon
+cmd weather clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd fill -8 -60 5 10 -46 24 minecraft:air
+cmd fill -1 -60 8 -1 -60 17 minecraft:smooth_stone
+cmd fill -2 -60 8 -2 -59 17 minecraft:smooth_stone
+cmd fill -3 -60 8 -3 -58 17 minecraft:smooth_stone
+cmd fill -4 -60 8 -4 -57 17 minecraft:smooth_stone
+cmd fill 3 -60 8 3 -60 17 minecraft:smooth_stone_slab[type=bottom]
+cmd fill 4 -60 8 4 -60 17 minecraft:stone_stairs[facing=east]
+cmd fill 5 -60 8 5 -60 17 minecraft:smooth_stone
+wait 10
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -52 22.5 180 38
+wait 3
+shot obl_steps
+wait 6
+shot obl_steps_b
+wait 30
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -59 21.5 180 6
+wait 3
+shot eye_steps
+wait 6
+shot eye_steps_b
+wait 30
+
+# ---------------- scene: wall
+cmd time set noon
+cmd weather clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd fill -8 -60 5 10 -46 24 minecraft:air
+cmd fill 2 -60 7 2 -54 18 minecraft:stone_bricks
+cmd fill -2 -60 10 -2 -56 10 minecraft:stone_bricks
+cmd fill -2 -60 15 -2 -57 15 minecraft:stone_bricks
+cmd fill 3 -60 7 3 -60 18 minecraft:cobblestone_slab[type=bottom]
+wait 10
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -52 22.5 180 38
+wait 3
+shot obl_wall
+wait 6
+shot obl_wall_b
+wait 30
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -59 21.5 180 6
+wait 3
+shot eye_wall
+wait 6
+shot eye_wall_b
+wait 30
+
+# ---------------- scene: mobs
+cmd time set noon
+cmd weather clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd fill -8 -60 5 10 -46 24 minecraft:air
+cmd setblock 1 -60 14 minecraft:smooth_stone
+cmd summon minecraft:iron_golem -1.5 -60 11.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd summon minecraft:iron_golem 3.5 -60 12.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd summon minecraft:zombie 1.5 -59 14.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+cmd summon minecraft:zombie -0.5 -60 15.5 {NoAI:1b,PersistenceRequired:1b,Invulnerable:1b}
+wait 10
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -52 22.5 180 38
+wait 3
+shot obl_mobs
+wait 6
+shot obl_mobs_b
+wait 30
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -59 21.5 180 6
+wait 3
+shot eye_mobs
+wait 6
+shot eye_mobs_b
+wait 30
+
+# ---------------- scene: ceiling
+cmd time set noon
+cmd weather clear
+cmd kill @e[type=!minecraft:player,distance=..80]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd fill -8 -60 5 10 -46 24 minecraft:air
+cmd fill -4 -58 8 0 -58 17 minecraft:stone_bricks
+cmd fill 1 -59 8 6 -59 17 minecraft:stone_bricks
+wait 10
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -52 22.5 180 38
+wait 3
+shot obl_ceiling
+wait 6
+shot obl_ceiling_b
+wait 30
+cmd kill @e[type=skyabyss:whalebone_captain]
+cmd gamemode survival Dev
+camera minecraft:overworld 0.5 -60 12.5 180 0
+cmd summon skyabyss:whalebone_captain 0 -60 0 {PersistenceRequired:1b,Rotation:[0f,0f]}
+wait 25
+cmd skyabyss dev force @e[type=skyabyss:whalebone_captain,limit=1] LEAP
+wait 1
+cmd gamemode spectator Dev
+camera minecraft:overworld 0.5 -59 21.5 180 6
+wait 3
+shot eye_ceiling
+wait 6
+shot eye_ceiling_b
+wait 30
+
+cmd kill @e[type=!minecraft:player,distance=..80]
+quit
