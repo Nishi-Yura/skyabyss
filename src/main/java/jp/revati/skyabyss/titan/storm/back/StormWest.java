@@ -141,8 +141,9 @@ final class StormWest {
                 level.playSound(null, p.getX() - 6, p.getY() + 2, p.getZ(), StormSetup.CROSSWIND.get(), SoundSource.AMBIENT, 1.6f, 1f);
             }
             if (gust == 2 && !p.isCreative() && !sheltered(level, p)) {
-                Vec3 d = p.getDeltaMovement();
-                p.setDeltaMovement(Math.max(d.x, GUST_PUSH), d.y, d.z * 0.8);
+                // 実際の動きに足す (サーバー側の古い速さを送り返すと、入力と跳躍が止まる)
+                Vec3 d = Updraft.actualMotion(p);
+                p.setDeltaMovement(Math.max(d.x, GUST_PUSH), d.y, d.z * 0.9);
                 p.hurtMarked = true;
                 if (gt % 4 == 0) {
                     StormFx.forced(level, ParticleTypes.CLOUD, p.getX() - 1, p.getY() + 1, p.getZ(), 3, 0.3, 0.6, 0.3, 0.1);
