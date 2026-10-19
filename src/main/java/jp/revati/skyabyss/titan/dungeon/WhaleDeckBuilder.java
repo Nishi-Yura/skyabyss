@@ -6,8 +6,15 @@ import static jp.revati.skyabyss.titan.dungeon.WhaleDeck.*;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.trial.whale.W02Bell;
 import jp.revati.skyabyss.trial.whale.W06Score;
+import jp.revati.skyabyss.trial.RingArenaCell;
+import jp.revati.skyabyss.trial.whale.W03Moss;
+import jp.revati.skyabyss.trial.whale.W04Vents;
 import jp.revati.skyabyss.trial.whale.W07Gates;
 import jp.revati.skyabyss.trial.whale.W10Fort;
+import jp.revati.skyabyss.trial.whale.W11Coffin;
+import jp.revati.skyabyss.trial.whale.W12Arena;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.BellBlock;
@@ -50,6 +57,7 @@ final class WhaleDeckBuilder {
         buildW06(kit);
         buildW07(kit);
         buildW10(kit);
+        buildSouth(kit);
         // S0・C1 の飾り
         kit.restPoint(S0);
         kit.pilasters(S0, 6);
@@ -62,7 +70,10 @@ final class WhaleDeckBuilder {
         kit.set(W06_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         kit.set(W07_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         kit.set(W10_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
-        for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD}) {
+        for (BlockPos stone : new BlockPos[] {W03_STONE, W04_STONE, W11_STONE, W12_STONE}) {
+            kit.set(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
+        }
+        for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD}) {
             kit.set(pad, PAD);
         }
         // 試練の板 (鼓動の間の南の壁ぎわ・試練の階の広間の北の壁ぎわ)
@@ -218,16 +229,269 @@ final class WhaleDeckBuilder {
     // 決まった位置の休み場: 魂の焚き火と四方の腰掛け (背もたれは外へ)、足もとの灯り。床が無い (縁の外の) 所には置かない
     private static void deckRest(BuildKit kit, String id) {
         BlockPos c = campfire(id);
-        kit.set(c.getX(), Y, c.getZ(), BuildKit.CHISELED);
+        int fy = c.getY() - 1;
+        kit.set(c.getX(), fy, c.getZ(), BuildKit.CHISELED);
         kit.set(c, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int bx = c.getX() + d.getStepX() * 2;
             int bz = c.getZ() + d.getStepZ() * 2;
             // 縁の外が空いている (落ちる) 所には置かない
-            if (!kit.get(bx, Y, bz).isAir() && kit.get(bx, Y + 1, bz).isAir() && !kit.get(bx + d.getStepX(), Y, bz + d.getStepZ()).isAir()) {
-                kit.set(bx, Y + 1, bz, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, d).setValue(StairBlock.HALF, Half.BOTTOM));
+            if (!kit.get(bx, fy, bz).isAir() && kit.get(bx, fy + 1, bz).isAir() && !kit.get(bx + d.getStepX(), fy, bz + d.getStepZ()).isAir()) {
+                kit.set(bx, fy + 1, bz, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, d).setValue(StairBlock.HALF, Half.BOTTOM));
             }
         }
-        kit.lantern(c.getX() + 1, Y + 1, c.getZ() - 1);
+        kit.lantern(c.getX() + 1, fy + 1, c.getZ() - 1);
+    }
+
+    // ---------------------------------------------------------------- 版 21: 最南の広間 S1 と、新しい四つのセル
+    private static final int BOTTOM_Y = 107;
+    private static final BlockState MOSS = Blocks.MOSS_BLOCK.defaultBlockState();
+    private static final BlockState WATER = Blocks.WATER.defaultBlockState();
+    private static final BlockState SEA_LANTERN = Blocks.SEA_LANTERN.defaultBlockState();
+    private static final BlockState GATE = ModBlocks.SEALED_GATE.get().defaultBlockState();
+
+    // 掘る: 内側を空け、床・天井の石を敷く (まわりの壁には触れない。細い通路が隣の部屋の壁を挟むため)
+    private static void carve(BuildKit kit, int x1, int x2, int z1, int z2, int floorY, int height) {
+        kit.fill(x1, floorY + 1, z1, x2, floorY + height, z2, BuildKit.AIR);
+        kit.fill(x1, floorY, z1, x2, floorY, z2, kit.pal().floor());
+        kit.fill(x1, floorY + height + 1, z1, x2, floorY + height + 1, z2, kit.pal().ceiling());
+    }
+
+    private static void buildSouth(BuildKit kit) {
+        // 細い通路 C2 (S0 の南の壁から S1 の北へ)・最南の広間 S1
+        carve(kit, 10, 12, 81, 117, Y, 5);
+        kit.room(S1);
+        // 戸口 (S1 の南の壁は 2 枚)
+        kit.doorway(-42, -38, 127, 128, Y, 5);
+        kit.doorway(-22, -18, 127, 128, Y, 5);
+        kit.doorway(0, 4, 127, 128, Y, 5);
+        kit.doorway(22, 26, 127, 128, Y, 5);
+        buildW03(kit);
+        buildW04(kit);
+        buildW11(kit);
+        buildW12(kit);
+        // 広間 S1・通路 C2 の飾りと灯り
+        kit.restPoint(S1);
+        kit.pilasters(S1, 6);
+        kit.ribs(S1, 5, true);
+        kit.wallLamps(S1, 4, Y + 4);
+        for (int z = 84; z <= 116; z += 4) {
+            lampIn(kit, 9, Y + 3, z);
+            lampIn(kit, 13, Y + 3, z);
+        }
+    }
+
+    // 壁の石・床の石を灯りに換える (固い所だけ。封印の扉のブロックは消えるので換えない)
+    private static void lampIn(BuildKit kit, int x, int y, int z) {
+        BlockState cur = kit.get(x, y, z);
+        if (!cur.isAir() && !cur.is(ModBlocks.SEALED_GATE.get()) && !cur.is(Blocks.WATER)) {
+            kit.set(x, y, z, SEA_LANTERN);
+        }
+    }
+
+    // ---------------------------------------------------------------- W03 苔の滑り坂
+    private static void buildW03(BuildKit kit) {
+        int x1 = W03_X1;
+        int x2 = W03_X2;
+        for (int[] seg : W03_SEGS) {
+            kit.room(new TitanBackLayout.Box(x1, x2, seg[0], seg[1], seg[2], 9));
+        }
+        // 床: 広間 (磨いた石)・流れ (苔)・島の列 (穴。底は水)
+        for (int i = 0; i < W03_SEGS.length; i++) {
+            int[] seg = W03_SEGS[i];
+            boolean lane = W03Moss.laneOf(seg[0]) >= 0;
+            boolean gap = seg[1] - seg[0] == 1;
+            if (gap) {
+                int f = seg[2];
+                kit.fill(x1, f - 6, seg[0], x2, f, seg[1], BuildKit.AIR);
+                kit.fill(x1, f - 6, seg[0], x2, f - 5, seg[1], WATER);
+                // 穴の両わきの壁ぎわの足もと (流れの端が穴へ落ちないよう、床は穴の手前で止まる)
+            } else {
+                kit.fill(x1, seg[2], seg[0], x2, seg[2], seg[1], lane ? MOSS : kit.pal().floor());
+            }
+        }
+        // 島 (三つの配置すべての分。封印の扉のブロック。グループごとに残る・消える)
+        for (BlockPos p : W03Moss.union()) {
+            kit.set(p, GATE);
+        }
+        // 広間の床の飾り: 休み場の広間・出口の広間は縁取り
+        for (int[] seg : new int[][] {W03_SEGS[0], W03_SEGS[6], W03_SEGS[10]}) {
+            for (int x = x1; x <= x2; x++) {
+                kit.set(x, seg[2], seg[0], BuildKit.TILES);
+                kit.set(x, seg[2], seg[1], BuildKit.TILES);
+            }
+        }
+        kit.restPoint(W03_REST_A);
+        kit.restPoint(W03_REST_M);
+        // 灯り: 両側の壁に、床から 3 つ上の高さで三行おき (天井は高く、真ん中まで明るくするため)。穴の底にも (水の中でも見える)
+        for (int[] seg : W03_SEGS) {
+            for (int z = seg[0]; z <= seg[1]; z += 3) {
+                lampIn(kit, x1 - 1, seg[2] + 3, z);
+                lampIn(kit, x2 + 1, seg[2] + 3, z);
+            }
+            if (seg[1] - seg[0] == 1) {
+                for (int x : new int[] {x1 + 2, (x1 + x2) / 2, x2 - 2}) {
+                    kit.set(x, seg[2] - 7, seg[0], SEA_LANTERN);
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- W04 噴気孔の昇り
+    private static void buildW04(BuildKit kit) {
+        kit.room(W04);
+        kit.room(W04_STONE_ROOM);
+        kit.doorway(-22, -18, 151, 152, Y, 5);
+        int x1 = W04.x1();
+        int x2 = W04.x2();
+        // 入口の岩棚 (北、床と同じ高さ)・出口の岩棚 (南、出口の戸の前)
+        kit.fill(x1, 108, 129, x2, Y - 1, 131, BuildKit.BRICKS);
+        kit.fill(x1, Y, 129, x2, Y, 131, BuildKit.POLISHED);
+        kit.fill(W04Vents.X0 + W04Vents.EXIT_U1, 108, 148, W04Vents.X0 + W04Vents.EXIT_U2, Y - 1, 150, BuildKit.BRICKS);
+        kit.fill(W04Vents.X0 + W04Vents.EXIT_U1, Y, 148, W04Vents.X0 + W04Vents.EXIT_U2, Y, 150, BuildKit.POLISHED);
+        // 縁取り (岩棚の縁を見やすく)
+        for (int x = x1; x <= x2; x++) {
+            kit.set(x, Y, 131, BuildKit.TILES);
+        }
+        for (int x = W04Vents.X0 + W04Vents.EXIT_U1; x <= W04Vents.X0 + W04Vents.EXIT_U2; x++) {
+            kit.set(x, Y, 148, BuildKit.TILES);
+        }
+        // 三つの配置の岩棚 (一段目 111・二段目 115)。柱は石、上面は封印の扉のブロック
+        for (int level = 1; level <= 2; level++) {
+            int top = level == 1 ? W04Vents.LEDGE1 : W04Vents.LEDGE2;
+            for (int c = 0; c < W04Vents.CAND_U.length; c++) {
+                List<BlockPos> cells = W04Vents.ledge(level, c);
+                for (BlockPos p : cells) {
+                    kit.fill(p.getX(), 108, p.getZ(), p.getX(), top - 1, p.getZ(), BuildKit.BRICKS);
+                    kit.set(p, GATE);
+                }
+            }
+        }
+        // 底の孔の台・栓の台 (見かけの上書きで光る)
+        for (BlockPos p : W04Vents.vent(0, 0).cells()) {
+            kit.set(p, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
+        }
+        for (BlockPos p : W04Vents.plugCells()) {
+            kit.set(p, Blocks.IRON_BLOCK.defaultBlockState());
+        }
+        deckRest(kit, REST_W04);
+        // 灯り: 底の床 (岩棚の下を避けた三つの列)・岩棚の柱の北の面・壁に高さを変えて・天井に吊るした灯り
+        for (int v : new int[] {6, 12, 18}) {
+            for (int u : new int[] {2, 6, 10, 14, 18}) {
+                lampIn(kit, W04Vents.X0 + u, BOTTOM_Y, W04Vents.Z0 + v);
+            }
+        }
+        for (int level = 1; level <= 2; level++) {
+            for (int c = 0; c < W04Vents.CAND_U.length; c++) {
+                BlockPos any = W04Vents.ledge(level, c).get(0);
+                int top = level == 1 ? W04Vents.LEDGE1 : W04Vents.LEDGE2;
+                lampIn(kit, any.getX() + 2, top - 1, any.getZ());
+                lampIn(kit, any.getX() + 2, top - 3, any.getZ() + 4);
+            }
+        }
+        for (int y : new int[] {110, 114, 118, 122, 126}) {
+            kit.wallLamps(new TitanBackLayout.Box(x1, x2, 129, 150, 107, 24), 4, y);
+        }
+        for (int[] at : new int[][] {{-20, 134}, {-20, 141}, {-14, 138}, {-26, 138}}) {
+            kit.hangingLantern(at[0], at[1], W04.ceilingY(), 5);
+        }
+        kit.ribs(W04, 6, true);
+        kit.wallLamps(W04_STONE_ROOM, 3, Y + 3);
+        kit.ribs(W04_STONE_ROOM, 3, true);
+    }
+
+    // ---------------------------------------------------------------- W11 棺の護送
+    private static void buildW11(BuildKit kit) {
+        kit.room(W11);
+        kit.room(W11_STONE_ROOM);
+        kit.doorway(0, 4, 166, 167, Y, 5);
+        kit.pilasters(W11, 6);
+        kit.ribs(W11, 5, false);
+        kit.wallLamps(W11, 4, Y + 4);
+        kit.wallLamps(W11_STONE_ROOM, 3, Y + 3);
+        for (int z = 137; z <= 161; z += 8) {
+            for (int x : new int[] {-3, 7}) {
+                kit.hangingLantern(x, z, W11.ceilingY(), 2);
+            }
+        }
+        // 灯り: 床に海のランタンを四マスおきに (広間の真ん中まで明るくする)
+        for (int z = 131; z <= 163; z += 4) {
+            for (int x : new int[] {-4, 2, 8}) {
+                lampIn(kit, x, Y, z);
+            }
+        }
+        // 祭壇 (道の終わり。戸の前の壇)
+        for (int x = 0; x <= 4; x++) {
+            kit.set(x, Y, 165, BuildKit.CHISELED);
+        }
+        deckRest(kit, REST_W11);
+        kit.ribs(W11_STONE_ROOM, 3, true);
+    }
+
+    // ---------------------------------------------------------------- W12 鯨骨の闘技場
+    private static void buildW12(BuildKit kit) {
+        int cx = W12_CX;
+        int cz = W12_CZ;
+        kit.room(W12_FOYER_N);
+        kit.room(W12_FOYER_S);
+        // 円い広間: 内側を掘る (半径 11.6)。円の床 (半径 10.2) の下は穴 (底は水)、芯 (半径 5.2) の下は石
+        for (int dx = -13; dx <= 13; dx++) {
+            for (int dz = -13; dz <= 13; dz++) {
+                double r = Math.hypot(dx, dz);
+                int x = cx + dx;
+                int z = cz + dz;
+                if (r <= RingArenaCell.R_HALL) {
+                    kit.fill(x, Y + 1, z, x, Y + 9, z, BuildKit.AIR);
+                    if (r > RingArenaCell.R_CORE) {
+                        kit.fill(x, Y - 6, z, x, Y, z, BuildKit.AIR);
+                        kit.fill(x, Y - 6, z, x, Y - 5, z, WATER);
+                    } else {
+                        kit.set(x, Y, z, r <= 1.6 ? BuildKit.CHISELED : BuildKit.POLISHED);
+                    }
+                } else if (r <= RingArenaCell.R_HALL + 1.2) {
+                    // 壁の灯り (円の外の石に埋める。三十度おきに高さを替えて)
+                    int k = (int) Math.round(Math.toDegrees(Math.atan2(dz, dx)) / 15.0);
+                    if (Math.floorMod(k, 2) == 0) {
+                        lampIn(kit, x, Y + (Math.floorMod(k / 2, 2) == 0 ? 2 : 6), z);
+                    }
+                }
+            }
+        }
+        // 崩れる床 (封印の扉のブロック)・橋
+        W12Arena arena = new W12Arena();
+        for (BlockPos p : arena.discCells()) {
+            kit.set(p, GATE);
+        }
+        kit.doorway(22, 26, 136, 137, Y, 5);
+        kit.doorway(22, 26, 159, 160, Y, 5);
+        for (BlockPos p : W12Arena.BRIDGE_IN) {
+            kit.set(p, GATE);
+        }
+        for (BlockPos p : W12Arena.BRIDGE_OUT) {
+            kit.set(p, GATE);
+        }
+        deckRest(kit, REST_W12);
+        kit.pilasters(W12_FOYER_N, 6);
+        kit.wallLamps(W12_FOYER_N, 4, Y + 4);
+        kit.wallLamps(W12_FOYER_S, 4, Y + 4);
+        kit.ribs(W12_FOYER_N, 5, false);
+        kit.ribs(W12_FOYER_S, 5, false);
+        // 芯の床の灯り (輪が二つ。崩れても残る)
+        for (int k = 0; k < 6; k++) {
+            double a = k * Math.PI / 3;
+            lampIn(kit, cx + (int) Math.round(Math.cos(a) * 3.2), Y, cz + (int) Math.round(Math.sin(a) * 3.2));
+            lampIn(kit, cx + (int) Math.round(Math.cos(a + Math.PI / 6) * 4.8), Y, cz + (int) Math.round(Math.sin(a + Math.PI / 6) * 4.8));
+        }
+        // 広間の天井の灯り (芯の上に輪)
+        for (int k = 0; k < 6; k++) {
+            double a = k * Math.PI / 3;
+            kit.set(cx + (int) Math.round(Math.cos(a) * 6), Y + 10, cz + (int) Math.round(Math.sin(a) * 6), SEA_LANTERN);
+        }
+        kit.set(cx, Y + 10, cz, SEA_LANTERN);
+        // 穴の底の灯り (水の中でも見える)
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4;
+            kit.set(cx + (int) Math.round(Math.cos(a) * 8), Y - 7, cz + (int) Math.round(Math.sin(a) * 8), SEA_LANTERN);
+        }
     }
 }

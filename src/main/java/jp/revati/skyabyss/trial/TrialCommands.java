@@ -166,12 +166,13 @@ public final class TrialCommands {
                     return 0;
                 }
                 BlockPos g = cell.ports().entrance().get(cell.ports().entrance().size() / 2);
-                // 入口の戸の奥へ (戸が南北なら ±3)
+                // 入口の戸の奥へ (入口の休み場があればそこ)
                 at = switch (cell.def().id()) {
                     case "W02" -> new BlockPos(18, WhaleDeck.Y + 1, 22);
                     case "W06" -> new BlockPos(36, WhaleDeck.Y + 1, 34);
                     case "W07" -> new BlockPos(-6, WhaleDeck.Y + 1, 85);
-                    default -> new BlockPos(30, WhaleDeck.Y + 1, 86);
+                    case "W10" -> new BlockPos(30, WhaleDeck.Y + 1, 86);
+                    default -> cell.ports().rests().isEmpty() ? g.offset(0, 0, 2) : cell.ports().rests().get(0).spawn();
                 };
                 yaw = cell.def().id().equals("W06") ? 90f : cell.def().id().equals("W02") ? 90f : 0f;
                 if (g == null) {

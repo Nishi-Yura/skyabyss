@@ -13,7 +13,7 @@ import jp.revati.skyabyss.trial.Trial.Kind;
 import jp.revati.skyabyss.trial.Trial.Slot;
 import jp.revati.skyabyss.trial.Trial.Space;
 
-// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 4 (W02・W06・W07・W10)。
+// 試練の一覧 (docs/design/29 の 3 章のうち、作ってあるもの)。今は 原型 12 (四体 × 三つ) と、岩鯨の新作 8 (W02・W03・W04・W06・W07・W10・W11・W12)。
 // 引き方 (プール) を動かすのは「枠の中に作ってある試練が二つ以上ある巨神」だけ (いまは岩鯨)。ほかの三体は、引く数が足りるまで
 // 原型の三つのまま (poolActive)。
 public final class TrialCatalog {
@@ -35,6 +35,19 @@ public final class TrialCatalog {
     public static final List<String> W10_NUMBERS = List.of("gunners", "waves");
     public static final List<String> W10_HAZARDS = List.of("rockfall");
     public static final List<String> W10_GOALS = List.of("no_hit");
+    // P2: 岩鯨の新作 4 (W03・W04・W11・W12)
+    public static final List<String> W03_NUMBERS = List.of("flow", "turn");
+    public static final List<String> W03_HAZARDS = List.of("surge");
+    public static final List<String> W03_GOALS = List.of("no_fall");
+    public static final List<String> W04_NUMBERS = List.of("vent_period", "vent_burst");
+    public static final List<String> W04_HAZARDS = List.of("rockfall");
+    public static final List<String> W04_GOALS = List.of("no_fall");
+    public static final List<String> W11_NUMBERS = List.of("raids", "coffin_speed");
+    public static final List<String> W11_HAZARDS = List.of("rockfall");
+    public static final List<String> W11_GOALS = List.of("no_scratch");
+    public static final List<String> W12_NUMBERS = List.of("foes", "warning");
+    public static final List<String> W12_HAZARDS = List.of("rockfall");
+    public static final List<String> W12_GOALS = List.of("no_fall");
 
     static {
         String whale = Titans.STONE_WHALE;
@@ -45,6 +58,10 @@ public final class TrialCatalog {
         add(new Def("W01", whale, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("W02", whale, Slot.WALK, Kind.BEAT, 2, false, false,
                 new Space(3, W02_NUMBERS, 0, W02_HAZARDS, W02_GOALS, List.of())));
+        add(new Def("W03", whale, Slot.WALK, Kind.CROSS, 2, true, false,
+                new Space(3, W03_NUMBERS, 0, W03_HAZARDS, W03_GOALS, List.of())));
+        add(new Def("W04", whale, Slot.WALK, Kind.BEAT, 3, true, false,
+                new Space(3, W04_NUMBERS, 0, W04_HAZARDS, W04_GOALS, List.of())));
         add(new Def("W05", whale, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
         add(new Def("W06", whale, Slot.WIT, Kind.SOLVE, 1, false, false,
                 new Space(3, W06_NUMBERS, 0, List.of(), W06_GOALS, List.of())));
@@ -53,6 +70,10 @@ public final class TrialCatalog {
         add(new Def("W09", whale, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("W10", whale, Slot.FIGHT, Kind.FIGHT, 2, false, false,
                 new Space(3, W10_NUMBERS, 2, W10_HAZARDS, W10_GOALS, List.of())));
+        add(new Def("W11", whale, Slot.FIGHT, Kind.ESCORT, 2, true, false,
+                new Space(3, W11_NUMBERS, 2, W11_HAZARDS, W11_GOALS, List.of())));
+        add(new Def("W12", whale, Slot.FIGHT, Kind.FIGHT, 3, true, false,
+                new Space(3, W12_NUMBERS, 2, W12_HAZARDS, W12_GOALS, List.of())));
         // ---- 潮殻 (西 T01 歩 / 東 T05 智 / 前 T09 闘)
         add(new Def("T01", tide, Slot.WALK, Kind.CARRY, 1, true, true, Space.EMPTY));
         add(new Def("T05", tide, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));

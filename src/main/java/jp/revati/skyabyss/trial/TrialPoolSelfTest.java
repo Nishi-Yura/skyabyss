@@ -66,6 +66,7 @@ public final class TrialPoolSelfTest {
         try {
             pure();
             variants(server);
+            TrialCellLogic.run(server, FAIL);
             world(server);
         } catch (RuntimeException e) {
             FAIL.add("exception " + e);
