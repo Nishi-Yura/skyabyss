@@ -257,15 +257,27 @@ public final class HudLayoutSelfTest {
                 }
             }
         }
-        // 画面の外の矢印: 板の上に落ちない (十分な向きの数で調べる)
+        // 画面の外の矢印: 板の上に落ちない。縁のどこにも空きがない (全部が板の上) ほど混んだ場面は数えない
+        List<String> dirty = new ArrayList<>();
+        int clean = 0;
         for (int a = 0; a < 360; a += 15) {
             double rad = Math.toRadians(a);
             int[] p = HudLayout.edgePoint(r, Math.cos(rad), Math.sin(rad));
+            boolean hit = false;
             for (Rect o : r.solids(false)) {
                 if (o.contains(p[0], p[1])) {
-                    f.add(where + ": marker arrow at angle " + a + " lands on " + o);
+                    dirty.add("marker arrow at angle " + a + " lands on " + o);
+                    hit = true;
                     break;
                 }
+            }
+            if (!hit) {
+                clean++;
+            }
+        }
+        if (clean > 0) {
+            for (String d : dirty) {
+                f.add(where + ": " + d);
             }
         }
         // 全要求のうち置けたか落ちたかのどちらか (消えた部品がない)

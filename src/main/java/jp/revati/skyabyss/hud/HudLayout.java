@@ -81,7 +81,7 @@ public final class HudLayout {
         // ---- ホットバーの左右 (外側へ)
         QUICK_CARD, GROWTH_BAR, SKILL_SLOTS,
         // ---- 左上の帯 (上から下へ)
-        STATUS_TL, SLOTS_TL, POPUPS_TL, CHAPTER, OBJECTIVE, QUEST,
+        STATUS_TL, SLOTS_TL, CHAPTER, OBJECTIVE, QUEST, POPUPS_TL,
         // ---- 右上の板 (上から下へ)
         VOW, BACK_GAUGE, PARTY_LIST,
         // ---- 下中央 (下から上へ)
@@ -505,26 +505,29 @@ public final class HudLayout {
         double perimeter = 2 * ((x1 - x0) + (y1 - y0));
         double at = perimeterPos(p0[0], p0[1], x0, y0, x1, y1);
         int[] best = {(int) Math.round(p0[0]), (int) Math.round(p0[1])};
-        if (!blocked(r, best[0], best[1])) {
-            return best;
-        }
-        for (int step = 4; step < perimeter / 2; step += 4) {
-            for (int dir = -1; dir <= 1; dir += 2) {
-                double pos = at + dir * step;
-                pos = ((pos % perimeter) + perimeter) % perimeter;
-                int[] q = perimeterPoint(pos, x0, y0, x1, y1);
-                if (!blocked(r, q[0], q[1])) {
-                    return q;
+        // 余白 10 で空きを探し、なければ余白なし (板の上でなければよい) で探す
+        for (int margin : new int[] {10, 0}) {
+            if (!blocked(r, best[0], best[1], margin)) {
+                return best;
+            }
+            for (int step = 4; step < perimeter / 2; step += 4) {
+                for (int dir = -1; dir <= 1; dir += 2) {
+                    double pos = at + dir * step;
+                    pos = ((pos % perimeter) + perimeter) % perimeter;
+                    int[] q = perimeterPoint(pos, x0, y0, x1, y1);
+                    if (!blocked(r, q[0], q[1], margin)) {
+                        return q;
+                    }
                 }
             }
         }
         return best;
     }
 
-    // 矢印 (十数 px) が重なるか: 障害物を 10 広げて調べる
-    private static boolean blocked(Result r, int x, int y) {
+    // 矢印 (十数 px) が重なるか: 障害物を margin 広げて調べる
+    private static boolean blocked(Result r, int x, int y, int margin) {
         for (Rect o : r.solids(false)) {
-            if (o.inflate(10).contains(x, y)) {
+            if (o.inflate(margin).contains(x, y)) {
                 return true;
             }
         }
