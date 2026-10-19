@@ -21,8 +21,17 @@
       ],
       "xp": 40,
       "skip_if": {
-        "type": "lore",
-        "entry": "chapter1/ember"
+        "type": "any",
+        "of": [
+          {
+            "type": "lore",
+            "entry": "chapter1/ember"
+          },
+          {
+            "type": "stilled",
+            "titan": "ember"
+          }
+        ]
       }
     },
     {

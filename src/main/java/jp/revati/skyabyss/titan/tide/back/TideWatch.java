@@ -259,7 +259,10 @@ public final class TideWatch {
         }
         if (!peaceful && !spawned && !state.rung(TideBackState.Trial.EAST)) {
             spawned = true;
-            spawnGuards(level, owner);
+            // 静かな潮見の間 (08 の 7.2節) は泡吹きが出ない
+            if (state.quiet() != TideBackState.Trial.EAST) {
+                spawnGuards(level, owner);
+            }
         }
         if (--flowTimer > 0) {
             return;

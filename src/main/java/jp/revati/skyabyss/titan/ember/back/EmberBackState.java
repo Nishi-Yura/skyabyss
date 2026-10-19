@@ -16,7 +16,7 @@ import net.minecraft.util.RandomSource;
 // 余燼の背の試練の状態 (13 の 7 章)。グループ (パーティ、または一人) ごとに持つ (docs/design/10 の 9 章)。
 // 中身はグループの記録 (BackGroupData.Record) の欄に書く。このクラスはその読み書きの窓 (保存はしない)。
 //   ember.rung.<試練>・ember.ready.<試練>  石が鳴った・鳴らせる
-//   ember.sleeping                         この周に眠る試練
+//   ember.sleeping                         この周に静かになる試練 (「静かな試練」。石は鳴っていない。敵が少なく、やさしい配置で、いつでも入れて最後までできる)
 //   ember.gateOpen                         熾の底の門が開いた
 //   ember.forgePattern                     鍛えの間の打つ順 (番号 + 1。部屋を最初に使ったときに決める)
 //   keep.ember.*                           リセットを越えて残る: 心臓を一度でも倒したか・前に眠った試練・初めての打つ順を使ったか・周回の数・撃破の数
@@ -108,7 +108,7 @@ public final class EmberBackState {
     }
 
     public boolean rung(Trial t) {
-        return record != null && (record.flag(RUNG + t.id()) || sleeping() == t);
+        return record != null && record.flag(RUNG + t.id());
     }
 
     public int rungCount() {
@@ -124,17 +124,17 @@ public final class EmberBackState {
     }
 
     @Nullable
-    public Trial sleeping() {
+    public Trial quiet() {
         return record == null ? null : Trial.byId(record.getString(SLEEPING));
     }
 
-    public boolean sleeping(Trial t) {
-        return sleeping() == t;
+    public boolean quiet(Trial t) {
+        return quiet() == t;
     }
 
-    // 部屋の名前で (smith は east と一緒に眠る)
-    public boolean roomSleeping(String room) {
-        Trial s = sleeping();
+    // 部屋の名前で (smith は east と一緒に静かになる。鍛え手は出るが、前の試練の灰被りは出ない)
+    public boolean roomQuiet(String room) {
+        Trial s = quiet();
         if (s == null) {
             return false;
         }
@@ -178,7 +178,7 @@ public final class EmberBackState {
         return record == null ? 0 : record.getInt(RESETS);
     }
 
-    // 何か試練が進んでいるか (眠っている試練の石は数えない)。放置のリセットはこれが真のときだけ
+    // 何か試練が進んでいるか。放置のリセットはこれが真のときだけ
     public boolean hasProgress() {
         if (record == null) {
             return false;
@@ -187,7 +187,7 @@ public final class EmberBackState {
             return true;
         }
         for (Trial t : Trial.values()) {
-            if (!sleeping(t) && (record.flag(RUNG + t.id()) || record.flag(READY + t.id()))) {
+            if (record.flag(RUNG + t.id()) || record.flag(READY + t.id())) {
                 return true;
             }
         }
@@ -203,7 +203,8 @@ public final class EmberBackState {
         if (stored > 0) {
             return stored - 1;
         }
-        int idx = firstForgeUsed() ? Math.floorMod(seed(), patterns) : 0;
+        // 初めての周と、静かな東の周は、いちばんやさしい順 (赤→橙→黄)
+        int idx = firstForgeUsed() && !quiet(Trial.EAST) ? Math.floorMod(seed(), patterns) : 0;
         record.putInt(FORGE_PATTERN, idx + 1);
         return idx;
     }
@@ -257,7 +258,7 @@ public final class EmberBackState {
         }
     }
 
-    // 記録を最初に戻した (BackGroupData.Record.resetProgress) あとに呼ぶ。2 周目からは試練を一つ眠らせる (同じ試練は二回続けて眠らない)
+    // 記録を最初に戻した (BackGroupData.Record.resetProgress) あとに呼ぶ。2 周目からは試練を一つ静かにする (同じ試練は二回続けて静かにならない)
     void afterReset(RandomSource random, @Nullable Trial forceSleep, boolean noSleep) {
         if (record == null) {
             return;
@@ -270,24 +271,19 @@ public final class EmberBackState {
             pool.remove(Trial.byId(record.getString(LAST_SLEEPING)));
             next = pool.get(random.nextInt(pool.size()));
         }
-        setSleepingRaw(next);
+        setQuietRaw(next);
         record.putInt(RESETS, record.getInt(RESETS) + 1);
     }
 
-    // 眠る試練をコマンドで決める (今の周に効かせる。null で眠らせない)
-    void setSleeping(@Nullable Trial t) {
+    // 静かな試練をコマンドで決める (今の周に効かせる。null で静かにしない。石の鳴りには触れない)
+    void setQuiet(@Nullable Trial t) {
         if (record == null) {
             return;
         }
-        Trial was = sleeping();
-        if (was != null && was != t) {
-            record.setFlag(RUNG + was.id(), false);
-            record.setFlag(READY + was.id(), false);
-        }
-        setSleepingRaw(t);
+        setQuietRaw(t);
     }
 
-    private void setSleepingRaw(@Nullable Trial t) {
+    private void setQuietRaw(@Nullable Trial t) {
         if (t == null) {
             if (record.has(SLEEPING)) {
                 record.remove(SLEEPING);

@@ -48,8 +48,8 @@ public final class EmberBackCommands {
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[] {"west", "east", "south", "none"}, b))
                         .executes(ctx -> run(ctx, back -> {
                             String id = StringArgumentType.getString(ctx, "trial");
-                            EmberBackTrials.setSleeping(back, group(ctx), EmberBackState.Trial.byId(id));
-                            return "ember sleeping: " + id;
+                            EmberBackTrials.setQuiet(back, group(ctx), EmberBackState.Trial.byId(id));
+                            return "ember quiet: " + id;
                         })))))));
         d.register(op(SkyAbyss.MODID).then(op("emberback")
                 .then(op("ring").then(trialArg().executes(ctx -> run(ctx, back -> {
@@ -77,7 +77,7 @@ public final class EmberBackCommands {
                     for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
                         b.append(' ').append(t.id()).append('=').append(s.rung(t)).append(s.ready(t) ? "(ready)" : "");
                     }
-                    b.append(", sleeping ").append(s.sleeping() == null ? "none" : s.sleeping().id()).append(", gate ").append(s.gateOpen())
+                    b.append(", quiet ").append(s.quiet() == null ? "none" : s.quiet().id()).append(", gate ").append(s.gateOpen())
                             .append(", heart ").append(s.heartDefeated()).append(", seed ").append(s.seed()).append(", resets ").append(s.resets()).append(", build ")
                             .append(TitanBackData.get(back).layoutVersion()).append(", rooms");
                     for (EmberRooms.Room r : EmberRooms.ALL) {

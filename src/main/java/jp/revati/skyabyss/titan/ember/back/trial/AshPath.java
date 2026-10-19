@@ -218,10 +218,6 @@ public final class AshPath {
     // ---------------------------------------------------------------- 壺
     public static void giveUrn(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        if (EmberBackTrials.sleeping(level, EmberIds.WEST)) {
-            EmberTrials.hint(player, EmberIds.LANG_WEST + "sleeping");
-            return;
-        }
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack s = player.getInventory().getItem(i);
             if (s.is(EmberTrialSetup.ASH_URN.get())) {
@@ -339,13 +335,13 @@ public final class AshPath {
         for (ServerPlayer p : in) {
             trackStand(level, p);
             rescueUrn(level, p);
-            if (FAR_SHORE.contains(p.position()) && !EmberBackTrials.sleeping(level, EmberIds.WEST)
+            if (FAR_SHORE.contains(p.position())
                     && !EmberBackState.forRoom(level, EmberIds.WEST).ready(EmberBackState.Trial.WEST)) {
                 EmberTrials.markReady(level, EmberBackState.Trial.WEST);
                 Notice.narrate(p, EmberIds.LANG_WEST + "far_shore");
             }
         }
-        if (!in.isEmpty() && !EmberBackTrials.sleeping(level, EmberIds.WEST)) {
+        if (!in.isEmpty() && !EmberBackTrials.quiet(level, EmberIds.WEST)) {
             keepEnemies(level, in, now);
         }
     }
@@ -353,7 +349,7 @@ public final class AshPath {
     // 島の上で壺を失った人 (死んで休み場 w1 で目覚めた、ログアウト、落とした) は湖の真ん中で動けなくなる。
     // 島に立っていて壺を持っていなければ、手元へ戻す (入口の岸は台から受け取るので対象外)
     static void rescueUrn(ServerLevel level, ServerPlayer p) {
-        if (!p.isAlive() || p.isSpectator() || p.isCreative() || EmberBackTrials.sleeping(level, EmberIds.WEST)) {
+        if (!p.isAlive() || p.isSpectator() || p.isCreative()) {
             return;
         }
         BlockPos feet = p.blockPosition();
@@ -492,7 +488,7 @@ public final class AshPath {
 
     // ---------------------------------------------------------------- リセット (EmberBackRooms.onReset("west", ...))
     // 部屋の持ち主が替わるたび (手放した・新しい持ち主が入った)。冷え殻を溶岩に戻し、島の並びが持ち主の種と違えば湖を建て直す
-    public static void reset(ServerLevel level, boolean sleeping) {
+    public static void reset(ServerLevel level, boolean quiet) {
         EmberTrials.clearMobs(level, EmberBackLayout.WEST);
         EmberTrials.clearItems(level, EmberBackLayout.WEST, EmberTrialSetup.ASH_URN.get());
         for (BlockPos p : crustKeys()) {

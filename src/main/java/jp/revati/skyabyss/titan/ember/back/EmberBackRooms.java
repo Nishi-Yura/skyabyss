@@ -17,9 +17,9 @@ import net.minecraft.server.level.ServerLevel;
 // - build(level, box): 体を置き、B が箱を掘ったあとに呼ぶ。箱の中はすべて空気で、いちばん下の段 (box.minY()) にだけ仮の床がある。
 //   箱の中だけに置くこと。EmberBackLayout.reserved(部屋) の場所は空けておく (B が後で休み場・熾り石・碑文を置く)。
 //   建て直し (LAYOUT_VERSION が上がった・titan rebuild ember) のたびに呼ばれるので、何度呼ばれても同じ物になるように書く。
-// - reset(level, sleeping): 部屋の持ち主が替わるたび (手放したとき = 持ち主なし、新しい持ち主が入ったとき)。部屋の中身は持ち主のためだけに動くので、
-//   持ち主の記録 (EmberBackState.forRoom) から作り直す。sleeping は「持ち主にとって、この周この試練は眠っている」
-//   (眠る試練の石は最初から鳴っている。東が眠る周は smith も sleeping)。熾り石・休み場は B が戻すので触らなくてよい。
+// - reset(level, quiet): 部屋の持ち主が替わるたび (手放したとき = 持ち主なし、新しい持ち主が入ったとき)。部屋の中身は持ち主のためだけに動くので、
+//   持ち主の記録 (EmberBackState.forRoom) から作り直す。quiet は「持ち主にとって、この周この試練は静かな試練」
+//   (静かな試練も石は鳴っておらず、最後までできる。東が静かな周は smith も quiet)。熾り石・休み場は B が戻すので触らなくてよい。
 //   ほかのグループの人の持ち物には触らない (試練の品は EmberTrials の見回りが、部屋の外で取り上げる)
 public final class EmberBackRooms {
     @FunctionalInterface
@@ -29,7 +29,7 @@ public final class EmberBackRooms {
 
     @FunctionalInterface
     public interface Resetter {
-        void reset(ServerLevel level, boolean sleeping);
+        void reset(ServerLevel level, boolean quiet);
     }
 
     private static final Map<String, List<Builder>> BUILDERS = new LinkedHashMap<>();
@@ -98,7 +98,7 @@ public final class EmberBackRooms {
     }
 
     // 占有の部屋 (EmberRooms) を最初に戻す / いまの持ち主の記録から作り直す。持ち主 (RoomLocks) を決めてから呼ぶ。
-    // sleeping は持ち主のグループにとってその部屋が眠っているか (east が眠るなら smith も)。持ち主がいなければ眠っていない最初の形
+    // quiet は持ち主のグループにとってその部屋が静かな周か (east が静かなら smith も)。持ち主がいなければ静かでない最初の形
     static void resetRoom(ServerLevel level, EmberRooms.Room room) {
         EmberBackState owner = EmberBackState.ofNullable(level, EmberRooms.owner(room));
         List<Map.Entry<String, List<Resetter>>> list;
@@ -111,7 +111,7 @@ public final class EmberBackRooms {
             }
             for (Resetter r : e.getValue()) {
                 try {
-                    r.reset(level, owner.roomSleeping(e.getKey()));
+                    r.reset(level, owner.roomQuiet(e.getKey()));
                 } catch (RuntimeException ex) {
                     SkyAbyss.LOGGER.error("ember back: resetting room {} failed", e.getKey(), ex);
                 }
