@@ -630,6 +630,8 @@ public final class TitanEndSelfTest {
         }
         String titan = Titans.STONE_WHALE;
         TitanDormancy.clear(server, titan);
+        // 同じ段の前の検査 (運び出し・出発など) が残した記録を、数に入れない
+        purgeGroups(server);
         var data = jp.revati.skyabyss.titan.group.BackGroupData.get(back);
         FakePlayer a = fake(back, "0041", "[titan_end_ga]");
         FakePlayer b = fake(back, "0042", "[titan_end_gb]");

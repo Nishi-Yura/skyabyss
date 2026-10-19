@@ -104,7 +104,7 @@ public final class StorySelfTest {
     private static void isanaTopics(MinecraftServer server, ServerLevel level, List<net.minecraft.world.entity.Entity> spawned, List<String> f,
                                     List<String> notes) {
         BlockPos spawn = level.getSharedSpawnPos();
-        BlockPos at = new BlockPos(spawn.getX() + 60, 300, spawn.getZ() + 60);
+        BlockPos at = new BlockPos(spawn.getX() + 40, 300, spawn.getZ() + 40);
         NpcEntity wc = NpcSetup.WHALE_CHASER.get().create(level);
         if (wc == null) {
             f.add("isana topics: npc could not be created");

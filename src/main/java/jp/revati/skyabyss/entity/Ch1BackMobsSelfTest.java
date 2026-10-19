@@ -527,8 +527,14 @@ public final class Ch1BackMobsSelfTest {
                     Object state = ctor.newInstance(UUID.randomUUID(), hall2);
                     waveField.setInt(state, waveNo);
                     playersField.setInt(state, players);
-                    spawnWave.invoke(null, level, hall2, state);
                     AABB box2 = wave == 3 ? TitanBackLayout.CK.aabb().inflate(2) : box;
+                    // 広間のチャンクを読み込んでから湧かせる (読み込まれていないと、湧いた敵が見つからない)
+                    for (int cx = (int) Math.floor(box2.minX) >> 4; cx <= (int) Math.floor(box2.maxX) >> 4; cx++) {
+                        for (int cz = (int) Math.floor(box2.minZ) >> 4; cz <= (int) Math.floor(box2.maxZ) >> 4; cz++) {
+                            level.getChunk(cx, cz);
+                        }
+                    }
+                    spawnWave.invoke(null, level, hall2, state);
                     List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box2, m -> m.getTags().contains(TitanBackTrials.MOB_TAG));
                     List<BoneMortar> mortars = mobs.stream().filter(m -> m instanceof BoneMortar).map(m -> (BoneMortar) m).toList();
                     List<ElderSentinel> elders = mobs.stream().filter(m -> m instanceof ElderSentinel).map(m -> (ElderSentinel) m).toList();

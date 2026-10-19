@@ -77,17 +77,17 @@ public final class UxPolishSelfTest {
         check(f, RespawnGuard.RADIUS >= 8.0, "the quiet radius is below 8 blocks");
         RespawnGuard.clear();
         FakePlayer p = player(back, "ux_respawn");
-        p.setPos(40.5, 100, 40.5);
-        back.getChunk(new BlockPos(40, 100, 40));
-        // 床のない所には敵が湧かない決まり (SpawnSafety) なので、敵を置く所に床を敷く
-        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(40, 100, 40), 5, 1);
-        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(60, 100, 40), 1, 1);
+        p.setPos(6040.5, 100, 6040.5);
+        back.getChunk(new BlockPos(6040, 100, 6040));
+        // 床のない所には敵が湧かない決まり (SpawnSafety) なので、敵を置く所に床を敷く (建物のない背の外れ。(40, 100, 40) は建てた背の体の中)
+        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(6040, 100, 6040), 5, 1);
+        jp.revati.skyabyss.util.SpawnSafety.testFloor(back, new BlockPos(6060, 100, 6040), 1, 1);
         Zombie chaser = EntityType.ZOMBIE.create(back);
         Zombie near = null;
         Zombie far = null;
         try {
             check(f, !ReentryRules.guarded(p), "guarded before any respawn");
-            chaser.moveTo(44.5, 100, 40.5);
+            chaser.moveTo(6044.5, 100, 6040.5);
             check(f, back.addFreshEntity(chaser), "the test mob could not be added to the back");
             chaser.setTarget(p);
             check(f, chaser.getTarget() == p, "the test could not set a target to begin with (guard active already?)");
@@ -114,10 +114,10 @@ public final class UxPolishSelfTest {
             check(f, !RespawnGuard.quiet(net.minecraft.world.level.Level.OVERWORLD, p.position(), now), "the quiet zone leaked into another dimension");
             // 実際の湧き: 近くは止まる・遠くは湧く
             near = EntityType.ZOMBIE.create(back);
-            near.moveTo(43.5, 100, 40.5);
+            near.moveTo(6043.5, 100, 6040.5);
             check(f, !back.addFreshEntity(near), "a mob spawned inside the quiet radius");
             far = EntityType.ZOMBIE.create(back);
-            far.moveTo(60.5, 100, 40.5);
+            far.moveTo(6060.5, 100, 6040.5);
             check(f, back.addFreshEntity(far), "a mob outside the quiet radius was blocked");
         } finally {
             RespawnGuard.clear();
