@@ -19,7 +19,6 @@ import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.group.RoomLocks;
 import jp.revati.skyabyss.titan.storm.StormSetup;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -30,7 +29,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 // 前の試練 眼の間 (12 の 4.3節)。巨神の左の眼から差す光を、羽鏡で三つの受け羽へ導く。
 // - 格子は 5x5 の台 (列 c は西から東、行 r は北から南)。光は西の壁の「入る行」から東へ、床から 2 の高さを走る
@@ -46,8 +44,6 @@ public final class EyeMirrors {
     static final int[][] STEP = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
     static final int[][] PAIRS = {{0, 1}, {1, 2}, {2, 3}, {3, 0}};
     public static final int RESET_COOLDOWN = 20 * 30;
-    private static final DustParticleOptions BEAM = new DustParticleOptions(new Vector3f(1f, 0.97f, 0.85f), 1.1f);
-    private static final DustParticleOptions BEAM_NIGHT = new DustParticleOptions(new Vector3f(0.75f, 0.85f, 1f), 1.1f);
 
     // 壁の受け羽: side = 光が出ていく向き (0 北の壁・1 東の壁・2 南の壁・3 西の壁)、index = 北・南の壁なら列、東・西の壁なら行
     public record Wall(int side, int index) {
@@ -97,7 +93,15 @@ public final class EyeMirrors {
     }
 
     // 光の道 (通った格子) と、出ていった壁 (止まったら null)
-    public record Trace(List<int[]> path, @Nullable Wall exit) {
+    // 止まった理由: EXIT = 壁へ出た、BACK = 鏡の裏に当たった、BLOCKED = 雷蛾がさえぎった、LOOP = 同じ所を回っている
+    public enum Stop {
+        EXIT, BACK, BLOCKED, LOOP
+    }
+
+    public record Trace(List<int[]> path, @Nullable Wall exit, Stop stop) {
+        public Trace(List<int[]> path, @Nullable Wall exit) {
+            this(path, exit, exit != null ? Stop.EXIT : Stop.BACK);
+        }
     }
 
     public static Trace trace(int entry, Grid g) {
@@ -112,9 +116,10 @@ public final class EyeMirrors {
             if (c < 0 || c > 4 || r < 0 || r > 4) {
                 return new Trace(path, new Wall(d, d == 1 || d == 3 ? r : c));
             }
-            if (!seen.add((c * 5 + r) * 4 + d) || g.blocked(c, r)) {
+            boolean blocked = g.blocked(c, r);
+            if (!seen.add((c * 5 + r) * 4 + d) || blocked) {
                 path.add(new int[] {c, r});
-                return new Trace(path, null);
+                return new Trace(path, null, blocked ? Stop.BLOCKED : Stop.LOOP);
             }
             path.add(new int[] {c, r});
             int k = g.mirror(c, r);
@@ -126,7 +131,7 @@ public final class EyeMirrors {
                 } else if (s == p[1]) {
                     d = p[0];
                 } else {
-                    return new Trace(path, null);
+                    return new Trace(path, null, Stop.BACK);
                 }
             }
         }
@@ -250,13 +255,13 @@ public final class EyeMirrors {
     // 部屋をグループの記録のとおりに置く (持ち主が変わったとき・戻しの鏡)。鏡の向きと光った受け羽は記録から
     public static void apply(ServerLevel level, StormProgress progress) {
         place(level, progress.config(), progress.mirrorRots(), progress.receivers());
-        beam = List.of();
+        clearBeams(level);
     }
 
     // だれも持っていない部屋の姿 (配置 0 の最初の向き、受け羽は消えている)
     public static void applyNeutral(ServerLevel level) {
         place(level, CONFIGS.get(0), CONFIGS.get(0).init(), 0);
-        beam = List.of();
+        clearBeams(level);
     }
 
     private static void place(ServerLevel level, Config cfg, int[] rots, int receivers) {
@@ -279,10 +284,40 @@ public final class EyeMirrors {
         for (int r = 0; r < 5; r++) {
             set(level, gridCell(0, r).offset(-GRID_STEP + 1, 0, 0).west(), StormKit.LENS);
         }
+        // 受け羽の額縁 (25 の 2.2): 白い羽は白い壁に紛れるので、いまの配置の受け羽だけ、まわり 8 マスを銅の枠にして目当てにする。
+        // ほかの配置で受け羽になりうる所の枠は、元の壁の石へ戻す
+        for (Config c : CONFIGS) {
+            for (Wall w : c.receivers()) {
+                frame(level, w, false);
+            }
+        }
+        for (Wall w : cfg.receivers()) {
+            frame(level, w, true);
+        }
         set(level, entryPos(cfg), Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState());
         for (int i = 0; i < cfg.receivers().size(); i++) {
             boolean lit = (receivers & (1 << i)) != 0;
             set(level, wallPos(cfg.receivers().get(i)), StormBackSetup.RECEIVER.get().defaultBlockState().setValue(StormBlocks.Receiver.LIT, lit));
+        }
+    }
+
+    // 受け羽のまわりの 3x3 (中心を除く)。on なら銅、でなければ元の壁の石
+    private static void frame(ServerLevel level, Wall w, boolean on) {
+        BlockPos c = wallPos(w);
+        boolean alongX = w.side() == 0 || w.side() == 2;
+        for (int d = -1; d <= 1; d++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (d == 0 && dy == 0) {
+                    continue;
+                }
+                BlockPos q = c.offset(alongX ? d : 0, dy, alongX ? 0 : d);
+                BlockState cur = level.getBlockState(q);
+                // 壁の石 (方解石・石英・閃緑岩・銅の枠) だけ。窓・碑・別の受け羽・空気には触れない
+                if (!(cur.is(Blocks.CALCITE) || cur.is(Blocks.SMOOTH_QUARTZ) || cur.is(Blocks.POLISHED_DIORITE) || cur.is(StormKit.COPPER.getBlock()))) {
+                    continue;
+                }
+                set(level, q, on ? StormKit.COPPER : StormKit.wall(StormKit.Style.EYE, q.getX(), q.getY(), q.getZ()));
+            }
         }
     }
 
@@ -343,42 +378,117 @@ public final class EyeMirrors {
     // 4 tick ごと (眼の間に持ち主がいる間)。光と粒は持ち主のグループのもの
     static void tick(ServerLevel level, StormProgress progress) {
         if (progress.rung(StormBackState.Trial.FRONT) && progress.receivers() == 7) {
-            beam = List.of();
+            clearBeams(level);
             return;
         }
         StormFx.to(progress.group, () -> traceAndDraw(level, progress));
     }
 
+    // 光の筋の見た目 (25 の 2.2): 粒ではなく、光る細い箱 (block_display) をつなぐ。光の筋が変わったときだけ置き直す
+    static final String BEAM_TAG = "skyabyss_storm_beam";
+    private static final double BEAM_THICK = 0.14;
+    private static String beamSig = "";
+
+    static void clearBeams(ServerLevel level) {
+        beam = List.of();
+        beamSig = "";
+        for (Entity e : level.getEntities((Entity) null, EYE_HALL.aabb().inflate(8, 6, 6), e -> e.getTags().contains(BEAM_TAG))) {
+            e.discard();
+        }
+    }
+
+    private static void box(ServerLevel level, String block, Vec3 c, double sx, double sy, double sz) {
+        String snbt = String.format(java.util.Locale.ROOT,
+                "{block_state:{Name:\"%s\"},brightness:{sky:15,block:15},Tags:[\"%s\"],view_range:2.0f,"
+                        + "transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[%.3ff,%.3ff,%.3ff],scale:[%.3ff,%.3ff,%.3ff]},"
+                        + "Pos:[%.3fd,%.3fd,%.3fd]}",
+                block, BEAM_TAG, -sx / 2, -sy / 2, -sz / 2, sx, sy, sz, c.x, c.y, c.z);
+        try {
+            Entity e = net.minecraft.world.entity.EntityType.BLOCK_DISPLAY.create(level);
+            if (e == null) {
+                return;
+            }
+            e.load(net.minecraft.nbt.TagParser.parseTag(snbt));
+            e.setPos(c.x, c.y, c.z);
+            level.addFreshEntity(e);
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException ex) {
+            jp.revati.skyabyss.SkyAbyss.LOGGER.warn("storm beam display failed: {}", ex.getMessage());
+        }
+    }
+
+    // 点の並び (入口の窓 → 曲がり角 → 壁) を、光る箱でつなぐ。曲がり角と終わりに小さな玉。止まった所は赤い玉
+    private static void drawBeam(ServerLevel level, List<Vec3> pts, boolean day, @Nullable Vec3 stop, boolean hit) {
+        StringBuilder sig = new StringBuilder(day ? "d" : "n").append(hit ? "h" : "").append(stop != null ? "s" : "");
+        for (Vec3 p : pts) {
+            sig.append((int) (p.x * 2)).append(',').append((int) (p.z * 2)).append(';');
+        }
+        if (sig.toString().equals(beamSig)) {
+            return;
+        }
+        beamSig = sig.toString();
+        for (Entity e : level.getEntities((Entity) null, EYE_HALL.aabb().inflate(8, 6, 6), e -> e.getTags().contains(BEAM_TAG))) {
+            e.discard();
+        }
+        String body = hit ? "minecraft:white_concrete" : day ? "minecraft:glowstone" : "minecraft:sea_lantern";
+        for (int i = 1; i < pts.size(); i++) {
+            Vec3 a = pts.get(i - 1);
+            Vec3 b = pts.get(i);
+            Vec3 mid = a.add(b).scale(0.5);
+            box(level, body, mid, Math.abs(b.x - a.x) + BEAM_THICK, BEAM_THICK, Math.abs(b.z - a.z) + BEAM_THICK);
+        }
+        for (int i = 1; i < pts.size() - 1; i++) {
+            box(level, "minecraft:white_concrete", pts.get(i), 0.3, 0.3, 0.3);
+        }
+        if (stop != null) {
+            box(level, "minecraft:redstone_block", stop, 0.38, 0.38, 0.38);
+        }
+    }
+
+    // 世界の光の筋 (入口の窓から)
     private static void traceAndDraw(ServerLevel level, StormProgress progress) {
         Config cfg = progress.config();
         Trace t = trace(cfg.entry(), worldGrid(level, progress));
-        // 粒の点: 入口から格子の中心を結ぶ線
         List<Vec3> pts = new ArrayList<>();
         BlockPos in = entryPos(cfg);
-        pts.add(Vec3.atCenterOf(in));
-        for (int[] p : t.path()) {
-            pts.add(Vec3.atCenterOf(gridCell(p[0], p[1])));
+        pts.add(Vec3.atCenterOf(in).add(0.4, 0, 0));
+        // 通った格子: 真っ直ぐ通り抜ける所は点を足さない (鏡と終わりの点だけ)
+        List<int[]> path = t.path();
+        for (int i = 0; i < path.size(); i++) {
+            int[] p = path.get(i);
+            boolean last = i == path.size() - 1;
+            if (last || cfg.mirrors().stream().anyMatch(m -> m[0] == p[0] && m[1] == p[1])) {
+                pts.add(Vec3.atCenterOf(gridCell(p[0], p[1])));
+            }
         }
+        boolean reached = false;
+        Vec3 stop = null;
         if (t.exit() != null) {
-            pts.add(Vec3.atCenterOf(wallPos(t.exit())));
+            Vec3 w = Vec3.atCenterOf(wallPos(t.exit()));
+            Vec3 prev = pts.get(pts.size() - 1);
+            pts.add(new Vec3(w.x - Math.signum(w.x - prev.x) * 0.45, w.y, w.z - Math.signum(w.z - prev.z) * 0.45));
             int i = cfg.receivers().indexOf(t.exit());
+            reached = i >= 0;
             if (i >= 0 && (progress.receivers() & (1 << i)) == 0) {
                 light(level, progress, cfg, i);
             }
+        } else {
+            stop = pts.get(pts.size() - 1);
         }
         beam = pts;
-        boolean day = level.isDay();
-        for (int i = 1; i < pts.size(); i++) {
-            StormFx.line(level, day ? BEAM : BEAM_NIGHT, pts.get(i - 1), pts.get(i), 0.5);
-        }
-        // 受け羽の近くを光が通ると、羽が少し揺れる (あと一つで届く、が分かる)
+        drawBeam(level, pts, level.isDay(), stop, reached);
+        long gt = level.getGameTime();
+        // 受け羽: まだ光っていないものは、小さな光の粒を立てて「ここだ」と示す。近くを光が通ると少し揺れる
         for (int i = 0; i < cfg.receivers().size(); i++) {
+            Vec3 w = Vec3.atCenterOf(wallPos(cfg.receivers().get(i)));
             if ((progress.receivers() & (1 << i)) != 0) {
                 continue;
             }
-            Vec3 w = Vec3.atCenterOf(wallPos(cfg.receivers().get(i)));
+            if (gt % 10 == 0) {
+                StormFx.forced(level, ParticleTypes.END_ROD, w.x, w.y + 0.6, w.z, 1, 0.15, 0.1, 0.15, 0.01);
+                StormFx.forced(level, ParticleTypes.END_ROD, w.x, w.y - 0.6, w.z, 1, 0.15, 0.1, 0.15, 0.01);
+            }
             for (Vec3 p : pts) {
-                if (p.distanceToSqr(w) < 16 && level.getGameTime() % 20 == 0) {
+                if (p.distanceToSqr(w) < 16 && gt % 20 == 0) {
                     StormFx.forced(level, ParticleTypes.WHITE_ASH, w.x, w.y, w.z, 6, 0.3, 0.3, 0.3, 0.01);
                     break;
                 }
@@ -401,6 +511,12 @@ public final class EyeMirrors {
         }
         if (progress.receivers() == 7) {
             GroupGates.open(level, progress.group, beakDoor());
+            level.playSound(null, new BlockPos(0, EYE_HALL.floor() + 2, BEAK_DOOR_Z1), net.minecraft.sounds.SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.7f);
+            for (ServerPlayer pl : Groups.online(level, progress.group)) {
+                if (inFront(pl.position())) {
+                    Notice.bar(pl, ModText.progress("message.skyabyss.storm.beak_opened"));
+                }
+            }
         }
     }
 
@@ -415,11 +531,45 @@ public final class EyeMirrors {
             Notice.bar(player, ModText.deny("message.skyabyss.room_busy"));
             return;
         }
-        turnFor(level, StormProgress.of(level, group), pos);
+        StormProgress progress = StormProgress.of(level, group);
+        if (turnFor(level, progress, pos, player.isShiftKeyDown() ? 3 : 1)) {
+            // 回した直後に光の筋を引き直し、どうなったかを一行で言う (25 の 2.2)
+            tick(level, progress);
+            report(level, player, progress);
+        }
+    }
+
+    // 光が今どうなっているか (回した人へ)
+    static void report(ServerLevel level, ServerPlayer player, StormProgress progress) {
+        Config cfg = progress.config();
+        Trace t = trace(cfg.entry(), worldGrid(level, progress));
+        String key;
+        if (t.exit() != null) {
+            int i = cfg.receivers().indexOf(t.exit());
+            if (i < 0) {
+                key = "message.skyabyss.storm.beam_wall";
+            } else if ((progress.receivers() & (1 << i)) != 0) {
+                key = "message.skyabyss.storm.beam_lit_already";
+            } else {
+                return;
+            }
+        } else {
+            key = switch (t.stop()) {
+                case BLOCKED -> "message.skyabyss.storm.beam_blocked";
+                case LOOP -> "message.skyabyss.storm.beam_loop";
+                default -> "message.skyabyss.storm.beam_back";
+            };
+        }
+        Notice.bar(player, ModText.hint(key));
     }
 
     // 持ち主のグループの記録の鏡を一つ回し、世界の鏡も合わせる (自己テストからも)
     static boolean turnFor(ServerLevel level, StormProgress progress, BlockPos pos) {
+        return turnFor(level, progress, pos, 1);
+    }
+
+    // step: 1 = 右へ 90 度、3 = 左へ 90 度 (しゃがんで右クリック)
+    static boolean turnFor(ServerLevel level, StormProgress progress, BlockPos pos, int step) {
         Config cfg = progress.config();
         int index = -1;
         for (int i = 0; i < cfg.mirrors().size(); i++) {
@@ -432,7 +582,7 @@ public final class EyeMirrors {
         if (index < 0) {
             return false;
         }
-        int rot = (progress.mirrorRots()[index] + 1) % 4;
+        int rot = (progress.mirrorRots()[index] + step) % 4;
         progress.setMirrorRot(index, rot);
         BlockState s = level.getBlockState(pos);
         if (s.is(StormBackSetup.MIRROR.get())) {
@@ -458,7 +608,7 @@ public final class EyeMirrors {
             apply(level, progress);
         }
         Notice.bar(player, ModText.hint("message.skyabyss.storm.mirrors_reset"));
-        level.playSound(null, MIRROR_RESET, StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1.5f, 0.6f);
+        level.playSound(null, player.blockPosition(), StormSetup.MIRROR_TURN.get(), SoundSource.BLOCKS, 1.5f, 0.6f);
         return true;
     }
 
@@ -469,6 +619,7 @@ public final class EyeMirrors {
     static void clear() {
         LAST_RESET.clear();
         beam = List.of();
+        beamSig = "";
     }
 
     public static List<Vec3> beam() {

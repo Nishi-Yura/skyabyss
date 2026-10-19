@@ -85,6 +85,8 @@ public final class StormBackSelfTest {
             FAILURES.addAll(reach.failures);
             checkReset(back, FAILURES);
             checkGroups(back, FAILURES);
+            checkGuide(back, FAILURES);
+            checkNoStateGates(back, FAILURES);
             checkParty(back, FAILURES);
             checkPeaceful(back, FAILURES);
             check(TitanBacks.isBack(StormTravel.STORM_BACK), "storm_back is not in the back list", FAILURES);
@@ -410,6 +412,24 @@ public final class StormBackSelfTest {
             state = fresh(l, GROUP_A);
             state.setMirrorConfig(i);
             EyeMirrors.apply(l, state);
+            // 受け羽の額縁 (銅) は、いまの配置の受け羽のまわりだけ
+            for (EyeMirrors.Config other : EyeMirrors.CONFIGS) {
+                for (EyeMirrors.Wall w : other.receivers()) {
+                    boolean active = cfg.receivers().contains(w);
+                    boolean copper = l.getBlockState(EyeMirrors.wallPos(w).above()).is(net.minecraft.world.level.block.Blocks.WAXED_CUT_COPPER);
+                    check(active == copper, "mirror config " + i + ": the copper frame of receiver " + w + " is " + copper + " (active " + active + ")", f);
+                }
+            }
+            // しゃがんで右クリックは逆回し (3 回右へ = 1 回左へ)
+            if (!cfg.mirrors().isEmpty()) {
+                int[] m0 = cfg.mirrors().get(0);
+                BlockPos mp = gridCell(m0[0], m0[1]);
+                int before = state.mirrorRots()[0];
+                EyeMirrors.turnFor(l, state, mp, 3);
+                check(state.mirrorRots()[0] == Math.floorMod(before - 1, 4), "mirror config " + i + ": reverse turn", f);
+                EyeMirrors.turnFor(l, state, mp);
+                check(state.mirrorRots()[0] == before, "mirror config " + i + ": turning back and forth", f);
+            }
             EyeMirrors.Trace a = EyeMirrors.trace(cfg.entry(), EyeMirrors.blockGrid(l));
             EyeMirrors.Trace b = EyeMirrors.trace(cfg.entry(), EyeMirrors.grid(cfg, cfg.init()));
             check(java.util.Objects.equals(a.exit(), b.exit()), "mirror config " + i + ": the world beam differs from the grid", f);
@@ -421,10 +441,18 @@ public final class StormBackSelfTest {
                 f.add("mirror config " + i + " has no solution");
                 continue;
             }
+            boolean first = true;
             for (int k : path) {
                 int[] c = cfg.mirrors().get(k);
                 EyeMirrors.turnFor(l, state, gridCell(c[0], c[1]));
                 EyeMirrors.tick(l, state);
+                if (first && state.receivers() != 7) {
+                    // 光の筋は光る箱 (block_display)。入口の窓から終わりまで、少なくとも 2 本はある (25 の 2.1 M1)
+                    int boxes = l.getEntities((net.minecraft.world.entity.Entity) null, EYE_HALL.aabb().inflate(8, 6, 6),
+                            e -> e.getTags().contains(EyeMirrors.BEAM_TAG)).size();
+                    check(boxes >= 2, "mirror config " + i + ": the beam has " + boxes + " display boxes", f);
+                }
+                first = false;
             }
             EyeMirrors.Trace w = EyeMirrors.trace(cfg.entry(), EyeMirrors.blockGrid(l));
             EyeMirrors.Trace r = EyeMirrors.trace(cfg.entry(), EyeMirrors.grid(cfg, state.mirrorRots()));
@@ -433,6 +461,8 @@ public final class StormBackSelfTest {
             check(GroupGates.isOpen(l, GROUP_A, door), "mirror config " + i + ": beak door did not open for the group", f);
             check(!GroupGates.isOpen(l, GROUP_B, door), "mirror config " + i + ": beak door opened for another group", f);
         }
+        check(l.getBlockState(MIRROR_RESET_HALL).is(StormBackSetup.RETURN_MIRROR.get()) && l.getBlockState(MIRROR_RESET).is(StormBackSetup.RETURN_MIRROR.get()),
+                "both reset mirrors should be in place", f);
         notes.add("mirror moves " + String.join("/", mins));
         fresh(l, GROUP_A);
         fresh(l, GROUP_B);
@@ -621,7 +651,8 @@ public final class StormBackSelfTest {
         for (Map.Entry<String, BlockPos> e : yes.entrySet()) {
             expect(calm, l, e.getKey() + " (calm)", e.getValue(), true, f);
         }
-        expect(calm, l, "west stone ledge in calm", WEST_STONE.offset(1, 0, 0), false, f);
+        // どの拍でも行ける (25 の 2章): 岩棚の昇り風の穴は拍によらず岩棚まで届く
+        expect(calm, l, "west stone ledge in calm", WEST_STONE.offset(1, 0, 0), true, f);
         expect(calm, l, "rest e1 with closed doors", rest("e1"), false, f);
         expect(calm, l, "east perch before the raiju", EAST_STONE.offset(-1, 0, 0), false, f);
         expect(calm, l, "beak room before the mirrors", FRONT_STONE.offset(1, 0, 0), false, f);
@@ -700,6 +731,80 @@ public final class StormBackSelfTest {
         BackGroupData.get(l).remove(GROUP_B);
         fresh(l, GROUP_A);
         fresh(l, GROUP_B);
+    }
+
+    // ---------------------------------------------------------------- 目的の板 (25 の 3章)
+    private static void checkGuide(ServerLevel l, List<String> f) {
+        for (String lang : SignFit.LANGUAGES) {
+            Map<String, String> m = SignFit.lang(lang);
+            for (String id : StormGuide.GOAL_IDS) {
+                check(m.containsKey("gui.skyabyss.storm_goal." + id), "goal text " + id + " is missing in " + lang, f);
+            }
+            for (String t : List.of("west", "east", "front", "hub")) {
+                check(m.containsKey("gui.skyabyss.storm_goal.title." + t), "goal title " + t + " is missing in " + lang, f);
+            }
+        }
+        StormProgress a = fresh(l, GROUP_A);
+        StormTestPlayer pa = StormTestPlayer.join(l, GROUP_A, "[storm_g]", net.minecraft.world.phys.Vec3.atBottomCenterOf(rest("hub")));
+        try {
+            check(StormGuide.goalFor(l, pa).id().equals("hub.stones"), "hub goal should be hub.stones, was " + StormGuide.goalFor(l, pa).id(), f);
+            Object[][] spots = {
+                    {-35, BONE_FLOOR + 1, -17, "west.gap", 0}, {-60, BONE_FLOOR + 1, -17, "west.gap", 2}, {-110, BONE_FLOOR + 1, -17, "west.knob", 4},
+                    {WEST_STONE.getX(), WEST_STONE.getY(), WEST_STONE.getZ(), "west.stone", 4}, {40, BONE_FLOOR + 1, -17, "east.rods", 0},
+                    {0, EYE_HALL.floor() + 1, -78, "front.mirror", 0}};
+            for (Object[] sp : spots) {
+                pa.moveTo((int) sp[0] + 0.5, (int) sp[1], (int) sp[2] + 0.5, 0f, 0f);
+                StormGuide.Goal g = StormGuide.goalFor(l, pa);
+                check(g.id().equals(sp[3]), "goal at " + sp[0] + "," + sp[1] + "," + sp[2] + " should be " + sp[3] + ", was " + g.id(), f);
+                check(g.total() > 0 && g.done() >= 0 && g.done() <= g.total(), "goal pips are wrong at " + sp[3] + ": " + g.done() + "/" + g.total(), f);
+                if (sp[3].toString().startsWith("west.gap")) {
+                    check(g.a() == (int) sp[4], "gaps passed at x " + sp[0] + " should be " + sp[4] + ", was " + g.a(), f);
+                }
+            }
+            // 進みの点: 石が鳴ると満点、受け羽・戸で増える
+            a.setRung(StormBackState.Trial.FRONT, true);
+            pa.moveTo(0.5, EYE_HALL.floor() + 1, -77.5, 0f, 0f);
+            StormGuide.Goal g = StormGuide.goalFor(l, pa);
+            check(g.id().equals("front.done") && g.done() == g.total(), "front goal after ringing: " + g, f);
+            a.setRung(StormBackState.Trial.FRONT, false);
+            a.setReceivers(7);
+            g = StormGuide.goalFor(l, pa);
+            check(g.id().equals("front.stone") && g.done() == 3, "front goal with all receivers: " + g, f);
+            a.openEastDoor(0);
+            a.openEastDoor(1);
+            pa.moveTo(40.5, BONE_FLOOR + 1, -16.5, 0f, 0f);
+            g = StormGuide.goalFor(l, pa);
+            check(g.id().equals("east.rods") && g.done() == 2 && g.a() == 2, "east goal with two doors: " + g, f);
+            a.openEastDoor(2);
+            check(StormGuide.goalFor(l, pa).id().equals("east.raiju"), "east goal with three doors should be east.raiju", f);
+            a.setRaijuDefeated(true);
+            check(StormGuide.goalFor(l, pa).id().equals("east.stone"), "east goal after the raiju should be east.stone", f);
+        } finally {
+            pa.leave();
+            fresh(l, GROUP_A);
+        }
+    }
+
+    // ---------------------------------------------------------------- どの拍でも試練に行ける・終えられる (25 の 2章)
+    private static void checkNoStateGates(ServerLevel l, List<String> f) {
+        // 凪でも、東の柱は雷で満ちる (招雷の間は凪が嵐の倍)。西の瘤の岩棚の穴は拍によらず岩棚まで届く
+        check(StormEast.CALM_STRIKE_EVERY > 0 && StormEast.CALM_STRIKE_EVERY <= StormEast.STRIKE_EVERY * 3, "calm strikes should come at most 3x slower than storm ones", f);
+        for (StormBackClock.Phase ph : new StormBackClock.Phase[] {StormBackClock.Phase.CALM, StormBackClock.Phase.STORM}) {
+            StormBackClock.force(ph);
+            for (StormWest.Vent v : StormWest.vents()) {
+                if (v.floor().equals(WEST_KNOB_VENT)) {
+                    double h = StormWest.liftFor(l, v);
+                    check(WEST_KNOB_VENT.getY() + 1 + h >= WEST_STONE.getY(), "the knob vent does not reach the ledge in " + ph + " (" + h + ")", f);
+                }
+            }
+        }
+        StormBackClock.force(null);
+        // 試練は自分では眠らない: 心臓を一度倒した記録でも、リセットのあと眠る試練がない (checkReset でも見る)
+        StormProgress a = fresh(l, GROUP_A);
+        a.markEverDefeated();
+        a.reset(l.random, null, false);
+        check(a.sleeping() == null && a.rungCount() == 0, "a trial sleeps by itself after the heart was defeated", f);
+        fresh(l, GROUP_A);
     }
 
     // ---------------------------------------------------------------- 二つのグループが同じ背中で
