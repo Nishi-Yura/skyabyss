@@ -66,6 +66,11 @@ public final class GrowthRules {
         }
     }
 
+    // 転生した回数を踏まえた、次のレベルへ要る経験値 (転生ごとに −6%、下限 −40%。docs/design/31 の B03)
+    public static int xpToNext(int level, int rebirths) {
+        return jp.revati.skyabyss.rebirth.RebirthRules.scaledXp(xpToNext(level), rebirths);
+    }
+
     // レベル L から L+1 へ上がるのに要る経験値。上限では 0
     public static int xpToNext(int level) {
         if (level >= MAX_LEVEL || level < 1) {

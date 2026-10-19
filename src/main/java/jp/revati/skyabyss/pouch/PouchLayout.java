@@ -21,6 +21,13 @@ public final class PouchLayout {
     // 枠の並びの下端 (この下は説明と飾り)
     public static final int SEPARATOR_Y = 160;
 
+    // 転生の余白の枠 (docs/design/31 の B13): 区分の枠の下、説明の線の上。名札はその 9 上
+    public static final int SPARE_Y = SEPARATOR_Y - 21;
+
+    public static int spareX(int i) {
+        return X0 + i * PITCH;
+    }
+
     private PouchLayout() {
     }
 

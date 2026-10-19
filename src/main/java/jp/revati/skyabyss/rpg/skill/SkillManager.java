@@ -363,7 +363,7 @@ public final class SkillManager {
                 && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.SECOND)) {
             ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
         }
-        return jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks);
+        return jp.revati.skyabyss.rebirth.Rebirth.scaleCooldown(player, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks));
     }
 
     public static boolean nearForge(Player player) {
@@ -538,6 +538,24 @@ public final class SkillManager {
         get(player).clearSkills();
         sync(player);
         applyModifiers(player);
+    }
+
+    // 転生 (docs/design/31): 覚えた技・刻印・天職・振り直しの回数を戻す。型の保存・解いた木・追加の点は残す。
+    // 呼ぶ前にレベルを 1 に戻しておく (知らせ済みの点の数をそのレベルに合わせるため)
+    public static void resetForRebirth(ServerPlayer player) {
+        SkillData d = get(player);
+        d.clearSkills();
+        d.calling = "";
+        d.calling2 = "";
+        d.respecs = 0;
+        d.runeSwaps = 0;
+        d.cooldowns.clear();
+        d.globalCooldown = 0;
+        d.sanitize(level(player));
+        d.notifiedPoints = d.totalPoints(level(player));
+        sync(player);
+        applyModifiers(player);
+        setMana(player, maxMana(player));
     }
 
     // 管理者・テスト用: 段を直接決める (前提とレベルは検めない。0 で忘れる)。

@@ -31,6 +31,8 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     public int fragmentCapacity = GrowthRules.FRAGMENT_CAPACITY;
     // ステータスを振り直した回数 (費用を決める。技の振り直しとは別に数える。持ち主のクライアントへも送る)
     public int statRespecs;
+    // 転生した回数 (0〜20。docs/design/31)。表示は「Lv 50+n」、必要経験値が減る。持ち主のクライアントへも送る
+    public int rebirths;
 
     // ここから下はサーバーだけが使う (クライアントへは送らない)
     // 一度だけの経験値 (新しい場所、初めての撃破) の記録
@@ -77,6 +79,11 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         return added;
     }
 
+    // いまのレベルから次へ要る経験値 (転生ごとに減る。B03)
+    public int xpNeed() {
+        return GrowthRules.xpToNext(level, rebirths);
+    }
+
     public long lifetimeXp() {
         return GrowthRules.totalXpFor(level) + xp;
     }
@@ -84,7 +91,8 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
     // 壊れた値 (手で書き換えた NBT など) を、遊べる範囲に戻す
     public void sanitize() {
         level = Mth.clamp(level, 1, GrowthRules.MAX_LEVEL);
-        xp = level >= GrowthRules.MAX_LEVEL ? 0 : Mth.clamp(xp, 0, GrowthRules.xpToNext(level) - 1);
+        rebirths = Mth.clamp(rebirths, 0, jp.revati.skyabyss.rebirth.RebirthRules.MAX_REBIRTHS);
+        xp = level >= GrowthRules.MAX_LEVEL ? 0 : Mth.clamp(xp, 0, xpNeed() - 1);
         bonusPoints = Math.max(0, bonusPoints);
         for (int i = 0; i < stats.length; i++) {
             stats[i] = Mth.clamp(stats[i], 0, GrowthRules.STAT_CAP);
@@ -114,6 +122,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         tag.put("fragments", f);
         tag.putInt("fragmentCapacity", fragmentCapacity);
         tag.putInt("statRespecs", statRespecs);
+        tag.putInt("rebirths", rebirths);
         ListTag d = new ListTag();
         for (String id : discoveries) {
             d.add(StringTag.valueOf(id));
@@ -140,6 +149,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
         }
         fragmentCapacity = tag.contains("fragmentCapacity") ? tag.getInt("fragmentCapacity") : GrowthRules.FRAGMENT_CAPACITY;
         statRespecs = tag.getInt("statRespecs");
+        rebirths = tag.getInt("rebirths");
         discoveries.clear();
         for (Tag t : tag.getList("discoveries", Tag.TAG_STRING)) {
             discoveries.add(t.getAsString());
@@ -165,6 +175,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                     buf.writeVarInt(n);
                 });
                 buf.writeVarInt(data.statRespecs);
+                buf.writeVarInt(data.rebirths);
             },
             buf -> {
                 GrowthData data = new GrowthData();
@@ -180,6 +191,7 @@ public final class GrowthData implements INBTSerializable<CompoundTag> {
                     data.fragments.put(buf.readUtf(), buf.readVarInt());
                 }
                 data.statRespecs = buf.readVarInt();
+                data.rebirths = buf.readVarInt();
                 return data;
             });
 }

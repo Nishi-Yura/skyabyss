@@ -495,6 +495,8 @@ public final class TrialRuntime {
             }
             awardTitles(p, codex, def, mods);
         }
+        // 転生者の結晶の出・導きの欠片 (未転生の仲間と遊んだとき)・仲間の経験値 (docs/design/31 の B05)
+        jp.revati.skyabyss.rebirth.Rebirth.onTrialCleared(Groups.online(back, group));
     }
 
     // 出会った修飾の印 (図鑑の「出会った修飾」の数え)

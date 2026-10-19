@@ -221,7 +221,7 @@ public final class Condition {
             case "watcher" -> PrologueData.get(ctx.player().server.overworld()).entry(ctx.player().getUUID()).sightings
                     >= GsonHelper.getAsInt(json, "min", 1);
             case "day" -> ctx.player().server.overworld().getGameTime() / 24000L >= GsonHelper.getAsInt(json, "min", 0);
-            case "level" -> Growth.get(ctx.player()).level >= GsonHelper.getAsInt(json, "min", 1);
+            case "level" -> jp.revati.skyabyss.rebirth.Rebirth.gearLevel(ctx.player()) >= GsonHelper.getAsInt(json, "min", 1);
             case "night" -> {
                 long t = ctx.player().server.overworld().getDayTime() % 24000L;
                 yield t >= 13000 && t < 23000;

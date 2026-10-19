@@ -44,6 +44,7 @@ public class SkyAbyss {
         jp.revati.skyabyss.cinematic.CinematicSetup.register(modEventBus);
         // 成長 (レベル・ステータス・記憶の断片)。登録は rpg パッケージにまとめてある
         jp.revati.skyabyss.rpg.Rpg.register(modEventBus);
+        jp.revati.skyabyss.rebirth.Rebirth.register(modEventBus);
         jp.revati.skyabyss.prologue.PrologueRegistry.register(modEventBus);
         // 1章の空 (削られた山頂・雲の目) の音
         jp.revati.skyabyss.sky.ChapterSkyRegistry.register(modEventBus);

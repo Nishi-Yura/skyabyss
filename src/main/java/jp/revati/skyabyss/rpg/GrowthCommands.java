@@ -127,7 +127,7 @@ public final class GrowthCommands {
     private static MutableComponent summary(ServerPlayer player) {
         GrowthData d = Growth.get(player);
         return Component.translatable("message.skyabyss.growth.summary", player.getDisplayName(), d.level, d.xp,
-                GrowthRules.xpToNext(d.level), d.stat(Stat.STRENGTH), d.stat(Stat.AGILITY), d.stat(Stat.SPIRIT),
+                d.xpNeed(), d.stat(Stat.STRENGTH), d.stat(Stat.AGILITY), d.stat(Stat.SPIRIT),
                 d.stat(Stat.VITALITY), d.unspentPoints(), d.fragmentCount(), d.fragmentCapacity);
     }
 
@@ -136,7 +136,7 @@ public final class GrowthCommands {
         source.sendSystemMessage(ModText.title("message.skyabyss.growth.title").append(Component.literal("  ").append(player.getDisplayName())));
         Component next = d.level >= GrowthRules.MAX_LEVEL
                 ? Component.translatable("gui.skyabyss.growth.max")
-                : Component.translatable("message.skyabyss.growth.xp", d.xp, GrowthRules.xpToNext(d.level));
+                : Component.translatable("message.skyabyss.growth.xp", d.xp, d.xpNeed());
         source.sendSystemMessage(ModText.progress("message.skyabyss.growth.level_line", d.level, next));
         MutableComponent stats = Component.empty();
         for (Stat s : Stat.values()) {

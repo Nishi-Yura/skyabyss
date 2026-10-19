@@ -212,13 +212,13 @@ public class GrowthScreen extends Screen {
         g.pose().scale(jp.revati.skyabyss.client.ui.TextStyle.HEADING.scale(), jp.revati.skyabyss.client.ui.TextStyle.HEADING.scale(), 1f);
         g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), 0, 0, GOLD, true);
         g.pose().popPose();
-        float fraction = max ? 1f : (float) d.xp / Math.max(1, GrowthRules.xpToNext(d.level));
+        float fraction = max ? 1f : (float) d.xp / Math.max(1, d.xpNeed());
         int fill = Mth.clamp(Math.round((BAR_W - 4) * fraction), 0, BAR_W - 4);
         if (fill > 0) {
             g.blit(TEXTURE, left + BAR_X + 2, top + BAR_Y + 2, fill, 2, 0, max ? 470 : 466, fill * 2, 4, TEX, TEX);
         }
         Component xpText = max ? Component.translatable("gui.skyabyss.growth.max")
-                : Component.translatable("gui.skyabyss.growth.xp", d.xp, GrowthRules.xpToNext(d.level));
+                : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());
         g.drawString(font, xpText, left + BAR_X + BAR_W - font.width(xpText), top + BAR_Y + 9, SOFT, false);
 
         // 振り分けられる力

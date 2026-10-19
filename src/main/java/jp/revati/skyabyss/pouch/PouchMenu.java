@@ -27,15 +27,21 @@ public class PouchMenu extends AbstractContainerMenu {
     private final DataSlot withdrawFlag = DataSlot.standalone();
     // 作り直しの一覧を見ているか (クライアントの画面だけの状態。見ている間は枠を隠して押せなくする)
     public boolean rebuildView;
+    // 転生の余白の枠の数 (開いたときの回数で決める。docs/design/31 の B13)。枠の番号は区分の枠のあとに続く
+    private final int spare;
 
     public PouchMenu(int id, Inventory inventory) {
         super(PouchSetup.MENU.get(), id);
         this.player = inventory.player;
         this.layout = PouchLayout.compute(PouchEntries.enabled());
-        Container view = new View(player, layout.spots());
+        this.spare = jp.revati.skyabyss.rebirth.RebirthSpare.slots(player);
+        Container view = new View(player, layout.spots(), spare);
         for (int i = 0; i < layout.spots().size(); i++) {
             PouchLayout.Spot spot = layout.spots().get(i);
             addSlot(new PouchSlot(view, i, spot.x(), spot.y()));
+        }
+        for (int i = 0; i < spare; i++) {
+            addSlot(new PouchSlot(view, layout.spots().size() + i, PouchLayout.spareX(i), PouchLayout.SPARE_Y));
         }
         addDataSlot(withdrawFlag);
         refreshFlag();
@@ -51,6 +57,11 @@ public class PouchMenu extends AbstractContainerMenu {
 
     public int pouchSlotCount() {
         return layout.spots().size();
+    }
+
+    // 余白の枠の数 (画面が枠を描くため)
+    public int spareCount() {
+        return spare;
     }
 
     // 画面が枠を「取り出せる」と見せてよいか (サーバーの決まりを写した値)
@@ -79,7 +90,14 @@ public class PouchMenu extends AbstractContainerMenu {
             }
             return;
         }
-        if (slotId >= layout.spots().size() || !(p instanceof ServerPlayer sp)) {
+        if (!(p instanceof ServerPlayer sp)) {
+            return;
+        }
+        if (slotId >= layout.spots().size()) {
+            if (slotId < layout.spots().size() + spare) {
+                clickedSpare(sp, slotId - layout.spots().size(), button, clickType);
+                broadcastChanges();
+            }
             return;
         }
         Entry entry = entryAt(slotId);
@@ -106,6 +124,39 @@ public class PouchMenu extends AbstractContainerMenu {
             }
         }
         broadcastChanges();
+    }
+
+    // 余白の枠: カーソルの品を預ける (左 = 全部、右 = 1 つ)、空の手で取り出す (左 = 1 スタック、右 = 半分)、シフト = 持ち物へ
+    private void clickedSpare(ServerPlayer sp, int index, int button, ClickType clickType) {
+        ItemStack carried = getCarried();
+        switch (clickType) {
+            case PICKUP -> {
+                if (!carried.isEmpty()) {
+                    jp.revati.skyabyss.rebirth.RebirthSpare.deposit(sp, index, carried, button == 1 ? 1 : carried.getCount());
+                    if (carried.isEmpty()) {
+                        setCarried(ItemStack.EMPTY);
+                    }
+                } else {
+                    ItemStack shown = jp.revati.skyabyss.rebirth.RebirthSpare.view(sp, index);
+                    if (!shown.isEmpty()) {
+                        int stack = shown.getMaxStackSize();
+                        int want = button == 1 ? Math.max(1, Math.min(shown.getCount(), stack) / 2) : stack;
+                        ItemStack out = jp.revati.skyabyss.rebirth.RebirthSpare.take(sp, index, want);
+                        if (!out.isEmpty()) {
+                            setCarried(out);
+                        }
+                    }
+                }
+            }
+            case QUICK_MOVE -> {
+                ItemStack out = jp.revati.skyabyss.rebirth.RebirthSpare.take(sp, index, 64);
+                if (!out.isEmpty()) {
+                    sp.getInventory().placeItemBackInInventory(out);
+                }
+            }
+            default -> {
+            }
+        }
     }
 
     // カーソルの品 n 個を袋へ入れる (枠の品と同じものだけ)。入れた数を返す
@@ -185,15 +236,17 @@ public class PouchMenu extends AbstractContainerMenu {
     private static final class View implements Container {
         private final Player player;
         private final List<PouchLayout.Spot> spots;
+        private final int spare;
 
-        View(Player player, List<PouchLayout.Spot> spots) {
+        View(Player player, List<PouchLayout.Spot> spots, int spare) {
             this.player = player;
             this.spots = spots;
+            this.spare = spare;
         }
 
         @Override
         public int getContainerSize() {
-            return spots.size();
+            return spots.size() + spare;
         }
 
         @Override
@@ -203,6 +256,9 @@ public class PouchMenu extends AbstractContainerMenu {
 
         @Override
         public ItemStack getItem(int slot) {
+            if (slot >= spots.size()) {
+                return jp.revati.skyabyss.rebirth.RebirthSpare.view(player, slot - spots.size());
+            }
             Entry e = spots.get(slot).entry();
             int n = Pouch.data(player).count(e.id());
             return n <= 0 ? ItemStack.EMPTY : new ItemStack(e.item(), n);

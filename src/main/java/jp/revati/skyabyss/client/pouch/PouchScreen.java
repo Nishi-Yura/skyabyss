@@ -146,6 +146,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             renderRebuildBg(g, x, y, mouseX, mouseY);
             return;
         }
+        renderSpareBg(g, x, y);
         for (int i = 0; i < menu.pouchSlotCount(); i++) {
             PouchLayout.Spot spot = menu.layout().spots().get(i);
             PouchEntries.Entry e = spot.entry();
@@ -168,6 +169,14 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
                     g.blit(TEXTURE, x + spot.x(), y + spot.y(), 16, 16, 360f, 50f, 32, 32, TEX, TEX);
                 }
             }
+        }
+    }
+
+    // 転生の余白の枠 (docs/design/31 の B13): 名札と枠。中身は標準の枠の描きが重ねる
+    private void renderSpareBg(GuiGraphics g, int x, int y) {
+        for (int i = 0; i < menu.spareCount(); i++) {
+            boolean has = !menu.getSlot(menu.pouchSlotCount() + i).getItem().isEmpty();
+            g.blit(TEXTURE, x + PouchLayout.spareX(i) - 1, y + PouchLayout.SPARE_Y - 1, 18, 18, has ? 400f : 360f, 0f, 36, 36, TEX, TEX);
         }
     }
 
@@ -247,6 +256,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         }
         for (PouchLayout.Label label : menu.layout().labels()) {
             g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x(), label.y(), DIM, false);
+        }
+        if (menu.spareCount() > 0) {
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), PouchLayout.X0, PouchLayout.SPARE_Y - 9, DIM, false);
         }
         renderInfo(g);
     }
@@ -329,6 +341,10 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
                     return;
                 }
             }
+            return;
+        }
+        if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index >= menu.pouchSlotCount()) {
+            g.renderTooltip(font, Component.translatable("skyabyss_pouch.screen.spare_empty"), mouseX, mouseY);
             return;
         }
         if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index < menu.pouchSlotCount()) {
