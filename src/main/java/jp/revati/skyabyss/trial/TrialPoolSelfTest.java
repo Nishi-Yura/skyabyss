@@ -71,7 +71,7 @@ public final class TrialPoolSelfTest {
             FAIL.add("exception " + e);
             SkyAbyss.LOGGER.error("SELFTEST trial pool exception", e);
         } finally {
-            WhaleDeck.setPlaced("1".equals(System.getenv("SKYABYSS_TRIAL_DECK")));
+            WhaleDeck.setPlaced(true);
         }
         if (FAIL.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST trial pool PASSED ({} ms)", System.currentTimeMillis() - t0);

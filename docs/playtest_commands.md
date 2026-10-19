@@ -23,7 +23,7 @@ OP (権限 2) 用。製品の jar でも使える。どれも最後に `[対象]
 - `playtest fast <on|off>` サーバーを 2 倍速 (`tick rate 40`) / 等速。昼夜も巨神の時間も速くなる
 - `playtest reset` 序章・クエスト・伝承・場面・巨神の進み・成長を最初に戻す
 - `playtest god <on|off>` 無敵 (テスト用)
-- `skyabyss dev trial build|list|board|cycle <n>|force <ID>…|mods <ID> <符号>|tp <ID|deck|hub>` 試練のプール (29)。`build` は岩鯨の背へ試練の階を今置く (本番の建設では、体の作り直しが済むまで置かない)。`tp hub` は鼓動の間、`tp <ID>` は新作のセルの入口
+- `skyabyss dev trial build|list|board|cycle <n>|force <ID>…|mods <ID> <符号>|tp <ID|deck|hub>` 試練のプール (29)。`build` は岩鯨の背へ試練の階を置き直す (版 19 から建設で置く)。`tp hub` は鼓動の間、`tp <ID>` は新作のセルの入口
 - `playtest help` 一覧
 
 ## 例

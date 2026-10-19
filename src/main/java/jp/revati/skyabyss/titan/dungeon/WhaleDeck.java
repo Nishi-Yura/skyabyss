@@ -22,10 +22,9 @@ public final class WhaleDeck {
     private WhaleDeck() {
     }
 
-    // 岩鯨の背に試練の階を置くか。体の作り直し (別担当) が済むまで、本番では置かない (false)。
-    // 開発・自己テストでは環境変数 SKYABYSS_TRIAL_DECK=1 か、開発コマンド dev trial build で置く。置かないあいだは、
-    // 引き方も原型の三つのまま (TrialCatalog.poolActive)
-    private static boolean placed = "1".equals(System.getenv("SKYABYSS_TRIAL_DECK"));
+    // 岩鯨の背に試練の階を置くか。版 19 から本番でも置く (既定 true)。自己テストが「置かない姿」(原型の三つだけ) を確かめるときだけ false にする
+    // (開発用: 環境変数 SKYABYSS_TRIAL_DECK=0 で置かない姿にして比べられる)
+    private static boolean placed = !"0".equals(System.getenv("SKYABYSS_TRIAL_DECK"));
 
     public static boolean placed() {
         return placed;

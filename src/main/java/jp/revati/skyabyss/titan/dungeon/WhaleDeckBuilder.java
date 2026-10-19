@@ -54,9 +54,9 @@ final class WhaleDeckBuilder {
         kit.restPoint(S0);
         kit.pilasters(S0, 6);
         kit.ribs(S0, 5, true);
-        kit.wallLamps(S0, 5, Y + 4);
+        kit.wallLamps(S0, 4, Y + 4);
         kit.ribs(C1, 4, true);
-        kit.wallLamps(C1, 4, Y + 3);
+        kit.wallLamps(C1, 3, Y + 3);
         // 石の差し口と戻りの光る床
         kit.set(W02_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         kit.set(W06_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
@@ -103,7 +103,7 @@ final class WhaleDeckBuilder {
         kit.restPoint(D0);
         kit.pilasters(D0, 6);
         kit.ribs(D0, 5, true);
-        kit.wallLamps(D0, 5, Y + 4);
+        kit.wallLamps(D0, 4, Y + 4);
     }
 
     // ---------------------------------------------------------------- W02 鐘楼の綱渡り
@@ -138,7 +138,7 @@ final class WhaleDeckBuilder {
         for (int z : new int[] {32, 46, 60}) {
             kit.hangingLantern(13, z, w.ceilingY(), 5);
         }
-        kit.wallLamps(w, 6, Y + 6);
+        kit.wallLamps(w, 4, Y + 6);
     }
 
     // ---------------------------------------------------------------- W06 骨の楽譜
@@ -160,7 +160,7 @@ final class WhaleDeckBuilder {
         kit.fill(28, Y + 1, 37, 28, top, 37, BuildKit.BRICKS);
         kit.lantern(26, Y + 1, 42);
         kit.ribs(W06, 5, true);
-        kit.wallLamps(W06, 5, Y + 3);
+        kit.wallLamps(W06, 4, Y + 3);
     }
 
     // ---------------------------------------------------------------- W07 三つの水門
@@ -185,7 +185,7 @@ final class WhaleDeckBuilder {
             kit.set(W07Gates.lamp(i), BLACKSTONE);
         }
         kit.ribs(W07, 6, true);
-        kit.wallLamps(W07, 6, Y + 4);
+        kit.wallLamps(W07, 4, Y + 4);
         for (int z : new int[] {92, 100}) {
             kit.hangingLantern(-6, z, W07.ceilingY(), 4);
         }
@@ -209,7 +209,7 @@ final class WhaleDeckBuilder {
         kit.fill(28, Y + 6, 111, 32, top, 111, BuildKit.BRICKS);
         deckRest(kit, REST_W10);
         kit.ribs(W10, 6, true);
-        kit.wallLamps(W10, 6, Y + 4);
+        kit.wallLamps(W10, 4, Y + 4);
         for (int z : new int[] {90, 100}) {
             kit.hangingLantern(30, z, W10.ceilingY(), 4);
         }
@@ -223,7 +223,8 @@ final class WhaleDeckBuilder {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int bx = c.getX() + d.getStepX() * 2;
             int bz = c.getZ() + d.getStepZ() * 2;
-            if (!kit.get(bx, Y, bz).isAir() && kit.get(bx, Y + 1, bz).isAir()) {
+            // 縁の外が空いている (落ちる) 所には置かない
+            if (!kit.get(bx, Y, bz).isAir() && kit.get(bx, Y + 1, bz).isAir() && !kit.get(bx + d.getStepX(), Y, bz + d.getStepZ()).isAir()) {
                 kit.set(bx, Y + 1, bz, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, d).setValue(StairBlock.HALF, Half.BOTTOM));
             }
         }

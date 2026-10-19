@@ -69,6 +69,23 @@ public final class TrialRuntime {
         GroupOverlays.register(TrialRuntime::overlay);
         // 鼓動の間の試練の碑 (越えた試練の碑がそのグループの画面で光る)
         TrialHub.register();
+        BackGroupData.IGNORED_OVERRIDE = TrialRuntime::isEntranceKey;
+    }
+
+    private static java.util.Set<Long> entranceKeys;
+
+    // 入口の戸 (引いた三つだけ開ける) の位置か。人が背にいるだけで戸の上書きが書かれるので、進みには数えない
+    static synchronized boolean isEntranceKey(long key) {
+        if (entranceKeys == null) {
+            java.util.Set<Long> set = new java.util.HashSet<>();
+            for (TrialCell c : TrialCells.all()) {
+                for (BlockPos p : c.ports().entrance()) {
+                    set.add(p.asLong());
+                }
+            }
+            entranceKeys = set;
+        }
+        return entranceKeys.contains(key);
     }
 
     private static String key(UUID group, String id) {
