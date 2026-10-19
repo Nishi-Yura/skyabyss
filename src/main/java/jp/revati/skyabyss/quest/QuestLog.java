@@ -91,7 +91,8 @@ public final class QuestLog {
     public static final Codec<QuestLog> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.unboundedMap(Codec.STRING, Entry.CODEC).optionalFieldOf("quests", Map.of()).forGetter(l -> l.quests),
             Codec.STRING.optionalFieldOf("tracked", "").forGetter(l -> l.tracked),
-            Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("claimed", Map.of()).forGetter(l -> l.claimed)).apply(i, QuestLog::new));
+            Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("claimed", Map.of()).forGetter(l -> l.claimed),
+            Codec.STRING.listOf().optionalFieldOf("heard", List.of()).forGetter(l -> List.copyOf(l.heard))).apply(i, QuestLog::new));
     // 同期は NBT を通す (中身が小さいので、手書きの符号化は要らない)
     public static final StreamCodec<ByteBuf, QuestLog> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
@@ -99,12 +100,15 @@ public final class QuestLog {
     String tracked = "";
     // 繰り返すクエストの、報酬を渡した最後の周期 (同じ日・週に二度は渡さない。記録を消して受け直しても)
     final Map<String, Long> claimed = new java.util.HashMap<>();
+    // 聞いた話題 ("クエスト|役/節"。そのクエストを始めたあとに聞いたものだけ)。「〜に尋ねよう」の目的は、順番や途中で閉じたかに依らず、聞いた時点で済む (Quests.onTalk が足し、measure が数える)
+    final java.util.Set<String> heard = new java.util.LinkedHashSet<>();
 
     public QuestLog() {
     }
 
-    private QuestLog(Map<String, Entry> quests, String tracked, Map<String, Long> claimed) {
+    private QuestLog(Map<String, Entry> quests, String tracked, Map<String, Long> claimed, List<String> heard) {
         this.claimed.putAll(claimed);
+        this.heard.addAll(heard);
         // 保存した順を保つため、始めた時刻で並べ直す (unboundedMap は順を保たない)
         quests.entrySet().stream().sorted(java.util.Comparator.comparingLong(e -> e.getValue().started))
                 .forEach(e -> this.quests.put(e.getKey(), e.getValue()));
@@ -128,13 +132,17 @@ public final class QuestLog {
         return tracked;
     }
 
+    public boolean heard(String quest, String role, String node) {
+        return heard.contains(quest + "|" + role + "/" + node);
+    }
+
     public long claimed(String quest) {
         return claimed.getOrDefault(quest, Long.MIN_VALUE);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof QuestLog l && l.quests.equals(quests) && l.tracked.equals(tracked) && l.claimed.equals(claimed);
+        return o instanceof QuestLog l && l.quests.equals(quests) && l.tracked.equals(tracked) && l.claimed.equals(claimed) && l.heard.equals(heard);
     }
 
     @Override
