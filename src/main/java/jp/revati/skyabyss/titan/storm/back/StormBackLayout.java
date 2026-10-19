@@ -15,8 +15,15 @@ import net.minecraft.world.phys.Vec3;
 //
 // ほかの担当へ (11.1 の約束): 雷獣の巣・竜骨の間・休み場はここから読む。数字を写さないこと (建て直しで動くことがある)。
 public final class StormBackLayout {
+    // 縮尺 (docs/design/26 の BackScale が後で差し込む倍率)。1.0 = 今の寸法。肋の間・回路・舵の配置は、基準の寸法をここへ通して作る
+    public static final double BACK_SCALE = 1.0;
+
+    public static int S(int units) {
+        return (int) Math.round(units * BACK_SCALE);
+    }
+
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 7;   // 7: 眼の間の碑を受け羽の候補から離した (南の壁 x -4 → 4。25 の 3.2)・西の岩棚の穴はどの拍でも届く。 6: 尾の間の西の壁の螺旋 (背の上へ出る段) をふさいだ (どこへも通じていなかった)。 5: 詰み監査の修正 (竜骨の螺旋の最後の段・背の小さな縦穴)。 4: 避雷の柱と戻しの鏡を専用のブロックに (storm_rod_*・return_mirror)。3: 外の鳥の色を低ポリ案 A (嵐の大鷲) に合わせた。2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 8;   // 8: 西を縦の肋の登りに (前腕を肋の間に。瘤はやめた)・東を雷の回路に (柱・導線・レバー・誘いの床)・入口に拍の舵 (25 の 5章 A・B・C)。 7: 眼の間の碑を受け羽の候補から離した (南の壁 x -4 → 4。25 の 3.2)・西の岩棚の穴はどの拍でも届く。 6: 尾の間の西の壁の螺旋 (背の上へ出る段) をふさいだ (どこへも通じていなかった)。 5: 詰み監査の修正 (竜骨の螺旋の最後の段・背の小さな縦穴)。 4: 避雷の柱と戻しの鏡を専用のブロックに (storm_rod_*・return_mirror)。3: 外の鳥の色を低ポリ案 A (嵐の大鷲) に合わせた。2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -90,21 +97,69 @@ public final class StormBackLayout {
     public static final int WEST_UPPER_X2 = -31;
     public static final BlockPos WEST_ELBOW = new BlockPos(-71, 142, -17);
     public static final int ELBOW_R = 7;
-    public static final int WEST_FORE_X1 = -115;
+    // 前腕の廊下 (肘 → 肋の間の入口)。肋の間そのものは RIB_X1〜RIB_X2
+    public static final int WEST_FORE_X1 = -107;
     public static final int WEST_FORE_X2 = -78;
-    // 割れた床 (x の範囲。肩の側から手首の側へ)
-    public static final int[][] WEST_GAPS = {{-44, -39}, {-59, -54}, {-92, -87}, {-108, -103}};
-    // 昇り風の穴 (割れた床の手前。凪 4・嵐 13 上がる)
-    public static final int[] WEST_VENT_X = {-37, -85};
+    // 割れた床 (上腕の二つ。x の範囲。肩の側から手首の側へ。前腕は肋の間に置き換えた)
+    public static final int[][] WEST_GAPS = {{-44, -39}, {-59, -54}};
+    // 昇り風の穴 (上腕の割れた床の手前。凪 4・嵐 13 上がる)
+    public static final int[] WEST_VENT_X = {-37};
     // 嵐の高い道 (昇り風で上がった梁。床 = BONE_FLOOR + 12)
     public static final int HIGH_BEAM_Y = BONE_FLOOR + 12;
-    // 左手首の瘤 (西の石は高い岩棚の上。岩棚の下の穴は、どの拍でも岩棚まで持ち上げる)
-    public static final BlockPos WEST_KNOB = new BlockPos(-128, 143, -17);
-    public static final int KNOB_R = 12;
-    public static final int KNOB_CEILING = 158;
-    public static final Area WEST_LEDGE = new Area(-139, -134, -21, -13, 154, 3);
-    public static final BlockPos WEST_STONE = new BlockPos(-137, 155, -17);
-    public static final BlockPos WEST_KNOB_VENT = new BlockPos(-132, 143, -17);
+
+    // ---- 肋の間 (25 の 5章 A「骨を縦に」): 前腕の骨を、縦の空洞の登りにした。
+    // 空洞 (x RIB_X1〜RIB_X2・z BONE_Z1〜BONE_Z2) の床 = 層 0。梁 (3x3 の銅の格子 = 昇り風の穴) の螺旋が 9 段 (RIB_HOP ずつ上がる)。
+    // 3 段おきが「層の岩棚」(5x5 の板。休み場・灯り)。頂の岩棚 (層 RIB_LAYERS) に西の石。凪の昇り風は RIB_HOP (4) 上がるので
+    // 一段ずつ登れる。嵐の昇り風は 13 上がり、風切りの羽根で滑空して次の層の岩棚へ (滑空の輪がつなぐ近道)。降りは頂から輪の流れで床へ
+    public static final int RIB_X1 = -107;
+    public static final int RIB_X2 = -92;
+    public static final int RIB_LAYERS = 3;
+    public static final int RIB_HOP = 4;
+    public static final int RIB_HOPS = 3;
+    public static final int RIB_RISE = RIB_HOP * RIB_HOPS;
+    public static final int RIB_TOP_Y = BONE_FLOOR + RIB_LAYERS * RIB_RISE;
+    // 空洞の高さ (床の上。頂の岩棚の 5 上まで)
+    public static final int RIB_HEIGHT = RIB_TOP_Y - BONE_FLOOR + 5;
+    // 梁の格子 (3x3 の穴が 3 列 3 行。中心の座標)
+    public static final int RIB_GRID_X0 = RIB_X1 + 1;
+    public static final int RIB_GRID_Z0 = -20;
+    public static final int RIB_STEP = 3;
+    // 螺旋の順 (列 u・行 v)。0 段目は入口に近い東の真ん中
+    public static final int[][] RIB_RING = {{2, 1}, {2, 0}, {1, 0}, {0, 0}, {0, 1}, {0, 2}, {1, 2}, {2, 2}};
+    public static final Area RIB_HALL = new Area(RIB_X1, RIB_X2, BONE_Z1, BONE_Z2, BONE_FLOOR, RIB_HEIGHT);
+
+    // 梁 i (0〜RIB_LAYERS*RIB_HOPS) の格子の穴の中心 (床のブロックの y)
+    public static BlockPos ribLedge(int i) {
+        int[] uv = RIB_RING[Math.floorMod(i, RIB_RING.length)];
+        return new BlockPos(RIB_GRID_X0 + RIB_STEP * uv[0], BONE_FLOOR + RIB_HOP * i, RIB_GRID_Z0 + RIB_STEP * uv[1]);
+    }
+
+    // 層 k (0〜RIB_LAYERS) の岩棚の板の中心 (床のブロックの y)。層 0 は床の上
+    public static BlockPos ribLanding(int layer) {
+        return ribLedge(layer * RIB_HOPS);
+    }
+
+    // 層の岩棚の板 (5x5。肋の間の中に収まる所だけ)
+    public static Area ribSlab(int layer) {
+        BlockPos c = ribLanding(layer);
+        return new Area(Math.max(RIB_X1, c.getX() - 2), Math.min(RIB_X2, c.getX() + 2), Math.max(BONE_Z1, c.getZ() - 2), Math.min(BONE_Z2, c.getZ() + 2), c.getY(), 4);
+    }
+
+    // 風切りの羽根の滑空の輪 (嵐の高い昇り風から次の層の岩棚へ。層 k → k+1 の中ほど、嵐の昇り風の上の端の高さ)
+    public static Vec3 ribRing(int layer) {
+        BlockPos a = ribLanding(layer);
+        BlockPos b = ribLanding(layer + 1);
+        return new Vec3((a.getX() + b.getX()) / 2.0 + 0.5, a.getY() + 1 + StormBackClock.STORM_LIFT + 0.6, (a.getZ() + b.getZ()) / 2.0 + 0.5);
+    }
+
+    // 頂の岩棚の板の中心 (層 RIB_LAYERS)。西の石・焚き火・光る床はこの板の上
+    public static final BlockPos RIB_TOP = ribLanding(RIB_LAYERS);
+    public static final BlockPos WEST_STONE = RIB_TOP.offset(1, 1, -1);
+    // 降りの輪 (頂の岩棚の東の縁 → 床の東側。輪の流れで降りる近道)
+    public static final Vec3[] RIB_DOWN_RINGS = {new Vec3(RIB_TOP.getX() + 3.4, RIB_TOP_Y + 0.9, RIB_TOP.getZ() + 0.5),
+            new Vec3(RIB_TOP.getX() + 4.2, RIB_TOP_Y - 11, RIB_TOP.getZ() + 1.5), new Vec3(RIB_TOP.getX() + 4.6, RIB_TOP_Y - 24, RIB_TOP.getZ() + 2.5)};
+    public static final Vec3 RIB_DOWN_LANDING = new Vec3(RIB_TOP.getX() + 4.6, BONE_FLOOR + 1.0, RIB_TOP.getZ() + 3.5);
+    public static final BlockPos RIB_TOP_REST = RIB_TOP.offset(1, 1, 1);
 
     // ---------------------------------------------------------------- 東の試練 雷の骨
     public static final Area EAST_PASS = new Area(15, 22, -7, -5, 137, 5);
@@ -115,7 +170,8 @@ public final class StormBackLayout {
     public static final BlockPos EAST_ELBOW = new BlockPos(71, 142, -17);
     // 骨の戸 (x)。戸の口は z -18〜-16、高さ 4。戸の手前 (肩の側) に避雷の柱
     public static final int[] EAST_DOORS = {48, 62, 95};
-    public static final List<BlockPos> EAST_RODS = List.of(new BlockPos(43, 143, -21), new BlockPos(57, 143, -13), new BlockPos(90, 143, -21));
+    // 戸の柱 (回路の出口。雷がここへ届くと対の戸が開く)。回路の全体は StormCircuit
+    public static final List<BlockPos> EAST_RODS = List.of(new BlockPos(S(43), 143, -22), new BlockPos(S(59), 143, -12), new BlockPos(S(92), 143, -12));
     // 右手首の瘤 (雷獣の巣)。直径 26・天井 158。避雷の柱は中心から半径 9、60 度おきに 6 本
     public static final BlockPos RAIJU_NEST = new BlockPos(128, 143, -17);
     public static final int RAIJU_NEST_RADIUS = 13;
@@ -169,7 +225,7 @@ public final class StormBackLayout {
     public static final AABB HEART_DOOR = new AABB(-1, 122, -30, 2, 125, -29);
 
     // ---------------------------------------------------------------- 抜け道 (石が鳴ると光る床。踏むと広間の近くへ)
-    public static final BlockPos RETURN_WEST = new BlockPos(-124, 143, -10);
+    public static final BlockPos RETURN_WEST = RIB_TOP.offset(2, 0, 0);
     public static final BlockPos RETURN_EAST = new BlockPos(124, 143, -10);
     public static final BlockPos RETURN_FRONT = new BlockPos(2, 146, -91);
     public static final Map<String, BlockPos> RETURN_TO = Map.of(
@@ -184,6 +240,7 @@ public final class StormBackLayout {
             new Rest("hub", new BlockPos(-9, 138, 7), new BlockPos(-7, 138, 7), HUB),
             new Rest("w0", new BlockPos(-28, 143, -1), new BlockPos(-26, 143, -2), W0),
             new Rest("w1", new BlockPos(-71, 143, -12), new BlockPos(-71, 143, -14), new Area(-77, -65, -23, -11, 142, 8)),
+            ribRest("w2", 1), ribRest("w3", 2), ribRest("w4", RIB_LAYERS),
             new Rest("e0", new BlockPos(28, 143, -1), new BlockPos(26, 143, -2), E0),
             new Rest("e1", new BlockPos(71, 143, -12), new BlockPos(71, 143, -14), new Area(65, 77, -23, -11, 142, 8)),
             new Rest("f0", new BlockPos(3, 151, -45), new BlockPos(1, 151, -46), F0),
@@ -218,6 +275,15 @@ public final class StormBackLayout {
     private StormBackLayout() {
     }
 
+    // 肋の間の層 layer の岩棚の休み場 (板の隅に焚き火。昇り風の穴から 1.7 以上離す)
+    private static Rest ribRest(String id, int layer) {
+        BlockPos c = ribLanding(layer);
+        boolean top = layer == RIB_LAYERS;
+        BlockPos fire = top ? RIB_TOP_REST : c.offset(2, 1, -2);
+        BlockPos spawn = top ? RIB_TOP.offset(0, 1, 1) : c.offset(2, 1, 2);
+        return new Rest(id, fire, spawn, ribSlab(layer));
+    }
+
     // 雷獣の巣の避雷の柱 (6 本、60 度おき) の根元
     public static List<BlockPos> raijuRods() {
         List<BlockPos> out = new ArrayList<>();
@@ -235,7 +301,7 @@ public final class StormBackLayout {
 
     // 試練の中 (リセットのときに広間へ移す所)
     public static boolean inWest(Vec3 p) {
-        return p.x < -22.5 && p.x > -142 && p.z > -32 && p.z < 2 && p.y > 138 && p.y < 162;
+        return p.x < -22.5 && p.x > -142 && p.z > -32 && p.z < 2 && p.y > 138 && p.y < RIB_TOP_Y + 12;
     }
 
     public static boolean inEast(Vec3 p) {
