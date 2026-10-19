@@ -88,8 +88,10 @@ public final class ObjectiveBandSelfTest {
                     for (QuestDef.Objective ob : st.objectives()) {
                         String k = def.objectiveKey(st, ob);
                         keys.put(k, ob.count() > 1);
-                        if (ja.containsKey(k + ".wait") || en.containsKey(k + ".wait")) {
-                            keys.put(k + ".wait", ob.count() > 1);
+                        for (String suffix : List.of(".wait", ".wait.prep", ".wait.lamps")) {
+                            if (ja.containsKey(k + suffix) || en.containsKey(k + suffix)) {
+                                keys.put(k + suffix, ob.count() > 1);
+                            }
                         }
                     }
                 }

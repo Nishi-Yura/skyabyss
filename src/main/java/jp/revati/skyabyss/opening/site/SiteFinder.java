@@ -196,6 +196,8 @@ public final class SiteFinder {
             planFootprints(p, out, camp, shelter.pos());
         } else {
             SkyAbyss.LOGGER.error("Opening sites: no land for the shelter near {}", camp);
+            // 宿りがなくても足跡は要る (足跡の頁の目印): 野営地から東 180 ブロックの仮の宿りを道の向きに使う (first_hour_log B-6)
+            planFootprints(p, out, camp, camp.offset(180, 0, 0));
         }
         Spot ribs = findRibs(p, camp, shelter == null ? 0 : pathYaw);
         if (ribs != null) {
@@ -341,9 +343,11 @@ public final class SiteFinder {
     // 段階: {高さの差の上限, 道からの下限, 上限, 本数, 向きを全部使うか, 乾いていてほしい範囲 (部品の大きさに対する %。小さい池は水の列を残して建てる)、群系を見るか}
     static final int[][] FOOT_STAGES = {{10, 38, 85, 4, 0, 100, 1}, {18, 38, 100, 4, 0, 100, 1}, {30, 38, 120, 4, 0, 100, 1}, {46, 36, 135, 4, 0, 100, 1},
             {70, 36, 140, 4, 0, 100, 1}, {30, 36, 120, 3, 0, 100, 1}, {70, 36, 140, 3, 0, 100, 1}, {60, 34, 140, 3, 1, 100, 1}, {60, 34, 150, 2, 1, 100, 1},
-            {90, 32, 150, 1, 1, 100, 1}, {120, 32, 155, 3, 0, 40, 0}, {200, 30, 155, 2, 1, 40, 0}, {400, 30, 155, 1, 1, 15, 0}};
+            {90, 32, 150, 1, 1, 100, 1}, {120, 32, 155, 3, 0, 40, 0}, {200, 30, 155, 2, 1, 40, 0}, {400, 30, 155, 1, 1, 15, 0},
+            // 最後の手段 (first_hour_log B-6): 中心が乾いていれば、高さの差も群系も問わず 1 つ (建てるときに SiteJob が動かす・強行する)
+            {2000, 30, 160, 1, 1, 0, 0}};
 
-    static void planFootprints(Probe p, List<Planned> out, BlockPos camp, BlockPos shelter) {
+    static void planFootprints(Ground p, List<Planned> out, BlockPos camp, BlockPos shelter) {
         double dx = shelter.getX() - camp.getX();
         double dz = shelter.getZ() - camp.getZ();
         double len = Math.sqrt(dx * dx + dz * dz);
@@ -392,7 +396,7 @@ public final class SiteFinder {
 
     // start から dir へ、count 歩の並びを探す (一歩ごとに少し前後・左右へずらして、乾いた所を探す)。見つからなければ null
     @Nullable
-    private static List<BlockPos> trail(Probe p, double sx, double sz, int[] dir, int maxRange, int count, BlockPos camp, BlockPos shelter, double ux,
+    private static List<BlockPos> trail(Ground p, double sx, double sz, int[] dir, int maxRange, int count, BlockPos camp, BlockPos shelter, double ux,
             double uz, double len, int dpMin, int dpMax, int corePercent, boolean biome) {
         boolean ns = dir[0] == 0;
         int hx = (ns ? FOOT_HALF_X : FOOT_HALF_Z) * corePercent / 100;

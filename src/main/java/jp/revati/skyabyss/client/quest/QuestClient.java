@@ -75,10 +75,13 @@ public final class QuestClient {
             case QuestNetwork.Notice.FINISHED -> "gui.skyabyss.quest.toast.finished";
             default -> "gui.skyabyss.quest.toast.updated";
         };
-        mc.getToasts().addToast(new QuestToast(Component.translatable(head), title, def != null && def.main()));
-        float pitch = kind == QuestNetwork.Notice.FINISHED ? 0.9f : kind == QuestNetwork.Notice.STARTED ? 0.7f : 1.2f;
-        mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, pitch, 0.7f));
-        QuestHud.flash();
+        // 会話・場面の最中は溜め、閉じたあとに一枚ずつ (first_hour_log B-2)
+        jp.revati.skyabyss.client.notice.NoticeClient.gate(jp.revati.skyabyss.notice.NoticeGate.P_CARD, jp.revati.skyabyss.client.notice.NoticeClient.CARD_GAP, () -> {
+            mc.getToasts().addToast(new QuestToast(Component.translatable(head), title, def != null && def.main()));
+            float pitch = kind == QuestNetwork.Notice.FINISHED ? 0.9f : kind == QuestNetwork.Notice.STARTED ? 0.7f : 1.2f;
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, pitch, 0.7f));
+            QuestHud.flash();
+        });
     }
 
     @Nullable

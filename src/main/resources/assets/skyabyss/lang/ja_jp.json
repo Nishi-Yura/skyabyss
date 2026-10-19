@@ -613,7 +613,7 @@
   "item.skyabyss.heartbeat_ward_thunder_wing": "雷翼の鼓動守",
   "item.skyabyss.heartbeat_ward_ember": "余燼の鼓動守",
   "item.skyabyss.heartbeat_ward.desc": "装飾の枠に付けると、心臓との戦いで一度だけ、倒れるはずの一撃を体力 1 で耐える。使うと光って消える",
-  "message.skyabyss.notes.given": "旅の覚書（%s）を受け取った",
+  "message.skyabyss.notes.given": "備えの頼みが増えた。手引きの旅の覚書（%s）が荷物に届いた",
   "message.skyabyss.notes.recipes": "覚書から、作り方を %s つ思い出した",
   "message.skyabyss.prep.ready": "%s の備えができた",
   "message.skyabyss.heartbeat_ward.used": "鼓動守が砕けて、あなたを引き止めた",

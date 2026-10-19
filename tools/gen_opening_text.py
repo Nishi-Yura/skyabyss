@@ -125,7 +125,8 @@ OBJECTIVES = [
     ("read_page", "破れた頁を拾って、読んでみよう", "Take the torn page, and read it", "B4 影が去ってから、落ちてきた破れた頁を読むまで (メインの段 watch_sky のまま。OpeningLogic.objective)"),
     ("ask_storyteller", "宿りの語り部に話しかけよう", "Talk to the lodge storyteller", "B4 影を見てから、語り部に尋ねるまで (メインの段 ask_storyteller)"),
     ("find_isana", "外れの焚き火の旅人に話しかけよう", "Talk to the traveler at the fire", "B5 語り部のあと、イサナと話すまで (メインの段 find_chaser)"),
-    ("see_whale", "探索しながら、夜空の歌に耳をすまそう", "Explore, and listen for the song at night", "B7〜B10 イサナと話してから、歌を聞くまで (メインの段 see_whale)"),
+    ("wait_steps", "探索しつつ、夜は明かりのそばで耳をすまそう", "At night, stay by a light and listen", "B7 イサナと話してから、夜の足音 (B6) を聞くまで (メインの段 see_whale。夜 1 に来るのは足音だけなので歌とは言わない。first_hour_log B-1)"),
+    ("see_whale", "探索しながら、次の夜の空の歌を待とう", "Explore; await the sky song next night", "B7〜B10 足音のあと、歌 (B9) を聞くまで (メインの段 see_whale)"),
     ("wait_whale", "夕方、空を見上げて岩鯨を待とう", "At dusk, look up for the stone whale", "歌を聞き、イサナと会ったあと、岩鯨を見るまで (メインの段 see_whale。歌のあとで帯が変わる)"),
     ("bone_hill", "白く霞む丘を確かめに行ってみよう", "Check the hazy white hill", "B8 日 2 の昼の寄り道 (任意。出さなくてもよい)"),
 ]

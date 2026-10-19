@@ -127,10 +127,43 @@ public final class QuestHud {
         if (def.id().equals("main_song") && stage.id().equals("board")) {
             waiting = !chainDown();
         }
-        if (waiting && net.minecraft.locale.Language.getInstance().has(key + ".wait")) {
+        net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
+        if (waiting && def.id().equals("main_song") && stage.id().equals("board")) {
+            // 鎖の待ちの帯 (first_hour_log B-4): 備えの頼みの本数と三灯を一行で言う。備えの頼みが 2 本済んでいれば三灯、まだなら本数。
+            // 備えの頼みの記録が無い (定義が無い・旧データ) ときは従来の一行
+            int done = prepDone();
+            if (done >= 0) {
+                String variant = jp.revati.skyabyss.quest.ObjectiveRules.waitVariant(done);
+                if (lang.has(key + variant)) {
+                    return Component.translatable(key + variant, Math.min(done, jp.revati.skyabyss.story.ch1.Ch1Descent.NEEDED_PREP)).getString();
+                }
+            }
+        }
+        if (waiting && lang.has(key + ".wait")) {
             key = key + ".wait";
         }
         return Component.translatable(key).getString();
+    }
+
+    // 一章の備えの頼みを終えた本数 (クエストの記録に 3 本とも無ければ -1)
+    static int prepDone() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return -1;
+        }
+        QuestLog log = QuestLog.of(mc.player);
+        int done = 0;
+        int known = 0;
+        for (String kind : jp.revati.skyabyss.guide.PrepQuests.KINDS) {
+            QuestLog.Entry e = log.entry(jp.revati.skyabyss.guide.PrepQuests.id(1, kind));
+            if (e != null) {
+                known++;
+                if (e.done) {
+                    done++;
+                }
+            }
+        }
+        return known == 0 ? -1 : done;
     }
 
     // 帯に出す、今の目的の一行 (折り返さず全文。数は「（1/3）」を後ろに付ける。長ければ帯が切る)

@@ -50,7 +50,7 @@ public final class OpeningStorySelfTest {
     private static final List<String> LORE_IDS = List.of("prologue/camp", "prologue/the_book_margin", "prologue/footprints",
             "prologue/footsteps", "prologue/bone_hill", "prologue/sky_song");
     private static final List<String> OBJECTIVE_IDS = List.of("examine_camp", "follow_smoke", "watch_sky", "ask_storyteller", "find_isana",
-            "see_whale", "wait_whale", "bone_hill", "read_page");
+            "see_whale", "wait_steps", "wait_whale", "bone_hill", "read_page");
     // 序盤で明かさない言葉 (巨神・見る者・ループ・天の鍵・ほかの巨神の名前)
     private static final List<String> SPOILERS = List.of("巨神", "見る者", "ループ", "天の鍵", "余燼", "潮殻", "雷翼", "titan", "Titan", "Watcher",
             "loop", "Sky Key", "Ember", "Tide Shell", "Thunder Wing");
