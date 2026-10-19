@@ -497,7 +497,7 @@ public final class CinematicSelfTest {
             Cinematics.stop(b, false);
             a.setPos(b.getX(), b.getY(), b.getZ());
             net.minecraft.world.entity.decoration.ArmorStand stand = new net.minecraft.world.entity.decoration.ArmorStand(net.minecraft.world.entity.EntityType.ARMOR_STAND, level);
-            // 範囲の内側 (200 ブロック。潮殻 90〜280・雷翼 130〜300・余燼 90〜240 のどれにも入る)
+            // 範囲の内側 (200 ブロック。潮殻 90〜280・雷翼 70〜360・余燼 90〜240 のどれにも入る)
             stand.setPos(a.getX() + 200, a.getY(), a.getZ());
             check(f, CinematicTriggers.firstSight(level, a, titan, null) == false && !Cinematics.active(a), titan + ": started with no titan");
             // 範囲の外: 遠すぎる・近すぎる。記録は付かない

@@ -58,12 +58,14 @@ public final class StormBirdBuilder {
         keel(kit);
         int skinned = kit.skin(StormBirdBuilder::styleAt);
         int sealed = kit.seal(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
+        int corners = kit.sealCorners(p -> openToSky(p.getX(), p.getY(), p.getZ()), StormBirdBuilder::styleAt);
+        StormRibShell.build(kit);
         fixtures(kit);
         // 鳥の背・翼の上の小さな縦穴 (落ちると出られない) を埋める (詰み監査)
         if (BIRD.exists()) {
             jp.revati.skyabyss.titan.WellFiller.fill(kit.level(), -200, 200, -125, 125, BIRD::top, 140);
         }
-        SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed in {} ms", kit.carved().size(), skinned, sealed,
+        SkyAbyss.LOGGER.info("Carved the storm bird: {} cells, {} wall blocks, {} sealed, {} corner gaps closed in {} ms", kit.carved().size(), skinned, sealed, corners,
                 System.currentTimeMillis() - t0);
     }
 
@@ -443,8 +445,8 @@ public final class StormBirdBuilder {
         for (int arm = 0; arm < WEST_VENT_X.length; arm++) {
             int vx = WEST_VENT_X[arm];
             vent(kit, new BlockPos(vx, BONE_FLOOR, -20));
-            int[] far = WEST_GAPS[arm * 2 + 1];
-            for (int x = vx + 1; x >= far[0] - 3; x--) {
+            // 梁は両端を骨の壁につなぐ (浮かせない)。東は上腕の東の壁、西は上腕の西の壁まで
+            for (int x = WEST_UPPER_X2; x >= WEST_UPPER_X1; x--) {
                 for (int z = -17; z <= -16; z++) {
                     kit.put(x, HIGH_BEAM_Y, z, StormKit.BONE);
                 }
@@ -503,7 +505,8 @@ public final class StormBirdBuilder {
                 }
             }
         }
-        for (int y = p.floor() + 3; y <= RAIJU_NEST_CEILING + 1; y++) {
+        // 台の角の柱 (台から洞の天井までつなぐ。台が宙に浮かないように)
+        for (int y = p.floor() + 1; y <= RAIJU_NEST_CEILING + 1; y++) {
             kit.put(p.x2(), y, p.z1(), StormKit.TILE);
         }
         vent(kit, RAIJU_VENT);
@@ -698,13 +701,10 @@ public final class StormBirdBuilder {
         for (BlockPos p : new BlockPos[] {LAMP_WEST, LAMP_EAST, LAMP_FRONT}) {
             kit.put(p.getX(), p.getY(), p.getZ(), StormKit.SLATE);
         }
-        // 拍の舵 (入口の台。凪の舵と嵐の舵。上に避雷針の風見)
+        // 拍の舵 (入口の台。凪の舵と嵐の舵。彫った台座と舵輪のモデル)
         for (StormHelm.Helm h : StormHelm.HELMS) {
             kit.put(h.calm().getX(), h.calm().getY(), h.calm().getZ(), StormBackSetup.HELM_CALM.get().defaultBlockState());
             kit.put(h.storm().getX(), h.storm().getY(), h.storm().getZ(), StormBackSetup.HELM_STORM.get().defaultBlockState());
-            for (BlockPos p : new BlockPos[] {h.calm(), h.storm()}) {
-                kit.put(p.getX(), p.getY() + 1, p.getZ(), Blocks.LIGHTNING_ROD.defaultBlockState());
-            }
         }
         // 風鳴り石 (台の上)
         for (BlockPos s : new BlockPos[] {WEST_STONE, EAST_STONE, FRONT_STONE}) {

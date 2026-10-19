@@ -66,7 +66,7 @@
 - **テストで Minecraft を開くときは音量 0**（`runClientTest` と台本は自動）。
 - **java を全部落とさない**。止めるのは自分が立てたプロセスだけ（ユーザーの CurseForge の Minecraft は絶対に止めない）。使っていない java（終わったエージェントのサーバー、古い Gradle デーモン）はこまめに止める。
 - **ゲームの窓を OS のキー操作で動かさない**。ボスの通しのプレイはユーザーがする。
-- **取り込みでよくぶつかる所**: `SelfTestRunner` の段の一覧、lang、`SkyAbyss.java` のコンストラクタの登録、`Config.java`、各背の `LAYOUT_VERSION`（岩鯨 12・潮殻 9・雷翼 5・余燼 7・雷獣の巣 3）、`combat/Telegraph`。両方を残す形で直す。
+- **取り込みでよくぶつかる所**: `SelfTestRunner` の段の一覧、lang、`SkyAbyss.java` のコンストラクタの登録、`Config.java`、各背の `LAYOUT_VERSION`（岩鯨 12・潮殻 9・雷翼 11・余燼 7・雷獣の巣 3）、`combat/Telegraph`。両方を残す形で直す。
 - **Windows の Python**: 日本語の長い行を含む .py を heredoc で渡すと文字コードで失敗することがある。ファイルに書いて `python <file>`。
 - **古いワールド**: `LAYOUT_VERSION` を上げると次の起動で背が建て直され、試練の進みと休み場の記録が戻る。
 - **版**: ネットワークの版 = mod の版。マルチは全員同じ jar が要る。

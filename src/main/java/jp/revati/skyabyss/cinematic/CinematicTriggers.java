@@ -11,6 +11,7 @@ import jp.revati.skyabyss.titan.ember.EmberKeeper;
 import jp.revati.skyabyss.titan.ember.EmberTitanEntity;
 import jp.revati.skyabyss.titan.storm.StormKeeper;
 import jp.revati.skyabyss.titan.tide.TideKeeper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -36,8 +37,8 @@ public final class CinematicTriggers {
     // 潮殻 (伝承は 200 以内)・雷翼 (96)・余燼 (96) の範囲。伝承より先に出るよう、遠い側は伝承の半径より大きい
     static final double TIDE_FAR = 280.0;
     static final double TIDE_NEAR = 90.0;
-    static final double STORM_FAR = 300.0;
-    static final double STORM_NEAR = 130.0;
+    static final double STORM_FAR = 360.0;
+    static final double STORM_NEAR = 70.0;
     static final double EMBER_FAR = 240.0;
     static final double EMBER_NEAR = 90.0;
     // 見回る巨神の順 (どの巨神にも一度ずつ)
@@ -46,6 +47,11 @@ public final class CinematicTriggers {
     // 敵が近い・傷を受けた直後は後ろへずらす
     private static final double HOSTILE_NEAR = 12.0;
     private static final int HURT_TICKS = 200;
+    // 襲ってくる敵が近くても、この間 (tick) 待ったら見せる。「近い」は、この人を狙っているか、この距離以内
+    private static final double HOSTILE_ADJACENT = 6.0;
+    private static final int DELAY_MAX_TICKS = 600;
+    // 柔らかい条件で待たされ始めた時刻 (人 + 場面)
+    private static final java.util.Map<String, Long> DELAYED = new java.util.HashMap<>();
 
     private CinematicTriggers() {
     }
@@ -80,6 +86,16 @@ public final class CinematicTriggers {
             }
         }
         return false;
+    }
+
+    private static String delayKey(ServerPlayer player, String scene) {
+        return player.getUUID() + "/" + scene;
+    }
+
+    // 空が見えるか。葉は数えない (針葉樹の森の中でも、枝のあいだから空は見えるので)
+    static boolean openSky(ServerLevel level, ServerPlayer player) {
+        BlockPos p = player.blockPosition();
+        return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) <= p.getY() + 1;
     }
 
     // 見回る対象か。船 (海で潮殻に会いに行く足) に乗っている人は対象。それ以外の騎乗 (馬・巨神の背の乗り物など) は見せない
@@ -132,11 +148,25 @@ public final class CinematicTriggers {
         double dx = at.x - player.getX();
         double dz = at.z - player.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);
-        if (d > far(titan) || d < near(titan) || !level.canSeeSky(player.blockPosition().above()) || player.isUnderWater() || player.isSleeping()
-                || player.getHealth() < player.getMaxHealth() * 0.5f || (player.getLastHurtByMobTimestamp() > 0 && player.tickCount - player.getLastHurtByMobTimestamp() < HURT_TICKS)
-                || !level.getEntitiesOfClass(Monster.class, new AABB(player.blockPosition()).inflate(HOSTILE_NEAR), m -> m.isAlive()).isEmpty()) {
+        // 硬い条件: 距離の範囲・空が見える (葉は数えない)・水の中でない・寝ていない。一つでも欠ければ、待ちの記録も消す
+        if (d > far(titan) || d < near(titan) || !openSky(level, player) || player.isUnderWater() || player.isSleeping()) {
+            DELAYED.remove(delayKey(player, scene));
             return false;
         }
+        // 柔らかい条件: 傷が深い・傷を受けた直後・襲ってくる敵が近い。後ろへずらすが、いつまでも待たせない (雷翼の嵐は敵が湧き続けるので、
+        // 待たせ続けると場面が出ないまま通り過ぎてしまう)。DELAY_MAX_TICKS を過ぎたら、柔らかい条件は見ない
+        boolean soft = player.getHealth() < player.getMaxHealth() * 0.5f
+                || (player.getLastHurtByMobTimestamp() > 0 && player.tickCount - player.getLastHurtByMobTimestamp() < HURT_TICKS)
+                || !level.getEntitiesOfClass(Monster.class, new AABB(player.blockPosition()).inflate(HOSTILE_NEAR),
+                        m -> m.isAlive() && (m.getTarget() == player || m.distanceToSqr(player) < HOSTILE_ADJACENT * HOSTILE_ADJACENT)).isEmpty();
+        if (soft) {
+            long now = level.getGameTime();
+            long since = DELAYED.computeIfAbsent(delayKey(player, scene), k -> now);
+            if (now - since < DELAY_MAX_TICKS) {
+                return false;
+            }
+        }
+        DELAYED.remove(delayKey(player, scene));
         return Cinematics.startOnce(player, scene, entity, at);
     }
 
