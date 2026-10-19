@@ -37,6 +37,15 @@ public final class TelegraphRenderer {
 
     @SubscribeEvent
     static void onRenderLevel(RenderLevelStageEvent event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onRenderLevel0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.telegraph", prof);
+        }
+    }
+
+    static void onRenderLevel0(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }

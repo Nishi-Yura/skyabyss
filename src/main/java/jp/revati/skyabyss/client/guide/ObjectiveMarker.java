@@ -77,6 +77,15 @@ public final class ObjectiveMarker {
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            render0(g, delta);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.objectiveMarker", prof);
+        }
+    }
+
+    static void render0(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (!visible(mc)) {
             return;

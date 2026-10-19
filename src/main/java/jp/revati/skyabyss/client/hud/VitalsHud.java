@@ -40,6 +40,15 @@ public final class VitalsHud {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void onLayer(RenderGuiLayerEvent.Pre event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onLayer0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.vitals", prof);
+        }
+    }
+
+    static void onLayer0(RenderGuiLayerEvent.Pre event) {
         var name = event.getName();
         boolean health = VanillaGuiLayers.PLAYER_HEALTH.equals(name);
         boolean armor = VanillaGuiLayers.ARMOR_LEVEL.equals(name);

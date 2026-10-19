@@ -43,6 +43,7 @@ public final class LowPoly {
 
     // shade: 巨神の焼き込みの明るさ (Bone.vshade) をかけるか。光る層 (発光マスクの重ね描き) では false にして、光を暗くしない
     public static void drawBone(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh.Bone bone, int packedLight, int packedOverlay, int colour, float flatten, boolean shade) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
         boolean weight = titanWeight;
         float[] vshade = shade && weight ? bone.vshade : null;
         int ca = colour >>> 24;
@@ -80,6 +81,7 @@ public final class LowPoly {
                 buffer.addVertex(t.x, t.y, t.z, c, uv[q * 8 + k * 2], uv[q * 8 + k * 2 + 1], packedOverlay, packedLight, nx, ny, nz);
             }
         }
+        jp.revati.skyabyss.dev.Prof.acc("client.lowpoly.drawBone", prof);
     }
 
     public static void drawAll(PoseStack poseStack, VertexConsumer buffer, LowPolyMesh mesh, int packedLight, int packedOverlay, int colour) {

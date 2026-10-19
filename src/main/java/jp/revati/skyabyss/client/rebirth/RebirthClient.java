@@ -85,6 +85,15 @@ public final class RebirthClient {
     // ---------------------------------------------------------------- 名札 (C03)
     @SubscribeEvent
     static void onNameTag(RenderNameTagEvent event) {
+        long prof = jp.revati.skyabyss.dev.Prof.begin();
+        try {
+            onNameTag0(event);
+        } finally {
+            jp.revati.skyabyss.dev.Prof.end("client.nametagRebirth", prof);
+        }
+    }
+
+    static void onNameTag0(RenderNameTagEvent event) {
         if (!(event.getEntity() instanceof Player p)) {
             return;
         }
