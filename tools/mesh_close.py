@@ -26,6 +26,7 @@ import os
 import sys
 
 import numpy as np
+from scipy.spatial import cKDTree
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mesh_audit as ma  # noqa: E402
@@ -393,47 +394,73 @@ def icosphere(center, r, level=0):
     return np.array(V) * r + np.asarray(center, float), F
 
 
-def joint_ball(bones, name, par_name):
-    """子の回転軸 (pivot) を中心にした玉を子の骨へ足す。pivot の回りに回すので、どの角度でも同じ形で、親と子の継ぎ目を覆う。
-    玉が親の体積に届く大きさ (かつ子の太さに見合う大きさ) にできるときだけ足す。足したら True。bones は {名前: [V, UV, T]} + "_pivot_<名前>"。"""
+def inside_any(P, refs):
+    """点 P が、塞いだ参照メッシュ refs = [(V, T)] のどれかの体積の中か。"""
+    m = np.zeros(len(P), bool)
+    for V, T in refs:
+        m |= ma.inside_mask(P, np.asarray(V, float), np.asarray(T, int))
+    return m
+
+
+def ref_samples(refs):
+    return np.vstack([ma.surface_samples(Bone_like(V, T)) for V, T in refs])
+
+
+def joint_ball(bones, name, refs, cchild, ref_uvs):
+    """子の付け根が親 (と兄弟) に十分埋まっていない (付け根に近い 80 点の 25% 未満) とき、子と親の隙間・接面・浅い重なりにまたがる小さな玉を子の骨へ足す。
+    玉の中心は、子と親の最近点どうしの線分のうち pivot にいちばん近い点 (回しても隙間に残る)、半径は両側の面に届く最小限
+    (+0.4)。隙間が 3 単位より大きい・玉が 2.5 を超えるときは足さない。色は玉の各三角形にいちばん近い子・親の面の絵の一点。
+    足したら True。"""
     V, UV, T = bones[name]
-    if len(T) == 0:
-        return False
-    pV, pUV, pT = bones[par_name]
-    if len(pT) == 0:
+    if len(T) == 0 or not refs:
         return False
     pivot = np.array(bones["_pivot_" + name], float)
-    Va = np.array(V)
-    loops, c = boundary_loops(V, T)
-    # 根元の輪 (pivot に最も近い輪) の広がり。輪が無ければ pivot に最も近い頂点
-    if loops:
-        best = min(loops, key=lambda L: np.linalg.norm(Va[L[0]].mean(0) - pivot))
-        rp = float(np.linalg.norm(Va[best[0]] - pivot, axis=1).max())
-    else:
-        rp = float(np.sort(np.linalg.norm(Va - pivot, axis=1))[:4].max())
-    psamp = ma.surface_samples(Bone_like(pV, pT))
-    dpar = float(np.min(np.linalg.norm(psamp - pivot, axis=1)))
-    pivot_in = bool(ma.inside_mask(pivot[None, :], pV, pT)[0])
-    r = max(rp * 1.05, 0.8)
-    if not pivot_in:
-        r = max(r, dpar + 0.6)
-    ext = float((Va.max(0) - Va.min(0)).max())
-    rmax = 0.45 * ext + 1.5
-    if r > rmax or r > 9.0:
+    cV, cUV, cT = cchild
+    cV, cT = np.asarray(cV, float), np.asarray(cT, int)
+    # すでに親に埋まっていれば足さない
+    csamp = ma.surface_samples(Bone_like(cV, cT))
+    psamp = ref_samples(refs)
+    d, ip = cKDTree(psamp).query(csamp)
+    zone = csamp[np.argsort(d)[:80]]
+    if inside_any(zone, refs).mean() >= 0.25:
+        return False  # 十分に埋まっている
+    k = int(np.argmin(d))
+    cp, pp = csamp[k], psamp[ip[k]]
+    gap = float(d[k])
+    if gap > 3.0:
         return False
-    # 玉の絵: pivot に最も近い子の三角形の中心の一点
-    cent = (Va[T[:, 0]] + Va[T[:, 1]] + Va[T[:, 2]]) / 3
-    ti = int(np.argmin(np.linalg.norm(cent - pivot, axis=1)))
-    suv = [float(np.mean([UV[i][0] for i in T[ti]])), float(np.mean([UV[i][1] for i in T[ti]]))]
-    level = 1 if r > 3.0 else 0
-    SV, SF = icosphere(pivot, r, level)
+    seg = pp - cp
+    t = float(np.clip(np.dot(pivot - cp, seg) / max(np.dot(seg, seg), 1e-9), 0, 1))
+    center = cp + seg * t
+    r = max(np.linalg.norm(center - cp), np.linalg.norm(center - pp)) + 0.4
+    # pivot が線分の近くなら pivot を中心にする (回しても玉の位置が動かず、どの角度でも隙間に残る)
+    if np.linalg.norm(pivot - center) <= 1.0:
+        r2 = max(np.linalg.norm(pivot - cp), np.linalg.norm(pivot - pp)) + 0.4
+        if r2 <= 2.5:
+            center, r = pivot, r2
+    r = max(r, 0.9)
+    if r > 2.5:
+        return False
+    SV, SF = icosphere(center, r, 0)
+    cent = [(cV[cT[:, 0]] + cV[cT[:, 1]] + cV[cT[:, 2]]) / 3]
+    uvs = [(np.asarray(cUV)[cT[:, 0]] + np.asarray(cUV)[cT[:, 1]] + np.asarray(cUV)[cT[:, 2]]) / 3]
+    for (rv, rt), ruv in ref_uvs:
+        rv, rt, ruv = np.asarray(rv, float), np.asarray(rt, int), np.asarray(ruv, float)
+        if len(rt):
+            cent.append((rv[rt[:, 0]] + rv[rt[:, 1]] + rv[rt[:, 2]]) / 3)
+            uvs.append((ruv[rt[:, 0]] + ruv[rt[:, 1]] + ruv[rt[:, 2]]) / 3)
+    cent = np.vstack(cent)
+    uvs = np.vstack(uvs)
+    tree = cKDTree(cent)
     V2 = [list(p) for p in V]
     UV2 = [list(p) for p in UV]
-    T2 = [list(t) for t in T]
-    for a, b, d in SF:
+    T2 = [list(t_) for t_ in T]
+    for a, b, d_ in SF:
+        c3 = (SV[a] + SV[b] + SV[d_]) / 3
+        suv = [float(x) for x in uvs[int(tree.query(c3)[1])]]
         vi = []
-        for k in (a, b, d):
-            V2.append([float(x) for x in SV[k]])
+        for kk in (a, b, d_):
+            V2.append([float(x) for x in SV[kk]])
             UV2.append(suv)
             vi.append(len(V2) - 1)
         T2.append(vi)
@@ -449,13 +476,12 @@ class Bone_like:
 
 # ----------------------------------------------------------------- 付け根の襟
 
-def collar(bones, name, par_name):
+def collar(bones, name, refs):
     """子 name の根元 (親に最も近い開いた輪) を親の体積の内側へ押し込んで筒で延長する。bones は {名前: [V, UV, T]} (蓋の前)。
     戻り値は追加した輪の数。"""
     V, UV, T = bones[name]
     if len(T) == 0:
         return 0
-    pV, pUV, pT = bones[par_name]
     loops, c = boundary_loops(V, T)
     if not loops:
         return 0
@@ -473,36 +499,40 @@ def collar(bones, name, par_name):
     _, ids, tis = best
     P = Va[ids]
     ctr = P.mean(0)
-    pVa, pTa = np.array(pV), np.array(pT)
-    if not len(pTa):
+    if not refs:
         return 0
-    inside_pivot = bool(ma.inside_mask(pivot[None, :], pVa, pTa)[0])
-    target = pivot if inside_pivot else pVa.mean(0)
-    direction = target - ctr
-    L = np.linalg.norm(direction)
-    if L < 1e-6:
-        return 0
-    direction /= L
-    # 子の体の側へ戻る向きだと側面が裏返る。体から遠ざかる向きだけ許す
+    inside_pivot = bool(inside_any(pivot[None, :], refs)[0])
+    if inside_pivot:
+        target = pivot
+    else:
+        # pivot が親の外: 親の表面でいちばん近い点から、親の中心の側へ少し入った点
+        psamp = ref_samples(refs)
+        ps = psamp[int(np.argmin(np.linalg.norm(psamp - pivot, axis=1)))]
+        inward = psamp.mean(0) - ps
+        ln_ = float(np.linalg.norm(inward))
+        target = ps + inward / max(ln_, 1e-9) * min(2.0, 0.5 * ln_)
     away = ctr - Va.mean(0)
-    if np.linalg.norm(away) < 1e-6 or np.dot(direction, away) <= 0.2 * np.linalg.norm(away):
-        return 0
-    # 輪が親の外にあるとき: 親の中に入るまで押し込む。すでに中なら 1 単位だけ
-    ring_ok = None
-    for s in (1.0, 2.0, 3.0, 4.0, 6.0, 8.0):
-        s = min(s, L * 1.0 + 2.0)
-        Q = P + direction * s
-        if ma.inside_mask(Q, pVa, pTa).mean() >= 0.99:
-            ring_ok = s
+    best_q = None
+    for f in (1.0, 0.7, 0.5, 0.3):
+        for taper in (0.5, 0.7):
+            tg = ctr + (target - ctr) * f
+            Q = tg + (P - ctr) * taper
+            direction = tg - ctr
+            if np.linalg.norm(direction) < 0.3 or np.dot(direction, away) <= 0:
+                continue
+            if inside_any(np.vstack([Q, tg[None, :]]), refs).mean() >= 0.9:
+                best_q = Q
+                break
+        if best_q is not None:
             break
-    if ring_ok is None:
+    if best_q is None:
         return 0
     # 筒: 輪の辺ごとに四角 (輪の向きに沿って新しい輪へ)。輪の辺は既存の面と逆向きに使う → 側面は輪の辺を逆向きにたどる
     n = len(ids)
     V2 = [list(p) for p in V]
     UV2 = [list(p) for p in UV]
     T2 = [list(t) for t in T]
-    Q = P + direction * ring_ok
+    Q = best_q
     for k in range(n):
         k2 = (k + 1) % n
         a, b = P[k], P[k2]
@@ -560,14 +590,21 @@ def close_mesh(data, with_collar=True):
     if with_collar and len(names) > 1:
         for n in names:
             pn = data["bones"][n].get("parent")
+            hops = 0
+            while pn in closed and len(closed[pn][2]) == 0 and hops < 20:
+                pn = data["bones"][pn].get("parent")  # 親が形を持たない骨 (root など) なら、形のある祖先まで遡る
+                hops += 1
             if pn in (None, "None", "") or pn not in closed or len(closed[pn][2]) == 0 or len(bones[n][2]) == 0:
                 continue
+            sib = [m for m in names if m != n and data["bones"][m].get("parent") == data["bones"][n].get("parent") and len(closed[m][2]) and m != pn]
+            refs_n = [pn] + sib
+            refs = [(closed[m][0], closed[m][2]) for m in refs_n]
+            ref_uvs = [((closed[m][0], closed[m][2]), closed[m][1]) for m in refs_n]
             view = dict(bones)
-            view[pn] = closed[pn]
-            if joint_ball(view, n, pn):
-                stats["balls"] += 1
-            elif collar(view, n, pn):
+            if collar(view, n, refs):
                 stats["collars"] += 1
+            if joint_ball(view, n, refs, closed[n], ref_uvs):
+                stats["balls"] += 1
             bones[n] = view[n]
     # 段 C: 仕上げ
     capstart = {}

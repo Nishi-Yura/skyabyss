@@ -16,7 +16,7 @@
            (手前の面が抜けていて中が見えている所。骨ごとに数える)
 関節 (親子の骨):
   detach       子の面が親の体積にまったく埋まっていない (休めの姿勢、またはアニメの最大回転で親から離れる)
-  shallow      子の面のうち親に埋まっている点が 4% 未満 / 埋まりが 0.5 単位より浅い (回転で隙間ができやすい)
+  shallow      子の面のうち親に付け根に近い 200 点のうち埋まっている点が 5% 未満 / 埋まりが max(0.15, 子の大きさの 2.5%) より浅い (回転で隙間ができやすい)
   (pivot-out   子の回転軸が親の体積の外。情報として出すだけで、失敗にはしない。関節の玉 (mesh_close.joint_ball) は pivot が中心なので回しても形が変わらない)
 アニメの回転幅は animations/**.animation.json から読む (数値のキーフレームと molang の式を標本化)。
 
@@ -477,41 +477,47 @@ def nearest_mesh_ancestor(bones, name):
 
 
 def joint_check(bones, mesh_name):
-    """親子の付け根の検査。戻り値は {子の骨: dict(status, ...)}"""
+    """親子の付け根の検査。参照する固体は、形のある最も近い祖先 + その子と同じ親を持つ兄弟 (胸と脚のように、同じ親に付く部品)。
+    戻り値は {子の骨: dict(status, ...)}"""
     rng_all = anim_ranges(mesh_name)
     out = {}
-    cache = {}
     for n, b in bones.items():
         if len(b.T) == 0:
             continue
         pn = nearest_mesh_ancestor(bones, n)
         if pn is None:
             continue
-        par = bones[pn]
-        if pn not in cache:
-            cache[pn] = surface_samples(par)
-        psamp = cache[pn]
-        pivot_in = bool(inside_mask(b.pivot[None, :], par.V, par.T)[0])
+        refs = [bones[pn]] + [m for k, m in bones.items() if k not in (n, pn) and m.parent == b.parent and len(m.T)]
+
+        def inside(P):
+            r = np.zeros(len(P), bool)
+            for m in refs:
+                r |= inside_mask(P, m.V, m.T)
+            return r
+        psamp = np.vstack([surface_samples(m) for m in refs])
+        pivot_in = bool(inside(b.pivot[None, :])[0])
         cs = surface_samples(b)
-        if len(cs) > 250:
-            cs = cs[np.random.RandomState(0).choice(len(cs), 250, replace=False)]
-        buried = inside_mask(cs, par.V, par.T)
+        if len(cs) > 200:
+            # 付け根の近く (親・兄弟の表面にいちばん近い 200 点) だけを見る。体の遠い所の点が割合を薄めないように
+            dd = cKDTree(psamp).query(cs)[0]
+            cs = cs[np.argsort(dd)[:200]]
+        ext = float((b.V.max(0) - b.V.min(0)).max())
+        buried = inside(cs)
         frac0 = float(buried.mean())
-        depth0 = float(depth_in(cs[buried], par.V, par.T, psamp).max()) if buried.any() else 0.0
+        depth0 = float(depth_in(cs[buried], None, None, psamp).max()) if buried.any() else 0.0
         rng = rng_all.get(n)
         worst = None
         if rng:
             for rot in rotation_corners(rng):
                 R = euler_matrix(*rot)
                 cs2 = (cs - b.pivot) @ R.T + b.pivot
-                # 親も回る分は付け根の相対回転ではないので子だけを回す
-                f1 = float(inside_mask(cs2, par.V, par.T).mean())
+                f1 = float(inside(cs2).mean())
                 if worst is None or f1 < worst[0]:
                     worst = (f1, rot)
         status = "ok"
         if frac0 == 0.0 or (worst is not None and worst[0] == 0.0):
             status = "detach"
-        elif frac0 < 0.04 or depth0 < 0.5:
+        elif frac0 < 0.05 or depth0 < max(0.15, 0.025 * ext):
             status = "shallow"
         out[n] = dict(parent=pn, status=status, pivot_in=pivot_in, buried=frac0, depth=depth0,
                       moves=bool(rng), worst=worst)
