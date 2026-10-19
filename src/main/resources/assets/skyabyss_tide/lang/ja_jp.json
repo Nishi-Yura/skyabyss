@@ -44,7 +44,7 @@
   "message.skyabyss.tide.gate_hint": "潮門をくぐると、背中へ渡る",
   "message.skyabyss.tide.arrived": "水をくぐると、巨きなひれの上にいた。目の前で、山のような甲羅がゆっくりと息をしている。",
   "message.skyabyss.tide.leaving": "潮門の向こうから、地上の海の音がする。",
-  "message.skyabyss.tide.return_hint": "光る帰り石の上でしゃがむか、見送りの段を下りて海に入ると、地上へ戻る",
+  "message.skyabyss.tide.return_hint": "見送りの段を下りて海に入るか、潮殻の笛をもう一度使うと、地上へ戻る",
   "message.skyabyss.tide.swept_back": "潮に押し戻された",
   "title.skyabyss.tide_back": "潮殻の背",
   "title.skyabyss.tide_back.sub": "海を歩く巨神の、甲羅の上",

@@ -215,8 +215,9 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
     // 門の口に入っているか
     boolean inGateMouth(Entity e) {
         Vec3 l = local(e.getX(), e.getY(), e.getZ());
-        return l.x >= GATE_SIDE_MIN && l.x <= GATE_SIDE_MAX && -l.z >= GATE_BACK_MIN && -l.z <= GATE_BACK_MAX
-                && l.y >= GATE_UP_MIN && l.y <= GATE_UP_MAX;
+        // 見える枠より少し広く (横・奥行き 1.5、上下 1)
+        return l.x >= GATE_SIDE_MIN - 1.5 && l.x <= GATE_SIDE_MAX + 1.5 && -l.z >= GATE_BACK_MIN - 1.5 && -l.z <= GATE_BACK_MAX + 1.5
+                && l.y >= GATE_UP_MIN - 1 && l.y <= GATE_UP_MAX + 1;
     }
 
     // 背中から戻るときに出る所 (門の口の外の水面)

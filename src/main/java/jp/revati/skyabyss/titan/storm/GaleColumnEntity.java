@@ -33,6 +33,8 @@ import net.minecraft.world.phys.Vec3;
 // 巨神が止まっているあいだだけ在る (飛び立てば消える)。保存しない (StormSetup で noSave)。
 public class GaleColumnEntity extends Entity {
     public static final double RADIUS = 2.5;
+    // 入れる広さ (見える柱・光の枠より少し広く。踏み込めば確実に持ち上がる)
+    public static final double ENTRY_RADIUS = RADIUS + 1.5;
     // 資格のない人が断られたあと、もう一度断るまで (tick)
     private static final int REFUSE_QUIET = 60;
     private static final int SLOW_FALL_AFTER_LEAVING = 120;
@@ -94,7 +96,8 @@ public class GaleColumnEntity extends Entity {
                 glow.add(new Vec3(baseX, y, baseZ));
             }
             glow.add(new Vec3(baseX, top, baseZ));
-            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, Titans.THUNDER_WING, glow);
+            jp.revati.skyabyss.titan.end.BoardGlow.emit(level, Titans.THUNDER_WING, glow,
+                    new jp.revati.skyabyss.titan.end.BoardGlow.Shape(new Vec3(baseX, baseY + 1.5, baseZ), (float) ENTRY_RADIUS, 2.5f, (float) ENTRY_RADIUS, 0f, baseY, top, 1.4f));
         }
         if (tickCount % 10 == 0) {
             StormFx.ring(level, ParticleTypes.CLOUD, new Vec3(baseX, baseY + 0.5, baseZ), RADIUS, 8);
@@ -156,7 +159,7 @@ public class GaleColumnEntity extends Entity {
     public boolean inColumn(double x, double y, double z) {
         double dx = x - baseX;
         double dz = z - baseZ;
-        return dx * dx + dz * dz <= RADIUS * RADIUS && y >= baseY - 1 && y <= top + 1;
+        return dx * dx + dz * dz <= ENTRY_RADIUS * ENTRY_RADIUS && y >= baseY - 2.5 && y <= top + 2;
     }
 
     public double topY() {

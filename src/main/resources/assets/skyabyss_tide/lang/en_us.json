@@ -44,7 +44,7 @@
   "message.skyabyss.tide.gate_hint": "Pass through the tide gate to cross onto its back",
   "message.skyabyss.tide.arrived": "Through the water, you stand on a great flipper. Before you, a vast shell slowly breathes.",
   "message.skyabyss.tide.leaving": "Beyond the tide gate, you hear the sea of the world below.",
-  "message.skyabyss.tide.return_hint": "Crouch on a glowing return stone, or wade down the farewell steps, to return to the surface",
+  "message.skyabyss.tide.return_hint": "Wade down the farewell steps, or use the tide shell whistle again, to return to the surface",
   "message.skyabyss.tide.swept_back": "The tide pushed you back",
   "title.skyabyss.tide_back": "The Tide Shell's Back",
   "title.skyabyss.tide_back.sub": "Atop the shell of the titan that walks the sea",

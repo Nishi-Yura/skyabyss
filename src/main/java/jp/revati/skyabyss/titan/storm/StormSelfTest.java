@@ -126,8 +126,8 @@ public final class StormSelfTest {
         }
         col.setup(java.util.UUID.randomUUID(), TEST_X + 20.5, TEST_Z + 20.5, 200);
         double base = col.position().y;
-        boolean inside = col.inColumn(TEST_X + 20.5 + 2.0, base + 10, TEST_Z + 20.5);
-        boolean outside = col.inColumn(TEST_X + 20.5 + 3.0, base + 10, TEST_Z + 20.5);
+        boolean inside = col.inColumn(TEST_X + 20.5 + 3.5, base + 10, TEST_Z + 20.5);
+        boolean outside = col.inColumn(TEST_X + 20.5 + 4.5, base + 10, TEST_Z + 20.5);
         boolean above = col.inColumn(TEST_X + 20.5, 300, TEST_Z + 20.5);
         if (!inside || outside || above) {
             failures.add("the gale column geometry is wrong (inside " + inside + ", outside " + outside + ", above " + above + ")");
