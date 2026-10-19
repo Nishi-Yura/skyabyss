@@ -12,22 +12,51 @@ cmd gamerule doDaylightCycle false
 cmd gamemode spectator
 camera minecraft:overworld 0 70 0 0 0
 waitchunks
-cmd fill -90 48 -100 90 48 111 minecraft:sand
-cmd fill -90 49 -100 90 62 -87 minecraft:water
-cmd fill -90 49 -86 90 62 -73 minecraft:water
-cmd fill -90 49 -72 90 62 -59 minecraft:water
-cmd fill -90 49 -58 90 62 -45 minecraft:water
-cmd fill -90 49 -44 90 62 -31 minecraft:water
-cmd fill -90 49 -30 90 62 -17 minecraft:water
-cmd fill -90 49 -16 90 62 -3 minecraft:water
-cmd fill -90 49 -2 90 62 11 minecraft:water
-cmd fill -90 49 12 90 62 25 minecraft:water
-cmd fill -90 49 26 90 62 39 minecraft:water
-cmd fill -90 49 40 90 62 53 minecraft:water
-cmd fill -90 49 54 90 62 67 minecraft:water
-cmd fill -90 49 68 90 62 81 minecraft:water
-cmd fill -90 49 82 90 62 95 minecraft:water
-cmd fill -90 49 96 90 62 109 minecraft:water
+cmd forceload add -90 -100 90 111
+wait 200
+cmd fill -90 48 -100 90 48 -91 minecraft:sand
+cmd fill -90 49 -100 90 62 -91 minecraft:water
+cmd fill -90 48 -90 90 48 -81 minecraft:sand
+cmd fill -90 49 -90 90 62 -81 minecraft:water
+cmd fill -90 48 -80 90 48 -71 minecraft:sand
+cmd fill -90 49 -80 90 62 -71 minecraft:water
+cmd fill -90 48 -70 90 48 -61 minecraft:sand
+cmd fill -90 49 -70 90 62 -61 minecraft:water
+cmd fill -90 48 -60 90 48 -51 minecraft:sand
+cmd fill -90 49 -60 90 62 -51 minecraft:water
+cmd fill -90 48 -50 90 48 -41 minecraft:sand
+cmd fill -90 49 -50 90 62 -41 minecraft:water
+cmd fill -90 48 -40 90 48 -31 minecraft:sand
+cmd fill -90 49 -40 90 62 -31 minecraft:water
+cmd fill -90 48 -30 90 48 -21 minecraft:sand
+cmd fill -90 49 -30 90 62 -21 minecraft:water
+cmd fill -90 48 -20 90 48 -11 minecraft:sand
+cmd fill -90 49 -20 90 62 -11 minecraft:water
+cmd fill -90 48 -10 90 48 -1 minecraft:sand
+cmd fill -90 49 -10 90 62 -1 minecraft:water
+cmd fill -90 48 0 90 48 9 minecraft:sand
+cmd fill -90 49 0 90 62 9 minecraft:water
+cmd fill -90 48 10 90 48 19 minecraft:sand
+cmd fill -90 49 10 90 62 19 minecraft:water
+cmd fill -90 48 20 90 48 29 minecraft:sand
+cmd fill -90 49 20 90 62 29 minecraft:water
+cmd fill -90 48 30 90 48 39 minecraft:sand
+cmd fill -90 49 30 90 62 39 minecraft:water
+cmd fill -90 48 40 90 48 49 minecraft:sand
+cmd fill -90 49 40 90 62 49 minecraft:water
+cmd fill -90 48 50 90 48 59 minecraft:sand
+cmd fill -90 49 50 90 62 59 minecraft:water
+cmd fill -90 48 60 90 48 69 minecraft:sand
+cmd fill -90 49 60 90 62 69 minecraft:water
+cmd fill -90 48 70 90 48 79 minecraft:sand
+cmd fill -90 49 70 90 62 79 minecraft:water
+cmd fill -90 48 80 90 48 89 minecraft:sand
+cmd fill -90 49 80 90 62 89 minecraft:water
+cmd fill -90 48 90 90 48 99 minecraft:sand
+cmd fill -90 49 90 90 62 99 minecraft:water
+cmd fill -90 48 100 90 48 109 minecraft:sand
+cmd fill -90 49 100 90 62 109 minecraft:water
+cmd fill -90 48 110 90 48 111 minecraft:sand
 cmd fill -90 49 110 90 62 111 minecraft:water
 wait 40
 cmd summon skyabyss:tide_shell 0 52 0 {Rotation:[0f,0f],Mode:2,ForcedTicks:999999}
