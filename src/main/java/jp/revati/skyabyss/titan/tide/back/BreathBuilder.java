@@ -127,7 +127,24 @@ public final class BreathBuilder {
                 }
             }
         }
-        // 予約の間の床と同じ高さの皿 (114・126): 縁の輪が気室の壁まで届くので、続く床へそのまま歩いて出られる (地続き)
+        // 予約の間 2・3 の床と同じ高さの皿 (114・126): 皿の縁から気室の壁まで床で埋め、続く床へそのまま歩いて出られる (地続き。足場の休み場 u1・u2)
+        if (fy == UPPER_2.floor() || fy == UPPER_3.floor()) {
+            for (int x = cx - 6; x <= cx + 6; x++) {
+                for (int z = cz - 6; z <= cz + 6; z++) {
+                    double dw = dist(x, z);
+                    double dc = Math.hypot(x - cx, z - cz);
+                    if (dw > R_A - 2.2 && dw <= R_A + 0.6 && dc > RING_R && dc <= RING_R + 3.2) {
+                        kit.set(x, fy, z, TideKit.FLOOR);
+                        kit.set(x, fy - 1, z, TideKit.BRICK);
+                        for (int y = fy + 1; y <= fy + 3; y++) {
+                            if (dw <= R_A && !kit.get(x, y, z).isAir()) {
+                                kit.set(x, y, z, TideKit.AIR);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void entryPad(TideKit kit) {

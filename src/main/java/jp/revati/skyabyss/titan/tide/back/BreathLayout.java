@@ -196,7 +196,7 @@ public final class BreathLayout {
         // 9: 舞台 (真珠守りの床)。風の柱から昇り、柱の外の床へ降りる。泡は舞台の真ん中 (展望の間への昇り)
         Dish v = vent();
         double[] in = unit(WX - v.wx(), WZ - v.wz());
-        list.add(new Node(9, Kind.ARENA, -1, WX, WZ, ARENA_FLOOR + 1, v.wx() + in[0] * ARENA_LAND_DIST, v.wz() + in[1] * ARENA_LAND_DIST, ARENA_FLOOR + 1,
+        list.add(new Node(9, Kind.ARENA, -1, WX, WZ, ARENA_FLOOR + 1, WX - in[1] * 2.6, WZ + in[0] * 2.6, ARENA_FLOOR + 1,
                 DECK_FLOOR + 2.0));
         // 10: 展望の間
         list.add(new Node(10, Kind.DECK, -1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, WX - 4.5, WZ + 0.0, DECK_FLOOR + 1, OBS_ROOF - 1.9));

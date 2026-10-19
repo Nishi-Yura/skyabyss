@@ -59,6 +59,7 @@ public final class Breath {
         final int to;
         double s;
         int age;
+        boolean sneakReleased;
         boolean cancelled;
 
         Ride(List<Vec3> path, boolean tower, boolean up, int to) {
@@ -177,6 +178,7 @@ public final class Breath {
 
     static void start(ServerLevel level, ServerPlayer p, List<Vec3> path, boolean tower, boolean up, int to) {
         Ride r = new Ride(path, tower, up, to);
+        r.sneakReleased = !p.isShiftKeyDown();
         RIDES.put(p.getUUID(), r);
         boardings++;
         p.fallDistance = 0;
@@ -188,7 +190,10 @@ public final class Breath {
     static void tickRide(ServerLevel level, ServerPlayer p, Ride r) {
         r.age++;
         Vec3 pos = p.position();
-        boolean sneak = p.isShiftKeyDown() && r.age > 12;
+        if (!p.isShiftKeyDown()) {
+            r.sneakReleased = true;
+        }
+        boolean sneak = r.sneakReleased && p.isShiftKeyDown() && r.age > 12;
         BreathLayout.Step st = BreathLayout.step(r.path, pos, r.s, r.tower);
         Vec3 near = BreathLayout.pointAt(r.path, BreathLayout.progress(r.path, pos));
         boolean lost = pos.distanceTo(near) > 3.4;

@@ -61,7 +61,7 @@ public class PearlKeeper extends TideMob {
     public static final int SHELL_HOLD = 100;
     public static final int TIRED_TICKS = 40;
     public static final int EXPOSED_TICKS = 80;
-    public static final double UPDRAFT_RADIUS = 2.0;
+    public static final double UPDRAFT_RADIUS = 1.8;
     public static final double VOLLEY_RADIUS = 1.5;
     public static final double CHARGE_LENGTH = 9.0;
     public static final double CHARGE_HALF_WIDTH = 1.3;
@@ -72,7 +72,7 @@ public class PearlKeeper extends TideMob {
 
     // 人数 (n) で増える数。自己テストが同じ式を見る
     public static int updrafts(int n) {
-        return Math.min(Math.max(n, 1) + 1, 7);
+        return Math.min(Math.max(n, 1) + 1, 6);
     }
 
     public static int volleys(int n) {
@@ -81,6 +81,11 @@ public class PearlKeeper extends TideMob {
 
     public static int chargeLines(int n) {
         return n >= 5 ? 3 : n >= 3 ? 2 : 1;
+    }
+
+    // 輪が重なる数 (三人から二重。跳び越える輪が続く)
+    public static int rings(int n) {
+        return n >= 3 ? 2 : 1;
     }
 
     public static int lanes(int n) {
@@ -104,6 +109,7 @@ public class PearlKeeper extends TideMob {
     private int downdraftCooldown = 130;
     private int chargeCooldown = 170;
     private int volleyCooldown = 100;
+    private double[] shellLane = new double[0];
     private int tiredLeft;
     private int exposedLeft;
     private int shells;
@@ -357,7 +363,10 @@ public class PearlKeeper extends TideMob {
             case DOWNDRAFT -> {
                 playAction("downdraft");
                 sound(TideBackSetup.BECKONER_RAISE.get(), 2.5f, 0.8f);
-                ripple(server, getX(), getZ(), ground, RING_R0, RING_R1, DOWNDRAFT_WINDUP, gaps(random.nextDouble() * Math.PI * 2, lanes(present(server))), DOWNDRAFT_DAMAGE);
+                double[] lane = gaps(random.nextDouble() * Math.PI * 2, lanes(present(server)));
+                for (int i = 0; i < rings(present(server)); i++) {
+                    ripple(server, getX(), getZ(), ground, RING_R0, RING_R1, DOWNDRAFT_WINDUP + i * 14, lane, DOWNDRAFT_DAMAGE);
+                }
             }
             case CHARGE -> {
                 playAction("charge");
@@ -374,6 +383,7 @@ public class PearlKeeper extends TideMob {
                 sound(TideBackSetup.BECKONER_ROAR.get(), 3f, 0.9f);
                 setMode(MODE_SHELLED);
                 invulnerableTicks = SHELL_WINDUP + SHELL_HOLD;
+                shellLane = gaps(random.nextDouble() * Math.PI * 2, lanes(present(server)));
             }
             default -> {
             }
@@ -396,7 +406,7 @@ public class PearlKeeper extends TideMob {
                     sound(TideBackSetup.BECKONER_SLAM.get(), 3f, 0.8f);
                     downdraftCooldown = 170 + random.nextInt(40);
                 }
-                if (actionTick >= DOWNDRAFT_WINDUP + 26) {
+                if (actionTick >= DOWNDRAFT_WINDUP + 26 + 14 * (rings(present(server)) - 1)) {
                     finish();
                 }
             }
@@ -576,11 +586,11 @@ public class PearlKeeper extends TideMob {
     // 殻籠もり: 殻に閉じこもり (5 秒は傷を受けない)、途中 2 回輪が走り、出てから 4 秒ぐったりする
     private void tickShell(ServerLevel server) {
         double ground = groundY(position());
-        if (actionTick == SHELL_WINDUP + 40) {
-            ripple(server, getX(), getZ(), ground, RING_R0, RING_R1, 28, gaps(random.nextDouble() * Math.PI * 2, lanes(present(server))), SHELL_RING_DAMAGE);
-        }
-        if (actionTick == SHELL_WINDUP + 70) {
-            ripple(server, getX(), getZ(), ground, RING_R0, RING_R1, 28, gaps(random.nextDouble() * Math.PI * 2, lanes(present(server))), SHELL_RING_DAMAGE);
+        if (actionTick == SHELL_WINDUP + 40 || actionTick == SHELL_WINDUP + 70) {
+            double[] lane = shellLane;
+            for (int i = 0; i < rings(present(server)); i++) {
+                ripple(server, getX(), getZ(), ground, RING_R0, RING_R1, 28 + i * 14, lane, SHELL_RING_DAMAGE);
+            }
         }
         if (actionTick % 6 == 0 && actionTick < SHELL_WINDUP + SHELL_HOLD) {
             server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2.4, getZ(), 3, 0.4, 0.3, 0.4, 0.02);

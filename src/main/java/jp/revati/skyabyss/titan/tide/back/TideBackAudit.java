@@ -35,7 +35,50 @@ public final class TideBackAudit {
         s.goals.put("west stone", STONE_WEST.offset(1, 0, 0));
         s.goals.put("beach", new BlockPos(-22, BEACH.floor() + 1, 50));
         s.goals.put("shell top", new BlockPos(TOP_STAIR_X1 + 2, shellTop(TOP_STAIR_X1 + 2, TOP_STAIR_Z1 - 4) + 1, TOP_STAIR_Z1 - 4));
+        // 息の間: 縁の入口の泡・各皿の着地・舞台・展望の間。昇りは光る近い泡だけ (遠い泡は潮が満ちたときの近道なので、なくても昇れること)
+        for (BreathLayout.Node n : BreathLayout.nodes()) {
+            s.goals.put("breath " + n.label(), landingBlock(n));
+        }
+        s.extra = TideBackAudit::breathEdges;
         return s;
+    }
+
+    static BlockPos landingBlock(BreathLayout.Node n) {
+        return BlockPos.containing(n.landX(), n.landY() + 0.01, n.landZ());
+    }
+
+    // 運び (近い泡) と下り (しゃがみ) を道に足す: 泡に立つ足もとから行き先の着地へ、乗り場の上の足もとからひとつ前の着地へ
+    static void breathEdges(BackReach.Probe probe, BackReach.Extra out) {
+        BlockPos p = probe.pos();
+        if (!Breath.active(net.minecraft.world.phys.Vec3.atBottomCenterOf(p))) {
+            return;
+        }
+        double cx = p.getX() + 0.5;
+        double cz = p.getZ() + 0.5;
+        for (BreathLayout.Lift l : Breath.LIFTS) {
+            if (l.far()) {
+                continue;
+            }
+            double[] pad = l.pad();
+            if (Math.hypot(cx - pad[0], cz - pad[1]) <= l.padRadius() + 0.5 && p.getY() == (int) Math.floor(l.padY() + 1e-6)) {
+                out.add(landingBlock(l.b()));
+            }
+        }
+        for (BreathLayout.Node n : BreathLayout.nodes()) {
+            if (n.kind() == BreathLayout.Kind.ENTRY) {
+                continue;
+            }
+            boolean on = switch (n.kind()) {
+                case DISH -> Math.hypot(cx - (BreathLayout.dish(n.dish()).wx()), cz - BreathLayout.dish(n.dish()).wz()) <= BreathLayout.RING_R
+                        && (p.getY() == BreathLayout.dish(n.dish()).floorY() || p.getY() == BreathLayout.dish(n.dish()).floorY() + 1);
+                case ARENA -> Math.hypot(cx - BreathLayout.WX, cz - BreathLayout.WZ) <= BreathLayout.ARENA_R && p.getY() == BreathLayout.ARENA_FLOOR + 1;
+                case DECK -> BreathLayout.deckBox().contains(net.minecraft.world.phys.Vec3.atBottomCenterOf(p)) && p.getY() == BreathLayout.DECK_FLOOR + 1;
+                default -> false;
+            };
+            if (on) {
+                out.add(landingBlock(BreathLayout.nodes().get(n.id() - 1)));
+            }
+        }
     }
 
     // 庭の道の形 (3 通り) × 潮見の間の配置 (4 通り) のすべてで調べる。干潮、戸は開いているものとして

@@ -355,10 +355,10 @@ public final class TideBackSelfTest {
         }
         int[] box = {x0, x1, z0, z1, y0, y1};
         flood(start, open, enclosed, box, failures, notes, "rooms", true);
-        // 封じた予約の間 (08 の 3.8節): 戸は固いので広間からは行けない。中から調べて、外へ抜ける口が 0 であること
+        // 息の間 (予約の間 1〜3・気室・舞台・展望の間): 中から調べて、外へ抜ける口が戸口 (崖の穴) のほかに 0 であること
         BlockPos up = new BlockPos(20, UPPER_1.floor() + 1, 20);
         check(open.test(up) && enclosed.test(up), "reserved room 1 is not an enclosed room at " + up.toShortString(), failures);
-        flood(up, open, enclosed, box, failures, notes, "reserved rooms", false);
+        flood(up, open, enclosed, box, failures, notes, "breath chamber rooms", true);
     }
 
     private static void flood(BlockPos start, java.util.function.Predicate<BlockPos> open, java.util.function.Predicate<BlockPos> enclosed,
@@ -407,6 +407,9 @@ public final class TideBackSelfTest {
     // わざと開けた口: 潮門と到着の段・ひれ・見送りの段 (左後ろの縁)、甲羅の上へ出る段の口
     private static boolean intendedOpening(BlockPos p) {
         if (p.getX() <= GATE_MOUTH_X2 && p.getZ() >= GATE_MOUTH_Z1 - 6 && p.getY() <= GATE_FLOOR + 32) {
+            return true;
+        }
+        if (p.getX() <= UPPER_GATE_X + 1 && Math.abs(p.getZ() - UPPER_GATE_Z) <= 3 && p.getY() >= UPPER_1.floor() && p.getY() <= UPPER_1.floor() + 6) {
             return true;
         }
         return p.getY() >= 95 && Math.abs(p.getX() - (TOP_STAIR_X1 + 2)) <= 3 && Math.abs(p.getZ() - (TOP_STAIR_Z1 + 2)) <= 3;
@@ -699,10 +702,13 @@ public final class TideBackSelfTest {
         Map<Long, Integer> dist = walk(back, ARRIVAL);
         Map<String, BlockPos> should = new java.util.LinkedHashMap<>();
         for (Rest r : RESTS) {
-            if (!r.id().equals("heart")) {
+            // 殻の底の前室は三つの石のあと、息の間の足場 (u1〜u3) は光る泡で昇る (歩いては行けない)
+            if (!r.id().equals("heart") && !r.id().equals("u1") && !r.id().equals("u2") && !r.id().equals("u3")) {
                 should.put("rest " + r.id(), r.spawn());
             }
         }
+        should.put("breath chamber (room 1 floor)", new BlockPos(20, UPPER_1.floor() + 1, 20));
+        should.put("breath entry bubble", TideBackAudit.landingBlock(BreathLayout.entry()));
         should.put("clam", new BlockPos(CLAM[0] + 2, GARDEN_FLOOR + 1, CLAM[1] - 2));
         should.put("altar", new BlockPos(ALTAR[0] + 1, ALTAR_TOP + 1, ALTAR[1] + 1));
         should.put("east gallery", new BlockPos(10, HUB_LEDGE + 1, -2));
@@ -741,7 +747,12 @@ public final class TideBackSelfTest {
         shouldNot.put("upper tier", new BlockPos(52, TIER_FLOOR[2] + 1, -11));
         shouldNot.put("east ledge", new BlockPos(53, LEDGE_FLOOR + 1, -32));
         shouldNot.put("heart rest", RESTS.get(5).spawn());
-        shouldNot.put("reserved room 1 (sealed)", new BlockPos(20, UPPER_1.floor() + 1, 20));
+        // 息の間: 光る泡に乗らないと昇れない (皿・足場・舞台・展望の間へは歩いて行けない)
+        shouldNot.put("breath dish 0", TideBackAudit.landingBlock(BreathLayout.dishNode(0)));
+        shouldNot.put("breath ledge u1", RESTS.get(7).spawn());
+        shouldNot.put("breath ledge u2", RESTS.get(8).spawn());
+        shouldNot.put("breath summit", TideBackAudit.landingBlock(BreathLayout.arena()));
+        shouldNot.put("breath deck", RESTS.get(9).spawn());
         shouldNot.put("terrace 2", new BlockPos(0, TERRACE_Y[1] + 1, 46));
         shouldNot.put("garden from above", new BlockPos(PLAT_C[0], PLATFORM_TOP + 1, PLAT_C[1]).above(30));
         shouldNot.put("garden wall top", new BlockPos(-30, GARDEN_WALL_TOP + 1, 20));
@@ -750,18 +761,6 @@ public final class TideBackSelfTest {
                 failures.add("can walk to " + e.getKey() + " without solving (" + e.getValue() + "): " + pathTo(e.getValue()));
             }
         }
-        // 封じた予約の間の中は歩ける: 廊下の奥から階段で、三つの部屋の床へ
-        Map<Long, Integer> inUpper = walk(back, new BlockPos(UPPER_GATE_X + 2, UPPER_1.floor() + 1, UPPER_GATE_Z));
-        Map<String, BlockPos> upper = new java.util.LinkedHashMap<>();
-        upper.put("reserved room 1", new BlockPos(20, UPPER_1.floor() + 1, 20));
-        upper.put("reserved room 2", new BlockPos(16, UPPER_2.floor() + 1, 10));
-        upper.put("reserved room 3", new BlockPos(6, UPPER_3.floor() + 1, 8));
-        for (Map.Entry<String, BlockPos> e : upper.entrySet()) {
-            if (!inUpper.containsKey(e.getValue().asLong())) {
-                failures.add("cannot walk inside the reserved rooms to " + e.getKey() + " " + e.getValue() + " (standable " + standable(back, e.getValue()) + ")");
-            }
-        }
-        notes.add("reserved rooms walkable " + inUpper.size() + " spots");
         PARENT.clear();
         String mapDir = System.getenv("SKYABYSS_TIDE_MAP");
         if (mapDir != null) {
