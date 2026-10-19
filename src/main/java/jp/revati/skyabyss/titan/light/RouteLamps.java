@@ -46,7 +46,7 @@ public final class RouteLamps {
                 || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.DIORITE) || s.is(Blocks.POLISHED_DIORITE)
                 || s.is(Blocks.RED_NETHER_BRICKS) || s.is(Blocks.NETHER_WART_BLOCK) || s.is(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS)
                 || s.is(Blocks.CHISELED_POLISHED_BLACKSTONE) || s.is(Blocks.RED_TERRACOTTA) || s.is(Blocks.LIGHT_GRAY_TERRACOTTA)
-                || s.is(Blocks.ORANGE_TERRACOTTA);
+                || s.is(Blocks.ORANGE_TERRACOTTA) || s.is(Blocks.BROWN_TERRACOTTA);
         return stone && s.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
     }
 
