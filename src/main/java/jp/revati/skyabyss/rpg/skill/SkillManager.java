@@ -373,7 +373,7 @@ public final class SkillManager {
             ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
         }
         ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill));
-        return jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks);
+        return jp.revati.skyabyss.rebirth.Rebirth.scaleCooldown(player, jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks));
     }
 
     // 技のマナ (構え・キーストーン・外の修飾を入れた値。画面も同じ計算)

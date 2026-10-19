@@ -69,7 +69,7 @@ public final class AffixEvents {
             group = EquipmentSlotGroup.OFFHAND;
             slotName = "offhand";
         }
-        for (Affix affix : AffixRules.affixes(stack)) {
+        for (Affix affix : AffixRules.effective(stack)) {
             AffixType t = affix.kind();
             if (t == null) {
                 continue;
@@ -169,7 +169,10 @@ public final class AffixEvents {
         Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            if (AffixRules.ensureRolled(stack, player.getRandom())) {
+            boolean rolled = AffixRules.ensureRolled(stack, player.getRandom());
+            // 穴・世代の刻み (古いセーブの装備も、手にしたときに一度だけ穴を抽選する。item/extra/GearFreedom)
+            rolled |= jp.revati.skyabyss.item.extra.GearFreedom.ensure(stack, player.getRandom());
+            if (rolled) {
                 inventory.setChanged();
             }
         }

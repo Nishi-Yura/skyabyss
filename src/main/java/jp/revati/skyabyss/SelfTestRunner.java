@@ -110,6 +110,8 @@ public final class SelfTestRunner {
         // 仲間が起こせる仕組み・倒れた回数の札・「ここ」の印。docs/design/10 の 10.12〜10.14
         steps.add(Step.once("party revive", jp.revati.skyabyss.party.ReviveSelfTest::runSelfTest));
         steps.add(Step.once("growth", GrowthSelfTest::runSelfTest));
+        // 転生 (戻る・残る範囲、上限 20、代価、恩恵、余白の枠、導きの欠片、共闘の合わせ)。docs/design/31。SKYABYSS_SELFTEST_ONLY="soul"
+        steps.add(Step.once("soul", jp.revati.skyabyss.rebirth.SoulSelfTest::runSelfTest));
         steps.add(Step.once("skills", SkillSelfTest::runSelfTest));
         // 画面の知らせ (種類分け・順番待ち)。docs/design/18_notices.md
         steps.add(Step.once("notice", jp.revati.skyabyss.notice.NoticeSelfTest::runSelfTest));
@@ -129,6 +131,7 @@ public final class SelfTestRunner {
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));
         steps.add(Step.once("affix", AffixSelfTest::runSelfTest));
+        steps.add(Step.once("gear freedom", jp.revati.skyabyss.item.extra.GearFreedomSelfTest::runSelfTest));
         // 心臓の遺物の選択 (四体・一度だけ・入り直し・二人・あとで・場面の終わり)。docs/design/30_heart_reward_ui.md。SKYABYSS_SELFTEST_ONLY="heart reward"
         steps.addAll(jp.revati.skyabyss.loot.reward.HeartRewardSelfTest.steps());
         steps.add(Step.once("accessory", AccessorySelfTest::runSelfTest));

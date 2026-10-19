@@ -160,7 +160,7 @@ public final class YoungCarriers {
                 }
                 return true;
             }
-            if (trip != null && mine.distanceTo(player) <= JOIN_RANGE && boardable(mine)) {
+            if (trip != null && mine.distanceTo(player) <= JOIN_RANGE + bondRange(player.server, player.getUUID()) && boardable(mine)) {
                 tryBoard(mine, player);
                 return true;
             }
@@ -224,6 +224,11 @@ public final class YoungCarriers {
         return young;
     }
 
+    // 持ち主の転生の絆による、呼べる・乗れる距離の足し (docs/design/31 の B14)
+    private static double bondRange(net.minecraft.server.MinecraftServer server, UUID owner) {
+        return jp.revati.skyabyss.rebirth.Rebirth.youngRange(server, owner);
+    }
+
     private static boolean boardable(YoungEntity e) {
         int p = e.phase();
         return p == YoungEntity.APPEAR || p == YoungEntity.WAIT || p == YoungEntity.COUNTDOWN;
@@ -233,14 +238,15 @@ public final class YoungCarriers {
     @Nullable
     private static YoungEntity mateCarrier(ServerPlayer player) {
         YoungEntity best = null;
-        double bestD = JOIN_RANGE * JOIN_RANGE;
+        double bestD = Double.MAX_VALUE;
         for (YoungEntity e : BY_OWNER.values()) {
             YoungTrip trip = e.trip();
             if (e.isRemoved() || trip == null || e.level() != player.level() || !boardable(e) || !trip.mayRide(player)) {
                 continue;
             }
             double d = e.distanceToSqr(player);
-            if (d < bestD) {
+            double range = JOIN_RANGE + bondRange(player.server, e.owner());
+            if (d <= range * range && d < bestD) {
                 bestD = d;
                 best = e;
             }
@@ -328,7 +334,7 @@ public final class YoungCarriers {
             Notice.bar(player, ModText.hint("message.skyabyss.young.too_late"));
             return;
         }
-        if (player.isPassenger() || player.distanceTo(young) > BOARD_RANGE + 36) {
+        if (player.isPassenger() || player.distanceTo(young) > BOARD_RANGE + 36 + bondRange(player.server, young.owner())) {
             return;
         }
         if (young.riderCount() >= YoungKind.SEATS) {

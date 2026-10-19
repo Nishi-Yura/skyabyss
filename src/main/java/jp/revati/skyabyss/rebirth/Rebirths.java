@@ -45,6 +45,12 @@ public final class Rebirths {
     // 仮の元の回数を書く (開発用コマンド・自己テスト)。順位表の名前と数字も合わせる。記録 (人生の長さ・死) は onRebirth だけが付ける
     public static void setCount(ServerPlayer p, int n) {
         int c = RebirthTier.clamp(n);
+        if (!RebirthView.isStub()) {
+            // 本体の回数も合わせる (開発用)
+            jp.revati.skyabyss.rpg.Growth.get(p).rebirths = c;
+            jp.revati.skyabyss.rpg.Growth.sync(p);
+            jp.revati.skyabyss.rpg.Growth.applyModifiers(p);
+        }
         put(p, data(p).withCount(c));
         RebirthStats.Entry e = RebirthStats.get(p.server).entry(p.getUUID());
         e.name = p.getGameProfile().getName();
@@ -87,6 +93,8 @@ public final class Rebirths {
             e.order = stats.takeOrder();
         }
         e.rebirths = now;
+        // 持ち越した装備の世代を一つ上げる (B15。item/extra/GearFreedom)
+        jp.revati.skyabyss.item.extra.GearFreedom.onRebirth(p, now);
         stats.touch();
         refreshNames(p);
         updateTitles(p);

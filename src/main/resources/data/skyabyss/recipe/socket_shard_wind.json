@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "skyabyss:thunder_wing_shard"
+    },
+    {
+      "item": "skyabyss:thunder_wing_shard"
+    },
+    {
+      "item": "skyabyss:thunder_wing_shard"
+    },
+    {
+      "item": "skyabyss:thunder_wing_shard"
+    },
+    {
+      "item": "skyabyss:resonance_crystal"
+    }
+  ],
+  "result": {
+    "id": "skyabyss:socket_shard_wind",
+    "count": 1
+  }
+}

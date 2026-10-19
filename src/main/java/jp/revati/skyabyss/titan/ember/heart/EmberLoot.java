@@ -186,6 +186,8 @@ public final class EmberLoot {
             draws.addAll(roll.draws());
             List<String> unmade = new ArrayList<>();
             List<ItemStack> items = stacks(draws, level.random, unmade);
+            // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
+            items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(TITAN, level.random));
             int held = TitanLoot.handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {

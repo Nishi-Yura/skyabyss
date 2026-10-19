@@ -120,7 +120,7 @@ public final class GrowthHud {
         // 二行目: 細いバー
         int by = o[1] + 11;
         g.blit(TEXTURE, x, by, BAR_W, BAR_H, 0, 0, 128, 10, 128, 32);
-        float fraction = max ? 1f : (float) data.xp / Math.max(1, GrowthRules.xpToNext(data.level));
+        float fraction = max ? 1f : (float) data.xp / Math.max(1, data.xpNeed());
         int fill = Mth.clamp(Math.round(62 * fraction), 0, 62);
         if (fill > 0) {
             g.blit(TEXTURE, x + 1, by + 1, fill, 3, 2, max ? 16 : 10, fill * 2, 6, 128, 32);
