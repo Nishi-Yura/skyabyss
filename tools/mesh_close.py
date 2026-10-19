@@ -370,30 +370,6 @@ def close_bone(V, UV, T, centroid):
 
 # ----------------------------------------------------------------- 関節の玉
 
-def icosphere(center, r, level=0):
-    t = (1 + 5 ** 0.5) / 2
-    V = [(-1, t, 0), (1, t, 0), (-1, -t, 0), (1, -t, 0), (0, -1, t), (0, 1, t), (0, -1, -t), (0, 1, -t), (t, 0, -1), (t, 0, 1), (-t, 0, -1), (-t, 0, 1)]
-    F = [(0, 11, 5), (0, 5, 1), (0, 1, 7), (0, 7, 10), (0, 10, 11), (1, 5, 9), (5, 11, 4), (11, 10, 2), (10, 7, 6), (7, 1, 8),
-         (3, 9, 4), (3, 4, 2), (3, 2, 6), (3, 6, 8), (3, 8, 9), (4, 9, 5), (2, 4, 11), (6, 2, 10), (8, 6, 7), (9, 8, 1)]
-    V = [np.array(v, float) / np.linalg.norm(v) for v in V]
-    for _ in range(level):
-        cache = {}
-        newF = []
-
-        def mid(a, b):
-            k = (min(a, b), max(a, b))
-            if k not in cache:
-                m = (V[a] + V[b]) / 2
-                V.append(m / np.linalg.norm(m))
-                cache[k] = len(V) - 1
-            return cache[k]
-        for a, b, c in F:
-            ab, bc, ca = mid(a, b), mid(b, c), mid(c, a)
-            newF += [(a, ab, ca), (b, bc, ab), (c, ca, bc), (ab, bc, ca)]
-        F = newF
-    return np.array(V) * r + np.asarray(center, float), F
-
-
 def inside_any(P, refs):
     """点 P が、塞いだ参照メッシュ refs = [(V, T)] のどれかの体積の中か。"""
     m = np.zeros(len(P), bool)
@@ -406,66 +382,14 @@ def ref_samples(refs):
     return np.vstack([ma.surface_samples(Bone_like(V, T)) for V, T in refs])
 
 
-def joint_ball(bones, name, refs, cchild, ref_uvs):
-    """子の付け根が親 (と兄弟) に十分埋まっていない (付け根に近い 80 点の 25% 未満) とき、子と親の隙間・接面・浅い重なりにまたがる小さな玉を子の骨へ足す。
-    玉の中心は、子と親の最近点どうしの線分のうち pivot にいちばん近い点 (回しても隙間に残る)、半径は両側の面に届く最小限
-    (+0.4)。隙間が 3 単位より大きい・玉が 2.5 を超えるときは足さない。色は玉の各三角形にいちばん近い子・親の面の絵の一点。
-    足したら True。"""
+def root_buried(bones, name, refs):
+    """子の付け根に近い 80 点のうち、親 (と兄弟) の体積の中にある割合。"""
     V, UV, T = bones[name]
-    if len(T) == 0 or not refs:
-        return False
-    pivot = np.array(bones["_pivot_" + name], float)
-    cV, cUV, cT = cchild
-    cV, cT = np.asarray(cV, float), np.asarray(cT, int)
-    # すでに親に埋まっていれば足さない
-    csamp = ma.surface_samples(Bone_like(cV, cT))
-    psamp = ref_samples(refs)
-    d, ip = cKDTree(psamp).query(csamp)
-    zone = csamp[np.argsort(d)[:80]]
-    if inside_any(zone, refs).mean() >= 0.25:
-        return False  # 十分に埋まっている
-    k = int(np.argmin(d))
-    cp, pp = csamp[k], psamp[ip[k]]
-    gap = float(d[k])
-    if gap > 3.0:
-        return False
-    seg = pp - cp
-    t = float(np.clip(np.dot(pivot - cp, seg) / max(np.dot(seg, seg), 1e-9), 0, 1))
-    center = cp + seg * t
-    r = max(np.linalg.norm(center - cp), np.linalg.norm(center - pp)) + 0.4
-    # pivot が線分の近くなら pivot を中心にする (回しても玉の位置が動かず、どの角度でも隙間に残る)
-    if np.linalg.norm(pivot - center) <= 1.0:
-        r2 = max(np.linalg.norm(pivot - cp), np.linalg.norm(pivot - pp)) + 0.4
-        if r2 <= 2.5:
-            center, r = pivot, r2
-    r = max(r, 0.9)
-    if r > 2.5:
-        return False
-    SV, SF = icosphere(center, r, 0)
-    cent = [(cV[cT[:, 0]] + cV[cT[:, 1]] + cV[cT[:, 2]]) / 3]
-    uvs = [(np.asarray(cUV)[cT[:, 0]] + np.asarray(cUV)[cT[:, 1]] + np.asarray(cUV)[cT[:, 2]]) / 3]
-    for (rv, rt), ruv in ref_uvs:
-        rv, rt, ruv = np.asarray(rv, float), np.asarray(rt, int), np.asarray(ruv, float)
-        if len(rt):
-            cent.append((rv[rt[:, 0]] + rv[rt[:, 1]] + rv[rt[:, 2]]) / 3)
-            uvs.append((ruv[rt[:, 0]] + ruv[rt[:, 1]] + ruv[rt[:, 2]]) / 3)
-    cent = np.vstack(cent)
-    uvs = np.vstack(uvs)
-    tree = cKDTree(cent)
-    V2 = [list(p) for p in V]
-    UV2 = [list(p) for p in UV]
-    T2 = [list(t_) for t_ in T]
-    for a, b, d_ in SF:
-        c3 = (SV[a] + SV[b] + SV[d_]) / 3
-        suv = [float(x) for x in uvs[int(tree.query(c3)[1])]]
-        vi = []
-        for kk in (a, b, d_):
-            V2.append([float(x) for x in SV[kk]])
-            UV2.append(suv)
-            vi.append(len(V2) - 1)
-        T2.append(vi)
-    bones[name] = [np.array(V2), np.array(UV2), np.array(T2, int)]
-    return True
+    if len(T) == 0:
+        return 1.0
+    cs = ma.surface_samples(Bone_like(np.asarray(V, float), np.asarray(T, int)))
+    d = cKDTree(ref_samples(refs)).query(cs)[0]
+    return float(inside_any(cs[np.argsort(d)[:80]], refs).mean())
 
 
 class Bone_like:
@@ -476,58 +400,61 @@ class Bone_like:
 
 # ----------------------------------------------------------------- 付け根の襟
 
-def collar(bones, name, refs):
-    """子 name の根元 (親に最も近い開いた輪) を親の体積の内側へ押し込んで筒で延長する。bones は {名前: [V, UV, T]} (蓋の前)。
-    戻り値は追加した輪の数。"""
+def collar(bones, name, refs, loop=None):
+    """子 name の根元 (親に最も近い開いた輪。loop で輪を直接渡してもよい) を、輪の断面そのままに細めた筒 (袖) で親の体積の内側へ延ばす。
+    アニメで曲がっても根元が親から抜けず、隙間が開かない。袖の側面の絵は輪の隣の面の絵の一点 (隣と同じ色で続く)。
+    bones は {名前: [V, UV, T]} (蓋の前)。戻り値は追加した輪の数。"""
     V, UV, T = bones[name]
-    if len(T) == 0:
+    if len(T) == 0 or not refs:
         return 0
     loops, c = boundary_loops(V, T)
     if not loops:
         return 0
     pivot = np.array(bones.get("_pivot_" + name, [0, 0, 0]), float)
     Va = np.array(V)
-    # 根元の輪: 輪の重心が pivot に最も近いもの
-    best = None
-    for ids, tis in loops:
-        P = Va[ids]
-        d = np.linalg.norm(P.mean(0) - pivot)
-        if best is None or d < best[0]:
-            best = (d, ids, tis)
-    if best is None:
-        return 0
-    _, ids, tis = best
+    if loop is None:
+        best = None
+        for ids, tis in loops:
+            d = np.linalg.norm(Va[ids].mean(0) - pivot)
+            if best is None or d < best[0]:
+                best = (d, ids, tis)
+        _, ids, tis = best
+    else:
+        ids, tis = loop
     P = Va[ids]
     ctr = P.mean(0)
-    if not refs:
-        return 0
-    inside_pivot = bool(inside_any(pivot[None, :], refs)[0])
-    if inside_pivot:
-        target = pivot
-    else:
-        # pivot が親の外: 親の表面でいちばん近い点から、親の中心の側へ少し入った点
-        psamp = ref_samples(refs)
-        ps = psamp[int(np.argmin(np.linalg.norm(psamp - pivot, axis=1)))]
-        inward = psamp.mean(0) - ps
-        ln_ = float(np.linalg.norm(inward))
-        target = ps + inward / max(ln_, 1e-9) * min(2.0, 0.5 * ln_)
-    away = ctr - Va.mean(0)
+    psamp = ref_samples(refs)
+    # 袖の行き先: 輪の中心から親の表面へ最も近い点を通り、その先の親の中へ入った点 (pivot が親の中ならそこ)
+    cand = []
+    if bool(inside_any(pivot[None, :], refs)[0]):
+        cand.append(pivot)
+    k = int(np.argmin(np.linalg.norm(psamp - ctr, axis=1)))
+    ps = psamp[k]
+    dv = ps - ctr
+    ln_ = float(np.linalg.norm(dv))
+    pc = psamp.mean(0)
+    ext_c = float((Va.max(0) - Va.min(0)).max())
+    for depth in (max(1.6, 0.06 * ext_c), max(1.2, 0.04 * ext_c), max(0.8, 0.025 * ext_c), 0.5):
+        dirn = dv / ln_ if ln_ > 1e-6 else (pc - ctr) / max(float(np.linalg.norm(pc - ctr)), 1e-9)
+        cand.append(ps + dirn * depth)
+        cand.append(ps + (pc - ps) / max(float(np.linalg.norm(pc - ps)), 1e-9) * depth)
     best_q = None
-    for f in (1.0, 0.7, 0.5, 0.3):
-        for taper in (0.5, 0.7):
-            tg = ctr + (target - ctr) * f
-            Q = tg + (P - ctr) * taper
-            direction = tg - ctr
-            if np.linalg.norm(direction) < 0.3 or np.dot(direction, away) <= 0:
-                continue
-            if inside_any(np.vstack([Q, tg[None, :]]), refs).mean() >= 0.9:
-                best_q = Q
+    for target in cand:
+        for f in (1.0, 0.8, 0.6):
+            for taper in (0.85, 0.7, 0.55):
+                tg = ctr + (target - ctr) * f
+                Q = tg + (P - ctr) * taper
+                if np.linalg.norm(tg - ctr) < 0.2:
+                    continue
+                if inside_any(np.vstack([Q, tg[None, :]]), refs).mean() >= 0.9:
+                    best_q = Q
+                    break
+            if best_q is not None:
                 break
         if best_q is not None:
             break
     if best_q is None:
         return 0
-    # 筒: 輪の辺ごとに四角 (輪の向きに沿って新しい輪へ)。輪の辺は既存の面と逆向きに使う → 側面は輪の辺を逆向きにたどる
     n = len(ids)
     V2 = [list(p) for p in V]
     UV2 = [list(p) for p in UV]
@@ -539,7 +466,6 @@ def collar(bones, name, refs):
         a2, b2 = Q[k], Q[k2]
         nb = T[tis[k]]
         suv = [sum(UV[i][0] for i in nb) / 3.0, sum(UV[i][1] for i in nb) / 3.0]
-        # 既存の面は辺 a→b を持つ。側面は b→a を持つ: (b, a, a2), (b, a2, b2)
         for tri in ((b, a, a2), (b, a2, b2)):
             vi = []
             for pos in tri:
@@ -549,6 +475,211 @@ def collar(bones, name, refs):
             T2.append(vi)
     bones[name] = [np.array(V2), np.array(UV2), np.array(T2, int)]
     return 1
+
+
+def extrude_root(bones, name, refs):
+    """閉じた子 (根元に開いた輪がない) の「親に向いた端の面」を取り除き、その縁から袖を親の中へ延ばす (人が面を押し出すのと同じ)。
+    端の面 = 親にいちばん近い面と同じ向きでつながる面。取り除くのは全体の 35% まで。戻り値は True / False。"""
+    V, UV, T = bones[name]
+    if len(T) < 8 or not refs:
+        return False
+    V = np.asarray(V, float)
+    T = np.asarray(T, int)
+    psamp = ref_samples(refs)
+    tree = cKDTree(psamp)
+    A, B, C = V[T[:, 0]], V[T[:, 1]], V[T[:, 2]]
+    cr = np.cross(B - A, C - A)
+    ar = np.linalg.norm(cr, axis=1)
+    ok = ar > 1e-9
+    Nf = np.zeros_like(cr)
+    Nf[ok] = cr[ok] / ar[ok][:, None]
+    cen = (A + B + C) / 3
+    d, ip = tree.query(cen)
+    toward = np.einsum("ij,ij->i", Nf, psamp[ip] - cen)
+    facing = ok & ((toward > 0.2 * np.maximum(d, 1e-6)) | (d < 0.05))
+    if not facing.any():
+        return False
+    dd = np.where(facing, d, np.inf)
+    seed = int(np.argmin(dd))
+    ext = float((V.max(0) - V.min(0)).max())
+    cl = ma.weld_ids(V)
+    ct = cl[T]
+    edge = collections.defaultdict(list)
+    for ti in range(len(T)):
+        a, b, e = ct[ti]
+        for p, q in ((a, b), (b, e), (e, a)):
+            edge[(min(p, q), max(p, q))].append(ti)
+    region = {seed}
+    stack = [seed]
+    while stack:
+        ti = stack.pop()
+        a, b, e = ct[ti]
+        for p, q in ((a, b), (b, e), (e, a)):
+            for tj in edge[(min(p, q), max(p, q))]:
+                if tj in region or not ok[tj]:
+                    continue
+                if float(Nf[tj] @ Nf[seed]) < 0.8 or d[tj] > d[seed] + 0.25 * ext:
+                    continue
+                region.add(tj)
+                stack.append(tj)
+    if len(region) > 0.35 * len(T):
+        return False
+    keep = np.array([i for i in range(len(T)) if i not in region])
+    V2, UV2 = np.array(bones[name][0], float), np.array(bones[name][1], float)
+    bones[name] = [V2, UV2, T[keep]]
+    loops, _ = boundary_loops(V2, T[keep])
+    rc = cen[list(region)].mean(0)
+    best = None
+    for ids, tis in loops:
+        dist = np.linalg.norm(V2[ids].mean(0) - rc)
+        if best is None or dist < best[0]:
+            best = (dist, ids, tis)
+    if best is None:
+        bones[name] = [V2, UV2, T]
+        return False
+    if collar(bones, name, refs, loop=(best[1], best[2])):
+        return True
+    bones[name] = [V2, UV2, T]
+    return False
+
+
+# ----------------------------------------------------------------- 付け根を沈める
+
+def components(V, T):
+    """三角形ごとの連結成分の番号 (溶接した頂点でつながるもの)。"""
+    c = ma.weld_ids(V)
+    par = {}
+
+    def find(x):
+        while par.setdefault(x, x) != x:
+            par[x] = par[par[x]]
+            x = par[x]
+        return x
+    for a, b, d in c[T]:
+        for p, q in ((a, b), (b, d)):
+            ra, rb = find(p), find(q)
+            if ra != rb:
+                par[ra] = rb
+    return np.array([find(c[t[0]]) for t in T])
+
+
+def sink_root(bd, refs, amount, name):
+    """子の骨 bd (data["bones"][name]) の付け根まわりの頂点を、親の中へ向けて滑らかに沈める。頂点数・面は変えない (新しい面を足さない)。
+    つながった塊ごとに (背びれの棘のように一つの骨に塊がいくつもあるとき、それぞれの根を沈める)、付け根 = 親の表面にいちばん近い 80 点の中心、
+    動かす量 (隙間 + amount) は親の表面までの距離に応じて 1 → 0 (帯の幅は塊の大きさの 14% と動かす量の 2 倍の大きいほう。
+    帯を動かす量より十分広く取るので、薄い部品が裏返らない)。人が「付け根の点を選んで親の中へ動かす」のと同じで、継ぎ目に何も足さない。
+    amount は塊の大きさに対する倍率ではなく、骨全体の大きさ ext に対する量。戻り値は動かしたか。"""
+    V = np.array(bd["vertices"], float)
+    T = np.array(bd["triangles"], int)
+    if len(V) == 0 or not refs:
+        return False
+    psamp = np.vstack([ma.surface_samples(r) for r in refs])
+    tree = cKDTree(psamp)
+    lab = components(V, T)
+    V2 = V.copy()
+    moved = False
+    for L in np.unique(lab):
+        tt = T[lab == L]
+        vi = np.unique(tt)
+        Vc = V[vi]
+        ext = float((Vc.max(0) - Vc.min(0)).max())
+        cs = ma.surface_samples(Bone_like(V, tt))
+        dd = tree.query(cs)[0]
+        gap = float(dd.min())
+        if gap > 0.4 * max(ext, 1e-6):
+            continue
+        root = cs[np.argsort(dd)[:80]]
+        c = root.mean(0)
+        k = int(np.argmin(np.linalg.norm(psamp - c, axis=1)))
+        ps = psamp[k]
+        near = psamp[np.linalg.norm(psamp - ps, axis=1) < max(1.0, 0.25 * ext)]
+        u = ps - c
+        c_in = any(bool(ma.inside_mask(c[None, :], r.V, r.T)[0]) for r in refs)
+        if c_in:
+            u = c - ps  # 根がもう親の中なら、表面から離れる向き (さらに奥へ)
+        elif float(np.linalg.norm(u)) < 1e-6 or gap < 0.05 * ext:
+            u = near.mean(0) - ps
+        nu = float(np.linalg.norm(u))
+        if nu < 1e-9:
+            continue
+        u = u / nu
+        push = gap + amount * (ext / max(float((V.max(0) - V.min(0)).max()), 1e-6))
+        band = max(0.14 * ext, 2.0 * push, 0.6)
+        d_v = tree.query(Vc)[0]
+        w = np.clip(1.0 - d_v / band, 0.0, 1.0)
+        w = w * w * (3 - 2 * w)
+        V2[vi] = Vc + u[None, :] * push * w[:, None]
+        moved = True
+    if not moved:
+        return False
+    bd["vertices"] = [[round(float(x), 4) for x in p] for p in V2]
+    return True
+
+
+def joint_bad(data, mesh_name):
+    bones = {n: ma.Bone(n, b) for n, b in data["bones"].items()}
+    if len(bones) < 2:
+        return {}, bones
+    j = ma.joint_check(bones, mesh_name)
+    return {n: v for n, v in j.items() if v["status"] in ("detach", "shallow")}, bones
+
+
+def fix_joints(data, mesh_name, rounds=8):
+    """付け根の検査 (mesh_audit.joint_check) で detach / shallow の骨を、sink_root で沈めて直す。直るまで量を増やす (部品の大きさの 3% から 35%)。
+    離れすぎた部品 (隙間が大きさの 40% 超。煙の柱のように元から浮かせてあるもの) は触らない。戻り値は直せなかった骨の名前の一覧。"""
+    steps = (0.03, 0.06, 0.1, 0.16, 0.24, 0.35)
+    moved = {}
+    for rd in range(rounds):
+        bad, bones = joint_bad(data, mesh_name)
+        if not bad:
+            return []
+        todo = False
+        # 親から先に直す (親が動くと子の判定も変わる)
+        for n in sorted(bad, key=lambda x: _depth(data, x)):
+            b = data["bones"][n]
+            if not b.get("vertices"):
+                continue
+            pn = bad[n]["parent"]
+            refs = [bones[pn]] + [m for k, m in bones.items() if k not in (n, pn) and m.parent == bones[n].parent and len(m.T)]
+            ext = float((bones[n].V.max(0) - bones[n].V.min(0)).max())
+            psamp = np.vstack([ma.surface_samples(r) for r in refs])
+            gap = float(cKDTree(psamp).query(ma.surface_samples(bones[n]))[0].min())
+            if gap > 0.4 * ext:
+                continue
+            if any(_anc_in(data, n, bad)):
+                continue  # 祖先が悪いときは、祖先が直ってから (祖先が動くと判定が変わる)
+            i = moved.get(n, 0)
+            if i >= len(steps):
+                continue
+            # 同じ回で動かした親の影響は次の回の判定で見る
+            old = b["vertices"]
+            if sink_root(b, refs, steps[i] * ext, n):
+                moved[n] = i + 1
+                todo = True
+                if ma.analyze(np.array(b["vertices"], float), np.array(b["triangles"], int))["inv"]:
+                    b["vertices"] = old  # 裏返った (薄い部品が突き抜けた) ので戻す
+                    moved[n] = len(steps)
+        if not todo:
+            break
+    bad, _ = joint_bad(data, mesh_name)
+    return sorted(bad)
+
+
+def _anc_in(data, n, bad):
+    p = data["bones"][n].get("parent")
+    k = 0
+    while p in data["bones"] and k < 50:
+        yield p in bad
+        p = data["bones"][p].get("parent")
+        k += 1
+
+
+def _depth(data, n):
+    d = 0
+    while n in data["bones"] and data["bones"][n].get("parent") in data["bones"] and d < 50:
+        n = data["bones"][n]["parent"]
+        d += 1
+    return d
 
 
 # ----------------------------------------------------------------- ファイル
@@ -570,7 +701,7 @@ def close_mesh(data, with_collar=True):
                  np.array(b.get("triangles", []), int).reshape(-1, 3)] for n, b in data["bones"].items()}
     for n, b in data["bones"].items():
         bones["_pivot_" + n] = b.get("pivot", [0, 0, 0])
-    stats = dict(caps=0, flipped=0, collars=0, balls=0)
+    stats = dict(caps=0, flipped=0, collars=0)
     names = [n for n in data["bones"]]
     for n in names:
         V, UV, T = bones[n]
@@ -599,12 +730,11 @@ def close_mesh(data, with_collar=True):
             sib = [m for m in names if m != n and data["bones"][m].get("parent") == data["bones"][n].get("parent") and len(closed[m][2]) and m != pn]
             refs_n = [pn] + sib
             refs = [(closed[m][0], closed[m][2]) for m in refs_n]
-            ref_uvs = [((closed[m][0], closed[m][2]), closed[m][1]) for m in refs_n]
             view = dict(bones)
             if collar(view, n, refs):
                 stats["collars"] += 1
-            if joint_ball(view, n, refs, closed[n], ref_uvs):
-                stats["balls"] += 1
+            elif root_buried(view, n, refs) < 0.25 and extrude_root(view, n, refs):
+                stats["collars"] += 1
             bones[n] = view[n]
     # 段 C: 仕上げ
     capstart = {}
@@ -643,6 +773,8 @@ def close_mesh_file(path, with_collar=True, force=False):
     if "bones" not in data or (data.get(MARK) and not force):
         return None
     data, stats = close_mesh(data, with_collar)
+    if with_collar:
+        stats["unfixed"] = fix_joints(data, os.path.splitext(os.path.basename(path))[0])
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, separators=(",", ":"))
     return stats
@@ -660,7 +792,7 @@ def main(argv):
             continue
         st = close_mesh_file(p, with_collar="--no-collar" not in argv, force=force)
         if st:
-            print("%-50s caps=%d flipped=%d collars=%d balls=%d" % (r, st["caps"], st["flipped"], st["collars"], st["balls"]))
+            print("%-50s caps=%d flipped=%d collars=%d unfixed=%s" % (r, st["caps"], st["flipped"], st["collars"], ",".join(st.get("unfixed", [])) or "-"))
     return 0
 
 

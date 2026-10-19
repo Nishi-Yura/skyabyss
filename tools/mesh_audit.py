@@ -482,8 +482,8 @@ def joint_check(bones, mesh_name):
     rng_all = anim_ranges(mesh_name)
     out = {}
     for n, b in bones.items():
-        if len(b.T) == 0:
-            continue
+        if len(b.T) == 0 or n.startswith("smoke"):
+            continue  # 煙の柱は親の上に浮かせて立ち昇らせる演出なので付け根を見ない
         pn = nearest_mesh_ancestor(bones, n)
         if pn is None:
             continue
@@ -501,7 +501,8 @@ def joint_check(bones, mesh_name):
             # 付け根の近く (親・兄弟の表面にいちばん近い 200 点) だけを見る。体の遠い所の点が割合を薄めないように
             dd = cKDTree(psamp).query(cs)[0]
             cs = cs[np.argsort(dd)[:200]]
-        ext = float((b.V.max(0) - b.V.min(0)).max())
+        # 浅さの基準は部品の大きさの 2.5%。ただし巨神 (200 超) では大きさの上限を 40 にして、基準を 1 単位 (1/16 ブロック) までにする
+        ext = min(40.0, float((b.V.max(0) - b.V.min(0)).max()))
         buried = inside(cs)
         frac0 = float(buried.mean())
         depth0 = float(depth_in(cs[buried], None, None, psamp).max()) if buried.any() else 0.0
