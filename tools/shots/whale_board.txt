@@ -16,13 +16,13 @@ wait 40
 cmd summon skyabyss:stone_whale 0 -30 0 {Rotation:[0f,0f],Mode:2,RestTicks:999999}
 wait 500
 hud off
-cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^40 ^-29 ^8 facing ^10.5 ^-45 ^-30.5
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^40 ^-29 ^8 facing ^10.5 ^-30 ^-30.5
 wait 60
 shot board_far
-cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^18 ^-28 ^-24 facing ^10.5 ^-45 ^-30.5
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^18 ^-28 ^-24 facing ^10.5 ^-30 ^-30.5
 wait 60
 shot board_close
-cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^12 ^-18 ^-12 facing ^10.5 ^-50 ^-30.5
+cmd execute as @e[type=skyabyss:stone_whale,limit=1] at @s run tp @p ^12 ^-18 ^-12 facing ^10.5 ^-30 ^-30.5
 wait 60
 shot board_above
 cmd kill @e[type=skyabyss:stone_whale,distance=..600]
