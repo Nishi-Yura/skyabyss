@@ -29,7 +29,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 // - 吹く (右クリック): 海から 32 ブロック以内で、刻の 1 分前から刻の途中までに吹くと、その刻は自分のそばへ寄るよう頼める (一つの刻に一人)。
 //   巨神が頼みを受けると TideShellEntity.request が休む場所を決めて向かう。ほかに貝を持つ人には「○○が呼んだ」と知らせる
 // - 入手: 二章の小要素「漂着の荷」で一人に一つ。作業台では作らない
-public class TideConchItem extends Item {
+public class TideConchItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     // 距離の三段の境 (ブロック)
     public static final double NEAR = 320;
     public static final double CLOSE = 96;
@@ -117,9 +117,17 @@ public class TideConchItem extends Item {
         if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel server)) {
             return InteractionResultHolder.success(stack);
         }
-        player.getCooldowns().addCooldown(this, 40);
-        blow(sp, server);
+        usePouch(sp, () -> {
+        });
         return InteractionResultHolder.consume(stack);
+    }
+
+    // 吹く (右クリックと、旅嚢の輪・短押しの共通の中身)
+    @Override
+    public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
+        player.getCooldowns().addCooldown(this, 40);
+        blow(player, player.serverLevel());
+        return true;
     }
 
     // 吹く。結果を返す (自己テストが使う)。巨神がいない・海から遠い場合は null

@@ -66,11 +66,11 @@ public final class AccessoryClient {
         }
     }
 
-    // 持ち物の画面 (サバイバル) の上に、つまみを二つ。創造モードの持ち物の画面は形が違うので足さない
+    // 持ち物の画面 (サバイバル) の上に、つまみを三つ。創造モードの持ち物の画面は形が違うので足さない
     @SubscribeEvent
     static void onScreenInit(ScreenEvent.Init.Post event) {
         if (event.getScreen() instanceof InventoryScreen screen) {
-            AccessoryScreen.addTabs(event::addListener, screen, true);
+            AccessoryScreen.addTabs(event::addListener, screen, 0);
         }
     }
 
