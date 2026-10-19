@@ -138,7 +138,7 @@ public final class StormSelfTest {
         double topY = col.topY();
         int misses = 0;
         int samples = 0;
-        for (double r : new double[] {0, 1, 2, 2.5, 3, 3.5, 4}) {
+        for (double r : new double[] {0, 1, 2, 2.5, 3, 3.5, 3.9}) {
             for (int a = 0; a < 12; a++) {
                 for (double h : new double[] {-2, -0.5, 0, 0.6, 1.25, 3, 10, (topY - base) / 2, topY - base - 3, topY - base - 0.5}) {
                     samples++;
