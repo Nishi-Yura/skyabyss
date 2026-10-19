@@ -37,12 +37,17 @@ import os
 import shutil
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import mesh_close  # noqa: E402  (メッシュは書き出す前に水密にする: tools/mesh_close.py)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "skyabyss")
 
 
 def write_json(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    if isinstance(data, dict) and "bones" in data and os.sep + "lowpoly" + os.sep in path and "geo" not in path.split(os.sep)[-2:]:
+        data, _ = mesh_close.close_mesh(data)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, separators=(",", ":"))
 
