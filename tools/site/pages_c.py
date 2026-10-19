@@ -46,6 +46,7 @@ def faq():
         ["<code>skyabyssGraveExpire</code>", T("墓が消えるまでの分（0 で消えない）", "Minutes before a grave vanishes (0 = never)")],
         ["<code>skyabyssGraveRescue</code>", T("語り部の救いで戻る割合（%。0 で救いなし）", "Percent returned by the storyteller's rescue (0 = no rescue)")],
         ["<code>skyabyssDeathDurability</code>", T("耐久だけ減る型での減る割合（%）", "Durability loss percent in durability-only mode")],
+        ["<code>skyabyssRevive</code>", T("パーティの仲間が倒れた人を起こせる仕組み（既定 true。false で従来どおり死ぬ）", "Whether party members can revive a downed player (default true; false means normal death)")],
         ["<code>skyabyssHeartReentryLimit</code>", T("戦いで倒れた人が 20 秒後に戻れる回数（既定 3。0 で数えない）", "Re-entries allowed per fight after 20 s (default 3; 0 = uncounted)")],
     ])
     cmds = table([T("コマンド（OP・権限 2）", "Command (op level 2)"), T("働き", "What it does")], [
@@ -69,7 +70,6 @@ def faq():
     qa_html = "".join("<details><summary>%s</summary><p>%s</p></details>" % (T(a, b), T(c, d)) for a, b, c, d in qa)
     limits = [
         ("マルチは、まだ人の手で通しの確認をしていません（特に 2 つのパーティが同じ背中にいるとき）。", "Multiplayer has not yet been verified end to end by people (especially with two parties on one back)."),
-        ("雷翼と余燼では、巨神に乗って移動する旅がまだありません。", "Traveling by riding Thunder Wing or Ember is not available yet."),
         ("序盤の演出・予兆・仕掛けの濃さは、通しで確かめていません。", "The density of early-game staging, omens and small set pieces has not been playtested end to end."),
         ("余燼の背中は、人が通しで遊んでいません。", "Ember's back has not been played through by a person."),
         ("風見鶏と潮の真珠の絵は仮のものです。", "The art for the weathercock and the tide pearl is placeholder."),
@@ -91,6 +91,7 @@ def faq():
 <ol class="steps">
 <li>%(i1)s</li><li>%(i2)s</li><li>%(i3)s</li><li>%(i4)s</li><li>%(i5)s</li>
 </ol>
+<div class="note warn"><strong>%(norel)s</strong></div>
 <div class="note">%(dl)s</div>
 <p><a class="btn" href="%(repo)s/releases">%(btn)s</a> <a class="btn ghost" style="color:var(--ink);background:var(--surface);border-color:var(--edge)" href="%(repo)s">%(btn2)s</a></p>
 </div>
@@ -132,6 +133,7 @@ def faq():
         i4=T("新しいワールドを作ります。難易度はピースフル以外にします。", "Create a new world on any difficulty except Peaceful."),
         i5=T("目覚めたら、画面の左上の目的の帯に従って進みます。", "When you wake, follow the objective strip at the top left."),
         dl=T("jar は開発者から受け取るか、ソースから <code>./gradlew build</code> で作ると <code>build/libs/</code> に出ます。", "Get the jar from the developer, or build it from source with <code>./gradlew build</code>; it appears in <code>build/libs/</code>."),
+        norel=T("まだ公開リリースはありません。今は、ソースから <code>./gradlew build</code> で jar を作って使います（下のリリースのページは、公開されたときの置き場です）。", "There is no public release yet. For now, build the jar from source with <code>./gradlew build</code> (the Releases page below is where it will appear once published)."),
         btn=T("リリースのページ", "Releases page"), btn2=T("ソース（GitHub）", "Source (GitHub)"),
         h_srv=T("サーバーの管理者向け", "For server administrators"),
         srv=T("<code>/gamerule</code> で決まりを変えられます。巨神の背中は専用のディメンションなので、ワールドのバックアップは通常どおりで構いません。", "Rules can be changed with <code>/gamerule</code>. Titan backs live in dedicated dimensions, so normal world backups work as usual."),
@@ -152,6 +154,13 @@ def faq():
 
 def changelog():
     ver = [
+        (T("0.2.2 以降（開発中・リリース前）", "After 0.2.2 (in development, unreleased)"), "2026-10-20", [
+            ("心臓の領域が変わりました。時間では終わらず、三つの仕掛け（共鳴する骨・潮の水門・避雷の柱・熾の核）を解くまで続き、そのあいだ心臓は傷を受けません。", "Heart domains changed: they no longer time out and last until three gimmicks (resonant bones, tide valves, lightning rods, ember cores) are solved; the heart is invulnerable meanwhile."),
+            ("倒れた仲間を起こせるようになりました（約 15 秒の「倒れた」状態、3 秒の長押しで蘇生）。", "Party members can now revive a downed ally (about 15 s downed state, 3 s hold to revive)."),
+            ("試練のプール（巨神ごとに十二、周回ごとに歩・智・闘から一つずつ）、試練の板・図鑑・称号・今週の試練を追加。試練を越えると鼓動の間へ戻り、碑が光ります。", "Added the trial pool (twelve per titan, one drawn each cycle per Traverse/Wit/Combat slot), the trial board, codex, titles and weekly trial. Clearing a trial returns you to the hub and lights its tablet."),
+            ("巨神の子が運ぶ旅を追加（笛で子を呼び、パーティ全員で乗って海図から行き先を選ぶ）。成体はもう動きません。", "Added travel by young carriers (summon with a whistle, ride as a party, choose a destination from a chart); adult titans no longer move."),
+            ("5 つの木と旅人の 36 の技、天職、刻印、要、型、伝説の書き換え、ステータスの刻み目を追加。", "Added 36 skills across five trees and the Wayfarer, callings, runes, keystones, weapon types, legendary rewrites and stat breakpoints."),
+        ]),
         ("0.2.2", "2026-10-19", [
             ("岩鯨の背を大きくしました（広間・心臓の間・水路）。", "Enlarged the Stone Whale's back (halls, heart chamber, channel)."),
             ("ボスの技の予告を床に出すようにしました（橙・青白の破線・灰）。", "Boss attacks are now telegraphed on the floor (orange, pale dashed, gray)."),
@@ -168,7 +177,7 @@ def changelog():
             ("潮見の貝、地上で倒れたときの墓、装飾の枠、READMEとドット絵の刷新。", "Added the Tide-watching Shell, graves on ground deaths, accessory slots, and refreshed the README and pixel art."),
         ]),
     ]
-    items = "".join('<li><h3>v%s</h3><p class="date">%s</p><ul>%s</ul></li>' % (v, d, "".join("<li>%s</li>" % T(a, b) for a, b in notes)) for v, d, notes in ver)
+    items = "".join('<li><h3>%s</h3><p class="date">%s</p><ul>%s</ul></li>' % (v if v.startswith("<") else "v" + v, d, "".join("<li>%s</li>" % T(a, b) for a, b in notes)) for v, d, notes in ver)
     body = page_head("更新履歴", "Changelog", "ベータ版の主な変更です。", "Main changes in the beta versions.") + """
 <section aria-labelledby="log">
 <div class="wrap">

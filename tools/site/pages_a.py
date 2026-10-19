@@ -374,12 +374,66 @@ def titans():
         c_h=T("心臓の戦い", "Heart fights"),
         c1=T("心臓の戦いで倒れたら、前室で目を覚まし、20 秒後に戻れます（1 戦に 3 回まで）。戻ると 3 秒の守りがあります。", "If you fall in a heart fight you wake in the antechamber and may re-enter after 20 s (3 times per fight), with 3 s of protection."),
         c2=T("敵の技は床に予告が出ます。橙〜赤の実線は傷、青白い破線は安全な筋、灰は押されるだけです。", "Attacks are telegraphed on the floor: orange to red solid is damage, pale dashed is a safe lane, gray only pushes."),
-        c3=T("体力が半分を切ると、一度だけ「領域」が広がります。35 秒のあいだ領域だけの床の決まりが回り、与えた傷が最大体力の 6% に届くと領域が砕け、心臓は 5 秒のあいだ傷を 1.5 倍受けます。", "When its health drops below half, the heart opens a domain once. For 35 seconds domain-only floor rules run; deal 6% of its max health and the domain shatters, leaving the heart taking 1.5x damage for 5 seconds."),
+        c3=T("体力が半分を切ると、一度だけ「領域」が広がります。領域のあいだ心臓は傷を受けず、部屋に立つ三つの仕掛けを解くまで続きます。解けると心臓は 5 秒のあいだ傷を 1.5 倍受けます。決まりの傷はすべて床の予告から出て、仕掛けは一人でも解けます。", "When its health drops below half, the heart opens a domain once. During it the heart cannot be damaged, and it lasts until you solve three gimmicks in the room; solving them leaves the heart taking 1.5x damage for 5 seconds. All domain damage is telegraphed on the floor and the gimmicks are solvable solo."),
         c4=T("一方向に回り続けるだけでは勝てません。止まる・逆へ回る・跳ぶ・内外へ出る、で避けます。", "Circling in one direction forever will not work. Stop, reverse, jump or move in and out."),
         d_h=T("備えの三灯", "The three readiness lamps"),
         d1=T("乗り込み口に近づくと、今の備えが三つの灯で出ます。身（防具）・刃（武器）・糧（回復と護りの品）です。", "Near an entrance your readiness shows as three lamps: body (armor), blade (weapon) and provisions (healing and protection)."),
         lamp_alt="備えの三灯の見本", l1=T("緑: 足りている", "Green: ready"), l2=T("黄: 少し足りない", "Yellow: a bit short"), l3=T("赤: 足りない", "Red: lacking"),
         d2=T("足りない灯があると「このまま乗る？」と聞かれ、5 秒以内に同じ操作をすると乗れます。", "If a lamp is short you are asked to confirm; repeat the action within 5 seconds to board."),
+    )
+    pool = """
+<section aria-labelledby="h-pool" id="pool">
+<div class="wrap">
+<h2 id="h-pool">%(h)s</h2>
+<p class="lead">%(lead)s</p>
+<div class="grid g2">
+<div class="panel"><h3>%(a_h)s</h3><p>%(a)s</p></div>
+<div class="panel"><h3>%(b_h)s</h3><p>%(b)s</p></div>
+<div class="panel"><h3>%(c_h)s</h3><p>%(c)s</p></div>
+<div class="panel"><h3>%(d_h)s</h3><p>%(d)s</p></div>
+</div>
+<p class="muted"><small>%(note)s</small></p>
+</div>
+</section>
+""" % dict(
+        h=T("試練のプール", "The trial pool"),
+        lead=T("巨神ごとに十二の試練（四体で 48）があり、周回ごとにその中から三つが選ばれます。同じ背でも、周回すると違う遊びになります。",
+               "Each titan has twelve trials (48 in all) and each cycle draws three of them. The same back plays differently every cycle."),
+        a_h=T("引き方", "How trials are drawn"),
+        a=T("試練は歩・智・闘の三つの枠に分かれ、心臓を止めて周回するたびに、パーティごとに各枠から一つずつ引きます。最初の周は今までの三つ（原型）で固定です。四周で巨神ごとの十二をすべて見られます。",
+            "Trials fall into three slots: Traverse, Wit and Combat. Each cycle (every heart you stop) your party draws one per slot. The first cycle always uses the original three, and four cycles reveal all twelve."),
+        b_h=T("難度の段と修飾", "Tiers and modifiers"),
+        b=T("難度は★1〜★3（周回の数で解禁され、必要 Lv や装備では閉じません。どの段も一人で解けます）。配置の型・数字の振り・敵の組・障害・任意の目標がランダムに加わり、修飾の稀さは「常・稀・極」で表され、稀・極は素材が増えます。",
+            "Difficulty runs from 1 to 3 stars, unlocked by cycle count and never gated by level or gear; every tier is solvable solo. Layout, numbers, enemy mix, hazards and optional goals vary, with rarity shown as Common, Rare or Extreme; Rare and Extreme give more materials."),
+        c_h=T("試練の板・図鑑・称号", "Trial board, codex, titles"),
+        c=T("鼓動の間と背の入口の「試練の板」に、引いた三つと修飾が出ます。図鑑と称号で見た試練を数え、「今週の試練」（一人週一回、素材が倍・共鳴の欠片 1）は引いていなくても挑めます。ロックではありません。",
+            "The trial board in the hub and at the back entrance lists your three trials and their modifiers. A codex and titles track what you have seen, and the weekly trial (once a week per player: doubled materials and one resonance fragment) can be taken even if it was not drawn. Nothing is locked."),
+        d_h=T("越えたあと", "After a clear"),
+        d=T("石が鳴って 4 秒ほどで、その試練の中にいた仲間は鼓動の間へ戻り、碑が光ります。越えた試練はそのパーティにだけ封じられ、同じ背にいる別のパーティには触れません。戦いは、部屋の中にいる人数に合わせて強くなります。",
+            "About four seconds after the stone rings, party members inside that trial return to the hub and its tablet lights up. The cleared trial is sealed for that party only, never affecting another party on the same back. Combat scales with the number of people inside the room."),
+        note=T("試練のプールは順次追加中です（今は岩鯨の背に原型 3 と新作が入っています）。", "The pool is being filled in gradually (currently the Stone Whale has its three originals plus new trials)."),
+    )
+    travel = """
+<section class="alt" aria-labelledby="h-travel" id="travel">
+<div class="wrap">
+<h2 id="h-travel">%(h)s</h2>
+<p class="lead">%(lead)s</p>
+<ol class="steps">
+<li>%(s1)s</li><li>%(s2)s</li><li>%(s3)s</li><li>%(s4)s</li><li>%(s5)s</li>
+</ol>
+<p class="muted"><small>%(note)s</small></p>
+</div>
+</section>
+""" % dict(
+        h=T("巨神の子と旅", "Young carriers and travel"),
+        lead=T("成体の巨神は、もう動き回りません。遠くへの旅は、笛で呼ぶ「子」（巨神の分かれた鼓動、歌のかけら）が運びます。",
+               "Adult titans no longer roam. Long journeys are carried by a young one, a split beat of the titan, summoned with a whistle."),
+        s1=T("<strong>呼ぶ。</strong>笛（潮殻は貝）を使うと、巨神の子が現れます。子は乗っている間だけいます。", "<strong>Summon.</strong> Use the whistle (a conch for Tide Shell) and a young carrier appears. It exists only while someone rides it."),
+        s2=T("<strong>全員で乗る。</strong>パーティ全員（最大 6 人）が乗れます。", "<strong>Ride together.</strong> The whole party, up to six, can ride."),
+        s3=T("<strong>行き先を選ぶ。</strong>持ち主が海図から、はじまりの地・覚えた碑・出会った巨神のいる場所を選びます。行き先は子の得意で限られ、選べないものには理由が付きます。", "<strong>Pick a destination.</strong> The owner chooses from a chart: the starting land, remembered tablets or the places of titans you have met. Each young carrier has strengths that limit destinations, and unavailable ones show why."),
+        s4=T("<strong>出発。</strong>全員が乗っていれば約 3 秒、64 ブロック以内に乗っていない仲間がいれば約 15 秒（最大 30 秒）待ちます。遠い旅は途中で雲の帳に包まれます。", "<strong>Depart.</strong> About 3 seconds if everyone is aboard, about 15 (up to 30) if a party member within 64 blocks has not boarded. Long trips pass through a veil of cloud."),
+        s5=T("<strong>着く。</strong>行き先が成体なら、足もとの光の輪に立つと背へ入れます（この旅に乗っていた人だけ）。全員が降りると、子は歌に溶けて消えます。", "<strong>Arrive.</strong> If the destination is an adult titan, stand in the glowing ring at your feet to enter its back (riders only). Once everyone dismounts the young carrier dissolves into song."),
+        note=T("親の巨神が眠れば、子も眠ります。誰も乗らないまま 20 秒、行き先を決めないまま約 2 分で子は溶けます。", "If the parent titan sleeps, so does its young one. A young carrier dissolves after 20 seconds with no rider, or about 2 minutes without a destination."),
     )
     after = """
 <section aria-labelledby="after">
@@ -415,7 +469,7 @@ def titans():
         n=T("推奨より 3 レベルを超えて上だと、倒したときの経験値が減ります。物語の進みで上限が決まります（最初は 15）。", "More than 3 levels above the recommendation reduces XP. Story progress sets the level cap (15 at the start)."),
         sep=divider())
     body = page_head("巨神と背中", "Titans and their backs", "四体の巨神の姿、乗り方、背中の三つの試練、心臓、領域。仕組みだけを書いています。",
-                     "Four titans: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + after
+                     "Four titans: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + pool + travel + after
     page("titans.html", "巨神と背中 — 天と淵のあいだ", "Titans and their backs — Between the Sky and the Abyss",
          "岩鯨・潮殻・雷翼・余燼。乗り方、三つの試練、心臓、領域、装備。", "Stone Whale, Tide Shell, Thunder Wing and Ember: boarding, trials, hearts, domains and gear.", body)
 
@@ -427,7 +481,7 @@ HEARTS = {
     "ember": ["ember_heart_icon_p1.png", "ember_heart_icon_p2.png", "ember_heart_icon_p3.png"],
 }
 
-BOARD_SHORT = {
+BOARD_SHORT = {  # 乗り込み口 (成体の巨神は動かない。遠い旅は子が運ぶ)
     "whale": ("空から垂れる鎖を右クリック", "Right-click the chain lowered from the sky"),
     "shell": ("干潮のころ、浅瀬の「潮門」を泳ぐか舟でくぐる", "At low tide, swim or boat through the tide gate"),
     "wing": ("夕立のころ、峰に立つ「昇り風」に入る", "At the evening squall, step into the updraft on the peak"),
@@ -445,7 +499,7 @@ TITAN_BODY = {
                 ("東の翼", "East wing", "三つの広間の番兵を倒しながら進み、最後は中ボス「鯨骨の番兵長」。", "Fight through three halls of sentries to the mid-boss, the Whalebone Warden Captain."),
                 ("下の水路", "Underside channel", "真っ暗な水没した迷路。灯をたずさえて光の道をたどり、息継ぎをしながら進みます。", "A pitch-dark flooded maze. Carry a light, follow the lit path and surface for breath.")],
         heart=("岩鯨の心臓は 3 段階。体力が半分を切ると領域を広げます。", "The Stone Whale's heart has three phases and opens its domain below half health."),
-        dom=("石の海", "Sea of Stone"), domtxt=("部屋の色が変わり、石の海の床の決まりが 35 秒回ります。", "The room changes color and stone-sea floor rules run for 35 seconds."),
+        dom=("石の海", "Sea of Stone"), domtxt=("心臓は傷を受けなくなり、広がる輪を跳んで越えながら、部屋の三本の共鳴する骨を、鳴った順に叩き返すと解けます。", "The heart becomes invulnerable. Jump over the expanding rings and strike the three resonant bones back in the order they chimed to break the domain."),
         gear=["whalebone_greatsword", "captain_pike", "waterway_fang",
               "stone_whale_plating", "stone_whale_chestplate"]),
     "shell": dict(
@@ -457,7 +511,7 @@ TITAN_BODY = {
                 ("東 潮見の間", "East: Tide-Watch Hall", "栓で水位を動かし、三段の溜めを渡る謎解き。", "A puzzle of moving the water level with plugs to cross three basins."),
                 ("前 群れの干潟", "Front: Swarm Flats", "干潮のあいだに群れの巣を壊し、最後は中ボス「潮招き」。", "Destroy the swarm nests during low tide, then face the mid-boss, the Tide Beckoner.")],
         heart=("潮殻の心臓は 3 段階。体力が半分を切ると領域を広げます。", "The Tide Shell's heart has three phases and opens its domain below half health."),
-        dom=("満ち潮", "Rising Tide"), domtxt=("部屋の色が変わり、満ち潮の床の決まりが 35 秒回ります。", "The room changes color and rising-tide floor rules run for 35 seconds."),
+        dom=("満ち潮", "Rising Tide"), domtxt=("心臓は傷を受けなくなり、岩の島の上の三つの潮の水門を叩きます。三つを同時に開けておく（各 45 秒）と潮が引き、解けます。", "The heart becomes invulnerable. Strike three tide valves on the rock islands; keep all three open at once (45 s each) and the tide recedes."),
         gear=["tide_shell_trident", "coral_shield", "tidecaller_claw",
               "coral_harpoon", "moontide_pearl", "tide_shell_chestplate"]),
     "wing": dict(
@@ -469,7 +523,7 @@ TITAN_BODY = {
                 , ("東 雷の骨", "East: Thunder Bones", "落雷の予告を読み、雷を避雷の柱へ導いて骨の戸を開けます。中ボスは「雷獣」。", "Read the lightning telegraphs and guide strikes into lightning rods to open the bone door. Mid-boss: the Thunder Beast."),
                 ("前 眼の間", "Front: Hall of the Eye", "巨神の眼から差す光を、羽鏡で三つの受け羽へ導きます。", "Steer light from the titan's eye into three receiving feathers with feather mirrors.")],
         heart=("雷翼の心臓は 3 段階で、三つの試練で覚えたことをそれぞれ使います（避雷の柱・昇り風・光）。", "The Thunder Wing's heart has three phases, each using what a trial taught you (lightning rods, updrafts, light)."),
-        dom=("雷の檻", "Cage of Thunder"), domtxt=("部屋の色が変わり、雷の檻の床の決まりが 35 秒回ります。", "The room changes color and cage-of-thunder floor rules run for 35 seconds."),
+        dom=("雷の檻", "Cage of Thunder"), domtxt=("心臓は傷を受けなくなり、三本の避雷の柱が順に雷を溜めます。溜まりきる前に叩いて地へ逃がし、三本とも打てば解けます。", "The heart becomes invulnerable. Three lightning rods charge one after another; strike each to ground the bolt before it fully charges."),
         gear=["thunder_wing_bow", "raiju_claw", "warden_glaive",
               "storm_eye_feather", "storm_anklet", "thunder_wing_chestplate"]),
     "ember": dict(
@@ -481,7 +535,7 @@ TITAN_BODY = {
                 ("東 鍛えの間", "East: Forging Hall", "熱の色を読んで「火の鍵」を鍛え、焼き入れます。扉を開くと中ボス「灰の鍛え手」が目を覚まします。", "Read the colors of heat to forge and quench a fire key. Opening the door wakes the mid-boss, the Ashen Smith."),
                 ("南 火守り", "South: Firekeeping", "背の亀裂の底で、消えかけた火床に熾をくべ続けます。", "At the bottom of a rift, keep feeding embers to a fading hearth.")],
         heart=("余燼の心臓は 3 段階。体力が半分を切ると領域を広げます。", "The Ember's heart has three phases and opens its domain below half health."),
-        dom=("炉心", "Furnace Core"), domtxt=("部屋の色が変わり、炉心の床の決まりが 35 秒回ります。", "The room changes color and furnace-core floor rules run for 35 seconds."),
+        dom=("炉心", "Furnace Core"), domtxt=("心臓は傷を受けなくなり、三つの熾の核のそばでしゃがみ続けて冷まします（熱い床の予告を避けながら）。三つ冷ませば解けます。", "The heart becomes invulnerable. Crouch beside each of three ember cores to quench them while dodging heated floor telegraphs."),
         gear=["ember_war_axe", "smith_hammer", "thrall_poker",
               "ember_lantern", "ember_mantle", "ember_chestplate"]),
 }
