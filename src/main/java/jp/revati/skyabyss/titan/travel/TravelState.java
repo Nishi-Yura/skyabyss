@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 
 // プレイヤーごとの「巨神での移動」の記録。プレイヤーのデータと一緒に保存し、死んでも引き継ぐ。
 // - unlocked: 認めてくれた巨神 (心臓を倒した巨神。コマンドで足すこともできる)
+// - met: 出会った巨神 (乗れる姿を見た・背へ入った・心臓を倒した)。出会った巨神は、その呼び笛でいつでも呼べる (TitanCalls)
 // - callGiven: 呼び笛をすでに渡した巨神 (一度だけ自動で渡す。なくしたら作り直す)
 // - waymarks: 覚えた碑 (オーバーワールドの位置。覚えた順)
 // - readyAt: 次に呼べるようになる時刻 (オーバーワールドの総 tick)
@@ -24,11 +25,13 @@ public final class TravelState {
             Codec.STRING.listOf().optionalFieldOf("callGiven", List.of()).forGetter(s -> List.copyOf(s.callGiven)),
             Codec.LONG.listOf().optionalFieldOf("waymarks", List.of()).forGetter(s -> s.waymarks.stream().map(BlockPos::asLong).toList()),
             Codec.LONG.optionalFieldOf("readyAt", 0L).forGetter(s -> s.readyAt),
-            Codec.INT.optionalFieldOf("voyages", 0).forGetter(s -> s.voyages)
+            Codec.INT.optionalFieldOf("voyages", 0).forGetter(s -> s.voyages),
+            Codec.STRING.listOf().optionalFieldOf("met", List.of()).forGetter(s -> List.copyOf(s.met))
     ).apply(i, TravelState::new));
 
     public final Set<String> unlocked = new LinkedHashSet<>();
     public final Set<String> callGiven = new LinkedHashSet<>();
+    public final Set<String> met = new LinkedHashSet<>();
     public final List<BlockPos> waymarks = new ArrayList<>();
     public long readyAt;
     public int voyages;
@@ -36,7 +39,7 @@ public final class TravelState {
     public TravelState() {
     }
 
-    private TravelState(List<String> unlocked, List<String> callGiven, List<Long> waymarks, long readyAt, int voyages) {
+    private TravelState(List<String> unlocked, List<String> callGiven, List<Long> waymarks, long readyAt, int voyages, List<String> met) {
         this.unlocked.addAll(unlocked);
         this.callGiven.addAll(callGiven);
         for (long pos : waymarks) {
@@ -47,6 +50,7 @@ public final class TravelState {
         }
         this.readyAt = readyAt;
         this.voyages = voyages;
+        this.met.addAll(met);
     }
 
     public enum AddResult { ADDED, ALREADY, FULL }

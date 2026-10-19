@@ -935,8 +935,14 @@ public class EmberTitanEntity extends Entity implements GeoEntity, jp.revati.sky
 
     // このプレイヤーの近くで眠らせる (夜を待たない)。眠る場所の地の中へ移ってから浮かぶ。眠る場所がなければ false
     public boolean comeSleepNear(ServerPlayer player) {
+        return callNear(player, null);
+    }
+
+    // 呼び鈴 (titan.travel.TitanCalls): 夜を待たずに、その人の近く (なければ広げて探す) の地の中へ移り、浮かんで眠る。
+    // 眠る (浮かぶ) と 20 分 (TitanStay) 口を開け閉めする。spotOverride はテスト用 (陸の検査を省く)
+    public boolean callNear(ServerPlayer player, @Nullable EmberGround.Spot spotOverride) {
         ServerLevel level = (ServerLevel) level();
-        EmberGround.Spot spot = EmberGround.findSleepSpot(level, player.getX(), player.getZ());
+        EmberGround.Spot spot = spotOverride != null ? spotOverride : EmberGround.findCallSpot(level, player.getX(), player.getZ());
         if (spot == null) {
             return false;
         }

@@ -185,11 +185,11 @@ public final class Config {
 
     public static final ModConfigSpec.EnumValue<MarkerStyle> BOARD_MARKER = CLIENT_BUILDER
             .comment("乗り込み口の目印の見せ方。CURRENT = 今の光の柱と枠, A = 柔らかい光の筋と床の紋様, B = 浮かぶ欠片の輪と矢印の流れ, C = 巨神の体の灯りと光の綱")
-            .defineEnum("boardMarker", MarkerStyle.CURRENT);
+            .defineEnum("boardMarker", MarkerStyle.B);
 
     public static final ModConfigSpec.EnumValue<MarkerStyle> RETURN_MARKER = CLIENT_BUILDER
             .comment("真ん中へ戻る光の見せ方。CURRENT = 今の光の柱と枠, A = 浮かぶ灯の精, B = 床の紋様と立ちのぼる粒, C = 光の拱門")
-            .defineEnum("returnMarker", MarkerStyle.CURRENT);
+            .defineEnum("returnMarker", MarkerStyle.B);
 
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 

@@ -183,6 +183,28 @@ public final class EmberGround {
         return null;
     }
 
+    // 呼び鈴で呼ぶときの眠る場所: まず人の近く (findSleepSpot)。そこに平らな陸がなければ、輪を 160 ブロックまで広げて探す
+    // (口をその人へ向ける)。読み込まれている範囲だけを見る。見つからなければ null
+    @Nullable
+    public static Spot findCallSpot(ServerLevel level, double px, double pz) {
+        Spot near = findSleepSpot(level, px, pz);
+        if (near != null) {
+            return near;
+        }
+        for (int r = 72; r <= 160; r += 16) {
+            for (int a = 0; a < 24; a++) {
+                double angle = Math.PI * 2 * (a + (r % 7) / 7.0) / 24;
+                double sx = px + Math.cos(angle) * r;
+                double sz = pz + Math.sin(angle) * r;
+                Spot spot = sleepSpotAt(level, sx, sz, yawOf(px - sx, pz - sz));
+                if (spot != null) {
+                    return spot;
+                }
+            }
+        }
+        return null;
+    }
+
     // 鼻先を (sx, sz) に置き、向き yaw で伏せられるか。伏せられれば眠る場所
     @Nullable
     public static Spot sleepSpotAt(ServerLevel level, double sx, double sz, float yaw) {

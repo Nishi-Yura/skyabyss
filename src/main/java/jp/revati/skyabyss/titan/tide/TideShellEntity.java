@@ -595,6 +595,23 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         return requestWindow == TideOcean.windowId(level().getDayTime()) ? requesterName : "";
     }
 
+    // 呼び貝 (titan.travel.TitanCalls): 干満・昼夜に関わらず、その人にいちばん近い浅瀬へ寄って、20 分 (TitanStay) 潮門を開ける。
+    // 遠くにいるときは、休む場所から 90〜140 ブロックの沖から歩いてくる。休む場所がなければ false
+    public boolean callNear(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) level();
+        Vec3 spot = TideOcean.findCallSpot(level, player.getX(), player.getZ());
+        if (spot == null) {
+            return false;
+        }
+        if (horizontalDistanceTo(spot.x, spot.z) > 160) {
+            Vec3 from = TideOcean.findOceanPoint(level, random, spot.x, spot.z, 90, 140, 6, 24);
+            Vec3 at = from != null ? from : new Vec3(spot.x + 100, 0, spot.z);
+            setPos(at.x, level.getSeaLevel() - REST_DRAFT, at.z);
+        }
+        beginApproach(level, spot, FORCED_REST);
+        return true;
+    }
+
     // テスト用: このプレイヤーの近くの浅瀬へ寄せ、休ませる (刻を待たない)。休む場所がなければ false
     public boolean comeRestNear(ServerPlayer player) {
         Vec3 spot = TideOcean.findRestSpot((ServerLevel) level(), player.getX(), player.getZ());

@@ -96,6 +96,9 @@ public final class Keepsakes {
                 items.add(core);
             }
         }
+        // 旅のない巨神 (雷翼・余燼) の呼び笛も大事な品 (出会いの印として渡る。titan.travel.TitanCalls)
+        items.add(TravelSetup.THUNDER_WING_CALL.get());
+        items.add(TravelSetup.EMBER_CALL.get());
         for (jp.revati.skyabyss.titan.travel.TitanKind kind : jp.revati.skyabyss.titan.travel.TitanKind.all()) {
             if (!items.contains(kind.callItem().get())) {
                 items.add(kind.callItem().get());
