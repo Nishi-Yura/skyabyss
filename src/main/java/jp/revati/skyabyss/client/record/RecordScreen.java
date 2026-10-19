@@ -371,6 +371,7 @@ public class RecordScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
         renderTabs(g, mouseX, mouseY);
         renderHeader(g);
+        renderRebirthLink(g, mouseX, mouseY);
         @Nullable ItemHover hover = renderList(g, mouseX, mouseY);
         renderDetail(g, mouseX, mouseY);
         if (hover != null) {
@@ -421,8 +422,17 @@ public class RecordScreen extends Screen {
         g.drawString(font, name, cx - font.width(name) / 2, top + 9, TITLE, false);
         Component owner = snapshot.self() ? Component.translatable("skyabyss_record.gui.owner", snapshot.targetName())
                 : Component.translatable("skyabyss_record.gui.inspecting", snapshot.targetName());
+        // 転生した人は、名前の横に段の色の記号と枠 (docs/design/31 の C15)
+        int rebirths = jp.revati.skyabyss.rebirth.RebirthRecord.countOf(snapshot);
+        if (rebirths > 0) {
+            owner = jp.revati.skyabyss.rebirth.RebirthText.symbols(rebirths, jp.revati.skyabyss.client.rebirth.RebirthClient.timeMs(),
+                    jp.revati.skyabyss.client.rebirth.RebirthClient.still()).append(" ").append(owner);
+        }
         FormattedCharSequence o = ellipsize(owner, LW - 8);
         int ow = font.width(o);
+        if (rebirths > 0) {
+            jp.revati.skyabyss.client.rebirth.RebirthClient.drawFrame(g, cx - ow / 2 - 4, top + 17, ow + 8, 11, rebirths);
+        }
         if (!snapshot.self()) {
             // 管理者がほかの人を見ているときは、えんじの帯で
             RIBBON.draw(g, cx - ow / 2 - 6, top + 18, ow + 16, 10);
@@ -430,6 +440,21 @@ public class RecordScreen extends Screen {
         } else {
             g.drawString(font, o, cx - ow / 2, top + 19, FADED, false);
         }
+    }
+
+    // 称号・飾りの画面へのリンク (自分の記録だけ。見出しの右)
+    private int linkX() {
+        return left + LX + LW - font.width(Component.translatable("skyabyss_rebirth.gui.open")) - 2;
+    }
+
+    private void renderRebirthLink(GuiGraphics g, int mouseX, int mouseY) {
+        if (!snapshot.self()) {
+            return;
+        }
+        Component label = Component.translatable("skyabyss_rebirth.gui.open");
+        int x = linkX();
+        boolean hover = mouseX >= x - 2 && mouseX < x + font.width(label) + 2 && mouseY >= top + 7 && mouseY < top + 18;
+        g.drawString(font, label, x, top + 9, hover ? TITLE : FADED, false);
     }
 
     // 中のつまみの帯: 左の頁の上に、頁の数で等分して並べる (巨神が増えれば細くなる)
@@ -613,6 +638,12 @@ public class RecordScreen extends Screen {
     // ---------------------------------------------------------------- 操作
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && snapshot.self() && mouseX >= linkX() - 2 && mouseX < linkX() + font.width(Component.translatable("skyabyss_rebirth.gui.open")) + 2
+                && mouseY >= top + 7 && mouseY < top + 18) {
+            click();
+            minecraft.setScreen(new jp.revati.skyabyss.client.rebirth.RebirthScreen(this));
+            return true;
+        }
         if (button == 0) {
             // つまみ
             for (int i = 0; i < RecordSnapshot.TAB_IDS.size(); i++) {
