@@ -92,7 +92,7 @@ public class SoulScreen extends Screen {
         }
         go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(left + C1, top + 158, C1W, 16).build());
         shardButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
-                .bounds(left + C3 + 66, top + 160, 50, 14).build());
+                .bounds(left + C3, top + 160, 60, 14).build());
         RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.REBIRTH);
         refresh();
     }
@@ -243,7 +243,7 @@ public class SoulScreen extends Screen {
         Component afterLabel = Component.translatable("gui.skyabyss.rebirth.after_label");
         g.drawString(font, afterLabel, x, top + 62, SOFT, false);
         int lx = x + font.width(afterLabel) + 5;
-        g.drawString(font, Rebirth.levelLabel(RebirthRules.MIN_LEVEL, after) + " " + Rebirth.symbol(after), lx, top + 62, 0xFF000000 | Rebirth.tierColor(after, ms), false);
+        g.drawString(font, Rebirth.levelLabel(RebirthRules.MIN_LEVEL, after), lx, top + 62, 0xFF000000 | Rebirth.tierColor(after, ms), false);
         // 代価
         boolean cost = minecraft.player.isCreative() || crystals() >= RebirthRules.COST_CRYSTALS;
         g.drawString(font, Component.translatable("gui.skyabyss.rebirth.cost", RebirthRules.COST_CRYSTALS, crystals()), x, top + 73, cost ? OK : DENY, false);
@@ -365,7 +365,7 @@ public class SoulScreen extends Screen {
             }
         }
         // 欠片
-        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.shards", rd.shards, RebirthRules.SHARDS_PER_NODE), left + C3, top + 164, rd.shards > 0 ? TEXT : SOFT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.rebirth.shards", rd.shards, RebirthRules.SHARDS_PER_NODE), left + C3, top + 150, rd.shards > 0 ? TEXT : SOFT, false);
     }
 
     private void drawTooltips(GuiGraphics g, SoulData rd, int mouseX, int mouseY) {
@@ -391,7 +391,7 @@ public class SoulScreen extends Screen {
                 return;
             }
         }
-        if (shardButton.isHovered() || (mouseX >= left + C3 && mouseX < left + C3 + 64 && mouseY >= top + 160 && mouseY < top + 174)) {
+        if (shardButton.isHovered() || (mouseX >= left + C3 && mouseX < left + C3 + 90 && mouseY >= top + 148 && mouseY < top + 160)) {
             g.renderComponentTooltip(font, List.of(Component.translatable("gui.skyabyss.rebirth.shards_desc", RebirthRules.GUIDE_PER_DAY,
                     RebirthRules.MAX_SHARD_NODES).withColor(SOFT)), mouseX, mouseY);
         }

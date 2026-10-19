@@ -66,6 +66,18 @@ public final class SoulCommands {
                                     Rebirth.sync(p);
                                     return 1;
                                 }))))
+                        .then(Commands.literal("spare").then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("slot", IntegerArgumentType.integer(0, 2))
+                                        .then(Commands.argument("item", StringArgumentType.string())
+                                                .then(Commands.argument("n", IntegerArgumentType.integer(0, 999)).executes(ctx -> {
+                                                    ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+                                                    int slot = IntegerArgumentType.getInteger(ctx, "slot");
+                                                    int n = IntegerArgumentType.getInteger(ctx, "n");
+                                                    Rebirth.data(p).spareItem[slot] = n > 0 ? StringArgumentType.getString(ctx, "item") : "";
+                                                    Rebirth.data(p).spareCount[slot] = n;
+                                                    Rebirth.sync(p);
+                                                    return 1;
+                                                }))))))
                         .then(Commands.literal("open").then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
                             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(EntityArgument.getPlayer(ctx, "player"), new RebirthOpenPayload());
                             return 1;

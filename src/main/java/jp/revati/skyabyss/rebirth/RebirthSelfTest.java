@@ -58,6 +58,8 @@ public final class RebirthSelfTest {
 
     public static void runSelfTest(MinecraftServer server) {
         List<String> f = new ArrayList<>();
+        // 見せ方の検査は、仮の元 (同期する写しの回数) で流す。終わったら本体の元へ戻す
+        RebirthView.useSource(null);
         try {
             tiers(f);
             titles(f);
@@ -71,6 +73,7 @@ public final class RebirthSelfTest {
             f.add("crashed: " + e);
         }
         force(server, false);
+        RebirthView.useSource(Rebirth::displayCount);
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST rebirth PASSED (tier math, symbols, titles, leaderboard order, sync round trips, life records, names, grave flair, ja/en)");
         } else {
@@ -220,6 +223,7 @@ public final class RebirthSelfTest {
         check(f, RebirthRecord.countOf(RecordSnapshot.STREAM_CODEC.decode(b5)) == 7, "record screen frame reads the count through the snapshot");
         check(f, RebirthRecord.countOf(new RecordSnapshot(p.getUUID(), Component.empty(), true, List.of())) == 0, "no growth tab means no frame");
         // 読み出し口: 元を替えられる (本体の API へ切り替える点)
+        RebirthView.useSource(null);
         check(f, RebirthView.isStub() && RebirthView.count(p) == 7, "stub view reads the synced attachment");
         RebirthView.useSource(pl -> 3);
         check(f, !RebirthView.isStub() && RebirthView.count(p) == 3, "view source can be swapped");

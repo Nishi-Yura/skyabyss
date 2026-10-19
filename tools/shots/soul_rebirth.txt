@@ -1,0 +1,42 @@
+# 転生の画面 (docs/design/31): 灰色の説明 / 転生できる / 12 回 / 旅嚢の余白。./gradlew runShots -Pscript=tools/shots/soul_rebirth.txt
+world shots flat
+size 960 540
+timeout 400
+render 6
+clouds off
+guiscale 2
+
+cmd time set noon
+cmd gamemode survival
+cmd give @s skyabyss:resonance_crystal 12
+hud off
+waitchunks
+chat clear
+wait 40
+
+cmd skyabyss level set @s 20
+cmd skyabyss soul set @s 0
+open jp.revati.skyabyss.client.rebirth.SoulScreen
+wait 20
+shot soul_locked
+close
+
+cmd skyabyss level set @s 50
+cmd skyabyss soul set @s 2
+open jp.revati.skyabyss.client.rebirth.SoulScreen
+wait 20
+shot soul_ready
+close
+
+cmd skyabyss soul set @s 12
+open jp.revati.skyabyss.client.rebirth.SoulScreen
+wait 20
+shot soul_12
+close
+
+cmd skyabyss soul spare @s 0 "minecraft:cobblestone" 321
+cmd skyabyss soul spare @s 1 "minecraft:oak_log" 40
+key skyabyss_pouch.key.open
+wait 30
+shot pouch_spare
+close
