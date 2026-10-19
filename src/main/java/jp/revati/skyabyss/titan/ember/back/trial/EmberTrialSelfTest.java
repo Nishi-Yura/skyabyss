@@ -179,6 +179,15 @@ public final class EmberTrialSelfTest {
         HearthRoom.build(level, EmberBackLayout.SOUTH);
     }
 
+    private static boolean inLavaRange(int z) {
+        for (int[] r : AshPath.LAVA_RANGES) {
+            if (z >= r[0] && z <= r[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------------------------------------------------------- 静的な検査 (溶岩を 100 tick 流したあと)
     static void staticChecks(MinecraftServer server) {
         ServerLevel level = server.getLevel(EmberIds.BACK);
@@ -207,8 +216,8 @@ public final class EmberTrialSelfTest {
                     for (int z = b.minZ(); z <= b.maxZ(); z++) {
                         BlockPos pos = new BlockPos(x, y, z);
                         if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.LAVA)) {
-                            boolean inLake = b == EmberBackLayout.WEST && x >= AshPath.LAKE_X1 && x <= AshPath.LAKE_X2 && z >= AshPath.LAKE_Z1
-                                    && z <= AshPath.LAKE_Z2 && y >= 74 && y <= AshPath.LAVA_Y;
+                            boolean inLake = b == EmberBackLayout.WEST && x >= AshPath.LAKE_X1 && x <= AshPath.LAKE_X2 && inLavaRange(z)
+                                    && y >= AshPath.LAVA_Y - 2 && y <= AshPath.LAVA_Y;
                             if (inLake) {
                                 lavaInLake++;
                             } else {
@@ -352,9 +361,6 @@ public final class EmberTrialSelfTest {
                 }
             }
         }
-        if (i.w1()) {
-            cells.add(key(i.puddle().getX(), i.puddle().getZ()));
-        }
         return new Node("island " + i.cx() + "," + i.cz(), cells, i.cx(), i.cz());
     }
 
@@ -473,14 +479,18 @@ public final class EmberTrialSelfTest {
             AshPathRoom.buildLake(level, pattern);
             AshPath.clearMemory();
             List<Node> nodes = new ArrayList<>();
-            nodes.add(bandNode("entrance shore", -2, -1));
+            // 岸は水際の 2 列 (庭の南端・試しの岸の北端と南端・中ノ岸の北端と南端・奥の岸の北端)。同じ岸の北端と南端は歩いてつながる (壺 0 回)
+            nodes.add(bandNode("garden shore", AshPath.CHANNEL_Z1 - 2, AshPath.CHANNEL_Z1 - 1));
+            nodes.add(bandNode("teach north", AshPath.TEACH_Z1, AshPath.TEACH_Z1 + 1));
+            nodes.add(bandNode("teach south", AshPath.TEACH_Z2 - 1, AshPath.TEACH_Z2));
+            nodes.add(bandNode("mid north", AshPath.MID_Z1, AshPath.MID_Z1 + 1));
+            nodes.add(bandNode("mid south", AshPath.MID_Z2 - 1, AshPath.MID_Z2));
             for (AshPath.Island i : AshPath.PATTERNS.get(pattern)) {
                 nodes.add(islandNode(i));
             }
-            nodes.add(bandNode("far shore", 49, 50));
+            nodes.add(bandNode("far shore", AshPath.LAKE2_Z2 + 1, AshPath.LAKE2_Z2 + 2));
             int n = nodes.size();
-            expect(AshPath.PATTERNS.get(pattern).size() == 7, "pattern " + pattern + " has " + AshPath.PATTERNS.get(pattern).size() + " islands");
-            expect(AshPath.PATTERNS.get(pattern).stream().anyMatch(AshPath.Island::w1), "pattern " + pattern + " lacks the w1 island");
+            expect(AshPath.PATTERNS.get(pattern).size() == 8, "pattern " + pattern + " has " + AshPath.PATTERNS.get(pattern).size() + " islands");
             int[][] throwsOf = new int[n][n];
             for (int[] row : throwsOf) {
                 java.util.Arrays.fill(row, -1);
@@ -497,6 +507,8 @@ public final class EmberTrialSelfTest {
                     throwsOf[i][j] = cross(level, fp, nodes.get(i), nodes.get(j));
                 }
             }
+            throwsOf[1][2] = 0;
+            throwsOf[3][4] = 0;
             // 最短の道 (使う壺の回数が少ない)、島の数が最も少ない道
             int[] cost = new int[n];
             java.util.Arrays.fill(cost, Integer.MAX_VALUE);
@@ -525,13 +537,7 @@ public final class EmberTrialSelfTest {
             }
             expect(worst[n - 1] <= 4, "ash path pattern " + pattern + " has no route with every hop within 4 scatters (best " + worst[n - 1] + ")");
             expect(cost[n - 1] != Integer.MAX_VALUE, "ash path pattern " + pattern + " cannot be crossed with 5 scatters per hop");
-            int w1 = -1;
-            for (int i = 0; i < n; i++) {
-                if (nodes.get(i).name().equals("island -25,24")) {
-                    w1 = i;
-                }
-            }
-            expect(w1 >= 0 && cost[w1] != Integer.MAX_VALUE, "the w1 island is unreachable in pattern " + pattern);
+            expect(cost[4] != Integer.MAX_VALUE, "the middle shore is unreachable in pattern " + pattern);
             int maxHop = 0;
             int edges = 0;
             for (int[] row : throwsOf) {
@@ -542,7 +548,7 @@ public final class EmberTrialSelfTest {
                     }
                 }
             }
-            expect(edges >= 8, "pattern " + pattern + " has too few hops: " + edges);
+            expect(edges >= 14, "pattern " + pattern + " has too few hops: " + edges);
             SkyAbyss.LOGGER.info("ember trial: ash path pattern {} crosses with {} scatters in total, easiest route needs at most {} per hop ({} hops, longest {})", pattern,
                     cost[n - 1], worst[n - 1], edges, maxHop);
         }
@@ -553,7 +559,7 @@ public final class EmberTrialSelfTest {
     // ---------------------------------------------------------------- 冷え殻の時計・呑まれた
     private static void westCrust(ServerLevel level) {
         AshPath.clearMemory();
-        BlockPos spot = new BlockPos(-33, AshPath.LAVA_Y, 20);
+        BlockPos spot = new BlockPos(-33, AshPath.LAVA_Y, 18);
         int placed = AshPath.placeCrust(level, spot.getX(), spot.getZ());
         expect(placed == 9, "3 x 3 crust expected, got " + placed);
         BlockPos mid = spot;

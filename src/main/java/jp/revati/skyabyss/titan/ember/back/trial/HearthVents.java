@@ -39,19 +39,19 @@ public final class HearthVents {
     public static final int HEIGHT = 5;
     public static final int GROUPS = 4;
 
-    // 割れ目の位置 (谷の床 y 78)。組は番号 % 4。0〜4 番は灰運びの道 (x -1〜1) の中、5〜9 番は両脇の人の通り道
+    // 割れ目の位置 (谷の床 y 83)。組は番号 % 4。0〜4 番は灰運びの道 (x -1〜1) の中、5〜15 番は両脇の人の通り道 (谷は版 20 で x1.6 に広がったので 16 本)
+    private static final int F = EmberBackLayout.FLOOR_SOUTH;
     public static final List<BlockPos> VENTS = List.of(
-            new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 8), new BlockPos(-1, EmberBackLayout.FLOOR_SOUTH, 12),
-            new BlockPos(1, EmberBackLayout.FLOOR_SOUTH, 16), new BlockPos(0, EmberBackLayout.FLOOR_SOUTH, 20),
-            new BlockPos(-1, EmberBackLayout.FLOOR_SOUTH, 24), new BlockPos(-6, EmberBackLayout.FLOOR_SOUTH, 10),
-            new BlockPos(6, EmberBackLayout.FLOOR_SOUTH, 14), new BlockPos(-6, EmberBackLayout.FLOOR_SOUTH, 18),
-            new BlockPos(6, EmberBackLayout.FLOOR_SOUTH, 22), new BlockPos(-5, EmberBackLayout.FLOOR_SOUTH, 26));
-    // 灰運びの道の壁 (x = ±3、z 6〜24、高さ 2)。隙は z 14〜15 の 2 か所 (両側)。HearthRoom が建てる
+            new BlockPos(0, F, 14), new BlockPos(-1, F, 21), new BlockPos(1, F, 27), new BlockPos(0, F, 34), new BlockPos(-1, F, 40),
+            new BlockPos(-9, F, 18), new BlockPos(9, F, 24), new BlockPos(-9, F, 30), new BlockPos(9, F, 37), new BlockPos(-8, F, 43),
+            new BlockPos(-13, F, 22), new BlockPos(13, F, 18), new BlockPos(13, F, 31), new BlockPos(-13, F, 37), new BlockPos(13, F, 43),
+            new BlockPos(-14, F, 28));
+    // 灰運びの道の壁 (x = ±3、z 11〜40、高さ 2)。隙は z 24〜26 の 2 か所 (両側)。HearthRoom が建てる
     public static final int LANE_WALL_X = 3;
-    public static final int LANE_Z0 = 6;
-    public static final int LANE_Z1 = 24;
-    public static final int LANE_GAP_Z0 = 14;
-    public static final int LANE_GAP_Z1 = 15;
+    public static final int LANE_Z0 = 11;
+    public static final int LANE_Z1 = 40;
+    public static final int LANE_GAP_Z0 = 24;
+    public static final int LANE_GAP_Z1 = 26;
 
     public static class VentBlock extends Block {
         // 0 しずか、1 白く光る (噴く前)、2 噴いている

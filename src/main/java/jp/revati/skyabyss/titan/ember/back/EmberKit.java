@@ -134,4 +134,22 @@ public final class EmberKit {
         set(pos, Tablets.wallState(facing));
         Tablets.write(level, pos, key);
     }
+
+    // 掲示の碑 (壁に付く看板。後ろが壁でなければ、2 段の石の台を立て、その上に灯りを置く。台は床の上)
+    public void board(BlockPos pos, Direction facing, String key, DyeColor color) {
+        BlockPos back = pos.relative(facing.getOpposite());
+        if (!get(back.getX(), back.getY(), back.getZ()).isSolid()) {
+            set(back, RUIN_CHISELED);
+            BlockPos below = back.below();
+            if (!get(below.getX(), below.getY(), below.getZ()).isSolid()) {
+                set(below, RUIN_CHISELED);
+            }
+            BlockPos above = back.above();
+            if (get(above.getX(), above.getY(), above.getZ()).isAir()) {
+                set(above, Blocks.LANTERN.defaultBlockState());
+            }
+        }
+        set(pos, Tablets.wallState(facing));
+        Tablets.write(level, pos, key);
+    }
 }

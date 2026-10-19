@@ -96,4 +96,72 @@ final class RoomKit {
     void air(int x1, int y1, int z1, int x2, int y2, int z2) {
         fill(x1, y1, z1, x2, y2, z2, AIR);
     }
+
+    // ---------------------------------------------------------------- 飾りの部品 (版 20。区ごとの言葉は EmberZones と同じ: 黒い岩・骨・灯り)
+    static final BlockState ASH_DRIFT = Blocks.GRAY_CONCRETE.defaultBlockState();
+    static final BlockState LANTERN = Blocks.LANTERN.defaultBlockState();
+    static final BlockState SHROOM = Blocks.SHROOMLIGHT.defaultBlockState();
+    static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
+
+    static int hash(int x, int y, int z) {
+        return Math.floorMod(x * 73856093 ^ y * 19349663 ^ z * 83492791, 1000);
+    }
+
+    // 床 floorY の上の柱 (黒石レンガ。先に灯り)
+    void post(int x, int z, int h) {
+        for (int y = floorY + 1; y <= floorY + h; y++) {
+            set(x, y, z, y == floorY + h ? BRICKS : y == floorY + 1 ? POLISHED : BRICKS);
+        }
+        set(x, floorY + h + 1, z, LANTERN);
+    }
+
+    // 灰の木 (玄武岩の幹と、灰色の凝灰岩の冠。冠の芯に光る茂み)。h = 幹の高さ
+    void ashTree(int x, int z, int h) {
+        for (int y = floorY + 1; y <= floorY + h; y++) {
+            set(x, y, z, Blocks.BASALT.defaultBlockState());
+        }
+        int top = floorY + h;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                for (int dy = 0; dy <= 1; dy++) {
+                    boolean corner = Math.abs(dx) == 1 && Math.abs(dz) == 1 && dy == 1;
+                    if (!corner && !(dx == 0 && dz == 0 && dy == 0)) {
+                        set(x + dx, top + dy, z + dz, hash(x + dx, top + dy, z + dz) < 450 ? TUFF : Blocks.COBBLED_DEEPSLATE.defaultBlockState());
+                    }
+                }
+            }
+        }
+        set(x, top + 1, z, SHROOM);
+        // 枝 (横へ 1 本)
+        int sx = hash(x, 1, z) < 500 ? 1 : -1;
+        set(x + sx, top - 1, z, Blocks.BASALT.defaultBlockState());
+        set(x + 2 * sx, top - 1, z, TUFF);
+    }
+
+    // 灰の吹きだまり (床の上のまだら。灰色のコンクリート。灰溜まり = 灰色の羊毛とは別。熱は冷めない)
+    void drifts(int x1, int z1, int x2, int z2, int percent) {
+        for (int x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
+            for (int z = Math.min(z1, z2); z <= Math.max(z1, z2); z++) {
+                if (hash(x, 9, z) < percent * 10) {
+                    set(x, floorY, z, ASH_DRIFT);
+                }
+            }
+        }
+    }
+
+    // 灰溜まり (灰色の羊毛。熱が冷える。壺が満ちる) を w × d の長方形に
+    void ashPool(int x, int z, int w, int d) {
+        for (int dx = 0; dx < w; dx++) {
+            for (int dz = 0; dz < d; dz++) {
+                set(x + dx, floorY, z + dz, Blocks.GRAY_WOOL.defaultBlockState());
+            }
+        }
+    }
+
+    // 掲示の台 (後ろに 2 段の石の台を置き、その上に灯り)。掲示は床の上 2 段の高さ
+    void stele(int x, int z, int backDz) {
+        set(x, floorY + 1, z + backDz, Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
+        set(x, floorY + 2, z + backDz, Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
+        set(x, floorY + 3, z + backDz, LANTERN);
+    }
 }
