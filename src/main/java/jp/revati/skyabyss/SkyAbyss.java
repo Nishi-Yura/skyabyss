@@ -58,6 +58,8 @@ public class SkyAbyss {
         jp.revati.skyabyss.quest.free.FreeQuestSetup.register(modEventBus);
         // 巨神での移動 (呼び笛・碑・音・プレイヤーの記録)。登録は titan.travel パッケージにまとめてある
         jp.revati.skyabyss.titan.travel.TravelSetup.register(modEventBus);
+        // 巨神の子 (岩鯨の仔・潮殻の稚貝・雷翼の雛・余燼の仔。パーティ全員を乗せて運ぶ)。docs/design/28
+        jp.revati.skyabyss.titan.young.YoungSetup.register(modEventBus);
         // 第二の巨神「潮殻の巨神」(エンティティ・音)。登録は titan.tide パッケージにまとめてある
         jp.revati.skyabyss.titan.tide.TideSetup.register(modEventBus);
         // 第三の巨神「雷翼の巨神」(エンティティ・音・背中の結びつけ)。登録は titan.storm パッケージにまとめてある

@@ -525,11 +525,7 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 continue;
             }
             standCooldown.put(player.getUUID(), tickCount);
-            if (voyage) {
-                jp.revati.skyabyss.titan.travel.Voyages.grabChain(player, this);
-            } else {
-                jp.revati.skyabyss.titan.TitanTravel.startLift(player, this, jp.revati.skyabyss.readiness.BoardReadiness.Mode.WALK_IN);
-            }
+            jp.revati.skyabyss.titan.TitanTravel.startLift(player, this, jp.revati.skyabyss.readiness.BoardReadiness.Mode.WALK_IN);
         }
     }
 

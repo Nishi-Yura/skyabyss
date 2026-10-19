@@ -642,7 +642,10 @@ public final class TitanEndSelfTest {
             var recB = data.of(gb);
             recA.markHallCleared("t1");
             recB.markHallCleared("t1");
-            check(f, jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) == 2, "two groups mid-trial did not both count as inside");
+            check(f, jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) == 2,
+                    "two groups mid-trial did not both count as inside (counted " + jp.revati.skyabyss.titan.group.GroupProgress.activeInside(back) + "; players in the back: "
+                            + back.players().stream().map(pl -> pl.getGameProfile().getName()).toList() + "; records with progress: "
+                            + data.ids().stream().filter(id -> data.peek(id) != null && data.peek(id).hasProgress()).count() + ")");
             // A が心臓を止める
             recA.markHeartDefeated();
             TitanDormancy.Rest r = TitanDormancy.begin(server, titan, 0);

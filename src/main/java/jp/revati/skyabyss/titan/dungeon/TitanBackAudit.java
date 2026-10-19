@@ -15,8 +15,8 @@ public final class TitanBackAudit {
     }
 
     // 体の中の部屋すべて (穴・はしごを調べる範囲と、通れるかの目標に使う)
-    public static final List<TitanBackLayout.Box> ROOMS = List.of(HUB, ENTRY, TREASURY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3,
-            E2, CK, E2_PASS, CK_PASS, MAZE_EXIT_ROOM, MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, HEART_REST, HEART, HEART_CORRIDOR, BELL, BELL_PASS, W2_CONN1,
+    public static final List<TitanBackLayout.Box> ROOMS = List.of(HUB, ENTRY, W0, WA, W1, WB, W2, WC, E0, E1, CE1, E3_CORRIDOR, E3,
+            E2, CK, CK_PASS, MAZE_EXIT_ROOM, MAZE_ENTRY_ROOM, MAZE_ENTRY_ROOM2, HEART_REST, HEART, HEART_CORRIDOR, BELL, BELL_PASS, W2_CONN1,
             W2_CONN2, LIBRARY, LIBRARY_PASS, SONG_SHRINE, SONG_PASS, WEST_HALL, EAST_HALL, EXIT_PASS);
 
     public static BackReach.Spec spec() {
@@ -43,7 +43,7 @@ public final class TitanBackAudit {
         s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 6));
         s.goals.put("hub", HUB.center().offset(0, 0, 6));
         s.goals.put("entry", ENTRY.center());
-        s.goals.put("treasury", TREASURY.center());
+        s.goals.put("seal corridor", HEART_CORRIDOR.center().offset(0, 0, 20));
         s.goals.put("rest w0", W0.center().offset(2, 0, 2));
         s.goals.put("rest w1", W1.center().offset(2, 0, 2));
         s.goals.put("rest w2", W2.center().offset(2, 0, 2));
@@ -52,7 +52,6 @@ public final class TitanBackAudit {
         s.goals.put("west stone ledge", new BlockPos(WC.x2() - 3, WEST_LEDGE_Y + 1, -52));
         s.goals.put("rest e0", E0.center().offset(2, 0, 2));
         s.goals.put("e1", E1.center());
-        s.goals.put("rest e2r", E2_PASS.center().offset(2, 0, -2));
         s.goals.put("e2", E2.center());
         s.goals.put("rest ckr", CK_PASS.center().offset(2, 0, -2));
         s.goals.put("ck", CK.center());
@@ -66,9 +65,11 @@ public final class TitanBackAudit {
         s.goals.put("heart arena", HEART.center());
         s.goals.put("library", LIBRARY.center());
         // 任意の翼 (背の外): 胸びれの道の先端・尾の展望・背の野営地
-        s.goals.put("bell tower floor", BELL.center());
+        s.goals.put("bell tower floor", new BlockPos(BELL.x1() + 3, FLOOR + 1, BELL.z1() + 6));
         s.goals.put("fin left tip", WingsBuilder.finTip(-1));
         s.goals.put("fin right tip", WingsBuilder.finTip(1));
+        s.goals.put("fin left cache", WingsBuilder.cachePos(-1).north());
+        s.goals.put("fin right cache", WingsBuilder.cachePos(1).north());
         s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 4));
         s.goals.put("back camp", new BlockPos(0, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z - 3));
         return s;

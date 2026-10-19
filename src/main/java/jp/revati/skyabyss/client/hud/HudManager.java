@@ -108,6 +108,12 @@ public final class HudManager {
     // ------------------------------------------------------------ 計算
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void onFrame(RenderGuiEvent.Pre event) {
+        long t = jp.revati.skyabyss.dev.Prof.begin();
+        onFrame0(event);
+        jp.revati.skyabyss.dev.Prof.end("client.hudLayout", t);
+    }
+
+    private static void onFrame0(RenderGuiEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         frame++;
         bossBottom = bossBottomNow;
@@ -126,13 +132,23 @@ public final class HudManager {
         }
         // F1・場面 (カメラの演出) の間は mod の部品を全部出さない
         if (mc.player == null || mc.level == null || mc.options.hideGui || jp.revati.skyabyss.client.cinematic.CinematicClient.active()) {
+            lastScene = null;
             current = HudLayout.compute(Scene.plain(w, h), List.of());
             return;
         }
         List<Request> requests = new ArrayList<>();
         HudRequests.collect(mc, w, h, requests);
-        current = HudLayout.compute(scene(mc, w, h), requests);
+        // 計算は入力 (場面と要求の並び) だけで決まる純粋な関数。入力が前の枠と同じなら前の結果をそのまま使う
+        Scene sc = scene(mc, w, h);
+        if (!sc.equals(lastScene) || !requests.equals(lastRequests)) {
+            current = HudLayout.compute(sc, requests);
+            lastScene = sc;
+            lastRequests = requests;
+        }
     }
+
+    private static Scene lastScene;
+    private static List<Request> lastRequests = List.of();
 
     @SubscribeEvent
     static void onChat(ClientChatReceivedEvent event) {

@@ -168,7 +168,7 @@ public final class TideOcean {
     }
 
     // 休む場所の中心が人から離れてよい輪 (近い順)。体の下が開けた海を、沖まで探す
-    static final int[] REST_RINGS = {24, 30, 36, 40, 44, 52, 60, 64, 72, 80, 96, 112, 128, 144, 160, 180, 200};
+    static final int[] REST_RINGS = {24, 30, 36, 40, 44, 52, 60, 64, 72, 80, 96, 112, 128, 144, 160, 180, 200, 225, 250};
     // 休む場所の水深の下限 (上限はない。深い沖でも休む高さは海面の 11 下)
     static final int REST_MIN_DEPTH = 6;
 
@@ -184,12 +184,12 @@ public final class TideOcean {
         }
         double need = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.FLOOR,
                 jp.revati.skyabyss.titan.solid.TitanVolume.get("tide_shell"), x, z, yaw,
-                jp.revati.skyabyss.titan.TitanGround.MARGIN, 1, TideShellEntity.REST_LEG_SKIP);
+                jp.revati.skyabyss.titan.TitanGround.MARGIN, 1, TideShellEntity.REST_LEG_SKIP, TideShellEntity.REST_SKIRT_HI);
         return Double.isFinite(need) ? need - TideShellEntity.REST_BURY - (level.getSeaLevel() - TideShellEntity.REST_DRAFT) : 0.0;
     }
 
     // 休む場所を選ぶときの持ち上げの上限 (ブロック)。安全の余白だけ。これより持ち上げないと浅瀬・岸にめり込む場所は選ばない (浮いて見えない)
-    public static final double MAX_RAISE = 1.5;
+    public static final double MAX_RAISE = 8.0;
 
     // 呼び貝で呼ぶときの休む場所: まず (px, pz) の人の近く (findRestSpot)。人が海から遠いときは、読み込まれている範囲で
     // いちばん近い海辺を、輪を広げながら探す (人から 96〜256 ブロックを 32 ブロックずつ、16 方向)。見つからなければ null。

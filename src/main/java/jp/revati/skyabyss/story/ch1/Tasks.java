@@ -41,9 +41,13 @@ public final class Tasks {
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
-        List<Runnable> due = new ArrayList<>();
+        List<Runnable> due = List.of();
         synchronized (Tasks.class) {
             now++;
+            if (QUEUE.isEmpty()) {
+                return;
+            }
+            due = new ArrayList<>();
             Iterator<Task> it = QUEUE.iterator();
             while (it.hasNext()) {
                 Task t = it.next();

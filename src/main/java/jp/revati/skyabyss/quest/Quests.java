@@ -77,8 +77,7 @@ public final class Quests {
             String titan = jp.revati.skyabyss.progress.Titans.titanOfBack(player.level().dimension());
             if (titan != null) {
                 jp.revati.skyabyss.advancement.Beats.fire(player, "trial:" + titan);
-                // 試練を越えたら、背中の真ん中へすぐ戻れる光をそばに出す (四つの背中で共通)
-                jp.revati.skyabyss.titan.end.ReturnBeacons.offer(player);
+                // 試練を越えたら、中にいる仲間ごと自動で鼓動の間へ戻る (trial/TrialHub)。「光の中でしゃがむ」手順はなくした
             }
         }
         bump(player, (def, stage, ob) -> ob.type().equals("signal") && ob.targets().contains(signal));

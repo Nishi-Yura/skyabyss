@@ -60,7 +60,7 @@ final class BuildAuditExtra {
     }
 
     // 暗さの限界 (この値以下は暗い)
-    static final int DARK = 2;
+    static final int DARK = 3;
 
     private static final Direction[] H = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 

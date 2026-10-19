@@ -172,6 +172,15 @@ public final class TitanTravel {
         board(player, whale.getUUID());
     }
 
+    // 巨神の子が着いた輪から入る (岩鯨の体がどこにいても入れる)。乗れなければ false
+    public static boolean boardFromYoung(ServerPlayer player) {
+        if (!jp.revati.skyabyss.progress.Progression.checkBoard(player, "stone_whale")) {
+            return false;
+        }
+        board(player, (UUID) null);
+        return true;
+    }
+
     // whaleId: どの岩鯨か。岩鯨は一体だけなので今は使わない (前は skyabyss_titan に書いていたが、読む所がなく消した)
     private static void board(ServerPlayer player, UUID whaleId) {
         // 乗る資格 (10 の 3 章。岩鯨は最初の巨神なので誰でも乗れる。後の巨神と同じ入口の形にしておく)

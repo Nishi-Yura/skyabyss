@@ -49,6 +49,14 @@ public final class PartyNetwork {
                 });
     }
 
+    // 人ごとに最後に送った内容 (同じなら送り直さない)
+    private static final java.util.Map<UUID, Sync> LAST_SENT = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @SubscribeEvent
+    static void onLogoutForget(PlayerEvent.PlayerLoggedOutEvent event) {
+        LAST_SENT.remove(event.getEntity().getUUID());
+    }
+
     public static void syncSoon(ServerPlayer player) {
         SOON.add(player.getUUID());
     }
@@ -63,8 +71,15 @@ public final class PartyNetwork {
         PartyData data = PartyData.get(server);
         for (ServerPlayer player : Players.snapshot(server.getPlayerList().getPlayers())) {
             boolean inParty = data.of(player.getUUID()) != null;
-            if (SOON.remove(player.getUUID()) || inParty || tick % 100 == 0) {
+            boolean soon = SOON.remove(player.getUUID());
+            if (soon || tick % 100 == 0) {
                 send(player);
+            } else if (inParty && player.connection != null) {
+                // 仲間がいる間は 0.5 秒ごとに見るが、前に送った中身と同じなら送らない (5 秒に一度は必ず送る)
+                Sync now = build(player);
+                if (!now.equals(LAST_SENT.put(player.getUUID(), now))) {
+                    PacketDistributor.sendToPlayer(player, now);
+                }
             }
         }
         SOON.clear();
@@ -86,6 +101,7 @@ public final class PartyNetwork {
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {
         SOON.clear();
+        LAST_SENT.clear();
     }
 
     public static Sync build(ServerPlayer player) {
@@ -112,7 +128,9 @@ public final class PartyNetwork {
 
     static void send(ServerPlayer player) {
         if (player.connection != null) {
-            PacketDistributor.sendToPlayer(player, build(player));
+            Sync now = build(player);
+            LAST_SENT.put(player.getUUID(), now);
+            PacketDistributor.sendToPlayer(player, now);
         }
     }
 

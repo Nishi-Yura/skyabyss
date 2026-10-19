@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.registry.ModSounds;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
-import jp.revati.skyabyss.titan.travel.TravelTitan;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
@@ -72,7 +71,7 @@ public final class TravelClient {
             return;
         }
         Entity vehicle = player.getVehicle();
-        boolean riding = vehicle instanceof TravelTitan;
+        boolean riding = vehicle instanceof jp.revati.skyabyss.titan.young.YoungEntity;
         if (riding && (wind == null || wind.isStopped())) {
             wind = new RideWind(player);
             mc.getSoundManager().play(wind);
@@ -142,7 +141,7 @@ public final class TravelClient {
         @Override
         public void tick() {
             Entity vehicle = player.getVehicle();
-            if (player.isRemoved() || !(vehicle instanceof TravelTitan)) {
+            if (player.isRemoved() || !(vehicle instanceof jp.revati.skyabyss.titan.young.YoungEntity)) {
                 stop();
                 return;
             }

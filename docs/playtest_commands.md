@@ -23,6 +23,7 @@ OP (権限 2) 用。製品の jar でも使える。どれも最後に `[対象]
 - `playtest fast <on|off>` サーバーを 2 倍速 (`tick rate 40`) / 等速。昼夜も巨神の時間も速くなる
 - `playtest reset` 序章・クエスト・伝承・場面・巨神の進み・成長を最初に戻す
 - `playtest god <on|off>` 無敵 (テスト用)
+- `skyabyss dev trial build|list|board|cycle <n>|force <ID>…|mods <ID> <符号>|tp <ID|deck|hub>` 試練のプール (29)。`build` は岩鯨の背へ試練の階を置き直す (版 19 から建設で置く)。`tp hub` は鼓動の間、`tp <ID>` は新作のセルの入口
 - `playtest help` 一覧
 
 ## 例
@@ -63,6 +64,6 @@ solo、最初から岩鯨の心臓前まで:
 - `trials` はグループ単位。パーティを組んでから実行する。
 - 心臓を止めたあとの運び出し・眠りは普通に進む。眠った巨神は 40 秒で地上から去る (見守りは眠りのあいだ呼び直さない。目覚めたらまた現れる)。`next` で次の巨神へ。
 - `next`・`trials` は心臓を止めずに進みだけ記すので、巨神は眠らず・去らない。巨神を眠らせて去らせたいときは心臓を倒すか、`/skyabyss titan end sleep <巨神>`。
-- 巨神を呼ぶ（出会った巨神はいつでも、呼び笛で近くへ。09 の 4.4）: 旅嚢（Y）か手に持って吹く。出会いの記録は `/skyabyss travel ...` の `unlock <巨神>`（コマンドで認める）か、乗れる姿の巨神の近く・背の中で自動。岩鯨・潮殻の笛は、心臓を倒していれば旅の呼びなので、**しゃがんで吹くと背へ乗るための呼び**。雷翼・余燼の笛（`thunder_wing_call`・`ember_call`）はいつでもその呼び。昼夜・潮・嵐の刻に関わらず、20〜50 秒で近くへ来て 20 分とどまる。確かめる自己テスト: `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="titan call" ./gradlew runServer`。
+- 巨神の子を呼ぶ（出会った巨神の笛。成体は動かない。docs/design/28）: 旅嚢（Y）か手に持って吹くと、足もとに子が現れる。右クリックで乗る（仲間は笛か右クリックで同じ子に乗る。最大 6 人）。持ち主が乗ると海図が開き、行き先を選ぶと 3 秒（仲間待ちは最大 30 秒）で出発する。出会いの記録は `/skyabyss travel met`（全巨神）か `unlock <巨神>`。`/skyabyss travel young <巨神>` は条件を見ずに子を出す、`go <x> <z>` は行き先を座標で決める。確かめる自己テスト: `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY=young ./gradlew runServer`。
 - 背中から地上へ戻る: その巨神の呼び笛（旅嚢）を背中の中で使う → 「地上へ下りる？」→ 5 秒以内にもう一度。`/skyabyss titan leave` でも戻る。試練を越えると 5 分だけ出る光の中でしゃがむ (1.5 秒) と、その背中の真ん中へ戻る。
 - `fast on` は全員に効く。試遊が終わったら `fast off`。

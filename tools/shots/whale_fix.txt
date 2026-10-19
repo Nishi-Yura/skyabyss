@@ -1,0 +1,98 @@
+# 岩鯨の背の作り直し (版 18。docs/design/26 の 8.5) の確かめ。./gradlew runShots -Pscript=tools/shots/whale_fix.txt
+# 出力: run/shots/whale_fix/shots/whale_fix/*.png → python -I tools/whale_fix_sheet.py で docs/review/previews/whale_fix_sheet.png
+world whale_fix flat
+size 1280 720
+timeout 3000
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive titan_back
+waitchunks 1200
+wait 60
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+hud off
+fov 90
+fov 85
+camera skyabyss:titan_back -43 114.6 -108 180 12
+waitchunks 600
+wait 30
+shot bell_landing
+fov 95
+camera skyabyss:titan_back -43 106 -108 180 -2
+waitchunks 600
+wait 30
+shot bell_bells
+fov 100
+camera skyabyss:titan_back -38 114 -26 90 22
+waitchunks 600
+wait 30
+shot west_a
+fov 100
+camera skyabyss:titan_back -45 110 -71 180 22
+waitchunks 600
+wait 90
+shot west_b
+fov 100
+camera skyabyss:titan_back -29 110 -83 0 22
+waitchunks 600
+wait 90
+shot west_c
+fov 100
+camera skyabyss:titan_back 35 108 -30 270 12
+waitchunks 600
+wait 30
+shot east_e1
+fov 100
+camera skyabyss:titan_back 47 107 -71 180 -2
+waitchunks 600
+wait 30
+shot east_e2
+fov 100
+camera skyabyss:titan_back 53 106 -104 90 2
+waitchunks 600
+wait 30
+shot east_ck
+fov 100
+camera skyabyss:titan_back 31 107 -104 0 8
+waitchunks 600
+wait 30
+shot east_e3
+fov 95
+camera skyabyss:titan_back 39.5 106.5 -46 180 0
+waitchunks 600
+wait 30
+shot east_door_sign
+fov 100
+camera skyabyss:titan_back 0 108 -17 180 5
+waitchunks 600
+wait 30
+shot hub
+fov 95
+camera skyabyss:titan_back 0 107 -60 180 0
+waitchunks 600
+wait 30
+shot seal_corridor
+fov 95
+camera skyabyss:titan_back -140 70 -36 100 18
+waitchunks 600
+wait 30
+shot fin_left
+fov 100
+camera skyabyss:titan_back 140 68 -31 0 35
+waitchunks 600
+wait 30
+shot fin_right_ledge
+fov 95
+camera skyabyss:titan_back -13 107 6 90 -8
+waitchunks 600
+wait 30
+shot library
+quit

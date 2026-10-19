@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.travel.Voyages;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -123,7 +122,7 @@ public final class TitanSolids {
             return true;
         }
         UUID id = player.getUUID();
-        return TitanTravel.isLifting(id) || Voyages.involvesPlayer(id);
+        return TitanTravel.isLifting(id) || jp.revati.skyabyss.titan.young.YoungCarriers.riding(id);
     }
 
     // ---------------------------------------------------------------- 人

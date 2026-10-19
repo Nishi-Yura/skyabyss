@@ -1,9 +1,8 @@
 {
   "gui.skyabyss.domain.label": "領域",
-  "gui.skyabyss.domain.hud": "領域「%s」 残り %s 秒",
-  "gui.skyabyss.domain.broken": "領域、砕ける",
+  "gui.skyabyss.domain.hud": "領域「%s」",
+  "gui.skyabyss.domain.broken": "領域、解ける",
   "gui.skyabyss.domain.faded": "領域、消える",
-  "gui.skyabyss.domain.break": "心臓を削って砕く %s%%",
   "gui.skyabyss.domain.stone_sea.name": "石の海",
   "gui.skyabyss.domain.stone_sea.line": "岩は、波となって世を覆う。",
   "gui.skyabyss.domain.rising_tide.name": "満ち潮",

@@ -107,7 +107,22 @@ public final class BackGroupData extends SavedData {
         // 何かしら試練が進んでいるか (進んでいなければ、元に戻す必要もない)
         public boolean hasProgress() {
             return gateOpened || heartDefeated || !clearedHalls.isEmpty() || hasProgressData()
-                    || !openOverride.isEmpty() || !closedOverride.isEmpty();
+                    || hasRealOverride();
+        }
+
+        // 試練の入口の戸 (引いた三つだけ開ける戸。人が背にいるだけで書かれる) 以外の上書きがあるか
+        private boolean hasRealOverride() {
+            for (long k : openOverride) {
+                if (!IGNORED_OVERRIDE.test(k)) {
+                    return true;
+                }
+            }
+            for (long k : closedOverride) {
+                if (!IGNORED_OVERRIDE.test(k)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // data に進みの欄があるか ("keep." の欄はリセットで残る記録なので、進みには数えない)
@@ -310,6 +325,9 @@ public final class BackGroupData extends SavedData {
     }
 
     private final Map<UUID, Record> records = new LinkedHashMap<>();
+
+    // 進みに数えない戸の位置 (試練のプールの入口の戸。TrialRuntime が設定する)
+    public static volatile java.util.function.LongPredicate IGNORED_OVERRIDE = k -> false;
 
     public static BackGroupData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, NAME);

@@ -267,7 +267,7 @@ public final class Playtest {
                 record.markHallCleared("e1");
                 record.markHallCleared("e3");
                 record.markGateOpened();
-                for (List<BlockPos> gate : List.of(TitanBackLayout.GATE, TitanBackLayout.INNER_GATE, TitanBackLayout.WEST_RETURN,
+                for (List<BlockPos> gate : List.of(TitanBackLayout.GATE, TitanBackLayout.WEST_RETURN,
                         TitanBackLayout.EAST_RETURN, TitanBackLayout.LOWER_RETURN, TitanBackLayout.E1_EXIT)) {
                     GroupGates.open(level, group, gate);
                 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
-import jp.revati.skyabyss.titan.travel.Voyages;
+import jp.revati.skyabyss.titan.travel.TravelDest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -168,6 +168,14 @@ public class TravelChartScreen extends Screen {
                 dotted(g, left + CHART_X, top + CHART_Y, p[0], p[1]);
             }
             blit(g, p[0] - 4, p[1] - 4, s);
+            if (d.kind() == 2) {
+                // 巨神: 色つきのひし形を重ねる (巨神ごとの色。選べないときは暗く)
+                int c = (d.valid() ? 0xFF000000 : 0x99000000) | TravelDest.titanColor(d.name());
+                g.fill(p[0], p[1] - 3, p[0] + 1, p[1] + 4, c);
+                g.fill(p[0] - 1, p[1] - 2, p[0] + 2, p[1] + 3, c);
+                g.fill(p[0] - 2, p[1] - 1, p[0] + 3, p[1] + 2, c);
+                g.fill(p[0] - 3, p[1], p[0] + 4, p[1] + 1, c);
+            }
             if (Math.abs(mouseX - p[0]) <= 4 && Math.abs(mouseY - p[1]) <= 4) {
                 hovered = d;
             }
@@ -199,6 +207,9 @@ public class TravelChartScreen extends Screen {
             blit(g, x, y, sel ? ROW_SELECTED : hover ? ROW_HOVER : ROW);
             // 失われた碑は灰色 (選べない。サーバーは海図を送ったときに記録から外している)
             int color = !d.valid() ? LOST : reachable(d) ? TEXT : DIM;
+            if (d.kind() == 2 && d.valid() && reachable(d)) {
+                color = 0xFF000000 | TravelDest.titanColor(d.name());
+            }
             g.drawString(font, font.plainSubstrByWidth(name(d).getString(), ROW_W - 18), x + 5, y + 3, color, false);
             g.drawString(font, detail(d), x + 5, y + 12, d.valid() ? DIM : LOST, false);
             if (d.kind() == 1 && d.valid() && chart.leader() && hover) {
@@ -219,12 +230,12 @@ public class TravelChartScreen extends Screen {
     }
 
     private Component name(TravelNetwork.Dest d) {
-        return Voyages.destName(d);
+        return TravelDest.destName(d);
     }
 
     private Component detail(TravelNetwork.Dest d) {
         if (!d.valid()) {
-            return Component.translatable("gui.skyabyss.travel.lost");
+            return d.lock().isEmpty() ? Component.translatable("gui.skyabyss.travel.lost") : Component.translatable("gui.skyabyss.young.lock." + d.lock());
         }
         double dist = distance(d);
         if (dist < 64) {

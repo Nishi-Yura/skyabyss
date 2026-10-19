@@ -23,7 +23,6 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackSelfTest;
 import jp.revati.skyabyss.titan.tide.TideSelfTest;
 import jp.revati.skyabyss.titan.tide.heart.TideHeartSelfTest;
 import jp.revati.skyabyss.titan.tide.mob.TideMobSelfTest;
-import jp.revati.skyabyss.titan.travel.TravelSelfTest;
 import net.minecraft.Util;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -101,6 +100,8 @@ public final class SelfTestRunner {
         // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
+        // 敵が壁・地面の中に湧かない (すべての湧き口と波に共通の決まり)。SKYABYSS_SELFTEST_ONLY="spawn safety"
+        steps.add(Step.once("spawn safety", jp.revati.skyabyss.util.SpawnSafetySelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
         steps.add(Step.once("players snapshot", jp.revati.skyabyss.util.PlayersSelfTest::runSelfTest));
         // 目的の道しるべ (矢印の角度・歩ける道の探索・予算・持ち主にだけ・パケット)。docs/design/18 の 8.3 節
@@ -181,13 +182,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("titan solid", 40, jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
-        steps.add(Step.once("travel (load)", TravelSelfTest::load));
-        steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
-        steps.add(Step.until("tide travel (load)", jp.revati.skyabyss.titan.travel.TideTravelSelfTest::load));
-        steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
-        // 巨神の呼び (出会った巨神を、いつでも笛で近くへ呼べる)。docs/design/09 の 4.4節。SKYABYSS_SELFTEST_ONLY="titan call"
-        steps.add(Step.until("titan call (load)", jp.revati.skyabyss.titan.travel.TitanCallSelfTest::load));
-        steps.add(Step.once("titan call", 400, jp.revati.skyabyss.titan.travel.TitanCallSelfTest::runSelfTest));
+        // 巨神の子 (笛で現れる・パーティ全員 6 人が乗る・得意ごとの行き先・降りると歌に溶ける・眠りの断り・入り直し)。docs/design/28。SKYABYSS_SELFTEST_ONLY=young
+        steps.addAll(jp.revati.skyabyss.titan.young.YoungSelfTest.steps());
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
         steps.add(Step.once("titan end (reset after tide_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
@@ -262,6 +258,10 @@ public final class SelfTestRunner {
         // 建築の監査 (階段の向き・段差・埋まり・戸・はしご・地形との関係。docs/design/08)。SKYABYSS_SELFTEST_ONLY="build audit" でこれだけ流せる
         steps.addAll(jp.revati.skyabyss.titan.audit.BuildAuditSelfTest.steps());
         steps.addAll(TitanBackSelfTest.trialSteps());
+        // 試練のプール (引き方・修飾・全変種・今週の試練・図鑑・戸・複数グループ)。docs/design/29。背を建て直すので最後。SKYABYSS_SELFTEST_ONLY="trial pool"
+        steps.addAll(jp.revati.skyabyss.trial.TrialPoolSelfTest.steps());
+        // 試練を越えたあと (範囲・碑・鼓動の間への戻り・パーティごとの封)。docs/design/29 の 4.6。背が建ててある巨神だけ世界の検査をする
+        steps.addAll(jp.revati.skyabyss.trial.TrialHubSelfTest.steps());
         return steps;
     }
 

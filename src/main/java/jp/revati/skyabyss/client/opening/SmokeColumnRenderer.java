@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.client.opening;
 
-import java.util.Arrays;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -101,6 +100,12 @@ public final class SmokeColumnRenderer {
 
     @SubscribeEvent
     static void onRenderLevel(RenderLevelStageEvent event) {
+        long t = jp.revati.skyabyss.dev.Prof.begin();
+        onRenderLevel0(event);
+        jp.revati.skyabyss.dev.Prof.end("client.smokeColumn", t);
+    }
+
+    private static void onRenderLevel0(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
@@ -143,7 +148,8 @@ public final class SmokeColumnRenderer {
         float[] ps = new float[PUFFS];
         float[] pa = new float[PUFFS];
         float[] ph = new float[PUFFS];
-        Integer[] order = new Integer[PUFFS];
+        int[] order = new int[PUFFS];
+        double[] pd2 = new double[PUFFS];
         for (int i = 0; i < PUFFS; i++) {
             float a = age(i, t);
             float h = a * HEIGHT;
@@ -169,11 +175,18 @@ public final class SmokeColumnRenderer {
             pa[i] = dense * fade * far * near * nearBase;
             ph[i] = a;
             order[i] = i;
+            pd2[i] = d2(px[i], py[i], pz[i], cx, cy, cz);
         }
-        final double fcx = cx;
-        final double fcy = cy;
-        final double fcz = cz;
-        Arrays.sort(order, (p, q) -> Double.compare(d2(px[q], py[q], pz[q], fcx, fcy, fcz), d2(px[p], py[p], pz[p], fcx, fcy, fcz)));
+        // 遠い順 (安定な挿入整列。個数が少ないので十分速く、箱詰めも比較のたびの距離計算も要らない)
+        for (int a = 1; a < PUFFS; a++) {
+            int v = order[a];
+            int b = a - 1;
+            while (b >= 0 && Double.compare(pd2[v], pd2[order[b]]) > 0) {
+                order[b + 1] = order[b];
+                b--;
+            }
+            order[b + 1] = v;
+        }
 
         Matrix4f pose = event.getPoseStack().last().pose();
         BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -182,7 +195,7 @@ public final class SmokeColumnRenderer {
             if (pa[i] <= 0.004f) {
                 continue;
             }
-            double dist = Math.sqrt(d2(px[i], py[i], pz[i], cx, cy, cz));
+            double dist = Math.sqrt(pd2[i]);
             float mix = Mth.clamp((float) (dist - 120.0) / 700f, 0f, 0.6f);
             float r = Mth.lerp(mix, baseR, fog[0]);
             float g = Mth.lerp(mix, baseG, fog[1]);

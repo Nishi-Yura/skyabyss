@@ -30,7 +30,7 @@ public final class TitanGroundSelfTest {
     private static final int SCAN_STEP = 48;
     private static final int SITES = 4;
     private static final int PLAYERS_PER_SHORE = 3;
-    private static final int PRELOAD = 14;
+    private static final int PRELOAD = 17;
 
     private TitanGroundSelfTest() {
     }
@@ -135,7 +135,7 @@ public final class TitanGroundSelfTest {
                     }
                     // 体がその高さにあるときの、体の中の固いブロック (ブロックを直接数える)
                     // 休むときは足・ひれを除いた腹を REST_BURY だけ海底へ沈めてよい。その分だけ持ち上げた体が地形に触れないことを見る
-                    int bad = solidColumns(level, shell, now.x, restY + raise + TideShellEntity.REST_BURY, now.z, (float) now.y, TideShellEntity.REST_LEG_SKIP);
+                    int bad = solidColumns(level, shell, now.x, restY + raise + TideShellEntity.REST_BURY, now.z, (float) now.y, TideShellEntity.REST_LEG_SKIP, TideShellEntity.REST_SKIRT_HI);
                     if (bad > 0) {
                         failures.add("the tide shell rest spot (" + (int) now.x + ", " + (int) now.z + ") has " + bad + " body columns inside blocks");
                     }
@@ -411,12 +411,16 @@ public final class TitanGroundSelfTest {
 
     // loFrom より下に底のある柱 (足・ひれ) は数えない版
     static int solidColumns(ServerLevel level, TitanVolume volume, double x, double y, double z, float yaw, double loFrom) {
+        return solidColumns(level, volume, x, y, z, yaw, loFrom, Double.NEGATIVE_INFINITY);
+    }
+
+    static int solidColumns(ServerLevel level, TitanVolume volume, double x, double y, double z, float yaw, double loFrom, double hiFrom) {
         double fx = -Mth.sin(yaw * Mth.DEG_TO_RAD);
         double fz = Mth.cos(yaw * Mth.DEG_TO_RAD);
         int bad = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (TitanVolume.Column c : volume.coreColumns()) {
-            if (c.lo() < loFrom) {
+            if (c.lo() < loFrom || c.hi() < hiFrom) {
                 continue;
             }
             int wx = Mth.floor(x + fx * c.fwd() + fz * c.side());

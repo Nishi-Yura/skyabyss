@@ -116,6 +116,7 @@ public final class EmberBodyBuilder {
         b.repairPockets(back);
         data.markBuilt(buildVersion());
         EmberBackTrials.afterBuild(back);
+        jp.revati.skyabyss.titan.light.RouteLamps.place(back, "ember");
         long ms = System.currentTimeMillis() - start;
         lastBuildMs = ms;
         SkyAbyss.LOGGER.info("Built the ember back (build {}): {} body blocks in {} ms, carving {} ms, rooms {} ms, total {} ms",

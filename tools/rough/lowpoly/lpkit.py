@@ -359,8 +359,12 @@ def fill_outside(img, faces, INS, M, pad=0):
             continue
         iy, ix = np.nonzero(ins)
         oy, ox = np.nonzero(~ins)
-        d = (oy[:, None] - iy[None]) ** 2 + (ox[:, None] - ix[None]) ** 2
-        nn = d.argmin(1)
+        # chunked so a big chart never builds an (outside x inside) matrix of gigabytes
+        step = max(1, 1_500_000 // max(1, len(iy)))
+        nn = np.empty(len(oy), np.int64)
+        for s0 in range(0, len(oy), step):
+            d = (oy[s0:s0 + step, None] - iy[None]) ** 2 + (ox[s0:s0 + step, None] - ix[None]) ** 2
+            nn[s0:s0 + step] = d.argmin(1)
         block = out[sub]
         block[oy, ox] = block[iy[nn], ix[nn]]
     return out
