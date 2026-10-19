@@ -27,6 +27,7 @@ public final class HeartBalanceSelfTest {
         list.add(StoneWhaleHeart::balanceProfile);
         list.add(jp.revati.skyabyss.titan.storm.heart.StormHeart::balanceProfile);
         list.add(jp.revati.skyabyss.titan.tide.heart.TideHeart::balanceProfile);
+        list.add(jp.revati.skyabyss.titan.ember.heart.EmberHeart::balanceProfile);
         return list;
     }
 

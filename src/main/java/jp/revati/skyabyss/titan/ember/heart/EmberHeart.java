@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import jp.revati.skyabyss.combat.HeartBalance;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.entity.HeartBoss;
@@ -58,29 +59,36 @@ import net.minecraft.world.phys.Vec3;
 //  段階 2 熔け落ちる殻 : 崩れる床 (区画が溶岩に沈む) / 鞴の嵐 (中心へ引く) / 灰の礫 (人を追う礫)。受ける傷 1.2 倍。主題は「立つ場所が動く」
 //  段階 3 余燼         : 冷え (熱が 1 秒に −8、熱 0 で凍え) / 残り火 (温まる場所) / 消えかけの鼓動 (中央の輪) / 灰の帳 (見通しが悪い)。
 //                        主題は「熱が足りない」 (ここまでの「熱をためすぎない」の逆)
+// 体力 15% 未満で最終段階 (憤怒、模型は段階 3 のまま): 3 秒の咆哮のあと、技が二つ重なる組 (PAIRS_FURY) だけを短い間で出す。
+//  憤怒だけの新しい技「炉打ち」(FORGE): 鎚が部屋を三度回って打ち (扇 90 度を 120 度ずつ)、最後に台の上 (中央の円) を打つ。
+// 段階 2・3 でも、技の組 (COMBO) が割り込む (二つ目の予告は 16〜30 tick 遅れて始まり、どの予告も 0.8 秒以上)。
 // 段階は同期データで全員の画面に届き、模型 (段階ごとの geo) とボスバーの見た目を決める。
-// 強さは 03 の 9.8節の余燼の段 (体力 790、防御 9 / 靭性 7。想定は Lv 28〜30)
+// 強さ: 最大体力 HeartBalance.MAX_HP (1000) × 基本の硬さ BASE_RESIST = 実質 2290 (02 の 5.6、13 の 8.2)。防御 9 / 靭性 7。想定は Lv 28〜30
 public class EmberHeart extends HeartBoss {
     public static final int PHASE_COUNT = 3;
     public static final float PHASE_TWO_AT = 0.66f;
     public static final float PHASE_THREE_AT = 0.33f;
     public static final int ROAR_TICKS = 60;
-    public static final float MAX_HEALTH = 790f;
+    public static final float MAX_HEALTH = HeartBalance.MAX_HP;
+    // 基本の硬さ: 受ける傷をこの値で割る (実質の体力 = 1000 × 2.29 = 2290。人数の分はさらに HeartBalance.partyScale を掛ける)
+    public static final float BASE_RESIST = 2.29f;
     // 段階 2 (熔け落ちる殻) で受ける傷の倍率
     public static final float EXPOSED_TAKEN = 1.2f;
 
-    // 技の傷 (防具で減る前。13 の 5.3節の表の値)
-    public static final float BREATH_DAMAGE = 18f;
+    // 技の傷 (防具で減る前。13 の 8.3節の表の値)。最も重い一撃 (消えかけの鼓動 37) が、想定の防具 22 / 強靭 16 で想定の体力 38 の 3 割弱
+    public static final float BREATH_DAMAGE = 32f;
     public static final float BREATH_HEAT = 15f;
-    public static final float PULSE_DAMAGE = 13f;
+    public static final float PULSE_DAMAGE = 24f;
     public static final float PULSE_HEAT = 10f;
-    public static final float ORB_DAMAGE = 15f;
-    public static final float ORB_FLOOR_DAMAGE = 3f;
+    public static final float ORB_DAMAGE = 28f;
+    // 燃える床の燃え立ち一回 (1 秒の予告つき、3 回)。小さな傷は防具でほとんど消えるので、倍にはしない
+    public static final float ORB_FLOOR_DAMAGE = 5f;
     public static final float ORB_FLOOR_HEAT = 5f;
-    public static final float GALE_DAMAGE = 16f;
-    public static final float PELLET_DAMAGE = 10f;
-    public static final float FADING_DAMAGE = 22f;
-    public static final float EMBER_BURN_DAMAGE = 5f;
+    public static final float GALE_DAMAGE = 30f;
+    public static final float PELLET_DAMAGE = 18f;
+    public static final float FADING_DAMAGE = 37f;
+    // 残り火の燃え立ち (温まる代わりの小さな傷。1 秒の予告つき)
+    public static final float EMBER_BURN_DAMAGE = 8f;
     public static final float EMBER_HEAT_PER_SECOND = 12f;
     // 段階 3 の冷え: 熱が 1 秒に −8。0 で凍え (移動 −30%、攻撃の速さ −20%)、10 を超えると解ける
     public static final float CHILL_PER_SECOND = 8f;
@@ -106,12 +114,12 @@ public class EmberHeart extends HeartBoss {
     public static final int BLAZE_BURNS = 3;
     public static final int GALE_WARN = 70;
     public static final double GALE_RADIUS = 6;
-    public static final float GALE_WAVE_DAMAGE = 8f;
+    public static final float GALE_WAVE_DAMAGE = 15f;
     public static final int PELLET_WARN = 30;
     public static final double PELLET_RADIUS = 1.6;
     public static final int FADING_WARN = 40;
     public static final double FADING_RADIUS = 6;
-    public static final float FADING_WAVE_DAMAGE = 10f;
+    public static final float FADING_WAVE_DAMAGE = 18f;
     public static final int EMBER_BURST_FIRST = 40;
     public static final int EMBER_BURST_WARN = 16;
     public static final int ROAR_WARN = 22;
@@ -119,21 +127,42 @@ public class EmberHeart extends HeartBoss {
     public static final double EMBER_RADIUS = 2.5;
     public static final int EMBER_TICKS = 160;
     public static final int EMBER_COUNT = 4;
-    // 技の間 (tick): 段階 1 は 2.5〜3.3 秒、段階 2 は 2.0〜2.8 秒、段階 3 は 1.8〜2.4 秒
-    public static final int[] GAP_MIN = {50, 40, 36};
-    public static final int[] GAP_SPAN = {17, 17, 13};
+    // 炉打ち (憤怒だけ): 扇 (半径 FORGE_RANGE、片側 45 度) を 120 度ずつ回して三打、最後に中央の円 (半径 5)
+    public static final int FORGE_WARN = 24;
+    public static final int FORGE_STEP = 16;
+    public static final double FORGE_RANGE = 15.5;
+    public static final double FORGE_HALF = Math.toRadians(45);
+    public static final int FORGE_CORE_WARN = 72;
+    public static final double FORGE_CORE_RADIUS = 5;
+    public static final float FORGE_DAMAGE = 34f;
+    public static final float FORGE_CORE_DAMAGE = 30f;
+    public static final int FORGE_TICKS = 80;
+    // 技の間 (tick): 段階 1 は 1.4〜1.9 秒、段階 2 は 1.1〜1.5 秒、段階 3 は 1.0〜1.4 秒 (冷えがあるので岩鯨より少し長い)。憤怒は 0.4〜0.7 秒
+    public static final int[] GAP_MIN = {28, 22, 20};
+    public static final int[] GAP_SPAN = {10, 8, 8};
+    public static final int GAP_FURY = 8;
+    public static final int GAP_FURY_SPAN = 6;
+    // 最初の技までと、咆哮のあとの間
+    public static final int FIRST_COOLDOWN = 30;
+    public static final int ROAR_COOLDOWN = 30;
+    public static final int ENRAGE_COOLDOWN = 20;
+    // 憤怒の鼓動 (最後に燃え上がる。間 1.3 秒、強く高く)
+    public static final int FURY_BEAT = 26;
 
     static final ResourceLocation CHILL_SPEED_ID = EmberIds.id("ember_heart_chill_speed");
     static final ResourceLocation CHILL_ATTACK_ID = EmberIds.id("ember_heart_chill_attack");
 
     private static final EntityDataAccessor<Integer> DATA_PHASE = SynchedEntityData.defineId(EmberHeart.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(EmberHeart.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_ENRAGED = SynchedEntityData.defineId(EmberHeart.class, EntityDataSerializers.BOOLEAN);
 
     public enum Action {
         NONE(null), ROAR(null),
         BREATH("breath"), PULSE("pulse"), ORB("orb"),
         FLOOR("floor"), GALE("gale"), PELLET("pellet"),
-        CHILL("chill"), EMBERS("embers"), FADING("fading"), VEIL("veil");
+        CHILL("chill"), EMBERS("embers"), FADING("fading"), VEIL("veil"),
+        // 炉打ち (憤怒だけ。模型の動きは消えかけの鼓動を使う) と、技の組 (二つの技を重ねる。動きは一つ目のもの)
+        FORGE("fading"), COMBO(null);
 
         final String anim;
 
@@ -146,6 +175,19 @@ public class EmberHeart extends HeartBoss {
     public static final Action[] PHASE_ONE = {Action.BREATH, Action.PULSE, Action.ORB};
     public static final Action[] PHASE_TWO = {Action.FLOOR, Action.GALE, Action.PELLET};
     public static final Action[] PHASE_THREE = {Action.EMBERS, Action.FADING, Action.VEIL};
+
+    // 技の組 (二つの技を、二つ目を offset tick 遅らせて重ねる。length は組の長さ = 遅い方の技の終わり)。
+    // 選ぶのは、避け方が違い (帯と円、輪と足もと、扇と線)、灰の帳 (見通しが悪い) と鞴の嵐 (凍えた足では逆らいにくい) を段階 3 に含まない組だけ
+    public record Pair(Action first, Action second, int offset, int length) {
+    }
+
+    public static final Pair[] PAIRS_TWO = {new Pair(Action.FLOOR, Action.PELLET, 16, 48), new Pair(Action.GALE, Action.ORB, 20, 82)};
+    public static final Pair[] PAIRS_THREE = {new Pair(Action.FADING, Action.ORB, 24, 64), new Pair(Action.EMBERS, Action.BREATH, 20, 60)};
+    public static final Pair[] PAIRS_FURY = {new Pair(Action.FADING, Action.ORB, 24, 64), new Pair(Action.EMBERS, Action.BREATH, 20, 60),
+            new Pair(Action.FORGE, Action.EMBERS, 30, FORGE_TICKS), new Pair(Action.PULSE, Action.ORB, 16, 56),
+            new Pair(Action.FORGE, Action.BREATH, 30, FORGE_TICKS)};
+    // 組が割り込む割合 (段階 1 / 2 / 3)。憤怒は組だけ
+    public static final double[] COMBO_CHANCE = {0, 0.3, 0.45};
 
     // 熔け玉の予告のあとに落ちる玉
     private record Orb(double x, double z, int impactAt) {
@@ -163,7 +205,7 @@ public class EmberHeart extends HeartBoss {
     private Action action = Action.NONE;
     private Action last = Action.NONE;
     private int actionTicks;
-    private int cooldown = 40;
+    private int cooldown = FIRST_COOLDOWN;
     private float attackYaw;
     private boolean defeated;
     private final List<Orb> orbs = new ArrayList<>();
@@ -178,7 +220,12 @@ public class EmberHeart extends HeartBoss {
     private final Set<UUID> chilled = new HashSet<>();
     @Nullable
     private AABB arena;
-    private float toughness = 1f;
+    private float toughness = BASE_RESIST;
+    // 憤怒の咆哮の最中か / 技の組の進み (組の中の技は finish を呼んでも終わらない)
+    private boolean enrageRoar;
+    @Nullable
+    private Pair pair;
+    private boolean suppressFinish;
     // 自己テスト用: 技を自分で選ばない (forceAction だけで動かす)
     private boolean holdAttacks;
     // 開発用: 熾の底にいる人数を多いことにする (0 なら実際の人数)
@@ -208,6 +255,7 @@ public class EmberHeart extends HeartBoss {
         super.defineSynchedData(builder);
         builder.define(DATA_PHASE, 0);
         builder.define(DATA_ROARING, false);
+        builder.define(DATA_ENRAGED, false);
     }
 
     // 段階 (0 から 2)
@@ -219,11 +267,19 @@ public class EmberHeart extends HeartBoss {
         return entityData.get(DATA_ROARING);
     }
 
+    // 最終段階 (憤怒) か。模型は段階 3 のまま、ボスバーが赤くなる
+    public boolean isEnraged() {
+        return entityData.get(DATA_ENRAGED);
+    }
+
     // テスト用のコマンドと自己テストから: 段階を直接決める
     public void forcePhase(int phase) {
         int next = Mth.clamp(phase, 0, PHASE_COUNT - 1);
         entityData.set(DATA_PHASE, next);
         entityData.set(DATA_ROARING, false);
+        entityData.set(DATA_ENRAGED, false);
+        enrageRoar = false;
+        pair = null;
         action = Action.NONE;
         cooldown = 20;
         if (level() instanceof ServerLevel server && isBound()) {
@@ -283,12 +339,17 @@ public class EmberHeart extends HeartBoss {
     // 戦いの部屋と挑む人数 (EmberHeartBattle が湧かせるときに)
     public void bindArena(AABB arena, int challengers) {
         this.arena = arena;
-        this.toughness = scaleFor(challengers);
+        this.toughness = toughnessFor(challengers);
     }
 
-    // 人数による強さの倍率: 1 + 0.6 × (人数 − 1)。最大体力は変えず、受ける傷を割る (岩鯨・潮殻と同じ)
+    // 人数による強さの倍率: HeartBalance.partyScale = 1 + 0.85 × (人数 − 1)。最大体力は変えず、受ける傷を割る (岩鯨と同じ)
     public static float scaleFor(int challengers) {
-        return 1f + 0.6f * (Math.max(1, challengers) - 1);
+        return (float) HeartBalance.partyScale(challengers);
+    }
+
+    // 受ける傷を割る値 (基本の硬さ × 人数の倍率)
+    public static float toughnessFor(int challengers) {
+        return BASE_RESIST * scaleFor(challengers);
     }
 
     public float toughness() {
@@ -370,6 +431,11 @@ public class EmberHeart extends HeartBoss {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
                 return;
             }
+            if (!isEnraged() && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < HeartBalance.ENRAGE_AT) {
+                enrageRoar = true;
+                begin(Action.ROAR, "roar_2");
+                return;
+            }
             if (holdAttacks) {
                 return;
             }
@@ -400,13 +466,20 @@ public class EmberHeart extends HeartBoss {
             case EMBERS -> tickEmbersMove(server);
             case FADING -> tickFading(server);
             case VEIL -> tickVeilMove(server);
+            case FORGE -> tickForge(server);
+            case COMBO -> tickCombo(server);
             default -> {
             }
         }
     }
 
-    // 段階の技から、直前と同じでないものを選ぶ
+    // 段階の技から、直前と同じでないものを選ぶ。段階 2・3 はときどき技の組、憤怒は組だけ
     private Action pickAttack() {
+        Pair[] pairs = pairsFor(getPhase(), isEnraged());
+        if (pairs != null && (isEnraged() || random.nextDouble() < COMBO_CHANCE[getPhase()])) {
+            pair = pairs[random.nextInt(pairs.length)];
+            return Action.COMBO;
+        }
         Action[] bag = bagFor(getPhase());
         Action pick;
         int guard = 0;
@@ -415,6 +488,18 @@ public class EmberHeart extends HeartBoss {
             guard++;
         } while (pick == last && guard < 20);
         return pick;
+    }
+
+    @Nullable
+    public static Pair[] pairsFor(int phase, boolean enraged) {
+        if (enraged) {
+            return PAIRS_FURY;
+        }
+        return switch (phase) {
+            case 1 -> PAIRS_TWO;
+            case 2 -> PAIRS_THREE;
+            default -> null;
+        };
     }
 
     public static Action[] bagFor(int phase) {
@@ -426,8 +511,29 @@ public class EmberHeart extends HeartBoss {
     }
 
     // テスト用: 技を直接始める
+    // 技の組 (COMBO) は、いまの段階の組 (段階 1 では段階 2 の組) から一つ選ぶ
     public void forceAction(Action next) {
+        if (next == Action.COMBO) {
+            Pair[] pairs = pairsFor(getPhase(), isEnraged());
+            Pair[] from = pairs != null ? pairs : PAIRS_TWO;
+            forcePair(from[random.nextInt(from.length)]);
+            return;
+        }
         begin(next, next == Action.ROAR ? "roar_" + (getPhase() + 1) : null);
+    }
+
+    // テスト用: 技の組を直接始める
+    public void forcePair(Pair p) {
+        pair = p;
+        begin(Action.COMBO, null);
+    }
+
+    // テスト用: 憤怒に入れる (咆哮なし。段階 3 にする)
+    public void forceEnraged(boolean on) {
+        if (on && getPhase() != PHASE_COUNT - 1) {
+            forcePhase(PHASE_COUNT - 1);
+        }
+        entityData.set(DATA_ENRAGED, on);
     }
 
     private void begin(Action next, @Nullable String animation) {
@@ -439,14 +545,61 @@ public class EmberHeart extends HeartBoss {
             faceTarget(target);
         }
         attackYaw = getYRot();
-        playAction(animation != null ? animation : next.anim);
+        playAction(animation != null ? animation : next == Action.COMBO && pair != null ? pair.first().anim : next.anim);
     }
 
     private void finish() {
+        if (suppressFinish) {
+            return;
+        }
         action = Action.NONE;
         actionTicks = 0;
+        pair = null;
         int phase = getPhase();
-        cooldown = GAP_MIN[phase] + random.nextInt(GAP_SPAN[phase]);
+        cooldown = isEnraged() ? GAP_FURY + random.nextInt(GAP_FURY_SPAN) : GAP_MIN[phase] + random.nextInt(GAP_SPAN[phase]);
+    }
+
+    // 技の組: 一つ目はそのまま、二つ目は offset tick 遅れて始まる (どの技も自分の tick を数え直して動く)
+    private void tickCombo(ServerLevel server) {
+        Pair p = pair;
+        if (p == null) {
+            finish();
+            return;
+        }
+        runPart(server, p.first(), actionTicks);
+        if (actionTicks > p.offset()) {
+            runPart(server, p.second(), actionTicks - p.offset());
+        }
+        if (actionTicks >= p.length()) {
+            finish();
+        }
+    }
+
+    private void runPart(ServerLevel server, Action part, int ticks) {
+        int savedTicks = actionTicks;
+        Action saved = action;
+        actionTicks = ticks;
+        action = part;
+        suppressFinish = true;
+        try {
+            switch (part) {
+                case BREATH -> tickBreath(server);
+                case PULSE -> tickPulse(server);
+                case ORB -> tickOrb(server);
+                case FLOOR -> tickFloor(server);
+                case GALE -> tickGale(server);
+                case PELLET -> tickPellet(server);
+                case EMBERS -> tickEmbersMove(server);
+                case FADING -> tickFading(server);
+                case FORGE -> tickForge(server);
+                default -> {
+                }
+            }
+        } finally {
+            suppressFinish = false;
+            actionTicks = savedTicks;
+            action = saved;
+        }
     }
 
     private void faceTarget(LivingEntity target) {
@@ -544,7 +697,26 @@ public class EmberHeart extends HeartBoss {
                     .start();
         }
         if (actionTicks % 4 == 0 && actionTicks < 56) {
+            if (enrageRoar) {
+                // 憤怒: 消えかけた火が最後に燃え上がる (赤い粒と炎)
+                warn(server, dust(0xFF3A1A, 1.5f), getX(), coreY(), getZ(), 8, 1.3, 1.3, 1.3, 0.05);
+                warn(server, ParticleTypes.FLAME, getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.08);
+            }
             warn(server, dust(getPhase() == 0 ? 0xFFB040 : 0xE8E0D8, 1.3f), getX(), coreY(), getZ(), 6, 1.2, 1.2, 1.2, 0.05);
+        }
+        if (actionTicks >= ROAR_TICKS && enrageRoar) {
+            entityData.set(DATA_ROARING, false);
+            enrageRoar = false;
+            entityData.set(DATA_ENRAGED, true);
+            bossBar.setColor(BossEvent.BossBarColor.RED);
+            sound(server, SoundEvents.BLAZE_SHOOT, 3f, 0.5f);
+            sound(server, EmberHeartSetup.BEAT.get(), 3f, 1.3f);
+            server.sendParticles(ParticleTypes.LAVA, getX(), coreY(), getZ(), 50, 1.8, 1.6, 1.8, 0);
+            server.sendParticles(ParticleTypes.FLAME, getX(), coreY(), getZ(), 90, 1.8, 1.6, 1.8, 0.15);
+            nextBeat = tickCount + 10;
+            finish();
+            cooldown = ENRAGE_COOLDOWN;
+            return;
         }
         if (actionTicks >= ROAR_TICKS) {
             entityData.set(DATA_ROARING, false);
@@ -558,7 +730,7 @@ public class EmberHeart extends HeartBoss {
                 enterPhaseThree(server);
             }
             finish();
-            cooldown = 40;
+            cooldown = ROAR_COOLDOWN;
         }
     }
 
@@ -1018,8 +1190,14 @@ public class EmberHeart extends HeartBoss {
     private void tickBeat(ServerLevel server) {
         if (tickCount >= nextBeat) {
             float frac = getHealth() / getMaxHealth();
-            sound(server, EmberHeartSetup.BEAT.get(), beatVolume(frac), 0.8f + 0.2f * frac / PHASE_THREE_AT);
-            nextBeat = tickCount + beatInterval(frac);
+            if (isEnraged()) {
+                // 憤怒: 最後に燃え上がって、鼓動が速く強くなる
+                sound(server, EmberHeartSetup.BEAT.get(), 2.4f, 1.15f);
+                nextBeat = tickCount + FURY_BEAT;
+            } else {
+                sound(server, EmberHeartSetup.BEAT.get(), beatVolume(frac), 0.8f + 0.2f * frac / PHASE_THREE_AT);
+                nextBeat = tickCount + beatInterval(frac);
+            }
             echoAt = tickCount + 12;
         }
         if (echoAt > 0 && tickCount >= echoAt) {
@@ -1172,6 +1350,57 @@ public class EmberHeart extends HeartBoss {
             }
         }
         if (actionTicks >= 60) {
+            finish();
+        }
+    }
+
+    // 炉打ち (4.0 秒。憤怒だけ、組の中で出る): 鎚が部屋を回って三度打つ。扇 (半径 15.5、片側 45 度) が 120 度ずつ回り、
+    // 1.2 / 2.0 / 2.8 秒に当たる (三つとも初めから見える。扇のあいだの筋 30 度と、打ち終わった扇は安全)。最後に 3.6 秒で台の上 (中央の円、半径 5) を打つ。
+    // 一打目は狙っている人の向き、回る向きは毎回ちがう。傷 34 (扇) / 30 (中央)
+    private void tickForge(ServerLevel server) {
+        if (actionTicks == 1) {
+            sound(server, SoundEvents.ANVIL_PLACE, 2.5f, 0.5f);
+            sound(server, EmberHeartSetup.PULSE.get(), 2f, 0.7f);
+            double base = Telegraph.angleOf(forward(attackYaw));
+            double turn = (random.nextBoolean() ? 1 : -1) * Math.PI * 2 / 3;
+            for (int i = 0; i < 3; i++) {
+                double angle = base + turn * i;
+                double dx = Math.cos(angle);
+                double dz = Math.sin(angle);
+                boolean lead = i == 0;
+                tg(server, TelegraphShape.cone(getX(), getZ(), angle, FORGE_RANGE, FORGE_HALF), FORGE_WARN + i * FORGE_STEP, D)
+                        .onImpact(s -> {
+                            s.playSound(null, getX(), floorY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, lead ? 2.5f : 2.0f, 0.5f);
+                            double fy = floorY();
+                            for (double d = 3; d <= FORGE_RANGE; d += 2.5) {
+                                s.sendParticles(ParticleTypes.FLAME, getX() + dx * d, fy + 0.4, getZ() + dz * d, 8, 1.2, 0.2, 1.2, 0.05);
+                                s.sendParticles(ParticleTypes.LAVA, getX() + dx * d, fy + 0.5, getZ() + dz * d, 1, 0.8, 0.1, 0.8, 0);
+                            }
+                        })
+                        .onHit((s, player) -> {
+                            strike(player, FORGE_DAMAGE);
+                            player.knockback(0.8, -dx, -dz);
+                            player.hurtMarked = true;
+                        })
+                        .start();
+            }
+            tg(server, TelegraphShape.circle(getX(), getZ(), FORGE_CORE_RADIUS), FORGE_CORE_WARN, D)
+                    .onImpact(s -> {
+                        sound(s, SoundEvents.ANVIL_LAND, 3f, 0.4f);
+                        s.sendParticles(ParticleTypes.FLAME, getX(), floorY() + 0.5, getZ(), 80, 2.5, 0.4, 2.5, 0.12);
+                    })
+                    .onHit((s, player) -> {
+                        Vec3 out = player.position().subtract(position()).multiply(1, 0, 1);
+                        strike(player, FORGE_CORE_DAMAGE);
+                        player.knockback(1.0, -out.x, -out.z);
+                        player.hurtMarked = true;
+                    })
+                    .start();
+        }
+        if (actionTicks < 70 && actionTicks % 3 == 0) {
+            warn(server, dust(0xFF5A20, 1.4f), getX(), coreY(), getZ(), 6, 1.0, 1.0, 1.0, 0.04);
+        }
+        if (actionTicks >= FORGE_TICKS) {
             finish();
         }
     }
@@ -1358,6 +1587,46 @@ public class EmberHeart extends HeartBoss {
     // 受ける傷 (段階と人数で)。自己テストからも使う
     public static float takenFor(int phase, float amount, float toughness) {
         return (phase == 1 ? amount * EXPOSED_TAKEN : amount) / toughness;
+    }
+
+    // 手ごたえの数 (HeartBalance / 自己テスト用)。段階 1 / 2 / 3 / 憤怒。
+    // action = 技の長さの平均 tick (組が割り込む分を入れた)。hits = 選ばれる技の一撃 (組の中の技も並べる。灰の帳は 0)。
+    // 段階 2 は熔け落ちた殻で受ける傷が 1.2 倍だが、式では硬さ 2.29 のまま数える (実際は少し短くなる側)
+    public static HeartBalance.Profile balanceProfile() {
+        int[] action = new int[4];
+        double[] singles = {mean(40, 40, 40), mean(44, 82, 32), mean(30, 60, 34)};
+        for (int phase = 0; phase < 3; phase++) {
+            Pair[] pairs = pairsFor(phase, false);
+            double chance = COMBO_CHANCE[phase];
+            action[phase] = (int) Math.round(pairs == null ? singles[phase] : singles[phase] * (1 - chance) + meanLength(pairs) * chance);
+        }
+        action[3] = (int) Math.round(meanLength(PAIRS_FURY));
+        return new HeartBalance.Profile("ember", MAX_HEALTH, BASE_RESIST,
+                new int[] {GAP_MIN[0] + GAP_SPAN[0] / 2, GAP_MIN[1] + GAP_SPAN[1] / 2, GAP_MIN[2] + GAP_SPAN[2] / 2, GAP_FURY + GAP_FURY_SPAN / 2},
+                action,
+                new double[] {0, COMBO_CHANCE[1], COMBO_CHANCE[2], 1.0},
+                new float[][] {
+                        {BREATH_DAMAGE, PULSE_DAMAGE, ORB_DAMAGE},
+                        {EmberHeartArena.ENGULF_DAMAGE, GALE_DAMAGE, PELLET_DAMAGE, ORB_DAMAGE},
+                        {EMBER_BURN_DAMAGE, FADING_DAMAGE, 0f, ORB_DAMAGE, BREATH_DAMAGE},
+                        {FADING_DAMAGE, ORB_DAMAGE, BREATH_DAMAGE, FORGE_DAMAGE, FORGE_CORE_DAMAGE, ORB_DAMAGE, PULSE_DAMAGE}},
+                3 * ROAR_TICKS);
+    }
+
+    private static double mean(int... v) {
+        double sum = 0;
+        for (int x : v) {
+            sum += x;
+        }
+        return sum / v.length;
+    }
+
+    private static double meanLength(Pair[] pairs) {
+        double sum = 0;
+        for (Pair p : pairs) {
+            sum += p.length();
+        }
+        return sum / pairs.length;
     }
 
     private void updateBossBarViewers() {
