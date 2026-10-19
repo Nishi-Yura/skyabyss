@@ -47,7 +47,7 @@ def font(size):
     return ImageFont.truetype(FONT, size)
 
 
-W, H, COLS = 480, 270, 4
+W, H, COLS = 400, 225, 4
 rows = (len(CELLS) + COLS - 1) // COLS
 HEAD = 64
 img = Image.new("RGB", (W * COLS, HEAD + (H + 26) * rows), BG)
@@ -65,5 +65,5 @@ for i, (name, zone, label) in enumerate(CELLS):
     d.text((x + 20, y + 4), label, font=font(13), fill=TEXT)
     d.rectangle((x + 1, y + 25, x + W - 2, y + 26 + H - 1), outline=LINE)
 OUT.parent.mkdir(parents=True, exist_ok=True)
-img.save(OUT, optimize=True)
+img.convert("P", palette=Image.ADAPTIVE, colors=256).save(OUT, optimize=True)
 print(OUT, img.size)
