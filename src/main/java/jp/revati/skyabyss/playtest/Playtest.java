@@ -245,6 +245,9 @@ public final class Playtest {
             run(pp, "skyabyss titan board" + suffix(idx));
             if (insideBack(pp, idx)) {
                 then.accept(pp);
+            } else {
+                pp.sendSystemMessage(net.minecraft.network.chat.Component.translatable("commands.skyabyss.playtest.board_failed")
+                        .withStyle(net.minecraft.ChatFormatting.RED));
             }
         });
     }
@@ -286,12 +289,16 @@ public final class Playtest {
                 }
                 sp.setRaijuDefeated(true);
                 sp.setKeelOpen(true);
+                for (int i = 0; i < StormBackLayout.EAST_DOORS.length; i++) {
+                    sp.openEastDoor(i);
+                }
             }
             default -> {
                 EmberBackState es = EmberBackState.of(level, group);
                 for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
                     es.ring(t);
                 }
+                es.markGateOpen();
             }
         }
         return true;
@@ -475,6 +482,21 @@ public final class Playtest {
     // ---------------------------------------------------------------- いま・つぎ
     // 今の目的の「次の出来事」を、本物の仕組みで今すぐ起こす。返すのは言語キー (引数は無し)
     public static String now(ServerPlayer p, boolean next) {
+        try {
+            return nowInner(p, next);
+        } catch (RuntimeException e) {
+            SkyAbyss.LOGGER.warn("playtest now failed", e);
+            return "commands.skyabyss.playtest.now.unknown";
+        }
+    }
+
+    // 一日の中の時刻 (tick) へ。日付は変えない
+    private static void timeOfDay(MinecraftServer server, long tod) {
+        ServerLevel ow = server.overworld();
+        ow.setDayTime(Math.floorDiv(ow.getDayTime(), 24000L) * 24000L + tod);
+    }
+
+    private static String nowInner(ServerPlayer p, boolean next) {
         var st = OpeningDirector.state(p);
         OpeningBeat open = null;
         for (OpeningBeat b : OpeningBeat.values()) {
@@ -496,6 +518,12 @@ public final class Playtest {
                 return now(p, false);
             }
             toOverworld(p);
+            switch (open) {
+                case FOOTSTEPS, SONG -> timeOfDay(p.server, 14000);
+                case WHALE -> timeOfDay(p.server, 12000);
+                default -> {
+                }
+            }
             switch (open) {
                 case STORYTELLER -> run(p, "execute positioned ^ ^ ^2 run skyabyss npc spawn storyteller");
                 case ISANA -> run(p, "execute positioned ^ ^ ^2 run skyabyss npc spawn whale_chaser");

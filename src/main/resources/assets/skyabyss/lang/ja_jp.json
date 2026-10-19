@@ -663,12 +663,14 @@
   "commands.skyabyss.playtest.now.footprints": "巨大な足跡の伝承を出した。足跡を見に行こう",
   "commands.skyabyss.playtest.now.shadow": "空の影を通した。空を見上げよう",
   "commands.skyabyss.playtest.now.storyteller": "語り部を目の前に出した。話しかけよう",
-  "commands.skyabyss.playtest.now.footsteps": "夜の足音を鳴らした。じっと聞いて、そのまま待とう",
+  "commands.skyabyss.playtest.now.footsteps": "夜にして、夜の足音を鳴らした。じっと聞いて、そのまま待とう",
   "commands.skyabyss.playtest.now.isana": "イサナを目の前に出した。話しかけよう",
   "commands.skyabyss.playtest.now.bones": "骨の丘の伝承を出した。読んでみよう",
-  "commands.skyabyss.playtest.now.song": "空の歌を鳴らした。聞き終えよう",
-  "commands.skyabyss.playtest.now.whale": "岩鯨の初見の場面を起こし、鎖を目の前に下ろした。鎖を右クリックで上ろう",
+  "commands.skyabyss.playtest.now.song": "夜にして、空の歌を鳴らした。聞き終えよう",
+  "commands.skyabyss.playtest.now.whale": "夕方にして、岩鯨の初見の場面を起こし、鎖を目の前に下ろした。鎖を右クリックで上ろう",
   "commands.skyabyss.playtest.now.titan": "次の巨神を近くに降ろした。道 (鎖など) から背中へ乗ろう",
   "commands.skyabyss.playtest.now.heart": "試練を済ませ、心臓の前へ移した。扉を進んで心臓に挑もう",
-  "commands.skyabyss.playtest.now.all_done": "もう全部の心臓が止まっている。これ以上の出来事はない"
+  "commands.skyabyss.playtest.now.all_done": "もう全部の心臓が止まっている。これ以上の出来事はない",
+  "commands.skyabyss.playtest.now.unknown": "この段は playtest now で起こせない",
+  "commands.skyabyss.playtest.board_failed": "[試遊] 背中へ乗れなかった (巨神が遠い・乗る資格・読み込み待ち)。もう一度試すか now を使おう"
 }
