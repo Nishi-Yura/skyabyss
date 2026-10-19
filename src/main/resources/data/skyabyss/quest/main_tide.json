@@ -39,6 +39,10 @@
           {
             "type": "lore",
             "entry": "chapter1/tide_hours"
+          },
+          {
+            "type": "stilled",
+            "titan": "tide_shell"
           }
         ]
       }
