@@ -36,7 +36,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 // NPC の頭の上の印 (サーバーが人ごとに決めて送る。npc/NpcMarkers)。その人の画面にしか出ない。
-//   形: 「!」新しい話・頼み、「?」報告、吹き出し = 新しい雑談 (16x24 のドット絵・暗い縁取り・やわらかい光)。金 = メイン、青緑 = サブ。ゆっくり上下し、新しい印は脈打つ
+//   形: メイン (金) は「!」新しい話、「?」報告。サブ (青緑) は「!」を使わず、巻物 = 新しい頼み、チェックの巻物 = 報告。吹き出し = 新しい雑談 (16x24 のドット絵・暗い縁取り・やわらかい光)。ゆっくり上下し、新しい印は脈打つ
 //   見え方: 遠くからも読める (距離に応じて大きく。64 ブロックで消える)。16 ブロックまでは壁越しでも見える。それより遠くは見通せるときだけ
 //   描かない場面: 場面・画面・F1・序盤の目覚め・設定 npcMarkers が OFF
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
@@ -50,9 +50,9 @@ public final class NpcMarkerClient {
     private static final String DIR = "textures/gui/npc_marker/";
     private static final ResourceLocation GLOW = tex("glow");
     private static final ResourceLocation BANG_GOLD = tex("bang_gold");
-    private static final ResourceLocation BANG_TEAL = tex("bang_teal");
+    private static final ResourceLocation SCROLL_TEAL = tex("scroll_teal");
     private static final ResourceLocation QUESTION_GOLD = tex("question_gold");
-    private static final ResourceLocation QUESTION_TEAL = tex("question_teal");
+    private static final ResourceLocation SCROLL_CHECK_TEAL = tex("scroll_check_teal");
     private static final ResourceLocation CHAT = tex("chat");
     // 近くでの高さ (ブロック。絵の余白を含む 24 画素ぶん。見える形は約 0.55)
     private static final float ICON_H = 1.0f;
@@ -192,9 +192,9 @@ public final class NpcMarkerClient {
     static ResourceLocation icon(Marker marker) {
         return switch (marker) {
             case NEW_MAIN -> BANG_GOLD;
-            case NEW_SIDE -> BANG_TEAL;
+            case NEW_SIDE -> SCROLL_TEAL;
             case READY_MAIN -> QUESTION_GOLD;
-            case READY_SIDE -> QUESTION_TEAL;
+            case READY_SIDE -> SCROLL_CHECK_TEAL;
             default -> CHAT;
         };
     }

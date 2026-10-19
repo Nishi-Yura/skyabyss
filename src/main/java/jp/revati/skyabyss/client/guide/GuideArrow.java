@@ -4,22 +4,25 @@ import com.mojang.math.Axis;
 
 import net.minecraft.client.gui.GuiGraphics;
 
-// ドット絵の矢印 (帯・追跡中のクエストの札が使う)。9×9 の「上向き」の形を、向きの角度だけ回して描く。
+// ドット絵の矢印 (帯・追跡中のクエストの札が使う。目的の標 ObjectiveMarker と同じ金色)。11×11 の「上向き」の形を、向きの角度だけ回して描く。
 // 色だけに頼らない: 形 (矢じり + 軸) と暗い縁取りで読む
 public final class GuideArrow {
-    public static final int SIZE = 9;
-    private static final int GOLD = 0xF2C14E;
-    // 上向き (9 列 × 9 行)。# = 塗る
+    public static final int SIZE = 11;
+    // 目的の標 (ObjectiveMarker) と同じ明るい金
+    private static final int GOLD = 0xFFD866;
+    // 上向き (11 列 × 11 行)。# = 塗る
     private static final String[] SHAPE = {
-            "....#....",
-            "...###...",
-            "..#####..",
-            ".#######.",
-            "#########",
-            "...###...",
-            "...###...",
-            "...###...",
-            "...###...",
+            ".....#.....",
+            "....###....",
+            "...#####...",
+            "..#######..",
+            ".#########.",
+            "....###....",
+            "....###....",
+            "....###....",
+            "....###....",
+            "....###....",
+            "....###....",
     };
 
     private GuideArrow() {

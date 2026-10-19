@@ -288,6 +288,14 @@ public final class NoticeClient {
             boolean big = kind == Notice.Kind.PLACE || kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH;
             out.add(Request.of(Id.BANNER, Region.TOP_CENTER, (maxW, maxH) -> {
                 BannerPlan p = bannerPlan(font, kind, text, extra, guiW, maxW);
+                if (p != null && p.h > maxH && kind == Notice.Kind.CHAPTER) {
+                    for (float k : new float[] {0.75f, 0.6f}) {
+                        p = bannerPlan(font, kind, text, extra, guiW, maxW, k);
+                        if (p.h <= maxH) {
+                            break;
+                        }
+                    }
+                }
                 if (p != null && p.h > maxH && !p.subLines.isEmpty()) {
                     p = bannerPlan(font, kind, text, Component.empty(), guiW, maxW);
                 }
@@ -345,10 +353,15 @@ public final class NoticeClient {
     }
 
     // 上の帯: kind = 場所 (PLACE)・章の題字 (CHAPTER)・余韻 (AFTERMATH)・戦いの知らせ (そのほか)。scale = 本文の拡大
-    private record BannerPlan(Notice.Kind kind, float scale, List<FormattedCharSequence> lines, List<FormattedCharSequence> subLines, int textW, int w, int h) {
+    private record BannerPlan(Notice.Kind kind, float scale, List<FormattedCharSequence> lines, List<FormattedCharSequence> subLines, int textW, int w, int h, float k) {
     }
 
     private static BannerPlan bannerPlan(Font font, Notice.Kind kind, Component text, Component sub, int guiW, int maxW) {
+        return bannerPlan(font, kind, text, sub, guiW, maxW, 1f);
+    }
+
+    // k = 章の題字の札の縮み (高さが足りない画面では 1 → 0.75 → 0.6 と小さくして入れる)
+    private static BannerPlan bannerPlan(Font font, Notice.Kind kind, Component text, Component sub, int guiW, int maxW, float k) {
         boolean chapter = kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH;
         boolean title = kind == Notice.Kind.CHAPTER;
         boolean place = kind == Notice.Kind.PLACE;
@@ -374,12 +387,12 @@ public final class NoticeClient {
         if (chapter) {
             w = blockW + 60;
             if (title) {
-                h = (int) (lines.size() * 11 * scale) + 4 + 6;
-                if (!sub.getString().isEmpty()) {
-                    float subScale = TextStyle.HEADING.scale();
-                    h += (int) (11 * subScale) + 2;
-                    w = Math.max(w, (int) (font.width(sub) * subScale) + 8);
-                }
+                // 章の題字の札 (飾り枠つき): 章の番号の行・題名 (TITLE の拡大)・区切り線・副題。高さは CARD_H で固定
+                String[] parts = splitLabel(text.getString());
+                int nameW = (int) (font.width(parts[1]) * scale);
+                int subW = (int) (font.width(sub) * CARD_SUB_SCALE);
+                w = Math.min(maxW, Math.round(Math.max(200, Math.max(nameW, subW) + 90) * k));
+                h = Math.round(CARD_H * k);
             } else {
                 h = 20 + (int) (lines.size() * 11 * scale);
                 w = Math.max(w, font.width(sub) + 56);
@@ -401,7 +414,7 @@ public final class NoticeClient {
             }
             w = Math.min(w, maxW);
         }
-        return new BannerPlan(kind, scale, lines, subLines, tw, w, h);
+        return new BannerPlan(kind, scale, lines, subLines, tw, w, h, k);
     }
 
     // ------------------------------------------------------------ 描く
@@ -507,8 +520,174 @@ public final class NoticeClient {
     // 章の題字の札 (CHAPTER) と余韻の札 (AFTERMATH)。
     //   CHAPTER  : 「一章　岩鯨」を TITLE の金の文字で、その下に題字を HEADING で。線が左右へ伸びる
     //   AFTERMATH: 見出し (小さな金) の下に一言を HEADING で、折り返し 3 行まで
+    static final int CARD_H = 80;
+    static final float CARD_SUB_SCALE = 1.2f;
+    private static NoticeQueue.Entry<Line> cardEntry;
+    private static int cardSounds;
+
+    // 「一章　岩鯨」を章の番号と題名に分ける (全角空白で。英語は「I　Stone Whale」で、番号を「CHAPTER I」にする)
+    static String[] splitLabel(String label) {
+        int i = label.indexOf('　');
+        if (i < 0) {
+            return new String[] {"", label};
+        }
+        String num = label.substring(0, i);
+        if (num.matches("[IVX]+")) {
+            num = "CHAPTER " + num;
+        }
+        return new String[] {num, label.substring(i + 1).trim()};
+    }
+
+    private static float smooth(float t) {
+        t = Mth.clamp(t, 0f, 1f);
+        return t * t * (3f - 2f * t);
+    }
+
+    // 章の題字 (CHAPTER) の札: 画面の上下に黒い帯 (レターボックス) が降りて、飾り枠の中に章の番号 → 題名が一文字ずつ現れ → 副題が浮かぶ。
+    // 金の粒がゆっくり昇る。音は始まりの響きと、題名が現れるときの鐘。経過は札の経過時間 (e.age) で決める
+    private static void renderChapterTitle(GuiGraphics g, Font font, int cx, int y, NoticeQueue.Entry<Line> e, float a, BannerPlan p) {
+        Minecraft mc = Minecraft.getInstance();
+        int gw = g.guiWidth();
+        int gh = g.guiHeight();
+        long age = e.age();
+        if (cardEntry != e) {
+            cardEntry = e;
+            cardSounds = 0;
+        }
+        if (cardSounds < 1) {
+            cardSounds = 1;
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_RESONATE, 0.6f, 0.8f));
+        }
+        if (cardSounds < 2 && age > 900) {
+            cardSounds = 2;
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BELL_BLOCK, 0.5f, 0.55f));
+        }
+        // レターボックス: 画面の高さの 11%。出入りは札の濃さ a に合わせてなめらかに
+        int bar = (int) (gh * 0.11f * smooth(a));
+        g.fill(0, 0, gw, bar, 0xFF000000);
+        g.fill(0, gh - bar, gw, gh, 0xFF000000);
+        if (bar > 2) {
+            int edge = ((int) (a * 0xA0) << 24) | 0xB8923A;
+            g.fill(0, bar, gw, bar + 1, edge);
+            g.fill(0, gh - bar - 1, gw, gh - bar, edge);
+        }
+        String[] parts = splitLabel(e.value.text().getString());
+        Component sub = e.value.extra();
+        // 札は縮み k で描く (局所の座標: 左上 = (cx, y) の原点、幅 = p.w / k)
+        float shrink = p.k;
+        g.pose().pushPose();
+        g.pose().translate(cx, y, 0f);
+        g.pose().scale(shrink, shrink, 1f);
+        cx = 0;
+        y = 0;
+        int w = Math.round(p.w / shrink);
+        int x0 = cx - w / 2;
+        int x1 = cx + w / 2;
+        int y0 = y;
+        int y1 = y + CARD_H;
+        // 板: 暗い石板 + 金の外枠 + 青緑の内枠 + 四隅の金の L と、上下の辺の中央の菱形
+        g.fill(x0, y0, x1, y1, ((int) (a * 0xC0) << 24) | 0x07090C);
+        int gold = ((int) (a * 0xE0) << 24) | 0xF2C14E;
+        int dim = ((int) (a * 0xA0) << 24) | 0xB8923A;
+        int teal = ((int) (a * 0x90) << 24) | 0x2E5552;
+        g.fill(x0, y0, x1, y0 + 1, dim);
+        g.fill(x0, y1 - 1, x1, y1, dim);
+        g.fill(x0, y0, x0 + 1, y1, dim);
+        g.fill(x1 - 1, y0, x1, y1, dim);
+        g.fill(x0 + 3, y0 + 3, x1 - 3, y0 + 4, teal);
+        g.fill(x0 + 3, y1 - 4, x1 - 3, y1 - 3, teal);
+        g.fill(x0 + 3, y0 + 3, x0 + 4, y1 - 3, teal);
+        g.fill(x1 - 4, y0 + 3, x1 - 3, y1 - 3, teal);
+        for (int k = 0; k < 4; k++) {
+            boolean left = (k & 1) == 0;
+            boolean top = (k & 2) == 0;
+            int ox = left ? x0 - 2 : x1 + 2 - 9;
+            int oy = top ? y0 - 2 : y1 + 2 - 9;
+            g.fill(ox, top ? oy : oy + 8, ox + 9, top ? oy + 1 : oy + 9, gold);
+            g.fill(left ? ox : ox + 8, oy, left ? ox + 1 : ox + 9, oy + 9, gold);
+        }
+        diamond(g, cx, y0, 4, gold);
+        diamond(g, cx, y1 - 1, 4, gold);
+        // 章の番号: 両側に線をのばし、小さな金の字
+        float t1 = smooth((age - 250) / 500f);
+        if (!parts[0].isEmpty() && t1 > 0f) {
+            int na = Mth.clamp((int) (a * t1 * 255), 4, 255) << 24;
+            int nw = font.width(parts[0]);
+            int ny = y0 + 9;
+            g.drawString(font, parts[0], cx - nw / 2, ny, na | 0xD9C48A, true);
+            int arm = (int) (t1 * Math.max(0, Math.min(60, (w - nw) / 2 - 24)));
+            int lc = ((int) (a * t1 * 0xB0) << 24) | 0xB8923A;
+            g.fill(cx - nw / 2 - 6 - arm, ny + 4, cx - nw / 2 - 6, ny + 5, lc);
+            g.fill(cx + nw / 2 + 6, ny + 4, cx + nw / 2 + 6 + arm, ny + 5, lc);
+        }
+        // 題名: 一文字ずつ、少し遅れて、下から浮かぶ
+        float ns = TextStyle.TITLE.scale();
+        String name = parts[1];
+        int nx = cx - (int) (font.width(name) * ns) / 2;
+        int ny = y0 + 22;
+        int off = 0;
+        for (int i = 0; i < name.length(); ) {
+            int cp = name.codePointAt(i);
+            String ch = new String(Character.toChars(cp));
+            float t = smooth((age - 700 - i * 150L) / 420f);
+            if (t > 0f) {
+                g.pose().pushPose();
+                g.pose().translate(nx + off * ns, ny + (1f - t) * 6f, 0);
+                g.pose().scale(ns, ns, 1f);
+                g.drawString(font, ch, 0, 0, (Mth.clamp((int) (a * t * 255), 4, 255) << 24) | 0xF2C14E, true);
+                g.pose().popPose();
+            }
+            off += font.width(ch);
+            i += ch.length();
+        }
+        long nameEnd = 700 + name.length() * 150L + 420;
+        // 区切り線: 題名が現れきるころ、中央から左右へ
+        float t3 = smooth((age - nameEnd + 300) / 600f);
+        int arm = (int) (t3 * (w / 2 - 22));
+        g.fill(cx - arm, y0 + 52, cx + arm, y0 + 53, ((int) (a * 0xC0) << 24) | 0xF2C14E);
+        // 副題
+        float t4 = smooth((age - nameEnd - 100) / 700f);
+        if (!sub.getString().isEmpty() && t4 > 0f) {
+            int sw = (int) (font.width(sub) * CARD_SUB_SCALE);
+            g.pose().pushPose();
+            g.pose().translate(cx - sw / 2f, y0 + 58, 0);
+            g.pose().scale(CARD_SUB_SCALE, CARD_SUB_SCALE, 1f);
+            g.drawString(font, sub, 0, 0, (Mth.clamp((int) (a * t4 * 255), 4, 255) << 24) | 0xE9E3D4, true);
+            g.pose().popPose();
+        }
+        // 金の粒: 板の内側をゆっくり昇り、またたく
+        for (int i = 0; i < 26; i++) {
+            long seed = (i + 1) * 2654435761L;
+            float fx = ((seed >> 3) & 1023) / 1023f;
+            float speed = 0.012f + ((seed >> 13) & 255) / 255f * 0.016f;
+            float phase = ((seed >> 21) & 1023) / 1023f;
+            float prog = (age * speed / (CARD_H + 16) + phase) % 1f;
+            int px = x0 + 6 + (int) (fx * (w - 12));
+            int py = y1 - 4 - (int) (prog * (CARD_H - 8));
+            float tw = 0.5f + 0.5f * (float) Math.sin(age * 0.006 + i * 1.7);
+            float life = (float) Math.sin(prog * Math.PI);
+            int pa = (int) (a * life * tw * 200);
+            if (pa > 6) {
+                int size = (i % 5 == 0) ? 2 : 1;
+                g.fill(px, py, px + size, py + size, (pa << 24) | 0xF2D88A);
+            }
+        }
+        g.pose().popPose();
+    }
+
+    private static void diamond(GuiGraphics g, int cx, int cy, int r, int argb) {
+        for (int d = -r; d <= r; d++) {
+            int half = r - Math.abs(d);
+            g.fill(cx - half, cy + d, cx + half + 1, cy + d + 1, argb);
+        }
+    }
+
     private static void renderChapterCard(GuiGraphics g, Font font, int cx, int y, NoticeQueue.Entry<Line> e, float a, BannerPlan p) {
         boolean title = e.kind == Notice.Kind.CHAPTER;
+        if (title) {
+            renderChapterTitle(g, font, cx, y, e, a, p);
+            return;
+        }
         float mainScale = p.scale;
         int textColor = title ? 0xF2C14E : 0xE9E3D4;
         int lineColor = ((int) (a * 0x90) << 24) | 0xF2C14E;
