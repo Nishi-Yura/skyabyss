@@ -119,12 +119,14 @@ public final class EmberBodyBuilder {
         b.crack();
         b.fireWell();
         b.backTube();
+        b.deckRooms();
         b.skin();
         long tCarve = System.currentTimeMillis() - t0;
         t0 = System.currentTimeMillis();
         EmberBackRooms.buildAll(back);
         long tRooms = System.currentTimeMillis() - t0;
         b.fixtures();
+        b.deckContent();
         // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
         EmberBossGates.build(back);
         b.repairPockets(back);
@@ -888,6 +890,32 @@ public final class EmberBodyBuilder {
     // 背へ出る洞の脇の小部屋の z の範囲 (宝箱 rim の置き場)
     public static final int RIM_NICHE_Z1 = -16;
     public static final int RIM_NICHE_Z2 = -10;
+
+    // ---------------------------------------------------------------- 試練の階 (EmberDeck。docs/design/29)
+    // 箱を掘り、床を張り、回廊とセルのあいだの戸口 (高さ 5) を開ける。中身は deckContent (休み場・碑文のあと)
+    private void deckRooms() {
+        if (!EmberDeck.placed()) {
+            return;
+        }
+        for (Box b : EmberDeck.ROOMS) {
+            carve(b);
+        }
+        for (List<BlockPos> gate : List.of(EmberDeck.E02_GATE, EmberDeck.E10_GATE, EmberDeck.E06_GATE, EmberDeck.E07_GATE)) {
+            for (BlockPos p : gate) {
+                kit.set(p, EmberKit.AIR);
+            }
+            BlockPos lo = gate.get(0);
+            BlockPos hi = gate.get(gate.size() - 1);
+            track(lo.getX(), EmberDeck.Y, lo.getZ(), hi.getX(), EmberDeck.G1, hi.getZ());
+        }
+        EmberDeckBuilder.floors(kit);
+    }
+
+    private void deckContent() {
+        if (EmberDeck.placed()) {
+            EmberDeckBuilder.build(kit);
+        }
+    }
 
     // ---------------------------------------------------------------- 掘った所の内壁を「肉と骨の壁」(洞は玄武岩) に (体の芯の凝灰岩・灰の原の石が見えたら)
     static boolean coreMaterial(BlockState s) {

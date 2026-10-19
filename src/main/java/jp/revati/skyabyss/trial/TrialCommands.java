@@ -163,11 +163,33 @@ public final class TrialCommands {
         return list(src);
     }
 
+    // 余燼の背: hub = 炉心の広間の休み場、deck = 試練の階の広間、セルの id = そのセルの入口の内側
+    private static int tpEmber(ServerPlayer sp, ServerLevel back, String where) {
+        int y = jp.revati.skyabyss.titan.ember.back.EmberDeck.Y + 1;
+        BlockPos at = switch (where.toLowerCase()) {
+            case "hub" -> jp.revati.skyabyss.titan.ember.back.EmberBackLayout.rest("hub").floor().above();
+            case "deck" -> jp.revati.skyabyss.titan.ember.back.EmberDeck.RESTS.get(0).floor().above();
+            case "e02" -> new BlockPos(16, y, 25);
+            case "e10" -> new BlockPos(16, y, 75);
+            case "e06" -> new BlockPos(-16, y, 25);
+            case "e07" -> new BlockPos(-16, y, 67);
+            default -> null;
+        };
+        if (at == null) {
+            return 0;
+        }
+        sp.teleportTo(back, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, where.equalsIgnoreCase("e06") || where.equalsIgnoreCase("e07") ? 90f : -90f, 0f);
+        return 1;
+    }
+
     private static int tp(CommandSourceStack src, String where) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer sp = src.getPlayerOrException();
         ServerLevel back = back(src);
         BlockPos at;
         float yaw = 0;
+        if (Titans.EMBER.equals(titan(back))) {
+            return tpEmber(sp, back, where);
+        }
         switch (where) {
             case "hub" -> at = Titans.TIDE_SHELL.equals(titan(back)) ? jp.revati.skyabyss.titan.tide.back.TideBackLayout.RESTS.get(0).spawn()
                     : jp.revati.skyabyss.titan.dungeon.TitanBackLayout.HUB.center().offset(0, 0, 4);

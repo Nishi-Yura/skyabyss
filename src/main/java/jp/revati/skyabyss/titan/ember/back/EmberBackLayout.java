@@ -26,8 +26,9 @@ import net.minecraft.world.phys.Vec3;
 // 箱の中の座標は、できるだけ箱の角 (min) や中心からの相対で書くこと。
 public final class EmberBackLayout {
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。13〜: 版 12 までの履歴は docs/design/13 の 3.3節。
+    // 23: 試練の階 (EmberDeck。docs/design/29): 螺旋の踊り場から南の浅い所に、新作の試練 E02・E06・E07・E10 の四つのセルと広間・回廊・休み場 6 つ・試練の板。冷えた溶岩洞の口の戸 (原型の三つ)
     // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
-    public static final int LAYOUT_VERSION = 20;
+    public static final int LAYOUT_VERSION = 23;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)
@@ -272,6 +273,9 @@ public final class EmberBackLayout {
         m.put("heart_ante", HEART_ANTE);
         m.put("heart", HEART);
         m.put("back_tube", BACK_TUBE);
+        for (String name : EmberDeck.NAMES) {
+            m.put(name, EmberDeck.box(name));
+        }
         return java.util.Collections.unmodifiableMap(m);
     }
 
@@ -306,14 +310,14 @@ public final class EmberBackLayout {
         }
     }
 
-    public static final List<Rest> RESTS = List.of(
+    public static final List<Rest> RESTS = java.util.stream.Stream.concat(List.of(
             new Rest("throat", new BlockPos(0, THROAT_LANDING, -125), 0f),
             new Rest("hub", new BlockPos(0, FLOOR_HUB, -72), 0f),
             new Rest("w0", new BlockPos(TUBE_WEST_X, FLOOR_WEST, -6), 0f),
             new Rest("w1", new BlockPos(TUBE_WEST_X, FLOOR_WEST, 70), 0f),
             new Rest("e0", new BlockPos(TUBE_EAST_X - 5, FLOOR_EAST, 24), 0f),
             new Rest("s0", new BlockPos(0, FLOOR_SOUTH, 0), 0f),
-            new Rest("heart", new BlockPos(0, FLOOR_HEART, -27), 0f));
+            new Rest("heart", new BlockPos(0, FLOOR_HEART, -27), 0f)).stream(), EmberDeck.RESTS.stream()).toList();
 
     public static Rest rest(String name) {
         for (Rest r : RESTS) {

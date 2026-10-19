@@ -68,6 +68,10 @@ public final class TrialCells {
         register(new S03Pillars());
         register(new S09Nest());
         register(new S10Watch());
+        register(new jp.revati.skyabyss.trial.ember.E02Vents());
+        register(new jp.revati.skyabyss.trial.ember.E06Flues());
+        register(new jp.revati.skyabyss.trial.ember.E07Bellows());
+        register(new jp.revati.skyabyss.trial.ember.E10Furnace());
         register(new W11Coffin());
         register(new W12Arena());
         register(new T02Crossing());
@@ -127,6 +131,13 @@ public final class TrialCells {
             case "S01" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.WEST_GATE, true, List.of(), null, null, "", empty(), List.of());
             case "S05" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.EAST_GATE, true, List.of(), null, null, "", empty(), List.of());
             case "S06" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.FRONT_GATE, true, List.of(), null, null, "", empty(), List.of());
+            // 余燼: 広間からの冷えた溶岩洞の口の戸 (引かなかったグループに閉じる。石は熾り石 = EmberBackTrials が扱う)
+            case "E01" -> new Ports(jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(jp.revati.skyabyss.titan.ember.back.EmberBackLayout.WEST_DOOR), true,
+                    List.of(), null, null, "", empty(), List.of());
+            case "E05" -> new Ports(jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(jp.revati.skyabyss.titan.ember.back.EmberBackLayout.EAST_DOOR), true,
+                    List.of(), null, null, "", empty(), List.of());
+            case "E09" -> new Ports(jp.revati.skyabyss.titan.ember.back.EmberBackTrials.boxBlocks(jp.revati.skyabyss.titan.ember.back.EmberBackLayout.SOUTH_DOOR), true,
+                    List.of(), null, null, "", empty(), List.of());
             default -> Ports.NONE;
         };
     }

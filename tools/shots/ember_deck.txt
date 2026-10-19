@@ -1,0 +1,65 @@
+# 余燼の試練の階 (版 23。docs/design/29 の 3.4 の P2: E02 噴気の渡り・E06 煙突の風読み・E07 三つの鞴・E10 鞴持ちの炉) の確かめ。
+# ./gradlew runShots -Pscript=tools/shots/ember_deck.txt  → python -I tools/ember_deck_sheet.py で docs/review/previews/trial_p2_ember_sheet.png
+# 向き: yaw 0 = 南 (z の正)、180 = 北、90 = 西、270 = 東
+world ember_deck flat
+size 1280 720
+timeout 3600
+render 16
+clouds off
+
+cmd time set midnight
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive ember_back
+waitchunks 1500
+wait 60
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+hud off
+fov 90
+
+camera skyabyss:ember_back 2 94.5 -68 225 6
+waitchunks 600
+wait 30
+close
+wait 5
+shot hub_board
+camera skyabyss:ember_back 17 122.5 -26 0 4
+waitchunks 600
+close
+wait 5
+shot landing_corridor
+camera skyabyss:ember_back -9 122.5 12 270 8
+waitchunks 300
+close
+wait 5
+shot deck_hall
+camera skyabyss:ember_back 16 122 24 0 14
+waitchunks 300
+close
+wait 5
+shot e02_start
+camera skyabyss:ember_back 24 125 29 0 24
+waitchunks 300
+close
+wait 5
+shot e02_bands
+camera skyabyss:ember_back 16 123.5 74 328 10
+waitchunks 300
+close
+wait 5
+shot e10_hall
+camera skyabyss:ember_back -16 123.5 24 30 10
+waitchunks 300
+close
+wait 5
+shot e06_hall
+camera skyabyss:ember_back -16 123.5 66 30 10
+waitchunks 300
+close
+wait 5
+shot e07_hall

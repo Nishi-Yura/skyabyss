@@ -206,9 +206,9 @@ public final class TrialPoolSelfTest {
         WhaleDeck.setPlaced(true);
         TideDeck.setPlaced(true);
         UUID g = new UUID(1, 2);
-        check(!TrialCatalog.poolActive(Titans.EMBER), "the ember pool must stay off (no new cells)");
-        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 4, 4242L, g, new TrialDraw.Memory());
-        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember draw is not the originals");
+        check(TrialCatalog.poolActive(Titans.EMBER), "the ember pool is not active with its deck placed (EmberDeckSelfTest checks the rest)");
+        TrialDraw.Draw ember = TrialDraw.draw(Titans.EMBER, 1, 4242L, g, new TrialDraw.Memory());
+        check(ember.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("E01", "E05", "E09")), "the ember cycle-1 draw is not the originals");
         // ---- 修飾
         Random rng = new Random(12345);
         for (Def d : TrialCatalog.all()) {
@@ -303,7 +303,7 @@ public final class TrialPoolSelfTest {
     }
 
     // ---------------------------------------------------------------- 全変種
-    private static List<Mods> variantsOf(Def d) {
+    public static List<Mods> variantsOf(Def d) {
         Space sp = d.space();
         List<Mods> out = new ArrayList<>();
         int nn = sp.numbers().size();
@@ -486,8 +486,7 @@ public final class TrialPoolSelfTest {
         deckRooms();
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {
-            // 雷翼の新作は雷翼の背で調べる (trial pool storm)
-            if (!cell.runtime() || !Titans.STONE_WHALE.equals(cell.def().titan())) {
+            if (!cell.runtime() || !cell.def().titan().equals(Titans.STONE_WHALE)) {
                 continue;
             }
             ServerLevel back = server.getLevel(Titans.backOf(cell.def().titan()));

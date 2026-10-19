@@ -71,6 +71,9 @@ public final class TrialBacks {
         if (Titans.THUNDER_WING.equals(titan)) {
             return STORM;
         }
+        if (Titans.EMBER.equals(titan)) {
+            return EMBER;
+        }
         return null;
     }
 
@@ -270,4 +273,66 @@ public final class TrialBacks {
         }
         return TideBackLayout.ARRIVAL;
     }
+
+    // ---------------------------------------------------------------- 余燼 (熾り石。EmberBackState の鳴った印 ember.rung.<西・東・南>。歩 = 西、智 = 東、闘 = 南)
+    public static jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial emberTrial(Slot slot) {
+        return switch (slot) {
+            case WALK -> jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial.WEST;
+            case WIT -> jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial.EAST;
+            case FIGHT -> jp.revati.skyabyss.titan.ember.back.EmberBackState.Trial.SOUTH;
+        };
+    }
+
+    private static final Back EMBER = new Back() {
+        @Override
+        public String titan() {
+            return Titans.EMBER;
+        }
+
+        @Override
+        public String signal() {
+            return TrialSteles.EMBER;
+        }
+
+        @Override
+        public boolean isRung(ServerLevel back, UUID group, Def def, boolean drawn) {
+            return drawn ? jp.revati.skyabyss.titan.ember.back.EmberBackState.of(back, group).rung(emberTrial(def.slot()))
+                    : GroupProgress.of(back, group).flag("wstone." + def.id());
+        }
+
+        @Override
+        public void ring(ServerLevel back, UUID group, Def def, boolean drawn, ServerPlayer by, BlockPos pos) {
+            if (drawn) {
+                // 引いた枠の熾り石を鳴らす: 鳴った印・抜け道の光る床・踏破の経験値・クエスト・三つ目で炉の門が開く、までを余燼の仕組みが行う
+                TrialRuntime.withLegacySuppressed(() -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.ring(back, group, emberTrial(def.slot()), by));
+                return;
+            }
+            GroupProgress.of(back, group).setFlag("wstone." + def.id(), true);
+            GroupOverlays.refresh(back, group);
+            back.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 20, 0.3, 0.6, 0.3, 0.03);
+        }
+
+        @Override
+        public void afterCleared(ServerLevel back, UUID group, Def def, boolean drawn, ServerPlayer by) {
+        }
+
+        @Override
+        public void tellWho(ServerPlayer sp, Def def) {
+            TrialSteles.tellWho(sp, TrialSteles.EMBER, emberTrial(def.slot()).id());
+        }
+
+        @Override
+        public void returnTo(ServerPlayer p, String restId) {
+            BlockPos at = jp.revati.skyabyss.titan.ember.back.EmberBackTrials.restSpawn(p.serverLevel(), restId);
+            p.fallDistance = 0;
+            p.teleportTo(p.serverLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), 0f);
+            jp.revati.skyabyss.titan.ember.back.EmberHeat.reset(p);
+        }
+
+        @Override
+        public BlockState lit() {
+            return jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get().defaultBlockState()
+                    .setValue(jp.revati.skyabyss.titan.ember.back.KindleStoneBlock.ACTIVE, true);
+        }
+    };
 }
