@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jp.revati.skyabyss.guide.RecipeLock;
 import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
@@ -70,8 +71,13 @@ public final class PouchRebuild {
         return out;
     }
 
-    // この人に見せてよいか: 材料の袋の品を、どれも一度は手に入れている
-    public static boolean visible(Player player, CraftingRecipe recipe) {
+    // この人に見せてよいか: 鍵のかかったレシピ (旅の覚書・職人が解くまで作れない。RecipeLock) は解けていること、材料の袋の品を、どれも一度は手に入れていること
+    public static boolean visible(Player player, RecipeHolder<CraftingRecipe> holder) {
+        // 鍵の判定はサーバーだけ (クライアントの画面は同じ判定を自分のレシピブックで足す)
+        if (player instanceof ServerPlayer sp && !RecipeLock.mayCraft(sp, holder)) {
+            return false;
+        }
+        CraftingRecipe recipe = holder.value();
         PouchData data = Pouch.data(player);
         for (Ingredient ing : recipe.getIngredients()) {
             List<PouchEntries.Entry> matches = pouchMatches(ing);
@@ -132,7 +138,7 @@ public final class PouchRebuild {
             return false;
         }
         CraftingRecipe recipe = list.get(index).value();
-        if (!visible(player, recipe)) {
+        if (!visible(player, list.get(index))) {
             return false;
         }
         Plan plan = plan(player, recipe);

@@ -440,6 +440,7 @@ public final class PouchSelfTest {
         runScreen(server, f, level);
         runUse(server, f, level);
         runRebuild(server, f, level);
+        runCraftTable(server, f, level);
         runDefaults(server, f);
     }
 
@@ -629,10 +630,10 @@ public final class PouchSelfTest {
         FakePlayer p = player(level, "[pouch_rebuild]");
         var recipe = all.get(index).value();
         // まだ手に入れていない品の作り直しは見せない・作れない
-        check(f, !PouchRebuild.visible(p, recipe) && !PouchRebuild.rebuild(p, index), "a recipe for items never obtained was visible or built");
+        check(f, !PouchRebuild.visible(p, all.get(index)) && !PouchRebuild.rebuild(p, index), "a recipe for items never obtained was visible or built");
         Pouch.add(p, new ItemStack(core));
         Pouch.add(p, new ItemStack(shard, 5));
-        check(f, PouchRebuild.visible(p, recipe), "the recipe stayed hidden after obtaining the items");
+        check(f, PouchRebuild.visible(p, all.get(index)), "the recipe stayed hidden after obtaining the items");
         // 骨 (持ち物の品) が足りない
         check(f, PouchRebuild.plan(p, recipe) == null && !PouchRebuild.rebuild(p, index) && Pouch.count(p, core) == 1 && Pouch.count(p, shard) == 5,
                 "a rebuild without the bone consumed something");
@@ -678,6 +679,174 @@ public final class PouchSelfTest {
         }
         Pouch.clear(p);
         p.getInventory().clearContent();
+    }
+
+    // ---------------------------------------------------------------- 作業台が旅嚢の材料を使う (22 の 17 章)
+    private static int gridCount(net.minecraft.world.inventory.CraftingMenu menu, Item item) {
+        int n = 0;
+        for (int i = 1; i <= 9; i++) {
+            ItemStack s = menu.getSlot(i).getItem();
+            if (s.is(item)) {
+                n += s.getCount();
+            }
+        }
+        return n;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> holder(MinecraftServer server, String name) {
+        return (net.minecraft.world.item.crafting.RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe>)
+                server.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name)).orElseThrow();
+    }
+
+    private static net.minecraft.world.inventory.CraftingMenu table(ServerLevel level, FakePlayer p) {
+        var menu = new net.minecraft.world.inventory.CraftingMenu(31, p.getInventory(), net.minecraft.world.inventory.ContainerLevelAccess.create(level, BlockPos.ZERO));
+        p.containerMenu = menu;
+        return menu;
+    }
+
+    // 閉じる: バニラの閉じる処理 (枠とカーソルの品を持ち物へ) と、旅嚢の掃除
+    private static void closeTable(FakePlayer p, net.minecraft.world.inventory.CraftingMenu menu) {
+        menu.removed(p);
+        p.containerMenu = p.inventoryMenu;
+        Pouch.sweepAfterClose(p);
+    }
+
+    private static void unlockAll(FakePlayer p) {
+        for (int chapter = 0; chapter <= jp.revati.skyabyss.guide.WayfarerNotes.MAX_CHAPTER; chapter++) {
+            jp.revati.skyabyss.guide.WayfarerNotes.unlockRecipes(p, chapter);
+        }
+    }
+
+    private static void runCraftTable(MinecraftServer server, List<String> f, ServerLevel level) {
+        Item scrap = jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_SCRAP.get();
+        Item thread = jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_THREAD.get();
+        Item chip = jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get();
+        Item quill = jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get();
+        for (Item item : new Item[]{scrap, thread, chip, quill}) {
+            check(f, PouchEntries.entry(item) != null && PouchEntries.entry(item).withdrawable(), "a chapter material is not a pouch entry: " + item);
+        }
+        FakePlayer p = player(level, "[pouch_craft_a]");
+        unlockAll(p);
+        var helmet = holder(server, "whale_road_helmet");
+        var whetstone = holder(server, "rock_whetstone");
+        var hardtack = holder(server, "road_hardtack");
+        var salve = holder(server, "moss_salve");
+        Item helmetItem = jp.revati.skyabyss.guide.TravelGear.HELMET.get();
+        // 旅装 (岩殻片 3 を旅嚢に、鉄は持ち物に): レシピブックの置くで枠へ。旅嚢からだけ減り、持ち物には岩殻片が残らない
+        Pouch.add(p, new ItemStack(scrap, 20));
+        Pouch.add(p, new ItemStack(chip, 5));
+        p.getInventory().add(new ItemStack(Items.IRON_INGOT, 4));
+        var menu = table(level, p);
+        menu.handlePlacement(false, helmet, p);
+        check(f, gridCount(menu, scrap) == 3 && gridCount(menu, Items.IRON_INGOT) == 2 && Pouch.count(p, scrap) == 17 && inv(p, scrap) == 0,
+                "the helmet was not filled from the pouch: grid scrap " + gridCount(menu, scrap) + " pouch " + Pouch.count(p, scrap) + " inv " + inv(p, scrap));
+        check(f, menu.getSlot(0).getItem().is(helmetItem), "the helmet did not show in the result slot");
+        menu.quickMoveStack(p, 0);
+        check(f, inv(p, helmetItem) == 1 && gridCount(menu, scrap) == 0 && Pouch.count(p, scrap) == 17, "crafting the helmet from the grid went wrong");
+        closeTable(p, menu);
+        check(f, Pouch.count(p, scrap) == 17 && inv(p, scrap) == 0 && inv(p, Items.IRON_INGOT) == 2, "leftovers after the helmet are wrong");
+        // 砥石 (岩殻片 2 + 骨片 + 火打石)。シフト (全部) で置くと、できる数だけの材料が枠に出て、残りは旅嚢へ戻る
+        p.getInventory().add(new ItemStack(Items.FLINT, 3));
+        menu = table(level, p);
+        menu.handlePlacement(true, whetstone, p);
+        int k = gridCount(menu, chip);
+        check(f, k == 3 && gridCount(menu, scrap) == 6 && Pouch.count(p, chip) == 2 && Pouch.count(p, scrap) == 11 && inv(p, chip) == 0 && inv(p, scrap) == 0,
+                "the shift fill of the whetstone is wrong: chip in grid " + k + " pouch chip " + Pouch.count(p, chip) + " scrap " + Pouch.count(p, scrap));
+        menu.quickMoveStack(p, 0);
+        check(f, inv(p, jp.revati.skyabyss.guide.TravelGear.ROCK_WHETSTONE.get()) > 0, "no whetstone came out of the table");
+        closeTable(p, menu);
+        check(f, Pouch.count(p, chip) == 5 - inv(p, jp.revati.skyabyss.guide.TravelGear.ROCK_WHETSTONE.get()) / 2 && inv(p, chip) == 0, "bone chips were duplicated or lost after the whetstone: pouch " + Pouch.count(p, chip) + " inv " + inv(p, chip) + " whet " + inv(p, jp.revati.skyabyss.guide.TravelGear.ROCK_WHETSTONE.get()));
+        // 閉じるときに枠に残った旅嚢の品は旅嚢へ戻る (増えない)
+        p.getInventory().clearContent();
+        Pouch.clear(p);
+        Pouch.add(p, new ItemStack(chip, 5));
+        p.getInventory().add(new ItemStack(Items.WHEAT, 9));
+        menu = table(level, p);
+        menu.handlePlacement(false, hardtack, p);
+        check(f, gridCount(menu, chip) == 1 && gridCount(menu, Items.WHEAT) == 3 && Pouch.count(p, chip) == 4, "the hardtack was not filled from the pouch");
+        closeTable(p, menu);
+        check(f, Pouch.count(p, chip) == 5 && inv(p, chip) == 0 && inv(p, Items.WHEAT) == 9, "closing the table with pouch items in the grid lost or duplicated items");
+        // 軟膏 (苔・骨片・粘土玉)
+        p.getInventory().add(new ItemStack(Items.MOSS_BLOCK, 2));
+        p.getInventory().add(new ItemStack(Items.CLAY_BALL, 2));
+        menu = table(level, p);
+        menu.handlePlacement(false, salve, p);
+        check(f, menu.getSlot(0).getItem().is(jp.revati.skyabyss.guide.TravelGear.MOSS_SALVE.get()) && gridCount(menu, chip) == 1, "the salve was not filled from the pouch");
+        menu.quickMoveStack(p, 0);
+        check(f, inv(p, jp.revati.skyabyss.guide.TravelGear.MOSS_SALVE.get()) == 2, "the salve did not come out");
+        closeTable(p, menu);
+        check(f, Pouch.count(p, chip) == 4 && inv(p, chip) == 0, "the salve took the wrong number of chips");
+        // 持ち物がいっぱいでも、出しすぎない (旅嚢 + 持ち物 + 枠の合計が変わらない)
+        p.getInventory().clearContent();
+        Pouch.clear(p);
+        Pouch.add(p, new ItemStack(scrap, 30));
+        for (int i = 0; i < p.getInventory().items.size(); i++) {
+            p.getInventory().items.set(i, new ItemStack(Items.DIRT, 64));
+        }
+        menu = table(level, p);
+        menu.handlePlacement(false, holder(server, "whale_road_chestplate"), p);
+        int total = Pouch.count(p, scrap) + inv(p, scrap) + gridCount(menu, scrap);
+        check(f, total == 30, "a full inventory changed the total of scraps: " + total);
+        closeTable(p, menu);
+        check(f, Pouch.count(p, scrap) + inv(p, scrap) == 30, "a full inventory lost scraps on close");
+        p.getInventory().clearContent();
+        // 鍵のかかったレシピは旅嚢から出さない
+        FakePlayer locked = player(level, "[pouch_craft_locked]");
+        Pouch.add(locked, new ItemStack(scrap, 5));
+        locked.getInventory().add(new ItemStack(Items.IRON_INGOT, 2));
+        var lockedMenu = table(level, locked);
+        lockedMenu.handlePlacement(false, helmet, locked);
+        check(f, Pouch.count(locked, scrap) == 5 && gridCount(lockedMenu, scrap) == 0 && inv(locked, scrap) == 0, "a locked recipe pulled from the pouch");
+        closeTable(locked, lockedMenu);
+        // 作り直しの一覧にも、鍵のかかったレシピは出ない (解いた人には出る)
+        check(f, !PouchRebuild.visible(locked, helmet) && PouchRebuild.visible(p, helmet), "the rebuild list ignored the recipe lock");
+        // 手で置く: 帯のクリック (PouchCraft.grid)。左 = 一束、右 = 一つ、同じ品を持っていれば戻す
+        Pouch.clear(p);
+        Pouch.add(p, new ItemStack(scrap, 100));
+        menu = table(level, p);
+        ResourceLocation scrapId = PouchEntries.entry(scrap).id();
+        check(f, PouchCraft.grid(p, scrapId, false) && menu.getCarried().is(scrap) && menu.getCarried().getCount() == 64 && Pouch.count(p, scrap) == 36, "the strip left click did not take a stack");
+        check(f, PouchCraft.grid(p, scrapId, true) && menu.getCarried().getCount() == 63 && Pouch.count(p, scrap) == 37, "the strip right click did not put one back");
+        check(f, !PouchCraft.grid(p, PouchEntries.entry(chip).id(), false) && menu.getCarried().getCount() == 63, "the strip took a different item onto a held cursor");
+        menu.getSlot(1).set(menu.getCarried().copyWithCount(10));
+        menu.setCarried(menu.getCarried().copyWithCount(53));
+        closeTable(p, menu);
+        check(f, Pouch.count(p, scrap) == 100 && inv(p, scrap) == 0, "the cursor and the grid did not return to the pouch on close: " + Pouch.count(p, scrap) + " inv " + inv(p, scrap));
+        // 持ち物の 2x2 でも
+        p.containerMenu = p.inventoryMenu;
+        check(f, PouchCraft.grid(p, scrapId, false) && p.inventoryMenu.getCarried().getCount() == 64, "the strip did not work with the 2x2 grid");
+        check(f, PouchCraft.grid(p, scrapId, false) && Pouch.count(p, scrap) == 100, "putting the whole held stack back failed");
+        // 旅嚢の画面・結ばれる品・登録にない品は、帯では動かない
+        p.containerMenu = new PouchMenu(33, p.getInventory());
+        check(f, !PouchCraft.grid(p, scrapId, false), "the strip worked on the pouch screen");
+        p.containerMenu = p.inventoryMenu;
+        check(f, !PouchCraft.grid(p, PouchEntries.entry(ModItems.SKY_KEY_FRAGMENT.get()).id(), false), "the strip handled a bonded item");
+        check(f, !PouchCraft.grid(p, ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "nope"), false), "the strip handled an unknown id");
+        // サーバー側では、持ち物の数にだけ頼る (旅嚢を二重に数えない)
+        net.minecraft.world.entity.player.StackedContents contents = new net.minecraft.world.entity.player.StackedContents();
+        p.getInventory().fillStackedContents(contents);
+        check(f, !contents.canCraft(helmet.value(), null), "the server counted the pouch for the recipe book");
+        // 二人 (別々の旅嚢・別々の作業台)
+        FakePlayer a = player(level, "[pouch_craft_two_a]");
+        FakePlayer b = player(level, "[pouch_craft_two_b]");
+        for (FakePlayer x : new FakePlayer[]{a, b}) {
+            unlockAll(x);
+            x.getInventory().add(new ItemStack(Items.IRON_INGOT, 2));
+        }
+        Pouch.add(a, new ItemStack(scrap, 10));
+        Pouch.add(b, new ItemStack(scrap, 4));
+        var ma = table(level, a);
+        var mb = table(level, b);
+        ma.handlePlacement(false, helmet, a);
+        mb.handlePlacement(false, helmet, b);
+        check(f, gridCount(ma, scrap) == 3 && gridCount(mb, scrap) == 3 && Pouch.count(a, scrap) == 7 && Pouch.count(b, scrap) == 1, "two players' tables mixed up their pouches");
+        closeTable(a, ma);
+        check(f, Pouch.count(a, scrap) == 10 && Pouch.count(b, scrap) == 1 && gridCount(mb, scrap) == 3, "closing one table touched the other player");
+        closeTable(b, mb);
+        check(f, Pouch.count(b, scrap) == 4 && inv(b, scrap) == 0, "the second player's leftovers are wrong");
+        p.getInventory().clearContent();
+        Pouch.clear(p);
     }
 
     // ---------------------------------------------------------------- 既定 (入・取り出し不可)・親スイッチの一度きりの書き換え

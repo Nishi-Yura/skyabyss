@@ -91,7 +91,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         List<Row> out = new ArrayList<>();
         for (int i = 0; i < all.size(); i++) {
             RecipeHolder<CraftingRecipe> h = all.get(i);
-            if (PouchRebuild.visible(minecraft.player, h.value())) {
+            if (PouchRebuild.visible(minecraft.player, h) && (!jp.revati.skyabyss.guide.RecipeLock.locked(h.id()) || minecraft.player.isCreative() || minecraft.player.getRecipeBook().contains(h))) {
                 out.add(new Row(i, h, h.value().getResultItem(minecraft.level.registryAccess()).copy(), PouchRebuild.plan(minecraft.player, h.value()) != null));
             }
         }
