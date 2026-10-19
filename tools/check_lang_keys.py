@@ -7,6 +7,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEY = re.compile(r'"([a-z][A-Za-z]*\.skyabyss(?:_[a-z0-9_]+)?\.[A-Za-z0-9_.]*[A-Za-z0-9_])"(\s*\+)?')
 # 偽陽性の許可リスト (理由つき)。LangSelfTest の ALLOW と同じ内容にする
 ALLOW = {
+    "sign.skyabyss.library_",  # TitanBackSelfTest: startsWith の頭 (WingsBuilder が番号を足す。実キーは lang にある)
     "sign.skyabyss.ch3_wind_",  # StormChapterSelfTest: startsWith の頭 (tabletKey(index) が実キーを作る。実キーは lang にある)
     "opening.skyabyss.hint_move",  # OpeningStorySelfTest: 「この生キーはもう無い」ことを確かめる否定の検査
 }

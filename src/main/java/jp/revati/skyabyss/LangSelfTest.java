@@ -36,6 +36,8 @@ public final class LangSelfTest {
     private static final java.util.Set<String> ALLOW = java.util.Set.of(
             // StormChapterSelfTest: startsWith の頭 (StormSites.tabletKey(index) が実キーを作る。実キーは lang にある)
             "sign.skyabyss.ch3_wind_",
+            // TitanBackSelfTest: startsWith の頭 (WingsBuilder が "sign.skyabyss.library_" + 番号 で実キーを作る。実キー 1〜12 は lang にある)
+            "sign.skyabyss.library_",
             // OpeningStorySelfTest: 「この生キーはもう無い」ことを確かめる否定の検査
             "opening.skyabyss.hint_move");
     // <種類>.skyabyss[_名前空間].<名前> の文字列リテラル。続けて + があれば「頭だけのキー」(あとで番号などを足す)
