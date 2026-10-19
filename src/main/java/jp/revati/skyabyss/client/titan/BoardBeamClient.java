@@ -51,6 +51,16 @@ public final class BoardBeamClient {
         return BEAMS.containsKey(key);
     }
 
+    // key が prefix で始まる、表示中の知らせ (なければ null)
+    public static TitanEndNetwork.Beam byPrefix(String prefix) {
+        for (Entry e : BEAMS.values()) {
+            if (e.beam().key().startsWith(prefix)) {
+                return e.beam();
+            }
+        }
+        return null;
+    }
+
     // 全部消す (選定・撮影用)
     public static void clearAll() {
         Minecraft.getInstance().execute(BEAMS::clear);

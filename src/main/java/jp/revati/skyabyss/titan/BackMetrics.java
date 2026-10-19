@@ -43,7 +43,6 @@ public final class BackMetrics {
         List<Room> r = new ArrayList<>();
         r.add(new Room("hub", "hall", TitanBackLayout.HUB, 399));
         r.add(new Room("entry", "corr", TitanBackLayout.ENTRY, 48));
-        r.add(new Room("treasury", "rest", TitanBackLayout.TREASURY, 143));
         r.add(new Room("heart corridor", "corr", TitanBackLayout.HEART_CORRIDOR, 0));
         r.add(new Room("heart rest", "rest", TitanBackLayout.HEART_REST, 49));
         r.add(new Room("song shrine", "wing", TitanBackLayout.SONG_SHRINE, 0));

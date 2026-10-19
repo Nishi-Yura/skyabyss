@@ -505,8 +505,7 @@ public final class TitanBackSelfTest {
                 {0, FLOOR + 1, -13}, {0, FLOOR + 1, 10}, {-22, FLOOR + 1, -36}, {22, FLOOR + 1, -36},
                 {WA.x2() + 1, FLOOR + 1, -36}, {-50, W1.floorY() + 1, WA.z1() - 1}, {-47, W1.floorY() + 1, WB.z2() + 1},
                 {-44, W2.floorY() + 1, WB.z1() - 1}, {-42, W2.floorY() + 1, BELL.z2() + 3}, {-33, W2.floorY() + 1, -97},
-                {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -63}, {E3.x2() + 1, FLOOR + 1, -63}, {38, FLOOR + 1, -2}, {38, FLOOR + 1, 4},
-                {38, FLOOR + 1, 50}, {38, FLOOR + 1, 55}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
+                {E1.x1() - 1, FLOOR + 1, -36}, {36, FLOOR + 1, -103}, {E3.x2() + 1, FLOOR + 1, -103}, {47, FLOOR + 1, -69}, {47, FLOOR + 1, -100}, {10, FLOOR + 1, -5}, {21, FLOOR + 1, -5},
                 // 心臓の回廊と心臓の間の入口 (戦いの前は開いている)
                 {0, FLOOR + 1, -76}, {0, FLOOR + 1, HEART_GATE_Z + 1}, {0, FLOOR + 1, HEART_GATE_Z}, {0, FLOOR + 1, HEART_GATE_Z - 1}};
         for (int[] d : open) {
@@ -514,7 +513,7 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E1_SOUTH, E2_EXIT, E3_LOCK, BELL_GATE)) {
+        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E2_EXIT, E3_LOCK, BELL_GATE)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -563,7 +562,7 @@ public final class TitanBackSelfTest {
     // 囁き (看板の代わりの案内) の文が lang にあること
     // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
     private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.song_shrine", "sign.skyabyss.fin_left",
-            "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page");
+            "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page", "sign.skyabyss.fin_left_lore", "sign.skyabyss.fin_right_lore");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {
         Set<BlockPos> expected = new HashSet<>();
@@ -600,38 +599,38 @@ public final class TitanBackSelfTest {
                 jp.revati.skyabyss.SignFit.MAX_LINE_WIDTH);
     }
 
-    // アスレチック: どの足場も次の足場へ届き、一つ飛ばしでは届かず、頭上が空いていること。谷に床が残っていないこと。
-    // 今の形に加えて、ほかの種でも作れることを確かめる (リセットのたびに作り直すため)
+    // アスレチック (版 18): 谷ごとに筋の通った一本の道。入口の岩棚から出口の岩棚まで、足場と島の石を伝って行けること (隣り合うか、跳んで届く)。
+    // 近道 (足場を大きく飛ばす) がないこと。足場・島の石が世界にあり、頭上が空いていること。島が休み場で、谷に床が残っていないこと
     private static void checkCourses(ServerLevel level, List<String> failures) {
         List<List<int[]>> courses = ParkourCourses.current(level);
         for (int c = 0; c < courses.size(); c++) {
-            CourseGenerator.Spec spec = ParkourCourses.ALL.get(c);
-            for (int[] s : courses.get(c)) {
+            for (int[] s : ParkourCourses.allBlocks(c)) {
                 BlockPos p = new BlockPos(s[0], s[1], s[2]);
                 if (level.getBlockState(p).isAir()) {
-                    failures.add("course step missing at " + p);
+                    failures.add("course " + c + " step missing at " + p);
                 }
-                for (int h = 1; h <= 3; h++) {
-                    // 隣のレーンの足場が頭上にあるのは許す (別の道)
-                    if (!level.getBlockState(p.above(h)).is(ModBlocks.CRUMBLING_BONE.get())) {
-                        air(level, p.above(h), "room above course step", failures);
-                    }
+                // 島の四隅には灯りの柱が立つ (中央は空いている)。足場と島の中央の頭上が空いていること
+                boolean corner = false;
+                for (ParkourCourses.Island isl : ParkourCourses.ISLANDS.get(c)) {
+                    corner |= isl.has(s[0], s[2]) && s[1] == isl.y() && (s[0] != isl.cx() && s[2] != isl.cz());
+                }
+                for (int h = 1; h <= 3 && !corner; h++) {
+                    air(level, p.above(h), "room above course step", failures);
                 }
             }
-            validateCourse(spec, courses.get(c), "course " + c, failures);
-        }
-        for (long seed = 1; seed <= 12; seed++) {
-            List<List<int[]>> other = ParkourCourses.forSeed(seed * 7919);
-            for (int c = 0; c < other.size(); c++) {
-                validateCourse(ParkourCourses.ALL.get(c), other.get(c), "seed " + seed + " course " + c, failures);
+            validateCourse(ParkourCourses.ALL.get(c), ParkourCourses.allBlocks(c), "course " + c, failures);
+            for (ParkourCourses.Island isl : ParkourCourses.ISLANDS.get(c)) {
+                BlockPos spawn = TitanBackTrials.checkpointSpawns().get(isl.id());
+                if (spawn == null || spawn.getX() != isl.cx() || spawn.getZ() != isl.cz() || spawn.getY() != isl.y() + 1) {
+                    failures.add("island " + isl.id() + " is not a rest point at its centre (" + spawn + ")");
+                }
             }
         }
-        ParkourCourses.forSeed(TitanBackData.get(level).courseSeed());
         for (Box pit : PITS) {
             for (int x = pit.x1(); x <= pit.x2(); x++) {
                 for (int z = pit.z1(); z <= pit.z2(); z++) {
                     BlockState floor = level.getBlockState(new BlockPos(x, FLOOR, z));
-                    boolean ledge = (x == WA.x2() && z >= -38 && z <= -34) || isStep(courses, x, FLOOR, z);
+                    boolean ledge = (x == WA.x2() && z >= -38 && z <= -34) || isStep(courses, x, FLOOR, z) || isIslandColumn(x, z);
                     if (!floor.isAir() && !ledge) {
                         failures.add("pit floor remains at " + x + "," + z + " (" + floor + ")");
                         return;
@@ -641,36 +640,76 @@ public final class TitanBackSelfTest {
         }
     }
 
-    private static void validateCourse(CourseGenerator.Spec spec, List<int[]> steps, String name, List<String> failures) {
-        if (steps.size() < spec.minSteps() || steps.size() > spec.maxSteps()) {
-            failures.add(name + " has " + steps.size() + " steps");
-        }
-        List<int[]> earlier = new ArrayList<>(spec.start());
-        int[] prev = null;
-        for (int[] s : steps) {
-            boolean ok = prev == null ? spec.start().stream().anyMatch(b -> reachable(b, s)) : reachable(prev, s);
-            if (!ok) {
-                failures.add(name + " jump too far to " + s[0] + "," + s[1] + "," + s[2]);
-            }
-            for (int[] e : earlier) {
-                if (e != prev && reachable(e, s) && prev != null) {
-                    failures.add(name + " can skip to " + s[0] + "," + s[1] + "," + s[2]);
-                    break;
+    private static boolean isIslandColumn(int x, int z) {
+        for (int pit = 0; pit < ParkourCourses.ISLANDS.size(); pit++) {
+            for (ParkourCourses.Island i : ParkourCourses.ISLANDS.get(pit)) {
+                if (i.has(x, z)) {
+                    return true;
                 }
             }
-            if (prev != null) {
-                earlier.add(prev);
+        }
+        return false;
+    }
+
+    private static boolean isIsland(int x, int y, int z) {
+        for (int pit = 0; pit < ParkourCourses.ISLANDS.size(); pit++) {
+            for (ParkourCourses.Island i : ParkourCourses.ISLANDS.get(pit)) {
+                if (i.y() == y && i.has(x, z)) {
+                    return true;
+                }
             }
-            prev = s;
         }
-        final int[] last = prev;
-        if (last == null || spec.end().stream().noneMatch(b -> reachable(last, b))) {
+        return false;
+    }
+
+    // 入口の岩棚から、足場・島の石をたどって出口の岩棚に着くこと。着くまでの最短の手数が、足場の数に近い (大きな近道がない) こと
+    private static void validateCourse(CourseGenerator.Spec spec, List<int[]> blocks, String name, List<String> failures) {
+        List<int[]> nodes = new ArrayList<>(blocks);
+        nodes.addAll(spec.start());
+        nodes.addAll(spec.end());
+        int n = nodes.size();
+        int[] dist = new int[n];
+        java.util.Arrays.fill(dist, -1);
+        java.util.ArrayDeque<Integer> queue = new java.util.ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            for (int[] st : spec.start()) {
+                if (nodes.get(i) == st) {
+                    dist[i] = 0;
+                    queue.add(i);
+                }
+            }
+        }
+        while (!queue.isEmpty()) {
+            int i = queue.poll();
+            for (int j = 0; j < n; j++) {
+                if (dist[j] < 0 && CourseGenerator.connected(nodes.get(i), nodes.get(j))) {
+                    dist[j] = dist[i] + 1;
+                    queue.add(j);
+                }
+            }
+        }
+        int best = Integer.MAX_VALUE;
+        for (int j = 0; j < n; j++) {
+            for (int[] en : spec.end()) {
+                if (nodes.get(j) == en && dist[j] >= 0) {
+                    best = Math.min(best, dist[j]);
+                }
+            }
+        }
+        if (best == Integer.MAX_VALUE) {
             failures.add(name + " does not reach its end ledge");
+        } else if (best < 6) {
+            failures.add(name + " has a shortcut: " + best + " hops for " + blocks.size() + " blocks");
         }
-        for (int[] e : earlier) {
-            if (spec.end().stream().anyMatch(b -> reachable(e, b))) {
-                failures.add(name + " end ledge reachable too early");
-                break;
+        for (int j = 0; j < blocks.size(); j++) {
+            if (dist[j] < 0) {
+                int[] b = blocks.get(j);
+                failures.add(name + " block cannot be reached from the start at " + b[0] + "," + b[1] + "," + b[2]);
+            }
+        }
+        for (int[] b : blocks) {
+            if (b[0] < spec.x1() || b[0] > spec.x2() || b[2] < spec.z1() || b[2] > spec.z2() || b[1] < spec.yMin() || b[1] > spec.yMax()) {
+                failures.add(name + " block is outside its pit at " + b[0] + "," + b[1] + "," + b[2]);
             }
         }
     }
@@ -685,17 +724,6 @@ public final class TitanBackSelfTest {
         }
         return false;
     }
-
-    private static boolean reachable(int[] p, int[] q) {
-        int dy = q[1] - p[1];
-        double d = Math.hypot(q[0] - p[0], q[2] - p[2]);
-        if (dy > 1 || dy < -1 || d < 2) {
-            return false;
-        }
-        double limit = dy == 1 ? 3.2 : dy == 0 ? 4.0 : 4.3;
-        return d <= limit;
-    }
-
 
     private static void checkHalls(ServerLevel level, List<String> failures) {
         for (Box hall : List.of(E1, E2, E3, CK)) {
@@ -888,16 +916,22 @@ public final class TitanBackSelfTest {
         SkyAbyss.LOGGER.info("SELFTEST maze pockets: {} in all, {} flooded", pockets.size(), flooded);
     }
 
-    // 宝物庫: 台座は飾りとして残る。宝箱はもうない (欠片と装備は心臓を倒したときに渡す)
+    // 封印の回廊 (版 18: 宝物庫の部屋は無くした): 鼓動の間の北の封印のすぐ先が心臓の回廊で、宝箱も台座もないこと (欠片と装備は心臓を倒したときに渡す)
     private static void checkTreasury(ServerLevel level, List<String> failures) {
-        if (!level.getBlockState(PEDESTAL).is(Blocks.LODESTONE)) {
-            failures.add("pedestal missing");
-        }
-        for (int x = TREASURY.x1(); x <= TREASURY.x2(); x++) {
-            for (int z = TREASURY.z1(); z <= TREASURY.z2(); z++) {
+        for (int z = HEART_CORRIDOR.z1(); z <= HEART_CORRIDOR.z2(); z++) {
+            for (int x = HEART_CORRIDOR.x1(); x <= HEART_CORRIDOR.x2(); x++) {
                 if (level.getBlockEntity(new BlockPos(x, FLOOR + 1, z)) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity) {
                     failures.add("treasure chest should be gone at " + x + "," + z);
                 }
+                if (level.getBlockState(new BlockPos(x, FLOOR + 1, z)).is(Blocks.LODESTONE)) {
+                    failures.add("the old pedestal should be gone at " + x + "," + z);
+                }
+            }
+        }
+        for (BlockPos p : GATE) {
+            BlockPos beyond = p.north();
+            if (!level.getBlockState(beyond).isAir()) {
+                failures.add("the seal opens onto a wall at " + beyond);
             }
         }
     }
@@ -957,7 +991,7 @@ public final class TitanBackSelfTest {
     // 休み場がいまの戦いの前室なら、鼓動の間で目覚めること。闇の水路の中ほどの休み場は水路の中の乾いた足場であること
     private static void checkRespawnSafety(ServerLevel level, List<String> failures) {
         List<TitanBackLayout.Box> fights = List.of(E1, E2, CK, E3, HEART);
-        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, CK_ENTRANCE, CE1_WEST_DOOR, E3_ENTRANCE, HEART_GATE);
+        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, E2_EXIT, CK_ENTRANCE, E3_LOCK, E3_ENTRANCE, HEART_GATE);
         for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
             BlockPos spawn = e.getValue();
             for (TitanBackLayout.Box room : fights) {
@@ -994,7 +1028,7 @@ public final class TitanBackSelfTest {
         // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
         UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
         UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
-        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e3"}, {"e2r", "e2"}, {"ckr", "ck"}}) {
+        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e2"}, {"ckr", "ck"}}) {
             if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
                 failures.add("rest point " + pair[0] + " moved without a fight");
             }
@@ -1109,7 +1143,7 @@ public final class TitanBackSelfTest {
                 failures.add("reset left a stone singing for the group: " + i);
             }
         }
-        for (List<BlockPos> sealed : List.of(GATE, INNER_GATE, E1_EXIT)) {
+        for (List<BlockPos> sealed : List.of(GATE, E1_EXIT)) {
             if (GroupGates.isOpen(level, TEST_GROUP, sealed)) {
                 failures.add("reset did not reseal " + sealed.get(0));
             }
