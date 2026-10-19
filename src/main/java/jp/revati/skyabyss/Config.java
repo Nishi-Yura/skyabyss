@@ -104,6 +104,14 @@ public final class Config {
             .comment("自分の墓の標 (画面の中の札・画面の端の矢印と距離。8 ブロック以内で消える) を画面に出すか (false = 出さない。サーバーからは届くが描かない)")
             .define("graveMarker", true);
 
+    public static final ModConfigSpec.BooleanValue POUCH_QUICK_CARD = CLIENT_BUILDER
+            .comment("ホットバーの左に、旅嚢の短押しで使う道具の札 (場面に合わせて自動で入れ替わる) を出すか (false = 出さない。短押しは前回の道具)")
+            .define("pouchQuickCard", true);
+
+    public static final ModConfigSpec.ConfigValue<String> POUCH_QUICK_PIN = CLIENT_BUILDER
+            .comment("札に置いた道具の名前 (空 = 自動)。旅嚢の画面で右クリックして置く／はずす。輪で選んだ道具も置かれる")
+            .define("pouchQuickPin", "");
+
     // 技の予告の見せ方 (client/combat/TelegraphRenderer): DECAL = 床に満ちる面と縁 (既定)、PARTICLES = 点線の粒、BOTH = 両方
     public enum TelegraphStyle {
         DECAL,

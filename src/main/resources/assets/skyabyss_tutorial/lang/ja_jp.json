@@ -8,7 +8,7 @@
   "tutorial.skyabyss.lore_page.wheel": "[%s] 長押しで旅嚢の輪 → 破れた頁を選んで離すと読める",
   "tutorial.skyabyss.pouch": "[%s] で旅嚢を開く",
   "tutorial.skyabyss.whistle.hand": "右クリックで笛を吹いて巨神を呼ぶ",
-  "tutorial.skyabyss.whistle.short": "[%s] を短く押して笛を吹く (呼ぶ)",
+  "tutorial.skyabyss.whistle.short": "左の札が笛なら [%s] を短く押して吹く (呼ぶ)",
   "tutorial.skyabyss.whistle.wheel": "[%s] 長押しで旅嚢の輪 → 笛を選んで離すと呼べる",
   "tutorial.skyabyss.record": "[%s] で控え帳を開く",
   "tutorial.skyabyss.ping": "[%s] で見ている先を仲間に知らせる"

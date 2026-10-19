@@ -19,7 +19,7 @@
   "skyabyss_pouch.cmd.migrated": "移し替えを流した（%s 個）",
   "skyabyss_pouch.tab": "旅嚢",
   "skyabyss_pouch.key.open": "旅嚢を開く",
-  "skyabyss_pouch.key.use": "旅嚢の道具（長押しで輪・短押しで前回の道具）",
+  "skyabyss_pouch.key.use": "旅嚢の道具（長押しで輪・短押しで左の札の道具）",
   "skyabyss_pouch.screen.empty": "ここに、旅で手に入れた大事な品が自然に入る",
   "skyabyss_pouch.screen.unknown": "？？？",
   "skyabyss_pouch.screen.unknown_hint": "まだ手に入れていない品",
@@ -44,6 +44,8 @@
   "skyabyss_pouch.rebuild.repair_none": "手に持った品は壊れていない",
   "skyabyss_pouch.rebuild.repair_short": "直せる素材が袋にない",
   "skyabyss_pouch.rebuild.repaired": "【%1$s】を直した（%3$s ×%2$s）",
+  "skyabyss_pouch.screen.pin": "右クリック：この札に置く（短押しで使う）",
+  "skyabyss_pouch.screen.unpin": "右クリック：札からはずす（場面で自動に戻る）",
   "skyabyss_pouch.wheel.none": "使える道具が旅嚢にない",
   "skyabyss_pouch.wheel.hint": "向きで選び、キーを離すと使う",
   "skyabyss_pouch.wheel.cancel": "中心で離すと取りやめ"

@@ -19,7 +19,7 @@
   "skyabyss_pouch.cmd.migrated": "Ran the migration (%s items)",
   "skyabyss_pouch.tab": "Satchel",
   "skyabyss_pouch.key.open": "Open the Travel Satchel",
-  "skyabyss_pouch.key.use": "Satchel tool (hold: wheel, tap: last tool)",
+  "skyabyss_pouch.key.use": "Satchel tool (hold: wheel, tap: the quick card tool)",
   "skyabyss_pouch.screen.empty": "Important things you find on the road go in here by themselves",
   "skyabyss_pouch.screen.unknown": "???",
   "skyabyss_pouch.screen.unknown_hint": "Not found yet",
@@ -44,6 +44,8 @@
   "skyabyss_pouch.rebuild.repair_none": "The held item is not damaged",
   "skyabyss_pouch.rebuild.repair_short": "No repair material in the satchel",
   "skyabyss_pouch.rebuild.repaired": "Repaired [%1$s] (%3$s x%2$s)",
+  "skyabyss_pouch.screen.pin": "Right-click: put on the quick card (tap to use)",
+  "skyabyss_pouch.screen.unpin": "Right-click: take off the card (back to automatic)",
   "skyabyss_pouch.wheel.none": "No usable tools in the satchel",
   "skyabyss_pouch.wheel.hint": "Aim, then release the key to use",
   "skyabyss_pouch.wheel.cancel": "Release in the center to cancel"
