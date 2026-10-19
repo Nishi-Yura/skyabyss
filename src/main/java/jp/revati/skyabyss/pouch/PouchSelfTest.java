@@ -6,6 +6,9 @@ import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DataResult;
+import java.util.Optional;
+import net.minecraft.world.inventory.ClickType;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 import io.netty.buffer.Unpooled;
 import jp.revati.skyabyss.SkyAbyss;
@@ -47,7 +50,7 @@ import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 // 留め袋の自己テスト (SKYABYSS_SELFTEST=1、SKYABYSS_SELFTEST_ONLY=pouch で単独に)。結果はログに SELFTEST pouch PASSED / FAILED。
-// docs/design/22 の 13 章のうち、画面と使う入力 (P4・P6) を除いたもの:
+// docs/design/22 の 13 章・16.6 章のとおり (画面そのものの描画・マウスは窓がないと確かめられないので、メニューの決まり・輪の入口・作り直し・既定をサーバー側で):
 //   登録の表 (区分・上限・入れない品・手に持って使う品)、保存と同期の往復 (登録にない品の保持も)、入れる・出す・払う・上限、
 //   部品のある品は入れない、渡し (PouchRouting.give)、拾う入口、掃除 (取り出し済みの印・hold)、取り出しの決まり (ゲームルール・区分)、
 //   倒れても残る (型ごと・墓に入らない・体の入れ替え)、控え帳の在りか・天の鍵がそろう数え方、読む側 (炉の費用・振り直し・クエスト)、移し替え
@@ -68,7 +71,7 @@ public final class PouchSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST pouch PASSED (registry, save/sync round trip, add/take/limit, component refusal, give, pickup, sweep, loan mark, withdraw rules, "
-                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration)");
+                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, rebuild and repair, defaults flip)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST pouch FAILED: {}", x));
         }
@@ -80,7 +83,10 @@ public final class PouchSelfTest {
             GameRules rules = server.getGameRules();
             boolean on = rules.getBoolean(PouchConfig.MASTER_RULE);
             rules.getRule(PouchConfig.MASTER_RULE).set(true, server);
-            return new PouchSetupState(on, rules.getInt(PouchConfig.WITHDRAW_RULE), rules.getInt(DeathRules.MODE), rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
+            // 既定は取り出し不可 (0)。取り出しの決まりを確かめる段は、ここで可 (1) にして、段ごとに 0 へ切り替える
+            int withdraw = rules.getInt(PouchConfig.WITHDRAW_RULE);
+            rules.getRule(PouchConfig.WITHDRAW_RULE).set(1, server);
+            return new PouchSetupState(on, withdraw, rules.getInt(DeathRules.MODE), rules.getBoolean(GameRules.RULE_KEEPINVENTORY));
         }
 
         void restore(MinecraftServer server) {
@@ -135,7 +141,13 @@ public final class PouchSelfTest {
         check(f, PouchEntries.entry(crystal).category() == Category.RESONANCE, "the resonance crystal is not in the resonance category");
         check(f, PouchEntries.any(call) != null && PouchEntries.any(call).needsHand() && PouchEntries.any(call).category() == Category.TOOL,
                 "the call whistle is not a hand-used tool entry");
-        check(f, PouchConfig.USE_TOOLS_IN_POUCH || PouchEntries.entry(call) == null, "hand-used tools must stay out of the pouch until the use input exists");
+        check(f, PouchConfig.USE_TOOLS_IN_POUCH && PouchEntries.entry(call) != null, "hand-used tools must be pouch entries now that the wheel exists");
+        check(f, PouchConfig.ENABLED_DEFAULT && PouchConfig.WITHDRAW_DEFAULT == 0, "the pouch must default to on with withdraw off");
+        for (Item usable : new Item[]{call, jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.TIDE_WATCHING_SHELL.get(),
+                jp.revati.skyabyss.titan.storm.StormSetup.WEATHERCOCK.get(), jp.revati.skyabyss.lore.LoreSetup.LORE_BOOK.get(),
+                jp.revati.skyabyss.lore.LoreSetup.LORE_PAGE.get()}) {
+            check(f, usable instanceof PouchUsable && PouchEntries.entry(usable) != null, "a hand-used item is not a usable pouch entry: " + usable);
+        }
         for (Item guarded : Keepsakes.guardedItems()) {
             check(f, PouchEntries.any(guarded) != null, "a guarded keepsake is missing in the pouch entries: " + guarded);
         }
@@ -193,7 +205,7 @@ public final class PouchSelfTest {
         named.set(DataComponents.CUSTOM_NAME, Component.literal("renamed"));
         check(f, Pouch.add(p, named) == 0 && named.getCount() == 2 && Pouch.count(p, shard) == 0, "a renamed scale went into the pouch");
         check(f, Pouch.add(p, new ItemStack(Items.DIAMOND, 3)) == 0, "a vanilla item went into the pouch");
-        check(f, Pouch.add(p, new ItemStack(call)) == 0, "a hand-used whistle went into the pouch");
+        check(f, Pouch.add(p, new ItemStack(call)) == 1 && Pouch.count(p, call) == 1 && Pouch.take(p, call, 1) == 1, "a whistle did not go into the pouch");
 
         // ---- 渡し (PouchRouting.give)
         p.getInventory().clearContent();
@@ -424,5 +436,269 @@ public final class PouchSelfTest {
 
         // ---- 同期の呼び出しは作り物のプレイヤーでも落ちない
         Pouch.sync(m);
+
+        runScreen(server, f, level);
+        runUse(server, f, level);
+        runRebuild(server, f, level);
+        runDefaults(server, f);
     }
+
+    // ---------------------------------------------------------------- 画面 (メニューの決まり。サーバー側の論理)
+    private static int slotOf(PouchMenu menu, Item item) {
+        for (int i = 0; i < menu.pouchSlotCount(); i++) {
+            if (menu.entryAt(i).item() == item) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static void runScreen(MinecraftServer server, List<String> f, ServerLevel level) {
+        Item shard = ModItems.STONE_WHALE_SHARD.get();
+        Item crystal = ModItems.RESONANCE_CRYSTAL.get();
+        Item core = ModItems.STONE_WHALE_CORE.get();
+        FakePlayer p = player(level, "[pouch_screen]");
+        PouchMenu menu = new PouchMenu(7, p.getInventory());
+        p.containerMenu = menu;
+        // 枠の並び: 登録の品ごとに 1 枠、重ならず、画面の中、説明の線より上
+        PouchLayout.Result layout = PouchLayout.compute(PouchEntries.enabled());
+        check(f, menu.pouchSlotCount() == PouchEntries.enabled().size() && menu.slots.size() == menu.pouchSlotCount(), "the menu does not have one slot per entry");
+        check(f, layout.bottom() <= PouchLayout.SEPARATOR_Y - 2, "the pouch slots run into the info area: " + layout.bottom());
+        boolean clean = true;
+        for (int i = 0; i < layout.spots().size(); i++) {
+            PouchLayout.Spot a = layout.spots().get(i);
+            clean &= a.x() >= 4 && a.x() + 16 <= PouchLayout.W - 4 && a.y() >= 0 && a.entry() == menu.entryAt(i)
+                    && menu.getSlot(i).x == a.x() && menu.getSlot(i).y == a.y();
+            for (int j = i + 1; j < layout.spots().size(); j++) {
+                PouchLayout.Spot b = layout.spots().get(j);
+                clean &= Math.abs(a.x() - b.x()) >= 18 || Math.abs(a.y() - b.y()) >= 18;
+            }
+        }
+        check(f, clean, "the pouch slot positions overlap or leave the panel");
+        check(f, layout.labels().size() == Category.values().length, "a category has no label");
+        int sh = slotOf(menu, shard);
+        int cr = slotOf(menu, crystal);
+        int co = slotOf(menu, core);
+        check(f, sh >= 0 && cr >= 0 && co >= 0, "the slots for scale/crystal/core are missing");
+        // 枠は見かけの品を映す (個数 0 は空、999 まで)
+        check(f, menu.getSlot(sh).getItem().isEmpty(), "an empty pouch slot is not empty");
+        // 手でも置ける: カーソルの品を左クリックで全部、右クリックで一つ (その枠の品だけ)
+        menu.setCarried(new ItemStack(shard, 12));
+        menu.clicked(sh, 0, ClickType.PICKUP, p);
+        check(f, Pouch.count(p, shard) == 12 && menu.getCarried().isEmpty() && menu.getSlot(sh).getItem().getCount() == 12, "a left click did not put the whole cursor stack in");
+        menu.setCarried(new ItemStack(shard, 5));
+        menu.clicked(sh, 1, ClickType.PICKUP, p);
+        check(f, Pouch.count(p, shard) == 13 && menu.getCarried().getCount() == 4, "a right click did not put exactly one in");
+        menu.clicked(cr, 0, ClickType.PICKUP, p);
+        check(f, Pouch.count(p, crystal) == 0 && menu.getCarried().getCount() == 4, "a scale was put in the crystal slot");
+        menu.setCarried(ItemStack.EMPTY);
+        // 999 まで
+        Pouch.add(p, new ItemStack(shard, 986));
+        check(f, Pouch.count(p, shard) == 999, "could not fill a slot to 999");
+        menu.setCarried(new ItemStack(shard, 20));
+        menu.clicked(sh, 0, ClickType.PICKUP, p);
+        check(f, Pouch.count(p, shard) == 999 && menu.getCarried().getCount() == 20, "the slot took more than 999");
+        menu.setCarried(ItemStack.EMPTY);
+        check(f, menu.getSlot(sh).getItem().getCount() == 999, "the slot does not show 999");
+        // 取り出し (ゲームルール skyabyssPouchWithdraw)。既定は 0 = 取り出せない
+        server.getGameRules().getRule(PouchConfig.WITHDRAW_RULE).set(0, server);
+        menu.broadcastChanges();
+        menu.clicked(sh, 0, ClickType.PICKUP, p);
+        menu.clicked(sh, 0, ClickType.QUICK_MOVE, p);
+        check(f, menu.getCarried().isEmpty() && Pouch.count(p, shard) == 999 && inv(p, shard) == 0 && !menu.withdrawAllowed(),
+                "withdraw 0 still let an item out of the slot");
+        check(f, Pouch.withdraw(p, shard, 3, false) == 0 && Pouch.takeOut(p, shard, 3, false).isEmpty(), "withdraw 0 still let the API take an item out");
+        // 管理者 (force) は取り出せる
+        check(f, Pouch.withdraw(p, shard, 3, true) == 3 && inv(p, shard) == 3 && Pouch.count(p, shard) == 996, "the admin withdraw did not work with withdraw 0");
+        p.getInventory().clearContent();
+        // 取り出し可 (1): 左クリックで一スタック、右クリックで半分、シフトで持ち物へ。鍵・心核は区分で不可
+        server.getGameRules().getRule(PouchConfig.WITHDRAW_RULE).set(1, server);
+        menu.broadcastChanges();
+        check(f, menu.withdrawAllowed(), "the withdraw flag did not follow the game rule");
+        int stack = shard.getDefaultMaxStackSize();
+        menu.clicked(sh, 0, ClickType.PICKUP, p);
+        ItemStack out = menu.getCarried();
+        check(f, out.is(shard) && out.getCount() == stack && out.has(PouchSetup.LOAN.get()) && Pouch.count(p, shard) == 996 - stack,
+                "a left click did not take one stack out with the loan mark");
+        // 取り出した品を枠へ置き戻す: 印が外れて袋へ戻る
+        menu.clicked(sh, 0, ClickType.PICKUP, p);
+        check(f, menu.getCarried().isEmpty() && Pouch.count(p, shard) == 996, "putting a withdrawn stack back did not return it to the pouch");
+        menu.clicked(sh, 1, ClickType.PICKUP, p);
+        check(f, menu.getCarried().getCount() == stack / 2, "a right click did not take half a stack: " + menu.getCarried().getCount());
+        menu.setCarried(ItemStack.EMPTY);
+        Pouch.add(p, new ItemStack(shard, stack / 2));
+        int before = Pouch.count(p, shard);
+        menu.clicked(sh, 0, ClickType.QUICK_MOVE, p);
+        check(f, inv(p, shard) == stack && Pouch.count(p, shard) == before - stack, "shift-click did not move a stack to the inventory");
+        p.getInventory().clearContent();
+        Pouch.add(p, new ItemStack(core, 2));
+        menu.clicked(co, 0, ClickType.PICKUP, p);
+        menu.clicked(co, 0, ClickType.QUICK_MOVE, p);
+        check(f, menu.getCarried().isEmpty() && Pouch.count(p, core) == 2 && inv(p, core) == 0, "a core came out of the pouch screen");
+        // 枠の外・決まりのない動き (投げる・入れ替え) は何も起こさない
+        int now = Pouch.count(p, shard);
+        menu.clicked(-999, 0, ClickType.PICKUP, p);
+        menu.clicked(sh, 0, ClickType.THROW, p);
+        menu.clicked(sh, 0, ClickType.SWAP, p);
+        check(f, Pouch.count(p, shard) == now && inv(p, shard) == 0, "an unsupported click changed the pouch");
+        // 枠は標準の動きを断る
+        check(f, !menu.getSlot(sh).mayPlace(new ItemStack(shard)) && !menu.getSlot(sh).mayPickup(p), "the pouch slot accepts the standard moves");
+        check(f, menu.quickMoveStack(p, sh).isEmpty(), "quickMoveStack moved something");
+        // 作り直しの一覧を見ている間は、クライアントの画面だけ枠を隠す
+        menu.rebuildView = true;
+        check(f, !menu.getSlot(sh).isActive(), "the slots stay active in the rebuild view");
+        menu.rebuildView = false;
+        Pouch.clear(p);
+        p.getInventory().clearContent();
+    }
+
+    // ---------------------------------------------------------------- 使う入力 (輪・短押し・PouchUse)
+    private static void runUse(MinecraftServer server, List<String> f, ServerLevel level) {
+        Item cock = jp.revati.skyabyss.titan.storm.StormSetup.WEATHERCOCK.get();
+        Item conch = jp.revati.skyabyss.titan.tide.chapter.TideChapterSetup.TIDE_WATCHING_SHELL.get();
+        Item page = jp.revati.skyabyss.lore.LoreSetup.LORE_PAGE.get();
+        Item shard = ModItems.STONE_WHALE_SHARD.get();
+        FakePlayer p = player(level, "[pouch_use]");
+        check(f, PouchUsable.usable(p).isEmpty() && PouchUsable.usePouch(p, cock) == PouchUsable.Result.NONE, "an empty pouch has a usable tool");
+        check(f, PouchNet.use(p, Optional.empty()) == PouchUsable.Result.NONE, "a short press with no tool did something");
+        Pouch.add(p, new ItemStack(cock));
+        Pouch.add(p, new ItemStack(conch));
+        Pouch.add(p, new ItemStack(shard, 3));
+        List<PouchEntries.Entry> usable = PouchUsable.usable(p);
+        check(f, usable.size() == 2, "the wheel list is wrong: " + usable.size());
+        check(f, usable.stream().noneMatch(e -> e.item() == shard), "a material is in the wheel list");
+        // 使う: 右クリックと同じ中身 (条件を満たさなければ断られ、待ちが付く。作り物のプレイヤーは空の洞の中なので断られる)
+        PouchUsable.Result first = PouchNet.use(p, Optional.of(PouchEntries.any(cock).id()));
+        check(f, first == PouchUsable.Result.REFUSED || first == PouchUsable.Result.OK, "using the weathercock from the pouch did not reach the item: " + first);
+        check(f, PouchEntries.any(cock).id().equals(PouchNet.last(p)), "the last tool was not remembered");
+        check(f, p.getCooldowns().isOnCooldown(cock), "using from the pouch did not start the item's cooldown (same as right click)");
+        check(f, PouchNet.use(p, Optional.empty()) == PouchUsable.Result.COOLDOWN, "a short press did not reuse the last tool (it should be on cooldown)");
+        check(f, PouchNet.use(p, Optional.of(PouchEntries.any(shard).id())) == PouchUsable.Result.NONE, "a material was used from the wheel");
+        // 袋にない道具・袋が切のとき
+        Pouch.take(p, conch, 1);
+        check(f, PouchUsable.usePouch(p, conch) == PouchUsable.Result.NONE, "a tool that is not in the pouch was used");
+        p.getCooldowns().removeCooldown(cock);
+        server.getGameRules().getRule(PouchConfig.MASTER_RULE).set(false, server);
+        check(f, PouchUsable.usePouch(p, cock) == PouchUsable.Result.NONE, "the wheel worked with the switch off");
+        server.getGameRules().getRule(PouchConfig.MASTER_RULE).set(true, server);
+        // 破れた頁: 使えれば袋の数が一つ減り、使えなければ残る
+        Pouch.add(p, new ItemStack(page, 2));
+        PouchUsable.Result pr = PouchUsable.usePouch(p, page);
+        check(f, (pr == PouchUsable.Result.OK && Pouch.count(p, page) == 1) || (pr == PouchUsable.Result.REFUSED && Pouch.count(p, page) == 2),
+                "using a page did not consume the right amount: " + pr);
+        // 出どころの印のある頁は袋に入らない (持ち物に残り、右クリックで読む)
+        ItemStack tagged = jp.revati.skyabyss.lore.LorePageItem.of("village");
+        check(f, Pouch.add(p, tagged) == 0 && !tagged.isEmpty(), "a page with its source mark went into the pouch");
+        // パケットの往復
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
+        PouchNet.Use.STREAM_CODEC.encode(buf, new PouchNet.Use(Optional.of(PouchEntries.any(cock).id())));
+        PouchNet.Use.STREAM_CODEC.encode(buf, new PouchNet.Use(Optional.empty()));
+        PouchNet.Use a = PouchNet.Use.STREAM_CODEC.decode(buf);
+        PouchNet.Use b = PouchNet.Use.STREAM_CODEC.decode(buf);
+        check(f, a.item().isPresent() && a.item().get().equals(PouchEntries.any(cock).id()) && b.item().isEmpty(), "the PouchUse packet changed on a round trip");
+        Pouch.clear(p);
+        p.getCooldowns().removeCooldown(cock);
+    }
+
+    // ---------------------------------------------------------------- 作り直し・修理
+    private static void runRebuild(MinecraftServer server, List<String> f, ServerLevel level) {
+        Item core = ModItems.STONE_WHALE_CORE.get();
+        Item shard = ModItems.STONE_WHALE_SHARD.get();
+        Item call = TravelSetup.STONE_WHALE_CALL.get();
+        var all = PouchRebuild.recipes(server.getRecipeManager(), server.registryAccess());
+        ResourceLocation callId = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "stone_whale_call");
+        int index = -1;
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).id().equals(callId)) {
+                index = i;
+            }
+        }
+        check(f, index >= 0, "the whistle recipe is not in the rebuild list (" + all.size() + " recipes)");
+        // 材料に袋の品を使う作業台のレシピは、全部ここに並ぶ (袋の品を一つも使わないレシピは並ばない)
+        for (String name : new String[]{"stone_whale_call", "tide_shell_call", "titan_waymark", "resonance_forge", "cinder_lamp", "firework_rocket_from_spark_dust"}) {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, name);
+            check(f, all.stream().anyMatch(h -> h.id().equals(id)), "a recipe that needs pouch items is missing from the rebuild list: " + name);
+        }
+        check(f, all.stream().noneMatch(h -> h.id().equals(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "message_board"))),
+                "a recipe without pouch items is in the rebuild list");
+        List<String> ids = all.stream().map(h -> h.id().toString()).toList();
+        check(f, ids.equals(ids.stream().sorted().toList()), "the rebuild list is not in id order (client and server must agree)");
+        if (index < 0) {
+            return;
+        }
+        FakePlayer p = player(level, "[pouch_rebuild]");
+        var recipe = all.get(index).value();
+        // まだ手に入れていない品の作り直しは見せない・作れない
+        check(f, !PouchRebuild.visible(p, recipe) && !PouchRebuild.rebuild(p, index), "a recipe for items never obtained was visible or built");
+        Pouch.add(p, new ItemStack(core));
+        Pouch.add(p, new ItemStack(shard, 5));
+        check(f, PouchRebuild.visible(p, recipe), "the recipe stayed hidden after obtaining the items");
+        // 骨 (持ち物の品) が足りない
+        check(f, PouchRebuild.plan(p, recipe) == null && !PouchRebuild.rebuild(p, index) && Pouch.count(p, core) == 1 && Pouch.count(p, shard) == 5,
+                "a rebuild without the bone consumed something");
+        p.getInventory().add(new ItemStack(Items.BONE, 2));
+        PouchMenu menu = new PouchMenu(9, p.getInventory());
+        p.containerMenu = menu;
+        check(f, menu.clickMenuButton(p, PouchRebuild.BUTTON_RECIPE_BASE + index), "the menu button did not accept the rebuild");
+        check(f, Pouch.count(p, call) == 1 && Pouch.count(p, core) == 0 && Pouch.count(p, shard) == 4 && inv(p, Items.BONE) == 1 && inv(p, call) == 0,
+                "the rebuilt whistle or the payment is wrong: call " + Pouch.count(p, call) + " core " + Pouch.count(p, core) + " shard " + Pouch.count(p, shard)
+                        + " bone " + inv(p, Items.BONE));
+        check(f, !PouchRebuild.rebuild(p, index) && !PouchRebuild.rebuild(p, -1) && !PouchRebuild.rebuild(p, 9999), "a rebuild with no core or a bad index went through");
+        Pouch.clear(p);
+        // 修理: 手に持った壊れた品を、袋の素材で直す
+        ItemStack tool = ItemStack.EMPTY;
+        PouchEntries.Entry material = null;
+        for (Item item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+            ItemStack candidate = new ItemStack(item);
+            if (!SkyAbyss.MODID.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getNamespace()) || !candidate.isDamageableItem()) {
+                continue;
+            }
+            for (PouchEntries.Entry e : PouchEntries.enabled()) {
+                if (e.category() == Category.MATERIAL && item.isValidRepairItem(candidate, new ItemStack(e.item()))) {
+                    tool = candidate;
+                    material = e;
+                }
+            }
+            if (!tool.isEmpty()) {
+                break;
+            }
+        }
+        check(f, !tool.isEmpty(), "no mod item can be repaired with a pouch material");
+        if (!tool.isEmpty()) {
+            tool.setDamageValue(tool.getMaxDamage() / 2);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, tool);
+            int damaged = tool.getDamageValue();
+            check(f, PouchRebuild.repair(p) == 0 && tool.getDamageValue() == damaged, "a repair with no material changed the item");
+            Pouch.add(p, new ItemStack(material.item(), 10));
+            int repaired = PouchRebuild.repair(p);
+            check(f, repaired > 0 && tool.getDamageValue() == damaged - repaired && Pouch.count(p, material.item()) < 10, "the repair did not use the pouch material");
+            tool.setDamageValue(0);
+            check(f, PouchRebuild.repair(p) == 0, "an undamaged item was repaired");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        }
+        Pouch.clear(p);
+        p.getInventory().clearContent();
+    }
+
+    // ---------------------------------------------------------------- 既定 (入・取り出し不可)・親スイッチの一度きりの書き換え
+    private static void runDefaults(MinecraftServer server, List<String> f) {
+        PouchSetup.WorldState state = PouchSetup.WorldState.get(server);
+        boolean was = state.ruleApplied;
+        GameRules rules = server.getGameRules();
+        // 古いワールド (ゲームルールが切で保存されている) は、最初の起動で一度だけ既定 (入) になる
+        rules.getRule(PouchConfig.MASTER_RULE).set(false, server);
+        rules.getRule(PouchConfig.WITHDRAW_RULE).set(1, server);
+        state.ruleApplied = false;
+        PouchSetup.onServerStarted(new ServerStartedEvent(server));
+        check(f, rules.getBoolean(PouchConfig.MASTER_RULE) && rules.getInt(PouchConfig.WITHDRAW_RULE) == 0 && state.ruleApplied,
+                "the first start did not switch the pouch to the new defaults");
+        // 管理者が切にしたものは、次の起動で入に戻さない
+        rules.getRule(PouchConfig.MASTER_RULE).set(false, server);
+        PouchSetup.onServerStarted(new ServerStartedEvent(server));
+        check(f, !rules.getBoolean(PouchConfig.MASTER_RULE), "a later start switched the pouch back on");
+        rules.getRule(PouchConfig.MASTER_RULE).set(true, server);
+        rules.getRule(PouchConfig.WITHDRAW_RULE).set(1, server);
+        state.ruleApplied = was;
+    }
+
 }

@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 
 // 巨神の呼び笛。吹くと (右クリック)、認めてくれた巨神が迎えに来る。乗り場の上で吹くと、海図を開き直す。
 // 吹く仕草はヤギの角笛と同じ。音は tools/gen_titan_travel_assets.py で合成した独自の音
-public class TitanCallItem extends Item {
+public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.PouchUsable {
     private final Supplier<TitanKind> kind;
 
     public TitanCallItem(Supplier<TitanKind> kind, Properties properties) {
@@ -33,17 +33,25 @@ public class TitanCallItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (player instanceof ServerPlayer server) {
-            Voyages.CallResult result = Voyages.call(server, kind.get(), false);
-            if (result == Voyages.CallResult.REFUSED) {
-                return InteractionResultHolder.fail(stack);
-            }
-            if (result == Voyages.CallResult.CALLED) {
-                player.getCooldowns().addCooldown(this, 60);
-            }
+        if (player instanceof ServerPlayer server && !usePouch(server, () -> {
+        })) {
+            return InteractionResultHolder.fail(stack);
         }
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
+    }
+
+    // 吹く (右クリックと、旅嚢の輪・短押しの共通の中身)。断られたら false
+    @Override
+    public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
+        Voyages.CallResult result = Voyages.call(player, kind.get(), false);
+        if (result == Voyages.CallResult.REFUSED) {
+            return false;
+        }
+        if (result == Voyages.CallResult.CALLED) {
+            player.getCooldowns().addCooldown(this, 60);
+        }
+        return true;
     }
 
     @Override

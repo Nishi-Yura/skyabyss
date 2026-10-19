@@ -1,8 +1,8 @@
 {
   "item.skyabyss.lore_book": "Book of Lore",
-  "item.skyabyss.lore_book.desc": "What you see and read writes itself in. Right-click to open.",
+  "item.skyabyss.lore_book.desc": "What you see and read writes itself in. Right-click to open (from the Satchel, use the tool wheel).",
   "item.skyabyss.lore_page": "Torn Page",
-  "item.skyabyss.lore_page.desc": "Right-click to copy it into your Book of Lore.",
+  "item.skyabyss.lore_page.desc": "Right-click to copy it into your Book of Lore (from the Satchel, use the tool wheel).",
   "item.skyabyss.lore_page.desc.village": "Left behind by someone in a village. Right-click to read.",
   "item.skyabyss.lore_page.desc.titan_back": "Left by the people of the titan's back. Right-click to read.",
   "gui.skyabyss.lore.toast": "Written in the Book of Lore",

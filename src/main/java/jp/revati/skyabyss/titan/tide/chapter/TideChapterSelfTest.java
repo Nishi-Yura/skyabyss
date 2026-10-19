@@ -290,7 +290,7 @@ public final class TideChapterSelfTest {
         FakePlayer g = fake(level, "conch_gift");
         g.getPersistentData().remove(TideChapter.SHELL_GIVEN);
         check(f, TideChapter.giveShell(g) && !TideChapter.giveShell(g), "the shell is given once per player");
-        check(f, g.getInventory().contains(new net.minecraft.world.item.ItemStack(TideChapterSetup.TIDE_WATCHING_SHELL.get())), "the shell is in the inventory");
+        check(f, jp.revati.skyabyss.pouch.Pouch.countAll(g, TideChapterSetup.TIDE_WATCHING_SHELL.get()) == 1, "the shell is in the pouch or the inventory");
         g.getPersistentData().remove(TideChapter.SHELL_GIVEN);
         if (third != null) {
             third.discard();
@@ -463,6 +463,8 @@ public final class TideChapterSelfTest {
         check(f, !yes.condition().test(ctx), "with a conch in the pack, no second conch");
         // 手もとのどこかにあれば (箱の中でも) 数える
         var chest = p.getEnderChestInventory();
+        check(f, !yes.condition().test(ctx) && jp.revati.skyabyss.pouch.Pouch.count(p, shell) == 1, "a conch in the pouch counts as owned");
+        jp.revati.skyabyss.pouch.Pouch.clear(p);
         p.getInventory().clearContent();
         chest.setItem(0, new net.minecraft.world.item.ItemStack(shell));
         check(f, !yes.condition().test(ctx), "a conch in the ender chest counts as owned");

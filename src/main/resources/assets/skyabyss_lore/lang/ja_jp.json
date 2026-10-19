@@ -1,8 +1,8 @@
 {
   "item.skyabyss.lore_book": "伝承の書",
-  "item.skyabyss.lore_book.desc": "見たもの、読んだものが、ひとりでに記されていく。右クリックで開く",
+  "item.skyabyss.lore_book.desc": "見たもの、読んだものが、ひとりでに記されていく。右クリックで開く（旅嚢の中なら、道具の輪から）",
   "item.skyabyss.lore_page": "破れた頁",
-  "item.skyabyss.lore_page.desc": "右クリックで読むと、伝承の書に写される",
+  "item.skyabyss.lore_page.desc": "右クリックで読むと、伝承の書に写される（旅嚢の中なら、道具の輪から）",
   "item.skyabyss.lore_page.desc.village": "村の誰かが書き残したもの。右クリックで読む",
   "item.skyabyss.lore_page.desc.titan_back": "巨神の背の民が残したもの。右クリックで読む",
   "gui.skyabyss.lore.toast": "伝承の書に記された",

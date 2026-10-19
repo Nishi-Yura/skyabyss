@@ -208,6 +208,31 @@ public final class Pouch {
         return moved;
     }
 
+    // 画面のカーソルへ出す分: 取り出しの決まりに従い、一スタックまで (n 個まで) を袋から外して、「取り出し済み」の印つきの品を返す。出せなければ空
+    public static ItemStack takeOut(ServerPlayer player, Item item, int n, boolean force) {
+        Entry e = PouchEntries.any(item);
+        if (e == null || n <= 0 || (!force && !canWithdraw(player, e))) {
+            return ItemStack.EMPTY;
+        }
+        int c = Math.min(Math.min(n, data(player).count(e.id())), Math.max(1, item.getDefaultMaxStackSize()));
+        if (c <= 0) {
+            return ItemStack.EMPTY;
+        }
+        data(player).set(e.id(), data(player).count(e.id()) - c);
+        sync(player);
+        ItemStack s = new ItemStack(item, c);
+        s.set(PouchSetup.LOAN.get(), Unit.INSTANCE);
+        if (e.bonded()) {
+            KeepsakeBonds.bindFor(player, s);
+        }
+        return s;
+    }
+
+    // いまの決まり (ゲームルール・区分) で、この品を取り出せるか
+    public static boolean canWithdraw(ServerPlayer player, Entry e) {
+        return PouchConfig.withdrawEnabled(player.server) && e.withdrawable();
+    }
+
     // ---------------------------------------------------------------- 掃除
     // 持ち物 (メイン・左手) の袋の品を袋へ移す。印のある (取り出し済みの) 品は移さない。移した数を返す
     public static int sweep(ServerPlayer player) {
