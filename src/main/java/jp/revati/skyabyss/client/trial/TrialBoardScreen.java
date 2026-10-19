@@ -223,7 +223,7 @@ public class TrialBoardScreen extends Screen {
             frame(g, px + 10, y, W - 20, 52, rc, CARD);
             // 枠の絵と名前
             icon(g, slotIcon(def.slot()), px + 17, y + 8, 24, 1f);
-            Component slot = Component.translatable("trial.skyabyss.slot." + def.slot().id());
+            Component slot = Component.translatable("trial.skyabyss.slot." + def.slot().id);
             g.drawString(font, slot, px + 29 - font.width(slot) / 2, y + 35, argb(1f, DIM), false);
             Component name = Component.translatable(def.nameKey());
             g.drawString(font, name, px + 48, y + 7, argb(1f, GOLD), true);

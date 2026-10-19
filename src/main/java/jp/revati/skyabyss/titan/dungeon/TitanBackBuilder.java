@@ -36,6 +36,13 @@ public final class TitanBackBuilder {
         buildRest(level, data, kit, start);
     }
 
+    // 開発・自己テスト: 試練の階を、いまの背へ後から置く (本番の建設では WhaleDeck.placed() が false のあいだ置かない)
+    public static void placeDeck(ServerLevel level) {
+        WhaleDeck.setPlaced(true);
+        WhaleDeckBuilder.build(new BuildKit(level, RandomSource.create(20261015L)));
+        jp.revati.skyabyss.trial.TrialRuntime.installGates(level);
+    }
+
     // 起動時: 島の体を何 tick かに分けて置き、置き終えた tick に残りを建てる (BackBuildJobs。13 の 24.5節)
     public static void schedule(ServerLevel level, TitanBackData data) {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
@@ -57,7 +64,9 @@ public final class TitanBackBuilder {
         EastWingBuilder.build(kit);
         WingsBuilder.build(kit);
         // 試練の階 (階段・広間・四つの新しいセル。docs/design/29)。入口の通路・東の翼の天井の上の、体の中の空き
-        WhaleDeckBuilder.build(kit);
+        if (WhaleDeck.placed()) {
+            WhaleDeckBuilder.build(kit);
+        }
         // ボス部屋の大門 (心臓の間・番兵長の広間)。部屋と通路を掘ったあと
         BossGates.build(kit);
         MazeBuilder.buildFixtures(kit);

@@ -48,6 +48,10 @@ public final class TrialCommands {
                 .then(Commands.literal("dev").then(Commands.literal("trial")
                         .then(Commands.literal("board").executes(ctx -> board(ctx.getSource(), Titans.STONE_WHALE))
                                 .then(Commands.argument("titan", StringArgumentType.word()).executes(ctx -> board(ctx.getSource(), StringArgumentType.getString(ctx, "titan")))))
+                        .then(Commands.literal("build").executes(ctx -> {
+                            jp.revati.skyabyss.titan.dungeon.TitanBackBuilder.placeDeck(back(ctx.getSource()));
+                            return 1;
+                        }))
                         .then(Commands.literal("list").executes(ctx -> list(ctx.getSource())))
                         .then(Commands.literal("cycle").then(Commands.argument("n", IntegerArgumentType.integer(1, 99))
                                 .executes(ctx -> cycle(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "n")))))

@@ -91,7 +91,7 @@ public final class TrialRuntime {
     // 原型の入口 (既定で開く) と新作の入口 (既定で閉じる) のブロックを置く。建てたあと・起動のあと・建て直しのあとに呼ぶ (何度でも)
     public static void installGates(ServerLevel back) {
         String titan = Titans.titanOfBack(back.dimension());
-        if (titan == null) {
+        if (titan == null || !TrialCatalog.deckPlaced(titan)) {
             return;
         }
         for (TrialCell cell : TrialCells.of(titan)) {
@@ -107,6 +107,9 @@ public final class TrialRuntime {
 
     // 引いた試練 (と今週の試練) の入口だけを、そのグループに開ける。ほかには閉じて見える
     public static void syncGates(ServerLevel back, UUID group, String titan, TrialDraw.Draw draw) {
+        if (!TrialCatalog.deckPlaced(titan)) {
+            return;
+        }
         Def weekly = TrialData.weekly(titan, TrialData.worldSeed(back), TrialData.week());
         for (TrialCell cell : TrialCells.of(titan)) {
             TrialCell.Ports p = cell.ports();

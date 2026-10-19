@@ -115,12 +115,20 @@ public final class TrialCatalog {
 
     // 引き方 (プール) を動かす巨神か。三つの枠すべてに、作ってある試練が二つ以上ある巨神だけ (そうでなければ周回しても原型のまま)
     public static boolean poolActive(String titan) {
+        if (!deckPlaced(titan)) {
+            return false;
+        }
         for (Slot s : Slot.values()) {
             if (inSlot(titan, s).size() < 2) {
                 return false;
             }
         }
         return true;
+    }
+
+    // 新作のセルを背に置いてあるか (岩鯨の試練の階。体の作り直しが済むまで置かない。WhaleDeck.placed)。ほかの巨神は新作がまだ無いので false
+    public static boolean deckPlaced(String titan) {
+        return Titans.STONE_WHALE.equals(titan) && jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed();
     }
 
     // 石の合図 (TrialSteles の titan と trial の文字) から、その石の原型の試練。なければ null
