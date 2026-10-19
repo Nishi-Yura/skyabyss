@@ -9,6 +9,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.progress.Titans;
+import jp.revati.skyabyss.titan.young.YoungCarriers;
+import jp.revati.skyabyss.titan.young.YoungEntity;
+import jp.revati.skyabyss.titan.young.YoungKind;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -20,14 +24,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-// 巨神での移動のテスト用コマンド (OP)。/skyabyss travel ...
-//   unlock [人]    岩鯨に認めさせる (心臓を倒さなくても呼べる)。呼び笛はまだなら次の確認で渡る
+// 巨神の子のテスト用コマンド (OP)。/skyabyss travel ...
+//   unlock [人]    岩鯨・潮殻に認めさせる (心臓を倒さなくても。呼び笛はまだなら次の確認で渡る)
 //   lock [人]      認めたのを取り消す (心臓の撃破の記録があれば、認められたまま)
-//   call           条件 (クールダウン・空・戦い) を見ずに岩鯨を呼ぶ
-//   go <x> <z>     乗り場の上で、海図を使わずに行き先を座標で決める
-//   cooldown       自分のクールダウンを消す
-//   status         今の旅と、自分の記録を見る
-//   end            今の旅を打ち切る (乗っている人は緩やかに降ろす)
+//   met [人]       四体すべてに「出会った」ことにする
+//   young [巨神]   条件 (出会い・眠り・戦い・待ち) を見ずに、足もとの前へ子を呼ぶ
+//   go <x> <z>     子に乗っている持ち主が、海図を使わずに行き先を座標で決める
+//   cooldown       自分の笛の待ちを消す
+//   status         今の子と、自分の記録を見る
+//   end            今の子を全部歌に戻す (乗っている人は地面へ降ろす)
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelCommands {
     private TravelCommands() {
@@ -46,10 +51,15 @@ public final class TravelCommands {
                                 .executes(ctx -> unlock(ctx, List.of(ctx.getSource().getPlayerOrException()), false))
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(ctx -> unlock(ctx, EntityArgument.getPlayers(ctx, "targets"), false))))
-                        .then(Commands.literal("call").executes(ctx -> call(ctx, TitanKind.STONE_WHALE))
+                        .then(Commands.literal("met")
+                                .executes(ctx -> met(ctx, List.of(ctx.getSource().getPlayerOrException())))
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(ctx -> met(ctx, EntityArgument.getPlayers(ctx, "targets")))))
+                        .then(Commands.literal("young")
+                                .executes(ctx -> young(ctx, YoungKind.WHALE))
                                 .then(Commands.argument("titan", StringArgumentType.word())
-                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(kindIds(), b))
-                                        .executes(ctx -> call(ctx, kind(ctx)))))
+                                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Titans.all(), b))
+                                        .executes(ctx -> young(ctx, kind(ctx)))))
                         .then(Commands.literal("go")
                                 .then(Commands.argument("x", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer()).executes(TravelCommands::go))))
@@ -60,24 +70,16 @@ public final class TravelCommands {
                         }))
                         .then(Commands.literal("status").executes(TravelCommands::status))
                         .then(Commands.literal("end").executes(ctx -> {
-                            for (TitanKind k : TitanKind.all()) {
-                                Voyages.forceEnd(k);
-                            }
-                            ctx.getSource().sendSuccess(() -> Component.literal("voyages ended"), true);
+                            int n = YoungCarriers.endAll();
+                            ctx.getSource().sendSuccess(() -> Component.literal(n + " young one(s) ended"), true);
                             return 1;
                         }))));
     }
 
-    private static List<String> kindIds() {
-        List<String> ids = new java.util.ArrayList<>();
-        TitanKind.all().forEach(k -> ids.add(k.id()));
-        return ids;
-    }
-
-    private static TitanKind kind(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        TitanKind k = TitanKind.byId(StringArgumentType.getString(ctx, "titan"));
+    private static YoungKind kind(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        YoungKind k = YoungKind.ofTitan(StringArgumentType.getString(ctx, "titan"));
         if (k == null) {
-            throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(Component.literal("unknown titan; try " + kindIds())).create();
+            throw new com.mojang.brigadier.exceptions.SimpleCommandExceptionType(Component.literal("unknown titan; try " + Titans.all())).create();
         }
         return k;
     }
@@ -98,32 +100,41 @@ public final class TravelCommands {
         return players.size();
     }
 
-    private static int call(CommandContext<CommandSourceStack> ctx, TitanKind kind) throws CommandSyntaxException {
+    private static int met(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players) {
+        for (ServerPlayer p : players) {
+            for (String id : Titans.all()) {
+                if (TitanCalls.known(id)) {
+                    TitanCalls.markMet(p, id);
+                }
+            }
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("met every titan for " + players.size() + " player(s)"), true);
+        return players.size();
+    }
+
+    private static int young(CommandContext<CommandSourceStack> ctx, YoungKind kind) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Voyages.CallResult r = Voyages.call(player, kind, true);
-        ctx.getSource().sendSuccess(() -> Component.literal("call: " + r), false);
-        return r == Voyages.CallResult.REFUSED ? 0 : 1;
+        YoungEntity existing = YoungCarriers.of(player.getUUID());
+        if (existing != null) {
+            existing.discard();
+        }
+        net.minecraft.world.phys.Vec3 spot = YoungCarriers.spotFor(player, kind);
+        YoungEntity e = spot == null ? null : YoungCarriers.spawn(player.serverLevel(), kind, player, spot);
+        ctx.getSource().sendSuccess(() -> Component.literal(e == null ? "no room" : kind.model + " at " + BlockPos.containing(spot)), false);
+        return e == null ? 0 : 1;
     }
 
     private static int go(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         int x = IntegerArgumentType.getInteger(ctx, "x");
         int z = IntegerArgumentType.getInteger(ctx, "z");
-        Voyage v = Voyages.involving(player.getUUID());
-        if (v == null || !v.riders.contains(player.getUUID()) || v.dest != null || v.phase != Voyage.Phase.WAITING) {
-            ctx.getSource().sendFailure(Component.literal("sit on the titan's head (before choosing a destination) first"));
-            return 0;
-        }
-        v.leader = player.getUUID();
-        v.leaderName = player.getGameProfile().getName();
         BlockPos pos = new BlockPos(x, player.serverLevel().getSeaLevel(), z);
-        TravelNetwork.Dest d = new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 2, true, 0);
-        String refused = v.accept(d);
+        TravelNetwork.Dest d = new TravelNetwork.Dest("test", x + ", " + z, "", x, pos.getY(), z, 1, true, 0, "");
+        String refused = YoungCarriers.chooseDirect(player, d);
         if (refused != null) {
             ctx.getSource().sendFailure(Component.translatable(refused));
             return 0;
         }
-        v.chosen(d);
         ctx.getSource().sendSuccess(() -> Component.literal("destination set to " + x + ", " + z), true);
         return 1;
     }
@@ -131,12 +142,13 @@ public final class TravelCommands {
     private static int status(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         TravelState s = Voyages.state(player);
-        for (TitanKind k : TitanKind.all()) {
-            String voyage = Voyages.describe(k);
-            ctx.getSource().sendSuccess(() -> Component.literal(k.id() + " voyage: " + (voyage == null ? "none" : voyage)), false);
+        for (YoungEntity e : YoungCarriers.all()) {
+            String line = e.kind.model + " owner=" + e.owner() + " phase=" + (e.trip() == null ? "?" : e.trip().phase()) + " riders=" + e.riderCount()
+                    + " at " + BlockPos.containing(e.position());
+            ctx.getSource().sendSuccess(() -> Component.literal(line), false);
         }
-        ctx.getSource().sendSuccess(() -> Component.literal("unlocked=" + Voyages.isUnlocked(player, TitanKind.STONE_WHALE) + " " + s.unlocked
-                + " callGiven=" + s.callGiven + " waymarks=" + s.waymarks.size() + " cooldown=" + TravelRules.cooldownLeft(player) / 20 + "s voyages=" + s.voyages), false);
+        ctx.getSource().sendSuccess(() -> Component.literal("unlocked=" + s.unlocked + " met=" + s.met + " callGiven=" + s.callGiven + " waymarks="
+                + s.waymarks.size() + " cooldown=" + Voyages.cooldownLeft(player) / 20 + "s voyages=" + s.voyages), false);
         return 1;
     }
 }

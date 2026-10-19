@@ -1,0 +1,71 @@
+{
+ "model": "young_tide_shell",
+ "seat_y": 1.5,
+ "seats": [
+  [
+   -1.0,
+   1.5,
+   -2.0
+  ],
+  [
+   1.0,
+   1.5,
+   -2.0
+  ],
+  [
+   -1.0,
+   1.5,
+   0.0
+  ],
+  [
+   1.0,
+   1.5,
+   0.0
+  ],
+  [
+   -1.0,
+   1.5,
+   2.0
+  ],
+  [
+   1.0,
+   1.5,
+   2.0
+  ]
+ ],
+ "hitbox": [
+  4.6,
+  3.4
+ ],
+ "waterline_y": 0.4,
+ "front": "-Z (final geo space; root carries the pearl-keeper style Y 180 rest rotation)",
+ "bones": [
+  "root",
+  "body",
+  "saddle",
+  "head",
+  "song",
+  "fin_fl",
+  "fin_fr",
+  "fin_bl",
+  "fin_br",
+  "tail"
+ ],
+ "anims": {
+  "idle": 3.0,
+  "move": 1.2,
+  "appear": 1.6,
+  "dissolve": 1.4
+ },
+ "loops": {
+  "idle": true,
+  "move": true,
+  "appear": false,
+  "dissolve": "hold_on_last_frame"
+ },
+ "saddle_drift_blocks": {
+  "idle": 0.061,
+  "move": 0.091
+ },
+ "glow": "textures/entity/young_tide_shell_glowmask.png (cube) / textures/lowpoly/young_tide_shell_glowmask.png (low-poly): the song mote"
+}

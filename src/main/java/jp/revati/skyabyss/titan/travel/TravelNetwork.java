@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 // 巨神での移動のパケット。ほかの担当とぶつからないように、別の版で登録する
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TravelNetwork {
-    private static final String PROTOCOL_VERSION = "travel-2";
+    private static final String PROTOCOL_VERSION = "travel-3";
 
     private TravelNetwork() {
     }
@@ -30,23 +30,24 @@ public final class TravelNetwork {
                 .playToClient(Veil.TYPE, Veil.STREAM_CODEC, (payload, context) -> TravelClient.veil(payload.on(), payload.style()))
                 .playToServer(Choose.TYPE, Choose.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        Voyages.choose(player, payload.id());
+                        jp.revati.skyabyss.titan.young.YoungCarriers.choose(player, payload.id());
                     }
                 })
                 .playToServer(Forget.TYPE, Forget.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        Voyages.forget(player, payload.id());
+                        jp.revati.skyabyss.titan.young.YoungCarriers.forgetWaymark(player, payload.id());
                     }
                 })
                 .playToServer(Disembark.TYPE, Disembark.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        Voyages.disembark(player);
+                        jp.revati.skyabyss.titan.young.YoungCarriers.disembark(player);
                     }
                 });
     }
 
-    // 行き先の一つ。kind: 0 = はじまりの地 (世界の初期スポーン)、1 = 碑。valid = 今も行ける (碑が壊されていない)
-    public record Dest(String id, String name, String biome, int x, int y, int z, int kind, boolean valid, int seconds) {
+    // 行き先の一つ。kind: 0 = はじまりの地 (世界の初期スポーン)、1 = 碑、2 = 出会った巨神 (name = 巨神の名前)。
+    // valid = 選べる。lock = 選べない理由 (gui.skyabyss.young.lock.<lock>。空なら壊された碑)
+    public record Dest(String id, String name, String biome, int x, int y, int z, int kind, boolean valid, int seconds, String lock) {
         static void write(RegistryFriendlyByteBuf buf, Dest d) {
             buf.writeUtf(d.id);
             buf.writeUtf(d.name);
@@ -57,11 +58,12 @@ public final class TravelNetwork {
             buf.writeVarInt(d.kind);
             buf.writeBoolean(d.valid);
             buf.writeVarInt(d.seconds);
+            buf.writeUtf(d.lock);
         }
 
         static Dest read(RegistryFriendlyByteBuf buf) {
             return new Dest(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
-                    buf.readVarInt(), buf.readBoolean(), buf.readVarInt());
+                    buf.readVarInt(), buf.readBoolean(), buf.readVarInt(), buf.readUtf());
         }
     }
 

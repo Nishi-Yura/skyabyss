@@ -1,0 +1,84 @@
+{
+  "model": "young_ember",
+  "seat_y": 2.5,
+  "seat_y_units": 40.0,
+  "hitbox": [
+    4.6,
+    3.4
+  ],
+  "seats_blocks": [
+    [
+      -1.0,
+      2.5,
+      -2.0
+    ],
+    [
+      1.0,
+      2.5,
+      -2.0
+    ],
+    [
+      -1.0,
+      2.5,
+      0.0
+    ],
+    [
+      1.0,
+      2.5,
+      0.0
+    ],
+    [
+      -1.0,
+      2.5,
+      2.0
+    ],
+    [
+      1.0,
+      2.5,
+      2.0
+    ]
+  ],
+  "saddle_flat_area_blocks": {
+    "x": [
+      -1.6,
+      1.6
+    ],
+    "z": [
+      -3.2,
+      3.2
+    ]
+  },
+  "front": "-Z (geo root carries rotation [0,180,0] like pearl_keeper; final front = -Z)",
+  "bones": [
+    "root",
+    "body",
+    "saddle",
+    "core",
+    "neck",
+    "head",
+    "jaw",
+    "tail",
+    "tail2",
+    "leg_fr",
+    "leg_fl",
+    "leg_br",
+    "leg_bl"
+  ],
+  "anims": {
+    "idle": 3.0,
+    "move": 1.2,
+    "appear": 1.6,
+    "dissolve": 1.4
+  },
+  "loops": {
+    "idle": true,
+    "move": true,
+    "appear": false,
+    "dissolve": "hold_on_last_frame"
+  },
+  "saddle_max_drift_blocks": {
+    "idle": 0.025,
+    "move": 0.0978
+  },
+  "notes": "Entity (not LivingEntity). saddle bone is never animated; idle/move move the seat <= 0.15 block. appear/dissolve scale root (dissolve ends at scale 0, hold). core = glowing song mote (glowmask)."
+}

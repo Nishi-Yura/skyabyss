@@ -43,7 +43,6 @@ import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.titan.travel.TitanKind;
-import jp.revati.skyabyss.titan.travel.TravelRules;
 import jp.revati.skyabyss.titan.travel.TravelState;
 import jp.revati.skyabyss.titan.travel.TravelWorldData;
 import jp.revati.skyabyss.titan.travel.Voyages;
@@ -448,7 +447,7 @@ public final class RecordBuilder {
         }
         rows.add(value("waymarks", t("r.waymarks"), t("v.of", travel.waymarks.size(), TravelState.MAX_WAYMARKS), RecordSnapshot.MARK_NONE, marks));
         rows.add(value("voyages", t("r.voyages"), t("v.times", travel.voyages), RecordSnapshot.MARK_NONE, List.of(t("d.voyages"))));
-        long left = TravelRules.cooldownLeft(p);
+        long left = Voyages.cooldownLeft(p);
         rows.add(value("cooldown", t("r.cooldown"), left <= 0 ? t("v.ready") : t("v.seconds", (left + 19) / 20), RecordSnapshot.MARK_NONE,
                 List.of(t("d.cooldown"))));
         return rows;
