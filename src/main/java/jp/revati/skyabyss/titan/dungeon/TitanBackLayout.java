@@ -25,7 +25,7 @@ import net.minecraft.world.phys.AABB;
 // 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 番兵長の控えの間 → 短い通路 → 番兵長の広間 → 共鳴石
 //                        広間の扉は戦いの間だけ閉じる。制圧すると出口と入口が開く
 // 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
-// 闇の水路: 3×3 の水の通路でできた迷路。毎回形が変わり、途中に息継ぎのくぼみだけがある
+// 闇の水路 (光海): 3×3 の水の通路でできた迷路。毎回形が変わり、息継ぎのくぼみが 2 マスごとに、灯の台が 3 つある
 public final class TitanBackLayout {
     // 雲の海の高さの基準 (雲は BASE_Y - 55 = 45、BASE_Y - 50 より下に落ちたら地上へ)。鯨の腹の下端は y 58
     public static final int BASE_Y = 100;
@@ -46,7 +46,9 @@ public final class TitanBackLayout {
     // 11: 闇の水路の入口 (はしごを下りた先) に、乾いた小部屋の休み場 (mz0) を足した
     // 13: ボス部屋の大門 (心臓の間・番兵長の広間の入口。BossGates)。心臓の間の入口の看板を右の柱の面 (2, 96, -62) へ
     // 14: ボス部屋の大門と建築の監査の両方
-    public static final int LAYOUT_VERSION = 14; // 13: 建築の監査 (ベンチの向き)
+    // 16: 光海の作り直し (23 の 11 章。入口の小部屋を 13×9 に広げ、灯の台を 3 つ・息継ぎのくぼみを 2 マスごと・近道と水域の色を足した)。
+    //     15 は背の拡大 (26) が使っている。両方が入るときは max + 1 にすること
+    public static final int LAYOUT_VERSION = 16;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
@@ -144,7 +146,7 @@ public final class TitanBackLayout {
     public static final int MAZE_EXIT_I = 8;
     public static final int MAZE_EXIT_J = 13;
     // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、中は 3×3×3。はしごが北の隅を通る)
-    public static final Box MAZE_ENTRY_ROOM = new Box(3, 5, -25, -23, MAZE_FLOOR + 4, 3);
+    public static final Box MAZE_ENTRY_ROOM = new Box(-2, 10, -25, -17, MAZE_FLOOR + 4, 4);
     public static final Box MAZE_EXIT_ROOM = new Box(10, 14, -10, -6, 81, 4);
     // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)
     public static final List<BlockPos> LOWER_RETURN = List.of(new BlockPos(2, 94, -7), new BlockPos(2, 95, -7));

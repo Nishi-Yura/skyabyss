@@ -115,6 +115,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("tutorial", jp.revati.skyabyss.tutorial.TutorialSelfTest::runSelfTest));
         // 大事な場面のカメラ演出 (台本・日英の文・座標・サーバーの流れ)。docs/design/20_cinematics.md
         steps.add(Step.once("cinematic", jp.revati.skyabyss.cinematic.CinematicSelfTest::runSelfTest));
+        steps.add(Step.once("storm scan", jp.revati.skyabyss.titan.storm.back.StormBuildScan::runSelfTest));
+        steps.add(jp.revati.skyabyss.cinematic.SightLiveSelfTest.step(jp.revati.skyabyss.progress.Titans.THUNDER_WING));
         steps.add(Step.once("gear curve", GearCurveSelfTest::runSelfTest));
         // 心臓四体の手ごたえ (戦いの長さ・一撃・避けそこね)
         steps.add(Step.once("heart balance", jp.revati.skyabyss.combat.HeartBalanceSelfTest::runSelfTest));

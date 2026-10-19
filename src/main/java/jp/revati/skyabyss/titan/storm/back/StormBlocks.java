@@ -181,6 +181,13 @@ public final class StormBlocks {
     // ---- 拍の舵 (25 の 5章 C。入口の台。右クリックでその試練の拍を 60 秒、凪か嵐に固定する。StormHelm) ----
     public static class Helm extends Block {
         public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+        // 台座と舵輪 (台座の幅 11、舵輪は薄い)
+        private static final VoxelShape HELM_SHAPE = Block.box(2.5, 0, 2.5, 13.5, 16, 13.5);
+
+        @Override
+        protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+            return HELM_SHAPE;
+        }
 
         public Helm(Properties p) {
             super(p);

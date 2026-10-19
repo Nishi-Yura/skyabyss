@@ -1,0 +1,139 @@
+# 岩鯨の下の試練 (光海) の作り直しを撮る (docs/design/23 の 11 章)。
+# ./gradlew runShots -Pscript=tools/shots/whale_underside_fix.txt   → python tools/whale_underside_fix_sheet.py
+# 出力: run/shots/whale_underside_fix/shots/whale_underside_fix/*.png。音は台本が自分で消す (TestMute)
+world underside_fix flat
+size 1280 720
+timeout 1500
+render 8
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 60
+cmd skyabyss dev lamp info
+cmd skyabyss dev lamp clear
+chat clear
+
+# ---- ブロックそのものの見え方 (昼の光の中。真っ黒でないこと): 台 (まだ・ともした)・苗床・数え石 (0 と 2)
+cmd setblock -45 89 113 skyabyss:anemone_pedestal[lit=false,waterlogged=false]
+cmd setblock -43 89 113 skyabyss:anemone_pedestal[lit=true,waterlogged=false]
+cmd setblock -41 89 113 skyabyss:anemone_bed[waterlogged=false]
+cmd setblock -39 89 113 skyabyss:anemone_tally[count=0]
+cmd setblock -37 89 113 skyabyss:anemone_tally[count=2]
+camera skyabyss:titan_back -41 90.4 108.5 0 14
+waitchunks
+wait 30
+hud off
+shot blocks_day
+cmd time set night
+wait 20
+shot blocks_night
+cmd time set noon
+
+# ---- 入口の休み場 (広くした 13×9)。まだ何もともっていない
+cmd gamemode spectator
+camera skyabyss:titan_back -1.5 83.6 -24.4 295 8
+waitchunks
+wait 30
+hud off
+shot entry_wide
+camera skyabyss:titan_back 3.5 83.6 -21.5 273 3
+wait 20
+shot entry_board_unlit
+camera skyabyss:titan_back 4.5 83.7 -18.6 180 12
+wait 20
+shot entry_beds_hatch
+
+# ---- 灯が一つともると、掲示板が灯る (光の道ものびる)。全部ともるとすべてが灯る
+cmd skyabyss dev lamp light 1
+wait 40
+camera skyabyss:titan_back 3.5 83.6 -21.5 273 3
+wait 20
+shot entry_board_lit1
+cmd skyabyss dev lamp all
+wait 80
+shot entry_board_lit3
+cmd skyabyss dev lamp clear
+wait 40
+
+# ---- 息継ぎのくぼみ (泡の柱と水域の色の光)
+cmd skyabyss dev lamp pocket 1
+waitchunks
+wait 30
+shot pocket_close
+cmd skyabyss dev lamp pocket 4
+wait 30
+shot pocket_close_b
+
+# ---- 灯の台: まだ / 近く / 遠くから
+cmd skyabyss dev lamp vista 2
+waitchunks
+wait 30
+shot stand_unlit_close
+cmd skyabyss dev lamp light 2
+wait 60
+cmd skyabyss dev lamp vista 2
+wait 30
+shot stand_lit_close
+cmd skyabyss dev lamp path 2
+wait 20
+shot trail_one_lamp
+cmd skyabyss dev lamp clear
+wait 40
+
+# ---- 水域の色 (入口の水域から出口の水域まで)
+cmd skyabyss dev lamp zone 0
+waitchunks
+wait 30
+shot zone0
+cmd skyabyss dev lamp zone 1
+wait 30
+shot zone1
+cmd skyabyss dev lamp zone 2
+wait 30
+shot zone2
+cmd skyabyss dev lamp zone 3
+wait 30
+shot zone3
+
+# ---- 近道の戸 (灯が足りないあいだは壁、そろうと開く)
+cmd skyabyss dev lamp cut 1
+waitchunks
+wait 30
+shot cut_closed
+cmd skyabyss dev lamp all
+wait 80
+cmd skyabyss dev lamp cut 1
+wait 30
+shot cut_open
+
+# ---- 三つともった: 光の道が出口まで通り、出口の戸が開く
+cmd skyabyss dev lamp path 4
+wait 30
+shot trail_full_a
+cmd skyabyss dev lamp path 10
+wait 20
+shot trail_full_b
+cmd skyabyss dev lamp exit
+waitchunks
+wait 30
+shot exit_gate_open
+cmd skyabyss dev lamp clear
+wait 40
+cmd skyabyss dev lamp exit
+wait 30
+shot exit_gate_closed
+
+# ---- 目的の帯 (アクションバー): 灯の数・方角・道のり
+cmd gamemode creative
+cmd give @s skyabyss:glow_anemone 3
+cmd skyabyss dev lamp path 3
+hud on
+wait 60
+shot band_carry
+cmd skyabyss dev lamp light 1
+cmd skyabyss dev lamp light 3
+wait 60
+shot band_two_lit
+quit

@@ -46,6 +46,8 @@ public final class SiteNetwork {
         OpeningSites.notebook(server).ifPresent(p -> m.put("notebook", p));
         OpeningSites.shelter(server).ifPresent(p -> m.put("shelter", p));
         OpeningSites.bell(server).ifPresent(p -> m.put("bell", p));
+        // 宿りの煙の焚き火 (クライアントが遠くから見える煙の柱を描く。client/opening/SmokeColumnRenderer)
+        OpeningSites.smoke(server).or(() -> OpeningSites.shelter(server)).ifPresent(p -> m.put("smoke", p));
         OpeningSites.ribs(server).ifPresent(p -> m.put("ribs", p));
         int i = 0;
         for (BlockPos p : OpeningSites.footprints(server)) {
