@@ -44,6 +44,10 @@ public class TitanCallItem extends Item implements jp.revati.skyabyss.pouch.Pouc
     // 吹く (右クリックと、旅嚢の輪・短押しの共通の中身)。断られたら false
     @Override
     public boolean usePouch(ServerPlayer player, Runnable consumeOne) {
+        // その巨神の背中の中で吹いたら、呼ばずに「地上へ下りる？」(もう一度で下りる)
+        if (jp.revati.skyabyss.titan.end.ReturnBeacons.whistleInBack(player, kind.get().id())) {
+            return true;
+        }
         Voyages.CallResult result = Voyages.call(player, kind.get(), false);
         if (result == Voyages.CallResult.REFUSED) {
             return false;

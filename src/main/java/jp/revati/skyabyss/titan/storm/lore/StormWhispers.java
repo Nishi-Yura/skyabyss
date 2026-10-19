@@ -39,10 +39,6 @@ public final class StormWhispers {
             StormBackLayout.ARRIVAL.getX() + 5, StormBackLayout.ARRIVAL.getY() + 3, StormBackLayout.ARRIVAL.getZ() + 3);  // 尾羽の上
     static final Box TAIL = of(StormBackLayout.TAIL_HALL);       // 尾の間 (炉・焚き火・碑文)
     static final Box HUB = of(StormBackLayout.HUB);              // 風の広間 (上の回廊まで)
-    // 背の上: 尾の間の西の壁の段を上りきった所のまわり (鳥の背の表面より上だけ)
-    static final Box TOP = new Box(StormBackLayout.TOP_STAIR.getX() - 6, StormBirdBuilder.top(StormBackLayout.TOP_STAIR.getX(), StormBackLayout.TOP_STAIR.getZ()) + 1,
-            StormBackLayout.TOP_STAIR.getZ() - 6, StormBackLayout.TOP_STAIR.getX() + 6,
-            StormBirdBuilder.top(StormBackLayout.TOP_STAIR.getX(), StormBackLayout.TOP_STAIR.getZ()) + 8, StormBackLayout.TOP_STAIR.getZ() + 6);
     static final Box WEST = of(StormBackLayout.W0);              // 左の肩の門と休み場 w0
     static final Box EAST = of(StormBackLayout.E0);              // 右の肩の門と休み場 e0
     static final Box FRONT = of(StormBackLayout.F0);             // 首の前室 (休み場 f0)
@@ -53,7 +49,6 @@ public final class StormWhispers {
             new Whisper("storm_landing", true, false, LANDING::contains),
             new Whisper("storm_tail", false, false, TAIL::contains),
             new Whisper("storm_hub", true, false, HUB::contains),
-            new Whisper("storm_top", true, false, TOP::contains),
             new Whisper("storm_west", false, true, WEST::contains),
             new Whisper("storm_east", false, true, EAST::contains),
             new Whisper("storm_front", false, true, FRONT::contains),

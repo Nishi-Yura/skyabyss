@@ -18,7 +18,9 @@
   "message.skyabyss.titan_end.departed.tide_shell": "The tide shell has gone to the bottom of the sea.",
   "message.skyabyss.titan_end.departed.thunder_wing": "The thunder wing has flown beyond the sky.",
   "message.skyabyss.titan_end.departed.ember": "The ember titan has gone deep into the earth.",
-  "message.skyabyss.return_beacon.hint": "Crouch on a glowing return stone to go back to the surface",
-  "message.skyabyss.return_beacon.offer": "To go home at once, crouch on the glowing return stone nearby",
-  "message.skyabyss.return_beacon.leaving": "Light closes around you, and the ground falls away."
+  "message.skyabyss.return_beacon.hint": "Crouch in the light to return to the hub of this back",
+  "message.skyabyss.return_beacon.offer": "The trial is over. Crouch in the nearby light to return to the hub",
+  "message.skyabyss.return_beacon.leaving": "Light closes around you and carries you to the hub.",
+  "message.skyabyss.return_beacon.confirm": "Go down to the surface? Use the whistle again within 5 seconds",
+  "message.skyabyss.return_beacon.descending": "With the call of the whistle, the ground falls away."
 }

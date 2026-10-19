@@ -77,6 +77,7 @@ public final class TideBackSelfTest {
         steps.add(jp.revati.skyabyss.SelfTestRunner.Step.once("tide back (pools settled)", SETTLE_TICKS, server -> guarded(server, back -> {
             checkSettled(back, FAILURES, "after building");
             checkWatchSettled(back, FAILURES, "after building");
+            checkHighGate(back, FAILURES);
             checkWaterlogged(back, FAILURES, NOTES, "full");
             drainPools(back);
         })));
@@ -97,6 +98,7 @@ public final class TideBackSelfTest {
             checkBottom(back, FAILURES);
             checkReset(back, FAILURES, NOTES);
             checkGroups(back, FAILURES, NOTES);
+            checkAnyState(back, FAILURES, NOTES);
             // リセットのあと (庭の道の形が変わる) にも、もう一度満たして漏れを数える。新しい道の形は、庭を持ったときに掘る
             TideRooms.claim(back, TideRooms.GARDEN, TEST);
             TideBackTrials.initPools(back);
@@ -450,7 +452,7 @@ public final class TideBackSelfTest {
             }
         }
         notes.add("pools " + sizes.toString().trim());
-        // 満ちるときは干潟の門が (既定で) 閉じている
+        // 干潟の門のブロックは、満ちるときいつも閉じている (開いた扉は水を通す)。グループへの開放は上書きで、checkHighGate で見る
         jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), false);
         TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
         for (List<BlockPos> layer : hub.layers) {
@@ -934,7 +936,7 @@ public final class TideBackSelfTest {
             st.ring(TideBackState.Trial.WEST);
             st.ring(TideBackState.Trial.EAST);
             st.ring(TideBackState.Trial.FRONT);
-            expectGoal(back, p, "hub.wait", 3, 3, failures);
+            expectGoal(back, p, "hub.bottom", 3, 3, failures);
             // 進みの点と光の経路 (落ちない)
             TideGuide.pips(back, p, net.minecraft.world.phys.Vec3.atCenterOf(STONE_WEST).add(0, 1.4, 0), 1, 3);
             // 外にいれば出ない
@@ -1022,6 +1024,124 @@ public final class TideBackSelfTest {
         check(state.rung(TideBackState.Trial.FRONT), "front stone did not ring after the beckoner", failures);
     }
 
+    // ---------------------------------------------------------------- 満潮でも干潟の門は (グループには) 開いていて、広間の水が門を抜けてトンネルへ漏れない
+    private static void checkHighGate(ServerLevel back, List<String> failures) {
+        List<BlockPos> flats = TideGates.flats();
+        check(jp.revati.skyabyss.titan.group.GroupGates.isGate(back, flats.get(0)) && !TideGates.defaultOpen(back, flats.get(0)),
+                "the flats gate block must stay shut in the world (an open gate lets the flood through)", failures);
+        TestPlayer p = join(back, TEST, "[TideTest]", RESTS.get(0).spawn());
+        try {
+            TideBackTrials.tickGatesForTest(back);
+        } finally {
+            leave(back, p);
+        }
+        check(jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, TEST, flats), "the flats gate is not open for the group at flood", failures);
+        TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
+        check(hub != null && hub.level() == hub.depth(), "the hub basin is not full for the flood check", failures);
+        int leaks = 0;
+        BlockPos first = null;
+        for (int x = -1; x <= 1; x++) {
+            for (int z = FLATS_GATE_Z - 1; z >= FLATS_GATE_Z - 30; z--) {
+                for (int y = TUNNEL_FLOOR; y <= HUB_FLOOR + 6; y++) {
+                    BlockPos c = new BlockPos(x, y, z);
+                    if (!back.getFluidState(c).isEmpty()) {
+                        leaks++;
+                        first = first == null ? c : first;
+                    }
+                }
+            }
+        }
+        check(leaks == 0, "flood water leaked through the flats gate into the tunnel at " + leaks + " cells (first " + first + ")", failures);
+    }
+
+    // ---------------------------------------------------------------- どの潮・どの静かな試練でも、入れて最後までできる (08 の 3.5・7.2節)
+    private static void checkAnyState(ServerLevel back, List<String> failures, List<String> notes) {
+        FakePlayer fp = FakePlayerFactory.get(back, new GameProfile(TEST, "[TideTest]"));
+        // 干潟の門: どの段階でも、背中にいるグループには開いている (戦っているグループだけに閉じる)
+        TestPlayer gatePlayer = join(back, TEST, "[TideTest]", RESTS.get(0).spawn());
+        try {
+            for (TideClock.Phase ph : TideClock.Phase.values()) {
+                TideClock.force(ph);
+                jp.revati.skyabyss.titan.group.GroupGates.reset(back, TEST);
+                TideBackTrials.tickGatesForTest(back);
+                check(jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, TEST, TideGates.flats()), "the flats gate is shut for the group at " + ph, failures);
+            }
+        } finally {
+            leave(back, gatePlayer);
+        }
+        // 巣: 潮に関わらず壊せる。満ちているあいだは通る傷が減るだけ
+        ReefNest nest = TideBackSetup.REEF_NEST.get().create(back);
+        if (nest == null) {
+            failures.add("nest cannot be created");
+        } else {
+            float[] loss = new float[2];
+            TideClock.Phase[] phases = {TideClock.Phase.LOW, TideClock.Phase.HIGH};
+            for (int i = 0; i < 2; i++) {
+                TideClock.force(phases[i]);
+                nest.setHealth(ReefNest.BASE_HEALTH);
+                nest.invulnerableTime = 0;
+                nest.hurt(back.damageSources().playerAttack(fp), 20f);
+                loss[i] = ReefNest.BASE_HEALTH - nest.getHealth();
+            }
+            check(loss[0] > 0 && loss[1] > 0 && loss[1] < loss[0], "a nest takes " + loss[0] + " at ebb and " + loss[1] + " at flood (want 0 < flood < ebb)", failures);
+            notes.add("nest damage ebb/flood " + loss[0] + "/" + loss[1]);
+            nest.discard();
+        }
+        // 潮招き: 満潮でも、集合のあとすぐ現れる
+        TideBackTrials.resetGroup(back, TEST, false, null, true);
+        TideRooms.claim(back, TideRooms.FLATS, TEST);
+        BlockPos flats = new BlockPos(0, FLATS_FLOOR + 1, -85 + FLATS_DZ);
+        TestPlayer fighter = join(back, TEST, "[TideTest]", flats);
+        try {
+            TideClock.force(TideClock.Phase.HIGH);
+            check(TideFlats.waitingSpawnsForTest(back, fighter.getUUID()), "the beckoner did not rise at flood", failures);
+        } finally {
+            leave(back, fighter);
+            TideClock.force(TideClock.Phase.LOW);
+        }
+        // 静かな試練 (三つとも): 石は自分で鳴らし、満潮でも潮の底が開く。静かな庭は敵が少ない
+        for (TideBackState.Trial t : TideBackState.Trial.values()) {
+            TideBackTrials.resetGroup(back, TEST, false, t, false);
+            TideBackState.Group state = TideBackState.of(back, TEST);
+            check(state.quiet() == t && state.rungCount() == 0 && !state.rung(t), "quiet " + t + " is not rung-free at the start", failures);
+            check(t != TideBackState.Trial.EAST || state.eastConfig() == 0, "quiet east is not the gentlest layout", failures);
+            if (t == TideBackState.Trial.WEST) {
+                TideRooms.claim(back, TideRooms.GARDEN, TEST);
+                TideGarden.spawnForTest(back, TEST, 1);
+                int quietGuards = TideGarden.guards(back, TEST);
+                TideRooms.releaseAll(back);
+                TideBackTrials.resetGroup(back, TEST, false, null, true);
+                TideRooms.claim(back, TideRooms.GARDEN, TEST);
+                TideGarden.spawnForTest(back, TEST, 1);
+                int normalGuards = TideGarden.guards(back, TEST);
+                TideRooms.releaseAll(back);
+                check(quietGuards > 0 && quietGuards < normalGuards, "quiet garden has " + quietGuards + " guards (normal " + normalGuards + ")", failures);
+                notes.add("garden guards quiet/normal " + quietGuards + "/" + normalGuards);
+                TideBackTrials.resetGroup(back, TEST, false, t, false);
+                state = TideBackState.of(back, TEST);
+            }
+            for (TideBackState.Trial u : TideBackState.Trial.values()) {
+                TideBackTrials.ring(back, state, u, null);
+            }
+            check(state.rungCount() == 3, "quiet " + t + ": three stones did not ring", failures);
+            // 満潮でも、三つの石で潮の底が開く
+            TideClock.force(TideClock.Phase.HIGH);
+            TideField.Pool hub = TideBackTrials.FIELD.pool("hub");
+            TideField.settleNow(back, hub, hub.depth());
+            TestPlayer p = join(back, TEST, "[TideTest]", RESTS.get(0).spawn());
+            try {
+                TideBackTrials.tickGatesForTest(back);
+            } finally {
+                leave(back, p);
+            }
+            check(state.bottomOpen(), "quiet " + t + ": the bottom gate did not open at flood", failures);
+            TideField.settleNow(back, hub, 0);
+            TideClock.force(TideClock.Phase.LOW);
+        }
+        TideRooms.releaseAll(back);
+        TideBackTrials.resetGroup(back, TEST, false, null, true);
+    }
+
     // ---------------------------------------------------------------- 三つの石で潮の底が開く (そのグループにだけ)
     private static void checkBottom(ServerLevel back, List<String> failures) {
         TideBackState.Group state = TideBackState.of(back, TEST);
@@ -1064,30 +1184,31 @@ public final class TideBackSelfTest {
         check(!jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST).containsKey(STONE_WEST), "reset left the west stone lit", failures);
         check(back.getBlockState(TideGarden.pearlBlock()).is(Blocks.PEARLESCENT_FROGLIGHT), "reset did not return the pearl", failures);
         check(TideRooms.owner(TideRooms.GARDEN) == null && TideRooms.owner(TideRooms.FLATS) == null, "reset kept the group's rooms", failures);
-        // 2 周目から: 一つ眠る。同じ試練が二回続けて眠らない
+        // 2 周目から: 一つ静かな試練になる。同じ試練が二回続けて静かにならない
         state.markEverDefeated();
         TideBackState.Trial last = null;
         int[] counts = new int[3];
         for (int i = 0; i < 24; i++) {
             state.reset(back.random, null, false);
-            TideBackState.Trial s = state.sleeping();
+            TideBackState.Trial s = state.quiet();
             if (s == null) {
-                failures.add("no trial sleeps after the heart fell");
+                failures.add("no trial is quiet after the heart fell");
                 break;
             }
             counts[s.ordinal()]++;
-            check(s != last, "the same trial slept twice in a row (" + s + ")", failures);
-            check(state.rung(s) && state.rungCount() == 1, "sleeping trial's stone is not ringing", failures);
+            check(s != last, "the same trial was quiet twice in a row (" + s + ")", failures);
+            check(!state.rung(s) && state.rungCount() == 0, "a quiet trial's stone rings for free (it must be rung like the others)", failures);
+            check(s != TideBackState.Trial.EAST || state.eastConfig() == 0, "a quiet east does not use the gentlest plug layout", failures);
             last = s;
         }
-        notes.add("sleeping west/east/front " + counts[0] + "/" + counts[1] + "/" + counts[2]);
-        check(counts[0] > 0 && counts[1] > 0 && counts[2] > 0, "some trial never sleeps", failures);
+        notes.add("quiet west/east/front " + counts[0] + "/" + counts[1] + "/" + counts[2]);
+        check(counts[0] > 0 && counts[1] > 0 && counts[2] > 0, "some trial is never quiet", failures);
         check(state.everDefeated(), "a reset forgot that the group once defeated the heart", failures);
-        // 眠った試練は石が鳴っていて (そのグループに光って見える)、残り二つで潮の底が開く
+        // 静かな試練も石は鳴っていない (そのグループに光って見えない)。三つとも自分で鳴らす
         TideBackTrials.resetGroup(back, TEST, false, TideBackState.Trial.EAST, false);
         Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
-        check(state.sleeping() == TideBackState.Trial.EAST && state.rung(TideBackState.Trial.EAST)
-                && overlay.containsKey(STONE_EAST) && overlay.get(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE), "forced sleeping trial is not lit", failures);
+        check(state.quiet() == TideBackState.Trial.EAST && !state.rung(TideBackState.Trial.EAST)
+                && !(overlay.containsKey(STONE_EAST) && overlay.get(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE)), "a forced quiet trial is lit before it is rung", failures);
         // 休み場の記録は、そのグループのリセットの番号で無効になる
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.putString("skyabyss_tide_checkpoint", "f0");
@@ -1128,7 +1249,7 @@ public final class TideBackSelfTest {
             check(!gs.getCollisionShape(back, g, net.minecraft.world.phys.shapes.CollisionContext.of(b)).isEmpty(), "the gate opened for A lets B through", failures);
             check(jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_A, g, false) && !jp.revati.skyabyss.titan.group.GroupGates.effective(back, GROUP_B, g, false),
                     "gate overrides are not per group", failures);
-            // 干潟の門: 潮の既定は全員に効き、戦っているグループにだけ閉じる
+            // 干潟の門: 開ける既定は全員に効き、戦っているグループにだけ閉じる
             jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), true);
             jp.revati.skyabyss.titan.group.GroupGates.seal(back, GROUP_A, TideGates.flats());
             check(!jp.revati.skyabyss.titan.group.GroupGates.isOpen(back, GROUP_A, TideGates.flats())

@@ -28,11 +28,11 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 // 潮殻の背の本番のテスト用コマンド (OP)。08 の 12章の案に合わせた:
 // /skyabyss titan reset tide                       : 打った人のグループの試練だけ戻す (心臓も眠り直す。コンソールからは記録のあるすべてのグループ)
 // /skyabyss titan tide <low|high|cycle>            : 潮を干潮・満潮に止める / 時計に戻す (潮殻の背だけの潮)
-// /skyabyss titan sleep tide <west|east|front|none> : 打った人のグループの眠る試練を決めて、そのグループの試練を戻す
+// /skyabyss titan sleep tide <west|east|front|none> : 打った人のグループの静かな試練を決めて、そのグループの試練を戻す
 // 確かめるための操作 (/skyabyss tideback ...):
 //   go <場所>           : 浜・広間・庭・大貝・祭壇・潮見・岩棚・干潟の前室・干潟・殻の底の前室・息の間の縁 (breath)・舞台の下 (vent)・舞台 (summit)・展望の間 (deck) へ移る
 //   ring <west|east|front> : 打った人のグループの石を鳴らす (試練を飛ばす)
-//   status              : 潮と、打った人のグループの石・眠る試練・種・巣・潮招き、部屋の持ち主
+//   status              : 潮と、打った人のグループの石・静かな試練・種・巣・潮招き、部屋の持ち主
 //   watch <下> <中> <上> : 潮見の間の水位を直接決める
 //   nests               : 群れの巣をすべて壊す (潮招きの集合が始まる)
 //   route <x> <y> <z>   : 自分の足もとから、そこまで歩いて (跳んで 1 段・落ちて 3 段) 行く道の曲がり角を出す。
@@ -127,7 +127,7 @@ public final class TideBackCommands {
         if (player != null) {
             java.util.UUID group = jp.revati.skyabyss.titan.group.Groups.keyOf(player);
             TideBackTrials.resetGroup(back, group, true, force, noSleep);
-            TideBackState.Trial s = TideBackState.of(back, group).sleeping();
+            TideBackState.Trial s = TideBackState.of(back, group).quiet();
             String shown = arg != null ? arg : s == null ? "none" : s.id();
             ctx.getSource().sendSuccess(() -> ModText.hint(key, shown), true);
         } else {
@@ -203,7 +203,7 @@ public final class TideBackCommands {
         }
         int left = nests;
         ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.status", TideClock.phase(back).name().toLowerCase(java.util.Locale.ROOT),
-                TideClock.ticksLeft(back), s.rungCount(), s.sleeping() == null ? "none" : s.sleeping().id(), s.gardenRoute(), s.eastConfig(), left,
+                TideClock.ticksLeft(back), s.rungCount(), s.quiet() == null ? "none" : s.quiet().id(), s.gardenRoute(), s.eastConfig(), left,
                 s.beckonerDefeated() ? "defeated" : TideFlats.fightActive() ? "fighting" : "waiting", s.bottomOpen() ? "open" : "closed"), false);
         int[] lv = TideWatch.levels();
         ctx.getSource().sendSuccess(() -> ModText.hint("commands.skyabyss.tideback.watch", lv[0], lv[1], lv[2], TideWatch.config()), false);

@@ -128,10 +128,6 @@ public final class TitanEnd {
         for (UUID id : targetIds(server, back, fought)) {
             HOLDING.put(id, until);
         }
-        // 心臓を止めた人のそばに、すぐ帰れる帰り石 (運び出しを待たずに戻れる)
-        for (ServerPlayer p : targets(server, back, fought)) {
-            ReturnBeacons.offer(p);
-        }
         Tasks.later(SILENCE_AT, () -> narrateBack(back, "message.skyabyss.titan_end.silence"));
         Tasks.later(TREMBLE_AT, () -> tremble(back, titan));
         Tasks.later(FADE_AT, () -> fadeOut(server, back, titan, fought));

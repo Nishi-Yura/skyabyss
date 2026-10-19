@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.titan.BossAttackCue;
 import jp.revati.skyabyss.client.titan.PhasedBossBar;
 import jp.revati.skyabyss.titan.storm.heart.StormHeart;
 import jp.revati.skyabyss.titan.storm.heart.StormHeartSetup;
@@ -30,10 +31,6 @@ public final class StormHeartClient {
             new int[] {0xF0A878, 0xC8E8FF, 0xFFF4C0},
             "gui.skyabyss.boss.thunder_wing_heart.phase.", "gui.skyabyss.boss.thunder_wing_heart.roaring", 0xFFD27A);
 
-    // 今の予告 (技の名前、始まった時刻、長さ)
-    private static String warnMove = "";
-    private static long warnStart;
-    private static int warnTicks;
     // 閃光: 暗くなる始まりと長さ、瞬きの始まりと強さ
     private static long darkStart = -1000;
     private static int darkTicks;
@@ -54,9 +51,12 @@ public final class StormHeartClient {
     }
 
     public static void warn(String move, int ticks) {
-        warnMove = move;
-        warnStart = now();
-        warnTicks = ticks;
+        if (move.isEmpty()) {
+            BossAttackCue.clear();
+            return;
+        }
+        BossAttackCue.show(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/storm_heart/warn_" + move + ".png"),
+                Component.translatable("gui.skyabyss.storm_heart.warn." + move), ticks);
     }
 
     public static void flash(int ticks, boolean hit) {
@@ -86,7 +86,7 @@ public final class StormHeartClient {
         GuiGraphics g = event.getGuiGraphics();
         float t = now() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
         drawFlash(g, mc, t);
-        drawWarn(g, mc, t);
+        BossAttackCue.render(g, mc, t);
     }
 
     // 閃光の暗転 (画面の効果の強さの設定が低い人にも出す。弱めるだけ) と、閃光の瞬き
@@ -109,42 +109,6 @@ public final class StormHeartClient {
         if (f >= 0 && f < len) {
             float a = (1f - f / len) * (flashHit ? 0.92f : 0.25f) * (flashHit ? 1f : scale);
             g.fill(0, 0, w, h, ((int) (a * 255) << 24) | 0xFFFCEC);
-        }
-    }
-
-    // 技の予告の印: 画面の中央の上 (ボスバーの下) に、印と技の名前と残りの帯。パーティクルの設定に左右されない
-    private static void drawWarn(GuiGraphics g, Minecraft mc, float t) {
-        if (warnMove.isEmpty()) {
-            return;
-        }
-        float k = (t - warnStart) / Math.max(1, warnTicks);
-        if (k > 1.25f || k < 0) {
-            if (k > 1.25f) {
-                warnMove = "";
-            }
-            return;
-        }
-        int w = g.guiWidth();
-        int cx = w / 2;
-        int y = 62;
-        float alpha = k <= 1f ? 1f : 1f - (k - 1f) / 0.25f;
-        // 終わりが近いほど速く脈打つ
-        float pulse = 0.75f + 0.25f * (float) Math.sin(t * (0.6f + k * 1.4f));
-        int a = (int) (alpha * 255);
-        g.pose().pushPose();
-        g.setColor(1f, 1f, 1f, alpha * pulse);
-        g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/storm_heart/warn_" + warnMove + ".png"),
-                cx - 12, y, 24, 24, 0, 0, 32, 32, 32, 32);
-        g.setColor(1f, 1f, 1f, 1f);
-        g.pose().popPose();
-        Component label = Component.translatable("gui.skyabyss.storm_heart.warn." + warnMove);
-        int lw = mc.font.width(label);
-        g.drawString(mc.font, label, cx - lw / 2, y + 27, (a << 24) | 0xFFF4D0, true);
-        if (k <= 1f) {
-            int bw = 48;
-            int left = Math.round(bw * (1f - k));
-            g.fill(cx - bw / 2, y + 38, cx + bw / 2, y + 40, (a / 2 << 24) | 0x202838);
-            g.fill(cx - bw / 2, y + 38, cx - bw / 2 + left, y + 40, (a << 24) | 0xFFE278);
         }
     }
 

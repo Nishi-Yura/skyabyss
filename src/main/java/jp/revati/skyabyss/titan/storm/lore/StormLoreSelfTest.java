@@ -172,7 +172,7 @@ public final class StormLoreSelfTest {
                 check(lang.has(k) && !lang.get(k).getAsString().isBlank(), code + ": missing whisper " + k, f);
             }
         }
-        check(StormWhispers.WHISPERS.size() == 8, "expected 8 whispers, found " + StormWhispers.WHISPERS.size(), f);
+        check(StormWhispers.WHISPERS.size() == 7, "expected 7 whispers, found " + StormWhispers.WHISPERS.size(), f);
         FakePlayer p = player(level, "w");
         forgetWhispers(p);
         for (StormWhispers.Whisper w : StormWhispers.WHISPERS) {
@@ -193,7 +193,6 @@ public final class StormLoreSelfTest {
             case "storm_landing" -> StormWhispers.LANDING;
             case "storm_tail" -> StormWhispers.TAIL;
             case "storm_hub" -> StormWhispers.HUB;
-            case "storm_top" -> StormWhispers.TOP;
             case "storm_west" -> StormWhispers.WEST;
             case "storm_east" -> StormWhispers.EAST;
             case "storm_front" -> StormWhispers.FRONT;

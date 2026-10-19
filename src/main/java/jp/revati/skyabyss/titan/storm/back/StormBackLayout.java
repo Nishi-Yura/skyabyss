@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 // ほかの担当へ (11.1 の約束): 雷獣の巣・竜骨の間・休み場はここから読む。数字を写さないこと (建て直しで動くことがある)。
 public final class StormBackLayout {
     // 版が上がったら建て直す
-    public static final int LAYOUT_VERSION = 5;   // 5: 詰み監査の修正 (竜骨の螺旋の最後の段・背の小さな縦穴)。 4: 避雷の柱と戻しの鏡を専用のブロックに (storm_rod_*・return_mirror)。3: 外の鳥の色を低ポリ案 A (嵐の大鷲) に合わせた。2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
+    public static final int LAYOUT_VERSION = 6;   // 6: 尾の間の西の壁の螺旋 (背の上へ出る段) をふさいだ (どこへも通じていなかった)。 5: 詰み監査の修正 (竜骨の螺旋の最後の段・背の小さな縦穴)。 4: 避雷の柱と戻しの鏡を専用のブロックに (storm_rod_*・return_mirror)。3: 外の鳥の色を低ポリ案 A (嵐の大鷲) に合わせた。2: 風鳴り石・受け羽のブロックの名前を wind_stone・catch_feather に
 
     // 箱の部屋 (内側の範囲。床のブロックは floor、空くのは floor+1〜floor+height)
     public record Area(int x1, int x2, int z1, int z2, int floor, int height) {
@@ -166,9 +166,6 @@ public final class StormBackLayout {
     // 竜骨の間の入口 (入ると閉じる)。前室の北の口
     public static final AABB HEART_DOOR = new AABB(-1, 122, -30, 2, 125, -29);
 
-    // ---------------------------------------------------------------- 背の上 (尾の間の西の壁の段から)
-    public static final BlockPos TOP_STAIR = new BlockPos(-14, 147, 26);
-
     // ---------------------------------------------------------------- 抜け道 (石が鳴ると光る床。踏むと広間の近くへ)
     public static final BlockPos RETURN_WEST = new BlockPos(-124, 143, -10);
     public static final BlockPos RETURN_EAST = new BlockPos(124, 143, -10);
@@ -261,15 +258,12 @@ public final class StormBackLayout {
         return p.z < SEAL_Z && p.y < 158 && p.y > 110 && Math.abs(p.x) < 145 && p.z > -100;
     }
 
-    // 外へ開いていてよい所: 尾羽の上の到着の台と下り風の輪・羽根の門・背の上へ出る段・天窓
+    // 外へ開いていてよい所: 尾羽の上の到着の台と下り風の輪・羽根の門・天窓
     public static boolean openToSky(int x, int y, int z) {
         if (Math.abs(x - ARRIVAL.getX()) <= 4 && z >= ARRIVAL.getZ() - 4 && z <= DOWNDRAFT.getZ() + 4) {
             return true;
         }
         if (x >= FEATHER_GATE.minX - 2 && x <= FEATHER_GATE.maxX + 2 && z >= FEATHER_GATE.minZ - 4 && z <= FEATHER_GATE.maxZ + 4) {
-            return true;
-        }
-        if (Math.abs(x - TOP_STAIR.getX()) <= 3 && Math.abs(z - TOP_STAIR.getZ()) <= 3) {
             return true;
         }
         return y > HUB.floor() + HUB.height() && x * x + (z + 4) * (z + 4) <= (SKYLIGHT_R + 1) * (SKYLIGHT_R + 1);

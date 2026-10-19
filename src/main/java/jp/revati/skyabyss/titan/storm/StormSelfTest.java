@@ -126,11 +126,37 @@ public final class StormSelfTest {
         }
         col.setup(java.util.UUID.randomUUID(), TEST_X + 20.5, TEST_Z + 20.5, 200);
         double base = col.position().y;
-        boolean inside = col.inColumn(TEST_X + 20.5 + 2.0, base + 10, TEST_Z + 20.5);
-        boolean outside = col.inColumn(TEST_X + 20.5 + 3.0, base + 10, TEST_Z + 20.5);
+        boolean inside = col.inColumn(TEST_X + 20.5 + 3.5, base + 10, TEST_Z + 20.5);
+        boolean outside = col.inColumn(TEST_X + 20.5 + 4.5, base + 10, TEST_Z + 20.5);
         boolean above = col.inColumn(TEST_X + 20.5, 300, TEST_Z + 20.5);
         if (!inside || outside || above) {
             failures.add("the gale column geometry is wrong (inside " + inside + ", outside " + outside + ", above " + above + ")");
+        }
+        // 見える柱 (半径 2.5・光の枠 4) のなかの点を、縁・複数の高さ・跳びこむ高さまで調べる: どこでも持ち上がる範囲に入っている
+        double cx = TEST_X + 20.5;
+        double cz = TEST_Z + 20.5;
+        double topY = col.topY();
+        int misses = 0;
+        int samples = 0;
+        for (double r : new double[] {0, 1, 2, 2.5, 3, 3.5, 3.9}) {
+            for (int a = 0; a < 12; a++) {
+                for (double h : new double[] {-2, -0.5, 0, 0.6, 1.25, 3, 10, (topY - base) / 2, topY - base - 3, topY - base - 0.5}) {
+                    samples++;
+                    if (!col.inColumn(cx + Math.cos(a * Math.PI / 6) * r, base + h, cz + Math.sin(a * Math.PI / 6) * r)) {
+                        misses++;
+                    }
+                }
+            }
+        }
+        if (misses > 0) {
+            failures.add("the gale column misses " + misses + " of " + samples + " positions inside the visible column");
+        }
+        // 乗り心地: 強さは頂へ向けて段階的に弱まり (毎秒 8 → 3 ブロック)、最後まで上向き
+        int far = GaleColumnEntity.levitationFor(20);
+        int mid = GaleColumnEntity.levitationFor(5);
+        int near = GaleColumnEntity.levitationFor(1);
+        if (!(far > mid && mid > near && near >= 1) || (far + 1) * 0.05 * 20 < 7.9) {
+            failures.add("the gale ride is not a smooth taper (" + far + ", " + mid + ", " + near + ")");
         }
         col.discard();
     }
