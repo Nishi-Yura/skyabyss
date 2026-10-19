@@ -31,7 +31,7 @@ public final class DialogueService {
     public static final int CONTINUE = -1;
     public static final int LEAVE = -2;
 
-    record Session(int npcId, String role, String node, List<Integer> shown) {
+    record Session(int npcId, String role, String node, List<Integer> shown, List<String> kinds) {
     }
 
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
@@ -149,16 +149,52 @@ public final class DialogueService {
             Quests.onTalk(player, dialogue.role(), node.id());
         }
         List<Integer> shown = new ArrayList<>();
+        List<String> kinds = new ArrayList<>();
         List<NpcNetwork.OptionView> views = new ArrayList<>();
+        visibleOptions(dialogue, node, ctx, shown, kinds);
+        for (int k = 0; k < shown.size(); k++) {
+            Dialogue.Option op = node.options().get(shown.get(k));
+            views.add(new NpcNetwork.OptionView(shown.get(k), op.textKey(), kinds.get(k)));
+        }
+        SESSIONS.put(player.getUUID(), new Session(npc.getId(), dialogue.role(), node.id(), List.copyOf(shown), List.copyOf(kinds)));
+        send(player, new NpcNetwork.Show(npc.getId(), dialogue.role(), node.id(), node.face(), node.textKey(), views, node.next() != null));
+    }
+
+
+    // 見せる選択肢とその印を決める。「ほかに頼みは」のように、先の節がまた選択肢の束 (ハブ) である選択肢は、
+    // 先で実際に選べるものから決める: 先に (立ち去る以外の) 選択肢が一つもなければ隠し、
+    // 新しい頼み・渡す品 (kind が quest/give で、その場で終わらない選択肢) がなければ、印は普通の話題にする
+    static void visibleOptions(Dialogue dialogue, Dialogue.Node node, StoryContext ctx, List<Integer> shown, List<String> kinds) {
         for (int i = 0; i < node.options().size(); i++) {
             Dialogue.Option op = node.options().get(i);
-            if (op.condition().test(ctx)) {
-                shown.add(i);
-                views.add(new NpcNetwork.OptionView(i, op.textKey(), op.kind()));
+            if (!op.condition().test(ctx)) {
+                continue;
             }
+            String kind = op.kind();
+            Dialogue.Node target = dialogue.nodes().get(op.target());
+            if (target != null && !target.options().isEmpty() && !op.kind().equals("leave")) {
+                int available = 0;
+                int fresh = 0;
+                for (Dialogue.Option t : target.options()) {
+                    if (!t.condition().test(ctx) || t.kind().equals("leave")) {
+                        continue;
+                    }
+                    available++;
+                    if ((t.kind().equals("quest") || t.kind().equals("give")) && !t.target().equals(Dialogue.END)
+                            && !t.target().equals(Dialogue.ENTRY)) {
+                        fresh++;
+                    }
+                }
+                if (available == 0) {
+                    continue;
+                }
+                if (fresh == 0 && (kind.equals("quest") || kind.equals("give"))) {
+                    kind = "talk";
+                }
+            }
+            shown.add(i);
+            kinds.add(kind);
         }
-        SESSIONS.put(player.getUUID(), new Session(npc.getId(), dialogue.role(), node.id(), List.copyOf(shown)));
-        send(player, new NpcNetwork.Show(npc.getId(), dialogue.role(), node.id(), node.face(), node.textKey(), views, node.next() != null));
     }
 
     public static void close(ServerPlayer player) {
@@ -194,6 +230,13 @@ public final class DialogueService {
     public static List<Integer> shownOptions(ServerPlayer player) {
         Session s = SESSIONS.get(player.getUUID());
         return s == null ? null : s.shown();
+    }
+
+    // 自己テスト用: 今見せている選択肢の印 (shownOptions と同じ並び)
+    @Nullable
+    public static List<String> shownKinds(ServerPlayer player) {
+        Session s = SESSIONS.get(player.getUUID());
+        return s == null ? null : s.kinds();
     }
 
     @Nullable
@@ -245,12 +288,9 @@ public final class DialogueService {
         }
         StoryContext ctx = new StoryContext(player, s.role(), npc);
         List<Integer> now = new ArrayList<>();
-        for (int i = 0; i < node.options().size(); i++) {
-            if (node.options().get(i).condition().test(ctx)) {
-                now.add(i);
-            }
-        }
-        if (now.equals(s.shown())) {
+        List<String> nowKinds = new ArrayList<>();
+        visibleOptions(dialogue, node, ctx, now, nowKinds);
+        if (now.equals(s.shown()) && nowKinds.equals(s.kinds())) {
             return false;
         }
         enter(player, npc, dialogue, node, false);
