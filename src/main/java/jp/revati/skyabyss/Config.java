@@ -88,6 +88,17 @@ public final class Config {
             .comment("知らせの出し先。TOAST = 画面の演出 (字幕・札・帯) だけ, CHAT = チャットだけ (今までどおり), BOTH = 両方。流れた知らせは N の「知らせの記録」で読み返せる")
             .defineEnum("notifyMode", NotifyMode.TOAST);
 
+    // ボスの技の名前の出し方 (client/titan/BossAttackCue, docs/design/18_notices.md の 6.1)
+    public enum BossAttackNames {
+        FULL,
+        SMALL,
+        OFF
+    }
+
+    public static final ModConfigSpec.EnumValue<BossAttackNames> BOSS_ATTACK_NAMES = CLIENT_BUILDER
+            .comment("ボス戦で技の名前をどう出すか。SMALL = ボスバーの下に小さな一行 (既定), FULL = 画面の上のほうに大きく (印つき), OFF = 出さない (床の予告だけ)")
+            .defineEnum("bossAttackNames", BossAttackNames.SMALL);
+
     public static final ModConfigSpec.BooleanValue OBJECTIVE_STRIP = CLIENT_BUILDER
             .comment("メインの目的を左上の細い帯に常に出すか (false = 出さない。全文は U のクエストログ)")
             .define("objectiveStrip", true);
