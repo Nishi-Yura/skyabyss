@@ -35,12 +35,24 @@ public final class AntiStrafe {
     private double cx;
     private double cz;
     private long clock;
+    // 試験用: 切ると誰も「回っている」と見なさない (修正前の動きとの比べ用)
+    private boolean enabled = true;
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (!enabled) {
+            tracks.clear();
+        }
+    }
 
     // 中心と人の位置から、毎 tick 一度だけ更新する (一度に複数回呼んでも、同じ位置なら速さは 0 とみなして減るだけ)
     public void update(double cx, double cz, Collection<? extends Player> players) {
         this.cx = cx;
         this.cz = cz;
         clock++;
+        if (!enabled) {
+            return;
+        }
         for (Player p : players) {
             Track t = tracks.computeIfAbsent(p.getUUID(), k -> new Track());
             t.seen = clock;

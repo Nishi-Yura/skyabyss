@@ -147,6 +147,13 @@ public class TideHeart extends HeartBoss {
     // 大潮の安全な筋
     @Nullable
     private double[] springGaps;
+    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「満ち潮」(titan/domain/RisingTideDomain)
+    private final jp.revati.skyabyss.combat.HeartPursuit pursuit;
+    @Nullable
+    private jp.revati.skyabyss.titan.domain.RisingTideDomain domain;
+    public static final float DOMAIN_AT = 0.5f;
+    // 回っている人への狙いの先読み (予告の長さに近い tick)
+    private static final int AIM_TICKS = 24;
 
     public TideHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "tide_heart", "roar_1", "roar_2", "breath", "shell_strike", "whirl", "flood", "bubble", "pearl",
@@ -154,6 +161,33 @@ public class TideHeart extends HeartBoss {
         this.xpReward = 300;
         this.setNoGravity(true);
         this.setPersistenceRequired();
+        this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("tide", 19f, ParticleTypes.SPLASH, SoundEvents.GENERIC_SPLASH, 1.6f),
+                this::canReach, this::strike,
+                () -> level() instanceof ServerLevel s ? reachable(s, 40) : List.<ServerPlayer>of(),
+                this::position, this::floorY, () -> isBound() ? TideHeartArena.RADIUS - 0.5 : 12);
+    }
+
+    public jp.revati.skyabyss.combat.HeartPursuit pursuit() {
+        return pursuit;
+    }
+
+    @Nullable
+    public jp.revati.skyabyss.titan.domain.RisingTideDomain domain() {
+        return domain;
+    }
+
+    // 領域「満ち潮」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
+    public void startDomain(ServerLevel server) {
+        if (domain != null) {
+            return;
+        }
+        double cx = isBound() ? TideHeartArena.CX + 0.5 : getX();
+        double cz = isBound() ? TideHeartArena.CZ + 0.5 : getZ();
+        double radius = isBound() ? TideHeartArena.RADIUS - 0.5 : 12;
+        domain = new jp.revati.skyabyss.titan.domain.RisingTideDomain(this, cx, cz, floorY(), radius, this::canReach, this::strike,
+                () -> reachable(server, 40));
+        domain.begin(server);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -265,6 +299,19 @@ public class TideHeart extends HeartBoss {
         if (cooldown > 0) {
             cooldown--;
         }
+        boolean domainRunning = domain != null && domain.running();
+        pursuit.tick(server, action != Action.ROAR && !domainRunning);
+        if (domainRunning) {
+            LivingEntity watched = getTarget();
+            if (watched != null && canReach(watched)) {
+                faceTarget(watched);
+            }
+            domain.tick(server);
+            if (!domain.running()) {
+                cooldown = 40;
+            }
+            return;
+        }
 
         if (action == Action.NONE) {
             if (getPhase() < phaseForHealth()) {
@@ -274,6 +321,10 @@ public class TideHeart extends HeartBoss {
             if (!enraged && getPhase() == PHASE_COUNT - 1 && getHealth() / getMaxHealth() < jp.revati.skyabyss.combat.HeartBalance.ENRAGE_AT) {
                 enrageRoar = true;
                 begin(Action.ROAR, "roar_2");
+                return;
+            }
+            if (domain == null && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !reachable(server, 40).isEmpty()) {
+                startDomain(server);
                 return;
             }
             LivingEntity target = getTarget();
@@ -372,6 +423,27 @@ public class TideHeart extends HeartBoss {
             secondDone = false;
         }
         playAction(animation != null ? animation : next == Action.COMBO && pair != null ? pair.first().anim : next.anim);
+        cue(next == Action.COMBO && pair != null ? pair.first() : next);
+    }
+
+    // 技の名前 (ボスバーの下の小さな一行。BossCue)。咆哮・組は出さない (組は一つ目・二つ目それぞれ)
+    private void cue(Action a) {
+        int warn = switch (a) {
+            case BREATH -> BREATH_WARN;
+            case SHELL_STRIKE -> SHELL_WARN;
+            case WHIRL -> WHIRL_WARN;
+            case FLOOD -> 30;
+            case BUBBLE -> BUBBLE_WARN;
+            case PEARL -> PEARL_WARN;
+            case EBB -> EBB_WARN;
+            case MOON_WAVE -> MOON_WARN;
+            case PEARL_RAIN -> RAIN_WARN;
+            case SPRING_TIDE -> SPRING_WARN;
+            default -> 0;
+        };
+        if (warn > 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "tide", a.name().toLowerCase(java.util.Locale.ROOT), Math.min(warn, 60));
+        }
     }
 
     // 次の技までの間 (tick) の基準と幅 (段階 1 / 2 / 3)、最終段階。段階が進むほど短い (予告の長さはそのまま)
@@ -399,6 +471,9 @@ public class TideHeart extends HeartBoss {
         }
         if (!firstDone) {
             firstDone = runPart(server, pair.first(), actionTicks);
+        }
+        if (actionTicks == pair.offset() + 1) {
+            cue(pair.second());
         }
         if (!secondDone && actionTicks > pair.offset()) {
             secondDone = runPart(server, pair.second(), actionTicks - pair.offset());
@@ -625,7 +700,8 @@ public class TideHeart extends HeartBoss {
         List<Vec3> spots = new ArrayList<>();
         for (ServerPlayer p : all) {
             if (spots.size() < want) {
-                spots.add(p.position());
+                // 回り続けている人には、予告が満ちる頃にいる所を狙う (combat/AntiStrafe)
+                spots.add(pursuit.strafe().aim(p, AIM_TICKS));
             }
         }
         while (fill && spots.size() < want) {
@@ -987,7 +1063,7 @@ public class TideHeart extends HeartBoss {
         List<Vec3> spots = new ArrayList<>();
         for (ServerPlayer p : onFloor) {
             if (spots.size() < Math.min(Math.max(n, 1), 5)) {
-                spots.add(p.position());
+                spots.add(pursuit.strafe().aim(p, SPEAR_WARN));
             }
         }
         while (spots.size() < want) {
@@ -1322,7 +1398,19 @@ public class TideHeart extends HeartBoss {
             }
             return false;
         }
-        return super.hurt(source, takenFor(getPhase(), amount, toughness));
+        if (domain != null && domain.invulnerable()) {
+            if (level() instanceof ServerLevel server) {
+                server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.8f);
+                server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), coreY(), getZ(), 8, 0.8, 0.8, 0.8, 0.1);
+            }
+            return false;
+        }
+        float before = getHealth();
+        boolean result = super.hurt(source, takenFor(getPhase(), amount, toughness) * (domain != null ? domain.takenMultiplier() : 1f));
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.damaged(server, before - getHealth());
+        }
+        return result;
     }
 
     // 受ける傷 (段階と人数で)。自己テストからも使う
@@ -1354,6 +1442,9 @@ public class TideHeart extends HeartBoss {
     @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         super.remove(reason);
     }
 
@@ -1366,6 +1457,9 @@ public class TideHeart extends HeartBoss {
         defeated = true;
         super.die(source);
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), TideHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
             server.sendParticles(ParticleTypes.SPLASH, getX(), coreY(), getZ(), 160, 1.5, 1.6, 1.5, 0.3);

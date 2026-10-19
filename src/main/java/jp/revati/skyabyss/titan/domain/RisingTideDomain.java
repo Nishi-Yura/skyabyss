@@ -18,23 +18,23 @@ import net.minecraft.world.entity.Mob;
 
 // 潮殻の心臓の領域「満ち潮」(docs/design/08 の 5.5)。床が潮に洗われる。外から内へ満ちる四つの輪 (満ち) と、内から外へ引く四つの輪 (引き) が、
 // 一巡 (RING_STEP × 8 + 余り) ごとにくり返す。
-//  輪 k (0 外〜3 内): 幅 3.5 の輪 [R − 3.5(k+1), R − 3.5k]。予告 1.5 秒、そのあと 1.8 秒のあいだ 12 tick ごとに傷 (高さは床から 1.9 まで = 島の上は濡れない)
+//  輪 k (0 外〜3 内): 幅 3.5 の輪 [R − 3.5(k+1), R − 3.5k]。予告 1.5 秒、そのあと 1.5 秒のあいだ 12 tick ごとに傷 (高さは床から 1.9 まで = 島の上は濡れない)
 //  満ち: 輪 0 → 1 → 2 → 3 の順に RING_STEP (24 tick) 間隔、引き: 輪 3 → 2 → 1 → 0。満ちの終わりと引きの始まりの間は 0.5 秒あけ、
 //  どの瞬間も「いま予告が出ているか・まだ予告の出ていない」安全な輪と、島 (四つの岩の島) がある。同時に出ている輪は三つまで
 //  中心の円 (輪 3) は満ちの最後・引きの最初に当たるので、心臓を殴れる窓は一巡のうち、満ちの始め (約 5 秒) と引きの終わり
-// 本物の水も床に満ちる (TideHeartArena の満ち潮。見た目)。技の名前: tide.flood_rise / tide.flood_ebb。傷 9 × 最大 4 回
+// 本物の水も床に満ちる (TideHeartArena の満ち潮。見た目)。技の名前: tide.flood_rise / tide.flood_ebb。傷 8 × 最大 3 回
 public final class RisingTideDomain extends HeartDomain {
     public static final String ID = "rising_tide";
     public static final int RING_STEP = 24;
     public static final int RING_WARN = 30;
-    public static final int RING_ACTIVE = 36;
+    public static final int RING_ACTIVE = 30;
     public static final int RING_REPEAT = 12;
     public static final double RING_WIDTH = 3.5;
     public static final int RINGS = 4;
     public static final int FIRST = 24;
     public static final int EBB_START = RING_STEP * 3 + 48;
     public static final int CYCLE = EBB_START + RING_STEP * 3 + 40;
-    public static final float RING_DAMAGE = 9f;
+    public static final float RING_DAMAGE = 8f;
     public static final double FLOOR_REACH = 1.9;
 
     public RisingTideDomain(Mob heart, double cx, double cz, double floorY, double radius, Predicate<ServerPlayer> victims,

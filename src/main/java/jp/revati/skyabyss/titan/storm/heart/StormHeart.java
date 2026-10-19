@@ -275,6 +275,13 @@ public class StormHeart extends HeartBoss {
     @Nullable
     private Pair pair;
     private boolean suppressFinish;
+    // 回り続けへの追い技 (combat/HeartPursuit) と、体力が半分を切ったときの領域「雷の檻」(titan/domain/ThunderCageDomain)
+    private final jp.revati.skyabyss.combat.HeartPursuit pursuit;
+    @Nullable
+    private jp.revati.skyabyss.titan.domain.ThunderCageDomain domain;
+    public static final float DOMAIN_AT = 0.5f;
+    // 回っている人への狙いの先読み (予告の長さに近い tick)
+    private static final int AIM_TICKS = 24;
 
     public StormHeart(EntityType<? extends Monster> type, Level level) {
         super(type, level, "storm_heart", "roar_1", "roar_2", "summon", "blade", "chain", "split", "wingbeat", "charge", "feather",
@@ -283,6 +290,30 @@ public class StormHeart extends HeartBoss {
         this.setNoGravity(true);
         this.setPersistenceRequired();
         this.noPhysics = true;
+        this.pursuit = new jp.revati.skyabyss.combat.HeartPursuit(this,
+                new jp.revati.skyabyss.combat.HeartPursuit.Theme("storm", FEATHER_DAMAGE, ParticleTypes.ELECTRIC_SPARK, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.9f, 16),
+                this::canReach, this::strike,
+                () -> level() instanceof ServerLevel s ? reachable(s, 40) : List.<ServerPlayer>of(),
+                () -> new Vec3(centerX(), getY(), centerZ()), this::floorY, this::roomRadius);
+    }
+
+    public jp.revati.skyabyss.combat.HeartPursuit pursuit() {
+        return pursuit;
+    }
+
+    @Nullable
+    public jp.revati.skyabyss.titan.domain.ThunderCageDomain domain() {
+        return domain;
+    }
+
+    // 領域「雷の檻」を始める (体力が半分を切ったとき一度だけ。試験・開発用にも)
+    public void startDomain(ServerLevel server) {
+        if (domain != null) {
+            return;
+        }
+        domain = new jp.revati.skyabyss.titan.domain.ThunderCageDomain(this, centerX(), centerZ(), floorY(), roomRadius(), this::canReach, this::strike,
+                () -> reachable(server, 40));
+        domain.begin(server);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -430,7 +461,7 @@ public class StormHeart extends HeartBoss {
 
     // 段階 2 の拍で、いま下りている (床の近くにいる) ときか
     public boolean isPerched() {
-        return getPhase() == 1 && !isRoaring() && perchedAt(riseClock);
+        return getPhase() == 1 && !isRoaring() && (perchedAt(riseClock) || (domain != null && domain.running()));
     }
 
     // 拍の時計 clock (tick) のとき、下りているか。HIGH_TICKS 高く、PERCH_TICKS 下りる、のくり返し
@@ -493,6 +524,8 @@ public class StormHeart extends HeartBoss {
         if (cooldown > 0) {
             cooldown--;
         }
+        boolean domainRunning = domain != null && domain.running();
+        pursuit.tick(server, action != Action.ROAR && !domainRunning && splitTicks == 0);
         tickUpdrafts(server);
         if (safeFallTicks > 0) {
             safeFallTicks--;
@@ -507,6 +540,17 @@ public class StormHeart extends HeartBoss {
             tickSplit(server);
             return;
         }
+        if (domainRunning) {
+            LivingEntity watched = getTarget();
+            if (watched != null && canReach(watched)) {
+                faceTarget(watched);
+            }
+            domain.tick(server);
+            if (!domain.running()) {
+                cooldown = 40;
+            }
+            return;
+        }
         if (action == Action.NONE) {
             if (getPhase() < phaseForHealth()) {
                 begin(Action.ROAR, "roar_" + (getPhase() + 1));
@@ -516,6 +560,10 @@ public class StormHeart extends HeartBoss {
                 // 憤怒の咆哮 (模型は段階 3 のまま。段階 2 → 3 の咆哮のアニメを使う)
                 enrageRoar = true;
                 begin(Action.ROAR, "roar_2");
+                return;
+            }
+            if (domain == null && getPhase() >= 1 && getHealth() / getMaxHealth() < DOMAIN_AT && !reachable(server, 40).isEmpty()) {
+                startDomain(server);
                 return;
             }
             LivingEntity target = getTarget();
@@ -871,12 +919,16 @@ public class StormHeart extends HeartBoss {
 
     // 人の足もとの点 (pickSpots などが返した点) の人。床の適当な点なら null (帯・線の狙いの印に使う)
     private static ServerPlayer playerAt(ServerLevel server, Vec3 spot) {
+        ServerPlayer best = null;
+        double bestD = 7.0 * 7.0;
         for (ServerPlayer p : Players.snapshot(server.players())) {
-            if (p.position().equals(spot)) {
-                return p;
+            double d = p.position().distanceToSqr(spot);
+            if (d < bestD) {
+                bestD = d;
+                best = p;
             }
         }
-        return null;
+        return best;
     }
 
     private Telegraph.Builder tg(ServerLevel server, TelegraphShape shape, int warn, int style) {
@@ -904,7 +956,8 @@ public class StormHeart extends HeartBoss {
             if (spots.size() >= max) {
                 break;
             }
-            spots.add(p.position());
+            // 回り続けている人には、予告が満ちる頃にいる所を狙う (combat/AntiStrafe)
+            spots.add(pursuit.strafe().aim(p, AIM_TICKS));
         }
         while (spots.size() < Math.min(max, partyOverride)) {
             spots.add(randomSpot(2.5));
@@ -1576,7 +1629,19 @@ public class StormHeart extends HeartBoss {
             }
             return false;
         }
-        return super.hurt(source, takenFor(getPhase(), splitTicks > 0, amount, toughness));
+        if (domain != null && domain.invulnerable()) {
+            if (level() instanceof ServerLevel server) {
+                server.playSound(null, getX(), getY(), getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.HOSTILE, 1.5f, 0.8f);
+                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), core().y, getZ(), 8, 0.8, 0.8, 0.8, 0.1);
+            }
+            return false;
+        }
+        float before = getHealth();
+        boolean result = super.hurt(source, takenFor(getPhase(), splitTicks > 0, amount, toughness) * (domain != null ? domain.takenMultiplier() : 1f));
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.damaged(server, before - getHealth());
+        }
+        return result;
     }
 
     public static float takenFor(int phase, boolean split, float amount, float toughness) {
@@ -1614,6 +1679,9 @@ public class StormHeart extends HeartBoss {
     @Override
     public void remove(RemovalReason reason) {
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         super.remove(reason);
     }
 
@@ -1626,6 +1694,9 @@ public class StormHeart extends HeartBoss {
         defeated = true;
         super.die(source);
         bossBar.removeAllPlayers();
+        if (domain != null && level() instanceof ServerLevel server) {
+            domain.abort(server);
+        }
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), StormHeartSetup.DEATH.get(), SoundSource.HOSTILE, 3f, 1f);
             server.sendParticles(ParticleTypes.END_ROD, getX(), core().y, getZ(), 120, 1.5, 1.6, 1.5, 0.2);

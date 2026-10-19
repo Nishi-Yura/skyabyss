@@ -353,6 +353,9 @@ public class PearlKeeper extends TideMob {
     private void start(ServerLevel server, Action a) {
         action = a;
         actionTick = 0;
+        if (a.ordinal() != 0) {
+            jp.revati.skyabyss.combat.BossCue.send(this, "pearl_keeper", a.name().toLowerCase(java.util.Locale.ROOT), 30);
+        }
         double ground = groundY(position());
         switch (a) {
             case UPDRAFT -> {

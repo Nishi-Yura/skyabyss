@@ -42,7 +42,10 @@ public final class HeartPursuit {
     public static final String[] KEYS = {"lead", "cutoff", "chase"};
 
     // 心臓ごとの数: 名前 (gui.skyabyss.attack.<bossKey>.<lead|cutoff|chase>)、傷 (防具の前)、見た目と音
-    public record Theme(String bossKey, float damage, ParticleOptions fx, SoundEvent hitSound, float soundVolume) {
+    public record Theme(String bossKey, float damage, ParticleOptions fx, SoundEvent hitSound, float soundVolume, double reach) {
+        public Theme(String bossKey, float damage, ParticleOptions fx, SoundEvent hitSound, float soundVolume) {
+            this(bossKey, damage, fx, hitSound, soundVolume, 3.5);
+        }
     }
 
     private record Delayed(int at, Runnable run) {
@@ -88,6 +91,7 @@ public final class HeartPursuit {
     // 試験用: 追い技を止める (回り続けても出さない。心臓の技だけを見るとき)
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
+        strafe.setEnabled(!disabled);
     }
 
     // 毎 tick。enabled が偽 (咆哮・登場・領域のあいだ) は、見張りだけ続けて技は出さない
@@ -145,7 +149,7 @@ public final class HeartPursuit {
     }
 
     private Telegraph.Builder tg(ServerLevel level, TelegraphShape shape, int warn) {
-        return Telegraph.in(level, shape).floor(floorY.getAsDouble()).warn(warn).danger().owner(heart).victims(victims).reach(3.5);
+        return Telegraph.in(level, shape).floor(floorY.getAsDouble()).warn(warn).danger().owner(heart).victims(victims).reach(theme.reach());
     }
 
     private void cue(String key, int warn) {
