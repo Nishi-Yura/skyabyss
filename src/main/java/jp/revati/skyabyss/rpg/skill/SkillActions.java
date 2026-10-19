@@ -343,6 +343,20 @@ public final class SkillActions {
         for (Mob m : mobs) {
             SkillEffects.taunt(m, player, ticks);
         }
+        if (rune == 4) {
+            // 鉤寄せ: 引いた敵を前の 1 か所へ寄せる (大きな相手は動かさない)
+            Vec3 gather = player.position().add(flatLook(player).scale(SkillRules.HOOK_POINT_AHEAD));
+            for (Mob m : mobs) {
+                if (isLarge(m)) {
+                    continue;
+                }
+                Vec3 to = new Vec3(gather.x - m.getX(), 0, gather.z - m.getZ());
+                double len = Math.max(0.3, to.length());
+                m.setDeltaMovement(to.scale(Mth.clamp(len * 0.28, 0.3, 1.3) / len).add(0, 0.15, 0));
+                m.hurtMarked = true;
+            }
+            ring(player.serverLevel(), Skills.RUNE_SPARK.get(), gather, 1.2, 14, 0.5);
+        }
         SkillData d = SkillManager.get(player);
         d.tauntUntil = player.level().getGameTime() + ticks;
         d.tauntRune = rune;
@@ -426,12 +440,26 @@ public final class SkillActions {
                 level.sendParticles(Skills.RUNE_SPARK.get(), p.x, p.y, p.z, 1, 0.15, 0.3, 0.15, 0.0);
             }
         }
-        if (rune == 3) {
-            // 突き通し: 通り道の全員に ×0.6
+        if (rune == 3 || rune == 4) {
+            // 突き通し: 通り道の全員に ×0.6 (伝説の突き通し・骨は ×1.0)
+            double through = rune == 4 ? SkillRules.BONE_PIERCE_MULTIPLIER : SkillRules.PIERCE_THROUGH_MULTIPLIER;
             for (LivingEntity e : foesAroundAny(player, range + 2)) {
                 if (e != target && distanceToSegment(e.position(), from, reached) <= 1.3 + e.getBbWidth() / 2) {
-                    hit(player, e, attackDamage(player) * (float) SkillRules.PIERCE_THROUGH_MULTIPLIER, Skill.LUNGE);
+                    hit(player, e, attackDamage(player) * (float) through, Skill.LUNGE);
                 }
+            }
+        }
+        if (rune == 4) {
+            // 3 回に 1 度、着いた足もとから骨が噴く
+            int n = BONE_COUNT.merge(player.getUUID(), 1, Integer::sum);
+            if (n % SkillRules.BONE_EVERY == 0) {
+                for (LivingEntity e : foesAroundAny(player, SkillRules.BONE_RADIUS + 2)) {
+                    if (Math.hypot(e.getX() - reached.x, e.getZ() - reached.z) <= SkillRules.BONE_RADIUS + e.getBbWidth() / 2) {
+                        hit(player, e, attackDamage(player) * (float) SkillRules.BONE_SCALE, Skill.LUNGE);
+                    }
+                }
+                ring(level, new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()),
+                        reached, SkillRules.BONE_RADIUS * 0.6, 14, 0.2);
             }
         }
         boolean landed = false;
@@ -445,6 +473,8 @@ public final class SkillActions {
         sound(player, Skills.SOUND_LUNGE.get(), 0.9f, 1.0f);
         return null;
     }
+
+    private static final java.util.Map<java.util.UUID, Integer> BONE_COUNT = new java.util.HashMap<>();
 
     private static double distanceToSegment(Vec3 p, Vec3 a, Vec3 b) {
         double ax = b.x - a.x;
@@ -502,7 +532,12 @@ public final class SkillActions {
                 continue;
             }
             if (hit(player, e, damage, Skill.WHALE_SWEEP)) {
-                if (rune == 2) {
+                if (rune == 4) {
+                    // 挟み切り: 動けなくする (大きな相手は半分の時間)
+                    SkillEffects.slow(e, 1.0, isLarge(e) ? SkillRules.SNIP_LARGE_TICKS : SkillRules.SNIP_TICKS);
+                    e.setDeltaMovement(0, Math.min(0, e.getDeltaMovement().y), 0);
+                    e.hurtMarked = true;
+                } else if (rune == 2) {
                     // 挟み: 足もとへ引き寄せる (大きな相手は動かさない)
                     if (!isLarge(e)) {
                         Vec3 to = new Vec3(-dx, 0, -dz);
@@ -539,7 +574,27 @@ public final class SkillActions {
         player.setDeltaMovement(back.x, SkillRules.BACKSTEP_LIFT, back.z);
         player.hurtMarked = true;
         player.fallDistance = 0;
-        if (rune == 1) {
+        if (rune == 4) {
+            // 雷の輪: 着地したら、元の場所とのあいだの敵に ×0.8
+            SkillEffects.later(level, SkillRules.THUNDER_RING_DELAY, () -> {
+                if (!player.isAlive() || player.hasDisconnected() || player.level() != level) {
+                    return;
+                }
+                Vec3 land = player.position();
+                for (LivingEntity e : foesAroundAny(player, origin.distanceTo(land) + 3)) {
+                    if (distanceToSegment(e.position(), origin, land) <= SkillRules.THUNDER_RING_WIDTH + e.getBbWidth() / 2) {
+                        hit(player, e, attackDamage(player) * (float) SkillRules.THUNDER_RING_MULTIPLIER, Skill.BACKSTEP);
+                    }
+                }
+                int steps = (int) Math.ceil(origin.distanceTo(land) / 0.5);
+                for (int i = 0; i <= steps; i++) {
+                    Vec3 p = origin.lerp(land, i / (double) Math.max(1, steps)).add(0, 0.6, 0);
+                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y, p.z, 2, 0.1, 0.2, 0.1, 0.02);
+                }
+                ring(level, ParticleTypes.ELECTRIC_SPARK, origin, 1.0, 12, 0.3);
+                ring(level, ParticleTypes.ELECTRIC_SPARK, land, 1.0, 12, 0.3);
+            });
+        } else if (rune == 1) {
             SkillManager.get(player).returnFireUntil = level.getGameTime() + SkillRules.RETURN_FIRE_TICKS;
         } else if (rune == 3) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin, SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
@@ -588,18 +643,25 @@ public final class SkillActions {
             return "message.skyabyss.skill.no_target";
         }
         boolean back = behind(target, player);
-        double factor = back ? (rune == 1 ? SkillRules.BACK_TAKE_BACK_FACTOR : SkillRules.REND_BACK_FACTOR) : (rune == 1 ? SkillRules.BACK_TAKE_FRONT_FACTOR : 1.0);
+        double factor = back && rune != 4 ? (rune == 1 ? SkillRules.BACK_TAKE_BACK_FACTOR : SkillRules.REND_BACK_FACTOR) : (rune == 1 ? SkillRules.BACK_TAKE_FRONT_FACTOR : 1.0);
         double per = SkillRules.rendFront(rank) * factor + (WeaponType.has(player, WeaponType.FAST) ? SkillRules.REND_FAST_BONUS : 0);
         float amount = attackDamage(player) * (float) per;
         LivingEntity foe = target;
         slash(level, player, foe, back);
         hit(player, foe, amount, Skill.WIND_REND);
-        SkillEffects.later(level, SkillRules.REND_GAP, () -> {
-            if (player.isAlive() && foe.isAlive() && !player.hasDisconnected() && player.level() == foe.level()) {
-                slash(level, player, foe, back);
-                hit(player, foe, amount, Skill.WIND_REND);
-            }
-        });
+        // 二連 (噛みつきは三連)
+        for (int i = 1; i < (rune == 4 ? SkillRules.BITE_HITS : 2); i++) {
+            SkillEffects.later(level, SkillRules.REND_GAP * i, () -> {
+                if (player.isAlive() && foe.isAlive() && !player.hasDisconnected() && player.level() == foe.level()) {
+                    slash(level, player, foe, back);
+                    hit(player, foe, amount, Skill.WIND_REND);
+                }
+            });
+        }
+        if (rune == 4 && back) {
+            // 背後の上乗せは、傷の代わりに 3 秒の出血になる
+            SkillEffects.bleed(player, foe, amount * (float) (SkillRules.REND_BACK_FACTOR - 1.0) * (float) SkillEffects.damagePower(player, Skill.WIND_REND), 3);
+        }
         if (rune == 2) {
             SkillEffects.bleed(player, foe, attackDamage(player) * (float) SkillRules.BLEED_PER_SECOND * (float) SkillEffects.damagePower(player, Skill.WIND_REND),
                     SkillRules.BLEED_TICKS / SkillRules.SECOND);
@@ -677,7 +739,9 @@ public final class SkillActions {
             Vec3 to = new Vec3(origin.x - e.getX(), 0, origin.z - e.getZ());
             double len = Math.max(0.3, to.length());
             Vec3 unit = to.scale(1.0 / len);
-            if (rune == 3) {
+            if (rune == 4) {
+                // 銛打ち: 引かずに結ぶ (下の tie で、結ばれた敵が動くと近くの敵が引かれる)
+            } else if (rune == 3) {
                 // 押し返し: 引かずに押し出す (大きな相手は動かさない)
                 if (!large) {
                     e.setDeltaMovement(unit.scale(-1.0).add(0, 0.2, 0));
@@ -697,6 +761,16 @@ public final class SkillActions {
         if (rune == 2) {
             SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, origin.add(dir.scale(1.5)), SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
         }
+        if (rune == 4) {
+            // 結ばれた敵 (最も近い 1 体) が動くと、近くの敵が引かれる
+            LivingEntity tied = foes.get(0);
+            for (LivingEntity e : foes) {
+                if (e.distanceToSqr(player) < tied.distanceToSqr(player)) {
+                    tied = e;
+                }
+            }
+            tieStep(player, level, tied, tied.position(), SkillRules.HARPOON_TICKS / 10);
+        }
         // 引く波の筋
         for (int i = 0; i < 18; i++) {
             double t = range - i * range / 18.0;
@@ -706,6 +780,33 @@ public final class SkillActions {
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_BACKSTEP.get(), 1.0f, 0.6f);
         return null;
+    }
+
+    // 銛の綱: 0.5 秒ごとに、結ばれた敵が動いた分だけ、近くの敵を引く
+    private static void tieStep(ServerPlayer player, ServerLevel level, LivingEntity tied, Vec3 last, int steps) {
+        if (steps <= 0 || !tied.isAlive() || !player.isAlive() || player.hasDisconnected() || tied.level() != level) {
+            return;
+        }
+        SkillEffects.later(level, 10, () -> {
+            if (!tied.isAlive()) {
+                return;
+            }
+            Vec3 now = tied.position();
+            if (now.distanceToSqr(last) > 0.25) {
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, tied.getBoundingBox().inflate(SkillRules.HARPOON_LINK_RADIUS), f -> isFoe(player, f))) {
+                    if (e == tied || isLarge(e)) {
+                        continue;
+                    }
+                    Vec3 to = new Vec3(now.x - e.getX(), 0, now.z - e.getZ());
+                    double len = Math.max(0.3, to.length());
+                    e.setDeltaMovement(to.scale(Mth.clamp(len * 0.2, 0.2, 0.7) / len).add(0, 0.1, 0));
+                    e.hurtMarked = true;
+                    level.sendParticles(Skills.SKY_MOTE.get(), e.getX(), e.getY() + 0.8, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
+                }
+            }
+            tieStep(player, level, tied, now, steps - 1);
+        });
+        level.sendParticles(Skills.SKY_MOTE.get(), tied.getX(), tied.getY() + tied.getBbHeight() * 0.6, tied.getZ(), 4, 0.25, 0.25, 0.25, 0.0);
     }
 
     // 巡りの唄: 近くの仲間のマナの回復を数秒、速める (自分は半分)
@@ -740,12 +841,34 @@ public final class SkillActions {
             target = p;
         }
         long now = player.level().getGameTime();
-        SkillData d = SkillManager.get(target);
-        d.temperUntil = now + SkillRules.TEMPER_TICKS;
-        d.temperMult = SkillRules.temperMultiplier(rank);
         ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.FLAME, target.getX(), target.getY() + 1.1, target.getZ(), 18, 0.35, 0.5, 0.35, 0.02);
-        level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY() + 1.2, target.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
+        List<ServerPlayer> targets = new ArrayList<>();
+        targets.add(target);
+        if (rune(player, Skill.TEMPER) == 4) {
+            // 火移し: 自分と、仲間 2 人まで (見ている仲間が先) に同時に
+            if (!targets.contains(player)) {
+                targets.add(player);
+            }
+            List<ServerPlayer> near = new ArrayList<>(SkillEffects.allies(player, SkillRules.TEMPER_RANGE));
+            near.sort(java.util.Comparator.comparingDouble(a -> a.distanceToSqr(player)));
+            int extra = SkillRules.FIRE_PASS_ALLIES - (target != player ? 1 : 0);
+            for (ServerPlayer a : near) {
+                if (extra <= 0) {
+                    break;
+                }
+                if (!targets.contains(a)) {
+                    targets.add(a);
+                    extra--;
+                }
+            }
+        }
+        for (ServerPlayer t : targets) {
+            SkillData d = SkillManager.get(t);
+            d.temperUntil = now + SkillRules.TEMPER_TICKS;
+            d.temperMult = SkillRules.temperMultiplier(rank);
+            level.sendParticles(ParticleTypes.FLAME, t.getX(), t.getY() + 1.1, t.getZ(), 18, 0.35, 0.5, 0.35, 0.02);
+            level.sendParticles(ParticleTypes.LAVA, t.getX(), t.getY() + 1.2, t.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
+        }
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_RIPOSTE.get(), 0.9f, 0.6f);
         return null;
@@ -764,19 +887,24 @@ public final class SkillActions {
         if (rune == 1) {
             mult *= SkillRules.LONG_FIRE_SCALE;
             fireTicks = SkillRules.LONG_FIRE_TICKS;
-        } else if (rune == 2) {
+        } else if (rune == 2 || rune == 4) {
             mult = SkillRules.DOUBLE_STRIKE_SCALE;
+            if (rune == 4) {
+                // 二度打ち・火床: 熾火が 8 秒
+                fireTicks = SkillRules.LONG_FIRE_TICKS;
+            }
         }
         float amount = attackDamage(player) * (float) mult;
         slam(player, center, radius, amount, rune == 3);
-        if (rune == 2) {
+        if (rune == 2 || rune == 4) {
             SkillEffects.later(level, SkillRules.DOUBLE_STRIKE_GAP, () -> {
                 if (player.isAlive() && !player.hasDisconnected() && player.level() == level) {
                     slam(player, center, radius, amount, false);
                 }
             });
         }
-        SkillEffects.zone(SkillEffects.ZoneKind.EMBER, player, center, radius, fireTicks, rank);
+        SkillEffects.Zone bed = SkillEffects.zone(SkillEffects.ZoneKind.EMBER, player, center, radius, fireTicks, rank);
+        bed.weaken = rune == 4;
         player.swing(InteractionHand.MAIN_HAND, true);
         sound(player, Skills.SOUND_CLEAVE.get(), 1.0f, 0.6f);
         return null;

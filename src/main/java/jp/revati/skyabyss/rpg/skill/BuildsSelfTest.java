@@ -38,6 +38,113 @@ final class BuildsSelfTest {
         balance(f);
         player(server, f);
         callings(server, f);
+        legendary(server, f);
+        marks(server, f);
+    }
+
+    private static ItemStack legendStack(String path) {
+        return new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, path)));
+    }
+
+    // ---------------------------------------------------------------- 伝説の書き換え (4 番目の刻印)
+    private static void legendary(MinecraftServer server, List<String> f) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "builds_test_l"));
+        p.moveTo(spawn.getX() + 0.5, 300, spawn.getZ() + 0.5, 0f, 0f);
+        Growth.get(p).level = 30;
+        SkillData d = SkillManager.get(p);
+        d.bonusPoints = 60;
+        d.calling = "";
+        // 書き換えは 8 つ。武器の品は実在し、書き換える技は使う技
+        int count = 0;
+        for (Rune r : Rune.values()) {
+            if (!r.legendary()) {
+                continue;
+            }
+            count++;
+            check(f, r.index == 4 && r.skill.active && !legendStack(r.weapon).isEmpty(), "legendary rune " + r.id + " points at nothing");
+            check(f, Rune.of(r.skill).stream().noneMatch(Rune::legendary), "ordinary rune list holds a legendary rune for " + r.skill.id);
+        }
+        check(f, count == 8, "legendary rune count is " + count);
+        // 持っていなければ選べない・持てば選べる・外せば効かない (記録には残る)
+        SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
+        SkillManager.forceRank(p, Skill.LUNGE, 2);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        check(f, SkillManager.chooseRune(p, Skill.LUNGE, 4) == SkillManager.RuneResult.NOT_AVAILABLE, "a legendary rune was chosen without the weapon");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("warden_glaive"));
+        check(f, SkillManager.chooseRune(p, Skill.LUNGE, 4) == SkillManager.RuneResult.NOT_AVAILABLE, "a legendary rune was chosen with the wrong weapon");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("captain_pike"));
+        check(f, SkillManager.chooseRune(p, Skill.LUNGE, 4) == SkillManager.RuneResult.OK && SkillManager.runeOf(p, Skill.LUNGE) == 4, "the legendary rune was not chosen");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        check(f, d.rune(Skill.LUNGE) == 4 && SkillManager.runeOf(p, Skill.LUNGE) == 0, "the legendary rune still worked without the weapon");
+        // 技の側: 火床は熾火が 8 秒で弱らせる、火移しは仲間 2 人まで (一人でも通る)
+        SkillManager.forceRank(p, Skill.EMBER_HAMMER, 2);
+        SkillManager.forceRank(p, Skill.TEMPER, 3);
+        d.runes.put(Skill.EMBER_HAMMER.id, 4);
+        d.runes.put(Skill.TEMPER.id, 4);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("smith_hammer"));
+        check(f, SkillManager.runeOf(p, Skill.EMBER_HAMMER) == 4 && SkillManager.runeOf(p, Skill.TEMPER) == 0, "hammer / poker rune held checks are wrong");
+        SkillEffects.clear();
+        d.mana = 100;
+        d.cooldowns.clear();
+        d.globalCooldown = 0;
+        d.slots[0] = Skill.EMBER_HAMMER.id;
+        check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK, "the hearth hammer could not be cast");
+        var zone = SkillEffects.zonesOf(SkillEffects.ZoneKind.EMBER, p.getUUID());
+        check(f, zone == 1, "the hearth hammer left no embers");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, legendStack("thrall_poker"));
+        d.mana = 100;
+        d.cooldowns.clear();
+        d.globalCooldown = 0;
+        d.slots[0] = Skill.TEMPER.id;
+        check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK && d.temperUntil > level.getGameTime(), "the poker temper did not work");
+        SkillEffects.clear();
+        SkillManager.forgetAll(p);
+    }
+
+    // ---------------------------------------------------------------- 木の印
+    private static void marks(MinecraftServer server, List<String> f) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "builds_test_m"));
+        p.moveTo(spawn.getX() + 0.5, 300, spawn.getZ() + 0.5, 0f, 0f);
+        // 種類: 5 つ・武器・重み 10 の合計・幅 5〜10%
+        int marks = 0;
+        int weight = 0;
+        for (jp.revati.skyabyss.item.affix.AffixType t : jp.revati.skyabyss.item.affix.AffixType.values()) {
+            if (t.isMark()) {
+                marks++;
+                weight += t.weight;
+                check(f, t.slot == jp.revati.skyabyss.item.affix.AffixType.Slot.WEAPON && t.min == 0.05 && t.max == 0.10, "mark " + t.id + " is wrong");
+            }
+        }
+        check(f, marks == 5 && weight == 10, "mark count/weight: " + marks + "/" + weight);
+        for (SkillTree t : SkillTree.values()) {
+            check(f, t.callable() == (SkillMarks.typeOf(t) != null), "mark type of " + t.id);
+        }
+        // 抽選: 1 装備に 1 つまで
+        net.minecraft.util.RandomSource rnd = net.minecraft.util.RandomSource.create(42);
+        int seen = 0;
+        for (int i = 0; i < 4000; i++) {
+            List<jp.revati.skyabyss.item.affix.Affix> list = jp.revati.skyabyss.item.affix.AffixRules.roll(jp.revati.skyabyss.item.affix.AffixType.Slot.WEAPON,
+                    jp.revati.skyabyss.item.GearTier.LEGENDARY, rnd);
+            long n = list.stream().filter(a -> a.kind() != null && a.kind().isMark()).count();
+            check(f, n <= 1, "a weapon rolled two marks");
+            seen += (int) n;
+        }
+        check(f, seen > 100 && seen < 1000, "mark frequency is off: " + seen + " / 4000");
+        // 効き目: 手の武器の印が、その木の技の力にだけ足される
+        ItemStack sword = legendStack("captain_pike");
+        sword.set(jp.revati.skyabyss.registry.ModDataComponents.AFFIXES.get(), List.of(new jp.revati.skyabyss.item.affix.Affix(jp.revati.skyabyss.item.affix.AffixType.MARK_WIND, 0.08)));
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, sword);
+        Growth.get(p).level = 30;
+        check(f, Math.abs(SkillMarks.power(p, SkillTree.WIND) - 0.08) < 1e-9 && SkillMarks.power(p, SkillTree.ROCK) == 0 && SkillMarks.power(p, SkillTree.TRAVELER) == 0, "mark power is wrong");
+        double rock = SkillEffects.damagePower(p, Skill.TITAN_CLEAVE);
+        double wind = SkillEffects.damagePower(p, Skill.WIND_REND);
+        check(f, Math.abs(wind - rock - 0.08) < 1e-9, "mark did not raise the wind skill power: " + wind + " vs " + rock);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        check(f, SkillMarks.power(p, SkillTree.WIND) == 0, "mark worked from an empty hand");
     }
 
     // ---------------------------------------------------------------- 天職の層 (docs/design/27 の 10 節)

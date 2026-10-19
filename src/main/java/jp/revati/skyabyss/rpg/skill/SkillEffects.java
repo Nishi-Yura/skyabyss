@@ -366,6 +366,8 @@ public final class SkillEffects {
         public final long until;
         // 熾火は槌の傷の倍率ではなく、燃やすだけ。罠は踏まれたら 1 回で消える
         public boolean spent;
+        // 火床 (鍛え手の大鎚の書き換え): 熾火の中の敵は攻撃力 −10%
+        public boolean weaken;
 
         Zone(ZoneKind kind, ServerLevel level, Vec3 center, double radius, UUID owner, int rank, long until) {
             this.kind = kind;
@@ -444,6 +446,9 @@ public final class SkillEffects {
                         for (LivingEntity e : foesIn(owner, z)) {
                             if (e.getRemainingFireTicks() < 50) {
                                 e.setRemainingFireTicks(60);
+                            }
+                            if (z.weaken) {
+                                timedMod(e, Attributes.ATTACK_DAMAGE, "fire_bed", -SkillRules.FIRE_BED_WEAKEN, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, 30);
                             }
                         }
                     }

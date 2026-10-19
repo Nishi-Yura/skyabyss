@@ -622,7 +622,9 @@ public class SkillScreen extends Screen {
         }
         // 刻印 (使う技のうち、刻印のあるもの): 3 つの行。極めていなければ理由
         List<Rune> runes = s.runes();
-        int runeHeight = runes.isEmpty() ? 0 : 4 * 11 + 2;
+        boolean legend = legendShown(d, s);
+        boolean hasRunes = !runes.isEmpty() || legend;
+        int runeHeight = !hasRunes ? 0 : 4 * 11 + 2 + (legend ? 13 : 0);
         // 入りきるなら、言い伝えの一行を効果の前に添える
         List<FormattedCharSequence> flavor = TextWrap.split(font, Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
         int room = (maxY - y - runeHeight) / 10 - lines.size() - body.size();
@@ -633,9 +635,15 @@ public class SkillScreen extends Screen {
         int usedBottom = y + lines.size() * 10;
         // 本文は刻印の分を残して描く
         drawLines(g, lines, x, y, maxY - runeHeight);
-        if (!runes.isEmpty()) {
+        if (hasRunes) {
             renderRunes(g, d, s, x, Math.min(usedBottom + 2, maxY - runeHeight), w, mx, my);
         }
+    }
+
+    // 伝説の書き換えの行を出すか (その武器を主の手に持っているか、もう選んでいるとき)
+    private boolean legendShown(SkillData d, Skill s) {
+        Rune legend = Rune.legendaryOf(s);
+        return legend != null && (legend.held(minecraft.player) || d.rune(s) == legend.index);
     }
 
     private void renderRunes(GuiGraphics g, SkillData d, Skill s, int x, int y, int w, int mx, int my) {
@@ -669,16 +677,42 @@ public class SkillScreen extends Screen {
                 hoverRune = r.index;
             }
         }
+        // 伝説の書き換え: 全幅の行 (その武器を持つあいだ)
+        boolean legendRow = legendShown(d, s);
+        if (legendRow) {
+            Rune r = Rune.legendaryOf(s);
+            int ly = ry + 14;
+            boolean mine = current == r.index;
+            boolean usable = available && r.held(minecraft.player);
+            boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
+            g.fill(x, ly, x + w - 4, ly + 12, mine ? 0xFF000000 | GOLD : runeArmed == r.index ? 0xFF000000 | DENY : usable ? 0xFF9A7A2E : 0xFF2A2E38);
+            g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? 0xFF2A3A40 : hover ? 0xFF2E2A20 : 0xFF1C1A16);
+            Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
+            g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine ? GOLD : usable ? 0xF2D78A : DIM, false);
+            runeRows.add(new int[] {x, ly, w - 4, 12, r.index});
+            if (hover) {
+                hoverRune = r.index;
+            }
+        }
         // 見ている (選んでいる) 刻印の効果
         int shown = hoverRune != 0 ? hoverRune : current;
         Rune shownRune = shown == 0 ? null : Rune.of(s, shown);
-        int ty = ry + 14;
+        int ty = ry + (legendRow ? 28 : 14);
         if (shownRune != null) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable(shownRune.effectKey()).withColor(shown == current ? TEXT : PALE), w)) {
                 if (ty + 9 > top + INFO_Y + INFO_H - 1) {
                     break;
                 }
                 g.drawString(font, line, x, ty, TEXT, false);
+                ty += 10;
+            }
+        }
+        if (shownRune != null && shownRune.legendary() && ty + 9 <= top + INFO_Y + INFO_H - 1) {
+            for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.skill.legend_need", Component.translatable(shownRune.skillNameKey())).withColor(SOFT), w)) {
+                if (ty + 9 > top + INFO_Y + INFO_H - 1) {
+                    break;
+                }
+                g.drawString(font, line, x, ty, SOFT, false);
                 ty += 10;
             }
         }

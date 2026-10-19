@@ -769,7 +769,6 @@
   "checkpoint.skyabyss.ckr": "Rest before the guard post",
   "checkpoint.skyabyss.camp": "Camp on the back",
   "checkpoint.skyabyss.mz1": "Second waterway entrance",
-  "message.skyabyss.lamp_band_bed": "Lamps %s / %s  No lamp. Pick one at a bed %s %sm",
   "message.skyabyss.lamp_open_title": "The exit is open",
   "message.skyabyss.lamp_open_sub": "Follow the light path to the bubble column",
   "message.skyabyss.lamp_cut_open": "A shortcut opened",
@@ -1060,5 +1059,6 @@
   "legend.skyabyss.poker_share.skill": "Tempering",
   "gui.skyabyss.skill.legend_head": "Legendary Rewrite",
   "gui.skyabyss.skill.legend_need": "Works only while you hold that weapon. Requires %s.",
-  "tooltip.skyabyss.legend_rewrite": "Skill rewrite: %1$s - %2$s"
+  "tooltip.skyabyss.legend_rewrite": "Skill rewrite: %1$s - %2$s",
+  "gui.skyabyss.skill.rune_legend": "★ %s"
 }

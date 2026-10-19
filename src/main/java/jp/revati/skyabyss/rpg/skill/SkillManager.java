@@ -239,7 +239,12 @@ public final class SkillManager {
     public static int runeOf(Player player, Skill skill) {
         SkillData d = get(player);
         int r = d.rune(skill);
-        return r > 0 && d.runeAvailable(skill) ? r : 0;
+        if (r <= 0 || !d.runeAvailable(skill)) {
+            return 0;
+        }
+        // 伝説の書き換えは、その武器を持つあいだだけ
+        Rune rune = Rune.of(skill, r);
+        return rune != null && rune.held(player) ? r : 0;
     }
 
     public enum RuneResult {
@@ -259,7 +264,7 @@ public final class SkillManager {
     // 刻印を選ぶ。はじめて選ぶのは 1 点、別の刻印へ付け替えるのは炉などで結晶 1 (初回は無料)
     public static RuneResult chooseRune(ServerPlayer player, Skill skill, int index) {
         SkillData d = get(player);
-        if (skill == null || Rune.of(skill, index) == null || !d.runeAvailable(skill)) {
+        if (skill == null || Rune.of(skill, index) == null || !d.runeAvailable(skill) || !Rune.of(skill, index).held(player)) {
             return RuneResult.NOT_AVAILABLE;
         }
         int current = d.rune(skill);

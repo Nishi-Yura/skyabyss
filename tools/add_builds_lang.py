@@ -328,6 +328,7 @@ for k, (ja, en, jskill, jd, eskill, ed) in LEGEND.items():
     both(f"legend.skyabyss.{k}.skill", jskill, eskill)
 both("gui.skyabyss.skill.legend_head", "伝説の書き換え", "Legendary Rewrite")
 both("gui.skyabyss.skill.legend_need", "その武器を持っているあいだだけ効く。%s を覚えている必要がある。", "Works only while you hold that weapon. Requires %s.")
+both("gui.skyabyss.skill.rune_legend", "★ %s", "★ %s")
 both("tooltip.skyabyss.legend_rewrite", "技の書き換え: %1$s ─ %2$s", "Skill rewrite: %1$s - %2$s")
 
 

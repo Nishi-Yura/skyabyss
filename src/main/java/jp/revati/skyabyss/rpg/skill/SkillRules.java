@@ -238,6 +238,30 @@ public final class SkillRules {
     public static final double LUNGE_MULTIPLIER = 0.8;
     // 突き通し: 通り道の全員に ×0.6
     public static final double PIERCE_THROUGH_MULTIPLIER = 0.6;
+    // 伝説の書き換え (docs/design/27 の 4.2)
+    // 突き通し・骨: 通り道の全員に ×1.0、3 回に 1 度、着いた足もとから骨 (半径 2.5、×0.5)
+    public static final double BONE_PIERCE_MULTIPLIER = 1.0;
+    public static final int BONE_EVERY = 3;
+    public static final double BONE_RADIUS = 2.5;
+    public static final double BONE_SCALE = 0.5;
+    // 噛みつき: 三連。背後の上乗せは出血 (3 秒) に変わる
+    public static final int BITE_HITS = 3;
+    // 挟み切り: 1 秒 (大きな相手は 0.5 秒) 動けなくする
+    public static final int SNIP_TICKS = SECOND;
+    public static final int SNIP_LARGE_TICKS = SECOND / 2;
+    // 銛打ち: 結んで 3 秒。結ばれた敵が動くと、近く (5 ブロック) の敵が引かれる
+    public static final int HARPOON_TICKS = 3 * SECOND;
+    public static final double HARPOON_LINK_RADIUS = 5;
+    // 雷の輪: 跳んだ元の場所と着地点を結び、間の敵に ×0.8
+    public static final double THUNDER_RING_MULTIPLIER = 0.8;
+    public static final int THUNDER_RING_DELAY = 14;
+    public static final double THUNDER_RING_WIDTH = 1.6;
+    // 鉤寄せ: 狙いを引いた敵を、前の 1 か所へ寄せる
+    public static final double HOOK_POINT_AHEAD = 2.5;
+    // 火床: 熾火 8 秒、中の敵の攻撃力 −10%
+    public static final double FIRE_BED_WEAKEN = 0.10;
+    // 火移し: 焼き入れを仲間 2 人まで同時に
+    public static final int FIRE_PASS_ALLIES = 2;
 
     // 軽業: 地上での移動 +2 / 4 / 6%、落下の傷が −1 / 2 / 3 ブロック分。速で +2%
     public static double nimbleMove(int rank) {

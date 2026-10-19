@@ -769,7 +769,6 @@
   "checkpoint.skyabyss.ckr": "番兵の詰所の前の休み場",
   "checkpoint.skyabyss.camp": "背の外の宿",
   "checkpoint.skyabyss.mz1": "闇の水路の第二の入口の小部屋",
-  "message.skyabyss.lamp_band_bed": "灯 %s / %s　灯がない。苗床で摘もう %s %sm",
   "message.skyabyss.lamp_open_title": "出口が開いた",
   "message.skyabyss.lamp_open_sub": "光の道をたどり、泡の柱へ",
   "message.skyabyss.lamp_cut_open": "近道が開いた",
@@ -1060,5 +1059,6 @@
   "legend.skyabyss.poker_share.skill": "焼き入れ",
   "gui.skyabyss.skill.legend_head": "伝説の書き換え",
   "gui.skyabyss.skill.legend_need": "その武器を持っているあいだだけ効く。%s を覚えている必要がある。",
-  "tooltip.skyabyss.legend_rewrite": "技の書き換え: %1$s ─ %2$s"
+  "tooltip.skyabyss.legend_rewrite": "技の書き換え: %1$s ─ %2$s",
+  "gui.skyabyss.skill.rune_legend": "★ %s"
 }

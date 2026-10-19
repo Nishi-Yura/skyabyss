@@ -46,31 +46,73 @@ public enum Rune {
     // ---- 雲穿ち
     THIN_ARROW("thin_arrow", Skill.CLOUD_PIERCE, 1),
     HEAVY_ARROW("heavy_arrow", Skill.CLOUD_PIERCE, 2),
-    LIGHTNING("lightning", Skill.CLOUD_PIERCE, 3);
+    LIGHTNING("lightning", Skill.CLOUD_PIERCE, 3),
+    // ---- 伝説の書き換え (4 番目。その武器を主の手に持つあいだだけ選べて、効く。docs/design/27 の 4.2)
+    BONE_PIERCE("pike_bone", Skill.LUNGE, 4, "captain_pike"),
+    BITE("fang_bite", Skill.WIND_REND, 4, "waterway_fang"),
+    SNIP("shears_cut", Skill.WHALE_SWEEP, 4, "tidecaller_claw"),
+    HARPOON_TIE("harpoon_tie", Skill.EBB_TIDE, 4, "coral_harpoon"),
+    THUNDER_RING("claw_ring", Skill.BACKSTEP, 4, "raiju_claw"),
+    HOOK_PULL("halberd_hook", Skill.ROCK_CALL, 4, "warden_glaive"),
+    FIRE_BED("hammer_forge", Skill.EMBER_HAMMER, 4, "smith_hammer"),
+    FIRE_PASS("poker_share", Skill.TEMPER, 4, "thrall_poker");
 
     public final String id;
     public final Skill skill;
-    // 1..3 (同じ技の中での番号。記録にはこの番号を入れる)
+    // 1..3 (同じ技の中での番号。記録にはこの番号を入れる)。伝説の書き換えは 4
     public final int index;
+    // 伝説の書き換えに要る武器 (品の id の path。ふつうの刻印は空)
+    public final String weapon;
 
     Rune(String id, Skill skill, int index) {
+        this(id, skill, index, "");
+    }
+
+    Rune(String id, Skill skill, int index, String weapon) {
         this.id = id;
         this.skill = skill;
         this.index = index;
+        this.weapon = weapon;
+    }
+
+    public boolean legendary() {
+        return !weapon.isEmpty();
+    }
+
+    // その武器を主の手に持っているか (ふつうの刻印は常に true)
+    public boolean held(net.minecraft.world.entity.player.Player player) {
+        if (!legendary()) {
+            return true;
+        }
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().equals(weapon);
+    }
+
+    public static Rune legendaryOf(Skill skill) {
+        for (Rune r : values()) {
+            if (r.skill == skill && r.legendary()) {
+                return r;
+            }
+        }
+        return null;
     }
 
     public String nameKey() {
-        return "rune.skyabyss." + id;
+        return (legendary() ? "legend.skyabyss." : "rune.skyabyss.") + id;
     }
 
     public String effectKey() {
-        return "rune.skyabyss." + id + ".effect";
+        return nameKey() + ".effect";
+    }
+
+    // 伝説の書き換えの説明に添える、書き換わる技の名前の鍵
+    public String skillNameKey() {
+        return skill.nameKey();
     }
 
     public static List<Rune> of(Skill skill) {
         List<Rune> list = new ArrayList<>();
         for (Rune r : values()) {
-            if (r.skill == skill) {
+            if (r.skill == skill && !r.legendary()) {
                 list.add(r);
             }
         }

@@ -277,7 +277,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // その技の刻印を選べるか (技を極めている・刻印がある・天職の木)
     public boolean runeAvailable(Skill skill) {
-        return skill.active && rank(skill) >= skill.maxRank && !skill.runes().isEmpty() && runesOpen(skill);
+        return skill.active && rank(skill) >= skill.maxRank && (!skill.runes().isEmpty() || Rune.legendaryOf(skill) != null) && runesOpen(skill);
     }
 
     // ---------------------------------------------------------------- 記録の検め
