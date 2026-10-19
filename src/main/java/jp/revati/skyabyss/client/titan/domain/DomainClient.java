@@ -90,7 +90,7 @@ public final class DomainClient {
                 r.cz = p.cz();
                 r.floor = p.floor();
                 r.radius = p.radius();
-                r.remaining = p.b();
+                r.remaining = 0;
                 r.theme = theme(p.id());
                 run = r;
             }

@@ -7,9 +7,9 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 // サーバー -> クライアント: 領域の始まり・進み・終わり (HeartDomain)。画面の側は client/titan/domain/DomainClient。
-//  START   : a = 宣言の長さ tick、b = 領域の長さ tick。部屋の中心・床の高さ・半径つき
-//  PROGRESS: a = 砕く進み (0〜100 %)、b = 残りの tick
-//  END     : a = 1 なら砕かれた、0 なら時間切れ・心臓が倒れた
+//  START   : a = 宣言の長さ tick、b = 領域の長さの目安 tick (安全網。画面が通信の途切れを見切る)。部屋の中心・床の高さ・半径つき
+//  PROGRESS: a = 解いた割合 (0〜100 %)、b = 解いた仕掛けの数
+//  END     : a = 1 なら解けた (砕けた)、0 なら安全網・心臓が倒れた
 public record DomainPayload(String id, int state, int a, int b, double cx, double cz, double floor, double radius) implements CustomPacketPayload {
     public static final int START = 0;
     public static final int PROGRESS = 1;

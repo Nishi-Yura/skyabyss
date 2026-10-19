@@ -188,7 +188,8 @@ public abstract class HeartDomain {
         solved = false;
         stun = 0;
         lastSolved = -1;
-        send(level, DomainPayload.start(id, DECLARE_TICKS, 0, cx, cz, floorY, radius));
+        // 領域の長さの欄は、通信が途切れたときに画面が自分で片づける目安 (安全網の長さ)
+        send(level, DomainPayload.start(id, DECLARE_TICKS, SAFETY_TICKS, cx, cz, floorY, radius));
         level.playSound(null, cx, floorY + 4, cz, sting, SoundSource.MASTER, 4f, 1f);
         onDeclare(level);
     }
