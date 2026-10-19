@@ -85,6 +85,21 @@ public final class EmberDeck {
     public static final List<BlockPos> E06_EXIT = wallZ(E06_EXIT_Z, -27, -23);
     public static final List<BlockPos> E07_EXIT = wallZ(E07_EXIT_Z, -27, -23);
 
+    // 試練の階の戸のブロックの位置 (入口 4・出口 2)。どのグループに開くかは引きが決める (詰み監査・歩きの検査は開いているものとして通る)
+    private static final java.util.Set<Long> POOL_GATES = new java.util.HashSet<>();
+
+    static {
+        for (List<BlockPos> g : List.of(E02_GATE, E10_GATE, E06_GATE, E07_GATE, E06_EXIT, E07_EXIT)) {
+            for (BlockPos p : g) {
+                POOL_GATES.add(p.asLong());
+            }
+        }
+    }
+
+    public static boolean isPoolGate(BlockPos p) {
+        return POOL_GATES.contains(p.asLong());
+    }
+
     public static List<BlockPos> wallX(int x, int z1, int z2) {
         List<BlockPos> out = new ArrayList<>();
         for (int z = z1; z <= z2; z++) {

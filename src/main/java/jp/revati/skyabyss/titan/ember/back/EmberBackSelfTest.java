@@ -317,7 +317,8 @@ public final class EmberBackSelfTest {
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
-            if (mechanisms && SMITH_DOOR.contains(p)) {
+            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p)) {
+                // 試練の階の戸は引き (試練のプール) で開く。歩いて届くかだけを見る (引きと戸は trial pool ember が調べる)
                 return true;
             }
             return walkGroup == null ? s.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN)

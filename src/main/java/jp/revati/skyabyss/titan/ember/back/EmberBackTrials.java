@@ -718,9 +718,23 @@ public final class EmberBackTrials {
     }
 
     static void tellQuiet(ServerPlayer p, EmberBackState state) {
-        if (state.quiet() != null) {
-            Notice.narrate(p, EmberIds.LANG_BACK + "quiet_" + state.quiet().id());
+        EmberBackState.Trial q = state.quiet();
+        if (q == null) {
+            return;
         }
+        // 引いた試練が試練の階の新作なら、その枠の「静かな周」の一行は言わない (新作の静はその試練自身の修飾。docs/design/29)
+        if (EmberDeck.placed() && state.group() != null) {
+            jp.revati.skyabyss.trial.Trial.Slot slot = switch (q) {
+                case WEST -> jp.revati.skyabyss.trial.Trial.Slot.WALK;
+                case EAST -> jp.revati.skyabyss.trial.Trial.Slot.WIT;
+                case SOUTH -> jp.revati.skyabyss.trial.Trial.Slot.FIGHT;
+            };
+            jp.revati.skyabyss.trial.TrialDraw.Pick pick = jp.revati.skyabyss.trial.TrialData.current(p.serverLevel(), state.group()).inSlot(slot);
+            if (pick != null && !pick.def().original()) {
+                return;
+            }
+        }
+        Notice.narrate(p, EmberIds.LANG_BACK + "quiet_" + q.id());
     }
 
     // ---------------------------------------------------------------- ピースフル (7.4節): 喉の坂の上を封じる。口と見送りの段は歩ける
