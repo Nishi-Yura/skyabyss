@@ -60,6 +60,12 @@ public final class SkillEvents {
 
     private static void onDodge(ServerPlayer player) {
         SkillData d = SkillManager.get(player);
+        // 条件の特性 (風・灰) と熟練: 予告をよけた直後。5 秒傷を受けていなければ「完璧」
+        long when = player.level().getGameTime();
+        d.dodgeUntil = when + SkillRules.COND_DODGE_TICKS;
+        if (when - d.lastHurt >= SkillRules.PERFECT_CLEAN_TICKS) {
+            d.perfectUntil = when + SkillRules.COND_PERFECT_TICKS;
+        }
         int foresight = d.rank(Skill.FORESIGHT);
         if (foresight > 0) {
             double bonus = SkillRules.foresightBonus(foresight) + (WeaponType.has(player, WeaponType.FAST) ? SkillRules.FORESIGHT_FAST_BONUS : 0);
@@ -189,11 +195,15 @@ public final class SkillEvents {
         if (victim instanceof ServerPlayer hurtPlayer) {
             SkillData vd = SkillManager.get(hurtPlayer);
             vd.lastCombat = now;
+            if (amount > 0) {
+                vd.lastHurt = now;
+            }
             // 熾の心得・耐久 30: 火の傷、(毒の傷) を減らす
             boolean fire = source.is(DamageTypeTags.IS_FIRE);
             boolean poison = source.is(DamageTypes.MAGIC) && hurtPlayer.hasEffect(MobEffects.POISON);
             if (fire) {
                 amount *= (float) (1 - SkillRules.emberHeartReduction(vd.rank(Skill.EMBER_HEART)));
+                amount *= (float) (1 - SkillBuild.fireReduction(hurtPlayer));
                 // 炉の手 (灰の鍛え人の天性)
                 if (vd.callingTree() == SkillTree.ASH) {
                     amount *= (float) (1 - SkillRules.TRAIT_ASH_FIRE);
@@ -235,6 +245,8 @@ public final class SkillEvents {
             Skill dealing = SkillActions.dealing();
             // 近接の攻撃 (技の斬撃を含む。驟雨・出血・炎の上乗せ・稲光は含まない)
             boolean melee = direct == player && dealing != Skill.SKY_RAIN && !riderless;
+            // ビルド: キーストーン・構え・条件の特性・木のセット・タグの足し (近接も飛び道具も技も)
+            amount *= (float) (1 + SkillBuild.generalDamage(player, direct instanceof Projectile));
             // 返し刃
             if (melee && d.riposteUntil >= now && d.knows(Skill.RIPOSTE)) {
                 amount *= (float) (1 + SkillRules.riposteBonus(d.rank(Skill.RIPOSTE)));
@@ -297,6 +309,15 @@ public final class SkillEvents {
         }
         DamageSource source = event.getSource();
         long now = victim.level().getGameTime();
+        // 熟練: 技が当たった (予告をよけた直後に当てると多く数える)
+        if (source.getEntity() instanceof ServerPlayer att && att != victim && SkillActions.dealing() != null) {
+            SkillData ad = SkillManager.get(att);
+            Long last = ad.masteryHitAt.get(SkillActions.dealing().id);
+            if (last == null || now - last >= 10) {
+                ad.masteryHitAt.put(SkillActions.dealing().id, now);
+                SkillManager.addMastery(att, SkillActions.dealing(), ad.dodgeUntil >= now ? SkillRules.MASTERY_DODGE_HIT : 1);
+            }
+        }
         if (victim instanceof ServerPlayer player) {
             SkillData d = SkillManager.get(player);
             // 返し刃: 生き物から傷を受けた

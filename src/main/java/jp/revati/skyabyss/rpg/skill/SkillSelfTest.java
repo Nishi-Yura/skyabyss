@@ -238,11 +238,11 @@ public final class SkillSelfTest {
         check(f, SkillManager.learn(p, Skill.SKY_RAIN) != SkillData.LearnResult.OK, "sky rain was learned without its requirements");
         check(f, !SkillManager.setSlot(p, 1, Skill.RIPOSTE) && !SkillManager.setSlot(p, 1, Skill.LUNGE), "an unknown or passive skill was slotted");
 
-        // 常時の技の修飾子 (岩の構え)
+        // 常時の技の修飾子 (岩の構え 2 段 = 防具 +2・押し返し耐性 +20%) と、岩の木の点 5 のセット (防具 +1・押し返し耐性 +10%)
         SkillManager.forceRank(p, Skill.STONE_STANCE, 2);
         check(f, pd.knows(Skill.RIPOSTE), "forcing stone stance did not fill its requirement");
-        check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR) - 2) < 1e-6
-                && Math.abs(p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.2) < 1e-6, "stone stance modifiers are wrong: armor "
+        check(f, Math.abs(p.getAttributeValue(Attributes.ARMOR) - 3) < 1e-6
+                && Math.abs(p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) - 0.3) < 1e-6, "stone stance modifiers are wrong: armor "
                         + p.getAttributeValue(Attributes.ARMOR) + ", kb " + p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         check(f, pd.unspentPoints(12) >= 0, "forcing a rank left negative points");
 
@@ -362,7 +362,7 @@ public final class SkillSelfTest {
         loaded.load(saved);
         check(f, same(pd, SkillManager.get(loaded)), "skill data was not saved with the player");
         check(f, SkillManager.get(loaded).cooldown(Skill.TITAN_CLEAVE) == 77, "cooldowns were not saved");
-        check(f, Math.abs(loaded.getAttributeValue(Attributes.ARMOR) - 2) < 1e-6, "stone stance armor was not saved with the player");
+        check(f, Math.abs(loaded.getAttributeValue(Attributes.ARMOR) - 3) < 1e-6, "stone stance armor was not saved with the player");
 
         // 忘れると修飾子が外れる
         SkillManager.forgetAll(p);

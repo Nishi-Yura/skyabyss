@@ -4,6 +4,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
+import jp.revati.skyabyss.rpg.skill.SkillStance;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.client.hud.HudManager;
 import jp.revati.skyabyss.hud.HudLayout.Id;
@@ -48,7 +49,8 @@ public final class SkillHud {
         if (!anySlot(SkillManager.get(mc.player))) {
             return;
         }
-        int row = SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP;
+        // 右端に構えの字の分 (11) を足す
+        int row = SkillManager.get(mc.player).slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11;
         out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
@@ -123,6 +125,7 @@ public final class SkillHud {
             return;
         }
         Font font = mc.font;
+        renderStance(g, font, d, o[0] + d.slotCount() * (SLOT + SLOT_GAP) + 1, o[1]);
         for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
@@ -132,7 +135,7 @@ public final class SkillHud {
                 int rank = d.rank(s);
                 drawIcon(g, s.iconIndex(), x + 2, y + 2);
                 // マナが足りない: 青黒く沈める
-                if (d.mana + 1e-4 < SkillRules.manaCost(s, rank)) {
+                if (d.mana + 1e-4 < SkillManager.manaCostFor(mc.player, s)) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A101A3A);
                 }
                 // クールダウン: 上から暗く覆い、残りの秒を出す
@@ -148,6 +151,10 @@ public final class SkillHud {
                 } else if (d.globalCooldown > 0) {
                     g.fill(x + 2, y + 2, x + 18, y + 18, 0x50101418);
                 }
+            }
+            // 連鎖の印: 次の枠とのあいだに金の小さな帯
+            if (i + 1 < d.slotCount() && (d.chainMask & (1 << i)) != 0) {
+                g.fill(x + SLOT, y + 5, x + SLOT + SLOT_GAP, y + SLOT - 5, 0xFFF2C14E);
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)
             int f = SkillClient.slotFlash[i];
@@ -171,6 +178,18 @@ public final class SkillHud {
             g.drawString(font, k, x + SLOT - 1 - font.width(k), y + SLOT - 8, s == null ? 0x6A707C : 0xB8B8C8, true);
             g.pose().popPose();
         }
+    }
+
+    // 構えの字 (枠の右端。切り替えの待ちのあいだは暗く)
+    private static void renderStance(GuiGraphics g, Font font, SkillData d, int x, int y) {
+        if (d.stance == 0) {
+            return;
+        }
+        SkillStance st = SkillStance.of(d.stance);
+        String letter = Component.translatable(st.nameKey() + ".short").getString();
+        int color = st == SkillStance.GUARD ? 0xC9A66B : st == SkillStance.SWIFT ? 0x8FE3C2 : 0x6FB8FF;
+        g.fill(x, y + 3, x + 9, y + SLOT - 3, 0xA0101418);
+        g.drawString(font, letter, x + 5 - font.width(letter) / 2, y + 6, d.stanceCd > 0 ? 0x6A707C : color, true);
     }
 
     // 32px の絵を 16 で描く
