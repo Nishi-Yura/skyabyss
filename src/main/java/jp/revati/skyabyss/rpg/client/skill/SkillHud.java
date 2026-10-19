@@ -5,7 +5,12 @@ import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
-import net.minecraft.client.AttackIndicatorStatus;
+import jp.revati.skyabyss.client.hud.HudManager;
+import jp.revati.skyabyss.hud.HudLayout.Id;
+import jp.revati.skyabyss.hud.HudLayout.Rect;
+import jp.revati.skyabyss.hud.HudLayout.Region;
+import jp.revati.skyabyss.hud.HudLayout.Request;
+import jp.revati.skyabyss.hud.HudLayout.Side;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -13,7 +18,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 
 // 技の小さな表示: 左上の成長の表示の下に細いマナのバー (月の青)、ホットバーの右に技の枠 4 つ。
@@ -36,34 +40,16 @@ public final class SkillHud {
     private SkillHud() {
     }
 
-    // 成長の表示が「+12」の列を下げる量 (マナのバーと、画面が狭くて左上に寄せた技の枠の分)
-    public static int rowsBelowXpBar() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return 0;
+    // HUD の要求: 技の枠はホットバーの右 (入らなければ左上のマナの下)
+    public static void requests(Minecraft mc, java.util.List<Request> out) {
+        if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.player.isSpectator()) {
+            return;
         }
-        SkillData d = SkillManager.get(mc.player);
-        int rows = showMana(mc.player, d) ? MANA_ROW : 0;
-        if (anySlot(d) && slotsOnTopLeft(mc, mc.getWindow().getGuiScaledWidth())) {
-            rows += SLOT + 4;
+        if (!anySlot(SkillManager.get(mc.player))) {
+            return;
         }
-        return rows;
-    }
-
-    // 成長の表示を経験値バーの左に置いたとき、左上に残るものの高さ (画面が狭くて左上に寄せた技の枠だけ)。クエストの追跡が読む
-    public static int topLeftRowsWhenGrowthAtBottom() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) {
-            return 0;
-        }
-        SkillData d = SkillManager.get(mc.player);
-        return anySlot(d) && slotsOnTopLeft(mc, mc.getWindow().getGuiScaledWidth()) ? SLOT + 4 : 0;
-    }
-
-    // マナのバーの位置: 成長の表示のバーのすぐ下 (左上でも経験値バーの左でも)
-    static int[] manaOrigin(Minecraft mc, int guiWidth, int guiHeight) {
-        int[] o = jp.revati.skyabyss.rpg.client.GrowthHud.origin(mc, guiWidth, guiHeight);
-        return new int[] {o[0], o[1] + MANA_Y - 6};
+        int row = SkillRules.SLOTS * (SLOT + SLOT_GAP) - SLOT_GAP;
+        out.add(Request.side(Id.SKILL_SLOTS, Side.RIGHT, row, SLOT, 1, Request.of(Id.SLOTS_TL, Region.TOP_LEFT, row + 6, SLOT + 2)));
     }
 
     static boolean anySlot(SkillData d) {
@@ -103,7 +89,10 @@ public final class SkillHud {
 
     private static void renderMana(GuiGraphics g, Minecraft mc, SkillData d) {
         double max = SkillManager.maxMana(mc.player);
-        int[] m = manaOrigin(mc, g.guiWidth(), g.guiHeight());
+        int[] m = jp.revati.skyabyss.rpg.client.GrowthHud.manaOrigin();
+        if (m == null) {
+            return;
+        }
         int mx = m[0];
         int my = m[1];
         float fraction = max <= 0 ? 0 : (float) Mth.clamp(Math.max(0, d.mana) / max, 0, 1);
@@ -118,32 +107,21 @@ public final class SkillHud {
         }
     }
 
-    // 枠の置き場: ホットバーの右 (攻撃の目盛りや、左利きのオフハンドの枠があればその先)。画面が狭ければ左上のマナの下
-    static int[] slotOrigin(Minecraft mc, GuiGraphics g) {
-        if (slotsOnTopLeft(mc, g.guiWidth())) {
-            // 成長の表示が経験値バーの左にあるときは、左上が空いているので一番上に
-            if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, g.guiWidth())) {
-                return new int[] {MANA_X, 6};
-            }
-            return new int[] {MANA_X, MANA_Y + 8};
+    // 枠の置き場: HudManager が割り当てた長方形 (ホットバーの右、または左上)
+    static int[] slotOrigin() {
+        Rect r = HudManager.rect(Id.SKILL_SLOTS);
+        if (r != null) {
+            return new int[] {r.x(), r.y()};
         }
-        return new int[] {hotbarSideX(mc, g.guiWidth()), g.guiHeight() - 21};
-    }
-
-    private static int hotbarSideX(Minecraft mc, int guiWidth) {
-        Player p = mc.player;
-        boolean leftHanded = p.getMainArm() == HumanoidArm.LEFT;
-        boolean rightBusy = leftHanded ? !p.getOffhandItem().isEmpty()
-                : mc.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR;
-        return guiWidth / 2 + 91 + 6 + (rightBusy ? 26 : 0);
-    }
-
-    static boolean slotsOnTopLeft(Minecraft mc, int guiWidth) {
-        return hotbarSideX(mc, guiWidth) + SkillRules.SLOTS * (SLOT + SLOT_GAP) > guiWidth - 2;
+        r = HudManager.rect(Id.SLOTS_TL);
+        return r == null ? null : new int[] {r.x() + 3, r.y()};
     }
 
     private static void renderSlots(GuiGraphics g, Minecraft mc, SkillData d) {
-        int[] o = slotOrigin(mc, g);
+        int[] o = slotOrigin();
+        if (o == null) {
+            return;
+        }
         Font font = mc.font;
         for (int i = 0; i < d.slots.length; i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);

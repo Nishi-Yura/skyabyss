@@ -92,7 +92,7 @@ public final class QuickCard {
             scanIn = SCAN_INTERVAL;
             ctx = scan(mc);
         }
-        ResourceLocation now = pick(mc);
+        ResourceLocation now = jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) && !PouchEntries.all().isEmpty() ? PouchEntries.all().get(0).id() : pick(mc);
         if (!java.util.Objects.equals(now, shown)) {
             // 初めて出るとき (shown が null) は強調しない
             if (shown != null && now != null) {
@@ -200,6 +200,38 @@ public final class QuickCard {
     }
 
     // ---------------------------------------------------------------- 描く
+    // HUD の要求: ホットバーの左 (右利き) か右 (左利き)。オフハンドの枠があればその先、技の枠・成長の表示はさらに外へ
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (!PartyMarkers.hudAllowed(mc) || mc.player.isSpectator()) {
+            return;
+        }
+        jp.revati.skyabyss.hud.HudLayout.Side side = mc.options.mainHand().get() == HumanoidArm.RIGHT ? jp.revati.skyabyss.hud.HudLayout.Side.LEFT
+                : jp.revati.skyabyss.hud.HudLayout.Side.RIGHT;
+        if (cardShown(mc)) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.side(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD, side, SPRITE_W, 31, 0));
+        } else if (PouchNew.any()) {
+            // 札が出ていないときの小さな「[I] 旅嚢 NEW」の一行 (同じ置き場を使う)
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.side(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD, side, openHintWidth(mc), 10, 10));
+        }
+    }
+
+    // 札を出す場面か (renderCard と同じ判断)
+    private static boolean cardShown(Minecraft mc) {
+        if (!Config.POUCH_QUICK_CARD.get() || shown == null) {
+            return false;
+        }
+        PouchEntries.Entry e = PouchEntries.byId(shown);
+        return e != null && (jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) || Pouch.count(mc.player, e.item()) > 0);
+    }
+
+    private static Component openHintLabel() {
+        return Component.literal("[").append(PouchClient.OPEN_KEY.getTranslatedKeyMessage()).append("] ").append(Component.translatable("skyabyss_pouch.name"));
+    }
+
+    private static int openHintWidth(Minecraft mc) {
+        return Math.round(mc.font.width(openHintLabel()) * 0.75f) + 14;
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !PartyMarkers.hudAllowed(mc) || mc.player.isSpectator()) {
@@ -212,13 +244,15 @@ public final class QuickCard {
 
     // 札が出ていないとき (設定で消した・使える道具がまだない) も、新しい品があることだけ小さく知らせる: [I] 旅嚢 NEW
     private static void renderOpenHint(GuiGraphics g, Minecraft mc) {
-        Component label = Component.literal("[").append(PouchClient.OPEN_KEY.getTranslatedKeyMessage()).append("] ").append(Component.translatable("skyabyss_pouch.name"));
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD);
+        if (r == null) {
+            return;
+        }
+        Component label = openHintLabel();
         float scale = 0.75f;
         int tw = mc.font.width(label);
-        boolean leftSide = mc.options.mainHand().get() == HumanoidArm.RIGHT;
-        int cx = g.guiWidth() / 2;
-        int y = g.guiHeight() - 20;
-        int x = leftSide ? cx - 91 - 6 - Math.round(tw * scale) - 14 : cx + 91 + 6;
+        int x = r.x();
+        int y = r.y();
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
         g.pose().scale(scale, scale, 1f);
@@ -235,26 +269,18 @@ public final class QuickCard {
         if (e == null) {
             return false;
         }
-        int count = Pouch.count(mc.player, e.item());
+        int count = jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.QUICKCARD) ? 3 : Pouch.count(mc.player, e.item());
         if (count <= 0) {
             return false;
         }
-        int w = g.guiWidth();
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD);
+        if (r == null) {
+            return false;
+        }
         int h = g.guiHeight();
         boolean leftSide = mc.options.mainHand().get() == HumanoidArm.RIGHT;
-        boolean offhand = !mc.player.getOffhandItem().isEmpty();
-        int cx = w / 2;
-        int spriteX;
-        int itemX;
-        if (leftSide) {
-            int base = cx - 91 - (offhand ? SPRITE_W + GAP : 0);
-            spriteX = base - SPRITE_W - GAP;
-            itemX = spriteX + 3;
-        } else {
-            int base = cx + 91 + (offhand ? SPRITE_W + GAP : 0);
-            spriteX = base + GAP;
-            itemX = spriteX + 10;
-        }
+        int spriteX = r.x();
+        int itemX = leftSide ? spriteX + 3 : spriteX + 10;
         int spriteY = h - 23;
         long age = Util.getMillis() - changedAt;
         float glow = age < HIGHLIGHT_MS ? 1f - age / (float) HIGHLIGHT_MS : 0f;
