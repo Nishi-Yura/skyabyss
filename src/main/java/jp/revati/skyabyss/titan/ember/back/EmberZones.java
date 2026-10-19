@@ -156,7 +156,7 @@ final class EmberZones {
             return 0;
         }
         int h = ax <= 6 ? 1 : ax <= 8 ? 2 : ax <= 10 ? 3 : 4;
-        if (ax >= 7 && hash(x, 5, z) % 5 == 0) {
+        if (ax >= 7 && hash(x >> 1, 5, z >> 1) % 5 == 0) {
             h++;
         }
         return h;
@@ -177,9 +177,9 @@ final class EmberZones {
             for (int x = -EmberBodyBuilder.HALL_HALF; x <= EmberBodyBuilder.HALL_HALF; x++) {
                 int ax = Math.abs(x);
                 int top = f + EmberBodyBuilder.throatHeight(z, x);
-                if (!riser && ax >= 5) {
+                if (ax >= 5) {
                     int h = ridgeHeight(ax, x, z);
-                    if (bay && ax >= 9) {
+                    if (bay) {
                         h = 0;
                     }
                     for (int y = f + 1; y <= f + h; y++) {

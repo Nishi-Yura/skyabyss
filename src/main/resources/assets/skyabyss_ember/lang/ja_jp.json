@@ -412,7 +412,7 @@
   "gui.skyabyss.ember_goal.title.east": "東 鍛えの間",
   "gui.skyabyss.ember_goal.title.south": "南 火守り",
   "gui.skyabyss.ember_goal.title.hub": "炉心の広間",
-  "gui.skyabyss.ember_goal.west.urn": "入口の岸の台に触れて、灰の壺を取れ",
+  "gui.skyabyss.ember_goal.west.urn": "庭の壺の台 (休み場のとなり) に触れて、灰の壺を取れ",
   "gui.skyabyss.ember_goal.west.cross": "壺を溶岩へ向けて右クリック。12 秒だけ歩ける黒い殻ができる。島で灰を満たし、奥の岸へ",
   "gui.skyabyss.ember_goal.west.stone": "奥の岸の熾り石に触れよ",
   "gui.skyabyss.ember_goal.west.done": "西の熾り石は鳴った。光る床で広間へ戻れる",
@@ -530,5 +530,10 @@
   "sign.skyabyss.ember_cache_rim.3": "小さな宝",
   "sign.skyabyss.ember_cache_rim.4": "",
   "message.skyabyss.ember_cache_rim": "洞の隠し棚の宝を見つけた",
-  "message.skyabyss.ember_cache_empty": "宝箱は空だ（もう取った）"
+  "message.skyabyss.ember_cache_empty": "宝箱は空だ（もう取った）",
+  "sign.skyabyss.ember_cache_crater.1": "火口の供え",
+  "sign.skyabyss.ember_cache_crater.2": "のぼった者の",
+  "sign.skyabyss.ember_cache_crater.3": "ための宝",
+  "sign.skyabyss.ember_cache_crater.4": "",
+  "message.skyabyss.ember_cache_crater": "火口の供え物を受け取った"
 }

@@ -178,6 +178,8 @@ public final class EmberBackLayout {
     public static final BlockPos WELL_STAIR = new BlockPos(14, FLOOR_HUB, -31);
     // 背へ出る洞の床 (井戸の螺旋の 2 周目の段にそろえる。井戸の南から、体の表が床より低くなるまで)
     public static final int BACK_EXIT_FLOOR = 136;
+    // 火口の床 (井戸の外の平らな輪。体の表から読んだ高さと自己テストで合わせる)
+    public static final int CRATER_Y = 207;
     // 背の亀裂 (火守りの谷の天井から背の上まで。上に格子の手すり)
     public static final Box CRACK = new Box(-3, 113, 22, 3, 146, 52);
     // 背へ出る洞の箱 (自己テスト・検査用。井戸の南の縁から出口まで)
@@ -249,7 +251,8 @@ public final class EmberBackLayout {
             new Cache("tomb", new BlockPos(-61, FLOOR_WEST + 1, -3), Direction.EAST),
             new Cache("workshop", new BlockPos(63, FLOOR_EAST + 1, 6), Direction.WEST),
             new Cache("garden", new BlockPos(-16, FLOOR_SOUTH + 1, 3), Direction.EAST),
-            new Cache("rim", new BlockPos(10, BACK_EXIT_FLOOR + 1, -14), Direction.WEST));
+            new Cache("rim", new BlockPos(10, BACK_EXIT_FLOOR + 1, -14), Direction.WEST),
+            new Cache("crater", new BlockPos(0, CRATER_Y + 1, HUB_CENTER.getZ() + 12), Direction.NORTH));
 
     // ---------------------------------------------------------------- 部屋の一覧
     // 部屋の名前 → 箱 (コマンドの go・自己テストの重なりの検査・リセットで中の人を広間へ移す範囲)

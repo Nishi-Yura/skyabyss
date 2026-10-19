@@ -31,8 +31,8 @@ public final class EmberBodyBuilder {
     // 門の螺旋: 最初の段は南の真ん中 (並びの 7 番)、広間の床の 1 下から 1 段ずつ y 51 まで
     public static final int GATE_STEP_START = 7;
     public static final int GATE_STEPS = (FLOOR_HUB - 1) - (FLOOR_HEART + 1) + 1;
-    // 壁の螺旋 (広間の床 → 井戸の底 119): 最初の段は並びの 2 番 (北西の角)
-    public static final int WELL_STAIR_START = 2;
+    // 壁の螺旋 (広間の床 → 井戸の底 119): 最初の段は並びの 3 番 (北の真ん中)。最後の段が角でなく辺の真ん中 (並びの 5 番) になるので、まっすぐ登って着地する
+    public static final int WELL_STAIR_START = 3;
     public static final int WELL_STAIR_STEPS = WELL_BOTTOM - FLOOR_HUB;
     // 井戸の螺旋: 一周で 16 上がる。下の端の角度 (x-z の角度。南東 60 度)
     public static final double HELIX_RISE = 16.0;
@@ -128,6 +128,7 @@ public final class EmberBodyBuilder {
         // ボス部屋の大門 (熾の底の入口・鍛え手の扉)。部屋・休み場・碑文を置いたあと
         EmberBossGates.build(back);
         b.repairPockets(back);
+        b.smoothDimples();
         data.markBuilt(buildVersion());
         EmberBackTrials.afterBuild(back);
         jp.revati.skyabyss.titan.light.RouteLamps.place(back, "ember");
@@ -149,6 +150,45 @@ public final class EmberBodyBuilder {
                 Blocks.BASALT.defaultBlockState());
         if (filled > 0) {
             SkyAbyss.LOGGER.info("Ember back: filled {} blocks of dead-end pockets on the body's outside", filled);
+        }
+    }
+
+    // 1 つだけ四方より 1 低い床のブロック (建築の監査 FLOOR_DIMPLE) を、同じブロックを重ねて平らにする。体の外 (repairPockets の範囲) と喉・尾根の広間の中。
+    // 床 = 上が 2 つ空いた固いブロック。四方の隣も同じ高さの床 (上が空いている) より 1 高く並んでいる所
+    void smoothDimples() {
+        List<Box> boxes = List.of(new Box(-190, 63, 80, -40, 130, 240), new Box(40, 63, 80, 190, 130, 240), new Box(-72, 150, -130, 72, 232, 24),
+                new Box(-110, 63, -245, 110, 128, -90));
+        int filled = 0;
+        for (int pass = 0; pass < 2; pass++) {
+            for (Box b : boxes) {
+                for (int x = b.minX(); x <= b.maxX(); x++) {
+                    for (int z = b.minZ(); z <= b.maxZ(); z++) {
+                        for (int y = b.minY(); y <= b.maxY(); y++) {
+                            BlockState s = kit.get(x, y, z);
+                            if (s.isAir() || !s.isCollisionShapeFullBlock(kit.level(), new BlockPos(x, y, z))
+                                    || !kit.get(x, y + 1, z).isAir() || !kit.get(x, y + 2, z).isAir()) {
+                                continue;
+                            }
+                            boolean pit = true;
+                            for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                                BlockState n = kit.get(x + d[0], y + 1, z + d[1]);
+                                if (n.isAir() || !n.isCollisionShapeFullBlock(kit.level(), new BlockPos(x + d[0], y + 1, z + d[1]))
+                                        || !kit.get(x + d[0], y + 2, z + d[1]).isAir()) {
+                                    pit = false;
+                                    break;
+                                }
+                            }
+                            if (pit) {
+                                kit.set(x, y + 1, z, s);
+                                filled++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (filled > 0) {
+            SkyAbyss.LOGGER.info("Ember back: smoothed {} one-block dimples", filled);
         }
     }
 
@@ -295,7 +335,7 @@ public final class EmberBodyBuilder {
             boolean rise = z > NECK_Z1 && f > throatFloor(z - 1);
             int hw = throatHalf(z);
             for (int x = -hw; x <= hw; x++) {
-                if (rise) {
+                if (rise && Math.abs(x) <= 4) {
                     kit.stair(x, f, z, Direction.SOUTH);
                 } else {
                     kit.set(x, f, z, Math.abs(x) <= 1 ? EmberKit.ruinFloor(x, z) : Math.abs(x) <= 4 ? EmberKit.BASALT : EmberKit.FLESH);
@@ -636,20 +676,6 @@ public final class EmberBodyBuilder {
         int cz = HUB_CENTER.getZ();
         craterFloor = craterFloorOf();
         int r = (int) Math.ceil(WELL_RADIUS);
-        // 縦穴 (半径 8.6) を火口の床まで掘る
-        for (int x = cx - r; x <= cx + r; x++) {
-            for (int z = cz - r; z <= cz + r; z++) {
-                double d = wellDist(x, z);
-                if (d > WELL_RADIUS) {
-                    continue;
-                }
-                for (int y = WELL_BOTTOM; y <= craterFloor + 1; y++) {
-                    kit.set(x, y, z, EmberKit.AIR);
-                }
-            }
-        }
-        track(cx - r - 1, WELL_BOTTOM - 1, cz - r - 1, cx + r + 1, craterFloor + 2, cz + r + 1);
-        // 火口の底を半径 12.5 まで広げる (井戸の螺旋の上の端から縁への段の足もと。壁の斜面を掘り下げ、床を張る)
         int rim = craterFloor;
         for (int x = cx - 17; x <= cx + 17; x++) {
             for (int z = cz - 17; z <= cz + 17; z++) {
@@ -658,6 +684,20 @@ public final class EmberBodyBuilder {
                 }
             }
         }
+        // 縦穴 (半径 8.6) を火口の縁の上まで掘る (火口の床の上に残った体の欠片で宙に浮く石を作らない)
+        for (int x = cx - r; x <= cx + r; x++) {
+            for (int z = cz - r; z <= cz + r; z++) {
+                double d = wellDist(x, z);
+                if (d > WELL_RADIUS) {
+                    continue;
+                }
+                for (int y = WELL_BOTTOM; y <= rim + 2; y++) {
+                    kit.set(x, y, z, EmberKit.AIR);
+                }
+            }
+        }
+        track(cx - r - 1, WELL_BOTTOM - 1, cz - r - 1, cx + r + 1, craterFloor + 2, cz + r + 1);
+        // 火口の底を半径 12.5 まで広げる (井戸の螺旋の上の端から縁への段の足もと。壁の斜面を掘り下げ、床を張る)
         for (int x = cx - 13; x <= cx + 13; x++) {
             for (int z = cz - 13; z <= cz + 13; z++) {
                 double d = wellDist(x, z);

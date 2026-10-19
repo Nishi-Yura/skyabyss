@@ -20,6 +20,11 @@ public final class ForgeRoom {
     // 工房 (回廊の東の張り出し。西に口)
     public static final EmberBackLayout.Box WORKSHOP = new EmberBackLayout.Box(56, EmberBackLayout.FLOOR_EAST, -3, 63, EmberBackLayout.FLOOR_EAST + 6, 9);
 
+    // 砥石 (床に置く向き。壁づけだと後ろに支えが要る)
+    private static final BlockState GRIND = Blocks.GRINDSTONE.defaultBlockState()
+            .setValue(net.minecraft.world.level.block.GrindstoneBlock.FACE, net.minecraft.world.level.block.state.properties.AttachFace.FLOOR)
+            .setValue(net.minecraft.world.level.block.GrindstoneBlock.FACING, Direction.EAST);
+
     private ForgeRoom() {
     }
 
@@ -94,7 +99,7 @@ public final class ForgeRoom {
             k.set(box.minX() + 2, floor + 1, z, Blocks.ANVIL.defaultBlockState().setValue(net.minecraft.world.level.block.AnvilBlock.FACING, Direction.NORTH));
         }
         k.set(box.minX() + 2, floor + 1, 6, Blocks.SMITHING_TABLE.defaultBlockState());
-        k.set(box.minX() + 2, floor + 1, 18, Blocks.GRINDSTONE.defaultBlockState());
+        k.set(box.minX() + 2, floor + 1, 18, GRIND);
         // 色の見本 (黒 → 赤 → 橙 → 黄 → 白。碑 east_colors の東の台)
         BlockState[] colors = {Blocks.BLACK_CONCRETE.defaultBlockState(), Blocks.RED_CONCRETE.defaultBlockState(),
                 Blocks.ORANGE_CONCRETE.defaultBlockState(), Blocks.YELLOW_CONCRETE.defaultBlockState(), Blocks.WHITE_CONCRETE.defaultBlockState()};
@@ -144,7 +149,7 @@ public final class ForgeRoom {
         }
         k.set(w.minX() + 1, floor + 1, w.minZ(), Blocks.LAVA_CAULDRON.defaultBlockState());
         k.set(w.minX() + 1, floor + 1, w.maxZ(), Blocks.LAVA_CAULDRON.defaultBlockState());
-        k.set(w.minX() + 3, floor + 1, w.minZ(), Blocks.GRINDSTONE.defaultBlockState());
+        k.set(w.minX() + 3, floor + 1, w.minZ(), GRIND);
         k.set(w.minX() + 3, floor + 1, w.maxZ(), Blocks.CAULDRON.defaultBlockState());
         k.set(w.maxX(), floor + 4, w.minZ() + 1, RoomKit.SHROOM);
         k.set(w.maxX(), floor + 4, w.maxZ() - 1, RoomKit.SHROOM);

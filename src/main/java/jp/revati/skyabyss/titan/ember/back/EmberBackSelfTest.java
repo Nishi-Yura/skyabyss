@@ -148,6 +148,7 @@ public final class EmberBackSelfTest {
         int crater = EmberBodyBuilder.crater();
         expect(crater > 150, "the crater floor is at " + crater + ", expected the volcano");
         NOTES.add("crater floor " + crater);
+        expect(crater == CRATER_Y, "EmberBackLayout.CRATER_Y is " + CRATER_Y + " but the body's crater floor is " + crater);
         expect(!back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, 40)).isAir(), "the belly does not rest on the ash plain");
         // 体の外 (灰の原) は平らなまま
         expect(back.getBlockState(new BlockPos(0, PLAIN_TOP, -295)).is(Blocks.SMOOTH_BASALT) && back.getBlockState(new BlockPos(0, PLAIN_TOP + 1, -295)).isAir(),
