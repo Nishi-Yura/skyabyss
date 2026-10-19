@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,fresh=false": {
+      "model": "skyabyss:block/record_board",
+      "y": 0
+    },
+    "facing=east,fresh=false": {
+      "model": "skyabyss:block/record_board",
+      "y": 90
+    },
+    "facing=south,fresh=false": {
+      "model": "skyabyss:block/record_board",
+      "y": 180
+    },
+    "facing=west,fresh=false": {
+      "model": "skyabyss:block/record_board",
+      "y": 270
+    },
+    "facing=north,fresh=true": {
+      "model": "skyabyss:block/record_board_fresh",
+      "y": 0
+    },
+    "facing=east,fresh=true": {
+      "model": "skyabyss:block/record_board_fresh",
+      "y": 90
+    },
+    "facing=south,fresh=true": {
+      "model": "skyabyss:block/record_board_fresh",
+      "y": 180
+    },
+    "facing=west,fresh=true": {
+      "model": "skyabyss:block/record_board_fresh",
+      "y": 270
+    }
+  }
+}
