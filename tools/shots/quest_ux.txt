@@ -39,6 +39,11 @@ cmd skyabyss quest stage @s main_song return
 wait 80
 shot near_ready
 
+# 15 ブロック
+camera minecraft:overworld 0 -58.5 15 180 0
+wait 40
+shot mid_15
+
 # 遠くから (約 40 ブロック)
 camera minecraft:overworld 0 -60 40 180 -2
 waitchunks
