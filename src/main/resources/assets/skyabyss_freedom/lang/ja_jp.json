@@ -9,7 +9,7 @@
   "item.skyabyss.socket_shard.desc": "%2$s の力を宿す、穴に差す欠片。巨神の素材から作る。",
   "item.skyabyss.socket_shard.weapon": "武器: ",
   "item.skyabyss.socket_shard.armor": "防具: ",
-  "item.skyabyss.socket_shard.tag": "属性タグ: その木の技の力 +%1$s%%",
+  "item.skyabyss.socket_shard.tag": "属性タグ: 差すと %1$s のタグが 1 つ数えられる",
   "item.skyabyss.aspect_core.desc": "伝説から取り出した、技の書き換え。レアの武器か防具に刻む（1 装備に 1 つ）。",
   "item.skyabyss.skill_rune.desc": "ひとつの技にだけ効くルーン。穴に差す。1 つの技に 1 枚だけ働く。",
   "item.skyabyss.skill_rune.cap": "修飾の力の合計は ×2.0 まで",

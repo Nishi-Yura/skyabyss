@@ -43,6 +43,12 @@ public final class SkillManager {
     public static final ResourceLocation MOD_TRAIT_MOVE = id("skill/trait_wind_move");
     public static final ResourceLocation MOD_TRAIT_MANA = id("skill/trait_tide_mana");
     public static final ResourceLocation MOD_BP_SWING = id("skill/bp_strength_swing");
+    public static final ResourceLocation MOD_B_ARMOR = id("skill/build_armor");
+    public static final ResourceLocation MOD_B_KNOCKBACK = id("skill/build_knockback");
+    public static final ResourceLocation MOD_B_MOVE = id("skill/build_move");
+    public static final ResourceLocation MOD_B_ASPEED = id("skill/build_attack_speed");
+    public static final ResourceLocation MOD_B_MANA = id("skill/build_mana");
+    public static final ResourceLocation MOD_B_MANA_MULT = id("skill/build_mana_mult");
 
     private SkillManager() {
     }
@@ -227,6 +233,8 @@ public final class SkillManager {
         if (!early) {
             d.respecs++;
         }
+        // 構えも外す
+        d.stance = 0;
         sync(player);
         applyModifiers(player);
         player.serverLevel().playSound(null, player.getX(), player.getY(), player.getZ(), Rpg.LEVEL_UP.get(), SoundSource.PLAYERS, 0.6f, 0.7f);
@@ -239,12 +247,11 @@ public final class SkillManager {
     public static int runeOf(Player player, Skill skill) {
         SkillData d = get(player);
         int r = d.rune(skill);
-        if (r <= 0 || !d.runeAvailable(skill)) {
+        if (r <= 0 || !d.runeUsable(skill, r)) {
             return 0;
         }
         // 伝説の書き換えは、その武器を持つあいだだけ
-        Rune rune = Rune.of(skill, r);
-        return rune != null && rune.held(player) ? r : 0;
+        return Rune.valid(skill, r) && Rune.heldOf(skill, r, player) ? r : 0;
     }
 
     public enum RuneResult {
@@ -264,7 +271,7 @@ public final class SkillManager {
     // 刻印を選ぶ。はじめて選ぶのは 1 点、別の刻印へ付け替えるのは炉などで結晶 1 (初回は無料)
     public static RuneResult chooseRune(ServerPlayer player, Skill skill, int index) {
         SkillData d = get(player);
-        if (skill == null || Rune.of(skill, index) == null || !d.runeAvailable(skill) || !Rune.of(skill, index).held(player)) {
+        if (skill == null || !Rune.valid(skill, index) || !d.runeUsable(skill, index) || !Rune.heldOf(skill, index, player)) {
             return RuneResult.NOT_AVAILABLE;
         }
         int current = d.rune(skill);
@@ -313,6 +320,7 @@ public final class SkillManager {
         for (var e : d.runes.entrySet()) {
             l.runes.put(e.getKey(), e.getValue());
         }
+        l.chainMask = d.chainMask;
         l.saved = true;
         sync(player);
         return true;
@@ -342,9 +350,10 @@ public final class SkillManager {
                 d.slots[i] = s.id;
             }
         }
+        d.chainMask = l.chainMask & ((1 << (SkillRules.SLOTS - 1)) - 1);
         for (var e : l.runes.entrySet()) {
             Skill s = Skill.byId(e.getKey());
-            if (s != null && d.rune(s) > 0 && d.runeAvailable(s) && Rune.of(s, e.getValue()) != null) {
+            if (s != null && d.rune(s) > 0 && d.runeUsable(s, e.getValue()) && Rune.heldOf(s, e.getValue(), player)) {
                 d.runes.put(s.id, e.getValue());
             }
         }
@@ -363,8 +372,14 @@ public final class SkillManager {
                 && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.AGILITY, Breakpoints.SECOND)) {
             ticks = (int) Math.round(ticks * (1 - Breakpoints.AGILITY_30_COOLDOWN));
         }
-        ticks = (int) Math.round(ticks * jp.revati.skyabyss.rpg.skill.api.SkillModifiers.cooldown(player, skill));
+        ticks = (int) Math.round(ticks * SkillBuild.cooldownScale(player, skill));
         return jp.revati.skyabyss.item.affix.AffixEvents.scaleCooldown(player, ticks);
+    }
+
+    // 技のマナ (構え・キーストーン・外の修飾を入れた値。画面も同じ計算)
+    public static int manaCostFor(Player player, Skill skill) {
+        int base = SkillRules.manaCost(skill, get(player).rank(skill));
+        return base == 0 ? 0 : Math.max(1, (int) Math.round(base * SkillBuild.manaScale(player, skill)));
     }
 
     public static boolean nearForge(Player player) {
@@ -435,7 +450,7 @@ public final class SkillManager {
             return CastResult.COOLDOWN;
         }
         settleMana(player);
-        int cost = SkillRules.manaCost(skill, rank);
+        int cost = manaCostFor(player, skill);
         if (d.mana + 1e-4 < cost) {
             Notice.bar(player, ModText.deny("message.skyabyss.skill.no_mana"));
             player.playNotifySound(Skills.SOUND_FAIL.get(), SoundSource.PLAYERS, 0.6f, 1f);
@@ -443,6 +458,15 @@ public final class SkillManager {
             return CastResult.NO_MANA;
         }
         SkillActions.cooldownScale = 1;
+        long now = player.level().getGameTime();
+        // 連鎖: 直前の枠の技から 2 秒以内で、連鎖の印が立っていれば、この技の力が増す
+        boolean chain = slot > 0 && d.lastCastSlot == slot - 1 && now - d.lastCastTick <= SkillRules.CHAIN_WINDOW && (d.chainMask & (1 << (slot - 1))) != 0;
+        if (chain) {
+            d.chainSkill = skill.id;
+            d.chainUntil = now + SkillRules.CHAIN_WINDOW;
+        } else {
+            d.chainSkill = "";
+        }
         String failure = SkillActions.perform(player, skill, rank);
         if (failure != null) {
             Notice.bar(player, ModText.deny(failure));
@@ -460,10 +484,166 @@ public final class SkillManager {
             d.embers = Math.min(memory, d.embers + 1);
         }
         d.globalCooldown = SkillRules.GLOBAL_COOLDOWN;
-        d.lastCombat = player.level().getGameTime();
+        d.lastCombat = now;
+        d.lastCastSlot = slot;
+        d.lastCastTick = now;
+        addMastery(player, skill, 1);
+        if (chain) {
+            player.serverLevel().sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.2, player.getZ(), 8, 0.3, 0.4, 0.3, 0.05);
+        }
+        if (d.masteryLevel(skill) >= SkillRules.MASTERY_VISUAL_LEVEL) {
+            masteryGlow(player);
+        }
         sync(player);
         sendResult(player, slot, true);
         return CastResult.OK;
+    }
+
+    // ---------------------------------------------------------------- 熟練 (A13)
+    // 熟練の点を足す (使う +1、当てる +1、予告をよけた直後に当てる +3)。段が上がったら小さく知らせる
+    public static void addMastery(ServerPlayer player, Skill skill, int amount) {
+        SkillData d = get(player);
+        int before = d.masteryLevel(skill);
+        d.mastery.merge(skill.id, amount, Integer::sum);
+        int after = d.masteryLevel(skill);
+        if (after > before) {
+            Notice.bar(player, ModText.lore("message.skyabyss.skill.mastery_up", Component.translatable(skill.nameKey()), after));
+            player.serverLevel().sendParticles(Skills.RUNE_SPARK.get(), player.getX(), player.getY() + 1.0, player.getZ(), 14, 0.4, 0.6, 0.4, 0.03);
+            sync(player);
+        }
+    }
+
+    // 熟練 5 の見た目: 足元から白金の火花の輪 (形は変えず、使ったときに添える)
+    static void masteryGlow(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        for (int i = 0; i < 10; i++) {
+            double a = i * Math.PI / 5;
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, player.getX() + Math.cos(a) * 0.9, player.getY() + 0.1,
+                    player.getZ() + Math.sin(a) * 0.9, 1, 0, 0.05, 0, 0.01);
+        }
+    }
+
+    // ---------------------------------------------------------------- 構え (A11)
+    public enum StanceResult {
+        OK, SAME, COOLDOWN
+    }
+
+    public static StanceResult setStance(ServerPlayer player, SkillStance stance) {
+        SkillData d = get(player);
+        if (d.stance == stance.ordinal()) {
+            return StanceResult.SAME;
+        }
+        if (d.stanceCd > 0 && !player.isCreative()) {
+            return StanceResult.COOLDOWN;
+        }
+        d.stance = stance.ordinal();
+        d.stanceCd = SkillRules.STANCE_SWAP_TICKS;
+        sync(player);
+        applyModifiers(player);
+        d.regenScale = SkillPassives.regenScale(player, d);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.6f, 0.8f + 0.2f * stance.ordinal());
+        return StanceResult.OK;
+    }
+
+    // ---------------------------------------------------------------- 連鎖 (A10)
+    public enum ChainResult {
+        OK, BAD_SLOT, TOO_MANY
+    }
+
+    // 枠 slot → slot+1 の連鎖の印を入れる・外す
+    public static ChainResult toggleChain(ServerPlayer player, int slot) {
+        SkillData d = get(player);
+        if (slot < 0 || slot + 1 >= d.slotCount()) {
+            return ChainResult.BAD_SLOT;
+        }
+        int bit = 1 << slot;
+        if ((d.chainMask & bit) != 0) {
+            d.chainMask &= ~bit;
+        } else {
+            if (Integer.bitCount(d.chainMask) >= SkillRules.CHAIN_MAX) {
+                return ChainResult.TOO_MANY;
+            }
+            d.chainMask |= bit;
+        }
+        sync(player);
+        return ChainResult.OK;
+    }
+
+    // ---------------------------------------------------------------- キーストーン (A20)
+    public enum KeystoneResult {
+        OK, UNKNOWN, FULL, NO_POINTS, NOT_REACHED, NOT_QUIET
+    }
+
+    // 取る (1 点) か、外す (戦いの外で無料)
+    public static KeystoneResult toggleKeystone(ServerPlayer player, SkillKeystone k) {
+        SkillData d = get(player);
+        if (k == null) {
+            return KeystoneResult.UNKNOWN;
+        }
+        if (d.keystones.contains(k.id)) {
+            if (!quiet(player)) {
+                return KeystoneResult.NOT_QUIET;
+            }
+            d.keystones.remove(k.id);
+        } else {
+            if (d.keystones.size() >= SkillRules.KEYSTONE_MAX) {
+                return KeystoneResult.FULL;
+            }
+            if (!d.keystoneReachable(k)) {
+                return KeystoneResult.NOT_REACHED;
+            }
+            if (d.unspentPoints(level(player)) < 1) {
+                return KeystoneResult.NO_POINTS;
+            }
+            d.keystones.add(k.id);
+        }
+        sync(player);
+        applyModifiers(player);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.7f, 0.6f);
+        return KeystoneResult.OK;
+    }
+
+    // ---------------------------------------------------------------- 武器の持ち替えで枠が入れ替わる (A12)
+    // 近接などの組と弓の組を、手の武器に合わせて入れ替える。待ちは技ごとなので、持ち替えても共有のまま。空手は今の組のまま
+    public static void syncBar(ServerPlayer player) {
+        SkillData d = get(player);
+        int want;
+        if (WeaponType.has(player, WeaponType.RANGED)) {
+            want = 1;
+        } else if (!player.getMainHandItem().isEmpty()) {
+            want = 0;
+        } else {
+            return;
+        }
+        if (want == d.bar) {
+            return;
+        }
+        // いまの枠を元の組へしまい、行き先の組があれば出す (はじめての行き先は、今の枠をそのまま使う)
+        System.arraycopy(d.slots, 0, d.bars[d.bar], 0, d.slots.length);
+        d.barUsed[d.bar] = true;
+        d.bar = want;
+        if (d.barUsed[want]) {
+            for (int i = 0; i < d.slots.length; i++) {
+                Skill s = Skill.byId(d.bars[want][i]);
+                d.slots[i] = s != null && s.active && d.knows(s) && i < d.slotCount() ? s.id : "";
+            }
+        }
+        sync(player);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), Skills.SOUND_LEARN.get(), SoundSource.PLAYERS, 0.4f, 1.6f);
+    }
+
+    // ---------------------------------------------------------------- 試着の確定 (A18)
+    // 画面で仮に振った順の技を、1 つずつ本当に覚える。途中で通らなければそこで止める (戻り値は覚えた数)
+    public static int learnAll(ServerPlayer player, java.util.List<String> skills) {
+        int n = 0;
+        for (String id : skills) {
+            Skill s = Skill.byId(id);
+            if (s == null || learn(player, s) != SkillData.LearnResult.OK) {
+                break;
+            }
+            n++;
+        }
+        return n;
     }
 
     private static void sendResult(ServerPlayer player, int slot, boolean ok) {
@@ -502,6 +682,14 @@ public final class SkillManager {
         boolean heavy = WeaponType.isHeld(player.getMainHandItem(), WeaponType.HEAVY)
                 && Breakpoints.reached(player, jp.revati.skyabyss.rpg.GrowthRules.Stat.STRENGTH, Breakpoints.FIRST);
         set(player, Attributes.ATTACK_SPEED, MOD_BP_SWING, heavy ? Breakpoints.STRENGTH_15_SWING : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        // ビルド (構え・キーストーン・木のセット・タグ・条件の特性。docs/design/31)
+        SkillBuild.Attrs b = SkillBuild.attrs(player);
+        add(player, Attributes.ARMOR, MOD_B_ARMOR, b.armor());
+        add(player, Attributes.KNOCKBACK_RESISTANCE, MOD_B_KNOCKBACK, b.knockback());
+        set(player, Attributes.MOVEMENT_SPEED, MOD_B_MOVE, b.move(), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        set(player, Attributes.ATTACK_SPEED, MOD_B_ASPEED, b.attackSpeed(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        add(player, Rpg.MAX_MANA, MOD_B_MANA, b.manaAdd());
+        set(player, Rpg.MAX_MANA, MOD_B_MANA_MULT, b.manaMult(), AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
     }
 
     private static void add(Player player, Holder<Attribute> attribute, ResourceLocation id, double value) {

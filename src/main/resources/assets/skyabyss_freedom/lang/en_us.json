@@ -9,7 +9,7 @@
   "item.skyabyss.socket_shard.desc": "A socket shard holding the power of %2$s. Crafted from titan materials.",
   "item.skyabyss.socket_shard.weapon": "Weapon: ",
   "item.skyabyss.socket_shard.armor": "Armor: ",
-  "item.skyabyss.socket_shard.tag": "Element tag: that tree's skill power +%1$s%%",
+  "item.skyabyss.socket_shard.tag": "Element tag: counts as one %1$s tag while socketed",
   "item.skyabyss.aspect_core.desc": "A skill rewrite drawn out of a legendary. Imprint it on a rare weapon or armor piece (one per item).",
   "item.skyabyss.skill_rune.desc": "A rune for a single skill. Socket it. Only one rune per skill works.",
   "item.skyabyss.skill_rune.cap": "Total modifier power caps at x2.0",

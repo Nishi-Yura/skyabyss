@@ -38,7 +38,7 @@ public final class GearFreedomItems {
             tooltip.add(Component.literal(" ◇ ").withStyle(s -> s.withColor(AffixRules.MARK_COLOR))
                     .append(Component.translatable("item.skyabyss.socket_shard.armor").withStyle(ChatFormatting.DARK_GRAY))
                     .append(AffixRules.describe(new Affix(element.armor, element.armorValue)).withStyle(s -> s.withColor(AffixRules.LINE_COLOR))));
-            tooltip.add(Component.translatable("item.skyabyss.socket_shard.tag", Math.round(Element.TAG_POWER * 100)).withStyle(s -> s.withColor(GearFreedom.TAG_COLOR)));
+            tooltip.add(Component.translatable("item.skyabyss.socket_shard.tag", Component.translatable(element.tree.nameKey())).withStyle(s -> s.withColor(GearFreedom.TAG_COLOR)));
         }
     }
 

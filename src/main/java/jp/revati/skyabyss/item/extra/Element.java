@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.item.affix.AffixType;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 
-// 欠片の属性 (岩・風・潮・灰・骨)。差すと、その木の属性タグが付き (その木の技の力 +TAG_POWER)、小さな数字が上がる。
+// 欠片の属性 (岩・風・潮・灰・骨)。差すと、その木の属性タグが付き (SkillBuild のタグの数に 1 つ足す)、小さな数字が上がる。
 // 数字は武器と防具で別。特性と同じ修飾子の道 (AffixRules.effective) で効く
 public enum Element {
     STONE("stone", SkillTree.ROCK, AffixType.SHARP, 0.02, AffixType.BULWARK, 0.25),
@@ -13,9 +13,6 @@ public enum Element {
     TIDE("tide", SkillTree.TIDE, AffixType.RESONANT, 3, AffixType.CALM, 2),
     ASH("ash", SkillTree.ASH, AffixType.KEEN, 0.02, AffixType.WARD, 0.01),
     BONE("bone", SkillTree.BONE, AffixType.THIRST, 0.01, AffixType.STEADY, 0.03);
-
-    // 属性タグ一つあたりの、その木の技の力の足し (0.03 = +3%)
-    public static final double TAG_POWER = 0.03;
 
     public final String id;
     public final SkillTree tree;

@@ -19,14 +19,17 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 // 死んでも (copyOnDeath)、ディメンションを移っても、ログアウトしても残る。月のループでも消さない。
 // 書き換えは SkillManager を通す (同期と修飾子の付け直しをそこでまとめて行う)
 public final class SkillData implements INBTSerializable<CompoundTag> {
-    // 記録の版。1 = 剣士・弓使いの木の 10 の技だけ、2 = 5 つの木・刻印・型の保存 (docs/design/27)
-    public static final int VERSION = 2;
+    // 記録の版。1 = 剣士・弓使いの木の 10 の技だけ、2 = 5 つの木・刻印・型の保存 (docs/design/27)、
+    // 3 = 全部の木を最初から開く・キーストーン・構え・連鎖・熟練・型 4 つ・武器ごとの枠 (docs/design/31 の A 案)
+    public static final int VERSION = 3;
 
     // 型の保存 1 つぶん: 枠の置き方と、技ごとの刻印の選び
     public static final class Loadout {
         public final String[] slots = new String[SkillRules.SLOTS];
         public final Map<String, Integer> runes = new LinkedHashMap<>();
         public boolean saved;
+        // 連鎖の印 (枠 i → i+1 の連鎖を 1 << i で持つ)
+        public int chainMask;
 
         public Loadout() {
             Arrays.fill(slots, "");
@@ -37,10 +40,11 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             runes.clear();
             runes.putAll(o.runes);
             saved = o.saved;
+            chainMask = o.chainMask;
         }
 
         public boolean sameAs(Loadout o) {
-            return saved == o.saved && Arrays.equals(slots, o.slots) && runes.equals(o.runes);
+            return saved == o.saved && chainMask == o.chainMask && Arrays.equals(slots, o.slots) && runes.equals(o.runes);
         }
     }
 
@@ -50,8 +54,21 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public final Map<String, Integer> runes = new LinkedHashMap<>();
     // 技の置き場 (最大 5 枠。いま使えるのは slotCount() まで)。空は ""
     public final String[] slots = new String[SkillRules.SLOTS];
-    // 型の保存 (2 つ)
-    public final Loadout[] loadouts = {new Loadout(), new Loadout()};
+    // 型の保存 (4 つ)
+    public final Loadout[] loadouts = new Loadout[SkillRules.LOADOUTS];
+    // キーストーン (鍵石。最大 2)
+    public final Set<String> keystones = new LinkedHashSet<>();
+    // 熟練の経験 (技の id → 点。転生しても残る)
+    public final Map<String, Integer> mastery = new LinkedHashMap<>();
+    // 構え (SkillStance の番号) と、次に切り替えられるまでの tick
+    public int stance;
+    public int stanceCd;
+    // 連鎖の印 (枠 i → i+1 を 1 << i で持つ。立っているのは 3 つまで)
+    public int chainMask;
+    // 武器の持ち替えで入れ替わる枠の組 (0 = 近接など、1 = 弓)。いま使っている枠は slots、使っていないほうがここ
+    public final String[][] bars = new String[2][SkillRules.SLOTS];
+    public final boolean[] barUsed = new boolean[2];
+    public int bar;
     // 記録の版 (読んだ記録が古ければ sanitize で移す)
     public int version = VERSION;
     // レベル以外から得た技の点 (クエストや記憶の断片の報酬に使う予定。今は 0)
@@ -79,6 +96,17 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public long riposteUntil;
     // 最後に戦った時刻 (傷を受けた・与えた・技を使った)。静かなときマナが早く満ちる
     public long lastCombat = Long.MIN_VALUE / 2;
+    // 予告をよけた直後の期限と、無傷で完璧によけた直後の期限、最後に傷を受けた時刻
+    public long dodgeUntil;
+    public long perfectUntil;
+    public long lastHurt = Long.MIN_VALUE / 2;
+    // 連鎖: 直前に使った枠と時刻、連鎖が付いた技と期限
+    public int lastCastSlot = -1;
+    public long lastCastTick = Long.MIN_VALUE / 2;
+    public String chainSkill = "";
+    // 熟練の「当てた」を数えた時刻 (技ごと。広い技が一度に何体に当たっても、10 tick に 1 度だけ数える)
+    public final Map<String, Long> masteryHitAt = new LinkedHashMap<>();
+    public long chainUntil;
     // 最後に持ち主へ送ったマナ (送りすぎないため)
     public float sentMana = -999;
     // マナの回復の倍率 (毎秒、SkillEffects が計算する): 凪の心得・野営の手、巡りの唄の期限つきの上乗せ
@@ -110,10 +138,63 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     public SkillData() {
         Arrays.fill(slots, "");
+        for (int i = 0; i < loadouts.length; i++) {
+            loadouts[i] = new Loadout();
+        }
+        Arrays.fill(bars[0], "");
+        Arrays.fill(bars[1], "");
     }
 
     public int rank(Skill skill) {
-        return ranks.getOrDefault(skill.id, 0);
+        int r = ranks.getOrDefault(skill.id, 0);
+        return r == 0 && granted(skill) ? 1 : r;
+    }
+
+    // 天職の木の要は、点を使わずに授かる (天職の特典。docs/design/31 の A01)
+    public boolean granted(Skill skill) {
+        return SkillRules.CALLINGS && skill.keystone() && (skill.tree.id.equals(calling) || skill.tree.id.equals(calling2));
+    }
+
+    // 熟練 (0〜5)
+    public int masteryXp(Skill skill) {
+        return mastery.getOrDefault(skill.id, 0);
+    }
+
+    public int masteryLevel(Skill skill) {
+        return SkillRules.masteryLevel(masteryXp(skill));
+    }
+
+    // その木に使った点 (技の段と刻印。授かった要は数えない)
+    public int treePoints(SkillTree tree) {
+        int sum = 0;
+        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+            Skill s = Skill.byId(e.getKey());
+            if (s != null && s.tree == tree) {
+                sum += e.getValue();
+            }
+        }
+        for (String id : runes.keySet()) {
+            Skill s = Skill.byId(id);
+            if (s != null && s.tree == tree) {
+                sum += 1;
+            }
+        }
+        return sum;
+    }
+
+    // 天職の割引: 天職の木の技の段を 3 つぶんまで 1 点ずつ安くする (戻る点)。要と刻印は数えない
+    public int callingDiscount() {
+        if (!SkillRules.CALLINGS || !hasCalling()) {
+            return 0;
+        }
+        int n = 0;
+        for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+            Skill s = Skill.byId(e.getKey());
+            if (s != null && s.tree.id.equals(calling) && !s.keystone()) {
+                n += e.getValue();
+            }
+        }
+        return Math.min(SkillRules.CALLING_DISCOUNT_MAX, n);
     }
 
     public boolean knows(Skill skill) {
@@ -137,7 +218,8 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 sum += 1;
             }
         }
-        return sum;
+        sum += keystones.size();
+        return Math.max(0, sum - callingDiscount());
     }
 
     public int totalPoints(int level) {
@@ -167,7 +249,10 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
 
     // 1 tick 進める (サーバーとクライアントの両方で数える)
     public boolean tickCooldowns() {
-        boolean any = globalCooldown > 0 || !cooldowns.isEmpty();
+        boolean any = globalCooldown > 0 || !cooldowns.isEmpty() || stanceCd > 0;
+        if (stanceCd > 0) {
+            stanceCd--;
+        }
         if (globalCooldown > 0) {
             globalCooldown--;
         }
@@ -220,6 +305,9 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     }
 
     public boolean requirementsMet(Skill skill) {
+        if (granted(skill)) {
+            return true;
+        }
         var req = skill.requires();
         if (req.isEmpty()) {
             return true;
@@ -232,52 +320,52 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return false;
     }
 
-    // ---------------------------------------------------------------- 天職の決まり (docs/design/27 の 10 節)
-    // 天職の前: 5 つの木の 1 行目と、旅人の 1 行目だけ、段は 3 まで
-    // 天職のあと: 天職の木はすべて (要まで)、2 つ目の天職の木は 3 行目まで (要なし)、
-    //   ほかの木は 1 行目だけ・段は 2 まで、旅人はすべて
+    // ---------------------------------------------------------------- 天職の決まり (docs/design/31 の A01)
+    // 木はすべて最初から開いていて、どの行も段の上限まで取れる (行ごとの要るレベルと前提だけは残る)。
+    // 天職は「専門」: その木の要を授かる・天性・技の段 3 つぶんの割引。2 つ目の天職は 5 つ目の枠と、その木の要
     public boolean callingAllows(Skill skill) {
-        if (!SkillRules.CALLINGS) {
-            return true;
-        }
-        if (skill.tree == SkillTree.TRAVELER || skill.tree.sealed) {
-            return !hasCalling() ? skill.tier == 0 : true;
-        }
-        if (!hasCalling()) {
-            return skill.tier == 0;
-        }
-        if (skill.tree.id.equals(calling)) {
-            return true;
-        }
-        if (skill.tree.id.equals(calling2)) {
-            return !skill.keystone();
-        }
-        return skill.tier == 0;
+        return true;
     }
 
-    // 今の天職で、その技を覚えられる最大の段 (ほかの木の技は 2 まで)
     public int rankLimit(Skill skill) {
-        if (!SkillRules.CALLINGS || !hasCalling() || skill.tree == SkillTree.TRAVELER || skill.tree.sealed || skill.tree.id.equals(calling)
-                || skill.tree.id.equals(calling2)) {
-            return skill.maxRank;
-        }
-        return Math.min(skill.maxRank, 2);
+        return skill.maxRank;
     }
 
-    // 刻印が使える状態か (天職の前は刻印なし。ほかの木の技にもなし。2 つ目の天職の木は可)
+    // 刻印が使える状態か (全部の木で使える。点は 1)
     public boolean runesOpen(Skill skill) {
-        if (!SkillRules.CALLINGS) {
-            return true;
-        }
-        if (!hasCalling()) {
-            return false;
-        }
-        return skill.tree.id.equals(calling) || skill.tree.id.equals(calling2);
+        return true;
     }
 
-    // その技の刻印を選べるか (技を極めている・刻印がある・天職の木)
+    // その技の刻印を選べるか (技を極めている。刻印の 4 つ目は熟練 3 から)
     public boolean runeAvailable(Skill skill) {
-        return skill.active && rank(skill) >= skill.maxRank && (!skill.runes().isEmpty() || Rune.legendaryOf(skill) != null) && runesOpen(skill);
+        return skill.active && rank(skill) >= skill.maxRank && (!skill.runes().isEmpty() || Rune.legendaryOf(skill) != null
+                || masteryLevel(skill) >= SkillRules.MASTERY_RUNE_LEVEL);
+    }
+
+    // その番号の刻印を今選べるか (熟練の刻印は熟練 3 から)
+    public boolean runeUsable(Skill skill, int index) {
+        return runeAvailable(skill) && Rune.valid(skill, index) && (index != Rune.MASTERY || masteryLevel(skill) >= SkillRules.MASTERY_RUNE_LEVEL);
+    }
+
+    // 画面の試着 (仮振り) 用の写し。技の段・刻印・キーストーン・天職・熟練・追加の点・開いた木だけ
+    public SkillData copyOf() {
+        SkillData c = new SkillData();
+        c.ranks.putAll(ranks);
+        c.runes.putAll(runes);
+        c.keystones.addAll(keystones);
+        c.mastery.putAll(mastery);
+        c.unlockedTrees.addAll(unlockedTrees);
+        c.calling = calling;
+        c.calling2 = calling2;
+        c.bonusPoints = bonusPoints;
+        c.mana = mana;
+        System.arraycopy(slots, 0, c.slots, 0, slots.length);
+        return c;
+    }
+
+    // キーストーンを取れる状態か (そのタグの木に点が足りているか)
+    public boolean keystoneReachable(SkillKeystone k) {
+        return treePoints(k.tag.tree) >= SkillRules.KEYSTONE_TREE_POINTS;
     }
 
     // ---------------------------------------------------------------- 記録の検め
@@ -298,6 +386,22 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 || calling2.equals(calling)) {
             calling2 = "";
         }
+        // 天職の木の要は授かるので、自分で取っていた分は外す (点が戻る)
+        ranks.keySet().removeIf(id -> granted(Skill.byId(id)));
+        // キーストーン: 知らないものは外し、2 つまで
+        keystones.removeIf(id -> SkillKeystone.byId(id) == null);
+        while (keystones.size() > SkillRules.KEYSTONE_MAX) {
+            keystones.remove(keystones.iterator().next());
+        }
+        mastery.entrySet().removeIf(e -> Skill.byId(e.getKey()) == null || e.getValue() == null || e.getValue() <= 0);
+        stance = SkillStance.of(stance).ordinal();
+        stanceCd = Math.max(0, stanceCd);
+        bar = bar == 1 ? 1 : 0;
+        // 連鎖: 立っているのは 3 つまで (低い枠から残す)
+        chainMask &= (1 << (SkillRules.SLOTS - 1)) - 1;
+        while (Integer.bitCount(chainMask) > SkillRules.CHAIN_MAX) {
+            chainMask &= ~Integer.highestOneBit(chainMask);
+        }
         // 前の版の記録: 木が組み替わったので、前提が崩れた技 (と、その先) だけ戻す。ほかは残す
         if (version < VERSION) {
             pruneBroken();
@@ -306,11 +410,15 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         // 刻印: 技を極めている・刻印がある・選びが範囲内、のものだけ残す
         runes.entrySet().removeIf(e -> {
             Skill s = Skill.byId(e.getKey());
-            return s == null || e.getValue() == null || Rune.of(s, e.getValue()) == null || rank(s) < s.maxRank;
+            return s == null || e.getValue() == null || !Rune.valid(s, e.getValue()) || rank(s) < s.maxRank;
         });
         // 点を使いすぎている (レベルを下げられた) か、前提が崩れていたら、すべて戻して振り直してもらう。
         // 要るレベル (minLevel) は覚えるときだけの条件で、あとから下がっても消さない
         boolean broken = spentPoints() > totalPoints(level);
+        // キーストーンは、点が足りなくなったか木の点が足りなくなったら全部外す (技はそのまま)
+        if (!broken) {
+            keystones.removeIf(id -> !keystoneReachable(SkillKeystone.byId(id)));
+        }
         for (String id : ranks.keySet()) {
             Skill s = Skill.byId(id);
             if (!requirementsMet(s) || !treeOpen(s.tree)) {
@@ -320,6 +428,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         if (broken) {
             ranks.clear();
             runes.clear();
+            keystones.clear();
         }
         for (int i = 0; i < slots.length; i++) {
             Skill s = Skill.byId(slots[i]);
@@ -333,7 +442,21 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
             }
         }
+        for (String[] b : bars) {
+            for (int i = 0; i < b.length; i++) {
+                Skill s = Skill.byId(b[i]);
+                if (s == null || !s.active || !knows(s) || i >= slotCount()) {
+                    b[i] = "";
+                }
+                for (int j = 0; j < i; j++) {
+                    if (!b[i].isEmpty() && b[i].equals(b[j])) {
+                        b[i] = "";
+                    }
+                }
+            }
+        }
         for (Loadout l : loadouts) {
+            l.chainMask &= (1 << (SkillRules.SLOTS - 1)) - 1;
             for (int i = 0; i < l.slots.length; i++) {
                 Skill s = Skill.byId(l.slots[i]);
                 if (s == null || !s.active || i >= SkillRules.SLOTS) {
@@ -347,7 +470,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             }
             l.runes.entrySet().removeIf(e -> {
                 Skill s = Skill.byId(e.getKey());
-                return s == null || e.getValue() == null || Rune.of(s, e.getValue()) == null;
+                return s == null || e.getValue() == null || !Rune.valid(s, e.getValue());
             });
         }
         cooldowns.entrySet().removeIf(e -> Skill.byId(e.getKey()) == null || e.getValue() == null || e.getValue() <= 0);
@@ -376,7 +499,13 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
     public void clearSkills() {
         ranks.clear();
         runes.clear();
+        keystones.clear();
+        chainMask = 0;
         Arrays.fill(slots, "");
+        Arrays.fill(bars[0], "");
+        Arrays.fill(bars[1], "");
+        barUsed[0] = false;
+        barUsed[1] = false;
     }
 
     @Override
@@ -406,9 +535,29 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             l.runes.forEach(lr::putInt);
             lt.put("runes", lr);
             lt.putBoolean("saved", l.saved);
+            lt.putInt("chain", l.chainMask);
             ld.add(lt);
         }
         tag.put("loadouts", ld);
+        ListTag ks = new ListTag();
+        for (String id : keystones) {
+            ks.add(StringTag.valueOf(id));
+        }
+        tag.put("keystones", ks);
+        CompoundTag ms = new CompoundTag();
+        mastery.forEach(ms::putInt);
+        tag.put("mastery", ms);
+        tag.putInt("stance", stance);
+        tag.putInt("chain", chainMask);
+        tag.putInt("bar", bar);
+        for (int b = 0; b < 2; b++) {
+            ListTag bl = new ListTag();
+            for (String id : bars[b]) {
+                bl.add(StringTag.valueOf(id));
+            }
+            tag.put("bar" + b, bl);
+            tag.putBoolean("barUsed" + b, barUsed[b]);
+        }
         tag.putInt("bonusPoints", bonusPoints);
         tag.putInt("respecs", respecs);
         tag.putInt("runeSwaps", runeSwaps);
@@ -462,6 +611,27 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 l.runes.put(key, lr.getInt(key));
             }
             l.saved = lt.getBoolean("saved");
+            l.chainMask = lt.getInt("chain");
+        }
+        keystones.clear();
+        for (Tag t : tag.getList("keystones", Tag.TAG_STRING)) {
+            keystones.add(t.getAsString());
+        }
+        mastery.clear();
+        CompoundTag ms = tag.getCompound("mastery");
+        for (String key : ms.getAllKeys()) {
+            mastery.put(key, ms.getInt(key));
+        }
+        stance = tag.getInt("stance");
+        chainMask = tag.getInt("chain");
+        bar = tag.getInt("bar");
+        for (int b = 0; b < 2; b++) {
+            Arrays.fill(bars[b], "");
+            ListTag bl = tag.getList("bar" + b, Tag.TAG_STRING);
+            for (int i = 0; i < Math.min(bl.size(), bars[b].length); i++) {
+                bars[b][i] = bl.getString(i);
+            }
+            barUsed[b] = tag.getBoolean("barUsed" + b);
         }
         bonusPoints = tag.getInt("bonusPoints");
         respecs = tag.getInt("respecs");
@@ -501,6 +671,7 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
                 for (Loadout l : d.loadouts) {
                     buf.writeBoolean(l.saved);
+                    buf.writeVarInt(l.chainMask);
                     for (String id : l.slots) {
                         buf.writeUtf(id, 64);
                     }
@@ -509,6 +680,25 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                         buf.writeUtf(id, 64);
                         buf.writeVarInt(n);
                     });
+                }
+                buf.writeVarInt(d.keystones.size());
+                for (String id : d.keystones) {
+                    buf.writeUtf(id, 32);
+                }
+                buf.writeVarInt(d.mastery.size());
+                d.mastery.forEach((id, n) -> {
+                    buf.writeUtf(id, 64);
+                    buf.writeVarInt(n);
+                });
+                buf.writeVarInt(d.stance);
+                buf.writeVarInt(d.stanceCd);
+                buf.writeVarInt(d.chainMask);
+                buf.writeVarInt(d.bar);
+                for (int b = 0; b < 2; b++) {
+                    buf.writeBoolean(d.barUsed[b]);
+                    for (String id : d.bars[b]) {
+                        buf.writeUtf(id, 64);
+                    }
                 }
                 buf.writeVarInt(d.bonusPoints);
                 buf.writeVarInt(d.respecs);
@@ -542,12 +732,31 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
                 }
                 for (Loadout l : d.loadouts) {
                     l.saved = buf.readBoolean();
+                    l.chainMask = buf.readVarInt();
                     for (int i = 0; i < l.slots.length; i++) {
                         l.slots[i] = buf.readUtf(64);
                     }
                     int lr = buf.readVarInt();
                     for (int i = 0; i < lr; i++) {
                         l.runes.put(buf.readUtf(64), buf.readVarInt());
+                    }
+                }
+                int kn = buf.readVarInt();
+                for (int i = 0; i < kn; i++) {
+                    d.keystones.add(buf.readUtf(32));
+                }
+                int mn = buf.readVarInt();
+                for (int i = 0; i < mn; i++) {
+                    d.mastery.put(buf.readUtf(64), buf.readVarInt());
+                }
+                d.stance = buf.readVarInt();
+                d.stanceCd = buf.readVarInt();
+                d.chainMask = buf.readVarInt();
+                d.bar = buf.readVarInt();
+                for (int b = 0; b < 2; b++) {
+                    d.barUsed[b] = buf.readBoolean();
+                    for (int i = 0; i < d.bars[b].length; i++) {
+                        d.bars[b][i] = buf.readUtf(64);
                     }
                 }
                 d.bonusPoints = buf.readVarInt();

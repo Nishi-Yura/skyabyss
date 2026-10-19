@@ -7,13 +7,21 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.skill.Rune;
 import jp.revati.skyabyss.rpg.skill.Skill;
+import jp.revati.skyabyss.rpg.skill.SkillBuild;
 import jp.revati.skyabyss.rpg.skill.SkillData;
+import jp.revati.skyabyss.rpg.skill.SkillKeystone;
+import jp.revati.skyabyss.rpg.skill.SkillStance;
+import jp.revati.skyabyss.rpg.skill.SkillTag;
 import jp.revati.skyabyss.rpg.skill.SkillManager;
 import jp.revati.skyabyss.rpg.skill.SkillRules;
 import jp.revati.skyabyss.rpg.skill.SkillTree;
 import jp.revati.skyabyss.rpg.skill.Skills;
 import jp.revati.skyabyss.rpg.skill.WeaponType;
+import jp.revati.skyabyss.rpg.skill.net.SkillChainPayload;
+import jp.revati.skyabyss.rpg.skill.net.SkillKeystonePayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillLearnPayload;
+import jp.revati.skyabyss.rpg.skill.net.SkillStancePayload;
+import jp.revati.skyabyss.rpg.skill.net.SkillTryonPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillLoadoutPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillRespecPayload;
 import jp.revati.skyabyss.rpg.skill.net.SkillRunePayload;
@@ -79,7 +87,20 @@ public class SkillScreen extends Screen {
     private Button respec;
     private Button calling;
     private final Button[] loadLoadout = new Button[SkillRules.LOADOUTS];
-    private final Button[] saveLoadout = new Button[SkillRules.LOADOUTS];
+    private Button saveToggle;
+    private boolean saveMode;
+    private Button tryonBtn;
+    private Button tryonOk;
+    private Button tryonUndo;
+    private Button tryonCancel;
+    private Button pageBtn;
+    // 0 = 木のページ、1 = ビルドのページ (構え・連鎖・タグ・鍵石)
+    private int page;
+    // 試着 (仮振り): 画面だけの写しと、仮に振った順。null = 試着していない
+    private SkillData tryon;
+    private final List<String> tryonOrder = new ArrayList<>();
+    // ビルドのページで押せる所: {x, y, w, h, 種類 (1 = 構え、2 = 連鎖、3 = 鍵石、4 = タグ), 引数}
+    private final List<int[]> hits = new ArrayList<>();
     private int respecArmed;
     // 刻印の付け替えの確かめ (押した刻印の番号。0 でなし)
     private int runeArmed;
@@ -102,17 +123,51 @@ public class SkillScreen extends Screen {
                 .bounds(left + INFO_X + INFO_W - 4 - LEARN_W, top + INFO_Y + 3, LEARN_W, 14).build());
         for (int i = 0; i < SkillRules.LOADOUTS; i++) {
             int index = i;
-            loadLoadout[i] = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.loadout_load", i + 1), b -> sendLoadout(index, false))
-                    .bounds(left + BTN_X + i * 56, top + BTN_ROW1, 26, 12).build());
-            saveLoadout[i] = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.loadout_save", i + 1), b -> sendLoadout(index, true))
-                    .bounds(left + BTN_X + i * 56 + 28, top + BTN_ROW1, 26, 12).build());
+            loadLoadout[i] = addRenderableWidget(Button.builder(Component.literal(String.valueOf(i + 1)), b -> pressLoadout(index))
+                    .bounds(left + BTN_X + i * 18, top + BTN_ROW1, 17, 12).build());
         }
+        saveToggle = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.loadout_save_mode"), b -> {
+            saveMode = !saveMode;
+            click();
+        }).bounds(left + BTN_X + 74, top + BTN_ROW1, 32, 12).build());
+        calling = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.calling_choose_short"), b -> openCalling())
+                .bounds(left + BTN_X + 108, top + BTN_ROW1, 50, 12).build());
         respec = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.respec"), b -> pressRespec())
-                .bounds(left + BTN_X, top + BTN_ROW2, 66, 12).build());
-        calling = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.calling_choose"), b -> openCalling())
-                .bounds(left + BTN_X + 70, top + BTN_ROW2, 92, 12).build());
+                .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
+        tryonBtn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon"), b -> toggleTryon())
+                .bounds(left + BTN_X + 52, top + BTN_ROW2, 36, 12).build());
+        pageBtn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.page_build"), b -> togglePage())
+                .bounds(left + BTN_X + 90, top + BTN_ROW2, 68, 12).build());
+        tryonOk = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_ok"), b -> tryonConfirm())
+                .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
+        tryonUndo = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_undo"), b -> tryonUndo())
+                .bounds(left + BTN_X + 52, top + BTN_ROW2, 50, 12).build());
+        tryonCancel = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_cancel"), b -> tryonCancel())
+                .bounds(left + BTN_X + 104, top + BTN_ROW2, 54, 12).build());
         RpgTabs.add(this::addRenderableWidget, width, height, RpgTabs.SKILLS);
+        if (!demoTry.isEmpty() && tryon == null) {
+            tryon = real().copyOf();
+            for (Skill s : demoTry) {
+                tryon.ranks.merge(s.id, 1, Integer::sum);
+                tryonOrder.add(s.id);
+            }
+            demoTry = new ArrayList<>();
+        }
         refresh();
+    }
+
+    // 撮影用: ビルドのページで開く
+    public SkillScreen buildPage() {
+        page = 1;
+        return this;
+    }
+
+    // 撮影用: 試着中 (仮に振った技を順に) の状態で開く
+    private List<Skill> demoTry = new ArrayList<>();
+
+    public SkillScreen tryOn(Skill... skills) {
+        demoTry = new ArrayList<>(List.of(skills));
+        return this;
     }
 
     // 撮影用: 技を選んだ状態で開く
@@ -122,8 +177,13 @@ public class SkillScreen extends Screen {
         return this;
     }
 
-    private SkillData data() {
+    private SkillData real() {
         return SkillManager.get(minecraft.player);
+    }
+
+    // 画面に見せる記録: 試着中は仮に振った写し
+    private SkillData data() {
+        return tryon != null && page == 0 ? tryon : real();
     }
 
     private int level() {
@@ -133,16 +193,29 @@ public class SkillScreen extends Screen {
     private void refresh() {
         SkillData d = data();
         learn.active = selected != null && d.canLearn(selected, level()) == SkillData.LearnResult.OK;
-        learn.visible = selected != null && d.treeOpen(selected.tree);
+        learn.visible = page == 0 && selected != null && d.treeOpen(selected.tree);
         if (selected != null) {
             learn.setMessage(d.rank(selected) >= d.rankLimit(selected) ? Component.translatable("gui.skyabyss.skill.learn_max")
                     : d.knows(selected) ? Component.translatable("gui.skyabyss.skill.learn_up") : Component.translatable("gui.skyabyss.skill.learn"));
         }
-        respec.active = d.spentPoints() > 0;
+        SkillData r = real();
+        boolean on = tryon != null;
+        respec.visible = !on;
+        tryonBtn.visible = !on;
+        pageBtn.visible = !on;
+        tryonOk.visible = on;
+        tryonUndo.visible = on;
+        tryonCancel.visible = on;
+        tryonOk.active = !tryonOrder.isEmpty();
+        tryonUndo.active = !tryonOrder.isEmpty();
+        tryonBtn.active = page == 0;
+        pageBtn.setMessage(Component.translatable(page == 0 ? "gui.skyabyss.skill.page_build" : "gui.skyabyss.skill.page_tree"));
+        respec.active = r.spentPoints() > 0;
         respec.setMessage(Component.translatable(respecArmed > 0 ? "gui.skyabyss.skill.respec_confirm" : "gui.skyabyss.skill.respec"));
         for (int i = 0; i < SkillRules.LOADOUTS; i++) {
-            loadLoadout[i].active = d.loadouts[i].saved;
+            loadLoadout[i].active = saveMode || r.loadouts[i].saved;
         }
+        saveToggle.setMessage(Component.translatable(saveMode ? "gui.skyabyss.skill.loadout_save_on" : "gui.skyabyss.skill.loadout_save_mode"));
         calling.visible = pendingCalling() > 0;
     }
 
@@ -162,9 +235,64 @@ public class SkillScreen extends Screen {
     }
 
     private void learnSelected() {
-        if (selected != null) {
-            PacketDistributor.sendToServer(new SkillLearnPayload(selected.id));
+        if (selected == null) {
+            return;
         }
+        if (tryon != null) {
+            // 試着: 画面の写しだけを進める (サーバーへは確定のときにまとめて送る)
+            if (tryon.canLearn(selected, level()) == SkillData.LearnResult.OK) {
+                tryon.ranks.merge(selected.id, 1, Integer::sum);
+                tryonOrder.add(selected.id);
+                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(Skills.SOUND_LEARN.get(), 1.8f, 0.3f));
+            } else {
+                notice(Component.translatable("message.skyabyss.skill.learn_failed." + tryon.canLearn(selected, level()).name().toLowerCase()));
+            }
+            return;
+        }
+        PacketDistributor.sendToServer(new SkillLearnPayload(selected.id));
+    }
+
+    private void toggleTryon() {
+        if (tryon != null) {
+            tryonCancel();
+            return;
+        }
+        tryon = real().copyOf();
+        tryonOrder.clear();
+        click();
+    }
+
+    private void tryonConfirm() {
+        if (tryon != null && !tryonOrder.isEmpty()) {
+            PacketDistributor.sendToServer(new SkillTryonPayload(new ArrayList<>(tryonOrder)));
+        }
+        tryon = null;
+        tryonOrder.clear();
+        click();
+    }
+
+    private void tryonCancel() {
+        tryon = null;
+        tryonOrder.clear();
+        click();
+    }
+
+    // 仮に振った最後の 1 つを戻す
+    private void tryonUndo() {
+        if (tryon == null || tryonOrder.isEmpty()) {
+            return;
+        }
+        String id = tryonOrder.remove(tryonOrder.size() - 1);
+        int left = tryon.ranks.merge(id, -1, Integer::sum);
+        if (left <= 0) {
+            tryon.ranks.remove(id);
+        }
+        click();
+    }
+
+    private void togglePage() {
+        page = page == 0 ? 1 : 0;
+        click();
     }
 
     private void openCalling() {
@@ -184,13 +312,22 @@ public class SkillScreen extends Screen {
         return !d.hasCalling() ? (ready >= 1 ? 1 : 0) : d.calling2.isEmpty() ? (ready >= 2 ? 2 : 0) : 0;
     }
 
-    private void sendLoadout(int index, boolean save) {
+    private void pressLoadout(int index) {
+        if (tryon != null) {
+            notice(Component.translatable("gui.skyabyss.skill.tryon_locked"));
+            return;
+        }
+        boolean save = saveMode;
+        saveMode = false;
         PacketDistributor.sendToServer(new SkillLoadoutPayload(index, save));
         click();
     }
 
     // 振り直しは二度押し (押しまちがえで技を失わないように)
     private void pressRespec() {
+        if (tryon != null) {
+            return;
+        }
         // 画面を開いている間はアクションバーが見えないので、断られる理由は先にここで出す (最後はサーバーが検める)
         int cost = SkillManager.respecCostFor(minecraft.player);
         if (!minecraft.player.isCreative() && !SkillManager.freeRespec(minecraft.player)) {
@@ -280,7 +417,15 @@ public class SkillScreen extends Screen {
         if (super.mouseClicked(mx, my, button)) {
             return true;
         }
-        SkillTree t = treeTabAt(mx, my);
+        if (page == 1) {
+            for (int[] h : hits) {
+                if (in(mx, my, h[0], h[1], h[2], h[3]) && h[4] != 4) {
+                    pressHit(h[4], h[5]);
+                    return true;
+                }
+            }
+        }
+        SkillTree t = page == 0 ? treeTabAt(mx, my) : null;
         if (t != null) {
             if (t != tree) {
                 tree = t;
@@ -291,7 +436,7 @@ public class SkillScreen extends Screen {
             }
             return true;
         }
-        Skill s = nodeAt(mx, my);
+        Skill s = page == 0 ? nodeAt(mx, my) : null;
         if (s != null) {
             selected = s;
             runeArmed = 0;
@@ -308,6 +453,10 @@ public class SkillScreen extends Screen {
         int slot = slotAt(mx, my);
         if (slot >= 0) {
             SkillData d = data();
+            if (tryon != null) {
+                notice(Component.translatable("gui.skyabyss.skill.tryon_locked"));
+                return true;
+            }
             if (slot >= d.slotCount()) {
                 notice(Component.translatable("gui.skyabyss.skill.slot_locked"));
                 return true;
@@ -343,8 +492,16 @@ public class SkillScreen extends Screen {
             return;
         }
         SkillData d = data();
+        if (tryon != null) {
+            notice(Component.translatable("gui.skyabyss.skill.tryon_locked"));
+            return;
+        }
         if (!d.runeAvailable(selected)) {
             notice(Component.translatable("gui.skyabyss.skill.rune_locked"));
+            return;
+        }
+        if (index == Rune.MASTERY && !d.runeUsable(selected, index)) {
+            notice(Component.translatable("gui.skyabyss.skill.mastery_locked", SkillRules.MASTERY_RUNE_LEVEL));
             return;
         }
         int current = d.rune(selected);
@@ -382,7 +539,7 @@ public class SkillScreen extends Screen {
             return true;
         }
         // 技を選んでいるとき、枠のキー (R・G・V・Z・B) でその枠に置ける
-        if (selected != null && !selected.active && data().knows(selected)) {
+        if (tryon == null && page == 0 && selected != null && !selected.active && data().knows(selected)) {
             for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
                 if (SkillClientSetup.SLOT_KEYS[i].matches(keyCode, scanCode)) {
                     notice(Component.translatable("gui.skyabyss.skill.passive_no_slot", Component.translatable(selected.nameKey())));
@@ -390,7 +547,7 @@ public class SkillScreen extends Screen {
                 }
             }
         }
-        if (selected != null && selected.active && data().knows(selected)) {
+        if (tryon == null && page == 0 && selected != null && selected.active && data().knows(selected)) {
             for (int i = 0; i < SkillClientSetup.SLOT_KEYS.length; i++) {
                 if (SkillClientSetup.SLOT_KEYS[i].matches(keyCode, scanCode)) {
                     if (i >= data().slotCount()) {
@@ -424,11 +581,19 @@ public class SkillScreen extends Screen {
         SkillData d = data();
         int level = level();
         g.drawCenteredString(font, title, left + W / 2, top + 8, TITLE);
-        renderTreeTabs(g, d);
-        renderTree(g, d, level);
-        hoverRune = 0;
-        renderInfo(g, d, level, mouseX, mouseY);
+        if (page == 0) {
+            renderTreeTabs(g, d);
+            renderTree(g, d, level);
+            hoverRune = 0;
+            renderInfo(g, d, level, mouseX, mouseY);
+        } else {
+            runeRows.clear();
+            renderBuild(g, d, level, mouseX, mouseY);
+        }
         renderBottom(g, d, level);
+        if (tryon != null && page == 0) {
+            g.drawString(font, Component.translatable("gui.skyabyss.skill.tryon_banner", tryonOrder.size()), left + 38, top + 25 + 0, 0xFF7FFFA0, false);
+        }
         if (noticeTicks > 0 && noticeText != null) {
             // 説明の欄の下端に、拒否の色で
             int alpha = Math.min(255, noticeTicks * 12);
@@ -476,7 +641,17 @@ public class SkillScreen extends Screen {
                 headColor = SOFT;
             }
         }
+        if (tryon != null) {
+            head = Component.empty();
+        }
         g.drawString(font, head, left + 38, top + 25, headColor, false);
+        if (tryon == null && SkillTag.of(tree) != null && tree != SkillTree.TRAVELER) {
+            int tier = SkillBuild.setTier(d, tree);
+            int hx = left + 38 + font.width(head) + 8;
+            for (int i = 0; i < 3; i++) {
+                g.fill(hx + i * 6, top + 27, hx + i * 6 + 4, top + 31, i < tier ? 0xFF000000 | GOLD : 0xFF3A404C);
+            }
+        }
         // 行の目印 (要るレベル)
         for (int tier = 0; tier < 4; tier++) {
             String lv = "Lv" + new int[] {1, 5, 12, 20}[tier];
@@ -528,12 +703,18 @@ public class SkillScreen extends Screen {
             // 段 (小さく、印の下)。要は段がないので出さない
             if (!s.keystone() || rank == 0) {
                 String r = s.keystone() ? "" : rank + "/" + d.rankLimit(s);
-                int color = rank >= d.rankLimit(s) ? GOLD : rank > 0 ? PALE : d.canLearn(s, level) == SkillData.LearnResult.OK ? TEXT : DIM;
+                boolean prov = tryon != null && rank > real().rank(s);
+                int color = prov ? 0x7FFFA0 : rank >= d.rankLimit(s) ? GOLD : rank > 0 ? PALE : d.canLearn(s, level) == SkillData.LearnResult.OK ? TEXT : DIM;
                 g.pose().pushPose();
                 g.pose().translate(x + NODE / 2f, y + NODE + 1, 0);
                 g.pose().scale(0.75f, 0.75f, 1f);
                 g.drawString(font, r, -font.width(r) / 2, 0, color, false);
                 g.pose().popPose();
+            }
+            // タグの色の点 (左上)
+            SkillTag tg = SkillTag.of(s);
+            if (tg != null) {
+                g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF000000 | tg.rgb);
             }
             // 能動の技には小さな菱形の印 (枠に置ける)。刻印を選んでいれば金
             if (s.active) {
@@ -560,6 +741,16 @@ public class SkillScreen extends Screen {
             lines.addAll(TextWrap.split(font, Component.translatable(tree.descKey()).withColor(SOFT), w));
             lines.add(statLine.copy().withColor(SOFT).getVisualOrderText());
             lines.add(FormattedCharSequence.EMPTY);
+            SkillTag treeTag = SkillTag.of(tree);
+            if (treeTag != null && tree != SkillTree.TRAVELER) {
+                int tier = SkillBuild.setTier(d, tree);
+                lines.add(Component.translatable("gui.skyabyss.skill.set_head", d.treePoints(tree), tier).withColor(PALE).getVisualOrderText());
+                for (int i = 0; i < 3; i++) {
+                    lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.set_line", SkillRules.SET_AT[i],
+                            Component.translatable("skillset.skyabyss." + treeTag.id + "." + (i + 1))).withColor(i < tier ? GOLD : DIM), w));
+                }
+                lines.add(FormattedCharSequence.EMPTY);
+            }
             if (SkillRules.CALLINGS && !d.hasCalling()) {
                 lines.addAll(TextWrap.split(font, Component.translatable("gui.skyabyss.skill.before_calling").withColor(LORE), w));
                 lines.add(FormattedCharSequence.EMPTY);
@@ -578,11 +769,20 @@ public class SkillScreen extends Screen {
         if (!s.keystone()) {
             kind.append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.rank", rank, limit));
         }
+        if (s.active) {
+            kind.append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.mastery_short", d.masteryLevel(s)));
+        }
+        if (d.granted(s)) {
+            kind.append(Component.literal("・")).append(Component.translatable("gui.skyabyss.skill.granted"));
+        }
         lines.add(kind.withColor(SOFT).getVisualOrderText());
         if (s.active) {
             int r = Math.max(1, rank);
-            int cooldown = rank > 0 ? SkillManager.cooldownFor(minecraft.player, s) : SkillRules.cooldownTicks(s, r);
-            lines.add(Component.translatable("gui.skyabyss.skill.cost", SkillRules.manaCost(s, r), SkillRules.fmtSeconds(cooldown))
+            // 試着の最中は、仮の段の数字 (待ち・マナは基準の値) を見せる
+            boolean live = tryon == null && rank > 0;
+            int cooldown = live ? SkillManager.cooldownFor(minecraft.player, s) : SkillRules.cooldownTicks(s, r);
+            int mana = live ? SkillManager.manaCostFor(minecraft.player, s) : SkillRules.manaCost(s, r);
+            lines.add(Component.translatable("gui.skyabyss.skill.cost", mana, SkillRules.fmtSeconds(cooldown))
                     .withColor(0x9FB8FF).getVisualOrderText());
         } else if (rank > 0) {
             lines.add(Component.translatable("gui.skyabyss.skill.passive_active").withColor(0x9FE8FF).getVisualOrderText());
@@ -630,7 +830,7 @@ public class SkillScreen extends Screen {
         // 刻印 (使う技のうち、刻印のあるもの): 3 つの行。極めていなければ理由
         List<Rune> runes = s.runes();
         boolean legend = legendShown(d, s);
-        boolean hasRunes = !runes.isEmpty() || legend;
+        boolean hasRunes = s.active;
         int runeHeight = !hasRunes ? 0 : 4 * 11 + 2 + (legend ? 13 : 0);
         // 入りきるなら、言い伝えの一行を効果の前に添える
         List<FormattedCharSequence> flavor = TextWrap.split(font, Component.translatable(s.flavorKey()).withStyle(st -> st.withColor(LORE).withItalic(true)), w);
@@ -659,14 +859,15 @@ public class SkillScreen extends Screen {
         MutableComponent head = Component.translatable("gui.skyabyss.skill.runes_head");
         if (!available) {
             head.append(Component.literal("  ")).append(Component.translatable(
-                    SkillRules.CALLINGS && !d.runesOpen(s) ? "gui.skyabyss.skill.runes_need_calling" : "gui.skyabyss.skill.runes_need_max", d.rank(s), s.maxRank));
+                    d.rank(s) >= s.maxRank ? "gui.skyabyss.skill.runes_need_mastery" : "gui.skyabyss.skill.runes_need_max", d.rank(s), s.maxRank));
         } else if (current == 0) {
             head.append(Component.literal("  ")).append(Component.translatable("gui.skyabyss.skill.runes_pick"));
         }
         g.drawString(font, head, x, y, available ? PALE : DIM, false);
         int ry = y + 11;
         List<Rune> list = s.runes();
-        int cell = (w - 4) / 3;
+        int cells = list.size() + 1;
+        int cell = (w - 4 - (cells - 1) * 2) / cells;
         for (int i = 0; i < list.size(); i++) {
             Rune r = list.get(i);
             int rx = x + i * (cell + 2);
@@ -682,6 +883,23 @@ public class SkillScreen extends Screen {
             runeRows.add(new int[] {rx, ry, cell, 12, r.index});
             if (hover) {
                 hoverRune = r.index;
+            }
+        }
+        // 熟練の刻印 (最後の 1 つ。熟練 3 から)
+        {
+            int rx = x + list.size() * (cell + 2);
+            boolean usable = d.runeUsable(s, Rune.MASTERY);
+            boolean mine = current == Rune.MASTERY;
+            boolean hover = in(mx, my, rx, ry, cell, 12);
+            int bg = mine ? 0xFF2A3A40 : hover && usable ? 0xFF222B36 : 0xFF161A22;
+            int edge = mine ? 0xFF000000 | GOLD : runeArmed == Rune.MASTERY ? 0xFF000000 | DENY : usable ? 0xFF6A8F5A : 0xFF2A2E38;
+            g.fill(rx, ry, rx + cell, ry + 12, edge);
+            g.fill(rx + 1, ry + 1, rx + cell - 1, ry + 11, bg);
+            Component name = Component.translatable("rune.skyabyss.mastery");
+            g.drawString(font, name, rx + (cell - font.width(name)) / 2, ry + 2, mine ? GOLD : usable ? 0xB8F2A8 : DIM, false);
+            runeRows.add(new int[] {rx, ry, cell, 12, Rune.MASTERY});
+            if (hover) {
+                hoverRune = Rune.MASTERY;
             }
         }
         // 伝説の書き換え: 全幅の行 (その武器を持つあいだ)
@@ -705,6 +923,16 @@ public class SkillScreen extends Screen {
         int shown = hoverRune != 0 ? hoverRune : current;
         Rune shownRune = shown == 0 ? null : Rune.of(s, shown);
         int ty = ry + (legendRow ? 28 : 14);
+        if (shown == Rune.MASTERY) {
+            for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("rune.skyabyss.mastery.effect", SkillRules.MASTERY_RUNE_LEVEL,
+                    d.masteryLevel(s)).withColor(shown == current ? TEXT : PALE), w)) {
+                if (ty + 9 > top + INFO_Y + INFO_H - 1) {
+                    break;
+                }
+                g.drawString(font, line, x, ty, TEXT, false);
+                ty += 10;
+            }
+        }
         if (shownRune != null) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable(shownRune.effectKey()).withColor(shown == current ? TEXT : PALE), w)) {
                 if (ty + 9 > top + INFO_Y + INFO_H - 1) {
@@ -762,7 +990,11 @@ public class SkillScreen extends Screen {
 
     private void renderBottom(GuiGraphics g, SkillData d, int level) {
         int points = d.unspentPoints(level);
-        g.drawString(font, Component.translatable("gui.skyabyss.skill.points", points), left + 10, top + 158, points > 0 ? GOLD : SOFT, false);
+        g.drawString(font, Component.translatable(tryon != null ? "gui.skyabyss.skill.points_tryon" : "gui.skyabyss.skill.points", points), left + 10, top + 158,
+                tryon != null ? 0x7FFFA0 : points > 0 ? GOLD : SOFT, false);
+        // 枠の組 (近接など / 弓): 武器を持ち替えると入れ替わる
+        Component barLabel = Component.translatable(real().bar == 1 ? "gui.skyabyss.skill.bar_bow" : "gui.skyabyss.skill.bar_melee");
+        g.drawString(font, barLabel, left + SLOT_X - 3 - font.width(barLabel), top + SLOT_Y + 7, SOFT, false);
         double max = SkillManager.maxMana(minecraft.player);
         g.drawString(font, Component.translatable("gui.skyabyss.skill.mana", Math.round(Math.max(0, d.mana)), Math.round(max)),
                 left + 10, top + 169, 0x9FB8FF, false);
@@ -791,12 +1023,25 @@ public class SkillScreen extends Screen {
     }
 
     private void renderHover(GuiGraphics g, SkillData d, int mx, int my) {
-        Skill node = nodeAt(mx, my);
+        if (page == 1 && buildTooltip(g, real(), mx, my)) {
+            return;
+        }
+        Skill node = page == 0 ? nodeAt(mx, my) : null;
         if (node != null) {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable(node.nameKey()).withColor(GOLD));
             lines.add(Component.translatable(node.keystone() ? "gui.skyabyss.skill.kind_keystone"
                     : node.active ? "gui.skyabyss.skill.kind_active" : "gui.skyabyss.skill.kind_passive").withColor(SOFT));
+            SkillTag nodeTag = SkillTag.of(node);
+            if (nodeTag != null) {
+                lines.add(Component.translatable("gui.skyabyss.skill.tag_line", Component.translatable(nodeTag.nameKey())).withColor(nodeTag.rgb));
+            }
+            if (node.active) {
+                int ml = d.masteryLevel(node);
+                int xp = d.masteryXp(node);
+                lines.add(Component.translatable("gui.skyabyss.skill.mastery_line", ml, xp,
+                        ml >= SkillRules.MASTERY_AT.length ? "-" : String.valueOf(SkillRules.MASTERY_AT[ml])).withColor(PALE));
+            }
             if (node.active && d.knows(node)) {
                 lines.add(Component.translatable("gui.skyabyss.skill.slot_hint").withColor(DIM));
             } else if (!node.active && d.knows(node)) {
@@ -824,22 +1069,38 @@ public class SkillScreen extends Screen {
             g.renderComponentTooltip(font, lines, mx, my);
             return;
         }
-        SkillTree t = treeTabAt(mx, my);
+        SkillTree t = page == 0 ? treeTabAt(mx, my) : null;
         if (t != null) {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable(t.nameKey()).withColor(GOLD));
             lines.add(Component.translatable(t.descKey()).withColor(SOFT));
+            SkillTag tabTag = SkillTag.of(t);
+            if (tabTag != null && t != SkillTree.TRAVELER) {
+                int tier = SkillBuild.setTier(d, t);
+                lines.add(Component.translatable("gui.skyabyss.skill.set_head", d.treePoints(t), tier).withColor(PALE));
+                for (int i = 0; i < 3; i++) {
+                    lines.add(Component.translatable("gui.skyabyss.skill.set_line", SkillRules.SET_AT[i],
+                            Component.translatable("skillset.skyabyss." + tabTag.id + "." + (i + 1))).withColor(i < tier ? GOLD : DIM));
+                }
+            }
             g.renderComponentTooltip(font, lines, mx, my);
             return;
         }
         for (int i = 0; i < SkillRules.LOADOUTS; i++) {
-            if (loadLoadout[i].isHovered() || saveLoadout[i].isHovered()) {
-                boolean save = saveLoadout[i].isHovered();
-                List<FormattedCharSequence> lines = new ArrayList<>(TextWrap.split(font, Component.translatable(save ? "gui.skyabyss.skill.loadout_save_tip" : "gui.skyabyss.skill.loadout_load_tip",
-                        i + 1, d.loadouts[i].saved ? Component.translatable("gui.skyabyss.skill.loadout_saved") : Component.translatable("gui.skyabyss.skill.loadout_empty")).withColor(TEXT), 190));
+            if (loadLoadout[i].isHovered()) {
+                SkillData rd = real();
+                List<FormattedCharSequence> lines = new ArrayList<>(TextWrap.split(font, Component.translatable(saveMode ? "gui.skyabyss.skill.loadout_save_tip" : "gui.skyabyss.skill.loadout_load_tip",
+                        i + 1, rd.loadouts[i].saved ? Component.translatable("gui.skyabyss.skill.loadout_saved") : Component.translatable("gui.skyabyss.skill.loadout_empty")).withColor(TEXT), 190));
                 g.renderTooltip(font, lines, mx, my);
                 return;
             }
+        }
+        if (saveToggle.isHovered() || tryonBtn.isHovered() || pageBtn.isHovered() || tryonOk.isHovered() || tryonUndo.isHovered() || tryonCancel.isHovered()) {
+            String key = saveToggle.isHovered() ? "gui.skyabyss.skill.loadout_mode_tip" : tryonBtn.isHovered() ? "gui.skyabyss.skill.tryon_tip"
+                    : pageBtn.isHovered() ? "gui.skyabyss.skill.page_tip" : tryonOk.isHovered() ? "gui.skyabyss.skill.tryon_ok_tip"
+                    : tryonUndo.isHovered() ? "gui.skyabyss.skill.tryon_undo_tip" : "gui.skyabyss.skill.tryon_cancel_tip";
+            g.renderTooltip(font, new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS).withColor(TEXT), 190)), mx, my);
+            return;
         }
         if (respec.isHovered()) {
             int cost = SkillManager.respecCostFor(minecraft.player);
@@ -852,5 +1113,209 @@ public class SkillScreen extends Screen {
             }
             g.renderTooltip(font, lines, mx, my);
         }
+    }
+
+    // ---------------------------------------------------------------- ビルドのページ (構え・連鎖・タグ・鍵石)
+    private void pressHit(int type, int arg) {
+        switch (type) {
+            case 1 -> {
+                SkillData r = real();
+                if (r.stance == arg) {
+                    return;
+                }
+                if (r.stanceCd > 0 && !minecraft.player.isCreative()) {
+                    notice(Component.translatable("message.skyabyss.skill.stance_cooldown"));
+                    return;
+                }
+                PacketDistributor.sendToServer(new SkillStancePayload(arg));
+                click();
+            }
+            case 2 -> {
+                SkillData r = real();
+                if ((r.chainMask & (1 << arg)) == 0 && Integer.bitCount(r.chainMask) >= SkillRules.CHAIN_MAX) {
+                    notice(Component.translatable("message.skyabyss.skill.chain_failed.too_many"));
+                    return;
+                }
+                PacketDistributor.sendToServer(new SkillChainPayload(arg));
+                click();
+            }
+            case 3 -> {
+                SkillData r = real();
+                SkillKeystone k = SkillKeystone.values()[arg];
+                if (!r.keystones.contains(k.id)) {
+                    if (r.keystones.size() >= SkillRules.KEYSTONE_MAX) {
+                        notice(Component.translatable("message.skyabyss.skill.keystone_failed.full"));
+                        return;
+                    }
+                    if (!r.keystoneReachable(k)) {
+                        notice(Component.translatable("message.skyabyss.skill.keystone_failed.not_reached", SkillRules.KEYSTONE_TREE_POINTS,
+                                Component.translatable(k.tag.tree.nameKey())));
+                        return;
+                    }
+                    if (r.unspentPoints(level()) < 1) {
+                        notice(Component.translatable("gui.skyabyss.skill.need_points"));
+                        return;
+                    }
+                }
+                PacketDistributor.sendToServer(new SkillKeystonePayload(k.id));
+                click();
+            }
+            default -> {
+            }
+        }
+    }
+
+    private void renderBuild(GuiGraphics g, SkillData d, int level, int mx, int my) {
+        hits.clear();
+        int x0 = left + 12;
+        int colW = 170;
+        int y = top + 24;
+        // 構え
+        g.drawString(font, Component.translatable("gui.skyabyss.skill.stance_head"), x0, y, GOLD, false);
+        Component cd = d.stanceCd > 0 ? Component.translatable("gui.skyabyss.skill.stance_cd", SkillRules.fmtSeconds(d.stanceCd))
+                : Component.translatable("gui.skyabyss.skill.stance_ready");
+        g.drawString(font, cd, x0 + colW - font.width(cd), y, d.stanceCd > 0 ? DENY : SOFT, false);
+        y += 11;
+        SkillStance shown = SkillStance.of(d.stance);
+        for (int i = 0; i < 4; i++) {
+            SkillStance st = SkillStance.of(i);
+            int cx = x0 + i * 43;
+            boolean mine = d.stance == i;
+            boolean hover = in(mx, my, cx, y, 41, 13);
+            g.fill(cx, y, cx + 41, y + 13, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : 0xFF3A4452);
+            g.fill(cx + 1, y + 1, cx + 40, y + 12, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
+            Component name = Component.translatable(st.nameKey());
+            g.drawString(font, name, cx + (41 - font.width(name)) / 2, y + 3, mine ? GOLD : TEXT, false);
+            hits.add(new int[] {cx, y, 41, 13, 1, i});
+            if (hover) {
+                shown = st;
+            }
+        }
+        y += 15;
+        int dy = y;
+        for (FormattedCharSequence line : TextWrap.split(font, Component.translatable(shown.descKey()).withColor(SOFT), colW)) {
+            if (dy + 9 > top + 84) {
+                break;
+            }
+            g.drawString(font, line, x0, dy, SOFT, false);
+            dy += 10;
+        }
+        // 連鎖
+        y = top + 86;
+        g.drawString(font, Component.translatable("gui.skyabyss.skill.chain_head", Integer.bitCount(d.chainMask), SkillRules.CHAIN_MAX), x0, y, GOLD, false);
+        y += 11;
+        for (int i = 0; i < d.slotCount(); i++) {
+            int cx = x0 + i * 32;
+            g.blit(SkillHud.TEXTURE, cx, y, 18, 18, 420, 384, 44, 44, SkillHud.TEX_W, SkillHud.TEX_H);
+            Skill s = d.slot(i);
+            if (s != null) {
+                SkillHud.drawIcon(g, s.iconIndex(), cx + 1, y + 1);
+            }
+            if (i + 1 < d.slotCount()) {
+                boolean on = (d.chainMask & (1 << i)) != 0;
+                int bx = cx + 20;
+                boolean hover = in(mx, my, bx, y, 10, 18);
+                g.fill(bx, y + 4, bx + 10, y + 14, on ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : 0xFF3A4452);
+                g.fill(bx + 1, y + 5, bx + 9, y + 13, on ? 0xFF3A3220 : 0xFF161A22);
+                g.drawString(font, "\u203a", bx + 3, y + 5, on ? GOLD : SOFT, false);
+                hits.add(new int[] {bx, y + 4, 10, 10, 2, i});
+            }
+        }
+        // タグ
+        y = top + 118;
+        g.drawString(font, Component.translatable("gui.skyabyss.skill.tag_head"), x0, y, GOLD, false);
+        y += 11;
+        for (int i = 0; i < SkillTag.values().length; i++) {
+            SkillTag t = SkillTag.values()[i];
+            int cx = x0 + i * 34;
+            int n = SkillBuild.tagCount(minecraft.player, t);
+            boolean hover = in(mx, my, cx, y, 32, 13);
+            g.fill(cx, y, cx + 32, y + 13, hover ? 0xFF6A7A8A : 0xFF3A4452);
+            g.fill(cx + 1, y + 1, cx + 31, y + 12, 0xFF161A22);
+            g.fill(cx + 3, y + 4, cx + 8, y + 9, 0xFF000000 | t.rgb);
+            String num = String.valueOf(n);
+            g.drawString(font, num, cx + 12, y + 3, n >= SkillRules.TAG_STEP2 ? GOLD : n >= SkillRules.TAG_STEP1 ? PALE : n > 0 ? TEXT : DIM, false);
+            if (SkillBuild.condActive(minecraft.player, t) && n >= SkillRules.COND_MIN_TAGS) {
+                g.fill(cx + 25, y + 4, cx + 29, y + 8, 0xFF000000 | GOLD);
+            }
+            hits.add(new int[] {cx, y, 32, 13, 4, i});
+        }
+        // 鍵石 (右の列)
+        int x1 = left + 194;
+        int w1 = 176;
+        y = top + 24;
+        g.drawString(font, Component.translatable("gui.skyabyss.skill.keystone_head", d.keystones.size(), SkillRules.KEYSTONE_MAX), x1, y, GOLD, false);
+        y += 11;
+        for (int i = 0; i < SkillKeystone.values().length; i++) {
+            SkillKeystone k = SkillKeystone.values()[i];
+            boolean mine = d.keystones.contains(k.id);
+            boolean reach = d.keystoneReachable(k);
+            boolean hover = in(mx, my, x1, y, w1, 17);
+            g.fill(x1, y, x1 + w1, y + 17, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : reach ? 0xFF4A5A6A : 0xFF2A2E38);
+            g.fill(x1 + 1, y + 1, x1 + w1 - 1, y + 16, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
+            g.fill(x1 + 3, y + 3, x1 + 7, y + 7, 0xFF000000 | k.tag.rgb);
+            g.drawString(font, Component.translatable(k.nameKey()), x1 + 10, y + 1, mine ? GOLD : reach ? TEXT : DIM, false);
+            g.pose().pushPose();
+            g.pose().translate(x1 + 10, y + 10.5f, 0);
+            g.pose().scale(0.7f, 0.7f, 1f);
+            g.drawString(font, Component.translatable(k.effectKey()), 0, 0, mine ? PALE : reach ? SOFT : DIM, false);
+            g.pose().popPose();
+            hits.add(new int[] {x1, y, w1, 17, 3, i});
+            y += 18;
+        }
+        if (noticeTicks > 0 && noticeText != null) {
+            int alpha = Math.min(255, noticeTicks * 12);
+            List<FormattedCharSequence> lines = TextWrap.split(font, noticeText, 330);
+            int ny = top + 146 - lines.size() * 10;
+            g.fill(left + 10, ny - 2, left + W - 10, top + 149, (Math.min(200, alpha) << 24) | 0x1A1020);
+            for (FormattedCharSequence line : lines) {
+                g.drawString(font, line, left + 14, ny, (alpha << 24) | DENY, false);
+                ny += 10;
+            }
+        }
+    }
+
+    private boolean buildTooltip(GuiGraphics g, SkillData d, int mx, int my) {
+        for (int[] h : hits) {
+            if (!in(mx, my, h[0], h[1], h[2], h[3])) {
+                continue;
+            }
+            List<Component> lines = new ArrayList<>();
+            switch (h[4]) {
+                case 1 -> {
+                    SkillStance st = SkillStance.of(h[5]);
+                    lines.add(Component.translatable(st.nameKey()).withColor(GOLD));
+                    lines.add(Component.translatable(st.descKey()).withColor(SOFT));
+                    lines.add(Component.translatable("gui.skyabyss.skill.stance_tip", SkillClientSetup.STANCE_KEY.getTranslatedKeyMessage(),
+                            SkillRules.fmtSeconds(SkillRules.STANCE_SWAP_TICKS)).withColor(DIM));
+                }
+                case 2 -> {
+                    lines.add(Component.translatable("gui.skyabyss.skill.chain_tip", SkillRules.CHAIN_MAX, SkillRules.fmtSeconds(SkillRules.CHAIN_WINDOW),
+                            Math.round(SkillRules.CHAIN_POWER * 100)).withColor(TEXT));
+                }
+                case 3 -> {
+                    SkillKeystone k = SkillKeystone.values()[h[5]];
+                    lines.add(Component.translatable(k.nameKey()).withColor(k.tag.rgb));
+                    lines.add(Component.translatable(k.effectKey()).withColor(TEXT));
+                    lines.add(Component.translatable("gui.skyabyss.skill.keystone_need", SkillRules.KEYSTONE_TREE_POINTS, Component.translatable(k.tag.tree.nameKey()),
+                            d.treePoints(k.tag.tree)).withColor(d.keystoneReachable(k) ? SOFT : DENY));
+                }
+                default -> {
+                    SkillTag t = SkillTag.values()[h[5]];
+                    int n = SkillBuild.tagCount(minecraft.player, t);
+                    int extra = SkillBuild.extraTagCount(minecraft.player, t);
+                    lines.add(Component.translatable(t.nameKey()).withColor(t.rgb));
+                    lines.add(Component.translatable("gui.skyabyss.skill.tag_count", n, n - extra, extra,
+                            Math.round(SkillRules.TAG_POWER_PER * Math.min(SkillRules.TAG_COUNT_CAP, n) * 100)).withColor(TEXT));
+                    lines.add(Component.translatable("gui.skyabyss.skill.tag_step", SkillRules.TAG_STEP1, SkillRules.TAG_STEP2,
+                            Component.translatable("tag.skyabyss." + t.id + ".step")).withColor(n >= SkillRules.TAG_STEP1 ? PALE : DIM));
+                    lines.add(Component.translatable("gui.skyabyss.skill.tag_cond", SkillRules.COND_MIN_TAGS, SkillRules.COND_BIG_TAGS,
+                            Component.translatable("tag.skyabyss." + t.id + ".cond")).withColor(n >= SkillRules.COND_MIN_TAGS ? PALE : DIM));
+                }
+            }
+            g.renderComponentTooltip(font, lines, mx, my);
+            return true;
+        }
+        return false;
     }
 }
