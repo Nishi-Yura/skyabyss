@@ -29,14 +29,14 @@ public final class EmberWhispers {
     static final List<Whisper> WHISPERS = List.of(
             new Whisper("mouth", true, false, p -> near(p, ARRIVAL, 6, 3)),
             new Whisper("throat", false, true, p -> rest("throat").area().grow(2).contains(p)),
-            new Whisper("hub", true, false, p -> HUB.contains(p) && EmberBodyBuilder.hubDist(p.getX(), p.getZ()) < 11),
-            new Whisper("ash", false, false, p -> HUB.contains(p) && EmberBodyBuilder.hubDist(p.getX(), p.getZ()) >= 11),
+            new Whisper("hub", true, false, p -> HUB.contains(p) && EmberBodyBuilder.hubDist(p.getX(), p.getZ()) < 16),
+            new Whisper("ash", false, false, p -> HUB.contains(p) && EmberBodyBuilder.hubDist(p.getX(), p.getZ()) >= 16),
             new Whisper("west", false, true, p -> rest("w0").area().grow(1).contains(p)),
             new Whisper("east", false, true, p -> rest("e0").area().grow(1).contains(p)),
             new Whisper("south", false, true, p -> rest("s0").area().grow(1).contains(p)),
             new Whisper("well", true, false, p -> EmberBodyBuilder.wellDist(p.getX(), p.getZ()) <= WELL_RADIUS && p.getY() > WELL_BOTTOM
                     && p.getY() < WELL_BOTTOM + 14),
-            new Whisper("crater", true, false, p -> EmberBodyBuilder.wellDist(p.getX(), p.getZ()) <= 12 && p.getY() >= EmberBodyBuilder.crater()),
+            new Whisper("crater", true, false, p -> EmberBodyBuilder.wellDist(p.getX(), p.getZ()) <= 14 && p.getY() >= EmberBodyBuilder.crater()),
             new Whisper("back", true, false, EmberWhispers::onBackTop),
             new Whisper("heart", true, true, p -> HEART_ANTE.grow(1).contains(p)));
 
@@ -53,7 +53,7 @@ public final class EmberWhispers {
 
     // 背の上 (外) に立っている (火山より南、背骨のまわり)
     static boolean onBackTop(BlockPos p) {
-        if (p.getZ() < -5 || p.getZ() > 120) {
+        if (p.getZ() < 5 || p.getZ() > 270) {
             return false;
         }
         int top = EmberBodyBuilder.BODY.shellTop(p.getX(), p.getZ());

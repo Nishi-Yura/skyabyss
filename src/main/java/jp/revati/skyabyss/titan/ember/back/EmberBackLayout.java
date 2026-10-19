@@ -10,7 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-// 余燼の背 (ember_back) の配置図: 部屋の箱と休み場 (docs/design/13_ember.md の 3.3節、26 の 9 章「余燼の拡大」)。
+// 余燼の背 (ember_back) の配置図: 部屋の箱と休み場 (docs/design/13_ember.md の 3.3節、26 の 11 章「余燼の拡大」)。
 //
 // 版 20 で水平 x1.6・垂直 x1.3 の体 (body.bin。tools/gen_ember_back_body.py の既定) に合わせて引き直した。
 // 戦いの部屋 (鍛え手の間 半径 13・熾の底 半径 16 とその前室) の大きさは変えない (縮めるかどうかは判断待ち)。位置だけ体に合わせた。
@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 // 箱の中の座標は、できるだけ箱の角 (min) や中心からの相対で書くこと。
 public final class EmberBackLayout {
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。13〜: 版 12 までの履歴は docs/design/13 の 3.3節。
-    // 20: 体を x1.6・y1.3 に (26 の 9 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
+    // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
     public static final int LAYOUT_VERSION = 20;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;

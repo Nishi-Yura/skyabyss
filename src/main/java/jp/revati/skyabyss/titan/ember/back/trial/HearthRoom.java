@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-// 火守りの谷の部屋の中身 (13 の 5.4節、26 の 9 章。部屋の箱は EmberBackLayout.SOUTH: x -17..17、y 83..112、z -8..66、床 83)。
+// 火守りの谷の部屋の中身 (13 の 5.4節、26 の 11 章。部屋の箱は EmberBackLayout.SOUTH: x -17..17、y 83..112、z -8..66、床 83)。
 // 流れは南へ一本: 入口 (z -7) → 灰降りの庭 (z -7..10。休み場 s0・灰の木・宝箱) → 灰運びの道と噴気の谷 (z 11..40。噴気の割れ目 16 本、
 //   灰溜まり 4 か所、燠虫 2 体) → 火床の壇 (z 44..48。火床は z 46) → 熾り石の岸 (z 56..65)。
 // 天井の中ほど (z 22..52) は背の亀裂 (CRACK) へ抜ける (背の上から灰が降りる所)。亀裂そのものは箱の外 (B)。

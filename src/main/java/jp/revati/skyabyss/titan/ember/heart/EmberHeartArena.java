@@ -299,6 +299,8 @@ public final class EmberHeartArena {
     // B の体の builder から呼ばれる形 (EmberBackRooms.register)。箱の中は空気で、いちばん下の段に仮の床がある
     public static void buildRoom(ServerLevel level, EmberBackLayout.Box box) {
         build(level);
+        // 作り直すと部屋の中の歩く道の灯りも消えるので置き直す (置き換えてよい石の所だけ)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
     }
 
     public static void build(ServerLevel level) {

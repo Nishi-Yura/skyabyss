@@ -117,5 +117,7 @@ public final class EmberBackRooms {
                 }
             }
         }
+        // 部屋を作り直すと、部屋の中の歩く道の灯り (route_lamps.json) も消えるので、置き直す (置き換えてよい石の所だけ。何度呼んでも同じ)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
     }
 }

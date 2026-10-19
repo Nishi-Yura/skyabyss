@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 余燼の背の「区」ごとの飾りと材質 (版 20。26 の 9 章)。体の中が一つの石の洞窟に見えないように、区ごとに材質・形・灯りの言葉を変える:
+// 余燼の背の「区」ごとの飾りと材質 (版 20。26 の 11 章)。体の中が一つの石の洞窟に見えないように、区ごとに材質・形・灯りの言葉を変える:
 //   喉の首 = 肉と骨の壁、尾根の広間 = 玄武の鱗の尾根 (段になった黒い岩の背と骨の肋)、坂 = 灯りの道、
 //   炉心の広間 = 火口の真下の円形の大聖堂 (三つの扉に色の柱: 西 灰・青白、東 橙、南 赤)、
 //   冷えた溶岩洞 = 黒い玄武岩の丸い洞 (熔脈 = マグマの筋、床の灯りの列)、背へ出る洞 = 同じ洞、井戸 = 壁の灯り。

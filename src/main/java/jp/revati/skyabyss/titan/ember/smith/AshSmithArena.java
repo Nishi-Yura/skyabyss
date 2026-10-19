@@ -171,6 +171,8 @@ public final class AshSmithArena {
             }
         }
         buildFurnace(level, false);
+        // 作り直すと部屋の中の歩く道の灯りも消えるので置き直す (置き換えてよい石の所だけ)
+        jp.revati.skyabyss.titan.light.RouteLamps.place(level, "ember");
     }
 
     private static void buildTrough(ServerLevel level, BlockPos c) {

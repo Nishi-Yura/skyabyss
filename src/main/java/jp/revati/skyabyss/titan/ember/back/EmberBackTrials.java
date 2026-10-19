@@ -80,7 +80,7 @@ public final class EmberBackTrials {
     // 炉の火が三度弱まってから門が開くまで (tick)
     public static final int GATE_OPEN_TICKS = 70;
     // ピースフルのあいだ喉の坂を封じる所 (広間の手前)
-    public static final int PEACEFUL_SEAL_Z = -60;
+    public static final int PEACEFUL_SEAL_Z = -90; // 坂 (幅 7・高さ 6) の上の方。広間の手前
     private static final String TAG_CHECKPOINT = "skyabyss_ember_checkpoint";
     private static final String TAG_CHECKPOINT_EPOCH = "skyabyss_ember_checkpoint_epoch";
     private static final String TAG_SEEN_EPOCH = "skyabyss_ember_epoch";
@@ -726,7 +726,7 @@ public final class EmberBackTrials {
         }
         List<BlockPos> seal = new ArrayList<>();
         for (int x = -3; x <= 3; x++) {
-            for (int y = f + 1; y <= f + 5; y++) {
+            for (int y = f + 1; y <= f + 6; y++) {
                 BlockPos p = new BlockPos(x, y, PEACEFUL_SEAL_Z);
                 BlockState s = level.getBlockState(p);
                 if (s.isAir() || s.is(ModBlocks.SEALED_GATE.get()) && s.getValue(SealedGateBlock.OPEN) == peaceful) {

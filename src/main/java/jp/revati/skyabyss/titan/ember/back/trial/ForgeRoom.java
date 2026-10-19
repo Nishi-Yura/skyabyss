@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 鍛えの間の部屋の中身 (13 の 5.3節、26 の 9 章。部屋の箱は EmberBackLayout.EAST: x 24..64、y 86..108、z -14..56、床 86)。
+// 鍛えの間の部屋の中身 (13 の 5.3節、26 の 11 章。部屋の箱は EmberBackLayout.EAST: x 24..64、y 86..108、z -14..56、床 86)。
 // 流れは南へ一本: 入口 → 鍛えの回廊 (z -13..19。色の見本・手順の碑・工房・灯りの道) → 前室 (z 20..33。休み場 e0) → 柱の列 (z 34)
 //   → 金床と刻み (z 39〜41)・焼き入れの槽 → 鞴 (z 48)・大炉 (z 50〜54) → 奥の壁 (z 57〜59) に鍛え手の扉 (封印の扉)。扉の前は B の取っておく場所。
 // 版 12 までの部屋 (z -8..28) を x +18・y +6・z +28 に移した所が、道具のある所 (Forge.DX・DY・DZ)。回廊は新しく足した前庭。

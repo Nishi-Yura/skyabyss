@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-// 灰の道の部屋の中身 (13 の 5.2節、26 の 9 章。部屋の箱は EmberBackLayout.WEST。B が箱を掘ったあとに EmberBackRooms から呼ばれる)。
+// 灰の道の部屋の中身 (13 の 5.2節、26 の 11 章。部屋の箱は EmberBackLayout.WEST。B が箱を掘ったあとに EmberBackRooms から呼ばれる)。
 // 箱: x -62..-24、y 77..106、z -14..112。流れは南へ一本: 入口 → 灰降りの庭 (休み場 w0・壺の台・灰の木・墓所) z -13..14
 //   → 試しの流れ (幅いっぱいの溶岩の溝。壺の使い方を教える) z 15..21 → 試しの岸 z 22..31 → 第一の湖 z 32..62 (島 4)
 //   → 中ノ岸 (休み場 w1) z 63..76 → 第二の湖 z 77..104 (島 4。蛾と燠虫が出る = ひねり) → 奥の岸 z 105..111 (熾り石)。
