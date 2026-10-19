@@ -595,7 +595,7 @@ public final class OpeningDirector {
     }
 
     // ---------------------------------------------------------------- 開発用 (コマンド)
-    static String loreOf(OpeningBeat beat) {
+    public static String loreOf(OpeningBeat beat) {
         return switch (beat) {
             case CAMP -> "prologue/camp";
             case FOOTPRINTS -> "prologue/footprints";

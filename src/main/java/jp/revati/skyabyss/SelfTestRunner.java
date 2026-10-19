@@ -121,6 +121,7 @@ public final class SelfTestRunner {
         steps.add(Step.once("grave", 40, jp.revati.skyabyss.grave.GraveSelfTest::runSelfTest));
         // 留め袋 (登録の表・保存と同期・入れる/出す・拾う・掃除・倒れても残る・読む側・移し替え)。docs/design/22 の 13 章
         steps.add(Step.once("pouch", jp.revati.skyabyss.pouch.PouchSelfTest::runSelfTest));
+        steps.add(Step.once("playtest", 40, jp.revati.skyabyss.playtest.PlaytestSelfTest::runSelfTest));
         steps.add(Step.once("item glow", jp.revati.skyabyss.glow.ItemGlowSelfTest::runSelfTest));
         steps.add(Step.once("progress", ProgressSelfTest::runSelfTest));
         steps.add(Step.once("lore", LoreSelfTest::runSelfTest));
