@@ -14,12 +14,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 
-// 人ごとの「一度きり」の記録 (オーバーワールドに一つ。死んでも・パーティが変わっても残る)。今は追憶の宝を受け取った印だけ
+// 人ごとの「一度きり」の記録 (オーバーワールドに一つ。死んでも・パーティが変わっても残る)。追憶の宝を受け取った印と、巨神ごとの誓いの最高の段 (控え帳に出す)
 public final class FirstRunData extends SavedData {
     private static final String NAME = "skyabyss_first_run";
     private static final Factory<FirstRunData> FACTORY = new Factory<>(FirstRunData::new, FirstRunData::load);
 
     private final Map<UUID, Set<String>> keepsakes = new HashMap<>();
+    // 人 → 巨神 → これまでに心臓を止めた一番高い誓いの段
+    private final Map<UUID, Map<String, Integer>> vowBest = new HashMap<>();
 
     public static FirstRunData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(FACTORY, NAME);
@@ -37,6 +39,28 @@ public final class FirstRunData extends SavedData {
             setDirty();
         }
         return added;
+    }
+
+    public int vowBest(UUID player, String titan) {
+        Map<String, Integer> m = vowBest.get(player);
+        return m == null ? 0 : m.getOrDefault(titan, 0);
+    }
+
+    // 段を記録する (今より高いときだけ)。上がったら true
+    public boolean recordVowBest(UUID player, String titan, int level) {
+        if (level <= vowBest(player, titan)) {
+            return false;
+        }
+        vowBest.computeIfAbsent(player, k -> new HashMap<>()).put(titan, level);
+        setDirty();
+        return true;
+    }
+
+    // 自己テスト用
+    public void forgetVowBest(UUID player) {
+        if (vowBest.remove(player) != null) {
+            setDirty();
+        }
     }
 
     // 自己テスト・コマンド用: 印を消す
@@ -57,6 +81,15 @@ public final class FirstRunData extends SavedData {
             }
             data.keepsakes.put(UUID.fromString(key), set);
         }
+        CompoundTag best = tag.getCompound("VowBest");
+        for (String key : best.getAllKeys()) {
+            CompoundTag per = best.getCompound(key);
+            Map<String, Integer> m = new HashMap<>();
+            for (String titan : per.getAllKeys()) {
+                m.put(titan, per.getInt(titan));
+            }
+            data.vowBest.put(UUID.fromString(key), m);
+        }
         return data;
     }
 
@@ -69,6 +102,13 @@ public final class FirstRunData extends SavedData {
             all.put(player.toString(), list);
         });
         tag.put("Keepsakes", all);
+        CompoundTag best = new CompoundTag();
+        vowBest.forEach((player, m) -> {
+            CompoundTag per = new CompoundTag();
+            m.forEach(per::putInt);
+            best.put(player.toString(), per);
+        });
+        tag.put("VowBest", best);
         return tag;
     }
 }

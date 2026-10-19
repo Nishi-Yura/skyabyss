@@ -113,6 +113,9 @@ public final class TrialSteles {
             if (p.level() != back) {
                 Notice.hint(p, "message.skyabyss.steles.party_rung",
                         name == null ? Component.translatable("trial.skyabyss." + titan + "_" + trial) : name);
+            } else if (!FirstRun.isFirstRun(back, group)) {
+                // 周回の言い回し (rpg_brushup B4): 石が鳴ったとき、背中の中の人に一行
+                Notice.hint(p, "message.skyabyss.steles.rung_repeat." + titan);
             }
             Quests.poll(p, false);
         }
@@ -158,6 +161,9 @@ public final class TrialSteles {
     public static void tellWho(ServerPlayer player, String titan, String trial) {
         WhoRang w = who(player.server, Groups.keyOf(player), player.getUUID(), signal(titan, trial));
         Notice.bar(player, jp.revati.skyabyss.ModText.hint("message.skyabyss.steles.who", whoText(w)));
+        if (w.who() != Who.NONE && !FirstRun.isFirstRun(player)) {
+            Notice.hint(player, "message.skyabyss.steles.touch_repeat." + titan);
+        }
     }
 
     // 控え帳の頁用: 巨神 (進行の名前: stone_whale / tide_shell / thunder_wing / ember) の石の合図の一覧。石のない巨神は空

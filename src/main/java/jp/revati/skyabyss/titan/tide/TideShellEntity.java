@@ -408,6 +408,10 @@ public class TideShellEntity extends Entity implements GeoEntity, TravelTitan, j
         setDeltaMovement(Vec3.ZERO);
         rise(level.getSeaLevel() - REST_DRAFT, REST_RISE);
         stayWarner.tick(level, position(), forcedTicks, "message.skyabyss.stay_ending.tide");
+        // 居座りの早じまい (20 分の滞在のあいだだけ): 誰もいないのが 3 分続いたら去る
+        if (forcedTicks > 0 && stayWarner.vacantTooLong(level, position(), jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
+            forcedTicks = 1;
+        }
         boolean done = forcedTicks > 0 ? --forcedTicks <= 0 : !TideOcean.isLowTide(level.getDayTime());
         if (done) {
             // 刻の終わり。縁を沈め、巡航に戻る (背中に人がいても戻る。背中から出る人は、休んだ場所の岸へ戻る)

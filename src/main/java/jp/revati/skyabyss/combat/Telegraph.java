@@ -120,7 +120,8 @@ public final class Telegraph {
         this.floor = b.floor;
         this.reach = b.reach;
         this.jumpClear = b.jumpClear;
-        this.warn = Math.max(MIN_WARN_TICKS, b.warn);
+        // 誓い (titan.vow) の「予告が短い」: 持ち主のグループの誓いで縮める。最短 MIN_WARN_TICKS は割れない
+        this.warn = Math.max(MIN_WARN_TICKS, jp.revati.skyabyss.titan.vow.Vows.telegraphWarn(b.owner, b.warn));
         this.active = Math.max(0, b.active);
         this.repeat = Math.max(0, b.repeat);
         this.rgb = b.rgb;
