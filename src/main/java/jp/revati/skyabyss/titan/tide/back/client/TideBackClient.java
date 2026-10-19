@@ -1,6 +1,7 @@
 package jp.revati.skyabyss.titan.tide.back.client;
 
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.titan.tide.back.PearlKeeper;
 import jp.revati.skyabyss.titan.tide.back.TideBackSetup;
 import jp.revati.skyabyss.titan.tide.back.TideBeckoner;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -24,6 +25,7 @@ public final class TideBackClient {
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(TideBackSetup.REEF_NEST.get(), NoopRenderer::new);
         event.registerEntityRenderer(TideBackSetup.TIDE_BECKONER.get(), BeckonerRenderer::new);
+        event.registerEntityRenderer(TideBackSetup.PEARL_KEEPER.get(), KeeperRenderer::new);
     }
 
     // 低ポリのメッシュ (client/lowpoly)。LowPoly.enabled = false で元のキューブの geo に戻る。発光層は LowPolyGeoRenderer が持つ
@@ -35,6 +37,19 @@ public final class TideBackClient {
 
         @Override
         protected float getDeathMaxRotation(TideBeckoner animatable) {
+            return 0f;
+        }
+    }
+
+    // 真珠守り (低ポリのメッシュ。いまは仮の A 案。選定ページ docs/review/pearl_keeper/index.html で決まるまで)
+    static final class KeeperRenderer extends jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer<PearlKeeper> {
+        KeeperRenderer(EntityRendererProvider.Context ctx) {
+            super(ctx, "pearl_keeper", 1.0f);
+            this.shadowRadius = 1.6f;
+        }
+
+        @Override
+        protected float getDeathMaxRotation(PearlKeeper animatable) {
             return 0f;
         }
     }

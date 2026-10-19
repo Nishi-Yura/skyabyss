@@ -70,17 +70,35 @@ public final class Keepsakes {
         return cached;
     }
 
+    // 巨神ごとの心核。図鑑の頁 (TitanPages) がまだない巨神 (雷翼・余燼) も、装備の表 (TitanGearSets) の心核で拾う
+    public static List<Item> coreItems() {
+        List<Item> out = new ArrayList<>();
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            TitanPages.Page page = TitanPages.page(titan);
+            Item core = page == null ? null : page.coreItem();
+            if (core == null) {
+                jp.revati.skyabyss.item.TitanGearSet set = jp.revati.skyabyss.item.TitanGearSets.get(titan);
+                core = set == null ? null : jp.revati.skyabyss.item.TitanGearSet.item(set.core).orElse(null);
+            }
+            if (core != null && !out.contains(core)) {
+                out.add(core);
+            }
+        }
+        return out;
+    }
+
     private static List<Item> buildGuarded() {
         // 欠片・天の鍵、巨神ごとの心核 (TitanPages)、巨神ごとの呼び笛 (TitanKind)
         List<Item> items = new ArrayList<>(List.of(ModItems.SKY_KEY_FRAGMENT.get(), jp.revati.skyabyss.story.StorySetup.SKY_KEY.get(),
                 ModItems.STONE_WHALE_CORE.get(), TravelSetup.STONE_WHALE_CALL.get()));
-        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
-            TitanPages.Page page = TitanPages.page(titan);
-            Item core = page == null ? null : page.coreItem();
-            if (core != null && !items.contains(core)) {
+        for (Item core : coreItems()) {
+            if (!items.contains(core)) {
                 items.add(core);
             }
         }
+        // 旅のない巨神 (雷翼・余燼) の呼び笛も大事な品 (出会いの印として渡る。titan.travel.TitanCalls)
+        items.add(TravelSetup.THUNDER_WING_CALL.get());
+        items.add(TravelSetup.EMBER_CALL.get());
         for (jp.revati.skyabyss.titan.travel.TitanKind kind : jp.revati.skyabyss.titan.travel.TitanKind.all()) {
             if (!items.contains(kind.callItem().get())) {
                 items.add(kind.callItem().get());

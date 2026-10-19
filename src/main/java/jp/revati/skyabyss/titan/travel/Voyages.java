@@ -85,6 +85,11 @@ public final class Voyages {
         return null;
     }
 
+    // この人は巨神での移動に加わっている最中か (乗り場へ歩く・座る・降りる)
+    public static boolean involvesPlayer(UUID player) {
+        return involving(player) != null;
+    }
+
     public static boolean isBusy(TitanKind kind) {
         return ACTIVE.containsKey(kind.id());
     }
@@ -514,17 +519,21 @@ public final class Voyages {
         int given = 0;
         for (TitanKind kind : TitanKind.all()) {
             TravelState s = state(player);
-            if (s.callGiven.contains(kind.id()) || !isUnlocked(player, kind)) {
+            // 笛は出会ったときにもう渡っていることがある (TitanCalls)。そのときも、心臓を倒したら「認められた」(旅ができる) 言葉は一度出す
+            boolean hadCall = s.callGiven.contains(kind.id());
+            if (!isUnlocked(player, kind) || (hadCall && s.unlocked.contains(kind.id()))) {
                 continue;
             }
             given++;
             s.callGiven.add(kind.id());
             s.unlocked.add(kind.id());
-            ItemStack call = new ItemStack(kind.callItem().get());
-            // 袋に入る設定のとき (使う入力ができたあと) は袋へ。今は笛は手に持って使うので持ち物へ (docs/design/22)
-            jp.revati.skyabyss.pouch.PouchRouting.give(player, call);
-            if (!call.isEmpty()) {
-                player.drop(call, false);
+            if (!hadCall) {
+                ItemStack call = new ItemStack(kind.callItem().get());
+                // 袋に入る設定のとき (使う入力ができたあと) は袋へ。今は笛は手に持って使うので持ち物へ (docs/design/22)
+                jp.revati.skyabyss.pouch.PouchRouting.give(player, call);
+                if (!call.isEmpty()) {
+                    player.drop(call, false);
+                }
             }
             Notice.narrate(player, kind.text("message.skyabyss.travel.recognized"));
             Notice.hint(player, kind.text("message.skyabyss.travel.recognized_hint"));

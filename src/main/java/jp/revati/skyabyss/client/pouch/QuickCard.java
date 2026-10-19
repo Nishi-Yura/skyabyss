@@ -121,7 +121,7 @@ public final class QuickCard {
 
     static QuickPick.Cand cand(PouchEntries.Entry e) {
         if (e.item() instanceof TitanCallItem call) {
-            return new QuickPick.Cand(e.id(), QuickPick.Role.CALL, call.kind().id());
+            return new QuickPick.Cand(e.id(), QuickPick.Role.CALL, call.titanId());
         }
         if (e.item() instanceof TideConchItem) {
             return new QuickPick.Cand(e.id(), QuickPick.Role.SEA, null);
@@ -147,6 +147,9 @@ public final class QuickCard {
                 kind = TitanKind.TIDE_SHELL.id();
             } else if (e instanceof StormWingEntity) {
                 wing = true;
+                kind = jp.revati.skyabyss.progress.Titans.THUNDER_WING;
+            } else if (e instanceof jp.revati.skyabyss.titan.ember.EmberTitanEntity ember && ember.isSurfaced()) {
+                kind = jp.revati.skyabyss.progress.Titans.EMBER;
             }
             if (kind != null) {
                 double d = e.distanceToSqr(mc.player);

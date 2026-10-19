@@ -168,12 +168,18 @@ public final class SelfTestRunner {
         // 序盤の流れの保証 (最初の影・書・岩鯨の門・語り部の野営)。平らな草地を作るので、チャンクを読み込んでから
         steps.add(Step.once("opening beats (load)", jp.revati.skyabyss.opening.OpeningBeatsSelfTest::load));
         steps.add(Step.once("opening beats", 60, jp.revati.skyabyss.opening.OpeningBeatsSelfTest::runSelfTest));
+        // 巨神の体に入れない仕組み (体積・通り道・押し出し・矢)。docs/design/02 の「体に入れない」
+        steps.add(Step.once("titan solid (load)", jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::load));
+        steps.add(Step.once("titan solid", 40, jp.revati.skyabyss.titan.solid.TitanSolidSelfTest::runSelfTest));
         steps.add(Step.once("whale (load)", WhaleKeeper::selfTestLoad));
         steps.add(Step.once("whale", 40, WhaleKeeper::selfTestRun));
         steps.add(Step.once("travel (load)", TravelSelfTest::load));
         steps.add(Step.once("travel", 70, TravelSelfTest::runSelfTest));
         steps.add(Step.until("tide travel (load)", jp.revati.skyabyss.titan.travel.TideTravelSelfTest::load));
         steps.add(Step.once("tide travel", 400, jp.revati.skyabyss.titan.travel.TideTravelSelfTest::runSelfTest));
+        // 巨神の呼び (出会った巨神を、いつでも笛で近くへ呼べる)。docs/design/09 の 4.4節。SKYABYSS_SELFTEST_ONLY="titan call"
+        steps.add(Step.until("titan call (load)", jp.revati.skyabyss.titan.travel.TitanCallSelfTest::load));
+        steps.add(Step.once("titan call", 400, jp.revati.skyabyss.titan.travel.TitanCallSelfTest::runSelfTest));
         steps.add(Step.once("tide_heart (load)", TideHeartSelfTest::load));
         steps.add(Step.once("tide_heart", 30, TideHeartSelfTest::runSelfTest));
         steps.add(Step.once("titan end (reset after tide_heart)", jp.revati.skyabyss.titan.end.TitanEndSelfTest::resetAll));
@@ -214,6 +220,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("storm mobs", 5, jp.revati.skyabyss.titan.storm.mob.StormMobSelfTest::runSelfTest));
         // 潮殻の背の本番 (島・潮の溜め・三つの試練・リセット)。水を流してから数える段がある
         steps.addAll(jp.revati.skyabyss.titan.tide.back.TideBackSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.titan.tide.back.BreathSelfTest.steps());
+        steps.addAll(jp.revati.skyabyss.titan.tide.back.PearlKeeperSelfTest.steps());
         // 二章「引く海」(予兆・潮見の貝・大干潮・小要素)。SKYABYSS_SELFTEST_ONLY=ch2
         steps.addAll(jp.revati.skyabyss.titan.tide.chapter.TideChapterSelfTest.steps());
         // 雷翼の中ボス 雷獣 (背中がまだ無ければ、オーバーワールドの仮の巣で)

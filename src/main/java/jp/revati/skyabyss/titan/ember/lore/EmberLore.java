@@ -74,7 +74,7 @@ public final class EmberLore {
     // B 体と広間
     public static final String BACK_STONE_RANG = LINE + "back.stone_rang";              // 熾り石が一つ鳴った
     public static final String BACK_ALL_STONES = LINE + "back.all_stones";              // 三つ鳴って炉の底が開く
-    public static final String BACK_TRIAL_ASLEEP = LINE + "back.trial_asleep";          // %s (試練の名) の火は眠っている
+    public static final String BACK_TRIAL_QUIET = LINE + "back.trial_quiet";          // %s (試練の名) の火は今宵は静かだ
     public static final String BACK_TRIAL_NAME = LINE + "back.trial.";                  // + west / east / south
     // C1 灰の道・C2 鍛えの間・C3 火守り
     public static final String WEST_ENGULFED = LINE + "west.engulfed";
@@ -100,7 +100,7 @@ public final class EmberLore {
             SURFACE_WARM + "right", SURFACE_WARM + "left", SURFACE_WARM + "ahead", SURFACE_WARM + "behind",
             SURFACE_DIST + "far", SURFACE_DIST + "near", SURFACE_DIST + "close", SURFACE_STATE + "sleeping", SURFACE_STATE + "burrowing",
             SURFACE_ASKED, SURFACE_ASKED_OTHER, SURFACE_ASK_TAKEN,
-            BACK_STONE_RANG, BACK_ALL_STONES, BACK_TRIAL_ASLEEP, BACK_TRIAL_NAME + "west", BACK_TRIAL_NAME + "east", BACK_TRIAL_NAME + "south",
+            BACK_STONE_RANG, BACK_ALL_STONES, BACK_TRIAL_QUIET, BACK_TRIAL_NAME + "west", BACK_TRIAL_NAME + "east", BACK_TRIAL_NAME + "south",
             WEST_ENGULFED, WEST_URN_EMPTY, WEST_URN_FULL, EAST_DOUSED, EAST_KEY_CRACKED, EAST_QUENCHED, EAST_DOOR, SOUTH_LOW, SOUTH_FULL,
             SMITH_WAKE, SMITH_FALLEN, HEART_CHILL, HEART_STILLED, HEART_FRAGMENT, FINALE_DAWN);
 

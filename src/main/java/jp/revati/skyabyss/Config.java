@@ -118,6 +118,16 @@ public final class Config {
             .comment("目的の場所へ向かう、地面の道しるべ。ON = いつも, NEAR = 目的が 64 ブロック以内のときだけ, OFF = 出さない (キーでも切り替えられる)")
             .defineEnum("questTrail", TrailMode.ON);
 
+    // 場面の字幕の出し方 (client/cinematic/CinematicScreen, cinematic/VoiceTiming)
+    public enum SubtitleReveal {
+        SYNCED,
+        INSTANT
+    }
+
+    public static final ModConfigSpec.EnumValue<SubtitleReveal> SUBTITLE_REVEAL = CLIENT_BUILDER
+            .comment("場面の台詞の字幕の出し方。SYNCED = 声の速さに合わせて文字が出る (声を消していても同じ速さ), INSTANT = 最初から全文")
+            .defineEnum("subtitleReveal", SubtitleReveal.SYNCED);
+
     public static final ModConfigSpec.BooleanValue CINEMATIC_SCENES = CLIENT_BUILDER
             .comment("大事な場面 (開幕・岩鯨の初見など) でカメラが動く演出を見るか (false = 見ない。物語の効果は変わらず、すぐ操作へ戻る)")
             .define("cinematicScenes", true);
@@ -164,6 +174,22 @@ public final class Config {
     public static final ModConfigSpec.EnumValue<StarEffectVariant> STAR_EFFECT = CLIENT_BUILDER
             .comment("夜の歌で星が欠ける見せ方。C (淡い光の輪郭 + 低い音のうねり) が採用。CURRENT = 前の帯, A = 暗い影の帯, B = 星空のゆがみ")
             .defineEnum("starEffect", StarEffectVariant.C);
+
+    // 乗り込み口の目印・戻る場所の光の見せ方 (開発用の選定。ユーザーが選ぶまで既定は CURRENT。client/titan/MarkerArt)
+    public enum MarkerStyle {
+        CURRENT,
+        A,
+        B,
+        C
+    }
+
+    public static final ModConfigSpec.EnumValue<MarkerStyle> BOARD_MARKER = CLIENT_BUILDER
+            .comment("乗り込み口の目印の見せ方。CURRENT = 今の光の柱と枠, A = 柔らかい光の筋と床の紋様, B = 浮かぶ欠片の輪と矢印の流れ, C = 巨神の体の灯りと光の綱")
+            .defineEnum("boardMarker", MarkerStyle.B);
+
+    public static final ModConfigSpec.EnumValue<MarkerStyle> RETURN_MARKER = CLIENT_BUILDER
+            .comment("真ん中へ戻る光の見せ方。CURRENT = 今の光の柱と枠, A = 浮かぶ灯の精, B = 床の紋様と立ちのぼる粒, C = 光の拱門")
+            .defineEnum("returnMarker", MarkerStyle.B);
 
     static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 

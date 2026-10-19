@@ -17,6 +17,8 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberBackLayout;
 import jp.revati.skyabyss.titan.ember.back.EmberBackRooms;
+import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
+import jp.revati.skyabyss.titan.ember.back.EmberRooms;
 import jp.revati.skyabyss.titan.ember.back.EmberBackState;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
@@ -299,6 +301,7 @@ public final class EmberTrialSelfTest {
             southNumbers(level);
             southVents(level);
             southSimulate(level);
+            quietTrials(level);
             resets(level);
         } catch (RuntimeException e) {
             SkyAbyss.LOGGER.error("SELFTEST ember trial crashed", e);
@@ -1135,6 +1138,53 @@ public final class EmberTrialSelfTest {
         }
         Hearth.clearMemory();
         EmberTrials.READY_CALLS.clear();
+    }
+
+    // ---------------------------------------------------------------- 静かな試練: 三つとも入れて最後までできる (13 の 10.2節)
+    private static void quietTrials(ServerLevel level) {
+        UUID g = UUID.nameUUIDFromBytes("ember_quiet_group".getBytes());
+        FakePlayer fp = fake(level, "ember_trial_quiet");
+        EmberBackState state = EmberBackState.of(level, g);
+        state.markFirstForgeUsed();
+        // 西: 静かでも壺が渡り、石は自分で鳴らす (敵は出ない)
+        EmberBackTrials.setQuiet(level, g, EmberBackState.Trial.WEST);
+        EmberRooms.claimForTest(level, EmberRooms.WEST, g);
+        expect(EmberBackTrials.quiet(level, EmberIds.WEST) && !state.rung(EmberBackState.Trial.WEST), "a quiet ash road must not ring its stone for free");
+        fp.getInventory().clearContent();
+        AshPath.giveUrn(fp);
+        expect(EmberTrials.count(fp, EmberTrialSetup.ASH_URN.get()) == 1, "a quiet ash road did not hand out the urn");
+        // 東: やさしい打つ順 (初めての周でなくても)。鞴も金床も動く
+        EmberBackTrials.setQuiet(level, g, EmberBackState.Trial.EAST);
+        EmberRooms.claimForTest(level, EmberRooms.EAST, g);
+        expect(EmberBackTrials.quiet(level, EmberIds.EAST) && java.util.Arrays.equals(Forge.pattern(level), Forge.PATTERNS[0]),
+                "a quiet forge does not use the gentlest order");
+        Forge.StrikeResult r = Forge.strike(level, fp);
+        expect(r != null, "a quiet forge refuses the anvil");
+        // 南: 熾が使える。ゆっくり弱まり、灰運びは 1 体まで、蛾と燠虫は出ない
+        EmberBackTrials.setQuiet(level, g, EmberBackState.Trial.SOUTH);
+        EmberRooms.claimForTest(level, EmberRooms.SOUTH, g);
+        Hearth.clearMemory();
+        Hearth.setStrength(50f);
+        expect(Hearth.feed(level, fp, new ItemStack(EmberTrialSetup.LIVE_COAL.get())), "a quiet hearth refuses coal");
+        float before = Hearth.strength();
+        Hearth.second(level, List.of(fp));
+        float loss = before - Hearth.strength();
+        expect(loss > 0 && Math.abs(loss - Hearth.decayPerSecond(1) * Hearth.QUIET_DECAY) < 1e-3, "a quiet hearth fades " + loss + " per second");
+        Hearth.setStrength(70f);
+        for (int i = 0; i < 4; i++) {
+            Hearth.spawnWaves(level, List.of(fp), 20L * 20 * (i + 1));
+        }
+        int rollers = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, EmberBackLayout.SOUTH.aabb(), m -> m instanceof jp.revati.skyabyss.titan.ember.mob.CinderRoller).size();
+        int moths = level.getEntitiesOfClass(EmberMoth.class, EmberBackLayout.SOUTH.aabb()).size();
+        int carriers = level.getEntitiesOfClass(AshThrall.class, EmberBackLayout.SOUTH.aabb(), t -> t.getTags().contains(Hearth.CARRIER_TAG)).size();
+        expect(rollers == 0 && moths == 0 && carriers >= 1 && carriers <= 1, "a quiet hearth has rollers " + rollers + ", moths " + moths + ", carriers " + carriers);
+        // 後片付け
+        EmberBackTrials.setQuiet(level, g, null);
+        for (EmberRooms.Room room : List.of(EmberRooms.WEST, EmberRooms.EAST, EmberRooms.SOUTH)) {
+            EmberRooms.releaseForTest(level, room);
+        }
+        Hearth.clearMemory();
+        fp.getInventory().clearContent();
     }
 
     private static void resets(ServerLevel level) {

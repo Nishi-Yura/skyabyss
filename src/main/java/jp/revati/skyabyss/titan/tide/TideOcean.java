@@ -160,6 +160,32 @@ public final class TideOcean {
         return null;
     }
 
+    // 呼び貝で呼ぶときの休む場所: まず (px, pz) の人の近く (findRestSpot)。人が海から遠いときは、読み込まれている範囲で
+    // いちばん近い海辺を、輪を広げながら探す (人から 96〜256 ブロックを 32 ブロックずつ、16 方向)。見つからなければ null。
+    // 戻り値は (x, 向き, z) で、向きは巨神の左 (潮門) をその海辺の点へ向ける
+    @Nullable
+    public static Vec3 findCallSpot(ServerLevel level, double px, double pz) {
+        Vec3 near = findRestSpot(level, px, pz);
+        if (near != null) {
+            return near;
+        }
+        for (int r = 96; r <= 256; r += 32) {
+            for (int a = 0; a < 16; a++) {
+                double angle = Math.PI * 2 * a / 16;
+                double cx = px + Math.cos(angle) * r;
+                double cz = pz + Math.sin(angle) * r;
+                if (!loaded(level, cx, cz)) {
+                    continue;
+                }
+                Vec3 spot = findRestSpot(level, cx, cz);
+                if (spot != null) {
+                    return spot;
+                }
+            }
+        }
+        return null;
+    }
+
     // 岸 (陸のブロック) が range ブロック以内にあるか (8 方向を 4 ブロックごとに見る)
     public static boolean nearShore(ServerLevel level, double x, double z, int range) {
         for (int dir = 0; dir < 8; dir++) {

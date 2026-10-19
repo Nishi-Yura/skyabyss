@@ -63,10 +63,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 潮殻の背の試練の進行 (08 の 3〜4・7 章)。岩鯨の TitanBackTrials と同じ決まりを、潮殻の背の配置で動かす。
 // 背中は一つだが、試練の進みはグループ (パーティ、または一人) ごと (TideBackState.Group。08 の 7.5節):
-//  - 潮の時計 (TideClock) は島で一つ。潮の溜め (広間の水盤・庭の水路・干潟) は潮で満ち引きする。干潟の門の既定は潮で開け閉めする
+//  - 潮の時計 (TideClock) は島で一つ。潮の溜め (広間の水盤・庭の水路・干潟) は潮で満ち引きする。干潟の門は潮に関わらずいつも開いている
 //  - 三つの試練 (TideGarden・TideWatch・TideFlats) は占有する部屋 (TideRooms)。潮鳴り石・広間の灯り・抜け道の床は、
 //    鳴らしたグループにだけ光って見える (見かけの上書き GroupOverlays)。抜け道は踏んだ人のグループの石で動く
-//  - 三つの石を鳴らしたグループは、水盤が引ききったとき、そのグループにだけ潮の底の門が開く
+//  - 三つの石を鳴らしたグループは、潮に関わらず、そのグループにだけ潮の底の門が開く (満潮は泳いで下りる)
 //  - 休み場 (hub・g0・g1・s0・f0・heart): 着くと記録、倒れるとそこで目を覚ます (記録はその人のグループの試練の番号つき)。
 //    焚き火にしゃがんで触れると浜へ
 //  - 倒れても持ち物と経験値は預かる (岩鯨と同じ部品 TitanBackTrials.keepBelongings)
@@ -124,7 +124,9 @@ public final class TideBackTrials {
     static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             GroupOverlays.register(TideBackTrials::overlay);
+            GroupOverlays.register(Breath::overlay);
             GroupEvents.addMembershipHook(TideBackTrials::membershipChanged);
+            BreathGuide.register();
         });
     }
 
@@ -296,6 +298,8 @@ public final class TideBackTrials {
             TideWatch.tick(level, false);
         }
         TideFlats.tick(level, peaceful);
+        Breath.tick(level, peaceful);
+        BreathSummit.tick(level, peaceful);
         if (level.getGameTime() % 5 == 0) {
             tickGates(level);
             tickPads(level);
@@ -328,26 +332,18 @@ public final class TideBackTrials {
         }
     }
 
-    // 干潟の門: 既定は干潮のあいだ (広間の水が引ききってから) だけ開く (潮招きと戦うグループには TideFlats が閉じる)。
-    // 潮の底の門: 三つの石を鳴らしたグループにだけ、水盤が引ききったときに開く
+    // 干潟の門: 潮に関わらず、背中にいるどのグループにもいつも開いている (満潮の広間は水の中を泳いでくぐる。潮招きと戦うグループには TideFlats が閉じる)。
+    // ワールドのブロックは閉じた扉のままにする (開いた扉は水を通し、満ちた広間の水がトンネルへ漏れる)。開けるのはグループの上書きだけ。
+    // 潮の底の門: 三つの石を鳴らしたグループにだけ、潮に関わらず開く (満潮でも水の中を泳いで下りられる)
     private static void tickGates(ServerLevel level) {
-        TideField.Pool hub = FIELD.pool("hub");
-        boolean open = TideClock.phase(level) == TideClock.Phase.LOW && hub != null && hub.level() == 0;
         List<BlockPos> flats = TideGates.flats();
-        if (TideGates.defaultOpen(level, flats.get(0)) != open || !GroupGates.isGate(level, flats.get(0))) {
-            if (!open) {
-                // 戸口に立っている人は、広間の側へ出す
-                for (BlockPos p : flats) {
-                    for (ServerPlayer pl : level.getEntitiesOfClass(ServerPlayer.class, new AABB(p))) {
-                        pl.teleportTo(pl.getX(), pl.getY(), FLATS_GATE_Z + 1.6);
-                    }
-                }
-            }
-            GroupGates.setDefault(level, flats, open);
-            level.playSound(null, 0.5, HUB_FLOOR + 2, FLATS_GATE_Z, open ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.6f);
+        if (!GroupGates.isGate(level, flats.get(0))) {
+            GroupGates.place(level, flats, false);
         }
-        if (hub == null || hub.level() != 0) {
-            return;
+        for (UUID group : presentGroups(level)) {
+            if (!TideFlats.flatsSealedFor(group)) {
+                GroupGates.open(level, group, flats);
+            }
         }
         for (UUID group : presentGroups(level)) {
             TideBackState.Group state = TideBackState.of(level, group);
@@ -455,11 +451,7 @@ public final class TideBackTrials {
             return;
         }
         if (state.rung(trial)) {
-            if (state.sleeping() == trial) {
-                Notice.bar(player, ModText.hint("message.skyabyss.tide.trial_sleeping"));
-            } else {
-                jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id());
-            }
+            jp.revati.skyabyss.titan.group.TrialSteles.tellWho(player, jp.revati.skyabyss.titan.group.TrialSteles.TIDE, trial.id());
             return;
         }
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -635,11 +627,11 @@ public final class TideBackTrials {
         if (announce) {
             for (ServerPlayer p : Groups.online(level, group)) {
                 Notice.narrate(p, "message.skyabyss.tide.trials_renewed");
-                tellSleeping(p, state);
+                tellQuiet(p, state);
             }
         }
-        SkyAbyss.LOGGER.info("Tide back trials reset for group {} (sleeping: {}, east config {}, garden route {})", group,
-                state.sleeping() == null ? "none" : state.sleeping().id(), state.eastConfig(), state.gardenRoute());
+        SkyAbyss.LOGGER.info("Tide back trials reset for group {} (quiet: {}, east config {}, garden route {})", group,
+                state.quiet() == null ? "none" : state.quiet().id(), state.eastConfig(), state.gardenRoute());
     }
 
     // 記録のあるグループをすべて戻す (コマンドで、人を指さないとき)
@@ -649,9 +641,9 @@ public final class TideBackTrials {
         }
     }
 
-    static void tellSleeping(ServerPlayer p, TideBackState.Group state) {
-        if (state.sleeping() != null) {
-            Notice.narrate(p, "message.skyabyss.tide.sleeping_" + state.sleeping().id());
+    static void tellQuiet(ServerPlayer p, TideBackState.Group state) {
+        if (state.quiet() != null) {
+            Notice.narrate(p, "message.skyabyss.tide.quiet_" + state.quiet().id());
         }
     }
 
@@ -673,6 +665,7 @@ public final class TideBackTrials {
                         || new AABB(GATE_X - 3, SEA - 3, GATE_MOUTH_Z1 - 3, BEACH.x1(), GATE_FLOOR + 12, GATE_MOUTH_Z2 + 3).contains(p.position())
                         || new AABB(TOP_STAIR_X1 - 1, BEACH.floor(), TOP_STAIR_Z1 - 1, BEACH.x1(), TOP_Y + 4, TOP_STAIR_Z1 + 6).contains(p.position())
                         || UPPER_ROOMS.stream().anyMatch(a -> a.aabb().inflate(2, 2, 2).contains(p.position()))
+                        || Breath.activeBox().inflate(2).contains(p.position()) || BreathGuide.nearDoor(p.position())
                         || p.position().distanceTo(ARRIVAL.getCenter()) < 14 || TideWhispers.onShellTop(p.blockPosition());
                 if (!beachSide) {
                     toArrival(p);
@@ -836,7 +829,7 @@ public final class TideBackTrials {
             ServerLevel back = player.server.getLevel(TideTravel.TIDE_BACK);
             if (event.getTo() == TideTravel.TIDE_BACK && back != null) {
                 persisted(player).putInt(TAG_SEEN_EPOCH, epochOf(back, player));
-                tellSleeping(player, state(back, player));
+                tellQuiet(player, state(back, player));
             }
         }
     }
@@ -876,6 +869,10 @@ public final class TideBackTrials {
             event.setCanceled(true);
             return;
         }
+        if (BreathSummit.useBlock(level, pos, player)) {
+            event.setCanceled(true);
+            return;
+        }
         if (level.getBlockState(pos).is(Blocks.SOUL_CAMPFIRE)) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
@@ -893,7 +890,7 @@ public final class TideBackTrials {
     @SubscribeEvent
     static void onEntityJoin(EntityJoinLevelEvent event) {
         if (event.loadedFromDisk() && event.getLevel().dimension() == TideTravel.TIDE_BACK
-                && (event.getEntity() instanceof ReefNest || event.getEntity() instanceof TideBeckoner)) {
+                && (event.getEntity() instanceof ReefNest || event.getEntity() instanceof TideBeckoner || event.getEntity() instanceof PearlKeeper)) {
             event.setCanceled(true);
         }
     }
@@ -912,6 +909,8 @@ public final class TideBackTrials {
         TideWatch.clear();
         TideGuide.clear();
         TideFlats.clear();
+        Breath.clear();
+        BreathSummit.clear();
         TideClock.force(null);
     }
 

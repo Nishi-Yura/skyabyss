@@ -299,6 +299,13 @@ public final class ShotRunner {
             say("line " + line.number() + ": " + line.op() + (line.rest().isEmpty() ? "" : " " + line.rest()));
         }
         switch (line.op()) {
+            case "marker" -> {
+                // marker board|return <current|a|b|c> : 乗り込み口の目印 / 戻る光の見せ方を切り替える (選定用)
+                // marker titan <id> : 戻る光の巨神の色・紋様 (背中の外で見るとき)
+                // marker fake board <titan> x y z yaw : 偽の乗り込み口の目印を置く / marker fake return x y z : 偽の戻る光 / marker clear
+                jp.revati.skyabyss.client.titan.MarkerArt.shotCommand(line.rest());
+                return true;
+            }
             case "stareffect" -> {
                 // stareffect <current|a|b|c>: 星が欠ける見せ方を、設定を書き換えずに切り替える (選定用)
                 jp.revati.skyabyss.client.opening.StarEffect.override =
@@ -500,6 +507,11 @@ public final class ShotRunner {
                     case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
                     default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
                 }
+                return true;
+            }
+            case "titanweight" -> {
+                // titanweight on|off : 巨神の重さの見せ方 (下ほど暗い陰・穴の蓋・地面や海面の影・雲や水しぶき) を入れる / 外す (前後の比べ用)
+                jp.revati.skyabyss.client.lowpoly.LowPoly.titanWeight = !line.arg(0).equalsIgnoreCase("off");
                 return true;
             }
             case "armortier" -> {

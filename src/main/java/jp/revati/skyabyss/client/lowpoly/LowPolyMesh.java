@@ -39,15 +39,21 @@ public final class LowPolyMesh {
         public final float[] pos;
         public final float[] uv;
         public final float[] nrm;
+        // 頂点ごとの明るさ (quad ごとに 4 つ)。巨神だけ: 下ほど暗い・面が下向きだと暗い・塞いだ穴の面は暗い。無ければ null
+        public final float[] vshade;
         public final int quadCount;
+        // 塞いだ穴の面 (巨神) が始まる quad の番号 (無ければ quadCount)。LowPoly.titanWeight が false のときはここまでしか描かない
+        public final int capStart;
 
-        Bone(String name, String parent, float[] pos, float[] uv, float[] nrm) {
+        Bone(String name, String parent, float[] pos, float[] uv, float[] nrm, float[] vshade, int capStart) {
             this.name = name;
             this.parent = parent;
             this.pos = pos;
             this.uv = uv;
             this.nrm = nrm;
+            this.vshade = vshade;
             this.quadCount = nrm.length / 3;
+            this.capStart = capStart;
         }
     }
 
@@ -66,6 +72,18 @@ public final class LowPolyMesh {
         Map<String, Bone> baked = new LinkedHashMap<>();
         int tris = 0;
         int quads = 0;
+        // 巨神: 全体の高さの範囲 (下を暗くする焼き込み用)
+        boolean titan = isTitan(name);
+        float yMin = Float.MAX_VALUE;
+        float yMax = -Float.MAX_VALUE;
+        if (titan) {
+            for (Map.Entry<String, JsonElement> e : bonesJson.entrySet()) {
+                for (float[] p : floats(e.getValue().getAsJsonObject().getAsJsonArray("vertices"), 3)) {
+                    yMin = Math.min(yMin, p[1]);
+                    yMax = Math.max(yMax, p[1]);
+                }
+            }
+        }
         for (Map.Entry<String, JsonElement> e : bonesJson.entrySet()) {
             JsonObject b = e.getValue().getAsJsonObject();
             float[][] v = floats(b.getAsJsonArray("vertices"), 3);
@@ -92,8 +110,25 @@ public final class LowPolyMesh {
                     }
                 }
             }
+            int origVerts = v.length;
+            if (titan && n > 0) {
+                // 骨の開いた縁 (関節・接ぎ目) に、内側へ引っ込めた暗い蓋をする。ひれ・顎・首が動いて継ぎ目が開いても、中が透けない
+                Capped c = capHoles(v, uv, t);
+                v = c.v();
+                uv = c.uv();
+                t = c.t();
+                n = t.length;
+            }
             List<int[]> quadList = mergeTriangles(v, uv, t);
             int q = quadList.size();
+            float[] vshade = titan ? new float[q * 4] : null;
+            int capStart = q;
+            for (int i = 0; i < q; i++) {
+                if (quadList.get(i)[0] >= origVerts) {
+                    capStart = i;
+                    break;
+                }
+            }
             float[] pos = new float[q * 12];
             float[] uvOut = new float[q * 8];
             float[] nrm = new float[q * 3];
@@ -123,15 +158,156 @@ public final class LowPolyMesh {
                 nrm[i * 3] = -nx / len;
                 nrm[i * 3 + 1] = ny / len;
                 nrm[i * 3 + 2] = nz / len;
+                if (vshade != null) {
+                    for (int k = 0; k < 4; k++) {
+                        vshade[i * 4 + k] = f[k] >= origVerts ? CAP_SHADE : weightShade(v[f[k]][1], yMin, yMax, ny / len);
+                    }
+                }
             }
             String parent = b.has("parent") && !b.get("parent").isJsonNull() ? b.get("parent").getAsString() : null;
-            baked.put(e.getKey(), new Bone(e.getKey(), parent, pos, uvOut, nrm));
+            baked.put(e.getKey(), new Bone(e.getKey(), parent, pos, uvOut, nrm, vshade, capStart));
             tris += n;
             quads += q;
         }
         LowPolyMesh mesh = new LowPolyMesh(name, tex, glow, socket, tris, quads);
         mesh.bones.putAll(baked);
         return mesh;
+    }
+
+    // ---- 巨神 (stone_whale / tide_shell / thunder_wing / ember_titan とその mid・far) だけの焼き込み
+    // 蓋の面の暗さ・体の下の暗さの下限 (1 = 手を加えない)
+    static final float CAP_SHADE = 0.30f;
+    private static final float BOTTOM_SHADE = 0.52f;
+
+    static boolean isTitan(String name) {
+        return name.matches("(stone_whale|tide_shell|thunder_wing|ember_titan)(_mid|_far)?");
+    }
+
+    // 重さの見せ方 (docs/design/02 の「重さ」): 体の下ほど暗く (地面・海面に近い側の陰)、面が下を向くと暗く、上は明るいまま
+    static float weightShade(float y, float yMin, float yMax, float ny) {
+        float h = yMax > yMin ? Math.max(0f, Math.min(1f, (y - yMin) / (yMax - yMin))) : 1f;
+        float t = Math.max(0f, Math.min(1f, h / 0.7f));
+        float g = BOTTOM_SHADE + (1f - BOTTOM_SHADE) * t * t * (3f - 2f * t);
+        float nt = ny < -0.3f ? 0.82f : ny < 0.3f ? 0.96f : 1f;
+        return g * nt;
+    }
+
+    private record Capped(float[][] v, float[][] uv, int[][] t) {
+    }
+
+    // 三角形の辺のうち一枚にしか使われていない辺 (開いた縁) をつないで輪にし、輪の重心を骨の中心の側へ少し引っ込めた頂点との扇で塞ぐ。
+    // 蓋の頂点は元の頂点の複製 (uv は縁の三角形の中心の一点) で、元の面の絵・法線には触らない
+    private static Capped capHoles(float[][] v, float[][] uv, int[][] t) {
+        Map<String, Integer> weld = new java.util.HashMap<>();
+        int[] canon = new int[v.length];
+        for (int i = 0; i < v.length; i++) {
+            String key = Math.round(v[i][0] * 50) + "," + Math.round(v[i][1] * 50) + "," + Math.round(v[i][2] * 50);
+            Integer id = weld.get(key);
+            if (id == null) {
+                id = weld.size();
+                weld.put(key, id);
+            }
+            canon[i] = id;
+        }
+        // 辺 (小さい番号, 大きい番号) の数と、最初の向き付きの辺 {数, 元の始点, 元の終点, 三角形}
+        Map<Long, int[]> edges = new LinkedHashMap<>();
+        for (int ti = 0; ti < t.length; ti++) {
+            for (int k = 0; k < 3; k++) {
+                int a = t[ti][k];
+                int b = t[ti][(k + 1) % 3];
+                int ca = canon[a];
+                int cb = canon[b];
+                if (ca == cb) {
+                    continue;
+                }
+                long key = ((long) Math.min(ca, cb) << 32) | Math.max(ca, cb);
+                int[] e = edges.get(key);
+                if (e == null) {
+                    edges.put(key, new int[] {1, a, b, ti});
+                } else {
+                    e[0]++;
+                }
+            }
+        }
+        Map<Integer, List<int[]>> from = new LinkedHashMap<>();
+        for (int[] e : edges.values()) {
+            if (e[0] == 1) {
+                from.computeIfAbsent(canon[e[1]], k -> new ArrayList<>()).add(e);
+            }
+        }
+        if (from.isEmpty()) {
+            return new Capped(v, uv, t);
+        }
+        float cx = 0;
+        float cy = 0;
+        float cz = 0;
+        for (float[] p : v) {
+            cx += p[0];
+            cy += p[1];
+            cz += p[2];
+        }
+        cx /= v.length;
+        cy /= v.length;
+        cz /= v.length;
+        List<float[]> nv = new ArrayList<>(java.util.Arrays.asList(v));
+        List<float[]> nuv = new ArrayList<>(java.util.Arrays.asList(uv));
+        List<int[]> nt = new ArrayList<>(java.util.Arrays.asList(t));
+        for (List<int[]> starts : new ArrayList<>(from.values())) {
+            while (!starts.isEmpty()) {
+                // 一つの輪をたどる
+                List<int[]> loop = new ArrayList<>();
+                int[] e = starts.remove(0);
+                loop.add(e);
+                int guard = 0;
+                while (guard++ < 2000) {
+                    List<int[]> next = from.get(canon[e[2]]);
+                    if (next == null || next.isEmpty()) {
+                        break;
+                    }
+                    int[] n2 = next.remove(0);
+                    if (n2 == loop.get(0)) {
+                        break;
+                    }
+                    loop.add(n2);
+                    e = n2;
+                }
+                if (loop.size() < 3) {
+                    continue;
+                }
+                float lx = 0;
+                float ly = 0;
+                float lz = 0;
+                for (int[] le : loop) {
+                    lx += v[le[1]][0];
+                    ly += v[le[1]][1];
+                    lz += v[le[1]][2];
+                }
+                lx /= loop.size();
+                ly /= loop.size();
+                lz /= loop.size();
+                int apex = nv.size();
+                nv.add(new float[] {lx + (cx - lx) * 0.2f, ly + (cy - ly) * 0.2f, lz + (cz - lz) * 0.2f});
+                nuv.add(new float[] {0, 0});
+                boolean apexSet = false;
+                for (int[] le : loop) {
+                    int[] tri = t[le[3]];
+                    float[] flat = {(uv[tri[0]][0] + uv[tri[1]][0] + uv[tri[2]][0]) / 3f, (uv[tri[0]][1] + uv[tri[1]][1] + uv[tri[2]][1]) / 3f};
+                    if (!apexSet) {
+                        nuv.set(apex, flat);
+                        apexSet = true;
+                    }
+                    int a = nv.size();
+                    nv.add(v[le[1]]);
+                    nuv.add(flat);
+                    int b = nv.size();
+                    nv.add(v[le[2]]);
+                    nuv.add(flat);
+                    // 辺と逆向き (b → a) にして、塞いだ面が外を向くようにする
+                    nt.add(new int[] {b, a, apex});
+                }
+            }
+        }
+        return new Capped(nv.toArray(new float[0][]), nuv.toArray(new float[0][]), nt.toArray(new int[0][]));
     }
 
     // メッシュ JSON の "texture" (無ければ名前) から、textures/lowpoly/ の下の画像名を取る

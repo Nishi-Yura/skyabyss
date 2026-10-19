@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 //                        | 干潟の口 (z=-49)
 //                  [干潟へのトンネル]      床 66
 //                  [干潟の前室 f0]         z -30〜-18、床 66        真下に [殻の底 (心臓の間)] 中心 (0,-30) 床 50 (腹の中)
-//                        | 干潟の門 (z=-13、干潮だけ開く)
+//                        | 干潟の門 (z=-13、潮に関わらずグループにはいつも開けてある)
 //   [珊瑚の庭 (西)]--[潮の広間 (HUB)]--[潮見の間 (東)]           広間の床 70、潮で 0〜3 満ちる。縁の段 (74) から入る
 //      床 64             | 縁のくぐり道            真上の甲羅の頂に [頂の塔] (月の窓の縦穴が塔の中を通る)
 //                   [潮門の浜]  床 66  ── 北西の角から甲羅の上へ上る段 (外の景色と遺跡)
@@ -26,7 +26,7 @@ import net.minecraft.world.phys.Vec3;
 //
 // 広間は「沈んだ円い水盤」: 床 70 の円 (半径 12) が潮で 3 マス (71〜73) 満ちる。入口は高さ 74 の縁の段
 // (南の段: 浜からのくぐり道、西の段: 庭への道、東の回廊: 潮見の間への道)。満潮なら水盤を泳いで東の回廊へ一段上がれる。
-// 干潮なら水盤の底へ下り、南東の回り道 (底から東の回廊まで上る坂) を通る。北の干潟の門は床の高さで、干潮のあいだだけ開く。
+// 干潮なら水盤の底へ下り、南東の回り道 (底から東の回廊まで上る坂) を通る。北の干潟の門は床の高さで、潮に関わらずいつも開いている (満潮は水の中を泳いでくぐる)。
 public final class TideBackLayout {
     // 配置の版。2: 本番の島 (2026-10-17) / 3: 甲羅の地表・庭の壁・浜のすり鉢を直した (試遊 1 周目) /
     // 4: 巨神の形の亀にし、試練を甲羅の中に埋めた (08 の 21 章) /
@@ -34,7 +34,10 @@ public final class TideBackLayout {
     // 6: 殻の底 (心臓の間) の天井を 1 段上げて、空気が 12 段にした (予告の高さ・心臓の大きさ 1.5 倍のため。08 の 5.5節)
     // 7: 詰み監査の修正 (甲羅の地表の 1 マス角の縦穴を埋めた。08 の「詰み監査」)
     // 8: 試練のわかりやすさ (入口の看板を 4 行にし、潮見の間の栓の色・戻しの栓・広間の案内の看板を足した。08 の 4.4節)
-    public static final int LAYOUT_VERSION = 8;
+    // 9: 干潟の門を潮に関わらず開けておき、眠る試練を「静かな試練」(石は自分で鳴らす) にした (08 の 3.5・7.2節)
+    // 10: 息の間 (亀の肺。予約の間 1〜3 と月の窓の縦穴を一つの大空洞にし、水を湛えた皿と風の柱、頂の真珠守りと展望の間を足した。封印の戸と階段はなくなった。
+    //    docs/design/24 の案 C、08 の 3.8節)
+    public static final int LAYOUT_VERSION = 10;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
@@ -112,22 +115,16 @@ public final class TideBackLayout {
     // 月の窓の縦穴の上端のガラス (塔の窓の高さ。ここから屋根の頂まで、半径 2.5 の柱がガラス)
     public static final int TOWER_DECK = 173;
 
-    // 封じた予約の間 (08 の 3.8節)。上の三つの台地の中の、空の歩ける部屋と、そのあいだの階段。今は何もない (将来の巨神の内容用)
+    // 予約の間 1〜3 (08 の 3.8節)。上の三つの台地の中の部屋。息の間 (BreathLayout) が真ん中を円く掘り抜いて一つの気室にした。
+    // 部屋の残りは気室を巻く回廊と、皿から歩いて渡れる足場 (予約の間 2・3 の床) になる
     public static final Area UPPER_1 = new Area(-32, 30, -38, 34, 101, 9);
     public static final Area UPPER_2 = new Area(-22, 22, -28, 22, 114, 9);
     public static final Area UPPER_3 = new Area(-10, 10, -16, 12, 126, 8);
     public static final List<Area> UPPER_ROOMS = List.of(UPPER_1, UPPER_2, UPPER_3);
-    // 入口: 西の面 (T2 の崖、x -49) の封印の戸 (x -49、z -1〜1、y 102〜104)。外は T1 の地面 (101)。戸の奥は廊下 (x -48〜-33) で UPPER_1 へ
+    // 入口: 西の面 (T2 の崖、x -49) の戸口 (x -49、z -1〜1、y 102〜104。いつも開いている。潮・時間・天気で閉じない)。外は T1 の地面 (101)。戸口の奥は廊下 (x -48〜-33) で UPPER_1 へ
     public static final int UPPER_GATE_X = -49;
     public static final int UPPER_GATE_Z = 0;
     public static final int UPPER_HALL_X2 = -33;
-    // 階段 (登る向き +z、幅 3、1 段ずつ。UPPER_1 の床 101 → UPPER_2 の床 114。x -20〜-18、z 8 から 13 段)
-    public static final int UPPER_STAIR12_X = -20;
-    public static final int UPPER_STAIR12_Z0 = 8;
-    // 階段 (登る向き +x、幅 3。UPPER_2 の床 114 → UPPER_3 の床 126。z 8〜10、x -20 から 12 段)
-    public static final int UPPER_STAIR23_Z = 8;
-    public static final int UPPER_STAIR23_X0 = -20;
-
     // 縁のくぐり道: 浜の北 (z=41) から広間の南の段 (y 74) へ上る屋根のある坂 (x -12〜-10)
     public static final int CAVE_X1 = -12;
     public static final int CAVE_X2 = -10;
@@ -152,7 +149,7 @@ public final class TideBackLayout {
     // 南の段から水盤の底へ下りる階段 (x -3〜-1、z 7〜5 の 3 段)
     public static final int HUB_STAIR_X1 = -3;
     public static final int HUB_STAIR_X2 = -1;
-    // 干潟の門 (北の壁、x -1〜1、y 71〜73、z -13)。干潮のあいだだけ開く
+    // 干潟の門 (北の壁、x -1〜1、y 71〜73、z -13)。いつも開いている (戦っているグループにだけ閉じる)
     public static final int FLATS_GATE_Z = -13;
     // 潮の底の門 (床の格子、x -1〜1、z -1〜1、y 70)。三つの石で開く
     public static final int BOTTOM_GATE_R = 1;
@@ -274,7 +271,13 @@ public final class TideBackLayout {
             new Rest("g1", G1, new BlockPos(PLAT_C[0] - 1, PLATFORM_TOP + 1, PLAT_C[1] + 1), new BlockPos(PLAT_C[0] + 1, PLATFORM_TOP + 1, PLAT_C[1] - 1)),
             new Rest("s0", S0, new BlockPos(25, HUB_LEDGE + 1, -13), new BlockPos(26, HUB_LEDGE + 1, -9)),
             new Rest("f0", F0, new BlockPos(-3, TUNNEL_FLOOR + 1, -28), new BlockPos(0, TUNNEL_FLOOR + 1, -24)),
-            new Rest("heart", HEART_REST, new BlockPos(3, 51, -6), new BlockPos(-2, 51, -6)));
+            new Rest("heart", HEART_REST, new BlockPos(3, 51, -6), new BlockPos(-2, 51, -6)),
+            // 息の間 (BreathLayout)。u0 = 縁 (入口の泡の近く)、u1 = 予約の間 2 の床 (皿 2 の隣)、u2 = 予約の間 3 の床 (皿 5 の隣)、u3 = 展望の間。
+            // 位置は BreathLayout の式と同じ (ここでは数で書く: クラスの初期化が互いを待たないように。自己テストが合っているか見る)
+            new Rest("u0", new Area(-12, -4, -8, 2, 101, 8), new BlockPos(-9, 102, -4), new BlockPos(-8, 102, -5)),
+            new Rest("u1", new Area(7, 14, -13, -4, 114, 8), new BlockPos(10, 115, -10), new BlockPos(9, 115, -8)),
+            new Rest("u2", new Area(-8, 8, 7, 12, 126, 8), new BlockPos(-3, 127, 9), new BlockPos(2, 127, 9)),
+            new Rest("u3", new Area(-9, -2, -11, -3, 173, 3), new BlockPos(-6, 174, -8), new BlockPos(-5, 174, -7)));
 
     // ---------------------------------------------------------------- 碑文 (05 の型。4 行の光る看板)
     public record Inscription(String key, BlockPos pos, Direction facing) {
@@ -286,7 +289,12 @@ public final class TideBackLayout {
             new Inscription("sign.skyabyss.lore_tide_west", new BlockPos(ALTAR[0] - 2, ALTAR_TOP + 2, ALTAR[1] - 2), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_east", new BlockPos(55, LEDGE_FLOOR + 2, -35), Direction.SOUTH),
             new Inscription("sign.skyabyss.lore_tide_front", new BlockPos(-7, ROCK_TOP + 1, -91 + FLATS_DZ), Direction.UP),
-            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST));
+            new Inscription("sign.skyabyss.lore_tide_heart", new BlockPos(-4, 52, -8), Direction.EAST),
+            // 息の間: 展望の間の碑文 2 枚 (北の壁。窓の外)、縁の入口の泡の脇の立て札、舞台の再戦の台の脇の立て札
+            new Inscription("sign.skyabyss.lore_tide_breath_a", new BlockPos(-8, 175, -12), Direction.SOUTH),
+            new Inscription("sign.skyabyss.lore_tide_breath_b", new BlockPos(6, 175, -12), Direction.SOUTH),
+            new Inscription("sign.skyabyss.tide_breath_pad", new BlockPos(-8, 102, 0), Direction.UP),
+            new Inscription("sign.skyabyss.tide_breath_rematch", new BlockPos(-3, 139, 1), Direction.UP));
 
     // ---------------------------------------------------------------- リセットで広間へ移す所 (試練の中)
     public static List<Area> trialAreas() {

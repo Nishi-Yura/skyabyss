@@ -22,7 +22,7 @@ import net.minecraft.world.item.Item;
 
 // 控え帳の「巨神」のつまみに出す、巨神ごとの頁の中身 (図鑑・心核・炉の交換)。11 の 3 章。
 // 巨神の一覧そのものは progress.Titans (ProgressRules.TITAN_ORDER) で、つまみの頁は一覧の順に自動で並ぶ。
-// ここに登録のない巨神 (本体がまだない雷翼・余燼) は、頁の枠と「まだ見ぬ巨神」の伏せ字だけを出す。
+// 四巨神とも登録済み。登録のない巨神 (五章以降) は、頁の枠と「まだ見ぬ巨神」の伏せ字だけを出す。
 //
 // 後の巨神の担当へ: 本体 (心臓) ができたら、起動時 (FMLCommonSetupEvent の enqueueWork など) に一行
 //     TitanPages.register(TitanPages.fromGearSet(Titans.THUNDER_WING));
@@ -54,6 +54,9 @@ public final class TitanPages {
                 () -> ModItems.STONE_WHALE_CORE.get(), true));
         // 潮殻: 装備の表 (TitanGearSets、titan/tide/gear/TideGearSetup が登録) から。交換は共鳴の炉 (GearExchange) で巨神ごとにできる
         register(fromGearSet(TideLoot.TITAN));
+        // 雷翼・余燼: 同じく装備の表 (StormGearSetup・EmberGearSetup が登録) から。表は呼ばれた時に読むので、登録の順に左右されない
+        register(fromGearSet(jp.revati.skyabyss.item.storm.StormGear.TITAN));
+        register(fromGearSet(jp.revati.skyabyss.titan.ember.gear.EmberGear.TITAN));
     }
 
     private TitanPages() {

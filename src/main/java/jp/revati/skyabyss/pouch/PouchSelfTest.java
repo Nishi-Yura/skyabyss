@@ -28,6 +28,7 @@ import jp.revati.skyabyss.story.StorySetup;
 import jp.revati.skyabyss.titan.travel.TravelSetup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -467,11 +468,86 @@ public final class PouchSelfTest {
         // ---- 同期の呼び出しは作り物のプレイヤーでも落ちない
         Pouch.sync(m);
 
+        runTitanMaterials(server, f, level);
         runScreen(server, f, level);
         runUse(server, f, level);
         runRebuild(server, f, level);
         runCraftTable(server, f, level);
         runDefaults(server, f);
+    }
+
+    // ---------------------------------------------------------------- 四巨神の欠片・素材・鍵・心核 (どの入口でも袋へ入る)
+    private static List<Item> titanPouchItems() {
+        List<Item> out = new ArrayList<>();
+        out.add(ModItems.SKY_KEY_FRAGMENT.get());
+        out.add(StorySetup.SKY_KEY.get());
+        out.add(ModItems.RESONANCE_CRYSTAL.get());
+        out.add(ModItems.RESONANCE_SHARD.get());
+        for (String titan : jp.revati.skyabyss.progress.Titans.all()) {
+            out.add(ModItems.resonanceShard(titan));
+        }
+        out.addAll(Keepsakes.coreItems());
+        out.add(ModItems.STONE_WHALE_SHARD.get());
+        out.add(ModItems.STONE_WHALE_CORE.get());
+        out.add(jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_SHELL_SHARD.get());
+        out.add(jp.revati.skyabyss.item.storm.StormGearSetup.SHARD.get());
+        out.add(jp.revati.skyabyss.item.storm.StormGearSetup.CORE.get());
+        out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SHARD.get());
+        out.add(jp.revati.skyabyss.item.storm.StormGearSetup.DUST.get());
+        out.add(jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_SAC.get());
+        out.add(jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.get());
+        out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SPARK_DUST.get());
+        out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.CINDER_HUSK.get());
+        return out;
+    }
+
+    private static void runTitanMaterials(MinecraftServer server, List<String> f, ServerLevel level) {
+        for (Item item : titanPouchItems()) {
+            String name = BuiltInRegistries.ITEM.getKey(item).toString();
+            check(f, PouchEntries.entry(item) != null, "a titan pouch item has no pouch entry: " + name);
+            check(f, new ItemStack(item).getComponentsPatch().isEmpty(), "a fresh titan item carries data components: " + name);
+            // 入口ごとに新しい人で (鍵・欠片は上限が小さいので積み重ねない)
+            FakePlayer p = player(level, "[pouch_titan_give]");
+            ItemStack a = new ItemStack(item, 1);
+            PouchRouting.give(p, a);
+            check(f, a.isEmpty() && Pouch.count(p, item) == 1 && inv(p, item) == 0, "give did not route " + name);
+            p = player(level, "[pouch_titan_quest]");
+            Quests.give(p, new ItemStack(item, 1));
+            check(f, Pouch.count(p, item) == 1 && inv(p, item) == 0, "Quests.give did not route " + name);
+            p = player(level, "[pouch_titan_loot]");
+            TitanLoot.handOver(server, p.getUUID(), p, List.of(new ItemStack(item, 1)), 0);
+            check(f, Pouch.count(p, item) == 1 && inv(p, item) == 0, "TitanLoot.handOver did not route " + name);
+            p = player(level, "[pouch_titan_pick]");
+            ItemEntity drop = new ItemEntity(level, p.getX(), p.getY(), p.getZ(), new ItemStack(item, 1));
+            drop.setNoPickUpDelay();
+            drop.setTarget(p.getUUID());
+            NeoForge.EVENT_BUS.post(new ItemEntityPickupEvent.Pre(p, drop));
+            check(f, Pouch.count(p, item) == 1 && inv(p, item) == 0 && drop.isRemoved(), "pickup did not route " + name);
+            p = player(level, "[pouch_titan_sweep]");
+            p.getInventory().setItem(7, new ItemStack(item, 1));
+            Pouch.sweep(p);
+            check(f, Pouch.count(p, item) == 1 && inv(p, item) == 0, "sweep did not route " + name);
+            FakePlayer m = player(level, "[pouch_titan_m]");
+            m.getInventory().setItem(2, new ItemStack(item, 1));
+            PouchMigration.run(m);
+            check(f, Pouch.count(m, item) == 1 && inv(m, item) == 0, "migration did not route " + name);
+        }
+        // 持ち主の印の付いた欠片・鍵: 自分の今の代の品は入り、取り出すと印が付く
+        FakePlayer b = player(level, "[pouch_titan_b]");
+        for (Item item : new Item[]{ModItems.SKY_KEY_FRAGMENT.get(), StorySetup.SKY_KEY.get()}) {
+            ItemStack bound = new ItemStack(item);
+            KeepsakeBonds.bindFor(b, bound);
+            check(f, !bound.getComponentsPatch().isEmpty(), "bindFor did not stamp " + item);
+            PouchRouting.give(b, bound);
+            check(f, bound.isEmpty() && Pouch.count(b, item) == 1 && inv(b, item) == 0, "an owner-bound item did not go into the pouch: " + item);
+            ItemStack bound2 = new ItemStack(item);
+            KeepsakeBonds.bindFor(b, bound2);
+            ItemEntity dropB = new ItemEntity(level, b.getX(), b.getY(), b.getZ(), bound2);
+            dropB.setNoPickUpDelay();
+            NeoForge.EVENT_BUS.post(new ItemEntityPickupEvent.Pre(b, dropB));
+            check(f, Pouch.count(b, item) == (item == StorySetup.SKY_KEY.get() ? 1 : 2) && inv(b, item) == 0,
+                    "an owner-bound item pickup was not routed right: " + item);
+        }
     }
 
     // ---------------------------------------------------------------- 画面 (メニューの決まり。サーバー側の論理)
