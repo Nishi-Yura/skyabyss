@@ -38,6 +38,7 @@ final class BuildsSelfTest {
         balance(f);
         player(server, f);
         callings(server, f);
+        freedom(server, f);
         legendary(server, f);
         marks(server, f);
     }
@@ -142,7 +143,7 @@ final class BuildsSelfTest {
         check(f, Math.abs(SkillMarks.power(p, SkillTree.WIND) - 0.08) < 1e-9 && SkillMarks.power(p, SkillTree.ROCK) == 0 && SkillMarks.power(p, SkillTree.TRAVELER) == 0, "mark power is wrong");
         double rock = SkillEffects.damagePower(p, Skill.TITAN_CLEAVE);
         double wind = SkillEffects.damagePower(p, Skill.WIND_REND);
-        check(f, Math.abs(wind - rock - 0.08) < 1e-9, "mark did not raise the wind skill power: " + wind + " vs " + rock);
+        check(f, Math.abs(wind - rock - 0.09) < 1e-9, "mark (+8%) and its tag (+1%) did not raise the wind skill power: " + wind + " vs " + rock);
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         check(f, SkillMarks.power(p, SkillTree.WIND) == 0, "mark worked from an empty hand");
     }
@@ -159,32 +160,33 @@ final class BuildsSelfTest {
         boolean before = SkillRules.CALLINGS;
         SkillRules.CALLINGS = true;
         try {
-            // 天職の前: 1 行目だけ・刻印なし
+            // 天職の前でも、どの行も開いている (A01)。刻印も極めれば選べる
             check(f, d.canLearn(Skill.TITAN_CLEAVE, 30) == SkillData.LearnResult.OK, "a first-row skill was refused before the calling");
             SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
-            check(f, d.canLearn(Skill.ROCK_CALL, 30) == SkillData.LearnResult.CALLING, "a second-row skill opened before the calling");
+            check(f, d.canLearn(Skill.ROCK_CALL, 30) == SkillData.LearnResult.OK, "a second-row skill did not open before the calling");
             check(f, SkillCalling.which(p) == 0, "a calling was offered before the whale heart");
             check(f, SkillCalling.choose(p, "rock") == SkillCalling.Result.NOT_READY, "a calling was chosen before the whale heart");
             check(f, SkillCalling.choose(p, "traveler", true) == SkillCalling.Result.BAD_TREE, "the traveler tree was chosen as a calling");
-            check(f, !d.runeAvailable(Skill.TITAN_CLEAVE), "a rune opened before the calling");
-            // 一つ目: 岩守り
+            check(f, d.runeAvailable(Skill.TITAN_CLEAVE), "a rune did not open for a mastered skill before the calling");
+            check(f, !d.knows(Skill.STONE_OATH) && d.callingDiscount() == 0, "a keystone or discount existed before the calling");
+            // 一つ目: 岩守り。要を授かる・天性・割引 (段 3 つぶん)
             check(f, SkillCalling.choose(p, "rock", true) == SkillCalling.Result.OK && d.calling.equals("rock") && d.calling2.isEmpty(), "the first calling was not set");
-            check(f, d.canLearn(Skill.ROCK_CALL, 30) == SkillData.LearnResult.OK, "the calling tree did not open");
-            check(f, d.canLearn(Skill.BACKSTEP, 30) == SkillData.LearnResult.CALLING || d.canLearn(Skill.BACKSTEP, 30) == SkillData.LearnResult.REQUIRES,
-                    "another tree's second row opened");
-            check(f, d.rankLimit(Skill.NIMBLE) == 2 && d.rankLimit(Skill.STONE_STANCE) == 3, "rank limits of other trees are wrong");
+            check(f, d.knows(Skill.STONE_OATH) && d.rank(Skill.STONE_OATH) == 1 && !d.ranks.containsKey(Skill.STONE_OATH.id), "the calling keystone was not granted");
+            check(f, d.callingDiscount() == 3, "the calling discount is " + d.callingDiscount());
+            check(f, d.canLearn(Skill.STONE_OATH, 30) == SkillData.LearnResult.MAX_RANK, "a granted keystone could be bought again");
+            check(f, d.canLearn(Skill.BACKSTEP, 30) == SkillData.LearnResult.REQUIRES, "another tree's second row opened without its first");
+            check(f, d.rankLimit(Skill.NIMBLE) == 3 && d.rankLimit(Skill.STONE_STANCE) == 3, "rank limits are wrong");
             check(f, d.runeAvailable(Skill.TITAN_CLEAVE), "a rune of the calling tree did not open");
             SkillManager.applyModifiers(p);
             var tough = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS).getModifier(SkillManager.MOD_TRAIT_TOUGH);
             check(f, tough != null && Math.abs(tough.amount() - SkillRules.TRAIT_ROCK_TOUGHNESS) < 1e-9, "the rock trait was not applied");
             check(f, d.slotCount() == SkillRules.BASE_SLOTS, "slot count before the second calling");
-            // 二つ目: 同じ木は選べない。風読みなら 3 行目まで・要なし・天性なし・枠 +1
+            // 二つ目: 同じ木は選べない。風読みなら 5 つ目の枠と、その木の要・天性なし
             check(f, SkillCalling.which(p) == 0 && SkillCalling.choose(p, "wind") == SkillCalling.Result.NOT_READY, "the second calling opened early");
             check(f, SkillCalling.choose(p, "rock", true) == SkillCalling.Result.TAKEN, "the same tree was chosen twice");
             check(f, SkillCalling.choose(p, "wind", true) == SkillCalling.Result.OK && d.calling2.equals("wind"), "the second calling was not set");
             check(f, d.slotCount() == SkillRules.SLOTS, "the fifth slot did not open");
-            check(f, d.callingAllows(Skill.BACKSTEP) && d.callingAllows(Skill.WIND_REND) && !d.callingAllows(Skill.LONE_WIND), "second calling rows are wrong");
-            check(f, d.rankLimit(Skill.NIMBLE) == 3, "second calling tree has a rank limit");
+            check(f, d.knows(Skill.LONE_WIND) && d.callingDiscount() == 3, "second calling keystone or discount is wrong");
             check(f, SkillCalling.choose(p, "tide", true) == SkillCalling.Result.TAKEN, "a third calling was set");
             var move = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).getModifier(SkillManager.MOD_TRAIT_MOVE);
             check(f, move == null, "the second calling gave a trait");
@@ -194,6 +196,253 @@ final class BuildsSelfTest {
             check(f, copy.calling.equals("rock") && copy.calling2.equals("wind"), "callings were lost in save/load");
         } finally {
             SkillRules.CALLINGS = before;
+            SkillManager.forgetAll(p);
+        }
+    }
+
+    // ---------------------------------------------------------------- 自由度 (docs/design/31 の A 案)
+    private static boolean testModOn;
+
+    private static void freedom(MinecraftServer server, List<String> f) {
+        ServerLevel level = server.overworld();
+        BlockPos spawn = level.getSharedSpawnPos();
+        FakePlayer p = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "builds_test_f"));
+        p.moveTo(spawn.getX() + 0.5, 300, spawn.getZ() + 0.5, 0f, 0f);
+        Growth.get(p).level = 50;
+        p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(7);
+        SkillData d = SkillManager.get(p);
+        p.getAttribute(jp.revati.skyabyss.rpg.Rpg.MAX_MANA).setBaseValue(200);
+        d.bonusPoints = 0;
+        boolean before = SkillRules.CALLINGS;
+        SkillRules.CALLINGS = true;
+        long now = level.getGameTime();
+        try {
+            SkillManager.forgetAll(p);
+            d.calling = "";
+            d.calling2 = "";
+            // ---- A01: 点の総数は 45 のまま。要は授かるだけで、点は増えない
+            check(f, d.totalPoints(50) == 45, "total points changed: " + d.totalPoints(50));
+            SkillManager.forceRank(p, Skill.WHALE_SWEEP, 2);
+            check(f, d.canLearn(Skill.STONE_OATH, 50) == SkillData.LearnResult.OK, "a keystone row did not open from the start");
+            // ---- A03: タグ (全 36 技に付き、旅人は持ち味で。数・力)
+            for (Skill s : Skill.values()) {
+                check(f, SkillTag.of(s) != null, "skill without a tag: " + s.id);
+            }
+            SkillManager.forgetAll(p);
+            SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
+            SkillManager.forceRank(p, Skill.RIPOSTE, 1);
+            SkillManager.forceRank(p, Skill.ROCK_CALL, 1);
+            SkillManager.forceRank(p, Skill.READINESS_REWARD, 1);
+            check(f, SkillBuild.tagCount(p, SkillTag.ROCK) == 4 && SkillBuild.tagCount(p, SkillTag.WIND) == 0, "tag count is wrong");
+            check(f, Math.abs(SkillBuild.tagPower(p, SkillTag.ROCK) - 0.04) < 1e-9, "tag power is wrong");
+            double rockPower = SkillEffects.damagePower(p, Skill.TITAN_CLEAVE);
+            double windPower = SkillEffects.damagePower(p, Skill.WIND_REND);
+            check(f, Math.abs(rockPower - windPower - 0.04) < 1e-9, "tag power did not reach the skill");
+            // ---- A04: 木のセット (2 / 4 / 6 点)
+            check(f, SkillBuild.setTier(d, SkillTree.ROCK) == 1 && d.treePoints(SkillTree.ROCK) == 3, "set tier at 3 points is wrong");
+            SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
+            SkillManager.forceRank(p, Skill.STONE_STANCE, 3);
+            check(f, d.treePoints(SkillTree.ROCK) == 8 && SkillBuild.setTier(d, SkillTree.ROCK) == 3, "set tier at 8 points is wrong");
+            SkillManager.applyModifiers(p);
+            var armor = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).getModifier(SkillManager.MOD_B_ARMOR);
+            check(f, armor != null && Math.abs(armor.amount() - 4) < 1e-9, "the rock set (3) and 5 rock tags (1) did not give armor +4: " + (armor == null ? "none" : armor.amount()));
+            // ---- A15: 条件の特性 (岩 = HP 3❤ 以下の防具。風 = 予告をよけた直後の傷)
+            p.setHealth(4f);
+            check(f, SkillBuild.condActive(p, SkillTag.ROCK) && Math.abs(SkillBuild.attrs(p).armor() - (3 + 1 + 4)) < 1e-9, "low hp armor did not apply: " + SkillBuild.attrs(p).armor());
+            p.setHealth(20f);
+            check(f, SkillBuild.condDamage(p, false) == 0, "a condition damage applied with no condition");
+            SkillManager.forceRank(p, Skill.NIMBLE, 1);
+            SkillManager.forceRank(p, Skill.LUNGE, 1);
+            SkillManager.forceRank(p, Skill.BACKSTEP, 1);
+            check(f, SkillBuild.tagCount(p, SkillTag.WIND) == 3, "wind tag count is " + SkillBuild.tagCount(p, SkillTag.WIND));
+            d.dodgeUntil = now + 60;
+            check(f, Math.abs(SkillBuild.condDamage(p, false) - 0.05) < 1e-9, "dodge condition damage is wrong");
+            d.dodgeUntil = 0;
+            // ---- A20: キーストーン (その木に点 4・2 つまで・外すのは戦いの外)
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.FULL_TIDE) == SkillManager.KeystoneResult.NOT_REACHED, "a keystone opened without tree points");
+            SkillManager.forceRank(p, Skill.WIND_REND, 2);
+            Growth.get(p).level = 50;
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.BULWARK) == SkillManager.KeystoneResult.OK && d.keystones.contains("bulwark"), "the first keystone was refused");
+            SkillManager.applyModifiers(p);
+            armor = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).getModifier(SkillManager.MOD_B_ARMOR);
+            check(f, armor != null && Math.abs(armor.amount() - 9) < 1e-9, "the bulwark keystone armor is wrong: " + (armor == null ? "none" : armor.amount()));
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.GLASS_BLADE) == SkillManager.KeystoneResult.OK, "the second keystone was refused");
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.WIND_DANCE) == SkillManager.KeystoneResult.FULL, "a third keystone was allowed");
+            check(f, Math.abs(SkillBuild.generalDamage(p, false) - (SkillRules.KEY_GLASS_DAMAGE + SkillBuild.condDamage(p, false))) < 1e-9, "keystone damage is wrong: " + SkillBuild.generalDamage(p, false));
+            d.lastCombat = level.getGameTime();
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.GLASS_BLADE) == SkillManager.KeystoneResult.NOT_QUIET, "a keystone was removed in combat");
+            d.lastCombat = level.getGameTime() - SkillRules.QUIET_TICKS - 1;
+            check(f, SkillManager.toggleKeystone(p, SkillKeystone.GLASS_BLADE) == SkillManager.KeystoneResult.OK && d.keystones.size() == 1, "a keystone was not removed");
+            // 技の点が足りなくなったら外れる (検め)
+            d.keystones.add("glass_blade");
+            d.bonusPoints = 0;
+            Growth.get(p).level = 1;
+            d.sanitize(1);
+            check(f, d.ranks.isEmpty() && d.keystones.isEmpty(), "points over the limit did not clear keystones");
+            Growth.get(p).level = 50;
+            // ---- A11: 構え
+            check(f, SkillManager.setStance(p, SkillStance.GUARD) == SkillManager.StanceResult.OK && d.stance == 1, "the guard stance was refused");
+            check(f, SkillManager.setStance(p, SkillStance.GUARD) == SkillManager.StanceResult.SAME, "the same stance was set twice");
+            check(f, SkillManager.setStance(p, SkillStance.SWIFT) == SkillManager.StanceResult.COOLDOWN, "a stance swapped with no wait");
+            d.stanceCd = 0;
+            SkillManager.applyModifiers(p);
+            var armor2 = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).getModifier(SkillManager.MOD_B_ARMOR);
+            check(f, armor2 != null && Math.abs(armor2.amount() - SkillRules.STANCE_GUARD_ARMOR) < 1e-9, "the guard stance armor is wrong");
+            check(f, SkillManager.setStance(p, SkillStance.SONG) == SkillManager.StanceResult.OK && Math.abs(SkillBuild.regenAdd(p) - SkillRules.STANCE_SONG_REGEN) < 1e-9, "the song stance is wrong");
+            d.stanceCd = 0;
+            SkillManager.setStance(p, SkillStance.SWIFT);
+            check(f, Math.abs(SkillBuild.cooldownScale(p, Skill.LUNGE) - (1 + SkillRules.STANCE_SWIFT_COOLDOWN)) < 1e-9, "the swift stance cooldown is wrong");
+            d.stanceCd = 0;
+            SkillManager.setStance(p, SkillStance.NONE);
+            check(f, SkillBuild.cooldownScale(p, Skill.LUNGE) == 1.0 && SkillBuild.manaScale(p, Skill.LUNGE) == 1.0, "a stance left numbers changed");
+            // ---- 外からの修飾 (装備の側の口): 力は +100% で頭打ち
+            SkillBuild.register(new SkillModifier() {
+                @Override
+                public double power(net.minecraft.world.entity.player.Player player, Skill skill) {
+                    return testModOn && skill == Skill.LUNGE ? 5.0 : 0;
+                }
+
+                @Override
+                public int extraTags(net.minecraft.world.entity.player.Player player, SkillTag tag) {
+                    return testModOn && tag == SkillTag.BONE ? 2 : 0;
+                }
+            });
+            testModOn = true;
+            check(f, SkillBuild.skillPower(p, Skill.LUNGE) <= SkillRules.POWER_CAP + 1e-9 && SkillBuild.tagCount(p, SkillTag.BONE) == 2, "a skill modifier did not apply or was not capped");
+            testModOn = false;
+            // ---- A05: 振り直しは結晶 1 (目利きで無料)・型は 4 つ
+            check(f, SkillRules.LOADOUTS == 4 && d.loadouts.length == 4, "loadout count is wrong");
+            check(f, SkillRules.respecCost(9, 30, false) == 1 && SkillRules.respecCost(9, 30, true) == 0 && SkillRules.respecCost(9, 10, false) == 0, "respec cost is wrong");
+            // ---- A12: 武器の持ち替えで枠が入れ替わる (待ちは共有)
+            SkillManager.forgetAll(p);
+            d.calling = "";
+            d.bonusPoints = 40;
+            SkillManager.forceRank(p, Skill.LUNGE, 1);
+            SkillManager.forceRank(p, Skill.CLOUD_PIERCE, 1);
+            SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
+            d.bar = 0;
+            d.slots[0] = Skill.LUNGE.id;
+            d.slots[1] = Skill.TITAN_CLEAVE.id;
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+            SkillManager.syncBar(p);
+            check(f, d.bar == 0 && d.slots[0].equals("lunge"), "a sword changed the bar");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+            SkillManager.syncBar(p);
+            check(f, d.bar == 1 && d.slots[0].equals("lunge"), "the first bow swap should keep the slots");
+            d.slots[0] = Skill.CLOUD_PIERCE.id;
+            d.slots[1] = "";
+            d.cooldowns.put(Skill.LUNGE.id, 100);
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+            SkillManager.syncBar(p);
+            check(f, d.bar == 0 && d.slots[0].equals("lunge") && d.slots[1].equals("titan_cleave"), "the melee bar did not come back");
+            check(f, d.cooldown(Skill.LUNGE) == 100, "a bar swap reset a cooldown");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+            SkillManager.syncBar(p);
+            check(f, d.bar == 1 && d.slots[0].equals("cloud_pierce") && d.slots[1].isEmpty(), "the bow bar did not come back");
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            SkillManager.syncBar(p);
+            check(f, d.bar == 1, "an empty hand changed the bar");
+            d.cooldowns.clear();
+            // ---- A10: 連鎖 (枠の隣どうし・3 本まで・2 秒以内)
+            d.calling2 = "wind";
+            d.calling = "rock";
+            d.chainMask = 0;
+            check(f, SkillManager.toggleChain(p, 0) == SkillManager.ChainResult.OK && SkillManager.toggleChain(p, 1) == SkillManager.ChainResult.OK
+                    && SkillManager.toggleChain(p, 2) == SkillManager.ChainResult.OK, "chains could not be set");
+            check(f, SkillManager.toggleChain(p, 3) == SkillManager.ChainResult.TOO_MANY, "a fourth chain was allowed");
+            check(f, SkillManager.toggleChain(p, 7) == SkillManager.ChainResult.BAD_SLOT, "a bad chain slot was allowed");
+            SkillManager.forceRank(p, Skill.TEMPER, 1);
+            d.slots[0] = Skill.TITAN_CLEAVE.id;
+            d.slots[1] = Skill.TEMPER.id;
+            d.mana = 100;
+            d.cooldowns.clear();
+            d.globalCooldown = 0;
+            p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+            d.bar = 0;
+            check(f, SkillManager.cast(p, 0) == SkillManager.CastResult.OK, "the first chain skill failed");
+            d.globalCooldown = 0;
+            SkillManager.CastResult second = SkillManager.cast(p, 1);
+            check(f, second == SkillManager.CastResult.OK && SkillBuild.chained(p, Skill.TEMPER)
+                    && SkillBuild.skillPower(p, Skill.TEMPER) >= SkillRules.CHAIN_POWER, "the chain did not boost the second skill: " + second + " " + d.chainSkill + " " + d.lastCastSlot + " mask " + d.chainMask + " power " + SkillBuild.skillPower(p, Skill.TEMPER));
+            d.cooldowns.clear();
+            d.globalCooldown = 0;
+            d.lastCastTick = level.getGameTime() - SkillRules.CHAIN_WINDOW - 5;
+            d.lastCastSlot = 0;
+            d.mana = 100;
+            SkillManager.cast(p, 1);
+            check(f, !SkillBuild.chained(p, Skill.TEMPER), "a chain worked after the window");
+            // ---- A13: 熟練 (使う・当てる・予告をよけて当てる。3 で 4 つ目の刻印、転生でも残る)
+            SkillManager.forgetAll(p);
+            d.bonusPoints = 40;
+            d.mastery.clear();
+            SkillManager.forceRank(p, Skill.TEMPER, 3);
+            check(f, d.masteryLevel(Skill.TEMPER) == 0 && SkillRules.masteryLevel(14) == 0 && SkillRules.masteryLevel(15) == 1 && SkillRules.masteryLevel(300) == 5,
+                    "mastery levels are wrong");
+            check(f, SkillManager.chooseRune(p, Skill.TEMPER, Rune.MASTERY) == SkillManager.RuneResult.NOT_AVAILABLE, "the mastery rune opened early");
+            SkillManager.addMastery(p, Skill.TEMPER, 100);
+            check(f, d.masteryLevel(Skill.TEMPER) == 3 && d.runeUsable(Skill.TEMPER, Rune.MASTERY), "mastery 3 did not open the 4th rune");
+            check(f, SkillManager.chooseRune(p, Skill.TEMPER, Rune.MASTERY) == SkillManager.RuneResult.OK && SkillManager.runeOf(p, Skill.TEMPER) == Rune.MASTERY, "the mastery rune was not chosen");
+            check(f, Math.abs(SkillBuild.skillPower(p, Skill.TEMPER) - SkillBuild.tagPower(p, SkillTag.ASH) - SkillRules.MASTERY_RUNE_POWER) < 1e-9
+                    && Math.abs(SkillBuild.cooldownScale(p, Skill.TEMPER) - (1 + SkillRules.MASTERY_RUNE_COOLDOWN)) < 1e-9, "the mastery rune numbers are wrong");
+            // ---- A18: 試着の確定 (途中で通らなければそこで止める)
+            SkillManager.forgetAll(p);
+            d.bonusPoints = 0;
+            Growth.get(p).level = 20;
+            int learned = SkillManager.learnAll(p, List.of("titan_cleave", "titan_cleave", "rock_call", "lone_wind", "riposte"));
+            check(f, learned == 3 && d.rank(Skill.TITAN_CLEAVE) == 2 && d.knows(Skill.ROCK_CALL) && !d.knows(Skill.RIPOSTE), "the try-on batch stopped in the wrong place: " + learned);
+            check(f, SkillManager.learnAll(p, List.of("no_such_skill")) == 0, "an unknown skill was learned from a try-on");
+            SkillData copy = d.copyOf();
+            copy.ranks.put(Skill.RIPOSTE.id, 1);
+            check(f, !d.knows(Skill.RIPOSTE) && copy.knows(Skill.RIPOSTE), "a try-on copy touched the real record");
+            // ---- 保存・同期・転生 (型・熟練・天職の外は残る)
+            SkillManager.forgetAll(p);
+            Growth.get(p).level = 50;
+            d.bonusPoints = 20;
+            d.calling = "ash";
+            SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 3);
+            SkillManager.forceRank(p, Skill.ROCK_CALL, 2);
+            SkillManager.setSlot(p, 0, Skill.TITAN_CLEAVE);
+            SkillManager.setSlot(p, 1, Skill.ROCK_CALL);
+            d.chainMask = 1;
+            d.stance = 2;
+            d.mastery.put(Skill.TITAN_CLEAVE.id, 70);
+            d.keystones.add("bulwark");
+            SkillManager.saveLoadout(p, 3);
+            check(f, d.loadouts[3].saved && d.loadouts[3].chainMask == 1, "the fourth loadout did not keep the chain");
+            CompoundTag nbt = d.serializeNBT(server.registryAccess());
+            SkillData back = new SkillData();
+            back.deserializeNBT(server.registryAccess(), nbt);
+            check(f, back.chainMask == 1 && back.stance == 2 && back.mastery.equals(d.mastery) && back.keystones.contains("bulwark") && back.loadouts[3].saved,
+                    "new fields did not survive the save");
+            net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), server.registryAccess());
+            SkillData.STREAM_CODEC.encode(buf, d);
+            SkillData synced = SkillData.STREAM_CODEC.decode(buf);
+            buf.release();
+            check(f, synced.chainMask == 1 && synced.stance == 2 && synced.mastery.equals(d.mastery) && synced.keystones.equals(d.keystones) && synced.bars[0].length == SkillRules.SLOTS,
+                    "new fields did not survive the sync codec");
+            SkillReset.forRebirth(p);
+            check(f, d.ranks.isEmpty() && d.runes.isEmpty() && d.keystones.isEmpty() && d.calling.isEmpty() && d.calling2.isEmpty() && d.bonusPoints == 0
+                    && d.stance == 0 && d.chainMask == 0 && d.unspentPoints(50) == 45, "the rebirth reset left something behind");
+            check(f, d.loadouts[3].saved && d.mastery.getOrDefault(Skill.TITAN_CLEAVE.id, 0) == 70, "the rebirth reset removed loadouts or mastery");
+            check(f, SkillCalling.which(p) >= 0, "the calling check failed after the reset");
+            // ---- 前の版 (v2) の記録: 天職の要を自分で取っていた分は点が戻る
+            CompoundTag old = new CompoundTag();
+            old.putInt("v", 2);
+            CompoundTag ranks = new CompoundTag();
+            ranks.putInt("titan_cleave", 3);
+            ranks.putInt("rock_call", 2);
+            ranks.putInt("whale_sweep", 2);
+            ranks.putInt("stone_oath", 1);
+            old.put("ranks", ranks);
+            old.putString("calling", "rock");
+            SkillData m = new SkillData();
+            m.deserializeNBT(server.registryAccess(), old);
+            check(f, m.version == SkillData.VERSION && m.knows(Skill.STONE_OATH) && !m.ranks.containsKey("stone_oath") && m.rank(Skill.WHALE_SWEEP) == 2
+                    && m.spentPoints() == 4, "a v2 record with a calling did not migrate: " + m.ranks + " spent " + m.spentPoints());
+            check(f, m.loadouts.length == 4 && !m.loadouts[3].saved, "a v2 record did not get four loadouts");
+        } finally {
+            SkillRules.CALLINGS = before;
+            testModOn = false;
             SkillManager.forgetAll(p);
         }
     }
@@ -284,6 +533,16 @@ final class BuildsSelfTest {
         double captain = 150 / (8 * (basic + skillDps));
         check(f, heart >= 20 && heart <= 40, "heart kill time is out of range: " + heart);
         check(f, captain >= 6 && captain <= 14, "captain kill time is out of range: " + captain);
+        // 組み立ての上限 (A 案): 傷のキーストーン 2 つ + 木のセット・条件の特性 + 技の力 (タグ・熟練の刻印・連鎖) をすべて足した人。
+        // 心臓は 15 秒、番兵長は 5 秒を割らない (全部を同時に満たすのは難しいので、ふつうは基準と上限の間)
+        double general = SkillRules.KEY_GLASS_DAMAGE + SkillRules.KEY_ASH_DAMAGE + 0.05 + 0.04 + 0.08 + 0.07;
+        double skillPart = SkillRules.TAG_POWER_PER * SkillRules.TAG_COUNT_CAP + SkillRules.MASTERY_RUNE_POWER + SkillRules.CHAIN_POWER;
+        double manaCost = 1 + SkillRules.KEY_ASH_MANA_COST;
+        double maxDps = basic * (1 + general) + skillDps / manaCost * (1 + general) * (1 + skillPart);
+        double heartMax = 450 / (8 * maxDps);
+        double captainMax = 150 / (8 * maxDps);
+        check(f, heartMax >= 15 && captainMax >= 5, "the strongest build kills the heart / captain too fast: " + heartMax + " / " + captainMax);
+        SkyAbyss.LOGGER.info("[selftest] skills balance (strongest build): heart {} s, captain {} s", Math.round(heartMax), Math.round(captainMax));
         SkyAbyss.LOGGER.info("[selftest] skills balance: rotation +{}%, heart {} s, captain {} s", Math.round(bonus * 100), Math.round(heart), Math.round(captain));
     }
 
@@ -358,7 +617,7 @@ final class BuildsSelfTest {
         d.bonusPoints = 40;
         SkillManager.forceRank(p, Skill.TITAN_CLEAVE, 1);
         check(f, SkillManager.respec(p) == SkillManager.RespecResult.NO_FORGE, "a late respec worked away from a forge");
-        check(f, SkillRules.respecCost(3, 16, true) == 2 && SkillRules.respecCost(1, 16, true) == 1 && SkillRules.respecCost(3, 14, false) == 0, "respec cost with appraiser / early");
+        check(f, SkillRules.respecCost(3, 16, true) == 0 && SkillRules.respecCost(3, 16, false) == 1 && SkillRules.respecCost(1, 16, false) == 1 && SkillRules.respecCost(3, 14, false) == 0, "respec cost with appraiser / early");
 
         // ---- 常時の技の修飾子と刻み目
         SkillManager.forgetAll(p);
