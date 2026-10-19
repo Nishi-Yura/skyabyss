@@ -51,6 +51,10 @@ final class StormRoomTitles {
         r.add(new Room("eye", EYE_HALL.aabb()));
         r.add(new Room("beak", BEAK_ROOM.aabb()));
         r.add(new Room("heart_ante", KEEL_ANTE.aabb()));
+        // 任意の翼 (StormExtra。外の台は除く)
+        for (StormExtra.Zone z : StormExtra.titledZones()) {
+            r.add(new Room(z.id(), z.area().aabb()));
+        }
         return List.copyOf(r);
     }
 
