@@ -83,7 +83,7 @@ public final class TideClient {
             super(TideSetup.BACK_WAVES.get(), SoundSource.AMBIENT, RandomSource.create());
             this.looping = true;
             this.delay = 0;
-            this.volume = 0.5f;
+            this.volume = 0.35f;
             this.relative = true;
             this.attenuation = SoundInstance.Attenuation.NONE;
         }

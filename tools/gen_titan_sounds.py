@@ -45,14 +45,22 @@ def song():
 
 
 def wind():
-    seconds = 12.0
+    # 突風が来ては去り、間は静かになる (一定の「ザーザー」をやめた版)。24 秒でつながるループ
+    seconds = 24.0
     t = t_axis(seconds)
     n = len(t)
-    low = band_noise(n, 60, 380) * (0.65 + 0.35 * np.sin(2 * np.pi * t / seconds * 2))
-    high = band_noise(n, 600, 2600) * (0.4 + 0.6 * np.clip(np.sin(2 * np.pi * t / seconds * 3 + 1), 0, 1)) * 0.35
-    # 遠くで風が何かの隙間を鳴らす、細い笛のような音
-    whistle = np.sin(2 * np.pi * 523.25 * t + 3 * np.sin(2 * np.pi * t / seconds)) * (0.5 + 0.5 * np.sin(2 * np.pi * t / seconds)) * 0.03
-    return finish(reverb(low * 0.8 + high + whistle, 2.5, 0.3, circular=True), -4.0, trim=False)
+    # 突風の山 (中心の秒, 幅の秒, 強さ)。周期 24 秒でつなぐので、距離は円で測る
+    gusts = [(3.0, 1.8, 1.0), (8.5, 1.2, 0.6), (13.5, 2.4, 0.9), (20.0, 1.5, 0.7)]
+    gust = np.zeros(n)
+    for c, w, a in gusts:
+        d = np.abs(((t - c) + seconds / 2) % seconds - seconds / 2)
+        gust += a * np.exp(-(d / w) ** 2)
+    level = 0.05 + 0.95 * np.clip(gust, 0, 1)
+    low = band_noise(n, 60, 380) * level
+    high = band_noise(n, 600, 2600) * (level ** 2) * 0.25
+    # 遠くで風が何かの隙間を鳴らす、細い笛 (突風のときだけ、ごく小さく)
+    whistle = np.sin(2 * np.pi * 523.25 * t + 3 * np.sin(2 * np.pi * t / seconds * 2)) * (level ** 3) * 0.02
+    return finish(reverb(low * 0.8 + high + whistle, 2.5, 0.3, circular=True), -7.0, trim=False)
 
 
 def chain():
@@ -68,7 +76,10 @@ def chain():
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    only = set(_sys.argv[1:])
     for name, make in [("song", song), ("wind", wind), ("chain", chain)]:
+        if only and name not in only:
+            continue
         data = make().astype(np.float32)
         write_ogg(OUT / f"{name}.ogg", data)
         print(f"{name}.ogg  {len(data) / SR:.1f}s")

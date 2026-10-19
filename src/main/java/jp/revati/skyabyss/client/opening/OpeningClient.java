@@ -39,9 +39,9 @@ public final class OpeningClient {
     // 足音の時刻 (tick。始まりから): 無音への移り 5 秒 → 3 秒おきに 3 度 → 5 秒の無音 → 戻り 5 秒
     private static final int[] STEP_AT = {OpeningLogic.STEPS_FADE, OpeningLogic.STEPS_FADE + OpeningLogic.STEPS_GAP,
             OpeningLogic.STEPS_FADE + 2 * OpeningLogic.STEPS_GAP};
-    private static final float[] STEP_VOLUME = {0.45f, 0.7f, 1.0f};
+    private static final float[] STEP_VOLUME = {0.8f, 1.0f, 1.0f};
     private static final float[] STEP_PITCH = {0.95f, 0.85f, 0.75f};
-    private static final int[] STEP_DISTANCE = {80, 56, 34};
+    private static final int[] STEP_DISTANCE = {70, 48, 28};
     private static final int SILENCE_FULL_UNTIL = OpeningLogic.STEPS_FADE + 2 * OpeningLogic.STEPS_GAP + 100;
     private static final int SILENCE_END = SILENCE_FULL_UNTIL + 100;
     // 歌: 星の欠けは 5 秒後から 30 秒
@@ -223,8 +223,11 @@ public final class OpeningClient {
         float volume = STEP_VOLUME[index];
         mc.getSoundManager().play(new SimpleSoundInstance(OpeningSetup.STEP.get(), SoundSource.AMBIENT, volume, STEP_PITCH[index], RandomSource.create(),
                 x, mc.player.getY(), z));
-        // 地面の揺れ: 1 回ごとに大きく (ふだんの影より弱く)
-        shake = Math.max(shake, 0.35f + 0.3f * index);
+        // 重ねる低音の層: 音量は 1 でそろうので、半音ほど下げた同じ音を足して重く聞かせる
+        mc.getSoundManager().play(new SimpleSoundInstance(OpeningSetup.STEP.get(), SoundSource.AMBIENT, volume * 0.85f, STEP_PITCH[index] * 0.7f,
+                RandomSource.create(), x, mc.player.getY(), z));
+        // 地面の揺れ: 1 回ごとに大きく (ふだんの影より弱く。画面の揺れの設定で切れる)
+        shake = Math.max(shake, 0.5f + 0.35f * index);
     }
 
     // ---------------------------------------------------------------- 時計と拍子
