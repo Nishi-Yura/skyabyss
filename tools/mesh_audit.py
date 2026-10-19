@@ -770,6 +770,20 @@ def selftest():
     expect(see_through(b).get("x", 0) == 0, "closed box is not see-through")
     V, T = box_mesh((0, 0, 0), (4, 4, 4))
     expect(bool(inside_mask(np.array([[2.0, 2, 2]]), V, T)[0]) and not bool(inside_mask(np.array([[9.0, 2, 2]]), V, T)[0]), "point-in-mesh")
+    # 閉じる道具: 穴のある箱を mesh_close で塞ぐと、開いた辺 0・透け 0・体積が正になる
+    import mesh_close
+    V, T = box_mesh((0, 0, 0), (4, 4, 4), drop=2)
+    data = {"bones": {"x": {"parent": None, "pivot": [0, 0, 0], "vertices": V.tolist(), "uvs": [[0.1, 0.1]] * len(V), "triangles": T.tolist()}}}
+    closed, _ = mesh_close.close_mesh(data)
+    cb = Bone("x", closed["bones"]["x"])
+    a = analyze(cb.V, cb.T)
+    expect(a["open"] == 0 and a["inv"] == 0 and a["wind"] == 0, "mesh_close seals the missing face")
+    expect(see_through({"x": cb}).get("x", 0) == 0, "sealed box is not see-through")
+    # ゲート: 入っている全メッシュに開いた辺・向きの食い違い・逆法線が無い
+    bad = failures(audit_all((), do_see=False, do_joints=False))
+    expect(not bad, "all installed meshes are watertight (%d failures)" % len(bad))
+    for line in bad[:10]:
+        print("   ", line)
     print("selftest:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 

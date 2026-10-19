@@ -232,8 +232,86 @@ def fix_orientation(V, T):
 
 # ----------------------------------------------------------------- 蓋
 
+def _plane(P):
+    """輪の Newell 法線 (単位)・重心・面積。"""
+    nm = newell(P)
+    ln = float(np.linalg.norm(nm))
+    return (nm / ln if ln > 1e-12 else nm), P.mean(0), ln / 2.0
+
+
+def _in_poly(pt2, poly2):
+    x, y = pt2
+    inside = False
+    n = len(poly2)
+    for i in range(n):
+        x1, y1 = poly2[i]
+        x2, y2 = poly2[(i + 1) % n]
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1 + 1e-18) + x1:
+            inside = not inside
+    return inside
+
+
+def nested_pairs(Ps):
+    """帯でつなぐ輪の組 [(外, 内)]。厚みのある壁の縁 (兜・筒・殻の口・窓の穴) は、外の輪と内の輪の二つになる。
+    辿った向きで法線が逆向きの平行な輪 (= 蓋にすると互いに背を向ける) で、内の輪の重心が外の輪の中に入るものを候補にし、
+    平面のずれと大きさの差が小さい組から順に、一つの輪を一度だけ使って決める。"""
+    info = [_plane(P) for P in Ps]
+    cands = []
+    for b, (nb, cb, ab) in enumerate(info):
+        for a, (na, ca, aa) in enumerate(info):
+            if a == b or aa < ab * 0.98 or aa < 1e-6 or (aa <= ab * 1.02 and a > b):
+                continue
+            if float(np.dot(na, nb)) > -0.85:
+                continue
+            ext = float(np.linalg.norm(Ps[a] - ca, axis=1).max())
+            off = abs(float(np.dot(cb - ca, na)))
+            if off > 0.3 * max(ext, 1e-9):
+                continue
+            h = np.array([0, 1, 0.0]) if abs(na[1]) < 0.9 else np.array([1, 0, 0.0])
+            u = np.cross(h, na)
+            u /= np.linalg.norm(u)
+            w = np.cross(na, u)
+            poly = [((p - ca) @ u, (p - ca) @ w) for p in Ps[a]]
+            if not _in_poly(((cb - ca) @ u, (cb - ca) @ w), poly):
+                continue
+            cands.append((off + 0.3 * abs(math.sqrt(aa) - math.sqrt(ab)), a, b))
+    cands.sort()
+    used = set()
+    out = []
+    for _, a, b in cands:
+        if a in used or b in used:
+            continue
+        used.add(a)
+        used.add(b)
+        out.append((a, b))
+    return out
+
+
+def annulus(PA, PB):
+    """外の輪 PA (既存の辺の向きの並び) と内の輪 PB の間の帯。戻り値は三角形 [(区分, 外の番号, 内の番号...)]、頂点はそれぞれ ('A', i) / ('B', j)。
+    蓋は既存の辺と逆向きに使うので、外は逆順 (RA)、内は元の順 (LB) の同じ回転の向きにして、ジッパーで進む。"""
+    RA = PA[::-1]
+    n, m = len(RA), len(PB)
+    j0 = int(np.argmin(np.linalg.norm(PB - RA[0], axis=1)))
+    B = np.roll(PB, -j0, axis=0)
+    ia = ib = 0
+    tris = []
+    while ia < n or ib < m:
+        a0, a1 = RA[ia % n], RA[(ia + 1) % n]
+        b0, b1 = B[ib % m], B[(ib + 1) % m]
+        ca = np.linalg.norm(a1 - b0) if ia < n else 1e18
+        cb = np.linalg.norm(a0 - b1) if ib < m else 1e18
+        if ia < n and (ib >= m or ca <= cb):
+            tris.append((("A", ia % n), ("A", (ia + 1) % n), ("B", ib % m)))
+            ia += 1
+        else:
+            tris.append((("A", ia % n), ("B", (ib + 1) % m), ("B", ib % m)))
+            ib += 1
+    return RA, B, tris
+
+
 def close_bone(V, UV, T, centroid):
-    """開いた縁を蓋で塞ぐ。戻り値 (V, UV, T, 蓋の数)。"""
+    """開いた縁を蓋で塞ぐ。入れ子の輪 (厚みのある壁の縁) は、内と外の間の帯でつなぐ。戻り値 (V, UV, T, 蓋の数)。"""
     loops, c = boundary_loops(V, T)
     if not loops:
         return V, UV, T, 0
@@ -241,14 +319,38 @@ def close_bone(V, UV, T, centroid):
     UV = [list(p) for p in UV]
     T = [list(t) for t in T]
     Va = np.array(V)
-    for ids, tis in loops:
+    Ps = [Va[ids] for ids, tis in loops]
+    done = set()
+    for a, b in nested_pairs(Ps):
+        RA, B, tris = annulus(Ps[a], Ps[b])
+        ta = loops[a][1][::-1]
+        tb = loops[b][1]
+        # 一周ぶんが三角形を作る向きが外れる (法線が外れた輪と逆) 場合は、帯にせず蓋に任せる
+        n_ann = newell(RA)
+        if float(np.dot(n_ann, newell(B))) <= 0:
+            continue
+        for tri in tris:
+            kind, idx = tri[0]
+            nbt = T[ta[min(idx, len(ta) - 1)]] if kind == "A" else T[tb[min(idx, len(tb) - 1)]]
+            suv = [sum(UV[i][0] for i in nbt) / 3.0, sum(UV[i][1] for i in nbt) / 3.0]
+            vi = []
+            for kk, ii in tri:
+                pos = RA[ii] if kk == "A" else B[ii]
+                V.append([float(pos[0]), float(pos[1]), float(pos[2])])
+                UV.append(suv)
+                vi.append(len(V) - 1)
+            T.append(vi)
+        done.add(a)
+        done.add(b)
+    for li, (ids, tis) in enumerate(loops):
+        if li in done:
+            continue
         P = Va[ids]
-        # 蓋は輪を逆向きにたどる向き (辺は既存の面と逆向きになる)。耳切りは輪の並びの向きに三角形を返すので逆順を渡す
+        # 蓋は輪を逆向きにたどる向き (辺は既存の面と逆向きになる)
         Prev = P[::-1]
         ids_rev = ids[::-1]
         tis_rev = tis[::-1]
         extra, tris = triangulate_loop(Prev, np.asarray(centroid, float))
-        base = len(V)
         # 蓋の頂点は輪の頂点の複製 (それぞれの三角形が自分の UV を持つ)
         for tri in tris:
             # 絵: 縁の隣の面の重心の一点 (どの頂点も同じ UV にして平らな色にする)
@@ -263,7 +365,6 @@ def close_bone(V, UV, T, centroid):
                 vi.append(len(V) - 1)
             T.append(vi)
     return np.array(V), np.array(UV), np.array(T, int), len(loops)
-
 
 
 # ----------------------------------------------------------------- 関節の玉
