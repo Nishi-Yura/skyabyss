@@ -238,12 +238,6 @@
   "message.skyabyss.whisper.tide_hub": "Rising, go up; ebbing, go forth. At flood, swim the basin to the east gallery; at ebb, the north gate opens",
   "message.skyabyss.whisper.tide_top": "You are out on the shell. Walk down to its front rim to see the titan's neck and head rising from the sea",
   "message.skyabyss.whisper.tide_garden": "Carry the giant clam's pearl to the north altar. Climb a platform before the tide comes in; if the tide covers your head, the pearl returns to the clam",
-<<<<<<< HEAD
-  "message.skyabyss.whisper.tide_watch": "Water flows from the basin of the plug stand's color to the basin of the rug's color in front of it. The weight plate reverses the plug with the same mark beside it",
-  "message.skyabyss.whisper.tide_flats": "The nests open only at low tide. When the tide comes in, climb onto the rock islands",
-  "message.skyabyss.tide.boat_given": "The shore is far, so a boat was set out for you"
-}
-=======
   "message.skyabyss.whisper.tide_watch": "A plug stand's stone is where the water comes from; the rug in front is where it goes. Water moves to the basin whose pillars match. A door opens when its basin holds 1 level or less; a float that reaches the lights lifts you a tier. The weight plate reverses the plug with the same mark beside it",
   "message.skyabyss.whisper.tide_flats": "The nests open only at low tide. When the tide comes in, climb onto the rock islands",
   "sign.skyabyss.tide_watch_color.1": "Reading plugs",
@@ -295,6 +289,6 @@
   "message.skyabyss.tide.exit_opened": "The bottom door opened. Go to the stone on the ledge",
   "message.skyabyss.tide.door_shut": "The door of the %s is shut. Lower it to 1 level or less (now %s)",
   "message.skyabyss.tide.exit_shut": "The bottom door is shut. Empty the top basin (now %2$s)",
-  "message.skyabyss.tide.pearl_halfway": "The pearl is past the garden's midpoint. The altar lies ahead, far north"
+  "message.skyabyss.tide.pearl_halfway": "The pearl is past the garden's midpoint. The altar lies ahead, far north",
+  "message.skyabyss.tide.boat_given": "The shore is far, so a boat was set out for you"
 }
->>>>>>> worktree-agent-ab6fb680c92583757
