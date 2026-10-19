@@ -182,9 +182,9 @@ public final class TelegraphGeometry {
         if (r1 <= r0 + 1e-9 || a1 <= a0 + 1e-9) {
             return;
         }
-        // 弦の誤差 (r(1 - cos(d/2))) が 0.05 以下で、弧の長さが CELL 以下
+        // 弦の誤差 (r(1 - cos(d/2))) が 0.008 以下で、弧の長さが CELL 以下
         double cell = cellFor(r1);
-        double maxStep = Math.min(cell / Math.max(r1, 1e-6), 2 * Math.acos(Math.max(0, 1 - 0.05 / Math.max(r1, 0.06))));
+        double maxStep = Math.min(cell / Math.max(r1, 1e-6), 2 * Math.acos(Math.max(0, 1 - 0.008 / Math.max(r1, 0.06))));
         int na = Math.max(1, (int) Math.ceil((a1 - a0) / Math.max(maxStep, 1e-3)));
         int nr = Math.max(1, (int) Math.ceil((r1 - r0) / cell));
         for (int i = 0; i < na; i++) {
@@ -260,7 +260,7 @@ public final class TelegraphGeometry {
     }
 
     private static void arcSegs(double cx, double cz, double r, double a0, double a1, Seg out) {
-        int n = Math.max(2, (int) Math.ceil(Math.abs(a1 - a0) * r / 0.7));
+        int n = Math.max(2, (int) Math.ceil(Math.abs(a1 - a0) * r / 0.25));
         double px = cx + Math.cos(a0) * r;
         double pz = cz + Math.sin(a0) * r;
         for (int i = 1; i <= n; i++) {
