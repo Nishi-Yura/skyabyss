@@ -480,7 +480,8 @@ public final class Ch1MobsSelfTest {
             p.moveTo(SX + 8, FLOOR, SZ, 0, 0);
             h.moveTo(SX + 14, FLOOR, SZ, 0, 0);
             h.setHome(new BlockPos(SX, FLOOR, SZ));
-            tick(level, h, 40);
+            h.getNavigation().stop(); // 前の道 (前の集め場への経路) を引きずらない
+            tick(level, h, 60);
             check(h.distanceTo(p) > 9, "hauler should flee away from the player when the cache is behind the player (" + h.distanceTo(p) + ")", f);
             notes.add("hauler cache " + round((float) dHome0) + " -> " + round((float) dHome));
             drop(ps);
