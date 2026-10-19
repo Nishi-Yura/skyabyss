@@ -99,6 +99,8 @@ public final class Downed {
     // 倒れてから死んだ人 (倒れた回数を二重に数えない。一度使うと消える)
     private static final Set<UUID> DIED_DOWN = new HashSet<>();
     private static final Map<UUID, Integer> LAST = new HashMap<>();
+    // 倒れてから死んだ人 (onDeath が付け、広間の数え方 TitanBackTrials.noteFallen が一度だけ取り出す)
+    private static final Set<UUID> DOWN_DEATH = new HashSet<>();
     // 自己テスト用: 仲間の引き方 (null なら実サーバーの一覧)
     public static Function<UUID, ServerPlayer> testLookup;
 
@@ -184,6 +186,7 @@ public final class Downed {
         player.clearFire();
         release(player);
         GroupBossRoom.noteDown(player.getUUID());
+        jp.revati.skyabyss.titan.dungeon.TitanBackTrials.noteDown(player.getUUID());
         if (player.level() instanceof ServerLevel level) {
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 1f, 0.6f);
         }
@@ -259,7 +262,15 @@ public final class Downed {
             clear(player.getUUID(), player);
         }
         boolean timeout = DIED_DOWN.remove(player.getUUID());
+        if (was || timeout) {
+            DOWN_DEATH.add(player.getUUID());
+        }
         return was || timeout;
+    }
+
+    // 倒れてから死んだ人か (一度取り出すと消える)
+    public static boolean takeDownDeath(UUID id) {
+        return DOWN_DEATH.remove(id);
     }
 
     // ---------------------------------------------------------------- 毎 tick
@@ -476,6 +487,7 @@ public final class Downed {
         DOWNED.clear();
         HOLDS.clear();
         DIED_DOWN.clear();
+        DOWN_DEATH.clear();
         LAST.clear();
     }
 
