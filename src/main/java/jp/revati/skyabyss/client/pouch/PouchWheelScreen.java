@@ -98,7 +98,7 @@ public class PouchWheelScreen extends Screen {
         }
         finished = true;
         if (use && selected >= 0 && selected < items.size()) {
-            PouchClient.use(items.get(selected).id());
+            PouchClient.useFromWheel(items.get(selected).id());
         }
         onClose();
     }

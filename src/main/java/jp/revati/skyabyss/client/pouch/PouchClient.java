@@ -8,6 +8,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
+import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.pouch.PouchEntries;
 import jp.revati.skyabyss.pouch.PouchNet;
@@ -62,6 +63,7 @@ public final class PouchClient {
     @SubscribeEvent
     static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
+        QuickCard.tick(mc);
         if (mc.player == null || mc.screen != null) {
             held = 0;
             return;
@@ -82,12 +84,28 @@ public final class PouchClient {
         }
     }
 
-    // 短押し: 前回の道具 (なければ使える品の先頭) をすぐ使う
+    // 短押し: 札の道具 (一枚札が入のとき。場面で自動・置いた道具が先) か、前回の道具 (なければ使える品の先頭) をすぐ使う
     private static void shortPress(Minecraft mc) {
-        List<PouchEntries.Entry> usable = PouchUsable.usable(mc.player);
-        if (usable.isEmpty()) {
+        ResourceLocation id = shortTool(mc);
+        if (id == null) {
             none(mc);
             return;
+        }
+        use(id);
+    }
+
+    // 短押しが今使う道具 (なければ null)
+    @Nullable
+    public static ResourceLocation shortTool(Minecraft mc) {
+        if (mc.player == null) {
+            return null;
+        }
+        if (Config.POUCH_QUICK_CARD.get()) {
+            return QuickCard.pick(mc);
+        }
+        List<PouchEntries.Entry> usable = PouchUsable.usable(mc.player);
+        if (usable.isEmpty()) {
+            return null;
         }
         ResourceLocation id = usable.get(0).id();
         for (PouchEntries.Entry e : usable) {
@@ -95,7 +113,7 @@ public final class PouchClient {
                 id = last;
             }
         }
-        use(id);
+        return id;
     }
 
     // 長押し: 輪を開く。道具が一つだけなら輪を出さずに使う
@@ -112,6 +130,12 @@ public final class PouchClient {
 
     private static void none(Minecraft mc) {
         mc.gui.setOverlayMessage(Component.translatable("skyabyss_pouch.wheel.none"), false);
+    }
+
+    // 輪で選んだ道具: 使って、札に置く (自動より優先。旅嚢の画面で右クリックしてはずす)
+    static void useFromWheel(ResourceLocation id) {
+        QuickCard.pin(id);
+        use(id);
     }
 
     // 道具を使う (サーバーへ)。前回の道具として覚える

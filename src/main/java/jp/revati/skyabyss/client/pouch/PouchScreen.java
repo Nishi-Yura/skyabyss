@@ -132,6 +132,11 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             // 枠: 持っている品は青緑の縁、使える道具は金の縁、ないものは空
             float u = usable ? 440f : n > 0 ? 400f : 360f;
             g.blit(TEXTURE, x + spot.x() - 1, y + spot.y() - 1, 18, 18, u, 0f, 36, 36, TEX, TEX);
+            if (usable && QuickCard.isPinned(e.id())) {
+                // 札に置いた印 (角の金の点)
+                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x() + 2, y + spot.y(), 0xFFF2C14E);
+                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x(), y + spot.y() + 2, 0xFFF2C14E);
+            }
             if (n <= 0) {
                 if (seen(e)) {
                     // いちど手に入れた品: 暗い影 (今は手もとにない)
@@ -251,6 +256,10 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             hint = Component.translatable("skyabyss_pouch.screen.kept");
         }
         g.drawString(font, font.plainSubstrByWidth(hint.getString(), PouchLayout.W - 24), 12, y2, color, false);
+        if (n > 0 && e.item() instanceof PouchUsable) {
+            Component pin = Component.translatable(QuickCard.isPinned(e.id()) ? "skyabyss_pouch.screen.unpin" : "skyabyss_pouch.screen.pin");
+            g.drawString(font, font.plainSubstrByWidth(pin.getString(), PouchLayout.W - 24), 12, y2 + 10, DIM, false);
+        }
     }
 
     private void drawWrapped(GuiGraphics g, Component line, int y) {
@@ -335,6 +344,15 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
             scroll = 0;
             refreshRows();
             return true;
+        }
+        if (button == 1 && !menu.rebuildView && hoveredSlot != null && hoveredSlot.index >= 0 && hoveredSlot.index < menu.pouchSlotCount()) {
+            // 使える道具の枠を右クリック: 一枚札に置く／はずす
+            PouchEntries.Entry e = menu.entryAt(hoveredSlot.index);
+            if (e != null && e.item() instanceof PouchUsable && Pouch.data(minecraft.player).count(e.id()) > 0) {
+                boolean on = QuickCard.togglePin(e.id());
+                minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.5f, on ? 1.2f : 0.9f);
+                return true;
+            }
         }
         if (menu.rebuildView) {
             if (button == 0 && hit(mx, my, REPAIR_X, REPAIR_Y, BTN_W, BTN_H)) {

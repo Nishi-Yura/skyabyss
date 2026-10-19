@@ -114,7 +114,7 @@ public final class TutorialClient {
         HAND, SHORT, WHEEL
     }
 
-    // 手 (持ち物) にあれば HAND。旅嚢だけにあるとき、使える道具が一つだけか前回の道具ならそれ SHORT、そうでなければ WHEEL
+    // 手 (持ち物) にあれば HAND。旅嚢だけにあるとき、短押しが使う道具 (一枚札) がそれなら SHORT、そうでなければ WHEEL
     public static Variant variant(Minecraft mc, Predicate<Item> match) {
         if (mc.player != null) {
             var inv = mc.player.getInventory();
@@ -124,14 +124,11 @@ public final class TutorialClient {
                     return Variant.HAND;
                 }
             }
-            List<PouchEntries.Entry> usable = mc.player == null ? List.of() : PouchUsable.usable(mc.player);
-            ResourceLocation last = PouchClient.lastUsed();
-            for (PouchEntries.Entry e : usable) {
-                if (match.test(e.item())) {
-                    if (usable.size() == 1 || e.id().equals(last) || (last == null && usable.get(0) == e)) {
-                        return Variant.SHORT;
-                    }
-                }
+            // 短押しが使う道具 (左の札。札が切のときは前回の道具か、使える道具が一つだけのもの) がその品なら SHORT
+            ResourceLocation tool = PouchClient.shortTool(mc);
+            PouchEntries.Entry e = tool == null ? null : PouchEntries.byId(tool);
+            if (e != null && match.test(e.item())) {
+                return Variant.SHORT;
             }
         }
         return Variant.WHEEL;

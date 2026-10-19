@@ -8,7 +8,7 @@
   "tutorial.skyabyss.lore_page.wheel": "Hold [%s] for the pouch wheel, pick the torn page, release to read it",
   "tutorial.skyabyss.pouch": "Press [%s] to open the pouch",
   "tutorial.skyabyss.whistle.hand": "Right-click to blow the whistle and call a titan",
-  "tutorial.skyabyss.whistle.short": "Tap [%s] to blow the whistle (call)",
+  "tutorial.skyabyss.whistle.short": "Tap [%s] to blow the whistle (call) when the left card shows it",
   "tutorial.skyabyss.whistle.wheel": "Hold [%s] for the pouch wheel, pick the whistle, release to call",
   "tutorial.skyabyss.record": "Press [%s] to open the record book",
   "tutorial.skyabyss.ping": "Press [%s] to point out what you are looking at to your party"

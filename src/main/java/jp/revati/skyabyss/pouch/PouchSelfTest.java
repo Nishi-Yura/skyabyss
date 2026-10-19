@@ -71,7 +71,7 @@ public final class PouchSelfTest {
         }
         if (f.isEmpty()) {
             SkyAbyss.LOGGER.info("SELFTEST pouch PASSED (registry, save/sync round trip, add/take/limit, component refusal, give, pickup, sweep, loan mark, withdraw rules, "
-                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, rebuild and repair, defaults flip)");
+                    + "death in every mode, copy to the new body, no grave, record holder, sky key count, forge cost, respec cost, quest count, migration, screen menu clicks and layout, wheel/short-press use, quick card pick and pin, rebuild and repair, defaults flip)");
         } else {
             f.forEach(x -> SkyAbyss.LOGGER.error("SELFTEST pouch FAILED: {}", x));
         }
@@ -118,6 +118,34 @@ public final class PouchSelfTest {
         return jp.revati.skyabyss.forge.ForgeRules.count(p, item);
     }
 
+    // 一枚札の選び方 (QuickPick。純粋な関数): 場面の自動、前回の道具、置いた札 (pin) の優先
+    private static void quickCard(List<String> f) {
+        var whale = net.minecraft.resources.ResourceLocation.parse("skyabyss:whale_call");
+        var shell = net.minecraft.resources.ResourceLocation.parse("skyabyss:shell_call");
+        var conch = net.minecraft.resources.ResourceLocation.parse("skyabyss:conch");
+        var cock = net.minecraft.resources.ResourceLocation.parse("skyabyss:cock");
+        var book = net.minecraft.resources.ResourceLocation.parse("skyabyss:book");
+        var all = List.of(new QuickPick.Cand(whale, QuickPick.Role.CALL, "whale"), new QuickPick.Cand(shell, QuickPick.Role.CALL, "shell"),
+                new QuickPick.Cand(conch, QuickPick.Role.SEA, null), new QuickPick.Cand(cock, QuickPick.Role.STORM, null),
+                new QuickPick.Cand(book, QuickPick.Role.OTHER, null));
+        var none = QuickPick.Ctx.NONE;
+        check(f, QuickPick.pick(List.of(), none, null, null) == null, "quick card: an empty pouch must give no card");
+        check(f, book.equals(QuickPick.pick(List.of(all.get(4)), none, null, null)), "quick card: a single tool must be the card");
+        check(f, whale.equals(QuickPick.pick(all, none, null, null)), "quick card: no context and no last must give the first tool");
+        check(f, conch.equals(QuickPick.pick(all, none, null, conch)), "quick card: nothing relevant must give the last tool");
+        check(f, shell.equals(QuickPick.pick(all, new QuickPick.Ctx("shell", false, false, false), null, conch)), "quick card: near a titan must give its own call");
+        check(f, whale.equals(QuickPick.pick(all, new QuickPick.Ctx("whale", true, true, true), null, conch)), "quick card: a titan must beat the sea and the storm");
+        check(f, shell.equals(QuickPick.pick(all, new QuickPick.Ctx(null, true, false, false), null, shell)), "quick card: a waymark must give the last call tool");
+        check(f, whale.equals(QuickPick.pick(all, new QuickPick.Ctx(null, true, false, false), null, conch)), "quick card: a waymark without a last call tool must give the first call");
+        check(f, conch.equals(QuickPick.pick(all, new QuickPick.Ctx(null, false, true, true), null, whale)), "quick card: the sea must give the conch before the storm");
+        check(f, cock.equals(QuickPick.pick(all, new QuickPick.Ctx(null, false, false, true), null, whale)), "quick card: a storm must give the weathercock");
+        check(f, whale.equals(QuickPick.pick(List.of(all.get(0), all.get(4)), new QuickPick.Ctx(null, false, true, true), null, whale)),
+                "quick card: a context without its tool must fall back to the last tool");
+        check(f, book.equals(QuickPick.pick(all, new QuickPick.Ctx("shell", true, true, true), book, whale)), "quick card: a pinned tool must beat every context");
+        check(f, conch.equals(QuickPick.pick(List.of(all.get(1), all.get(2)), none, whale, conch)),
+                "quick card: a pin that is not in the pouch must be ignored (fall to last)");
+    }
+
     static void run(MinecraftServer server, List<String> f) {
         ServerLevel level = server.overworld();
         Item shard = ModItems.STONE_WHALE_SHARD.get();
@@ -126,6 +154,8 @@ public final class PouchSelfTest {
         Item fragment = ModItems.SKY_KEY_FRAGMENT.get();
         Item key = StorySetup.SKY_KEY.get();
         Item call = TravelSetup.STONE_WHALE_CALL.get();
+
+        quickCard(f);
 
         // ---- 登録の表 (22 の 2・3 章)
         List<PouchEntries.Entry> all = PouchEntries.all();
