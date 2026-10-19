@@ -42,10 +42,10 @@ w("blockstates/anemone_bed.json", {"variants": {"waterlogged=false": {"model": "
                                                "waterlogged=true": {"model": "skyabyss:block/anemone_bed"}}})
 w("models/item/anemone_bed.json", {"parent": "skyabyss:block/anemone_bed"})
 
-# 数え石: 立方体 + 灯った丸 (丸 k=0..4 を 4 面に貼る。丸の中心は 2+3k、高さ 6.5〜8.5)
+# 数え石: 立方体 + 灯った丸 (丸 k=0..2 を 4 面に貼る。丸の中心は 4+4k、高さ 6.5〜8.5。台の数と同じ 3 つ)
 w("models/block/anemone_tally.json", {"parent": "minecraft:block/cube_all", "textures": {"all": "skyabyss:block/anemone_tally"}})
-for k in range(5):
-    x0, x1 = 1 + 3 * k, 3 + 3 * k
+for k in range(3):
+    x0, x1 = 3 + 4 * k, 5 + 4 * k
     y0, y1 = 6.5, 8.5
     uv = [7, 7, 9, 9]
 
@@ -60,8 +60,8 @@ for k in range(5):
     w(f"models/block/anemone_tally_dot{k}.json", {"parent": "minecraft:block/block", "render_type": "minecraft:cutout",
        "textures": {"d": "skyabyss:block/anemone_tally_dot"}, "elements": els})
 multipart = [{"apply": {"model": "skyabyss:block/anemone_tally"}}]
-for k in range(5):
-    when = "|".join(str(c) for c in range(k + 1, 6))
+for k in range(3):
+    when = "|".join(str(c) for c in range(k + 1, 4))
     multipart.append({"when": {"count": when}, "apply": {"model": f"skyabyss:block/anemone_tally_dot{k}"}})
 w("blockstates/anemone_tally.json", {"multipart": multipart})
 w("models/item/anemone_tally.json", {"parent": "skyabyss:block/anemone_tally"})
