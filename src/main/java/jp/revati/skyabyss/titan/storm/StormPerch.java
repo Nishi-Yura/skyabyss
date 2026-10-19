@@ -2,6 +2,8 @@ package jp.revati.skyabyss.titan.storm;
 
 import org.jetbrains.annotations.Nullable;
 
+import jp.revati.skyabyss.titan.TitanGround;
+import jp.revati.skyabyss.titan.solid.TitanVolume;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
@@ -43,10 +45,16 @@ public final class StormPerch {
                 && !level.getFluidState(new BlockPos(bx, top, bz)).is(FluidTags.WATER);
     }
 
-    // (cx, cz) から rMin〜rMax ブロックの中で、読み込まれた乾いた地表のうち一番高い点。なければ null
+    // 止まり木の候補を高い順に何点まで体の大きさで確かめるか。体が地形にめり込まない (要る持ち上がりが小さい) 最初の点を選ぶ
+    static final int FOOTPRINT_CANDIDATES = 12;
+    static final double OK_RISE = 4.0;
+
+    // (cx, cz) から rMin〜rMax ブロックの中で、読み込まれた乾いた地表のうち一番高い点 (ただし体がめり込まない所を優先)。なければ null。
+    // 戻りの y は雷翼の位置の y (体の底): 足もとの地表か、翼や体がまわりの丘・木に触れないよう持ち上げた高さのうち高い方。
+    // 向きは降りてから決まるので、8 方向 (45 度ごと) のどれでもめり込まない高さにする
     @Nullable
     public static Peak find(ServerLevel level, double cx, double cz, double rMin, double rMax) {
-        Peak best = null;
+        java.util.List<Peak> candidates = new java.util.ArrayList<>();
         int r = (int) Math.ceil(rMax);
         int x0 = Mth.floor((cx - r) / STEP) * STEP;
         int z0 = Mth.floor((cz - r) / STEP) * STEP;
@@ -56,10 +64,23 @@ public final class StormPerch {
                 if (d < rMin || d > rMax || !dry(level, x + 0.5, z + 0.5)) {
                     continue;
                 }
-                double y = surfaceAt(level, x + 0.5, z + 0.5);
-                if (best == null || y > best.y()) {
-                    best = new Peak(x + 0.5, y, z + 0.5);
-                }
+                candidates.add(new Peak(x + 0.5, surfaceAt(level, x + 0.5, z + 0.5), z + 0.5));
+            }
+        }
+        candidates.sort((a, b) -> Double.compare(b.y(), a.y()));
+        TitanVolume volume = TitanVolume.get("thunder_wing");
+        Peak best = null;
+        double bestRise = Double.MAX_VALUE;
+        for (int i = 0; i < Math.min(FOOTPRINT_CANDIDATES, candidates.size()); i++) {
+            Peak c = candidates.get(i);
+            double need = TitanGround.requiredAnyYaw(level, TitanGround.Surface.TOP, volume, c.x(), c.z(), 1);
+            double rise = Double.isFinite(need) ? Math.max(0, need - c.y()) : 0;
+            if (rise < bestRise) {
+                bestRise = rise;
+                best = new Peak(c.x(), c.y() + rise, c.z());
+            }
+            if (rise <= OK_RISE) {
+                break;
             }
         }
         return best;

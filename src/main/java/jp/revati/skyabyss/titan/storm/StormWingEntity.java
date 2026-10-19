@@ -241,6 +241,11 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         double gy = StormPerch.surfaceAt(level, getX(), getZ());
         perchX = getX();
         perchY = Double.isNaN(gy) ? getY() : gy;
+        double need = jp.revati.skyabyss.titan.TitanGround.requiredAnyYaw(level, jp.revati.skyabyss.titan.TitanGround.Surface.TOP,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), 1);
+        if (Double.isFinite(need)) {
+            perchY = Math.max(perchY, need);
+        }
         perchZ = getZ();
         hasPerch = true;
         forcedTicks = forced;
@@ -540,7 +545,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         double z = perchZ + r * Math.sin(descendTheta);
         double y = descendY0 + (perchY - descendY0) * p;
         setYRot((float) Math.toDegrees(descendTheta));
-        setPos(x, y, z);
+        setPos(x, Math.max(y, terrainFloor(level)), z);
         if (p >= 1.0) {
             setPos(perchX, perchY, perchZ);
             arrive(level);
@@ -620,7 +625,7 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
         double fx = -Math.sin(yaw);
         double fz = Math.cos(yaw);
         double y = Math.min(cruiseTarget(level), getY() + RISE_RATE);
-        setPos(getX() + fx * TAKE_OFF_FORWARD, y, getZ() + fz * TAKE_OFF_FORWARD);
+        setPos(getX() + fx * TAKE_OFF_FORWARD, Math.max(y, terrainFloor(level)), getZ() + fz * TAKE_OFF_FORWARD);
         if (modeTicks >= TAKE_OFF_TICKS) {
             // 輪の中心は進む向きの右の方 (接線が今の向きと一致するように置く)
             radius = 160;
@@ -677,12 +682,25 @@ public class StormWingEntity extends Entity implements GeoEntity, jp.revati.skya
                 setYRot(Mth.approachDegrees(getYRot(), (float) Math.toDegrees(Math.atan2(-dx, dz)), 3f));
                 double step = Math.min(COVER_SPEED, dist);
                 double ny = getY() + Mth.clamp(coverY - getY(), -COVER_SPEED, COVER_SPEED);
-                // (ny は今の高さから峰の高さへ寄せる)
-                setPos(getX() + dx / dist * step, ny, getZ() + dz / dist * step);
+                // (ny は今の高さから峰の高さへ寄せる。地形にめり込む高さには下げない)
+                setPos(getX() + dx / dist * step, Math.max(ny, terrainFloor(level)), getZ() + dz / dist * step);
             } else {
                 setPos(coverX, coverY, coverZ);
             }
         }
+    }
+
+    // 体が丘・木・峰にめり込まない最低の高さ (今の位置・向きで。4 tick ごとに測り直す。降りる・飛び立つ・峰へ急ぐあいだの下限)
+    private double groundNow = Double.NEGATIVE_INFINITY;
+    private int groundAt = -100;
+
+    private double terrainFloor(ServerLevel level) {
+        if (tickCount - groundAt >= 4) {
+            groundAt = tickCount;
+            groundNow = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.TOP,
+                    jp.revati.skyabyss.titan.solid.TitanVolume.get(volumeName()), getX(), getZ(), getYRot(), jp.revati.skyabyss.titan.TitanGround.MARGIN, 1);
+        }
+        return groundNow;
     }
 
     // 昇り風の柱: 止まっているあいだ、左の足もとから 8 ブロック左に一本立てる

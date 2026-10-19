@@ -30,6 +30,8 @@ public final class EmberGround {
     // 眠る場所の口の前の平らさ (16 ブロック、高さの差 3 以内)
     static final int FLAT_LENGTH = 16;
     static final int FLAT_STEP = 3;
+    // 地面より上の体と丘・木の食い込みの許し (ブロック。数値の誤差だけ)
+    static final double CLIP_TOLERANCE = 0.05;
 
     private EmberGround() {
     }
@@ -234,6 +236,13 @@ public final class EmberGround {
         }
         double cx = sx - fx * EmberTitanEntity.SNOUT_FORWARD;
         double cz = sz - fz * EmberTitanEntity.SNOUT_FORWARD;
+        // 地面より上の体 (腹は土に伏せてよい) が、丘・木・岩にめり込まない (体の底の高さ = 口の前の地面 - 舌の高さ)。めり込むなら、ここでは伏せない
+        double bodyY = ground - EmberTitanEntity.TONGUE_UP;
+        double need = jp.revati.skyabyss.titan.TitanGround.requiredY(level, jp.revati.skyabyss.titan.TitanGround.Surface.TOP,
+                jp.revati.skyabyss.titan.solid.TitanVolume.get("ember_titan"), cx, cz, yaw, 0.0, 1, EmberTitanEntity.TONGUE_UP);
+        if (need > bodyY + CLIP_TOLERANCE) {
+            return null;
+        }
         return new Spot(cx, cz, yaw, ground);
     }
 

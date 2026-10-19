@@ -719,6 +719,12 @@ public class StoneWhaleEntity extends Entity implements GeoEntity, TravelTitan, 
                 }
             }
         }
+        // 体の下の丘・木・峰に体のどこもめり込まない高さ (体積の柱ごと。休む高さ = surroundingMax + REST_CLEARANCE を下回らない)
+        double need = TitanGround.requiredY(level, TitanGround.Surface.TOP, jp.revati.skyabyss.titan.solid.TitanVolume.get("stone_whale"), getX(), getZ(), getYRot(),
+                TitanGround.MARGIN, 2);
+        if (Double.isFinite(need)) {
+            max = Math.max(max, need - REST_CLEARANCE);
+        }
         surroundingMax = max;
     }
 
