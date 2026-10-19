@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>巨神の子が運ぶ案 選定</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 8px}
+h2.dh{margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+.intro{color:var(--muted);max-width:72ch;margin:0 0 6px}
+svg{width:100%;height:auto;display:block}.dia{background:var(--panel);border:1px solid var(--line);padding:10px;margin:12px 0}.dia text{fill:var(--ink);font-size:13px;font-family:inherit}.dia .m{fill:var(--muted)}.dia .box{fill:var(--bg);stroke:var(--line)}.dia .ln{stroke:var(--accent);stroke-width:2;fill:none}.dia .ad{fill:var(--line);stroke:var(--muted)}.dia .yg{fill:var(--accent)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.fact{background:var(--panel);border:1px solid var(--line);padding:10px 12px;min-width:0}
+.fact b{display:block;font-size:20px}
+.fact span{font-size:12px;color:var(--muted)}
+figure{margin:12px 0;background:#f4f5f7;border:1px solid var(--line);padding:8px}
+figure img{display:block;width:100%;height:auto;max-width:100%}
+figcaption{font-size:12px;color:#5b6672;margin-top:6px}
+.pick{font-size:13px;color:var(--ok);margin:8px 0 0}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;min-width:0}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:2px}
+.rec{color:var(--ok);font-size:12px;font-weight:600}
+.letter{font-size:20px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:16px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:500}
+@media (max-width:760px){
+  .facts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .opts{grid-template-columns:minmax(0,1fr)}
+  table{display:block;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>巨神の「子」が運ぶ案</h1>
+  <p class="intro">試遊の声: 「巨神で移動するのはいいんだけど、他のパーティーとかにも迷惑がかかるので、巨神を呼び出すという設定より、子供を呼び出して、載せていってくれる方がよいのでは。」 詳しくは <code>docs/design/28_titan_young_carriers.md</code>。まだ作りません。ここでは 3 案を見比べて、決めてもらう 4 つに答えます。</p>
+
+  <h2>いまの困りごと</h2>
+  <p class="intro">笛を吹くと、世界に一体の本物の巨神が、吹いた人のもとへ動きます。背で別のパーティが戦っていても、外の位置や乗り込み口が変わり、旅の最中はほかの人が呼べません。</p>
+  <div class="dia"><svg viewBox="0 0 700 170" role="img" aria-label="いまの仕組み: 笛が成体を動かす"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#0a8fa6"/></marker></defs><rect class="ad" x="470" y="40" width="190" height="70" rx="8"/><text x="565" y="80" text-anchor="middle">巨神（成体・共有）</text>
+<rect class="box" x="30" y="40" width="140" height="70" rx="8"/><text x="100" y="80" text-anchor="middle" class="m">元の停泊場所</text>
+<path class="ln" d="M175 75 L465 75" marker-end="url(#a)"/><text x="320" y="64" text-anchor="middle">笛で成体が動く</text>
+<text x="350" y="145" text-anchor="middle" class="m">背で戦う他のパーティの外の景色・窓が変わる。旅の最中はだれも呼べない</text></svg><div style="font-size:12px;color:var(--muted)">いまの仕組み: 笛が成体を動かす</div></div>
+  <h2>世界観の確認</h2>
+  <div class="facts">
+    <div class="fact"><b>巨神は 4 体だけ</b><span>増えない (01)。本物の幼体を足すと食い違う</span></div>
+    <div class="fact"><b>心臓は借りもの</b><span>子は「さらに分かれた鼓動」にすると五章への伏線になる</span></div>
+    <div class="fact"><b>笛は巨神の歌</b><span>歌のかけらが迎えに来る、は筋が通る</span></div>
+    <div class="fact"><b>眠り</b><span>巨神が眠れば子も眠る (今の断りを使える)</span></div>
+  </div>
+  <table>
+    <thead><tr><th>巨神</th><th>子 (案)</th><th>運び方</th></tr></thead>
+    <tbody>
+      <tr><th>岩鯨</th><td>石の小鯨 (骨の鞍)</td><td>空を泳ぐ</td></tr>
+      <tr><th>潮殻</th><td>稚貝 (殻の縁に座る)</td><td>浅瀬・海を滑る</td></tr>
+      <tr><th>雷翼</th><td>雷羽の雛</td><td>稜線を低く飛ぶ</td></tr>
+      <tr><th>余燼</th><td>燠石の仔</td><td>地・溶岩を駆ける</td></tr>
+    </tbody>
+  </table>
+
+  <h2>三つの案</h2>
+  <p class="intro">三案とも、成体の巨神は一つのパーティの用事では動かず、子は呼んだ本人だけのものです (乗っている間だけ現れ、降ろすと歌に溶けます)。</p>
+  <h2 class="dh">案 A: 子が成体のもとへ連れていく</h2>
+  <div class="dia"><svg viewBox="0 0 700 170" role="img" aria-label="案 A: 子が成体のもとへ連れていく"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#0a8fa6"/></marker></defs><circle class="yg" cx="70" cy="85" r="14"/><text x="70" y="125" text-anchor="middle">あなた</text>
+<rect class="ad" x="480" y="40" width="190" height="70" rx="8"/><text x="575" y="80" text-anchor="middle">成体（動かない）</text>
+<path class="ln" d="M90 85 L470 85" marker-end="url(#a)" stroke-dasharray="6 5"/><circle class="yg" cx="270" cy="85" r="9"/><text x="270" y="64" text-anchor="middle">子（あなただけ）</text>
+<text x="350" y="150" text-anchor="middle" class="m">着いたら乗り込み口の手前に降ろし、子は歌に溶ける。行き先は成体の場所だけ</text></svg><div style="font-size:12px;color:var(--muted)">案 A: 子が成体のもとへ連れていく</div></div>
+  <p class="intro">流れ: 笛 → 子が現れる → 乗る → 成体のいる場所へ → 乗り込み口の手前で降ろす (その人だけに口を開ける)。マルチ: 一人一体。成体は動かず衝突しない。モデル: 子 4 (ラフ各 3 案 = 12 枚。低ポリ + 32px、閉じた面)。工数 M。</p>
+  <h2 class="dh">案 B: 専用の乗り物 (A から作る)</h2>
+  <div class="dia"><svg viewBox="0 0 700 180" role="img" aria-label="案 B: 専用の乗り物。海図で行き先を選ぶ"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#0a8fa6"/></marker></defs><circle class="yg" cx="350" cy="85" r="14"/><text x="350" y="125" text-anchor="middle">あなた + 子</text>
+<rect class="ad" x="540" y="25" width="140" height="44" rx="8"/><text x="610" y="52" text-anchor="middle">成体（動かない）</text>
+<rect class="box" x="540" y="105" width="140" height="44" rx="8"/><text x="610" y="132" text-anchor="middle">碑</text>
+<rect class="box" x="20" y="65" width="140" height="44" rx="8"/><text x="90" y="92" text-anchor="middle">はじまりの地</text>
+<path class="ln" d="M365 78 L535 50" marker-end="url(#a)"/><path class="ln" d="M365 92 L535 125" marker-end="url(#a)"/><path class="ln" d="M335 85 L165 87" marker-end="url(#a)"/>
+<text x="350" y="168" text-anchor="middle" class="m">海図で行き先を選ぶ。子の得意（空・海・峰・地）に合う所だけ</text></svg><div style="font-size:12px;color:var(--muted)">案 B: 専用の乗り物。海図で行き先を選ぶ</div></div>
+  <p class="intro">流れ: A + 海図で行き先 (成体・はじまりの地・碑) を選ぶ。子の得意に合わない行き先は断る。今の旅は子に置き換える。モデル: A と同じ + 海図のアイコン。工数 L。</p>
+  <h2 class="dh">案 C: 渡り鳥が案内する</h2>
+  <div class="dia"><svg viewBox="0 0 700 170" role="img" aria-label="案 C: 渡り鳥が方向を示す"><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#0a8fa6"/></marker></defs><circle class="yg" cx="70" cy="85" r="14"/><text x="70" y="125" text-anchor="middle">あなた</text>
+<rect class="ad" x="480" y="40" width="190" height="70" rx="8"/><text x="575" y="80" text-anchor="middle">成体（動かない）</text>
+<path class="ln" d="M90 80 C180 20 300 20 470 70" marker-end="url(#a)" stroke-dasharray="3 5"/><text x="280" y="22" text-anchor="middle">渡り鳥の光の軌跡（道しるべ）</text>
+<text x="350" y="150" text-anchor="middle" class="m">人は乗らない。自分の足と乗り物で行く。子は物語の場面にだけ出る</text></svg><div style="font-size:12px;color:var(--muted)">案 C: 渡り鳥が方向を示す</div></div>
+  <p class="intro">流れ: 笛 → 渡り鳥が方向を示す。人は乗らない。子は物語の場面だけ。モデル: 渡り鳥 1 (ラフ 3 案) + 子 4 の静止 (ラフ各 3 案)。工数 S〜M。移動は楽にならない。</p>
+
+  <h2>比べ</h2>
+  <table>
+    <thead><tr><th></th><th>A</th><th>B</th><th>C</th></tr></thead>
+    <tbody>
+      <tr><th>成体が動くか</th><td>動かない</td><td>動かない</td><td>動かない</td></tr>
+      <tr><th>移動が楽か</th><td>巨神のもとへは楽</td><td>巨神・拠点・碑へ楽</td><td>楽にならない</td></tr>
+      <tr><th>今の旅</th><td>別途そのまま</td><td>子に置き換え</td><td>撤去</td></tr>
+      <tr><th>新モデル</th><td>子 4</td><td>子 4 + アイコン</td><td>鳥 1 + 子 4 静止</td></tr>
+      <tr><th>工数</th><td>M</td><td>L</td><td>S〜M</td></tr>
+    </tbody>
+  </table>
+  <p class="pick">推薦: 案 B、作る順は A → B。移動の便利さを残しつつ、成体を動かす仕組みを撤去できる。</p>
+
+  <h2 class="dh">決めてもらうこと (4 つ)</h2>
+  <p class="intro">選ぶと自動で保存されます (db の <code>choices</code>、id は <code>young_1</code>〜<code>young_4</code>)。メモは任意です。</p>
+  <div id="decisions"></div>
+  <div class="save" id="save">読み込み中…</div>
+</div>
+<script>
+const DECISIONS = [
+  { id: 'young_1', title: '1. 案', q: 'どの案で進めますか。',
+    opts: [
+      ['a', 'A 子が成体のもとへ', '成体の場所まで子が連れていく。旅は別途。工数 M', false],
+      ['b', 'B 専用の乗り物 (A から作る)', '海図でどの巨神・はじまりの地・碑にも行ける。今の旅は子に置き換え。工数 L', true],
+      ['c', 'C 渡り鳥の案内', '人は乗らず方向だけ。子は物語だけ。工数 S〜M', false]],
+    note: '作る順は A → B。手応えを見てから海図を足す。' },
+  { id: 'young_2', title: '2. 子の正体', q: '子は世界の中でなんですか。',
+    opts: [
+      ['a', '分けた鼓動の子 (歌のかけら)', '乗っている間だけ現れ、降ろすと溶ける。巨神は 4 体のまま', true],
+      ['b', '本物の幼体', '世界に残る。巨神が増える (01 の「4 体だけ」を変える)', false],
+      ['c', '巨神の分身の幻', '生き物ではない。軽いが重みが減る', false]],
+    note: '五章の「鼓動は借りものだった」に静かに重なる。' },
+  { id: 'young_3', title: '3. 一度に乗れる人', q: '子の座席は何人ですか。',
+    opts: [
+      ['a', '一体に一人', '仲間も各自が笛を吹く。同じ場所に着く', true],
+      ['b', '二人まで', '持ち主 + 一人。座席の同期が増える', false],
+      ['c', 'パーティ全員 (最大 6)', '子を大きくする。乗り降りの衝突が増える', false]],
+    note: '一人一体なら持ち主の管理が最小。' },
+  { id: 'young_4', title: '4. 今の「成体が来る呼び」と旅', q: '成体を動かす今の仕組みはどうしますか。',
+    opts: [
+      ['a', '撤去', '成体は呼ばれても動かない。最初の出会いと自然の周期は残す', true],
+      ['b', '残す', '子の案と並べて選べる。マルチの迷惑は残る', false],
+      ['c', 'ゲームルールで切り替え', '既定は撤去。二つの経路を保つコストが残る', false]],
+    note: '近くで別の巨神を呼べない直しは、撤去すれば不要になる。' }
+];
+const root = document.getElementById('decisions');
+for (const d of DECISIONS) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2 class="dh">' + d.title + '</h2><p class="intro">' + d.q + '</p>' +
+    '<fieldset class="opts" id="opts_' + d.id + '">' +
+    d.opts.map(o => '<label class="opt"><input type="radio" name="' + d.id + '" value="' + o[0] + '"><span class="letter">' + o[0].toUpperCase() + '</span><span><b>' + o[1] + '</b>' + (o[3] ? ' <span class="rec">推薦</span>' : '') + '<small>' + o[2] + '</small></span></label>').join('') +
+    '</fieldset><p class="pick">' + d.note + '</p>' +
+    '<label class="note-l" for="n_' + d.id + '">メモ (任意)</label><textarea id="n_' + d.id + '" class="note" rows="2" placeholder="別案・条件・気になる点"></textarea>';
+  root.appendChild(sec);
+}
+(() => {
+  const saveEl = document.getElementById('save');
+  let db = null; const timers = {};
+  const chosen = id => { const r = document.querySelector('input[name=' + id + ']:checked'); return r ? r.value : ''; };
+  async function save(id) {
+    if (!db) return;
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + id).set({ option: chosen(id), note: document.getElementById('n_' + id).value, at: Date.now() });
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  for (const d of DECISIONS) {
+    document.querySelectorAll('input[name=' + d.id + ']').forEach(r => r.addEventListener('change', () => save(d.id)));
+    document.getElementById('n_' + d.id).addEventListener('input', () => { clearTimeout(timers[d.id]); timers[d.id] = setTimeout(() => save(d.id), 800); });
+  }
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'; return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const doc of docs) {
+        if (!/^young_/.test(doc.id)) continue;
+        const data = typeof doc.data === 'function' ? doc.data() : doc.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector('input[name=' + doc.id + '][value="' + data.option + '"]'); if (r) r.checked = true; }
+        if (data.note) { const n = document.getElementById('n_' + doc.id); if (n) n.value = data.note; }
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の選択を読み込めませんでした'; }
+  })();
+})();
+</script>
+</body>
+</html>
