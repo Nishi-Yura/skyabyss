@@ -33,9 +33,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int SIDE_X = 180;
     private static final int SIDE_W = 152;
     private static final int H = 166;
-    private static final int TAB_W = 48;
+    // つまみは 4 つ (強化・再鍛造・交換・刻み)。元の絵 (幅 48) を幅 35 に縮めて並べ、字は幅に収まるまで縮める
+    private static final int TAB_W = 35;
+    private static final int TAB_SRC_W = 48;
     private static final int TAB_H = 14;
-    private static final int[] TAB_X = {4, 52, 100};
+    private static final int[] TAB_X = {3, 40, 77, 114};
     private static final int CARD_W = 136;
     private static final int CARD_H = 31;
     private static final int CARD_Y = 44;
@@ -51,8 +53,28 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int INFO_X = 72;
 
     private enum Tab {
-        ENHANCE, REFORGE, EXCHANGE
+        ENHANCE, REFORGE, EXCHANGE, INSCRIBE
     }
+
+    // 刻みの中の三つの頁: 抽出 (伝説 → アスペクトの芯)・刻印 (芯 → レアの装備)・穴 (欠片とルーンを差す)
+    private enum Sub {
+        EXTRACT, IMPRINT, SOCKET
+    }
+
+    private static final int SUB_Y = 22;
+    private static final int SOCKET_ROW_Y = 52;
+    private static final int SOCKET_ROW_STEP = 13;
+    private static Sub lastSub = Sub.EXTRACT;
+    private Sub sub = lastSub;
+    private final Button[] subButtons = new Button[3];
+    private Button extractDestroyButton;
+    private Button extractKeepButton;
+    private Button imprintButton;
+    private Button insertButton;
+    private Button addSocketButton;
+    private final Button[] removeButtons = new Button[jp.revati.skyabyss.item.extra.GearExtras.MAX_SOCKETS];
+    private boolean extractDestroyArmed;
+    private boolean extractKeepArmed;
 
     // 最後に開いたつまみ (同じ遊びの間は覚えておく)
     private static Tab lastTab = Tab.ENHANCE;
@@ -131,6 +153,49 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             exchangeArmed = -1;
             updateButtons();
         }).bounds(sx + 10, topPos + 140, 132, 16).build());
+        String[] subKeys = {"gui.skyabyss.forge.sub_extract", "gui.skyabyss.forge.sub_imprint", "gui.skyabyss.forge.sub_socket"};
+        for (int i = 0; i < subButtons.length; i++) {
+            Sub target = Sub.values()[i];
+            subButtons[i] = addRenderableWidget(Button.builder(Component.translatable(subKeys[i]), b -> setSub(target))
+                    .bounds(sx + 8 + i * 46, topPos + SUB_Y, 44, 14).build());
+        }
+        extractDestroyButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.extract_destroy"), b -> {
+            if (!extractDestroyArmed) {
+                extractDestroyArmed = true;
+                extractKeepArmed = false;
+            } else {
+                extractDestroyArmed = false;
+                press(ResonanceForgeMenu.BUTTON_EXTRACT_DESTROY);
+            }
+        }).bounds(sx + 10, topPos + 122, 60, 16).build());
+        extractKeepButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.extract_keep"), b -> {
+            if (!extractKeepArmed) {
+                extractKeepArmed = true;
+                extractDestroyArmed = false;
+            } else {
+                extractKeepArmed = false;
+                press(ResonanceForgeMenu.BUTTON_EXTRACT_KEEP);
+            }
+        }).bounds(sx + 76, topPos + 122, 66, 16).build());
+        imprintButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.imprint"), b -> press(ResonanceForgeMenu.BUTTON_IMPRINT))
+                .bounds(sx + 10, topPos + 138, 132, 16).build());
+        insertButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.insert"), b -> press(ResonanceForgeMenu.BUTTON_INSERT))
+                .bounds(sx + 10, topPos + 106, 132, 16).build());
+        addSocketButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.add_socket"), b -> press(ResonanceForgeMenu.BUTTON_ADD_SOCKET))
+                .bounds(sx + 10, topPos + 126, 132, 16).build());
+        for (int i = 0; i < removeButtons.length; i++) {
+            int index = i;
+            removeButtons[i] = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.remove"), b -> press(ResonanceForgeMenu.BUTTON_REMOVE + index))
+                    .bounds(sx + 106, topPos + SOCKET_ROW_Y - 2 + i * SOCKET_ROW_STEP, 36, 12).build());
+        }
+        updateButtons();
+    }
+
+    private void setSub(Sub next) {
+        sub = next;
+        lastSub = next;
+        extractDestroyArmed = false;
+        extractKeepArmed = false;
         updateButtons();
     }
 
@@ -146,6 +211,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         dismantleArmed = false;
         keepArmed = false;
         exchangeArmed = -1;
+        extractDestroyArmed = false;
+        extractKeepArmed = false;
         updateButtons();
     }
 
@@ -157,6 +224,8 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             // 装備が替わった・候補が増えた・確定した: 二度押しの構えと、範囲外の選択を解く
             dismantleArmed = false;
             keepArmed = false;
+            extractDestroyArmed = false;
+            extractKeepArmed = false;
             if (!ItemStack.isSameItem(gear, lastGear) || selected >= AffixRules.offers(gear).size()) {
                 selected = -1;
             }
@@ -210,8 +279,41 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             b.setMessage(Component.translatable(exchangeArmed == i ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.exchange_pick"));
         }
 
+        updateInscribeButtons(gear);
+
         // 分解で得られるものは、ボタンに重ねると出る (右の板にも書く)
         dismantleButton.setTooltip(gear.isEmpty() ? null : Tooltip.create(Component.translatable("gui.skyabyss.forge.dismantle_hint")));
+    }
+
+    // 刻みの頁のボタン (見えるか・押せるか)。押せるかの検めはサーバーもやる
+    private void updateInscribeButtons(ItemStack gear) {
+        boolean on = tab == Tab.INSCRIBE;
+        net.minecraft.world.entity.player.Player me = minecraft.player;
+        ItemStack mat = menu.material();
+        for (int i = 0; i < subButtons.length; i++) {
+            subButtons[i].visible = on;
+            subButtons[i].active = Sub.values()[i] != sub;
+        }
+        extractDestroyButton.visible = on && sub == Sub.EXTRACT;
+        extractKeepButton.visible = on && sub == Sub.EXTRACT;
+        extractDestroyButton.active = ForgeRules.canExtract(me, gear, true);
+        extractKeepButton.active = ForgeRules.canExtract(me, gear, false);
+        extractDestroyButton.setMessage(Component.translatable(extractDestroyArmed ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.extract_destroy"));
+        extractKeepButton.setMessage(Component.translatable(extractKeepArmed ? "gui.skyabyss.forge.confirm" : "gui.skyabyss.forge.extract_keep"));
+        extractDestroyButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.extract_destroy_hint")));
+        extractKeepButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.extract_keep_hint")));
+        imprintButton.visible = on && sub == Sub.IMPRINT;
+        imprintButton.active = ForgeRules.canImprint(me, gear, mat);
+        insertButton.visible = on && sub == Sub.SOCKET;
+        insertButton.active = ForgeRules.canInsert(gear, mat);
+        addSocketButton.visible = on && sub == Sub.SOCKET;
+        addSocketButton.active = ForgeRules.canAddSocket(me, gear);
+        addSocketButton.setTooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.add_socket_hint")));
+        int gems = jp.revati.skyabyss.item.extra.GearFreedom.extras(gear).gems().size();
+        for (int i = 0; i < removeButtons.length; i++) {
+            removeButtons[i].visible = on && sub == Sub.SOCKET && i < gems;
+            removeButtons[i].active = ForgeRules.canRemoveGem(me, gear, i);
+        }
     }
 
     @Override
@@ -281,9 +383,13 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             int ty = y + 4;
             boolean hover = mouseX >= tx && mouseX < tx + TAB_W && mouseY >= ty && mouseY < ty + TAB_H;
             int state = t == tab ? 2 : hover ? 1 : 0;
-            g.blit(TEXTURE, tx, ty, TAB_W, TAB_H, state * 100, 352, TAB_W * 2, TAB_H * 2, TEX_W, TEX_H);
-            g.blit(TEXTURE, tx + 3, ty + 1, 12, 12, t.ordinal() * 32, 384, 24, 24, TEX_W, TEX_H);
+            g.blit(TEXTURE, tx, ty, TAB_W, TAB_H, state * 100, 352, TAB_SRC_W * 2, TAB_H * 2, TEX_W, TEX_H);
         }
+        // 材料の枠の縁 (絵に焼き込まれていないので描く)
+        int mx = x + ResonanceForgeMenu.MATERIAL_X - 1;
+        int my = y + ResonanceForgeMenu.MATERIAL_Y - 1;
+        g.fill(mx - 1, my - 1, mx + 19, my + 19, 0xFF4F8C96);
+        g.fill(mx, my, mx + 18, my + 18, 0xFF10161E);
         if (tab == Tab.REFORGE && AffixRules.eligible(menu.gear())) {
             int count = AffixRules.offers(menu.gear()).size();
             for (int i = 0; i < AffixRules.MAX_TRIALS; i++) {
@@ -305,16 +411,111 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, title, titleLabelX, titleLabelY, OK, false);
         g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, TEXT, false);
-        String[] tabKeys = {"gui.skyabyss.forge.tab_enhance", "gui.skyabyss.forge.tab_reforge", "gui.skyabyss.forge.tab_exchange"};
+        String[] tabKeys = {"gui.skyabyss.forge.tab_enhance", "gui.skyabyss.forge.tab_reforge", "gui.skyabyss.forge.tab_exchange", "gui.skyabyss.forge.tab_inscribe"};
         for (Tab t : Tab.values()) {
             int tx = SIDE_X + TAB_X[t.ordinal()];
-            g.drawString(font, Component.translatable(tabKeys[t.ordinal()]), tx + 16, 7, t == tab ? 0xFFFFFFFF : DIM, false);
+            Component label = Component.translatable(tabKeys[t.ordinal()]);
+            int w = font.width(label);
+            float scale = w > TAB_W - 4 ? (TAB_W - 4f) / w : 1f;
+            g.pose().pushPose();
+            g.pose().translate(tx + TAB_W / 2f - w * scale / 2f, 8 + (1 - scale) * 3.5f, 0);
+            g.pose().scale(scale, scale, 1f);
+            g.drawString(font, label, 0, 0, t == tab ? 0xFFFFFFFF : DIM, false);
+            g.pose().popPose();
         }
+        g.drawString(font, Component.translatable("gui.skyabyss.forge.material"), ResonanceForgeMenu.MATERIAL_X - 2, ResonanceForgeMenu.MATERIAL_Y - 12, DIM, false);
         gearInfo(g);
         switch (tab) {
             case ENHANCE -> enhancePanel(g);
             case REFORGE -> reforgePanel(g);
             case EXCHANGE -> exchangePanel(g);
+            case INSCRIBE -> inscribePanel(g);
+        }
+    }
+
+    // ---------------------------------------------------------------- 右: 刻み (抽出・刻印・穴)
+    private void inscribePanel(GuiGraphics g) {
+        ItemStack gear = menu.gear();
+        ItemStack mat = menu.material();
+        int x = SIDE_X + 10;
+        if (!AffixRules.eligible(gear)) {
+            drawWrapped(g, Component.translatable(gear.isEmpty() ? "gui.skyabyss.forge.inscribe_help" : "gui.skyabyss.forge.inscribe_no"), x, 42, 132, 5, DIM);
+            return;
+        }
+        jp.revati.skyabyss.item.extra.GearExtras ex = jp.revati.skyabyss.item.extra.GearFreedom.extras(gear);
+        int crystals = ForgeRules.count(minecraft.player, ModItems.RESONANCE_CRYSTAL.get());
+        switch (sub) {
+            case EXTRACT -> {
+                jp.revati.skyabyss.rpg.skill.Rune own = jp.revati.skyabyss.item.extra.GearFreedom.ownRune(gear);
+                if (own == null) {
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.extract_none"), x, 42, 132, 4, DIM);
+                } else if (ex.hollow()) {
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.extract_hollow"), x, 42, 132, 4, DIM);
+                } else {
+                    g.drawString(font, Component.translatable("gui.skyabyss.forge.extract_rewrite", Component.translatable(own.skillNameKey())), x, 42, GOLD, false);
+                    drawWrapped(g, Component.translatable(own.nameKey()), x, 52, 132, 1, TEXT);
+                    drawWrapped(g, Component.translatable(own.effectKey()), x, 62, 132, 4, DIM);
+                    g.drawString(font, Component.translatable("gui.skyabyss.forge.extract_cost", ForgeRules.extractCost(true), ForgeRules.extractCost(false), crystals), x, 108,
+                            minecraft.player.isCreative() || crystals >= ForgeRules.extractCost(true) ? OK : LACK, false);
+                }
+            }
+            case IMPRINT -> {
+                jp.revati.skyabyss.rpg.skill.Rune core = jp.revati.skyabyss.item.extra.GearFreedom.coreRune(mat);
+                if (!ex.aspect().isEmpty()) {
+                    jp.revati.skyabyss.rpg.skill.Rune have = jp.revati.skyabyss.rpg.skill.Rune.byId(ex.aspect());
+                    g.drawString(font, Component.translatable("gui.skyabyss.forge.imprint_has"), x, 42, GOLD, false);
+                    if (have != null) {
+                        drawWrapped(g, Component.translatable(have.nameKey()), x, 52, 132, 1, TEXT);
+                        drawWrapped(g, Component.translatable("tooltip.skyabyss.legend_rewrite", Component.translatable(have.skillNameKey()), Component.translatable(have.nameKey())), x, 62, 132, 2, DIM);
+                    }
+                } else if (!(gear.getItem() instanceof ModGear mg) || mg.tier() != jp.revati.skyabyss.item.GearTier.RARE) {
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.imprint_rare_only"), x, 42, 132, 4, DIM);
+                } else if (core == null) {
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.imprint_help"), x, 42, 132, 4, DIM);
+                } else {
+                    g.drawString(font, Component.translatable("gui.skyabyss.forge.imprint_ready"), x, 42, OK, false);
+                    drawWrapped(g, Component.translatable(core.nameKey()), x, 52, 132, 1, TEXT);
+                    drawWrapped(g, Component.translatable(core.effectKey()), x, 62, 132, 4, DIM);
+                }
+                g.drawString(font, Component.translatable("gui.skyabyss.forge.imprint_cost", jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS, crystals), x, 126,
+                        minecraft.player.isCreative() || crystals >= jp.revati.skyabyss.item.extra.GearFreedom.IMPRINT_CRYSTALS ? OK : LACK, false);
+            }
+            case SOCKET -> {
+                g.drawString(font, Component.translatable("gui.skyabyss.forge.sockets", ex.gems().size(), ex.sockets()), x, 40, TEXT, false);
+                for (int i = 0; i < ex.sockets(); i++) {
+                    int y = SOCKET_ROW_Y + i * SOCKET_ROW_STEP;
+                    if (i < ex.gems().size()) {
+                        g.drawString(font, Component.literal("◆"), x, y, jp.revati.skyabyss.item.extra.GearFreedom.TAG_COLOR | 0xFF000000, false);
+                        drawWrapped(g, jp.revati.skyabyss.item.extra.GearFreedom.gemLine(ex.gems().get(i), gear), x + 9, y, 86, 1, TEXT);
+                    } else {
+                        g.drawString(font, Component.translatable("gear.skyabyss.socket_empty"), x, y, DIM, false);
+                    }
+                }
+                if (ex.sockets() == 0) {
+                    drawWrapped(g, Component.translatable("gui.skyabyss.forge.sockets_none"), x, SOCKET_ROW_Y, 132, 2, DIM);
+                }
+                jp.revati.skyabyss.item.extra.Gem gem = ForgeRules.gemOf(mat);
+                Component hint;
+                int color = DIM;
+                if (gem == null) {
+                    hint = Component.translatable("gui.skyabyss.forge.insert_help");
+                } else if (jp.revati.skyabyss.item.extra.GearFreedom.canInsert(gear, gem)) {
+                    hint = Component.translatable("gui.skyabyss.forge.insert_ready", jp.revati.skyabyss.item.extra.GearFreedom.gemLine(gem, gear));
+                    color = OK;
+                } else {
+                    hint = Component.translatable(ex.gems().size() >= ex.sockets() ? "gui.skyabyss.forge.insert_full" : "gui.skyabyss.forge.insert_dup");
+                    color = LACK;
+                }
+                drawWrapped(g, hint, x, 80, 132, 2, color);
+                if (jp.revati.skyabyss.item.extra.GearFreedom.canAddSocket(gear)) {
+                    int need = ForgeRules.addSocketMaterial(gear);
+                    Item shard = ForgeRules.shardItem(gear);
+                    boolean enough = minecraft.player.isCreative() || (ForgeRules.count(minecraft.player, shard) >= need
+                            && crystals >= jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS);
+                    g.drawString(font, Component.translatable("gui.skyabyss.forge.add_cost", Component.translatable(shard.getDescriptionId()), need,
+                            jp.revati.skyabyss.item.extra.GearFreedom.ADD_SOCKET_CRYSTALS), x, 145, enough ? OK : LACK, false);
+                }
+            }
         }
     }
 

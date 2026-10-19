@@ -97,7 +97,13 @@ public enum Rune {
         if (!legendary()) {
             return true;
         }
-        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).getPath().equals(weapon);
+        net.minecraft.world.item.ItemStack hand = player.getMainHandItem();
+        // 自分の伝説を持っている (抽出して抜け殻になったものは除く)、または装備に刻んだアスペクト (item/extra/GearFreedom)
+        if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(hand.getItem()).getPath().equals(weapon)
+                && !jp.revati.skyabyss.item.extra.GearFreedom.isHollow(hand)) {
+            return true;
+        }
+        return jp.revati.skyabyss.item.extra.GearFreedom.carries(player, this);
     }
 
     public static Rune legendaryOf(Skill skill) {
