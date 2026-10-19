@@ -4,6 +4,7 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -217,9 +218,24 @@ final class BuildKit {
 
     // 休み場の設え: 青い焚き火、腰掛け、灯り。案内の看板は置かない (着いたことは焚き火と音で、先の様子は最初の一度だけの囁きで伝える: BackWhispers)
     void restPoint(Box box) {
+        restPoint(box, false);
+    }
+
+    // smokeless = true: 焚き火の代わりに、煙の出ない「魂の火鉢」(壁の柱の上の魂のランタン。まわりに灯したろうそく)。
+    // 閉じた部屋で焚き火の煙が壁や掲示板を覆うのを避ける。しゃがんで触れるとあきらめる働きは焚き火と同じ (TitanBackTrials)
+    void restPoint(Box box, boolean smokeless) {
         BlockPos c = box.center();
         set(c.getX(), box.floorY(), c.getZ(), CHISELED);
-        set(c.getX(), box.floorY() + 1, c.getZ(), Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        if (smokeless) {
+            set(c.getX(), box.floorY() + 1, c.getZ(), Blocks.DEEPSLATE_BRICK_WALL.defaultBlockState());
+            set(c.getX(), box.floorY() + 2, c.getZ(), Blocks.SOUL_LANTERN.defaultBlockState());
+            for (Direction d : Direction.Plane.HORIZONTAL) {
+                set(c.getX() + d.getStepX(), box.floorY() + 1, c.getZ() + d.getStepZ(),
+                        Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
+            }
+        } else {
+            set(c.getX(), box.floorY() + 1, c.getZ(), Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        }
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int bx = c.getX() + d.getStepX() * 2;
             int bz = c.getZ() + d.getStepZ() * 2;

@@ -39,7 +39,9 @@ public final class BossForceDev {
     private static int run(java.util.Collection<? extends Entity> targets, String action, int party) {
         int n = 0;
         for (Entity e : targets) {
-            if (e instanceof WhaleboneCaptain captain) {
+            if (forceHeartExtra(e, action)) {
+                n++;
+            } else if (e instanceof WhaleboneCaptain captain) {
                 captain.holdAttacks();
                 var nearest = captain.level().getNearestPlayer(captain, 60);
                 if (nearest != null) {
@@ -57,6 +59,15 @@ public final class BossForceDev {
                 storm.setPartyOverride(party);
                 storm.forceAction(jp.revati.skyabyss.titan.storm.heart.StormHeart.Action.valueOf(action.toUpperCase(java.util.Locale.ROOT)));
                 n++;
+            } else if (e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart tide) {
+                tide.holdAttacks();
+                tide.setPartyOverride(party);
+                tide.forceAction(jp.revati.skyabyss.titan.tide.heart.TideHeart.Action.valueOf(action.toUpperCase(java.util.Locale.ROOT)));
+                n++;
+            } else if (e instanceof jp.revati.skyabyss.titan.ember.heart.EmberHeart ember) {
+                ember.holdAttacks(true);
+                ember.forceAction(jp.revati.skyabyss.titan.ember.heart.EmberHeart.Action.valueOf(action.toUpperCase(java.util.Locale.ROOT)));
+                n++;
             } else if (e instanceof jp.revati.skyabyss.titan.storm.raiju.Raiju raiju) {
                 raiju.holdAttacks();
                 raiju.setPartyOverride(party);
@@ -65,5 +76,52 @@ public final class BossForceDev {
             }
         }
         return n;
+    }
+
+    // 回り続けへの追い技 (LEAD / CUTOFF / CHASE。いちばん近い人へ) と領域 (DOMAIN) を、四つの心臓で出す。出したら true
+    private static boolean forceHeartExtra(Entity e, String action) {
+        String a = action.toUpperCase(java.util.Locale.ROOT);
+        int kind = switch (a) {
+            case "LEAD" -> 0;
+            case "CUTOFF" -> 1;
+            case "CHASE" -> 2;
+            default -> -1;
+        };
+        if (kind < 0 && !a.equals("DOMAIN")) {
+            return false;
+        }
+        if (!(e.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return false;
+        }
+        jp.revati.skyabyss.combat.HeartPursuit pursuit;
+        java.util.function.Consumer<net.minecraft.server.level.ServerLevel> domain;
+        if (e instanceof StoneWhaleHeart h) {
+            h.holdAttacks();
+            pursuit = h.pursuit();
+            domain = h::startDomain;
+        } else if (e instanceof jp.revati.skyabyss.titan.tide.heart.TideHeart h) {
+            h.holdAttacks();
+            pursuit = h.pursuit();
+            domain = h::startDomain;
+        } else if (e instanceof jp.revati.skyabyss.titan.storm.heart.StormHeart h) {
+            h.holdAttacks();
+            pursuit = h.pursuit();
+            domain = h::startDomain;
+        } else if (e instanceof jp.revati.skyabyss.titan.ember.heart.EmberHeart h) {
+            h.holdAttacks(true);
+            pursuit = h.pursuit();
+            domain = h::startDomain;
+        } else {
+            return false;
+        }
+        if (kind < 0) {
+            domain.accept(level);
+            return true;
+        }
+        net.minecraft.world.entity.player.Player p = level.getNearestPlayer(e, 60);
+        if (p instanceof net.minecraft.server.level.ServerPlayer sp) {
+            pursuit.launch(level, sp, kind);
+        }
+        return true;
     }
 }

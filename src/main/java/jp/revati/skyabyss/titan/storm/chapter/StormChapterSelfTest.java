@@ -602,8 +602,13 @@ public final class StormChapterSelfTest {
                 BlockPos at = e.pos;
                 if (e.siteId.equals(StormSites.VANE) && e.extra("top") != null) {
                     vanes++;
+                    // 矢の向きは日と巨神で変わり、建てたあとは 5 秒おきの直し (StormVane.tick。世界の人が 96 ブロック以内) が合わせる。
+                    // 建てた時の向きは、そのときの日・巨神 (見守りが出入りする) で決まり、今とは違いうる。この試験の人は偽物で、直しの対象 (level.players) に
+                    // 入らないので、直しがすることそのもの (今の目標へ向け直す) をここで行って、矢が立っている形のまま向きを読み戻せることを見る
+                    StormVane.orient(level, e.extra("top"), StormVane.target(level, e.extra("top")));
                     double read = StormVane.readBearing(level, e.extra("top"));
-                    double target = StormVane.defaultBearing(level.getDayTime() / 24000L);
+                    // 風見の矢は、雷翼がいればその方角、いなければ風に逆らう向き (StormVane.target)。雷翼のいる世界でも同じ決まりで見る
+                    double target = StormVane.target(level, e.extra("top"));
                     check(f, !Double.isNaN(read) && StormVane.diff(read, target) <= Math.toRadians(25),
                             "the built vane points against the wind (" + Math.toDegrees(read) + " vs " + Math.toDegrees(target) + ")");
                     check(f, level.getBlockState(e.extra("top")).is(Blocks.LIGHTNING_ROD), "the vane has its head rod");

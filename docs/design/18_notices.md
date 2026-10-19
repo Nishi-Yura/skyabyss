@@ -87,6 +87,9 @@
 | `noticeSpeed` | 1.0 | 字幕・中央・帯の出ている長さの倍率（0.5〜2） |
 | `bossAttackNames` | `SMALL` | ボスの技の名前。`SMALL` = ボスバーのすぐ下に小さな一行（印 8px。1 秒あまりで消える）、`FULL` = 従来の大きな印と名前と残りの帯、`OFF` = 出さない（床の予告だけ） |
 | `objectiveStrip` | true | 左上のメインの目的の帯 |
+| `chapterLabel` | true | 左上の目的の帯の上の、今の章の札（8.4） |
+| `questSound` | true | クエストが始まった・進んだ・終わったときの小さな音（メインとサブで音が違う。8.4） |
+| `npcMarkers` | true | NPC の頭の上の印（話すことがあるとき。その人にだけ見える。07 の 8.5） |
 | `partyMarkers` | true | 仲間の札・矢印 |
 | `graveMarker` | true | 自分の墓の標（札・矢印と距離） |
 | `questArrow` | true | 目的の帯の方角を、向きに合わせて回る矢印にする（false = 北東などの文字）。8.3 |
@@ -94,8 +97,24 @@
 
 ### 6.1 ボスの技の名前（`BossAttackCue`）
 
-- 心臓・中ボス共通の部品（`client/titan/BossAttackCue`）。サーバーが技の始まりに送る名前と印（`show(印, 名前, 予告の長さ)`）を、設定 `bossAttackNames` に従って出す。今、技の名前を送っているのは雷翼の心臓（`StormHeartNetwork.Warn`）だけ。ほかの心臓・中ボスで名前を出すときも、この口に渡す。
+- 心臓・中ボス共通の部品（`client/titan/BossAttackCue`）。サーバーが技の始まりに送る名前と印（`show(印, 名前, 予告の長さ)`）を、設定 `bossAttackNames` に従って出す。技の名前を送るのは、**四つの心臓すべてと中ボス・番兵**。雷翼の心臓の主な技は従来どおり印つきの `StormHeartNetwork.Warn`（`gui.skyabyss.storm_heart.warn.<技>`）。それ以外は `combat/BossCue.send(ボス, ボスの鍵, 技の鍵, 予告の長さ)` が、ボスの近く（64 ブロック以内）の、そのボスが見える人（`GroupOwned.visibleTo`）へ送り、クライアントが `gui.skyabyss.attack.<ボスの鍵>.<技の鍵>`（印なし）を出す（`client/titan/BossCueClient`。`BossAttackCue.render` もここが毎フレーム呼ぶ）。名前の文は `assets/skyabyss_heartdomain/lang/`（ja_jp / en_us）。回り続けへの追い技（`lead` / `cutoff` / `chase`）と領域の決まり（`sea_wave` など）も同じ口。
 - SMALL（既定）: ボスバーの直下（`NoticeClient.lastBossBottom`）に中央揃えで一行。小さな印（8px）+ 名前、薄い暗い帯の上。予告の長さ（14〜40 tick）+ 10 tick で消え、出入りは淡く。続けて技が来たら下へ最大 3 行まで積み（古いほうから消える）、同じ名前は一行にまとめて延ばす。画面の中央・足もとには届かないので、床の予告をふさがない。
+| ボスの鍵 | 技の鍵 → 名前（ja） |
+|---|---|
+| `whale`（岩鯨の心臓） | thrust 殻の突き / sweep 石棘の掃射 / leap 跳躍の叩きつけ / crack 亀裂の爆発 / reclose 殻の再閉 / volley 骨の棘の投射 / beam 赤熱の光線 / chain 鎖の振り回し / shell_drop 殻の落下 / lead 石の先回り / cutoff 行く手の石壁 / chase 追い石の薙ぎ / sea_wave 石の波 / sea_spike 石棘の輪 |
+| `tide`（潮殻の心臓） | breath 潮の吐息 / shell_strike 殻打ち / whirl 渦潮 / flood 満ち潮と珊瑚の槍 / bubble 泡の牢 / pearl 真珠の脈 / ebb 引き潮 / moon_wave 月潮の大波 / pearl_rain 真珠の雨 / spring_tide 大潮 / lead 潮の先回り / cutoff 行く手の潮目 / chase 追い潮の薙ぎ / flood_rise 潮、満ちる / flood_ebb 潮、引く |
+| `storm`（雷翼の心臓） | 主な技は `storm_heart.warn.*`（招雷・風の刃・雷の鎖・羽ばたき・帯電の床・羽根の雨・閃光・雷の網・招雷の連打・雷翼の十字）。追加: lead 雷の先回り / cutoff 行く手の雷壁 / chase 追い雷の薙ぎ / cage_bars 雷の檻 ― 格子 / cage_cross 雷の檻 ― 斜めの格子 |
+| `ember`（余燼の心臓） | breath 火の息 / pulse 熱の脈 / orb 熔け玉 / floor 崩れる床 / gale 鞴の嵐 / pellet 灰の礫 / embers 残り火 / fading 消えかけの鼓動 / veil 灰の帳 / forge 炉打ち / lead 熾の先回り / cutoff 行く手の熱壁 / chase 追い熾の薙ぎ / core_rings 炉心の輪 / core_fans 炉心の扇 |
+| `captain`（鯨骨の番兵長） | sweep 骨の薙ぎ払い / leap 鎧の跳躍 / erupt 骨の噴出 / roar 番兵長の咆哮 |
+| `elder_sentinel`（老番兵） | rush 老番兵の突進 / stomp 老番兵の踏みしめ / flute 骨笛の呼び |
+| `elder_sentry`（老いた歩哨） | swing 歩哨の振りかぶり / rush 歩哨の突進 / horn 骨笛の合図 / stomp 歩哨の踏みしめ |
+| `pearl_keeper`（真珠守り） | updraft 昇り潮 / downdraft 押し潮 / charge 真珠守の突進 / volley 真珠の斉射 / shell 殻ごもり |
+| `tide_beckoner`（潮招き） | slam 打ち下ろし / beckon 潮の招き / breath 潮の吐息 / burrow 潜り / roar 潮招きの咆哮 |
+| `raiju`（雷獣） | rail 雷の走り / descend 雷獣の降下 / pounce 雷獣の飛びかかり / claw 雷の爪 / roar 雷獣の咆哮 / return 雷獣の跳び戻り |
+| `ash_smith`（灰の鍛え手） | slam 鎚の打ち下ろし / breath 炉の吐息 / quench 焼き入れ / sparks 火花の散らし / rage 鍛え手の怒り |
+
+組（二つの技が重なる）は、一つ目の名前を始めに、二つ目の名前を二つ目の予告が出る tick に出す。咆哮（段階の変わり目）・冷えなど常時の技は出さない。英語の名前は同じ lang の en_us。自己テスト `heart bots` が、技を出すたびに `BossCue` が送られること（領域の最中も）を数える。
+
 - FULL: 従来の大きな表示（上から 62px、印 24px、残りの帯）を一つだけ。
 - OFF: 出さない。F1 で隠れる。
 
@@ -146,6 +165,13 @@
   - 描かない場面: 場面（シネマティック）・開幕の目覚め・画面を開いている間・F1・オーバーワールド以外・目印が 3.5 ブロック以内（近づくと薄れる）・設定 OFF。
 - 自己テスト `SELFTEST guide nav`（`guide/nav/GuideNavSelfTest`）: 矢印の角度（八方・yaw の巻き戻り・範囲）、探索（平ら・段差 1・壁 2・穴・落差 3/4・全面の壁・池を避ける/湖を渡る・溶岩・読み込み外・遠い目印・空の目印・出発点が空中・上限）、予算（1 tick の上限・何 tick かに分散・持ち主にだけ届く・動かなければ送り直さない・8 ブロックで再計算・目印の変更・止めたら送らない・途絶えで捨てる）、パケットの往復と大きさ。
 
+
+### 8.4 章の札・更新の音・NPC の頭の印（`quest/QuestUx`、`client/quest/ChapterLabel`）
+
+- **章の札**: 目的の帯のすぐ上に、今の章（「一章　空を泳ぐもの」。`Chapters` の `tab` + 全角空白 + `title`。序章は「序章　空の影」）を小さく出しっぱなしにする。章はサーバーが人ごとに `Chapters.of` で導き、変わったとき・入ったときだけその人に送る（パケット版 `questux-1`）。場面・F1・F3・目覚めの暗転では出さない。画面を開いている間は薄くする。設定 `chapterLabel`。札の高さ（11px）の分だけ、下の帯と追跡の表示が下へずれる（`QuestHud.y()`）。HUD の置き場を一括で持つ部品（`HudLayout`）ができたら、札はそこの「帯の上」の段に載せる。
+- **更新の音**: クエストの札（`QuestToast`）と同時に、メインの段の更新・始まり・終わりは小さな鐘が二つ（五度上がる、1.3 秒、最大音量 0.5。終わりは少し低く）、サブは柔らかいひとつ（0.7 秒、0.32）。合成は `tools/gen_quest_ux_sounds.py`（序盤の鐘と同じ部分音の組み方）、出力は `sounds/ui/quest_main.ogg`・`quest_side.ogg`、登録は `QuestUx`、鳴らすのは `QuestClient.playSound`。会話・場面の最中は札と同じく溜めて、閉じたあとに鳴る。設定 `questSound` で止める（以前の水晶の音は廃止）。
+- **NPC の頭の上の印**: 07 の 8.5 節。見本の絵は `docs/review/previews/quest_ux_sheet.png`（`tools/shots/quest_ux.txt` → `tools/quest_ux_sheet.py`）。
+- **旅嚢の "NEW"**: 新しく袋に入って、まだ画面で見ていない品の枠・輪の札・ホットバー脇の札に小さな赤い "NEW"（持ち主ごとに保存。カーソルを重ねると外れる）。22 の 9.4 節。
 
 ## 9. 章の題字と余韻（`story/arc/ChapterCards`）
 
@@ -201,7 +227,7 @@
 - **記録**: 人ごと（`TutorialData`、Data Attachment `skyabyss:tutorial`。出ている ID と済んだ ID。死んでも・再ログインしても残る）。済んだ手引きは二度と出ない。操作を先に済ませた人には、あとから品を得ても出ない。
 - **送り**: サーバーは「今出ている ID」と「いま済んだ ID」だけを送る（`TutorialHints.Sync`、版 tutorial-1。変わったときと、ログイン・復活・次元移動のときだけ）。持ち物の見回りは 20 tick ごと（人ごとにずらす）。
 - **文面とキー名**: クライアントが作る（`client/tutorial/TutorialClient`）。キー名は今のキー設定から `KeyMapping.getTranslatedKeyMessage()`、lang は `assets/skyabyss_tutorial/lang`（`tutorial.skyabyss.<ID>` に `%s` でキー名）。使う品は持ち方で 3 通り: 持ち物にある = 「右クリックで…」（`.hand`）、旅嚢にあって使える道具が一つだけ・前回の道具・まだ何も使っていない先頭 = 「[Y] を短く押して…」（`.short`）、それ以外 = 「[Y] 長押しで旅嚢の輪 → … を選んで離す」（`.wheel`）。
-- **表示**: ホットバーの上、字幕（下から 84）のすぐ下。暗い帯に金の「◆」と白い字、ゆっくり呼吸するように濃さが揺れる。済むと緑の「✔ できた」を 1.8 秒出して消える。会話（`DialogueScreen`）・場面（シネマティック・開幕の目覚め）・画面を開いている間・F1・デバッグ画面では出さず（`NoticeClient.busy`、`NoticeGate` と同じ関所）、閉じたあとにまた出る（出し続ける札なので溜めはしない。「できた」の時計も止まる）。
+- **表示**: 下中央の手がかりの列（14 章）。字幕の下、アクションバーの上。暗い帯に金の「◆」と白い字、ゆっくり呼吸するように濃さが揺れる。済むと緑の「✔ できた」を 1.8 秒出して消える。会話（`DialogueScreen`）・場面（シネマティック・開幕の目覚め）・画面を開いている間・F1・デバッグ画面では出さず（`NoticeClient.busy`、`NoticeGate` と同じ関所）、閉じたあとにまた出る（出し続ける札なので溜めはしない。「できた」の時計も止まる）。
 
 | ID | 始まり | 済み |
 | --- | --- | --- |
@@ -215,13 +241,45 @@
 - 新しい手引きは `ALL` に足し、始まりの場所で `start`（品なら述語）、済みの場所で `done`、lang に鍵（品なら `.hand/.short/.wheel`、そうでなければ鍵一つ）を足す。`TutorialClient.text` に ID の分岐を足す。
 - 自己テスト `SELFTEST tutorial`（`tutorial/TutorialSelfTest`。品で始まる・済むまで出続ける・人ごと・済んだら二度と出ない・先に済ませた人には出ない・出来事で始まる・保存の往復・優先の並び・日英の鍵）。
 
-## 14. 会話の画面の肖像
+## 14. 画面の部品の置き場（`client/hud/HudManager`・`hud/HudLayout`）
+
+試遊の「手引きの文と、J キーを押そう・U キーを押そうが重なる」に応える仕組み。昔は部品ごとに自分で座標を決めていた（下から 82、下から 84、y = 4 …）ので、お互いを知らず重なった。いまは置き場を一か所で決める。
+
+**考え方**
+- バニラの部品（ホットバー・体力・満腹・空気・経験値・アクションバー・効き目の絵・ボスバー・照準・札・チャット）は動かせない障害物。毎フレーム、現在の状態（利き手・オフハンド・体力の段・効き目の数・ボスバーの下端・札の高さ・チャット）から長方形を作る。
+- mod の部品は要求（`HudLayout.Request`: 名前 `Id`・区分 `Region`・寸法の決め方 `Fit`）だけを出す。座標は持たない。寸法の決め方は幅と高さの上限を受けて、文を折り返し行を減らして収まる寸法を返す（収まらなければ null）。
+- `HudLayout.compute`（Minecraft の型を使わない純粋な計算）が区分ごとに積み、入らなければ縮め、それでも入らなければ優先の低いほうを出さない（`dropped`）。重ねて描かない。
+- 描画層は `HudManager.rect(Id)` でもらった長方形の中にだけ描く（もらえなければ描かない）。要求は `client/hud/HudRequests` に一覧してある。新しい部品は、ここに一行足し、`HudLayout.Id` に名前を足す。
+
+**区分と優先**（`Id` の並びが区分の中の優先と上下の順）
+| 区分 | 並べ方 | 部品 |
+| --- | --- | --- |
+| 左上の帯 | 上から下へ。左端 3 | 成長 `STATUS_TL`・技の枠 `SLOTS_TL` → 章の札 `CHAPTER`（`ChapterLabel`）→ 目的の帯 `OBJECTIVE` → 追跡中の依頼 `QUEST` → 得た経験値の列 `POPUPS_TL`（目的を押し下げないよう、いちばん下。入らなければ出さない） |
+| 右上の板 | 効き目の絵・札の下から下へ。右端 6 | 誓い `VOW` → 背の目盛りと目的の板 `BACK_GAUGE` → 仲間の一覧 `PARTY_LIST`（画面の高さの 1/3 より下から） |
+| 上中央 | ボスバーの下へ上から。照準の上まで | ボスの技の名前 `BOSS_CUE` → 領域の残り時間 `BOSS_DOMAIN` → 上の帯 `BANNER`（場所・章・余韻・戦いの知らせ）→ レベルアップ `LEVEL_UP` → 中央の一行 `CENTER_LINE` |
+| 下中央 | アクションバーの上（下から 78）から上へ | 倒れた表示 `DOWNED_SELF` → 手がかり `HINTS`（初回の案内・できた） |
+| 字幕 `CAPTION` | 上中央と手がかりのあいだ | 一行ぶん（最低の高さ）を必ず残す。足りなければ行数を減らす。手がかりを押し下げない |
+| ホットバーの左右 | オフハンド・攻撃の目盛りの先から外側へ | 旅嚢の札 `QUICK_CARD`（札が無く新しい品だけあるときは小さな「[I] 旅嚢 NEW」の一行が同じ置き場）・成長 `GROWTH_BAR`（設定が経験値バーの左のとき）・技の枠 `SKILL_SLOTS`。入らない狭い画面では左上へ逃がす（`fallback`） |
+| 中央（固定） | 画面の中心から | 仲間を起こす輪と文 `AIM_RING`。ほかの部品はここを避ける |
+
+- 画面の外の矢印（仲間・倒れた仲間・墓の標。`PartyMarkers.drawMarker`）は `HudManager.edgePoint` で縁の点をもらい、板やバニラの部品の上なら縁を伝って空いた所へずれる。
+- 右上の札（トースト）の高さは `noteToast` で数え、なめらかに寄せる（出入りで板が跳ねない）。ボスバーの下端は `NoticeClient` のイベントから `noteBossBottom`。
+- F1・場面（`CinematicClient.active`）では mod の部品の要求を出さない（全部隠れる）。戦いの最中（ボスバーが出ている・直近 10 秒に敵から傷を受けた。`HudManager.inCombat`）は、操作の手がかり（初回の手引き `HINTS` と、種類 HINT の字幕）を出さない。
+- 章の題字・余韻の大きな札（`BANNER`）は、左上・右上の帯（目的の帯など）の下へ避けて置く（避けて入らなければ幅を縮める）。札が出ている間と、右上の札が 4 枠ぶん（128）積まれている間は、`NoticeClient.busy` が真になり、札・経験値・手がかりは関所で溜めて、あとから出す（初回の手引きも隠れる）。
+- 右上の板の幅は、ボスバーの右（中央の幅 182 の端から 4 あけ、最小 112）までに切る。文は Fit が切る。会話・開いた画面の扱いは各部品のまま。
+
+**14.5 見本と確かめ**
+- 開発用の見本: `/skyabyss_hud demo [all|opening|back|boss|off]`（表示だけにデータを入れる。サーバーには触れない）、`/skyabyss_hud layout`（いまの長方形と出さなかった部品をチャットへ）。台本では `huddemo <all|opening|back|boss|off>`。
+- 台本 `tools/shots/hud_layout.txt`（一番混む三つの場面 × GUI 倍率 2・3・4）。整理の前後の比べは `docs/review/previews/hud_layout_sheet.png`。
+- 自己テスト `SELFTEST hud layout`（`hud/HudLayoutSelfTest`。倍率 1〜4 × 16 種の窓で、置いた長方形が画面に収まる・mod の部品どうし、バニラの部品と重ならない・普通の大きさでは字幕と手がかりと目的が出る、をランダムな部品の組み合わせでも確かめる）。ゲームを開かずに main でも回せる。
+- 絵柄（板・文字・キーの表示）の 3 案は `docs/review/hud/index.html`（選びは db の `choices/hud_style`）。置き場の整理は絵柄に依らない。
+
+## 15. 会話の画面の肖像
 
 - 会話の枠（07 の 4.1）の肖像を、32px 密度の 80×80 から 128×128 のドット絵に描き直した（語り部・イサナ・旅の職人の 3 人 × ふつう・笑み・沈む）。知らせではなく画面の絵だが、画面の絵の決まりはここにそろえる: 光は左上の手前、暗い石板の枠（縁 `0xFF2E5552`）になじむ色、拡大は画素の整数倍で最近傍。
 - 肖像は枠の中で最も大きな絵なので、枠が高くなる。ほかの知らせの場所と重ならないよう、枠は画面の下に置いたまま、背景の暗がりは下半分だけにしてある。
 - 3 案（A/B/C）の選定は `docs/review/portraits/index.html`。A を仮に入れてある。仕様と描き方は 07 の 4.1。
 
----
 
 ## 旧節番号の対応
 

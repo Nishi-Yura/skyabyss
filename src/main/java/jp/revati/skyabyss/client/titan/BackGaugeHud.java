@@ -42,8 +42,12 @@ public final class BackGaugeHud {
         }
     }
 
-    // 板の上端。右上の効き目の絵 (バニラ: 良い効き目は y 1〜、そのほかは y 27〜) があれば、その下へずらす
+    // 板の上端: 置き場は HudManager (右上。誓いの帯の下、効き目の絵・札の下)。もらえていなければ従来の位置
     public static int top(Minecraft mc) {
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BACK_GAUGE);
+        if (r != null) {
+            return r.y();
+        }
         if (mc.player == null || mc.player.getActiveEffects().isEmpty()) {
             return MARGIN;
         }
@@ -52,19 +56,32 @@ public final class BackGaugeHud {
         return other ? 54 : good ? 28 : MARGIN;
     }
 
+    // HUD の要求: 出ている板の全部ぶん (一番高いもの。目的の板があれば板の下に続く) を一つの塊として右上に
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (mc.level == null || mc.options.hideGui) {
+            return;
+        }
+        int h = 0;
+        for (Gauge g : GAUGES) {
+            if (g.shown(mc)) {
+                h = Math.max(h, g.height());
+            }
+        }
+        if (h > 0) {
+            int guiW = mc.getWindow().getGuiScaledWidth();
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BACK_GAUGE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
+                    Mth.clamp(150, 112, Math.max(112, guiW / 2 - 91 - 4 - MARGIN)), h));
+        }
+    }
+
     // 出ている板の下端 (仲間の表示がこれより下に来るように)。板が出ていなければ 0
     public static int bottom() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.options.hideGui) {
             return 0;
         }
-        int bottom = 0;
-        for (Gauge g : GAUGES) {
-            if (g.shown(mc)) {
-                bottom = Math.max(bottom, top(mc) + g.height());
-            }
-        }
-        return bottom;
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BACK_GAUGE);
+        return r == null ? 0 : r.bottom();
     }
 
     // 板の幅: 中身の幅 wanted を、最小 min から、ボスバー (中央の幅 182) との間を 4 あけた幅までに収める

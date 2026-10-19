@@ -17,19 +17,6 @@ import net.minecraft.util.Mth;
 // 済んだ目的は出さない (「どれか一つ」の段階は、選べる目的を「または」でつなぐ)。F1・F3 の画面と、追跡していないときは出さない
 public final class QuestHud {
     public static final int X = 6;
-    // 成長の表示の「+12」の列 (バーの下 y=25 から、マナ・技の段の分だけ下げて、最大 4 行) より下に置く。
-    // 列の長さで上下に動かないよう、いつも 4 行分あける
-    static final int POPUP_TOP = 25;
-    static final int POPUP_ROWS = 4;
-
-    public static int y() {
-        // 成長の表示を経験値バーの左に置いたときは、左上の一番上から (左上に寄せた技の枠があればその下)
-        Minecraft mc = Minecraft.getInstance();
-        if (jp.revati.skyabyss.rpg.client.GrowthHud.atXpBar(mc, mc.getWindow().getGuiScaledWidth())) {
-            return 6 + jp.revati.skyabyss.rpg.client.skill.SkillHud.topLeftRowsWhenGrowthAtBottom();
-        }
-        return POPUP_TOP + jp.revati.skyabyss.rpg.client.skill.SkillHud.rowsBelowXpBar() + POPUP_ROWS * 10 + 6;
-    }
     static final int WIDTH = 150;
     static final int TITLE = 0xFF7FD6D0;
     static final int MAIN_TITLE = 0xFFF2C14E;
@@ -50,38 +37,76 @@ public final class QuestHud {
         }
     }
 
-    static void render(GuiGraphics g, DeltaTracker delta) {
-        Minecraft mc = Minecraft.getInstance();
+    // 札を出すなら (題 + 済んでいない目的の行)。出さないなら null。要求と描画で同じ判断をする
+    @javax.annotation.Nullable
+    private static Shown shown(Minecraft mc) {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.screen instanceof QuestLogScreen) {
-            return;
+            return null;
+        }
+        if (demo) {
+            return new Shown(null, null, Component.literal("見張り台の頼みごと"), false,
+                    List.of(new Line("・渡り鳥の羽を 3 枚集める（1/3）", 0, TEXT), new Line("・見張り台の鐘を鳴らす", 0, TEXT)));
         }
         QuestLog log = QuestLog.of(mc.player);
         if (log.tracked().isEmpty()) {
-            return;
+            return null;
         }
         QuestDef def = QuestClient.quest(log.tracked());
         QuestLog.Entry entry = log.entry(log.tracked());
         if (def == null || entry == null || entry.done || entry.stage >= def.stages().size()) {
-            return;
+            return null;
         }
         if (def.main() && ObjectiveStrip.active()) {
+            return null;
+        }
+        return new Shown(def, entry, Component.translatable(def.titleKey()), def.main(), lines(mc.font, def, entry, WIDTH - 12));
+    }
+
+    private record Shown(QuestDef def, QuestLog.Entry entry, Component title, boolean main, List<Line> lines) {
+    }
+
+    // HUD の要求 (左上の帯。目的の帯の下)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        Shown s = shown(mc);
+        if (s != null) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.QUEST, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
+                    WIDTH + 6, s.lines.size() * 10 + 16));
+        }
+    }
+
+    static void render(GuiGraphics g, DeltaTracker delta) {
+        Minecraft mc = Minecraft.getInstance();
+        Shown s = shown(mc);
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.QUEST);
+        if (s == null || r == null) {
             return;
         }
+        int top = r.y() + 3;
+        drawBox(g, mc, top, s.title, s.main, s.lines, () -> {
+            if (s.def != null) {
+                drawGuide(g, mc, s.def, s.entry, top);
+            }
+        });
+    }
+
+    // 札の箱 (題と、済んでいない目的の行)
+    private static void drawBox(GuiGraphics g, Minecraft mc, int top, Component title, boolean main, List<Line> lines, Runnable guide) {
         Font font = mc.font;
-        List<Line> lines = lines(font, def, entry, WIDTH - 12);
         int h = 12 + lines.size() * 10 + 3;
-        int top = y() + ObjectiveStrip.rows();
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, (0x50 + bg) << 24 | 0x0A0C10);
-        g.fill(X - 3, top - 3, X - 2, top + h - 2, def.main() ? MAIN_TITLE : TITLE);
-        g.drawString(font, Component.translatable(def.titleKey()), X + 1, top, def.main() ? MAIN_TITLE : TITLE, true);
-        drawGuide(g, mc, def, entry, top);
+        g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
+        g.drawString(font, title, X + 1, top, main ? MAIN_TITLE : TITLE, true);
+        guide.run();
         int y = top + 12;
         for (Line l : lines) {
             g.drawString(font, l.text, X + l.indent, y, l.color, true);
             y += 10;
         }
     }
+
+    // 開発用 (/skyabyss_hud demo): データなしで追跡の札を出す
+    public static volatile boolean demo;
 
     // 追跡中のクエストの札の右上に、目的までの矢印と距離 (帯と同じ。設定 questArrow が OFF なら方位の文字)。背中の中なら「背中の中」
     private static void drawGuide(GuiGraphics g, Minecraft mc, QuestDef def, QuestLog.Entry entry, int top) {
@@ -156,7 +181,7 @@ public final class QuestHud {
         jp.revati.skyabyss.client.opening.OpeningClient.Objective o = jp.revati.skyabyss.client.opening.OpeningClient.objective();
         // 序盤の帯が出ていない人 (以前から遊んでいた人など) は、歌の頁が記されたかで決める
         boolean waiting = o != null ? o.id().equals("wait_whale") : jp.revati.skyabyss.lore.client.LoreClient.has("prologue/sky_song");
-        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める・探索する。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
+        // 岩鯨の「鎖を上る」段: 待ち版の文は、鎖が降りるまで (備えを進める。story.ch1.Ch1Descent の条件が整うまで降りてこない)。
         // 歌の頁を持つ人は上の式がいつも真になり、鎖が降りても「待ち」のままだった (first_hour.txt の通しで発見)。この段だけは鎖で決める
         if (def.id().equals("main_song") && stage.id().equals("board")) {
             waiting = !chainDown();

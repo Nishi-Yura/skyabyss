@@ -2,37 +2,42 @@ package jp.revati.skyabyss.titan.dungeon;
 
 import java.util.List;
 
+import jp.revati.skyabyss.titan.BackScale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 
-// 岩鯨の背の配置図。建てる側 (Builder) と仕組みの側 (試練・休憩地点・リセット) の両方がここを参照する。
+// 岩鯨の背の配置図 (版 13: 水平 x1.6・垂直 x1.3 に作り直した。設計書 26、02 の 3.1)。建てる側 (Builder) と仕組みの側 (試練・休憩地点・リセット) の両方がここを参照する。
 //
-// 島は、空を泳ぐ岩鯨と同じ形のブロックの鯨 (WhaleShape。頭は -Z、全長 412、体の幅 82、ゲームの岩鯨の 2.8 倍)。
-// 試練の部屋は体の中に埋まっている。体内の主な床は y=93 (床ブロック、1つ上から空間)。
-// 尾の付け根の背 (z 100) に到着の広場と錨石、背の中ほど (z 39) に祠。祠の階段で体の中の鼓動の間へ下りる。
+// 島は、空を泳ぐ岩鯨と同じ形のブロックの鯨 (WhaleShape。頭は -Z、全長 約 680、体の幅 約 135、ゲームの岩鯨の 4.5 倍)。
+// 試練の部屋は体の中に埋まっている。体内の主な床は y=103 (床ブロック、1つ上から空間)。腹の下端は y 58 のまま (雲の海の高さの基準 BASE_Y は動かさない)。
+// 尾の付け根の背 (z 160) に到着の広場と錨石、背の中ほど (z 62) に祠。祠の階段で体の中の鼓動の間へ下りる。
 // 西の翼は左のわき腹の肋骨の間 (肋骨の窓から空が見える)、東の翼は背骨に沿った広間、闇の水路は腹の中の水、心臓の間は胸の奥
 //
-//              [宝物庫]  (北: 封印の扉の奥)
+//              [宝物庫]  (北: 封印の扉の奥)           [歌の祠]
 //                 |
-//   [西の翼]--[鼓動の間]--[東の翼]
-//                 |  \__ 床の穴の下に [闇の水路] (y 77〜81)
+//   [西の翼]--[鼓動の間]--[東の翼]   [図書室 (骨の書庫)]
+//                 |  \__ 床の穴の下に [闇の水路] (y 84〜89。入口 2 つ)
 //            [入口の通路]
 //                 |
-//             [祠] (背の中ほど) … 背の石の門 (アーチ) … [尾の付け根の広場・錨石] (到着地点)
+//             [祠] (背の中ほど) … 背の石の門 (アーチ) … [尾の付け根の広場・錨石] (到着地点) … [尾の展望]
 //
-// 西の翼 (裂け目の回廊): 西の前室 → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 → 崩れ橋 → 共鳴石
-//                        足場の並びは毎回変わる
+// 西の翼 (裂け目の回廊): 西の前室 → 肋骨の谷 → 第一の休み場 → 竪穴 → 第二の休み場 (→ 数え歌の鐘楼) → 崩れ橋 → 共鳴石
+//                        足場の並びは毎回変わる (谷ごとに 3 本の並列のレーン)
 // 東の翼 (番兵の回廊):   東の前室 → 第一の広間 → 番兵長の控えの間 → 短い通路 → 番兵長の広間 → 共鳴石
+//                        第一の広間の南の戸 → 第二の広間 (射手の波) → 番兵の詰所 (老番兵。奥の戸の鍵は老番兵が持つ「割符」)
 //                        広間の扉は戦いの間だけ閉じる。制圧すると出口と入口が開く
 // 心臓の回廊・心臓の間: 宝物庫の奥の扉から北へ。円形の大広間で岩鯨の心臓と戦う (最終ボス)
-// 闇の水路: 3×3 の水の通路でできた迷路。毎回形が変わり、途中に息継ぎのくぼみだけがある
+// 闇の水路 (光海): 5×5 の水の通路でできた迷路 (15×21 マス)。毎回形が変わり、息継ぎのくぼみがどのマスからも 3 マス以内に、灯の台が 3 つある
 public final class TitanBackLayout {
     // 雲の海の高さの基準 (雲は BASE_Y - 55 = 45、BASE_Y - 50 より下に落ちたら地上へ)。鯨の腹の下端は y 58
     public static final int BASE_Y = 100;
     // 鯨の全体を包む範囲 (x -RX〜RX、z -RZ〜RZ)。番兵の掃除・看板の数え・地図に使う
-    public static final int RX = 100;
-    public static final int RZ = 256;
-    public static final int FLOOR = 93;
+    public static final int RX = 180;
+    public static final int RZ = 416;
+    public static final int FLOOR = 103;
+
+    // 倍率 (版 13)。設計の単位 (版 12 の座標) を水平 x1.6・垂直 x1.3 にする。腹の下端 (y 58) を動かさず、旧 y 95 (体の中心) を y 106 へ
+    public static final BackScale SCALE = new BackScale(1.6, 1.3, 95, 106);
 
     // 配置の版。部屋の配置を変えたら上げる。保存された版と違えば、起動時に背中を建て直す (TitanBackData)
     //  1: 最初の配置 / 2: 東の翼の第二の広間 (E2) と番兵長の控えの間 (旧 CE2) を除いた
@@ -44,112 +49,174 @@ public final class TitanBackLayout {
     //     中心を 5 北へ (z -85)。テレグラフの円 (スタンプ 半径 5 など) が床の 4 割以下に収まり、避ける広さが残る (02 の 4.2、5.2)
     // 10: 詰み監査の修正 (西の翼の最後の岩棚と戸のあいだの溶岩の穴を埋めた。鼓動の間の西のはしごの頂を戸の足もとの高さに下げた)
     // 11: 闇の水路の入口 (はしごを下りた先) に、乾いた小部屋の休み場 (mz0) を足した
-    public static final int LAYOUT_VERSION = 13; // 13: 建築の監査 (ベンチの向き)
+    // 12: 詰み監査の穴埋め (背の外の凹み) / 13: 建築の監査 (ベンチの向き) / 13': ボス部屋の大門 (BossGates) / 14: 大門と建築の監査の両方
+    // 15: 水平 x1.6・垂直 x1.3 に作り直した (設計書 26)。部屋 x2.6、広間 x3.6、心臓の間 x1.3。通路は幅 5〜7・高さ 6。第二の広間・番兵の詰所・
+    //     数え歌の鐘楼・骨の書庫・歌の祠・胸びれの道・尾の展望・闇の水路 15×21 (入口 2 つ)・グループごとの幕を足した。体の bin は深い内側を 1 種類にした。
+    //     ボス部屋の大門は、広げた入口 (心臓の間・番兵長の広間) に合わせて建てる (BossGates)
+    // 16: 光海の作り直し (23 の 11 章。灯の台 3 つ・息継ぎのくぼみを 3 マス以内・近道・水域の色・広い入口の小部屋)
+    // 17: 15 と 16 の両方 (背の拡大の迷路 15×21 マス・1 マス 5×5 の上に、光海の導きをのせた。入口の小部屋は 21×14)
+    public static final int LAYOUT_VERSION = 17;
 
     // ---------------------------------------------------------------- 地表
-    // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 4) で床に着く
-    public static final int PLATFORM_Z = 100;
-    public static final int SHRINE_Z = 39;
-    // 広場と祠のあいだの、背の石の門 (モデルの半ば埋まったアーチ、z 48〜60)
-    public static final int RIDGE_Z = 53;
-    // モデルの錨石 (左のわき腹の留め具、x -38〜-27、y 83〜95、z 107〜113)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
-    public static final int ANCHOR_STONE_X = -38;
-    public static final int ANCHOR_CHAIN_X = -48;
-    public static final int ANCHOR_CHAIN_Y = 92;
-    public static final int ANCHOR_CHAIN_Z = 110;
+    // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
+    public static final int PLATFORM_Z = 160;
+    public static final int SHRINE_Z = 62;
+    // 広場と祠のあいだの、背の石の門 (モデルの半ば埋まったアーチ、z 77〜96)
+    public static final int RIDGE_Z = 85;
+    // モデルの錨石 (左のわき腹の留め具、x -61〜-43、y 71〜107、z 170〜183)。鎖はここから西へ張り出し (x = ANCHOR_CHAIN_X)、雲の海へ垂れる
+    public static final int ANCHOR_STONE_X = -61;
+    public static final int ANCHOR_CHAIN_X = -77;
+    public static final int ANCHOR_CHAIN_Y = 102;
+    public static final int ANCHOR_CHAIN_Z = 176;
     // 左のわき腹の台 (到着): 錨石 (モデルの鉄の留め具) の外に張り出した石の台。床の高さ・範囲 (x は西の端から体の面まで、z)。
     // 台の北の端から、体の中を東へ登る階段が、背の広場 (尾の付け根) の石畳へ出る
-    public static final int FLANK_FLOOR_Y = 88;
-    public static final int FLANK_X0 = -47;
-    public static final int FLANK_X1 = -31;
-    public static final int FLANK_Z0 = 100;
-    public static final int FLANK_Z1 = 116;
+    public static final int FLANK_FLOOR_Y = 97;
+    public static final int FLANK_X0 = -75;
+    public static final int FLANK_X1 = -50;
+    public static final int FLANK_Z0 = 160;
+    public static final int FLANK_Z1 = 186;
     // 到着の向き (東 = 体のほう。錨石・炉・登り口の階段が見える)
     public static final float ARRIVAL_YAW = 270f;
-    // 登り口の階段: x = STAIR_X0 から東へ、1 ブロックごとに 1 上がる。幅 3 (z STAIR_Z0〜STAIR_Z1)
-    public static final int STAIR_X0 = -34;
-    public static final int STAIR_Z0 = 104;
-    public static final int STAIR_Z1 = 106;
+    // 登り口の階段: x = STAIR_X0 から東へ、1 ブロックごとに 1 上がる。幅 5 (z STAIR_Z0〜STAIR_Z1)、高さ 6
+    public static final int STAIR_X0 = -54;
+    public static final int STAIR_Z0 = 162;
+    public static final int STAIR_Z1 = 166;
+    public static final int STAIR_HEIGHT = 6;
 
-    // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 5 段目、祠の床の下に入った所)。これより北の体内は試練の場
-    public static final int SHRINE_SEAL_Z = SHRINE_Z - 5;
+    // ピースフルのあいだ祠の階段を塞ぐ封印の z (階段の 6 段目。ここまで階段の頭が祠の床を割って空へ開くので、この面で閉じる)。これより北の体内は試練の場
+    public static final int SHRINE_SEAL_Z = SHRINE_Z - 6;
+    // 祠の階段の幅の半分 (x -3〜3 = 幅 7。本道)・高さ
+    public static final int SHRINE_STAIR_HALF = 3;
+    public static final int SHRINE_STAIR_HEIGHT = 6;
 
     // ---------------------------------------------------------------- 中央
-    public static final Box HUB = new Box(-9, 9, -32, -12, FLOOR, 9);
-    public static final Box ENTRY = new Box(-1, 1, -11, 4, FLOOR, 4);
-    public static final Box TREASURY = new Box(-6, 6, -44, -34, FLOOR, 7);
-    // 宝物庫の封印 (三つの石で開く)
-    public static final List<BlockPos> GATE = wall(-1, 1, 94, 97, -33, true);
+    public static final Box HUB = new Box(-18, 18, -55, -15, FLOOR, 16);
+    // 入口の通路: 祠の階段の足もと (z 15) から鼓動の間まで
+    public static final Box ENTRY = new Box(-3, 3, -14, 15, FLOOR, 6);
+    public static final Box TREASURY = new Box(-10, 10, -73, -57, FLOOR, 9);
+    // 宝物庫の封印 (三つの石で開く)。鼓動の間の北の壁 (z -56)
+    public static final List<BlockPos> GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, -56, true);
     // 宝物庫の奥の扉 (三つの石で封印が開くと、一緒に開く)。その先は心臓の回廊
-    public static final List<BlockPos> INNER_GATE = wall(-1, 1, 94, 97, -45, true);
+    public static final List<BlockPos> INNER_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, -74, true);
     // 天の鍵の欠片の台座 (飾り。欠片は岩鯨の心臓を倒すと、そこで受け取る)
-    public static final BlockPos PEDESTAL = new BlockPos(0, FLOOR + 1, -41);
+    public static final BlockPos PEDESTAL = new BlockPos(0, FLOOR + 1, -66);
+    // 鼓動の間の中央の台座 (眠る心臓)
+    public static final int HUB_CX = 0;
+    public static final int HUB_CZ = -35;
 
     // ---------------------------------------------------------------- 心臓の回廊と心臓の間 (最終ボス)
-    // 奥の扉から北へ伸びる回廊 (x -1〜1、z -46〜-63)。途中に休み場 heart がある
-    public static final Box HEART_REST = new Box(-3, 3, -57, -51, FLOOR, 4);
-    // 心臓の間: 中心 (0, 94, -85)、床 y=93、天井 y=106 (体の表面の内側に収まる)。内側の半径 19、壁の外側 21 (入口の壁 z=-64 が円の南の端)
+    // 奥の扉から北へ伸びる回廊 (x -3〜3、z -75〜-108)。途中に休み場 heart がある
+    public static final Box HEART_CORRIDOR = new Box(-3, 3, -108, -75, FLOOR, 6);
+    public static final Box HEART_REST = new Box(-6, 6, -100, -88, FLOOR, 7);
+    // 心臓の間: 中心 (0, 104, -136)、床 y=103、天井 y=120 (体の表面の内側に収まる)。内側の半径 25、壁の外側 27 (入口の壁 z=-109 が円の南の端)
     public static final int HEART_CX = 0;
-    public static final int HEART_CZ = -85;
-    public static final Box HEART = new Box(-21, 21, -106, -64, FLOOR, 12);
+    public static final int HEART_CZ = -136;
+    public static final Box HEART = new Box(-27, 27, -163, -109, FLOOR, 16);
     // 心臓の間の入口 (戦いが始まると閉じる)。z=HEART_GATE_Z の壁
-    public static final int HEART_GATE_Z = -64;
-    public static final List<BlockPos> HEART_GATE = wall(-1, 1, 94, 97, HEART_GATE_Z, true);
+    public static final int HEART_GATE_Z = -109;
+    public static final List<BlockPos> HEART_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, HEART_GATE_Z, true);
     // 心臓を倒すと現れる光の柱。上に立つと尾の台へ戻される
     public static final BlockPos HEART_PILLAR = new BlockPos(HEART_CX, FLOOR + 1, HEART_CZ);
+    // 歌の祠 (心臓の前の静かな部屋。21 の 3.3。休み場 heart の西)
+    public static final Box SONG_SHRINE = new Box(-20, -9, -106, -92, FLOOR, 7);
+    public static final Box SONG_PASS = new Box(-8, -7, -98, -94, FLOOR, 5);
 
     // ---------------------------------------------------------------- 西の翼 (アスレチック)
-    public static final Box W0 = new Box(-22, -16, -26, -18, FLOOR, 6);
-    public static final Box WA = new Box(-36, -24, -34, -12, FLOOR, 11);
-    public static final Box W1 = new Box(-34, -28, -42, -36, 97, 5);
-    public static final Box WB = new Box(-31, -22, -56, -44, FLOOR, 11);
-    public static final Box W2 = new Box(-24, -16, -63, -58, 100, 4);
-    public static final Box WC = new Box(-19, -11, -52, -30, FLOOR, 11);
+    public static final Box W0 = new Box(-35, -26, -42, -29, FLOOR, 8);
+    public static final Box WA = new Box(-57, -37, -54, -19, FLOOR, 15);
+    public static final Box W1 = new Box(-54, -45, -67, -56, FLOOR + 5, 7);
+    public static final Box WB = new Box(-55, -38, -90, -69, FLOOR, 15);
+    public static final Box W2 = new Box(-47, -36, -101, -92, FLOOR + 9, 6);
+    public static final Box WC = new Box(-35, -20, -85, -49, FLOOR, 15);
+    // 鼓動の間 → 西の前室 / 西の前室 → 肋骨の谷 (つなぎの通路は壁の厚さの分を含む)
+    public static final Box WEST_HALL = new Box(-25, -19, -38, -34, FLOOR, 6);
+    // 数え歌の鐘楼 (W2 の北。縦の穴。床 y 103、入口の岩棚は y 112)。W2 の北の戸口 BELL_PASS から入る
+    public static final Box BELL = new Box(-52, -34, -128, -106, FLOOR, 22);
+    public static final Box BELL_PASS = new Box(-44, -40, -105, -102, FLOOR + 9, 6);
+    // W2 → 崩れ橋 (WC) の入口の岩棚をつなぐ通路 (L 字)。鐘楼の鐘が鳴りやむまで途中の戸が閉じている (初回)
+    public static final Box W2_CONN1 = new Box(-35, -31, -99, -95, FLOOR + 9, 6);
+    public static final Box W2_CONN2 = new Box(-33, -29, -94, -86, FLOOR + 9, 6);
+    public static final List<BlockPos> BELL_GATE = wall(-33, -29, FLOOR + 10, FLOOR + 15, -90, true);
     // 足場の並びは試練が元に戻るたびに作り直される (ParkourCourses)
     // 落ちたら直前の休み場へ戻される高さ (この高さより下に落ちたら)
-    public static final int FALL_LINE = 90;
+    public static final int PIT_LAVA_Y = FLOOR - 9;
+    public static final int FALL_LINE = FLOOR - 4;
     public static final List<Box> PITS = List.of(WA, WB, WC);
-    // 西の石を鳴らすと開く、鼓動の間へ下りる抜け道
-    public static final List<BlockPos> WEST_RETURN = List.of(new BlockPos(-10, 98, -31), new BlockPos(-10, 99, -31));
+    // 西の石を鳴らすと開く、鼓動の間へ下りる抜け道 (戸は岩棚 y = FLOOR + 5 の上。はしごは鼓動の間の側)
+    public static final int WEST_LEDGE_Y = FLOOR + 5;
+    public static final int WEST_RETURN_X = -19;
+    public static final int WEST_RETURN_Z = -52;
+    public static final List<BlockPos> WEST_RETURN = wall(WEST_RETURN_Z - 1, WEST_RETURN_Z + 1, WEST_LEDGE_Y + 1, WEST_LEDGE_Y + 3, WEST_RETURN_X, false);
+    // 骨の書庫 (任意の翼。入口の通路の西)
+    public static final Box LIBRARY = new Box(-34, -12, -8, 18, FLOOR, 10);
+    public static final Box LIBRARY_PASS = new Box(-11, -4, 3, 9, FLOOR, 6);
 
     // ---------------------------------------------------------------- 東の翼 (戦闘)
-    public static final Box E0 = new Box(16, 22, -26, -18, FLOOR, 6);
-    public static final Box E1 = new Box(24, 36, -34, -5, FLOOR, 8);
+    public static final Box E0 = new Box(26, 32, -42, -29, FLOOR, 8);
+    public static final Box E1 = new Box(34, 54, -54, -8, FLOOR, 11);
     // 番兵長の控えの間 (休み場 ce1)。E1 の出口の先。西の壁の戸口から短い通路で番兵長の広間へ
-    public static final Box CE1 = new Box(26, 32, -42, -36, FLOOR, 5);
-    public static final Box E3 = new Box(11, 19, -60, -30, FLOOR, 8);
-    // 控えの間 → 番兵長の広間の通路 (x 21〜24)。両端の壁 x=25 (戸口) と x=20 (番兵長の広間の入口)
-    public static final Box E3_CORRIDOR = new Box(21, 24, -40, -38, FLOOR, 4);
-    public static final List<BlockPos> E1_ENTRANCE = wall(-23, -21, 94, 97, 23, false);
-    public static final List<BlockPos> E1_EXIT = wall(28, 30, 94, 97, -35, true);
-    public static final List<BlockPos> CE1_WEST_DOOR = wall(-40, -38, 94, 97, 25, false);
-    public static final List<BlockPos> E3_ENTRANCE = wall(-40, -38, 94, 97, 20, false);
+    public static final Box CE1 = new Box(41, 53, -68, -56, FLOOR, 7);
+    public static final Box E3 = new Box(20, 32, -106, -52, FLOOR, 11);
+    // 控えの間 → 番兵長の広間の通路 (x 34〜39)。両端の壁 x=40 (戸口) と x=33 (番兵長の広間の入口)
+    public static final Box E3_CORRIDOR = new Box(34, 39, -65, -61, FLOOR, 6);
+    public static final List<BlockPos> E1_ENTRANCE = wall(-38, -34, FLOOR + 1, FLOOR + 6, 33, false);
+    public static final List<BlockPos> E1_EXIT = wall(42, 46, FLOOR + 1, FLOOR + 6, -55, true);
+    public static final List<BlockPos> CE1_WEST_DOOR = wall(-65, -61, FLOOR + 1, FLOOR + 6, 40, false);
+    public static final List<BlockPos> E3_ENTRANCE = wall(-65, -61, FLOOR + 1, FLOOR + 6, 33, false);
     // 番兵長の広間の前室 (扉が閉じるとき、ここにいる人も中へ入れる): 控えの間と通路
     public static final AABB E3_ANTE = CE1.aabb().minmax(E3_CORRIDOR.aabb());
-    // 東の石を鳴らすと開く、鼓動の間へ戻る扉
-    public static final List<BlockPos> EAST_RETURN = List.of(new BlockPos(10, 94, -31), new BlockPos(10, 95, -31));
+    // 東の石を鳴らすと開く、鼓動の間へ戻る扉 (鼓動の間の東の壁 x=19。広間 E3 と壁を共有する所)
+    public static final List<BlockPos> EAST_RETURN = wall(-54, -52, FLOOR + 1, FLOOR + 3, 19, false);
+    // 第二の広間 (E2。射手の波) と番兵の詰所 (CK。老番兵)。E1 の南の戸 → E2 → CK。初回だけ働く
+    public static final Box E2 = new Box(24, 46, 5, 47, FLOOR, 12);
+    public static final Box CK = new Box(24, 46, 56, 76, FLOOR, 8);
+    public static final Box E2_PASS = new Box(33, 43, -6, 3, FLOOR, 6);
+    public static final Box CK_PASS = new Box(33, 43, 49, 54, FLOOR, 6);
+    public static final List<BlockPos> E1_SOUTH = wall(36, 40, FLOOR + 1, FLOOR + 6, -7, true);
+    public static final List<BlockPos> E2_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 4, true);
+    public static final List<BlockPos> E2_EXIT = wall(36, 40, FLOOR + 1, FLOOR + 6, 48, true);
+    public static final List<BlockPos> CK_ENTRANCE = wall(36, 40, FLOOR + 1, FLOOR + 6, 55, true);
+    // 番兵長の広間への戸: 初回は老番兵が持つ「割符」が鍵 (詰所を制したグループにだけ開く)。控えの間の西の戸口 (x 40)
+    public static final List<BlockPos> E3_LOCK = CE1_WEST_DOOR;
+    // 幕 (26 の 4.4・判断 3): 一人〜二人のグループには、大きな広間の遠い側に、そのグループだけに閉じた封印の壁 (GroupGates) を張って、
+    // 戦いの範囲を狭める。三人以上なら開く。戸口・出口・共鳴石はいつも近い側にある。広間 E1 は東の端 (x 48〜54)、E2 は西の端 (x 24〜32)、
+    // 番兵長の広間 E3 は北の端 (z -106〜-85)
+    public static final List<BlockPos> VEIL_E1 = wall(E1.z1(), E1.z2(), FLOOR + 1, FLOOR + 11, 47, false);
+    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 33, false);
+    public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -84, true);
+    // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
+    public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
 
     // ---------------------------------------------------------------- 闇の水路
-    // 11×15 マス、1マス 3×3 の水、壁の厚さ1。x -22〜22, z -62〜-2、床 y 77 (水は y 78〜80、天井 y 81)
-    public static final int MAZE_X0 = -22;
-    public static final int MAZE_Z0 = -62;
-    public static final int MAZE_W = 11;
-    public static final int MAZE_H = 15;
-    public static final int MAZE_CELL = 3;
-    public static final int MAZE_FLOOR = 77;
-    public static final int MAZE_START_I = 6;
-    public static final int MAZE_START_J = 9;
-    public static final int MAZE_EXIT_I = 8;
-    public static final int MAZE_EXIT_J = 13;
-    // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、中は 3×3×3。はしごが北の隅を通る)
-    public static final Box MAZE_ENTRY_ROOM = new Box(3, 5, -25, -23, MAZE_FLOOR + 4, 3);
-    public static final Box MAZE_EXIT_ROOM = new Box(10, 14, -10, -6, 81, 4);
-    // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)
-    public static final List<BlockPos> LOWER_RETURN = List.of(new BlockPos(2, 94, -7), new BlockPos(2, 95, -7));
+    // 15×21 マス、1マス 5×5 の水、壁の厚さ1。x -45〜45, z -122〜4、床 y 84 (水は y 85〜87、天井 y 88)
+    public static final int MAZE_X0 = -45;
+    public static final int MAZE_Z0 = -122;
+    public static final int MAZE_W = 15;
+    public static final int MAZE_H = 21;
+    public static final int MAZE_CELL = 5;
+    // 出口の小部屋の上のはしごの z (入口の通路から出口の小部屋へ上がる通路 EXIT_PASS の中ほど)
+    public static final int EXIT_LADDER_Z = -5;
+    public static final int MAZE_FLOOR = FLOOR - 19;
+    // 入口は 2 つ (出口は 1 つ): 6 人が分かれて探せる。1 つめは鼓動の間の北東、2 つめは南西
+    public static final int MAZE_START_I = 8;
+    public static final int MAZE_START_J = 12;
+    public static final int MAZE_START2_I = 5;
+    public static final int MAZE_START2_J = 15;
+    public static final int MAZE_EXIT_I = 11;
+    public static final int MAZE_EXIT_J = 19;
+    // 入口のはしごを下りた先の、乾いた小部屋 (迷路の天井の上。床は迷路の天井の石、はしごが北の辺を通る)
+    // 1 つめは 21×14×4 の広い休み場 (6 人が焚き火を囲み、苗床・数え石・掲示板の前に立てる。はしごの穴は北の辺の x 6)。2 つめは 5×5×4
+    public static final Box MAZE_ENTRY_ROOM = new Box(-4, 16, -49, -36, MAZE_FLOOR + 4, 4);
+    public static final Box MAZE_ENTRY_ROOM2 = new Box(mazeCellX(MAZE_START2_I), mazeCellX(MAZE_START2_I) + 4, mazeCellZ(MAZE_START2_J), mazeCellZ(MAZE_START2_J) + 4, MAZE_FLOOR + 4, 4);
+    public static final Box MAZE_EXIT_ROOM = new Box(21, 27, -7, -3, MAZE_FLOOR + 4, 5);
+    // 出口の小部屋から入口の通路へ戻る抜け道 (下の石が歌うまで閉じている)。入口の通路の東の壁 (x 4)
+    public static final List<BlockPos> LOWER_RETURN = wall(-7, -3, FLOOR + 1, FLOOR + 4, 4, false);
+    // 出口の小部屋から入口の通路へ上がる通路 (床 FLOOR。x 4〜21)
+    public static final Box EXIT_PASS = new Box(4, 21, -7, -3, FLOOR, 6);
 
     // ---------------------------------------------------------------- 共鳴石 (0 = 西, 1 = 東, 2 = 下)
     public static final List<BlockPos> RESONANCE_STONES = List.of(
-            new BlockPos(-15, 98, -30), new BlockPos(15, 94, -31), new BlockPos(13, 82, -9));
+            new BlockPos(-23, WEST_LEDGE_Y + 1, -50), new BlockPos(25, FLOOR + 1, -53), new BlockPos(26, MAZE_FLOOR + 5, -5));
 
     // ---------------------------------------------------------------- 碑文 (物語の断片)。sign.skyabyss.lore_<name>
     // facing は看板の向く側。看板は反対側の壁に掛かる
@@ -157,21 +224,21 @@ public final class TitanBackLayout {
     }
 
     public static final List<Inscription> LORE_SIGNS = List.of(
-            new Inscription("sign.skyabyss.lore_heart", new BlockPos(3, 96, -54), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-6, 96, -38), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.lore_west", new BlockPos(-17, 99, -30), net.minecraft.core.Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_east", new BlockPos(17, 96, -30), net.minecraft.core.Direction.NORTH),
-            new Inscription("sign.skyabyss.lore_below", new BlockPos(11, 83, -6), net.minecraft.core.Direction.NORTH));
+            new Inscription("sign.skyabyss.lore_heart", new BlockPos(6, FLOOR + 3, -90), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.lore_vault", new BlockPos(-10, FLOOR + 3, -62), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.lore_west", new BlockPos(-24, WEST_LEDGE_Y + 2, -49), net.minecraft.core.Direction.NORTH),
+            new Inscription("sign.skyabyss.lore_east", new BlockPos(30, FLOOR + 3, -52), net.minecraft.core.Direction.NORTH),
+            new Inscription("sign.skyabyss.lore_below", new BlockPos(23, MAZE_FLOOR + 6, -3), net.minecraft.core.Direction.NORTH));
 
     // ---------------------------------------------------------------- 試練の入口の一言 (看板)。背中に置く看板は、これと碑文だけ
     // 案内 (錨石・炉・休み場・封印の扉・台座・抜け道) は看板にせず、形・光・音と、最初の一度だけの囁き (BackWhispers) で伝える
     public static final List<Inscription> TRIAL_SIGNS = List.of(
-            new Inscription("sign.skyabyss.chasm", new BlockPos(-9, FLOOR + 3, -25), net.minecraft.core.Direction.EAST),
-            new Inscription("sign.skyabyss.arena", new BlockPos(9, FLOOR + 3, -25), net.minecraft.core.Direction.WEST),
-            new Inscription("sign.skyabyss.maze", new BlockPos(5, FLOOR + 3, -32), net.minecraft.core.Direction.SOUTH));
+            new Inscription("sign.skyabyss.chasm", new BlockPos(-18, FLOOR + 4, -41), net.minecraft.core.Direction.EAST),
+            new Inscription("sign.skyabyss.arena", new BlockPos(18, FLOOR + 4, -41), net.minecraft.core.Direction.WEST),
+            new Inscription("sign.skyabyss.maze", new BlockPos(10, FLOOR + 4, -55), net.minecraft.core.Direction.SOUTH));
     // 心臓の間の入口 (最後の試練)
     public static final Inscription HEART_GATE_SIGN =
-            new Inscription("sign.skyabyss.heart_gate", new BlockPos(1, FLOOR + 3, -62), net.minecraft.core.Direction.WEST);
+            new Inscription("sign.skyabyss.heart_gate", new BlockPos(4, FLOOR + 3, -107), net.minecraft.core.Direction.WEST);
 
     // 背中に置く看板すべて (自己テストで、この数より多く置かれていないか・各行が看板の幅に収まるかを見る)
     public static List<Inscription> allSigns() {
@@ -184,25 +251,34 @@ public final class TitanBackLayout {
     private TitanBackLayout() {
     }
 
-    // 祠の階段の封印 (ピースフルのあいだだけ置く)。階段の幅 3 × 高さ 4
+    // 迷路のマス (i, j) の x / z の南西 (最小) の角
+    public static int mazeCellX(int i) {
+        return MAZE_X0 + 1 + i * (MAZE_CELL + 1);
+    }
+
+    public static int mazeCellZ(int j) {
+        return MAZE_Z0 + 1 + j * (MAZE_CELL + 1);
+    }
+
+    // 祠の階段の封印 (ピースフルのあいだだけ置く)。階段の幅 7 × 高さ 6
     public static List<BlockPos> shrineSeal() {
         int step = shrineY() - 1 - (SHRINE_Z - 1 - SHRINE_SEAL_Z);
-        return wall(-1, 1, step + 1, step + 4, SHRINE_SEAL_Z, true);
+        return wall(-SHRINE_STAIR_HALF, SHRINE_STAIR_HALF, step + 1, step + SHRINE_STAIR_HEIGHT, SHRINE_SEAL_Z, true);
     }
 
     // 到着の場所: 左のわき腹の台。乗り移ってきた人はここに立つ (向きは ARRIVAL_YAW)
     public static BlockPos arrival() {
-        return new BlockPos(-41, FLANK_FLOOR_Y + 1, 108);
+        return new BlockPos(-66, FLANK_FLOOR_Y + 1, 173);
     }
 
     // 尾の付け根の広場 (背の上)。台から階段を登った先。倒れたとき・あきらめたとき・光の柱の行き先 (記録がなければ)
     public static BlockPos plaza() {
-        return new BlockPos(0, platformY() + 1, PLATFORM_Z - 2);
+        return new BlockPos(0, platformY() + 1, PLATFORM_Z - 3);
     }
 
     // 台に置かれた共鳴の炉 (着いてすぐ装備を鍛えられる)
     public static BlockPos forge() {
-        return new BlockPos(-40, FLANK_FLOOR_Y + 1, 105);
+        return new BlockPos(-64, FLANK_FLOOR_Y + 1, 168);
     }
 
     // 錨石 (台の上、モデルの留め具の外の面に寄せた石の磁石)。右クリックすると地上へ降りる
@@ -215,18 +291,23 @@ public final class TitanBackLayout {
         return platformY() - FLANK_FLOOR_Y;
     }
 
-    // 広場の石畳の高さ: 広場 (x -8〜8、z ±10) の背のいちばん高い所。背の丸みに沈まず、北の背を見渡せる
+    // 広場の石畳の高さ: 広場 (x -12〜12、z ±16) の背のいちばん高い所。背の丸みに沈まず、北の背を見渡せる
     private static int platformY = Integer.MIN_VALUE;
 
     public static int platformY() {
         if (platformY == Integer.MIN_VALUE) {
-            int y = BASE_Y;
-            for (int x = -8; x <= 8; x++) {
-                for (int z = PLATFORM_Z - 10; z <= PLATFORM_Z + 10; z++) {
-                    y = Math.max(y, top(x, z));
+            // 広場の円 (rx 11・rz 14) の中の背の高さの 65 番目の百分位。小さな背びれの出っ張りに引きずられて、広場が高い台にならない
+            // (出っ張りは広場の空きで削る)
+            java.util.List<Integer> tops = new java.util.ArrayList<>();
+            for (int x = -11; x <= 11; x++) {
+                for (int z = PLATFORM_Z - 14; z <= PLATFORM_Z + 14; z++) {
+                    if (Math.hypot(x / 11.0, (z - PLATFORM_Z) / 14.0) <= 1.0) {
+                        tops.add(top(x, z));
+                    }
                 }
             }
-            platformY = y;
+            java.util.Collections.sort(tops);
+            platformY = Math.max(BASE_Y, tops.get((int) (tops.size() * 0.65)));
         }
         return platformY;
     }
@@ -252,13 +333,13 @@ public final class TitanBackLayout {
         return b == Integer.MIN_VALUE ? BASE_Y : b;
     }
 
-    // 迷路のマス (i, j) の北西の角
+    // 迷路のマス (i, j) の北西の角 (水の一段目)
     public static BlockPos mazeCell(int i, int j) {
-        return new BlockPos(MAZE_X0 + 1 + i * (MAZE_CELL + 1), MAZE_FLOOR + 1, MAZE_Z0 + 1 + j * (MAZE_CELL + 1));
+        return new BlockPos(mazeCellX(i), MAZE_FLOOR + 1, mazeCellZ(j));
     }
 
     // 戸口の位置の一覧。alongX = true なら z が一定で x が a〜b、false なら x が一定で z が a〜b
-    private static List<BlockPos> wall(int a, int b, int y1, int y2, int fixed, boolean alongX) {
+    static List<BlockPos> wall(int a, int b, int y1, int y2, int fixed, boolean alongX) {
         List<BlockPos> list = new java.util.ArrayList<>();
         for (int y = y1; y <= y2; y++) {
             for (int v = a; v <= b; v++) {
@@ -284,6 +365,11 @@ public final class TitanBackLayout {
 
         public BlockPos center() {
             return new BlockPos((x1 + x2) / 2, floorY + 1, (z1 + z2) / 2);
+        }
+
+        // 床の面積 (m²)
+        public int area() {
+            return (x2 - x1 + 1) * (z2 - z1 + 1);
         }
     }
 }

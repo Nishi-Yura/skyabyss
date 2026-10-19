@@ -129,6 +129,24 @@ public final class DownedClient {
     }
 
     // ---------------------------------------------------------------- 描く
+    // HUD の要求: 自分が倒れているときの表示は下中央 (手がかりの下)。仲間を起こす輪と文は中央 (照準のまわり。ほかの部品はそこを避ける)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
+        if (entries.isEmpty() || !PartyMarkers.hudAllowed(mc)) {
+            return;
+        }
+        if (self() != null) {
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.DOWNED_SELF, jp.revati.skyabyss.hud.HudLayout.Region.BOTTOM_CENTER, 124, 41));
+            return;
+        }
+        DownedPackets.Entry aim = aimed();
+        if (aim != null) {
+            boolean active = aim.progressPercent() > 0 || mc.options.keyUse.isDown();
+            Component text = Component.translatable(active ? "hud.skyabyss.downed.reviving" : "hud.skyabyss.downed.hold", aim.name());
+            int tw = Math.max(28, mc.font.width(text));
+            out.add(jp.revati.skyabyss.hud.HudLayout.Request.center(jp.revati.skyabyss.hud.HudLayout.Id.AIM_RING, -tw / 2, -14, tw, 45));
+        }
+    }
+
     static void render(GuiGraphics g, DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
         if (entries.isEmpty() || !PartyMarkers.hudAllowed(mc)) {
@@ -139,7 +157,8 @@ public final class DownedClient {
         int h = g.guiHeight();
         DownedPackets.Entry me = self();
         if (me != null) {
-            renderSelf(g, font, me, w, h);
+            jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.DOWNED_SELF);
+            renderSelf(g, font, me, w, h, r);
             return;
         }
         // 倒れた仲間の札
@@ -178,14 +197,17 @@ public final class DownedClient {
         }
     }
 
-    private static void renderSelf(GuiGraphics g, Font font, DownedPackets.Entry me, int w, int h) {
+    private static void renderSelf(GuiGraphics g, Font font, DownedPackets.Entry me, int w, int h, @javax.annotation.Nullable jp.revati.skyabyss.hud.HudLayout.Rect r) {
         // 画面の縁の薄い赤み
         g.fill(0, 0, w, 8, 0x30602020);
         g.fill(0, h - 8, w, h, 0x30602020);
         g.fill(0, 8, 8, h - 8, 0x30602020);
         g.fill(w - 8, 8, w, h - 8, 0x30602020);
-        int cx = w / 2;
-        int y = h * 5 / 8;
+        if (r == null) {
+            return;
+        }
+        int cx = r.x() + r.w() / 2;
+        int y = r.y();
         g.drawCenteredString(font, Component.translatable("hud.skyabyss.downed.self"), cx, y, 0xFFFF8A8A);
         int seconds = (me.ticksLeft() + 19) / 20;
         float f = Math.max(0f, Math.min(1f, me.ticksLeft() / (float) Downed.DOWN_TICKS));

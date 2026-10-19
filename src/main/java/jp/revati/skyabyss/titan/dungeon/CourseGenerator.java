@@ -24,9 +24,17 @@ public final class CourseGenerator {
 
     // 足場の並び ({x, y, z, 崩れるなら1}) を返す。足場はすべて崩れる骨。同じ種からは同じ道になる
     public static List<int[]> generate(Spec spec, long seed) {
+        return generate(spec, seed, List.of());
+    }
+
+    // 別のレーンの足場 (avoid) から水平に LANE_GAP 以上離して作る。レーンは同じ入口の岩棚から同じ出口の岩棚へ行く並列の道で、
+    // 隣のレーンへ跳び移って足場を飛ばせないようにする (26 の 3.1)。作れなければ例外
+    public static List<int[]> generate(Spec spec, long seed, List<int[]> avoid) {
         Random random = new Random(seed);
-        for (int attempt = 0; attempt < 2000; attempt++) {
-            List<int[]> steps = attempt(spec, random);
+        // 隣のレーンを避けるときは、作れなければ早く諦める (呼ぶ側が別の種で試し直す)
+        int tries = avoid.isEmpty() ? 2000 : 300;
+        for (int attempt = 0; attempt < tries; attempt++) {
+            List<int[]> steps = attempt(spec, random, avoid);
             if (steps != null) {
                 // すべての足場を崩れる骨にする (入口と出口の岩棚は石のまま、ここには含まれない)
                 for (int[] step : steps) {
@@ -38,7 +46,10 @@ public final class CourseGenerator {
         throw new IllegalStateException("Could not generate a parkour course for seed " + seed);
     }
 
-    private static List<int[]> attempt(Spec spec, Random random) {
+    // 隣のレーンとの水平の距離の下限
+    public static final double LANE_GAP = 4.5;
+
+    private static List<int[]> attempt(Spec spec, Random random, List<int[]> avoid) {
         // 寄り道の目印: 部屋の中のランダムな地点
         List<int[]> targets = new ArrayList<>();
         for (int i = 0; i < spec.detours(); i++) {
@@ -72,7 +83,7 @@ public final class CourseGenerator {
                         } else if (!CourseRules.reachable(cur, q)) {
                             continue;
                         }
-                        if (valid(spec, path, q)) {
+                        if (valid(spec, path, q, avoid)) {
                             options.add(q);
                         }
                     }
@@ -105,9 +116,23 @@ public final class CourseGenerator {
     }
 
     // 新しい足場 q を置けるか
-    private static boolean valid(Spec spec, List<int[]> path, int[] q) {
+    private static boolean valid(Spec spec, List<int[]> path, int[] q, List<int[]> avoid) {
         if (q[0] < spec.x1() || q[0] > spec.x2() || q[2] < spec.z1() || q[2] > spec.z2() || q[1] < spec.yMin() || q[1] > spec.yMax()) {
             return false;
+        }
+        // (入口・出口の岩棚のそば 6 マスは、どのレーンも同じ岩棚を使うので、離さない)
+        boolean nearLedge = false;
+        for (List<int[]> ledge : List.of(spec.start(), spec.end())) {
+            for (int[] b : ledge) {
+                nearLedge |= Math.hypot(b[0] - q[0], b[2] - q[2]) < 6;
+            }
+        }
+        if (!nearLedge) {
+            for (int[] b : avoid) {
+                if (Math.hypot(b[0] - q[0], b[2] - q[2]) < LANE_GAP) {
+                    return false;
+                }
+            }
         }
         // 入口・出口の岩棚、これまでの足場から、横に2マス以上離す
         for (List<int[]> group : List.of(spec.start(), spec.end(), path)) {

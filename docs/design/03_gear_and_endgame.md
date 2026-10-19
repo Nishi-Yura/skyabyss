@@ -125,7 +125,7 @@
 
 ### 2.5 初回クリアの選択報酬
 
-- 各巨神の心臓を初めて倒すと、専用伝説 3 種から一つをチャットで選ぶ（`/titanmemory choose <装備>`。潮殻は `/titanmemory tide`）。
+- 各巨神の心臓を初めて倒すと、専用伝説 3 種から一つを選ぶ。巨神の眠りの場面が終わると専用の画面が開く（[30](30_heart_reward_ui.md)）。「あとで」にしても、旅嚢の「遺物」・控え帳・`/titanmemory reward` から選ぶまで開ける。`/titanmemory choose <装備>`（潮殻は `/titanmemory tide choose`）は同じ決まりを通る古い入口として残す。
 - この贈り物ではカウンタを戻さない。
 
 ### 2.6 コマンド
@@ -134,7 +134,8 @@
 |---|---|
 | `/titanmemory` | 自分の記憶・撃破数・図鑑を見る（誰でも）。交換ができるか・この周回は済んだかの一行も出る |
 | `/titanmemory claim` | 預かっている報酬を受け取る |
-| `/titanmemory choose <装備>` | 初回の選択（チャットのクリックで実行される） |
+| `/titanmemory reward` | 初回の選択の画面を開く（選ぶまで何度でも） |
+| `/titanmemory choose <装備>` | 初回の選択（画面と同じ決まり。巨神ごとに `/titanmemory <tide\|storm\|ember> choose`） |
 | `/skyabyss memory set <人> <0-5>`、`memory clear <人>` | 管理者・テスト用 |
 | `/skyabyss affix show` | 手の装備の特性と候補（内部の値つき） |
 | `/skyabyss affix reroll` | 特性を抽選し直す（候補は消す） |

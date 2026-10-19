@@ -183,7 +183,7 @@ final class CinematicScreen extends Screen {
         }
         int shown = total;
         if (Config.SUBTITLE_REVEAL.get() == Config.SubtitleReveal.SYNCED && r.phase == CinematicClient.Phase.PLAY && r.skipHeld == 0) {
-            shown = VoiceTiming.revealCount(VoiceTiming.of(r.scene.id(), lineIndex), sec - line.at(), total);
+            shown = VoiceTiming.revealCount(VoiceTiming.of(r.scene.id(), lineIndex), sec - line.at(), total, Config.STEADY_REVEAL_CPS.get().floatValue());
         }
         int left = shown;
         for (FormattedCharSequence row : rows) {

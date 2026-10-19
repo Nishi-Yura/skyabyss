@@ -1,0 +1,18 @@
+# 煙の柱 (17 の 3.2) の下調べ: 普通の世界で場所を作って座標を記録する
+world smoke_sheet normal
+size 1280 720
+timeout 900
+render 12
+clouds off
+waitchunks
+wait 100
+cmd skyabyss cinematic stop
+cmd skyabyss dev opening build
+wait 60
+cmd skyabyss dev opening info
+cmd weather clear
+cmd time set 6000
+cmd gamemode spectator
+hud off
+wait 20
+shot probe

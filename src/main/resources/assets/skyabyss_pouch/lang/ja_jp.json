@@ -24,6 +24,7 @@
   "skyabyss_pouch.screen.unknown": "？？？",
   "skyabyss_pouch.screen.unknown_hint": "まだ手に入れていない品",
   "skyabyss_pouch.screen.missing": "いまは手もとにない",
+  "skyabyss_pouch.badge.new": "NEW",
   "skyabyss_pouch.screen.kept": "ここの品は、倒れても残り、落とせない",
   "skyabyss_pouch.screen.count": "%1$s / %2$s",
   "skyabyss_pouch.screen.withdraw_off": "袋から出せない決まり",

@@ -24,6 +24,7 @@ import jp.revati.skyabyss.titan.storm.StormSetup;
 import jp.revati.skyabyss.titan.storm.StormWingEntity;
 import jp.revati.skyabyss.titan.tide.TideKeeper;
 import jp.revati.skyabyss.titan.tide.TideShellEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +51,8 @@ public final class TitanCalls {
     public static final double MEET_RANGE = 200;
     // すぐそこにいるとみなす距離 (呼ばずに「ここにいる」と答える)
     public static final double HERE_RANGE = 128;
+    // 別の巨神がこの距離 (水平) 以内にいるあいだは、呼びを断る (巨神の近くで別の巨神を呼ばない。TitanStay.LEAVE_RANGE と同じ)
+    public static final double NEAR_TITAN_RANGE = 160;
     // 遠くから呼び寄せるときの現れる距離
     private static final double ENTRY = 260;
     // 巨神ごとの、呼び寄せに頼る距離 (これより遠ければ、現れ直す)
@@ -220,6 +223,12 @@ public final class TitanCalls {
             }
         }
         ServerLevel level = player.server.overworld();
+        String near = nearTitan(level, player, id);
+        if (near != null) {
+            Notice.bar(player, ModText.hint(LANG + "near_titan", Progression.titanName(near)));
+            player.playNotifySound(net.minecraft.sounds.SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.5f, 0.7f);
+            return Result.REFUSED;
+        }
         TitanWorldData data = TitanWorldData.get(level);
         TitanWorldData.Slot slot = data.slot(id);
         if (!slot.spawned) {
@@ -254,6 +263,26 @@ public final class TitanCalls {
         Notice.narrate(player, LANG + "called." + id);
         SkyAbyss.LOGGER.info("{} called the {} near {}", player.getGameProfile().getName(), id, player.blockPosition());
         return Result.CALLED;
+    }
+
+    // 呼ぶ巨神 except 以外で、player から NEAR_TITAN_RANGE (水平) 以内にいる巨神の id (いなければ null)。止まっていても飛んでいても数える
+    @Nullable
+    public static String nearTitan(ServerLevel level, ServerPlayer player, String except) {
+        for (String other : Titans.all()) {
+            if (!known(other) || other.equals(except)) {
+                continue;
+            }
+            net.minecraft.world.entity.Entity e = switch (other) {
+                case Titans.STONE_WHALE -> WhaleKeeper.current(level);
+                case Titans.TIDE_SHELL -> TideKeeper.KEEPER.current(level);
+                case Titans.THUNDER_WING -> StormKeeper.KEEPER.current(level);
+                default -> EmberKeeper.KEEPER.current(level);
+            };
+            if (e != null && e.isAlive() && Math.hypot(e.getX() - player.getX(), e.getZ() - player.getZ()) <= NEAR_TITAN_RANGE) {
+                return other;
+            }
+        }
+        return null;
     }
 
     private static boolean skyTitan(String id) {
@@ -322,7 +351,16 @@ public final class TitanCalls {
         if (shell == null) {
             shell = (TideShellEntity) TitanKind.TIDE_SHELL.respawn().spawn(level, spot.x + 100, level.getSeaLevel(), spot.z);
         }
-        return shell.callNear(player);
+        boolean ok = shell.callNear(player);
+        if (ok) {
+            // 体の下が開けた水が人から遠いとき (岸が荒れて近くに寄れない) は、待っている場所の向きと距離を添える
+            double far = Math.hypot(spot.x - player.getX(), spot.z - player.getZ());
+            if (far > 60) {
+                Notice.hint(player, LANG + "far.tide_shell", Component.translatable("message.skyabyss.travel.compass."
+                        + SeaVoyage.compass(player.blockPosition(), BlockPos.containing(spot.x, 0, spot.z))), (int) Math.round(far));
+            }
+        }
+        return ok;
     }
 
     private static boolean callWing(ServerLevel level, ServerPlayer player) {

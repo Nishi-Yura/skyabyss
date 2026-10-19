@@ -206,13 +206,13 @@ def bed():
 
 
 def tally():
-    """入口の数え石: 深層岩の石に、五つの丸い窪み (丸は横一列、y 13〜17)"""
+    """入口の数え石: 深層岩の石に、三つの丸い窪み (灯の台と同じ数。丸は横一列、y 13〜17、中心は x 8・16・24)"""
     rng = random.Random(55)
     im = stone_tile(rng, ROCK_M, ROCK_H, ROCK_D, cracks=4)
     d = ImageDraw.Draw(im)
     d.rectangle((0, 0, 31, 31), outline=ROCK_D)
-    for i in range(5):
-        cx = 3 + i * 6
+    for i in range(3):
+        cx = 7 + i * 8
         d.ellipse((cx - 1, 13, cx + 3, 17), fill=INK, outline=ROCK_D)
     return im
 

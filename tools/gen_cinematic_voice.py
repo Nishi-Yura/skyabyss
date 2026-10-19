@@ -4,7 +4,8 @@
 台詞の本文は日本語の文字数 (かな = 1 拍、漢字 = 約 2 拍、句読点 = 間) が拍の数と間になる。英語も同じクリップを使う。
 
 使い方 (リポジトリ直下で):
-  python tools/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の声を assets に書く (既定 a)
+  python tools/gen_cinematic_voice.py --install [--style a|b|c|a2|a3|a4|m1|m2|m3|l1|l2|l3]  # l1〜l3 は架空の言語 (conlang_voice.py)
+  python tools/gen_cinematic_voice.py --review4   # 架空の言語 3 案の見本を docs/review/voice4/ に書く   # 全台詞の声を assets に書く (既定 a)
   (--install は voice_timing.json も書く: 字幕が声に合わせて出る時刻。各文字が出る秒と全体の長さ)
   python tools/gen_cinematic_voice.py --check                      # 全台詞にクリップと音の登録があり、長さが台詞の表示時間に収まるか
   python tools/gen_cinematic_voice.py --review2                    # 自然さを磨いた A2/A3/A4 と A の見本を docs/review/voice2/ に書く
@@ -37,10 +38,15 @@ MANIFEST = CINE / "voice_manifest.json"
 VOICE_DIR = CINE / "sounds" / "voice"
 REVIEW = ROOT / "docs/review/voice"
 REVIEW2 = ROOT / "docs/review/voice2"
-STYLES = ("a", "b", "c", "a2", "a3", "a4")
+STYLES = ("a", "b", "c", "a2", "a3", "a4", "m1", "m2", "m3", "l1", "l2", "l3")
+# 架空の言語 (conlang_voice.py)。本文の母音には従わない
+CONLANG_STYLES = ("l1", "l2", "l3")
+# 文字に合わせて鳴らさない様式 (動機・環境音・息だけ)。字幕は一定の速さで出る (voice_timing の span)
+STEADY_STYLES = ("m1", "m2", "m3", "l1", "l2", "l3")
+REVIEW3 = ROOT / "docs/review/voice3"
 CUR_TEXT = [""]  # 今描いている台詞の本文 (抑揚: 。で下がる・？で上がる)
 # 仕上げの音量 (有音部の RMS)。A は耳にきついという声があり 0.10 → 0.07 に下げた
-LEVEL = {"a": 0.07, "b": 0.10, "c": 0.10, "a2": 0.055, "a3": 0.04, "a4": 0.035}
+LEVEL = {"a": 0.07, "b": 0.10, "c": 0.10, "a2": 0.055, "a3": 0.04, "a4": 0.035, "m1": 0.04, "m2": 0.02, "m3": 0.03, "l1": 0.035, "l2": 0.036, "l3": 0.03}
 
 # ----------------------------------------------------------------------------- 話し手
 # f0: 基本の高さ (Hz)、form: 口の大きさ (formant の倍率)、mora: 一拍の秒、breath: 息の量、voiced: ささやきに混ぜる声 (B)、
@@ -548,7 +554,7 @@ def style_a4(events, length, spk, rng):
 
 
 STYLE_FN = {"a": style_a, "b": style_b, "c": style_c, "a2": style_a2, "a3": style_a3, "a4": style_a4}
-LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200}
+LOWPASS = {"a2": 4800, "a3": 2600, "a4": 3200, "l1": 3600, "l2": 4300, "l3": 3200}
 
 
 def render_voice(style, text, speaker, avail, seed_key):
@@ -557,16 +563,23 @@ def render_voice(style, text, speaker, avail, seed_key):
 
 def render_voice_timed(style, text, speaker, avail, seed_key):
     """(波形, 字幕の時刻 {"n": 文字数, "dur": 秒, "t": [各文字の出る時刻]})"""
+    if style in STEADY_STYLES and style not in CONLANG_STYLES:
+        return render_steady(style, text, speaker, avail, seed_key)
     spk = dict(SPEAKERS[speaker])
     if style in ("a2", "a3", "a4"):
         spk["mora"] *= 1.2  # ゆっくり
     CUR_TEXT[0] = text
     rng = np.random.default_rng(zlib.crc32((seed_key + style + speaker).encode("utf-8")))
-    events, length, starts = plan(text, spk, avail, rng)
-    if not any(e["t"] == "m" for e in events):
-        events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
-        length = spk["mora"]
-    c = STYLE_FN[style](events, length, spk, rng)
+    if style in CONLANG_STYLES:
+        import conlang_voice
+        c, length = conlang_voice.build(sys.modules[__name__], style, text, speaker, avail, seed_key, spk, rng)
+        starts = []
+    else:
+        events, length, starts = plan(text, spk, avail, rng)
+        if not any(e["t"] == "m" for e in events):
+            events = [{"t": "m", "at": 0.0, "d": spk["mora"], "c": "", "v": "n", "i": 0}]
+            length = spk["mora"]
+        c = STYLE_FN[style](events, length, spk, rng)
     n = len(c["amp"])
     # 声の源 (重ね)
     voiced = np.zeros(n)
@@ -574,7 +587,7 @@ def render_voice_timed(style, text, speaker, avail, seed_key):
         f = c["f0"] * 2 ** ((st + cents / 100.0) / 12.0)
         if style == "c":
             f = f * (1 + 0.0015 * np.sin(2 * math.pi * (4.7 + 0.3 * rng.uniform()) * np.arange(n) / SR + rng.uniform(0, 6)))
-        voiced += g * lfilter([1.0], [1, -0.55 if style not in ("a2", "a3", "a4") else -0.85], saw(f))
+        voiced += g * lfilter([1.0], [1, -0.55 if style not in ("a2", "a3", "a4") + CONLANG_STYLES else -0.85], saw(f))
     voiced /= max(1.0, sum(g for _, g, _ in spk["layers"]) ** 0.7)
     noise = lfilter([1.0], [1, -0.4], rng.standard_normal(n)) * 0.6
     src = voiced * c["vmix"] + noise * c["nmix"]
@@ -600,11 +613,161 @@ def render_voice_timed(style, text, speaker, avail, seed_key):
         rv, mix = rv + 0.5, mix + 0.18
     elif style == "a4":
         rv, mix = rv * 1.8 + 0.7, min(0.75, mix * 1.6 + 0.3)
+    elif style == "l1":
+        rv, mix = rv * 1.6 + 0.6, min(0.72, mix * 1.5 + 0.26)
+    elif style == "l2":
+        rv, mix = rv * 1.3 + 0.7, min(0.62, mix * 1.3 + 0.22)  # 石の広間のような、子音の輪郭が残る残響
+    elif style == "l3":
+        rv, mix = rv * 1.9 + 0.8, min(0.78, mix * 1.6 + 0.34)
     y = reverb(y, rv, mix, rng)
     y = finish(y, avail - 0.05, LEVEL[style], 0.08 if style in LOWPASS else 0.02)
     dur = len(y) / SR
     meta = {"n": len(text), "dur": round(dur, 3), "t": [round(min(x, dur), 3) for x in starts]}
+    if style in STEADY_STYLES:
+        meta["span"] = round(float(avail), 3)  # 字幕は一定の速さ (声の長さに合わせない)
     return y, meta
+
+
+# ----------------------------------------------------------------------------- 文字に合わせない様式 (m1 / m2 / m3)
+def _bp(y, lo, hi):
+    return sosfilt(butter(2, [lo / (SR / 2), min(hi, 0.45 * SR) / (SR / 2)], btype="band", output="sos"), y)
+
+
+def _lp(y, hz):
+    return sosfilt(butter(2, hz / (SR / 2), output="sos"), y)
+
+
+def _bump(n, attack, release):
+    """なだらかな立ち上がりと尾 (秒)"""
+    e = np.ones(n)
+    a, r = min(n, max(1, int(attack * SR))), min(n, max(1, int(release * SR)))
+    e[:a] *= np.sin(np.linspace(0, math.pi / 2, a)) ** 2
+    e[n - r:] *= np.cos(np.linspace(0, math.pi / 2, r)) ** 2
+    return e
+
+
+def _breath(n, rng, lo, hi, shape):
+    """息: 帯域雑音にゆるい強弱をつける。shape = 'in' (だんだん強く)・'out' (だんだん弱く)・'sigh' (入って出る)"""
+    x = _bp(rng.standard_normal(n), lo, hi)
+    t = np.linspace(0, 1, n)
+    if shape == "in":
+        e = t ** 1.5 * (1 - t) ** 0.3
+    elif shape == "out":
+        e = (1 - t) ** 1.6 * np.minimum(1, t * 8)
+    else:
+        e = np.where(t < 0.38, (t / 0.38) ** 1.4, ((1 - t) / 0.62) ** 1.8) * np.minimum(1, t * 20)
+    e = e * np.clip(1 + 0.15 * smooth(rng.standard_normal(n), 60), 0.3, None)
+    return x * e
+
+
+def _hum(f0, n, rng, forms, glide=None, layers=((0, 1.0),), vib=0.004):
+    """口を閉じたハミング: のこぎり波をやわらかい共鳴に通す"""
+    t = np.arange(n) / SR
+    f = np.full(n, float(f0))
+    if glide is not None:
+        f = f * 2 ** (np.interp(np.linspace(0, 1, n), glide[0], glide[1]) / 12.0)
+    f = f * (1 + vib * np.sin(2 * math.pi * 4.6 * t + rng.uniform(0, 6)))
+    y = np.zeros(n)
+    for st, g in layers:
+        y += g * lfilter([1.0], [1, -0.85], saw(f * 2 ** (st / 12.0)))
+    return formant_filter(y, np.repeat(np.array(forms, float)[:, None], n, axis=1), FORM_BW, FORM_GAIN)
+
+
+def motif(speaker, rng):
+    """話し手ごとの短い合図の音 (0.6〜1.2 秒)。言葉のリズムは持たない"""
+    if speaker == "heaven":  # 息のような鈴: ゆっくり膨らんで、ほどける
+        n = int(1.2 * SR)
+        t = np.arange(n) / SR
+        y = np.zeros(n)
+        for f, g, d in ((523.3, 1.0, 0.0), (784.0, 0.7, 0.07), (1046.5, 0.45, 0.14), (1318.5, 0.25, 0.2)):
+            env = np.clip((t - d) / 0.4, 0, 1) ** 2 * np.exp(-np.maximum(0, t - d - 0.4) * 3.2)
+            y += g * env * (np.sin(2 * math.pi * f * t) + 0.4 * np.sin(2 * math.pi * (f * 1.004) * t + 1))
+        y += 0.25 * _breath(n, rng, 2500, 7000, "sigh")
+        return reverb(_lp(y, 5200), 1.6, 0.55, rng)
+    if speaker == "hero":  # やわらかい息・ため息
+        n = int(0.85 * SR)
+        return reverb(_lp(_breath(n, rng, 500, 2600, "sigh"), 3200), 0.3, 0.1, rng)
+    if speaker == "isana":  # 軽いハミング: 二つの音が上がる
+        n = int(0.8 * SR)
+        y = _hum(236, n, rng, (300, 1300, 2400), glide=([0, 0.5, 1], [0, 0, 3.5]), layers=((0, 1.0), (12, 0.2)))
+        return reverb(_lp(y * _bump(n, 0.08, 0.3), 4200), 0.45, 0.12, rng)
+    if speaker == "storyteller":  # 低く温かい ハム
+        n = int(1.1 * SR)
+        y = _hum(96, n, rng, (270, 900, 2200), glide=([0, 0.6, 1], [0, 0.8, -1.2]), layers=((0, 1.0), (0, 0.25), (12, 0.12)), vib=0.006)
+        y = y * _bump(n, 0.2, 0.45) + 0.1 * _breath(n, rng, 300, 1500, "sigh")
+        return reverb(_lp(y, 2400), 0.5, 0.12, rng)
+    n = int(1.0 * SR)  # watcher: うつろなささやき
+    y = comb_hollow(_breath(n, rng, 900, 3800, "sigh"), 118, 0.9)
+    return reverb(y, 1.2, 0.4, rng)
+
+
+def bed(speaker, n, rng):
+    """話し手ごとの、ゆっくり鳴り続ける柔らかい音 (リズムなし)"""
+    t = np.arange(n) / SR
+
+    def wob(hz, depth):
+        return 1 + depth * np.sin(2 * math.pi * hz * t + rng.uniform(0, 6))
+
+    def tones(parts):
+        return sum(g * np.sin(2 * math.pi * f * t + rng.uniform(0, 6)) * wob(h, d) for f, g, h, d in parts)
+
+    if speaker == "heaven":  # 空気の和音 (完全五度・オクターブ)
+        y = tones(((196, 1.0, 0.13, 0.25), (293.7, 0.7, 0.17, 0.25), (392, 0.5, 0.11, 0.25), (587.3, 0.25, 0.21, 0.25)))
+        y += 0.15 * _bp(rng.standard_normal(n), 1800, 5200)
+        return reverb(_lp(y, 4800), 1.4, 0.4, rng)
+    if speaker == "hero":  # 低い息づかい
+        y = tones(((110, 0.7, 0.2, 0.3), (165, 0.25, 0.13, 0.2))) + 0.5 * _bp(rng.standard_normal(n), 300, 1400) * wob(0.3, 0.4)
+        return _lp(y, 2200)
+    if speaker == "isana":  # 明るい音のゆらぎ
+        y = tones(((440, 1.0, 0.23, 0.3), (660, 0.5, 0.31, 0.3), (880, 0.2, 0.19, 0.3)))
+        return reverb(_lp(y, 4200), 0.5, 0.15, rng)
+    if speaker == "storyteller":  # 低くあたたかい ドローン
+        y = tones(((96, 1.0, 0.1, 0.15), (192, 0.45, 0.14, 0.15), (288, 0.2, 0.09, 0.15), (144, 0.3, 0.12, 0.15)))
+        return _lp(y, 1500)
+    y = comb_hollow(_bp(rng.standard_normal(n), 400, 2400), 118, 0.85) * wob(0.16, 0.45)  # watcher: うつろな風
+    y += 0.15 * tones(((118, 1.0, 0.1, 0.3),))
+    return reverb(_lp(y, 3000), 1.0, 0.3, rng)
+
+
+# 息の質 (話し手ごと): 帯域・吸う息と吐く息の長さ・残響
+BREATH_SET = {
+    "heaven": dict(band=(1800, 6500), inh=0.55, exh=0.9, rev=(1.4, 0.45)),
+    "hero": dict(band=(500, 2600), inh=0.4, exh=0.55, rev=(0.3, 0.08)),
+    "isana": dict(band=(900, 4200), inh=0.3, exh=0.45, rev=(0.4, 0.1)),
+    "storyteller": dict(band=(300, 1600), inh=0.5, exh=0.8, rev=(0.5, 0.12)),
+    "watcher": dict(band=(800, 3600), inh=0.6, exh=1.0, rev=(1.1, 0.35)),
+}
+
+
+def breath_only(speaker, length, rng):
+    """出だしの吸う息と、終わりのかすかな吐く息。間は無音"""
+    b = BREATH_SET[speaker]
+    lo, hi = b["band"]
+    n = int(length * SR)
+    y = np.zeros(n)
+    ni, ne = int(b["inh"] * SR), int(b["exh"] * SR)
+    y[:ni] += _breath(ni, rng, lo, hi, "in")
+    y[n - ne:] += _breath(ne, rng, lo * 0.9, hi * 0.8, "out") * 0.45
+    if speaker == "watcher":
+        y = comb_hollow(y, 118, 0.8)
+    rv, mix = b["rev"]
+    return _lp(reverb(y, rv, mix, rng)[:n], 5000)
+
+
+def render_steady(style, text, speaker, avail, seed_key):
+    """文字に合わせない声。字幕は一定の速さ (timing の span = 台詞の表示時間、t は空)"""
+    rng = np.random.default_rng(zlib.crc32((seed_key + style + speaker).encode("utf-8")))
+    cap = max(0.5, avail - 0.05)
+    if style == "m1":
+        y = finish(motif(speaker, rng), min(cap, 1.3), LEVEL[style], 0.05)
+    elif style == "m2":
+        n = int(max(0.6, avail * 0.92) * SR)
+        y = bed(speaker, n, rng)
+        y = y * _bump(len(y), min(1.2, avail * 0.3), min(1.5, avail * 0.35))
+        y = finish(y, cap, LEVEL[style], 0.5)
+    else:
+        y = finish(breath_only(speaker, max(1.2, min(avail * 0.9, cap)), rng), cap, LEVEL[style], 0.1)
+    return y, {"n": len(text), "dur": round(len(y) / SR, 3), "t": [], "span": round(float(avail), 3)}
 
 
 def finish(y, max_len=None, level=0.10, fade_in=0.02):
@@ -714,14 +877,16 @@ def check():
         d = info.frames / info.samplerate
         if info.channels != 1 or info.samplerate != SR:
             bad.append(f"{p.name}: not mono {SR}")
-        if not (0.4 * ln["duration"] <= d <= ln["duration"] + 0.05):
+        steady_clip = timing.get(name, {}).get("span", 0) > 0
+        if not ((steady_clip or 0.4 * ln["duration"] <= d) and d <= ln["duration"] + 0.05):
             bad.append(f"{name}: clip {d:.2f}s vs line {ln['duration']:.2f}s")
         tm = timing.get(name)
         if tm is None:
             bad.append(f"no timing {name}")
         else:
             ts = tm["t"]
-            if tm["n"] != len(lang[ln["text"]]) or len(ts) != tm["n"]:
+            steady = tm.get("span", 0) > 0
+            if tm["n"] != len(lang[ln["text"]]) or (not steady and len(ts) != tm["n"]):
                 bad.append(f"{name}: timing n={tm['n']} vs ja text {len(lang[ln['text']])}")
             if abs(tm["dur"] - d) > 0.01:
                 bad.append(f"{name}: timing dur {tm['dur']:.3f} vs clip {d:.3f}")
@@ -804,6 +969,25 @@ STYLE_INFO2 = {
 REVIEW2_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review2_template.html"
 
 
+STYLE_INFO3 = {
+    "a4": ("A4 いまの声 (比較用)", "文字の拍に合わせて鳴る、遠いつぶやき。字幕は声に合わせて出る。"),
+    "m1": ("V1 動機", "行の頭に、話し手ごとの短い合図の音 (天=息の鈴、主人公=ため息、イサナ=軽いハミング、語り部=低いハム、見る者=うつろなささやき) が 0.6〜1.2 秒だけ鳴り、あとは無音。字幕は一定の速さで出る。"),
+    "m2": ("V2 環境音", "話し手ごとの静かな持続音が、行に合わせて浅く入って消える。リズムなし・ごく小さい。字幕は一定の速さで出る。"),
+    "m3": ("V3 息だけ", "行の頭に吸う息、終わりにかすかな吐く息。間は無音。字幕は一定の速さで出る。"),
+}
+REVIEW3_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review3_template.html"
+
+
+REVIEW4 = ROOT / "docs/review/voice4"
+STYLE_INFO4 = {
+    "a4": ("A4 いまの声 (比較用)", "日本語の文字の拍・母音に合わせて鳴る遠いつぶやき。字幕は声に合わせて出る。"),
+    "l1": ("L1 やわらかく流れる言葉", "母音・子音とも本文とは無関係の、架空の言語。開音節・鼻音・流音が多く、二重母音と長い母音がなめらかにつながる。語のまとまりと弱い強勢、文末で下がる抑揚。A4 と同じ遠い音色。字幕は一定の速さ。"),
+    "l2": ("L2 子音の多い古い言葉", "破裂・摩擦・喉の閉鎖・ごく小さなクリックと、子音の連なる閉音節。短い拍で語末に強勢。母音は中舌・奥舌が中心。古い儀式の言葉のような硬さ。字幕は一定の速さ。"),
+    "l3": ("L3 ささやきの詠唱", "息の声で、ほぼ一定の高さに乗せて唱える。長い母音、語の繰り返し、拍がそろう。文末で一段下がる。字幕は一定の速さ。"),
+}
+REVIEW4_TEMPLATE_PATH = Path(__file__).resolve().parent / "voice_review4_template.html"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--style", choices=STYLES, default="a")
@@ -811,6 +995,8 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--review", action="store_true")
     ap.add_argument("--review2", action="store_true")
+    ap.add_argument("--review3", action="store_true")
+    ap.add_argument("--review4", action="store_true")
     a = ap.parse_args()
     if a.install:
         install(a.style)
@@ -818,9 +1004,13 @@ def main():
         review()
     if a.review2:
         review(("a", "a2", "a3", "a4"), REVIEW2, REVIEW2_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO2)
+    if a.review3:
+        review(("a4", "m1", "m2", "m3"), REVIEW3, REVIEW3_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO3)
+    if a.review4:
+        review(("a4", "l1", "l2", "l3"), REVIEW4, REVIEW4_TEMPLATE_PATH.read_text(encoding="utf-8"), STYLE_INFO4)
     if a.check:
         check()
-    if not (a.install or a.review or a.review2 or a.check):
+    if not (a.install or a.review or a.review2 or a.review3 or a.review4 or a.check):
         ap.print_help()
 
 

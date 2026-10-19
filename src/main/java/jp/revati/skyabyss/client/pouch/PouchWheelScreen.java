@@ -135,6 +135,9 @@ public class PouchWheelScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         selected = pick(mouseX, mouseY);
+        if (selected >= 0 && selected < items.size()) {
+            PouchNew.viewed(items.get(selected).id());
+        }
         // 画面を少し暗く
         g.fill(0, 0, width, height, 0x66000000);
         int cx = width / 2;
@@ -146,6 +149,9 @@ public class PouchWheelScreen extends Screen {
             int py = plateY(i);
             g.blit(TEXTURE, px - PLATE / 2, py - PLATE / 2, PLATE, PLATE, on ? 420f : 360f, 150f, 56, 56, TEX, TEX);
             g.renderItem(new ItemStack(items.get(i).item()), px - 8, py - 8);
+            if (PouchNew.isNew(items.get(i).id())) {
+                PouchNew.badge(g, font, px - 8, py - 8);
+            }
         }
         // 中心: 選んだ道具の名前。選んでいなければ取りやめの案内
         Component name;

@@ -188,14 +188,25 @@ public final class ShotRunner {
         if (mc.level != null || mc.getSingleplayerServer() != null) {
             return;
         }
-        // タイトル画面か、初回の案内の画面が出たら入る
+        // タイトル画面か、初回の案内の画面が出たら入る。ただし読み込みの幕 (LoadingOverlay) がまだ上がっている間は入らない
+        // (幕の終わりの呼び出しの中で世界を作ると、世界の読み込みが幕の消えるのを待って止まる。onClientTick が幕が消えてから入る)
         if (screen instanceof TitleScreen || screen.getClass().getSimpleName().contains("Onboarding")) {
+            if (mc.getOverlay() != null) {
+                say("title screen while the loading overlay is still up; entering the world once it is gone");
+                // 読み込みの幕 (NeoForgeLoadingOverlay) の描画の最中に世界へ入ると、世界の読み込みの待ちが幕の消えるのを待ったまま止まることがある
+                // (幕の描き直しが入れ子になる)。幕が消えてから、毎 tick の側で入る
+                enterWhenOverlayGone = true;
+                return;
+            }
             worldRequested = true;
             mc.execute(ShotRunner::enterWorld);
         } else {
             say("screen before the world: " + screen.getClass().getName());
         }
     }
+
+    // 幕が消えてから世界へ入る (onScreenInit で幕が残っていたとき)
+    private static boolean enterWhenOverlayGone;
 
     private static void enterWorld() {
         Minecraft mc = Minecraft.getInstance();
@@ -219,7 +230,17 @@ public final class ShotRunner {
         rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
         rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
         LevelSettings settings = new LevelSettings(name, GameType.CREATIVE, false, Difficulty.NORMAL, true, rules, WorldDataConfiguration.DEFAULT);
-        WorldOptions options = new WorldOptions(20261016L, false, false);
+        // 世界の種は既定 20261016。環境変数 SKYABYSS_SHOTS_SEED で変えられる (別の地形で撮るとき)
+        long seed = 20261016L;
+        try {
+            String fromEnv = System.getenv("SKYABYSS_SHOTS_SEED");
+            if (fromEnv != null && !fromEnv.isBlank()) {
+                seed = Long.parseLong(fromEnv.trim());
+            }
+        } catch (NumberFormatException ignored) {
+            // 数でなければ既定のまま
+        }
+        WorldOptions options = new WorldOptions(seed, false, false);
         String type = script.worldType;
         mc.createWorldOpenFlows().createFreshLevel(name, settings, options, registries -> switch (type) {
             case "normal" -> WorldPresets.createNormalWorldDimensions(registries);
@@ -244,8 +265,20 @@ public final class ShotRunner {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
+        if (enterWhenOverlayGone && !worldRequested && mc.getOverlay() == null && mc.level == null) {
+            enterWhenOverlayGone = false;
+            worldRequested = true;
+            enterWorld();
+            return;
+        }
         if (Util.getMillis() > deadline) {
             fail("timed out after " + script.timeoutSeconds + " s at step " + (index + 1));
+            return;
+        }
+        if (!worldRequested && mc.level == null && mc.getSingleplayerServer() == null && mc.getOverlay() == null
+                && (mc.screen instanceof TitleScreen || (mc.screen != null && mc.screen.getClass().getSimpleName().contains("Onboarding")))) {
+            worldRequested = true;
+            mc.execute(ShotRunner::enterWorld);
             return;
         }
         if (mc.level == null || mc.player == null) {
@@ -314,6 +347,13 @@ public final class ShotRunner {
             }
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
+            }
+            case "heartreward" -> {
+                // heartreward <focus N|confirm|later|done> : 心臓の遺物の選択画面を、その見せ場まで進める (確かめ用。選ぶ決まりはサーバー)
+                if (mc.screen instanceof jp.revati.skyabyss.client.reward.HeartRewardScreen screen) {
+                    screen.devPhase(line.arg(0), line.rest().contains(" ") ? Integer.parseInt(line.arg(1)) : 0);
+                }
+                return true;
             }
             case "echo" -> {
                 return true;
@@ -509,6 +549,27 @@ public final class ShotRunner {
                 }
                 return true;
             }
+            case "skycircle" -> {
+                // skycircle <x> <z> <半径> | off : 空の影の形を、決まった円 (縁は 10 ブロックでぼやける) にする。skypass で影を置いたあとに使う
+                jp.revati.skyabyss.client.sky.SkyPassRenderer.testCircle = line.arg(0).equalsIgnoreCase("off") ? null
+                        : new double[] {line.doubleArg(0), line.doubleArg(1), line.doubleArg(2)};
+                return true;
+            }
+            case "skypass" -> {
+                // skypass <x> <z> <dirX> <dirZ> | off : 動かない空の影 (サーバーなし。速さ 0) をこのクライアントにだけ置く。影の縁を決まった場所に置いて撮る用
+                if (line.arg(0).equalsIgnoreCase("off")) {
+                    jp.revati.skyabyss.client.sky.SkyPassClient.clear();
+                } else {
+                    jp.revati.skyabyss.client.sky.SkyPassClient.receive(new jp.revati.skyabyss.sky.SkyPass(mc.level.getGameTime(),
+                            line.doubleArg(0), line.doubleArg(1), (float) line.doubleArg(2), (float) line.doubleArg(3), 0f, 1000000));
+                }
+                return true;
+            }
+            case "overheadshadow" -> {
+                // overheadshadow on|off : 上から落ちる影 (空の影・巨神の影) を画素ごとの影 (OverheadShadow) にする / 昔の地面の板と屋内の弱めに戻す (前後の比べ用)
+                jp.revati.skyabyss.client.sky.OverheadShadow.enabled = !line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
             case "titanweight" -> {
                 // titanweight on|off : 巨神の重さの見せ方 (下ほど暗い陰・穴の蓋・地面や海面の影・雲や水しぶき) を入れる / 外す (前後の比べ用)
                 jp.revati.skyabyss.client.lowpoly.LowPoly.titanWeight = !line.arg(0).equalsIgnoreCase("off");
@@ -584,6 +645,11 @@ public final class ShotRunner {
             }
             case "hud" -> {
                 mc.options.hideGui = line.arg(0).equalsIgnoreCase("off");
+                return true;
+            }
+            case "huddemo" -> {
+                // huddemo <all|opening|back|boss|off> : 画面の部品をいっぺんに出す (client/hud/HudDemo)
+                jp.revati.skyabyss.client.hud.HudDemo.set(line.arg(0));
                 return true;
             }
             case "perspective" -> {

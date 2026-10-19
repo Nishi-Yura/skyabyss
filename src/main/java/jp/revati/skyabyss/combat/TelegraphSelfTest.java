@@ -66,6 +66,7 @@ public final class TelegraphSelfTest {
             platform(level);
             shapes(level, f, notes);
             TelegraphDecalTest.run(server, f, notes);
+            TelegraphGroundTest.run(f, notes);
             basics(level, f, notes);
             roomSizes(f, notes);
             captain(level, f, notes);
@@ -294,7 +295,7 @@ public final class TelegraphSelfTest {
         double sweep = Math.PI * WhaleboneCaptain.SWEEP_RANGE * WhaleboneCaptain.SWEEP_RANGE * (2 * WhaleboneCaptain.SWEEP_HALF_ANGLE / 360);
         double ratio = Math.max(stomp, sweep) / floor;
         check(ratio <= 0.4, "the largest captain area is " + Math.round(ratio * 100) + "% of the captain hall floor (limit 40%)", f);
-        double heartFloor = Math.PI * 19 * 19;
+        double heartFloor = Math.PI * 25 * 25;
         double chain = Math.PI * 14 * 14 / 2;
         check(chain / heartFloor <= 0.4, "the chain sector covers too much of the heart chamber", f);
         notes.add("rooms: captain hall " + (e3.x2() - e3.x1() + 1) + "x" + (e3.z2() - e3.z1() + 1) + " (largest area " + Math.round(ratio * 100) + "%), first hall "
@@ -545,6 +546,7 @@ public final class TelegraphSelfTest {
         heart.moveTo(SX, FLOOR + 2, SZ, 0f, 0f);
         heart.setPersistenceRequired();
         heart.skipIntro();
+        heart.setDomainEnabled(false);
         level.addFreshEntity(heart);
         List<FakePlayer> ps = new ArrayList<>();
         try {

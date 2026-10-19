@@ -79,12 +79,16 @@ public final class TitanTravel {
     }
 
     public static void startLift(ServerPlayer player, StoneWhaleEntity whale) {
+        startLift(player, whale, jp.revati.skyabyss.readiness.BoardReadiness.Mode.RIGHT_CLICK);
+    }
+
+    // mode: 鎖を右クリックした (RIGHT_CLICK) か、鎖の下の陣の中に立った (WALK_IN)
+    public static void startLift(ServerPlayer player, StoneWhaleEntity whale, jp.revati.skyabyss.readiness.BoardReadiness.Mode mode) {
         if (LIFTS.containsKey(player.getUUID())) {
             return;
         }
-        // 備えの三灯 (21 の 1.2): 赤があれば一度は引き上げず、二度目の右クリック (5 秒以内) で上る
-        if (!jp.revati.skyabyss.readiness.BoardReadiness.attempt(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE,
-                jp.revati.skyabyss.readiness.BoardReadiness.Mode.RIGHT_CLICK)) {
+        // 備えの三灯 (21 の 1.2): 赤があれば一度は引き上げず、二度目 (右クリックなら 5 秒以内) で上る
+        if (!jp.revati.skyabyss.readiness.BoardReadiness.attempt(player, jp.revati.skyabyss.progress.Titans.STONE_WHALE, mode)) {
             return;
         }
         LIFTS.put(player.getUUID(), new Lift(whale.getUUID(), 0));

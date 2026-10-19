@@ -73,6 +73,11 @@ public final class SkyPassClient {
         lastCall = 0;
     }
 
+    // 開発用 (台本の skypass off)
+    public static void clear() {
+        current = null;
+    }
+
     @Nullable
     public static SkyPass current() {
         return current;
@@ -106,9 +111,11 @@ public final class SkyPassClient {
         return cover;
     }
 
-    // 影の真下の効果 (暗さ・縁の暗がり・霧・視野) にかける係数。空が見えれば 1、まったく覆われていれば 0.12 (外の気配がうっすら伝わる程度)
+    // 影の真下の画面の効果 (縁の暗がり・霧・視野・色味) にかける係数。空が見えれば 1、覆われていても 0.7。
+    // 暗さそのものは画素ごとの影 (OverheadShadow) が世界の位置でかけるので、屋根の下でも影の輪郭の中なら周りの景色は暗い。
+    // ここで弱めるのは、画面全体にかかる気配 (霧が迫る・視野が狭まる) の分だけ
     static float exposure() {
-        return 1f - 0.88f * cover;
+        return OverheadShadow.ready() ? 1f - 0.3f * cover : 1f - 0.88f * cover;
     }
 
     // 近くを通るだけの効果 (嵐の暗さ・近さ) にかける係数。屋内でも外が暗くなった気配は残す (1 → 0.3)

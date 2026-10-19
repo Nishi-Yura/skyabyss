@@ -188,6 +188,7 @@ public final class StormBackTrials {
     // 背中そのもの (全員に同じ所) を置き直す。何度呼んでも同じ: 風切りの骨の道、竜骨の門の下の形、扉のブロック、
     // 風鳴り石・灯り・抜け道の床の既定の姿 (まだ鳴っていない)、持ち主のいない部屋
     static void applyWorld(ServerLevel level) {
+        registerFirstRun();
         StormBirdBuilder.carveWestRoute(new StormKit(level), StormBackState.get(level).westRoute());
         StormBirdBuilder.carveKeel(level);
         placeGates(level);
@@ -204,6 +205,16 @@ public final class StormBackTrials {
         } else {
             EyeMirrors.apply(level, StormProgress.of(level, eye));
         }
+    }
+
+    // 初回と周回 (21 の 1.7): 肋の間と雷の回路は、周回のグループには既知の道 (道しるべが光る。仕掛けはそのまま。敵は出さない)
+    static void registerFirstRun() {
+        jp.revati.skyabyss.titan.group.FirstRun.register(jp.revati.skyabyss.titan.group.FirstRun.Room
+                .firstRun("storm.west.rib", StormTravel.STORM_BACK, RIB_HALL.aabb())
+                .guide(StormRib.guideCells()).guideState(StormKit.LAMP));
+        jp.revati.skyabyss.titan.group.FirstRun.register(jp.revati.skyabyss.titan.group.FirstRun.Room
+                .firstRun("storm.east.circuit", StormTravel.STORM_BACK, StormEast.room())
+                .guide(StormCircuit.solutionCells()).guideState(StormCircuit.B_LIT));
     }
 
     // ---------------------------------------------------------------- 扉 (グループごと)
@@ -244,6 +255,7 @@ public final class StormBackTrials {
         if (level.dimension() != StormTravel.STORM_BACK) {
             return;
         }
+        StormRib.overlay(level, group, out);
         StormProgress p = StormProgress.peek(level, group);
         if (p == null) {
             return;
@@ -288,6 +300,7 @@ public final class StormBackTrials {
         }
         boolean peaceful = level.getDifficulty() == Difficulty.PEACEFUL;
         StormWest.tick(level, peaceful);
+        StormRib.tick(level);
         StormEast.tick(level, RoomLocks.owner(EAST_ROOM), peaceful);
         if (gt % 4 == 0) {
             UUID eye = RoomLocks.owner(EYE_ROOM);
@@ -300,6 +313,7 @@ public final class StormBackTrials {
             tickPads(level);
             tickPeaceful(level, peaceful);
             tickGateFace(level);
+            StormHelm.tick(level);
             StormGuide.tick(level);
         }
         StormBackClock.Phase phase = StormBackClock.phase(level);
@@ -576,6 +590,8 @@ public final class StormBackTrials {
             RoomLocks.release(room);
         }
         StormBackState.get(level).reroll(level.random);
+        StormHelm.clear();
+        StormRib.clear();
         ready = false;
         lastPhase = null;
         SkyAbyss.LOGGER.info("Storm back cleaned up (nobody on the back; west route {})", StormBackState.get(level).westRoute());
@@ -597,6 +613,7 @@ public final class StormBackTrials {
         StormProgress p = StormProgress.of(level, group);
         p.reset(level.random, forceSleep, noSleep);
         AFTER_HEART.remove(group);
+        StormHelm.clearGroup(level, group);
         EyeMirrors.forget(group);
         if (group.equals(RoomLocks.owner(EYE_ROOM))) {
             RoomLocks.release(EYE_ROOM);
@@ -896,6 +913,9 @@ public final class StormBackTrials {
         RoomLocks.release(EYE_ROOM);
         RoomLocks.release(EAST_ROOM);
         StormEast.clear();
+        StormCircuit.clear();
+        StormHelm.clear();
+        StormRib.clear();
         EyeMirrors.clear();
         StormGuide.clear();
         StormBackClock.force(null);
@@ -914,9 +934,13 @@ public final class StormBackTrials {
 
     static StormBackNetwork.Gauge gauge(ServerLevel level, ServerPlayer player) {
         StormGuide.Goal goal = StormGuide.goalFor(level, player);
-        return new StormBackNetwork.Gauge(StormBackClock.phase(level).ordinal(), StormBackClock.ticksLeft(level),
-                (float) StormBackClock.strength(level), StormProgress.of(level, player).rungCount(), goal.id(), goal.done(), goal.total(), goal.a(), goal.b(),
-                goal.c());
+        // 拍の舵で固定中なら、その拍と固定の残りを見せる
+        StormHelm.Lock lock = StormHelm.lockOf(level, StormHelm.trialAt(player.position()), Groups.keyOf(player));
+        int phase = lock != null ? lock.phase().ordinal() : StormBackClock.phase(level).ordinal();
+        int left = lock != null ? (int) (lock.end() - level.getGameTime()) : StormBackClock.ticksLeft(level);
+        float strength = lock != null ? (lock.phase() == StormBackClock.Phase.STORM ? 1f : 0f) : (float) StormBackClock.strength(level);
+        return new StormBackNetwork.Gauge(phase, left, strength, StormProgress.of(level, player).rungCount(), goal.id(), goal.done(), goal.total(), goal.a(),
+                goal.b(), goal.c(), lock != null);
     }
 
     public static Vec3 hubSpawn() {

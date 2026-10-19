@@ -146,6 +146,7 @@
   "message.skyabyss.titan_call.no_sky": "空が見えない。ここでは%sがあなたを見つけられない",
   "message.skyabyss.titan_call.absent": "%sは、まだこの世界に姿を見せていない",
   "message.skyabyss.titan_call.here": "%sはすぐそこにいる。背へ乗れる",
+  "message.skyabyss.titan_call.near_titan": "%sがすぐ近くにいる。離れてから、ほかの巨神を呼ぼう",
   "message.skyabyss.titan_call.busy": "%sは、ほかの人の用で手が離せない",
   "message.skyabyss.titan_call.sleeping": "%sは眠っている。目覚めまで、およそ %s 分",
   "message.skyabyss.titan_call.met_hint": "呼び笛は、旅嚢から吹ける。出会った巨神は、いつでも呼べば近くへ来て、20 分のあいだ背を貸してくれる",
@@ -155,10 +156,11 @@
   "message.skyabyss.titan_call.met.ember": "足もとの熱が、小さな鈴の形に固まった。これで、余燼を呼べる",
   "message.skyabyss.titan_call.called.stone_whale": "骨の笛が鳴る。遠くで、低い歌が応える",
   "message.skyabyss.titan_call.called.tide_shell": "貝の音が潮に溶ける。浅瀬の向こうで、何かが身を起こした",
+  "message.skyabyss.titan_call.far.tide_shell": "岸が荒れていて、潮殻は沖の開けた水で待っている。ここから%sへ およそ %s ブロック。舟か泳ぎで光の輪へ",
   "message.skyabyss.titan_call.called.thunder_wing": "羽が風を切る。遠い雷が、こちらへ向きを変えた",
   "message.skyabyss.titan_call.called.ember": "鈴が灰の中で鳴る。地の底が、ゆっくりと持ち上がりはじめる",
   "message.skyabyss.titan_call.no_place.stone_whale": "降りる場所が見つからない。もう少し開けた所で",
-  "message.skyabyss.titan_call.no_place.tide_shell": "近くに寄れる浅瀬がない。海辺で呼ぶ",
+  "message.skyabyss.titan_call.no_place.tide_shell": "近くに寄れる開けた海がない。海辺で呼ぶ",
   "message.skyabyss.titan_call.no_place.thunder_wing": "降りられる峰が近くにない。地面の見える開けた所で",
   "message.skyabyss.titan_call.no_place.ember": "伏せられる平らな陸が近くにない。少し開けた陸で"
 }

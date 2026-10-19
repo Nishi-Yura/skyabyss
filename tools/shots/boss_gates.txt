@@ -1,0 +1,64 @@
+# 四つの背のボス部屋の大門 8 か所 を撮る。./gradlew runShots -Pscript=tools/shots/boss_gates.txt
+# 出力: run/shots/boss_gates/shots/boss_gates/*.png → python tools/boss_gates_sheet.py で docs/review/previews/boss_gates_sheet.png
+world shots flat
+size 1280 720
+timeout 2400
+render 16
+clouds off
+
+cmd time set midnight
+cmd weather clear
+cmd gamemode spectator
+hud off
+fov 85
+# 背を建て終えるのを待つ (四つの背を一度に建てるので、読み込みの直後は壁が無い)
+wait 2400
+# 心臓の間: 回廊 (休み場の北) から大門を見る (北向き。yaw 180)
+fov 90
+camera skyabyss:titan_back 0.5 95.6 -52.5 180 -18
+waitchunks 900
+wait 60
+shot gate_whale_heart
+# 番兵長の広間: 控えの間から、扉の先の大門を見る (西向き。yaw 90)
+fov 100
+camera skyabyss:titan_back 24.5 95.6 -38.5 90 -18
+waitchunks 900
+wait 30
+shot gate_whale_sentinel
+# 干潟の口: 前室 f0 の北の端から、トンネルの先の大門を見る (北向き。yaw 180)
+fov 95
+camera skyabyss:tide_back 0.5 68.6 -40.5 180 -22
+waitchunks 900
+wait 60
+shot gate_tide_flats
+# 殻の底の心臓の間: 休み場の小部屋の南寄りから、前庭の先の大門を見る (北向き)
+fov 90
+camera skyabyss:tide_back 0.5 52.6 -4.5 180 -22
+waitchunks 900
+wait 30
+shot gate_tide_heart
+# 雷獣の巣: 雷の骨の回廊の中ほどから、突き当たりの大門を見る (東向き。yaw 270)
+fov 85
+camera skyabyss:storm_back 98.5 145.0 -16.5 270 -6
+waitchunks 900
+wait 60
+shot gate_storm_nest
+# 竜骨の間: 前室の南端から、大門を見る (南向き。yaw 0)
+fov 100
+camera skyabyss:storm_back 0.5 123.4 -35.5 0 -35
+waitchunks 900
+wait 30
+shot gate_storm_heart
+# 鍛え手の扉: 鍛えの間の入口の前室から、大炉の向こうの大門を見る (南向き。yaw 0)
+fov 85
+camera skyabyss:ember_back 26.5 83.0 -2.5 0 -8
+waitchunks 900
+wait 60
+shot gate_ember_smith
+# 熾の底: 前室の北の端 (螺旋の底からの通路) から大門を見る (南向き)
+fov 85
+camera skyabyss:ember_back 0.5 52.6 -31.5 0 -25
+waitchunks 900
+wait 30
+shot gate_ember_heart
+quit

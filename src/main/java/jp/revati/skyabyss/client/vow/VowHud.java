@@ -70,17 +70,38 @@ public final class VowHud {
         return java.util.List.of(head, names);
     }
 
-    static void render(GuiGraphics g, DeltaTracker delta) {
-        Minecraft mc = Minecraft.getInstance();
+    // HUD の要求: 右上の細い二行 (効き目の絵・札の下)
+    public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
         VowNetwork.Sync s = current;
         if (s.ids().isEmpty() || !PartyMarkers.hudAllowed(mc)) {
             return;
         }
+        java.util.List<Component> lines = lines(s, net.minecraft.Util.getMillis() - receivedAt);
+        int w = 0;
+        for (Component line : lines) {
+            w = Math.max(w, mc.font.width(line));
+        }
+        int natW = w;
+        int h = lines.size() * 11;
+        // 狭い画面では文を切って幅に収める (最小 60)
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.VOW, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
+                (maxW, maxH) -> maxW >= 60 && h <= maxH ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(natW, maxW), h) : null));
+    }
+
+    static void render(GuiGraphics g, DeltaTracker delta) {
+        Minecraft mc = Minecraft.getInstance();
+        VowNetwork.Sync s = current;
+        jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.VOW);
+        if (s.ids().isEmpty() || r == null || !PartyMarkers.hudAllowed(mc)) {
+            return;
+        }
         Font font = mc.font;
-        int y = 4;
+        int y = r.y();
+        boolean first = true;
         for (Component line : lines(s, net.minecraft.Util.getMillis() - receivedAt)) {
-            int w = font.width(line);
-            g.drawString(font, line, g.guiWidth() - w - 6, y, y == 4 ? 0xF2C14E : 0xE9E3D4, true);
+            net.minecraft.util.FormattedCharSequence shown = net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(line, r.w()));
+            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? 0xF2C14E : 0xE9E3D4, true);
+            first = false;
             y += 11;
         }
     }

@@ -183,7 +183,7 @@ public final class CinematicSelfTest {
             VoiceTiming t = VoiceTiming.of(w[0], idx);
             check(f, t != null, "no voice timing " + name);
             if (t != null) {
-                check(f, t.starts().length > 0, "voice timing " + name + " has no characters");
+                check(f, t.steady() || t.starts().length > 0, "voice timing " + name + " has no characters");
                 check(f, clipSec > 0 && Math.abs(t.dur() - clipSec) < 0.01, "voice timing " + name + " dur " + t.dur() + " vs clip " + clipSec);
                 check(f, t.dur() <= Float.parseFloat(w[3]) + 0.05f, "voice timing " + name + " is longer than the line");
                 boolean ok = true;
@@ -191,10 +191,29 @@ public final class CinematicSelfTest {
                     ok &= t.starts()[k] >= 0f && t.starts()[k] <= t.dur() + 1.0e-4f && (k == 0 || t.starts()[k] >= t.starts()[k - 1]);
                 }
                 check(f, ok, "voice timing " + name + " starts are not monotonic / out of range");
-                check(f, VoiceTiming.revealCount(t, t.dur(), 20) == 20 && VoiceTiming.revealCount(t, -1f, 20) == 0, "voice timing " + name + " reveal ends");
+                float endSec = t.steady() ? t.span() : t.dur();
+                check(f, VoiceTiming.revealCount(t, endSec, 20, VoiceTiming.DEFAULT_CPS) == 20 && VoiceTiming.revealCount(t, -1f, 20, VoiceTiming.DEFAULT_CPS) == 0, "voice timing " + name + " reveal ends");
             }
         }
         revealSchedule(f);
+        revealSteady(f);
+    }
+
+    // 一定の速さの字幕 (VoiceTiming.revealSteady)
+    private static void revealSteady(List<String> f) {
+        check(f, VoiceTiming.revealSteady(10f, -0.1f, 10, 8f) == 0, "steady before the line");
+        check(f, VoiceTiming.revealSteady(10f, 0f, 10, 8f) == 1, "steady first character");
+        check(f, VoiceTiming.revealSteady(10f, 0.5f, 40, 8f) == 5, "steady 8 cps");
+        check(f, VoiceTiming.revealSteady(10f, 10f, 40, 8f) == 40, "steady ends at the span");
+        check(f, VoiceTiming.revealSteady(2f, 1.7f, 40, 8f) == 40, "steady speeds up for a long line");
+        int prev = 0;
+        boolean mono = true;
+        for (float x = 0f; x < 5f; x += 0.05f) {
+            int c = VoiceTiming.revealSteady(5f, x, 30, 8f);
+            mono &= c >= prev;
+            prev = c;
+        }
+        check(f, mono && prev == 30, "steady is monotonic");
     }
 
     // 字幕の出る数の純関数 (VoiceTiming.revealCount)
@@ -478,7 +497,7 @@ public final class CinematicSelfTest {
             Cinematics.stop(b, false);
             a.setPos(b.getX(), b.getY(), b.getZ());
             net.minecraft.world.entity.decoration.ArmorStand stand = new net.minecraft.world.entity.decoration.ArmorStand(net.minecraft.world.entity.EntityType.ARMOR_STAND, level);
-            // 範囲の内側 (200 ブロック。潮殻 90〜280・雷翼 130〜300・余燼 90〜240 のどれにも入る)
+            // 範囲の内側 (200 ブロック。潮殻 90〜280・雷翼 70〜360・余燼 90〜240 のどれにも入る)
             stand.setPos(a.getX() + 200, a.getY(), a.getZ());
             check(f, CinematicTriggers.firstSight(level, a, titan, null) == false && !Cinematics.active(a), titan + ": started with no titan");
             // 範囲の外: 遠すぎる・近すぎる。記録は付かない

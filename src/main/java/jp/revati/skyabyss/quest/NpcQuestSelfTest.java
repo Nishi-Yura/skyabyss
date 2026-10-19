@@ -106,6 +106,7 @@ public final class NpcQuestSelfTest {
             placement(level, new BlockPos(spawn.getX(), 260, spawn.getZ()), failures, notes);
             entity(st, failures, notes);
             dialogues(server, level, st, wc, at, failures, notes);
+            jp.revati.skyabyss.npc.NpcMarkerSelfTest.run(player(level, 41, at), player(level, 42, at), st, wc, failures, notes);
             kills(level, failures, notes);
         } finally {
             st.discard();
