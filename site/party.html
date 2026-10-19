@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja" data-lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-ja="パーティとマルチ — 天と淵のあいだ" data-en="Party and multiplayer — Between the Sky and the Abyss">パーティとマルチ — 天と淵のあいだ</title>
+<meta name="description" content="6 人までのパーティ、背中の進みはパーティごと、人数による強さ、仲間の目印。">
+<meta property="og:title" content="パーティとマルチ — 天と淵のあいだ">
+<meta property="og:description" content="6 人までのパーティ、背中の進みはパーティごと、人数による強さ、仲間の目印。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://nishi-yura.github.io/skyabyss/img/plate_title.png">
+<meta name="theme-color" content="#080e20" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eaf4ff" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/main.js"></script>
+</head>
+<body class="">
+<a class="skip" href="#main"><span class="ja" lang="ja">本文へ</span><span class="en" lang="en">Skip to content</span></a>
+<header class="site-header">
+<div class="wrap bar">
+<a class="brand" href="index.html"><img class="px" src="img/favicon.png" width="32" height="32" alt=""><span>天と淵のあいだ</span></a>
+<span class="lang" role="group" aria-label="Language / 言語"><button type="button" data-set="ja" aria-pressed="true" lang="ja">日本語</button><button type="button" data-set="en" aria-pressed="false" lang="en">English</button></span>
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="ja" lang="ja">メニュー</span><span class="en" lang="en">Menu</span></button>
+<nav class="nav" id="site-nav" aria-label="メニュー / Menu"><a href="index.html"><span class="ja" lang="ja">ホーム</span><span class="en" lang="en">Home</span></a><a href="play.html"><span class="ja" lang="ja">遊び方</span><span class="en" lang="en">How to play</span></a><a href="titans.html"><span class="ja" lang="ja">巨神と背中</span><span class="en" lang="en">Titans</span></a><a href="skills.html"><span class="ja" lang="ja">スキルとビルド</span><span class="en" lang="en">Skills</span></a><a href="gear.html"><span class="ja" lang="ja">装備</span><span class="en" lang="en">Gear</span></a><a href="pouch.html"><span class="ja" lang="ja">旅嚢と道具</span><span class="en" lang="en">Pouch</span></a><a href="party.html" aria-current="page"><span class="ja" lang="ja">パーティとマルチ</span><span class="en" lang="en">Multiplayer</span></a><a href="story.html"><span class="ja" lang="ja">物語</span><span class="en" lang="en">Story</span></a><a href="faq.html"><span class="ja" lang="ja">導入・FAQ</span><span class="en" lang="en">Install / FAQ</span></a><a href="changelog.html"><span class="ja" lang="ja">更新履歴</span><span class="en" lang="en">Changelog</span></a></nav>
+</div>
+</header>
+<main id="main"><div class="page-head"><div class="wrap"><h1><span class="ja" lang="ja">パーティとマルチ</span><span class="en" lang="en">Party and multiplayer</span></h1><p><span class="ja" lang="ja">6 人まで。背中の進みはパーティごと。人数に合わせて敵が増え、報酬は減りません。</span><span class="en" lang="en">Up to six players. Back progress is per party. Enemies scale with the party and rewards never shrink.</span></p></div></div>
+<section aria-labelledby="party">
+<div class="wrap">
+<h2 id="party"><span class="ja" lang="ja">パーティを組む</span><span class="en" lang="en">Forming a party</span></h2>
+<p class="lead"><span class="ja" lang="ja"><kbd>O</kbd> のパーティの画面、または <code>/party invite &lt;名前&gt;</code> で組みます。人数は 6 人までです。</span><span class="en" lang="en">Open the party screen with <kbd>O</kbd> or use <code>/party invite &lt;name&gt;</code>. Parties hold up to six players.</span></p>
+<div class="grid g2">
+<div class="panel"><h3><span class="ja" lang="ja">みんなで同じ jar</span><span class="en" lang="en">Same jar for everyone</span></h3><p><span class="ja" lang="ja">サーバーでも、遊ぶ全員が同じ jar（と GeckoLib）を入れます。サーバーなら、サーバーの mods フォルダにも入れます。</span><span class="en" lang="en">Everyone playing, and the server itself, needs the same jar and GeckoLib in the mods folder.</span></p></div>
+<div class="panel"><h3><span class="ja" lang="ja">乗る資格は個人</span><span class="en" lang="en">Boarding is personal</span></h3><p><span class="ja" lang="ja">乗れるのは、自分で前の心臓を止めた人です。先に進んだ仲間に連れていってもらうことはできません。追いつくには、一緒に前の心臓を止めに行きます。</span><span class="en" lang="en">You can board only if you personally stopped the previous heart. A friend cannot carry you; to catch up, go stop that heart together.</span></p></div>
+<div class="panel"><h3><span class="ja" lang="ja">経験値</span><span class="en" lang="en">Experience</span></h3><p><span class="ja" lang="ja">道中の敵の経験値は近くにいる全員で分けます。ボスは参加者それぞれに満額です。その場にいなかった仲間にも、いくらかの分け前が入ります。</span><span class="en" lang="en">XP from regular enemies is split among nearby players. Bosses give full XP to each participant, and absent party members receive a share.</span></p></div>
+<div class="panel"><h3><span class="ja" lang="ja">装備と報酬</span><span class="en" lang="en">Gear and rewards</span></h3><p><span class="ja" lang="ja">専用装備は一人ずつの抽選です。心臓の遺物の選択も、仲間それぞれの画面で自分で選びます。</span><span class="en" lang="en">Dedicated gear is rolled per player, and each party member picks their own heart relic on their own screen.</span></p></div>
+</div>
+</div>
+</section>
+
+<section class="alt" aria-labelledby="shared">
+<div class="wrap">
+<h2 id="shared"><span class="ja" lang="ja">背中の進みはパーティごと</span><span class="en" lang="en">Back progress is per party</span></h2>
+<p class="lead"><span class="ja" lang="ja">開けた扉、鳴らした石、倒した心臓、試練のリセットは、パーティ（入っていない人は一人のパーティ）ごとに持ちます。</span><span class="en" lang="en">Opened doors, rung stones, defeated hearts and trial resets are kept per party (a solo player counts as a party of one).</span></p>
+<ul>
+<li><span class="ja" lang="ja">同じ背中に別のパーティがいても、扉や敵は混ざりません。ほかのパーティの敵は見えず、狙われもしません。</span><span class="en" lang="en">Even with another party on the same back, doors and enemies never mix; you cannot see or be targeted by their enemies.</span></li><li><span class="ja" lang="ja">水や足場が動く部屋は、一度に一つのパーティだけが入れます。使っているときは「別のパーティーがこの試練に挑んでいる」と出ます。</span><span class="en" lang="en">Rooms with moving water or platforms admit one party at a time; a notice says another party is attempting that trial.</span></li><li><span class="ja" lang="ja">途中でパーティを組む・抜けると、背中の進みはパーティの記録に切り替わります。体の中にいるときは広間へ戻されます。</span><span class="en" lang="en">Joining or leaving a party mid-run switches to that party's record; if you are inside the body you are returned to the hall.</span></li><li><span class="ja" lang="ja">全員が同じ順番で進みます。先に進んだ人がいても、遅れた人は自分の順番で進めます。</span><span class="en" lang="en">Everyone progresses in the same order; stragglers keep their own pace.</span></li><li><span class="ja" lang="ja">試練の石には、パーティで鳴らした数と、誰が鳴らしたかが出ます（控え帳の「試練の石」）。</span><span class="en" lang="en">Trial stones show how many the party rang and who rang them (record book, "Trial stones").</span></li>
+</ul>
+</div>
+</section>
+
+<section aria-labelledby="scale">
+<div class="wrap">
+<h2 id="scale"><span class="ja" lang="ja">人数による強さ</span><span class="en" lang="en">Scaling by entrants</span></h2>
+<ul>
+<li><span class="ja" lang="ja">背中の試練は、6 人までを想定した敵の数です。人数に合わせて敵が増えるものがあります。</span><span class="en" lang="en">Back trials are tuned for up to six; many trials add enemies as the party grows.</span></li><li><span class="ja" lang="ja">心臓の体力は参加者の数に合わせて実質的に増え、一人あたりの戦いの長さが人数によらず 4 分ほどになるように調整されています（岩鯨）。</span><span class="en" lang="en">Heart durability scales with participants so that the fight lasts about four minutes per player regardless of party size (Stone Whale).</span></li><li><span class="ja" lang="ja">報酬は人数が増えても減りません。</span><span class="en" lang="en">Rewards do not shrink as the party grows.</span></li><li><span class="ja" lang="ja">一人でも遊べます。</span><span class="en" lang="en">Solo play is fully supported.</span></li>
+</ul>
+</div>
+</section>
+
+<section class="alt" aria-labelledby="down">
+<div class="wrap">
+<h2 id="down"><span class="ja" lang="ja">倒れたとき</span><span class="en" lang="en">Falling in a fight</span></h2>
+<ul><li><span class="ja" lang="ja">戦いで倒れた人は、前室で目を覚まし、20 秒たつと扉から戻れます。1 つの戦いで戻れるのは 3 回までです。</span><span class="en" lang="en">A fallen player wakes in the antechamber and may re-enter after 20 seconds, up to 3 times per fight.</span></li><li><span class="ja" lang="ja">戻った人は 3 秒のあいだ光って傷を受けません。回数を使い切ったら、戦いが終わるまで中へ入れません。</span><span class="en" lang="en">A returning player glows and is invulnerable for 3 seconds. After using all returns they cannot re-enter until the fight ends.</span></li><li><span class="ja" lang="ja">仲間の蘇生の仕組みは、今のところありません（復帰の回数は仲間を数えません）。</span><span class="en" lang="en">There is currently no ally-revive mechanic; re-entry is the only way back into a fight.</span></li></ul>
+</div>
+</section>
+
+<section aria-labelledby="mark">
+<div class="wrap">
+<h2 id="mark"><span class="ja" lang="ja">仲間の目印</span><span class="en" lang="en">Party markers</span></h2>
+<p><span class="ja" lang="ja">仲間の位置は、壁の向こうでも頭の上の札（名前と距離）と、画面の端の矢印で分かります。別の背中にいる仲間は右の一覧に「別の場所」と出ます。設定 <code>partyMarkers</code> で消せます。旅人の技「合図」で、見ている先に全員に見える光の標も立てられます。</span><span class="en" lang="en">Teammates show through walls as overhead tags (name and distance) and edge-of-screen arrows. A teammate on another back appears in the right-hand list as "elsewhere". Turn it off with the <code>partyMarkers</code> setting. The Wayfarer skill Signal plants a beacon everyone can see.</span></p>
+<div class="mock" role="img" aria-label="仲間の目印の見本"><div class="marks"><span class="marker"><span class="ja" lang="ja">Alex　24 m</span><span class="en" lang="en">Alex  24 m</span></span><span class="marker"><span class="ja" lang="ja">Steve　58 m ▶</span><span class="en" lang="en">Steve  58 m ▶</span></span><span class="marker"><span class="ja" lang="ja">別の場所　Sam</span><span class="en" lang="en">Elsewhere: Sam</span></span></div></div>
+<p class="muted" style="margin-top:.6em"><small><span class="ja" lang="ja">見本です。名前は例です。</span><span class="en" lang="en">A sample. The names are made up.</span></small></p>
+</div>
+</section>
+
+<section class="alt" aria-labelledby="roles">
+<div class="wrap">
+<h2 id="roles"><span class="ja" lang="ja">役目と管理者向けの設定</span><span class="en" lang="en">Roles and admin settings</span></h2>
+<p><span class="ja" lang="ja">岩守りは壁、潮歌いは支え、灰の鍛え人と骨の射手は攻め、風読みは機動と崩し。技の木の組み合わせで、パーティでの役目が分かれます。</span><span class="en" lang="en">Rockwarden holds the line, Tidesinger supports, Ashsmith and Boneshooter attack, Windreader skirmishes. Tree choices give each party member a role.</span></p>
+<div class="tablewrap"><table><thead><tr><th scope="col"><span class="ja" lang="ja">ゲームルール</span><span class="en" lang="en">Game rule</span></th><th scope="col"><span class="ja" lang="ja">内容</span><span class="en" lang="en">Effect</span></th></tr></thead><tbody><tr><td><code>skyabyssPartyShare</code></td><td><span class="ja" lang="ja">その場にいなかった仲間への経験値の分け前（50〜80%）</span><span class="en" lang="en">XP share for party members who were not present (50-80%)</span></td></tr><tr><td><code>skyabyssHeartReentryLimit</code></td><td><span class="ja" lang="ja">戦いで倒れた人が、20 秒のあとに戻れる回数（既定 3。0 で数えない）</span><span class="en" lang="en">How often a fallen player may re-enter after 20 s (default 3; 0 = unlimited)</span></td></tr></tbody></table></div>
+</div>
+</section>
+</main>
+<footer class="site-footer">
+<div class="wrap">
+<ul class="foot-links"><li><a href="index.html"><span class="ja" lang="ja">ホーム</span><span class="en" lang="en">Home</span></a></li><li><a href="play.html"><span class="ja" lang="ja">遊び方</span><span class="en" lang="en">How to play</span></a></li><li><a href="titans.html"><span class="ja" lang="ja">巨神と背中</span><span class="en" lang="en">Titans</span></a></li><li><a href="skills.html"><span class="ja" lang="ja">スキルとビルド</span><span class="en" lang="en">Skills</span></a></li><li><a href="gear.html"><span class="ja" lang="ja">装備</span><span class="en" lang="en">Gear</span></a></li><li><a href="pouch.html"><span class="ja" lang="ja">旅嚢と道具</span><span class="en" lang="en">Pouch</span></a></li><li><a href="party.html"><span class="ja" lang="ja">パーティとマルチ</span><span class="en" lang="en">Multiplayer</span></a></li><li><a href="story.html"><span class="ja" lang="ja">物語</span><span class="en" lang="en">Story</span></a></li><li><a href="faq.html"><span class="ja" lang="ja">導入・FAQ</span><span class="en" lang="en">Install / FAQ</span></a></li><li><a href="changelog.html"><span class="ja" lang="ja">更新履歴</span><span class="en" lang="en">Changelog</span></a></li></ul>
+<p><span class="ja" lang="ja">天と淵のあいだ v0.2.2（ベータ版）。作 Nishi-Yura。All Rights Reserved。巨神の動きに GeckoLib を使っています。</span><span class="en" lang="en">Between the Sky and the Abyss v0.2.2 (beta) by Nishi-Yura. All Rights Reserved. Titan animation uses GeckoLib.</span></p>
+<p><span class="ja" lang="ja">ソースと更新:</span><span class="en" lang="en">Source and updates:</span> <a href="https://github.com/Nishi-Yura/skyabyss">GitHub: Nishi-Yura/skyabyss</a></p>
+<p><small><span class="ja" lang="ja">Minecraft はMojang Studios の商標です。このサイトと mod は Mojang・Microsoft とは関係ありません。</span><span class="en" lang="en">Minecraft is a trademark of Mojang Studios. This site and mod are not affiliated with Mojang or Microsoft.</span></small></p>
+</div>
+</footer>
+</body>
+</html>
