@@ -346,8 +346,8 @@ public final class Ch1SitesSelfTest {
             }
             SiteSpawner.tick(level, List.of(a), now + 40);
             check(progress.cleared(a.getUUID(), CleftCave.SITE) && !progress.cleared(b.getUUID(), CleftCave.SITE), "the clear was not recorded for exactly group A");
-            check(a.getInventory().countItem(GuideSetup.ROCK_SHELL_THREAD.get()) == 1, "the first clear should hand over one ward thread");
-            check(a.getInventory().countItem(GuideSetup.ROCK_SHELL_SCRAP.get()) >= 4, "the first clear should hand over shell scraps");
+            check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_THREAD.get()) == 1, "the first clear should hand over one ward thread");
+            check(jp.revati.skyabyss.pouch.Pouch.countAll(a, GuideSetup.ROCK_SHELL_SCRAP.get()) >= 4, "the first clear should hand over shell scraps");
             check(Growth.get(a).discoveries.contains("site:" + CleftCave.SITE) && Growth.get(a).xp >= xpBefore, "the clear xp was not granted");
             QuestLog.Entry e = QuestLog.of(a).entry(Ch1Prep.Q_BLADE);
             check(e != null && e.stage >= 1, "the clear signal (with the whetstone used) did not finish the cave stage of prep_blade");

@@ -270,6 +270,25 @@ public final class LangSelfTest {
             if (questKeys < 50) {
                 f.add("only " + questKeys + " quest keys were checked (no quests loaded?)");
             }
+            int dialogueKeys = 0;
+            for (jp.revati.skyabyss.npc.Dialogue d : jp.revati.skyabyss.npc.DialogueManager.all().values()) {
+                for (var node : d.nodes().values()) {
+                    List<String> keys = new ArrayList<>();
+                    if (node.textKey() != null) {
+                        keys.add(node.textKey());
+                    }
+                    node.options().forEach(o -> keys.add(o.textKey()));
+                    for (String k : keys) {
+                        dialogueKeys++;
+                        if (k != null && (!jaT.containsKey(k) || !enT.containsKey(k))) {
+                            f.add("dialogue key " + k + " is missing from " + (jaT.containsKey(k) ? "en_us" : enT.containsKey(k) ? "ja_jp" : "both"));
+                        }
+                    }
+                }
+            }
+            if (dialogueKeys < 100) {
+                f.add("only " + dialogueKeys + " dialogue keys were checked (no dialogues loaded?)");
+            }
             // 検査の部品そのものが動くこと
             if (specs("%s と %1$s と %% と %d") != 3) {
                 f.add("the placeholder counter is wrong");
