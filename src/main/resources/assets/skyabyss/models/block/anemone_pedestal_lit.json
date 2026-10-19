@@ -1,0 +1,167 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "t": "skyabyss:block/anemone_pedestal",
+    "b": "skyabyss:block/anemone_bloom",
+    "particle": "skyabyss:block/anemone_bloom"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        2,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t"
+        },
+        "south": {
+          "texture": "#t"
+        },
+        "east": {
+          "texture": "#t"
+        },
+        "west": {
+          "texture": "#t"
+        },
+        "up": {
+          "texture": "#t"
+        },
+        "down": {
+          "texture": "#t"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        5
+      ],
+      "to": [
+        11,
+        10,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t"
+        },
+        "south": {
+          "texture": "#t"
+        },
+        "east": {
+          "texture": "#t"
+        },
+        "west": {
+          "texture": "#t"
+        },
+        "up": {
+          "texture": "#t"
+        },
+        "down": {
+          "texture": "#t"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        10,
+        3
+      ],
+      "to": [
+        13,
+        13,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t"
+        },
+        "south": {
+          "texture": "#t"
+        },
+        "east": {
+          "texture": "#t"
+        },
+        "west": {
+          "texture": "#t"
+        },
+        "up": {
+          "texture": "#t"
+        },
+        "down": {
+          "texture": "#t"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        13,
+        8
+      ],
+      "to": [
+        14,
+        29,
+        8
+      ],
+      "rotation": {
+        "angle": 45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        13,
+        8
+      ],
+      "to": [
+        14,
+        29,
+        8
+      ],
+      "rotation": {
+        "angle": -45,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          8
+        ]
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        }
+      }
+    }
+  ]
+}
