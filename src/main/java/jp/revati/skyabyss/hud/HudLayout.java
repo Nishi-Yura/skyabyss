@@ -270,7 +270,18 @@ public final class HudLayout {
                 continue;
             }
             int top = Math.max(cursor, q.minTop);
-            Rect got = placeCentered(s, r, q, top, false, Math.min(hintsTop - 6, centerTop - 6), false);
+            int limit = Math.min(hintsTop - 6, centerTop - 6);
+            Rect got = null;
+            if (q.id == Id.BANNER) {
+                // 大きな札は、左上・右上の帯 (目的の帯など) の下へ避ける。避けて入らなければ、従来どおり幅を縮めて入れる
+                int pushed = pushBelowColumns(s, r, q, top);
+                if (pushed > top) {
+                    got = placeCentered(s, r, q, pushed, false, limit, false);
+                }
+            }
+            if (got == null) {
+                got = placeCentered(s, r, q, top, false, limit, false);
+            }
             if (got == null) {
                 r.dropped.add(q.id);
             } else {
@@ -293,6 +304,30 @@ public final class HudLayout {
             }
         }
         return r;
+    }
+
+    // 中央に寄せた板が、すでに置いた左上・右上の部品と重なるなら、その下端まで下げた上端を返す
+    private static int pushBelowColumns(Scene s, Result r, Request q, int top) {
+        Size sz = q.fit.fit(Math.max(1, s.w - 16), Math.max(1, s.h));
+        if (sz == null) {
+            return top;
+        }
+        int x = Mth.clamp(s.cx() - sz.w / 2, 2, s.w - 2 - sz.w);
+        for (int i = 0; i < 8; i++) {
+            Rect cand = new Rect(x, top, sz.w, sz.h);
+            Rect hit = null;
+            for (Map.Entry<Id, Rect> e : r.placed.entrySet()) {
+                if (e.getKey().ordinal() >= Id.STATUS_TL.ordinal() && e.getKey().ordinal() <= Id.PARTY_LIST.ordinal() && e.getValue().intersects(cand)) {
+                    hit = e.getValue();
+                    break;
+                }
+            }
+            if (hit == null) {
+                break;
+            }
+            top = hit.bottom() + GAP;
+        }
+        return top;
     }
 
     // ------------------------------------------------------------ バニラ

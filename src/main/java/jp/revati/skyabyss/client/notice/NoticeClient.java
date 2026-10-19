@@ -65,7 +65,15 @@ public final class NoticeClient {
     // 画面に重ねて出さない画面: NPC との会話、場面 (カメラの演出・開幕の目覚め)
     public static boolean busy() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.screen instanceof jp.revati.skyabyss.client.npc.DialogueScreen || jp.revati.skyabyss.client.opening.OpeningClient.awakeActive();
+        // 章の題字・余韻の札が出ている間と、右上の札が四枠ぶん積まれている間も、札・手がかりは溜めて、あとから出す
+        return mc.screen instanceof jp.revati.skyabyss.client.npc.DialogueScreen || jp.revati.skyabyss.client.opening.OpeningClient.awakeActive()
+                || chapterCardShowing() || HudManager.toastHeight() >= 128;
+    }
+
+    // 章の題字か余韻の札が、いま上の帯に出ているか
+    public static boolean chapterCardShowing() {
+        NoticeQueue.Entry<Line> e = BANNER.current();
+        return e != null && BANNER.alpha() > 0.01f && (e.kind == Notice.Kind.CHAPTER || e.kind == Notice.Kind.AFTERMATH);
     }
 
     // 札・経験値・演出・手がかりを出す仕事を関所に預ける (すぐ出せるときはすぐ出る)。優先は NoticeGate.P_*、gapAfter は次を出すまでの間隔

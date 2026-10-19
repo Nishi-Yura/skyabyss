@@ -91,6 +91,11 @@ public final class HudManager {
         return bossBottom > 0 || p.hurtTime > 0 || (p.getLastHurtByMobTimestamp() > 0 && p.tickCount - p.getLastHurtByMobTimestamp() < 200);
     }
 
+    // 右上の札が積まれている下端 (なめらかにした値)
+    public static int toastHeight() {
+        return Math.round(toastEased);
+    }
+
     public static int lastBossBottom() {
         return bossBottom;
     }
