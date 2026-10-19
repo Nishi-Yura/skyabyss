@@ -267,10 +267,30 @@ public final class ObjectiveStrip {
         }
     }
 
+    // 帯の文字化けの調べ用 (試遊の声: 余燼で帯の文が化けた)。帯の文が変わるたびに、生の文と全コードポイントを debug.log へ ([band] raw=...)。
+    // 制御文字・置換文字 (U+FFFD)・§・訳されていないキー・書式の取り残し (%s) を含むときは、latest.log にも WARN で出す。
+    // 取り方: 化けたら logs/debug.log (または latest.log) の最後の「[band]」の行を貼る。その行の cp= が化けた字の正体を示す
+    private static void dumpBand(String text) {
+        StringBuilder cp = new StringBuilder();
+        boolean odd = text.indexOf('�') >= 0 || text.indexOf('§') >= 0 || text.contains("%s") || text.contains("%d")
+                || text.matches(".*[a-z]+\\.[a-z_]+\\.[a-z_.]+.*");
+        text.codePoints().forEach(c -> cp.append(String.format("%04X ", c)));
+        if (text.codePoints().anyMatch(c -> c < 0x20 || (c >= 0x7F && c < 0xA0))) {
+            odd = true;
+        }
+        String msg = "[band] raw='" + text.replace("\n", "\\n") + "' len=" + text.length() + " cp=" + cp.toString().trim();
+        if (odd) {
+            jp.revati.skyabyss.SkyAbyss.LOGGER.warn(msg);
+        } else {
+            jp.revati.skyabyss.SkyAbyss.LOGGER.debug(msg);
+        }
+    }
+
     private static void draw(GuiGraphics g, Minecraft mc, String text, Resolved resolved) {
         Font font = mc.font;
         long now = net.minecraft.Util.getMillis();
         if (!text.equals(lastText)) {
+            dumpBand(text);
             if (!lastText.isEmpty()) {
                 flashUntil = now + 1400;
             }
