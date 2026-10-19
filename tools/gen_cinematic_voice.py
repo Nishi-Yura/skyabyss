@@ -4,7 +4,8 @@
 台詞の本文は日本語の文字数 (かな = 1 拍、漢字 = 約 2 拍、句読点 = 間) が拍の数と間になる。英語も同じクリップを使う。
 
 使い方 (リポジトリ直下で):
-  python tools/gen_cinematic_voice.py --install [--style a|b|c]   # 全台詞の声を assets に書く (既定 a)
+  python tools/gen_cinematic_voice.py --install [--style a|b|c|a2|a3|a4|m1|m2|m3|l1|l2|l3]  # l1〜l3 は架空の言語 (conlang_voice.py)
+  python tools/gen_cinematic_voice.py --review4   # 架空の言語 3 案の見本を docs/review/voice4/ に書く   # 全台詞の声を assets に書く (既定 a)
   (--install は voice_timing.json も書く: 字幕が声に合わせて出る時刻。各文字が出る秒と全体の長さ)
   python tools/gen_cinematic_voice.py --check                      # 全台詞にクリップと音の登録があり、長さが台詞の表示時間に収まるか
   python tools/gen_cinematic_voice.py --review2                    # 自然さを磨いた A2/A3/A4 と A の見本を docs/review/voice2/ に書く
