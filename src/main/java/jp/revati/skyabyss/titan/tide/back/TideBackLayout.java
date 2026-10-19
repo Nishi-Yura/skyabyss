@@ -41,7 +41,8 @@ public final class TideBackLayout {
     // 14: 歩く道の灯り (route_lamps)
     // 20: 背の拡大 (水平 x1.6・垂直 x1.3。広間・庭・潮見の間・干潟・息の間を作り直し、ひれの道・貝の間・冠を足した。26 の 9 章)。
     //    他の背の版の最大 (岩鯨 19) の次
-    public static final int LAYOUT_VERSION = 20;
+    // 21: 試練の階 (TideDeck。潮の広間の南の段の戸口から通路・試練の広間・潮の背渡り T02・満ち潮の円環 T10・貝の合唱 T06・二つの海 T07・試練の板。docs/design/29 の 3.2)
+    public static final int LAYOUT_VERSION = 21;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;
@@ -281,7 +282,7 @@ public final class TideBackLayout {
     public record Rest(String id, Area area, BlockPos campfire, BlockPos spawn) {
     }
 
-    public static final List<Rest> RESTS = List.of(
+    public static final List<Rest> RESTS = concat(List.of(
             new Rest("hub", HUB, new BlockPos(-7, HUB_LEDGE + 1, 23), new BlockPos(-5, HUB_LEDGE + 1, 21)),
             new Rest("g0", G0, new BlockPos(-37, PLATFORM_TOP + 1, 4), new BlockPos(-35, PLATFORM_TOP + 1, 0)),
             new Rest("g1", G1, new BlockPos(PLAT_C[0] - 2, PLATFORM_TOP + 1, PLAT_C[1] + 2), new BlockPos(PLAT_C[0] + 2, PLATFORM_TOP + 1, PLAT_C[1] - 2)),
@@ -293,7 +294,15 @@ public final class TideBackLayout {
             new Rest("u0", new Area(-16, -6, -13, 4, 113, 8), new BlockPos(-13, 114, -6), new BlockPos(-12, 114, -9)),
             new Rest("u1", new Area(5, 16, -26, -12, 130, 8), new BlockPos(11, 131, -20), new BlockPos(9, 131, -17)),
             new Rest("u2", new Area(-10, 10, 10, 19, 146, 8), new BlockPos(-4, 147, 16), new BlockPos(3, 147, 16)),
-            new Rest("u3", new Area(-9, -2, -15, -4, 206, 3), new BlockPos(-6, 207, -10), new BlockPos(-5, 207, -9)));
+            new Rest("u3", new Area(-9, -2, -15, -4, 206, 3), new BlockPos(-6, 207, -10), new BlockPos(-5, 207, -9))),
+            // 試練の階 (TideDeck。番号は 10 から。上の 10 個の並びは変えない: RESTS.get(n) で引く所がある)
+            TideDeck.rests());
+
+    private static List<Rest> concat(List<Rest> a, List<Rest> b) {
+        List<Rest> out = new ArrayList<>(a);
+        out.addAll(b);
+        return List.copyOf(out);
+    }
 
     // ---------------------------------------------------------------- 碑文 (05 の型。4 行の光る看板)
     public record Inscription(String key, BlockPos pos, Direction facing) {

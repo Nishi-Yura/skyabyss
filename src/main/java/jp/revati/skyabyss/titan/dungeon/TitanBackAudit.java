@@ -72,7 +72,112 @@ public final class TitanBackAudit {
         s.goals.put("fin right cache", WingsBuilder.cachePos(1).north());
         s.goals.put("tail vista", new BlockPos(0, WingsBuilder.TAIL_Y + 1, WingsBuilder.TAIL_CZ - 4));
         s.goals.put("back camp", new BlockPos(0, WingsBuilder.CAMP_Y + 1, WingsBuilder.CAMP_Z - 3));
+        if (WhaleDeck.placed()) {
+            deckAllowances(s);
+        }
         return s;
+    }
+
+    // 試練の階の南の拡張 (最南の広間 S1 と四つのセル。docs/design/29 の P2) を、配置 3 通りで調べる。足場の戸 (島・岩棚・崩れる床・橋) は閉じた足場として歩く。
+    // 噴気孔の吹き上げは「台から次の岩棚へ」の道として足す。穴 (落ちたら最後の島・控えへ戻る) は出口の箱。石の戻りの床は出口。
+    // 試練の階の南の拡張の「わざとの穴」: 滑り坂の島の列と闘技場の穴 (底は水。落ちたら最後の島・控えへ戻される)・縦の穴の底 (落ちても吹き上げで昇れる。
+    // 吹き上げの道は deck の調べで足す)。四つの背全体の調べ (spec) でも、deck の調べ (runDeck) でも同じに許す
+    static void deckAllowances(BackReach.Spec s) {
+        // 穴: 滑り坂の島の列 (水の底)・闘技場の穴。落ちたら控え・最後の島へ戻される
+        for (int g = 0; g < jp.revati.skyabyss.trial.whale.W03Moss.GAP_Z.length; g++) {
+            int z = jp.revati.skyabyss.trial.whale.W03Moss.GAP_Z[g];
+            int top = jp.revati.skyabyss.trial.whale.W03Moss.GAP_Y[g];
+            Box pit = new Box(WhaleDeck.W03_X1, top - 7, z, WhaleDeck.W03_X2, top - 1, z + 1);
+            s.resets.add(pit);
+            s.allowHole.add(new Box(WhaleDeck.W03_X1, top - 7, z - 1, WhaleDeck.W03_X2, top, z + 2));
+        }
+        // 穴の底 (水) に入ったら、戻される立ち位置 (出口)
+        final int[] pitTops = jp.revati.skyabyss.trial.whale.W03Moss.GAP_Y;
+        s.exitNode = p -> {
+            for (int g = 0; g < pitTops.length; g++) {
+                int z = jp.revati.skyabyss.trial.whale.W03Moss.GAP_Z[g];
+                if (p.getZ() >= z && p.getZ() <= z + 1 && p.getY() <= pitTops[g] - 1 && p.getY() >= pitTops[g] - 7 && p.getX() >= WhaleDeck.W03_X1 && p.getX() <= WhaleDeck.W03_X2) {
+                    return true;
+                }
+            }
+            return Math.hypot(p.getX() - WhaleDeck.W12_CX, p.getZ() - WhaleDeck.W12_CZ) <= 12.5 && p.getY() <= WhaleDeck.Y - 1 && p.getY() >= WhaleDeck.Y - 8;
+        };
+        Box hall = new Box(WhaleDeck.W12_CX - 12, WhaleDeck.Y - 8, WhaleDeck.W12_CZ - 12, WhaleDeck.W12_CX + 12, WhaleDeck.Y - 1, WhaleDeck.W12_CZ + 12);
+        s.resets.add(hall);
+        s.allowHole.add(new Box(hall.x1(), hall.y1(), hall.z1(), hall.x2(), WhaleDeck.Y, hall.z2()));
+        // 縦の穴の底: 岩棚から落ちて着く所。吹き上げの道 (extra) で上へ戻れる
+        Box shaft = new Box(WhaleDeck.W04.x1(), WhaleDeck.W04.floorY(), WhaleDeck.W04.z1(), WhaleDeck.W04.x2(), WhaleDeck.W04.ceilingY(), WhaleDeck.W04.z2());
+        s.allowHole.add(shaft);
+        s.allowTrap.add(shaft);
+    }
+
+    public static BackReach.Report runDeck(ServerLevel level) {
+        BackReach.Report all = new BackReach.Report();
+        if (!WhaleDeck.placed()) {
+            return all;
+        }
+        jp.revati.skyabyss.trial.whale.W12Arena arena = new jp.revati.skyabyss.trial.whale.W12Arena();
+        for (int layout = 0; layout < 3; layout++) {
+            BackReach.Spec s = new BackReach.Spec("whale deck south " + layout, new Box(-62, 96, 66, 62, 140, 180));
+            s.entrances.add(WhaleDeck.S0.center());
+            s.exits.add(WhaleDeck.S0.center());
+            for (BlockPos pad : new BlockPos[] {WhaleDeck.W03_PAD, WhaleDeck.W04_PAD, WhaleDeck.W11_PAD, WhaleDeck.W12_PAD}) {
+                s.exits.add(pad.above());
+            }
+            // 足場の戸
+            java.util.Set<BlockPos> solid = new java.util.HashSet<>(jp.revati.skyabyss.trial.whale.W03Moss.active(layout));
+            solid.addAll(jp.revati.skyabyss.trial.whale.W04Vents.ledge(1, jp.revati.skyabyss.trial.whale.W04Vents.LAYOUT[layout][0]));
+            solid.addAll(jp.revati.skyabyss.trial.whale.W04Vents.ledge(2, jp.revati.skyabyss.trial.whale.W04Vents.LAYOUT[layout][1]));
+            solid.addAll(arena.discCells());
+            solid.addAll(jp.revati.skyabyss.trial.whale.W12Arena.BRIDGE_IN);
+            solid.addAll(jp.revati.skyabyss.trial.whale.W12Arena.BRIDGE_OUT);
+            s.solidGate = solid::contains;
+            deckAllowances(s);
+            // 穴・はしごを調べる範囲 (広間・通路・控え・石の部屋)
+            for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {WhaleDeck.C2, WhaleDeck.S1, WhaleDeck.W11, WhaleDeck.W11_STONE_ROOM, WhaleDeck.W04_STONE_ROOM,
+                    WhaleDeck.W12_FOYER_N, WhaleDeck.W12_FOYER_S}) {
+                s.scan.add(new Box(b.x1() - 1, b.floorY() - 2, b.z1() - 1, b.x2() + 1, b.ceilingY(), b.z2() + 1));
+            }
+            for (int[] seg : WhaleDeck.W03_SEGS) {
+                if (seg[1] - seg[0] > 1) {
+                    s.scan.add(new Box(WhaleDeck.W03_X1 - 1, seg[2] - 2, seg[0] - 1, WhaleDeck.W03_X2 + 1, seg[2] + 10, seg[1] + 1));
+                }
+            }
+            for (jp.revati.skyabyss.trial.TrialCell.Rest r : WhaleDeck.rests()) {
+                if (r.spawn().getZ() >= 66) {
+                    s.goals.put("deck rest " + r.id(), r.spawn());
+                }
+            }
+            s.goals.put("W03 stone", WhaleDeck.W03_STONE.east());
+            s.goals.put("W04 stone", WhaleDeck.W04_STONE.east());
+            s.goals.put("W11 stone", WhaleDeck.W11_STONE.east());
+            s.goals.put("W12 stone", WhaleDeck.W12_STONE.east());
+            s.goals.put("W04 exit ledge", new BlockPos(WhaleDeck.W04.x1() + 10, WhaleDeck.Y + 1, 149));
+            s.goals.put("W12 foyer south", WhaleDeck.W12_FOYER_S.center());
+            final int lay = layout;
+            s.extra = (probe, out) -> {
+                BlockPos p = probe.pos();
+                for (int i = 0; i < 3; i++) {
+                    jp.revati.skyabyss.trial.whale.W04Vents.Vent v = jp.revati.skyabyss.trial.whale.W04Vents.vent(lay, i);
+                    if (Math.abs(p.getX() - v.cx()) <= 1 && Math.abs(p.getZ() - v.cz()) <= 1 && p.getY() == v.padY() + 1) {
+                        int[] to = jp.revati.skyabyss.trial.whale.W04Vents.landing(lay, i);
+                        out.add(new BlockPos(to[0], to[1], to[2]));
+                    }
+                }
+            };
+            BackReach.Report r = BackReach.run(level, s);
+            for (String f : r.failures) {
+                all.failures.add("[layout " + layout + "] " + f);
+            }
+            all.notes.addAll(r.notes);
+            if (r.reached != null) {
+                if (all.reached == null) {
+                    all.reached = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
+                }
+                all.reached.addAll(r.reached);
+            }
+        }
+        return all;
     }
 
     public static BackReach.Report run(ServerLevel level) {
@@ -91,6 +196,13 @@ public final class TitanBackAudit {
             s.goals.put("lamp stand " + (i + 1), stands.get(i).above());
         }
         BackReach.Report rep = BackReach.run(level, s);
+        BackReach.Report deck = runDeck(level);
+        rep.failures.addAll(deck.failures);
+        rep.notes.addAll(deck.notes);
+        if (rep.reached != null && deck.reached != null) {
+            // 試練の階の南の拡張の歩ける所も、暗さの検査に入れる (閉じた足場として歩いた所。三つの配置の和)
+            rep.reached.addAll(deck.reached);
+        }
         if (!rep.failures.isEmpty()) {
             List<List<int[]>> courses = ParkourCourses.current(level);
             for (int c = 0; c < courses.size(); c++) {

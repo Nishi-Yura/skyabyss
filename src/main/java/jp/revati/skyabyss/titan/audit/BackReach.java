@@ -80,6 +80,9 @@ public final class BackReach {
         public Predicate<BlockPos> exitNode = p -> false;
         // 何マス落ちても平気な所 (滑空・水など。位置で判断)
         public Predicate<BlockPos> glide = p -> false;
+        // 戸 (封印の扉) のブロックのうち、床や足場として「閉じている」ものとして歩く所 (試練の階の島・岩棚・崩れる床など。グループごとに残る足場)。
+        // それ以外の戸は、開いているものとして通れる
+        public Predicate<BlockPos> solidGate = p -> false;
         // 歩く・跳ぶ・登る以外の道 (昇り風・泡の柱など)。立つ位置 p から行ける立つ位置を out に足す
         public BiConsumer<Probe, Extra> extra = (probe, out) -> {
         };
@@ -233,6 +236,11 @@ public final class BackReach {
             boolean water = f.is(FluidTags.WATER);
             boolean climb = s.is(BlockTags.CLIMBABLE);
             boolean gate = s.is(ModBlocks.SEALED_GATE.get());
+            if (gate && spec.solidGate.test(p)) {
+                // 閉じた足場の戸: 丸ごとのブロックとして立てる
+                gate = false;
+                s = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+            }
             boolean empty;
             double top = 0;
             if (gate) {

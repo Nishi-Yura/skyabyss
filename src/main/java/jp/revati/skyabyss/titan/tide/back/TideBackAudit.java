@@ -53,6 +53,19 @@ public final class TideBackAudit {
             s.goals.put("fin room " + r.id(), r.center());
         }
         s.extra = TideBackAudit::breathEdges;
+        if (TideDeck.placed()) {
+            // 試練の階 (TideDeck): 足場の戸 (砂州・浮き石・円環の床・橋。y = 床のブロック) は、三つの配置すべてを閉じた足場として歩く
+            // (配置ごとの道は、セルの audit が調べる)。戸口の戸 (y が床より上) は開いているものとして通る
+            s.solidGate = p -> p.getY() == TideDeck.F && p.getX() >= 0 && p.getX() <= 100 && p.getZ() >= 45 && p.getZ() <= 95;
+            s.goals.put("deck hall", new BlockPos(40, TideDeck.F + 1, 42));
+            s.goals.put("deck T02 islet", new BlockPos(12, TideDeck.F + 1, 70));
+            s.goals.put("deck T02 far shore", new BlockPos(12, TideDeck.F + 1, 90));
+            s.goals.put("deck T02 stone", TideDeck.T02_STONE.east());
+            s.goals.put("deck T10 foyer south", new BlockPos(40, TideDeck.F + 1, 84));
+            s.goals.put("deck T10 stone", TideDeck.T10_STONE.east());
+            s.goals.put("deck T06 stone", TideDeck.T06_STONE.east());
+            s.goals.put("deck T07 stone", TideDeck.T07_STONE.east());
+        }
         return s;
     }
 

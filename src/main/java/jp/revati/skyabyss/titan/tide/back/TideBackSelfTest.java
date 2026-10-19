@@ -211,6 +211,9 @@ public final class TideBackSelfTest {
         java.util.Set<BlockPos> expected = new java.util.HashSet<>();
         LORE_SIGNS.forEach(i -> expected.add(i.pos()));
         TideIslandBuilder.ENTRANCE_SIGNS.forEach(i -> expected.add(i.pos()));
+        if (TideDeck.placed()) {
+            TideDeck.SIGNS.forEach(i -> expected.add(i.pos()));
+        }
         TideCaches.CACHES.forEach(c -> expected.add(c.tablet()));
         TideCaches.TABLETS.forEach(t -> expected.add(t.pos()));
         java.util.Set<String> keys = new java.util.TreeSet<>();
@@ -710,6 +713,13 @@ public final class TideBackSelfTest {
         TideRooms.claim(back, TideRooms.FLATS, TEST);
         // 干潟の門を (既定で) 開ける (干潮で水盤が空)
         jp.revati.skyabyss.titan.group.GroupGates.setDefault(back, TideGates.flats(), true);
+        // 試練の階の戸 (引いた三つだけがグループに開く) は、全部開けて歩く
+        for (jp.revati.skyabyss.trial.TrialCell cell : jp.revati.skyabyss.trial.TrialCells.of(jp.revati.skyabyss.progress.Titans.TIDE_SHELL)) {
+            if (cell.runtime()) {
+                jp.revati.skyabyss.titan.group.GroupGates.open(back, TEST, cell.ports().entrance());
+                jp.revati.skyabyss.titan.group.GroupGates.open(back, TEST, cell.ports().exitGate());
+            }
+        }
         walkGroup = TEST;
         Map<Long, Integer> dist = walk(back, ARRIVAL);
         Map<String, BlockPos> should = new java.util.LinkedHashMap<>();

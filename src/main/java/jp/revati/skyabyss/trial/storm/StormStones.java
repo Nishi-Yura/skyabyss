@@ -70,45 +70,4 @@ public final class StormStones {
         TrialCell cell = TrialCells.get(d.id());
         return cell != null && cell.runtime() ? cell.ports().area().inflate(1, 2, 1) : null;
     }
-
-    // 新作の石を触った (TrialRuntime.useStone から。セルが済んでいることは確かめてある)
-    public static InteractionResult use(ServerLevel back, ServerPlayer sp, TrialCell cell, TrialDraw.Draw draw, boolean drawn, TrialCell.Run run) {
-        UUID group = Groups.keyOf(sp);
-        BackGroupData.Record r = GroupProgress.of(back, group);
-        String flag = TrialRuntime.stoneFlag(cell, draw);
-        Def def = cell.def();
-        String key = keyOf(draw, def);
-        if (r.flag(flag)) {
-            if (drawn) {
-                TrialSteles.tellWho(sp, TrialSteles.STORM, key);
-            } else {
-                Notice.bar(sp, ModText.hint("message.skyabyss.trial.weekly_stone_rung"));
-            }
-            return InteractionResult.SUCCESS;
-        }
-        if (back.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
-            return InteractionResult.SUCCESS;
-        }
-        r.setFlag(flag, true);
-        GroupOverlays.refresh(back, group);
-        Mods mods = run.mods;
-        boolean goalDone = mods.goal() >= 0 && run.goalOk;
-        BlockPos pos = cell.ports().stone();
-        if (drawn) {
-            StormBackState.Trial trial = StormBackState.Trial.valueOf(key.toUpperCase(java.util.Locale.ROOT));
-            StormProgress p = StormProgress.of(back, group);
-            // 風鳴り石が鳴る (音・経験値・広間の碑・仲間の戻り)。原型の数えは止める (この試練は下で数える)
-            TrialRuntime.withoutLegacy(() -> StormBackTrials.ring(back, p, trial, sp));
-        } else if (pos != null) {
-            // 今週の試練 (引いていない): 石の音と光だけ
-            Groups.sound(back, group, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, ModSounds.RESONANCE.get(), SoundSource.BLOCKS, 2.5f, 0.7f);
-            for (ServerPlayer member : Groups.online(back, group)) {
-                if (member.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < 64 * 64) {
-                    back.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
-                }
-            }
-        }
-        TrialRuntime.onCellCleared(back, group, def, mods, goalDone, sp);
-        return InteractionResult.SUCCESS;
-    }
 }
