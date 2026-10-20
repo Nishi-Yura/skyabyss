@@ -322,7 +322,8 @@ final class TrialCellLogic {
                 cell.tick(back, run, inside, now);
                 check(fail, run.getInt("phase") == 3, tag + "the fight did not start once everyone was on the floor");
                 boolean stage0Gone = GroupGates.isOpen(back, group, arena.cellsOfStage(layout, 0).get(0));
-                check(fail, stage0Gone == small, tag + "stage 0 floor should be " + (small ? "gone from the start" : "intact") + " (open=" + stage0Gone + ")");
+                // 広さ B (26 の 8.7): 円は一人・二人でも全面。外の輪を先に崩す作りはやめた
+                check(fail, !stage0Gone, tag + "stage 0 floor should be intact (open=" + stage0Gone + ")");
                 // 波 1
                 now += 60;
                 cell.tick(back, run, inside, now);

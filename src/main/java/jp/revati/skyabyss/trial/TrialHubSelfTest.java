@@ -253,9 +253,11 @@ public final class TrialHubSelfTest {
             check(f, d.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, "the trial hall pad did not take the player to the hub: " + d.position());
             d.setPos(0, 0, 0);
             // ---- 版 22: 新作のセルは、終えると (run.cleared) 石を押さなくても鳴り、中にいる仲間が鼓動の間へ戻される準備が整う
-            jp.revati.skyabyss.titan.group.BackGroupData.Record rd = jp.revati.skyabyss.titan.group.GroupProgress.of(back, keyD);
+            FakePlayer e = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000e005"), "trialhub_e"));
+            UUID keyE = Groups.keyOf(e);
+            jp.revati.skyabyss.titan.group.BackGroupData.Record rd = jp.revati.skyabyss.titan.group.GroupProgress.of(back, keyE);
             rd.putInt(TrialData.DONE, 1);
-            TrialDraw.Draw dd = TrialData.current(back, keyD);
+            TrialDraw.Draw dd = TrialData.current(back, keyE);
             TrialDraw.Pick np = null;
             for (TrialDraw.Pick pk : dd.picks()) {
                 if (!pk.def().original()) {
@@ -268,19 +270,19 @@ public final class TrialHubSelfTest {
             } else {
                 TrialCell cell = TrialCells.get(np.cellId());
                 String cellKey = TrialRegions.keyOfDef(titan, cell.def(), dd);
-                TrialCell.Run run = TrialRuntime.armed(back, keyD, cell, dd, back.getGameTime());
+                TrialCell.Run run = TrialRuntime.armed(back, keyE, cell, dd, back.getGameTime());
                 run.cleared = true;
-                d.setPos(Vec3.atBottomCenterOf(cell.ports().stone()));
+                e.setPos(Vec3.atBottomCenterOf(cell.ports().stone()));
                 long now = back.getGameTime();
-                TrialRuntime.autoRing(back, keyD, cell, run, dd, List.of(d), now);
-                check(f, !HubTablets.cleared(back, keyD, titan, cellKey), np.cellId() + ": the stone rang the moment the cell was cleared (no delay)");
-                TrialRuntime.autoRing(back, keyD, cell, run, dd, List.of(d), now + TrialRuntime.AUTO_RING_DELAY + 1);
-                check(f, HubTablets.cleared(back, keyD, titan, cellKey), np.cellId() + ": a cleared cell did not ring its own stone");
-                check(f, TrialHub.pending(keyD, titan, cellKey), np.cellId() + ": the auto ring did not queue the return to the hub");
-                TrialRuntime.stopGroup(back, keyD);
-                d.setPos(0, 0, 0);
+                TrialRuntime.autoRing(back, keyE, cell, run, dd, List.of(e), now);
+                check(f, !HubTablets.cleared(back, keyE, titan, cellKey), np.cellId() + ": the stone rang the moment the cell was cleared (no delay)");
+                TrialRuntime.autoRing(back, keyE, cell, run, dd, List.of(e), now + TrialRuntime.AUTO_RING_DELAY + 1);
+                check(f, HubTablets.cleared(back, keyE, titan, cellKey), np.cellId() + ": a cleared cell did not ring its own stone");
+                check(f, TrialHub.pending(keyE, titan, cellKey), np.cellId() + ": the auto ring did not queue the return to the hub");
+                TrialRuntime.stopGroup(back, keyE);
+                e.setPos(0, 0, 0);
                 TrialHub.clearAll();
-                GroupGates.reset(back, keyD);
+                GroupGates.reset(back, keyE);
             }
         }
         // 後始末

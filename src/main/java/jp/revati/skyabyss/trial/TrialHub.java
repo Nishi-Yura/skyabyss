@@ -263,6 +263,11 @@ public final class TrialHub {
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 14, 0.3, 0.6, 0.3, 0.03);
             if (hubPad) {
                 jp.revati.skyabyss.titan.dungeon.TitanBackTrials.returnToCheckpoint(p, jp.revati.skyabyss.titan.dungeon.WhaleDeck.REST_D0);
+                if (p instanceof net.neoforged.neoforge.common.util.FakePlayer) {
+                    // 試験の偽の人は通信がないので、位置だけ直接動かす
+                    BlockPos d0 = jp.revati.skyabyss.titan.dungeon.TitanBackTrials.checkpointSpawns().get(jp.revati.skyabyss.titan.dungeon.WhaleDeck.REST_D0);
+                    p.setPos(d0.getX() + 0.5, d0.getY(), d0.getZ() + 0.5);
+                }
             } else {
                 sendToHub(level, p, titan, false, null);
             }
