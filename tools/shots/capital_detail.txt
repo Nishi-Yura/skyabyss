@@ -16,23 +16,11 @@ cmd gamerule doDaylightCycle false
 cmd gamemode spectator
 cmd skyabyss dev opening build
 hud off
-cmd skyabyss dev opening at shelter 0 -6 22 -40 150 4
+cmd skyabyss dev opening at shelter 0 -49 6 -76 180 -14
 waitchunks
 wait 20
-shot d_bell_far
-cmd skyabyss dev opening at shelter 0 -17 6 -59 180 -8
+shot d_hall
+cmd skyabyss dev opening at shelter 0 -66 14 -70 135 0
 waitchunks
 wait 20
-shot d_story_front
-cmd skyabyss dev opening at shelter 0 -6 8 -66 135 -5
-waitchunks
-wait 20
-shot d_story_side
-cmd skyabyss dev opening at shelter 0 -15 5 -74 160 10
-waitchunks
-wait 20
-shot d_story_inside
-cmd skyabyss dev opening at shelter 0 -19 10 -76 200 20
-waitchunks
-wait 20
-shot d_story_up
+shot d_hall_side
