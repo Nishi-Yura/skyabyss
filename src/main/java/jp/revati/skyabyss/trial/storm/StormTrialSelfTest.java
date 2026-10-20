@@ -25,6 +25,7 @@ import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.storm.back.StormBackSetup;
 import jp.revati.skyabyss.titan.storm.back.StormBackState;
 import jp.revati.skyabyss.titan.storm.back.StormDeck;
+import jp.revati.skyabyss.titan.storm.back.StormDeck2;
 import jp.revati.skyabyss.titan.storm.back.StormDeck.Island;
 import jp.revati.skyabyss.titan.storm.back.StormProgress;
 import jp.revati.skyabyss.titan.storm.back.StormRods;
@@ -65,6 +66,8 @@ public final class StormTrialSelfTest {
     private StormTrialSelfTest() {
     }
 
+    // 新作 (P2 の四つと P3 の五つ)
+    static final List<String> NEW = List.of("S02", "S03", "S09", "S10", "S04", "S07", "S08", "S11", "S12");
     private static final List<String> FAIL = new ArrayList<>();
     private static final List<String> NOTES = new ArrayList<>();
 
@@ -100,7 +103,7 @@ public final class StormTrialSelfTest {
     // 試練の甲板のあたりの区画を読み込んだままにする (敵が動く・ブロックを読む)
     private static void forceChunks(ServerLevel back, boolean on) {
         for (int cx = -170 >> 4; cx <= 170 >> 4; cx++) {
-            for (int cz = 20 >> 4; cz <= 140 >> 4; cz++) {
+            for (int cz = 20 >> 4; cz <= 230 >> 4; cz++) {
                 back.setChunkForced(cx, cz, on);
             }
         }
@@ -143,13 +146,18 @@ public final class StormTrialSelfTest {
         StormDeck.setPlaced(true);
         check(TrialCatalog.poolActive(storm), "the storm pool is not active with the deck placed");
         check(TrialCatalog.originals(storm).stream().map(Def::id).toList().equals(List.of("S01", "S05", "S06")), "storm originals are not S01 S05 S06");
-        for (String id : List.of("S02", "S03", "S09", "S10")) {
+        for (String id : NEW) {
             TrialCell c = TrialCells.get(id);
             check(c != null && c.runtime(), id + " has no running cell");
             check(!TrialCatalog.get(id).original() && TrialCatalog.get(id).titan().equals(storm), id + " is not a new storm trial");
         }
-        check(TrialCatalog.inSlot(storm, Slot.WALK).size() == 3 && TrialCatalog.inSlot(storm, Slot.WIT).size() == 2 && TrialCatalog.inSlot(storm, Slot.FIGHT).size() == 2,
-                "the storm slots are not 3 / 2 / 2");
+        check(TrialCatalog.inSlot(storm, Slot.WALK).size() == 4 && TrialCatalog.inSlot(storm, Slot.WIT).size() == 4 && TrialCatalog.inSlot(storm, Slot.FIGHT).size() == 4,
+                "the storm slots are not 4 / 4 / 4");
+        int[] tiers = new int[4];
+        for (Def d : TrialCatalog.of(storm)) {
+            tiers[d.tier()]++;
+        }
+        check(tiers[1] == 4 && tiers[2] == 5 && tiers[3] == 3, "the storm tiers are not 4 / 5 / 3: " + java.util.Arrays.toString(tiers));
         UUID g = new UUID(3, 4);
         TrialDraw.Draw d1 = TrialDraw.draw(storm, 1, 4242L, g, new TrialDraw.Memory());
         check(d1.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("S01", "S05", "S06")), "storm cycle 1 is not the originals");
@@ -171,14 +179,14 @@ public final class StormTrialSelfTest {
                 check(dr.inSlot(Slot.WALK) != null && dr.inSlot(Slot.WIT) != null && dr.inSlot(Slot.FIGHT) != null, "a slot is missing in " + dr.encode());
             }
         }
-        check(seenIds.containsAll(List.of("S02", "S03", "S09", "S10")), "not every new storm trial was drawn in 60 groups x 9 cycles: " + seenIds);
+        check(seenIds.containsAll(NEW), "not every new storm trial was drawn in 60 groups x 9 cycles: " + seenIds);
         // 置かないあいだは雷翼も原型のまま
         StormDeck.setPlaced(false);
         TrialDraw.Draw off = TrialDraw.draw(storm, 5, 4242L, g, new TrialDraw.Memory());
         check(off.picks().stream().map(TrialDraw.Pick::cellId).toList().equals(List.of("S01", "S05", "S06")), "the storm pool drew with the deck not placed");
         StormDeck.setPlaced(true);
         // 修飾の口の名前 (lang の鍵が引ける数だけ)
-        for (String id : List.of("S02", "S03", "S09", "S10")) {
+        for (String id : NEW) {
             Space sp = TrialCatalog.get(id).space();
             check(sp.layouts() == 3 && sp.numbers().size() == 2 && sp.hazards().size() == 2 && sp.goals().size() == 1, id + " does not have 3 layouts, 2 numbers, 2 hazards, 1 goal");
         }
@@ -223,6 +231,27 @@ public final class StormTrialSelfTest {
         for (int i = 0; i < StormDeck.S10_PLATFORMS.length; i++) {
             add(boxes, names, "s10 " + i, islandBox(StormDeck.S10_PLATFORMS[i]));
         }
+        // 第二の渡り場 (StormDeck2)
+        add(boxes, names, "bridge2", new AABB(StormDeck2.BRIDGE_X1 - 1, Y, StormDeck2.BRIDGE_Z1, StormDeck2.BRIDGE_X2 + 2, Y + 1, StormDeck2.BRIDGE_Z2 + 1));
+        add(boxes, names, "yard2", new AABB(-25, Y, 131, 26, Y + 1, 152));
+        add(boxes, names, "s04 start", islandBox(StormDeck2.S04_START));
+        add(boxes, names, "s04 mid", islandBox(StormDeck2.S04_MID));
+        add(boxes, names, "s04 end", islandBox(StormDeck2.S04_END));
+        add(boxes, names, "s04 bridge a", new AABB(StormDeck2.S04_A_X1, Y, StormDeck2.S04_BRIDGE_Z1, StormDeck2.S04_A_X2 + 1, Y + 1, StormDeck2.S04_BRIDGE_Z2 + 1));
+        add(boxes, names, "s04 bridge b", new AABB(StormDeck2.S04_B_X1, Y, StormDeck2.S04_BRIDGE_Z1, StormDeck2.S04_B_X2 + 1, Y + 1, StormDeck2.S04_BRIDGE_Z2 + 1));
+        add(boxes, names, "s08 hall", islandBox(StormDeck2.S08_HALL));
+        add(boxes, names, "s07 hall", new AABB(StormDeck2.S07_X1 - 1, Y, StormDeck2.S07_Z1 - 1, StormDeck2.S07_X2 + 2, Y + 1, StormDeck2.S07_Z2 + 2));
+        add(boxes, names, "s12 foyer", islandBox(StormDeck2.S12_FOYER));
+        add(boxes, names, "s12 arena", new AABB(StormDeck2.S12_ARENA.cx() - 14, Y, StormDeck2.S12_ARENA.cz() - 14, StormDeck2.S12_ARENA.cx() + 15, Y + 1, StormDeck2.S12_ARENA.cz() + 15));
+        add(boxes, names, "s12 exit", islandBox(StormDeck2.S12_EXIT));
+        add(boxes, names, "s11 deck", islandBox(StormDeck2.S11_DECK));
+        add(boxes, names, "s04 approach", new AABB(-32, Y, 138, -25, Y + 1, 145));
+        add(boxes, names, "s08 approach", new AABB(25, Y, 138, 32, Y + 1, 145));
+        add(boxes, names, "s07 approach", new AABB(-25, Y, 152, -19, Y + 1, 159));
+        add(boxes, names, "s12 approach", new AABB(-3, Y, 152, 4, Y + 1, 159));
+        add(boxes, names, "s11 approach", new AABB(17, Y, 152, 24, Y + 1, 158));
+        add(boxes, names, "s12 bridge", new AABB(-3, Y, 169, 4, Y + 1, 176));
+        add(boxes, names, "s12 exit bridge", new AABB(-3, Y, 201, 4, Y + 1, 207));
         // 戸の道 (途中の道は島の間に入る)
         add(boxes, names, "s02 approach", new AABB(-32, Y, 70, -25, Y + 1, 77));
         add(boxes, names, "s03 approach", new AABB(26, Y, 70, 33, Y + 1, 77));
@@ -253,13 +282,14 @@ public final class StormTrialSelfTest {
             }
         }
         // 四つの戸は互いに離れて、渡り場の縁にある
-        List<List<BlockPos>> gates = List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE);
+        List<List<BlockPos>> gates = List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE, StormDeck2.S04_GATE, StormDeck2.S08_GATE,
+                StormDeck2.S07_GATE, StormDeck2.S12_GATE, StormDeck2.S11_GATE);
         Set<BlockPos> all = new HashSet<>();
         for (List<BlockPos> gt : gates) {
             check(gt.size() == 25, "a deck gate is not 5x5");
             all.addAll(gt);
         }
-        check(all.size() == 100, "the four deck gates overlap");
+        check(all.size() == 225, "the nine deck gates overlap");
         // 滑空の余裕・跳ぶ距離 (凪の昇り風で 0.7 以下)
         double worst = 0;
         for (StormDeck.Hop h : StormDeck.hops()) {
@@ -279,7 +309,8 @@ public final class StormTrialSelfTest {
 
     private static boolean adjacentOk(String a, String b) {
         // 橋・戸の道は島や渡り場に接する (縁を一マス共有する) ので、箱の端が重なって見える組を許す
-        return a.contains("approach") || b.contains("approach") || a.contains("bridge") || b.contains("bridge") || a.equals("yard") || b.equals("yard");
+        return a.contains("approach") || b.contains("approach") || a.contains("bridge") || b.contains("bridge") || a.equals("yard") || b.equals("yard") || a.equals("yard2")
+                || b.equals("yard2");
     }
 
     private static void add(List<AABB> boxes, List<String> names, String n, AABB b) {
@@ -302,7 +333,7 @@ public final class StormTrialSelfTest {
 
     // ---------------------------------------------------------------- 世界
     private static void world(ServerLevel back) {
-        for (String id : List.of("S02", "S03", "S09", "S10")) {
+        for (String id : NEW) {
             TrialCell c = TrialCells.get(id);
             List<String> bad = c.audit(back);
             check(bad.isEmpty(), id + " audit: " + bad);
@@ -323,7 +354,8 @@ public final class StormTrialSelfTest {
         check(back.getBlockState(StormDeck.BOARD_YARD).is(ModBlocks.TRIAL_BOARD.get()), "the yard board is missing");
         // 戸: 置いて、通路をふさぐこと
         TrialRuntime.installGates(back);
-        for (List<BlockPos> g : List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE, StormDeck.S09_EXIT_GATE)) {
+        for (List<BlockPos> g : List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE, StormDeck.S09_EXIT_GATE, StormDeck2.S04_GATE, StormDeck2.S08_GATE,
+                StormDeck2.S07_GATE, StormDeck2.S12_GATE, StormDeck2.S11_GATE, StormDeck2.S12_EXIT_GATE)) {
             for (BlockPos p : g) {
                 check(back.getBlockState(p).is(ModBlocks.SEALED_GATE.get()), "deck gate block missing at " + p);
                 break;
@@ -334,7 +366,8 @@ public final class StormTrialSelfTest {
             check(gateClosesPassage(back, g), "the original-route gate at " + g.get(0) + " leaves a gap in its passage");
         }
         // 四つの戸の道は、戸のところで 5 幅の床が続き、戸の外は空・手すり
-        for (List<BlockPos> g : List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE)) {
+        for (List<BlockPos> g : List.of(StormDeck.S02_GATE, StormDeck.S03_GATE, StormDeck.S10_GATE, StormDeck.S09_GATE, StormDeck2.S04_GATE, StormDeck2.S08_GATE,
+                StormDeck2.S07_GATE, StormDeck2.S12_GATE, StormDeck2.S11_GATE)) {
             check(!back.getBlockState(g.get(0).below()).isAir(), "a deck gate has no floor under it at " + g.get(0));
         }
         gates(back);
@@ -410,7 +443,7 @@ public final class StormTrialSelfTest {
             NOTES.add("stone checks skipped on peaceful");
             return;
         }
-        for (String id : List.of("S02", "S03", "S09", "S10")) {
+        for (String id : NEW) {
             TrialCell cell = TrialCells.get(id);
             UUID g = new UUID(0x571, id.hashCode());
             StormTestPlayer p = StormTestPlayer.join(back, g, "stone_" + id, Vec3.atBottomCenterOf(cell.ports().stone().west(2)));
@@ -500,7 +533,7 @@ public final class StormTrialSelfTest {
 
     private static void variants(ServerLevel back) {
         int total = 0;
-        for (String id : List.of("S02", "S03", "S09", "S10")) {
+        for (String id : NEW) {
             TrialCell cell = TrialCells.get(id);
             AABB box = cell.ports().area().inflate(3);
             int n = 0;
@@ -569,7 +602,7 @@ public final class StormTrialSelfTest {
         }
     }
 
-    private static Hit person(ServerLevel back, UUID group, String name, double x, double y, double z) {
+    static Hit person(ServerLevel back, UUID group, String name, double x, double y, double z) {
         Hit p = new Hit(back, group, name);
         p.moveTo(x, y, z, 0f, 0f);
         p.setOnGround(true);
@@ -577,6 +610,7 @@ public final class StormTrialSelfTest {
     }
 
     private static void logic(ServerLevel back) {
+        StormP3SelfTest.run(back, FAIL, NOTES);
         s02(back);
         s03(back);
         s09(back);
