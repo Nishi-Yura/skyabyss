@@ -21,6 +21,8 @@ import jp.revati.skyabyss.titan.ember.back.EmberBackTrials;
 import jp.revati.skyabyss.titan.ember.back.EmberBodyBuilder;
 import jp.revati.skyabyss.titan.ember.back.EmberDeck;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
+import jp.revati.skyabyss.titan.ember.back.trial.EmberTrialSetup;
+import jp.revati.skyabyss.titan.ember.back.trial.EmberTrials;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
 import jp.revati.skyabyss.titan.ember.mob.EmberMoth;
 import jp.revati.skyabyss.titan.group.BackGroupData;
@@ -44,6 +46,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -99,6 +102,7 @@ public final class EmberDeckSelfTest {
             e06(back);
             e07(back);
             e10(back);
+            p3(back);
             world(back);
         } catch (RuntimeException e) {
             FAIL.add("exception " + e);
@@ -119,9 +123,16 @@ public final class EmberDeckSelfTest {
         EmberDeck.setPlaced(true);
         check(TrialCatalog.poolActive(EMBER), "the ember pool is not active with the deck placed");
         check(TrialCatalog.originals(EMBER).stream().map(Def::id).toList().equals(List.of("E01", "E05", "E09")), "ember originals are not E01 E05 E09");
-        check(TrialCatalog.inSlot(EMBER, Slot.WALK).size() == 2 && TrialCatalog.inSlot(EMBER, Slot.WIT).size() == 3 && TrialCatalog.inSlot(EMBER, Slot.FIGHT).size() == 2,
-                "the ember slots are not 2 / 3 / 2");
-        for (String id : List.of("E02", "E06", "E07", "E10")) {
+        // 版 24: 余燼は十二（原型 3 + 新作 9）。枠は 4 / 4 / 4、段は ★1 が 4・★2 が 5・★3 が 3
+        check(TrialCatalog.of(EMBER).size() == 12, "the ember pool is not twelve trials: " + TrialCatalog.of(EMBER).size());
+        check(TrialCatalog.inSlot(EMBER, Slot.WALK).size() == 4 && TrialCatalog.inSlot(EMBER, Slot.WIT).size() == 4
+                && TrialCatalog.inSlot(EMBER, Slot.FIGHT).size() == 4, "the ember slots are not 4 / 4 / 4");
+        int[] tiers = new int[4];
+        for (Def d : TrialCatalog.of(EMBER)) {
+            tiers[d.tier()]++;
+        }
+        check(tiers[1] == 4 && tiers[2] == 5 && tiers[3] == 3, "the ember tiers are not 4 / 5 / 3: " + java.util.Arrays.toString(tiers));
+        for (String id : List.of("E02", "E06", "E07", "E10", "E03", "E04", "E08", "E11", "E12")) {
             Def d = TrialCatalog.get(id);
             check(d != null && d.titan().equals(EMBER) && !d.original() && !d.physical(), id + " is not a registered, non-physical new ember trial");
             check(TrialCells.get(id) != null && TrialCells.get(id).runtime(), id + " has no runtime cell");
@@ -129,6 +140,10 @@ public final class EmberDeckSelfTest {
                     id + " does not have layouts 3 / numbers 2 / a hazard / a goal");
         }
         check(TrialCatalog.get("E10").space().enemySets() == 2, "E10 needs two enemy sets");
+        check(TrialCatalog.get("E11").space().enemySets() == 2 && TrialCatalog.get("E12").space().enemySets() == 2, "E11 and E12 need two enemy sets");
+        check(TrialCatalog.get("E03").slot() == Slot.WALK && TrialCatalog.get("E04").slot() == Slot.WALK && TrialCatalog.get("E08").slot() == Slot.WIT
+                && TrialCatalog.get("E11").slot() == Slot.FIGHT && TrialCatalog.get("E12").slot() == Slot.FIGHT,
+                "a version 24 ember trial is in the wrong slot");
         check(TrialCatalog.get("E02").slot() == Slot.WALK && TrialCatalog.get("E06").slot() == Slot.WIT && TrialCatalog.get("E07").slot() == Slot.WIT
                 && TrialCatalog.get("E10").slot() == Slot.FIGHT, "an ember trial is in the wrong slot");
         // 置かないあいだは原型のまま (本番の安全)
@@ -169,7 +184,7 @@ public final class EmberDeckSelfTest {
         check(seen.containsAll(List.of("E02", "E06", "E07", "E10", "E01", "E05", "E09")), "not every ember trial was drawn within seven cycles: " + seen);
         // 修飾: 範囲・符号の往復・深淵の数式
         Random rng = new Random(777);
-        for (String id : List.of("E02", "E06", "E07", "E10")) {
+        for (String id : List.of("E02", "E06", "E07", "E10", "E03", "E04", "E08", "E11", "E12")) {
             Def d = TrialCatalog.get(id);
             for (int i = 0; i < 1500; i++) {
                 Mods m = TrialDraw.rollMods(d, rng);
@@ -241,6 +256,13 @@ public final class EmberDeckSelfTest {
                 && EmberDeck.D.contains(EmberDeck.E07_STONE), "a stone is outside its cell");
         check(EmberDeck.A.contains(EmberDeck.E02_PAD) && EmberDeck.B.contains(EmberDeck.E10_PAD) && EmberDeck.C.contains(EmberDeck.E06_PAD) && EmberDeck.D.contains(EmberDeck.E07_PAD),
                 "a return pad is outside its cell");
+        check(EmberDeck.NW.contains(EmberDeck.E03_STONE) && EmberDeck.NW.contains(EmberDeck.E03_PAD) && EmberDeck.NE.contains(EmberDeck.E08_STONE)
+                && EmberDeck.NE.contains(EmberDeck.E08_PAD) && EmberDeck.SW.contains(EmberDeck.E11_STONE) && EmberDeck.SW.contains(EmberDeck.E11_PAD)
+                && EmberDeck.SC.contains(EmberDeck.E12_STONE) && EmberDeck.SC.contains(EmberDeck.E12_PAD) && EmberDeck.SE.contains(EmberDeck.E04_STONE)
+                && EmberDeck.SE.contains(EmberDeck.E04_PAD), "a version 24 stone or pad is outside its cell");
+        for (List<BlockPos> gate : EmberDeck.GATES) {
+            check(gate.stream().allMatch(g -> deck.stream().anyMatch(b -> b.grow(1).contains(g))), "a gate is not next to a deck room: " + gate.get(0));
+        }
         check(EmberDeck.D0.contains(EmberDeck.BOARD_D0), "the deck board is outside the hall");
         check(EmberBackLayout.HUB.contains(EmberDeck.BOARD_HUB), "the hub board is outside the hub");
     }
@@ -645,6 +667,122 @@ public final class EmberDeckSelfTest {
             cell.disarm(back, v);
             GroupGates.reset(back, group);
             EmberHeat.reset(p);
+        }
+    }
+
+    // ---------------------------------------------------------------- 版 24 の五つ (E03・E04・E08・E11・E12)。偽の人で動かす
+    private static void p3(ServerLevel back) {
+        // E03: 立ち続けると段が赤くなる。赤い段へ乗ると焼けて戻る。坑へ落ちても戻る
+        E03Chain c3 = (E03Chain) TrialCells.get("E03");
+        FakePlayer p = fake(back, 30);
+        UUID group = Groups.keyOf(p);
+        TrialCell.Run r3 = new TrialCell.Run(group, c3, mods(0, 0, 0, -1, new int[0], 0), 31L, 0);
+        try {
+            c3.arm(back, r3);
+            long now = 5000;
+            boolean[] hot = r3.get("hot", () -> new boolean[E03Chain.PLANKS]);
+            stand(p, -13.5, 10.5);
+            for (int i = 0; i < 40 && !hot[0]; i++) {
+                now += 5;
+                c3.tick(back, r3, List.of(p), now);
+            }
+            check(hot[0], "E03: the plank under a standing player did not turn hot");
+            check(r3.getInt("burns") == 0, "E03: the plank burned on the tick it turned hot");
+            now += 5;
+            stand(p, -13.5, 10.5);
+            c3.tick(back, r3, List.of(p), now);
+            check(r3.getInt("burns") == 1, "E03: standing on a hot plank did not burn (" + r3.getInt("burns") + ")");
+            check(!r3.goalOk, "E03: the no-burn goal stayed ok");
+            p.setPos(-20.5, Y - 0.6, 4.5);
+            c3.tick(back, r3, List.of(p), now + 5);
+            check(r3.getInt("burns") == 2, "E03: a fall into the pit did not count (" + r3.getInt("burns") + ")");
+        } finally {
+            c3.disarm(back, r3);
+            GroupGates.reset(back, group);
+            EmberHeat.reset(p);
+        }
+        // E04: 熾を取り、水の溜まりへ入ると消える (持ち物から消え、消えた数が増える)
+        E04Carry c4 = (E04Carry) TrialCells.get("E04");
+        FakePlayer q = fake(back, 31);
+        UUID g4 = Groups.keyOf(q);
+        TrialCell.Run r4 = new TrialCell.Run(g4, c4, mods(0, 0, 0, -1, new int[0], 0), 41L, 0);
+        try {
+            c4.arm(back, r4);
+            long now = 6000;
+            stand(q, 17.5, 111.5);
+            check(c4.onUse(back, r4, q, E04Carry.BRAZIER, false, now), "E04: the brazier did not answer a click");
+            Item coal = EmberTrialSetup.LIVE_COAL.get();
+            check(EmberTrials.count(q, coal) == 1, "E04: the coal was not taken");
+            int[] pool = E04Carry.point(0, E04Carry.pools(r4).get(0));
+            stand(q, pool[0] + 0.5, pool[1] + 0.5);
+            c4.tick(back, r4, List.of(q), now + 5);
+            check(EmberTrials.count(q, coal) == 0 && r4.getInt("douses") == 1, "E04: the water did not put the coal out");
+            check(!r4.goalOk, "E04: the no-douse goal stayed ok after the water");
+        } finally {
+            c4.disarm(back, r4);
+            EmberTrials.stripGroup(back, g4, EmberTrialSetup.LIVE_COAL.get());
+            EmberHeat.reset(q);
+        }
+        // E08: 示しを覚えて注ぐ。違う鋳型は熱が上がって止まり、示しは最初から組み直す
+        E08Mold c8 = (E08Mold) TrialCells.get("E08");
+        FakePlayer m = fake(back, 32);
+        UUID g8 = Groups.keyOf(m);
+        TrialCell.Run r8 = new TrialCell.Run(g8, c8, mods(0, 0, 1, -1, new int[0], 0), 81L, 0);
+        try {
+            c8.arm(back, r8);
+            long now = r8.getLong("showAt") + 400L;
+            stand(m, 27.5, 13.5);
+            c8.tick(back, r8, List.of(m), now);
+            int[] seq = r8.get("seq", () -> new int[0]);
+            check(seq.length == 3, "E08: the sequence is not three steps (" + seq.length + ")");
+            int want = E08Mold.expected(r8, seq, 0);
+            int wrong = (want + 1) % E08Mold.COLORS;
+            check(c8.onUse(back, r8, m, E08Mold.moldAt(0, wrong), false, now), "E08: the mold did not answer a pour");
+            check(r8.getInt("k") == 0 && r8.getLong("lockUntil") > now && EmberHeat.get(m) >= 15f, "E08: a wrong pour did not lock and heat");
+            check(!r8.goalOk, "E08: the one-pour goal stayed ok after a wrong pour");
+            check(c8.onUse(back, r8, m, E08Mold.moldAt(0, want), false, now + 100) && r8.getInt("k") == 0, "E08: a pour during the lock was accepted");
+            check(c8.onUse(back, r8, m, E08Mold.moldAt(0, want), false, now + 200) && r8.getInt("k") == 1, "E08: the right pour was not accepted");
+        } finally {
+            c8.disarm(back, r8);
+            GroupGates.reset(back, g8);
+            EmberHeat.reset(m);
+        }
+        // E11: 荷車は、そばに人がいて敵がいないあいだ押せる (8 回の 5 tick で一つ進む)
+        E11Cart c11 = (E11Cart) TrialCells.get("E11");
+        FakePlayer w = fake(back, 33);
+        UUID g11 = Groups.keyOf(w);
+        TrialCell.Run r11 = new TrialCell.Run(g11, c11, mods(0, 0, 0, 0, new int[0], 0), 111L, 0);
+        try {
+            c11.arm(back, r11);
+            long now = 7000;
+            stand(w, -26.5, 114.5);
+            for (int i = 0; i < 8; i++) {
+                now += 5;
+                c11.tick(back, r11, List.of(w), now);
+            }
+            check(r11.getInt("index") == 1, "E11: the cart did not move one step when pushed (" + r11.getInt("index") + ")");
+        } finally {
+            c11.disarm(back, r11);
+            GroupGates.reset(back, g11);
+            EmberHeat.reset(w);
+        }
+        // E12: 最初の波は決まった時刻に、穴から大燠虫が出る
+        E12Nest c12 = (E12Nest) TrialCells.get("E12");
+        FakePlayer n = fake(back, 34);
+        UUID g12 = Groups.keyOf(n);
+        TrialCell.Run r12 = new TrialCell.Run(g12, c12, mods(0, 0, 0, 0, new int[0], 0), 121L, 0);
+        try {
+            c12.arm(back, r12);
+            long now = 8000;
+            stand(n, 0.5, 115.5);
+            c12.tick(back, r12, List.of(n), now);
+            check(r12.getLong("nextWave") == now + E12Nest.FIRST_WAVE, "E12: the first wave is not timed");
+            c12.tick(back, r12, List.of(n), now + E12Nest.FIRST_WAVE + 5);
+            check(r12.getInt("wave") == 1 && !((List<?>) r12.get("mobs", ArrayList::new)).isEmpty(), "E12: the first wave did not come out of the holes");
+        } finally {
+            c12.disarm(back, r12);
+            GroupGates.reset(back, g12);
+            EmberHeat.reset(n);
         }
     }
 

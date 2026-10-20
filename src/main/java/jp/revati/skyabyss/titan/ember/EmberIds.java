@@ -177,7 +177,8 @@ public final class EmberIds {
     public static final String SOUND_HEART_DEATH = "ember_heart_death";
 
     // ================================================================ 休み場 (7.3節。EmberBackLayout.RESTS の名前。→ B)
-    public static final List<String> RESTS = List.of("throat", "hub", "w0", "w1", "e0", "s0", "heart", "k0", "k_e02a", "k_e02b", "k_e10", "k_e06", "k_e07");
+    public static final List<String> RESTS = List.of("throat", "hub", "w0", "w1", "e0", "s0", "heart", "k0", "k_e02a", "k_e02b", "k_e10", "k_e06", "k_e07",
+            "k_e03", "k_e08", "k_e11", "k_e12", "k_e04");
     // 試練の名前 (眠る試練・石・コマンド)
     public static final String WEST = "west";
     public static final String EAST = "east";

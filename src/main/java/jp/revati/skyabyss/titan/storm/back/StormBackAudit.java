@@ -17,7 +17,7 @@ public final class StormBackAudit {
     }
 
     public static BackReach.Spec spec(ServerLevel level) {
-        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 235, 200));
+        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 235, 270));
         s.voidY = CLOUD_Y + 5;
         s.longFallIsExit = true;
         s.entrances.add(ARRIVAL);
@@ -107,6 +107,9 @@ public final class StormBackAudit {
         }
         if (StormDeck.placed()) {
             s.goals.putAll(StormDeck.goals());
+            s.goals.putAll(StormDeck2.goals());
+            // 第二の甲板の頂 (S12) の扇の足場は、閉じた足場として歩く
+            s.solidGate = StormDeck2::isFloorGate;
         }
         return s;
     }

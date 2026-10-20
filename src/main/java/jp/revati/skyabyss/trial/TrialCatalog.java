@@ -48,6 +48,22 @@ public final class TrialCatalog {
     public static final List<String> S10_NUMBERS = List.of("wardens", "watch_posts");
     public static final List<String> S10_HAZARDS = List.of("crosswind", "sky_bolt");
     public static final List<String> S10_GOALS = List.of("no_hit");
+    // 雷翼の新作 (P3。第二の渡り場 = StormDeck2): S04・S07・S08・S11・S12
+    public static final List<String> S04_NUMBERS = List.of("gust_gap", "gust_blow");
+    public static final List<String> S04_HAZARDS = List.of("spark_moth", "sky_bolt");
+    public static final List<String> S04_GOALS = List.of("no_fall");
+    public static final List<String> S07_NUMBERS = List.of("mirror_flips", "beam_hold");
+    public static final List<String> S07_HAZARDS = List.of("spark_moth", "sky_bolt");
+    public static final List<String> S07_GOALS = List.of("few_flips");
+    public static final List<String> S08_NUMBERS = List.of("valve_turns", "valve_hold");
+    public static final List<String> S08_HAZARDS = List.of("bellows_leak", "spark_moth");
+    public static final List<String> S08_GOALS = List.of("few_turns");
+    public static final List<String> S11_NUMBERS = List.of("raids", "cage_speed");
+    public static final List<String> S11_HAZARDS = List.of("double_bolt", "sky_bolt");
+    public static final List<String> S11_GOALS = List.of("cage_whole");
+    public static final List<String> S12_NUMBERS = List.of("pad_swap", "feather_storm");
+    public static final List<String> S12_HAZARDS = List.of("crosswind", "sky_bolt");
+    public static final List<String> S12_GOALS = List.of("no_fall");
     // P2: 岩鯨の新作 4 (W03・W04・W11・W12)
     public static final List<String> W03_NUMBERS = List.of("flow", "turn");
     public static final List<String> W03_HAZARDS = List.of("surge");
@@ -108,6 +124,22 @@ public final class TrialCatalog {
     public static final List<String> E10_NUMBERS = List.of("bearers", "waves");
     public static final List<String> E10_HAZARDS = List.of("vents");
     public static final List<String> E10_GOALS = List.of("no_scorch");
+    // 余燼の新作 (P3)。E03 鎖橋・E04 熾の道・E08 鋳型・E11 荷車・E12 巣
+    public static final List<String> E03_NUMBERS = List.of("hot_time", "cool_time");
+    public static final List<String> E03_HAZARDS = List.of("moths");
+    public static final List<String> E03_GOALS = List.of("no_burn");
+    public static final List<String> E04_NUMBERS = List.of("gust_period", "pools");
+    public static final List<String> E04_HAZARDS = List.of("gust");
+    public static final List<String> E04_GOALS = List.of("no_douse");
+    public static final List<String> E08_NUMBERS = List.of("steps", "show_speed");
+    public static final List<String> E08_HAZARDS = List.of("steam");
+    public static final List<String> E08_GOALS = List.of("one_pour");
+    public static final List<String> E11_NUMBERS = List.of("raids", "push_speed");
+    public static final List<String> E11_HAZARDS = List.of("moths");
+    public static final List<String> E11_GOALS = List.of("no_dent");
+    public static final List<String> E12_NUMBERS = List.of("rollers", "waves");
+    public static final List<String> E12_HAZARDS = List.of("vents");
+    public static final List<String> E12_GOALS = List.of("no_vent");
 
     static {
         String whale = Titans.STONE_WHALE;
@@ -167,6 +199,12 @@ public final class TrialCatalog {
         add(new Def("S03", storm, Slot.WALK, Kind.BEAT, 2, false, false, new Space(3, S03_NUMBERS, 0, S03_HAZARDS, S03_GOALS, List.of())));
         add(new Def("S09", storm, Slot.FIGHT, Kind.FIGHT, 1, true, false, new Space(3, S09_NUMBERS, 2, S09_HAZARDS, S09_GOALS, List.of())));
         add(new Def("S10", storm, Slot.FIGHT, Kind.FIGHT, 2, false, false, new Space(3, S10_NUMBERS, 2, S10_HAZARDS, S10_GOALS, List.of())));
+        // ---- 雷翼の新作 5 (P3。第二の渡り場 = StormDeck2): 歩 S04、智 S07・S08、闘 S11・S12
+        add(new Def("S04", storm, Slot.WALK, Kind.CROSS, 3, false, false, new Space(3, S04_NUMBERS, 0, S04_HAZARDS, S04_GOALS, List.of())));
+        add(new Def("S07", storm, Slot.WIT, Kind.TOGETHER, 2, true, false, new Space(3, S07_NUMBERS, 0, S07_HAZARDS, S07_GOALS, List.of())));
+        add(new Def("S08", storm, Slot.WIT, Kind.SOLVE, 3, false, false, new Space(3, S08_NUMBERS, 0, S08_HAZARDS, S08_GOALS, List.of())));
+        add(new Def("S11", storm, Slot.FIGHT, Kind.ESCORT, 2, false, false, new Space(3, S11_NUMBERS, 2, S11_HAZARDS, S11_GOALS, List.of())));
+        add(new Def("S12", storm, Slot.FIGHT, Kind.FIGHT, 3, true, false, new Space(3, S12_NUMBERS, 2, S12_HAZARDS, S12_GOALS, List.of())));
         // ---- 余燼 (西 E01 歩 / 東 E05 智 / 南 E09 闘)
         add(new Def("E01", ember, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("E02", ember, Slot.WALK, Kind.BEAT, 2, false, false,
@@ -179,6 +217,17 @@ public final class TrialCatalog {
         add(new Def("E09", ember, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("E10", ember, Slot.FIGHT, Kind.FIGHT, 2, false, false,
                 new Space(3, E10_NUMBERS, 2, E10_HAZARDS, E10_GOALS, List.of())));
+        // ---- 余燼の新作 5 (P3): 歩 E03・E04、智 E08、闘 E11・E12。★ は 2 / 3 / 3 / 2 / 3 (合わせて ★1:4・★2:5・★3:3)
+        add(new Def("E03", ember, Slot.WALK, Kind.CROSS, 2, false, false,
+                new Space(3, E03_NUMBERS, 0, E03_HAZARDS, E03_GOALS, List.of())));
+        add(new Def("E04", ember, Slot.WALK, Kind.CARRY, 3, false, false,
+                new Space(3, E04_NUMBERS, 0, E04_HAZARDS, E04_GOALS, List.of())));
+        add(new Def("E08", ember, Slot.WIT, Kind.SOLVE, 3, false, false,
+                new Space(3, E08_NUMBERS, 0, E08_HAZARDS, E08_GOALS, List.of())));
+        add(new Def("E11", ember, Slot.FIGHT, Kind.ESCORT, 2, false, false,
+                new Space(3, E11_NUMBERS, 2, E11_HAZARDS, E11_GOALS, List.of())));
+        add(new Def("E12", ember, Slot.FIGHT, Kind.FIGHT, 3, false, false,
+                new Space(3, E12_NUMBERS, 2, E12_HAZARDS, E12_GOALS, List.of())));
     }
 
     private static void add(Def def) {

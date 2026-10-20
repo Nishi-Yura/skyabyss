@@ -31,7 +31,8 @@ final class StormObjective {
             "storm_keel", "storm_extra_chest", "storm_west_gap", "storm_west_rib", "storm_west_stone", "storm_east_lever", "storm_east_pad", "storm_east_raiju", "storm_east_stone",
             "storm_front_mirror", "storm_front_stone", "storm_back_w", "storm_back_e", "storm_back_f", "storm_heart",
             "storm_deck_hall", "storm_deck_turret", "storm_deck_bridge", "storm_deck_gate", "storm_deck_s02", "storm_deck_s03", "storm_deck_s09", "storm_deck_s10_vent",
-            "storm_deck_s10_guard", "storm_deck_stone");
+            "storm_deck_s10_guard", "storm_deck_stone", "storm_deck_bridge2", "storm_deck_s04", "storm_deck_s07_a", "storm_deck_s07_b", "storm_deck_s08",
+            "storm_deck_s11", "storm_deck_s12", "storm_deck_s12_fight");
 
     private StormObjective() {
     }
@@ -69,7 +70,7 @@ final class StormObjective {
             if (t != null) {
                 return goal(t.id(), t.at(), t.hx(), t.hy(), t.hz());
             }
-            boolean onDeck = StormDeck.YARD.aabb().inflate(1, 4, 1).contains(v)
+            boolean onDeck = StormDeck.YARD.aabb().inflate(1, 4, 1).contains(v) || StormDeck2.onLanding(v)
                     || v.x >= StormDeck.BRIDGE_X1 - 1 && v.x <= StormDeck.BRIDGE_X2 + 2 && v.z >= StormDeck.BRIDGE_Z1 && v.z <= StormDeck.BRIDGE_Z2 + 1 && v.y > StormDeck.Y - 2;
             if (onDeck) {
                 var g = jp.revati.skyabyss.trial.storm.StormGuides.atYard(level, player);

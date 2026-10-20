@@ -52,6 +52,12 @@ public final class EmberBackAudit {
         s.goals.put("deck e10 stone", EmberDeck.E10_STONE.north());
         s.goals.put("deck e06 stone", EmberDeck.E06_STONE.north());
         s.goals.put("deck e07 stone", EmberDeck.E07_STONE.north());
+        // 版 24: 鎖橋の向こうの岸・鋳型の間・荷車の炉・巣・熾の道の石 (戸は開いているものとして)
+        s.goals.put("deck e03 stone", EmberDeck.E03_STONE.north());
+        s.goals.put("deck e08 stone", EmberDeck.E08_STONE.north());
+        s.goals.put("deck e11 stone", EmberDeck.E11_STONE.north());
+        s.goals.put("deck e12 stone", EmberDeck.E12_STONE.north());
+        s.goals.put("deck e04 stone", EmberDeck.E04_STONE.north());
         s.goals.put("well top (crater)", new BlockPos(HUB_CENTER.getX() + 11, EmberBodyBuilder.crater() + 1, HUB_CENTER.getZ()));
         s.goals.put("back top", new BlockPos(0, BACK_EXIT_FLOOR + 1, EmberBodyBuilder.backTubeEnd()));
         for (Cache c : CACHES) {
