@@ -337,31 +337,41 @@ def hall():
 
 
 def plaza_market():
-    # 広場 (x -36..36, z -36..3)。市松
+    # 広場 (x -36..36, z -36..3) と市 (ラフ C「丸い市」で決定): 井戸の噴水を囲んで露店が輪に並び、外に腰掛けと灯りの輪
+    import math
     checker(-36, -36, 36, 3, 'polished_andesite', 'stone_bricks', y=-1, step=4)
-    # 井戸 (0, -18)
-    box(-1, 0, -19, 1, 0, -17, 'stone_bricks')
-    box(-1, -1, -19, 1, -1, -17, 'stone_bricks')
-    blk(0, -1, -18, 'water')
-    blk(0, 0, -18, 'air')
-    box(-1, 1, -19, -1, 2, -19, 'spruce_fence')
-    box(1, 1, -17, 1, 2, -17, 'spruce_fence')
-    blk(0, 3, -18, 'spruce_slab[type=bottom,waterlogged=false]')
-    # 露店 (西と東。4×4、6 おき)。柱・羊毛の屋根・樽
+    cx, cz, R = 0, -16, 19
+    for x in range(cx - R, cx + R + 1):
+        for z in range(cz - R, cz + R + 1):
+            d = math.hypot(x - cx, z - cz)
+            if d <= R:
+                blk(x, -1, z, 'polished_andesite' if int(d) % 4 < 2 else 'stone_bricks')
+    # 噴水 (井戸)
+    box(cx - 2, 0, cz - 2, cx + 2, 0, cz + 2, 'stone_bricks')
+    box(cx - 1, -1, cz - 1, cx + 1, -1, cz + 1, 'water')
+    box(cx - 1, 0, cz - 1, cx + 1, 0, cz + 1, 'air')
+    blk(cx, 0, cz, 'stone_bricks')
+    blk(cx, 1, cz, 'stone_brick_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]')
+    blk(cx, 2, cz, 'lantern[hanging=false]')
+    # 露店 8 (輪)。柱・羊毛の庇・樽
     n = 1
-    for sx in (-32, 8):
-        for i in range(0, 24, 6):
-            for j in range(0, 30, 10):
-                x, z = sx + i, -30 + j
-                if abs(x + 2) < 8:
-                    continue
-                for cx, cz in ((x, z), (x + 3, z), (x, z + 3), (x + 3, z + 3)):
-                    box(cx, 0, cz, cx, 2, cz, 'spruce_fence')
-                box(x, 3, z, x + 3, 3, z + 3, 'orange_wool' if (i // 6 + j // 10) % 2 == 0 else 'white_wool')
-                blk(x + 1, 0, z + 1, 'barrel[facing=up,open=false]')
-                if n <= 6:
-                    mark('villager_%d' % n, x + 2, 0, z + 2)
-                    n += 1
+    for k in range(8):
+        a = math.radians(k * 45)
+        x = int(round(math.cos(a) * 12)) + cx - 2
+        z = int(round(math.sin(a) * 12)) + cz - 2
+        for ex, ez in ((x, z), (x + 3, z), (x, z + 3), (x + 3, z + 3)):
+            box(ex, 0, ez, ex, 2, ez, 'spruce_fence')
+        box(x, 3, z, x + 3, 3, z + 3, 'orange_wool' if k % 2 == 0 else 'white_wool')
+        blk(x + 1, 0, z + 1, 'barrel[facing=up,open=false]')
+        blk(x + 2, 0, z + 2, 'spruce_slab[type=top,waterlogged=false]')
+        if n <= 6:
+            mark('villager_%d' % n, x + 2, 0, z - 1)
+            n += 1
+    # 腰掛けと灯りの輪
+    for k in range(8):
+        a = math.radians(k * 45 + 22)
+        lantern_post(int(round(math.cos(a) * 18)) + cx, 0, int(round(math.sin(a) * 18)) + cz)
+        blk(int(round(math.cos(a) * 16)) + cx, 0, int(round(math.sin(a) * 16)) + cz, 'spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]')
     mark('stand', 0, 0, 94)
 
 
