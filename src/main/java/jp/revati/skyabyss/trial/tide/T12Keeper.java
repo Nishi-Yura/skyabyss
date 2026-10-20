@@ -507,7 +507,7 @@ public final class T12Keeper implements TrialCell {
         if (R_SMALL >= CURTAIN_R1) {
             bad.add("T12 the small arena reaches the curtain");
         }
-        if (!back.getBlockState(TideDeck.T12_STONE).is(TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T12_STONE))) {
             bad.add("T12 stone missing");
         }
         return bad;

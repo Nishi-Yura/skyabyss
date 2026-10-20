@@ -282,7 +282,7 @@ public final class E08Mold implements TrialCell {
                 bad.add("E08 mold " + c + " is missing");
             }
         }
-        if (!back.getBlockState(EmberDeck.E08_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E08_STONE))) {
             bad.add("E08 stone missing");
         }
         return bad;

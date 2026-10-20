@@ -248,7 +248,7 @@ public final class W10Fort implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(WhaleDeck.W10_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W10_STONE))) {
             bad.add("W10 stone missing");
         }
         return bad;

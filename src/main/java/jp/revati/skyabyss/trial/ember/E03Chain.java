@@ -323,7 +323,7 @@ public final class E03Chain implements TrialCell {
         if (!back.getBlockState(side).isAir() || !back.getBlockState(side.below()).is(Blocks.MAGMA_BLOCK)) {
             bad.add("E03 pit is not open over magma at " + side);
         }
-        if (!back.getBlockState(EmberDeck.E03_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E03_STONE))) {
             bad.add("E03 stone missing");
         }
         return bad;

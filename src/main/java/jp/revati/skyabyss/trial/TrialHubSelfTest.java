@@ -74,7 +74,7 @@ public final class TrialHubSelfTest {
                 }
                 // 単独の実行 (ONLY) では、岩鯨のほかの背は建てていない (建てるのは各巨神の背の自己テスト) ので、世界の検査は全体の実行だけ
                 boolean only = System.getenv("SKYABYSS_SELFTEST_ONLY") != null;
-                boolean ready = hub != null && back.hasChunkAt(hub) && (!only || Titans.STONE_WHALE.equals(titan) || Titans.TIDE_SHELL.equals(titan) && TrialPoolSelfTest.tideBuilt()) && !back.getBlockState(hub.below()).isAir()
+                boolean ready = hub != null && back.hasChunkAt(hub) && (!only || !Titans.TIDE_SHELL.equals(titan) || TrialPoolSelfTest.tideBuilt()) && !back.getBlockState(hub.below()).isAir()
                         && (!Titans.STONE_WHALE.equals(titan) || placedBefore);
                 if (ready) {
                     world(f, back, titan, hub);
@@ -285,11 +285,99 @@ public final class TrialHubSelfTest {
                 GroupGates.reset(back, keyE);
             }
         }
+        weekly(f, back, titan, hub, spots);
         // 後始末
         a.setPos(0, 0, 0);
         b.setPos(0, 0, 0);
         c.setPos(0, 0, 0);
         GroupGates.reset(back, keyA);
+    }
+
+    // ---------------------------------------------------------------- 版 27: 今週の試練の入口 (光る床・灯りの道・立て札)・個人の戻り・何の部屋かの題
+    private static void weekly(List<String> f, ServerLevel back, String titan, BlockPos hub, List<HubTablets.Spot> tablets) {
+        WeeklyGate.clearAll();
+        WeeklyGate.Site site = WeeklyGate.site(back, titan);
+        check(f, site != null, titan + ": no place for the weekly gate near the hub");
+        if (site == null) {
+            return;
+        }
+        check(f, WeeklyGate.install(back, titan) || back.getBlockState(site.pad().below()).is(net.minecraft.world.level.block.Blocks.GOLD_BLOCK),
+                titan + ": the weekly pad was not built");
+        check(f, back.getBlockState(site.pad().below()).is(net.minecraft.world.level.block.Blocks.GOLD_BLOCK), titan + ": the weekly pad is not gold");
+        SkyAbyss.LOGGER.info("SELFTEST trial hub weekly gate {}: hub={} pad={} sign={} path={} tablets={}", titan, hub, site.pad(), site.sign(), site.path().size(),
+                tablets.stream().map(t -> t.pos().toShortString()).toList());
+        check(f, site.pad().distSqr(hub) <= 49 && site.pad().distSqr(hub) >= 4, titan + ": the weekly pad is not close to (but off) the hub rest spot: " + site.pad());
+        for (HubTablets.Spot s : tablets) {
+            check(f, s.pos().distSqr(site.pad()) >= 16, titan + ": the weekly pad is on top of a tablet");
+        }
+        check(f, !site.path().isEmpty() || site.pad().distSqr(hub) < 5, titan + ": the weekly pad has no lit path");
+        for (BlockPos p : site.path()) {
+            check(f, back.getBlockState(p).is(HubTablets.inlayLight(titan).getBlock()), titan + ": a lit path tile is missing at " + p);
+        }
+        check(f, site.sign() != null && back.getBlockState(site.sign()).getBlock() instanceof net.minecraft.world.level.block.StandingSignBlock,
+                titan + ": the weekly sign is missing");
+        if (site.sign() != null && back.getBlockEntity(site.sign()) instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign) {
+            String line = sign.getFrontText().getMessage(1, false).getString();
+            check(f, !line.isEmpty(), titan + ": the weekly sign does not name this week's trial");
+        }
+        // 週ごとに今週の試練が変わっても、入口へ送れる (入口の戸・休み場のどちらかがある)
+        long week0 = TrialData.week();
+        FakePlayer w = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000f006"), "trialhub_w"));
+        FakePlayer other = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000f007"), "trialhub_x"));
+        UUID gw = Groups.keyOf(w);
+        boolean ranCell = false;
+        try {
+            for (long wk = week0; wk < week0 + 40; wk++) {
+                TrialData.weekOverride = wk;
+                Trial.Def def = TrialData.weekly(titan, TrialData.worldSeed(back), wk);
+                BlockPos at = WeeklyGate.entryPoint(back, titan);
+                check(f, def != null && at != null, titan + ": week " + wk + " has no entry point for " + (def == null ? "-" : def.id()));
+                if (def == null || at == null) {
+                    continue;
+                }
+                // パッドに立つと、その人だけが入口へ移る
+                w.setPos(Vec3.atBottomCenterOf(site.pad()));
+                other.setPos(Vec3.atBottomCenterOf(hub));
+                WeeklyGate.clearAll();
+                int sent = WeeklyGate.tick(back, titan, List.of(w, other), back.getGameTime() + 100000L * (wk - week0 + 1));
+                check(f, sent == 1 && w.position().distanceTo(Vec3.atBottomCenterOf(at)) < 1.5, titan + ": week " + wk + ": the pad did not take the player to " + def.id()
+                        + "'s entrance (" + w.position() + " vs " + at + ", sent " + sent + ")");
+                check(f, other.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 0.5, titan + ": the weekly pad moved someone who was not on it");
+                TrialCell cell = TrialCells.get(def.id());
+                if (!ranCell && cell != null && cell.runtime() && cell.ports().entrance().size() > 0 && !TrialData.current(back, gw).has(def.id())) {
+                    ranCell = true;
+                    // 越えたら、中にいるその人だけが鼓動の間へ戻る
+                    TrialDraw.Draw draw = TrialData.current(back, gw);
+                    TrialCell.Run run = TrialRuntime.armed(back, gw, cell, draw, back.getGameTime());
+                    run.cleared = true;
+                    TrialBacks.of(titan).ring(back, gw, cell.def(), false, w, cell.ports().stone() == null ? at : cell.ports().stone());
+                    w.setPos(cell.ports().area().getCenter().x, cell.ports().area().minY + 1, cell.ports().area().getCenter().z);
+                    other.setPos(Vec3.atBottomCenterOf(site.pad().east(3)));
+                    int moved = TrialRuntime.weeklyBack(back, titan, cell, run, draw, List.of(w));
+                    check(f, moved == 1 && w.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, titan + ": clearing the weekly trial did not return the player to the hub: " + w.position());
+                    check(f, other.position().distanceTo(Vec3.atBottomCenterOf(site.pad().east(3))) < 0.5, titan + ": the weekly clear moved another player");
+                    TrialRuntime.stopGroup(back, gw);
+                    jp.revati.skyabyss.titan.group.GroupProgress.of(back, gw).setFlag("wstone." + cell.def().id(), false);
+                }
+            }
+        } finally {
+            TrialData.weekOverride = Long.MIN_VALUE;
+            WeeklyGate.clearAll();
+            w.setPos(0, 0, 0);
+            other.setPos(0, 0, 0);
+            GroupGates.reset(back, gw);
+        }
+        // ---- 何の部屋か分からない部屋の題 (岩鯨)
+        if (Titans.STONE_WHALE.equals(titan)) {
+            check(f, jp.revati.skyabyss.titan.dungeon.RoomTitles.LIBRARY.equals(jp.revati.skyabyss.titan.dungeon.RoomTitles.roomAt(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.LIBRARY.center())),
+                    "the bone library is not recognised as a titled room");
+            check(f, jp.revati.skyabyss.titan.dungeon.RoomTitles.BELL_ROOM.equals(jp.revati.skyabyss.titan.dungeon.RoomTitles.roomAt(jp.revati.skyabyss.titan.dungeon.TitanBackLayout.BELL.center())),
+                    "the bell tower is not recognised as a titled room");
+            check(f, jp.revati.skyabyss.titan.dungeon.RoomTitles.roomAt(hub) == null, "the hub was taken for a titled room");
+            FakePlayer r = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000f008"), "trialhub_r"));
+            check(f, jp.revati.skyabyss.titan.dungeon.RoomTitles.show(back, r, jp.revati.skyabyss.titan.dungeon.RoomTitles.LIBRARY), "the library title was not shown");
+            check(f, !jp.revati.skyabyss.titan.dungeon.RoomTitles.show(back, r, jp.revati.skyabyss.titan.dungeon.RoomTitles.LIBRARY), "the library title was shown twice in a row");
+        }
     }
 
     // 範囲の中の、立てる場所の近くの点 (範囲の真ん中の x・z で、石の高さ)

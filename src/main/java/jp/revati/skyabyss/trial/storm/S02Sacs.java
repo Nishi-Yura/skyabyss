@@ -304,7 +304,7 @@ public final class S02Sacs extends StormCell implements StormCell.PerTick {
                 bad.add("S02 hop " + i + " is too long for the calm updraft (margin " + String.format("%.2f", margin) + ")");
             }
         }
-        if (!back.getBlockState(StormDeck.S02_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck.S02_STONE))) {
             bad.add("S02 stone missing");
         }
         return bad;

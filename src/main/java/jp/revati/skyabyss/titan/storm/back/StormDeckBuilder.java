@@ -578,7 +578,7 @@ final class StormDeckBuilder {
     // 石の台 (石のある島): 床の石 (チャイムの石) とその台
     static void station(StormKit kit, BlockPos stone, Island is) {
         kit.put(stone.getX(), stone.getY() - 1, stone.getZ(), CHISELED);
-        kit.put(stone.getX(), stone.getY(), stone.getZ(), StormBackSetup.CHIME_STONE.get().defaultBlockState());
+        kit.put(stone.getX(), stone.getY(), stone.getZ(), jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.put(stone.getX(), stone.getY() + 1, stone.getZ(), AIR);
     }
 }

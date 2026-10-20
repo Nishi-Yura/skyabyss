@@ -171,7 +171,7 @@ public final class EmberBackTrials {
             if (!state.rung(t)) {
                 continue;
             }
-            out.accept(stonePos(t), EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, true));
+            out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
             BlockPos pad = padPos(t);
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
@@ -282,7 +282,7 @@ public final class EmberBackTrials {
         GroupGates.place(level, boxBlocks(HEART_DOOR), true);
         for (EmberBackState.Trial t : EmberBackState.Trial.values()) {
             BlockPos s = stonePos(t);
-            BlockState want = EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, false);
+            BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
             if (!level.getBlockState(s).equals(want)) {
                 level.setBlock(s, want, 3);
             }

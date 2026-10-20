@@ -142,7 +142,7 @@ public final class TideWatch {
         }
         spawned = false;
         level.setBlock(STONE_EAST.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState(), 3);
-        level.setBlock(STONE_EAST, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false), 3);
+        level.setBlock(STONE_EAST, jp.revati.skyabyss.trial.TrialGoal.mark(), 3);
         level.setBlock(RETURN_EAST, TideKit.DARK, 3);
     }
 

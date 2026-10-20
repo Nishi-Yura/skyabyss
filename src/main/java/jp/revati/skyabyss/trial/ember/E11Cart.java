@@ -256,7 +256,7 @@ public final class E11Cart implements TrialCell {
                 break;
             }
         }
-        if (!back.getBlockState(EmberDeck.E11_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E11_STONE))) {
             bad.add("E11 stone missing");
         }
         return bad;

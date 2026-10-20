@@ -430,7 +430,7 @@ public final class T02Crossing implements TrialCell {
                 bad.add("T02: the overlap " + ov + " is not longer than the warning");
             }
         }
-        if (!back.getBlockState(TideDeck.T02_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T02_STONE))) {
             bad.add("T02 stone missing");
         }
         return bad;

@@ -63,9 +63,9 @@ final class WestWingBuilder {
         placeCourses(kit, ParkourCourses.forSeed(0));
         pathLights(kit);
 
-        // 最後の岩棚から鼓動の間へ下りる抜け道 (石が歌うまで封じられている)
+        // 最後の岩棚から鼓動の間へ下りる抜け道の戸は無くした (版 27)。壁を閉じる
         for (BlockPos p : WEST_RETURN) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
+            kit.set(p, kit.pal().wall());
         }
         // 数え歌の鐘楼 (第二の休み場の北) と、そこへ行く通路。鐘が鳴りやむまで崩れ橋への通路が閉じる
         BellTower.build(kit);

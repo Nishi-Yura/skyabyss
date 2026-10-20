@@ -57,9 +57,9 @@ public final class TitanBackAudit {
         s.goals.put("ck", CK.center());
         s.goals.put("rest ce1", CE1.center().offset(2, 0, 2));
         s.goals.put("e3", E3.center());
-        s.goals.put("east stone", RESONANCE_STONES.get(1).offset(-1, 0, 0));
+        s.goals.put("east stone", GOAL_SPOTS.get(1).offset(-1, 0, 0));
         s.goals.put("maze exit room", MAZE_EXIT_ROOM.center());
-        s.goals.put("lower stone", RESONANCE_STONES.get(2).offset(-1, 0, 0));
+        s.goals.put("lower stone", GOAL_SPOTS.get(2).offset(-1, 0, 0));
         s.goals.put("rest heart", HEART_REST.center().offset(1, 0, 1));
         s.goals.put("heart arena", HEART.center());
         s.goals.put("library", LIBRARY.center());

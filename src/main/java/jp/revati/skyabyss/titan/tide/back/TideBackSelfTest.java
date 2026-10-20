@@ -173,7 +173,7 @@ public final class TideBackSelfTest {
             check(back.getBlockEntity(i.pos()) instanceof TabletBlockEntity, "inscription " + i.key() + " missing at " + i.pos(), failures);
         }
         for (TideBackState.Trial t : TideBackState.Trial.values()) {
-            check(back.getBlockState(TideBackTrials.stonePos(t)).is(TideBackSetup.CHIME_STONE.get()), "chime stone " + t + " missing", failures);
+            check(back.getBlockState(TideBackTrials.stonePos(t)).is(net.minecraft.world.level.block.Blocks.GLOWSTONE), "chime stone " + t + " missing", failures);
         }
         for (Rest r : RESTS) {
             check(TitanBackTrials.isSafeStand(back, r.spawn()), "cannot stand at the rest spawn " + r.id() + " " + r.spawn(), failures);
@@ -1006,9 +1006,9 @@ public final class TideBackSelfTest {
         check(!TideGarden.holds(fake), "pearl stayed in the inventory after placing", failures);
         // 光るのは鳴らしたグループの見かけだけ。ワールドの石は「まだ鳴っていない」形のまま
         Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
-        check(overlay.containsKey(STONE_WEST) && overlay.get(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "west stone not lit for the group", failures);
+        check(overlay.containsKey(STONE_WEST) && jp.revati.skyabyss.trial.TrialGoal.isReached(overlay.get(STONE_WEST)), "west stone not lit for the group", failures);
         check(TideKit.LAMP.equals(overlay.get(RETURN_WEST)), "west return floor not lit for the group", failures);
-        check(!back.getBlockState(STONE_WEST).getValue(TideChimeStoneBlock.ACTIVE), "the world's west stone was lit (it should stay unlit for other groups)", failures);
+        check(!jp.revati.skyabyss.trial.TrialGoal.isReached(back.getBlockState(STONE_WEST)), "the world's west stone was lit (it should stay unlit for other groups)", failures);
         // 前の石は潮招きを倒すまで黙る
         TideBackTrials.useStone(back, STONE_FRONT, fake, net.minecraft.world.item.ItemStack.EMPTY);
         check(!state.rung(TideBackState.Trial.FRONT), "front stone rang before the beckoner fell", failures);
@@ -1228,7 +1228,7 @@ public final class TideBackSelfTest {
         TideBackTrials.resetGroup(back, TEST, false, TideBackState.Trial.EAST, false);
         Map<BlockPos, BlockState> overlay = jp.revati.skyabyss.titan.group.GroupOverlays.compute(back, TEST);
         check(state.quiet() == TideBackState.Trial.EAST && !state.rung(TideBackState.Trial.EAST)
-                && !(overlay.containsKey(STONE_EAST) && overlay.get(STONE_EAST).getValue(TideChimeStoneBlock.ACTIVE)), "a forced quiet trial is lit before it is rung", failures);
+                && !(overlay.containsKey(STONE_EAST) && jp.revati.skyabyss.trial.TrialGoal.isReached(overlay.get(STONE_EAST))), "a forced quiet trial is lit before it is rung", failures);
         // 休み場の記録は、そのグループのリセットの番号で無効になる
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.putString("skyabyss_tide_checkpoint", "f0");

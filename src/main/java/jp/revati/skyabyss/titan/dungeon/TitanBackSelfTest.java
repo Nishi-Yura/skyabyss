@@ -524,26 +524,26 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E3_LOCK, BELL_GATE)) {
+        for (List<BlockPos> sealed : List.of(GATE, E1_EXIT, E3_LOCK, BELL_GATE)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
                 }
             }
         }
-        for (BlockPos p : RESONANCE_STONES) {
-            if (!level.getBlockState(p).is(ModBlocks.RESONANCE_STONE.get())) {
+        for (BlockPos p : GOAL_SPOTS) {
+            if (!jp.revati.skyabyss.trial.TrialGoal.isMark(level.getBlockState(p))) {
                 failures.add("resonance stone missing at " + p);
             }
             air(level, p.above(), "above resonance stone", failures);
         }
-        // 抜け道の内側 (鼓動の間の側) が柱などでふさがれていないこと
-        air(level, new BlockPos(HUB.x2(), FLOOR + 1, -53), "east return (hub side)", failures);
-        air(level, new BlockPos(E3.x1(), FLOOR + 1, -53), "east return (hall side)", failures);
-        // 頂は WEST_LEDGE_Y (戸の足もとの石の高さ)。その上だと支えが戸になる (詰み監査)
-        if (!level.getBlockState(new BlockPos(HUB.x1(), WEST_LEDGE_Y, WEST_RETURN_Z)).is(Blocks.LADDER)
-                || level.getBlockState(new BlockPos(HUB.x1(), WEST_LEDGE_Y + 1, WEST_RETURN_Z)).is(Blocks.LADDER)) {
-            failures.add("west return ladder missing or too high (top must be y " + WEST_LEDGE_Y + ")");
+        // 版 27: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無い。壁が閉じていて、封印の扉が置かれていないこと
+        for (List<BlockPos> gone : List.of(WEST_RETURN, EAST_RETURN, LOWER_RETURN)) {
+            for (BlockPos p : gone) {
+                if (level.getBlockState(p).is(ModBlocks.SEALED_GATE.get()) || level.getBlockState(p).isAir()) {
+                    failures.add("the old return gate was not walled over: " + p);
+                }
+            }
         }
         for (BlockPos start : List.of(mazeCell(MAZE_START_I, MAZE_START_J), mazeCell(MAZE_START2_I, MAZE_START2_J))) {
             if (!level.getBlockState(new BlockPos(start.getX() + MAZE_CELL / 2, FLOOR, start.getZ())).is(Blocks.LADDER)) {
@@ -1112,7 +1112,7 @@ public final class TitanBackSelfTest {
     // 試練を進めた状態から、リセットで元に戻ること (グループごと)
     private static void checkReset(ServerLevel level, List<String> failures) {
         BackGroupData.Record record = GroupProgress.of(level, TEST_GROUP);
-        for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+        for (int i = 0; i < GOAL_SPOTS.size(); i++) {
             record.setFlag(TitanBackTrials.STONE_FLAG + i, true);
         }
         GroupGates.open(level, TEST_GROUP, GATE);
@@ -1149,7 +1149,7 @@ public final class TitanBackSelfTest {
         checkCourses(level, after);
         checkMaze(level, after);
         after.forEach(f -> failures.add("after reset: " + f));
-        for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+        for (int i = 0; i < GOAL_SPOTS.size(); i++) {
             if (record.flag(TitanBackTrials.STONE_FLAG + i)) {
                 failures.add("reset left a stone singing for the group: " + i);
             }

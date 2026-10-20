@@ -460,7 +460,7 @@ public final class S08Valves extends StormCell {
                 bad.add("S08 panel " + v + " is missing");
             }
         }
-        if (!back.getBlockState(StormDeck2.S08_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck2.S08_STONE))) {
             bad.add("S08 stone missing");
         }
         // どの配置・数字・人数でも、目盛りが選べる (第一の段・第二の段とも、最短が 2 以上)

@@ -385,7 +385,7 @@ public final class W04Vents implements TrialCell {
                 break;
             }
         }
-        if (!back.getBlockState(WhaleDeck.W04_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W04_STONE))) {
             bad.add("W04 stone missing");
         }
         return bad;

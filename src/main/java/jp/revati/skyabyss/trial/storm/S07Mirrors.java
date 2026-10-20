@@ -483,7 +483,7 @@ public final class S07Mirrors extends StormCell {
         if (!back.getBlockState(StormDeck2.s07Catcher()).is(StormBackSetup.RECEIVER.get())) {
             bad.add("S07 catcher missing");
         }
-        if (!back.getBlockState(StormDeck2.S07_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck2.S07_STONE))) {
             bad.add("S07 stone missing");
         }
         // 解く状態が実際に光を窓へ、そして受け羽へ届ける。どの最初の状態も、そのままでは届かない

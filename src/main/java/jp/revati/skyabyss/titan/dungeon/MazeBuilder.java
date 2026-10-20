@@ -283,8 +283,9 @@ public final class MazeBuilder {
         for (int y = MAZE_EXIT_ROOM.floorY() + 1; y <= FLOOR; y++) {
             kit.set(MAZE_EXIT_ROOM.x1(), y, EXIT_LADDER_Z, ladderEast);
         }
+        // 版 27: 来た道へ戻る抜け道の戸 (紫の封印のブロック) は無くした。壁を閉じる
         for (BlockPos p : LOWER_RETURN) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
+            kit.set(p, kit.pal().wall());
         }
         // 鼓動の間の床の入口 (2 つ) を、黒い石の縁取りと灯りで目立たせる
         for (BlockPos hatch : List.of(mazeCell(MAZE_START_I, MAZE_START_J).offset(MAZE_CELL / 2, 0, 0), mazeCell(MAZE_START2_I, MAZE_START2_J).offset(MAZE_CELL / 2, 0, 0))) {

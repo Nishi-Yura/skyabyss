@@ -282,7 +282,7 @@ public final class E02Vents implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(EmberDeck.E02_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E02_STONE))) {
             bad.add("E02 stone missing");
         }
         return bad;

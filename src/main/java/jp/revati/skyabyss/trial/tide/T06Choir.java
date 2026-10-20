@@ -394,7 +394,7 @@ public final class T06Choir implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(TideDeck.T06_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T06_STONE))) {
             bad.add("T06 stone missing");
         }
         if (!back.getBlockState(TideDeck.T06_EXIT.get(0)).is(ModBlocks.SEALED_GATE.get())) {

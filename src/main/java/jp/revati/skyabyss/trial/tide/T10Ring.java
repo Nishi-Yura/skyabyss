@@ -209,7 +209,7 @@ public final class T10Ring extends RingArenaCell {
                 break;
             }
         }
-        if (!back.getBlockState(TideDeck.T10_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T10_STONE))) {
             bad.add("T10 stone missing");
         }
         return bad;

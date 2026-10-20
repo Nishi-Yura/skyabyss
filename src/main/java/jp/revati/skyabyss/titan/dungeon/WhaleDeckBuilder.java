@@ -68,12 +68,12 @@ final class WhaleDeckBuilder {
         kit.ribs(C1, 4, true);
         kit.wallLamps(C1, 3, Y + 3);
         // 石の差し口と戻りの光る床
-        kit.set(W02_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
-        kit.set(W06_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
-        kit.set(W07_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
-        kit.set(W10_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
+        kit.set(W02_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
+        kit.set(W06_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
+        kit.set(W07_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
+        kit.set(W10_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         for (BlockPos stone : new BlockPos[] {W03_STONE, W04_STONE, W11_STONE, W12_STONE, W08_STONE}) {
-            kit.set(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
+            kit.set(stone, jp.revati.skyabyss.trial.TrialGoal.mark());
         }
         for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD, W08_PAD}) {
             kit.set(pad, PAD);

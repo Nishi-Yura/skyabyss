@@ -1,8 +1,4 @@
 {
-  "block.skyabyss.wind_stone": {
-    "en": "Wind Chime Stone",
-    "ja": "風鳴り石"
-  },
   "block.skyabyss.feather_mirror": {
     "en": "Feather Mirror",
     "ja": "羽鏡"
@@ -89,7 +85,7 @@
   },
   "growth.skyabyss.reason.storm_trial": {
     "en": "Wind chime stone",
-    "ja": "風鳴り石"
+    "ja": "ゴール"
   },
   "message.skyabyss.storm.storm_soon": {
     "en": "A low wind growls through the bones... the storm is coming.",
@@ -105,7 +101,7 @@
   },
   "message.skyabyss.storm.stone_ringing": {
     "en": "The wind chime stone of %s rings (%s/%s).",
-    "ja": "%s の風鳴り石が鳴った（%s/%s）。"
+    "ja": "%s のゴールに着いた（%s/%s）。"
   },
   "message.skyabyss.storm.all_rung": {
     "en": "All three stones are singing. Something opens in the floor of the Wind Hall.",

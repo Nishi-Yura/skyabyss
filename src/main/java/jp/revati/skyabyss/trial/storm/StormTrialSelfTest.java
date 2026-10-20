@@ -91,7 +91,7 @@ public final class StormTrialSelfTest {
                     forceChunks(back, true);
                     // 背が建ってあれば (全体の実行では "storm back" が先に建てる) 建て直さない
                     back.getChunk(StormDeck.S02_STONE.getX() >> 4, StormDeck.S02_STONE.getZ() >> 4);
-                    if (!back.getBlockState(StormDeck.S02_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+                    if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck.S02_STONE))) {
                         long t0 = System.currentTimeMillis();
                         StormBackBuilder.build(back, TitanBackData.get(back));
                         NOTES.add("built in " + (System.currentTimeMillis() - t0) + " ms");

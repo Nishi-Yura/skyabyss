@@ -506,7 +506,7 @@ public final class T03Jellies implements TrialCell {
         if (shortest - ROW_WARN - ROW_ZAP < 60) {
             bad.add("T03 the tentacle rows leave too little time (" + (shortest - ROW_WARN - ROW_ZAP) + " ticks)");
         }
-        if (!back.getBlockState(TideDeck.T03_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T03_STONE))) {
             bad.add("T03 stone missing");
         }
         return bad;

@@ -263,7 +263,7 @@ public final class E12Nest implements TrialCell {
                 break;
             }
         }
-        if (!back.getBlockState(EmberDeck.E12_STONE).is(jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E12_STONE))) {
             bad.add("E12 stone missing");
         }
         return bad;

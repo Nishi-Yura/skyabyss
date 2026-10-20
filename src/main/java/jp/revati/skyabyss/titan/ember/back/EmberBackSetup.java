@@ -24,11 +24,6 @@ public final class EmberBackSetup {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
-    // 熾り石 (壊せない。鳴ると光る)
-    public static final DeferredBlock<KindleStoneBlock> KINDLE_STONE = BLOCKS.register(EmberIds.KINDLE_STONE,
-            () -> new KindleStoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(-1.0f, 3600000.0f)
-                    .noLootTable().sound(SoundType.POLISHED_DEEPSLATE).lightLevel(s -> s.getValue(KindleStoneBlock.ACTIVE) ? 13 : 3)));
-
     // 燠の灯 (吊り灯。光 12。燠の殻から作業台で作る。00 の 126)
     public static final DeferredBlock<CinderLampBlock> CINDER_LAMP = BLOCKS.register("cinder_lamp",
             () -> new CinderLampBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).forceSolidOn().strength(3.5f)

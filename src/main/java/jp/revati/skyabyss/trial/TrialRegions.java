@@ -268,7 +268,7 @@ public final class TrialRegions {
     public static BlockPos stoneOf(String titan, String key) {
         try {
             return switch (signalTitan(titan)) {
-                case "whale" -> TitanBackLayout.RESONANCE_STONES.get(Integer.parseInt(key));
+                case "whale" -> TitanBackLayout.GOAL_SPOTS.get(Integer.parseInt(key));
                 case "tide" -> switch (key) {
                     case "west" -> TideBackLayout.STONE_WEST;
                     case "east" -> TideBackLayout.STONE_EAST;

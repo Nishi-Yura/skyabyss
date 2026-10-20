@@ -440,7 +440,7 @@ public final class S11Cage extends StormCell {
                 }
             }
         }
-        if (!back.getBlockState(StormDeck2.S11_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck2.S11_STONE))) {
             bad.add("S11 stone missing");
         }
         return bad;

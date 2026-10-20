@@ -361,7 +361,7 @@ public final class S03Pillars extends StormCell {
                 bad.add("S03 pillar " + k + " has no gold tile");
             }
         }
-        if (!back.getBlockState(StormDeck.S03_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck.S03_STONE))) {
             bad.add("S03 stone missing");
         }
         // 形: どの形も金の床を含まず、どの段にも安全な床が半分以上ある (ALL は金の一枚だけ)

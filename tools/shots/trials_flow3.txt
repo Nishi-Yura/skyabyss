@@ -1,0 +1,53 @@
+# 試練の流れ (版 27。docs/design/29 の 4.6・4.7、26 の 8.8): ゴールの印・鼓動の間の碑・今週の試練の入口・入ると題が出る部屋。
+# ./gradlew runShots -Pscript=tools/shots/trials_flow3.txt  →  python -I tools/trials_flow3_sheet.py で docs/review/previews/trials_flow3_sheet.png
+# 岩鯨の背 (平らな世界)。鼓動の間 (0,104,-29)。今週の入口のパッドは (1,104,-34) (置き場は WeeklyGate.find が決める。変わったら座標を直す)
+world trials_flow3 flat
+size 1280 720
+timeout 3000
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive titan_back
+waitchunks 1200
+wait 60
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+cmd skyabyss dev trial build
+wait 40
+cmd skyabyss dev trial weekly
+cmd skyabyss dev trial lit 0
+cmd skyabyss dev trial lit 2
+fov 90
+hud off
+camera skyabyss:titan_back 0 105.8 -31.5 0 6
+waitchunks 600
+wait 40
+shot hub_tablets
+camera skyabyss:titan_back 0 107.5 -26 180 20
+waitchunks 600
+wait 40
+shot weekly_path
+camera skyabyss:titan_back 1.5 105.6 -31.6 180 8
+waitchunks 600
+wait 40
+shot weekly_sign
+camera skyabyss:titan_back 21.5 121.8 40.5 270 10
+waitchunks 600
+wait 40
+shot goal_mark
+hud on
+camera skyabyss:titan_back -22 105.6 5 0 5
+waitchunks 600
+wait 30
+shot room_library
+camera skyabyss:titan_back -43 114.6 -108 180 12
+waitchunks 600
+wait 30
+shot room_bell

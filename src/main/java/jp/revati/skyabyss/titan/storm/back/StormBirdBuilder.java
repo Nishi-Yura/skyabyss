@@ -687,7 +687,7 @@ public final class StormBirdBuilder {
         // 風鳴り石 (台の上)
         for (BlockPos s : new BlockPos[] {WEST_STONE, EAST_STONE, FRONT_STONE}) {
             kit.put(s.getX(), s.getY() - 1, s.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
-            kit.put(s.getX(), s.getY(), s.getZ(), StormBackSetup.CHIME_STONE.get().defaultBlockState());
+            kit.put(s.getX(), s.getY(), s.getZ(), jp.revati.skyabyss.trial.TrialGoal.mark());
         }
         // 三つ目の受け羽の下の、人の形の小さな浮き彫り (四角い頭)。眼の間の北東の角
         kit.put(10, EYE_HALL.floor() + 1, EYE_HALL.z1() - 1, Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());

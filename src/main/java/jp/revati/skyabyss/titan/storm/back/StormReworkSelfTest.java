@@ -67,7 +67,7 @@ final class StormReworkSelfTest {
             check(StormRib.layerAt(Vec3.atBottomCenterOf(spawn)) == layer, "layerAt does not see rest w" + (layer + 1), f);
             check(l.getBlockState(StormRib.layerLight(layer)).is(StormKit.SLATE.getBlock()), "layer light " + layer + " should start dark", f);
         }
-        check(l.getBlockState(WEST_STONE).is(StormBackSetup.CHIME_STONE.get()), "no wind stone at the top ledge", f);
+        check(jp.revati.skyabyss.trial.TrialGoal.isMark(l.getBlockState(WEST_STONE)), "no wind stone at the top ledge", f);
         // 輪の流れが通る線 (人の大きさの箱がぶつからない)
         for (int k = 0; k < RIB_LAYERS; k++) {
             lineClear(l, StormRib.upRing(k), StormRib.landingTarget(k + 1), "up ring " + k, f);

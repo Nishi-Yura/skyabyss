@@ -319,7 +319,7 @@ public final class W02Bell implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(WhaleDeck.W02_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W02_STONE))) {
             bad.add("W02 stone missing");
         }
         return bad;
