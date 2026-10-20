@@ -80,10 +80,10 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 6 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 7 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -151,11 +151,23 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>空見の館（議事・伝承の書庫）</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">国の記録。伝承の書の頁の読み返しと旅の覚書の置き場。「忘れないうちに書け」の出どころ。四章で開く。中は本棚と書見台。</p>
+  <p class="extra">採用: B 記録の塔の館（設計図に写し済み）。</p>
   <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="hall_sheet.jpg" aria-label="空見の館（議事・伝承の書庫） のシートを拡大"><img loading="lazy" src="hall_sheet.jpg" alt="空見の館（議事・伝承の書庫） の比較シート"></button></figure></div>
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="hall-a"><input type="radio" name="hall" id="hall-a" value="a"><span class="letter">A</span><span class="otext"><b>書庫の館</b><span>石の長い館（23×13）。背の高い窓と深層岩の切妻。中は二段の本棚。落ち着いた役所</span></span></label><label class="opt" for="hall-b"><input type="radio" name="hall" id="hall-b" value="b"><span class="letter">B</span><span class="otext"><b>記録の塔の館</b><span>館の東に丸い記録の塔（高さ 18）。帳面は塔に積まれる。砦の塔と対になる</span></span></label><label class="opt" for="hall-c"><input type="radio" name="hall" id="hall-c" value="c"><span class="letter">C</span><span class="otext"><b>回廊の館</b><span>南に柱の回廊。回廊の壁に四つの章の碑が並び、屋根は平らな露台。開いたあと回廊を歩きながら碑を読める</span></span></label></fieldset>
   <label class="note-l" for="hall-note">直してほしい点 (任意)</label>
   <textarea id="hall-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="smithy" data-id="smithy">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>鍛冶場（共鳴の炉と旅の職人の店）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">序章から開いている建物。共鳴の炉（背の到着の台から移す）、金床・鍛冶台・砥石、溶鉱炉、職人の店（樽と棚）。職人は荷車の傍らで初めて立ち、以後ここに居る。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="smithy_sheet.jpg" aria-label="鍛冶場（共鳴の炉と旅の職人の店） のシートを拡大"><img loading="lazy" src="smithy_sheet.jpg" alt="鍛冶場（共鳴の炉と旅の職人の店） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="smithy-a"><input type="radio" name="smithy" id="smithy-a" value="a"><span class="letter">A</span><span class="otext"><b>開いた鍛冶場</b><span>丸石と石レンガの工房（29×19）。南が大きく開き庇が張り出す。奥に炉と大きな煙突、東の隅に職人の店。使いやすい</span></span></label><label class="opt" for="smithy-b"><input type="radio" name="smithy" id="smithy-b" value="b"><span class="letter">B</span><span class="otext"><b>炉の塔</b><span>木の工房（23×15）の西に石の丸い炉の塔（高さ 12）。炉はその足もと、上は煙突。塔の火が夜の目印になる</span></span></label><label class="opt" for="smithy-c"><input type="radio" name="smithy" id="smithy-c" value="c"><span class="letter">C</span><span class="otext"><b>屋根だけの工房</b><span>柱と屋根だけの開いた工房（27×17）。真ん中に炉の台と高い煙突、まわりに道具の台と職人の荷車。市と地続きの作り</span></span></label></fieldset>
+  <label class="note-l" for="smithy-note">直してほしい点 (任意)</label>
+  <textarea id="smithy-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -163,7 +175,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 6;
+  const total = 7;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
