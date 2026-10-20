@@ -1,0 +1,106 @@
+# 武器の新しい動き (weapon_moves/*.json) の確認: 一人称の止めた絵 (swingpose + swingstep)、実際に振った絵 (swing = 時計 + 軌跡 + 連撃)、三人称、点検 (inspectpose)
+# 使い方: ./gradlew runShots -Pscript=tools/shots/weapon_moves.txt --no-daemon   (音は自分で消える)
+world shots flat
+size 960 540
+timeout 1500
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+wait 200
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 300
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+perspective first
+hud on
+swingpose off
+wait 12
+shot gs_fp_idle
+swingstep 0
+swingpose 0.34
+wait 3
+shot gs_fp_top
+swingpose 0.5
+wait 3
+shot gs_fp_hit
+swingstep 1
+swingpose 0.5
+wait 3
+shot gs_fp_hit2
+swingpose off
+wait 30
+swing
+wait 5
+shot gs_fp_live
+wait 4
+shot gs_fp_live2
+wait 30
+swingpose 0.5
+swingstep 0
+perspective front
+hud off
+wait 3
+shot gs_tp_hit
+inspectpose 0.5
+swingpose off
+perspective first
+hud on
+wait 3
+shot gs_fp_inspect
+inspectpose off
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+swingpose off
+wait 12
+swingstep 2
+swingpose 0.45
+wait 3
+shot pike_fp_thrust
+perspective front
+hud off
+wait 3
+shot pike_tp_thrust
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+swingstep 0
+swingpose 0.4
+wait 3
+shot fang_fp_slash1
+swingstep 1
+wait 3
+shot fang_fp_slash2
+swingpose off
+wait 30
+swing
+wait 2
+shot fang_fp_live
+cmd item replace entity @s weapon.mainhand with skyabyss:smith_hammer
+swingpose 0.55
+swingstep 0
+wait 3
+shot hammer_fp_slam
+perspective front
+hud off
+wait 3
+shot hammer_tp_slam
+perspective first
+hud on
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_bell_staff
+swingpose 0.46
+wait 3
+shot staff_fp_charge
+swingpose 0.5
+wait 3
+shot staff_fp_hit
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+swingpose 0.45
+wait 3
+shot shield_fp_bash
+cmd item replace entity @s weapon.mainhand with skyabyss:thunder_wing_bow
+swingpose 0.4
+wait 3
+shot bow_fp_flourish
+swingpose off
+quit

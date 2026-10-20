@@ -337,3 +337,10 @@ python tools/gen_cinematic_voice.py --review                     # 3 様式の�
 ## 文字のはみ出しの検査 (`python tools/check_text_fit.py`)
 
 日本語・英語の画面・HUD の文を、字体の幅の表で箱 (幅・行数) と照らす。GUI 倍率 2・3・4 (1920x1080 の窓)。箱の登録簿 `BOXES` は画面のコードから写した値なので、画面の寸法を変えたらここも直す。知らせ (`Notice.*`) は Java のソースから経路を拾って、字幕 3 行・中央 2 行・札 3 行・アクションバー 1 行などに照らす。失敗が 1 件でもあれば終了コード 1。引数の `%s` は 2 字、名前が入る箇所は余裕を見て箱を決めてある。
+
+## 武器の動き (`gen_weapon_moves.py`・`weapon_moves_sheet.py`)
+
+- 武器ごとの動き (構え・連撃の各段のキーフレーム・当たる瞬間・ヒットストップ・画面の揺れ・軌跡・点検) は `src/main/resources/assets/skyabyss/weapon_moves/<品の id>.json`。**正は `tools/gen_weapon_moves.py`** (直して `python tools/gen_weapon_moves.py` で書き出す)。ゲームの読み込みは `weapon/MoveSet.java`、サーバーの「当たる tick」は `weapon/WeaponStrikes.java`
+- 各段に `hit` の key が 1 つあり、その時刻 = 武器の `strike` (サーバーがダメージを入れる、振りの何割か)。自己テスト `SKYABYSS_SELFTEST=1 SKYABYSS_SELFTEST_ONLY="weapon" ./gradlew runServer` が、同期・連撃・釣り合い・預けたクリックの当たる tick を見る
+- 一人称の連続の絵 `python tools/weapon_moves_sheet.py` → `docs/review/previews/weapon_moves_sheet.png`。ゲーム内の確認は `tools/shots/weapon_moves.txt` (台本の `swingstep <段>`・`inspectpose <0..1>` が使える)
+- 画面の揺れは設定 `weaponShake`、軌跡は `weaponTrail`。点検のキーは `[` (`KeyDefaults.WEAPON_INSPECT`)

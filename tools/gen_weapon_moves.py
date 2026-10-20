@@ -495,8 +495,8 @@ W["coral_shield"] = weapon(
         step("盾殴り", 0, 0.3, [
             k(0.0, "smooth", TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, MX=-0.5, BY=0),
             k(0.28, "in_out", TX=-0.06, TY=0.02, TZ=0.1, RX=-8, RY=-6, RZ=4, MX=-0.4, BY=0.2),
-            k(0.45, "snap", hit=True, TX=0.05, TY=0.0, TZ=-0.5, RX=-18, RY=14, RZ=-4, MX=-1.3, BY=-0.3),
-            k(0.62, "out_back", TX=0.04, TY=0.0, TZ=-0.54, RX=-20, RY=16, RZ=-4, MX=-1.35, BY=-0.3),
+            k(0.45, "snap", hit=True, TX=0.14, TY=0.04, TZ=-0.36, RX=-18, RY=14, RZ=-4, MX=-1.3, BY=-0.3),
+            k(0.62, "out_back", TX=0.12, TY=0.04, TZ=-0.4, RX=-20, RY=16, RZ=-4, MX=-1.35, BY=-0.3),
             k(1.0, "out", TX=0, TY=0, TZ=0, RX=0, RY=0, RZ=0, MX=-0.5, BY=0),
         ], 0.08, 0.2),
     ],

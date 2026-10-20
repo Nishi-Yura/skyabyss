@@ -144,7 +144,7 @@ final class WeaponTrail {
     private static int alpha(Sample s, float now) {
         float age = Math.max(0f, (now - s.time) / LIFE);
         float k = 1f - age;
-        return Math.max(0, Math.min(255, (int) (s.level * k * k * 150f)));
+        return Math.max(0, Math.min(255, (int) (s.level * k * k * 210f)));
     }
 
     static void clear() {
