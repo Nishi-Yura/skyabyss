@@ -332,15 +332,37 @@ def plaza_market():
 
 
 def guild():
-    # 鯨追いの組合 (x 40..84, z -32..-10)。閉じた戸 (西)。碑
+    # 鯨追いの組合 (ラフ A「長屋の組合」で決定。x 40..84, z -32..-10)。石の腰壁と木の壁、切妻、棟に鯨骨の肋を三つ。
+    # 西の大戸 (鉄の両開き) は閉じている。外に言伝ての板の枠と名簿の碑
     x0, z0, x1, z1 = 40, -32, 84, -10
-    hollow(x0, 0, z0, x1, 7, z1, 'stone_bricks', roof='spruce_slab[type=bottom,waterlogged=false]', floor_s='spruce_planks', corner='stripped_spruce_log[axis=y]')
+    cz = (z0 + z1) // 2
+    box(x0, -1, z0, x1, -1, z1, 'spruce_planks')
+    hollow(x0, 0, z0, x1, 2, z1, 'stone_bricks', roof=None, floor_s=None, corner='stripped_spruce_log[axis=y]')
+    hollow(x0, 3, z0, x1, 7, z1, 'spruce_planks', roof=None, floor_s=None, corner='stripped_spruce_log[axis=y]')
+    for x in range(x0 + 3, x1 - 2, 4):
+        blk(x, 4, z0, 'glass_pane[north=false,south=false,east=true,west=true]')
+        blk(x, 4, z1, 'glass_pane[north=false,south=false,east=true,west=true]')
     box(x0 + 1, 8, z0 + 1, x1 - 1, 8, z1 - 1, 'spruce_planks')
-    windows(x0, z0, x1, z1, 3, 5)
-    blk(x0, 0, -21, 'iron_door[facing=east,half=lower,hinge=left,open=false,powered=false]')
-    blk(x0, 1, -21, 'iron_door[facing=east,half=upper,hinge=left,open=false,powered=false]')
-    tablet(x0 - 1, 0, -23, 'west', 'guild')
-    lantern_post(x0 - 1, 0, -19)
+    gable(x0 - 1, x1 + 1, z0 - 1, z1 + 1, 8)
+    # 肋: 棟をまたぐ骨の弧 (三つ)
+    for x in (x0 + 8, (x0 + x1) // 2, x1 - 8):
+        for z in range(z0 - 2, z1 + 3):
+            y = 9 + 11 - abs(z - cz) * 11 // 13
+            blk(x, y, z, 'bone_block[axis=z]')
+    # 西の大戸 (閉じた鉄の戸 2 枚)
+    opening(x0, 0, cz - 1, x0, 2, cz)
+    blk(x0, 0, cz - 1, 'iron_door[facing=east,half=lower,hinge=left,open=false,powered=false]')
+    blk(x0, 1, cz - 1, 'iron_door[facing=east,half=upper,hinge=left,open=false,powered=false]')
+    blk(x0, 0, cz, 'iron_door[facing=east,half=lower,hinge=right,open=false,powered=false]')
+    blk(x0, 1, cz, 'iron_door[facing=east,half=upper,hinge=right,open=false,powered=false]')
+    # 言伝ての板の枠 (二本柱と庇) と名簿の碑
+    for dz in (-2, 2):
+        box(x0 - 3, 0, cz + 6 + dz, x0 - 3, 3, cz + 6 + dz, 'stripped_spruce_log[axis=y]')
+    box(x0 - 3, 4, cz + 3, x0 - 3, 4, cz + 9, 'spruce_slab[type=bottom,waterlogged=false]')
+    box(x0 - 3, 1, cz + 5, x0 - 3, 2, cz + 7, 'spruce_planks')
+    tablet(x0 - 2, 0, cz - 5, 'west', 'guild')
+    lantern_post(x0 - 2, 0, cz - 3)
+    lantern_post(x0 - 2, 0, cz + 3)
 
 
 def shrine():
