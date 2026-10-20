@@ -128,6 +128,27 @@ def walls():
             blk(x0 if name == 'gate_w' else x1, 5, z0 - 1, 'lantern[hanging=false]')
             blk(x0 if name == 'gate_w' else x1, 5, z1 + 1, 'lantern[hanging=false]')
         tablet(tx, 0, tz, tf, name)
+        # 門塔 (ラフ A「石の門」で決定): 門をはさむ二つの四角い塔 7×7・高さ 14
+        if name in ('gate_n', 'gate_s'):
+            zt0 = -W - 2 if name == 'gate_n' else W - 4
+            for xt0 in (-11, 5):
+                box(xt0, 0, zt0, xt0 + 6, 13, zt0 + 6, 'stone_bricks')
+                box(xt0 + 1, 1, zt0 + 1, xt0 + 5, 12, zt0 + 5, 'air')
+                box(xt0, 14, zt0, xt0 + 6, 14, zt0 + 6, 'deepslate_tile_slab[type=bottom,waterlogged=false]')
+                blk(xt0 + 3, 15, zt0 + 3, 'lantern[hanging=false]')
+                for y in (5, 10):
+                    zi = zt0 + 6 if name == 'gate_n' else zt0
+                    opening(xt0 + 3, y, zi, xt0 + 3, y + 1, zi)
+        else:
+            xt0 = -W - 2 if name == 'gate_w' else W - 4
+            for zt0 in (-11, 5):
+                box(xt0, 0, zt0, xt0 + 6, 13, zt0 + 6, 'stone_bricks')
+                box(xt0 + 1, 1, zt0 + 1, xt0 + 5, 12, zt0 + 5, 'air')
+                box(xt0, 14, zt0, xt0 + 6, 14, zt0 + 6, 'deepslate_tile_slab[type=bottom,waterlogged=false]')
+                blk(xt0 + 3, 15, zt0 + 3, 'lantern[hanging=false]')
+                for y in (5, 10):
+                    xi = xt0 + 6 if name == 'gate_w' else xt0
+                    opening(xi, y, zt0 + 3, xi, y + 1, zt0 + 3)
 
 
 def streets():
