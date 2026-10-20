@@ -77,13 +77,13 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 <div class="wrap">
   <div class="top">
     <h1>はじまりの町 ラフ選定</h1>
-    <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。第 2 回の 3 案から選んでください（第 1 回の 3 案は取り下げ）。直してほしい点はメモに。</p>
+    <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 1 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 10 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a><a href="#market" data-nav="market">市</a><a href="#houses" data-nav="houses">住まい</a><a href="#gate" data-nav="gate">門と壁</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -96,6 +96,114 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="town_layout-a"><input type="radio" name="town_layout" id="town_layout-a" value="a"><span class="letter">A</span><span class="otext"><b>鐘の都</b><span>北の段に大鐘楼と砦が並んで都を見下ろす。段の下に広場と市、東に組合、西に社。見通しがよく迷わない。墓地は西門の外</span></span></label><label class="opt" for="town_layout-b"><input type="radio" name="town_layout" id="town_layout-b" value="b"><span class="letter">B</span><span class="otext"><b>砦の都</b><span>北東の丘の砦を壁で二重に囲い、坂の大通りが南西の市へ下る。国の座が強く出る。鐘楼は砦の門の前。高低差があり景色が変わる</span></span></label><label class="opt" for="town_layout-c"><input type="radio" name="town_layout" id="town_layout-c" value="c"><span class="letter">C</span><span class="otext"><b>二つの丘</b><span>東の丘に砦と館（国の務め）、西の丘に鐘楼と社（祈り）。谷の大通りに市・組合・鍛冶。務めと祈りが向かい合う形。歩く距離は長め</span></span></label></fieldset>
   <label class="note-l" for="town_layout-note">直してほしい点 (任意)</label>
   <textarea id="town_layout-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="bell_tower" data-id="bell_tower">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>大鐘楼（語り部の家つき）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: A 石の鐘楼（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="bell_sheet.jpg" aria-label="大鐘楼（語り部の家つき） のシートを拡大"><img loading="lazy" src="bell_sheet.jpg" alt="大鐘楼（語り部の家つき） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="bell_tower-a"><input type="radio" name="bell_tower" id="bell_tower-a" value="a"><span class="letter">A</span><span class="otext"><b>石の鐘楼</b><span>四角い石レンガの塔 9×9・高さ 24。四方のアーチの吹き抜け、頂に鐘の間と尖り屋根。家は東に別棟（木の家）</span></span></label><label class="opt" for="bell_tower-b"><input type="radio" name="bell_tower" id="bell_tower-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の鐘楼</b><span>深層岩の塔に鯨の骨の肋を四隅に立て、頂で合わせる。鐘は骨の梁に。国の印（鯨追い）が形に出る。家は石造りの別棟</span></span></label><label class="opt" for="bell_tower-c"><input type="radio" name="bell_tower" id="bell_tower-c" value="c"><span class="letter">C</span><span class="otext"><b>段の鐘楼</b><span>三段の塔（13→9→5）。一段目が鐘、二段目が語り部の部屋で中に階段。家は塔の中。灯りの庇が段ごとに</span></span></label></fieldset>
+  <label class="note-l" for="bell_tower-note">直してほしい点 (任意)</label>
+  <textarea id="bell_tower-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="keep" data-id="keep">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>空見の砦（天守のない見張りの砦）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: A 四隅の塔の砦（本丸を足して設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="keep_sheet.jpg" aria-label="空見の砦（天守のない見張りの砦） のシートを拡大"><img loading="lazy" src="keep_sheet.jpg" alt="空見の砦（天守のない見張りの砦） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="keep-a"><input type="radio" name="keep" id="keep-a" value="a"><span class="letter">A</span><span class="otext"><b>四隅の塔の砦</b><span>44×40 の城壁（高さ 10）と四隅の塔、北東に見張り塔（高さ 30）。中に閉じた本丸（低い石の館）。今の骨組みに近い</span></span></label><label class="opt" for="keep-b"><input type="radio" name="keep" id="keep-b" value="b"><span class="letter">B</span><span class="otext"><b>一本の大塔</b><span>低い輪の壁の中に、太い見張り塔（15×15・高さ 40）だけが立つ。「塔だけが生きている」をそのまま形に。都のどこからでも見える</span></span></label><label class="opt" for="keep-c"><input type="radio" name="keep" id="keep-c" value="c"><span class="letter">C</span><span class="otext"><b>岩の上の砦</b><span>盛った岩（三段）の上に小さな砦と見張り塔。南の階段で上る。遠くから丘の上の砦に見える。砦の足もとに岩の段ができる</span></span></label></fieldset>
+  <label class="note-l" for="keep-note">直してほしい点 (任意)</label>
+  <textarea id="keep-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="guild" data-id="guild">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>鯨追いの組合（板・名簿・順位の石）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: A 長屋の組合（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="guild_sheet.jpg" aria-label="鯨追いの組合（板・名簿・順位の石） のシートを拡大"><img loading="lazy" src="guild_sheet.jpg" alt="鯨追いの組合（板・名簿・順位の石） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="guild-a"><input type="radio" name="guild" id="guild-a" value="a"><span class="letter">A</span><span class="otext"><b>長屋の組合</b><span>45×23 の長い館。石の腰壁と木の壁、切妻の棟に鯨骨の肋を三つ渡す。落ち着いた組合の家</span></span></label><label class="opt" for="guild-b"><input type="radio" name="guild" id="guild-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の屋根</b><span>鯨の肋骨そのものを屋根にした館。入口は鯨の頭骨の門（目に灯り）。いちばん鯨追いらしい。やや奇抜</span></span></label><label class="opt" for="guild-c"><input type="radio" name="guild" id="guild-c" value="c"><span class="letter">C</span><span class="otext"><b>二階の組合</b><span>二階建て。一階は石、二階は木の張り出し。西に露台と帆柱（旗）。板は露台の下。船乗りの組合の雰囲気</span></span></label></fieldset>
+  <label class="note-l" for="guild-note">直してほしい点 (任意)</label>
+  <textarea id="guild-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="shrine" data-id="shrine">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>四巨神の社（転生の台座・鍵の間）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: C 石の輪の社（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="shrine_sheet.jpg" aria-label="四巨神の社（転生の台座・鍵の間） のシートを拡大"><img loading="lazy" src="shrine_sheet.jpg" alt="四巨神の社（転生の台座・鍵の間） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="shrine-a"><input type="radio" name="shrine" id="shrine-a" value="a"><span class="letter">A</span><span class="otext"><b>八角の社</b><span>深層岩の八角堂（幅 28・高さ 10）。四方に巨神の色の柱と灯り、頂に小さな塔。閉じた堂で、中は暗く静か。今の骨組みに近い</span></span></label><label class="opt" for="shrine-b"><input type="radio" name="shrine" id="shrine-b" value="b"><span class="letter">B</span><span class="otext"><b>四つの塔の社</b><span>四角い堂の四隅に巨神ごとの材質の塔（高さ 16）。段々の屋根と天窓。遠くから四本の塔で社と分かる</span></span></label><label class="opt" for="shrine-c"><input type="radio" name="shrine" id="shrine-c" value="c"><span class="letter">C</span><span class="otext"><b>石の輪の社</b><span>屋根のない社。四つの大きな巨神の石が輪に立ち、骨の梁が中央の台を覆う。空の下で祈る形。輪は低い壁と閉じた門</span></span></label></fieldset>
+  <label class="note-l" for="shrine-note">直してほしい点 (任意)</label>
+  <textarea id="shrine-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="hall" data-id="hall">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>空見の館（議事・伝承の書庫）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: B 記録の塔の館（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="hall_sheet.jpg" aria-label="空見の館（議事・伝承の書庫） のシートを拡大"><img loading="lazy" src="hall_sheet.jpg" alt="空見の館（議事・伝承の書庫） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="hall-a"><input type="radio" name="hall" id="hall-a" value="a"><span class="letter">A</span><span class="otext"><b>書庫の館</b><span>石の長い館（23×13）。背の高い窓と深層岩の切妻。中は二段の本棚。落ち着いた役所</span></span></label><label class="opt" for="hall-b"><input type="radio" name="hall" id="hall-b" value="b"><span class="letter">B</span><span class="otext"><b>記録の塔の館</b><span>館の東に丸い記録の塔（高さ 18）。帳面は塔に積まれる。砦の塔と対になる</span></span></label><label class="opt" for="hall-c"><input type="radio" name="hall" id="hall-c" value="c"><span class="letter">C</span><span class="otext"><b>回廊の館</b><span>南に柱の回廊。回廊の壁に四つの章の碑が並び、屋根は平らな露台。開いたあと回廊を歩きながら碑を読める</span></span></label></fieldset>
+  <label class="note-l" for="hall-note">直してほしい点 (任意)</label>
+  <textarea id="hall-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="smithy" data-id="smithy">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>鍛冶場（共鳴の炉と旅の職人の店）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: A 開いた鍛冶場（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="smithy_sheet.jpg" aria-label="鍛冶場（共鳴の炉と旅の職人の店） のシートを拡大"><img loading="lazy" src="smithy_sheet.jpg" alt="鍛冶場（共鳴の炉と旅の職人の店） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="smithy-a"><input type="radio" name="smithy" id="smithy-a" value="a"><span class="letter">A</span><span class="otext"><b>開いた鍛冶場</b><span>丸石と石レンガの工房（29×19）。南が大きく開き庇が張り出す。奥に炉と大きな煙突、東の隅に職人の店。使いやすい</span></span></label><label class="opt" for="smithy-b"><input type="radio" name="smithy" id="smithy-b" value="b"><span class="letter">B</span><span class="otext"><b>炉の塔</b><span>木の工房（23×15）の西に石の丸い炉の塔（高さ 12）。炉はその足もと、上は煙突。塔の火が夜の目印になる</span></span></label><label class="opt" for="smithy-c"><input type="radio" name="smithy" id="smithy-c" value="c"><span class="letter">C</span><span class="otext"><b>屋根だけの工房</b><span>柱と屋根だけの開いた工房（27×17）。真ん中に炉の台と高い煙突、まわりに道具の台と職人の荷車。市と地続きの作り</span></span></label></fieldset>
+  <label class="note-l" for="smithy-note">直してほしい点 (任意)</label>
+  <textarea id="smithy-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="market" data-id="market">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>市（露店・井戸・村人）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: C 丸い市（設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="market_sheet.jpg" aria-label="市（露店・井戸・村人） のシートを拡大"><img loading="lazy" src="market_sheet.jpg" alt="市（露店・井戸・村人） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="market-a"><input type="radio" name="market" id="market-a" value="a"><span class="letter">A</span><span class="otext"><b>露店の列</b><span>市松の石畳に橙と白の庇の露店が二列、真ん中に屋根つきの井戸。今の骨組み。見通しがよい</span></span></label><label class="opt" for="market-b"><input type="radio" name="market" id="market-b" value="b"><span class="letter">B</span><span class="otext"><b>屋根つきの市</b><span>柱と切妻の長い市場（36×16）。両側にカウンターと棚、奥に井戸。雨の日も市が立つ。広場の一角が建物になる</span></span></label><label class="opt" for="market-c"><input type="radio" name="market" id="market-c" value="c"><span class="letter">C</span><span class="otext"><b>丸い市</b><span>井戸の噴水を囲んで露店が輪に並び、外に腰掛けと灯りの輪。広場の真ん中が集まる所になる</span></span></label></fieldset>
+  <label class="note-l" for="market-note">直してほしい点 (任意)</label>
+  <textarea id="market-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="houses" data-id="houses">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>住まい（空き家 8〜12）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">採用: A 石と木の家（12 軒、設計図に写し済み）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="houses_sheet.jpg" aria-label="住まい（空き家 8〜12） のシートを拡大"><img loading="lazy" src="houses_sheet.jpg" alt="住まい（空き家 8〜12） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="houses-a"><input type="radio" name="houses" id="houses-a" value="a"><span class="letter">A</span><span class="otext"><b>石と木の家</b><span>7×7。石の腰壁と木の壁、切妻の屋根、小さな煙突。戸口は開いている。今の骨組みに屋根と煙突を足した形</span></span></label><label class="opt" for="houses-b"><input type="radio" name="houses" id="houses-b" value="b"><span class="letter">B</span><span class="otext"><b>二階の家</b><span>7×7 で二階建て。石の一階、張り出した木の二階、深層岩の瓦の段々屋根。都らしい高さが出る</span></span></label><label class="opt" for="houses-c"><input type="radio" name="houses" id="houses-c" value="c"><span class="letter">C</span><span class="otext"><b>長屋</b><span>三軒つながりの長屋（21×7）。共通の切妻、戸口が三つ、一軒ごとに煙突。通りに面して並べると町並みになる</span></span></label></fieldset>
+  <label class="note-l" for="houses-note">直してほしい点 (任意)</label>
+  <textarea id="houses-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="gate" data-id="gate">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>門と壁（鯨門・潮門・風門・灰門）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">四つの門は章の跡地の方位を向き、門の碑がその巨神のことを一行言う。壁は石レンガ（厚さ 3・高さ 8）で四隅に塔。絵は 40 ブロックの一区間。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="gate_sheet.jpg" aria-label="門と壁（鯨門・潮門・風門・灰門） のシートを拡大"><img loading="lazy" src="gate_sheet.jpg" alt="門と壁（鯨門・潮門・風門・灰門） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="gate-a"><input type="radio" name="gate" id="gate-a" value="a"><span class="letter">A</span><span class="otext"><b>石の門</b><span>二つの四角い門塔（高さ 14）が門（幅 7・高さ 6）をはさむ。門の上に深層岩の帯と灯り。堅い国の門</span></span></label><label class="opt" for="gate-b"><input type="radio" name="gate" id="gate-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の門</b><span>門の前に鯨の顎の骨（骨の弧）が架かり、壁には 12 ごとに骨の柱。鯨追いの国の印が門に出る</span></span></label><label class="opt" for="gate-c"><input type="radio" name="gate" id="gate-c" value="c"><span class="letter">C</span><span class="otext"><b>二重の門</b><span>門の外に低い外壁の前庭（馬出し）。外の門と内の門が食い違う。守りの国らしいが、出入りの歩きが少し増える</span></span></label></fieldset>
+  <label class="note-l" for="gate-note">直してほしい点 (任意)</label>
+  <textarea id="gate-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -103,7 +211,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 1;
+  const total = 10;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
