@@ -67,7 +67,7 @@ public final class EmberGoalHud {
     @SubscribeEvent
     static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (!shown(mc)) {
+        if (!shown(mc) || !jp.revati.skyabyss.client.titan.BackGaugeHud.placed()) {
             return;
         }
         GuiGraphics g = event.getGuiGraphics();

@@ -42,6 +42,11 @@ public final class BackGaugeHud {
         }
     }
 
+    // 置き場が割り当てられているか (入る空きがなく出さないことになった間は false。板を従来の位置に描いてはいけない)
+    public static boolean placed() {
+        return jp.revati.skyabyss.client.hud.HudManager.placed(jp.revati.skyabyss.hud.HudLayout.Id.BACK_GAUGE);
+    }
+
     // 板の上端: 置き場は HudManager (右上。誓いの帯の下、効き目の絵・札の下)。もらえていなければ従来の位置
     public static int top(Minecraft mc) {
         jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BACK_GAUGE);

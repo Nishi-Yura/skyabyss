@@ -1,0 +1,144 @@
+# バニラの HUD をずらす確認 2 (札・チャット・効き目・字幕・アクションバー・横板が mod の HUD に重ならない)。1920x1080 で GUI 2/3/4 (自動 = 4)。./gradlew runShots -Pscript=tools/shots/hud_vanilla2.txt -PshotsName=hud_vanilla2
+# HUD の置き場の確認 (docs/design/18_notices.md の 9 章)。./gradlew runShots -Pscript=tools/shots/hud_layout.txt [-PshotsName=<名前>]
+# 一番混む場面 3 つを、GUI 倍率 2・3・4 で撮る:
+#   boss    : パーティでのボス戦 (ボスバー 3 本・効き目・技の名前・手引き・キーの手がかり・目的の帯・誓い・目盛りと目的の板・仲間の一覧と矢印)
+#   opening : 序盤 (手引き 2 行 + できた + キーの手がかり + 字幕 + 目的の帯)
+#   back    : 背中 (目盛りと目的の板 + 誓い + 仲間の一覧 + 札)
+# 見本のデータは huddemo (client/hud/HudDemo)。4:3 の窓は `size 1024 768` に替えて流す
+world hud_layout flat
+size 1920 1080
+timeout 900
+render 8
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+hud on
+waitchunks
+chat clear
+guiscale 2
+# 新しい世界の開幕の暗転と題字 (360 tick) と場面が終わるまで待つ
+wait 900
+cmd effect give @a minecraft:speed infinite 0 false
+cmd effect give @a minecraft:strength infinite 0 false
+cmd effect give @a minecraft:night_vision infinite 0 false
+cmd effect give @a minecraft:weakness infinite 0 false
+cmd bossbar add hud:b1 "雷翼の心臓"
+cmd bossbar set hud:b1 players @a
+cmd bossbar set hud:b1 value 70
+cmd bossbar set hud:b1 color red
+cmd bossbar add hud:b2 "砦の番兵"
+cmd bossbar set hud:b2 players @a
+cmd bossbar set hud:b2 value 40
+cmd bossbar add hud:b3 "雷獣"
+cmd bossbar set hud:b3 players @a
+cmd bossbar set hud:b3 value 90
+cmd bossbar set hud:b3 color purple
+wait 20
+
+cmd scoreboard objectives add hudsb dummy "試練の記録"
+cmd scoreboard players set 雷獣 hudsb 12
+cmd scoreboard players set 砦の番兵 hudsb 7
+cmd scoreboard players set 見張り hudsb 3
+cmd scoreboard objectives setdisplay sidebar hudsb
+echo === vanilla2
+huddemo boss
+wait 60
+guiscale 2
+huddemo boss
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_boss_s2
+guiscale 3
+huddemo boss
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_boss_s3
+guiscale 4
+huddemo boss
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_boss_s4
+huddemo opening
+wait 60
+guiscale 2
+huddemo opening
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_opening_s2
+guiscale 3
+huddemo opening
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_opening_s3
+guiscale 4
+huddemo opening
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_opening_s4
+huddemo back
+wait 60
+guiscale 2
+huddemo back
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_back_s2
+guiscale 3
+huddemo back
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_back_s3
+guiscale 4
+huddemo back
+wait 34
+cmd tellraw @a {"text":"<仲間> 札は空きの列へ、チャットは行を減らして細くなる"}
+cmd tellraw @a {"text":"<仲間> 字幕の線にもアクションバーにも重ならない"}
+cmd tellraw @a {"text":"<ミオ> 右の板は札のあいだ下へ詰める"}
+cmd tellraw @a {"text":"<カイ> 倍率 4 でも効き目の絵と誓いは分かれる"}
+cmd title @a actionbar {"text":"アクションバーの一行 (手がかりに重ならない高さ)"}
+wait 14
+shot vanilla2_back_s4
+huddemo off
+cmd scoreboard objectives remove hudsb
+echo done
