@@ -636,7 +636,6 @@ public final class TitanBackSelfTest {
                     failures.add("island " + isl.id() + " must not be a rest point inside a parkour course");
                 }
             }
-            }
         }
         for (Box pit : PITS) {
             for (int x = pit.x1(); x <= pit.x2(); x++) {

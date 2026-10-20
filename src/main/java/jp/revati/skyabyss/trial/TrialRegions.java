@@ -210,6 +210,59 @@ public final class TrialRegions {
         return cell != null && cell.runtime() ? cell : null;
     }
 
+    // その石の枠 (key) にあたる、引いてあるセル (原型の包みも含む。新作なら新作)。引きがない・枠が決まらなければ null (版 22。入口の封印・自動の石で使う)
+    @Nullable
+    public static TrialCell cellOfKey(String titan, String key, @Nullable TrialDraw.Draw draw) {
+        if (draw == null) {
+            return null;
+        }
+        String t = signalTitan(titan);
+        if (t.equals("storm")) {
+            Trial.Def d = jp.revati.skyabyss.trial.storm.StormStones.cellOfKey(draw, key);
+            return d == null ? null : TrialCells.get(d.id());
+        }
+        Slot slot;
+        try {
+            slot = switch (t) {
+                case "whale" -> Slot.ofStone(Integer.parseInt(key));
+                case "tide", "ember" -> switch (key) {
+                    case "west" -> Slot.WALK;
+                    case "east" -> Slot.WIT;
+                    default -> Slot.FIGHT;
+                };
+                default -> null;
+            };
+        } catch (RuntimeException e) {
+            return null;
+        }
+        if (slot == null) {
+            return null;
+        }
+        TrialDraw.Pick pick = draw.inSlot(slot);
+        return pick == null ? null : TrialCells.get(pick.cellId());
+    }
+
+    // 逆: 引いた試練 def が、その巨神のどの石の枠 (key) か。なければ null
+    @Nullable
+    public static String keyOfDef(String titan, Trial.Def def, @Nullable TrialDraw.Draw draw) {
+        String t = signalTitan(titan);
+        return switch (t) {
+            case "whale" -> String.valueOf(def.slot().stone);
+            case "tide" -> switch (def.slot()) {
+                case WALK -> "west";
+                case WIT -> "east";
+                case FIGHT -> "front";
+            };
+            case "ember" -> switch (def.slot()) {
+                case WALK -> "west";
+                case WIT -> "east";
+                case FIGHT -> "south";
+            };
+            case "storm" -> jp.revati.skyabyss.trial.storm.StormStones.keyOf(draw, def);
+            default -> null;
+        };
+    }
+
     // 試験用: 石の位置 (その試練の石)
     @Nullable
     public static BlockPos stoneOf(String titan, String key) {

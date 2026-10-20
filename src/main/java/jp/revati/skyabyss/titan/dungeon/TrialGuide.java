@@ -29,7 +29,7 @@ public final class TrialGuide {
 
     // 目的の id の一覧 (lang の確認用)
     public static final List<String> IDS = List.of("wings", "west", "bell", "east_e1", "east_ck", "east_e3", "east_stone", "maze",
-            "stone_back", "heart");
+            "heart");
 
     static void tick(ServerPlayer player) {
         if (player.tickCount % 40 != 7 || player.isSpectator() || !player.isAlive() || !TitanBackTrials.isBelowSurface(player)) {
@@ -60,7 +60,7 @@ public final class TrialGuide {
         }
         if (inEast(pos)) {
             if (east) {
-                return new Goal("stone_back", EAST_RETURN.get(EAST_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             if (!record.isHallCleared("e1")) {
                 return new Goal("east_e1", E1_EXIT.get(E1_EXIT.size() / 2), 2.5f, 3f, 0.7f);
@@ -75,7 +75,7 @@ public final class TrialGuide {
         }
         if (inWest(pos)) {
             if (west) {
-                return new Goal("stone_back", WEST_RETURN.get(WEST_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             if (BELL.contains(pos) || BELL_PASS.contains(pos) || (W2.contains(pos) && !record.flag(BellTower.FLAG))) {
                 if (!record.flag(BellTower.FLAG) && pos.getY() > FLOOR) {
@@ -86,7 +86,7 @@ public final class TrialGuide {
         }
         if (pos.getY() < FLOOR - 10) {
             if (lower) {
-                return new Goal("stone_back", LOWER_RETURN.get(LOWER_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             return new Goal("maze", RESONANCE_STONES.get(2), 1f, 1.5f, 1f);
         }

@@ -107,7 +107,7 @@ public final class WhaleScaleSelfTest {
         check(f, g1 != null && g1.id().equals("east_stone"), "guide after the captain: " + g1);
         r.setFlag(TitanBackTrials.STONE_FLAG + 1, true);
         g1 = TrialGuide.next(r, E3.center());
-        check(f, g1 != null && g1.id().equals("stone_back"), "guide after the east stone: " + g1);
+        check(f, g1 == null, "guide after the east stone should be none (the party is returned to the hub automatically): " + g1);
         g1 = TrialGuide.next(BackGroupData.get(back).of(UUID.randomUUID()), W2.center());
         check(f, g1 != null && g1.id().equals("bell"), "guide at the second west rest: " + g1);
         var ja = jp.revati.skyabyss.SignFit.lang("ja_jp");

@@ -15,6 +15,8 @@ import jp.revati.skyabyss.cinematic.Scenes;
 import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.titan.end.ReturnBeacons;
+import jp.revati.skyabyss.titan.group.BackGroupData;
+import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.group.GroupOverlays;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.util.Players;
@@ -103,6 +105,59 @@ public final class TrialHub {
         return STATIC.computeIfAbsent(titan + "|" + key, k -> TrialRegions.of(back, titan, key, null));
     }
 
+    // ---------------------------------------------------------------- 試練済みの封印 (版 22)
+    // そのグループが引いた、その石の枠 (key) の試練の入口 (戸のブロック)。引きがない・入口のない試練 (潮殻の原型) は空
+    public static List<BlockPos> entranceOf(ServerLevel back, UUID group, String titan, String key) {
+        BackGroupData.Record r = BackGroupData.get(back).peek(group);
+        if (r == null) {
+            return List.of();
+        }
+        TrialCell cell = TrialRegions.cellOfKey(titan, key, TrialData.current(back, group));
+        return cell == null ? List.of() : cell.ports().entrance();
+    }
+
+    // 越えた試練の入口を、そのグループには閉じる (封印の扉の閉じる印。見かけは試練済みの封印 = sealOverlay)。閉じた戸があれば true
+    public static boolean sealEntrance(ServerLevel back, UUID group, String titan, String key) {
+        List<BlockPos> door = entranceOf(back, group, titan, key);
+        if (door.isEmpty()) {
+            return false;
+        }
+        GroupGates.seal(back, group, door);
+        GroupOverlays.refresh(back, group);
+        return true;
+    }
+
+    // 越えた試練のそのグループへの入口か (SealedGateBlock が触れられたときの一行を選ぶ)
+    public static boolean isClearedEntrance(ServerLevel back, UUID group, BlockPos pos) {
+        String titan = Titans.titanOfBack(back.dimension());
+        if (titan == null) {
+            return false;
+        }
+        for (String key : TrialRegions.keys(titan)) {
+            if (HubTablets.cleared(back, group, titan, key) && entranceOf(back, group, titan, key).contains(pos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // GroupOverlays から: 越えた試練の入口に、試練済みの封印を見せる
+    private static void sealOverlay(ServerLevel level, UUID group, java.util.function.BiConsumer<BlockPos, net.minecraft.world.level.block.state.BlockState> out) {
+        String titan = Titans.titanOfBack(level.dimension());
+        if (titan == null || BackGroupData.get(level).peek(group) == null) {
+            return;
+        }
+        net.minecraft.world.level.block.state.BlockState seal = jp.revati.skyabyss.registry.ModBlocks.TRIAL_SEAL.get().defaultBlockState();
+        for (String key : TrialRegions.keys(titan)) {
+            if (!HubTablets.cleared(level, group, titan, key)) {
+                continue;
+            }
+            for (BlockPos p : entranceOf(level, group, titan, key)) {
+                out.accept(p, seal);
+            }
+        }
+    }
+
     // 鼓動の間へ戻す (静かに。越えた直後の戻りと、封じられた試練への入り直しの戻りで使う)。戻せたか
     public static boolean sendToHub(ServerLevel back, ServerPlayer player, String titan, boolean reveal, @Nullable String key) {
         BlockPos hub = ReturnBeacons.hubOf(titan);
@@ -175,6 +230,52 @@ public final class TrialHub {
         }
         tickPending(level, now, g -> Groups.online(level, g));
         tickSeal(level, titan, players, now);
+        autoStones(level, titan, players, now);
+    }
+
+    // ---------------------------------------------------------------- 原型の石は近づくだけで (版 22)
+    // 原型の石 (岩鯨の共鳴石・潮鳴り石・風鳴り石・熾り石の、引いた枠のセルが原型のもの) は、押さなくても、石に近づけば「押した」ことになる
+    // (中身は右クリックと同じ: 条件が足りなければ、石がなぜ黙っているかを言う。同じ人・同じ石には STONE_RETRY tick に一度だけ)。
+    // 新作のセルの石は、セルが終わった時に自動 (TrialRuntime.autoRing) で鳴る
+    private static final int STONE_RETRY = 160;
+    private static final double STONE_REACH = 2.6;
+    private static final Map<String, Long> STONE_TRY = new HashMap<>();
+
+    static int autoStones(ServerLevel level, String titan, List<ServerPlayer> players, long now) {
+        if (level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
+            return 0;
+        }
+        int pressed = 0;
+        for (ServerPlayer p : players) {
+            if (!p.isAlive() || p.isSpectator()) {
+                continue;
+            }
+            UUID group = Groups.keyOf(p);
+            for (String key : TrialRegions.keys(titan)) {
+                BlockPos stone = TrialRegions.stoneOf(titan, key);
+                if (stone == null || Math.abs(p.getX() - (stone.getX() + 0.5)) > STONE_REACH || Math.abs(p.getZ() - (stone.getZ() + 0.5)) > STONE_REACH
+                        || Math.abs(p.getY() - stone.getY()) > 3) {
+                    continue;
+                }
+                if (jp.revati.skyabyss.titan.group.TrialSteles.rung(level.getServer(), group,
+                        jp.revati.skyabyss.titan.group.TrialSteles.signal(TrialRegions.signalTitan(titan), key))) {
+                    continue;
+                }
+                TrialCell cell = TrialRegions.cellOfKey(titan, key, TrialData.current(level, group));
+                if (cell != null && cell.runtime()) {
+                    continue;
+                }
+                String tk = p.getUUID() + "|" + titan + "|" + key;
+                Long last = STONE_TRY.get(tk);
+                if (last != null && now - last < STONE_RETRY) {
+                    continue;
+                }
+                STONE_TRY.put(tk, now);
+                level.getBlockState(stone).useWithoutItem(level, p, new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(stone), net.minecraft.core.Direction.UP, stone, false));
+                pressed++;
+            }
+        }
+        return pressed;
     }
 
     // 戻す時刻になった試練 (online = そのグループの、その背にいる人の取り方。試験では偽の人を渡す)
@@ -197,6 +298,8 @@ public final class TrialHub {
                 jp.revati.skyabyss.rpg.skill.SkillExtOps.award(m, p.titan(), p.key());
                 sendToHub(level, m, p.titan(), true, p.key());
             }
+            // 越えた試練の入口は、そのグループには試練済みの封印で閉じる (戻った人が入り直せない。ほかのグループには開いたまま)
+            sealEntrance(level, p.group(), p.titan(), p.key());
             SkyAbyss.LOGGER.info("Trial {} of the {} cleared by group {}: {} member(s) returned to the hub", p.key(), p.titan(), p.group(), moved.size());
         }
     }
@@ -252,6 +355,7 @@ public final class TrialHub {
     }
 
     public static void clearAll() {
+        STONE_TRY.clear();
         PENDING.clear();
         BOUNCED.clear();
         STATIC.clear();
@@ -266,5 +370,6 @@ public final class TrialHub {
     // 登録: 碑の光の上書きを GroupOverlays へ (SkyAbyss の起動で一度)
     public static void register() {
         GroupOverlays.register(HubTablets::overlay);
+        GroupOverlays.register(TrialHub::sealOverlay);
     }
 }

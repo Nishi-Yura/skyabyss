@@ -378,5 +378,7 @@
   "trial.skyabyss.enemy.S09.0": "Callers and moths",
   "trial.skyabyss.enemy.S09.1": "Callers and wardens",
   "trial.skyabyss.enemy.S10.0": "Wardens and moths",
-  "trial.skyabyss.enemy.S10.1": "Wardens and callers"
+  "trial.skyabyss.enemy.S10.1": "Wardens and callers",
+  "block.skyabyss.trial_seal": "Cleared Trial Seal",
+  "message.skyabyss.trial_hub.sealed_block": "A seal is carved here. You have already cleared this trial"
 }

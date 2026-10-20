@@ -136,7 +136,11 @@ public final class TrialRuntime {
                 continue;
             }
             boolean want = draw.has(cell.def().id()) || weekly != null && weekly.id().equals(cell.def().id());
-            if (want) {
+            String cellKey = draw.has(cell.def().id()) ? TrialRegions.keyOfDef(titan, cell.def(), draw) : null;
+            if (want && cellKey != null && HubTablets.cleared(back, group, titan, cellKey)) {
+                // 越えた試練 (版 22): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
+                GroupGates.seal(back, group, p.entrance());
+            } else if (want) {
                 GroupGates.open(back, group, p.entrance());
             } else {
                 GroupGates.seal(back, group, p.entrance());
@@ -208,6 +212,7 @@ public final class TrialRuntime {
                 run.lastPresent = now;
                 cell.tick(level, run, inside, now);
                 tickPad(level, run, inside);
+                autoRing(level, group, cell, run, draw, inside, now);
             }
         }
         // 誰もいなくなったセルを止める
@@ -421,12 +426,42 @@ public final class TrialRuntime {
             }
             return InteractionResult.SUCCESS;
         }
-        Mods mods = run.mods;
-        kind.ring(back, group, cell.def(), drawn, sp, pos);
-        boolean goalDone = mods.goal() >= 0 && run.goalOk;
-        onCellCleared(back, group, cell.def(), mods, goalDone, sp);
-        kind.afterCleared(back, group, cell.def(), drawn, sp);
+        ringCell(back, group, cell, run, drawn, sp, pos, kind);
         return InteractionResult.SUCCESS;
+    }
+
+    // 石を鳴らして、試練を越えたことにする (石の右クリックと、自動 (autoRing) の両方)
+    private static void ringCell(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, boolean drawn, ServerPlayer by, BlockPos pos, TrialBacks.Back kind) {
+        Mods mods = run.mods;
+        kind.ring(back, group, cell.def(), drawn, by, pos);
+        boolean goalDone = mods.goal() >= 0 && run.goalOk;
+        onCellCleared(back, group, cell.def(), mods, goalDone, by);
+        kind.afterCleared(back, group, cell.def(), drawn, by);
+    }
+
+    // 版 22: 試練を終えたら、石を押さなくても越えたことになる。セルが「終えた」(run.cleared) と、少し (AUTO_RING_DELAY tick。終わりの演出を見せる) 待って石が鳴り、
+    // そのあとは石を押したときと同じ (TrialHub が 80 tick 後に、中にいる仲間を鼓動の間へ戻し、入口を試練済みの封印で閉じる)。石は押しても同じ (二重には数えない)
+    public static final int AUTO_RING_DELAY = 30;
+
+    private static void autoRing(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside, long now) {
+        BlockPos stone = cell.ports().stone();
+        if (!run.cleared || stone == null || inside.isEmpty()) {
+            return;
+        }
+        TrialBacks.Back kind = TrialBacks.of(cell.def().titan());
+        boolean drawn = draw.has(cell.def().id());
+        if (kind == null || kind.isRung(back, group, cell.def(), drawn)) {
+            return;
+        }
+        long at = run.getLong("autoRingAt");
+        if (at == 0) {
+            run.put("autoRingAt", Math.max(1L, now));
+            return;
+        }
+        if (now - at < AUTO_RING_DELAY) {
+            return;
+        }
+        ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind);
     }
 
     // 石の知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)

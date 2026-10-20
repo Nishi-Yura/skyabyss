@@ -71,7 +71,11 @@ public class SealedGateBlock extends Block {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
+        if (level instanceof ServerLevel server) {
+            // 越えた試練の入口 (そのグループの画面では試練済みの封印): 一行を替える
+            Notice.bar(player, jp.revati.skyabyss.trial.TrialHub.isClearedEntrance(server, Groups.keyOf(player), pos)
+                    ? ModText.hint("message.skyabyss.trial_hub.sealed_block") : ModText.deny("message.skyabyss.sealed_gate"));
+        } else if (!level.isClientSide) {
             Notice.bar(player, ModText.deny("message.skyabyss.sealed_gate"));
         }
         return InteractionResult.SUCCESS;

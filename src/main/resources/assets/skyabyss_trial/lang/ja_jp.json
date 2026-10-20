@@ -378,5 +378,7 @@
   "trial.skyabyss.enemy.S09.0": "雷乞いと雷蛾",
   "trial.skyabyss.enemy.S09.1": "雷乞いと羽守",
   "trial.skyabyss.enemy.S10.0": "羽守と雷蛾",
-  "trial.skyabyss.enemy.S10.1": "羽守と雷乞い"
+  "trial.skyabyss.enemy.S10.1": "羽守と雷乞い",
+  "block.skyabyss.trial_seal": "試練済みの封印",
+  "message.skyabyss.trial_hub.sealed_block": "封印が刻まれている。この試練は、もう越えた"
 }

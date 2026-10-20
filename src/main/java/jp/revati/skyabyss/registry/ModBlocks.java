@@ -67,6 +67,10 @@ public final class ModBlocks {
     public static final DeferredBlock<jp.revati.skyabyss.trial.TrialTabletBlock> TRIAL_TABLET = BLOCKS.register("trial_tablet",
             () -> new jp.revati.skyabyss.trial.TrialTabletBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> state.getValue(jp.revati.skyabyss.trial.TrialTabletBlock.LIT) ? 12 : 2)));
 
+    // 試練済みの封印: 越えた試練の入口に、そのグループの画面だけに立つ (TrialHub の見かけの上書き。docs/design/29 の 4.6)
+    public static final DeferredBlock<jp.revati.skyabyss.trial.TrialSealBlock> TRIAL_SEAL = BLOCKS.register("trial_seal",
+            () -> new jp.revati.skyabyss.trial.TrialSealBlock(unbreakable(MapColor.COLOR_BLACK).lightLevel(state -> 4)));
+
     private ModBlocks() {
     }
 
