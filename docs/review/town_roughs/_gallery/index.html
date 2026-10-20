@@ -80,10 +80,10 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 3 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 4 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -115,11 +115,23 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>空見の砦（天守のない見張りの砦）</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">王の館ではない見張りの砦。塔だけが生きていて本丸は閉じている（碑が一行）。見張り塔に望遠鏡、記録の間は三章で開く。</p>
+  <p class="extra">採用: A 四隅の塔の砦（本丸を足して設計図に写し済み）。</p>
   <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="keep_sheet.jpg" aria-label="空見の砦（天守のない見張りの砦） のシートを拡大"><img loading="lazy" src="keep_sheet.jpg" alt="空見の砦（天守のない見張りの砦） の比較シート"></button></figure></div>
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="keep-a"><input type="radio" name="keep" id="keep-a" value="a"><span class="letter">A</span><span class="otext"><b>四隅の塔の砦</b><span>44×40 の城壁（高さ 10）と四隅の塔、北東に見張り塔（高さ 30）。中に閉じた本丸（低い石の館）。今の骨組みに近い</span></span></label><label class="opt" for="keep-b"><input type="radio" name="keep" id="keep-b" value="b"><span class="letter">B</span><span class="otext"><b>一本の大塔</b><span>低い輪の壁の中に、太い見張り塔（15×15・高さ 40）だけが立つ。「塔だけが生きている」をそのまま形に。都のどこからでも見える</span></span></label><label class="opt" for="keep-c"><input type="radio" name="keep" id="keep-c" value="c"><span class="letter">C</span><span class="otext"><b>岩の上の砦</b><span>盛った岩（三段）の上に小さな砦と見張り塔。南の階段で上る。遠くから丘の上の砦に見える。砦の足もとに岩の段ができる</span></span></label></fieldset>
   <label class="note-l" for="keep-note">直してほしい点 (任意)</label>
   <textarea id="keep-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="guild" data-id="guild">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>鯨追いの組合（板・名簿・順位の石）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">イサナの一族の組合。一章でイサナと会うと開く。外に言伝ての板（二本柱と庇）と名簿の碑。戸は鉄の両開きで閉じている。B の屋根は肋骨のあいだを木の板で埋める（ラフの描画では隙間に見える所がある）。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="guild_sheet.jpg" aria-label="鯨追いの組合（板・名簿・順位の石） のシートを拡大"><img loading="lazy" src="guild_sheet.jpg" alt="鯨追いの組合（板・名簿・順位の石） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="guild-a"><input type="radio" name="guild" id="guild-a" value="a"><span class="letter">A</span><span class="otext"><b>長屋の組合</b><span>45×23 の長い館。石の腰壁と木の壁、切妻の棟に鯨骨の肋を三つ渡す。落ち着いた組合の家</span></span></label><label class="opt" for="guild-b"><input type="radio" name="guild" id="guild-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の屋根</b><span>鯨の肋骨そのものを屋根にした館。入口は鯨の頭骨の門（目に灯り）。いちばん鯨追いらしい。やや奇抜</span></span></label><label class="opt" for="guild-c"><input type="radio" name="guild" id="guild-c" value="c"><span class="letter">C</span><span class="otext"><b>二階の組合</b><span>二階建て。一階は石、二階は木の張り出し。西に露台と帆柱（旗）。板は露台の下。船乗りの組合の雰囲気</span></span></label></fieldset>
+  <label class="note-l" for="guild-note">直してほしい点 (任意)</label>
+  <textarea id="guild-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -127,7 +139,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 3;
+  const total = 4;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
