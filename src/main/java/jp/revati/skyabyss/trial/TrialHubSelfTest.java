@@ -218,6 +218,71 @@ public final class TrialHubSelfTest {
             // 合図の先の記録 (進捗・クエスト) は偽の人では動かないことがある。光が出ないことだけ見る
         }
         check(f, !ReturnBeacons.hasOffer(a.getUUID()), titan + ": a return light was offered after the clear");
+        // ---- 版 22: 越えた試練の入口は、そのグループには試練済みの封印で閉じる (見かけ = trial_seal、当たり = 封印の扉の閉じる印)。ほかのグループには閉じない
+        List<BlockPos> door = TrialHub.entranceOf(back, keyA, titan, keys.get(0));
+        if (!door.isEmpty() && GroupGates.isGate(back, door.get(0))) {
+            check(f, !GroupGates.isOpen(back, keyA, door), titan + ": the cleared trial's entrance is still open for its group");
+            BlockState seenByA = GroupOverlays.compute(back, keyA).get(door.get(0));
+            check(f, seenByA != null && seenByA.is(ModBlocks.TRIAL_SEAL.get()), titan + ": the cleared entrance does not show the trial seal");
+            check(f, TrialHub.isClearedEntrance(back, keyA, door.get(0)) && !TrialHub.isClearedEntrance(back, keyB, door.get(0)), titan + ": isClearedEntrance is wrong");
+            BlockState seenByB = GroupOverlays.compute(back, keyB).get(door.get(0));
+            check(f, seenByB == null || !seenByB.is(ModBlocks.TRIAL_SEAL.get()), titan + ": the trial seal showed for a group that has not cleared the trial");
+        } else {
+            SkyAbyss.LOGGER.info("SELFTEST trial hub: {} has no entrance gate for trial {} (the bounce is the seal there)", titan, keys.get(0));
+        }
+        // ---- 版 22: 原型の石は近づくだけで鳴る (岩鯨。石の右クリックと同じ)・光る床 (鼓動の間 <-> 試練の階)
+        if (Titans.STONE_WHALE.equals(titan)) {
+            FakePlayer d = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000d004"), "trialhub_d"));
+            UUID keyD = Groups.keyOf(d);
+            BlockPos stone = TrialRegions.stoneOf(titan, "0");
+            d.setPos(stone.getX() + 0.5, stone.getY(), stone.getZ() + 2.0);
+            int pressed = TrialHub.autoStones(back, titan, List.of(d), back.getGameTime() + 5000);
+            check(f, pressed == 1 && jp.revati.skyabyss.titan.group.TrialSteles.rung(back.getServer(), keyD, jp.revati.skyabyss.titan.group.TrialSteles.signal("whale", "0")),
+                    titan + ": walking up to the west stone did not ring it (pressed " + pressed + ")");
+            check(f, TrialHub.autoStones(back, titan, List.of(d), back.getGameTime() + 5001) == 0, titan + ": the stone was pressed again right away");
+            d.setPos(0, 0, 0);
+            GroupGates.reset(back, keyD);
+            TrialHub.clearAll();
+            check(f, back.getBlockState(jp.revati.skyabyss.titan.dungeon.WhaleDeck.HUB_PAD).is(net.minecraft.world.level.block.Blocks.SEA_LANTERN)
+                    && back.getBlockState(jp.revati.skyabyss.titan.dungeon.WhaleDeck.D0_PAD).is(net.minecraft.world.level.block.Blocks.SEA_LANTERN), "the hub-deck glow pads are not built");
+            d.setPos(Vec3.atBottomCenterOf(jp.revati.skyabyss.titan.dungeon.WhaleDeck.HUB_PAD.above()));
+            TrialHub.tickPads(back, titan, List.of(d), back.getGameTime() + 9000);
+            check(f, jp.revati.skyabyss.titan.dungeon.WhaleDeck.D0.aabb().inflate(1, 2, 1).contains(d.position()), "the hub pad did not take the player to the trial hall: " + d.position());
+            d.setPos(Vec3.atBottomCenterOf(jp.revati.skyabyss.titan.dungeon.WhaleDeck.D0_PAD.above()));
+            TrialHub.tickPads(back, titan, List.of(d), back.getGameTime() + 9100);
+            check(f, d.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, "the trial hall pad did not take the player to the hub: " + d.position());
+            d.setPos(0, 0, 0);
+            // ---- 版 22: 新作のセルは、終えると (run.cleared) 石を押さなくても鳴り、中にいる仲間が鼓動の間へ戻される準備が整う
+            jp.revati.skyabyss.titan.group.BackGroupData.Record rd = jp.revati.skyabyss.titan.group.GroupProgress.of(back, keyD);
+            rd.putInt(TrialData.DONE, 1);
+            TrialDraw.Draw dd = TrialData.current(back, keyD);
+            TrialDraw.Pick np = null;
+            for (TrialDraw.Pick pk : dd.picks()) {
+                if (!pk.def().original()) {
+                    np = pk;
+                    break;
+                }
+            }
+            if (np == null) {
+                f.add(titan + ": the second cycle drew no new cell");
+            } else {
+                TrialCell cell = TrialCells.get(np.cellId());
+                String cellKey = TrialRegions.keyOfDef(titan, cell.def(), dd);
+                TrialCell.Run run = TrialRuntime.armed(back, keyD, cell, dd, back.getGameTime());
+                run.cleared = true;
+                d.setPos(Vec3.atBottomCenterOf(cell.ports().stone()));
+                long now = back.getGameTime();
+                TrialRuntime.autoRing(back, keyD, cell, run, dd, List.of(d), now);
+                check(f, !HubTablets.cleared(back, keyD, titan, cellKey), np.cellId() + ": the stone rang the moment the cell was cleared (no delay)");
+                TrialRuntime.autoRing(back, keyD, cell, run, dd, List.of(d), now + TrialRuntime.AUTO_RING_DELAY + 1);
+                check(f, HubTablets.cleared(back, keyD, titan, cellKey), np.cellId() + ": a cleared cell did not ring its own stone");
+                check(f, TrialHub.pending(keyD, titan, cellKey), np.cellId() + ": the auto ring did not queue the return to the hub");
+                TrialRuntime.stopGroup(back, keyD);
+                d.setPos(0, 0, 0);
+                TrialHub.clearAll();
+                GroupGates.reset(back, keyD);
+            }
+        }
         // 後始末
         a.setPos(0, 0, 0);
         b.setPos(0, 0, 0);

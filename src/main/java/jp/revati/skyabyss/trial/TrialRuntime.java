@@ -449,7 +449,7 @@ public final class TrialRuntime {
     // そのあとは石を押したときと同じ (TrialHub が 80 tick 後に、中にいる仲間を鼓動の間へ戻し、入口を試練済みの封印で閉じる)。石は押しても同じ (二重には数えない)
     public static final int AUTO_RING_DELAY = 30;
 
-    private static void autoRing(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside, long now) {
+    static void autoRing(ServerLevel back, UUID group, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside, long now) {
         BlockPos stone = cell.ports().stone();
         if (!run.cleared || stone == null || inside.isEmpty()) {
             return;
