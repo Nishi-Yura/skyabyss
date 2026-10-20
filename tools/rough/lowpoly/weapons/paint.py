@@ -30,6 +30,8 @@ PAL = dict(
     PLUME=A_([(110, 122, 150), (150, 162, 188), (190, 200, 220), (226, 232, 246), (248, 250, 255)]),
     VEIN=A_([(120, 176, 240), (170, 214, 255), (220, 240, 255), (255, 255, 255)]),
     CORD=A_([(150, 140, 120), (186, 176, 152), (214, 206, 180), (234, 228, 206)]),
+    SOOT=A_([(14, 12, 14), (28, 22, 22), (46, 36, 32), (70, 54, 44), (98, 78, 62)]),
+    CRACK=A_([(30, 16, 10), (52, 28, 16), (74, 40, 22)]),
     # 余燼
     ROCK=A_([(14, 13, 16), (24, 23, 27), (36, 35, 40), (50, 48, 54), (66, 64, 70), (84, 82, 88)]),
     IRON=A_([(36, 34, 38), (58, 54, 58), (84, 78, 80), (112, 104, 102), (142, 132, 126), (174, 162, 150)]),
@@ -153,6 +155,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         barb = np.abs(((X * 0.9 + Y * 0.8) % 1.0) - 0.5) < 0.12
         mid = np.abs(X) < 0.35
         put(m("acc"), pick(PL, shaded(PL, 0.80, 0.26, 0.05) - barb + mid * 1))
+        # 嵐に焼けた傷み: 焦げた羽先 (soot)、羽の縁の焦げ、銅のひび (暗い線) と、ひびの中の稲妻 (光る)
+        SO = PAL["SOOT"]
+        put(m("soot"), pick(SO, np.floor(1.4 + 1.6 * lit + 1.2 * bay + 1.2 * (n_mid - 0.5)).astype(int)))
+        sing = np.isin(mats, ["acc", "cloth"]) & (D < 1.25) & (n_mid > 0.42)
+        put(sing, pick(SO, np.floor(1.6 + 1.4 * lit + bay).astype(int)))
+        put(m("cloth"), pick(PAL["STEEL"], shaded(PAL["STEEL"], 0.34, 0.26, 0.06)) * 0.9)
+        rn = np.abs(vnoise(L * 0.26 + 9, 5) - 0.5)
+        crk = np.isin(mats, ["main", "edge", "wrap"]) & (rn < 0.017) & INS & (D > 0.4)
+        put(crk, pick(PAL["CRACK"], np.floor(0.6 + 1.4 * hash1(xx + yy * 3, 2)).astype(int)))
         dark_c = PAL["DARK"]
     else:  # ember
         RO, IR, RW, HA, AS = PAL["ROCK"], PAL["IRON"], PAL["ROCKW"], PAL["HAFT"], PAL["ASH"]
