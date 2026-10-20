@@ -818,6 +818,74 @@ SUBJECTS["market"] = {
 }
 
 
+# ---------------------------------------------------------------- 住まい 3 案 (空き家。中は空で、拠点にしてよい)
+def house_a(g: Grid, rng=None):
+    """A「石と木の家」: 7×7。石の腰壁と木の壁、切妻の屋根、小さな煙突。戸口は開いている。今の骨組みに屋根と煙突を足した形"""
+    g.meta = {"rect": [-6, -6, 6, 6], "level": True}
+    x0, z0, x1, z1 = -3, -3, 3, 3
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 0, z1, "cobblestone", "stripped_spruce_log[axis=y]")
+    shell(g, x0, 1, z0, x1, 3, z1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    air(g, 0, 0, z1, 0, 1, z1)
+    g.set(-2, 1, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    g.set(2, 1, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    box(g, x0 + 1, 4, z0 + 1, x1 - 1, 4, z1 - 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 4)
+    box(g, x1 - 1, 4, z0 + 1, x1 - 1, 7, z0 + 1, "cobblestone")
+    g.set(0, 3, 0, "lantern[hanging=true]")
+    g.mark("stand", 0, 0, 8)
+
+
+def house_b(g: Grid, rng=None):
+    """B「二階の家」: 7×7 で二階建て (石の一階、木の二階が少し張り出す)。深層岩の瓦の段々屋根、南に小さな庇。都らしい高さ"""
+    g.meta = {"rect": [-6, -6, 6, 6], "level": True}
+    x0, z0, x1, z1 = -3, -3, 3, 3
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 2, z1, "stone_bricks", "deepslate_bricks")
+    box(g, x0 - 1, 3, z0 - 1, x1 + 1, 3, z1 + 1, "spruce_planks")
+    shell(g, x0 - 1, 4, z0 - 1, x1 + 1, 6, z1 + 1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    air(g, 0, 0, z1, 0, 1, z1)
+    g.set(-2, 1, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    g.set(2, 1, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    g.set(-2, 5, z1 + 1, "glass_pane[north=false,south=false,east=true,west=true]")
+    g.set(2, 5, z1 + 1, "glass_pane[north=false,south=false,east=true,west=true]")
+    for i in range(3):
+        box(g, x0 - 2 + i, 7 + i, z0 - 2 + i, x1 + 2 - i, 7 + i, z1 + 2 - i, "deepslate_tiles")
+        if i < 2:
+            air(g, x0 - 1 + i, 7 + i, z0 - 1 + i, x1 + 1 - i, 7 + i, z1 + 1 - i)
+    box(g, -1, 2, z1 + 1, 1, 2, z1 + 2, "spruce_slab[type=bottom]")
+    g.set(0, 3, 0, "lantern[hanging=true]")
+    g.mark("stand", 0, 0, 9)
+
+
+def house_c(g: Grid, rng=None):
+    """C「長屋」: 三軒つながりの長屋 (21×7)。共通の切妻、戸口が三つ。一軒ごとに煙突。通りに面して並ぶと町並みになる"""
+    g.meta = {"rect": [-12, -6, 12, 6], "level": True}
+    x0, z0, x1, z1 = -10, -3, 10, 3
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 0, z1, "cobblestone", "stripped_spruce_log[axis=y]")
+    shell(g, x0, 1, z0, x1, 3, z1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    for x in (-7, 0, 7):
+        air(g, x, 0, z1, x, 1, z1)
+        g.set(x - 2, 1, z1, "glass_pane[north=false,south=false,east=true,west=true]")
+        g.set(x + 2, 1, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+        box(g, x + 2, 4, z0 + 1, x + 2, 7, z0 + 1, "cobblestone")
+        g.set(x, 3, 0, "lantern[hanging=true]")
+    for x in (-3, 4):
+        box(g, x, 0, z0 + 1, x, 3, z1 - 1, "spruce_planks")
+    box(g, x0 + 1, 4, z0 + 1, x1 - 1, 4, z1 - 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 4)
+    g.mark("stand", 0, 0, 8)
+
+
+SUBJECTS["houses"] = {
+    "title": "住まい（空き家）",
+    "options": {"a": house_a, "b": house_b, "c": house_c},
+    "notes": {"a": "A 石と木の家（切妻と煙突）", "b": "B 二階の家（段々の瓦）", "c": "C 長屋（三軒つながり）"},
+    "eye": ((0, 1.6, 16), (0, 3, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
