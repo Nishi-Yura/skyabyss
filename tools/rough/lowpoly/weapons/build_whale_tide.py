@@ -27,7 +27,7 @@ ITEMS = [  # (module, 巨神の日本語, 手に持つ型)
     ("item_tidecaller_claw", "潮殻", "clawt"),
     ("item_coral_shield", "潮殻", "shield"),
 ]
-BUDGET = dict(common=250, rare=300, legend=350)
+BUDGET = dict(common=400, rare=450, legend=520)   # D2 (整え) で +25-50%
 PLAT = (36, 40, 48)
 FONTS = ["C:/Windows/Fonts/YuGothB.ttc", "C:/Windows/Fonts/meiryob.ttc", "C:/Windows/Fonts/meiryo.ttc", "C:/Windows/Fonts/msgothic.ttc"]
 

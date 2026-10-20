@@ -60,3 +60,7 @@ def inlay(env, kind):
     if kind == "p10":
         return (np.isin(env["mats"], ["edge"]) & env["convex"]) & (env["Y"] > 14)
     return env["lit"] < -9
+
+
+import wd2  # noqa: E402
+wd2.install(ID, __name__)   # D2 (整え): 面取り + 輪 + 宝石 + 光る線

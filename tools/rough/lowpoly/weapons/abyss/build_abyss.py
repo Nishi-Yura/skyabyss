@@ -39,9 +39,15 @@ def font(sz):
     return ImageFont.load_default()
 
 
+import wd2  # noqa: E402
+PICK = {"abyss_greatsword": "b", "abyss_bell_staff": "c", "abyss_storm_bow": "b", "abyss_ash_scythe": "a"}   # 選んだ案 (aaadacf7)
+
+
 def make(wid, k, plus=0, stage=0):
     w = D.WEAPONS[wid]
     fn, inlay, em, _ = w["opts"][k]
+    if PICK.get(wid) == k:      # D2 (整え) は選ばれた案だけ (wd2.py)
+        fn = wd2.d2(wid, fn)
     faces = fn(stage) if w["stages"] > 1 else fn()
     faces, size, P, N, M, L = build(faces)
     atlas, glow = PA.paint(faces, size, P, N, M, L, w["titan"], plus, inlay, em)
@@ -211,14 +217,15 @@ def main():
         out = PAGE / SHORT[wid]
         out.mkdir(parents=True, exist_ok=True)
         allres = {}
-        for k in "abc":
+        for k in ("abc" if "--picked" not in sys.argv else PICK[wid]):
             res = build_option(wid, k, quick)
             allres[k] = res
             print(wid, k, "tris", res[(0, 0)]["tris"], "atlas", res[(0, 0)]["size"], flush=True)
             views_image(wid, k, res, w["opts"][k][3]).save(out / f"opt_{k}_views.png")
             if not quick:
                 actions_image(wid, k, res).save(out / f"opt_{k}_actions.png")
-        compare_image(wid, allres).save(out / "compare.png")
+        if "--picked" not in sys.argv:
+            compare_image(wid, allres).save(out / "compare.png")
 
 
 if __name__ == "__main__":
