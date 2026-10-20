@@ -253,7 +253,7 @@ def storyteller_house():
 
 
 def keep():
-    # 空見の砦 (x 10..54, z -92..-52)。段の上。壁 y 5..14 厚さ 2、隅の塔、南の門は閉じている (鉄格子)
+    # 空見の砦 (ラフ A「四隅の塔の砦」で決定。x 10..54, z -92..-52)。段の上。壁 y 5..14 厚さ 2、隅の塔、見張り塔、本丸、南の門は閉じている (鉄格子)
     x0, z0, x1, z1 = 10, -92, 54, -52
     box(x0, 4, z0, x1, 4, z1, 'cobbled_deepslate')
     for (ax0, az0, ax1, az1) in ((x0, z0, x1, z0 + 1), (x0, z1 - 1, x1, z1), (x0, z0, x0 + 1, z1), (x1 - 1, z0, x1, z1)):
@@ -278,6 +278,11 @@ def keep():
     for y in (12, 20, 28):
         opening(tx0 + 3, y, tz0, tx0 + 5, y + 1, tz0)
         opening(tx0 + 3, y, tz0 + 8, tx0 + 5, y + 1, tz0 + 8)
+    # 本丸 (ラフ A で決定): 閉じた低い石の館 20×12 (x 18..37, z -80..-69)。鉄の戸、三章で記録の間が開く
+    hollow(18, 5, -80, 37, 11, -69, 'stone_bricks', roof='deepslate_tiles', floor_s='polished_deepslate', corner='deepslate_bricks')
+    blk(27, 5, -69, 'iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
+    blk(27, 6, -69, 'iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
+    blk(24, 5, -68, 'lantern[hanging=false]')
     # 南の門 (幅 5、高さ 5)。鉄格子で閉じる
     box(30, 5, z1 - 1, 34, 9, z1, 'air')
     box(30, 5, z1, 34, 9, z1, 'iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]')
