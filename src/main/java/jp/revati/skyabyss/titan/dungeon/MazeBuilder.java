@@ -147,14 +147,18 @@ public final class MazeBuilder {
                 // 空気の層 (足元と頭の二段) は通路の口が壁でふさがれているので、魚は入れない。紫水晶が目印。
                 // 隅の足場は水の一段目 (y = p.y) のシーピクルスの上に重ねる
                 // 版 27: 隅だけでなく、くぼみの 5×5 の全面を足場にする (真ん中の一マスだけは水の穴。泡の柱で上がる)。休み場の遺物の火を北の辺に置く
+                // 版 29: 足場が通路の口をふさぐと、足場の下の水は一段 (高さ 1) しか残らず、泳いで通り抜けられない (道が途切れる)。
+                // 正しい道 (と近道) が出入りする通路の口から真ん中の穴までは、足場を抜いた一列の水路 (高さ 2) にして、泳いで抜けられるようにする (midLanes)
+                boolean[][] lane = midLanes(maze, plan);
                 for (int dx = 0; dx <= hi; dx++) {
                     for (int dz = 0; dz <= hi; dz++) {
-                        if (dx != mid || dz != mid) {
+                        if ((dx != mid || dz != mid) && !lane[dx][dz]) {
                             kit.set(p.getX() + dx, p.getY() + 1, p.getZ() + dz, BuildKit.POLISHED);
                         }
                     }
                 }
-                kit.set(p.getX() + mid, p.getY() + 2, p.getZ() + hi, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
+                int hearthX = lane[mid][hi] ? 1 : mid;
+                kit.set(p.getX() + hearthX, p.getY() + 2, p.getZ() + hi, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
                 kit.set(p.getX() + hi, p.getY() + 2, p.getZ() + hi, Blocks.AMETHYST_CLUSTER.defaultBlockState());
             }
         }
@@ -307,6 +311,43 @@ public final class MazeBuilder {
             kit.lantern(hatch.getX() - 2, FLOOR + 1, hatch.getZ());
             kit.lantern(hatch.getX() + 2, FLOOR + 1, hatch.getZ());
         }
+    }
+
+    // 中ほどの休み場の足場から抜く水路 (正しい道の前後のマスと、近道のつながるマスへの口から、真ん中の穴まで)。[dx][dz] がマスの中の位置
+    public static boolean[][] midLanes(FloodedMaze maze, MazePlan plan) {
+        boolean[][] lane = new boolean[MAZE_CELL][MAZE_CELL];
+        int[] c = plan.pathPockets.get(plan.pathPockets.size() / 2);
+        List<int[]> others = new java.util.ArrayList<>();
+        int k = -1;
+        for (int n = 0; n < plan.path.size(); n++) {
+            if (plan.path.get(n)[0] == c[0] && plan.path.get(n)[1] == c[1]) {
+                k = n;
+            }
+        }
+        if (k > 0) {
+            others.add(plan.path.get(k - 1));
+        }
+        if (k >= 0 && k + 1 < plan.path.size()) {
+            others.add(plan.path.get(k + 1));
+        }
+        for (MazePlan.Cut cut : plan.cuts) {
+            if (cut.a()[0] == c[0] && cut.a()[1] == c[1]) {
+                others.add(cut.b());
+            } else if (cut.b()[0] == c[0] && cut.b()[1] == c[1]) {
+                others.add(cut.a());
+            }
+        }
+        int mid = MAZE_CELL / 2;
+        int hi = MAZE_CELL - 1;
+        for (int[] o : others) {
+            int ddx = Integer.signum(o[0] - c[0]);
+            int ddz = Integer.signum(o[1] - c[1]);
+            for (int t = 0; t < mid; t++) {
+                int off = ddx + ddz > 0 ? hi - t : t;
+                lane[ddx != 0 ? off : mid][ddz != 0 ? off : mid] = true;
+            }
+        }
+        return lane;
     }
 
     // 息継ぎのマス c へつながるすべての通路 (正しい道も枝道も) の、一番上の段を壁にする
