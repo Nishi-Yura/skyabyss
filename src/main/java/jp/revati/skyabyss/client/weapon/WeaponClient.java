@@ -129,9 +129,10 @@ public final class WeaponClient {
                 return false;
             }
             baseTransform(pose, i, equipProcess);
-            // 手元が後ろ上へ跳ねて、戻る
-            pose.translate(0f, 0.03f * r, 0.08f * r);
-            pose.mulPose(Axis.XP.rotationDegrees(8f * r));
+            // 手元が前へ弾けて、戻る
+            // 放した弓は前へ押し出される (矢の向きへ): 手元が前へ出て、少しだけ上へ
+            pose.translate(0f, 0.025f * r, -0.1f * r);
+            pose.mulPose(Axis.XP.rotationDegrees(-5f * r));
             pose.mulPose(Axis.ZP.rotationDegrees(i * -4f * r));
             MoveSet ms = MoveSets.get(id);
             if (fl >= 0f && ms != null && !ms.steps.isEmpty()) {
@@ -188,6 +189,10 @@ public final class WeaponClient {
 
         @Override
         public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
+            // 構えている間 (どちらの手でも) はバニラの「盾を構える」腕 (BLOCK)。主の手の殴る構えのままだと盾が体の横に残る
+            if (entity.isUsingItem() && entity.getUseItem() == stack) {
+                return null;
+            }
             return hand == InteractionHand.MAIN_HAND ? WeaponArmPoses.generic() : null;
         }
 

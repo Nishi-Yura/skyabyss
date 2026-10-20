@@ -132,7 +132,7 @@ public final class WeaponItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (!dagger && !id.equals("thrall_poker")) {
             return 1f;
         }
-        return tier.equals("legend") ? 1.35f : tier.equals("rare") ? 1.15f : 1f;
+        return tier.equals("legend") ? 1.12f : tier.equals("rare") ? 1.06f : 1f;
     }
 
     // 強化のアトラスと光る画像。メッシュの texture は textures/lowpoly/items/<id>/<段>[_pullN]_atlas.png で、強化ぶんは _atlas の前に _plus5 / _plus10 が入る

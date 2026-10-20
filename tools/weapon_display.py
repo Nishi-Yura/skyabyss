@@ -103,8 +103,12 @@ def bow_hold(ctx, p, s, grip, v_g, yaw=0.0):
     return _display(F * c - L * sn, U, grip, s, v_g)
 
 
-def _fwd(p, tps, fps, gy, pitch=12.0):
-    return (forward_hold("tp", p, tps, gy, (0, 0, 1.0)), forward_hold("fp", 0, fps, gy, (1.2, -0.8, 0.0), pitch))
+# 槍は休んでいるとき、穂先を水平から TP_PITCH / FP_PITCH 度だけ起こす (縦から 40 度ほど。横すぎたので起こした)
+TP_PITCH, FP_PITCH = 50.0, 50.0
+
+
+def _fwd(p, tps, fps, gy, pitch=FP_PITCH, tp_pitch=TP_PITCH):
+    return (forward_hold("tp", p, tps, gy, (0, 0, 1.0), tp_pitch), forward_hold("fp", 0, fps, gy, (1.2, -0.8, 0.0), pitch))
 
 
 BOW_GRIP = (5.0, 8.2)
@@ -112,12 +116,12 @@ BOW_GRIP = (5.0, 8.2)
 # 武器ごとの持ち方: (三人称, 一人称)。右手の値
 HELD = {
     # 剣・爪・斧・鎚: バニラの向きのまま、大きさと位置だけ合わせる (全体に 15〜25% 大きく。短剣・爪は 35% 大きく)
-    "whalebone_greatsword": (t((0, -90, 55), (0, 4.5, 0.5), 1.4), t((0, -90, 25), (0.5, 4.6, 1.13), 0.68)),
-    "waterway_fang": (t((0, -90, 55), (0, 4.0, 0.5), 1.15), t((0, -90, 25), (1.13, 3.2, 1.13), 0.62)),
-    "raiju_claw": (t((0, -90, 55), (0, 4.0, 0.5), 1.15), t((0, -90, 25), (1.13, 3.2, 1.13), 0.62)),
-    "tidecaller_claw": (t((0, -90, 55), (0, 4.0, 0.5), 1.15), t((0, -90, 25), (1.13, 3.2, 1.13), 0.62)),
-    "ember_war_axe": (t((0, -90, 55), (0, 4.0, 0.5), 1.2), t((0, -90, 25), (0.5, 4.6, 1.13), 0.8)),
-    "smith_hammer": (t((0, -90, 55), (0, 4.0, 0.5), 1.05), t((0, -90, 25), (0.5, 4.6, 1.13), 0.58)),
+    "whalebone_greatsword": (t((0, -90, 55), (0, 4.5, 0.5), 1.7), t((0, -90, 25), (0.5, 4.6, 1.13), 0.74)),
+    "waterway_fang": (t((0, -90, 55), (0, 4.0, 0.5), 1.05), t((0, -90, 25), (1.13, 3.2, 1.13), 0.57)),
+    "raiju_claw": (t((0, -90, 55), (0, 4.0, 0.5), 1.05), t((0, -90, 25), (1.13, 3.2, 1.13), 0.57)),
+    "tidecaller_claw": (t((0, -90, 55), (0, 4.0, 0.5), 1.05), t((0, -90, 25), (1.13, 3.2, 1.13), 0.57)),
+    "ember_war_axe": (t((0, -90, 55), (0, 4.0, 0.5), 1.3), t((0, -90, 25), (0.5, 4.6, 1.13), 0.78)),
+    "smith_hammer": (t((0, -90, 55), (0, 4.0, 0.5), 1.2), t((0, -90, 25), (0.5, 4.6, 1.13), 0.62)),
     # 槍・長柄・火かき棒: 穂先が前へ (手は柄の下から 1/4〜1/3 のところ)
     "captain_pike": _fwd(66, 1.5, 1.05, 5),
     "tide_shell_trident": _fwd(66, 1.5, 1.05, 5),
@@ -125,8 +129,8 @@ HELD = {
     "warden_glaive": _fwd(66, 1.45, 1.05, 5),
     "thrall_poker": _fwd(57, 1.3, 0.95, 4),
     # 深淵の専用伝説: 大剣は鯨骨の大剣、鎌は戦斧と同じ持ち方。杖は頭を上にして柄の 1/3 を握る
-    "abyss_greatsword": (t((0, -90, 55), (0, 4.5, 0.5), 1.4), t((0, -90, 25), (0.5, 4.6, 1.13), 0.68)),
-    "abyss_ash_scythe": (t((0, -90, 55), (0, 4.0, 0.5), 1.2), t((0, -90, 25), (0.5, 4.6, 1.13), 0.8)),
+    "abyss_greatsword": (t((0, -90, 55), (0, 4.5, 0.5), 1.7), t((0, -90, 25), (0.5, 4.6, 1.13), 0.74)),
+    "abyss_ash_scythe": (t((0, -90, 55), (0, 4.0, 0.5), 1.3), t((0, -90, 25), (0.5, 4.6, 1.13), 0.78)),
     "abyss_bell_staff": (staff_hold("tp", 57, 1.3, 4.5, (0, 0, 1.0)), staff_hold("fp", 0, 0.72, 4.5, (1.0, -1.2, 0.0), 8)),
 }
 # 弓 (引き絵 3 枚も同じ持ち方。引くときは腕を前へまっすぐ上げる)。弦が射手の側、腹が前、縦に立てる
@@ -170,9 +174,37 @@ def display_for(item: str, current: dict) -> dict:
     return out
 
 
+# 盾 (coral_shield = ふだん、coral_shield_blocking = 構えている間)。一人称だけ作り直す (大きさ・位置)。左手は x の移動を逆にしただけ
+SHIELD_FP = {
+    # 右手 (主の手) と左手 (副の手) は画面の端からの位置が違うので別々に決める (x の移動は大きいほど右手は左へ・左手は左へ)
+    "coral_shield": {"r": ([0, 180, 5], [5, -2, -10], 0.95), "l": ([0, 180, 5], [8, -1, -10], 0.95)},
+    "coral_shield_blocking": {"r": ([0, 180, -5], [-19, 3, -11], 0.95), "l": ([0, 180, -5], [6, 3, -11], 0.95)},
+}
+
+
+def shield_display(name, current):
+    out = copy.deepcopy(current)
+    for hand, key in (("r", "firstperson_righthand"), ("l", "firstperson_lefthand")):
+        rot, tr, sc = SHIELD_FP[name][hand]
+        out[key] = {"rotation": rot, "translation": tr, "scale": [sc] * 3}
+    if name == "coral_shield_blocking":
+        # 三人称の構え: 左手 (副の手) は右手と同じ数 (エンジンが左手のとき回転 y・z と移動 x を反転して、体の中心で鏡に映した姿になる)
+        out["thirdperson_lefthand"] = copy.deepcopy(out["thirdperson_righthand"])
+    return out
+
+
 def main():
     check = "--check" in sys.argv
     bad = []
+    for name in SHIELD_FP:
+        path = MODELS / f"{name}.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        new = shield_display(name, data["base"]["display"])
+        if new != data["base"]["display"]:
+            bad.append(name)
+            if not check:
+                data["base"]["display"] = new
+                path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for item in HELD:
         path = MODELS / f"{item}.json"
         data = json.loads(path.read_text(encoding="utf-8"))
