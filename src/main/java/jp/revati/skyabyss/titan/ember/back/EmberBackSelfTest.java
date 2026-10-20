@@ -502,11 +502,11 @@ public final class EmberBackSelfTest {
         EmberBackTrials.useStone(back, STONE_WEST, p);
         expect(state.rung(EmberBackState.Trial.WEST), "the west stone did not ring");
         // 光る石と床はグループの見かけ。ワールドのブロックは鳴っていない姿のまま、ほかのグループには見えない
-        expect(overlayHas(back, GROUP_A, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)), "the rung west stone is not lit for its group");
+        expect(overlayHas(back, GROUP_A, STONE_WEST, s -> jp.revati.skyabyss.trial.TrialGoal.isReached(s)), "the rung west stone is not lit for its group");
         expect(overlayHas(back, GROUP_A, PAD_WEST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the west shortcut floor is not lit for its group");
         expect(!overlayHas(back, GROUP_A, PAD_EAST, s -> s.is(EmberKit.EMBERLIGHT.getBlock())), "the east shortcut floor is lit before its stone");
-        expect(!back.getBlockState(STONE_WEST).getValue(KindleStoneBlock.ACTIVE), "ringing changed the world block of the stone");
-        expect(!overlayHas(back, GROUP_B, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)) && EmberBackState.of(back, GROUP_B).rungCount() == 0,
+        expect(!jp.revati.skyabyss.trial.TrialGoal.isReached(back.getBlockState(STONE_WEST)), "ringing changed the world block of the stone");
+        expect(!overlayHas(back, GROUP_B, STONE_WEST, s -> jp.revati.skyabyss.trial.TrialGoal.isReached(s)) && EmberBackState.of(back, GROUP_B).rungCount() == 0,
                 "group B sees or has group A's rung stone");
         EmberBackTrials.markReady(back, GROUP_A, EmberBackState.Trial.EAST);
         EmberBackTrials.useStone(back, STONE_EAST, p);
@@ -516,6 +516,8 @@ public final class EmberBackSelfTest {
         expect(EmberBackTrials.gateOpening(GROUP_A), "the forge does not start dimming after three stones");
         expect(!EmberBackTrials.gateOpening(GROUP_B), "group B's forge dims with group A's stones");
         expect(!state.gateOpen(), "the gate opened at once (no dimming)");
+        // 越えた試練の入口は、80 tick 後に試練済みの封印で閉じる (TrialHub)。歩きの検査は封印の前の姿で見るので、戻しの待ちは捨てる
+        jp.revati.skyabyss.trial.TrialHub.clearAll();
     }
 
     // 門を開けたグループ A は通れ、B は閉じたまま (当たり判定も)
@@ -549,7 +551,7 @@ public final class EmberBackSelfTest {
         expect(EmberBackState.of(back, GROUP_B).epoch() == epochB, "resetting group A advanced group B's trial number");
         expect(state.resets() == resets + 1 && state.rungCount() == 0 && !state.gateOpen(), "a reset does not clear the stones and gate");
         expect(!EmberBackTrials.gateOpenFor(back, GROUP_A), "a reset does not close the gate for the group");
-        expect(!overlayHas(back, GROUP_A, STONE_WEST, s -> s.getValue(KindleStoneBlock.ACTIVE)), "a reset does not dim the stones");
+        expect(!overlayHas(back, GROUP_A, STONE_WEST, s -> jp.revati.skyabyss.trial.TrialGoal.isReached(s)), "a reset does not dim the stones");
         // 静かな試練: 東が静かだと smith の部屋も静かな周になるが、石は鳴っておらず (最後までできる)、やさしい打つ順になる (部屋の持ち主のグループにとって)
         EmberRooms.claimForTest(back, EmberRooms.EAST, GROUP_A);
         EmberRooms.claimForTest(back, EmberRooms.WEST, GROUP_A);

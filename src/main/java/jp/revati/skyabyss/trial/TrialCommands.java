@@ -64,6 +64,23 @@ public final class TrialCommands {
                                 .executes(ctx -> force(ctx.getSource(), StringArgumentType.getString(ctx, "ids")))))
                         .then(Commands.literal("mods").then(Commands.argument("id", StringArgumentType.word()).then(Commands.argument("code", StringArgumentType.word())
                                 .executes(ctx -> mods(ctx.getSource(), StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "code"))))))
+                        .then(Commands.literal("lit").then(Commands.argument("key", StringArgumentType.word()).executes(ctx -> {
+                            // 開発用 (撮影): 鼓動の間の碑を、その試練を越えたことにして光らせる (記録は触らない)
+                            ServerLevel here = back(ctx.getSource());
+                            UUID group = Groups.keyOf(ctx.getSource().getPlayerOrException());
+                            HubTablets.TEST_CLEARED.add(group + "|" + titan(here) + "|" + StringArgumentType.getString(ctx, "key"));
+                            HubTablets.refresh(here, group);
+                            return 1;
+                        })))
+                        .then(Commands.literal("weekly").executes(ctx -> {
+                            // 開発用: 今週の試練の入口の置き場 (パッド・立て札) を作り直して知らせる
+                            ServerLevel here = back(ctx.getSource());
+                            WeeklyGate.clearAll();
+                            WeeklyGate.install(here, titan(here));
+                            WeeklyGate.Site site = WeeklyGate.site(here, titan(here));
+                            ctx.getSource().sendSuccess(() -> Component.literal("weekly gate " + (site == null ? "-" : site.pad() + " sign " + site.sign())), false);
+                            return 1;
+                        }))
                         .then(Commands.literal("tp").then(Commands.argument("where", StringArgumentType.word())
                                 .executes(ctx -> tp(ctx.getSource(), StringArgumentType.getString(ctx, "where"))))))));
     }

@@ -437,7 +437,7 @@ public final class T04Whirl implements TrialCell {
         if (!back.getBlockState(new BlockPos(X1, BED + 1, WATER_Z1)).is(Blocks.WATER)) {
             bad.add("T04 entry basin is dry");
         }
-        if (!back.getBlockState(TideDeck.T04_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T04_STONE))) {
             bad.add("T04 stone missing");
         }
         return bad;

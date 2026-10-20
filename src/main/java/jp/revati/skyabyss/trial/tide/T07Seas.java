@@ -397,7 +397,7 @@ public final class T07Seas implements TrialCell {
         if (!back.getBlockState(RESET).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get())) {
             bad.add("T07 reset plug missing");
         }
-        if (!back.getBlockState(TideDeck.T07_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T07_STONE))) {
             bad.add("T07 stone missing");
         }
         return bad;

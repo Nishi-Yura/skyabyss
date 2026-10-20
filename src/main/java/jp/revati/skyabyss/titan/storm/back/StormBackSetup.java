@@ -19,9 +19,6 @@ public final class StormBackSetup {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SkyAbyss.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
-    public static final DeferredBlock<StormBlocks.ChimeStone> CHIME_STONE = BLOCKS.register("wind_stone",
-            () -> new StormBlocks.ChimeStone(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0f, 3600000.0f)
-                    .noLootTable().sound(SoundType.AMETHYST).lightLevel(s -> s.getValue(StormBlocks.ChimeStone.ACTIVE) ? 13 : 3)));
     public static final DeferredBlock<StormBlocks.Mirror> MIRROR = BLOCKS.register("feather_mirror",
             () -> new StormBlocks.Mirror(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(-1.0f, 3600000.0f)
                     .noLootTable().noOcclusion().sound(SoundType.COPPER).lightLevel(s -> 4)));

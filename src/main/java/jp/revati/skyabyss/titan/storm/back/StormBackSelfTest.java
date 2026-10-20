@@ -1136,9 +1136,9 @@ public final class StormBackSelfTest {
             BlockPos stone = StormBackTrials.stonePos(StormBackState.Trial.WEST);
             BlockState shownA = jp.revati.skyabyss.titan.group.GroupOverlays.compute(l, GROUP_A).get(stone);
             check(a.rung(StormBackState.Trial.WEST) && !b.rung(StormBackState.Trial.WEST), "ringing the west stone for A changed B", f);
-            check(shownA != null && shownA.getValue(StormBlocks.ChimeStone.ACTIVE), "A does not see its rung stone", f);
+            check(shownA != null && jp.revati.skyabyss.trial.TrialGoal.isReached(shownA), "A does not see its rung stone", f);
             check(!jp.revati.skyabyss.titan.group.GroupOverlays.compute(l, GROUP_B).containsKey(stone), "B sees A's rung stone", f);
-            check(!l.getBlockState(stone).getValue(StormBlocks.ChimeStone.ACTIVE), "the world stone should stay silent (the rung look is per group)", f);
+            check(!jp.revati.skyabyss.trial.TrialGoal.isReached(l.getBlockState(stone)), "the world stone should stay silent (the rung look is per group)", f);
             // 竜骨の門: A の三つの石がそろうと A にだけ開く
             a.setRung(StormBackState.Trial.EAST, true);
             a.setRung(StormBackState.Trial.FRONT, true);

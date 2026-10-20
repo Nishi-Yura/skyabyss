@@ -18,7 +18,7 @@ import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModSounds;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
+import jp.revati.skyabyss.titan.dungeon.WhaleGoals;
 import jp.revati.skyabyss.titan.dungeon.TitanBackData;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.group.BackGroupData;
@@ -119,7 +119,9 @@ public final class TrialRuntime {
                 GroupGates.place(back, p.entrance(), p.entranceDefaultOpen());
             }
             if (!p.exitGate().isEmpty()) {
-                GroupGates.place(back, p.exitGate(), false);
+                // 版 28: 石のそば・ゴールの床の横に紫の封印の扉 (出口の戸) が立っていた。岩鯨・潮殻・余燼は、出口の戸を開いた (見えず・当たりもない) 状態で置く。
+                // 雷翼の出口の戸は、東の橋・出口の橋をつなぐ仕掛けなので、これまでどおり閉じて置く
+                GroupGates.place(back, p.exitGate(), !Titans.THUNDER_WING.equals(titan));
             }
         }
     }
@@ -219,6 +221,7 @@ public final class TrialRuntime {
                 cell.tick(level, run, inside, now);
                 tickPad(level, run, inside);
                 autoRing(level, group, cell, run, draw, inside, now);
+                weeklyBack(level, titan, cell, run, draw, inside);
             }
         }
         // 誰もいなくなったセルを止める
@@ -400,7 +403,7 @@ public final class TrialRuntime {
     }
 
     // ---------------------------------------------------------------- 石の差し口 (新作)
-    // ResonanceStoneBlock から。新作の石なら扱って結果を返し、そうでなければ null
+    // ゴールに着いた (TitanBackTrials などから)。新作のセルのゴールなら扱って結果を返し、そうでなければ null
     @Nullable
     public static InteractionResult useStone(ServerLevel back, ServerPlayer sp, BlockPos pos) {
         TrialCell cell = TrialCells.atStone(pos);
@@ -470,7 +473,25 @@ public final class TrialRuntime {
         ringCell(back, group, cell, run, drawn, inside.get(0), stone, kind);
     }
 
-    // 石の知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)
+    // 今週の試練 (引いていない試練。個人のもの): 越えたら、中にいる人だけを鼓動の間 (真ん中) へ戻す。越えたあとに入ってきた人も同じ
+    // (ほかの試練にいる仲間は動かさない)。引いた試練の戻りは TrialHub (グループのゴールの合図) が行う
+    static int weeklyBack(ServerLevel back, String titan, TrialCell cell, TrialCell.Run run, TrialDraw.Draw draw, List<ServerPlayer> inside) {
+        TrialBacks.Back kind = TrialBacks.of(titan);
+        if (kind == null || draw.has(cell.def().id()) || !run.cleared || !kind.isRung(back, run.group, cell.def(), false)) {
+            return 0;
+        }
+        int moved = 0;
+        for (ServerPlayer p : inside) {
+            if (p.isCreative() || !TrialHub.sendToHub(back, p, titan, false, null)) {
+                continue;
+            }
+            Notice.bar(p, ModText.hint("message.skyabyss.trial_hub.weekly_back"));
+            moved++;
+        }
+        return moved;
+    }
+
+    // ゴールの知らせの数え (TrialSteles.onRung) が、原型の石として数えないようにして動かす (新作の石は自分で数える)
     public static void withLegacySuppressed(Runnable action) {
         suppressLegacy = true;
         try {

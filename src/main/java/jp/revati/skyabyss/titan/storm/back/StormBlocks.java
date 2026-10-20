@@ -28,38 +28,6 @@ public final class StormBlocks {
     private StormBlocks() {
     }
 
-    // 風鳴り石 (三つの試練の終わり)。鳴ると光る。どうすれば鳴るかは試練ごと (StormBackTrials.useStone)
-    public static class ChimeStone extends Block {
-        public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
-
-        public ChimeStone(Properties p) {
-            super(p);
-            registerDefaultState(stateDefinition.any().setValue(ACTIVE, false));
-        }
-
-        @Override
-        protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> b) {
-            b.add(ACTIVE);
-        }
-
-        @Override
-        protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                StormBackTrials.useStone(server, pos, sp);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        @Override
-        protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-                BlockHitResult hit) {
-            if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-                StormBackTrials.useStone(server, pos, sp);
-            }
-            return ItemInteractionResult.SUCCESS;
-        }
-    }
-
     // 羽鏡 (眼の間)。磨いた銅の羽を 45 度に立てた片面の鏡。右クリックで 90 度ずつ回る (ROT 0〜3)。
     // ROT k の鏡は、二つの向きの光をつなぐ: 0 = 北と東、1 = 東と南、2 = 南と西、3 = 西と北 (EyeMirrors)
     public static class Mirror extends Block {

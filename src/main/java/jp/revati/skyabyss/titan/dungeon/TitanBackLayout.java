@@ -66,7 +66,8 @@ public final class TitanBackLayout {
     //     鼓動の間 と 試練の階の光る床 (HUB_PAD・D0_PAD)・案内の碑 (WhaleDeck.SIGNS)・歌の祠をなくした・鼓動の間の碑を弧と台座に。docs/design/26 の 8.8
     // 27: 闇の水路の休み場を最低 5×5 の歩ける床に (入口の小部屋 2 つめを 5×5 → 7×7・休み場の火は休み場の遺物に・中ほどの息継ぎのくぼみを 5×5 の足場に)。
     //     建て直しは、前の版の部屋や小部屋が残らないよう、体の範囲の外の鯨の外周も空にしてから建てる (TitanBackBuilder.clearStale)
-    public static final int LAYOUT_VERSION = 27;
+    // 28: 試練の流れ (石を無くしてゴールの印に・紫の抜け道の戸を壁に・今週の試練の入口。docs/design/26 の 8.8、29 の 4.6・4.7)。四体とも 28
+    public static final int LAYOUT_VERSION = 28;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -218,7 +219,7 @@ public final class TitanBackLayout {
     public static final Box EXIT_PASS = new Box(4, 21, -7, -3, FLOOR, 6);
 
     // ---------------------------------------------------------------- 共鳴石 (0 = 西, 1 = 東, 2 = 下)
-    public static final List<BlockPos> RESONANCE_STONES = List.of(
+    public static final List<BlockPos> GOAL_SPOTS = List.of(
             new BlockPos(-23, WEST_LEDGE_Y + 1, -50), new BlockPos(25, FLOOR + 1, -53), new BlockPos(26, MAZE_FLOOR + 5, -5));
 
     // ---------------------------------------------------------------- 碑文 (物語の断片)。sign.skyabyss.lore_<name>

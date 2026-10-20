@@ -224,6 +224,10 @@ public final class TrialHub {
             // 順位の石と飾り板 (転生。docs/design/31 の C11・C21)
             jp.revati.skyabyss.rebirth.RebirthBoards.install(level, titan);
         }
+        if (now % 200 == 0 && !players.isEmpty()) {
+            // 今週の試練の入口 (光る床・灯りの道・立て札)
+            WeeklyGate.install(level, titan);
+        }
         if (now % 200 == 0 && !players.isEmpty() && HubTablets.install(level, titan) > 0) {
             for (UUID g : groupsOf(players)) {
                 HubTablets.refresh(level, g);
@@ -234,6 +238,7 @@ public final class TrialHub {
         autoStones(level, titan, players, now);
         TrialIntro.tick(titan, players);
         tickPads(level, titan, players, now);
+        WeeklyGate.tick(level, titan, players, now);
     }
 
     // ---------------------------------------------------------------- 光る床 (鼓動の間 <-> 試練の階。岩鯨。版 25)
@@ -316,11 +321,23 @@ public final class TrialHub {
                     continue;
                 }
                 STONE_TRY.put(tk, now);
-                level.getBlockState(stone).useWithoutItem(level, p, new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(stone), net.minecraft.core.Direction.UP, stone, false));
+                arrive(level, titan, p, stone);
                 pressed++;
             }
         }
         return pressed;
+    }
+
+    // ゴールに着いた (巨神ごとの決まりに渡す。足りない条件は一行で言う)
+    static void arrive(ServerLevel level, String titan, ServerPlayer p, BlockPos goal) {
+        switch (titan) {
+            case Titans.STONE_WHALE -> jp.revati.skyabyss.titan.dungeon.WhaleGoals.arrive(level, p, goal);
+            case Titans.TIDE_SHELL -> jp.revati.skyabyss.titan.tide.back.TideBackTrials.useStone(level, goal, p, net.minecraft.world.item.ItemStack.EMPTY);
+            case Titans.THUNDER_WING -> jp.revati.skyabyss.titan.storm.back.StormBackTrials.useStone(level, goal, p);
+            case Titans.EMBER -> jp.revati.skyabyss.titan.ember.back.EmberBackTrials.useStone(level, goal, p);
+            default -> {
+            }
+        }
     }
 
     // 戻す時刻になった試練 (online = そのグループの、その背にいる人の取り方。試験では偽の人を渡す)
@@ -401,6 +418,7 @@ public final class TrialHub {
 
     public static void clearAll() {
         STONE_TRY.clear();
+        WeeklyGate.clearAll();
         PAD_USED.clear();
         PENDING.clear();
         BOUNCED.clear();

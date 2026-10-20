@@ -150,7 +150,6 @@ public final class ModItems {
     public static final DeferredItem<Item> STONE_WHALE_HEART_EGG = ITEMS.register("stone_whale_heart_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.STONE_WHALE_HEART, 0x96505A, 0x7FD6D0, new Item.Properties()));
 
-    public static final DeferredItem<BlockItem> RESONANCE_STONE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_STONE);
     public static final DeferredItem<BlockItem> SEALED_GATE = ITEMS.registerSimpleBlockItem(ModBlocks.SEALED_GATE);
     public static final DeferredItem<BlockItem> CRUMBLING_BONE = ITEMS.registerSimpleBlockItem(ModBlocks.CRUMBLING_BONE);
     public static final DeferredItem<BlockItem> RESONANCE_FORGE = ITEMS.registerSimpleBlockItem(ModBlocks.RESONANCE_FORGE);
@@ -223,7 +222,6 @@ public final class ModItems {
                 output.accept(WATERWAY_MAW_EGG.get());
                 output.accept(WHALEBONE_CAPTAIN_EGG.get());
                 output.accept(STONE_WHALE_HEART_EGG.get());
-                output.accept(RESONANCE_STONE.get());
                 output.accept(SEALED_GATE.get());
                 output.accept(CRUMBLING_BONE.get());
                 output.accept(GLOW_ANEMONE.get());

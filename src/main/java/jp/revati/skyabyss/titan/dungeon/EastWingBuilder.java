@@ -75,9 +75,9 @@ final class EastWingBuilder {
         kit.palette(ZonePalette.CAPTAIN);
         captainHall(kit);
         throneDais(kit);
-        // 番兵長の広間から鼓動の間へ戻る扉 (石が歌うまで封じられている)。広間を掘ったあとに置く
+        // 番兵長の広間から鼓動の間へ戻る抜け道の戸は無くした (版 28)。壁を閉じる。広間を掘ったあとに置く
         for (BlockPos p : EAST_RETURN) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
+            kit.set(p, kit.pal().wall());
         }
         // 休み場: 東の前室 (練兵場の材質)、控えの間 (射手の回廊の材質)、詰所の前室 (詰所の材質)
         kit.palette(ZonePalette.DRILL);
@@ -210,7 +210,7 @@ final class EastWingBuilder {
 
     // 番兵長の広間の奥 (共鳴石のある南端): 石を囲む彫刻の床と、両脇の灯り。抜け道の前は空けておく
     private static void throneDais(BuildKit kit) {
-        BlockPos stone = RESONANCE_STONES.get(1);
+        BlockPos stone = GOAL_SPOTS.get(1);
         for (int x = stone.getX() - 2; x <= stone.getX() + 2; x++) {
             for (int z = stone.getZ() - 2; z <= stone.getZ() + 1; z++) {
                 kit.set(x, FLOOR, z, (x + z) % 2 == 0 ? BuildKit.CHISELED : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());

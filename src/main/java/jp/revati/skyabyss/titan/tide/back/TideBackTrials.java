@@ -146,7 +146,7 @@ public final class TideBackTrials {
             if (!state.rung(t)) {
                 continue;
             }
-            out.accept(stonePos(t), TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, true));
+            out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
             out.accept(lampPos(t), Blocks.SEA_LANTERN.defaultBlockState());
             out.accept(padPos(t), TideKit.LAMP);
             if (t == TideBackState.Trial.WEST) {
@@ -559,7 +559,7 @@ public final class TideBackTrials {
     // 三つの石・広間の床の灯り・抜け道の床を、ワールドでは「まだ鳴っていない」形にする (鳴らしたグループには見かけの上書きで見せる)
     static void applyStones(ServerLevel level) {
         for (TideBackState.Trial t : TideBackState.Trial.values()) {
-            net.minecraft.world.level.block.state.BlockState want = TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false);
+            net.minecraft.world.level.block.state.BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
             if (!level.getBlockState(stonePos(t)).equals(want)) {
                 level.setBlock(stonePos(t), want, 3);
             }

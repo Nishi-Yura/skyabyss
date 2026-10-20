@@ -360,7 +360,7 @@ public final class S04Bridge extends StormCell implements StormCell.PerTick {
                 bad.add("S04 pillars " + i + " and " + (i + 1) + " are too far apart");
             }
         }
-        if (!back.getBlockState(StormDeck2.S04_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck2.S04_STONE))) {
             bad.add("S04 stone missing");
         }
         return bad;

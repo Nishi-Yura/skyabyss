@@ -22,63 +22,30 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 
-// 共鳴石。触れると歌い出し、光り続ける。岩鯨の背の3つがそろうと封印の扉が解ける
-public class ResonanceStoneBlock extends Block {
-    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
-
-    public ResonanceStoneBlock(Properties properties) {
-        super(properties);
-        registerDefaultState(stateDefinition.any().setValue(ACTIVE, false));
+// 岩鯨の背の原型の試練 (西・東・下) のゴール。石はもう無い: 試練の終わりのゴールの印 (TrialGoal) に着くと、その試練を越えたことになる。
+// 三つ越えると宝物庫の封印が解ける
+public final class WhaleGoals {
+    private WhaleGoals() {
     }
 
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(ACTIVE);
-    }
-
-    @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (state.getValue(ACTIVE)) {
+    // ゴールに着いた (TrialHub.autoStones から)。index = 西 0 / 東 1 / 下 2。着けなかった理由は一行で言う
+    public static InteractionResult arrive(ServerLevel server, ServerPlayer sp, BlockPos pos) {
+        int index = TitanBackLayout.GOAL_SPOTS.indexOf(pos);
+        if (server.dimension() != TitanTravel.TITAN_BACK || index < 0) {
             return InteractionResult.PASS;
         }
-        if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp)) {
-            return InteractionResult.SUCCESS;
-        }
-        boolean onBack = server.dimension() == TitanTravel.TITAN_BACK;
-        int index = TitanBackLayout.RESONANCE_STONES.indexOf(pos);
-        if (onBack && index < 0) {
-            // 試練の階の石 (新しいセル。docs/design/29): 引いた試練のスロットの石として数える
-            InteractionResult deck = jp.revati.skyabyss.trial.TrialRuntime.useStone(server, sp, pos);
-            if (deck != null) {
-                return deck;
-            }
-        }
-        if (!onBack || index < 0) {
-            // 岩鯨の背の外の石 (ふつうのブロックとして置いた石): 光るのはワールド全体
-            server.setBlock(pos, state.setValue(ACTIVE, true), Block.UPDATE_ALL);
-            server.playSound(null, pos, ModSounds.RESONANCE.get(), SoundSource.BLOCKS, 2.5f, 0.7f);
-            server.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
-            return InteractionResult.SUCCESS;
-        }
-        // 背中の石の「鳴ったか」はグループの記録にある (世界のブロックは光らない。光って見えるのは、鳴らしたグループの画面だけ)
+        Player player = sp;
+        // 背中のゴールの「着いたか」はグループの記録にある (世界のブロックは変わらない。金の印に見えるのは、着いたグループの画面だけ)
         UUID group = Groups.keyOf(sp);
         BackGroupData.Record record = GroupProgress.of(server, group);
         if (record.flag(TitanBackTrials.STONE_FLAG + index)) {
-            // すでに鳴っている石: 誰が鳴らしたかを見せる (鳴らした石はもう一度は鳴らせない)
-            jp.revati.skyabyss.titan.group.TrialSteles.tellWho(sp, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index));
             return InteractionResult.SUCCESS;
         }
-        // 番兵の回廊の石は、そのグループが番兵長を倒すまで黙っている
+        // 番兵の回廊のゴールは、そのグループが番兵長を倒すまで着けない
         if (index == 1 && !record.isHallCleared("e3")) {
-            Notice.bar(player, ModText.deny("message.skyabyss.stone_silent"));
+            Notice.bar(player, ModText.deny("message.skyabyss.goal_not_yet"));
             return InteractionResult.SUCCESS;
         }
         record.setFlag(TitanBackTrials.STONE_FLAG + index, true);
@@ -89,19 +56,19 @@ public class ResonanceStoneBlock extends Block {
                 server.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
             }
         }
-        // 版 25: 抜け道は開かない。石が歌うと、中にいる仲間は少しして鼓動の間へ戻り (TrialHub)、入口は試練済みの封印で閉じる
+        // 着いたら、中にいる仲間は少しして鼓動の間へ戻る (TrialHub)
         Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
-        // 背中の外にいる仲間にも (クエストはグループの記録から数える)
+        // 背の外にいる仲間にも (クエストはグループの記録から数える)
         jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),
-                Component.translatable("block.skyabyss.resonance_stone"), sp);
+                Component.translatable("message.skyabyss.goal_name"), sp);
         finishRung(server, sp, group, record);
         return InteractionResult.SUCCESS;
     }
 
-    // 石が鳴ったあとの数え: 何個目かを知らせ、三つそろえば宝物庫の封印を解く (試練の階の石からも使う)
+    // ゴールに着いたあとの数え: 何個目かを知らせ、三つそろえば宝物庫の封印を解く (試練の階のセルからも使う)
     public static void finishRung(ServerLevel server, ServerPlayer sp, UUID group, BackGroupData.Record record) {
         int active = countActive(record);
-        int total = TitanBackLayout.RESONANCE_STONES.size();
+        int total = TitanBackLayout.GOAL_SPOTS.size();
         notifyGroup(server, group, ModText.progress("message.skyabyss.resonance", active, total));
         if (active >= total) {
             openGate(server, group, record);
@@ -110,7 +77,7 @@ public class ResonanceStoneBlock extends Block {
 
     private static int countActive(BackGroupData.Record record) {
         int count = 0;
-        for (int i = 0; i < TitanBackLayout.RESONANCE_STONES.size(); i++) {
+        for (int i = 0; i < TitanBackLayout.GOAL_SPOTS.size(); i++) {
             if (record.flag(TitanBackTrials.STONE_FLAG + i)) {
                 count++;
             }

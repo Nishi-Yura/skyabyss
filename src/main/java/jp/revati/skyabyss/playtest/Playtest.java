@@ -261,14 +261,13 @@ public final class Playtest {
         switch (idx) {
             case 0 -> {
                 var record = GroupProgress.of(level, group);
-                for (int i = 0; i < TitanBackLayout.RESONANCE_STONES.size(); i++) {
+                for (int i = 0; i < TitanBackLayout.GOAL_SPOTS.size(); i++) {
                     record.setFlag(TitanBackTrials.STONE_FLAG + i, true);
                 }
                 record.markHallCleared("e1");
                 record.markHallCleared("e3");
                 record.markGateOpened();
-                for (List<BlockPos> gate : List.of(TitanBackLayout.GATE, TitanBackLayout.WEST_RETURN,
-                        TitanBackLayout.EAST_RETURN, TitanBackLayout.LOWER_RETURN, TitanBackLayout.E1_EXIT)) {
+                for (List<BlockPos> gate : List.of(TitanBackLayout.GATE, TitanBackLayout.E1_EXIT)) {
                     GroupGates.open(level, group, gate);
                 }
                 GroupGates.release(level, group, TitanBackLayout.E1_ENTRANCE);

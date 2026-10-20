@@ -473,7 +473,7 @@ public final class T11Clam implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(TideDeck.T11_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T11_STONE))) {
             bad.add("T11 stone missing");
         }
         return bad;

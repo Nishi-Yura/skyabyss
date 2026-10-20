@@ -265,7 +265,7 @@ public final class StormBackTrials {
         }
         for (StormBackState.Trial t : StormBackState.Trial.values()) {
             if (p.rung(t)) {
-                out.accept(stonePos(t), StormBackSetup.CHIME_STONE.get().defaultBlockState().setValue(StormBlocks.ChimeStone.ACTIVE, true));
+                out.accept(stonePos(t), jp.revati.skyabyss.trial.TrialGoal.reached());
                 out.accept(lampPos(t), StormKit.LAMP);
                 out.accept(padPos(t), StormKit.LAMP);
             }
@@ -508,7 +508,7 @@ public final class StormBackTrials {
     // 三つの石・広間の床の灯り・抜け道の床のワールドの姿 (まだ鳴っていない)。鳴った姿はグループごとの見かけ (overlay)
     static void applyStones(ServerLevel level) {
         for (StormBackState.Trial t : StormBackState.Trial.values()) {
-            BlockState want = StormBackSetup.CHIME_STONE.get().defaultBlockState().setValue(StormBlocks.ChimeStone.ACTIVE, false);
+            BlockState want = jp.revati.skyabyss.trial.TrialGoal.mark();
             BlockPos s = stonePos(t);
             if (!level.getBlockState(s).equals(want)) {
                 level.setBlock(s, want, 3);

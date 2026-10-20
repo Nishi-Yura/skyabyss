@@ -361,7 +361,7 @@ public final class W03Moss implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(WhaleDeck.W03_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W03_STONE))) {
             bad.add("W03 stone missing");
         }
         return bad;

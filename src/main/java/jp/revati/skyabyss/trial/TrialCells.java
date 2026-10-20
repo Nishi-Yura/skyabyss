@@ -134,7 +134,7 @@ public final class TrialCells {
         return List.copyOf(CELLS.values());
     }
 
-    // 位置が石の差し口のセル (新作)。原型の石は別 (ResonanceStoneBlock などが扱う)
+    // 位置がゴールのセル (新作)。原型のゴールは別 (WhaleGoals などが扱う)
     @Nullable
     public static TrialCell atStone(BlockPos pos) {
         for (TrialCell c : all()) {
@@ -147,9 +147,9 @@ public final class TrialCells {
 
     private static Ports legacyPorts(Def d) {
         return switch (d.id()) {
-            case "W01" -> new Ports(WhaleDeck.WEST_GATE, true, List.of(), TitanBackLayout.RESONANCE_STONES.get(0), null, "", empty(), List.of());
-            case "W09" -> new Ports(WhaleDeck.EAST_GATE, true, List.of(), TitanBackLayout.RESONANCE_STONES.get(1), null, "", empty(), List.of());
-            case "W05" -> new Ports(WhaleDeck.mazeLids(), true, List.of(), TitanBackLayout.RESONANCE_STONES.get(2), null, "", empty(), List.of());
+            case "W01" -> new Ports(WhaleDeck.WEST_GATE, true, List.of(), TitanBackLayout.GOAL_SPOTS.get(0), null, "", empty(), List.of());
+            case "W09" -> new Ports(WhaleDeck.EAST_GATE, true, List.of(), TitanBackLayout.GOAL_SPOTS.get(1), null, "", empty(), List.of());
+            case "W05" -> new Ports(WhaleDeck.mazeLids(), true, List.of(), TitanBackLayout.GOAL_SPOTS.get(2), null, "", empty(), List.of());
             // 雷翼: 広間の三つの出口 (西の肩の階段・東・首) の戸。引かなかったグループに閉じる
             case "S01" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.WEST_GATE, true, List.of(), null, null, "", empty(), List.of());
             case "S05" -> new Ports(jp.revati.skyabyss.titan.storm.back.StormDeck.EAST_GATE, true, List.of(), null, null, "", empty(), List.of());

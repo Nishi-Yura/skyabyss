@@ -77,8 +77,8 @@ public final class TitanBackBuilder {
         MazeBuilder.buildMaze(new BuildKit(level, RandomSource.create(data.mazeSeed())), data.mazeSeed());
         // 体内を掘ってから階段を通す (先に階段を作ると、通路の壁でふさがれる)
         buildShrineAndStairs(kit);
-        for (BlockPos p : RESONANCE_STONES) {
-            kit.set(p, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
+        for (BlockPos p : GOAL_SPOTS) {
+            kit.set(p, jp.revati.skyabyss.trial.TrialGoal.mark());
         }
         // 物語の断片の碑文 (部屋と柱をすべて置いたあとに掛ける)
         for (Inscription lore : LORE_SIGNS) {
@@ -528,17 +528,12 @@ public final class TitanBackBuilder {
         for (Inscription s : TRIAL_SIGNS) {
             kit.wallSign(s.pos(), s.facing(), s.key());
         }
-        // 西・東の石を鳴らすと開く抜け道 (鼓動の間の側)
+        // 版 28: 西・東の来た道へ戻る「抜け道の戸」(紫の封印のブロック。開かないまま残っていた) は無くした。壁を閉じる (ゴールに着けば広間へ戻される)
         for (BlockPos p : WEST_RETURN) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
-        }
-        BlockState ladderEast = Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.EAST);
-        // はしごの頂は 97 まで。98 (戸と同じ高さ) だと、支えの壁が戸になって、戸が開くと浮いてしまう。頂の隣 (-10, 98〜99) が戸 = 出口
-        for (int y = FLOOR + 1; y <= WEST_LEDGE_Y; y++) {
-            kit.set(HUB.x1(), y, WEST_RETURN_Z, ladderEast);
+            kit.set(p, kit.pal().wall());
         }
         for (BlockPos p : EAST_RETURN) {
-            kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
+            kit.set(p, kit.pal().wall());
         }
     }
 

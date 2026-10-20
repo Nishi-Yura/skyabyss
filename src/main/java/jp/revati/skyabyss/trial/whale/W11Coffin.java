@@ -379,7 +379,7 @@ public final class W11Coffin implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(WhaleDeck.W11_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W11_STONE))) {
             bad.add("W11 stone missing");
         }
         return bad;

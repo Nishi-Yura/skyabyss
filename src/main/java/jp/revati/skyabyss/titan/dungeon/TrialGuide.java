@@ -162,7 +162,7 @@ public final class TrialGuide {
             if (!record.isHallCleared("e3")) {
                 return new Goal("east_e3", E3.center(), 2f, 2f, 2f);
             }
-            return new Goal("east_stone", RESONANCE_STONES.get(1), 1f, 1.5f, 1f);
+            return new Goal("east_stone", GOAL_SPOTS.get(1), 1f, 1.5f, 1f);
         }
         if (inWest(pos)) {
             if (west) {
@@ -173,13 +173,13 @@ public final class TrialGuide {
                     return new Goal("bell", BellTower.bellPos(1), 1f, 1f, 1f);
                 }
             }
-            return new Goal("west", RESONANCE_STONES.get(0), 1f, 1.5f, 1f);
+            return new Goal("west", GOAL_SPOTS.get(0), 1f, 1.5f, 1f);
         }
         if (pos.getY() < FLOOR - 10) {
             if (lower) {
                 return null;
             }
-            return new Goal("maze", RESONANCE_STONES.get(2), 1f, 1.5f, 1f);
+            return new Goal("maze", GOAL_SPOTS.get(2), 1f, 1.5f, 1f);
         }
         // 鼓動の間・入口の通路ほか: 鳴らしていない石のうち、いちばん近い翼の入口
         BlockPos best = null;

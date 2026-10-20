@@ -28,11 +28,6 @@ public final class TideBackSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, SkyAbyss.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Registries.SOUND_EVENT, SkyAbyss.MODID);
 
-    // 潮鳴り石 (三つの試練の終わり)。壊せない。鳴ると光る
-    public static final DeferredBlock<TideChimeStoneBlock> CHIME_STONE = BLOCKS.register("tide_chime_stone",
-            () -> new TideChimeStoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(-1.0f, 3600000.0f)
-                    .noLootTable().sound(SoundType.AMETHYST).lightLevel(s -> s.getValue(TideChimeStoneBlock.ACTIVE) ? 12 : 2)));
-
     // 潮の真珠 (珊瑚の庭で運ぶ。一度に一つだけ島にある)
     public static final DeferredItem<Item> TIDE_PEARL = ITEMS.register("tide_pearl",
             () -> new TidePearlItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));

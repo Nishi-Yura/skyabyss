@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.titan.TitanTravel;
-import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
 import jp.revati.skyabyss.titan.dungeon.TitanBackLayout;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import net.minecraft.core.BlockPos;
@@ -322,12 +321,12 @@ public final class GrowthRewards {
                 || level.getGameTime() % 20 != 3 || level.players().isEmpty()) {
             return;
         }
-        for (BlockPos pos : TitanBackLayout.RESONANCE_STONES) {
+        for (BlockPos pos : TitanBackLayout.GOAL_SPOTS) {
             if (!level.isLoaded(pos)) {
                 continue;
             }
             BlockState state = level.getBlockState(pos);
-            boolean active = state.getBlock() instanceof ResonanceStoneBlock && state.getValue(ResonanceStoneBlock.ACTIVE);
+            boolean active = false;
             Boolean before = STONES.put(pos.immutable(), active);
             if (before != null && !before && active) {
                 List<ServerPlayer> near = level.getEntitiesOfClass(ServerPlayer.class, new AABB(pos).inflate(TRIAL_RADIUS),

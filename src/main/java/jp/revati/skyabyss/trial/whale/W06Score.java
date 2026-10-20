@@ -241,7 +241,7 @@ public final class W06Score implements TrialCell {
                 bad.add("W06 score slot " + k + " missing");
             }
         }
-        if (!back.getBlockState(WhaleDeck.W06_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W06_STONE))) {
             bad.add("W06 stone missing");
         }
         return bad;

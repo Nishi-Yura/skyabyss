@@ -391,7 +391,7 @@ public final class S09Nest extends StormCell {
                 bad.add("S09 rod too near the rim at " + base);
             }
         }
-        if (!back.getBlockState(StormDeck.S09_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck.S09_STONE))) {
             bad.add("S09 stone missing");
         }
         // 柱どうしの間は 6 以上 (放電が重ならない) 、6 本のどの二本も 3 ブロック以内の柱を共有しない

@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import jp.revati.skyabyss.progress.Titans;
 import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.registry.ModSounds;
-import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
+import jp.revati.skyabyss.titan.dungeon.WhaleGoals;
 import jp.revati.skyabyss.titan.dungeon.TitanBackTrials;
 import jp.revati.skyabyss.titan.group.BackGroupData;
 import jp.revati.skyabyss.titan.group.GroupOverlays;
@@ -17,7 +17,6 @@ import jp.revati.skyabyss.titan.group.TrialSteles;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
 import jp.revati.skyabyss.titan.tide.back.TideBackState;
 import jp.revati.skyabyss.titan.tide.back.TideBackTrials;
-import jp.revati.skyabyss.titan.tide.back.TideChimeStoneBlock;
 import jp.revati.skyabyss.trial.Trial.Def;
 import jp.revati.skyabyss.trial.Trial.Slot;
 import net.minecraft.core.BlockPos;
@@ -119,7 +118,7 @@ public final class TrialBacks {
             // 岩鯨の石の三つ目なら、宝物庫の封印が開く (原型の石と同じ数え方)。クエストの石の合図もスロットの番号で数える
             TrialRuntime.withLegacySuppressed(() -> TrialSteles.onRung(back, group, TrialSteles.WHALE, String.valueOf(def.slot().stone),
                     Component.translatable(def.nameKey()), by));
-            ResonanceStoneBlock.finishRung(back, by, group, GroupProgress.of(back, group));
+            WhaleGoals.finishRung(back, by, group, GroupProgress.of(back, group));
         }
 
         @Override
@@ -134,7 +133,7 @@ public final class TrialBacks {
 
         @Override
         public BlockState lit() {
-            return ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true);
+            return jp.revati.skyabyss.trial.TrialGoal.reached();
         }
     };
 
@@ -194,7 +193,7 @@ public final class TrialBacks {
 
         @Override
         public BlockState lit() {
-            return jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, true);
+            return jp.revati.skyabyss.trial.TrialGoal.reached();
         }
     };
 
@@ -259,8 +258,7 @@ public final class TrialBacks {
 
         @Override
         public BlockState lit() {
-            return jp.revati.skyabyss.titan.storm.back.StormBackSetup.CHIME_STONE.get().defaultBlockState()
-                    .setValue(jp.revati.skyabyss.titan.storm.back.StormBlocks.ChimeStone.ACTIVE, true);
+            return jp.revati.skyabyss.trial.TrialGoal.reached();
         }
     };
 
@@ -331,8 +329,7 @@ public final class TrialBacks {
 
         @Override
         public BlockState lit() {
-            return jp.revati.skyabyss.titan.ember.back.EmberBackSetup.KINDLE_STONE.get().defaultBlockState()
-                    .setValue(jp.revati.skyabyss.titan.ember.back.KindleStoneBlock.ACTIVE, true);
+            return jp.revati.skyabyss.trial.TrialGoal.reached();
         }
     };
 }

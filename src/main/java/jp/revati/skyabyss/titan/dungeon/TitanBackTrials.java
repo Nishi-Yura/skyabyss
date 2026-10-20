@@ -304,7 +304,7 @@ public final class TitanBackTrials {
     private static final GroupBossRooms HEART_ROOMS = new GroupBossRooms();
 
     // 扉: 建てたときに閉じているもの (進みで開く) と、開いているもの (戦いの間だけ閉じる)
-    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT,
+    private static final List<List<BlockPos>> CLOSED_GATES = List.of(GATE, E1_EXIT,
             E3_LOCK, BELL_GATE);
     private static final List<List<BlockPos>> OPEN_GATES = List.of(E1_ENTRANCE, E3_ENTRANCE, HEART_GATE, CK_ENTRANCE);
 
@@ -361,9 +361,9 @@ public final class TitanBackTrials {
             if (r == null) {
                 return;
             }
-            for (int i = 0; i < RESONANCE_STONES.size(); i++) {
+            for (int i = 0; i < GOAL_SPOTS.size(); i++) {
                 if (r.flag(STONE_FLAG + i)) {
-                    out.accept(RESONANCE_STONES.get(i), ModBlocks.RESONANCE_STONE.get().defaultBlockState().setValue(ResonanceStoneBlock.ACTIVE, true));
+                    out.accept(GOAL_SPOTS.get(i), jp.revati.skyabyss.trial.TrialGoal.reached());
                 }
             }
         });

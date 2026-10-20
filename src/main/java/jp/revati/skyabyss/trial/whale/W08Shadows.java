@@ -575,7 +575,7 @@ public final class W08Shadows implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(WhaleDeck.W08_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W08_STONE))) {
             bad.add("W08 stone missing");
         }
         return bad;

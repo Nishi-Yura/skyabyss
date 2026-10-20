@@ -7,7 +7,6 @@ import jp.revati.skyabyss.titan.dungeon.AnemoneBedBlock;
 import jp.revati.skyabyss.titan.dungeon.AnemonePedestalBlock;
 import jp.revati.skyabyss.titan.dungeon.AnemoneTallyBlock;
 import jp.revati.skyabyss.titan.dungeon.CrumblingBoneBlock;
-import jp.revati.skyabyss.titan.dungeon.ResonanceStoneBlock;
 import jp.revati.skyabyss.titan.dungeon.SealedGateBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -22,9 +21,6 @@ public final class ModBlocks {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SkyAbyss.MODID);
 
     // 叩くと歌い出す古代の石。3つそろうと封印が解ける
-    public static final DeferredBlock<ResonanceStoneBlock> RESONANCE_STONE = BLOCKS.register("resonance_stone",
-            () -> new ResonanceStoneBlock(unbreakable(MapColor.COLOR_GRAY)
-                    .lightLevel(state -> state.getValue(ResonanceStoneBlock.ACTIVE) ? 11 : 0)));
     // 封印の扉。共鳴石がそろうまで壊せない
     public static final DeferredBlock<SealedGateBlock> SEALED_GATE = BLOCKS.register("sealed_gate",
             () -> new SealedGateBlock(unbreakable(MapColor.COLOR_PURPLE).noOcclusion().dynamicShape()

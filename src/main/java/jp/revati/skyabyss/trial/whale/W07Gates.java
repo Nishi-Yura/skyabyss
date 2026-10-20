@@ -312,7 +312,7 @@ public final class W07Gates implements TrialCell {
                 bad.add("W07 handle " + k + " missing");
             }
         }
-        if (!back.getBlockState(WhaleDeck.W07_STONE).is(ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W07_STONE))) {
             bad.add("W07 stone missing");
         }
         return bad;

@@ -75,7 +75,7 @@ public final class EmberDeckBuilder {
         // 石の差し口 (熾り石)・戻りの光る床 (中心は彫った石、まわりは暗い磨き石。光るのはそのグループの画面だけ)
         for (BlockPos stone : new BlockPos[] {E02_STONE, E10_STONE, E06_STONE, E07_STONE, E03_STONE, E08_STONE, E11_STONE, E12_STONE, E04_STONE}) {
             kit.set(stone.below(), EmberKit.RUIN_CHISELED);
-            kit.set(stone, EmberBackSetup.KINDLE_STONE.get().defaultBlockState().setValue(KindleStoneBlock.ACTIVE, false));
+            kit.set(stone, jp.revati.skyabyss.trial.TrialGoal.mark());
         }
         for (BlockPos pad : new BlockPos[] {E02_PAD, E10_PAD, E06_PAD, E07_PAD, E03_PAD, E08_PAD, E11_PAD, E12_PAD, E04_PAD}) {
             for (int dx = -1; dx <= 1; dx++) {

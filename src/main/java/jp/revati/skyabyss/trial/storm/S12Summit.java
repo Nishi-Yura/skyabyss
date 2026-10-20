@@ -521,7 +521,7 @@ public final class S12Summit extends StormCell {
                 bad.add("S12 wedge " + w + " is too small (" + WEDGES.get(w).size() + ")");
             }
         }
-        if (!back.getBlockState(StormDeck2.S12_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck2.S12_STONE))) {
             bad.add("S12 stone missing");
         }
         return bad;

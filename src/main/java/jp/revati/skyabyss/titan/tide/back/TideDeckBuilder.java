@@ -181,7 +181,7 @@ public final class TideDeckBuilder {
         for (int[] at : new int[][] {{4, 51}, {20, 51}, {4, 53}, {20, 53}, {4, 89}, {20, 89}, {4, 91}, {20, 91}, {8, 69}, {16, 70}}) {
             floorLamp(kit, at[0], at[1]);
         }
-        kit.set(T02_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T02_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T02_PAD, LAMP);
     }
 
@@ -243,7 +243,7 @@ public final class TideDeckBuilder {
         }
         lampsAlong(kit, T10_FOYER_N, F + 2, 4);
         lampsAlong(kit, T10_FOYER_S, F + 2, 4);
-        kit.set(T10_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T10_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T10_PAD, LAMP);
     }
 
@@ -269,7 +269,7 @@ public final class TideDeckBuilder {
             kit.lampIn(62, F + 11, z);
         }
         floorLamp(kit, 62, 69);
-        kit.set(T06_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T06_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T06_PAD, LAMP);
     }
 
@@ -319,7 +319,7 @@ public final class TideDeckBuilder {
             }
         }
         floorLamp(kit, 80, 67);
-        kit.set(T07_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T07_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T07_PAD, LAMP);
     }
 
@@ -437,7 +437,7 @@ public final class TideDeckBuilder {
         floorLamp2(kit, 2, 109);
         floorLamp2(kit, 14, 109);
         floorLamp2(kit, 8, 114);
-        kit.set(T03_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T03_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T03_PAD, LAMP);
     }
 
@@ -494,7 +494,7 @@ public final class TideDeckBuilder {
             floorLamp2(kit, at[0], at[1]);
         }
         lampsAlong(kit, T04_STONE_ROOM, G + 2, 3);
-        kit.set(T04_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T04_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T04_PAD, LAMP);
     }
 
@@ -525,7 +525,7 @@ public final class TideDeckBuilder {
             floorLamp2(kit, at[0], at[1]);
         }
         lampsAlong(kit, T11_STONE_ROOM, G + 2, 3);
-        kit.set(T11_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T11_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T11_PAD, LAMP);
     }
 
@@ -555,7 +555,7 @@ public final class TideDeckBuilder {
             floorLamp2(kit, at[0], at[1]);
         }
         lampsAlong(kit, T08_STONE_ROOM, G + 2, 3);
-        kit.set(T08_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T08_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T08_PAD, LAMP);
     }
 
@@ -606,7 +606,7 @@ public final class TideDeckBuilder {
         }
         kit.lampIn(cx, G + T12.height() + 1, cz);
         lampsAlong(kit, T12_STONE_ROOM, G + 2, 3);
-        kit.set(T12_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T12_STONE, jp.revati.skyabyss.trial.TrialGoal.mark());
         kit.set(T12_PAD, LAMP);
     }
 }

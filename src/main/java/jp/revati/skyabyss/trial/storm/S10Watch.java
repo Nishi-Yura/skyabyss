@@ -378,7 +378,7 @@ public final class S10Watch extends StormCell implements StormCell.PerTick {
                 }
             }
         }
-        if (!back.getBlockState(StormDeck.S10_STONE).is(StormBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(StormDeck.S10_STONE))) {
             bad.add("S10 stone missing");
         }
         return bad;

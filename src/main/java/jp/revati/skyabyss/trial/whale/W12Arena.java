@@ -134,7 +134,7 @@ public final class W12Arena extends RingArenaCell {
                 break;
             }
         }
-        if (!back.getBlockState(WhaleDeck.W12_STONE).is(jp.revati.skyabyss.registry.ModBlocks.RESONANCE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(WhaleDeck.W12_STONE))) {
             bad.add("W12 stone missing");
         }
         return bad;

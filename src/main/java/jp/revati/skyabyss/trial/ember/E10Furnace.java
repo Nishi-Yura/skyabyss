@@ -352,7 +352,7 @@ public final class E10Furnace implements TrialCell {
                 break;
             }
         }
-        if (!back.getBlockState(EmberDeck.E10_STONE).is(EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E10_STONE))) {
             bad.add("E10 stone missing");
         }
         // 熱の収支: 鞴持ち 1 体で 100 まで 33 秒以上、6 人でも (鞴持ち 5 体・人数で 0.7) 噴くまで 5 秒以上

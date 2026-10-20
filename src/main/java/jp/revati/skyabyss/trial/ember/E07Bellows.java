@@ -404,7 +404,7 @@ public final class E07Bellows implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(EmberDeck.E07_STONE).is(EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E07_STONE))) {
             bad.add("E07 stone missing");
         }
         return bad;

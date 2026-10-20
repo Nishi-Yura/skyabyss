@@ -421,7 +421,7 @@ public final class E06Flues implements TrialCell {
                 bad.add("E06 the first round must have four chimneys");
             }
         }
-        if (!back.getBlockState(EmberDeck.E06_STONE).is(EmberBackSetup.KINDLE_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(EmberDeck.E06_STONE))) {
             bad.add("E06 stone missing");
         }
         return bad;

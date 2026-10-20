@@ -652,7 +652,7 @@ public final class T08Shelf implements TrialCell {
                 }
             }
         }
-        if (!back.getBlockState(TideDeck.T08_STONE).is(jp.revati.skyabyss.titan.tide.back.TideBackSetup.CHIME_STONE.get())) {
+        if (!jp.revati.skyabyss.trial.TrialGoal.isMark(back.getBlockState(TideDeck.T08_STONE))) {
             bad.add("T08 stone missing");
         }
         return bad;
