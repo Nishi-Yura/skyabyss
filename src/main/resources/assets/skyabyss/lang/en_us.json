@@ -1357,5 +1357,8 @@
   "message.skyabyss.skill.ext_failed.not_quiet": "Change glyphs outside combat (30 s)",
   "message.skyabyss.skill.ext_failed.bag_full": "Your glyph bag is full",
   "message.skyabyss.skill.ext_failed.bad": "Could not do that",
-  "message.skyabyss.room_trap": "Step on a floor plate and it crumbles or bursts a moment later. Lure the enemies onto it"
+  "message.skyabyss.room_trap": "Step on a floor plate and it crumbles or bursts a moment later. Lure the enemies onto it",
+  "skyabyss.configuration.weaponShake": "Weapon Hit Shake",
+  "skyabyss.configuration.weaponTrail": "Blade Trails",
+  "key.skyabyss.weapon_inspect": "Inspect weapon"
 }

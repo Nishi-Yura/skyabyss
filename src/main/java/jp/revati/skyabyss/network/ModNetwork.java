@@ -32,6 +32,12 @@ public final class ModNetwork {
                         (payload, context) -> jp.revati.skyabyss.client.titan.BossCueClient.receive(payload))
                 .playToClient(jp.revati.skyabyss.titan.dungeon.LampBand.Payload.TYPE, jp.revati.skyabyss.titan.dungeon.LampBand.Payload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.LampBandClient.receive(payload))
+                .playToClient(jp.revati.skyabyss.weapon.StrikePayload.TYPE, jp.revati.skyabyss.weapon.StrikePayload.STREAM_CODEC,
+                        (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveStrike(payload))
+                .playBidirectional(jp.revati.skyabyss.weapon.InspectPayload.TYPE, jp.revati.skyabyss.weapon.InspectPayload.STREAM_CODEC,
+                        new net.neoforged.neoforge.network.handling.DirectionalPayloadHandler<>(
+                                (payload, context) -> jp.revati.skyabyss.client.weapon.WeaponFeel.receiveInspect(payload),
+                                (payload, context) -> jp.revati.skyabyss.weapon.InspectPayload.relay(context.player())))
                 .playToClient(jp.revati.skyabyss.titan.domain.DomainPayload.TYPE, jp.revati.skyabyss.titan.domain.DomainPayload.STREAM_CODEC,
                         (payload, context) -> jp.revati.skyabyss.client.titan.domain.DomainClient.receive(payload));
     }

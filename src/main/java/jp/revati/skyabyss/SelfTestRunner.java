@@ -101,6 +101,10 @@ public final class SelfTestRunner {
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
         steps.add(Step.once("keys", KeyDefaultsSelfTest::runSelfTest));
+        // 武器の動き (データ・絵と当たりの同期・連撃の時間・釣り合い) と、預けたクリックが当たる tick に当たる流れ。SKYABYSS_SELFTEST_ONLY="weapon"
+        steps.add(Step.once("weapon moves", jp.revati.skyabyss.weapon.WeaponMoveSelfTest::runSelfTest));
+        steps.add(Step.until("weapon strike", jp.revati.skyabyss.weapon.WeaponMoveSelfTest::runFlow));
+        steps.add(Step.once("weapon strike end", s -> jp.revati.skyabyss.weapon.WeaponMoveSelfTest.finishFlow()));
         // 敵が壁・地面の中に湧かない (すべての湧き口と波に共通の決まり)。SKYABYSS_SELFTEST_ONLY="spawn safety"
         steps.add(Step.once("spawn safety", jp.revati.skyabyss.util.SpawnSafetySelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));

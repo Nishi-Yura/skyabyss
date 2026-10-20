@@ -1,0 +1,22 @@
+{
+  "item": "thunder_wing_bow",
+  "label": "雷翼の弓: 流れるように引き、放して弓を返す",
+  "family": "BOW",
+  "strike": 0.0,
+  "reach": 0.0,
+  "window": 0,
+  "fixedDuration": 14,
+  "idle": {"sway": 0.03, "hz": 0.3},
+  "steps": [
+    {
+      "name": "放ちの返し", "hitstop": 0, "shake": 0.15, "blendIn": 0.04, "blendOut": 0.12,
+      "keys": [
+        {"t": 0.0, "e": "smooth", "v": {"TX": 0, "TY": 0, "TZ": 0, "RX": 0, "RY": 0, "RZ": 0, "GLOW": 1}},
+        {"t": 0.12, "e": "out", "v": {"TX": 0, "TY": 0.04, "TZ": 0.1, "RX": 9, "RY": 0, "RZ": -5, "GLOW": 1}},
+        {"t": 0.4, "e": "in_out", "v": {"TX": -0.03, "TY": 0.06, "TZ": 0.05, "RX": 4, "RY": -8, "RZ": -70, "GLOW": 0.7}},
+        {"t": 0.7, "e": "spring", "v": {"TX": 0, "TY": 0.02, "TZ": 0.02, "RX": 1, "RY": -3, "RZ": -300, "GLOW": 0.3}},
+        {"t": 1.0, "e": "out", "v": {"TX": 0, "TY": 0, "TZ": 0, "RX": 0, "RY": 0, "RZ": -360, "GLOW": 0}}
+      ]
+    }
+  ]
+}

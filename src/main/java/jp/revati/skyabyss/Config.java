@@ -44,6 +44,15 @@ public final class Config {
             .comment("羽ばたきなどで画面を揺らすか")
             .define("screenShake", true);
 
+    // 武器 (client/weapon/WeaponFeel): 重い一撃が当たったときの画面の小さな揺れと、刃の軌跡
+    public static final ModConfigSpec.DoubleValue WEAPON_SHAKE = CLIENT_BUILDER
+            .comment("武器の重い一撃が当たったときの画面の揺れの強さ (0 = 揺らさない, 1 = 標準)。screenShake が false のときも揺れない")
+            .defineInRange("weaponShake", 1.0, 0.0, 1.5);
+
+    public static final ModConfigSpec.BooleanValue WEAPON_TRAIL = CLIENT_BUILDER
+            .comment("刃を振った軌跡の光の帯を出すか")
+            .define("weaponTrail", true);
+
     public static final ModConfigSpec.DoubleValue SCREEN_EFFECT_STRENGTH = CLIENT_BUILDER
             .comment("影の下での画面効果（暗さ・縁の暗がり・霧）の強さ (0 = なし, 1 = 標準)")
             .defineInRange("screenEffectStrength", 1.0, 0.0, 1.5);
