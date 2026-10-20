@@ -719,6 +719,105 @@ SUBJECTS["smithy"] = {
 }
 
 
+# ---------------------------------------------------------------- 市 3 案 (広場の露店・井戸・村人。序章から開いている)
+def _stall(g, x, z, wool="orange_wool", w=4):
+    for cx, cz in ((x, z), (x + w - 1, z), (x, z + w - 1), (x + w - 1, z + w - 1)):
+        box(g, cx, 0, cz, cx, 2, cz, "spruce_fence")
+    box(g, x, 3, z, x + w - 1, 3, z + w - 1, wool)
+    g.set(x + 1, 0, z + 1, "barrel[facing=up,open=false]")
+    g.set(x + 2, 0, z + 2, "spruce_slab[type=top]")
+
+
+def _well(g, cx, cz, roof=True):
+    box(g, cx - 1, 0, cz - 1, cx + 1, 0, cz + 1, "stone_bricks")
+    box(g, cx - 1, -1, cz - 1, cx + 1, -1, cz + 1, "stone_bricks")
+    g.set(cx, -1, cz, "water")
+    g.set(cx, 0, cz, "air")
+    if roof:
+        box(g, cx - 1, 1, cz - 1, cx - 1, 2, cz - 1, "spruce_fence")
+        box(g, cx + 1, 1, cz + 1, cx + 1, 2, cz + 1, "spruce_fence")
+        box(g, cx - 2, 3, cz - 2, cx + 2, 3, cz + 2, "spruce_slab[type=bottom]")
+        g.set(cx, 2, cz, "lantern[hanging=true]")
+
+
+def market_a(g: Grid, rng=None):
+    """A「露店の列」: 市松の石畳に、橙と白の庇の露店が二列 (左右 6 ずつ)。真ん中に屋根つきの井戸と灯りの柱。今の骨組み"""
+    g.meta = {"rect": [-22, -18, 22, 18], "level": True}
+    for x in range(-20, 21, 4):
+        for z in range(-16, 17, 4):
+            box(g, x, -1, z, min(x + 3, 20), -1, min(z + 3, 16), "polished_andesite" if ((x + 20) // 4 + (z + 16) // 4) % 2 == 0 else "stone_bricks")
+    n = 0
+    for sx in (-18, 6):
+        for i in range(0, 12, 6):
+            for j in range(-14, 16, 10):
+                _stall(g, sx + i, j, "orange_wool" if n % 2 == 0 else "white_wool")
+                n += 1
+    _well(g, 0, 0)
+    for z in (-14, 14):
+        lantern_post(g, -3, 0, z)
+        lantern_post(g, 3, 0, z)
+    g.mark("stand", 0, 0, 20)
+
+
+def market_b(g: Grid, rng=None):
+    """B「屋根つきの市」: 柱と切妻の屋根の長い市場 (36×16)。両側にカウンターと棚、奥に井戸。雨の日も市が立つ"""
+    g.meta = {"rect": [-22, -12, 22, 12], "level": True}
+    x0, z0, x1, z1 = -18, -8, 18, 8
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    for x in range(x0, x1 + 1, 6):
+        for z in (z0, z1):
+            box(g, x, 0, z, x, 4, z, "stripped_spruce_log[axis=y]")
+    box(g, x0 - 1, 5, z0 - 1, x1 + 1, 5, z1 + 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 6)
+    for z in (z0 + 1, z1 - 1):
+        box(g, x0 + 1, 0, z, x1 - 1, 0, z, "spruce_slab[type=top]")
+        for x in range(x0 + 2, x1, 5):
+            g.set(x, 1, z, "barrel[facing=up,open=false]")
+            g.set(x + 2, 1, z, "orange_wool" if (x // 5) % 2 else "white_wool")
+    for x in (x0 + 3, 0, x1 - 3):
+        g.set(x, 4, 0, "lantern[hanging=true]")
+    _well(g, x1 - 4, 0, roof=False)
+    g.mark("stand", 0, 0, 14)
+
+
+def market_c(g: Grid, rng=None):
+    """C「丸い市」: 真ん中の井戸の噴水を囲んで露店が輪に並ぶ。輪の外に腰掛けと灯りの輪。広場の真ん中が集まる所になる"""
+    g.meta = {"rect": [-22, -22, 22, 22], "level": True}
+    import math as _m
+    for x in range(-20, 21):
+        for z in range(-20, 21):
+            d = _m.hypot(x, z)
+            if d <= 20:
+                g.set(x, -1, z, "polished_andesite" if int(d) % 4 < 2 else "stone_bricks")
+    box(g, -2, 0, -2, 2, 0, 2, "stone_bricks")
+    box(g, -1, -1, -1, 1, -1, 1, "water")
+    g.set(0, 0, 0, "stone_bricks")
+    g.set(0, 1, 0, "stone_brick_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]")
+    g.set(0, 2, 0, "lantern[hanging=false]")
+    n = 0
+    for k in range(8):
+        a = _m.radians(k * 45)
+        x = int(round(_m.cos(a) * 12)) - 2
+        z = int(round(_m.sin(a) * 12)) - 2
+        _stall(g, x, z, "orange_wool" if n % 2 == 0 else "white_wool")
+        n += 1
+    for k in range(8):
+        a = _m.radians(k * 45 + 22)
+        x = int(round(_m.cos(a) * 18))
+        z = int(round(_m.sin(a) * 18))
+        lantern_post(g, x, 0, z)
+        g.set(int(round(_m.cos(a) * 16)), 0, int(round(_m.sin(a) * 16)), "spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]")
+    g.mark("stand", 0, 0, 22)
+
+
+SUBJECTS["market"] = {
+    "title": "市（露店・井戸・村人）",
+    "options": {"a": market_a, "b": market_b, "c": market_c},
+    "notes": {"a": "A 露店の列（二列と井戸）", "b": "B 屋根つきの市（市場の館）", "c": "C 丸い市（井戸を囲む輪）"},
+    "eye": ((0, 1.6, 30), (0, 3, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
