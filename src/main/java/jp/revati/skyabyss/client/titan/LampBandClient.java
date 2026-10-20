@@ -20,16 +20,24 @@ public final class LampBandClient {
     private LampBandClient() {
     }
 
-    private static net.minecraft.world.phys.Vec3 way;
+    private static java.util.List<net.minecraft.world.phys.Vec3> route = java.util.List.of();
 
-    // 次に向かう中継点 (届いて 2.5 秒のあいだ。なければ null)。目的の標 (ObjectiveMarker) が使う
+    // 目的までの迷路の道のり (届いて 2.5 秒のあいだ。なければ null)。床の線 (GuideTrailRenderer) が使う
+    public static java.util.List<net.minecraft.world.phys.Vec3> route() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.player != null && mc.level != null && receivedAt != Long.MIN_VALUE && !route.isEmpty()
+                && mc.level.getGameTime() - receivedAt <= LIFE && mc.level.getGameTime() >= receivedAt ? route : null;
+    }
+
+    // 迷路の中にいて道のりが届いているか (目的の標・帯の矢印を出さない目印)
     public static net.minecraft.world.phys.Vec3 waypoint() {
-        return visible(Minecraft.getInstance()) ? way : null;
+        java.util.List<net.minecraft.world.phys.Vec3> r = route();
+        return r == null ? null : r.get(0);
     }
 
     public static void receive(LampBand.Payload p) {
         text = p.text();
-        way = p.hasWay() ? new net.minecraft.world.phys.Vec3(p.x(), p.y(), p.z()) : null;
+        route = p.route();
         Minecraft mc = Minecraft.getInstance();
         receivedAt = mc.level == null ? Long.MIN_VALUE : mc.level.getGameTime();
     }

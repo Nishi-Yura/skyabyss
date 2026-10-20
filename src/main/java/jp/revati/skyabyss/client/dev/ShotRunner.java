@@ -747,6 +747,40 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.notice.NoticeClient.clear();
                 return true;
             }
+            case "hover" -> {
+                // hover slot <メニューの枠の番号> | hover <GUI 座標 x> <GUI 座標 y> : 画面の中のマウスの位置を決める (ツールチップの確認用。OS のカーソルは動かさない)
+                int gx;
+                int gy;
+                if (line.arg(0).equalsIgnoreCase("slot") && mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> cs) {
+                    net.minecraft.world.inventory.Slot sl = cs.getMenu().getSlot((int) line.doubleArg(1));
+                    gx = cs.getGuiLeft() + sl.x + 8;
+                    gy = cs.getGuiTop() + sl.y + 8;
+                } else {
+                    gx = (int) line.doubleArg(0);
+                    gy = (int) line.doubleArg(1);
+                }
+                try {
+                    Field fx = net.minecraft.client.MouseHandler.class.getDeclaredField("xpos");
+                    Field fy = net.minecraft.client.MouseHandler.class.getDeclaredField("ypos");
+                    fx.setAccessible(true);
+                    fy.setAccessible(true);
+                    fx.setDouble(mc.mouseHandler, gx * (double) mc.getWindow().getScreenWidth() / mc.getWindow().getGuiScaledWidth());
+                    fy.setDouble(mc.mouseHandler, gy * (double) mc.getWindow().getScreenHeight() / mc.getWindow().getGuiScaledHeight());
+                } catch (ReflectiveOperationException e) {
+                    say("hover failed: " + e);
+                }
+                return true;
+            }
+            case "openacc" -> {
+                // openacc : 装飾の画面を開く (つまみを押したのと同じ)
+                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
+                return true;
+            }
+            case "trail" -> {
+                // trail main|side <前へ ブロック> <横のうねり ブロック> | trail off : 床の道しるべを、いまの位置から向いている方へ、うねる道で出す (地面の高さにそう)
+                jp.revati.skyabyss.client.guide.GuideClient.debugTrail(mc, line.arg(0), line.args().length > 1 ? line.doubleArg(1) : 40, line.args().length > 2 ? line.doubleArg(2) : 6);
+                return true;
+            }
             case "open" -> {
                 Screen screen = screen(mc, line.arg(0));
                 mc.setScreen(screen);

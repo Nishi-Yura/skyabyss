@@ -1,0 +1,96 @@
+# 画面の見直し 3 (道しるべの一本線・装飾/旅嚢のつまみの字・ツールチップの折り返しと収まり) の確認。
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix3.txt   →  python -I tools/ui_fix3_sheet.py で docs/review/previews/ui_fix3_sheet.png
+world ui_fix3t flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+camera 0 -60 0 0 25
+hud on
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 80
+
+# でこぼこの地面 (南へ向かう道に、段と丘)
+cmd fill -12 -60 6 12 -60 11 stone
+cmd fill -12 -60 12 12 -59 18 dirt
+cmd fill -8 -60 19 8 -58 24 stone
+cmd fill -12 -60 25 12 -60 29 dirt
+cmd fill -12 -60 30 12 -59 36 stone
+cmd fill -6 -60 37 6 -58 40 dirt
+wait 20
+# --- 道しるべ (でこぼこの地面。メイン = 金、サブ = 青緑) ---
+cmd gamemode creative
+trail main 38 3
+look 0 28
+wait 30
+shot trail_main_first
+perspective back
+look 0 30
+wait 10
+shot trail_main_back
+trail side 38 3
+wait 10
+shot trail_side_back
+trail off
+perspective first
+cmd gamemode survival
+
+# --- 持ち物 (長い説明) ---
+cmd skyabyss cinematic stop
+cmd give @s skyabyss:thunder_wing_bow
+cmd give @s skyabyss:ember_war_axe[minecraft:lore=['"ここに長い説明が入る。夜明け前の風を受けた者だけが、この弓の本当の名を聞くことができるという。名を聞いた者は二度と同じ空を見上げられない。"']]
+wait 20
+guiscale 3
+open inventory
+wait 10
+hover slot 36
+wait 4
+shot inv_g3_bow
+hover slot 37
+wait 4
+shot inv_g3_axe_lore
+guiscale 4
+wait 4
+hover slot 37
+wait 4
+shot inv_g4_axe_lore
+guiscale 2
+wait 4
+hover slot 36
+wait 4
+shot inv_g2_bow
+close
+
+# --- 装飾・旅嚢のつまみ ---
+guiscale 3
+openacc
+wait 30
+hover 20 20
+shot acc_g3
+hover slot 12
+wait 4
+shot acc_g3_hover
+close
+wait 10
+key skyabyss_pouch.key.open
+wait 30
+shot pouch_g3
+close
+guiscale 4
+openacc
+wait 30
+shot acc_g4
+close
+guiscale 2
+openacc
+wait 30
+shot acc_g2
+close
+echo done

@@ -23,7 +23,7 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
     static final int W = 176;
     static final int H = 166;
     static final int TAB_W = 48;
-    static final int TAB_H = 16;
+    public static final int TAB_H = 16;
     static final int TABS = 3;
     private static final int DOLL_X0 = 58;
     private static final int DOLL_Y0 = 14;
@@ -182,6 +182,6 @@ public class AccessoryScreen extends AbstractContainerScreen<AccessoryMenu> impl
 
     @Override
     public int[] textBounds() {
-        return new int[] {leftPos, topPos, W, H};
+        return new int[] {leftPos, topPos - TAB_H, W, H + TAB_H};
     }
 }

@@ -707,12 +707,31 @@ public final class AnemoneLights {
         return ARROWS[idx];
     }
 
-    // bandText が最後に向かった中継点 (band が目的の標のために一緒に送る。サーバーは一つのスレッドなので static でよい)
-    private static Vec3 lastWay;
+    // bandText が最後に引いた道のり (band が床の線のために一緒に送る。サーバーは一つのスレッドなので static でよい)
+    private static List<Vec3> lastRoute = List.of();
 
-    private static String arrowTo(ServerPlayer player, Vec3 pos) {
-        lastWay = pos;
-        return arrow(player, pos.x - player.getX(), pos.z - player.getZ());
+    // from のマスから to のマスへ、迷路の通路を通る道のり (マスの真ん中の列)。水の入口の小部屋にいるときは、水への入口 (はしごの穴) まで
+    private static List<Vec3> route(MazePlan plan, int[] from, int[] to, boolean inRoom) {
+        List<Vec3> out = new java.util.ArrayList<>();
+        if (inRoom) {
+            out.add(waypoint(plan, from, to, true));
+            return out;
+        }
+        int[] cell = from;
+        for (int i = 0; i < 300; i++) {
+            int[] next = plan.nextStep(cell, to);
+            if (next == null) {
+                break;
+            }
+            BlockPos c = MazePlan.center(next);
+            out.add(new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5));
+            cell = next;
+        }
+        if (out.isEmpty()) {
+            BlockPos c = MazePlan.center(to);
+            out.add(new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5));
+        }
+        return out;
     }
 
     // いまの目的の帯の文 (自己テスト・撮影用に、送らずに作る)
@@ -725,9 +744,8 @@ public final class AnemoneLights {
         int[] here = MazePlan.cellAt(player.getX(), player.getZ());
         int[] start = plan.path.get(0);
         if (GroupGates.isOpen(level, group, exitGate(level))) {
-            Vec3 way = waypoint(plan, here, plan.path.get(plan.path.size() - 1), inRoom);
-            return ModText.objective("message.skyabyss.lamp_band_open", lit, STANDS, arrowTo(player, way),
-                    meters(plan.distance(here, plan.path.get(plan.path.size() - 1))));
+            lastRoute = route(plan, here, plan.path.get(plan.path.size() - 1), inRoom);
+            return ModText.objective("message.skyabyss.lamp_band_open", lit, STANDS);
         }
         if (held > 0 || lit >= NEED) {
             // 近い (道のりの) ともしていない台へ
@@ -743,9 +761,8 @@ public final class AnemoneLights {
                 }
             }
             if (best >= 0) {
-                Vec3 way = waypoint(plan, inRoom ? start : here, plan.path.get(plan.standK[best]), inRoom);
-                int d = inRoom ? plan.distance(start, plan.path.get(plan.standK[best])) : bestD;
-                return ModText.objective("message.skyabyss.lamp_band", lit, STANDS, arrowTo(player, way), meters(d), held);
+                lastRoute = route(plan, inRoom ? start : here, plan.path.get(plan.standK[best]), inRoom);
+                return ModText.objective("message.skyabyss.lamp_band", lit, STANDS, held);
             }
         }
         // 灯が手元にない: 苗床へ (入口の小部屋の苗床か、中ほどの休み場の苗床。近いほう)
@@ -753,26 +770,12 @@ public final class AnemoneLights {
         int[] midCell = MazePlan.cellAt(mid.getX(), mid.getZ());
         int dMid = inRoom ? Integer.MAX_VALUE : plan.distance(here, midCell);
         int dEntry = inRoom ? 0 : plan.distance(here, start);
-        Vec3 target;
-        int dist;
-        if (inRoom || dEntry <= dMid || dMid < 0) {
-            target = ENTRY_BED_POS.getCenter();
-            dist = inRoom ? (int) Math.ceil(Math.sqrt(player.distanceToSqr(target)) / (MAZE_CELL + 1.0)) : dEntry;
-            if (!inRoom) {
-                target = new Vec3(MazePlan.center(start).getX() + 0.5, MAZE_FLOOR + 1, MazePlan.center(start).getZ() + 0.5);
-                int[] next = plan.nextStep(here, start);
-                if (next != null) {
-                    BlockPos c = MazePlan.center(next);
-                    target = new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5);
-                }
-            }
+        if (inRoom) {
+            lastRoute = List.of(ENTRY_BED_POS.getCenter());
         } else {
-            int[] next = plan.nextStep(here, midCell);
-            BlockPos c = MazePlan.center(next == null ? midCell : next);
-            target = new Vec3(c.getX() + 0.5, MAZE_FLOOR + 1, c.getZ() + 0.5);
-            dist = dMid;
+            lastRoute = route(plan, here, inRoom || dEntry <= dMid || dMid < 0 ? start : midCell, false);
         }
-        return ModText.objective("message.skyabyss.lamp_band_bed", lit, STANDS, arrowTo(player, target), meters(dist));
+        return ModText.objective("message.skyabyss.lamp_band_bed", lit, STANDS);
     }
 
     private static int meters(int cells) {
@@ -791,9 +794,9 @@ public final class AnemoneLights {
     }
 
     private static void band(ServerLevel level, ServerPlayer player, UUID group) {
-        lastWay = null;
+        lastRoute = List.of();
         Component text = bandText(level, player, group);
-        LampBand.send(player, text, lastWay);
+        LampBand.send(player, text, lastRoute);
     }
 
     // 灯の台の粒 (その人にだけ。近いものだけ): ともした台は白い光が昇り、まだの台は青い火がゆらぐ (遠くからも台の場所が分かる)
