@@ -1,0 +1,39 @@
+# 光海の迷路: 帯の矢印・距離をやめ、床の一本の金の線だけで案内する (ui_fix3)。
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix3_maze.txt
+world ui_fix3_maze flat
+size 1280 720
+timeout 900
+render 8
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss dev arrive titan_back
+waitchunks
+wait 60
+guiscale 3
+cmd skyabyss dev lamp clear
+wait 40
+cmd skyabyss dev lamp path 15 1
+waitchunks 600
+wait 100
+chat clear
+shot maze_bed_fp
+look 0 32
+wait 4
+shot maze_bed_fp_pitch
+perspective back
+wait 10
+shot maze_bed_tp
+perspective first
+cmd skyabyss dev lamp path 25 1
+wait 100
+shot maze_bed_far
+cmd skyabyss dev lamp all
+cmd skyabyss dev lamp path 15 0
+wait 100
+shot maze_exit_fp
+perspective back
+wait 10
+shot maze_exit_tp
+band
+echo done

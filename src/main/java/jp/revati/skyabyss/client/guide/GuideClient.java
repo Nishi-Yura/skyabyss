@@ -63,6 +63,40 @@ public final class GuideClient {
         return goal;
     }
 
+    // いまの目的が、追跡中のクエスト (サブ) の場所か。道しるべの色 (メイン = 金、サブ = 青緑) に使う
+    public static boolean goalIsSide() {
+        return goalSide;
+    }
+
+    private static volatile boolean goalSide;
+    private static volatile boolean debug;
+
+    // 台本 (ShotRunner の trail) 用。いまの位置から向いている方へ、うねる道 (地面の高さにそう) を偽の目印として置く。off で戻す
+    public static void debugTrail(Minecraft mc, String mode, double ahead, double sway) {
+        if (mode.equalsIgnoreCase("off") || mc.player == null || mc.level == null) {
+            debug = false;
+            goal = null;
+            trail = null;
+            return;
+        }
+        double yaw = Math.toRadians(mc.player.getYRot());
+        double fx = -Math.sin(yaw);
+        double fz = Math.cos(yaw);
+        java.util.List<BlockPos> nodes = new java.util.ArrayList<>();
+        BlockPos p0 = mc.player.blockPosition();
+        for (double d = 0; d <= ahead; d += 2.0) {
+            double side = Math.sin(d / 9.0) * sway;
+            int x = net.minecraft.util.Mth.floor(p0.getX() + fx * d - fz * side);
+            int z = net.minecraft.util.Mth.floor(p0.getZ() + fz * d + fx * side);
+            nodes.add(new BlockPos(x, mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z), z));
+        }
+        BlockPos end = nodes.get(nodes.size() - 1);
+        trail = new Trail(end, true, nodes.toArray(new BlockPos[0]), Long.MAX_VALUE);
+        goal = end;
+        goalSide = mode.equalsIgnoreCase("side");
+        debug = true;
+    }
+
     // 目印に合った新しい道 (なければ null → 破線)
     @Nullable
     public static Trail trailFor(BlockPos target) {
@@ -99,6 +133,9 @@ public final class GuideClient {
                 mc.player.displayClientMessage(Component.translatable(next == Config.TrailMode.OFF ? "gui.skyabyss.guide.trail_off" : "gui.skyabyss.guide.trail_on"), true);
             }
         }
+        if (debug && mc.player != null) {
+            return;
+        }
         if (mc.player == null || mc.level == null || mc.getConnection() == null) {
             goal = null;
             trail = null;
@@ -134,12 +171,14 @@ public final class GuideClient {
     @Nullable
     private static BlockPos decide(Minecraft mc) {
         ObjectiveStrip.Resolved r = ObjectiveStrip.resolve(mc);
+        goalSide = false;
         if (r.pos() != null) {
             return r.pos();
         }
         if (r.inside()) {
             return null;
         }
+        goalSide = true;
         return ObjectiveStrip.resolveTracked(mc).pos();
     }
 

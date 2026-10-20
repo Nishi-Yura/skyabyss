@@ -460,6 +460,6 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
 
     @Override
     public int[] textBounds() {
-        return new int[] {leftPos, topPos, PouchLayout.W, PouchLayout.H};
+        return new int[] {leftPos, topPos - AccessoryScreen.TAB_H, PouchLayout.W, PouchLayout.H + AccessoryScreen.TAB_H};
     }
 }

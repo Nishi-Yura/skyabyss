@@ -150,8 +150,8 @@ public final class ObjectiveStrip {
         }
         Font font = mc.font;
         int want = bandWidth(mc);
-        boolean mazeBig = jp.revati.skyabyss.client.titan.LampBandClient.waypoint() != null;
-        boolean far = hasFar(c) || mazeBig;
+        boolean mazeBig = false;
+        boolean far = hasFar(c) && jp.revati.skyabyss.client.titan.LampBandClient.waypoint() == null;
         out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
             int w = Math.min(want, maxW - 6);
             if (w < 60) {
@@ -320,19 +320,11 @@ public final class ObjectiveStrip {
             far = Component.translatable("gui.skyabyss.guide.inside").getString();
             arrow = false;
         }
-        // 光海の迷路 (版 25): ひし形の標のかわりに、帯の矢印を大きく (メインのクエストの矢印と同じ見やすさ) し、迷路の道のりの次のマスを指して距離を出す
-        net.minecraft.world.phys.Vec3 mazeWay = jp.revati.skyabyss.client.titan.LampBandClient.waypoint();
-        boolean big = mazeWay != null;
-        if (big) {
-            double d = Math.sqrt(mc.player.position().distanceToSqr(mazeWay.x, mc.player.getY(), mazeWay.z));
-            far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, "");
-            if (far.isEmpty()) {
-                far = Math.max(1, (int) Math.round(d)) + " m";
-            }
-            arrowDeg = NavMath.arrowDegrees(mc.player.getX(), mc.player.getZ(), mazeWay.x, mazeWay.z, mc.player.getYRot());
-            vertical = NavMath.vertical(mazeWay.y - mc.player.getY());
-            target = BlockPos.containing(mazeWay);
-            arrow = true;
+        // 光海の迷路: 帯の矢印も距離も出さない (道案内は床の一本の金の線だけ。client/guide/GuideTrailRenderer)。帯は文の行だけ
+        boolean big = false;
+        if (jp.revati.skyabyss.client.titan.LampBandClient.waypoint() != null) {
+            far = "";
+            arrow = false;
         }
         boolean withArrow = arrow && target != null && !far.isEmpty();
         int w = rect.w() - 6;

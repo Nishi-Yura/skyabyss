@@ -1,5 +1,8 @@
 package jp.revati.skyabyss.client.guide;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -24,19 +27,22 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-// 地面の道しるべ。サーバーが探した歩ける道 (GuideClient.Trail) の上に、柔らかい金色のひし形の足あと (左右にずらして並べる) を置き、
-// 5〜6 歩ごとに目的の向きを指す山形 (›) を置く。手前ほど濃く、約 40 ブロック先で消え、目的の方へ光が流れる。
-// 道なしのときは、地面にまっすぐの破線 (16 ブロック)。床の高さは道の点の高さ (破線は上から床を探す)。
-// 形 (ひし形・山形・破線) で読めるので、色が見分けにくくても伝わる。技の予告 (橙・赤・青白) とは色も形も違う。
-// 描かない場面: 場面・画面・F1・オーバーワールド以外・目的がないとき・設定 OFF (GuideClient.visible)
+// 地面の道しるべ。サーバーが探した歩ける道 (GuideClient.Trail) の上に、一本のつながった光の帯 (リボン) を床にそって敷く。
+// 道の点は滑らかな曲線 (Catmull-Rom) にならし、床の高さにそって上下する。中心が明るく縁が溶ける帯で、ゆるやかな光の波が目的の方へ流れる。
+// 手前ほど濃く、約 40 ブロック先で消え、足もとからは少し間を置いて立ち上がる。メインは金、サブ (追跡中のクエスト) は青緑。
+// 道なしのときは、足もとの床にそって目印の向きへ 16 ブロックだけ、同じ帯を伸ばす (床の高さは上から床を探す)。
+// 描かない場面: 場面・画面・F1・オーバーワールド以外・目的がないとき・設定 OFF (GuideClient.visible)。技の予告 (橙・赤・青白) とは色が違う。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class GuideTrailRenderer {
     static final double SHOW_LENGTH = 40.0;
-    static final double SPACING = 1.5;
     static final double DASH_LENGTH = 16.0;
     private static final int GOLD = 0xF2C14E;
     private static final int PALE = 0xFFE9A8;
-    private static final int MARK_EVERY = 5;
+    private static final int TEAL = 0x7FE0D8;
+    private static final int TEAL_PALE = 0xDCFFF8;
+    private static final double STEP = 0.4;
+    private static final double CORE = 0.17;
+    private static final double EDGE = 0.25;
 
     private GuideTrailRenderer() {
     }
@@ -48,6 +54,9 @@ public final class GuideTrailRenderer {
         }
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
+        if (level != null && mc.player != null && mc.screen == null && !mc.options.hideGui && drawMaze(event, mc, level)) {
+            return;
+        }
         BlockPos goal = GuideClient.goal();
         if (level == null || goal == null || !GuideClient.trailEnabled() || !GuideClient.visible(mc)) {
             return;
@@ -69,19 +78,80 @@ public final class GuideTrailRenderer {
         double time = (level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false)) / 20.0;
 
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Painter p = new Painter(buffer, pose, cam, arrive, time);
+        boolean side = GuideClient.goalIsSide();
+        Painter p = new Painter(buffer, pose, cam, arrive, time, side ? TEAL : GOLD, side ? TEAL_PALE : PALE);
         GuideClient.Trail trail = GuideClient.trailFor(goal);
         if (trail != null) {
             drawTrail(p, trail.nodes(), eye);
         } else {
-            drawDashes(p, level, eye, gx, gz, goalDist);
+            drawStraight(p, level, eye, gx, gz, goalDist);
         }
+        submit(buffer, false);
+    }
+
+    // 光海の迷路: 目的 (次の灯の台・苗床・出口) までの迷路の道のりを、床の一本の金の線で。道のりはサーバーが 1 秒ごとに送る (LampBandClient.route)。
+    // 目的が変わればサーバーが道のりを引き直して送るので、線もすぐ変わる。水の中でも見える (水のあとに描く)
+    private static boolean drawMaze(RenderLevelStageEvent event, Minecraft mc, ClientLevel level) {
+        java.util.List<Vec3> route = jp.revati.skyabyss.client.titan.LampBandClient.route();
+        if (route == null || route.isEmpty()) {
+            return false;
+        }
+        Vec3 pos = mc.player.position();
+        Vec3 cam = event.getCamera().getPosition();
+        Matrix4f pose = event.getPoseStack().last().pose();
+        double time = (level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false)) / 20.0;
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        Painter p = new Painter(buffer, pose, cam, 1.0f, time, GOLD, PALE);
+        // 最初の点だけ、いまの足もと (小数) から。あとはマスの真ん中
+        java.util.List<double[]> pts = new ArrayList<>();
+        double s = 0.0;
+        double lx = pos.x;
+        double lz = pos.z;
+        double[][] ctrl = new double[route.size() + 1][];
+        ctrl[0] = new double[] {pos.x, route.get(0).y, pos.z};
+        for (int i = 1; i < ctrl.length; i++) {
+            Vec3 v = route.get(i - 1);
+            ctrl[i] = new double[] {v.x, v.y, v.z};
+        }
+        for (int i = 0; i + 1 < ctrl.length && s <= SHOW_LENGTH; i++) {
+            double[] a = ctrl[i];
+            double[] b = ctrl[i + 1];
+            double[] p0 = ctrl[Math.max(0, i - 1)];
+            double[] p3 = ctrl[Math.min(ctrl.length - 1, i + 2)];
+            double len = Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[2] - b[2]) * (a[2] - b[2]));
+            int n = Math.max(1, (int) Math.ceil(len / STEP));
+            for (int k = 0; k < n; k++) {
+                double t = (double) k / n;
+                double x = cr(p0[0], a[0], b[0], p3[0], t);
+                double z = cr(p0[2], a[2], b[2], p3[2], t);
+                double y = Mth.lerp(smooth((t - 0.35) / 0.3), a[1], b[1]);
+                s += Math.sqrt((x - lx) * (x - lx) + (z - lz) * (z - lz));
+                lx = x;
+                lz = z;
+                pts.add(new double[] {x, y, z, s});
+            }
+        }
+        p.ribbon(pts, 0.0);
+        submit(buffer, true);
+        return true;
+    }
+
+    // glow = 迷路 (暗い・霧の濃い場所): 足し合わせで光らせ、霧で消えないようにする
+    private static void submit(BufferBuilder buffer, boolean glow) {
         MeshData mesh = buffer.build();
         if (mesh == null) {
             return;
         }
+        float fogStart = RenderSystem.getShaderFogStart();
+        float fogEnd = RenderSystem.getShaderFogEnd();
         RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        if (glow) {
+            RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA, com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+            RenderSystem.setShaderFogStart(1.0e6f);
+            RenderSystem.setShaderFogEnd(2.0e6f);
+        } else {
+            RenderSystem.defaultBlendFunc();
+        }
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
         RenderSystem.depthMask(false);
@@ -94,9 +164,13 @@ public final class GuideTrailRenderer {
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderFogStart(fogStart);
+        RenderSystem.setShaderFogEnd(fogEnd);
     }
 
-    // 道の点に沿って、プレイヤーに一番近い点から SHOW_LENGTH ブロック分
+
+    // 道の点に沿って、プレイヤーに一番近い点から SHOW_LENGTH ブロック分。xz は滑らかな曲線、y は床の高さを線でつなぐ
     private static void drawTrail(Painter p, BlockPos[] nodes, Vec3 eye) {
         int from = 0;
         double bestD = Double.MAX_VALUE;
@@ -109,61 +183,57 @@ public final class GuideTrailRenderer {
                 from = i;
             }
         }
+        List<double[]> pts = new ArrayList<>();
         double s = 0.0;
-        double carry = SPACING * 0.5;
-        int count = 0;
-        boolean left = true;
-        for (int i = from; i + 1 < nodes.length && s < SHOW_LENGTH; i++) {
+        double[] last = null;
+        for (int i = from; i + 1 < nodes.length && s <= SHOW_LENGTH; i++) {
             BlockPos a = nodes[i];
             BlockPos b = nodes[i + 1];
-            double ax = a.getX() + 0.5;
-            double az = a.getZ() + 0.5;
-            double sx = b.getX() + 0.5 - ax;
-            double sz = b.getZ() + 0.5 - az;
-            double len = Math.sqrt(sx * sx + sz * sz);
-            if (len < 1.0e-6) {
-                continue;
-            }
-            double fx = sx / len;
-            double fz = sz / len;
-            while (carry <= len) {
-                double t = carry / len;
-                // 床の高さ: 段の境 (中間) で切り替わる
-                double y = (t < 0.5 ? a.getY() : b.getY()) + 0.03;
-                double x = ax + sx * t;
-                double z = az + sz * t;
-                double dist = s + carry;
-                if (dist > SHOW_LENGTH) {
-                    return;
+            BlockPos p0 = nodes[Math.max(0, i - 1)];
+            BlockPos p3 = nodes[Math.min(nodes.length - 1, i + 2)];
+            double len = Math.sqrt((double) (a.getX() - b.getX()) * (a.getX() - b.getX()) + (double) (a.getZ() - b.getZ()) * (a.getZ() - b.getZ()));
+            int n = Math.max(1, (int) Math.ceil(len / STEP));
+            for (int k = 0; k < n; k++) {
+                double t = (double) k / n;
+                double x = cr(p0.getX(), a.getX(), b.getX(), p3.getX(), t) + 0.5;
+                double z = cr(p0.getZ(), a.getZ(), b.getZ(), p3.getZ(), t) + 0.5;
+                double y = Mth.lerp(smooth((t - 0.35) / 0.3), a.getY(), b.getY());
+                if (last != null) {
+                    s += Math.sqrt((x - last[0]) * (x - last[0]) + (z - last[2]) * (z - last[2]));
                 }
-                count++;
-                if (count % MARK_EVERY == 0) {
-                    p.chevron(x, y, z, fx, fz, dist);
-                } else {
-                    double side = (left ? 1 : -1) * 0.17;
-                    p.diamond(x - fz * side, y, z + fx * side, fx, fz, dist);
-                    left = !left;
-                }
-                carry += SPACING;
+                last = new double[] {x, y, z, s};
+                pts.add(last);
             }
-            carry -= len;
-            s += len;
         }
+        p.ribbon(pts, 0.0);
     }
 
-    // 道なし: 目印の向きへ、足もとの地面にそって破線
-    private static void drawDashes(Painter p, ClientLevel level, Vec3 eye, double gx, double gz, double goalDist) {
+    private static double smooth(double x) {
+        double c = Mth.clamp(x, 0.0, 1.0);
+        return c * c * (3 - 2 * c);
+    }
+
+    private static double cr(double p0, double p1, double p2, double p3, double t) {
+        double t2 = t * t;
+        double t3 = t2 * t;
+        return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+    }
+
+    // 道なし: 目印の向きへ、足もとの地面にそって帯
+    private static void drawStraight(Painter p, ClientLevel level, Vec3 eye, double gx, double gz, double goalDist) {
         double fx = gx / goalDist;
         double fz = gz / goalDist;
         double reach = Math.min(DASH_LENGTH, goalDist - 2.0);
         double lastY = eye.y;
-        for (double d = 1.6; d + 0.5 <= reach; d += 1.0) {
-            double x = eye.x + fx * (d + 0.25);
-            double z = eye.z + fz * (d + 0.25);
+        List<double[]> pts = new ArrayList<>();
+        for (double d = 0.8; d <= reach; d += 0.5) {
+            double x = eye.x + fx * d;
+            double z = eye.z + fz * d;
             double y = floorY(level, x, lastY, z);
             lastY = y;
-            p.dash(x, y + 0.03, z, fx, fz, d);
+            pts.add(new double[] {x, y, z, d});
         }
+        p.ribbon(pts, DASH_LENGTH);
     }
 
     // (x, z) の床の高さ (足もとの高さの少し上から下へ探す。見つからなければ前の高さ)
@@ -188,78 +258,84 @@ public final class GuideTrailRenderer {
         private final Vec3 cam;
         private final float base;
         private final double time;
+        private final int color;
+        private final int pale;
 
-        Painter(BufferBuilder buf, Matrix4f pose, Vec3 cam, float base, double time) {
+        Painter(BufferBuilder buf, Matrix4f pose, Vec3 cam, float base, double time, int color, int pale) {
             this.buf = buf;
             this.pose = pose;
             this.cam = cam;
             this.base = base;
             this.time = time;
+            this.color = color;
+            this.pale = pale;
         }
 
-        // 手前ほど濃く、遠いほど薄れる。光が目的の方へ流れる (距離に対する波)
-        private float alpha(double dist) {
-            float fade = (float) Mth.clamp(1.0 - dist / SHOW_LENGTH, 0.0, 1.0);
-            float wave = 0.5f + 0.5f * (float) Math.sin((dist / 7.0 - time * 1.1) * Math.PI * 2.0);
-            return base * fade * (0.55f + 0.45f * wave);
+        // 光の波が目的の方へ流れる (距離に対する波)
+        private float wave(double dist) {
+            return 0.5f + 0.5f * (float) Math.sin((dist / 6.0 - time * 1.2) * Math.PI * 2.0);
         }
 
-        private int rgb(double dist) {
-            float wave = 0.5f + 0.5f * (float) Math.sin((dist / 7.0 - time * 1.1) * Math.PI * 2.0);
-            return mix(GOLD, PALE, wave * 0.7f);
+        // 手前ほど濃く、遠いほど薄れる。足もとのごく近くは立ち上がる
+        private float alpha(double dist, double len) {
+            double span = len > 0 ? len : SHOW_LENGTH;
+            float fade = (float) Mth.clamp(1.0 - dist / span, 0.0, 1.0);
+            float rise = (float) Mth.clamp(dist / 0.9, 0.0, 1.0);
+            return base * fade * rise * (0.62f + 0.38f * wave(dist));
         }
 
-        // ひし形の足あと (進行方向に長い)
-        void diamond(double x, double y, double z, double fx, double fz, double dist) {
-            float a = alpha(dist);
-            // 暗い縁取り (明るい床でも見える)
-            quad(x, y, z, fx, fz, 0.21, 0.15, 0x1A1408, a * 0.45f);
-            quad(x, y + 0.004, z, fx, fz, 0.17, 0.11, rgb(dist), a * 0.9f);
-        }
-
-        // 目的の向きを指す山形 (›)
-        void chevron(double x, double y, double z, double fx, double fz, double dist) {
-            float a = alpha(dist);
-            double rx = -fz;
-            double rz = fx;
-            // 左右の腕 2 本 (先端が前)
-            for (int side = -1; side <= 1; side += 2) {
-                double cx = x - fx * 0.12 + rx * side * 0.17;
-                double cz = z - fz * 0.12 + rz * side * 0.17;
-                // 腕の向き: 先端 (x + f*0.2) へ寄せる
-                double ax = fx * 0.55 - rx * side * 0.55;
-                double az = fz * 0.55 - rz * side * 0.55;
-                double al = Math.sqrt(ax * ax + az * az);
-                ax /= al;
-                az /= al;
-                quad(cx, y, cz, ax, az, 0.27, 0.075, 0x1A1408, a * 0.45f);
-                quad(cx, y + 0.004, cz, ax, az, 0.24, 0.05, mix(PALE, GOLD, 0.2f), a);
+        // 点 (x, y, z, 距離) の列を、床の上の一本の帯にする。len > 0 なら、その長さで消える (道なし)
+        void ribbon(List<double[]> pts, double len) {
+            int n = pts.size();
+            if (n < 2) {
+                return;
+            }
+            double[][] nx = new double[n][];
+            double[] lift = new double[n];
+            for (int i = 0; i < n; i++) {
+                double[] a = pts.get(Math.max(0, i - 1));
+                double[] b = pts.get(Math.min(n - 1, i + 1));
+                double tx = b[0] - a[0];
+                double tz = b[2] - a[2];
+                double tl = Math.sqrt(tx * tx + tz * tz);
+                if (tl < 1.0e-6) {
+                    tx = 0;
+                    tz = 1;
+                    tl = 1;
+                }
+                nx[i] = new double[] {tz / tl, -tx / tl};
+                double slope = Math.abs(b[1] - a[1]) / Math.max(0.2, tl);
+                lift[i] = 0.03 + Math.min(0.14, slope * 0.12);
+            }
+            for (int i = 0; i + 1 < n; i++) {
+                double[] p = pts.get(i);
+                double[] q = pts.get(i + 1);
+                float a0 = alpha(p[3], len);
+                float a1 = alpha(q[3], len);
+                if (a0 <= 0.003f && a1 <= 0.003f) {
+                    continue;
+                }
+                // 暗い縁取り (明るい床でも見える)
+                vtx(p, nx[i], EDGE, lift[i], 0x1A1408, a0 * 0.34f);
+                vtx(p, nx[i], -EDGE, lift[i], 0x1A1408, a0 * 0.34f);
+                vtx(q, nx[i + 1], -EDGE, lift[i + 1], 0x1A1408, a1 * 0.34f);
+                vtx(q, nx[i + 1], EDGE, lift[i + 1], 0x1A1408, a1 * 0.34f);
+                // 光る帯: 中心が明るく縁が溶ける
+                int c0 = mix(color, pale, wave(p[3]) * 0.75f);
+                int c1 = mix(color, pale, wave(q[3]) * 0.75f);
+                for (int sgn = -1; sgn <= 1; sgn += 2) {
+                    vtx(p, nx[i], sgn * CORE, lift[i] + 0.004, c0, a0 * 0.1f);
+                    vtx(p, nx[i], 0, lift[i] + 0.004, c0, a0 * 0.95f);
+                    vtx(q, nx[i + 1], 0, lift[i + 1] + 0.004, c1, a1 * 0.95f);
+                    vtx(q, nx[i + 1], sgn * CORE, lift[i + 1] + 0.004, c1, a1 * 0.1f);
+                }
             }
         }
 
-        // 破線の一つ (細長い)
-        void dash(double x, double y, double z, double fx, double fz, double dist) {
-            float a = alpha(dist * 2.0) * 0.8f;
-            quad(x, y, z, fx, fz, 0.27, 0.085, 0x1A1408, a * 0.4f);
-            quad(x, y + 0.004, z, fx, fz, 0.25, 0.06, mix(GOLD, PALE, 0.25f), a);
-        }
-
-        // 中心 (x, y, z)、向き (fx, fz)、長い半径 l・短い半径 w の菱形。dash/chevron の腕は細長い菱形で代用
-        private void quad(double x, double y, double z, double fx, double fz, double l, double w, int rgb, float alpha) {
-            double rx = -fz;
-            double rz = fx;
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
+        private void vtx(double[] c, double[] n, double w, double lift, int rgb, float alpha) {
             int a = (int) (Mth.clamp(alpha, 0f, 1f) * 255f);
-            vertex(x + fx * l, y, z + fz * l, r, g, b, a);
-            vertex(x + rx * w, y, z + rz * w, r, g, b, a);
-            vertex(x - fx * l, y, z - fz * l, r, g, b, a);
-            vertex(x - rx * w, y, z - rz * w, r, g, b, a);
-        }
-
-        private void vertex(double x, double y, double z, int r, int g, int b, int a) {
-            buf.addVertex(pose, (float) (x - cam.x), (float) (y - cam.y), (float) (z - cam.z)).setColor(r, g, b, a);
+            buf.addVertex(pose, (float) (c[0] + n[0] * w - cam.x), (float) (c[1] + lift - cam.y), (float) (c[2] + n[1] * w - cam.z))
+                    .setColor((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, a);
         }
     }
 

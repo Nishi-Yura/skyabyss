@@ -16,12 +16,16 @@ public final class LampBand {
     private LampBand() {
     }
 
-    // way = 次に向かう中継点 (灯の台・苗床・出口。迷路の道のりで次のマス)。クライアントは目的の標 (client/guide/ObjectiveMarker) をそこへ出す。hasWay が false なら標なし
-    public record Payload(Component text, boolean hasWay, double x, double y, double z) implements CustomPacketPayload {
+    private static final StreamCodec<net.minecraft.network.FriendlyByteBuf, net.minecraft.world.phys.Vec3> VEC3 = StreamCodec.of(
+            (buf, v) -> buf.writeDouble(v.x).writeDouble(v.y).writeDouble(v.z),
+            buf -> new net.minecraft.world.phys.Vec3(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+
+    // route = 目的 (次の灯の台・苗床・出口) までの迷路の道のり (マスの真ん中の列。水の入口前は水への入口)。クライアントは床に一本の金の線として引く
+    // (client/guide/GuideTrailRenderer)。空なら線なし。目的が変われば引き直して送る
+    public record Payload(Component text, java.util.List<net.minecraft.world.phys.Vec3> route) implements CustomPacketPayload {
         public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "lamp_band"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Payload> STREAM_CODEC = StreamCodec.composite(ComponentSerialization.STREAM_CODEC, Payload::text,
-                net.minecraft.network.codec.ByteBufCodecs.BOOL, Payload::hasWay, net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::x,
-                net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::y, net.minecraft.network.codec.ByteBufCodecs.DOUBLE, Payload::z, Payload::new);
+                VEC3.apply(net.minecraft.network.codec.ByteBufCodecs.list(400)), Payload::route, Payload::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
@@ -36,10 +40,10 @@ public final class LampBand {
         send(player, text, null);
     }
 
-    public static void send(ServerPlayer player, Component text, @javax.annotation.Nullable net.minecraft.world.phys.Vec3 way) {
+    public static void send(ServerPlayer player, Component text, java.util.List<net.minecraft.world.phys.Vec3> route) {
         lastSent = text;
         if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
-            PacketDistributor.sendToPlayer(player, way == null ? new Payload(text, false, 0, 0, 0) : new Payload(text, true, way.x, way.y, way.z));
+            PacketDistributor.sendToPlayer(player, new Payload(text, route == null ? java.util.List.of() : route));
         }
     }
 
