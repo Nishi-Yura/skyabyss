@@ -209,6 +209,21 @@ public final class NpcSpawner {
 
     @Nullable
     public static NpcEntity spawnChaser(ServerLevel level, BlockPos bell, RandomSource random) {
+        // 都の鐘なら、設計図が用意した野営の場所 (庭の草地) を先に使う
+        BlockPos camp = jp.revati.skyabyss.opening.OpeningSites.chaserCamp(level.getServer()).orElse(null);
+        if (camp != null && camp.distSqr(bell) < 80 * 80) {
+            level.getChunk(camp);
+            BlockPos at = ground(level, camp, 3, 3);
+            jp.revati.skyabyss.SkyAbyss.LOGGER.info("[npc] chaser camp {} -> {}", camp, at);
+            if (at != null) {
+                BlockPos fire = campfireSpot(level, at, random);
+                if (fire != null) {
+                    level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), 3);
+                    return place(level, NpcSetup.WHALE_CHASER.get(), at, fire);
+                }
+                return place(level, NpcSetup.WHALE_CHASER.get(), at, at);
+            }
+        }
         for (int i = 0; i < 60; i++) {
             double angle = random.nextDouble() * Math.PI * 2;
             int r = 18 + random.nextInt(17);

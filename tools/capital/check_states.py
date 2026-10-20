@@ -13,7 +13,7 @@ import zipfile
 JARS = [os.path.expanduser('~/.gradle/caches/neoformruntime/artifacts/minecraft_1.21.1_client.jar')]
 # blockstates の json に出てこない (モデルを変えない) 状態
 SILENT = {'waterlogged', 'powered', 'distance', 'persistent', 'snowy', 'signal_fire', 'lit', 'open', 'level', 'up',
-          'north', 'south', 'east', 'west', 'hanging', 'half', 'shape', 'facing', 'type', 'axis', 'hinge', 'occupied', 'part'}
+          'north', 'south', 'east', 'west', 'hanging', 'half', 'shape', 'facing', 'type', 'axis', 'hinge', 'occupied', 'part', 'has_book', 'attachment', 'in_wall', 'moisture', 'age', 'face', 'stage'}
 
 
 def load():

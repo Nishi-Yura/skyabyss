@@ -229,7 +229,9 @@ SEEN_ANY = any_(*[seen_if(t, e) for t, e in SEEN])
 # 語り部の話題の節は選択肢を 13 個までしか置けない (枠の高さ 210)。岩鯨を見た・背中の町を見た話も、この「見たもの」の節へ移した
 SEEN_ST = SEEN + [("whale", "chapter1/stone_whale"), ("back", "chapter1/sky_ruins")]
 # 都の閉じた戸のことも「見たもの」(伝承は要らない。一度だけ)
-SEEN_ST_ANY = any_(*[seen_if(t, e) for t, e in SEEN_ST], not_(flag("capital_told")))
+CAPITAL_LORE = any_(lore("prologue/capital_skywatch"), lore("prologue/capital_guild_roll"), lore("prologue/capital_graveyard"), lore("prologue/capital_gates"))
+CAPITAL_ST = all_(CAPITAL_LORE, not_(flag("capital_told")))
+SEEN_ST_ANY = any_(*[seen_if(t, e) for t, e in SEEN_ST], CAPITAL_ST)
 
 MENU_OPTS = [
     ("shadow_seen", "昼間、雲の上を何かが渡っていった。", "Something crossed above the clouds at midday.",
@@ -391,7 +393,7 @@ st.node("seen_menu", "ほう。何を見たんだい。", "Oh? What did you see?
     ("ruins", "鯨の背中に、町の跡があった。", "There were ruins of a town on the whale's back.",
      {"goto": "back", "if": seen_if("back", "chapter1/sky_ruins")}),
     ("capital", "この都は、どこも戸が閉じている。", "Every door in this city is shut.",
-     {"goto": "capital1", "if": not_(flag("capital_told"))}),
+     {"goto": "capital1", "if": CAPITAL_ST}),
     ("cancel", "やっぱり、いい。", "Never mind.", {"goto": "menu"}),
 ], note="序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話、都の閉じた戸の話もここ)")
 st.node("camp0",

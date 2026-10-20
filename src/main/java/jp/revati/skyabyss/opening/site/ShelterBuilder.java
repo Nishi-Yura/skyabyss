@@ -47,7 +47,7 @@ public final class ShelterBuilder {
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall")) {
+                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);

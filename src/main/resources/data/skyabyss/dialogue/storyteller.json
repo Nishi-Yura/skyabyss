@@ -466,13 +466,36 @@
                   }
                 }
               ],
-              {
-                "type": "not",
-                "of": {
-                  "type": "flag",
-                  "flag": "capital_told"
+              [
+                {
+                  "type": "any",
+                  "of": [
+                    {
+                      "type": "lore",
+                      "entry": "prologue/capital_skywatch"
+                    },
+                    {
+                      "type": "lore",
+                      "entry": "prologue/capital_guild_roll"
+                    },
+                    {
+                      "type": "lore",
+                      "entry": "prologue/capital_graveyard"
+                    },
+                    {
+                      "type": "lore",
+                      "entry": "prologue/capital_gates"
+                    }
+                  ]
+                },
+                {
+                  "type": "not",
+                  "of": {
+                    "type": "flag",
+                    "flag": "capital_told"
+                  }
                 }
-              }
+              ]
             ]
           },
           "goto": "seen_menu"
@@ -868,13 +891,36 @@
         },
         {
           "id": "capital",
-          "if": {
-            "type": "not",
-            "of": {
-              "type": "flag",
-              "flag": "capital_told"
+          "if": [
+            {
+              "type": "any",
+              "of": [
+                {
+                  "type": "lore",
+                  "entry": "prologue/capital_skywatch"
+                },
+                {
+                  "type": "lore",
+                  "entry": "prologue/capital_guild_roll"
+                },
+                {
+                  "type": "lore",
+                  "entry": "prologue/capital_graveyard"
+                },
+                {
+                  "type": "lore",
+                  "entry": "prologue/capital_gates"
+                }
+              ]
+            },
+            {
+              "type": "not",
+              "of": {
+                "type": "flag",
+                "flag": "capital_told"
+              }
             }
-          },
+          ],
           "goto": "capital1"
         },
         {

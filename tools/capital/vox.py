@@ -89,7 +89,7 @@ STYLE_B = Style(
     glass='gray_stained_glass_pane', frame='dark_oak_trapdoor',
     railing='stone_brick_wall', fence='dark_oak_fence',
     pave=[('stone_bricks', 4), ('andesite', 3), ('cobblestone', 2), ('gravel', 1), ('polished_andesite', 2), ('mossy_cobblestone', 1)],
-    pave_trim='polished_andesite', pave_inlay=['polished_diorite', 'red_nether_bricks'],
+    pave_trim='polished_andesite', pave_inlay=['polished_diorite', 'polished_andesite'],
     flowers=['red_tulip', 'poppy', 'oxeye_daisy', 'azure_bluet', 'white_tulip', 'dandelion'],
     leaves='oak_leaves', trunk='oak_log', leaves2='spruce_leaves', trunk2='spruce_log',
     lamp='lantern', banner_wool='red_wool',
@@ -142,6 +142,26 @@ STYLE_C.__dict__.update(
     pot_flowers=['red_tulip', 'orange_tulip', 'pink_tulip', 'allium', 'azalea_bush'],
     spire=Mat('bricks', 'brick', 'brick_wall'),
     dome=Mat('oxidized_cut_copper', 'oxidized_cut_copper'))
+
+
+# 都の大きな部品 (城壁・家の壁の揺れ・屋根の別色)
+STYLE_A.__dict__.update(
+    wall_main='polished_diorite', wall_mix2=['diorite', 'calcite', 'mossy_stone_bricks'],
+    house_infills=['calcite', 'calcite', 'polished_diorite', 'smooth_quartz'],
+    roof_alts=[Mat('polished_blackstone_bricks', 'polished_blackstone_brick'), Mat('oxidized_cut_copper', 'oxidized_cut_copper')])
+STYLE_B.__dict__.update(
+    wall_main='stone_bricks', wall_mix2=['cracked_stone_bricks', 'mossy_stone_bricks', 'andesite'],
+    house_infills=['stone_bricks', 'stone_bricks', 'tuff_bricks', 'polished_andesite'],
+    roof_alts=[Mat('nether_bricks', 'nether_brick', 'nether_brick_wall'), Mat('mud_bricks', 'mud_brick', 'mud_brick_wall')])
+STYLE_C.__dict__.update(
+    wall_main='cut_sandstone', wall_mix2=['sandstone', 'smooth_sandstone', 'chiseled_sandstone'],
+    house_infills=['smooth_sandstone', 'smooth_sandstone', 'white_terracotta', 'calcite'],
+    roof_alts=[Mat('polished_granite', 'polished_granite'), Mat('mud_bricks', 'mud_brick', 'mud_brick_wall')])
+
+
+STYLE_A.__dict__.update(banner_color='light_blue', fence_rail='diorite_wall')
+STYLE_B.__dict__.update(banner_color='red', fence_rail='dark_oak_fence')
+STYLE_C.__dict__.update(banner_color='cyan', fence_rail='birch_fence')
 
 STYLES = {'a': STYLE_A, 'b': STYLE_B, 'c': STYLE_C}
 
@@ -255,11 +275,14 @@ class Vox:
         self.b.update(out)
 
     # -- 書き出し
-    def runs(self, meta, extra_marks=None):
-        """詰めた形: 同じ y・z の x の並びを [y, z, x0, 番号, 長さ, …] に (-1 = 置かない)"""
+    def runs(self, meta, extra_marks=None, keep_air=False):
+        """詰めた形: 同じ y・z の x の並びを [y, z, x0, 番号, 長さ, …] に (-1 = 置かない)。
+        空気は書かない (場所の範囲は建てる前に建物の高さまで片付くので)。keep_air = 空気も書く"""
         palette, pidx = [], {}
         rows: dict[tuple[int, int], dict[int, int]] = {}
         for (x, y, z), s in self.b.items():
+            if s == 'air' and not keep_air:
+                continue
             s2 = s if ':' in s else M + s
             if s2 not in pidx:
                 pidx[s2] = len(palette)
@@ -349,6 +372,30 @@ def bush(v: Vox, x, y, z, leaves, r=1):
 
 
 def tree(v: Vox, x, y, z, trunk, leaves, h=5, r=2, cone=False):
+    """木。幹の上の方に枝を 2〜3 本出し、枝先ごとに不揃いの葉の塊を置く (棒の先の玉にしない)"""
+    rng = v.rng
+    L = '%s[persistent=true,distance=1,waterlogged=false]' % leaves
+    log = trunk if '[' in trunk else trunk + '[axis=y]'
+    v.fill(x, y, z, x, y + h - 1, z, log)
+    tips = [(x, y + h, z)]
+    for k in range(rng.choice([2, 3])):
+        dx, dz = rng.choice([(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)])
+        yb = y + h - 2 - rng.randint(0, 1)
+        bx, bz = x + dx, z + dz
+        axis = 'x' if dx and not dz else ('z' if dz and not dx else 'y')
+        v.set(bx, yb, bz, trunk.split('[')[0] + '[axis=%s]' % axis)
+        tips.append((bx + dx, yb + 1, bz + dz))
+    for (tx, ty, tz) in tips:
+        rr = r + (0 if (tx, tz) == (x, z) else -1 + rng.random())
+        for ddx in range(-r - 1, r + 2):
+            for ddz in range(-r - 1, r + 2):
+                for ddy in range(-1, 3):
+                    d = (ddx * ddx + ddz * ddz) / (rr + 0.7) ** 2 + ((ddy - 0.5) / 1.6) ** 2
+                    if d <= 1.0 and rng.random() > 0.12 * d:
+                        v.set(tx + ddx, ty + ddy, tz + ddz, L, keep=True)
+
+
+def tree_old(v: Vox, x, y, z, trunk, leaves, h=5, r=2, cone=False):
     """小さな木。cone = 針葉樹らしい円錐"""
     L = '%s[persistent=true,distance=1,waterlogged=false]' % leaves
     v.fill(x, y, z, x, y + h - 1, z, '%s[axis=y]' % trunk)
@@ -466,7 +513,8 @@ def fountain(v: Vox, st: Style, cx, cz, r=5, y=0):
         v.set(cx + dx, y + 1, cz + dz, st.trim.stairs(OPP[f], 'bottom'))
         v.set(cx + dx, y + 4, cz + dz, st.trim.stairs(OPP[f], 'top'))
     v.set(cx, y + 4, cz, st.trim2)
-    v.set(cx, y + 5, cz, 'water[level=0]')
+    v.set(cx, y + 5, cz, st.trim.wall())
+    v.set(cx, y + 6, cz, 'lantern[hanging=false,waterlogged=false]')
 
 
 # ---------------------------------------------------------------- 壁面
@@ -498,7 +546,7 @@ class Body:
 
     def __init__(self, v: Vox, st: Style, x0, z0, x1, z1, y0=0, floors=2, fh=5, bay=4, plinth=2,
                  door_side='south', door_at=None, door='wood', ground='window', interior=True,
-                 sides=('north', 'south', 'east', 'west'), shutters=None, pots=0.3, infill=None):
+                 sides=('north', 'south', 'east', 'west'), shutters=None, pots=0.3, infill=None, ornate=True):
         self.v, self.st = v, st
         self.x0, self.z0, self.x1, self.z1 = x0, z0, x1, z1
         self.y0, self.floors, self.fh = y0, floors, fh
@@ -509,6 +557,7 @@ class Body:
         self.shutters = st.shutters if shutters is None else shutters
         self.pots = pots
         self.infill = infill
+        self.ornate = ornate
         self.doors = []
 
     def fillb(self):
@@ -552,15 +601,21 @@ class Body:
             self._interior()
         return self
 
-    def ring(self, y, mat, half):
+    def ring(self, y, mat, half, sides=None):
+        """外の面の外へ一周の階段 (蛇腹・裾)。sides = 飾る側 (隣と壁を接する側は出さない)"""
         v = self.v
+        sides = self.sides if sides is None else sides
         for side in ('north', 'south', 'east', 'west'):
+            if side not in sides:
+                continue
             cells, out = _facade_cells(self.x0, self.z0, self.x1, self.z1, side)
             dx, dz = DX[out]
             for (cx, cz) in cells:
                 v.set(cx + dx, y, cz + dz, mat.stairs(OPP[out], half), keep=(half == 'bottom'))
-        for (cx, cz) in ((self.x0 - 1, self.z0 - 1), (self.x1 + 1, self.z0 - 1), (self.x0 - 1, self.z1 + 1), (self.x1 + 1, self.z1 + 1)):
-            v.set(cx, y, cz, mat.full if half == 'top' else mat.slab('bottom'), keep=(half == 'bottom'))
+        for (cx, cz, a, b) in ((self.x0 - 1, self.z0 - 1, 'north', 'west'), (self.x1 + 1, self.z0 - 1, 'north', 'east'),
+                               (self.x0 - 1, self.z1 + 1, 'south', 'west'), (self.x1 + 1, self.z1 + 1, 'south', 'east')):
+            if a in sides and b in sides:
+                v.set(cx, y, cz, mat.full if half == 'top' else mat.slab('bottom'), keep=(half == 'bottom'))
 
     def _bays(self, n):
         inner = n - 2
@@ -619,6 +674,19 @@ class Body:
                 yt = min(yt, yb + (3 if fh >= 6 else 2) - 1)
                 if yt >= yb:
                     self._window(cells, out, c0, c0 + ww - 1, yb, yt)
+                    # 表の面の上の階: ときどき張り出し窓か露台
+                    if f >= 1 and side == self.door_side and w >= 3 and self.ornate:
+                        r = v.rng.random()
+                        if r < 0.22:
+                            self._oriel(cells, out, a + 1, b - 1, yb, yt)
+                        elif r < 0.40 and f < self.floors:
+                            self._balcony(cells, out, a + 1, b - 1, fy)
+        # 柱型の旗 (表の面、上の階)
+        if self.ornate and side == self.door_side and self.floors >= 2 and v.rng.random() < 0.45:
+            for p in pil[1:-1]:
+                if v.rng.random() < 0.5:
+                    px, pz = cells[p]
+                    v.set(px + dx, top - 2, pz + dz, '%s_wall_banner[facing=%s]' % (st.banner_color, out), keep=True)
 
     def _window(self, cells, out, i0, i1, yb, yt):
         v, st = self.v, self.st
@@ -646,6 +714,38 @@ class Body:
                     cx, cz = cells[i]
                     for y in range(yb, yt + 1):
                         v.set(cx + dx, y, cz + dz, '%s_trapdoor[facing=%s,half=bottom,open=true,waterlogged=false,powered=false]' % (st.shutter_wood, out))
+
+    def _oriel(self, cells, out, i0, i1, yb, yt):
+        """張り出し窓: 窓の前へ一つ出た硝子の箱。下に持ち送り、上に小さな屋根"""
+        v, st = self.v, self.st
+        dx, dz = DX[out]
+        for i in range(i0, i1 + 1):
+            cx, cz = cells[i]
+            ox, oz = cx + dx, cz + dz
+            edge = i in (i0, i1)
+            for y in range(yb, yt + 1):
+                v.set(cx, y, cz, 'air')
+                v.set(ox, y, oz, st.pilaster if edge else st.glass)
+            v.set(ox, yb - 1, oz, st.trim.stairs(OPP[out], 'top'))
+            v.set(ox, yt + 1, oz, st.trim.full)
+            v.set(ox + dx, yt + 1, oz + dz, st.roof.stairs(OPP[out], 'bottom'))
+            v.set(ox, yt + 2, oz, st.roof.stairs(OPP[out], 'bottom'))
+            v.set(ox + dx, yb - 1, oz + dz, 'air')
+
+    def _balcony(self, cells, out, i0, i1, fy):
+        """露台: 階の帯の段に床を一つ出し、手すり。窓は戸口のように高く"""
+        v, st = self.v, self.st
+        dx, dz = DX[out]
+        # 露台は「その階の床の段」(fy) の一つ上の階に付ける: 床 = 次の階の帯 (fy + fh)
+        yf = fy + self.fh
+        if yf >= self.top:
+            return
+        for i in range(i0, i1 + 1):
+            cx, cz = cells[i]
+            ox, oz = cx + dx, cz + dz
+            v.set(ox, yf, oz, st.trim.full)
+            v.set(ox, yf - 1, oz, st.trim.stairs(OPP[out], 'top'))
+            v.set(ox, yf + 1, oz, st.railing if i in (i0, i1) else st.fence_rail)
 
     def _shop(self, cells, out, i0, i1, ytop):
         v, st = self.v, self.st
@@ -982,8 +1082,11 @@ def tower(v: Vox, st: Style, cx, cz, half=3, y0=0, h=20, belfry=True, spire_rise
         px, pz = cells[len(cells) // 2]
         dx, dz = DX[out]
         yc = b.y0 + floors * fh - 3
-        for (ax, ay) in ((-1, 0), (1, 0), (0, 1), (0, -1), (0, 0)):
-            v.set(px + ax, yc + ay, pz + dx * 0 + dz, st.trim2 if (ax, ay) == (0, 0) else st.accent.full)
+        # 丸窓 (縁は白い石、真ん中は硝子)
+        for (ax, ay) in ((-1, 0), (1, 0), (0, 1), (0, -1)):
+            v.set(px + ax, yc + ay, pz + dz, st.trim.full)
+        v.set(px, yc, pz + dz, st.trim2)
+        v.set(px, yc, pz, st.glass)
     return peak
 
 

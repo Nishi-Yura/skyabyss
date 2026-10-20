@@ -275,6 +275,11 @@ public final class SiteBuilds {
                                 .then(Commands.argument("dist", FloatArgumentType.floatArg(0, 400)).then(Commands.argument("up", FloatArgumentType.floatArg(-20, 80))
                                         .then(Commands.argument("yaw", FloatArgumentType.floatArg(-360, 720)).then(Commands.argument("pitch", FloatArgumentType.floatArg(-90, 90))
                                                 .executes(SiteBuilds::view))))))))
+                        // at <種類> <番号> <x> <y> <z> <yaw> <pitch>: 設計図の座標 (回す前。y=0 が地面の上の最初の段) と、設計図の向きの yaw で体ごと置く
+                        .then(Commands.literal("at").then(Commands.argument("kind", kinds).then(Commands.argument("index", IntegerArgumentType.integer(0, 9))
+                                .then(Commands.argument("bx", IntegerArgumentType.integer()).then(Commands.argument("by", IntegerArgumentType.integer())
+                                        .then(Commands.argument("bz", IntegerArgumentType.integer()).then(Commands.argument("yaw", FloatArgumentType.floatArg(-360, 720))
+                                                .then(Commands.argument("pitch", FloatArgumentType.floatArg(-90, 90)).executes(SiteBuilds::at)))))))))
                         // goto <notebook|bell|smoke|slab|chaser> <離れる距離>: 帳面・鐘・煙の焚き火・鯨追いの焚き火の、南へ距離だけ離れた所へ体ごと置く (北向き。first_hour.txt 用)
                         .then(Commands.literal("goto").then(Commands.argument("what", StringArgumentType.word()).then(Commands.argument("dist", FloatArgumentType.floatArg(0, 400))
                                 .executes(SiteBuilds::gotoSite))))
@@ -355,6 +360,27 @@ public final class SiteBuilds {
         level.getChunk(((int) Math.floor(x)) >> 4, ((int) Math.floor(z)) >> 4);
         player.teleportTo(level, x, e.pos.getY() + up, z, yaw, pitch);
         ctx.getSource().sendSuccess(() -> Component.literal("view " + e.kind + " " + e.index + " at " + e.pos.toShortString()), false);
+        return 1;
+    }
+
+    private static int at(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        SiteData.Entry e = find(ctx);
+        if (e == null) {
+            ctx.getSource().sendFailure(Component.literal("no such site"));
+            return 0;
+        }
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        int rot = SiteFinder.rot(e.yaw);
+        boolean mirror = SiteFinder.mirror(e.yaw);
+        BlockPos w = Blueprint.transform(IntegerArgumentType.getInteger(ctx, "bx"), IntegerArgumentType.getInteger(ctx, "by"),
+                IntegerArgumentType.getInteger(ctx, "bz"), rot, mirror, e.pos);
+        float yaw = FloatArgumentType.getFloat(ctx, "yaw");
+        yaw = (mirror ? -yaw : yaw) + 90f * (rot & 3);
+        float pitch = FloatArgumentType.getFloat(ctx, "pitch");
+        ServerLevel level = ctx.getSource().getServer().overworld();
+        level.getChunk(w.getX() >> 4, w.getZ() >> 4);
+        player.teleportTo(level, w.getX() + 0.5, w.getY(), w.getZ() + 0.5, yaw, pitch);
+        ctx.getSource().sendSuccess(() -> Component.literal("at " + w.toShortString()), false);
         return 1;
     }
 
