@@ -35,7 +35,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 // 新作のセルの動きの自己テスト (trial pool から呼ぶ)。偽の人をセルの中に立たせ、セルの tick を動かして、決まりが働くかを見る:
 // 苔の流れが向きへ押す・入れ替わる・穴に落ちたら最後の島へ戻る / 噴気孔が吹き上げのあいだだけ昇らせる / 棺が押されると進み、囲まれると進まず傷み、
-// 傷みきると戻る・着けば戸が開く / 闘技場の波・崩れ・幕で半分・出口の橋。
+// 傷みきると戻る・着けば戸が開く / 闘技場の波・崩れ・出口の橋。
 final class TrialCellLogic {
     private TrialCellLogic() {
     }

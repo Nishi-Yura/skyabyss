@@ -111,7 +111,13 @@ public final class W10Fort implements TrialCell {
     }
 
     private void spawnWave(ServerLevel back, Run run, int players, int wave) {
-        int[] order = ORDER[run.mods.layout()];
+        // 設計書 26 の 8.7 の B: 一人・二人は、入口に近い口から先に使う (4 人から、もとの順)
+        java.util.List<BlockPos> slotPos = new java.util.ArrayList<>();
+        for (int i = 0; i < SLOTS.length; i++) {
+            slotPos.add(slotSpawn(i));
+        }
+        BlockPos entrance = jp.revati.skyabyss.titan.dungeon.RoomPlayRooms.entranceOf("w10");
+        int[] order = jp.revati.skyabyss.combat.RoomPlay.orderNear(ORDER[run.mods.layout()], slotPos, entrance, players);
         int g = gunners(run, players);
         for (int j = 0; j < g; j++) {
             Mob m = TitanBackTrials.spawnGuard(back, "mortar", slotSpawn(order[j % order.length]), run.group);
@@ -123,7 +129,7 @@ public final class W10Fort implements TrialCell {
             int s = 2 + Math.max(0, players - 1);
             for (int j = 0; j < s; j++) {
                 int x = 24 + (j % 2) * 12 + (j / 2) * 2;
-                Mob m = TitanBackTrials.spawnGuard(back, "sentinel", new BlockPos(x, Y + 1, 100 + (j / 2)), run.group);
+                Mob m = TitanBackTrials.spawnGuard(back, "sentinel", new BlockPos(x, Y + 1, (players <= 2 ? 92 : 100) + (j / 2)), run.group);
                 if (m != null) {
                     mobs(run).add(m.getUUID());
                 }
