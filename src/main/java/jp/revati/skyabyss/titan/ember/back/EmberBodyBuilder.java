@@ -900,7 +900,7 @@ public final class EmberBodyBuilder {
         for (Box b : EmberDeck.ROOMS) {
             carve(b);
         }
-        for (List<BlockPos> gate : List.of(EmberDeck.E02_GATE, EmberDeck.E10_GATE, EmberDeck.E06_GATE, EmberDeck.E07_GATE)) {
+        for (List<BlockPos> gate : EmberDeck.GATES) {
             for (BlockPos p : gate) {
                 kit.set(p, EmberKit.AIR);
             }
