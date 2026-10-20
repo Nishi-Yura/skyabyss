@@ -432,18 +432,35 @@ def shrine():
 
 
 def smithy():
-    # 鍛冶場 (x 6..34, z 12..30)。開いた戸口 (北)。炉・金床・鍛冶台・焚き火
+    # 鍛冶場 (ラフ A「開いた鍛冶場」で決定。x 6..34, z 12..30)。丸石と石レンガの工房、南が大きく開き庇が張り出す。
+    # 奥 (北) に共鳴の炉と煙突、金床・鍛冶台・砥石・溶鉱炉。東の隅に職人の店 (樽と棚)
     x0, z0, x1, z1 = 6, 12, 34, 30
-    hollow(x0, 0, z0, x1, 5, z1, 'cobblestone', roof='spruce_slab[type=bottom,waterlogged=false]', floor_s='stone_bricks', corner='stripped_spruce_log[axis=y]')
+    cx = (x0 + x1) // 2
+    box(x0, -1, z0, x1, -1, z1 + 3, 'stone_bricks')
+    hollow(x0, 0, z0, x1, 5, z1, 'cobblestone', roof=None, floor_s=None, corner='stripped_spruce_log[axis=y]')
+    opening(x0 + 2, 0, z1, x1 - 2, 3, z1)
+    for x in range(x0 + 2, x1 - 1, 4):
+        blk(x, 2, z0, 'glass_pane[north=false,south=false,east=true,west=true]')
     box(x0 + 1, 6, z0 + 1, x1 - 1, 6, z1 - 1, 'spruce_planks')
-    opening(19, 0, z0, 21, 2, z0)
-    blk(x0 + 2, 0, z1 - 2, 'blast_furnace[facing=north,lit=false]')
-    blk(x0 + 4, 0, z1 - 2, 'anvil[facing=east]')
-    blk(x0 + 6, 0, z1 - 2, 'smithing_table')
-    blk(x1 - 3, 0, z1 - 2, 'campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]')
-    blk(x1 - 2, 0, z0 + 2, 'chest[facing=west,type=single,waterlogged=false]')
-    blk(20, 5, 21, 'lantern[hanging=true]')
-    tablet(23, 0, z0 - 1, 'north', 'smithy')
+    gable(x0 - 1, x1 + 1, z0 - 1, z1 + 3, 6)
+    for x in (x0 + 1, cx, x1 - 1):
+        box(x, 0, z1 + 3, x, 5, z1 + 3, 'stripped_spruce_log[axis=y]')
+    # 炉と煙突 (北の壁ぎわ)
+    blk(cx, 0, z0 + 2, 'skyabyss:resonance_forge')
+    box(cx - 1, 0, z0 + 1, cx + 1, 1, z0 + 1, 'polished_deepslate')
+    box(cx - 1, 2, z0 + 1, cx + 1, 12, z0 + 1, 'deepslate_bricks')
+    blk(cx, 1, z0 + 2, 'campfire[facing=south,lit=true,signal_fire=false,waterlogged=false]')
+    blk(cx + 4, 0, z0 + 3, 'anvil[facing=east]')
+    blk(cx + 5, 0, z0 + 3, 'smithing_table')
+    blk(cx + 6, 0, z0 + 3, 'grindstone[face=floor,facing=north]')
+    blk(cx - 4, 0, z0 + 3, 'blast_furnace[facing=south,lit=false]')
+    blk(cx - 6, 0, z0 + 3, 'chest[facing=south,type=single,waterlogged=false]')
+    # 職人の店 (東の隅: 樽と棚、カウンター)
+    box(x1 - 5, 0, z0 + 1, x1 - 1, 0, z0 + 1, 'barrel[facing=up,open=false]')
+    box(x1 - 5, 0, z0 + 9, x1 - 1, 0, z0 + 9, 'spruce_slab[type=top,waterlogged=false]')
+    blk(x1 - 3, 1, z0 + 1, 'lantern[hanging=false]')
+    blk(cx, 5, (z0 + z1) // 2, 'lantern[hanging=true]')
+    tablet(x0 + 6, 0, z1 + 4, 'south', 'smithy')
 
 
 def houses():
