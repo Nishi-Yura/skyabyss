@@ -422,6 +422,96 @@ SUBJECTS["guild"] = {
 }
 
 
+# ---------------------------------------------------------------- 四巨神の社 3 案 (国の信仰「四体が空を支える」。転生の台座・鍵の間。二章で開く。戸は閉じている)
+TITAN_BLOCKS = ("stone_bricks", "prismarine_bricks", "cut_copper", "polished_blackstone_bricks")  # 岩鯨・潮殻・雷翼・余燼
+
+
+def _altar(g, cx, cz, y):
+    """鍵の間の台 (四つの欠片を納める台)。中央に灯り"""
+    box(g, cx - 1, y, cz - 1, cx + 1, y, cz + 1, "polished_deepslate")
+    g.set(cx, y + 1, cz, "lantern[hanging=false]")
+
+
+def shrine_a(g: Grid, rng=None):
+    """A「八角の社」: 深層岩の八角堂 (幅 28・高さ 10)。四方に巨神の色の柱と灯り、頂に小さな塔と灯り。東の戸は閉じる"""
+    g.meta = {"rect": [-20, -20, 20, 20], "level": True}
+    r = 14
+    box(g, -r, -1, -r, r, -1, r, "polished_deepslate")
+    box(g, -r, 0, -r, r, 9, r, "deepslate_bricks")
+    air(g, -r + 1, 0, -r + 1, r - 1, 8, r - 1)
+    for ax, az in ((-r, -r), (r - 5, -r), (-r, r - 5), (r - 5, r - 5)):
+        air(g, ax, -1, az, ax + 5, 10, az + 5)
+        box(g, ax, -1, az, ax + 5, -1, az + 5, "grass_block")
+    box(g, -r + 2, 10, -r + 2, r - 2, 10, r - 2, "deepslate_tile_slab[type=bottom]")
+    box(g, -2, 11, -2, 2, 13, 2, "deepslate_bricks")
+    g.set(0, 14, 0, "lantern[hanging=false]")
+    _altar(g, 0, 0, 0)
+    for (dx, dz), blk in zip(((-r - 3, 0), (r + 3, 0), (0, -r - 3), (0, r + 3)), TITAN_BLOCKS):
+        box(g, dx, 0, dz, dx, 4, dz, blk)
+        g.set(dx, 5, dz, "lantern[hanging=false]")
+    g.set(r, 0, 0, "iron_door[facing=west,half=lower,hinge=left,open=false,powered=false]")
+    g.set(r, 1, 0, "iron_door[facing=west,half=upper,hinge=left,open=false,powered=false]")
+    g.set(r + 1, 0, 2, "skyabyss:tablet[facing=east,standing=true]")
+    g.mark("stand", r + 6, 0, 0)
+
+
+def shrine_b(g: Grid, rng=None):
+    """B「四つの塔の社」: 四角い堂 (24×24・高さ 8) の四隅に巨神ごとの材質の塔 (高さ 16)。堂の屋根は段々、中央の鍵の間に天窓。戸は東"""
+    g.meta = {"rect": [-20, -20, 20, 20], "level": True}
+    h = 12
+    box(g, -h, -1, -h, h, -1, h, "polished_deepslate")
+    shell(g, -h, 0, -h, h, 7, h, "stone_bricks", "deepslate_bricks")
+    for i in range(3):
+        box(g, -h + 1 + i * 2, 8 + i, -h + 1 + i * 2, h - 1 - i * 2, 8 + i, h - 1 - i * 2, "deepslate_tiles")
+        if i < 2:
+            air(g, -h + 3 + i * 2, 8 + i, -h + 3 + i * 2, h - 3 - i * 2, 8 + i, h - 3 - i * 2)
+    air(g, -1, 10, -1, 1, 10, 1)
+    for (ax, az), blk in zip(((-h - 2, -h - 2), (h - 2, -h - 2), (-h - 2, h - 2), (h - 2, h - 2)), TITAN_BLOCKS):
+        box(g, ax, 0, az, ax + 4, 15, az + 4, blk)
+        air(g, ax + 1, 1, az + 1, ax + 3, 14, az + 3)
+        box(g, ax, 16, az, ax + 4, 16, az + 4, "deepslate_tile_slab[type=bottom]")
+        g.set(ax + 2, 17, az + 2, "lantern[hanging=false]")
+    _altar(g, 0, 0, 0)
+    g.set(h, 0, 0, "iron_door[facing=west,half=lower,hinge=left,open=false,powered=false]")
+    g.set(h, 1, 0, "iron_door[facing=west,half=upper,hinge=left,open=false,powered=false]")
+    g.set(h + 1, 0, 2, "skyabyss:tablet[facing=east,standing=true]")
+    g.mark("stand", h + 6, 0, 0)
+
+
+def shrine_c(g: Grid, rng=None):
+    """C「石の輪の社」: 屋根のない社。四つの大きな巨神の石 (高さ 9) が輪に立ち、中央の鍵の間を骨の梁が覆う。輪は低い壁と閉じた門で囲う"""
+    g.meta = {"rect": [-20, -20, 20, 20], "level": True}
+    r = 15
+    box(g, -r, -1, -r, r, -1, r, "polished_deepslate")
+    for i in range(-r, r + 1):
+        for j in range(-r, r + 1):
+            if abs(i) == r or abs(j) == r:
+                g.set(i, 0, j, "deepslate_brick_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]")
+    for (dx, dz), blk in zip(((-9, -9), (9, -9), (-9, 9), (9, 9)), TITAN_BLOCKS):
+        box(g, dx - 1, 0, dz - 1, dx + 1, 8, dz + 1, blk)
+        g.set(dx, 9, dz, "lantern[hanging=false]")
+        # 骨の梁: 石から中央へ
+        for k in range(1, 9):
+            x = dx - (dx // 9) * k
+            z = dz - (dz // 9) * k
+            g.set(x, 8 + k // 3, z, "bone_block[axis=y]")
+    box(g, -1, 11, -1, 1, 11, 1, "bone_block[axis=y]")
+    g.set(0, 12, 0, "lantern[hanging=true]")
+    _altar(g, 0, 0, 0)
+    air(g, r, 0, -1, r, 0, 1)
+    box(g, r, 0, -1, r, 2, 1, "iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]")
+    g.set(r + 1, 0, 3, "skyabyss:tablet[facing=east,standing=true]")
+    g.mark("stand", r + 6, 0, 0)
+
+
+SUBJECTS["shrine"] = {
+    "title": "四巨神の社（転生の台座・鍵の間）",
+    "options": {"a": shrine_a, "b": shrine_b, "c": shrine_c},
+    "notes": {"a": "A 八角の社（深層岩の堂）", "b": "B 四つの塔の社（巨神の色の塔）", "c": "C 石の輪の社（屋根のない輪）"},
+    "eye": ((36, 1.6, 0), (0, 6, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
