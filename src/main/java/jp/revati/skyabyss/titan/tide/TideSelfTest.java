@@ -154,9 +154,11 @@ public final class TideSelfTest {
                     }
                 }
             }
-            BlockPos step = g.east().below();
+            // 見送りの段 (TideIslandBuilder.gate): 到着の段の西の縁から 4 段、一段ずつ海へ下りる。最初の段は (x1 - 1、床 - 1)
+            BlockPos step = new BlockPos(jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.x1() - 1,
+                    jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.floor() - 1, g.getZ());
             if (!(back.getBlockState(step).getBlock() instanceof net.minecraft.world.level.block.StairBlock)) {
-                failures.add("the return steps have no stair at " + step);
+                failures.add("the return steps have no stair at " + step + " (found " + back.getBlockState(step) + "; above " + back.getBlockState(step.above()) + ", west " + back.getBlockState(step.west()) + ")");
             }
             // 到着の段は平ら (到着から段の西の縁まで)
             for (int x = a.getX(); x >= jp.revati.skyabyss.titan.tide.back.TideBackLayout.LANDING.x1(); x--) {
@@ -167,10 +169,10 @@ public final class TideSelfTest {
                 }
             }
             // 島の外は海 (落ちたら泳げる)
-            BlockPos sea = new BlockPos(-110, TideBackBuilder.SEA - 1, 40);
+            BlockPos sea = new BlockPos(-220, TideBackBuilder.SEA - 1, 40);
             back.getChunk(sea);
             if (!back.getFluidState(sea).isSource()) {
-                failures.add("no sea around the tide back island at " + sea);
+                failures.add("no sea around the tide back island at " + sea + " (found " + back.getBlockState(sea) + ", above " + back.getBlockState(sea.above()) + ", SEA " + TideBackBuilder.SEA + ")");
             }
         } finally {
             for (int dx = -1; dx <= 1; dx++) {

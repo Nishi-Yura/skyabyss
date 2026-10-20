@@ -207,6 +207,17 @@ public final class Ch1BackMobsSelfTest {
         return HEALTH - p.getHealth();
     }
 
+    // 狙いを変える仕組み (いちばん近い人を選び直す) を外す。試験が決めた相手だけを狙わせる (外さないと、横の人へ狙いが移って線が変わる揺らぎが出る)
+    private static void lockTarget(Mob mob) {
+        try {
+            Field selector = Mob.class.getDeclaredField("targetSelector");
+            selector.setAccessible(true);
+            ((net.minecraft.world.entity.ai.goal.GoalSelector) selector.get(mob)).removeAllGoals(goal -> true);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("could not lock the target of " + mob, e);
+        }
+    }
+
     private static void tick(ServerLevel level, Mob mob, int ticks) {
         for (int i = 0; i < ticks; i++) {
             mob.tickCount++;
@@ -333,6 +344,7 @@ public final class Ch1BackMobsSelfTest {
             FakePlayer inLine = fake(level, "g_in", SX, FLOOR, SZ + 9);
             FakePlayer side = fake(level, "g_side", SX + 3, FLOOR, SZ + 6);
             ps.addAll(List.of(inLine, side));
+            lockTarget(g);
             g.setTarget(inLine);
             List<TelegraphShape> shapes = new ArrayList<>();
             Telegraph.record(shapes);
@@ -544,7 +556,19 @@ public final class Ch1BackMobsSelfTest {
             Method spawnWave = trials.getDeclaredMethod("spawnWave", ServerLevel.class, hallClass, stateClass);
             spawnWave.setAccessible(true);
             AABB box = TitanBackLayout.E1.aabb().inflate(2);
-            Object ckHall = ((List<?>) hallsField.get(null)).get(2);
+            // 番兵の詰所 (ck) を名前で探す (広間の並びは版で変わる。第二の広間をなくした版 25 で番号がずれた)
+            Method idOf = hallClass.getDeclaredMethod("id");
+            idOf.setAccessible(true);
+            Object ckHall = null;
+            for (Object h : (List<?>) hallsField.get(null)) {
+                if ("ck".equals(idOf.invoke(h))) {
+                    ckHall = h;
+                }
+            }
+            check(ckHall != null, "the guard post hall (ck) is not in the hall list", f);
+            if (ckHall == null) {
+                return;
+            }
             for (int players : new int[] {1, 3, 4}) {
                 for (int wave = 2; wave <= 3; wave++) {
                     // 波 3 = 番兵の詰所 (ck) の老番兵の波。第一の広間は 2 波まで
@@ -560,7 +584,16 @@ public final class Ch1BackMobsSelfTest {
                             level.getChunk(cx, cz);
                         }
                     }
+                    BlockPos mid = BlockPos.containing(box2.getCenter());
+                    int refusedBefore = jp.revati.skyabyss.util.SpawnSafety.refused;
                     spawnWave.invoke(null, level, hall2, state);
+                    if (jp.revati.skyabyss.util.SpawnSafety.refused > refusedBefore) {
+                        StringBuilder col = new StringBuilder();
+                        for (int y = TitanBackLayout.FLOOR; y <= TitanBackLayout.FLOOR + 6; y++) {
+                            col.append(level.getBlockState(new BlockPos(mid.getX(), y, mid.getZ())).getBlock().getDescriptionId().replace("block.minecraft.", "")).append(' ');
+                        }
+                        notes.add("spawn refused near " + mid + " column from floor: " + col + "entityTicking=" + level.isPositionEntityTicking(new BlockPos(mid.getX(), TitanBackLayout.FLOOR + 1, mid.getZ())));
+                    }
                     List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box2, m -> m.getTags().contains(TitanBackTrials.MOB_TAG));
                     List<BoneMortar> mortars = mobs.stream().filter(m -> m instanceof BoneMortar).map(m -> (BoneMortar) m).toList();
                     List<ElderSentinel> elders = mobs.stream().filter(m -> m instanceof ElderSentinel).map(m -> (ElderSentinel) m).toList();
@@ -574,8 +607,10 @@ public final class Ch1BackMobsSelfTest {
                         check(mortars.size() == expectedMortars, label + ": " + mortars.size() + " mortars (expected " + expectedMortars + ")", f);
                         check(archers == 3 + 2L * (players - 1) && sentinels == 1 + 0, label + ": " + archers + " archers, " + sentinels + " sentinels", f);
                         for (BoneMortar m : mortars) {
-                            check(m.getZ() <= TitanBackLayout.E1.z1() + 3.5 && TitanBackLayout.E1.contains(m.blockPosition()) && m.getTags().contains(TitanBackTrials.MOB_TAG),
-                                    label + ": a mortar is not on the back line: " + m.position(), f);
+                            // 設計書 26 の 8.7 B: 少人数は湧き場所を入口側へ寄せるので、奥の壁ぎわに立つのは 4 人から。それ以下は広間の中ならよい
+                            boolean line = players < 4 || m.getZ() <= TitanBackLayout.E1.z1() + 3.5;
+                            check(line && TitanBackLayout.E1.contains(m.blockPosition()) && m.getTags().contains(TitanBackTrials.MOB_TAG),
+                                    label + ": a mortar is not in its place (back line from 4 players): " + m.position(), f);
                         }
                     } else {
                         check(elders.size() == 1 && archers == 0, label + ": " + elders.size() + " elders, " + archers + " archers", f);

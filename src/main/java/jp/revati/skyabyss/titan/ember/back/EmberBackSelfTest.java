@@ -314,10 +314,23 @@ public final class EmberBackSelfTest {
     // 歩く人のグループ (扉の開け閉めをこのグループで見る。null なら扉の既定)
     private static UUID walkGroup;
 
+    // 試練のセルの入口の戸 (原型の三つの冷えた溶岩洞の口)。引き (試練のプール) で、引いたグループにだけ開く。歩いて届くかだけを見る
+    private static java.util.Set<Long> cellEntrances;
+
+    private static boolean isCellEntrance(BlockPos p) {
+        if (cellEntrances == null) {
+            cellEntrances = new java.util.HashSet<>();
+            for (jp.revati.skyabyss.trial.TrialCell cell : jp.revati.skyabyss.trial.TrialCells.of("ember")) {
+                cell.ports().entrance().forEach(b -> cellEntrances.add(b.asLong()));
+            }
+        }
+        return cellEntrances.contains(p.asLong());
+    }
+
     static boolean passable(ServerLevel l, BlockPos p) {
         BlockState s = l.getBlockState(p);
         if (s.is(ModBlocks.SEALED_GATE.get())) {
-            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p)) {
+            if (mechanisms && SMITH_DOOR.contains(p) || EmberDeck.isPoolGate(p) || isCellEntrance(p)) {
                 // 試練の階の戸は引き (試練のプール) で開く。歩いて届くかだけを見る (引きと戸は trial pool ember が調べる)
                 return true;
             }
@@ -451,6 +464,22 @@ public final class EmberBackSelfTest {
             } else if (!gateOpen && !mech) {
                 sb.append(e.getKey()).append('=').append(d).append(' ');
             }
+        }
+        if (!miss.isEmpty()) {
+            // 届かないときの手がかり: 歩いて届いた所に接している、閉じた戸
+            Set<BlockPos> shut = new java.util.LinkedHashSet<>();
+            for (Long key : dist.keySet()) {
+                BlockPos c = BlockPos.of(key);
+                for (Direction dir : Direction.Plane.HORIZONTAL) {
+                    for (int dy = 0; dy <= 1; dy++) {
+                        BlockPos n = c.relative(dir).above(dy);
+                        if (back.getBlockState(n).is(ModBlocks.SEALED_GATE.get()) && !passable(back, n) && shut.size() < 12) {
+                            shut.add(n.immutable());
+                        }
+                    }
+                }
+            }
+            miss.add("closed doors next to the walked area: " + shut);
         }
         expect(miss.isEmpty(), (gateOpen ? "with the gate open" : "with the gate closed") + (mech ? " and the trials' mechanisms used" : "")
                 + " cannot walk from the arrival to: " + miss);
