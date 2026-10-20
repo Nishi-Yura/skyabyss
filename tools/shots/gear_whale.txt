@@ -1,0 +1,258 @@
+# 岩鯨の武器の確認 (tools/gen_gear_whale_shots.py が作る)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+weapontier common
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_common_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_captain_pike_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_common_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_waterway_fang_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_common_tpSide
+weapontier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_rare_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_captain_pike_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_rare_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_waterway_fang_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_rare_tpSide
+weapontier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:whalebone_greatsword
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_whalebone_greatsword_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:captain_pike
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_captain_pike_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_captain_pike_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:waterway_fang
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_waterway_fang_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_waterway_fang_legend_tpSide
+weapontier legend
+cmd gamemode creative
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon item -2 -59 4 {Item:{id:"skyabyss:whalebone_greatsword",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie -2 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:whalebone_greatsword",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+cmd summon item 0 -59 4 {Item:{id:"skyabyss:captain_pike",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie 0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:captain_pike",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+cmd summon item 2 -59 4 {Item:{id:"skyabyss:waterway_fang",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie 2 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:waterway_fang",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+camera 0 -58.4 8 180 -6
+perspective first
+hud off
+wait 30
+shot ground_and_mob_all
+camera 0 -59.2 2.4 180 25
+wait 6
+shot ground_close
+camera 0 -59.6 -6.0 0 3
+wait 6
+shot mob_held_close
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd clear @s
+cmd give @s skyabyss:whalebone_greatsword
+cmd give @s skyabyss:captain_pike
+cmd give @s skyabyss:waterway_fang
+cmd gamemode survival
+guiscale 4
+chat clear
+open inventory
+wait 10
+shot gui_inventory
+close
+quit
