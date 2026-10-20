@@ -12,26 +12,25 @@ cmd gamemode spectator
 cmd skyabyss dev opening build
 cmd skyabyss dev opening info
 hud off
-# 南門の外から (野営地から来た向き)
-cmd skyabyss dev opening view shelter 0 150 24 180 8
+# 南門の外 (高め) から全景、南門の前
+cmd skyabyss dev opening view shelter 0 130 45 180 14
 waitchunks
 shot capital_far_south
-cmd skyabyss dev opening view shelter 0 108 2 180 2
+cmd skyabyss dev opening view shelter 0 112 3 180 2
 waitchunks
 shot capital_gate_south
-# 広場から北の段 (鐘楼と砦)
-cmd skyabyss dev opening view shelter 0 20 2 180 4
+# 広場 (市の輪) と、段の上の鐘楼・砦
+cmd skyabyss dev opening view shelter 0 30 6 180 8
 waitchunks
-shot capital_plaza_north
-# 段の上から鐘楼
-cmd skyabyss dev opening view shelter 0 60 8 180 6
+shot capital_plaza
+cmd skyabyss dev opening view shelter 0 44 20 0 16
 waitchunks
-shot capital_terrace
-# 西から社と壁、東から組合
-cmd skyabyss dev opening view shelter 0 150 30 270 10
+shot capital_terrace_north
+# 西から社、東から組合
+cmd skyabyss dev opening view shelter 0 125 40 270 14
 waitchunks
 shot capital_far_west
-cmd skyabyss dev opening view shelter 0 150 30 90 10
+cmd skyabyss dev opening view shelter 0 125 40 90 14
 waitchunks
 shot capital_far_east
 # 上から
