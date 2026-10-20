@@ -137,7 +137,7 @@ public final class StarBandRenderer {
         } else {
             drawModern(pose, variant, sky, moon, center, progress, time, level.getStarBrightness(partial) > 0.01f);
         }
-        // 版 22: 自前の星は描かない (ユーザーの声「星は作らず、オーロラだけ残す」)。C (採用) は光の幕 (オーロラ) だけを出す。A・B・CURRENT は選定用で従来どおり
+        // 版 25: 自前の星は描かない (ユーザーの声「星は作らず、オーロラだけ残す」)。C (採用) は光の幕 (オーロラ) だけを出す。A・B・CURRENT は選定用で従来どおり
         if (variant != StarEffectVariant.C) {
             drawStars(pose, level, partial, center, moon, variant, time);
         }

@@ -320,7 +320,7 @@ public final class ObjectiveStrip {
             far = Component.translatable("gui.skyabyss.guide.inside").getString();
             arrow = false;
         }
-        // 光海の迷路 (版 22): ひし形の標のかわりに、帯の矢印を大きく (メインのクエストの矢印と同じ見やすさ) し、迷路の道のりの次のマスを指して距離を出す
+        // 光海の迷路 (版 25): ひし形の標のかわりに、帯の矢印を大きく (メインのクエストの矢印と同じ見やすさ) し、迷路の道のりの次のマスを指して距離を出す
         net.minecraft.world.phys.Vec3 mazeWay = jp.revati.skyabyss.client.titan.LampBandClient.waypoint();
         boolean big = mazeWay != null;
         if (big) {

@@ -93,7 +93,12 @@ public final class WhaleDeck {
     public static final Box W12_FOYER_S = new Box(18, 28, 161, 166, Y, 9);
     public static final Box W12 = new Box(13, 35, 129, 166, Y - 7, 16);
 
-    public static final List<Box> ROOMS = List.of(STAIR, D0, W02, C1, W06, S0, W07, W10, C2, S1, W03, W04, W04_STONE_ROOM, W11, W11_STONE_ROOM, W12);
+    // 版 24: 影絵の間 W08 (docs/design/29 の 3.7)。最南の広間 S1 の北の壁 (z 116・117) の戸から北へ、W07 の西の体の中。出口 (石の前の戸) は東の壁
+    public static final Box W08 = new Box(-48, -32, 98, 115, Y, 10);
+    public static final Box W08_STONE_ROOM = new Box(-29, -25, 104, 110, Y, 6);
+    public static final Box W08_REST = new Box(-48, -32, 112, 115, Y, 9);
+
+    public static final List<Box> ROOMS = List.of(STAIR, D0, W02, C1, W06, S0, W07, W10, C2, S1, W03, W04, W04_STONE_ROOM, W11, W11_STONE_ROOM, W12, W08, W08_STONE_ROOM);
 
     // ---------------------------------------------------------------- 戸 (封印の扉。グループごとに開け閉め)
     // 戸の高さは 5 (足の高さ Y + 1 〜 Y + 5)
@@ -118,6 +123,9 @@ public final class WhaleDeck {
     public static final List<BlockPos> W11_GATE = concat(TitanBackLayout.wall(0, 4, G0, G1, 127, true), TitanBackLayout.wall(0, 4, G0, G1, 128, true));
     public static final List<BlockPos> W11_EXIT = concat(TitanBackLayout.wall(0, 4, G0, G1, 166, true), TitanBackLayout.wall(0, 4, G0, G1, 167, true));
     public static final List<BlockPos> W12_GATE = concat(TitanBackLayout.wall(22, 26, G0, G1, 127, true), TitanBackLayout.wall(22, 26, G0, G1, 128, true));
+    // 影絵の間 W08: 入口は S1 の北の壁 (z 116・117、x -42〜-38)。出口は東の壁 (x -31・-30、z 104〜108)
+    public static final List<BlockPos> W08_GATE = concat(TitanBackLayout.wall(-42, -38, G0, G1, 116, true), TitanBackLayout.wall(-42, -38, G0, G1, 117, true));
+    public static final List<BlockPos> W08_EXIT = concat(TitanBackLayout.wall(104, 108, G0, G1, -31, false), TitanBackLayout.wall(104, 108, G0, G1, -30, false));
 
     // ---------------------------------------------------------------- 原型の三つの入口の戸 (引かなかったグループに閉じる。既定は開いている)
     // 鼓動の間 → 西の前室 (x 22 の線は西の前室の中ほど。x -25〜-19)、東の前室 (x 19〜25)
@@ -151,12 +159,14 @@ public final class WhaleDeck {
     public static final BlockPos W11_PAD = new BlockPos(4, Y, 171);
     public static final BlockPos W12_STONE = new BlockPos(22, Y + 1, 164);
     public static final BlockPos W12_PAD = new BlockPos(26, Y, 164);
+    public static final BlockPos W08_STONE = new BlockPos(-27, Y + 1, 107);
+    public static final BlockPos W08_PAD = new BlockPos(-27, Y, 109);
 
-    // 版 22: 光る床 (鼓動の間 <-> 試練の階の広間 D0)。立つと、もう一方の休み場へ移る。入口の通路の長い道と 16 段の階段を飛ばせる (階段でも行ける)
+    // 版 25: 光る床 (鼓動の間 <-> 試練の階の広間 D0)。立つと、もう一方の休み場へ移る。入口の通路の長い道と 16 段の階段を飛ばせる (階段でも行ける)
     public static final BlockPos HUB_PAD = new BlockPos(-4, FLOOR, -17);
     public static final BlockPos D0_PAD = new BlockPos(24, Y, 7);
 
-    // 版 22: 試練の板・試練の階の案内の碑 (sign.skyabyss.deck_*)。置き場は部屋の壁ぎわの空気の所
+    // 版 25: 試練の板・試練の階の案内の碑 (sign.skyabyss.deck_*)。置き場は部屋の壁ぎわの空気の所
     public static final List<TitanBackLayout.Inscription> SIGNS = List.of(
             new TitanBackLayout.Inscription("sign.skyabyss.deck_board", new BlockPos(-8, FLOOR + 3, -15), net.minecraft.core.Direction.NORTH),
             new TitanBackLayout.Inscription("sign.skyabyss.deck_pad", new BlockPos(-4, FLOOR + 3, -15), net.minecraft.core.Direction.NORTH),
@@ -180,6 +190,7 @@ public final class WhaleDeck {
     public static final String REST_W04 = "w04a";
     public static final String REST_W11 = "w11a";
     public static final String REST_W12 = "w12a";
+    public static final String REST_W08 = "w08a";
 
     // 鐘楼の足場 (岩棚 A・中ほどの台 M・向こうの岩棚 C)
     public static final Box W02_LEDGE_A = new Box(7, 20, 20, 26, Y, 8);
@@ -205,7 +216,8 @@ public final class WhaleDeck {
                 new Rest(REST_W03_M, W03_REST_M, new BlockPos(-38, 117, 147)),
                 new Rest(REST_W04, W04_BOTTOM, new BlockPos(-24, 108, 134)),
                 new Rest(REST_W11, W11_REST, new BlockPos(7, Y + 1, 132)),
-                new Rest(REST_W12, W12_FOYER_N, new BlockPos(29, Y + 1, 133)));
+                new Rest(REST_W12, W12_FOYER_N, new BlockPos(29, Y + 1, 133)),
+                new Rest(REST_W08, W08_REST, new BlockPos(-40, Y + 1, 113)));
     }
 
     // 休み場の焚き火の位置 (建てるとき)。広間は箱の中心、鐘楼の岩棚・砦の隅は決めた位置
@@ -223,13 +235,14 @@ public final class WhaleDeck {
             case REST_W04 -> new BlockPos(-25, 108, 133);
             case REST_W11 -> new BlockPos(8, Y + 1, 131);
             case REST_W12 -> new BlockPos(30, Y + 1, 132);
+            case REST_W08 -> new BlockPos(-44, Y + 1, 113);
             default -> throw new IllegalArgumentException(id);
         };
     }
 
     // 全部の戸 (原型の入口の戸は別。新作の入口と出口)
     public static List<List<BlockPos>> closedGates() {
-        return List.of(W02_GATE, W06_GATE, W06_EXIT, W07_GATE, W07_EXIT, W10_GATE, W10_EXIT, W03_GATE, W04_GATE, W04_EXIT, W11_GATE, W11_EXIT, W12_GATE);
+        return List.of(W02_GATE, W06_GATE, W06_EXIT, W07_GATE, W07_EXIT, W10_GATE, W10_EXIT, W03_GATE, W04_GATE, W04_EXIT, W11_GATE, W11_EXIT, W12_GATE, W08_GATE, W08_EXIT);
     }
 
     public static List<List<BlockPos>> legacyGates() {

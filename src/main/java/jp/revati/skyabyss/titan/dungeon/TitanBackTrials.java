@@ -137,7 +137,7 @@ public final class TitanBackTrials {
             new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
             new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
-            // 谷の中ほどの島は休み場にしない (版 22: コースの途中の休み場をなくした。落ちると、その谷の入口の休み場 w0・w1・w2 へ戻る)
+            // 谷の中ほどの島は休み場にしない (版 25: コースの途中の休み場をなくした。落ちると、その谷の入口の休み場 w0・w1・w2 へ戻る)
             // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
             // 倒れて目覚めた所の目の前が戦場、にならないように
             new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
@@ -251,7 +251,7 @@ public final class TitanBackTrials {
                     List.of("sentinel", "sentinel", "crawler", "crawler"),
                     List.of("archer", "archer", "archer", "sentinel", "mortar")), null,
                     NO_CUTS),
-            // 版 22: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
+            // 版 25: 第二の広間 (射手の回廊) は戦わない通路にした。東の翼の戦いは 3 つ (第一の広間・詰所・番兵長の広間)
             // 番兵の詰所: 盾の壁の列 (骨の番兵 4) → 老番兵。倒すと番兵長の広間への戸 (割符の戸) が開く。初回だけ
             new Hall("ck", CK, CK_PASS.aabb(), CK_ENTRANCE, E3_LOCK, List.of(
                     List.of("sentinel", "sentinel", "sentinel", "sentinel"),

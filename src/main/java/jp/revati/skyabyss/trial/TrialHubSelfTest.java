@@ -218,7 +218,7 @@ public final class TrialHubSelfTest {
             // 合図の先の記録 (進捗・クエスト) は偽の人では動かないことがある。光が出ないことだけ見る
         }
         check(f, !ReturnBeacons.hasOffer(a.getUUID()), titan + ": a return light was offered after the clear");
-        // ---- 版 22: 越えた試練の入口は、そのグループには試練済みの封印で閉じる (見かけ = trial_seal、当たり = 封印の扉の閉じる印)。ほかのグループには閉じない
+        // ---- 版 25: 越えた試練の入口は、そのグループには試練済みの封印で閉じる (見かけ = trial_seal、当たり = 封印の扉の閉じる印)。ほかのグループには閉じない
         List<BlockPos> door = TrialHub.entranceOf(back, keyA, titan, keys.get(0));
         if (!door.isEmpty() && GroupGates.isGate(back, door.get(0))) {
             check(f, !GroupGates.isOpen(back, keyA, door), titan + ": the cleared trial's entrance is still open for its group");
@@ -230,7 +230,7 @@ public final class TrialHubSelfTest {
         } else {
             SkyAbyss.LOGGER.info("SELFTEST trial hub: {} has no entrance gate for trial {} (the bounce is the seal there)", titan, keys.get(0));
         }
-        // ---- 版 22: 原型の石は近づくだけで鳴る (岩鯨。石の右クリックと同じ)・光る床 (鼓動の間 <-> 試練の階)
+        // ---- 版 25: 原型の石は近づくだけで鳴る (岩鯨。石の右クリックと同じ)・光る床 (鼓動の間 <-> 試練の階)
         if (Titans.STONE_WHALE.equals(titan)) {
             FakePlayer d = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000d004"), "trialhub_d"));
             UUID keyD = Groups.keyOf(d);
@@ -252,7 +252,7 @@ public final class TrialHubSelfTest {
             TrialHub.tickPads(back, titan, List.of(d), back.getGameTime() + 9100);
             check(f, d.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, "the trial hall pad did not take the player to the hub: " + d.position());
             d.setPos(0, 0, 0);
-            // ---- 版 22: 新作のセルは、終えると (run.cleared) 石を押さなくても鳴り、中にいる仲間が鼓動の間へ戻される準備が整う
+            // ---- 版 25: 新作のセルは、終えると (run.cleared) 石を押さなくても鳴り、中にいる仲間が鼓動の間へ戻される準備が整う
             FakePlayer e = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000e005"), "trialhub_e"));
             UUID keyE = Groups.keyOf(e);
             jp.revati.skyabyss.titan.group.BackGroupData.Record rd = jp.revati.skyabyss.titan.group.GroupProgress.of(back, keyE);

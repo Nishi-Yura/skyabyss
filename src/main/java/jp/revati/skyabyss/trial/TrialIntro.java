@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-// 試練の板まわりの、初めての説明 (版 22。ユーザーの試遊の声「鼓動の間の脇の部屋の石を押したら今週の… と出たが、先に説明がない」)。
+// 試練の板まわりの、初めての説明 (版 25。ユーザーの試遊の声「鼓動の間の脇の部屋の石を押したら今週の… と出たが、先に説明がない」)。
 // 人ごとに一度ずつ (倒れても残る PlayerPersisted の印):
 //  - BOARD: 試練の板のそば (半径 6) に初めて来た: 「この石の板が試練の板。引いた三つと今週の試練が読める」
 //  - DECK: 試練の階の広間に初めて入った (岩鯨のみ): 「引いた三つと今週の試練の戸だけが開く」

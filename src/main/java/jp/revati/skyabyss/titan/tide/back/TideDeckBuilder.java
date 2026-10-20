@@ -8,6 +8,10 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout.Area;
 import jp.revati.skyabyss.trial.RingArenaCell;
 import jp.revati.skyabyss.trial.tide.T02Crossing;
+import jp.revati.skyabyss.trial.tide.T03Jellies;
+import jp.revati.skyabyss.trial.tide.T04Whirl;
+import jp.revati.skyabyss.trial.tide.T08Shelf;
+import jp.revati.skyabyss.trial.tide.T12Keeper;
 import jp.revati.skyabyss.trial.tide.T06Choir;
 import jp.revati.skyabyss.trial.tide.T07Seas;
 import jp.revati.skyabyss.trial.tide.T10Ring;
@@ -50,11 +54,16 @@ public final class TideDeckBuilder {
         t10(kit);
         t06(kit);
         t07(kit);
+        lower(kit);
         // 戸口の脇の碑 (どの試練の戸か。入口の一言)・広間の案内
         for (TideBackLayout.Inscription i : SIGNS) {
             kit.wallSign(i.pos(), i.facing(), i.key());
         }
+        for (TideBackLayout.Inscription i : SIGNS2) {
+            kit.wallSign(i.pos(), i.facing(), i.key());
+        }
         kit.set(BOARD_H, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
+        kit.set(BOARD_H2, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
         jp.revati.skyabyss.SkyAbyss.LOGGER.info("Built the tide trial deck in {} ms", System.currentTimeMillis() - t0);
     }
 
@@ -312,5 +321,292 @@ public final class TideDeckBuilder {
         floorLamp(kit, 80, 67);
         kit.set(T07_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
         kit.set(T07_PAD, LAMP);
+    }
+
+    // ================================================================ P3: 下の階 (docs/design/29 の 3.7)
+    private static void floorLamp2(TideKit kit, int x, int z) {
+        BlockState cur = kit.get(x, G, z);
+        if (!cur.isAir() && !cur.is(ModBlocks.SEALED_GATE.get()) && !cur.is(Blocks.WATER)) {
+            kit.set(x, G, z, LAMP);
+        }
+    }
+
+    private static void lower(TideKit kit) {
+        stairwell(kit);
+        hall2(kit);
+        t03(kit);
+        t04(kit);
+        t11(kit);
+        t08(kit);
+        t12(kit);
+    }
+
+    // H の南の壁 (x 24〜27。T02 と T10 のあいだ) から南へ 18 段下る階段。頭上は 6。H の南の壁 (z 47・48) を抜く
+    private static void stairwell(TideKit kit) {
+        kit.zone(TideZone.VAULT);
+        for (int z = 47; z <= 64; z++) {
+            int top = 120 - z;
+            for (int x = STAIR.x1(); x <= STAIR.x2(); x++) {
+                kit.set(x, top, z, kit.floorAt(x, z));
+                for (int y = top + 1; y <= top + 6; y++) {
+                    kit.set(x, y, z, AIR);
+                }
+                kit.set(x, top + 7, z, kit.wall(x, top + 7, z));
+            }
+            if (z % 4 == 1) {
+                kit.lampIn(STAIR.x1() - 1, top + 3, z);
+                kit.lampIn(STAIR.x2() + 1, top + 3, z);
+            }
+        }
+    }
+
+    // 下の階の広間 H2 (休み場・板)。南の壁に五つの戸口
+    private static void hall2(TideKit kit) {
+        kit.zone(TideZone.VAULT);
+        room(kit, H2);
+        for (int x = -6; x <= 88; x += 6) {
+            floorLamp2(kit, x, 67);
+            floorLamp2(kit, x + 3, 70);
+        }
+        for (int x = 0; x <= 84; x += 12) {
+            kit.lampIn(x, G + 11, 69);
+        }
+        lampsAlong(kit, H2, G + 3, 6);
+        for (List<BlockPos> g : List.of(T03_GATE, T04_GATE, T11_GATE, T08_GATE, T12_GATE)) {
+            open(kit, g);
+        }
+    }
+
+    // 溜め水 (床の面まで) の空間: 底 bed に bedState、y bed+1〜G は水
+    private static void pool(TideKit kit, int x1, int x2, int z1, int z2, int bed, BlockState bedState) {
+        for (int x = x1; x <= x2; x++) {
+            for (int z = z1; z <= z2; z++) {
+                kit.set(x, bed, z, bedState);
+                for (int y = bed + 1; y <= G; y++) {
+                    kit.set(x, y, z, WATER);
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- T03 くらげの回廊: 海の洞
+    private static void t03(TideKit kit) {
+        kit.zone(TideZone.CORAL);
+        room(kit, T03);
+        room(kit, T03_STONE_ROOM);
+        open(kit, T03_EXIT);
+        int bed = T03Jellies.BED;
+        pool(kit, T03.x1(), T03.x2(), T03Jellies.WATER_Z1, T03Jellies.WATER_Z2, bed, TideKit.SAND);
+        // 休み島 (石の島)
+        Area is = T03_ISLET;
+        for (int x = is.x1(); x <= is.x2(); x++) {
+            for (int z = is.z1(); z <= is.z2(); z++) {
+                for (int y = bed; y < G; y++) {
+                    kit.set(x, y, z, TideKit.SANDSTONE);
+                }
+                kit.set(x, G, z, kit.floorAt(x, z));
+            }
+        }
+        for (BlockPos p : T03Jellies.union()) {
+            kit.set(p, GATE);
+        }
+        // 灯り: 水の底 (壁ぎわと三列。触手の線の底は避ける)・壁・天井
+        for (int z = 80; z <= 106; z += 4) {
+            for (int x : new int[] {0, 16}) {
+                kit.set(x, bed, z, LAMP);
+            }
+            boolean row = z >= T03Jellies.ROW_Z[0] - 1 && z <= T03Jellies.ROW_Z[0] + 2 || z >= T03Jellies.ROW_Z[1] - 1 && z <= T03Jellies.ROW_Z[1] + 2;
+            if ((z < 91 || z > 94) && !row) {
+                for (int x : new int[] {4, 8, 12}) {
+                    kit.set(x, bed, z, LAMP);
+                }
+            }
+        }
+        for (int x : new int[] {4, 8, 12}) {
+            kit.set(x, bed, 107, LAMP);
+        }
+        lampsAlong(kit, T03, G + 3, 4);
+        for (int z = 76; z <= 108; z += 4) {
+            for (int x : new int[] {2, 8, 14}) {
+                kit.lampIn(x, G + 11, z);
+            }
+        }
+        lampsAlong(kit, T03_STONE_ROOM, G + 2, 3);
+        floorLamp2(kit, 2, 77);
+        floorLamp2(kit, 14, 77);
+        floorLamp2(kit, 2, 109);
+        floorLamp2(kit, 14, 109);
+        floorLamp2(kit, 8, 114);
+        kit.set(T03_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T03_PAD, LAMP);
+    }
+
+    // ---------------------------------------------------------------- T04 渦潮の滑り台: 水の流れる溝
+    private static void t04(TideKit kit) {
+        kit.zone(TideZone.GAUGE);
+        room(kit, T04);
+        room(kit, T04_STONE_ROOM);
+        open(kit, T04_EXIT);
+        int bed = T04Whirl.BED;
+        pool(kit, T04Whirl.X1, T04Whirl.X2, T04Whirl.WATER_Z1, T04Whirl.WATER_Z2, bed, TideKit.DARK);
+        for (int k = 0; k < 3; k++) {
+            int z1 = T04Whirl.J_START[k];
+            int z2 = z1 + T04Whirl.J_LEN - 1;
+            // 水路の側壁 (x 20・21 と x 31・32) は分かれ道のあいだ、天井まで
+            for (int z = z1; z <= z2; z++) {
+                for (int x : new int[] {20, 21, 31, 32}) {
+                    for (int y = G + 1; y <= G + T04.height(); y++) {
+                        kit.set(x, y, z, kit.wall(x, y, z));
+                    }
+                }
+            }
+            // 仕切り (x 26。水の面より上 3 まで)。窓のところは空ける
+            for (int z = z1; z <= z2; z++) {
+                boolean window = false;
+                for (int w : T04Whirl.WINDOWS) {
+                    window |= z == z1 + w;
+                }
+                if (!window) {
+                    for (int y = bed + 1; y <= G + 3; y++) {
+                        kit.set(T04Whirl.DIV_X, y, z, TideKit.BRICK);
+                    }
+                    kit.set(T04Whirl.DIV_X, G + 3, z, z % 2 == 0 ? TideKit.BRICK : TideKit.DARK);
+                }
+            }
+            // 灯り: 側壁の水の中・仕切りの上
+            for (int z : new int[] {z1 + 1, z1 + 4, z1 + 7}) {
+                kit.set(21, bed + 1, z, LAMP);
+                kit.set(31, bed + 1, z, LAMP);
+            }
+            kit.set(T04Whirl.DIV_X, G + 3, z1 + 4, LAMP);
+        }
+        // 栓 (入口の縁・溜まりの張り出し)
+        for (BlockPos v : T04Whirl.VALVES) {
+            kit.set(v, Blocks.COPPER_BLOCK.defaultBlockState());
+        }
+        lampsAlong(kit, T04, G + 4, 5);
+        for (int z = 76; z <= 112; z += 4) {
+            for (int x : new int[] {23, 26, 29}) {
+                kit.lampIn(x, G + 11, z);
+            }
+        }
+        for (int[] at : new int[][] {{22, 77}, {30, 77}, {22, 113}, {30, 113}, {26, 113}}) {
+            floorLamp2(kit, at[0], at[1]);
+        }
+        lampsAlong(kit, T04_STONE_ROOM, G + 2, 3);
+        kit.set(T04_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T04_PAD, LAMP);
+    }
+
+    // ---------------------------------------------------------------- T11 大貝の護送: 干潟の広間
+    private static void t11(TideKit kit) {
+        kit.zone(TideZone.HATCH);
+        room(kit, T11);
+        room(kit, T11_STONE_ROOM);
+        open(kit, T11_EXIT);
+        // 祭壇 (道の終わりの壇)
+        for (int x = 42; x <= 46; x++) {
+            kit.set(x, G, 106, TideKit.NACRE);
+        }
+        lampsAlong(kit, T11, G + 3, 4);
+        lampsAlong(kit, T11, G + 7, 6);
+        // 床の灯り (道の下にも埋める。道は見かけで描き替えるが、光は残る)
+        for (int z = 79; z <= 103; z += 4) {
+            for (int x : new int[] {40, 44, 48}) {
+                floorLamp2(kit, x, z);
+            }
+        }
+        for (int z = 77; z <= 105; z += 4) {
+            for (int x : new int[] {38, 44, 50}) {
+                kit.lampIn(x, G + 11, z);
+            }
+        }
+        for (int[] at : new int[][] {{37, 78}, {51, 78}, {37, 105}, {51, 105}, {37, 92}, {51, 92}}) {
+            floorLamp2(kit, at[0], at[1]);
+        }
+        lampsAlong(kit, T11_STONE_ROOM, G + 2, 3);
+        kit.set(T11_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T11_PAD, LAMP);
+    }
+
+    // ---------------------------------------------------------------- T08 珊瑚の標本棚: 棚・鉢・札
+    private static void t08(TideKit kit) {
+        kit.zone(TideZone.CORAL);
+        room(kit, T08);
+        room(kit, T08_STONE_ROOM);
+        open(kit, T08_EXIT);
+        BlockState plinth = Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+        for (int s = 0; s < T08Shelf.SLOTS; s++) {
+            kit.set(T08Shelf.slot(s), plinth);
+        }
+        for (int b = 0; b < 4; b++) {
+            kit.set(T08Shelf.bowl(b), Blocks.DARK_PRISMARINE.defaultBlockState());
+            kit.set(T08Shelf.label(b), plinth);
+        }
+        kit.set(T08Shelf.LECTERN, Blocks.LECTERN.defaultBlockState().setValue(LecternBlock.FACING, Direction.NORTH));
+        lampsAlong(kit, T08, G + 3, 4);
+        lampsAlong(kit, T08, G + 7, 6);
+        for (int z = 76; z <= 92; z += 4) {
+            for (int x : new int[] {58, 64, 70}) {
+                kit.lampIn(x, G + 11, z);
+            }
+        }
+        for (int[] at : new int[][] {{58, 76}, {70, 76}, {60, 84}, {66, 84}, {60, 90}, {66, 90}, {64, 78}}) {
+            floorLamp2(kit, at[0], at[1]);
+        }
+        lampsAlong(kit, T08_STONE_ROOM, G + 2, 3);
+        kit.set(T08_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T08_PAD, LAMP);
+    }
+
+    // ---------------------------------------------------------------- T12 真珠守りの試し: 円い広間
+    private static void t12(TideKit kit) {
+        kit.zone(TideZone.HATCH);
+        room(kit, T12);
+        room(kit, T12_STONE_ROOM);
+        open(kit, T12_EXIT);
+        int cx = T12_CX;
+        int cz = T12_CZ;
+        // 四隅は壁 (円の外を石で埋める)。円の中の床: 舞台 (半径 8.5) と縁の歩み板
+        for (int x = T12.x1(); x <= T12.x2(); x++) {
+            for (int z = T12.z1(); z <= T12.z2(); z++) {
+                double r = Math.hypot(x - cx, z - cz);
+                if (r > T12Keeper.R_HALL) {
+                    for (int y = G; y <= G + T12.height() + 1; y++) {
+                        kit.set(x, y, z, y == G ? kit.floorAt(x, z) : kit.wall(x, y, z));
+                    }
+                } else {
+                    kit.set(x, G, z, r <= T12Keeper.R_FULL ? TideKit.NACRE : kit.floorAt(x, z));
+                }
+            }
+        }
+        // 真珠の台 (三つの配置の分。いつも置いてある台。真珠は見かけで出る)
+        for (BlockPos p : T12Keeper.pearls()) {
+            kit.set(p, Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
+        }
+        // 幕の輪 (封印の扉のブロック。小さな広間のとき、入ったあとに閉じる)
+        for (BlockPos p : T12Keeper.curtain()) {
+            kit.set(p, GATE);
+        }
+        // 灯り: 舞台の床の輪・壁の輪・天井の輪
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4;
+            floorLamp2(kit, cx + (int) Math.round(Math.cos(a) * 3.4), cz + (int) Math.round(Math.sin(a) * 3.4));
+            floorLamp2(kit, cx + (int) Math.round(Math.cos(a + Math.PI / 8) * 5.6), cz + (int) Math.round(Math.sin(a + Math.PI / 8) * 5.6));
+        }
+        for (int k = 0; k < 24; k++) {
+            double a = k * Math.PI / 12;
+            int x = cx + (int) Math.round(Math.cos(a) * 11.0);
+            int z = cz + (int) Math.round(Math.sin(a) * 11.0);
+            kit.lampIn(x, G + 3 + (k % 2) * 5, z);
+        }
+        for (int k = 0; k < 6; k++) {
+            double a = k * Math.PI / 3;
+            kit.lampIn(cx + (int) Math.round(Math.cos(a) * 6), G + T12.height() + 1, cz + (int) Math.round(Math.sin(a) * 6));
+        }
+        kit.lampIn(cx, G + T12.height() + 1, cz);
+        lampsAlong(kit, T12_STONE_ROOM, G + 2, 3);
+        kit.set(T12_STONE, TideBackSetup.CHIME_STONE.get().defaultBlockState().setValue(TideChimeStoneBlock.ACTIVE, false));
+        kit.set(T12_PAD, LAMP);
     }
 }

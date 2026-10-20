@@ -26,9 +26,10 @@ import net.minecraft.world.phys.Vec3;
 // 箱の中の座標は、できるだけ箱の角 (min) や中心からの相対で書くこと。
 public final class EmberBackLayout {
     // 配置の版。上がったら体を建て直す (TitanBackData.markBuilt)。13〜: 版 12 までの履歴は docs/design/13 の 3.3節。
+    // 24: 試練の階の南の広間 (EmberDeck。docs/design/29 の 3.4 の P3): 北西の鎖橋の間 E03・北東の鋳型の間 E08・南の廊下 SP と三つの南の広間 (荷車 E11・巣 E12・熾の道 E04)。回廊は南へ延びた
     // 23: 試練の階 (EmberDeck。docs/design/29): 螺旋の踊り場から南の浅い所に、新作の試練 E02・E06・E07・E10 の四つのセルと広間・回廊・休み場 6 つ・試練の板。冷えた溶岩洞の口の戸 (原型の三つ)
     // 20: 体を x1.6・y1.3 に (26 の 11 章)。喉・広間・三つの試練・井戸を引き直し、冷えた溶岩洞・灰降りの庭・尾根の広間・任意の翼を足した
-    public static final int LAYOUT_VERSION = 23;
+    public static final int LAYOUT_VERSION = 24;
     // 灰の原のいちばん上のブロックの y (dimension/ember_back.json の層と合わせる)
     public static final int PLAIN_TOP = 63;
     // 体の中心 (遠くへ歩いたかを見る。体の長さ 621 の半分に余白)

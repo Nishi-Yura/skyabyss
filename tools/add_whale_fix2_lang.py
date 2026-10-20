@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""岩鯨の試遊の声 2 回目 (版 22) の言葉を足す。リポジトリ直下で python tools/add_whale_fix2_lang.py 。何度流しても同じ。
+"""岩鯨の試遊の声 2 回目 (版 25) の言葉を足す。リポジトリ直下で python tools/add_whale_fix2_lang.py 。何度流しても同じ。
  - 試練済みの封印 (trial_seal)・越えた試練の知らせ・抜け道の言い換え
  - 試練の板のまわり (案内の碑・目的・初めての説明) は別の節で足す"""
 import json, os

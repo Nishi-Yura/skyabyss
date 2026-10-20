@@ -486,7 +486,9 @@ public final class TrialPoolSelfTest {
         deckRooms();
         int total = 0;
         for (TrialCell cell : TrialCells.all()) {
-            if (!cell.runtime() || !cell.def().titan().equals(Titans.STONE_WHALE)) {
+            boolean whale = cell.def().titan().equals(Titans.STONE_WHALE);
+            boolean tide = cell.def().titan().equals(Titans.TIDE_SHELL) && tideBuilt;
+            if (!cell.runtime() || !(whale || tide)) {
                 continue;
             }
             ServerLevel back = server.getLevel(Titans.backOf(cell.def().titan()));
@@ -503,17 +505,11 @@ public final class TrialPoolSelfTest {
                 TrialCell.Run run = new TrialCell.Run(group, cell, m, 4242L + n, 0);
                 try {
                     cell.arm(back, run);
-                    Set<BlockPos> seen = new HashSet<>();
-                    cell.overlay(back, run, (pos, st) -> seen.add(pos));
-                    for (BlockPos p : seen) {
-                        if (!box.contains(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5)) {
-                            FAIL.add(cell.def().id() + " variant " + m.encode() + " overlays a block outside its cell at " + p);
-                            break;
-                        }
-                    }
+                    checkOverlay(cell, back, run, box, m, "after arm");
                     for (long t = 5; t <= 25; t += 5) {
                         cell.tick(back, run, List.of(), t);
                     }
+                    checkOverlay(cell, back, run, box, m, "after ticks");
                 } finally {
                     cell.disarm(back, run);
                     GroupGates.reset(back, group);
@@ -526,6 +522,18 @@ public final class TrialPoolSelfTest {
             total += n;
         }
         check(total >= 500, "too few variants were enumerated: " + total);
+    }
+
+    // セルの見かけの上書きが、すべてセルの箱の中にあるか
+    private static void checkOverlay(TrialCell cell, ServerLevel back, TrialCell.Run run, net.minecraft.world.phys.AABB box, Mods m, String when) {
+        Set<BlockPos> seen = new HashSet<>();
+        cell.overlay(back, run, (pos, st) -> seen.add(pos));
+        for (BlockPos p : seen) {
+            if (!box.contains(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5)) {
+                FAIL.add(cell.def().id() + " variant " + m.encode() + " overlays a block outside its cell at " + p + " (" + when + ")");
+                break;
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 世界: 戸・複数グループ・記録

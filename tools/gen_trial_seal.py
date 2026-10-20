@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""試練済みの封印 (trial_seal) のブロックの絵 (32x32)・モデル・状態・アイテムモデルを書く (docs/design/29 の 4.6、版 22)。
+"""試練済みの封印 (trial_seal) のブロックの絵 (32x32)・モデル・状態・アイテムモデルを書く (docs/design/29 の 4.6、版 25)。
 越えた試練の入口に、そのグループにだけ立つ封印。暗い玄武岩の板に、金の輪と、閉じた目 (まぶたの線と一つの点) の紋。
 リポジトリ直下で python tools/gen_trial_seal.py 。何度流しても同じ。"""
 import json, os, random

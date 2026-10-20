@@ -89,7 +89,7 @@ public class ResonanceStoneBlock extends Block {
                 server.sendParticles(member, ParticleTypes.END_ROD, false, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 30, 0.3, 0.6, 0.3, 0.05);
             }
         }
-        // 版 22: 抜け道は開かない。石が歌うと、中にいる仲間は少しして鼓動の間へ戻り (TrialHub)、入口は試練済みの封印で閉じる
+        // 版 25: 抜け道は開かない。石が歌うと、中にいる仲間は少しして鼓動の間へ戻り (TrialHub)、入口は試練済みの封印で閉じる
         Notice.bar(player, ModText.hint("message.skyabyss.return_opened"));
         // 背中の外にいる仲間にも (クエストはグループの記録から数える)
         jp.revati.skyabyss.titan.group.TrialSteles.onRung(server, group, jp.revati.skyabyss.titan.group.TrialSteles.WHALE, String.valueOf(index),

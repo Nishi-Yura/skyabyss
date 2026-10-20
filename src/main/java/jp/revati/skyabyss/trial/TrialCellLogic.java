@@ -65,22 +65,24 @@ final class TrialCellLogic {
             server.setDifficulty(net.minecraft.world.Difficulty.EASY, true);
         }
         // 敵を湧かせて探すので、試験の区域のチャンクは読み込んだままにする (偽の人は読み込みの票にならない)
-        keepLoaded(back, -48, 40, 118, 176, true);
+        keepLoaded(back, -48, 40, 90, 176, true);
         try {
             w03(back, fail);
             w04(back, fail);
             w11(back, fail);
             w12(back, fail);
+            TrialCellLogicP3.whale(back, fail);
         } finally {
-            keepLoaded(back, -48, 40, 118, 176, false);
+            keepLoaded(back, -48, 40, 90, 176, false);
         }
         ServerLevel tideLevel = server.getLevel(jp.revati.skyabyss.titan.tide.TideTravel.TIDE_BACK);
         if (tideLevel != null) {
-            keepLoaded(tideLevel, 0, 100, 27, 95, true);
+            keepLoaded(tideLevel, 0, 100, 27, 125, true);
             try {
                 tide(tideLevel, fail);
+                TrialCellLogicP3.tide(tideLevel, fail);
             } finally {
-                keepLoaded(tideLevel, 0, 100, 27, 95, false);
+                keepLoaded(tideLevel, 0, 100, 27, 125, false);
             }
         }
     }
@@ -322,8 +324,8 @@ final class TrialCellLogic {
                 cell.tick(back, run, inside, now);
                 check(fail, run.getInt("phase") == 3, tag + "the fight did not start once everyone was on the floor");
                 boolean stage0Gone = GroupGates.isOpen(back, group, arena.cellsOfStage(layout, 0).get(0));
-                // 広さ B (26 の 8.7): 円は一人・二人でも全面。外の輪を先に崩す作りはやめた
-                check(fail, !stage0Gone, tag + "stage 0 floor should be intact (open=" + stage0Gone + ")");
+                // 設計書 26 の 8.7 の B: 人数が少なくても円は全面 (幕で半分にはしない)。段 0 の床は最初は残っている
+                check(fail, !stage0Gone, tag + "stage 0 floor should be intact for any party size (open=" + stage0Gone + ")");
                 // 波 1
                 now += 60;
                 cell.tick(back, run, inside, now);

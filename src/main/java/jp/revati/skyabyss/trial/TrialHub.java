@@ -105,7 +105,7 @@ public final class TrialHub {
         return STATIC.computeIfAbsent(titan + "|" + key, k -> TrialRegions.of(back, titan, key, null));
     }
 
-    // ---------------------------------------------------------------- 試練済みの封印 (版 22)
+    // ---------------------------------------------------------------- 試練済みの封印 (版 25)
     // そのグループが引いた、その石の枠 (key) の試練の入口 (戸のブロック)。引きがない・入口のない試練 (潮殻の原型) は空
     public static List<BlockPos> entranceOf(ServerLevel back, UUID group, String titan, String key) {
         BackGroupData.Record r = BackGroupData.get(back).peek(group);
@@ -235,7 +235,7 @@ public final class TrialHub {
         tickPads(level, titan, players, now);
     }
 
-    // ---------------------------------------------------------------- 光る床 (鼓動の間 <-> 試練の階。岩鯨。版 22)
+    // ---------------------------------------------------------------- 光る床 (鼓動の間 <-> 試練の階。岩鯨。版 25)
     // 立つと、もう一方の休み場へ移る (人ごとに PAD_COOLDOWN tick は続けて使えない)。階段の長い道を飛ばすための近道
     private static final int PAD_COOLDOWN = 60;
     private static final Map<UUID, Long> PAD_USED = new HashMap<>();
@@ -277,7 +277,7 @@ public final class TrialHub {
         return moved;
     }
 
-    // ---------------------------------------------------------------- 原型の石は近づくだけで (版 22)
+    // ---------------------------------------------------------------- 原型の石は近づくだけで (版 25)
     // 原型の石 (岩鯨の共鳴石・潮鳴り石・風鳴り石・熾り石の、引いた枠のセルが原型のもの) は、押さなくても、石に近づけば「押した」ことになる
     // (中身は右クリックと同じ: 条件が足りなければ、石がなぜ黙っているかを言う。同じ人・同じ石には STONE_RETRY tick に一度だけ)。
     // 新作のセルの石は、セルが終わった時に自動 (TrialRuntime.autoRing) で鳴る

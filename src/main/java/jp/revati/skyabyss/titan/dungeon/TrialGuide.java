@@ -40,7 +40,7 @@ public final class TrialGuide {
         BackGroupData.Record record = GroupProgress.of(level, group);
         Goal goal;
         if (WhaleDeck.placed() && !record.isHeartDefeated() && !record.isGateOpened() && onDeckSide(player.blockPosition())) {
-            // 試練の階を置いたあとの、引いた試練の案内 (版 22)。引いた三つが新作のセルのとき・試練の階にいるとき
+            // 試練の階を置いたあとの、引いた試練の案内 (版 25)。引いた三つが新作のセルのとき・試練の階にいるとき
             goal = deckGoal(player, level, group, record);
         } else {
             goal = next(record, player.blockPosition());
@@ -53,7 +53,7 @@ public final class TrialGuide {
                 goal.hx(), goal.hy(), goal.hz(), 0f, at.getY(), at.getY() + 9, 0.35f, 70));
     }
 
-    // ---------------------------------------------------------------- 試練の階の案内 (版 22)
+    // ---------------------------------------------------------------- 試練の階の案内 (版 25)
     // 鼓動の間・入口の通路・試練の階の中にいるか (原型の西の翼・東の翼・下の水路の中は含まない)
     static boolean onDeckSide(BlockPos p) {
         if (p.getY() < FLOOR - 10) {

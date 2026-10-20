@@ -41,8 +41,8 @@ public final class StormStones {
     // 試練の id と、そのグループの引き → 枠の名前
     public static String keyOf(TrialDraw.Draw draw, Def def) {
         return switch (def.id()) {
-            case "S01", "S02", "S03" -> "west";
-            case "S05" -> "east";
+            case "S01", "S02", "S03", "S04" -> "west";
+            case "S05", "S07", "S08" -> "east";
             case "S06" -> "front";
             default -> draw != null && draw.has("S06") ? "east" : "front";
         };

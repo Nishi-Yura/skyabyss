@@ -11,7 +11,7 @@ import jp.revati.skyabyss.titan.dungeon.TitanBackLayout.Box;
 import net.minecraft.core.BlockPos;
 
 // 広さの使い方 (RoomPlay) を入れる戦いの部屋の一覧 (設計書 26 の 8.7・29 の 2.8)。巨神ごと。
-// 入れる所: 岩鯨の四つの広間 (E1・E2・詰所・番兵長)、試練の階の砦 (W10)・棺の廊下 (W11)、鞴持ちの炉 (E10)、嵐の巣 (S09)。
+// 入れる所: 岩鯨の四つの広間 (E1・E2・詰所・番兵長)、試練の階の砦 (W10)・棺の廊下 (W11)・大貝の護送 (T11)、鞴持ちの炉 (E10)、嵐の巣 (S09)。
 // 円い闘技場 (W12・T10) と一台ずつの台 (S10) と、巣・水路・炉の口から湧く部屋 (干潟・庭・火床) は、部屋の作りが敵の出どころを決めているので、
 // 湧きを入口へ寄せるだけか、そのままにする (各部屋のコードに書いてある)
 public final class RoomPlayRooms {
@@ -38,6 +38,10 @@ public final class RoomPlayRooms {
             Box w11 = WhaleDeck.W11;
             out.add(new Room(Titans.STONE_WHALE, "w11", Theme.BONE, w11.x1(), w11.x2(), w11.z1(), w11.z2(), w11.floorY(), w11.height(),
                     entrance(WhaleDeck.W11_GATE, w11.floorY()), List.of()));
+            // 潮殻 (試練の階の下の階。大貝の護送 T11 は棺の廊下と同じ作り。真珠守りの試し T12 の円い広間は、湧きを人のそばに寄せるだけ)
+            var t11 = jp.revati.skyabyss.titan.tide.back.TideDeck.T11;
+            out.add(new Room(Titans.TIDE_SHELL, "t11", Theme.TIDE, t11.x1(), t11.x2(), t11.z1(), t11.z2(), t11.floor(), t11.height(),
+                    entrance(jp.revati.skyabyss.titan.tide.back.TideDeck.T11_GATE, t11.floor()), List.of()));
             // 灰の巨神 (試練の階の炉)
             var b = jp.revati.skyabyss.titan.ember.back.EmberDeck.B;
             List<BlockPos> e10 = new ArrayList<>();

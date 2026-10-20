@@ -138,7 +138,7 @@ public final class TrialRuntime {
             boolean want = draw.has(cell.def().id()) || weekly != null && weekly.id().equals(cell.def().id());
             String cellKey = draw.has(cell.def().id()) ? TrialRegions.keyOfDef(titan, cell.def(), draw) : null;
             if (want && cellKey != null && HubTablets.cleared(back, group, titan, cellKey)) {
-                // 越えた試練 (版 22): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
+                // 越えた試練 (版 25): 入口は試練済みの封印で閉じたまま (見かけは TrialHub.sealOverlay)
                 GroupGates.seal(back, group, p.entrance());
             } else if (want) {
                 GroupGates.open(back, group, p.entrance());
@@ -211,7 +211,7 @@ public final class TrialRuntime {
                 TrialCell.Run run = armed(level, group, cell, draw, now);
                 run.lastPresent = now;
                 if (!draw.has(cell.def().id())) {
-                    // 引いていない試練 = 今週の試練 (版 22: 初めて入った人に一行)
+                    // 引いていない試練 = 今週の試練 (版 25: 初めて入った人に一行)
                     for (ServerPlayer p : inside) {
                         TrialIntro.onWeeklyEntered(p);
                     }
@@ -445,7 +445,7 @@ public final class TrialRuntime {
         kind.afterCleared(back, group, cell.def(), drawn, by);
     }
 
-    // 版 22: 試練を終えたら、石を押さなくても越えたことになる。セルが「終えた」(run.cleared) と、少し (AUTO_RING_DELAY tick。終わりの演出を見せる) 待って石が鳴り、
+    // 版 25: 試練を終えたら、石を押さなくても越えたことになる。セルが「終えた」(run.cleared) と、少し (AUTO_RING_DELAY tick。終わりの演出を見せる) 待って石が鳴り、
     // そのあとは石を押したときと同じ (TrialHub が 80 tick 後に、中にいる仲間を鼓動の間へ戻し、入口を試練済みの封印で閉じる)。石は押しても同じ (二重には数えない)
     public static final int AUTO_RING_DELAY = 30;
 

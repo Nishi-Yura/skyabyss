@@ -210,7 +210,7 @@ public final class TrialRegions {
         return cell != null && cell.runtime() ? cell : null;
     }
 
-    // その石の枠 (key) にあたる、引いてあるセル (原型の包みも含む。新作なら新作)。引きがない・枠が決まらなければ null (版 22。入口の封印・自動の石で使う)
+    // その石の枠 (key) にあたる、引いてあるセル (原型の包みも含む。新作なら新作)。引きがない・枠が決まらなければ null (版 25。入口の封印・自動の石で使う)
     @Nullable
     public static TrialCell cellOfKey(String titan, String key, @Nullable TrialDraw.Draw draw) {
         if (draw == null) {

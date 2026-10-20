@@ -120,7 +120,7 @@ public final class TitanBackAudit {
             BackReach.Spec s = new BackReach.Spec("whale deck south " + layout, new Box(-62, 96, 66, 62, 140, 180));
             s.entrances.add(WhaleDeck.S0.center());
             s.exits.add(WhaleDeck.S0.center());
-            for (BlockPos pad : new BlockPos[] {WhaleDeck.W03_PAD, WhaleDeck.W04_PAD, WhaleDeck.W11_PAD, WhaleDeck.W12_PAD}) {
+            for (BlockPos pad : new BlockPos[] {WhaleDeck.W03_PAD, WhaleDeck.W04_PAD, WhaleDeck.W11_PAD, WhaleDeck.W12_PAD, WhaleDeck.W08_PAD}) {
                 s.exits.add(pad.above());
             }
             // 足場の戸
@@ -134,7 +134,7 @@ public final class TitanBackAudit {
             deckAllowances(s);
             // 穴・はしごを調べる範囲 (広間・通路・控え・石の部屋)
             for (TitanBackLayout.Box b : new TitanBackLayout.Box[] {WhaleDeck.C2, WhaleDeck.S1, WhaleDeck.W11, WhaleDeck.W11_STONE_ROOM, WhaleDeck.W04_STONE_ROOM,
-                    WhaleDeck.W12_FOYER_N, WhaleDeck.W12_FOYER_S}) {
+                    WhaleDeck.W12_FOYER_N, WhaleDeck.W12_FOYER_S, WhaleDeck.W08, WhaleDeck.W08_STONE_ROOM}) {
                 s.scan.add(new Box(b.x1() - 1, b.floorY() - 2, b.z1() - 1, b.x2() + 1, b.ceilingY(), b.z2() + 1));
             }
             for (int[] seg : WhaleDeck.W03_SEGS) {
@@ -151,6 +151,8 @@ public final class TitanBackAudit {
             s.goals.put("W04 stone", WhaleDeck.W04_STONE.east());
             s.goals.put("W11 stone", WhaleDeck.W11_STONE.east());
             s.goals.put("W12 stone", WhaleDeck.W12_STONE.east());
+            s.goals.put("W08 stone", WhaleDeck.W08_STONE.east());
+            s.goals.put("W08 console", new BlockPos(-40, WhaleDeck.Y + 1, 100));
             s.goals.put("W04 exit ledge", new BlockPos(WhaleDeck.W04.x1() + 10, WhaleDeck.Y + 1, 149));
             s.goals.put("W12 foyer south", WhaleDeck.W12_FOYER_S.center());
             final int lay = layout;

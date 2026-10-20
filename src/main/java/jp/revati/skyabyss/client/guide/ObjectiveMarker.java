@@ -92,7 +92,7 @@ public final class ObjectiveMarker {
         }
         Vec3 way = LampBandClient.waypoint();
         if (way != null) {
-            // 光海の迷路 (版 22): ひし形の標は出さない。道しるべは左上の目的の帯の大きな矢印と距離 (ObjectiveStrip)
+            // 光海の迷路 (版 25): ひし形の標は出さない。道しるべは左上の目的の帯の大きな矢印と距離 (ObjectiveStrip)
             return;
         }
         ObjectiveStrip.Resolved main = ObjectiveStrip.demo ? new ObjectiveStrip.Resolved(mc.player.blockPosition().offset(60, 3, -30), false) : ObjectiveStrip.resolve(mc);
