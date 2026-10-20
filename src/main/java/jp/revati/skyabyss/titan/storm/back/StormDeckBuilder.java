@@ -18,17 +18,17 @@ import net.minecraft.world.level.block.state.BlockState;
 // 外へ開いた所なので kit.put で置く (掘った所として覚えない。覚えると seal が屋根をかけるため)。
 // 色の約束: 風 = 白と水色 (気嚢・見張り台)、雷 = 黒い石と銅と橙 (柱・巣)。戸の上の色の線が、渡り場の中で行き先を言う
 final class StormDeckBuilder {
-    private static final BlockState AIR = StormKit.AIR;
-    private static final BlockState WOOL = Blocks.WHITE_WOOL.defaultBlockState();
-    private static final BlockState WOOL_BLUE = Blocks.LIGHT_BLUE_WOOL.defaultBlockState();
-    private static final BlockState DARK = Blocks.DEEPSLATE_TILES.defaultBlockState();
-    private static final BlockState DARK2 = Blocks.POLISHED_DEEPSLATE.defaultBlockState();
-    private static final BlockState BLACK = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
-    private static final BlockState GOLD = Blocks.GOLD_BLOCK.defaultBlockState();
-    private static final BlockState VENT_OFF = Blocks.GRAY_CONCRETE.defaultBlockState();
-    private static final BlockState VENT_ON = Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState();
-    private static final BlockState CHISELED = Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState();
-    private static final BlockState RAIL = StormDeco.RAIL;
+    static final BlockState AIR = StormKit.AIR;
+    static final BlockState WOOL = Blocks.WHITE_WOOL.defaultBlockState();
+    static final BlockState WOOL_BLUE = Blocks.LIGHT_BLUE_WOOL.defaultBlockState();
+    static final BlockState DARK = Blocks.DEEPSLATE_TILES.defaultBlockState();
+    static final BlockState DARK2 = Blocks.POLISHED_DEEPSLATE.defaultBlockState();
+    static final BlockState BLACK = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+    static final BlockState GOLD = Blocks.GOLD_BLOCK.defaultBlockState();
+    static final BlockState VENT_OFF = Blocks.GRAY_CONCRETE.defaultBlockState();
+    static final BlockState VENT_ON = Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState();
+    static final BlockState CHISELED = Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState();
+    static final BlockState RAIL = StormDeco.RAIL;
 
     private StormDeckBuilder() {
     }
@@ -44,22 +44,23 @@ final class StormDeckBuilder {
         s03(kit);
         s09(kit);
         s10(kit);
+        StormDeck2Builder.build(kit);
         signs(kit);
     }
 
     // ---------------------------------------------------------------- 部品
-    private static void put(StormKit kit, BlockPos p, BlockState s) {
+    static void put(StormKit kit, BlockPos p, BlockState s) {
         kit.put(p.getX(), p.getY(), p.getZ(), s);
     }
 
-    private static void clearAbove(StormKit kit, int x, int z, int fy, int h) {
+    static void clearAbove(StormKit kit, int x, int z, int fy, int h) {
         for (int y = fy + 1; y <= fy + h; y++) {
             kit.put(x, y, z, AIR);
         }
     }
 
     // 島の床。edge = 縁の石、fill = 中の石 (x, z → 石)
-    private static void floor(StormKit kit, Island is, BlockState edge, BiFunction<Integer, Integer, BlockState> fill) {
+    static void floor(StormKit kit, Island is, BlockState edge, BiFunction<Integer, Integer, BlockState> fill) {
         for (BlockPos p : is.floor()) {
             boolean border = !is.has(p.getX() + 1, p.getZ()) || !is.has(p.getX() - 1, p.getZ()) || !is.has(p.getX(), p.getZ() + 1) || !is.has(p.getX(), p.getZ() - 1);
             kit.put(p.getX(), p.getY(), p.getZ(), border ? edge : fill.apply(p.getX(), p.getZ()));
@@ -67,16 +68,16 @@ final class StormDeckBuilder {
         }
     }
 
-    private static BlockState windFloor(int x, int z) {
+    static BlockState windFloor(int x, int z) {
         return Math.floorMod(Math.abs(x) - z, 8) < 4 ? StormKit.FEATHER_WHITE : StormKit.QUARTZ;
     }
 
-    private static BlockState thunderFloor(int x, int z) {
+    static BlockState thunderFloor(int x, int z) {
         return (x + z & 1) == 0 ? DARK : DARK2;
     }
 
     // 床の下: 逆さの錐 (半径 r が深さ depth で尖る)。shape: 0 = 錐、1 = 丸い袋 (半球)。mat は (深さ, x, z) → 石
-    private static void hang(StormKit kit, int cx, int cz, int fy, int r, int depth, int shape, java.util.function.Function<int[], BlockState> mat) {
+    static void hang(StormKit kit, int cx, int cz, int fy, int r, int depth, int shape, java.util.function.Function<int[], BlockState> mat) {
         for (int d = 1; d <= depth; d++) {
             double t = d / (double) depth;
             double rr = shape == 1 ? r * Math.sqrt(Math.max(0, 1 - t * t)) : r * (1 - t) + 0.5;
@@ -91,7 +92,7 @@ final class StormDeckBuilder {
         }
     }
 
-    private static void hangSquare(StormKit kit, Island is, int depth, java.util.function.Function<int[], BlockState> mat) {
+    static void hangSquare(StormKit kit, Island is, int depth, java.util.function.Function<int[], BlockState> mat) {
         // 四角の島の下: 逆さの角錐 (半分の幅が depth で 0 に近づく)
         for (int d = 1; d <= depth; d++) {
             int h = Math.max(0, (int) Math.round(is.size() * (1 - d / (double) (depth + 1))));
@@ -103,20 +104,20 @@ final class StormDeckBuilder {
         }
     }
 
-    private static BlockState featherUnder(int[] a) {
+    static BlockState featherUnder(int[] a) {
         return a[0] % 3 == 0 ? StormKit.COPPER : (a[1] + a[2] & 1) == 0 ? StormKit.FEATHER : StormKit.FEATHER_WHITE;
     }
 
-    private static BlockState slateUnder(int[] a) {
+    static BlockState slateUnder(int[] a) {
         return a[0] % 4 == 0 ? StormKit.COPPER : (a[1] + a[2] & 1) == 0 ? BLACK : DARK;
     }
 
-    private static BlockState sacUnder(int[] a) {
+    static BlockState sacUnder(int[] a) {
         return a[0] % 3 == 0 ? WOOL_BLUE : WOOL;
     }
 
     // 昇り風の穴の床 (中心 3x3)。ring が光る色
-    private static void spot(StormKit kit, BlockPos c, boolean on) {
+    static void spot(StormKit kit, BlockPos c, boolean on) {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 boolean mid = dx == 0 && dz == 0;
@@ -125,7 +126,7 @@ final class StormDeckBuilder {
         }
     }
 
-    private static void rails(StormKit kit, int x1, int x2, int z1, int z2, int fy) {
+    static void rails(StormKit kit, int x1, int x2, int z1, int z2, int fy) {
         for (int x = x1; x <= x2; x++) {
             for (int z = z1; z <= z2; z++) {
                 kit.put(x, fy, z, StormKit.COPPER);
@@ -135,25 +136,25 @@ final class StormDeckBuilder {
     }
 
     // 下へ下げる灯り: 銅の柱が from から to まで、下の 3 マスは海のランタン
-    private static void underLamp(StormKit kit, int x, int z, int from, int to) {
+    static void underLamp(StormKit kit, int x, int z, int from, int to) {
         for (int y = from; y >= to; y--) {
             kit.put(x, y, z, y <= to + 2 ? StormKit.LAMP : StormKit.COPPER);
         }
     }
 
     // 碑の台の代わり: 立てた碑 (床の 1 上)
-    private static void signs(StormKit kit) {
+    static void signs(StormKit kit) {
         for (Inscription i : SIGNS) {
             kit.standingTablet(i.pos(), i.key());
         }
     }
 
     // 灯りの柱 (床の 4 上まで)
-    private static void lamp(StormKit kit, int x, int fy, int z) {
+    static void lamp(StormKit kit, int x, int fy, int z) {
         StormDeco.lampPost(kit, x, fy, z);
     }
 
-    private static void fire(StormKit kit, Rest r) {
+    static void fire(StormKit kit, Rest r) {
         kit.campfire(r.campfire());
         // 渡り場だけ、焚き火の北と南に腰掛け (背もたれは外向き。ほかの島は縁が近いので置かない)
         if (r == REST_YARD) {
@@ -165,7 +166,7 @@ final class StormDeckBuilder {
     }
 
     // 戸の枠 (戸の外側の左右の銅の柱と、上の横木。戸は置かない。TrialRuntime.installGates が置く)
-    private static void gateFrame(StormKit kit, java.util.List<BlockPos> gate, boolean alongZ) {
+    static void gateFrame(StormKit kit, java.util.List<BlockPos> gate, boolean alongZ) {
         int minA = Integer.MAX_VALUE;
         int maxA = Integer.MIN_VALUE;
         int fix = alongZ ? gate.get(0).getX() : gate.get(0).getZ();
@@ -192,13 +193,13 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- 風の広間の板と、原型の三つの戸の枠
-    private static void hub(StormKit kit) {
+    static void hub(StormKit kit) {
         kit.put(BOARD_HUB.getX(), BOARD_HUB.getY(), BOARD_HUB.getZ(),
                 ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
     }
 
     // ---------------------------------------------------------------- 橋 (背の広場の南の縁 → 渡り場の北の縁)
-    private static void bridge(StormKit kit) {
+    static void bridge(StormKit kit) {
         for (int z = BRIDGE_Z1; z <= BRIDGE_Z2; z++) {
             for (int x = BRIDGE_X1 - 1; x <= BRIDGE_X2 + 1; x++) {
                 boolean walk = x >= BRIDGE_X1 && x <= BRIDGE_X2;
@@ -247,7 +248,7 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- 渡り場 (x -24〜24、z 64〜82)
-    private static void yard(StormKit kit) {
+    static void yard(StormKit kit) {
         for (int x = -25; x <= 25; x++) {
             for (int z = 63; z <= 83; z++) {
                 boolean in = x >= -24 && x <= 24 && z >= 64 && z <= 82;
@@ -331,7 +332,7 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- S02 気嚢の滑空
-    private static void s02(StormKit kit) {
+    static void s02(StormKit kit) {
         // 戸から始めの台への道 (x -31〜-26)
         approach(kit, -31, -26, 71, 75, true);
         for (int i = 0; i < S02_ISLANDS.length; i++) {
@@ -375,7 +376,7 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- S03 雷柱の渡り
-    private static void s03(StormKit kit) {
+    static void s03(StormKit kit) {
         approach(kit, 26, 31, 71, 75, false);
         for (int i = 0; i < S03_ISLANDS.length; i++) {
             Island is = S03_ISLANDS[i];
@@ -406,7 +407,7 @@ final class StormDeckBuilder {
     }
 
     // 銅の柱 (5x5。下へ 14、先細り。先に避雷針)
-    private static void column(StormKit kit, Island is) {
+    static void column(StormKit kit, Island is) {
         for (int d = 1; d <= 14; d++) {
             int h = d <= 9 ? 2 : d <= 12 ? 1 : 0;
             for (int dx = -h; dx <= h; dx++) {
@@ -420,7 +421,7 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- S09 雷乞いの巣
-    private static void s09(StormKit kit) {
+    static void s09(StormKit kit) {
         approach(kit, 13, 17, 84, 90, false);
         floor(kit, S09_FOYER, StormKit.COPPER, StormDeckBuilder::thunderFloor);
         hangSquare(kit, S09_FOYER, 8, StormDeckBuilder::slateUnder);
@@ -511,7 +512,7 @@ final class StormDeckBuilder {
     }
 
     // ---------------------------------------------------------------- S10 羽守の見張り台
-    private static void s10(StormKit kit) {
+    static void s10(StormKit kit) {
         approach(kit, -17, -13, 84, 90, true);
         for (int i = 0; i < S10_PLATFORMS.length; i++) {
             Island is = S10_PLATFORMS[i];
@@ -548,7 +549,7 @@ final class StormDeckBuilder {
 
     // ---------------------------------------------------------------- 共通
     // 戸の外の道 (幅 5。長い辺の両側に手すり)。wind = 風の色の床、そうでなければ雷の色の床
-    private static void approach(StormKit kit, int x1, int x2, int z1, int z2, boolean wind) {
+    static void approach(StormKit kit, int x1, int x2, int z1, int z2, boolean wind) {
         boolean alongX = x2 - x1 > z2 - z1;
         for (int x = x1; x <= x2; x++) {
             for (int z = z1; z <= z2; z++) {
@@ -575,7 +576,7 @@ final class StormDeckBuilder {
     }
 
     // 石の台 (石のある島): 床の石 (チャイムの石) とその台
-    private static void station(StormKit kit, BlockPos stone, Island is) {
+    static void station(StormKit kit, BlockPos stone, Island is) {
         kit.put(stone.getX(), stone.getY() - 1, stone.getZ(), CHISELED);
         kit.put(stone.getX(), stone.getY(), stone.getZ(), StormBackSetup.CHIME_STONE.get().defaultBlockState());
         kit.put(stone.getX(), stone.getY() + 1, stone.getZ(), AIR);

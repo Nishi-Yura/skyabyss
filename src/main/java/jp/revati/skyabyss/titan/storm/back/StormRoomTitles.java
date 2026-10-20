@@ -60,6 +60,9 @@ final class StormRoomTitles {
             for (StormDeck.Zone z : StormDeck.zones()) {
                 r.add(new Room(z.id(), z.box()));
             }
+            for (StormDeck.Zone z : StormDeck2.zones()) {
+                r.add(new Room(z.id(), z.box()));
+            }
         }
         return List.copyOf(r);
     }

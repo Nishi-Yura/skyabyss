@@ -82,6 +82,20 @@ public final class StormBackCommands {
         PLACES.put("s10", rest("s10a"));
         PLACES.put("s10m", rest("s10m"));
         PLACES.put("s10stone", StormDeck.S10_STONE.east(2));
+        // 第二の渡り場 (29 の P3)
+        PLACES.put("yard2", rest("yard2"));
+        PLACES.put("s04", rest("s04a"));
+        PLACES.put("s04m", rest("s04m"));
+        PLACES.put("s04stone", StormDeck2.S04_STONE.east(2));
+        PLACES.put("s07", rest("s07a"));
+        PLACES.put("s07stone", StormDeck2.S07_STONE.west(2));
+        PLACES.put("s08", rest("s08a"));
+        PLACES.put("s08stone", StormDeck2.S08_STONE.west(2));
+        PLACES.put("s11", rest("s11a"));
+        PLACES.put("s11stone", StormDeck2.S11_STONE.west(2));
+        PLACES.put("s12", rest("s12a"));
+        PLACES.put("s12arena", new BlockPos(StormDeck2.S12_ARENA.cx() - 2, StormDeck2.Y + 1, StormDeck2.S12_ARENA.cz() - 8));
+        PLACES.put("s12stone", StormDeck2.S12_STONE.north(2));
     }
 
     private StormBackCommands() {
