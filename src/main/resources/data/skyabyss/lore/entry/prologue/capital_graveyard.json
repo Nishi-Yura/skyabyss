@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 72,
+  "inscription_sign": "sign.skyabyss.capital.graveyard",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "prologue/watcher"
+  ]
+}

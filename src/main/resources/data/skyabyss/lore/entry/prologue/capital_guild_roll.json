@@ -1,0 +1,13 @@
+{
+  "chapter": "prologue",
+  "order": 71,
+  "inscription_sign": "sign.skyabyss.capital.guild",
+  "unlock": [
+    {
+      "type": "manual"
+    }
+  ],
+  "related": [
+    "chapter1/stone_whale"
+  ]
+}

@@ -110,5 +110,17 @@
   "lore.skyabyss.prologue.bone_hill.title": "The Bone Hill",
   "lore.skyabyss.prologue.bone_hill.body": "On a hill stood a gigantic rib cage, arching up from the ground, polished stone-white by long years of wind. I tried to count the ribs and gave up partway.\n\nA single line was carved into the slab at its foot.\n\nCan something this vast really end?",
   "lore.skyabyss.prologue.sky_song.title": "The Song from the Sky",
-  "lore.skyabyss.prologue.sky_song.body": "At night, a song came down from the sky. A low, long voice, with no way to tell where it came from.\n\nThe stars went out in a broad band, as if something were passing high above. When the song ended, the stars returned as though nothing had happened.\n\nWhat was it that hid the stars?"
+  "lore.skyabyss.prologue.sky_song.body": "At night, a song came down from the sky. A low, long voice, with no way to tell where it came from.\n\nThe stars went out in a broad band, as if something were passing high above. When the song ended, the stars returned as though nothing had happened.\n\nWhat was it that hid the stars?",
+  "lore.skyabyss.prologue.capital_skywatch.title": "Skywatch Keep",
+  "lore.skyabyss.prologue.capital_skywatch.inscription": "Only the tower still lives. The keep is shut",
+  "lore.skyabyss.prologue.capital_skywatch.body": "The tablet of the keep on the north terrace.\nA line called the Skywatchers kept this nation. When the shadow passed they rang the great bell and wrote down what they saw. That was their duty.\nThe line is gone; only the tower keeps watch. The inner door stays shut.",
+  "lore.skyabyss.prologue.capital_guild_roll.title": "The Roll of Those Who Did Not Return",
+  "lore.skyabyss.prologue.capital_guild_roll.inscription": "The roll of those who went up. The door is shut",
+  "lore.skyabyss.prologue.capital_guild_roll.body": "The tablet of the Whale Chasers' Guild.\nThe names of those who climbed onto the titans' backs are kept on a roll in the back room. The names of those who came back carry a mark; the others do not.\nTravelers say the end of the roll is nothing but unmarked names.",
+  "lore.skyabyss.prologue.capital_graveyard.title": "The Grave Without a Name",
+  "lore.skyabyss.prologue.capital_graveyard.inscription": "Those who went up and did not return. One grave has no name",
+  "lore.skyabyss.prologue.capital_graveyard.body": "The tablet of the graveyard outside the west gate.\nThe stones belong to whale chasers who went up and did not return, set facing the sky.\nIn the middle of a row there is a new grave with no stone, only heaped earth. No name, no date.",
+  "lore.skyabyss.prologue.capital_gates.title": "The Four Gates",
+  "lore.skyabyss.prologue.capital_gates.inscription": "North. The hills of the one that swims the sky",
+  "lore.skyabyss.prologue.capital_gates.body": "The tablets of the four gates.\nThe Whale Gate faces the northern hills, the Tide Gate the eastern sea, the Wind Gate the western peaks, the Ash Gate the southern ash lands.\nThe nation lived surrounded by four titans, the gates say. Four that hold up the sky, they also say."
 }

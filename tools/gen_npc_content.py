@@ -150,7 +150,8 @@ class Dialogue:
             n["options"] = opts
         self.nodes[nid] = n
         self.order.append((nid, note))
-        text(f"{self.base}.{nid}", ja, en)
+        if ja is not None:  # None = 文はほかの名前空間の lang にある (誓いの skyabyss_vow など)
+            text(f"{self.base}.{nid}", ja, en)
 
     def json(self):
         return {"npc": self.role, "entries": self.entries, "nodes": self.nodes}
@@ -173,6 +174,8 @@ st.entry("shadow0", q(MAIN, stage="follow_smoke"))
 st.entry("shadow_first", all_(q(MAIN, stage="ask_storyteller"), not_(flag("met"))))
 st.entry("shadow_wait", all_(q(MAIN, stage="watch_sky"), not_(flag("wait_told"))))
 st.entry("first", not_(flag("met")))
+# 周回 (誓いの仕組み。一度でも心臓を止めて戻った人に一度だけ): 文は assets/skyabyss_vow/lang にある
+st.entry("repeat_note", all_({"type": "repeat_run"}, not_(flag("repeat_told"))))
 st.entry("menu")
 
 st.node("first",
@@ -192,7 +195,7 @@ st.node("deja_vu_song",
 st.node("shadow0",
         "おや、煙を辿ってきたのかい。……見ない顔だね。\n旅の人が火にあたりに寄るのは、珍しいことじゃない。ゆっくりしておいき。",
         "Oh, you followed the smoke, did you. ...I don't know your face.\nTravelers stopping by to warm themselves is nothing unusual. Stay a while.",
-        face="smile", next="shadow0_b", note="序盤: 帳面を持って宿りへ来た (メインの「煙の下の、鐘の宿りへ」が済む)")
+        face="smile", next="shadow0_b", note="序盤: 帳面を持って宿りへ来た (メインの「煙の下の鐘の宿りへ向かおう」が済む)")
 st.node("shadow0_b",
         "何もないけれど、空だけは広い。\n今日あたり、空を見ていなさい。晴れた昼は、とくにね。……勧めたくは、ないんだけど。",
         "There's nothing here, but the sky is wide.\nKeep an eye on the sky today. At midday, especially, if it's clear. ...Not that I like to recommend it.",
@@ -225,7 +228,8 @@ def seen_if(topic, entry):
 SEEN_ANY = any_(*[seen_if(t, e) for t, e in SEEN])
 # 語り部の話題の節は選択肢を 13 個までしか置けない (枠の高さ 210)。岩鯨を見た・背中の町を見た話も、この「見たもの」の節へ移した
 SEEN_ST = SEEN + [("whale", "chapter1/stone_whale"), ("back", "chapter1/sky_ruins")]
-SEEN_ST_ANY = any_(*[seen_if(t, e) for t, e in SEEN_ST])
+# 都の閉じた戸のことも「見たもの」(伝承は要らない。一度だけ)
+SEEN_ST_ANY = any_(*[seen_if(t, e) for t, e in SEEN_ST], not_(flag("capital_told")))
 
 MENU_OPTS = [
     ("shadow_seen", "昼間、雲の上を何かが渡っていった。", "Something crossed above the clouds at midday.",
@@ -252,6 +256,19 @@ MENU_OPTS = [
 ]
 st.node("menu", "何か聞きたいことでもあるのかい。", "Is there something you want to ask?", options=MENU_OPTS,
         note="話題を選ぶ節 (条件で出る話題が変わる)")
+
+# 都 (鐘の国。docs/design/33 の 2.2): 絶えかけの国の都。空見の一族と、最後の鐘守
+st.node("capital1",
+        "閉じているだろう。ここは都だった。……そう呼ぶ人は、もう少ないけれどね。\n昔は「空見」と呼ばれる一族がいて、国を預かっていた。影が通れば鐘を鳴らし、見たものを帳面に書く。それだけの一族さ。",
+        "Shut, yes. This was a capital once. ...Not many call it that anymore.\nThere was a line here called the Skywatchers who kept the nation. When the shadow passed they rang the bell and wrote down what they saw. That was all they were.",
+        face="neutral", next="capital2", note="都の話 1 (空見の一族)")
+st.node("capital2",
+        "その一族は絶えた。砦は塔だけが生きている。わたしは最後の鐘守だ。\n家は空いている。好きなのを使えばいい。……戸の閉まっている所は、まだ開けられない。時が来れば開く。",
+        "That line is gone. Of the keep only the tower still lives. I am the last bell keeper.\nThe houses are empty. Use whichever you like. ...The doors that are shut cannot be opened yet. They will open when the time comes.",
+        face="grave", next="menu", do=[set_flag("capital_told"), add_aff(1)], note="都の話 2 (最後の鐘守。閉じた施設)")
+
+st.node("repeat_note", None, None, face="smile", next="menu", do=[set_flag("repeat_told")],
+        note="周回 (一度でも心臓を止めて戻った人に一度だけ。文は skyabyss_vow の lang)")
 
 # 空の影 → 鯨追い (メイン 1 段目)
 st.node("shadow1",
@@ -373,8 +390,10 @@ st.node("seen_menu", "ほう。何を見たんだい。", "Oh? What did you see?
      {"goto": "whale", "if": seen_if("whale", "chapter1/stone_whale")}),
     ("ruins", "鯨の背中に、町の跡があった。", "There were ruins of a town on the whale's back.",
      {"goto": "back", "if": seen_if("back", "chapter1/sky_ruins")}),
+    ("capital", "この都は、どこも戸が閉じている。", "Every door in this city is shut.",
+     {"goto": "capital1", "if": not_(flag("capital_told"))}),
     ("cancel", "やっぱり、いい。", "Never mind.", {"goto": "menu"}),
-], note="序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話もここ)")
+], note="序盤: 見たものの話題 (見たものだけ並ぶ。岩鯨と背中の話、都の閉じた戸の話もここ)")
 st.node("camp0",
         "あの野営地かい。……焚き火は、いつも冷えているだろう。\n誰かが使った跡だけが、あそこにはあるんだ。使うところを見た者は、いないけれどね。",
         "That camp, is it. ...The fire's always cold, isn't it.\nThere's only ever the trace of someone having used it. No one has ever seen them use it.",
@@ -577,8 +596,16 @@ DIALOGUES = [st, wc]
 QUESTS = []
 
 
+# クエストの章 (QuestLog の章の札。一章 titan_whale)
+CHAPTER = {MAIN: "titan_whale"}
+
+
 def quest(qid, category, order, giver, title, summary, done, stages, reward, start_when=None):
-    data = {"category": category, "order": order, "giver": giver}
+    data = {"category": category}
+    if qid in CHAPTER:
+        data["chapter"] = CHAPTER[qid]
+    data["order"] = order
+    data["giver"] = giver
     if start_when is not None:
         data["start_when"] = start_when
     data["stages"] = []
@@ -597,9 +624,12 @@ def quest(qid, category, order, giver, title, summary, done, stages, reward, sta
         sj["objectives"] = []
         text(f"{base}.{s['id']}.journal", *s["journal"])
         for o in s["objectives"]:
-            oj = {k: v for k, v in o.items() if k not in ("ja", "en")}
+            oj = {k: v for k, v in o.items() if k not in ("ja", "en", "sub")}
             sj["objectives"].append(oj)
             text(f"{base}.{s['id']}.{o['id']}", o["ja"], o["en"])
+            # sub: 状況で Java が差し替える目的の文 (鎖待ちなど。QuestObjectives)
+            for suffix, (sja, sen) in (o.get("sub") or {}).items():
+                text(f"{base}.{s['id']}.{o['id']}.{suffix}", sja, sen)
         data["stages"].append(sj)
     data["reward"] = reward
     QUESTS.append((qid, data))
@@ -624,7 +654,7 @@ quest(MAIN, "main", 10, ST,
            "journal": ("鐘の宿りの語り部は、今日あたり空を見ていなさい、と言った。\n鐘は朝から、風もないのに小さく鳴っているという。",
                        "The storyteller at the Bell Lodge told me to keep an eye on the sky today.\nThe bell has been ringing softly since morning, she said, though there is no wind."),
            "objectives": [{"id": "look", "type": "lore", "targets": ["prologue/shadow"],
-                           "ja": "晴れた昼を待って、空を見上げよう", "en": "Wait for a clear midday and look up at the sky"}]},
+                           "ja": "晴れた昼を待って、空を見上げよう", "en": "Wait for a clear midday; look up"}]},
           {"id": "ask_storyteller", "xp": 30,
            "skip_if": lore("chapter1/stone_whale"),
            "journal": ("晴れた昼に、空が暗くなった。雲の上を、何かが渡っていった。\n語り部なら、何か知っているかもしれない。",
@@ -641,12 +671,16 @@ quest(MAIN, "main", 10, ST,
            "journal": ("歌の主は、空を泳ぐ岩の鯨だという。ときどき雲の下まで降りてきて、鎖を垂らす。\n歌が聞こえたら、空を見ろ。",
                        "The singer is said to be a whale of rock that swims in the sky. Sometimes it comes below the clouds and lets down a chain.\nWhen you hear the song, look at the sky."),
            "objectives": [{"id": "see", "type": "lore", "targets": ["chapter1/stone_whale"],
-                           "ja": "歌に耳をすまし、空を泳ぐ岩鯨を探そう", "en": "Listen for the song; look for the whale"}]},
+                           "ja": "歌に耳をすまし、空を泳ぐ岩鯨を探そう", "en": "Listen for the song; look for the whale",
+                           "sub": {"wait": ("夕方まで待って、岩鯨を探そう", "Wait until dusk; look for the whale")}}]},
           {"id": "board", "xp": 60,
            "journal": ("岩鯨が、すぐそこにいる。降りてきたら、地面に届いた鎖をつかめば、背中へ引き上げられるはずだ。",
                        "The stone whale is right there. When it comes down, grab the chain that reaches the ground and it should haul you up onto its back."),
            "objectives": [{"id": "ride", "type": "lore", "targets": ["chapter1/sky_ruins"],
-                           "ja": "鎖をのぼって、岩鯨の背中へ渡ろう", "en": "Climb the chain onto the stone whale's back"}]},
+                           "ja": "鎖をのぼって、岩鯨の背中へ渡ろう", "en": "Climb the chain to its back",
+                           "sub": {"wait": ("鎖が降りるまで、備えを整えよう", "Prepare and await the chain"),
+                                   "wait.prep": ("備えの頼み %s/2 と三灯を整えよう", "Prep quests %s/2; ready lamps"),
+                                   "wait.lamps": ("三灯をそろえて、鎖を待とう", "Ready the lamps; await the chain")}}]},
           {"id": "inscriptions", "xp": 90,
            "journal": ("背中には、崩れた町があった。祠の階段を下りると、三つの道が奥へ続いている。\nどの道の先にも、背中の民が碑文を残しているはずだ。",
                        "On its back lay a ruined town. Below the shrine stairs, three paths lead deeper in.\nAt the end of each, the people of the back must have left an inscription."),
@@ -723,7 +757,7 @@ UI = [
     ("message.skyabyss.npc.handed", "%s を %s 個渡した", "Handed over %s ×%s"),
     ("growth.skyabyss.reason.npc", "会話", "Conversation"),
     ("gui.skyabyss.quest.log", "クエストログ", "Quest Log"),
-    ("gui.skyabyss.quest.empty", "まだ、何も始まっていない。", "Nothing has begun yet."),
+    ("gui.skyabyss.quest.empty", "何も始まっていない", "Nothing begun yet"),
     ("gui.skyabyss.quest.section.main", "メイン", "Main"),
     ("gui.skyabyss.quest.section.sub", "サブ", "Side"),
     ("gui.skyabyss.quest.section.done", "終えたもの", "Finished"),
@@ -816,16 +850,18 @@ def doc_tables() -> str:
     lines = []
     for d in DIALOGUES:
         name = JA[f"entity.skyabyss.{d.path}"]
-        lines.append(f"#### {name}（`{d.role}`）の入口\n")
+        if d.path == "whale_chaser":
+            lines.append("### 9.2 イサナ\n")
+        lines.append(f"**{name}（`{d.role}`）の入口**\n")
         lines.append("| 順 | 条件 | 始まる節 |\n| --- | --- | --- |")
         for i, e in enumerate(d.entries, 1):
             lines.append(f"| {i} | {cond_text(e.get('if'))} | `{e['node']}` |")
         lines.append("")
-        lines.append(f"#### {name}のセリフ\n")
+        lines.append(f"**{name}のセリフ**\n")
         lines.append("| 節 | 顔 | セリフ | 入ったとき | 次 / 選択肢 |\n| --- | --- | --- | --- | --- |")
         for nid, note in d.order:
             n = d.nodes[nid]
-            body = md(JA[f"{d.base}.{nid}"])
+            body = md(JA[f"{d.base}.{nid}"]) if f"{d.base}.{nid}" in JA else "（文は `skyabyss_vow` の lang）"
             if note:
                 body += f"<br>（{note}）"
             nxt = []
@@ -843,9 +879,10 @@ def doc_tables() -> str:
                 nxt.append(md(s))
             lines.append(f"| `{nid}` | {n['face']} | {body} | {act_text(n.get('do'))} | {'<br>'.join(nxt)} |")
         lines.append("")
+    lines.append("### 9.3 メイン「雲の下の歌」とサブ 2 本\n")
     for qid, data in QUESTS:
         base = f"quest.skyabyss.{qid}"
-        lines.append(f"#### クエスト「{JA[base + '.title']}」（`{qid}`、{ {'main': 'メイン', 'sub': 'サブ'}[data['category']] }）\n")
+        lines.append(f"**クエスト「{JA[base + '.title']}」（`{qid}`、{ {'main': 'メイン', 'sub': 'サブ'}[data['category']] }）**\n")
         lines.append(f"- 依頼主: {JA['entity.skyabyss.' + data['giver'].split(':')[1]]}")
         if "start_when" in data:
             lines.append(f"- 自動で始まる条件: {cond_text(data['start_when'])}")
@@ -860,7 +897,10 @@ def doc_tables() -> str:
             objs = []
             how = []
             for o in s["objectives"]:
-                objs.append(JA[f"{base}.{s['id']}.{o['id']}"] + (f"（{o['count']}）" if o.get("count", 1) > 1 else ""))
+                ot = JA[f"{base}.{s['id']}.{o['id']}"] + (f"（{o['count']}）" if o.get("count", 1) > 1 else "")
+                for suffix, (sja, _) in (o.get("sub") or {}).items():
+                    ot += f"（状況で「{sja}」。`{s['id']}.{o['id']}.{suffix}`）"
+                objs.append(ot)
                 tg = o.get("targets") or [o.get("target")]
                 if o["type"] == "talk":
                     how.append(f"talk {o['target'].split(':')[1]} の節 `{o.get('topic')}`")
@@ -882,8 +922,15 @@ def main():
         write_json(DATA / "quest" / f"{qid}.json", data)
     LANG.mkdir(parents=True, exist_ok=True)
     assert set(JA) == set(EN)
-    write_json(LANG / "ja_jp.json", JA)
-    write_json(LANG / "en_us.json", EN)
+    # 同じ lang に tools/gen_artisan_dialogue.py が足すキー (旅の職人) は、ここでは持たず、あるものを後ろに残す
+    for fn, mine in (("ja_jp.json", JA), ("en_us.json", EN)):
+        path = LANG / fn
+        kept = {}
+        if path.exists():
+            for k, v in json.loads(path.read_text(encoding="utf-8")).items():
+                if k not in mine and (".artisan" in k or k == "message.skyabyss.heartbeat_ward.remade"):
+                    kept[k] = v
+        write_json(path, {**mine, **kept})
     if DOC.exists():
         doc = DOC.read_text(encoding="utf-8")
         pat = re.compile(r"(<!-- 生成ここから.*?-->\n).*?(<!-- 生成ここまで -->)", re.S)

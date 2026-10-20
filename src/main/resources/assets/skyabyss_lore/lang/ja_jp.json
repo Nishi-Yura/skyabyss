@@ -110,5 +110,17 @@
   "lore.skyabyss.prologue.bone_hill.title": "骨の丘",
   "lore.skyabyss.prologue.bone_hill.body": "丘の上に、巨大なあばら骨が弧を描いて立っていた。長く風に磨かれて、石のように白い。数えようとして、途中でやめた。\n\n足もとの石板に、一行だけ刻まれていた。\n\nこれほど大きなものにも、終わりがあるのか。",
   "lore.skyabyss.prologue.sky_song.title": "空の歌",
-  "lore.skyabyss.prologue.sky_song.body": "夜、空から歌が降ってきた。低く長く、どちらから来るとも分からない声だった。\n\n星が、帯のかたちに消えていった。何かが、空の上を通っていくように。歌が終わると、星は何ごともなかったように戻った。\n\n星を隠したのは、何だったのだろう。"
+  "lore.skyabyss.prologue.sky_song.body": "夜、空から歌が降ってきた。低く長く、どちらから来るとも分からない声だった。\n\n星が、帯のかたちに消えていった。何かが、空の上を通っていくように。歌が終わると、星は何ごともなかったように戻った。\n\n星を隠したのは、何だったのだろう。",
+  "lore.skyabyss.prologue.capital_skywatch.title": "空見の砦",
+  "lore.skyabyss.prologue.capital_skywatch.inscription": "塔だけが生きている。本丸は閉じた",
+  "lore.skyabyss.prologue.capital_skywatch.body": "都の北の段に立つ砦の碑。\n代々「空見」と呼ばれる一族が、この国を預かっていた。影が通れば大鐘楼の鐘を鳴らし、見たものを帳面に記す。それが務めだった。\n一族は絶え、今は塔だけが見張りを続けている。本丸の戸は閉じたままだ。",
+  "lore.skyabyss.prologue.capital_guild_roll.title": "帰らなかった者の名簿",
+  "lore.skyabyss.prologue.capital_guild_roll.inscription": "上った者の名簿がある。戸は閉じている",
+  "lore.skyabyss.prologue.capital_guild_roll.body": "鯨追いの組合の碑。\n巨神の背へ上った者の名が、組合の奥の名簿に並んでいるという。帰った者の名には印があり、帰らなかった者の名にはない。\n名簿の最後の方は、印のない名ばかりだと旅の人は言う。",
+  "lore.skyabyss.prologue.capital_graveyard.title": "名のない墓",
+  "lore.skyabyss.prologue.capital_graveyard.inscription": "上って帰らなかった者。名のない墓が、一つ",
+  "lore.skyabyss.prologue.capital_graveyard.body": "西門の外の墓地の碑。\n石の墓標は、上って帰らなかった鯨追いたちのもの。空を見上げて立つ向きに並べてある。\n列の中ほどに、石のない新しい墓が一つある。土が盛られているだけで、名も、いつのものかも分からない。",
+  "lore.skyabyss.prologue.capital_gates.title": "四つの門",
+  "lore.skyabyss.prologue.capital_gates.inscription": "北へ。空を泳ぐものの丘",
+  "lore.skyabyss.prologue.capital_gates.body": "都の四つの門の碑。\n鯨門は北の丘へ、潮門は東の海へ、風門は西の峰へ、灰門は南の灰の地へ向く。\n国は四体の巨神に囲まれて生きてきた、と門の碑は言う。四体が空を支えている、とも。"
 }

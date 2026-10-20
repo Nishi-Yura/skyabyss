@@ -183,8 +183,13 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 | `prologue/seventh_night` | 暦の書き込み | 破れた頁（村）／語り部の話（好感度 20 から） | 村の数え歌 |
 | `prologue/shaved_peak` | 平らな峰 | 破れた頁（村）／鯨追いの話 | 雲の上の影 |
 | `prologue/watcher` | 見る者 | 破れた頁（村）／語り部の話（見る者に気づいた人か好感度 10 から） | — |
+| `prologue/capital_skywatch` | 空見の砦 | 都の砦の碑を見る（`inscription_sign` = `sign.skyabyss.capital.keep`） | 白紙の帳面 |
+| `prologue/capital_guild_roll` | 帰らなかった者の名簿 | 鯨追いの組合の碑を見る（`sign.skyabyss.capital.guild`） | 空を泳ぐ岩鯨 |
+| `prologue/capital_graveyard` | 名のない墓 | 西門の外の墓地の碑を見る（`sign.skyabyss.capital.graveyard`） | 見る者 |
+| `prologue/capital_gates` | 四つの門 | 鯨門の碑を見る（`sign.skyabyss.capital.gate_n`） | 雲の上の影 |
 
-- 順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`shadow_heading` 25、`footsteps` 27、`bone_hill` 28、`sky_song` 29。
+- 順は `the_book` 10、`camp` 12、`the_book_margin` 14、`footprints` 15、`shadow` 20、`shadow_heading` 25、`footsteps` 27、`bone_hill` 28、`sky_song` 29。都の碑の 4 項目は 70〜73（村の 4 項目の後）。
+- 都の碑の 4 項目（33 の 2.2）は碑を見ると記される（碑文の写し = 碑の 4 行。文は `assets/skyabyss_opening/lang`）。国の物語の入口で、閉じた施設は章が進むと開く（17 の 3.3）。墓地の「名のない墓」は見る者のほのめかし（六章まで言わない）。
 - 序盤の項目（camp〜sky_song）は `data/skyabyss/lore/entry/prologue/` と lang、生成は `tools/gen_opening_text.py`（全文は [17](17_opening_and_rpg_feel.md) の 11 章）。きっかけは 17 の表。本文は 2〜3 段、説明せず、問いか物で終える。巨神・見る者・ループ・天の鍵の意味・ほかの巨神の名前は書かない（`OpeningStorySelfTest` が言葉で確かめる）。
 - 序章の村の 4 項目は、破れた頁と NPC の話の両方で記される（頁の運だけに頼らず、サブ「数え歌のつづき」を必ず終えられる。00 の 19 = A）。項目の JSON は変えていない（`Lore.unlock` は条件の種類を問わず記せる）。数え歌は語り部が歌う。
 - 石板の看板の文は `sign.skyabyss.lore_bone_slab.1〜4`（本体の lang。`SignFit` が幅を測る）。
@@ -238,6 +243,30 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 声をかけると、もういない。近づいてみても、足跡は残っていない。
 
 村の年寄りは、あれを「見る者」と呼ぶ。目を合わせなければ、何もしてこないそうだ。
+
+**空見の砦**（`prologue/capital_skywatch`）
+
+都の北の段に立つ砦の碑。代々「空見」と呼ばれる一族が、この国を預かっていた。影が通れば大鐘楼の鐘を鳴らし、見たものを帳面に記す。それが務めだった。
+
+一族は絶え、今は塔だけが見張りを続けている。本丸の戸は閉じたままだ。
+
+**帰らなかった者の名簿**（`prologue/capital_guild_roll`）
+
+鯨追いの組合の碑。巨神の背へ上った者の名が、組合の奥の名簿に並んでいるという。帰った者の名には印があり、帰らなかった者の名にはない。
+
+名簿の最後の方は、印のない名ばかりだと旅の人は言う。
+
+**名のない墓**（`prologue/capital_graveyard`）
+
+西門の外の墓地の碑。石の墓標は、上って帰らなかった鯨追いたちのもの。空を見上げて立つ向きに並べてある。
+
+列の中ほどに、石のない新しい墓が一つある。土が盛られているだけで、名も、いつのものかも分からない。
+
+**四つの門**（`prologue/capital_gates`）
+
+都の四つの門の碑。鯨門は北の丘へ、潮門は東の海へ、風門は西の峰へ、灰門は南の灰の地へ向く。
+
+国は四体の巨神に囲まれて生きてきた、と門の碑は言う。四体が空を支えている、とも。
 
 **序盤の項目のほのめかし**（全文は 07 の 2.2 節）
 

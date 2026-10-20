@@ -1,0 +1,26 @@
+# 鯨追いの墓地 (西門の外) を撮る。./gradlew runShots -Pscript=tools/shots/capital_grave.txt
+# view の yaw は野営地から見た向きが基準で、都の設計図は南門が野営地側になる向きで建つ。
+# なので yaw 90 = 西側から東を見る (カメラは都の西)、270 = 東側から西を見る。
+world opening_capital normal
+size 1280 720
+timeout 900
+render 12
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+# 西の上空から墓地と西門を見下ろす
+cmd skyabyss dev opening view shelter 0 150 45 90 40
+waitchunks
+shot capital_grave_above
+# 墓地の中 (西の端) から東の西門へ
+cmd skyabyss dev opening view shelter 0 134 2 90 6
+waitchunks
+shot capital_grave_inside
+# 西門の前から墓地を見る (都の東に置いてから、向きのまま 200 進めて西門の外へ)
+cmd skyabyss dev opening view shelter 0 100 3 270 6
+cmd tp @s ^ ^ ^203
+waitchunks
+shot capital_grave_from_gate
