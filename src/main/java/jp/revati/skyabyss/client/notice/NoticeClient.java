@@ -109,7 +109,7 @@ public final class NoticeClient {
 
     // 知らせの記録を開く (N)
     public static final KeyMapping LOG_KEY = new KeyMapping("key.skyabyss.notice_log", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.NOTICE_LOG, "key.categories.skyabyss");
 
     @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
     public static final class Ticker {

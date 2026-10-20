@@ -11,7 +11,7 @@
   "skyabyss_gear.screen.charm_key": "[%s] to use",
   "skyabyss_gear.screen.trinket": "Trinkets",
   "skyabyss_gear.screen.level": "Lv %s",
-  "skyabyss_gear.screen.tab_inventory": "Inventory",
+  "skyabyss_gear.screen.tab_inventory": "Items",
   "skyabyss_gear.screen.tab_accessories": "Trinkets",
   "skyabyss_gear.tooltip.required_level": "Requires Lv %s",
   "skyabyss_gear.tooltip.level_now": " (you: Lv %s)",

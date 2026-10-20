@@ -37,7 +37,7 @@
   "gui.skyabyss.forge.extract_none": "技の書き換えを持つ伝説だけが抽出できます。",
   "gui.skyabyss.forge.extract_hollow": "この伝説は、もう書き換えを抜いてあります。",
   "gui.skyabyss.forge.extract_rewrite": "書き換え: %1$s",
-  "gui.skyabyss.forge.extract_cost": "結晶 壊す%1$s／残す%2$s（手持ち %3$s）",
+  "gui.skyabyss.forge.extract_cost": "結晶 壊す%1$s／残す%2$s（持ち %3$s）",
   "gui.skyabyss.forge.extract_destroy": "抽出",
   "gui.skyabyss.forge.extract_keep": "印を残す",
   "gui.skyabyss.forge.extract_destroy_hint": "伝説を壊して、アスペクトの芯だけを取り出す。",

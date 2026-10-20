@@ -69,6 +69,11 @@ public class SkillScreen extends Screen {
     static final int BTN_X = 214;
     static final int BTN_ROW1 = 157;
     static final int BTN_ROW2 = 169;
+    // ページの見出し (上の帯の右)
+    static final int SUB_X = 222;
+    static final int SUB_Y = 5;
+    static final int SUB_W = 50;
+    static final int SUB_H = 13;
 
     static final int TITLE = 0x9FE8FF;
     static final int TEXT = 0xE6E2D6;
@@ -96,7 +101,8 @@ public class SkillScreen extends Screen {
     private Button tryonOk;
     private Button tryonUndo;
     private Button tryonCancel;
-    private Button pageBtn;
+    // ページの見出し (木 / 構え・鍵石 / 変異・紋)。いつも 3 つ並び、いまのページが金の縁になる
+    private final SubTab[] subTabs = new SubTab[3];
     // 0 = 木のページ、1 = ビルドのページ (構え・連鎖・タグ・鍵石)
     private int page;
     // 試着 (仮振り): 画面だけの写しと、仮に振った順。null = 試着していない
@@ -139,8 +145,10 @@ public class SkillScreen extends Screen {
                 .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
         tryonBtn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon"), b -> toggleTryon())
                 .bounds(left + BTN_X + 52, top + BTN_ROW2, 36, 12).build());
-        pageBtn = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.page_build"), b -> togglePage())
-                .bounds(left + BTN_X + 90, top + BTN_ROW2, 68, 12).build());
+        String[] subKeys = {"gui.skyabyss.skill.sub_tree", "gui.skyabyss.skill.sub_build", "gui.skyabyss.skill.sub_ext"};
+        for (int i = 0; i < 3; i++) {
+            subTabs[i] = addRenderableWidget(new SubTab(left + SUB_X + i * (SUB_W + 1), top + SUB_Y, i, Component.translatable(subKeys[i])));
+        }
         tryonOk = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_ok"), b -> tryonConfirm())
                 .bounds(left + BTN_X, top + BTN_ROW2, 50, 12).build());
         tryonUndo = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.skill.tryon_undo"), b -> tryonUndo())
@@ -205,14 +213,15 @@ public class SkillScreen extends Screen {
         boolean on = tryon != null;
         respec.visible = !on;
         tryonBtn.visible = !on;
-        pageBtn.visible = !on;
+        for (SubTab t : subTabs) {
+            t.visible = !on;
+        }
         tryonOk.visible = on;
         tryonUndo.visible = on;
         tryonCancel.visible = on;
         tryonOk.active = !tryonOrder.isEmpty();
         tryonUndo.active = !tryonOrder.isEmpty();
         tryonBtn.active = page == 0;
-        pageBtn.setMessage(Component.translatable(page == 0 ? "gui.skyabyss.skill.page_build" : page == 1 ? "gui.skyabyss.ext.page" : "gui.skyabyss.skill.page_tree"));
         if (!shownTrees().contains(tree)) {
             tree = SkillTree.ROCK;
             lastTree = tree;
@@ -299,9 +308,40 @@ public class SkillScreen extends Screen {
         click();
     }
 
-    private void togglePage() {
-        page = (page + 1) % 3;
-        click();
+    private void setPage(int p) {
+        if (p != page) {
+            page = p;
+            click();
+        }
+    }
+
+    // ページの見出し: 暗い札。いまのページは金の縁、触れていれば明るい縁。字は箱に収まらなければ縮める
+    private final class SubTab extends net.minecraft.client.gui.components.AbstractWidget {
+        private final int index;
+
+        SubTab(int x, int y, int index, Component label) {
+            super(x, y, SUB_W, SUB_H, label);
+            this.index = index;
+        }
+
+        @Override
+        public void onClick(double mx, double my) {
+            setPage(index);
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mx, int my, float partial) {
+            boolean on = page == index;
+            int edge = on ? 0xFF000000 | GOLD : isHovered() ? 0xFF6A7A8A : 0xFF3A4452;
+            g.fill(getX(), getY(), getX() + width, getY() + height, edge);
+            g.fill(getX() + 1, getY() + 1, getX() + width - 1, getY() + height - 1, on ? 0xFF2A3A40 : 0xFF161A22);
+            drawFit(g, getMessage(), getX() + width / 2, getY() + 3, width - 6, on ? GOLD : SOFT);
+        }
+
+        @Override
+        protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput out) {
+            defaultButtonNarrationText(out);
+        }
     }
 
     // 撮影用: 変異・紋のページで開く (穴と中心の技を選んだ状態)
@@ -430,12 +470,13 @@ public class SkillScreen extends Screen {
     }
 
     // タブの大きさ: 6 本までは今のまま、それより多いときは詰める
+    // 木のつまみは、下の「技の点」の文字 (top + 156) にかからない高さ (top + 24 〜 150) に収める。木が増えたぶんだけ詰める
     private int tabStep(int count) {
-        return count > 6 ? 17 : TREE_TAB_STEP;
+        return Math.min(TREE_TAB_STEP, (150 - TREE_TAB_Y) / Math.max(1, count));
     }
 
     private int tabSize(int count) {
-        return count > 6 ? 16 : TREE_TAB;
+        return Math.min(TREE_TAB, tabStep(count) - 1);
     }
 
     private Skill nodeAt(double mx, double my) {
@@ -997,6 +1038,22 @@ public class SkillScreen extends Screen {
         return legend != null && (legend.held(minecraft.player) || d.rune(s) == legend.index);
     }
 
+    // 狭い箱に名前を収める: 幅が足りなければ 0.7 倍まで縮め、それでも足りなければ「…」で切る (中心 cx、上端 y)
+    private void drawFit(GuiGraphics g, Component name, int cx, int y, int maxW, int color) {
+        String text = name.getString();
+        int w = font.width(text);
+        float k = w <= maxW ? 1f : Math.max(0.7f, maxW / (float) w);
+        if (w * k > maxW) {
+            text = font.plainSubstrByWidth(text, (int) (maxW / k) - font.width("…")) + "…";
+            w = font.width(text);
+        }
+        g.pose().pushPose();
+        g.pose().translate(cx - w * k / 2f, y + (1f - k) * 3.5f, 0f);
+        g.pose().scale(k, k, 1f);
+        g.drawString(font, text, 0, 0, color, false);
+        g.pose().popPose();
+    }
+
     private void renderRunes(GuiGraphics g, SkillData d, Skill s, int x, int y, int w, int mx, int my) {
         boolean available = d.runeAvailable(s);
         int current = d.rune(s);
@@ -1023,7 +1080,7 @@ public class SkillScreen extends Screen {
             g.fill(rx + 1, ry + 1, rx + cell - 1, ry + 11, bg);
             Component name = Component.translatable(r.nameKey());
             int color = mine ? GOLD : available ? TEXT : DIM;
-            g.drawString(font, name, rx + (cell - font.width(name)) / 2, ry + 2, color, false);
+            drawFit(g, name, rx + cell / 2, ry + 2, cell - 3, color);
             runeRows.add(new int[] {rx, ry, cell, 12, r.index});
             if (hover) {
                 hoverRune = r.index;
@@ -1040,7 +1097,7 @@ public class SkillScreen extends Screen {
             g.fill(rx, ry, rx + cell, ry + 12, edge);
             g.fill(rx + 1, ry + 1, rx + cell - 1, ry + 11, bg);
             Component name = Component.translatable("rune.skyabyss.mastery");
-            g.drawString(font, name, rx + (cell - font.width(name)) / 2, ry + 2, mine ? GOLD : usable ? 0xB8F2A8 : DIM, false);
+            drawFit(g, name, rx + cell / 2, ry + 2, cell - 3, mine ? GOLD : usable ? 0xB8F2A8 : DIM);
             runeRows.add(new int[] {rx, ry, cell, 12, Rune.MASTERY});
             if (hover) {
                 hoverRune = Rune.MASTERY;
@@ -1076,6 +1133,11 @@ public class SkillScreen extends Screen {
                 g.drawString(font, line, x, ty, TEXT, false);
                 ty += 10;
             }
+        }
+        if (shownRune != null && !shownRune.legendary() && ty + 9 <= top + INFO_Y + INFO_H - 1) {
+            // 箱に収まらず縮めた名前も、ここで全文が読める
+            g.drawString(font, Component.translatable(shownRune.nameKey()).withColor(GOLD), x, ty, GOLD, false);
+            ty += 10;
         }
         if (shownRune != null) {
             for (FormattedCharSequence line : TextWrap.split(font, Component.translatable(shownRune.effectKey()).withColor(shown == current ? TEXT : PALE), w)) {
@@ -1123,13 +1185,30 @@ public class SkillScreen extends Screen {
     }
 
     private void drawLines(GuiGraphics g, List<FormattedCharSequence> lines, int x, int y, int maxY) {
+        FormattedCharSequence last = null;
+        int lastY = 0;
         for (FormattedCharSequence line : lines) {
             if (y + 9 > maxY) {
+                // 入りきらない続きがある: 最後の行の終わりに「…」で知らせる (途中で黙って切れない)
+                if (last != null) {
+                    g.drawString(font, "…", x + font.width(last) + 1, lastY, SOFT, false);
+                }
                 break;
             }
             g.drawString(font, line, x, y, TEXT, false);
+            last = line;
+            lastY = y;
             y += 10;
         }
+    }
+
+    private boolean subTabHovered() {
+        for (SubTab t : subTabs) {
+            if (t.isHovered()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void renderBottom(GuiGraphics g, SkillData d, int level) {
@@ -1239,9 +1318,9 @@ public class SkillScreen extends Screen {
                 return;
             }
         }
-        if (saveToggle.isHovered() || tryonBtn.isHovered() || pageBtn.isHovered() || tryonOk.isHovered() || tryonUndo.isHovered() || tryonCancel.isHovered()) {
+        if (saveToggle.isHovered() || tryonBtn.isHovered() || subTabHovered() || tryonOk.isHovered() || tryonUndo.isHovered() || tryonCancel.isHovered()) {
             String key = saveToggle.isHovered() ? "gui.skyabyss.skill.loadout_mode_tip" : tryonBtn.isHovered() ? "gui.skyabyss.skill.tryon_tip"
-                    : pageBtn.isHovered() ? "gui.skyabyss.skill.page_tip" : tryonOk.isHovered() ? "gui.skyabyss.skill.tryon_ok_tip"
+                    : subTabHovered() ? "gui.skyabyss.skill.page_tip" : tryonOk.isHovered() ? "gui.skyabyss.skill.tryon_ok_tip"
                     : tryonUndo.isHovered() ? "gui.skyabyss.skill.tryon_undo_tip" : "gui.skyabyss.skill.tryon_cancel_tip";
             g.renderTooltip(font, new ArrayList<>(TextWrap.split(font, Component.translatable(key, SkillRules.LOADOUTS).withColor(TEXT), 190)), mx, my);
             return;
@@ -1316,6 +1395,7 @@ public class SkillScreen extends Screen {
         int y = top + 24;
         // 構え
         g.drawString(font, Component.translatable("gui.skyabyss.skill.stance_head"), x0, y, GOLD, false);
+        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
         Component cd = d.stanceCd > 0 ? Component.translatable("gui.skyabyss.skill.stance_cd", SkillRules.fmtSeconds(d.stanceCd))
                 : Component.translatable("gui.skyabyss.skill.stance_ready");
         g.drawString(font, cd, x0 + colW - font.width(cd), y, d.stanceCd > 0 ? DENY : SOFT, false);
@@ -1329,7 +1409,7 @@ public class SkillScreen extends Screen {
             g.fill(cx, y, cx + 41, y + 13, mine ? 0xFF000000 | GOLD : hover ? 0xFF6A7A8A : 0xFF3A4452);
             g.fill(cx + 1, y + 1, cx + 40, y + 12, mine ? 0xFF2A3A40 : hover ? 0xFF222B36 : 0xFF161A22);
             Component name = Component.translatable(st.nameKey());
-            g.drawString(font, name, cx + (41 - font.width(name)) / 2, y + 3, mine ? GOLD : TEXT, false);
+            drawFit(g, name, cx + 20, y + 3, 37, mine ? GOLD : TEXT);
             hits.add(new int[] {cx, y, 41, 13, 1, i});
             if (hover) {
                 shown = st;
@@ -1347,6 +1427,7 @@ public class SkillScreen extends Screen {
         // 連鎖
         y = top + 86;
         g.drawString(font, Component.translatable("gui.skyabyss.skill.chain_head", Integer.bitCount(d.chainMask), SkillRules.CHAIN_MAX), x0, y, GOLD, false);
+        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
         y += 11;
         for (int i = 0; i < d.slotCount(); i++) {
             int cx = x0 + i * 32;
@@ -1368,6 +1449,7 @@ public class SkillScreen extends Screen {
         // タグ
         y = top + 118;
         g.drawString(font, Component.translatable("gui.skyabyss.skill.tag_head"), x0, y, GOLD, false);
+        g.fill(x0, y + 9, x0 + colW, y + 10, 0x553A4452);
         y += 11;
         for (int i = 0; i < SkillTag.values().length; i++) {
             SkillTag t = SkillTag.values()[i];
@@ -1383,12 +1465,23 @@ public class SkillScreen extends Screen {
                 g.fill(cx + 25, y + 4, cx + 29, y + 8, 0xFF000000 | GOLD);
             }
             hits.add(new int[] {cx, y, 32, 13, 4, i});
+            // 凡例: 色の点の意味 (タグの名前) を札の下に小さく
+            g.pose().pushPose();
+            Component tagName = Component.translatable(t.nameKey());
+            float k = Math.min(0.75f, 31f / Math.max(1, font.width(tagName)));
+            g.pose().translate(cx + 16 - font.width(tagName) * k / 2f, y + 15, 0);
+            g.pose().scale(k, k, 1f);
+            g.drawString(font, tagName, 0, 0, 0xFF000000 | t.rgb, false);
+            g.pose().popPose();
         }
+        // 二つの列の境の線
+        g.fill(left + 188, top + 24, left + 189, top + 148, 0x553A4452);
         // 鍵石 (右の列)
         int x1 = left + 194;
         int w1 = 176;
         y = top + 24;
         g.drawString(font, Component.translatable("gui.skyabyss.skill.keystone_head", d.keystones.size(), SkillRules.KEYSTONE_MAX), x1, y, GOLD, false);
+        g.fill(x1, y + 9, x1 + w1, y + 10, 0x553A4452);
         y += 11;
         for (int i = 0; i < SkillKeystone.values().length; i++) {
             SkillKeystone k = SkillKeystone.values()[i];

@@ -15,7 +15,7 @@
   "skyabyss_reward.kind.charm": "Charm",
   "skyabyss_reward.kind.trinket": "Trinket",
   "skyabyss_reward.req": "Requires Lv %s",
-  "skyabyss_reward.req_now": "Requires Lv %s (now Lv %s)",
+  "skyabyss_reward.req_now": "Needs Lv %s (you: %s)",
   "skyabyss_reward.equipped": "Equipped: %s",
   "skyabyss_reward.equipped.none": "Equipped: none",
   "skyabyss_reward.stat.attack_damage": "Attack",

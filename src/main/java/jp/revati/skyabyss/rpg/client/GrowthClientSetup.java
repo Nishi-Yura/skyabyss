@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class GrowthClientSetup {
     public static final KeyMapping STATUS_KEY = new KeyMapping("key.skyabyss.status", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.STATUS, "key.categories.skyabyss");
 
     private GrowthClientSetup() {
     }

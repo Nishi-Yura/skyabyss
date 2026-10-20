@@ -82,7 +82,7 @@
   "message.skyabyss.tide_heart.descend": "The floor sinks and you reach the dry bottom of the shell. From within comes a beat like the ebb and flow of the tide.",
   "message.skyabyss.tide_heart.exit_hint": "Step on the glowing floor at the south end of the antechamber to return to the island",
   "message.skyabyss.tide_heart.pillar": "The pillar of light carried you to the tide gate beach",
-  "message.skyabyss.tide_heart.defeated": "The heart of the tide shell has stopped. On the sea floor, the titan breathes out slowly",
+  "message.skyabyss.tide_heart.defeated": "The tide shell's heart has stopped. On the sea floor, the titan breathes out",
   "message.skyabyss.tide_heart.go": "You are in the antechamber of the shell's bottom (the heart lies beyond the north entrance)",
   "message.skyabyss.tide_heart.choice_later": "The first-clear gift (one exclusive legendary) can be chosen with /titanmemory tide once those items exist",
   "message.skyabyss.memory_title_tide_shell": "── Titan Memory: Tide Shell ──",

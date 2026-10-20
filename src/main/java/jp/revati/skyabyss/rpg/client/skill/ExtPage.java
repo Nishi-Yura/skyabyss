@@ -117,16 +117,16 @@ final class ExtPage {
         g.drawString(font, Component.translatable("gui.skyabyss.ext.glyph_head", open, SkillRules.GLYPH_SOCKETS), rx, top + 23, GOLD, false);
         for (int i = 0; i < SkillRules.GLYPH_SOCKETS; i++) {
             int cx = rx + (i % 3) * 61;
-            int cy = top + 34 + (i / 3) * 35;
+            int cy = top + 34 + (i / 3) * 33;
             boolean closed = i >= open;
             boolean sel = i == socket;
-            boolean hover = in(mx, my, cx, cy, 59, 33);
-            g.fill(cx, cy, cx + 59, cy + 33, sel ? 0xFF000000 | GOLD : hover && !closed ? 0xFF6A7A8A : 0xFF3A4452);
-            g.fill(cx + 1, cy + 1, cx + 58, cy + 32, closed ? 0xFF10131A : 0xFF161A22);
+            boolean hover = in(mx, my, cx, cy, 59, 31);
+            g.fill(cx, cy, cx + 59, cy + 31, sel ? 0xFF000000 | GOLD : hover && !closed ? 0xFF6A7A8A : 0xFF3A4452);
+            g.fill(cx + 1, cy + 1, cx + 58, cy + 30, closed ? 0xFF10131A : 0xFF161A22);
             Glyph.Placed p = Glyph.parsePlaced(d.glyphSockets[i]);
             if (closed) {
                 Component lock = Component.translatable("gui.skyabyss.ext.socket_closed", i - SkillRules.GLYPH_SOCKETS_BASE + 1);
-                g.drawString(font, lock, cx + (59 - font.width(lock)) / 2, cy + 12, DIM, false);
+                g.drawString(font, lock, cx + (59 - font.width(lock)) / 2, cy + 11, DIM, false);
             } else if (p == null) {
                 g.drawString(font, "+", cx + 28, cy + 12, sel ? GOLD : DIM, false);
             } else {
@@ -140,14 +140,14 @@ final class ExtPage {
                 String lv = "Lv" + p.item().level();
                 g.drawString(font, lv, cx + 31, cy + 22, GOLD, false);
             }
-            hits.add(new int[] {cx, cy, 59, 33, HIT_SOCKET, i});
+            hits.add(new int[] {cx, cy, 59, 31, HIT_SOCKET, i});
             if (hover && p != null && !closed) {
                 tip = glyphTip(d, p.item(), p.center());
             }
         }
         // 中心の技の選び (覚えている技。ホイールで送る)
         List<Skill> ks = known(d);
-        int py = top + 104;
+        int py = top + 100;
         pickScroll = Math.max(0, Math.min(pickScroll, Math.max(0, ks.size() - CHIPS)));
         g.drawString(font, Component.translatable("gui.skyabyss.ext.pick_head"), rx, py - 0, SOFT, false);
         py += 10;
@@ -165,7 +165,7 @@ final class ExtPage {
             }
         }
         // 持っている紋
-        int by = top + 140;
+        int by = top + 135;
         bagScroll = Math.max(0, Math.min(bagScroll, Math.max(0, d.glyphBag.size() - CHIPS)));
         Glyph.Item hoverItem = null;
         for (int k = 0; k < CHIPS; k++) {

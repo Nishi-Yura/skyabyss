@@ -39,7 +39,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AccessoryClient {
     public static final KeyMapping CHARM_KEY = new KeyMapping("skyabyss_gear.key.charm", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.CHARM, "key.categories.skyabyss");
     private static final int OK = 0x9AA0B0;
     private static final int SHORT = 0xE0505A;
 

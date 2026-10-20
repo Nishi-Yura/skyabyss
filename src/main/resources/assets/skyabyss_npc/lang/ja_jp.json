@@ -179,7 +179,7 @@
   "message.skyabyss.npc.handed": "%s を %s 個渡した",
   "growth.skyabyss.reason.npc": "会話",
   "gui.skyabyss.quest.log": "クエストログ",
-  "gui.skyabyss.quest.empty": "まだ、何も始まっていない。",
+  "gui.skyabyss.quest.empty": "何も始まっていない",
   "gui.skyabyss.quest.section.main": "メイン",
   "gui.skyabyss.quest.section.sub": "サブ",
   "gui.skyabyss.quest.section.done": "終えたもの",

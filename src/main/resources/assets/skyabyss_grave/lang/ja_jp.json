@@ -8,7 +8,7 @@
   "skyabyss_grave.collected_part": "品 %s 個を取り戻した。持ち物がいっぱいで、%s 種類は墓に残っている。空けてからもう一度",
   "skyabyss_grave.expired": "時の経った墓が崩れて、中身が地面に散らばった",
   "skyabyss_grave.rescue_none": "呼び戻せる墓はない",
-  "skyabyss_grave.rescued": "語り部の呼びかけで、品 %s 個と経験値 %s が戻った（墓の %s％）。墓は土に還った",
+  "skyabyss_grave.rescued": "語り部の呼びかけで、品 %s 個と経験値 %s が戻った（墓の %s％）",
   "skyabyss_grave.rescued_pending": "入りきらなかった %s 個は、報酬の預かりに入れた。控え帳から受け取れる",
   "dialogue.skyabyss.storyteller.menu.grave": "なくしたものがある。",
   "dialogue.skyabyss.storyteller.lost_ask": "……なくしたのかい。何をだい。",
