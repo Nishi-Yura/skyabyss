@@ -166,6 +166,15 @@ final class StormDeck2Builder {
                 }
             }
         }
+        // 下の灯り: 第二の渡り場の下は尾羽の背 (歩ける所)。空が見えないので、銅の柱に海のランタンを下げる (建築の監査の暗さ)
+        for (int x : new int[] {-16, -9, -3, 3, 9, 16}) {
+            for (int z : new int[] {177, 185}) {
+                StormDeckBuilder.underLamp(kit, x, z, Y - 4, Math.max(StormBirdBuilder.top(x, z) + 3, Y - 15));
+            }
+        }
+        for (int x : new int[] {-19, 19}) {
+            StormDeckBuilder.underLamp(kit, x, 181, Y - 4, Math.max(StormBirdBuilder.top(x, 181) + 3, Y - 15));
+        }
         // 灯りの柱: 四隅と、橋の口・戸のそば
         for (int x : new int[] {-24, 24}) {
             for (int z : new int[] {172, 190}) {
