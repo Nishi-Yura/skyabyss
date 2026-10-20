@@ -219,8 +219,8 @@ public final class EmberDeckBuilder {
             }
         }
         sideLamps(kit, b, 5, Y + 3);
-        // 坑の上の天井の灯り (坑の歩ける所は 4 以上の明るさに。格子 4 ブロックごと)
-        for (int x = -30; x <= -14; x += 4) {
+        // 坑の上の天井の灯り (坑の歩ける所は 4 以上の明るさに。格子 3 × 4 ブロックごと)
+        for (int x = -30; x <= -15; x += 3) {
             for (int z = 2; z <= 18; z += 4) {
                 lamp(kit, x, TOP + 1, z);
             }
