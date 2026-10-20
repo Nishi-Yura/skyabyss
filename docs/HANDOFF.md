@@ -55,7 +55,11 @@
 - **嵐の塔の頂の戦い**（雷翼の任意の翼）: 未仕上げ。仕様は 12 の 3.3、26 の 10.5。
 - **試練の P3**: 各巨神を十二にするまで、岩鯨 W08、潮殻 T03・T04・T08・T11・T12、雷翼と余燼の新作 5 つずつ（29 の 5.5）。
 - **モデルの検査（2026-10-20 の時点）**: `python tools/mesh_audit.py` は開いた辺 0・関節 NG 0。ブロックモデルの欠けた面 32 個（遺物のブロック）は `python tools/fix_block_faces.py` で塞いだ。低ポリの「裏面透け」の画素は残る（ash_smith・ash_thrall・bone_mortar・bubble_puffer・storyteller・pearl_keeper など）が、描画は `entityCutoutNoCull`（両面）で、アトラスに透明な画素もないので、ゲームで穴にはならない。**浮いた部品**（休めの姿勢で、ほかのどの部品の面からも 0.35 単位より離れた塊）は、面を 0.3 刻みで標本化して測ると 0（`docs/review/floating_parts.md`）。頂点どうしの距離だけで測ると防具の背の板・鍛え手の腕・番兵の脚の飾りなどが「浮く」と出るが、面では触れている。ゲームで浮いて見える所は、動いた姿勢か絵の見え方なので、場所を指して（スクショ）直す。
-- **順路（32）の実装**: R1（順路の記録・門・運び・回廊を建てない版）→ R2（板・碑・帯）→ R3（巨神の祠）→ R4（セルを太らせる）。
+- **順路（32）の実装**: R0（書類）は済み。R1 から（32 の 8.2 の順）。作業は worktree `../mod-raid`（枝 `wip/raid-route`、m1-sky-pass と同じ所から）で。入口の手がかり:
+  - 越えた合図は `titan/group/TrialSteles.onRung` → `TrialRuntime.onStoneRung`（図鑑・報い）と `TrialHub.onCleared`（4 秒後に `tickPending` が中の人を `sendToHub` で鼓動の間へ）。**ここを「次の段の入口の休み場へ」に差し替える**のが R1 の芯。`TrialHub.sendToHub` の運びの作り（teleportTo・FakePlayer・音）をそのまま使う。
+  - 枠と石の対応: `Trial.Slot`（岩鯨 0 歩 / 1 闘 / 2 智）、潮殻・雷翼は `TrialRegions.drawnCell`（west 歩 / east 智 / front 闘）、余燼は同 190 行あたり（西 歩 / 東 智 / 南 闘）。原型の入口の休み場: 岩鯨 `w0`・`mz0`（`MAZE_ENTRY`）・`e0`（`TitanBackTrials` の Checkpoint 一覧 129〜157 行）、潮殻・雷翼・余燼は各 `*BackTrials`／`EmberTrials` の Checkpoint と `respawnCheckpoint`。
+  - 順路の記録はグループの記録 `BackGroupData.Record` の `keep.trial.*`（`TrialData` に定数。`keep.` はリセットで消えない）。グループの人は `Groups.online/inBox`。
+  - 消す対象（32 の 7 章）: `trial/TrialHub`（封・碑）、`trial/HubTablets`、`trial/TrialBoard*`、`trial/TrialTabletBlock`、`trial/TrialSealBlock`、`trial/WeeklyGate`、`titan/vow/*`、各 `*Deck*`（回廊・戸・案内。`TrialCell.build` は残す）、各背の任意の翼と広場・祠・踏み跡の建て方、`FirstRun` の既知の道。
 - **一章の敵がフルスイートの負荷で不安定**: 自己テストの全体を回すと、一章の mob の段が時々落ちる。単独の `SKYABYSS_SELFTEST_ONLY` では通る。
 - **岩鯨の広間の広さ**（26 の 8.6）: 1〜2 人には広い。判断待ち。
 - **実機で確かめていないもの**: 深淵の心臓の戦い・専用伝説 4 点の見た目と効き、紋の盤・変異の画面、転生の台座から転生を終えるまで（本番の jar）、順位の石・飾り板の複数人での表示、版 22・23 の試練の階の歩き（雷翼・余燼）、巨神の子の遠い旅。
