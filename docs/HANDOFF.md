@@ -59,7 +59,7 @@
   - 越えた合図は `titan/group/TrialSteles.onRung` → `TrialRuntime.onStoneRung`（図鑑・報い）と `TrialHub.onCleared`（4 秒後に `tickPending` が中の人を `sendToHub` で鼓動の間へ）。**ここを「次の段の入口の休み場へ」に差し替える**のが R1 の芯。`TrialHub.sendToHub` の運びの作り（teleportTo・FakePlayer・音）をそのまま使う。
   - 枠と石の対応: `Trial.Slot`（岩鯨 0 歩 / 1 闘 / 2 智）、潮殻・雷翼は `TrialRegions.drawnCell`（west 歩 / east 智 / front 闘）、余燼は同 190 行あたり（西 歩 / 東 智 / 南 闘）。原型の入口の休み場: 岩鯨 `w0`・`mz0`（`MAZE_ENTRY`）・`e0`（`TitanBackTrials` の Checkpoint 一覧 129〜157 行）、潮殻・雷翼・余燼は各 `*BackTrials`／`EmberTrials` の Checkpoint と `respawnCheckpoint`。
   - 順路の記録はグループの記録 `BackGroupData.Record` の `keep.trial.*`（`TrialData` に定数。`keep.` はリセットで消えない）。グループの人は `Groups.online/inBox`。
-  - 消す対象（32 の 7 章）: `trial/TrialHub`（封・碑）、`trial/HubTablets`、`trial/TrialBoard*`、`trial/TrialTabletBlock`、`trial/TrialSealBlock`、`trial/WeeklyGate`、`titan/vow/*`、各 `*Deck*`（回廊・戸・案内。`TrialCell.build` は残す）、各背の任意の翼と広場・祠・踏み跡の建て方、`FirstRun` の既知の道。
+  - 消す対象（32 の 7 章）: `trial/TrialHub`（封・碑）、`trial/HubTablets`、`trial/TrialBoard*`、`trial/TrialTabletBlock`、`trial/TrialSealBlock`、`trial/WeeklyGate`、各 `*Deck*`（回廊・戸・案内。`TrialCell.build` は残す）、各背の任意の翼と広場・祠・踏み跡の建て方、`FirstRun` の既知の道。
 - **一章の敵がフルスイートの負荷で不安定**: 自己テストの全体を回すと、一章の mob の段が時々落ちる。単独の `SKYABYSS_SELFTEST_ONLY` では通る。
 - **岩鯨の広間の広さ**（26 の 8.6）: 1〜2 人には広い。判断待ち。
 - **実機で確かめていないもの**: 深淵の心臓の戦い・専用伝説 4 点の見た目と効き、紋の盤・変異の画面、転生の台座から転生を終えるまで（本番の jar）、順位の石・飾り板の複数人での表示、版 22・23 の試練の階の歩き（雷翼・余燼）、巨神の子の遠い旅。
