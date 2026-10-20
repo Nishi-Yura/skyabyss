@@ -43,7 +43,9 @@ public final class TideTravel {
     // 待ち・資格・舟から降ろす・0.5 秒は共通の TitanGate (13 の 10.2節。待ちの記録の名前 skyabyss_tide_cooldown は前と同じ)
     static final jp.revati.skyabyss.titan.TitanGate PASSAGE = new jp.revati.skyabyss.titan.TitanGate("tide", TideKeeper.SLOT, 60, 10);
     private static final int SWEPT_AFTER = 100;
-    private static final double FAR = 160;
+    // 背の中心 (0, SHELL_CZ) からこれより遠くへ出た人は押し戻す。ひれの先端の台 (x ±179)・到着の段 (半径 172) が入る大きさ。
+    // 旧い値 160 は版 20 の拡大の前のままで、到着の直後と貝の間・先端の宝のそばで押し戻され続けた
+    public static final double FAR = 240;
 
     // 背中のまわりの海にいる人 → 何 tick いるか
     private static final Map<UUID, Integer> ADRIFT = new HashMap<>();
@@ -195,15 +197,12 @@ public final class TideTravel {
                 Notice.bar(player, ModText.hint("message.skyabyss.tide.return_hint"));
             }
         }
-        double r = Math.hypot(player.getX(), player.getZ() - jp.revati.skyabyss.titan.tide.back.TideBackLayout.SHELL_CZ);
-        if (r > FAR) {
+        if (farOut(player.getX(), player.getZ())) {
             sweepBack(player);
             return;
         }
         // 島から海に落ちた: 5 秒たつと、潮に押し戻される (甲羅の外で、海の水の中にいる)
-        boolean offIsland = jp.revati.skyabyss.titan.tide.back.TideBackLayout.shellS2(player.getX(), player.getZ()) > 1.02
-                && player.getY() < TideBackBuilder.SEA + 1;
-        if (offIsland && player.isInWater()) {
+        if (offIsland(player.getX(), player.getY(), player.getZ()) && player.isInWater()) {
             int t = ADRIFT.merge(player.getUUID(), 2, Integer::sum);
             if (t >= SWEPT_AFTER) {
                 sweepBack(player);
@@ -211,6 +210,15 @@ public final class TideTravel {
         } else {
             ADRIFT.remove(player.getUUID());
         }
+    }
+
+    public static boolean farOut(double x, double z) {
+        return Math.hypot(x, z - jp.revati.skyabyss.titan.tide.back.TideBackLayout.SHELL_CZ) > FAR;
+    }
+
+    // 甲羅の外の海面の高さ (島の外。ひれ・到着の段・甲羅の上は海面より上なので入らない)
+    public static boolean offIsland(double x, double y, double z) {
+        return jp.revati.skyabyss.titan.tide.back.TideBackLayout.shellS2(x, z) > 1.02 && y < TideBackBuilder.SEA + 1;
     }
 
     private static void sweepBack(ServerPlayer player) {

@@ -93,6 +93,7 @@ public final class TitanGroundSelfTest {
         int newFound = 0;
         int newRaised = 0;
         double maxRaise = 0;
+        double minSunk = Double.POSITIVE_INFINITY;
         double worstOld = 0;
         List<Double> looseRaise = new ArrayList<>();
         for (Shore s : shores) {
@@ -139,18 +140,38 @@ public final class TitanGroundSelfTest {
                     if (bad > 0) {
                         failures.add("the tide shell rest spot (" + (int) now.x + ", " + (int) now.z + ") has " + bad + " body columns inside blocks");
                     }
+                    // 体の底 (甲羅の腹。足・ひれと低い裾を除く) が、水面より 6 ブロック以上下にあること = 腹が水に浸かって、甲羅が海に浮いて見えない
+                    double belly = bellyBottom(shell);
+                    double hullBottom = restY + raise + belly;
+                    double sunk = level.getSeaLevel() - hullBottom;
+                    minSunk = Math.min(minSunk, sunk);
+                    if (sunk < 6.0 - 0.05) {
+                        failures.add("the tide shell hull floats: its belly bottom is only " + sunk + " blocks under the water at (" + (int) now.x + ", " + (int) now.z + ") raise " + raise);
+                    }
                     if (raise > TideOcean.MAX_RAISE + 0.05) {
                         failures.add("a chosen rest spot needs a lift above the limit: " + raise);
                     }
                 }
             }
         }
+        notes.add("hull belly under the water at the rest spots: at least " + String.format("%.1f", minSunk) + " blocks");
         notes.add("rest spots: " + tried + " player positions, old rule found " + oldFound + " (" + oldBad + " clip into terrain, worst " + (int) worstOld
                 + " columns), new rule found " + newFound + " (" + newRaised + " need the shell lifted, max " + String.format("%.1f", maxRaise) + " blocks), clipping 0 required");
         notes.add("lowest lift needed over the " + tried + " positions with the limit raised to 40: " + looseRaise.stream().map(v -> String.format("%.1f", v)).toList());
         if (newFound == 0 && oldFound > 0) {
             failures.add("the new rule never finds a rest spot where the old one did (" + oldFound + ")");
         }
+    }
+
+    // 体積の底の高さ: 足・ひれ・低い裾 (頂が REST_SKIRT_HI に届かない柱) を除いた柱の底の最小 (甲羅の腹の底)
+    private static double bellyBottom(TitanVolume shell) {
+        double lo = Double.POSITIVE_INFINITY;
+        for (TitanVolume.Column c : shell.coreColumns()) {
+            if (c.hi() > TideShellEntity.REST_SKIRT_HI && c.lo() >= TideShellEntity.REST_LEG_SKIP) {
+                lo = Math.min(lo, c.lo());
+            }
+        }
+        return Double.isFinite(lo) ? lo : 0.0;
     }
 
     // ---------------------------------------------------------------- 2. 巡航

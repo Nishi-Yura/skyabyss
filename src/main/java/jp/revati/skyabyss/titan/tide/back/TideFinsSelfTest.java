@@ -49,7 +49,58 @@ public final class TideFinsSelfTest {
         }
     }
 
+    // 潮に押し戻される所 (背の中心から遠すぎる・甲羅の外の海面) に、歩く場所が一つもかからないこと。
+    // 版 20 の拡大のあと、到着の段 (半径 172) と貝の間・先端の台 (x 177) が旧い半径 160 の外になり、着いてすぐ・宝のそばで押し戻され続けた
+    private static void checkSweep() {
+        List<String> names = new ArrayList<>();
+        List<net.minecraft.world.phys.Vec3> spots = new ArrayList<>();
+        java.util.function.BiConsumer<String, BlockPos> add = (n, b) -> {
+            names.add(n);
+            spots.add(net.minecraft.world.phys.Vec3.atBottomCenterOf(b));
+        };
+        add.accept("arrival", ARRIVAL);
+        add.accept("landing", LANDING.center());
+        add.accept("beach", BEACH.center());
+        for (TideFins.Room r : TideFins.ROOMS) {
+            add.accept(r.id() + " centre", r.center());
+            for (int u = r.u1(); u <= r.u2(); u += 6) {
+                add.accept(r.id() + " floor u" + u, new BlockPos(r.x(u), TideFins.FIN_FLOOR + 1, -20));
+            }
+            for (int i = 0; i < r.pedZ().length; i++) {
+                add.accept(r.id() + " pedestal " + i, r.pedestal(i).above());
+            }
+        }
+        for (int side : new int[] {-1, 1}) {
+            add.accept("tip " + side, TideFins.tipCenter(side).above());
+        }
+        for (TideCaches.Cache c : TideCaches.CACHES) {
+            add.accept("cache " + c.id(), c.chest());
+            add.accept("cache front " + c.id(), c.chest().relative(c.front()));
+        }
+        for (TideCaches.Tablet t : TideCaches.TABLETS) {
+            add.accept("tablet " + t.id(), t.pos().below());
+        }
+        for (Area a : trialAreas()) {
+            add.accept("area " + a.center().toShortString(), a.center());
+        }
+        for (Rest r : RESTS) {
+            add.accept("rest " + r.id(), r.spawn());
+        }
+        for (int i = 0; i < spots.size(); i++) {
+            net.minecraft.world.phys.Vec3 v = spots.get(i);
+            check(!jp.revati.skyabyss.titan.tide.TideTravel.farOut(v.x, v.z), "the sweep-back radius covers a walkable place: " + names.get(i) + " " + v);
+        }
+        // 到着・先端・貝の間は、島から落ちた判定 (甲羅の外で海面より低い) にも入らない
+        for (BlockPos b : List.of(ARRIVAL, TideFins.tipCenter(-1).above(), TideFins.tipCenter(1).above(), new BlockPos(-150, TideFins.FIN_FLOOR + 1, -20),
+                new BlockPos(150, TideFins.FIN_FLOOR + 1, -20))) {
+            check(!jp.revati.skyabyss.titan.tide.TideTravel.offIsland(b.getX() + 0.5, b.getY(), b.getZ() + 0.5), "off-island rule catches " + b.toShortString());
+        }
+        // 本当に遠い海は押し戻す
+        check(jp.revati.skyabyss.titan.tide.TideTravel.farOut(400, 0), "the far sea is not swept back");
+    }
+
     private static void run(ServerLevel back) {
+        checkSweep();
         TideFins.clear();
         TideBackTrials.resetGroup(back, TideBackSelfTest.TEST, false, null, true);
         // 建て: 貝の台は色つきの石、戸は封印の扉 (ワールドでは閉じている)、先端の台に宝箱
