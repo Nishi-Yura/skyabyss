@@ -170,7 +170,7 @@ public final class TutorialClient {
         int w = widest;
         out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.HINTS, jp.revati.skyabyss.hud.HudLayout.Region.BOTTOM_CENTER,
                 // 高さが足りなければ手前の行だけ (できた → 手引きの順)
-                (maxW, maxH) -> Math.min(lines.size(), maxH / 13) >= 1 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(w + 28, maxW), Math.min(lines.size(), maxH / 13) * 13) : null));
+                jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of("hints", lines.size(), w), (maxW, maxH) -> Math.min(lines.size(), maxH / 13) >= 1 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(w + 28, maxW), Math.min(lines.size(), maxH / 13) * 13) : null)));
     }
 
     static void render(GuiGraphics g, DeltaTracker delta) {

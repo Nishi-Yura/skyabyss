@@ -41,6 +41,10 @@ public final class CardFeed {
     private static final long FEED_FADE = 700L;
     private static final int FEED_MAX = 4;
     public static final int FEED_W = 220;
+    private static final boolean DEBUG_LOG = System.getenv("SKYABYSS_FEED_LOG") != null;
+    private static long lastRender = -1;
+    private static int capTop = Integer.MAX_VALUE;
+    private static int capW = FEED_W;
 
     public static Config.CardPlace place() {
         return Config.CARD_PLACE.get();
@@ -90,20 +94,10 @@ public final class CardFeed {
             return;
         }
         HudLayout.Rect rect;
+        capTop = Integer.MAX_VALUE;
+        capW = FEED_W;
         if (p == Config.CardPlace.COMPACT) {
-            // 右上: 右上の板 (誓い・背中の目盛り・仲間) とバニラの効果のアイコンの下に、右へ寄せて
-            int y = 4;
-            for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.BOSS_DOMAIN, HudLayout.Id.VOW, HudLayout.Id.BACK_GAUGE, HudLayout.Id.PARTY_LIST}) {
-                HudLayout.Rect r = HudManager.rect(id);
-                if (r != null) {
-                    y = Math.max(y, r.bottom() + 3);
-                }
-            }
-            HudLayout.Rect fx = HudManager.result().vanilla.get(HudLayout.Id.V_EFFECTS);
-            if (fx != null && fx.h() > 0 && fx.x() + fx.w() > g.guiWidth() - FEED_W) {
-                y = Math.max(y, fx.bottom() + 3);
-            }
-            rect = new HudLayout.Rect(g.guiWidth() - FEED_W - 4, y, FEED_W, 200);
+            rect = topRight(g);
         } else {
             // 左: 章の札・目的の帯・灯の帯・追跡中の依頼・経験値の列の下から、チャット欄の上まで
             int y = 4;
@@ -121,10 +115,15 @@ public final class CardFeed {
             }
             // 幅は画面の中央の字幕 (と手がかり) にかからない所まで。字幕が今出ているならその左の端まで
             int w = Math.max(110, Math.min(FEED_W, g.guiWidth() / 2 - 182));
-            for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.CAPTION, HudLayout.Id.HINTS}) {
-                HudLayout.Rect c = HudManager.rect(id);
-                if (c != null && c.x() > 3 + 60) {
-                    w = Math.min(w, c.x() - 3 - 4);
+            // 字幕 (帯を含めて中央から左右へ広がる) にかかる高さまでは今の幅、そこから下は字幕の左の端まで細くした幅で続ける
+            HudLayout.Rect cap = HudManager.rect(HudLayout.Id.CAPTION);
+            capTop = Integer.MAX_VALUE;
+            capW = w;
+            if (cap != null && cap.x() < 3 + w + 4 && cap.bottom() > y) {
+                capTop = cap.y() - 2;
+                capW = cap.x() - 3 - 18;
+                if (capW < 90) {
+                    limit = Math.min(limit, capTop - 1);
                 }
             }
             rect = new HudLayout.Rect(3, y, w, Math.max(0, limit - y));
@@ -140,7 +139,7 @@ public final class CardFeed {
         int used = 0;
         int from = shown.size();
         while (from > 0) {
-            int hh = lines(font, shown.get(from - 1), rect.w()).size() * 10 + 2;
+            int hh = lines(font, shown.get(from - 1), Math.min(rect.w(), capW)).size() * 10 + 2;
             if (used + hh > rect.h()) {
                 break;
             }
@@ -148,6 +147,42 @@ public final class CardFeed {
             from--;
         }
         shown = shown.subList(from, shown.size());
+        // 左に一行も入らない (GUI の倍率が大きい・字幕が長い) ときは、右上に出す
+        if (shown.isEmpty() && p == Config.CardPlace.LEFT_FEED && !live(now).isEmpty()) {
+            rect = topRight(g);
+            capTop = Integer.MAX_VALUE;
+            capW = rect.w();
+            shown = live(now);
+            used = 0;
+            from = shown.size();
+            while (from > 0) {
+                int hh = lines(font, shown.get(from - 1), rect.w()).size() * 10 + 2;
+                if (used + hh > rect.h()) {
+                    break;
+                }
+                used += hh;
+                from--;
+            }
+            shown = shown.subList(from, shown.size());
+            y = rect.y() + 1;
+        }
+        // どこにも入らないあいだは時計を止める (混んだ場面が過ぎてから出る。消えて見逃さない)
+        long dt = lastRender < 0 ? 0 : Math.min(250, now - lastRender);
+        lastRender = now;
+        if (shown.isEmpty() && dt > 0) {
+            synchronized (FEED) {
+                for (int i = 0; i < FEED.size(); i++) {
+                    Entry e = FEED.get(i);
+                    FEED.set(i, new Entry(e.head, e.body, e.accent, e.at + dt));
+                }
+            }
+            return;
+        }
+        if (DEBUG_LOG && HudManager.frame() % 40 == 0) {
+            SkyAbyss.LOGGER.info("[cardfeed] rect={} capTop={} capW={} live={} shown={}", rect, capTop, capW, live(now).size(), shown.size());
+        }
+        int capTop0 = capTop;
+        int capW0 = capW;
         for (Entry e : shown) {
             long age = now - e.at;
             float a = age > FEED_LIFE - FEED_FADE ? Mth.clamp((FEED_LIFE - age) / (float) FEED_FADE, 0f, 1f) : Mth.clamp(age / 180f, 0f, 1f);
@@ -160,9 +195,10 @@ public final class CardFeed {
             int slide = age < 180 ? (int) ((1f - age / 180f) * 8) : 0;
             String head = e.head.getString();
             int hw = font.width(head);
-            List<FormattedCharSequence> lines = lines(font, e, rect.w());
+            int ew = y + 24 > capTop0 ? Math.min(rect.w(), capW0) : rect.w();
+            List<FormattedCharSequence> lines = lines(font, e, ew);
             int hh = lines.size() * 10 + 1;
-            g.fill(x - slide, y, x + rect.w() - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
+            g.fill(x - slide, y, x + ew - slide, y + hh, ((int) (alpha * 0.55f)) << 24 | 0x0A0C10);
             g.fill(x - slide, y, x + 1 - slide, y + hh, alpha << 24 | e.accent);
             g.drawString(font, head, x + 4 - slide, y + 2, alpha << 24 | e.accent, true);
             int ly = y + 2;
@@ -193,6 +229,31 @@ public final class CardFeed {
 
     private static int rows(Font font, Entry e) {
         return lines(font, e, FEED_W).size();
+    }
+
+    // 右上 (右上の板とバニラの効果のアイコンの下)
+    private static HudLayout.Rect topRight(GuiGraphics g) {
+        int y = 4;
+        for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.BOSS_DOMAIN, HudLayout.Id.VOW, HudLayout.Id.BACK_GAUGE, HudLayout.Id.PARTY_LIST}) {
+            HudLayout.Rect r = HudManager.rect(id);
+            if (r != null) {
+                y = Math.max(y, r.bottom() + 3);
+            }
+        }
+        HudLayout.Rect fx = HudManager.result().vanilla.get(HudLayout.Id.V_EFFECTS);
+        if (fx != null && fx.h() > 0 && fx.x() + fx.w() > g.guiWidth() - FEED_W) {
+            y = Math.max(y, fx.bottom() + 3);
+        }
+        int w = Math.min(FEED_W, Math.max(110, g.guiWidth() / 2 - 100));
+        int x = g.guiWidth() - w - 4;
+        // 上中央の帯 (場所の名前・戦いの知らせ・技の名前・レベルアップ・中央の一行) と横で重なるなら、その下から
+        for (HudLayout.Id id : new HudLayout.Id[] {HudLayout.Id.BOSS_CUE, HudLayout.Id.BANNER, HudLayout.Id.LEVEL_UP, HudLayout.Id.CENTER_LINE}) {
+            HudLayout.Rect r = HudManager.rect(id);
+            if (r != null && r.x() + r.w() > x && r.bottom() + 3 > y && r.y() < g.guiHeight() / 2) {
+                y = r.bottom() + 3;
+            }
+        }
+        return new HudLayout.Rect(x, y, w, Math.max(0, g.guiHeight() / 2 - 20 - y));
     }
 
     @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)

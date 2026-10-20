@@ -266,20 +266,20 @@ public final class NoticeClient {
         // 操作の手がかり (HINT) は戦いの最中は出さない (順番待ちの時計は進むので、終わったあとに残らない)
         if (cap != null && CAPTIONS.alpha() > 0.01f && !(cap.kind == Notice.Kind.HINT && HudManager.inCombat())) {
             Component text = cap.value.text();
-            out.add(Request.of(Id.CAPTION, Region.CAPTION, (maxW, maxH) -> {
+            out.add(Request.of(Id.CAPTION, Region.CAPTION, jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of("cap", text, guiW), (maxW, maxH) -> {
                 CapPlan p = captionPlan(font, text, guiW, maxW, maxH);
                 capPlan = p;
                 return p == null ? null : new Size(p.w, p.h);
-            }).minH(20));
+            })).minH(20));
         }
         NoticeQueue.Entry<Line> mid = CENTER.current();
         if (mid != null && CENTER.alpha() > 0.01f) {
             Component text = mid.value.text();
-            out.add(Request.of(Id.CENTER_LINE, Region.TOP_CENTER, (maxW, maxH) -> {
+            out.add(Request.of(Id.CENTER_LINE, Region.TOP_CENTER, jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of("mid", text, guiW), (maxW, maxH) -> {
                 CenterPlan p = centerPlan(font, text, guiW, maxW, maxH);
                 centerPlan = p;
                 return p == null ? null : new Size(p.w, p.h);
-            }).minTop((int) (guiH * 0.36f) - 6));
+            })).minTop((int) (guiH * 0.36f) - 6));
         }
         NoticeQueue.Entry<Line> ban = BANNER.current();
         if (ban != null && BANNER.alpha() > 0.01f) {
@@ -287,7 +287,7 @@ public final class NoticeClient {
             Component text = ban.value.text();
             Component extra = ban.value.extra();
             boolean big = kind == Notice.Kind.PLACE || kind == Notice.Kind.CHAPTER || kind == Notice.Kind.AFTERMATH;
-            out.add(Request.of(Id.BANNER, Region.TOP_CENTER, (maxW, maxH) -> {
+            out.add(Request.of(Id.BANNER, Region.TOP_CENTER, jp.revati.skyabyss.hud.HudLayout.Fit.keyed(java.util.List.of("ban", kind, text, extra, guiW), (maxW, maxH) -> {
                 BannerPlan p = bannerPlan(font, kind, text, extra, guiW, maxW);
                 if (p != null && p.h > maxH && kind == Notice.Kind.CHAPTER) {
                     for (float k : new float[] {0.75f, 0.6f}) {
@@ -305,7 +305,7 @@ public final class NoticeClient {
                 }
                 bannerPlan = p;
                 return p == null ? null : new Size(p.w, p.h);
-            }).minTop((int) (guiH * (big ? 0.16f : 0.1f))));
+            })).minTop((int) (guiH * (big ? 0.16f : 0.1f))));
         }
     }
 
