@@ -139,6 +139,9 @@ public final class SiteFinder {
     }
 
     // biome = false なら群系を問わない (大きな構造物の最後の手段)
+    // 大きな範囲で許す水の割合 (標本の 1/この数)。都の最後の手段では 1/4
+    static int WET_FRACTION = 10;
+
     public static Area area(Ground p, int cx, int cz, int halfX, int halfZ, int maxRange, boolean fine, boolean biome) {
         int wet = 0;
         List<Integer> hs = new ArrayList<>();
@@ -156,7 +159,7 @@ public final class SiteFinder {
                 boolean coarse = halfX >= 16 || halfZ >= 16;
                 if (coarse ? p.wetCoarse(wx, wz) : p.wet(wx, wz)) {
                     // 都のような大きな範囲は、池や川が少し (1 割まで) あってもよい (整地で埋める。fillWater)
-                    if (halfX >= 60 && ++wet <= nx * nz / 10) {
+                    if (halfX >= 60 && ++wet <= nx * nz / WET_FRACTION) {
                         continue;
                     }
                     return new Area(false, 0, 0, 0, 0);
@@ -288,6 +291,33 @@ public final class SiteFinder {
                     }
                 }
             }
+        }
+        // 最後の手段: 都は必ず建てる。群系を問わず、水は 1/4 まで許し、段差のいちばん小さい所を選ぶ (整地で吸収する)
+        WET_FRACTION = 4;
+        try {
+            Area best = null;
+            int bx = 0;
+            int bz = 0;
+            for (int ai = 0; ai < 24; ai++) {
+                int deg = ((ai + 1) / 2) * 15 * (ai % 2 == 1 ? 1 : -1);
+                double a = Math.toRadians(deg);
+                for (int d = 260; d <= 420; d += 40) {
+                    int x = camp.getX() + (int) Math.round(Math.cos(a) * d);
+                    int z = camp.getZ() + (int) Math.round(Math.sin(a) * d);
+                    Area ar = area(p, x, z, 100, 100, 512, false, false);
+                    if (ar.ok() && (best == null || ar.max() - ar.min() < best.max() - best.min())) {
+                        best = ar;
+                        bx = x;
+                        bz = z;
+                    }
+                }
+            }
+            if (best != null) {
+                SkyAbyss.LOGGER.warn("Opening sites: the capital takes rough ground near {} {} (height range {})", bx, bz, best.max() - best.min());
+                return new Spot(new BlockPos(bx, best.median() + 1, bz), rotToward(camp.getX() - bx, camp.getZ() - bz, true), false);
+            }
+        } finally {
+            WET_FRACTION = 10;
         }
         return null;
     }

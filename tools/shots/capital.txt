@@ -35,6 +35,6 @@ cmd skyabyss dev opening view shelter 0 150 30 90 10
 waitchunks
 shot capital_far_east
 # 上から
-cmd skyabyss dev opening view shelter 0 0 180 0 90
+cmd skyabyss dev opening view shelter 0 0 80 0 90
 waitchunks
 shot capital_top
