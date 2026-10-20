@@ -1,0 +1,40 @@
+# はじまりの都「鐘の宿り」(docs/design/33 の 2。案 A) を撮る。./gradlew runShots -Pscript=tools/shots/capital.txt
+# ワールド名が opening で始まるので構造物が建つ。絵は run/shots/capital/shots/capital/*.png
+world opening_capital normal
+size 1280 720
+timeout 1200
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd skyabyss dev opening build
+cmd skyabyss dev opening info
+hud off
+# 南門の外から (野営地から来た向き)
+cmd skyabyss dev opening view shelter 0 150 24 180 8
+waitchunks
+shot capital_far_south
+cmd skyabyss dev opening view shelter 0 108 2 180 2
+waitchunks
+shot capital_gate_south
+# 広場から北の段 (鐘楼と砦)
+cmd skyabyss dev opening view shelter 0 20 2 180 4
+waitchunks
+shot capital_plaza_north
+# 段の上から鐘楼
+cmd skyabyss dev opening view shelter 0 60 8 180 6
+waitchunks
+shot capital_terrace
+# 西から社と壁、東から組合
+cmd skyabyss dev opening view shelter 0 150 30 270 10
+waitchunks
+shot capital_far_west
+cmd skyabyss dev opening view shelter 0 150 30 90 10
+waitchunks
+shot capital_far_east
+# 上から
+cmd skyabyss dev opening view shelter 0 0 180 0 90
+waitchunks
+shot capital_top

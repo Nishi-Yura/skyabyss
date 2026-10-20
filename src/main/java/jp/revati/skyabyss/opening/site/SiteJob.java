@@ -177,6 +177,20 @@ public final class SiteJob {
 
     // ---------------------------------------------------------------- 地面
     // 実際のブロックで、地面 (木・草・葉を除いた、いちばん上の固いブロック) の高さ。水なら WET
+    // 水の列の、水の下の地面の高さ (fillWater の整地の起点)
+    private int seabed(int x, int z) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, 0, z);
+        int top = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
+        for (int y = top; y > level.getMinBuildHeight(); y--) {
+            p.setY(y);
+            net.minecraft.world.level.block.state.BlockState st = level.getBlockState(p);
+            if (!st.isAir() && st.getFluidState().isEmpty()) {
+                return y;
+            }
+        }
+        return top;
+    }
+
     public int ground(int x, int z) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, 0, z);
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
@@ -256,6 +270,11 @@ public final class SiteJob {
                 if (g == WET && bp.wetOk) {
                     wetCols.add(BlockPos.asLong(x, 0, z));
                     groundCache[(x - x0) + (z - z0) * w] = origin.getY() - 1;
+                    continue;
+                }
+                if (g == WET && bp.fillWater) {
+                    // 都: 池や川は土で埋めて整える (水の底までは見ない。目標の高さまで土を盛る)
+                    groundCache[(x - x0) + (z - z0) * w] = Math.min(origin.getY() - 1, seabed(x, z));
                     continue;
                 }
                 if (g == WET) {
@@ -762,7 +781,7 @@ public final class SiteJob {
     private static int otherRadius(String kind) {
         return switch (kind) {
             case "camp" -> 12;
-            case "shelter" -> 16;
+            case "shelter" -> 110;
             case "footprint" -> SiteFinder.FOOT_HALF_Z;
             case "ribs" -> SiteFinder.RIB_HALF_LONG;
             default -> 3;
