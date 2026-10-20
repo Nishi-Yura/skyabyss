@@ -612,6 +612,113 @@ SUBJECTS["hall"] = {
 }
 
 
+# ---------------------------------------------------------------- 鍛冶場 3 案 (共鳴の炉と旅の職人の店。開いている建物)
+FORGE = "skyabyss:resonance_forge"
+
+
+def _tools(g, x, z, facing="north"):
+    g.set(x, 0, z, "anvil[facing=east]")
+    g.set(x + 1, 0, z, "smithing_table")
+    g.set(x + 2, 0, z, "grindstone[face=floor,facing=%s]" % facing)
+
+
+def smithy_a(g: Grid, rng=None):
+    """A「開いた鍛冶場」: 丸石と石レンガの工房 (29×19)。南の面が大きく開き、庇が張り出す。奥に共鳴の炉と大きな煙突、脇に職人の店 (樽と棚)"""
+    g.meta = {"rect": [-16, -11, 16, 13], "level": True}
+    x0, z0, x1, z1 = -14, -9, 14, 9
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 5, z1, "cobblestone", "stripped_spruce_log[axis=y]")
+    air(g, x0 + 2, 0, z1, x1 - 2, 3, z1)
+    for x in range(x0 + 2, x1 - 1, 4):
+        g.set(x, 2, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    box(g, x0 + 1, 6, z0 + 1, x1 - 1, 6, z1 - 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 3, 6)
+    for x in (x0 + 1, 0, x1 - 1):
+        box(g, x, 0, z1 + 3, x, 5, z1 + 3, "stripped_spruce_log[axis=y]")
+    # 炉と煙突 (北の壁ぎわ)
+    g.set(0, 0, z0 + 2, FORGE)
+    box(g, -1, 0, z0 + 1, 1, 1, z0 + 1, "polished_deepslate")
+    box(g, -1, 2, z0 + 1, 1, 12, z0 + 1, "deepslate_bricks")
+    g.set(0, 1, z0 + 2, "campfire[facing=south,lit=true,signal_fire=false,waterlogged=false]")
+    _tools(g, 4, z0 + 3)
+    g.set(-4, 0, z0 + 3, "blast_furnace[facing=south,lit=false]")
+    g.set(-6, 0, z0 + 3, "chest[facing=south,type=single,waterlogged=false]")
+    # 職人の店 (東の隅: 樽と棚、カウンター)
+    box(g, x1 - 5, 0, z0 + 1, x1 - 1, 0, z0 + 1, "barrel[facing=up,open=false]")
+    box(g, x1 - 5, 0, 2, x1 - 1, 0, 2, "spruce_slab[type=top]")
+    g.set(x1 - 3, 1, z0 + 1, "lantern[hanging=false]")
+    g.set(0, 5, 0, "lantern[hanging=true]")
+    g.set(-8, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+    g.mark("stand", 0, 0, 14)
+
+
+def smithy_b(g: Grid, rng=None):
+    """B「炉の塔」: 木の工房 (23×15) の西に、石の丸い炉の塔 (直径 7・高さ 12。炉がその足もと、上は煙突)。塔の火が夜の目印"""
+    g.meta = {"rect": [-18, -10, 14, 12], "level": True}
+    x0, z0, x1, z1 = -9, -7, 13, 7
+    box(g, x0 - 7, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 4, z1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    air(g, 0, 0, z1, 2, 2, z1)
+    for x in range(x0 + 2, x1 - 1, 3):
+        g.set(x, 2, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    box(g, x0 + 1, 5, z0 + 1, x1 - 1, 5, z1 - 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 5)
+    # 丸い炉の塔 (八角)
+    cx, cz, rr = x0 - 4, 0, 3
+    for y in range(0, 12):
+        for x in range(cx - rr, cx + rr + 1):
+            for z in range(cz - rr, cz + rr + 1):
+                d = abs(x - cx) + abs(z - cz)
+                if d == rr + 1 or (abs(x - cx) == rr and abs(z - cz) <= 1) or (abs(z - cz) == rr and abs(x - cx) <= 1):
+                    g.set(x, y, z, "deepslate_bricks" if y < 8 else "polished_blackstone_bricks")
+    air(g, cx + rr, 0, -1, cx + rr, 2, 1)
+    g.set(cx, 0, cz, FORGE)
+    g.set(cx, 1, cz, "campfire[facing=south,lit=true,signal_fire=true,waterlogged=false]")
+    g.set(cx, 12, cz, "lantern[hanging=false]")
+    _tools(g, 2, z0 + 2)
+    g.set(-3, 0, z0 + 2, "blast_furnace[facing=south,lit=false]")
+    box(g, x1 - 4, 0, z0 + 1, x1 - 1, 0, z0 + 1, "barrel[facing=up,open=false]")
+    g.set(5, 4, 0, "lantern[hanging=true]")
+    g.set(-3, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+    g.mark("stand", 1, 0, 12)
+
+
+def smithy_c(g: Grid, rng=None):
+    """C「屋根だけの工房」: 柱と屋根だけの開いた工房 (27×17)。真ん中に炉の台 (高い煙突)、まわりに道具の台と職人の荷車。市に近い作り"""
+    g.meta = {"rect": [-15, -10, 15, 12], "level": True}
+    x0, z0, x1, z1 = -13, -8, 13, 8
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    for x in range(x0, x1 + 1, 6):
+        for z in (z0, z1):
+            box(g, x, 0, z, x, 5, z, "stripped_spruce_log[axis=y]")
+    box(g, x0 - 1, 6, z0 - 1, x1 + 1, 6, z1 + 1, "spruce_planks")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 7)
+    box(g, -2, 0, -2, 2, 0, 2, "polished_deepslate")
+    g.set(0, 1, 0, FORGE)
+    box(g, -1, 2, -1, 1, 14, 1, "deepslate_bricks")
+    g.set(0, 15, 0, "campfire[facing=south,lit=true,signal_fire=true,waterlogged=false]")
+    _tools(g, -8, z0 + 2)
+    g.set(6, 0, z0 + 2, "blast_furnace[facing=south,lit=false]")
+    g.set(8, 0, z0 + 2, "chest[facing=south,type=single,waterlogged=false]")
+    # 職人の荷車 (東): 樽と車輪は柵で
+    box(g, 8, 0, 3, 11, 0, 5, "spruce_planks")
+    box(g, 8, 1, 3, 11, 1, 3, "barrel[facing=up,open=false]")
+    g.set(7, 0, 4, "spruce_fence")
+    g.set(12, 0, 4, "spruce_fence")
+    for x in (-8, 0, 8):
+        g.set(x, 5, 0, "lantern[hanging=true]")
+    g.set(-6, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+    g.mark("stand", 0, 0, 12)
+
+
+SUBJECTS["smithy"] = {
+    "title": "鍛冶場（共鳴の炉と旅の職人の店）",
+    "options": {"a": smithy_a, "b": smithy_b, "c": smithy_c},
+    "notes": {"a": "A 開いた鍛冶場（庇と煙突）", "b": "B 炉の塔（丸い石の炉）", "c": "C 屋根だけの工房（柱と荷車）"},
+    "eye": ((0, 1.6, 30), (0, 5, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
