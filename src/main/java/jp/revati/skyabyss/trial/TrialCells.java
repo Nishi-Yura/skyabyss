@@ -77,6 +77,11 @@ public final class TrialCells {
         register(new jp.revati.skyabyss.trial.ember.E06Flues());
         register(new jp.revati.skyabyss.trial.ember.E07Bellows());
         register(new jp.revati.skyabyss.trial.ember.E10Furnace());
+        register(new jp.revati.skyabyss.trial.ember.E03Chain());
+        register(new jp.revati.skyabyss.trial.ember.E04Carry());
+        register(new jp.revati.skyabyss.trial.ember.E08Mold());
+        register(new jp.revati.skyabyss.trial.ember.E11Cart());
+        register(new jp.revati.skyabyss.trial.ember.E12Nest());
         register(new W11Coffin());
         register(new W12Arena());
         register(new T02Crossing());

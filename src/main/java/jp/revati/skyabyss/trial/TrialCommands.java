@@ -173,6 +173,11 @@ public final class TrialCommands {
             case "e10" -> new BlockPos(16, y, 75);
             case "e06" -> new BlockPos(-16, y, 25);
             case "e07" -> new BlockPos(-16, y, 67);
+            case "e03" -> new BlockPos(-16, y, 10);
+            case "e04" -> new BlockPos(21, y, 111);
+            case "e08" -> new BlockPos(25, y, 8);
+            case "e11" -> new BlockPos(-22, y, 111);
+            case "e12" -> new BlockPos(0, y, 112);
             default -> null;
         };
         if (at == null) {

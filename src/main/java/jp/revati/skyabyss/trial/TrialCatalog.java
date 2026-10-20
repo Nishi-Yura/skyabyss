@@ -104,6 +104,22 @@ public final class TrialCatalog {
     public static final List<String> E10_NUMBERS = List.of("bearers", "waves");
     public static final List<String> E10_HAZARDS = List.of("vents");
     public static final List<String> E10_GOALS = List.of("no_scorch");
+    // 余燼の新作 (P3)。E03 鎖橋・E04 熾の道・E08 鋳型・E11 荷車・E12 巣
+    public static final List<String> E03_NUMBERS = List.of("hot_time", "cool_time");
+    public static final List<String> E03_HAZARDS = List.of("moths");
+    public static final List<String> E03_GOALS = List.of("no_burn");
+    public static final List<String> E04_NUMBERS = List.of("gust_period", "pools");
+    public static final List<String> E04_HAZARDS = List.of("gust");
+    public static final List<String> E04_GOALS = List.of("no_douse");
+    public static final List<String> E08_NUMBERS = List.of("steps", "show_speed");
+    public static final List<String> E08_HAZARDS = List.of("steam");
+    public static final List<String> E08_GOALS = List.of("one_pour");
+    public static final List<String> E11_NUMBERS = List.of("raids", "push_speed");
+    public static final List<String> E11_HAZARDS = List.of("moths");
+    public static final List<String> E11_GOALS = List.of("no_dent");
+    public static final List<String> E12_NUMBERS = List.of("rollers", "waves");
+    public static final List<String> E12_HAZARDS = List.of("vents");
+    public static final List<String> E12_GOALS = List.of("no_vent");
 
     static {
         String whale = Titans.STONE_WHALE;
@@ -169,6 +185,17 @@ public final class TrialCatalog {
         add(new Def("E09", ember, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("E10", ember, Slot.FIGHT, Kind.FIGHT, 2, false, false,
                 new Space(3, E10_NUMBERS, 2, E10_HAZARDS, E10_GOALS, List.of())));
+        // ---- 余燼の新作 5 (P3): 歩 E03・E04、智 E08、闘 E11・E12。★ は 2 / 3 / 3 / 2 / 3 (合わせて ★1:4・★2:5・★3:3)
+        add(new Def("E03", ember, Slot.WALK, Kind.CROSS, 2, false, false,
+                new Space(3, E03_NUMBERS, 0, E03_HAZARDS, E03_GOALS, List.of())));
+        add(new Def("E04", ember, Slot.WALK, Kind.CARRY, 3, false, false,
+                new Space(3, E04_NUMBERS, 0, E04_HAZARDS, E04_GOALS, List.of())));
+        add(new Def("E08", ember, Slot.WIT, Kind.SOLVE, 3, false, false,
+                new Space(3, E08_NUMBERS, 0, E08_HAZARDS, E08_GOALS, List.of())));
+        add(new Def("E11", ember, Slot.FIGHT, Kind.ESCORT, 2, false, false,
+                new Space(3, E11_NUMBERS, 2, E11_HAZARDS, E11_GOALS, List.of())));
+        add(new Def("E12", ember, Slot.FIGHT, Kind.FIGHT, 3, false, false,
+                new Space(3, E12_NUMBERS, 2, E12_HAZARDS, E12_GOALS, List.of())));
     }
 
     private static void add(Def def) {
