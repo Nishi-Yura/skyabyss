@@ -80,10 +80,10 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 2 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 3 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -103,11 +103,23 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>大鐘楼（語り部の家つき）</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">都の芯。鐘は一階の天井に吊り、語り部がその足もとに立つ（今と同じ）。煙の焚き火は家の前。採用した案を設計図に写して、次の建物（空見の砦）へ進む。</p>
+  <p class="extra">採用: A 石の鐘楼（設計図に写し済み）。</p>
   <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="bell_sheet.jpg" aria-label="大鐘楼（語り部の家つき） のシートを拡大"><img loading="lazy" src="bell_sheet.jpg" alt="大鐘楼（語り部の家つき） の比較シート"></button></figure></div>
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="bell_tower-a"><input type="radio" name="bell_tower" id="bell_tower-a" value="a"><span class="letter">A</span><span class="otext"><b>石の鐘楼</b><span>四角い石レンガの塔 9×9・高さ 24。四方のアーチの吹き抜け、頂に鐘の間と尖り屋根。家は東に別棟（木の家）</span></span></label><label class="opt" for="bell_tower-b"><input type="radio" name="bell_tower" id="bell_tower-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の鐘楼</b><span>深層岩の塔に鯨の骨の肋を四隅に立て、頂で合わせる。鐘は骨の梁に。国の印（鯨追い）が形に出る。家は石造りの別棟</span></span></label><label class="opt" for="bell_tower-c"><input type="radio" name="bell_tower" id="bell_tower-c" value="c"><span class="letter">C</span><span class="otext"><b>段の鐘楼</b><span>三段の塔（13→9→5）。一段目が鐘、二段目が語り部の部屋で中に階段。家は塔の中。灯りの庇が段ごとに</span></span></label></fieldset>
   <label class="note-l" for="bell_tower-note">直してほしい点 (任意)</label>
   <textarea id="bell_tower-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="keep" data-id="keep">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>空見の砦（天守のない見張りの砦）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">王の館ではない見張りの砦。塔だけが生きていて本丸は閉じている（碑が一行）。見張り塔に望遠鏡、記録の間は三章で開く。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="keep_sheet.jpg" aria-label="空見の砦（天守のない見張りの砦） のシートを拡大"><img loading="lazy" src="keep_sheet.jpg" alt="空見の砦（天守のない見張りの砦） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="keep-a"><input type="radio" name="keep" id="keep-a" value="a"><span class="letter">A</span><span class="otext"><b>四隅の塔の砦</b><span>44×40 の城壁（高さ 10）と四隅の塔、北東に見張り塔（高さ 30）。中に閉じた本丸（低い石の館）。今の骨組みに近い</span></span></label><label class="opt" for="keep-b"><input type="radio" name="keep" id="keep-b" value="b"><span class="letter">B</span><span class="otext"><b>一本の大塔</b><span>低い輪の壁の中に、太い見張り塔（15×15・高さ 40）だけが立つ。「塔だけが生きている」をそのまま形に。都のどこからでも見える</span></span></label><label class="opt" for="keep-c"><input type="radio" name="keep" id="keep-c" value="c"><span class="letter">C</span><span class="otext"><b>岩の上の砦</b><span>盛った岩（三段）の上に小さな砦と見張り塔。南の階段で上る。遠くから丘の上の砦に見える。砦の足もとに岩の段ができる</span></span></label></fieldset>
+  <label class="note-l" for="keep-note">直してほしい点 (任意)</label>
+  <textarea id="keep-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -115,7 +127,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 2;
+  const total = 3;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
