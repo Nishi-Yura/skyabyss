@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 // ボスの技の名前の表示 (心臓・中ボス共通。docs/design/18_notices.md の 6.1)。
-// SMALL (既定): ボスバーのすぐ下に小さな一行 (印は 8px)。短く出てすっと消える。続けて来たら下へ最大 3 行まで積み、同じ技は一行にまとめる。
+// SMALL (既定): ボスバーのすぐ下に小さな一行 (印は 10px)。短く出てすっと消える。続けて来たら下へ最大 3 行まで積み、同じ技は一行にまとめる。
 //   画面の中央・足もとの予告には届かない。
 // FULL: 従来どおり画面の上のほうに印と名前と残りの帯を大きく一つだけ。
 // OFF: 出さない。
@@ -86,7 +86,7 @@ public final class BossAttackCue {
         }
         int w = 0;
         for (Entry e : ENTRIES) {
-            w = Math.max(w, mc.font.width(e.label) + (e.icon == null ? 0 : 10) + 6);
+            w = Math.max(w, mc.font.width(e.label) + (e.icon == null ? 0 : 12) + 6);
         }
         out.add(Request.of(Id.BOSS_CUE, Region.TOP_CENTER, w, ENTRIES.size() * 11));
     }
@@ -124,12 +124,12 @@ public final class BossAttackCue {
             a *= 0.85f;
             int ia = Math.max(4, (int) (a * 255));
             int lw = mc.font.width(e.label);
-            int iconW = e.icon == null ? 0 : 10;
+            int iconW = e.icon == null ? 0 : 12;
             int x = cx - (lw + iconW) / 2;
             g.fill(x - 3, y - 1, x + lw + iconW + 3, y + 9, ((int) (a * 110) << 24) | 0x0A0E18);
             if (e.icon != null) {
                 g.setColor(1f, 1f, 1f, a);
-                g.blit(e.icon, x, y, 8, 8, 0, 0, 32, 32, 32, 32);
+                g.blit(e.icon, x - 1, y - 1, 10, 10, 0, 0, 32, 32, 32, 32);
                 g.setColor(1f, 1f, 1f, 1f);
             }
             g.drawString(mc.font, e.label, x + iconW, y, (ia << 24) | 0xEADFC0, false);

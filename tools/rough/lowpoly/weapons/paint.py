@@ -21,6 +21,7 @@ PAL = dict(
     CORAL=A_([(150, 48, 84), (190, 66, 104), (222, 92, 128), (242, 126, 154), (255, 164, 182)]),
     CORALO=A_([(176, 78, 24), (214, 106, 34), (240, 138, 52), (255, 172, 84)]),
     KELP=A_([(26, 66, 38), (38, 92, 48), (56, 120, 62), (82, 148, 82)]),
+    SASH=A_([(92, 42, 66), (134, 60, 88), (172, 86, 112), (204, 120, 142), (228, 160, 174)]),
     PINK=A_([(240, 130, 180), (255, 170, 205), (255, 210, 228), (255, 240, 248)]),
     # 雷翼
     STEEL=A_([(26, 30, 46), (38, 44, 64), (52, 60, 84), (68, 78, 106), (86, 98, 128), (108, 122, 152)]),
@@ -126,6 +127,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         put(m("acc"), coral)
         wet = np.isin(mats, ["guard", "grip"]) & (hash1(xx * 3 + yy * 19, 4) < 0.05) & (lit > 0.2)
         put(wet, pick(WE, A_(5)))
+        # 帯 (潮殻の祭具の布): 褪せた薔薇色、縦の織り筋、端はすり切れ
+        SA = PAL["SASH"]
+        fray = (np.floor(Y * 0.8 + X * 0.25) % 3 == 0)
+        put(m("cloth"), pick(SA, shaded(SA, 0.52, 0.30, 0.10) - fray * (n_mid > 0.35) - (pit < 0.05)))
+        # 使い込み (様式 C): 藤壺 (石の上の白い点) と、貝の欠けた暗い画素
+        bar = np.isin(mats, ["guard", "grip", "spine"]) & (hash1(xx * 13 + yy * 7 + fi * 5, 9) < 0.075) & (D > 0.8)
+        put(bar, pick(PE, np.floor(2.0 + 1.5 * lit + bay).astype(int)))
+        chip = np.isin(mats, ["main", "edge"]) & (hash1(xx * 11 + yy * 5 + fi, 6) < 0.03) & (D > 0.9)
+        put(chip, pick(WE, A_(1)))
         dark_c = PAL["DARK"]
     elif titan == "thunder":
         CP, ST, PA, PL, CD = PAL["COPPER"], PAL["STEEL"], PAL["PATINA"], PAL["PLUME"], PAL["CORD"]

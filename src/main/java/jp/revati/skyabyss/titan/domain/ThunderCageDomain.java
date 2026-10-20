@@ -16,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 // 雷翼の心臓の領域「雷の檻」(docs/design/12 の 5.5)。部屋が雷の格子で区切られる。
 // 64 tick ごとに一巡: 格子の線 (間隔 GRID = 7、幅 2.2 = 半幅 1.1) がすべて同時に予告 (1.5 秒) され、落ちる。線は床から天井までの柱
@@ -160,6 +162,40 @@ public final class ThunderCageDomain extends HeartDomain {
     }
 
     @Override
+    protected Hint standing() {
+        if (stage >= NODES) {
+            return null;
+        }
+        return chargeStart >= 0 ? new Hint("gui.skyabyss.domain.thunder_cage.hit", stage, NODES)
+                : new Hint("gui.skyabyss.domain.thunder_cage.wait", stage, NODES);
+    }
+
+    @Override
+    protected Block bodyBlock() {
+        return Blocks.LIGHTNING_ROD;
+    }
+
+    @Override
+    protected float bodyWidth() {
+        return 2.2f;
+    }
+
+    @Override
+    protected float bodyHeight() {
+        return 2.2f;
+    }
+
+    @Override
+    protected Block capBlock(boolean lit) {
+        return lit ? Blocks.GLOWSTONE : Blocks.WAXED_OXIDIZED_COPPER;
+    }
+
+    @Override
+    protected boolean lit(Node n, int t) {
+        return charging() == n.index || n.flash > 0;
+    }
+
+    @Override
     protected void puzzleBegin(ServerLevel level) {
         java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
         java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
@@ -205,6 +241,8 @@ public final class ThunderCageDomain extends HeartDomain {
             pending = null;
             chargeStart = -1;
             readyAt = t + fast(RESET);
+            n.flash = 16;
+            n.flashRgb = 0xE0402A;
             burst(level, n, ParticleTypes.FLASH, 1, 0.1, 0);
             tell(level, "message.skyabyss.domain.thunder_cage.spent");
         }
@@ -217,6 +255,8 @@ public final class ThunderCageDomain extends HeartDomain {
         }
         if (chargeStart >= 0 && node.index == order[stage]) {
             node.done = true;
+            node.flash = 14;
+            node.flashRgb = 0x66E08A;
             if (pending != null) {
                 pending.cancel();
                 pending = null;

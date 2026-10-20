@@ -1,0 +1,330 @@
+# 潮殻の武器の確認 (tools/gen_gear_tide_shots.py が作る)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+weapontier common
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_common_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_common_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_common_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_shield_common_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_common_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_common_tpSide
+weapontier rare
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_rare_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_rare_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_rare_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_shield_rare_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_rare_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_rare_tpSide
+weapontier legend
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_shell_trident
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tide_shell_trident_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_harpoon
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_harpoon_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_tidecaller_claw_legend_tpSide
+cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
+mainhand right
+perspective first
+bodyyaw 0
+hud on
+close
+wait 8
+chat clear
+shot hold_coral_shield_legend_fpR
+perspective front
+bodyyaw 0
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_legend_tpR
+perspective front
+bodyyaw 50
+hud off
+close
+wait 8
+chat clear
+shot hold_coral_shield_legend_tpSide
+weapontier legend
+cmd gamemode creative
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd summon item -3.0 -59 4 {Item:{id:"skyabyss:tide_shell_trident",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie -3.0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:tide_shell_trident",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+cmd summon item -1.0 -59 4 {Item:{id:"skyabyss:coral_harpoon",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie -1.0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:coral_harpoon",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+cmd summon item 1.0 -59 4 {Item:{id:"skyabyss:tidecaller_claw",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie 1.0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:tidecaller_claw",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+cmd summon item 3.0 -59 4 {Item:{id:"skyabyss:coral_shield",count:1},PickupDelay:32767,Age:-32768}
+cmd summon zombie 3.0 -60 -1 {PersistenceRequired:1b,NoAI:1b,Rotation:[0f,0f],HandItems:[{id:"skyabyss:coral_shield",count:1},{}],ArmorItems:[{},{},{},{}],HandDropChances:[0f,0f]}
+camera 0 -58.4 8 180 -6
+perspective first
+hud off
+wait 30
+shot ground_and_mob_all
+camera 0 -59.2 2.4 180 25
+wait 6
+shot ground_close
+camera 0 -59.6 -6.0 0 3
+wait 6
+shot mob_held_close
+cmd kill @e[type=!minecraft:player,distance=..64]
+cmd clear @s
+cmd give @s skyabyss:tide_shell_trident
+cmd give @s skyabyss:coral_harpoon
+cmd give @s skyabyss:tidecaller_claw
+cmd give @s skyabyss:coral_shield
+cmd gamemode survival
+guiscale 4
+chat clear
+open inventory
+wait 10
+shot gui_inventory
+close
+quit

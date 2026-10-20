@@ -98,7 +98,7 @@ public final class NoticeClient {
         // ボスバーの下端を知る (上の帯・レベルアップ・中央の演出が、その下へずれるため)。ほかの担当が増分を変えたあとに見る
         @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST, receiveCanceled = true)
         static void onBossBar(net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent.BossEventProgress event) {
-            jp.revati.skyabyss.client.hud.HudManager.noteBossBottom(event.getY() + event.getIncrement());
+            jp.revati.skyabyss.client.hud.HudManager.noteBossBottom(event.getY() + event.getIncrement() - jp.revati.skyabyss.client.titan.BossBarShift.UP);
         }
 
         @SubscribeEvent

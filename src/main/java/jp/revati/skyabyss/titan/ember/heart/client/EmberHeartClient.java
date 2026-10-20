@@ -129,7 +129,7 @@ public final class EmberHeartClient {
             return;
         }
         event.setCanceled(true);
-        PhasedBossBar.draw(event.getGuiGraphics(), mc, heart.isEnraged() ? BAR_FURY : BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY());
+        PhasedBossBar.draw(event.getGuiGraphics(), mc, heart.isEnraged() ? BAR_FURY : BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY() - jp.revati.skyabyss.client.titan.BossBarShift.UP);
         event.setIncrement(event.getIncrement() + PhasedBossBar.EXTRA_HEIGHT);
     }
 }

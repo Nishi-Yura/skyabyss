@@ -78,6 +78,15 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0):
         pores = (hash1(xx * 5 + yy * 11 + fi, 3) < 0.08) & (D > 0.9)
         put(m("acc"), np.where(pores[..., None], pick(CO, cidx - 2) * 0.7, coral))
         put(m("cloth"), pick(WE, shaded(WE, 0.40, 0.3, 0.08) - weave * (n_mid > 0.3) - (stripe_v & (n_mid > 0.55))))
+        # 帯 (薔薇色の布、縦の織り筋とすり切れ)・海藻の縄・使い込み (様式 C)
+        SA = PAL["SASH"]
+        fray = (np.floor(Y * 0.8 + X * 0.25) % 3 == 0)
+        put(m("sash"), pick(SA, shaded(SA, 0.52, 0.30, 0.10) - fray * (n_mid > 0.35) - (pit < 0.05)))
+        put(m("cord"), pick(KE, np.floor(1.4 + 1.6 * lit + 0.8 * bay - 1.0 * ((LU + LV) % 3 == 0)).astype(int)))
+        chip = np.isin(mats, ["main", "sec", "edge"]) & (hash1(xx * 11 + yy * 5 + fi, 6) < 0.03) & (D > 0.9)
+        put(chip, pick(WE, A_(1)))
+        wornm = np.isin(mats, ["main"]) & (hash1(xx * 7 + yy * 3 + fi, 8) < 0.06) & (D > 0.9)
+        put(wornm, pick(PE, np.floor(2.0 + 1.5 * lit + bay).astype(int)))
     elif titan == "thunder":
         ST, CP, PA, PL = PAL["STEEL"], PAL["COPPER"], PAL["PATINA"], PAL["PLUME"]
         brush = hash1(np.floor(X * 2.0) * 3 + fi, 6)

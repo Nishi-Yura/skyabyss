@@ -16,6 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 // 余燼の心臓の領域「炉心」(docs/design/13 の 5.5)。床が炉の底の熾になり、二つの組の床が交互に熱くなる。
 //  一巡 = 4 つの型を 60 tick おきに: 輪 A (外側の帯と中の帯)、輪 B (その間の帯)、扇 A (3 方向)、扇 B (その間の 3 方向)。
@@ -164,6 +166,8 @@ public final class HearthCoreDomain extends HeartDomain {
                 }
                 if (n.state >= QUENCH) {
                     n.done = true;
+                    n.flash = 14;
+                    n.flashRgb = 0x66E08A;
                     burst(level, n, ParticleTypes.LARGE_SMOKE, 30, 0.6, 0.1);
                     tone(level, n.pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, 2.5f, 0.8f);
                     tell(level, "message.skyabyss.domain.hearth_core.step", solvedCount(), NODES);
@@ -173,6 +177,31 @@ public final class HearthCoreDomain extends HeartDomain {
                 n.state--;
             }
         }
+    }
+
+    @Override
+    protected Hint standing() {
+        return new Hint("gui.skyabyss.domain.hearth_core.cool", solvedCount(), NODES);
+    }
+
+    @Override
+    protected Block bodyBlock() {
+        return Blocks.MAGMA_BLOCK;
+    }
+
+    @Override
+    protected float bodyWidth() {
+        return 1.2f;
+    }
+
+    @Override
+    protected Block capBlock(boolean lit) {
+        return lit ? Blocks.SHROOMLIGHT : Blocks.BLACKSTONE;
+    }
+
+    @Override
+    protected boolean lit(Node n, int t) {
+        return !n.done;
     }
 
     @Override

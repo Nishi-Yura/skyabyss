@@ -24,10 +24,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -72,6 +75,12 @@ public abstract class HeartDomain {
         public boolean done;
         // 仕掛けごとの数字 (水門: 開いている残り tick / 核: しゃがんだ分)
         public int state;
+        // 光らせる残り tick と、その色 (0 なら通常の色)。手本・叩いた・間違えたの合図
+        public int flash;
+        public int flashRgb;
+        // 見える物 (本体・上の玉・光の線) の生き物と、直近に描いた見た目の鍵
+        final List<UUID> props = new ArrayList<>();
+        String propKey = "";
 
         Node(int index, Vec3 pos) {
             this.index = index;
@@ -220,9 +229,10 @@ public abstract class HeartDomain {
                 ticks = 0;
                 spawnNodes(level);
                 puzzleBegin(level);
-                tell(level, "message.skyabyss.domain." + id + ".goal");
-                tell(level, "message.skyabyss.domain.invulnerable");
+                announce(level, "message.skyabyss.domain." + id + ".goal");
+                announce(level, "message.skyabyss.domain.invulnerable");
                 send(level, DomainPayload.progress(id, percent(), solvedCount()));
+                standingHint(level, true);
             }
             return true;
         }
@@ -232,6 +242,17 @@ public abstract class HeartDomain {
                 keepNodes(level);
             }
             puzzleTick(level, ticks);
+            for (Node n : nodes) {
+                if (n.flash > 0) {
+                    n.flash--;
+                }
+            }
+            if (ticks % 2 == 0) {
+                updateProps(level, ticks);
+            }
+            if (ticks % 5 == 0) {
+                standingHint(level, ticks % 100 == 0);
+            }
             if (ticks % 6 == 0) {
                 ambient(level, ticks);
                 markNodes(level, ticks);
@@ -265,6 +286,11 @@ public abstract class HeartDomain {
             stun = STUN_TICKS;
         }
         send(level, DomainPayload.end(id, shattered));
+        if (shattered) {
+            for (ServerPlayer p : inRoom()) {
+                p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0f, 1.0f);
+            }
+        }
         onEnd(level, shattered);
     }
 
@@ -366,7 +392,9 @@ public abstract class HeartDomain {
             Node n = new Node(i, snap(level, spots.get(i)));
             nodes.add(n);
             n.entity = spawnBox(level, n.pos);
+            n.propKey = "";
         }
+        updateProps(level, 0);
     }
 
     // 叩ける当たりの箱 (見えない Interaction)。幅 1.4・高さ 2.2。落ちたら保存されない (再読み込みでは DomainNodeEvents が片付ける)
@@ -397,11 +425,21 @@ public abstract class HeartDomain {
                 }
                 n.entity = spawnBox(level, n.pos);
             }
+            boolean missing = n.props.size() < 3;
+            for (UUID u : n.props) {
+                missing |= level.getEntity(u) == null;
+            }
+            if (missing) {
+                removeProps(level, n);
+                n.propKey = "";
+            }
         }
+        updateProps(level, ticks);
     }
 
     private void removeNodes(ServerLevel level) {
         for (Node n : nodes) {
+            removeProps(level, n);
             if (n.entity != null) {
                 NODE_OWNER.remove(n.entity);
                 Entity e = level.getEntity(n.entity);
@@ -483,13 +521,207 @@ public abstract class HeartDomain {
         level.playSound(null, at.x, at.y + 1, at.z, sound, SoundSource.HOSTILE, volume, pitch);
     }
 
-    // 部屋の人に一行 (仕掛けの手がかり・進み)
-    protected void tell(ServerLevel level, String key, Object... args) {
+    // 開始時の一行 (従来の通知欄。手順の案内は下の hint = 画面の固定の板が受け持つ)
+    protected void announce(ServerLevel level, String key, Object... args) {
         for (ServerPlayer p : inRoom()) {
             if (!(p instanceof FakePlayer)) {
                 Notice.bar(p, ModText.objective(key, args));
             }
         }
+    }
+
+    // ---- 手順の案内 (画面の固定の板。client/titan/domain/DomainClient) ----
+    // 「いま何をするか」の常時の一行 (標準の案内)。変わったときだけ送る。null なら出さない
+    public record Hint(String key, int a, int b) {
+    }
+
+    protected Hint standing() {
+        return null;
+    }
+
+    private String lastStanding = "";
+
+    private void standingHint(ServerLevel level, boolean force) {
+        Hint h = standing();
+        String sig = h == null ? "" : h.key + "/" + h.a + "/" + h.b;
+        if (force || !sig.equals(lastStanding)) {
+            lastStanding = sig;
+            if (h != null) {
+                send(level, DomainPayload.hint(id, h.key, h.a, h.b, 0));
+            }
+        }
+    }
+
+    // 試験用: 最後に出した標準の案内
+    public String lastStandingSig() {
+        return lastStanding;
+    }
+
+    // 一瞬の合図 (正解・失敗・状況)。鍵の末尾で成否が決まる: step/open/grounded = 正解、wrong/close/spent = 失敗。数字は a b の順
+    protected void tell(ServerLevel level, String key, Object... args) {
+        int mood = key.endsWith(".wrong") || key.endsWith(".close") || key.endsWith(".spent") ? 2
+                : key.endsWith(".step") || key.endsWith(".open") || key.endsWith(".grounded") ? 1 : 3;
+        int a = args.length > 0 && args[0] instanceof Number n ? n.intValue() : 0;
+        int b = args.length > 1 && args[1] instanceof Number n ? n.intValue() : 0;
+        send(level, DomainPayload.hint(id, key, a, b, mood));
+        lastTell = key;
+        for (ServerPlayer p : inRoom()) {
+            if (mood == 1) {
+                p.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.9f, 1.3f);
+            } else if (mood == 2) {
+                p.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1.0f, 0.55f);
+                p.playNotifySound(SoundEvents.VILLAGER_NO, SoundSource.PLAYERS, 0.6f, 1.0f);
+            }
+        }
+    }
+
+    private static String lastTell = "";
+
+    public static String lastTell() {
+        return lastTell;
+    }
+
+    // ---- 見える仕掛け (Display の生き物。クライアントの描画の追加なしで同期される) ----
+    // 本体 (柱) + 上の玉 + 空へ伸びる光の線。どれも明るさ最大・輪郭が光る。色は仕掛けの状態 (markColor / 合図の色)
+    protected Block bodyBlock() {
+        return Blocks.BONE_BLOCK;
+    }
+
+    // 上の玉: 光っている (lit) とき / いないとき
+    protected Block capBlock(boolean lit) {
+        return lit ? Blocks.GLOWSTONE : Blocks.BONE_BLOCK;
+    }
+
+    protected boolean lit(Node n, int t) {
+        return n.flash > 0;
+    }
+
+    protected float bodyWidth() {
+        return 1.4f;
+    }
+
+    protected float bodyHeight() {
+        return 2.2f;
+    }
+
+    private static final Block[] BEAM_PALETTE = {Blocks.WHITE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.RED_CONCRETE,
+            Blocks.LIGHT_BLUE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE};
+    private static final int[] BEAM_RGB = {0xF0F4F8, 0xF2D23C, 0x66E08A, 0xE0402A, 0x4DC3FF, 0xF08A26, 0xA070E0, 0xA0A8B4};
+
+    private static Block beamBlock(int rgb) {
+        int best = 0;
+        long bd = Long.MAX_VALUE;
+        for (int i = 0; i < BEAM_RGB.length; i++) {
+            long dr = ((rgb >> 16) & 255) - ((BEAM_RGB[i] >> 16) & 255);
+            long dg = ((rgb >> 8) & 255) - ((BEAM_RGB[i] >> 8) & 255);
+            long db = (rgb & 255) - (BEAM_RGB[i] & 255);
+            long d = dr * dr + dg * dg + db * db;
+            if (d < bd) {
+                bd = d;
+                best = i;
+            }
+        }
+        return BEAM_PALETTE[best];
+    }
+
+    // 光の線の高さ
+    private static final float BEAM_HEIGHT = 18f;
+
+    private void updateProps(ServerLevel level, int t) {
+        for (Node n : nodes) {
+            int rgb = n.flash > 0 && n.flashRgb != 0 ? n.flashRgb : markColor(n, t);
+            boolean lit = lit(n, t);
+            String key = rgb + "/" + lit + "/" + n.done;
+            if (key.equals(n.propKey) && n.props.size() == 3) {
+                continue;
+            }
+            n.propKey = key;
+            float w = bodyWidth();
+            float h = bodyHeight();
+            float bw = lit ? 0.5f : 0.24f;
+            if (n.props.size() < 3) {
+                removeProps(level, n);
+                n.props.add(spawnDisplay(level, n.pos, bodyBlock(), rgb, -w / 2, 0f, -w / 2, w, h, w));
+                n.props.add(spawnDisplay(level, n.pos, capBlock(lit), rgb, -0.6f, h + 0.2f, -0.6f, 1.2f, 1.2f, 1.2f));
+                n.props.add(spawnDisplay(level, n.pos, beamBlock(rgb), rgb, -bw / 2, h + 1.4f, -bw / 2, bw, BEAM_HEIGHT, bw));
+            } else {
+                retarget(level, n.props.get(0), bodyBlock(), rgb, -w / 2, 0f, -w / 2, w, h, w);
+                retarget(level, n.props.get(1), capBlock(lit), rgb, -0.6f, h + 0.2f, -0.6f, 1.2f, 1.2f, 1.2f);
+                retarget(level, n.props.get(2), beamBlock(rgb), rgb, -bw / 2, h + 1.4f, -bw / 2, bw, BEAM_HEIGHT, bw);
+            }
+        }
+    }
+
+    private static net.minecraft.nbt.ListTag floats(float... v) {
+        net.minecraft.nbt.ListTag l = new net.minecraft.nbt.ListTag();
+        for (float f : v) {
+            l.add(net.minecraft.nbt.FloatTag.valueOf(f));
+        }
+        return l;
+    }
+
+    private static void fill(CompoundTag tag, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
+        tag.put("block_state", net.minecraft.nbt.NbtUtils.writeBlockState(block.defaultBlockState()));
+        CompoundTag tr = new CompoundTag();
+        tr.put("translation", floats(tx, ty, tz));
+        tr.put("scale", floats(sx, sy, sz));
+        tr.put("left_rotation", floats(0, 0, 0, 1));
+        tr.put("right_rotation", floats(0, 0, 0, 1));
+        tag.put("transformation", tr);
+        CompoundTag br = new CompoundTag();
+        br.putInt("block", 15);
+        br.putInt("sky", 15);
+        tag.put("brightness", br);
+        tag.putInt("glow_color_override", rgb & 0xFFFFFF);
+        tag.putBoolean("Glowing", true);
+        tag.putFloat("view_range", 3f);
+        tag.putFloat("shadow_radius", 0f);
+        tag.putFloat("width", 0f);
+        tag.putFloat("height", 0f);
+    }
+
+    private UUID spawnDisplay(ServerLevel level, Vec3 pos, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
+        net.minecraft.world.entity.Display.BlockDisplay d = EntityType.BLOCK_DISPLAY.create(level);
+        CompoundTag tag = d.saveWithoutId(new CompoundTag());
+        fill(tag, block, rgb, tx, ty, tz, sx, sy, sz);
+        d.load(tag);
+        d.setPos(pos.x, pos.y, pos.z);
+        d.addTag(NODE_TAG);
+        d.setNoGravity(true);
+        level.addFreshEntity(d);
+        return d.getUUID();
+    }
+
+    private void retarget(ServerLevel level, UUID id, Block block, int rgb, float tx, float ty, float tz, float sx, float sy, float sz) {
+        Entity e = level.getEntity(id);
+        if (e instanceof net.minecraft.world.entity.Display.BlockDisplay d) {
+            CompoundTag tag = d.saveWithoutId(new CompoundTag());
+            fill(tag, block, rgb, tx, ty, tz, sx, sy, sz);
+            d.load(tag);
+        }
+    }
+
+    private void removeProps(ServerLevel level, Node n) {
+        for (UUID u : n.props) {
+            Entity e = level.getEntity(u);
+            if (e != null) {
+                e.discard();
+            }
+        }
+        n.props.clear();
+    }
+
+    // 試験用: 仕掛けの見える物の数 (一つにつき 本体・玉・線 = 3)
+    public static int propCount(HeartDomain d, ServerLevel level) {
+        int c = 0;
+        for (Node n : d.nodes) {
+            for (UUID u : n.props) {
+                if (level.getEntity(u) != null) {
+                    c++;
+                }
+            }
+        }
+        return c;
     }
 
     // 仕掛けの印 (6 tick ごと): 済みは緑、まだは白。仕掛けごとに markColor で替える
