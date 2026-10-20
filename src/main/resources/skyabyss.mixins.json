@@ -12,7 +12,8 @@
     "ToastShiftMixin",
     "ChatLinesMixin",
     "ToastAddMixin",
-    "AdvancementToastAccessor"
+    "AdvancementToastAccessor",
+    "ContainerLabelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
