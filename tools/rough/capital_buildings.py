@@ -886,6 +886,92 @@ SUBJECTS["houses"] = {
 }
 
 
+# ---------------------------------------------------------------- 門と壁 3 案 (四門: 鯨門・潮門・風門・灰門。門の碑がその巨神を言う。壁は 40 ブロックの一区間で描く)
+def _wall_run(g, x0, x1, z, h=7, t=3, wall="stone_bricks", base="cobbled_deepslate"):
+    box(g, x0, -1, z - t + 1, x1, -1, z, base)
+    box(g, x0, 0, z - t + 1, x1, h, z, wall)
+    for x in range(x0, x1 + 1, 2):
+        g.set(x, h + 1, z - t + 1, wall)
+
+
+def gate_a(g: Grid, rng=None):
+    """A「石の門」: 石レンガの壁 (厚さ 3・高さ 8) に、二つの四角い門塔 (高さ 14) が門 (幅 7・高さ 6) をはさむ。門の上に深層岩の帯と灯り、両脇に碑"""
+    g.meta = {"rect": [-22, -6, 22, 8], "level": True}
+    _wall_run(g, -20, 20, 0)
+    air(g, -3, 0, -2, 3, 5, 0)
+    box(g, -3, -1, -2, 3, -1, 0, "stone_bricks")
+    box(g, -3, 6, -2, 3, 7, 0, "polished_deepslate")
+    for sx in (-1, 1):
+        x0 = sx * 7 - 3 if sx > 0 else sx * 7 - 3
+        x0 = 4 if sx > 0 else -10
+        box(g, x0, 0, -4, x0 + 6, 13, 2, "stone_bricks")
+        air(g, x0 + 1, 1, -3, x0 + 5, 12, 1)
+        box(g, x0, 14, -4, x0 + 6, 14, 2, "deepslate_tile_slab[type=bottom]")
+        g.set(x0 + 3, 15, -1, "lantern[hanging=false]")
+        for y in (5, 10):
+            air(g, x0 + 3, y, 2, x0 + 3, y + 1, 2)
+    g.set(-4, 5, 1, "lantern[hanging=false]")
+    g.set(4, 5, 1, "lantern[hanging=false]")
+    g.set(6, 0, 3, "skyabyss:tablet[facing=south,standing=true]")
+    g.mark("stand", 0, 0, 12)
+
+
+def gate_b(g: Grid, rng=None):
+    """B「鯨骨の門」: 壁は石だが、門の上に鯨の顎の骨 (骨ブロックの弧) が架かる。壁には 12 ごとに骨の柱。門の脇に骨の牙の碑"""
+    g.meta = {"rect": [-22, -6, 22, 8], "level": True}
+    _wall_run(g, -20, 20, 0)
+    air(g, -3, 0, -2, 3, 5, 0)
+    box(g, -3, -1, -2, 3, -1, 0, "stone_bricks")
+    box(g, -3, 6, -2, 3, 7, 0, "polished_deepslate")
+    # 顎の骨: 門の前に立つ二本の骨が上で合わさる
+    for sx in (-1, 1):
+        for y in range(0, 9):
+            g.set(sx * 5, y, 2, "bone_block[axis=y]")
+        for i in range(1, 5):
+            g.set(sx * (5 - i), 8 + i, 2, "bone_block[axis=y]")
+    box(g, -1, 13, 2, 1, 13, 2, "bone_block[axis=x]")
+    g.set(0, 12, 2, "lantern[hanging=true]")
+    for x in (-16, -8, 8, 16):
+        box(g, x, 0, 1, x, 10, 1, "bone_block[axis=y]")
+        g.set(x, 11, 1, "lantern[hanging=false]")
+    g.set(7, 0, 3, "skyabyss:tablet[facing=south,standing=true]")
+    g.mark("stand", 0, 0, 12)
+
+
+def gate_c(g: Grid, rng=None):
+    """C「二重の門」: 門の外に低い外壁 (高さ 4) の小さな前庭 (馬出し)。外壁の門と内壁の門が食い違い、前庭に碑と灯り。守りの国らしい門"""
+    g.meta = {"rect": [-22, -6, 22, 14], "level": True}
+    _wall_run(g, -20, 20, 0)
+    air(g, -3, 0, -2, 3, 5, 0)
+    box(g, -3, -1, -2, 3, -1, 0, "stone_bricks")
+    box(g, -3, 6, -2, 3, 7, 0, "polished_deepslate")
+    for sx in (-1, 1):
+        x0 = 4 if sx > 0 else -8
+        box(g, x0, 0, -3, x0 + 4, 11, 1, "stone_bricks")
+        air(g, x0 + 1, 1, -2, x0 + 3, 10, 0)
+        g.set(x0 + 2, 12, -1, "lantern[hanging=false]")
+    # 前庭の外壁 (高さ 4、厚さ 1)。外の門は東にずらす
+    box(g, -12, 0, 10, 12, 3, 10, "cobblestone")
+    box(g, -12, 0, 1, -12, 3, 10, "cobblestone")
+    box(g, 12, 0, 1, 12, 3, 10, "cobblestone")
+    air(g, 6, 0, 10, 9, 2, 10)
+    for x in range(-12, 13, 2):
+        g.set(x, 4, 10, "cobblestone")
+    box(g, -12, -1, 1, 12, -1, 10, "stone_bricks")
+    g.set(-8, 0, 6, "skyabyss:tablet[facing=east,standing=true]")
+    lantern_post(g, -10, 0, 3)
+    lantern_post(g, 10, 0, 3)
+    g.mark("stand", 8, 0, 13)
+
+
+SUBJECTS["gate"] = {
+    "title": "門と壁（鯨門・潮門・風門・灰門）",
+    "options": {"a": gate_a, "b": gate_b, "c": gate_c},
+    "notes": {"a": "A 石の門（二つの門塔）", "b": "B 鯨骨の門（顎の骨の弧）", "c": "C 二重の門（前庭の馬出し）"},
+    "eye": ((0, 1.6, 26), (0, 6, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
