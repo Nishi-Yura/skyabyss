@@ -59,6 +59,10 @@ class Town:
         st, v = self.st, self.v
         b = Body(v, st, x0, z0, x1, z1, y0, floors=floors, fh=fh, bay=4, door_side=front if door else 'none',
                  ground=ground, sides=sides, infill=infill or self.rng.choice(st.house_infills), pots=0.35, sealed=sealed).build()
+        if floors >= 2 and self.rng.random() < 0.3:
+            vox.timber_upper(v, st, b)
+        for (dx_, dy_, dz_, out) in (v.fake_doors[-1:] if sealed and v.fake_doors and b.door_side != 'none' else []):
+            vox.door_canopy(v, st, dx_, dy_, dz_, out) if self.rng.random() < 0.6 else None
         mat = roof or (self.rng.choice(st.roof_alts) if self.rng.random() < 0.25 else None)
         ridge = gable_roof(v, st, x0, z0, x1, z1, b.top + 1, axis=axis, steep=True,
                            dormers=(1 if (axis == 'x' and x1 - x0 >= 8) or (axis == 'z' and z1 - z0 >= 8) else 0) if 'dormer' in extras else 0,
@@ -176,10 +180,37 @@ class Town:
         for x in (-4, 4):
             g.set(x, 4, -W - 3, 'lantern[hanging=false,waterlogged=false]')
             g.set(x, 4, -W + 4, 'lantern[hanging=false,waterlogged=false]')
-        for x in (-8, 8):
-            for y in range(9, 14):
-                g.set(x, y, -W - 3, st.banner_wool)
-            g.set(x, 14, -W - 3, st.trim.slab('top'))
+        # 門塔の外の面に旗を二枚ずつ、楼の屋根に旗竿
+        for x in (-9, -7, 7, 9):
+            g.set(x, 12, -W - 3, '%s_wall_banner[facing=north]' % st.banner_color)
+            g.set(x, 12, -W + 5, '%s_wall_banner[facing=south]' % st.banner_color)
+        g.fill(0, 17, -W, 0, 24, -W, st.fence)
+        for yy in range(20, 24):
+            g.set(1, yy, -W, '%s_wool' % st.banner_color)
+            g.set(2, yy, -W, '%s_wool' % st.banner_color if yy > 20 else 'air')
+        # 上がった落とし格子 (口の上の縁に鉄格子の歯) と鎖
+        for x in range(-3, 4):
+            g.set(x, 5, -W, 'iron_bars')
+        for x in (-2, 2):
+            g.set(x, 4, -W + 1, 'chain[axis=y,waterlogged=false]') if False else None
+        # 門の中の番兵のくぼみ (両わき) と灯り
+        for x, f in ((-4, 'east'), (4, 'west')):
+            for z in (-W + 1,):
+                g.set(x, 0, z, 'air')
+                g.set(x, 1, z, 'air')
+                g.set(x, 2, z, st.trim.stairs(f, 'top'))
+                g.set(x - (1 if x < 0 else -1), 1, z, 'lantern[hanging=false,waterlogged=false]') if False else None
+            g.set(x, 3, -W - 1, 'lantern[hanging=false,waterlogged=false]')
+            g.set(x, 3, -W + 3, 'lantern[hanging=false,waterlogged=false]')
+        # 門の外の道 (14 先まで) と灯りの並び
+        for z in range(-W - 18, -W - 3):
+            for x in range(-3, 4):
+                g.set(x, -1, z, st.pave_trim if abs(x) == 3 else self.v.pick(st.pave))
+        for z in (-W - 8, -W - 14):
+            for x in (-5, 5):
+                g.set(x, 0, z, st.base.full)
+                g.fill(x, 1, z, x, 3, z, st.fence)
+                g.set(x, 4, z, 'lantern[hanging=false,waterlogged=false]')
         # 碑は門の内の東
         rot = {'north': 0, 'east': 1, 'south': 2, 'west': 3}[side]
         for (x, y, z), s in g.b.items():
@@ -187,7 +218,11 @@ class Town:
             v.set(X, y, Z, S)
         tx, tz = _rot(6, -W + 3 + 1, '', rot)[:2]
         facing = {'north': 'south', 'south': 'north', 'east': 'west', 'west': 'east'}[side]
-        self.tablet(tx, 0, tz, facing, name)
+        if side == 'north':
+            # 北の門の内は段の階段なので、碑は段の上 (階段を上がった所の東)
+            self.tablet(6, TER + 1, -90, 'south', name)
+        else:
+            self.tablet(tx, 0, tz, facing, name)
 
     # ---------------------------------------------------------------- 北の段
     def terrace(self):
@@ -234,6 +269,23 @@ class Town:
             pinnacle(v, st, x, TER + 1, z1, h=2)
             v.set(x, 0, z1 + 6, st.base.full)
             v.set(x, 1, z1 + 6, 'lantern[hanging=false,waterlogged=false]')
+        # 北の門から段の上へ上がる階段 (門の口 z -97 は地面の高さ、z -96..-93 で 0 → 3 の段、-92 から段の上)
+        for x in range(-3, 4):
+            for yy in range(0, TER + 4):
+                v.set(x, yy, -97, 'air')
+            v.set(x, -1, -97, st.pave_trim)
+            for i in range(4):
+                z = -96 + i
+                for yy in range(0, TER + 4):
+                    v.set(x, yy, z, 'air')
+                for yy in range(-1, i):
+                    v.set(x, yy, z, st.base.full)
+                v.set(x, i, z, st.base.stairs('south', 'bottom'))
+        for z in range(-97, -91):
+            for x in (-4, 4):
+                for yy in range(0, TER + 1):
+                    v.set(x, yy, z, st.base.full)
+                v.set(x, TER + 1, z, st.railing)
         # 段の上の大通り
         for z in range(z0, z1 + 1):
             for x in (-4, 3):
@@ -698,7 +750,7 @@ class Town:
         # 東の記録の塔 (八角、中心 -35, -90)
         self.octagon_tower(-34, -90, 5, y, 22)
         dx_, dy_, dz_, _ = b.doors[0]
-        self.tablet(dx_ - 3, y, z1 + 1, 'south', 'hall')
+        self.tablet(dx_ - 6, y, z1 + 3, 'south', 'hall')
         self.mark('open_hall', dx_, y, dz_)
         lamp_post(v, st, dx_ - 3, y, z1 + 3, h=3)
         lamp_post(v, st, dx_ + 3, y, z1 + 3, h=3)
@@ -773,7 +825,7 @@ class Town:
             z = int(round(math.sin(a) * 12)) + cz
             self.stall(x, z, k)
             if n <= 6:
-                self.mark('villager_%d' % n, x, 0, z + (2 if z >= cz else -2))
+                self.mark('villager_%d' % n, x, 0, z)
                 n += 1
         # 灯りの輪と腰掛け
         for k in range(8):
@@ -788,21 +840,45 @@ class Town:
             tree(v, x, 0, z, st.trunk2, st.leaves2, h=6, r=2)
         self.claim(-30, -38, 30, 4)
 
+    STALLS = [
+        # 種類, 布の二色, 台の上の品 (順に並べる), 台の下・まわり
+        ('fruit', ('red_wool', 'white_wool'), ['melon', 'pumpkin', 'potted_red_tulip', 'melon'], ['hay_block[axis=y]', 'barrel[facing=up,open=false]']),
+        ('flower', ('white_wool', 'lime_wool'), ['potted_red_tulip', 'potted_white_tulip', 'potted_azure_bluet', 'potted_oxeye_daisy'], ['flowering_azalea', 'azalea']),
+        ('books', ('brown_wool', 'white_wool'), ['bookshelf', 'lectern[facing=south,has_book=false,powered=false]', 'bookshelf', 'chiseled_bookshelf[facing=south,slot_0_occupied=true,slot_1_occupied=false,slot_2_occupied=true,slot_3_occupied=true,slot_4_occupied=false,slot_5_occupied=true]'], ['barrel[facing=up,open=false]']),
+        ('tools', ('gray_wool', 'red_wool'), ['anvil[facing=east]', 'grindstone[face=floor,facing=north]', 'smithing_table', 'chest[facing=south,type=single,waterlogged=false]'], ['barrel[facing=up,open=false]', 'iron_block']),
+        ('cloth', ('red_wool', 'yellow_wool'), ['white_wool', 'red_wool', 'light_blue_wool', 'yellow_wool'], ['loom[facing=south]']),
+        ('fish', ('blue_wool', 'white_wool'), ['barrel[facing=up,open=false]', 'cauldron', 'water_cauldron[level=3]', 'barrel[facing=up,open=false]'], ['dried_kelp_block']),
+        ('bakery', ('white_wool', 'brown_wool'), ['hay_block[axis=y]', 'cake[bites=0]', 'hay_block[axis=y]', 'smoker[facing=south,lit=false]'], ['barrel[facing=up,open=false]']),
+        ('lamps', ('black_wool', 'yellow_wool'), ['lantern[hanging=false,waterlogged=false]', 'soul_lantern[hanging=false,waterlogged=false]', 'lantern[hanging=false,waterlogged=false]', 'candle[candles=4,lit=false,waterlogged=false]'], ['chain[axis=y,waterlogged=false]']),
+    ]
+
     def stall(self, x, z, k):
+        """露店 (5×5)。四本の柱、縞の日よけ (切妻の布)、前に売り台 (半ブロック) と品物、吊り灯り、樽や箱"""
         st, v = self.st, self.v
-        cloth = ['white_wool', st.banner_wool, 'white_wool', 'orange_wool' if st.key != 'a' else 'light_gray_wool']
-        c = cloth[k % 4]
+        kind, (c1, c2), goods, extra = self.STALLS[k % len(self.STALLS)]
+        post = '%s_fence' % st.wood
         for (ex, ez) in ((x - 2, z - 2), (x + 2, z - 2), (x - 2, z + 2), (x + 2, z + 2)):
-            v.fill(ex, 0, ez, ex, 2, ez, st.fence)
-        for ex in range(x - 2, x + 3):
-            for ez in range(z - 2, z + 3):
-                edge = abs(ex - x) == 2 or abs(ez - z) == 2
-                v.set(ex, 3, ez, c if not edge else ('%s_slab[type=bottom,waterlogged=false]' % st.wood))
-        v.set(x, 4, z, c)
-        v.set(x - 1, 0, z - 1, 'barrel[facing=up,open=false]')
-        v.set(x + 1, 0, z - 1, '%s_slab[type=top,waterlogged=false]' % st.wood)
-        v.set(x + 1, 1, z - 1, self.rng.choice(['potted_red_tulip', 'melon', 'pumpkin', 'hay_block[axis=y]', 'potted_fern']))
-        v.set(x - 1, 0, z + 1, 'composter[level=0]' if k % 3 == 0 else 'barrel[facing=up,open=false]')
+            v.fill(ex, 0, ez, ex, 2, ez, post)
+        # 日よけ: 縞 (x 方向に色を替える)、真ん中が高い
+        for ex in range(x - 3, x + 4):
+            c = c1 if (ex - x) % 2 == 0 else c2
+            for ez in range(z - 3, z + 4):
+                d = abs(ez - z)
+                yy = 3 + (1 if d <= 1 else 0) + (1 if d == 0 else 0)
+                v.set(ex, yy, ez, c)
+        # 売り台 (南と北の縁) と品物
+        for ex in range(x - 1, x + 2):
+            for ez, f in ((z + 2, 'north'), (z - 2, 'south')):
+                v.set(ex, 0, ez, '%s_slab[type=top,waterlogged=false]' % st.wood)
+        for i, ex in enumerate(range(x - 1, x + 2)):
+            g = goods[i % len(goods)]
+            v.set(ex, 1, z + 2, g)
+        v.set(x, 1, z - 2, goods[3 % len(goods)])
+        # 中の箱と、吊り灯り
+        v.set(x - 1, 0, z, extra[0])
+        if len(extra) > 1:
+            v.set(x + 1, 0, z, extra[1])
+        v.set(x, 2, z, 'lantern[hanging=true,waterlogged=false]')
 
     # ---------------------------------------------------------------- 鯨追いの組合
     def guild(self):
@@ -818,6 +894,9 @@ class Town:
         v.set(dx_, 1, dz_ - 1, 'iron_door[facing=east,half=upper,hinge=right,open=false,powered=false]')
         v.set(dx_ - 1, 0, dz_ - 1, 'air')
         v.set(dx_ - 1, 1, dz_ - 1, 'air')
+        for zz in range(dz_ - 3, dz_ + 3):
+            v.set(x0 - 1, 0, zz, 'air')
+            v.set(x0 - 1, -1, zz, st.trim.full)
         self.mark('open_guild', dx_, 0, dz_)
         # 棟の上の鯨骨の肋 (三つ)
         for x in (x0 + 8, (x0 + x1) // 2, x1 - 8):
@@ -1381,7 +1460,7 @@ def main():
     st = vox.STYLES[key]
     t = Town(st)
     v = t.build()
-    meta = {'rect': [-140, -100, 100, 100], 'level': True, 'ring': 12, 'fillWater': True, 'height': 60}
+    meta = {'rect': [-140, -120, 120, 120], 'level': True, 'ring': 12, 'fillWater': True, 'height': 60}
     data = v.runs(meta)
     data['site'] = 'capital'
     data['option'] = 'style_' + key

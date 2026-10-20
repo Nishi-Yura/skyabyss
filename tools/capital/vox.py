@@ -178,6 +178,7 @@ class Vox:
     def __init__(self, seed=1):
         self.b: dict[tuple[int, int, int], str] = {}
         self.marks: dict[str, list[int]] = {}
+        self.fake_doors: list = []  # 入れない家の戸 (検査用)
         self.rng = random.Random(seed)
 
     # -- 基本
@@ -662,6 +663,9 @@ class Body:
             if i in pil and dressed:
                 v.set(cx + dx, top - 1, cz + dz, st.trim.stairs(OPP[out], 'top'), keep=True)
                 v.set(cx + dx, y0 + self.plinth, cz + dz, st.trim.stairs(OPP[out], 'bottom'), keep=True)
+                # 通りの明かり: 一階の柱型の足もとの段に、ときどき灯り
+                if side == self.door_side and 0 < i < n - 1 and v.rng.random() < 0.35 and self.y0 <= 5:
+                    v.set(cx + dx, y0 + self.plinth + 1, cz + dz, 'lantern[hanging=false,waterlogged=false]', keep=True)
         if not dressed:
             return
         door_i = None
@@ -783,6 +787,9 @@ class Body:
         if v.rng.random() < 0.6:
             cx, cz = cells[i0]
             v.set(cx + dx, self.y0, cz + dz, 'barrel[facing=up,open=false]', keep=True)
+        if v.rng.random() < 0.7:
+            cx, cz = cells[i0]
+            hanging_sign(v, st, cx, yt + 2, cz, out) if yt + 2 < self.top else None
 
     def _door(self, cells, out, i):
         v, st = self.v, self.st
@@ -805,6 +812,7 @@ class Body:
             tp = '%s_trapdoor[facing=%s,half=bottom,open=true,waterlogged=false,powered=false]' % (st.shutter_wood, out)
             v.set(cx, y, cz, tp)
             v.set(cx, y + 1, cz, tp)
+            v.fake_doors.append((cx, y, cz, out))
         elif d:
             v.set(cx + ix, y, cz + iz, d % 'lower')
             v.set(cx + ix, y + 1, cz + iz, d % 'upper')
@@ -821,6 +829,13 @@ class Body:
                 v.set(ox + dx, y + 2, oz + dz, 'lantern[hanging=false,waterlogged=false]', keep=True) if st.door_lamps else None
         v.set(cx, y - 1, cz, st.trim.full)
         v.set(cx + dx, y - 1, cz + dz, st.trim.full)
+        if not self.sealed:
+            # 戸の前の裾の段を外して平らに (つまずかない)
+            for j in (-1, 0, 1):
+                if 0 < i + j < len(cells) - 1:
+                    ox, oz = cells[i + j]
+                    v.set(ox + dx, y, oz + dz, 'air')
+                    v.set(ox + dx, y - 1, oz + dz, st.trim.full)
         self.doors.append((cx + ix, y, cz + iz, out))
 
     def _interior(self):
@@ -853,6 +868,46 @@ def _dir_toward(cells, i, sgn):
             return f
     return 'north'
 
+
+
+def timber_upper(v: Vox, st: Style, b: 'Body', log=None, plaster='calcite'):
+    """上の階を木の骨組みに: 飾る側の外の面の、壁の地のブロックを、柱型の所は縦の木、帯の段は横の木、間は白い漆喰に"""
+    log = log or ('%s_log' % st.wood)
+    y2a = b.y0 + b.fh
+    keep = ('pane', 'glass', 'stairs', 'slab', 'potted', 'trapdoor', 'banner', 'door', 'lantern', 'air')
+    for side in b.sides:
+        if side not in ('north', 'south', 'east', 'west'):
+            continue
+        cells, out = _facade_cells(b.x0, b.z0, b.x1, b.z1, side)
+        pil = set(b._bays(len(cells)))
+        for i, (px, pz) in enumerate(cells):
+            for yy in range(y2a, b.top + 1):
+                s0 = v.get(px, yy, pz)
+                if s0 is None or any(k in s0 for k in keep):
+                    continue
+                if (yy - b.y0) % b.fh == 0 or yy == b.top:
+                    v.set(px, yy, pz, '%s[axis=%s]' % (log, 'x' if side in ('north', 'south') else 'z'))
+                elif i in pil or i in (0, len(cells) - 1):
+                    v.set(px, yy, pz, '%s[axis=y]' % log)
+                else:
+                    v.set(px, yy, pz, plaster)
+
+
+def door_canopy(v: Vox, st: Style, x, y, z, out):
+    """戸の上の小さな庇 (幅 3) と持ち送り"""
+    dx, dz = DX[out]
+    ax, az = (1, 0) if out in ('north', 'south') else (0, 1)
+    for k in (-1, 0, 1):
+        v.set(x + dx + ax * k, y + 3, z + dz + az * k, st.roof.stairs(OPP[out], 'bottom'))
+    for k in (-1, 1):
+        v.set(x + dx + ax * k, y + 2, z + dz + az * k, '%s_stairs[facing=%s,half=top,shape=straight,waterlogged=false]' % (st.wood, OPP[out]))
+
+
+def hanging_sign(v: Vox, st: Style, x, y, z, out):
+    """壁の吊り看板 (壁の外の一つ前、向きは壁に沿う)"""
+    dx, dz = DX[out]
+    f = CW[out]
+    v.set(x + dx, y, z + dz, '%s_wall_hanging_sign[facing=%s,waterlogged=false]' % (st.wood, f), keep=True)
 
 
 # ---------------------------------------------------------------- 屋根
