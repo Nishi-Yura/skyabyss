@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 // 三つの波。波を片付けるたびに、床が一段ずつ崩れ (段 0 → 段 1。崩れる 2〜5 秒前に白く瞬く)、最後の波は芯の上で戦う。
 // 床の模様が崩れる順を教える (ひびの入った床が先に崩れる)。崩れた所は穴 (底は水。落ちると控えへ戻る。傷は軽い)。
 // 配置 (3): 0 外の輪から / 1 向かい合う二つの扇から / 2 市松の半分から。
-// 一人・二人: 幕で半分。最初に段 0 の床がなくなっていて、波は小さい。 三人から: 全面。 人数で敵が増える。
+// 人数が少なくても円は全面 (設計書 26 の 8.7 の B)。一人・二人は敵を入口の橋の側に寄せて湧かせる。落ちた敵は消える (崩れる床へ押し込める)。人数で敵が増える。
 // 入口の橋は段 0 と一緒に崩れる (入ったあとは戻れない。やり直すとき、全員が闘技場から出て 6 秒で、最初に戻る)。出口の橋は最後の波のあとに現れる。
 public abstract class RingArenaCell implements TrialCell {
     public static final double R_CORE = 5.2;
@@ -214,6 +214,19 @@ public abstract class RingArenaCell implements TrialCell {
         return n;
     }
 
+    // 入口の橋の中ほど (敵を寄せる向き)
+    protected BlockPos bridgeEnd() {
+        List<BlockPos> b = bridgeIn();
+        long x = 0;
+        long z = 0;
+        for (BlockPos p : b) {
+            x += p.getX();
+            z += p.getZ();
+        }
+        int n = Math.max(1, b.size());
+        return new BlockPos((int) Math.round((double) x / n), floorY() + 1, (int) Math.round((double) z / n));
+    }
+
     // 生きている床の上の湧き場所 (その波に崩れていない床。半径 3.5〜9)
     protected List<BlockPos> spots(Run run, int collapsed, int count) {
         List<BlockPos> cand = new ArrayList<>();
@@ -233,6 +246,11 @@ public abstract class RingArenaCell implements TrialCell {
                     cand.add(new BlockPos(cx() + dx, floorY() + 1, cz() + dz));
                 }
             }
+        }
+        // 設計書 26 の 8.7 の B: 一人・二人も円全体 (崩れる床も同じ)。そのかわり湧きは入口の橋の側に寄せる (4 人から全面)
+        List<BlockPos> picked = jp.revati.skyabyss.combat.RoomPlay.spawnNear(cand, bridgeEnd(), Math.max(1, run.getInt("players")));
+        if (!picked.isEmpty()) {
+            cand = new ArrayList<>(picked);
         }
         Random rng = new Random(run.seed ^ (collapsed * 977L) ^ count);
         List<BlockPos> out = new ArrayList<>();
@@ -302,12 +320,6 @@ public abstract class RingArenaCell implements TrialCell {
                     } else if (onDisc >= inside.size() || now - first >= 160) {
                         int n = Math.max(1, onDisc);
                         run.put("players", n);
-                        if (n <= 2) {
-                            // 幕で半分: 段 0 の床と入口の橋は最初からない
-                            GroupGates.open(back, run.group, cellsOfStage(layout, 0));
-                            GroupGates.open(back, run.group, bridgeIn());
-                            run.put("collapsed", 0);
-                        }
                         run.put("phase", 3);
                         run.put("phaseAt", now + 50L);
                         run.put("wave", 0);
@@ -327,7 +339,7 @@ public abstract class RingArenaCell implements TrialCell {
                         TrialRuntime.refresh(back, run);
                         return;
                     }
-                    // 床が崩れる前の予告。崩れる段は、いまの崩れた段の次 (小さい人数は最初に段 0 がない)
+                    // 床が崩れる前の予告。崩れる段は、いまの崩れた段の次
                     int next = Math.max(collapsed + 1, wave - 1);
                     if (next > 1) {
                         run.put("phase", 3);

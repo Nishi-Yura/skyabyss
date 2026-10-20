@@ -58,6 +58,8 @@ final class DeepSkillsSelfTest {
 
     private static void setRebirth(FakePlayer p, int n) {
         p.setData(RebirthSetup.DATA.get(), RebirthData.EMPTY.withCount(n));
+        // サーバーの見せ方は本体の回数 (GrowthData.rebirths) を読む (Rebirth.displayCount)。写しと本体を揃える
+        jp.revati.skyabyss.rpg.Growth.get(p).rebirths = n;
         SkillManager.sync(p);
         SkillExtOps.refreshRebirth(p);
     }

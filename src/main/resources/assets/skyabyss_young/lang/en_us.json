@@ -31,7 +31,7 @@
   "message.skyabyss.young.ember.veil": "The whelp drops into a stream of hot ash. In the red dark, it felt like a long while passed.",
   "message.skyabyss.young.ember.arrived": "The whelp sets you down at %s and crumbles back into ash.",
   "message.skyabyss.young.recognized.ember": "An ember popped softly deep in your chest. The titan remembers you now.",
-  "message.skyabyss.young.recognized_hint": "You obtained a call. Blow it and the titan's young one appears at your feet; you and your party (up to 6) can ride it to a destination. The titan itself does not move.",
+  "message.skyabyss.young.recognized_hint": "You got a call. Blow it and the titan's young one appears; you and your party (up to 6) can ride it to a destination.",
   "message.skyabyss.young.not_now": "You cannot choose a destination right now.",
   "message.skyabyss.young.chosen": "Destination: %s. We leave once your party is aboard.",
   "message.skyabyss.young.cancelled": "The owner got off. The destination must be chosen again.",

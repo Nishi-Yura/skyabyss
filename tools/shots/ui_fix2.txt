@@ -1,0 +1,61 @@
+# K の技の画面の見直し (ページの見出し・凡例・下の列) の確認。./gradlew runShots --no-daemon -Pscript=tools/shots/ui_fix2.txt
+# 絵は python tools/ui_fix2_sheet.py (撮った絵があれば使う) で docs/review/previews/ui_fix2_sheet.png にまとめる
+world shots flat
+size 1280 720
+timeout 500
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 40
+cmd skyabyss skill forget @p
+cmd skyabyss skill points @p 40
+cmd skyabyss skill calling @p rock
+cmd skyabyss skill learn @p titan_cleave 3
+cmd skyabyss skill learn @p lunge 1
+cmd skyabyss dev rebirth 3
+hud on
+camera 0 -60 8 0 0
+waitchunks
+chat clear
+wait 40
+
+open skills_cleave
+wait 20
+shot ui2_tree_s3
+close
+wait 10
+open skills_build
+wait 20
+shot ui2_build_s3
+close
+wait 10
+cmd skyabyss skill mutate @p titan_cleave
+cmd skyabyss skill glyph @p rock 3
+cmd skyabyss skill socket @p 0 titan_cleave
+open skills_ext
+wait 20
+shot ui2_ext_s3
+close
+wait 10
+
+guiscale 2
+open skills_build
+wait 20
+shot ui2_build_s2
+close
+wait 10
+guiscale 4
+open skills_cleave
+wait 20
+shot ui2_tree_s4
+close
+wait 10
+open skills_build
+wait 20
+shot ui2_build_s4
+close
+wait 10

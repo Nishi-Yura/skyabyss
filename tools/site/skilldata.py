@@ -68,6 +68,8 @@ def load():
     pat = re.compile(r'^\s+([A-Z_]+)\("([a-z_]+)",\s*SkillTree\.([A-Z]+),\s*Kind\.([A-Z]+),\s*(\d+),\s*(\d+),\s*(\d+)((?:,\s*"[a-z_]+")*)\)', re.M)
     for m in pat.finditer(src):
         _, sid, tree, kind, rank, row, col, pre = m.groups()
+        if tree.lower() not in TREES:
+            continue  # 橋・淵・前世の技は別の表 (pages_d) で説明する
         skills.append(dict(id=sid, tree=tree.lower(), kind=KIND[kind], rank=int(rank), row=int(row), col=int(col),
                            pre=re.findall(r'"([a-z_]+)"', pre)))
     assert len(skills) == 36, len(skills)

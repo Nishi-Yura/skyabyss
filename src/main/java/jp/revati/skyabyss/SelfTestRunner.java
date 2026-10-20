@@ -100,6 +100,7 @@ public final class SelfTestRunner {
         // brushup の直し: 戦いの最中の復活先 (四つの背)・復活の守りの後始末・lang の重複と ja/en の一致
         steps.add(Step.once("brushup", jp.revati.skyabyss.titan.group.BrushupSelfTest::runSelfTest));
         steps.add(Step.once("lang", LangSelfTest::runSelfTest));
+        steps.add(Step.once("keys", KeyDefaultsSelfTest::runSelfTest));
         // 敵が壁・地面の中に湧かない (すべての湧き口と波に共通の決まり)。SKYABYSS_SELFTEST_ONLY="spawn safety"
         steps.add(Step.once("spawn safety", jp.revati.skyabyss.util.SpawnSafetySelfTest::runSelfTest));
         steps.add(Step.once("lang objective band", ObjectiveBandSelfTest::runSelfTest));
@@ -207,6 +208,8 @@ public final class SelfTestRunner {
         steps.add(Step.once("heart bots", 40, jp.revati.skyabyss.combat.HeartBotSelfTest::runSelfTest));
         // 予告 (Telegraph): 当たる範囲と印が同じ形・予告 0.8 秒以上・番兵長と岩鯨の心臓の技・人数で増える。docs/design/02 の 5.4
         steps.addAll(jp.revati.skyabyss.combat.TelegraphSelfTest.steps());
+        // 広さの使い方 (26 の 8.7 の B): 人数ごとの湧き場所・罠と柱の置き場所・予告の長さ・重ならない・柱の段。SKYABYSS_SELFTEST_ONLY="room play"
+        steps.addAll(jp.revati.skyabyss.combat.RoomPlaySelfTest.steps());
         // 岩鯨の背の新しい敵 (骨の砲手・骨鳥・老番兵)。SKYABYSS_SELFTEST_ONLY="ch1 back mobs"。21 の 3.3
         steps.addAll(jp.revati.skyabyss.entity.Ch1BackMobsSelfTest.steps());
         // 巨神の眠りと運び出し (心臓を止めたあと。眠り方・運ぶ人・降ろす場所・初回の場面)。docs/design/01 の 4.3、20 の 3.4

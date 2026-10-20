@@ -23,11 +23,11 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class SkillClientSetup {
     public static final KeyMapping SKILLS_KEY = new KeyMapping("key.skyabyss.skills", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.SKILLS, "key.categories.skyabyss");
     // 構えを順に切り替える (なし → 守 → 疾 → 歌 → なし)
     public static final KeyMapping STANCE_KEY = new KeyMapping("key.skyabyss.skill_stance", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.skyabyss");
-    private static final int[] SLOT_DEFAULTS = {GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_B};
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.STANCE, "key.categories.skyabyss");
+    private static final int[] SLOT_DEFAULTS = jp.revati.skyabyss.KeyDefaults.SLOTS;
     public static final KeyMapping[] SLOT_KEYS = new KeyMapping[SkillRules.SLOTS];
     static {
         for (int i = 0; i < SLOT_KEYS.length; i++) {

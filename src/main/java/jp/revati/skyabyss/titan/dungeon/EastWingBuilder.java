@@ -305,7 +305,7 @@ final class EastWingBuilder {
     }
 
     // 戦いの湧き場所 (TitanBackTrials が使う)。広間の四隅の内側・辺の中ほど・中央 (9 か所)
-    static List<BlockPos> spawnPoints(Box hall) {
+    public static List<BlockPos> spawnPoints(Box hall) {
         BlockPos c = hall.center();
         int y = hall.floorY() + 1;
         int x1 = hall.x1() + 2;

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>専用ブロックの見た目</title>
+<style>
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:28px 80px}
+h1{font-weight:700;font-size:clamp(24px,4vw,34px);margin:0 0 8px;letter-spacing:.03em;text-wrap:balance}
+h2{font-size:19px;margin:34px 0 10px}
+.intro{color:var(--muted);max-width:70ch;margin:0 0 6px}
+.sheet{display:block;width:100%;height:auto;border:1px solid var(--line);image-rendering:pixelated;margin:16px 0;background:#161c22}
+.opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt img{width:100%;max-width:340px;height:auto;image-rendering:pixelated;flex:none;background:#162a38}
+.letter{font-size:22px;font-weight:700;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);flex:none}
+.opt:has(input:checked){border-color:var(--accent)}
+.opt:has(input:checked) .letter{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt small{display:block;color:var(--muted);font-size:12px;line-height:1.4}
+.note{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:8px 10px;resize:vertical}
+.note:focus{outline:2px solid var(--accent)}
+.note-l{font-size:13px;color:var(--muted);display:block;margin:14px 0 4px}
+.save{color:var(--muted);font-size:13px;margin-top:6px}
+@media (max-width:760px){.opts{grid-template-columns:minmax(0,1fr)}}
+.row{display:flex;gap:10px;align-items:center}.states{color:var(--muted);font-size:12px}.bid{font-size:13px;color:var(--muted);font-weight:400}</style>
+</head>
+<body>
+<div class="wrap">
+<h1>modの専用ブロックの見た目</h1>
+<p class="intro">modに関わるブロック (宝の箱・休み場所の火・レバー・ボタン・感圧板・碑・封印・鐘) を、バニラとは別の専用ブロックにして、「これはmodの要素だ」と気づけるようにする案です。どれも「巨像の遺物」の共通の様式 (彫った石の枠・素材の象嵌・光る一本の筋) で、素材と光の色だけが 3 案で違います。各ブロック 32×32 のドット絵で、1 枚の中の左右が 2 つの状態です。ブロックごとに好きな案を選べます (混ぜてもよい)。どこで使っているかの一覧は docs/review/mod_blocks_audit.md。ゲームのブロックはまだ差し替えていません。</p>
+<img class="sheet" src="sheet.png" alt="8 種 x 3 案の全体 (各 2 状態)">
+<h2>遺物の箱 <span class="bid">Relic Cache</span></h2>
+<p class="intro">宝のキャッシュ (岩鯨の左右の尾びれなど)。向きあり・開く蓋・光る錠</p>
+<fieldset class="opts" id="chest_opts"></fieldset>
+<label class="note-l" for="chest_note">直してほしい点 (任意)</label>
+<textarea id="chest_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="chest_save">読み込み中…</div>
+<h2>休み火 <span class="bid">Rest Hearth</span></h2>
+<p class="intro">休み場所のたき火の代わり。冷えた / 灯った</p>
+<fieldset class="opts" id="hearth_opts"></fieldset>
+<label class="note-l" for="hearth_note">直してほしい点 (任意)</label>
+<textarea id="hearth_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="hearth_save">読み込み中…</div>
+<h2>遺物のレバー <span class="bid">Relic Lever</span></h2>
+<p class="intro">仕掛けのレバー。入にすると台座の溝が光る</p>
+<fieldset class="opts" id="lever_opts"></fieldset>
+<label class="note-l" for="lever_note">直してほしい点 (任意)</label>
+<textarea id="lever_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="lever_save">読み込み中…</div>
+<h2>遺物のボタン <span class="bid">Relic Button</span></h2>
+<p class="intro">押す仕掛け用 (今後)。押すと沈んで輪が光る</p>
+<fieldset class="opts" id="button_opts"></fieldset>
+<label class="note-l" for="button_note">直してほしい点 (任意)</label>
+<textarea id="button_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="button_save">読み込み中…</div>
+<h2>遺物の感圧板 <span class="bid">Relic Plate</span></h2>
+<p class="intro">踏む仕掛け。踏むと沈んで縁が光る</p>
+<fieldset class="opts" id="plate_opts"></fieldset>
+<label class="note-l" for="plate_note">直してほしい点 (任意)</label>
+<textarea id="plate_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="plate_save">読み込み中…</div>
+<h2>語りの碑 <span class="bid">Lore Tablet (いまの TABLET の見た目)</span></h2>
+<p class="intro">看板の代わりの碑。目を向けると字幕に文が出る。暗い / 光る</p>
+<fieldset class="opts" id="tablet_opts"></fieldset>
+<label class="note-l" for="tablet_note">直してほしい点 (任意)</label>
+<textarea id="tablet_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="tablet_save">読み込み中…</div>
+<h2>試練の封印 <span class="bid">Trial Seal / Cleared Seal</span></h2>
+<p class="intro">封印 → 越えた印。※別の人が作っている「試練を越えた印」ブロックには、見た目の候補としてだけ使えます</p>
+<fieldset class="opts" id="seal_opts"></fieldset>
+<label class="note-l" for="seal_note">直してほしい点 (任意)</label>
+<textarea id="seal_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="seal_save">読み込み中…</div>
+<h2>遺物の鐘 <span class="bid">Relic Bell</span></h2>
+<p class="intro">鐘楼の謎の鐘。鳴る間は音の輪が光る</p>
+<fieldset class="opts" id="bell_opts"></fieldset>
+<label class="note-l" for="bell_note">直してほしい点 (任意)</label>
+<textarea id="bell_note" class="note" rows="2" placeholder="例: Bの貝をもう少し大きく / これは専用にしなくてよい"></textarea>
+<div class="save" id="bell_save">読み込み中…</div>
+</div>
+<script>
+(() => {
+  const L = {"a": ["A 鯨骨と深層岩", "鯨骨の白と深層岩の青灰。光は青 (岩鯨の脈)。いちばん「背中」らしい"], "b": ["B 潮の鱗と貝", "青紫の鱗石と真珠貝・珊瑚。光は青緑。潮の巨像寄りで柔らかい"], "c": ["C 灰の鉄と刻印", "炭の灰色に鉄と銅の帯。光は琥珀。嵐・熾の巨像寄りで硬い"]};
+  const BL = [["chest", "閉 / 開"], ["hearth", "冷 / 灯"], ["lever", "切 / 入"], ["button", "上 / 押"], ["plate", "上 / 踏"], ["tablet", "暗 / 光"], ["seal", "封 / 開"], ["bell", "静 / 鳴"]];
+  const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const parts = [];
+  for (const [id, st] of BL) {
+    const box = document.getElementById(id + '_opts');
+    for (const k of Object.keys(L)) {
+      box.appendChild(mk('label', 'opt', `<input type="radio" name="${id}" value="${k}"><span class="row"><span class="letter">${k.toUpperCase()}</span><span>${L[k][0]}<small>${L[k][1]}</small></span></span><img src="${id}_${k}.png" alt="${L[k][0]} (${st})"><span class="states">${st}</span>`));
+    }
+    parts.push({ name: id, doc: 'mod_block_' + id, note: document.getElementById(id + '_note'), saveEl: document.getElementById(id + '_save') });
+  }
+  let db = null;
+  const chosen = p => { const r = document.querySelector(`input[name=${p.name}]:checked`); return r ? r.value : ''; };
+  async function save(p) {
+    if (!db) return;
+    p.saveEl.textContent = '保存中…';
+    try {
+      await db.doc('choices/' + p.doc).set({ option: chosen(p), note: p.note.value, at: Date.now() });
+      p.saveEl.textContent = '保存しました';
+    } catch (e) { p.saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+  for (const p of parts) {
+    document.querySelectorAll(`input[name=${p.name}]`).forEach(r => r.addEventListener('change', () => save(p)));
+    let timer = null;
+    p.note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => save(p), 800); });
+  }
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { parts.forEach(p => p.saveEl.textContent = 'この表示では選択を保存できません (サインインして開いてください)'); return; }
+    try {
+      const snap = await db.collection('choices').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const p = parts.find(x => x.doc === d.id);
+        if (!p) continue;
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        if (!data) continue;
+        if (data.option) { const r = document.querySelector(`input[name=${p.name}][value="${data.option}"]`); if (r) r.checked = true; }
+        if (data.note) p.note.value = data.note;
+      }
+      parts.forEach(p => p.saveEl.textContent = '選ぶと自動で保存されます');
+    } catch (e) { parts.forEach(p => p.saveEl.textContent = '前回の選択を読み込めませんでした'); }
+  })();
+})();
+</script>
+</body>
+</html>

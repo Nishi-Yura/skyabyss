@@ -29,7 +29,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PartyClient {
     public static final KeyMapping PARTY_KEY = new KeyMapping("key.skyabyss.party", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.PARTY, "key.categories.skyabyss");
 
     static PartyNetwork.Sync last = new PartyNetwork.Sync(0, 15, 0, "", 70, List.of(), "");
 

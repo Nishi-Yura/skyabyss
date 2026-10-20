@@ -46,7 +46,7 @@
   "gui.skyabyss.rebirth.cost": "Crystals %1$s (have %2$s)",
   "gui.skyabyss.rebirth.boon_title": "Choose a boon",
   "gui.skyabyss.rebirth.button": "Rebirth (%s crystals)",
-  "gui.skyabyss.rebirth.confirm": "Press again to rebirth",
+  "gui.skyabyss.rebirth.confirm": "Press again",
   "gui.skyabyss.rebirth.go_hub": "At the hub altar",
   "gui.skyabyss.rebirth.locked": "At Lv %s you can rebirth at the altar in the heartbeat hall. Level and skills reset so you can grow again. The story is not replayed.",
   "gui.skyabyss.rebirth.maxed": "Rebirth is capped at 20. Your soul board, boons and name colour stay.",

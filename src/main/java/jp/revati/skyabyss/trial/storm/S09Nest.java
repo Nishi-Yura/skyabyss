@@ -267,8 +267,10 @@ public final class S09Nest extends StormCell {
         double base = Math.toRadians(20 * run.mods.layout() + 37 * wave);
         int c = StormDeck.S09_ARENA.cx();
         int z0 = StormDeck.S09_ARENA.cz();
+        // 設計書 26 の 8.7 の B: 一人・二人は、入口 (西の渡り) の側の縁に寄せる。3 人からは配置で回る輪のまま
+        double bearing = jp.revati.skyabyss.combat.RoomPlay.bearingFor(c, z0, jp.revati.skyabyss.titan.dungeon.RoomPlayRooms.entranceOf("s09"));
         for (int i = 0; i < callers; i++) {
-            double a = base + Math.PI * 2 * i / callers;
+            double a = jp.revati.skyabyss.combat.RoomPlay.angleNear(base + Math.PI * 2 * i / callers, i, callers, bearing, players);
             ThunderSupplicant s = spawn(back, StormMobSetup.THUNDER_SUPPLICANT.get(), run.group, c + 0.5 + Math.cos(a) * 10, Y + 1, z0 + 0.5 + Math.sin(a) * 10);
             if (s != null) {
                 mobs(run).add(s.getUUID());
@@ -277,7 +279,8 @@ public final class S09Nest extends StormCell {
         if (!quiet && wave >= 2) {
             int support = 1 + (players >= 3 ? 1 : 0) + (wave >= 3 ? 1 : 0);
             for (int i = 0; i < support; i++) {
-                double a = base + Math.PI * (0.4 + 2.0 * i / Math.max(1, support));
+                double a = jp.revati.skyabyss.combat.RoomPlay.angleNear(base + Math.PI * (0.4 + 2.0 * i / Math.max(1, support)), i, support,
+                        bearing + 0.35, players);
                 Mob m;
                 if (run.mods.enemy() == 1) {
                     m = spawn(back, StormMobSetup.FEATHER_WARDEN.get(), run.group, c + 0.5 + Math.cos(a) * 8, Y + 1, z0 + 0.5 + Math.sin(a) * 8);

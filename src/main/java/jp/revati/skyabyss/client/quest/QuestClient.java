@@ -34,7 +34,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class QuestClient {
     public static final KeyMapping LOG_KEY = new KeyMapping("key.skyabyss.quest_log", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.QUEST_LOG, "key.categories.skyabyss");
 
     private static Map<String, QuestDef> catalog = Map.of();
     private static List<QuestDef> ordered = List.of();

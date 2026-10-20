@@ -311,10 +311,10 @@ public final class TideGarden {
         }
         // 静かな庭: 珊瑚憑きは 2 体 (+1/人) で、水路の磯走りは出ない
         if (state.quiet() == TideBackState.Trial.WEST) {
-            placeThralls(level, spots, 2 + (people - 1), owner);
+            placeThralls(level, spots, 2 + (people - 1), owner, people);
             return;
         }
-        placeThralls(level, spots, 5 + 2 * (people - 1), owner);
+        placeThralls(level, spots, 5 + 2 * (people - 1), owner, people);
         placePack(level, 3 + people - 1, owner);
     }
 
@@ -328,17 +328,21 @@ public final class TideGarden {
             spots.add(new BlockPos(c.from[0], GARDEN_FLOOR + 1, c.to[1]));
         }
         if (state.quiet() == TideBackState.Trial.WEST) {
-            placeThralls(level, spots, added, owner);
+            placeThralls(level, spots, added, owner, spawnedFor + added);
             return;
         }
-        placeThralls(level, spots, 2 * added, owner);
+        placeThralls(level, spots, 2 * added, owner, spawnedFor + added);
         placePack(level, added, owner);
     }
 
     // 珊瑚憑きを置ける所 (空気か水) に、数がそろうまで置く。
     // 前は候補の先頭から数だけ試し、壁の中の候補を飛ばした分だけ少なかった (二人で 7 体のはずが 5 体)
     // 候補より数が多いとき (6 人のパーティで 15 体) は、二巡目から候補のとなりのマスにも置く
-    private static void placeThralls(ServerLevel level, List<BlockPos> spots, int count, UUID owner) {
+    // 設計書 26 の 8.7 の B: 一人・二人は、入口 (東の台 g0) に近い角・水路に寄せる。4 人からは庭いっぱい
+    private static final BlockPos GARDEN_ENTRY = new BlockPos(-36, GARDEN_FLOOR + 1, 0);
+
+    private static void placeThralls(ServerLevel level, List<BlockPos> spots, int count, UUID owner, int entrants) {
+        spots = new ArrayList<>(jp.revati.skyabyss.combat.RoomPlay.spawnNear(spots, GARDEN_ENTRY, entrants));
         java.util.Collections.shuffle(spots, new java.util.Random(level.random.nextLong()));
         int[][] near = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         int placed = 0;

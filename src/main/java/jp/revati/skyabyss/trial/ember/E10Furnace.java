@@ -130,7 +130,13 @@ public final class E10Furnace implements TrialCell {
     }
 
     private void spawnWave(ServerLevel back, Run run, int players, int wave) {
-        int[] order = ORDER[run.mods.layout()];
+        // 設計書 26 の 8.7 の B: 一人・二人は、入口に近い口から先に使う (4 人から、もとの順)
+        java.util.List<BlockPos> spotPos = new java.util.ArrayList<>();
+        for (int i = 0; i < SPAWNS.length; i++) {
+            spotPos.add(spawnAt(i));
+        }
+        BlockPos entrance = jp.revati.skyabyss.titan.dungeon.RoomPlayRooms.entranceOf("e10");
+        int[] order = jp.revati.skyabyss.combat.RoomPlay.orderNear(ORDER[run.mods.layout()], spotPos, entrance, players);
         int count = bearers(run, players);
         for (int j = 0; j < count; j++) {
             BlockPos at = spawnAt(order[j % order.length]);
