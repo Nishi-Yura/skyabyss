@@ -108,10 +108,10 @@ STORM_ENTRIES = {
     "message.skyabyss.storm.room.d_s12": ("羽守長の頂: 足場は半分ずつ運ばれる。黄は消える合図、橙は羽の嵐。芯は安全", "Chief's Summit: pads leave half at a time. Yellow = leaving, orange = feather storm. The core is safe"),
     "message.skyabyss.storm.room.d_s11": ("避雷の護送: 籠は近くに人がいるあいだ進む。雷は籠に落ちる。離れて守る", "Rod Escort: the cage moves while someone is near. Lightning strikes it. Guard from a distance"),
     # ---- 目的の帯
-    "objective.skyabyss.trial_storm_deck_bridge2": ("第一の渡り場の南の橋を渡って、第二の渡り場へ行こう", "Cross the south bridge to the second Landing"),
-    "objective.skyabyss.trial_storm_deck_s04": ("白く光る陰を探して、橋の柱から柱へ渡ろう", "Find the glowing lee and cross from pillar to pillar"),
-    "objective.skyabyss.trial_storm_deck_s07_a": ("鏡を裏返して、光を窓へ当てよう", "Flip the mirrors and send the beam to the window"),
-    "objective.skyabyss.trial_storm_deck_s07_b": ("奥の部屋の鏡を直して、光を東の受け羽へ", "Fix the far room's mirrors and send the beam to the catcher"),
+    "objective.skyabyss.trial_storm_deck_bridge2": ("南の橋を渡って第二の渡り場へ", "Cross the south bridge"),
+    "objective.skyabyss.trial_storm_deck_s04": ("白く光る陰を探して、柱から柱へ渡ろう", "Cross, sheltering at pillars"),
+    "objective.skyabyss.trial_storm_deck_s07_a": ("鏡を裏返して、光を窓へ当てよう", "Flip mirrors, light the window"),
+    "objective.skyabyss.trial_storm_deck_s07_b": ("奥の部屋の鏡を直して、光を東の受け羽へ", "Aim the beam at the catcher"),
     "objective.skyabyss.trial_storm_deck_s08": ("弁を回して、気嚢の圧を金の印に合わせよう", "Turn the valves to match the gold marks"),
     "objective.skyabyss.trial_storm_deck_s11": ("籠から離れて見守りながら、道を進もう", "Follow the cage from a safe distance"),
     "objective.skyabyss.trial_storm_deck_s12": ("頂の真ん中へ進もう", "Advance to the middle of the summit"),
@@ -135,7 +135,7 @@ SIGNS.update(sign("storm_d_s04_start", ["羽毛が流れたら", "突風の合�
 SIGNS.update(sign("storm_d_s04_mid", ["ここから風の", "向きが変わる", "羽毛の向きと", "光る側を見る"], ["From here the", "wind turns.", "Watch feathers", "and the glow."]))
 SIGNS.update(sign("storm_d_s08", ["気圧の弁", "弁を回すと", "気嚢の圧が動く", "金の印に合わせる"], ["Pressure Valves", "Turning a valve", "moves the sacs.", "Match the gold."]))
 SIGNS.update(sign("storm_d_s08_start", ["板の緑は +1", "赤は −1", "しゃがむと", "逆回し"], ["Green = +1", "Red = -1", "Sneak to", "turn back."]))
-SIGNS.update(sign("storm_d_s08_mid", ["合わせたら", "C と D が目覚め", "弁が三つになる", "効きも変わる"], ["When matched,", "C and D wake,", "a third valve", "joins in."]))
+SIGNS.update(sign("storm_d_s08_mid", ["合わせたら", "C・Dが目覚め", "弁が三つになり", "効きも変わる"], ["When matched,", "C and D wake,", "a third valve", "joins in."]))
 SIGNS.update(sign("storm_d_s07", ["二枚の鏡の間", "鏡を右クリック", "光は鏡で曲がる", "窓へ当てる"], ["Two Mirrors", "Right-click a", "mirror to flip.", "Hit the window."]))
 SIGNS.update(sign("storm_d_s07_start", ["光が窓に届くと", "窓が開く", "部屋 1 の鏡を", "直そう"], ["When the beam", "hits the window", "it opens. Fix", "room 1 first."]))
 SIGNS.update(sign("storm_d_s07_mid", ["同じ色の台の", "鏡はつながる", "片方を回すと", "もう片方も回る"], ["Same-colored", "mirrors link:", "flip one and", "the twin flips."]))

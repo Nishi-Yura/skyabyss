@@ -103,7 +103,7 @@ public final class StormTrialSelfTest {
     // 試練の甲板のあたりの区画を読み込んだままにする (敵が動く・ブロックを読む)
     private static void forceChunks(ServerLevel back, boolean on) {
         for (int cx = -170 >> 4; cx <= 170 >> 4; cx++) {
-            for (int cz = 20 >> 4; cz <= 230 >> 4; cz++) {
+            for (int cz = 20 >> 4; cz <= 270 >> 4; cz++) {
                 back.setChunkForced(cx, cz, on);
             }
         }
@@ -233,7 +233,7 @@ public final class StormTrialSelfTest {
         }
         // 第二の渡り場 (StormDeck2)
         add(boxes, names, "bridge2", new AABB(StormDeck2.BRIDGE_X1 - 1, Y, StormDeck2.BRIDGE_Z1, StormDeck2.BRIDGE_X2 + 2, Y + 1, StormDeck2.BRIDGE_Z2 + 1));
-        add(boxes, names, "yard2", new AABB(-25, Y, 131, 26, Y + 1, 152));
+        add(boxes, names, "yard2", new AABB(-25, Y, 171, 26, Y + 1, 192));
         add(boxes, names, "s04 start", islandBox(StormDeck2.S04_START));
         add(boxes, names, "s04 mid", islandBox(StormDeck2.S04_MID));
         add(boxes, names, "s04 end", islandBox(StormDeck2.S04_END));
@@ -245,13 +245,13 @@ public final class StormTrialSelfTest {
         add(boxes, names, "s12 arena", new AABB(StormDeck2.S12_ARENA.cx() - 14, Y, StormDeck2.S12_ARENA.cz() - 14, StormDeck2.S12_ARENA.cx() + 15, Y + 1, StormDeck2.S12_ARENA.cz() + 15));
         add(boxes, names, "s12 exit", islandBox(StormDeck2.S12_EXIT));
         add(boxes, names, "s11 deck", islandBox(StormDeck2.S11_DECK));
-        add(boxes, names, "s04 approach", new AABB(-32, Y, 138, -25, Y + 1, 145));
-        add(boxes, names, "s08 approach", new AABB(25, Y, 138, 32, Y + 1, 145));
-        add(boxes, names, "s07 approach", new AABB(-25, Y, 152, -19, Y + 1, 159));
-        add(boxes, names, "s12 approach", new AABB(-3, Y, 152, 4, Y + 1, 159));
-        add(boxes, names, "s11 approach", new AABB(17, Y, 152, 24, Y + 1, 158));
-        add(boxes, names, "s12 bridge", new AABB(-3, Y, 169, 4, Y + 1, 176));
-        add(boxes, names, "s12 exit bridge", new AABB(-3, Y, 201, 4, Y + 1, 207));
+        add(boxes, names, "s04 approach", new AABB(-32, Y, 178, -25, Y + 1, 185));
+        add(boxes, names, "s08 approach", new AABB(25, Y, 178, 32, Y + 1, 185));
+        add(boxes, names, "s07 approach", new AABB(-25, Y, 192, -19, Y + 1, 199));
+        add(boxes, names, "s12 approach", new AABB(-3, Y, 192, 4, Y + 1, 199));
+        add(boxes, names, "s11 approach", new AABB(17, Y, 192, 24, Y + 1, 198));
+        add(boxes, names, "s12 bridge", new AABB(-3, Y, 209, 4, Y + 1, 216));
+        add(boxes, names, "s12 exit bridge", new AABB(-3, Y, 241, 4, Y + 1, 247));
         // 戸の道 (途中の道は島の間に入る)
         add(boxes, names, "s02 approach", new AABB(-32, Y, 70, -25, Y + 1, 77));
         add(boxes, names, "s03 approach", new AABB(26, Y, 70, 33, Y + 1, 77));
@@ -273,9 +273,12 @@ public final class StormTrialSelfTest {
         // 背の広場・塔・翼の外廊・尾羽の庭の箱と重ならない
         AABB plaza = new AABB(-25, 150, 11, 26, 190, 36);
         AABB turret = new AABB(-14, 140, 36, -8, 175, 43);
+        // 任意の翼の尾羽の庭 (StormExtra。x ±5〜34、z 122〜164、床 147。西の見張りの台は床 160 まで・階段は x -34 から)。中央の隙間 x -4〜4 は橋が通る
+        AABB gardenW = new AABB(-36, 147, 121, -4.5, 172, 166);
+        AABB gardenE = new AABB(4.5, 147, 121, 36, 172, 166);
         for (int i = 1; i < boxes.size(); i++) {
             AABB b = boxes.get(i);
-            for (AABB z : List.of(plaza, turret)) {
+            for (AABB z : List.of(plaza, turret, gardenW, gardenE)) {
                 if (b.minX < z.maxX && z.minX < b.maxX && b.minZ < z.maxZ && z.minZ < b.maxZ && b.minY < z.maxY && z.minY < b.maxY) {
                     FAIL.add("deck part " + names.get(i) + " overlaps the plaza or the turret: " + b);
                 }

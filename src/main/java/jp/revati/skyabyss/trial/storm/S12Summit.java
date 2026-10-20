@@ -290,6 +290,10 @@ public final class S12Summit extends StormCell {
             boss.setCustomNameVisible(true);
             mobs(run).add(boss.getUUID());
             run.put("chief", boss.getUUID());
+        } else {
+            // 湧かせられなかった: 始めない (次の tick でもう一度)
+            run.put("phase", 0);
+            return;
         }
         TrialFx.sound(back, run.group, StormDeck2.S12_ARENA.center(), SoundEvents.RAVAGER_ROAR, 1.5f, 0.7f);
         bar(inside, ModText.battle("message.skyabyss.trial.s12.chief"));

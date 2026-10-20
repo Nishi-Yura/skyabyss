@@ -216,7 +216,7 @@ public final class StormGuides {
     // S11: 籠のそば
     private static Target s11(@Nullable TrialCell.Run run) {
         if (run == null) {
-            return new Target("storm_deck_s11", new BlockPos(20, Y + 1, 163), 3f, 1f, 3f);
+            return new Target("storm_deck_s11", new BlockPos(20, Y + 1, 203), 3f, 1f, 3f);
         }
         double[] c = S11Cage.at(run.mods.layout(), run.data.get("s") instanceof Double d ? d : 0.0);
         return new Target("storm_deck_s11", new BlockPos((int) c[0], Y + 1, (int) c[1]), 3f, 1f, 3f);

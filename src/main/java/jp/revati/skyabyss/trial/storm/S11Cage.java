@@ -415,12 +415,12 @@ public final class S11Cage extends StormCell {
         }
         for (int l = 0; l < StormDeck2.S11_ROUTES.length; l++) {
             int[][] r = StormDeck2.S11_ROUTES[l];
-            if (r[0][0] != 20 || r[0][1] != 161) {
-                bad.add("S11 route " + l + " does not start at (20,161)");
+            if (r[0][0] != 20 || r[0][1] != 201) {
+                bad.add("S11 route " + l + " does not start at (20,201)");
             }
             int[] e = r[r.length - 1];
-            if (e[0] != 62 || e[1] != 204) {
-                bad.add("S11 route " + l + " does not end at (62,204)");
+            if (e[0] != 62 || e[1] != 244) {
+                bad.add("S11 route " + l + " does not end at (62,244)");
             }
             for (int[] pt : r) {
                 if (pt[0] < d.x1() + 2 || pt[0] > d.x2() - 2 || pt[1] < d.z1() + 2 || pt[1] > d.z2() - 2) {

@@ -17,7 +17,7 @@ public final class StormBackAudit {
     }
 
     public static BackReach.Spec spec(ServerLevel level) {
-        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 235, 230));
+        BackReach.Spec s = new BackReach.Spec("storm", new Box(-330, 105, -190, 330, 235, 270));
         s.voidY = CLOUD_Y + 5;
         s.longFallIsExit = true;
         s.entrances.add(ARRIVAL);

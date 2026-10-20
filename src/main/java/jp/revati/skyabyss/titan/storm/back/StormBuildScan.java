@@ -179,7 +179,7 @@ public final class StormBuildScan {
                 m.set(xOf(first), yOf(first), zOf(first));
                 String name = level.getBlockState(m).getBlock().getDescriptionId().replace("block.minecraft.", "");
                 // 試練の甲板の空に浮かぶ島 (StormDeck。設計どおり浮かべた気嚢・柱・台・巣。橋と渡り場は背の広場につながる)
-                boolean skyIsland = StormDeck.placed() && minY >= StormDeck.Y - 16 && maxY <= StormDeck.Y + 8 && minZ >= 60 && maxZ <= 232 && minX >= -160 && maxX <= 160;
+                boolean skyIsland = StormDeck.placed() && minY >= StormDeck.Y - 16 && maxY <= StormDeck.Y + 8 && minZ >= 60 && maxZ <= 272 && minX >= -160 && maxX <= 160;
                 if (inRibHall || skyIsland) {
                     designFloating += size;
                     continue;

@@ -106,16 +106,10 @@ final class StormDeck2Builder {
                     StormDeckBuilder.clearAbove(kit, x, z, Y + 1, 8);
                 }
             }
-            for (int x = BRIDGE_X1 + 1; x <= BRIDGE_X2 - 1; x++) {
-                kit.put(x, Y - 2, z, StormKit.FEATHER);
-            }
         }
-        // 橋の脚 (9 おき。鳥の背から) と灯りの柱
+        // 灯りの柱 (9 おき)。橋の下は羽軸の道 (床 147〜155、頭上 5。x -3〜3) の上なので、脚は立てず、橋の下の羽の梁も置かない (y 161 の方解石の一枚だけ)
         for (int z = BRIDGE_Z1 + 5; z <= BRIDGE_Z2 - 2; z += 9) {
             for (int sx : new int[] {BRIDGE_X1 - 1, BRIDGE_X2 + 1}) {
-                for (int y = Math.min(StormBirdBuilder.top(sx, z) + 1, Y - 2); y < Y; y++) {
-                    kit.put(sx, y, z, StormKit.COPPER);
-                }
                 StormDeckBuilder.lamp(kit, sx, Y + 1, z);
             }
         }
@@ -127,12 +121,12 @@ final class StormDeck2Builder {
     // ---------------------------------------------------------------- 第二の渡り場 (x -24〜24、z 132〜150)
     private static void yard(StormKit kit) {
         for (int x = -25; x <= 25; x++) {
-            for (int z = 131; z <= 151; z++) {
-                boolean in = x >= -24 && x <= 24 && z >= 132 && z <= 150;
+            for (int z = 171; z <= 191; z++) {
+                boolean in = x >= -24 && x <= 24 && z >= 172 && z <= 190;
                 if (in) {
-                    boolean border = x == -24 || x == 24 || z == 132 || z == 150;
+                    boolean border = x == -24 || x == 24 || z == 172 || z == 190;
                     int dx = Math.abs(x);
-                    int dz = Math.abs(z - 141);
+                    int dz = Math.abs(z - 181);
                     boolean ring = Math.max(dx, dz) == 4 || (dx + dz <= 2);
                     kit.put(x, Y, z, border || ring ? StormKit.COPPER : StormDeckBuilder.windFloor(x, z));
                     StormDeckBuilder.clearAbove(kit, x, z, Y, 12);
@@ -145,8 +139,8 @@ final class StormDeck2Builder {
         }
         // 橋の口 (北の縁の手すりを橋の幅だけあける)
         for (int x = BRIDGE_X1; x <= BRIDGE_X2; x++) {
-            kit.put(x, Y + 1, 131, AIR);
-            kit.put(x, Y, 131, StormKit.COPPER);
+            kit.put(x, Y + 1, 171, AIR);
+            kit.put(x, Y, 171, StormKit.COPPER);
         }
         // 戸の口 (手すりを戸の幅だけあけ、床を渡す)
         for (List<BlockPos> g : List.of(S04_GATE, S08_GATE, S07_GATE, S12_GATE, S11_GATE)) {
@@ -167,32 +161,32 @@ final class StormDeck2Builder {
                 break;
             }
             for (int x = -hx; x <= hx; x++) {
-                for (int z = 141 - hz; z <= 141 + hz; z++) {
+                for (int z = 181 - hz; z <= 181 + hz; z++) {
                     kit.put(x, Y - d, z, StormDeckBuilder.featherUnder(new int[] {d, x, z}));
                 }
             }
         }
         // 灯りの柱: 四隅と、橋の口・戸のそば
         for (int x : new int[] {-24, 24}) {
-            for (int z : new int[] {132, 150}) {
+            for (int z : new int[] {172, 190}) {
                 StormDeckBuilder.lamp(kit, x, Y + 1, z);
             }
         }
-        StormDeckBuilder.lamp(kit, 6, Y + 1, 131);
-        StormDeckBuilder.lamp(kit, -6, Y + 1, 131);
-        StormDeckBuilder.lamp(kit, -10, Y + 1, 151);
-        StormDeckBuilder.lamp(kit, 10, Y + 1, 151);
-        StormDeckBuilder.lamp(kit, -25, Y + 1, 134);
-        StormDeckBuilder.lamp(kit, 25, Y + 1, 134);
-        StormDeckBuilder.lamp(kit, -25, Y + 1, 148);
-        StormDeckBuilder.lamp(kit, 25, Y + 1, 148);
+        StormDeckBuilder.lamp(kit, 6, Y + 1, 171);
+        StormDeckBuilder.lamp(kit, -6, Y + 1, 171);
+        StormDeckBuilder.lamp(kit, -10, Y + 1, 191);
+        StormDeckBuilder.lamp(kit, 10, Y + 1, 191);
+        StormDeckBuilder.lamp(kit, -25, Y + 1, 174);
+        StormDeckBuilder.lamp(kit, 25, Y + 1, 174);
+        StormDeckBuilder.lamp(kit, -25, Y + 1, 188);
+        StormDeckBuilder.lamp(kit, 25, Y + 1, 188);
         // 色の線: 橋の口から広場の中心を通り、各戸へ。西と南西 = 水色、東と南東 = 金、南 = 白
-        StormDeco.strip(kit, Y, StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 0, new int[] {-2, 141}, new int[] {-24, 141});
-        StormDeco.strip(kit, Y, StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 0, new int[] {2, 141}, new int[] {24, 141});
-        StormDeco.strip(kit, Y, StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 0, new int[] {-6, 142}, new int[] {-22, 142}, new int[] {-22, 150});
-        StormDeco.strip(kit, Y, StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 0, new int[] {6, 142}, new int[] {20, 142}, new int[] {20, 150});
-        StormDeco.strip(kit, Y, StormDeco.FRONT_LINE, StormDeco.FRONT_PIP, 4, 0, new int[] {0, 144}, new int[] {0, 150});
-        StormDeco.strip(kit, Y, StormKit.COPPER, StormKit.COPPER, 99, 0, new int[] {0, 132}, new int[] {0, 137}, new int[] {5, 137});
+        StormDeco.strip(kit, Y, StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 0, new int[] {-2, 181}, new int[] {-24, 181});
+        StormDeco.strip(kit, Y, StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 0, new int[] {2, 181}, new int[] {24, 181});
+        StormDeco.strip(kit, Y, StormDeco.WEST_LINE, StormDeco.WEST_PIP, 4, 0, new int[] {-6, 182}, new int[] {-22, 182}, new int[] {-22, 190});
+        StormDeco.strip(kit, Y, StormDeco.EAST_LINE, StormDeco.EAST_PIP, 4, 0, new int[] {6, 182}, new int[] {20, 182}, new int[] {20, 190});
+        StormDeco.strip(kit, Y, StormDeco.FRONT_LINE, StormDeco.FRONT_PIP, 4, 0, new int[] {0, 184}, new int[] {0, 190});
+        StormDeco.strip(kit, Y, StormKit.COPPER, StormKit.COPPER, 99, 0, new int[] {0, 172}, new int[] {0, 177}, new int[] {5, 177});
         // 休み場・板・羽軸の柱・腰掛け
         kit.campfire(YARD_FIRE);
         for (int dz : new int[] {-2, 2}) {
@@ -201,13 +195,13 @@ final class StormDeck2Builder {
         }
         kit.put(BOARD_YARD.getX(), BOARD_YARD.getY(), BOARD_YARD.getZ(),
                 ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
-        StormDeco.featherPillar(kit, -12, 137, Y, 6);
-        StormDeco.featherPillar(kit, 12, 137, Y, 6);
+        StormDeco.featherPillar(kit, -12, 177, Y, 6);
+        StormDeco.featherPillar(kit, 12, 177, Y, 6);
     }
 
     // ---------------------------------------------------------------- S04 羽根の吊り橋
     private static void s04(StormKit kit) {
-        StormDeckBuilder.approach(kit, -31, -26, 139, 143, true);
+        StormDeckBuilder.approach(kit, -31, -26, 179, 183, true);
         for (Island is : new Island[] {S04_START, S04_MID, S04_END}) {
             StormDeckBuilder.floor(kit, is, StormKit.COPPER, StormDeckBuilder::windFloor);
             StormDeckBuilder.hangSquare(kit, is, 8, StormDeckBuilder::featherUnder);
@@ -266,12 +260,12 @@ final class StormDeck2Builder {
 
     // ---------------------------------------------------------------- S08 気圧の弁
     private static void s08(StormKit kit) {
-        StormDeckBuilder.approach(kit, 26, 31, 139, 143, true);
+        StormDeckBuilder.approach(kit, 26, 31, 179, 183, true);
         Island h = S08_HALL;
         StormDeckBuilder.floor(kit, h, StormKit.COPPER, StormDeckBuilder::windFloor);
         StormDeckBuilder.hangSquare(kit, h, 9, StormDeckBuilder::featherUnder);
         // 壁: 北・南・東。西は戸の道のところだけあける
-        rimWall(kit, h, 6, null, null, new int[] {139, 143}, null);
+        rimWall(kit, h, 6, null, null, new int[] {179, 183}, null);
         // 気嚢の目盛り (北の壁の前。ガラスの柱と、両脇の銅の柱、てっぺんに鍵の色)
         for (int t = 0; t < 4; t++) {
             int x = S08_TANK_X[t];
@@ -307,7 +301,7 @@ final class StormDeck2Builder {
 
     // ---------------------------------------------------------------- S07 二枚の鏡の間
     private static void s07(StormKit kit) {
-        StormDeckBuilder.approach(kit, -24, -20, 152, 158, false);
+        StormDeckBuilder.approach(kit, -24, -20, 192, 198, false);
         int x1 = S07_X1;
         int x2 = S07_X2;
         int z1 = S07_Z1;
@@ -409,7 +403,7 @@ final class StormDeck2Builder {
 
     // ---------------------------------------------------------------- S12 羽守長の頂
     private static void s12(StormKit kit) {
-        StormDeckBuilder.approach(kit, -2, 2, 152, 158, false);
+        StormDeckBuilder.approach(kit, -2, 2, 192, 198, false);
         StormDeckBuilder.floor(kit, S12_FOYER, StormKit.COPPER, StormDeckBuilder::windFloor);
         StormDeckBuilder.hangSquare(kit, S12_FOYER, 8, StormDeckBuilder::featherUnder);
         for (int[] c : new int[][] {{S12_FOYER.x1(), S12_FOYER.z1()}, {S12_FOYER.x1(), S12_FOYER.z2()}, {S12_FOYER.x2(), S12_FOYER.z1()},
@@ -485,7 +479,7 @@ final class StormDeck2Builder {
 
     // ---------------------------------------------------------------- S11 避雷の護送
     private static void s11(StormKit kit) {
-        StormDeckBuilder.approach(kit, 18, 22, 152, 157, false);
+        StormDeckBuilder.approach(kit, 18, 22, 192, 197, false);
         Island d = S11_DECK;
         StormDeckBuilder.floor(kit, d, StormKit.COPPER, StormDeckBuilder::thunderFloor);
         StormDeckBuilder.hangSquare(kit, d, 11, StormDeckBuilder::slateUnder);

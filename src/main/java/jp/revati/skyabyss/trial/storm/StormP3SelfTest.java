@@ -67,8 +67,8 @@ final class StormP3SelfTest {
         check(S04Bridge.period(mods(0, 0, 1), 1) > S04Bridge.period(mods(0, 2, 1), 1), "S04: the easy gap is not longer");
         check(S04Bridge.blow(mods(0, 1, 0)) < S04Bridge.blow(mods(0, 1, 2)), "S04: the gust length does not grow with the number");
         check(S04Bridge.warn(false) > S04Bridge.warn(true) && S04Bridge.push(false) < S04Bridge.push(true), "S04: calm is not gentler than storm");
-        check(S04Bridge.zoneOf(-60, 141.5, Y + 1) == 0 && S04Bridge.zoneOf(-100, 141.5, Y + 1) == 1 && S04Bridge.zoneOf(-90, 141.5, Y + 1) == -1
-                && S04Bridge.zoneOf(-60, 130, Y + 1) == -1, "S04: the bridge zones are wrong");
+        check(S04Bridge.zoneOf(-60, 181.5, Y + 1) == 0 && S04Bridge.zoneOf(-100, 181.5, Y + 1) == 1 && S04Bridge.zoneOf(-90, 181.5, Y + 1) == -1
+                && S04Bridge.zoneOf(-60, 170, Y + 1) == -1, "S04: the bridge zones are wrong");
         // 風向き: 教えの橋はいつも +1、ひねりの橋は配置ごとに両方が出る
         UUID g = new UUID(0x504, 1);
         for (int layout = 0; layout < 3; layout++) {
@@ -82,14 +82,14 @@ final class StormP3SelfTest {
         }
         // 陰: どの向きでも、柱のそばに陰がある。風上の側は陰でない。柱から離れたら陰でない
         for (int px : StormDeck2.S04_PILLARS) {
-            check(S04Bridge.inLee(px, 144.5, px, 1) && !S04Bridge.inLee(px, 138.5, px, 1), "S04: the lee of pillar " + px + " is wrong for a north wind");
-            check(S04Bridge.inLee(px + 1.5, 138.5, px, -1) && !S04Bridge.inLee(px, 144.5, px, -1), "S04: the lee of pillar " + px + " is wrong for a south wind");
-            check(!S04Bridge.inLee(px + 4, 144.5, px, 1), "S04: the lee of pillar " + px + " is too long");
+            check(S04Bridge.inLee(px, 184.5, px, 1) && !S04Bridge.inLee(px, 178.5, px, 1), "S04: the lee of pillar " + px + " is wrong for a north wind");
+            check(S04Bridge.inLee(px + 1.5, 178.5, px, -1) && !S04Bridge.inLee(px, 184.5, px, -1), "S04: the lee of pillar " + px + " is wrong for a south wind");
+            check(!S04Bridge.inLee(px + 4, 184.5, px, 1), "S04: the lee of pillar " + px + " is too long");
         }
         // 吹いているあいだ: 陰の外の人は押され、陰の中の人は押されない。予告のあいだは押されない
         StormBackClock.force(StormBackClock.Phase.CALM);
-        StormTrialSelfTest.Hit out = StormTrialSelfTest.person(back, g, "s04out", -60, Y + 1, 139.5);
-        StormTrialSelfTest.Hit in = StormTrialSelfTest.person(back, g, "s04in", -54, Y + 1, 144.5);
+        StormTrialSelfTest.Hit out = StormTrialSelfTest.person(back, g, "s04out", -60, Y + 1, 179.5);
+        StormTrialSelfTest.Hit in = StormTrialSelfTest.person(back, g, "s04in", -54, Y + 1, 184.5);
         TrialCell.Run run = new TrialCell.Run(g, cell, plain, 99L, 0);
         cell.arm(back, run);
         try {
@@ -110,7 +110,7 @@ final class StormP3SelfTest {
             check(out.getDeltaMovement().z == 0, "S04: the gust kept blowing after its length");
             check(period > warn + blow + 20, "S04: the quiet part of the cycle is too short");
             // 落ちたら休み場へ (傷は軽い)・向こうの台で済み
-            StormTrialSelfTest.Hit fallen = StormTrialSelfTest.person(back, g, "s04fall", -60, Y - 6, 141.5);
+            StormTrialSelfTest.Hit fallen = StormTrialSelfTest.person(back, g, "s04fall", -60, Y - 6, 181.5);
             cell.tick(back, run, List.of(fallen), 100);
             check(fallen.getY() > Y - 3, "S04: the fallen player was not returned to a rest point");
             StormTrialSelfTest.Hit crosser = StormTrialSelfTest.person(back, g, "s04end", StormDeck2.S04_END.cx(), Y + 1, StormDeck2.S04_END.cz());
@@ -260,7 +260,7 @@ final class StormP3SelfTest {
         // 一周: 偽の人で最短の回しをして、二つの段を越える
         for (int l = 0; l < 3; l++) {
             UUID g = new UUID(0x508, l);
-            StormTrialSelfTest.Hit p = StormTrialSelfTest.person(back, g, "s08", 42, Y + 1, 146);
+            StormTrialSelfTest.Hit p = StormTrialSelfTest.person(back, g, "s08", 42, Y + 1, 186);
             TrialCell.Run run = new TrialCell.Run(g, cell, mods(l, 1, 0), 321L + l, 0);
             cell.arm(back, run);
             try {
@@ -318,7 +318,7 @@ final class StormP3SelfTest {
             check(len > 100 && len < 180, "S11 route " + l + " has an odd length " + len);
             double[] s0 = S11Cage.at(l, 0);
             double[] e = S11Cage.at(l, len);
-            check(s0[0] == 20 && s0[1] == 161 && e[0] == 62 && e[1] == 204, "S11 route " + l + " has wrong ends");
+            check(s0[0] == 20 && s0[1] == 201 && e[0] == 62 && e[1] == 244, "S11 route " + l + " has wrong ends");
         }
         Mods plain = mods(0, 1, 1);
         UUID g = new UUID(0x511, 1);
@@ -330,9 +330,9 @@ final class StormP3SelfTest {
         StormBackClock.force(StormBackClock.Phase.CALM);
         TrialCell.Run run = new TrialCell.Run(g, cell, plain, 4242L, 0);
         cell.arm(back, run);
-        StormTrialSelfTest.Hit near = StormTrialSelfTest.person(back, g, "s11near", 20.5, Y + 1, 163.5);
-        StormTrialSelfTest.Hit far = StormTrialSelfTest.person(back, g, "s11far", 20.5, Y + 1, 168.5);
-        StormTrialSelfTest.Hit away = StormTrialSelfTest.person(back, g, "s11away", 60.5, Y + 1, 190.5);
+        StormTrialSelfTest.Hit near = StormTrialSelfTest.person(back, g, "s11near", 20.5, Y + 1, 203.5);
+        StormTrialSelfTest.Hit far = StormTrialSelfTest.person(back, g, "s11far", 20.5, Y + 1, 208.5);
+        StormTrialSelfTest.Hit away = StormTrialSelfTest.person(back, g, "s11away", 60.5, Y + 1, 230.5);
         try {
             double s0 = (Double) run.data.get("s");
             cell.tick(back, run, List.of(away), 5);
