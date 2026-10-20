@@ -80,10 +80,10 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 9 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 10 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a><a href="#market" data-nav="market">市</a><a href="#houses" data-nav="houses">住まい</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a><a href="#market" data-nav="market">市</a><a href="#houses" data-nav="houses">住まい</a><a href="#gate" data-nav="gate">門と壁</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -187,11 +187,23 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>住まい（空き家 8〜12）</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">中は空で、拠点にしてよい。村人が少し住む。選んだ形を 12 軒（または長屋 4 棟）並べる。</p>
+  <p class="extra">採用: A 石と木の家（12 軒、設計図に写し済み）。</p>
   <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="houses_sheet.jpg" aria-label="住まい（空き家 8〜12） のシートを拡大"><img loading="lazy" src="houses_sheet.jpg" alt="住まい（空き家 8〜12） の比較シート"></button></figure></div>
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="houses-a"><input type="radio" name="houses" id="houses-a" value="a"><span class="letter">A</span><span class="otext"><b>石と木の家</b><span>7×7。石の腰壁と木の壁、切妻の屋根、小さな煙突。戸口は開いている。今の骨組みに屋根と煙突を足した形</span></span></label><label class="opt" for="houses-b"><input type="radio" name="houses" id="houses-b" value="b"><span class="letter">B</span><span class="otext"><b>二階の家</b><span>7×7 で二階建て。石の一階、張り出した木の二階、深層岩の瓦の段々屋根。都らしい高さが出る</span></span></label><label class="opt" for="houses-c"><input type="radio" name="houses" id="houses-c" value="c"><span class="letter">C</span><span class="otext"><b>長屋</b><span>三軒つながりの長屋（21×7）。共通の切妻、戸口が三つ、一軒ごとに煙突。通りに面して並べると町並みになる</span></span></label></fieldset>
   <label class="note-l" for="houses-note">直してほしい点 (任意)</label>
   <textarea id="houses-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="gate" data-id="gate">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>門と壁（鯨門・潮門・風門・灰門）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">四つの門は章の跡地の方位を向き、門の碑がその巨神のことを一行言う。壁は石レンガ（厚さ 3・高さ 8）で四隅に塔。絵は 40 ブロックの一区間。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="gate_sheet.jpg" aria-label="門と壁（鯨門・潮門・風門・灰門） のシートを拡大"><img loading="lazy" src="gate_sheet.jpg" alt="門と壁（鯨門・潮門・風門・灰門） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="gate-a"><input type="radio" name="gate" id="gate-a" value="a"><span class="letter">A</span><span class="otext"><b>石の門</b><span>二つの四角い門塔（高さ 14）が門（幅 7・高さ 6）をはさむ。門の上に深層岩の帯と灯り。堅い国の門</span></span></label><label class="opt" for="gate-b"><input type="radio" name="gate" id="gate-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の門</b><span>門の前に鯨の顎の骨（骨の弧）が架かり、壁には 12 ごとに骨の柱。鯨追いの国の印が門に出る</span></span></label><label class="opt" for="gate-c"><input type="radio" name="gate" id="gate-c" value="c"><span class="letter">C</span><span class="otext"><b>二重の門</b><span>門の外に低い外壁の前庭（馬出し）。外の門と内の門が食い違う。守りの国らしいが、出入りの歩きが少し増える</span></span></label></fieldset>
+  <label class="note-l" for="gate-note">直してほしい点 (任意)</label>
+  <textarea id="gate-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -199,7 +211,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 9;
+  const total = 10;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
