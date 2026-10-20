@@ -45,6 +45,7 @@ public final class TrialBoard {
             return;
         }
         PacketDistributor.sendToPlayer(sp, build(sp, back, t));
+        TrialIntro.onBoardOpened(sp);
     }
 
     public static TrialBoardNet.Open build(ServerPlayer sp, ServerLevel back, String titan) {

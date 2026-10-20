@@ -380,5 +380,9 @@
   "trial.skyabyss.enemy.S10.0": "Wardens and moths",
   "trial.skyabyss.enemy.S10.1": "Wardens and callers",
   "block.skyabyss.trial_seal": "Cleared Trial Seal",
-  "message.skyabyss.trial_hub.sealed_block": "A seal is carved here. You have already cleared this trial"
+  "message.skyabyss.trial_hub.sealed_block": "A seal is carved here. You have already cleared this trial",
+  "message.skyabyss.trial_intro.board": "A stone slab: the Trial Board. Right-click it to read your three trials and the weekly trial",
+  "message.skyabyss.trial_intro.deck": "The Trial Hall. Only the doors of your three drawn trials and the weekly trial are open; the rest stay shut",
+  "message.skyabyss.trial_intro.weekly": "The weekly trial is a fourth trial that changes each week. Take it any time; clearing it doubles your materials",
+  "message.skyabyss.trial_intro.weekly_cell": "This is the weekly trial. You can take it without drawing it. Clearing it doubles your materials this week"
 }

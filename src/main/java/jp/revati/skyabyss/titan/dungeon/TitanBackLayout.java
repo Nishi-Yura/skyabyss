@@ -255,6 +255,9 @@ public final class TitanBackLayout {
         all.addAll(TRIAL_SIGNS);
         all.addAll(GUIDE_SIGNS);
         all.add(HEART_GATE_SIGN);
+        if (WhaleDeck.placed()) {
+            all.addAll(WhaleDeck.SIGNS);
+        }
         return List.copyOf(all);
     }
 

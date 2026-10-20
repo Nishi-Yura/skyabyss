@@ -231,6 +231,45 @@ public final class TrialHub {
         tickPending(level, now, g -> Groups.online(level, g));
         tickSeal(level, titan, players, now);
         autoStones(level, titan, players, now);
+        TrialIntro.tick(titan, players);
+        tickPads(level, titan, players, now);
+    }
+
+    // ---------------------------------------------------------------- 光る床 (鼓動の間 <-> 試練の階。岩鯨。版 22)
+    // 立つと、もう一方の休み場へ移る (人ごとに PAD_COOLDOWN tick は続けて使えない)。階段の長い道を飛ばすための近道
+    private static final int PAD_COOLDOWN = 60;
+    private static final Map<UUID, Long> PAD_USED = new HashMap<>();
+
+    static int tickPads(ServerLevel level, String titan, List<ServerPlayer> players, long now) {
+        if (!Titans.STONE_WHALE.equals(titan) || !jp.revati.skyabyss.titan.dungeon.WhaleDeck.placed()) {
+            return 0;
+        }
+        int moved = 0;
+        for (ServerPlayer p : players) {
+            if (!p.isAlive() || p.isSpectator()) {
+                continue;
+            }
+            BlockPos at = p.blockPosition();
+            boolean hubPad = at.equals(jp.revati.skyabyss.titan.dungeon.WhaleDeck.HUB_PAD.above());
+            boolean deckPad = at.equals(jp.revati.skyabyss.titan.dungeon.WhaleDeck.D0_PAD.above());
+            if (!hubPad && !deckPad) {
+                continue;
+            }
+            Long last = PAD_USED.get(p.getUUID());
+            if (last != null && now - last < PAD_COOLDOWN) {
+                continue;
+            }
+            PAD_USED.put(p.getUUID(), now);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 14, 0.3, 0.6, 0.3, 0.03);
+            if (hubPad) {
+                jp.revati.skyabyss.titan.dungeon.TitanBackTrials.returnToCheckpoint(p, jp.revati.skyabyss.titan.dungeon.WhaleDeck.REST_D0);
+            } else {
+                sendToHub(level, p, titan, false, null);
+            }
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 14, 0.3, 0.6, 0.3, 0.03);
+            moved++;
+        }
+        return moved;
     }
 
     // ---------------------------------------------------------------- 原型の石は近づくだけで (版 22)
@@ -356,6 +395,7 @@ public final class TrialHub {
 
     public static void clearAll() {
         STONE_TRY.clear();
+        PAD_USED.clear();
         PENDING.clear();
         BOUNCED.clear();
         STATIC.clear();

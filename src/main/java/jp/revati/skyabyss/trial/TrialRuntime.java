@@ -210,6 +210,12 @@ public final class TrialRuntime {
                 }
                 TrialCell.Run run = armed(level, group, cell, draw, now);
                 run.lastPresent = now;
+                if (!draw.has(cell.def().id())) {
+                    // 引いていない試練 = 今週の試練 (版 22: 初めて入った人に一行)
+                    for (ServerPlayer p : inside) {
+                        TrialIntro.onWeeklyEntered(p);
+                    }
+                }
                 cell.tick(level, run, inside, now);
                 tickPad(level, run, inside);
                 autoRing(level, group, cell, run, draw, inside, now);

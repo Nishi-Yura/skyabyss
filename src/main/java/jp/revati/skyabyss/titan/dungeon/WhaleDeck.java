@@ -152,6 +152,17 @@ public final class WhaleDeck {
     public static final BlockPos W12_STONE = new BlockPos(22, Y + 1, 164);
     public static final BlockPos W12_PAD = new BlockPos(26, Y, 164);
 
+    // 版 22: 光る床 (鼓動の間 <-> 試練の階の広間 D0)。立つと、もう一方の休み場へ移る。入口の通路の長い道と 16 段の階段を飛ばせる (階段でも行ける)
+    public static final BlockPos HUB_PAD = new BlockPos(-4, FLOOR, -17);
+    public static final BlockPos D0_PAD = new BlockPos(24, Y, 7);
+
+    // 版 22: 試練の板・試練の階の案内の碑 (sign.skyabyss.deck_*)。置き場は部屋の壁ぎわの空気の所
+    public static final List<TitanBackLayout.Inscription> SIGNS = List.of(
+            new TitanBackLayout.Inscription("sign.skyabyss.deck_board", new BlockPos(-8, FLOOR + 3, -15), net.minecraft.core.Direction.NORTH),
+            new TitanBackLayout.Inscription("sign.skyabyss.deck_pad", new BlockPos(-4, FLOOR + 3, -15), net.minecraft.core.Direction.NORTH),
+            new TitanBackLayout.Inscription("sign.skyabyss.deck_stair", new BlockPos(3, FLOOR + 3, 7), net.minecraft.core.Direction.WEST),
+            new TitanBackLayout.Inscription("sign.skyabyss.deck_hall", new BlockPos(22, Y + 3, 6), net.minecraft.core.Direction.EAST));
+
     // 試練の板 (鼓動の間の南の壁ぎわ・試練の階の広間の北の壁ぎわ)
     public static final BlockPos BOARD_HUB = new BlockPos(-8, FLOOR + 1, -15);
     public static final BlockPos BOARD_D0 = new BlockPos(26, Y + 1, 4);
