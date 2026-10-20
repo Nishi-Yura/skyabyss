@@ -124,7 +124,7 @@ public final class StormBackSelfTest {
 
     private static void forceChunks(ServerLevel back, boolean on) {
         for (int cx = -340 >> 4; cx <= 340 >> 4; cx++) {
-            for (int cz = -200 >> 4; cz <= 205 >> 4; cz++) {
+            for (int cz = -200 >> 4; cz <= 270 >> 4; cz++) {
                 back.setChunkForced(cx, cz, on);
             }
         }
@@ -423,7 +423,7 @@ public final class StormBackSelfTest {
         Set<String> keys = new HashSet<>();
         int n = 0;
         for (int cx = -340 >> 4; cx <= 340 >> 4; cx++) {
-            for (int cz = -200 >> 4; cz <= 205 >> 4; cz++) {
+            for (int cz = -200 >> 4; cz <= 270 >> 4; cz++) {
                 for (BlockEntity be : l.getChunk(cx, cz).getBlockEntities().values()) {
                     if (be instanceof TabletBlockEntity) {
                         n++;
