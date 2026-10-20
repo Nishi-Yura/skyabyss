@@ -207,7 +207,7 @@ public final class EmberBackSelfTest {
         }
         for (Cache c : CACHES) {
             more.add("sign.skyabyss.ember_cache_" + c.id());
-            expect(back.getBlockState(c.pos()).is(Blocks.CHEST), "cache " + c.id() + " has no chest at " + c.pos().toShortString());
+            expect(back.getBlockState(c.pos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get()), "cache " + c.id() + " has no chest at " + c.pos().toShortString());
             BlockState cs = back.getBlockState(c.pos().above());
             expect(cs.getBlock() instanceof TabletBlock, "cache " + c.id() + " has no tablet above the chest");
         }
