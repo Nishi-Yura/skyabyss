@@ -128,6 +128,7 @@ public final class TrialData {
         r.putInt(DONE, Math.max(0, r.getInt(DONE)) + 1);
         r.remove(DRAW);
         r.remove(CLEARED);
+        TrialRoute.reset(r);
     }
 
     public static Set<String> clearedIds(BackGroupData.Record r) {

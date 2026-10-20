@@ -899,6 +899,9 @@ public final class TideBackTrials {
         if (level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
+                if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                    return;
+                }
                 TideGarden.dropOut(level, player, TideRooms.owns(TideRooms.GARDEN, player));
                 clearCheckpoint(player);
                 toArrival(player);

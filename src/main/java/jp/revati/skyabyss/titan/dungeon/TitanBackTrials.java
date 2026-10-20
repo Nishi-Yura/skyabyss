@@ -1625,6 +1625,11 @@ public final class TitanBackTrials {
         return plaza();
     }
 
+    // 休み場の立つ位置 (順路の運び先。trial/TrialRoute)。知らない id なら広場
+    public static BlockPos restSpawn(ServerLevel level, String id) {
+        return checkpointSpawn(level, id);
+    }
+
     // 立てる場所か: 足元と頭が空いていて (当たり判定も液体もない)、床が固い
     public static boolean isSafeStand(ServerLevel level, BlockPos feet) {
         BlockState f = level.getBlockState(feet);
@@ -1909,6 +1914,9 @@ public final class TitanBackTrials {
             event.setCanceled(true);
             if (event.getEntity() instanceof ServerPlayer player) {
                 if (player.isShiftKeyDown()) {
+                    if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                        return;
+                    }
                     clearCheckpoint(player);
                     BlockPos a = plaza();
                     player.teleportTo(player.serverLevel(), a.getX() + 0.5, a.getY(), a.getZ() + 0.5, 180f, 0f);

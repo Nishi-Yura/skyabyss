@@ -912,6 +912,9 @@ public final class StormBackTrials {
         if (level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
+                if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                    return;
+                }
                 StormWest.strip(player);
                 clearCheckpoint(player);
                 player.fallDistance = 0;

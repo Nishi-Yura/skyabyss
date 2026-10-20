@@ -187,7 +187,11 @@ public final class TrialHubSelfTest {
         check(f, TrialHub.tickSeal(back, titan, List.of(a), back.getGameTime()) == 0, titan + ": the seal bounced a player while the return was pending");
         TrialHub.flushPending(back);
         TrialHub.tickPending(back, back.getGameTime() + 1, g -> List.of(a, b, c));
-        check(f, a.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, titan + ": the player inside the cleared trial was not returned to the hub: " + a.position());
+        // 順路 (docs/design/32): 鼓動の間へは戻さない。段が進み、運びは TrialRoute が CARRY_DELAY 後に次の入口へ (trial route の自己テストが見る)
+        check(f, a.position().distanceTo(inA) < 0.5, titan + ": the player inside the cleared trial was moved by the hub (route carries instead): " + a.position());
+        check(f, TrialRoute.step(back, keyA) == 2, titan + ": clearing the first route trial did not set step 2 (got " + TrialRoute.step(back, keyA) + ")");
+        TrialRoute.clearAll();
+        TrialRoute.finish(back, keyA);
         check(f, b.position().distanceTo(inB) < 0.5, titan + ": a player in another trial was moved");
         check(f, c.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 0.5, titan + ": the player at the hub was moved");
         check(f, TrialHub.pendingCount() == 0, titan + ": the return stayed queued");
@@ -203,14 +207,7 @@ public final class TrialHubSelfTest {
         check(f, litA.containsKey(s0.pos()) && litA.get(s0.pos()).getValue(TrialTabletBlock.LIT), titan + ": the cleared tablet does not light for its own group");
         check(f, !litA.containsKey(s1.pos()), titan + ": an uncleared tablet lit up");
         check(f, !litB.containsKey(s0.pos()), titan + ": the tablet lit for a group that has not cleared it");
-        // 封: 越えたグループの人が入り直すと戻される。越えていないグループの人は、同じ場所にいても動かない
-        a.setPos(inA);
-        b.setPos(inA);
-        int bounced = TrialHub.tickSeal(back, titan, List.of(a, b), back.getGameTime() + 1000);
-        check(f, bounced == 1, titan + ": expected exactly the clearing group's player to be bounced, got " + bounced + " (inside " + TrialHub.inside(back, keyA, titan, keys.get(0), a)
-                + ", cleared " + HubTablets.cleared(back, keyA, titan, keys.get(0)) + ", pending " + TrialHub.pending(keyA, titan, keys.get(0)) + ", at " + a.position() + ")");
-        check(f, a.position().distanceTo(Vec3.atBottomCenterOf(hub)) < 2.5, titan + ": the sealed trial did not send its player back to the hub");
-        check(f, b.position().distanceTo(inA) < 0.5, titan + ": a player of another party was bounced out of a trial it has not cleared");
+        // 順路では、越えた試練を封じない (入り直しは起きない。次の入口へ運ばれる)
         // 「光の中でしゃがむ」手順はない: 試練を越えた合図を送っても、個人の光は出ない
         try {
             jp.revati.skyabyss.quest.Quests.signal(a, jp.revati.skyabyss.quest.free.FreeQuestEvents.TRIAL_CLEARED);
@@ -218,18 +215,6 @@ public final class TrialHubSelfTest {
             // 合図の先の記録 (進捗・クエスト) は偽の人では動かないことがある。光が出ないことだけ見る
         }
         check(f, !ReturnBeacons.hasOffer(a.getUUID()), titan + ": a return light was offered after the clear");
-        // ---- 版 25: 越えた試練の入口は、そのグループには試練済みの封印で閉じる (見かけ = trial_seal、当たり = 封印の扉の閉じる印)。ほかのグループには閉じない
-        List<BlockPos> door = TrialHub.entranceOf(back, keyA, titan, keys.get(0));
-        if (!door.isEmpty() && GroupGates.isGate(back, door.get(0))) {
-            check(f, !GroupGates.isOpen(back, keyA, door), titan + ": the cleared trial's entrance is still open for its group");
-            BlockState seenByA = GroupOverlays.compute(back, keyA).get(door.get(0));
-            check(f, seenByA != null && seenByA.is(ModBlocks.TRIAL_SEAL.get()), titan + ": the cleared entrance does not show the trial seal");
-            check(f, TrialHub.isClearedEntrance(back, keyA, door.get(0)) && !TrialHub.isClearedEntrance(back, keyB, door.get(0)), titan + ": isClearedEntrance is wrong");
-            BlockState seenByB = GroupOverlays.compute(back, keyB).get(door.get(0));
-            check(f, seenByB == null || !seenByB.is(ModBlocks.TRIAL_SEAL.get()), titan + ": the trial seal showed for a group that has not cleared the trial");
-        } else {
-            SkyAbyss.LOGGER.info("SELFTEST trial hub: {} has no entrance gate for trial {} (the bounce is the seal there)", titan, keys.get(0));
-        }
         // ---- 版 25: 原型の石は近づくだけで鳴る (岩鯨。石の右クリックと同じ)・光る床 (鼓動の間 <-> 試練の階)
         if (Titans.STONE_WHALE.equals(titan)) {
             FakePlayer d = FakePlayerFactory.get(back, new GameProfile(UUID.fromString("7a0b1c00-0000-4000-8000-00000000d004"), "trialhub_d"));

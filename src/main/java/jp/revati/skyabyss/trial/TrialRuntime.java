@@ -655,6 +655,7 @@ public final class TrialRuntime {
     public static void onGroupReset(ServerLevel back, UUID group) {
         heartCounted.removeIf(s -> s.startsWith(group + "@"));
         stopGroup(back, group);
+        TrialRoute.finish(back, group);
         // 戸の上書きが消えるので、引いた試練の戸を開け直す
         String titan = Titans.titanOfBack(back.dimension());
         if (titan != null && hasWork(titan)) {
@@ -666,5 +667,6 @@ public final class TrialRuntime {
     public static void clearAll() {
         RUNS.clear();
         heartCounted.clear();
+        TrialRoute.clearAll();
     }
 }

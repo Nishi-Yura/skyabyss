@@ -863,6 +863,9 @@ public final class EmberBackTrials {
         if (player.serverLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
+                if (jp.revati.skyabyss.trial.TrialRoute.propose(player)) {
+                    return;
+                }
                 clearCheckpoint(player);
                 toArrival(player);
                 EmberHeat.reset(player);

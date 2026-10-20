@@ -71,6 +71,7 @@ public final class TrialHub {
             return;
         }
         PENDING.put(pk, new Pending(group, progress, key, back.getGameTime() + RETURN_DELAY));
+        TrialRoute.onCleared(back, group, progress, key);
         // 碑は鳴った瞬間から (その場で光を見せる)
         if (HubTablets.install(back, progress) >= 0) {
             HubTablets.refresh(back, group);
@@ -234,7 +235,7 @@ public final class TrialHub {
             }
         }
         tickPending(level, now, g -> Groups.online(level, g));
-        tickSeal(level, titan, players, now);
+        TrialRoute.tick(level, titan, players, now);
         autoStones(level, titan, players, now);
         TrialIntro.tick(titan, players);
         tickPads(level, titan, players, now);
@@ -358,11 +359,9 @@ public final class TrialHub {
             for (ServerPlayer m : moved) {
                 // 試練を越えた人に紋が 1 つ (同じ試練では一度だけ。docs/design/31 の A14)
                 jp.revati.skyabyss.rpg.skill.SkillExtOps.award(m, p.titan(), p.key());
-                sendToHub(level, m, p.titan(), true, p.key());
             }
-            // 越えた試練の入口は、そのグループには試練済みの封印で閉じる (戻った人が入り直せない。ほかのグループには開いたまま)
-            sealEntrance(level, p.group(), p.titan(), p.key());
-            SkyAbyss.LOGGER.info("Trial {} of the {} cleared by group {}: {} member(s) returned to the hub", p.key(), p.titan(), p.group(), moved.size());
+            // 順路 (docs/design/32 の 2.3): 鼓動の間へ戻す・封じるのではなく、グループ全員を次の段の入口へ運ぶ (TrialRoute が CARRY_DELAY 後に運ぶ)
+            SkyAbyss.LOGGER.info("Trial {} of the {} cleared by group {}: {} member(s) inside, route step {}", p.key(), p.titan(), p.group(), moved.size(), TrialRoute.step(level, p.group()));
         }
     }
 
