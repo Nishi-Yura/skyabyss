@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pages_a
 import pages_b
 import pages_c
+import pages_d
 
 
 def main():
@@ -20,6 +21,7 @@ def main():
     pages_a.titans()
     pages_b.skills()
     pages_b.gear()
+    pages_d.rebirth()
     pages_b.pouch()
     pages_b.party()
     pages_c.story()

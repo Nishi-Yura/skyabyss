@@ -155,6 +155,10 @@ def faq():
 def changelog():
     ver = [
         (T("0.2.2 以降（開発中・リリース前）", "After 0.2.2 (in development, unreleased)"), "2026-10-20", [
+            ("転生（Lv 50+n）を追加。魂盤・3 択の恩恵・祖の力・色と記号・称号 24・順位の石・飾りがあります。深淵の難度と、巨神ごとの専用伝説 4 つも加わりました。", "Added rebirth (Lv 50+n) with the soul board, three-choice boons, ancestral power, colors and symbols, 24 titles, a rank stone and cosmetics. Abyss difficulty and four dedicated abyss legendaries arrive with it."),
+            ("スキルの自由度を追加: 木は全部最初から開き、天職は専門に。タグ・セット・連鎖・構え・熟練・キーストーン・試着・型 4 つ。変異・橋・紋の盤・前世の技・淵の木も。", "Added skill freedom: every tree open from the start, callings as specialties, tags, sets, chains, stances, mastery, keystones, try-on and four loadouts, plus mutations, bridges, the glyph board, past-life skills and the Abyss tree."),
+            ("装備の自由度を追加: 穴・欠片・技のルーン・アスペクト・世代と、炉の「刻み」画面。", "Added gear freedom: sockets, shards, skill runes, aspects, generations and the forge's Engrave tab."),
+            ("試練のプールが各巨神 7 つ以上（原型 3 と新作 4 以上）になりました。巨神の背を大きく作り直しました（水平 ×1.6）。", "The trial pool now holds at least seven trials per titan (three originals plus four or more new), and the backs were rebuilt larger (1.6x horizontally)."),
             ("心臓の領域が変わりました。時間では終わらず、三つの仕掛け（共鳴する骨・潮の水門・避雷の柱・熾の核）を解くまで続き、そのあいだ心臓は傷を受けません。", "Heart domains changed: they no longer time out and last until three gimmicks (resonant bones, tide valves, lightning rods, ember cores) are solved; the heart is invulnerable meanwhile."),
             ("倒れた仲間を起こせるようになりました（約 15 秒の「倒れた」状態、3 秒の長押しで蘇生）。", "Party members can now revive a downed ally (about 15 s downed state, 3 s hold to revive)."),
             ("試練のプール（巨神ごとに十二、周回ごとに歩・智・闘から一つずつ）、試練の板・図鑑・称号・今週の試練を追加。試練を越えると鼓動の間へ戻り、碑が光ります。", "Added the trial pool (twelve per titan, one drawn each cycle per Traverse/Wit/Combat slot), the trial board, codex, titles and weekly trial. Clearing a trial returns you to the hub and lights its tablet."),

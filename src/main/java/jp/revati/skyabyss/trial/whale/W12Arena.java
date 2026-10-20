@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 // W12 鯨骨の闘技場 (闘・戦う・★★★。docs/design/29 の 3.1)。環状の骨の闘技場で三つの波と、番兵長の影に挑む。波のたびに床が崩れて足場が狭まる。
-// 仕組みは RingArenaCell (円い床・崩れる順・幕で半分・橋)。ここは敵 (剣と盾 / 射手つき。最後の波は番兵長の影つき) と、場所だけを決める。
+// 仕組みは RingArenaCell (円い床・崩れる順・橋。少人数も円は全面 (26 の 8.7))。ここは敵 (剣と盾 / 射手つき。最後の波は番兵長の影つき) と、場所だけを決める。
 // 修飾: 配置 3 (崩れる順)・数字 2 (波の敵の数・崩れる前の予告)・敵の組 2 (剣と盾 / 射手つき)・障害 (落石)・任意の目標 (一度も落ちずに)
 public final class W12Arena extends RingArenaCell {
     private final Def def = TrialCatalog.get("W12");
