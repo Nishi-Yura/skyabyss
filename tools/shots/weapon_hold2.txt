@@ -725,8 +725,7 @@ perspective front
 hud off
 wait 4
 shot coral_shield_common_tpGuard
-bodyyaw 70
-wait 4
+bodyyaw 45
 shot coral_shield_common_tpGuardSide
 stopuse
 wait 20
@@ -746,8 +745,7 @@ perspective front
 hud off
 wait 4
 shot offhand_shield_tpGuard
-bodyyaw 70
-wait 4
+bodyyaw 45
 shot offhand_shield_tpGuardSide
 stopuse
 wait 10
@@ -761,8 +759,12 @@ wait 5
 chat clear
 shot thunder_wing_bow_fpDraw0
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_fpRelease0a
+wait 2
 shot thunder_wing_bow_fpRelease0
+wait 4
+shot thunder_wing_bow_fpRelease0b
 wait 25
 perspective first
 bodyyaw 0
@@ -772,8 +774,12 @@ wait 15
 chat clear
 shot thunder_wing_bow_fpDraw1
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_fpRelease1a
+wait 2
 shot thunder_wing_bow_fpRelease1
+wait 4
+shot thunder_wing_bow_fpRelease1b
 wait 25
 perspective first
 bodyyaw 0
@@ -783,8 +789,12 @@ wait 26
 chat clear
 shot thunder_wing_bow_fpDraw2
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_fpRelease2a
+wait 2
 shot thunder_wing_bow_fpRelease2
+wait 4
+shot thunder_wing_bow_fpRelease2b
 wait 25
 perspective front
 bodyyaw 0
@@ -794,8 +804,13 @@ wait 5
 chat clear
 shot thunder_wing_bow_tpDraw0
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_tpRelease0a
+wait 2
 shot thunder_wing_bow_tpRelease0
+perspective back
+wait 3
+shot thunder_wing_bow_tpRelease0b
 wait 25
 perspective front
 bodyyaw 0
@@ -805,8 +820,13 @@ wait 15
 chat clear
 shot thunder_wing_bow_tpDraw1
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_tpRelease1a
+wait 2
 shot thunder_wing_bow_tpRelease1
+perspective back
+wait 3
+shot thunder_wing_bow_tpRelease1b
 wait 25
 perspective front
 bodyyaw 0
@@ -816,7 +836,12 @@ wait 26
 chat clear
 shot thunder_wing_bow_tpDraw2
 stopuse
-wait 3
+wait 1
+shot thunder_wing_bow_tpRelease2a
+wait 2
 shot thunder_wing_bow_tpRelease2
+perspective back
+wait 3
+shot thunder_wing_bow_tpRelease2b
 wait 25
 quit
