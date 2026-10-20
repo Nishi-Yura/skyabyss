@@ -164,7 +164,7 @@ public final class BuildAuditSelfTest {
         })));
         steps.add(Step.once("build audit (tide build)", server -> build(server, TideTravel.TIDE_BACK, TideBackBuilder::ensureBuilt)));
         steps.add(Step.once("build audit (storm build)", server -> build(server, StormTravel.STORM_BACK, StormBackBuilder::ensureBuilt)));
-        // 余燼は体が大きく (x1.6)、歩く所の端は読み込みの外れた区画になる。光の計算が済むまで区画を読み込んだままにして (調べたあとで外す)、100 tick 待つ
+        // 余燼は体が大きく (x1.6)、歩く所の端は読み込みの外れた区画になる。光の計算が済むまで区画を読み込んだままにして (調べたあとで外す)、400 tick 待つ (負荷が高いと 100 tick では光が足りず、体の南の端で暗い所が 5〜13 件出た)
         steps.add(Step.once("build audit (ember build)", server -> {
             build(server, EmberIds.BACK, EmberBodyBuilder::ensureBuilt);
             forceBox(server, EmberIds.BACK, EMBER_BOX, true);
@@ -175,7 +175,7 @@ public final class BuildAuditSelfTest {
                 level -> BackReach.run(level, jp.revati.skyabyss.titan.tide.back.TideBackAudit.spec()))));
         steps.add(Step.once("build audit (storm)", server -> back(server, StormTravel.STORM_BACK, "storm", STORM_BOX,
                 level -> jp.revati.skyabyss.titan.storm.back.StormBackAudit.run(level))));
-        steps.add(Step.once("build audit (ember)", 100, server -> {
+        steps.add(Step.once("build audit (ember)", 400, server -> {
             back(server, EmberIds.BACK, "ember", EMBER_BOX, level -> jp.revati.skyabyss.titan.ember.back.EmberBackAudit.run(level));
             forceBox(server, EmberIds.BACK, EMBER_BOX, false);
         }));

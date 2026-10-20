@@ -693,7 +693,8 @@ public final class HeartBotSelfTest {
                 if (rod >= 0) {
                     Vec3 np = c.nodes().get(rod).pos;
                     int walk = legTicks(at[0], np);
-                    check(f, walk <= c.chargeTicks() - (c.round() == 0 ? 50 : 25), name + ": a rod is " + walk + " ticks of walking away (charge is " + c.chargeTicks() + " in round " + (c.round() + 1) + ")");
+                    // 巡が進むと溜まりが短くなる (8 → 7.4 → 6.8 秒)。三巡目は歩きの余裕を 20 tick まで見る
+                    check(f, walk <= c.chargeTicks() - (c.round() == 0 ? 50 : c.round() == 1 ? 25 : 20), name + ": a rod is " + walk + " ticks of walking away (charge is " + c.chargeTicks() + " in round " + (c.round() + 1) + ")");
                     if (d.ticks() - c.chargeStart() >= walk) {
                         // 溜まり始めからの時間で、歩いて着く
                         bot.moveTo(np.x + 1, np.y, np.z);
