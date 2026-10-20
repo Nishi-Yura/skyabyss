@@ -38,14 +38,15 @@ BONES = [
 def main():
     mesh_dir = os.path.join(ASSETS, 'lowpoly', 'armor')
     tex_dir = os.path.join(ASSETS, 'textures', 'lowpoly', 'armor')
-    for d in (mesh_dir, tex_dir):
-        if os.path.isdir(d):
-            shutil.rmtree(d)
+    for d in (mesh_dir, tex_dir):    # 消すのは 4 巨神の分だけ (whale_road など別の組は残す)
+        for s in SETS:
+            if os.path.isdir(os.path.join(d, s)):
+                shutil.rmtree(os.path.join(d, s))
     n_mesh = n_tex = 0
     tris = {}
     for s in SETS:
-        os.makedirs(os.path.join(mesh_dir, s))
-        os.makedirs(os.path.join(tex_dir, s))
+        os.makedirs(os.path.join(mesh_dir, s), exist_ok=True)
+        os.makedirs(os.path.join(tex_dir, s), exist_ok=True)
         for p in PIECES:
             for t in TIERS:
                 src = os.path.join(SRC, s, f'{p}{t}_mesh.json')
