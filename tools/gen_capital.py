@@ -292,14 +292,48 @@ def keep():
 
 
 def hall():
-    # 空見の館 (x -58..-36, z -96..-84)。段の上。閉じた戸 (鉄の戸)
-    x0, z0, x1, z1 = -58, -96, -36, -84
-    hollow(x0, 5, z0, x1, 10, z1, 'stone_bricks', roof='deepslate_tile_slab[type=bottom,waterlogged=false]', floor_s='polished_andesite', corner='deepslate_bricks')
+    # 空見の館 (ラフ B「記録の塔の館」で決定。段の上、床 y 4)。館 19×13 (x -58..-40, z -96..-84) と、東に丸い記録の塔 (直径 9・高さ 18)。
+    # 中は本棚と書見台。南の戸は閉じた鉄の戸、碑
+    x0, z0, x1, z1 = -58, -96, -40, -84
+    cz = (z0 + z1) // 2
+    hollow(x0, 5, z0, x1, 10, z1, 'stone_bricks', roof=None, floor_s='polished_andesite', corner='deepslate_bricks')
+    for x in range(x0 + 2, x1 - 1, 3):
+        for y in (6, 7):
+            blk(x, y, z0, 'glass_pane[north=false,south=false,east=true,west=true]')
+            if x != x0 + 9:
+                blk(x, y, z1, 'glass_pane[north=false,south=false,east=true,west=true]')
     box(x0 + 1, 11, z0 + 1, x1 - 1, 11, z1 - 1, 'deepslate_tiles')
-    windows(x0, z0, x1, z1, 7, 4)
-    blk(-47, 5, z1, 'iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
-    blk(-47, 6, z1, 'iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
-    tablet(-49, 5, z1 + 1, 'south', 'hall')
+    gable(x0 - 1, x1 + 1, z0 - 1, z1 + 1, 11, block='deepslate_tile_stairs', cap='deepslate_tile_slab[type=bottom,waterlogged=false]')
+    # 本棚 (北と南の壁ぎわ、二段) と書見台
+    box(x0 + 1, 5, z0 + 1, x1 - 1, 6, z0 + 1, 'bookshelf')
+    box(x0 + 1, 5, z1 - 1, x1 - 1, 6, z1 - 1, 'bookshelf')
+    blk(x0 + 9, 5, cz, 'lectern[facing=south,has_book=false,powered=false]')
+    blk(x0 + 5, 9, cz, 'lantern[hanging=true]')
+    blk(x1 - 5, 9, cz, 'lantern[hanging=true]')
+    # 丸い記録の塔 (八角で近似。中心 -35, -90)
+    tcx, tcz, rr = -35, cz, 4
+    box(tcx - rr, 4, tcz - rr, tcx + rr, 4, tcz + rr, 'polished_andesite')
+    for y in range(5, 23):
+        for x in range(tcx - rr, tcx + rr + 1):
+            for z in range(tcz - rr, tcz + rr + 1):
+                d = abs(x - tcx) + abs(z - tcz)
+                if d == rr + 1 or (abs(x - tcx) == rr and abs(z - tcz) <= 1) or (abs(z - tcz) == rr and abs(x - tcx) <= 1):
+                    win = (y - 5) % 6 == 3 and (x + z) % 2 == 0
+                    blk(x, y, z, 'glass_pane[north=false,south=false,east=false,west=false]' if win else 'deepslate_bricks')
+    for x in range(tcx - rr, tcx + rr + 1):
+        for z in range(tcz - rr, tcz + rr + 1):
+            if abs(x - tcx) + abs(z - tcz) <= rr:
+                blk(x, 23, z, 'deepslate_tile_slab[type=bottom,waterlogged=false]')
+    blk(tcx, 24, tcz, 'lantern[hanging=false]')
+    # 館と塔をつなぐ戸口 (館の東の壁)
+    opening(x1, 5, cz, x1, 6, cz)
+    opening(tcx - rr - 1, 5, tcz, tcx - rr - 1, 6, tcz)
+    # 南の戸 (閉じた鉄の戸) と碑
+    blk(x0 + 9, 5, z1, 'iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
+    blk(x0 + 9, 6, z1, 'iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
+    tablet(x0 + 7, 5, z1 + 1, 'south', 'hall')
+    lantern_post(x0 + 6, 5, z1 + 2, 2)
+    lantern_post(x0 + 12, 5, z1 + 2, 2)
 
 
 def plaza_market():
