@@ -104,9 +104,9 @@
   "rar": "rare",
   "titan": "whale",
   "tris": {
-   "common": 136,
+   "common": 108,
    "rare": 148,
-   "legend": 148
+   "legend": 139
   }
  },
  "moss_talisman": {
@@ -137,9 +137,9 @@
   "rar": "rare",
   "titan": "tide",
   "tris": {
-   "common": 122,
-   "rare": 134,
-   "legend": 134
+   "common": 100,
+   "rare": 130,
+   "legend": 150
   }
  },
  "moontide_pearl": {
@@ -148,9 +148,9 @@
   "rar": "legend",
   "titan": "tide",
   "tris": {
-   "common": 154,
-   "rare": 166,
-   "legend": 196
+   "common": 164,
+   "rare": 186,
+   "legend": 186
   }
  },
  "tide_watching_shell": {
@@ -159,9 +159,9 @@
   "rar": "common",
   "titan": "tide",
   "tris": {
-   "common": 132,
-   "rare": 144,
-   "legend": 144
+   "common": 135,
+   "rare": 147,
+   "legend": 147
   }
  },
  "tide_pearl": {
