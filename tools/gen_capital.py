@@ -474,18 +474,22 @@ def smithy():
 
 
 def houses():
-    # 住まい (西南。3 列 × 4 行、7×7)。戸口は開いている。中は空
+    # 住まい (ラフ A「石と木の家」で決定。西南。3 列 × 4 行、7×7)。石の腰壁と木の壁、切妻の屋根、小さな煙突。戸口は開いている。中は空
     n = 7
     for i in range(3):
         for j in range(4):
             x0 = -50 + i * 14
             z0 = 12 + j * 20
             x1, z1 = x0 + 6, z0 + 6
-            hollow(x0, 0, z0, x1, 3, z1, 'spruce_planks', roof='spruce_slab[type=bottom,waterlogged=false]', floor_s='stone_bricks', corner='stripped_spruce_log[axis=y]')
-            box(x0 + 1, 4, z0 + 1, x1 - 1, 4, z1 - 1, 'spruce_planks')
+            box(x0, -1, z0, x1, -1, z1, 'stone_bricks')
+            hollow(x0, 0, z0, x1, 0, z1, 'cobblestone', roof=None, floor_s=None, corner='stripped_spruce_log[axis=y]')
+            hollow(x0, 1, z0, x1, 3, z1, 'spruce_planks', roof=None, floor_s=None, corner='stripped_spruce_log[axis=y]')
             opening(x0 + 3, 0, z1, x0 + 3, 1, z1)
             blk(x0 + 1, 1, z0, 'glass_pane[north=false,south=false,east=true,west=true]')
             blk(x1 - 1, 1, z0, 'glass_pane[north=false,south=false,east=true,west=true]')
+            box(x0 + 1, 4, z0 + 1, x1 - 1, 4, z1 - 1, 'spruce_planks')
+            gable(x0 - 1, x1 + 1, z0 - 1, z1 + 1, 4)
+            box(x1 - 1, 4, z0 + 1, x1 - 1, 7, z0 + 1, 'cobblestone')
             blk(x0 + 3, 3, z0 + 3, 'lantern[hanging=true]')
             if n <= 10 and (i + j) % 2 == 0:
                 mark('villager_%d' % n, x0 + 3, 0, z1 + 2)
