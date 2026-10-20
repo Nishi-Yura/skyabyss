@@ -77,14 +77,26 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 <div class="wrap">
   <div class="top">
     <h1>はじまりの町 ラフ選定</h1>
-    <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
+    <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。見取り図は案 A、建物の形は一棟ずつ採用済み。いまは「都の建築をもっと豪華に。壁の中ぎりぎりまで建物を詰め、建築の水準を参考画像くらいに」の作り直し中。まず作風を一つ選ぶ。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 10 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 11 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a><a href="#market" data-nav="market">市</a><a href="#houses" data-nav="houses">住まい</a><a href="#gate" data-nav="gate">門と壁</a></nav>
+    <nav aria-label="対象"><a href="#style" data-nav="style">都の作風</a><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a><a href="#hall" data-nav="hall">空見の館</a><a href="#smithy" data-nav="smithy">鍛冶場</a><a href="#market" data-nav="market">市</a><a href="#houses" data-nav="houses">住まい</a><a href="#gate" data-nav="gate">門と壁</a></nav>
     <main>
+<section class="subject" id="style" data-id="style">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>都の作風（同じ一角を三つの作風で）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">三案とも同じ一角（北に町家の並び、東の角に鐘の塔、南に張り出しと小塔のある館、南東に店とアーケード、真ん中に広場と噴水）。壁は二重で、柱型と帯が前に出て窓が一つ奥に入る。屋根は全段が階段の瓦で、妻の縁は白い縁石、屋根窓・煙突・隅の小塔つき。選んだ作風で都全体を建て直し、建物の種類を増やし（張り出し窓・露台・旗・橋・段の庭）、壁の中を詰める。いまの作り込みはまだ参考画像の手前。作風が決まったら一棟ずつ部品を足して上げていく。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="style_a.jpg" aria-label="都の作風（同じ一角を三つの作風で） のシートを拡大"><img loading="lazy" src="style_a.jpg" alt="都の作風（同じ一角を三つの作風で） の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="style_b.jpg" aria-label="都の作風（同じ一角を三つの作風で） のシートを拡大"><img loading="lazy" src="style_b.jpg" alt="都の作風（同じ一角を三つの作風で） の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="style_c.jpg" aria-label="都の作風（同じ一角を三つの作風で） のシートを拡大"><img loading="lazy" src="style_c.jpg" alt="都の作風（同じ一角を三つの作風で） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="style-a"><input type="radio" name="style" id="style-a" value="a"><span class="letter">A</span><span class="otext"><b>白の鐘都</b><span>白い石（方解石と石英の柱）に青黒い瓦、緑青の銅の飾り。空を見張る国の白い都。参考画像の一枚目に近い。古びは苔と割れで少しだけ</span></span></label><label class="opt" for="style-b"><input type="radio" name="style" id="style-b" value="b"><span class="letter">B</span><span class="otext"><b>灰石と緋の屋根</b><span>灰色の石レンガと黒い土台、白い石の縁、濃い木の鎧戸、緋色の瓦。参考画像の二枚目に近い。重く、絶えかけの国らしい落ち着き</span></span></label><label class="opt" for="style-c"><input type="radio" name="style" id="style-c" value="c"><span class="letter">C</span><span class="otext"><b>砂岩と瓦の段丘</b><span>白い砂岩と石英の柱、橙の瓦、木の鎧戸。参考画像の三枚目に近い明るい都。緑と花が映える</span></span></label></fieldset>
+  <label class="note-l" for="style-note">直してほしい点 (任意)</label>
+  <textarea id="style-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
     <p class="kind">ラフ 3案</p>
@@ -211,7 +223,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 10;
+  const total = 11;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;

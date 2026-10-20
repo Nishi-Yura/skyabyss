@@ -91,11 +91,31 @@ public final class Blueprint {
                     }
                 }
             }
-            for (JsonElement e : json.getAsJsonArray("blocks")) {
+            // runs (x の向きに続く並び。作り込んだ都向け): [y, z, x0, 番号, 長さ, 番号, 長さ, …]。番号 -1 = 何も置かない
+            if (json.has("runs")) {
+                for (JsonElement e : json.getAsJsonArray("runs")) {
+                    JsonArray a = e.getAsJsonArray();
+                    int y = a.get(0).getAsInt();
+                    int z = a.get(1).getAsInt();
+                    int x = a.get(2).getAsInt();
+                    for (int i = 3; i + 1 < a.size(); i += 2) {
+                        int idx = a.get(i).getAsInt();
+                        int len = a.get(i + 1).getAsInt();
+                        if (idx >= 0) {
+                            BlockState st = palette.get(idx);
+                            for (int k = 0; k < len; k++) {
+                                byPos.put(net.minecraft.core.BlockPos.asLong(x + k, y, z), new Cell(x + k, y, z, st));
+                            }
+                        }
+                        x += len;
+                    }
+                }
+            }
+            for (JsonElement e : json.has("blocks") ? json.getAsJsonArray("blocks") : new JsonArray()) {
                 JsonArray a = e.getAsJsonArray();
                 int y = a.get(1).getAsInt();
                 Cell c = new Cell(a.get(0).getAsInt(), y, a.get(2).getAsInt(), palette.get(a.get(3).getAsInt()));
-                if (byPos.isEmpty() && !json.has("boxes")) {
+                if (byPos.isEmpty() && !json.has("boxes") && !json.has("runs")) {
                     bp.cells.add(c);
                 } else {
                     byPos.put(net.minecraft.core.BlockPos.asLong(c.x(), y, c.z()), c);

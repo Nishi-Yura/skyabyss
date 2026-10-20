@@ -144,7 +144,7 @@ python tools/weapon_lp_sheet.py [id ...]       # docs/review/previews/weapon_lp_
 
 ```
 rm -rf run/shots/first_hour/saves/opening_first_hour      # 毎回、新しい世界で (新しいプレイヤーの目覚めから)
-./gradlew runShots -Pscript=tools/shots/first_hour.txt   # 約 15 分。音は自動で 0
+SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # 約 25 分。音は自動で 0。台本の待ち (waitband / waitnotice) は英語の文なので英語で
 ```
 
 新しいプレイヤーが、序章 → 帳面 → 煙 → 語り部 → 最初の影 → 破れた頁 → イサナ → 足音の夜 → 歌の夜 → 岩鯨の初見 → 鎖、を進む間の「帯の文・画面・知らせ」を、ゲーム内の時刻つきで `run/shots/first_hour/shots/first_hour/shots.log` の `[watch]` に残す (開発用。本番の計測ではない)。拍子の強制 (`opening <拍子>`) は使わず、影・足音・歌・岩鯨は本物の判断に任せて総 tick を 60 分ぶん流す (`cmd tick rate 100` でサーバーだけ 5 倍)。歩きは `dev opening view|goto` で運び、会話は `dev talk "<役>"` / `dev talk say <continue|leave|番号>` で本物の会話 (DialogueService) を進める (節と選択肢が `[dialogue]` に出る)。結果の読み方と見つけた穴は `docs/review/first_hour_log.md`。
