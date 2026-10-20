@@ -9,7 +9,8 @@
   ],
   "client": [
     "GuiGraphicsMixin",
-    "ToastShiftMixin"
+    "ToastShiftMixin",
+    "ChatLinesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

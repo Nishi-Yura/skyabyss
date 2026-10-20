@@ -159,6 +159,16 @@ public final class HudLayout {
         public final EnumSet<Id> dropped = EnumSet.noneOf(Id.class);
         // ずらしたバニラの縦の量 (下が正)。ずらさないものは入らない。vanilla にはずらしたあとの長方形が入る
         public final Map<Id, Integer> shiftY = new EnumMap<>(Id.class);
+        // 横へずらした量 (右が正)。空きが縦にないとき、横へも動かす (横板・札・チャットなど)
+        public final Map<Id, Integer> shiftX = new EnumMap<>(Id.class);
+        // チャットの見せる行数の上限 (-1 = そのまま)。0 = いまは出さない (入る空きがない。チャットの窓を開いているときは除く)
+        public int chatLines = -1;
+        // チャットの幅の上限 (-1 = そのまま)。細くすると、チャットの文はその幅で折り返し直される
+        public int chatWidth = -1;
+        // 札 (トースト) を同時に出せる数の上限 (5 = そのまま)。札の列が入るだけの空きしかないとき、あとの札は待たせる
+        public int toastCap = 5;
+        // どこへも動かせなかった動かせるバニラ (計算の途中で使う。効き目・札・横板は、このとき mod の板のほうが避ける組み直しをする)
+        final EnumSet<Id> stuck = EnumSet.noneOf(Id.class);
 
         Result(Scene scene) {
             this.scene = scene;
@@ -187,6 +197,26 @@ public final class HudLayout {
 
     // ------------------------------------------------------------ 計算
     public static Result compute(Scene s, List<Request> requests) {
+        EnumSet<Id> yielding = EnumSet.noneOf(Id.class);
+        Result r = compute(s, requests, yielding);
+        // 組み直しで別のものが動かせなくなることがあるので、動かせないものが増えなくなるまで (最大 4 回) 繰り返す
+        for (int i = 0; i < 4; i++) {
+            EnumSet<Id> more = EnumSet.copyOf(yielding);
+            for (Id id : r.stuck) {
+                if (id != Id.V_BOSS_BARS && id != Id.V_CHAT) {
+                    more.add(id);
+                }
+            }
+            if (more.equals(yielding)) {
+                break;
+            }
+            yielding = more;
+            r = compute(s, requests, yielding);
+        }
+        return r;
+    }
+
+    private static Result compute(Scene s, List<Request> requests, EnumSet<Id> first) {
         Result r = new Result(s);
         vanilla(s, r);
         // 動かせるバニラは、mod を置くあいだは障害物にしない (置いたあとで空きへずらす)
@@ -195,6 +225,24 @@ public final class HudLayout {
             Rect m = r.vanilla.remove(id);
             if (m != null) {
                 movable.put(id, m);
+            }
+        }
+        // 譲ってもらう組み直し: 効き目 → 札 → 横板の順に、バニラの場所 (重なるものは縦に避ける) へ先に置く
+        for (Id id : MOVABLE) {
+            if (!first.contains(id) || (movable.get(id) == null && id != Id.V_TOASTS)) {
+                continue;
+            }
+            Rect n = movable.remove(id);
+            if (id == Id.V_TOASTS) {
+                int rows = Math.max(1, n == null ? 1 : (n.bottom() + 31) / 32);
+                Rect col = new Rect(s.w - 160, 0, 160, 32 * rows);
+                int[] p = findFreeVertical(r, col, 1, s.h);
+                record(r, id, col, p == null ? new int[] {0, 0} : p);
+                r.toastCap = 1;
+            } else {
+                boolean down = id == Id.V_EFFECTS || id == Id.V_SIDEBAR;
+                int[] p = findFreeVertical(r, n, down ? 1 : -1, down ? s.h : 140);
+                record(r, id, n, p == null ? new int[] {0, 0} : p);
             }
         }
         List<Request> reqs = new ArrayList<>(requests);
@@ -333,24 +381,149 @@ public final class HudLayout {
                 r.placed.put(q.id, got);
             }
         }
-        // 7. 動かせるバニラ (効き目・札・横板は下へ、アクションバー・名前・字幕・チャットは上へ)。mod の部品はそのまま、重なるバニラを空きへずらす
+        // 7. 動かせるバニラ (効き目・横板は下へ、アクションバー・名前・字幕は上へ。札とチャットは行数・列数を減らしながら)。
+        //    mod の部品はそのまま、重なるバニラを空きへずらす。縦で入らなければ横へも動かす
         for (Id id : MOVABLE) {
             Rect n = movable.get(id);
-            if (n == null || id == Id.V_BOSS_BARS) {
+            if (id == Id.V_BOSS_BARS || first.contains(id)) {
                 continue;
             }
-            boolean down = id == Id.V_EFFECTS || id == Id.V_TOASTS || id == Id.V_SIDEBAR;
-            int dy = shiftAway(r, n, down ? 1 : -1, id == Id.V_CHAT || down ? s.h : 140);
-            if (dy != 0) {
-                r.shiftY.put(id, dy);
+            if (id == Id.V_TOASTS) {
+                placeToasts(s, r, n);
+                continue;
             }
-            r.vanilla.put(id, new Rect(n.x, n.y + dy, n.w, n.h));
+            if (n == null) {
+                continue;
+            }
+            if (id == Id.V_CHAT) {
+                placeChat(s, r, n);
+                continue;
+            }
+            boolean down = id == Id.V_EFFECTS || id == Id.V_SIDEBAR;
+            int[] p = findFree(r, n, down ? 1 : -1, down ? s.h : 140);
+            if (p == null) {
+                r.stuck.add(id);
+            }
+            record(r, id, n, p == null ? new int[] {0, 0} : p);
+        }
+        // 先に置いたバニラが、あとから置いた mod の部品 (中央の照準の輪など) と重なったら、もう一度空きを探す
+        for (Id id : first) {
+            Rect cur = r.vanilla.get(id);
+            if (cur == null || id == Id.V_TOASTS && cur.h == 0) {
+                continue;
+            }
+            boolean hit = false;
+            for (Rect m : r.placed.values()) {
+                if (m.intersects(cur)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (!hit) {
+                continue;
+            }
+            int sx = r.shiftX.getOrDefault(id, 0);
+            int sy = r.shiftY.getOrDefault(id, 0);
+            Rect base = new Rect(cur.x - sx, cur.y - sy, cur.w, cur.h);
+            r.vanilla.remove(id);
+            boolean down = id == Id.V_EFFECTS || id == Id.V_SIDEBAR || id == Id.V_TOASTS;
+            int[] p = findFree(r, base, down ? 1 : -1, down ? s.h : 140);
+            if (p == null) {
+                r.vanilla.put(id, cur);
+            } else {
+                r.shiftX.remove(id);
+                r.shiftY.remove(id);
+                record(r, id, base, p);
+            }
         }
         return r;
     }
 
+    private static void record(Result r, Id id, Rect n, int[] p) {
+        if (p[1] != 0) {
+            r.shiftY.put(id, p[1]);
+        }
+        if (p[0] != 0) {
+            r.shiftX.put(id, p[0]);
+        }
+        r.vanilla.put(id, new Rect(n.x + p[0], n.y + p[1], n.w, n.h));
+    }
+
+    // 札 (トースト): 右上の 160 幅の列。何段 (32 ずつ) の列がどこなら空いているかを探し、入る最大の段数を同時に出せる数 (toastCap) にする。
+    // いま出ている札があれば、その列 (空いた段も含む) を障害物として置く。札はあとの札を待たせるだけで消さない
+    private static void placeToasts(Scene s, Result r, Rect visible) {
+        int rows = visible == null ? 0 : (visible.bottom() + 31) / 32;
+        int cap = 0;
+        int[] capAt = null;
+        for (int k = 5; k >= 1; k--) {
+            int[] p = findFree(r, new Rect(s.w - 160, 0, 160, 32 * k), 1, s.h);
+            if (p != null) {
+                cap = k;
+                capAt = p;
+                break;
+            }
+        }
+        if (cap == 0) {
+            if (visible != null) {
+                r.stuck.add(Id.V_TOASTS);
+            }
+            // どこにも入らない (狭い画面に mod の板が詰まっている): 一段だけ、いつもの場所へ。重なるが札を見せることを優先する
+            cap = 1;
+            capAt = new int[] {0, 0};
+        }
+        r.toastCap = cap;
+        if (visible == null) {
+            return;
+        }
+        int use = Math.max(cap, rows);
+        int[] at = capAt;
+        if (rows > cap) {
+            int[] p = findFree(r, new Rect(s.w - 160, 0, 160, 32 * rows), 1, s.h);
+            if (p != null) {
+                at = p;
+            } else {
+                r.stuck.add(Id.V_TOASTS);
+            }
+        }
+        record(r, Id.V_TOASTS, new Rect(s.w - 160, 0, 160, 32 * use), at);
+    }
+
+    // チャット: まず幅はそのままで、少しの縦移動で入る行数まで行を減らし、次に縦に大きく動かし、それでも入らなければ横へも動かす。
+    // それでも入らなければ幅を細くして (3/4・約半分・約 4 割。最小 110) 同じ順で探す。どれも入らなければ出さない (chatLines = 0)。
+    // 見せる行数の上限は必ず出す (chatLines)。幅を細くすると同じ文が折り返して行が増えるので、行数は幅の比で見積もる
+    private static void placeChat(Scene s, Result r, Rect n) {
+        int want = Math.max(1, (n.h - 2) / 9);
+        int[][] passes = {{30, 0}, {s.h, 0}, {s.h, 1}};
+        int[] percents = {100, 75, 55, 40};
+        for (int[] pass : passes) {
+            for (int percent : percents) {
+                int w = n.w * percent / 100;
+                if (w < 110 && percent < 100) {
+                    break;
+                }
+                int wantNow = percent == 100 ? want : Math.min(20, (int) Math.ceil(want * 100.0 / percent));
+                for (int k = wantNow; k >= 1; k--) {
+                    // 横へも動かす探しは重いので、行数は (欲しい数・3・2・1) だけ、幅は (全部・約半分・約 4 割) だけ試す
+                    if (pass[1] == 1 && (k > 3 && k != wantNow || percent == 75)) {
+                        continue;
+                    }
+                    int h = k * 9 + 2;
+                    Rect c = new Rect(n.x, n.bottom() - h, w, h);
+                    int[] p = pass[1] == 0 ? findFreeVertical(r, c, -1, pass[0]) : findFree(r, c, -1, pass[0]);
+                    if (p != null) {
+                        r.chatLines = k;
+                        r.chatWidth = percent == 100 ? -1 : w;
+                        record(r, Id.V_CHAT, c, p);
+                        return;
+                    }
+                }
+            }
+        }
+        r.chatLines = 0;
+    }
+
     // ずらせるバニラ。この順に、ずらしたものが次のものの障害物になる
-    private static final List<Id> MOVABLE = List.of(Id.V_BOSS_BARS, Id.V_EFFECTS, Id.V_TOASTS, Id.V_SIDEBAR, Id.V_ACTION_BAR, Id.V_ITEM_NAME, Id.V_SUBTITLES, Id.V_CHAT);
+    private static final List<Id> MOVABLE = List.of(Id.V_BOSS_BARS, Id.V_ACTION_BAR, Id.V_ITEM_NAME, Id.V_CHAT, Id.V_EFFECTS, Id.V_TOASTS, Id.V_SIDEBAR, Id.V_SUBTITLES);
 
     // 長方形 n を、いま置かれている mod の部品とバニラの障害物に重ならない所へ動かす縦の量。まず dir (1 = 下、-1 = 上) の向きに、重なっている相手の端まで飛んで探し、
     // 画面からはみ出す・限度 (limit) を超えるなら反対の向きを探す。どちらも入らなければ 0 (動かさない)
@@ -386,6 +559,103 @@ public final class HudLayout {
             }
         }
         return Integer.MIN_VALUE;
+    }
+
+    // 長方形 n を空きへ動かす量 {dx, dy}。dir = 縦の動かしたい向き (1 = 下、-1 = 上)。逆向きは 3 倍の重み、横は 2 倍の重みで、近い空きを選ぶ。
+    // 縦の限度 (limit) を超えず、画面の中で、いま置かれた mod の部品とバニラのどれにも重ならない場所。なければ null。動かさずに済めば {0, 0}
+    static int[] findFree(Result r, Rect n, int dir, int limit) {
+        for (int gap : new int[] {GAP, 1}) {
+            int[] got = search(r, n, dir, limit, gap, true);
+            if (got != null) {
+                return got;
+            }
+        }
+        return null;
+    }
+
+    // 縦だけ (横へは動かさない)
+    static int[] findFreeVertical(Result r, Rect n, int dir, int limit) {
+        for (int gap : new int[] {GAP, 1}) {
+            int[] got = search(r, n, dir, limit, gap, false);
+            if (got != null) {
+                return got;
+            }
+        }
+        return null;
+    }
+
+    private static int[] search(Result r, Rect n, int dir, int limit, int gap, boolean sideways) {
+        Scene s = r.scene;
+        List<Rect> obs = r.solids(true);
+        if (!hits(obs, n)) {
+            return n.y >= 0 && n.bottom() <= s.h - 2 && n.x >= 0 && n.right() <= s.w ? new int[] {0, 0} : null;
+        }
+        java.util.TreeSet<Integer> xs = new java.util.TreeSet<>();
+        java.util.TreeSet<Integer> ys = new java.util.TreeSet<>();
+        xs.add(n.x);
+        ys.add(n.y);
+        if (sideways) {
+            xs.add(2);
+            xs.add(s.w - 2 - n.w);
+        }
+        ys.add(2);
+        ys.add(s.h - 2 - n.h);
+        for (Rect o : obs) {
+            if (sideways) {
+                xs.add(o.right() + gap);
+                xs.add(o.x - gap - n.w);
+            }
+            ys.add(o.bottom() + gap);
+            ys.add(o.y - gap - n.h);
+        }
+        // 費用の小さい順に並べて、見つけた最良より高くなったらそこで打ち切る
+        List<int[]> yc = new ArrayList<>();
+        for (int y : ys) {
+            int dy = y - n.y;
+            if (y < 0 || y + n.h > s.h - 2 || Math.abs(dy) > limit) {
+                continue;
+            }
+            yc.add(new int[] {y, dy * dir >= 0 ? Math.abs(dy) : 3 * Math.abs(dy)});
+        }
+        yc.sort((p, q) -> Integer.compare(p[1], q[1]));
+        List<int[]> xc = new ArrayList<>();
+        for (int x : xs) {
+            if (x < 0 || x + n.w > s.w) {
+                continue;
+            }
+            xc.add(new int[] {x, 2 * Math.abs(x - n.x)});
+        }
+        xc.sort((p, q) -> Integer.compare(p[1], q[1]));
+        int bestX = 0;
+        int bestY = 0;
+        long best = Long.MAX_VALUE;
+        for (int[] y : yc) {
+            if (y[1] >= best) {
+                break;
+            }
+            for (int[] x : xc) {
+                long cost = (long) y[1] + x[1];
+                if (cost >= best) {
+                    break;
+                }
+                if (!hits(obs, new Rect(x[0], y[0], n.w, n.h))) {
+                    best = cost;
+                    bestX = x[0] - n.x;
+                    bestY = y[0] - n.y;
+                    break;
+                }
+            }
+        }
+        return best == Long.MAX_VALUE ? null : new int[] {bestX, bestY};
+    }
+
+    private static boolean hits(List<Rect> obs, Rect c) {
+        for (Rect o : obs) {
+            if (o.intersects(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // 中央に寄せた板が、すでに置いた左上・右上の部品と重なるなら、その下端まで下げた上端を返す
@@ -541,13 +811,25 @@ public final class HudLayout {
         for (Request q : items) {
             // 右上の板はボスバーの右に収まる幅まで (中央の幅 182 の右の端から 4 あけた所。最小 112)。文は Fit が切る
             int maxW = right ? Math.max(112, s.w / 2 - 91 - GAP - M) : Math.max(1, s.w - 2 * M);
-            Size sz = q.fit.fit(maxW, Math.max(1, s.h));
+            int top = Math.max(y, q.minTop);
+            Size sz = null;
+            // 左上の帯も同じ: ボスバーの高さにかかるあいだは、ボスバーの左に収まる幅まで (文は折り返す)。その幅で入らない板は、ボスバーの下へ下げる
+            int bossLeft = s.cx() - 91 - GAP - LEFT_X;
+            int bossLow = s.bossBottom > 0 ? s.bossBottom - 8 + GAP : 0;
+            if (!right && top < bossLow && bossLeft >= 40) {
+                sz = q.fit.fit(Math.min(maxW, bossLeft), Math.max(1, s.h));
+                if (sz == null) {
+                    top = Math.max(top, bossLow);
+                }
+            }
+            if (sz == null) {
+                sz = q.fit.fit(maxW, Math.max(1, s.h));
+            }
             if (sz == null) {
                 r.dropped.add(q.id);
                 continue;
             }
             int x = right ? s.w - M - sz.w : LEFT_X;
-            int top = Math.max(y, q.minTop);
             Rect cand = null;
             for (int i = 0; i < 10; i++) {
                 cand = new Rect(x, top, sz.w, sz.h);
@@ -578,7 +860,8 @@ public final class HudLayout {
 
     // 帯の部品が下へ避けてよい障害物 (効き目の絵・札・ボスバー)
     private static boolean pushable(Result r, Rect b) {
-        return b.equals(r.vanilla.get(Id.V_EFFECTS)) || b.equals(r.vanilla.get(Id.V_TOASTS)) || b.equals(r.vanilla.get(Id.V_BOSS_BARS));
+        return b.equals(r.vanilla.get(Id.V_EFFECTS)) || b.equals(r.vanilla.get(Id.V_TOASTS)) || b.equals(r.vanilla.get(Id.V_BOSS_BARS))
+                || b.equals(r.vanilla.get(Id.V_SIDEBAR));
     }
 
     // 候補と重なる、いま積まれているもの (なければ null)。チャットは withChat のときだけ数える
@@ -677,8 +960,9 @@ public final class HudLayout {
         double at = perimeterPos(p0[0], p0[1], x0, y0, x1, y1);
         int[] best = {(int) Math.round(p0[0]), (int) Math.round(p0[1])};
         // 余白 10 で空きを探し、なければ余白なし (板の上でなければよい) で探す
-        for (int margin : new int[] {10, 0}) {
-            if (!blocked(r, best[0], best[1], margin)) {
+        // 札 (ラベル) は矢印の横へ 100 ほど広がるので、まずは横に広い余白 (64 x 12)、次に 10、最後は余白なしで探す
+        for (int[] margin : new int[][] {{64, 12}, {10, 10}, {0, 0}}) {
+            if (!blocked(r, best[0], best[1], margin[0], margin[1])) {
                 return best;
             }
             for (int step = 4; step < perimeter / 2; step += 4) {
@@ -686,7 +970,7 @@ public final class HudLayout {
                     double pos = at + dir * step;
                     pos = ((pos % perimeter) + perimeter) % perimeter;
                     int[] q = perimeterPoint(pos, x0, y0, x1, y1);
-                    if (!blocked(r, q[0], q[1], margin)) {
+                    if (!blocked(r, q[0], q[1], margin[0], margin[1])) {
                         return q;
                     }
                 }
@@ -696,9 +980,9 @@ public final class HudLayout {
     }
 
     // 矢印 (十数 px) が重なるか: 障害物を margin 広げて調べる
-    private static boolean blocked(Result r, int x, int y, int margin) {
+    private static boolean blocked(Result r, int x, int y, int mx, int my) {
         for (Rect o : r.solids(false)) {
-            if (o.inflate(margin).contains(x, y)) {
+            if (new Rect(o.x - mx, o.y - my, o.w + 2 * mx, o.h + 2 * my).contains(x, y)) {
                 return true;
             }
         }

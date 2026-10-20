@@ -150,6 +150,20 @@ public final class HudManager {
             lastScene = sc;
             lastRequests = requests;
         }
+        applyChatWidth(mc);
+    }
+
+    // チャットの幅の上限が変わったら、いまある文を折り返し直す (新しい文は mixin が細くした幅で折り返す)。出入りで何度も走らないよう、15 枠あけて
+    private static int appliedChatWidth = -1;
+    private static int lastRescaleFrame;
+
+    private static void applyChatWidth(Minecraft mc) {
+        int cw = current.chatWidth;
+        if (cw != appliedChatWidth && frame - lastRescaleFrame >= 15) {
+            appliedChatWidth = cw;
+            lastRescaleFrame = frame;
+            mc.gui.getChat().rescaleChat();
+        }
     }
 
     private static Scene lastScene;
@@ -170,6 +184,34 @@ public final class HudManager {
             // 数えられなければ一行
         }
         RECENT_CHAT.add(new long[] {now, Math.max(1, lines)});
+    }
+
+    private static java.lang.reflect.Field trimmedField;
+    private static boolean trimmedBroken;
+
+    // チャットのいま出ている (200 tick 以内の) 行数。数えられなければ fallback
+    private static int shownChatLines(Minecraft mc, int fallback) {
+        if (trimmedBroken) {
+            return fallback;
+        }
+        try {
+            if (trimmedField == null) {
+                trimmedField = net.minecraft.client.gui.components.ChatComponent.class.getDeclaredField("trimmedMessages");
+                trimmedField.setAccessible(true);
+            }
+            int ticks = mc.gui.getGuiTicks();
+            int n = 0;
+            for (Object o : (java.util.List<?>) trimmedField.get(mc.gui.getChat())) {
+                if (ticks - ((net.minecraft.client.GuiMessage.Line) o).addedTime() >= 200) {
+                    break;
+                }
+                n++;
+            }
+            return Math.max(1, n);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            trimmedBroken = true;
+            return fallback;
+        }
     }
 
     // 直近 10 秒のチャットの (時刻, 行数)
@@ -261,15 +303,19 @@ public final class HudManager {
         int chatH = 0;
         long nowMs = net.minecraft.Util.getMillis();
         RECENT_CHAT.removeIf(e -> nowMs - e[0] >= 10000);
+        // チャットの欲しい幅は設定の幅 (HudLayout が細くしたあとの幅ではない。mixin で細くした getWidth() は使わない)
+        int wantW = net.minecraft.client.gui.components.ChatComponent.getWidth(mc.options.chatWidth().get());
         if (mc.screen instanceof net.minecraft.client.gui.screens.ChatScreen) {
-            chatW = mc.gui.getChat().getWidth();
+            chatW = wantW;
             chatH = mc.gui.getChat().getHeight();
         } else if (!RECENT_CHAT.isEmpty()) {
             int lines = 0;
             for (long[] e : RECENT_CHAT) {
                 lines += (int) e[1];
             }
-            chatW = mc.gui.getChat().getWidth();
+            // 実際に出ている行 (折り返し直したあとの数) が数えられるなら、そちらを使う
+            lines = shownChatLines(mc, lines);
+            chatW = wantW;
             chatH = Math.min(mc.gui.getChat().getHeight(), lines * 9 + 2);
         }
         int[] sb = sidebar(mc);

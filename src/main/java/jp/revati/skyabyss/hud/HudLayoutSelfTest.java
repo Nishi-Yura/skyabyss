@@ -205,6 +205,7 @@ public final class HudLayoutSelfTest {
                 }
             }
         }
+        crowded(f, stats);
         // 倍率の計算そのもの
         if (HudLayout.guiSize(1920, 3) != 640 || HudLayout.guiSize(1080, 4) != 270 || HudLayout.maxScale(1920, 1080) != 4 || HudLayout.maxScale(854, 480) != 2) {
             f.add("gui size / max scale math is wrong");
@@ -229,6 +230,8 @@ public final class HudLayoutSelfTest {
 
     static final java.util.Set<Id> MOVABLE = java.util.EnumSet.of(Id.V_BOSS_BARS, Id.V_EFFECTS, Id.V_TOASTS, Id.V_SIDEBAR, Id.V_ACTION_BAR, Id.V_ITEM_NAME, Id.V_SUBTITLES, Id.V_CHAT);
     static int stuck;
+    // 混んだ場面の検査 (crowded) のあいだは true: バニラが mod の部品に重なったまま (動かせる空きがない) は許さず、落ちとして数える
+    static boolean strict;
 
     // ずらしたバニラ v (いまの長方形 now) を、縦のどこかへ動かせば mod の部品と固定のバニラに重ならずに置けるか (画面の中)
     static boolean canMove(Result r, Id id, Rect now) {
@@ -262,6 +265,69 @@ public final class HudLayoutSelfTest {
         return false;
     }
 
+    // ------------------------------------------------------------ 混んだ場面 (tools/shots/hud_vanilla.txt の boss / opening / back と同じ組み合わせ)
+    // GUI 倍率 2・3・4 の窓 (1920x1080 の自動 = 4、1280x720) で、ボスバー・効き目・札・チャット・アクションバー・スコアボード・字幕を
+    // 振って、バニラと mod の部品が一つも重ならないこと (ずらせる空きがなくて「そのまま」は許さない) を確かめる
+    static final int[][] CROWD_WINDOWS = {{1920, 1080}, {1280, 720}, {1600, 900}, {2560, 1440}};
+
+    static List<Request> crowdScene(Scene s, String name) {
+        List<Request> all = everything(s, true);
+        EnumSet<Id> keep = switch (name) {
+            case "boss" -> EnumSet.of(Id.PARTY_LIST, Id.HINTS, Id.CAPTION, Id.OBJECTIVE, Id.VOW, Id.BACK_GAUGE, Id.SKILL_SLOTS, Id.QUICK_CARD, Id.BOSS_CUE,
+                    Id.GROWTH_BAR, Id.BANNER);
+            case "opening" -> EnumSet.of(Id.HINTS, Id.CAPTION, Id.OBJECTIVE, Id.GROWTH_BAR, Id.QUICK_CARD, Id.SKILL_SLOTS);
+            default -> EnumSet.of(Id.BACK_GAUGE, Id.VOW, Id.PARTY_LIST, Id.OBJECTIVE, Id.QUEST, Id.GROWTH_BAR, Id.HINTS, Id.SKILL_SLOTS, Id.QUICK_CARD);
+        };
+        all.removeIf(r -> !keep.contains(r.id()));
+        // 経験値バーの左の成長の箱は実物の寸法 (GrowthHud: 72 x 22。+経験値の列が出ると上へ 10 ずつ伸びる)
+        Request status = Request.of(Id.STATUS_TL, Region.TOP_LEFT, 72, 23);
+        Request popups = Request.of(Id.POPUPS_TL, Region.TOP_LEFT, 110, 40);
+        all.replaceAll(r -> r.id() == Id.GROWTH_BAR ? Request.side(Id.GROWTH_BAR, Side.LEFT, 72, 22 + (s.sidebarW() > 0 ? 31 : 0), 18, status, popups) : r);
+        return all;
+    }
+
+    static void crowded(List<String> f, StringBuilder stats) {
+        strict = true;
+        int cases = 0;
+        int before = f.size();
+        java.util.TreeMap<String, Integer> hidden = new java.util.TreeMap<>();
+        for (int[] win : CROWD_WINDOWS) {
+            for (int scale = 2; scale <= Math.min(4, HudLayout.maxScale(win[0], win[1])); scale++) {
+                int gw = HudLayout.guiSize(win[0], scale);
+                int gh = HudLayout.guiSize(win[1], scale);
+                for (String name : new String[] {"boss", "opening", "back"}) {
+                    for (int bars : new int[] {0, 3}) {
+                        for (int[] eff : new int[][] {{0, 0}, {2, 1}, {4, 2}}) {
+                            for (int toast : new int[] {0, 32, 96}) {
+                                for (int chat : new int[] {0, 2, 4, 7}) {
+                                    for (int sub = 0; sub < 4; sub++) {
+                                        Scene s = new Scene(gw, gh, true, sub == 1, false, 1, eff[0], eff[1], bars <= 0 ? 0 : 12 + 19 * bars, toast, chat > 0 ? 320 : 0,
+                                                chat > 0 ? chat * 9 + 2 : 0, sub >= 2 ? 90 : 0, sub >= 2 ? 40 : 0, sub == 3, sub == 0 ? 0 : 260, 0);
+                                        List<Request> q = crowdScene(s, name);
+                                        check(f, s, q, name + " " + win[0] + "x" + win[1] + "@" + scale);
+                                        Result r = HudLayout.compute(s, q);
+                                        for (Id d : r.dropped) {
+                                            hidden.merge(name + "@" + win[0] + "@" + scale + " " + d, 1, Integer::sum);
+                                        }
+                                        if (chat > 0 && r.chatLines == 0) {
+                                            hidden.merge(name + "@" + win[0] + "@" + scale + " chat-hidden", 1, Integer::sum);
+                                        }
+                                        if (r.toastCap < 3) {
+                                            hidden.merge(name + "@" + win[0] + "@" + scale + " toast-cap<3", 1, Integer::sum);
+                                        }
+                                        cases++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        strict = false;
+        stats.append("crowded cases: ").append(cases).append(", failures ").append(f.size() - before).append(", dropped parts (count of cases) ").append(hidden).append('\n');
+    }
+
     static void check(List<String> f, Scene s, List<Request> reqs, String what) {
         Result r = HudLayout.compute(s, reqs);
         String where = String.format("gui %dx%d boss %d eff %d/%d rh %s off %s atk %s rows %d toast %d chat %s [%s]", s.w(), s.h(), s.bossBottom(),
@@ -290,7 +356,7 @@ public final class HudLayoutSelfTest {
                 }
                 if (mods.get(i).getValue().intersects(v.getValue())) {
                     // 動かせるバニラは、重なるなら「どこへ動かしても空きがない」ときだけ許す (mod 側は動かさない)
-                    if (MOVABLE.contains(v.getKey()) && !canMove(r, v.getKey(), v.getValue())) {
+                    if (!strict && MOVABLE.contains(v.getKey()) && !canMove(r, v.getKey(), v.getValue())) {
                         stuck++;
                         continue;
                     }
