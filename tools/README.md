@@ -333,3 +333,7 @@ python tools/gen_cinematic_voice.py --review                     # 3 様式の�
 ## 公式サイト (`site/`)
 
 `python tools/site/gen_art.py`（ドット絵と素材の写し）→ `python tools/site/build.py`（HTML を書き出す）。`site/` はそのまま GitHub Pages に載る（`.github/workflows/pages.yml`）。技の木は `Skill.java` と lang から読むので、技を足したら build し直す。
+
+## 文字のはみ出しの検査 (`python tools/check_text_fit.py`)
+
+日本語・英語の画面・HUD の文を、字体の幅の表で箱 (幅・行数) と照らす。GUI 倍率 2・3・4 (1920x1080 の窓)。箱の登録簿 `BOXES` は画面のコードから写した値なので、画面の寸法を変えたらここも直す。知らせ (`Notice.*`) は Java のソースから経路を拾って、字幕 3 行・中央 2 行・札 3 行・アクションバー 1 行などに照らす。失敗が 1 件でもあれば終了コード 1。引数の `%s` は 2 字、名前が入る箇所は余裕を見て箱を決めてある。

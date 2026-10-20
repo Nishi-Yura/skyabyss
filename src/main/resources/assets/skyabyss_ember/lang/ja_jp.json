@@ -394,6 +394,8 @@
   "item.skyabyss.cinder_husk": "燠の殻",
   "item.skyabyss.cinder_husk.desc": "燠虫の背の板。冷めても、継ぎ目だけがほんのり赤い",
   "gear.skyabyss.origin.ember": "余燼の専用装備",
+
+  "gear.skyabyss.origin_weapon.ember": "余燼の専用武器",
   "gui.skyabyss.forge.exchange_no_clear.ember": "余燼の心臓を倒すと、選べるようになる",
   "gui.skyabyss.forge.exchange_all_owned.ember": "余燼の専用伝説は、すべて手にしている",
   "skyabyss_record.h.ember": "余燼",

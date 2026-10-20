@@ -38,7 +38,7 @@ public final class GuideClient {
     private static final long STALE_MS = 25_000L;
 
     public static final KeyMapping TOGGLE_KEY = new KeyMapping("key.skyabyss.guide_trail", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_SEMICOLON, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.GUIDE_TRAIL, "key.categories.skyabyss");
 
     // サーバーから届いた道。nodes は出発点から目印の方へ (空 = 道なし or 着いた)
     public record Trail(BlockPos target, boolean found, BlockPos[] nodes, long at) {

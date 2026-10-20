@@ -394,6 +394,8 @@
   "item.skyabyss.cinder_husk": "Cinder Husk",
   "item.skyabyss.cinder_husk.desc": "A plate from a cinder roller's back. Even cold, its seams glow faintly red",
   "gear.skyabyss.origin.ember": "Ember titan gear",
+
+  "gear.skyabyss.origin_weapon.ember": "Ember titan weapon",
   "gui.skyabyss.forge.exchange_no_clear.ember": "Defeat the ember heart to choose",
   "gui.skyabyss.forge.exchange_all_owned.ember": "You already own every ember legendary",
   "skyabyss_record.h.ember": "Ember",

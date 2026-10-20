@@ -31,7 +31,7 @@
   "message.skyabyss.young.ember.veil": "仔が熱い灰の流れへ潜る。赤い闇の中で、長い時が流れた気がした。",
   "message.skyabyss.young.ember.arrived": "仔は %s にあなたたちを降ろし、灰に溶けていく。",
   "message.skyabyss.young.recognized.ember": "胸の奥で、燠が小さくはぜた。あの巨神は、もうあなたを覚えている。",
-  "message.skyabyss.young.recognized_hint": "呼び笛を手に入れた。吹くと、その巨神の「子」が足もとに現れる。仲間（最大 6 人）と一緒に乗って、行き先まで運んでもらえる。巨神そのものは動かない。",
+  "message.skyabyss.young.recognized_hint": "呼び笛を手に入れた。吹くと、その巨神の「子」が足もとに現れる。仲間（最大 6 人）と乗って行き先へ運んでもらえる。",
   "message.skyabyss.young.not_now": "今は行き先を決められない。",
   "message.skyabyss.young.chosen": "行き先は %s。仲間が乗るのを少し待って、出発する。",
   "message.skyabyss.young.cancelled": "持ち主が降りた。行き先は決め直しになる。",
