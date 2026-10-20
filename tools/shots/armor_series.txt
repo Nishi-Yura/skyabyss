@@ -1,0 +1,194 @@
+# Titan armor series S2: worn by the player (front/back/diagonal/walk/crouch/first person) and on stands.
+# ./gradlew runShots -Pscript=tools/shots/armor_series.txt
+world shots flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd gamemode creative
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot stone_whale_rare_front
+perspective back
+wait 4
+shot stone_whale_rare_back
+camera minecraft:overworld 0 -60 0 130 10
+perspective front
+wait 6
+shot stone_whale_rare_diag
+camera minecraft:overworld 0 -60 0 180 0
+walk on
+wait 9
+shot stone_whale_rare_walk
+walk off
+wait 6
+sneak on
+wait 12
+shot stone_whale_rare_crouch
+sneak off
+wait 4
+camera minecraft:overworld 0 -60 0 180 55
+perspective first
+wait 6
+shot stone_whale_rare_first
+camera minecraft:overworld 0 -60 0 180 0
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot stone_whale_legend_front
+perspective back
+wait 4
+shot stone_whale_legend_back
+cmd item replace entity @s armor.feet with skyabyss:tide_shell_boots
+cmd item replace entity @s armor.legs with skyabyss:tide_shell_leggings
+cmd item replace entity @s armor.chest with skyabyss:tide_shell_chestplate
+cmd item replace entity @s armor.head with skyabyss:tide_shell_helmet
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot tide_shell_rare_front
+perspective back
+wait 4
+shot tide_shell_rare_back
+camera minecraft:overworld 0 -60 0 130 10
+perspective front
+wait 6
+shot tide_shell_rare_diag
+camera minecraft:overworld 0 -60 0 180 0
+walk on
+wait 9
+shot tide_shell_rare_walk
+walk off
+wait 6
+sneak on
+wait 12
+shot tide_shell_rare_crouch
+sneak off
+wait 4
+camera minecraft:overworld 0 -60 0 180 55
+perspective first
+wait 6
+shot tide_shell_rare_first
+camera minecraft:overworld 0 -60 0 180 0
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot tide_shell_legend_front
+perspective back
+wait 4
+shot tide_shell_legend_back
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot thunder_wing_rare_front
+perspective back
+wait 4
+shot thunder_wing_rare_back
+camera minecraft:overworld 0 -60 0 130 10
+perspective front
+wait 6
+shot thunder_wing_rare_diag
+camera minecraft:overworld 0 -60 0 180 0
+walk on
+wait 9
+shot thunder_wing_rare_walk
+walk off
+wait 6
+sneak on
+wait 12
+shot thunder_wing_rare_crouch
+sneak off
+wait 4
+camera minecraft:overworld 0 -60 0 180 55
+perspective first
+wait 6
+shot thunder_wing_rare_first
+camera minecraft:overworld 0 -60 0 180 0
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot thunder_wing_legend_front
+perspective back
+wait 4
+shot thunder_wing_legend_back
+cmd item replace entity @s armor.feet with skyabyss:ember_boots
+cmd item replace entity @s armor.legs with skyabyss:ember_leggings
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+armortier rare
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot ember_rare_front
+perspective back
+wait 4
+shot ember_rare_back
+camera minecraft:overworld 0 -60 0 130 10
+perspective front
+wait 6
+shot ember_rare_diag
+camera minecraft:overworld 0 -60 0 180 0
+walk on
+wait 9
+shot ember_rare_walk
+walk off
+wait 6
+sneak on
+wait 12
+shot ember_rare_crouch
+sneak off
+wait 4
+camera minecraft:overworld 0 -60 0 180 55
+perspective first
+wait 6
+shot ember_rare_first
+camera minecraft:overworld 0 -60 0 180 0
+armortier legend
+armorlevel 10
+camera minecraft:overworld 0 -60 0 180 0
+perspective front
+waitchunks
+wait 25
+shot ember_legend_front
+perspective back
+wait 4
+shot ember_legend_back
+quit
