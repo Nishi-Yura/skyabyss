@@ -122,9 +122,7 @@ public final class EmberHeartClient {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        List<EmberHeart> hearts = mc.level.getEntitiesOfClass(EmberHeart.class, mc.player.getBoundingBox().inflate(160),
-                h -> h.isAlive() && h.getDisplayName().getString().equals(name));
-        EmberHeart heart = hearts.stream().min(Comparator.comparingDouble(h -> h.distanceToSqr(mc.player))).orElse(null);
+        EmberHeart heart = jp.revati.skyabyss.client.BossOwners.find(mc, boss, EmberHeart.class, 160);
         if (heart == null) {
             return;
         }

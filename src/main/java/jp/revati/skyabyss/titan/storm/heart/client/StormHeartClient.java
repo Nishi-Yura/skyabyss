@@ -119,9 +119,7 @@ public final class StormHeartClient {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        List<StormHeart> hearts = mc.level.getEntitiesOfClass(StormHeart.class, mc.player.getBoundingBox().inflate(160),
-                h -> h.isAlive() && h.getDisplayName().getString().equals(name));
-        StormHeart heart = hearts.stream().min(Comparator.comparingDouble(h -> h.distanceToSqr(mc.player))).orElse(null);
+        StormHeart heart = jp.revati.skyabyss.client.BossOwners.find(mc, boss, StormHeart.class, 160);
         if (heart == null) {
             return;
         }

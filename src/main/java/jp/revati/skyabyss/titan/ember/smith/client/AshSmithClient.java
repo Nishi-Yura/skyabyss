@@ -75,9 +75,7 @@ public final class AshSmithClient {
         }
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
-        AshSmith smith = mc.level.getEntitiesOfClass(AshSmith.class, mc.player.getBoundingBox().inflate(64),
-                        s -> s.isAlive() && s.getDisplayName().getString().equals(name))
-                .stream().min(Comparator.comparingDouble(s -> s.distanceToSqr(mc.player))).orElse(null);
+        AshSmith smith = jp.revati.skyabyss.client.BossOwners.find(mc, boss, AshSmith.class, 64);
         if (smith == null) {
             return;
         }

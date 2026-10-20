@@ -41,8 +41,23 @@ public final class QuestHud {
     }
 
     // 札を出すなら (題 + 済んでいない目的の行)。出さないなら null。要求と描画で同じ判断をする
+    // 要求 (HudManager) と描画は同じフレームで同じ答えになるので、一フレームに一度だけ組み立てる
+    private static int shownFrame = -1;
+    private static Shown shownCache;
+
     @javax.annotation.Nullable
     private static Shown shown(Minecraft mc) {
+        int f = jp.revati.skyabyss.client.hud.HudManager.frame();
+        if (f == shownFrame) {
+            return shownCache;
+        }
+        shownCache = build(mc);
+        shownFrame = f;
+        return shownCache;
+    }
+
+    @javax.annotation.Nullable
+    private static Shown build(Minecraft mc) {
         if (mc.player == null || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen() || mc.screen instanceof QuestLogScreen) {
             return null;
         }
@@ -188,17 +203,31 @@ public final class QuestHud {
 
     // 目的の文。序盤の帯が「歌のあと」(wait_whale) の間は、その段の「待つ」版の文 (<鍵>.wait があれば) を出す (クエストログと帯の言うことを合わせる)
     // 近く (クライアントが追っている範囲) の岩鯨が、鎖を地上へ垂らしているか
+    // (生き物は tick ごとにしか変わらないので、同じ tick のあいだは前の答え)
+    private static long chainTick = Long.MIN_VALUE;
+    private static Object chainLevel;
+    private static boolean chainCache;
+
     static boolean chainDown() {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.level == null) {
             return false;
         }
+        long t = mc.level.getGameTime();
+        if (t == chainTick && chainLevel == mc.level) {
+            return chainCache;
+        }
+        boolean down = false;
         for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
             if (e instanceof jp.revati.skyabyss.titan.StoneWhaleEntity whale && whale.isChainReaching()) {
-                return true;
+                down = true;
+                break;
             }
         }
-        return false;
+        chainTick = t;
+        chainLevel = mc.level;
+        chainCache = down;
+        return down;
     }
 
     public static String objectiveText(QuestDef def, QuestDef.Stage stage, QuestDef.Objective ob) {

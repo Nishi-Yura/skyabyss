@@ -59,10 +59,7 @@ public final class StoneWhaleHeartBar {
         if (mc.player == null) {
             return null;
         }
-        String name = boss.getName().getString();
-        List<StoneWhaleHeart> hearts = mc.level.getEntitiesOfClass(StoneWhaleHeart.class, mc.player.getBoundingBox().inflate(160),
-                h -> h.isAlive() && h.getDisplayName().getString().equals(name));
-        return hearts.stream().min(Comparator.comparingDouble(h -> h.distanceToSqr(mc.player))).orElse(null);
+        return jp.revati.skyabyss.client.BossOwners.find(mc, boss, StoneWhaleHeart.class, 160);
     }
 
     private static void draw(GuiGraphics g, Minecraft mc, StoneWhaleHeart heart, BossEvent boss, int x, int y) {
