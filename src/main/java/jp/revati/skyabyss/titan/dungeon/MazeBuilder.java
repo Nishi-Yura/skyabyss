@@ -146,9 +146,15 @@ public final class MazeBuilder {
                 // 中ほどの休み場: 四隅に乾いた足場 (水の二段目の高さ) を置く。真ん中は水のままで、そこから浮かび上がって上がれる。
                 // 空気の層 (足元と頭の二段) は通路の口が壁でふさがれているので、魚は入れない。紫水晶が目印。
                 // 隅の足場は水の一段目 (y = p.y) のシーピクルスの上に重ねる
-                for (int[] corner : new int[][]{{0, 0}, {hi, 0}, {0, hi}, {hi, hi}}) {
-                    kit.set(p.getX() + corner[0], p.getY() + 1, p.getZ() + corner[1], BuildKit.POLISHED);
+                // 版 27: 隅だけでなく、くぼみの 5×5 の全面を足場にする (真ん中の一マスだけは水の穴。泡の柱で上がる)。休み場の遺物の火を北の辺に置く
+                for (int dx = 0; dx <= hi; dx++) {
+                    for (int dz = 0; dz <= hi; dz++) {
+                        if (dx != mid || dz != mid) {
+                            kit.set(p.getX() + dx, p.getY() + 1, p.getZ() + dz, BuildKit.POLISHED);
+                        }
+                    }
                 }
+                kit.set(p.getX() + mid, p.getY() + 2, p.getZ() + hi, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
                 kit.set(p.getX() + hi, p.getY() + 2, p.getZ() + hi, Blocks.AMETHYST_CLUSTER.defaultBlockState());
             }
         }
@@ -268,8 +274,8 @@ public final class MazeBuilder {
         }
         // 休み場の設え (焚き火は煙の出ない魂の焚き火。BuildKit.restPoint)。広い部屋 (21×14) は壁の灯りを天井近くに。
         // 灯の数え石・苗床・灯の数の掲示板 (docs/design/23)
-        kit.restPoint(MAZE_ENTRY_ROOM, true);
-        kit.restPoint(MAZE_ENTRY_ROOM2, true);
+        kit.restPoint(MAZE_ENTRY_ROOM);
+        kit.restPoint(MAZE_ENTRY_ROOM2);
         kit.wallLamps(MAZE_ENTRY_ROOM, 4, MAZE_ENTRY_ROOM.ceilingY() - 1);
         AnemoneLights.buildEntry(kit);
         kit.room(MAZE_EXIT_ROOM, BuildKit.POLISHED, BuildKit.TILES);

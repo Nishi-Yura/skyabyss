@@ -47,7 +47,7 @@ public final class TitanBackBuilder {
     public static void schedule(ServerLevel level, TitanBackData data) {
         BuildKit kit = new BuildKit(level, RandomSource.create(20261015L));
         data.reseed(level.getRandom());
-        BackBuildJobs.schedule("stone whale back", level, WhaleShape.job(kit), () -> buildRest(level, data, kit, System.currentTimeMillis()));
+        BackBuildJobs.schedule("stone whale back", level, WhaleShape.jobWithClear(kit), () -> buildRest(level, data, kit, System.currentTimeMillis()));
     }
 
     private static void buildRest(ServerLevel level, TitanBackData data, BuildKit kit, long start) {
