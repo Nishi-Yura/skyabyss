@@ -14,6 +14,9 @@ TITANS = [
 ]
 
 
+import pages_d
+
+
 def index():
     arches = "".join(
         '<a class="panel titan-card" href="titans.html#%s"><div class="pic">%s</div><div class="body"><h3 class="%s">%s</h3>'
@@ -31,6 +34,8 @@ def index():
              "空・海・嵐・地の中を行く巨神に、一体ずつ挑みます。", "Take on titans that move through sky, sea, storm and earth, one by one.", "titans.html"),
         feat("skill/05.png", "36 の技と天職", "36 skills, callings",
              "5 つの木と旅人。天職を選び、刻印で技の形を変えます。", "Five trees plus the Wayfarer. Choose a calling and reshape skills with runes.", "skills.html"),
+        feat("item/resonance_shard_ember.png", "転生と深淵", "Rebirth and the Abyss",
+             "Lv 50 で転生し、魂盤と恩恵でビルドを作り直します。深淵の難度も。", "Rebirth at Lv 50, rebuild with the soul board and boons, then try Abyss difficulty.", "rebirth.html"),
         feat("item/waterway_fang.png", "13 種の武器", "13 weapons",
              "型・階級・特性・伝説の書き換え。周回で揃えます。", "Types, tiers, affixes and legendary rewrites. Collect them over repeat runs.", "gear.html"),
         feat("item/resonance_crystal.png", "共鳴の炉", "Resonance Forge",
@@ -397,11 +402,11 @@ def titans():
 </section>
 """ % dict(
         h=T("試練のプール", "The trial pool"),
-        lead=T("巨神ごとに十二の試練（四体で 48）があり、周回ごとにその中から三つが選ばれます。同じ背でも、周回すると違う遊びになります。",
-               "Each titan has twelve trials (48 in all) and each cycle draws three of them. The same back plays differently every cycle."),
+        lead=T("巨神ごとに試練のプールがあり、周回ごとにその中から三つが選ばれます。今は各巨神に原型 3 と新作 4 の 7 つ以上が入っていて（岩鯨は 11）、最終的に十二（四体で 48）まで増やします。同じ背でも、周回すると違う遊びになります。",
+               "Each titan has a trial pool and each cycle draws three of it. Every titan now holds at least seven trials (three originals plus four new; the Stone Whale has eleven), growing to twelve (48 in all). The same back plays differently every cycle."),
         a_h=T("引き方", "How trials are drawn"),
-        a=T("試練は歩・智・闘の三つの枠に分かれ、心臓を止めて周回するたびに、パーティごとに各枠から一つずつ引きます。最初の周は今までの三つ（原型）で固定です。四周で巨神ごとの十二をすべて見られます。",
-            "Trials fall into three slots: Traverse, Wit and Combat. Each cycle (every heart you stop) your party draws one per slot. The first cycle always uses the original three, and four cycles reveal all twelve."),
+        a=T("試練は歩・智・闘の三つの枠に分かれ、心臓を止めて周回するたびに、パーティごとに各枠から一つずつ引きます。最初の周は今までの三つ（原型）で固定です。プールが埋まるほど、見られる試練が増えます。",
+            "Trials fall into three slots: Traverse, Wit and Combat. Each cycle (every heart you stop) your party draws one per slot. The first cycle always uses the original three, and the more of the pool is filled, the more variety you see."),
         b_h=T("難度の段と修飾", "Tiers and modifiers"),
         b=T("難度は★1〜★3（周回の数で解禁され、必要 Lv や装備では閉じません。どの段も一人で解けます）。配置の型・数字の振り・敵の組・障害・任意の目標がランダムに加わり、修飾の稀さは「常・稀・極」で表され、稀・極は素材が増えます。",
             "Difficulty runs from 1 to 3 stars, unlocked by cycle count and never gated by level or gear; every tier is solvable solo. Layout, numbers, enemy mix, hazards and optional goals vary, with rarity shown as Common, Rare or Extreme; Rare and Extreme give more materials."),
@@ -411,7 +416,7 @@ def titans():
         d_h=T("越えたあと", "After a clear"),
         d=T("石が鳴って 4 秒ほどで、その試練の中にいた仲間は鼓動の間へ戻り、碑が光ります。越えた試練はそのパーティにだけ封じられ、同じ背にいる別のパーティには触れません。戦いは、部屋の中にいる人数に合わせて強くなります。",
             "About four seconds after the stone rings, party members inside that trial return to the hub and its tablet lights up. The cleared trial is sealed for that party only, never affecting another party on the same back. Combat scales with the number of people inside the room."),
-        note=T("試練のプールは順次追加中です（今は岩鯨の背に原型 3 と新作が入っています）。", "The pool is being filled in gradually (currently the Stone Whale has its three originals plus new trials)."),
+        note=T("試練のプールは順次追加中です。深淵の難度は<a href=\"rebirth.html#abyss\">転生のページ</a>へ。", "The pool is still being filled. For Abyss difficulty see <a href=\"rebirth.html#abyss\">Rebirth</a>."),
     )
     travel = """
 <section class="alt" aria-labelledby="h-travel" id="travel">
@@ -469,7 +474,7 @@ def titans():
         n=T("推奨より 3 レベルを超えて上だと、倒したときの経験値が減ります。物語の進みで上限が決まります（最初は 15）。", "More than 3 levels above the recommendation reduces XP. Story progress sets the level cap (15 at the start)."),
         sep=divider())
     body = page_head("巨神と背中", "Titans and their backs", "四体の巨神の姿、乗り方、背中の三つの試練、心臓、領域。仕組みだけを書いています。",
-                     "Four titans: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + pool + travel + after
+                     "Four titans: how to board, the three trials on each back, the hearts and domains. Mechanics only.") + overview + "".join(cards) + common + pool + pages_d.titans_extra() + travel + after
     page("titans.html", "巨神と背中 — 天と淵のあいだ", "Titans and their backs — Between the Sky and the Abyss",
          "岩鯨・潮殻・雷翼・余燼。乗り方、三つの試練、心臓、領域、装備。", "Stone Whale, Tide Shell, Thunder Wing and Ember: boarding, trials, hearts, domains and gear.", body)
 

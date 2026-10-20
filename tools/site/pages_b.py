@@ -1,6 +1,7 @@
 """スキルとビルド・装備・旅嚢と道具・パーティとマルチ。"""
 from sitelib import *
 import skilldata
+import pages_d
 
 
 def skills():
@@ -72,10 +73,10 @@ def skills():
     ])
 
     resp = table([T("できること", "Action"), T("決まり", "Rule")], [
-        [T("技の振り直し", "Respec skills"), T("Lv 15 まではどこでも無料。そのあとは共鳴の炉の近くで、初回は無料、以後は共鳴の結晶 1・2・3・4・5（5 で頭打ち）", "Free anywhere until Lv 15. After that, near a Resonance Forge: first time free, then 1, 2, 3, 4, 5 resonance crystals (capped at 5)")],
-        [T("戻るもの", "What returns"), T("覚えた技・枠・刻印がすべて戻り、技の点は全部戻る。天職は変わらない", "All learned skills, slots and runes reset and every point is refunded. Your calling stays")],
+        [T("技の振り直し", "Respec skills"), T("Lv 15 まではどこでも無料。そのあとは共鳴の炉のそばでいつでも共鳴の結晶 1（旅人の目利きがあれば無料）", "Free anywhere until Lv 15. After that, near a Resonance Forge at any time for 1 resonance crystal (free with the Wayfarer's Eye)")],
+        [T("戻るもの", "What returns"), T("覚えた技・刻印・要がすべて戻り、技の点は全部戻る。天職は変わらない", "All learned skills, runes and keystones reset and every point is refunded. Your calling stays")],
         [T("刻印の付け替え", "Swap runes"), T("戦いの外で、炉か焚き火の近く（旅の手帖があればどこでも）。初回は無料、以後は結晶 1", "Outside combat near a forge or campfire (anywhere with the Traveler's Journal). First swap free, then 1 crystal")],
-        [T("型の保存", "Loadouts"), T("枠と刻印の組を 2 つ保存でき、戦いの外でいつでも切り替えられる", "Save two slot-and-rune sets and switch outside combat")],
+        [T("型の保存", "Loadouts"), T("枠・刻印・連鎖の組を 4 つ保存でき、戦いの外でいつでも切り替えられる", "Save four sets of slots, runes and chains and switch outside combat")],
         [T("ステータスの振り直し", "Respec stats"), T("技と同じ炉・結晶・費用の表。回数は技と別に数える", "Same forge and cost table as skills; counted separately")],
     ])
 
@@ -151,6 +152,7 @@ def skills():
 </div>
 </section>
 
+%(freedom)s
 <section class="alt" aria-labelledby="respec">
 <div class="wrap">
 <h2 id="respec">%(h_resp)s</h2>
@@ -160,8 +162,8 @@ def skills():
 </section>
 """ % dict(
         h_grow=T("成長の仕組み", "How you grow"),
-        grow=T("レベルが上がると、力の振り分けと技の点が増えます。技は、岩鯨の心臓を止めるまでは各木の 1 行目だけ。そのあと天職を選ぶと、その木が全部開きます。",
-               "Leveling grants stat points and skill points. Until you stop the Stone Whale's heart you can learn only the first row of each tree; choosing a calling afterwards opens that tree fully."),
+        grow=T("レベルが上がると、力の振り分けと技の点が増えます。5 つの木と旅人は、最初から全部の行が取れます。天職は木を開く鍵ではなく、あなたの専門です。",
+               "Leveling grants stat points and skill points. Every tree and the Wayfarer is open from the start; a calling is not a key but your specialty."),
         g1h=T("4 つのステータス", "Four stats"), g1=T("筋力・敏捷・精神・耐久を、ステータス画面（<kbd>J</kbd>）で振り分けます。15 と 30 に小さな分かれ目があります。", "Spend points on Strength, Agility, Spirit and Vitality in the status screen (<kbd>J</kbd>). Each has small breakpoints at 15 and 30."),
         g2h=T("技の点", "Skill points"), g2=T("技の画面（<kbd>K</kbd>）で、1 段 1 点。どの技も同じ値段です。Lv 10 までは 1 レベルおきに増え、そのあとは 1 レベルごとに 1 点です。", "Each rank costs 1 point in the skill screen (<kbd>K</kbd>). Points come every other level up to Lv 10, then 1 per level."),
         ptable=ptable, pnote=T("三本の木を極めることはできません。何を選ぶかが、ビルドになります。", "You cannot max out three trees. What you pick is your build."),
@@ -170,15 +172,15 @@ def skills():
                      "Each tree has six skills: two entry skills in row 1, two in row 2, a signature active in row 3 and a keystone in row 4. Rows unlock at levels 1, 5, 12 and 20. Lines show prerequisites."),
         legend=legend, cards="".join(cards), h_lists=T("技の一覧", "Skill lists"), lists="".join(lists),
         h_call=T("天職", "Callings"),
-        call=T("天職は、あなたの木を決める選びです。選んだ木が全部開き、天性が付きます。", "A calling picks your tree. It opens fully and grants an innate trait."),
+        call=T("天職は専門です。木はどれも最初から開いています。選んだ木の要を授かり、天性が付き、その木の技 3 つぶんが 1 点ずつ安くなります。", "A calling is a specialty. Every tree is already open. Choosing one grants that tree's keystone, an innate trait and a one-point discount on three of its skill ranks."),
         c1=T("岩鯨の心臓を止め、心臓の報酬を選び終えると、天職を選ぶ画面が開きます。「あとで」にしても、技の画面から選べます。", "After you stop the Stone Whale's heart and choose its reward, a calling screen opens. You can postpone it and pick from the skill screen later."),
-        c2=T("一つ目の天職: その木が全部開きます（2〜4 行目・刻印・要）。ほかの木の技は 1 行目だけ・段 2 までです。旅人は全部取れます。", "First calling: that tree opens completely (rows 2 to 4, runes, keystone). Other trees stay limited to row 1 and rank 2. The Wayfarer is always open."),
-        c3=T("二つ目の天職（雷翼の心臓を止めたあと）: もう 1 本の木が 3 行目まで開き、刻印も使えます。5 つ目の技の枠も開きます。", "Second calling (after Thunder Wing's heart): another tree opens up to row 3 with runes, and a fifth skill slot unlocks."),
-        c4=T("天職を継ぐ・変えるには、画面で二度押します。取った技は消えません。", "Confirm a calling change by pressing twice. Learned skills are never removed."),
+        c2=T("一つ目の天職: その木の要を点なし・Lv 条件なしで授かり、天性が付き、その木の技の段（要・刻印は除く）3 つぶんが 1 点ずつ安くなります（戻る点）。", "First calling: you receive the tree's keystone free of points and level, gain the innate trait, and three of its skill ranks (not keystone or runes) cost 1 point less, refunded."),
+        c3=T("二つ目の天職（雷翼の心臓を止めたあと）: その木の要を授かり、5 つ目の技の枠が開きます。天性と割引はありません。", "Second calling (after Thunder Wing's heart): you receive that tree's keystone and a fifth skill slot unlocks. No innate trait or discount."),
+        c4=T("天職は転生で空に戻り、選び直せます。変えるには画面で二度押します。", "Callings reset on rebirth so you can pick again. Confirm a change by pressing twice."),
         traits=traits,
         h_run=T("刻印（ルーン）", "Runes"), run=T("使う技のうち 10 本には 3 択の刻印があり、技の形が変わります。", "Ten active skills each have three runes that reshape the skill."),
         r1=T("対象: 巨神斬り・鯨尾薙ぎ・岩呼び・踏み込み・跳び退き・風裂き・守りの唄・引き潮・熾火の槌・雲穿ち", "Skills: Titan Cleave, Whale-Tail Sweep, Rock Call, Lunge, Backstep, Wind Rend, Ward Song, Ebb Tide, Ember Hammer, Cloud Piercer"),
-        r2=T("技を極める（最大段）と開き、天職の木（と二つ目の天職の木）の技だけが対象です。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes; only skills in your calling trees (and the second calling's tree) qualify. Choosing the first rune costs 1 point."),
+        r2=T("技を極める（最大段）と開きます。天職の前でも、どの木の技でも選べます。最初に選ぶのは 1 点です。", "Maxing a skill unlocks its runes, in any tree and even before choosing a calling. Choosing the first rune costs 1 point."),
         r3=T("付け替えは戦いの外で、炉・焚き火の近く。初回は無料、あとは共鳴の結晶 1。同時に効くのは 1 つです。", "Swap outside combat near a forge or campfire. The first swap is free, then 1 resonance crystal. Only one rune is active at a time."),
         h_leg=T("伝説の書き換え（4 番目の刻印）", "Legendary rewrites (the fourth rune)"),
         leg=T("8 つの伝説の武器が、1 つの技を別の形に書き換えます。その武器を主の手に持つあいだだけ選べて効きます。", "Eight legendary weapons each rewrite one skill. They can be chosen and work only while held in your main hand."),
@@ -186,6 +188,7 @@ def skills():
         h_key=T("要（かなめ）", "Keystones"), key=T("各木の 4 行目。得と引き換えに癖のある、常に効く技です。段は 1 つだけ。", "Row 4 of each tree: a quirky always-on skill with a trade-off. One rank only."), keyt=keys,
         h_bp=T("ステータスの刻み目", "Stat breakpoints"), bp=T("4 つのステータスそれぞれに、15 と 30 で小さな分かれ目があります（計 8 つ）。全部を 30 にするには力が 120 要るので、どこを届かせるかが選びです。", "Each stat has a small breakpoint at 15 and 30 (eight in total). Getting all four to 30 takes 120 points, so where to reach is a choice."), bpt=bp,
         h_types=T("武器の型", "Weapon types"), types=T("13 種の武器は 5 つの型に分かれます。合う型の武器を持つと、技に小さなおまけが付きます。縛りはありません。", "The 13 weapons fall into five types. Holding a matching type gives a small bonus; nothing is ever required."), typet=types,
+        freedom=pages_d.skills_extra(),
         h_resp=T("振り直しと型の保存", "Respec and loadouts"), respt=resp,
         mk=T("装備の「木の印」の特性は、その木の技の力を伸ばします。", "The \"tree mark\" affixes on gear boost the power of that tree's skills."), mk2=T("装備のページへ", "See the gear page"),
     )
@@ -288,6 +291,7 @@ def gear():
 </div>
 </section>
 
+%(gfree)s
 <section aria-labelledby="leg">
 <div class="wrap">
 <h2 id="leg">%(h_leg)s</h2>
@@ -339,6 +343,7 @@ def gear():
         f2h=T("分解", "Dismantle"), f2=T("伝説は共鳴の欠片 10 ＋素材の半分、レア以下はその巨神の素材になります。特性の付く品は共鳴の結晶も出ます。", "A Legendary yields 10 resonance fragments plus half the materials; lower tiers yield that titan's materials. Items with affixes also give resonance crystals."),
         f3h=T("再鍛造", "Reforge"), f3=T("結晶 1 つで、特性をすべて振り直した候補を 1 組作ります（3 組まで）。候補のどれか、または「今のまま」を選んで確定するので、弱くなることはありません。", "One crystal makes a candidate set with all affixes rerolled (up to three). You pick one or \"keep current\", so you can never end up worse."),
         f4h=T("交換", "Trade"), f4=T("巨神の共鳴の欠片で、その巨神の専用伝説 3 つから好きな物を選んで手に入れます。", "Spend a titan's resonance fragments to pick any of that titan's three dedicated legendaries."),
+        gfree=pages_d.gear_extra(),
         h_leg=T("伝説の書き換え", "Legendary rewrites"),
         leg=T("伝説の武器 8 本は、持っているあいだ、特定の技を別の形に書き換えられます。", "Eight legendary weapons can rewrite a specific skill while you hold them."), leg2=T("一覧はスキルのページへ。", "See the list on the skills page."),
         h_acc=T("装飾品", "Accessories"),

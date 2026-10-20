@@ -97,6 +97,7 @@ NAV = [
     ("play.html", "遊び方", "How to play"),
     ("titans.html", "巨神と背中", "Titans"),
     ("skills.html", "スキルとビルド", "Skills"),
+    ("rebirth.html", "転生と深淵", "Rebirth"),
     ("gear.html", "装備", "Gear"),
     ("pouch.html", "旅嚢と道具", "Pouch"),
     ("party.html", "パーティとマルチ", "Multiplayer"),
