@@ -22,7 +22,6 @@ final class WingsBuilder {
         kit.palette(ZonePalette.LIBRARY);
         library(kit);
         kit.palette(ZonePalette.SONG);
-        songShrine(kit);
         kit.palette(ZonePalette.FIN);
         finPath(kit, -1);
         finPath(kit, 1);
@@ -108,25 +107,6 @@ final class WingsBuilder {
                 kit.hangingLantern(x, z, LIBRARY.ceilingY(), 2);
             }
         }
-    }
-
-    // ---------------------------------------------------------------- 歌の祠 (心臓の前の静かな部屋)
-    private static void songShrine(BuildKit kit) {
-        kit.roomSolid(SONG_SHRINE);
-        kit.room(SONG_PASS);
-        kit.ribs(SONG_SHRINE, 4, true);
-        kit.floorBorder(SONG_SHRINE);
-        BlockPos c = SONG_SHRINE.center();
-        kit.set(c.getX(), FLOOR, c.getZ(), kit.pal().trim());
-        for (Direction d : Direction.Plane.HORIZONTAL) {
-            kit.set(c.getX() + d.getStepX() * 2, FLOOR + 1, c.getZ() + d.getStepZ() * 2,
-                    Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 4).setValue(CandleBlock.LIT, true));
-        }
-        kit.set(c.getX(), FLOOR + 1, c.getZ(), Blocks.AMETHYST_CLUSTER.defaultBlockState());
-        kit.hangingLantern(c.getX(), c.getZ(), SONG_SHRINE.ceilingY(), 2);
-        kit.standingSign(new BlockPos(c.getX(), FLOOR + 1, SONG_SHRINE.z1() + 2), "sign.skyabyss.song_shrine");
-        kit.wallLamps(SONG_SHRINE, 4, FLOOR + 4);
-        kit.moss(SONG_SHRINE, 0.03f);
     }
 
     // ---------------------------------------------------------------- 胸びれの道 (側 side = -1 左 / +1 右)

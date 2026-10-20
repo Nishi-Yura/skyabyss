@@ -12,6 +12,7 @@ import jp.revati.skyabyss.titan.group.FirstRun;
 //   whale_maze : 闇の水路の出口の手前の戸が開く (灯の台。AnemoneLights が登録)
 // 任意の翼 (書庫・胸びれ・尾の展望・歌の祠・宿) は登録しない (いつも開いている。FirstRun.Room.optional で名前だけ残す)
 public final class WhaleFirstRun {
+    // 版 25: 射手の回廊 (E2) は戦わない通路。名前は残し、周回では第一の広間の北の戸 (E1_EXIT) を最初から開ける印だけに使う
     public static final String E2 = "whale_e2";
     public static final String CK = "whale_ck";
     public static final String LIBRARY_ROOM = "whale_library";
@@ -23,7 +24,7 @@ public final class WhaleFirstRun {
     public static void register() {
         BellTower.register();
         FirstRun.register(FirstRun.Room.firstRun(E2, TitanTravel.TITAN_BACK, TitanBackLayout.E2.aabb().minmax(CE1.aabb()))
-                .doors(java.util.stream.Stream.concat(E1_EXIT.stream(), E2_EXIT.stream()).toList()));
+                .doors(E1_EXIT));
         FirstRun.register(FirstRun.Room.firstRun(CK, TitanTravel.TITAN_BACK, TitanBackLayout.CK.aabb().minmax(CK_PASS.aabb()))
                 .doors(E3_LOCK));
         FirstRun.register(FirstRun.Room.optional(LIBRARY_ROOM, TitanTravel.TITAN_BACK, LIBRARY.aabb()));

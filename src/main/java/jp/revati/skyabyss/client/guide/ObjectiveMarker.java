@@ -92,11 +92,7 @@ public final class ObjectiveMarker {
         }
         Vec3 way = LampBandClient.waypoint();
         if (way != null) {
-            // 光海の迷路: 次の中継点 (迷路の道のりで次のマス)。見通しのない迷路なので、近いマスでも出す
-            Placement pw = place(g, mc, way, BASE, 3.0);
-            if (pw != null) {
-                show(g, mc, pw, GOLD, false);
-            }
+            // 光海の迷路 (版 25): ひし形の標は出さない。道しるべは左上の目的の帯の大きな矢印と距離 (ObjectiveStrip)
             return;
         }
         ObjectiveStrip.Resolved main = ObjectiveStrip.demo ? new ObjectiveStrip.Resolved(mc.player.blockPosition().offset(60, 3, -30), false) : ObjectiveStrip.resolve(mc);

@@ -28,8 +28,8 @@ public final class TrialGuide {
     }
 
     // 目的の id の一覧 (lang の確認用)
-    public static final List<String> IDS = List.of("wings", "west", "bell", "east_e1", "east_e2", "east_ck", "east_e3", "east_stone", "maze",
-            "stone_back", "heart");
+    public static final List<String> IDS = List.of("wings", "west", "bell", "east_e1", "east_ck", "east_e3", "east_stone", "maze",
+            "heart", "board", "deck", "door");
 
     static void tick(ServerPlayer player) {
         if (player.tickCount % 40 != 7 || player.isSpectator() || !player.isAlive() || !TitanBackTrials.isBelowSurface(player)) {
@@ -38,13 +38,104 @@ public final class TrialGuide {
         var level = player.serverLevel();
         UUID group = Groups.keyOf(player);
         BackGroupData.Record record = GroupProgress.of(level, group);
-        Goal goal = next(record, player.blockPosition());
+        Goal goal;
+        if (WhaleDeck.placed() && !record.isHeartDefeated() && !record.isGateOpened() && onDeckSide(player.blockPosition())) {
+            // 試練の階を置いたあとの、引いた試練の案内 (版 25)。引いた三つが新作のセルのとき・試練の階にいるとき
+            goal = deckGoal(player, level, group, record);
+        } else {
+            goal = next(record, player.blockPosition());
+        }
         if (goal == null) {
             return;
         }
         BlockPos at = goal.at();
         PacketDistributor.sendToPlayer(player, new TitanEndNetwork.Beam(KEY_PREFIX + goal.id(), GOLD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5,
                 goal.hx(), goal.hy(), goal.hz(), 0f, at.getY(), at.getY() + 9, 0.35f, 70));
+    }
+
+    // ---------------------------------------------------------------- 試練の階の案内 (版 25)
+    // 鼓動の間・入口の通路・試練の階の中にいるか (原型の西の翼・東の翼・下の水路の中は含まない)
+    static boolean onDeckSide(BlockPos p) {
+        if (p.getY() < FLOOR - 10) {
+            return false;
+        }
+        // 試練の階のセルはすべて z 4 より南で、床が y 105 より上 (原型の西・東の翼は z 5 より北)
+        if (p.getZ() >= 4 && p.getY() >= WhaleDeck.Y - 14 && p.getY() <= WhaleDeck.Y + 30) {
+            return true;
+        }
+        return HUB.contains(p) || ENTRY.contains(p) || WhaleDeck.STAIR.contains(p);
+    }
+
+    // 次の目的 (試練の階の案内)。なければ null (セルの中・全部越えたあとなど)
+    // 1. 鼓動の間で、まだ板を読んでいない人 → 試練の板
+    // 2. 引いた試練のうち、越えていない新作のセルがある → 階段を上って試練の階へ (階にいれば、いちばん近いセルの戸へ)
+    // 3. 引いた試練が原型だけ → 今までどおり翼の入口 (next)
+    private static Goal deckGoal(ServerPlayer player, net.minecraft.server.level.ServerLevel level, UUID group, BackGroupData.Record record) {
+        BlockPos pos = player.blockPosition();
+        var draw = jp.revati.skyabyss.trial.TrialData.current(level, group);
+        List<jp.revati.skyabyss.trial.TrialCell> open = new java.util.ArrayList<>();
+        boolean legacyLeft = false;
+        for (String key : List.of("0", "1", "2")) {
+            if (jp.revati.skyabyss.titan.group.TrialSteles.rung(level.getServer(), group, jp.revati.skyabyss.titan.group.TrialSteles.signal("whale", key))) {
+                continue;
+            }
+            var cell = jp.revati.skyabyss.trial.TrialRegions.cellOfKey("whale", key, draw);
+            if (cell == null || !cell.runtime()) {
+                legacyLeft = true;
+            } else {
+                open.add(cell);
+            }
+        }
+        boolean hubSide = HUB.contains(pos) || ENTRY.contains(pos) || WhaleDeck.STAIR.contains(pos);
+        if (hubSide && !jp.revati.skyabyss.trial.TrialIntro.seen(player, jp.revati.skyabyss.trial.TrialIntro.BOARD_READ) && (!open.isEmpty() || legacyLeft)) {
+            return new Goal("board", WhaleDeck.BOARD_HUB, 0.9f, 1f, 0.9f);
+        }
+        if (open.isEmpty()) {
+            return legacyLeft && hubSide ? next(record, pos) : null;
+        }
+        // 引いた新作のセルの中にいる: セルが案内する (ここでは何も出さない)
+        for (var cell : open) {
+            if (cell.ports().area().contains(player.position())) {
+                return null;
+            }
+        }
+        if (hubSide) {
+            BlockPos door = new BlockPos(WhaleDeck.STAIR_DOOR_X, FLOOR + 1, (WhaleDeck.STAIR_Z0 + WhaleDeck.STAIR_Z1) / 2);
+            return new Goal("deck", door, 0.7f, 1.5f, 2.5f);
+        }
+        // 試練の階の中: いちばん近い、引いた新作のセルの戸
+        BlockPos best = null;
+        List<BlockPos> bestDoor = List.of();
+        double bestD = Double.MAX_VALUE;
+        for (var cell : open) {
+            List<BlockPos> door = cell.ports().entrance();
+            if (door.isEmpty()) {
+                continue;
+            }
+            BlockPos c = door.get(door.size() / 2);
+            double d = c.distSqr(pos);
+            if (d < bestD) {
+                bestD = d;
+                best = c;
+                bestDoor = door;
+            }
+        }
+        if (best == null) {
+            return null;
+        }
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+        for (BlockPos b : bestDoor) {
+            minX = Math.min(minX, b.getX());
+            maxX = Math.max(maxX, b.getX());
+            minZ = Math.min(minZ, b.getZ());
+            maxZ = Math.max(maxZ, b.getZ());
+        }
+        float hx = Math.max(0.7f, (maxX - minX + 1) / 2f);
+        float hz = Math.max(0.7f, (maxZ - minZ + 1) / 2f);
+        return new Goal("door", best, hx, 2.5f, hz);
     }
 
     // 次の目的 (純粋: 記録と位置だけから)。なければ null (心臓を倒したあとなど)
@@ -60,13 +151,10 @@ public final class TrialGuide {
         }
         if (inEast(pos)) {
             if (east) {
-                return new Goal("stone_back", EAST_RETURN.get(EAST_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             if (!record.isHallCleared("e1")) {
                 return new Goal("east_e1", E1_EXIT.get(E1_EXIT.size() / 2), 2.5f, 3f, 0.7f);
-            }
-            if (!record.isHallCleared("e2")) {
-                return new Goal("east_e2", E2_EXIT.get(E2_EXIT.size() / 2), 2.5f, 3f, 0.7f);
             }
             if (!record.isHallCleared("ck")) {
                 return new Goal("east_ck", E3_LOCK.get(E3_LOCK.size() / 2), 0.7f, 3f, 2.5f);
@@ -78,7 +166,7 @@ public final class TrialGuide {
         }
         if (inWest(pos)) {
             if (west) {
-                return new Goal("stone_back", WEST_RETURN.get(WEST_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             if (BELL.contains(pos) || BELL_PASS.contains(pos) || (W2.contains(pos) && !record.flag(BellTower.FLAG))) {
                 if (!record.flag(BellTower.FLAG) && pos.getY() > FLOOR) {
@@ -89,7 +177,7 @@ public final class TrialGuide {
         }
         if (pos.getY() < FLOOR - 10) {
             if (lower) {
-                return new Goal("stone_back", LOWER_RETURN.get(LOWER_RETURN.size() / 2), 0.7f, 1.5f, 1.5f);
+                return null;
             }
             return new Goal("maze", RESONANCE_STONES.get(2), 1f, 1.5f, 1f);
         }

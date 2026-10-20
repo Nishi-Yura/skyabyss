@@ -25,7 +25,6 @@ public final class RoomPlayRooms {
             List<Room> out = new ArrayList<>();
             // 岩鯨の背
             out.add(hall("e1", TitanBackLayout.E1, TitanBackLayout.E1_ENTRANCE));
-            out.add(hall("e2", TitanBackLayout.E2, TitanBackLayout.E2_ENTRANCE));
             out.add(hall("ck", TitanBackLayout.CK, TitanBackLayout.CK_ENTRANCE));
             out.add(hall("e3", TitanBackLayout.E3, TitanBackLayout.E3_ENTRANCE));
             // 試練の階 (岩鯨)

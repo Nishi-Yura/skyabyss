@@ -475,7 +475,7 @@ public final class TitanBackSelfTest {
     private static void checkRooms(ServerLevel level, List<String> failures) {
         for (Box room : TitanBackAudit.ROOMS) {
             // 通路の天井は、大門 (BossGates) の高い空間で開く。迷路の入口の小部屋の天井ははしごの縦穴
-            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL || room == SONG_PASS) {
+            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL) {
                 continue;
             }
             int holes = 0;
@@ -524,7 +524,7 @@ public final class TitanBackSelfTest {
             air(level, p, "doorway", failures);
             air(level, p.above(), "doorway head", failures);
         }
-        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E2_EXIT, E3_LOCK, BELL_GATE)) {
+        for (List<BlockPos> sealed : List.of(GATE, WEST_RETURN, EAST_RETURN, LOWER_RETURN, E1_EXIT, E3_LOCK, BELL_GATE)) {
             for (BlockPos p : sealed) {
                 if (!level.getBlockState(p).is(ModBlocks.SEALED_GATE.get())) {
                     failures.add("should start sealed: " + p);
@@ -572,7 +572,7 @@ public final class TitanBackSelfTest {
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
     // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
-    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.song_shrine", "sign.skyabyss.fin_left",
+    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.fin_left",
             "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page", "sign.skyabyss.fin_left_lore", "sign.skyabyss.fin_right_lore");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {
@@ -631,9 +631,9 @@ public final class TitanBackSelfTest {
             }
             validateCourse(ParkourCourses.ALL.get(c), ParkourCourses.allBlocks(c), "course " + c, failures);
             for (ParkourCourses.Island isl : ParkourCourses.ISLANDS.get(c)) {
-                BlockPos spawn = TitanBackTrials.checkpointSpawns().get(isl.id());
-                if (spawn == null || spawn.getX() != isl.cx() || spawn.getZ() != isl.cz() || spawn.getY() != isl.y() + 1) {
-                    failures.add("island " + isl.id() + " is not a rest point at its centre (" + spawn + ")");
+                // 版 25: 島はコースの途中の休み場ではない (落ちたら谷の入口の休み場へ戻る)
+                if (TitanBackTrials.checkpointSpawns().containsKey(isl.id())) {
+                    failures.add("island " + isl.id() + " must not be a rest point inside a parkour course");
                 }
             }
         }
@@ -737,7 +737,7 @@ public final class TitanBackSelfTest {
     }
 
     private static void checkHalls(ServerLevel level, List<String> failures) {
-        for (Box hall : List.of(E1, E2, E3, CK)) {
+        for (Box hall : List.of(E1, E3, CK)) {
             for (BlockPos p : EastWingBuilder.spawnPoints(hall)) {
                 air(level, p, "hall spawn point", failures);
                 air(level, p.above(), "hall spawn point head", failures);
@@ -1001,8 +1001,8 @@ public final class TitanBackSelfTest {
     // 倒れて目覚める場所は、戦いの部屋の中ではなく、戦いの扉から離れていること (目の前が戦場にならない)。
     // 休み場がいまの戦いの前室なら、鼓動の間で目覚めること。闇の水路の中ほどの休み場は水路の中の乾いた足場であること
     private static void checkRespawnSafety(ServerLevel level, List<String> failures) {
-        List<TitanBackLayout.Box> fights = List.of(E1, E2, CK, E3, HEART);
-        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, E2_ENTRANCE, E2_EXIT, CK_ENTRANCE, E3_LOCK, E3_ENTRANCE, HEART_GATE);
+        List<TitanBackLayout.Box> fights = List.of(E1, CK, E3, HEART);
+        List<List<BlockPos>> doors = List.of(E1_ENTRANCE, E1_EXIT, CK_ENTRANCE, E3_LOCK, E3_ENTRANCE, HEART_GATE);
         for (var e : TitanBackTrials.checkpointSpawns(level).entrySet()) {
             BlockPos spawn = e.getValue();
             for (TitanBackLayout.Box room : fights) {
@@ -1039,7 +1039,7 @@ public final class TitanBackSelfTest {
         // 戦いの前室で休み場を取っていて、その戦いの最中なら、鼓動の間で目覚める (グループごと)
         UUID group = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
         UUID other = UUID.fromString("00000000-0000-0000-0000-0000000000b2");
-        for (String[] pair : new String[][] {{"e0", "e1"}, {"ce1", "e2"}, {"ckr", "ck"}}) {
+        for (String[] pair : new String[][] {{"e0", "e1"}, {"ckr", "ck"}}) {
             if (!pair[0].equals(TitanBackTrials.respawnCheckpoint(level, group, pair[0]))) {
                 failures.add("rest point " + pair[0] + " moved without a fight");
             }

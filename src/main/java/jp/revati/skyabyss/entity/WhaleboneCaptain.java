@@ -383,7 +383,7 @@ public class WhaleboneCaptain extends GuardMob {
                         for (int i = 0; i < 2; i++) {
                             double angle = random.nextDouble() * Math.PI * 2;
                             BlockPos at = BlockPos.containing(getX() + Math.cos(angle) * 3, getY(), getZ() + Math.sin(angle) * 3);
-                            TitanBackTrials.spawnGuard(server, "sentinel", at, groupId());
+                            TitanBackTrials.spawnSummon(server, "sentinel", at, groupId(), this);
                         }
                         addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, Integer.MAX_VALUE, 0, false, false));
                         addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, Integer.MAX_VALUE, 0, false, false));

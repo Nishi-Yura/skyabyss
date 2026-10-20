@@ -9,12 +9,12 @@ import jp.revati.skyabyss.titan.dungeon.CourseGenerator.Spec;
 import net.minecraft.server.level.ServerLevel;
 
 // 西の翼の三つの谷のアスレチック (版 18 で作り直し。26 の 8.6)。足場の並びは毎回ちがう乱数ではなく、読める一本の道:
-//   飛び石 (落ちない石を 3 マスおきに) → 島 (休み場。ここから落ちても島へ戻る) → 骨の橋 (崩れる骨が一列に続き、ところどころ 2 マスの溝を跳ぶ) → …
+//   飛び石 (落ちない石を 3 マスおきに) → 島 (足場の島。休み場ではない。落ちたら谷の入口の休み場へ戻る) → 骨の橋 (崩れる骨が一列に続き、ところどころ 2 マスの溝を跳ぶ) → …
 // 足場はひとつずつ、次の足場へ必ず跳べる (CourseRules)。道は谷の入口の岩棚 (start) から出口の岩棚 (end) まで一本。
-// 島は 3×3 の石の台で、休み場 (wa1・wa2・wb1・wc1) を兼ねる。
+// 島は 3×3 の石の台 (wa1・wa2・wb1・wc1)。版 25 でコースの途中の休み場をなくした (休み場は谷と谷のあいだの岩室 w0・w1・w2 だけ)。
 // 足場の種類 (4 番目の値): 0 = 崩れる骨 (乗ると崩れ、4.5 秒で戻る)、1 = 石 (飛び石。崩れない)。島の石は ISLANDS から建てる
 public final class ParkourCourses {
-    // 休み場を兼ねる島: 中心 (cx, cz)・床の高さ y。3×3
+    // コースの途中の足場の島 (休み場ではない): 中心 (cx, cz)・床の高さ y。3×3
     public record Island(String id, int cx, int y, int cz) {
         public boolean has(int x, int z) {
             return Math.abs(x - cx) <= 1 && Math.abs(z - cz) <= 1;
@@ -49,7 +49,7 @@ public final class ParkourCourses {
     // 谷ごとの指定 (谷 0 = 肋骨の谷、1 = 竪穴、2 = 崩れ橋)
     public static final List<Spec> ALL = List.of(A, B, C);
 
-    // 休み場を兼ねる島 (谷ごと)
+    // コースの途中の足場の島 (休み場ではない) (谷ごと)
     public static final List<Island> ISLANDS_A = List.of(new Island("wa1", -49, FLOOR, -26), new Island("wa2", -49, FLOOR + 2, -40));
     public static final List<Island> ISLANDS_B = List.of(new Island("wb1", -52, W1.floorY() + 2, -81));
     public static final List<Island> ISLANDS_C = List.of(new Island("wc1", -29, W2.floorY(), -70));

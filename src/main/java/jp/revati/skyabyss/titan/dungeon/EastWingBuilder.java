@@ -59,8 +59,8 @@ final class EastWingBuilder {
         kit.doorFrame(E3_LOCK, FLOOR);
         kit.palette(ZonePalette.CAPTAIN);
         kit.doorFrame(E3_ENTRANCE, FLOOR);
-        // 出口は制圧するまで閉じている (入口は戦いが始まると閉じる)
-        for (List<BlockPos> exit : List.of(E1_EXIT, E2_EXIT, E3_LOCK)) {
+        // 出口は制圧するまで閉じている (入口は戦いが始まると閉じる)。E2 は戦わない通路なので戸は閉じない (空いたまま)
+        for (List<BlockPos> exit : List.of(E1_EXIT, E3_LOCK)) {
             for (BlockPos p : exit) {
                 kit.set(p, ModBlocks.SEALED_GATE.get().defaultBlockState());
             }
@@ -123,11 +123,10 @@ final class EastWingBuilder {
         }
     }
 
-    // ---------------------------------------------------------------- 第二の広間: 射手の回廊
-    // 縦の縞の床 (明暗)・磨いた安山岩の壁・トウヒの梁・白い旗。入口から北の戸まで灯りの道
+    // ---------------------------------------------------------------- 射手の回廊 (版 25: 戦わない通路。第一の広間と詰所のあいだの息つぎ)
+    // 縦の縞の床 (明暗)・磨いた安山岩の壁・トウヒの梁・白い旗。入口から北の戸口まで灯りの道。敵は湧かない (東の翼の戦いは 3 つ)
     private static void galleryHall(BuildKit kit) {
         hallFloorAndPillars(kit, E2, ROUTE_E2);
-        // 縦の縞: 2 マスおきに床の色を替える
         for (int x = E2.x1(); x <= E2.x2(); x++) {
             if ((x - E2.x1()) % 4 < 2) {
                 continue;
@@ -139,15 +138,10 @@ final class EastWingBuilder {
             }
         }
         kit.pilasters(E2, 5);
-        kit.wallLamps(E2, 5, E2.floorY() + 6);
-        kit.ribs(E2, 6, true);
+        kit.wallLamps(E2, 4, E2.floorY() + 5);
+        kit.ribs(E2, 5, true);
         lanterns(kit, E2, 8, 3);
         banners(kit, E2, Blocks.LIGHT_GRAY_WALL_BANNER, 6);
-        clearSpawns(kit, E2);
-        // 射手の足場: 壁ぎわの一段高い石の台 (東西の端 2 マス。戸口と湧き場所と仕切りの前は避ける)。射手の矢が通る高さの目印になる
-        for (int z : new int[]{-88, -84, -80, -76, -72}) {
-            kit.set(E2.x2(), FLOOR + 1, z, Blocks.STONE_BRICK_SLAB.defaultBlockState());
-        }
     }
 
     // ---------------------------------------------------------------- 番兵の詰所: 兵舎

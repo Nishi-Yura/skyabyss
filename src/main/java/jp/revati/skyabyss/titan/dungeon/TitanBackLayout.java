@@ -62,7 +62,9 @@ public final class TitanBackLayout {
     // 20: 歩く道の灯り (RouteLamps。下の迷路を除く歩ける所の暗い所に海のランタンを壁へ埋める。心臓の間の仕掛けの置き場の修正)
     // 21: 試練の階の南の拡張 (P2。細い通路 C2・最南の広間 S1・苔の滑り坂 W03・噴気孔の昇り W04・棺の護送 W11・鯨骨の闘技場 W12。docs/design/29 の 3.1)
     // 24: 影絵の間 W08 (P3。最南の広間 S1 の北の壁の戸から北へ。docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
-    public static final int LAYOUT_VERSION = 24;
+    // 25: 試遊の声 2 回目 (四体の最大 24 の次): 東の翼の戦いを 4 → 3 (第二の広間 E2 は戦わない射手の回廊に・幅 7)・西の翼の谷の途中の休み場 (島 wa1 wa2 wb1 wc1) をなくした・
+    //     鼓動の間 と 試練の階の光る床 (HUB_PAD・D0_PAD)・案内の碑 (WhaleDeck.SIGNS)・歌の祠をなくした・鼓動の間の碑を弧と台座に。docs/design/26 の 8.8
+    public static final int LAYOUT_VERSION = 25;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く
@@ -119,9 +121,7 @@ public final class TitanBackLayout {
     public static final List<BlockPos> HEART_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, HEART_GATE_Z, true);
     // 心臓を倒すと現れる光の柱。上に立つと尾の台へ戻される
     public static final BlockPos HEART_PILLAR = new BlockPos(HEART_CX, FLOOR + 1, HEART_CZ);
-    // 歌の祠 (心臓の前の静かな部屋。21 の 3.3。休み場 heart の西)
-    public static final Box SONG_SHRINE = new Box(-20, -9, -106, -92, FLOOR, 7);
-    public static final Box SONG_PASS = new Box(-8, -7, -98, -94, FLOOR, 5);
+    // 版 24: 歌の祠 (休み場 heart の西の小部屋。看板だけで用がなかった) はなくした
 
     // ---------------------------------------------------------------- 西の翼 (アスレチック)
     public static final Box W0 = new Box(-35, -26, -42, -29, FLOOR, 8);
@@ -154,13 +154,14 @@ public final class TitanBackLayout {
     public static final Box LIBRARY_PASS = new Box(-11, -4, 3, 9, FLOOR, 6);
 
     // ---------------------------------------------------------------- 東の翼 (戦闘。版 18: 一本道。戻らずに先へ進む)
-    // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 第二の広間 E2 → (北の戸) 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
+    // 東の前室 E0 → 第一の広間 E1 → (北の戸) 控えの間 CE1 (休み場) → 射手の回廊 E2 (通路。戦わない。版 25) → 前室 CK_PASS (休み場) → 番兵の詰所 CK (老番兵)
     //   → (西の戸 = 割符の戸) 通路 E3_CORRIDOR (休み場) → 番兵長の広間 E3 (共鳴石) → 鼓動の間へ戻る扉
     // どの戸も、手前の広間を鎮めたあとにだけ開く (道の途中で二つの戸が同時に開くことはない)。戦いの広間の入口は、戦いの間だけ閉じる
     public static final Box E0 = new Box(26, 32, -42, -29, FLOOR, 8);
     public static final Box E1 = new Box(34, 54, -54, -8, FLOOR, 11);
     public static final Box CE1 = new Box(41, 53, -68, -56, FLOOR, 7);
-    public static final Box E2 = new Box(41, 55, -92, -70, FLOOR, 12);
+    // 版 25: 第二の広間は戦わない「射手の回廊」(ただの通路) にした。東の翼の戦いは 3 つ (E1・詰所 CK・E3)
+    public static final Box E2 = new Box(44, 50, -92, -70, FLOOR, 8);
     public static final Box CK_PASS = new Box(42, 54, -99, -94, FLOOR, 6);
     public static final Box CK = new Box(41, 55, -118, -101, FLOOR, 8);
     public static final Box E3_CORRIDOR = new Box(34, 39, -105, -101, FLOOR, 6);
@@ -180,11 +181,9 @@ public final class TitanBackLayout {
     // 仕切りの候補 (版 18。**いまは建てず、使わない**。広さの扱いはユーザーの判断待ち: 設計書 26 の 8.7 の案 A〜C)。案 A を採るときは、
     // 少人数のグループだけに、広間の中へ立てる封印の壁 (GroupGates。そのグループにだけ見える)。外側は封じられ、湧きも戸口・出口・共鳴石のある側だけ。戦いが終われば開く。
     //   第一の広間 E1: 二人以下は南 (z -26〜-8) を、一人はさらに東 (x 48〜54) を封じる (21×47 → 21×27 → 13×27)
-    //   第二の広間 E2: 一人は東の端 (x 51〜55) を封じる (15×23 → 10×23)
     //   番兵長の広間 E3: 二人以下は南 (z -75〜-52。共鳴石の側) を封じる。倒すと開き、共鳴石へ行ける (13×55 → 13×30)
     public static final List<BlockPos> VEIL_E1 = wall(E1.x1(), E1.x2(), FLOOR + 1, FLOOR + 11, -27, true);
     public static final List<BlockPos> VEIL_E1_SOLO = wall(E1.z1(), -28, FLOOR + 1, FLOOR + 11, 47, false);
-    public static final List<BlockPos> VEIL_E2 = wall(E2.z1(), E2.z2(), FLOOR + 1, FLOOR + 12, 50, false);
     public static final List<BlockPos> VEIL_E3 = wall(E3.x1(), E3.x2(), FLOOR + 1, FLOOR + 11, -76, true);
     // 東の前室 → 第一の広間 のつなぎ / 鼓動の間 → 東の前室
     public static final Box EAST_HALL = new Box(19, 25, -38, -34, FLOOR, 6);
@@ -243,7 +242,6 @@ public final class TitanBackLayout {
             new Inscription("sign.skyabyss.hall_e1", new BlockPos(34, FLOOR + 3, -40), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.door_next", new BlockPos(39, FLOOR + 3, -54), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.hall_e2", new BlockPos(44, FLOOR + 3, -68), net.minecraft.core.Direction.SOUTH),
-            new Inscription("sign.skyabyss.door_next", new BlockPos(44, FLOOR + 3, -92), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.hall_ck", new BlockPos(51, FLOOR + 3, -99), net.minecraft.core.Direction.SOUTH),
             new Inscription("sign.skyabyss.door_tally", new BlockPos(41, FLOOR + 3, -107), net.minecraft.core.Direction.EAST),
             new Inscription("sign.skyabyss.hall_e3", new BlockPos(32, FLOOR + 3, -96), net.minecraft.core.Direction.WEST),
@@ -258,6 +256,9 @@ public final class TitanBackLayout {
         all.addAll(TRIAL_SIGNS);
         all.addAll(GUIDE_SIGNS);
         all.add(HEART_GATE_SIGN);
+        if (WhaleDeck.placed()) {
+            all.addAll(WhaleDeck.SIGNS);
+        }
         return List.copyOf(all);
     }
 

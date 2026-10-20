@@ -81,6 +81,12 @@ final class WhaleDeckBuilder {
         // 試練の板 (鼓動の間の南の壁ぎわ・試練の階の広間の北の壁ぎわ)
         kit.set(BOARD_HUB, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
         kit.set(BOARD_D0, ModBlocks.TRIAL_BOARD.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH));
+        // 光る床 (鼓動の間 <-> 試練の階の広間。版 25) と、案内の碑
+        kit.set(HUB_PAD, PAD);
+        kit.set(D0_PAD, PAD);
+        for (TitanBackLayout.Inscription s : SIGNS) {
+            kit.wallSign(s.pos(), s.facing(), s.key());
+        }
         jp.revati.skyabyss.SkyAbyss.LOGGER.info("Built the whale trial deck in {} ms", System.currentTimeMillis() - t0);
     }
 

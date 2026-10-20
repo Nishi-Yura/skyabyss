@@ -1,0 +1,63 @@
+# 岩鯨の試遊の声 2 回目 (版 25。docs/design/26 の 8.8) の確かめ。./gradlew runShots -Pscript=tools/shots/whale_fix2.txt
+# 出力: run/shots/whale_fix2/shots/whale_fix2/*.png → python -I tools/whale_fix2_sheet.py で docs/review/previews/whale_fix2_sheet.png
+world whale_fix2 flat
+size 1280 720
+timeout 3000
+render 16
+clouds off
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 40
+cmd skyabyss dev arrive titan_back
+waitchunks 1200
+wait 400
+chat clear
+cmd gamemode spectator
+cmd effect give @p minecraft:night_vision infinite 0 true
+hud off
+fov 95
+camera skyabyss:titan_back 0 107 -17 180 6
+waitchunks 600
+wait 60
+shot tablets_arc
+fov 100
+camera skyabyss:titan_back 13 106 -22 120 14
+waitchunks 600
+wait 30
+shot tablets_side
+fov 100
+camera skyabyss:titan_back -6 106 -27 0 6
+waitchunks 600
+wait 30
+shot hub_board_pad
+fov 100
+camera skyabyss:titan_back -1 105.5 9 270 2
+waitchunks 600
+wait 30
+shot stair_sign
+fov 100
+camera skyabyss:titan_back 37 122 14 90 8
+waitchunks 600
+wait 30
+shot deck_hall
+fov 100
+camera skyabyss:titan_back 47 106 -69 180 4
+waitchunks 600
+wait 30
+shot gallery_e2
+fov 100
+camera skyabyss:titan_back 4 106 -94 90 4
+waitchunks 600
+wait 30
+shot heart_rest_west
+cmd fill -22 104 -38 -22 108 -34 skyabyss:trial_seal
+fov 100
+camera skyabyss:titan_back -18 106 -36 90 0
+waitchunks 600
+wait 30
+shot trial_seal
+quit
