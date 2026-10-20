@@ -77,7 +77,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 <div class="wrap">
   <div class="top">
     <h1>はじまりの町 ラフ選定</h1>
-    <p class="intro">docs/design/33 の 2 章。約 200×200（Wynncraft のラグニ級）、壁と四つの門、芯（鐘楼・語り部の家・広場）、工房の通り、住まい、畑、空き区画（自由に建ててよい）。見取り図の 3 案から、採用する形を選んでください。直してほしい点はメモに。</p>
+    <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。第 2 回の 3 案から選んでください（第 1 回の 3 案は取り下げ）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
       <span id="pcount">0 / 1 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
@@ -91,9 +91,9 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>はじまりの町の見取り図</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">北が上。門はそれぞれ章の跡地の方位（北 岩鯨・東 潮殻・西 雷翼・南 余燼）を向く。壁の外は普通の地形。</p>
-  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="town_a.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town_a.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="town_b.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town_b.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="town_c.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town_c.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure></div>
-  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="town_layout-a"><input type="radio" name="town_layout" id="town_layout-a" value="a"><span class="letter">A</span><span class="otext"><b>鐘の広場</b><span>中心の広場から四つの門へ十字の大通り。東が工房、西が住まい、四隅が空き区画。迷わない</span></span></label><label class="opt" for="town_layout-b"><input type="radio" name="town_layout" id="town_layout-b" value="b"><span class="letter">B</span><span class="otext"><b>川沿いの段々</b><span>川が南北に流れ橋でつなぐ。鐘楼は北の高い段。段々の住まい。水辺の景色が出る。地形の選び方が少し厳しくなる（川か水辺が要る）</span></span></label><label class="opt" for="town_layout-c"><input type="radio" name="town_layout" id="town_layout-c" value="c"><span class="letter">C</span><span class="otext"><b>二重の輪</b><span>古い芯を内の輪で囲い、外の輪に新しい町。内と外のあいだが市。古さと静けさが出る。歩く距離は長い</span></span></label></fieldset>
+  <p class="extra">北が上。門は章の跡地の方位を向く（北 鯨門・東 潮門・西 風門・南 灰門）。壁の外は普通の地形。砦は天守のない見張りの砦（王の館ではない）。村人は市と住まいに少し。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="town2_a.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town2_a.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="town2_b.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town2_b.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure><figure class="sheet"><button class="zoom" type="button" data-src="town2_c.jpg" aria-label="はじまりの町の見取り図 のシートを拡大"><img loading="lazy" src="town2_c.jpg" alt="はじまりの町の見取り図 の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="town_layout-a"><input type="radio" name="town_layout" id="town_layout-a" value="a"><span class="letter">A</span><span class="otext"><b>鐘の都</b><span>北の段に大鐘楼と砦が並んで都を見下ろす。段の下に広場と市、東に組合、西に社。見通しがよく迷わない。墓地は西門の外</span></span></label><label class="opt" for="town_layout-b"><input type="radio" name="town_layout" id="town_layout-b" value="b"><span class="letter">B</span><span class="otext"><b>砦の都</b><span>北東の丘の砦を壁で二重に囲い、坂の大通りが南西の市へ下る。国の座が強く出る。鐘楼は砦の門の前。高低差があり景色が変わる</span></span></label><label class="opt" for="town_layout-c"><input type="radio" name="town_layout" id="town_layout-c" value="c"><span class="letter">C</span><span class="otext"><b>二つの丘</b><span>東の丘に砦と館（国の務め）、西の丘に鐘楼と社（祈り）。谷の大通りに市・組合・鍛冶。務めと祈りが向かい合う形。歩く距離は長め</span></span></label></fieldset>
   <label class="note-l" for="town_layout-note">直してほしい点 (任意)</label>
   <textarea id="town_layout-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
