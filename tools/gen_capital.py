@@ -171,43 +171,68 @@ def terrace():
     lantern_post(5, 5, -44)
 
 
+def gable(x0, x1, z0, z1, y, block='spruce_stairs', cap='spruce_slab[type=bottom,waterlogged=false]'):
+    """東西に棟のある切妻 (ラフ A と同じ)。z0..z1 の両側から段々に上がる"""
+    depth = (z1 - z0) // 2
+    for i in range(depth + 1):
+        zn, zs = z0 + i, z1 - i
+        if zn >= zs:
+            box(x0, y + i, zn, x1, y + i, zn, cap)
+            break
+        box(x0, y + i, zn, x1, y + i, zn, block + '[facing=south,half=bottom,shape=straight,waterlogged=false]')
+        box(x0, y + i, zs, x1, y + i, zs, block + '[facing=north,half=bottom,shape=straight,waterlogged=false]')
+
+
 def bell_tower():
-    # 大鐘楼 9×9 (x -34..-26, z -80..-72)。段の上 (床 y 5)。高さ 24
+    # 大鐘楼 (ラフ A「石の鐘楼」で決定): 石レンガの塔 9×9 (x -34..-26, z -80..-72)、段の上 (床 y 5)、高さ 24。
+    # 四方のアーチの吹き抜け、一階の天井に鐘。頂は鐘の間 (四方が開く) と段々の尖り屋根
     x0, z0, x1, z1 = -34, -80, -26, -72
+    cx, cz = -30, -76
     box(x0, 4, z0, x1, 4, z1, 'polished_deepslate')
     box(x0, 5, z0, x1, 28, z1, 'stone_bricks')
     box(x0 + 1, 5, z0 + 1, x1 - 1, 27, z1 - 1, 'air')
+    for ccx, ccz in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
+        box(ccx, 5, ccz, ccx, 28, ccz, 'deepslate_bricks')
     # 一階の四方のアーチ (幅 3、高さ 3)
-    opening(-31, 5, z0, -29, 7, z0)
-    opening(-31, 5, z1, -29, 7, z1)
-    opening(x0, 5, -77, x0, 7, -75)
-    opening(x1, 5, -77, x1, 7, -75)
-    # 一階の天井 (y 8) と鐘 (天井に吊る)
+    opening(cx - 1, 5, z0, cx + 1, 7, z0)
+    opening(cx - 1, 5, z1, cx + 1, 7, z1)
+    opening(x0, 5, cz - 1, x0, 7, cz + 1)
+    opening(x1, 5, cz - 1, x1, 7, cz + 1)
+    # 一階の天井 (y 8) と鐘 (天井に吊る。語り部はその足もと)
     box(x0 + 1, 8, z0 + 1, x1 - 1, 8, z1 - 1, 'spruce_planks')
-    blk(-30, 7, -76, 'bell[attachment=ceiling,facing=north,powered=false]')
-    mark('bell', -30, 7, -76)
-    # 上階の窓と柱
-    for y in (12, 18, 24):
-        opening(-31, y, z0, -29, y + 1, z0)
-        opening(-31, y, z1, -29, y + 1, z1)
-        opening(x0, y, -77, x0, y + 1, -75)
-        opening(x1, y, -77, x1, y + 1, -75)
-    for cx, cz in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
-        box(cx, 5, cz, cx, 28, cz, 'deepslate_bricks')
-    # 鐘の間 (最上階) と屋根
-    box(x0, 29, z0, x1, 29, z1, 'spruce_slab[type=bottom,waterlogged=false]')
-    box(x0 + 2, 30, z0 + 2, x1 - 2, 30, z1 - 2, 'spruce_slab[type=bottom,waterlogged=false]')
-    blk(-30, 31, -76, 'lantern[hanging=false]')
+    blk(cx, 7, cz, 'bell[attachment=ceiling,facing=north,powered=false]')
+    mark('bell', cx, 7, cz)
+    # 上階の細い窓
+    for y in (13, 18, 23):
+        opening(cx, y, z0, cx, y + 1, z0)
+        opening(cx, y, z1, cx, y + 1, z1)
+        opening(x0, y, cz, x0, y + 1, cz)
+        opening(x1, y, cz, x1, y + 1, cz)
+    # 頂の鐘の間 (y 25..27 は四方が開く)。床 y 24、二つ目の鐘
+    box(x0 + 1, 24, z0 + 1, x1 - 1, 24, z1 - 1, 'spruce_planks')
+    opening(cx - 2, 25, z0, cx + 2, 27, z0)
+    opening(cx - 2, 25, z1, cx + 2, 27, z1)
+    opening(x0, 25, cz - 2, x0, 27, cz + 2)
+    opening(x1, 25, cz - 2, x1, 27, cz + 2)
+    blk(cx, 27, cz, 'bell[attachment=ceiling,facing=north,powered=false]')
+    # 段々の尖り屋根 (y 29..33) と頂の灯り
+    for i in range(5):
+        y = 29 + i
+        box(x0 + i, y, z0 + i, x1 - i, y, z1 - i, 'deepslate_tiles' if i < 4 else 'deepslate_tile_slab[type=bottom,waterlogged=false]')
+        if 1 <= i < 4:
+            box(x0 + i + 1, y, z0 + i + 1, x1 - i - 1, y, z1 - i - 1, 'air')
+    blk(cx, 34, cz, 'lantern[hanging=false]')
     # 足もとの灯り
     for dx, dz in ((-2, 2), (2, 2), (-2, -2), (2, -2)):
-        lantern_post(-30 + dx * 3, 5, -76 + dz * 3, 2)
+        lantern_post(cx + dx * 3, 5, cz + dz * 3, 2)
 
 
 def storyteller_house():
     # 語り部の家 (鐘楼の東、x -22..-12, z -82..-72)。床 y 4 (段の上)、壁 y 5..8、屋根 y 9
     x0, z0, x1, z1 = -22, -82, -12, -72
-    hollow(x0, 5, z0, x1, 8, z1, 'spruce_planks', roof='spruce_slab[type=bottom,waterlogged=false]', floor_s='spruce_planks', corner='stripped_spruce_log[axis=y]')
+    hollow(x0, 5, z0, x1, 8, z1, 'spruce_planks', roof=None, floor_s='spruce_planks', corner='stripped_spruce_log[axis=y]')
     box(x0 + 1, 9, z0 + 1, x1 - 1, 9, z1 - 1, 'spruce_planks')
+    gable(x0 - 1, x1 + 1, z0 - 1, z1 + 1, 9)
     # 戸 (南)
     opening(-17, 5, z1, -17, 6, z1)
     blk(-17, 5, z1, 'spruce_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
