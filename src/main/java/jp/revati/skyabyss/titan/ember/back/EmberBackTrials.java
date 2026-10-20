@@ -180,7 +180,7 @@ public final class EmberBackTrials {
             }
         }
         if (!gateOpenFor(level, group)) {
-            BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, fireLit(group)).setValue(CampfireBlock.SIGNAL_FIRE, false);
+            BlockState fire = jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.EMBER, fireLit(group));
             for (BlockPos p : HUB_FIRE) {
                 out.accept(p, fire);
             }
@@ -860,7 +860,7 @@ public final class EmberBackTrials {
         if (!(event.getEntity() instanceof ServerPlayer player) || !onBack(player.serverLevel())) {
             return;
         }
-        if (player.serverLevel().getBlockState(event.getPos()).is(Blocks.SOUL_CAMPFIRE)) {
+        if (player.serverLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
                 clearCheckpoint(player);

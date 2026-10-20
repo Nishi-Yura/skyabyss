@@ -226,7 +226,7 @@ public final class TideIslandBuilder {
         }
         // 浜の道具: 炉、焚き火と腰掛け、碑文の石柱 (看板は fixtures)、縁の灯り
         kit.set(-20, 67, 76, ModBlocks.RESONANCE_FORGE.get().defaultBlockState().setValue(ResonanceForgeBlock.FACING, Direction.WEST));
-        kit.set(-44, 67, 80, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(-44, 67, 80, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.TIDE, true));
         kit.stair(-46, 67, 80, Direction.WEST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
         kit.stair(-42, 67, 80, Direction.EAST, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());
         kit.stair(-44, 67, 82, Direction.SOUTH, Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState());

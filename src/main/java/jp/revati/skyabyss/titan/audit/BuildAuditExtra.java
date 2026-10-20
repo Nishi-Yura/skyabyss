@@ -270,7 +270,7 @@ public final class BuildAuditExtra {
             }
         } else if (b instanceof FenceGateBlock) {
             gate(g, p, s, st, out);
-        } else if (b instanceof ChestBlock) {
+        } else if (b instanceof ChestBlock || b instanceof jp.revati.skyabyss.relic.RelicCacheBlock) {
             Direction f = s.getValue(ChestBlock.FACING);
             if (BuildAudit.top(g.get(p.relative(f))) >= 1) {
                 flag(out, st, "ATTACH_FACING", p, "chest faces into a solid block at " + p.relative(f).toShortString());

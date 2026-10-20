@@ -1,0 +1,124 @@
+{
+ "variants": {
+  "facing=north,open=false,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale"
+  },
+  "facing=north,open=true,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale_open"
+  },
+  "facing=east,open=false,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale",
+   "y": 90
+  },
+  "facing=east,open=true,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale_open",
+   "y": 90
+  },
+  "facing=south,open=false,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale",
+   "y": 180
+  },
+  "facing=south,open=true,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale_open",
+   "y": 180
+  },
+  "facing=west,open=false,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale",
+   "y": 270
+  },
+  "facing=west,open=true,titan=whale": {
+   "model": "skyabyss:block/relic_cache_whale_open",
+   "y": 270
+  },
+  "facing=north,open=false,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide"
+  },
+  "facing=north,open=true,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide_open"
+  },
+  "facing=east,open=false,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide",
+   "y": 90
+  },
+  "facing=east,open=true,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide_open",
+   "y": 90
+  },
+  "facing=south,open=false,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide",
+   "y": 180
+  },
+  "facing=south,open=true,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide_open",
+   "y": 180
+  },
+  "facing=west,open=false,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide",
+   "y": 270
+  },
+  "facing=west,open=true,titan=tide": {
+   "model": "skyabyss:block/relic_cache_tide_open",
+   "y": 270
+  },
+  "facing=north,open=false,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm"
+  },
+  "facing=north,open=true,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm_open"
+  },
+  "facing=east,open=false,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm",
+   "y": 90
+  },
+  "facing=east,open=true,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm_open",
+   "y": 90
+  },
+  "facing=south,open=false,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm",
+   "y": 180
+  },
+  "facing=south,open=true,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm_open",
+   "y": 180
+  },
+  "facing=west,open=false,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm",
+   "y": 270
+  },
+  "facing=west,open=true,titan=storm": {
+   "model": "skyabyss:block/relic_cache_storm_open",
+   "y": 270
+  },
+  "facing=north,open=false,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember"
+  },
+  "facing=north,open=true,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember_open"
+  },
+  "facing=east,open=false,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember",
+   "y": 90
+  },
+  "facing=east,open=true,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember_open",
+   "y": 90
+  },
+  "facing=south,open=false,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember",
+   "y": 180
+  },
+  "facing=south,open=true,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember_open",
+   "y": 180
+  },
+  "facing=west,open=false,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember",
+   "y": 270
+  },
+  "facing=west,open=true,titan=ember": {
+   "model": "skyabyss:block/relic_cache_ember_open",
+   "y": 270
+  }
+ }
+}

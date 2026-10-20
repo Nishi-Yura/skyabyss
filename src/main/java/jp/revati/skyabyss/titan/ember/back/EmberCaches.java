@@ -39,7 +39,7 @@ public final class EmberCaches {
         for (Cache c : EmberBackLayout.CACHES) {
             BlockPos p = c.pos();
             kit.set(p.below(), EmberKit.RUIN_CHISELED);
-            kit.set(p, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, c.facing()));
+            kit.set(p, jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.EMBER, c.facing()));
             kit.wallSign(p.above(), c.facing(), "sign.skyabyss.ember_cache_" + c.id(), DyeColor.YELLOW);
         }
     }
@@ -59,7 +59,7 @@ public final class EmberCaches {
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
-        if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
+        if (!event.getLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return;
         }
         Cache c = at(event.getPos());
@@ -80,6 +80,7 @@ public final class EmberCaches {
             return;
         }
         tag.putBoolean(TAG + c.id(), true);
+        jp.revati.skyabyss.relic.RelicCacheBlock.pulse(player.level(), c.pos());
         give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), 3));
         give(player, stackOf(EmberIds.id(EmberIds.EMBER_SHARD), 2));
         give(player, stackOf(EmberIds.id(EmberIds.SPARK_DUST), 2));

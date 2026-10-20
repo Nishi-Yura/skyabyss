@@ -121,7 +121,7 @@ public final class EmberKit {
     // 休み場の焚き火 (青い焚き火 =「冷えた火」。しゃがんで触れると、試練をあきらめて到着点へ戻る)
     public void campfire(BlockPos p) {
         set(p.below(), RUIN_CHISELED);
-        set(p, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        set(p, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.EMBER, true));
         set(p.above(), AIR);
     }
 
@@ -131,7 +131,7 @@ public final class EmberKit {
         if (!get(back.getX(), back.getY(), back.getZ()).isSolid()) {
             set(back, RUIN_CHISELED);
         }
-        set(pos, Tablets.wallState(facing));
+        set(pos, Tablets.wallState(facing).setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.EMBER));
         Tablets.write(level, pos, key);
     }
 
@@ -149,7 +149,7 @@ public final class EmberKit {
                 set(above, Blocks.LANTERN.defaultBlockState());
             }
         }
-        set(pos, Tablets.wallState(facing));
+        set(pos, Tablets.wallState(facing).setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.EMBER));
         Tablets.write(level, pos, key);
     }
 }

@@ -219,19 +219,19 @@ public final class StormKit {
     // 休み場の焚き火 (青い焚き火。しゃがんで触れると、試練をあきらめて尾の間へ戻る)
     public void campfire(BlockPos p) {
         put(p.getX(), p.getY() - 1, p.getZ(), Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
-        put(p.getX(), p.getY(), p.getZ(), Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        put(p.getX(), p.getY(), p.getZ(), jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.STORM, true));
         air(p.getX(), p.getY() + 1, p.getZ());
     }
 
     // 碑 (看板の代わり)。文のキーは lang の "<key>.1"〜"<key>.4"
     public void wallSign(BlockPos pos, Direction facing, String key) {
-        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.wallState(facing));
+        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.wallState(facing).setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.STORM));
         Tablets.write(level, pos, key);
     }
 
     // 立てた碑
     public void standingTablet(BlockPos pos, String key) {
-        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.standingState());
+        put(pos.getX(), pos.getY(), pos.getZ(), Tablets.standingState().setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.STORM));
         Tablets.write(level, pos, key);
     }
 

@@ -177,7 +177,7 @@ public final class TideBackSelfTest {
         }
         for (Rest r : RESTS) {
             check(TitanBackTrials.isSafeStand(back, r.spawn()), "cannot stand at the rest spawn " + r.id() + " " + r.spawn(), failures);
-            check(back.getBlockState(r.campfire()).is(Blocks.SOUL_CAMPFIRE), "rest campfire " + r.id() + " missing", failures);
+            check(back.getBlockState(r.campfire()).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get()), "rest campfire " + r.id() + " missing", failures);
             check(r.area().contains(r.spawn()) || r.id().equals("hub"), "rest spawn " + r.id() + " outside its area", failures);
         }
         check(TitanBackTrials.isSafeStand(back, ARRIVAL), "cannot stand at the arrival", failures);
@@ -193,7 +193,7 @@ public final class TideBackSelfTest {
         check(TideGates.defaultOpen(back, TideGates.mouth().get(0)) && TideGates.defaultOpen(back, TideGates.cave().get(0))
                 && TideGates.defaultOpen(back, jp.revati.skyabyss.titan.tide.heart.TideHeartArena.gate().get(0)), "mouth, cave seal or heart entrance is not open by default", failures);
         check(back.getBlockState(new BlockPos(0, HUB_FLOOR + 1, 0)).isAir(), "hub is not open above the bottom gate", failures);
-        check(back.getBlockState(TideWatch.RESET_LEVER.above()).is(Blocks.LEVER), "reset plug missing", failures);
+        check(back.getBlockState(TideWatch.RESET_LEVER.above()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()), "reset plug missing", failures);
         // 螺旋の階段の段がある
         int stairs = 0;
         for (int y = SPIRAL_BOTTOM; y <= SPIRAL_TOP; y++) {

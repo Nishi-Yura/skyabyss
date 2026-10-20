@@ -35,7 +35,7 @@ public final class FinCaches {
                 || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
-        if (!event.getLevel().getBlockState(event.getPos()).is(Blocks.CHEST)) {
+        if (!event.getLevel().getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get())) {
             return;
         }
         for (int side : new int[]{-1, 1}) {
@@ -59,6 +59,7 @@ public final class FinCaches {
             return;
         }
         tag.putBoolean(TAG + side, true);
+        jp.revati.skyabyss.relic.RelicCacheBlock.pulse(player.level(), WingsBuilder.cachePos(side));
         give(player, new ItemStack(ModItems.GLOW_ANEMONE.get(), 1));
         if (side < 0) {
             give(player, new ItemStack(ModItems.CLOUD_JERKY.get(), 4));

@@ -116,7 +116,7 @@ public final class TideFinsSelfTest {
             boolean found = false;
             for (TideCaches.Cache c : TideCaches.CACHES) {
                 if (c.id().equals(id)) {
-                    found = back.getBlockState(c.chest()).is(Blocks.CHEST);
+                    found = back.getBlockState(c.chest()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get());
                 }
             }
             check(found, "cache chest missing " + id);

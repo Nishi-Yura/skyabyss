@@ -108,7 +108,7 @@ public final class RaijuNest {
         public BlockPos plug(int i) {
             BlockPos b = rodBase(i).above();
             for (Direction d : Direction.Plane.HORIZONTAL) {
-                if (level.getBlockState(b.relative(d)).is(Blocks.LEVER)) {
+                if (level.getBlockState(b.relative(d)).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get())) {
                     return b.relative(d);
                 }
             }
@@ -337,7 +337,7 @@ public final class RaijuNest {
         }
         BlockPos plug = site.plug(i);
         BlockState lever = level.getBlockState(plug);
-        if (lever.is(Blocks.LEVER) && lever.getValue(LeverBlock.POWERED) != grounded) {
+        if (lever.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && lever.getValue(LeverBlock.POWERED) != grounded) {
             level.setBlock(plug, lever.setValue(LeverBlock.POWERED, grounded), 2);
         }
         SHOWN.put(i, grounded);
@@ -372,7 +372,7 @@ public final class RaijuNest {
         if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (!level.getBlockState(event.getPos()).is(Blocks.LEVER) || !isNestLevel(level)) {
+        if (!level.getBlockState(event.getPos()).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) || !isNestLevel(level)) {
             return;
         }
         Site site = site(level.getServer());

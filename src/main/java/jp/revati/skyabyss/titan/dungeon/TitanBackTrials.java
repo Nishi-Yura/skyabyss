@@ -1905,7 +1905,7 @@ public final class TitanBackTrials {
         // 休み場の焚き火: しゃがんで触れると、試練をあきらめて尾の台へ戻る (休み場の記録も消える)
         net.minecraft.world.level.block.state.BlockState clicked = event.getLevel().getBlockState(pos);
         // (煙の出ない魂の火鉢 = 地面の魂のランタン。闇の水路の入口の小部屋 BuildKit.restPoint)
-        if (clicked.is(Blocks.SOUL_CAMPFIRE) || (clicked.is(Blocks.SOUL_LANTERN) && !clicked.getValue(net.minecraft.world.level.block.LanternBlock.HANGING))) {
+        if (clicked.is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get()) || (clicked.is(Blocks.SOUL_LANTERN) && !clicked.getValue(net.minecraft.world.level.block.LanternBlock.HANGING))) {
             event.setCanceled(true);
             if (event.getEntity() instanceof ServerPlayer player) {
                 if (player.isShiftKeyDown()) {

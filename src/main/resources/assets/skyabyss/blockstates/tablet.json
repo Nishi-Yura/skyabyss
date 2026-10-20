@@ -1,34 +1,124 @@
 {
-  "variants": {
-    "facing=north,standing=false": {
-      "model": "skyabyss:block/tablet_wall"
-    },
-    "facing=east,standing=false": {
-      "model": "skyabyss:block/tablet_wall",
-      "y": 90
-    },
-    "facing=south,standing=false": {
-      "model": "skyabyss:block/tablet_wall",
-      "y": 180
-    },
-    "facing=west,standing=false": {
-      "model": "skyabyss:block/tablet_wall",
-      "y": 270
-    },
-    "facing=north,standing=true": {
-      "model": "skyabyss:block/tablet_standing"
-    },
-    "facing=east,standing=true": {
-      "model": "skyabyss:block/tablet_standing",
-      "y": 90
-    },
-    "facing=south,standing=true": {
-      "model": "skyabyss:block/tablet_standing",
-      "y": 180
-    },
-    "facing=west,standing=true": {
-      "model": "skyabyss:block/tablet_standing",
-      "y": 270
-    }
+ "variants": {
+  "facing=north,standing=false,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_wall"
+  },
+  "facing=north,standing=true,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_standing"
+  },
+  "facing=east,standing=false,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_wall",
+   "y": 90
+  },
+  "facing=east,standing=true,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_standing",
+   "y": 90
+  },
+  "facing=south,standing=false,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_wall",
+   "y": 180
+  },
+  "facing=south,standing=true,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_standing",
+   "y": 180
+  },
+  "facing=west,standing=false,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_wall",
+   "y": 270
+  },
+  "facing=west,standing=true,titan=whale": {
+   "model": "skyabyss:block/relic_tablet_whale_standing",
+   "y": 270
+  },
+  "facing=north,standing=false,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_wall"
+  },
+  "facing=north,standing=true,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_standing"
+  },
+  "facing=east,standing=false,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_wall",
+   "y": 90
+  },
+  "facing=east,standing=true,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_standing",
+   "y": 90
+  },
+  "facing=south,standing=false,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_wall",
+   "y": 180
+  },
+  "facing=south,standing=true,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_standing",
+   "y": 180
+  },
+  "facing=west,standing=false,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_wall",
+   "y": 270
+  },
+  "facing=west,standing=true,titan=tide": {
+   "model": "skyabyss:block/relic_tablet_tide_standing",
+   "y": 270
+  },
+  "facing=north,standing=false,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_wall"
+  },
+  "facing=north,standing=true,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_standing"
+  },
+  "facing=east,standing=false,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_wall",
+   "y": 90
+  },
+  "facing=east,standing=true,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_standing",
+   "y": 90
+  },
+  "facing=south,standing=false,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_wall",
+   "y": 180
+  },
+  "facing=south,standing=true,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_standing",
+   "y": 180
+  },
+  "facing=west,standing=false,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_wall",
+   "y": 270
+  },
+  "facing=west,standing=true,titan=storm": {
+   "model": "skyabyss:block/relic_tablet_storm_standing",
+   "y": 270
+  },
+  "facing=north,standing=false,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_wall"
+  },
+  "facing=north,standing=true,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_standing"
+  },
+  "facing=east,standing=false,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_wall",
+   "y": 90
+  },
+  "facing=east,standing=true,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_standing",
+   "y": 90
+  },
+  "facing=south,standing=false,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_wall",
+   "y": 180
+  },
+  "facing=south,standing=true,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_standing",
+   "y": 180
+  },
+  "facing=west,standing=false,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_wall",
+   "y": 270
+  },
+  "facing=west,standing=true,titan=ember": {
+   "model": "skyabyss:block/relic_tablet_ember_standing",
+   "y": 270
   }
+ }
 }

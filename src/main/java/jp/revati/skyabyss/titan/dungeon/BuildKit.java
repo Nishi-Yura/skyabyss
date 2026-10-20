@@ -278,7 +278,7 @@ final class BuildKit {
                         Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 3).setValue(CandleBlock.LIT, true));
             }
         } else {
-            set(c.getX(), box.floorY() + 1, c.getZ(), Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+            set(c.getX(), box.floorY() + 1, c.getZ(), jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         }
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int bx = c.getX() + d.getStepX() * 2;
@@ -400,12 +400,12 @@ final class BuildKit {
 
     // 碑 (看板の代わり)。文のキーは lang の "<key>.1" 〜 "<key>.4"
     void wallSign(BlockPos pos, Direction facing, String key) {
-        set(pos, Tablets.wallState(facing));
+        set(pos, Tablets.wallState(facing).setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.WHALE));
         Tablets.write(level, pos, key);
     }
 
     void standingSign(BlockPos pos, String key) {
-        set(pos, Tablets.standingState());
+        set(pos, Tablets.standingState().setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.WHALE));
         Tablets.write(level, pos, key);
     }
 }

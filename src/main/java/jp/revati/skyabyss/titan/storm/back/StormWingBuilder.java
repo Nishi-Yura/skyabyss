@@ -191,7 +191,7 @@ final class StormWingBuilder {
             kit.put(mid, a.floor(), z, StormKit.COPPER);
         }
         // 奥の壁ぎわの宝箱 (見た目だけ。右クリックで一度だけ小さな贈り物)
-        kit.put(chest.getX(), chest.getY(), chest.getZ(), Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, Direction.SOUTH));
+        kit.put(chest.getX(), chest.getY(), chest.getZ(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.STORM, Direction.SOUTH));
         kit.put(chest.getX() - 1, chest.getY(), chest.getZ(), StormKit.LAMP);
         kit.put(chest.getX() + 1, chest.getY(), chest.getZ(), StormKit.LAMP);
         // 側の壁: 書庫は本棚 (3 段)、炉は銅のコイルの柱
@@ -351,7 +351,7 @@ final class StormWingBuilder {
             int dz = Integer.signum(RAIJU_NEST.getZ() - r.getZ());
             BlockPos lever = r.offset(Math.abs(dx) >= Math.abs(dz) ? dx : 0, 0, Math.abs(dx) >= Math.abs(dz) ? 0 : dz);
             Direction face = Direction.getNearest(lever.getX() - r.getX(), 0, lever.getZ() - r.getZ());
-            kit.put(lever.getX(), lever.getY() + 1, lever.getZ(), Blocks.LEVER.defaultBlockState().setValue(LeverBlock.FACE, AttachFace.FLOOR)
+            kit.put(lever.getX(), lever.getY() + 1, lever.getZ(), jp.revati.skyabyss.relic.RelicBlocks.leverBase(jp.revati.skyabyss.relic.RelicStyle.STORM).setValue(LeverBlock.FACE, AttachFace.FLOOR)
                     .setValue(LeverBlock.FACING, face));
         }
         // 頂の台 (東の石) と、真ん中の昇り風の穴 (雷獣を倒すと立つ)

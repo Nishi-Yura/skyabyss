@@ -896,7 +896,7 @@ public final class TideBackTrials {
             event.setCanceled(true);
             return;
         }
-        if (level.getBlockState(pos).is(Blocks.SOUL_CAMPFIRE)) {
+        if (level.getBlockState(pos).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             event.setCanceled(true);
             if (player.isShiftKeyDown()) {
                 TideGarden.dropOut(level, player, TideRooms.owns(TideRooms.GARDEN, player));

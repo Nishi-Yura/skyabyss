@@ -1,0 +1,157 @@
+# 遺物ブロックの全様式 (自動生成: tools/gen_relic_shots.py)
+world relic_show flat
+size 1280 720
+timeout 600
+render 8
+clouds off
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+hud off
+cmd gamerule doDaylightCycle false
+camera 0.5 -60 0.5 0 0
+waitchunks
+wait 1500
+cmd effect give @p minecraft:night_vision infinite 0 true
+fov 62
+camera 5.0 -58.1 8.2 180 21
+fov 58
+waitchunks
+cmd fill -6 -61 -3 16 -61 8 minecraft:polished_deepslate
+cmd fill -6 -60 -3 16 -54 8 minecraft:air
+cmd setblock 0 -60 3 skyabyss:relic_cache[facing=south,open=false,titan=whale]
+cmd setblock 0 -60 0 skyabyss:relic_cache[facing=south,open=true,titan=whale]
+cmd setblock 3 -60 3 skyabyss:relic_cache[facing=south,open=false,titan=tide]
+cmd setblock 3 -60 0 skyabyss:relic_cache[facing=south,open=true,titan=tide]
+cmd setblock 6 -60 3 skyabyss:relic_cache[facing=south,open=false,titan=storm]
+cmd setblock 6 -60 0 skyabyss:relic_cache[facing=south,open=true,titan=storm]
+cmd setblock 9 -60 3 skyabyss:relic_cache[facing=south,open=false,titan=ember]
+cmd setblock 9 -60 0 skyabyss:relic_cache[facing=south,open=true,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_relic_cache
+camera 5.0 -58.1 18.2 180 21
+fov 58
+waitchunks
+cmd fill -6 -61 7 16 -61 18 minecraft:polished_deepslate
+cmd fill -6 -60 7 16 -54 18 minecraft:air
+cmd setblock 0 -60 13 skyabyss:rest_hearth[lit=true,titan=whale]
+cmd setblock 0 -60 10 skyabyss:rest_hearth[lit=false,titan=whale]
+cmd setblock 3 -60 13 skyabyss:rest_hearth[lit=true,titan=tide]
+cmd setblock 3 -60 10 skyabyss:rest_hearth[lit=false,titan=tide]
+cmd setblock 6 -60 13 skyabyss:rest_hearth[lit=true,titan=storm]
+cmd setblock 6 -60 10 skyabyss:rest_hearth[lit=false,titan=storm]
+cmd setblock 9 -60 13 skyabyss:rest_hearth[lit=true,titan=ember]
+cmd setblock 9 -60 10 skyabyss:rest_hearth[lit=false,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_rest_hearth
+camera 5.0 -58.8 28.4 180 34
+fov 56
+waitchunks
+cmd fill -6 -61 17 16 -61 28 minecraft:polished_deepslate
+cmd fill -6 -60 17 16 -54 28 minecraft:air
+cmd setblock 0 -60 23 skyabyss:relic_lever[face=floor,facing=south,powered=false,titan=whale]
+cmd setblock 0 -60 20 skyabyss:relic_lever[face=floor,facing=south,powered=true,titan=whale]
+cmd setblock 3 -60 23 skyabyss:relic_lever[face=floor,facing=south,powered=false,titan=tide]
+cmd setblock 3 -60 20 skyabyss:relic_lever[face=floor,facing=south,powered=true,titan=tide]
+cmd setblock 6 -60 23 skyabyss:relic_lever[face=floor,facing=south,powered=false,titan=storm]
+cmd setblock 6 -60 20 skyabyss:relic_lever[face=floor,facing=south,powered=true,titan=storm]
+cmd setblock 9 -60 23 skyabyss:relic_lever[face=floor,facing=south,powered=false,titan=ember]
+cmd setblock 9 -60 20 skyabyss:relic_lever[face=floor,facing=south,powered=true,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_relic_lever
+camera 5.0 -58.8 38.4 180 34
+fov 56
+waitchunks
+cmd fill -6 -61 27 16 -61 38 minecraft:polished_deepslate
+cmd fill -6 -60 27 16 -54 38 minecraft:air
+cmd setblock 0 -60 33 skyabyss:relic_button[face=floor,facing=south,powered=false,titan=whale]
+cmd setblock 0 -60 30 skyabyss:relic_button[face=floor,facing=south,powered=true,titan=whale]
+cmd setblock 3 -60 33 skyabyss:relic_button[face=floor,facing=south,powered=false,titan=tide]
+cmd setblock 3 -60 30 skyabyss:relic_button[face=floor,facing=south,powered=true,titan=tide]
+cmd setblock 6 -60 33 skyabyss:relic_button[face=floor,facing=south,powered=false,titan=storm]
+cmd setblock 6 -60 30 skyabyss:relic_button[face=floor,facing=south,powered=true,titan=storm]
+cmd setblock 9 -60 33 skyabyss:relic_button[face=floor,facing=south,powered=false,titan=ember]
+cmd setblock 9 -60 30 skyabyss:relic_button[face=floor,facing=south,powered=true,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_relic_button
+camera 5.0 -58.8 48.4 180 34
+fov 56
+waitchunks
+cmd fill -6 -61 37 16 -61 48 minecraft:polished_deepslate
+cmd fill -6 -60 37 16 -54 48 minecraft:air
+cmd setblock 0 -60 43 skyabyss:relic_plate[powered=false,titan=whale]
+cmd setblock 0 -60 40 skyabyss:relic_plate[powered=true,titan=whale]
+cmd setblock 3 -60 43 skyabyss:relic_plate[powered=false,titan=tide]
+cmd setblock 3 -60 40 skyabyss:relic_plate[powered=true,titan=tide]
+cmd setblock 6 -60 43 skyabyss:relic_plate[powered=false,titan=storm]
+cmd setblock 6 -60 40 skyabyss:relic_plate[powered=true,titan=storm]
+cmd setblock 9 -60 43 skyabyss:relic_plate[powered=false,titan=ember]
+cmd setblock 9 -60 40 skyabyss:relic_plate[powered=true,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_relic_plate
+camera 5.0 -58.1 58.2 180 21
+fov 58
+waitchunks
+cmd fill -6 -61 47 16 -61 58 minecraft:polished_deepslate
+cmd fill -6 -60 47 16 -54 58 minecraft:air
+cmd setblock 0 -60 53 skyabyss:relic_bell[facing=north,ring=false,titan=whale]
+cmd setblock 0 -60 50 skyabyss:relic_bell[facing=north,ring=true,titan=whale]
+cmd setblock 3 -60 53 skyabyss:relic_bell[facing=north,ring=false,titan=tide]
+cmd setblock 3 -60 50 skyabyss:relic_bell[facing=north,ring=true,titan=tide]
+cmd setblock 6 -60 53 skyabyss:relic_bell[facing=north,ring=false,titan=storm]
+cmd setblock 6 -60 50 skyabyss:relic_bell[facing=north,ring=true,titan=storm]
+cmd setblock 9 -60 53 skyabyss:relic_bell[facing=north,ring=false,titan=ember]
+cmd setblock 9 -60 50 skyabyss:relic_bell[facing=north,ring=true,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_relic_bell
+camera 5.0 -58.1 68.2 180 21
+fov 58
+waitchunks
+cmd fill -6 -61 57 16 -61 68 minecraft:polished_deepslate
+cmd fill -6 -60 57 16 -54 68 minecraft:air
+cmd setblock 0 -60 61 minecraft:stone_bricks
+cmd setblock 0 -60 65 skyabyss:tablet[facing=south,standing=true,titan=whale]
+cmd setblock 0 -60 62 skyabyss:tablet[facing=south,standing=false,titan=whale]
+cmd setblock 3 -60 61 minecraft:stone_bricks
+cmd setblock 3 -60 65 skyabyss:tablet[facing=south,standing=true,titan=tide]
+cmd setblock 3 -60 62 skyabyss:tablet[facing=south,standing=false,titan=tide]
+cmd setblock 6 -60 61 minecraft:stone_bricks
+cmd setblock 6 -60 65 skyabyss:tablet[facing=south,standing=true,titan=storm]
+cmd setblock 6 -60 62 skyabyss:tablet[facing=south,standing=false,titan=storm]
+cmd setblock 9 -60 61 minecraft:stone_bricks
+cmd setblock 9 -60 65 skyabyss:tablet[facing=south,standing=true,titan=ember]
+cmd setblock 9 -60 62 skyabyss:tablet[facing=south,standing=false,titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_tablet
+camera 5.0 -58.1 78.2 180 21
+fov 58
+waitchunks
+cmd fill -6 -61 67 16 -61 78 minecraft:polished_deepslate
+cmd fill -6 -60 67 16 -54 78 minecraft:air
+cmd setblock 0 -60 70 skyabyss:trial_seal[titan=whale]
+cmd setblock 0 -60 73 skyabyss:trial_seal[titan=whale]
+cmd setblock 3 -60 70 skyabyss:trial_seal[titan=tide]
+cmd setblock 3 -60 73 skyabyss:trial_seal[titan=tide]
+cmd setblock 6 -60 70 skyabyss:trial_seal[titan=storm]
+cmd setblock 6 -60 73 skyabyss:trial_seal[titan=storm]
+cmd setblock 9 -60 70 skyabyss:trial_seal[titan=ember]
+cmd setblock 9 -60 73 skyabyss:trial_seal[titan=ember]
+wait 30
+chat clear
+wait 5
+shot relic_trial_seal
+quit

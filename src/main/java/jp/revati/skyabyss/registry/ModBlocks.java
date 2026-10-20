@@ -71,6 +71,29 @@ public final class ModBlocks {
     public static final DeferredBlock<jp.revati.skyabyss.trial.TrialSealBlock> TRIAL_SEAL = BLOCKS.register("trial_seal",
             () -> new jp.revati.skyabyss.trial.TrialSealBlock(unbreakable(MapColor.COLOR_BLACK).lightLevel(state -> 4)));
 
+    // ---- 遺物ブロック (見た目だけ巨神ごと: titan = whale / tide / storm / ember。挙動はバニラの箱・焚き火・レバー等と同じ)
+    // 遺物の箱 (宝のキャッシュ)。光る錠。OPEN で蓋が上がる
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RelicCacheBlock> RELIC_CACHE = BLOCKS.register("relic_cache",
+            () -> new jp.revati.skyabyss.relic.RelicCacheBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion().lightLevel(state -> 5)));
+    // 休み火 (休み場所)。灯ると明るい
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RestHearthBlock> REST_HEARTH = BLOCKS.register("rest_hearth",
+            () -> new jp.revati.skyabyss.relic.RestHearthBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion()
+                    .lightLevel(state -> state.getValue(jp.revati.skyabyss.relic.RestHearthBlock.LIT) ? 12 : 2)));
+    // 遺物のレバー・ボタン・感圧板 (入れた/押した/踏んだ間は筋が光る)
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RelicLeverBlock> RELIC_LEVER = BLOCKS.register("relic_lever",
+            () -> new jp.revati.skyabyss.relic.RelicLeverBlock(unbreakable(MapColor.COLOR_GRAY).noCollission()
+                    .lightLevel(state -> state.getValue(net.minecraft.world.level.block.LeverBlock.POWERED) ? 5 : 1)));
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RelicButtonBlock> RELIC_BUTTON = BLOCKS.register("relic_button",
+            () -> new jp.revati.skyabyss.relic.RelicButtonBlock(unbreakable(MapColor.COLOR_GRAY).noCollission()
+                    .lightLevel(state -> state.getValue(net.minecraft.world.level.block.ButtonBlock.POWERED) ? 5 : 1)));
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RelicPlateBlock> RELIC_PLATE = BLOCKS.register("relic_plate",
+            () -> new jp.revati.skyabyss.relic.RelicPlateBlock(unbreakable(MapColor.COLOR_GRAY).noCollission()
+                    .lightLevel(state -> state.getValue(net.minecraft.world.level.block.PressurePlateBlock.POWERED) ? 5 : 1)));
+    // 遺物の鐘。鳴る間は音の輪が光る
+    public static final DeferredBlock<jp.revati.skyabyss.relic.RelicBellBlock> RELIC_BELL = BLOCKS.register("relic_bell",
+            () -> new jp.revati.skyabyss.relic.RelicBellBlock(unbreakable(MapColor.COLOR_GRAY).noOcclusion()
+                    .lightLevel(state -> state.getValue(jp.revati.skyabyss.relic.RelicBellBlock.RING) ? 8 : 2)));
+
     private ModBlocks() {
     }
 

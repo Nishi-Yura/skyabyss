@@ -982,7 +982,7 @@ public final class TitanBackSelfTest {
         if (holes > 0) {
             failures.add("heart arena shell has " + holes + " holes");
         }
-        if (!level.getBlockState(HEART_REST.center()).is(Blocks.SOUL_CAMPFIRE)) {
+        if (!level.getBlockState(HEART_REST.center()).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())) {
             failures.add("heart rest campfire missing");
         }
     }

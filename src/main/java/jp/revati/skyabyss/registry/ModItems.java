@@ -165,6 +165,14 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> TRIAL_TABLET = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_TABLET);
     public static final DeferredItem<BlockItem> TRIAL_SEAL = ITEMS.registerSimpleBlockItem(ModBlocks.TRIAL_SEAL);
 
+    // 遺物ブロック (巨神ごとの様式は設置側が決める。持ち物のは鯨の様式)
+    public static final DeferredItem<BlockItem> RELIC_CACHE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_CACHE);
+    public static final DeferredItem<BlockItem> REST_HEARTH = ITEMS.registerSimpleBlockItem(ModBlocks.REST_HEARTH);
+    public static final DeferredItem<BlockItem> RELIC_LEVER = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_LEVER);
+    public static final DeferredItem<BlockItem> RELIC_BUTTON = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_BUTTON);
+    public static final DeferredItem<BlockItem> RELIC_PLATE = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_PLATE);
+    public static final DeferredItem<BlockItem> RELIC_BELL = ITEMS.registerSimpleBlockItem(ModBlocks.RELIC_BELL);
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.skyabyss"))
             .icon(() -> SKY_KEY_FRAGMENT.get().getDefaultInstance())

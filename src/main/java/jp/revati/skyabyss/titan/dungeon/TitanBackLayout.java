@@ -64,7 +64,7 @@ public final class TitanBackLayout {
     // 24: 影絵の間 W08 (P3。最南の広間 S1 の北の壁の戸から北へ。docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
     // 25: 試遊の声 2 回目 (四体の最大 24 の次): 東の翼の戦いを 4 → 3 (第二の広間 E2 は戦わない射手の回廊に・幅 7)・西の翼の谷の途中の休み場 (島 wa1 wa2 wb1 wc1) をなくした・
     //     鼓動の間 と 試練の階の光る床 (HUB_PAD・D0_PAD)・案内の碑 (WhaleDeck.SIGNS)・歌の祠をなくした・鼓動の間の碑を弧と台座に。docs/design/26 の 8.8
-    public static final int LAYOUT_VERSION = 25;
+    public static final int LAYOUT_VERSION = 26;
 
     // ---------------------------------------------------------------- 地表
     // 尾の付け根の背の広場 (到着) と、背の中ほどの祠。祠の階段は 1 段ごとに 1 下がり、入口の通路の南の端 (z 15) で床に着く

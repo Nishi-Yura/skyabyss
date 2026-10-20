@@ -873,7 +873,7 @@ public final class StormBackSelfTest {
             StormCaches.open(p, side);
             check(once > before && p.getInventory().countItem(jp.revati.skyabyss.registry.ModItems.CLOUD_JERKY.get()) == once && StormCaches.taken(p, side),
                     "extra chest " + side + " should give once", f);
-            check(l.getBlockState(StormExtra.caches().get(side)).is(net.minecraft.world.level.block.Blocks.CHEST), "extra chest " + side + " is not a chest", f);
+            check(l.getBlockState(StormExtra.caches().get(side)).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_CACHE.get()), "extra chest " + side + " is not a chest", f);
         }
         expectGoal(l, p, 0.5, StormExtra.DECK_Y + 1, 23.5, "storm_hall", f);
         p.getPersistentData().remove(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);

@@ -190,7 +190,7 @@ public final class RaijuSelfTest {
                 check(level.getBlockState(rod.above(k)).is(StormBackSetup.ROD_BULB.get()) && level.getBlockState(rod.above(k)).getValue(StormBlocks.RodBulb.LIT),
                         "rod " + i + " bulb " + k + " is not a lit bulb", failures);
             }
-            check(level.getBlockState(site.plug(i)).is(Blocks.LEVER) && !level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED),
+            check(level.getBlockState(site.plug(i)).is(jp.revati.skyabyss.registry.ModBlocks.RELIC_LEVER.get()) && !level.getBlockState(site.plug(i)).getValue(LeverBlock.POWERED),
                     "rod " + i + " has no plug (or it is down)", failures);
             check(level.getBlockState(top.above()).isAir() && level.getBlockState(top.above(3)).isAir(), "no room above rod " + i, failures);
             check(site.inside(site.dropPoint(i)) && level.getBlockState(BlockPos.containing(site.dropPoint(i))).isAir()

@@ -170,19 +170,19 @@ public final class TideKit {
     // 休み場の焚き火 (青い焚き火。しゃがんで触れると、試練をあきらめて浜へ戻る)
     public void campfire(BlockPos p) {
         set(p.below(), Blocks.CHISELED_SANDSTONE.defaultBlockState());
-        set(p, Blocks.SOUL_CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        set(p, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.TIDE, true));
         set(p.above(), AIR);
     }
 
     // 碑 (看板の代わり)。文のキーは lang の "<key>.1"〜"<key>.4"
     public void wallSign(BlockPos pos, Direction facing, String key) {
-        set(pos, Tablets.wallState(facing));
+        set(pos, Tablets.wallState(facing).setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.TIDE));
         Tablets.write(level, pos, key);
     }
 
     // 立てた碑
     public void standingTablet(BlockPos pos, String key) {
-        set(pos, Tablets.standingState());
+        set(pos, Tablets.standingState().setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.TIDE));
         Tablets.write(level, pos, key);
     }
 }

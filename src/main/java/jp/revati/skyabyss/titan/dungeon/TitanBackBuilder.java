@@ -264,8 +264,7 @@ public final class TitanBackBuilder {
         kit.set(-7, py + 1, PLATFORM_Z - 5, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
         kit.set(7, py + 1, PLATFORM_Z - 5, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
         // 魂の焚き火の休み場 (祠の脇): 焚き火と、そのまわりのベンチ
-        kit.set(-7, py + 1, PLATFORM_Z + 6, Blocks.SOUL_CAMPFIRE.defaultBlockState()
-                .setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
+        kit.set(-7, py + 1, PLATFORM_Z + 6, jp.revati.skyabyss.relic.RelicBlocks.hearth(jp.revati.skyabyss.relic.RelicStyle.WHALE, true));
         kit.set(-8, py + 1, PLATFORM_Z + 6, Blocks.DEEPSLATE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
         kit.set(-7, py + 1, PLATFORM_Z + 7, Blocks.DEEPSLATE_BRICK_SLAB.defaultBlockState());
         // 広場の錨石の祠の台は飾り (錨石は左のわき腹の台にある)。案内の看板は置かない (BackWhispers)

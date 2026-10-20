@@ -45,7 +45,8 @@ public class TabletBlock extends BaseEntityBlock {
 
     public TabletBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH).setValue(STANDING, false));
+        registerDefaultState(stateDefinition.any().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH).setValue(STANDING, false)
+                .setValue(jp.revati.skyabyss.relic.RelicStyle.PROP, jp.revati.skyabyss.relic.RelicStyle.WHALE));
     }
 
     @Override
@@ -55,7 +56,7 @@ public class TabletBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HorizontalDirectionalBlock.FACING, STANDING);
+        builder.add(HorizontalDirectionalBlock.FACING, STANDING, jp.revati.skyabyss.relic.RelicStyle.PROP);
     }
 
     @Nullable

@@ -149,7 +149,7 @@ public final class BellTower {
             for (int y = FLOOR + 1; y <= FLOOR + n; y++) {
                 kit.set(p[0], y, p[1], y == FLOOR + n ? kit.pal().trim() : kit.pal().pillarAlong(Direction.Axis.Y));
             }
-            kit.set(bellPos(n), Blocks.BELL.defaultBlockState());
+            kit.set(bellPos(n), jp.revati.skyabyss.relic.RelicBlocks.bell(jp.revati.skyabyss.relic.RelicStyle.WHALE, Direction.NORTH));
             kit.lantern(p[0] + 1, FLOOR + 1, p[1]);
         }
         greatBell(kit);

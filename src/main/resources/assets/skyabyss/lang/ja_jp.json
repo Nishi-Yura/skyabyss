@@ -1374,5 +1374,11 @@
   "sign.skyabyss.deck_hall.4": "戸だけが開く",
   "objective.skyabyss.trial_board": "試練の板を読んで、挑む試練を確かめよう",
   "objective.skyabyss.trial_deck": "階段を上り、試練の階へ向かおう",
-  "objective.skyabyss.trial_door": "光る目印の戸から、引いた試練へ入ろう"
+  "objective.skyabyss.trial_door": "光る目印の戸から、引いた試練へ入ろう",
+  "block.skyabyss.relic_cache": "遺物の箱",
+  "block.skyabyss.rest_hearth": "休み火",
+  "block.skyabyss.relic_lever": "遺物のレバー",
+  "block.skyabyss.relic_button": "遺物のボタン",
+  "block.skyabyss.relic_plate": "遺物の感圧板",
+  "block.skyabyss.relic_bell": "遺物の鐘"
 }

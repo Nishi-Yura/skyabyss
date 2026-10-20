@@ -618,7 +618,7 @@ final class StormExtraBuilder {
     }
 
     private static void chest(StormKit kit, BlockPos c, Direction facing) {
-        kit.put(c.getX(), c.getY(), c.getZ(), Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, facing));
+        kit.put(c.getX(), c.getY(), c.getZ(), jp.revati.skyabyss.relic.RelicBlocks.cache(jp.revati.skyabyss.relic.RelicStyle.STORM, facing));
         kit.put(c.getX(), c.getY() - 1, c.getZ(), StormKit.COPPER);
         kit.put(c.getX(), c.getY(), c.getZ() - 1, StormKit.LAMP);
         kit.put(c.getX(), c.getY(), c.getZ() + 1, StormKit.LAMP);
@@ -884,8 +884,7 @@ final class StormExtraBuilder {
                 kit.put(-13 + dx, GARDEN_Y + 4, 143 + dz, StormKit.COPPER);
             }
         }
-        kit.put(BELL.getX(), BELL.getY(), BELL.getZ(), Blocks.BELL.defaultBlockState().setValue(net.minecraft.world.level.block.BellBlock.FACING, Direction.WEST)
-                .setValue(net.minecraft.world.level.block.BellBlock.ATTACHMENT, net.minecraft.world.level.block.state.properties.BellAttachType.FLOOR));
+        kit.put(BELL.getX(), BELL.getY(), BELL.getZ(), jp.revati.skyabyss.relic.RelicBlocks.bell(jp.revati.skyabyss.relic.RelicStyle.STORM, Direction.WEST));
         // 吹き流し (庭の北の端に細い柱と、風上の側を指す羽の旗)
         for (int y = GARDEN_Y + 1; y <= GARDEN_Y + 9; y++) {
             kit.put(-28, y, 127, y == GARDEN_Y + 9 ? StormKit.LAMP : StormKit.COPPER_BLOCK);

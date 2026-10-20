@@ -1,0 +1,28 @@
+{
+ "variants": {
+  "lit=false,titan=whale": {
+   "model": "skyabyss:block/rest_hearth_whale_cold"
+  },
+  "lit=true,titan=whale": {
+   "model": "skyabyss:block/rest_hearth_whale_lit"
+  },
+  "lit=false,titan=tide": {
+   "model": "skyabyss:block/rest_hearth_tide_cold"
+  },
+  "lit=true,titan=tide": {
+   "model": "skyabyss:block/rest_hearth_tide_lit"
+  },
+  "lit=false,titan=storm": {
+   "model": "skyabyss:block/rest_hearth_storm_cold"
+  },
+  "lit=true,titan=storm": {
+   "model": "skyabyss:block/rest_hearth_storm_lit"
+  },
+  "lit=false,titan=ember": {
+   "model": "skyabyss:block/rest_hearth_ember_cold"
+  },
+  "lit=true,titan=ember": {
+   "model": "skyabyss:block/rest_hearth_ember_lit"
+  }
+ }
+}

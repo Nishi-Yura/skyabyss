@@ -1,0 +1,28 @@
+{
+ "variants": {
+  "powered=false,titan=whale": {
+   "model": "skyabyss:block/relic_plate_whale_up"
+  },
+  "powered=true,titan=whale": {
+   "model": "skyabyss:block/relic_plate_whale_pressed"
+  },
+  "powered=false,titan=tide": {
+   "model": "skyabyss:block/relic_plate_tide_up"
+  },
+  "powered=true,titan=tide": {
+   "model": "skyabyss:block/relic_plate_tide_pressed"
+  },
+  "powered=false,titan=storm": {
+   "model": "skyabyss:block/relic_plate_storm_up"
+  },
+  "powered=true,titan=storm": {
+   "model": "skyabyss:block/relic_plate_storm_pressed"
+  },
+  "powered=false,titan=ember": {
+   "model": "skyabyss:block/relic_plate_ember_up"
+  },
+  "powered=true,titan=ember": {
+   "model": "skyabyss:block/relic_plate_ember_pressed"
+  }
+ }
+}
