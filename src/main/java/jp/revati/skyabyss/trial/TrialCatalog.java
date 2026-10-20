@@ -75,6 +75,26 @@ public final class TrialCatalog {
     public static final List<String> T10_HAZARDS = List.of("crash");
     public static final List<String> T10_GOALS = List.of("no_wet");
 
+    // P3: 岩鯨 W08・潮殻 T03・T04・T08・T11・T12 (docs/design/29 の 3.7)
+    public static final List<String> W08_NUMBERS = List.of("pieces", "beams");
+    public static final List<String> W08_HAZARDS = List.of("draft");
+    public static final List<String> W08_GOALS = List.of("few_moves");
+    public static final List<String> T03_NUMBERS = List.of("jelly_sink", "sweep");
+    public static final List<String> T03_HAZARDS = List.of("minnows");
+    public static final List<String> T03_GOALS = List.of("no_dunk");
+    public static final List<String> T04_NUMBERS = List.of("current", "turn");
+    public static final List<String> T04_HAZARDS = List.of("eddies");
+    public static final List<String> T04_GOALS = List.of("no_wash");
+    public static final List<String> T08_NUMBERS = List.of("specimens", "plaque");
+    public static final List<String> T08_HAZARDS = List.of("tideswap");
+    public static final List<String> T08_GOALS = List.of("no_return");
+    public static final List<String> T11_NUMBERS = List.of("clam_raids", "flood");
+    public static final List<String> T11_HAZARDS = List.of("crash");
+    public static final List<String> T11_GOALS = List.of("no_chip");
+    public static final List<String> T12_NUMBERS = List.of("brood", "keeper_hp");
+    public static final List<String> T12_HAZARDS = List.of("crash");
+    public static final List<String> T12_GOALS = List.of("no_crack");
+
     // 余燼の新作の修飾の口の名前
     public static final List<String> E02_NUMBERS = List.of("vent_period", "vent_warn");
     public static final List<String> E02_HAZARDS = List.of("gust", "moths");
@@ -107,6 +127,8 @@ public final class TrialCatalog {
                 new Space(3, W06_NUMBERS, 0, List.of(), W06_GOALS, List.of())));
         add(new Def("W07", whale, Slot.WIT, Kind.TOGETHER, 2, false, false,
                 new Space(3, W07_NUMBERS, 0, W07_HAZARDS, W07_GOALS, List.of())));
+        add(new Def("W08", whale, Slot.WIT, Kind.SOLVE, 3, false, false,
+                new Space(3, W08_NUMBERS, 0, W08_HAZARDS, W08_GOALS, List.of())));
         add(new Def("W09", whale, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("W10", whale, Slot.FIGHT, Kind.FIGHT, 2, false, false,
                 new Space(3, W10_NUMBERS, 2, W10_HAZARDS, W10_GOALS, List.of())));
@@ -118,14 +140,24 @@ public final class TrialCatalog {
         add(new Def("T01", tide, Slot.WALK, Kind.CARRY, 1, true, true, Space.EMPTY));
         add(new Def("T02", tide, Slot.WALK, Kind.BEAT, 2, true, false,
                 new Space(3, T02_NUMBERS, 0, T02_HAZARDS, T02_GOALS, List.of())));
+        add(new Def("T03", tide, Slot.WALK, Kind.CROSS, 2, false, false,
+                new Space(3, T03_NUMBERS, 0, T03_HAZARDS, T03_GOALS, List.of())));
+        add(new Def("T04", tide, Slot.WALK, Kind.BEAT, 3, false, false,
+                new Space(3, T04_NUMBERS, 0, T04_HAZARDS, T04_GOALS, List.of())));
         add(new Def("T05", tide, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));
         add(new Def("T06", tide, Slot.WIT, Kind.SOLVE, 1, false, false,
                 new Space(1, T06_NUMBERS, 0, T06_HAZARDS, T06_GOALS, List.of())));
         add(new Def("T07", tide, Slot.WIT, Kind.TOGETHER, 2, false, false,
                 new Space(3, T07_NUMBERS, 0, T07_HAZARDS, T07_GOALS, List.of())));
+        add(new Def("T08", tide, Slot.WIT, Kind.SOLVE, 3, false, false,
+                new Space(3, T08_NUMBERS, 0, T08_HAZARDS, T08_GOALS, List.of())));
         add(new Def("T09", tide, Slot.FIGHT, Kind.FIGHT, 1, false, true, Space.EMPTY));
         add(new Def("T10", tide, Slot.FIGHT, Kind.FIGHT, 2, true, false,
                 new Space(3, T10_NUMBERS, 2, T10_HAZARDS, T10_GOALS, List.of())));
+        add(new Def("T11", tide, Slot.FIGHT, Kind.ESCORT, 2, false, false,
+                new Space(3, T11_NUMBERS, 2, T11_HAZARDS, T11_GOALS, List.of())));
+        add(new Def("T12", tide, Slot.FIGHT, Kind.FIGHT, 3, false, false,
+                new Space(3, T12_NUMBERS, 2, T12_HAZARDS, T12_GOALS, List.of())));
         // ---- 雷翼 (西 S01 歩 / 東 S05 智 / 前 S06 智。闘の枠は初回は無い)
         add(new Def("S01", storm, Slot.WALK, Kind.CROSS, 1, true, true, Space.EMPTY));
         add(new Def("S05", storm, Slot.WIT, Kind.SOLVE, 1, true, true, Space.EMPTY));

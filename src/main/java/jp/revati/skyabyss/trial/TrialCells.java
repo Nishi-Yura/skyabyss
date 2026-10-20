@@ -16,6 +16,11 @@ import jp.revati.skyabyss.trial.storm.S03Pillars;
 import jp.revati.skyabyss.trial.storm.S09Nest;
 import jp.revati.skyabyss.trial.storm.S10Watch;
 import jp.revati.skyabyss.trial.tide.T02Crossing;
+import jp.revati.skyabyss.trial.tide.T03Jellies;
+import jp.revati.skyabyss.trial.tide.T04Whirl;
+import jp.revati.skyabyss.trial.tide.T08Shelf;
+import jp.revati.skyabyss.trial.tide.T11Clam;
+import jp.revati.skyabyss.trial.tide.T12Keeper;
 import jp.revati.skyabyss.trial.tide.T06Choir;
 import jp.revati.skyabyss.trial.tide.T07Seas;
 import jp.revati.skyabyss.trial.tide.T10Ring;
@@ -26,6 +31,7 @@ import jp.revati.skyabyss.trial.whale.W11Coffin;
 import jp.revati.skyabyss.trial.whale.W12Arena;
 import jp.revati.skyabyss.trial.whale.W06Score;
 import jp.revati.skyabyss.trial.whale.W07Gates;
+import jp.revati.skyabyss.trial.whale.W08Shadows;
 import jp.revati.skyabyss.trial.whale.W10Fort;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
@@ -78,6 +84,13 @@ public final class TrialCells {
         register(new T06Choir());
         register(new T07Seas());
         register(new T10Ring());
+        // P3 (29 の 3.7): 岩鯨 W08・潮殻 T03・T04・T08・T11・T12
+        register(new W08Shadows());
+        register(new T03Jellies());
+        register(new T04Whirl());
+        register(new T08Shelf());
+        register(new T11Clam());
+        register(new T12Keeper());
         for (Def d : TrialCatalog.all()) {
             if (!CELLS.containsKey(d.id())) {
                 throw new IllegalStateException("trial " + d.id() + " has no cell");

@@ -13,6 +13,7 @@ import jp.revati.skyabyss.trial.whale.W07Gates;
 import jp.revati.skyabyss.trial.whale.W10Fort;
 import jp.revati.skyabyss.trial.whale.W11Coffin;
 import jp.revati.skyabyss.trial.whale.W12Arena;
+import jp.revati.skyabyss.trial.whale.W08Shadows;
 import java.util.List;
 
 import net.minecraft.core.BlockPos;
@@ -71,10 +72,10 @@ final class WhaleDeckBuilder {
         kit.set(W06_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         kit.set(W07_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         kit.set(W10_STONE, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
-        for (BlockPos stone : new BlockPos[] {W03_STONE, W04_STONE, W11_STONE, W12_STONE}) {
+        for (BlockPos stone : new BlockPos[] {W03_STONE, W04_STONE, W11_STONE, W12_STONE, W08_STONE}) {
             kit.set(stone, ModBlocks.RESONANCE_STONE.get().defaultBlockState());
         }
-        for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD}) {
+        for (BlockPos pad : new BlockPos[] {W02_PAD, W06_PAD, W07_PAD, W10_PAD, W03_PAD, W04_PAD, W11_PAD, W12_PAD, W08_PAD}) {
             kit.set(pad, PAD);
         }
         // 試練の板 (鼓動の間の南の壁ぎわ・試練の階の広間の北の壁ぎわ)
@@ -268,6 +269,7 @@ final class WhaleDeckBuilder {
         kit.doorway(-22, -18, 127, 128, Y, 5);
         kit.doorway(0, 4, 127, 128, Y, 5);
         kit.doorway(22, 26, 127, 128, Y, 5);
+        buildW08(kit);
         buildW03(kit);
         buildW04(kit);
         buildW11(kit);
@@ -495,5 +497,46 @@ final class WhaleDeckBuilder {
             double a = k * Math.PI / 4;
             kit.set(cx + (int) Math.round(Math.cos(a) * 8), Y - 7, cz + (int) Math.round(Math.sin(a) * 8), SEA_LANTERN);
         }
+    }
+
+    // ---------------------------------------------------------------- W08 影絵の間 (S1 の北の壁の戸から北へ)
+    private static void buildW08(BuildKit kit) {
+        kit.room(W08);
+        kit.room(W08_STONE_ROOM);
+        // 戸口: S1 の北の壁 (z 116・117)・東の壁 (x -31・-30。石の小部屋へ)
+        kit.doorway(-42, -38, 116, 117, Y, 5);
+        kit.doorway(-31, -30, 104, 108, Y, 5);
+        // 幕の壁 (北、z 97) と台 (灯の台 x -37〜-33・柱の台 x -47〜-43、段 y Y+1〜Y+3): 磨いた黒石。幕の行は見かけで描く
+        BlockState socket = Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+        for (int i = 0; i < W08Shadows.MAX_PIECES; i++) {
+            for (int k = 0; k < W08Shadows.SLOTS; k++) {
+                kit.set(W08Shadows.lampSocket(i, k), socket);
+                kit.set(W08Shadows.pillarSocket(i, k), socket);
+            }
+        }
+        for (int c = 0; c < W08Shadows.CELLS; c++) {
+            for (int y : new int[] {W08Shadows.ROW_TARGET, W08Shadows.ROW_TARGET + 1, W08Shadows.ROW_MATCH, W08Shadows.ROW_LIVE, W08Shadows.ROW_LIVE + 1}) {
+                kit.set(W08Shadows.SCREEN_X0 + c, y, W08Shadows.SCREEN_Z, Blocks.SMOOTH_STONE.defaultBlockState());
+            }
+        }
+        // 灯の列 (奥) と柱の列 (まんなか) の床の筋
+        for (int k = 0; k < W08Shadows.SLOTS; k++) {
+            kit.set(W08Shadows.LAMP_X0 + k, Y, W08Shadows.LAMP_Z, Blocks.COPPER_BLOCK.defaultBlockState());
+        }
+        for (int k = 0; k <= W08Shadows.SLOTS; k++) {
+            kit.set(W08Shadows.PILLAR_X0 + k, Y, W08Shadows.PILLAR_Z, Blocks.COPPER_BLOCK.defaultBlockState());
+            kit.set(W08Shadows.PILLAR_X0 + k, Y, W08Shadows.PILLAR_Z - 1, Blocks.COPPER_BLOCK.defaultBlockState());
+        }
+        kit.wallLamps(W08, 4, Y + 4);
+        kit.wallLamps(W08_STONE_ROOM, 3, Y + 3);
+        kit.ribs(W08, 5, false);
+        kit.ribs(W08_STONE_ROOM, 3, true);
+        for (int[] at : new int[][] {{-46, 100}, {-34, 100}, {-46, 107}, {-34, 107}, {-46, 113}, {-34, 113}, {-40, 100}, {-40, 107}, {-40, 114}}) {
+            lampIn(kit, at[0], Y, at[1]);
+        }
+        for (int[] at : new int[][] {{-44, 101}, {-36, 101}, {-44, 107}, {-36, 107}, {-40, 112}}) {
+            kit.hangingLantern(at[0], at[1], W08.ceilingY(), 3);
+        }
+        deckRest(kit, REST_W08);
     }
 }

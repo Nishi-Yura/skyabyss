@@ -122,6 +122,14 @@ public class PearlKeeper extends TideMob {
     private List<ServerPlayer> devFighters;
     private int partyOverride;
     private boolean holdAttacks;
+    // 試練 (T12 真珠守りの試し) で使うとき: 舞台の円 (中心と半径。NaN = 息の間の頂)・使える技 (null = 全部)・倒れたときの知らせ
+    private double arenaCx = Double.NaN;
+    private double arenaCz;
+    private double arenaR;
+    @Nullable
+    private java.util.Set<Action> allowed;
+    @Nullable
+    private java.util.function.Consumer<PearlKeeper> defeatHook;
 
     public PearlKeeper(EntityType<? extends Monster> type, Level level) {
         super(type, level, "pearl_keeper", "updraft", "downdraft", "charge", "volley", "shell_in", "shell_out", "emerge");
@@ -189,6 +197,41 @@ public class PearlKeeper extends TideMob {
 
     public void setPartyOverride(int count) {
         partyOverride = count;
+    }
+
+    // 試練の舞台: 円の中心と半径 (突進の行き先・吹き上げの散らばりをこの円の中に収める)。名前は技の名前 (UPDRAFT・DOWNDRAFT・CHARGE・VOLLEY)。null = 全部使える
+    public void setTrialArena(double cx, double cz, double radius) {
+        arenaCx = cx;
+        arenaCz = cz;
+        arenaR = radius;
+    }
+
+    public void setAllowedActions(@Nullable java.util.Collection<String> names) {
+        if (names == null) {
+            allowed = null;
+            return;
+        }
+        java.util.Set<Action> set = java.util.EnumSet.noneOf(Action.class);
+        for (String n : names) {
+            set.add(Action.valueOf(n.toUpperCase(java.util.Locale.ROOT)));
+        }
+        allowed = set;
+    }
+
+    public void setDefeatHook(@Nullable java.util.function.Consumer<PearlKeeper> hook) {
+        defeatHook = hook;
+    }
+
+    private boolean may(Action a) {
+        return allowed == null || allowed.contains(a);
+    }
+
+    private double arenaX() {
+        return Double.isNaN(arenaCx) ? BreathLayout.WX : arenaCx;
+    }
+
+    private double arenaZ() {
+        return Double.isNaN(arenaCx) ? BreathLayout.WZ : arenaCz;
     }
 
     public boolean idle() {
@@ -292,13 +335,13 @@ public class PearlKeeper extends TideMob {
             return;
         }
         double dist = Math.sqrt(distanceToSqr(target));
-        if (chargeCooldown <= 0 && dist > 3.0) {
+        if (chargeCooldown <= 0 && dist > 3.0 && may(Action.CHARGE)) {
             start(server, Action.CHARGE);
-        } else if (updraftCooldown <= 0) {
+        } else if (updraftCooldown <= 0 && may(Action.UPDRAFT)) {
             start(server, Action.UPDRAFT);
-        } else if (downdraftCooldown <= 0) {
+        } else if (downdraftCooldown <= 0 && may(Action.DOWNDRAFT)) {
             start(server, Action.DOWNDRAFT);
-        } else if (volleyCooldown <= 0) {
+        } else if (volleyCooldown <= 0 && may(Action.VOLLEY)) {
             start(server, Action.VOLLEY);
         } else if (dist > 4.0) {
             getNavigation().moveTo(target, 1.0);
@@ -446,9 +489,9 @@ public class PearlKeeper extends TideMob {
             } else {
                 double a = random.nextDouble() * Math.PI * 2;
                 double r = 1.5 + random.nextDouble() * 3.5;
-                cx = BreathLayout.WX + Math.cos(a) * r;
-                cz = BreathLayout.WZ + Math.sin(a) * r;
-                if (devFighters != null || partyOverride > 0) {
+                cx = arenaX() + Math.cos(a) * r;
+                cz = arenaZ() + Math.sin(a) * r;
+                if (Double.isNaN(arenaCx) && (devFighters != null || partyOverride > 0)) {
                     cx = getX() + Math.cos(a) * (3 + r);
                     cz = getZ() + Math.sin(a) * (3 + r);
                 }
@@ -513,15 +556,15 @@ public class PearlKeeper extends TideMob {
     }
 
     // 舞台の円の中へ (中心から 5 まで)
-    private static Vec3 clampToArena(Vec3 p) {
-        double dx = p.x - BreathLayout.WX;
-        double dz = p.z - BreathLayout.WZ;
+    private Vec3 clampToArena(Vec3 p) {
+        double dx = p.x - arenaX();
+        double dz = p.z - arenaZ();
         double d = Math.hypot(dx, dz);
-        double max = BreathLayout.ARENA_R - 1.0;
+        double max = (Double.isNaN(arenaCx) ? BreathLayout.ARENA_R : arenaR) - 1.0;
         if (d <= max || d < 1e-6) {
             return p;
         }
-        return new Vec3(BreathLayout.WX + dx / d * max, p.y, BreathLayout.WZ + dz / d * max);
+        return new Vec3(arenaX() + dx / d * max, p.y, arenaZ() + dz / d * max);
     }
 
     private void tickCharge(ServerLevel server) {
@@ -667,7 +710,9 @@ public class PearlKeeper extends TideMob {
         bossBar.removeAllPlayers();
         playSound(TideBackSetup.BECKONER_DEATH.get(), 4f, 1.2f);
         setMode(MODE_NORMAL);
-        if (level() instanceof ServerLevel server) {
+        if (defeatHook != null) {
+            defeatHook.accept(this);
+        } else if (level() instanceof ServerLevel server) {
             BreathSummit.onKeeperDefeated(server, this);
         }
     }

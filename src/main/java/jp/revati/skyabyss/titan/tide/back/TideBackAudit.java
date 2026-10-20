@@ -56,7 +56,8 @@ public final class TideBackAudit {
         if (TideDeck.placed()) {
             // 試練の階 (TideDeck): 足場の戸 (砂州・浮き石・円環の床・橋。y = 床のブロック) は、三つの配置すべてを閉じた足場として歩く
             // (配置ごとの道は、セルの audit が調べる)。戸口の戸 (y が床より上) は開いているものとして通る
-            s.solidGate = p -> p.getY() == TideDeck.F && p.getX() >= 0 && p.getX() <= 100 && p.getZ() >= 45 && p.getZ() <= 95;
+            s.solidGate = p -> p.getY() == TideDeck.F && p.getX() >= 0 && p.getX() <= 100 && p.getZ() >= 45 && p.getZ() <= 95
+                    || p.getY() == TideDeck.G && p.getX() >= 0 && p.getX() <= 20 && p.getZ() >= 75 && p.getZ() <= 108;
             s.goals.put("deck hall", new BlockPos(40, TideDeck.F + 1, 42));
             s.goals.put("deck T02 islet", new BlockPos(12, TideDeck.F + 1, 70));
             s.goals.put("deck T02 far shore", new BlockPos(12, TideDeck.F + 1, 90));
@@ -65,6 +66,19 @@ public final class TideBackAudit {
             s.goals.put("deck T10 stone", TideDeck.T10_STONE.east());
             s.goals.put("deck T06 stone", TideDeck.T06_STONE.east());
             s.goals.put("deck T07 stone", TideDeck.T07_STONE.east());
+            // 下の階 (P3): 階段の下の広間・各セルの石 (水路・傘の戸は開いているものとして通る)
+            s.goals.put("deck2 hall", new BlockPos(40, TideDeck.G + 1, 68));
+            s.goals.put("deck2 hall far", new BlockPos(86, TideDeck.G + 1, 68));
+            s.goals.put("deck2 T03 islet", new BlockPos(8, TideDeck.G + 1, 92));
+            s.goals.put("deck2 T03 stone", TideDeck.T03_STONE.east());
+            s.goals.put("deck2 T04 shore", new BlockPos(26, TideDeck.G + 1, 113));
+            s.goals.put("deck2 T04 stone", TideDeck.T04_STONE.east());
+            s.goals.put("deck2 T11 altar", new BlockPos(44, TideDeck.G + 1, 105));
+            s.goals.put("deck2 T11 stone", TideDeck.T11_STONE.east());
+            s.goals.put("deck2 T08 bowls", new BlockPos(62, TideDeck.G + 1, 84));
+            s.goals.put("deck2 T08 stone", TideDeck.T08_STONE.east());
+            s.goals.put("deck2 T12 arena", new BlockPos(85, TideDeck.G + 1, 80));
+            s.goals.put("deck2 T12 stone", TideDeck.T12_STONE.east());
         }
         return s;
     }
