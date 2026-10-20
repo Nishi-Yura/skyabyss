@@ -7,7 +7,7 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent / "shots/relic_blocks.txt"
 Y = -60
 TITANS = ["whale", "tide", "storm", "ember"]
-X0, STEP = 100, 3
+X0, STEP = 0, 3
 # 種類: (名前, 手前の行の状態, 奥の行の状態, 向きのプロパティ)
 ROWS = [
     ("relic_cache", "facing=south,open=false", "facing=south,open=true"),
@@ -23,11 +23,17 @@ ROWS = [
 
 def main():
     L = ["# 遺物ブロックの全様式 (自動生成: tools/gen_relic_shots.py)", "world relic_show flat", "size 1280 720", "timeout 600", "render 8", "clouds off",
-         "cmd time set 13200", "cmd weather clear", "cmd gamemode spectator", "hud off", "cmd gamerule doDaylightCycle false"]
-    # 床
-    L.append(f"cmd fill {X0 - 8} {Y - 1} -4 {X0 + 20} {Y - 1} {len(ROWS) * 10 + 4} minecraft:polished_deepslate")
+         "cmd time set noon", "cmd weather clear", "cmd gamemode spectator", "hud off", "cmd gamerule doDaylightCycle false", "camera 0.5 -60 0.5 0 0", "waitchunks", "wait 1500", "cmd effect give @p minecraft:night_vision infinite 0 true", "fov 62"]
     for i, (name, a, b) in enumerate(ROWS):
         z = i * 10
+        cx = X0 + 1.5 * STEP + 0.5
+        # 先にそこへ行って読み込ませてから置く
+        small = name in ("relic_lever", "relic_button", "relic_plate")
+        L.append(f"camera {cx} {Y + (1.2 if small else 1.9)} {z + (8.4 if small else 8.2)} 180 {34 if small else 21}")
+        L.append("fov 56" if small else "fov 58")
+        L.append("waitchunks")
+        L.append(f"cmd fill {X0 - 6} {Y - 1} {z - 3} {X0 + 16} {Y - 1} {z + 8} minecraft:polished_deepslate")
+        L.append(f"cmd fill {X0 - 6} {Y} {z - 3} {X0 + 16} {Y + 6} {z + 8} minecraft:air")
         for j, t in enumerate(TITANS):
             x = X0 + j * STEP
             sa = (a + "," if a else "") + f"titan={t}"
@@ -35,21 +41,16 @@ def main():
             if name == "trial_seal":
                 L.append(f"cmd setblock {x} {Y} {z} skyabyss:{name}[titan={t}]")
                 L.append(f"cmd setblock {x} {Y} {z + 3} skyabyss:{name}[titan={t}]")
-                continue
-            if name == "tablet":
-                L.append(f"cmd setblock {x} {Y} {z + 3} minecraft:stone_bricks")
-                L.append(f"cmd setblock {x} {Y} {z + 4} minecraft:stone_bricks")
-                L.append(f"cmd setblock {x} {Y} {z} skyabyss:{name}[{sa}]")
-                L.append(f"cmd setblock {x} {Y} {z + 4} skyabyss:{name}[{sb}]")
-                continue
-            L.append(f"cmd setblock {x} {Y} {z} skyabyss:{name}[{sa}]")
-            L.append(f"cmd setblock {x} {Y} {z + 3} skyabyss:{name}[{sb}]")
-    for i, (name, a, b) in enumerate(ROWS):
-        z = i * 10
-        cx = X0 + 1.5 * STEP + 0.5
-        L.append(f"camera {cx} {Y + 3.6} {z + 8.5} 180 30")
-        L.append("waitchunks")
-        L.append("wait 20")
+            elif name == "tablet":
+                L.append(f"cmd setblock {x} {Y} {z + 1} minecraft:stone_bricks")
+                L.append(f"cmd setblock {x} {Y} {z + 5} skyabyss:{name}[{sa}]")
+                L.append(f"cmd setblock {x} {Y} {z + 2} skyabyss:{name}[{sb}]")
+            else:
+                L.append(f"cmd setblock {x} {Y} {z + 3} skyabyss:{name}[{sa}]")
+                L.append(f"cmd setblock {x} {Y} {z} skyabyss:{name}[{sb}]")
+        L.append("wait 30")
+        L.append("chat clear")
+        L.append("wait 5")
         L.append(f"shot relic_{name}")
     L.append("quit")
     OUT.write_text("\n".join(L) + "\n", encoding="utf-8")
