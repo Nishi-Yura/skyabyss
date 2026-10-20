@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.combat.RoomPlay;
 import jp.revati.skyabyss.entity.ElderSentinel;
 import jp.revati.skyabyss.entity.StoneWhaleHeart;
 import jp.revati.skyabyss.entity.WhaleboneCaptain;
@@ -246,7 +247,7 @@ public final class TitanBackTrials {
     // 第一の広間は、近接の波 (番兵が前に立ち、苔這いが回り込む) → 射手の波 (番兵の盾の後ろから射手 3 体が撃つ。奥の壁ぎわで骨の砲手が
     // 足もとへ骨の塊を落とす) → 老番兵の波 (名づきの小さな中ボス。号令の骨笛で射手を呼ぶ)。
     // 番兵長の広間の第一波で両方が混ざる。(配置の版 2 で第二の広間を除き、その射手の波を第一の広間へ移した)
-    // 動かせる仕切りは、いまは使わない (ユーザーの判断待ち。設計書 26 の 8.7 の案 A〜C)。入れるなら、各広間の NO_CUTS を
+    // 動かせる仕切りは、使わない (設計書 26 の 8.7 は B: 同じ広間で湧きを入口側へ寄せ、罠と柱で使わせる。RoomPlay)。入れるなら、各広間の NO_CUTS を
     // List.of(new Cut(最大人数, VEIL_E1, 封じる側の判定), ...) に替え、VEIL_* を OPEN_GATES に足す (仕組みは applyVeil・spawnWave・resetHall が持っている)
     private static final List<Cut> NO_CUTS = List.of();
 
@@ -789,6 +790,9 @@ public final class TitanBackTrials {
                 spawns = near;
             }
         }
+        // 設計書 26 の 8.7 の B: 広間の大きさは同じ。一人・二人は、湧き場所を入口側に寄せる (広間いっぱいは 4 人から)
+        BlockPos entrance = RoomPlayRooms.entranceOf(hall.id());
+        spawns = RoomPlay.spawnNear(spawns, entrance, state.players);
         List<String> wave = new ArrayList<>(hall.waves().get(state.wave - 1));
         // 人数が多いほど番兵も増える (1人増えるごとに2体。番兵長の波では骨の番兵が増える。最大 6 人分)。
         // 老番兵の波は骨の番兵が増える (老番兵は体力が増える)。骨の砲手は 4 人から 2 体
@@ -813,11 +817,12 @@ public final class TitanBackTrials {
             String kind = wave.get(i);
             BlockPos at;
             if (kind.equals("captain") || kind.equals("elder")) {
-                at = hall.box().center();
+                at = bossSpot(level, hall, entrance, state.players);
             } else if (kind.equals("mortar")) {
-                // 骨の砲手は奥の壁ぎわ (広間の出口側の二つの角) から撃つ
+                // 骨の砲手は奥の壁ぎわ (広間の出口側の二つの角) から撃つ。少人数は入口側の湧き場所から、広間の内へ 2 マス
                 int m = mortars++ % 2;
-                at = spawns.get(m).offset(m == 0 ? 2 : -2, 0, 0);
+                BlockPos base = spawns.get(m);
+                at = base.offset(Integer.signum(hall.box().center().getX() - base.getX()) * 2, 0, 0);
             } else {
                 at = spawns.get(i % spawns.size());
             }
@@ -832,6 +837,23 @@ public final class TitanBackTrials {
             }
         }
         broadcast(level, state.group, hall.box(), ModText.battle("message.skyabyss.arena_wave", state.wave, hall.waves().size()));
+    }
+
+    // 番兵長・老番兵の立つ場所: 4 人からは広間の真ん中。一人・二人は入口から真ん中へ向かう道の途中 (45%・60%・80%)。
+    // 体が大きいので、そこが柱や置物にふさがれていたら真ん中へ戻す
+    private static BlockPos bossSpot(ServerLevel level, Hall hall, BlockPos entrance, int players) {
+        BlockPos c = hall.box().center();
+        if (players >= 4 || hall.id().equals("ck")) {
+            return c;
+        }
+        double f = RoomPlay.keepFraction(players);
+        int x = (int) Math.round(entrance.getX() + (c.getX() - entrance.getX()) * f);
+        int z = (int) Math.round(entrance.getZ() + (c.getZ() - entrance.getZ()) * f);
+        x = Math.max(hall.box().x1() + 3, Math.min(hall.box().x2() - 3, x));
+        z = Math.max(hall.box().z1() + 3, Math.min(hall.box().z2() - 3, z));
+        BlockPos at = new BlockPos(x, c.getY(), z);
+        net.minecraft.world.phys.AABB body = new net.minecraft.world.phys.AABB(x - 1.6, c.getY(), z - 1.6, x + 2.6, c.getY() + 4, z + 2.6);
+        return level.noCollision(body) ? at : c;
     }
 
     @Nullable
