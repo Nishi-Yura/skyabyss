@@ -512,6 +512,106 @@ SUBJECTS["shrine"] = {
 }
 
 
+# ---------------------------------------------------------------- 空見の館 3 案 (議事の間と伝承の書庫。「忘れないうちに書け」の出どころ。四章で開く。戸は閉じている)
+def _shelves(g, x0, z0, x1, z1, y0, y1):
+    for x in range(x0, x1 + 1):
+        for y in range(y0, y1 + 1):
+            g.set(x, y, z0, "bookshelf")
+            g.set(x, y, z1, "bookshelf")
+
+
+def hall_a(g: Grid, rng=None):
+    """A「書庫の館」: 石の長い館 (23×13・高さ 7)。背の高い窓、切妻の屋根、中は二段の本棚と書見台。南の戸は閉じた鉄の戸"""
+    g.meta = {"rect": [-14, -9, 14, 11], "level": True}
+    x0, z0, x1, z1 = -11, -6, 11, 6
+    box(g, x0, -1, z0, x1, -1, z1, "polished_andesite")
+    shell(g, x0, 0, z0, x1, 6, z1, "stone_bricks", "deepslate_bricks")
+    for x in range(x0 + 2, x1 - 1, 3):
+        for y in (1, 2, 3):
+            g.set(x, y, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+            if x != 0:
+                g.set(x, y, z1, "glass_pane[north=false,south=false,east=true,west=true]")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 7, block="deepslate_tile_stairs", cap="deepslate_tile_slab[type=bottom]")
+    _shelves(g, x0 + 1, z0 + 1, x1 - 1, z1 - 1, 0, 1)
+    g.set(0, 0, 0, "lectern[facing=south,has_book=false,powered=false]")
+    g.set(-4, 5, 0, "lantern[hanging=true]")
+    g.set(4, 5, 0, "lantern[hanging=true]")
+    g.set(0, 0, z1, "iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]")
+    g.set(0, 1, z1, "iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]")
+    g.set(-2, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+    lantern_post(g, -3, 0, z1 + 2)
+    lantern_post(g, 3, 0, z1 + 2)
+    g.mark("stand", 0, 0, 10)
+
+
+def hall_b(g: Grid, rng=None):
+    """B「記録の塔の館」: 館 (19×13) の東に丸い記録の塔 (直径 9・高さ 18)。塔に巻き窓と頂の灯り。帳面は塔に積まれる。戸は南"""
+    g.meta = {"rect": [-14, -9, 16, 11], "level": True}
+    x0, z0, x1, z1 = -11, -6, 7, 6
+    box(g, x0, -1, z0, x1 + 8, -1, z1, "polished_andesite")
+    shell(g, x0, 0, z0, x1, 5, z1, "stone_bricks", "deepslate_bricks")
+    for x in range(x0 + 2, x1 - 1, 3):
+        for y in (1, 2):
+            g.set(x, y, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+            if x != -2:
+                g.set(x, y, z1, "glass_pane[north=false,south=false,east=true,west=true]")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 6, block="deepslate_tile_stairs", cap="deepslate_tile_slab[type=bottom]")
+    _shelves(g, x0 + 1, z0 + 1, x1 - 1, z1 - 1, 0, 1)
+    # 丸い塔 (八角で近似)
+    cx, cz, rr = 11, 0, 4
+    for y in range(0, 18):
+        for x in range(cx - rr, cx + rr + 1):
+            for z in range(cz - rr, cz + rr + 1):
+                d = abs(x - cx) + abs(z - cz)
+                if d == rr + 1 or (abs(x - cx) == rr and abs(z - cz) <= 1) or (abs(z - cz) == rr and abs(x - cx) <= 1):
+                    g.set(x, y, z, "deepslate_bricks" if y % 6 != 3 or (x + z) % 2 else "glass_pane[north=false,south=false,east=false,west=false]")
+    for x in range(cx - rr, cx + rr + 1):
+        for z in range(cz - rr, cz + rr + 1):
+            if abs(x - cx) + abs(z - cz) <= rr:
+                g.set(x, 18, z, "deepslate_tile_slab[type=bottom]")
+    g.set(cx, 19, cz, "lantern[hanging=false]")
+    g.set(-2, 0, z1, "iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]")
+    g.set(-2, 1, z1, "iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]")
+    g.set(-4, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+    lantern_post(g, -5, 0, z1 + 2)
+    lantern_post(g, 1, 0, z1 + 2)
+    g.mark("stand", -2, 0, 10)
+
+
+def hall_c(g: Grid, rng=None):
+    """C「回廊の館」: 館 (23×11) の南に柱の回廊 (庇の下の通路)。回廊の壁に四つの章の碑が並ぶ。屋根は平らな露台で見張りに上がれる"""
+    g.meta = {"rect": [-14, -9, 14, 12], "level": True}
+    x0, z0, x1, z1 = -11, -7, 11, 3
+    box(g, x0, -1, z0, x1, -1, z1 + 4, "polished_andesite")
+    shell(g, x0, 0, z0, x1, 6, z1, "stone_bricks", "deepslate_bricks")
+    box(g, x0 - 1, 7, z0 - 1, x1 + 1, 7, z1 + 4, "deepslate_tiles")
+    box(g, x0 - 1, 8, z0 - 1, x1 + 1, 8, z0 - 1, "deepslate_brick_wall[up=true,north=none,south=none,east=low,west=low,waterlogged=false]")
+    box(g, x0 - 1, 8, z1 + 4, x1 + 1, 8, z1 + 4, "deepslate_brick_wall[up=true,north=none,south=none,east=low,west=low,waterlogged=false]")
+    # 回廊: 南の面に柱 (3 おき)。庇は露台の屋根がそのまま
+    for x in range(x0 - 1, x1 + 2, 3):
+        box(g, x, 0, z1 + 4, x, 6, z1 + 4, "deepslate_bricks")
+    for x in (-8, -3, 3, 8):
+        g.set(x, 0, z1 + 1, "skyabyss:tablet[facing=south,standing=true]")
+        g.set(x, 2, z1, "glass_pane[north=false,south=false,east=true,west=true]")
+    for x in range(x0 + 2, x1 - 1, 3):
+        for y in (1, 2, 3):
+            g.set(x, y, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+    _shelves(g, x0 + 1, z0 + 1, x1 - 1, z1 - 1, 0, 1)
+    g.set(0, 0, z1, "iron_door[facing=north,half=lower,hinge=left,open=false,powered=false]")
+    g.set(0, 1, z1, "iron_door[facing=north,half=upper,hinge=left,open=false,powered=false]")
+    for x in (-6, 0, 6):
+        g.set(x, 6, z1 + 2, "lantern[hanging=true]")
+    g.mark("stand", 0, 0, 11)
+
+
+SUBJECTS["hall"] = {
+    "title": "空見の館（議事・伝承の書庫）",
+    "options": {"a": hall_a, "b": hall_b, "c": hall_c},
+    "notes": {"a": "A 書庫の館（高い窓と切妻）", "b": "B 記録の塔の館（丸い塔）", "c": "C 回廊の館（柱の回廊と露台）"},
+    "eye": ((0, 1.6, 26), (0, 5, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
