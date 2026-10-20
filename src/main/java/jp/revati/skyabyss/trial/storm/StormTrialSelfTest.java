@@ -345,7 +345,7 @@ public final class StormTrialSelfTest {
         for (StormBackLayout.Rest r : StormDeck.RESTS) {
             check(back.getBlockState(r.spawn()).isAir() && back.getBlockState(r.spawn().above()).isAir(), "rest " + r.id() + " is not open air at " + r.spawn());
             check(!back.getBlockState(r.spawn().below()).isAir(), "rest " + r.id() + " has no floor at " + r.spawn());
-            check(back.getBlockState(r.campfire()).is(Blocks.SOUL_CAMPFIRE), "rest " + r.id() + " has no campfire at " + r.campfire());
+            check(back.getBlockState(r.campfire()).is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get()), "rest " + r.id() + " has no campfire at " + r.campfire());
         }
         // 看板 (碑): 十四枚、島の床の上
         for (StormBackLayout.Inscription i : StormDeck.SIGNS) {

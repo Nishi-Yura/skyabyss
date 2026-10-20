@@ -493,7 +493,7 @@ public final class EmberBackSelfTest {
         BlockState plug = back.getBlockState(HEART_GATE.min());
         expect(plug.is(ModBlocks.SEALED_GATE.get()) && !plug.getValue(jp.revati.skyabyss.titan.dungeon.SealedGateBlock.OPEN),
                 "the hub gate is not a closed gate block in the world");
-        expect(overlayHas(back, GROUP_A, HUB_CENTER.above(), s -> s.is(Blocks.CAMPFIRE)), "a group with the gate closed does not see the forge fire");
+        expect(overlayHas(back, GROUP_A, HUB_CENTER.above(), s -> s.is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())), "a group with the gate closed does not see the forge fire");
         expect(state.rungCount() == 0 && !state.gateOpen(), "a fresh round starts with rung stones");
         FakePlayer p = fake(back, GROUP_A, "ember_test_ring");
         // 東は鍛え手を倒すまで黙る
@@ -533,8 +533,8 @@ public final class EmberBackSelfTest {
             expect(!back.getBlockState(w).getCollisionShape(back, w, net.minecraft.world.phys.shapes.CollisionContext.of(b)).isEmpty(),
                     "the furnace mouth is open for group B at " + w.toShortString());
         }
-        expect(!overlayHas(back, GROUP_A, HUB_CENTER.above(), s2 -> s2.is(Blocks.CAMPFIRE)), "group A still sees the forge fire after the gate opened");
-        expect(overlayHas(back, GROUP_B, HUB_CENTER.above(), s2 -> s2.is(Blocks.CAMPFIRE)), "group B lost its forge fire when group A opened the gate");
+        expect(!overlayHas(back, GROUP_A, HUB_CENTER.above(), s2 -> s2.is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())), "group A still sees the forge fire after the gate opened");
+        expect(overlayHas(back, GROUP_B, HUB_CENTER.above(), s2 -> s2.is(jp.revati.skyabyss.registry.ModBlocks.REST_HEARTH.get())), "group B lost its forge fire when group A opened the gate");
     }
 
     private static void checkReset(ServerLevel back) {

@@ -152,7 +152,7 @@ public final class WhaleScaleSelfTest {
         if (back != null && TitanBackData.get(back).isBuilt()) {
             for (int n = 1; n <= BellTower.COUNT; n++) {
                 BlockState st = back.getBlockState(BellTower.bellPos(n));
-                check(f, st.is(net.minecraft.world.level.block.Blocks.BELL), "bell " + n + " is missing at " + BellTower.bellPos(n));
+                check(f, st.is(jp.revati.skyabyss.registry.ModBlocks.RELIC_BELL.get()), "bell " + n + " is missing at " + BellTower.bellPos(n));
             }
             // 初回だけの部屋と、既知の道で開く戸
             TitanBackTrials.installGates(back);
