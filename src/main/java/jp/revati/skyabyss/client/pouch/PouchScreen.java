@@ -29,7 +29,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 //       枠の置く・取り出す・シフトクリックは PouchMenu が決める (取り出せない決まりのときは何も起きない)
 //   作り直し: 右上の「作り直し」で一覧に切り替わる。材料に袋の品を使う作業台のレシピを、袋の画面から作る (PouchRebuild)。
 //       「修理」は手に持った品を袋の素材で直す。作るのはサーバーが決める (メニューのボタン)
-public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
+public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
     static final int TEX = 512;
     private static final int TEXT = 0xFFD8DCE6;
@@ -279,12 +279,12 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
         PouchData d = Pouch.data(minecraft.player);
         int n = d.count(e.id());
         if (!seen(e)) {
-            g.drawString(font, Component.translatable("skyabyss_pouch.screen.unknown"), 12, y1, DIM, false);
-            g.drawString(font, Component.translatable("skyabyss_pouch.screen.unknown_hint"), 12, y2, DIM, false);
+            jp.revati.skyabyss.client.ui.TextClip.line(g, font, Component.translatable("skyabyss_pouch.screen.unknown"), 12, y1, PouchLayout.W - 24, DIM, false);
+            jp.revati.skyabyss.client.ui.TextClip.line(g, font, Component.translatable("skyabyss_pouch.screen.unknown_hint"), 12, y2, PouchLayout.W - 24, DIM, false);
             return;
         }
-        g.drawString(font, e.item().getDescription(), 12, y1, n > 0 ? GOLD : DIM, false);
         Component count = Component.translatable("skyabyss_pouch.screen.count", n, e.limit());
+        jp.revati.skyabyss.client.ui.TextClip.line(g, font, e.item().getDescription(), 12, y1, PouchLayout.W - 24 - font.width(count) - 6, n > 0 ? GOLD : DIM, false);
         g.drawString(font, count, PouchLayout.W - 12 - font.width(count), y1, n > 0 ? TEXT : DIM, false);
         Component hint;
         int color = DIM;
@@ -306,11 +306,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     }
 
     private void drawWrapped(GuiGraphics g, Component line, int y) {
-        int yy = y;
-        for (var part : font.split(line, PouchLayout.W - 24)) {
-            g.drawString(font, part, 12, yy, DIM, false);
-            yy += 10;
-        }
+        jp.revati.skyabyss.client.ui.TextClip.wrapped(g, font, line, 12, y, PouchLayout.W - 24, 3, 10, DIM, false);
     }
 
     private PouchEntries.Entry hoveredEntry() {
@@ -460,5 +456,10 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> {
     public void removed() {
         menu.rebuildView = false;
         super.removed();
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {leftPos, topPos, PouchLayout.W, PouchLayout.H};
     }
 }

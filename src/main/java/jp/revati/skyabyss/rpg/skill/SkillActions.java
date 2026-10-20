@@ -1209,7 +1209,8 @@ public final class SkillActions {
         if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
             at = target.position();
             if (isFoe(player, target)) {
-                SkillEvents.mark(target, SkillRules.signalMark(rank), level.getGameTime(), SkillRules.MARK_TICKS, player);
+                SkillEvents.mark(target, SkillRules.signalMark(rank), level.getGameTime(), SkillRules.SIGNAL_MARK_TICKS, player);
+                signalTell(player, "message.skyabyss.signal.foe", target.getDisplayName(), (int) Math.round(SkillRules.signalMark(rank) * 100), SkillRules.SIGNAL_MARK_TICKS / 20);
             } else {
                 SkillEffects.glow(target, SkillRules.MARK_TICKS, player);
             }
@@ -1220,10 +1221,30 @@ public final class SkillActions {
                 at = ground.getLocation();
             }
         }
+        if (!(entityHit != null && entityHit.getEntity() instanceof LivingEntity t2 && isFoe(player, t2))) {
+            signalTell(player, "message.skyabyss.signal.place", SkillRules.SIGNAL_TICKS / 20);
+        }
         SkillEffects.zone(SkillEffects.ZoneKind.SIGNAL, player, at, 0.5, SkillRules.SIGNAL_TICKS, rank);
         player.swing(InteractionHand.MAIN_HAND, true);
         level.playSound(null, at.x, at.y, at.z, Skills.SOUND_MARK.get(), SoundSource.PLAYERS, 1.0f, 1.3f);
         return null;
+    }
+
+    // 標を打ったことを、本人とパーティの仲間 (同じ次元) に知らせる
+    private static void signalTell(ServerPlayer player, String key, Object... args) {
+        Object[] a = new Object[args.length + 1];
+        a[0] = player.getDisplayName();
+        System.arraycopy(args, 0, a, 1, args.length);
+        jp.revati.skyabyss.notice.Notice.hint(player, key, a);
+        var party = jp.revati.skyabyss.party.PartyData.get(player.server).of(player.getUUID());
+        if (party != null) {
+            for (java.util.UUID id : party.members) {
+                ServerPlayer m = id.equals(player.getUUID()) ? null : player.server.getPlayerList().getPlayer(id);
+                if (m != null && m.level() == player.level()) {
+                    jp.revati.skyabyss.notice.Notice.hint(m, key, a);
+                }
+            }
+        }
     }
 
     // ---------------------------------------------------------------- 毎 tick (SkillEvents から)

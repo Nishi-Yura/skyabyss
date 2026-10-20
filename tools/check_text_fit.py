@@ -270,6 +270,16 @@ box("hud: downed/party labels", r"hud\.skyabyss\.(downed\.[a-z_]+|party_pos\.[a-
 
 
 # 目的の帯: 文は幅 (帯の幅 - 12) で折り返す。倍率 4 では帯が 115 px しかない
+# ---- 文字のはみ出しの総点検で足した箱 (実行時は TextBounded の scissor が最後の守り。ここは「切られずに読める」ことを見る)
+box("skill: effect (info panel 186 minus safety; 5 lines before the rune rows cut it)", r"skill\.skyabyss\.[a-z_0-9]+\.effect", 176, "wrap:5")
+box("skill: flavor (info panel 186)", r"skill\.skyabyss\.[a-z_0-9]+\.flavor", 186, "wrap:3")
+box("skill: signal party message (hint, 3 lines)", r"message\.skyabyss\.signal\.(foe|place)", lambda g, s: min(g - 30, 340), "wrap:3")
+box("pouch: info line (item name + count, 176-24)", r"skyabyss_pouch\.screen\.(unknown|unknown_hint)", 152)
+box("record: detail wrap (RW)", r"skyabyss_record\.gui\.before", 128, "wrap:3")
+box("hud: skill hotbar tip", r"gui\.skyabyss\.skill\.(learn_tip|loadout_save_tip|loadout_load_tip)", 190, "wrap:4")
+box("growth: effect desc (200, 4 lines)", r"gui\.skyabyss\.growth\.(desc\.[a-z]+|cap|fragments_desc)", 200, "wrap:4")
+box("growth: respec info (200, 4 lines)", r"gui\.skyabyss\.growth\.respec_again", 200, "wrap:3")
+
 def band(g, s):
     return max(112, min(230, int(g * 0.24))) - 12
 

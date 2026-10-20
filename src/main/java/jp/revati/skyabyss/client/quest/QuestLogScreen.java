@@ -26,7 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // クエストログ (U)。左に一覧 (メイン・サブ・終えたもの)、右に選んだクエストの今の書き付け、目的、報酬。
 // 「やること」を書く帳面で、「知ったこと」は伝承の書に分ける。下の釦で、左の小さな表示に出すクエストを選ぶ
-public class QuestLogScreen extends Screen {
+public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 330;
     private static final int H = 206;
     private static final int LIST_W = 112;
@@ -383,5 +383,10 @@ public class QuestLogScreen extends Screen {
             return true;
         }
         return super.keyPressed(key, scan, mods);
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left, top, W, H};
     }
 }

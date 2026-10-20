@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 順位の石 (C11) と飾り板 (C21) の画面。順位の石: 転生数・最速・最少の死の 3 つの表。上位 3 人だけ大きく、4 位からは小さく (8 位まで)。載せない設定の切り替えもここ。
 // 飾り板: 巨神ごとの世界の最速 (その巨神の背にいるときは強調。最近更新されたものは光る縁)
-public final class BoardScreen extends Screen {
+public final class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int W = 330;
     private static final int H = 196;
     private static final int TEXT = 0xFFE9EDF0;
@@ -137,5 +137,10 @@ public final class BoardScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left - 6, top - 6, W + 12, H + 12};
     }
 }

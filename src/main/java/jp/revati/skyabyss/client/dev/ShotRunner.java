@@ -931,6 +931,7 @@ public final class ShotRunner {
             case "skills_past" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().showTree(jp.revati.skyabyss.rpg.skill.SkillTree.PAST)
                     .select(jp.revati.skyabyss.rpg.skill.Skill.ECHO_STRIKE);
             case "skills_ext" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().extPage(0, jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);
+            case "skills_signal" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.SIGNAL);
             case "skills_rockcall" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL);
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;

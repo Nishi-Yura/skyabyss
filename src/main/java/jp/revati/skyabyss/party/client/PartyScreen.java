@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 // 「物語と仲間」の画面 (O)。上に物語の段階とレベルの上限、左に仲間、右に招待できる人。
 // 操作はサーバーへ送るだけ (検めるのはサーバー)。届いた状態で描き直す
-public final class PartyScreen extends Screen {
+public final class PartyScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int TEXT = 0xE8F4FF;
     private static final int SOFT = 0xA8B4C4;
     private static final int GOLD = 0xF2C14E;
@@ -173,5 +173,10 @@ public final class PartyScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public int[] textBounds() {
+        return new int[] {left - 8, top - 8, 336, 208};
     }
 }
