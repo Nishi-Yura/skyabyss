@@ -80,10 +80,10 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <p class="intro">docs/design/33 の 2.2。空を見張る小さな国「鐘の国」の都。大鐘楼・空見の砦・空見の館・鯨追いの組合・四巨神の社・鍛冶場・市・住まい・墓地・壁と四門を、約 200×200 の中にどう置くか。見取り図は案 A で決定。次は建物を一棟ずつ（まず大鐘楼）。直してほしい点はメモに。</p>
     
     <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
-      <span id="pcount">0 / 4 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
+      <span id="pcount">0 / 5 選択済み</span><span class="save-state" id="savestate">読み込み中…</span></div>
   </div>
   <div class="layout">
-    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a></nav>
+    <nav aria-label="対象"><a href="#town_layout" data-nav="town_layout">町の見取り図</a><a href="#bell_tower" data-nav="bell_tower">大鐘楼</a><a href="#keep" data-nav="keep">空見の砦</a><a href="#guild" data-nav="guild">鯨追いの組合</a><a href="#shrine" data-nav="shrine">四巨神の社</a></nav>
     <main>
 <section class="subject" id="town_layout" data-id="town_layout">
   <header class="shead">
@@ -127,11 +127,23 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
     <h2>鯨追いの組合（板・名簿・順位の石）</h2>
     <span class="state" data-state="none">未選択</span>
   </header>
-  <p class="extra">イサナの一族の組合。一章でイサナと会うと開く。外に言伝ての板（二本柱と庇）と名簿の碑。戸は鉄の両開きで閉じている。B の屋根は肋骨のあいだを木の板で埋める（ラフの描画では隙間に見える所がある）。</p>
+  <p class="extra">採用: A 長屋の組合（設計図に写し済み）。</p>
   <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="guild_sheet.jpg" aria-label="鯨追いの組合（板・名簿・順位の石） のシートを拡大"><img loading="lazy" src="guild_sheet.jpg" alt="鯨追いの組合（板・名簿・順位の石） の比較シート"></button></figure></div>
   <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="guild-a"><input type="radio" name="guild" id="guild-a" value="a"><span class="letter">A</span><span class="otext"><b>長屋の組合</b><span>45×23 の長い館。石の腰壁と木の壁、切妻の棟に鯨骨の肋を三つ渡す。落ち着いた組合の家</span></span></label><label class="opt" for="guild-b"><input type="radio" name="guild" id="guild-b" value="b"><span class="letter">B</span><span class="otext"><b>鯨骨の屋根</b><span>鯨の肋骨そのものを屋根にした館。入口は鯨の頭骨の門（目に灯り）。いちばん鯨追いらしい。やや奇抜</span></span></label><label class="opt" for="guild-c"><input type="radio" name="guild" id="guild-c" value="c"><span class="letter">C</span><span class="otext"><b>二階の組合</b><span>二階建て。一階は石、二階は木の張り出し。西に露台と帆柱（旗）。板は露台の下。船乗りの組合の雰囲気</span></span></label></fieldset>
   <label class="note-l" for="guild-note">直してほしい点 (任意)</label>
   <textarea id="guild-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
+</section>
+<section class="subject" id="shrine" data-id="shrine">
+  <header class="shead">
+    <p class="kind">ラフ 3案</p>
+    <h2>四巨神の社（転生の台座・鍵の間）</h2>
+    <span class="state" data-state="none">未選択</span>
+  </header>
+  <p class="extra">国の信仰「四体の巨神が空を支える」。中央が鍵の間の台（四つの欠片を納める）、転生の台座もここ。二章で開く。四体の材質は 岩鯨=石レンガ・潮殻=プリズマリン・雷翼=銅・余燼=黒石。</p>
+  <div class="sheets"><figure class="sheet"><button class="zoom" type="button" data-src="shrine_sheet.jpg" aria-label="四巨神の社（転生の台座・鍵の間） のシートを拡大"><img loading="lazy" src="shrine_sheet.jpg" alt="四巨神の社（転生の台座・鍵の間） の比較シート"></button></figure></div>
+  <fieldset class="opts"><legend>採用する案</legend><label class="opt" for="shrine-a"><input type="radio" name="shrine" id="shrine-a" value="a"><span class="letter">A</span><span class="otext"><b>八角の社</b><span>深層岩の八角堂（幅 28・高さ 10）。四方に巨神の色の柱と灯り、頂に小さな塔。閉じた堂で、中は暗く静か。今の骨組みに近い</span></span></label><label class="opt" for="shrine-b"><input type="radio" name="shrine" id="shrine-b" value="b"><span class="letter">B</span><span class="otext"><b>四つの塔の社</b><span>四角い堂の四隅に巨神ごとの材質の塔（高さ 16）。段々の屋根と天窓。遠くから四本の塔で社と分かる</span></span></label><label class="opt" for="shrine-c"><input type="radio" name="shrine" id="shrine-c" value="c"><span class="letter">C</span><span class="otext"><b>石の輪の社</b><span>屋根のない社。四つの大きな巨神の石が輪に立ち、骨の梁が中央の台を覆う。空の下で祈る形。輪は低い壁と閉じた門</span></span></label></fieldset>
+  <label class="note-l" for="shrine-note">直してほしい点 (任意)</label>
+  <textarea id="shrine-note" class="note" rows="2" placeholder="例: Bの形でCの色、盾をもっと大きく"></textarea>
 </section></main>
   </div>
 </div>
@@ -139,7 +151,7 @@ dialog img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto}
 
 <script>
 (() => {
-  const total = 4;
+  const total = 5;
   const sections = [...document.querySelectorAll('.subject')];
   const saveState = document.getElementById('savestate');
   let db = null;
