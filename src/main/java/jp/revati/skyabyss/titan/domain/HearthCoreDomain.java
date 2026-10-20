@@ -143,6 +143,25 @@ public final class HearthCoreDomain extends HeartDomain {
     // 叩いても冷めない (しゃがむ手がかりの一行が出る)
     public static final int QUENCH = 90;
     public static final double QUENCH_RANGE = 2.6;
+    // 離れたときに戻る熱 (6 tick あたり): 2 → 3 → 3 (3 tick に 1 → 2 tick に 1 → 2 tick に 1。三巡目は冷めきる量も増える)。巡が進むほど、離れると核がすぐ熱を取り戻す
+    public static final int[] REHEAT = {2, 3, 3};
+
+    // 冷めきるまでの量: 90 → 100 → 110 (巡ごとに少しずつ長く)
+    public int quench() {
+        return QUENCH + 10 * Math.min(round(), 2);
+    }
+
+    public int reheat() {
+        return REHEAT[Math.min(round(), REHEAT.length - 1)];
+    }
+
+    // 巡の合間: 三方の扇の熱
+    @Override
+    protected void interludeAttack(ServerLevel level) {
+        for (int i = 0; i < 3; i++) {
+            fan(level, fanBase + Math.PI * 2 * i / 3);
+        }
+    }
 
     @Override
     protected void puzzleTick(ServerLevel level, int t) {
@@ -159,12 +178,12 @@ public final class HearthCoreDomain extends HeartDomain {
                 }
             }
             if (near > 0) {
-                n.state = Math.min(QUENCH, n.state + Math.min(near, 3));
+                n.state = Math.min(quench(), n.state + Math.min(near, 3));
                 if (t % 5 == 0) {
                     burst(level, n, ParticleTypes.CLOUD, 6, 0.4, 0.05);
                     tone(level, n.pos, SoundEvents.FIRE_EXTINGUISH, 0.6f, 1.2f);
                 }
-                if (n.state >= QUENCH) {
+                if (n.state >= quench()) {
                     n.done = true;
                     n.flash = 14;
                     n.flashRgb = 0x66E08A;
@@ -172,9 +191,9 @@ public final class HearthCoreDomain extends HeartDomain {
                     tone(level, n.pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, 2.5f, 0.8f);
                     tell(level, "message.skyabyss.domain.hearth_core.step", solvedCount(), NODES);
                 }
-            } else if (n.state > 0 && t % fast(3) == 0) {
+            } else if (n.state > 0 && t % 6 == 0) {
                 // 離れると、ゆっくり戻る (予告を避けて少し離れても、進みは大きく失わない)。深淵は戻りが速い (3 tick に 1 → 2 tick に 1。熱い床の周期は変えない: 一人で冷ませる余地を守る)
-                n.state--;
+                n.state = Math.max(0, n.state - reheat());
             }
         }
     }
@@ -232,7 +251,7 @@ public final class HearthCoreDomain extends HeartDomain {
         if (n.done) {
             return 0x7A8088;
         }
-        float f = n.state / (float) QUENCH;
+        float f = n.state / (float) quench();
         int r = 255;
         int g = (int) (80 + 120 * f);
         int b = (int) (20 + 180 * f);

@@ -162,7 +162,79 @@ public final class WhaleShape {
 
     // 鯨を置く。範囲の中で、鯨のブロックでない所は空に戻す (前の版の島や、掘った部屋を消す)。
     // 変わるブロックだけを置く (同じなら触らない)。置いたブロックの数を返す
+    // 版を上げる建て直しで、前の版の部屋・小部屋・足場が残らないようにする (版 27)。体の型 (whale.bin) の範囲の外 (鯨の外周 RX/RZ の中) と、
+    // 型の範囲の上下の外を、体を置く前に空気にする。型の範囲の中は体の置き直しが全部の柱を書き直す。空でない区画だけを見るので軽い
+    static jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob staleJob(BuildKit kit) {
+        Data d = data();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        int rx = TitanBackLayout.RX;
+        int rz = TitanBackLayout.RZ;
+        return new jp.revati.skyabyss.titan.BackBuildJobs.ColumnJob(kit.level(), Math.min(-rx, d.x0), Math.max(rx, d.x0 + d.nx - 1), Math.min(-rz, d.z0), Math.max(rz, d.z0 + d.nz - 1)) {
+            @Override
+            protected void beginChunk(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk) {
+                for (BlockPos p : java.util.List.copyOf(chunk.getBlockEntitiesPos())) {
+                    chunk.removeBlockEntity(p);
+                }
+            }
+
+            @Override
+            protected int column(net.minecraft.server.level.ServerLevel lv, LevelChunk chunk, int x, int z) {
+                boolean inside = index(x, z) >= 0;
+                int placed = 0;
+                for (int si = 0; si < chunk.getSectionsCount(); si++) {
+                    if (chunk.getSection(si).hasOnlyAir()) {
+                        continue;
+                    }
+                    int wy0 = chunk.getSectionYFromSectionIndex(si) << 4;
+                    for (int wy = wy0; wy < wy0 + 16; wy++) {
+                        if (inside && wy >= d.y0 && wy < d.y0 + d.ny) {
+                            continue;
+                        }
+                        m.set(x, wy, z);
+                        if (!chunk.getBlockState(m).isAir()) {
+                            lv.setBlock(m, air, BuildKit.UPDATE);
+                            placed++;
+                        }
+                    }
+                }
+                return placed;
+            }
+        };
+    }
+
+    // 古い島を空にしてから体を置く仕事 (一続きの Job)
+    static jp.revati.skyabyss.titan.BackBuildJobs.Job jobWithClear(BuildKit kit) {
+        jp.revati.skyabyss.titan.BackBuildJobs.Job clear = staleJob(kit);
+        jp.revati.skyabyss.titan.BackBuildJobs.Job body = job(kit);
+        return new jp.revati.skyabyss.titan.BackBuildJobs.Job() {
+            private boolean cleared;
+
+            @Override
+            public boolean step(long deadlineNanos) {
+                if (!cleared) {
+                    cleared = clear.step(deadlineNanos);
+                    return false;
+                }
+                return body.step(deadlineNanos);
+            }
+
+            @Override
+            public int placed() {
+                return clear.placed() + body.placed();
+            }
+        };
+    }
+
     static int place(BuildKit kit) {
+        jp.revati.skyabyss.titan.BackBuildJobs.Job job = jobWithClear(kit);
+        while (!job.step(Long.MAX_VALUE)) {
+            // 空にする仕事の次の一歩へ
+        }
+        return job.placed();
+    }
+
+    static int placeBodyOnly(BuildKit kit) {
         jp.revati.skyabyss.titan.BackBuildJobs.Job job = job(kit);
         job.step(Long.MAX_VALUE);
         return job.placed();

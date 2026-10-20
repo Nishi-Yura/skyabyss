@@ -44,7 +44,7 @@ public final class TideBackLayout {
     // 21: 試練の階 (TideDeck。潮の広間の南の段の戸口から通路・試練の広間・潮の背渡り T02・満ち潮の円環 T10・貝の合唱 T06・二つの海 T07・試練の板。docs/design/29 の 3.2)
     // 24: 試練の階の下の階 (TideDeck。広間の西の階段から下る H2・くらげの回廊 T03・渦潮の滑り台 T04・大貝の護送 T11・珊瑚の標本棚 T08・真珠守りの試し T12。P3。
     //     docs/design/29 の 3.7)。他の背の版の最大 (余燼 23) の次
-    public static final int LAYOUT_VERSION = 27;
+    public static final int LAYOUT_VERSION = 28;
     // 生成の海 (水の最上段は y=62)
     public static final int SEA = 63;
     public static final int SEA_FLOOR = 41;

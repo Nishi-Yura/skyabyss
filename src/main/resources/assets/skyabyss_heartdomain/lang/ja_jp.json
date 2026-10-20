@@ -98,5 +98,9 @@
   "gui.skyabyss.domain.rising_tide.warn": "水門が閉じかけている。叩き直せ (開いた %s/%s)",
   "gui.skyabyss.domain.thunder_cage.hit": "強く光る柱を叩いて雷を逃がせ (逃がした %s/%s)",
   "gui.skyabyss.domain.thunder_cage.wait": "次に雷が溜まる柱を待て (逃がした %s/%s)",
-  "gui.skyabyss.domain.hearth_core.cool": "熾の核のそばでしゃがみ続けて冷ませ (冷めた %s/%s)"
+  "gui.skyabyss.domain.hearth_core.cool": "熾の核のそばでしゃがみ続けて冷ませ (冷めた %s/%s)",
+  "gui.skyabyss.domain.round": "第 %s / %s 巡",
+  "gui.skyabyss.domain.round_wait": "領域が揺らぐ。次の巡に備えろ (第 %s / %s 巡)",
+  "message.skyabyss.domain.round_clear": "一巡が崩れた。だが領域はまだ終わらない (%s / %s 巡)",
+  "message.skyabyss.domain.round_start": "第 %s / %s 巡。仕掛けは立て直され、前より手強い"
 }

@@ -98,5 +98,9 @@
   "gui.skyabyss.domain.rising_tide.warn": "A gate is closing. Strike it again (open %s/%s)",
   "gui.skyabyss.domain.thunder_cage.hit": "Strike the glowing rod to ground the lightning (grounded %s/%s)",
   "gui.skyabyss.domain.thunder_cage.wait": "Wait for the next rod to charge (grounded %s/%s)",
-  "gui.skyabyss.domain.hearth_core.cool": "Crouch beside the embers to cool them (cooled %s/%s)"
+  "gui.skyabyss.domain.hearth_core.cool": "Crouch beside the embers to cool them (cooled %s/%s)",
+  "gui.skyabyss.domain.round": "Round %s / %s",
+  "gui.skyabyss.domain.round_wait": "The domain wavers. Brace for the next round (%s / %s)",
+  "message.skyabyss.domain.round_clear": "A round breaks, but the domain holds (%s / %s)",
+  "message.skyabyss.domain.round_start": "Round %s / %s. The gimmicks are rebuilt, and harder"
 }

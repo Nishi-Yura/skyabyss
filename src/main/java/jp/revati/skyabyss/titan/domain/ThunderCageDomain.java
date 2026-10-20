@@ -83,6 +83,14 @@ public final class ThunderCageDomain extends HeartDomain {
         }
     }
 
+    // 巡の合間: 縦横の格子の雷
+    @Override
+    protected void interludeAttack(ServerLevel level) {
+        double length = radius * 2 + 4;
+        lines(level, 0, 0, length);
+        lines(level, Math.PI / 2, 0, length);
+    }
+
     // 角度 theta の線を、垂直の向きに GRID おきに並べる (中心を通る線 + off ずらし)
     private void lines(ServerLevel level, double theta, double off, double length) {
         double tx = Math.cos(theta);
@@ -139,6 +147,12 @@ public final class ThunderCageDomain extends HeartDomain {
     public static final int TELE_WARN = 28;
     public static final int GAP = 30;
     public static final int RESET = 70;
+    // 巡ごとの溜まりきるまでの時間 (CHARGE tick) の割合: 8 秒 → 7.4 秒 → 6.8 秒。柱の順も毎巡あたらしい
+    public static final double[] CHARGE_SCALE = {1.0, 0.92, 0.85};
+
+    public int chargeTicks() {
+        return fast((int) Math.round(CHARGE * CHARGE_SCALE[Math.min(round(), CHARGE_SCALE.length - 1)]));
+    }
     public static final double ROD_RADIUS = 3.4;
     public static final float ROD_DAMAGE = 14f;
 
@@ -197,12 +211,17 @@ public final class ThunderCageDomain extends HeartDomain {
 
     @Override
     protected void puzzleBegin(ServerLevel level) {
-        java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
-        java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
-        order = new int[] {list.get(0), list.get(1), list.get(2)};
+        int[] prev = order;
+        int[] next;
+        do {
+            java.util.List<Integer> list = new java.util.ArrayList<>(java.util.List.of(0, 1, 2));
+            java.util.Collections.shuffle(list, new java.util.Random(heart.getRandom().nextLong()));
+            next = new int[] {list.get(0), list.get(1), list.get(2)};
+        } while (round() > 0 && java.util.Arrays.equals(next, prev));
+        order = next;
         stage = 0;
         chargeStart = -1;
-        readyAt = 50;
+        readyAt = ticks() + 50;
         pending = null;
     }
 
@@ -223,12 +242,12 @@ public final class ThunderCageDomain extends HeartDomain {
         int k = t - chargeStart;
         if (k % 8 == 0) {
             burst(level, n, ParticleTypes.ELECTRIC_SPARK, 6 + k / 12, 0.4, 0.3);
-            ring(level, n.pos, ROD_RADIUS, k > fast(CHARGE) - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
+            ring(level, n.pos, ROD_RADIUS, k > chargeTicks() - TELE_WARN ? ParticleTypes.CRIT : ParticleTypes.ELECTRIC_SPARK, 12);
         }
         if (k % 20 == 0) {
             tone(level, n.pos, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.5f + k / 200f, 1.8f);
         }
-        if (k == fast(CHARGE) - TELE_WARN) {
+        if (k == chargeTicks() - TELE_WARN) {
             double x = n.pos.x;
             double z = n.pos.z;
             pending = tg(level, TelegraphShape.circle(x, z, ROD_RADIUS), TELE_WARN)
@@ -236,7 +255,7 @@ public final class ThunderCageDomain extends HeartDomain {
                     .onHit((s, p) -> striker.accept(p, ROD_DAMAGE))
                     .start();
         }
-        if (k >= fast(CHARGE)) {
+        if (k >= chargeTicks()) {
             // 溜まりきって落ちた (傷は予告が出した)。柱はしばらくして、また溜まる
             pending = null;
             chargeStart = -1;

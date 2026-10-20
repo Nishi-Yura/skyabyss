@@ -119,7 +119,9 @@ public final class TitanBackSelfTest {
                     checkPockets(back, after);
                     after.forEach(f -> PENDING.add("after reset: " + f));
                     forceMazeChunks(back, false);
-                })));
+                })),
+                // 休み場の 5×5 と、版を上げる建て直しで前の配置が残らないこと (版 27)
+                SelfTestRunner.Step.once("titan back (rebuild)", server -> withBack(server, back -> PENDING.addAll(UndersideRebuildSelfTest.run(back)))));
     }
 
     public static List<SelfTestRunner.Step> trialSteps() {
@@ -901,8 +903,8 @@ public final class TitanBackSelfTest {
             String bad = null;
             for (int dx = 0; dx < MAZE_CELL && bad == null; dx++) {
                 for (int dz = 0; dz < MAZE_CELL && bad == null; dz++) {
-                    // 中ほどの休み場の四隅は乾いた足場 (水の二段目が石、その上は紫水晶があってもよい)
-                    boolean ledge = p.equals(mid) && (dx == 0 || dx == MAZE_CELL - 1) && (dz == 0 || dz == MAZE_CELL - 1);
+                    // 中ほどの休み場は、真ん中の一マスの水の穴を除く全面が乾いた足場 (版 27) (水の二段目が石、その上は紫水晶があってもよい)
+                    boolean ledge = p.equals(mid) && (dx != MAZE_CELL / 2 || dz != MAZE_CELL / 2);
                     if (ledge) {
                         if (!level.getBlockState(p.offset(dx, 1, dz)).is(Blocks.POLISHED_DEEPSLATE)) {
                             bad = "the rest ledge corner is missing at " + p.offset(dx, 1, dz).toShortString();

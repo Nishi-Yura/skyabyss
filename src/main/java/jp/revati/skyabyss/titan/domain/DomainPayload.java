@@ -10,12 +10,14 @@ import net.minecraft.resources.ResourceLocation;
 //  START   : a = 宣言の長さ tick、b = 領域の長さの目安 tick (安全網。画面が通信の途切れを見切る)。部屋の中心・床の高さ・半径つき
 //  PROGRESS: a = 解いた割合 (0〜100 %)、b = 解いた仕掛けの数
 //  HINT    : key = 案内の翻訳キー (その領域の手順の一行)、a b = 数字 (叩く順の番号・解いた数)、mood = 0 常時の案内 / 1 正解 / 2 失敗 / 3 状況の合図
+//  ROUND   : a = いまの巡 (1 始まり)、b = 巡の数
 //  END     : a = 1 なら解けた (砕けた)、0 なら安全網・心臓が倒れた
 public record DomainPayload(String id, int state, int a, int b, double cx, double cz, double floor, double radius, String key, int mood) implements CustomPacketPayload {
     public static final int START = 0;
     public static final int PROGRESS = 1;
     public static final int END = 2;
     public static final int HINT = 3;
+    public static final int ROUND = 4;
 
     public static final Type<DomainPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "heart_domain"));
 
@@ -41,6 +43,10 @@ public record DomainPayload(String id, int state, int a, int b, double cx, doubl
 
     public static DomainPayload progress(String id, int percent, int remaining) {
         return new DomainPayload(id, PROGRESS, percent, remaining, 0, 0, 0, 0, "", 0);
+    }
+
+    public static DomainPayload round(String id, int round, int rounds) {
+        return new DomainPayload(id, ROUND, round, rounds, 0, 0, 0, 0, "", 0);
     }
 
     public static DomainPayload end(String id, boolean broken) {
