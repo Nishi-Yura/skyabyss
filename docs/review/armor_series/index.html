@@ -118,6 +118,7 @@ details.wn summary{cursor:pointer;font-weight:700;padding:4px 0}
     const state = () => {
       const o = { at: Date.now(), note: noteEl.value };
       for (const [key, name] of fields) { const r = document.querySelector('input[name=' + name + ']:checked'); o[key] = r ? r.value : ''; }
+      o.option = o[fields[0][0]];
       return o;
     };
     const save = async () => {
