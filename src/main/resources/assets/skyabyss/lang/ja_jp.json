@@ -714,10 +714,6 @@
   "sign.skyabyss.bell_hint.2": "みっつ よっつ",
   "sign.skyabyss.bell_hint.3": "いつつで 終わる",
   "sign.skyabyss.bell_hint.4": "低い鐘から",
-  "sign.skyabyss.song_shrine.1": "歌は止まらず",
-  "sign.skyabyss.song_shrine.2": "鼓動に重なる",
-  "sign.skyabyss.song_shrine.3": "ここで息を整え",
-  "sign.skyabyss.song_shrine.4": "扉を開けよ",
   "sign.skyabyss.library_1.1": "骨の書庫",
   "sign.skyabyss.library_1.2": "ここに頁を",
   "sign.skyabyss.library_1.3": "残した者がいる",
@@ -1373,6 +1369,6 @@
   "sign.skyabyss.deck_hall.3": "今週の試練の",
   "sign.skyabyss.deck_hall.4": "戸だけが開く",
   "objective.skyabyss.trial_board": "試練の板を読んで、挑む試練を確かめよう",
-  "objective.skyabyss.trial_deck": "階段を上って試練の階へ向かおう (光る床でも行ける)",
+  "objective.skyabyss.trial_deck": "階段を上り、試練の階へ向かおう",
   "objective.skyabyss.trial_door": "光る目印の戸から、引いた試練へ入ろう"
 }

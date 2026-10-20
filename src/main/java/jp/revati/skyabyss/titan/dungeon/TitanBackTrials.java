@@ -615,7 +615,7 @@ public final class TitanBackTrials {
     // 封印の先 (宝物庫・心臓の回廊・心臓の前室・心臓の間) にいるか
     static boolean isPastHeartSeal(Player player) {
         BlockPos p = player.blockPosition();
-        return HEART_CORRIDOR.contains(p) || HEART_REST.contains(p) || HEART.contains(p) || SONG_SHRINE.contains(p);
+        return HEART_CORRIDOR.contains(p) || HEART_REST.contains(p) || HEART.contains(p);
     }
 
     // 体内 (島の地表より下) にいるか

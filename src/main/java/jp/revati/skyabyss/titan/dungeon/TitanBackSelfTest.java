@@ -475,7 +475,7 @@ public final class TitanBackSelfTest {
     private static void checkRooms(ServerLevel level, List<String> failures) {
         for (Box room : TitanBackAudit.ROOMS) {
             // 通路の天井は、大門 (BossGates) の高い空間で開く。迷路の入口の小部屋の天井ははしごの縦穴
-            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL || room == SONG_PASS) {
+            if (room == E3_CORRIDOR || room == HEART_CORRIDOR || room == MAZE_ENTRY_ROOM || room == MAZE_ENTRY_ROOM2 || room == BELL) {
                 continue;
             }
             int holes = 0;
@@ -572,7 +572,7 @@ public final class TitanBackSelfTest {
     // 看板: 背中に置かれた看板は、碑文と試練の入口の一言だけ (allSigns) で、どの行も看板の幅に収まること (日本語・英語)。
     // 囁き (看板の代わりの案内) の文が lang にあること
     // 版 13 で足した碑 (鐘楼・歌の祠・書庫・胸びれの先・尾の展望・宿)。書庫は sign.skyabyss.library_1〜11
-    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.song_shrine", "sign.skyabyss.fin_left",
+    private static final Set<String> NEW_TABLETS = Set.of("sign.skyabyss.bell_hint", "sign.skyabyss.fin_left",
             "sign.skyabyss.fin_right", "sign.skyabyss.tail_vista", "sign.skyabyss.camp_page", "sign.skyabyss.fin_left_lore", "sign.skyabyss.fin_right_lore");
 
     private static void checkSigns(ServerLevel level, List<String> failures) {

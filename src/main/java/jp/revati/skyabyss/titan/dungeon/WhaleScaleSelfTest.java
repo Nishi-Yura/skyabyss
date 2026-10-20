@@ -78,7 +78,7 @@ public final class WhaleScaleSelfTest {
     private static void checkVersion18(ServerLevel back, List<String> f) {
         // 材質: ゾーンごとの壁が、少なくとも 8 種類はちがう
         java.util.Set<net.minecraft.world.level.block.Block> walls = new java.util.HashSet<>();
-        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, LIBRARY, SONG_SHRINE, HEART_REST)) {
+        for (Box b : List.of(HUB, W0, WA, E0, E1, CE1, E2, CK_PASS, CK, E3, BELL, LIBRARY, HEART_REST)) {
             walls.add(back.getBlockState(new BlockPos(b.x1() - 1, b.floorY() + 2, (b.z1() + b.z2()) / 2)).getBlock());
         }
         check(f, walls.size() >= 8, "the zones do not read differently: only " + walls.size() + " wall materials " + walls);
@@ -157,7 +157,7 @@ public final class WhaleScaleSelfTest {
             // 初回だけの部屋と、既知の道で開く戸
             TitanBackTrials.installGates(back);
             WhaleFirstRun.register();
-            for (String id : List.of(BellTower.FIRST_ROOM, WhaleFirstRun.CK)) {
+            for (String id : List.of(BellTower.FIRST_ROOM, WhaleFirstRun.E2, WhaleFirstRun.CK)) {
                 check(f, FirstRun.room(id) != null && FirstRun.room(id).firstRunOnly, "first-run room is not registered: " + id);
             }
             check(f, FirstRun.room(WhaleFirstRun.LIBRARY_ROOM) != null && !FirstRun.room(WhaleFirstRun.LIBRARY_ROOM).firstRunOnly, "the library is not an optional wing");

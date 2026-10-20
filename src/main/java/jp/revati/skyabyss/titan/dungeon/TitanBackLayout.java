@@ -120,9 +120,7 @@ public final class TitanBackLayout {
     public static final List<BlockPos> HEART_GATE = wall(-3, 3, FLOOR + 1, FLOOR + 6, HEART_GATE_Z, true);
     // 心臓を倒すと現れる光の柱。上に立つと尾の台へ戻される
     public static final BlockPos HEART_PILLAR = new BlockPos(HEART_CX, FLOOR + 1, HEART_CZ);
-    // 歌の祠 (心臓の前の静かな部屋。21 の 3.3。休み場 heart の西)
-    public static final Box SONG_SHRINE = new Box(-20, -9, -106, -92, FLOOR, 7);
-    public static final Box SONG_PASS = new Box(-8, -7, -98, -94, FLOOR, 5);
+    // 版 24: 歌の祠 (休み場 heart の西の小部屋。看板だけで用がなかった) はなくした
 
     // ---------------------------------------------------------------- 西の翼 (アスレチック)
     public static final Box W0 = new Box(-35, -26, -42, -29, FLOOR, 8);

@@ -33,7 +33,7 @@ ADD['skyabyss'] = {
         'sign.skyabyss.deck_stair.1': 'この階段は', 'sign.skyabyss.deck_stair.2': '試練の階へ', 'sign.skyabyss.deck_stair.3': '続いている', 'sign.skyabyss.deck_stair.4': '(光る床が近道)',
         'sign.skyabyss.deck_hall.1': '試練の階', 'sign.skyabyss.deck_hall.2': '引いた三つと', 'sign.skyabyss.deck_hall.3': '今週の試練の', 'sign.skyabyss.deck_hall.4': '戸だけが開く',
         'objective.skyabyss.trial_board': '試練の板を読んで、挑む試練を確かめよう',
-        'objective.skyabyss.trial_deck': '階段を上って試練の階へ向かおう (光る床でも行ける)',
+        'objective.skyabyss.trial_deck': '階段を上り、試練の階へ向かおう',
         'objective.skyabyss.trial_door': '光る目印の戸から、引いた試練へ入ろう',
     },
     'en_us': {
@@ -42,7 +42,7 @@ ADD['skyabyss'] = {
         'sign.skyabyss.deck_stair.1': 'Stairs up to', 'sign.skyabyss.deck_stair.2': 'the Trial Hall', 'sign.skyabyss.deck_stair.3': '(the glow pad', 'sign.skyabyss.deck_stair.4': 'is faster)',
         'sign.skyabyss.deck_hall.1': 'Trial Hall', 'sign.skyabyss.deck_hall.2': 'Only your three', 'sign.skyabyss.deck_hall.3': 'and the weekly', 'sign.skyabyss.deck_hall.4': 'doors open',
         'objective.skyabyss.trial_board': 'Read the Trial Board to see your trials',
-        'objective.skyabyss.trial_deck': 'Climb the stairs to the Trial Hall (or use the glow pad)',
+        'objective.skyabyss.trial_deck': 'Go up to the Trial Hall',
         'objective.skyabyss.trial_door': 'Enter your trial through the marked door',
     },
 }

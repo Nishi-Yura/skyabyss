@@ -45,7 +45,6 @@ public final class BackMetrics {
         r.add(new Room("entry", "corr", TitanBackLayout.ENTRY, 48));
         r.add(new Room("heart corridor", "corr", TitanBackLayout.HEART_CORRIDOR, 0));
         r.add(new Room("heart rest", "rest", TitanBackLayout.HEART_REST, 49));
-        r.add(new Room("song shrine", "wing", TitanBackLayout.SONG_SHRINE, 0));
         r.add(new Room("w0", "rest", TitanBackLayout.W0, 63));
         r.add(new Room("wa", "trial", TitanBackLayout.WA, 299));
         r.add(new Room("w1", "rest", TitanBackLayout.W1, 63));

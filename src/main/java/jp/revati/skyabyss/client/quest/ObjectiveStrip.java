@@ -150,13 +150,14 @@ public final class ObjectiveStrip {
         }
         Font font = mc.font;
         int want = bandWidth(mc);
-        boolean far = hasFar(c);
+        boolean mazeBig = jp.revati.skyabyss.client.titan.LampBandClient.waypoint() != null;
+        boolean far = hasFar(c) || mazeBig;
         out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.OBJECTIVE, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT, (maxW, maxH) -> {
             int w = Math.min(want, maxW - 6);
             if (w < 60) {
                 return null;
             }
-            int extra = far ? 11 : 0;
+            int extra = far ? (mazeBig ? 26 : 11) : 0;
             int maxLines = (maxH - 2 - extra) / 10;
             if (maxLines < 1) {
                 return null;
@@ -319,9 +320,23 @@ public final class ObjectiveStrip {
             far = Component.translatable("gui.skyabyss.guide.inside").getString();
             arrow = false;
         }
+        // 光海の迷路 (版 22): ひし形の標のかわりに、帯の矢印を大きく (メインのクエストの矢印と同じ見やすさ) し、迷路の道のりの次のマスを指して距離を出す
+        net.minecraft.world.phys.Vec3 mazeWay = jp.revati.skyabyss.client.titan.LampBandClient.waypoint();
+        boolean big = mazeWay != null;
+        if (big) {
+            double d = Math.sqrt(mc.player.position().distanceToSqr(mazeWay.x, mc.player.getY(), mazeWay.z));
+            far = jp.revati.skyabyss.quest.ObjectiveRules.distanceLabel(d, "");
+            if (far.isEmpty()) {
+                far = Math.max(1, (int) Math.round(d)) + " m";
+            }
+            arrowDeg = NavMath.arrowDegrees(mc.player.getX(), mc.player.getZ(), mazeWay.x, mazeWay.z, mc.player.getYRot());
+            vertical = NavMath.vertical(mazeWay.y - mc.player.getY());
+            target = BlockPos.containing(mazeWay);
+            arrow = true;
+        }
         boolean withArrow = arrow && target != null && !far.isEmpty();
         int w = rect.w() - 6;
-        int extra = far.isEmpty() ? 0 : 11;
+        int extra = far.isEmpty() ? 0 : big ? 26 : 11;
         java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 2 - extra) / 10));
         int bottom = y + lines.size() * 10 + extra - 2;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
@@ -341,15 +356,30 @@ public final class ObjectiveStrip {
             // 距離は最後の行 (矢印と、その右に距離)
             int fy = ty;
             int fx = x + 1;
-            if (withArrow) {
-                GuideArrow.draw(g, fx + GuideArrow.SIZE / 2, fy + 4, arrowDeg, a);
-                fx += GuideArrow.SIZE + 3;
+            if (withArrow && big) {
+                // 2 倍の矢印 (22 画素) と、その右に大きめの距離
+                g.pose().pushPose();
+                g.pose().translate(fx + GuideArrow.SIZE, fy + GuideArrow.SIZE - 1, 0);
+                g.pose().scale(2f, 2f, 1f);
+                GuideArrow.draw(g, 0f, 0f, arrowDeg, a);
+                g.pose().popPose();
+                fx += GuideArrow.SIZE * 2 + 5;
                 if (vertical != 0) {
-                    GuideArrow.drawVertical(g, fx + 2, fy + 4, vertical > 0, a);
+                    GuideArrow.drawVertical(g, fx + 2, fy + 10, vertical > 0, a);
                     fx += 9;
                 }
+                g.drawString(font, far, fx, fy + 7, ((int) (255 * a)) << 24 | 0xFFD866, true);
+            } else {
+                if (withArrow) {
+                    GuideArrow.draw(g, fx + GuideArrow.SIZE / 2, fy + 4, arrowDeg, a);
+                    fx += GuideArrow.SIZE + 3;
+                    if (vertical != 0) {
+                        GuideArrow.drawVertical(g, fx + 2, fy + 4, vertical > 0, a);
+                        fx += 9;
+                    }
+                }
+                g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
             }
-            g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
         }
     }
 }

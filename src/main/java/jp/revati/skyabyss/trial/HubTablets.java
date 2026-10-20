@@ -61,8 +61,115 @@ public final class HubTablets {
         return found;
     }
 
+    // ---------------------------------------------------------------- 弧の並べ (版 22。試遊の声「碑の置き方が雑」)
+    // 三つの碑を、休み場 (hub) のまわりに、左右対称の浅い弧として並べる。方眼に合わせ (整数の座標)、高さ (hub と同じ床)・向き (hub のほう。三つとも同じ向き) をそろえ、
+    // 台座 (その巨神の材質) の上に立て (向きは弧の外側 = 入ってきた人に表が見える)、台座のまわりの床に灯り (四隅)。左から 歩・智・闘 の順 (岩鯨は石の番号 0 歩・2 智・1 闘 の並び)
+    // 弧の向きは、南・北・東・西の順に、全部入る最初のもの。型は (横のずれ, 弧の両端の奥行き, 真ん中の奥行き) を小さい順に
+    private static final int[][] ARCS = {{5, 4, 6}, {6, 4, 7}, {4, 3, 5}, {7, 5, 8}, {5, 3, 6}};
+    private static final Direction[] ARC_SIDES = {Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST};
+
+    // 左から右へ並べる試練の名前 (歩・智・闘)
+    static List<String> arcOrder(String titan) {
+        List<String> keys = TrialRegions.keys(titan);
+        if (keys.size() == 3 && Titans.STONE_WHALE.equals(titan)) {
+            return List.of(keys.get(0), keys.get(2), keys.get(1));
+        }
+        return keys;
+    }
+
+    // 台座の材質・灯り (巨神の背の材質に合わせる)
+    static BlockState pedestal(String titan) {
+        return switch (titan) {
+            case Titans.TIDE_SHELL -> net.minecraft.world.level.block.Blocks.DARK_PRISMARINE.defaultBlockState();
+            case Titans.THUNDER_WING -> net.minecraft.world.level.block.Blocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState();
+            case Titans.EMBER -> net.minecraft.world.level.block.Blocks.POLISHED_BLACKSTONE.defaultBlockState();
+            default -> net.minecraft.world.level.block.Blocks.POLISHED_DEEPSLATE.defaultBlockState();
+        };
+    }
+
+    static BlockState inlayLight(String titan) {
+        return Titans.EMBER.equals(titan) ? net.minecraft.world.level.block.Blocks.SHROOMLIGHT.defaultBlockState()
+                : net.minecraft.world.level.block.Blocks.SEA_LANTERN.defaultBlockState();
+    }
+
+    // 弧の碑の一つ分が入るか: 台座の床 (足もとの高さ = hub と同じ) の上に、台座 1・碑 1・頭上 2 が空き、まわりの四方が空気
+    private static boolean arcFree(ServerLevel back, String titan, BlockPos feet) {
+        BlockState at = back.getBlockState(feet);
+        if (!(at.isAir() || at.is(pedestal(titan).getBlock())) || !back.getBlockState(feet.below()).isFaceSturdy(back, feet.below(), Direction.UP)) {
+            return false;
+        }
+        BlockPos tab = feet.above();
+        BlockState t = back.getBlockState(tab);
+        if (!(t.isAir() || t.is(ModBlocks.TRIAL_TABLET.get())) || !back.getBlockState(tab.above()).isAir() || !back.getBlockState(tab.above(2)).isAir()) {
+            return false;
+        }
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (!back.getBlockState(feet.relative(d)).isAir() || !back.getBlockState(tab.relative(d)).isAir()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 弧の置き場 (左から 歩・智・闘)。全部入る型がなければ空
+    static List<Spot> findArc(ServerLevel back, String titan, BlockPos hub) {
+        List<String> order = arcOrder(titan);
+        if (order.size() != 3) {
+            return List.of();
+        }
+        for (Direction side : ARC_SIDES) {
+            // 碑の表 (向き) は弧の外側 (side)。表を見る人 (side の反対を向く人) の右手が、左から右への並びの右
+            Direction right = side.getCounterClockWise();
+            for (int[] arc : ARCS) {
+                // 弧の左 (a = 奥行き arc[1]、横 -arc[0])・真ん中 (奥行き arc[2])・右。hub の足もとの高さそのまま
+                BlockPos[] feet = new BlockPos[3];
+                int[] lateral = {-arc[0], 0, arc[0]};
+                int[] depth = {arc[1], arc[2], arc[1]};
+                boolean ok = true;
+                for (int i = 0; i < 3 && ok; i++) {
+                    BlockPos p = hub.relative(side, depth[i]).relative(right, lateral[i]);
+                    feet[i] = p;
+                    ok = arcFree(back, titan, p);
+                }
+                if (ok) {
+                    List<Spot> out = new ArrayList<>();
+                    for (int i = 0; i < 3; i++) {
+                        // 碑は台座の上 (feet の 1 上)。向きは三つとも弧の外側 (side)
+                        out.add(new Spot(order.get(i), feet[i].above(), side));
+                    }
+                    return out;
+                }
+            }
+        }
+        return List.of();
+    }
+
+    // 台座とまわりの灯りを置く (何度でも)。碑の足もと (pos の 1 下) が台座、その 1 下の床の四隅 (台座から斜めに 1) が灯り
+    static void placePedestal(ServerLevel back, String titan, BlockPos tablet) {
+        BlockPos base = tablet.below();
+        BlockState ped = pedestal(titan);
+        if (!back.getBlockState(base).is(ped.getBlock())) {
+            back.setBlock(base, ped, 3);
+        }
+        BlockState lamp = inlayLight(titan);
+        for (int dx = -1; dx <= 1; dx += 2) {
+            for (int dz = -1; dz <= 1; dz += 2) {
+                BlockPos c = base.offset(dx, -1, dz);
+                if (!back.getBlockState(c).is(lamp.getBlock()) && back.getBlockState(c).isFaceSturdy(back, c, Direction.UP)) {
+                    back.setBlock(c, lamp, 3);
+                }
+            }
+        }
+    }
+
     // 鼓動の間の休み場のまわり (半径 4〜9) の、碑を立てられる床を決まった順に探す。角度は 12 度おき、半径は 6・5・7・4・8・9 の順
     static List<Spot> find(ServerLevel back, String titan, BlockPos hub) {
+        List<Spot> arc = findArc(back, titan, hub);
+        return arc.isEmpty() ? findScan(back, titan, hub) : arc;
+    }
+
+    // 弧が入らない作りのとき (予備): 休み場のまわりの開いた床から、決まった順に三つ
+    static List<Spot> findScan(ServerLevel back, String titan, BlockPos hub) {
         List<BlockPos> cand = new ArrayList<>();
         int[] radii = {6, 5, 7, 4, 8, 9};
         for (int a = 0; a < 360; a += 12) {
@@ -155,6 +262,10 @@ public final class HubTablets {
     public static int install(ServerLevel back, String titan) {
         int n = 0;
         for (Spot s : spots(back, titan)) {
+            BlockState under = back.getBlockState(s.pos().below());
+            if (s.pos().getY() == ReturnBeacons.hubOf(titan).getY() + 1 && (under.isAir() || under.is(pedestal(titan).getBlock()))) {
+                placePedestal(back, titan, s.pos());
+            }
             if (!back.getBlockState(s.pos()).is(ModBlocks.TRIAL_TABLET.get())) {
                 back.setBlock(s.pos(), unlit(s.facing()), 3);
                 n++;
