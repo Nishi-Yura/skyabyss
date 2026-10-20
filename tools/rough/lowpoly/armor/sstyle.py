@@ -83,37 +83,38 @@ def helmet(T, rar, v):
     b = "armorHead"
     f = []
     cap = V_["cowl"] == "cap"
-    lv = [(24.5, 4.8, -4.7, 4.8), (26.6, 5.1, -5.0, 5.3), (28.7, 5.1, -5.0, 5.3), (30.6, 4.7, -4.8, 4.9),
-          (32.3, 3.7, -3.9, 4.0), (33.4, 1.9, -2.1, 2.3)]
+    # 頭巾は頭の箱 (帽子の層 ±4.5、y 23.5〜32.5) をすっぽり包む大きさ (hoodchk: 余白 0.13 以上)。頭がはみ出さない
+    lv = [(24.2, 5.6, -5.6, 5.7), (26.4, 5.85, -5.85, 5.95), (28.8, 5.85, -5.85, 5.95), (31.0, 5.7, -5.7, 5.8),
+          (32.8, 5.5, -5.5, 5.6), (34.0, 4.1, -4.2, 4.3), (34.7, 2.0, -2.1, 2.3)]
     if cap:
-        lv = [(25.8, 4.6, -4.6, 4.6), (27.4, 4.9, -4.9, 5.0), (29.2, 4.9, -4.9, 5.0), (31.0, 4.4, -4.5, 4.6),
-              (32.5, 3.3, -3.6, 3.8), (33.4, 1.7, -1.9, 2.2)]
-    rings = [sring(y, hx, zf, zb, n=12, p=2.9) for (y, hx, zf, zb) in lv]
+        lv = [(25.4, 5.6, -5.6, 5.7), (27.4, 5.8, -5.8, 5.9), (29.2, 5.8, -5.8, 5.9), (31.0, 5.65, -5.65, 5.75),
+              (32.8, 5.45, -5.45, 5.55), (33.9, 3.9, -4.0, 4.1), (34.5, 1.8, -1.9, 2.2)]
+    rings = [sring(y, hx, zf, zb, n=16, p=4.0) for (y, hx, zf, zb) in lv]
     sh = dloft(b, "cloth", rings, caps=(False, "cloth"))
     ymax = 29.9 if not cap else 29.6
     for fc in sh:
         c = fc.verts.mean(0)
-        if fc.verts[:, 1].max() < ymax + 1e-6 and fc.normal[2] < -0.35 and abs(c[0]) < 3.6:
+        if fc.verts[:, 1].max() < ymax + 1e-6 and fc.normal[2] < -0.35 and abs(c[0]) < 4.0:
             continue
         f.append(fc)
     y0 = 29.2     # 額の環
-    f += dloft(b, "trim", [sring(y0, 5.12, -5.12, 5.5, n=12, p=2.9), sring(y0 + 0.35, 5.3, -5.3, 5.7, n=12, p=2.9),
-                           sring(y0 + 1.15, 5.3, -5.3, 5.7, n=12, p=2.9), sring(y0 + 1.5, 5.06, -5.06, 5.44, n=12, p=2.9)],
+    f += dloft(b, "trim", [sring(y0, 5.8, -5.8, 5.9, n=16, p=4.0), sring(y0 + 0.35, 6.05, -6.05, 6.15, n=16, p=4.0),
+                           sring(y0 + 1.15, 6.05, -6.05, 6.15, n=16, p=4.0), sring(y0 + 1.5, 5.8, -5.8, 5.9, n=16, p=4.0)],
                mats=["trim", "trim", "trim"])
-    f += gem(b, (0, 30.0, -5.6), (1.4, 1.1, 0.55))
+    f += gem(b, (0, 30.0, -6.3), (1.4, 1.1, 0.55))
     if not cap:
         for s in (-1, 1):
-            f += bplate(b, "plate", "bevel", ngon(3.0, 4.2, 8, taper=0.3), c=(s * 5.1, 26.6, -1.6), R=np.array([[0, 0, -1.0 * s], [0, 1.0, 0], [1.0 * s, 0, 0]]), h=0.8, ins=0.5, ch=0.35, bow=0.5)
+            f += bplate(b, "plate", "bevel", ngon(3.0, 4.2, 8, taper=0.3), c=(s * 5.85, 26.6, -1.6), R=np.array([[0, 0, -1.0 * s], [0, 1.0, 0], [1.0 * s, 0, 0]]), h=0.8, ins=0.5, ch=0.35, bow=0.5)
     # 冠: S1 = 太い 1 枚の流れる刃 / S2 = 頭の弧に沿った刃の列 (額 → 頭頂 → うなじ) / S3 = 後頭の放射状の刃 (光背)
     n = V_["crest"]
     if v == "S1":
-        f += blade(T, b, (0, 30.6, -3.6), (0, 0.86, 0.34), 6.4, 3.8, axis=(0, 0, 1), sweep=0.0, h=1.0)
+        f += blade(T, b, (0, 31.4, -4.2), (0, 0.86, 0.34), 6.4, 3.8, axis=(0, 0, 1), sweep=0.0, h=1.0)
     elif v == "S2":
         for i in range(n):
             t = (i + 0.5) / n
             a = math.radians(-62 + 140 * t)
-            z, y = 4.9 * math.sin(a), 29.0 + 4.5 * math.cos(a)
-            nz, ny = z / 5.0 ** 2, (y - 29.0) / 4.6 ** 2
+            z, y = 5.6 * math.sin(a), 29.0 + 5.3 * math.cos(a)
+            nz, ny = z / 5.7 ** 2, (y - 29.0) / 5.4 ** 2
             nn = math.hypot(nz, ny)
             d = (0, ny / nn * 0.8 + 0.3, nz / nn * 0.9 + 0.35)
             Lh = 3.4 + 3.0 * math.sin(math.pi * t)
@@ -123,13 +124,13 @@ def helmet(T, rar, v):
             a = -68 + 136.0 * i / (n - 1)
             ar = math.radians(a)
             L_ = 7.4 - 2.6 * abs(a) / 68.0 + (0.8 if i == n // 2 else 0)
-            f += blade(T, b, (math.sin(ar) * 3.4, 31.0 + math.cos(ar) * 1.6, 3.0 + 0.4 * abs(a) / 68), (math.sin(ar), math.cos(ar), 0.14), L_,
+            f += blade(T, b, (math.sin(ar) * 3.8, 32.0 + math.cos(ar) * 1.8, 3.0 + 0.4 * abs(a) / 68), (math.sin(ar), math.cos(ar), 0.14), L_,
                        3.4, axis=(0, 0, 1), sweep=-0.4 * math.sin(ar), h=0.9)
     # 側翼 (耳の上): 冠と同じ形の刃を左右へ
     nf = V_["fins"] + (1 if (rar != "common" and V_["fins"] == 0) else 0)
     for s in (-1, 1):
         for k in range(nf):
-            f += blade(T, b, (s * 5.0, 29.8 - 1.3 * k, 0.4 - 1.6 * k), (s * 0.8, 0.45 - 0.1 * k, 0.5 + 0.4 * k),
+            f += blade(T, b, (s * 5.75, 29.8 - 1.3 * k, 0.4 - 1.6 * k), (s * 0.8, 0.45 - 0.1 * k, 0.5 + 0.4 * k),
                        (5.0 if k == 0 else 3.6) * (1.12 if rar == "legend" else 1.0), 2.4 if k == 0 else 2.0,
                        axis=(0, 0, 1), sweep=-s * 0.5 * 0)
     return {b: f}
