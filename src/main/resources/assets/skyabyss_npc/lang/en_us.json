@@ -179,7 +179,7 @@
   "message.skyabyss.npc.handed": "Handed over %s ×%s",
   "growth.skyabyss.reason.npc": "Conversation",
   "gui.skyabyss.quest.log": "Quest Log",
-  "gui.skyabyss.quest.empty": "Nothing has begun yet.",
+  "gui.skyabyss.quest.empty": "Nothing begun yet",
   "gui.skyabyss.quest.section.main": "Main",
   "gui.skyabyss.quest.section.sub": "Side",
   "gui.skyabyss.quest.section.done": "Finished",

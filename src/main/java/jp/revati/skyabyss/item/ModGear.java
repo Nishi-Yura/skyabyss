@@ -60,12 +60,20 @@ public interface ModGear {
                 + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath() + ".story";
     }
 
+    // 由来の一行のキー。武器は「〇〇の専用武器」(origin_weapon)、防具・装身具は「専用装備」。武器の版がない由来は装備のまま
+    static String originKey(ItemStack stack) {
+        String dungeon = stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale";
+        boolean weapon = !(stack.getItem() instanceof net.minecraft.world.item.ArmorItem)
+                && !(stack.getItem() instanceof jp.revati.skyabyss.item.accessory.Accessory);
+        String weaponKey = "gear.skyabyss.origin_weapon." + dungeon;
+        return weapon && net.minecraft.locale.Language.getInstance().has(weaponKey) ? weaponKey : "gear.skyabyss.origin." + dungeon;
+    }
+
     // ツールチップ: 階級と由来、説明、物語の一行、強化の段階
     static void tooltip(ItemStack stack, List<Component> tooltip, GearTier tier, String descKey, boolean enhanceable) {
         tooltip.add(Component.translatable("gear.skyabyss.tier." + tier.key).withStyle(s -> s.withColor(tier.color))
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
-                .append(Component.translatable("gear.skyabyss.origin." + (stack.getItem() instanceof ModGear g ? g.dungeon() : "stone_whale"))
-                        .withStyle(ChatFormatting.GRAY)));
+                .append(Component.translatable(originKey(stack)).withStyle(ChatFormatting.GRAY)));
         tooltip.add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         // 物語の一行 (巨神の声で、短く。灰色の斜体)。キー item.skyabyss.<id>.story があるときだけ (assets/skyabyss_gear_story/lang)
         String storyKey = storyKey(stack);

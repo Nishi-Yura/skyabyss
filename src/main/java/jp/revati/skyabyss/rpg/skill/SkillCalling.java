@@ -44,6 +44,23 @@ public final class SkillCalling {
         return 0;
     }
 
+    // 進みで「選べる」に届いているか (クリエイティブの特例を含まない)。自動の案内はこれを見る
+    public static boolean earned(ServerPlayer player) {
+        if (!SkillRules.CALLINGS || player instanceof FakePlayer) {
+            return false;
+        }
+        SkillData d = SkillManager.get(player);
+        return earnedAt(Progression.stage(player), d.hasCalling(), !d.calling2.isEmpty());
+    }
+
+    // 進み (止めた巨神の数) と選び済みから、自動の案内をしてよいか。クリエイティブかどうかは関係しない
+    public static boolean earnedAt(int stage, boolean hasFirst, boolean hasSecond) {
+        if (!hasFirst) {
+            return stage >= FIRST_STAGE;
+        }
+        return !hasSecond && stage >= SECOND_STAGE;
+    }
+
     // 自己テストなどから、進みと関係なく決める
     public static Result choose(ServerPlayer player, String treeId, boolean ignoreStage) {
         SkillTree tree = SkillTree.byId(treeId);
@@ -109,6 +126,10 @@ public final class SkillCalling {
         sendState(player);
         Tasks.later(delay, () -> {
             if (player.hasDisconnected() || player.isRemoved() || !player.isAlive() || which(player) == 0) {
+                return;
+            }
+            // 始まりのとき (進みが足りない) は案内しない。クリエイティブでも、K の画面から自分で選ぶだけ
+            if (!force && !earned(player)) {
                 return;
             }
             // 心臓の報酬の画面が先 (選び終わったあとにここへ来る)

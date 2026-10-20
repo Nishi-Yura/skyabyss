@@ -34,9 +34,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class PouchClient {
     public static final KeyMapping USE_KEY = new KeyMapping("skyabyss_pouch.key.use", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.POUCH_USE, "key.categories.skyabyss");
     public static final KeyMapping OPEN_KEY = new KeyMapping("skyabyss_pouch.key.open", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.categories.skyabyss");
+            InputConstants.Type.KEYSYM, jp.revati.skyabyss.KeyDefaults.POUCH_OPEN, "key.categories.skyabyss");
     // 長押しとみなす長さ (tick。4 = 0.2 秒)
     public static final int HOLD_TICKS = 4;
 
