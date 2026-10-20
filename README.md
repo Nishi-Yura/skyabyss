@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://nishi-yura.github.io/skyabyss/">
-    <img src="docs/readme/plate_title.png" width="840" alt="天と淵のあいだ　BETWEEN THE SKY AND THE ABYSS　空を追う人の旅の手帳　v0.2.2 ベータ版">
+    <img src="docs/readme/plate_title.png" width="840" alt="天と淵のあいだ　BETWEEN THE SKY AND THE ABYSS　空を追う人の旅の手帳　v0.3.1 ベータ版">
   </a>
 </p>
 
@@ -25,7 +25,7 @@
 ## かんたんな導入
 
 1. NeoForge 1.21.1 を入れて、一度起動する。
-2. `skyabyss-0.2.2.jar` と GeckoLib の jar を、どちらも `mods` フォルダへ入れる（サーバーなら、サーバーの `mods` にも）。
+2. `skyabyss-0.3.1.jar` と GeckoLib の jar を、どちらも `mods` フォルダへ入れる（サーバーなら、サーバーの `mods` にも）。
 3. 新しいワールドを作る。難易度はピースフル以外。一人でも、仲間と 6 人までで遊べます（みんなで同じ jar を）。
 
 jar は開発者から受け取るか、ソースから `./gradlew build` で作ると `build/libs/` に出ます。

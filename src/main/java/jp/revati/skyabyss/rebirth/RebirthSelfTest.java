@@ -313,6 +313,8 @@ public final class RebirthSelfTest {
                 }
             }
         }
+        // 前の実行の札が同じ世界 (run/) に残っていることがあるので、先に消す (世界は実行をまたいで残る)
+        RebirthFx.graveRemoved(level, base);
         Rebirths.setCount(p, 0);
         RebirthFx.graveCreated(p, level, base);
         check(f, RebirthFx.labels(level, base).isEmpty(), "no flair for a player who has not reborn");

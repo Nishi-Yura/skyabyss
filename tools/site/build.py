@@ -27,8 +27,6 @@ def main():
     pages_c.story()
     pages_c.faq()
     pages_c.changelog()
-    pages_c.alt_b()
-    pages_c.alt_c()
     print("built")
 
 

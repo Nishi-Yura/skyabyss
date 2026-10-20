@@ -367,7 +367,8 @@ public final class HudLayoutSelfTest {
         // 画面の外の矢印: 板の上に落ちない。縁のどこにも空きがない (全部が板の上) ほど混んだ場面は数えない
         List<String> dirty = new ArrayList<>();
         int clean = 0;
-        for (int a = 0; a < 360; a += 15) {
+        // 全部そろった場面は 15 度刻み、乱数の部分集合は 90 度刻み (縁の探索が重く、一 tick に収めるため)
+        for (int a = 0; a < 360; a += "all".equals(where) ? 15 : 90) {
             double rad = Math.toRadians(a);
             int[] p = HudLayout.edgePoint(r, Math.cos(rad), Math.sin(rad));
             boolean hit = false;

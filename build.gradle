@@ -227,3 +227,25 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// 自己テスト (SKYABYSS_SELFTEST=1) のときだけ、サーバーのウォッチドッグを切る (max-tick-time=-1)。
+// 重い段 (チャンクの同期生成・配置の検査) が 1 tick で 60 秒を超えると、サーバーが「固まった」と見なされて落ちるため。
+// ふつうの runServer では触らない (server.properties はそのまま)。
+def selftestProps = layout.projectDirectory.file('run/server.properties').asFile
+def selftestEnv = providers.environmentVariable('SKYABYSS_SELFTEST')
+tasks.named('runServer') {
+    doFirst {
+        if (selftestEnv.isPresent()) {
+            def f = selftestProps
+            def lines = f.exists() ? f.readLines('UTF-8') : []
+            def found = false
+            lines = lines.collect { l ->
+                if (l.startsWith('max-tick-time=')) { found = true; return 'max-tick-time=-1' }
+                return l
+            }
+            if (!found) lines << 'max-tick-time=-1'
+            f.parentFile.mkdirs()
+            f.write(lines.join(System.lineSeparator()) + System.lineSeparator(), 'UTF-8')
+        }
+    }
+}

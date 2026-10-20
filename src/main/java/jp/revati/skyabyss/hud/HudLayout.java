@@ -961,8 +961,11 @@ public final class HudLayout {
         int[] best = {(int) Math.round(p0[0]), (int) Math.round(p0[1])};
         // 余白 10 で空きを探し、なければ余白なし (板の上でなければよい) で探す
         // 札 (ラベル) は矢印の横へ 100 ほど広がるので、まずは横に広い余白 (64 x 12)、次に 10、最後は余白なしで探す
+        // 板の一覧は一度だけ取り、余白ぶん広げた形も余白ごとに一度だけ作る (周を 4 px 刻みで探るので、探るたびに作ると重い)
+        List<Rect> solids = r.solids(false);
         for (int[] margin : new int[][] {{64, 12}, {10, 10}, {0, 0}}) {
-            if (!blocked(r, best[0], best[1], margin[0], margin[1])) {
+            Rect[] grown = grow(solids, margin[0], margin[1]);
+            if (!blocked(grown, best[0], best[1])) {
                 return best;
             }
             for (int step = 4; step < perimeter / 2; step += 4) {
@@ -970,7 +973,7 @@ public final class HudLayout {
                     double pos = at + dir * step;
                     pos = ((pos % perimeter) + perimeter) % perimeter;
                     int[] q = perimeterPoint(pos, x0, y0, x1, y1);
-                    if (!blocked(r, q[0], q[1], margin[0], margin[1])) {
+                    if (!blocked(grown, q[0], q[1])) {
                         return q;
                     }
                 }
@@ -979,10 +982,19 @@ public final class HudLayout {
         return best;
     }
 
-    // 矢印 (十数 px) が重なるか: 障害物を margin 広げて調べる
-    private static boolean blocked(Result r, int x, int y, int mx, int my) {
-        for (Rect o : r.solids(false)) {
-            if (new Rect(o.x - mx, o.y - my, o.w + 2 * mx, o.h + 2 * my).contains(x, y)) {
+    private static Rect[] grow(List<Rect> solids, int mx, int my) {
+        Rect[] out = new Rect[solids.size()];
+        for (int i = 0; i < out.length; i++) {
+            Rect o = solids.get(i);
+            out[i] = mx == 0 && my == 0 ? o : new Rect(o.x - mx, o.y - my, o.w + 2 * mx, o.h + 2 * my);
+        }
+        return out;
+    }
+
+    // 矢印 (十数 px) が重なるか: 余白ぶん広げた障害物のどれかに入るか
+    private static boolean blocked(Rect[] grown, int x, int y) {
+        for (Rect o : grown) {
+            if (o.contains(x, y)) {
                 return true;
             }
         }
