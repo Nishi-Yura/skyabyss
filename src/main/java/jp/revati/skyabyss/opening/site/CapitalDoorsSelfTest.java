@@ -76,6 +76,20 @@ public final class CapitalDoorsSelfTest {
                 }
             }
         }
+        // 社の祭壇 (転生の台座) の印、組合の中の言伝ての板 2 枚、都の鐘のそばに板を自動で立てない記録
+        check(f, e.extra("altar") != null, "the shrine altar mark is missing");
+        BlockPos guildDoor = e.extra("open_guild");
+        if (guildDoor != null) {
+            int boards = 0;
+            for (BlockPos q : BlockPos.betweenClosed(guildDoor.offset(-45, -2, -45), guildDoor.offset(45, 4, 45))) {
+                if (level.getBlockState(q).is(jp.revati.skyabyss.quest.free.FreeQuestSetup.MESSAGE_BOARD.get())) {
+                    boards++;
+                }
+            }
+            check(f, boards == 2, "the guild should hold 2 message boards, found " + boards);
+        }
+        BlockPos bell = e.extra("bell");
+        check(f, bell != null && jp.revati.skyabyss.quest.free.FreeQuestEvents.boardSuppressed(level, bell), "a message board may still be placed by the capital bell");
         // 組合を開ける: 戸が消え、記録が残る
         if (!CapitalDoors.opened(server, "guild")) {
             BlockPos at = e.extra("open_guild");

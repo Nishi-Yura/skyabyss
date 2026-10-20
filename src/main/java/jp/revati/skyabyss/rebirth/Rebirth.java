@@ -207,6 +207,18 @@ public final class Rebirth {
     // ---------------------------------------------------------------- 台座
     // 転生できる所 (背中の鼓動の間の台座のそば)。背中の外・台座から遠いところでは false
     public static boolean nearAltar(Player player) {
+        // 都の社の祭壇 (社が開いたあと。docs/design/33 の 2.2「以後: 転生の台座（社）」)
+        if (player.level().dimension() == net.minecraft.world.level.Level.OVERWORLD && player.getServer() != null
+                && jp.revati.skyabyss.opening.site.CapitalDoors.opened(player.getServer(), "shrine")) {
+            BlockPos a = jp.revati.skyabyss.opening.OpeningSites.capitalAltar(player.getServer()).orElse(null);
+            if (a != null) {
+                double ax = player.getX() - (a.getX() + 0.5);
+                double az = player.getZ() - (a.getZ() + 0.5);
+                if (ax * ax + az * az <= ALTAR_RANGE * ALTAR_RANGE && Math.abs(player.getY() - a.getY()) <= ALTAR_HEIGHT) {
+                    return true;
+                }
+            }
+        }
         String titan = Titans.titanOfBack(player.level().dimension());
         if (titan == null) {
             return false;

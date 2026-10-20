@@ -47,11 +47,15 @@ public final class ShelterBuilder {
         }
         // 章で開く施設の戸の印と碑の印 (CapitalDoors が読む)
         for (String key : List.of("open_guild", "open_shrine", "open_keep", "open_keep2", "open_hall",
-                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser")) {
+                "sign_guild", "sign_shrine", "sign_keep", "sign_hall", "chaser", "altar")) {
             BlockPos at = job.mark(key);
             if (at != null) {
                 job.entry.extra(key, at);
             }
+        }
+        // 都の言伝ての板は組合の中 (設計図が置く)。鐘のそばに自動で立てる板は出さない
+        if (job.mark("altar") != null && job.mark("bell") != null) {
+            jp.revati.skyabyss.quest.free.FreeQuestData.get(job.level.getServer().overworld()).markBoard(job.mark("bell").asLong());
         }
         int villagers = 0;
         for (int i = 1; i <= 10; i++) {

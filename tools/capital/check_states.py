@@ -41,8 +41,30 @@ def load():
     return known
 
 
+def load_mod():
+    """mod のブロック (skyabyss:) の状態の名前を assets の blockstates から。mod のものは厳しく見る (使える状態は json に出るものだけ)"""
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'src', 'main', 'resources', 'assets', 'skyabyss', 'blockstates')
+    known = {}
+    for fn in os.listdir(root):
+        if not fn.endswith('.json'):
+            continue
+        d = json.load(open(os.path.join(root, fn), encoding='utf-8'))
+        props = set()
+        for k in d.get('variants', {}):
+            for kv in k.split(','):
+                if '=' in kv:
+                    props.add(kv.split('=')[0])
+        for part in d.get('multipart', []):
+            w = part.get('when', {})
+            for c in (w.get('OR') or w.get('AND') or [w]):
+                props.update(c.keys())
+        known[fn[:-5]] = props
+    return known
+
+
 def main(paths):
     known = load()
+    mod = load_mod()
     if not known:
         print('no vanilla jar found; skipped')
         return 0
@@ -51,6 +73,18 @@ def main(paths):
         data = json.load(open(p, encoding='utf-8'))
         for s in data['palette']:
             name = s.split('[')[0]
+            if name.startswith('skyabyss:'):
+                n = name[len('skyabyss:'):]
+                if n not in mod:
+                    print('%s: unknown mod block %s' % (os.path.basename(p), s))
+                    bad += 1
+                elif '[' in s:
+                    for kv in s[s.index('[') + 1:-1].split(','):
+                        k = kv.split('=')[0]
+                        if k not in mod[n] and k not in ('waterlogged',):
+                            print('%s: mod block %s has no state %s (has %s)' % (os.path.basename(p), n, k, sorted(mod[n])))
+                            bad += 1
+                continue
             if not name.startswith('minecraft:'):
                 continue
             n = name[len('minecraft:'):]

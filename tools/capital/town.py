@@ -612,8 +612,8 @@ class Town:
         for yy in range(y, y + 5):
             v.set(ix0, yy, iz1, 'ladder[facing=north,waterlogged=false]')
         v.set(ix0 - 1 + 1, y, iz1 - 1 + 1, 'ladder[facing=north,waterlogged=false]') if False else None
-        v.set(ix1, y + 5, iz0, 'red_bed[facing=south,part=head,occupied=false]')
-        v.set(ix1, y + 5, iz0 + 1, 'red_bed[facing=south,part=foot,occupied=false]')
+        v.set(ix1, y + 5, iz0, 'red_bed[facing=north,part=head,occupied=false]')
+        v.set(ix1, y + 5, iz0 + 1, 'red_bed[facing=north,part=foot,occupied=false]')
         v.set(ix0, y + 5, iz0, 'chest[facing=south,type=single,waterlogged=false]')
         v.fill(ix0 + 1, y + 5, iz0, ix0 + 3, y + 6, iz0, 'bookshelf')
         v.set((ix0 + ix1) // 2, y + 8, (iz0 + iz1) // 2, 'lantern[hanging=true,waterlogged=false]')
@@ -1188,6 +1188,95 @@ class Town:
         self.tablet(mx - 1, 0, z1 + 1, 'south', name)
 
 
+
+    # ---------------------------------------------------------------- 閉じた施設の中身 (章で開いたあとに入れる)
+    def furnish_guild(self):
+        """組合 (イサナと会うと開く): 言伝ての板 2 枚 (日替わり・週替わりの頼み)、長机と腰掛け、帳場、暖炉、地図台、吊るした鯨の骨、二階の寝台"""
+        st, v = self.st, self.v
+        w = st.wood
+        v.set(55, 0, -31, 'skyabyss:message_board[facing=south]')
+        v.set(55, 0, -13, 'skyabyss:message_board[facing=north]')
+        for zt in (-26, -17):
+            for x in range(60, 81):
+                if (x - 60) % 5 == 0:
+                    v.set(x, 0, zt, '%s_fence' % w)
+                v.set(x, 1, zt, '%s_slab[type=bottom,waterlogged=false]' % w)
+                if (x - 60) % 5 != 0:
+                    v.set(x, 0, zt - 1, '%s_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]' % w)
+                    v.set(x, 0, zt + 1, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % w)
+            for x in range(62, 80, 6):
+                v.set(x, 2, zt, 'candle[candles=3,lit=true,waterlogged=false]')
+        # 帳場 (東の端)
+        for z in range(-28, -15):
+            v.set(85, 0, z, '%s_planks' % w)
+            v.set(85, 1, z, '%s_slab[type=bottom,waterlogged=false]' % w)
+            v.set(89, 0, z, 'barrel[facing=west,open=false]')
+            v.set(89, 1, z, 'barrel[facing=west,open=false]' if z % 2 else 'bookshelf')
+        v.set(85, 0, -22, 'air')
+        v.set(85, 1, -22, 'air')
+        v.set(86, 2, -24, 'lantern[hanging=false,waterlogged=false]')
+        # 暖炉 (北の壁の真ん中)
+        for x in range(69, 72):
+            v.fill(x, 0, -32, x, 4, -32, 'bricks')
+        v.set(70, 0, -32, 'campfire[facing=south,lit=true,signal_fire=false,waterlogged=false]')
+        v.set(70, 1, -32, 'air')
+        v.set(58, 0, -29, 'cartography_table')
+        v.set(58, 0, -15, 'lectern[facing=north,has_book=false,powered=false]')
+        # 吊るした鯨の骨と灯り
+        for x in range(62, 82, 6):
+            v.set(x, 5, -22, 'chain[axis=y,waterlogged=false]')
+            v.set(x, 4, -22, 'bone_block[axis=x]')
+            v.set(x - 1, 4, -22, 'bone_block[axis=x]')
+            v.set(x + 1, 4, -22, 'bone_block[axis=x]')
+            v.set(x, 5, -28, 'lantern[hanging=true,waterlogged=false]')
+            v.set(x, 5, -16, 'lantern[hanging=true,waterlogged=false]')
+        for x in range(60, 84, 8):
+            v.set(x, 3, -32, '%s_wall_banner[facing=south]' % st.banner_color)
+            v.set(x, 3, -12, '%s_wall_banner[facing=north]' % st.banner_color)
+        # 二階へ梯子、寝台 6
+        for yy in range(0, 7):
+            v.set(90, yy, -13, 'ladder[facing=north,waterlogged=false]')
+        v.set(90, 6, -13, 'ladder[facing=north,waterlogged=false]')
+        for x in range(56, 86, 5):
+            v.set(x, 7, -32, 'red_bed[facing=north,part=head,occupied=false]')
+            v.set(x, 7, -31, 'red_bed[facing=north,part=foot,occupied=false]')
+            v.set(x + 1, 7, -32, 'chest[facing=south,type=single,waterlogged=false]')
+            v.set(x, 11, -26, 'lantern[hanging=true,waterlogged=false]')
+
+    def furnish_keep(self):
+        """砦の本丸の記録の間 (心臓を二つ止めると開く): 順位の石、記録の板 2 枚、本棚と書見台、敷物"""
+        st, v = self.st, self.v
+        y = TER + 1
+        v.set(27, y, -76, 'skyabyss:rebirth_stone')
+        v.set(22, y, -78, 'skyabyss:record_board[facing=south]')
+        v.set(32, y, -78, 'skyabyss:record_board[facing=south]')
+        for z in range(-78, -71):
+            v.fill(20, y, z, 20, y + 3, z, 'bookshelf')
+            v.fill(35, y, z, 35, y + 3, z, 'bookshelf')
+        for x in range(24, 31):
+            for z in range(-75, -71):
+                v.set(x, y, z, 'red_carpet')
+        v.set(24, y, -78, 'lectern[facing=south,has_book=false,powered=false]')
+        v.set(30, y, -78, 'lectern[facing=south,has_book=false,powered=false]')
+        for x in (23, 31):
+            v.set(x, y + 4, -74, 'chain[axis=y,waterlogged=false]')
+            v.set(x, y + 3, -74, 'lantern[hanging=true,waterlogged=false]')
+
+    def furnish_hall(self):
+        """館の書庫 (心臓を三つ止めると開く): 本棚の列、閲覧の机、灯り"""
+        st, v = self.st, self.v
+        y = TER + 1
+        for z in (-92, -89):
+            for x in list(range(-55, -50)) + list(range(-47, -43)):
+                v.fill(x, y, z, x, y + 2, z, 'bookshelf')
+        for x in range(-52, -46):
+            v.set(x, y, -87, '%s_slab[type=top,waterlogged=false]' % st.wood)
+        v.set(-51, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(-48, y, -86, '%s_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]' % st.wood)
+        v.set(-50, y + 1, -87, 'candle[candles=2,lit=true,waterlogged=false]')
+        for x in (-53, -45):
+            v.set(x, y + 4, -90, 'lantern[hanging=true,waterlogged=false]')
+
     # ---------------------------------------------------------------- 名所の作り込み (形を建てたあとに足す)
     def hall_extra(self):
         """空見の館: 正面の列柱の玄関、南の壁の控え柱、棟の小尖塔"""
@@ -1292,6 +1381,7 @@ class Town:
                 v.set(ax, 0, az, st.base.stairs(f, 'bottom'))
         v.set(cx, 2, cz, st.trim2)
         v.set(cx, 3, cz, 'lantern[hanging=false,waterlogged=false]')
+        self.mark('altar', cx, 2, cz)  # 転生の台座 (社が開いたあと右クリックで転生の画面)
         # 篝火
         for (dx, dz) in ((-6, 0), (6, 0), (0, -6), (0, 6)):
             v.set(cx + dx, 0, cz + dz, st.base.full)
@@ -1333,12 +1423,15 @@ class Town:
         self.bell_tower()
         self.storyteller_house()
         self.keep()
+        self.furnish_keep()
         self.hall()
         self.hall_extra()
+        self.furnish_hall()
         self.terrace_gardens()
         self.plaza()
         self.guild()
         self.guild_extra()
+        self.furnish_guild()
         self.shrine()
         self.shrine_extra()
         self.smithy()

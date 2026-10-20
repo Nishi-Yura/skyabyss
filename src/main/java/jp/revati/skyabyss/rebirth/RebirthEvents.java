@@ -124,7 +124,10 @@ public final class RebirthEvents {
         if (event.getLevel().isClientSide || !(event.getEntity() instanceof ServerPlayer player) || event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) {
             return;
         }
-        if (event.getLevel().dimension() != TitanTravel.TITAN_BACK || !isWhalePedestal(event.getPos()) || player.isShiftKeyDown()) {
+        boolean capital = event.getLevel().dimension() == net.minecraft.world.level.Level.OVERWORLD
+                && jp.revati.skyabyss.opening.OpeningSites.capitalAltar(player.server).map(a -> a.equals(event.getPos()) || a.below().equals(event.getPos())).orElse(false)
+                && jp.revati.skyabyss.opening.site.CapitalDoors.opened(player.server, "shrine");
+        if ((!capital && (event.getLevel().dimension() != TitanTravel.TITAN_BACK || !isWhalePedestal(event.getPos()))) || player.isShiftKeyDown()) {
             return;
         }
         if (Rebirth.count(player) <= 0 && Growth.get(player).level < RebirthRules.MIN_LEVEL) {
