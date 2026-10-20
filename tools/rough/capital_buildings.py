@@ -311,6 +311,117 @@ SUBJECTS["keep"] = {
 }
 
 
+# ---------------------------------------------------------------- 鯨追いの組合 3 案 (イサナの一族の組合。板・名簿・順位の石。一章で開く。戸は閉じている)
+def _board(g, x, z, facing="west"):
+    """言伝ての板 (二本柱と庇。07 の 85) を建物の外に"""
+    for dz in (-2, 2):
+        box(g, x, 0, z + dz, x, 3, z + dz, "stripped_spruce_log[axis=y]")
+    box(g, x, 4, z - 3, x, 4, z + 3, "spruce_slab[type=bottom]")
+    box(g, x, 1, z - 1, x, 2, z + 1, "spruce_planks")
+    g.set(x, 0, z - 4, "skyabyss:tablet[facing=%s,standing=true]" % facing)
+
+
+def guild_a(g: Grid, rng=None):
+    """A「長屋の組合」: 45×23 の長い館 (石の腰壁と木の壁、切妻)。棟の上に鯨骨の肋を三つ渡す。西の大戸は閉じ、戸の脇に言伝ての板と名簿の碑"""
+    g.meta = {"rect": [-26, -14, 24, 14], "level": True}
+    x0, z0, x1, z1 = -22, -11, 22, 11
+    box(g, x0, -1, z0, x1, -1, z1, "spruce_planks")
+    shell(g, x0, 0, z0, x1, 2, z1, "stone_bricks", "stripped_spruce_log[axis=y]")
+    shell(g, x0, 3, z0, x1, 7, z1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    for x in range(x0 + 3, x1 - 2, 4):
+        g.set(x, 4, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+        g.set(x, 4, z1, "glass_pane[north=false,south=false,east=true,west=true]")
+    gable(g, x0 - 1, x1 + 1, z0 - 1, z1 + 1, 8)
+    for x in (-14, 0, 14):
+        for i in range(0, 12):
+            g.set(x, 8 + 6 - abs(i - 6) + 7 - 7, z0 - 1 + i * 2 if False else z0 - 1 + i * 2, "bone_block[axis=z]") if False else None
+    # 肋: 棟をまたぐ骨の弧 (三つ)
+    for x in (-14, 0, 14):
+        for i, z in enumerate(range(z0 - 2, z1 + 3)):
+            y = 9 + 11 - abs(z) * 11 // 13
+            g.set(x, y, z, "bone_block[axis=z]")
+    # 西の大戸 (閉じた鉄の戸 2 枚) と板・碑
+    for dz in (-1, 0):
+        g.set(x0, 0, dz, "iron_door[facing=east,half=lower,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+        g.set(x0, 1, dz, "iron_door[facing=east,half=upper,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+    air(g, x0, 2, -1, x0, 2, 0)
+    _board(g, x0 - 3, 6, "west")
+    g.set(x0 - 2, 0, -5, "skyabyss:tablet[facing=west,standing=true]")
+    lantern_post(g, x0 - 2, 0, -3)
+    lantern_post(g, x0 - 2, 0, 3)
+    g.mark("stand", x0 - 6, 0, 0)
+
+
+def guild_b(g: Grid, rng=None):
+    """B「鯨骨の屋根」: 鯨の肋骨そのものを屋根にした館 (骨の弧が 7 本並び、あいだに木の板)。入口に鯨の頭骨の門。前庭に板と碑"""
+    g.meta = {"rect": [-26, -14, 24, 14], "level": True}
+    x0, z0, x1, z1 = -20, -10, 20, 10
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 3, z1, "spruce_planks", "bone_block[axis=y]")
+    for x in range(x0, x1 + 1, 6):
+        for z in range(z0 - 1, z1 + 2):
+            y = 4 + 9 - (abs(z) * 9) // 11
+            g.set(x, y, z, "bone_block[axis=z]")
+            if x + 3 <= x1:
+                g.set(x + 3, y, z, "spruce_slab[type=bottom]") if z % 2 == 0 else g.set(x + 3, y, z, "spruce_planks")
+    for x in range(x0 + 1, x1, 1):
+        if x % 6 != 0 and (x - x0) % 6 != 3:
+            for z in range(z0 - 1, z1 + 2):
+                y = 4 + 9 - (abs(z) * 9) // 11
+                g.set(x, y, z, "spruce_planks")
+    # 頭骨の門 (西): 骨の弧と、目の穴の灯り
+    for i in range(6):
+        g.set(x0 - 4, i, -3 + 0, "bone_block[axis=y]")
+        g.set(x0 - 4, i, 3, "bone_block[axis=y]")
+    box(g, x0 - 4, 6, -3, x0 - 4, 6, 3, "bone_block[axis=z]")
+    g.set(x0 - 4, 7, -1, "bone_block[axis=y]")
+    g.set(x0 - 4, 7, 1, "bone_block[axis=y]")
+    g.set(x0 - 4, 5, -2, "lantern[hanging=true]")
+    g.set(x0 - 4, 5, 2, "lantern[hanging=true]")
+    for dz in (-1, 0):
+        g.set(x0, 0, dz, "iron_door[facing=east,half=lower,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+        g.set(x0, 1, dz, "iron_door[facing=east,half=upper,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+    _board(g, x0 - 7, 7, "west")
+    g.set(x0 - 6, 0, -7, "skyabyss:tablet[facing=west,standing=true]")
+    g.mark("stand", x0 - 9, 0, 0)
+
+
+def guild_c(g: Grid, rng=None):
+    """C「二階の組合」: 二階建ての館 (一階は石、二階は木の張り出し)。西に見張りの帆柱 (鯨追いの印の旗) と、二階の露台。板は露台の下"""
+    g.meta = {"rect": [-26, -14, 24, 14], "level": True}
+    x0, z0, x1, z1 = -20, -10, 20, 10
+    box(g, x0, -1, z0, x1, -1, z1, "stone_bricks")
+    shell(g, x0, 0, z0, x1, 4, z1, "stone_bricks", "deepslate_bricks")
+    box(g, x0 - 1, 5, z0 - 1, x1 + 1, 5, z1 + 1, "spruce_planks")
+    shell(g, x0 - 1, 6, z0 - 1, x1 + 1, 9, z1 + 1, "spruce_planks", "stripped_spruce_log[axis=y]")
+    for x in range(x0 + 2, x1 - 1, 4):
+        g.set(x, 2, z0, "glass_pane[north=false,south=false,east=true,west=true]")
+        g.set(x, 7, z0 - 1, "glass_pane[north=false,south=false,east=true,west=true]")
+        g.set(x, 7, z1 + 1, "glass_pane[north=false,south=false,east=true,west=true]")
+    gable(g, x0 - 2, x1 + 2, z0 - 2, z1 + 2, 10)
+    # 西の露台 (二階) と帆柱・旗
+    box(g, x0 - 5, 5, -4, x0 - 2, 5, 4, "spruce_planks")
+    box(g, x0 - 5, 6, -4, x0 - 5, 6, 4, "spruce_fence")
+    box(g, x0 - 6, 0, 0, x0 - 6, 16, 0, "stripped_spruce_log[axis=y]")
+    box(g, x0 - 5, 12, 0, x0 - 2, 12, 0, "white_wool")
+    box(g, x0 - 5, 13, 0, x0 - 2, 14, 0, "light_blue_wool")
+    g.set(x0 - 6, 17, 0, "lantern[hanging=false]")
+    for dz in (-1, 0):
+        g.set(x0, 0, dz, "iron_door[facing=east,half=lower,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+        g.set(x0, 1, dz, "iron_door[facing=east,half=upper,hinge=%s,open=false,powered=false]" % ("left" if dz else "right"))
+    _board(g, x0 - 3, 7, "west")
+    g.set(x0 - 2, 0, -6, "skyabyss:tablet[facing=west,standing=true]")
+    g.mark("stand", x0 - 9, 0, 0)
+
+
+SUBJECTS["guild"] = {
+    "title": "鯨追いの組合（板・名簿・順位の石）",
+    "options": {"a": guild_a, "b": guild_b, "c": guild_c},
+    "notes": {"a": "A 長屋の組合（棟に骨の肋）", "b": "B 鯨骨の屋根（肋骨の館）", "c": "C 二階の組合（露台と帆柱）"},
+    "eye": ((-44, 1.6, 0), (0, 6, 0)),
+}
+
+
 def render(subject: str):
     sub = SUBJECTS[subject]
     cols = []
