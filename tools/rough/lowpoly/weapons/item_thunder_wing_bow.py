@@ -28,16 +28,16 @@ def side_feathers(t, sg, pull):
     prim = [((4.8, 11.2), (12.0, 15.0), 1.15, -0.7),
             ((4.1, 12.8), (10.6, 17.4), 1.2, -0.6),
             ((2.8, 14.4), (7.0, 18.6), 1.1, -0.4)]
-    if t >= 1:
+    if t == 1:
         prim.append(((5.2, 10.4), (11.4, 12.4), 1.0, -0.5))
     if t == 2:
         prim = [((5.0, 10.6), (14.6, 14.0), 1.3, -0.9)] + prim
     for i, (b, tp, w, bd) in enumerate(prim):
         zz = z[i % 5] * (1 if sg > 0 else -1)
-        f += plume(my((b[0], b[1], zz)), my((tp[0] - pull * 0.1, tp[1], zz)), w, 0.45, bend=bd * sg, big=(i % 2 == 0),
-                   scorch=1 + (t == 2 and i == 0))
+        f += plume(my((b[0], b[1], zz)), my((tp[0] - pull * 0.1, tp[1], zz)), w, 0.45, bend=bd * sg, big=(t == 2 and i == 0),
+                   scorch=1)
     if t >= 1:   # 雨覆い: 肢の背に重なる短い羽
-        for (b, tp) in (((4.4, 12.0), (7.8, 13.8)), ((3.2, 14.0), (6.2, 16.0))):
+        for (b, tp) in (((3.6, 13.6), (7.0, 15.4)),):
             f += plume(my((b[0], b[1], -0.6)), my((tp[0], tp[1], -0.6)), 0.8, 0.35, bend=-0.3 * sg, scorch=1)
     return f
 
@@ -59,22 +59,16 @@ def faces(r="common", stage=0):
         sg = 1 if path is up else -1
         f += curve("main", path, [1.0, 0.9, 0.7, 0.4], [1.1, 1.0, 0.8, 0.5], sides=4, caps=(False, False), hint=(0, 0, 1))
         px, py, _ = path[-1]
-        f += block("edge", (px, py + sg * 0.25, 0), (1.2, 1.3, 1.5), taper=(0.7, 0.7))
         f += side_feathers(t, sg, pull)
         if t >= 1:   # 肢の銅の輪 (雷鳥の脚環)
-            for i in (1, 2):
+            for i in (2,):
                 a, c = path[i - 1], path[i + 1]
                 f += band(path[i], (c[0] - a[0], c[1] - a[1], 0), 1.35 if i == 1 else 1.2, 0.8, "trim")
     f += string_and_arrow(stage, r, ((up[-1][0], up[-1][1]), (lo[-1][0], lo[-1][1])))
-    if t >= 1:
-        f += prism("trim", (5.0, CY + 3.3, 0), (5.0, CY + 3.9, 0), 1.5, 1.5, sides=6, caps=(False, False), hint=(0, 0, 1))
-        f += prism("trim", (5.0, CY - 3.9, 0), (5.0, CY - 3.3, 0), 1.5, 1.5, sides=6, caps=(False, False), hint=(0, 0, 1))
     if t == 2:
         # 握りの翼 (握りの上下から大きな羽が背へ流れる) + 肢の先の外へ尖る銅の叉
         for sg in (1, -1):
-            f += plume((6.2, CY + sg * 2.6, 0.0), (12.6, CY + sg * 7.6, 0.0), 1.5, 0.5, bend=-1.0 * sg, big=True, scorch=2)
-            f += plume((-2.6 - pull, CY + sg * 9.2, 0.0), (-6.2 - pull, CY + sg * 12.0, 0.0), 0.8, 0.5, bend=0.5 * sg,
-                       mat="edge", tipmat="edge", scorch=0)
+            f += plume((6.2, CY + sg * 2.6, 0.0), (12.6, CY + sg * 7.6, 0.0), 1.4, 0.5, bend=-1.0 * sg, big=False, scorch=1)
     return f
 
 

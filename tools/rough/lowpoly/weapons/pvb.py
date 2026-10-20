@@ -15,7 +15,7 @@ for rar in ("common", "rare", "legend"):
     atlas, glow = paint(faces, size, P, N, M, L, mod.TITAN, rar, plus, mod.inlay, mod.EDGE)
     print(rar, "tris", tri_count(faces), "atlas", size)
     for yaw, pitch in ((180, 0), (150, -12), (90, 0)):
-        im = view(faces, atlas, glow, mod.TITAN, yaw, pitch, (300, 400), (-1, 8, 0), 14)
+        im = view(faces, atlas, glow, mod.TITAN, yaw, pitch, (300, 400), (4, 8, 0), 12)
         bg = Image.new("RGBA", (300, 400), (40, 44, 52, 255))
         bg.alpha_composite(im)
         tiles.append(bg.convert("RGB"))

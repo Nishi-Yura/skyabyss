@@ -158,7 +158,7 @@ def paint(faces, size, P, N, M, L, titan, rarity="common", plus=0, inlay=None, e
         # 嵐に焼けた傷み: 焦げた羽先 (soot)、羽の縁の焦げ、銅のひび (暗い線) と、ひびの中の稲妻 (光る)
         SO = PAL["SOOT"]
         put(m("soot"), pick(SO, np.floor(1.4 + 1.6 * lit + 1.2 * bay + 1.2 * (n_mid - 0.5)).astype(int)))
-        sing = np.isin(mats, ["acc", "cloth"]) & (D < 1.25) & (n_mid > 0.42)
+        sing = np.isin(mats, ["acc", "cloth"]) & (D < 0.8) & (n_mid > 0.55)
         put(sing, pick(SO, np.floor(1.6 + 1.4 * lit + bay).astype(int)))
         put(m("cloth"), pick(PAL["STEEL"], shaded(PAL["STEEL"], 0.34, 0.26, 0.06)) * 0.9)
         rn = np.abs(vnoise(L * 0.26 + 9, 5) - 0.5)
