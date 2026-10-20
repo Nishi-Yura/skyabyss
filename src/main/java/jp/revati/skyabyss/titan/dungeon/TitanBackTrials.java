@@ -130,10 +130,6 @@ public final class TitanBackTrials {
     }
 
     public static final String MAZE_ENTRY = "mz0";
-    private static Checkpoint islandCheckpoint(ParkourCourses.Island i) {
-        return new Checkpoint(i.id(), new Box(i.cx() - 1, i.cx() + 1, i.cz() - 1, i.cz() + 1, i.y(), 3), new BlockPos(i.cx(), i.y() + 1, i.cz()));
-    }
-
     private static final List<Checkpoint> BASE_CHECKPOINTS = List.of(
             // 鼓動の間の中央は眠る心臓の台座 (強化深層岩) なので、南へずらす
             new Checkpoint("hub", HUB, HUB.center().offset(0, 0, 6)),
@@ -141,9 +137,7 @@ public final class TitanBackTrials {
             new Checkpoint("w0", W0, W0.center().offset(2, 0, 2)),
             new Checkpoint("w1", W1, W1.center().offset(2, 0, 2)),
             new Checkpoint("w2", W2, W2.center().offset(2, 0, 2)),
-            // 谷の中ほどの島 (アスレチックの休み場。落ちるとここへ戻る)
-            islandCheckpoint(ParkourCourses.ISLANDS_A.get(0)), islandCheckpoint(ParkourCourses.ISLANDS_A.get(1)),
-            islandCheckpoint(ParkourCourses.ISLANDS_B.get(0)), islandCheckpoint(ParkourCourses.ISLANDS_C.get(0)),
+            // 谷の中ほどの島は休み場にしない (版 22: コースの途中の休み場をなくした。落ちると、その谷の入口の休み場 w0・w1・w2 へ戻る)
             // 戦いの部屋の扉から離れた隅に置く (E0 は西の隅、CE1 は南東の隅。どちらも扉から 5 マス以上)。
             // 倒れて目覚めた所の目の前が戦場、にならないように
             new Checkpoint("e0", E0, E0.center().offset(-2, 0, -2)),
@@ -165,7 +159,7 @@ public final class TitanBackTrials {
     private static List<Checkpoint> checkpoints() {
         return WhaleDeck.placed() ? WITH_DECK_CHECKPOINTS : BASE_CHECKPOINTS;
     }
-    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2", "wa1", "wa2", "wb1", "wc1");
+    private static final List<String> WEST_CHECKPOINTS = List.of("w0", "w1", "w2");
 
     private static List<Checkpoint> concatCheckpoints(List<Checkpoint> a, List<Checkpoint> b) {
         List<Checkpoint> out = new ArrayList<>(a);

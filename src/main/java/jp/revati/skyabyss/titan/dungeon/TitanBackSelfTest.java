@@ -631,10 +631,11 @@ public final class TitanBackSelfTest {
             }
             validateCourse(ParkourCourses.ALL.get(c), ParkourCourses.allBlocks(c), "course " + c, failures);
             for (ParkourCourses.Island isl : ParkourCourses.ISLANDS.get(c)) {
-                BlockPos spawn = TitanBackTrials.checkpointSpawns().get(isl.id());
-                if (spawn == null || spawn.getX() != isl.cx() || spawn.getZ() != isl.cz() || spawn.getY() != isl.y() + 1) {
-                    failures.add("island " + isl.id() + " is not a rest point at its centre (" + spawn + ")");
+                // 版 22: 島はコースの途中の休み場ではない (落ちたら谷の入口の休み場へ戻る)
+                if (TitanBackTrials.checkpointSpawns().containsKey(isl.id())) {
+                    failures.add("island " + isl.id() + " must not be a rest point inside a parkour course");
                 }
+            }
             }
         }
         for (Box pit : PITS) {
