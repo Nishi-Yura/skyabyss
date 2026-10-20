@@ -1,0 +1,43 @@
+# 岩鯨の心臓の領域「石の海」の仕掛け (共鳴する骨) を、本物の心臓の間 (titan_back) で撮る。手本・手順の板・正解/失敗・ボスバーと技の名前の印。
+# ./gradlew runShots -Pscript=tools/shots/heart_domain2.txt   (音は 0。日本語の画面)
+# 出力: run/shots/heart_domain2/shots/heart_domain2/*.png -> python tools/heart_domain2_sheet.py で docs/review/previews/heart_domain2_sheet.png
+world shots flat
+size 1280 720
+timeout 3000
+render 8
+clouds off
+
+cmd gamemode survival Dev
+cmd effect give Dev minecraft:resistance 1000000 4 true
+hud on
+# 背を建て終えるのを待つ
+wait 2400
+fov 95
+cmd attribute Dev minecraft:generic.gravity base set 0
+camera skyabyss:titan_back 0.5 117 -112 180 40
+waitchunks 900
+# 本物の心臓の間へ入ると、本物の心臓 (部屋に束ねた岩鯨の心臓) が起きる。起きるのを待つ
+wait 400
+cmd skyabyss cinematic stop
+camera skyabyss:titan_back 0.5 117 -112 180 40
+wait 20
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+# 宣言 (80 tick) と手本の始まり (領域の 30 tick 目)
+wait 100
+shot demo0
+wait 20
+shot demo1
+wait 22
+shot demo2
+wait 22
+shot demo3
+wait 60
+shot tap
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN_BAD
+wait 8
+shot wrong
+wait 300
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN_OK
+wait 8
+shot right
+wait 20

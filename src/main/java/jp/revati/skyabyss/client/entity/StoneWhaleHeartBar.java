@@ -49,7 +49,7 @@ public final class StoneWhaleHeartBar {
             return;
         }
         event.setCanceled(true);
-        draw(event.getGuiGraphics(), mc, heart, boss, event.getX(), event.getY());
+        draw(event.getGuiGraphics(), mc, heart, boss, event.getX(), event.getY() - jp.revati.skyabyss.client.titan.BossBarShift.UP);
         // バニラの横棒より高い段を空ける
         event.setIncrement(event.getIncrement() + 12);
     }

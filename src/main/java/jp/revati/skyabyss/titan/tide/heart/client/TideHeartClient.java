@@ -92,7 +92,7 @@ public final class TideHeartClient {
             return;
         }
         event.setCanceled(true);
-        PhasedBossBar.draw(event.getGuiGraphics(), mc, BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY());
+        PhasedBossBar.draw(event.getGuiGraphics(), mc, BAR, heart.getDisplayName(), heart.getPhase(), heart.isRoaring(), boss, event.getX(), event.getY() - jp.revati.skyabyss.client.titan.BossBarShift.UP);
         event.setIncrement(event.getIncrement() + PhasedBossBar.EXTRA_HEIGHT);
     }
 }

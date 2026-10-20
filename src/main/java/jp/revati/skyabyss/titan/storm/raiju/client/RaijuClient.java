@@ -63,7 +63,7 @@ public final class RaijuClient {
             return;
         }
         event.setCanceled(true);
-        draw(event.getGuiGraphics(), mc, raiju, boss, event.getX(), event.getY());
+        draw(event.getGuiGraphics(), mc, raiju, boss, event.getX(), event.getY() - jp.revati.skyabyss.client.titan.BossBarShift.UP);
         event.setIncrement(event.getIncrement() + EXTRA_HEIGHT);
     }
 

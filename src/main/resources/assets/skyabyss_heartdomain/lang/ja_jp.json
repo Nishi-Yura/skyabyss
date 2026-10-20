@@ -91,5 +91,12 @@
   "gui.skyabyss.attack.ash_smith.breath": "炉の吐息",
   "gui.skyabyss.attack.ash_smith.quench": "焼き入れ",
   "gui.skyabyss.attack.ash_smith.sparks": "火花の散らし",
-  "gui.skyabyss.attack.ash_smith.rage": "鍛え手の怒り"
+  "gui.skyabyss.attack.ash_smith.rage": "鍛え手の怒り",
+  "gui.skyabyss.domain.stone_sea.watch": "骨が鳴る順を覚えろ (%s/%s)",
+  "gui.skyabyss.domain.stone_sea.tap": "光った順に骨を叩け %s/%s",
+  "gui.skyabyss.domain.rising_tide.keep": "三つの水門を叩いて開けろ (開いた %s/%s)",
+  "gui.skyabyss.domain.rising_tide.warn": "水門が閉じかけている。叩き直せ (開いた %s/%s)",
+  "gui.skyabyss.domain.thunder_cage.hit": "強く光る柱を叩いて雷を逃がせ (逃がした %s/%s)",
+  "gui.skyabyss.domain.thunder_cage.wait": "次に雷が溜まる柱を待て (逃がした %s/%s)",
+  "gui.skyabyss.domain.hearth_core.cool": "熾の核のそばでしゃがみ続けて冷ませ (冷めた %s/%s)"
 }

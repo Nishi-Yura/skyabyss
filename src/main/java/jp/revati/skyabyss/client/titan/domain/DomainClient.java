@@ -65,6 +65,15 @@ public final class DomainClient {
         double radius;
         int percent;
         int remaining;
+        // 手順の案内: 常時の一行 (key / a / b) と、一瞬の合図 (正解・失敗・状況)
+        String standKey = "";
+        int standA;
+        int standB;
+        String flashKey = "";
+        int flashA;
+        int flashB;
+        int flashMood;
+        long flashAt;
         // 終わり: 0 = 続いている、1 = 時間切れ、2 = 砕かれた
         int ended;
         long endedAt;
@@ -98,6 +107,21 @@ public final class DomainClient {
                 if (run != null && run.ended == 0) {
                     run.percent = p.a();
                     run.remaining = p.b();
+                }
+            }
+            case DomainPayload.HINT -> {
+                if (run != null && run.ended == 0) {
+                    if (p.mood() == 0) {
+                        run.standKey = p.key();
+                        run.standA = p.a();
+                        run.standB = p.b();
+                    } else {
+                        run.flashKey = p.key();
+                        run.flashA = p.a();
+                        run.flashB = p.b();
+                        run.flashMood = p.mood();
+                        run.flashAt = now;
+                    }
                 }
             }
             default -> {
@@ -304,7 +328,10 @@ public final class DomainClient {
         return Component.translatable("gui.skyabyss.domain.hud", name);
     }
 
-    // HUD の要求: 上中央 (ボスの技の名前の下)。名前・進み・手がかりの三段 (高さ 44)
+    // 手順の板 (右上。HudLayout の BOSS_DOMAIN。高さは固定で、ボスの技の名前が出ても動かない)
+    public static final int PANEL_W = 196;
+    public static final int PANEL_H = 52;
+
     public static void requests(Minecraft mc, java.util.List<jp.revati.skyabyss.hud.HudLayout.Request> out) {
         Run r = run;
         if (r == null || mc.level == null) {
@@ -314,25 +341,19 @@ public final class DomainClient {
         if (!(t - r.start >= r.declare - 8 || r.ended != 0)) {
             return;
         }
-        int w = Math.max(100, mc.font.width(hudHead(r)) + 8);
-        if (r.ended == 0) {
-            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain.solve", r.remaining, jp.revati.skyabyss.titan.domain.HeartDomain.NODES)) + 4);
-            w = Math.max(w, mc.font.width(Component.translatable("gui.skyabyss.domain." + r.id + ".goal")) + 4);
-        }
-        int h = r.ended == 0 ? 44 : 14;
-        int fw = w;
-        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN, jp.revati.skyabyss.hud.HudLayout.Region.TOP_CENTER,
-                (maxW, maxH) -> h <= maxH && maxW >= 60 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(fw, maxW), h) : null));
+        int h = r.ended == 0 ? PANEL_H : 16;
+        out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN, jp.revati.skyabyss.hud.HudLayout.Region.TOP_RIGHT,
+                (maxW, maxH) -> h <= maxH && maxW >= 100 ? new jp.revati.skyabyss.hud.HudLayout.Size(Math.min(PANEL_W, maxW), h) : null));
     }
 
-    // 領域の名前・解いた仕掛けの数・手がかりの一行 (ボスの技の名前の下)
+    private static final int FLASH_TICKS = 50;
+
+    // 領域の名前・解いた数・進みの帯・いまの手順 (大きく二行まで)・正解/失敗の合図
     private static void drawHud(GuiGraphics g, Minecraft mc, Run r, float t, int w) {
         jp.revati.skyabyss.hud.HudLayout.Rect rect = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.BOSS_DOMAIN);
         if (rect == null) {
             return;
         }
-        int cx = rect.x() + rect.w() / 2;
-        int y = rect.y() + 2;
         float fadeIn = Mth.clamp((t - r.start - r.declare + 8f) / 10f, 0f, 1f);
         float fadeOut = r.ended != 0 ? Mth.clamp(1f - (t - r.endedAt) / 40f, 0f, 1f) : 1f;
         float a = fadeIn * fadeOut;
@@ -341,21 +362,62 @@ public final class DomainClient {
         }
         int ia = Mth.clamp((int) (a * 255f), 4, 255) << 24;
         int rgb = r.theme.accent & 0xFFFFFF;
-        Component head = hudHead(r);
-        int tw = mc.font.width(head);
-        g.fill(cx - tw / 2 - 4, y - 2, cx + tw / 2 + 4, y + 10, ((int) (a * 120) << 24) | 0x0A0E18);
-        g.drawString(mc.font, head, cx - tw / 2, y, ia | 0xFFFFFF, false);
-        if (r.ended == 0) {
-            int bw = 90;
-            int by = y + 13;
-            g.fill(cx - bw / 2, by, cx + bw / 2, by + 3, ((int) (a * 150) << 24) | 0x101828);
-            int filled = Math.round(bw * Mth.clamp(r.percent / 100f, 0f, 1f));
-            g.fill(cx - bw / 2, by, cx - bw / 2 + filled, by + 3, ia | rgb);
-            Component hint = Component.translatable("gui.skyabyss.domain.solve", r.remaining, jp.revati.skyabyss.titan.domain.HeartDomain.NODES);
-            g.drawCenteredString(mc.font, hint, cx, by + 6, ((int) (a * 190) << 24) | 0xC8CCD8);
-            Component goal = Component.translatable("gui.skyabyss.domain." + r.id + ".goal");
-            g.drawCenteredString(mc.font, goal, cx, by + 17, ((int) (a * 150) << 24) | 0xE9E3D4);
+        int x = rect.x();
+        int y = rect.y();
+        int pw = rect.w();
+        int ph = rect.h();
+        float since = t - r.flashAt;
+        boolean flashing = r.ended == 0 && !r.flashKey.isEmpty() && since < FLASH_TICKS;
+        int tint = 0x0A0E18;
+        if (flashing && r.flashMood == 1) {
+            tint = blend(tint, 0x1F8A4A, 1f - since / FLASH_TICKS);
+        } else if (flashing && r.flashMood == 2) {
+            tint = blend(tint, 0xB02A20, 1f - since / FLASH_TICKS);
         }
+        g.fill(x, y, x + pw, y + ph, ((int) (a * 190) << 24) | tint);
+        int edge = flashing && r.flashMood == 1 ? 0x66E08A : flashing && r.flashMood == 2 ? 0xFF6A4D : rgb;
+        g.fill(x, y, x + pw, y + 1, ia | edge);
+        g.fill(x, y + ph - 1, x + pw, y + ph, ia | edge);
+        g.fill(x, y, x + 1, y + ph, ia | edge);
+        g.fill(x + pw - 1, y, x + pw, y + ph, ia | edge);
+        Component head = hudHead(r);
+        g.drawString(mc.font, head, x + 5, y + 4, ia | 0xFFFFFF, false);
+        if (r.ended != 0) {
+            return;
+        }
+        String count = r.remaining + " / " + jp.revati.skyabyss.titan.domain.HeartDomain.NODES;
+        g.drawString(mc.font, count, x + pw - 5 - mc.font.width(count), y + 4, ia | 0xC8CCD8, false);
+        int by = y + 14;
+        int bw = pw - 10;
+        g.fill(x + 5, by, x + 5 + bw, by + 3, ((int) (a * 170) << 24) | 0x101828);
+        g.fill(x + 5, by, x + 5 + Math.round(bw * Mth.clamp(r.percent / 100f, 0f, 1f)), by + 3, ia | rgb);
+        // いまの手順 (常時。二行まで)
+        Component stand = Component.translatable(r.standKey.isEmpty() ? "gui.skyabyss.domain." + r.id + ".goal" : r.standKey, r.standA, r.standB);
+        int ty = y + 20;
+        for (FormattedCharSequence row : mc.font.split(stand, pw - 10).stream().limit(2).toList()) {
+            g.drawString(mc.font, row, x + 5, ty, ia | 0xFFF4D0, true);
+            ty += 10;
+        }
+        // 正解・失敗・状況の合図 (一つ。数秒で薄れる)
+        if (flashing) {
+            float fa = since < FLASH_TICKS - 12 ? 1f : (FLASH_TICKS - since) / 12f;
+            int fc = r.flashMood == 1 ? 0x7DF0A0 : r.flashMood == 2 ? 0xFF8A72 : 0xE9E3D4;
+            String mark = r.flashMood == 1 ? "◎ " : r.flashMood == 2 ? "✖ " : "";
+            Component fl = Component.literal(mark).append(Component.translatable(r.flashKey, r.flashA, r.flashB));
+            int fy = y + 41;
+            for (FormattedCharSequence row : mc.font.split(fl, pw - 10).stream().limit(1).toList()) {
+                g.drawString(mc.font, row, x + 5, fy, (Mth.clamp((int) (a * fa * 255), 4, 255) << 24) | fc, true);
+                fy += 10;
+            }
+        }
+    }
+
+    private static int blend(int from, int to, float k) {
+        k = Mth.clamp(k, 0f, 1f);
+        int r = (int) Mth.lerp(k, (from >> 16) & 255, (to >> 16) & 255);
+        int gg = (int) Mth.lerp(k, (from >> 8) & 255, (to >> 8) & 255);
+        int b = (int) Mth.lerp(k, from & 255, to & 255);
+        return (r << 16) | (gg << 8) | b;
     }
 
     // ---------------------------------------------------------------- 床の紋 (うすく。予告の面より常に弱い)
