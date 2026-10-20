@@ -36,9 +36,44 @@ def V(*a):
 
 # ------------------------------------------------------------------ 形
 
+CHAMFER = [0.0]   # > 0 のとき、大きめの箱の縦の角を面取りする (整え / 細密の案)
+
+
+def cblock(mat, c, size, rot, taper, skip, shear, ch):
+    """縦の角を面取りした箱 (八角柱)。"""
+    sx, sy, sz = size
+    hy = sy / 2
+    R = np.eye(3) if rot is None else rot
+    c = np.asarray(c, float)
+
+    def ringp(y, hx, hz, sh):
+        k = min(ch, 0.3 * min(hx, hz))
+        return [R @ np.array(p, float) + c for p in (
+            (-hx + k + sh, y, -hz), (hx - k + sh, y, -hz), (hx + sh, y, -hz + k), (hx + sh, y, hz - k),
+            (hx - k + sh, y, hz), (-hx + k + sh, y, hz), (-hx + sh, y, hz - k), (-hx + sh, y, -hz + k))]
+    b = ringp(-hy, sx / 2, sz / 2, 0.0)
+    t = ringp(hy, sx / 2 * taper[0], sz / 2 * taper[1], shear)
+    out = []
+    qs = []
+    if "b" not in skip:
+        qs.append(b[::-1])
+    if "u" not in skip:
+        qs.append(t)
+    for i in range(8):
+        j = (i + 1) % 8
+        qs.append([b[i], b[j], t[j], t[i]])
+    for q in qs:
+        f = _mk(list(q), BONE, mat, c)
+        if f is not None:
+            out.append(f)
+    return out
+
+
 def block(mat, c, size, rot=None, taper=(1.0, 1.0), skip=(), shear=0.0):
     """箱 (taper: 上面の x, z の倍率。shear: 上面を x へずらす量)。skip に 'b' 'u' を入れると下・上の面を作らない。"""
     sx, sy, sz = size
+    if CHAMFER[0] > 0 and mat not in ("gem", "trim", "dark", "cord", "cloth") and min(sx, sz) >= 2.0 and sy >= 0.9:
+        return cblock(mat, c, size, rot, taper, skip, shear, CHAMFER[0])
     hx, hy, hz = sx / 2, sy / 2, sz / 2
     tx, tz = taper
     b = [(-hx, -hy, -hz), (hx, -hy, -hz), (hx, -hy, hz), (-hx, -hy, hz)]

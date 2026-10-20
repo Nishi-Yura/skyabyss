@@ -1,0 +1,32 @@
+{
+ "whalebone_greatsword": {
+  "D1": 272,
+  "D2": 372,
+  "D3": 516
+ },
+ "tide_shell_trident": {
+  "D1": 273,
+  "D2": 335,
+  "D3": 467
+ },
+ "thunder_wing_bow": {
+  "D1": 264,
+  "D2": 364,
+  "D3": 484
+ },
+ "waterway_fang": {
+  "D1": 226,
+  "D2": 338,
+  "D3": 452
+ },
+ "ember_war_axe": {
+  "D1": 266,
+  "D2": 350,
+  "D3": 492
+ },
+ "coral_shield": {
+  "D1": 299,
+  "D2": 389,
+  "D3": 523
+ }
+}
