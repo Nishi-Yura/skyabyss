@@ -365,27 +365,36 @@ def guild():
     lantern_post(x0 - 2, 0, cz + 3)
 
 
+TITAN_BLOCKS = ('stone_bricks', 'prismarine_bricks', 'cut_copper', 'polished_blackstone_bricks')  # 岩鯨・潮殻・雷翼・余燼
+
+
 def shrine():
-    # 四巨神の社 (中心 -64, -16。28×28、隅を落とす)。閉じた戸 (東)。碑
-    cx, cz, r = -64, -16, 14
-    x0, z0, x1, z1 = cx - r, cz - r, cx + r, cz + r
-    box(x0, -1, z0, x1, -1, z1, 'polished_deepslate')
-    box(x0, 0, z0, x1, 9, z1, 'deepslate_bricks')
-    box(x0 + 1, 0, z0 + 1, x1 - 1, 8, z1 - 1, 'air')
-    # 隅を落とす (6 ブロック)
-    for ax, az in ((x0, z0), (x1 - 5, z0), (x0, z1 - 5), (x1 - 5, z1 - 5)):
-        box(ax, -1, az, ax + 5, 10, az + 5, 'air')
-        box(ax, -1, az, ax + 5, -1, az + 5, 'grass_block')
-    box(x0 + 2, 10, z0 + 2, x1 - 2, 10, z1 - 2, 'deepslate_tile_slab[type=bottom,waterlogged=false]')
-    box(cx - 2, 11, cz - 2, cx + 2, 13, cz + 2, 'deepslate_bricks')
-    blk(cx, 14, cz, 'lantern[hanging=false]')
-    # 戸 (東)
-    blk(x1, 0, cz, 'iron_door[facing=west,half=lower,hinge=left,open=false,powered=false]')
-    blk(x1, 1, cz, 'iron_door[facing=west,half=upper,hinge=left,open=false,powered=false]')
-    tablet(x1 + 1, 0, cz + 2, 'east', 'shrine')
-    # 四つの灯 (四体の巨神)
-    for dx, dz in ((-r - 3, 0), (r + 3, 0), (0, -r - 3), (0, r + 3)):
-        lantern_post(cx + dx, 0, cz + dz, 4)
+    # 四巨神の社 (ラフ C「石の輪の社」で決定。中心 -64, -16)。屋根のない社: 四つの巨神の石 (3×3・高さ 9) が輪に立ち、
+    # 骨の梁が中央の鍵の間の台を覆う。輪は低い壁。東の門は閉じている (鉄格子) と碑
+    cx, cz, r = -64, -16, 15
+    box(cx - r, -1, cz - r, cx + r, -1, cz + r, 'polished_deepslate')
+    wall = 'deepslate_brick_wall[up=true,north=none,south=none,east=none,west=none,waterlogged=false]'
+    box(cx - r, 0, cz - r, cx + r, 0, cz - r, wall)
+    box(cx - r, 0, cz + r, cx + r, 0, cz + r, wall)
+    box(cx - r, 0, cz - r, cx - r, 0, cz + r, wall)
+    box(cx + r, 0, cz - r, cx + r, 0, cz + r, wall)
+    for (dx, dz), tb in zip(((-9, -9), (9, -9), (-9, 9), (9, 9)), TITAN_BLOCKS):
+        box(cx + dx - 1, 0, cz + dz - 1, cx + dx + 1, 8, cz + dz + 1, tb)
+        blk(cx + dx, 9, cz + dz, 'lantern[hanging=false]')
+        for k in range(1, 9):
+            x = cx + dx - (dx // 9) * k
+            z = cz + dz - (dz // 9) * k
+            blk(x, 8 + k // 3, z, 'bone_block[axis=y]')
+    box(cx - 1, 11, cz - 1, cx + 1, 11, cz + 1, 'bone_block[axis=y]')
+    blk(cx, 10, cz, 'lantern[hanging=true]')
+    # 鍵の間の台
+    box(cx - 1, 0, cz - 1, cx + 1, 0, cz + 1, 'polished_deepslate')
+    blk(cx, 1, cz, 'lantern[hanging=false]')
+    # 東の門 (閉じている) と碑
+    opening(cx + r, 0, cz - 1, cx + r, 2, cz + 1)
+    box(cx + r, 0, cz - 1, cx + r, 2, cz + 1, 'iron_bars[north=false,south=false,east=true,west=true,waterlogged=false]')
+    tablet(cx + r + 1, 0, cz + 3, 'east', 'shrine')
+    lantern_post(cx + r + 2, 0, cz - 3, 3)
 
 
 def smithy():
